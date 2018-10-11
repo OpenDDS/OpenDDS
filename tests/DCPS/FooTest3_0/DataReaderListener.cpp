@@ -43,7 +43,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
     Xyz::Foo foo;
     DDS::SampleInfo si;
 
-    DDS::ReturnCode_t status = foo_dr->take_next_sample(foo, si) ;
+    const DDS::ReturnCode_t status = foo_dr->take_next_sample(foo, si) ;
 
     if (status == DDS::RETCODE_OK) {
       ++samples_read_;
@@ -51,15 +51,13 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
       std::cout << "SampleInfo.sample_rank = " << si.sample_rank << std::endl;
       std::cout << "SampleInfo.instance_state = " << si.instance_state << std::endl;
 
-      if (si.valid_data) {
-        std::cout << "Foo sample processed" << std::endl;
-      } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is disposed\n")));
+      if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance %d is disposed\n"), foo.a_long_value));
         ++samples_disposed_;
-
+      } else if (si.valid_data) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: Foo sample %d processed\n"), foo.sample_sequence));
       } else if (si.instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is unregistered\n")));
-
       } else {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("%N:%l: on_data_available()")

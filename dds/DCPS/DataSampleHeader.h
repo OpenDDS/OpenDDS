@@ -244,6 +244,9 @@ struct OpenDDS_Dcps_Export DataSampleHeader : public PoolAllocationBase {
   static void split_payload(const ACE_Message_Block& orig, size_t size,
                             Message_Block_Ptr& head, Message_Block_Ptr& tail);
 
+  /// Returns false if the sample is dispose and/or unregister,
+  bool valid_data() const;
+
 private:
   /// Keep track of the amount of data read from a buffer.
   size_t marshaled_size_;

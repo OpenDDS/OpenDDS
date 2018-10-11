@@ -92,6 +92,11 @@ public:
 
   size_t number_parameters() const { return number_parameters_; }
 
+  bool has_non_key_fields(const MetaStruct& meta) const;
+
+  /**
+   * Returns true if the unserialized sample matches the filter.
+   */
   template<typename T>
   bool eval(const T& sample, const DDS::StringSeq& params) const
   {
@@ -99,6 +104,9 @@ public:
     return eval_i(data);
   }
 
+  /**
+   * Returns true if the serialized sample matches the filter.
+   */
   bool eval(ACE_Message_Block* serializedSample, bool swap_bytes,
             bool cdr_encap, const MetaStruct& meta,
             const DDS::StringSeq& params) const
@@ -157,6 +165,7 @@ private:
   /// Number of parameter used in the filter, this should
   /// match the number of values passed when evaluating the filter
   size_t number_parameters_;
+
 };
 
 class OpenDDS_Dcps_Export MetaStruct {
@@ -174,6 +183,8 @@ public:
 
   virtual bool compare(const void* lhs, const void* rhs,
                        const char* fieldSpec) const = 0;
+
+  virtual bool isDcpsKey(const char* field) const = 0;
 
 #ifndef OPENDDS_NO_MULTI_TOPIC
   virtual size_t numDcpsKeys() const = 0;

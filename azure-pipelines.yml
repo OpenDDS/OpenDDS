@@ -1,0 +1,107 @@
+jobs:
+- job: VisualStudio2017
+  timeoutInMinutes: 90
+  pool:
+    vmImage: vs2017-win2016
+  strategy:
+    maxParallel: 4
+    matrix:
+      Debug64:
+        BuildPlatform: x64
+        BuildConfiguration: Debug
+      Release64:
+        BuildPlatform: x64
+        BuildConfiguration: Release
+      Debug32:
+        BuildPlatform: Win32
+        BuildConfiguration: Debug
+      Release32:
+        BuildPlatform: Win32
+        BuildConfiguration: Release
+  steps:
+  - powershell: |
+      $client = new-object System.Net.WebClient
+      $client.DownloadFile("http://strawberryperl.com/download/5.28.0.1/strawberry-perl-5.28.0.1-64bit-portable.zip", "strawberry-perl.zip");
+    displayName: Download perl
+  - task: ExtractFiles@1
+    displayName: Extract perl
+    inputs:
+      archiveFilePatterns: strawberry-perl.zip
+      destinationFolder: ext\strawberry
+  - task: BatchScript@1
+    displayName: Put perl on PATH
+    inputs:
+      filename: tools\scripts\prepend_path
+      arguments: '%CD%\ext\strawberry\perl\bin'
+      modifyEnvironment: true
+  - script: git clone --depth 1 git://github.com/DOCGroup/MPC ext\MPC
+    displayName: git clone MPC
+  - script: git clone --depth 1 git://github.com/DOCGroup/ACE_TAO
+    displayName: git clone ACE_TAO
+  - task: BatchScript@1
+    displayName: VcVars
+    inputs:
+      filename: '"C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvars64.bat"'
+      modifyEnvironment: true
+  - script: |
+      if %BuildConfiguration%==Release set OPT=--no-tests
+      call configure -v --mpc=ext\MPC %OPT%
+      if %BuildConfiguration%==Release (set SLN=DDS_TAOv2.sln) else set SLN=DDS_TAOv2_all.sln
+      echo ##vso[task.setvariable variable=BuildSolution]%SLN%
+    displayName: Run configure script
+  - task: BatchScript@1
+    displayName: Setenv from configure script
+    inputs:
+      filename: setenv.cmd
+      modifyEnvironment: true
+  - task: VSBuild@1
+    displayName: Build solution
+    inputs:
+      solution: $(BuildSolution)
+      platform: $(BuildPlatform)
+      configuration: $(BuildConfiguration)
+      maximumCpuCount: true
+
+- job: Linux
+  timeoutInMinutes: 90
+  pool:
+    vmImage: ubuntu-16.04
+  strategy:
+    maxParallel: 3
+    matrix:
+      Debug:
+        ConfigOpts: --no-inline
+      Release:
+        ConfigOpts: --no-debug --optimize
+      Safety:
+        ConfigOpts: --safety-profile
+  steps:
+  - script: git clone --depth 1 git://github.com/DOCGroup/MPC ext/MPC
+    displayName: git clone MPC
+  - script: git clone --depth 1 git://github.com/DOCGroup/ACE_TAO
+    displayName: git clone ACE_TAO
+  - script: ./configure -v --mpc=ext/MPC $(ConfigOpts)
+    displayName: Run configure script
+  - script: make -sj6
+    displayName: Compile
+
+- job: macOS
+  timeoutInMinutes: 90
+  pool:
+    vmImage: macOS-10.13
+  strategy:
+    maxParallel: 2
+    matrix:
+      Debug:
+        ConfigOpts: --no-inline
+      Release:
+        ConfigOpts: --no-debug --optimize
+  steps:
+  - script: git clone --depth 1 git://github.com/DOCGroup/MPC ext/MPC
+    displayName: git clone MPC
+  - script: git clone --depth 1 git://github.com/DOCGroup/ACE_TAO
+    displayName: git clone ACE_TAO
+  - script: ./configure -v --mpc=ext/MPC $(ConfigOpts)
+    displayName: Run configure script
+  - script: make -sj6
+    displayName: Compile

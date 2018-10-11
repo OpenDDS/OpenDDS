@@ -7,8 +7,10 @@
 
 #include <QtGui/QtGui>
 #include <QtGui/QPixmap>
-#include <QtGui/QScrollBar>
-#include <QtGui/QGraphicsScene>
+#include <QtWidgets/QScrollBar>
+#include <QtWidgets/QGraphicsScene>
+#include <QtWidgets/QFileDialog>
+
 #include <sstream>
 #include "Viewer.h"
 #include "RepoSelect.h"

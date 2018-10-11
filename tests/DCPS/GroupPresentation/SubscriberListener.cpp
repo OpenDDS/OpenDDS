@@ -83,11 +83,12 @@ SubscriberListenerImpl::on_data_on_readers(
       return;
     }
 
-    if (len != num_messages * 4) {
+    const size_t expecting = num_messages * 4;
+    if (len != expecting) {
       ACE_ERROR((LM_ERROR,
                     ACE_TEXT("%N:%l: SubscriberListenerImpl::on_data_on_readers()")
-                    ACE_TEXT(" ERROR: get_datareaders returned %d readers!\n"),
-                    len));
+                    ACE_TEXT(" ERROR: get_datareaders returned %d readers, expecting %d!\n"),
+                    len, expecting));
       this->verify_result_ = false;
     }
 
