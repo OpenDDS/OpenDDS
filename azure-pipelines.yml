@@ -80,8 +80,8 @@ jobs:
         PackageDeps: libxerces-c-dev libssl-dev cmake
 
   steps:
-  - script: sudo apt-get update && sudo apt-get install ${PackageDeps}
-    displayName: apt-get install libxerces-c-dev libssl-dev
+  - script: sudo apt-get update && sudo apt-get install $(PackageDeps)
+    displayName: apt-get install package dependencies
     condition: and(succeeded(), ne(variables['PackageDeps'], ''))
   - script: git clone --depth 1 git://github.com/DOCGroup/MPC ext/MPC
     displayName: git clone MPC
