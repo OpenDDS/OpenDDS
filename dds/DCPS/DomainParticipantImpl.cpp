@@ -35,8 +35,8 @@
 #include "RecorderImpl.h"
 #include "ReplayerImpl.h"
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
 #include "BuiltInTopicUtils.h"
+#if !defined (DDS_HAS_MINIMUM_BIT)
 #include "dds/DdsDcpsCoreTypeSupportImpl.h"
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
@@ -1864,20 +1864,6 @@ DomainParticipantImpl::get_repoid(const DDS::InstanceHandle_t& handle)
   return result;
 }
 
-#ifdef OPENDDS_SECURITY
-namespace {
-
-  bool
-  is_bit(const char* topic_name) {
-    return strcmp(topic_name, BUILT_IN_PARTICIPANT_TOPIC) == 0
-      || strcmp(topic_name, BUILT_IN_TOPIC_TOPIC) == 0
-      || strcmp(topic_name, BUILT_IN_PUBLICATION_TOPIC) == 0
-      || strcmp(topic_name, BUILT_IN_SUBSCRIPTION_TOPIC) == 0;
-  }
-
-}
-#endif
-
 DDS::Topic_ptr
 DomainParticipantImpl::create_new_topic(
   const RepoId topic_id,
@@ -1894,7 +1880,7 @@ DomainParticipantImpl::create_new_topic(
                    DDS::Topic::_nil());
 
 #ifdef OPENDDS_SECURITY
-  if (TheServiceParticipant->get_security() && !is_bit(topic_name)) {
+  if (TheServiceParticipant->get_security() && !topicIsBIT(topic_name, type_name)) {
     Security::AccessControl_var access = security_config_->get_access_control();
 
     DDS::Security::SecurityException se;

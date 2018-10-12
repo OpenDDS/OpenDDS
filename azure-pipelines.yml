@@ -67,7 +67,7 @@ jobs:
   pool:
     vmImage: ubuntu-16.04
   strategy:
-    maxParallel: 3
+    maxParallel: 4
     matrix:
       Debug:
         ConfigOpts: --no-inline
@@ -75,7 +75,14 @@ jobs:
         ConfigOpts: --no-debug --optimize
       Safety:
         ConfigOpts: --safety-profile
+      SecurityWithoutFeatures:
+        ConfigOpts: --no-inline --no-debug --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile --security
+        PackageDeps: libxerces-c-dev libssl-dev cmake
+
   steps:
+  - script: sudo apt-get --yes update && sudo apt-get --yes install $(PackageDeps)
+    displayName: install system package dependencies ($(PackageDeps))
+    condition: and(succeeded(), ne(variables['PackageDeps'], ''))
   - script: git clone --depth 1 git://github.com/DOCGroup/MPC ext/MPC
     displayName: git clone MPC
   - script: git clone --depth 1 git://github.com/DOCGroup/ACE_TAO
