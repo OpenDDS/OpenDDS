@@ -178,7 +178,7 @@ struct GeneratorBase
     }
   }
 
-  static std::string generateDefaultValue(AST_Union* the_union, AST_Type* discriminator)
+  static std::string generateDefaultValue(AST_Union* the_union)
   {
     std::stringstream first_label;
     AST_Union::DefaultValue dv;
@@ -186,7 +186,7 @@ struct GeneratorBase
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: generateDefaultValue::")
         ACE_TEXT(" computing default value failed\n")));
-      return first_label.str();
+      return "";
     }
 
     switch (the_union->udisc_type ())
@@ -211,8 +211,13 @@ struct GeneratorBase
         break;
       case AST_Expression::EV_enum:
         {
-          AST_Enum* e = AST_Enum::narrow_from_decl(discriminator);
-          first_label << scoped(e->value_to_name(dv.u.enum_val));
+          AST_Enum* e = AST_Enum::narrow_from_decl(the_union->disc_type());
+          if (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11) {
+            first_label << scoped(e->name()) << "::"
+              << e->value_to_name(dv.u.enum_val)->last_component()->get_string();
+          } else {
+            first_label << scoped(e->value_to_name(dv.u.enum_val));
+          }
           break;
         }
       case AST_Expression::EV_longlong:
@@ -246,7 +251,7 @@ struct GeneratorBase
       {
         AST_UnionLabel* label = branch->label(0);
         if (label->label_kind() == AST_UnionLabel::UL_default) {
-          first_label << generateDefaultValue(the_union, discriminator);
+          first_label << generateDefaultValue(the_union);
         } else if (discriminator->node_type() == AST_Decl::NT_enum) {
           first_label << getEnumLabel(label->label_val(), discriminator);
         } else {
@@ -515,7 +520,7 @@ struct GeneratorBase
       be_global->lang_header_ <<
         "  void _default() {\n"
         "    _reset();\n"
-        "    _discriminator = " << generateDefaultValue(u, discriminator) << ";\n"
+        "    _discriminator = " << generateDefaultValue(u) << ";\n"
         "  }\n";
     }
 
@@ -1390,7 +1395,7 @@ struct Cxx11Generator : GeneratorBase
       "using " << nm << " = std::vector<" << elem_type << ">;\n";
   }
 
-  void gen_common_strunion_pre(const char* nm)
+  static void gen_common_strunion_pre(const char* nm)
   {
     be_global->lang_header_ <<
       "\n"
@@ -1399,13 +1404,46 @@ struct Cxx11Generator : GeneratorBase
       "public: \n\n";
   }
 
-  void gen_common_strunion_post(const char* nm)
+  static void gen_common_strunion_post(const char* nm)
   {
     be_global->lang_header_ <<
       "\n"
       "};\n\n"
       << exporter() << "void swap(" << nm << "& lhs, " << nm << "& rhs);\n\n";
   }
+
+  struct StructAccessors {
+    std::string& swaps_;
+    explicit StructAccessors(std::string& swaps) : swaps_(swaps) {}
+    void operator()(AST_Field* field)
+    {
+      const std::string nm = field->local_name()->get_string();
+      AST_Type* field_type = field->field_type();
+      AST_Type* actual_field_type = resolveActualType(field_type);
+      const Classification cls = classify(actual_field_type);
+      const std::string lang_field_type = generator_->map_type(field_type);
+      const std::string assign_pre = "{ _" + nm + " = ",
+        assign = assign_pre + "val; }\n",
+        move = assign_pre + "std::move(val); }\n",
+        ret = "{ return _" + nm + "; }\n";
+      be_global->lang_header_ <<
+        "  " << lang_field_type << " _" << nm << ";\n";
+      if (cls & (CL_PRIMITIVE | CL_ENUM)) {
+        be_global->lang_header_ <<
+          "  void " << nm << '(' << lang_field_type << " val) " << assign <<
+          "  " << lang_field_type << ' ' << nm << "() const " << ret <<
+          "  " << lang_field_type << "& " << nm << "() " << ret << "\n";
+      } else {
+        be_global->add_include("<utility>", BE_GlobalData::STREAM_LANG_H);
+        be_global->lang_header_ <<
+          "  void " << nm << "(const " << lang_field_type << "& val) " << assign <<
+          "  void " << nm << '(' << lang_field_type << "&& val) " << move <<
+          "  const " << lang_field_type << "& " << nm << "() const " << ret <<
+          "  " << lang_field_type << "& " << nm << "() " << ret << "\n";
+      }
+      swaps_ += "  swap(lhs._" + nm + ", rhs._" + nm + ");\n";
+    }
+  };
 
   bool gen_struct(AST_Structure*, UTL_ScopedName* name,
                   const std::vector<AST_Field*>& fields,
@@ -1418,15 +1456,7 @@ struct Cxx11Generator : GeneratorBase
     gen_common_strunion_pre(nm);
 
     std::string swaps;
-    for (size_t i = 0; i < fields.size(); ++i) {
-      AST_Type* field_type = fields[i]->field_type();
-      const std::string field_name = fields[i]->local_name()->get_string();
-      std::string type_name = map_type(field_type);
-      const Classification cls = classify(field_type);
-      be_global->lang_header_ <<
-        "  " << type_name << ' ' << field_name << ";\n";
-      swaps += "  swap(lhs." + field_name + ", rhs." + field_name + ");\n";
-    }
+    std::for_each(fields.begin(), fields.end(), StructAccessors(swaps));
 
     gen_common_strunion_post(nm);
     be_global->impl_ <<
@@ -1437,13 +1467,173 @@ struct Cxx11Generator : GeneratorBase
     return true;
   }
 
+  static void union_field(AST_UnionBranch* branch)
+  {
+    AST_Type* field_type = branch->field_type();
+    AST_Type* actual_field_type = resolveActualType(field_type);
+    const Classification cls = classify(actual_field_type);
+    const std::string lang_field_type = generator_->map_type(field_type);
+    be_global->lang_header_ <<
+      "    " << lang_field_type << " _" << branch->local_name()->get_string()
+      << ";\n";
+  }
+
+  static void union_accessors(AST_UnionBranch* branch)
+  {
+    AST_Type* field_type = branch->field_type();
+    AST_Type* actual_field_type = resolveActualType(field_type);
+    const std::string lang_field_type = generator_->map_type(field_type);
+    const Classification cls = classify(actual_field_type);
+    const char* nm = branch->local_name()->get_string();
+
+    AST_UnionLabel* label = branch->label(0);
+    AST_Union* union_ = AST_Union::narrow_from_scope(branch->defined_in());
+    AST_Type* dtype = resolveActualType(union_->disc_type());
+
+    std::ostringstream dval;
+    if (label->label_kind() == AST_UnionLabel::UL_default) {
+      dval << generateDefaultValue(union_);
+    } else if (dtype->node_type() == AST_Decl::NT_enum) {
+      dval << getEnumLabel(label->label_val(), dtype);
+    } else {
+      dval << *label->label_val()->ev();
+    }
+
+    const std::string assign_pre = "{ _activate(" + dval.str() + "); _"
+      + std::string(nm) + " = ",
+      assign = assign_pre + "val; }\n",
+      move = assign_pre + "std::move(val); }\n",
+      ret = "{ return _" + std::string(nm) + "; }\n";
+    if (cls & (CL_PRIMITIVE | CL_ENUM)) {
+      be_global->lang_header_ <<
+        "  void " << nm << '(' << lang_field_type << " val) " << assign <<
+        "  " << lang_field_type << ' ' << nm << "() const " << ret <<
+        "  " << lang_field_type << "& " << nm << "() " << ret << "\n";
+    } else {
+      be_global->add_include("<utility>", BE_GlobalData::STREAM_LANG_H);
+      be_global->lang_header_ <<
+        "  void " << nm << "(const " << lang_field_type << "& val) " << assign <<
+        "  void " << nm << '(' << lang_field_type << "&& val) " << move <<
+        "  const " << lang_field_type << "& " << nm << "() const " << ret <<
+        "  " << lang_field_type << "& " << nm << "() " << ret << "\n";
+    }
+  }
+
+  static std::string union_copy(const std::string& name, AST_Type* type,
+                                const std::string& prefix, std::string& intro,
+                                const std::string&)
+  {
+    return "    _" + name + " = rhs._" + name + ";\n";
+  }
+
+  static std::string union_activate(const std::string& name, AST_Type* type,
+                                    const std::string& prefix, std::string& intro,
+                                    const std::string&)
+  {
+    AST_Type* actual_field_type = resolveActualType(type);
+    const std::string lang_field_type = generator_->map_type(type);
+    const Classification cls = classify(actual_field_type);
+    if (!(cls & (CL_PRIMITIVE | CL_ENUM))) {
+      return "    new(&_" + name + ") " + lang_field_type + ";\n";
+    }
+    return "";
+  }
+
+  static std::string union_reset(const std::string& name, AST_Type* type,
+                                 const std::string& prefix, std::string& intro,
+                                 const std::string&)
+  {
+    AST_Type* actual_field_type = resolveActualType(type);
+    const std::string lang_field_type = generator_->map_type(type);
+    const Classification cls = classify(actual_field_type);
+    if (cls & CL_STRING) {
+      return "    _" + name + ".~basic_string();\n";
+    } else if (!(cls & (CL_PRIMITIVE | CL_ENUM))) {
+      const size_t idx = lang_field_type.rfind("::");
+      const std::string dtor_name = (idx == std::string::npos) ? lang_field_type
+        : lang_field_type.substr(idx + 2);
+      return "    _" + name + ".~" + dtor_name + "();\n";
+    }
+    return "";
+  }
+
   bool gen_union(AST_Union* u, UTL_ScopedName* name,
                  const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator)
   {
     const ScopedNamespaceGuard namespaces(name, be_global->lang_header_);
     const char* const nm = name->last_component()->get_string();
+    const std::string d_type = generator_->map_type(discriminator);
+    const std::string defVal = generateDefaultValue(u);
+
     gen_common_strunion_pre(nm);
+
+    be_global->lang_header_ <<
+      "  " << nm << "() { _activate(" << defVal << "); }\n"
+      "  " << nm << "(const " << nm << "& rhs);\n"
+      "  " << nm << "& operator=(const " << nm << "& rhs);\n"
+      "  ~" << nm << "() { _reset(); }\n\n"
+      "  " << d_type << " _d() const { return _disc; }\n"
+      "  void _d(" << d_type << " d) { _disc = d; }\n\n";
+
+    std::for_each(branches.begin(), branches.end(), union_accessors);
+    if (needsDefault(branches, discriminator)) {
+      be_global->lang_header_ <<
+        "  void _default() { _reset(); _activate(" << defVal << "); }\n\n";
+    }
+
+    be_global->lang_header_ <<
+      "private:\n"
+      "  bool _set = false;\n"
+      "  " << d_type << " _disc;\n\n"
+      "  union {\n";
+
+    std::for_each(branches.begin(), branches.end(), union_field);
+
+    be_global->lang_header_ <<
+      "  };\n\n"
+      "  void _activate(" << d_type << " d);\n"
+      "  void _reset();\n";
+
     gen_common_strunion_post(nm);
+
+    const ScopedNamespaceGuard namespacesCpp(name, be_global->impl_);
+    be_global->impl_ <<
+      nm << "::" << nm << "(const " << nm << "& rhs)\n"
+      "{\n"
+      "  _activate(rhs._disc);\n";
+    generateSwitchForUnion("_disc", union_copy, branches, discriminator, "", "", "", false, false);
+    be_global->impl_ <<
+      "}\n\n" <<
+      nm << "& " << nm << "::operator=(const " << nm << "& rhs)\n"
+      "{\n"
+      "  if (this != &rhs) {\n"
+      "    " << nm << " tmp(rhs);\n"
+      "    swap(*this, tmp);\n"
+      "  }\n"
+      "  return *this;\n"
+      "}\n\n" <<
+      "void " << nm << "::_activate(" << d_type << " d)\n"
+      "{\n"
+      "  if (_set && d != _disc) {\n"
+      "    _reset();\n"
+      "  }\n";
+    generateSwitchForUnion("d", union_activate, branches, discriminator, "", "", "", false, false);
+    be_global->impl_ <<
+      "  _set = true;\n"
+      "  _disc = d;\n"
+      "}\n\n"
+      "void " << nm << "::_reset()\n"
+      "{\n"
+      "  if (!_set) return;\n";
+    generateSwitchForUnion("_disc", union_reset, branches, discriminator, "", "", "", false, false);
+    be_global->impl_ <<
+      "  _set = false;\n"
+      "}\n\n"
+      "void swap(" << nm << "& lhs, " << nm << "& rhs)\n"
+      "{\n"
+      "  std::swap(lhs, rhs);\n"
+      "}\n\n";
+
     return true;
   }
 
@@ -1611,6 +1801,10 @@ bool langmap_generator::gen_union(AST_Union* u, UTL_ScopedName* name,
 
 bool langmap_generator::gen_interf_fwd(UTL_ScopedName* name)
 {
+  if (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11) {
+    return true;
+  }
+
   const ScopedNamespaceGuard namespaces(name, be_global->lang_header_);
 
   be_global->add_include("<tao/Objref_VarOut_T.h>", BE_GlobalData::STREAM_LANG_H);

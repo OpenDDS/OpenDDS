@@ -17,6 +17,8 @@
 #include "Comparator_T.h"
 #include "RcObject.h"
 
+#include <string>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -36,7 +38,12 @@ struct OpenDDS_Dcps_Export Value {
   Value(char c, bool conversion_preferred = false);
   Value(double f, bool conversion_preferred = false);
   Value(ACE_CDR::LongDouble ld, bool conversion_preferred = false);
+  Value(long double ld, bool conversion_preferred = false);
   Value(const char* s, bool conversion_preferred = false);
+  Value(const std::string& s, bool conversion_preferred = false);
+#ifdef DDS_HAS_WCHAR
+  Value(const std::wstring& s, bool conversion_preferred = false);
+#endif
   Value(const TAO::String_Manager& s, bool conversion_preferred = false);
   Value(const TAO::WString_Manager& s, bool conversion_preferred = false);
 

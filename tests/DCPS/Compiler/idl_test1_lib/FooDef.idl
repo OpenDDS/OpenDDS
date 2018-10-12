@@ -67,6 +67,8 @@ module Xyz {
     ArrayOfAStruct f1;
   };
 
+  union AUnion;
+  
   union AUnion switch (ColorX) {
     case redx:
     case yellowx:
@@ -95,6 +97,14 @@ module Xyz {
   typedef sequence<BoundedString> UnboundedSeqOfBoundedString;
   typedef sequence<BoundedString, 10> BoundedSeqOfBoundedString;
   typedef sequence<string> UnboundedSeqOfUnboundedString;
+
+  struct BoundedStringStruct {
+    BoundedString a;
+  };
+
+  struct BoundedSeqStruct {
+    AStringSeq seq;
+  };
 
   // +4+(3*12)
   typedef sequence<AStruct,3> AStructSeqX;
@@ -185,10 +195,16 @@ module N1 {
 
 module N1 {
   typedef sequence<N1::FwdDeclStruct> FwdDeclSameNamespaceStructs;
+  struct FwdDeclStructSeqWrapper {
+    FwdDeclSameNamespaceStructs wrapped;
+  };
 };
 
 module N2 {
   typedef sequence<N1::FwdDeclStruct> FwdDeclDiffNamespaceStructs;
+  struct FwdDeclStructSeqWrapper {
+    FwdDeclDiffNamespaceStructs wrapped;
+  };
 };
 
 module N1 {
