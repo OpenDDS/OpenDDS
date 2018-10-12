@@ -141,7 +141,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'tao=s', 'TAO (use TAO_ROOT, ACE_ROOT/TAO, or download)',
     'mpc=s', 'MPC (use MPC_ROOT, ACE_ROOT/MPC, or download)',
     'doc_group!', 'Use the DOC Group release of TAO',
-    'doc_group_master!', 'Download latest ACE/TAO/MPC from DOC Group master branches',
+    'ace-github-latest!', 'Clone latest ACE/TAO/MPC from GitHub',
    ],
    ['Advanced configuration:',
     'configh=s@', 'Extra text for config.h',
@@ -544,30 +544,24 @@ if ($opts{'safety-profile'}) {
   $opts{'safety-profile'} = lc($opts{'safety-profile'});
 }
 
-sub ace_tao_not_found { !$ace_src || !$tao_src; }
-
 ## Download ACE+TAO
-if (ace_tao_not_found()) {
-  my $urlbase;
-
-  if ($opts{'doc_group_master'}) {
-    die "ERROR: Git not found in path (required to download ACE/TAO/MPC master)"
+if (!$ace_src || !$tao_src) {
+  if ($opts{'ace-github-latest'}) {
+    die "ERROR: Git not found in path (required to clone ACE/TAO/MPC)"
       if ! which('git');
 
-    my $git_cmd_switches = $opts{'verbose'} ? '--verbose' : '';
+    my $urlbase = 'https://github.com/DOCGroup';
 
-    $urlbase = 'https://github.com/DOCGroup';
-
-    print "Cloning git repo: $urlbase/ACE_TAO.git\n";
-    my $err = system("git clone $urlbase/ACE_TAO.git $git_cmd_switches");
-    die 'ERROR: Failed to clone ACE/TAO from DOC Group'
+    print "Cloning git repo: $urlbase/ACE_TAO\n";
+    my $err = system("git clone --depth 1 $urlbase/ACE_TAO");
+    die 'ERROR: Failed to clone ACE/TAO from GitHub'
       if $err ||
         ! -r 'ACE_TAO/ACE/ace/ACE.h' ||
           ! -r 'ACE_TAO/TAO/tao/ORB.h';
 
     print "Cloning git repo: $urlbase/MPC into ACE_TAO/ACE/MPC\n";
-    $err = system("git clone $urlbase/MPC ACE_TAO/ACE/MPC $git_cmd_switches");
-    die 'ERROR: Failed to clone MPC (into ACE_TAO/ACE/MPC) from DOC Group'
+    $err = system("git clone --depth 1 $urlbase/MPC ACE_TAO/ACE/MPC");
+    die 'ERROR: Failed to clone MPC (into ACE_TAO/ACE/MPC) from GitHub'
       if $err ||
         ! -r 'ACE_TAO/ACE/MPC/mwc.pl';
 
@@ -575,8 +569,7 @@ if (ace_tao_not_found()) {
     $tao_src = normalizePath('ACE_TAO/TAO');
 
   } else {
-    my $file;
-    my $download_message;
+    my($urlbase, $file, $download_message);
 
     if ($opts{'doc_group'}) {
       $urlbase = 'http://download.dre.vanderbilt.edu/previous_versions/';
