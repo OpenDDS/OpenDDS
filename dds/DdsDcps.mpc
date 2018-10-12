@@ -162,6 +162,11 @@ project(OpenDDS_Dcps): core, coverage_optional, \
 //    DdsDcpsCore.idl which means that opendds_idl generates
 //    DdsDcpsCoreTypeSupport.idl which is then processed with tao_idl.
 
+// 4. Safety profile (with no builtin topics)
+
+//    Similar to the previous case except fileTypeSupport.idl and its
+//    products can almost be avoided entirely.
+
 // Various interfaces use sequences of interfaces.  This is a problem in
 // safety profile builds because the included TAO headers have calls to
 // global operator new.  Sequences of interfaces are handled by pulling
