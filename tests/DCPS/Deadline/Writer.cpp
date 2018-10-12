@@ -15,30 +15,37 @@ using namespace std;
 
 static int const num_messages = 10;
 static ACE_Time_Value write_interval(0, 500000);
-extern ACE_Time_Value SLEPP_DURATION;
+extern ACE_Time_Value SLEEP_DURATION;
+
+// Wait for up to 10 seconds for subscription matched status.
+static DDS::Duration_t const MATCHED_WAIT_MAX_DURATION =
+{
+  10, // seconds
+  0   // nanoseconds
+};
 
 Writer::Writer(::DDS::DataWriter_ptr writer,
                CORBA::Long key,
                ACE_Time_Value sleep_duration)
-: writer_ (::DDS::DataWriter::_duplicate (writer)),
-  condition_ (this->lock_),
-  associated_ (false),
-  dwl_servant_ (0),
-  instance_handle_ (::DDS::HANDLE_NIL),
-  key_ (key),
-  sleep_duration_ (sleep_duration)
+: writer_(::DDS::DataWriter::_duplicate(writer)),
+  condition_(this->lock_),
+  associated_(false),
+  dwl_servant_(0),
+  instance_handle_(::DDS::HANDLE_NIL),
+  key_(key),
+  sleep_duration_(sleep_duration)
 {
   ::DDS::DataWriterListener_var dwl = writer->get_listener();
   dwl_servant_ =
-    dynamic_cast<DataWriterListenerImpl*> (dwl.in());
+    dynamic_cast<DataWriterListenerImpl*>(dwl.in());
 }
 
 void
-Writer::start ()
+Writer::start()
 {
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::start \n")));
   // Launch threads.
-  if (activate (THR_NEW_LWP | THR_JOINABLE, 1) == -1)
+  if (activate(THR_NEW_LWP | THR_JOINABLE, 1) == -1)
   {
     cerr << "Writer::start(): activate failed" << endl;
     exit(1);
@@ -46,41 +53,40 @@ Writer::start ()
 }
 
 void
-Writer::end ()
+Writer::end()
 {
   ACE_DEBUG((LM_DEBUG,
              ACE_TEXT("(%P|%t) Writer::end \n")));
-  wait ();
+  wait();
 }
 
 
 int
-Writer::svc ()
+Writer::svc()
 {
   ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) Writer::svc begins.\n")));
 
   try
   {
-    while (1)
+    ACE_Time_Value now(ACE_OS::gettimeofday());
+    ACE_Time_Value connect_deadline(now + OpenDDS::DCPS::duration_to_time_value(MATCHED_WAIT_MAX_DURATION));
+
+    if (dwl_servant_->wait_matched(2, &connect_deadline) != 0)
     {
-      ::DDS::InstanceHandleSeq handles;
-      this->writer_->get_matched_subscriptions (handles);
-      if (handles.length () == 2)
-        break;
-      else
-        ACE_OS::sleep(ACE_Time_Value(0,250000));
+      cerr << "ERROR: wait for subscription matching failed." << endl;
+      exit(1);
     }
 
     {
-      GuardType guard (this->lock_);
+      GuardType guard(this->lock_);
       this->associated_ = true;
-      this->condition_.signal ();
+      this->condition_.broadcast();
     }
 
     Messenger::MessageDataWriter_var message_dw =
       Messenger::MessageDataWriter::_narrow(writer_.in());
-    if (CORBA::is_nil (message_dw.in ())) {
+    if (CORBA::is_nil(message_dw.in())) {
       cerr << "Data Writer could not be narrowed"<< endl;
       exit(1);
     }
@@ -98,9 +104,9 @@ Writer::svc ()
               ACE_TEXT("(%P|%t) Writer::svc sleep for %d seconds.\n"),
               this->sleep_duration_.sec()));
 
-    ACE_OS::sleep (this->sleep_duration_);
+    ACE_OS::sleep(this->sleep_duration_);
 
-    for (int i = 0; i< num_messages; i ++)
+    for (int i = 0; i < num_messages; ++i)
     {
       ++message.count;
 
@@ -108,22 +114,22 @@ Writer::svc ()
               ACE_TEXT("(%P|%t) Writer::svc write sample %d to instance %d.\n"),
               message.count, this->instance_handle_));
 
-      ::DDS::ReturnCode_t const ret = message_dw->write (message, this->instance_handle_);
+      ::DDS::ReturnCode_t const ret = message_dw->write(message, this->instance_handle_);
 
       if (ret != ::DDS::RETCODE_OK)
       {
-        ACE_ERROR ((LM_ERROR,
-                    ACE_TEXT("(%P|%t) ERROR: Writer::svc, ")
-                    ACE_TEXT ("%dth write() returned %d.\n"),
-                    i,
-                    -1));
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: Writer::svc, ")
+                   ACE_TEXT("%dth write() returned %d.\n"),
+                   i,
+                   -1));
       }
 
       // Sleep for half a second between writes to allow some deadline
       // periods to expire.  Missed deadline should not occur since
       // the time between writes should be less than the offered
       // deadline period.
-      ACE_OS::sleep (write_interval);
+      ACE_OS::sleep(write_interval);
     }
   }
   catch (CORBA::Exception& e)
@@ -145,14 +151,14 @@ Writer::get_instance_handle()
 }
 
 
-bool Writer::wait_for_start ()
+bool Writer::wait_for_start()
 {
-  GuardType guard (this->lock_);
+  GuardType guard(this->lock_);
 
   if (! associated_)
   {
-    ACE_Time_Value abs = ACE_OS::gettimeofday () + ACE_Time_Value (10);
-    if (this->condition_.wait (&abs) == -1)
+    ACE_Time_Value abs = ACE_OS::gettimeofday() + ACE_Time_Value(10);
+    if (this->condition_.wait(&abs) == -1)
     {
       return false;
     }
