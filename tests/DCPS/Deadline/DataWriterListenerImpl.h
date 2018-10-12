@@ -20,41 +20,50 @@ public:
 
   virtual void on_offered_deadline_missed (
       ::DDS::DataWriter_ptr writer,
-      const ::DDS::OfferedDeadlineMissedStatus & status
+      const ::DDS::OfferedDeadlineMissedStatus& status
     );
 
   virtual void on_offered_incompatible_qos (
       ::DDS::DataWriter_ptr writer,
-      const ::DDS::OfferedIncompatibleQosStatus & status
+      const ::DDS::OfferedIncompatibleQosStatus& status
     );
 
   virtual void on_liveliness_lost (
       ::DDS::DataWriter_ptr writer,
-      const ::DDS::LivelinessLostStatus & status
+      const ::DDS::LivelinessLostStatus& status
     );
 
   virtual void on_publication_matched (
       ::DDS::DataWriter_ptr writer,
-      const ::DDS::PublicationMatchedStatus & status
+      const ::DDS::PublicationMatchedStatus& status
     );
 
   virtual void on_publication_disconnected (
       ::DDS::DataWriter_ptr reader,
-      const ::OpenDDS::DCPS::PublicationDisconnectedStatus & status
+      const ::OpenDDS::DCPS::PublicationDisconnectedStatus& status
     );
 
   virtual void on_publication_reconnected (
       ::DDS::DataWriter_ptr reader,
-      const ::OpenDDS::DCPS::PublicationReconnectedStatus & status
+      const ::OpenDDS::DCPS::PublicationReconnectedStatus& status
     );
 
   virtual void on_publication_lost (
       ::DDS::DataWriter_ptr writer,
-      const ::OpenDDS::DCPS::PublicationLostStatus & status
+      const ::OpenDDS::DCPS::PublicationLostStatus& status
     );
+
+  int wait_matched(long count, const ACE_Time_Value *abstime) const;
+
 protected:
 
   virtual ~DataWriterListenerImpl (void);
+
+private:
+
+  mutable ACE_Thread_Mutex mutex_;
+  mutable ACE_Condition<ACE_Thread_Mutex> matched_condition_;
+  long matched_;
 };
 
 #endif /* DATAWRITER_LISTENER_IMPL  */

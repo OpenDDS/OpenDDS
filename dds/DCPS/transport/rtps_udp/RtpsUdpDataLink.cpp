@@ -785,7 +785,12 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
   }
 
 #ifdef OPENDDS_SECURITY
-  send_strategy()->encode_payload(pub_id, data, subm);
+  {
+    GuardType guard(this->strategy_lock_);
+    if (this->send_strategy_) {
+      send_strategy()->encode_payload(pub_id, data, subm);
+    }
+  }
 #endif
 
   Message_Block_Ptr hdr(submsgs_to_msgblock(subm));
