@@ -1405,43 +1405,51 @@ struct Cxx11Generator : GeneratorBase
   static void gen_common_strunion_post(const char* nm)
   {
     be_global->lang_header_ <<
-      "\n"
       "};\n\n"
       << exporter() << "void swap(" << nm << "& lhs, " << nm << "& rhs);\n\n";
   }
 
-  struct StructAccessors {
-    std::string& swaps_;
-    explicit StructAccessors(std::string& swaps) : swaps_(swaps) {}
-    void operator()(AST_Field* field)
-    {
-      const std::string nm = field->local_name()->get_string();
-      AST_Type* field_type = field->field_type();
-      AST_Type* actual_field_type = resolveActualType(field_type);
-      const Classification cls = classify(actual_field_type);
-      const std::string lang_field_type = generator_->map_type(field_type);
-      const std::string assign_pre = "{ _" + nm + " = ",
-        assign = assign_pre + "val; }\n",
-        move = assign_pre + "std::move(val); }\n",
-        ret = "{ return _" + nm + "; }\n";
+  static void gen_struct_members(AST_Field* field)
+  {
+    const std::string nm = field->local_name()->get_string();
+    AST_Type* field_type = field->field_type();
+    AST_Type* actual_field_type = resolveActualType(field_type);
+    const Classification cls = classify(actual_field_type);
+    const std::string lang_field_type = generator_->map_type(field_type);
+
+    const std::string assign_pre = "{ _" + nm + " = ",
+      assign = assign_pre + "val; }\n",
+      move = assign_pre + "std::move(val); }\n",
+      ret = "{ return _" + nm + "; }\n";
+    std::string initializer;
+    if (cls & (CL_PRIMITIVE | CL_ENUM)) {
       be_global->lang_header_ <<
-        "  " << lang_field_type << " _" << nm << ";\n";
-      if (cls & (CL_PRIMITIVE | CL_ENUM)) {
-        be_global->lang_header_ <<
-          "  void " << nm << '(' << lang_field_type << " val) " << assign <<
-          "  " << lang_field_type << ' ' << nm << "() const " << ret <<
-          "  " << lang_field_type << "& " << nm << "() " << ret << "\n";
+        "  void " << nm << '(' << lang_field_type << " val) " << assign <<
+        "  " << lang_field_type << ' ' << nm << "() const " << ret <<
+        "  " << lang_field_type << "& " << nm << "() " << ret;
+      if (cls & CL_ENUM) {
+        AST_Enum* enu = AST_Enum::narrow_from_decl(actual_field_type);
+        for (UTL_ScopeActiveIterator it(enu, UTL_Scope::IK_decls); !it.is_done(); it.next()) {
+          if (it.item()->node_type() == AST_Decl::NT_enum_val) {
+            initializer = '{' + generator_->map_type(field_type)
+              + "::" + it.item()->local_name()->get_string() + '}';
+            break;
+          }
+        }
       } else {
-        be_global->add_include("<utility>", BE_GlobalData::STREAM_LANG_H);
-        be_global->lang_header_ <<
-          "  void " << nm << "(const " << lang_field_type << "& val) " << assign <<
-          "  void " << nm << '(' << lang_field_type << "&& val) " << move <<
-          "  const " << lang_field_type << "& " << nm << "() const " << ret <<
-          "  " << lang_field_type << "& " << nm << "() " << ret << "\n";
+        initializer = "{}";
       }
-      swaps_ += "  swap(lhs._" + nm + ", rhs._" + nm + ");\n";
+    } else {
+      be_global->add_include("<utility>", BE_GlobalData::STREAM_LANG_H);
+      be_global->lang_header_ <<
+        "  void " << nm << "(const " << lang_field_type << "& val) " << assign <<
+        "  void " << nm << '(' << lang_field_type << "&& val) " << move <<
+        "  const " << lang_field_type << "& " << nm << "() const " << ret <<
+        "  " << lang_field_type << "& " << nm << "() " << ret;
     }
-  };
+    be_global->lang_header_ <<
+      "  " << lang_field_type << " _" << nm << initializer << ";\n\n";
+  }
 
   bool gen_struct(AST_Structure*, UTL_ScopedName* name,
                   const std::vector<AST_Field*>& fields,
@@ -1452,8 +1460,31 @@ struct Cxx11Generator : GeneratorBase
     const char* const nm = name->last_component()->get_string();
     gen_common_strunion_pre(nm);
 
-    std::string swaps;
-    std::for_each(fields.begin(), fields.end(), StructAccessors(swaps));
+    be_global->lang_header_ <<
+      "  " << nm << "() = default;\n"
+      "  " << (fields.size() == 1 ? "explicit " : "") << nm << '(';
+    be_global->impl_ <<
+      nm << "::" << nm << '(';
+      
+    std::string init_list, swaps;
+    for (size_t i = 0; i < fields.size(); ++i) {
+      const std::string fn = fields[i]->local_name()->get_string();
+      const std::string ft = map_type(fields[i]->field_type());
+      const Classification cls = classify(fields[i]->field_type());
+      const bool by_ref = (cls & (CL_PRIMITIVE | CL_ENUM)) == 0;
+      const std::string param = (by_ref ? "const " : "") + ft + (by_ref ? "&" : "")
+        + ' ' + fn + (i < fields.size() - 1 ? ",\n    " : ")");
+      be_global->lang_header_ << param;
+      be_global->impl_ << param;
+      init_list += '_' + fn + '(' + fn + ')';
+      if (i < fields.size() - 1) init_list += "\n  , ";
+      swaps += "  swap(lhs._" + fn + ", rhs._" + fn + ");\n";
+    }
+
+    be_global->lang_header_ << ";\n\n";
+    be_global->impl_ << "\n  : " << init_list << "\n{}\n\n";
+
+    std::for_each(fields.begin(), fields.end(), gen_struct_members);
 
     gen_common_strunion_post(nm);
     be_global->impl_ <<
