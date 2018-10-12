@@ -1,9 +1,8 @@
 #include "../idl_test1_lib/FooDefTypeSupportImpl.h"
+#include "dds/DCPS/Message_Block_Ptr.h"
 #include "ace/ACE.h"
 #include "ace/Log_Msg.h"
 #include <map>
-#include "tao/CDR.h"
-#include "dds/DCPS/Message_Block_Ptr.h"
 
 namespace {
   template <typename T>
@@ -16,10 +15,40 @@ namespace {
   }
 }
 
+bool idl2cxx11_test()
+{
+  Xyz::Foo f;
+  if (f.key() != 0) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("Foo default key = %d\n"), f.key()));
+    return false;
+  }
+  Xyz::Foo f2(f);
+  f = f2;
+  Xyz::Foo f3(std::move(f));
+  f = std::move(f2);
+  swap(f3, f);
+  
+  Xyz::AStruct a{3, Xyz::ShortSeq{-1, 5}};
+
+  Xyz::AUnion u;
+  if (u._d() != Xyz::ColorX::bluex) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("AUnion default _d = %d\n"),
+               static_cast<int>(u._d())));
+    return false;
+  }
+  Xyz::AUnion u2(u);
+  u = u2;
+  Xyz::AUnion u3(std::move(u));
+  u = std::move(u2);
+  swap(u3, u);
+
+  return true;
+}
+
 // this test tests the opendds_idl generated code for type XyZ::Foo from idl_test1_lib.
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
-  int failed = false;
+  bool failed = !idl2cxx11_test();
   bool dump_buffer = false;
 
   if (argc > 1) dump_buffer = true;
