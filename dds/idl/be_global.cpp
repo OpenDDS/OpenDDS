@@ -260,6 +260,19 @@ BE_GlobalData::spawn_options()
   return idl_global->idl_flags();
 }
 
+#ifdef TAO_IDL_HAS_PARSE_ARGS_EXIT
+#define PARSE_ARGS_ERROR idl_global->parse_args_exit (1);
+#else
+#define PARSE_ARGS_ERROR \
+  idl_global->set_compile_flags (\
+    idl_global->compile_flags () | IDL_CF_ONLY_USAGE);
+#endif
+
+#define INVALID_OPTION \
+  ACE_ERROR((LM_ERROR, ACE_TEXT("IDL: I don't understand the '%C'") \
+             ACE_TEXT(" option\n"), av[i])); \
+  PARSE_ARGS_ERROR;
+
 void
 BE_GlobalData::parse_args(long& i, char** av)
 {
@@ -286,10 +299,7 @@ BE_GlobalData::parse_args(long& i, char** av)
       face_ts(true);
     else
       {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("IDL: I don't understand the '%C'")
-                   ACE_TEXT(" option\n"), av[i]));
-        idl_global->set_compile_flags(idl_global->compile_flags()
-                                      | IDL_CF_ONLY_USAGE);
+        INVALID_OPTION;
       }
     break;
   case 'L':
@@ -298,10 +308,7 @@ BE_GlobalData::parse_args(long& i, char** av)
     else if (0 == ACE_OS::strcasecmp(av[i], "-Lspcpp"))
       language_mapping(LANGMAP_SP_CXX);
     else {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("IDL: I don't understand the '%C'")
-                  ACE_TEXT(" option\n"), av[i]));
-      idl_global->set_compile_flags(idl_global->compile_flags()
-                                    | IDL_CF_ONLY_USAGE);
+      INVALID_OPTION;
     }
     break;
   case 'S':
@@ -316,10 +323,7 @@ BE_GlobalData::parse_args(long& i, char** av)
       // ignore, accepted for tao_idl compatibility
       break;
     default:
-      ACE_ERROR((LM_ERROR, ACE_TEXT("IDL: I don't understand the '%C'")
-        ACE_TEXT(" option\n"), av[i]));
-      idl_global->set_compile_flags(idl_global->compile_flags()
-                                    | IDL_CF_ONLY_USAGE);
+      INVALID_OPTION;
     }
     break;
   case 'Z':
@@ -328,10 +332,7 @@ BE_GlobalData::parse_args(long& i, char** av)
       add_include (av[++i], STREAM_CPP);
       break;
     default:
-      ACE_ERROR((LM_ERROR, ACE_TEXT("IDL: I don't understand the '%C'")
-                 ACE_TEXT(" option\n"), av[i]));
-      idl_global->set_compile_flags(idl_global->compile_flags()
-                                    | IDL_CF_ONLY_USAGE);
+      INVALID_OPTION;
     }
     break;
   case '-':
@@ -340,10 +341,7 @@ BE_GlobalData::parse_args(long& i, char** av)
     }
     break;
   default:
-    ACE_ERROR((LM_ERROR, ACE_TEXT("IDL: I don't understand the '%C' option\n"),
-               av[i]));
-    idl_global->set_compile_flags(idl_global->compile_flags()
-                                  | IDL_CF_ONLY_USAGE);
+    INVALID_OPTION;
   }
 }
 
