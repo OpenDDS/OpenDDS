@@ -7,67 +7,90 @@
 using namespace std;
 
 
-DataWriterListenerImpl::DataWriterListenerImpl ()
+DataWriterListenerImpl::DataWriterListenerImpl()
+  : mutex_()
+  , matched_condition_(mutex_)
+  , matched_(0)
 {
 }
 
-DataWriterListenerImpl::~DataWriterListenerImpl ()
+DataWriterListenerImpl::~DataWriterListenerImpl()
 {
 }
 
 void
-DataWriterListenerImpl::on_offered_deadline_missed (
+DataWriterListenerImpl::on_offered_deadline_missed(
     ::DDS::DataWriter_ptr /* writer */,
-    ::DDS::OfferedDeadlineMissedStatus const & status)
+    const ::DDS::OfferedDeadlineMissedStatus& status)
 {
-  ACE_DEBUG ((LM_DEBUG,
+  ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) DataWriterListenerImpl::on_offered_deadline_missed:")
     ACE_TEXT("total_count=%d total_count_change=%d last_instance_handle=%d \n"),
     status.total_count, status.total_count_change, status.last_instance_handle));
-  //cerr << "DataWriterListenerImpl::on_offered_deadline_missed" << endl
-  //     << "  total_count        = " << status.total_count << endl
-  //     << "  total_count_change = " << status.total_count_change << endl;
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataWriterListenerImpl::on_offered_deadline_missed\n")
+    ACE_TEXT("  total_count        = %d\n")
+    ACE_TEXT("  total_count_change = %d\n"), status.total_count, status.total_count_change));
 }
 
 void
-DataWriterListenerImpl::on_offered_incompatible_qos (
+DataWriterListenerImpl::on_offered_incompatible_qos(
     ::DDS::DataWriter_ptr /* writer */,
-    ::DDS::OfferedIncompatibleQosStatus const & /* status */)
+    const ::DDS::OfferedIncompatibleQosStatus& /* status */)
 {
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataWriterListenerImpl::on_offered_incompatible_qos\n")));
 }
 
 void
-DataWriterListenerImpl::on_liveliness_lost (
+DataWriterListenerImpl::on_liveliness_lost(
     ::DDS::DataWriter_ptr /* writer */,
-    ::DDS::LivelinessLostStatus const & /* status */)
+    const ::DDS::LivelinessLostStatus& /* status */)
 {
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataWriterListenerImpl::on_liveliness_lost\n")));
 }
 
 void
-DataWriterListenerImpl::on_publication_matched (
+DataWriterListenerImpl::on_publication_matched(
     ::DDS::DataWriter_ptr /* writer */,
-    ::DDS::PublicationMatchedStatus const & /* status */)
+    const ::DDS::PublicationMatchedStatus& status)
 {
+  ACE_GUARD(ACE_Thread_Mutex, guard, mutex_);
+  matched_ = status.current_count;
+  matched_condition_.broadcast();
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataWriterListenerImpl::on_publication_matched\n")));
 }
 
 void
-DataWriterListenerImpl::on_publication_disconnected (
+DataWriterListenerImpl::on_publication_disconnected(
     ::DDS::DataWriter_ptr /* writer */,
-    ::OpenDDS::DCPS::PublicationDisconnectedStatus const & /* status */)
+    const ::OpenDDS::DCPS::PublicationDisconnectedStatus& /* status */)
 {
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataWriterListenerImpl::on_publication_disconnected\n")));
 }
 
 void
-DataWriterListenerImpl::on_publication_reconnected (
+DataWriterListenerImpl::on_publication_reconnected(
     ::DDS::DataWriter_ptr /* writer */,
-    ::OpenDDS::DCPS::PublicationReconnectedStatus const & /* status */)
+    const ::OpenDDS::DCPS::PublicationReconnectedStatus& /* status */)
 {
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataWriterListenerImpl::on_publication_reconnected\n")));
 }
 
 void
-DataWriterListenerImpl::on_publication_lost (
+DataWriterListenerImpl::on_publication_lost(
     ::DDS::DataWriter_ptr /* writer */,
-    ::OpenDDS::DCPS::PublicationLostStatus const & /* status */)
+    const ::OpenDDS::DCPS::PublicationLostStatus& /* status */)
 {
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataWriterListenerImpl::on_publication_lost\n")));
+}
+
+int DataWriterListenerImpl::wait_matched(long count, const ACE_Time_Value *abstime) const
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, -1);
+
+  int result = 0;
+  while (count != matched_ && result == 0) {
+    result = matched_condition_.wait(abstime);
+  }
+  return count == matched_ ? 0 : result;
 }
 
