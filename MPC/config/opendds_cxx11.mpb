@@ -2,7 +2,7 @@ project: dcps, dcps_ts_defaults {
 
   avoids += no_cxx11
   dcps_ts_flags += -Lc++11
-  idlflags += -SS
+  idlflags += -SS -Sa -St
 
   Modify_Custom(Idl) {
     automatic_in = 0

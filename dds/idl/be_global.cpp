@@ -297,9 +297,10 @@ BE_GlobalData::parse_args(long& i, char** av)
       language_mapping(LANGMAP_FACE_CXX);
     else if (0 == ACE_OS::strcasecmp(av[i], "-Lspcpp"))
       language_mapping(LANGMAP_SP_CXX);
-    else if (0 == ACE_OS::strcasecmp(av[i], "-Lc++11"))
+    else if (0 == ACE_OS::strcasecmp(av[i], "-Lc++11")) {
       language_mapping(LANGMAP_CXX11);
-    else {
+      suppress_typecode_ = true;
+    } else {
       ACE_ERROR((LM_ERROR, ACE_TEXT("IDL: I don't understand the '%C'")
                   ACE_TEXT(" option\n"), av[i]));
       idl_global->set_compile_flags(idl_global->compile_flags()

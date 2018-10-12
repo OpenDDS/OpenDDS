@@ -1399,7 +1399,7 @@ struct Cxx11Generator : GeneratorBase
       "\n"
       "class " << exporter() << nm << "\n"
       "{\n"
-      "public: \n\n";
+      "public:\n\n";
   }
 
   static void gen_common_strunion_post(const char* nm)

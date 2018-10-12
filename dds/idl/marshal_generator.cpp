@@ -427,8 +427,8 @@ namespace {
       const string underscores = dds_generator::scoped_helper(tdname, "_");
       be_global->header_ <<
         "struct " << underscores << "_tag {};\n\n";
-      unwrap = "  " + cxx + "& seq = wrap;\n";
-      const_unwrap = "  const " + cxx + "& seq = wrap;\n";
+      unwrap = "  " + cxx + "& seq = wrap;\n  ACE_UNUSED_ARG(seq);\n";
+      const_unwrap = "  const " + cxx + "& seq = wrap;\n  ACE_UNUSED_ARG(seq);\n";
       const_cxx = "IDL::DistinctType<const " + cxx + ", " + underscores + "_tag>";
       cxx = "IDL::DistinctType<" + cxx + ", " + underscores + "_tag>";
     } else {
@@ -669,8 +669,8 @@ namespace {
       const string underscores = dds_generator::scoped_helper(name, "_");
       be_global->header_ <<
         "struct " << underscores << "_tag {};\n\n";
-      unwrap = "  " + cxx + "& arr = wrap;\n";
-      const_unwrap = "  const " + cxx + "& arr = wrap;\n";
+      unwrap = "  " + cxx + "& arr = wrap;\n  ACE_UNUSED_ARG(arr);\n";
+      const_unwrap = "  const " + cxx + "& arr = wrap;\n  ACE_UNUSED_ARG(arr);\n";
       const_cxx = "IDL::DistinctType<const " + cxx + ", " + underscores + "_tag>";
       cxx = "IDL::DistinctType<" + cxx + ", " + underscores + "_tag>";
     } else {
@@ -1265,7 +1265,7 @@ namespace {
           return "(strm " + shift + ' ' + getWrapper(args, type, WD_OUTPUT) + ')';
         }
       } else if (use_cxx11 && (fld_cls & (CL_ARRAY | CL_SEQUENCE))) {
-        return "(strm " + shift + " IDL::DistinctType<" + 
+        return "(strm " + shift + " IDL::DistinctType<" +
           (dir == WD_OUTPUT ? "const " : "") + tdname + ", " +
           dds_generator::scoped_helper(typedeff->name(), "_") + "_tag>("
           + (fieldref + local).substr(3) + "))";
