@@ -721,6 +721,7 @@ operator<<(Serializer& s, const ACE_CDR::WChar* x)
   return s.good_bit();
 }
 
+#ifdef NONNATIVE_LONGDOUBLE
 ACE_INLINE bool
 operator<<(Serializer& s, long double x)
 {
@@ -728,6 +729,7 @@ operator<<(Serializer& s, long double x)
   ACE_CDR_LONG_DOUBLE_ASSIGNMENT(ld, x);
   return s << ld;
 }
+#endif
 
 ACE_INLINE bool
 operator<<(Serializer& s, ACE_OutputCDR::from_boolean x)
@@ -926,6 +928,7 @@ operator>>(Serializer& s, ACE_CDR::WChar*& x)
   return s.good_bit();
 }
 
+#ifdef NONNATIVE_LONGDOUBLE
 ACE_INLINE bool
 operator>>(Serializer& s, long double& x)
 {
@@ -936,6 +939,7 @@ operator>>(Serializer& s, long double& x)
   }
   return false;
 }
+#endif
 
 ACE_INLINE bool
 operator>>(Serializer& s, ACE_InputCDR::to_boolean x)

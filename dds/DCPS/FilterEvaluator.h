@@ -38,7 +38,9 @@ struct OpenDDS_Dcps_Export Value {
   Value(char c, bool conversion_preferred = false);
   Value(double f, bool conversion_preferred = false);
   Value(ACE_CDR::LongDouble ld, bool conversion_preferred = false);
+#ifdef NONNATIVE_LONGDOUBLE
   Value(long double ld, bool conversion_preferred = false);
+#endif
   Value(const char* s, bool conversion_preferred = false);
   Value(const std::string& s, bool conversion_preferred = false);
 #ifdef DDS_HAS_WCHAR

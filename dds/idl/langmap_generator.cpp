@@ -1353,7 +1353,7 @@ struct Cxx11Generator : GeneratorBase
 
   bool scoped_enum() { return true; }
   std::string enum_base() { return " : uint32_t"; }
-  
+
   void struct_decls(UTL_ScopedName* name, AST_Type::SIZE_TYPE, const char*)
   {
     be_global->lang_header_ <<
@@ -1365,7 +1365,6 @@ struct Cxx11Generator : GeneratorBase
     be_global->add_include("<array>", BE_GlobalData::STREAM_LANG_H);
     const char* const nm = tdname->last_component()->get_string();
     AST_Type* elem = arr->base_type();
-    const Classification elem_cls = classify(elem);
     const std::string elem_type = map_type(elem);
 
     std::ostringstream bounds;
@@ -1385,11 +1384,10 @@ struct Cxx11Generator : GeneratorBase
   void gen_typedef_varout(const char*, AST_Type*) {}
 
   void gen_sequence(UTL_ScopedName* tdname, AST_Sequence* seq)
-  {    
+  {
     be_global->add_include("<vector>", BE_GlobalData::STREAM_LANG_H);
     const char* const nm = tdname->last_component()->get_string();
     AST_Type* elem = seq->base_type();
-    const Classification elem_cls = classify(elem);
     const std::string elem_type = map_type(elem);
     be_global->lang_header_ <<
       "using " << nm << " = std::vector<" << elem_type << ">;\n";
@@ -1447,8 +1445,7 @@ struct Cxx11Generator : GeneratorBase
 
   bool gen_struct(AST_Structure*, UTL_ScopedName* name,
                   const std::vector<AST_Field*>& fields,
-                  AST_Type::SIZE_TYPE size,
-                  const char*)
+                  AST_Type::SIZE_TYPE, const char*)
   {
     const ScopedNamespaceGuard namespaces(name, be_global->lang_header_);
     const ScopedNamespaceGuard namespaces2(name, be_global->impl_);
@@ -1470,8 +1467,6 @@ struct Cxx11Generator : GeneratorBase
   static void union_field(AST_UnionBranch* branch)
   {
     AST_Type* field_type = branch->field_type();
-    AST_Type* actual_field_type = resolveActualType(field_type);
-    const Classification cls = classify(actual_field_type);
     const std::string lang_field_type = generator_->map_type(field_type);
     be_global->lang_header_ <<
       "    " << lang_field_type << " _" << branch->local_name()->get_string()
@@ -1519,15 +1514,15 @@ struct Cxx11Generator : GeneratorBase
     }
   }
 
-  static std::string union_copy(const std::string& name, AST_Type* type,
-                                const std::string& prefix, std::string& intro,
+  static std::string union_copy(const std::string& name, AST_Type*,
+                                const std::string&, std::string&,
                                 const std::string&)
   {
     return "    _" + name + " = rhs._" + name + ";\n";
   }
 
   static std::string union_activate(const std::string& name, AST_Type* type,
-                                    const std::string& prefix, std::string& intro,
+                                    const std::string&, std::string&,
                                     const std::string&)
   {
     AST_Type* actual_field_type = resolveActualType(type);
@@ -1540,7 +1535,7 @@ struct Cxx11Generator : GeneratorBase
   }
 
   static std::string union_reset(const std::string& name, AST_Type* type,
-                                 const std::string& prefix, std::string& intro,
+                                 const std::string&, std::string&,
                                  const std::string&)
   {
     AST_Type* actual_field_type = resolveActualType(type);
@@ -1744,8 +1739,6 @@ bool langmap_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type
   {
     const ScopedNamespaceGuard namespaces(name, be_global->lang_header_);
     const char* const nm = name->last_component()->get_string();
-
-    const Classification cls = classify(base);
 
     switch (base->node_type()) {
     case AST_Decl::NT_sequence:

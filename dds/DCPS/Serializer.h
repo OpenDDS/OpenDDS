@@ -174,8 +174,10 @@ public:
   friend OpenDDS_Dcps_Export
   bool operator<<(Serializer& s, const ACE_CDR::WChar* x);
 
+#ifdef NONNATIVE_LONGDOUBLE
   friend OpenDDS_Dcps_Export
   bool operator<<(Serializer& s, long double x);
+#endif
 
   // Using the ACE CDR Stream disambiguators.
   friend OpenDDS_Dcps_Export
@@ -241,8 +243,10 @@ public:
   friend OpenDDS_Dcps_Export
   bool operator>>(Serializer& s, ACE_CDR::WChar*& x);
 
+#ifdef NONNATIVE_LONGDOUBLE
   friend OpenDDS_Dcps_Export
   bool operator>>(Serializer& s, long double& x);
+#endif
 
   // Using the ACE CDR Stream disambiguators.
   friend OpenDDS_Dcps_Export

@@ -593,11 +593,13 @@ Value::Value(ACE_CDR::LongDouble ld, bool conversion_preferred)
   : type_(VAL_LNGDUB), ld_(ld), conversion_preferred_(conversion_preferred)
 {}
 
+#ifdef NONNATIVE_LONGDOUBLE
 Value::Value(long double ld, bool conversion_preferred)
   : type_(VAL_LNGDUB), conversion_preferred_(conversion_preferred)
 {
   ACE_CDR_LONG_DOUBLE_ASSIGNMENT(ld_, ld);
 }
+#endif
 
 Value::Value(const char* s, bool conversion_preferred)
   : type_(VAL_STRING), s_(ACE_OS::strdup(s))
