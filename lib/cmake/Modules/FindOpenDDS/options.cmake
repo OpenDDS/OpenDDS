@@ -12,6 +12,9 @@
 # OpenDDS::Dcps).
 #
 
+# Handle base property defines like MPC/config/dcps_optional_features.mpb
+# depending on which cmd-line switches the user provided.
+
 macro(_OPENDDS_APPEND_DEF)
   foreach(_def ${ARGN})
     foreach(_defines_list
@@ -68,4 +71,10 @@ endif()
 
 if (OPENDDS_SECURITY)
   _OPENDDS_APPEND_DEF(OPENDDS_SECURITY)
+endif()
+
+# Handle configure-generated link dependencies.
+
+if (OPENDDS_XERCES3)
+  list(APPEND OPENDDS_DCPS_LINK_DEPS ACE::XML_Utils)
 endif()

@@ -163,6 +163,10 @@ macro(OPENDDS_TARGET_SOURCES target)
         ${_target_upper}_BUILD_DLL
         ${OPENDDS_DCPS_COMPILE_DEFS})
 
+    if (OPENDDS_DCPS_LINK_DEPS)
+      target_link_libraries(${target} ${OPENDDS_DCPS_LINK_DEPS})
+    endif()
+
   endif()
 
   if(NOT "${_tao_options}" MATCHES "-Wb,stub_export_include")

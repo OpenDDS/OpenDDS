@@ -35,7 +35,6 @@ if (MSVC)
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindOpenDDS/config.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/FindOpenDDS/options.cmake)
 
 find_path(OPENDDS_INCLUDE_DIR dds HINTS ${DDS_ROOT})
 find_path(OPENDDS_BIN_DIR bin HINTS ${DDS_ROOT})
@@ -397,5 +396,6 @@ if(OPENDDS_FOUND)
     target_link_libraries(OpenDDS::OpenDDS INTERFACE ${_opendds_core_libs})
   endif()
 
+  include(${CMAKE_CURRENT_LIST_DIR}/FindOpenDDS/options.cmake)
   include(${CMAKE_CURRENT_LIST_DIR}/FindOpenDDS/api_macros.cmake)
 endif()
