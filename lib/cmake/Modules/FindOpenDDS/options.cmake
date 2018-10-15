@@ -17,11 +17,11 @@
 
 macro(_OPENDDS_APPEND_DEF)
   foreach(_def ${ARGN})
+    list(APPEND OPENDDS_DCPS_COMPILE_DEFS ${_def})
     foreach(_defines_list
-              OPENDDS_DCPS_COMPILE_DEFS
               OPENDDS_DDS_BASE_IDL_FLAGS
               OPENDDS_TAO_BASE_IDL_FLAGS)
-      list(APPEND ${_defines_list} ${_def})
+      list(APPEND ${_defines_list} -D${_def})
     endforeach()
   endforeach()
 endmacro()
