@@ -25,10 +25,8 @@ macro(OPENDDS_GET_SOURCES_AND_OPTIONS
   src_prefix
   idl_prefix
   libs
-  cmake_options
   tao_options
-  opendds_options
-  options)
+  opendds_options)
 
   set(_options_n
     PUBLIC PRIVATE INTERFACE
@@ -55,33 +53,16 @@ macro(OPENDDS_GET_SOURCES_AND_OPTIONS
   set(${tao_options} ${_arg_TAO_IDL_OPTIONS})
   set(${opendds_options} ${_arg_OPENDDS_IDL_OPTIONS})
 
-  set(${cmake_options})
-  set(${options})
-
   foreach(arg ${_arg_UNPARSED_ARGUMENTS})
-    if("x${arg}" STREQUAL "xWIN32" OR
-       "x${arg}" STREQUAL "xMACOSX_BUNDLE" OR
-       "x${arg}" STREQUAL "xEXCLUDE_FROM_ALL" OR
-       "x${arg}" STREQUAL "xSTATIC" OR
-       "x${arg}" STREQUAL "xSHARED" OR
-       "x${arg}" STREQUAL "xMODULE")
-      list(APPEND ${cmake_options} ${arg})
+    if(TARGET ${arg})
+      list(APPEND ${libs} ${arg})
 
-    elseif("x${arg}" STREQUAL "xSKIP_TAO_IDL" OR
-           "x${arg}" STREQUAL "xSKIP_TAO_IDL_EXPORT")
-      list(APPEND ${options} ${arg})
+    elseif("${arg}" MATCHES "\\.idl$")
+      # Implicit sources default to PUBLIC
+      list(APPEND ${idl_prefix}_PUBLIC ${arg})
 
     else()
-      if(TARGET ${arg})
-        list(APPEND ${libs} ${arg})
-
-      elseif("${arg}" MATCHES "\\.idl$")
-        # Implicit sources default to PUBLIC
-        list(APPEND ${idl_prefix}_PUBLIC ${arg})
-
-      else()
-        list(APPEND ${src_prefix}_PUBLIC ${arg})
-      endif()
+      list(APPEND ${src_prefix}_PUBLIC ${arg})
     endif()
   endforeach()
 endmacro()
@@ -136,10 +117,8 @@ macro(OPENDDS_TARGET_SOURCES target)
     _sources
     _idl_sources
     _libs
-    _cmake_options
     _tao_options
     _opendds_options
-    _options
     ${ARGN})
 
   if(_libs)
