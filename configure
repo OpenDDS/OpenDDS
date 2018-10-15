@@ -142,6 +142,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'tao=s', 'TAO (use TAO_ROOT, ACE_ROOT/TAO, or download)',
     'mpc=s', 'MPC (use MPC_ROOT, ACE_ROOT/MPC, or download)',
     'doc_group!', 'Use the DOC Group release of TAO',
+    'ace-github-latest!', 'Clone latest ACE/TAO/MPC from GitHub',
    ],
    ['Advanced configuration:',
     'configh=s@', 'Extra text for config.h',
@@ -546,128 +547,151 @@ if ($opts{'safety-profile'}) {
 
 ## Download ACE+TAO
 if (!$ace_src || !$tao_src) {
-  my $urlbase;
-  my $file;
-  my $download_message;
-  if ($opts{'doc_group'}) {
-    $urlbase = 'http://download.dre.vanderbilt.edu/previous_versions/';
-    $file = 'ACE+TAO-src-' . $doc_tao_version . '.'
-      . ($is_windows ? 'zip' : 'tar.gz');
-    $download_message = "Downloading $file";
+  if ($opts{'ace-github-latest'}) {
+    die "ERROR: Git not found in path (required to clone ACE/TAO/MPC)"
+      if ! which('git');
+
+    my $urlbase = 'https://github.com/DOCGroup';
+
+    print "Cloning git repo: $urlbase/ACE_TAO\n";
+    my $err = system("git clone --depth 1 $urlbase/ACE_TAO");
+    die 'ERROR: Failed to clone ACE/TAO from GitHub'
+      if $err ||
+        ! -r 'ACE_TAO/ACE/ace/ACE.h' ||
+          ! -r 'ACE_TAO/TAO/tao/ORB.h';
+
+    print "Cloning git repo: $urlbase/MPC into ACE_TAO/ACE/MPC\n";
+    $err = system("git clone --depth 1 $urlbase/MPC ACE_TAO/ACE/MPC");
+    die 'ERROR: Failed to clone MPC (into ACE_TAO/ACE/MPC) from GitHub'
+      if $err ||
+        ! -r 'ACE_TAO/ACE/MPC/mwc.pl';
+
+    $ace_src = normalizePath('ACE_TAO/ACE');
+    $tao_src = normalizePath('ACE_TAO/TAO');
+
   } else {
-    $urlbase = 'http://download.ociweb.com/TAO-' . $oci_tao_version . '/';
-    $file = 'ACE+TAO-' . $oci_tao_version . '_with_latest_patches_NO_makefiles.'
-      . ($is_windows ? 'zip' : 'tar.gz');
-    $download_message =
-      "Downloading ACE+TAO $oci_tao_version with latest patches";
-  }
-  if (-r $file) {
-    print "Using ACE+TAO source package $file\n" if $opts{'verbose'};
-  }
-  else {
-    $would_download = 1;
-    eval {
-      require LWP::UserAgent;
-      my $ua = LWP::UserAgent->new;
-      $ua->env_proxy;
-      print $download_message . "\n";
-      if ($opts{'dry-run'}) {
-        print "Dry-run: would LWP::UserAgent get $urlbase$file\n";
-      }
-      else {
-        my $response = $ua->get($urlbase . $file, ':content_file' => $file);
-        if ($response->is_error) {
-          die $response->message . "\nstopped";
-        }
-      }
-    };
-    if ($@) {
-      if (which('wget')) {
-        print $download_message . " (using wget)\n";
+    my($urlbase, $file, $download_message);
+
+    if ($opts{'doc_group'}) {
+      $urlbase = 'http://download.dre.vanderbilt.edu/previous_versions/';
+      $file = 'ACE+TAO-src-' . $doc_tao_version . '.'
+        . ($is_windows ? 'zip' : 'tar.gz');
+      $download_message = "Downloading $file";
+    } else {
+      $urlbase = 'http://download.ociweb.com/TAO-' . $oci_tao_version . '/';
+      $file = 'ACE+TAO-' . $oci_tao_version . '_with_latest_patches_NO_makefiles.'
+        . ($is_windows ? 'zip' : 'tar.gz');
+      $download_message =
+        "Downloading ACE+TAO $oci_tao_version with latest patches";
+    }
+    if (-r $file) {
+      print "Using ACE+TAO source package $file\n" if $opts{'verbose'};
+    }
+    else {
+      $would_download = 1;
+      eval {
+        require LWP::UserAgent;
+        my $ua = LWP::UserAgent->new;
+        $ua->env_proxy;
+        print $download_message . "\n";
         if ($opts{'dry-run'}) {
-          print "Dry-run: would run wget $urlbase$file\n";
+          print "Dry-run: would LWP::UserAgent get $urlbase$file\n";
         }
-        elsif (system("wget $urlbase$file")) {
-          die "ERROR from wget, stopped";
+        else {
+          my $response = $ua->get($urlbase . $file, ':content_file' => $file);
+          if ($response->is_error) {
+            die $response->message . "\nstopped";
+          }
         }
-      }
-      elsif (which('curl')) {
-        print $download_message . " (using curl)\n";
-        if ($opts{'dry-run'}) {
-          print "Dry-run: would run curl $urlbase$file -o $file\n";
+      };
+      if ($@) {
+        if (which('wget')) {
+          print $download_message . " (using wget)\n";
+          if ($opts{'dry-run'}) {
+            print "Dry-run: would run wget $urlbase$file\n";
+          }
+          elsif (system("wget $urlbase$file")) {
+            die "ERROR from wget, stopped";
+          }
         }
-        elsif (system("curl $urlbase$file -o $file")) {
-          die "ERROR: from curl, stopped";
+        elsif (which('curl')) {
+          print $download_message . " (using curl)\n";
+          if ($opts{'dry-run'}) {
+            print "Dry-run: would run curl $urlbase$file -o $file\n";
+          }
+          elsif (system("curl $urlbase$file -o $file")) {
+            die "ERROR: from curl, stopped";
+          }
         }
-      }
-      else {
-        die "ERROR: Can't download ACE+TAO using LWP, wget, or curl.\n" .
-          "Download ACE+TAO from $urlbase$file, place the file here\n, " .
-          "and re-run the script.\nStopped";
+        else {
+          die "ERROR: Can't download ACE+TAO using LWP, wget, or curl.\n" .
+            "Download ACE+TAO from $urlbase$file, place the file here\n, " .
+            "and re-run the script.\nStopped";
+        }
       }
     }
-  }
 
-  print "Extracting archive $file\n";
-  $ENV{'ACTIVEPERL_CONFIG_DISABLE'} = 1 if $^O eq 'MSWin32';
-  $ENV{'ACTIVEPERL_CONFIG_SILENT'} = 1 if $^O eq 'MSWin32';
-  eval {require Archive::Extract;};
-  if ($@) {
-    my $err = 1;
-    my $ddsroot = getcwd;
-    if (!$is_windows) {
-      if ($opts{'dry-run'}) {
-        print "Dry-run: would run " . ($^O eq 'solaris' ? 'g' : '') .
-          "tar xzf $ddsroot/$file\n";
-        $err = 0;
-      }
-      else {
-        $err = system(($^O eq 'solaris' ? 'g' : '') . "tar xzf $ddsroot/$file");
-      }
-    } else {
-      # Try Archive::Zip
-      print "Archive::Extract isn't installed, trying Archive::Zip\n" if $opts{'verbose'};
-      eval {require Archive::Zip};
-      if ($@) {
-        print "Neither Archive::Extract or Archive::Zip are installed\n" if $opts{'verbose'};
-      } else {
+    print "Extracting archive $file\n";
+    $ENV{'ACTIVEPERL_CONFIG_DISABLE'} = 1 if $^O eq 'MSWin32';
+    $ENV{'ACTIVEPERL_CONFIG_SILENT'} = 1 if $^O eq 'MSWin32';
+    eval {require Archive::Extract;};
+    if ($@) {
+      my $err = 1;
+      my $ddsroot = getcwd;
+      if (!$is_windows) {
         if ($opts{'dry-run'}) {
-          print "Dry-run: would Archive::Zip $file\n";
+          print "Dry-run: would run " . ($^O eq 'solaris' ? 'g' : '') .
+            "tar xzf $ddsroot/$file\n";
+          $err = 0;
+        }
+        else {
+          $err = system(($^O eq 'solaris' ? 'g' : '') . "tar xzf $ddsroot/$file");
+        }
+      } else {
+        # Try Archive::Zip
+        print "Archive::Extract isn't installed, trying Archive::Zip\n" if $opts{'verbose'};
+        eval {require Archive::Zip};
+        if ($@) {
+          print "Neither Archive::Extract or Archive::Zip are installed\n" if $opts{'verbose'};
         } else {
-          my $zip = Archive::Zip->new();
-          if ($zip->read( $file ) == Archive::Zip::AZ_OK() &&
-            $zip->extractTree() == Archive::Zip::AZ_OK()) {
-            $err = 0;
+          if ($opts{'dry-run'}) {
+            print "Dry-run: would Archive::Zip $file\n";
+          } else {
+            my $zip = Archive::Zip->new();
+            if ($zip->read( $file ) == Archive::Zip::AZ_OK() &&
+              $zip->extractTree() == Archive::Zip::AZ_OK()) {
+              $err = 0;
+            }
           }
         }
       }
-    }
 
-    if ($err) {
-      die "ERROR: Can't extract $file, extract it to " . Cwd::abs_path('.') .
-        "\nand run this script again.\nStopped";
-    }
-  }
-  else {
-    if ($opts{'dry-run'}) {
-      print "Dry-run: would Archive::Extract $file\n";
+      if ($err) {
+        die "ERROR: Can't extract $file, extract it to " . Cwd::abs_path('.') .
+          "\nand run this script again.\nStopped";
+      }
     }
     else {
-      if ($^O ne 'MSWin32') {
-        no warnings 'once';
-        $Archive::Extract::PREFER_BIN = 1;
+      if ($opts{'dry-run'}) {
+        print "Dry-run: would Archive::Extract $file\n";
       }
-      my $ae = Archive::Extract->new('archive' => $file);
-      if (!$ae->extract('to' => '.')) {
-        die $ae->error . "\nstopped";
+      else {
+        if ($^O ne 'MSWin32') {
+          no warnings 'once';
+          $Archive::Extract::PREFER_BIN = 1;
+        }
+        my $ae = Archive::Extract->new('archive' => $file);
+        if (!$ae->extract('to' => '.')) {
+          die $ae->error . "\nstopped";
+        }
       }
     }
-  }
 
-  unlink $file;
-  print "Removed $file\n" if $opts{'verbose'};
-  $ace_src = 'ACE_wrappers';
-  $tao_src = 'ACE_wrappers/TAO';
+    unlink $file;
+    print "Removed $file\n" if $opts{'verbose'};
+    $ace_src = 'ACE_wrappers';
+    $tao_src = 'ACE_wrappers/TAO';
+  }
 }
 
 print "Using ace_src: $ace_src\n" if $opts{'verbose'};
