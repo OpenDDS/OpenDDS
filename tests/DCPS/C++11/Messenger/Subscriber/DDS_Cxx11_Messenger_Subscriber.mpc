@@ -1,0 +1,11 @@
+project: dcpsexe, dcps_transports_for_test{
+  avoids   += no_cxx11
+  exename   = subscriber
+  after    += DDS_Cxx11_Messenger_Idl
+  libs     += DDS_Cxx11_Messenger_Idl
+  libpaths += ../Idl
+
+  Source_Files {
+    subscriber.cpp
+  }
+}

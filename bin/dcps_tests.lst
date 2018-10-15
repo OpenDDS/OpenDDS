@@ -55,6 +55,7 @@ tests/DCPS/Compiler/idl_test1_main/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFIL
 tests/DCPS/Compiler/idl_test3_main/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/Compiler/C++11/idl_test1_main/run_test.pl: !DCPS_MIN CXX11
 tests/DCPS/Compiler/C++11/idl_test3_main/run_test.pl: !DCPS_MIN CXX11
+tests/DCPS/C++11/Messenger/run_test.pl: !DCPS_MIN CXX11
 
 tests/DCPS/DcpsIntegration/run_test-integration.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/DcpsIntegration/run_test-topic.pl: !DCPS_MIN !DDS_NO_PERSISTENCE_PROFILE !DDS_NO_OWNERSHIP_PROFILE
