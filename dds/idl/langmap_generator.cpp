@@ -1552,6 +1552,27 @@ struct Cxx11Generator : GeneratorBase
     return "    _" + name + " = rhs._" + name + ";\n";
   }
 
+  static std::string union_move(const std::string& name, AST_Type*,
+                                const std::string&, std::string&,
+                                const std::string&)
+  {
+    return "    _" + name + " = std::move(rhs._" + name + ");\n";
+  }
+
+  static std::string union_assign(const std::string& name, AST_Type*,
+                                  const std::string&, std::string&,
+                                  const std::string&)
+  {
+    return "    " + name + "(rhs._" + name + ");\n";
+  }
+
+  static std::string union_move_assign(const std::string& name, AST_Type*,
+                                       const std::string&, std::string&,
+                                       const std::string&)
+  {
+    return "    " + name + "(std::move(rhs._" + name + "));\n";
+  }
+
   static std::string union_activate(const std::string& name, AST_Type* type,
                                     const std::string&, std::string&,
                                     const std::string&)
@@ -1596,7 +1617,9 @@ struct Cxx11Generator : GeneratorBase
     be_global->lang_header_ <<
       "  " << nm << "() { _activate(" << defVal << "); }\n"
       "  " << nm << "(const " << nm << "& rhs);\n"
+      "  " << nm << "(" << nm << "&& rhs);\n"
       "  " << nm << "& operator=(const " << nm << "& rhs);\n"
+      "  " << nm << "& operator=(" << nm << "&& rhs);\n"
       "  ~" << nm << "() { _reset(); }\n\n"
       "  " << d_type << " _d() const { return _disc; }\n"
       "  void _d(" << d_type << " d) { _disc = d; }\n\n";
@@ -1630,12 +1653,30 @@ struct Cxx11Generator : GeneratorBase
     generateSwitchForUnion("_disc", union_copy, branches, discriminator, "", "", "", false, false);
     be_global->impl_ <<
       "}\n\n" <<
+      nm << "::" << nm << '(' << nm << "&& rhs)\n"
+      "{\n"
+      "  _activate(rhs._disc);\n";
+    generateSwitchForUnion("_disc", union_move, branches, discriminator, "", "", "", false, false);
+    be_global->impl_ <<
+      "}\n\n" <<
       nm << "& " << nm << "::operator=(const " << nm << "& rhs)\n"
       "{\n"
-      "  if (this != &rhs) {\n"
-      "    " << nm << " tmp(rhs);\n"
-      "    swap(*this, tmp);\n"
-      "  }\n"
+      "  if (this == &rhs) {\n"
+      "    return *this;\n"
+      "  }\n";
+    generateSwitchForUnion("rhs._disc", union_assign, branches, discriminator, "", "", "", false, false);
+    be_global->impl_ <<
+      "  _disc = rhs._disc;\n"
+      "  return *this;\n"
+      "}\n\n" <<
+      nm << "& " << nm << "::operator=(" << nm << "&& rhs)\n"
+      "{\n"
+      "  if (this == &rhs) {\n"
+      "    return *this;\n"
+      "  }\n";
+    generateSwitchForUnion("rhs._disc", union_move_assign, branches, discriminator, "", "", "", false, false);
+    be_global->impl_ <<
+      "  _disc = rhs._disc;\n"
       "  return *this;\n"
       "}\n\n" <<
       "void " << nm << "::_activate(" << d_type << " d)\n"
