@@ -446,7 +446,7 @@ elsif ($opts{'compiler'} =~ /g\+\+/) {
     }
   }
 
-  if ($opts{'std'} && $opts{'std'} =~ /(0x|11|0y|14|1z|17)$/) {
+  if ($opts{'std'} && $opts{'std'} =~ /(0x|11|1y|14|1z|17)$/) {
     push(@{$opts{'features'}}, 'no_cxx11=0');
     print "Compiler has C++11 support\n" if $opts{'verbose'};
   }
