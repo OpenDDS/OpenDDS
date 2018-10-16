@@ -18,23 +18,27 @@
 # OPENDDS_VERSION_MINOR - Minor version of OpenDDS.
 # OPENDDS_VERSION_PATCH - Patch version of OpenDDS.
 
+include(${CMAKE_CURRENT_LIST_DIR}/FindOpenDDS/config.cmake)
+
 if (NOT DEFINED DDS_ROOT)
   set(DDS_ROOT $ENV{DDS_ROOT})
 endif()
 
-if (NOT DEFINED ACE_ROOT)
+if (OPENDDS_ACE)
+  set(ACE_ROOT ${OPENDDS_ACE})
+else()
   set(ACE_ROOT $ENV{ACE_ROOT})
 endif()
 
-if (NOT DEFINED TAO_ROOT)
+if(OPENDDS_TAO)
+  set(TAO_ROOT ${OPENDDS_TAO})
+else()
   set(TAO_ROOT $ENV{TAO_ROOT})
 endif()
 
 if (MSVC)
   set(CMAKE_MSVCIDE_RUN_PATH ${CMAKE_MSVCIDE_RUN_PATH} ${DDS_ROOT}/lib ${ACE_ROOT}/lib)
 endif()
-
-include(${CMAKE_CURRENT_LIST_DIR}/FindOpenDDS/config.cmake)
 
 find_path(OPENDDS_INCLUDE_DIR dds HINTS ${DDS_ROOT})
 find_path(OPENDDS_BIN_DIR bin HINTS ${DDS_ROOT})
