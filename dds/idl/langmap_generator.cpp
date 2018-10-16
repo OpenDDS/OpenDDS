@@ -1465,7 +1465,7 @@ struct Cxx11Generator : GeneratorBase
       "  " << (fields.size() == 1 ? "explicit " : "") << nm << '(';
     be_global->impl_ <<
       nm << "::" << nm << '(';
-      
+
     std::string init_list, swaps;
     for (size_t i = 0; i < fields.size(); ++i) {
       const std::string fn = fields[i]->local_name()->get_string();

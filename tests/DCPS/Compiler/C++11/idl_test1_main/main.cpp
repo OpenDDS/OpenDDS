@@ -27,7 +27,7 @@ bool idl2cxx11_test()
   Xyz::Foo f3(std::move(f));
   f = std::move(f2);
   swap(f3, f);
-  
+
   Xyz::AStruct a{3, Xyz::ShortSeq{-1, 5}};
 
   Xyz::AUnion u;

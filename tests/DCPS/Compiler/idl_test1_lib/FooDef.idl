@@ -68,7 +68,7 @@ module Xyz {
   };
 
   union AUnion;
-  
+
   union AUnion switch (ColorX) {
     case redx:
     case yellowx:
