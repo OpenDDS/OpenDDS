@@ -73,8 +73,22 @@ if (OPENDDS_SECURITY)
   _OPENDDS_APPEND_DEF(OPENDDS_SECURITY)
 endif()
 
-# Handle configure-generated link dependencies.
+# Other stuff.
 
 if (OPENDDS_XERCES3)
   list(APPEND OPENDDS_DCPS_LINK_DEPS ACE::XML_Utils)
+endif()
+
+if (OPENDDS_STD AND CMAKE_HOST_UNIX)
+  if("${OPENDDS_STD}" MATCHES "(03|98)$")
+    set(CMAKE_CXX_STANDARD 98)
+  elseif("${OPENDDS_STD}" MATCHES "(0x|11)$")
+    set(CMAKE_CXX_STANDARD 11)
+  elseif("${OPENDDS_STD}" MATCHES "(1y|14)$")
+    set(CMAKE_CXX_STANDARD 14)
+  elseif("${OPENDDS_STD}" MATCHES "(1z|17)$")
+    set(CMAKE_CXX_STANDARD 17)
+  else()
+    message(WARNING "Ignoring unknown OPENDDS_STD value '${OPENDDS_STD}'")
+  endif()
 endif()
