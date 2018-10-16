@@ -155,7 +155,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         cerr << "DataReader failed to get_qos when not enabled." << endl;
         return 1;
       }
-      
+
       dr_qos.user_data.value.length(1);
       dr_qos.user_data.value[0] = 0x42;
 
