@@ -149,6 +149,22 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         exit(1);
       }
 
+      DDS::DataReaderQos dr_qos;
+      if (dr->get_qos(dr_qos) != ::DDS::RETCODE_OK)
+      {
+        cerr << "DataReader failed to get_qos when not enabled." << endl;
+        return 1;
+      }
+
+      dr_qos.user_data.value.length(1);
+      dr_qos.user_data.value[0] = 0x42;
+
+      if (dr->set_qos(dr_qos) != ::DDS::RETCODE_OK)
+      {
+        cerr << "DataReader failed to set_qos when not enabled." << endl;
+        return 1;
+      }
+
       if (dr->enable () != ::DDS::RETCODE_PRECONDITION_NOT_MET)
       {
         cerr << "DataReader can not be enabled because Subscriber is not enabled." << endl;

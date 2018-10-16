@@ -855,30 +855,32 @@ DDS::ReturnCode_t DataReaderImpl::set_qos(
     if (qos_ == qos)
       return DDS::RETCODE_OK;
 
-    if (!Qos_Helper::changeable(qos_, qos) && enabled_ == true) {
-      return DDS::RETCODE_IMMUTABLE_POLICY;
+    if (enabled_ == true) {
+      if (!Qos_Helper::changeable(qos_, qos)) {
+        return DDS::RETCODE_IMMUTABLE_POLICY;
 
-    } else {
-      Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
-      DDS::SubscriberQos subscriberQos;
+      } else {
+        Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
+        DDS::SubscriberQos subscriberQos;
 
-      RcHandle<SubscriberImpl> subscriber = get_subscriber_servant();
-      bool status = false;
-      if (subscriber) {
-        subscriber->get_qos(subscriberQos);
-        status =
-          disco->update_subscription_qos(
+        RcHandle<SubscriberImpl> subscriber = get_subscriber_servant();
+        bool status = false;
+        if (subscriber) {
+          subscriber->get_qos(subscriberQos);
+          status =
+            disco->update_subscription_qos(
               domain_id_,
               dp_id_,
               this->subscription_id_,
               qos,
               subscriberQos);
-      }
-      if (!status) {
-        ACE_ERROR_RETURN((LM_ERROR,
-            ACE_TEXT("(%P|%t) DataReaderImpl::set_qos, ")
-            ACE_TEXT("qos not updated. \n")),
-            DDS::RETCODE_ERROR);
+        }
+        if (!status) {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            ACE_TEXT("(%P|%t) DataReaderImpl::set_qos, ")
+                            ACE_TEXT("qos not updated. \n")),
+                            DDS::RETCODE_ERROR);
+        }
       }
     }
 
