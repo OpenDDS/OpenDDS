@@ -56,8 +56,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   {
     Xyz::StructAUnion sau;
-    sau.sau_f1()._d(Xyz::ColorX::redx);
-    sau.sau_f1().rsv("joe");
+    sau.sau_f1().rsv("joe", Xyz::ColorX::redx);
     // size = union descr/4 + string length/4 + string contents/4
     if (find_size(sau, padding) != 4+4+4) {
       ACE_ERROR((LM_ERROR,

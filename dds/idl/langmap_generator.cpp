@@ -1515,31 +1515,44 @@ struct Cxx11Generator : GeneratorBase
     AST_UnionLabel* label = branch->label(0);
     AST_Union* union_ = AST_Union::narrow_from_scope(branch->defined_in());
     AST_Type* dtype = resolveActualType(union_->disc_type());
+    const std::string disc_type = generator_->map_type(dtype);
 
-    std::ostringstream dval;
+    std::string dval;
     if (label->label_kind() == AST_UnionLabel::UL_default) {
-      dval << generateDefaultValue(union_);
+      dval = generateDefaultValue(union_);
     } else if (dtype->node_type() == AST_Decl::NT_enum) {
-      dval << getEnumLabel(label->label_val(), dtype);
+      dval = getEnumLabel(label->label_val(), dtype);
     } else {
-      dval << *label->label_val()->ev();
+      std::ostringstream strm;
+      strm << *label->label_val()->ev();
+      dval = strm.str();
     }
 
-    const std::string assign_pre = "{ _activate(" + dval.str() + "); _"
+    std::string disc_param, disc_name = dval;
+    if (label->label_kind() == AST_UnionLabel::UL_default ||
+        branch->label_list_length() > 1) {
+      disc_name = "disc";
+      disc_param = ", " + disc_type + " disc = " + dval;
+    }
+
+    const std::string assign_pre = "{ _activate(" + disc_name + "); _"
       + std::string(nm) + " = ",
       assign = assign_pre + "val; }\n",
       move = assign_pre + "std::move(val); }\n",
       ret = "{ return _" + std::string(nm) + "; }\n";
     if (cls & (CL_PRIMITIVE | CL_ENUM)) {
       be_global->lang_header_ <<
-        "  void " << nm << '(' << lang_field_type << " val) " << assign <<
+        "  void " << nm << '(' << lang_field_type << " val" << disc_param
+        << ") " << assign <<
         "  " << lang_field_type << ' ' << nm << "() const " << ret <<
         "  " << lang_field_type << "& " << nm << "() " << ret << "\n";
     } else {
       be_global->add_include("<utility>", BE_GlobalData::STREAM_LANG_H);
       be_global->lang_header_ <<
-        "  void " << nm << "(const " << lang_field_type << "& val) " << assign <<
-        "  void " << nm << '(' << lang_field_type << "&& val) " << move <<
+        "  void " << nm << "(const " << lang_field_type << "& val" << disc_param
+        << ") " << assign <<
+        "  void " << nm << '(' << lang_field_type << "&& val" << disc_param
+        << ") " << move <<
         "  const " << lang_field_type << "& " << nm << "() const " << ret <<
         "  " << lang_field_type << "& " << nm << "() " << ret << "\n";
     }
