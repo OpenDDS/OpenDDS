@@ -1989,6 +1989,12 @@ sub write_cmake_file {
       security
     );
 
+    my %make_absolute_path = map {$_, 1} qw(
+      ace
+      tao
+      mpc
+    );
+
     my $result = "";
     # Merge the hashes together; the user-supplied %opts will override
     # the enabled-/disabled-defaults.
@@ -1997,6 +2003,10 @@ sub write_cmake_file {
     for my $k (sort keys %opts_) {
       my $var = uc "OPENDDS_${k}" =~ s/-/_/gr;
       my $val = $opts_{$k};
+
+      if ($make_absolute_path{$k}) {
+        $val = Cwd::abs_path($val);
+      }
 
       if (ref($val) eq 'ARRAY') {
         $result .= qq{set($var "${\( to_cmake_list($val))}")\n};
