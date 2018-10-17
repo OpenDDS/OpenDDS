@@ -147,7 +147,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'configh=s@', 'Extra text for config.h',
     'macros=s@', 'Extra text for platform_macros.GNU',
     'features=s@', 'Extra text for default.features',
-    'mpcopts=s@', 'Extra command-line args for MPC (if MPC is run)',
+    'mpcopts=s@', 'Extra command-line args for MPC',
    ],
    ['Optional dependencies for OpenDDS:',
     'java:s', 'Java development kit (use JAVA_HOME)',
