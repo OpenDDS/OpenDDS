@@ -21,19 +21,47 @@
 include(${CMAKE_CURRENT_LIST_DIR}/FindOpenDDS/config.cmake)
 
 if (NOT DEFINED DDS_ROOT)
-  set(DDS_ROOT $ENV{DDS_ROOT})
+  if (ENV{DDS_ROOT})
+    set(DDS_ROOT $ENV{DDS_ROOT})
+
+  else()
+    message(FATAL_ERROR
+    "Missing DDS_ROOT, please do one of the following: invoke the CMake command \
+    set(DDS_ROOT path/to/opendds) prior to finding the OpenDDS module or \
+    set the DDS_ROOT environment variable")
+  endif()
 endif()
 
-if (OPENDDS_ACE)
-  set(ACE_ROOT ${OPENDDS_ACE})
-else()
-  set(ACE_ROOT $ENV{ACE_ROOT})
+if (NOT DEFINED ACE_ROOT)
+  if (OPENDDS_ACE)
+    set(ACE_ROOT ${OPENDDS_ACE})
+
+  elseif(ENV{ACE_ROOT})
+    set(ACE_ROOT $ENV{ACE_ROOT})
+
+  else()
+    message(FATAL_ERROR
+      "Missing ACE_ROOT, please do one of the following: invoke the CMake command \
+      set(ACE_ROOT path/to/ace) prior to finding the OpenDDS module; \
+      set the ACE_ROOT environment variable; \
+      or use --ace with the configure script to point to a valid ACE install")
+  endif()
 endif()
 
-if(OPENDDS_TAO)
-  set(TAO_ROOT ${OPENDDS_TAO})
-else()
-  set(TAO_ROOT $ENV{TAO_ROOT})
+if (NOT DEFINED TAO_ROOT)
+  if(OPENDDS_TAO)
+    set(TAO_ROOT ${OPENDDS_TAO})
+
+  elseif(ENV{TAO_ROOT})
+    set(TAO_ROOT $ENV{TAO_ROOT})
+
+  else()
+    message(FATAL_ERROR
+      "Missing TAO_ROOT, please do one of the following: invoke the CMake command \
+      set(TAO_ROOT path/to/tao) prior to finding the OpenDDS module; \
+      set the TAO_ROOT environment variable; \
+      or use --tao with the configure script to point to a valid ACE install")
+  endif()
 endif()
 
 if (MSVC)
