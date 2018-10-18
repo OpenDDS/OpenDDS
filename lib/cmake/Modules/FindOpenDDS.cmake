@@ -23,7 +23,7 @@ cmake_minimum_required(VERSION 3.3)
 include(${CMAKE_CURRENT_LIST_DIR}/FindOpenDDS/config.cmake)
 
 if (NOT DEFINED DDS_ROOT)
-  if (ENV{DDS_ROOT})
+  if (DEFINED ENV{DDS_ROOT})
     set(DDS_ROOT $ENV{DDS_ROOT})
 
   else()
@@ -38,7 +38,7 @@ if (NOT DEFINED ACE_ROOT)
   if (OPENDDS_ACE)
     set(ACE_ROOT ${OPENDDS_ACE})
 
-  elseif(ENV{ACE_ROOT})
+  elseif(DEFINED ENV{ACE_ROOT})
     set(ACE_ROOT $ENV{ACE_ROOT})
 
   else()
@@ -54,7 +54,7 @@ if (NOT DEFINED TAO_ROOT)
   if(OPENDDS_TAO)
     set(TAO_ROOT ${OPENDDS_TAO})
 
-  elseif(ENV{TAO_ROOT})
+  elseif(DEFINED ENV{TAO_ROOT})
     set(TAO_ROOT $ENV{TAO_ROOT})
 
   else()
