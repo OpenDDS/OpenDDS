@@ -68,17 +68,13 @@ macro(tao_setup_visual_studio_custom_command_fanout_dependencies)
 endmacro(tao_setup_visual_studio_custom_command_fanout_dependencies)
 
 function(tao_idl_command name)
-  set(multiValueArgs IDL_FLAGS IDL_FILES USED_BY WORKING_DIRECTORY)
+  set(multiValueArgs IDL_FLAGS IDL_FILES WORKING_DIRECTORY)
   cmake_parse_arguments(_arg "" "" "${multiValueArgs}" ${ARGN})
 
   set(_arg_IDL_FLAGS ${_arg_IDL_FLAGS})
 
   if (NOT _arg_IDL_FILES)
     message(FATAL_ERROR "using tao_idl_command(${name}) without specifying IDL_FILES")
-  endif()
-
-  if ((CMAKE_GENERATOR MATCHES "Visual Studio") AND (_arg_USED_BY MATCHES ";"))
-    set(exclude_cpps_from_command_output ON)
   endif()
 
   if (NOT _arg_WORKING_DIRECTORY)
@@ -176,28 +172,6 @@ function(tao_idl_command name)
       list(APPEND _SKEL_HEADER_FILES ${CMAKE_CURRENT_BINARY_DIR}/${idl_cmd_arg-wb-skel_export_file})
     endif()
 
-
-    set(_OUTPUT_FILES ${_STUB_HEADER_FILES}
-                      ${_SKEL_HEADER_FILES}
-                      ${_ANYOP_HEADER_FILES})
-
-
-    if (NOT exclude_cpps_from_command_output)
-    ## This is the general case where we are not using Visual Studio generator
-    ## or this command is only used by one target. Directly setting the
-    ## generated cpp files as the OUTPUT of add_custom_command() is fine.
-      list(APPEND _OUTPUT_FILES
-                  ${_STUB_CPP_FILES}
-                  ${_SKEL_CPP_FILES}
-                  ${_ANYOP_CPP_FILES}
-      )
-    else()
-      ## For the special case of using Visual Studio generator and outputs are used
-      ## by multiple targets, we cannot list the generated cpp files as the OUTPUT
-      ## add_custom_command() because it would cause the IDL generation comand
-      ## triggered by all dependent targets and executed multiple times.
-    endif()
-
     get_filename_component(idl_file_path "${idl_file}" ABSOLUTE)
 
     set(GPERF_LOCATION $<TARGET_FILE:ace_gperf>)
@@ -212,45 +186,36 @@ function(tao_idl_command name)
       set(tao_idl_shared_libs TAO_IDL_BE TAO_IDL_FE)
     endif()
 
+    set(_OUTPUT_FILES
+      ${_STUB_HEADER_FILES}
+      ${_SKEL_HEADER_FILES}
+      ${_ANYOP_HEADER_FILES}
+      ${_STUB_CPP_FILES}
+      ${_SKEL_CPP_FILES}
+      ${_ANYOP_CPP_FILES})
+
     add_custom_command(
       OUTPUT ${_OUTPUT_FILES}
       DEPENDS tao_idl ${tao_idl_shared_libs} ace_gperf
-      MAIN_DEPENDENCY ${idl_file}
+      MAIN_DEPENDENCY ${idl_file_path}
       COMMAND tao_idl -g ${GPERF_LOCATION} ${TAO_CORBA_IDL_FLAGS} -Sg -Wb,pre_include=ace/pre.h -Wb,post_include=ace/post.h -I${TAO_INCLUDE_DIR} -I${_working_source_dir} ${_converted_flags} ${idl_file_path}
       WORKING_DIRECTORY ${_arg_WORKING_DIRECTORY}
       VERBATIM
     )
 
-    list(APPEND ${name}_STUB_CPP_FILES ${_STUB_CPP_FILES})
-    list(APPEND ${name}_STUB_HEADER_FILES ${_STUB_HEADER_FILES})
-    list(APPEND ${name}_SKEL_CPP_FILES ${_SKEL_CPP_FILES})
-    list(APPEND ${name}_SKEL_HEADER_FILES ${_SKEL_HEADER_FILES})
-    list(APPEND ${name}_ANYOP_CPP_FILES ${_ANYOP_CPP_FILES})
-    list(APPEND ${name}_ANYOP_HEADER_FILES ${_ANYOP_HEADER_FILES})
+    set_property(SOURCE ${idl_file_path} APPEND PROPERTY
+      OPENDDS_CPP_FILES
+        ${_STUB_CPP_FILES}
+        ${_SKEL_CPP_FILES}
+        ${_ANYOP_CPP_FILES})
+
+    set_property(SOURCE ${idl_file_path} APPEND PROPERTY
+      OPENDDS_HEADER_FILES
+        ${_STUB_HEADER_FILES}
+        ${_SKEL_HEADER_FILES}
+        ${_ANYOP_HEADER_FILES})
   endforeach()
-
-  set(${name}_STUB_CPP_FILES ${${name}_STUB_CPP_FILES} PARENT_SCOPE)
-  set(${name}_STUB_HEADER_FILES ${${name}_STUB_HEADER_FILES} PARENT_SCOPE)
-  set(${name}_STUB_FILES ${${name}_STUB_CPP_FILES} ${${name}_STUB_HEADER_FILES})
-  set(${name}_STUB_FILES ${${name}_STUB_FILES} PARENT_SCOPE)
-
-  set(${name}_SKEL_CPP_FILES ${${name}_SKEL_CPP_FILES} PARENT_SCOPE)
-  set(${name}_SKEL_HEADER_FILES ${${name}_SKEL_HEADER_FILES} PARENT_SCOPE)
-  set(${name}_SKEL_FILES ${${name}_SKEL_CPP_FILES} ${${name}_SKEL_HEADER_FILES})
-  set(${name}_SKEL_FILES ${${name}_SKEL_FILES} PARENT_SCOPE)
-
-  set(${name}_ANYOP_CPP_FILES ${${name}_ANYOP_CPP_FILES} PARENT_SCOPE)
-  set(${name}_ANYOP_HEADER_FILES ${${name}_ANYOP_HEADER_FILES} PARENT_SCOPE)
-  set(${name}_ANYOP_FILES ${${name}_ANYOP_CPP_FILES} ${${name}_ANYOP_HEADER_FILES})
-  set(${name}_ANYOP_FILES ${${name}_ANYOP_FILES} PARENT_SCOPE)
-
-  set(${name}_HEADER_FILES ${${name}_STUB_HEADER_FILES} ${${name}_SKEL_HEADER_FILES} ${${name}_ANYOP_HEADER_FILES})
-  set(${name}_HEADER_FILES ${${name}_HEADER_FILES} PARENT_SCOPE)
-  set(${name}_CPP_FILES ${${name}_STUB_CPP_FILES} ${${name}_SKEL_CPP_FILES} ${${name}_ANYOP_CPP_FILES})
-  set(${name}_CPP_FILES ${${name}_CPP_FILES} PARENT_SCOPE)
-  set(${name}_OUTPUT_FILES ${${name}_HEADER_FILES} ${${name}_CPP_FILES})
-  set(${name}_OUTPUT_FILES ${${name}_OUTPUT_FILES} PARENT_SCOPE)
-endfunction(tao_idl_command name)
+endfunction()
 
 macro(tao_filter_valid_targets)
   foreach(__target_list ${ARGN})
@@ -263,114 +228,3 @@ macro(tao_filter_valid_targets)
     endforeach()
   endforeach(__target_list ${ARGN})
 endmacro()
-
-
-function(tao_idl_sources)
-  set(multiValueArgs TARGETS STUB_TARGETS SKEL_TARGETS ANYOP_TARGETS IDL_FLAGS IDL_FILES WORKING_DIRECTORY)
-
-  cmake_parse_arguments(_arg "" "${outValueArgs}" "${multiValueArgs}" ${ARGN})
-
-  #filter out invliad targets in each list
-  tao_filter_valid_targets(_arg_TARGETS _arg_STUB_TARGETS _arg_SKEL_TARGETS _arg_ANYOP_TARGETS)
-
-  set(all_targets ${_arg_TARGETS} ${_arg_STUB_TARGETS} ${_arg_SKEL_TARGETS} ${_arg_ANYOP_TARGETS})
-  if (NOT all_targets)
-    ## no valid target exists, just skip the rest
-    return()
-  endif()
-
-  foreach(path ${_arg_IDL_FILES})
-    if (IS_ABSOLUTE ${path})
-      list(APPEND _result ${path})
-    else()
-      list(APPEND _result ${CMAKE_CURRENT_LIST_DIR}/${path})
-    endif()
-  endforeach()
-  set(_arg_IDL_FILES ${_result})
-
-  if (_arg_WORKING_DIRECTORY)
-    if (IS_ABSOLUTE ${_arg_WORKING_DIRECTORY})
-      message(FATAL_ERROR "WORKING_DIRECTORY for tao_idl_sources() must be relative path")
-    else()
-      set(rel_path ${_arg_WORKING_DIRECTORY})
-    endif()
-  else(_arg_WORKING_DIRECTORY)
-    file(RELATIVE_PATH rel_path ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_LIST_DIR})
-  endif(_arg_WORKING_DIRECTORY)
-
-  tao_idl_command(_idls
-    IDL_FLAGS ${_arg_IDL_FLAGS}
-    IDL_FILES ${_arg_IDL_FILES}
-    WORKING_DIRECTORY ${rel_path}
-    USED_BY "${all_targets}"
-  )
-
-  foreach(target ${_arg_ANYOP_TARGETS})
-    ace_target_sources("${target}" ${_idls_ANYOP_CPP_FILES})
-  endforeach()
-
-  foreach(target ${_arg_SKEL_TARGETS})
-    ace_target_sources("${target}" ${_idls_SKEL_CPP_FILES})
-  endforeach()
-
-  foreach(target ${_arg_STUB_TARGETS})
-    ace_target_sources("${target}" ${_idls_STUB_CPP_FILES})
-  endforeach()
-
-  foreach(target ${_arg_TARGETS})
-    ace_target_sources("${target}" ${_idls_ANYOP_CPP_FILES} ${_idls_SKEL_CPP_FILES} ${_idls_STUB_CPP_FILES})
-  endforeach()
-
-  tao_setup_visual_studio_custom_command_fanout_dependencies(
-    TARGETS "${all_targets}"
-    DEPENDS "${_arg_IDL_FILES}"
-    OUTPUT "${_idls_CPP_FILES}"
-  )
-
-  set(CMAKE_INCLUDE_CURRENT_DIR ON PARENT_SCOPE)
-
-  set_source_files_properties(${_arg_IDL_FILES} ${_idls_SKEL_HEADER_FILES} PROPERTIES HEADER_FILE_ONLY ON)
-  source_group("Generated Files" FILES ${_idls_OUTPUT_FILES})
-  source_group("IDL Files" FILES ${_arg_IDL_FILES})
-
-  foreach(target ${_arg_TARGETS} ${_arg_STUB_TARGETS} ${_arg_SKEL_TARGETS} ${_arg_ANYOP_TARGETS})
-    if (TARGET ${target})
-      list(APPEND packages ${PACKAGE_OF_${target}})
-    endif()
-  endforeach()
-
-  if (packages)
-    list(REMOVE_DUPLICATES packages)
-  endif()
-
-  foreach (package ${packages})
-    ## All files listed in _arg_IDL_FILES and _idls_HEADER_FILES are absolute paths.
-    ## In addition, they can be either in the source tree or in the binary tree.
-    ## We need to identify where they are and install them to the install tree based
-    ## on their relative path to either source tree root or binary tree root.
-    foreach(file ${_arg_IDL_FILES} ${_idls_HEADER_FILES})
-      ## first we check if the file startswith ${CMAKE_CURRENT_BINARY_DIR}
-      string(FIND ${file} ${CMAKE_CURRENT_BINARY_DIR} prefix_index)
-      if (${prefix_index} EQUAL 0)
-        ## the file is in the binary tree
-        file(RELATIVE_PATH rel_path  ${${package}_BINARY_DIR} ${file})
-
-      else()
-        string(FIND ${file} ${CMAKE_CURRENT_SOURCE_DIR} prefix_index)
-        if (${prefix_index} EQUAL 0)
-          file(RELATIVE_PATH rel_path  ${${package}_SOURCE_DIR} ${file})
-        else()
-          ## the file is neither in the source nor the binary tree, treat it as an external file, don't install it.
-          continue()
-        endif()
-      endif()
-
-      get_filename_component(dest "${${package}_INSTALL_DIR}/${rel_path}" DIRECTORY)
-
-      install(FILES ${file}
-              DESTINATION ${dest}
-              COMPONENT ${package}_devel)
-    endforeach(file)
-  endforeach(package)
-
-endfunction()

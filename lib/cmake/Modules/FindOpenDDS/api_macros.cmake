@@ -20,7 +20,6 @@ function(OPENDDS_INCLUDE_DIRS_ONCE)
   endif()
 endfunction()
 
-
 macro(OPENDDS_GET_SOURCES_AND_OPTIONS
   src_prefix
   idl_prefix
@@ -111,6 +110,11 @@ endmacro()
 #   OPENDDS_SECURITY (if security is enabled)
 #
 macro(OPENDDS_TARGET_SOURCES target)
+
+  if (NOT TARGET ${target})
+    message(FATAL_ERROR "Invalid target '${target}' passed into OPENDDS_TARGET_SOURCES")
+  endif()
+
   OPENDDS_INCLUDE_DIRS_ONCE()
 
   OPENDDS_GET_SOURCES_AND_OPTIONS(
@@ -126,7 +130,7 @@ macro(OPENDDS_TARGET_SOURCES target)
   endif()
 
   get_property(_export_generated TARGET ${target}
-    PROPERTY OPENDDS_EXPORT_GENERATED SET)
+    PROPERTY OPENDDS_EXPORT_GENERATED)
 
   if(NOT _export_generated)
     _OPENDDS_GENERATE_EXPORT_MACRO_COMMAND(${target} _export_generated)
@@ -165,16 +169,11 @@ macro(OPENDDS_TARGET_SOURCES target)
   endif()
 
   foreach(scope PUBLIC PRIVATE INTERFACE)
-    # TODO: Test the output of the scope qualifiers with IDL files.
-    # Does it get inherited by all generated c/cpp/h files? Does it
-    # matter?
     if(_idl_sources_${scope})
-      dds_idl_sources(
-        TARGETS ${target}
+      opendds_target_idl_sources(${target}
         TAO_IDL_FLAGS ${_tao_options} ${OPENDDS_TAO_BASE_IDL_FLAGS}
         DDS_IDL_FLAGS ${_opendds_options} ${OPENDDS_DDS_BASE_IDL_FLAGS}
-        IDL_FILES ${_idl_sources_${scope}}
-        ${options})
+        IDL_FILES ${_idl_sources_${scope}})
     endif()
 
     # The above should add IDL-Generated sources; here, the

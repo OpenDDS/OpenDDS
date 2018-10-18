@@ -1,40 +1,103 @@
+# Distributed under the OpenDDS License. See accompanying LICENSE
+# file or http://www.opendds.org/license.html for details.
 
-define_property(SOURCE PROPERTY DDS_IDL_FLAGS
-  BRIEF_DOCS "sets additional opendds_idl compiler flags used to build sources within the target"
-  FULL_DOCS "sets additional opendds_idl compiler flags used to build sources within the target"
-)
+function(opendds_target_generated_dependencies target idl_file)
+  get_property(bridge_target SOURCE ${idl_file} PROPERTY OPENDDS_IDL_BRIDGE_TARGET)
+  if (bridge_target)
+    add_dependencies(${target} ${bridge_target})
 
-define_property(SOURCE PROPERTY DDS_IDL_MAIN_TARGET
-  BRIEF_DOCS "the main target to process the IDL file"
-  FULL_DOCS "the main target to process the IDL file"
-)
+  else()
+    # TODO: Generate the target using add_custom_target(...) to better indicate
+    # the dependency graph.
+    set_property(SOURCE ${idl_file} PROPERTY
+      OPENDDS_IDL_BRIDGE_TARGET ${target})
 
-set(DDS_CMAKE_DIR ${CMAKE_CURRENT_LIST_DIR})
+    get_source_file_property(idl_ts_files ${idl_file} OPENDDS_TYPESUPPORT_IDLS)
 
-if (WIN32 AND NOT TAO_INSTALL_DIR)
-  ## we use TAO_INSTALL_DIR to check if tao_idl is imported or not;
-  ## TAO_INSTALL_DIR is only defined when TAO is not imported
-  # get_target_property(tao_idl_fe_loc TAO_IDL_FE LOCATION)
-  # get_filename_component(tao_idl_fe_dir ${tao_idl_fe_loc} DIRECTORY)
-  set (tao_idl_fe_dir "$ACE_ROOT/bin")
-  set(IDL_PATH_ENV "PATH=\"${tao_idl_fe_dir}\;%PATH%\"")
-endif()
+    set(all_idl_files ${idl_file} ${idl_ts_files})
+    foreach(file ${all_idl_files})
+      get_source_file_property(cpps ${file} OPENDDS_CPP_FILES)
+      get_source_file_property(hdrs ${file} OPENDDS_HEADER_FILES)
+      list(APPEND cpp_files ${cpps})
+      list(APPEND hdr_files ${hdrs})
+    endforeach()
 
-function(dds_idl_command Name)
-  set(dds_idl_command_usage "dds_idl_command(<Name> TAO_IDL_FLAGS flags DDS_IDL_FLAGS flags IDL_FILES Input1 Input2 ...]")
+    # The only file not generated internally is the passed-in IDL file.
+    set(all_gen_files ${cpp_files} ${hdr_files} ${idl_ts_files})
+    set(all_files ${all_gen_files} ${idl_file})
 
-  set(multiValueArgs TAO_IDL_FLAGS DDS_IDL_FLAGS IDL_FILES USED_BY WORKING_DIRECTORY)
+    message(STATUS "${all_files}")
+
+    source_group("Generated Files" FILES ${all_files})
+    source_group("IDL Files" FILES ${all_idl_files})
+
+    set_property(SOURCE ${all_idl_files} ${hdr_files}
+      PROPERTY HEADER_FILE_ONLY ON)
+
+    set_property(SOURCE ${cpp_files}
+      PROPERTY SKIP_AUTOGEN ON)
+
+    foreach(file ${all_files})
+      get_property(target_includes TARGET ${target} PROPERTY INCLUDE_DIRECTORIES)
+      get_filename_component(file_path ${file} DIRECTORY)
+
+      if (NOT "${file_path}" IN_LIST target_includes)
+        target_include_directories(${target} PUBLIC ${file_path})
+      endif()
+
+      target_sources(${target} PRIVATE ${file})
+    endforeach()
+  endif()
+endfunction()
+
+function(opendds_target_idl_sources target)
+  set(multiValueArgs TAO_IDL_FLAGS DDS_IDL_FLAGS IDL_FILES)
   cmake_parse_arguments(_arg "SKIP_TAO_IDL" "" "${multiValueArgs}" ${ARGN})
 
-  if ((CMAKE_GENERATOR MATCHES "Visual Studio") AND (_arg_USED_BY MATCHES ";"))
-    set(exclude_cpps_from_command_output ON)
+  foreach(idl_file ${_arg_IDL_FILES})
+    if (NOT IS_ABSOLUTE ${idl_file})
+      set(idl_file ${CMAKE_CURRENT_LIST_DIR}/${idl_file})
+    endif()
+
+    get_property(_generated_dependencies SOURCE ${idl_file}
+      PROPERTY OPENDDS_IDL_GENERATED_DEPENDENCIES SET)
+
+    if (_generated_dependencies)
+      # If an IDL-Generation command was already created this file can safely be
+      # skipped; however, the dependencies still need to be added to the target.
+      opendds_target_generated_dependencies(${target} ${idl_file})
+
+    else()
+      list(APPEND non_generated_idl_files ${idl_file})
+    endif()
+  endforeach()
+
+  if (NOT non_generated_idl_files)
+    return()
   endif()
 
-  if (NOT IS_ABSOLUTE "${_arg_WORKING_DIRECTORY}")
-    set(_working_binary_dir ${CMAKE_CURRENT_BINARY_DIR}/${_arg_WORKING_DIRECTORY})
-    set(_working_source_dir ${CMAKE_CURRENT_SOURCE_DIR}/${_arg_WORKING_DIRECTORY})
+  get_property(target_link_libs TARGET ${target} PROPERTY LINK_LIBRARIES)
+  if ("OpenDDS::FACE" IN_LIST target_link_libs)
+    foreach(_tao_face_flag -SS -Wb,no_fixed_err)
+      if (NOT "${_arg_TAO_IDL_FLAGS}" MATCHES "${_tao_face_flag}")
+        list(APPEND _arg_TAO_IDL_FLAGS ${_tao_face_flag})
+      endif()
+    endforeach()
+
+    foreach(_dds_face_flag -GfaceTS -Lface)
+      if (NOT "${_arg_DDS_IDL_FLAGS}" MATCHES "${_dds_face_flag}")
+        list(APPEND _arg_DDS_IDL_FLAGS ${_dds_face_flag})
+      endif()
+    endforeach()
+  endif()
+
+  file(RELATIVE_PATH working_dir ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_LIST_DIR})
+
+  if (NOT IS_ABSOLUTE "${working_dir}")
+    set(_working_binary_dir ${CMAKE_CURRENT_BINARY_DIR}/${working_dir})
+    set(_working_source_dir ${CMAKE_CURRENT_SOURCE_DIR}/${working_dir})
   else()
-    set(_working_binary_dir ${_arg_WORKING_DIRECTORY})
+    set(_working_binary_dir ${working_dir})
     set(_working_source_dir ${CMAKE_CURRENT_SOURCE_DIR})
   endif()
 
@@ -59,23 +122,13 @@ function(dds_idl_command Name)
 
   set(_ddsidl_flags ${_converted_dds_idl_flags})
 
-  # cmake_parse_arguments(_ddsidl_cmd_arg "-SI;-GfaceTS" "-o" "" ${_ddsidl_flags})
-
-  set(_dds_idl_outputs)
-  set(_dds_idl_cpp_files)
-  set(_dds_idl_headers)
-  set(_type_support_idls)
-  set(_type_support_javas)
-  set(_taoidl_inputs)
-
-  foreach(input ${_arg_IDL_FILES})
+  foreach(input ${non_generated_idl_files})
     unset(_ddsidl_cmd_arg_-SI)
     unset(_ddsidl_cmd_arg_-GfaceTS)
     unset(_ddsidl_cmd_arg_-o)
     unset(_ddsidl_cmd_arg_-Wb,java)
 
-    get_property(file_dds_idl_flags SOURCE ${input} PROPERTY DDS_IDL_FLAGS)
-    cmake_parse_arguments(_ddsidl_cmd_arg "-SI;-GfaceTS;-Wb,java" "-o" "" ${_ddsidl_flags} ${file_dds_idl_flags})
+    cmake_parse_arguments(_ddsidl_cmd_arg "-SI;-GfaceTS;-Wb,java" "-o" "" ${_ddsidl_flags})
 
     get_filename_component(noext_name ${input} NAME_WE)
     get_filename_component(abs_filename ${input} ABSOLUTE)
@@ -89,8 +142,6 @@ function(dds_idl_command Name)
 
     if (NOT _ddsidl_cmd_arg_-SI)
       set(_cur_type_support_idl ${output_prefix}TypeSupport.idl)
-      list(APPEND _type_support_idls ${_cur_type_support_idl})
-      list(APPEND _taoidl_inputs ${_cur_type_support_idl})
     else()
       unset(_cur_type_support_idl)
     endif()
@@ -103,24 +154,17 @@ function(dds_idl_command Name)
       list(APPEND _cur_idl_cpp_files ${output_prefix}_TS.cpp)
       ## if this is FACE IDL, do not reprocess the original idl file throught tao_idl
     else()
-      list(APPEND _taoidl_inputs ${input})
+      set(_cur_idl_file ${input})
     endif()
-
-    list(APPEND _dds_idl_headers ${_cur_idl_headers})
-    list(APPEND _dds_idl_cpp_files ${_cur_idl_cpp_files})
 
     if (_ddsidl_cmd_arg_-Wb,java)
       set(_cur_java_list "${output_prefix}${file_ext}.TypeSupportImpl.java.list")
-      list(APPEND _type_support_javas "@${_cur_java_list}")
       list(APPEND file_dds_idl_flags -j)
     else()
       unset(_cur_java_list)
     endif()
 
-    set(_cur_idl_outputs ${_cur_idl_headers})
-    if (NOT exclude_cpps_from_command_output)
-      list(APPEND _cur_idl_outputs ${_cur_idl_cpp_files})
-    endif()
+    set(_cur_idl_outputs ${_cur_idl_headers} ${_cur_idl_cpp_files})
 
     add_custom_command(
       OUTPUT ${_cur_idl_outputs} ${_cur_type_support_idl} ${_cur_java_list}
@@ -132,145 +176,27 @@ function(dds_idl_command Name)
       WORKING_DIRECTORY ${_arg_WORKING_DIRECTORY}
     )
 
-  endforeach(input)
+    set_property(SOURCE ${abs_filename} APPEND PROPERTY
+      OPENDDS_CPP_FILES ${_cur_idl_cpp_files})
 
-  if (NOT _arg_SKIP_TAO_IDL)
-    tao_idl_command(${Name}
-      IDL_FLAGS -I${DDS_ROOT} ${_arg_TAO_IDL_FLAGS}
-      IDL_FILES ${_taoidl_inputs}
-      USED_BY ${_arg_USED_BY}
-    )
-  endif()
+    set_property(SOURCE ${abs_filename} APPEND PROPERTY
+      OPENDDS_HEADER_FILES ${_cur_idl_headers})
 
-  list(APPEND ${Name}_CPP_FILES ${_dds_idl_cpp_files})
-  list(APPEND ${Name}_HEADER_FILES ${_dds_idl_headers})
-  list(APPEND ${Name}_TYPESUPPORT_IDLS ${_type_support_idls})
-  list(APPEND ${Name}_JAVA_OUTPUTS ${_type_support_javas})
-  list(APPEND ${Name}_OUTPUT_FILES ${_dds_idl_cpp_files} ${_dds_idl_headers} ${_type_support_idls} ${_type_support_javas})
+    set_property(SOURCE ${abs_filename} APPEND PROPERTY
+      OPENDDS_TYPESUPPORT_IDLS ${_cur_type_support_idl})
 
-  if (EXCLUDE_CPPS_FROM_COMMAND_OUTPUT)
-    add_custom_command(
-      OUTPUT ${_dds_idl_cpp_files}
-      COMMAND ${CMAKE_COMMAND} -E echo ""
-    )
-  endif()
+    set_property(SOURCE ${abs_filename} APPEND PROPERTY
+      OPENDDS_JAVA_OUTPUTS "@${_cur_java_list}")
 
-  set(${Name}_OUTPUT_FILES ${${Name}_OUTPUT_FILES} PARENT_SCOPE)
-  set(${Name}_CPP_FILES ${${Name}_CPP_FILES} PARENT_SCOPE)
-  set(${Name}_HEADER_FILES ${${Name}_HEADER_FILES} PARENT_SCOPE)
-  set(${Name}_TYPESUPPORT_IDLS ${${Name}_TYPESUPPORT_IDLS} PARENT_SCOPE)
-  set(${Name}_JAVA_OUTPUTS ${${Name}_JAVA_OUTPUTS} PARENT_SCOPE)
-endfunction()
-
-
-function(dds_idl_sources)
-  set(multiValueArgs TARGETS TAO_IDL_FLAGS DDS_IDL_FLAGS IDL_FILES)
-  cmake_parse_arguments(_arg "SKIP_TAO_IDL" "" "${multiValueArgs}" ${ARGN})
-
-  set(target_links_against_face OFF)
-
-  tao_filter_valid_targets(_arg_TARGETS)
-
-  if (NOT _arg_TARGETS)
-    return()
-  endif()
-
-  foreach(target ${_arg_TARGETS})
-    get_property(target_link_libs TARGET ${target} PROPERTY LINK_LIBRARIES)
-    if ("OpenDDS::FACE" IN_LIST target_link_libs)
-      set(target_links_against_face ON)
-    endif()
-    set(first_target ${target})
-    break()
-  endforeach()
-
-  foreach(path ${_arg_IDL_FILES})
-    get_property(main_target SOURCE ${path} PROPERTY DDS_IDL_MAIN_TARGET)
-
-    if (main_target)
-      message(FATAL_ERROR "${path} is added twice in ${CMAKE_CURRENT_LIST_FILE}")
-    else()
-      set_property(SOURCE ${path} PROPERTY DDS_IDL_MAIN_TARGET "${first_target}")
+    if (NOT _arg_SKIP_TAO_IDL)
+      tao_idl_command(${target}
+        IDL_FLAGS -I${DDS_ROOT} ${_arg_TAO_IDL_FLAGS}
+        IDL_FILES ${_cur_idl_file} ${_cur_type_support_idl})
     endif()
 
-    if (IS_ABSOLUTE ${path})
-      list(APPEND _result ${path})
-    else()
-      list(APPEND _result ${CMAKE_CURRENT_LIST_DIR}/${path})
-    endif()
-  endforeach()
+    set_property(SOURCE ${abs_filename} PROPERTY
+      OPENDDS_IDL_GENERATED_DEPENDENCIES TRUE)
 
-  set(_arg_IDL_FILES ${_result})
-
-  file(RELATIVE_PATH rel_path ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_LIST_DIR})
-
-  if (_arg_SKIP_TAO_IDL)
-    set(OPTIONAL_TAO_IDL SKIP_TAO_IDL)
-  endif()
-
-  if (target_links_against_face)
-    foreach(_tao_face_flag -SS -Wb,no_fixed_err)
-      if (NOT "${_arg_TAO_IDL_FLAGS}" MATCHES "${_tao_face_flag}")
-        list(APPEND _arg_TAO_IDL_FLAGS ${_tao_face_flag})
-      endif()
-    endforeach()
-
-    foreach(_dds_face_flag -GfaceTS -Lface)
-      if (NOT "${_arg_DDS_IDL_FLAGS}" MATCHES "${_dds_face_flag}")
-        list(APPEND _arg_DDS_IDL_FLAGS ${_dds_face_flag})
-      endif()
-    endforeach()
-  endif()
-
-  dds_idl_command(_idl
-    ${OPTIONAL_TAO_IDL}
-    TAO_IDL_FLAGS ${_arg_TAO_IDL_FLAGS}
-    DDS_IDL_FLAGS ${_arg_DDS_IDL_FLAGS}
-    IDL_FILES ${_arg_IDL_FILES}
-    WORKING_DIRECTORY ${rel_path}
-    USED_BY "${_arg_TARGETS}"
-  )
-
-  tao_setup_visual_studio_custom_command_fanout_dependencies(
-    TARGETS "${_arg_TARGETS}"
-    DEPENDS "${_arg_IDL_FILES};${_idl_TYPESUPPORT_IDLS};${_idl_HEADER_FILES}"
-    OUTPUT  "${_idl_CPP_FILES}"
-  )
-
-  foreach(target ${_arg_TARGETS})
-    ace_target_sources(${target} ${_idl_CPP_FILES})
-    list(APPEND packages ${PACKAGE_OF_${target}})
-  endforeach()
-
-
-  if (_arg_DDS_IDL_FLAGS MATCHES "-Wb,export_macro=")
-    set(CMAKE_INCLUDE_CURRENT_DIR ON PARENT_SCOPE)
-  else()
-    ## include only ${CMAKE_CURRENT_BINARY_DIR} when the IDL generated files do not include
-    ## some export file. Usually, it's not a problem to include ${CMAKE_CURRENT_SOURCE_DIR} as well;
-    ## however, it doesn't work for performance_tests/Bench/src on Windows. That directory
-    ## contains a "Process.h" conflicting with the system "process.h" due to the case-insesitive
-    ## file system on Windows.
-    include_directories(${CMAKE_CURRENT_BINARY_DIR})
-  endif()
-
-  source_group("Generated Files" FILES ${_idl_OUTPUT_FILES} )
-  source_group("IDL Files" FILES ${_arg_IDL_FILES})
-  set_source_files_properties(${_arg_IDL_FILES} ${_idl_HEADER_FILES} PROPERTIES HEADER_FILE_ONLY ON)
-  set_property(SOURCE ${_idl_CPP_FILES} PROPERTY SKIP_AUTOGEN ON)
-
-  set(DDS_IDL_TYPESUPPORT_IDLS ${_idl_TYPESUPPORT_IDLS} PARENT_SCOPE)
-  set(DDS_IDL_JAVA_OUTPUTS ${_idl_JAVA_OUTPUTS} PARENT_SCOPE)
-
-  if (packages)
-    list(REMOVE_DUPLICATES packages)
-  endif()
-
-  foreach (package ${packages})
-    set(package_root ${${package}_SOURCE_DIR})
-    set(package_install_dir ${${package}_INSTALL_DIR})
-    file(RELATIVE_PATH rel_path ${package_root} ${CMAKE_CURRENT_LIST_DIR})
-    install(FILES ${_arg_IDL_FILES} ${_idl_HEADER_FILES}
-            DESTINATION ${package_install_dir}/${rel_path})
+    opendds_target_generated_dependencies(${target} ${abs_filename})
   endforeach()
 endfunction()
