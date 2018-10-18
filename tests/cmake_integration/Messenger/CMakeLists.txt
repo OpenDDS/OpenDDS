@@ -1,3 +1,6 @@
+# Distributed under the OpenDDS License. See accompanying LICENSE
+# file or http://www.opendds.org/license.html for details.
+
 project(Messenger_cmake CXX)
 cmake_minimum_required(VERSION 3.3)
 
