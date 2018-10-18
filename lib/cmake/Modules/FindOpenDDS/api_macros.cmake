@@ -82,28 +82,6 @@ macro(_OPENDDS_GENERATE_EXPORT_MACRO_COMMAND  target  output)
   set(${output} ${_output_file})
 endmacro()
 
-# OPENDDS_TARGET_SOURCES(target
-#   [items...]
-#   [<INTERFACE|PUBLIC|PRIVATE> items...])
-#
-# This macro behaves similarly to target_sources(...) with the following
-# differences:
-#   1) Items can be either C/C++ sources or IDL sources.
-#   2) The scope-qualifier (PUBLIC, PRIVATE, INTERFACE) is not required.
-#      When it is omitted, PUBLIC is used by default.
-#
-# When IDL sources are supplied, custom commands are generated which will
-# be invoked to compile the IDL sources into their component cpp/h files.
-#
-# A custom command will also be added to generate the required IDL export
-# header file (*target*_export.h) to add the required export macros. This
-# file is then added as a dependency for the supplied target.
-#
-# The following defines are implicitly added to the target and any exe/lib
-# which uses the library:
-#   *TARGET*_BUILD_DLL
-#   OPENDDS_SECURITY (if security is enabled)
-#
 macro(OPENDDS_TARGET_SOURCES target)
 
   if (NOT TARGET ${target})
