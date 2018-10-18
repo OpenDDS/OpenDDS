@@ -523,7 +523,6 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type* t
   }
   const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
 
-  const Classification cls = classify(type);
   const std::string clazz = scoped(name), clazz_underscores = scoped_helper(name, "_");
   ContentSubscriptionGuard csg;
   NamespaceGuard ng;
