@@ -1,11 +1,11 @@
 # Distributed under the OpenDDS License. See accompanying LICENSE
 # file or http://www.opendds.org/license.html for details.
 
-foreach(_dependency  ace_utils tao_idl_sources dds_idl_sources)
+foreach(_dependency tao_idl_sources dds_idl_sources)
   include(${CMAKE_CURRENT_LIST_DIR}/${_dependency}.cmake)
 endforeach()
 
-function(OPENDDS_INCLUDE_DIRS_ONCE)
+function(opendds_include_dirs_once)
   get_directory_property(_include_directories INCLUDE_DIRECTORIES)
   set(_add TRUE)
   if(_include_directories)
@@ -115,7 +115,7 @@ macro(OPENDDS_TARGET_SOURCES target)
     message(FATAL_ERROR "Invalid target '${target}' passed into OPENDDS_TARGET_SOURCES")
   endif()
 
-  OPENDDS_INCLUDE_DIRS_ONCE()
+  opendds_include_dirs_once()
 
   OPENDDS_GET_SOURCES_AND_OPTIONS(
     _sources
@@ -129,14 +129,14 @@ macro(OPENDDS_TARGET_SOURCES target)
     message(WARNING "Ignoring libs '${_libs}' passed into OPENDDS_TARGET_SOURCES.")
   endif()
 
-  get_property(_export_generated TARGET ${target}
-    PROPERTY OPENDDS_EXPORT_GENERATED)
+  get_target_property(_export_generated ${target} OPENDDS_EXPORT_GENERATED)
 
   if(NOT _export_generated)
     _OPENDDS_GENERATE_EXPORT_MACRO_COMMAND(${target} _export_generated)
 
-    set_property(TARGET ${target}
-      PROPERTY OPENDDS_EXPORT_GENERATED ${_export_generated})
+    set_target_properties(${target}
+      PROPERTIES
+        OPENDDS_EXPORT_GENERATED ${_export_generated})
 
     target_sources(${target} PUBLIC ${_export_generated})
 

@@ -18,6 +18,8 @@
 # OPENDDS_VERSION_MINOR - Minor version of OpenDDS.
 # OPENDDS_VERSION_PATCH - Patch version of OpenDDS.
 
+cmake_minimum_required(VERSION 3.3)
+
 include(${CMAKE_CURRENT_LIST_DIR}/FindOpenDDS/config.cmake)
 
 if (NOT DEFINED DDS_ROOT)

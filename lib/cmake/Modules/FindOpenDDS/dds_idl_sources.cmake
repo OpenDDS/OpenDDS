@@ -9,8 +9,9 @@ function(opendds_target_generated_dependencies target idl_file)
   else()
     # TODO: Generate the target using add_custom_target(...) to better indicate
     # the dependency graph.
-    set_property(SOURCE ${idl_file} PROPERTY
-      OPENDDS_IDL_BRIDGE_TARGET ${target})
+    set_source_files_properties(${idl_file}
+      PROPERTIES
+        OPENDDS_IDL_BRIDGE_TARGET ${target})
 
     get_source_file_property(idl_ts_files ${idl_file} OPENDDS_TYPESUPPORT_IDLS)
 
@@ -26,16 +27,16 @@ function(opendds_target_generated_dependencies target idl_file)
     set(all_gen_files ${cpp_files} ${hdr_files} ${idl_ts_files})
     set(all_files ${all_gen_files} ${idl_file})
 
-    message(STATUS "${all_files}")
-
     source_group("Generated Files" FILES ${all_files})
     source_group("IDL Files" FILES ${all_idl_files})
 
-    set_property(SOURCE ${all_idl_files} ${hdr_files}
-      PROPERTY HEADER_FILE_ONLY ON)
+    set_source_files_properties(${all_idl_files} ${hdr_files}
+      PROPERTIES
+        HEADER_FILE_ONLY ON)
 
-    set_property(SOURCE ${cpp_files}
-      PROPERTY SKIP_AUTOGEN ON)
+    set_source_files_properties(${cpp_files}
+      PROPERTIES
+        SKIP_AUTOGEN ON)
 
     foreach(file ${all_files})
       get_property(target_includes TARGET ${target} PROPERTY INCLUDE_DIRECTORIES)
