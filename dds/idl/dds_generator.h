@@ -516,7 +516,7 @@ void generateCaseBody(CommonFn commonFn, AST_UnionBranch* branch,
         rhs = "tmp";
       } else {
         const std::string nmspace =
-          lmap == BE_GlobalData::LANGMAP_CXX11 ? "FACE::" : "CORBA::";
+          lmap == BE_GlobalData::LANGMAP_FACE_CXX ? "FACE::" : "CORBA::";
         brType = nmspace + ((br_cls & CL_WIDE) ? "W" : "")
           + "String_var";
         rhs = "tmp.out()";
