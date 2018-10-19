@@ -11,37 +11,32 @@ endif()
 
 find_package(OpenDDS)
 
-# IDL Library
-add_library(messenger)
-OPENDDS_TARGET_SOURCES(messenger Messenger.idl)
-target_link_libraries(OpenDDS::Dcps)
-
 # Publisher
 add_executable(publisher)
-target_sources(publisher
+OPENDDS_TARGET_SOURCES(publisher
   PUBLIC
-    Writer.cpp Writer.h publisher.cpp)
+    Writer.cpp Writer.h publisher.cpp
+    Messenger.idl)
 
-target_link_libraries(publisher
-  messenger OpenDDS::OpenDDS)
+target_link_libraries(publisher OpenDDS::OpenDDS)
 
 # Subscriber
 add_executable(subscriber)
-target_sources(subscriber
+OPENDDS_TARGET_SOURCES(subscriber
   PUBLIC
-    DataReaderListener.cpp DataReaderListener.h subscriber.cpp)
+    DataReaderListener.cpp DataReaderListener.h subscriber.cpp
+    Messenger.idl)
 
-target_link_libraries(subscriber
-  messenger OpenDDS::OpenDDS)
+target_link_libraries(subscriber OpenDDS::OpenDDS)
 
 # Stacksubscriber
 add_executable(stack_subscriber)
-target_sources(stack_subscriber
+OPENDDS_TARGET_SOURCES(stack_subscriber
   PUBLIC
-    DataReaderListener.cpp DataReaderListener.h stack_subscriber.cpp)
+    DataReaderListener.cpp DataReaderListener.h stack_subscriber.cpp
+    Messenger.idl)
 
-target_link_libraries(stack_subscriber
-  messenger OpenDDS::OpenDDS)
+target_link_libraries(stack_subscriber OpenDDS::OpenDDS)
 
 # Copy configs/scripts into build-output directory
 set(_src_dir ${CMAKE_CURRENT_SOURCE_DIR})
@@ -58,7 +53,6 @@ add_custom_target(Copy_ini_and_scripts
     copy ${_ini_src} ${_pl_src} ${_dst_dir}/$<CONFIG>)
 
 set(_post_build_deps
-  messenger
   publisher
   subscriber
   stack_subscriber)
