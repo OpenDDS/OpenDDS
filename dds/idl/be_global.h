@@ -119,7 +119,8 @@ public:
   enum LanguageMapping {
     LANGMAP_NONE, ///< Don't generate, let tao_idl handle it
     LANGMAP_FACE_CXX, ///< Generate C++ language mapping from FACE spec
-    LANGMAP_SP_CXX ///< Generate C++ language mapping for Safety Profile
+    LANGMAP_SP_CXX, ///< Generate C++ language mapping for Safety Profile
+    LANGMAP_CXX11, ///< Generate OMG IDL-to-C++11
   };
 
   LanguageMapping language_mapping() const;

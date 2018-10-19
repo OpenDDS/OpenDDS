@@ -200,6 +200,7 @@ SubDriver::init(int& argc, ACE_TCHAR* argv[])
                                      drl.in(),
                                      ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   TEST_CHECK (! CORBA::is_nil (datareader_.in ()));
+  TEST_CHECK (participant_->contains_entity(datareader_->get_instance_handle()));
 
 #ifndef OPENDDS_NO_QUERY_CONDITION
   if (qc_usage_)

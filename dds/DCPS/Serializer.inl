@@ -721,6 +721,16 @@ operator<<(Serializer& s, const ACE_CDR::WChar* x)
   return s.good_bit();
 }
 
+#ifdef NONNATIVE_LONGDOUBLE
+ACE_INLINE bool
+operator<<(Serializer& s, long double x)
+{
+  ACE_CDR::LongDouble ld;
+  ACE_CDR_LONG_DOUBLE_ASSIGNMENT(ld, x);
+  return s << ld;
+}
+#endif
+
 ACE_INLINE bool
 operator<<(Serializer& s, ACE_OutputCDR::from_boolean x)
 {
@@ -762,11 +772,23 @@ operator<<(Serializer& s, const std::string& x)
   return s << x.c_str();
 }
 
+ACE_INLINE bool
+operator<<(Serializer& s, Serializer::FromBoundedString<char> x)
+{
+  return (x.bound_ == 0 || x.str_.size() <= x.bound_) && s << x.str_;
+}
+
 #ifdef DDS_HAS_WCHAR
 ACE_INLINE bool
 operator<<(Serializer& s, const std::wstring& x)
 {
   return s << x.c_str();
+}
+
+ACE_INLINE bool
+operator<<(Serializer& s, Serializer::FromBoundedString<wchar_t> x)
+{
+  return (x.bound_ == 0 || x.str_.size() <= x.bound_) && s << x.str_;
 }
 #endif /* DDS_HAS_WCHAR */
 #endif /* !OPENDDS_SAFETY_PROFILE */
@@ -906,6 +928,19 @@ operator>>(Serializer& s, ACE_CDR::WChar*& x)
   return s.good_bit();
 }
 
+#ifdef NONNATIVE_LONGDOUBLE
+ACE_INLINE bool
+operator>>(Serializer& s, long double& x)
+{
+  ACE_CDR::LongDouble ld;
+  if (s >> ld) {
+    x = ld;
+    return true;
+  }
+  return false;
+}
+#endif
+
 ACE_INLINE bool
 operator>>(Serializer& s, ACE_InputCDR::to_boolean x)
 {
@@ -973,6 +1008,12 @@ operator>>(Serializer& s, std::string& x)
   return s.good_bit();
 }
 
+ACE_INLINE bool
+operator>>(Serializer& s, Serializer::ToBoundedString<char> x)
+{
+  return (s >> x.str_) && (x.bound_ == 0 || x.str_.size() <= x.bound_);
+}
+
 #ifdef DDS_HAS_WCHAR
 ACE_INLINE bool
 operator>>(Serializer& s, std::wstring& x)
@@ -982,6 +1023,12 @@ operator>>(Serializer& s, std::wstring& x)
   x.assign(buf, length);
   CORBA::wstring_free(buf);
   return s.good_bit();
+}
+
+ACE_INLINE bool
+operator>>(Serializer& s, Serializer::ToBoundedString<wchar_t> x)
+{
+  return (s >> x.str_) && (x.bound_ == 0 || x.str_.size() <= x.bound_);
 }
 #endif /* DDS_HAS_WCHAR */
 #endif /* !OPENDDS_SAFETY_PROFILE */

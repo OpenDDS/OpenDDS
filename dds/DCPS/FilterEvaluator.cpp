@@ -593,10 +593,30 @@ Value::Value(ACE_CDR::LongDouble ld, bool conversion_preferred)
   : type_(VAL_LNGDUB), ld_(ld), conversion_preferred_(conversion_preferred)
 {}
 
+#ifdef NONNATIVE_LONGDOUBLE
+Value::Value(long double ld, bool conversion_preferred)
+  : type_(VAL_LNGDUB), conversion_preferred_(conversion_preferred)
+{
+  ACE_CDR_LONG_DOUBLE_ASSIGNMENT(ld_, ld);
+}
+#endif
+
 Value::Value(const char* s, bool conversion_preferred)
   : type_(VAL_STRING), s_(ACE_OS::strdup(s))
   , conversion_preferred_(conversion_preferred)
 {}
+
+Value::Value(const std::string& s, bool conversion_preferred)
+  : type_(VAL_STRING), s_(ACE_OS::strdup(s.c_str()))
+  , conversion_preferred_(conversion_preferred)
+{}
+
+#ifdef DDS_HAS_WCHAR
+Value::Value(const std::wstring& s, bool conversion_preferred)
+  : type_(VAL_STRING), s_(ACE_OS::strdup(ACE_Wide_To_Ascii(s.c_str()).char_rep()))
+  , conversion_preferred_(conversion_preferred)
+{}
+#endif
 
 Value::Value(const TAO::String_Manager& s, bool conversion_preferred)
   : type_(VAL_STRING), s_(ACE_OS::strdup(s.in()))
