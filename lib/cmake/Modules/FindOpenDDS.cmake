@@ -9,9 +9,9 @@
 #
 # This module defines the following variables::
 #
-# OPENDDS_FOUND - True if OpenDDS was found.
+# OPENDDS_FOUND - True if OpenDDS (and all primary dependencies) were found.
 # OPENDDS_INCLUDE_DIRS - Primary include directories used by OpenDDS.
-# OPENDDS_LIBRARIES - List of all imported targets available (see below).
+# OPENDDS_LIBRARIES - List of all OpenDDS-Imported targets.
 # OPENDDS_VERSION - Full OpenDDS version string.
 # OPENDDS_VERSION_MAJOR - Major version of OpenDDS.
 # OPENDDS_VERSION_MINOR - Minor version of OpenDDS.
@@ -347,10 +347,6 @@ include(FindPackageHandleStandardArgs)
 foreach(_lib ${_all_libs})
   string(TOUPPER ${_lib} _LIB_VAR)
   select_library_configurations(${_LIB_VAR})
-
-  if(${${_LIB_VAR}_FOUND})
-    message(STATUS "${_lib} -> ${${_LIB_VAR}_LIBRARY}")
-  endif()
 endforeach()
 
 find_package_handle_standard_args(OPENDDS
@@ -416,7 +412,7 @@ macro(_ADD_TARGET_LIB  target  var_prefix  include_dir)
       )
     endif()
 
-    list(APPEND OPENDDS_LIBRARIES ${${var_prefix}})
+    list(APPEND OPENDDS_LIBRARIES ${target})
 
   endif()
 endmacro()
@@ -488,4 +484,11 @@ if(OPENDDS_FOUND)
 
   include(${CMAKE_CURRENT_LIST_DIR}/FindOpenDDS/options.cmake)
   include(${CMAKE_CURRENT_LIST_DIR}/FindOpenDDS/api_macros.cmake)
+
+  # Summary information
+  message(STATUS "Added the following targets to OPENDDS_LIBRARIES:")
+  foreach(_target ${OPENDDS_LIBRARIES})
+    get_target_property(_target_location ${_target} LOCATION)
+    message(STATUS "${_target} -> ${_target_location}")
+  endforeach()
 endif()
