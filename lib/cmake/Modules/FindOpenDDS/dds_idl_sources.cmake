@@ -16,21 +16,13 @@ function(opendds_target_generated_dependencies target idl_file)
   set(all_gen_files ${cpp_files} ${hdr_files} ${idl_ts_files})
   set(all_files ${all_gen_files} ${idl_file})
 
-  source_group("Generated Files" FILES ${all_files})
-  source_group("IDL Files" FILES ${all_idl_files})
-
   get_source_file_property(bridge_target ${idl_file} OPENDDS_IDL_BRIDGE_TARGET)
   if (NOT bridge_target)
-    get_filename_component(bridge_target ${idl_file} NAME)
-
     # Each IDL file corresponds to one bridge target. All targets which depend
     # upon the C/C++ files generated from IDL compilation will also depend upon
     # the bridge target to guarantee that IDL files will compile prior to the
-    # dependent targets.
-    add_custom_target(${bridge_target}
-      ALL
-      DEPENDS ${all_gen_files}
-      COMMENT "Triggering IDL compilation")
+    # dependent targets. This is simply set to the first IDL-Dependent target.
+    set(bridge_target ${target})
 
     set_source_files_properties(${idl_file}
       PROPERTIES
@@ -44,11 +36,17 @@ function(opendds_target_generated_dependencies target idl_file)
       PROPERTIES
         SKIP_AUTOGEN ON)
 
+    source_group("Generated Files" FILES ${all_gen_files})
+    source_group("IDL Files" FILES ${idl_file})
   endif()
 
   add_dependencies(${target} ${bridge_target})
 
-  target_sources(${target} PRIVATE ${cpp_files} PUBLIC ${hdr_files})
+  target_sources(${target}
+    PRIVATE
+      ${cpp_files} ${all_idl_files}
+    PUBLIC
+      ${hdr_files})
 
   foreach(file ${hdr_files})
     get_target_property(target_includes ${target} INCLUDE_DIRECTORIES)
