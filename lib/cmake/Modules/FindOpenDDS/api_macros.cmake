@@ -102,43 +102,50 @@ macro(OPENDDS_TARGET_SOURCES target)
     message(WARNING "Ignoring libs '${_libs}' passed into OPENDDS_TARGET_SOURCES.")
   endif()
 
-  get_target_property(_export_generated ${target} OPENDDS_EXPORT_GENERATED)
+  get_target_property(_target_type ${target} TYPE)
+  if (_target_type STREQUAL "SHARED_LIBRARY")
 
-  if(NOT _export_generated)
-    _OPENDDS_GENERATE_EXPORT_MACRO_COMMAND(${target} _export_generated)
+    get_target_property(_export_generated ${target} OPENDDS_EXPORT_GENERATED)
+    if(NOT _export_generated)
+      _OPENDDS_GENERATE_EXPORT_MACRO_COMMAND(${target} _export_generated)
 
-    set_target_properties(${target}
-      PROPERTIES
-        OPENDDS_EXPORT_GENERATED ${_export_generated})
+      set_target_properties(${target}
+        PROPERTIES
+          OPENDDS_EXPORT_GENERATED ${_export_generated})
 
-    target_sources(${target} PUBLIC ${_export_generated})
+      target_sources(${target} PUBLIC ${_export_generated})
 
-    string(TOUPPER "${target}" _target_upper)
-    target_compile_definitions(${target}
-      PUBLIC
-        ${_target_upper}_BUILD_DLL
-        ${OPENDDS_DCPS_COMPILE_DEFS})
-
-    if (OPENDDS_DCPS_LINK_DEPS)
-      target_link_libraries(${target} ${OPENDDS_DCPS_LINK_DEPS})
+      string(TOUPPER "${target}" _target_upper)
+      target_compile_definitions(${target}
+        PUBLIC
+          ${_target_upper}_BUILD_DLL)
     endif()
 
-  endif()
+    if(NOT "${_tao_options}" MATCHES "-Wb,stub_export_include")
+      list(APPEND _tao_options "-Wb,stub_export_include=${_export_generated}")
+    endif()
 
-  if(NOT "${_tao_options}" MATCHES "-Wb,stub_export_include")
-    list(APPEND _tao_options "-Wb,stub_export_include=${_export_generated}")
-  endif()
+    if(NOT "${_tao_options}" MATCHES "-Wb,stub_export_macro")
+      list(APPEND _tao_options "-Wb,stub_export_macro=${target}_Export")
+    endif()
 
-  if(NOT "${_tao_options}" MATCHES "-Wb,stub_export_macro")
-    list(APPEND _tao_options "-Wb,stub_export_macro=${target}_Export")
+    if(NOT "${_opendds_options}" MATCHES "-Wb,export_macro")
+      list(APPEND _opendds_options "-Wb,export_macro=${target}_Export")
+    endif()
   endif()
 
   if(NOT "${_tao_options}" MATCHES "-SS")
     list(APPEND _tao_options "-SS")
   endif()
 
-  if(NOT "${_opendds_options}" MATCHES "-Wb,export_macro")
-    list(APPEND _opendds_options "-Wb,export_macro=${target}_Export")
+  if (OPENDDS_DCPS_COMPILE_DEFS)
+    target_compile_definitions(${target}
+      PUBLIC
+        ${OPENDDS_DCPS_COMPILE_DEFS})
+  endif()
+
+  if (OPENDDS_DCPS_LINK_DEPS)
+    target_link_libraries(${target} ${OPENDDS_DCPS_LINK_DEPS})
   endif()
 
   foreach(scope PUBLIC PRIVATE INTERFACE)
