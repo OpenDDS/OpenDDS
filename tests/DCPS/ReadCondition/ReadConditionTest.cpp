@@ -63,13 +63,13 @@ int run_test_instance(DDS::DomainParticipant_ptr dp)
   }
 
   ReadCondition_var dr_rc = dr->create_readcondition(NOT_READ_SAMPLE_STATE,
-    NEW_VIEW_STATE, ALIVE_INSTANCE_STATE);
+    NEW_VIEW_STATE, ALIVE_INSTANCE_STATE);  
   ReadCondition_var dr_rc2 = dr->create_readcondition(ANY_SAMPLE_STATE,
     ANY_VIEW_STATE, NOT_ALIVE_DISPOSED_INSTANCE_STATE);
   ws->attach_condition(dr_rc);
   ws->attach_condition(dr_rc2);
   MessageDataReader_var mdr = MessageDataReader::_narrow(dr);
-  bool passed = true, done = false;
+  bool passed = true, done = false;  
   while (!done) {
     ret = ws->wait(active, infinite);
     if (ret != RETCODE_OK) {
@@ -177,6 +177,11 @@ int run_test_next_instance(DDS::DomainParticipant_ptr dp)
   ws->attach_condition(dr_rc2);
   MessageDataReader_var mdr = MessageDataReader::_narrow(dr);
   bool passed = true, done = false;
+  if (sub->delete_datareader(dr) != DDS::RETCODE_PRECONDITION_NOT_MET) {
+    cout << "ERROR: the deletion of a DataReader is not allowed if there are any existing ReadCondition objects that are attached to the DataReader." << endl;
+    passed = false;
+    done = true;
+  }
   while (!done) {
     ret = ws->wait(active, infinite);
     if (ret != RETCODE_OK) {
@@ -223,7 +228,7 @@ int run_test_next_instance(DDS::DomainParticipant_ptr dp)
   }
   ws->detach_condition(dr_rc);
   ws->detach_condition(dr_rc2);
-
+  
   dp->delete_contained_entities();
   return passed ? 0 : 1;
 }
