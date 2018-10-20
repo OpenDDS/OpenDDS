@@ -221,7 +221,7 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   if (!dr_qc) {
     cerr << "ERROR: failed to create QueryCondition" << endl;
     return false;
-  }  
+  }
   WaitSet_var ws = new WaitSet;
   ws->attach_condition(dr_qc);
   ConditionSeq active;
@@ -295,7 +295,7 @@ bool run_complex_filtering_test(const DomainParticipant_var& dp,
   if (!dr_qc1) {
     cerr << "ERROR: failed to create QueryCondition 1" << endl;
     return false;
-  }  
+  }
   QueryCondition_var dr_qc2 = dr2->create_querycondition(NOT_READ_SAMPLE_STATE,
     NEW_VIEW_STATE | NOT_NEW_VIEW_STATE, ANY_INSTANCE_STATE, "( (iteration < %0) OR (iteration > %1) )", params);
   if (!dr_qc2) {
@@ -412,7 +412,7 @@ bool run_sorting_test(const DomainParticipant_var& dp,
   if (!dr_qc) {
     cerr << "ERROR: failed to create QueryCondition" << endl;
     return false;
-  }  
+  }
   WaitSet_var ws = new WaitSet;
   ws->attach_condition(dr_qc);
   MessageDataReader_var mdr = MessageDataReader::_narrow(dr);
