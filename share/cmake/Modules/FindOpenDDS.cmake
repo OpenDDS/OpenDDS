@@ -356,7 +356,6 @@ foreach(_cfg  RELEASE  DEBUG)
       HINTS ${_dds_lib_hints}
     )
   endforeach()
-
 endforeach()
 
 function(opendds_extract_version  in_version_file  out_version  out_major  out_minor)
@@ -369,7 +368,10 @@ function(opendds_extract_version  in_version_file  out_version  out_major  out_m
   endif()
 endfunction()
 
-opendds_extract_version("${DDS_ROOT}/VERSION"
+find_file(_OPENDDS_VERSION_FILE VERSION
+  HINTS "${DDS_ROOT}/share/dds" "${DDS_ROOT}")
+
+opendds_extract_version("${_OPENDDS_VERSION_FILE}"
   OPENDDS_VERSION
   OPENDDS_VERSION_MAJOR
   OPENDDS_VERSION_MINOR
