@@ -92,69 +92,87 @@ include(${_OPENDDS_FIND_MODULE_DIR}/FindOpenDDS/config.cmake)
 if(NOT DEFINED DDS_ROOT)
   if(OPENDDS_PREFIX AND EXISTS "${OPENDDS_PREFIX}/include/dds/DdsDcps.idl")
     set(DDS_ROOT ${OPENDDS_PREFIX})
+    set(OPENDDS_INCLUDE_DIR "${DDS_ROOT}/include")
 
-  elseif(EXISTS "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/include/dds/DdsDcps.idl"
-          OR EXISTS "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/dds/DdsDcps.idl")
+  elseif(EXISTS "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/include/dds/DdsDcps.idl")
     set(DDS_ROOT ${_OPENDDS_FIND_MODULE_RELATIVE_ROOT})
+    set(OPENDDS_INCLUDE_DIR "${DDS_ROOT}/include")
+
+  elseif(EXISTS "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/dds/DdsDcps.idl")
+    set(DDS_ROOT ${_OPENDDS_FIND_MODULE_RELATIVE_ROOT})
+    set(OPENDDS_INCLUDE_DIR "${DDS_ROOT}/dds")
 
   else()
     _OPENDDS_RETURN_ERR("Failed to locate DDS_ROOT")
   endif()
+
+  set(OPENDDS_BIN_DIR "${DDS_ROOT}/bin")
+  set(OPENDDS_LIB_DIR "${DDS_ROOT}/lib")
+
+else()
+  _OPENDDS_RETURN_ERR("DDS_ROOT has already been set")
 endif()
+
 
 if (NOT DEFINED ACE_ROOT)
   if(OPENDDS_PREFIX AND EXISTS "${OPENDDS_PREFIX}/include/ace/ACE.h")
     set(ACE_ROOT ${OPENDDS_PREFIX})
+    set(ACE_INCLUDE_DIR "${ACE_ROOT}/include")
 
   elseif(OPENDDS_ACE AND EXISTS "${OPENDDS_ACE}/ace/ACE.h")
     set(ACE_ROOT ${OPENDDS_ACE})
+    set(ACE_INCLUDE_DIR "${ACE_ROOT}")
 
   elseif(EXISTS "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/ACE_TAO/ACE/ace/ACE.h")
     set(ACE_ROOT "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/ACE_TAO/ACE")
+    set(ACE_INCLUDE_DIR "${ACE_ROOT}")
 
   elseif(EXISTS "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/ACE_wrappers/ace/ACE.h")
     set(ACE_ROOT "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/ACE_wrappers")
+    set(ACE_INCLUDE_DIR "${ACE_ROOT}")
 
   else()
     _OPENDDS_RETURN_ERR("Failed to locate ACE_ROOT")
   endif()
+
+  set(ACE_BIN_DIR "${ACE_ROOT}/bin")
+  set(ACE_LIB_DIR "${ACE_ROOT}/lib")
+
+else()
+  _OPENDDS_RETURN_ERR("ACE_ROOT has already been set")
 endif()
 
 if (NOT DEFINED TAO_ROOT)
   if(OPENDDS_PREFIX AND EXISTS "${OPENDDS_PREFIX}/include/tao/ORB.h")
-    set(ACE_ROOT ${OPENDDS_PREFIX})
+    set(TAO_ROOT ${OPENDDS_PREFIX})
+    set(TAO_INCLUDE_DIR "${TAO_ROOT}/include")
 
   elseif(OPENDDS_TAO AND EXISTS "${OPENDDS_TAO}/tao/ORB.h")
     set(TAO_ROOT ${OPENDDS_TAO})
+    set(TAO_INCLUDE_DIR "${TAO_ROOT}")
 
   elseif(EXISTS "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/ACE_TAO/TAO/tao/ORB.h")
     set(TAO_ROOT "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/ACE_TAO/TAO")
+    set(TAO_INCLUDE_DIR "${TAO_ROOT}")
 
   elseif(EXISTS "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/ACE_wrappers/TAO/tao/ORB.h")
-    set(ACE_ROOT "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/ACE_wrappers/TAO")
+    set(TAO_ROOT "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/ACE_wrappers/TAO")
+    set(TAO_INCLUDE_DIR "${TAO_ROOT}")
 
   else()
     _OPENDDS_RETURN_ERR("Failed to locate TAO_ROOT")
   endif()
+
+  set(TAO_BIN_DIR ${ACE_BIN_DIR})
+  set(TAO_LIB_DIR ${ACE_LIB_DIR})
+
+else()
+  _OPENDDS_RETURN_ERR("TAO_ROOT has already been set")
 endif()
 
-if (MSVC)
-  set(CMAKE_MSVCIDE_RUN_PATH ${CMAKE_MSVCIDE_RUN_PATH} ${DDS_ROOT}/lib ${ACE_ROOT}/lib)
-endif()
-
-find_path(OPENDDS_INCLUDE_DIR dds HINTS ${DDS_ROOT})
-find_path(OPENDDS_BIN_DIR bin HINTS ${DDS_ROOT})
-find_path(OPENDDS_LIB_DIR lib HINTS ${DDS_ROOT})
-find_path(ACE_INCLUDE_DIR ace HINTS ${ACE_ROOT})
-find_path(ACE_BIN_DIR bin HINTS ${ACE_ROOT})
-find_path(ACE_LIB_DIR lib HINTS ${ACE_ROOT})
-find_path(TAO_INCLUDE_DIR tao HINTS ${TAO_ROOT})
-set(TAO_BIN_DIR ${ACE_BIN_DIR})
-set(TAO_LIB_DIR ${ACE_LIB_DIR})
-
-set(_dds_bin_hints ${OPENDDS_BIN_DIR} $ENV{DDS_ROOT}/bin)
-set(_tao_bin_hints ${ACE_BIN_DIR} $ENV{ACE_ROOT}/bin)
-set(_ace_bin_hints ${TAO_BIN_DIR} $ENV{TAO_ROOT}/bin)
+set(_dds_bin_hints ${OPENDDS_BIN_DIR})
+set(_tao_bin_hints ${ACE_BIN_DIR})
+set(_ace_bin_hints ${TAO_BIN_DIR})
 
 find_program(PERL perl)
 
@@ -301,9 +319,9 @@ set(OPENDDS_UDP_DEPS
   OpenDDS::Dcps
 )
 
-set(_dds_lib_hints  ${OPENDDS_LIB_DIR}  $ENV{DDS_ROOT}/lib)
-set(_ace_lib_hints  ${ACE_LIB_DIR}  $ENV{ACE_ROOT}/lib)
-set(_tao_lib_hints  ${TAO_LIB_DIR}  $ENV{TAO_ROOT}/lib)
+set(_dds_lib_hints  ${OPENDDS_LIB_DIR})
+set(_ace_lib_hints  ${ACE_LIB_DIR})
+set(_tao_lib_hints  ${TAO_LIB_DIR})
 
 set(_suffix_RELEASE "")
 set(_suffix_DEBUG d)
