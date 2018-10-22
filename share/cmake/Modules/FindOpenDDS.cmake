@@ -76,49 +76,65 @@
 
 cmake_minimum_required(VERSION 3.3)
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindOpenDDS/config.cmake)
+macro(_OPENDDS_RETURN_ERR msg)
+  message(FATAL_ERROR "${msg}")
+  set(OPENDDS_FOUND "OpenDDS-NOTFOUND")
+  return()
+endmacro()
 
-if (NOT DEFINED DDS_ROOT)
-  if (DEFINED ENV{DDS_ROOT})
-    set(DDS_ROOT $ENV{DDS_ROOT})
+set(_OPENDDS_FIND_MODULE_DIR ${CMAKE_CURRENT_LIST_DIR})
+set(_OPENDDS_FIND_MODULE_RELATIVE_ROOT "${_OPENDDS_FIND_MODULE_DIR}/../../..")
+
+include(${_OPENDDS_FIND_MODULE_DIR}/FindOpenDDS/config.cmake)
+
+# TODO: Sanitize prefix by stripping trailing slash prior to continuing.
+
+if(NOT DEFINED DDS_ROOT)
+  if(OPENDDS_PREFIX AND EXISTS "${OPENDDS_PREFIX}/include/dds/DdsDcps.idl")
+    set(DDS_ROOT ${OPENDDS_PREFIX})
+
+  elseif(EXISTS "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/include/dds/DdsDcps.idl"
+          OR EXISTS "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/dds/DdsDcps.idl")
+    set(DDS_ROOT ${_OPENDDS_FIND_MODULE_RELATIVE_ROOT})
 
   else()
-    message(FATAL_ERROR
-    "Missing DDS_ROOT, please do one of the following: invoke the CMake command \
-    set(DDS_ROOT path/to/opendds) prior to finding the OpenDDS module or \
-    set the DDS_ROOT environment variable")
+    _OPENDDS_RETURN_ERR("Failed to locate DDS_ROOT")
   endif()
 endif()
 
 if (NOT DEFINED ACE_ROOT)
-  if (OPENDDS_ACE)
+  if(OPENDDS_PREFIX AND EXISTS "${OPENDDS_PREFIX}/include/ace/ACE.h")
+    set(ACE_ROOT ${OPENDDS_PREFIX})
+
+  elseif(OPENDDS_ACE AND EXISTS "${OPENDDS_ACE}/ace/ACE.h")
     set(ACE_ROOT ${OPENDDS_ACE})
 
-  elseif(DEFINED ENV{ACE_ROOT})
-    set(ACE_ROOT $ENV{ACE_ROOT})
+  elseif(EXISTS "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/ACE_TAO/ACE/ace/ACE.h")
+    set(ACE_ROOT "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/ACE_TAO/ACE")
+
+  elseif(EXISTS "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/ACE_wrappers/ace/ACE.h")
+    set(ACE_ROOT "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/ACE_wrappers")
 
   else()
-    message(FATAL_ERROR
-      "Missing ACE_ROOT, please do one of the following: invoke the CMake command \
-      set(ACE_ROOT path/to/ace) prior to finding the OpenDDS module; \
-      set the ACE_ROOT environment variable; \
-      or use --ace with the configure script to point to a valid ACE install")
+    _OPENDDS_RETURN_ERR("Failed to locate ACE_ROOT")
   endif()
 endif()
 
 if (NOT DEFINED TAO_ROOT)
-  if(OPENDDS_TAO)
+  if(OPENDDS_PREFIX AND EXISTS "${OPENDDS_PREFIX}/include/tao/ORB.h")
+    set(ACE_ROOT ${OPENDDS_PREFIX})
+
+  elseif(OPENDDS_TAO AND EXISTS "${OPENDDS_TAO}/tao/ORB.h")
     set(TAO_ROOT ${OPENDDS_TAO})
 
-  elseif(DEFINED ENV{TAO_ROOT})
-    set(TAO_ROOT $ENV{TAO_ROOT})
+  elseif(EXISTS "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/ACE_TAO/TAO/tao/ORB.h")
+    set(TAO_ROOT "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/ACE_TAO/TAO")
+
+  elseif(EXISTS "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/ACE_wrappers/TAO/tao/ORB.h")
+    set(ACE_ROOT "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/ACE_wrappers/TAO")
 
   else()
-    message(FATAL_ERROR
-      "Missing TAO_ROOT, please do one of the following: invoke the CMake command \
-      set(TAO_ROOT path/to/tao) prior to finding the OpenDDS module; \
-      set the TAO_ROOT environment variable; \
-      or use --tao with the configure script to point to a valid ACE install")
+    _OPENDDS_RETURN_ERR("Failed to locate TAO_ROOT")
   endif()
 endif()
 
@@ -482,8 +498,8 @@ if(OPENDDS_FOUND)
     target_link_libraries(OpenDDS::OpenDDS INTERFACE ${_opendds_core_libs})
   endif()
 
-  include(${CMAKE_CURRENT_LIST_DIR}/FindOpenDDS/options.cmake)
-  include(${CMAKE_CURRENT_LIST_DIR}/FindOpenDDS/api_macros.cmake)
+  include(${_OPENDDS_FIND_MODULE_DIR}/FindOpenDDS/options.cmake)
+  include(${_OPENDDS_FIND_MODULE_DIR}/FindOpenDDS/api_macros.cmake)
 
   # Summary information
   message(STATUS "Added the following targets to OPENDDS_LIBRARIES:")

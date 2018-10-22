@@ -4,11 +4,7 @@
 project(Messenger_cmake CXX)
 cmake_minimum_required(VERSION 3.3)
 
-if (DEFINED ENV{DDS_ROOT})
-  set(DDS_ROOT $ENV{DDS_ROOT})
-  list(APPEND CMAKE_MODULE_PATH "${DDS_ROOT}/lib/cmake/Modules")
-endif()
-
+list(APPEND CMAKE_MODULE_PATH "$ENV{DDS_ROOT}/share/cmake/Modules")
 find_package(OpenDDS)
 
 # Publisher
