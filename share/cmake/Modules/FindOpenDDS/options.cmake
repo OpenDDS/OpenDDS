@@ -112,9 +112,3 @@ if (OPENDDS_STD AND CMAKE_HOST_UNIX)
     message(WARNING "Ignoring unknown OPENDDS_STD value '${OPENDDS_STD}'")
   endif()
 endif()
-
-# IDL-Compiler environment variables.
-
-if (CMAKE_HOST_UNIX)
-  list(APPEND OPENDDS_TAO_IDL_ENV "LD_LIBRARY_PATH=\"${OPENDDS_LIB_DIR}:${ACE_LIB_DIR}:${TAO_LIB_DIR}\"")
-endif()
