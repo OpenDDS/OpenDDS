@@ -174,13 +174,9 @@ function(opendds_target_idl_sources target)
 
     set(_cur_idl_outputs ${_cur_idl_headers} ${_cur_idl_cpp_files})
 
-    find_file(_idl_template_file IDLTemplate.txt
-      HINTS "${DDS_ROOT}/dds/idl" # In the source tree.
-            "${DDS_ROOT}/share/dds/dds/idl") # In the install-prefix dir.
-
     add_custom_command(
       OUTPUT ${_cur_idl_outputs} ${_cur_type_support_idl} ${_cur_java_list}
-      DEPENDS opendds_idl ${_idl_template_file}
+      DEPENDS opendds_idl ${DDS_ROOT}/dds/idl/IDLTemplate.txt
       MAIN_DEPENDENCY ${abs_filename}
       COMMAND ${CMAKE_COMMAND} -E env "DDS_ROOT=${DDS_ROOT}"  "TAO_ROOT=${TAO_INCLUDE_DIR}" "${IDL_PATH_ENV}"
               $<TARGET_FILE:opendds_idl> -I${_working_source_dir}
