@@ -559,6 +559,7 @@ namespace {
     if (OpenDDS::DCPS::DCPS_debug_level > 3) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) cleanup_opendds_subscriber - subscriber no longer in use, delete sub\n"));
     }
+    sub->delete_contained_entities();
     dp->delete_subscriber(sub);
     return true;
   }
