@@ -312,6 +312,7 @@ void Destroy_Connection(CONNECTION_ID_TYPE connection_id,
       const DDS::Subscriber_var sub = datareader->get_subscriber();
       delete readers[connection_id];
       readers.erase(connection_id);
+      datareader->delete_contained_entities();
       sub->delete_datareader(datareader);
       dp = sub->get_participant();
       try_cleanup_participant = cleanup_opendds_subscriber(sub);
