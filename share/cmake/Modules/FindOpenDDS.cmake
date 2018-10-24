@@ -90,19 +90,15 @@ include(${_OPENDDS_FIND_MODULE_DIR}/FindOpenDDS/config.cmake)
 # TODO: Sanitize prefix by stripping trailing slash prior to continuing.
 
 if(NOT DEFINED DDS_ROOT)
-  if(OPENDDS_PREFIX AND EXISTS "${OPENDDS_PREFIX}/include/dds/DdsDcps.idl")
-    set(DDS_ROOT "${OPENDDS_PREFIX}/share/dds")
-    set(OPENDDS_INCLUDE_DIR "${OPENDDS_PREFIX}/include")
-    set(OPENDDS_BIN_DIR "${OPENDDS_PREFIX}/bin")
-    set(OPENDDS_LIB_DIR "${OPENDDS_PREFIX}/lib")
-
-  elseif(EXISTS "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/include/dds/DdsDcps.idl")
-    set(DDS_ROOT ${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/share/dds)
+  if(EXISTS "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/include/dds/DdsDcps.idl")
+    # Configure was invoked with --prefix; Note the DDS_ROOT is different.
+    set(DDS_ROOT "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/share/dds")
     set(OPENDDS_INCLUDE_DIR "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/include")
     set(OPENDDS_BIN_DIR "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/bin")
     set(OPENDDS_LIB_DIR "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/lib")
 
   elseif(EXISTS "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/dds/DdsDcps.idl")
+    # Default to the source-tree DDS_ROOT.
     set(DDS_ROOT ${_OPENDDS_FIND_MODULE_RELATIVE_ROOT})
     set(OPENDDS_INCLUDE_DIR "${DDS_ROOT}")
     set(OPENDDS_BIN_DIR "${DDS_ROOT}/bin")
@@ -116,33 +112,30 @@ else()
   _OPENDDS_RETURN_ERR("DDS_ROOT has already been set")
 endif()
 
-
 if (NOT DEFINED ACE_ROOT)
-  if(OPENDDS_PREFIX AND EXISTS "${OPENDDS_PREFIX}/include/ace/ACE.h")
-    set(ACE_ROOT "${OPENDDS_PREFIX}/share/ace")
-    set(ACE_INCLUDE_DIR "${OPENDDS_PREFIX}/include")
-    set(ACE_BIN_DIR "${OPENDDS_PREFIX}/bin")
-    set(ACE_LIB_DIR "${OPENDDS_PREFIX}/lib")
-
-  elseif(EXISTS "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/include/ace/ACE.h")
+  if(EXISTS "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/include/ace/ACE.h")
+    # Configure was invoked with --prefix; Note the ACE_ROOT is different.
     set(ACE_ROOT "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/share/ace")
     set(ACE_INCLUDE_DIR "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/include")
     set(ACE_BIN_DIR "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/bin")
     set(ACE_LIB_DIR "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/lib")
 
   elseif(OPENDDS_ACE AND EXISTS "${OPENDDS_ACE}/ace/ACE.h")
+    # Configure was invoked with --ace.
     set(ACE_ROOT ${OPENDDS_ACE})
     set(ACE_INCLUDE_DIR "${ACE_ROOT}")
     set(ACE_BIN_DIR "${ACE_ROOT}/bin")
     set(ACE_LIB_DIR "${ACE_ROOT}/lib")
 
   elseif(EXISTS "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/ACE_TAO/ACE/ace/ACE.h")
+    # Configure was invoked with --ace-github-latest.
     set(ACE_ROOT "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/ACE_TAO/ACE")
     set(ACE_INCLUDE_DIR "${ACE_ROOT}")
     set(ACE_BIN_DIR "${ACE_ROOT}/bin")
     set(ACE_LIB_DIR "${ACE_ROOT}/lib")
 
   elseif(EXISTS "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/ACE_wrappers/ace/ACE.h")
+    # Configure was invoked with the default ACE/TAO download-behavior.
     set(ACE_ROOT "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/ACE_wrappers")
     set(ACE_INCLUDE_DIR "${ACE_ROOT}")
     set(ACE_BIN_DIR "${ACE_ROOT}/bin")
@@ -157,31 +150,29 @@ else()
 endif()
 
 if (NOT DEFINED TAO_ROOT)
-  if(OPENDDS_PREFIX AND EXISTS "${OPENDDS_PREFIX}/include/tao/ORB.h")
-    set(TAO_ROOT "${OPENDDS_PREFIX}/share/tao")
-    set(TAO_INCLUDE_DIR "${OPENDDS_PREFIX}/include")
-    set(TAO_BIN_DIR ${OPENDDS_PREFIX}/bin)
-    set(TAO_LIB_DIR ${OPENDDS_PREFIX}/lib)
-
-  elseif(EXISTS "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/include/tao/ORB.h")
+  if(EXISTS "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/include/tao/ORB.h")
+    # Configure was invoked with --prefix; Note the TAO_ROOT is different.
     set(TAO_ROOT "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/share/tao")
     set(TAO_INCLUDE_DIR "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/include")
     set(TAO_BIN_DIR ${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/bin)
     set(TAO_LIB_DIR ${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/lib)
 
   elseif(OPENDDS_TAO AND EXISTS "${OPENDDS_TAO}/tao/ORB.h")
+    # Configure was invoked with --tao.
     set(TAO_ROOT "${OPENDDS_TAO}")
     set(TAO_INCLUDE_DIR "${OPENDDS_TAO}")
     set(TAO_BIN_DIR ${ACE_BIN_DIR})
     set(TAO_LIB_DIR ${ACE_LIB_DIR})
 
   elseif(EXISTS "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/ACE_TAO/TAO/tao/ORB.h")
+    # Configure was invoked with --ace-github-latest.
     set(TAO_ROOT "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/ACE_TAO/TAO")
     set(TAO_INCLUDE_DIR "${TAO_ROOT}")
     set(TAO_BIN_DIR ${ACE_BIN_DIR})
     set(TAO_LIB_DIR ${ACE_LIB_DIR})
 
   elseif(EXISTS "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/ACE_wrappers/TAO/tao/ORB.h")
+    # Configure was invoked with the default ACE/TAO download-behavior.
     set(TAO_ROOT "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/ACE_wrappers/TAO")
     set(TAO_INCLUDE_DIR "${TAO_ROOT}")
     set(TAO_BIN_DIR ${ACE_BIN_DIR})
