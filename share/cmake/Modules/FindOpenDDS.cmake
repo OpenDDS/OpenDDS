@@ -87,8 +87,6 @@ set(_OPENDDS_FIND_MODULE_RELATIVE_ROOT "${_OPENDDS_FIND_MODULE_DIR}/../../..")
 
 include(${_OPENDDS_FIND_MODULE_DIR}/FindOpenDDS/config.cmake)
 
-# TODO: Sanitize prefix by stripping trailing slash prior to continuing.
-
 if(NOT DEFINED DDS_ROOT)
   if(EXISTS "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/include/dds/DdsDcps.idl")
     # Configure was invoked with --prefix; Note the DDS_ROOT is different.
