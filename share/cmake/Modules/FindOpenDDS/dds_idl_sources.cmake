@@ -141,6 +141,7 @@ function(opendds_target_idl_sources target)
     get_filename_component(noext_name ${input} NAME_WE)
     get_filename_component(abs_filename ${input} ABSOLUTE)
     get_filename_component(file_ext ${input} EXT)
+    get_filename_component(idl_file_dir ${abs_filename} DIRECTORY)
 
     if (_ddsidl_cmd_arg_-o)
       set(output_prefix ${_working_binary_dir}/${_ddsidl_cmd_arg_-o}/${noext_name})
@@ -199,7 +200,10 @@ function(opendds_target_idl_sources target)
 
     if (NOT _arg_SKIP_TAO_IDL)
       tao_idl_command(${target}
-        IDL_FLAGS -I${DDS_ROOT} ${_arg_TAO_IDL_FLAGS}
+        IDL_FLAGS
+          -I${DDS_ROOT}
+          -I${idl_file_dir} # The type-support IDL will include the primary IDL file
+          ${_arg_TAO_IDL_FLAGS}
         IDL_FILES ${_cur_idl_file} ${_cur_type_support_idl})
     endif()
 
