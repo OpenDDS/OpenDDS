@@ -297,17 +297,19 @@ BE_GlobalData::parse_args(long& i, char** av)
       generate_itl_ = true;
     else if (0 == ACE_OS::strcasecmp(av[i], "-GfaceTS"))
       face_ts(true);
-    else
-      {
-        INVALID_OPTION;
-      }
+    else {
+      INVALID_OPTION;
+    }
     break;
   case 'L':
     if (0 == ACE_OS::strcasecmp(av[i], "-Lface"))
       language_mapping(LANGMAP_FACE_CXX);
     else if (0 == ACE_OS::strcasecmp(av[i], "-Lspcpp"))
       language_mapping(LANGMAP_SP_CXX);
-    else {
+    else if (0 == ACE_OS::strcasecmp(av[i], "-Lc++11")) {
+      language_mapping(LANGMAP_CXX11);
+      suppress_typecode_ = true;
+    } else {
       INVALID_OPTION;
     }
     break;

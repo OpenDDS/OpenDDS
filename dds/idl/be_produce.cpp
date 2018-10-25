@@ -393,8 +393,7 @@ BE_produce()
                 BE_GlobalData::STREAM_FACETS_CPP);
   }
 
-  if (be_global->language_mapping() == BE_GlobalData::LANGMAP_FACE_CXX ||
-      be_global->language_mapping() == BE_GlobalData::LANGMAP_SP_CXX) {
+  if (be_global->language_mapping() != BE_GlobalData::LANGMAP_NONE) {
     postprocess(be_global->lang_header_name_.c_str(), be_global->lang_header_,
                 BE_GlobalData::STREAM_LANG_H);
   }

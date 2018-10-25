@@ -874,29 +874,31 @@ DataWriterImpl::set_qos(const DDS::DataWriterQos & qos)
     if (qos_ == qos)
       return DDS::RETCODE_OK;
 
-    if (!Qos_Helper::changeable(qos_, qos) && enabled_ == true) {
-      return DDS::RETCODE_IMMUTABLE_POLICY;
+    if (enabled_ == true) {
+      if (!Qos_Helper::changeable(qos_, qos)) {
+        return DDS::RETCODE_IMMUTABLE_POLICY;
 
-    } else {
-      Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
-      DDS::PublisherQos publisherQos;
-      RcHandle<PublisherImpl> publisher = this->publisher_servant_.lock();
+      } else {
+        Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
+        DDS::PublisherQos publisherQos;
+        RcHandle<PublisherImpl> publisher = this->publisher_servant_.lock();
 
-      bool status = false;
-      if (publisher) {
-        publisher->get_qos(publisherQos);
-        status
-          = disco->update_publication_qos(domain_id_,
-                                          dp_id_,
-                                          this->publication_id_,
-                                          qos,
-                                          publisherQos);
-      }
-      if (!status) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) DataWriterImpl::set_qos, ")
-                          ACE_TEXT("qos not updated. \n")),
-                         DDS::RETCODE_ERROR);
+        bool status = false;
+        if (publisher) {
+          publisher->get_qos(publisherQos);
+          status
+            = disco->update_publication_qos(domain_id_,
+                                            dp_id_,
+                                            this->publication_id_,
+                                            qos,
+                                            publisherQos);
+        }
+        if (!status) {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            ACE_TEXT("(%P|%t) DataWriterImpl::set_qos, ")
+                            ACE_TEXT("qos not updated. \n")),
+                           DDS::RETCODE_ERROR);
+        }
       }
     }
 
