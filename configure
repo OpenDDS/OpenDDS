@@ -1999,6 +1999,8 @@ sub write_cmake_file {
     # Merge the hashes together; the user-supplied %opts will override
     # the enabled-/disabled-defaults.
     my %opts_ = (%enabled_by_default, %disabled_by_default, %opts);
+    $opts_{'ace'} = $ace_src;
+    $opts_{'tao'} = $tao_src;
 
     for my $k (sort keys %opts_) {
       my $var = uc "OPENDDS_${k}" =~ s/-/_/gr;

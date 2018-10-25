@@ -35,6 +35,8 @@ macro(OPENDDS_GET_SOURCES_AND_OPTIONS
 
     if(_arg_${scope})
       foreach(src ${_arg_${scope}})
+        get_filename_component(src ${src} ABSOLUTE)
+
         if("${src}" MATCHES "\\.idl$")
           list(APPEND ${idl_prefix}_${scope} ${src})
         else()
@@ -48,6 +50,8 @@ macro(OPENDDS_GET_SOURCES_AND_OPTIONS
   set(${opendds_options} ${_arg_OPENDDS_IDL_OPTIONS})
 
   foreach(arg ${_arg_UNPARSED_ARGUMENTS})
+    get_filename_component(arg ${arg} ABSOLUTE)
+
     if(TARGET ${arg})
       list(APPEND ${libs} ${arg})
 

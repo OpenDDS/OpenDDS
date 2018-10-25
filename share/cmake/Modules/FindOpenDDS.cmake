@@ -99,7 +99,7 @@ if(NOT DEFINED DDS_ROOT)
     set(OPENDDS_LIB_DIR "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/lib")
 
   elseif(EXISTS "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/dds/DdsDcps.idl")
-    # Default to the source-tree DDS_ROOT.
+    # Use the source tree.
     set(DDS_ROOT ${_OPENDDS_FIND_MODULE_RELATIVE_ROOT})
     set(OPENDDS_INCLUDE_DIR "${DDS_ROOT}")
     set(OPENDDS_BIN_DIR "${DDS_ROOT}/bin")
@@ -122,22 +122,8 @@ if (NOT DEFINED ACE_ROOT)
     set(ACE_LIB_DIR "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/lib")
 
   elseif(OPENDDS_ACE AND EXISTS "${OPENDDS_ACE}/ace/ACE.h")
-    # Configure was invoked with --ace.
+    # Use the source tree.
     set(ACE_ROOT ${OPENDDS_ACE})
-    set(ACE_INCLUDE_DIR "${ACE_ROOT}")
-    set(ACE_BIN_DIR "${ACE_ROOT}/bin")
-    set(ACE_LIB_DIR "${ACE_ROOT}/lib")
-
-  elseif(EXISTS "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/ACE_TAO/ACE/ace/ACE.h")
-    # Configure was invoked with --ace-github-latest.
-    set(ACE_ROOT "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/ACE_TAO/ACE")
-    set(ACE_INCLUDE_DIR "${ACE_ROOT}")
-    set(ACE_BIN_DIR "${ACE_ROOT}/bin")
-    set(ACE_LIB_DIR "${ACE_ROOT}/lib")
-
-  elseif(EXISTS "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/ACE_wrappers/ace/ACE.h")
-    # Configure was invoked with the default ACE/TAO download-behavior.
-    set(ACE_ROOT "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/ACE_wrappers")
     set(ACE_INCLUDE_DIR "${ACE_ROOT}")
     set(ACE_BIN_DIR "${ACE_ROOT}/bin")
     set(ACE_LIB_DIR "${ACE_ROOT}/lib")
@@ -159,23 +145,9 @@ if (NOT DEFINED TAO_ROOT)
     set(TAO_LIB_DIR ${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/lib)
 
   elseif(OPENDDS_TAO AND EXISTS "${OPENDDS_TAO}/tao/ORB.h")
-    # Configure was invoked with --tao.
+    # Use the source tree.
     set(TAO_ROOT "${OPENDDS_TAO}")
     set(TAO_INCLUDE_DIR "${OPENDDS_TAO}")
-    set(TAO_BIN_DIR ${ACE_BIN_DIR})
-    set(TAO_LIB_DIR ${ACE_LIB_DIR})
-
-  elseif(EXISTS "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/ACE_TAO/TAO/tao/ORB.h")
-    # Configure was invoked with --ace-github-latest.
-    set(TAO_ROOT "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/ACE_TAO/TAO")
-    set(TAO_INCLUDE_DIR "${TAO_ROOT}")
-    set(TAO_BIN_DIR ${ACE_BIN_DIR})
-    set(TAO_LIB_DIR ${ACE_LIB_DIR})
-
-  elseif(EXISTS "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/ACE_wrappers/TAO/tao/ORB.h")
-    # Configure was invoked with the default ACE/TAO download-behavior.
-    set(TAO_ROOT "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/ACE_wrappers/TAO")
-    set(TAO_INCLUDE_DIR "${TAO_ROOT}")
     set(TAO_BIN_DIR ${ACE_BIN_DIR})
     set(TAO_LIB_DIR ${ACE_LIB_DIR})
 
