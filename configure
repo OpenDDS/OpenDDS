@@ -1517,6 +1517,10 @@ sub generate_workspace {
     }
   }
 
+  if ($cross_compile && $opts{'java'} && $buildEnv->{'build'} eq 'target') {
+    disable_feature(\@features, "full_jre");
+  }
+
   my $mpctype = (!$is_windows ||
                   ($cross_compile && $buildEnv->{'build'} eq 'target'))
                 ? 'gnuace' : $opts{'compiler_version'};
