@@ -502,7 +502,10 @@ if(OPENDDS_FOUND)
       list(APPEND _opendds_core_libs OpenDDS::Security)
     endif()
 
-    target_link_libraries(OpenDDS::OpenDDS INTERFACE ${_opendds_core_libs})
+    set_target_properties(OpenDDS::OpenDDS
+      PROPERTIES
+        INTERFACE_LINK_LIBRARIES "${_opendds_core_libs}")
+
   endif()
 
   include(${_OPENDDS_FIND_MODULE_DIR}/FindOpenDDS/options.cmake)

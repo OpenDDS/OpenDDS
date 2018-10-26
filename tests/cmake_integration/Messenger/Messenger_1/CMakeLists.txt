@@ -12,32 +12,35 @@ set(dst ${CMAKE_CURRENT_BINARY_DIR})
 set(all_targets publisher subscriber stack_subscriber)
 
 # Publisher
-add_executable(publisher)
+add_executable(publisher
+    ${src}/publisher.cpp
+)
 OPENDDS_TARGET_SOURCES(publisher
   PUBLIC
     ${src}/Writer.cpp
     ${src}/Writer.h
-    ${src}/publisher.cpp
     ${src}/Messenger.idl
 )
 
 # Subscriber
-add_executable(subscriber)
+add_executable(subscriber
+    ${src}/subscriber.cpp
+)
 OPENDDS_TARGET_SOURCES(subscriber
   PUBLIC
     ${src}/DataReaderListener.cpp
     ${src}/DataReaderListener.h
-    ${src}/subscriber.cpp
     ${src}/Messenger.idl
 )
 
 # Stacksubscriber
-add_executable(stack_subscriber)
+add_executable(stack_subscriber
+    ${src}/stack_subscriber.cpp
+)
 OPENDDS_TARGET_SOURCES(stack_subscriber
   PUBLIC
     ${src}/DataReaderListener.cpp
     ${src}/DataReaderListener.h
-    ${src}/stack_subscriber.cpp
     ${src}/Messenger.idl
 )
 
