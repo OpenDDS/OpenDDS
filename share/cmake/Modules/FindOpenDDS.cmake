@@ -76,37 +76,43 @@
 
 cmake_minimum_required(VERSION 3.3.2)
 
+set(_OPENDDS_FIND_MODULE_DIR ${CMAKE_CURRENT_LIST_DIR})
+
+include(${_OPENDDS_FIND_MODULE_DIR}/FindOpenDDS/config.cmake)
+
+set(_OPENDDS_RELATIVE_SOURCE_ROOT "${_OPENDDS_FIND_MODULE_DIR}/../../..")
+set(_OPENDDS_RELATIVE_PREFIX_ROOT "${_OPENDDS_FIND_MODULE_DIR}/../../..")
+
+get_filename_component(_OPENDDS_RELATIVE_SOURCE_ROOT
+  ${_OPENDDS_RELATIVE_SOURCE_ROOT} ABSOLUTE)
+
+get_filename_component(_OPENDDS_RELATIVE_PREFIX_ROOT
+  ${_OPENDDS_RELATIVE_PREFIX_ROOT} ABSOLUTE)
+
+if (OPENDDS_USE_PREFIX_PATH)
+  message(STATUS "Detected installed version of OpenDDS '${_OPENDDS_RELATIVE_PREFIX_ROOT}'")
+else()
+  message(STATUS "Detected source version of OpenDDS '${_OPENDDS_RELATIVE_SOURCE_ROOT}'")
+endif()
+
 macro(_OPENDDS_RETURN_ERR msg)
   message(FATAL_ERROR "${msg}")
   set(OPENDDS_FOUND "OpenDDS-NOTFOUND")
   return()
 endmacro()
 
-set(_OPENDDS_FIND_MODULE_DIR ${CMAKE_CURRENT_LIST_DIR})
-set(_OPENDDS_FIND_MODULE_RELATIVE_ROOT "${_OPENDDS_FIND_MODULE_DIR}/../../..")
-
-get_filename_component(_OPENDDS_FIND_MODULE_RELATIVE_ROOT
-  ${_OPENDDS_FIND_MODULE_RELATIVE_ROOT} ABSOLUTE)
-
-include(${_OPENDDS_FIND_MODULE_DIR}/FindOpenDDS/config.cmake)
-
 if(NOT DEFINED DDS_ROOT)
-  if(EXISTS "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/include/dds/DdsDcps.idl")
-    # Configure was invoked with --prefix; Note the DDS_ROOT is different.
-    set(DDS_ROOT "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/share/dds")
-    set(OPENDDS_INCLUDE_DIR "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/include")
-    set(OPENDDS_BIN_DIR "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/bin")
-    set(OPENDDS_LIB_DIR "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/lib")
+  if(OPENDDS_USE_PREFIX_PATH)
+    set(DDS_ROOT "${_OPENDDS_RELATIVE_PREFIX_ROOT}/share/dds")
+    set(OPENDDS_INCLUDE_DIR "${_OPENDDS_RELATIVE_PREFIX_ROOT}/include")
+    set(OPENDDS_BIN_DIR "${_OPENDDS_RELATIVE_PREFIX_ROOT}/bin")
+    set(OPENDDS_LIB_DIR "${_OPENDDS_RELATIVE_PREFIX_ROOT}/lib")
 
-  elseif(EXISTS "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/dds/DdsDcps.idl")
-    # Use the source tree.
-    set(DDS_ROOT ${_OPENDDS_FIND_MODULE_RELATIVE_ROOT})
+  else()
+    set(DDS_ROOT ${_OPENDDS_RELATIVE_SOURCE_ROOT})
     set(OPENDDS_INCLUDE_DIR "${DDS_ROOT}")
     set(OPENDDS_BIN_DIR "${DDS_ROOT}/bin")
     set(OPENDDS_LIB_DIR "${DDS_ROOT}/lib")
-
-  else()
-    _OPENDDS_RETURN_ERR("Failed to locate DDS_ROOT")
   endif()
 
 else()
@@ -114,15 +120,13 @@ else()
 endif()
 
 if (NOT DEFINED ACE_ROOT)
-  if(EXISTS "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/include/ace/ACE.h")
-    # Configure was invoked with --prefix; Note the ACE_ROOT is different.
-    set(ACE_ROOT "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/share/ace")
-    set(ACE_INCLUDE_DIR "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/include")
-    set(ACE_BIN_DIR "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/bin")
-    set(ACE_LIB_DIR "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/lib")
+  if(OPENDDS_USE_PREFIX_PATH)
+    set(ACE_ROOT "${_OPENDDS_RELATIVE_PREFIX_ROOT}/share/ace")
+    set(ACE_INCLUDE_DIR "${_OPENDDS_RELATIVE_PREFIX_ROOT}/include")
+    set(ACE_BIN_DIR "${_OPENDDS_RELATIVE_PREFIX_ROOT}/bin")
+    set(ACE_LIB_DIR "${_OPENDDS_RELATIVE_PREFIX_ROOT}/lib")
 
-  elseif(OPENDDS_ACE AND EXISTS "${OPENDDS_ACE}/ace/ACE.h")
-    # Use the source tree.
+  elseif(OPENDDS_ACE)
     set(ACE_ROOT ${OPENDDS_ACE})
     set(ACE_INCLUDE_DIR "${ACE_ROOT}")
     set(ACE_BIN_DIR "${ACE_ROOT}/bin")
@@ -137,15 +141,13 @@ else()
 endif()
 
 if (NOT DEFINED TAO_ROOT)
-  if(EXISTS "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/include/tao/ORB.h")
-    # Configure was invoked with --prefix; Note the TAO_ROOT is different.
-    set(TAO_ROOT "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/share/tao")
-    set(TAO_INCLUDE_DIR "${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/include")
-    set(TAO_BIN_DIR ${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/bin)
-    set(TAO_LIB_DIR ${_OPENDDS_FIND_MODULE_RELATIVE_ROOT}/lib)
+  if(OPENDDS_USE_PREFIX_PATH)
+    set(TAO_ROOT "${_OPENDDS_RELATIVE_PREFIX_ROOT}/share/tao")
+    set(TAO_INCLUDE_DIR "${_OPENDDS_RELATIVE_PREFIX_ROOT}/include")
+    set(TAO_BIN_DIR ${_OPENDDS_RELATIVE_PREFIX_ROOT}/bin)
+    set(TAO_LIB_DIR ${_OPENDDS_RELATIVE_PREFIX_ROOT}/lib)
 
-  elseif(OPENDDS_TAO AND EXISTS "${OPENDDS_TAO}/tao/ORB.h")
-    # Use the source tree.
+  elseif(OPENDDS_TAO)
     set(TAO_ROOT "${OPENDDS_TAO}")
     set(TAO_INCLUDE_DIR "${OPENDDS_TAO}")
     set(TAO_BIN_DIR ${ACE_BIN_DIR})

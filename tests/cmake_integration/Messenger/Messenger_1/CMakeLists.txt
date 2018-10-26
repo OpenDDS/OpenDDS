@@ -1,10 +1,16 @@
 # Distributed under the OpenDDS License. See accompanying LICENSE
 # file or http://www.opendds.org/license.html for details.
+#
+# To build this project follow these steps:
+#   1) mkdir build
+#   2) cd build
+#   3) cmake -D CMAKE_MODULE_PATH=$DDS_ROOT/share/cmake/Modules ..
+#   4) cmake --build .
+#
 
 project(Messenger_cmake CXX)
 cmake_minimum_required(VERSION 3.8.2)
 
-list(APPEND CMAKE_MODULE_PATH "$ENV{DDS_ROOT}/share/cmake/Modules")
 find_package(OpenDDS)
 
 set(src "${CMAKE_CURRENT_SOURCE_DIR}/..")
