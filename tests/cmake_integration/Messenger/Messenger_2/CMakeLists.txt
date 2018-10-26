@@ -2,7 +2,7 @@
 # file or http://www.opendds.org/license.html for details.
 
 project(Messenger_cmake CXX)
-cmake_minimum_required(VERSION 3.3)
+cmake_minimum_required(VERSION 3.8.2)
 
 list(APPEND CMAKE_MODULE_PATH "$ENV{DDS_ROOT}/share/cmake/Modules")
 find_package(OpenDDS)

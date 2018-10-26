@@ -74,7 +74,7 @@
 # file is then added as a dependency for the supplied target.
 #
 
-cmake_minimum_required(VERSION 3.3)
+cmake_minimum_required(VERSION 3.3.2)
 
 macro(_OPENDDS_RETURN_ERR msg)
   message(FATAL_ERROR "${msg}")
