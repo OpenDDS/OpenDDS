@@ -89,12 +89,6 @@ get_filename_component(_OPENDDS_RELATIVE_SOURCE_ROOT
 get_filename_component(_OPENDDS_RELATIVE_PREFIX_ROOT
   ${_OPENDDS_RELATIVE_PREFIX_ROOT} ABSOLUTE)
 
-if (OPENDDS_USE_PREFIX_PATH)
-  message(STATUS "Detected installed version of OpenDDS '${_OPENDDS_RELATIVE_PREFIX_ROOT}'")
-else()
-  message(STATUS "Detected source version of OpenDDS '${_OPENDDS_RELATIVE_SOURCE_ROOT}'")
-endif()
-
 macro(_OPENDDS_RETURN_ERR msg)
   message(FATAL_ERROR "${msg}")
   set(OPENDDS_FOUND "OpenDDS-NOTFOUND")
