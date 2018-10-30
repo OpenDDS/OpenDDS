@@ -156,4 +156,10 @@ OpenDDS::DCPS::TransportInst::set_port_in_addr_string(OPENDDS_STRING& addr_str, 
   addr_str = result;
 }
 
+OpenDDS::ICE::Endpoint*
+OpenDDS::DCPS::TransportInst::get_ice_endpoint()
+{
+  return impl()->get_ice_endpoint();
+}
+
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

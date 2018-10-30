@@ -82,8 +82,8 @@ public:
   virtual void release_instance_i(DDS::InstanceHandle_t) {}
   virtual void dds_demarshal(const OpenDDS::DCPS::ReceivedDataSample&,
                              OpenDDS::DCPS::SubscriptionInstance_rch &,
-                             bool &,
-                             bool &,
+                             bool&,
+                             bool&,
                              OpenDDS::DCPS::MarshalingType) {}
   virtual void dec_ref_data_element(OpenDDS::DCPS::ReceivedDataElement *) {}
   virtual void delete_instance_map (void *) {}

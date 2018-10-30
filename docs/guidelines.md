@@ -302,3 +302,7 @@ If not it will turn into a link to that object.
 
 For more information, see [the Doxygen manual](http://www.doxygen.nl/manual/).
 
+### Preprocessor Macros
+
+* Use `#ifdef MACRO` to test if `MACRO` is defined.
+* Use `#ifndef MACRO` to test if `MACRO` is not defined.

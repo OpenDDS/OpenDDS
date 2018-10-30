@@ -463,6 +463,7 @@ public:
  PublicationInstance_rch get_handle_instance(
    DDS::InstanceHandle_t handle);
 
+ virtual ICE::Endpoint* get_ice_endpoint();
 
 protected:
 

@@ -51,6 +51,8 @@ public:
       return received_;
     }
 
+  OpenDDS::ICE::Endpoint* get_ice_endpoint() { return 0; }
+
 private:
   DiscReceivedCalls received_;
 };

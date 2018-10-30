@@ -29,6 +29,11 @@ ACE_END_VERSIONED_NAMESPACE_DECL
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
+
+namespace ICE {
+  class Endpoint;
+}
+
 namespace DCPS {
 
 /**
@@ -105,6 +110,8 @@ public:
   /// Populate a transport locator sequence.  Return the number of "locators."
   virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info) const = 0;
 
+  ICE::Endpoint* get_ice_endpoint();
+
 protected:
 
   TransportInst(const char* type,
@@ -126,7 +133,9 @@ private:
   void shutdown();
 
   friend class TransportClient;
+ protected:
   TransportImpl* impl();
+ private:
   virtual TransportImpl_rch new_impl() = 0;
 
   const OPENDDS_STRING name_;
