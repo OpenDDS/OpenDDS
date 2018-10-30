@@ -4,7 +4,7 @@
 # To build this project follow these steps:
 #   1) mkdir build
 #   2) cd build
-#   3) cmake -D CMAKE_MODULE_PATH=$DDS_ROOT/share/cmake/Modules ..
+#   3) cmake -DCMAKE_PREFIX_PATH=$DDS_ROOT ..
 #   4) cmake --build .
 #
 

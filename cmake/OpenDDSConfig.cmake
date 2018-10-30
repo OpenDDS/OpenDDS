@@ -2,12 +2,12 @@
 # file or http://www.opendds.org/license.html for details.
 
 #.rst:
-# FindOpenDDS
+# OpenDDS Package
 # -----------
 #
 # Finds OpenDDS include dirs and libraries
 #
-# This module defines the following variables::
+# This package defines the following variables::
 #
 # OPENDDS_FOUND - True if OpenDDS (and all primary dependencies) were found.
 # OPENDDS_INCLUDE_DIRS - Primary include directories used by OpenDDS.
@@ -76,12 +76,12 @@
 
 cmake_minimum_required(VERSION 3.3.2)
 
-set(_OPENDDS_FIND_MODULE_DIR ${CMAKE_CURRENT_LIST_DIR})
+set(_OPENDDS_PACKAGE_DIR ${CMAKE_CURRENT_LIST_DIR})
 
-include(${_OPENDDS_FIND_MODULE_DIR}/FindOpenDDS/config.cmake)
+include(${_OPENDDS_PACKAGE_DIR}/OpenDDS/config.cmake)
 
-set(_OPENDDS_RELATIVE_SOURCE_ROOT "${_OPENDDS_FIND_MODULE_DIR}/../../..")
-set(_OPENDDS_RELATIVE_PREFIX_ROOT "${_OPENDDS_FIND_MODULE_DIR}/../../..")
+set(_OPENDDS_RELATIVE_SOURCE_ROOT "${_OPENDDS_PACKAGE_DIR}/..")
+set(_OPENDDS_RELATIVE_PREFIX_ROOT "${_OPENDDS_PACKAGE_DIR}/../..")
 
 get_filename_component(_OPENDDS_RELATIVE_SOURCE_ROOT
   ${_OPENDDS_RELATIVE_SOURCE_ROOT} ABSOLUTE)
@@ -530,8 +530,8 @@ if(OPENDDS_FOUND)
 
   endif()
 
-  include(${_OPENDDS_FIND_MODULE_DIR}/FindOpenDDS/options.cmake)
-  include(${_OPENDDS_FIND_MODULE_DIR}/FindOpenDDS/api_macros.cmake)
+  include(${_OPENDDS_PACKAGE_DIR}/OpenDDS/options.cmake)
+  include(${_OPENDDS_PACKAGE_DIR}/OpenDDS/api_macros.cmake)
 
   # Summary information
   message(STATUS "Added the following targets to OPENDDS_LIBRARIES:")

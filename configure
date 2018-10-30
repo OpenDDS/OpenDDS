@@ -1949,10 +1949,10 @@ if ($is_windows) {
 sub write_cmake_file {
   my %buildEnv = %{shift()};
   my $dir = shift;
-  my $module_dir = $dir . '/share/cmake/Modules';
+  my $module_dir = $dir . '/cmake/OpenDDS';
 
   make_path($module_dir) if ! -d $module_dir;
-  my $CM = backup_and_open($module_dir . '/FindOpenDDS/config.cmake');
+  my $CM = backup_and_open($module_dir . '/config.cmake');
 
   sub whack_to_slash {
     my $s = shift;
