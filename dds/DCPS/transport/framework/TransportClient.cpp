@@ -687,6 +687,21 @@ TransportClient::unregister_for_writer(const RepoId& participant,
   }
 }
 
+ICE::Endpoint*
+TransportClient::get_ice_endpoint()
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, lock_, 0);
+  for (ImplsType::iterator pos = impls_.begin(), limit = impls_.end();
+       pos != limit;
+       ++pos) {
+    ICE::Endpoint* endpoint = (*pos)->get_ice_endpoint();
+    if (endpoint) { return endpoint; }
+  }
+
+  // TODO(jrw972):  This should return a set.  How would the semantics change?
+  return 0;
+}
+
 bool
 TransportClient::send_response(const RepoId& peer,
                                const DataSampleHeader& header,

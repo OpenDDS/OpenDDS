@@ -11,6 +11,8 @@
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/DiscoveryListener.h"
 #include "dds/DCPS/RcObject.h"
+#include "dds/DCPS/ICE/Ice.h"
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
@@ -60,6 +62,7 @@ public:
                                      const RepoId& /*writerid*/,
                                      const RepoId& /*readerid*/) { }
 
+  virtual ICE::Endpoint* get_ice_endpoint() = 0;
 };
 
 } // namespace DCPS

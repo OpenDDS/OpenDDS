@@ -39,6 +39,8 @@
 #include "dds/DCPS/security/framework/SecurityConfig_rch.h"
 #endif
 
+#include "dds/DCPS/ICE/Ice.h"
+
 class DDS_TEST;
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -98,13 +100,11 @@ public:
   void add_locator(const RepoId& remote_id, const ACE_INET_Addr& address,
                    bool requires_inline_qos);
 
-  /// Given a 'local_id' of a publication or subscription, populate the set of
-  /// 'addrs' with the network addresses of any remote peers (or if 'local_id'
-  /// is GUID_UNKNOWN, all known addresses).
-  void get_locators(const RepoId& local_id,
-                    OPENDDS_SET(ACE_INET_Addr)& addrs) const;
-
-  ACE_INET_Addr get_locator(const RepoId& remote_id) const;
+  /// Given a 'local' id and a 'remote' id of a publication or
+  /// subscription, return the set of addresses of the remote peers.
+  OPENDDS_SET(ACE_INET_Addr) get_addresses(RepoId const & local, RepoId const & remote) const;
+  /// Given a 'local' id, return the set of address for all remote peers.
+  OPENDDS_SET(ACE_INET_Addr) get_addresses(RepoId const & local) const;
 
   void associated(const RepoId& local, const RepoId& remote,
                   bool local_reliable, bool remote_reliable,
@@ -131,6 +131,8 @@ public:
   virtual void pre_stop_i();
 
   virtual void send_final_acks(const RepoId& readerid);
+
+  virtual ICE::Endpoint* get_ice_endpoint() const;
 
 #ifdef OPENDDS_SECURITY
   Security::SecurityConfig_rch security_config() const
@@ -326,7 +328,7 @@ private:
                                   const DisjointSequence& gaps,
                                   bool durable = false);
 
-  void send_nackfrag_replies(RtpsWriter& writer, DisjointSequence& gaps,
+  void send_nackfrag_replies(RtpsWriterMap::iterator rw_iter, DisjointSequence& gaps,
                              OPENDDS_SET(ACE_INET_Addr)& gap_recipients);
 
   template<typename T, typename FN>
@@ -546,6 +548,7 @@ private:
                           GUID_tKeyLessThan)::const_iterator PeerHandlesCIter;
 #endif
 
+  void get_addresses_i(RepoId const & local, RepoId const & remote, OPENDDS_SET(ACE_INET_Addr) & addresses) const;
 };
 
 } // namespace DCPS

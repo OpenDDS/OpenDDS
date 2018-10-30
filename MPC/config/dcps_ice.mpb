@@ -1,0 +1,4 @@
+project: dcps, openssl {
+  after += OpenDDS_Ice
+  libs  += OpenDDS_Ice
+}

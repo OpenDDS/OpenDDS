@@ -41,6 +41,7 @@ RtpsUdpInst::RtpsUdpInst(const OPENDDS_STRING& name)
   , handshake_timeout_(30) // default syn_timeout in OpenDDS_Multicast
   , durable_data_timeout_(60)
   , opendds_discovery_guid_(GUID_UNKNOWN)
+  , use_ice_(false)
 {
 }
 
@@ -104,6 +105,16 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
     ACE_INET_Addr addr(rtps_relay_address_s.c_str());
     rtps_relay_address(addr);
   }
+
+  ACE_TString stun_server_address_s;
+  GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("DataStunServerAddress"),
+                           stun_server_address_s);
+  if (!stun_server_address_s.is_empty()) {
+    ACE_INET_Addr addr(stun_server_address_s.c_str());
+    stun_server_address(addr);
+  }
+
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("UseIce"), use_ice_, bool);
 
   return 0;
 }
@@ -206,6 +217,30 @@ RtpsUdpInst::get_blob(const OpenDDS::DCPS::TransportLocatorSeq& trans_info) cons
   }
 
   return 0;
+}
+
+ICE::AddressListType
+RtpsUdpInst::host_addresses() const {
+  ICE::AddressListType addresses;
+
+  //if local_address_string is empty, or only the port has been set
+  //need to get interface addresses to populate into the locator
+  if (this->local_address_string().empty() ||
+      this->local_address_string().rfind(':') == 0) {
+    if (TheServiceParticipant->default_address ().empty ()) {
+      get_interface_addrs(addresses);
+    } else {
+      addresses.push_back (ACE_INET_Addr (static_cast<u_short> (0), TheServiceParticipant->default_address ().c_str ()));
+    }
+  } else {
+    addresses.push_back(this->local_address());
+  }
+
+  for (ICE::AddressListType::iterator pos = addresses.begin(), limit = addresses.end(); pos != limit; ++pos) {
+    pos->set_port_number(this->local_address().get_port_number());
+  }
+
+  return addresses;
 }
 
 } // namespace DCPS

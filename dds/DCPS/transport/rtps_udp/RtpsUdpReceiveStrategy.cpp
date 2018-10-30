@@ -21,7 +21,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link, const GuidPrefix_t& local_prefix)
+  RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link, const GuidPrefix_t& local_prefix)
   : link_(link)
   , last_received_()
   , recvd_sample_(0)
@@ -42,10 +42,57 @@ RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
 }
 
 ssize_t
+RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
+                                             int n,
+                                             ACE_SOCK_Dgram const & socket,
+                                             ACE_INET_Addr & remote_address,
+                                             ICE::Endpoint * endpoint,
+                                             bool & stop)
+{
+  ACE_INET_Addr local_address;
+  const ssize_t ret = socket.recv(iov, n, remote_address, 0, &local_address);
+
+  if (ret == -1) {
+    return ret;
+  }
+
+  if (endpoint && n > 0 && ret > 0 && iov[0].iov_len >= 4 && memcmp(iov[0].iov_base, "RTPS", 4) != 0) {
+    // Assume STUN
+    stop = true;
+    size_t bytes = ret;
+    size_t block_size = std::min(bytes, static_cast<size_t>(iov[0].iov_len));
+    ACE_Message_Block* head = new ACE_Message_Block(static_cast<const char*>(iov[0].iov_base), block_size);
+    head->length(block_size);
+    bytes -= block_size;
+
+    ACE_Message_Block* tail = head;
+    for (int i = 1; i < n && bytes != 0; ++i) {
+      block_size = std::min(bytes, static_cast<size_t>(iov[i].iov_len));
+      ACE_Message_Block* mb = new ACE_Message_Block(static_cast<const char*>(iov[i].iov_base), block_size);
+      mb->length(block_size);
+      tail->cont(mb);
+      tail = mb;
+      bytes -= block_size;
+    }
+
+    DCPS::Serializer serializer(head, true);
+    STUN::Message message;
+    message.block = head;
+    if (serializer >> message) {
+      ICE::Agent::instance()->receive(endpoint, local_address, remote_address, message);
+    }
+    head->release();
+  }
+
+  return ret;
+}
+
+ssize_t
 RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
                                       int n,
                                       ACE_INET_Addr& remote_address,
-                                      ACE_HANDLE fd)
+                                      ACE_HANDLE fd,
+                                      bool& stop)
 {
   const ACE_SOCK_Dgram& socket =
     (fd == link_->unicast_socket().get_handle())
@@ -63,9 +110,10 @@ RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
   }
   const ssize_t ret = (scatter < 0) ? scatter : (iter - buffer);
 #else
-  const ssize_t ret = socket.recv(iov, n, remote_address);
+  const ssize_t ret = receive_bytes_helper(iov, n, socket, remote_address, link_->get_ice_endpoint(), stop);
 #endif
   remote_address_ = remote_address;
+
   return ret;
 }
 

@@ -3275,6 +3275,12 @@ DataReaderImpl::unregister_for_writer(const RepoId& participant,
   TransportClient::unregister_for_writer(participant, readerid, writerid);
 }
 
+ICE::Endpoint*
+DataReaderImpl::get_ice_endpoint()
+{
+  return TransportClient::get_ice_endpoint();
+}
+
 void DataReaderImpl::accept_sample_processing(const SubscriptionInstance_rch& instance, const DataSampleHeader& header, bool is_new_instance)
 {
   bool accepted = true;

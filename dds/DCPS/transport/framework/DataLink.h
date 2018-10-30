@@ -24,6 +24,7 @@
 #include "TransportSendListener.h"
 #include "TransportReceiveListener.h"
 #include "dds/DCPS/transport/framework/QueueTaskBase_T.h"
+#include "dds/DCPS/ICE/Ice.h"
 
 #include "ace/Event_Handler.h"
 #include "ace/Synch_Traits.h"
@@ -254,6 +255,8 @@ public:
   void set_scheduling_release(bool scheduling_release);
 
   virtual void send_final_acks (const RepoId& readerid);
+
+  virtual ICE::Endpoint* get_ice_endpoint() const { return 0; }
 
 protected:
 

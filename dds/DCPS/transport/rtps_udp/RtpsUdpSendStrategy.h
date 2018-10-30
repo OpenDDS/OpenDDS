@@ -18,6 +18,8 @@
 
 #include "dds/DCPS/RTPS/MessageTypes.h"
 
+#include "dds/DCPS/ICE/Stun.h"
+
 #include "ace/INET_Addr.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL

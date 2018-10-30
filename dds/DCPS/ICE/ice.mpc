@@ -1,0 +1,11 @@
+project(OpenDDS_Ice): dcpslib, openssl, install {
+  sharedname = OpenDDS_Ice
+  dynamicflags = OPENDDS_ICE_BUILD_DLL
+
+  IDL_Files {
+  }
+
+  specific {
+    install_dir = dds/DCPS/ICE
+  }
+}

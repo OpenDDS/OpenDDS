@@ -98,16 +98,26 @@ handle_to_octets(DDS::Security::NativeCryptoHandle handle)
   return handleOctets;
 }
 
-struct DiscoveredWriterData_SecurityWrapper {
+struct DiscoveredPublication_SecurityWrapper {
   DCPS::DiscoveredWriterData data;
   DDS::Security::EndpointSecurityInfo security_info;
   DDS::Security::DataTags data_tags;
+  bool have_ice_agent_info;
+  ICE::AgentInfo ice_agent_info;
+
+  DiscoveredPublication_SecurityWrapper()
+    : have_ice_agent_info(false) {}
 };
 
-struct DiscoveredReaderData_SecurityWrapper {
+struct DiscoveredSubscription_SecurityWrapper {
   DCPS::DiscoveredReaderData data;
   DDS::Security::EndpointSecurityInfo security_info;
   DDS::Security::DataTags data_tags;
+  bool have_ice_agent_info;
+  ICE::AgentInfo ice_agent_info;
+
+  DiscoveredSubscription_SecurityWrapper()
+    : have_ice_agent_info(false) {}
 };
 
 }
