@@ -308,8 +308,32 @@ set(_dds_lib_hints  ${OPENDDS_LIB_DIR})
 set(_ace_lib_hints  ${ACE_LIB_DIR})
 set(_tao_lib_hints  ${TAO_LIB_DIR})
 
-set(_suffix_RELEASE "")
-set(_suffix_DEBUG d)
+macro(opendds_vs_force_static)
+  # See https://gitlab.kitware.com/cmake/community/wikis/FAQ#dynamic-replace
+  foreach(flag_var
+          CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
+          CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
+    if(${flag_var} MATCHES "/MD")
+      string(REGEX REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}")
+    endif()
+  endforeach()
+endmacro()
+
+if(OPENDDS_STATIC)
+  if(MSVC)
+    list(APPEND ACE_DEPS iphlpapi)
+
+    opendds_vs_force_static()
+  endif()
+
+  set(_suffix_RELEASE s)
+  set(_suffix_DEBUG sd)
+
+else()
+  set(_suffix_RELEASE "")
+  set(_suffix_DEBUG d)
+endif()
+
 foreach(_cfg  RELEASE  DEBUG)
   set(_sfx ${_suffix_${_cfg}})
 
