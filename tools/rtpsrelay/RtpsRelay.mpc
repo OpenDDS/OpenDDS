@@ -1,0 +1,51 @@
+//
+//
+
+project(RtpsRelay_Idl): dcps, opendds_cxx11 {
+  dcps_ts_flags += -Wb,export_include=RtpsRelay_export.h \
+                   -Wb,export_macro=RtpsRelay_Export
+  idlflags      += -Wb,export_macro=RtpsRelay_Export
+  dynamicflags  += RTPSRELAY_BUILD_DLL
+  libout = .
+
+  TypeSupport_Files {
+    Relay.idl
+  }
+
+  IDL_Files {
+    RelayTypeSupport.idl
+  }
+
+  // Prevent blanket include of all C++ sources
+  Source_Files {
+  }
+}
+
+project(RtpsRelay_RtpsRelay): dcps_rtps {
+  requires += no_opendds_safety_profile
+  avoids += no_cxx11
+  exename = RtpsRelay
+  after += RtpsRelay_Idl
+  libs += RtpsRelay_Idl
+
+  Source_Files {
+    GroupTable.cpp
+    RelayHandler.cpp
+    RoutingTable.cpp
+    RtpsRelay.cpp
+    StatisticsHandler.cpp
+  }
+
+  Header_Files {
+    GroupTable.h
+    RelayHandler.h
+    RoutingTable.h
+    StatisticsHandler.h
+  }
+
+  // Prevent blanket include of all IDL files
+  IDL_Files {
+  }
+}
+
+

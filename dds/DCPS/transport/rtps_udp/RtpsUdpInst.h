@@ -69,6 +69,9 @@ public:
     set_port_in_addr_string(local_address_config_str_, port_number);
   }
 
+  void rtps_relay_address(const ACE_INET_Addr& address) { rtps_relay_address_ = address; }
+  ACE_INET_Addr rtps_relay_address() const { return rtps_relay_address_; }
+
 private:
   friend class RtpsUdpType;
   template <typename T, typename U>
@@ -84,6 +87,7 @@ private:
 
   ACE_INET_Addr local_address_;
   OPENDDS_STRING local_address_config_str_;
+  ACE_INET_Addr rtps_relay_address_;
 };
 
 } // namespace DCPS

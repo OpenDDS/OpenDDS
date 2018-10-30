@@ -375,6 +375,7 @@ private:
   void check_heartbeats();
   void send_heartbeats_manual(const TransportSendControlElement* tsce);
   void send_heartbeat_replies();
+  void send_relay_beacon();
 
   CORBA::Long best_effort_heartbeat_count_;
 
@@ -451,7 +452,7 @@ private:
 
   };
 
-  RcHandle<HeartBeat> heartbeat_, heartbeatchecker_;
+  RcHandle<HeartBeat> heartbeat_, heartbeatchecker_, relay_beacon_;
 
   /// Data structure representing an "interesting" remote entity for static discovery.
   struct InterestingRemote {

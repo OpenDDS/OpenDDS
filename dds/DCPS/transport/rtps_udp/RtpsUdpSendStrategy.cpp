@@ -84,6 +84,9 @@ ssize_t
 RtpsUdpSendStrategy::send_bytes_i_helper(const iovec iov[], int n)
 {
   if (override_single_dest_) {
+    if (link_->config().rtps_relay_address() != ACE_INET_Addr()) {
+      send_single_i(iov, n, link_->config().rtps_relay_address());
+    }
     return send_single_i(iov, n, *override_single_dest_);
   }
 
@@ -162,6 +165,9 @@ RtpsUdpSendStrategy::send_rtps_control(ACE_Message_Block& submessages,
 
   iovec iov[MAX_SEND_BLOCKS];
   const int num_blocks = mb_to_iov(use_mb, iov);
+  if (link_->config().rtps_relay_address() != ACE_INET_Addr()) {
+    send_single_i(iov, num_blocks, link_->config().rtps_relay_address());
+  }
   const ssize_t result = send_single_i(iov, num_blocks, addr);
   if (result < 0) {
     const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
@@ -200,6 +206,9 @@ ssize_t
 RtpsUdpSendStrategy::send_multi_i(const iovec iov[], int n,
                                   const OPENDDS_SET(ACE_INET_Addr)& addrs)
 {
+  if (link_->config().rtps_relay_address() != ACE_INET_Addr()) {
+    send_single_i(iov, n, link_->config().rtps_relay_address());
+  }
   ssize_t result = -1;
   typedef OPENDDS_SET(ACE_INET_Addr)::const_iterator iter_t;
   for (iter_t iter = addrs.begin(); iter != addrs.end(); ++iter) {

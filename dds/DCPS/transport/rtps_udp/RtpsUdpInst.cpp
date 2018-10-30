@@ -96,6 +96,15 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
                         heartbeat_response_delay_);
   GET_CONFIG_TIME_VALUE(cf, sect, ACE_TEXT("handshake_timeout"),
                         handshake_timeout_);
+
+  ACE_TString rtps_relay_address_s;
+  GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("DataRtpsRelayAddress"),
+                           rtps_relay_address_s);
+  if (!rtps_relay_address_s.is_empty()) {
+    ACE_INET_Addr addr(rtps_relay_address_s.c_str());
+    rtps_relay_address(addr);
+  }
+
   return 0;
 }
 

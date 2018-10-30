@@ -1,0 +1,10 @@
+/RtpsRelay
+.obj
+.depend.*
+GNUMakefile*
+*~
+README.html
+RelayC.*
+RelayS.*
+RelayTypeSupport*
+RtpsRelay.dSYM

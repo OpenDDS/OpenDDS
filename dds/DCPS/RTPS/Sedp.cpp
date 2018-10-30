@@ -377,6 +377,13 @@ Sedp::init(const RepoId& guid,
   return DDS::RETCODE_OK;
 }
 
+void
+Sedp::rtps_relay_address(const ACE_INET_Addr& address) {
+  DCPS::RtpsUdpInst_rch rtps_inst =
+    DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
+  rtps_inst->rtps_relay_address(address);
+}
+
 #ifdef OPENDDS_SECURITY
 DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle */,
                                       DDS::Security::PermissionsHandle perm_handle,
