@@ -319,19 +319,21 @@ macro(opendds_vs_force_static)
   endforeach()
 endmacro()
 
+set(_suffix_RELEASE "")
+set(_suffix_DEBUG d)
+
 if(OPENDDS_STATIC)
   if(MSVC)
     list(APPEND ACE_DEPS iphlpapi)
 
     opendds_vs_force_static()
+
+    set(_suffix_RELEASE s${_suffix_RELEASE})
+    set(_suffix_DEBUG s${_suffix_DEBUG})
+
+  else()
+    list(APPEND ACE_DEPS pthread rt dl)
   endif()
-
-  set(_suffix_RELEASE s)
-  set(_suffix_DEBUG sd)
-
-else()
-  set(_suffix_RELEASE "")
-  set(_suffix_DEBUG d)
 endif()
 
 foreach(_cfg  RELEASE  DEBUG)
