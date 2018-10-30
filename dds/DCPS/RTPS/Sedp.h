@@ -147,6 +147,7 @@ public:
   static const bool host_is_bigendian_;
 private:
   Spdp& spdp_;
+  OPENDDS_STRING rtps_relay_data_;
 
 #ifdef OPENDDS_SECURITY
   DDS::Security::ParticipantSecurityAttributes participant_sec_attr_;

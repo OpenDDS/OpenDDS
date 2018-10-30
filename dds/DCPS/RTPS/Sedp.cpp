@@ -374,6 +374,8 @@ Sedp::init(const RepoId& guid,
   dcps_participant_secure_reader_->enable_transport_using_config(reliability, durability, transport_cfg);
 #endif
 
+  rtps_relay_data_ = disco.rtps_relay_data();
+
   return DDS::RETCODE_OK;
 }
 
@@ -3307,6 +3309,18 @@ Sedp::write_publication_data_unsecure(
       result = DDS::RETCODE_ERROR;
     }
     if (DDS::RETCODE_OK == result) {
+      if (!rtps_relay_data_.empty()) {
+        ACE_INET_Addr relay(rtps_relay_data_.c_str());
+        for (size_t idx = 0, count = plist.length(); idx != count; ++idx) {
+          RTPS::Parameter& parameter = plist[idx];
+          if (parameter._d() == RTPS::PID_UNICAST_LOCATOR) {
+            DCPS::Locator_t& locator = parameter.locator();
+            locator.kind = address_to_kind(relay);
+            locator.port = relay.get_port_number();
+            RTPS::address_to_bytes(locator.address, relay);
+          }
+        }
+      }
       result = publications_writer_.write_parameter_list(plist, reader, lp.sequence_);
     }
   } else if (DCPS::DCPS_debug_level > 3) {
@@ -3402,6 +3416,18 @@ Sedp::write_subscription_data_unsecure(
       result = DDS::RETCODE_ERROR;
     }
     if (DDS::RETCODE_OK == result) {
+      if (!rtps_relay_data_.empty()) {
+        ACE_INET_Addr relay(rtps_relay_data_.c_str());
+        for (size_t idx = 0, count = plist.length(); idx != count; ++idx) {
+          RTPS::Parameter& parameter = plist[idx];
+          if (parameter._d() == RTPS::PID_UNICAST_LOCATOR) {
+            DCPS::Locator_t& locator = parameter.locator();
+            locator.kind = address_to_kind(relay);
+            locator.port = relay.get_port_number();
+            RTPS::address_to_bytes(locator.address, relay);
+          }
+        }
+      }
       result = subscriptions_writer_.write_parameter_list(plist, reader, ls.sequence_);
     }
   } else if (DCPS::DCPS_debug_level > 3) {

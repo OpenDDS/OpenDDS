@@ -100,6 +100,8 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
       OPENDDS_STRING default_multicast_group = "239.255.0.1" /*RTPS v2.1 9.6.1.4.1*/;
       OPENDDS_STRING mi, sla, gi;
       OPENDDS_STRING spdpaddr;
+      OPENDDS_STRING rtps_relay_sedp;
+      OPENDDS_STRING rtps_relay_data;
       bool has_resend = false, has_pb = false, has_dg = false, has_pg = false,
         has_d0 = false, has_d1 = false, has_dx = false, has_sm = false,
         has_ttl = false, sm = false;
@@ -228,6 +230,12 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
             spdp_send_addrs.push_back(value.substr(i, (n == OPENDDS_STRING::npos) ? n : n - i));
             i = value.find(',', i);
           } while (i++ != OPENDDS_STRING::npos); // skip past comma if there is one
+        } else if (name == "RtpsRelaySpdp") {
+          spdp_send_addrs.push_back(it->second);
+        } else if (name == "RtpsRelaySedp") {
+          rtps_relay_sedp = it->second;
+        } else if (name == "RtpsRelayData") {
+          rtps_relay_data = it->second;
         } else {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
@@ -250,6 +258,8 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
       discovery->multicast_interface(mi);
       discovery->default_multicast_group(default_multicast_group);
       discovery->spdp_send_addrs().swap(spdp_send_addrs);
+      discovery->rtps_relay_sedp(rtps_relay_sedp);
+      discovery->rtps_relay_data(rtps_relay_data);
       discovery->sedp_local_address(sla);
       discovery->guid_interface(gi);
       discovery->spdp_local_address(spdpaddr);

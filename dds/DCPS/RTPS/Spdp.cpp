@@ -121,6 +121,17 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
   // Append metatraffic unicast locator
   sedp_.unicast_locators(sedp_unicast_);
 
+  if (!disco->rtps_relay_sedp().empty()) {
+    // CORBA::ULong idx = sedp_unicast_.length();
+    // sedp_unicast_.length(idx + 1);
+    sedp_unicast_.length(1);
+    CORBA::ULong idx = 0;
+    ACE_INET_Addr relay(disco->rtps_relay_sedp().c_str());
+    sedp_unicast_[idx].kind = address_to_kind(relay);
+    sedp_unicast_[idx].port = relay.get_port_number();
+    RTPS::address_to_bytes(sedp_unicast_[idx].address, relay);
+  }
+
   if (disco->sedp_multicast()) { // Append metatraffic multicast locator
     const ACE_INET_Addr& mc_addr = sedp_.multicast_group();
     DCPS::Locator_t mc_locator;

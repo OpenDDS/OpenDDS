@@ -140,6 +140,17 @@ public:
   void guid_interface(const OPENDDS_STRING& gi) {
     guid_interface_ = gi;
   }
+
+  OPENDDS_STRING rtps_relay_sedp() const { return rtps_relay_sedp_; }
+  void rtps_relay_sedp(const OPENDDS_STRING& rrs) {
+    rtps_relay_sedp_ = rrs;
+  }
+
+  OPENDDS_STRING rtps_relay_data() const { return rtps_relay_data_; }
+  void rtps_relay_data(const OPENDDS_STRING& rrd) {
+    rtps_relay_data_ = rrd;
+  }
+
 private:
   ACE_Time_Value resend_period_;
   u_short pb_, dg_, pg_, d0_, d1_, dx_;
@@ -149,6 +160,8 @@ private:
   OPENDDS_STRING default_multicast_group_;  /// FUTURE: handle > 1 group.
   OPENDDS_STRING guid_interface_;
   AddrVec spdp_send_addrs_;
+  OPENDDS_STRING rtps_relay_sedp_;
+  OPENDDS_STRING rtps_relay_data_;
 
   /// Guids will be unique within this RTPS configuration
   GuidGenerator guid_gen_;

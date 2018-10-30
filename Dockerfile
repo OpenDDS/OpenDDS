@@ -11,8 +11,10 @@ RUN apt-get update && apt-get install -y \
 
 ADD . /opt/OpenDDS
 
+RUN rm -rf /opt/OpenDDS/ACE_wrappers
+
 RUN cd /opt/OpenDDS && \
-    ./configure --prefix=/usr/local --no-tests --security && \
+    ./configure --prefix=/usr/local --doc_group --std=c++11 --no-tests --security && \
     make && \
     make install && \
     cp -a /opt/OpenDDS/ACE_wrappers/MPC /usr/local/share/ace/MPC
