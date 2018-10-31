@@ -75,7 +75,7 @@ jobs:
         ConfigOpts: --no-inline --no-debug --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile --security
         PackageDeps: libxerces-c-dev libssl-dev cmake
       Clang:
-        RepoDep: ppa:llvm-toolchain-trusty-7
+        RepoDep: 'ppa:llvm-toolchain-trusty-7'
         ConfigOpts: --no-inline --compiler=clang++-7
         PackageDeps: clang++-7
 
