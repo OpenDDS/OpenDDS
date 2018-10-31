@@ -75,11 +75,15 @@ jobs:
         ConfigOpts: --no-inline --no-debug --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile --security
         PackageDeps: libxerces-c-dev libssl-dev cmake
       Clang:
+        RepoDep: ppa:llvm-toolchain-trusty-7
         ConfigOpts: --no-inline --compiler=clang++-7
         PackageDeps: clang++-7
 
   steps:
-  - script: sudo apt-get --yes update && sudo apt-get --yes install
+  - script: |
+      sudo add-apt-repository $(RepoDep) -y
+      condition: and(succeeded(), ne(variables['RepoDep'], ''))
+    displayName: install optional repositories
   - script: |
       sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
       sudo apt-get --yes update
