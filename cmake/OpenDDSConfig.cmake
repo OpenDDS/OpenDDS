@@ -76,84 +76,7 @@
 
 cmake_minimum_required(VERSION 3.3.2)
 
-set(_OPENDDS_PACKAGE_DIR ${CMAKE_CURRENT_LIST_DIR})
-
-include(${_OPENDDS_PACKAGE_DIR}/OpenDDS/config.cmake)
-
-set(_OPENDDS_RELATIVE_SOURCE_ROOT "${_OPENDDS_PACKAGE_DIR}/..")
-set(_OPENDDS_RELATIVE_PREFIX_ROOT "${_OPENDDS_PACKAGE_DIR}/../..")
-
-get_filename_component(_OPENDDS_RELATIVE_SOURCE_ROOT
-  ${_OPENDDS_RELATIVE_SOURCE_ROOT} ABSOLUTE)
-
-get_filename_component(_OPENDDS_RELATIVE_PREFIX_ROOT
-  ${_OPENDDS_RELATIVE_PREFIX_ROOT} ABSOLUTE)
-
-macro(_OPENDDS_RETURN_ERR msg)
-  message(FATAL_ERROR "${msg}")
-  set(OPENDDS_FOUND "OpenDDS-NOTFOUND")
-  return()
-endmacro()
-
-if(NOT DEFINED DDS_ROOT)
-  if(OPENDDS_USE_PREFIX_PATH)
-    set(DDS_ROOT "${_OPENDDS_RELATIVE_PREFIX_ROOT}/share/dds")
-    set(OPENDDS_INCLUDE_DIR "${_OPENDDS_RELATIVE_PREFIX_ROOT}/include")
-    set(OPENDDS_BIN_DIR "${_OPENDDS_RELATIVE_PREFIX_ROOT}/bin")
-    set(OPENDDS_LIB_DIR "${_OPENDDS_RELATIVE_PREFIX_ROOT}/lib")
-
-  else()
-    set(DDS_ROOT ${_OPENDDS_RELATIVE_SOURCE_ROOT})
-    set(OPENDDS_INCLUDE_DIR "${DDS_ROOT}")
-    set(OPENDDS_BIN_DIR "${DDS_ROOT}/bin")
-    set(OPENDDS_LIB_DIR "${DDS_ROOT}/lib")
-  endif()
-
-else()
-  _OPENDDS_RETURN_ERR("DDS_ROOT has already been set")
-endif()
-
-if (NOT DEFINED ACE_ROOT)
-  if(OPENDDS_USE_PREFIX_PATH)
-    set(ACE_ROOT "${_OPENDDS_RELATIVE_PREFIX_ROOT}/share/ace")
-    set(ACE_INCLUDE_DIR "${_OPENDDS_RELATIVE_PREFIX_ROOT}/include")
-    set(ACE_BIN_DIR "${_OPENDDS_RELATIVE_PREFIX_ROOT}/bin")
-    set(ACE_LIB_DIR "${_OPENDDS_RELATIVE_PREFIX_ROOT}/lib")
-
-  elseif(OPENDDS_ACE)
-    set(ACE_ROOT ${OPENDDS_ACE})
-    set(ACE_INCLUDE_DIR "${ACE_ROOT}")
-    set(ACE_BIN_DIR "${ACE_ROOT}/bin")
-    set(ACE_LIB_DIR "${ACE_ROOT}/lib")
-
-  else()
-    _OPENDDS_RETURN_ERR("Failed to locate ACE_ROOT")
-  endif()
-
-else()
-  _OPENDDS_RETURN_ERR("ACE_ROOT has already been set")
-endif()
-
-if (NOT DEFINED TAO_ROOT)
-  if(OPENDDS_USE_PREFIX_PATH)
-    set(TAO_ROOT "${_OPENDDS_RELATIVE_PREFIX_ROOT}/share/tao")
-    set(TAO_INCLUDE_DIR "${_OPENDDS_RELATIVE_PREFIX_ROOT}/include")
-    set(TAO_BIN_DIR ${_OPENDDS_RELATIVE_PREFIX_ROOT}/bin)
-    set(TAO_LIB_DIR ${_OPENDDS_RELATIVE_PREFIX_ROOT}/lib)
-
-  elseif(OPENDDS_TAO)
-    set(TAO_ROOT "${OPENDDS_TAO}")
-    set(TAO_INCLUDE_DIR "${OPENDDS_TAO}")
-    set(TAO_BIN_DIR ${ACE_BIN_DIR})
-    set(TAO_LIB_DIR ${ACE_LIB_DIR})
-
-  else()
-    _OPENDDS_RETURN_ERR("Failed to locate TAO_ROOT")
-  endif()
-
-else()
-  _OPENDDS_RETURN_ERR("TAO_ROOT has already been set")
-endif()
+include(${CMAKE_CURRENT_LIST_DIR}/OpenDDS/init.cmake)
 
 set(_dds_bin_hints ${OPENDDS_BIN_DIR})
 set(_tao_bin_hints ${ACE_BIN_DIR})
@@ -370,43 +293,35 @@ foreach(_cfg  RELEASE  DEBUG)
 
 endforeach()
 
-function(opendds_extract_version  in_version_file  out_version  out_major  out_minor)
-  file(READ "${in_version_file}" contents)
-  if(contents)
-    string(REGEX MATCH "OpenDDS version (([0-9]+).([0-9]+))" _ "${contents}")
-    set(${out_version} ${CMAKE_MATCH_1} PARENT_SCOPE)
-    set(${out_major}   ${CMAKE_MATCH_2} PARENT_SCOPE)
-    set(${out_minor}   ${CMAKE_MATCH_3} PARENT_SCOPE)
-  endif()
-endfunction()
-
-opendds_extract_version("${DDS_ROOT}/VERSION"
-  OPENDDS_VERSION
-  OPENDDS_VERSION_MAJOR
-  OPENDDS_VERSION_MINOR
-)
-
 include(SelectLibraryConfigurations)
-include(FindPackageHandleStandardArgs)
 
 foreach(_lib ${_all_libs})
   string(TOUPPER ${_lib} _LIB_VAR)
   select_library_configurations(${_LIB_VAR})
 endforeach()
 
-find_package_handle_standard_args(OPENDDS
-  FOUND_VAR OPENDDS_FOUND
-  REQUIRED_VARS
-    OPENDDS_INCLUDE_DIR
-    OPENDDS_DCPS_LIBRARY
-    OPENDDS_IDL
-    ACE_LIBRARY
-    ACE_GPERF
-    TAO_LIBRARY
-    TAO_IDL
-    PERL
-  VERSION_VAR OPENDDS_VERSION
+set(_opendds_required_deps
+      OPENDDS_DCPS_LIBRARY
+      OPENDDS_IDL
+      ACE_LIBRARY
+      ACE_GPERF
+      TAO_LIBRARY
+      TAO_IDL
+      PERL
 )
+
+foreach(_dep ${_opendds_required_deps})
+  if(NOT ${_dep})
+    list(APPEND _opendds_missing_deps ${_dep})
+  endif()
+endforeach()
+
+if(_opendds_missing_deps)
+  _OPENDDS_RETURN_ERR("Missing required dependencies ${_opendds_missing_deps}")
+
+else()
+  set(OPENDDS_FOUND TRUE)
+endif()
 
 macro(_ADD_TARGET_BINARY  target  path)
   if (NOT TARGET ${target} AND EXISTS "${path}")
@@ -530,8 +445,8 @@ if(OPENDDS_FOUND)
 
   endif()
 
-  include(${_OPENDDS_PACKAGE_DIR}/OpenDDS/options.cmake)
-  include(${_OPENDDS_PACKAGE_DIR}/OpenDDS/api_macros.cmake)
+  include(${CMAKE_CURRENT_LIST_DIR}/OpenDDS/options.cmake)
+  include(${CMAKE_CURRENT_LIST_DIR}/OpenDDS/api_macros.cmake)
 
   # Summary information
   message(STATUS "Added the following targets to OPENDDS_LIBRARIES:")
