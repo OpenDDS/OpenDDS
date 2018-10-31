@@ -82,7 +82,7 @@ jobs:
   steps:
   - script: |
       sudo add-apt-repository $(RepoDep) -y
-      condition: and(succeeded(), ne(variables['RepoDep'], ''))
+    condition: and(succeeded(), ne(variables['RepoDep'], ''))
     displayName: install optional repositories
   - script: |
       sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
