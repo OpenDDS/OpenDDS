@@ -52,7 +52,7 @@ on Unix or `setenv.cmd` on Windows was already run):
 ### Unix
 
 ```bash
-cd $DDS_ROOT/tests/Messenger/Messenger_1
+cd $DDS_ROOT/tests/cmake_integration/Messenger/Messenger_1
 mkdir build
 cd build
 cmake -DCMAKE_PREFIX_PATH=$DDS_ROOT ..
@@ -65,7 +65,7 @@ The following assumes Visual Studio 2017 using 64-bit architecture (in
 case it's not obvious from the -G switch).
 
 ```bat
-cd %DDS_ROOT%\tests\Messenger\Messenger_1
+cd %DDS_ROOT%\tests\cmake_integration\Messenger\Messenger_1
 mkdir build
 cd build
 cmake -DCMAKE_PREFIX_PATH=%DDS_ROOT:\=/% -G "Visual Studio 15 2017 Win64" ..
