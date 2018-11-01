@@ -6,6 +6,7 @@
  */
 
 #include <QtGui/QtGui>
+#include <QtWidgets/QFileDialog>
 #include "RepoSelect.h"
 
 namespace Monitor {

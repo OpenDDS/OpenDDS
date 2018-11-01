@@ -5,7 +5,7 @@
 * See: http://www.opendds.org/license.html
 */
 
-#include <QtGui/QGraphicsTextItem>
+#include <QtWidgets/QGraphicsTextItem>
 #include <QtGui/QPainter>
 #include <vector>
 

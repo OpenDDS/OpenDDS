@@ -1,16 +1,98 @@
-1. your OpenDDS git repo needs to have submodules enabled
-the directory $DDS_ROOT/tests/googletest shouldn't be empty,
-if it is, run "git submodule init" followed by "git submodule update"
-see https://git-scm.com/book/en/v2/Git-Tools-Submodules
 
-2. build the Gtest library
-create the directory "build" in $DDS_ROOT/tests/googletest
-run cmake with this new one as the build directory and
-$DDS_ROOT/tests/googletest as the source directory
-(if using Visual C++ and your OpenDDS build is not static,
-enable gtest_force_shared_crt or BUILD_SHARED_LIBS) then
-build with Gtest library with GNU Make or Visual Studio
+# Setting up Google Test
 
-3. configure and build OpenDDS as usual
-any test executables that depend on Gtest can use the googletest.mpb
-MPC base project (in $DDS_ROOT/MPC/config)
+Many of the newer OpenDDS unit tests rely on Google Test, which can be set up
+using Git submodules or by specifying an external location (system-wide or user-
+defined).
+
+Note: Any test executables which depend upon Gtest can use the googletest.mpb
+MPC base project (in $DDS_ROOT/MPC/config) to pull in the required libraries.
+
+## Using a Git Submodule
+
+  1. Your OpenDDS git repo needs to have submodules enabled and
+     the directory $DDS_ROOT/tests/googletest should not be empty.
+     If it is empty, run "git submodule init" followed by "git submodule update"
+
+     see https://git-scm.com/book/en/v2/Git-Tools-Submodules
+
+  2. Build the Gtest library.
+     Create the following directories:
+       a. $DDS_ROOT/tests/googletest/build
+       b. $DDS_ROOT/tests/googletest/build/install
+
+     Change into the build directory just created and run cmake using
+     $DDS_ROOT/tests/googletest as the source directory, and using
+     $DDS_ROOT/tests/googletest/build/install as an install prefix:
+
+     ~~~
+     cd tests/googletest/build
+     cmake -DCMAKE_INSTALL_PREFIX=./install ..
+     ~~~
+
+     Note: if using Visual C++ and your OpenDDS build is not static,
+     enable gtest_force_shared_crt or BUILD_SHARED_LIBS. In addition,
+     a couple other flags are probably necessary to select the proper
+     build environment and disable TR1-Deprecation warnings:
+
+     ~~~
+     cd tests\googletest\build
+     cmake -DCMAKE_INSTALL_PREFIX=.\install ^
+           -Dgtest_force_shared_crt=ON ^
+           -DCMAKE_CXX_FLAGS=/D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING=1 ^
+           -G "Visual Studio 15 2017 Win64" ..
+     ~~~
+
+     Then build and install the Gtest library using cmake from the build
+     directory:
+
+     ~~~
+     cmake --build . --target install
+     ~~~
+
+  3. Configure and build OpenDDS as usual.
+
+
+## Using an External Location
+
+  1. Clone the Google Test repo into some directory (doesn't really matter where
+     as the install target will be the _actual_ library directory).
+
+     ~~~
+     git clone https://github.com/google/googletest.git
+     ~~~
+
+  2. Follow the steps in "Using a Git Submodule" with the following differences:
+      a. The install location can be anywhere you desire, or it can be completely
+         omitted (in which case the default system location will be used).
+
+      b. An elevated terminal/cmd shell will probably be required if the install
+         prefix is omitted.
+
+      c. When invoking the OpenDDS configure script, if the default system location
+         is _not_ used, then the gtest switch can be used to inform the configure
+         script where the gtest libraries are located. Otherwise, the configure script
+         should detect the default location.
+
+         ~~~
+         ./configure --gtest=/path/the/gtest/install/dir
+         ~~~
+
+      d. Alternatively, the Gtest root can be overridden by setting the GTEST_ROOT
+         environment variable before regenerating the build files with MWC.pl.
+
+         For example (within the DDS_ROOT directory):
+
+         Windows:
+         ~~~
+         set GTEST_ROOT=c:\path\to\gtest\root
+         mwc.pl -type vs2017 DDS.mwc
+         msbuild /m DDS_TAOv2_all.sln
+         ~~~
+
+         Unix:
+         ~~~
+         export GTEST_ROOT=/path/to/gtest/root
+         mwc.pl -type gnuace DDS.mwc
+         make
+         ~~~

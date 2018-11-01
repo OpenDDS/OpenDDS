@@ -2,7 +2,7 @@
 #ifndef _SHAPESWIDGET_HPP
 #define _SHAPESWIDGET_HPP
 
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 #include <QtCore/QRect>
 #include <QtGui/QPixmap>
 #include <vector>

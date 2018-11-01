@@ -102,50 +102,47 @@ void check_read_status(DDS::ReturnCode_t status,
                        CORBA::ULong expected,
                        const char* where)
 {
+  if (status == ::DDS::RETCODE_OK)
+  {
+      if (data.length() != expected)
+      {
+          ACE_ERROR ((LM_ERROR,
+              ACE_TEXT("(%P|%t) %C ERROR: expected %d samples but got %d\n"),
+              where, expected, data.length() ));
+          test_failed = 1;
+          throw TestException();
+      }
 
-      if (status == ::DDS::RETCODE_OK)
-      {
-          if (data.length() != expected)
-          {
-              ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("(%P|%t) %C ERROR: expected %d samples but got %d\n"),
-                  where, expected, data.length() ));
-              test_failed = 1;
-              throw TestException();
-          }
-
-      }
-      else if (status == ::DDS::RETCODE_NO_DATA)
-      {
-        ACE_ERROR ((LM_ERROR,
-          ACE_TEXT("(%P|%t) %C ERROR: reader received NO_DATA!\n"),
-          where));
-        test_failed = 1;
-        throw TestException();
-      }
-      else if (status == ::DDS::RETCODE_PRECONDITION_NOT_MET)
-      {
-        ACE_ERROR ((LM_ERROR,
-          ACE_TEXT("(%P|%t) %C ERROR: reader received PRECONDITION_NOT_MET!\n"),
-          where));
-        test_failed = 1;
-        throw TestException();
-      }
-      else
-      {
-        ACE_ERROR((LM_ERROR,
-            ACE_TEXT("(%P|%t) %C ERROR: unexpected status %d!\n"),
-            where, status ));
-        test_failed = 1;
-        throw TestException();
-      }
+  }
+  else if (status == ::DDS::RETCODE_NO_DATA)
+  {
+    ACE_ERROR ((LM_ERROR,
+      ACE_TEXT("(%P|%t) %C ERROR: reader received NO_DATA!\n"),
+      where));
+    test_failed = 1;
+    throw TestException();
+  }
+  else if (status == ::DDS::RETCODE_PRECONDITION_NOT_MET)
+  {
+    ACE_ERROR ((LM_ERROR,
+      ACE_TEXT("(%P|%t) %C ERROR: reader received PRECONDITION_NOT_MET!\n"),
+      where));
+    test_failed = 1;
+    throw TestException();
+  }
+  else
+  {
+    ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) %C ERROR: unexpected status %d!\n"),
+        where, status ));
+    test_failed = 1;
+    throw TestException();
+  }
 }
 
 
 int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {
-
-
   u_long mask = ACE_LOG_MSG->priority_mask(ACE_Log_Msg::PROCESS);
   ACE_LOG_MSG->priority_mask(mask | LM_TRACE | LM_DEBUG, ACE_Log_Msg::PROCESS);
 
@@ -343,7 +340,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           // write first sample
           foo_dw->write(foo1, handle);
 
-          // wait for write to propogate
+          // wait for write to propagate
           if (!wait_for_data(sub.in (), 5))
             ACE_ERROR_RETURN ((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: timeout waiting for data.\n")),
@@ -387,7 +384,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           // write second sample
           foo_dw->write(foo2, handle);
 
-          // wait for write to propogate
+          // wait for write to propagate
           if (!wait_for_data(sub.in (), 5))
             ACE_ERROR_RETURN ((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: timeout waiting for data.\n")),
@@ -436,7 +433,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           // changed to NEW_VIEW when data sample is received.
           foo_dw->dispose(foo1, handle);
 
-          //// wait for dispose sample to propogate
+          //// wait for dispose sample to propagate
           if (!wait_for_data(sub.in (), 5))
             ACE_ERROR_RETURN ((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: timeout waiting for data.\n")),
@@ -449,7 +446,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           Test::SimpleSeq     disposeData (max_samples);
           ::DDS::SampleInfoSeq disposeDataInfo;
 
-          status = foo_dr->read(  disposeData
+          status = foo_dr->read(disposeData
             , disposeDataInfo
             , max_samples
             , ::DDS::NOT_READ_SAMPLE_STATE
@@ -473,7 +470,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
           foo_dw->write (foo3, handle);
 
-          //// wait for write to propogate
+          //// wait for write to propagate
           if (!wait_for_data(sub.in (), 5))
             ACE_ERROR_RETURN ((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: timeout waiting for data.\n")),
@@ -530,13 +527,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
           check_read_status(status, data4, 4, "read samples from most recent generation");
 
-          if (info4[2].valid_data == 1)
-          {
-             ACE_ERROR ((LM_ERROR,
-              ACE_TEXT("(%P|%t) ERROR: expected an invalid data sample (dispose notification).\n") ));
-             test_failed = 1;
-          }
-
           if (info4[0].view_state != ::DDS::NEW_VIEW_STATE
             || info4[1].view_state != ::DDS::NEW_VIEW_STATE
             || info4[3].view_state != ::DDS::NEW_VIEW_STATE)
@@ -552,6 +542,15 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
             ACE_ERROR ((LM_ERROR,
               ACE_TEXT("(%P|%t) ERROR: read samples from most recent generation")
               ACE_TEXT(" failed to provide same data.\n") ));
+            test_failed = 1;
+          }
+
+          if (info4[2].valid_data == 1)
+          {
+            ACE_ERROR ((LM_ERROR,
+              ACE_TEXT("(%P|%t) ERROR: expected an invalid data sample (dispose notification), instance state is %C.\n"),
+              OpenDDS::DCPS::InstanceState::instance_state_string(
+                info4[2].instance_state).c_str()));
             test_failed = 1;
           }
 
@@ -604,7 +603,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           //Let it automatically register.
           foo_dw->write (xfoo, ::DDS::HANDLE_NIL);
 
-          //// wait for write to propogate
+          //// wait for write to propagate
           if (!wait_for_data(sub.in (), 5))
             ACE_ERROR_RETURN ((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: timeout waiting for data.\n")),

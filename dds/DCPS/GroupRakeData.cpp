@@ -27,7 +27,9 @@ bool GroupRakeData::insert_sample(ReceivedDataElement* sample,
 {
   // Ignore DISPOSE and UNREGISTER messages in case they are sent
   // in the group coherent changes, but it shouldn't.
-  if (!sample->registered_data_) return false;
+  if (!sample->valid_data_) {
+    return false;
+  }
 
   RakeData rd = {sample, instance, index_in_instance};
   this->sorted_.insert(rd);

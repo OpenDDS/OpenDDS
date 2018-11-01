@@ -83,6 +83,20 @@ public:
     std::for_each(children_.begin(), children_.end(), deleteChild);
   }
 
+  virtual bool has_non_key_fields(const MetaStruct& meta) const
+  {
+    for (
+      OPENDDS_VECTOR(EvalNode*)::const_iterator i = children_.begin();
+      i != children_.end(); ++i
+    ) {
+      EvalNode* child = *i;
+      if (child->has_non_key_fields(meta)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   virtual Value eval(DataForEval& data) = 0;
 
 private:
@@ -129,17 +143,41 @@ FilterEvaluator::~FilterEvaluator()
   delete filter_root_;
 }
 
+bool FilterEvaluator::has_non_key_fields(const MetaStruct& meta) const
+{
+  for (
+    OPENDDS_VECTOR(OPENDDS_STRING)::const_iterator i = order_bys_.begin();
+    i != order_bys_.end(); ++i
+  ) {
+    if (!meta.isDcpsKey(i->c_str())) {
+      return true;
+    }
+  }
+
+  if (filter_root_->has_non_key_fields(meta)) {
+    return true;
+  }
+
+  return false;
+}
+
 namespace {
 
   class FieldLookup : public FilterEvaluator::Operand {
   public:
     explicit FieldLookup(AstNode* fnNode)
       : fieldName_(toString(fnNode))
-    {}
+    {
+    }
 
     Value eval(FilterEvaluator::DataForEval& data)
     {
       return data.lookup(fieldName_.c_str());
+    }
+
+    bool has_non_key_fields(const MetaStruct& meta) const
+    {
+      return !meta.isDcpsKey(fieldName_.c_str());
     }
 
     OPENDDS_STRING fieldName_;
@@ -555,10 +593,30 @@ Value::Value(ACE_CDR::LongDouble ld, bool conversion_preferred)
   : type_(VAL_LNGDUB), ld_(ld), conversion_preferred_(conversion_preferred)
 {}
 
+#ifdef NONNATIVE_LONGDOUBLE
+Value::Value(long double ld, bool conversion_preferred)
+  : type_(VAL_LNGDUB), conversion_preferred_(conversion_preferred)
+{
+  ACE_CDR_LONG_DOUBLE_ASSIGNMENT(ld_, ld);
+}
+#endif
+
 Value::Value(const char* s, bool conversion_preferred)
   : type_(VAL_STRING), s_(ACE_OS::strdup(s))
   , conversion_preferred_(conversion_preferred)
 {}
+
+Value::Value(const std::string& s, bool conversion_preferred)
+  : type_(VAL_STRING), s_(ACE_OS::strdup(s.c_str()))
+  , conversion_preferred_(conversion_preferred)
+{}
+
+#ifdef DDS_HAS_WCHAR
+Value::Value(const std::wstring& s, bool conversion_preferred)
+  : type_(VAL_STRING), s_(ACE_OS::strdup(ACE_Wide_To_Ascii(s.c_str()).char_rep()))
+  , conversion_preferred_(conversion_preferred)
+{}
+#endif
 
 Value::Value(const TAO::String_Manager& s, bool conversion_preferred)
   : type_(VAL_STRING), s_(ACE_OS::strdup(s.in()))

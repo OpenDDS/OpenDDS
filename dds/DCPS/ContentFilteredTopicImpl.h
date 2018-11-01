@@ -42,10 +42,21 @@ public:
 
   DDS::Topic_ptr get_related_topic();
 
+  /**
+   * Returns true if the sample matches the filter.
+   */
   template<typename Sample>
-  bool filter(const Sample& s) const
+  bool filter(const Sample& s, bool sample_only_has_key_fields) const
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
+    const MetaStruct& meta = getMetaStruct<Sample>();
+    /*
+     * Omit the sample from results if the filter references non-key fields
+     * and the sample only has key fields.
+     */
+    if (sample_only_has_key_fields && filter_eval_.has_non_key_fields(meta)) {
+      return false;
+    }
     return filter_eval_.eval(s, expression_parameters_);
   }
 

@@ -6,6 +6,7 @@
 #include "dds/DCPS/RepoIdBuilder.h"
 #include "dds/DCPS/RestoreOutputStreamState.h"
 #include "DataReaderListener.h"
+#include "DataReaderQCListener.h"
 #include "tests/DCPS/common/TestSupport.h"
 #include "tests/Utils/ExceptionStreams.h"
 
@@ -30,7 +31,8 @@ SubDriver::SubDriver()
     add_new_subscription_ (0),
     shutdown_delay_secs_ (10),
     sub_ready_filename_(ACE_TEXT("sub_ready.txt")),
-    listener_(0)
+    listener_(0),
+    qc_usage_ (false)
 {
 }
 
@@ -88,6 +90,11 @@ SubDriver::parse_args(int& argc, ACE_TCHAR* argv[])
       else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-i"))) != 0)
         {
           num_disposed_ = ACE_OS::atoi (current_arg);
+          arg_shifter.consume_arg ();
+        }
+      else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-q"))) != 0)
+        {
+          qc_usage_ = ACE_OS::atoi (current_arg);
           arg_shifter.consume_arg ();
         }
       else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-?")) == 0)
@@ -173,8 +180,19 @@ SubDriver::init(int& argc, ACE_TCHAR* argv[])
   }
 
   // Create datareader to test copy_from_topic_qos.
-  listener_ = new DataReaderListenerImpl;
-  ::DDS::DataReaderListener_var drl (listener_);
+#ifndef OPENDDS_NO_QUERY_CONDITION
+  DataReaderQCListenerImpl* qc_listener = 0;
+  if (qc_usage_)
+  {
+    qc_listener = new DataReaderQCListenerImpl;
+    listener_ = qc_listener;
+  }
+  else
+#endif
+  {
+    listener_ = new DataReaderListenerImpl;
+  }
+  ::DDS::DataReaderListener_var drl = listener_;
 
   datareader_
     = subscriber_->create_datareader(topic_.in (),
@@ -182,6 +200,26 @@ SubDriver::init(int& argc, ACE_TCHAR* argv[])
                                      drl.in(),
                                      ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   TEST_CHECK (! CORBA::is_nil (datareader_.in ()));
+  TEST_CHECK (participant_->contains_entity(datareader_->get_instance_handle()));
+
+#ifndef OPENDDS_NO_QUERY_CONDITION
+  if (qc_usage_)
+  {
+    DDS::StringSeq params(1);
+    params.length (1);
+    params[0] = "101010";
+
+    DDS::QueryCondition_var qc =
+      datareader_->create_querycondition (DDS::NOT_READ_SAMPLE_STATE,
+                                          DDS::ANY_VIEW_STATE,
+                                          DDS::ANY_INSTANCE_STATE,
+                                          "a_long_value = %0",
+                                          params);
+    TEST_CHECK (! CORBA::is_nil (qc.in ()));
+
+    qc_listener->set_qc (qc.in ());
+  }
+#endif
 
   // Indicate that the subscriber is ready to accept connection
   FILE* readers_ready = ACE_OS::fopen (sub_ready_filename_.c_str (), ACE_TEXT("w"));
