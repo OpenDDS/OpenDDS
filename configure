@@ -139,6 +139,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'std=s', 'C++ standard version (for compilers that use -std)',
     'target=s', 'Cross-compile target (none): see --target-help',
     'target-compiler=s', 'Compiler for target (if req\'d): see --target-help',
+    'host-tools=s', 'DDS_ROOT of host tools for cross compile (build them)',
     'prefix=s', 'Installation prefix (none)',
    ],
    ['Build flags:',
@@ -356,8 +357,12 @@ if (defined $opts{'safety-profile'} && $opts{'safety-profile'} eq '') {
   $opts{'safety-profile'} = 'extended';
 }
 
+my $build_host_tools;
 if ($opts{'host'} ne $opts{'target'} || $opts{'safety-profile'}) {
-  print "Setting cross-compile build\n" if $opts{'verbose'};
+  $build_host_tools = !$opts{'host-tools'};
+  print "Cross-compile build " .
+    ($build_host_tools ? 'including' : 'excluding') . " host tools\n"
+    if $opts{'verbose'};
   $cross_compile = 1;
 }
 
@@ -812,10 +817,13 @@ sub write_platform_macros {
       }
       if ($cross_compile) {
         print $PMG 'TAO_IDL = $(HOST_ACE)/bin/tao_idl', "\n";
-        print $PMG 'TAO_IDL_DEP = $(TAO_IDL)', "\n";
+        print $PMG 'TAO_IDL_DEP = $(TAO_IDL)$(HOST_EXE_EXT)', "\n";
         print $PMG 'TAO_IDL_PREPROCESSOR = ', $opts{'compiler'}, "\n";
         print $PMG 'TAO_IDLFLAGS += -g $(HOST_ACE)/bin/ace_gperf', "\n";
         print $PMG 'build_tao_idl_be = 0', "\n";
+        unless ($build_host_tools) {
+          print $PMG 'HOST_ACE = $(HOST_DDS)', nested($ace_src, '.'), "\n";
+        }
         if ($opts{'target-compiler'}) {
           my $tcomp = $opts{'target-compiler'};
           if ($tcomp =~ s/-g([c+])\1$/-/) {
@@ -1153,9 +1161,11 @@ for my $key (keys %optdep) {
   if (exists $opts{$key}) {
     print "Enabling $key\n" if $opts{'verbose'};
     my ($e, $s, $m) = @{$optdep{$key}};
-    env_from_opt($key, $e) if defined $e;
-    if ($s && !-r $targetEnv{$e} . '/' . $s) {
-      die "ERROR: Can't find $key at $targetEnv{$e} (using $s).\nStopped";
+    if ($opts{$key} ne 'skip_version_check') {
+      env_from_opt($key, $e) if defined $e;
+      if ($s && !-r $targetEnv{$e} . '/' . $s) {
+        die "ERROR: Can't find $key at $targetEnv{$e} (using $s).\nStopped";
+      }
     }
     push(@features, $m) if $m;
     push(@platformmacros, $m) if $need_platform_macros{$key};
@@ -1178,7 +1188,7 @@ if ($is_windows && !$opts{'optimize'}) { # look for nonstandard vcpkg layout
 }
 
 ## OpenSSL version-detection / feature-injection
-if ($opts{'openssl'}) {
+if ($opts{'openssl'} && $opts{'openssl'} ne 'skip_version_check') {
   my $ssl_version_file = $opts{'openssl'} . '/' .
                            $optdep{'openssl'}->[1]; # Use sanity file
 
@@ -1832,10 +1842,14 @@ if ($cloned_build) {
 
   write_cross_compile_makefile() if $slash eq '/';
 }
-else { # not cross-compiling:
+else { # does not require cloned builds
   setEnv('ACE_ROOT', $ace_src);
   setEnv('TAO_ROOT', $tao_src);
   setEnv('DDS_ROOT', '.');
+
+  if (!$build_host_tools) {
+    setEnv('HOST_DDS', $opts{'host-tools'});
+  }
 
   push_path(\%targetEnv, $targetEnv{'ACE_ROOT'} . $slash . 'bin');
   push_path(\%targetEnv, $targetEnv{'DDS_ROOT'} . $slash . 'bin');
@@ -1851,10 +1865,10 @@ else { # not cross-compiling:
 }
 
 print "Completed configuring OpenDDS, next ";
-if ($slash eq '/') {
+if ($slash eq '/' || ($cross_compile && !$cloned_build)) {
   print "run '", (($^O eq 'solaris' || $^O eq 'freebsd') ? 'g' : ''), "make'";
 }
-elsif ($cross_compile) {
+elsif ($cloned_build) {
   print "compile build\\host\\host_tools.sln\n",
     "using the environment in build\\host\\setenv.cmd.\n",
     "Then build OpenDDS for $opts{'target'} by running make in ",
@@ -1865,14 +1879,15 @@ else {
   print "build '", $opts{'solution_file'}, "' using the '",
     ($opts{'optimize'} ? 'Release' : 'Debug'), "' configuration";
 }
+
 print " to compile ",
-  ($cross_compile ? "\nthe host and target builds of " : ''),
-  "OpenDDS", (($buildtao || $cross_compile) ? ' and ACE+TAO' : '') ,".\n",
+  ($cloned_build ? "\nthe host and target builds of " : ''),
+  "OpenDDS", (($buildtao || $cloned_build) ? ' and ACE+TAO' : '') ,".\n",
   "You can use the generated setenv.$specific{'ext'} script ",
-  ($cross_compile ?
+  ($cloned_build ?
    "in the\nbuild${slash}host and build${slash}target dirs " : ''),
   "to set environment\nvariables for future shell sessions.\n";
-if ($slash ne '/') {
+if ($slash ne '/' && !$cross_compile) {
   print "Start Visual Studio from this command prompt so that it inherits ",
     "the correct\nenvironment variables.\n";
 }
