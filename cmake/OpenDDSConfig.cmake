@@ -51,7 +51,7 @@
 # differences:
 #   1) Items can be either C/C++ sources or IDL sources.
 #   2) The scope-qualifier (PUBLIC, PRIVATE, INTERFACE) is not required.
-#      When it is omitted, PUBLIC is used by default.
+#      When it is omitted, PRIVATE is used by default.
 #   3) Command-line options can be supplied to the TAO/OpenDDS IDL compilers
 #      using TAO_IDL_OPTIONS and/or OPENDDS_IDL_OPTIONS (if the default be-
 #      havior is not suitable).

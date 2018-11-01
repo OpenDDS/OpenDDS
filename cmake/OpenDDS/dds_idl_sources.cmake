@@ -1,7 +1,7 @@
 # Distributed under the OpenDDS License. See accompanying LICENSE
 # file or http://www.opendds.org/license.html for details.
 
-function(opendds_target_generated_dependencies target idl_file)
+function(opendds_target_generated_dependencies target idl_file scope)
 
   get_source_file_property(idl_ts_files ${idl_file} OPENDDS_TYPESUPPORT_IDLS)
   set(all_idl_files ${idl_file} ${idl_ts_files})
@@ -42,25 +42,22 @@ function(opendds_target_generated_dependencies target idl_file)
 
   add_dependencies(${target} ${bridge_target})
 
-  target_sources(${target}
-    PRIVATE
-      ${cpp_files} ${all_idl_files}
-    PUBLIC
-      ${hdr_files})
+  target_sources(${target} ${scope} ${cpp_files} ${all_idl_files} ${hdr_files})
 
   foreach(file ${hdr_files})
     get_target_property(target_includes ${target} INCLUDE_DIRECTORIES)
     get_filename_component(file_path ${file} DIRECTORY)
 
     if (NOT "${file_path}" IN_LIST target_includes)
-      target_include_directories(${target} PUBLIC ${file_path})
+      target_include_directories(${target} PRIVATE ${file_path})
     endif()
   endforeach()
 endfunction()
 
 function(opendds_target_idl_sources target)
+  set(oneValueArgs SCOPE SKIP_TAO_IDL)
   set(multiValueArgs TAO_IDL_FLAGS DDS_IDL_FLAGS IDL_FILES)
-  cmake_parse_arguments(_arg "SKIP_TAO_IDL" "" "${multiValueArgs}" ${ARGN})
+  cmake_parse_arguments(_arg "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
   foreach(idl_file ${_arg_IDL_FILES})
     if (NOT IS_ABSOLUTE ${idl_file})
@@ -73,7 +70,7 @@ function(opendds_target_idl_sources target)
     if (_generated_dependencies)
       # If an IDL-Generation command was already created this file can safely be
       # skipped; however, the dependencies still need to be added to the target.
-      opendds_target_generated_dependencies(${target} ${idl_file})
+      opendds_target_generated_dependencies(${target} ${idl_file} ${_arg_SCOPE})
 
     else()
       list(APPEND non_generated_idl_files ${idl_file})
@@ -210,6 +207,6 @@ function(opendds_target_idl_sources target)
     set_property(SOURCE ${abs_filename} PROPERTY
       OPENDDS_IDL_GENERATED_DEPENDENCIES TRUE)
 
-    opendds_target_generated_dependencies(${target} ${abs_filename})
+    opendds_target_generated_dependencies(${target} ${abs_filename} ${_arg_SCOPE})
   endforeach()
 endfunction()

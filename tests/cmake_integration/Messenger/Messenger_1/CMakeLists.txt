@@ -16,7 +16,6 @@ add_executable(publisher
     ${src}/publisher.cpp
 )
 OPENDDS_TARGET_SOURCES(publisher
-  PUBLIC
     ${src}/Writer.cpp
     ${src}/Writer.h
     ${src}/Messenger.idl
@@ -27,7 +26,6 @@ add_executable(subscriber
     ${src}/subscriber.cpp
 )
 OPENDDS_TARGET_SOURCES(subscriber
-  PUBLIC
     ${src}/DataReaderListener.cpp
     ${src}/DataReaderListener.h
     ${src}/Messenger.idl
@@ -38,7 +36,6 @@ add_executable(stack_subscriber
     ${src}/stack_subscriber.cpp
 )
 OPENDDS_TARGET_SOURCES(stack_subscriber
-  PUBLIC
     ${src}/DataReaderListener.cpp
     ${src}/DataReaderListener.h
     ${src}/Messenger.idl

@@ -13,16 +13,13 @@ set(all_targets publisher subscriber stack_subscriber messenger)
 
 # Messenger library
 add_library(messenger)
-OPENDDS_TARGET_SOURCES(messenger
-  PUBLIC
-    ${src}/Messenger.idl)
+OPENDDS_TARGET_SOURCES(messenger ${src}/Messenger.idl)
 
 # Publisher
 add_executable(publisher
     ${src}/publisher.cpp
 )
 OPENDDS_TARGET_SOURCES(publisher
-  PUBLIC
     ${src}/Writer.cpp
     ${src}/Writer.h
 )
@@ -32,7 +29,6 @@ add_executable(subscriber
     ${src}/subscriber.cpp
 )
 OPENDDS_TARGET_SOURCES(subscriber
-  PUBLIC
     ${src}/DataReaderListener.cpp
     ${src}/DataReaderListener.h
 )
@@ -42,7 +38,6 @@ add_executable(stack_subscriber
     ${src}/stack_subscriber.cpp
 )
 OPENDDS_TARGET_SOURCES(stack_subscriber
-  PUBLIC
     ${src}/DataReaderListener.cpp
     ${src}/DataReaderListener.h
 )

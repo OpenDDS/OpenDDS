@@ -56,11 +56,10 @@ macro(OPENDDS_GET_SOURCES_AND_OPTIONS
       list(APPEND ${libs} ${arg})
 
     elseif("${arg}" MATCHES "\\.idl$")
-      # Implicit sources default to PUBLIC
-      list(APPEND ${idl_prefix}_PUBLIC ${arg})
+      list(APPEND ${idl_prefix}_PRIVATE ${arg})
 
     else()
-      list(APPEND ${src_prefix}_PUBLIC ${arg})
+      list(APPEND ${src_prefix}_PRIVATE ${arg})
     endif()
   endforeach()
 endmacro()
@@ -157,7 +156,8 @@ macro(OPENDDS_TARGET_SOURCES target)
       opendds_target_idl_sources(${target}
         TAO_IDL_FLAGS ${_tao_options} ${OPENDDS_TAO_BASE_IDL_FLAGS}
         DDS_IDL_FLAGS ${_opendds_options} ${OPENDDS_DDS_BASE_IDL_FLAGS}
-        IDL_FILES ${_idl_sources_${scope}})
+        IDL_FILES ${_idl_sources_${scope}}
+        SCOPE ${scope})
     endif()
 
     # The above should add IDL-Generated sources; here, the
