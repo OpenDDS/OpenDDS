@@ -2,8 +2,23 @@
 # Integrating OpenDDS with CMake
 
 OpenDDS can be used with CMake-Based projects by using the OpenDDS CMake Config
-package (located [here](../cmake)). There are two example CMake-Based Messenger
-applications which exist to showcase different CMake-Project usage scenarios:
+package (located [here](../cmake)). This package bridges the gap between the
+MPC build system used by OpenDDS and CMake-Based projects by exposing CMake
+targets for each OpenDDS dependency and by providing the
+[`OPENDDS_TARGET_SOURCES`](#adding-idl-sources-to-a-target) macro to simplify
+IDL compilation.
+
+## Requirements
+
+In order to use the Config module, CMake version 3.3.2 or greater is required.
+However, to run the Messenger examples, version 3.8.2 or greater is required
+(due to some dependencies which simplify the custom file-copy targets).
+
+## CMake Messenger Examples
+
+Included with OpenDDS are two example CMake-Based Messenger applications which
+exist to showcase two different strategies for adding IDL files (internally they
+also test different aspects of the IDL-Compilation mechanism):
 
   1. [Messenger with direct IDL inclusion](../tests/cmake_integration/Messenger/Messenger_1/CMakeLists.txt)
   2. [Messenger with auxiliary IDL lib](../tests/cmake_integration/Messenger/Messenger_2/CMakeLists.txt)
@@ -16,17 +31,10 @@ The second scenario simply adds the IDL file directly into each executable so
 the generated headers/sources are added to the publisher/subscriber targets
 independently.
 
-## CMake Requirements
-
-In order to use the Config module, CMake version 3.3.2 or greater is required.
-However, to run the Messenger tests version 3.8.2 or greater is required. The
-reason for this difference is due to some features used to simplify post-build
-cross-platform copy of *.ini and *.pl files.
-
 ## Configure-Generated output
 
 The configure script ($DDS_ROOT/configure) is responsible for generating the
-config.cmake file (placed in [$DDS_ROOT/cmake/OpenDDS](../cmake/OpenDDS))
+config.cmake file (placed in [$DDS_ROOT/cmake/OpenDDS](../cmake/OpenDDS)),
 which houses various configuration options. These options provide the OpenDDS
 CMake package with the required context it needs to integrate with the
 collection of MPC-Generated OpenDDS libraries.
@@ -36,7 +44,7 @@ generated from variables in the configure script. However, to get a better
 sense of how they are being used take a look at the
 [options.cmake](../cmake/OpenDDS/options.cmake) file. This is where various
 CMake C/C++ compile-time defines and IDL-Compiler flags are set/unset
-depending on which variables are enabled/disabled.
+depending upon which variables are enabled/disabled.
 
 ## Using the OpenDDS CMake Package
 
@@ -46,10 +54,13 @@ so the typical generate/compile steps only require setting the `CMAKE_PREFIX_PAT
 calling [`find_package(OpenDDS)`](https://cmake.org/cmake/help/latest/command/find_package.html)
 within a CMakeLists.txt file.
 
-For example, to generate/compile the Messenger examples referenced above (assuming `source setenv.sh`
-on Unix or `setenv.cmd` on Windows was already run):
+### Example Using OpenDDS Sources
 
-### Unix
+To generate/compile the Messenger examples referenced [above](#cmake-messenger-examples)
+(assuming `source setenv.sh` on Unix or `setenv.cmd` on Windows was already run) within
+the downloaded and compiled OpenDDS source-tree:
+
+#### Unix
 
 ```bash
 cd $DDS_ROOT/tests/cmake_integration/Messenger/Messenger_1
@@ -59,7 +70,7 @@ cmake -DCMAKE_PREFIX_PATH=$DDS_ROOT ..
 cmake --build .
 ```
 
-### Windows
+#### Windows
 
 The following assumes Visual Studio 2017 using 64-bit architecture (in
 case it's not obvious from the -G switch).
@@ -71,8 +82,42 @@ cd build
 cmake -DCMAKE_PREFIX_PATH=%DDS_ROOT:\=/% -G "Visual Studio 15 2017 Win64" ..
 cmake --build .
 ```
-*NOTE:* The `:\=/` portion of the `%DDS_ROOT:\=/%` is required to prevent
+*Note:* The `:\=/` portion of the `%DDS_ROOT:\=/%` is required to prevent
 backslashes from being passed into cmake (which might cause an allergic reaction).
+
+### Example Using Installed OpenDDS (Unix only)
+
+After OpenDDS has been downloaded, the `--prefix` switch can be passed into
+configure to enable the `install` target, which will copy everything required
+for a working OpenDDS installation when built (including the OpenDDS CMake
+Config module) into the specified directory.
+
+Here is a snippet to download OpenDDS, compile, install, and generate/compile
+the Messenger_1 example from outside the source-tree:
+
+```bash
+git clone git@github.com:objectcomputing/OpenDDS.git $HOME/opendds
+cd $HOME/opendds
+./configure --prefix=$HOME/opendds-install --ace-github-latest
+make
+make install
+cp -ar $HOME/opendds/tests/cmake_integration/Messenger $HOME/Messenger
+cd $HOME/Messenger/Messenger_1
+mkdir build
+cd build
+cmake -DCMAKE_PREFIX_PATH=$HOME/opendds-install ..
+cmake --build .
+```
+*Note:* The `--ace-github-latest` switch will download the latest ACE/TAO sources
+from github, as opposed to downloading the most-recently released version.
+
+*Note:* While this will build the Messenger_1 example, the run_test.pl script will
+not work due to missing perl dependencies (well, they are in the source-tree but
+that is out of scope).
+
+This example demonstrated that the entire process of downloading and building CMake-Based
+projects with an installed OpenDDS is just as easy as it is when using the freshly
+compiled OpenDDS source-tree.
 
 ## Adding IDL sources to a target
 
