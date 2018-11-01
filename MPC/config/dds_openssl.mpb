@@ -1,0 +1,6 @@
+feature(openssl): openssl {
+}
+
+feature(!no_vxworks_openssl) {
+  lit_libs += OPENSSL HASH unix
+}
