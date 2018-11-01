@@ -7,7 +7,9 @@ Version 3.14 of OpenDDS
 - TODO: Add your fixes here
 
 ##### Notes:
-- TODO: Add your notes here
+- Removed outdated `-Gws` option of `opendds_idl`. This option produced sample
+  descriptions for the Wireshark dissector before OpenDDS v3.7.
+
 _______________________________________________________________________________
 Version 3.13 of OpenDDS
 
