@@ -1,15 +1,13 @@
 # Distributed under the OpenDDS License. See accompanying LICENSE
 # file or http://www.opendds.org/license.html for details.
 #
-# CMake options for configuring the FindOpenDDS cmake module. These options
+# CMake options for configuring the OpenDDS CMake package. These options
 # depend upon variables/options from the config.cmake file which is auto-
 # generated using the $DDS_ROOT/configure script.
 #
-# Other options which don't depend upon configuration-time settings are
-# set. In addition, some base #defines are set depending on which options
-# have been enabled. These are set on every target which generates IDL
-# and/or links against respective MPC-Compiled targets (for example,
-# OpenDDS::Dcps).
+# Various base #defines are set depending on which options have been enabled.
+# These are set as transient dependencies on every target which generates IDL
+# and/or links against respective MPC-Compiled targets (for example, OpenDDS::Dcps).
 #
 
 # Handle base property defines like MPC/config/dcps_optional_features.mpb

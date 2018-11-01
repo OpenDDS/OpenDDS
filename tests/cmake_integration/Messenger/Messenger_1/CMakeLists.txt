@@ -1,12 +1,6 @@
 # Distributed under the OpenDDS License. See accompanying LICENSE
 # file or http://www.opendds.org/license.html for details.
 #
-# To build this project follow these steps:
-#   1) mkdir build
-#   2) cd build
-#   3) cmake -DCMAKE_PREFIX_PATH=$DDS_ROOT ..
-#   4) cmake --build .
-#
 
 project(Messenger_cmake CXX)
 cmake_minimum_required(VERSION 3.8.2)
