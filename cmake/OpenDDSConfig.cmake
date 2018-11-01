@@ -2,20 +2,10 @@
 # file or http://www.opendds.org/license.html for details.
 
 #.rst:
-# OpenDDS Package
-# -----------
+# OpenDDS CMake Config-File Package
+# ---------------------------------
 #
-# Finds OpenDDS include dirs and libraries
-#
-# This package defines the following variables::
-#
-# OPENDDS_FOUND - True if OpenDDS (and all primary dependencies) were found.
-# OPENDDS_INCLUDE_DIRS - Primary include directories used by OpenDDS.
-# OPENDDS_LIBRARIES - List of all OpenDDS-Imported targets.
-# OPENDDS_VERSION - Full OpenDDS version string.
-# OPENDDS_VERSION_MAJOR - Major version of OpenDDS.
-# OPENDDS_VERSION_MINOR - Minor version of OpenDDS.
-# OPENDDS_VERSION_PATCH - Patch version of OpenDDS.
+# Finds OpenDDS MPC-Compiled libraries and imports them as CMake targets.
 #
 # The following imported targets will be defined if the corresponding libraries
 # were compiled with OpenDDS (using MPC):
@@ -276,9 +266,7 @@ foreach(_cfg  RELEASE  DEBUG)
 
     find_library(${_LIB_VAR}_LIBRARY_${_cfg}
       ${_lib}${_sfx}
-      # By default TAO libraries are built into ACE_ROOT/lib
-      # so the hints are shared here.
-      HINTS ${_tao_lib_hints} ${_ace_lib_hints}
+      HINTS ${_tao_lib_hints}
     )
   endforeach()
 
@@ -323,7 +311,7 @@ else()
   set(OPENDDS_FOUND TRUE)
 endif()
 
-macro(_ADD_TARGET_BINARY  target  path)
+macro(_OPENDDS_ADD_TARGET_BINARY  target  path)
   if (NOT TARGET ${target} AND EXISTS "${path}")
     add_executable(${target} IMPORTED)
     set_target_properties(${target}
@@ -333,7 +321,7 @@ macro(_ADD_TARGET_BINARY  target  path)
   endif()
 endmacro()
 
-macro(_ADD_TARGET_LIB  target  var_prefix  include_dir)
+macro(_OPENDDS_ADD_TARGET_LIB  target  var_prefix  include_dir)
   set(_debug_lib "${${var_prefix}_LIBRARY_DEBUG}")
   set(_release_lib "${${var_prefix}_LIBRARY_RELEASE}")
   set(_deps "${${var_prefix}_DEPS}")
@@ -385,10 +373,10 @@ if(OPENDDS_FOUND)
       ${TAO_INCLUDE_DIR}/orbsvcs
   )
 
-  _ADD_TARGET_BINARY(opendds_idl "${OPENDDS_IDL}")
-  _ADD_TARGET_BINARY(tao_idl "${TAO_IDL}")
-  _ADD_TARGET_BINARY(ace_gperf "${ACE_GPERF}")
-  _ADD_TARGET_BINARY(perl "${PERL}")
+  _OPENDDS_ADD_TARGET_BINARY(opendds_idl "${OPENDDS_IDL}")
+  _OPENDDS_ADD_TARGET_BINARY(tao_idl "${TAO_IDL}")
+  _OPENDDS_ADD_TARGET_BINARY(ace_gperf "${ACE_GPERF}")
+  _OPENDDS_ADD_TARGET_BINARY(perl "${PERL}")
 
   foreach(_lib ${_ace_libs})
     string(TOUPPER ${_lib} _VAR_PREFIX)
@@ -399,7 +387,7 @@ if(OPENDDS_FOUND)
       string(REPLACE "ACE_" "ACE::" _target ${_lib})
     endif()
 
-    _ADD_TARGET_LIB(${_target} ${_VAR_PREFIX} "${ACE_INCLUDE_DIR}")
+    _OPENDDS_ADD_TARGET_LIB(${_target} ${_VAR_PREFIX} "${ACE_INCLUDE_DIR}")
   endforeach()
 
   foreach(_lib ${_tao_libs})
@@ -411,14 +399,14 @@ if(OPENDDS_FOUND)
       string(REPLACE "TAO_" "TAO::" _target ${_lib})
     endif()
 
-    _ADD_TARGET_LIB(${_target} ${_VAR_PREFIX} "${TAO_INCLUDE_DIR}")
+    _OPENDDS_ADD_TARGET_LIB(${_target} ${_VAR_PREFIX} "${TAO_INCLUDE_DIR}")
   endforeach()
 
   foreach(_lib ${_opendds_libs})
     string(TOUPPER ${_lib} _VAR_PREFIX)
     string(REPLACE "OpenDDS_" "OpenDDS::" _target ${_lib})
 
-    _ADD_TARGET_LIB(${_target} ${_VAR_PREFIX} "${OPENDDS_INCLUDE_DIR}")
+    _OPENDDS_ADD_TARGET_LIB(${_target} ${_VAR_PREFIX} "${OPENDDS_INCLUDE_DIR}")
 
   endforeach()
 
@@ -449,7 +437,7 @@ if(OPENDDS_FOUND)
   include(${CMAKE_CURRENT_LIST_DIR}/OpenDDS/api_macros.cmake)
 
   # Summary information
-  message(STATUS "Added the following targets to OPENDDS_LIBRARIES:")
+  message(STATUS "Loaded OpenDDS targets:")
   foreach(_target ${OPENDDS_LIBRARIES})
     get_target_property(_target_location ${_target} LOCATION)
     message(STATUS "${_target} -> ${_target_location}")
