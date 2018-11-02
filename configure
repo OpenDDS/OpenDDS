@@ -1908,7 +1908,7 @@ else { # does not require cloned builds
   setEnv('TAO_ROOT', $tao_src);
   setEnv('DDS_ROOT', '.');
 
-  if (!$build_host_tools) {
+  if (!$build_host_tools && $opts{'host-tools'}) {
     setEnv('HOST_DDS', $opts{'host-tools'});
   }
 
