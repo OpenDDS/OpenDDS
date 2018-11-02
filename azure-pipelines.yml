@@ -31,6 +31,21 @@ jobs:
     SSL_LIBDIR: $(SSL_ROOT)\$(vcpkglibdir)
     XERCESC_LIBDIR: $(XERCESCROOT)\$(vcpkglibdir)
   steps:
+  - powershell: |
+      $client = new-object System.Net.WebClient
+      $client.DownloadFile("http://strawberryperl.com/download/5.28.0.1/strawberry-perl-5.28.0.1-64bit-portable.zip", "strawberry-perl.zip");
+    displayName: Download perl
+  - task: ExtractFiles@1
+    displayName: Extract perl
+    inputs:
+      archiveFilePatterns: strawberry-perl.zip
+      destinationFolder: ext\strawberry
+  - task: BatchScript@1
+    displayName: Put perl on PATH
+    inputs:
+      filename: tools\scripts\prepend_path
+      arguments: '%CD%\ext\strawberry\perl\bin'
+      modifyEnvironment: true
   - powershell: git clone --depth 1 git://github.com/Microsoft/vcpkg.git $(Build.SourcesDirectory)\vcpkg
     displayName: git clone vcpkg
   - script: .\vcpkg\bootstrap-vcpkg.bat
