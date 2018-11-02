@@ -1,7 +1,7 @@
 # Distributed under the OpenDDS License. See accompanying LICENSE
 # file or http://www.opendds.org/license.html for details.
 
-include(${CMAKE_CURRENT_LIST_DIR}/OpenDDS/init.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/init.cmake)
 
 macro(opendds_extract_version  in_version_file  out_version  out_major  out_minor)
   file(READ "${in_version_file}" contents)

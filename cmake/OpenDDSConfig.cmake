@@ -66,7 +66,7 @@
 
 cmake_minimum_required(VERSION 3.3.2)
 
-include(${CMAKE_CURRENT_LIST_DIR}/OpenDDS/init.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/init.cmake)
 
 set(_dds_bin_hints ${OPENDDS_BIN_DIR})
 set(_tao_bin_hints ${ACE_BIN_DIR})
@@ -433,8 +433,8 @@ if(OPENDDS_FOUND)
 
   endif()
 
-  include(${CMAKE_CURRENT_LIST_DIR}/OpenDDS/options.cmake)
-  include(${CMAKE_CURRENT_LIST_DIR}/OpenDDS/api_macros.cmake)
+  include(${CMAKE_CURRENT_LIST_DIR}/options.cmake)
+  include(${CMAKE_CURRENT_LIST_DIR}/api_macros.cmake)
 
   # Summary information
   message(STATUS "Loaded OpenDDS targets:")

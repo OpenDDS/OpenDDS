@@ -2028,9 +2028,6 @@ sub write_cmake_file {
   };
 
   print $CM <<"FIND_OPENDDS_CMAKE_CONFIG";
-# Distributed under the OpenDDS License. See accompanying LICENSE
-# file or http://www.opendds.org/license.html for details.
-#
 # Contains configuration variables for the FindOpenDDS cmake module based on
 # detected defaults and/or user-supplied switches. Feel free to edit them as
 # necessary, but keep in mind that they will be moved to config.cmake.bak.*
