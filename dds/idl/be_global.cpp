@@ -258,18 +258,17 @@ BE_GlobalData::spawn_options()
   return idl_global->idl_flags();
 }
 
+void invalid_option(char * option)
+{
+  ACE_ERROR((LM_ERROR,
+    ACE_TEXT("IDL: I don't understand the '%C' option\n"), option));
 #ifdef TAO_IDL_HAS_PARSE_ARGS_EXIT
-#define PARSE_ARGS_ERROR idl_global->parse_args_exit (1);
+  idl_global->parse_args_exit(1);
 #else
-#define PARSE_ARGS_ERROR \
-  idl_global->set_compile_flags (\
-    idl_global->compile_flags () | IDL_CF_ONLY_USAGE);
+  idl_global->set_compile_flags(
+    idl_global->compile_flags() | IDL_CF_ONLY_USAGE);
 #endif
-
-#define INVALID_OPTION \
-  ACE_ERROR((LM_ERROR, ACE_TEXT("IDL: I don't understand the '%C'") \
-             ACE_TEXT(" option\n"), av[i])); \
-  PARSE_ARGS_ERROR;
+}
 
 void
 BE_GlobalData::parse_args(long& i, char** av)
@@ -284,6 +283,9 @@ BE_GlobalData::parse_args(long& i, char** av)
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("IDL: unable to create directory %C")
         ACE_TEXT(" specified by -o option\n"), av[i + 1]));
+#ifdef TAO_IDL_HAS_PARSE_ARGS_EXIT
+      idl_global->parse_args_exit(1);
+#endif
     } else {
       output_dir_ = av[++i];
     }
@@ -294,7 +296,7 @@ BE_GlobalData::parse_args(long& i, char** av)
     else if (0 == ACE_OS::strcasecmp(av[i], "-GfaceTS"))
       face_ts(true);
     else {
-      INVALID_OPTION;
+      invalid_option(av[i]);
     }
     break;
   case 'L':
@@ -306,10 +308,14 @@ BE_GlobalData::parse_args(long& i, char** av)
       language_mapping(LANGMAP_CXX11);
       suppress_typecode_ = true;
     } else {
-      INVALID_OPTION;
+      invalid_option(av[i]);
     }
     break;
   case 'S':
+    if (av[i][2] && av[i][3]) {
+      invalid_option(av[i]);
+      break;
+    }
     switch (av[i][2]) {
     case 'I':
       suppress_idl_ = true;
@@ -321,25 +327,31 @@ BE_GlobalData::parse_args(long& i, char** av)
       // ignore, accepted for tao_idl compatibility
       break;
     default:
-      INVALID_OPTION;
+      invalid_option(av[i]);
     }
     break;
   case 'Z':
+    if (av[i][2] && av[i][3]) {
+      invalid_option(av[i]);
+      break;
+    }
     switch (av[i][2]) {
     case 'C':
       add_include (av[++i], STREAM_CPP);
       break;
     default:
-      INVALID_OPTION;
+      invalid_option(av[i]);
     }
     break;
   case '-':
     if (0 == ACE_OS::strncasecmp(av[i], WB_EXPORT_MACRO, SZ_WB_EXPORT_MACRO)) {
       this->export_macro(av[i] + SZ_WB_EXPORT_MACRO);
+    } else {
+      invalid_option(av[i]);
     }
     break;
   default:
-    INVALID_OPTION;
+    invalid_option(av[i]);
   }
 }
 
