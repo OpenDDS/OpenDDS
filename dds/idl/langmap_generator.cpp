@@ -1440,6 +1440,9 @@ struct Cxx11Generator : GeneratorBase
         initializer = "{}";
       }
     } else {
+      if (cls & CL_ARRAY) {
+        initializer = "{}";
+      }
       be_global->add_include("<utility>", BE_GlobalData::STREAM_LANG_H);
       be_global->lang_header_ <<
         "  void " << nm << "(const " << lang_field_type << "& val) " << assign <<

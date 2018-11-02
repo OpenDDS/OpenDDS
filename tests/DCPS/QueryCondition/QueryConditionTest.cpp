@@ -418,6 +418,11 @@ bool run_sorting_test(const DomainParticipant_var& dp,
   MessageDataReader_var mdr = MessageDataReader::_narrow(dr);
   Duration_t five_seconds = {5, 0};
   bool passed = true, done = false;
+  if (sub->delete_datareader(dr) != DDS::RETCODE_PRECONDITION_NOT_MET) {
+    cerr << "ERROR: the deletion of a DataReader is not allowed if there are any existing QueryCondition objects that are attached to the DataReader." << endl;
+    passed = false;
+    done = true;
+  }
   while (!done) {
     ConditionSeq active;
     ret = ws->wait(active, five_seconds);

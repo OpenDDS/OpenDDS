@@ -19,6 +19,9 @@
 #include <dds/DCPS/transport/multicast/Multicast.h>
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #include <dds/DCPS/transport/shmem/Shmem.h>
+#  ifdef OPENDDS_SECURITY
+#  include "dds/DCPS/security/BuiltInPlugins.h"
+#  endif
 # endif
 #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif

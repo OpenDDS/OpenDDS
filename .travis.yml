@@ -53,6 +53,16 @@ matrix:
             - libxerces-c-dev
             - clang++-6.0
       env: COMPILER=clang++-6.0 NO_INLINE=1
+    - compiler: clang
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-7
+          packages:
+            - libxerces-c-dev
+            - clang++-7
+      env: COMPILER=clang++-7 NO_INLINE=1
     - compiler: gcc
       addons:
         apt:

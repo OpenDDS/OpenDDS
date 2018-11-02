@@ -10,6 +10,8 @@
 
 #include <deque>
 #include <algorithm>
+#include <iterator>
+
 #include "dds/DCPS/PoolAllocationBase.h"
 #include "dds/DCPS/PoolAllocator.h"
 #include "BasicQueueVisitor_T.h"
