@@ -317,16 +317,21 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         exit(1);
       }
 
-      if (deadline_status1.total_count_change != NUM_INSTANCE
-          || deadline_status2.total_count_change != NUM_INSTANCE)
+      // dr1 has a listener so we need to check if the total count changed compared
+      // to the last time we got it through the listener
+      // dr2 has no listener, so the total_count_change should match the total count
+      // and we have to save the value for the next check
+      CORBA::Long const deadline_total_count_2 = deadline_status2.total_count;
+      if (deadline_status1.total_count_change != (deadline_status1.total_count - listener_servant->requested_deadline_total_count ())
+          || deadline_status2.total_count_change != deadline_status2.total_count)
       {
         cerr << "ERROR: Incorrect missed requested "
-             << "deadline count change" << endl
-             << "       ("
+             << "deadline count change ("
              << deadline_status1.total_count_change
              << " and/or "
              << deadline_status2.total_count_change
-             << " instead of " << NUM_EXPIRATIONS * NUM_INSTANCE << ")."
+             << ") instead of (" << (deadline_status1.total_count - listener_servant->requested_deadline_total_count ())
+             << " and " << deadline_status2.total_count << ")"
              << endl;
 
         exit(1);
@@ -389,20 +394,23 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         exit(1);
       }
 
-      if (deadline_status1.total_count_change != 2 * NUM_INSTANCE
-          || deadline_status2.total_count_change != 2 * NUM_INSTANCE)
+      // dr1 has a listener so we need to check if the total count changed compared
+      // to the last time we got it through the listener
+      // dr2 has no listener, so the total_count_change should match the total count
+      if (deadline_status1.total_count_change != (deadline_status1.total_count - listener_servant->requested_deadline_total_count ())
+          || deadline_status2.total_count_change != (deadline_status2.total_count - deadline_total_count_2))
       {
         cerr << "ERROR: Incorrect missed requested "
-             << "deadline count" << endl
-             << "       change ("
+             << "deadline count change ("
              << deadline_status1.total_count_change
              << "and/or "
              << deadline_status2.total_count_change
-             << " instead of " << NUM_EXPIRATIONS << ")." << endl;
+             << ") instead of (" << (deadline_status1.total_count - listener_servant->requested_deadline_total_count ())
+             << " and " << (deadline_status2.total_count - deadline_total_count_2) << ")"
+             << endl;
 
         exit(1);
       }
-
 
       int expected = 10;
       while (listener_servant->num_arrived() < expected) {
