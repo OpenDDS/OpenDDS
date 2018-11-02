@@ -37,7 +37,6 @@
 #include "ts_generator.h"
 #include "marshal_generator.h"
 #include "keys_generator.h"
-#include "wireshark_generator.h"
 #include "itl_generator.h"
 #include "v8_generator.h"
 #include "langmap_generator.h"
@@ -54,12 +53,11 @@ namespace {
   keys_generator key_gen_;
   ts_generator ts_gen_;
   metaclass_generator mc_gen_;
-  wireshark_generator ws_gen_;
   itl_generator itl_gen_;
   v8_generator v8_gen_;
   langmap_generator lm_gen_;
 
-  dds_generator* generators_[] = {&mar_gen_, &key_gen_, &ts_gen_, &mc_gen_, &ws_gen_, &itl_gen_};
+  dds_generator* generators_[] = {&mar_gen_, &key_gen_, &ts_gen_, &mc_gen_, &itl_gen_};
   const size_t N_MAP = sizeof(generators_) / sizeof(generators_[0]);
 
   composite_generator gen_target_(&generators_[0], &generators_[N_MAP]);
