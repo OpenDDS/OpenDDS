@@ -4,6 +4,7 @@ apt-get -y --fix-missing install \
     qtbase5-dev \
     libwireshark-dev \
     libglib2.0-dev \
+    libwiretap-dev \
     libxerces-c-dev \
     libssl-dev \
     openjdk-8-jdk-headless \
