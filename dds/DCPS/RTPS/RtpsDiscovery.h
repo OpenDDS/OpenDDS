@@ -151,6 +151,11 @@ public:
     rtps_relay_data_ = rrd;
   }
 
+  OPENDDS_STRING rtps_relay_url() const { return rtps_relay_url_; }
+  void rtps_relay_url(const OPENDDS_STRING& rru) {
+    rtps_relay_url_ = rru;
+  }
+
 private:
   ACE_Time_Value resend_period_;
   u_short pb_, dg_, pg_, d0_, d1_, dx_;
@@ -162,6 +167,7 @@ private:
   AddrVec spdp_send_addrs_;
   OPENDDS_STRING rtps_relay_sedp_;
   OPENDDS_STRING rtps_relay_data_;
+  OPENDDS_STRING rtps_relay_url_;
 
   /// Guids will be unique within this RTPS configuration
   GuidGenerator guid_gen_;

@@ -102,6 +102,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
       OPENDDS_STRING spdpaddr;
       OPENDDS_STRING rtps_relay_sedp;
       OPENDDS_STRING rtps_relay_data;
+      OPENDDS_STRING rtps_relay_url;
       bool has_resend = false, has_pb = false, has_dg = false, has_pg = false,
         has_d0 = false, has_d1 = false, has_dx = false, has_sm = false,
         has_ttl = false, sm = false;
@@ -236,6 +237,8 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           rtps_relay_sedp = it->second;
         } else if (name == "RtpsRelayData") {
           rtps_relay_data = it->second;
+        } else if (name == "RtpsRelayUrl") {
+          rtps_relay_url = it->second;
         } else {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
@@ -260,6 +263,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
       discovery->spdp_send_addrs().swap(spdp_send_addrs);
       discovery->rtps_relay_sedp(rtps_relay_sedp);
       discovery->rtps_relay_data(rtps_relay_data);
+      discovery->rtps_relay_url(rtps_relay_url);
       discovery->sedp_local_address(sla);
       discovery->guid_interface(gi);
       discovery->spdp_local_address(spdpaddr);

@@ -145,9 +145,15 @@ public:
 #endif
 
   static const bool host_is_bigendian_;
+
+  void remove_unicast_address(const ACE_INET_Addr& addr);
+  void add_unicast_address(const ACE_INET_Addr& addr);
+
 private:
   Spdp& spdp_;
   OPENDDS_STRING rtps_relay_data_;
+  typedef OPENDDS_SET(ACE_INET_Addr) UnicastAddressesType;
+  UnicastAddressesType unicast_addresses_;
 
 #ifdef OPENDDS_SECURITY
   DDS::Security::ParticipantSecurityAttributes participant_sec_attr_;

@@ -31,6 +31,10 @@
 #include <cstring>
 #include <stdexcept>
 
+#include "ace/Auto_Ptr.h"
+#include "ace/INet/HTTP_URL.h"
+#include "ace/INet/HTTP_ClientRequestHandler.h"
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -109,12 +113,148 @@ namespace {
   }
 }
 
+  class RtpsRelayResponseHandler : public ACE::HTTP::ClientRequestHandler {
+  public:
+    RtpsRelayResponseHandler () : in_length_ (0), read_length_ (0) {}
+    virtual ~RtpsRelayResponseHandler () {}
+
+  protected:
+    virtual void handle_request_error (const ACE::HTTP::URL& url)
+    {
+      std::cout << "ERROR" << std::endl;
+      std::cerr << "Failed to handle request for " << url.to_string ().c_str () << std::endl;
+    }
+
+    virtual void handle_connection_error (const ACE::HTTP::URL& url)
+    {
+      std::cout << "ERROR" << std::endl;
+      std::cerr << "Failed to set up connection for " << url.to_string ().c_str () << std::endl;
+    }
+
+    virtual void after_read (const char_type* /*buffer*/, int length_read)
+    {
+      if (this->read_length_ == 0)
+        {
+          this->in_length_ = this->response ().get_content_length ();
+        }
+      this->read_length_ += length_read;
+      std::cout << "\r [" << this->read_length_ << '/';
+      if (this->in_length_ != ACE::HTTP::Response::UNKNOWN_CONTENT_LENGTH)
+        {
+          std::cout << this->in_length_ << "] " << ((this->read_length_ * 100) / this->in_length_) << "%";
+        }
+      else
+        std::cout << "???]";
+      std::cout.flush ();
+    }
+
+    virtual void on_eof ()
+    {
+      ACE::HTTP::ClientRequestHandler::on_eof ();
+      std::cout << std::endl;
+      this->read_length_ = 0;
+    }
+
+  private:
+    int in_length_;
+    int read_length_;
+  };
+
+  class RtpsRelayHelper : public DiscoveryHelper {
+  public:
+    RtpsRelayHelper(const OPENDDS_STRING& a_url, Spdp* a_spdp, Sedp* a_sedp)
+      : url_(a_url), spdp_(a_spdp), sedp_(a_sedp) {}
+
+    void init() override {
+      ACE_Auto_Ptr<ACE::INet::URL_Base> url_safe (ACE::INet::URL_Base::create_from_string (url_.c_str()));
+      // if (url_safe.get () == 0 || url != url_safe->to_string ())
+      //   {
+      //     std::cerr << "Failed parsing url [" << url << "]" << std::endl;
+      //     std::cerr << "\tresult = " << (url_safe.get () == 0 ? "(null)" : url_safe->to_string ().c_str ()) << std::endl;
+      //     return 1;
+      //   }
+      ACE::HTTP::URL& http_url = *dynamic_cast<ACE::HTTP::URL*> (url_safe.get ());
+      RtpsRelayResponseHandler my_rh;
+      ACE::INet::URLStream urlin = http_url.open (my_rh);
+      if (urlin)
+        {
+          std::cout << "Received response "
+                    << (int)my_rh.response ().get_status ().get_status ()
+                    << " "
+                    << my_rh.response ().get_status ().get_reason ().c_str ()
+                    << std::endl;
+          if (my_rh.response ().get_status ().is_ok ())
+            {
+              std::cout << "Length: ";
+              if (my_rh.response ().get_content_length () != ACE::HTTP::Response::UNKNOWN_CONTENT_LENGTH)
+                std::cout << my_rh.response ().get_content_length () << " [";
+              else
+                std::cout << "(unknown) [";
+              if (my_rh.response ().get_content_type () != ACE::HTTP::Response::UNKNOWN_CONTENT_TYPE)
+                std::cout << my_rh.response ().get_content_type ().c_str ();
+              else
+                std::cout << "(unknown)";
+              std::cout  << "]" << std::endl;
+            }
+
+          while (urlin) {
+            std::string key;
+            std::string address_string;
+            *urlin >> key;
+            *urlin >> address_string;
+            std::cout << "Got " << key << ' ' << address_string << std::endl;
+            ACE_INET_Addr address(address_string.c_str());
+            if (key == "Spdp") {
+              if (!rtps_relay_spdp_.empty()) {
+                spdp_->remove_send_addr(ACE_INET_Addr(rtps_relay_spdp_.c_str()));
+              }
+              rtps_relay_spdp_ = address_string;
+              spdp_->add_send_addr(address);
+            } else if (key == "Sedp") {
+              if (!rtps_relay_sedp_.empty()) {
+                spdp_->remove_sedp_unicast(ACE_INET_Addr(rtps_relay_sedp_.c_str()));
+              }
+              rtps_relay_sedp_ = address_string;
+              spdp_->add_sedp_unicast(address);
+            } else if (key == "Data") {
+              if (!rtps_relay_data_.empty()) {
+                sedp_->remove_unicast_address(ACE_INET_Addr(rtps_relay_data_.c_str()));
+              }
+              rtps_relay_data_ = address_string;
+              sedp_->add_unicast_address(address);
+            } else {
+              std::cerr << "TODO: unknown key " << key << std::endl;
+            }
+          }
+          //std::cout << urlin->rdbuf ();
+          //std::cout.flush ();
+        }
+
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) RtpsRelayHelper::init() %C\n"), url_.c_str()));
+    }
+
+  private:
+    OPENDDS_STRING url_;
+    Spdp* spdp_;
+    Sedp* sedp_;
+    OPENDDS_STRING rtps_relay_spdp_;
+    OPENDDS_STRING rtps_relay_sedp_;
+    OPENDDS_STRING rtps_relay_data_;
+  };
+
 void Spdp::init(DDS::DomainId_t /*domain*/,
                        DCPS::RepoId& guid,
                        const DDS::DomainParticipantQos& /*qos*/,
                        RtpsDiscovery* disco)
 {
   guid = guid_; // may have changed in SpdpTransport constructor
+
+  if (!disco->rtps_relay_url().empty()) {
+    discovery_helper_ = new RtpsRelayHelper(disco->rtps_relay_url(), this, &sedp_);
+    discovery_helper_->init();
+  }
+
+
   sedp_.ignore(guid);
   sedp_.init(guid_, *disco, domain_);
 
@@ -122,10 +262,8 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
   sedp_.unicast_locators(sedp_unicast_);
 
   if (!disco->rtps_relay_sedp().empty()) {
-    // CORBA::ULong idx = sedp_unicast_.length();
-    // sedp_unicast_.length(idx + 1);
-    sedp_unicast_.length(1);
-    CORBA::ULong idx = 0;
+    CORBA::ULong idx = sedp_unicast_.length();
+    sedp_unicast_.length(idx + 1);
     ACE_INET_Addr relay(disco->rtps_relay_sedp().c_str());
     sedp_unicast_[idx].kind = address_to_kind(relay);
     sedp_unicast_[idx].port = relay.get_port_number();
@@ -151,6 +289,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
 
   : DCPS::LocalParticipant<Sedp>(qos)
   , disco_(disco)
+  , discovery_helper_(0) // TODO: Destructor.
   , domain_(domain)
   , guid_(guid)
   , tport_(new SpdpTransport(this, false))
@@ -185,6 +324,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
 
   : DCPS::LocalParticipant<Sedp>(qos)
   , disco_(disco)
+  , discovery_helper_(0)
   , domain_(domain)
   , guid_(guid)
   , tport_(new SpdpTransport(this, true))
@@ -1706,6 +1846,18 @@ Spdp::SpdpTransport::acknowledge()
 }
 
 void
+Spdp::SpdpTransport::remove_send_addr(const ACE_INET_Addr& addr)
+{
+  send_addrs_.erase(addr);
+}
+
+void
+Spdp::SpdpTransport::insert_send_addr(const ACE_INET_Addr& addr)
+{
+  send_addrs_.insert(addr);
+}
+
+void
 Spdp::signal_liveliness(DDS::LivelinessQosPolicyKind kind)
 {
   sedp_.signal_liveliness(kind);
@@ -1883,6 +2035,64 @@ Spdp::lookup_participant_auth_state(const DCPS::RepoId& id) const
   return result;
 }
 #endif
+
+void
+Spdp::remove_send_addr(const ACE_INET_Addr& addr)
+{
+  tport_->remove_send_addr(addr);
+}
+
+void
+Spdp::add_send_addr(const ACE_INET_Addr& addr)
+{
+  tport_->insert_send_addr(addr);
+}
+
+bool
+operator==(const DCPS::Locator_t& x, const DCPS::Locator_t& y)
+{
+  return x.kind == y.kind && x.port == y.port && x.address == y.address;
+}
+
+bool
+operator!=(const DCPS::Locator_t& x, const DCPS::Locator_t& y)
+{
+  return x.kind != y.kind && x.port != y.port && x.address != y.address;
+}
+
+void
+Spdp::remove_sedp_unicast(const ACE_INET_Addr& addr)
+{
+  DCPS::Locator_t locator;
+  locator.kind = address_to_kind(addr);
+  locator.port = addr.get_port_number();
+  RTPS::address_to_bytes(locator.address, addr);
+
+  DCPS::LocatorSeq new_sedp_unicast;
+  for (size_t idx = 0; idx != sedp_unicast_.length(); ++idx) {
+    if (sedp_unicast_[idx] != locator) {
+      size_t out_idx = new_sedp_unicast.length();
+      new_sedp_unicast.length(out_idx + 1);
+      new_sedp_unicast[out_idx] = sedp_unicast_[idx];
+    }
+  }
+
+  sedp_unicast_ = new_sedp_unicast;
+}
+
+void
+Spdp::add_sedp_unicast(const ACE_INET_Addr& addr)
+{
+  DCPS::Locator_t locator;
+  locator.kind = address_to_kind(addr);
+  locator.port = addr.get_port_number();
+  RTPS::address_to_bytes(locator.address, addr);
+
+  size_t idx = sedp_unicast_.length();
+  sedp_unicast_.length(idx + 1);
+  sedp_unicast_[idx] = locator;
+}
+
 
 }
 }
