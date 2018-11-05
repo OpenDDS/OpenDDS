@@ -1,4 +1,4 @@
-sudo: false
+group: travis_latest
 language: cpp
 
 compiler:
