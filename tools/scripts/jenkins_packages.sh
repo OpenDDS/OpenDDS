@@ -2,9 +2,7 @@
 # Install dependency packages for use by Jenkins (debian stable)
 apt-get -y --fix-missing install \
     qtbase5-dev \
-    libwireshark-dev \
-    libglib2.0-dev \
-    libwiretap-dev \
+    wireshark-dev \
     libxerces-c-dev \
     libssl-dev \
     openjdk-8-jdk-headless \
