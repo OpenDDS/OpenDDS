@@ -114,6 +114,10 @@ OpenDDS::DCPS::OfferedDeadlineWatchdog::execute(
           //       catch all exceptions, and act accordingly.
           listener->on_offered_deadline_missed(&writer,
                                               status);
+
+          // We need to update the last total count value to our current total
+          // so that the next time we will calculate the correct total_count_change;
+          this->last_total_count_ = this->status_.total_count;
         }
 
         writer.notify_status_condition();
