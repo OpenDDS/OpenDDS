@@ -39,6 +39,8 @@ sub perlOS_to_java_platform {
   return $^O;
 }
 
+my $targetUsageIndent = "\t\t";
+
 my %platforminfo =
   ('win32' => {
                'compilers' => ['cl'],
@@ -91,6 +93,17 @@ my %platforminfo =
                              'Specify the VSB with --macros=VSB_DIR=<dir>',
                             ],
                 },
+   'android' => {
+     'libpath' => 'LD_LIBRARY_PATH',
+     'aceplatform' => 'android',
+     'aceconfig' => 'android',
+     'no_host' => 1,
+     'usage' => [
+       "Use --macros=ANDROID_ABI=<ARCH> to specify the target archtecture.\n" .
+       "${targetUsageIndent}Defaults to armeabi-v7a which is 32-bit ARMv7.\n" .
+       "${targetUsageIndent}See docs/android.md for details."
+     ],
+   },
   );
 
 sub targetUsage {
@@ -101,7 +114,7 @@ sub targetUsage {
       print "\t$k\n";
       if ($platforminfo{$k}->{'usage'}) {
         for my $line (@{$platforminfo{$k}->{'usage'}}) {
-          print "\t\t$line\n";
+          print "${targetUsageIndent}$line\n";
         }
       }
     }
@@ -1514,18 +1527,22 @@ sub generate_workspace {
     }
   }
 
+  if ($cross_compile && $opts{'java'} && $buildEnv->{'build'} eq 'target') {
+    disable_feature(\@features, "full_jre");
+  }
+
   my $mpctype = (!$is_windows ||
                   ($cross_compile && $buildEnv->{'build'} eq 'target'))
                 ? 'gnuace' : $opts{'compiler_version'};
 
   if ($mpctype eq 'gnuace') {
+    my $UM;
+    if (@features || $cross_compile) {
+      print "Writing $buildEnv->{'DDS_ROOT'}/user_macros.GNU\n"
+        if $opts{'verbose'};
+      $UM = backup_and_open($buildEnv->{'DDS_ROOT'} . '/user_macros.GNU');
+    }
     if ($buildEnv->{'build'} eq 'target') {
-      my $UM;
-      if (@features || $cross_compile) {
-        print "Writing $buildEnv->{'DDS_ROOT'}/user_macros.GNU\n"
-          if $opts{'verbose'};
-        $UM = backup_and_open($buildEnv->{'DDS_ROOT'} . '/user_macros.GNU');
-      }
       for my $feat (@features) {
         my $key = $feat;
         $key =~ s/=.*//;
@@ -1541,9 +1558,13 @@ IDL2JNI_DEP = $(IDL2JNI)$(HOST_EXE_EXT)
 CROSS-COMPILE = 1
 EOT
       }
-      $UM->close if $UM;
-      dump_and_unlink($UM) if $UM && $opts{'dry-run'};
+    } elsif ($buildEnv->{'build'} eq 'host') {
+      if ($cross_compile && $opts{'java'}) {
+        print $UM "java:=1\n";
+      }
     }
+    $UM->close if $UM;
+    dump_and_unlink($UM) if $UM && $opts{'dry-run'};
   }
 
   if ($opts{'safety-profile'} && $buildEnv->{'build'} eq 'target') {
