@@ -10,6 +10,7 @@ DataReaderListenerImpl::DataReaderListenerImpl()
   , matched_condition_(mutex_)
   , matched_(0)
   , num_arrived_(0)
+  , requested_deadline_total_count_ (0)
 {
 }
 
@@ -30,11 +31,23 @@ DataReaderListenerImpl::on_requested_deadline_missed(
     DDS::DataReader_ptr /* reader */,
     DDS::RequestedDeadlineMissedStatus const & status)
 {
-  ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_requested_deadline_missed:")
-             ACE_TEXT("total_count=%d total_count_change=%d last_instance_handle=%d\n"),
-    status.total_count, status.total_count_change, status.last_instance_handle));
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_requested_deadline_missed\n")));
+  if ((requested_deadline_total_count_ + status.total_count_change) != status.total_count)
+    {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_requested_deadline_missed:")
+        ACE_TEXT("Received incorrect total_count_change, previous total count %d ")
+        ACE_TEXT("new total_count=%d total_count_change=%d last_instance_handle=%d\n"),
+        requested_deadline_total_count_, status.total_count, status.total_count_change,
+        status.last_instance_handle));
+    }
+  else
+    {
+      ACE_DEBUG((LM_DEBUG,
+                ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_requested_deadline_missed:")
+                ACE_TEXT("total_count=%d total_count_change=%d last_instance_handle=%d\n"),
+        status.total_count, status.total_count_change, status.last_instance_handle));
+    }
+  requested_deadline_total_count_ += status.total_count_change;
 }
 
 void
@@ -122,3 +135,7 @@ int DataReaderListenerImpl::wait_matched(long count, const ACE_Time_Value *absti
   return count == matched_ ? 0 : result;
 }
 
+CORBA::Long DataReaderListenerImpl::requested_deadline_total_count (void) const
+{
+  return requested_deadline_total_count_;
+}
