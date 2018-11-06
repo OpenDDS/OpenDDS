@@ -49,7 +49,7 @@ function(opendds_target_generated_dependencies target idl_file scope)
     get_filename_component(file_path ${file} DIRECTORY)
 
     if (NOT "${file_path}" IN_LIST target_includes)
-      target_include_directories(${target} PRIVATE ${file_path})
+      target_include_directories(${target} PUBLIC ${file_path})
     endif()
   endforeach()
 endfunction()
