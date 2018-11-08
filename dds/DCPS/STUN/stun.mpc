@@ -1,0 +1,11 @@
+project(OpenDDS_Stun): dcpslib, install {
+  sharedname = OpenDDS_Stun
+  dynamicflags = OPENDDS_STUN_BUILD_DLL
+
+  IDL_Files {
+  }
+
+  specific {
+    install_dir = dds/DCPS/STUN
+  }
+}

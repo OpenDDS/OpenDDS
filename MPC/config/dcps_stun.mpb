@@ -1,0 +1,4 @@
+project : dcps {
+  after += OpenDDS_Stun
+  libs  += OpenDDS_Stun
+}
