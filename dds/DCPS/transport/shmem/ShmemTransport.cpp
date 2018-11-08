@@ -144,7 +144,7 @@ ShmemTransport::configure_i(ShmemInst& config)
                              0 /*no name*/);
   ACE_sema_t ace_sema = *pSem;
   ok = (*pSem != 0);
-# elif !defined ACE_LACKS_UNNAMED_SEMAPHORE
+# elif defined (ACE_HAS_POSIX_SEM) && !defined (ACE_LACKS_UNNAMED_SEMAPHORE)
   ok = (0 == ::sem_init(pSem, 1 /*process shared*/, 0 /*initial count*/));
   ACE_sema_t ace_sema;
   std::memset(&ace_sema, 0, sizeof ace_sema);
