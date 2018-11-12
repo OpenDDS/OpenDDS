@@ -17,6 +17,8 @@
 #include "dds/DCPS/RTPS/RtpsCoreC.h"
 #include "dds/DCPS/RcEventHandler.h"
 
+#include "dds/DCPS/STUN/Stun.h"
+
 #include "ace/INET_Addr.h"
 
 #include <cstring>
@@ -34,7 +36,8 @@ class OpenDDS_Rtps_Udp_Export RtpsUdpReceiveStrategy
     public RcEventHandler
 {
 public:
-  explicit RtpsUdpReceiveStrategy(RtpsUdpDataLink* link, const GuidPrefix_t& local_prefix);
+  explicit RtpsUdpReceiveStrategy(RtpsUdpDataLink* link, const GuidPrefix_t& local_prefix,
+                                  STUN::Participant& stun_participant);
 
   virtual int handle_input(ACE_HANDLE fd);
 
@@ -66,7 +69,8 @@ private:
   virtual ssize_t receive_bytes(iovec iov[],
                                 int n,
                                 ACE_INET_Addr& remote_address,
-                                ACE_HANDLE fd);
+                                ACE_HANDLE fd,
+                                bool& stop);
 
   virtual void deliver_sample(ReceivedDataSample& sample,
                               const ACE_INET_Addr& remote_address);
@@ -136,6 +140,8 @@ private:
   OPENDDS_VECTOR(RTPS::Submessage) secure_submessages_;
   ReceivedDataSample secure_sample_;
 #endif
+
+  STUN::Participant& stun_participant_;
 };
 
 } // namespace DCPS

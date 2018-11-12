@@ -20,6 +20,8 @@
 
 #include "dds/DCPS/RTPS/RtpsCoreC.h"
 
+#include "dds/DCPS/STUN/Stun.h"
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -120,6 +122,18 @@ private:
 #if defined(OPENDDS_SECURITY)
   DDS::Security::ParticipantCryptoHandle local_crypto_handle_;
 #endif
+
+  struct StunHandler : public ACE_Event_Handler, public STUN::Sender {
+    RtpsUdpTransport& transport;
+    STUN::Participant stun_participant;
+
+    StunHandler(RtpsUdpTransport& a_transport)
+      : transport(a_transport), stun_participant(this) {}
+
+    virtual int handle_input(ACE_HANDLE fd);
+    void send(const ACE_INET_Addr& address, const STUN::Message& message) override;
+  };
+  StunHandler stun_handler_;
 
 };
 

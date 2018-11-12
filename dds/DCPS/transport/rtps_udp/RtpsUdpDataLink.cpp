@@ -80,30 +80,31 @@ namespace DCPS {
 RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
                                  const GuidPrefix_t& local_prefix,
                                  const RtpsUdpInst& config,
-                                 const TransportReactorTask_rch& reactor_task)
+                                 const TransportReactorTask_rch& reactor_task,
+                                 STUN::Participant& stun_participant)
   : DataLink(transport, // 3 data link "attributes", below, are unused
              0,         // priority
              false,     // is_loopback
-             false),    // is_active
-    reactor_task_(reactor_task),
-    multi_buff_(this, config.nak_depth_),
-    best_effort_heartbeat_count_(0),
-    nack_reply_(this, &RtpsUdpDataLink::send_nack_replies,
-                config.nak_response_delay_),
-    heartbeat_reply_(this, &RtpsUdpDataLink::send_heartbeat_replies,
-                     config.heartbeat_response_delay_),
-    heartbeat_(make_rch<HeartBeat>(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::send_heartbeats)),
-    heartbeatchecker_(make_rch<HeartBeat>(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::check_heartbeats)),
+             false)     // is_active
+  , reactor_task_(reactor_task)
+  , multi_buff_(this, config.nak_depth_)
+  , best_effort_heartbeat_count_(0)
+  , nack_reply_(this, &RtpsUdpDataLink::send_nack_replies,
+                config.nak_response_delay_)
+  , heartbeat_reply_(this, &RtpsUdpDataLink::send_heartbeat_replies,
+                     config.heartbeat_response_delay_)
+  , heartbeat_(make_rch<HeartBeat>(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::send_heartbeats))
+  , heartbeatchecker_(make_rch<HeartBeat>(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::check_heartbeats))
 #ifdef OPENDDS_SECURITY
-    held_data_delivery_handler_(this),
-    security_config_(Security::SecurityRegistry::instance()->default_config()),
-    local_crypto_handle_(DDS::HANDLE_NIL)
+  , held_data_delivery_handler_(this)
+  , security_config_(Security::SecurityRegistry::instance()->default_config())
+  , local_crypto_handle_(DDS::HANDLE_NIL)
 #else
-    held_data_delivery_handler_(this)
+  , held_data_delivery_handler_(this)
 #endif
 {
   this->send_strategy_ = make_rch<RtpsUdpSendStrategy>(this, local_prefix);
-  this->receive_strategy_ = make_rch<RtpsUdpReceiveStrategy>(this, local_prefix);
+  this->receive_strategy_ = make_rch<RtpsUdpReceiveStrategy>(this, local_prefix, ref(stun_participant));
   std::memcpy(local_prefix_, local_prefix, sizeof(GuidPrefix_t));
 }
 

@@ -39,6 +39,8 @@
 #include "dds/DCPS/security/framework/SecurityConfig_rch.h"
 #endif
 
+#include "dds/DCPS/STUN/Stun.h"
+
 class DDS_TEST;
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -58,7 +60,8 @@ public:
   RtpsUdpDataLink(RtpsUdpTransport& transport,
                   const GuidPrefix_t& local_prefix,
                   const RtpsUdpInst& config,
-                  const TransportReactorTask_rch& reactor_task);
+                  const TransportReactorTask_rch& reactor_task,
+                  STUN::Participant& stun_participant);
 
   bool add_delayed_notification(TransportQueueElement* element);
 
