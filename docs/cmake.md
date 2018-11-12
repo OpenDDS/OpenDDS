@@ -20,8 +20,8 @@ Included with OpenDDS are two example CMake-Based Messenger applications which
 exist to showcase two different strategies for adding IDL files (internally they
 also test different aspects of the IDL-Compilation mechanism):
 
-  1. [Messenger with direct IDL inclusion](../tests/cmake_integration/Messenger/Messenger_1/CMakeLists.txt)
-  2. [Messenger with auxiliary IDL lib](../tests/cmake_integration/Messenger/Messenger_2/CMakeLists.txt)
+  1. [Messenger with direct IDL inclusion]
+  2. [Messenger with auxiliary IDL lib]
 
 The first scenario creates an intermediary library which has the IDL file (and
 the generated headers/sources) added to it. The publisher/subscriber in this case
@@ -59,9 +59,8 @@ within a CMakeLists.txt file. See the examples below for typical usage scenarios
 
 ### Example Using OpenDDS Source Tree
 
-To generate/compile the Messenger examples referenced [above](#cmake-messenger-examples)
-(assuming `source setenv.sh` on Unix or `setenv.cmd` on Windows was already run) within
-the downloaded and compiled OpenDDS source-tree:
+To generate/compile the [Messenger with direct IDL inclusion] within the OpenDDS source-tree
+(assuming `source setenv.sh` on Unix or `setenv.cmd` on Windows was already run):
 
 #### Unix
 
@@ -95,20 +94,23 @@ configure to enable the `install` target, which will copy everything required
 for a working OpenDDS installation when built (including the OpenDDS CMake
 Config module) into the specified directory.
 
+*Note:* Be sure to pass an absolute path to `--prefix`.
+
 Here is a snippet to download OpenDDS, compile, install, and generate/compile
 the Messenger_1 example from outside the source-tree:
 
 ```bash
-git clone git@github.com:objectcomputing/OpenDDS.git $HOME/opendds
-cd $HOME/opendds
-./configure --prefix=$HOME/opendds-install --ace-github-latest
+DDS_WORKSPACE=$(pwd)
+git clone git@github.com:objectcomputing/OpenDDS.git $DDS_WORKSPACE/opendds
+cd $DDS_WORKSPACE/opendds
+./configure --prefix=$DDS_WORKSPACE/opendds-install --ace-github-latest
 make
 make install
-cp -ar $HOME/opendds/tests/cmake_integration/Messenger $HOME/Messenger
-cd $HOME/Messenger/Messenger_1
+cp -ar $DDS_WORKSPACE/opendds/tests/cmake_integration/Messenger $DDS_WORKSPACE/Messenger
+cd $DDS_WORKSPACE/Messenger/Messenger_1
 mkdir build
 cd build
-cmake -DCMAKE_PREFIX_PATH=$HOME/opendds-install ..
+cmake -DCMAKE_PREFIX_PATH=$DDS_WORKSPACE/opendds-install ..
 cmake --build .
 ```
 *Note:* The `--ace-github-latest` switch will download the latest ACE/TAO sources
@@ -152,18 +154,40 @@ OPENDDS_TARGET_SOURCES(target
 
 ### Example
 
-Taken from the Messenger_1 example referenced above, here is a snippet showcasing
-how IDL files can be added directly to executable targets using the
-`OPENDDS_TARGET_SOURCES` macro:
+Taken from the [Messenger with direct IDL inclusion], here is a snippet showcasing
+how IDL files can be added directly to executable targets using the `OPENDDS_TARGET_SOURCES`
+macro:
 
 ```cmake
 add_executable(publisher
     ${src}/publisher.cpp
 )
 OPENDDS_TARGET_SOURCES(publisher
-  PUBLIC
     ${src}/Writer.cpp
     ${src}/Writer.h
     ${src}/Messenger.idl
 )
 ```
+
+Another snippet, based upon [Messenger with auxiliary IDL lib], showcases how an
+auxiliary IDL library can be created for inclusion by other executables:
+
+```cmake
+add_library(messenger)
+OPENDDS_TARGET_SOURCES(messenger ${src}/Messenger.idl)
+
+add_executable(publisher
+    ${src}/publisher.cpp
+    ${src}/Writer.cpp
+    ${src}/Writer.h
+)
+
+target_link_libraries(publisher messenger OpenDDS::OpenDDS)
+
+```
+
+*Note:* This may issue a warning in earlier version of CMake due to the messenger library
+not having any sources added with it in the call to `add_library`.
+
+[Messenger with direct IDL inclusion]: ../tests/cmake_integration/Messenger/Messenger_1/CMakeLists.txt
+[Messenger with auxiliary IDL lib]: ../tests/cmake_integration/Messenger/Messenger_2/CMakeLists.txt
