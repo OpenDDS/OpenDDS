@@ -110,8 +110,8 @@ function(opendds_target_idl_sources target)
   string(REGEX REPLACE "/$" "" _working_binary_dir ${_working_binary_dir})
   string(REGEX REPLACE "/$" "" _working_source_dir ${_working_source_dir})
 
-  ## opendds_idl would generate different codes with the -I flag followed by absolute path
-  ## or relative path, if it's a relatvie path we need to keep it a relative path to the binary tree
+  ## opendds_idl would generate different code with the -I flag followed by absolute path
+  ## or relative path, if it's a relative path we need to keep it a relative path to the binary tree
   file(RELATIVE_PATH _rel_path_to_source_tree ${_working_binary_dir} ${_working_source_dir})
   if (_rel_path_to_source_tree)
     set(_rel_path_to_source_tree "${_rel_path_to_source_tree}/")
