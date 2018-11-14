@@ -96,7 +96,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]){
       // ----------------------------------------------
 
       // Create the listener.
-      DDS::DataWriterListener_var listener(new DataWriterListenerImpl);
+      DataWriterListenerImpl* typed_listener_ptr = new DataWriterListenerImpl;
+      DDS::DataWriterListener_var listener(typed_listener_ptr);
       if (CORBA::is_nil(listener.in()))
       {
         cerr << "ERROR: listener is nil." << endl;
@@ -130,7 +131,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]){
         dw_qos.deadline.period.sec     = DEADLINE_PERIOD.sec;
         dw_qos.deadline.period.nanosec = DEADLINE_PERIOD.nanosec;
 
-        cerr << "Seting datawriter deadline QOS" << endl;
+        cerr << "Setting datawriter deadline QOS" << endl;
 
         // Set qos with deadline. The watch dog starts now.
         if (dw->set_qos(dw_qos) != ::DDS::RETCODE_OK)
@@ -182,12 +183,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]){
           exit(1);
         }
 
-        if (deadline_status.total_count_change != NUM_EXPIRATIONS * NUM_WRITE_THREADS)
+        // Check if the total count changed is correctly giving the change between
+        // the last time our listener got invoked and our manual call now
+        if (deadline_status.total_count_change != (deadline_status.total_count - typed_listener_ptr->offered_deadline_total_count()))
         {
           cerr << "ERROR: Incorrect missed offered "
             << "deadline count change ("
             << deadline_status.total_count_change
-            << ") instead of " << NUM_EXPIRATIONS * NUM_WRITE_THREADS
+            << ") instead of " << (deadline_status.total_count - typed_listener_ptr->offered_deadline_total_count())
             << endl;
 
           exit(1);
@@ -228,13 +231,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]){
         {
           cerr << "ERROR: Unexpected number of missed offered "
             << "deadlines (" << deadline_status.total_count
-            << " instead of " << (NUM_EXPIRATIONS + 2) * NUM_WRITE_THREADS << ") "
+            << " instead of " << (deadline_status.total_count - typed_listener_ptr->offered_deadline_total_count()) << ") "
             << endl;
 
           exit(1);
         }
 
-        if (deadline_status.total_count_change != NUM_WRITE_THREADS * 2)
+        // Check if the total count changed is correctly giving the change between
+        // the last time our listener got invoked and our manual call now
+        if (deadline_status.total_count_change != (deadline_status.total_count - typed_listener_ptr->offered_deadline_total_count()))
         {
           cerr << "ERROR: Incorrect missed offered "
             << "deadline count change ("
