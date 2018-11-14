@@ -105,17 +105,6 @@ int DataWriterListenerImpl::wait_matched(long count, const ACE_Time_Value *absti
   return count == matched_ ? 0 : result;
 }
 
-int DataWriterListenerImpl::wait_matched(long count, const ACE_Time_Value *abstime) const
-{
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, -1);
-
-  int result = 0;
-  while (count != matched_ && result == 0) {
-    result = matched_condition_.wait(abstime);
-  }
-  return count == matched_ ? 0 : result;
-}
-
 CORBA::Long DataWriterListenerImpl::offered_deadline_total_count (void) const
 {
   return offered_deadline_total_count_;
