@@ -1,9 +1,7 @@
 # Distributed under the OpenDDS License. See accompanying LICENSE
 # file or http://www.opendds.org/license.html for details.
 
-foreach(_dependency tao_idl_sources dds_idl_sources)
-  include(${CMAKE_CURRENT_LIST_DIR}/${_dependency}.cmake)
-endforeach()
+include(${CMAKE_CURRENT_LIST_DIR}/dds_idl_sources.cmake)
 
 function(opendds_include_dirs_once)
   get_directory_property(includes INCLUDE_DIRECTORIES)

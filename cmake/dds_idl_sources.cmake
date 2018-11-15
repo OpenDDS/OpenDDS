@@ -1,6 +1,8 @@
 # Distributed under the OpenDDS License. See accompanying LICENSE
 # file or http://www.opendds.org/license.html for details.
 
+include(${CMAKE_CURRENT_LIST_DIR}/tao_idl_sources.cmake)
+
 function(opendds_target_generated_dependencies target idl_file scope)
 
   get_source_file_property(idl_ts_files ${idl_file} OPENDDS_TYPESUPPORT_IDLS)
@@ -172,12 +174,14 @@ function(opendds_target_idl_sources target)
 
     set(_cur_idl_outputs ${_cur_idl_headers} ${_cur_idl_cpp_files})
 
+    _tao_append_lib_dir_to_path(_tao_extra_lib_dirs)
+
     add_custom_command(
       OUTPUT ${_cur_idl_outputs} ${_cur_type_support_idl} ${_cur_java_list}
       DEPENDS opendds_idl ${DDS_ROOT}/dds/idl/IDLTemplate.txt
       MAIN_DEPENDENCY ${abs_filename}
       COMMAND ${CMAKE_COMMAND} -E env "DDS_ROOT=${DDS_ROOT}" "TAO_ROOT=${TAO_INCLUDE_DIR}"
-              "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${TAO_LIB_DIR}"
+              "${_tao_extra_lib_dirs}"
               $<TARGET_FILE:opendds_idl> -I${_working_source_dir}
               ${_ddsidl_flags} ${file_dds_idl_flags} ${abs_filename}
       WORKING_DIRECTORY ${_arg_WORKING_DIRECTORY}

@@ -1,6 +1,23 @@
 # Distributed under the OpenDDS License. See accompanying LICENSE
 # file or http://www.opendds.org/license.html for details.
 
+macro(_tao_append_lib_dir_to_path dst)
+  if (MSVC)
+    set(${dst} "PATH=")
+    if (DEFINED ENV{PATH})
+      set(${dst} "${${dst}}$ENV{PATH};")
+    endif()
+
+  else()
+    set(${dst} "LD_LIBRARY_PATH=")
+    if (DEFINED ENV{LD_LIBRARY_PATH})
+      set(${dst} "${${dst}}$ENV{LD_LIBRARY_PATH}:")
+    endif()
+  endif()
+
+  set(${dst} "${${dst}}${TAO_LIB_DIR}")
+endmacro()
+
 set(TAO_VERSIONING_IDL_FLAGS
   -Wb,versioning_begin=TAO_BEGIN_VERSIONED_NAMESPACE_DECL
   -Wb,versioning_end=TAO_END_VERSIONED_NAMESPACE_DECL
@@ -157,12 +174,14 @@ function(tao_idl_command name)
       ${_SKEL_CPP_FILES}
       ${_ANYOP_CPP_FILES})
 
+    _tao_append_lib_dir_to_path(_tao_extra_lib_dirs)
+
     add_custom_command(
       OUTPUT ${_OUTPUT_FILES}
       DEPENDS tao_idl ${tao_idl_shared_libs} ace_gperf
       MAIN_DEPENDENCY ${idl_file_path}
       COMMAND ${CMAKE_COMMAND} -E env "DDS_ROOT=${DDS_ROOT}"  "TAO_ROOT=${TAO_INCLUDE_DIR}"
-        "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${TAO_LIB_DIR}"
+        "${_tao_extra_lib_dirs}"
         $<TARGET_FILE:tao_idl> -g ${GPERF_LOCATION} ${TAO_CORBA_IDL_FLAGS} -Sg -Wb,pre_include=ace/pre.h -Wb,post_include=ace/post.h -I${TAO_INCLUDE_DIR} -I${_working_source_dir} ${_converted_flags} ${idl_file_path}
       WORKING_DIRECTORY ${_arg_WORKING_DIRECTORY}
     )
