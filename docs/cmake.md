@@ -103,7 +103,7 @@ cd OpenDDS-src
 ./configure --prefix=$DDS_WORKSPACE/opendds-install --ace-github-latest
 make
 make install
-cp -ar tests/cmake_integration/Messenger ../Messenger
+cp -ar tests/cmake_integration/Messenger ..
 cd ../Messenger/Messenger_1
 mkdir build
 cd build

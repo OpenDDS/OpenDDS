@@ -9,7 +9,7 @@ find_package(OpenDDS)
 
 set(src "${CMAKE_CURRENT_SOURCE_DIR}/..")
 set(dst ${CMAKE_CURRENT_BINARY_DIR})
-set(all_targets publisher subscriber stack_subscriber messenger)
+set(all_targets publisher subscriber messenger)
 
 # Messenger library
 add_library(messenger)
@@ -25,13 +25,6 @@ add_executable(publisher
 # Subscriber
 add_executable(subscriber
     ${src}/subscriber.cpp
-    ${src}/DataReaderListener.cpp
-    ${src}/DataReaderListener.h
-)
-
-# Stacksubscriber
-add_executable(stack_subscriber
-    ${src}/stack_subscriber.cpp
     ${src}/DataReaderListener.cpp
     ${src}/DataReaderListener.h
 )
