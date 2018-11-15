@@ -11,6 +11,8 @@
 #include "ace/INET_Addr.h"
 #include "dds/DCPS/Serializer.h"
 
+#include "stun_export.h"
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
@@ -112,15 +114,15 @@ namespace STUN {
     uint16_t m_length;
   };
 
-  bool operator>>(DCPS::Serializer& serializer, Message& message);
-  bool operator<<(DCPS::Serializer& serializer, const Message& message);
+  OpenDDS_Stun_Export bool operator>>(DCPS::Serializer& serializer, Message& message);
+  OpenDDS_Stun_Export bool operator<<(DCPS::Serializer& serializer, const Message& message);
 
   class Sender {
   public:
     virtual void send(const ACE_INET_Addr& address, const Message& message) = 0;
   };
 
-  class Participant {
+  class OpenDDS_Stun_Export Participant {
   public:
     Participant(Sender* a_sender) : m_sender(a_sender) {}
 
