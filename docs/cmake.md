@@ -38,7 +38,7 @@ CMake package with the required context it needs to integrate with the
 OpenDDS code generators and libraries.
 
 *Note:* With an installed version of OpenDDS (generated using `make install`),
-`config.cmake`  will be placed in `/path/to/install-prefix-dir/lib/cmake/opendds`.  This location allows CMake to locate the file using `CMAKE_PREFIX_PATH`.
+`config.cmake`  will be placed in `/path/to/install-prefix-dir/lib/cmake/OpenDDS`.  This location allows CMake to locate the file using `CMAKE_PREFIX_PATH`.
 
 Not all of the variables in this file are used.  They are procedurally
 generated from variables in the configure script. However, to get a better
@@ -60,16 +60,20 @@ within a CMakeLists.txt file. See the examples below for typical usage scenarios
 
 ### Example Using OpenDDS Source Tree
 
-To generate/compile the [Messenger with direct IDL inclusion] within the OpenDDS source tree
-(assuming `source setenv.sh` on Unix or `setenv.cmd` on Windows was already run):
+When using the CMake Package, the OpenDDS build environment variables (from
+setenv.sh or setenv.cmd) do not need to be set.  CMake's varaible
+`CMAKE_PREFIX_PATH` needs to include the top directory of OpenDDS's source tree,
+that is the directory known as `DDS_ROOT` when OpenDDS was compiled.
+
+To generate/compile the [Messenger with direct IDL inclusion] within the OpenDDS source tree:
 
 #### Unix
 
 ```bash
-cd $DDS_ROOT/tests/cmake_integration/Messenger/Messenger_1
+cd tests/cmake_integration/Messenger/Messenger_1
 mkdir build
 cd build
-cmake -DCMAKE_PREFIX_PATH=$DDS_ROOT ..
+cmake -DCMAKE_PREFIX_PATH=<location of OpenDDS source tree> ..
 cmake --build .
 ```
 
@@ -79,10 +83,10 @@ The following assumes Visual Studio 2017 using 64-bit architecture (adjust the
 CMake -G parameter if using something different).
 
 ```bat
-cd %DDS_ROOT%\tests\cmake_integration\Messenger\Messenger_1
+cd tests\cmake_integration\Messenger\Messenger_1
 mkdir build
 cd build
-cmake -DCMAKE_PREFIX_PATH=%DDS_ROOT% -G "Visual Studio 15 2017 Win64" ..
+cmake -DCMAKE_PREFIX_PATH=<location of OpenDDS source tree> -G "Visual Studio 15 2017 Win64" ..
 cmake --build .
 ```
 
@@ -100,7 +104,7 @@ the Messenger_1 example from outside the source tree
 ```bash
 DDS_WORKSPACE=$(pwd)
 cd OpenDDS-src
-./configure --prefix=$DDS_WORKSPACE/opendds-install --ace-github-latest
+./configure --prefix=$DDS_WORKSPACE/opendds-install
 make
 make install
 cp -ar tests/cmake_integration/Messenger ..
@@ -110,9 +114,6 @@ cd build
 cmake -DCMAKE_PREFIX_PATH=$DDS_WORKSPACE/opendds-install ..
 cmake --build .
 ```
-*Note:* The `--ace-github-latest` switch will download the latest ACE/TAO sources
-from GitHub, as opposed to downloading the most-recently released OCITAO.
-
 *Note:* While this will build the Messenger\_1 example, the run_test.pl script will
 not work due to missing Perl dependencies.
 
