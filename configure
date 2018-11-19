@@ -23,7 +23,7 @@ use warnings;
 ## Version of OCI's TAO to download
 my $oci_tao_version = '2.2a';
 ## Version of DOC Group ACE/TAO to download, uses the ACE version number
-my $doc_tao_version = '6.5.2';
+my $doc_tao_version = '6.5.3';
 
 # save args before Getopt modifies them
 my @ARGS = @ARGV;
@@ -590,7 +590,9 @@ if (!$ace_src || !$tao_src) {
     my($urlbase, $file, $download_message);
 
     if ($opts{'doc_group'}) {
-      $urlbase = 'http://download.dre.vanderbilt.edu/previous_versions/';
+      my $github_url_tao_version = $doc_tao_version;
+      $github_url_tao_version =~ s/\./_/g;
+      $urlbase = 'http://github.com/DOCGroup/ACE_TAO/releases/download/ACE%2BTAO-' . $github_url_tao_version . '/';
       $file = 'ACE+TAO-src-' . $doc_tao_version . '.'
         . ($is_windows ? 'zip' : 'tar.gz');
       $download_message = "Downloading $file";
