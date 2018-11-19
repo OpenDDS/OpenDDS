@@ -3,6 +3,8 @@
 
 include(${CMAKE_CURRENT_LIST_DIR}/config.cmake)
 
+option(OPENDDS_CMAKE_VERBOSE "Print verbose output when loading the OpenDDS Config Package")
+
 set(_OPENDDS_RELATIVE_SOURCE_ROOT "${CMAKE_CURRENT_LIST_DIR}/..")
 set(_OPENDDS_RELATIVE_PREFIX_ROOT "${CMAKE_CURRENT_LIST_DIR}/../../..")
 
