@@ -56,7 +56,13 @@ The OpenDDS CMake package is based upon the standard CMake
 [packaging guidelines](https://cmake.org/cmake/help/latest/manual/cmake-packages.7.html),
 so the typical generate/compile steps only require setting the `CMAKE_PREFIX_PATH` and
 calling [`find_package(OpenDDS)`](https://cmake.org/cmake/help/latest/command/find_package.html)
-within a CMakeLists.txt file. See the examples below for typical usage scenarios.
+within a CMakeLists.txt file. In addition, the following cache variables/options can be used to
+control the behavior of the OpenDDS CMake package.
+
+### Cache Variables/Options Understood by OpenDDS
+|Cache Variable           | Description                                                |
+|------------------------ | ---------------------------------------------------------- |
+|`OPENDDS_CMAKE_VERBOSE`  | Print detailed status information at CMake-Generation time |
 
 ### Example Using OpenDDS Source Tree
 
@@ -165,7 +171,7 @@ OPENDDS_TARGET_SOURCES(publisher
 )
 ```
 
-Another snippet, based upon [Messenger with auxiliary IDL lib], showcases how an
+Another snippet, based upon [Messenger with auxiliary IDL library], showcases how an
 auxiliary IDL library can be created for inclusion by other executables:
 
 ```cmake
@@ -186,4 +192,4 @@ target_link_libraries(publisher messenger OpenDDS::OpenDDS)
 not having any sources added with it in the call to `add_library`.
 
 [Messenger with direct IDL inclusion]: ../tests/cmake_integration/Messenger/Messenger_1/CMakeLists.txt
-[Messenger with auxiliary IDL lib]: ../tests/cmake_integration/Messenger/Messenger_2/CMakeLists.txt
+[Messenger with auxiliary IDL library]: ../tests/cmake_integration/Messenger/Messenger_2/CMakeLists.txt
