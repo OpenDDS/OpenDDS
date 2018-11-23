@@ -55,9 +55,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         case '?':
         default:
           ACE_ERROR_RETURN ((LM_ERROR,
-            "usage:  %s "
-            "-l expected late samples "
-            "\n",
+            ACE_TEXT("usage:  %s -l expected late samples \n"),
             argv [0]),
             -1);
         }
