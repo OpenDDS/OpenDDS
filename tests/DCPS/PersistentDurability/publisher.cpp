@@ -51,9 +51,7 @@ parse_args (int argc, ACE_TCHAR *argv[])
       case '?':
       default:
         ACE_ERROR_RETURN ((LM_ERROR,
-                           "usage:  %s "
-                           "[-w] [-d directory]"
-                           "\n",
+                           ACE_TEXT("usage:  %s [-w] [-d directory]\n"),
                            argv [0]),
                           -1);
       }
