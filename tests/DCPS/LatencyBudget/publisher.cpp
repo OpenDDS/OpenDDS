@@ -59,9 +59,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         case '?':
         default:
           ACE_ERROR_RETURN ((LM_ERROR,
-            "usage:  %s "
-            "-o offset (in seconds) "
-            "\n",
+            ACE_TEXT("usage:  %s -o offset (in seconds) \n"),
             argv [0]),
             -1);
         }
