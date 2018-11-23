@@ -40,8 +40,8 @@ DataWriterRemoteImpl::add_association(const RepoId& yourId,
     GuidConverter reader_converter(reader.readerId);
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataWriterRemoteImpl::add_association - ")
                ACE_TEXT("local %C remote %C\n"),
-               std::string(writer_converter).c_str(),
-               std::string(reader_converter).c_str()));
+               OPENDDS_STRING(writer_converter).c_str(),
+               OPENDDS_STRING(reader_converter).c_str()));
   }
 
   // the local copy of parent_ is necessary to prevent race condition
