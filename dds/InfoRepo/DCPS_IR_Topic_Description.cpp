@@ -367,7 +367,7 @@ void DCPS_IR_Topic_Description::associate(DCPS_IR_Publication* publication,
     // Associate the subscription with the publication
     subscription->add_associated_publication(publication, false);
   } else {
-    ACE_DEBUG((LM_INFO, ACE_TEXT("Invalid publication detected, NOT notifying subcription of association\n")));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("Invalid publication detected, NOT notifying subscription of association\n")));
   }
 }
 
