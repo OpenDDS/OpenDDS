@@ -43,9 +43,7 @@ int parse_args (int argc, ACE_TCHAR *argv[])
       case '?':
       default:
         ACE_ERROR_RETURN ((LM_ERROR,
-                           "usage:  %s "
-                           "-k <Info Repo ior> "
-                           "\n",
+                           ACE_TEXT("usage:  %s -k <Info Repo ior> \n"),
                            argv [0]),
                           -1);
       }
