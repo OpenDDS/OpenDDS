@@ -56,8 +56,7 @@ parse_args (int argc, ACE_TCHAR *argv[])
     case '?':
     default:
       ACE_ERROR_RETURN ((LM_ERROR,
-        "usage:  %s "
-        "\n",
+        ACE_TEXT("usage:  %s \n"),
         argv [0]),
         -1);
     }
