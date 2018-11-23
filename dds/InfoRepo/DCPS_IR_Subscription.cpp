@@ -418,9 +418,9 @@ void DCPS_IR_Subscription::disassociate_publication(OpenDDS::DCPS::RepoId id,
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) DCPS_IR_Subscription::disassociate_publication: ")
                    ACE_TEXT("subscription %C testing if publication %C == %C.\n"),
-                   std::string(sub_converter).c_str(),
-                   std::string(pub_converter).c_str(),
-                   std::string(sub_pub_converter).c_str()));
+                   OPENDDS_STRING(sub_converter).c_str(),
+                   OPENDDS_STRING(pub_converter).c_str(),
+                   OPENDDS_STRING(sub_pub_converter).c_str()));
       }
 
       if (id == pub->get_id()) {
