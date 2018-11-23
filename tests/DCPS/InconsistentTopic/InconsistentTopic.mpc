@@ -1,0 +1,40 @@
+
+project(DDS*idl): dcps_test_lib {
+  idlflags      += -Wb,stub_export_include=StringKey_export.h \
+                   -Wb,stub_export_macro=StringKey_Export -SS
+  dcps_ts_flags += -Wb,export_macro=StringKey_Export
+  dynamicflags  += STRINGKEY_BUILD_DLL
+
+  TypeSupport_Files {
+    Messenger.idl
+  }
+
+
+}
+
+
+project(DDS*Publisher) : dcpsexe, dcps_transports_for_test {
+  exename = publisher
+  after  += DDS*idl
+  libs   += DDS*idl
+
+  Idl_Files {
+  }
+
+  Source_Files {
+    publisher.cpp
+  }
+}
+
+project(DDS*Subscriber) : dcpsexe, dcps_transports_for_test {
+  exename = subscriber
+  after  += DDS*idl
+  libs   += DDS*idl
+
+  Idl_Files {
+  }
+
+  Source_Files {
+    subscriber.cpp
+  }
+}
