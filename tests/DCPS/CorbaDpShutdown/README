@@ -1,0 +1,21 @@
+/**
+
+$Id: README 2179 2018-11-2 17:01:51 dczanella $
+
+@page CorbaDpShutdown Test README File
+
+  Objective: This test check start/stop OpenDDS infrastructure using a CORBA 
+  During start() procedure it configures OpenDDS in RTPS Mode create a participant
+  During stop() procedure it destroys a participant and shutdown
+  Doing this at first time it is OK, but a second time it gets a SIG FAULT
+
+Please refrain from "improving", extending or expanding this
+test, if you need to change
+
+  To run the test use the run_test.pl script:
+
+$ ./run_test.pl
+
+  the script returns 0 if the test was successful.
+
+*/

@@ -1,0 +1,37 @@
+// -*- MPC -*-
+// $Id: CorbaDpShutdown.mpc 935 2008-12-10 21:47:27Z mitza $
+
+project(*idl): taoidldefaults {
+  idlflags += -Sp
+  IDL_Files {
+    Test.idl
+  }
+  custom_only = 1
+}
+
+project(*Server): dcpsexe,dcps_transports_for_test,taoserver {
+  after += *idl
+  Source_Files {
+    CorbaDpShutdown.cpp
+    server.cpp
+  }
+  Source_Files {
+    TestC.cpp
+    TestS.cpp
+  }
+  IDL_Files {
+  }
+}
+
+project(*Client): taoclient {
+  after += *idl
+  Source_Files {
+    client.cpp
+  }
+  Source_Files {
+    TestC.cpp
+  }
+  IDL_Files {
+  }
+}
+
