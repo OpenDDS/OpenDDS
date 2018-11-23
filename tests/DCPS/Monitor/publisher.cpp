@@ -40,9 +40,7 @@ parse_args (int argc, ACE_TCHAR *argv[])
     case '?':
     default:
       ACE_ERROR_RETURN ((LM_ERROR,
-        "usage:  %s "
-        "-i <send_interval_sec> "
-        "\n",
+        ACE_TEXT("usage:  %s -i <send_interval_sec> \n"),
         argv [0]),
         -1);
     }
