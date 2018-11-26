@@ -56,7 +56,7 @@ public:
   /// Delete the topic object upon last topic associated sub/pub and topic
   /// object deletion. It's kind of reference counting.
   /// The removing true indicates it's called upon delete_topic, otherwise
-  /// it's upon remove_publication/remove_subcription.
+  /// it's upon remove_publication/remove_subscription.
   void release(bool removing);
 
   /// Adds the publication to the list of publications
