@@ -1995,7 +1995,8 @@ sub write_cmake_file {
 
   sub whack_to_slash {
     my $s = shift;
-    $s =~ s|\\|/|gr;
+    $s =~ s|\\|/|g;
+    return $s;
   };
 
   sub to_cmake_scalar {
@@ -2042,7 +2043,8 @@ sub write_cmake_file {
     $opts_{'tao'} = $tao_src;
 
     for my $k (sort keys %opts_) {
-      my $var = uc "OPENDDS_${k}" =~ s/-/_/gr;
+      my $var = uc "OPENDDS_${k}";
+      $var =~ s/-/_/g;
       my $val = $opts_{$k};
 
       if ($make_absolute_path{$k}) {
