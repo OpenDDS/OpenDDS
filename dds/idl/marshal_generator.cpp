@@ -21,6 +21,14 @@ using namespace AstTypeClassification;
 
 namespace {
 
+  std::string& insert_cxx11_accessor_parens(std::string& dst) {
+    std::string::size_type n = dst.find_first_of(".");
+    if (n != std::string::npos) {
+      dst.insert(n, "()");
+    }
+    return dst;
+  }
+
   typedef bool (*is_special_case)(const string& cxx);
   typedef bool (*gen_special_case)(const string& cxx);
 
@@ -1757,7 +1765,7 @@ bool marshal_generator::gen_struct(AST_Structure* /* node */,
                     << " (" << key_name << "). " << error << std::endl;
           return false;
         }
-        expr += findSizeCommon(use_cxx11 ? key_name + "()" : key_name,
+        expr += findSizeCommon(use_cxx11 ? insert_cxx11_accessor_parens(key_name) : key_name,
                                field_type, "stru.t", intro);
       }
       be_global->impl_ << intro << expr;
@@ -1784,7 +1792,7 @@ bool marshal_generator::gen_struct(AST_Structure* /* node */,
         }
         if (first) first = false;
         else       expr += "\n    && ";
-        expr += streamCommon(use_cxx11 ? key_name + "()" : key_name,
+        expr += streamCommon(use_cxx11 ? insert_cxx11_accessor_parens(key_name) : key_name,
                              field_type, "<< stru.t", intro);
       }
       if (first) be_global->impl_ << intro << "  return true;\n";
@@ -1812,7 +1820,7 @@ bool marshal_generator::gen_struct(AST_Structure* /* node */,
         }
         if (first) first = false;
         else       expr += "\n    && ";
-        expr += streamCommon(use_cxx11 ? key_name + "()" : key_name,
+        expr += streamCommon(use_cxx11 ? insert_cxx11_accessor_parens(key_name) : key_name,
                              field_type, ">> stru.t", intro);
       }
       if (first) be_global->impl_ << intro << "  return true;\n";
