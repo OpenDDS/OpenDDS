@@ -120,6 +120,7 @@ namespace STUN {
   class Sender {
   public:
     virtual void send(const ACE_INET_Addr& address, const Message& message) = 0;
+    virtual ~Sender() = default;
   };
 
   class OpenDDS_Stun_Export Participant {
