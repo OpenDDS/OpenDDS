@@ -43,7 +43,7 @@ ShmemDataLink::open(const std::string& peer_address)
   const ACE_TString name = ACE_TEXT_CHAR_TO_TCHAR(peer_address.c_str());
   ShmemAllocator::MEMORY_POOL_OPTIONS alloc_opts;
 
-#ifdef ACE_WIN32
+#ifdef OPENDDS_SHMEM_WINDOWS
   const bool use_opts = true;
   const ACE_TString name_under = name + ACE_TEXT('_');
   // Find max size of peer's pool so enough local address space is reserved.
