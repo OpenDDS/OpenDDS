@@ -78,7 +78,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
         exit(1);
       }
 
-      ACE_OS::sleep (5);
+      ACE_OS::sleep (8);
 
       DDS::Duration_t timeout;
       timeout.sec = 0;
