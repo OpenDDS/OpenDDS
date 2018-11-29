@@ -1,0 +1,17 @@
+{
+  "name": "repeater",
+  "version": "0.1.0",
+  "description": "Multicast Datagram Repeater",
+  "main": "repeater.js",
+  "bin": "./repeater.js",
+  "dependencies": {
+    "@google-cloud/compute": "^0.10.0",
+    "yargs": "^12.0.5"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Adam Mitz (Object Computing, Inc.)",
+  "license": "SEE LICENSE IN OpenDDS"
+}
