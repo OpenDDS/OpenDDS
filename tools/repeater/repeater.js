@@ -19,6 +19,11 @@ const args = require('yargs')
           type: 'array',
           requiresArg: true
       })
+      .option('gcp', {
+          describe: 'Get send addresses from GCP (zone:group)',
+          type: 'string',
+          requiresArg: true
+      })
       .option('verbose', {
           describe: 'Log each incoming datagram',
           alias: 'v',
@@ -32,6 +37,24 @@ const mport = mcast[1];
 
 if (mport == args.uport) {
     throw new Error('Multicast port and unicast port must be distinct.');
+}
+
+const sendTo = {};
+if (args.send) {
+    args.send.forEach((addr) => {
+        sendTo[addr] = 1;
+    });
+}
+
+if (args.gcp) {
+    require('./gcp.js')(args.gcp).then((addrs) => {
+        addrs.forEach((addr) => {
+            if (!sendTo[addr]) {
+                console.log(`GCP: adding send address ${addr}`);
+            }
+            sendTo[addr] = 1;
+        });
+    });
 }
 
 const msock = dgram.createSocket({type: 'udp4', reuseAddr: true});
@@ -60,9 +83,9 @@ msock.on('message', (msg, rinfo) => {
     if (args.verbose) {
         console.log(`mc from ${rinfo.address}:${rinfo.port} ${rinfo.size} B`);
     }
-    args.send.forEach((sendAddr) => {
+    for (let sendAddr of Object.keys(sendTo)) {
         msock.send(msg, args.uport, sendAddr);
-    });
+    }
 });
 
 usock.on('listening', () => {
