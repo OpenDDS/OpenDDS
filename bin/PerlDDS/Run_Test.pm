@@ -727,6 +727,36 @@ sub stop_process {
   return !$kill_status;
 }
 
+sub kill_process {
+  my $self = shift;
+  my $timed_wait = shift;
+  my $name = shift;
+
+  if (!defined($self->{processes}->{process}->{$name})) {
+    print STDERR "ERROR: no process with name=$name\n";
+    $self->{status} = -1;
+    return 0;
+  }
+
+  # remove $name from the order list
+  my @order = @{$self->{processes}->{order}};
+  $self->{processes}->{order} = [];
+  foreach my $list_name (@order) {
+    if ($list_name ne $name) {
+      push(@{$self->{processes}->{order}}, $list_name);
+    }
+  }
+
+  my $kill_status =
+    PerlDDS::terminate_wait_kill($self->{processes}->{process}->{$name}->{process},
+                                 $timed_wait,
+                                 $name,
+                                 $self->{test_verbose});
+  $self->{status} |= $kill_status;
+  delete($self->{processes}->{process}->{$name});
+  return !$kill_status;
+}
+
 sub stop_processes {
   my $self = shift;
   my $timed_wait = shift;
