@@ -13,6 +13,20 @@
 #include <string>
 using std::string;
 
+namespace {
+  std::string& insert_cxx11_accessor_parens(std::string& dst) {
+    std::string::size_type n = dst.find_first_of(".");
+    if (n != std::string::npos) {
+      dst.insert(n, "()");
+    }
+    n = dst.find_first_of("[");
+    if (n != std::string::npos) {
+      dst.insert(n, "()");
+    }
+    return dst;
+  }
+}
+
 bool keys_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
   const std::vector<AST_Field*>&, AST_Type::SIZE_TYPE, const char*)
 {
@@ -75,10 +89,7 @@ bool keys_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
       for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
         string fname = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
         if (use_cxx11) {
-          std::string::size_type n = fname.find_first_of(".");
-          if (n != std::string::npos) {
-            fname.insert(n, "()");
-          }
+          insert_cxx11_accessor_parens(fname);
         }
         be_global->header_ <<
           "    if (v1." << fname << " < v2." << fname << ") return true;\n"
