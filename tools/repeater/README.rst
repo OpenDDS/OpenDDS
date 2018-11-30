@@ -52,3 +52,13 @@ within a subnet.  In this scenario, hosts A1 and A2 can exchange multicast
 traffic, as can B1 and B2.  However, B1 can't multicast to A1, etc.  Using the
 same deployment as above, the repeater on A1 can also serve A2 and the repeater
 on B1 can serve B2.  Each multicast domain needs one repeater.
+
+Integration with Google Cloud Platform
+--------------------------------------
+
+When the repeater is run on a GCP compute engine instance that's part of an
+instance group, a common use case is to connect all instances in the group.
+Instead of (or in addition to) using ``--send`` to manually specify destination
+addresses, use ``--gcp zone:group`` which will use GCP's API to find the IP
+addresses of all other instances in the group.  The instances need to have
+the Cloud API access scope "Compute Engine" enabled.
