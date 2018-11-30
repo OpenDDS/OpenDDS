@@ -47,9 +47,9 @@ typedef HANDLE ShmemSharedSemaphore;
 #  define OPENDDS_SHMEM_UNIX
 typedef ACE_Shared_Memory_Pool ShmemPool;
 typedef sem_t ShmemSharedSemaphore;
-#  if !defined (ACE_HAS_POSIX_SEM_TIMEOUT) && \
-      !defined (ACE_DISABLE_POSIX_SEM_TIMEOUT_EMULATION)
-#    define OPENDDS_SHMEM_UNIX_NO_SEM_TIMEOUT
+#  if !defined ACE_HAS_POSIX_SEM_TIMEOUT && \
+      !defined ACE_DISABLE_POSIX_SEM_TIMEOUT_EMULATION
+#    define OPENDDS_SHMEM_UNIX_EMULATE_SEM_TIMEOUT
 #  endif
 
 // No Support for this Platform, Trying to Use Shared Memory Transport Will

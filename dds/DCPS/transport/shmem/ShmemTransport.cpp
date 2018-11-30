@@ -147,7 +147,7 @@ ShmemTransport::configure_i(ShmemInst& config)
   ACE_sema_t ace_sema;
   std::memset(&ace_sema, 0, sizeof ace_sema);
   ace_sema.sema_ = pSem;
-#    ifdef OPENDDS_SHMEM_UNIX_NO_SEM_TIMEOUT
+#    ifdef OPENDDS_SHMEM_UNIX_EMULATE_SEM_TIMEOUT
   ace_sema.lock_ = PTHREAD_MUTEX_INITIALIZER;
   ace_sema.count_nonzero_ = PTHREAD_COND_INITIALIZER;
 #    endif
