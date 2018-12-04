@@ -18,6 +18,7 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/GuidConverter.h"
+#include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/Qos_Helper.h"
 
 #ifdef OPENDDS_SECURITY
@@ -260,15 +261,6 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
 
   // Append metatraffic unicast locator
   sedp_.unicast_locators(sedp_unicast_);
-
-  if (!disco->rtps_relay_sedp().empty()) {
-    CORBA::ULong idx = sedp_unicast_.length();
-    sedp_unicast_.length(idx + 1);
-    ACE_INET_Addr relay(disco->rtps_relay_sedp().c_str());
-    sedp_unicast_[idx].kind = address_to_kind(relay);
-    sedp_unicast_[idx].port = relay.get_port_number();
-    RTPS::address_to_bytes(sedp_unicast_[idx].address, relay);
-  }
 
   if (disco->sedp_multicast()) { // Append metatraffic multicast locator
     const ACE_INET_Addr& mc_addr = sedp_.multicast_group();
@@ -659,9 +651,101 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
     return;
   }
 
+  const DCPS::RepoId guid = make_guid(pdata.participantProxy.guidPrefix, DCPS::ENTITYID_PARTICIPANT);
+  if (guid == guid_) {
+    // About us, stop.
+    return;
+  }
+
   DCPS::MessageId msg_id = (data.inlineQos.length() && disposed(data.inlineQos)) ? DCPS::DISPOSE_INSTANCE : DCPS::SAMPLE_DATA;
 
   handle_participant_data(msg_id, pdata);
+
+  ICE::AbstractAgent* ice_agent = sedp_.get_ice_agent();
+  if (!ice_agent) {
+    return;
+  }
+
+  // Form the set of guids.
+  ICE::GuidSetType guids;
+  const BuiltinEndpointSet_t& avail = pdata.participantProxy.availableBuiltinEndpoints;
+
+  // TODO:  Security.
+  // See RTPS v2.1 section 8.5.5.1
+  if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR) {
+    RepoId r = guid;
+    r.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER;
+    guids.insert(r);
+  }
+  if (avail & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR) {
+    RepoId r = guid;
+    r.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER;
+    guids.insert(r);
+  }
+  if (avail & BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER) {
+    RepoId r = guid;
+    r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER;
+    guids.insert(r);
+  }
+  if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER) {
+    RepoId r = guid;
+    r.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER;
+    guids.insert(r);
+  }
+  if (avail & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER) {
+    RepoId r = guid;
+    r.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER;
+    guids.insert(r);
+  }
+  if (avail & BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER) {
+    RepoId r = guid;
+    r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER;
+    guids.insert(r);
+  }
+
+  for (ICE::GuidSetType::const_iterator pos = guids.begin(), limit = guids.end(); pos != limit; ++pos) {
+    ice_agent->start_ice(*pos);
+  }
+
+  ICE::AgentInfo agent_info;
+  bool have_agent_info = false;
+
+  for (size_t idx = 0, count = plist.length(); idx != count; ++idx) {
+    const RTPS::Parameter& parameter = plist[idx];
+    switch (parameter._d()) {
+    case RTPS::PID_OPENDDS_ICE_GENERAL:
+      {
+        have_agent_info = true;
+        const IceGeneral_t& ice_general = parameter.ice_general();
+        agent_info.type = static_cast<ICE::AgentType>(ice_general.agent_type);
+        agent_info.username = ice_general.username;
+        agent_info.password = ice_general.password;
+      }
+      break;
+    case RTPS::PID_OPENDDS_ICE_CANDIDATE:
+      {
+        have_agent_info = true;
+        const IceCandidate_t& ice_candidate = parameter.ice_candidate();
+        ICE::Candidate candidate;
+        candidate.address = ACE_INET_Addr(ice_candidate.portt, ice_candidate.address);
+        candidate.foundation = ice_candidate.foundation;
+        candidate.priority = ice_candidate.priority;
+        candidate.type = static_cast<ICE::CandidateType>(ice_candidate.type);
+        agent_info.candidates.push_back(candidate);
+      }
+      break;
+    default:
+      // Do nothing.
+      break;
+    }
+  }
+
+  if (have_agent_info) {
+    // TODO:  Call remove_remote_agent when liveliness is lost.
+    for (ICE::GuidSetType::const_iterator pos = guids.begin(), limit = guids.end(); pos != limit; ++pos) {
+      ice_agent->update_remote_agent_info(*pos, agent_info);
+    }
+  }
 }
 
 void
@@ -1668,6 +1752,40 @@ Spdp::SpdpTransport::write_i()
     return;
   }
 
+  ICE::AbstractAgent* ice_agent = outer_->sedp_.get_ice_agent();
+
+  if (ice_agent && ice_agent->is_running()) {
+    const ICE::AgentInfo& agent_info = ice_agent->get_local_agent_info();
+
+    {
+      IceGeneral_t ice_general;
+      ice_general.agent_type = agent_info.type;
+      ice_general.username = agent_info.username.c_str();
+      ice_general.password = agent_info.password.c_str();
+
+      Parameter param;
+      param.ice_general(ice_general);
+      const CORBA::ULong length = plist.length();
+      plist.length(length + 1);
+      plist[length] = param;
+    }
+
+    for (ICE::AgentInfo::CandidatesType::const_iterator pos = agent_info.candidates.begin(), limit = agent_info.candidates.end(); pos != limit; ++pos) {
+      IceCandidate_t ice_candidate;
+      ice_candidate.address = pos->address.get_ip_address();
+      ice_candidate.portt = pos->address.get_port_number();
+      ice_candidate.foundation = pos->foundation.c_str();
+      ice_candidate.priority = pos->priority;
+      ice_candidate.type = pos->type;
+
+      Parameter param;
+      param.ice_candidate(ice_candidate);
+      const CORBA::ULong length = plist.length();
+      plist.length(length + 1);
+      plist[length] = param;
+    }
+  }
+
   wbuff_.reset();
   CORBA::UShort options = 0;
   DCPS::Serializer ser(&wbuff_, false, DCPS::Serializer::ALIGN_CDR);
@@ -2092,7 +2210,6 @@ Spdp::add_sedp_unicast(const ACE_INET_Addr& addr)
   sedp_unicast_.length(idx + 1);
   sedp_unicast_[idx] = locator;
 }
-
 
 }
 }

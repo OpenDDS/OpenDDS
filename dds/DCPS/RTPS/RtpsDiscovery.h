@@ -141,14 +141,14 @@ public:
     guid_interface_ = gi;
   }
 
-  OPENDDS_STRING rtps_relay_sedp() const { return rtps_relay_sedp_; }
-  void rtps_relay_sedp(const OPENDDS_STRING& rrs) {
-    rtps_relay_sedp_ = rrs;
+  const ACE_INET_Addr& sedp_stun_server_address() const { return sedp_stun_server_address_; }
+  void sedp_stun_server_address(const ACE_INET_Addr& address) {
+    sedp_stun_server_address_ = address;
   }
 
-  OPENDDS_STRING rtps_relay_data() const { return rtps_relay_data_; }
-  void rtps_relay_data(const OPENDDS_STRING& rrd) {
-    rtps_relay_data_ = rrd;
+  const ACE_INET_Addr& sedp_rtps_relay_address() const { return sedp_rtps_relay_address_; }
+  void sedp_rtps_relay_address(const ACE_INET_Addr& address) {
+    sedp_rtps_relay_address_ = address;
   }
 
   OPENDDS_STRING rtps_relay_url() const { return rtps_relay_url_; }
@@ -165,8 +165,8 @@ private:
   OPENDDS_STRING default_multicast_group_;  /// FUTURE: handle > 1 group.
   OPENDDS_STRING guid_interface_;
   AddrVec spdp_send_addrs_;
-  OPENDDS_STRING rtps_relay_sedp_;
-  OPENDDS_STRING rtps_relay_data_;
+  ACE_INET_Addr sedp_stun_server_address_;
+  ACE_INET_Addr sedp_rtps_relay_address_;
   OPENDDS_STRING rtps_relay_url_;
 
   /// Guids will be unique within this RTPS configuration

@@ -687,6 +687,28 @@ TransportClient::unregister_for_writer(const RepoId& participant,
   }
 }
 
+ICE::AbstractAgent*
+TransportClient::get_ice_agent()
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, lock_, 0);
+  for (ImplsType::iterator pos = impls_.begin(), limit = impls_.end();
+       pos != limit;
+       ++pos) {
+    ICE::AbstractAgent* agent = (*pos)->config().get_ice_agent();
+    if (agent) { return agent; }
+  }
+
+  // DataLinkSet::GuardType guard(links_.lock());
+  // // TODO:  Return a set of agents or separate ice agents from transport and allow one ice agent to service multiple transports.
+  // for (DataLinkSet::MapType::const_iterator itr = links_.map().begin(); itr != links_.map().end(); ++itr) {
+  //   ICE::AbstractAgent* agent = itr->second->get_ice_agent();
+  //   if (agent) { return agent; }
+  // }
+
+  std::cerr << "NO AGENTS" << std::endl;
+  return 0;
+}
+
 bool
 TransportClient::send_response(const RepoId& peer,
                                const DataSampleHeader& header,

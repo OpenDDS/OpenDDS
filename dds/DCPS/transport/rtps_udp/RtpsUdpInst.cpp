@@ -96,6 +96,23 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
                         heartbeat_response_delay_);
   GET_CONFIG_TIME_VALUE(cf, sect, ACE_TEXT("handshake_timeout"),
                         handshake_timeout_);
+
+  ACE_TString stun_server_address_s;
+  GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("DataStunServerAddress"),
+                           stun_server_address_s);
+  if (!stun_server_address_s.is_empty()) {
+    ACE_INET_Addr addr(stun_server_address_s.c_str());
+    stun_server_address(addr);
+  }
+
+  ACE_TString rtps_relay_address_s;
+  GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("DataRtpsRelayAddress"),
+                           rtps_relay_address_s);
+  if (!rtps_relay_address_s.is_empty()) {
+    ACE_INET_Addr addr(rtps_relay_address_s.c_str());
+    rtps_relay_address(addr);
+  }
+
   return 0;
 }
 
@@ -182,6 +199,9 @@ RtpsUdpInst::populate_locator(OpenDDS::DCPS::TransportLocator& info) const
   }
 
   info.transport_type = "rtps_udp";
+  // TODO:  Probably don't need to do this anymore.
+  const void* ptr = &ice_agent_;
+  memcpy(info.ice_agent, &ptr, sizeof(void*));
   RTPS::locators_to_blob(locators, info.data);
 
   return locators.length();
@@ -197,6 +217,30 @@ RtpsUdpInst::get_blob(const OpenDDS::DCPS::TransportLocatorSeq& trans_info) cons
   }
 
   return 0;
+}
+
+ICE::AddressListType
+RtpsUdpInst::host_addresses() const {
+  ICE::AddressListType addresses;
+
+  //if local_address_string is empty, or only the port has been set
+  //need to get interface addresses to populate into the locator
+  if (this->local_address_string().empty() ||
+      this->local_address_string().rfind(':') == 0) {
+    if (TheServiceParticipant->default_address ().empty ()) {
+      get_interface_addrs(addresses);
+    } else {
+      addresses.push_back (ACE_INET_Addr (static_cast<u_short> (0), TheServiceParticipant->default_address ().c_str ()));
+    }
+  } else {
+    addresses.push_back(this->local_address());
+  }
+
+  for (ICE::AddressListType::iterator pos = addresses.begin(), limit = addresses.end(); pos != limit; ++pos) {
+    pos->set_port_number(this->local_address().get_port_number());
+  }
+
+  return addresses;
 }
 
 } // namespace DCPS

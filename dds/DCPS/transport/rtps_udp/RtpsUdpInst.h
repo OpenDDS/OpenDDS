@@ -13,6 +13,8 @@
 #include "dds/DCPS/transport/framework/TransportInst.h"
 #include "dds/DCPS/SafetyProfileStreams.h"
 
+#include "dds/DCPS/STUN/Stun.h"
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -69,6 +71,19 @@ public:
     set_port_in_addr_string(local_address_config_str_, port_number);
   }
 
+  void stun_server_address(const ACE_INET_Addr& address) {
+    ice_agent_.stun_server_address(address);
+  }
+  
+  void rtps_relay_address(const ACE_INET_Addr& /*address*/) {
+    std::cout << "TODO: rtps_relay_address in RtpsUdpInst" << std::endl;
+  }
+
+  ICE::AbstractAgent* get_ice_agent() { return &ice_agent_; }
+
+  OPENDDS_STRING rtps_relay_url_;
+
+
 private:
   friend class RtpsUdpType;
   template <typename T, typename U>
@@ -84,6 +99,9 @@ private:
 
   ACE_INET_Addr local_address_;
   OPENDDS_STRING local_address_config_str_;
+  ICE::Agent ice_agent_;
+
+  ICE::AddressListType host_addresses() const;
 };
 
 } // namespace DCPS

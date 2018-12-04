@@ -16,6 +16,8 @@
 #include "dds/DCPS/RTPS/BaseMessageTypes.h"
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
 
+#include "dds/DCPS/STUN/Stun.h"
+
 #include "dds/DCPS/RcHandle_T.h"
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/DataReaderCallbacks.h"
@@ -148,10 +150,10 @@ public:
 
   void remove_unicast_address(const ACE_INET_Addr& addr);
   void add_unicast_address(const ACE_INET_Addr& addr);
+  ICE::AbstractAgent* get_ice_agent();
 
 private:
   Spdp& spdp_;
-  OPENDDS_STRING rtps_relay_data_;
   typedef OPENDDS_SET(ACE_INET_Addr) UnicastAddressesType;
   UnicastAddressesType unicast_addresses_;
 
@@ -695,6 +697,13 @@ protected:
   DDS::DomainId_t get_domain_id() const;
 #endif
 
+  virtual void setup_remote_reader(DCPS::DataWriterCallbacks* dwr, const DCPS::RepoId& reader) {
+    dwr->get_ice_agent()->start_ice(reader);
+  }
+
+  virtual void setup_remote_writer(DCPS::DataReaderCallbacks* drr, const DCPS::RepoId& writer) {
+    drr->get_ice_agent()->start_ice(writer);
+  }
 };
 
 /// A class to wait on acknowledgments from other threads

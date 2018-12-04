@@ -1,3 +1,4 @@
+
 /*
  *
  *
@@ -7,6 +8,8 @@
 
 #ifndef OPENDDS_RTPS_STUN_H
 #define OPENDDS_RTPS_STUN_H
+
+#include <map>
 
 #include "ace/INET_Addr.h"
 #include "dds/DCPS/Serializer.h"
@@ -43,35 +46,39 @@ namespace STUN {
 
   enum AttributeType {
     MAPPED_ADDRESS     = 0x0001,
-    // USERNAME           = 0x0006,
-    // MESSAGE_INTEGRITY  = 0x0008,
+    USERNAME           = 0x0006,
+    MESSAGE_INTEGRITY  = 0x0008,
     // ERROR_CODE         = 0x0009,
     // UNKNOWN_ATTRIBUTES = 0x000A,
     // REALM              = 0x0014,
     // NONCE              = 0x0015,
     XOR_MAPPED_ADDRESS = 0x0020,
+    PRIORITY           = 0x0024,
+    USE_CANDIDATE      = 0x0025,
 
     // SOFTWARE           = 0x8022,
     // ALTERNATE_SERVER   = 0x8023,
-    // FINGERPRINT        = 0x8028
+    FINGERPRINT        = 0x8028,
+    ICE_CONTROLLED     = 0x8029,
+    ICE_CONTROLLING    = 0x802A
   };
 
   struct Attribute {
     AttributeType type;
 
-    ACE_INET_Addr mapped_address; // shared by MAPPED_ADDRESS and XOR_MAPPED_ADDRESS
-    std::string username;
-    std::string message_integrity;
-    uint32_t fingerprint;
+    ACE_INET_Addr mapped_address; // MAPPED_ADDRESS, XOR_MAPPED_ADDRESS
+    std::string username; // USERNAME
+    union {
+      unsigned char message_integrity[20]; // MESSAGE_INTEGRITY
+      uint32_t fingerprint; // FINGERPRINT
+      uint32_t priority; // PRIORITY
+      ACE_UINT64 ice_tie_breaker; // ICE_CONTROLLED, ICE_CONTROLLING
+    };
     struct {
       uint16_t code;
       std::string reason;
     } error;
-    std::string realm;
-    std::string nonce;
     std::vector<uint16_t> unknown_attributes;
-    std::string software;
-    ACE_INET_Addr alternate_server;
 
     uint16_t unknown_length;
 
@@ -79,11 +86,26 @@ namespace STUN {
   };
 
   Attribute make_mapped_address(const ACE_INET_Addr& addr);
+  Attribute make_username(const std::string& username);
+  Attribute make_message_integrity();
   Attribute make_xor_mapped_address(const ACE_INET_Addr& addr);
   Attribute make_unknown_attribute(uint16_t type, uint16_t length);
+  Attribute make_priority(uint32_t priority);
+  Attribute make_use_candidate();;
+
+  Attribute make_fingerprint();
+  Attribute make_ice_controlling(ACE_UINT64 ice_tie_breaker);
+  Attribute make_ice_controlled(ACE_UINT64 ice_tie_breaker);
 
   bool operator>>(DCPS::Serializer& serializer, Attribute& attribute);
   bool operator<<(DCPS::Serializer& serializer, const Attribute& attribute);
+
+  struct TransactionId {
+    uint8_t data[12];
+    bool operator<(const TransactionId& other) const;
+    bool operator==(const TransactionId& other) const;
+    bool operator!=(const TransactionId& other) const;
+  };
 
   struct Message {
     typedef std::vector<Attribute> AttributesType;
@@ -91,54 +113,60 @@ namespace STUN {
 
     Class class_;
     Method method;
+    TransactionId transaction_id;
 
-    uint8_t transaction_id[12];
-    bool valid_header;
-    bool valid_attributes;
+    Message()
+    : block(0), m_length(0), m_length_for_message_integrity(0) {}
 
-    Message() : valid_header(false), valid_attributes(false), m_length(0) {}
+    void generate_transaction_id();
 
     void append_attribute(const Attribute& attribute) {
       m_attributes.push_back(attribute);
       m_length += (4 + attribute.length() + 3) & ~3;
+      if (attribute.type == MESSAGE_INTEGRITY) {
+        m_length_for_message_integrity = m_length;
+      }
     }
 
     const_iterator begin() const { return m_attributes.begin(); }
     const_iterator end() const { return m_attributes.end(); }
     uint16_t length() const { return m_length; }
+    uint16_t length_for_message_integrity() const { return m_length_for_message_integrity; }
 
     bool contains_unknown_comprehension_required_attributes() const;
+    bool get_mapped_address(ACE_INET_Addr& address) const;
+    bool get_priority(uint32_t& priority) const;
+    bool get_username(std::string& username) const;
+    bool has_message_integrity() const;
+    bool verify_message_integrity(const std::string& password) const;
+    void compute_message_integrity(const std::string& password, unsigned char message_integrity[20]) const;
+    bool has_fingerprint() const;
+    uint32_t compute_fingerprint() const;
+    bool has_ice_controlled() const;
+    bool has_ice_controlling() const;
+    bool has_use_candidate() const;
+
+    ACE_Message_Block* block;
+    std::string password; // For integrity hashing.
 
   private:
     AttributesType m_attributes;
     uint16_t m_length;
+    uint16_t m_length_for_message_integrity;
   };
 
   OpenDDS_Stun_Export bool operator>>(DCPS::Serializer& serializer, Message& message);
   OpenDDS_Stun_Export bool operator<<(DCPS::Serializer& serializer, const Message& message);
+} // namespace STUN
 
-  class Sender {
-  public:
-    virtual void send(const ACE_INET_Addr& address, const Message& message) = 0;
-  };
-
-  class OpenDDS_Stun_Export Participant {
-  public:
-    Participant(Sender* a_sender) : m_sender(a_sender) {}
-
-    void receive(const ACE_INET_Addr& address, const Message& message);
-
-  private:
-    Sender* m_sender;
-
-    void request(const ACE_INET_Addr& address, const Message& message);
-    void indication(const ACE_INET_Addr& /*address*/, const Message& message);
-    void success_response(const ACE_INET_Addr& /*address*/, const Message& /*message*/);
-    void error_response(const ACE_INET_Addr& /*address*/, const Message& /*message*/);
-  };
+// TODO:  Find a home for this.
+class DiscoveryHelper {
+ public:
+  virtual ~DiscoveryHelper() {}
+  virtual void init() = 0;
+};
 
 } // namespace OpenDDS
-} // namespace STUN
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 

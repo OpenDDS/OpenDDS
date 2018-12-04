@@ -20,6 +20,8 @@
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/PoolAllocationBase.h"
 
+#include "dds/DCPS/STUN/Ice.h"
+
 #ifdef OPENDDS_SECURITY
 #include "dds/DdsSecurityCoreC.h"
 #endif

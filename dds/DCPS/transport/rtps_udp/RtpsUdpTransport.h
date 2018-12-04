@@ -33,6 +33,7 @@ class OpenDDS_Rtps_Udp_Export RtpsUdpTransport : public TransportImpl {
 public:
   RtpsUdpTransport(RtpsUdpInst& inst);
   RtpsUdpInst& config() const;
+
 private:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
                                                const ConnectionAttribs& attribs,
@@ -123,18 +124,17 @@ private:
   DDS::Security::ParticipantCryptoHandle local_crypto_handle_;
 #endif
 
-  struct StunHandler : public ACE_Event_Handler, public STUN::Sender {
+  struct StunHandler : public ACE_Event_Handler, public ICE::StunSender {
     RtpsUdpTransport& transport;
-    STUN::Participant stun_participant;
 
     StunHandler(RtpsUdpTransport& a_transport)
-      : transport(a_transport), stun_participant(this) {}
+      : transport(a_transport) {}
 
     virtual int handle_input(ACE_HANDLE fd);
-    void send(const ACE_INET_Addr& address, const STUN::Message& message) override;
+    virtual ICE::AddressListType host_addresses() const;
+    virtual void send(const ACE_INET_Addr& address, const STUN::Message& message);
   };
   StunHandler stun_handler_;
-
 };
 
 } // namespace DCPS

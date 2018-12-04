@@ -314,6 +314,9 @@ Sedp::init(const RepoId& guid,
     rtps_inst->local_address_.set(sedp_addr.c_str());
   }
 
+  rtps_inst->stun_server_address(disco.sedp_stun_server_address());
+  rtps_inst->rtps_relay_url_ = disco.rtps_relay_url();
+
   // Create a config
   OPENDDS_STRING config_name = DCPS::TransportRegistry::DEFAULT_INST_PREFIX +
                             OPENDDS_STRING("_SEDP_TransportCfg_") + key +
@@ -373,8 +376,6 @@ Sedp::init(const RepoId& guid,
   dcps_participant_secure_writer_.enable_transport_using_config(reliability, durability, transport_cfg);
   dcps_participant_secure_reader_->enable_transport_using_config(reliability, durability, transport_cfg);
 #endif
-
-  rtps_relay_data_ = disco.rtps_relay_data();
 
   return DDS::RETCODE_OK;
 }
@@ -2498,6 +2499,12 @@ Sedp::add_unicast_address(const ACE_INET_Addr& addr)
   unicast_addresses_.insert(addr);
 }
 
+ICE::AbstractAgent* Sedp::get_ice_agent() {
+  DCPS::RtpsUdpInst_rch rtps_inst =
+    DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
+  return rtps_inst->get_ice_agent();
+}
+
 
 Sedp::Endpoint::~Endpoint()
 {
@@ -3322,22 +3329,6 @@ Sedp::write_publication_data_unsecure(
       result = DDS::RETCODE_ERROR;
     }
     if (DDS::RETCODE_OK == result) {
-      if (!rtps_relay_data_.empty()) {
-        ACE_INET_Addr relay(rtps_relay_data_.c_str());
-
-        DCPS::Locator_t locator;
-        locator.kind = address_to_kind(relay);
-        locator.port = relay.get_port_number();
-        RTPS::address_to_bytes(locator.address, relay);
-
-        Parameter param;
-        param.locator(locator);
-        param._d(PID_UNICAST_LOCATOR);
-        size_t idx = plist.length();
-        plist.length(idx + 1);
-        plist[idx] = param;
-      }
-
       for (UnicastAddressesType::const_iterator pos = unicast_addresses_.begin(),
              limit = unicast_addresses_.end();
            pos != limit; ++pos) {
@@ -3450,22 +3441,6 @@ Sedp::write_subscription_data_unsecure(
       result = DDS::RETCODE_ERROR;
     }
     if (DDS::RETCODE_OK == result) {
-      if (!rtps_relay_data_.empty()) {
-        ACE_INET_Addr relay(rtps_relay_data_.c_str());
-
-        DCPS::Locator_t locator;
-        locator.kind = address_to_kind(relay);
-        locator.port = relay.get_port_number();
-        RTPS::address_to_bytes(locator.address, relay);
-
-        Parameter param;
-        param.locator(locator);
-        param._d(PID_UNICAST_LOCATOR);
-        size_t idx = plist.length();
-        plist.length(idx + 1);
-        plist[idx] = param;
-      }
-
       for (UnicastAddressesType::const_iterator pos = unicast_addresses_.begin(),
              limit = unicast_addresses_.end();
            pos != limit; ++pos) {

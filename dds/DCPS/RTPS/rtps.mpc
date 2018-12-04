@@ -1,4 +1,4 @@
-project(OpenDDS_Rtps): dcpslib, install, rtps_optional_safety, inet {
+project(OpenDDS_Rtps): dcpslib, install, rtps_optional_safety, inet, dcps_stun {
   sharedname = OpenDDS_Rtps
   dynamicflags = OPENDDS_RTPS_BUILD_DLL
 

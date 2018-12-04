@@ -47,12 +47,6 @@ namespace RTPS {
 
 class RtpsDiscovery;
 
-class DiscoveryHelper {
- public:
-  virtual ~DiscoveryHelper() {}
-  virtual void init() = 0;
-};
-
 /// Each instance of class Spdp represents the implementation of the RTPS
 /// Simple Participant Discovery Protocol for a single local DomainParticipant.
 class OpenDDS_Rtps_Export Spdp : public DCPS::LocalParticipant<Sedp> {
@@ -233,6 +227,7 @@ private:
 
   DDS::Security::ParticipantSecurityAttributes participant_sec_attr_;
 #endif
+
 };
 
 }

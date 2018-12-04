@@ -21,6 +21,8 @@
 #include "TransportImpl.h"
 #include "ace/Synch_Traits.h"
 
+#include "dds/DCPS/STUN/Ice.h"
+
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Configuration_Heap;
 class ACE_Configuration_Section_Key;
@@ -105,6 +107,8 @@ public:
   /// Populate a transport locator sequence.  Return the number of "locators."
   virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info) const = 0;
 
+  virtual ICE::AbstractAgent* get_ice_agent() { return 0; }
+
 protected:
 
   TransportInst(const char* type,
@@ -124,7 +128,9 @@ private:
   void shutdown();
 
   friend class TransportClient;
+ protected:
   TransportImpl* impl();
+ private:
   virtual TransportImpl_rch new_impl() = 0;
 
   const OPENDDS_STRING name_;

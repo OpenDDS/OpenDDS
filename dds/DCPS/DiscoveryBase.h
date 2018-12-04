@@ -752,6 +752,9 @@ namespace OpenDDS {
         return -1;
       }
 
+      virtual void setup_remote_reader(DCPS::DataWriterCallbacks*, const RepoId&) {}
+      virtual void setup_remote_writer(DCPS::DataReaderCallbacks*, const RepoId&) {}
+
       void
       match(const RepoId& writer, const RepoId& reader)
       {
@@ -921,9 +924,11 @@ namespace OpenDDS {
           bool call_writer = false, call_reader = false;
           if (writer_local) {
             call_writer = lpi->second.matched_endpoints_.insert(reader).second;
+            setup_remote_reader(dwr, reader);
           }
           if (reader_local) {
             call_reader = lsi->second.matched_endpoints_.insert(writer).second;
+            setup_remote_writer(drr, writer);
           }
           if (!call_writer && !call_reader) {
             return; // nothing more to do

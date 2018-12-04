@@ -23,6 +23,23 @@
 #include "ace/Log_Msg.h"
 #include "ace/Sock_Connect.h"
 
+#if defined IP_RECVDSTADDR
+# define DSTADDR_SOCKOPT IP_RECVDSTADDR
+# define DSTADDR_DATASIZE (CMSG_SPACE(sizeof(struct in_addr)))
+# define dstaddr(x) (CMSG_DATA(x))
+#elif defined IP_PKTINFO
+# define DSTADDR_SOCKOPT IP_PKTINFO
+# define DSTADDR_DATASIZE (CMSG_SPACE(sizeof(struct in_pktinfo)))
+# define dstaddr(x) (&(((struct in_pktinfo *)(CMSG_DATA(x)))->ipi_addr))
+#else
+# error "can't determine socket option"
+#endif
+
+union control_data {
+    struct cmsghdr  cmsg;
+    u_char          data[DSTADDR_DATASIZE];
+};
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -50,7 +67,7 @@ RtpsUdpDataLink_rch
 RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
 {
 
-  RtpsUdpDataLink_rch link = make_rch<RtpsUdpDataLink>(ref(*this), local_prefix, config(), reactor_task(), ref(stun_handler_.stun_participant));
+  RtpsUdpDataLink_rch link = make_rch<RtpsUdpDataLink>(ref(*this), local_prefix, config(), reactor_task());
 
 #if defined(OPENDDS_SECURITY)
   link->local_crypto_handle(local_crypto_handle_);
@@ -301,6 +318,12 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
                       false);
   }
 
+  int sockopt = 1;
+  if (setsockopt(unicast_socket_.get_handle(), IPPROTO_IP, DSTADDR_SOCKOPT, &sockopt, sizeof sockopt) == -1) {
+    perror("setsockopt");
+    exit(EXIT_FAILURE);
+  }
+
   if (config.local_address().get_port_number() == 0) {
 
     ACE_INET_Addr address;
@@ -324,6 +347,8 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
                       unicast_socket_.get_handle()),
                      false);
   }
+
+  config.ice_agent_.stun_sender(&stun_handler_, reactor());
 
   if (config.opendds_discovery_default_listener_) {
     link_= make_datalink(config.opendds_discovery_guid_.guidPrefix);
@@ -363,11 +388,47 @@ RtpsUdpTransport::map_ipv4_to_ipv6() const
 }
 
 int
-RtpsUdpTransport::StunHandler::handle_input(ACE_HANDLE fd)
+RtpsUdpTransport::StunHandler::handle_input(ACE_HANDLE /*fd*/)
 {
+  struct msghdr       msg;
+  union control_data  cmsg;
+  struct sockaddr_in  cliaddr;
+  struct iovec        iov[1];
   char buffer[0x10000];
-  ACE_INET_Addr remote_address;
-  ssize_t bytes = transport.unicast_socket_.recv(buffer, sizeof buffer, remote_address);
+
+  iov[0].iov_base = buffer;
+  iov[0].iov_len  = sizeof buffer;
+
+  memset(&msg, 0, sizeof msg);
+  msg.msg_name       = &cliaddr;
+  msg.msg_namelen    = sizeof cliaddr;
+  msg.msg_iov        = iov;
+  msg.msg_iovlen     = 1;
+  msg.msg_control    = &cmsg;
+  msg.msg_controllen = sizeof cmsg;
+
+  const ssize_t bytes = recvmsg(transport.unicast_socket_.get_handle(), &msg, 0);
+
+  if (bytes == -1) {
+    perror("recvfrom");
+    exit(EXIT_FAILURE);
+  }
+
+  ACE_INET_Addr remote_address(&cliaddr, sizeof cliaddr);
+  ACE_INET_Addr local_address;
+
+  for (struct cmsghdr     * cmsgptr = CMSG_FIRSTHDR(&msg);
+       cmsgptr != NULL;
+       cmsgptr = CMSG_NXTHDR(&msg, cmsgptr)) {
+
+    if (cmsgptr->cmsg_level == IPPROTO_IP &&
+        cmsgptr->cmsg_type == DSTADDR_SOCKOPT) {
+      local_address.set((u_short)0 /* TODO: fix this */, ntohl(reinterpret_cast<struct in_addr *>(dstaddr(cmsgptr))->s_addr));
+    }
+  }
+
+  //ACE_INET_Addr remote_address;
+  //ssize_t bytes = transport.unicast_socket_.recv(buffer, sizeof buffer, remote_address);
 
   // Assume STUN
   // TODO:  This may be RTPS so be paranoid.
@@ -376,8 +437,12 @@ RtpsUdpTransport::StunHandler::handle_input(ACE_HANDLE fd)
   block.length(bytes);
   DCPS::Serializer serializer(&block, true);
   STUN::Message message;
-  serializer >> message;
-  stun_participant.receive(remote_address, message);
+  message.block = &block;
+  if (serializer >> message) {
+    transport.config().get_ice_agent()->receive(local_address, remote_address, message);
+  } else {
+    // TODO:  Not RTPS and not STUN.
+  }
 
   return 0;
 }
@@ -419,6 +484,11 @@ namespace {
   }
 }
 
+ICE::AddressListType
+RtpsUdpTransport::StunHandler::host_addresses() const {
+  return transport.config().host_addresses();
+}
+
 void
 RtpsUdpTransport::StunHandler::send(const ACE_INET_Addr& destination, const STUN::Message& message)
 {
@@ -426,6 +496,7 @@ RtpsUdpTransport::StunHandler::send(const ACE_INET_Addr& destination, const STUN
 
   ACE_Message_Block block(20 + message.length());
   DCPS::Serializer serializer(&block, true);
+  const_cast<STUN::Message&>(message).block = &block;
   serializer << message;
 
   iovec iov[MAX_SEND_BLOCKS];

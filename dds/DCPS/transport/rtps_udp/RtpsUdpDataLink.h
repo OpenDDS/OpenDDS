@@ -39,7 +39,7 @@
 #include "dds/DCPS/security/framework/SecurityConfig_rch.h"
 #endif
 
-#include "dds/DCPS/STUN/Stun.h"
+#include "dds/DCPS/STUN/Ice.h"
 
 class DDS_TEST;
 
@@ -60,8 +60,7 @@ public:
   RtpsUdpDataLink(RtpsUdpTransport& transport,
                   const GuidPrefix_t& local_prefix,
                   const RtpsUdpInst& config,
-                  const TransportReactorTask_rch& reactor_task,
-                  STUN::Participant& stun_participant);
+                  const TransportReactorTask_rch& reactor_task);
 
   bool add_delayed_notification(TransportQueueElement* element);
 
@@ -134,6 +133,8 @@ public:
   virtual void pre_stop_i();
 
   virtual void send_final_acks(const RepoId& readerid);
+
+  virtual ICE::AbstractAgent* get_ice_agent();
 
 #ifdef OPENDDS_SECURITY
   Security::SecurityConfig_rch security_config() const
@@ -546,6 +547,7 @@ private:
                           GUID_tKeyLessThan)::const_iterator PeerHandlesCIter;
 #endif
 
+  ACE_INET_Addr get_address(const RepoId& guid) const;
 };
 
 } // namespace DCPS
