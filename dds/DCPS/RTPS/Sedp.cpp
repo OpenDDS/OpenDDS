@@ -4172,19 +4172,40 @@ DDS::DomainId_t Sedp::get_domain_id() const {
 #endif
 
 void
+Sedp::setup_remote_reader(DCPS::DataWriterCallbacks* dwr, const DCPS::RepoId& writer, const DCPS::RepoId& reader) {
+  dwr->get_ice_agent()->start_ice(ICE::GuidPair(writer, reader), &ice_signaling_channel_);
+  LocalPublicationIter pos = local_publications_.find(writer);
+  pos->second.have_ice_agent_info = true;
+  pos->second.ice_agent_info = dwr->get_ice_agent()->get_local_agent_info();
+  std::cout << "TODO: Send agent info" << std::endl;
+}
+
+void
+Sedp::setup_remote_writer(DCPS::DataReaderCallbacks* drr, const DCPS::RepoId& reader, const DCPS::RepoId& writer) {
+  drr->get_ice_agent()->start_ice(ICE::GuidPair(reader, writer), &ice_signaling_channel_);
+  LocalSubscriptionIter pos = local_subscriptions_.find(reader);
+  pos->second.have_ice_agent_info = true;
+  pos->second.ice_agent_info = drr->get_ice_agent()->get_local_agent_info();
+  std::cout << "TODO: Send agent info" << std::endl;
+}
+
+void
 Sedp::IceSignalingChannel::update_agent_info(const ICE::GuidPair& guidp, const ICE::AgentInfo& agent_info) {
-  std::cout << "UPDATE_AGENT_INFO " << guidp.local << ':' << guidp.remote << std::endl;
   {
     LocalPublicationIter pos = sedp.local_publications_.find(guidp.local);
     if (pos != sedp.local_publications_.end()) {
-      std::cout << "UPDATE AGENT INFO for publication " << std::endl;
+      pos->second.have_ice_agent_info = true;
+      pos->second.ice_agent_info = agent_info;
+      std::cout << "TODO: Send agent info" << std::endl;
     }
   }
 
   {
     LocalSubscriptionIter pos = sedp.local_subscriptions_.find(guidp.local);
     if (pos != sedp.local_subscriptions_.end()) {
-      std::cout << "UPDATE AGENT INFO for subscription " << std::endl;
+      pos->second.have_ice_agent_info = true;
+      pos->second.ice_agent_info = agent_info;
+      std::cout << "TODO: Send agent info" << std::endl;
     }
   }
 }

@@ -697,13 +697,8 @@ protected:
   DDS::DomainId_t get_domain_id() const;
 #endif
 
-  virtual void setup_remote_reader(DCPS::DataWriterCallbacks* dwr, const DCPS::RepoId& writer, const DCPS::RepoId& reader) {
-    dwr->get_ice_agent()->start_ice(ICE::GuidPair(writer, reader), &ice_signaling_channel_);
-  }
-
-  virtual void setup_remote_writer(DCPS::DataReaderCallbacks* drr, const DCPS::RepoId& reader, const DCPS::RepoId& writer) {
-    drr->get_ice_agent()->start_ice(ICE::GuidPair(reader, writer), &ice_signaling_channel_);
-  }
+  virtual void setup_remote_reader(DCPS::DataWriterCallbacks* dwr, const DCPS::RepoId& writer, const DCPS::RepoId& reader);
+  virtual void setup_remote_writer(DCPS::DataReaderCallbacks* drr, const DCPS::RepoId& reader, const DCPS::RepoId& writer);
 
   struct IceSignalingChannel : public ICE::SignalingChannel {
     Sedp& sedp;
