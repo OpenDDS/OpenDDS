@@ -672,7 +672,6 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
   ICE::GuidSetType guids;
   const BuiltinEndpointSet_t& avail = pdata.participantProxy.availableBuiltinEndpoints;
 
-  // TODO:  Security.
   // See RTPS v2.1 section 8.5.5.1
   if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR) {
     RepoId r = guid;
@@ -704,6 +703,71 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
     r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER;
     guids.insert(r);
   }
+
+#ifdef OPENDDS_SECURITY
+  using namespace DDS::Security;
+  // See DDS-Security v1.1 section 7.3.7.1
+  if (avail & SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER) {
+    RepoId r = guid;
+    r.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER;
+    guids.insert(r);
+  }
+  if (avail & SEDP_BUILTIN_PUBLICATIONS_SECURE_READER) {
+    RepoId r = guid;
+    r.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER;
+    guids.insert(r);
+  }
+  if (avail & SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER) {
+    RepoId r = guid;
+    r.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER;
+    guids.insert(r);
+  }
+  if (avail & SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER) {
+    RepoId r = guid;
+    r.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER;
+    guids.insert(r);
+  }
+  if (avail & BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER) {
+    RepoId r = guid;
+    r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER;
+    guids.insert(r);
+  }
+  if (avail & BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER) {
+    RepoId r = guid;
+    r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER;
+    guids.insert(r);
+  }
+  if (avail & BUILTIN_PARTICIPANT_STATELESS_MESSAGE_WRITER) {
+    RepoId r = guid;
+    r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER;
+    guids.insert(r);
+  }
+  if (avail & BUILTIN_PARTICIPANT_STATELESS_MESSAGE_READER) {
+    RepoId r = guid;
+    r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
+    guids.insert(r);
+  }
+  if (avail & BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_WRITER) {
+    RepoId r = guid;
+    r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER;
+    guids.insert(r);
+  }
+  if (avail & BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_READER) {
+    RepoId r = guid;
+    r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER;
+    guids.insert(r);
+  }
+  if (avail & SPDP_BUILTIN_PARTICIPANT_SECURE_WRITER) {
+    RepoId r = guid;
+    r.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER;
+    guids.insert(r);
+  }
+  if (avail & SPDP_BUILTIN_PARTICIPANT_SECURE_READER) {
+    RepoId r = guid;
+    r.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER;
+    guids.insert(r);
+  }
+#endif
 
   for (ICE::GuidSetType::const_iterator pos = guids.begin(), limit = guids.end(); pos != limit; ++pos) {
     ice_agent->start_ice(*pos);
