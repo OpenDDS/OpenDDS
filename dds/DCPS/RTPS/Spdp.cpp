@@ -671,101 +671,102 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
   // Form the set of guids.
   std::vector<ICE::GuidPair> guids;
   const BuiltinEndpointSet_t& avail = pdata.participantProxy.availableBuiltinEndpoints;
+  RepoId r = guid, l = guid_;
 
   // See RTPS v2.1 section 8.5.5.1
   if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR) {
-    RepoId r = guid;
+    l.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER;
     r.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER;
-    guids.push_back(ICE::GuidPair(r,r));
+    guids.push_back(ICE::GuidPair(l, r));
   }
   if (avail & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR) {
-    RepoId r = guid;
+    l.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER
     r.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER;
-    guids.push_back(ICE::GuidPair(r,r));
+    guids.push_back(ICE::GuidPair(l, r));
   }
   if (avail & BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER) {
-    RepoId r = guid;
+    l.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER;
     r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER;
-    guids.push_back(ICE::GuidPair(r,r));
+    guids.push_back(ICE::GuidPair(l, r));
   }
   if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER) {
-    RepoId r = guid;
+    l.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER;
     r.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER;
-    guids.push_back(ICE::GuidPair(r,r));
+    guids.push_back(ICE::GuidPair(l, r));
   }
   if (avail & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER) {
-    RepoId r = guid;
+    l.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER;
     r.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER;
-    guids.push_back(ICE::GuidPair(r,r));
+    guids.push_back(ICE::GuidPair(l, r));
   }
   if (avail & BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER) {
-    RepoId r = guid;
+    l.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER;
     r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER;
-    guids.push_back(ICE::GuidPair(r,r));
+    guids.push_back(ICE::GuidPair(l, r));
   }
 
 #ifdef OPENDDS_SECURITY
   using namespace DDS::Security;
   // See DDS-Security v1.1 section 7.3.7.1
   if (avail & SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER) {
-    RepoId r = guid;
+    l.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER;
     r.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER;
-    guids.push_back(ICE::GuidPair(r,r));
+    guids.push_back(ICE::GuidPair(l, r));
   }
   if (avail & SEDP_BUILTIN_PUBLICATIONS_SECURE_READER) {
-    RepoId r = guid;
+    l.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER;
     r.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER;
-    guids.push_back(ICE::GuidPair(r,r));
+    guids.push_back(ICE::GuidPair(l, r));
   }
   if (avail & SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER) {
-    RepoId r = guid;
+    l.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER;
     r.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER;
-    guids.push_back(ICE::GuidPair(r,r));
+    guids.push_back(ICE::GuidPair(l, r));
   }
-  if (avail & SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER) {
-    RepoId r = guid;
-    r.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER;
-    guids.push_back(ICE::GuidPair(r,r));
+  if (avail & SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER) {
+    l.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER;
+    r.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER;
+    guids.push_back(ICE::GuidPair(l, r));
   }
   if (avail & BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER) {
-    RepoId r = guid;
+    l.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER;
     r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER;
-    guids.push_back(ICE::GuidPair(r,r));
+    guids.push_back(ICE::GuidPair(l, r));
   }
   if (avail & BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER) {
-    RepoId r = guid;
+    l.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER;
     r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER;
-    guids.push_back(ICE::GuidPair(r,r));
+    guids.push_back(ICE::GuidPair(l, r));
   }
   if (avail & BUILTIN_PARTICIPANT_STATELESS_MESSAGE_WRITER) {
-    RepoId r = guid;
+    l.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
     r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER;
-    guids.push_back(ICE::GuidPair(r,r));
+    guids.push_back(ICE::GuidPair(l, r));
   }
   if (avail & BUILTIN_PARTICIPANT_STATELESS_MESSAGE_READER) {
-    RepoId r = guid;
+    l.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER;
     r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
-    guids.push_back(ICE::GuidPair(r,r));
+    guids.push_back(ICE::GuidPair(l, r));
   }
   if (avail & BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_WRITER) {
-    RepoId r = guid;
+    l.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER;
     r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER;
-    guids.push_back(ICE::GuidPair(r,r));
+    guids.push_back(ICE::GuidPair(l, r));
   }
   if (avail & BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_READER) {
-    RepoId r = guid;
+    l.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER;
     r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER;
-    guids.push_back(ICE::GuidPair(r,r));
+    guids.push_back(ICE::GuidPair(l, r));
   }
   if (avail & SPDP_BUILTIN_PARTICIPANT_SECURE_WRITER) {
-    RepoId r = guid;
+    l.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER;
     r.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER;
-    guids.push_back(ICE::GuidPair(r,r));
+    guids.push_back(ICE::GuidPair(l, r));
   }
   if (avail & SPDP_BUILTIN_PARTICIPANT_SECURE_READER) {
-    RepoId r = guid;
+    l.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER;
     r.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER;
-    guids.push_back(ICE::GuidPair(r,r));
+    guids.push_back(ICE::GuidPair(l, r));
   }
 #endif
 
