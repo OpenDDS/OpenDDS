@@ -249,7 +249,8 @@ Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock) :
 #endif
 
   automatic_liveliness_seq_ (DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN()),
-  manual_liveliness_seq_ (DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN())
+  manual_liveliness_seq_ (DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN()),
+  ice_signaling_channel_(*this)
 {
   pub_bit_key_.value[0] = pub_bit_key_.value[1] = pub_bit_key_.value[2] = 0;
   sub_bit_key_.value[0] = sub_bit_key_.value[1] = sub_bit_key_.value[2] = 0;
@@ -4169,6 +4170,24 @@ DDS::DomainId_t Sedp::get_domain_id() const {
   return spdp_.get_domain_id();
 }
 #endif
+
+void
+Sedp::IceSignalingChannel::update_agent_info(const ICE::GuidPair& guidp, const ICE::AgentInfo& agent_info) {
+  std::cout << "UPDATE_AGENT_INFO " << guidp.local << ':' << guidp.remote << std::endl;
+  {
+    LocalPublicationIter pos = sedp.local_publications_.find(guidp.local);
+    if (pos != sedp.local_publications_.end()) {
+      std::cout << "UPDATE AGENT INFO for publication " << std::endl;
+    }
+  }
+
+  {
+    LocalSubscriptionIter pos = sedp.local_subscriptions_.find(guidp.local);
+    if (pos != sedp.local_subscriptions_.end()) {
+      std::cout << "UPDATE AGENT INFO for subscription " << std::endl;
+    }
+  }
+}
 
 WaitForAcks::WaitForAcks()
 : cond_(lock_)

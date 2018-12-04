@@ -411,8 +411,8 @@ namespace ICE {
     ACE_INET_Addr selected_address_;
   };
 
-  bool operator==(Checklist* checklist, const DCPS::RepoId& guid) {
-    return checklist->guids().count(guid) != 0;
+  bool operator==(Checklist* checklist, const GuidPair& guidp) {
+    return checklist->guids().count(guidp) != 0;
   }
 
   bool operator==(Checklist* checklist, const std::string& username) {
@@ -452,31 +452,33 @@ namespace ICE {
     stun_server_address_ = address;
   }
 
-  void Agent::start_ice(const DCPS::RepoId& guid, SignalingChannel* signaling_channel) {
-    if (std::find(checklists_.begin(), checklists_.end(), guid) != checklists_.end()) {
+  void Agent::start_ice(const GuidPair& guidp, SignalingChannel* signaling_channel) {
+    if (std::find(checklists_.begin(), checklists_.end(), guidp) != checklists_.end()) {
       // We have a checklist for this key.
+
       return;
     }
 
-    if (unknown_guids_.count(guid) != 0) {
+    if (unknown_guids_.count(guidp) != 0) {
       // We have already heard about this key.
       return;
     }
 
-    std::cout << "Waiting for agent info from " << guid << std::endl;
-    unknown_guids_.insert(guid);
+    unknown_guids_[guidp] = signaling_channel;
+    std::cout << "Waiting for agent info from " << guidp.local << ':' << guidp.remote << std::endl;
 
     candidate_gatherer_.start();
   }
 
-  void Agent::update_remote_agent_info(const DCPS::RepoId& guid, const AgentInfo& remote_agent_info) {
-    start_ice(guid);
+  void Agent::update_remote_agent_info(const GuidPair& guidp, const AgentInfo& remote_agent_info) {
+    start_ice(guidp);
 
-    unknown_guids_.erase(guid);
+    SignalingChannel* signaling_channel = unknown_guids_[guidp];
+    unknown_guids_.erase(guidp);
 
     // Try to find by guid.
     Checklist* guid_checklist = 0;
-    ChecklistSetType::const_iterator pos = std::find(checklists_.begin(), checklists_.end(), guid);
+    ChecklistSetType::const_iterator pos = std::find(checklists_.begin(), checklists_.end(), guidp);
     if (pos != checklists_.end()) {
       guid_checklist = *pos;
     }
@@ -492,16 +494,16 @@ namespace ICE {
 
     if (guid_checklist != username_checklist && guid_checklist != 0) {
       // Remove from the old checklist.
-      guid_checklist->guids().erase(guid);
-      selected_addresses_.erase(guid);
+      guid_checklist->guids().erase(guidp);
+      selected_addresses_.erase(guidp.remote);
       if (guid_checklist->guids().empty()) {
         remove_checklist(guid_checklist);
       }
     }
 
-    username_checklist->guids().insert(guid);
+    username_checklist->guids()[guidp] = signaling_channel;
     if (username_checklist->is_completed()) {
-      selected_addresses_[guid] = username_checklist->selected_address();
+      selected_addresses_[guidp.remote] = username_checklist->selected_address();
     }
 
     if (remote_agent_info != username_checklist->remote_agent_info()) {
@@ -511,7 +513,7 @@ namespace ICE {
     }
   }
 
-  void Agent::stop_ice(const DCPS::RepoId& /*guid*/) {
+  void Agent::stop_ice(const GuidPair& /*guidp*/) {
     // TODO
   }
 
@@ -543,7 +545,7 @@ namespace ICE {
     checklists_.remove(checklist);
     connectivity_checks_.remove_if(ConnectivityCheckChecklistPred(checklist));
     for (GuidSetType::const_iterator pos = checklist->guids().begin(), limit = checklist->guids().end(); pos != limit; ++pos) {
-      selected_addresses_.erase(*pos);
+      selected_addresses_.erase(pos->first.remote);
     }
     delete checklist;
   }
@@ -571,7 +573,7 @@ namespace ICE {
       if (use_candidate) {
         ACE_INET_Addr addr = checklist->nominate(cp);
         for (GuidSetType::const_iterator pos = checklist->guids().begin(), limit = checklist->guids().end(); pos != limit; ++pos) {
-          selected_addresses_[*pos] = addr;
+          selected_addresses_[pos->first.remote] = addr;
         }
       }
       return;
@@ -776,7 +778,7 @@ namespace ICE {
         if (cp.local_is_controlling && cp.nominate) {
           ACE_INET_Addr addr = checklist->nominate(cp);
           for (GuidSetType::const_iterator pos = checklist->guids().begin(), limit = checklist->guids().end(); pos != limit; ++pos) {
-            selected_addresses_[*pos] = addr;
+            selected_addresses_[pos->first.remote] = addr;
           }
           return;
         }
@@ -828,7 +830,7 @@ namespace ICE {
         if (!cp.local_is_controlling && cp.nominate) {
           ACE_INET_Addr addr = valid_checklist->nominate(cp);
           for (GuidSetType::const_iterator pos = valid_checklist->guids().begin(), limit = valid_checklist->guids().end(); pos != limit; ++pos) {
-            selected_addresses_[*pos] = addr;
+            selected_addresses_[pos->first.remote] = addr;
           }
           return;
         }
@@ -887,6 +889,20 @@ namespace ICE {
       /* `err` is valid    */
     }
     local_agent_info_.password = stringify(password[0]) + stringify(password[1]);
+
+    // Send to all interesting signaling channels.
+    for (GuidSetType::const_iterator pos2 = unknown_guids_.begin(), limit2 = unknown_guids_.end(); pos2 != limit2; ++pos2) {
+      if (pos2->second) {
+        pos2->second->update_agent_info(pos2->first, local_agent_info_);
+      }
+    }
+    for (ChecklistSetType::const_iterator pos = checklists_.begin(), limit = checklists_.end(); pos != limit; ++pos) {
+      for (GuidSetType::const_iterator pos2 = (*pos)->guids().begin(), limit2 = (*pos)->guids().end(); pos2 != limit2; ++pos2) {
+        if (pos2->second) {
+          pos2->second->update_agent_info(pos2->first, local_agent_info_);
+        }
+      }
+    }
   }
 
   const size_t RETRY_LIMIT = 3;
@@ -1088,6 +1104,14 @@ namespace ICE {
     }
 
     state_ = next_state;
+  }
+
+  bool GuidPair::operator< (const GuidPair& other) const
+  {
+    if (this->local != other.local) {
+      return DCPS::GUID_tKeyLessThan() (this->local, other.local);
+    }
+    return DCPS::GUID_tKeyLessThan() (this->remote, other.remote);
   }
 
 } // namespace ICE

@@ -561,12 +561,14 @@ namespace OpenDDS {
 
     protected:
       struct LocalEndpoint {
-        LocalEndpoint() : topic_id_(DCPS::GUID_UNKNOWN), sequence_(DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {}
+        LocalEndpoint() : topic_id_(DCPS::GUID_UNKNOWN), sequence_(DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN()), have_ice_agent_info(false) {}
         DCPS::RepoId topic_id_;
         DCPS::TransportLocatorSeq trans_info_;
         RepoIdSet matched_endpoints_;
         DCPS::SequenceNumber sequence_;
         RepoIdSet remote_opendds_associations_;
+        bool have_ice_agent_info;
+        ICE::AgentInfo ice_agent_info;
       };
 
       struct LocalPublication : LocalEndpoint {
@@ -752,8 +754,8 @@ namespace OpenDDS {
         return -1;
       }
 
-      virtual void setup_remote_reader(DCPS::DataWriterCallbacks*, const RepoId&) {}
-      virtual void setup_remote_writer(DCPS::DataReaderCallbacks*, const RepoId&) {}
+      virtual void setup_remote_reader(DCPS::DataWriterCallbacks*, const RepoId&, const RepoId&) {}
+      virtual void setup_remote_writer(DCPS::DataReaderCallbacks*, const RepoId&, const RepoId&) {}
 
       void
       match(const RepoId& writer, const RepoId& reader)
@@ -924,11 +926,11 @@ namespace OpenDDS {
           bool call_writer = false, call_reader = false;
           if (writer_local) {
             call_writer = lpi->second.matched_endpoints_.insert(reader).second;
-            setup_remote_reader(dwr, reader);
+            setup_remote_reader(dwr, writer, reader);
           }
           if (reader_local) {
             call_reader = lsi->second.matched_endpoints_.insert(writer).second;
-            setup_remote_writer(drr, writer);
+            setup_remote_writer(drr, reader, writer);
           }
           if (!call_writer && !call_reader) {
             return; // nothing more to do

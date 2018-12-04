@@ -697,13 +697,20 @@ protected:
   DDS::DomainId_t get_domain_id() const;
 #endif
 
-  virtual void setup_remote_reader(DCPS::DataWriterCallbacks* dwr, const DCPS::RepoId& reader) {
-    dwr->get_ice_agent()->start_ice(reader);
+  virtual void setup_remote_reader(DCPS::DataWriterCallbacks* dwr, const DCPS::RepoId& writer, const DCPS::RepoId& reader) {
+    dwr->get_ice_agent()->start_ice(ICE::GuidPair(writer, reader), &ice_signaling_channel_);
   }
 
-  virtual void setup_remote_writer(DCPS::DataReaderCallbacks* drr, const DCPS::RepoId& writer) {
-    drr->get_ice_agent()->start_ice(writer);
+  virtual void setup_remote_writer(DCPS::DataReaderCallbacks* drr, const DCPS::RepoId& reader, const DCPS::RepoId& writer) {
+    drr->get_ice_agent()->start_ice(ICE::GuidPair(reader, writer), &ice_signaling_channel_);
   }
+
+  struct IceSignalingChannel : public ICE::SignalingChannel {
+    Sedp& sedp;
+
+    IceSignalingChannel(Sedp& a_sedp) : sedp(a_sedp) {}
+    virtual void update_agent_info(const ICE::GuidPair& guidp, const ICE::AgentInfo& agent_info);
+  } ice_signaling_channel_;
 };
 
 /// A class to wait on acknowledgments from other threads

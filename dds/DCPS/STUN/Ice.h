@@ -163,18 +163,26 @@ namespace ICE {
     {}
   };
 
-  typedef std::set<DCPS::RepoId, DCPS::GUID_tKeyLessThan> GuidSetType;
+  struct GuidPair {
+    DCPS::RepoId local;
+    DCPS::RepoId remote;
+
+    GuidPair(const DCPS::RepoId& a_local, const DCPS::RepoId& a_remote) : local(a_local), remote(a_remote) {}
+    bool operator< (const GuidPair& other) const;
+  };
 
   class SignalingChannel {
   public:
-    virtual void update_agent_info() = 0;
+    virtual void update_agent_info(const GuidPair& guidp, const AgentInfo& agent_info) = 0;
   };
+
+  typedef std::map<GuidPair, SignalingChannel*> GuidSetType;
 
   class AbstractAgent {
   public:
-    virtual void start_ice(const DCPS::RepoId& guid, SignalingChannel* signaling_channel = 0) = 0;
-    virtual void update_remote_agent_info(const DCPS::RepoId& guid, const AgentInfo& agent_info) = 0;
-    virtual void stop_ice(const DCPS::RepoId& guid) = 0;
+    virtual void start_ice(const GuidPair& guidp, SignalingChannel* signaling_channel = 0) = 0;
+    virtual void update_remote_agent_info(const GuidPair& guidp, const AgentInfo& agent_info) = 0;
+    virtual void stop_ice(const GuidPair& guidp) = 0;
     virtual const AgentInfo& get_local_agent_info() const = 0;
     virtual bool is_running() const = 0;
     virtual ACE_INET_Addr get_address(const DCPS::RepoId& guid) const = 0;
@@ -194,9 +202,9 @@ namespace ICE {
     // In practice, there may be multiple stun participants using multiple interfaces with multiple STUN servers.  However, one of each is enough to get started.
 
 
-    void start_ice(const DCPS::RepoId& guid, SignalingChannel* signaling_channel = 0);
-    void update_remote_agent_info(const DCPS::RepoId& guid, const AgentInfo& agent_info);
-    void stop_ice(const DCPS::RepoId& guid);
+    void start_ice(const GuidPair& guidp, SignalingChannel* signaling_channel = 0);
+    void update_remote_agent_info(const GuidPair& guidp, const AgentInfo& agent_info);
+    void stop_ice(const GuidPair& guidp);
 
     const AgentInfo& get_local_agent_info() const { return local_agent_info_; }
 
