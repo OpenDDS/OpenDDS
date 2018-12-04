@@ -147,13 +147,7 @@ namespace STUN {
           if (!(serializer >> address)) {
             return false;
           }
-          struct sockaddr_in addr;
-          memset(&addr, 0, sizeof(addr));
-          addr.sin_len = sizeof(addr);
-          addr.sin_family = AF_INET;
-          addr.sin_port = htons(port);
-          addr.sin_addr.s_addr = htonl(address);
-          attribute = make_mapped_address(ACE_INET_Addr(&addr, sizeof(addr)));
+          attribute = make_mapped_address(ACE_INET_Addr(htons(port), htonl(address)));
         } else if (family == IPv6) {
           // TODO:  Implement.
           std::cerr << "TODO: Implement MAPPED_ADDRESS IPv6" << std::endl;
@@ -200,13 +194,7 @@ namespace STUN {
             return false;
           }
           address ^= MAGIC_COOKIE;
-          struct sockaddr_in addr;
-          memset(&addr, 0, sizeof(addr));
-          addr.sin_len = sizeof(addr);
-          addr.sin_family = AF_INET;
-          addr.sin_port = htons(port);
-          addr.sin_addr.s_addr = htonl(address);
-          attribute = make_xor_mapped_address(ACE_INET_Addr(&addr, sizeof(addr)));
+          attribute = make_xor_mapped_address(ACE_INET_Addr(htons(port), htonl(address)));
         } else if (family == IPv6) {
           // TODO:  Implement.
           std::cerr << "TODO: Implement XOR_MAPPED_ADDRESS IPv6" << std::endl;
