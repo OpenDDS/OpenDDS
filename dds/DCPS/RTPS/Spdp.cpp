@@ -21,6 +21,8 @@
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/Qos_Helper.h"
 
+#include "dds/DCPS/STUN/Ice.h"
+
 #ifdef OPENDDS_SECURITY
 #include "SecurityHelpers.h"
 #include "dds/DCPS/security/framework/SecurityRegistry.h"
@@ -708,36 +710,12 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
   }
 
   ICE::AgentInfo agent_info;
-  bool have_agent_info = false;
-
-  for (size_t idx = 0, count = plist.length(); idx != count; ++idx) {
-    const RTPS::Parameter& parameter = plist[idx];
-    switch (parameter._d()) {
-    case RTPS::PID_OPENDDS_ICE_GENERAL:
-      {
-        have_agent_info = true;
-        const IceGeneral_t& ice_general = parameter.ice_general();
-        agent_info.type = static_cast<ICE::AgentType>(ice_general.agent_type);
-        agent_info.username = ice_general.username;
-        agent_info.password = ice_general.password;
-      }
-      break;
-    case RTPS::PID_OPENDDS_ICE_CANDIDATE:
-      {
-        have_agent_info = true;
-        const IceCandidate_t& ice_candidate = parameter.ice_candidate();
-        ICE::Candidate candidate;
-        candidate.address = ACE_INET_Addr(ice_candidate.portt, ice_candidate.address);
-        candidate.foundation = ice_candidate.foundation;
-        candidate.priority = ice_candidate.priority;
-        candidate.type = static_cast<ICE::CandidateType>(ice_candidate.type);
-        agent_info.candidates.push_back(candidate);
-      }
-      break;
-    default:
-      // Do nothing.
-      break;
-    }
+  bool have_agent_info;
+  if (ParameterListConverter::from_param_list(plist, agent_info, have_agent_info) < 0) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::data_received - ")
+      ACE_TEXT("failed to convert from ParameterList to ")
+      ACE_TEXT("ICE::AgentInfo\n")));
+    return;
   }
 
   if (have_agent_info) {
@@ -1756,33 +1734,12 @@ Spdp::SpdpTransport::write_i()
 
   if (ice_agent && ice_agent->is_running()) {
     const ICE::AgentInfo& agent_info = ice_agent->get_local_agent_info();
-
-    {
-      IceGeneral_t ice_general;
-      ice_general.agent_type = agent_info.type;
-      ice_general.username = agent_info.username.c_str();
-      ice_general.password = agent_info.password.c_str();
-
-      Parameter param;
-      param.ice_general(ice_general);
-      const CORBA::ULong length = plist.length();
-      plist.length(length + 1);
-      plist[length] = param;
-    }
-
-    for (ICE::AgentInfo::CandidatesType::const_iterator pos = agent_info.candidates.begin(), limit = agent_info.candidates.end(); pos != limit; ++pos) {
-      IceCandidate_t ice_candidate;
-      ice_candidate.address = pos->address.get_ip_address();
-      ice_candidate.portt = pos->address.get_port_number();
-      ice_candidate.foundation = pos->foundation.c_str();
-      ice_candidate.priority = pos->priority;
-      ice_candidate.type = pos->type;
-
-      Parameter param;
-      param.ice_candidate(ice_candidate);
-      const CORBA::ULong length = plist.length();
-      plist.length(length + 1);
-      plist[length] = param;
+    if (ParameterListConverter::to_param_list(agent_info, plist) < 0) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("Spdp::SpdpTransport::write() - ")
+                 ACE_TEXT("failed to convert from ICE::AgentInfo ")
+                 ACE_TEXT("to ParameterList\n")));
+      return;
     }
   }
 

@@ -14,6 +14,8 @@
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DCPS/GuidUtils.h"
 
+#include <cassert>
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
@@ -299,7 +301,7 @@ namespace ICE {
       int handle_timeout(const ACE_Time_Value& /*now*/, const void* /*act*/);
       void schedule(State next_state, const ACE_Time_Value& delay);
     } connectivity_checker_;
-    
+
   };
 
 } // namespace ICE
