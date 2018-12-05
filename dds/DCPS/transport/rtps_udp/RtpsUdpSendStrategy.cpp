@@ -57,7 +57,7 @@ RtpsUdpSendStrategy::RtpsUdpSendStrategy(RtpsUdpDataLink* link,
 namespace {
   bool shouldWarn(int code) {
     return code == EPERM || code == EACCES || code == EINTR || code == ENOBUFS
-      || code == ENOMEM || code == EADDRNOTAVAIL;
+      || code == ENOMEM || code == EADDRNOTAVAIL || code == ENETUNREACH;
   }
 }
 
