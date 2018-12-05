@@ -1763,10 +1763,11 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
 
 void
 Sedp::data_received(DCPS::MessageId message_id,
-                    const DCPS::DiscoveredWriterData& wdata)
+                    const DiscoveredPublication& dpub)
 {
   if (spdp_.shutting_down()) { return; }
 
+  const DCPS::DiscoveredWriterData& wdata = dpub.writer_data_;
   const RepoId& guid = wdata.writerProxy.remoteWriterGuid;
   RepoId guid_participant = guid;
   guid_participant.entityId = ENTITYID_PARTICIPANT;
@@ -1786,11 +1787,30 @@ Sedp::data_received(DCPS::MessageId message_id,
 #endif
 
   if (!spdp_.has_discovered_participant(guid_participant)) {
-    deferred_publications_[guid] = std::make_pair(message_id, wdata);
+    deferred_publications_[guid] = std::make_pair(message_id, dpub);
     return;
   }
 
   process_discovered_writer_data(message_id, wdata, guid);
+
+  if (dpub.have_ice_agent_info_) {
+    TopicDetails& td = topics_[wdata.ddsPublicationData.topic_name.in()];
+    for (DCPS::RepoIdSet::const_iterator it = td.endpoints_.begin(),
+           end = td.endpoints_.end(); it != end; ++it) {
+      const DCPS::GuidConverter conv(*it);
+      if (conv.isReader()) {
+        LocalSubscriptionIter lsi = local_subscriptions_.find(*it);
+        if (lsi != local_subscriptions_.end() &&
+            lsi->second.matched_endpoints_.count(guid)) {
+          ICE::AbstractAgent* agent = lsi->second.subscription_->get_ice_agent();
+          if (agent) {
+            agent->update_remote_agent_info(ICE::GuidPair(*it, guid),
+                                            dpub.ice_agent_info_);
+          }
+        }
+      }
+    }
+  }
 }
 
 #ifdef OPENDDS_SECURITY
@@ -2088,18 +2108,19 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
 
 void
 Sedp::Task::svc_i(DCPS::MessageId message_id,
-                  const DCPS::DiscoveredReaderData* prdata)
+                  const DiscoveredSubscription* prdata)
 {
-  DCPS::unique_ptr<const DCPS::DiscoveredReaderData> delete_the_data(prdata);
+  DCPS::unique_ptr<const DiscoveredSubscription> delete_the_data(prdata);
   sedp_->data_received(message_id, *prdata);
 }
 
 void
 Sedp::data_received(DCPS::MessageId message_id,
-                    const DCPS::DiscoveredReaderData& rdata)
+                    const DiscoveredSubscription& dsub)
 {
   if (spdp_.shutting_down()) { return; }
 
+  const DCPS::DiscoveredReaderData& rdata = dsub.reader_data_;
   const RepoId& guid = rdata.readerProxy.remoteReaderGuid;
   RepoId guid_participant = guid;
   guid_participant.entityId = ENTITYID_PARTICIPANT;
@@ -2119,11 +2140,30 @@ Sedp::data_received(DCPS::MessageId message_id,
 #endif
 
   if (!spdp_.has_discovered_participant(guid_participant)) {
-    deferred_subscriptions_[guid] = std::make_pair(message_id, rdata);
+    deferred_subscriptions_[guid] = std::make_pair(message_id, dsub);
     return;
   }
 
   process_discovered_reader_data(message_id, rdata, guid);
+
+  if (dsub.have_ice_agent_info_) {
+    TopicDetails& td = topics_[rdata.ddsSubscriptionData.topic_name.in()];
+    for (DCPS::RepoIdSet::const_iterator it = td.endpoints_.begin(),
+           end = td.endpoints_.end(); it != end; ++it) {
+      const DCPS::GuidConverter conv(*it);
+      if (conv.isWriter()) {
+        LocalPublicationIter lpi = local_publications_.find(*it);
+        if (lpi != local_publications_.end() &&
+            lpi->second.matched_endpoints_.count(guid)) {
+          ICE::AbstractAgent* agent = lpi->second.publication_->get_ice_agent();
+          if (agent) {
+            agent->update_remote_agent_info(ICE::GuidPair(*it, guid),
+                                            dsub.ice_agent_info_);
+          }
+        }
+      }
+    }
+  }
 }
 
 #ifdef OPENDDS_SECURITY
@@ -3005,7 +3045,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
         return;
       }
       if (rdata->reader_data_.readerProxy.expectsInlineQos) {
-        set_inline_qos(rdata->readerProxy.allLocators);
+        set_inline_qos(rdata->reader_data_.readerProxy.allLocators);
       }
       sedp_.task_.enqueue(id, move(rdata));
 
@@ -3587,7 +3627,7 @@ Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<DiscoveredWriterData_Se
 #endif
 
 void
-Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<DCPS::DiscoveredReaderData> rdata)
+Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<DiscoveredSubscription> rdata)
 {
   if (spdp_->shutting_down()) { return; }
   putq(new Msg(Msg::MSG_READER, id, rdata.release()));
