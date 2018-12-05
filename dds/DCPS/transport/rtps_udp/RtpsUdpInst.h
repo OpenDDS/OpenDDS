@@ -75,12 +75,12 @@ public:
     ice_agent_.stun_server_address(address);
   }
   
-  void rtps_relay_address(const ACE_INET_Addr& /*address*/) {
-    std::cout << "TODO: rtps_relay_address in RtpsUdpInst" << std::endl;
-  }
+  void rtps_relay_address(const ACE_INET_Addr& address) { rtps_relay_address_ = address; }
+  ACE_INET_Addr rtps_relay_address() const { return rtps_relay_address_; }
 
   ICE::AbstractAgent* get_ice_agent() { return &ice_agent_; }
 
+  // TODO:  Get rid of this.
   OPENDDS_STRING rtps_relay_url_;
 
 
@@ -100,6 +100,7 @@ private:
   ACE_INET_Addr local_address_;
   OPENDDS_STRING local_address_config_str_;
   ICE::Agent ice_agent_;
+  ACE_INET_Addr rtps_relay_address_;
 
   ICE::AddressListType host_addresses() const;
 };
