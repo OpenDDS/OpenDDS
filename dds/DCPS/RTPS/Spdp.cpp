@@ -680,7 +680,7 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
     guids.push_back(ICE::GuidPair(l, r));
   }
   if (avail & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR) {
-    l.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER
+    l.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER;
     r.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER;
     guids.push_back(ICE::GuidPair(l, r));
   }
