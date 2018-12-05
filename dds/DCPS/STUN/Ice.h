@@ -183,7 +183,7 @@ namespace ICE {
     virtual void start_ice(const GuidPair& guidp, SignalingChannel* signaling_channel = 0) = 0;
     virtual void update_remote_agent_info(const GuidPair& guidp, const AgentInfo& agent_info) = 0;
     virtual void stop_ice(const GuidPair& guidp) = 0;
-    virtual const AgentInfo& get_local_agent_info() const = 0;
+    virtual AgentInfo get_local_agent_info() const = 0;
     virtual bool is_running() const = 0;
     virtual ACE_INET_Addr get_address(const DCPS::RepoId& guid) const = 0;
 
@@ -206,7 +206,7 @@ namespace ICE {
     void update_remote_agent_info(const GuidPair& guidp, const AgentInfo& agent_info);
     void stop_ice(const GuidPair& guidp);
 
-    const AgentInfo& get_local_agent_info() const { return local_agent_info_; }
+    AgentInfo get_local_agent_info() const;
 
     bool is_running() const;
 
@@ -216,6 +216,7 @@ namespace ICE {
     void receive(const ACE_INET_Addr& local_address, const ACE_INET_Addr& remote_address, const STUN::Message& message);
 
   private:
+    ACE_Recursive_Thread_Mutex mutex_;
     // The info for this agent.
     AgentInfo local_agent_info_;
     // Data stream capable of multiplexing STUN messages.
@@ -264,6 +265,28 @@ namespace ICE {
     void remove_checklist(Checklist* checklist);
     void generate_triggered_check(Checklist* checklist, const ACE_INET_Addr& local_address, const ACE_INET_Addr& remote_address, uint32_t priority, bool use_candidate);
 
+    ACE_INET_Addr stun_server_address() const;
+    ACE_INET_Addr server_reflexive_address() const;
+    void server_reflexive_address(const ACE_INET_Addr& address);
+    void send(const ACE_INET_Addr& address, const STUN::Message message);
+    //agent_.stun_sender_->send(agent_.stun_server_address_, binding_request_);
+
+    // Hide the agent from its works to force all interaction through methods.
+    // All of the invoked methods require locks.
+    struct AgentWorkerView {
+      AgentWorkerView(Agent& agent) : agent_(agent) {}
+      bool is_running() const { return agent_.is_running(); }
+      ACE_INET_Addr stun_server_address() const { return agent_.stun_server_address(); }
+      ACE_INET_Addr server_reflexive_address() const { return agent_.server_reflexive_address(); }
+      void server_reflexive_address(const ACE_INET_Addr& address) { agent_.server_reflexive_address(address); }
+      void regenerate_local_agent_info() { agent_.regenerate_local_agent_info(); }
+      void send(const ACE_INET_Addr& address, const STUN::Message message) { agent_.send(address, message); }
+      bool do_next_check() { return agent_.do_next_check(); }
+
+    private:
+      Agent& agent_;
+    };
+
     struct CandidateGatherer : public ACE_Event_Handler {
       enum State {
         STOPPED,
@@ -278,7 +301,7 @@ namespace ICE {
       void stop();
       bool success_response(const STUN::Message& message);
     private:
-      Agent& agent_;
+      AgentWorkerView agent_;
       State state_;
       // Binding request sent to STUN server.
       STUN::Message binding_request_;
@@ -303,7 +326,7 @@ namespace ICE {
       void stop();
 
     private:
-      Agent& agent_;
+      AgentWorkerView agent_;
       State state_;
 
       int handle_timeout(const ACE_Time_Value& /*now*/, const void* /*act*/);

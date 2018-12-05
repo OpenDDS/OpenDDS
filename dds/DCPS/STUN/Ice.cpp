@@ -440,6 +440,7 @@ namespace ICE {
   }
 
   void Agent::stun_sender(StunSender* stun_sender, ACE_Reactor* reactor) {
+    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(mutex_);
     stun_sender_ = stun_sender;
     candidate_gatherer_.reactor(reactor);
     connectivity_checker_.reactor(reactor);
@@ -449,10 +450,12 @@ namespace ICE {
   }
 
   void Agent::stun_server_address(const ACE_INET_Addr& address) {
+    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(mutex_);
     stun_server_address_ = address;
   }
 
   void Agent::start_ice(const GuidPair& guidp, SignalingChannel* signaling_channel) {
+    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(mutex_);
     if (std::find(checklists_.begin(), checklists_.end(), guidp) != checklists_.end()) {
       // We have a checklist for this key.
 
@@ -471,6 +474,7 @@ namespace ICE {
   }
 
   void Agent::update_remote_agent_info(const GuidPair& guidp, const AgentInfo& remote_agent_info) {
+    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(mutex_);
     start_ice(guidp);
 
     SignalingChannel* signaling_channel = unknown_guids_[guidp];
@@ -514,7 +518,13 @@ namespace ICE {
   }
 
   void Agent::stop_ice(const GuidPair& /*guidp*/) {
+    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(mutex_);
     // TODO
+  }
+
+  AgentInfo Agent::get_local_agent_info() const {
+    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(const_cast<ACE_Recursive_Thread_Mutex&>(mutex_));
+    return local_agent_info_;
   }
 
   Checklist* Agent::add_checklist(const AgentInfo& remote_agent_info) {
@@ -594,11 +604,13 @@ namespace ICE {
   };
 
   bool Agent::is_running() const {
+    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(const_cast<ACE_Recursive_Thread_Mutex&>(mutex_));
     bool r = std::find_if(checklists_.begin(), checklists_.end(), Running()) != checklists_.end();;
     return stun_sender_ && (!unknown_guids_.empty() || r || !deferred_triggered_checks_.empty());
   }
 
   ACE_INET_Addr Agent::get_address(const DCPS::RepoId& guid) const {
+    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(const_cast<ACE_Recursive_Thread_Mutex&>(mutex_));
     SelectedAddressesType::const_iterator pos = selected_addresses_.find(guid);
     if (pos != selected_addresses_.end()) {
       return pos->second;
@@ -608,6 +620,7 @@ namespace ICE {
   }
 
   void Agent::receive(const ACE_INET_Addr& local_address, const ACE_INET_Addr& remote_address, const STUN::Message& message) {
+    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(mutex_);
     switch (message.class_) {
     case STUN::REQUEST:
       request(local_address, remote_address, message);
@@ -854,6 +867,8 @@ namespace ICE {
   }
 
   void Agent::regenerate_local_agent_info() {
+    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(mutex_);
+
     // Populate candidates.
     local_agent_info_.candidates.clear();
     for (AddressListType::const_iterator pos = host_addresses_.begin(), limit = host_addresses_.end(); pos != limit; ++pos) {
@@ -908,6 +923,8 @@ namespace ICE {
   const size_t RETRY_LIMIT = 3;
 
   bool Agent::do_next_check() {
+    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(mutex_);
+
     for (size_t n = 0; n != checklists_.size(); ++n) {
       Checklist* checklist = checklists_.front();
       checklists_.pop_front();
@@ -982,13 +999,33 @@ namespace ICE {
     }
   }
 
+  ACE_INET_Addr Agent::stun_server_address() const {
+    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(const_cast<ACE_Recursive_Thread_Mutex&>(mutex_));
+    return stun_server_address_;
+  }
+
+  ACE_INET_Addr Agent::server_reflexive_address() const {
+    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(const_cast<ACE_Recursive_Thread_Mutex&>(mutex_));
+    return server_reflexive_address_;
+  }
+
+  void Agent::server_reflexive_address(const ACE_INET_Addr& address) {
+    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(mutex_);
+    server_reflexive_address_ = address;
+  }
+
+  void Agent::send(const ACE_INET_Addr& address, const STUN::Message message) {
+    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(mutex_);
+    stun_sender_->send(address, message);
+  }
+
   const ACE_Time_Value T_a(0, 50000); // Mininum time between consecutive sends.
   const ACE_Time_Value T_r(30, 0);    // Send new binding request this often.
 
   void Agent::CandidateGatherer::start() {
     if (agent_.is_running() &&
         state_ == STOPPED &&
-        agent_.stun_server_address_ != ACE_INET_Addr()) {
+        agent_.stun_server_address() != ACE_INET_Addr()) {
       schedule (RETRANSMITTING, gather_RTO());
       form_request();
       send_request();
@@ -1016,8 +1053,8 @@ namespace ICE {
       schedule(MAINTAINING, T_r);
     }
 
-    if (server_reflexive_address != agent_.server_reflexive_address_) {
-      agent_.server_reflexive_address_ = server_reflexive_address;
+    if (server_reflexive_address != agent_.server_reflexive_address()) {
+      agent_.server_reflexive_address(server_reflexive_address);
       agent_.regenerate_local_agent_info();
     }
 
@@ -1054,7 +1091,7 @@ namespace ICE {
 
   void Agent::CandidateGatherer::send_request() {
     if (state_ != STOPPED) {
-      agent_.stun_sender_->send(agent_.stun_server_address_, binding_request_);
+      agent_.send(agent_.stun_server_address(), binding_request_);
     }
   }
 
