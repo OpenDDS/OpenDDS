@@ -221,10 +221,10 @@ namespace {
               spdp_->add_sedp_unicast(address);
             } else if (key == "Data") {
               if (!rtps_relay_data_.empty()) {
-                sedp_->remove_unicast_address(ACE_INET_Addr(rtps_relay_data_.c_str()));
+                //sedp_->remove_unicast_address(ACE_INET_Addr(rtps_relay_data_.c_str()));
               }
               rtps_relay_data_ = address_string;
-              sedp_->add_unicast_address(address);
+              //sedp_->add_unicast_address(address);
             } else {
               std::cerr << "TODO: unknown key " << key << std::endl;
             }

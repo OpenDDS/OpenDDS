@@ -148,14 +148,10 @@ public:
 
   static const bool host_is_bigendian_;
 
-  void remove_unicast_address(const ACE_INET_Addr& addr);
-  void add_unicast_address(const ACE_INET_Addr& addr);
   ICE::AbstractAgent* get_ice_agent();
 
 private:
   Spdp& spdp_;
-  typedef OPENDDS_SET(ACE_INET_Addr) UnicastAddressesType;
-  UnicastAddressesType unicast_addresses_;
 
 #ifdef OPENDDS_SECURITY
   DDS::Security::ParticipantSecurityAttributes participant_sec_attr_;
@@ -188,7 +184,7 @@ private:
     union {
       const ParticipantData_t* dpdata_;
 
-      const DCPS::DiscoveredWriterData* wdata_;
+      const DiscoveredPublication* wdata_;
 
 #ifdef OPENDDS_SECURITY
       const DiscoveredWriterData_SecurityWrapper* wdata_secure_;
@@ -211,7 +207,7 @@ private:
     Msg(MsgType mt, DCPS::MessageId id, const ParticipantData_t* dpdata)
       : type_(mt), id_(id), dpdata_(dpdata) {}
 
-    Msg(MsgType mt, DCPS::MessageId id, const DCPS::DiscoveredWriterData* wdata)
+    Msg(MsgType mt, DCPS::MessageId id, const DiscoveredPublication* wdata)
       : type_(mt), id_(id), wdata_(wdata) {}
 
 #ifdef OPENDDS_SECURITY
@@ -449,7 +445,7 @@ private:
 
     void enqueue(DCPS::MessageId id, DCPS::unique_ptr<ParticipantData_t> pdata);
 
-    void enqueue(DCPS::MessageId id, DCPS::unique_ptr<DCPS::DiscoveredWriterData> wdata);
+    void enqueue(DCPS::MessageId id, DCPS::unique_ptr<DiscoveredPublication> wdata);
     void enqueue(DCPS::MessageId id, DCPS::unique_ptr<DCPS::DiscoveredReaderData> rdata);
 
 #ifdef OPENDDS_SECURITY
@@ -478,7 +474,7 @@ private:
     void svc_secure_i(DCPS::MessageId id, const Security::SPDPdiscoveredParticipantData* pdata);
 #endif
 
-    void svc_i(DCPS::MessageId id, const DCPS::DiscoveredWriterData* wdata);
+    void svc_i(DCPS::MessageId id, const DiscoveredPublication* wdata);
     void svc_i(DCPS::MessageId id, const DCPS::DiscoveredReaderData* rdata);
 
 #ifdef OPENDDS_SECURITY

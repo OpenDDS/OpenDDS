@@ -1535,9 +1535,9 @@ Sedp::Task::shutdown()
 
 void
 Sedp::Task::svc_i(DCPS::MessageId message_id,
-                  const DCPS::DiscoveredWriterData* pwdata)
+                  const DiscoveredPublication* pwdata)
 {
-  DCPS::unique_ptr<const DCPS::DiscoveredWriterData> delete_the_data(pwdata);
+  DCPS::unique_ptr<const DiscoveredPublication> delete_the_data(pwdata);
   sedp_->data_received(message_id, *pwdata);
 }
 
@@ -2491,18 +2491,6 @@ Sedp::signal_liveliness_secure(DDS::LivelinessQosPolicyKind kind)
 }
 #endif
 
-void
-Sedp::remove_unicast_address(const ACE_INET_Addr& addr)
-{
-  unicast_addresses_.erase(addr);
-}
-
-void
-Sedp::add_unicast_address(const ACE_INET_Addr& addr)
-{
-  unicast_addresses_.insert(addr);
-}
-
 ICE::AbstractAgent* Sedp::get_ice_agent() {
   DCPS::RtpsUdpInst_rch rtps_inst =
     DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
@@ -2955,12 +2943,19 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
         return;
       }
 
-      DCPS::unique_ptr<DCPS::DiscoveredWriterData> wdata(new DCPS::DiscoveredWriterData);
-      if (ParameterListConverter::from_param_list(data, *wdata) < 0) {
+      DCPS::unique_ptr<DiscoveredPublication> wdata(new DiscoveredPublication);
+      if (ParameterListConverter::from_param_list(data, wdata->writer_data_) < 0) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to convert from ParameterList ")
                    ACE_TEXT("to DiscoveredWriterData\n")));
+        return;
+      }
+      if (ParameterListConverter::from_param_list(data, wdata->ice_agent_info_, wdata->have_ice_agent_info_) < 0) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
+                   ACE_TEXT("failed to convert from ParameterList ")
+                   ACE_TEXT("to ICE Agent info\n")));
         return;
       }
       sedp_.task_.enqueue(id, move(wdata));
@@ -2994,15 +2989,22 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
         return;
       }
 
-      DCPS::unique_ptr<DCPS::DiscoveredReaderData> rdata(new DCPS::DiscoveredReaderData);
-      if (ParameterListConverter::from_param_list(data, *rdata) < 0) {
+      DCPS::unique_ptr<DiscoveredSubscription> rdata(new DiscoveredSubscription);
+      if (ParameterListConverter::from_param_list(data, rdata->reader_data_) < 0) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to convert from ParameterList ")
                    ACE_TEXT("to DiscoveredReaderData\n")));
         return;
       }
-      if (rdata->readerProxy.expectsInlineQos) {
+      if (ParameterListConverter::from_param_list(data, rdata->ice_agent_info_, rdata->have_ice_agent_info_) < 0) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
+                   ACE_TEXT("failed to convert from ParameterList ")
+                   ACE_TEXT("to ICE Agent info\n")));
+        return;
+      }
+      if (rdata->reader_data_.readerProxy.expectsInlineQos) {
         set_inline_qos(rdata->readerProxy.allLocators);
       }
       sedp_.task_.enqueue(id, move(rdata));
@@ -3332,24 +3334,17 @@ Sedp::write_publication_data_unsecure(
                  ACE_TEXT(" to ParameterList\n")));
       result = DDS::RETCODE_ERROR;
     }
-    if (DDS::RETCODE_OK == result) {
-      for (UnicastAddressesType::const_iterator pos = unicast_addresses_.begin(),
-             limit = unicast_addresses_.end();
-           pos != limit; ++pos) {
-        const UnicastAddressesType::value_type& address = *pos;
-        DCPS::Locator_t locator;
-        locator.kind = address_to_kind(address);
-        locator.port = address.get_port_number();
-        RTPS::address_to_bytes(locator.address, address);
-
-        Parameter param;
-        param.locator(locator);
-        param._d(PID_UNICAST_LOCATOR);
-        size_t idx = plist.length();
-        plist.length(idx + 1);
-        plist[idx] = param;
+    if (lp.have_ice_agent_info && lp.publication_->get_ice_agent()->is_running()) {
+      if (ParameterListConverter::to_param_list(lp.ice_agent_info, plist)) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data - ")
+                   ACE_TEXT("Failed to convert ICE Agent info ")
+                   ACE_TEXT("to ParameterList\n")));
+        result = DDS::RETCODE_ERROR;
       }
+    }
 
+    if (DDS::RETCODE_OK == result) {
       result = publications_writer_.write_parameter_list(plist, reader, lp.sequence_);
     }
   } else if (DCPS::DCPS_debug_level > 3) {
@@ -3384,6 +3379,15 @@ Sedp::write_publication_data_secure(
                  ACE_TEXT("Failed to convert DiscoveredWriterData ")
                  ACE_TEXT("to ParameterList\n")));
       result = DDS::RETCODE_ERROR;
+    }
+    if (lp.have_ice_agent_info && lp.publication_->get_ice_agent()->is_running()) {
+      if (ParameterListConverter::to_param_list(lp.ice_agent_info, plist)) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data - ")
+                   ACE_TEXT("Failed to convert ICE Agent info ")
+                   ACE_TEXT("to ParameterList\n")));
+        result = DDS::RETCODE_ERROR;
+      }
     }
     if (DDS::RETCODE_OK == result) {
       RepoId effective_reader = reader;
@@ -3444,24 +3448,16 @@ Sedp::write_subscription_data_unsecure(
                  ACE_TEXT("to ParameterList\n")));
       result = DDS::RETCODE_ERROR;
     }
-    if (DDS::RETCODE_OK == result) {
-      for (UnicastAddressesType::const_iterator pos = unicast_addresses_.begin(),
-             limit = unicast_addresses_.end();
-           pos != limit; ++pos) {
-        const UnicastAddressesType::value_type& address = *pos;
-        DCPS::Locator_t locator;
-        locator.kind = address_to_kind(address);
-        locator.port = address.get_port_number();
-        RTPS::address_to_bytes(locator.address, address);
-
-        Parameter param;
-        param.locator(locator);
-        param._d(PID_UNICAST_LOCATOR);
-        size_t idx = plist.length();
-        plist.length(idx + 1);
-        plist[idx] = param;
+    if (ls.have_ice_agent_info && ls.subscription_->get_ice_agent()->is_running()) {
+      if (ParameterListConverter::to_param_list(ls.ice_agent_info, plist)) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data - ")
+                   ACE_TEXT("Failed to convert ICE Agent info ")
+                   ACE_TEXT("to ParameterList\n")));
+        result = DDS::RETCODE_ERROR;
       }
-
+    }
+    if (DDS::RETCODE_OK == result) {
       result = subscriptions_writer_.write_parameter_list(plist, reader, ls.sequence_);
     }
   } else if (DCPS::DCPS_debug_level > 3) {
@@ -3496,6 +3492,15 @@ Sedp::write_subscription_data_secure(
                  ACE_TEXT("Failed to convert DiscoveredReaderData ")
                  ACE_TEXT("to ParameterList\n")));
       result = DDS::RETCODE_ERROR;
+    }
+    if (ls.have_ice_agent_info && ls.subscription_->get_ice_agent()->is_running()) {
+      if (ParameterListConverter::to_param_list(ls.ice_agent_info, plist)) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data - ")
+                   ACE_TEXT("Failed to convert ICE Agent info ")
+                   ACE_TEXT("to ParameterList\n")));
+        result = DDS::RETCODE_ERROR;
+      }
     }
     if (DDS::RETCODE_OK == result) {
       RepoId effective_reader = reader;
@@ -3566,7 +3571,7 @@ Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<ParticipantData_t> pdat
 }
 
 void
-Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<DCPS::DiscoveredWriterData> wdata)
+Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<DiscoveredPublication> wdata)
 {
   if (spdp_->shutting_down()) { return; }
   putq(new Msg(Msg::MSG_WRITER, id, wdata.release()));
@@ -4180,7 +4185,7 @@ Sedp::setup_remote_reader(DCPS::DataWriterCallbacks* dwr, const DCPS::RepoId& wr
   LocalPublicationIter pos = local_publications_.find(writer);
   pos->second.have_ice_agent_info = true;
   pos->second.ice_agent_info = dwr->get_ice_agent()->get_local_agent_info();
-  std::cout << "TODO: Send agent info" << std::endl;
+  write_publication_data(writer, pos->second);
 }
 
 void
@@ -4189,7 +4194,7 @@ Sedp::setup_remote_writer(DCPS::DataReaderCallbacks* drr, const DCPS::RepoId& re
   LocalSubscriptionIter pos = local_subscriptions_.find(reader);
   pos->second.have_ice_agent_info = true;
   pos->second.ice_agent_info = drr->get_ice_agent()->get_local_agent_info();
-  std::cout << "TODO: Send agent info" << std::endl;
+  write_subscription_data(reader, pos->second);
 }
 
 void
@@ -4199,7 +4204,7 @@ Sedp::IceSignalingChannel::update_agent_info(const ICE::GuidPair& guidp, const I
     if (pos != sedp.local_publications_.end()) {
       pos->second.have_ice_agent_info = true;
       pos->second.ice_agent_info = agent_info;
-      std::cout << "TODO: Send agent info" << std::endl;
+      sedp.write_publication_data(guidp.local, pos->second);
     }
   }
 
@@ -4208,7 +4213,7 @@ Sedp::IceSignalingChannel::update_agent_info(const ICE::GuidPair& guidp, const I
     if (pos != sedp.local_subscriptions_.end()) {
       pos->second.have_ice_agent_info = true;
       pos->second.ice_agent_info = agent_info;
-      std::cout << "TODO: Send agent info" << std::endl;
+      sedp.write_subscription_data(guidp.local, pos->second);
     }
   }
 }

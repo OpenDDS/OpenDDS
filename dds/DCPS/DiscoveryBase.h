@@ -115,12 +115,14 @@ namespace OpenDDS {
       struct DiscoveredSubscription {
         DiscoveredSubscription()
         : bit_ih_(DDS::HANDLE_NIL)
+        , have_ice_agent_info_(false)
         {
         }
 
         explicit DiscoveredSubscription(const OpenDDS::DCPS::DiscoveredReaderData& r)
         : reader_data_(r)
         , bit_ih_(DDS::HANDLE_NIL)
+        , have_ice_agent_info_(false)
         {
         }
 
@@ -131,6 +133,8 @@ namespace OpenDDS {
         DDS::Security::EndpointSecurityAttributes security_attribs_;
 #endif
 
+        bool have_ice_agent_info_;
+        ICE::AgentInfo ice_agent_info_;
       };
 
       typedef OPENDDS_MAP_CMP(DCPS::RepoId, DiscoveredSubscription,
@@ -141,12 +145,14 @@ namespace OpenDDS {
       struct DiscoveredPublication {
         DiscoveredPublication()
         : bit_ih_(DDS::HANDLE_NIL)
+        , have_ice_agent_info_(false)
         {
         }
 
         explicit DiscoveredPublication(const OpenDDS::DCPS::DiscoveredWriterData& w)
         : writer_data_(w)
         , bit_ih_(DDS::HANDLE_NIL)
+        , have_ice_agent_info_(false)
         {
         }
 
@@ -157,6 +163,8 @@ namespace OpenDDS {
         DDS::Security::EndpointSecurityAttributes security_attribs_;
 #endif
 
+        bool have_ice_agent_info_;
+        ICE::AgentInfo ice_agent_info_;
       };
 
       typedef OPENDDS_MAP_CMP(DCPS::RepoId, DiscoveredPublication,
