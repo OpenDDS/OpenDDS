@@ -198,7 +198,7 @@ namespace ICE {
     virtual void receive(const ACE_INET_Addr& local_address, const ACE_INET_Addr& remote_address, const STUN::Message& message) = 0;
   };
 
-  class Agent : public AbstractAgent {
+  class OpenDDS_Stun_Export Agent : public AbstractAgent {
   public:
     Agent(StunSender* stun_sender, const ACE_INET_Addr& stun_server_address, ACE_Reactor* reactor, ACE_thread_t owner);
 
