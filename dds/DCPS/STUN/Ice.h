@@ -76,6 +76,7 @@ namespace ICE {
 
   class StunSender {
   public:
+    virtual ~StunSender() {}
     virtual AddressListType host_addresses() const = 0;
     virtual void send(const ACE_INET_Addr& address, const STUN::Message& message) = 0;
     virtual bool reactor_is_shut_down() const = 0;
@@ -178,6 +179,7 @@ namespace ICE {
 
   class SignalingChannel {
   public:
+    virtual ~SignalingChannel() {}
     virtual void update_agent_info(const GuidPair& guidp, const AgentInfo& agent_info) = 0;
   };
 
@@ -185,6 +187,7 @@ namespace ICE {
 
   class AbstractAgent {
   public:
+    virtual ~AbstractAgent() {}
     virtual void start_ice(const GuidPair& guidp, SignalingChannel* signaling_channel = 0) = 0;
     virtual bool update_remote_agent_info(const GuidPair& guidp, const AgentInfo& agent_info) = 0;
     virtual void stop_ice(const GuidPair& guidp) = 0;
