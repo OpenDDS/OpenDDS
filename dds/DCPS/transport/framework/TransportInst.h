@@ -124,7 +124,9 @@ private:
   void shutdown();
 
   friend class TransportClient;
+ protected:
   TransportImpl* impl();
+ private:
   virtual TransportImpl_rch new_impl() = 0;
 
   const OPENDDS_STRING name_;

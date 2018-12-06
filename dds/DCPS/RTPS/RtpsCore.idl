@@ -19,6 +19,7 @@ module OpenDDS {
 
     typedef octet OctetArray2[2];
     typedef octet OctetArray4[4];
+    typedef octet OctetArray16[16];
 
     /* A list of filters that were applied to the sample.
        See section 9.6.3.1 for the signature-generation algorithm. */
@@ -156,6 +157,36 @@ module OpenDDS {
     };
     // see VENDORID_* constants in BaseMessageTypes.h
 
+    typedef unsigned long IceAgentType_t;
+    const IceAgentType_t ICE_FULL = 0x0;
+    const IceAgentType_t ICE_LITE = 0x1;
+
+    struct IceGeneral_t {
+      IceAgentType_t agent_type;
+      // Optional Connectivity-Check Pacing Value
+      string username;
+      string password;
+      // Optional Extensions
+    };
+
+    typedef unsigned long IceCandidateType_t;
+    const IceCandidateType_t ICE_HOST = 0x0;
+    const IceCandidateType_t ICE_SERVER_REFLEXIVE = 0x1;
+    const IceCandidateType_t ICE_PEER_REFLEXIVE = 0x2;
+    const IceCandidateType_t ICE_RELAYED = 0x3;
+
+    struct IceCandidate_t {
+      unsigned long address;
+      unsigned short portt;
+      // Optional Transport
+      string foundation;
+      // Optional Component ID
+      unsigned long priority;
+      IceCandidateType_t type;
+      // Related Address and Port
+      // Extensibility Parameters
+    };
+    
     typedef unsigned long BuiltinEndpointSet_t;
     const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER =
       1 << 0;
@@ -272,6 +303,8 @@ module OpenDDS {
     const ParameterId_t PID_OPENDDS_BASE = PIDMASK_VENDOR_SPECIFIC + 0x3000;
     const ParameterId_t PID_OPENDDS_LOCATOR           = PID_OPENDDS_BASE + 1;
     const ParameterId_t PID_OPENDDS_ASSOCIATED_WRITER = PID_OPENDDS_BASE + 2;
+    const ParameterId_t PID_OPENDDS_ICE_GENERAL       = PID_OPENDDS_BASE + 3;
+    const ParameterId_t PID_OPENDDS_ICE_CANDIDATE     = PID_OPENDDS_BASE + 4;
 
 
     /* Always used inside a ParameterList */
@@ -430,6 +463,12 @@ module OpenDDS {
       case DDS::Security::PID_IDENTITY_STATUS_TOKEN:
         DDS::Security::IdentityStatusToken identity_status_token;
 #endif
+
+      case PID_OPENDDS_ICE_GENERAL:
+        IceGeneral_t ice_general;
+
+      case PID_OPENDDS_ICE_CANDIDATE:
+        IceCandidate_t ice_candidate;
 
       default:
         DDS::OctetSeq unknown_data;

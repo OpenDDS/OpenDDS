@@ -9,6 +9,10 @@
 
 #include <iostream>
 
+#include <openssl/rand.h>
+#include <openssl/hmac.h>
+#include <openssl/err.h>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -19,8 +23,21 @@ namespace STUN {
     case MAPPED_ADDRESS:
       // TODO:  Handle IPv6.
       return 8;
+    case USERNAME:
+      return username.size();
+    case MESSAGE_INTEGRITY:
+      return 20;
     case XOR_MAPPED_ADDRESS:
       // TODO:  Handle IPv6.
+      return 8;
+    case PRIORITY:
+      return 4;
+    case USE_CANDIDATE:
+      return 0;
+    case FINGERPRINT:
+      return 4;
+    case ICE_CONTROLLED:
+    case ICE_CONTROLLING:
       return 8;
     }
 
@@ -35,11 +52,57 @@ namespace STUN {
     return attribute;
   }
 
+  Attribute make_username(const std::string& username) {
+    Attribute attribute;
+    attribute.type = USERNAME;
+    attribute.username = username;
+    return attribute;
+  }
+
+  Attribute make_message_integrity() {
+    Attribute attribute;
+    attribute.type = MESSAGE_INTEGRITY;
+    return attribute;
+  }
+
   Attribute make_xor_mapped_address(const ACE_INET_Addr& addr) {
     Attribute attribute;
     attribute.type = XOR_MAPPED_ADDRESS;
     // TODO:  Handle IPv6
     attribute.mapped_address = addr;
+    return attribute;
+  }
+
+  Attribute make_priority(uint32_t priority) {
+    Attribute attribute;
+    attribute.type = PRIORITY;
+    attribute.priority = priority;
+    return attribute;
+  }
+
+  Attribute make_use_candidate() {
+    Attribute attribute;
+    attribute.type = USE_CANDIDATE;
+    return attribute;
+  }
+
+  Attribute make_fingerprint() {
+    Attribute attribute;
+    attribute.type = FINGERPRINT;
+    return attribute;
+  }
+
+  Attribute make_ice_controlling(ACE_UINT64 ice_tie_breaker) {
+    Attribute attribute;
+    attribute.type = ICE_CONTROLLING;
+    attribute.ice_tie_breaker = ice_tie_breaker;
+    return attribute;
+  }
+
+  Attribute make_ice_controlled(ACE_UINT64 ice_tie_breaker) {
+    Attribute attribute;
+    attribute.type = ICE_CONTROLLED;
+    attribute.ice_tie_breaker = ice_tie_breaker;
     return attribute;
   }
 
@@ -84,14 +147,27 @@ namespace STUN {
           if (!(serializer >> address)) {
             return false;
           }
-          struct sockaddr_in addr;
-          addr.sin_family = AF_INET;
-          addr.sin_port = htons(port);
-          addr.sin_addr.s_addr = htonl(address);
-          attribute = make_mapped_address(ACE_INET_Addr(&addr, sizeof(addr)));
+          attribute = make_mapped_address(ACE_INET_Addr(port, address));
         } else if (family == IPv6) {
           // TODO:  Implement.
           std::cerr << "TODO: Implement MAPPED_ADDRESS IPv6" << std::endl;
+        }
+      }
+      break;
+    case USERNAME:
+      {
+        unsigned char buffer[512];
+        if (!serializer.read_octet_array(buffer, attribute_length)) {
+          return false;
+        }
+        attribute = make_username(std::string(reinterpret_cast<char*>(buffer), attribute_length));
+      }
+      break;
+    case MESSAGE_INTEGRITY:
+      {
+        attribute = make_message_integrity();
+        if (!serializer.read_octet_array(attribute.message_integrity, sizeof(attribute.message_integrity))) {
+          return false;
         }
       }
       break;
@@ -118,15 +194,49 @@ namespace STUN {
             return false;
           }
           address ^= MAGIC_COOKIE;
-          struct sockaddr_in addr;
-          addr.sin_family = AF_INET;
-          addr.sin_port = htons(port);
-          addr.sin_addr.s_addr = htonl(address);
-          attribute = make_xor_mapped_address(ACE_INET_Addr(&addr, sizeof(addr)));
+          attribute = make_xor_mapped_address(ACE_INET_Addr(port, address));
         } else if (family == IPv6) {
           // TODO:  Implement.
           std::cerr << "TODO: Implement XOR_MAPPED_ADDRESS IPv6" << std::endl;
         }
+      }
+      break;
+    case PRIORITY:
+      {
+        uint32_t priority;
+        if (!(serializer >> priority)) {
+          return false;
+        }
+        attribute = make_priority(priority);
+      }
+      break;
+    case USE_CANDIDATE:
+      attribute = make_use_candidate();
+      break;
+    case FINGERPRINT:
+      {
+        attribute = make_fingerprint();
+        if (!(serializer >> attribute.fingerprint)) {
+          return false;
+        }
+      }
+      break;
+    case ICE_CONTROLLED:
+      {
+        ACE_UINT64 ice_tie_breaker;
+        if (!(serializer >> ice_tie_breaker)) {
+          return false;
+        }
+        attribute = make_ice_controlled(ice_tie_breaker);
+      }
+      break;
+    case ICE_CONTROLLING:
+      {
+        ACE_UINT64 ice_tie_breaker;
+        if (!(serializer >> ice_tie_breaker)) {
+          return false;
+        }
+        attribute = make_ice_controlling(ice_tie_breaker);
       }
       break;
     default:
@@ -140,7 +250,7 @@ namespace STUN {
     }
 
     // All attributes are aligned on 32-bit boundaries.
-    if (!serializer.skip(attribute_length % 4)) {
+    if (!serializer.skip((4 - (attribute_length & 0x3)) % 4)) {
       return false;
     }
 
@@ -163,6 +273,16 @@ namespace STUN {
         // TODO:  Handle IPv6.
       }
       break;
+    case USERNAME:
+      {
+        serializer.write_octet_array(reinterpret_cast<const ACE_CDR::Octet*>(attribute.username.c_str()), attribute.username.size());
+      }
+      break;
+    case MESSAGE_INTEGRITY:
+      {
+        serializer.write_octet_array(attribute.message_integrity, sizeof(attribute.message_integrity));
+      }
+      break;
     case XOR_MAPPED_ADDRESS:
       {
         serializer << static_cast<ACE_CDR::Char>(0);
@@ -170,6 +290,24 @@ namespace STUN {
         serializer << static_cast<uint16_t>(attribute.mapped_address.get_port_number() ^ (MAGIC_COOKIE >> 16));
         serializer << (attribute.mapped_address.get_ip_address() ^ MAGIC_COOKIE);
         // TODO:  Handle IPv6.
+      }
+      break;
+    case PRIORITY:
+      {
+        serializer << attribute.priority;
+      }
+      break;
+    case USE_CANDIDATE:
+      break;
+    case FINGERPRINT:
+      {
+        serializer << attribute.fingerprint;
+      }
+      break;
+    case ICE_CONTROLLED:
+    case ICE_CONTROLLING:
+      {
+        serializer << attribute.ice_tie_breaker;
       }
       break;
     default:
@@ -187,11 +325,36 @@ namespace STUN {
     return true;
   }
 
+  bool TransactionId::operator<(const TransactionId& other) const {
+    return (memcmp(this->data, other.data, sizeof(data)) < 0);
+  }
+
+  bool TransactionId::operator==(const TransactionId& other) const {
+    return (memcmp(this->data, other.data, sizeof(data)) == 0);
+  }
+
+  bool TransactionId::operator!=(const TransactionId& other) const {
+    return (memcmp(this->data, other.data, sizeof(data)) != 0);
+  }
+
+  void Message::generate_transaction_id() {
+    int rc = RAND_bytes(transaction_id.data, sizeof(transaction_id.data));
+    unsigned long err = ERR_get_error();
+    if (rc != 1) {
+      /* RAND_bytes failed */
+      /* `err` is valid    */
+    }
+  }
+
   bool Message::contains_unknown_comprehension_required_attributes() const {
     for (const AttributesType::value_type& attribute : m_attributes) {
       switch (attribute.type) {
       case MAPPED_ADDRESS:
+      case USERNAME:
+      case MESSAGE_INTEGRITY:
       case XOR_MAPPED_ADDRESS:
+      case PRIORITY:
+      case USE_CANDIDATE:
         break;
       default:
         if (attribute.type < 0x8000) {
@@ -199,6 +362,157 @@ namespace STUN {
         }
       }
     }
+    return false;
+  }
+
+  bool Message::get_mapped_address(ACE_INET_Addr& address) const {
+    for (STUN::Message::const_iterator pos = begin(), limit = end(); pos != limit; ++pos) {
+      if (pos->type == STUN::XOR_MAPPED_ADDRESS) {
+        address = pos->mapped_address;
+        return true;
+      }
+    }
+
+    for (STUN::Message::const_iterator pos = begin(), limit = end(); pos != limit; ++pos) {
+      if (pos->type == STUN::MAPPED_ADDRESS) {
+        address = pos->mapped_address;
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool Message::get_priority(uint32_t& priority) const {
+    bool flag = false;
+
+    for (STUN::Message::const_iterator pos = begin(), limit = end(); pos != limit; ++pos) {
+      if (pos->type == STUN::PRIORITY) {
+        flag = true;
+        priority = pos->priority;
+        // Use the last.
+      }
+    }
+
+    return flag;
+  }
+
+  bool Message::get_username(std::string& username) const {
+    bool flag = false;
+
+    for (STUN::Message::const_iterator pos = begin(), limit = end(); pos != limit; ++pos) {
+      if (pos->type == STUN::USERNAME) {
+        flag = true;
+        username = pos->username;
+        // Use the last.
+      }
+    }
+
+    return flag;
+  }
+
+  bool Message::has_message_integrity() const {
+    for (STUN::Message::const_iterator pos = begin(), limit = end(); pos != limit; ++pos) {
+      if (pos->type == STUN::MESSAGE_INTEGRITY) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool Message::verify_message_integrity(const std::string& password) const {
+    bool verified = false;
+
+    for (STUN::Message::const_iterator pos = begin(), limit = end(); pos != limit; ++pos) {
+      if (pos->type == STUN::MESSAGE_INTEGRITY) {
+        unsigned char computed_message_integrity[20];
+        compute_message_integrity(password, computed_message_integrity);
+        verified = memcmp(computed_message_integrity, pos->message_integrity, 20) == 0;
+        // Use the last.
+      }
+    }
+
+    return verified;
+  }
+
+  void Message::compute_message_integrity(const std::string& password, unsigned char message_integrity[20]) const {
+    ACE_Message_Block* block = this->block->duplicate();
+    block->rd_ptr(block->base());
+    DCPS::Serializer serializer(block, true);
+
+    // Write the length and resize for hashing.
+    block->wr_ptr(block->base() + 2);
+    uint16_t message_length = length_for_message_integrity();
+    serializer << message_length;
+    block->wr_ptr(block->base() + 20 + length_for_message_integrity() - 24);
+
+    // Compute the SHA1.
+    unsigned char* digest = HMAC(EVP_sha1(), password.c_str(), password.size(),
+                                 reinterpret_cast<unsigned char*>(block->rd_ptr()), block->length(), NULL, NULL);
+    memcpy(message_integrity, digest, 20);
+
+    // Write the correct length.
+    block->wr_ptr(block->base() + 2);
+    message_length = length();
+    serializer << message_length;
+
+    block->release();
+  }
+
+  bool Message::has_fingerprint() const {
+    for (STUN::Message::const_iterator pos = begin(), limit = end(); pos != limit; ++pos) {
+      if (pos->type == STUN::FINGERPRINT) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  uint32_t Message::compute_fingerprint() const {
+    ACE_Message_Block* block = this->block->duplicate();
+    block->rd_ptr(block->base());
+    DCPS::Serializer serializer(block, true);
+
+    // Resize for hashing.
+    block->wr_ptr(block->base() + 20 + length() - 8);
+
+    // Compute the CRC-32
+    uint32_t crc = ACE::crc32(block->rd_ptr(), block->length());
+
+    block->release();
+
+    return crc ^ 0x5354554E;
+  }
+
+  bool Message::has_ice_controlled() const {
+    for (STUN::Message::const_iterator pos = begin(), limit = end(); pos != limit; ++pos) {
+      if (pos->type == STUN::ICE_CONTROLLED) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool Message::has_ice_controlling() const {
+    for (STUN::Message::const_iterator pos = begin(), limit = end(); pos != limit; ++pos) {
+      if (pos->type == STUN::ICE_CONTROLLING) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool Message::has_use_candidate() const {
+    for (STUN::Message::const_iterator pos = begin(), limit = end(); pos != limit; ++pos) {
+      if (pos->type == STUN::USE_CANDIDATE) {
+        return true;
+      }
+    }
+
     return false;
   }
 
@@ -232,7 +546,7 @@ namespace STUN {
       return false;
     }
 
-    if (!serializer.read_octet_array(message.transaction_id, 12)) {
+    if (!serializer.read_octet_array(message.transaction_id.data, 12)) {
       return false;
     }
 
@@ -241,20 +555,19 @@ namespace STUN {
       return false;
     }
 
-    message.valid_header = true;
-
     while (serializer.length() != 0) {
       Attribute attribute;
       if (!(serializer >> attribute)) {
         return false;
       }
       message.append_attribute(attribute);
+      if (attribute.type == FINGERPRINT && attribute.fingerprint != message.compute_fingerprint()) {
+        return false;
+      }
       if (message.length() > message_length) {
         return false;
       }
     }
-
-    message.valid_attributes = true;
 
     return true;
   }
@@ -269,95 +582,28 @@ namespace STUN {
       ((message_class & 0x1) << 4) |
       (message_method & 0x000F);
     serializer << message_type;
+
     uint16_t message_length = message.length();
     serializer << message_length;
     serializer << MAGIC_COOKIE;
-    serializer.write_octet_array(message.transaction_id, sizeof(message.transaction_id));
+    serializer.write_octet_array(message.transaction_id.data, sizeof(message.transaction_id.data));
 
     for (Message::const_iterator pos = message.begin(), limit = message.end();
          pos != limit; ++pos) {
       const Attribute& attribute = *pos;
+      if (attribute.type == MESSAGE_INTEGRITY) {
+        // Compute the hash.
+        message.compute_message_integrity(message.password, const_cast<Attribute&>(attribute).message_integrity);
+      } else if (attribute.type == FINGERPRINT) {
+        // Compute the hash.
+        const_cast<Attribute&>(attribute).fingerprint = message.compute_fingerprint();
+      }
       serializer << attribute;
     }
 
     return true;
   }
 
-  void Participant::receive(const ACE_INET_Addr& address, const Message& message) {
-    if (!message.valid_header) {
-      std::cerr << "Not a valid header" << std::endl;
-      return;
-    }
-
-    if (!message.valid_attributes) {
-      std::cerr << "TODO:  Send a 400" << std::endl;
-      return;
-    }
-
-    switch (message.class_) {
-    case STUN::REQUEST:
-      request(address, message);
-      break;
-    case STUN::INDICATION:
-      indication(address, message);
-      break;
-    case STUN::SUCCESS_RESPONSE:
-      success_response(address, message);
-      break;
-    case STUN::ERROR_RESPONSE:
-      error_response(address, message);
-      break;
-    }
-  }
-
-  void Participant::request(const ACE_INET_Addr& address, const Message& message) {
-    if (message.contains_unknown_comprehension_required_attributes()) {
-      std::cerr << "TODO: Send 420 with unknown attributes" << std::endl;
-      return;
-    }
-
-    switch (message.method) {
-    case STUN::BINDING:
-      {
-        Message response;
-        response.class_ = SUCCESS_RESPONSE;
-        response.method = STUN::BINDING;
-        memcpy(response.transaction_id, message.transaction_id, sizeof(message.transaction_id));
-        response.append_attribute(make_mapped_address(address));
-        response.append_attribute(make_xor_mapped_address(address));
-        m_sender->send(address, response);
-      }
-      break;
-    default:
-      // Unknown method.  Stop processing.
-      std::cerr << "TODO: Send error for unsupported method" << std::endl;
-      break;
-    }
-  }
-
-  void Participant::indication(const ACE_INET_Addr& /*address*/, const Message& message) {
-    if (message.contains_unknown_comprehension_required_attributes()) {
-      // No further processing according to spec.
-      return;
-    }
-
-    switch (message.method) {
-    case STUN::BINDING:
-      // Done.
-      break;
-    default:
-      // Unknown method.  Stop processing.
-      break;
-    }
-  }
-
-  void Participant::success_response(const ACE_INET_Addr& /*address*/, const Message& /*message*/) {
-    std::cerr << "TODO: Implement success_response" << std::endl;
-  }
-
-  void Participant::error_response(const ACE_INET_Addr& /*address*/, const Message& /*message*/) {
-    std::cerr << "TODO: Implement error_response" << std::endl;
-  }
 
 } // namespace STUN
 } // namespace OpenDDS

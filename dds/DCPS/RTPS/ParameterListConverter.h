@@ -10,6 +10,8 @@
 #include "dds/DCPS/RTPS/rtps_export.h"
 #include "dds/DCPS/RTPS/RtpsCoreC.h"
 
+#include "dds/DCPS/STUN/Ice.h"
+
 #ifdef OPENDDS_SECURITY
 #include "dds/DCPS/RTPS/RtpsSecurityC.h"
 #endif
@@ -120,7 +122,7 @@ int to_param_list(const DCPS::DiscoveredReaderData& reader_data,
 
 OpenDDS_Rtps_Export
 int from_param_list(const ParameterList& param_list,
-                   DCPS::DiscoveredReaderData& reader_data);
+                    DCPS::DiscoveredReaderData& reader_data);
 
 #ifdef OPENDDS_SECURITY
 // DDS::Security::EndpointSecurityInfo
@@ -152,7 +154,7 @@ int to_param_list(const DiscoveredWriterData_SecurityWrapper& wrapper,
 
 OpenDDS_Rtps_Export
 int from_param_list(const ParameterList& param_list,
-                   DiscoveredWriterData_SecurityWrapper& wrapper);
+                    DiscoveredWriterData_SecurityWrapper& wrapper);
 
 // DiscoveredReaderData_SecurityWrapper
 
@@ -163,8 +165,20 @@ int to_param_list(const DiscoveredReaderData_SecurityWrapper& wrapper,
 
 OpenDDS_Rtps_Export
 int from_param_list(const ParameterList& param_list,
-                   DiscoveredReaderData_SecurityWrapper& wrapper);
+                    DiscoveredReaderData_SecurityWrapper& wrapper);
 #endif
+
+
+// Extensions for ICE
+
+OpenDDS_Rtps_Export
+int to_param_list(const ICE::AgentInfo& agent_info,
+                  ParameterList& param_list);
+
+OpenDDS_Rtps_Export
+int from_param_list(const ParameterList& param_list,
+                    ICE::AgentInfo& agent_info,
+                    bool& have_agent_info);
 
 }
 }

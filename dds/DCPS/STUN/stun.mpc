@@ -1,4 +1,4 @@
-project(OpenDDS_Stun): dcpslib, install {
+project(OpenDDS_Stun): dcpslib, openssl, install {
   sharedname = OpenDDS_Stun
   dynamicflags = OPENDDS_STUN_BUILD_DLL
 

@@ -157,6 +157,8 @@ public:
                                      const RepoId& writerid,
                                      const RepoId& readerid);
 
+  virtual ICE::AbstractAgent* get_ice_agent() { return 0; }
+
   DDS::ReturnCode_t enable();
 
   DomainParticipantImpl*          participant() {

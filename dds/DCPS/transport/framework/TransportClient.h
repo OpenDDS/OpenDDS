@@ -101,6 +101,8 @@ public:
                              const RepoId& readerid,
                              const RepoId& writerid);
 
+  ICE::AbstractAgent* get_ice_agent();
+
   // Data transfer:
 
   bool send_response(const RepoId& peer,

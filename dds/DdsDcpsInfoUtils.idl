@@ -20,12 +20,15 @@ module OpenDDS
 
     typedef DDS::OctetSeq TransportBLOB;
 
+    typedef octet OctetArray8[8];
+
     struct TransportLocator {
       /// The transport type (e.g. tcp or udp)
       string transport_type;
       /// Information about the transport instance that is opaque to all but
       /// code specific to that transport implementation.
       TransportBLOB data;
+      OctetArray8 ice_agent;
     };
 
     typedef sequence<TransportLocator> TransportLocatorSeq;

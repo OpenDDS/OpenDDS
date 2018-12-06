@@ -463,6 +463,7 @@ public:
  PublicationInstance_rch get_handle_instance(
    DDS::InstanceHandle_t handle);
 
+ virtual ICE::AbstractAgent* get_ice_agent();
 
 protected:
 

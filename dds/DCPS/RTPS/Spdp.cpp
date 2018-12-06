@@ -18,7 +18,10 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/GuidConverter.h"
+#include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/Qos_Helper.h"
+
+#include "dds/DCPS/STUN/Ice.h"
 
 #ifdef OPENDDS_SECURITY
 #include "SecurityHelpers.h"
@@ -162,8 +165,8 @@ namespace {
 
   class RtpsRelayHelper : public DiscoveryHelper {
   public:
-    RtpsRelayHelper(const OPENDDS_STRING& a_url, Spdp* a_spdp, Sedp* a_sedp)
-      : url_(a_url), spdp_(a_spdp), sedp_(a_sedp) {}
+    RtpsRelayHelper(const OPENDDS_STRING& a_url, Spdp* a_spdp)
+      : url_(a_url), spdp_(a_spdp) {}
 
     void init() override {
       ACE_Auto_Ptr<ACE::INet::URL_Base> url_safe (ACE::INet::URL_Base::create_from_string (url_.c_str()));
@@ -218,10 +221,10 @@ namespace {
               spdp_->add_sedp_unicast(address);
             } else if (key == "Data") {
               if (!rtps_relay_data_.empty()) {
-                sedp_->remove_unicast_address(ACE_INET_Addr(rtps_relay_data_.c_str()));
+                //sedp_->remove_unicast_address(ACE_INET_Addr(rtps_relay_data_.c_str()));
               }
               rtps_relay_data_ = address_string;
-              sedp_->add_unicast_address(address);
+              //sedp_->add_unicast_address(address);
             } else {
               std::cerr << "TODO: unknown key " << key << std::endl;
             }
@@ -236,7 +239,6 @@ namespace {
   private:
     OPENDDS_STRING url_;
     Spdp* spdp_;
-    Sedp* sedp_;
     OPENDDS_STRING rtps_relay_spdp_;
     OPENDDS_STRING rtps_relay_sedp_;
     OPENDDS_STRING rtps_relay_data_;
@@ -250,7 +252,7 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
   guid = guid_; // may have changed in SpdpTransport constructor
 
   if (!disco->rtps_relay_url().empty()) {
-    discovery_helper_ = new RtpsRelayHelper(disco->rtps_relay_url(), this, &sedp_);
+    discovery_helper_ = new RtpsRelayHelper(disco->rtps_relay_url(), this);
     discovery_helper_->init();
   }
 
@@ -260,15 +262,6 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
 
   // Append metatraffic unicast locator
   sedp_.unicast_locators(sedp_unicast_);
-
-  if (!disco->rtps_relay_sedp().empty()) {
-    CORBA::ULong idx = sedp_unicast_.length();
-    sedp_unicast_.length(idx + 1);
-    ACE_INET_Addr relay(disco->rtps_relay_sedp().c_str());
-    sedp_unicast_[idx].kind = address_to_kind(relay);
-    sedp_unicast_[idx].port = relay.get_port_number();
-    RTPS::address_to_bytes(sedp_unicast_[idx].address, relay);
-  }
 
   if (disco->sedp_multicast()) { // Append metatraffic multicast locator
     const ACE_INET_Addr& mc_addr = sedp_.multicast_group();
@@ -298,6 +291,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , shutdown_cond_(lock_)
   , shutdown_flag_(false)
   , sedp_(guid_, *this, lock_)
+  , ice_agent_repeat_count_(0)
 #ifdef OPENDDS_SECURITY
   , security_config_()
   , security_enabled_(false)
@@ -333,6 +327,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , shutdown_cond_(lock_)
   , shutdown_flag_(false)
   , sedp_(guid_, *this, lock_)
+  , ice_agent_repeat_count_(0)
   , security_config_(Security::SecurityRegistry::instance()->default_config())
   , security_enabled_(security_config_->get_authentication() && security_config_->get_access_control() && security_config_->get_crypto_key_factory() && security_config_->get_crypto_key_exchange())
   , identity_handle_(identity_handle)
@@ -659,9 +654,144 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
     return;
   }
 
+  const DCPS::RepoId guid = make_guid(pdata.participantProxy.guidPrefix, DCPS::ENTITYID_PARTICIPANT);
+  if (guid == guid_) {
+    // About us, stop.
+    return;
+  }
+
   DCPS::MessageId msg_id = (data.inlineQos.length() && disposed(data.inlineQos)) ? DCPS::DISPOSE_INSTANCE : DCPS::SAMPLE_DATA;
 
   handle_participant_data(msg_id, pdata);
+
+  ICE::AbstractAgent* ice_agent = sedp_.get_ice_agent();
+  if (!ice_agent) {
+    return;
+  }
+
+  // Form the set of guids.
+  std::vector<ICE::GuidPair> guids;
+  const BuiltinEndpointSet_t& avail = pdata.participantProxy.availableBuiltinEndpoints;
+  RepoId r = guid, l = guid_;
+
+  // See RTPS v2.1 section 8.5.5.1
+  if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR) {
+    l.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER;
+    r.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER;
+    guids.push_back(ICE::GuidPair(l, r));
+  }
+  if (avail & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR) {
+    l.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER;
+    r.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER;
+    guids.push_back(ICE::GuidPair(l, r));
+  }
+  if (avail & BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER) {
+    l.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER;
+    r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER;
+    guids.push_back(ICE::GuidPair(l, r));
+  }
+  if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER) {
+    l.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER;
+    r.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER;
+    guids.push_back(ICE::GuidPair(l, r));
+  }
+  if (avail & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER) {
+    l.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER;
+    r.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER;
+    guids.push_back(ICE::GuidPair(l, r));
+  }
+  if (avail & BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER) {
+    l.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER;
+    r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER;
+    guids.push_back(ICE::GuidPair(l, r));
+  }
+
+#ifdef OPENDDS_SECURITY
+  using namespace DDS::Security;
+  // See DDS-Security v1.1 section 7.3.7.1
+  if (avail & SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER) {
+    l.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER;
+    r.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER;
+    guids.push_back(ICE::GuidPair(l, r));
+  }
+  if (avail & SEDP_BUILTIN_PUBLICATIONS_SECURE_READER) {
+    l.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER;
+    r.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER;
+    guids.push_back(ICE::GuidPair(l, r));
+  }
+  if (avail & SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER) {
+    l.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER;
+    r.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER;
+    guids.push_back(ICE::GuidPair(l, r));
+  }
+  if (avail & SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER) {
+    l.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER;
+    r.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER;
+    guids.push_back(ICE::GuidPair(l, r));
+  }
+  if (avail & BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER) {
+    l.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER;
+    r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER;
+    guids.push_back(ICE::GuidPair(l, r));
+  }
+  if (avail & BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER) {
+    l.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER;
+    r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER;
+    guids.push_back(ICE::GuidPair(l, r));
+  }
+  if (avail & BUILTIN_PARTICIPANT_STATELESS_MESSAGE_WRITER) {
+    l.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
+    r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER;
+    guids.push_back(ICE::GuidPair(l, r));
+  }
+  if (avail & BUILTIN_PARTICIPANT_STATELESS_MESSAGE_READER) {
+    l.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER;
+    r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
+    guids.push_back(ICE::GuidPair(l, r));
+  }
+  if (avail & BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_WRITER) {
+    l.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER;
+    r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER;
+    guids.push_back(ICE::GuidPair(l, r));
+  }
+  if (avail & BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_READER) {
+    l.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER;
+    r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER;
+    guids.push_back(ICE::GuidPair(l, r));
+  }
+  if (avail & SPDP_BUILTIN_PARTICIPANT_SECURE_WRITER) {
+    l.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER;
+    r.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER;
+    guids.push_back(ICE::GuidPair(l, r));
+  }
+  if (avail & SPDP_BUILTIN_PARTICIPANT_SECURE_READER) {
+    l.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER;
+    r.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER;
+    guids.push_back(ICE::GuidPair(l, r));
+  }
+#endif
+
+  for (std::vector<ICE::GuidPair>::const_iterator pos = guids.begin(), limit = guids.end(); pos != limit; ++pos) {
+    ice_agent->start_ice(*pos);
+  }
+
+  ICE::AgentInfo agent_info;
+  bool have_agent_info;
+  if (ParameterListConverter::from_param_list(plist, agent_info, have_agent_info) < 0) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::data_received - ")
+      ACE_TEXT("failed to convert from ParameterList to ")
+      ACE_TEXT("ICE::AgentInfo\n")));
+    return;
+  }
+
+  if (have_agent_info) {
+    // TODO:  Call remove_remote_agent when liveliness is lost.
+    for (std::vector<ICE::GuidPair>::const_iterator pos = guids.begin(), limit = guids.end(); pos != limit; ++pos) {
+      if (ice_agent->update_remote_agent_info(*pos, agent_info)) {
+        ice_agent_repeat_count_ = 0;
+      }
+    }
+  }
 }
 
 void
@@ -1668,6 +1798,20 @@ Spdp::SpdpTransport::write_i()
     return;
   }
 
+  ICE::AbstractAgent* ice_agent = outer_->sedp_.get_ice_agent();
+
+  if (ice_agent && (ice_agent->is_running() || outer_->ice_agent_repeat_count_ < 10)) {
+    const ICE::AgentInfo& agent_info = ice_agent->get_local_agent_info();
+    if (ParameterListConverter::to_param_list(agent_info, plist) < 0) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("Spdp::SpdpTransport::write() - ")
+                 ACE_TEXT("failed to convert from ICE::AgentInfo ")
+                 ACE_TEXT("to ParameterList\n")));
+      return;
+    }
+    outer_->ice_agent_repeat_count_ = ice_agent->is_running() ? 0 : outer_->ice_agent_repeat_count_ + 1;
+  }
+
   wbuff_.reset();
   CORBA::UShort options = 0;
   DCPS::Serializer ser(&wbuff_, false, DCPS::Serializer::ALIGN_CDR);
@@ -2092,7 +2236,6 @@ Spdp::add_sedp_unicast(const ACE_INET_Addr& addr)
   sedp_unicast_.length(idx + 1);
   sedp_unicast_[idx] = locator;
 }
-
 
 }
 }
