@@ -80,10 +80,10 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         exit(1);
       }
 
-      // Try to get the inconsistent_topic_status once a second for 5 seconds, when we got it
+      // Try to get the inconsistent_topic_status once a second for a number of seconds, when we got it
       // we can stop getting it
       DDS::InconsistentTopicStatus status;
-      for (size_t i = 0; i < 5; ++i) {
+      for (size_t i = 0; i < 10; ++i) {
         DDS::Duration_t timeout;
         timeout.sec = 0;
         timeout.nanosec = 0;
