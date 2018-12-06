@@ -427,6 +427,7 @@ namespace ICE {
       }
 
       // Not in checklist.
+      active_foundations.add(cp.foundation);
       waiting_.push_back(cp);
       waiting_.sort(CandidatePair::priority_sorted);
       triggered_check_queue_.push_back(cp);
@@ -604,8 +605,8 @@ namespace ICE {
 
   void Agent::remove_checklist(Checklist* checklist) {
     checklist->fix_foundations(active_foundations_);
-    check_invariant();
     checklists_.remove(checklist);
+    check_invariant();
     connectivity_checks_.remove_if(ConnectivityCheckChecklistPred(checklist));
     for (GuidSetType::const_iterator pos = checklist->guids().begin(), limit = checklist->guids().end(); pos != limit; ++pos) {
       selected_addresses_.erase(pos->first.remote);
