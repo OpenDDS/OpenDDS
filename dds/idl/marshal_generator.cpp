@@ -26,6 +26,10 @@ namespace {
     if (n != std::string::npos) {
       dst.insert(n, "()");
     }
+    n = dst.find_first_of("[");
+    if (n != std::string::npos) {
+      dst.insert(n, "()");
+    }
     return dst;
   }
 
