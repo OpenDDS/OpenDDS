@@ -154,7 +154,6 @@ namespace ICE {
       , remote_(remote)
       , nominating_(valid_list_.end())
       , nominated_(valid_list_.end())
-
     {
       // Add the candidate pairs.
       for (AgentInfo::CandidatesType::const_iterator local_pos = local.candidates.begin(), local_limit = local.candidates.end(); local_pos != local_limit; ++local_pos) {
@@ -177,6 +176,19 @@ namespace ICE {
             ++test_pos;
           }
         }
+      }
+    }
+
+    size_t size() const {
+      return frozen_.size() + waiting_.size() + in_progress_.size();
+    }
+
+    void compute_active_foundations(ActiveFoundationSet& active_foundations) const {
+      for (CandidatePairsType::const_iterator pos = waiting_.begin(), limit = waiting_.end(); pos != limit; ++pos) {
+	active_foundations.add(pos->foundation);
+      }
+      for (CandidatePairsType::const_iterator pos = in_progress_.begin(), limit = in_progress_.end(); pos != limit; ++pos) {
+	active_foundations.add(pos->foundation);
       }
     }
 
@@ -551,6 +563,7 @@ namespace ICE {
       deferred_triggered_checks_.erase(pos);
     }
     checklists_.push_back(checklist);
+    check_invariant();
     connectivity_checker_.start();
     return checklist;
   }
@@ -563,6 +576,7 @@ namespace ICE {
 
   void Agent::remove_checklist(Checklist* checklist) {
     checklist->fix_foundations(active_foundations_);
+    check_invariant();
     checklists_.remove(checklist);
     connectivity_checks_.remove_if(ConnectivityCheckChecklistPred(checklist));
     for (GuidSetType::const_iterator pos = checklist->guids().begin(), limit = checklist->guids().end(); pos != limit; ++pos) {
@@ -607,6 +621,7 @@ namespace ICE {
     }
 
     checklist->add_triggered_check(cp, active_foundations_);
+    check_invariant();
   }
 
   struct Running {
@@ -972,6 +987,7 @@ namespace ICE {
       }
 
       checklist->unfreeze(active_foundations_);
+      check_invariant();
 
       if (checklist->has_ordinary_check()) {
         ConnectivityCheck cc = checklist->get_ordinary_check(ice_tie_breaker_);
@@ -1009,6 +1025,7 @@ namespace ICE {
           failed(cc);
         } else {
           cc.checklist()->remove_from_in_progress(cc.candidate_pair(), active_foundations_);
+	  check_invariant();
         }
       }
     }
@@ -1023,9 +1040,12 @@ namespace ICE {
     // 7.2.5.3.3
     // 7.2.5.4
     checklist->succeeded(cp, active_foundations_);
+    check_invariant();
+    std::cout << local_agent_info_.username << " succeeded " << checklist->size() << " remaining for " << checklist->remote_agent_info().username << std::endl;
     // TODO:  Do we really need to set the valid pair to succeeded?
     for (ChecklistSetType::const_iterator pos = checklists_.begin(), limit = checklists_.end(); pos != limit; ++pos) {
       (*pos)->unfreeze(active_foundations_, cp.foundation);
+      check_invariant();
     }
   }
 
@@ -1037,6 +1057,8 @@ namespace ICE {
     } else {
       // 7.2.5.4
       checklist->failed(cp, active_foundations_);
+      check_invariant();
+      std::cout << local_agent_info_.username << " failed " << checklist->size() << " remaining for " << checklist->remote_agent_info().username << std::endl;
     }
   }
 
@@ -1162,6 +1184,7 @@ namespace ICE {
 
   void Agent::CandidateGatherer::send_request() {
     if (state_ != STOPPED) {
+      std::cout << "SENDING REQUEST TO " << agent_.stun_server_address() << std::endl;
       agent_.send(agent_.stun_server_address(), binding_request_);
     }
   }
@@ -1230,6 +1253,15 @@ namespace ICE {
       return DCPS::GUID_tKeyLessThan() (this->local, other.local);
     }
     return DCPS::GUID_tKeyLessThan() (this->remote, other.remote);
+  }
+
+  void Agent::check_invariant() const {
+    ActiveFoundationSet expected;
+
+    for (ChecklistSetType::const_iterator pos = checklists_.begin(), limit = checklists_.end(); pos != limit; ++pos) {
+      (*pos)->compute_active_foundations(expected);
+    }
+    assert(expected == active_foundations_);
   }
 
 } // namespace ICE
