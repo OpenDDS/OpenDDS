@@ -382,7 +382,11 @@ namespace ICE {
     }
 
     void add_triggered_check(const CandidatePair& cp, ActiveFoundationSet& active_foundations) {
-      if (std::find(in_progress_.begin(), in_progress_.end(), cp) != in_progress_.end()) {
+      CandidatePairsType::const_iterator pos;
+
+      pos = std::find(frozen_.begin(), frozen_.end(), cp);
+      if (pos != frozen_.end()) {
+        frozen_.erase(pos);
         active_foundations.add(cp.foundation);
         waiting_.push_back(cp);
         waiting_.sort(CandidatePair::priority_sorted);
@@ -390,17 +394,41 @@ namespace ICE {
         return;
       }
 
-      waiting_.remove(cp);
-      if (std::find(frozen_.begin(), frozen_.end(), cp) != frozen_.end() ||
-          std::find(failed_.begin(), failed_.end(), cp) != failed_.end()) {
-        active_foundations.add(cp.foundation);
+      pos = std::find(waiting_.begin(), waiting_.end(), cp);
+      if (pos != waiting_.end()) {
+        // Done.
+        return;
       }
-      frozen_.remove(cp);
-      failed_.remove(cp);
 
+      pos = std::find(in_progress_.begin(), in_progress_.end(), cp);
+      if (pos != in_progress_.end()) {
+        // Duplicating to waiting.
+        active_foundations.add(cp.foundation);
+        waiting_.push_back(cp);
+        waiting_.sort(CandidatePair::priority_sorted);
+        triggered_check_queue_.push_back(cp);
+        return;
+      }
+
+      pos = std::find(succeeded_.begin(), succeeded_.end(), cp);
+      if (pos != succeeded_.end()) {
+        // Done.
+        return;
+      }
+
+      pos = std::find(failed_.begin(), failed_.end(), cp);
+      if (pos != failed_.end()) {
+        failed_.erase(pos);
+        active_foundations.add(cp.foundation);
+        waiting_.push_back(cp);
+        waiting_.sort(CandidatePair::priority_sorted);
+        triggered_check_queue_.push_back(cp);
+        return;
+      }
+
+      // Not in checklist.
       waiting_.push_back(cp);
       waiting_.sort(CandidatePair::priority_sorted);
-
       triggered_check_queue_.push_back(cp);
     }
 
