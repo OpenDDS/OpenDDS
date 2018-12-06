@@ -118,7 +118,7 @@ namespace ICE {
   ConnectivityCheck::ConnectivityCheck(Checklist* checklist, const CandidatePair& candidate_pair,
                                        const AgentInfo& local_agent_info, const AgentInfo& remote_agent_info,
                                        uint64_t ice_tie_breaker)
-    : checklist_(checklist), candidate_pair_(candidate_pair), send_count_(0) {
+    : checklist_(checklist), candidate_pair_(candidate_pair), send_count_(0), cancelled_(false) {
     request_.class_ = STUN::REQUEST;
     request_.method = STUN::BINDING;
     request_.generate_transaction_id();
@@ -278,14 +278,14 @@ namespace ICE {
       valid_list_.sort(CandidatePair::priority_sorted);
     }
 
-    void succeeded(const CandidatePair& cp) {
-      in_progress_.remove(cp);
+    void succeeded(const CandidatePair& cp, ActiveFoundationSet& active_foundations) {
+      remove_from_in_progress(cp, active_foundations);
       succeeded_.push_back(cp);
       succeeded_.sort(CandidatePair::priority_sorted);
     }
 
-    void failed(const CandidatePair& cp) {
-      in_progress_.remove(cp);
+    void failed(const CandidatePair& cp, ActiveFoundationSet& active_foundations) {
+      remove_from_in_progress(cp, active_foundations);
       failed_.push_back(cp);
       failed_.sort(CandidatePair::priority_sorted);
     }
@@ -309,8 +309,6 @@ namespace ICE {
       } else {
         nominated_ = std::find(valid_list_.begin(), valid_list_.end(), cp);
       }
-
-      std::cout << "nominate " << nominated_->remote.address.get_host_addr() << ':' << nominated_->remote.address.get_port_number() << " for " << remote_.username << std::endl;
 
       selected_address_ = nominated_->remote.address;
 
@@ -372,8 +370,15 @@ namespace ICE {
     }
 
     void add_triggered_check(const CandidatePair& cp, ActiveFoundationSet& active_foundations) {
+      if (std::find(in_progress_.begin(), in_progress_.end(), cp) != in_progress_.end()) {
+        active_foundations.add(cp.foundation);
+        waiting_.push_back(cp);
+        waiting_.sort(CandidatePair::priority_sorted);
+        triggered_check_queue_.push_back(cp);
+        return;
+      }
+
       waiting_.remove(cp);
-      in_progress_.remove(cp);
       if (std::find(frozen_.begin(), frozen_.end(), cp) != frozen_.end() ||
           std::find(failed_.begin(), failed_.end(), cp) != failed_.end()) {
         active_foundations.add(cp.foundation);
@@ -385,6 +390,13 @@ namespace ICE {
       waiting_.sort(CandidatePair::priority_sorted);
 
       triggered_check_queue_.push_back(cp);
+    }
+
+    void remove_from_in_progress(const CandidatePair& cp, ActiveFoundationSet& active_foundations) {
+      active_foundations.remove(cp.foundation);
+      // Candidates can be in progress multiple times.
+      CandidatePairsType::const_iterator pos = std::find(in_progress_.begin(), in_progress_.end(), cp);
+      in_progress_.erase(pos);
     }
 
     const GuidSetType& guids() const { return guids_; }
@@ -423,11 +435,12 @@ namespace ICE {
     return cc.candidate_pair() == cp;
   }
 
-  Agent::Agent()
-    : stun_sender_(0)
+  Agent::Agent(StunSender* stun_sender, const ACE_INET_Addr& stun_server_address, ACE_Reactor* reactor, ACE_thread_t owner)
+    : stun_sender_(stun_sender)
+    , stun_server_address_(stun_server_address)
     , remote_peer_reflexive_counter_(0)
-    , candidate_gatherer_(*this)
-    , connectivity_checker_(*this)
+    , candidate_gatherer_(*this, reactor, owner)
+    , connectivity_checker_(*this, reactor, owner)
   {
     //int rc =
     RAND_bytes(reinterpret_cast<unsigned char*>(&ice_tie_breaker_), sizeof(ice_tie_breaker_));
@@ -436,22 +449,10 @@ namespace ICE {
     //   /* RAND_bytes failed */
     //   /* `err` is valid    */
     // }
-    regenerate_local_agent_info();
-  }
 
-  void Agent::stun_sender(StunSender* stun_sender, ACE_Reactor* reactor) {
-    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(mutex_);
-    stun_sender_ = stun_sender;
-    candidate_gatherer_.reactor(reactor);
-    connectivity_checker_.reactor(reactor);
     // TODO:  Filter out addresses not allowed by the spec.
     host_addresses_ = stun_sender->host_addresses();
     regenerate_local_agent_info();
-  }
-
-  void Agent::stun_server_address(const ACE_INET_Addr& address) {
-    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(mutex_);
-    stun_server_address_ = address;
   }
 
   void Agent::start_ice(const GuidPair& guidp, SignalingChannel* signaling_channel) {
@@ -468,12 +469,18 @@ namespace ICE {
     }
 
     unknown_guids_[guidp] = signaling_channel;
-    std::cout << "Waiting for agent info from " << guidp.local << ':' << guidp.remote << std::endl;
+    std::cout << local_agent_info_.username << " is waiting for agent info from " << guidp.local << ':' << guidp.remote << std::endl;
 
     candidate_gatherer_.start();
   }
 
-  void Agent::update_remote_agent_info(const GuidPair& guidp, const AgentInfo& remote_agent_info) {
+  bool Agent::update_remote_agent_info(const GuidPair& guidp, const AgentInfo& remote_agent_info) {
+    bool new_checklist = false;
+
+    for (AgentInfo::const_iterator pos = remote_agent_info.begin(), limit = remote_agent_info.end(); pos != limit; ++pos) {
+      std::cout << local_agent_info_.username << " has address for " << remote_agent_info.username << ' ' << pos->address.get_host_addr() << ':' << pos->address.get_port_number() << std::endl;
+    }
+
     ACE_Guard<ACE_Recursive_Thread_Mutex> guard(mutex_);
     start_ice(guidp);
 
@@ -494,6 +501,7 @@ namespace ICE {
       username_checklist = *pos;
     } else {
       username_checklist = add_checklist(remote_agent_info);
+      new_checklist = true;
     }
 
     if (guid_checklist != username_checklist && guid_checklist != 0) {
@@ -514,7 +522,10 @@ namespace ICE {
       Checklist* checklist = add_checklist(remote_agent_info);
       checklist->guids() = username_checklist->guids();
       remove_checklist(username_checklist);
+      new_checklist = true;
     }
+
+    return new_checklist;
   }
 
   void Agent::stop_ice(const GuidPair& /*guidp*/) {
@@ -528,7 +539,7 @@ namespace ICE {
   }
 
   Checklist* Agent::add_checklist(const AgentInfo& remote_agent_info) {
-    std::cout << "New checklist for " << remote_agent_info.username << std::endl;
+    std::cout << local_agent_info_.username << " new checklist for " << remote_agent_info.username << std::endl;
     Checklist* checklist = new Checklist(local_agent_info_, remote_agent_info);
     checklist->unfreeze(active_foundations_);
     DeferredTriggeredChecksType::iterator pos = deferred_triggered_checks_.find(remote_agent_info.username);
@@ -584,6 +595,7 @@ namespace ICE {
         ACE_INET_Addr addr = checklist->nominate(cp);
         for (GuidSetType::const_iterator pos = checklist->guids().begin(), limit = checklist->guids().end(); pos != limit; ++pos) {
           selected_addresses_[pos->first.remote] = addr;
+          std::cout << local_agent_info_.username << " auto nominate " << addr.get_host_addr() << ':' << addr.get_port_number() << " for " << checklist->remote_agent_info().username << ' ' << pos->first.remote << std::endl;
         }
       }
       return;
@@ -591,7 +603,7 @@ namespace ICE {
 
     if (checklist->is_in_progress(cp)) {
       ConnectivityChecksType::iterator pos = std::find(connectivity_checks_.begin(), connectivity_checks_.end(), cp);
-      connectivity_checks_.erase(pos);
+      pos->cancel();
     }
 
     checklist->add_triggered_check(cp, active_foundations_);
@@ -635,6 +647,18 @@ namespace ICE {
       error_response(remote_address, message);
       break;
     }
+  }
+
+  std::ostream& operator<<(std::ostream& stream, const ACE_INET_Addr& address) {
+    stream << address.get_host_addr() << ':' << address.get_port_number();
+    return stream;
+  }
+
+  std::ostream& operator<<(std::ostream& stream, const STUN::TransactionId& tid) {
+    for (size_t idx = 0; idx != 12; ++idx) {
+      stream << int(tid.data[idx]);
+    }
+    return stream;
   }
 
   void Agent::request(const ACE_INET_Addr& local_address,
@@ -711,6 +735,8 @@ namespace ICE {
         response.append_attribute(STUN::make_fingerprint());
         stun_sender_->send(remote_address, response);
 
+        std::cout << local_agent_info_.username << " respond to " << remote_username << ' ' << remote_address << ' ' << message.transaction_id << " use_candidate=" << use_candidate << std::endl;
+
         // Hack to get local port.
         const_cast<ACE_INET_Addr&>(local_address).set(host_addresses_[0].get_port_number(), local_address.get_ip_address());
 
@@ -747,6 +773,8 @@ namespace ICE {
         if (candidate_gatherer_.success_response(message)) {
           return;
         }
+
+        std::cout << local_agent_info_.username << " response from " << remote_address << ' ' << message.transaction_id << std::endl;
 
         ConnectivityChecksType::const_iterator pos = std::find(connectivity_checks_.begin(), connectivity_checks_.end(), message.transaction_id);
         if (pos == connectivity_checks_.end()) {
@@ -792,6 +820,7 @@ namespace ICE {
           ACE_INET_Addr addr = checklist->nominate(cp);
           for (GuidSetType::const_iterator pos = checklist->guids().begin(), limit = checklist->guids().end(); pos != limit; ++pos) {
             selected_addresses_[pos->first.remote] = addr;
+            std::cout << local_agent_info_.username << " active nominate " << addr.get_host_addr() << ':' << addr.get_port_number() << " for " << checklist->remote_agent_info().username << ' ' << pos->first.remote << std::endl;
           }
           return;
         }
@@ -844,6 +873,7 @@ namespace ICE {
           ACE_INET_Addr addr = valid_checklist->nominate(cp);
           for (GuidSetType::const_iterator pos = valid_checklist->guids().begin(), limit = valid_checklist->guids().end(); pos != limit; ++pos) {
             selected_addresses_[pos->first.remote] = addr;
+            std::cout << local_agent_info_.username << " triggered nominate " << addr.get_host_addr() << ':' << addr.get_port_number() << " for " << checklist->remote_agent_info().username << ' ' << pos->first.remote << std::endl;
           }
           return;
         }
@@ -894,7 +924,9 @@ namespace ICE {
       /* RAND_bytes failed */
       /* `err` is valid    */
     }
+    std::cout << local_agent_info_.username << " switching to ";
     local_agent_info_.username = stringify(username);
+    std::cout << local_agent_info_.username << std::endl;
 
     uint64_t password[2] = { 0, 0 };
     rc = RAND_bytes(reinterpret_cast<unsigned char*>(&password[0]), sizeof(password));
@@ -932,6 +964,7 @@ namespace ICE {
 
       if (checklist->has_triggered_check()) {
         ConnectivityCheck cc = checklist->get_triggered_check(ice_tie_breaker_);
+        std::cout << local_agent_info_.username << " triggered send to " << checklist->remote_agent_info().username << ' ' << cc.candidate_pair().remote.address << ' ' << cc.request().transaction_id << ' ' << cc.send_count() << std::endl;
         stun_sender_->send(cc.candidate_pair().remote.address, cc.request());
         cc.increment_send_count();
         connectivity_checks_.push_back(cc);
@@ -942,6 +975,7 @@ namespace ICE {
 
       if (checklist->has_ordinary_check()) {
         ConnectivityCheck cc = checklist->get_ordinary_check(ice_tie_breaker_);
+        std::cout << local_agent_info_.username << " ordinary send to " << checklist->remote_agent_info().username << ' ' << cc.candidate_pair().remote.address << ' ' << cc.request().transaction_id << ' ' << cc.send_count() << std::endl;
         stun_sender_->send(cc.candidate_pair().remote.address, cc.request());
         cc.increment_send_count();
         connectivity_checks_.push_back(cc);
@@ -950,6 +984,7 @@ namespace ICE {
 
       if (checklist->has_nominating_check()) {
         ConnectivityCheck cc = checklist->get_nominating_check(ice_tie_breaker_);
+        std::cout << local_agent_info_.username << " nominating send to " << checklist->remote_agent_info().username << ' ' << cc.candidate_pair().remote.address << ' ' << cc.request().transaction_id << ' ' << cc.send_count() << std::endl;
         stun_sender_->send(cc.candidate_pair().remote.address, cc.request());
         cc.increment_send_count();
         connectivity_checks_.push_back(cc);
@@ -961,12 +996,20 @@ namespace ICE {
       ConnectivityCheck cc = connectivity_checks_.front();
       connectivity_checks_.pop_front();
       if (cc.send_count() < RETRY_LIMIT) {
-        stun_sender_->send(cc.candidate_pair().remote.address, cc.request());
+        if (!cc.cancelled()) {
+          std::cout << local_agent_info_.username << " retry send to " << cc.checklist()->remote_agent_info().username << ' ' << cc.candidate_pair().remote.address << ' ' << cc.request().transaction_id << ' ' << cc.send_count() << std::endl;
+          stun_sender_->send(cc.candidate_pair().remote.address, cc.request());
+        }
         cc.increment_send_count();
         connectivity_checks_.push_back(cc);
         return true;
       } else {
-        failed(cc);
+        if (!cc.cancelled()) {
+          std::cout << local_agent_info_.username << " failed " << cc.checklist()->remote_agent_info().username << ' ' << cc.candidate_pair().remote.address << ' ' << cc.request().transaction_id << ' ' << cc.send_count() << std::endl;
+          failed(cc);
+        } else {
+          cc.checklist()->remove_from_in_progress(cc.candidate_pair(), active_foundations_);
+        }
       }
     }
 
@@ -976,11 +1019,10 @@ namespace ICE {
   void Agent::succeeded(const ConnectivityCheck& cc) {
     Checklist* checklist = cc.checklist();
     const CandidatePair& cp = cc.candidate_pair();
-    active_foundations_.remove(cp.foundation);
 
     // 7.2.5.3.3
     // 7.2.5.4
-    checklist->succeeded(cp);
+    checklist->succeeded(cp, active_foundations_);
     // TODO:  Do we really need to set the valid pair to succeeded?
     for (ChecklistSetType::const_iterator pos = checklists_.begin(), limit = checklists_.end(); pos != limit; ++pos) {
       (*pos)->unfreeze(active_foundations_, cp.foundation);
@@ -993,9 +1035,8 @@ namespace ICE {
     if (cp.nominate) {
       std::cout << "TODO: FAILED NOMINATION" << std::endl;
     } else {
-      active_foundations_.remove(cp.foundation);
       // 7.2.5.4
-      checklist->failed(cp);
+      checklist->failed(cp, active_foundations_);
     }
   }
 
@@ -1012,15 +1053,45 @@ namespace ICE {
   void Agent::server_reflexive_address(const ACE_INET_Addr& address) {
     ACE_Guard<ACE_Recursive_Thread_Mutex> guard(mutex_);
     server_reflexive_address_ = address;
+    std::cout << local_agent_info_.username << " received server reflexive address " << server_reflexive_address_.get_host_addr() << ':' << server_reflexive_address_.get_port_number() << std::endl;
   }
 
   void Agent::send(const ACE_INET_Addr& address, const STUN::Message message) {
-    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(mutex_);
+    // No lock.
     stun_sender_->send(address, message);
+  }
+
+  bool Agent::reactor_is_shut_down() const {
+    return stun_sender_->reactor_is_shut_down();
   }
 
   const ACE_Time_Value T_a(0, 50000); // Mininum time between consecutive sends.
   const ACE_Time_Value T_r(30, 0);    // Send new binding request this often.
+
+  struct CancelTimerCommand : public DCPS::ReactorInterceptor::Command {
+    ACE_Reactor* reactor;
+    ACE_Event_Handler* event_handler;
+
+    CancelTimerCommand(ACE_Reactor* a_reactor, ACE_Event_Handler* a_event_handler) :
+      reactor(a_reactor), event_handler(a_event_handler) {}
+
+    void execute() {
+      reactor->cancel_timer(event_handler);
+    }
+  };
+
+  struct ScheduleTimerCommand : public DCPS::ReactorInterceptor::Command {
+    ACE_Reactor* reactor;
+    ACE_Event_Handler* event_handler;
+    ACE_Time_Value delay;
+
+    ScheduleTimerCommand(ACE_Reactor* a_reactor, ACE_Event_Handler* a_event_handler, const ACE_Time_Value& a_delay) :
+      reactor(a_reactor), event_handler(a_event_handler), delay(a_delay) {}
+
+    void execute() {
+      reactor->schedule_timer(event_handler, 0, delay);
+    }
+  };
 
   void Agent::CandidateGatherer::start() {
     if (agent_.is_running() &&
@@ -1042,14 +1113,14 @@ namespace ICE {
       return false;
     }
 
-    reactor()->cancel_timer(this);
+    CancelTimerCommand c(reactor(), this);
+    execute_or_enqueue(c);
     ACE_INET_Addr server_reflexive_address;
     if (!message.get_mapped_address(server_reflexive_address)) {
       //  Go again.
       schedule(RETRANSMITTING, T_a);
     } else {
       // Success.
-      std::cout << "Received server reflexive address " << server_reflexive_address.get_host_addr() << ':' << server_reflexive_address.get_port_number() << std::endl;
       schedule(MAINTAINING, T_r);
     }
 
@@ -1101,12 +1172,17 @@ namespace ICE {
     }
 
     if (next_state != STOPPED) {
-      reactor()->schedule_timer(this, 0, delay);
+      ScheduleTimerCommand c(reactor(), this, delay);
+      execute_or_enqueue(c);
     } else {
       std::cout << "CandidateGatherer stopped" << std::endl;
     }
 
     state_ = next_state;
+  }
+
+  bool Agent::CandidateGatherer::reactor_is_shut_down() const {
+    return agent_.reactor_is_shut_down();
   }
 
   void Agent::ConnectivityChecker::start() {
@@ -1135,12 +1211,17 @@ namespace ICE {
     }
 
     if (next_state != STOPPED) {
-      reactor()->schedule_timer(this, 0, delay);
+      ScheduleTimerCommand c(reactor(), this, delay);
+      execute_or_enqueue(c);
     } else {
       std::cout << "ConnectivityChecker stopped" << std::endl;
     }
 
     state_ = next_state;
+  }
+
+  bool Agent::ConnectivityChecker::reactor_is_shut_down() const {
+    return agent_.reactor_is_shut_down();
   }
 
   bool GuidPair::operator< (const GuidPair& other) const

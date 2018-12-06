@@ -2534,7 +2534,7 @@ Sedp::signal_liveliness_secure(DDS::LivelinessQosPolicyKind kind)
 ICE::AbstractAgent* Sedp::get_ice_agent() {
   DCPS::RtpsUdpInst_rch rtps_inst =
     DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
-  return rtps_inst->get_ice_agent();
+  return rtps_inst->impl()->get_ice_agent();
 }
 
 

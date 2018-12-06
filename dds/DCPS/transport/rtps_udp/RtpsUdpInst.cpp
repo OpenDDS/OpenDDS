@@ -199,9 +199,6 @@ RtpsUdpInst::populate_locator(OpenDDS::DCPS::TransportLocator& info) const
   }
 
   info.transport_type = "rtps_udp";
-  // TODO:  Probably don't need to do this anymore.
-  const void* ptr = &ice_agent_;
-  memcpy(info.ice_agent, &ptr, sizeof(void*));
   RTPS::locators_to_blob(locators, info.data);
 
   return locators.length();

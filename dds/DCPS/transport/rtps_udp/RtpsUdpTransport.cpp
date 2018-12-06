@@ -51,6 +51,7 @@ RtpsUdpTransport::RtpsUdpTransport(RtpsUdpInst& inst)
   , local_crypto_handle_(DDS::HANDLE_NIL)
 #endif
   , stun_handler_(*this)
+  , ice_agent_(0)
 {
   if (! (configure_i(inst) && open())) {
     throw Transport::UnableToCreate();
@@ -348,7 +349,7 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
                      false);
   }
 
-  config.ice_agent_.stun_sender(&stun_handler_, reactor());
+  ice_agent_ = new ICE::Agent(&stun_handler_, config.stun_server_address(), reactor(), reactor_owner());
 
   if (config.opendds_discovery_default_listener_) {
     link_= make_datalink(config.opendds_discovery_guid_.guidPrefix);
@@ -439,7 +440,7 @@ RtpsUdpTransport::StunHandler::handle_input(ACE_HANDLE /*fd*/)
   STUN::Message message;
   message.block = &block;
   if (serializer >> message) {
-    transport.config().get_ice_agent()->receive(local_address, remote_address, message);
+    transport.config().impl()->get_ice_agent()->receive(local_address, remote_address, message);
   } else {
     // TODO:  Not RTPS and not STUN.
   }
@@ -507,6 +508,11 @@ RtpsUdpTransport::StunHandler::send(const ACE_INET_Addr& destination, const STUN
     ACE_ERROR((prio, "(%P|%t) RtpsUdpTransport::send() - "
                "failed to send STUN message\n"));
   }
+}
+
+bool
+RtpsUdpTransport::StunHandler::reactor_is_shut_down() const {
+  return transport.is_shut_down();
 }
 
 } // namespace DCPS

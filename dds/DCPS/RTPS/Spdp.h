@@ -211,6 +211,8 @@ private:
   // when BIT is being removed (fini_bit)
   WaitForAcks wait_for_acks_;
 
+  size_t ice_agent_repeat_count_;
+
 #ifdef OPENDDS_SECURITY
   Security::SecurityConfig_rch security_config_;
   bool security_enabled_;

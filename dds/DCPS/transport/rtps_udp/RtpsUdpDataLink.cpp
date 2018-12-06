@@ -2877,22 +2877,22 @@ OpenDDS::DCPS::RtpsUdpDataLink::receive_strategy()
 
 ACE_INET_Addr
 OpenDDS::DCPS::RtpsUdpDataLink::get_address(const RepoId& guid) const {
-  ACE_INET_Addr addr = this->config().get_ice_agent()->get_address(guid);
+  ACE_INET_Addr addr = this->impl().get_ice_agent()->get_address(guid);
   if (addr != ACE_INET_Addr()) {
-    // std::cout << "Using ICE " << addr.get_host_addr() << ':' << addr.get_port_number() << " for " << guid << std::endl;
+    std::cout << "Using ICE " << addr.get_host_addr() << ':' << addr.get_port_number() << " for " << guid << std::endl;
     return addr;
   }
 
   addr = this->config().rtps_relay_address();
   if (addr != ACE_INET_Addr()) {
-    // std::cout << "Using relay " << addr.get_host_addr() << ':' << addr.get_port_number() << " for " << guid << std::endl;
+    std::cout << "Using relay " << addr.get_host_addr() << ':' << addr.get_port_number() << " for " << guid << std::endl;
     return addr;
   }
 
   typedef OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan)::const_iterator iter_t;
   iter_t pos = locators_.find(guid);
   if (pos != locators_.end()) {
-    // std::cout << "Using locator " << pos->second.addr_.get_host_addr() << ':' << pos->second.addr_.get_port_number() << " for " << guid << std::endl;
+    std::cout << "Using locator " << pos->second.addr_.get_host_addr() << ':' << pos->second.addr_.get_port_number() << " for " << guid << std::endl;
     return pos->second.addr_;
   }
 
@@ -2901,7 +2901,7 @@ OpenDDS::DCPS::RtpsUdpDataLink::get_address(const RepoId& guid) const {
 
 ICE::AbstractAgent*
 OpenDDS::DCPS::RtpsUdpDataLink::get_ice_agent() {
-  return this->config().get_ice_agent();
+  return this->impl().get_ice_agent();
 }
 
 } // namespace DCPS

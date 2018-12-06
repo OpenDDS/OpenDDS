@@ -71,14 +71,11 @@ public:
     set_port_in_addr_string(local_address_config_str_, port_number);
   }
 
-  void stun_server_address(const ACE_INET_Addr& address) {
-    ice_agent_.stun_server_address(address);
-  }
+  void stun_server_address(const ACE_INET_Addr& address) { stun_server_address_ = address; }
+  ACE_INET_Addr stun_server_address() const { return stun_server_address_; }
   
   void rtps_relay_address(const ACE_INET_Addr& address) { rtps_relay_address_ = address; }
   ACE_INET_Addr rtps_relay_address() const { return rtps_relay_address_; }
-
-  ICE::AbstractAgent* get_ice_agent() { return &ice_agent_; }
 
   // TODO:  Get rid of this.
   OPENDDS_STRING rtps_relay_url_;
@@ -99,7 +96,7 @@ private:
 
   ACE_INET_Addr local_address_;
   OPENDDS_STRING local_address_config_str_;
-  ICE::Agent ice_agent_;
+  ACE_INET_Addr stun_server_address_;
   ACE_INET_Addr rtps_relay_address_;
 
   ICE::AddressListType host_addresses() const;

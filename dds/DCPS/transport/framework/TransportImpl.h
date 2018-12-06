@@ -153,6 +153,8 @@ public:
     DataLink_rch link_;
   };
 
+  virtual ICE::Agent* get_ice_agent() const { return 0; }
+
 protected:
   TransportImpl(TransportInst& config);
 

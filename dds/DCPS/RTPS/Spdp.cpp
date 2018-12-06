@@ -165,8 +165,8 @@ namespace {
 
   class RtpsRelayHelper : public DiscoveryHelper {
   public:
-    RtpsRelayHelper(const OPENDDS_STRING& a_url, Spdp* a_spdp, Sedp* a_sedp)
-      : url_(a_url), spdp_(a_spdp), sedp_(a_sedp) {}
+    RtpsRelayHelper(const OPENDDS_STRING& a_url, Spdp* a_spdp)
+      : url_(a_url), spdp_(a_spdp) {}
 
     void init() override {
       ACE_Auto_Ptr<ACE::INet::URL_Base> url_safe (ACE::INet::URL_Base::create_from_string (url_.c_str()));
@@ -239,7 +239,6 @@ namespace {
   private:
     OPENDDS_STRING url_;
     Spdp* spdp_;
-    Sedp* sedp_;
     OPENDDS_STRING rtps_relay_spdp_;
     OPENDDS_STRING rtps_relay_sedp_;
     OPENDDS_STRING rtps_relay_data_;
@@ -253,7 +252,7 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
   guid = guid_; // may have changed in SpdpTransport constructor
 
   if (!disco->rtps_relay_url().empty()) {
-    discovery_helper_ = new RtpsRelayHelper(disco->rtps_relay_url(), this, &sedp_);
+    discovery_helper_ = new RtpsRelayHelper(disco->rtps_relay_url(), this);
     discovery_helper_->init();
   }
 
@@ -292,6 +291,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , shutdown_cond_(lock_)
   , shutdown_flag_(false)
   , sedp_(guid_, *this, lock_)
+  , ice_agent_repeat_count_(0)
 #ifdef OPENDDS_SECURITY
   , security_config_()
   , security_enabled_(false)
@@ -327,6 +327,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , shutdown_cond_(lock_)
   , shutdown_flag_(false)
   , sedp_(guid_, *this, lock_)
+  , ice_agent_repeat_count_(0)
   , security_config_(Security::SecurityRegistry::instance()->default_config())
   , security_enabled_(security_config_->get_authentication() && security_config_->get_access_control() && security_config_->get_crypto_key_factory() && security_config_->get_crypto_key_exchange())
   , identity_handle_(identity_handle)
@@ -786,7 +787,9 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
   if (have_agent_info) {
     // TODO:  Call remove_remote_agent when liveliness is lost.
     for (std::vector<ICE::GuidPair>::const_iterator pos = guids.begin(), limit = guids.end(); pos != limit; ++pos) {
-      ice_agent->update_remote_agent_info(*pos, agent_info);
+      if (ice_agent->update_remote_agent_info(*pos, agent_info)) {
+        ice_agent_repeat_count_ = 0;
+      }
     }
   }
 }
@@ -1797,7 +1800,7 @@ Spdp::SpdpTransport::write_i()
 
   ICE::AbstractAgent* ice_agent = outer_->sedp_.get_ice_agent();
 
-  if (ice_agent && ice_agent->is_running()) {
+  if (ice_agent && (ice_agent->is_running() || outer_->ice_agent_repeat_count_ < 10)) {
     const ICE::AgentInfo& agent_info = ice_agent->get_local_agent_info();
     if (ParameterListConverter::to_param_list(agent_info, plist) < 0) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
@@ -1806,6 +1809,7 @@ Spdp::SpdpTransport::write_i()
                  ACE_TEXT("to ParameterList\n")));
       return;
     }
+    outer_->ice_agent_repeat_count_ = ice_agent->is_running() ? 0 : outer_->ice_agent_repeat_count_ + 1;
   }
 
   wbuff_.reset();

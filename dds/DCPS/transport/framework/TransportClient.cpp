@@ -694,7 +694,7 @@ TransportClient::get_ice_agent()
   for (ImplsType::iterator pos = impls_.begin(), limit = impls_.end();
        pos != limit;
        ++pos) {
-    ICE::AbstractAgent* agent = (*pos)->config().get_ice_agent();
+    ICE::AbstractAgent* agent = (*pos)->get_ice_agent();
     if (agent) { return agent; }
   }
 

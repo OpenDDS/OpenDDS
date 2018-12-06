@@ -13,6 +13,7 @@
 #include "dds/DCPS/STUN/Stun.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DCPS/GuidUtils.h"
+#include "dds/DCPS/ReactorInterceptor.h"
 
 #include <cassert>
 
@@ -77,6 +78,7 @@ namespace ICE {
   public:
     virtual AddressListType host_addresses() const = 0;
     virtual void send(const ACE_INET_Addr& address, const STUN::Message& message) = 0;
+    virtual bool reactor_is_shut_down() const = 0;
   };
 
   typedef std::pair<std::string, std::string> FoundationType;
@@ -115,6 +117,8 @@ namespace ICE {
     const STUN::Message& triggering_request() const { return triggering_request_; }
     void increment_send_count() { ++send_count_; }
     size_t send_count() const { return send_count_; }
+    void cancel() { cancelled_ = true; }
+    bool cancelled() const { return cancelled_; }
 
   private:
     Checklist* checklist_;
@@ -122,6 +126,7 @@ namespace ICE {
     STUN::Message request_;
     STUN::Message triggering_request_;
     size_t send_count_;
+    bool cancelled_;
   };
 
   class ActiveFoundationSet {
@@ -181,7 +186,7 @@ namespace ICE {
   class AbstractAgent {
   public:
     virtual void start_ice(const GuidPair& guidp, SignalingChannel* signaling_channel = 0) = 0;
-    virtual void update_remote_agent_info(const GuidPair& guidp, const AgentInfo& agent_info) = 0;
+    virtual bool update_remote_agent_info(const GuidPair& guidp, const AgentInfo& agent_info) = 0;
     virtual void stop_ice(const GuidPair& guidp) = 0;
     virtual AgentInfo get_local_agent_info() const = 0;
     virtual bool is_running() const = 0;
@@ -192,18 +197,10 @@ namespace ICE {
 
   class Agent : public AbstractAgent {
   public:
-    Agent();
-
-    // Set the STUN participant that will be used for sending messages.
-    // The host address is taken from the STUN participant.
-    void stun_sender(StunSender* stun_sender, ACE_Reactor* reactor);
-    // Set the addresses of the STUN server to use.
-    void stun_server_address(const ACE_INET_Addr& address);
-    // In practice, there may be multiple stun participants using multiple interfaces with multiple STUN servers.  However, one of each is enough to get started.
-
+    Agent(StunSender* stun_sender, const ACE_INET_Addr& stun_server_address, ACE_Reactor* reactor, ACE_thread_t owner);
 
     void start_ice(const GuidPair& guidp, SignalingChannel* signaling_channel = 0);
-    void update_remote_agent_info(const GuidPair& guidp, const AgentInfo& agent_info);
+    bool update_remote_agent_info(const GuidPair& guidp, const AgentInfo& agent_info);
     void stop_ice(const GuidPair& guidp);
 
     AgentInfo get_local_agent_info() const;
@@ -220,10 +217,10 @@ namespace ICE {
     // The info for this agent.
     AgentInfo local_agent_info_;
     // Data stream capable of multiplexing STUN messages.
-    StunSender* stun_sender_;
+    StunSender* const stun_sender_;
     // The address of the STUN server to use for server-reflexive addresses.
     // Supporting multiple servers would require multiple server-reflexive addresses.
-    ACE_INET_Addr stun_server_address_;
+    ACE_INET_Addr const stun_server_address_;
 
     // List of host addresses.
     AddressListType host_addresses_;
@@ -269,7 +266,7 @@ namespace ICE {
     ACE_INET_Addr server_reflexive_address() const;
     void server_reflexive_address(const ACE_INET_Addr& address);
     void send(const ACE_INET_Addr& address, const STUN::Message message);
-    //agent_.stun_sender_->send(agent_.stun_server_address_, binding_request_);
+    bool reactor_is_shut_down() const;
 
     // Hide the agent from its works to force all interaction through methods.
     // All of the invoked methods require locks.
@@ -282,20 +279,21 @@ namespace ICE {
       void regenerate_local_agent_info() { agent_.regenerate_local_agent_info(); }
       void send(const ACE_INET_Addr& address, const STUN::Message message) { agent_.send(address, message); }
       bool do_next_check() { return agent_.do_next_check(); }
+      bool reactor_is_shut_down() const { return agent_.reactor_is_shut_down(); }
 
     private:
       Agent& agent_;
     };
 
-    struct CandidateGatherer : public ACE_Event_Handler {
+    struct CandidateGatherer : public DCPS::ReactorInterceptor {
       enum State {
         STOPPED,
         RETRANSMITTING,
         MAINTAINING
       };
 
-      CandidateGatherer(Agent& a_agent)
-        : agent_(a_agent), state_(STOPPED) {}
+      CandidateGatherer(Agent& a_agent, ACE_Reactor* reactor, ACE_thread_t owner)
+        : DCPS::ReactorInterceptor(reactor, owner), agent_(a_agent), state_(STOPPED) {}
 
       void start();
       void stop();
@@ -311,16 +309,17 @@ namespace ICE {
       void form_request();
       void send_request();
       void schedule(State next_state, const ACE_Time_Value& delay);
+      virtual bool reactor_is_shut_down() const;
     } candidate_gatherer_;
 
-    struct ConnectivityChecker : public ACE_Event_Handler {
+    struct ConnectivityChecker : public DCPS::ReactorInterceptor {
       enum State {
         STOPPED,
         CHECKING,
       };
 
-      ConnectivityChecker(Agent& a_agent)
-        : agent_(a_agent), state_(STOPPED) {}
+      ConnectivityChecker(Agent& a_agent, ACE_Reactor* reactor, ACE_thread_t owner)
+        : DCPS::ReactorInterceptor(reactor, owner), agent_(a_agent), state_(STOPPED) {}
 
       void start();
       void stop();
@@ -331,6 +330,7 @@ namespace ICE {
 
       int handle_timeout(const ACE_Time_Value& /*now*/, const void* /*act*/);
       void schedule(State next_state, const ACE_Time_Value& delay);
+      virtual bool reactor_is_shut_down() const;
     } connectivity_checker_;
 
   };

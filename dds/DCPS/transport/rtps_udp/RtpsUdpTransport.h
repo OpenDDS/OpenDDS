@@ -33,6 +33,7 @@ class OpenDDS_Rtps_Udp_Export RtpsUdpTransport : public TransportImpl {
 public:
   RtpsUdpTransport(RtpsUdpInst& inst);
   RtpsUdpInst& config() const;
+  virtual ICE::Agent* get_ice_agent() const { return ice_agent_; }
 
 private:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
@@ -133,8 +134,11 @@ private:
     virtual int handle_input(ACE_HANDLE fd);
     virtual ICE::AddressListType host_addresses() const;
     virtual void send(const ACE_INET_Addr& address, const STUN::Message& message);
+    virtual bool reactor_is_shut_down() const;
   };
   StunHandler stun_handler_;
+  ICE::Agent* ice_agent_;
+
 };
 
 } // namespace DCPS
