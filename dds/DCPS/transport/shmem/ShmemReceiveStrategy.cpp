@@ -136,7 +136,7 @@ ShmemReceiveStrategy::receive_bytes(iovec iov[],
     const size_t space = (i == 0) ? iov[i].iov_len - total : iov[i].iov_len,
       chunk = std::min(space, remaining);
 
-#ifdef ACE_WIN32
+#ifdef OPENDDS_SHMEM_WINDOWS
     if (alloc->memory_pool().remap((void*)(src_iter + chunk - 1)) == -1) {
       VDBG_LVL((LM_ERROR, "(%P|%t) ERROR: ShmemReceiveStrategy::receive_bytes "
                 "shared memory pool couldn't be extended\n"), 0);

@@ -77,6 +77,7 @@ namespace {
 
   void gen_field_getValue(AST_Field* field)
   {
+    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const Classification cls = classify(field->field_type());
     const std::string fieldName = field->local_name()->get_string();
     if (cls & CL_SCALAR) {
@@ -86,16 +87,23 @@ namespace {
         prefix = "gen_" +
           dds_generator::scoped_helper(enum_type->name(), "_")
           + "_names[";
-        suffix = "]";
+        if (use_cxx11) {
+          prefix += "static_cast<int>(";
+        }
+        suffix = use_cxx11 ? "())]" : "]";
+      } else if (use_cxx11) {
+        suffix += "()";
       }
+      const std::string string_to_ptr = use_cxx11 ? "" : ".in()";
       be_global->impl_ <<
         "    if (std::strcmp(field, \"" << fieldName << "\") == 0) {\n"
         "      return " + prefix + "typed." + fieldName
-        + (cls & CL_STRING ? ".in()" : "") + suffix + ";\n"
+        + (cls & CL_STRING ? string_to_ptr : "") + suffix + ";\n"
         "    }\n";
       be_global->add_include("<cstring>", BE_GlobalData::STREAM_CPP);
     } else if (cls & CL_STRUCTURE) {
-      delegateToNested(fieldName, field, "&typed." + fieldName);
+      delegateToNested(fieldName, field,
+                       "&typed." + std::string(use_cxx11 ? "_" : "") + fieldName);
       be_global->add_include("<cstring>", BE_GlobalData::STREAM_CPP);
     }
   }
@@ -164,6 +172,7 @@ namespace {
 
   void gen_field_getValueFromSerialized(AST_Field* field)
   {
+    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     AST_Type* type = field->field_type();
     const Classification cls = classify(type);
     const std::string fieldName = field->local_name()->get_string();
@@ -216,9 +225,16 @@ namespace {
     } else if (cls & CL_STRUCTURE) {
       delegateToNested(fieldName, field, "ser", true);
     } else { // array, sequence, union:
+      std::string pre, post;
+      if (!use_cxx11 && (cls & CL_ARRAY)) {
+        post = "_forany";
+      } else if (use_cxx11 && (cls & (CL_ARRAY | CL_SEQUENCE))) {
+        pre = "IDL::DistinctType<";
+        post = ", " + dds_generator::scoped_helper(type->name(), "_") + "_tag>";
+      }
       be_global->impl_ <<
-        "    if (!gen_skip_over(ser, static_cast<" << cxx_type
-        << ((cls & CL_ARRAY) ? "_forany" : "") << "*>(0))) {\n"
+        "    if (!gen_skip_over(ser, static_cast<" << pre << cxx_type << post
+        << "*>(0))) {\n"
         "      throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \""
         " could not be skipped\");\n"
         "    }\n";
@@ -227,12 +243,14 @@ namespace {
 
   void gen_field_createQC(AST_Field* field)
   {
+    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     Classification cls = classify(field->field_type());
     const std::string fieldName = field->local_name()->get_string();
     if (cls & CL_SCALAR) {
       be_global->impl_ <<
         "    if (std::strcmp(field, \"" << fieldName << "\") == 0) {\n"
-        "      return make_field_cmp(&T::" << fieldName << ", next);\n"
+        "      return make_field_cmp(&T::" << (use_cxx11 ? "_" : "")
+        << fieldName << ", next);\n"
         "    }\n";
       be_global->add_include("<cstring>", BE_GlobalData::STREAM_CPP);
     } else if (cls & CL_STRUCTURE) {
@@ -241,7 +259,8 @@ namespace {
       be_global->impl_ <<
         "    if (std::strncmp(field, \"" << fieldName << ".\", " << n <<
         ") == 0) {\n"
-        "      return make_struct_cmp(&T::" << fieldName <<
+        "      return make_struct_cmp(&T::" << (use_cxx11 ? "_" : "")
+        << fieldName <<
         ", getMetaStruct<" << fieldType << ">().create_qc_comparator("
         "field + " << n << "), next);\n"
         "    }\n";
@@ -255,26 +274,30 @@ namespace {
 
   void get_raw_field(AST_Field* field)
   {
+    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const char* fieldName = field->local_name()->get_string();
     be_global->impl_ <<
       "    if (std::strcmp(field, \"" << fieldName << "\") == 0) {\n"
-      "      return &static_cast<const T*>(stru)->" << fieldName << ";\n"
+      "      return &static_cast<const T*>(stru)->" << (use_cxx11 ? "_" : "")
+      << fieldName << ";\n"
       "    }\n";
     be_global->add_include("<cstring>", BE_GlobalData::STREAM_CPP);
   }
 
   void assign_field(AST_Field* field)
   {
+    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     Classification cls = classify(field->field_type());
     if (!cls) return; // skip CL_UNKNOWN types
     const char* fieldName = field->local_name()->get_string();
     const std::string fieldType = (cls & CL_STRING) ?
       ((cls & CL_WIDE) ? "TAO::WString_Manager" : "TAO::String_Manager")
       : scoped(field->field_type()->name());
-    if (cls & (CL_SCALAR | CL_STRUCTURE | CL_SEQUENCE | CL_UNION)) {
+    if ((cls & (CL_SCALAR | CL_STRUCTURE | CL_SEQUENCE | CL_UNION))
+        || (use_cxx11 && (cls & CL_ARRAY))) {
       be_global->impl_ <<
         "    if (std::strcmp(field, \"" << fieldName << "\") == 0) {\n"
-        "      static_cast<T*>(lhs)->" << fieldName <<
+        "      static_cast<T*>(lhs)->" << (use_cxx11 ? "_" : "") << fieldName <<
         " = *static_cast<const " << fieldType <<
         "*>(rhsMeta.getRawField(rhs, rhsFieldSpec));\n"
         "      return;\n"
@@ -320,21 +343,23 @@ namespace {
 
   void compare_field(AST_Field* field)
   {
+    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     Classification cls = classify(field->field_type());
     if (!(cls & CL_SCALAR)) return;
     const char* fieldName = field->local_name()->get_string();
     be_global->impl_ <<
       "    if (std::strcmp(field, \"" << fieldName << "\") == 0) {\n";
     be_global->add_include("<cstring>", BE_GlobalData::STREAM_CPP);
-    if (cls & CL_STRING) {
+    if (!use_cxx11 && (cls & CL_STRING)) {
       be_global->impl_ << // ACE_OS::strcmp has overloads for narrow & wide
         "      return 0 == ACE_OS::strcmp(static_cast<const T*>(lhs)->"
         << fieldName << ".in(), static_cast<const T*>(rhs)->" << fieldName
         << ".in());\n";
     } else {
       be_global->impl_ <<
-        "      return static_cast<const T*>(lhs)->" << fieldName <<
-        " == static_cast<const T*>(rhs)->" << fieldName << ";\n";
+        "      return static_cast<const T*>(lhs)->" << (use_cxx11 ? "_" : "")
+        << fieldName << " == static_cast<const T*>(rhs)->" << (use_cxx11 ? "_" : "")
+        << fieldName << ";\n";
     }
     be_global->impl_ << "    }\n";
   }
@@ -496,14 +521,18 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type* t
   if (!arr && !(seq = AST_Sequence::narrow_from_decl(type))) {
     return true;
   }
+  const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
 
-  const Classification cls = classify(type);
-  const std::string clazz = scoped(name);
+  const std::string clazz = scoped(name), clazz_underscores = scoped_helper(name, "_");
   ContentSubscriptionGuard csg;
   NamespaceGuard ng;
   Function f("gen_skip_over", "bool");
   f.addArg("ser", "Serializer&");
-  f.addArg("", clazz + ((cls & CL_ARRAY) ? "_forany*" : "*"));
+  if (use_cxx11) {
+    f.addArg("", "IDL::DistinctType<" + clazz + ", " + clazz_underscores + "_tag>*");
+  } else {
+    f.addArg("", clazz + (arr ? "_forany*" : "*"));
+  }
   f.endArgs();
 
   std::string len;
@@ -527,6 +556,7 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type* t
   }
 
   const std::string cxx_elem = scoped(elem->name());
+  AST_Type* elem_orig = elem;
   elem = resolveActualType(elem);
   const Classification elem_cls = classify(elem);
 
@@ -550,9 +580,16 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type* t
         "    if (!(ser >> strlength)) return false;\n"
         "    if (!ser.skip(static_cast<ACE_UINT16>(strlength))) return false;\n";
     } else if (elem_cls & (CL_ARRAY | CL_SEQUENCE | CL_STRUCTURE)) {
+      std::string pre, post;
+      if (!use_cxx11 && (elem_cls & CL_ARRAY)) {
+        post = "_forany";
+      } else if (use_cxx11 && (elem_cls & (CL_ARRAY | CL_SEQUENCE))) {
+        pre = "IDL::DistinctType<";
+        post = ", " + dds_generator::scoped_helper(elem_orig->name(), "_") + "_tag>";
+      }
       be_global->impl_ <<
-        "    if (!gen_skip_over(ser, static_cast<" << cxx_elem <<
-        ((elem_cls & CL_ARRAY) ? "_forany" : "") << "*>(0))) return false;\n";
+        "    if (!gen_skip_over(ser, static_cast<" << pre << cxx_elem << post
+        << "*>(0))) return false;\n";
     }
     be_global->impl_ <<
       "  }\n";
@@ -569,6 +606,7 @@ static std::string func(const std::string&,
                         std::string&,
                         const std::string&)
 {
+  const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
   std::stringstream ss;
   const Classification br_cls = classify(br_type);
   if (br_cls & CL_STRING) {
@@ -587,9 +625,16 @@ static std::string func(const std::string&,
     ss <<
       "    if (!ser.skip(1, " << sz << ")) return false;\n";
   } else {
+    std::string pre, post;
+    if (!use_cxx11 && (br_cls & CL_ARRAY)) {
+      post = "_forany";
+    } else if (use_cxx11 && (br_cls & (CL_ARRAY | CL_SEQUENCE))) {
+      pre = "IDL::DistinctType<";
+      post = ", " + dds_generator::scoped_helper(br_type->name(), "_") + "_tag>";
+    }
     ss <<
-      "    if (!gen_skip_over(ser, static_cast<" << scoped(br_type->name()) <<
-      ((br_cls & CL_ARRAY) ? "_forany" : "") << "*>(0))) return false;\n";
+      "    if (!gen_skip_over(ser, static_cast<" << pre
+      << scoped(br_type->name()) << post << "*>(0))) return false;\n";
   }
 
   ss <<

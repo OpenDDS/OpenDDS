@@ -34,7 +34,6 @@ BE_GlobalData::BE_GlobalData()
   , java_(false)
   , suppress_idl_(false)
   , suppress_typecode_(false)
-  , generate_wireshark_(false)
   , generate_itl_(false)
   , v8_(false)
   , face_ts_(false)
@@ -216,7 +215,6 @@ BE_GlobalData::open_streams(const char* filename)
   header_name_ = (filebase + "TypeSupportImpl.h").c_str();
   impl_name_ = (filebase + "TypeSupportImpl.cpp").c_str();
   idl_name_ = (filebase + "TypeSupport.idl").c_str();
-  ws_config_name_ = (filebase + "_ws.ini").c_str();
   itl_name_ = (filebase + ".itl").c_str();
   facets_header_name_ = (filebase + "_TS.hpp").c_str();
   facets_impl_name_ = (filebase + "_TS.cpp").c_str();
@@ -278,9 +276,7 @@ BE_GlobalData::parse_args(long& i, char** av)
     }
     break;
   case 'G':
-    if (0 == ACE_OS::strcmp(av[i], "-Gws"))
-      generate_wireshark_ = true;
-    else if (0 == ACE_OS::strcmp(av[i], "-Gitl"))
+    if (0 == ACE_OS::strcmp(av[i], "-Gitl"))
       generate_itl_ = true;
     else if (0 == ACE_OS::strcasecmp(av[i], "-GfaceTS"))
       face_ts(true);
@@ -297,7 +293,10 @@ BE_GlobalData::parse_args(long& i, char** av)
       language_mapping(LANGMAP_FACE_CXX);
     else if (0 == ACE_OS::strcasecmp(av[i], "-Lspcpp"))
       language_mapping(LANGMAP_SP_CXX);
-    else {
+    else if (0 == ACE_OS::strcasecmp(av[i], "-Lc++11")) {
+      language_mapping(LANGMAP_CXX11);
+      suppress_typecode_ = true;
+    } else {
       ACE_ERROR((LM_ERROR, ACE_TEXT("IDL: I don't understand the '%C'")
                   ACE_TEXT(" option\n"), av[i]));
       idl_global->set_compile_flags(idl_global->compile_flags()

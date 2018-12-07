@@ -371,6 +371,14 @@ std::string wrapPrefix(AST_Type* type, WrapDirection wd)
 inline
 std::string getWrapper(const std::string& name, AST_Type* type, WrapDirection wd)
 {
+  using namespace AstTypeClassification;
+  if (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11) {
+    const Classification cls = classify(type);
+    if ((cls & (CL_BOUNDED | CL_STRING)) == (CL_BOUNDED | CL_STRING)) {
+      return (wd == WD_OUTPUT ? "Serializer::FromBoundedString" : "Serializer::ToBoundedString")
+        + std::string(cls & CL_WIDE ? "<wchar_t>(" : "<char>(") + name + ')';
+    }
+  }
   std::string pre = wrapPrefix(type, wd);
   return (pre.empty()) ? name : (pre + name + ')');
 }
@@ -380,6 +388,9 @@ std::string getEnumLabel(AST_Expression* label_val, AST_Type* disc)
 {
   std::string e = scoped(disc->name()),
     label = label_val->n()->last_component()->get_string();
+  if (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11) {
+    return e + "::" + label;
+  }
   const size_t colon = e.rfind("::");
   if (colon == std::string::npos) {
     return label;
@@ -486,7 +497,9 @@ void generateCaseBody(CommonFn commonFn, AST_UnionBranch* branch,
                       const char* uni, bool generateBreaks, bool parens)
 {
   using namespace AstTypeClassification;
-  std::string intro, name = branch->local_name()->get_string();
+  const BE_GlobalData::LanguageMapping lmap = be_global->language_mapping();
+  const bool use_cxx11 = lmap == BE_GlobalData::LANGMAP_CXX11;
+  const std::string name = branch->local_name()->get_string();
   if (namePrefix == std::string(">> ")) {
     std::string brType = scoped(branch->field_type()->name()), forany;
     AST_Type* br = resolveActualType(branch->field_type());
@@ -497,14 +510,21 @@ void generateCaseBody(CommonFn commonFn, AST_UnionBranch* branch,
     }
     std::string rhs;
     if (br_cls & CL_STRING) {
-      if (be_global->language_mapping() == BE_GlobalData::LANGMAP_FACE_CXX) {
-        brType = std::string("FACE::") + ((br_cls & CL_WIDE) ? "W" : "")
-          + "String_var";
+      if (use_cxx11) {
+        brType = std::string("std::") + ((br_cls & CL_WIDE) ? "w" : "")
+          + "string";
+        rhs = "tmp";
       } else {
-        brType = std::string("CORBA::") + ((br_cls & CL_WIDE) ? "W" : "")
+        const std::string nmspace =
+          lmap == BE_GlobalData::LANGMAP_FACE_CXX ? "FACE::" : "CORBA::";
+        brType = nmspace + ((br_cls & CL_WIDE) ? "W" : "")
           + "String_var";
+        rhs = "tmp.out()";
       }
-      rhs = "tmp.out()";
+    } else if (use_cxx11 && (br_cls & (CL_ARRAY | CL_SEQUENCE))) {
+      rhs = "IDL::DistinctType<" + brType + ", " +
+        dds_generator::scoped_helper(branch->field_type()->name(), "_")
+        + "_tag>(tmp)";
     } else if (br_cls & CL_ARRAY) {
       forany = "    " + brType + "_forany fa = tmp;\n";
       rhs = getWrapper("fa", br, WD_INPUT);
@@ -514,14 +534,14 @@ void generateCaseBody(CommonFn commonFn, AST_UnionBranch* branch,
     be_global->impl_ <<
       "    " << brType << " tmp;\n" << forany <<
       "    if (strm >> " << rhs << ") {\n"
-      "      uni." << name << "(tmp);\n"
+      "      uni." << name << (use_cxx11 ? "(std::move(tmp));\n" : "(tmp);\n") <<
       "      uni._d(disc);\n"
       "      return true;\n"
       "    }\n"
       "    return false;\n";
   } else {
     const char* breakString = generateBreaks ? "    break;\n" : "";
-
+    std::string intro;
     std::string expr = commonFn(name + (parens ? "()" : ""), branch->field_type(),
                                 std::string(namePrefix) + "uni", intro, uni);
     be_global->impl_ <<

@@ -1,6 +1,3 @@
-// -*- C++ -*-
-//
-
 #ifndef DATAREADER_LISTENER_IMPL
 #define DATAREADER_LISTENER_IMPL
 
@@ -64,14 +61,21 @@ public:
     return num_arrived_;
   }
 
+  int wait_matched(long count, const ACE_Time_Value *abstime) const;
+
+  CORBA::Long requested_deadline_total_count (void) const;
+
 protected:
 
   virtual ~DataReaderListenerImpl (void);
 
 private:
 
-  DDS::DataReader_var reader_;
-  long                  num_arrived_;
+  mutable ACE_Thread_Mutex mutex_;
+  mutable ACE_Condition<ACE_Thread_Mutex> matched_condition_;
+  long matched_;
+  long num_arrived_;
+  CORBA::Long requested_deadline_total_count_;
 };
 
 #endif /* DATAREADER_LISTENER_IMPL  */

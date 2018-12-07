@@ -91,6 +91,9 @@ project(OpenDDS_Dcps): core, coverage_optional, \
 "	echo export DDS_ROOT=$(DESTDIR)$(INSTALL_PREFIX)/share/dds> $(DESTDIR)$(INSTALL_PREFIX)/share/dds/dds-devel.sh"
 "	@$(MKDIR) $(DESTDIR)$(INSTALL_PREFIX)/share/dds/dds"
 "	ln -sf $(DESTDIR)$(INSTALL_PREFIX)/include/dds/Version.h $(DESTDIR)$(INSTALL_PREFIX)/share/dds/dds"
+"	@$(MKDIR) $(DESTDIR)$(INSTALL_PREFIX)/$(INSTALL_LIB)/cmake/OpenDDS"
+"	cp $(DDS_ROOT)/cmake/*.cmake $(DESTDIR)$(INSTALL_PREFIX)/$(INSTALL_LIB)/cmake/OpenDDS"
+"	echo 'set(OPENDDS_USE_PREFIX_PATH ON) # from make install' >> $(DESTDIR)$(INSTALL_PREFIX)/$(INSTALL_LIB)/cmake/OpenDDS/config.cmake"
   }
 
 }
@@ -142,18 +145,18 @@ project(OpenDDS_Dcps): core, coverage_optional, \
 // For IDL files containing message types, there are three scenarios (see
 // dcps_optional_safety.mpb):
 
-//  1. Standard profile with builtin topics
+//  1. Standard profile (with builtin topics)
 
-//    The main driver here in the InfoRepo.  Most files will be processed
+//    The main driver here is the InfoRepo.  Most files will be processed
 //    with tao_idl, type support will be generated with opendds_idl, and
 //    then fileTypeSupport.idl will be processed with tao_idl.
 
-// 2. Standard profile with no builtin topics
+// 2. Standard profile (with no builtin topics)
 
 //    Similar to the previous case except fileTypeSupport.idl and its
 //    products can be avoided for most files.
 
-// 3. Safety profile (with builtinin topics)
+// 3. Safety profile (with builtin topics)
 
 //    The main driver here is control of the language mapping.  In this
 //    configuration, opendds_idl is used with -I (prevent
@@ -161,6 +164,11 @@ project(OpenDDS_Dcps): core, coverage_optional, \
 //    serialization code).  Message types for builtin topics are in
 //    DdsDcpsCore.idl which means that opendds_idl generates
 //    DdsDcpsCoreTypeSupport.idl which is then processed with tao_idl.
+
+// 4. Safety profile (with no builtin topics)
+
+//    Similar to the previous case except fileTypeSupport.idl and its
+//    products can almost be avoided entirely.
 
 // Various interfaces use sequences of interfaces.  This is a problem in
 // safety profile builds because the included TAO headers have calls to

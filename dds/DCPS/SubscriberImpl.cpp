@@ -89,10 +89,11 @@ SubscriberImpl::contains_reader(DDS::InstanceHandle_t a_handle)
                    this->si_lock_,
                    false);
 
-  for (DataReaderSet::iterator it(datareader_set_.begin());
-       it != datareader_set_.end(); ++it) {
-    if (a_handle == (*it)->get_instance_handle())
+  for (DataReaderMap::iterator it(datareader_map_.begin());
+       it != datareader_map_.end(); ++it) {
+    if (a_handle == it->second->get_instance_handle()) {
       return true;
+    }
   }
 
   return false;
@@ -268,6 +269,10 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
     if (dr_servant->has_zero_copies()) {
       return DDS::RETCODE_PRECONDITION_NOT_MET;
     }
+
+    if (!dr_servant->read_conditions_.empty()) {
+      return DDS::RETCODE_PRECONDITION_NOT_MET;
+    }
   }
   if (dr_servant) {
     // marks entity as deleted and stops future associating
@@ -388,7 +393,10 @@ SubscriberImpl::delete_contained_entities()
   }
 
   for (size_t i = 0; i < drs.size(); ++i) {
-    const DDS::ReturnCode_t ret = delete_datareader(drs[i]);
+    DDS::ReturnCode_t ret = drs[i]->delete_contained_entities();
+    if (ret == DDS::RETCODE_OK) {
+      ret = delete_datareader(drs[i]);
+    }
     if (ret != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: ")
@@ -414,8 +422,10 @@ SubscriberImpl::delete_contained_entities()
   }
 
   for (size_t i = 0; i < drs.size(); ++i) {
-    DDS::ReturnCode_t ret = delete_datareader(drs[i]);
-
+    DDS::ReturnCode_t ret = drs[i]->delete_contained_entities();
+    if (ret == DDS::RETCODE_OK) {
+      ret = delete_datareader(drs[i]);
+    }
     if (ret != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: ")

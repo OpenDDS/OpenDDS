@@ -136,6 +136,50 @@ bool complex_test_setup(const DomainParticipant_var& dp,
   return true;
 }
 
+bool test_cleanup(
+  const DomainParticipant_var& dp,
+  const Publisher_var& pub, const Subscriber_var& sub,
+  DataWriter_var& dw, DataReader_var& dr,
+  bool complex_test = false)
+{
+  Topic_var topic = dw->get_topic();
+  ReturnCode_t r = sub->delete_datareader(dr);
+  if (r != DDS::RETCODE_OK) {
+    cerr << "ERROR: "
+      << (complex_test ? "complex_" : "") << "test_cleanup: "
+      << "delete " << (complex_test ? "1st " : "")
+      <<"datareader failed (" << r << ')' << endl;
+  }
+  r = pub->delete_datawriter(dw);
+  if (r != DDS::RETCODE_OK) {
+    cerr << "ERROR: "
+      << (complex_test ? "complex_" : "") << "test_cleanup: "
+      << "delete datawriter failed (" << r << ')' << endl;
+    return false;
+  }
+  r = dp->delete_topic(topic);
+  if (r != DDS::RETCODE_OK) {
+    cerr << "ERROR: "
+      << (complex_test ? "complex_" : "") << "test_cleanup: "
+      << "delete topic failed (" << r << ')' << endl;
+    return false;
+  }
+  return true;
+}
+
+bool complex_test_cleanup(
+  const DomainParticipant_var& dp,
+  const Publisher_var& pub, const Subscriber_var& sub,
+  DataWriter_var& dw, DataReader_var& dr1, DataReader_var& dr2)
+{
+  if (sub->delete_datareader(dr2) != DDS::RETCODE_OK) {
+    cerr << "ERROR: complex_test_cleanup: "
+      << "delete 2nd datareader failed" << endl;
+    return false;
+  }
+  return test_cleanup(dp, pub, sub, dw, dr1, true);
+}
+
 bool waitForSample(const DataReader_var& dr)
 {
   ReadCondition_var dr_rc = dr->create_readcondition(ANY_SAMPLE_STATE,
@@ -160,7 +204,10 @@ bool run_filtering_test(const DomainParticipant_var& dp,
 {
   DataWriter_var dw;
   DataReader_var dr;
-  if (!test_setup(dp, ts, pub, sub, "MyTopic2", dw, dr)) return false;
+  if (!test_setup(dp, ts, pub, sub, "MyTopic2", dw, dr)) {
+    cerr << "ERROR: run_filtering_test: setup failed" << endl;
+    return false;
+  }
 
   MessageDataWriter_var mdw = MessageDataWriter::_narrow(dw);
   Message sample;
@@ -220,6 +267,10 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   }
 
   dr->delete_readcondition(dr_qc);
+  if (!test_cleanup(dp, pub, sub, dw, dr)) {
+    cerr << "ERROR: run_filtering_test: cleanup failed" << endl;
+    return false;
+  }
   return true;
 }
 
@@ -230,7 +281,10 @@ bool run_complex_filtering_test(const DomainParticipant_var& dp,
   DataWriter_var dw;
   DataReader_var dr1;
   DataReader_var dr2;
-  if (!complex_test_setup(dp, ts, pub, sub, "MyTopicComplex", dw, dr1, dr2)) return false;
+  if (!complex_test_setup(dp, ts, pub, sub, "MyTopicComplex", dw, dr1, dr2)) {
+    cerr << "ERROR: run_complex_filtering_test: setup failed" << endl;
+    return false;
+  }
 
   DDS::StringSeq params(2);
   params.length (2);
@@ -310,6 +364,10 @@ bool run_complex_filtering_test(const DomainParticipant_var& dp,
 
   dr1->delete_readcondition(dr_qc1);
   dr2->delete_readcondition(dr_qc2);
+  if (!complex_test_cleanup(dp, pub, sub, dw, dr1, dr2)) {
+    cerr << "ERROR: run_complex_filtering_test: cleanup failed" << endl;
+    return false;
+  }
   return true;
 }
 
@@ -319,7 +377,10 @@ bool run_sorting_test(const DomainParticipant_var& dp,
 {
   DataWriter_var dw;
   DataReader_var dr;
-  test_setup(dp, ts, pub, sub, "MyTopic", dw, dr);
+  if (!test_setup(dp, ts, pub, sub, "MyTopic", dw, dr)) {
+    cerr << "ERROR: run_sorting_test: setup failed" << endl;
+    return false;
+  }
 
   ReturnCode_t ret = RETCODE_OK;
   MessageDataWriter_var mdw = MessageDataWriter::_narrow(dw);
@@ -357,6 +418,11 @@ bool run_sorting_test(const DomainParticipant_var& dp,
   MessageDataReader_var mdr = MessageDataReader::_narrow(dr);
   Duration_t five_seconds = {5, 0};
   bool passed = true, done = false;
+  if (sub->delete_datareader(dr) != DDS::RETCODE_PRECONDITION_NOT_MET) {
+    cerr << "ERROR: the deletion of a DataReader is not allowed if there are any existing QueryCondition objects that are attached to the DataReader." << endl;
+    passed = false;
+    done = true;
+  }
   while (!done) {
     ConditionSeq active;
     ret = ws->wait(active, five_seconds);
@@ -409,6 +475,10 @@ bool run_sorting_test(const DomainParticipant_var& dp,
 
   ws->detach_condition(dr_qc);
   dr->delete_readcondition(dr_qc);
+  if (!test_cleanup(dp, pub, sub, dw, dr)) {
+    cerr << "ERROR: run_sorting_test: cleanup failed" << endl;
+    return false;
+  }
   return passed;
 }
 
@@ -418,7 +488,10 @@ bool run_change_parameter_test(const DomainParticipant_var& dp,
 {
   DataWriter_var dw;
   DataReader_var dr;
-  test_setup(dp, ts, pub, sub, "MyTopic3", dw, dr);
+  if (!test_setup(dp, ts, pub, sub, "MyTopic3", dw, dr)) {
+    cerr << "ERROR: run_change_parameter_test: setup failed" << endl;
+    return false;
+  }
 
   MessageDataWriter_var mdw = MessageDataWriter::_narrow(dw);
   Message sample;
@@ -534,6 +607,10 @@ bool run_change_parameter_test(const DomainParticipant_var& dp,
   }
 
   dr->delete_readcondition(dr_qc);
+  if (!test_cleanup(dp, pub, sub, dw, dr)) {
+    cerr << "ERROR: run_change_parameter_test: cleanup failed" << endl;
+    return false;
+  }
   return true;
 }
 
@@ -546,10 +623,24 @@ bool run_single_dispose_filter_test(const DomainParticipant_var& dp,
 
   DataWriter_var dw;
   DataReader_var dr;
-  if (!test_setup(dp, ts, pub, sub, "run_dispose_filter_test_topic", dw, dr)) {
+  const char* topic_name = expect_dispose ?
+    "Dispose with Safe Query" : "Dispose with Unsafe Query";
+  if (!test_setup(dp, ts, pub, sub, topic_name, dw, dr)) {
     cerr << "ERROR: run_single_dispose_filter_test: setup failed" << endl;
     return false;
   }
+
+  // Create QueryCondition
+  ReadCondition_var dr_qc = dr->create_querycondition(
+    ANY_SAMPLE_STATE, ANY_VIEW_STATE, NOT_ALIVE_DISPOSED_INSTANCE_STATE,
+    query, DDS::StringSeq());
+  if (!dr_qc) {
+    cerr << "ERROR: run_single_dispose_filter_test: create read condition failed" << endl;
+    return false;
+  }
+  WaitSet_var ws = new WaitSet;
+  ws->attach_condition(dr_qc);
+  ConditionSeq active;
 
   // Write Sample with Valid Data
   MessageDataWriter_var mdw = MessageDataWriter::_narrow(dw);
@@ -562,20 +653,10 @@ bool run_single_dispose_filter_test(const DomainParticipant_var& dp,
     return false;
   }
 
-  // Create Dispose Sample with Invalid Data by Disposing the Writer
+  // Create Dispose Sample with Invalid Data by Disposing the Sample Instance
   mdw->dispose(sample, HANDLE_NIL);
 
-  // Wait for samples matching the query from the disposed writer
-  ReadCondition_var dr_qc = dr->create_querycondition(
-    ANY_SAMPLE_STATE, ANY_VIEW_STATE, NOT_ALIVE_DISPOSED_INSTANCE_STATE,
-    query, DDS::StringSeq());
-  if (!dr_qc) {
-    cerr << "ERROR: run_single_dispose_filter_test: create read condition failed" << endl;
-    return false;
-  }
-  WaitSet_var ws = new WaitSet;
-  ws->attach_condition(dr_qc);
-  ConditionSeq active;
+  // Wait for samples matching the query from the disposed instance
   if (ws->wait(active, max_wait_time) != RETCODE_OK) {
     cerr << "ERROR: run_single_dispose_filter_test: wait failed" << endl;
     return false;
@@ -614,7 +695,13 @@ bool run_single_dispose_filter_test(const DomainParticipant_var& dp,
     return false;
   }
 
+  // Cleanup
   dr->delete_readcondition(dr_qc);
+  if (!test_cleanup(dp, pub, sub, dw, dr)) {
+    cerr << "ERROR: run_single_dispose_filter_test: setup failed" << endl;
+    return false;
+  }
+
   return true;
 }
 
@@ -658,7 +745,8 @@ int run_test(int argc, ACE_TCHAR *argv[])
   Subscriber_var sub = dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0,
                                              DEFAULT_STATUS_MASK);
 
-  bool passed = run_sorting_test(dp, ts, pub, sub);
+  bool passed = true;
+  passed &= run_sorting_test(dp, ts, pub, sub);
   passed &= run_filtering_test(dp, ts, pub, sub);
   passed &= run_change_parameter_test(dp, ts, pub, sub);
   passed &= run_complex_filtering_test(dp, ts, pub, sub);

@@ -108,6 +108,7 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
     return;
   }
 
+  resulting_impl->enable_multi_topic(multitopic);
   resulting_impl->raw_latency_buffer_size() = parent->raw_latency_buffer_size();
   resulting_impl->raw_latency_buffer_type() = parent->raw_latency_buffer_type();
 
