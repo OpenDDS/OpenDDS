@@ -21,6 +21,8 @@ The primary development of OpenDDS was done by
 St. Louis and Phoenix.  It is released under the same generous license
 terms as ACE, TAO and MPC.  See the [LICENSE](LICENSE) file for details.
 
+**Table of Contents:**
+
 * [Documentation](#documentation)
 * [Support](#support)
 * [Features](#features)
@@ -39,17 +41,22 @@ terms as ACE, TAO and MPC.  See the [LICENSE](LICENSE) file for details.
 The OpenDDS Developer's Guide is freely downloadable at:
 http://download.objectcomputing.com/OpenDDS/
 
-The TAO Developer's Guide book set may also be purchased from:
-http://www.theaceorb.com/purchase/index.html
+The TAO Developer's Guide book set may also be purchased from
+https://objectcomputing.com/products/tao/tao-developers-guide
 
-For developer's wanting to contribute to OpenDDS, please take the time to read
+A Doxygen for the latest release is available at
+http://download.opendds.org/doxygen/.
+
+For developers wanting to contribute to OpenDDS, please take the time to read
 [the developer's guidelines](docs/guidelines.md).
 
+Other documentation can be found in [docs directory](docs).
 
 # Support
 
 If you encounter any problems with this release please fill out the
-PROBLEM-REPORT-FORM file found in this directory and use it when posting to
+[PROBLEM-REPORT-FORM](PROBLEM-REPORT-FORM) file found in this directory and use
+it when posting to
 the [mailing list](http://opendds.org/support.html) or creating a
 [GitHub Issue](https://github.com/objectcomputing/OpenDDS/issues).
 
@@ -69,8 +76,8 @@ transport protocols:
 
 RTPS (Interoperability) features are based on the [DDS-RTPS Specification
 formal/2014-09-01 (version 2.2)](http://www.omg.org/spec/DDSI-RTPS/2.2).  See
-the OpenDDS Developer's Guide and the file docs/design/RTPS for more details on
-RTPS.
+the OpenDDS Developer's Guide and the file [docs/design/RTPS](docs/design/RTPS)
+for more details on RTPS.
 
 See the [Developer's Guide](http://download.objectcomputing.com/OpenDDS) for
 information on OpenDDS compliance with the DDS specification. If you would like
@@ -92,18 +99,23 @@ the "configure" script will download it for you.
 
 Use one of the following versions when building OpenDDS:
 
-* TAO 2.2a patch 15
-* TAO 2.5.1 (DOC Group)
-
-Note that the 2.2a release is from OCI and can be obtained
-from http://www.theaceorb.com/.  The DOC Group releases can be obtained from
-http://download.dre.vanderbilt.edu/.
+* OCI TAO 2.2a patch 15
+  * http://download.objectcomputing.com/TAO-2.2a_patches/
+  * This version will be automatically downloaded by default when using the
+    configure script.
+* DOC Group TAO 2.5.1
+  * [github.com/DOCGroup/ACE_TAO](https://github.com/DOCGroup/ACE_TAO/releases)
+  * http://download.dre.vanderbilt.edu/
+  * When using the configure script, this version can be downloaded using one
+    of these arguments:
+    * `--doc_group` for the latest release
+    * `--ace-github-latest' to use the master branches of ACE_TAO and MPC as is
 
 ## Perl
 
-Perl is used for running the automated tests and examples included in this
-source tree and generating Makefiles or Visual Studio project files. The
-configure script also uses Perl.
+Perl is used for the configure script, running the automated tests and examples
+included in this source tree, and generating Makefiles or Visual Studio project
+files.
 
 On Windows we recommend the use of [ActiveState Perl](
 https://www.activestate.com/activeperl).
@@ -134,7 +146,7 @@ Embedded/Mobile/IoT:
 * LynxOS-178 (OpenDDS Safety Profile)
 * VxWorks 6.9 and 7 (see below)
 * Linux on Raspberry Pi
-* Android NDK r12b (ARM)
+* [Android](docs/android.md)
 
 We have built OpenDDS for VxWorks 6.9 and 7 and have run basic
 system and performance tests (but not the entire regression test suite).
