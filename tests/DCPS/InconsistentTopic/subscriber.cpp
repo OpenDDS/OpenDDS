@@ -80,27 +80,35 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         exit(1);
       }
 
-      ACE_OS::sleep (5);
-
-      DDS::Duration_t timeout;
-      timeout.sec = 0;
-      timeout.nanosec = 0;
-      DDS::Topic_var topic2 = participant->find_topic ("Movie Discussion List", timeout);
-      if (CORBA::is_nil (topic2.in ())) {
-        cerr << "not able to find topic." << endl;
-        exit(1);
-      }
-
+      // Try to get the inconsistent_topic_status once a second for a number of seconds, when we got it
+      // we can stop getting it
       DDS::InconsistentTopicStatus status;
-      DDS::ReturnCode_t const retcode = topic2->get_inconsistent_topic_status (status);
+      for (size_t i = 0; i < 10; ++i) {
+        DDS::Duration_t timeout;
+        timeout.sec = 0;
+        timeout.nanosec = 0;
+        DDS::Topic_var topic2 = participant->find_topic ("Movie Discussion List", timeout);
+        if (CORBA::is_nil (topic2.in ())) {
+          cerr << "not able to find topic." << endl;
+          exit(1);
+        }
 
-      if (retcode != DDS::RETCODE_OK) {
-        cerr << "not able to retrieve topic status." << endl;
-        exit(1);
+        DDS::ReturnCode_t const retcode = topic2->get_inconsistent_topic_status (status);
+
+        if (retcode != DDS::RETCODE_OK) {
+          cerr << "not able to retrieve topic status." << endl;
+          exit(1);
+        }
+
+        if (status.total_count_change != 0) {
+          break;
+        }
+
+        ACE_OS::sleep (1);
       }
 
       if (status.total_count == 0) {
-        cerr << "should have an inconsistent topic total count not equal zero." << endl;
+        cerr << "subscriber should have an inconsistent topic total count not equal zero." << endl;
         exit(1);
       } else {
         cout << "subscriber total count: " << status.total_count << endl;
