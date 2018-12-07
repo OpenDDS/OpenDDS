@@ -100,16 +100,18 @@ the "configure" script will download it for you.
 Use one of the following versions when building OpenDDS:
 
 * OCI TAO 2.2a patch 15
-  * http://download.objectcomputing.com/TAO-2.2a_patches/
+  * Availble from:
+    * http://download.objectcomputing.com/TAO-2.2a_patches/
   * This version will be automatically downloaded by default when using the
     configure script.
 * DOC Group TAO 2.5.1
-  * [github.com/DOCGroup/ACE_TAO](https://github.com/DOCGroup/ACE_TAO/releases)
-  * http://download.dre.vanderbilt.edu/
+  * Availble from:
+    * [github.com/DOCGroup/ACE_TAO](https://github.com/DOCGroup/ACE_TAO/releases)
+    * http://download.dre.vanderbilt.edu/
   * When using the configure script, this version can be downloaded using one
     of these arguments:
     * `--doc_group` for the latest release
-    * `--ace-github-latest' to use the master branches of ACE_TAO and MPC as is
+    * `--ace-github-latest` to use the master branches of ACE_TAO and MPC as is
 
 ### Perl
 
