@@ -36,7 +36,7 @@ terms as ACE, TAO and MPC.  See the [LICENSE](LICENSE) file for details.
 * [Quick Start with Docker](#quick-start-with-docker)
 
 
-# Documentation
+## Documentation
 
 The OpenDDS Developer's Guide is freely downloadable at:
 http://download.objectcomputing.com/OpenDDS/
@@ -52,7 +52,7 @@ For developers wanting to contribute to OpenDDS, please take the time to read
 
 Other documentation can be found in [docs directory](docs).
 
-# Support
+## Support
 
 If you encounter any problems with this release please fill out the
 [PROBLEM-REPORT-FORM](PROBLEM-REPORT-FORM) file found in this directory and use
@@ -63,7 +63,7 @@ the [mailing list](http://opendds.org/support.html) or creating a
 For commercial support please see http://opendds.org/support.html.
 
 
-# Features
+## Features
 
 This release of OpenDDS is based on the DDS Specification [formal/2015-04-10
 (version 1.4)](http://www.omg.org/spec/DDS/1.4).  It features the following
@@ -85,12 +85,12 @@ to contribute a feature or sponsor the developers to add a feature  please see
 the Support section above for contact information.
 
 
-# Dependencies
+## Dependencies
 
 For a complete detailed list of dependencies, see
 [docs/dependencies.md](docs/dependencies.md).
 
-## TAO
+### TAO
 
 OpenDDS requires TAO for both IDL compilation as well as interaction
 with the DCPSInfoRepo.  If you will be using the "configure" script for OpenDDS
@@ -111,7 +111,7 @@ Use one of the following versions when building OpenDDS:
     * `--doc_group` for the latest release
     * `--ace-github-latest' to use the master branches of ACE_TAO and MPC as is
 
-## Perl
+### Perl
 
 Perl is used for the configure script, running the automated tests and examples
 included in this source tree, and generating Makefiles or Visual Studio project
@@ -120,9 +120,9 @@ files.
 On Windows we recommend the use of [ActiveState Perl](
 https://www.activestate.com/activeperl).
 
-# Supported Platforms
+## Supported Platforms
 
-## Operating Systems
+### Operating Systems
 
 This release of OpenDDS has been tested under the following platforms:
 
@@ -157,7 +157,7 @@ Marketplace at:
 https://marketplace.windriver.com/index.php?partners&on=details&id=33
 
 
-## Compilers
+### Compilers
 
 This release of OpenDDS has been tested using the following compilers:
 
@@ -175,12 +175,12 @@ This release of OpenDDS has been tested using the following compilers:
 * Clang 6.0 (llvm.org) and 9.0 (Apple)
 
 
-# Building and Installing
+## Building and Installing
 
 For building and installation instructions
 see the [INSTALL.md](INSTALL.md) file in this directory.
 
-# Quick Start with Docker
+## Quick Start with Docker
 
 Docker images containing a pre-built OpenDDS are available on
 [DockerHub](https://hub.docker.com/r/objectcomputing/opendds/).  An image
