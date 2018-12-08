@@ -108,7 +108,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       }
 
       if (status.total_count_change != 0) {
-        cerr << "subscriber should have an inconsistent topic total changed count not equal zero." << endl;
+        cerr << "subscriber should have an inconsistent topic total change count not equal zero." << endl;
         exit(1);
       } else {
         cout << "subscriber total count: " << status.total_count << endl;
