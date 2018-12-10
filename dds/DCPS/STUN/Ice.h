@@ -90,9 +90,9 @@ namespace ICE {
     FoundationType const foundation;
     bool const local_is_controlling;
     uint64_t const priority;
-    bool const nominate; // nominate this pair on success
+    bool const use_candidate; // 1) set the use_candidate when local is controlling and 2) nominate when the response is successful (controlling and controlled)
 
-    CandidatePair(const Candidate& a_local, const Candidate& a_remote, bool a_local_is_controlling, bool a_nominate = false);
+    CandidatePair(const Candidate& a_local, const Candidate& a_remote, bool a_local_is_controlling, bool a_use_candidate = false);
     bool operator==(const CandidatePair& other) const;
 
     static bool priority_sorted(const CandidatePair& x, const CandidatePair& y) { return x.priority > y.priority; }
@@ -193,10 +193,9 @@ namespace ICE {
   public:
     virtual ~AbstractAgent() {}
     virtual void start_ice(const GuidPair& guidp, SignalingChannel* signaling_channel = 0) = 0;
-    virtual bool update_remote_agent_info(const GuidPair& guidp, const AgentInfo& agent_info) = 0;
+    virtual void update_remote_agent_info(const GuidPair& guidp, const AgentInfo& agent_info) = 0;
     virtual void stop_ice(const GuidPair& guidp) = 0;
     virtual AgentInfo get_local_agent_info() const = 0;
-    virtual bool is_running() const = 0;
     virtual ACE_INET_Addr get_address(const DCPS::RepoId& guid) const = 0;
 
     virtual void receive(const ACE_INET_Addr& local_address, const ACE_INET_Addr& remote_address, const STUN::Message& message) = 0;
@@ -207,12 +206,10 @@ namespace ICE {
     Agent(StunSender* stun_sender, const ACE_INET_Addr& stun_server_address, ACE_Reactor* reactor, ACE_thread_t owner);
 
     void start_ice(const GuidPair& guidp, SignalingChannel* signaling_channel = 0);
-    bool update_remote_agent_info(const GuidPair& guidp, const AgentInfo& agent_info);
+    void update_remote_agent_info(const GuidPair& guidp, const AgentInfo& agent_info);
     void stop_ice(const GuidPair& guidp);
 
     AgentInfo get_local_agent_info() const;
-
-    bool is_running() const;
 
     ACE_INET_Addr get_address(const DCPS::RepoId& guid) const;
 
@@ -265,6 +262,7 @@ namespace ICE {
     void succeeded(const ConnectivityCheck& cc);
     void failed(const ConnectivityCheck& cc);
 
+    bool is_running() const;
     Checklist* add_checklist(const AgentInfo& remote_agent_info);
     void remove_checklist(Checklist* checklist);
     void generate_triggered_check(Checklist* checklist, const ACE_INET_Addr& local_address, const ACE_INET_Addr& remote_address, uint32_t priority, bool use_candidate);
@@ -274,6 +272,7 @@ namespace ICE {
     void server_reflexive_address(const ACE_INET_Addr& address);
     void send(const ACE_INET_Addr& address, const STUN::Message message);
     bool reactor_is_shut_down() const;
+    void propagate() const;
 
     // Hide the agent from its works to force all interaction through methods.
     // All of the invoked methods require locks.
@@ -287,6 +286,7 @@ namespace ICE {
       void send(const ACE_INET_Addr& address, const STUN::Message message) { agent_.send(address, message); }
       bool do_next_check() { return agent_.do_next_check(); }
       bool reactor_is_shut_down() const { return agent_.reactor_is_shut_down(); }
+      void propagate() const { agent_.propagate(); }
 
     private:
       Agent& agent_;
@@ -339,6 +339,28 @@ namespace ICE {
       void schedule(State next_state, const ACE_Time_Value& delay);
       virtual bool reactor_is_shut_down() const;
     } connectivity_checker_;
+
+    struct InfoSender : public DCPS::ReactorInterceptor {
+      enum State {
+        STOPPED,
+        SENDING,
+      };
+
+      InfoSender(Agent& a_agent, ACE_Reactor* reactor, ACE_thread_t owner)
+        : DCPS::ReactorInterceptor(reactor, owner), agent_(a_agent), state_(STOPPED), count_(0) {}
+
+      void start();
+      void stop();
+
+    private:
+      AgentWorkerView agent_;
+      State state_;
+      size_t count_;
+
+      int handle_timeout(const ACE_Time_Value& /*now*/, const void* /*act*/);
+      void schedule(State next_state, const ACE_Time_Value& delay);
+      virtual bool reactor_is_shut_down() const;
+    } info_sender_;
 
     void check_invariant() const;
   };
