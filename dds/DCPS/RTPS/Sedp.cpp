@@ -3374,7 +3374,7 @@ Sedp::write_publication_data_unsecure(
                  ACE_TEXT(" to ParameterList\n")));
       result = DDS::RETCODE_ERROR;
     }
-    if (lp.have_ice_agent_info && lp.publication_->get_ice_agent()->is_running()) {
+    if (lp.have_ice_agent_info) {
       if (ParameterListConverter::to_param_list(lp.ice_agent_info, plist)) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data - ")
@@ -3420,7 +3420,7 @@ Sedp::write_publication_data_secure(
                  ACE_TEXT("to ParameterList\n")));
       result = DDS::RETCODE_ERROR;
     }
-    if (lp.have_ice_agent_info && lp.publication_->get_ice_agent()->is_running()) {
+    if (lp.have_ice_agent_info) {
       if (ParameterListConverter::to_param_list(lp.ice_agent_info, plist)) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data - ")
@@ -3488,7 +3488,7 @@ Sedp::write_subscription_data_unsecure(
                  ACE_TEXT("to ParameterList\n")));
       result = DDS::RETCODE_ERROR;
     }
-    if (ls.have_ice_agent_info && ls.subscription_->get_ice_agent()->is_running()) {
+    if (ls.have_ice_agent_info) {
       if (ParameterListConverter::to_param_list(ls.ice_agent_info, plist)) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data - ")
@@ -3533,7 +3533,7 @@ Sedp::write_subscription_data_secure(
                  ACE_TEXT("to ParameterList\n")));
       result = DDS::RETCODE_ERROR;
     }
-    if (ls.have_ice_agent_info && ls.subscription_->get_ice_agent()->is_running()) {
+    if (ls.have_ice_agent_info) {
       if (ParameterListConverter::to_param_list(ls.ice_agent_info, plist)) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data - ")
