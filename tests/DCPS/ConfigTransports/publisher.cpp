@@ -191,7 +191,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   catch (const std::runtime_error& rte)
   {
     ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) main() exception: %s\n"), rte.what()), -1);
+                      ACE_TEXT("(%P|%t) main() exception: %C\n"), rte.what()), -1);
   }
   catch (const OpenDDS::DCPS::Transport::MiscProblem& )
   {

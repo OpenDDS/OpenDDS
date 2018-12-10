@@ -36,20 +36,29 @@ class ShmemTransport;
 class ReceivedDataSample;
 typedef RcHandle<ShmemTransport> ShmemTransport_rch;
 
-#ifdef ACE_WIN32
-  typedef ACE_Pagefile_Memory_Pool ShmemPool;
-#elif !defined ACE_LACKS_SYSV_SHMEM
-  typedef ACE_Shared_Memory_Pool ShmemPool;
-#else // no shared memory support (will yield a runtime error if used)
-  typedef ACE_Local_Memory_Pool ShmemPool;
-#endif
+#if defined ACE_WIN32 && !defined ACE_HAS_WINCE
+#  define OPENDDS_SHMEM_WINDOWS
+typedef ACE_Pagefile_Memory_Pool ShmemPool;
+typedef HANDLE ShmemSharedSemaphore;
 
-#ifdef ACE_WIN32
-  typedef HANDLE ShmemSharedSemaphore;
-#elif defined ACE_HAS_POSIX_SEM
-  typedef sem_t ShmemSharedSemaphore;
+#elif !defined ACE_LACKS_SYSV_SHMEM \
+      && defined ACE_HAS_POSIX_SEM \
+      && !defined ACE_LACKS_UNNAMED_SEMAPHORE
+#  define OPENDDS_SHMEM_UNIX
+typedef ACE_Shared_Memory_Pool ShmemPool;
+typedef sem_t ShmemSharedSemaphore;
+#  if !defined ACE_HAS_POSIX_SEM_TIMEOUT && \
+      !defined ACE_DISABLE_POSIX_SEM_TIMEOUT_EMULATION
+#    define OPENDDS_SHMEM_UNIX_EMULATE_SEM_TIMEOUT
+#  endif
+
+// No Support for this Platform, Trying to Use Shared Memory Transport Will
+// Yield a Runtime Error
 #else
-  typedef int ShmemSharedSemaphore;
+#  define OPENDDS_SHMEM_UNSUPPORTED
+// These are just place holders
+typedef ACE_Local_Memory_Pool ShmemPool;
+typedef int ShmemSharedSemaphore;
 #endif
 
 typedef ACE_Malloc_T<ShmemPool, ACE_Process_Mutex, ACE_PI_Control_Block>
@@ -61,7 +70,10 @@ struct ShmemData {
   ACE_Based_Pointer_Basic<char> payload_;
 };
 
-enum { // values for ShmemData::status_
+/**
+ * values for ShmemData::status_
+ */
+enum {
   SHMEM_DATA_FREE = 0,
   SHMEM_DATA_IN_USE = 1,
   SHMEM_DATA_RECV_DONE = 2,

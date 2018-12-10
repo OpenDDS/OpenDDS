@@ -139,6 +139,10 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::execute(SubscriptionInstance_rch insta
           //       catch all exceptions, and act accordingly.
           listener->on_requested_deadline_missed(reader.in(),
                                                 status);
+
+          // We need to update the last total count value to our current total
+          // so that the next time we will calculate the correct total_count_change;
+          this->last_total_count_ = this->status_.total_count;
         }
 
         reader->notify_status_condition();

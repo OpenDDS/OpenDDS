@@ -111,7 +111,7 @@ public:
   /// Return Codes: 0 means successful reservation made.
   ///              -1 means failure.
   int make_reservation(const RepoId& remote_publication_id,
-                       const RepoId& local_subcription_id,
+                       const RepoId& local_subscription_id,
                        const TransportReceiveListener_wrch& receive_listener);
 
   // ciju: Called by LinkSet with locks held

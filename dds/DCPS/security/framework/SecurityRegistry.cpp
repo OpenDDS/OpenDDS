@@ -115,7 +115,6 @@ SecurityRegistry::register_plugin(const OPENDDS_STRING& plugin_name,
   GuardType guard(lock_);
 
   if (registered_plugins_.find(plugin_name) != registered_plugins_.end()) {
-    guard.release();
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) SecurityRegistry::register_plugin: ")
                ACE_TEXT("plugin=%C already exists.\n"),

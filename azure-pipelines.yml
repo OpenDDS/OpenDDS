@@ -81,7 +81,6 @@ jobs:
   pool:
     vmImage: ubuntu-16.04
   strategy:
-    maxParallel: 4
     matrix:
       Debug:
         ConfigOpts: --no-inline
@@ -94,12 +93,29 @@ jobs:
       SecurityWithoutFeatures:
         ConfigOpts: --no-inline --no-debug --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile --security
         PackageDeps: libxerces-c-dev libssl-dev cmake
+      CLANG5:
+        ConfigOpts: --compiler=clang++-5.0 --security
+        PackageDeps: libxerces-c-dev libssl-dev cmake clang-5.0
+        Repo: llvm-toolchain-$(lsb_release -cs)-5.0
+      CLANG6:
+        ConfigOpts: --compiler=clang++-6.0 --security
+        PackageDeps: libxerces-c-dev libssl-dev cmake clang-6.0
+        Repo: llvm-toolchain-$(lsb_release -cs)-6.0
+      CLANG7:
+        ConfigOpts: --compiler=clang++-7 --security
+        PackageDeps: libxerces-c-dev libssl-dev cmake clang-7
+        Repo: llvm-toolchain-$(lsb_release -cs)-7
 
   steps:
+  - script: |
+      wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|sudo apt-key add -
+      sudo apt-add-repository "deb http://apt.llvm.org/$(lsb_release -cs)/ $(Repo) main"
+    displayName: Add repository ($(Repo))
+    condition: and(succeeded(), ne(variables['Repo'], ''))
   - script: sudo apt-get --yes update && sudo apt-get --yes install $(PackageDeps)
     displayName: install system package dependencies ($(PackageDeps))
     condition: and(succeeded(), ne(variables['PackageDeps'], ''))
-  - script: ./configure -v --ace-github-latest $(ConfigOpts)
+  - script: ./configure -v --mpcopts="-workers 4" --ace-github-latest $(ConfigOpts)
     displayName: Run configure script
   - script: make -sj6
     displayName: Compile
