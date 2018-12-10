@@ -312,6 +312,11 @@ namespace ICE {
           nominating_ = valid_list_.end();
         } else {
           nominated_ = std::find(valid_list_.begin(), valid_list_.end(), cp);
+          // TODO:  This more about the case where the use_candidate check succeeded before the normal check.
+          if (nominated_ == valid_list_.end()) {
+            valid_list_.push_front(cp);
+            nominated_ = valid_list_.begin();
+          }
         }
         selected_address_ = nominated_->remote.address;
       }
@@ -867,7 +872,7 @@ namespace ICE {
         // Hack to get local port.
         const_cast<ACE_INET_Addr&>(local_address).set(host_addresses_[0].get_port_number(), local_address.get_ip_address());
 
-        if (remote_address != cp.remote.address || local_address != cp.local.address) {
+        if (remote_address != cp.remote.address || local_address != cp.local.base) {
           // 7.2.5.2.1 Non-Symmetric Transport Addresses
           failed(cc);
           return;
