@@ -12,9 +12,9 @@ OpenDDS is itself developed in C++, Java and JMS bindings are provided so
 that Java applications can use OpenDDS.  OpenDDS also includes support for the
 DDS Security specification.
 
-OpenDDS is built on the [ACE](http://www.theaceorb.com/product/aboutace.html)
+OpenDDS is built on the [ACE](docs/dependencies.md#ace)
 abstraction layer to provide platform portability.  OpenDDS also leverages
-capabilities of [TAO](http://www.theaceorb.com/), such as its IDL compiler
+capabilities of [TAO](docs/dependencies.md#tao), such as its IDL compiler
 and as the basis of the OpenDDS DCPS Information Repository (DCPSInfoRepo).
 
 The primary development of OpenDDS was done by
