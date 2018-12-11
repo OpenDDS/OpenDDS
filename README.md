@@ -39,16 +39,16 @@ terms as ACE, TAO and MPC.  See the [LICENSE](LICENSE) file for details.
 
 ## Documentation
 
-The OpenDDS Developer's Guide is freely downloadable at:
+- The OpenDDS Developer's Guide is freely downloadable at:
 http://download.objectcomputing.com/OpenDDS/
 
-The TAO Developer's Guide book set may also be purchased from
+- The TAO Developer's Guide book set may also be purchased from
 https://objectcomputing.com/products/tao/tao-developers-guide
 
-A Doxygen for the latest release is available at
+- A Doxygen for the latest release is available at
 http://download.opendds.org/doxygen/.
 
-For developers wanting to contribute to OpenDDS, please take the time to read
+- For developers wanting to contribute to OpenDDS, please take the time to read
 [the developer's guidelines](docs/guidelines.md).
 
 Other documentation can be found in [docs directory](docs).
@@ -155,10 +155,8 @@ We have built OpenDDS for VxWorks 6.9 and 7 and have run basic
 system and performance tests (but not the entire regression test suite).
 Please contact sales@objectcomputing.com or opendds-main@lists.sourceforge.net
 for more information on support for ACE, TAO, and OpenDDS on VxWorks.
-OCI's packages for ACE, TAO, and OpenDDS can be obtained on the Wind River
-Marketplace at:
-https://marketplace.windriver.com/index.php?partners&on=details&id=33
-
+OCI's packages for ACE, TAO, and OpenDDS can be obtained on the [Wind River
+Marketplace](https://marketplace.windriver.com/index.php?partners&on=details&id=33).
 
 ### Compilers
 
