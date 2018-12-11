@@ -317,6 +317,7 @@ Sedp::init(const RepoId& guid,
 
   rtps_inst->stun_server_address(disco.sedp_stun_server_address());
   rtps_inst->rtps_relay_address(disco.sedp_rtps_relay_address());
+  rtps_inst->use_ice_ = disco.use_ice();
 
   // TODO: Get rid of this.
   rtps_inst->rtps_relay_url_ = disco.rtps_relay_url();

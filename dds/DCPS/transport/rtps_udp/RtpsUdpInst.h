@@ -77,6 +77,8 @@ public:
   void rtps_relay_address(const ACE_INET_Addr& address) { rtps_relay_address_ = address; }
   ACE_INET_Addr rtps_relay_address() const { return rtps_relay_address_; }
 
+  bool use_ice_;
+
   // TODO:  Get rid of this.
   OPENDDS_STRING rtps_relay_url_;
 

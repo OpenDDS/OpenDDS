@@ -41,6 +41,7 @@ RtpsUdpInst::RtpsUdpInst(const OPENDDS_STRING& name)
   , handshake_timeout_(30) // default syn_timeout in OpenDDS_Multicast
   , durable_data_timeout_(60)
   , opendds_discovery_guid_(GUID_UNKNOWN)
+  , use_ice_(true)
 {
 }
 
@@ -112,6 +113,8 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
     ACE_INET_Addr addr(rtps_relay_address_s.c_str());
     rtps_relay_address(addr);
   }
+
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("UseIce"), use_ice_, bool);
 
   return 0;
 }

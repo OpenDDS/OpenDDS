@@ -2877,10 +2877,14 @@ OpenDDS::DCPS::RtpsUdpDataLink::receive_strategy()
 
 ACE_INET_Addr
 OpenDDS::DCPS::RtpsUdpDataLink::get_address(const RepoId& guid) const {
-  ACE_INET_Addr addr = this->impl().get_ice_agent()->get_address(guid);
-  if (addr != ACE_INET_Addr()) {
-//    std::cout << "Using ICE " << addr.get_host_addr() << ':' << addr.get_port_number() << " for " << guid << std::endl;
-    return addr;
+  ACE_INET_Addr addr;
+
+  if (this->config().use_ice_) {
+    addr = this->impl().get_ice_agent()->get_address(guid);
+    if (addr != ACE_INET_Addr()) {
+      //    std::cout << "Using ICE " << addr.get_host_addr() << ':' << addr.get_port_number() << " for " << guid << std::endl;
+      return addr;
+    }
   }
 
   addr = this->config().rtps_relay_address();
