@@ -349,7 +349,7 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
                      false);
   }
 
-  ice_agent_ = new ICE::Agent(&stun_handler_, config.stun_server_address(), reactor(), reactor_owner());
+  ice_agent_ = new ICE::Agent(config.use_ice_, &stun_handler_, config.stun_server_address(), reactor(), reactor_owner());
 
   if (config.opendds_discovery_default_listener_) {
     link_= make_datalink(config.opendds_discovery_guid_.guidPrefix);

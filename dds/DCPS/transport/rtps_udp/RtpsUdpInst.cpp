@@ -40,8 +40,8 @@ RtpsUdpInst::RtpsUdpInst(const OPENDDS_STRING& name)
   , heartbeat_response_delay_(0, 500*1000 /*microseconds*/) // default from RTPS
   , handshake_timeout_(30) // default syn_timeout in OpenDDS_Multicast
   , durable_data_timeout_(60)
-  , opendds_discovery_guid_(GUID_UNKNOWN)
   , use_ice_(true)
+  , opendds_discovery_guid_(GUID_UNKNOWN)
 {
 }
 

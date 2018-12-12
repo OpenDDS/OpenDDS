@@ -203,7 +203,7 @@ namespace ICE {
 
   class OpenDDS_Stun_Export Agent : public AbstractAgent {
   public:
-    Agent(StunSender* stun_sender, const ACE_INET_Addr& stun_server_address, ACE_Reactor* reactor, ACE_thread_t owner);
+    Agent(bool use_ice, StunSender* stun_sender, const ACE_INET_Addr& stun_server_address, ACE_Reactor* reactor, ACE_thread_t owner);
 
     void start_ice(const GuidPair& guidp, SignalingChannel* signaling_channel = 0);
     void update_remote_agent_info(const GuidPair& guidp, const AgentInfo& agent_info);
@@ -217,6 +217,7 @@ namespace ICE {
     void receive(const ACE_INET_Addr& local_address, const ACE_INET_Addr& remote_address, const STUN::Message& message);
 
   private:
+    bool use_ice_;
     ACE_Recursive_Thread_Mutex mutex_;
     // The info for this agent.
     AgentInfo local_agent_info_;

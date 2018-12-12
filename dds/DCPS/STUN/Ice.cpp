@@ -500,8 +500,9 @@ namespace ICE {
     return cc.candidate_pair() == cp;
   }
 
-  Agent::Agent(StunSender* stun_sender, const ACE_INET_Addr& stun_server_address, ACE_Reactor* reactor, ACE_thread_t owner)
-    : stun_sender_(stun_sender)
+  Agent::Agent(bool use_ice, StunSender* stun_sender, const ACE_INET_Addr& stun_server_address, ACE_Reactor* reactor, ACE_thread_t owner)
+    : use_ice_(use_ice)
+    , stun_sender_(stun_sender)
     , stun_server_address_(stun_server_address)
     , remote_peer_reflexive_counter_(0)
     , candidate_gatherer_(*this, reactor, owner)
@@ -677,7 +678,7 @@ namespace ICE {
   bool Agent::is_running() const {
     ACE_Guard<ACE_Recursive_Thread_Mutex> guard(const_cast<ACE_Recursive_Thread_Mutex&>(mutex_));
     bool r = std::find_if(checklists_.begin(), checklists_.end(), Running()) != checklists_.end();;
-    return stun_sender_ && (!unknown_guids_.empty() || r || !deferred_triggered_checks_.empty());
+    return use_ice_ && stun_sender_ && (!unknown_guids_.empty() || r || !deferred_triggered_checks_.empty());
   }
 
   ACE_INET_Addr Agent::get_address(const DCPS::RepoId& guid) const {
