@@ -72,6 +72,9 @@ jobs:
         ConfigOpts: --safety-profile
       SafetyBaseNoBuiltinTopics:
         ConfigOpts: --safety-profile=base --no-built-in-topics
+      Security:
+        ConfigOpts: --security --features=versioned_namespace=1
+        PackageDeps: libxerces-c-dev libssl-dev cmake
       SecurityWithoutFeatures:
         ConfigOpts: --no-inline --no-debug --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile --security
         PackageDeps: libxerces-c-dev libssl-dev cmake
