@@ -101,8 +101,11 @@ jobs:
       sudo apt-add-repository "deb http://apt.llvm.org/$(lsb_release -cs)/ $(Repo) main"
     displayName: Add repository ($(Repo))
     condition: and(succeeded(), ne(variables['Repo'], ''))
-  - script: sudo apt-get --yes update && sudo apt-get --yes install $(PackageDeps)
-    displayName: install system package dependencies ($(PackageDeps))
+  - script: |
+      sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+      sudo apt-get --yes update
+      sudo apt-get --yes install libxerces-c-dev libssl-dev $(PackageDeps)
+    displayName: install system package dependencies
     condition: and(succeeded(), ne(variables['PackageDeps'], ''))
   - script: ./configure -v --mpcopts="-workers 4" --ace-github-latest $(ConfigOpts)
     displayName: Run configure script
