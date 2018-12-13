@@ -75,6 +75,8 @@ jobs:
       SecurityWithoutFeatures:
         ConfigOpts: --no-inline --no-debug --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile --security
         PackageDeps: libxerces-c-dev libssl-dev cmake
+      WChar:
+        ConfigOpts: --features=uses_wchar=1 --no-inline
       CLANG5:
         ConfigOpts: --compiler=clang++-5.0 --security
         PackageDeps: libxerces-c-dev libssl-dev cmake clang-5.0
@@ -87,7 +89,12 @@ jobs:
         ConfigOpts: --compiler=clang++-7 --security
         PackageDeps: libxerces-c-dev libssl-dev cmake clang-7
         Repo: llvm-toolchain-$(lsb_release -cs)-7
-
+      GCC6:
+        ConfigOpts: --compiler=g++-6 --no-inline
+        PackageDeps: g++-6
+      GCC7:
+        ConfigOpts: --compiler=g++-7 --no-inline
+        PackageDeps: g++-7
   steps:
   - script: |
       wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|sudo apt-key add -
