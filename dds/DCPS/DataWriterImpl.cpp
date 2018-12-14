@@ -173,7 +173,7 @@ DataWriterImpl::get_instance_handle()
   RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
   if (participant)
     return participant->id_to_handle(publication_id_);
-  return 0;
+  return DDS::HANDLE_NIL;
 }
 
 DDS::InstanceHandle_t
@@ -183,7 +183,7 @@ DataWriterImpl::get_next_handle()
   RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
   if (participant)
     return participant->id_to_handle(GUID_UNKNOWN);
-  return 0;
+  return DDS::HANDLE_NIL;
 }
 
 void
