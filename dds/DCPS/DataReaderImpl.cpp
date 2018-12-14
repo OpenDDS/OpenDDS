@@ -209,7 +209,7 @@ DataReaderImpl::get_instance_handle()
   RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
   if (participant)
     return participant->id_to_handle(subscription_id_);
-  return 0;
+  return DDS::HANDLE_NIL;
 }
 
 void
@@ -1070,7 +1070,7 @@ DataReaderImpl::wait_for_historical_data(
     const DDS::Duration_t & /* max_wait */)
 {
   // Add your implementation here
-  return 0;
+  return DDS::RETCODE_OK;
 }
 
 DDS::ReturnCode_t
@@ -2443,7 +2443,7 @@ DataReaderImpl::get_next_handle(const DDS::BuiltinTopicKey_t& key)
 {
   RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
   if (!participant)
-    return 0;
+    return DDS::HANDLE_NIL;
 
   if (is_bit()) {
     Discovery_rch disc = TheServiceParticipant->get_discovery(domain_id_);
