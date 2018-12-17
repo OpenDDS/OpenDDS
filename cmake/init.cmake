@@ -3,6 +3,11 @@
 
 include(${CMAKE_CURRENT_LIST_DIR}/config.cmake)
 
+# Make Sure CMake can use the Paths
+file(TO_CMAKE_PATH "${OPENDDS_ACE}" OPENDDS_ACE)
+file(TO_CMAKE_PATH "${OPENDDS_MPC}" OPENDDS_MPC)
+file(TO_CMAKE_PATH "${OPENDDS_TAO}" OPENDDS_TAO)
+
 option(OPENDDS_CMAKE_VERBOSE "Print verbose output when loading the OpenDDS Config Package")
 
 set(_OPENDDS_RELATIVE_SOURCE_ROOT "${CMAKE_CURRENT_LIST_DIR}/..")
