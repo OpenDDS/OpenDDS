@@ -107,7 +107,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         ACE_OS::sleep (1);
       }
 
-      if (status.total_count_change != 0) {
+      if (status.total_count_change == 0) {
         cerr << "subscriber should have an inconsistent topic total change count not equal zero." << endl;
         exit(1);
       } else {
