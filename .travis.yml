@@ -5,11 +5,11 @@ compiler:
 
 env:
   matrix:
-    - FUZZ=1 STATIC=1 XERCES3=1 NO_TESTS=1
+    - COMPILER=g++ FUZZ=1 STATIC=1 XERCES3=1 NO_TESTS=1
     - NO_INLINE=1 NO_BIT=1
     - NO_DEBUG=1 NO_TESTS=1
     - SAFETY_PROFILE=1
-    - NO_INLINE=1 NO_MULTITOPIC=1 XERCES3=1
+    - COMPILER=g++ NO_INLINE=1 NO_MULTITOPIC=1 XERCES3=1
   global:
     - ACE_ROOT=$TRAVIS_BUILD_DIR/ACE_TAO/ACE
     - TAO_ROOT=$TRAVIS_BUILD_DIR/ACE_TAO/TAO
@@ -31,7 +31,7 @@ matrix:
             - openjdk-7-jdk
       env: COMPILER=g++-6 USE_JAVA=1 NO_DEBUG=1 NO_TESTS=1
     - os: osx
-      osx_image: xcode9.1
+      osx_image: xcode10.1
       compiler: clang
       env: COMPILER=clang++ NO_INLINE=1
 
