@@ -7,10 +7,8 @@ env:
   matrix:
     - FUZZ=1 STATIC=1 XERCES3=1 NO_TESTS=1
     - NO_INLINE=1 NO_BIT=1
-    - NO_INLINE=1 VERSIONED_NS=1 DDS_SECURITY=1
     - NO_DEBUG=1 NO_TESTS=1
     - SAFETY_PROFILE=1
-    - NO_INLINE=1 USES_WCHAR=1
     - NO_INLINE=1 NO_MULTITOPIC=1 XERCES3=1
   global:
     - ACE_ROOT=$TRAVIS_BUILD_DIR/ACE_TAO/ACE
@@ -32,24 +30,6 @@ matrix:
             - g++-6
             - openjdk-7-jdk
       env: COMPILER=g++-6 USE_JAVA=1 NO_DEBUG=1 NO_TESTS=1
-    - compiler: gcc
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - libxerces-c-dev
-            - g++-6
-      env: COMPILER=g++-6 NO_INLINE=1
-    - compiler: gcc
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - libxerces-c-dev
-            - g++-7
-      env: COMPILER=g++-7 NO_INLINE=1
     - os: osx
       osx_image: xcode9.1
       compiler: clang

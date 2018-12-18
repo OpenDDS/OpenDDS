@@ -90,9 +90,14 @@ jobs:
         ConfigOpts: --safety-profile
       SafetyBaseNoBuiltinTopics:
         ConfigOpts: --safety-profile=base --no-built-in-topics
+      Security:
+        ConfigOpts: --security --features=versioned_namespace=1
+        PackageDeps: libxerces-c-dev libssl-dev cmake
       SecurityWithoutFeatures:
         ConfigOpts: --no-inline --no-debug --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile --security
         PackageDeps: libxerces-c-dev libssl-dev cmake
+      WChar:
+        ConfigOpts: --features=uses_wchar=1 --no-inline
       CLANG5:
         ConfigOpts: --compiler=clang++-5.0 --security
         PackageDeps: libxerces-c-dev libssl-dev cmake clang-5.0
@@ -105,15 +110,23 @@ jobs:
         ConfigOpts: --compiler=clang++-7 --security
         PackageDeps: libxerces-c-dev libssl-dev cmake clang-7
         Repo: llvm-toolchain-$(lsb_release -cs)-7
-
+      GCC6:
+        ConfigOpts: --compiler=g++-6 --no-inline
+        PackageDeps: g++-6
+      GCC7:
+        ConfigOpts: --compiler=g++-7 --no-inline
+        PackageDeps: g++-7
   steps:
   - script: |
       wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|sudo apt-key add -
       sudo apt-add-repository "deb http://apt.llvm.org/$(lsb_release -cs)/ $(Repo) main"
     displayName: Add repository ($(Repo))
     condition: and(succeeded(), ne(variables['Repo'], ''))
-  - script: sudo apt-get --yes update && sudo apt-get --yes install $(PackageDeps)
-    displayName: install system package dependencies ($(PackageDeps))
+  - script: |
+      sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+      sudo apt-get --yes update
+      sudo apt-get --yes install libxerces-c-dev libssl-dev $(PackageDeps)
+    displayName: install system package dependencies
     condition: and(succeeded(), ne(variables['PackageDeps'], ''))
   - script: ./configure -v --mpcopts="-workers 4" --ace-github-latest $(ConfigOpts)
     displayName: Run configure script

@@ -107,12 +107,14 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         ACE_OS::sleep (1);
       }
 
-      if (status.total_count == 0) {
-        cerr << "subscriber should have an inconsistent topic total count not equal zero." << endl;
+      if (status.total_count_change == 0) {
+        cerr << "subscriber should have an inconsistent topic total change count not equal zero." << endl;
         exit(1);
       } else {
         cout << "subscriber total count: " << status.total_count << endl;
       }
+
+      ACE_OS::sleep (1);
 
       if (!CORBA::is_nil (participant.in ())) {
         participant->delete_contained_entities();

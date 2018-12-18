@@ -105,12 +105,14 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
         ACE_OS::sleep (1);
       }
 
-      if (status.total_count == 0) {
-        cerr << "publisher should have an inconsistent topic total count not equal zero." << endl;
+      if (status.total_count_change == 0) {
+        cerr << "publisher should have an inconsistent topic total count change not equal zero." << endl;
         exit(1);
       } else {
         cout << "publisher total count: " << status.total_count << endl;
       }
+
+      ACE_OS::sleep (1);
 
       participant->delete_contained_entities();
       dpf->delete_participant(participant);

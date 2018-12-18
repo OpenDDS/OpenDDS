@@ -1,5 +1,7 @@
-#!/bin/sh
+#!/bin/bash
+set -e
 # Install dependency packages for use by Jenkins (debian stable)
+apt-get -y update
 apt-get -y --fix-missing install \
     qtbase5-dev \
     wireshark-dev \
