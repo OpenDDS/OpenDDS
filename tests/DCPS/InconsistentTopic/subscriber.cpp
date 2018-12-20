@@ -101,7 +101,11 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         }
 
         if (status.total_count_change != 0) {
+          cout << "subscriber total_count_change not equal to zero, breaking loop after " << i << " iterations" << endl;
           break;
+        } else {
+          cout << "subscriber total_count_change zero, sleeping a second" << endl;
+          ACE_OS::sleep (1);
         }
 
         ACE_OS::sleep (1);
