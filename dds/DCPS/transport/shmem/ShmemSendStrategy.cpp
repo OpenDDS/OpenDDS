@@ -27,7 +27,7 @@ ShmemSendStrategy::ShmemSendStrategy(ShmemDataLink* link)
   , current_data_(0)
   , datalink_control_size_(link->impl().config().datalink_control_size_)
 {
-#ifdef ACE_HAS_POSIX_SEM
+#ifdef OPENDDS_SHMEM_UNIX
   memset(&peer_semaphore_, 0, sizeof(peer_semaphore_));
 #endif
 }
@@ -56,7 +56,7 @@ ShmemSendStrategy::start_i()
   ShmemAllocator* peer = link_->peer_allocator();
   peer->find("Semaphore", mem);
   ShmemSharedSemaphore* sem = reinterpret_cast<ShmemSharedSemaphore*>(mem);
-#if defined ACE_WIN32 && !defined ACE_HAS_WINCE
+#if defined OPENDDS_SHMEM_WINDOWS
   HANDLE srcProc = ::OpenProcess(PROCESS_DUP_HANDLE, false /*bInheritHandle*/,
                                  link_->peer_pid());
   ::DuplicateHandle(srcProc, *sem, GetCurrentProcess(), &peer_semaphore_,
@@ -64,7 +64,7 @@ ShmemSendStrategy::start_i()
                     false /*bInheritHandle*/,
                     DUPLICATE_SAME_ACCESS /*dwOptions*/);
   ::CloseHandle(srcProc);
-#elif defined ACE_HAS_POSIX_SEM
+#elif defined OPENDDS_SHMEM_UNIX
   peer_semaphore_.sema_ = sem;
   peer_semaphore_.name_ = 0;
 #else
@@ -174,7 +174,7 @@ ShmemSendStrategy::send_bytes_i(const iovec iov[], int n)
 void
 ShmemSendStrategy::stop_i()
 {
-#if defined ACE_WIN32 && !defined ACE_HAS_WINCE
+#ifdef OPENDDS_SHMEM_WINDOWS
   ::CloseHandle(peer_semaphore_);
 #endif
 }

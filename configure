@@ -13,6 +13,7 @@ use Dumpvalue;
 use File::Spec;
 use File::Basename;
 use File::Copy;
+use File::Path qw(make_path);
 require File::Temp;
 use File::Temp ();
 use FileHandle;
@@ -23,7 +24,7 @@ use warnings;
 ## Version of OCI's TAO to download
 my $oci_tao_version = '2.2a';
 ## Version of DOC Group ACE/TAO to download, uses the ACE version number
-my $doc_tao_version = '6.5.2';
+my $doc_tao_version = '6.5.3';
 
 # save args before Getopt modifies them
 my @ARGS = @ARGV;
@@ -38,6 +39,8 @@ sub perlOS_to_java_platform {
   return 'win32' if $^O eq 'MSWin32';
   return $^O;
 }
+
+my $targetUsageIndent = "\t\t";
 
 my %platforminfo =
   ('win32' => {
@@ -91,6 +94,17 @@ my %platforminfo =
                              'Specify the VSB with --macros=VSB_DIR=<dir>',
                             ],
                 },
+   'android' => {
+     'libpath' => 'LD_LIBRARY_PATH',
+     'aceplatform' => 'android',
+     'aceconfig' => 'android',
+     'no_host' => 1,
+     'usage' => [
+       "Use --macros=ANDROID_ABI=<ARCH> to specify the target archtecture.\n" .
+       "${targetUsageIndent}Defaults to armeabi-v7a which is 32-bit ARMv7.\n" .
+       "${targetUsageIndent}See docs/android.md for details."
+     ],
+   },
   );
 
 sub targetUsage {
@@ -101,7 +115,7 @@ sub targetUsage {
       print "\t$k\n";
       if ($platforminfo{$k}->{'usage'}) {
         for my $line (@{$platforminfo{$k}->{'usage'}}) {
-          print "\t\t$line\n";
+          print "${targetUsageIndent}$line\n";
         }
       }
     }
@@ -450,7 +464,7 @@ elsif ($opts{'compiler'} =~ /g\+\+/) {
     }
   }
 
-  if ($opts{'std'} && $opts{'std'} =~ /(0x|11|0y|14|1z|17)$/) {
+  if ($opts{'std'} && $opts{'std'} =~ /(0x|11|1y|14|1z|17)$/) {
     push(@{$opts{'features'}}, 'no_cxx11=0');
     print "Compiler has C++11 support\n" if $opts{'verbose'};
   }
@@ -577,7 +591,9 @@ if (!$ace_src || !$tao_src) {
     my($urlbase, $file, $download_message);
 
     if ($opts{'doc_group'}) {
-      $urlbase = 'http://download.dre.vanderbilt.edu/previous_versions/';
+      my $github_url_tao_version = $doc_tao_version;
+      $github_url_tao_version =~ s/\./_/g;
+      $urlbase = 'http://github.com/DOCGroup/ACE_TAO/releases/download/ACE%2BTAO-' . $github_url_tao_version . '/';
       $file = 'ACE+TAO-src-' . $doc_tao_version . '.'
         . ($is_windows ? 'zip' : 'tar.gz');
       $download_message = "Downloading $file";
@@ -1514,18 +1530,22 @@ sub generate_workspace {
     }
   }
 
+  if ($cross_compile && $opts{'java'} && $buildEnv->{'build'} eq 'target') {
+    disable_feature(\@features, "full_jre");
+  }
+
   my $mpctype = (!$is_windows ||
                   ($cross_compile && $buildEnv->{'build'} eq 'target'))
                 ? 'gnuace' : $opts{'compiler_version'};
 
   if ($mpctype eq 'gnuace') {
+    my $UM;
+    if (@features || $cross_compile) {
+      print "Writing $buildEnv->{'DDS_ROOT'}/user_macros.GNU\n"
+        if $opts{'verbose'};
+      $UM = backup_and_open($buildEnv->{'DDS_ROOT'} . '/user_macros.GNU');
+    }
     if ($buildEnv->{'build'} eq 'target') {
-      my $UM;
-      if (@features || $cross_compile) {
-        print "Writing $buildEnv->{'DDS_ROOT'}/user_macros.GNU\n"
-          if $opts{'verbose'};
-        $UM = backup_and_open($buildEnv->{'DDS_ROOT'} . '/user_macros.GNU');
-      }
       for my $feat (@features) {
         my $key = $feat;
         $key =~ s/=.*//;
@@ -1541,9 +1561,13 @@ IDL2JNI_DEP = $(IDL2JNI)$(HOST_EXE_EXT)
 CROSS-COMPILE = 1
 EOT
       }
-      $UM->close if $UM;
-      dump_and_unlink($UM) if $UM && $opts{'dry-run'};
+    } elsif ($buildEnv->{'build'} eq 'host') {
+      if ($cross_compile && $opts{'java'}) {
+        print $UM "java:=1\n";
+      }
     }
+    $UM->close if $UM;
+    dump_and_unlink($UM) if $UM && $opts{'dry-run'};
   }
 
   if ($opts{'safety-profile'} && $buildEnv->{'build'} eq 'target') {
@@ -1793,6 +1817,8 @@ sub configure_build {
   }
   generate_workspace($buildEnvRef);
   write_environment($buildEnvRef, $buildEnvRef->{'DDS_ROOT'});
+
+  write_cmake_file($buildEnvRef, $buildEnvRef->{'DDS_ROOT'});
 }
 
 sub write_cross_compile_makefile {
@@ -1908,7 +1934,7 @@ else { # does not require cloned builds
   setEnv('TAO_ROOT', $tao_src);
   setEnv('DDS_ROOT', '.');
 
-  if (!$build_host_tools) {
+  if (!$build_host_tools && $opts{'host-tools'}) {
     setEnv('HOST_DDS', $opts{'host-tools'});
   }
 
@@ -1957,4 +1983,103 @@ print " to compile ",
 if ($is_windows && !$cross_compile) {
   print "Start Visual Studio from this command prompt so that it inherits ",
     "the correct\nenvironment variables.\n";
+}
+
+sub write_cmake_file {
+  my %buildEnv = %{shift()};
+  my $dir = shift;
+  my $module_dir = $dir . '/cmake';
+
+  make_path($module_dir) if ! -d $module_dir;
+  my $CM = backup_and_open($module_dir . '/config.cmake');
+
+  sub whack_to_slash {
+    my $s = shift;
+    $s =~ s|\\|/|g;
+    return $s;
+  };
+
+  sub to_cmake_scalar {
+    my $val = shift;
+    return 'ON' if "$val" eq '1';
+    return 'OFF' if "$val" eq '0';
+    return whack_to_slash($val);
+  };
+
+  sub to_cmake_list {
+    my @list = @{$_[0]};
+    join ';', map {whack_to_slash($_)} @list;
+  };
+
+  sub generate_cmake_options {
+    # These flags only appear in the %opts map when specified by the user.
+    my %enabled_by_default = map {$_, 1} qw(
+      built-in-topics
+      content-subscription
+      content-filtered-topic
+      multi-topic
+      query-condition
+      ownership-profile
+      ownership-kind-exclusive
+      object-model-profile
+      persistence-profile
+    );
+
+    my %disabled_by_default = map {$_, 0} qw(
+      security
+    );
+
+    my %make_absolute_path = map {$_, 1} qw(
+      ace
+      tao
+      mpc
+    );
+
+    my $result = "";
+    # Merge the hashes together; the user-supplied %opts will override
+    # the enabled-/disabled-defaults.
+    my %opts_ = (%enabled_by_default, %disabled_by_default, %opts);
+    $opts_{'ace'} = $ace_src;
+    $opts_{'tao'} = $tao_src;
+
+    for my $k (sort keys %opts_) {
+      my $var = uc "OPENDDS_${k}";
+      $var =~ s/-/_/g;
+      my $val = $opts_{$k};
+
+      if ($make_absolute_path{$k}) {
+        $val = Cwd::abs_path($val);
+      }
+
+      if (ref($val) eq 'ARRAY') {
+        $result .= qq{set($var "${\( to_cmake_list($val))}")\n};
+
+      } else {
+        my $cmake_scalar = to_cmake_scalar($val);
+
+        if ($cmake_scalar eq 'ON' || $cmake_scalar eq 'OFF') {
+          $result .= qq{set($var $cmake_scalar)\n};
+
+        } else {
+          $result .= qq{set($var "$cmake_scalar")\n};
+        }
+      }
+    }
+    return $result;
+  };
+
+  print $CM <<"FIND_OPENDDS_CMAKE_CONFIG";
+# Contains configuration variables for the FindOpenDDS cmake module based on
+# detected defaults and/or user-supplied switches. Feel free to edit them as
+# necessary, but keep in mind that they will be moved to config.cmake.bak.*
+# the next time the \$DDS_ROOT/configure script is executed.
+#
+# THIS FILE WAS AUTO-GENERATED BY: $0 @ARGS
+#
+
+${\( generate_cmake_options() )}
+
+FIND_OPENDDS_CMAKE_CONFIG
+
+  dump_and_unlink($CM) if $opts{'dry-run'};
 }

@@ -105,8 +105,8 @@ public:
         if (DCPS_debug_level >= 6)
           if (allocs_from_heap_.value() % 500 == 0)
             ACE_DEBUG((LM_DEBUG,
-                       "(%P|%t) Dynamic_Cached_Allocator_With_Overflow::malloc %x"
-                       " %d heap allocs with %d outstanding\n",
+                       "(%P|%t) Dynamic_Cached_Allocator_With_Overflow::malloc %@"
+                       " %Lu heap allocs with %Lu outstanding\n",
                        this, this->allocs_from_heap_.value(),
                        this->allocs_from_heap_.value() - this->frees_to_heap_.value()));
       }
@@ -166,8 +166,8 @@ public:
       if (DCPS_debug_level >= 6) {
         if (frees_to_heap_.value() % 500 == 0) {
           ACE_DEBUG((LM_DEBUG,
-                     "(%P|%t) Dynamic_Cached_Allocator_With_Overflow::free %x"
-                     " %d heap allocs with %d oustanding\n",
+                     "(%P|%t) Dynamic_Cached_Allocator_With_Overflow::free %@"
+                     " %Lu heap allocs with %Lu oustanding\n",
                      this, this->allocs_from_heap_.value(),
                      this->allocs_from_heap_.value() - this->frees_to_heap_.value()));
         }

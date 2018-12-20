@@ -1559,7 +1559,7 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
     }
 
     if (got_publisher_content_filter) {
-      ACE_DEBUG((LM_DEBUG,
+      ACE_DEBUG((LM_NOTICE,
                  ACE_TEXT("(%P|%t) NOTICE: using DCPSPublisherContentFilter ")
                  ACE_TEXT("value from command option (overrides value if it's ")
                  ACE_TEXT("in config file).\n")));

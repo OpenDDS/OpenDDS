@@ -40,11 +40,8 @@ namespace OpenDDS { namespace DCPS {
 OPENDDS_STRING
 to_string(const GUID_t& guid)
 {
-  std::size_t len;
-
   OPENDDS_STRING ret;
-
-  len = sizeof(guid.guidPrefix);
+  std::size_t len = sizeof(guid.guidPrefix);
 
   for (std::size_t i = 0; i < len; ++i) {
     ret += to_dds_string(unsigned(guid.guidPrefix[i]), true);
@@ -69,9 +66,7 @@ to_string(const GUID_t& guid)
 std::ostream&
 operator<<(std::ostream& os, const GUID_t& rhs)
 {
-  std::size_t len;
-
-  len = sizeof(rhs.guidPrefix);
+  std::size_t len = sizeof(rhs.guidPrefix);
 
   os << std::hex;
 

@@ -110,7 +110,7 @@ bool qosChanged(DDS::SubscriptionBuiltinTopicData& dest,
 #endif
   bool changed = false;
 
-  // check each Changeable QoS policy value in Subcription BIT Data
+  // check each Changeable QoS policy value in Subscription BIT Data
 
   if (dest.deadline != src.deadline) {
     changed = true;
@@ -1944,7 +1944,7 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
                        ACE_TEXT("(%P|%t) Sedp::data_received(drd) - WARNING ")
                        ACE_TEXT("topic %C discovered data type %C doesn't ")
                        ACE_TEXT("match known data type %C, ignoring ")
-                       ACE_TEXT("discovered subcription.\n"),
+                       ACE_TEXT("discovered subscription.\n"),
                        topic_name.c_str(),
                        rdata.ddsSubscriptionData.type_name.in(),
                        top_it->second.data_type_.c_str()));

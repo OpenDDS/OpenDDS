@@ -11,6 +11,7 @@ DataWriterListenerImpl::DataWriterListenerImpl()
   : mutex_()
   , matched_condition_(mutex_)
   , matched_(0)
+  , offered_deadline_total_count_ (0)
 {
 }
 
@@ -23,13 +24,23 @@ DataWriterListenerImpl::on_offered_deadline_missed(
     ::DDS::DataWriter_ptr /* writer */,
     const ::DDS::OfferedDeadlineMissedStatus& status)
 {
-  ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("(%P|%t) DataWriterListenerImpl::on_offered_deadline_missed:")
-    ACE_TEXT("total_count=%d total_count_change=%d last_instance_handle=%d \n"),
-    status.total_count, status.total_count_change, status.last_instance_handle));
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataWriterListenerImpl::on_offered_deadline_missed\n")
-    ACE_TEXT("  total_count        = %d\n")
-    ACE_TEXT("  total_count_change = %d\n"), status.total_count, status.total_count_change));
+  if ((offered_deadline_total_count_ + status.total_count_change) != status.total_count)
+    {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) DataWriterListenerImpl::on_offered_deadline_missed:")
+        ACE_TEXT("Received incorrect total_count_change, previous total count %d ")
+        ACE_TEXT("new total_count=%d total_count_change=%d last_instance_handle=%d\n"),
+        offered_deadline_total_count_, status.total_count, status.total_count_change,
+        status.last_instance_handle));
+    }
+  else
+    {
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) DataWriterListenerImpl::on_offered_deadline_missed:")
+        ACE_TEXT("total_count=%d total_count_change=%d last_instance_handle=%d\n"),
+        status.total_count, status.total_count_change, status.last_instance_handle));
+    }
+  offered_deadline_total_count_ += status.total_count_change;
 }
 
 void
@@ -94,3 +105,7 @@ int DataWriterListenerImpl::wait_matched(long count, const ACE_Time_Value *absti
   return count == matched_ ? 0 : result;
 }
 
+CORBA::Long DataWriterListenerImpl::offered_deadline_total_count (void) const
+{
+  return offered_deadline_total_count_;
+}

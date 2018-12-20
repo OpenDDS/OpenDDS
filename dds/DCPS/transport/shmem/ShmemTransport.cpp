@@ -48,10 +48,9 @@ ShmemTransport::make_datalink(const std::string& remote_address)
   if (link->open(remote_address))
     return link;
 
-  ACE_ERROR((LM_ERROR,
-                    ACE_TEXT("(%P|%t) ERROR: ")
-                    ACE_TEXT("ShmemTransport::make_datalink: ")
-                    ACE_TEXT("failed to open DataLink!\n")));
+  ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+             ACE_TEXT("ShmemTransport::make_datalink: ")
+             ACE_TEXT("failed to open DataLink!\n")));
   return ShmemDataLink_rch();
 }
 
@@ -102,24 +101,23 @@ ShmemTransport::stop_accepting_or_connecting(const TransportClient_wrch&, const 
 bool
 ShmemTransport::configure_i(ShmemInst& config)
 {
-#if (!defined ACE_WIN32 && defined ACE_LACKS_SYSV_SHMEM) || defined ACE_HAS_WINCE
+#ifdef OPENDDS_SHMEM_UNSUPPORTED
   ACE_UNUSED_ARG(config);
-  ACE_ERROR_RETURN((LM_ERROR,
-                    ACE_TEXT("(%P|%t) ERROR: ")
+  ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
                     ACE_TEXT("ShmemTransport::configure_i: ")
                     ACE_TEXT("no platform support for shared memory!\n")),
                    false);
-#else
+#else // ifdef OPENDDS_SHMEM_UNSUPPORTED
 
   ShmemAllocator::MEMORY_POOL_OPTIONS alloc_opts;
-# ifdef ACE_WIN32
+#  if defined OPENDDS_SHMEM_WINDOWS
   alloc_opts.max_size_ = config.pool_size_;
-# elif !defined ACE_LACKS_SYSV_SHMEM
+#  elif defined OPENDDS_SHMEM_UNIX
   alloc_opts.base_addr_ = 0;
   alloc_opts.segment_size_ = config.pool_size_;
   alloc_opts.minimum_bytes_ = alloc_opts.segment_size_;
   alloc_opts.max_segments_ = 1;
-# endif
+#  endif // if defined OPENDDS_SHMEM_WINDOWS
 
   alloc_.reset(
     new ShmemAllocator(ACE_TEXT_CHAR_TO_TCHAR(config.poolname().c_str()),
@@ -137,29 +135,25 @@ ShmemTransport::configure_i(ShmemInst& config)
   alloc_->bind("Semaphore", pSem);
 
   bool ok;
-# ifdef ACE_WIN32
+#  if defined OPENDDS_SHMEM_WINDOWS
   *pSem = ::CreateSemaphoreW(0 /*default security*/,
                              0 /*initial count*/,
                              0x7fffffff /*max count (ACE's default)*/,
                              0 /*no name*/);
   ACE_sema_t ace_sema = *pSem;
   ok = (*pSem != 0);
-# elif !defined ACE_LACKS_UNNAMED_SEMAPHORE
+#  elif defined OPENDDS_SHMEM_UNIX
   ok = (0 == ::sem_init(pSem, 1 /*process shared*/, 0 /*initial count*/));
   ACE_sema_t ace_sema;
   std::memset(&ace_sema, 0, sizeof ace_sema);
   ace_sema.sema_ = pSem;
-#  if !defined (ACE_HAS_POSIX_SEM_TIMEOUT) && !defined (ACE_DISABLE_POSIX_SEM_TIMEOUT_EMULATION)
+#    ifdef OPENDDS_SHMEM_UNIX_EMULATE_SEM_TIMEOUT
   ace_sema.lock_ = PTHREAD_MUTEX_INITIALIZER;
   ace_sema.count_nonzero_ = PTHREAD_COND_INITIALIZER;
-#  endif
-# else
-  ok = false;
-  ACE_sema_t ace_sema;
-# endif
+#    endif
+#  endif // if defined OPENDDS_SHMEM_WINDOWS
   if (!ok) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("ShmemTransport::configure_i: ")
                       ACE_TEXT("could not create semaphore\n")),
                      false);
@@ -171,7 +165,7 @@ ShmemTransport::configure_i(ShmemInst& config)
             this, config.poolname().c_str()), 1);
 
   return true;
-#endif
+#endif // ifdef OPENDDS_SHMEM_UNSUPPORTED
 }
 
 void
@@ -190,16 +184,16 @@ ShmemTransport::shutdown_i()
   read_task_.reset();
 
   if (alloc_) {
+#ifndef OPENDDS_SHMEM_UNSUPPORTED
     void* mem = 0;
     alloc_->find("Semaphore", mem);
     ShmemSharedSemaphore* pSem = reinterpret_cast<ShmemSharedSemaphore*>(mem);
-#ifdef ACE_WIN32
+#  if defined OPENDDS_SHMEM_WINDOWS
     ::CloseHandle(*pSem);
-#elif defined ACE_HAS_POSIX_SEM && !defined ACE_LACKS_UNNAMED_SEMAPHORE
+#  elif defined OPENDDS_SHMEM_UNIX
     ::sem_destroy(pSem);
-#else
-    ACE_UNUSED_ARG(pSem);
-#endif
+#  endif // if defined OPENDDS_SHMEM_WINDOWS
+#endif // ifndef OPENDDS_SHMEM_UNSUPPORTED
 
     alloc_->release(1 /*close*/);
     alloc_.reset();
