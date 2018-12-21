@@ -536,7 +536,7 @@ namespace ICE {
     }
 
     unknown_guids_[guidp] = signaling_channel;
-    std::cout << local_agent_info_.username << " is waiting for agent info from " << guidp.local << ':' << guidp.remote << std::endl;
+    //std::cout << local_agent_info_.username << " is waiting for agent info from " << guidp.local << ':' << guidp.remote << std::endl;
 
     candidate_gatherer_.start();
     check_invariant();
@@ -1080,7 +1080,7 @@ namespace ICE {
       for (GuidSetType::const_iterator pos = checklist->guids().begin(), limit = checklist->guids().end(); pos != limit; ++pos) {
         ACE_INET_Addr addr = checklist->selected_address();
         selected_addresses_[pos->first.remote] = addr;
-        std::cout << local_agent_info_.username << " nominate " << addr.get_host_addr() << ':' << addr.get_port_number() << " for " << checklist->remote_agent_info().username << ' ' << pos->first.remote << " local_is_controlling=" << checklist->local_is_controlling << std::endl;
+        //std::cout << local_agent_info_.username << " nominate " << addr.get_host_addr() << ':' << addr.get_port_number() << " for " << checklist->remote_agent_info().username << ' ' << pos->first.remote << " local_is_controlling=" << checklist->local_is_controlling << std::endl;
       }
     }
 
@@ -1095,9 +1095,9 @@ namespace ICE {
     const CandidatePair& cp = cc.candidate_pair();
     // 7.2.5.4
     checklist->failed(cp, active_foundations_);
-    std::cout << local_agent_info_.username << " failed " << checklist->size() << " remaining for " << checklist->remote_agent_info().username << std::endl;
+    //std::cout << local_agent_info_.username << " failed " << checklist->size() << " remaining for " << checklist->remote_agent_info().username << std::endl;
     if (checklist->is_failed()) {
-      std::cout << local_agent_info_.username << " failed checklist for " << checklist->remote_agent_info().username << std::endl;
+      //std::cout << local_agent_info_.username << " failed checklist for " << checklist->remote_agent_info().username << std::endl;
     }
   }
 
@@ -1253,7 +1253,7 @@ namespace ICE {
       ScheduleTimerCommand c(reactor(), this, delay);
       execute_or_enqueue(c);
     } else {
-      std::cout << "CandidateGatherer stopped" << std::endl;
+      //std::cout << "CandidateGatherer stopped" << std::endl;
     }
 
     state_ = next_state;
@@ -1294,7 +1294,7 @@ namespace ICE {
       ScheduleTimerCommand c(reactor(), this, delay);
       execute_or_enqueue(c);
     } else {
-      std::cout << "ConnectivityChecker stopped" << std::endl;
+      //std::cout << "ConnectivityChecker stopped" << std::endl;
     }
 
     state_ = next_state;
