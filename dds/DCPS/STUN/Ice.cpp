@@ -902,7 +902,7 @@ namespace ICE {
 
         // The valid pair
         CandidatePair vp(local, cp.remote, checklist->local_is_controlling, true);
-        
+
         bool found = false;
         if (vp == cp) {
           checklist->add_valid_pair(vp);
@@ -1334,7 +1334,7 @@ namespace ICE {
       ScheduleTimerCommand c(reactor(), this, delay);
       execute_or_enqueue(c);
     } else {
-      std::cout << "InfoSender stopped" << std::endl;
+      //      std::cout << "InfoSender stopped" << std::endl;
     }
 
     state_ = next_state;
