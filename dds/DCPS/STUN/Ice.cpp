@@ -501,7 +501,8 @@ namespace ICE {
   }
 
   Agent::Agent(bool use_ice, StunSender* stun_sender, const ACE_INET_Addr& stun_server_address, ACE_Reactor* reactor, ACE_thread_t owner)
-    : use_ice_(use_ice)
+    : username_(0)
+    , use_ice_(use_ice)
     , stun_sender_(stun_sender)
     , stun_server_address_(stun_server_address)
     , remote_peer_reflexive_counter_(0)
@@ -966,19 +967,20 @@ namespace ICE {
     local_agent_info_.type = FULL;
 
     // Generate username and password.
-    uint32_t username = 0;
-    int rc = RAND_bytes(reinterpret_cast<unsigned char*>(&username), sizeof(username));
-    unsigned long err = ERR_get_error();
-    if (rc != 1) {
-      /* RAND_bytes failed */
-      /* `err` is valid    */
-    }
+    ++username_;
+    // uint32_t username = 0;
+    // int rc = RAND_bytes(reinterpret_cast<unsigned char*>(&username), sizeof(username));
+    // unsigned long err = ERR_get_error();
+    // if (rc != 1) {
+    //   /* RAND_bytes failed */
+    //   /* `err` is valid    */
+    // }
 
-    local_agent_info_.username = stringify(username);
+    local_agent_info_.username = stringify(username_);
 
     uint64_t password[2] = { 0, 0 };
-    rc = RAND_bytes(reinterpret_cast<unsigned char*>(&password[0]), sizeof(password));
-    err = ERR_get_error();
+    int rc = RAND_bytes(reinterpret_cast<unsigned char*>(&password[0]), sizeof(password));
+    unsigned long err = ERR_get_error();
     if (rc != 1) {
       /* RAND_bytes failed */
       /* `err` is valid    */

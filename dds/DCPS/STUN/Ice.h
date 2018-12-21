@@ -217,6 +217,7 @@ namespace ICE {
     void receive(const ACE_INET_Addr& local_address, const ACE_INET_Addr& remote_address, const STUN::Message& message);
 
   private:
+    uint32_t username_;
     bool use_ice_;
     ACE_Recursive_Thread_Mutex mutex_;
     // The info for this agent.
