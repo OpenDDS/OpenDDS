@@ -7,17 +7,30 @@
 
 #include "keys_generator.h"
 #include "be_extern.h"
+#include "sample_keys.h"
 
 #include "utl_identifier.h"
 
 #include <string>
 using std::string;
 
-bool keys_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
+bool keys_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
   const std::vector<AST_Field*>&, AST_Type::SIZE_TYPE, const char*)
 {
+#ifdef TAO_IDL_HAS_ANNOTATIONS
+  SampleKeys keys(node);
+#endif
+  size_t key_count = 0;
   IDL_GlobalData::DCPS_Data_Type_Info* info = idl_global->is_dcps_type(name);
-  if (!info) {
+  if (info) {
+    key_count = info->key_list_.size();
+  }
+#ifdef TAO_IDL_HAS_ANNOTATIONS
+  else if (be_global->is_sample_type(node)) {
+    key_count = keys.count();
+  }
+#endif
+  else {
     return true;
   }
 
@@ -45,19 +58,18 @@ bool keys_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
     } ns(name);
 
     be_global->header_ <<
-      "// This structure supports use of std::map with a key\n"
-      "// defined by one or more #pragma DCPS_DATA_KEY lines.\n"
+      "// This structure supports use of std::map with one or more keys.\n"
       "struct " << be_global->export_macro() << ' ' <<
       name->last_component()->get_string() << "_OpenDDS_KeyLessThan {\n";
 
     const string cxx = scoped(name);
-    if (info->key_list_.is_empty()) {
+    if (!key_count) {
       be_global->header_ <<
         "  bool operator()(const " << cxx << "&, const " << cxx
         << "&) const\n"
         "  {\n"
-        "    // Eith no DCPS_DATA_KEYs, return false\n"
-        "    // to allow use of map with just one entry\n";
+        "    // With no keys, return false to allow use of\n"
+        "    // map with just one entry\n";
     } else {
       const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
       be_global->header_ <<
@@ -70,10 +82,22 @@ bool keys_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
           "in global NS\n";
       }
 
-      IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
+      std::vector<string> key_names;
+      key_names.reserve(key_count);
+      if (info) {
+        IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
+        for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
+          key_names.push_back(ACE_TEXT_ALWAYS_CHAR(kp->c_str()));
+        }
+      } else {
+        SampleKeys::Iterator finished = keys.end();
+        for (SampleKeys::Iterator i = keys.begin(); i != finished; ++i) {
+          key_names.push_back(i.path());
+        }
+      }
 
-      for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
-        string fname = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
+      for (size_t i = 0; i < key_count; i++) {
+        string fname = key_names[i];
         if (use_cxx11) {
           fname += "()";
         }

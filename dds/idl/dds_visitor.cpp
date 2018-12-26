@@ -40,6 +40,7 @@
 #include "itl_generator.h"
 #include "v8_generator.h"
 #include "langmap_generator.h"
+#include "sample_keys.h"
 
 #include <iostream>
 #include <vector>
@@ -221,13 +222,20 @@ dds_visitor::visit_structure(AST_Structure* node)
   const char* name = node->local_name()->get_string();
 
   BE_Comment_Guard g("STRUCT", name);
-
   ACE_UNUSED_ARG(g);
+
+  // Check That Sample Keys Are Valid
+  try {
+    SampleKeys(node).count();
+  } catch (SampleKeys::Error& error) {
+    ACE_ERROR_RETURN((LM_ERROR,
+      ACE_TEXT("(%N:%l) dds_visitor::visit_structure: %C"),
+      error.what()), -1);
+  }
 
   size_t nfields = node->nfields();
   vector<AST_Field*> fields;
   fields.reserve(nfields);
-
   for (CORBA::ULong i = 0; i < nfields; ++i) {
     AST_Field** f;
     node->field(f, i);
@@ -244,7 +252,7 @@ dds_visitor::visit_structure(AST_Structure* node)
   }
 
   if (be_global->java()) {
-    java_ts_generator::generate(node->name());
+    java_ts_generator::generate(node);
   }
 
   return 0;

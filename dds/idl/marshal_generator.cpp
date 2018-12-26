@@ -8,6 +8,8 @@
 #include "marshal_generator.h"
 #include "be_extern.h"
 #include "utl_identifier.h"
+#include "sample_keys.h"
+
 #include <string>
 #include <sstream>
 #include <iostream>
@@ -1565,7 +1567,7 @@ namespace {
   };
 }
 
-bool marshal_generator::gen_struct(AST_Structure* /* node */,
+bool marshal_generator::gen_struct(AST_Structure* node,
                                    UTL_ScopedName* name,
                                    const std::vector<AST_Field*>& fields,
                                    AST_Type::SIZE_TYPE /* size */,
@@ -1653,9 +1655,14 @@ bool marshal_generator::gen_struct(AST_Structure* /* node */,
     be_global->impl_ << intro << "  return " << expr << ";\n";
   }
 
+#ifdef TAO_IDL_HAS_ANNOTATIONS
+  bool is_sample_type = be_global->is_sample_type(node);
+  SampleKeys keys(node);
+#endif
   IDL_GlobalData::DCPS_Data_Type_Info* info = idl_global->is_dcps_type(name);
+
   // Only generate these methods if this is a DCPS type
-  if (info != 0) {
+  if (info || is_sample_type) {
     bool is_bounded_struct = true;
     for (size_t i = 0; i < fields.size(); ++i) {
       if (!is_bounded_type(fields[i]->field_type())) {
@@ -1688,22 +1695,37 @@ bool marshal_generator::gen_struct(AST_Structure* /* node */,
 
     // Generate key-related marshaling code
     bool bounded_key = true;
-    IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
-    for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
-      string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
-      AST_Type* field_type = 0;
-      try {
-        field_type = find_type(fields, key_name);
-      } catch (const string& error) {
-        std::cerr << "ERROR: Invalid key specification for " << cxx
-                  << " (" << key_name << "). " << error << std::endl;
-        return false;
-      }
-      if (!is_bounded_type(field_type)) {
-        bounded_key = false;
-        break;
+    if (info) {
+      IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
+      for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
+        string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
+        AST_Type* field_type = 0;
+        try {
+          field_type = find_type(fields, key_name);
+        } catch (const string& error) {
+          std::cerr << "ERROR: Invalid key specification for " << cxx
+                    << " (" << key_name << "). " << error << std::endl;
+          return false;
+        }
+        if (!is_bounded_type(field_type)) {
+          bounded_key = false;
+          break;
+        }
       }
     }
+#ifdef TAO_IDL_HAS_ANNOTATIONS
+    else {
+      // TODO Support More than fields
+      SampleKeys::Iterator finished = keys.end();
+      for (SampleKeys::Iterator i = keys.begin(); i != finished; ++i) {
+        AST_Field* field = dynamic_cast<AST_Field*>(*i);
+        if (field && !is_bounded_type(field->field_type())) {
+          bounded_key = false;
+          break;
+        }
+      }
+    }
+#endif
 
     {
       Function max_marsh("gen_max_marshaled_size", "size_t");
@@ -1712,20 +1734,35 @@ bool marshal_generator::gen_struct(AST_Structure* /* node */,
       max_marsh.endArgs();
 
       if (bounded_key) {  // Only generate a size if the key is bounded
-        IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
         size_t size = 0, padding = 0;
-        for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
-          string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
-          AST_Type* field_type = 0;
-          try {
-            field_type = find_type(fields, key_name);
-          } catch (const string& error) {
-            std::cerr << "ERROR: Invalid key specification for " << cxx
-                      << " (" << key_name << "). " << error << std::endl;
-            return false;
+
+        if (info) {
+          IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
+          for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
+            string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
+            AST_Type* field_type = 0;
+            try {
+              field_type = find_type(fields, key_name);
+            } catch (const string& error) {
+              std::cerr << "ERROR: Invalid key specification for " << cxx
+                        << " (" << key_name << "). " << error << std::endl;
+              return false;
+            }
+            max_marshaled_size(field_type, size, padding);
           }
-          max_marshaled_size(field_type, size, padding);
         }
+#ifdef TAO_IDL_HAS_ANNOTATIONS
+        else {
+          SampleKeys::Iterator finished = keys.end();
+          for (SampleKeys::Iterator i = keys.begin(); i != finished; ++i) {
+            AST_Field* field = dynamic_cast<AST_Field*>(*i);
+            if (field) {
+              max_marshaled_size(field->field_type(), size, padding);
+            }
+          }
+        }
+#endif
+
         if (padding) {
           be_global->impl_
             << "  return align ? " << size + padding << " : " << size << ";\n";
@@ -1746,20 +1783,35 @@ bool marshal_generator::gen_struct(AST_Structure* /* node */,
       find_size.addArg("padding", "size_t&");
       find_size.endArgs();
       string expr, intro;
-      IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
-      for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
-        string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
-        AST_Type* field_type = 0;
-        try {
-          field_type = find_type(fields, key_name);
-        } catch (const string& error) {
-          std::cerr << "ERROR: Invalid key specification for " << cxx
-                    << " (" << key_name << "). " << error << std::endl;
-          return false;
+
+      if (info) {
+        IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
+        for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
+          string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
+          AST_Type* field_type = 0;
+          try {
+            field_type = find_type(fields, key_name);
+          } catch (const string& error) {
+            std::cerr << "ERROR: Invalid key specification for " << cxx
+                      << " (" << key_name << "). " << error << std::endl;
+            return false;
+          }
+          expr += findSizeCommon(use_cxx11 ? key_name + "()" : key_name,
+                                 field_type, "stru.t", intro);
         }
-        expr += findSizeCommon(use_cxx11 ? key_name + "()" : key_name,
-                               field_type, "stru.t", intro);
       }
+#ifdef TAO_IDL_HAS_ANNOTATIONS
+      else {
+        SampleKeys::Iterator finished = keys.end();
+        for (SampleKeys::Iterator i = keys.begin(); i != finished; ++i) {
+          std::string key_name = i.path();
+          AST_Field* field = dynamic_cast<AST_Field*>(*i);
+          expr += findSizeCommon(use_cxx11 ? key_name + "()" : key_name,
+                                 field->field_type(), "stru.t", intro);
+        }
+      }
+#endif
+
       be_global->impl_ << intro << expr;
     }
 
@@ -1771,24 +1823,50 @@ bool marshal_generator::gen_struct(AST_Structure* /* node */,
 
       bool first = true;
       string expr, intro;
-      IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
-      for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
-        string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
-        AST_Type* field_type = 0;
-        try {
-          field_type = find_type(fields, key_name);
-        } catch (const string& error) {
-          std::cerr << "ERROR: Invalid key specification for " << cxx
-                    << " (" << key_name << "). " << error << std::endl;
-          return false;
+
+      if (info) {
+        IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
+        for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
+          string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
+          AST_Type* field_type = 0;
+          try {
+            field_type = find_type(fields, key_name);
+          } catch (const string& error) {
+            std::cerr << "ERROR: Invalid key specification for " << cxx
+                      << " (" << key_name << "). " << error << std::endl;
+            return false;
+          }
+          if (first) {
+            first = false;
+          } else {
+            expr += "\n    && ";
+          }
+          expr += streamCommon(use_cxx11 ? key_name + "()" : key_name,
+                               field_type, "<< stru.t", intro);
         }
-        if (first) first = false;
-        else       expr += "\n    && ";
-        expr += streamCommon(use_cxx11 ? key_name + "()" : key_name,
-                             field_type, "<< stru.t", intro);
       }
-      if (first) be_global->impl_ << intro << "  return true;\n";
-      else be_global->impl_ << intro << "  return " << expr << ";\n";
+#ifdef TAO_IDL_HAS_ANNOTATIONS
+      else {
+        SampleKeys::Iterator finished = keys.end();
+        for (SampleKeys::Iterator i = keys.begin(); i != finished; ++i) {
+          std::string key_name = i.path();
+          AST_Field* field = dynamic_cast<AST_Field*>(*i);
+          if (first) {
+            first = false;
+          } else {
+            expr += "\n    && ";
+          }
+          expr += streamCommon(use_cxx11 ? key_name + "()" : key_name,
+                               field->field_type(), "<< stru.t", intro);
+        }
+      }
+#endif
+
+      if (first) {
+        be_global->impl_ << intro << "  return true;\n";
+      } else {
+        be_global->impl_ << intro << "  return " << expr << ";\n";
+      }
     }
 
     {
@@ -1799,24 +1877,50 @@ bool marshal_generator::gen_struct(AST_Structure* /* node */,
 
       bool first = true;
       string expr, intro;
-      IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
-      for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
-        string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
-        AST_Type* field_type = 0;
-        try {
-          field_type = find_type(fields, key_name);
-        } catch (const string& error) {
-          std::cerr << "ERROR: Invalid key specification for " << cxx
-                    << " (" << key_name << "). " << error << std::endl;
-          return false;
+
+      if (info) {
+        IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
+        for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
+          string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
+          AST_Type* field_type = 0;
+          try {
+            field_type = find_type(fields, key_name);
+          } catch (const string& error) {
+            std::cerr << "ERROR: Invalid key specification for " << cxx
+                      << " (" << key_name << "). " << error << std::endl;
+            return false;
+          }
+          if (first) {
+            first = false;
+          } else {
+            expr += "\n    && ";
+          }
+          expr += streamCommon(use_cxx11 ? key_name + "()" : key_name,
+                               field_type, ">> stru.t", intro);
         }
-        if (first) first = false;
-        else       expr += "\n    && ";
-        expr += streamCommon(use_cxx11 ? key_name + "()" : key_name,
-                             field_type, ">> stru.t", intro);
       }
-      if (first) be_global->impl_ << intro << "  return true;\n";
-      else be_global->impl_ << intro << "  return " << expr << ";\n";
+#ifdef TAO_IDL_HAS_ANNOTATIONS
+      else {
+        SampleKeys::Iterator finished = keys.end();
+        for (SampleKeys::Iterator i = keys.begin(); i != finished; ++i) {
+          std::string key_name = i.path();
+          AST_Field* field = dynamic_cast<AST_Field*>(*i);
+          if (first) {
+            first = false;
+          } else {
+            expr += "\n    && ";
+          }
+          expr += streamCommon(use_cxx11 ? key_name + "()" : key_name,
+                               field->field_type(), ">> stru.t", intro);
+        }
+      }
+#endif
+
+      if (first) {
+        be_global->impl_ << intro << "  return true;\n";
+      } else {
+        be_global->impl_ << intro << "  return " << expr << ";\n";
+      }
     }
 
     be_global->header_ <<

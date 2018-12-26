@@ -13,7 +13,7 @@
 #include <string>
 
 namespace java_ts_generator {
-  void generate(UTL_ScopedName* name);
+  void generate(AST_Structure* node);
 }
 
 namespace face_ts_generator {

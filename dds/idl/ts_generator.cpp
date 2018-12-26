@@ -7,6 +7,7 @@
 
 #include "ts_generator.h"
 #include "be_extern.h"
+#include "sample_keys.h"
 
 #include "utl_identifier.h"
 
@@ -63,13 +64,20 @@ ts_generator::ts_generator()
 {
 }
 
-bool ts_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
+bool ts_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
   const std::vector<AST_Field*>&, AST_Type::SIZE_TYPE, const char*)
 {
+  size_t key_count = 0;
   IDL_GlobalData::DCPS_Data_Type_Info* info = idl_global->is_dcps_type(name);
-
-  if (!info) {
-    // no #pragma DCPS_DATA_TYPE, so nothing to generate
+  if (info) {
+    key_count = info->key_list_.size();
+  }
+#ifdef TAO_IDL_HAS_ANNOTATIONS
+  else if (be_global->is_sample_type(node)) {
+    key_count = SampleKeys(node).count();
+  }
+#endif
+  else {
     return true;
   }
 
@@ -125,8 +133,6 @@ bool ts_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
   }
   be_global->header_ << be_global->versioning_end() << "\n";
 
-  const bool has_keys = info->key_list_.is_empty();
-
   be_global->header_ <<
     "OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL\n"
     "namespace OpenDDS { namespace DCPS {\n"
@@ -141,7 +147,7 @@ bool ts_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
     "  typedef " << cxxName << "_OpenDDS_KeyLessThan LessThanType;\n"
     "\n"
     "  static const char* type_name () { return \"" << cxxName << "\"; }\n"
-    "  static bool gen_has_key () { return " << (has_keys ? "false" : "true") << "; }\n"
+    "  static bool gen_has_key () { return " << (key_count ? "true" : "false") << "; }\n"
     "\n"
     "  static size_t gen_max_marshaled_size(const MessageType& x, bool align) { return ::OpenDDS::DCPS::gen_max_marshaled_size(x, align); }\n"
     "  static void gen_find_size(const MessageType& arr, size_t& size, size_t& padding) { ::OpenDDS::DCPS::gen_find_size(arr, size, padding); }\n"
@@ -256,9 +262,10 @@ bool ts_generator::gen_union(AST_Union*, UTL_ScopedName* name,
 namespace java_ts_generator {
 
   /// called directly by dds_visitor::visit_structure() if -Wb,java
-  void generate(UTL_ScopedName* name) {
-    if (idl_global->is_dcps_type(name) == 0) {
-      // no #pragma DCPS_DATA_TYPE, so nothing to generate
+  void generate(AST_Structure* node) {
+    UTL_ScopedName* name = node->name();
+
+    if (!(idl_global->is_dcps_type(name) || be_global->is_sample_type(node))) {
       return;
     }
 

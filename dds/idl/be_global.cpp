@@ -13,6 +13,15 @@
 #include "utl_err.h"
 #include "utl_string.h"
 
+#include "ast_decl.h"
+#include "ast_structure.h"
+#include "ast_field.h"
+#include "ast_union.h"
+#ifdef TAO_IDL_HAS_ANNOTATIONS
+#  include "ast_annotation_decl.h"
+#  include "utl_annotations.h"
+#endif
+
 #include "ace/OS_NS_strings.h"
 #include "ace/OS_NS_sys_stat.h"
 #include "ace/ARGV.h"
@@ -39,6 +48,10 @@ BE_GlobalData::BE_GlobalData()
   , face_ts_(false)
   , seq_("Seq")
   , language_mapping_(LANGMAP_NONE)
+#ifdef TAO_IDL_HAS_ANNOTATIONS
+  , sample_type_annotation_(0)
+  , key_annotation_(0)
+#endif
 {
 }
 
@@ -182,12 +195,6 @@ bool BE_GlobalData::face_ts() const
 {
   return this->face_ts_;
 }
-
-// bool
-// BE_GlobalData::do_included_files() const
-// {
-//   return false; //we never process included files
-// }
 
 void
 BE_GlobalData::open_streams(const char* filename)
@@ -557,4 +564,66 @@ BE_GlobalData::get_include_block(BE_GlobalData::stream_enum_t which)
   }
 
   return ret.str();
+}
+
+#ifdef TAO_IDL_HAS_ANNOTATIONS
+void
+BE_GlobalData::cache_sample_annotations()
+{
+  if (idl_global->idl_version_ >= IDL_VERSION_4) {
+    UTL_Scope* root = idl_global->scopes().bottom();
+    sample_type_annotation_ =
+      AST_Annotation_Decl::narrow_from_decl(
+        root->lookup_by_name("::@sample_type"));
+    key_annotation_ = AST_Annotation_Decl::narrow_from_decl(
+        root->lookup_by_name("::@key"));
+  }
+}
+#endif
+
+bool
+BE_GlobalData::is_sample_type(AST_Decl* node)
+{
+#ifdef TAO_IDL_HAS_ANNOTATIONS
+  if (node) {
+    if (node->node_type() == AST_Decl::NT_struct) {
+      return UTL_find_annotation(node->annotations(), sample_type_annotation_);
+    } else if (node->node_type() == AST_Decl::NT_union) {
+      return UTL_find_annotation(node->annotations(), sample_type_annotation_);
+    } else if (node->node_type() == AST_Decl::NT_typedef) {
+      AST_Type* type = dynamic_cast<AST_Type*>(node)->unaliased_type();
+      if (type->node_type() == AST_Decl::NT_struct
+          || type->node_type() == AST_Decl::NT_union) {
+        return UTL_find_annotation(node->annotations(), sample_type_annotation_);
+      }
+    }
+  }
+#endif
+  return false;
+}
+
+bool
+BE_GlobalData::is_key(AST_Field* node)
+{
+#ifdef TAO_IDL_HAS_ANNOTATIONS
+  // Check for @key
+  if (node && UTL_find_annotation(node->annotations(), key_annotation_)) {
+    return true;
+  }
+#endif
+
+  return false;
+}
+
+bool
+BE_GlobalData::has_key(AST_Union* node)
+{
+#ifdef TAO_IDL_HAS_ANNOTATIONS
+  // Check for @key on the discriminator
+  if (node && UTL_find_annotation(node->disc_annotations(), key_annotation_)) {
+    return true;
+  }
+#endif
+
+  return false;
 }

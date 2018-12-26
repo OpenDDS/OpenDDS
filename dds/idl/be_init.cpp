@@ -56,4 +56,17 @@ BE_post_init(char*[], long)
     ACE_CString included;
     DRV_add_include_path(included, dds_root.c_str(), 0, true);
   }
+
+#ifdef TAO_IDL_HAS_ANNOTATIONS
+  if (idl_global->idl_version_ >= IDL_VERSION_4) {
+    idl_global->eval(
+      "@annotation key {\n"
+      "};\n"
+      "\n"
+      "@annotation sample_type {\n"
+      "};\n"
+    );
+    be_global->cache_sample_annotations();
+  }
+#endif
 }

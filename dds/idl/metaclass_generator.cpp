@@ -10,6 +10,10 @@
 
 #include "utl_identifier.h"
 
+#ifdef TAO_IDL_HAS_ANNOTATIONS
+#  include "sample_keys.h"
+#endif
+
 using namespace AstTypeClassification;
 
 namespace {
@@ -364,25 +368,33 @@ namespace {
     be_global->impl_ << "    }\n";
   }
 
+  void gen_isDcpsKey_i(const char* key) {
+    be_global->impl_ <<
+      "    if (!ACE_OS::strcmp(field, \"" <<  key << "\")) {\n"
+      "      return true;\n"
+      "    }\n";
+  }
+
   void gen_isDcpsKey(IDL_GlobalData::DCPS_Data_Type_Info* info)
   {
-    if (info && info->key_list_.size()) {
-      IDL_GlobalData::DCPS_Key_List::CONST_ITERATOR i(info->key_list_);
-      for (ACE_TString* key = 0; i.next(key); i.advance()) {
-        be_global->impl_ <<
-          "    if (!ACE_OS::strcmp(field, \""
-        << ACE_TEXT_ALWAYS_CHAR(key->c_str()) << "\")) {\n"
-          "      return true;\n"
-          "    }\n";
-      }
-    } else {
-      be_global->impl_ << "    ACE_UNUSED_ARG(field);\n";
+    IDL_GlobalData::DCPS_Key_List::CONST_ITERATOR i(info->key_list_);
+    for (ACE_TString* key = 0; i.next(key); i.advance()) {
+      gen_isDcpsKey_i(ACE_TEXT_ALWAYS_CHAR(key->c_str()));
     }
-    be_global->impl_ << "    return false;\n";
   }
+
+#ifdef TAO_IDL_HAS_ANNOTATIONS
+  void gen_isDcpsKey(SampleKeys& keys)
+  {
+    SampleKeys::Iterator finished = keys.end();
+    for (SampleKeys::Iterator i = keys.begin(); i != finished; ++i) {
+      gen_isDcpsKey_i(i.path().c_str());
+    }
+  }
+#endif
 }
 
-bool metaclass_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
+bool metaclass_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
   const std::vector<AST_Field*>& fields, AST_Type::SIZE_TYPE, const char*)
 {
   ContentSubscriptionGuard csg;
@@ -399,11 +411,20 @@ bool metaclass_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
     first_struct_ = false;
   }
 
-  size_t nKeys = 0;
+#ifdef TAO_IDL_HAS_ANNOTATIONS
+  bool is_sample_type = be_global->is_sample_type(node);
+  SampleKeys keys(node);
+#endif
+  size_t key_count = 0;
   IDL_GlobalData::DCPS_Data_Type_Info* info = idl_global->is_dcps_type(name);
   if (info) {
-    nKeys = info->key_list_.size();
+    key_count = info->key_list_.size();
   }
+#ifdef TAO_IDL_HAS_ANNOTATIONS
+  else if (is_sample_type) {
+    key_count = keys.count();
+  }
+#endif
 
   std::string clazz = scoped(name);
   std::string decl = "const MetaStruct& getMetaStruct<" + clazz + ">()",
@@ -418,12 +439,24 @@ bool metaclass_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
     "#ifndef OPENDDS_NO_MULTI_TOPIC\n"
     "  void* allocate() const { return new T; }\n\n"
     "  void deallocate(void* stru) const { delete static_cast<T*>(stru); }\n\n"
-    "  size_t numDcpsKeys() const { return " << nKeys << "; }\n\n"
+    "  size_t numDcpsKeys() const { return " << key_count << "; }\n\n"
     "#endif /* OPENDDS_NO_MULTI_TOPIC */\n\n"
     "  bool isDcpsKey(const char* field) const\n"
     "  {\n";
-  gen_isDcpsKey(info);
+  if (key_count) {
+    if (info) {
+      gen_isDcpsKey(info);
+    }
+#ifdef TAO_IDL_HAS_ANNOTATIONS
+    else {
+      gen_isDcpsKey(keys);
+    }
+#endif
+  } else {
+    be_global->impl_ << "    ACE_UNUSED_ARG(field);\n";
+  }
   be_global->impl_ <<
+    "    return false;\n"
     "  }\n\n"
     "  Value getValue(const void* stru, const char* field) const\n"
     "  {\n"
