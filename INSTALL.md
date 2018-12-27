@@ -1,7 +1,5 @@
 # Building and Installing OpenDDS
 
-<!-- vim-markdown-toc GFM -->
-
 * [Java](#java)
 * [Supported platforms](#supported-platforms)
 * [Compiling](#compiling)
@@ -10,8 +8,6 @@
 * [Cross Compiling](#cross-compiling)
   * [Raspberry Pi](#raspberry-pi)
 * [Building your own applications:](#building-your-own-applications)
-
-<!-- vim-markdown-toc -->
 
 ## Java
 

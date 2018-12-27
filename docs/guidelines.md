@@ -11,8 +11,6 @@ diverse group of developers. At one point an automated re-formatter was run on
 the codebase, but automated tools can only cover a subset of the guidelines.
 
 
-<!-- vim-markdown-toc GFM -->
-
 * [Repository](#repository)
 * [Automated Build Systems](#automated-build-systems)
 * [Doxygen](#doxygen)
@@ -28,8 +26,6 @@ the codebase, but automated tools can only cover a subset of the guidelines.
   * [Naming](#naming)
   * [Comments](#comments)
   * [Documenting Code for Doxygen](#documenting-code-for-doxygen)
-
-<!-- vim-markdown-toc -->
 
 ## Repository
 

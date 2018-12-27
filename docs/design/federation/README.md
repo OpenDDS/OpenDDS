@@ -1,8 +1,6 @@
 <!-- Adapted from /docs/html/federation/federation.html -->
 # OpenDDS Repository Federation Design
 
-<!-- vim-markdown-toc GFM -->
-
 * [Introduction](#introduction)
 * [Use Cases](#use-cases)
   * [Normal Operation](#normal-operation)
@@ -20,8 +18,6 @@
   * [Operate Federated](#operate-federated)
   * [Leave Federation](#leave-federation)
 * [Architecture](#architecture)
-
-<!-- vim-markdown-toc -->
 
 ## Introduction
 
