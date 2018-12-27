@@ -272,25 +272,25 @@ class DoesStuff {
 For simple things, a single line documenting comment can be made like:
 
 ```C++
-\\\ Number of bugs in the code
+/// Number of bugs in the code
 unsigned bug_count = -1; // Woops
 ```
 
-The extra `*` on the multiline comment and `\` on the single line comment are
+The extra `*` on the multiline comment and `/` on the single line comment are
 important. They inform Doxygen that comment is the documentation for the
-following construct.
+following declaration.
 
-For groups of very similar things you can avoid repeating yourself with `\\\{`
-and `\\\}`:
+For groups of very similar things you can avoid repeating yourself with `///{`
+and `///}`:
 
 ```C++
 /**
  * Get a string
  */
-\\\{
+///{
 char* get_c_string();
 std::string get_cpp_string();
-\\\}
+///}
 ```
 
 If referring to something that happens to be a namespace or other global
