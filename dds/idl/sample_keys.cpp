@@ -31,7 +31,9 @@ SampleKeys::Error::Error(AST_Decl* node, const std::string& message)
 {
   std::stringstream ss;
   if (node) {
-    ss << "On line " << node->line() << " in " << node->file_name() << ":";
+    ss
+      << "Error on line " << node->line() << " in "
+      << node->file_name() << ": ";
   }
   ss << message;
   message_ = ss.str();
@@ -127,13 +129,18 @@ SampleKeys::Iterator& SampleKeys::Iterator::operator++()
         // If the field is a struct, transverse that
         if (field_type->node_type() == AST_Decl::NT_struct) {
           AST_Structure* struct_node = dynamic_cast<AST_Structure*>(field_type);
+          if (!be_global->is_sample_type(struct_node)) {
+            throw Error(field, "struct type field is marked as key, but "
+              "the struct (or any of it's typedefs) does not have a "
+              "@sample_type annotation.");
+          }
           child_ = new Iterator(struct_node);
           Iterator& child = *child_;
           if (child == Iterator()) {
             delete child_;
             child_ = 0;
             throw Error(field, "struct type field is marked as key, but "
-              "none if its fields are marked as a key.");
+              "none of it's fields are marked as a key.");
           } else {
             current_value_ = *child;
             return *this;
@@ -216,7 +223,7 @@ std::string SampleKeys::Iterator::path()
 void SampleKeys::Iterator::path_i(std::list<std::string>& name_stack)
 {
   AST_Field** field_ptrptr;
-  root_sample_->field(field_ptrptr, pos_-1);
+  root_sample_->field(field_ptrptr, child_ ? pos_ : pos_ - 1);
   AST_Field* field = *field_ptrptr;
   name_stack.push_back(field->local_name()->get_string());
   if (child_) {
