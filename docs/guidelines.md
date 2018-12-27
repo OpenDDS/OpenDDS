@@ -6,10 +6,12 @@ community. It's expected to evolve as different maintainers get a chance to
 review and contribute to it.
 
 Although ideally all code in the repository would already follow these
-guidelines, in reality the code has evolved over more than eight years by a
-diverse group of developers. At one point an automated re-formatter was run on
-the codebase, but automated tools can only cover a subset of the guidelines.
-
+guidelines, in reality the code has evolved over many years by a diverse group
+of developers. At one point an automated re-formatter was run on the codebase,
+migrating from the [GNU C
+style](https://www.gnu.org/prep/standards/html_node/Writing-C.html) to the
+current, more conventional style, but automated tools can only cover a subset
+of the guidelines.
 
 * [Repository](#repository)
 * [Automated Build Systems](#automated-build-systems)
@@ -35,10 +37,8 @@ open for pull requests.
 
 ## Automated Build Systems
 
-Pull requests will be subject to some testing, which will be least a build with
-default configuration.
-
-"nightly" builds of the master branch can be found at
+Pull requests will be tested automatically and full CI builds of the master
+branch can be found at
 [http://scoreboard.ociweb.com/oci-dds.html](http://scoreboard.ociweb.com/oci-dds.html).
 
 All tests listed in `DDS_ROOT/bin/dcps_tests.lst` are part of the automated
@@ -56,8 +56,8 @@ Doxygen is run on OpenDDS regularly. There are two hosted versions of this:
     get the updated Doxygen on to the web sever. Perfer latest release unless
     working with newer code.
 
-See [Documenting Code for Doxygen](#documenting-doxygen) to see how to take
-advantage of Doxygen when writing code in OpenDDS.
+See [Documenting Code for Doxygen](#documenting-code-for-doxygen) to see how to
+take advantage of Doxygen when writing code in OpenDDS.
 
 ## Dependencies
 
@@ -79,7 +79,7 @@ these are used in OpenDDS.
 ## Text File Formatting
 
 All text files in the source code repository follow a few basic rules. These
-apply to C++ source code, Perl scripts, MPC files,  and any other plaintext
+apply to C++ source code, Perl scripts, MPC files, and any other plaintext
 file.
 
 - A text file is a sequence of lines, each ending in the "end-of-line"
@@ -101,10 +101,10 @@ file.
 The C++ standard used in OpenDDS is C++03. There are some caveats to this but
 the OpenDDS must be able to be compiled with C++ 2003 compilers.
 
-Use the C++ standard library as much as possible. The C++ standard library
-includes the C standard library by reference, making those identifiers
-available in namespace std. Whenever there is similar functionality provided by
-ACE or system-specific libraries, use the C++ standard library. Not all
+Use the C++ standard library as much as possible. The standard library should
+be preferred over ACE, which in turn should be preferred over system specific
+libraries. The C++ standard library includes the C standard library by
+reference, making those identifiers available in namespace std. Not all
 supported platforms have standard library support for wide characters
 (`wchar_t`) but this is rarely needed. Preprocessor macro `DDS_HAS_WCHAR` can
 be used to detect those platforms.
@@ -128,7 +128,7 @@ be used to detect those platforms.
 
 ### Example
 
-```
+```C++
 template<typename T>
 class MyClass : public Base1, public Base2 {
 public:
@@ -208,14 +208,14 @@ The punctuation placement rules can be summarized as:
 
 Pointers and references go along with the type, not the identifier. For example:
 
-```
+```C++
 int* intPtr = &someInt;
 ```
 
-Watch out for multiple declarations in one statement.  `int* c, b;` does not
+Watch out for multiple declarations in one statement. `int* c, b;` does not
 declare two pointers! It's best just to break these into separate statements:
 
-```
+```C++
 int* c;
 int* b;
 ```
@@ -250,7 +250,6 @@ int* b;
 - Do not add a comment before the constructor that says `// Constructor`. We
   know it's a constructor. The same note applies to any redundant comment.
 
-<a name="documenting-doxygen"></a>
 ### Documenting Code for Doxygen
 
 Doxygen is run on the codebase with each change in master and each release.
@@ -259,7 +258,7 @@ This is a simple guide showing the way of documenting in OpenDDS.
 Doxygen supports multiple styles of documenting comments but this style should
 be used in non-trivial situations:
 
-```
+```C++
 /**
  * This sentence is the breif description.
  *
@@ -272,7 +271,7 @@ class DoesStuff {
 
 For simple things, a single line documenting comment can be made like:
 
-```
+```C++
 \\\ Number of bugs in the code
 unsigned bug_count = -1; // Woops
 ```
@@ -284,7 +283,7 @@ following construct.
 For groups of very similar things you can avoid repeating yourself with `\\\{`
 and `\\\}`:
 
-```
+```C++
 /**
  * Get a string
  */
