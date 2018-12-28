@@ -5,8 +5,8 @@
 
 #include <string>
 #include <iterator>
-#include <list>
 #include <exception>
+#include <sstream>
 
 class AST_Decl;
 class AST_Structure;
@@ -23,9 +23,27 @@ class AST_Structure;
  *   AST_Decl* key = *i;
  *   // ...
  * }
+ *
+ * The key AST_Decl will be a different type of node depending on the key:
+ * - For struct field keys this will be the AST_Field
+ * - For Array keys this will be the base AST_Type, repeated for each element
+ * - For Union keys this will be the AST_Union
  */
 class SampleKeys {
 public:
+  enum RootType {
+    PrimitiveType,
+    StructureType,
+    ArrayType,
+    UnionType,
+    InvalidType
+  };
+
+  /**
+   * Get the RootType of the AST_Type
+   */
+  static RootType root_type(AST_Type* type);
+
   /**
    * Error in the AST or the application of the @key annotation.
    */
@@ -49,10 +67,15 @@ public:
    */
   class Iterator {
   public:
+    /**
+     * Standard Iterator Type Declarations
+     */
+    ///{
     typedef AST_Decl* value_type;
     typedef AST_Decl** pointer;
     typedef AST_Decl*& reference;
     typedef std::output_iterator_tag iterator_category;
+    ///}
 
     /**
      * Create new iterator equal to SampleKey::end()
@@ -80,26 +103,66 @@ public:
     bool operator!=(const Iterator& other) const;
 
     /**
-     * Get the path of the key in reference to the root_sample
+     * Get the path of the key in reference to the root_
      */
     std::string path();
-    void cleanup();
+
+    /**
+     * Get the level of recursion
+     */
+    size_t level() const;
+
+    /**
+     * Get the root type of the final child
+     */
+    RootType root_type() const;
+
+    /**
+     * Get the final child's parent's root type
+     *
+     * Returns InvalidType if it is the root or a invalid iterator
+     */
+    RootType parents_root_type() const;
+
+    /**
+     * Get the AST_Type of the current value
+     *
+     * Returns 0 if the iterator is invalid
+     */
+    AST_Type* get_ast_type() const;
 
   private:
-    Iterator(AST_Structure* root_sample);
+    Iterator(AST_Type* root, const Iterator& parent);
+    Iterator(AST_Field* root, const Iterator& parent);
 
+    /**
+     * Position in whatever node we are in.
+     *
+     * This means different things for different types of nodes.
+     */
     size_t pos_;
     Iterator* child_;
+    /// Current value of the entire iterator stack
     value_type current_value_;
-    AST_Structure* root_sample_;
+    AST_Decl* root_;
+    RootType root_type_;
+    RootType parents_root_type_;
+    size_t level_;
 
-    void path_i(std::list<std::string>& name_stack);
+    /**
+     * Internal Recursive Impl. of path()
+     */
+    void path_i(std::stringstream& ss);
+
+    void cleanup();
   };
 
-  SampleKeys(AST_Structure* root_sample);
+  SampleKeys(AST_Structure* root);
+  SampleKeys(AST_Union* root);
   ~SampleKeys();
 
-  AST_Structure* root_sample() const;
+  AST_Decl* root() const;
+  RootType root_type() const;
 
   Iterator begin();
   Iterator end();
@@ -110,9 +173,14 @@ public:
   size_t count();
 
 private:
-  AST_Structure* root_sample_;
+  AST_Decl* root_;
+  RootType root_type_;
+
+  /// Cached Key Count
+  ///{
   bool counted_;
   size_t count_;
+  ///}
 };
 #endif
 #endif

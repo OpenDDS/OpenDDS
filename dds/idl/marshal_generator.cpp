@@ -1715,11 +1715,9 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     }
 #ifdef TAO_IDL_HAS_ANNOTATIONS
     else {
-      // TODO Support More than fields
       SampleKeys::Iterator finished = keys.end();
       for (SampleKeys::Iterator i = keys.begin(); i != finished; ++i) {
-        AST_Field* field = dynamic_cast<AST_Field*>(*i);
-        if (field && !is_bounded_type(field->field_type())) {
+        if (!is_bounded_type(i.get_ast_type())) {
           bounded_key = false;
           break;
         }
@@ -1755,10 +1753,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         else {
           SampleKeys::Iterator finished = keys.end();
           for (SampleKeys::Iterator i = keys.begin(); i != finished; ++i) {
-            AST_Field* field = dynamic_cast<AST_Field*>(*i);
-            if (field) {
-              max_marshaled_size(field->field_type(), size, padding);
-            }
+            max_marshaled_size(i.get_ast_type(), size, padding);
           }
         }
 #endif
@@ -1805,9 +1800,8 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         SampleKeys::Iterator finished = keys.end();
         for (SampleKeys::Iterator i = keys.begin(); i != finished; ++i) {
           std::string key_name = i.path();
-          AST_Field* field = dynamic_cast<AST_Field*>(*i);
           expr += findSizeCommon(use_cxx11 ? key_name + "()" : key_name,
-                                 field->field_type(), "stru.t", intro);
+                                 i.get_ast_type(), "stru.t", intro);
         }
       }
 #endif
@@ -1850,14 +1844,13 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         SampleKeys::Iterator finished = keys.end();
         for (SampleKeys::Iterator i = keys.begin(); i != finished; ++i) {
           std::string key_name = i.path();
-          AST_Field* field = dynamic_cast<AST_Field*>(*i);
           if (first) {
             first = false;
           } else {
             expr += "\n    && ";
           }
           expr += streamCommon(use_cxx11 ? key_name + "()" : key_name,
-                               field->field_type(), "<< stru.t", intro);
+                               i.get_ast_type(), "<< stru.t", intro);
         }
       }
 #endif
@@ -1904,14 +1897,13 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         SampleKeys::Iterator finished = keys.end();
         for (SampleKeys::Iterator i = keys.begin(); i != finished; ++i) {
           std::string key_name = i.path();
-          AST_Field* field = dynamic_cast<AST_Field*>(*i);
           if (first) {
             first = false;
           } else {
             expr += "\n    && ";
           }
           expr += streamCommon(use_cxx11 ? key_name + "()" : key_name,
-                               field->field_type(), ">> stru.t", intro);
+                               i.get_ast_type(), ">> stru.t", intro);
         }
       }
 #endif

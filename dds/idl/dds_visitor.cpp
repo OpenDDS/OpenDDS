@@ -224,6 +224,7 @@ dds_visitor::visit_structure(AST_Structure* node)
   BE_Comment_Guard g("STRUCT", name);
   ACE_UNUSED_ARG(g);
 
+#ifdef TAO_IDL_HAS_ANNOTATIONS
   // Check That Sample Keys Are Valid
   try {
     SampleKeys(node).count();
@@ -232,6 +233,7 @@ dds_visitor::visit_structure(AST_Structure* node)
       ACE_TEXT("(%N:%l) dds_visitor::visit_structure: %C"),
       error.what()), -1);
   }
+#endif
 
   size_t nfields = node->nfields();
   vector<AST_Field*> fields;
