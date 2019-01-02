@@ -38,10 +38,10 @@ Some other features OpenDDS relies on ACE for:
   MPC) to manage shared libraries' symbol visibility (also known as
   export/import)
   - See ACE documentation and usage guidelines for details
-- ACE logging is used (`ACE_Log_Msg` and related classes).
-- ACE logging uses a formatting string that works like `std::printf()` but not
-  all of the formatting specifiers are the same as `printf()`. Please read the
-  `ACE_Log_Msg` documentation before using.
+  - ACE logging is used (`ACE_Log_Msg` and related classes).
+  - ACE logging uses a formatting string that works like `std::printf()` but not
+    all of the formatting specifiers are the same as `printf()`. Please read the
+    `ACE_Log_Msg` documentation before using.
 - The most commonly misused one is `%s` for `char*` strings. ACE uses `%C` for
   `char*` strings.
 - ACE has classes and macros for wide/narrow string conversion. See
@@ -52,7 +52,7 @@ Some other features OpenDDS relies on ACE for:
 
 The OCI page for ACE is https://objectcomputing.com/products/ace.
 
-The official repository is hosted on Github at
+The upstream DOC Group repository is hosted on Github at
 [DOCGroup/ACE\_TAO](https://github.com/DOCGroup/ACE_TAO), which it shares with
 TAO.
 
@@ -70,7 +70,7 @@ TAO is a C++ CORBA Implementation built on ACE.
 
 The OCI page for TAO is https://objectcomputing.com/products/tao.
 
-The official repository is hosted on Github at
+The upstream DOC Group repository is hosted on Github at
 [DOCGroup/ACE\_TAO](https://github.com/DOCGroup/ACE_TAO), which it shares with
 ACE.
 
@@ -85,12 +85,17 @@ without the need to use MPC in your application.
 CMake is also used for the Google Test based DDS security unit tests. See
 [../tests/gtest_setup.txt](../tests/gtest_setup.txt).
 
+### Google Test
+
+Google Test is used for DDS security unit tests.
+See [../tests/gtest_setup.txt](../tests/gtest_setup.txt) for details.
+
 ### Java
 
 OpenDDS has optional Java bindings. It requires the Java Development Kit
 (JDK). See [../java/README](../java/README).
 
-There is also support for Java Message Server (JMS) v1.1. It in addition to the
+There is also support for Java Message Server (JMS) v1.1. In addition to the
 JDK, it requires Ant and JBoss 4.2.x. See [../java/jms](../java/jms/README).
 
 ### Qt
@@ -102,9 +107,9 @@ See [qt.md](qt.md) for details on configuring OpenDDS to use Qt.
 
 ### Wireshark
 
-A Wireshark dissector plugin for OpenDDS's classic InfoRepo based protocol is
-included with OpenDDS. The dissector supports displaying and filtering by
-sample contents and works with Wireshark 1.x and 2.x.
+A Wireshark dissector plugin for OpenDDS's non-RTPS transports is included with
+OpenDDS. The dissector supports displaying and filtering by sample contents and
+works with Wireshark 1.x and 2.x.
 
 See [../tools/dissector/README.md](../tools/dissector/README.md) for details.
 
@@ -124,8 +129,3 @@ for details.
 Boost, as of writing, is just an optional dependency of the
 [ishapes](../examples/DCPS/ishapes) RTPS demo and only if C++11 is not
 available.
-
-### Google Test
-
-Google Test is used for DDS security unit tests.
-See [../tests/gtest_setup.txt](../tests/gtest_setup.txt) for details.

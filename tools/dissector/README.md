@@ -8,7 +8,7 @@ supported from Wireshark 1.12 on. The dissector is compatible with Wireshark
 
 If you need to dissect packets in RTPS DDS systems, all recent versions of
 Wireshark have a built-in RTPS dissector. This dissector, at least for the
-moment, just dissects classic OpenDDS systems using an InfoRepo. Once set up
+moment, just dissects OpenDDS systems that are NOT using RTPS. Once set up
 though, this dissector allows viewing and filtering by dissected sample data
 from within Wireshark.
 
@@ -386,7 +386,7 @@ opendds.sample.payload.Messenger.Message.u.u_b == 1
 ## Known Limitations
 
   - As noted in the introduction, this dissector only works with OpenDDS
-    systems using an InfoRepo, which is a different protocal than RTPS.
+    systems which are not using RTPS.
 
   - OpenDDS only maintains wire compatibility with the current revision
     of the DCPS protocol.  This dissector is effective for the compiled

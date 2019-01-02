@@ -50,11 +50,13 @@ Doxygen is run on OpenDDS regularly. There are two hosted versions of this:
 
 - [Latest Release](http://download.opendds.org/doxygen)
   - Based on the current release of OpenDDS.
-- [Master](http://scoreboard.ociweb.com/dds_doc_master_mosquito_linux_doxygen_u1/Doxygen/html/dds/)
-  - Based on the master branch in the repository. Depending on the activity in
-    the repository this might be unstable because of the time it takes to
-    get the updated Doxygen on to the web sever. Perfer latest release unless
-    working with newer code.
+- Master
+  - Based on the master branch in the repository. To access it, go to the
+    [scoreboard](http://scoreboard.ociweb.com/oci-dds.html) and click the green
+    "Doxygen" link near the top.
+  - Depending on the activity in the repository this might be unstable because
+    of the time it takes to get the updated Doxygen on to the web sever. Perfer
+    latest release unless working with newer code.
 
 See [Documenting Code for Doxygen](#documenting-code-for-doxygen) to see how to
 take advantage of Doxygen when writing code in OpenDDS.
@@ -111,15 +113,15 @@ be used to detect those platforms.
 
 ## C++ Coding Style
 
-- C++ code in OpenDDS must compile under the compilers listed in the
-  `README.md` file.
+- C++ code in OpenDDS must compile under the [compilers listed in the
+  `README.md` file](../README.md#compilers).
 - Commit code in the proper style from the start, so follow-on commits to
   adjust style don't clutter history.
 - C++ source code is a plaintext file, so the guidelines in Text file
   formatting apply.
-- A modified Stroustrup style is used (see tools/scripts/style).
-- Warning: not everything in tools/scripts/style represents the current
-  guidelines.
+- A modified Stroustrup style is used (see [tools/scripts/style](../tools/scripts/style)).
+  - Warning: not everything in tools/scripts/style represents the current
+    guidelines.
 - Sometimes the punctuation characters are given different names, this document
   will use:
   - Parentheses `( )`
@@ -153,13 +155,12 @@ bool MyClass<T>::method(const OtherClass& parameter, int) const
 
 The punctuation placement rules can be summarized as:
 
-- Open brace appears as the first non-whitespace character to start function
-  definitions.
+- Open brace appears as the first non-whitespace character on the line to start
+  function definitions.
 - Otherwise the open brace shares the line with the preceding text.
 - Parentheses used for control-flow keywords (`if`, `while`, `for`, `switch`)
   are separated from the keyword by a single space.
 - Otherwise parentheses and brackets are not preceded by spaces.
-- Modifiers like `const` appear left of the types they modify:
 
 ### Whitespace
 
@@ -188,6 +189,8 @@ The punctuation placement rules can be summarized as:
 - Declare local variables at the latest point possible.
 - `const` is a powerful tool that enables the compiler to help the programmer
   find bugs. Use `const` everywhere possible, including local variables.
+- Modifiers like `const` appear left of the types they modify, like: `const
+  char* cstring = ...`. `char const*` is equivalent but not conventional.
 - For function arguments that are not modified by the callee, pass by value for
   small objects (8 bytes?) and pass by const-reference for everything else.
 - Arguments unused by the implementation have no names (in the definition that
