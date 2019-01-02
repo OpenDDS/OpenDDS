@@ -99,10 +99,12 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
         }
 
         if (status.total_count_change != 0) {
+          cout << "publisher total_count_change not equal to zero, breaking loop after " << i << " iterations" << endl;
           break;
+        } else {
+          cout << "publisher total_count_change zero, sleeping a second" << endl;
+          ACE_OS::sleep (1);
         }
-
-        ACE_OS::sleep (1);
       }
 
       if (status.total_count_change == 0) {
