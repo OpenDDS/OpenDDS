@@ -46,11 +46,11 @@ jobs:
       filename: tools\scripts\prepend_path
       arguments: '%CD%\ext\strawberry\perl\bin'
       modifyEnvironment: true
-  - powershell: git clone --depth 1 git://github.com/Microsoft/vcpkg.git $(Build.SourcesDirectory)\vcpkg
+  - script: git clone --depth 1 git://github.com/Microsoft/vcpkg
     displayName: git clone vcpkg
-  - script: .\vcpkg\bootstrap-vcpkg.bat
+  - script: vcpkg\bootstrap-vcpkg
     displayName: Bootstrap vcpkg
-  - script: .\vcpkg\vcpkg.exe install --recurse --triplet $(vcpkgarch) openssl xerces-c
+  - script: vcpkg\vcpkg install --triplet $(vcpkgarch) openssl xerces-c
     displayName: vcpkg install dependencies
   - task: BatchScript@1
     displayName: VcVars
