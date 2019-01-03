@@ -587,9 +587,9 @@ if (!$ace_src || !$tao_src) {
       elsif (which('curl')) {
         print $download_message . " (using curl)\n";
         if ($opts{'dry-run'}) {
-          print "Dry-run: would run curl $urlbase$file -o $file\n";
+            print "Dry-run: would run curl -L $urlbase$file -o $file\n";
         }
-        elsif (system("curl $urlbase$file -o $file")) {
+          elsif (system("curl -L $urlbase$file -o $file")) {
           die "ERROR: from curl, stopped";
         }
       }
