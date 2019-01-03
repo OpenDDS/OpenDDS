@@ -132,22 +132,23 @@ public:
     AST_Type* get_ast_type() const;
 
   private:
-    Iterator(AST_Type* root, const Iterator& parent);
-    Iterator(AST_Field* root, const Iterator& parent);
+    Iterator(AST_Type* root, Iterator* parent);
+    Iterator(AST_Field* root, Iterator* parent);
 
     /**
      * Position in whatever node we are in.
      *
      * This means different things for different types of nodes.
      */
+    Iterator* parent_;
     size_t pos_;
     Iterator* child_;
     /// Current value of the entire iterator stack
     value_type current_value_;
     AST_Decl* root_;
     RootType root_type_;
-    RootType parents_root_type_;
     size_t level_;
+    bool recursive_;
 
     /**
      * Internal Recursive Impl. of path()
@@ -157,7 +158,10 @@ public:
     void cleanup();
   };
 
-  SampleKeys(AST_Structure* root);
+  /**
+   * If recurive is false, do not recurse into other sturctures.
+   */
+  SampleKeys(AST_Structure* root, bool recursive = true);
   SampleKeys(AST_Union* root);
   ~SampleKeys();
 
@@ -172,6 +176,8 @@ public:
    */
   size_t count();
 
+  bool recursive() const;
+
 private:
   AST_Decl* root_;
   RootType root_type_;
@@ -181,6 +187,9 @@ private:
   bool counted_;
   size_t count_;
   ///}
+
+  /// Have iterators recurse into structures
+  bool recursive_;
 };
 #endif
 #endif

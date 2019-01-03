@@ -89,46 +89,50 @@ const char* SampleKeys::Error::what() const noexcept
 }
 
 SampleKeys::Iterator::Iterator()
-  : pos_(0),
+  : parent_(0),
+    pos_(0),
     child_(0),
     current_value_(0),
     root_(0),
     root_type_(InvalidType),
-    parents_root_type_(SampleKeys::InvalidType),
-    level_(0)
+    level_(0),
+    recursive_(false)
 {
 }
 
 SampleKeys::Iterator::Iterator(SampleKeys& parent)
-  : pos_(0),
+  : parent_(0),
+    pos_(0),
     child_(0),
     current_value_(0),
-    parents_root_type_(SampleKeys::InvalidType),
-    level_(0)
+    level_(0),
+    recursive_(parent.recursive())
 {
   root_ = parent.root();
   root_type_ = parent.root_type();
-  (*this)++;
+  ++(*this);
 }
 
-SampleKeys::Iterator::Iterator(AST_Type* root, const Iterator& parent)
-  : pos_(0),
+SampleKeys::Iterator::Iterator(AST_Type* root, Iterator* parent)
+  : parent_(parent),
+    pos_(0),
     child_(0),
     current_value_(0),
-    parents_root_type_(parent.root_type()),
-    level_(parent.level() + 1)
+    level_(parent->level() + 1),
+    recursive_(parent->recursive_)
 {
   root_type_ = SampleKeys::root_type(root);
   root_ = root;
-  (*this)++;
+  ++(*this);
 }
 
-SampleKeys::Iterator::Iterator(AST_Field* root, const Iterator& parent)
-  : pos_(0),
+SampleKeys::Iterator::Iterator(AST_Field* root, Iterator* parent)
+  : parent_(parent),
+    pos_(0),
     child_(0),
     current_value_(0),
-    parents_root_type_(parent.root_type()),
-    level_(parent.level() + 1)
+    level_(parent->level() + 1),
+    recursive_(parent->recursive_)
 {
   AST_Type* type = root->field_type()->unaliased_type();
   root_type_ = SampleKeys::root_type(type);
@@ -137,7 +141,7 @@ SampleKeys::Iterator::Iterator(AST_Field* root, const Iterator& parent)
   } else {
     root_ = type;
   }
-  (*this)++;
+  ++(*this);
 }
 
 SampleKeys::Iterator::Iterator(const SampleKeys::Iterator& other)
@@ -146,7 +150,8 @@ SampleKeys::Iterator::Iterator(const SampleKeys::Iterator& other)
     current_value_(0),
     root_(0),
     root_type_(InvalidType),
-    level_(0)
+    level_(0),
+    recursive_(false)
 {
   *this = other;
 }
@@ -159,12 +164,13 @@ SampleKeys::Iterator::~Iterator()
 SampleKeys::Iterator& SampleKeys::Iterator::operator=(const SampleKeys::Iterator& other)
 {
   cleanup();
+  parent_ = other.parent_;
   pos_ = other.pos_;
   current_value_ = other.current_value_;
   root_ = other.root_;
   root_type_ = other.root_type_;
-  parents_root_type_ = other.parents_root_type_;
   level_ = other.level_;
+  recursive_ = other.recursive_;
   child_ = other.child_ ? new Iterator(*other.child_) : 0;
   return *this;
 }
@@ -190,26 +196,32 @@ SampleKeys::Iterator& SampleKeys::Iterator::operator++()
     }
   }
 
-  // If we are a structure, look for key fields
   if (root_type_ == StructureType) {
-    AST_Structure* struct_root = dynamic_cast<AST_Structure*>(root_);
-    size_t field_count = struct_root->nfields();
-    for (; pos_ < field_count; ++pos_) {
-      AST_Field** field_ptrptr;
-      struct_root->field(field_ptrptr, pos_);
-      AST_Field* field = *field_ptrptr;
-      if (be_global->is_key(field)) {
-        child_ = new Iterator(field, *this);
-        Iterator& child = *child_;
-        if (child == Iterator()) {
-          delete child_;
-          child_ = 0;
-          throw Error(field, "field is marked as key, but does not contain any keys.");
-        } else {
-          current_value_ = *child;
-          return *this;
+    // If we are recursive and at a structure, look for key fields
+    if (recursive_ || level_ == 0) {
+      AST_Structure* struct_root = dynamic_cast<AST_Structure*>(root_);
+      size_t field_count = struct_root->nfields();
+      for (; pos_ < field_count; ++pos_) {
+        AST_Field** field_ptrptr;
+        struct_root->field(field_ptrptr, pos_);
+        AST_Field* field = *field_ptrptr;
+        if (be_global->is_key(field)) {
+          child_ = new Iterator(field, this);
+          Iterator& child = *child_;
+          if (child == Iterator()) {
+            delete child_;
+            child_ = 0;
+            throw Error(field, "field is marked as key, but does not contain any keys.");
+          } else {
+            current_value_ = *child;
+            return *this;
+          }
         }
       }
+    } else if (pos_ == 0) { // Else return "this" once
+      pos_ = 1;
+      current_value_ = root_;
+      return *this;
     }
 
   // If we are an array, use the base type and repeat for every element
@@ -223,7 +235,7 @@ SampleKeys::Iterator& SampleKeys::Iterator::operator++()
     AST_Type* type_node = array_node->base_type();
     AST_Type* unaliased_type_node = type_node->unaliased_type();
     for (; pos_ < element_count; ++pos_) {
-      child_ = new Iterator(unaliased_type_node, *this);
+      child_ = new Iterator(unaliased_type_node, this);
       Iterator& child = *child_;
       if (child == Iterator()) {
         delete child_;
@@ -281,12 +293,13 @@ SampleKeys::Iterator::value_type SampleKeys::Iterator::operator*() const
 bool SampleKeys::Iterator::operator==(const SampleKeys::Iterator& other) const
 {
   return
+    parent_ == other.parent_ &&
     root_ == other.root_ &&
     root_type_ == other.root_type_ &&
-    parents_root_type_ == other.parents_root_type_ &&
     pos_ == other.pos_ &&
     current_value_ == other.current_value_ &&
     level_ == other.level_ &&
+    recursive_ == other.recursive_ &&
     (
       (child_ && other.child_) ? *child_ == *other.child_ : child_ == other.child_
     );
@@ -319,7 +332,7 @@ void SampleKeys::Iterator::path_i(std::stringstream& ss)
   } else if (root_type_ != PrimitiveType) {
     throw Error(root_, "Can't get path for invalid sample key iterator!");
   }
-  if (child_) {
+  if (child_ && recursive_) {
     child_->path_i(ss);
   }
 }
@@ -336,7 +349,7 @@ SampleKeys::RootType SampleKeys::Iterator::root_type() const
 
 SampleKeys::RootType SampleKeys::Iterator::parents_root_type() const
 {
-  return child_ ? child_->parents_root_type() : parents_root_type_;
+  return child_ ? child_->parents_root_type() : (parent_ ? parent_->root_type_ : InvalidType);
 }
 
 size_t SampleKeys::Iterator::level() const
@@ -346,8 +359,20 @@ size_t SampleKeys::Iterator::level() const
 
 AST_Type* SampleKeys::Iterator::get_ast_type() const
 {
-  if (root_type() == UnionType) {
+  switch (root_type()) {
+  case UnionType:
     return dynamic_cast<AST_Type*>(current_value_);
+  case StructureType:
+    if (level_ > 0) {
+      if (!recursive_) {
+        return dynamic_cast<AST_Type*>(current_value_);
+      }
+    } else {
+      return child_->get_ast_type();
+    }
+    break;
+  default:
+    break;
   }
   switch (parents_root_type()) {
   case StructureType:
@@ -359,18 +384,20 @@ AST_Type* SampleKeys::Iterator::get_ast_type() const
   }
 }
 
-SampleKeys::SampleKeys(AST_Structure* root)
-  : root_ (root),
-    root_type_ (StructureType),
-    counted_ (false)
+SampleKeys::SampleKeys(AST_Structure* root, bool recursive)
+  : root_(root),
+    root_type_(StructureType),
+    counted_(false),
+    recursive_(recursive)
 {
   root_ = root;
 }
 
 SampleKeys::SampleKeys(AST_Union* root)
-  : root_ (root),
-    root_type_ (UnionType),
-    counted_ (false)
+  : root_(root),
+    root_type_(UnionType),
+    counted_(false),
+    recursive_(false)
 {
   root_ = root;
 }
@@ -411,4 +438,10 @@ size_t SampleKeys::count()
   }
   return count_;
 }
+
+bool SampleKeys::recursive() const
+{
+  return recursive_;
+}
+
 #endif

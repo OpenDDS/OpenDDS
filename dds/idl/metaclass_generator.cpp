@@ -10,9 +10,7 @@
 
 #include "utl_identifier.h"
 
-#ifdef TAO_IDL_HAS_ANNOTATIONS
-#  include "sample_keys.h"
-#endif
+#include "sample_keys.h"
 
 using namespace AstTypeClassification;
 
