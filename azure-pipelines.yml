@@ -8,28 +8,15 @@ jobs:
       Debug64:
         BuildPlatform: x64
         BuildConfiguration: Debug
-        vcpkgarch: x64-windows
-        vcpkglibdir: debug\lib
       Release64:
         BuildPlatform: x64
         BuildConfiguration: Release
-        vcpkgarch: x64-windows
-        vcpkglibdir: lib
       Debug32:
         BuildPlatform: Win32
         BuildConfiguration: Debug
-        vcpkgarch: x86-windows
-        vcpkglibdir: debug\lib
       Release32:
         BuildPlatform: Win32
         BuildConfiguration: Release
-        vcpkgarch: x86-windows
-        vcpkglibdir: lib
-  variables:
-    XERCESCROOT: $(Build.SourcesDirectory)\vcpkg\packages\xerces-c_$(vcpkgarch)
-    SSL_ROOT: $(Build.SourcesDirectory)\vcpkg\packages\openssl-windows_$(vcpkgarch)
-    SSL_LIBDIR: $(SSL_ROOT)\$(vcpkglibdir)
-    XERCESC_LIBDIR: $(XERCESCROOT)\$(vcpkglibdir)
   steps:
   - powershell: |
       $client = new-object System.Net.WebClient
@@ -46,12 +33,13 @@ jobs:
       filename: tools\scripts\prepend_path
       arguments: '%CD%\ext\strawberry\perl\bin'
       modifyEnvironment: true
-  - script: git clone --depth 1 git://github.com/Microsoft/vcpkg
-    displayName: git clone vcpkg
-  - script: vcpkg\bootstrap-vcpkg
-    displayName: Bootstrap vcpkg
-  - script: vcpkg\vcpkg install --triplet $(vcpkgarch) openssl xerces-c
-    displayName: vcpkg install dependencies
+  - script: |
+      git clone --depth 1 git://github.com/Microsoft/vcpkg
+      call vcpkg\bootstrap-vcpkg
+      if %BuildPlatform%==x64 (set VCPKG_ARCH=x64-windows) else set VCPKG_ARCH=x86-windows
+      vcpkg\vcpkg install --triplet %VCPKG_ARCH% openssl xerces-c
+      echo ##vso[task.setvariable variable=VcPkgInst]%CD%\vcpkg\installed\%VCPKG_ARCH%
+    displayName: Vcpkg
   - task: BatchScript@1
     displayName: VcVars
     inputs:
@@ -59,7 +47,7 @@ jobs:
       modifyEnvironment: true
   - script: |
       if %BuildConfiguration%==Release set OPT=--no-tests
-      call configure -v --ace-github-latest %OPT%
+      call configure -v --ace-github-latest --security --xerces3=$(VcPkgInst) --openssl=$(VcPkgInst) %OPT%
       if %BuildConfiguration%==Release (set SLN=DDS_TAOv2.sln) else set SLN=DDS_TAOv2_all.sln
       echo ##vso[task.setvariable variable=BuildSolution]%SLN%
     displayName: Run configure script
