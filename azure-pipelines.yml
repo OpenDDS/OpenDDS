@@ -37,14 +37,18 @@ jobs:
       git clone --depth 1 git://github.com/Microsoft/vcpkg
       call vcpkg\bootstrap-vcpkg
       if %BuildPlatform%==x64 (set VCPKG_ARCH=x64-windows) else set VCPKG_ARCH=x86-windows
+      if %BuildPlatform%==x64 (set VCVARS_ARCH=x64) else set VCVARS_ARCH=x86
+      echo ##vso[task.setvariable variable=VcVarsArch]%VCVARS_ARCH%
       vcpkg\vcpkg install --triplet %VCPKG_ARCH% openssl xerces-c
+      rmdir /s/q packages buildtrees
       echo ##vso[task.setvariable variable=VcPkgInst]%CD%\vcpkg\installed\%VCPKG_ARCH%
       for /f %%C in ('dir /s/b cmake.exe') do @echo ##vso[task.setvariable variable=VcPkgCMake]%%C
     displayName: Vcpkg
   - task: BatchScript@1
     displayName: VcVars
     inputs:
-      filename: '"C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvars64.bat"'
+      filename: '"C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvarsall.bat"'
+      arguments: $(VcVarsArch)
       modifyEnvironment: true
   - script: |
       if %BuildConfiguration%==Release set OPT=--no-tests --no-debug --optimize
