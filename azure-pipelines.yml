@@ -39,6 +39,7 @@ jobs:
       if %BuildPlatform%==x64 (set VCPKG_ARCH=x64-windows) else set VCPKG_ARCH=x86-windows
       vcpkg\vcpkg install --triplet %VCPKG_ARCH% openssl xerces-c
       echo ##vso[task.setvariable variable=VcPkgInst]%CD%\vcpkg\installed\%VCPKG_ARCH%
+      for /f %%C in ('dir /s/b cmake.exe') do @echo ##vso[task.setvariable variable=VcPkgCMake]%%C
     displayName: Vcpkg
   - task: BatchScript@1
     displayName: VcVars
@@ -47,7 +48,7 @@ jobs:
       modifyEnvironment: true
   - script: |
       if %BuildConfiguration%==Release set OPT=--no-tests
-      call configure -v --ace-github-latest --security --xerces3=$(VcPkgInst) --openssl=$(VcPkgInst) %OPT%
+      call configure -v --ace-github-latest --security --xerces3=$(VcPkgInst) --openssl=$(VcPkgInst) --cmake=$(VcPkgCMake) %OPT%
       if %BuildConfiguration%==Release (set SLN=DDS_TAOv2.sln) else set SLN=DDS_TAOv2_all.sln
       echo ##vso[task.setvariable variable=BuildSolution]%SLN%
     displayName: Run configure script
