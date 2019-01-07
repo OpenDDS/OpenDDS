@@ -13,7 +13,7 @@ use Dumpvalue;
 use File::Spec;
 use File::Basename;
 use File::Copy;
-use File::Path qw(make_path);
+use File::Path;
 require File::Temp;
 use File::Temp ();
 use FileHandle;
@@ -1990,7 +1990,7 @@ sub write_cmake_file {
   my $dir = shift;
   my $module_dir = $dir . '/cmake';
 
-  make_path($module_dir) if ! -d $module_dir;
+  mkpath($module_dir) unless -d $module_dir;
   my $CM = backup_and_open($module_dir . '/config.cmake');
 
   sub whack_to_slash {
