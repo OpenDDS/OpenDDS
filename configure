@@ -1162,6 +1162,21 @@ for my $key (keys %optdep) {
   }
 }
 
+if ($is_windows && !$opts{'optimize'}) { # look for nonstandard vcpkg layout
+  for my $key ('xerces3', 'openssl') {
+    my $env = $optdep{$key}->[0];
+    if ($opts{$key} && $targetEnv{$env}) {
+      if (-d $targetEnv{$env} . '/debug/lib') {
+        print "Using debug/lib subdir for $key\n" if $opts{'verbose'};
+        my $libenv = $env;
+        $libenv =~ s/_?ROOT$/_LIBDIR/;
+        setEnv($libenv, $targetEnv{$env} . '/debug/lib');
+        $opts{$key . '-debugbin'} = 1;
+      }
+    }
+  }
+}
+
 ## OpenSSL version-detection / feature-injection
 if ($opts{'openssl'}) {
   my $ssl_version_file = $opts{'openssl'} . '/' .
@@ -1727,7 +1742,26 @@ sub nested {
   return undef;
 }
 
-if ($cross_compile) {
+sub add_dependency_paths {
+  my %dirs;
+  for my $key ('openssl', 'xerces3') {
+    if ($opts{$key}) {
+      next if $opts{$key} eq '/usr' || $opts{$key} eq 'skip_version_check';
+      my $env = $optdep{$key}->[0];
+      my $suffix = $slash . 'bin';
+      if ($opts{$key . '-debugbin'}) {
+        $suffix = $slash . 'debug' . $suffix;
+      }
+      $dirs{$targetEnv{$env} . $suffix} = 1;
+    }
+  }
+  for my $d (keys %dirs) {
+    push_libpath(\%targetEnv, $d);
+  }
+}
+
+my $cloned_build = $cross_compile && $build_host_tools;
+if ($cloned_build) {
   clone_host_and_target('.');
   setHostEnv('DDS_ROOT', 'build/host');
   setEnv('HOST_DDS', 'build/host');
@@ -1788,13 +1822,7 @@ if ($cross_compile) {
     push_libpath(\%targetEnv, $targetEnv{'ACE_ROOT'} . $slash . 'lib');
     push_libpath(\%targetEnv, $targetEnv{'DDS_ROOT'} . $slash . 'lib');
 
-    if ($opts{'openssl'}) {
-      push_libpath(\%targetEnv, $targetEnv{'SSL_ROOT'} . $slash . 'bin');
-    }
-
-    if ($opts{'xerces3'}) {
-      push_libpath(\%targetEnv, $targetEnv{'XERCESCROOT'} . $slash . 'bin');
-    }
+    add_dependency_paths();
   }
 
   configure_build(\%targetEnv);
@@ -1816,13 +1844,7 @@ else { # not cross-compiling:
     push_libpath(\%targetEnv, $targetEnv{'ACE_ROOT'} . $slash . 'lib');
     push_libpath(\%targetEnv, $targetEnv{'DDS_ROOT'} . $slash . 'lib');
 
-    if ($opts{'openssl'}) {
-      push_libpath(\%targetEnv, $targetEnv{'SSL_ROOT'} . $slash . 'bin');
-    }
-
-    if ($opts{'xerces3'}) {
-      push_libpath(\%targetEnv, $targetEnv{'XERCESCROOT'} . $slash . 'bin');
-    }
+    add_dependency_paths();
   }
 
   configure_build(\%targetEnv);
