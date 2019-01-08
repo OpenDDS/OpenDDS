@@ -55,7 +55,7 @@ Doxygen is run on OpenDDS regularly. There are two hosted versions of this:
     [scoreboard](http://scoreboard.ociweb.com/oci-dds.html) and click the green
     "Doxygen" link near the top.
   - Depending on the activity in the repository this might be unstable because
-    of the time it takes to get the updated Doxygen on to the web sever. Perfer
+    of the time it takes to get the updated Doxygen on to the web sever. Prefer
     latest release unless working with newer code.
 
 See [Documenting Code for Doxygen](#documenting-code-for-doxygen) to see how to
