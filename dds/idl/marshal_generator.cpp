@@ -1167,19 +1167,20 @@ namespace {
                         const string& = "") // same sig as streamCommon
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+    const bool is_union_member = prefix == "uni";
 
     AST_Type* typedeff = type;
     type = resolveActualType(type);
     Classification fld_cls = classify(type);
 
-    const string qual = prefix + '.' + name + (use_cxx11 ? "()" : "");
-    const string indent = (prefix == "uni") ? "    " : "  ";
+    const string qual = prefix + '.' + name + (use_cxx11 && !is_union_member ? "()" : "");
+    const string indent = (is_union_member) ? "    " : "  ";
 
     if (fld_cls & CL_ENUM) {
       return indent + "find_size_ulong(size, padding);\n";
 
     } else if (fld_cls & CL_STRING) {
-      const string suffix = (prefix == "uni") ? "" : ".in()";
+      const string suffix = is_union_member ? "" : ".in()";
       const string get_size = use_cxx11 ? (qual + ".size()")
         : ("ACE_OS::strlen(" + qual + suffix + ")");
       return indent + "find_size_ulong(size, padding);\n" +
@@ -1211,7 +1212,7 @@ namespace {
 
     } else { // sequence, struct, union, array
       string fieldref = prefix,
-             local = name,
+             local = (use_cxx11 && !is_union_member? name + "()" : name),
              tdname = scoped(typedeff->name());
 
       if (!use_cxx11 && (fld_cls & CL_ARRAY)) {
@@ -1241,13 +1242,14 @@ namespace {
                       const string& stru = "")
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+    const bool is_union_member = prefix == "uni";
 
     AST_Type* typedeff = type;
     const string tdname = scoped(typedeff->name());
     type = resolveActualType(type);
     Classification fld_cls = classify(type);
 
-    const string qual = prefix + '.' + name + (use_cxx11 ? "()" : ""),
+    const string qual = prefix + '.' + name + (use_cxx11 && !is_union_member? "()" : ""),
           shift = prefix.substr(0, 2),
           expr = qual.substr(3);
 
@@ -1272,7 +1274,7 @@ namespace {
 
     } else { // sequence, struct, union, array, enum, string(insertion)
       string fieldref = prefix,
-             local = name;
+             local = name + (use_cxx11 && !is_union_member? "()" : "");
 
       const bool accessor =
         local.size() > 2 && local.substr(local.size() - 2) == "()";
@@ -1293,8 +1295,8 @@ namespace {
       }
 
       if (fld_cls & CL_STRING) {
-        if (!accessor) {
-          local += (use_cxx11 ? "()" : ".in()");
+        if (!use_cxx11 && !accessor) {
+          local += ".in()";
         }
         if (fld_cls & CL_BOUNDED) {
           const string args = (fieldref + local).substr(3) + ", " + bounded_arg(type);
@@ -2048,7 +2050,7 @@ bool marshal_generator::gen_union(AST_Union*, UTL_ScopedName* name,
         "  size += max_marshaled_size_ulong();\n";
     } else {
       be_global->impl_ <<
-        "  size += gen_max_marshaled_size(" << insert_cxx11_accessor_parens(wrap_out) << ");\n";
+        "  size += gen_max_marshaled_size(" << wrap_out << ");\n";
     }
     generateSwitchForUnion("uni._d()", findSizeCommon, branches, discriminator,
                            "", "", cxx.c_str());
