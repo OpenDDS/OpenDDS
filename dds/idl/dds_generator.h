@@ -542,7 +542,7 @@ void generateCaseBody(CommonFn commonFn, AST_UnionBranch* branch,
   } else {
     const char* breakString = generateBreaks ? "    break;\n" : "";
     std::string intro;
-    std::string expr = commonFn(name, branch->field_type(),
+    std::string expr = commonFn(name + (parens ? "()" : ""), branch->field_type(),
                                 std::string(namePrefix) + "uni", intro, uni);
     be_global->impl_ <<
       (intro.empty() ? "" : "  ") << intro;
