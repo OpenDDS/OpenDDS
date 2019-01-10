@@ -21,7 +21,7 @@ using namespace AstTypeClassification;
 
 namespace {
 
-  std::string& insert_cxx11_accessor_parens(std::string& dst) {
+  std::string insert_cxx11_accessor_parens(std::string dst) {
     std::string::size_type n = dst.find_first_of(".");
     if (n != std::string::npos) {
       dst.insert(n, "()");
@@ -1167,13 +1167,17 @@ namespace {
                         const string& = "") // same sig as streamCommon
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+
     AST_Type* typedeff = type;
     type = resolveActualType(type);
     Classification fld_cls = classify(type);
-    const string qual = prefix + '.' + name;
+
+    const string qual = prefix + '.' + name + (use_cxx11 ? "()" : "");
     const string indent = (prefix == "uni") ? "    " : "  ";
+
     if (fld_cls & CL_ENUM) {
       return indent + "find_size_ulong(size, padding);\n";
+
     } else if (fld_cls & CL_STRING) {
       const string suffix = (prefix == "uni") ? "" : ".in()";
       const string get_size = use_cxx11 ? (qual + ".size()")
@@ -1182,6 +1186,7 @@ namespace {
         indent + "size += " + get_size
         + ((fld_cls & CL_WIDE) ? " * OpenDDS::DCPS::Serializer::WCHAR_SIZE;\n"
                                : " + 1;\n");
+
     } else if (fld_cls & CL_PRIMITIVE) {
       string align = getAlignment(type);
       if (!align.empty()) {
@@ -1200,21 +1205,28 @@ namespace {
       return align +
         indent + "size += gen_max_marshaled_size(" +
         getWrapper(qual, type, WD_OUTPUT) + ");\n";
+
     } else if (fld_cls == CL_UNKNOWN) {
       return ""; // warning will be issued for the serialize functions
+
     } else { // sequence, struct, union, array
-      string fieldref = prefix, local = name, tdname = scoped(typedeff->name());
+      string fieldref = prefix,
+             local = name,
+             tdname = scoped(typedeff->name());
+
       if (!use_cxx11 && (fld_cls & CL_ARRAY)) {
         intro += "  " + getArrayForany(prefix.c_str(), name.c_str(), tdname) + '\n';
         fieldref += '_';
         if (local.size() > 2 && local.substr(local.size() - 2) == "()") {
           local.erase(local.size() - 2);
         }
+
       } else if (use_cxx11 && (fld_cls & (CL_SEQUENCE | CL_ARRAY))) {
         fieldref = "IDL::DistinctType<const " + tdname + ", " +
           dds_generator::scoped_helper(typedeff->name(), "_") + "_tag>("
           + fieldref + '.';
         local += ')';
+
       } else {
         fieldref += '.';
       }
@@ -1229,11 +1241,16 @@ namespace {
                       const string& stru = "")
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+
     AST_Type* typedeff = type;
     const string tdname = scoped(typedeff->name());
     type = resolveActualType(type);
     Classification fld_cls = classify(type);
-    const string qual = prefix + '.' + name, shift = prefix.substr(0, 2), expr = qual.substr(3);
+
+    const string qual = prefix + '.' + name + (use_cxx11 ? "()" : ""),
+          shift = prefix.substr(0, 2),
+          expr = qual.substr(3);
+
     WrapDirection dir = (shift == ">>") ? WD_INPUT : WD_OUTPUT;
     if ((fld_cls & CL_STRING) && (dir == WD_INPUT)) {
       if (fld_cls & CL_BOUNDED) {
@@ -1241,8 +1258,10 @@ namespace {
         return "(strm " + shift + ' ' + getWrapper(args, type, WD_INPUT) + ')';
       }
       return "(strm " + qual + (use_cxx11 ? "" : ".out()") + ')';
+
     } else if (fld_cls & CL_PRIMITIVE) {
       return "(strm " + shift + ' ' + getWrapper(expr, type, dir) + ')';
+
     } else if (fld_cls == CL_UNKNOWN) {
       if (dir == WD_INPUT) { // no need to warn twice
         std::cerr << "WARNING: field " << name << " can not be serialized.  "
@@ -1250,10 +1269,14 @@ namespace {
           ") can not be used in an OpenDDS topic type." << std::endl;
       }
       return "false";
+
     } else { // sequence, struct, union, array, enum, string(insertion)
-      string fieldref = prefix, local = name;
+      string fieldref = prefix,
+             local = name;
+
       const bool accessor =
         local.size() > 2 && local.substr(local.size() - 2) == "()";
+
       if (!use_cxx11 && (fld_cls & CL_ARRAY)) {
         string pre = prefix;
         if (shift == ">>" || shift == "<<") {
@@ -1264,18 +1287,20 @@ namespace {
         }
         intro += "  " + getArrayForany(pre.c_str(), name.c_str(), tdname) + '\n';
         fieldref += '_';
+
       } else {
         fieldref += '.';
       }
 
       if (fld_cls & CL_STRING) {
-        if (!accessor && !use_cxx11) {
-          local += ".in()";
+        if (!accessor) {
+          local += (use_cxx11 ? "()" : ".in()");
         }
         if (fld_cls & CL_BOUNDED) {
           const string args = (fieldref + local).substr(3) + ", " + bounded_arg(type);
           return "(strm " + shift + ' ' + getWrapper(args, type, WD_OUTPUT) + ')';
         }
+
       } else if (use_cxx11 && (fld_cls & (CL_ARRAY | CL_SEQUENCE))) {
         return "(strm " + shift + " IDL::DistinctType<" +
           (dir == WD_OUTPUT ? "const " : "") + tdname + ", " +
@@ -1613,8 +1638,7 @@ bool marshal_generator::gen_struct(AST_Structure* /* node */,
       if (!cond.empty()) {
         expr += "  if (" + cond + ") {\n  ";
       }
-      expr += findSizeCommon(use_cxx11 ? field_name + "()" : field_name,
-                             fields[i]->field_type(), "stru", intro);
+      expr += findSizeCommon(field_name, fields[i]->field_type(), "stru", intro);
       if (!cond.empty()) {
         expr += "  }\n";
       }
@@ -1634,8 +1658,7 @@ bool marshal_generator::gen_struct(AST_Structure* /* node */,
       if (!cond.empty()) {
         expr += "(!(" + cond + ") || ";
       }
-      expr += streamCommon(use_cxx11 ? field_name + "()" : field_name,
-                           fields[i]->field_type(), "<< stru", intro, cxx);
+      expr += streamCommon(field_name, fields[i]->field_type(), "<< stru", intro, cxx);
       if (!cond.empty()) {
         expr += ")";
       }
@@ -1656,8 +1679,7 @@ bool marshal_generator::gen_struct(AST_Structure* /* node */,
         expr += rtpsCustom.preFieldRead(field_name);
         expr += "(!(" + cond + ") || ";
       }
-      expr += streamCommon(use_cxx11 ? field_name + "()" : field_name,
-                           fields[i]->field_type(), ">> stru", intro, cxx);
+      expr += streamCommon(field_name, fields[i]->field_type(), ">> stru", intro, cxx);
       if (!cond.empty()) {
         expr += ")";
       }
@@ -1769,8 +1791,7 @@ bool marshal_generator::gen_struct(AST_Structure* /* node */,
                     << " (" << key_name << "). " << error << std::endl;
           return false;
         }
-        expr += findSizeCommon(use_cxx11 ? insert_cxx11_accessor_parens(key_name) : key_name,
-                               field_type, "stru.t", intro);
+        expr += findSizeCommon(key_name, field_type, "stru.t", intro);
       }
       be_global->impl_ << intro << expr;
     }
@@ -1796,8 +1817,7 @@ bool marshal_generator::gen_struct(AST_Structure* /* node */,
         }
         if (first) first = false;
         else       expr += "\n    && ";
-        expr += streamCommon(use_cxx11 ? insert_cxx11_accessor_parens(key_name) : key_name,
-                             field_type, "<< stru.t", intro);
+        expr += streamCommon(key_name, field_type, "<< stru.t", intro);
       }
       if (first) be_global->impl_ << intro << "  return true;\n";
       else be_global->impl_ << intro << "  return " << expr << ";\n";
@@ -1824,8 +1844,7 @@ bool marshal_generator::gen_struct(AST_Structure* /* node */,
         }
         if (first) first = false;
         else       expr += "\n    && ";
-        expr += streamCommon(use_cxx11 ? insert_cxx11_accessor_parens(key_name) : key_name,
-                             field_type, ">> stru.t", intro);
+        expr += streamCommon(key_name, field_type, ">> stru.t", intro);
       }
       if (first) be_global->impl_ << intro << "  return true;\n";
       else be_global->impl_ << intro << "  return " << expr << ";\n";
@@ -2029,7 +2048,7 @@ bool marshal_generator::gen_union(AST_Union*, UTL_ScopedName* name,
         "  size += max_marshaled_size_ulong();\n";
     } else {
       be_global->impl_ <<
-        "  size += gen_max_marshaled_size(" << wrap_out << ");\n";
+        "  size += gen_max_marshaled_size(" << insert_cxx11_accessor_parens(wrap_out) << ");\n";
     }
     generateSwitchForUnion("uni._d()", findSizeCommon, branches, discriminator,
                            "", "", cxx.c_str());
