@@ -13,6 +13,29 @@
 #include <string>
 using std::string;
 
+namespace {
+    std::string insert_cxx11_accessor_parens(std::string src, bool is_union_member) {
+    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+    if (!use_cxx11 || is_union_member) return src;
+
+    std::string::size_type n = 0;
+    while ((n = src.find(".", n)) != std::string::npos) {
+      if (src[n-1] != ']') {
+        src.insert(n, "()");
+        n += 3;
+      } else {
+        ++n;
+      }
+    }
+
+    n = 0;
+    while ((n = src.find("[", n)) != std::string::npos) {
+      src.insert(n, "()");
+      n += 3;
+    }
+    return src[src.length()-1] == ']' ? src : src + "()";
+  }
+}
 bool keys_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
   const std::vector<AST_Field*>&, AST_Type::SIZE_TYPE, const char*)
 {
@@ -75,7 +98,7 @@ bool keys_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
       for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
         string fname = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
         if (use_cxx11) {
-          fname += "()";
+          fname = insert_cxx11_accessor_parens(fname, false);
         }
         be_global->header_ <<
           "    if (v1." << fname << " < v2." << fname << ") return true;\n"

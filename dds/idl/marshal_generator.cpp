@@ -21,16 +21,26 @@ using namespace AstTypeClassification;
 
 namespace {
 
-  std::string insert_cxx11_accessor_parens(std::string dst) {
-    std::string::size_type n = dst.find_first_of(".");
-    if (n != std::string::npos) {
-      dst.insert(n, "()");
+  std::string insert_cxx11_accessor_parens(std::string src, bool is_union_member) {
+    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+    if (!use_cxx11 || is_union_member) return src;
+
+    std::string::size_type n = 0;
+    while ((n = src.find(".", n)) != std::string::npos) {
+      if (src[n-1] != ']') {
+        src.insert(n, "()");
+        n += 3;
+      } else {
+        ++n;
+      }
     }
-    n = dst.find_first_of("[");
-    if (n != std::string::npos) {
-      dst.insert(n, "()");
+
+    n = 0;
+    while ((n = src.find("[", n)) != std::string::npos) {
+      src.insert(n, "()");
+      n += 3;
     }
-    return dst;
+    return src[src.length()-1] == ']' ? src : src + "()";
   }
 
   typedef bool (*is_special_case)(const string& cxx);
@@ -1173,7 +1183,7 @@ namespace {
     type = resolveActualType(type);
     Classification fld_cls = classify(type);
 
-    const string qual = prefix + '.' + name + (use_cxx11 && !is_union_member ? "()" : "");
+    const string qual = prefix + '.' + insert_cxx11_accessor_parens(name, is_union_member);
     const string indent = (is_union_member) ? "    " : "  ";
 
     if (fld_cls & CL_ENUM) {
@@ -1212,7 +1222,7 @@ namespace {
 
     } else { // sequence, struct, union, array
       string fieldref = prefix,
-             local = (use_cxx11 && !is_union_member? name + "()" : name),
+             local = insert_cxx11_accessor_parens(name, is_union_member),
              tdname = scoped(typedeff->name());
 
       if (!use_cxx11 && (fld_cls & CL_ARRAY)) {
@@ -1249,7 +1259,7 @@ namespace {
     type = resolveActualType(type);
     Classification fld_cls = classify(type);
 
-    const string qual = prefix + '.' + name + (use_cxx11 && !is_union_member? "()" : ""),
+    const string qual = prefix + '.' + insert_cxx11_accessor_parens(name, is_union_member),
           shift = prefix.substr(0, 2),
           expr = qual.substr(3);
 
@@ -1274,7 +1284,7 @@ namespace {
 
     } else { // sequence, struct, union, array, enum, string(insertion)
       string fieldref = prefix,
-             local = name + (use_cxx11 && !is_union_member? "()" : "");
+             local = insert_cxx11_accessor_parens(name, is_union_member);
 
       const bool accessor =
         local.size() > 2 && local.substr(local.size() - 2) == "()";
