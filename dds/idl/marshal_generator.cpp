@@ -1242,7 +1242,7 @@ namespace {
                       const string& stru = "")
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-    const bool is_union_member = prefix == "uni";
+    const bool is_union_member = prefix.substr(3) == "uni";
 
     AST_Type* typedeff = type;
     const string tdname = scoped(typedeff->name());
