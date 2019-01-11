@@ -6,36 +6,13 @@
  */
 
 #include "keys_generator.h"
-#include "be_extern.h"
+#include "gen_util.h"
 
 #include "utl_identifier.h"
 
 #include <string>
 using std::string;
 
-namespace {
-    std::string insert_cxx11_accessor_parens(std::string src, bool is_union_member) {
-    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-    if (!use_cxx11 || is_union_member) return src;
-
-    std::string::size_type n = 0;
-    while ((n = src.find(".", n)) != std::string::npos) {
-      if (src[n-1] != ']') {
-        src.insert(n, "()");
-        n += 3;
-      } else {
-        ++n;
-      }
-    }
-
-    n = 0;
-    while ((n = src.find("[", n)) != std::string::npos) {
-      src.insert(n, "()");
-      n += 3;
-    }
-    return src[src.length()-1] == ']' ? src : src + "()";
-  }
-}
 bool keys_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
   const std::vector<AST_Field*>&, AST_Type::SIZE_TYPE, const char*)
 {

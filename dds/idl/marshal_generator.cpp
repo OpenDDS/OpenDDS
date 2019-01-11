@@ -6,7 +6,7 @@
  */
 
 #include "marshal_generator.h"
-#include "be_extern.h"
+#include "gen_util.h"
 #include "utl_identifier.h"
 #include <string>
 #include <sstream>
@@ -20,29 +20,6 @@ using namespace AstTypeClassification;
 #define LENGTH(CARRAY) (sizeof(CARRAY)/sizeof(CARRAY[0]))
 
 namespace {
-
-  std::string insert_cxx11_accessor_parens(std::string src, bool is_union_member) {
-    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-    if (!use_cxx11 || is_union_member) return src;
-
-    std::string::size_type n = 0;
-    while ((n = src.find(".", n)) != std::string::npos) {
-      if (src[n-1] != ']') {
-        src.insert(n, "()");
-        n += 3;
-      } else {
-        ++n;
-      }
-    }
-
-    n = 0;
-    while ((n = src.find("[", n)) != std::string::npos) {
-      src.insert(n, "()");
-      n += 3;
-    }
-    return src[src.length()-1] == ']' ? src : src + "()";
-  }
-
   typedef bool (*is_special_case)(const string& cxx);
   typedef bool (*gen_special_case)(const string& cxx);
 
