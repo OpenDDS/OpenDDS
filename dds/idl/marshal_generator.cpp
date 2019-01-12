@@ -1165,7 +1165,6 @@ namespace {
 
     if (fld_cls & CL_ENUM) {
       return indent + "find_size_ulong(size, padding);\n";
-
     } else if (fld_cls & CL_STRING) {
       const string suffix = is_union_member ? "" : ".in()";
       const string get_size = use_cxx11 ? (qual + ".size()")
@@ -1174,7 +1173,6 @@ namespace {
         indent + "size += " + get_size
         + ((fld_cls & CL_WIDE) ? " * OpenDDS::DCPS::Serializer::WCHAR_SIZE;\n"
                                : " + 1;\n");
-
     } else if (fld_cls & CL_PRIMITIVE) {
       string align = getAlignment(type);
       if (!align.empty()) {
@@ -1193,10 +1191,8 @@ namespace {
       return align +
         indent + "size += gen_max_marshaled_size(" +
         getWrapper(qual, type, WD_OUTPUT) + ");\n";
-
     } else if (fld_cls == CL_UNKNOWN) {
       return ""; // warning will be issued for the serialize functions
-
     } else { // sequence, struct, union, array
       string fieldref = prefix,
              local = insert_cxx11_accessor_parens(name, is_union_member),
@@ -1208,13 +1204,11 @@ namespace {
         if (local.size() > 2 && local.substr(local.size() - 2) == "()") {
           local.erase(local.size() - 2);
         }
-
       } else if (use_cxx11 && (fld_cls & (CL_SEQUENCE | CL_ARRAY))) {
         fieldref = "IDL::DistinctType<const " + tdname + ", " +
           dds_generator::scoped_helper(typedeff->name(), "_") + "_tag>("
           + fieldref + '.';
         local += ')';
-
       } else {
         fieldref += '.';
       }
@@ -1247,10 +1241,8 @@ namespace {
         return "(strm " + shift + ' ' + getWrapper(args, type, WD_INPUT) + ')';
       }
       return "(strm " + qual + (use_cxx11 ? "" : ".out()") + ')';
-
     } else if (fld_cls & CL_PRIMITIVE) {
       return "(strm " + shift + ' ' + getWrapper(expr, type, dir) + ')';
-
     } else if (fld_cls == CL_UNKNOWN) {
       if (dir == WD_INPUT) { // no need to warn twice
         std::cerr << "WARNING: field " << name << " can not be serialized.  "
@@ -1258,14 +1250,12 @@ namespace {
           ") can not be used in an OpenDDS topic type." << std::endl;
       }
       return "false";
-
     } else { // sequence, struct, union, array, enum, string(insertion)
       string fieldref = prefix,
              local = insert_cxx11_accessor_parens(name, is_union_member);
 
       const bool accessor =
         local.size() > 2 && local.substr(local.size() - 2) == "()";
-
       if (!use_cxx11 && (fld_cls & CL_ARRAY)) {
         string pre = prefix;
         if (shift == ">>" || shift == "<<") {
@@ -1276,20 +1266,18 @@ namespace {
         }
         intro += "  " + getArrayForany(pre.c_str(), name.c_str(), tdname) + '\n';
         fieldref += '_';
-
       } else {
         fieldref += '.';
       }
 
       if (fld_cls & CL_STRING) {
-        if (!use_cxx11 && !accessor) {
+        if (!accessor && !use_cxx11) {
           local += ".in()";
         }
         if (fld_cls & CL_BOUNDED) {
           const string args = (fieldref + local).substr(3) + ", " + bounded_arg(type);
           return "(strm " + shift + ' ' + getWrapper(args, type, WD_OUTPUT) + ')';
         }
-
       } else if (use_cxx11 && (fld_cls & (CL_ARRAY | CL_SEQUENCE))) {
         return "(strm " + shift + " IDL::DistinctType<" +
           (dir == WD_OUTPUT ? "const " : "") + tdname + ", " +
