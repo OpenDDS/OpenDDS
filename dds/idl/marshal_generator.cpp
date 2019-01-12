@@ -1585,7 +1585,6 @@ bool marshal_generator::gen_struct(AST_Structure* /* node */,
                                    AST_Type::SIZE_TYPE /* size */,
                                    const char* /* repoid */)
 {
-  const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
   NamespaceGuard ng;
   be_global->add_include("dds/DCPS/Serializer.h");
   string cxx = scoped(name); // name as a C++ class
