@@ -6,8 +6,6 @@
  */
 
 #include "keys_generator.h"
-#include "be_extern.h"
-
 #include "utl_identifier.h"
 
 #include <string>
@@ -75,7 +73,7 @@ bool keys_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
       for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
         string fname = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
         if (use_cxx11) {
-          fname += "()";
+          fname = insert_cxx11_accessor_parens(fname, false);
         }
         be_global->header_ <<
           "    if (v1." << fname << " < v2." << fname << ") return true;\n"

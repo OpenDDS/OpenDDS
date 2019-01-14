@@ -6,8 +6,8 @@
  */
 
 #include "marshal_generator.h"
-#include "be_extern.h"
 #include "utl_identifier.h"
+
 #include <string>
 #include <sstream>
 #include <iostream>
@@ -20,7 +20,6 @@ using namespace AstTypeClassification;
 #define LENGTH(CARRAY) (sizeof(CARRAY)/sizeof(CARRAY[0]))
 
 namespace {
-
   typedef bool (*is_special_case)(const string& cxx);
   typedef bool (*gen_special_case)(const string& cxx);
 
@@ -1155,15 +1154,19 @@ namespace {
                         const string& = "") // same sig as streamCommon
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+    const bool is_union_member = prefix == "uni";
+
     AST_Type* typedeff = type;
     type = resolveActualType(type);
     Classification fld_cls = classify(type);
-    const string qual = prefix + '.' + name;
-    const string indent = (prefix == "uni") ? "    " : "  ";
+
+    const string qual = prefix + '.' + insert_cxx11_accessor_parens(name, is_union_member);
+    const string indent = (is_union_member) ? "    " : "  ";
+
     if (fld_cls & CL_ENUM) {
       return indent + "find_size_ulong(size, padding);\n";
     } else if (fld_cls & CL_STRING) {
-      const string suffix = (prefix == "uni") ? "" : ".in()";
+      const string suffix = is_union_member ? "" : ".in()";
       const string get_size = use_cxx11 ? (qual + ".size()")
         : ("ACE_OS::strlen(" + qual + suffix + ")");
       return indent + "find_size_ulong(size, padding);\n" +
@@ -1191,7 +1194,10 @@ namespace {
     } else if (fld_cls == CL_UNKNOWN) {
       return ""; // warning will be issued for the serialize functions
     } else { // sequence, struct, union, array
-      string fieldref = prefix, local = name, tdname = scoped(typedeff->name());
+      string fieldref = prefix,
+             local = insert_cxx11_accessor_parens(name, is_union_member),
+             tdname = scoped(typedeff->name());
+
       if (!use_cxx11 && (fld_cls & CL_ARRAY)) {
         intro += "  " + getArrayForany(prefix.c_str(), name.c_str(), tdname) + '\n';
         fieldref += '_';
@@ -1217,11 +1223,17 @@ namespace {
                       const string& stru = "")
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+    const bool is_union_member = prefix.substr(3) == "uni";
+
     AST_Type* typedeff = type;
     const string tdname = scoped(typedeff->name());
     type = resolveActualType(type);
     Classification fld_cls = classify(type);
-    const string qual = prefix + '.' + name, shift = prefix.substr(0, 2), expr = qual.substr(3);
+
+    const string qual = prefix + '.' + insert_cxx11_accessor_parens(name, is_union_member),
+          shift = prefix.substr(0, 2),
+          expr = qual.substr(3);
+
     WrapDirection dir = (shift == ">>") ? WD_INPUT : WD_OUTPUT;
     if ((fld_cls & CL_STRING) && (dir == WD_INPUT)) {
       if (fld_cls & CL_BOUNDED) {
@@ -1239,7 +1251,9 @@ namespace {
       }
       return "false";
     } else { // sequence, struct, union, array, enum, string(insertion)
-      string fieldref = prefix, local = name;
+      string fieldref = prefix,
+             local = insert_cxx11_accessor_parens(name, is_union_member);
+
       const bool accessor =
         local.size() > 2 && local.substr(local.size() - 2) == "()";
       if (!use_cxx11 && (fld_cls & CL_ARRAY)) {
@@ -1571,7 +1585,6 @@ bool marshal_generator::gen_struct(AST_Structure* /* node */,
                                    AST_Type::SIZE_TYPE /* size */,
                                    const char* /* repoid */)
 {
-  const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
   NamespaceGuard ng;
   be_global->add_include("dds/DCPS/Serializer.h");
   string cxx = scoped(name); // name as a C++ class
@@ -1601,8 +1614,7 @@ bool marshal_generator::gen_struct(AST_Structure* /* node */,
       if (!cond.empty()) {
         expr += "  if (" + cond + ") {\n  ";
       }
-      expr += findSizeCommon(use_cxx11 ? field_name + "()" : field_name,
-                             fields[i]->field_type(), "stru", intro);
+      expr += findSizeCommon(field_name, fields[i]->field_type(), "stru", intro);
       if (!cond.empty()) {
         expr += "  }\n";
       }
@@ -1622,8 +1634,7 @@ bool marshal_generator::gen_struct(AST_Structure* /* node */,
       if (!cond.empty()) {
         expr += "(!(" + cond + ") || ";
       }
-      expr += streamCommon(use_cxx11 ? field_name + "()" : field_name,
-                           fields[i]->field_type(), "<< stru", intro, cxx);
+      expr += streamCommon(field_name, fields[i]->field_type(), "<< stru", intro, cxx);
       if (!cond.empty()) {
         expr += ")";
       }
@@ -1644,8 +1655,7 @@ bool marshal_generator::gen_struct(AST_Structure* /* node */,
         expr += rtpsCustom.preFieldRead(field_name);
         expr += "(!(" + cond + ") || ";
       }
-      expr += streamCommon(use_cxx11 ? field_name + "()" : field_name,
-                           fields[i]->field_type(), ">> stru", intro, cxx);
+      expr += streamCommon(field_name, fields[i]->field_type(), ">> stru", intro, cxx);
       if (!cond.empty()) {
         expr += ")";
       }
@@ -1757,8 +1767,7 @@ bool marshal_generator::gen_struct(AST_Structure* /* node */,
                     << " (" << key_name << "). " << error << std::endl;
           return false;
         }
-        expr += findSizeCommon(use_cxx11 ? key_name + "()" : key_name,
-                               field_type, "stru.t", intro);
+        expr += findSizeCommon(key_name, field_type, "stru.t", intro);
       }
       be_global->impl_ << intro << expr;
     }
@@ -1784,8 +1793,7 @@ bool marshal_generator::gen_struct(AST_Structure* /* node */,
         }
         if (first) first = false;
         else       expr += "\n    && ";
-        expr += streamCommon(use_cxx11 ? key_name + "()" : key_name,
-                             field_type, "<< stru.t", intro);
+        expr += streamCommon(key_name, field_type, "<< stru.t", intro);
       }
       if (first) be_global->impl_ << intro << "  return true;\n";
       else be_global->impl_ << intro << "  return " << expr << ";\n";
@@ -1812,8 +1820,7 @@ bool marshal_generator::gen_struct(AST_Structure* /* node */,
         }
         if (first) first = false;
         else       expr += "\n    && ";
-        expr += streamCommon(use_cxx11 ? key_name + "()" : key_name,
-                             field_type, ">> stru.t", intro);
+        expr += streamCommon(key_name, field_type, ">> stru.t", intro);
       }
       if (first) be_global->impl_ << intro << "  return true;\n";
       else be_global->impl_ << intro << "  return " << expr << ";\n";

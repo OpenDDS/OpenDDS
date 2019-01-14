@@ -1,0 +1,10 @@
+project: dcps {
+  idlflags      += -Wb,stub_export_include=NestedTypesTest_export.h \
+                   -Wb,stub_export_macro=NestedTypesTest_Export -SS
+  dcps_ts_flags += -Wb,export_macro=NestedTypesTest_Export
+  dynamicflags  += NESTEDTYPESTEST_BUILD_DLL
+
+  TypeSupport_Files {
+    NestedTypesTest.idl
+  }
+}
