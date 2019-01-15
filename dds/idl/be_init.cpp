@@ -59,6 +59,7 @@ BE_post_init(char*[], long)
 
 #ifdef TAO_IDL_HAS_ANNOTATIONS
   if (idl_global->idl_version_ >= IDL_VERSION_4) {
+    DRV_cpp_putarg("-D__OPENDDS_IDL_HAS_ANNOTATIONS");
     idl_global->eval(
       "@annotation key {\n"
       "};\n"
