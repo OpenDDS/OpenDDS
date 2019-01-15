@@ -299,8 +299,8 @@ bool itl_generator::gen_struct(AST_Structure* node, UTL_ScopedName*,
   if (!be_global->generate_itl())
     return true;
 
-  bool is_sample_type =
-    idl_global->is_dcps_type(node->name()) || be_global->is_sample_type(node);
+  bool is_topic_type =
+    idl_global->is_dcps_type(node->name()) || be_global->is_topic_type(node);
 
   new_type();
   be_global->itl_ << Open(this)
@@ -311,7 +311,7 @@ bool itl_generator::gen_struct(AST_Structure* node, UTL_ScopedName*,
 
   // Check if this is defined as a primary data type
                   << Indent(this) << "\"note\" : { \"is_dcps_data_type\" : "
-                  << (is_sample_type ? "true" : "false")
+                  << (is_topic_type ? "true" : "false")
                   << " },\n"
 
                   << Indent(this) << "\"type\" :\n"

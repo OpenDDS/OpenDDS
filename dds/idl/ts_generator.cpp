@@ -7,7 +7,7 @@
 
 #include "ts_generator.h"
 #include "be_extern.h"
-#include "sample_keys.h"
+#include "topic_keys.h"
 
 #include "utl_identifier.h"
 
@@ -73,8 +73,8 @@ bool ts_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
     key_count = info->key_list_.size();
   }
 #ifdef TAO_IDL_HAS_ANNOTATIONS
-  else if (be_global->is_sample_type(node)) {
-    key_count = SampleKeys(node).count();
+  else if (be_global->is_topic_type(node)) {
+    key_count = TopicKeys(node).count();
   }
 #endif
   else {
@@ -265,7 +265,7 @@ namespace java_ts_generator {
   void generate(AST_Structure* node) {
     UTL_ScopedName* name = node->name();
 
-    if (!(idl_global->is_dcps_type(name) || be_global->is_sample_type(node))) {
+    if (!(idl_global->is_dcps_type(name) || be_global->is_topic_type(node))) {
       return;
     }
 

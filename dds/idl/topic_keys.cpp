@@ -11,25 +11,25 @@
 #include "ast_union.h"
 #include "ast_array.h"
 
-#include "sample_keys.h"
+#include "topic_keys.h"
 
-static const char* root_type_to_string(SampleKeys::RootType root_type)
+static const char* root_type_to_string(TopicKeys::RootType root_type)
 {
   switch (root_type) {
-  case SampleKeys::PrimitiveType:
+  case TopicKeys::PrimitiveType:
     return "PrimitiveType";
-  case SampleKeys::StructureType:
+  case TopicKeys::StructureType:
     return "StructureType";
-  case SampleKeys::UnionType:
+  case TopicKeys::UnionType:
     return "UnionType";
-  case SampleKeys::ArrayType:
+  case TopicKeys::ArrayType:
     return "ArrayType";
   default:
     return "InvalidType";
   }
 }
 
-SampleKeys::RootType SampleKeys::root_type(AST_Type* type)
+TopicKeys::RootType TopicKeys::root_type(AST_Type* type)
 {
   if (!type) {
     return InvalidType;
@@ -51,21 +51,21 @@ SampleKeys::RootType SampleKeys::root_type(AST_Type* type)
   }
 }
 
-SampleKeys::Error::Error()
+TopicKeys::Error::Error()
 {
 }
 
-SampleKeys::Error::Error(const SampleKeys::Error& error)
+TopicKeys::Error::Error(const TopicKeys::Error& error)
   : message_(error.message_)
 {
 }
 
-SampleKeys::Error::Error(const std::string& message)
+TopicKeys::Error::Error(const std::string& message)
   : message_(message)
 {
 }
 
-SampleKeys::Error::Error(AST_Decl* node, const std::string& message)
+TopicKeys::Error::Error(AST_Decl* node, const std::string& message)
 {
   std::stringstream ss;
   if (node) {
@@ -77,18 +77,18 @@ SampleKeys::Error::Error(AST_Decl* node, const std::string& message)
   message_ = ss.str();
 }
 
-SampleKeys::Error& SampleKeys::Error::operator=(const SampleKeys::Error& error)
+TopicKeys::Error& TopicKeys::Error::operator=(const TopicKeys::Error& error)
 {
   message_ = error.message_;
   return *this;
 }
 
-const char* SampleKeys::Error::what() const noexcept
+const char* TopicKeys::Error::what() const noexcept
 {
   return message_.c_str();
 }
 
-SampleKeys::Iterator::Iterator()
+TopicKeys::Iterator::Iterator()
   : parent_(0),
     pos_(0),
     child_(0),
@@ -100,7 +100,7 @@ SampleKeys::Iterator::Iterator()
 {
 }
 
-SampleKeys::Iterator::Iterator(SampleKeys& parent)
+TopicKeys::Iterator::Iterator(TopicKeys& parent)
   : parent_(0),
     pos_(0),
     child_(0),
@@ -113,7 +113,7 @@ SampleKeys::Iterator::Iterator(SampleKeys& parent)
   ++(*this);
 }
 
-SampleKeys::Iterator::Iterator(AST_Type* root, Iterator* parent)
+TopicKeys::Iterator::Iterator(AST_Type* root, Iterator* parent)
   : parent_(parent),
     pos_(0),
     child_(0),
@@ -121,12 +121,12 @@ SampleKeys::Iterator::Iterator(AST_Type* root, Iterator* parent)
     level_(parent->level() + 1),
     recursive_(parent->recursive_)
 {
-  root_type_ = SampleKeys::root_type(root);
+  root_type_ = TopicKeys::root_type(root);
   root_ = root;
   ++(*this);
 }
 
-SampleKeys::Iterator::Iterator(AST_Field* root, Iterator* parent)
+TopicKeys::Iterator::Iterator(AST_Field* root, Iterator* parent)
   : parent_(parent),
     pos_(0),
     child_(0),
@@ -135,7 +135,7 @@ SampleKeys::Iterator::Iterator(AST_Field* root, Iterator* parent)
     recursive_(parent->recursive_)
 {
   AST_Type* type = root->field_type()->unaliased_type();
-  root_type_ = SampleKeys::root_type(type);
+  root_type_ = TopicKeys::root_type(type);
   if (root_type_ == PrimitiveType) {
     root_ = root;
   } else {
@@ -144,7 +144,7 @@ SampleKeys::Iterator::Iterator(AST_Field* root, Iterator* parent)
   ++(*this);
 }
 
-SampleKeys::Iterator::Iterator(const SampleKeys::Iterator& other)
+TopicKeys::Iterator::Iterator(const TopicKeys::Iterator& other)
   : pos_(0),
     child_(0),
     current_value_(0),
@@ -156,12 +156,12 @@ SampleKeys::Iterator::Iterator(const SampleKeys::Iterator& other)
   *this = other;
 }
 
-SampleKeys::Iterator::~Iterator()
+TopicKeys::Iterator::~Iterator()
 {
   cleanup();
 }
 
-SampleKeys::Iterator& SampleKeys::Iterator::operator=(const SampleKeys::Iterator& other)
+TopicKeys::Iterator& TopicKeys::Iterator::operator=(const TopicKeys::Iterator& other)
 {
   cleanup();
   parent_ = other.parent_;
@@ -175,7 +175,7 @@ SampleKeys::Iterator& SampleKeys::Iterator::operator=(const SampleKeys::Iterator
   return *this;
 }
 
-SampleKeys::Iterator& SampleKeys::Iterator::operator++()
+TopicKeys::Iterator& TopicKeys::Iterator::operator++()
 {
   // Nop if we are a invalid iterator of any type
   if (!root_ || root_type_ == InvalidType) {
@@ -278,19 +278,19 @@ SampleKeys::Iterator& SampleKeys::Iterator::operator++()
   return *this;
 }
 
-SampleKeys::Iterator SampleKeys::Iterator::operator++(int)
+TopicKeys::Iterator TopicKeys::Iterator::operator++(int)
 {
   Iterator prev(*this);
   ++(*this);
   return prev;
 }
 
-SampleKeys::Iterator::value_type SampleKeys::Iterator::operator*() const
+TopicKeys::Iterator::value_type TopicKeys::Iterator::operator*() const
 {
   return current_value_;
 }
 
-bool SampleKeys::Iterator::operator==(const SampleKeys::Iterator& other) const
+bool TopicKeys::Iterator::operator==(const TopicKeys::Iterator& other) const
 {
   return
     parent_ == other.parent_ &&
@@ -305,19 +305,19 @@ bool SampleKeys::Iterator::operator==(const SampleKeys::Iterator& other) const
     );
 }
 
-bool SampleKeys::Iterator::operator!=(const SampleKeys::Iterator& other) const
+bool TopicKeys::Iterator::operator!=(const TopicKeys::Iterator& other) const
 {
   return !(*this == other);
 }
 
-std::string SampleKeys::Iterator::path()
+std::string TopicKeys::Iterator::path()
 {
   std::stringstream ss;
   path_i(ss);
   return ss.str();
 }
 
-void SampleKeys::Iterator::path_i(std::stringstream& ss)
+void TopicKeys::Iterator::path_i(std::stringstream& ss)
 {
   if (root_type_ == StructureType) {
     AST_Structure* struct_root = dynamic_cast<AST_Structure*>(root_);
@@ -330,34 +330,34 @@ void SampleKeys::Iterator::path_i(std::stringstream& ss)
   } else if (root_type_ == ArrayType) {
     ss << '[' << pos_ << ']';
   } else if (root_type_ != PrimitiveType) {
-    throw Error(root_, "Can't get path for invalid sample key iterator!");
+    throw Error(root_, "Can't get path for invalid topic key iterator!");
   }
   if (child_ && recursive_) {
     child_->path_i(ss);
   }
 }
 
-void SampleKeys::Iterator::cleanup()
+void TopicKeys::Iterator::cleanup()
 {
   delete child_;
 }
 
-SampleKeys::RootType SampleKeys::Iterator::root_type() const
+TopicKeys::RootType TopicKeys::Iterator::root_type() const
 {
   return child_ ? child_->root_type() : root_type_;
 }
 
-SampleKeys::RootType SampleKeys::Iterator::parents_root_type() const
+TopicKeys::RootType TopicKeys::Iterator::parents_root_type() const
 {
   return child_ ? child_->parents_root_type() : (parent_ ? parent_->root_type_ : InvalidType);
 }
 
-size_t SampleKeys::Iterator::level() const
+size_t TopicKeys::Iterator::level() const
 {
   return child_ ? child_->level() : level_;
 }
 
-AST_Type* SampleKeys::Iterator::get_ast_type() const
+AST_Type* TopicKeys::Iterator::get_ast_type() const
 {
   switch (root_type()) {
   case UnionType:
@@ -384,7 +384,7 @@ AST_Type* SampleKeys::Iterator::get_ast_type() const
   }
 }
 
-SampleKeys::SampleKeys(AST_Structure* root, bool recursive)
+TopicKeys::TopicKeys(AST_Structure* root, bool recursive)
   : root_(root),
     root_type_(StructureType),
     counted_(false),
@@ -393,7 +393,7 @@ SampleKeys::SampleKeys(AST_Structure* root, bool recursive)
   root_ = root;
 }
 
-SampleKeys::SampleKeys(AST_Union* root)
+TopicKeys::TopicKeys(AST_Union* root)
   : root_(root),
     root_type_(UnionType),
     counted_(false),
@@ -402,31 +402,31 @@ SampleKeys::SampleKeys(AST_Union* root)
   root_ = root;
 }
 
-SampleKeys::~SampleKeys()
+TopicKeys::~TopicKeys()
 {
 }
 
-SampleKeys::Iterator SampleKeys::begin()
+TopicKeys::Iterator TopicKeys::begin()
 {
   return Iterator(*this);
 }
 
-SampleKeys::Iterator SampleKeys::end()
+TopicKeys::Iterator TopicKeys::end()
 {
   return Iterator();
 }
 
-AST_Decl* SampleKeys::root() const
+AST_Decl* TopicKeys::root() const
 {
   return root_;
 }
 
-SampleKeys::RootType SampleKeys::root_type() const
+TopicKeys::RootType TopicKeys::root_type() const
 {
   return root_type_;
 }
 
-size_t SampleKeys::count()
+size_t TopicKeys::count()
 {
   if (!counted_) {
     count_ = 0;
@@ -439,7 +439,7 @@ size_t SampleKeys::count()
   return count_;
 }
 
-bool SampleKeys::recursive() const
+bool TopicKeys::recursive() const
 {
   return recursive_;
 }

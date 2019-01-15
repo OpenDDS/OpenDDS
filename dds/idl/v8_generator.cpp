@@ -184,7 +184,7 @@ bool v8_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
     }
   }
 
-  if (idl_global->is_dcps_type(name) || be_global->is_sample_type(node)) {
+  if (idl_global->is_dcps_type(name) || be_global->is_topic_type(node)) {
     be_global->add_include("dds/DCPS/V8TypeConverter.h",
                            BE_GlobalData::STREAM_CPP);
     ScopedNamespaceGuard cppGuard(name, be_global->impl_);

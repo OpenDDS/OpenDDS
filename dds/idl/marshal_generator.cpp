@@ -8,7 +8,7 @@
 #include "marshal_generator.h"
 #include "be_extern.h"
 #include "utl_identifier.h"
-#include "sample_keys.h"
+#include "topic_keys.h"
 
 #include <string>
 #include <sstream>
@@ -1656,13 +1656,14 @@ bool marshal_generator::gen_struct(AST_Structure* node,
   }
 
 #ifdef TAO_IDL_HAS_ANNOTATIONS
-  bool is_sample_type = be_global->is_sample_type(node);
-  SampleKeys keys(node);
+  bool is_topic_type = be_global->is_topic_type(node);
+  TopicKeys keys(node);
+  TopicKeys nonrecursive_keys(node, /*recursive =*/ false);
 #endif
   IDL_GlobalData::DCPS_Data_Type_Info* info = idl_global->is_dcps_type(name);
 
-  // Only generate these methods if this is a DCPS type
-  if (info || is_sample_type) {
+  // Only generate these methods if this is a topic type
+  if (info || is_topic_type) {
     bool is_bounded_struct = true;
     for (size_t i = 0; i < fields.size(); ++i) {
       if (!is_bounded_type(fields[i]->field_type())) {
@@ -1715,8 +1716,8 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     }
 #ifdef TAO_IDL_HAS_ANNOTATIONS
     else {
-      SampleKeys::Iterator finished = keys.end();
-      for (SampleKeys::Iterator i = keys.begin(); i != finished; ++i) {
+      TopicKeys::Iterator finished = keys.end();
+      for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
         if (!is_bounded_type(i.get_ast_type())) {
           bounded_key = false;
           break;
@@ -1751,8 +1752,8 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         }
 #ifdef TAO_IDL_HAS_ANNOTATIONS
         else {
-          SampleKeys::Iterator finished = keys.end();
-          for (SampleKeys::Iterator i = keys.begin(); i != finished; ++i) {
+          TopicKeys::Iterator finished = keys.end();
+          for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
             max_marshaled_size(i.get_ast_type(), size, padding);
           }
         }
@@ -1797,8 +1798,8 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       }
 #ifdef TAO_IDL_HAS_ANNOTATIONS
       else {
-        SampleKeys::Iterator finished = keys.end();
-        for (SampleKeys::Iterator i = keys.begin(); i != finished; ++i) {
+        TopicKeys::Iterator finished = keys.end();
+        for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
           std::string key_name = i.path();
           expr += findSizeCommon(use_cxx11 ? key_name + "()" : key_name,
                                  i.get_ast_type(), "stru.t", intro);
@@ -1841,8 +1842,8 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       }
 #ifdef TAO_IDL_HAS_ANNOTATIONS
       else {
-        SampleKeys::Iterator finished = keys.end();
-        for (SampleKeys::Iterator i = keys.begin(); i != finished; ++i) {
+        TopicKeys::Iterator finished = nonrecursive_keys.end();
+        for (TopicKeys::Iterator i = nonrecursive_keys.begin(); i != finished; ++i) {
           std::string key_name = i.path();
           if (first) {
             first = false;
@@ -1894,8 +1895,8 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       }
 #ifdef TAO_IDL_HAS_ANNOTATIONS
       else {
-        SampleKeys::Iterator finished = keys.end();
-        for (SampleKeys::Iterator i = keys.begin(); i != finished; ++i) {
+        TopicKeys::Iterator finished = nonrecursive_keys.end();
+        for (TopicKeys::Iterator i = nonrecursive_keys.begin(); i != finished; ++i) {
           std::string key_name = i.path();
           if (first) {
             first = false;

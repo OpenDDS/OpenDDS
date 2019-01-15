@@ -63,10 +63,10 @@ BE_post_init(char*[], long)
       "@annotation key {\n"
       "};\n"
       "\n"
-      "@annotation sample_type {\n"
+      "@annotation topic {\n"
       "};\n"
     );
-    be_global->cache_sample_annotations();
+    be_global->cache_topic_annotations();
   }
 #endif
 }

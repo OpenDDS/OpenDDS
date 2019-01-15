@@ -145,15 +145,15 @@ public:
 
 #ifdef TAO_IDL_HAS_ANNOTATIONS
   /**
-   * Cache sample_type and key annotations if we have them.
+   * Cache @topic and @key
    */
-  void cache_sample_annotations();
+  void cache_topic_annotations();
 #endif
 
   /**
-   * Check if a type has been declared a sample type.
+   * Check if a type has been declared a topic type.
    */
-  bool is_sample_type(AST_Decl* node);
+  bool is_topic_type(AST_Decl* node);
 
   /**
    * Check if a struct field has been declared a key.
@@ -183,7 +183,7 @@ private:
    * Hold these for the convenience of not having to do a lookup for the nodes
    */
   ///{
-  AST_Annotation_Decl* sample_type_annotation_;
+  AST_Annotation_Decl* topic_annotation_;
   AST_Annotation_Decl* key_annotation_;
   ///}
 #endif

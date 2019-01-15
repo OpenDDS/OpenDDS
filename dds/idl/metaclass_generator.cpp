@@ -10,7 +10,7 @@
 
 #include "utl_identifier.h"
 
-#include "sample_keys.h"
+#include "topic_keys.h"
 
 using namespace AstTypeClassification;
 
@@ -382,10 +382,10 @@ namespace {
   }
 
 #ifdef TAO_IDL_HAS_ANNOTATIONS
-  void gen_isDcpsKey(SampleKeys& keys)
+  void gen_isDcpsKey(TopicKeys& keys)
   {
-    SampleKeys::Iterator finished = keys.end();
-    for (SampleKeys::Iterator i = keys.begin(); i != finished; ++i) {
+    TopicKeys::Iterator finished = keys.end();
+    for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
       gen_isDcpsKey_i(i.path().c_str());
     }
   }
@@ -410,8 +410,8 @@ bool metaclass_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
   }
 
 #ifdef TAO_IDL_HAS_ANNOTATIONS
-  bool is_sample_type = be_global->is_sample_type(node);
-  SampleKeys keys(node);
+  bool is_topic_type = be_global->is_topic_type(node);
+  TopicKeys keys(node);
 #endif
   size_t key_count = 0;
   IDL_GlobalData::DCPS_Data_Type_Info* info = idl_global->is_dcps_type(name);
@@ -419,7 +419,7 @@ bool metaclass_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
     key_count = info->key_list_.size();
   }
 #ifdef TAO_IDL_HAS_ANNOTATIONS
-  else if (is_sample_type) {
+  else if (is_topic_type) {
     key_count = keys.count();
   }
 #endif

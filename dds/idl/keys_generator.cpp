@@ -7,7 +7,7 @@
 
 #include "keys_generator.h"
 #include "be_extern.h"
-#include "sample_keys.h"
+#include "topic_keys.h"
 
 #include "utl_identifier.h"
 
@@ -18,7 +18,7 @@ bool keys_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
   const std::vector<AST_Field*>&, AST_Type::SIZE_TYPE, const char*)
 {
 #ifdef TAO_IDL_HAS_ANNOTATIONS
-  SampleKeys keys(node);
+  TopicKeys keys(node);
 #endif
   size_t key_count = 0;
   IDL_GlobalData::DCPS_Data_Type_Info* info = idl_global->is_dcps_type(name);
@@ -26,7 +26,7 @@ bool keys_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
     key_count = info->key_list_.size();
   }
 #ifdef TAO_IDL_HAS_ANNOTATIONS
-  else if (be_global->is_sample_type(node)) {
+  else if (be_global->is_topic_type(node)) {
     key_count = keys.count();
   }
 #endif
@@ -90,8 +90,8 @@ bool keys_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
           key_names.push_back(ACE_TEXT_ALWAYS_CHAR(kp->c_str()));
         }
       } else {
-        SampleKeys::Iterator finished = keys.end();
-        for (SampleKeys::Iterator i = keys.begin(); i != finished; ++i) {
+        TopicKeys::Iterator finished = keys.end();
+        for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
           key_names.push_back(i.path());
         }
       }

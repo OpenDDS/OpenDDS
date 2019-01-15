@@ -49,7 +49,7 @@ BE_GlobalData::BE_GlobalData()
   , seq_("Seq")
   , language_mapping_(LANGMAP_NONE)
 #ifdef TAO_IDL_HAS_ANNOTATIONS
-  , sample_type_annotation_(0)
+  , topic_annotation_(0)
   , key_annotation_(0)
 #endif
 {
@@ -568,13 +568,13 @@ BE_GlobalData::get_include_block(BE_GlobalData::stream_enum_t which)
 
 #ifdef TAO_IDL_HAS_ANNOTATIONS
 void
-BE_GlobalData::cache_sample_annotations()
+BE_GlobalData::cache_topic_annotations()
 {
   if (idl_global->idl_version_ >= IDL_VERSION_4) {
     UTL_Scope* root = idl_global->scopes().bottom();
-    sample_type_annotation_ =
+    topic_annotation_ =
       AST_Annotation_Decl::narrow_from_decl(
-        root->lookup_by_name("::@sample_type"));
+        root->lookup_by_name("::@topic"));
     key_annotation_ = AST_Annotation_Decl::narrow_from_decl(
         root->lookup_by_name("::@key"));
   }
@@ -582,19 +582,19 @@ BE_GlobalData::cache_sample_annotations()
 #endif
 
 bool
-BE_GlobalData::is_sample_type(AST_Decl* node)
+BE_GlobalData::is_topic_type(AST_Decl* node)
 {
 #ifdef TAO_IDL_HAS_ANNOTATIONS
   if (node) {
     if (node->node_type() == AST_Decl::NT_struct) {
-      return UTL_find_annotation(node->annotations(), sample_type_annotation_);
+      return UTL_find_annotation(node->annotations(), topic_annotation_);
     } else if (node->node_type() == AST_Decl::NT_union) {
-      return UTL_find_annotation(node->annotations(), sample_type_annotation_);
+      return UTL_find_annotation(node->annotations(), topic_annotation_);
     } else if (node->node_type() == AST_Decl::NT_typedef) {
       AST_Type* type = dynamic_cast<AST_Type*>(node)->unaliased_type();
       if (type->node_type() == AST_Decl::NT_struct
           || type->node_type() == AST_Decl::NT_union) {
-        return UTL_find_annotation(node->annotations(), sample_type_annotation_);
+        return UTL_find_annotation(node->annotations(), topic_annotation_);
       }
     }
   }

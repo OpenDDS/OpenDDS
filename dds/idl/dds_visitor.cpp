@@ -40,7 +40,7 @@
 #include "itl_generator.h"
 #include "v8_generator.h"
 #include "langmap_generator.h"
-#include "sample_keys.h"
+#include "topic_keys.h"
 
 #include <iostream>
 #include <vector>
@@ -227,8 +227,8 @@ dds_visitor::visit_structure(AST_Structure* node)
 #ifdef TAO_IDL_HAS_ANNOTATIONS
   // Check That Sample Keys Are Valid
   try {
-    SampleKeys(node).count();
-  } catch (SampleKeys::Error& error) {
+    TopicKeys(node).count();
+  } catch (TopicKeys::Error& error) {
     ACE_ERROR_RETURN((LM_ERROR,
       ACE_TEXT("(%N:%l) dds_visitor::visit_structure: %C"),
       error.what()), -1);

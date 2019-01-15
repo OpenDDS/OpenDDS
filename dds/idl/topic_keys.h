@@ -12,14 +12,14 @@ class AST_Decl;
 class AST_Structure;
 
 /**
- * Find Keys in Samples
+ * Find Keys in Topic Types
  *
  * Use like this:
  * AST_Structure* struct_node;
  * // ...
- * SampleKeys keys(struct_node);
- * SampleKeys::Iterator end = keys.end();
- * for (SampleKeys::Iterator i = keys.begin(); i != end; ++i) {
+ * TopicKeys keys(struct_node);
+ * TopicKeys::Iterator end = keys.end();
+ * for (TopicKeys::Iterator i = keys.begin(); i != end; ++i) {
  *   AST_Decl* key = *i;
  *   // ...
  * }
@@ -29,7 +29,7 @@ class AST_Structure;
  * - For Array keys this will be the base AST_Type, repeated for each element
  * - For Union keys this will be the AST_Union
  */
-class SampleKeys {
+class TopicKeys {
 public:
   enum RootType {
     PrimitiveType,
@@ -62,8 +62,8 @@ public:
   };
 
   /**
-   * Iterator for traversing the TAO_IDL AST, looking for nodes within a sample
-   * node that are annotated with @key.
+   * Iterator for traversing the TAO_IDL AST, looking for nodes within a topic
+   * type node that are annotated with @key.
    */
   class Iterator {
   public:
@@ -78,15 +78,15 @@ public:
     ///}
 
     /**
-     * Create new iterator equal to SampleKey::end()
+     * Create new iterator equal to TopicKeys::end()
      */
     Iterator();
 
     /**
-     * Create new iterator pointing to the first sample key or equal to
-     * SampleKey::end() if there are no keys.
+     * Create new iterator pointing to the first topic key or equal to
+     * TopicKeys::end() if there are no keys.
      */
-    Iterator(SampleKeys &parent);
+    Iterator(TopicKeys &parent);
 
     /**
      * Create completely separate copy of another iterator
@@ -161,9 +161,9 @@ public:
   /**
    * If recurive is false, do not recurse into other sturctures.
    */
-  SampleKeys(AST_Structure* root, bool recursive = true);
-  SampleKeys(AST_Union* root);
-  ~SampleKeys();
+  TopicKeys(AST_Structure* root, bool recursive = true);
+  TopicKeys(AST_Union* root);
+  ~TopicKeys();
 
   AST_Decl* root() const;
   RootType root_type() const;
@@ -172,7 +172,7 @@ public:
   Iterator end();
 
   /**
-   * Count the keys in the sample
+   * Count the keys in the topic type
    */
   size_t count();
 
