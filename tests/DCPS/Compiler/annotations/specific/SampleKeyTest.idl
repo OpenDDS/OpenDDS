@@ -1,0 +1,56 @@
+module SampleKeyTest {
+
+  /*
+   * Simplest Case of a Sample Struct with no Key
+   * 0 Keys
+   */
+  @topic
+  struct NoKeySampleStruct {
+    long value;
+  };
+
+  /*
+   * Simple Case of a Sample Struct with One Simple Key
+   * 1 Key
+   */
+  @topic
+  struct SimpleKeySampleStruct {
+    @key
+    long key;
+    long value;
+  };
+
+  /*
+   * Case of a Nested Struct Key
+   * 2 Keys
+   */
+  @topic
+  struct NestedKeySampleStruct {
+    @key
+    long non_nested_key;
+    @key
+    SimpleKeySampleStruct nested_key;
+  };
+
+  /*
+   * Case of an Array of Primitives
+   * 2 Keys
+   */
+  typedef long LongArray_t[2];
+  @topic
+  struct LongArraySampleStruct {
+    @key
+    LongArray_t values;
+  };
+
+  /*
+   * Case of an Array of Structs
+   * 2 Keys
+   */
+  typedef SimpleKeySampleStruct SimpleKeyArray_t[2];
+  @topic
+  struct SimpleKeyArray{
+    @key
+    SimpleKeyArray_t values;
+  };
+};

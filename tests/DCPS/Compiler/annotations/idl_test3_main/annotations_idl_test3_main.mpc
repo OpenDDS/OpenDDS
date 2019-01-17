@@ -1,0 +1,13 @@
+project: dcpsexe {
+  exename   = idl_test3
+
+  requires += no_opendds_safety_profile
+  libs += annotations_idl_test3_lib
+  libpaths += ../idl_test3_lib
+  after += annotations_idl_test3_lib
+
+  Source_Files {
+    main.cpp
+  }
+}
+
