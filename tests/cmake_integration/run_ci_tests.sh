@@ -12,7 +12,6 @@ for x in Messenger_1 Messenger_2; do
   pushd $build_dir
   cmake -DCMAKE_PREFIX_PATH=$DDS_ROOT ..
   cmake --build .
+  ./run_test.pl
   popd
 done
-$DDS_ROOT/tests/cmake_integration/Messenger/Messenger_1/build/run_test.pl
-$DDS_ROOT/tests/cmake_integration/Messenger/Messenger_2/build/run_test.pl
