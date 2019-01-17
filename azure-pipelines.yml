@@ -144,12 +144,5 @@ jobs:
     displayName: Run configure script
   - script: make -sj6
     displayName: Compile
-  - script: |
-      for x in Messenger_1 Messenger_2; do
-        build_dir=$DDS_ROOT/tests/cmake_integration/Messenger/$x/build
-        mkdir -p $build_dir; pushd $build_dir
-        cmake -DCMAKE_PREFIX_PATH=$DDS_ROOT ..
-        cmake --build .
-        popd
-      done
+  - script: $DDS_ROOT/tests/cmake_integration/run_ci_tests.sh
     displayName: Compile CMake Tests
