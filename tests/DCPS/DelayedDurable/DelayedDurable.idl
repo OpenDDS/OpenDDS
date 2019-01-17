@@ -1,0 +1,6 @@
+#pragma DCPS_DATA_TYPE "Property"
+#pragma DCPS_DATA_KEY "Property key"
+struct Property {
+  long key;
+  long value;
+};
