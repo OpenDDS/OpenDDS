@@ -1,4 +1,4 @@
-module SampleKeyTest {
+module TopicAnnotationsTest {
 
   /*
    * Simplest Case of a Sample Struct with no Key
