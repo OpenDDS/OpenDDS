@@ -1658,7 +1658,6 @@ bool marshal_generator::gen_struct(AST_Structure* node,
 #ifdef TAO_IDL_HAS_ANNOTATIONS
   bool is_topic_type = be_global->is_topic_type(node);
   TopicKeys keys(node);
-  TopicKeys nonrecursive_keys(node, /*recursive =*/ false);
 #endif
   IDL_GlobalData::DCPS_Data_Type_Info* info = idl_global->is_dcps_type(name);
 
@@ -1842,8 +1841,8 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       }
 #ifdef TAO_IDL_HAS_ANNOTATIONS
       else {
-        TopicKeys::Iterator finished = nonrecursive_keys.end();
-        for (TopicKeys::Iterator i = nonrecursive_keys.begin(); i != finished; ++i) {
+        TopicKeys::Iterator finished = keys.end();
+        for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
           std::string key_name = i.path();
           if (first) {
             first = false;
@@ -1895,8 +1894,8 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       }
 #ifdef TAO_IDL_HAS_ANNOTATIONS
       else {
-        TopicKeys::Iterator finished = nonrecursive_keys.end();
-        for (TopicKeys::Iterator i = nonrecursive_keys.begin(); i != finished; ++i) {
+        TopicKeys::Iterator finished = keys.end();
+        for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
           std::string key_name = i.path();
           if (first) {
             first = false;
