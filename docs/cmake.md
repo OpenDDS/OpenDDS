@@ -78,17 +78,11 @@ CMake variable below should be set to either _ON_ or _OFF_ depending on the desi
 |---                               | ---                                     | ---     |
 |`OPENDDS_BUILT_IN_TOPICS`         | Built-in Topics                         | ON      |
 |`OPENDDS_CONTENT_FILTERED_TOPIC`  | ContentFilteredTopic (CS Profile)       | ON      |
-|`OPENDDS_CONTENT_SUBSCRIPTION`    | Content-Subscription Profile.
-                                     When this is set to OFF then CONTENT_
-                                     FILTERED_TOPIC, MULTI_TOPIC, and QUERY_
-                                     CONDITION will also be set to OFF. See
-                                     the [OpenDDS Dev Guide] ch. 5 for info. | ON      |
+|`OPENDDS_CONTENT_SUBSCRIPTION`    | Content-Subscription Profile. When this is set to OFF then CONTENT_FILTERED_TOPIC, MULTI_TOPIC, and QUERY_CONDITION will also be set to OFF. See the [OpenDDS Dev Guide] ch. 5 for info. | ON      |
 |`OPENDDS_MULTI_TOPIC`             | MultiTopic (CS Profile)                 | ON      |
 |`OPENDDS_OBJECT_MODEL_PROFILE`    | Object Model Profile                    | ON      |
 |`OPENDDS_OWNERSHIP_KIND_EXCLUSIVE`| Exclusive Ownership (Ownership Profile) | ON      |
-|`OPENDDS_OWNERSHIP_PROFILE`       | Ownership Profile.
-                                     When this is set to OFF then OWNERSHIP_
-                                     KIND_EXCLUSIVE will also be set to OFF. | ON      |
+|`OPENDDS_OWNERSHIP_PROFILE`       | Ownership Profile. When this is set to OFF then OWNERSHIP_KIND_EXCLUSIVE will also be set to OFF. | ON      |
 |`OPENDDS_PERSISTENCE_PROFILE`     | Persistence Profile                     | ON      |
 |`OPENDDS_QUERY_CONDITION`         | QueryCondition (CS Profile)             | ON      |
 |`OPENDDS_SECURITY`                | DDS Security plugin                     | OFF     |
