@@ -49,57 +49,8 @@ depending upon which variables are enabled/disabled.
 
 If you are using OpenDDS libraries that were built without the help of the
 `configure` script, the `config.cmake` file needs to be created manually.
-
-### Manually Creating config.cmake
-
-In order to work with config.cmake it is important to understand the purpose
-of its contained variables. Below is a list of the important variables with
-some information on their purpose.
-
-#### Optional OpenDDS Features
-When OpenDDS is built using the MPC build-system
-and optional features are specified, various C/C++; tao_idl; and opendds_idl
-compiler macros are set on dependent libraries or executables. These defines
-are set by MPC using the [dcps_optional_features.mpb](../MPC/config/dcps_optional_features.mpb)
-file.
-
-CMake-Based targets must also inherit the defined macros, so the functionality
-in `dcps_optional_features.mpb` is simulated using `options.cmake`
-and its associated `config.cmake`. As such, if features are enabled/disabled when
-compiling OpenDDS then it is paramount that the MPC features are also matched
-within `config.cmake` prior to compilation.
-
-This table outlines the feature-related variables and their _expected_ default
-values (generated when the configure script is run without arguments).
-If any feature is explicitly enabled/disabled in the OpenDDS build then the corresponding
-CMake variable below should be set to either _ON_ or _OFF_ depending on the desired state.
-
-| CMake Variable                   | Notes (from configure script output)    | Default |
-|---                               | ---                                     | ---     |
-|`OPENDDS_BUILT_IN_TOPICS`         | Built-in Topics                         | ON      |
-|`OPENDDS_CONTENT_FILTERED_TOPIC`  | ContentFilteredTopic (CS Profile)       | ON      |
-|`OPENDDS_CONTENT_SUBSCRIPTION`    | Content-Subscription Profile. When this is set to OFF then CONTENT_FILTERED_TOPIC, MULTI_TOPIC, and QUERY_CONDITION will also be set to OFF. See the [OpenDDS Dev Guide] ch. 5 for info. | ON      |
-|`OPENDDS_MULTI_TOPIC`             | MultiTopic (CS Profile)                 | ON      |
-|`OPENDDS_OBJECT_MODEL_PROFILE`    | Object Model Profile                    | ON      |
-|`OPENDDS_OWNERSHIP_KIND_EXCLUSIVE`| Exclusive Ownership (Ownership Profile) | ON      |
-|`OPENDDS_OWNERSHIP_PROFILE`       | Ownership Profile. When this is set to OFF then OWNERSHIP_KIND_EXCLUSIVE will also be set to OFF. | ON      |
-|`OPENDDS_PERSISTENCE_PROFILE`     | Persistence Profile                     | ON      |
-|`OPENDDS_QUERY_CONDITION`         | QueryCondition (CS Profile)             | ON      |
-|`OPENDDS_SECURITY`                | DDS Security plugin                     | OFF     |
-
-#### Build-Related Options
-
-The following values impact the build in one way or another.
-
-| CMake Variable            | Notes                                                              | Default             |
-|---                        | ---                                                                | ---                 |
-|`OPENDDS_ACE`              | Location of ACE root dir.                                          | N/A                 |
-|`OPENDDS_TAO`              | Location of TAO root dir.                                          | N/A                 |
-|`OPENDDS_STD`              | Forces C++ standard (Unix only)                                    | Compiler dependant. |
-|`OPENDDS_NO_DEBUG`         | Sets NDEBUG flags on ACE for non-debug builds (Unix only)          | OFF                 |
-|`OPENDDS_NO_INLINE`        | Inlining                                                           | OFF                 |
-|`OPENDDS_STATIC`           | Use static libraries                                               | OFF                 |
-|`OPENDDS_XERCES3`          | Adds dependencies to targets; required when OPENDDS_SECURITY is ON | OFF                 |
+See [Manually Creating config.cmake](#manually-creating-config.cmake)
+in the advanced section below.
 
 ## Using the OpenDDS CMake Package
 
@@ -241,6 +192,60 @@ target_link_libraries(publisher messenger OpenDDS::OpenDDS)
 
 *Note:* This may issue a warning in earlier version of CMake due to the messenger library
 not having any sources added with it in the call to `add_library`.
+
+## Advanced Usage
+
+### Manually Creating config.cmake
+
+In order to work with config.cmake it is important to understand the purpose
+of its contained variables. Below is a list of the important variables with
+some information on their purpose.
+
+#### Optional OpenDDS Features
+When OpenDDS is built using the MPC build-system
+and optional features are specified, various C/C++; tao_idl; and opendds_idl
+compiler macros are set on dependent libraries or executables. These defines
+are set by MPC using the [dcps_optional_features.mpb](../MPC/config/dcps_optional_features.mpb)
+file.
+
+CMake-Based targets must also inherit the defined macros, so the functionality
+in `dcps_optional_features.mpb` is simulated using `options.cmake`
+and its associated `config.cmake`. As such, if features are enabled/disabled when
+compiling OpenDDS then it is paramount that the MPC features are also matched
+within `config.cmake` prior to compilation.
+
+This table outlines the feature-related variables and their _expected_ default
+values (generated when the configure script is run without arguments).
+If any feature is explicitly enabled/disabled in the OpenDDS build then the corresponding
+CMake variable below should be set to either _ON_ or _OFF_ depending on the desired state.
+
+| CMake Variable                   | Notes (from configure script output)    | Default |
+|---                               | ---                                     | ---     |
+|`OPENDDS_BUILT_IN_TOPICS`         | Built-in Topics                         | ON      |
+|`OPENDDS_CONTENT_FILTERED_TOPIC`  | ContentFilteredTopic (CS Profile)       | ON      |
+|`OPENDDS_CONTENT_SUBSCRIPTION`    | Content-Subscription Profile. When this is set to OFF then CONTENT_FILTERED_TOPIC, MULTI_TOPIC, and QUERY_CONDITION will also be set to OFF. See the [OpenDDS Dev Guide] ch. 5 for info. | ON      |
+|`OPENDDS_MULTI_TOPIC`             | MultiTopic (CS Profile)                 | ON      |
+|`OPENDDS_OBJECT_MODEL_PROFILE`    | Object Model Profile                    | ON      |
+|`OPENDDS_OWNERSHIP_KIND_EXCLUSIVE`| Exclusive Ownership (Ownership Profile) | ON      |
+|`OPENDDS_OWNERSHIP_PROFILE`       | Ownership Profile. When this is set to OFF then OWNERSHIP_KIND_EXCLUSIVE will also be set to OFF. | ON      |
+|`OPENDDS_PERSISTENCE_PROFILE`     | Persistence Profile                     | ON      |
+|`OPENDDS_QUERY_CONDITION`         | QueryCondition (CS Profile)             | ON      |
+|`OPENDDS_SECURITY`                | DDS Security plugin                     | OFF     |
+
+#### Build-Related Options
+
+The following values impact the build in one way or another.
+
+| CMake Variable            | Notes                                                              | Default             |
+|---                        | ---                                                                | ---                 |
+|`OPENDDS_ACE`              | Location of ACE root dir.                                          | N/A                 |
+|`OPENDDS_TAO`              | Location of TAO root dir.                                          | N/A                 |
+|`OPENDDS_STD`              | Forces C++ standard (Unix only). This option is used as a way for the configure script to inform CMake builds of the C/C++ standard used to build OpenDDS. To prevent weirdness, the C/C++ standards should match. The typical GCC -std values are supported. | Existing CMAKE_CXX_STANDARD value. |
+|`OPENDDS_NO_DEBUG`         | Sets NDEBUG flags on ACE for non-debug builds (Unix only)          | OFF                 |
+|`OPENDDS_NO_INLINE`        | Inlining                                                           | OFF                 |
+|`OPENDDS_STATIC`           | Use static libraries                                               | OFF                 |
+|`OPENDDS_XERCES3`          | Adds dependencies to targets; required when OPENDDS_SECURITY is ON | OFF                 |
+
 
 [Messenger with direct IDL inclusion]: ../tests/cmake_integration/Messenger/Messenger_1/CMakeLists.txt
 [Messenger with auxiliary IDL library]: ../tests/cmake_integration/Messenger/Messenger_2/CMakeLists.txt
