@@ -49,7 +49,7 @@ depending upon which variables are enabled/disabled.
 
 If you are using OpenDDS libraries that were built without the help of the
 `configure` script, the `config.cmake` file needs to be created manually.
-See [Manually Creating config.cmake](#manually-creating-config.cmake)
+See [Manually Creating config.cmake](#manually-creating-configcmake)
 in the advanced section below.
 
 ## Using the OpenDDS CMake Package
