@@ -58,6 +58,7 @@ module TopicAnnotationsTest {
    * Case of a Union Key Nested inside a Struct
    * 1 key
    */
+  @topic
   union Union1 switch (@key long) {
   case 0:
     long a;
@@ -70,5 +71,33 @@ module TopicAnnotationsTest {
   struct UnionKeyStruct {
     @key
     Union1 value;
+  };
+
+  /*
+   * Case of a Unkeyed Standalone Topic Union
+   * 0 keys
+   */
+  @topic
+  union Union2 switch (long) {
+  case 0:
+    long a;
+  case 5:
+    char b;
+  default:
+    float c;
+  };
+
+  /*
+   * Case of a Keyed Standalone Topic Union
+   * 1 key
+   */
+  @topic
+  union Union3 switch (@key long) {
+  case 0:
+    long a;
+  case 5:
+    char b;
+  default:
+    float c;
   };
 };
