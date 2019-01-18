@@ -326,7 +326,7 @@ void TopicKeys::Iterator::path_i(std::stringstream& ss)
     AST_Field* field = *field_ptrptr;
     ss << (level_ ? "." : "") << field->local_name()->get_string();
   } else if (root_type_ == UnionType) {
-    ss << "._d()";
+    // Nothing
   } else if (root_type_ == ArrayType) {
     ss << '[' << pos_ << ']';
   } else if (root_type_ != PrimitiveType) {

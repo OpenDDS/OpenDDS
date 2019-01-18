@@ -49,8 +49,26 @@ module TopicAnnotationsTest {
    */
   typedef SimpleKeySampleStruct SimpleKeyArray_t[2];
   @topic
-  struct SimpleKeyArray{
+  struct SimpleKeyArray {
     @key
     SimpleKeyArray_t values;
+  };
+
+  /*
+   * Case of a Union Key Nested inside a Struct
+   * 1 key
+   */
+  union Union1 switch (@key long) {
+  case 0:
+    long a;
+  case 5:
+    char b;
+  default:
+    float c;
+  };
+  @topic
+  struct UnionKeyStruct {
+    @key
+    Union1 value;
   };
 };

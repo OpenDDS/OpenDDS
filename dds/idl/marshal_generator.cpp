@@ -1753,7 +1753,15 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         else {
           TopicKeys::Iterator finished = keys.end();
           for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
-            max_marshaled_size(i.get_ast_type(), size, padding);
+            AST_Type* straight_ast_type = i.get_ast_type();
+            AST_Type* ast_type;
+            if (i.root_type() == TopicKeys::UnionType) {
+              AST_Union* union_type = dynamic_cast<AST_Union*>(straight_ast_type);
+              ast_type = dynamic_cast<AST_Type*>(union_type->disc_type());
+            } else {
+              ast_type = straight_ast_type;
+            }
+            max_marshaled_size(ast_type, size, padding);
           }
         }
 #endif
@@ -1799,9 +1807,20 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       else {
         TopicKeys::Iterator finished = keys.end();
         for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
+          AST_Type* straight_ast_type = i.get_ast_type();
+          AST_Type* ast_type;
           std::string key_name = i.path();
-          expr += findSizeCommon(use_cxx11 ? key_name + "()" : key_name,
-                                 i.get_ast_type(), "stru.t", intro);
+          if (i.root_type() == TopicKeys::UnionType) {
+            key_name.append("._d()");
+            AST_Union* union_type = dynamic_cast<AST_Union*>(straight_ast_type);
+            ast_type = dynamic_cast<AST_Type*>(union_type->disc_type());
+          } else {
+            if (use_cxx11) {
+              key_name.append("()");
+            }
+            ast_type = straight_ast_type;
+          }
+          expr += findSizeCommon(key_name, ast_type, "stru.t", intro);
         }
       }
 #endif
@@ -1849,8 +1868,19 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           } else {
             expr += "\n    && ";
           }
-          expr += streamCommon(use_cxx11 ? key_name + "()" : key_name,
-                               i.get_ast_type(), "<< stru.t", intro);
+          AST_Type* straight_ast_type = i.get_ast_type();
+          AST_Type* ast_type;
+          if (i.root_type() == TopicKeys::UnionType) {
+            key_name.append("._d()");
+            AST_Union* union_type = dynamic_cast<AST_Union*>(straight_ast_type);
+            ast_type = dynamic_cast<AST_Type*>(union_type->disc_type());
+          } else {
+            if (use_cxx11) {
+              key_name.append("()");
+            }
+            ast_type = straight_ast_type;
+          }
+          expr += streamCommon(key_name, ast_type, "<< stru.t", intro);
         }
       }
 #endif
@@ -1897,13 +1927,31 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         TopicKeys::Iterator finished = keys.end();
         for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
           std::string key_name = i.path();
-          if (first) {
-            first = false;
+          AST_Type* ast_type = i.get_ast_type();
+          if (i.root_type() == TopicKeys::UnionType) {
+            AST_Union* union_type = dynamic_cast<AST_Union*>(ast_type);
+            AST_Type* disc_type = dynamic_cast<AST_Type*>(union_type->disc_type());
+            be_global->impl_ <<
+              "  {\n"
+              "    " << scoped(disc_type->name()) << " tmp;\n" <<
+              "    if (strm >> " << getWrapper("tmp", disc_type, WD_INPUT) << ") {\n"
+              "      stru.t." << key_name << "._d(tmp);\n"
+              "    } else {\n"
+              "      return false;\n"
+              "    }\n"
+              "  }\n"
+              ;
           } else {
-            expr += "\n    && ";
+            if (first) {
+              first = false;
+            } else {
+              expr += "\n    && ";
+            }
+            if (use_cxx11) {
+              key_name.append("()");
+            }
+            expr += streamCommon(key_name, ast_type, ">> stru.t", intro);
           }
-          expr += streamCommon(use_cxx11 ? key_name + "()" : key_name,
-                               i.get_ast_type(), ">> stru.t", intro);
         }
       }
 #endif
