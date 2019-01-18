@@ -153,7 +153,7 @@ bool keys_generator::gen_union(
 
     if (be_global->has_key(node)) {
       wrapper.has_keys_signature();
-      wrapper.key_compare("._d()");
+      wrapper.key_compare("_d()");
     } else {
       wrapper.has_no_keys_signature();
     }
