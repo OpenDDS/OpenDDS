@@ -1,7 +1,3 @@
-/*C.h
-/*C.cpp
-/*C.inl
-/*S.h
-/*S.cpp
-/*S.inl
-/*TypeSupport*
+/topic_annotations_test*
+!/topic_annotations_test.idl
+!/topic_annotations_test.mpc
