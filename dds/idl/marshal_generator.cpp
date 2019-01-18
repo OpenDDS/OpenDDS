@@ -1589,7 +1589,6 @@ bool marshal_generator::gen_struct(AST_Structure* node,
   NamespaceGuard ng;
   be_global->add_include("dds/DCPS/Serializer.h");
   string cxx = scoped(name); // name as a C++ class
-  const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
 
   for (size_t i = 0; i < LENGTH(special_structs); ++i) {
     if (special_structs[i].check(cxx)) {
@@ -1807,8 +1806,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
                       << " (" << key_name << "). " << error << std::endl;
             return false;
           }
-          expr += findSizeCommon(use_cxx11 ? key_name + "()" : key_name,
-                                 field_type, "stru.t", intro);
+          expr += findSizeCommon(key_name, field_type, "stru.t", intro);
         }
 #ifdef TAO_IDL_HAS_ANNOTATIONS
       } else {
@@ -1822,9 +1820,6 @@ bool marshal_generator::gen_struct(AST_Structure* node,
             AST_Union* union_type = dynamic_cast<AST_Union*>(straight_ast_type);
             ast_type = dynamic_cast<AST_Type*>(union_type->disc_type());
           } else {
-            if (use_cxx11) {
-              key_name.append("()");
-            }
             ast_type = straight_ast_type;
           }
           expr += findSizeCommon(key_name, ast_type, "stru.t", intro);
@@ -1861,8 +1856,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           } else {
             expr += "\n    && ";
           }
-          expr += streamCommon(use_cxx11 ? key_name + "()" : key_name,
-                               field_type, "<< stru.t", intro);
+          expr += streamCommon(key_name, field_type, "<< stru.t", intro);
         }
 #ifdef TAO_IDL_HAS_ANNOTATIONS
       } else {
@@ -1881,9 +1875,6 @@ bool marshal_generator::gen_struct(AST_Structure* node,
             AST_Union* union_type = dynamic_cast<AST_Union*>(straight_ast_type);
             ast_type = dynamic_cast<AST_Type*>(union_type->disc_type());
           } else {
-            if (use_cxx11) {
-              key_name.append("()");
-            }
             ast_type = straight_ast_type;
           }
           expr += streamCommon(key_name, ast_type, "<< stru.t", intro);
@@ -1924,8 +1915,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           } else {
             expr += "\n    && ";
           }
-          expr += streamCommon(use_cxx11 ? key_name + "()" : key_name,
-                               field_type, ">> stru.t", intro);
+          expr += streamCommon(key_name, field_type, ">> stru.t", intro);
         }
 #ifdef TAO_IDL_HAS_ANNOTATIONS
       } else {
@@ -1951,9 +1941,6 @@ bool marshal_generator::gen_struct(AST_Structure* node,
               first = false;
             } else {
               expr += "\n    && ";
-            }
-            if (use_cxx11) {
-              key_name.append("()");
             }
             expr += streamCommon(key_name, ast_type, ">> stru.t", intro);
           }

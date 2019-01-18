@@ -1,4 +1,4 @@
-project: dcpsexe {
+project: dcpsexe, opendds_cxx11 {
   exename = cpp11_annotations_idl_test1
   exeout = .
 
@@ -8,7 +8,7 @@ project: dcpsexe {
   after += cpp11_annotations_idl_test1_lib
 
   Source_Files {
-    ../../../idl_test1_main/main.cpp
+    ../../../C++11/idl_test1_main/main.cpp
   }
 }
 
