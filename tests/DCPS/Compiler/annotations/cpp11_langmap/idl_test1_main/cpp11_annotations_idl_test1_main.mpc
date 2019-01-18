@@ -1,0 +1,14 @@
+project: dcpsexe {
+  exename = cpp11_annotations_idl_test1
+  exeout = .
+
+  includes += ../idl_test1_lib
+  libs += cpp11_annotations_idl_test1_lib
+  libpaths += ../idl_test1_lib
+  after += cpp11_annotations_idl_test1_lib
+
+  Source_Files {
+    ../../../idl_test1_main/main.cpp
+  }
+}
+
