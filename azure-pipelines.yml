@@ -125,7 +125,7 @@ jobs:
     displayName: Run configure script
   - script: make -sj6
     displayName: Compile
-  - script: $DDS_ROOT/tests/cmake_integration/run_ci_tests.sh
+  - script: ./tests/cmake_integration/run_ci_tests.sh .
     displayName: Compile CMake Tests
 
 - job: macOS
@@ -144,5 +144,5 @@ jobs:
     displayName: Run configure script
   - script: make -sj6
     displayName: Compile
-  - script: $DDS_ROOT/tests/cmake_integration/run_ci_tests.sh
+  - script: ./tests/cmake_integration/run_ci_tests.sh .
     displayName: Compile CMake Tests

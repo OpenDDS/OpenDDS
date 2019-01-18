@@ -6,6 +6,13 @@
 #
 
 set -ev
+if [ -n "$1" ]; then
+  DDS_ROOT="$1"
+else
+  echo "run_ci_tests.sh requires DDS_ROOT as first argument"
+  false # trip the -e and return err
+fi
+
 for x in Messenger_1 Messenger_2; do
   build_dir=$DDS_ROOT/tests/cmake_integration/Messenger/$x/build
   mkdir -p $build_dir
