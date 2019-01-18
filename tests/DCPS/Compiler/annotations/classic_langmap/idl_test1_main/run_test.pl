@@ -14,12 +14,12 @@ $status = 0;
 
 PerlDDS::add_lib_path('../idl_test1_lib');
 
-$TESTDVR = PerlDDS::create_process ("idl_test1");
+$TESTDVR = PerlDDS::create_process ("annotations_idl_test1");
 
 $status = $TESTDVR->SpawnWaitKill (300);
 
 if ($status != 0) {
-    print STDERR "ERROR: idl_test1 returned $status\n";
+    print STDERR "ERROR: annotations_idl_test1 returned $status\n";
     $status = 1;
 }
 

@@ -19,7 +19,7 @@ $TESTDVR = PerlDDS::create_process ("idl_test3");
 $status = $TESTDVR->SpawnWaitKill (300);
 
 if ($status != 0) {
-    print STDERR "ERROR: idl_test1 returned $status\n";
+    print STDERR "ERROR: idl_test3 returned $status\n";
     $status = 1;
 }
 
