@@ -71,13 +71,11 @@ bool ts_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
   IDL_GlobalData::DCPS_Data_Type_Info* info = idl_global->is_dcps_type(name);
   if (info) {
     key_count = info->key_list_.size();
-  }
 #ifdef TAO_IDL_HAS_ANNOTATIONS
-  else if (be_global->is_topic_type(node)) {
+  } else if (be_global->is_topic_type(node)) {
     key_count = TopicKeys(node).count();
-  }
 #endif
-  else {
+  } else {
     return true;
   }
 

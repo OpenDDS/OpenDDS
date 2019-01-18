@@ -1722,9 +1722,8 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           break;
         }
       }
-    }
 #ifdef TAO_IDL_HAS_ANNOTATIONS
-    else {
+    } else {
       TopicKeys::Iterator finished = keys.end();
       for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
         if (!is_bounded_type(i.get_ast_type())) {
@@ -1732,8 +1731,8 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           break;
         }
       }
-    }
 #endif
+    }
 
     {
       Function max_marsh("gen_max_marshaled_size", "size_t");
@@ -1758,9 +1757,8 @@ bool marshal_generator::gen_struct(AST_Structure* node,
             }
             max_marshaled_size(field_type, size, padding);
           }
-        }
 #ifdef TAO_IDL_HAS_ANNOTATIONS
-        else {
+        } else {
           TopicKeys::Iterator finished = keys.end();
           for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
             AST_Type* straight_ast_type = i.get_ast_type();
@@ -1773,8 +1771,8 @@ bool marshal_generator::gen_struct(AST_Structure* node,
             }
             max_marshaled_size(ast_type, size, padding);
           }
-        }
 #endif
+        }
 
         if (padding) {
           be_global->impl_
@@ -1812,9 +1810,8 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           expr += findSizeCommon(use_cxx11 ? key_name + "()" : key_name,
                                  field_type, "stru.t", intro);
         }
-      }
 #ifdef TAO_IDL_HAS_ANNOTATIONS
-      else {
+      } else {
         TopicKeys::Iterator finished = keys.end();
         for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
           AST_Type* straight_ast_type = i.get_ast_type();
@@ -1832,8 +1829,8 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           }
           expr += findSizeCommon(key_name, ast_type, "stru.t", intro);
         }
-      }
 #endif
+      }
 
       be_global->impl_ << intro << expr;
     }
@@ -1867,9 +1864,8 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           expr += streamCommon(use_cxx11 ? key_name + "()" : key_name,
                                field_type, "<< stru.t", intro);
         }
-      }
 #ifdef TAO_IDL_HAS_ANNOTATIONS
-      else {
+      } else {
         TopicKeys::Iterator finished = keys.end();
         for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
           std::string key_name = i.path();
@@ -1892,8 +1888,8 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           }
           expr += streamCommon(key_name, ast_type, "<< stru.t", intro);
         }
-      }
 #endif
+      }
 
       if (first) {
         be_global->impl_ << intro << "  return true;\n";
@@ -1931,9 +1927,8 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           expr += streamCommon(use_cxx11 ? key_name + "()" : key_name,
                                field_type, ">> stru.t", intro);
         }
-      }
 #ifdef TAO_IDL_HAS_ANNOTATIONS
-      else {
+      } else {
         TopicKeys::Iterator finished = keys.end();
         for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
           std::string key_name = i.path();
@@ -1963,8 +1958,8 @@ bool marshal_generator::gen_struct(AST_Structure* node,
             expr += streamCommon(key_name, ast_type, ">> stru.t", intro);
           }
         }
-      }
 #endif
+      }
 
       if (first) {
         be_global->impl_ << intro << "  return true;\n";

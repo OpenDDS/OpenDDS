@@ -417,12 +417,11 @@ bool metaclass_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
   IDL_GlobalData::DCPS_Data_Type_Info* info = idl_global->is_dcps_type(name);
   if (info) {
     key_count = info->key_list_.size();
-  }
 #ifdef TAO_IDL_HAS_ANNOTATIONS
-  else if (is_topic_type) {
+  } else if (is_topic_type) {
     key_count = keys.count();
-  }
 #endif
+  }
 
   std::string clazz = scoped(name);
   std::string decl = "const MetaStruct& getMetaStruct<" + clazz + ">()",
@@ -444,12 +443,11 @@ bool metaclass_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
   if (key_count) {
     if (info) {
       gen_isDcpsKey(info);
-    }
 #ifdef TAO_IDL_HAS_ANNOTATIONS
-    else {
+    } else {
       gen_isDcpsKey(keys);
-    }
 #endif
+    }
   } else {
     be_global->impl_ << "    ACE_UNUSED_ARG(field);\n";
   }
