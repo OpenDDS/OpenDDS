@@ -28,3 +28,7 @@ project : dds_macros {
   }
 
 }
+
+feature(!no_opendds_safety_profile): taobaseidldefaults {
+  idlflags += -SS
+}

@@ -1,0 +1,5 @@
+project: dcps, dcps_ts_defaults {
+  TypeSupport_Files {
+    DelayedDurable.idl
+  }
+}
