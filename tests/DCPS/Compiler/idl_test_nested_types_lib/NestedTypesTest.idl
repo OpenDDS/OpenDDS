@@ -1,0 +1,39 @@
+/*
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+module NestedTypesTest {
+
+  #pragma DCPS_DATA_TYPE "NestedTypesTest::KeyInNestedStruct"
+  #pragma DCPS_DATA_KEY "NestedTypesTest::KeyInNestedStruct dot_.separated_.key_"
+
+  typedef unsigned long KeyArray[3];
+
+  struct Separated {
+    unsigned long key_;
+    KeyArray key2_;
+  };
+
+  typedef Separated SeparatedArray[2];
+
+  struct Dot {
+    Separated separated_;
+    SeparatedArray separated2_;
+  };
+
+  struct KeyInNestedStruct {
+    Dot dot_;
+  };
+
+  #pragma DCPS_DATA_TYPE "NestedTypesTest::KeyInNestedArray"
+  #pragma DCPS_DATA_KEY "NestedTypesTest::KeyInNestedArray dots_[0].separated2_[1].key2_[2]"
+
+  typedef Dot ArrayOfDotSeparatedKey[2];
+
+  struct KeyInNestedArray {
+    ArrayOfDotSeparatedKey dots_;
+  };
+};

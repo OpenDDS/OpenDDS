@@ -13,7 +13,7 @@ use Dumpvalue;
 use File::Spec;
 use File::Basename;
 use File::Copy;
-use File::Path qw(make_path);
+use File::Path;
 require File::Temp;
 use File::Temp ();
 use FileHandle;
@@ -593,7 +593,7 @@ if (!$ace_src || !$tao_src) {
     if ($opts{'doc_group'}) {
       my $github_url_tao_version = $doc_tao_version;
       $github_url_tao_version =~ s/\./_/g;
-      $urlbase = 'http://github.com/DOCGroup/ACE_TAO/releases/download/ACE%2BTAO-' . $github_url_tao_version . '/';
+      $urlbase = 'https://github.com/DOCGroup/ACE_TAO/releases/download/ACE%2BTAO-' . $github_url_tao_version . '/';
       $file = 'ACE+TAO-src-' . $doc_tao_version . '.'
         . ($is_windows ? 'zip' : 'tar.gz');
       $download_message = "Downloading $file";
@@ -637,9 +637,9 @@ if (!$ace_src || !$tao_src) {
         elsif (which('curl')) {
           print $download_message . " (using curl)\n";
           if ($opts{'dry-run'}) {
-            print "Dry-run: would run curl $urlbase$file -o $file\n";
+            print "Dry-run: would run curl -L $urlbase$file -o $file\n";
           }
-          elsif (system("curl $urlbase$file -o $file")) {
+          elsif (system("curl -L $urlbase$file -o $file")) {
             die "ERROR: from curl, stopped";
           }
         }
@@ -1203,6 +1203,21 @@ for my $key (keys %optdep) {
     }
     push(@features, $m) if $m;
     push(@platformmacros, $m) if $need_platform_macros{$key};
+  }
+}
+
+if ($is_windows && !$opts{'optimize'}) { # look for nonstandard vcpkg layout
+  for my $key ('xerces3', 'openssl') {
+    my $env = $optdep{$key}->[0];
+    if ($opts{$key} && $targetEnv{$env}) {
+      if (-d $targetEnv{$env} . '/debug/lib') {
+        print "Using debug/lib subdir for $key\n" if $opts{'verbose'};
+        my $libenv = $env;
+        $libenv =~ s/_?ROOT$/_LIBDIR/;
+        setEnv($libenv, $targetEnv{$env} . '/debug/lib');
+        $opts{$key . '-debugbin'} = 1;
+      }
+    }
   }
 }
 
@@ -1851,6 +1866,24 @@ sub nested {
   return undef;
 }
 
+sub add_dependency_paths {
+  my %dirs;
+  for my $key ('openssl', 'xerces3') {
+    if ($opts{$key}) {
+      next if $opts{$key} eq '/usr' || $opts{$key} eq 'skip_version_check';
+      my $env = $optdep{$key}->[0];
+      my $suffix = $slash . 'bin';
+      if ($opts{$key . '-debugbin'}) {
+        $suffix = $slash . 'debug' . $suffix;
+      }
+      $dirs{$targetEnv{$env} . $suffix} = 1;
+    }
+  }
+  for my $d (keys %dirs) {
+    push_libpath(\%targetEnv, $d);
+  }
+}
+
 my $cloned_build = $cross_compile && $build_host_tools;
 if ($cloned_build) {
   clone_host_and_target('.');
@@ -1913,13 +1946,7 @@ if ($cloned_build) {
     push_libpath(\%targetEnv, $targetEnv{'ACE_ROOT'} . $slash . 'lib');
     push_libpath(\%targetEnv, $targetEnv{'DDS_ROOT'} . $slash . 'lib');
 
-    if ($opts{'openssl'} && $opts{'openssl'} ne 'skip_version_check') {
-      push_libpath(\%targetEnv, $targetEnv{'SSL_ROOT'} . $slash . 'bin');
-    }
-
-    if ($opts{'xerces3'}) {
-      push_libpath(\%targetEnv, $targetEnv{'XERCESCROOT'} . $slash . 'bin');
-    }
+    add_dependency_paths();
   }
 
   configure_build(\%targetEnv);
@@ -1945,13 +1972,7 @@ else { # does not require cloned builds
     push_libpath(\%targetEnv, $targetEnv{'ACE_ROOT'} . $slash . 'lib');
     push_libpath(\%targetEnv, $targetEnv{'DDS_ROOT'} . $slash . 'lib');
 
-    if ($opts{'openssl'} && $opts{'openssl'} ne 'skip_version_check') {
-      push_libpath(\%targetEnv, $targetEnv{'SSL_ROOT'} . $slash . 'bin');
-    }
-
-    if ($opts{'xerces3'}) {
-      push_libpath(\%targetEnv, $targetEnv{'XERCESCROOT'} . $slash . 'bin');
-    }
+    add_dependency_paths();
   }
 
   configure_build(\%targetEnv);
@@ -1990,7 +2011,7 @@ sub write_cmake_file {
   my $dir = shift;
   my $module_dir = $dir . '/cmake';
 
-  make_path($module_dir) if ! -d $module_dir;
+  mkpath($module_dir) unless -d $module_dir;
   my $CM = backup_and_open($module_dir . '/config.cmake');
 
   sub whack_to_slash {

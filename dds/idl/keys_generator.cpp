@@ -111,6 +111,9 @@ bool keys_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
         for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
           string fname = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
           if (use_cxx11) {
+            fname = insert_cxx11_accessor_parens(fname, false);
+          }
+          if (use_cxx11) {
             fname += "()";
           }
           wrapper.key_compare(fname);
