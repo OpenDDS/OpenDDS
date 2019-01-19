@@ -1,0 +1,19 @@
+project: opendds_cxx11 {
+  idlflags      += -Wb,export_macro=FooLib_Export -Wb,export_include=foolib_export.h -I../../../idl_test2_lib --idl-version 4
+  dcps_ts_flags += -Wb,export_macro=FooLib_Export -Wb,export_include=foolib_export.h -I../../../idl_test2_lib --idl-version 4
+  dynamicflags  += FOOLIB_BUILD_DLL
+
+  Modify_Custom (IDL) {
+    output_follows_input = 0
+  }
+
+  TypeSupport_Files {
+    ../../../idl_test2_lib/FooDef.idl
+    ../../../idl_test2_lib/BazDef.idl
+  }
+
+  IDL_Files {
+    FooDefTypeSupport.idl
+    BazDefTypeSupport.idl
+  }
+}

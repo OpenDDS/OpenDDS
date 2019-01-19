@@ -1,0 +1,14 @@
+project: dcpsexe, opendds_cxx11 {
+  exename = cpp11_annotations_idl_test3
+  exeout = .
+
+  includes += ../idl_test3_lib
+  libs += cpp11_annotations_idl_test3_lib
+  libpaths += ../idl_test3_lib
+  after += cpp11_annotations_idl_test3_lib
+
+  Source_Files {
+    ../../../C++11/idl_test3_main/main.cpp
+  }
+}
+

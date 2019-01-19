@@ -12,7 +12,6 @@ project: opendds_cxx11 {
   }
 
   IDL_Files {
-    ../../../idl_test1_lib/FooDef.idl
     FooDefTypeSupport.idl
   }
 }
