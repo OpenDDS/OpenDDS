@@ -126,7 +126,7 @@ jobs:
   - script: make -sj6
     displayName: Compile
   - script: >
-      source setenv.sh &&
+      source $(Build.SourcesDirectory)/setenv.sh &&
       $DDS_ROOT/tests/cmake_integration/run_ci_tests.sh
     displayName: Compile CMake Tests
 
@@ -147,6 +147,6 @@ jobs:
   - script: make -sj6
     displayName: Compile
   - script: >
-      source setenv.sh &&
+      source $(Build.SourcesDirectory)/setenv.sh &&
       $DDS_ROOT/tests/cmake_integration/run_ci_tests.sh
     displayName: Compile CMake Tests
