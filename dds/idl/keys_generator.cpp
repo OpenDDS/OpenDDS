@@ -113,9 +113,6 @@ bool keys_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
           if (use_cxx11) {
             fname = insert_cxx11_accessor_parens(fname, false);
           }
-          if (use_cxx11) {
-            fname += "()";
-          }
           wrapper.key_compare(fname);
         }
 #ifdef TAO_IDL_HAS_ANNOTATIONS
@@ -126,7 +123,7 @@ bool keys_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
           if (i.root_type() == TopicKeys::UnionType) {
             fname += "._d()";
           } else if (use_cxx11) {
-            fname += "()";
+            fname = insert_cxx11_accessor_parens(fname, false);
           }
           wrapper.key_compare(fname);
         }
