@@ -1,7 +1,3 @@
-variables:
-  DDS_ROOT: $(Build.SourcesDirectory)
-  ACE_ROOT: $(Build.SourcesDirectory)/ACE_TAO/ACE
-
 jobs:
 - job: VisualStudio2017
   timeoutInMinutes: 90
@@ -129,8 +125,8 @@ jobs:
     displayName: Run configure script
   - script: make -sj6
     displayName: Compile
-  - script: |
-      export DDS_ROOT=$(DDS_ROOT) ACE_ROOT=$(ACE_ROOT)
+  - script: >
+      source setenv.sh &&
       $DDS_ROOT/tests/cmake_integration/run_ci_tests.sh
     displayName: Compile CMake Tests
 
@@ -150,7 +146,7 @@ jobs:
     displayName: Run configure script
   - script: make -sj6
     displayName: Compile
-  - script: |
-      export DDS_ROOT=$(DDS_ROOT) ACE_ROOT=$(ACE_ROOT)
+  - script: >
+      source setenv.sh &&
       $DDS_ROOT/tests/cmake_integration/run_ci_tests.sh
     displayName: Compile CMake Tests
