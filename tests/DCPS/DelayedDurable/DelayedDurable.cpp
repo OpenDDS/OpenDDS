@@ -4,6 +4,11 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/WaitSet.h"
 
+#ifdef ACE_AS_STATIC_LIBS
+# include "dds/DCPS/RTPS/RtpsDiscovery.h"
+# include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
+#endif
+
 using namespace DDS;
 using OpenDDS::DCPS::DEFAULT_STATUS_MASK;
 
