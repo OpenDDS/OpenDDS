@@ -84,6 +84,7 @@ jobs:
         DisableCMakeIntegrationTest: true
       SafetyBaseNoBuiltinTopics:
         ConfigOpts: --safety-profile=base --no-built-in-topics
+        DisableCMakeIntegrationTest: true
       Security:
         ConfigOpts: --security --features=versioned_namespace=1
         PackageDeps: libxerces-c-dev libssl-dev cmake
