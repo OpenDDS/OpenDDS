@@ -81,6 +81,7 @@ jobs:
         ConfigOpts: --no-debug --optimize
       Safety:
         ConfigOpts: --safety-profile
+        DisableCMakeIntegrationTest: true
       SafetyBaseNoBuiltinTopics:
         ConfigOpts: --safety-profile=base --no-built-in-topics
       Security:
@@ -129,6 +130,7 @@ jobs:
       source $(Build.SourcesDirectory)/setenv.sh &&
       $DDS_ROOT/tests/cmake_integration/run_ci_tests.sh
     displayName: Compile CMake Tests
+    condition: and(succeeded(), eq(variables['DisableCMakeIntegrationTest'], false))
 
 - job: macOS
   timeoutInMinutes: 90
