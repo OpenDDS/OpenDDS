@@ -20,14 +20,16 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+#ifndef TAO_IDL_HAS_ANNOTATIONS
+#  error "Annotation support in tao_idl is required, please use a newer version of TAO"
+#endif
+
 class AST_Generator;
 class AST_Decl;
 class AST_Structure;
 class AST_Field;
 class AST_Union;
-#ifdef TAO_IDL_HAS_ANNOTATIONS
 class AST_Annotation_Decl;
-#endif
 
 // Defines a class containing all back end global data.
 
@@ -143,12 +145,10 @@ public:
 
   static bool writeFile(const char* fileName, const std::string &content);
 
-#ifdef TAO_IDL_HAS_ANNOTATIONS
   /**
    * Cache @topic and @key
    */
   void cache_topic_annotations();
-#endif
 
   /**
    * Check if a type has been declared a topic type.
@@ -178,7 +178,6 @@ private:
 
   LanguageMapping language_mapping_;
 
-#ifdef TAO_IDL_HAS_ANNOTATIONS
   /**
    * Hold these for the convenience of not having to do a lookup for the nodes
    */
@@ -186,7 +185,6 @@ private:
   AST_Annotation_Decl* topic_annotation_;
   AST_Annotation_Decl* key_annotation_;
   ///}
-#endif
 };
 
 class BE_Comment_Guard {

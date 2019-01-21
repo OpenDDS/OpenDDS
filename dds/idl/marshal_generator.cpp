@@ -1664,10 +1664,8 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     be_global->impl_ << intro << "  return " << expr << ";\n";
   }
 
-#ifdef TAO_IDL_HAS_ANNOTATIONS
   bool is_topic_type = be_global->is_topic_type(node);
   TopicKeys keys(node);
-#endif
   IDL_GlobalData::DCPS_Data_Type_Info* info = idl_global->is_dcps_type(name);
 
   // Only generate these methods if this is a topic type
@@ -1721,7 +1719,6 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           break;
         }
       }
-#ifdef TAO_IDL_HAS_ANNOTATIONS
     } else {
       TopicKeys::Iterator finished = keys.end();
       for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
@@ -1730,7 +1727,6 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           break;
         }
       }
-#endif
     }
 
     {
@@ -1756,7 +1752,6 @@ bool marshal_generator::gen_struct(AST_Structure* node,
             }
             max_marshaled_size(field_type, size, padding);
           }
-#ifdef TAO_IDL_HAS_ANNOTATIONS
         } else {
           TopicKeys::Iterator finished = keys.end();
           for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
@@ -1770,7 +1765,6 @@ bool marshal_generator::gen_struct(AST_Structure* node,
             }
             max_marshaled_size(ast_type, size, padding);
           }
-#endif
         }
 
         if (padding) {
@@ -1808,7 +1802,6 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           }
           expr += findSizeCommon(key_name, field_type, "stru.t", intro);
         }
-#ifdef TAO_IDL_HAS_ANNOTATIONS
       } else {
         TopicKeys::Iterator finished = keys.end();
         for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
@@ -1824,7 +1817,6 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           }
           expr += findSizeCommon(key_name, ast_type, "stru.t", intro);
         }
-#endif
       }
 
       be_global->impl_ << intro << expr;
@@ -1858,7 +1850,6 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           }
           expr += streamCommon(key_name, field_type, "<< stru.t", intro);
         }
-#ifdef TAO_IDL_HAS_ANNOTATIONS
       } else {
         TopicKeys::Iterator finished = keys.end();
         for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
@@ -1879,7 +1870,6 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           }
           expr += streamCommon(key_name, ast_type, "<< stru.t", intro);
         }
-#endif
       }
 
       if (first) {
@@ -1917,7 +1907,6 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           }
           expr += streamCommon(key_name, field_type, ">> stru.t", intro);
         }
-#ifdef TAO_IDL_HAS_ANNOTATIONS
       } else {
         TopicKeys::Iterator finished = keys.end();
         for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
@@ -1945,7 +1934,6 @@ bool marshal_generator::gen_struct(AST_Structure* node,
             expr += streamCommon(key_name, ast_type, ">> stru.t", intro);
           }
         }
-#endif
       }
 
       if (first) {

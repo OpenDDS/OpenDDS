@@ -76,17 +76,13 @@ struct KeyLessThanWrapper {
 bool keys_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
   const std::vector<AST_Field*>&, AST_Type::SIZE_TYPE, const char*)
 {
-#ifdef TAO_IDL_HAS_ANNOTATIONS
   TopicKeys keys(node);
-#endif
   size_t key_count = 0;
   IDL_GlobalData::DCPS_Data_Type_Info* info = idl_global->is_dcps_type(name);
   if (info) {
     key_count = info->key_list_.size();
-#ifdef TAO_IDL_HAS_ANNOTATIONS
   } else if (be_global->is_topic_type(node)) {
     key_count = keys.count();
-#endif
   } else {
     return true;
   }
@@ -115,7 +111,6 @@ bool keys_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
           }
           wrapper.key_compare(fname);
         }
-#ifdef TAO_IDL_HAS_ANNOTATIONS
       } else if (key_count) {
         TopicKeys::Iterator finished = keys.end();
         for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
@@ -127,7 +122,6 @@ bool keys_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
           }
           wrapper.key_compare(fname);
         }
-#endif
       }
     }
   }
@@ -139,10 +133,6 @@ bool keys_generator::gen_union(
   AST_Union* node, UTL_ScopedName* name,
   const std::vector<AST_UnionBranch*>&, AST_Type*, const char*)
 {
-#ifndef TAO_IDL_HAS_ANNOTATIONS
-  ACE_UNUSED_ARG(node);
-  ACE_UNUSED_ARG(name);
-#else
   if (!be_global->is_topic_type(node)) {
     return true;
   }
@@ -158,6 +148,5 @@ bool keys_generator::gen_union(
       wrapper.has_no_keys_signature();
     }
   }
-#endif
   return true;
 }

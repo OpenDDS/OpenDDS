@@ -17,10 +17,8 @@
 #include "ast_structure.h"
 #include "ast_field.h"
 #include "ast_union.h"
-#ifdef TAO_IDL_HAS_ANNOTATIONS
-#  include "ast_annotation_decl.h"
-#  include "utl_annotations.h"
-#endif
+#include "ast_annotation_decl.h"
+#include "utl_annotations.h"
 
 #include "ace/OS_NS_strings.h"
 #include "ace/OS_NS_sys_stat.h"
@@ -48,10 +46,8 @@ BE_GlobalData::BE_GlobalData()
   , face_ts_(false)
   , seq_("Seq")
   , language_mapping_(LANGMAP_NONE)
-#ifdef TAO_IDL_HAS_ANNOTATIONS
   , topic_annotation_(0)
   , key_annotation_(0)
-#endif
 {
 }
 
@@ -566,7 +562,6 @@ BE_GlobalData::get_include_block(BE_GlobalData::stream_enum_t which)
   return ret.str();
 }
 
-#ifdef TAO_IDL_HAS_ANNOTATIONS
 void
 BE_GlobalData::cache_topic_annotations()
 {
@@ -579,12 +574,10 @@ BE_GlobalData::cache_topic_annotations()
         root->lookup_by_name("::@key"));
   }
 }
-#endif
 
 bool
 BE_GlobalData::is_topic_type(AST_Decl* node)
 {
-#ifdef TAO_IDL_HAS_ANNOTATIONS
   if (node) {
     if (node->node_type() == AST_Decl::NT_struct) {
       return UTL_find_annotation(node->annotations(), topic_annotation_);
@@ -598,32 +591,19 @@ BE_GlobalData::is_topic_type(AST_Decl* node)
       }
     }
   }
-#endif
   return false;
 }
 
 bool
 BE_GlobalData::is_key(AST_Field* node)
 {
-#ifdef TAO_IDL_HAS_ANNOTATIONS
   // Check for @key
-  if (node && UTL_find_annotation(node->annotations(), key_annotation_)) {
-    return true;
-  }
-#endif
-
-  return false;
+  return node && UTL_find_annotation(node->annotations(), key_annotation_);
 }
 
 bool
 BE_GlobalData::has_key(AST_Union* node)
 {
-#ifdef TAO_IDL_HAS_ANNOTATIONS
   // Check for @key on the discriminator
-  if (node && UTL_find_annotation(node->disc_annotations(), key_annotation_)) {
-    return true;
-  }
-#endif
-
-  return false;
+  return node && UTL_find_annotation(node->disc_annotations(), key_annotation_);
 }

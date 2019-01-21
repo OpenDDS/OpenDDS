@@ -1,4 +1,3 @@
-
 // note the following predefined types often have special cases:
 //    char, octet, boolean, string
 // where as all of the integer and float types are just one case.
@@ -6,7 +5,6 @@
 #include "SharedTypes.idl"
 
 module Xyz {
-
 
   // needed to detect duplicate overload problems
   typedef sequence<boolean,3> SeqOfBoolean2;
@@ -21,18 +19,46 @@ module Xyz {
     SeqOfLong ss1;
   };
 
-
   // needed to call size methods on arrays
-#pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfSeqOfBoolean"
+#ifdef USE_TOPIC_ANNOTATIONS
+  @topic
+#else
+#  pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfSeqOfBoolean"
+#endif
   struct StructOfArrayOfSeqOfBoolean { ArrayOfSeqOfBoolean f; };
-#pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfSeqOfString"
+
+#ifdef USE_TOPIC_ANNOTATIONS
+  @topic
+#else
+#  pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfSeqOfString"
+#endif
   struct StructOfArrayOfSeqOfString { ArrayOfSeqOfString f;};
-#pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfSeqOfChar"
+
+#ifdef USE_TOPIC_ANNOTATIONS
+  @topic
+#else
+#  pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfSeqOfChar"
+#endif
   struct StructOfArrayOfSeqOfChar { ArrayOfSeqOfChar f;};
-#pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfSeqOfOctet"
+
+#ifdef USE_TOPIC_ANNOTATIONS
+  @topic
+#else
+#  pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfSeqOfOctet"
+#endif
   struct StructOfArrayOfSeqOfOctet { ArrayOfSeqOfOctet f;};
-#pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfSeqOfLong"
+
+#ifdef USE_TOPIC_ANNOTATIONS
+  @topic
+#else
+#  pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfSeqOfLong"
+#endif
   struct StructOfArrayOfSeqOfLong { ArrayOfSeqOfLong f;};
-#pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfSeqOfAnEnum"
+
+#ifdef USE_TOPIC_ANNOTATIONS
+  @topic
+#else
+#  pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfSeqOfAnEnum"
+#endif
   struct StructOfArrayOfSeqOfAnEnum { ArrayOfSeqOfAnEnum f;};
 };

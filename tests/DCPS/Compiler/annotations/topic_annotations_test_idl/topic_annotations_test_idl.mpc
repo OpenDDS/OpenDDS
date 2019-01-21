@@ -1,7 +1,4 @@
 project(*): dcps {
-  idlflags += --idl-version 4
-  dcps_ts_flags += --idl-version 4
-
   TypeSupport_Files {
     topic_annotations_test.idl
   }

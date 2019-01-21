@@ -1,4 +1,3 @@
-
 // note the following predefined types often have special cases:
 //    char, octet, boolean, string
 // where as all of the integer and float types are just one case.
@@ -25,31 +24,31 @@ module Xyz {
 
   // needed to call size methods on arrays
   struct StructOfArrayOfArrayOfBoolean { ArrayOfArrayOfBoolean f; };
-#ifdef __OPENDDS_IDL_HAS_TOPIC_ANNOTATIONS
+#ifdef USE_TOPIC_ANNOTATIONS
   @topic
 #else
 #  pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfArrayOfString"
 #endif
   struct StructOfArrayOfArrayOfString { ArrayOfArrayOfString f;};
-#ifdef __OPENDDS_IDL_HAS_TOPIC_ANNOTATIONS
+#ifdef USE_TOPIC_ANNOTATIONS
   @topic
 #else
 #  pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfArrayOfChar"
 #endif
   struct StructOfArrayOfArrayOfChar { ArrayOfArrayOfChar f;};
-#ifdef __OPENDDS_IDL_HAS_TOPIC_ANNOTATIONS
+#ifdef USE_TOPIC_ANNOTATIONS
   @topic
 #else
 #  pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfArrayOfOctet"
 #endif
   struct StructOfArrayOfArrayOfOctet { ArrayOfArrayOfOctet f;};
-#ifdef __OPENDDS_IDL_HAS_TOPIC_ANNOTATIONS
+#ifdef USE_TOPIC_ANNOTATIONS
   @topic
 #else
 #  pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfArrayOfLong"
 #endif
   struct StructOfArrayOfArrayOfLong { ArrayOfArrayOfLong f;};
-#ifdef __OPENDDS_IDL_HAS_TOPIC_ANNOTATIONS
+#ifdef USE_TOPIC_ANNOTATIONS
   @topic
 #else
 #  pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfArrayOfAnEnum"
@@ -67,7 +66,7 @@ module Xyz {
   // typedef of a "special" scalar type
   typedef octet OctetTypedef;
 
-#ifdef __OPENDDS_IDL_HAS_TOPIC_ANNOTATIONS
+#ifdef USE_TOPIC_ANNOTATIONS
   @topic
 #else
 #  pragma DCPS_DATA_TYPE "Xyz::StructOfSeqOfSeqOfLong"
@@ -253,7 +252,7 @@ module Xyz {
   };
 
   // for access to _dcps_* methods
-#ifdef __OPENDDS_IDL_HAS_TOPIC_ANNOTATIONS
+#ifdef USE_TOPIC_ANNOTATIONS
   @topic
 #else
 #  pragma DCPS_DATA_TYPE "Xyz::StructAUnion"
@@ -280,7 +279,7 @@ module Xyz {
 
   typedef octet OctetArray[3];
 
-#ifdef __OPENDDS_IDL_HAS_TOPIC_ANNOTATIONS
+#ifdef USE_TOPIC_ANNOTATIONS
   @topic
 #else
 #  pragma DCPS_DATA_TYPE "Xyz::Foo"
@@ -288,13 +287,13 @@ module Xyz {
 #  pragma DCPS_DATA_KEY "Xyz::Foo xcolor"
 #endif
   struct Foo {
-#ifdef __OPENDDS_IDL_HAS_TOPIC_ANNOTATIONS
+#ifdef USE_TOPIC_ANNOTATIONS
     @key
 #endif
     long key;
     octet octer;
     OctetTypedef theOctetTypedef;
-#ifdef __OPENDDS_IDL_HAS_TOPIC_ANNOTATIONS
+#ifdef USE_TOPIC_ANNOTATIONS
     @key
 #endif
     AnEnum xcolor;

@@ -1,5 +1,4 @@
 #include "idl_defines.h"
-#ifdef TAO_IDL_HAS_ANNOTATIONS
 
 #include <string>
 #include <list>
@@ -443,5 +442,3 @@ bool TopicKeys::recursive() const
 {
   return recursive_;
 }
-
-#endif

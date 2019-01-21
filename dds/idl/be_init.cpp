@@ -28,6 +28,7 @@ int
 BE_init(int&, ACE_TCHAR*[])
 {
   ACE_NEW_RETURN(be_global, BE_GlobalData, -1);
+  idl_global->default_idl_version_ = IDL_VERSION_4;
   return 0;
 }
 
@@ -57,7 +58,6 @@ BE_post_init(char*[], long)
     DRV_add_include_path(included, dds_root.c_str(), 0, true);
   }
 
-#ifdef TAO_IDL_HAS_ANNOTATIONS
   if (idl_global->idl_version_ >= IDL_VERSION_4) {
     DRV_cpp_putarg("-D__OPENDDS_IDL_HAS_ANNOTATIONS");
     idl_global->eval(
@@ -69,5 +69,4 @@ BE_post_init(char*[], long)
     );
     be_global->cache_topic_annotations();
   }
-#endif
 }

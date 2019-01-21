@@ -1,15 +1,13 @@
-
 module Xyz {
-
   // Example user defined "Foo" structure
-#ifdef __OPENDDS_IDL_HAS_TOPIC_ANNOTATIONS
+#ifdef USE_TOPIC_ANNOTATIONS
   @topic
 #else
 #  pragma DCPS_DATA_TYPE "Xyz::Foo"
 #  pragma DCPS_DATA_KEY "Xyz::Foo a_long_value"
 #endif
   struct Foo {
-#ifdef __OPENDDS_IDL_HAS_TOPIC_ANNOTATIONS
+#ifdef USE_TOPIC_ANNOTATIONS
     @key
 #endif
     long  a_long_value;  // the instance key
@@ -17,12 +15,11 @@ module Xyz {
     long  sample_sequence;
     long  writer_id;
   };
-
 };
 
 //Need to verify that we can have a "Foo" (or in this case, a "Bar") outside
 //of a module in IDL.
-#ifdef __OPENDDS_IDL_HAS_TOPIC_ANNOTATIONS
+#ifdef USE_TOPIC_ANNOTATIONS
   @topic
 #else
 #  pragma DCPS_DATA_TYPE "Bar"

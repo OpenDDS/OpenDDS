@@ -55,14 +55,14 @@ module Xyz {
 
   // +12
   typedef sequence<short> ShortSeq;
-#ifdef __OPENDDS_IDL_HAS_TOPIC_ANNOTATIONS
+#ifdef USE_TOPIC_ANNOTATIONS
   @topic
 #else
 #  pragma DCPS_DATA_TYPE "Xyz::AStruct"
 #  pragma DCPS_DATA_KEY "Xyz::AStruct v1"
 #endif
   struct AStruct {
-#ifdef __OPENDDS_IDL_HAS_TOPIC_ANNOTATIONS
+#ifdef USE_TOPIC_ANNOTATIONS
     @key
 #endif
     long v1;
@@ -118,8 +118,8 @@ module Xyz {
 
   typedef AStructSeqX ArrayOfAStructSeq[3];
 
-#ifdef __OPENDDS_IDL_HAS_TOPIC_ANNOTATIONS
-#  @topic
+#ifdef USE_TOPIC_ANNOTATIONS
+  @topic
 #else
 #  pragma DCPS_DATA_TYPE "Xyz::StructContainingArrayOfAStructSeq"
 #endif
@@ -133,22 +133,22 @@ module Xyz {
   typedef octet OctetArray[3];
 
   // Example user defined "Foo" structure
-#ifdef __OPENDDS_IDL_HAS_TOPIC_ANNOTATIONS
-  @key
+#ifdef USE_TOPIC_ANNOTATIONS
+  @topic
 #else
 #  pragma DCPS_DATA_TYPE "Xyz::Foo"
 #  pragma DCPS_DATA_KEY "Xyz::Foo key"
 #  pragma DCPS_DATA_KEY "Xyz::Foo xcolor"
 #endif
   struct Foo {
-#ifdef __OPENDDS_IDL_HAS_TOPIC_ANNOTATIONS
+#ifdef USE_TOPIC_ANNOTATIONS
     @key
 #endif
     long key;  //4
 //    TheKeyType key; // no different than without typedef
     //ArrayOfShorts shorts;
     octet octer; //+1 > 5
-#ifdef __OPENDDS_IDL_HAS_TOPIC_ANNOTATIONS
+#ifdef USE_TOPIC_ANNOTATIONS
     @key
 #endif
     ColorX xcolor; //+4 > 9
@@ -239,8 +239,8 @@ module N1 {
 
 //Need to verify that we can have a "Foo" (or in this case, a "Bar") outside
 //of a module in IDL.
-#ifdef __OPENDDS_IDL_HAS_TOPIC_ANNOTATIONS
-  @key
+#ifdef USE_TOPIC_ANNOTATIONS
+  @topic
 #else
 #  pragma DCPS_DATA_TYPE "Bar"
 #endif

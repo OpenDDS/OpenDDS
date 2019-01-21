@@ -1,5 +1,3 @@
-#include "idl_defines.h"
-#ifdef TAO_IDL_HAS_ANNOTATIONS
 #ifndef SAMPLE_KEYS_HEADER
 #define SAMPLE_KEYS_HEADER
 
@@ -191,5 +189,4 @@ private:
   /// Have iterators recurse into structures
   bool recursive_;
 };
-#endif
 #endif

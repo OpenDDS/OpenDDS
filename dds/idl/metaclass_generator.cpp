@@ -381,7 +381,6 @@ namespace {
     }
   }
 
-#ifdef TAO_IDL_HAS_ANNOTATIONS
   void gen_isDcpsKey(TopicKeys& keys)
   {
     TopicKeys::Iterator finished = keys.end();
@@ -389,7 +388,6 @@ namespace {
       gen_isDcpsKey_i(i.path().c_str());
     }
   }
-#endif
 }
 
 bool metaclass_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
@@ -409,18 +407,14 @@ bool metaclass_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
     first_struct_ = false;
   }
 
-#ifdef TAO_IDL_HAS_ANNOTATIONS
   bool is_topic_type = be_global->is_topic_type(node);
   TopicKeys keys(node);
-#endif
   size_t key_count = 0;
   IDL_GlobalData::DCPS_Data_Type_Info* info = idl_global->is_dcps_type(name);
   if (info) {
     key_count = info->key_list_.size();
-#ifdef TAO_IDL_HAS_ANNOTATIONS
   } else if (is_topic_type) {
     key_count = keys.count();
-#endif
   }
 
   std::string clazz = scoped(name);
@@ -443,10 +437,8 @@ bool metaclass_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
   if (key_count) {
     if (info) {
       gen_isDcpsKey(info);
-#ifdef TAO_IDL_HAS_ANNOTATIONS
     } else {
       gen_isDcpsKey(keys);
-#endif
     }
   } else {
     be_global->impl_ << "    ACE_UNUSED_ARG(field);\n";
