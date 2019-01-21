@@ -130,7 +130,9 @@ jobs:
       source $(Build.SourcesDirectory)/setenv.sh &&
       $DDS_ROOT/tests/cmake_integration/run_ci_tests.sh
     displayName: Compile CMake Tests
-    condition: and(succeeded(), eq(variables['DisableCMakeIntegrationTest'], false))
+    condition: >
+      and(succeeded(),
+          eq(false, variables['DisableCMakeIntegrationTest']))
 
 - job: macOS
   timeoutInMinutes: 90
