@@ -1172,7 +1172,7 @@ for my $key (keys %optdep) {
   }
 }
 
-if ($is_windows && !$opts{'optimize'}) { # look for nonstandard vcpkg layout
+if ($slash eq '\\' && !$opts{'optimize'}) { # look for nonstandard vcpkg layout
   for my $key ('xerces3', 'openssl') {
     my $env = $optdep{$key}->[0];
     if ($opts{$key} && $targetEnv{$env}) {
