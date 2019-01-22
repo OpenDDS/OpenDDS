@@ -63,3 +63,14 @@ to manually specify destination addresses, use ``--gcp zone:group``
 which will use GCP's API to find the IP addresses of all other
 instances in the group.  The instances need to have read permissions
 for the Compute Engine API.
+
+Integration with Microsoft Azure
+--------------------------------
+
+A common use case for the repeater is to connect all of the instances
+in a resource group.  Instead of (or in addition to) using ``--send``
+to manually specify destination addresses, use ``--azure
+resource_group`` which will use Azure's API to find the IP addresses
+of all other instances in the resource group.  The VM running the
+repeater needs to have read access to the network interfaces in the
+resource group.
