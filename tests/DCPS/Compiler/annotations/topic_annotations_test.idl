@@ -5,7 +5,7 @@ module TopicAnnotationsTest {
    * 0 Keys
    */
   @topic
-  struct NoKeySampleStruct {
+  struct UnkeyedStruct {
     long value;
   };
 
@@ -14,7 +14,7 @@ module TopicAnnotationsTest {
    * 1 Key
    */
   @topic
-  struct SimpleKeySampleStruct {
+  struct SimpleKeyStruct {
     @key
     long key;
     long value;
@@ -25,60 +25,41 @@ module TopicAnnotationsTest {
    * 2 Keys
    */
   @topic
-  struct NestedKeySampleStruct {
+  struct NestedKeyStruct {
     @key
     long non_nested_key;
     @key
-    SimpleKeySampleStruct nested_key;
+    SimpleKeyStruct nested_key;
   };
 
   /*
    * Case of an Array of Primitives
    * 2 Keys
    */
-  typedef long LongArray_t[2];
+  typedef long LongArray[2];
   @topic
-  struct LongArraySampleStruct {
+  struct LongArrayStruct {
     @key
-    LongArray_t values;
+    LongArray values;
   };
 
   /*
    * Case of an Array of Structs
    * 2 Keys
    */
-  typedef SimpleKeySampleStruct SimpleKeyArray_t[2];
+  typedef SimpleKeyStruct SimpleKeyStructArray[2];
   @topic
   struct SimpleKeyArray {
     @key
-    SimpleKeyArray_t values;
-  };
-
-  /*
-   * Case of a Union Key Nested inside a Struct
-   * 1 key
-   */
-  @topic
-  union Union1 switch (@key long) {
-  case 0:
-    long a;
-  case 5:
-    char b;
-  default:
-    float c;
-  };
-  @topic
-  struct UnionKeyStruct {
-    @key
-    Union1 value;
+    SimpleKeyStructArray values;
   };
 
   /*
    * Case of a Unkeyed Standalone Topic Union
-   * 0 keys
+   * 0 Keys
    */
   @topic
-  union Union2 switch (long) {
+  union UnkeyedUnion switch (long) {
   case 0:
     long a;
   case 5:
@@ -88,16 +69,28 @@ module TopicAnnotationsTest {
   };
 
   /*
-   * Case of a Keyed Standalone Topic Union
-   * 1 key
+   * Case of a Union Key Nested inside a Struct
+   * 1 Key
    */
   @topic
-  union Union3 switch (@key long) {
+  union KeyedUnion switch (@key long) {
   case 0:
     long a;
   case 5:
     char b;
   default:
     float c;
+  };
+
+  /*
+   * Case of a Keyed Union Nested inside a Struct
+   * 2 Keys
+   */
+  @topic
+  struct KeyedUnionStruct {
+    @key
+    KeyedUnion value;
+    @key
+    long another_key;
   };
 };

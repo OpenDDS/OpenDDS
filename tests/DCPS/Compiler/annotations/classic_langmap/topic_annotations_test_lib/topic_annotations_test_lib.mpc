@@ -1,5 +1,12 @@
-project(*): dcps {
+project: dcps {
+  idlflags += -I../../
+
   TypeSupport_Files {
-    topic_annotations_test.idl
+    ../../topic_annotations_test.idl
+  }
+
+  IDL_Files {
+    ../../topic_annotations_test.idl
+    topic_annotations_testTypeSupport.idl
   }
 }

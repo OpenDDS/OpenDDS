@@ -1,3 +1,2 @@
 /topic_annotations_test*
-!/topic_annotations_test.idl
-!/topic_annotations_test.mpc
+!/topic_annotations_test_lib.mpc
