@@ -127,9 +127,11 @@ jobs:
     displayName: Run configure script
   - script: make -sj6
     displayName: Compile
-  - script: >
-      source $(Build.SourcesDirectory)/setenv.sh &&
-      $DDS_ROOT/tests/cmake_integration/run_ci_tests.sh
+  - script: |
+      if [[ "$(ConfigOpts)" == *"--compiler=clang"* ]]; then
+        export CC=/usr/bin/clang CXX=/usr/bin/clang++
+      fi
+      source $(Build.SourcesDirectory)/setenv.sh && $DDS_ROOT/tests/cmake_integration/run_ci_tests.sh
     displayName: Compile CMake Tests
     condition: >
       and(succeeded(),
