@@ -81,7 +81,7 @@ sub news_contents_excerpt {
   my @lines;
   open(my $news, "NEWS.md") or die "Can't read NEWS.md file";
   while (<$news>) {
-    if (/^# Version/) {
+    if (/^(# )?Version/) {
       next;
     }
     if (/^_____/) {
@@ -536,7 +536,7 @@ sub verify_news_file_section {
   my $metaversion = quotemeta($version);
   my $has_version = 0;
   while (<NEWS>) {
-    if ($_ =~ /^# Version $metaversion of OpenDDS/) {
+    if ($_ =~ /^(# )?Version $metaversion of OpenDDS/) {
       $has_version = 1;
     }
   }
@@ -578,7 +578,7 @@ sub verify_update_news_file {
   my $corrected_features = 1;
   my $corrected_fixes = 1;
   while (<NEWS>) {
-    if ($_ =~ /^# Version $metaversion of OpenDDS/) {
+    if ($_ =~ /^(# )?Version $metaversion of OpenDDS/) {
       $has_version = 1;
     } elsif ($_ =~ /TODO: Add your features here/) {
       $corrected_features = 0;
