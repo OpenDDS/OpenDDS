@@ -14,6 +14,8 @@ Version 3.13.1 of OpenDDS
 - Configure: fixed detection of MSVC compiler versions
 - Configure on Windows: allow Perl to be located in a directory with spaces
 - Configure: follow redirects if using curl to download (#1025)
+- Configure: Android support (#964)
+- Configure: added for --host-tools option (part of #968)
 - Make install awareness of user_macros.GNU and improved Java bindings support (#1022)
 
 _______________________________________________________________________________
