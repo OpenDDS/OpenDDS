@@ -56,7 +56,6 @@ namespace {
       be_global->add_include(includes[i], whichStream);
     }
   }
-
 }
 
 ts_generator::ts_generator()
@@ -64,15 +63,34 @@ ts_generator::ts_generator()
 {
 }
 
-bool ts_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
-  const std::vector<AST_Field*>&, AST_Type::SIZE_TYPE, const char*)
+
+bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
 {
+  AST_Structure* struct_node = 0;
+  AST_Union* union_node = 0;
+  if (!node || !name) {
+    return false;
+  }
+  if (node->node_type() == AST_Decl::NT_struct) {
+    struct_node = dynamic_cast<AST_Structure*>(node);
+  } else if (node->node_type() == AST_Decl::NT_union) {
+    union_node = dynamic_cast<AST_Union*>(node);
+  } else {
+    return false;
+  }
+
   size_t key_count = 0;
-  IDL_GlobalData::DCPS_Data_Type_Info* info = idl_global->is_dcps_type(name);
-  if (info) {
-    key_count = info->key_list_.size();
-  } else if (be_global->is_topic_type(node)) {
-    key_count = TopicKeys(node).count();
+  if (struct_node) {
+    IDL_GlobalData::DCPS_Data_Type_Info* info = idl_global->is_dcps_type(name);
+    if (info) {
+      key_count = info->key_list_.size();
+    } else if (be_global->is_topic_type(struct_node)) {
+      key_count = TopicKeys(struct_node).count();
+    } else {
+      return true;
+    }
+  } else if (be_global->is_topic_type(union_node)) {
+    key_count = be_global->has_key(union_node) ? 1 : 0;
   } else {
     return true;
   }
@@ -144,6 +162,7 @@ bool ts_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
     "\n"
     "  static const char* type_name () { return \"" << cxxName << "\"; }\n"
     "  static bool gen_has_key () { return " << (key_count ? "true" : "false") << "; }\n"
+    "  static size_t key_count () { return " << key_count << "; }\n"
     "\n"
     "  static size_t gen_max_marshaled_size(const MessageType& x, bool align) { return ::OpenDDS::DCPS::gen_max_marshaled_size(x, align); }\n"
     "  static void gen_find_size(const MessageType& arr, size_t& size, size_t& padding) { ::OpenDDS::DCPS::gen_find_size(arr, size, padding); }\n"
@@ -237,6 +256,16 @@ bool ts_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
   }
   be_global->impl_ << be_global->versioning_end() << "\n";
 
+  return true;
+}
+
+bool ts_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
+  const std::vector<AST_Field*>&, AST_Type::SIZE_TYPE, const char*)
+{
+  if (!generate_ts(node, name)) {
+    return false;
+  }
+
   if (be_global->face_ts()) {
     face_ts_generator::generate(name);
   }
@@ -244,15 +273,10 @@ bool ts_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
   return true;
 }
 
-bool ts_generator::gen_union(AST_Union*, UTL_ScopedName* name,
+bool ts_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
   const std::vector<AST_UnionBranch*>&, AST_Type*, const char*)
 {
-  if (idl_global->is_dcps_type(name)) {
-    std::cerr << "ERROR: union " << scoped(name) << " can not be used as a "
-      "DCPS_DATA_TYPE (only structs can be Topic types)" << std::endl;
-    return false;
-  }
-  return true;
+  return generate_ts(node, name);
 }
 
 namespace java_ts_generator {

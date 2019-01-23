@@ -383,6 +383,19 @@ AST_Type* TopicKeys::Iterator::get_ast_type() const
   }
 }
 
+TopicKeys::TopicKeys()
+  : root_(0),
+    root_type_(InvalidType),
+    counted_(false),
+    recursive_(false)
+{
+}
+
+TopicKeys::TopicKeys(const TopicKeys& other)
+{
+  *this = other;
+}
+
 TopicKeys::TopicKeys(AST_Structure* root, bool recursive)
   : root_(root),
     root_type_(StructureType),
@@ -403,6 +416,16 @@ TopicKeys::TopicKeys(AST_Union* root)
 
 TopicKeys::~TopicKeys()
 {
+}
+
+TopicKeys& TopicKeys::operator=(const TopicKeys& other)
+{
+  root_ = other.root_;
+  root_type_ = other.root_type_;
+  counted_ = other.counted_;
+  count_ = other.count_;
+  recursive_ = other.recursive_;
+  return *this;
 }
 
 TopicKeys::Iterator TopicKeys::begin()

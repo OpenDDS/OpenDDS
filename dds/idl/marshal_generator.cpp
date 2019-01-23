@@ -2106,7 +2106,7 @@ namespace {
   }
 }
 
-bool marshal_generator::gen_union(AST_Union*, UTL_ScopedName* name,
+bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
    const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator,
    const char*)
 {
@@ -2173,5 +2173,125 @@ bool marshal_generator::gen_union(AST_Union*, UTL_ScopedName* name,
         "  return true;\n";
     }
   }
+
+  const bool has_key = be_global->has_key(node);
+  const bool is_topic_type = be_global->is_topic_type(node);
+
+  if (!is_topic_type) {
+    if (has_key) {
+      std::cerr
+        << "Warning: Union " << cxx << " has a key on its discriminator, "
+        << "but it's not a topic type, ignoring it...\n";
+    }
+    return true;
+  }
+
+  const string key_only_wrap_out = getWrapper("uni.t._d()", discriminator, WD_OUTPUT);
+
+  bool is_bounded = is_bounded_type(node);
+  {
+    Function max_marsh("gen_max_marshaled_size", "size_t");
+    max_marsh.addArg("uni", "const " + cxx + "&");
+    max_marsh.addArg("align", "bool");
+    max_marsh.endArgs();
+    if (is_bounded) {
+      size_t size = 0, padding = 0;
+      max_marshaled_size(node, size, padding);
+      if (padding) {
+        be_global->impl_
+          << "  return align ? " << size + padding << " : " << size << ";\n";
+      } else {
+        be_global->impl_
+          << "  return " << size << ";\n";
+      }
+    } else { // unbounded
+      be_global->impl_
+        << "  return 0;\n";
+    }
+  }
+
+  {
+    Function max_marsh("gen_max_marshaled_size", "size_t");
+    max_marsh.addArg("uni", "KeyOnly<const " + cxx + ">");
+    max_marsh.addArg("align", "bool");
+    max_marsh.endArgs();
+
+    if (has_key) {
+      size_t size = 0, padding = 0;
+      max_marshaled_size(node->disc_type (), size, padding);
+      if (padding) {
+        be_global->impl_
+          << "  return align ? " << size + padding << " : " << size << ";\n";
+      } else {
+        be_global->impl_
+          << "  return " << size << ";\n";
+      }
+    } else {
+      be_global->impl_
+        << "  return 0;\n";
+    }
+  }
+
+  {
+    Function find_size("gen_find_size", "void");
+    find_size.addArg("uni", "KeyOnly<const " + cxx + ">");
+    find_size.addArg("size", "size_t&");
+    find_size.addArg("padding", "size_t&");
+    find_size.endArgs();
+
+    if (has_key) {
+      const string align = getAlignment(discriminator);
+      if (!align.empty()) {
+        be_global->impl_ <<
+          "  if ((size + padding) % " << align << ") {\n"
+          "    padding += " << align << " - ((size + padding) % " << align
+          << ");\n"
+          "  }\n";
+      }
+      if (disc_cls & CL_ENUM) {
+        be_global->impl_ <<
+          "  size += max_marshaled_size_ulong();\n";
+      } else {
+        be_global->impl_ <<
+          "  size += gen_max_marshaled_size(" << key_only_wrap_out << ");\n";
+      }
+    }
+  }
+
+  {
+    Function insertion("operator<<", "bool");
+    insertion.addArg("strm", "Serializer&");
+    insertion.addArg("uni", "KeyOnly<const " + cxx + ">");
+    insertion.endArgs();
+
+    if (has_key) {
+      be_global->impl_ << streamAndCheck("<< " + key_only_wrap_out);
+    }
+
+    be_global->impl_ << "  return true;\n";
+  }
+
+  {
+    Function extraction("operator>>", "bool");
+    extraction.addArg("strm", "Serializer&");
+    extraction.addArg("uni", "KeyOnly<" + cxx + ">");
+    extraction.endArgs();
+
+    if (has_key) {
+      be_global->impl_ <<
+        "  " << scoped(discriminator->name()) << " disc;\n" <<
+        streamAndCheck(">> " + getWrapper("disc", discriminator, WD_INPUT));
+    }
+
+    be_global->impl_ << "  return true;\n";
+  }
+
+  be_global->header_ <<
+    "template <>\n"
+    "struct MarshalTraits<" << cxx << "> {\n"
+    "  static bool gen_is_bounded_size() { return true; }\n"
+    "  static bool gen_is_bounded_key_size() { return true; }\n"
+    "};\n";
+
   return true;
 }

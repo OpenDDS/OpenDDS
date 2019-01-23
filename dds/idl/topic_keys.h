@@ -156,6 +156,8 @@ public:
     void cleanup();
   };
 
+  TopicKeys();
+  TopicKeys(const TopicKeys& other);
   /**
    * If recurive is false, do not recurse into other sturctures.
    */
@@ -163,6 +165,7 @@ public:
   TopicKeys(AST_Union* root);
   ~TopicKeys();
 
+  TopicKeys& operator=(const TopicKeys& other);
   AST_Decl* root() const;
   RootType root_type() const;
 
