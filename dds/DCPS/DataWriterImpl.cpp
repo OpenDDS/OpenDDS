@@ -173,7 +173,7 @@ DataWriterImpl::get_instance_handle()
   RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
   if (participant)
     return participant->id_to_handle(publication_id_);
-  return 0;
+  return DDS::HANDLE_NIL;
 }
 
 DDS::InstanceHandle_t
@@ -183,7 +183,7 @@ DataWriterImpl::get_next_handle()
   RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
   if (participant)
     return participant->id_to_handle(GUID_UNKNOWN);
-  return 0;
+  return DDS::HANDLE_NIL;
 }
 
 void
@@ -874,29 +874,31 @@ DataWriterImpl::set_qos(const DDS::DataWriterQos & qos)
     if (qos_ == qos)
       return DDS::RETCODE_OK;
 
-    if (!Qos_Helper::changeable(qos_, qos) && enabled_ == true) {
-      return DDS::RETCODE_IMMUTABLE_POLICY;
+    if (enabled_ == true) {
+      if (!Qos_Helper::changeable(qos_, qos)) {
+        return DDS::RETCODE_IMMUTABLE_POLICY;
 
-    } else {
-      Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
-      DDS::PublisherQos publisherQos;
-      RcHandle<PublisherImpl> publisher = this->publisher_servant_.lock();
+      } else {
+        Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
+        DDS::PublisherQos publisherQos;
+        RcHandle<PublisherImpl> publisher = this->publisher_servant_.lock();
 
-      bool status = false;
-      if (publisher) {
-        publisher->get_qos(publisherQos);
-        status
-          = disco->update_publication_qos(domain_id_,
-                                          dp_id_,
-                                          this->publication_id_,
-                                          qos,
-                                          publisherQos);
-      }
-      if (!status) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) DataWriterImpl::set_qos, ")
-                          ACE_TEXT("qos not updated. \n")),
-                         DDS::RETCODE_ERROR);
+        bool status = false;
+        if (publisher) {
+          publisher->get_qos(publisherQos);
+          status
+            = disco->update_publication_qos(domain_id_,
+                                            dp_id_,
+                                            this->publication_id_,
+                                            qos,
+                                            publisherQos);
+        }
+        if (!status) {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            ACE_TEXT("(%P|%t) DataWriterImpl::set_qos, ")
+                            ACE_TEXT("qos not updated. \n")),
+                           DDS::RETCODE_ERROR);
+        }
       }
     }
 
@@ -2199,9 +2201,13 @@ DataWriterImpl::filter_out(const DataSampleElement& elt,
 
   if (filterClassName == "DDSSQL" ||
       filterClassName == "OPENDDSSQL") {
+    const MetaStruct& meta = typesupport->getMetaStructForType();
+    if (!elt.get_header().valid_data() && evaluator.has_non_key_fields(meta)) {
+      return true;
+    }
     return !evaluator.eval(elt.get_sample()->cont(),
                            elt.get_header().byte_order_ != ACE_CDR_BYTE_ORDER,
-                           elt.get_header().cdr_encapsulation_, typesupport->getMetaStructForType(),
+                           elt.get_header().cdr_encapsulation_, meta,
                            expression_params);
   }
   else {

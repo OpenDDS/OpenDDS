@@ -22,6 +22,9 @@
 #include <dds/DCPS/transport/multicast/Multicast.h>
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #include <dds/DCPS/transport/shmem/Shmem.h>
+#  ifdef OPENDDS_SECURITY
+#  include "dds/DCPS/security/BuiltInPlugins.h"
+#  endif
 # endif
 #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
@@ -30,6 +33,7 @@
 #include "Writer.h"
 #include "Args.h"
 
+#ifdef OPENDDS_SECURITY
 const char auth_ca_file[] = "file:../../security/certs/identity/identity_ca_cert.pem";
 const char perm_ca_file[] = "file:../../security/certs/permissions/permissions_ca_cert.pem";
 const char id_cert_file[] = "file:../../security/certs/identity/test_participant_01_cert.pem";
@@ -43,6 +47,7 @@ const char DDSSEC_PROP_IDENTITY_PRIVKEY[] = "dds.sec.auth.private_key";
 const char DDSSEC_PROP_PERM_CA[] = "dds.sec.access.permissions_ca";
 const char DDSSEC_PROP_PERM_GOV_DOC[] = "dds.sec.access.governance";
 const char DDSSEC_PROP_PERM_DOC[] = "dds.sec.access.permissions";
+#endif
 
 bool dw_reliable() {
   OpenDDS::DCPS::TransportConfig_rch gc = TheTransportRegistry->global_config();

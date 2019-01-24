@@ -57,26 +57,27 @@ DataReaderImpl::DataReaderImpl()
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   is_exclusive_ownership_ (false),
 #endif
-    coherent_(false),
-    subqos_ (TheServiceParticipant->initial_SubscriberQos()),
-    topic_desc_(0),
-    listener_mask_(DEFAULT_STATUS_MASK),
-    domain_id_(0),
-    end_historic_sweeper_(make_rch<EndHistoricSamplesMissedSweeper>(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
-    remove_association_sweeper_(make_rch<RemoveAssociationSweeper<DataReaderImpl> >(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
-    n_chunks_(TheServiceParticipant->n_chunks()),
-    reverse_pub_handle_lock_(publication_handle_lock_),
-    reactor_(0),
-    liveliness_timer_(make_rch<LivelinessTimer>(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
-    last_deadline_missed_total_count_(0),
-    is_bit_(false),
-    always_get_history_(false),
-    statistics_enabled_(false),
-    raw_latency_buffer_size_(0),
-    raw_latency_buffer_type_(DataCollector<double>::KeepOldest),
-    monitor_(0),
-    periodic_monitor_(0),
-    transport_disabled_(false)
+  coherent_(false),
+  subqos_ (TheServiceParticipant->initial_SubscriberQos()),
+  topic_desc_(0),
+  listener_mask_(DEFAULT_STATUS_MASK),
+  domain_id_(0),
+  end_historic_sweeper_(make_rch<EndHistoricSamplesMissedSweeper>(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
+  remove_association_sweeper_(make_rch<RemoveAssociationSweeper<DataReaderImpl> >(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
+  n_chunks_(TheServiceParticipant->n_chunks()),
+  reverse_pub_handle_lock_(publication_handle_lock_),
+  reactor_(0),
+  liveliness_timer_(make_rch<LivelinessTimer>(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
+  last_deadline_missed_total_count_(0),
+  watchdog_(),
+  is_bit_(false),
+  always_get_history_(false),
+  statistics_enabled_(false),
+  raw_latency_buffer_size_(0),
+  raw_latency_buffer_type_(DataCollector<double>::KeepOldest),
+  monitor_(0),
+  periodic_monitor_(0),
+  transport_disabled_(false)
 {
   reactor_ = TheServiceParticipant->timer();
 
@@ -125,14 +126,6 @@ DataReaderImpl::DataReaderImpl()
 DataReaderImpl::~DataReaderImpl()
 {
   DBG_ENTRY_LVL("DataReaderImpl","~DataReaderImpl",6);
-
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-  OwnershipManagerPtr owner_manager = this->ownership_manager();
-  if (owner_manager) {
-    owner_manager->unregister_reader(topic_servant_->type_name(), this);
-  }
-#endif
-
 }
 
 // this method is called when delete_datareader is called.
@@ -144,6 +137,22 @@ DataReaderImpl::cleanup()
   // deleted
   set_listener(0, NO_STATUS_MASK);
 
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+  OwnershipManagerPtr owner_manager = this->ownership_manager();
+  if (owner_manager) {
+    owner_manager->unregister_reader(topic_servant_->type_name(), this);
+  }
+#endif
+
+  topic_servant_ = 0;
+
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+  content_filtered_topic_ = 0;
+#endif
+
+#ifndef OPENDDS_NO_MULTI_TOPIC
+  multi_topic_ = 0;
+#endif
 
 }
 
@@ -200,7 +209,7 @@ DataReaderImpl::get_instance_handle()
   RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
   if (participant)
     return participant->id_to_handle(subscription_id_);
-  return 0;
+  return DDS::HANDLE_NIL;
 }
 
 void
@@ -681,7 +690,7 @@ DataReaderImpl::remove_all_associations()
 
   } catch (const CORBA::Exception&) {
       ACE_DEBUG((LM_WARNING,
-                 ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::remove_all_associations() - ")
+                 ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::remove_all_associations() - ")
                  ACE_TEXT("caught exception from remove_associations.\n")));
   }
 }
@@ -855,30 +864,32 @@ DDS::ReturnCode_t DataReaderImpl::set_qos(
     if (qos_ == qos)
       return DDS::RETCODE_OK;
 
-    if (!Qos_Helper::changeable(qos_, qos) && enabled_ == true) {
-      return DDS::RETCODE_IMMUTABLE_POLICY;
+    if (enabled_ == true) {
+      if (!Qos_Helper::changeable(qos_, qos)) {
+        return DDS::RETCODE_IMMUTABLE_POLICY;
 
-    } else {
-      Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
-      DDS::SubscriberQos subscriberQos;
+      } else {
+        Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
+        DDS::SubscriberQos subscriberQos;
 
-      RcHandle<SubscriberImpl> subscriber = get_subscriber_servant();
-      bool status = false;
-      if (subscriber) {
-        subscriber->get_qos(subscriberQos);
-        status =
-          disco->update_subscription_qos(
+        RcHandle<SubscriberImpl> subscriber = get_subscriber_servant();
+        bool status = false;
+        if (subscriber) {
+          subscriber->get_qos(subscriberQos);
+          status =
+            disco->update_subscription_qos(
               domain_id_,
               dp_id_,
               this->subscription_id_,
               qos,
               subscriberQos);
-      }
-      if (!status) {
-        ACE_ERROR_RETURN((LM_ERROR,
-            ACE_TEXT("(%P|%t) DataReaderImpl::set_qos, ")
-            ACE_TEXT("qos not updated. \n")),
-            DDS::RETCODE_ERROR);
+        }
+        if (!status) {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            ACE_TEXT("(%P|%t) DataReaderImpl::set_qos, ")
+                            ACE_TEXT("qos not updated. \n")),
+                            DDS::RETCODE_ERROR);
+        }
       }
     }
 
@@ -1059,7 +1070,7 @@ DataReaderImpl::wait_for_historical_data(
     const DDS::Duration_t & /* max_wait */)
 {
   // Add your implementation here
-  return 0;
+  return DDS::RETCODE_OK;
 }
 
 DDS::ReturnCode_t
@@ -2432,7 +2443,7 @@ DataReaderImpl::get_next_handle(const DDS::BuiltinTopicKey_t& key)
 {
   RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
   if (!participant)
-    return 0;
+    return DDS::HANDLE_NIL;
 
   if (is_bit()) {
     Discovery_rch disc = TheServiceParticipant->get_discovery(domain_id_);
@@ -3137,6 +3148,14 @@ DDS::ContentFilteredTopic_ptr
 DataReaderImpl::get_cf_topic() const
 {
   return DDS::ContentFilteredTopic::_duplicate(content_filtered_topic_.get());
+}
+#endif
+
+#ifndef OPENDDS_NO_MULTI_TOPIC
+void
+DataReaderImpl::enable_multi_topic(MultiTopicImpl* mt)
+{
+  multi_topic_ = mt;
 }
 #endif
 

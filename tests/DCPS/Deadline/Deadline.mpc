@@ -1,4 +1,3 @@
-
 project(DDS*idl): dcps_test_lib {
   idlflags      += -Wb,stub_export_include=Deadline_export.h \
                    -Wb,stub_export_macro=Deadline_Export -SS
@@ -8,10 +7,7 @@ project(DDS*idl): dcps_test_lib {
   TypeSupport_Files {
     Messenger.idl
   }
-
-
 }
-
 
 project(DDS*Publisher) : dcpsexe, dcps_transports_for_test {
   exename = publisher
@@ -38,6 +34,6 @@ project(DDS*Subscriber) : dcpsexe, dcps_transports_for_test {
 
   Source_Files {
     subscriber.cpp
-    DataReaderListener.cpp
+    DataReaderListenerImpl.cpp
   }
 }

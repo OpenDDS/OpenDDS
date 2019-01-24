@@ -34,7 +34,6 @@ BE_GlobalData::BE_GlobalData()
   , java_(false)
   , suppress_idl_(false)
   , suppress_typecode_(false)
-  , generate_wireshark_(false)
   , generate_itl_(false)
   , v8_(false)
   , face_ts_(false)
@@ -216,7 +215,6 @@ BE_GlobalData::open_streams(const char* filename)
   header_name_ = (filebase + "TypeSupportImpl.h").c_str();
   impl_name_ = (filebase + "TypeSupportImpl.cpp").c_str();
   idl_name_ = (filebase + "TypeSupport.idl").c_str();
-  ws_config_name_ = (filebase + "_ws.ini").c_str();
   itl_name_ = (filebase + ".itl").c_str();
   facets_header_name_ = (filebase + "_TS.hpp").c_str();
   facets_impl_name_ = (filebase + "_TS.cpp").c_str();
@@ -260,6 +258,18 @@ BE_GlobalData::spawn_options()
   return idl_global->idl_flags();
 }
 
+void invalid_option(char * option)
+{
+  ACE_ERROR((LM_ERROR,
+    ACE_TEXT("IDL: I don't understand the '%C' option\n"), option));
+#ifdef TAO_IDL_HAS_PARSE_ARGS_EXIT
+  idl_global->parse_args_exit(1);
+#else
+  idl_global->set_compile_flags(
+    idl_global->compile_flags() | IDL_CF_ONLY_USAGE);
+#endif
+}
+
 void
 BE_GlobalData::parse_args(long& i, char** av)
 {
@@ -273,38 +283,39 @@ BE_GlobalData::parse_args(long& i, char** av)
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("IDL: unable to create directory %C")
         ACE_TEXT(" specified by -o option\n"), av[i + 1]));
+#ifdef TAO_IDL_HAS_PARSE_ARGS_EXIT
+      idl_global->parse_args_exit(1);
+#endif
     } else {
       output_dir_ = av[++i];
     }
     break;
   case 'G':
-    if (0 == ACE_OS::strcmp(av[i], "-Gws"))
-      generate_wireshark_ = true;
-    else if (0 == ACE_OS::strcmp(av[i], "-Gitl"))
+    if (0 == ACE_OS::strcmp(av[i], "-Gitl"))
       generate_itl_ = true;
     else if (0 == ACE_OS::strcasecmp(av[i], "-GfaceTS"))
       face_ts(true);
-    else
-      {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("IDL: I don't understand the '%C'")
-                   ACE_TEXT(" option\n"), av[i]));
-        idl_global->set_compile_flags(idl_global->compile_flags()
-                                      | IDL_CF_ONLY_USAGE);
-      }
+    else {
+      invalid_option(av[i]);
+    }
     break;
   case 'L':
     if (0 == ACE_OS::strcasecmp(av[i], "-Lface"))
       language_mapping(LANGMAP_FACE_CXX);
     else if (0 == ACE_OS::strcasecmp(av[i], "-Lspcpp"))
       language_mapping(LANGMAP_SP_CXX);
-    else {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("IDL: I don't understand the '%C'")
-                  ACE_TEXT(" option\n"), av[i]));
-      idl_global->set_compile_flags(idl_global->compile_flags()
-                                    | IDL_CF_ONLY_USAGE);
+    else if (0 == ACE_OS::strcasecmp(av[i], "-Lc++11")) {
+      language_mapping(LANGMAP_CXX11);
+      suppress_typecode_ = true;
+    } else {
+      invalid_option(av[i]);
     }
     break;
   case 'S':
+    if (av[i][2] && av[i][3]) {
+      invalid_option(av[i]);
+      break;
+    }
     switch (av[i][2]) {
     case 'I':
       suppress_idl_ = true;
@@ -316,34 +327,31 @@ BE_GlobalData::parse_args(long& i, char** av)
       // ignore, accepted for tao_idl compatibility
       break;
     default:
-      ACE_ERROR((LM_ERROR, ACE_TEXT("IDL: I don't understand the '%C'")
-        ACE_TEXT(" option\n"), av[i]));
-      idl_global->set_compile_flags(idl_global->compile_flags()
-                                    | IDL_CF_ONLY_USAGE);
+      invalid_option(av[i]);
     }
     break;
   case 'Z':
+    if (av[i][2] && av[i][3]) {
+      invalid_option(av[i]);
+      break;
+    }
     switch (av[i][2]) {
     case 'C':
       add_include (av[++i], STREAM_CPP);
       break;
     default:
-      ACE_ERROR((LM_ERROR, ACE_TEXT("IDL: I don't understand the '%C'")
-                 ACE_TEXT(" option\n"), av[i]));
-      idl_global->set_compile_flags(idl_global->compile_flags()
-                                    | IDL_CF_ONLY_USAGE);
+      invalid_option(av[i]);
     }
     break;
   case '-':
     if (0 == ACE_OS::strncasecmp(av[i], WB_EXPORT_MACRO, SZ_WB_EXPORT_MACRO)) {
       this->export_macro(av[i] + SZ_WB_EXPORT_MACRO);
+    } else {
+      invalid_option(av[i]);
     }
     break;
   default:
-    ACE_ERROR((LM_ERROR, ACE_TEXT("IDL: I don't understand the '%C' option\n"),
-               av[i]));
-    idl_global->set_compile_flags(idl_global->compile_flags()
-                                  | IDL_CF_ONLY_USAGE);
+    invalid_option(av[i]);
   }
 }
 

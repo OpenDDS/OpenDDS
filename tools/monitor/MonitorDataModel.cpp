@@ -9,7 +9,7 @@
 #include "TreeNode.h"
 
 #include <QtCore/QStringList>
-#include <QtGui/QTreeView>
+#include <QtWidgets/QTreeView>
 
 namespace Monitor {
 
@@ -32,9 +32,10 @@ MonitorDataModel::~MonitorDataModel()
 void
 MonitorDataModel::newRoot( TreeNode* root)
 {
-  delete this->root_;
-  this->root_ = root;
-  this->reset();
+  beginResetModel();
+  delete root_;
+  root_ = root;
+  endResetModel();
 }
 
 void

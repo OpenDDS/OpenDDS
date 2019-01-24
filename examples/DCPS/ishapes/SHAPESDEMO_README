@@ -10,7 +10,7 @@ OpenDDS RTPS interoperability with other DDS vendors.
 ------------------------------------------------------------------------
 System Requirements:
 
-* Qt 4 - Qt 4.8.6 was used to create the provided application.
+* Qt 5 was used to create the provided application.
 
 ------------------------------------------------------------------------
 Shapes Demo link:

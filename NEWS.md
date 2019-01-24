@@ -1,3 +1,16 @@
+Version 3.14 of OpenDDS
+
+##### Additions:
+- Monitor and the ishapes demo now use Qt5
+
+##### Fixes:
+- TODO: Add your fixes here
+
+##### Notes:
+- Removed outdated `-Gws` option of `opendds_idl`. This option produced sample
+  descriptions for the Wireshark dissector before OpenDDS v3.7.
+
+_______________________________________________________________________________
 Version 3.13 of OpenDDS
 
 ##### Additions:

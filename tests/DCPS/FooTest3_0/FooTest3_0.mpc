@@ -23,5 +23,6 @@ project(*Subscriber): dcpsexe, dcps_transports_for_test {
     sub_main.cpp
     SubDriver.cpp
     DataReaderListener.cpp
+    DataReaderQCListener.cpp
   }
 }

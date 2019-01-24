@@ -174,6 +174,11 @@ public:
   friend OpenDDS_Dcps_Export
   bool operator<<(Serializer& s, const ACE_CDR::WChar* x);
 
+#ifdef NONNATIVE_LONGDOUBLE
+  friend OpenDDS_Dcps_Export
+  bool operator<<(Serializer& s, long double x);
+#endif
+
   // Using the ACE CDR Stream disambiguators.
   friend OpenDDS_Dcps_Export
   bool operator<<(Serializer& s, ACE_OutputCDR::from_boolean x);
@@ -191,9 +196,24 @@ public:
 #ifndef OPENDDS_SAFETY_PROFILE
   friend OpenDDS_Dcps_Export
   bool operator<<(Serializer& s, const std::string& x);
+
+  template <typename CharT>
+  struct FromBoundedString {
+    FromBoundedString(const std::basic_string<CharT>& str, ACE_CDR::ULong bound)
+      : str_(str), bound_(bound) {}
+    const std::basic_string<CharT>& str_;
+    ACE_CDR::ULong bound_;
+  };
+
+  friend OpenDDS_Dcps_Export
+  bool operator<<(Serializer& s, FromBoundedString<char> x);
+
 #ifdef DDS_HAS_WCHAR
   friend OpenDDS_Dcps_Export
   bool operator<<(Serializer& s, const std::wstring& x);
+
+  friend OpenDDS_Dcps_Export
+  bool operator<<(Serializer& s, FromBoundedString<wchar_t> x);
 #endif /* DDS_HAS_WCHAR */
 #endif /* !OPENDDS_SAFETYP_PROFILE */
 
@@ -223,6 +243,11 @@ public:
   friend OpenDDS_Dcps_Export
   bool operator>>(Serializer& s, ACE_CDR::WChar*& x);
 
+#ifdef NONNATIVE_LONGDOUBLE
+  friend OpenDDS_Dcps_Export
+  bool operator>>(Serializer& s, long double& x);
+#endif
+
   // Using the ACE CDR Stream disambiguators.
   friend OpenDDS_Dcps_Export
   bool operator>>(Serializer& s, ACE_InputCDR::to_boolean x);
@@ -240,9 +265,24 @@ public:
 #ifndef OPENDDS_SAFETY_PROFILE
   friend OpenDDS_Dcps_Export
   bool operator>>(Serializer& s, std::string& x);
+
+  template <typename CharT>
+  struct ToBoundedString {
+    ToBoundedString(std::basic_string<CharT>& str, ACE_CDR::ULong bound)
+      : str_(str), bound_(bound) {}
+    std::basic_string<CharT>& str_;
+    ACE_CDR::ULong bound_;
+  };
+
+  friend OpenDDS_Dcps_Export
+  bool operator>>(Serializer& s, ToBoundedString<char> x);
+
 #ifdef DDS_HAS_WCHAR
   friend OpenDDS_Dcps_Export
   bool operator>>(Serializer& s, std::wstring& x);
+
+  friend OpenDDS_Dcps_Export
+  bool operator>>(Serializer& s, ToBoundedString<wchar_t> x);
 #endif /* DDS_HAS_WCHAR */
 #endif /* !OPENDDS_SAFETY_PROFILE */
 
@@ -342,6 +382,19 @@ template<typename T> struct KeyOnly {
   explicit KeyOnly(T& mess) : t(mess) { }
   T& t;
 };
+
+namespace IDL {
+  // Although similar to C++11 reference_wrapper, this template has the
+  // additional Tag parameter to allow the IDL compiler to generate distinct
+  // overloads for sequence/array typedefs that map to the same C++ types.
+  template <typename T, typename /*Tag*/>
+  struct DistinctType {
+    typedef T value_type;
+    T* val_;
+    DistinctType(T& val) : val_(&val) {}
+    operator T&() const { return *val_; }
+  };
+}
 
 } // namespace DCPS
 } // namespace OpenDDS

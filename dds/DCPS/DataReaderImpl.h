@@ -27,6 +27,7 @@
 #include "Stats_T.h"
 #include "OwnershipManager.h"
 #include "ContentFilteredTopicImpl.h"
+#include "MultiTopicImpl.h"
 #include "GroupRakeData.h"
 #include "CoherentChangeControl.h"
 #include "AssociationData.h"
@@ -475,6 +476,12 @@ public:
 
 #endif
 
+#ifndef OPENDDS_NO_MULTI_TOPIC
+
+  void enable_multi_topic(MultiTopicImpl* mt);
+
+#endif
+
   void update_subscription_params(const DDS::StringSeq& params) const;
 
   typedef OPENDDS_VECTOR(void*) GenericSeq;
@@ -641,6 +648,9 @@ protected:
   TopicDescriptionPtr<ContentFilteredTopicImpl> content_filtered_topic_;
 #endif
 
+#ifndef OPENDDS_NO_MULTI_TOPIC
+  TopicDescriptionPtr<MultiTopicImpl> multi_topic_;
+#endif
 
   /// Is accessing to Group coherent changes ?
   bool coherent_;
@@ -755,8 +765,8 @@ private:
 
     void check_liveliness()
     {
-      CheckLivelinessCommand c(this);
-      execute_or_enqueue(c);
+     CheckLivelinessCommand c(this);
+     execute_or_enqueue(c);
     }
 
     void cancel_timer()

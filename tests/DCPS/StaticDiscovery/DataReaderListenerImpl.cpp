@@ -13,8 +13,6 @@
 #include "dds/DdsDcpsCoreTypeSupportC.h"
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
-#include <iostream>
-
 DataReaderListenerImpl::~DataReaderListenerImpl()
 {
   ACE_DEBUG((LM_DEBUG, "(%P|%t) DataReader %C is done\n", id_.c_str()));
@@ -79,7 +77,11 @@ DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
         ACE_DEBUG((LM_DEBUG, "(%P|%t) datareader deleted\n"));
         done_callback_(builtin_read_error_);
       } else {
-        ACE_DEBUG((LM_INFO, "(%P|%t) Got message %d\n", received_samples_));
+        if (static_cast<int>(writers_.size()) == total_writers_) {
+          ACE_DEBUG((LM_INFO, "(%P|%t) Reader %C got message %d (#%d from known writer %C)\n", id_.data(), received_samples_, message.value, writers_[message.src].data()));
+        } else {
+          ACE_DEBUG((LM_INFO, "(%P|%t) Reader %C got message %d (#%d from (ambiguous) writer #%d)\n", id_.data(), received_samples_, message.value, message.src));
+        }
       }
     }
   } else {
