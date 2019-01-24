@@ -110,3 +110,11 @@ if (OPENDDS_STD AND CMAKE_HOST_UNIX)
     message(WARNING "Ignoring unknown OPENDDS_STD value '${OPENDDS_STD}'")
   endif()
 endif()
+
+# Handle other features
+
+if (OPENDDS_FEATURES)
+  if ("${OPENDDS_FEATURES}" MATCHES "versioned_namespace=1")
+    list(APPEND OPENDDS_DCPS_COMPILE_DEFS ACE_HAS_VERSIONED_NAMESPACE=1)
+  endif()
+endif()
