@@ -317,7 +317,6 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
     w.remote_readers_[remote_id].durable_ = remote_durable;
     w.durable_ = local_durable;
     w.ready_to_hb_ = !(local_durable && remote_durable);
-    if (!w.ready_to_hb_) std::cout << "DURABLE WAITING FOR END HISTORIC" << std::endl;
     enable_heartbeat = w.ready_to_hb_;
   } else if (conv.isReader()) {
     RtpsReaderMap::iterator rr = readers_.find(local_id);
@@ -868,7 +867,6 @@ RtpsUdpDataLink::end_historic_samples(RtpsWriterMap::iterator writer,
         }
       }
     }
-    std::cout << "DURABLE REACHED END HISTORIC" << std::endl;
     writer->second.ready_to_hb_ = true;
     heartbeat_->schedule_enable(true);
   }
