@@ -18,7 +18,7 @@ for x in Messenger_1 Messenger_2; do
   build_dir=$DDS_ROOT/tests/cmake_integration/Messenger/$x/build
   mkdir -p $build_dir
   pushd $build_dir
-  cmake -DCMAKE_PREFIX_PATH=$DDS_ROOT ..
+  cmake -DCMAKE_PREFIX_PATH=$DDS_ROOT -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON ..
   cmake --build .
   ./run_test.pl
   popd
