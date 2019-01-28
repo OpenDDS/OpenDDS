@@ -30,9 +30,9 @@ bool assert_key_count(size_t expected) {
   if (count != expected) {
     const char* type_name = get_type_name<T>();
     ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: ")
-      ACE_TEXT("For %C, expected %d keys but ")
-      ACE_TEXT("OpenDDS::DCPS::DDSTraits<%C>::key_count() returned %d!\n"),
-      type_name, expected, type_name, count
+      ACE_TEXT("For DDSTraits<%C>::key_count(), expected %d keys but ")
+      ACE_TEXT("got %d!\n"),
+      type_name, expected, count
       ));
     return true;
   }
@@ -48,15 +48,18 @@ size_t find_size(const T& data, size_t& padding)
   return size;
 }
 
-template <typename T>
-bool assert_size(const T& data, size_t expected) {
+template <typename Type>
+bool assert_key_only_size(const Type& data, size_t expected) {
+  typedef OpenDDS::DCPS::KeyOnly<const Type> KeyOnlyType;
+  KeyOnlyType key_only_data(data);
+
   size_t padding;
-  size_t size = find_size<T>(data, padding);
+  size_t size = find_size<KeyOnlyType>(key_only_data, padding);
   if (size != expected) {
-    const char* type_name = get_type_name<T>();
+    const char* type_name = get_type_name<Type>();
     ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: ")
-      ACE_TEXT("For KeyOnly<%C> size, expected %d but ")
-      ACE_TEXT("OpenDDS::DCPS::genfind_size() returned %d!\n"),
+      ACE_TEXT("For gen_find_size(OpenDDS::DCPS::KeyOnly<%C>), expected %d but ")
+      ACE_TEXT("got %d!\n"),
       type_name, expected, size
       ));
     return true;
@@ -66,29 +69,37 @@ bool assert_size(const T& data, size_t expected) {
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
-  using TopicAnnotationsTest;
 
   bool failed = false;
 
   // Check Key Counts
-  failed |= assert_key_count<UnkeyedStruct>(0);
-  failed |= assert_key_count<SimpleKeyStruct>(1);
-  failed |= assert_key_count<NestedKeyStruct>(2);
-  failed |= assert_key_count<LongArrayStruct>(2);
-  failed |= assert_key_count<SimpleKeyArray>(2);
-  failed |= assert_key_count<UnkeyedUnion>(0);
-  failed |= assert_key_count<KeyedUnion>(1);
-  failed |= assert_key_count<KeyedUnionStruct>(2);
+  failed |= assert_key_count<TopicAnnotationsTest::UnkeyedStruct>(0);
+  failed |= assert_key_count<TopicAnnotationsTest::SimpleKeyStruct>(1);
+  failed |= assert_key_count<TopicAnnotationsTest::NestedKeyStruct>(2);
+  failed |= assert_key_count<TopicAnnotationsTest::LongArrayStruct>(2);
+  failed |= assert_key_count<TopicAnnotationsTest::SimpleKeyArray>(2);
+  failed |= assert_key_count<TopicAnnotationsTest::UnkeyedUnion>(0);
+  failed |= assert_key_count<TopicAnnotationsTest::KeyedUnion>(1);
+  failed |= assert_key_count<TopicAnnotationsTest::KeyedUnionStruct>(2);
 
   // Check KeyOnly for Unions
-  OpenDDS::DCPS::KeyOnly<UnkeyedUnion> key_only_unkeyed_union;
-  failed |= assery_size(key_only_unkeyed_union, 0);
+  {
+    typedef TopicAnnotationsTest::UnkeyedUnion Data;
+    Data data;
+    failed |= assert_key_only_size(data, 0);
+  }
 
-  OpenDDS::DCPS::KeyOnly<KeyedUnion> key_only_keyed_union;
-  failed |= assery_size(key_only_keyed_union, 4);
+  {
+    typedef TopicAnnotationsTest::KeyedUnion Data;
+    Data data;
+    failed |= assert_key_only_size(data, 4);
+  }
 
-  OpenDDS::DCPS::KeyOnly<KeyedUnionStruct> key_only_keyed_union_struct;
-  failed |= assery_size(key_only_keyed_union_struct, 8);
+  {
+    typedef TopicAnnotationsTest::KeyedUnionStruct Data;
+    Data data;
+    failed |= assert_key_only_size(data, 8);
+  }
 
   return failed;
 }
