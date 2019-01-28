@@ -132,7 +132,7 @@ jobs:
         export CXX=/usr/bin/$(grep -Eo 'clang\+\+-[0-9.]+' <<<"$(ConfigOpts)")
         export CC=/usr/bin/${CXX/++/}
       fi
-      source $(Build.SourcesDirectory)/setenv.sh && $DDS_ROOT/tests/cmake_integration/run_ci_tests.sh
+      source $(Build.SourcesDirectory)/setenv.sh && $DDS_ROOT/tests/cmake_integration/run_ci_tests.pl
     displayName: Compile CMake Tests
     condition: >
       and(succeeded(),
@@ -156,5 +156,5 @@ jobs:
     displayName: Compile
   - script: >
       source $(Build.SourcesDirectory)/setenv.sh &&
-      $DDS_ROOT/tests/cmake_integration/run_ci_tests.sh
+      $DDS_ROOT/tests/cmake_integration/run_ci_tests.pl
     displayName: Compile CMake Tests
