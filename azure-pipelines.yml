@@ -68,6 +68,8 @@ jobs:
       platform: $(BuildPlatform)
       configuration: $(BuildConfiguration)
       maximumCpuCount: true
+  - script: "%DDS_ROOT%\tests\cmake_integration\run_ci_tests.pl"
+    displayName: Compile (and run) CMake Tests
 
 - job: Linux
   timeoutInMinutes: 90
@@ -133,7 +135,7 @@ jobs:
         export CC=/usr/bin/${CXX/++/}
       fi
       source $(Build.SourcesDirectory)/setenv.sh && $DDS_ROOT/tests/cmake_integration/run_ci_tests.pl
-    displayName: Compile CMake Tests
+    displayName: Compile (and run) CMake Tests
     condition: >
       and(succeeded(),
           eq(false, variables['DisableCMakeIntegrationTest']))
@@ -157,4 +159,4 @@ jobs:
   - script: >
       source $(Build.SourcesDirectory)/setenv.sh &&
       $DDS_ROOT/tests/cmake_integration/run_ci_tests.pl
-    displayName: Compile CMake Tests
+    displayName: Compile (and run) CMake Tests
