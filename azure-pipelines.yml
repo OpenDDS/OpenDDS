@@ -69,7 +69,7 @@ jobs:
       configuration: $(BuildConfiguration)
       maximumCpuCount: true
   - script: |
-      perl "%DDS_ROOT%\tests\cmake_integration\run_ci_tests.pl"
+      perl "%DDS_ROOT%\tests\cmake_integration\run_ci_tests.pl" --build-config=$(BuildConfiguration)
     displayName: Compile (and run) CMake Tests
 
 - job: Linux

@@ -6,8 +6,14 @@
 # are set.
 #
 
+use Getopt::Long;
+use Cwd;
+
 die "ERROR: DDS_ROOT must be set" if !$ENV{'DDS_ROOT'};
 die "ERROR: ACE_ROOT must be set" if !$ENV{'ACE_ROOT'};
+
+my $build_config = "";
+GetOptions("build-config=s" => \$build_config);
 
 for my $x (qw(Messenger_1 Messenger_2)) {
   my $build_dir="$ENV{'DDS_ROOT'}/tests/cmake_integration/Messenger/$x/build";
@@ -17,10 +23,10 @@ for my $x (qw(Messenger_1 Messenger_2)) {
   my @cmds = (["cmake",
                "-D", "CMAKE_PREFIX_PATH=$ENV{'DDS_ROOT'}",
                "-D", "CMAKE_VERBOSE_MAKEFILE:BOOL=ON", ".."],
-              ["cmake", "--build", "."],
-              ["./run_test.pl"]);
+              ["cmake", "--build", "."]);
 
-  for my $cmd (@cmds) {
+  sub run_cmd {
+    my $cmd = shift;
     print "Running @{$cmd}\n";
     my $result = `@{$cmd} 2>&1`;
 
@@ -31,4 +37,16 @@ for my $x (qw(Messenger_1 Messenger_2)) {
       die "ERROR: invoking @{$cmd} failed with error '$?'";
     }
   }
+
+  for my $cmd (@cmds) {
+    run_cmd $cmd;
+  }
+
+  if ($build_config ne "") {
+    $build_config = getcwd() . "/$build_config";
+    print "Switching to '$build_config' to run tests\n";
+    chdir($build_config)
+      or die "ERROR: '$!'";
+  }
+  run_cmd ["perl", "run_test.pl"];
 }
