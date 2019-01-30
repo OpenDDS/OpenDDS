@@ -263,7 +263,7 @@ be used in non-trivial situations:
 
 ```C++
 /**
- * This sentence is the breif description.
+ * This sentence is the brief description.
  *
  * Everything else is the details.
  */
