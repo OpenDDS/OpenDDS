@@ -1,0 +1,46 @@
+---
+layout: page
+categories: [opendds]
+---
+
+<p>OpenDDS is an open source C++ implementation of the Object Management Group (OMG) Data Distribution Service (DDS). Java applications can use OpenDDS through JNI bindings. OpenDDS was developed and open sourced by <a href="{{ site.data.oci.homepage }}">Object Computing</a>. We welcome community contributions to the project. Commercial support is also available; see the <a href="support.html">support page</a> for more information.</p>
+
+{% for post in site.categories.news %}
+  <h3>{{ post.title }}</h3>
+  {{ post.excerpt }}
+  <a href="{{ post.url }}">Read More...</a>
+{% endfor %}
+
+{% assign sorted_rel = site.github.releases | sort: "created_at" | reverse %}
+{% assign latest_rel = sorted_rel | first %}
+<h3>Current Release: <a href="{{latest_rel.html_url}}">{{latest_rel.name}}</a></h3>
+
+{{ latest_rel.body | markdownify }}
+
+{% assign assets = latest_rel.assets | sort: "name" | reverse %}
+{% for a in assets %}
+  {% capture tn %}Open{{latest_rel.tag_name}}{% endcapture %}
+  
+  {% assign ext = a.name | remove: tn %}
+  {% if ext == '.zip' %}
+    {% assign note = 'Windows' %}
+  {% else %}
+    {% assign note = 'Linux/Solaris/MacOSX' %}
+  {% endif %}
+
+  <p><a href="{{ a.browser_download_url }}">Download {{a.name}}</a> ({{ note }})</p>
+{% endfor %}
+
+{% if site.github.releases.size > 1 %}
+  <h3>Previous Releases:</h3>
+
+  <ul>
+    {% for r in sorted_rel limit:5 offset:1 %}
+      <li><a href="{{ r.html_url }}">{{ r.name }}</a></li>
+    {% endfor %}
+    {% if site.github.releases.size > 6 %}
+      <li><a href="{{ site.github.releases_url }}">See all releases on GitHub</a></li>
+    {% endif %}
+  </ul>
+  <p>The <a href="https://raw.githubusercontent.com/objectcomputing/OpenDDS/{{latest_rel.tag_name}}/NEWS.md">NEWS</a> file contains release notes for all previous releases.</p>
+{% endif %}
