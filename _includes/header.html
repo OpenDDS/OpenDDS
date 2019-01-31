@@ -11,33 +11,36 @@
         </svg>
       </span></label>
       <ul class="trigger">
-{% assign sorted_pages = site.pages | sort: "order" %}
-{% assign level = 2 %}
-{% assign counter = 0 %}
-{% for p in sorted_pages %}
-  {% assign slash = p.url | split: '/' %}
-  {% unless slash == empty or slash[2] == 'main.css' or p.sitemap == false %}
-    {% assign indent = slash.size %}
-    {% assign level_m1 = level | minus: 1 %}
-    {% for i in (indent..level_m1) %}</ul></li>{% endfor %}
-    {% assign last = p.url | slice: -1, 1 %}
-    {% if last == '/' %}
-        <li>
-          <input type="checkbox" id="drop-{{counter}}"/>
-          <label for="drop-{{counter}}" class="toggle">{{p.title}} <span class="arrow">&#9660;</span></label>
-          <a class="page-link" href="{{p.url | prepend: site.baseurl}}">{{p.title}} <span class="arrow">&#96{% if indent > 2 %}54{% else %}60{% endif %};</span></a>
-      {% assign counter = counter | plus: 1 %}
-          <ul class="sub-menu">
-            <li class="mobile"><a class="page-link" href="{{p.url | prepend: site.baseurl}}">Index</a></li>
-        {% if p.title == 'Documentation' %}
-            <li><a class="page-link" href="http://download.objectcomputing.com/OpenDDS/OpenDDS-latest.pdf">Developer's Guide [PDF]</a></li>
-        {% endif %}
-    {% else %}
-        <li><a class="page-link" href="{{p.url | prepend: site.baseurl}}">{{p.title}}</a></li>
-    {% endif %}
-    {% assign level = slash.size %}
-  {% endunless %}
-{% endfor %}
+        {% assign sorted_pages = site.pages | sort: "order" %}
+        {% assign level = 2 %}
+        {% assign counter = 0 %}
+        {% for p in sorted_pages %}
+          {% assign slash = p.url | split: '/' %}
+          {% unless slash == empty
+                      or slash[2] == 'main.css'
+                      or p.sitemap == false
+                      or p.url == '/redirects.json' %}
+            {% assign indent = slash.size %}
+            {% assign level_m1 = level | minus: 1 %}
+            {% for i in (indent..level_m1) %}</ul></li>{% endfor %}
+            {% assign last = p.url | slice: -1, 1 %}
+            {% if last == '/' %}
+                <li>
+                  <input type="checkbox" id="drop-{{counter}}"/>
+                  <label for="drop-{{counter}}" class="toggle">{{p.title}} <span class="arrow">&#9660;</span></label>
+                  <a class="page-link" href="{{p.url | prepend: site.baseurl}}">{{p.title}} <span class="arrow">&#96{% if indent > 2 %}54{% else %}60{% endif %};</span></a>
+              {% assign counter = counter | plus: 1 %}
+                  <ul class="sub-menu">
+                    <li class="mobile"><a class="page-link" href="{{p.url | prepend: site.baseurl}}">Index</a></li>
+                {% if p.title == 'Documentation' %}
+                    <li><a class="page-link" href="http://download.objectcomputing.com/OpenDDS/OpenDDS-latest.pdf">Developer's Guide [PDF]</a></li>
+                {% endif %}
+            {% else %}
+                <li><a class="page-link" href="{{p.url | prepend: site.baseurl}}">{{p.title}}</a></li>
+            {% endif %}
+            {% assign level = slash.size %}
+          {% endunless %}
+        {% endfor %}
       </ul>
     </nav>
   </div>
