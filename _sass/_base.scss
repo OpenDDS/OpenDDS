@@ -115,7 +115,8 @@ h1, h2, h3, h4, h5, h6 {
 /**
  * Links
  */
-.page-content a[href] {
+
+ %link-baseline {
     color: $brand-color;
     text-decoration: none;
 
@@ -127,6 +128,10 @@ h1, h2, h3, h4, h5, h6 {
         color: $text-color;
         text-decoration: underline;
     }
+ }
+
+.page-content a[href] {
+    @extend %link-baseline;
 }
 
 
