@@ -299,6 +299,7 @@ my %specific =
 sub which {
   my $file = shift;
   for my $p (File::Spec->path()) {
+    next if $p eq '.';
     if (-x "$p/$file") {
       return "$p/$file";
     }
@@ -999,7 +1000,8 @@ if ($opts{'security'}) {
       }
     }
 
-    die "ERROR: CMake program does not exist..." unless -f $opts{'cmake'};
+    die "ERROR: CMake program $opts{'cmake'} does not exist..."
+      unless -f $opts{'cmake'};
 
     print "Using CMake '$opts{'cmake'}' to compile Google Test Framework\n"
       if $opts{'verbose'};
