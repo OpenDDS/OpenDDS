@@ -66,7 +66,7 @@
 
           <ul class="footer-resources-list">
             {% for post in site.categories.news %}
-              <li><a href="{{ post.url }}">{{ post.title }}</a> ({{ post.date | date_to_long_string }})</li>              
+              <li><a href="{{ post.url }}">{{ post.title }}</a>&nbsp;&nbsp;<i>posted {{ post.date | date_to_long_string }}</i></li>              
             {% endfor %}
           </ul>
       </div>
