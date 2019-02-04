@@ -1,5 +1,5 @@
 const Compute = require('@google-cloud/compute')
-const os = require('os')
+const getLocalIps = require('./get-local-ips')
 
 module.exports = (args, sendTo) => {
   const compute = new Compute()
@@ -9,24 +9,19 @@ module.exports = (args, sendTo) => {
   let previousIps = []
 
   const updateFunc = () => {
+    const localIps = getLocalIps()
     ig.getVMs().then((data) => {
       const vms = data[0]
       if (!vms || vms.length === 0) {
         console.log('No VMs in group')
         return
       }
-      const others = []
-      for (let vm of vms) {
-        if (vm.name !== os.hostname()) {
-          others.push(vm)
-        }
-      }
-      Promise.all(others.map((vm) => vm.getMetadata())).then((responses) => {
+      Promise.all(vms.map((vm) => vm.getMetadata())).then((responses) => {
         const ips = []
         for (let resp of responses) {
           const md = resp[0]
           for (let ni of md.networkInterfaces) {
-            if (ni.networkIP) {
+            if (ni.networkIP && !localIps.includes(ni.networkIP)) {
               ips.push(ni.networkIP)
             }
           }
