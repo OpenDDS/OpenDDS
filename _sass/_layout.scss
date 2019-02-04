@@ -22,6 +22,32 @@
 .sidebar:after {
     clear: both;
 }
+.above-nav-bg {
+    width: 100%;
+    margin-right: auto;
+    margin-left: auto;
+    background-color: #FFF;
+    @extend %clearfix;
+    padding: 5px 5px 5px 0;
+}
+
+.above-nav {
+    .opendds-logo {
+        width: 200px;
+    
+        img {
+            width: 50%;
+            float: left;
+        }
+    
+        h1 {
+            color: $text-color;
+            width: 50%;
+            float: right;
+            margin-top: 8px;
+        }
+    }
+}
 
 .site-nav {
     float: left;
