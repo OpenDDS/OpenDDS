@@ -28,7 +28,7 @@
     margin-left: auto;
     background-color: #FFF;
     @extend %clearfix;
-    padding: 5px 5px 5px 0;
+    padding: 10px 0;
 }
 
 .above-nav {
@@ -445,5 +445,35 @@
         @include media-query($on-laptop) {
             font-size: 18px;
         }
+    }
+}
+
+.news-summary {
+    float: left;
+    width: 50%;
+
+    .post-date {
+        display: block;
+        color: $grey-color;
+        font-size: 0.9em;
+        margin-top: 3px;
+    }
+}
+
+.release-summary {
+    float: right;
+    width: 45%;
+}
+
+@include media-query($on-palm) {
+    .news-summary {
+        float: none;
+        width: 90%;
+        margin-bottom: 1.5em;
+    }
+    
+    .release-summary {
+        float: none;
+        width: 90%;
     }
 }

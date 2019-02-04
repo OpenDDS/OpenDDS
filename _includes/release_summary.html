@@ -1,7 +1,9 @@
 
+<h2>Releases</h2>
+
 {% assign sorted_rel = site.github.releases | sort: "created_at" | reverse %}
 {% assign latest_rel = sorted_rel | first %}
-<h3>Current Release: <a href="{{latest_rel.html_url}}">{{latest_rel.name}}</a></h3>
+<h3><a href="{{latest_rel.html_url}}">{{latest_rel.name}}</a></h3>
 
 {{ latest_rel.body | markdownify }}
 
