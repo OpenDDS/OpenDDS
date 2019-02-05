@@ -28,7 +28,7 @@
     margin-left: auto;
     background-color: #FFF;
     @extend %clearfix;
-    padding: 10px 0;
+    padding: 1em 0;
 }
 
 .above-nav {
@@ -47,6 +47,12 @@
             margin-top: 8px;
         }
     }
+}
+
+.above-nav-main-content {
+    width: 98%;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .site-nav {
@@ -277,7 +283,9 @@
 .footer-col-wrapper {
     font-size: 15px;
     color: $grey-color;
-    margin-left: -$spacing-unit / 2;
+    width: 98%;
+    margin-left: auto;
+    margin-right: auto;
     @extend %clearfix;
 }
 
@@ -380,6 +388,12 @@
 
 .page-heading {
     font-size: 20px;
+}
+
+.post {
+    width: 95%;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .post-list {

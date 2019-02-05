@@ -2,12 +2,14 @@
 
   <div class="above-nav-bg">
     <div class="wrapper above-nav">
+      <div class="above-nav-main-content">
         <a href="/">
           <div class="opendds-logo">
             <img src="/images/opendds-notext.png">
             <h1>{{ site.title }}</h1>
           </div>
         </a>
+      </div>
     </div>
   </div>
 
@@ -30,7 +32,8 @@
           {% unless slash == empty
                       or slash[2] == 'main.css'
                       or p.sitemap == false
-                      or p.url == '/redirects.json' %}
+                      or p.url == '/redirects.json'
+                      or p.url == '/all_news.html' %}
             {% assign indent = slash.size %}
             {% assign level_m1 = level | minus: 1 %}
             {% for i in (indent..level_m1) %}</ul></li>{% endfor %}
@@ -42,10 +45,12 @@
                   <a class="page-link" href="{{p.url | prepend: site.baseurl}}">{{p.title}} <span class="arrow">&#96{% if indent > 2 %}54{% else %}60{% endif %};</span></a>
               {% assign counter = counter | plus: 1 %}
                   <ul class="sub-menu">
-                    <li class="mobile"><a class="page-link" href="{{p.url | prepend: site.baseurl}}">Index</a></li>
                 {% if p.title == 'Documentation' %}
+                    <li><a class="page-link" href="/documents/">Index</a></li>
                     <li><a class="page-link" href="{{ site.data.oci.download_uri }}/OpenDDS/OpenDDS-latest.pdf">Developer's Guide [PDF]</a></li>
                     <li><a class="page-link" href="{{ site.data.oci.download_uri }}/OpenDDS/Using_DDS_Security_in_OpenDDS_3_13.pdf">Using DDS Security in OpenDDS [PDF]</a></li>
+                {% else %}
+                    <li class="mobile"><a class="page-link" href="{{p.url | prepend: site.baseurl}}">Index</a></li>
                 {% endif %}
             {% else %}
                 <li><a class="page-link" href="{{p.url | prepend: site.baseurl}}">{{p.title}}</a></li>
