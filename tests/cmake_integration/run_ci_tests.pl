@@ -14,8 +14,10 @@ die "ERROR: ACE_ROOT must be set" if !$ENV{'ACE_ROOT'};
 
 my $build_config = "";
 my $generator = "";
+my $skip_run_test;
 GetOptions("build-config=s" => \$build_config,
-           "generator=s" => \$generator);
+           "generator=s" => \$generator,
+           "skip-run-test" => \$skip_run_test);
 
 for my $x (qw(Messenger_1 Messenger_2)) {
   my $build_dir="$ENV{'DDS_ROOT'}/tests/cmake_integration/Messenger/$x/build";
@@ -54,5 +56,6 @@ for my $x (qw(Messenger_1 Messenger_2)) {
     chdir($build_config)
       or die "ERROR: '$!'";
   }
-  run_cmd ["perl", "run_test.pl"];
+  run_cmd ["perl", "run_test.pl"]
+    if ! $skip_run_test;
 }
