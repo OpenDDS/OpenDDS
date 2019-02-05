@@ -50,12 +50,13 @@ for my $x (qw(Messenger_1 Messenger_2)) {
     run_cmd $cmd;
   }
 
-  if ($build_config ne "") {
-    $build_config = getcwd() . "/$build_config";
-    print "Switching to '$build_config' to run tests\n";
-    chdir($build_config)
-      or die "ERROR: '$!'";
+  if (! $skip_run_test) {
+    if ($build_config ne "") {
+      my $run_dir = getcwd() . "/$build_config";
+      print "Switching to '$run_dir' to run tests\n";
+      print "$run_dir"
+      chdir($run_dir) or die "ERROR: '$!'";
+    }
+    run_cmd ["perl", "run_test.pl"]
   }
-  run_cmd ["perl", "run_test.pl"]
-    if ! $skip_run_test;
 }

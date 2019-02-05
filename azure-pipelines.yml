@@ -60,7 +60,7 @@ jobs:
       maximumCpuCount: true
   - script: |
       if %BuildPlatform%==x64 set GEN=--generator="Visual Studio 15 2017 Win64"
-      perl "%DDS_ROOT%\tests\cmake_integration\run_ci_tests.pl" --build-config=$(BuildConfiguration) --skip-run-test %GEN%
+      perl "%DDS_ROOT%\tests\cmake_integration\run_ci_tests.pl" --build-config=$(BuildConfiguration) %GEN%
     displayName: Compile (and run) CMake Tests
 
 - job: Linux
