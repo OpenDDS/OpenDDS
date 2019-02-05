@@ -451,18 +451,18 @@
 .news-summary {
     float: left;
     width: 50%;
-
-    .post-date {
-        display: block;
-        color: $grey-color;
-        font-size: 0.9em;
-        margin-top: 3px;
-    }
 }
 
 .release-summary {
     float: right;
     width: 45%;
+}
+
+.post-date {
+    display: block;
+    color: $grey-color;
+    font-size: 0.9em;
+    margin-top: 3px;
 }
 
 @include media-query($on-palm) {

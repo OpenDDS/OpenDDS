@@ -3,9 +3,8 @@
 
 {% assign sorted_rel = site.github.releases | sort: "created_at" | reverse %}
 {% assign latest_rel = sorted_rel | first %}
-<h3><a href="{{latest_rel.html_url}}">{{latest_rel.name}}</a></h3>
 
-{{ latest_rel.body | markdownify }}
+<h3><a href="{{latest_rel.html_url}}">{{latest_rel.name}}</a></h3>
 
 {% assign assets = latest_rel.assets | sort: "name" | reverse %}
 {% for a in assets %}
@@ -20,6 +19,8 @@
 
   <p><a href="{{ a.browser_download_url }}">Download {{a.name}}</a> ({{ note }})</p>
 {% endfor %}
+
+<i class="post-date">Released on {{ latest_rel.published_at | date_to_long_string }}</i>
 
 {% if site.github.releases.size > 1 %}
   <h3>Previous Releases:</h3>
