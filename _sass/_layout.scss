@@ -451,6 +451,10 @@
 .news-summary {
     float: left;
     width: 50%;
+
+    .news-item {
+        margin-bottom: 1em;
+    }
 }
 
 .release-summary {
