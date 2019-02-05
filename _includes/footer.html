@@ -65,9 +65,16 @@
           <h3>News</h3>
 
           <ul class="footer-resources-list">
-            {% for post in site.categories.news %}
+            {% assign post_limit = 6 %}
+            {% assign posts = site.categories.news %}
+            {% for post in posts limit: post_limit %}
               <li><a href="{{ post.url }}">{{ post.title }}</a>&nbsp;&nbsp;<i>posted {{ post.date | date_to_long_string }}</i></li>              
             {% endfor %}
+            {% if posts.size > post_limit %}
+              <div class="more-news">
+                <a href="/all_news.html"><h3>More News...</h3></a>
+              </div>
+            {% endif %}
           </ul>
       </div>
     </div>

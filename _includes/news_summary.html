@@ -1,11 +1,19 @@
 
 <h2>News</h2>
-{% for post in site.categories.news %}
+{% assign post_limit = 4 %}
+{% assign posts = site.categories.news %}
+{% for post in posts limit: post_limit %}
   <h3>{{ post.title }}</h3>
 
   {{ post.excerpt }}
 
-  <a href="{{ post.url }}">Read More...</a>
+  <a href="{{ post.url }}">Continue Reading...</a>
 
   <i class="post-date">Posted on {{ post.date | date_to_long_string }}</i>
 {% endfor %}
+
+{% if posts.size > post_limit %}
+<div class="more-news">
+  <a href="/all_news.html"><h3>More News...</h3></a>
+</div>
+{% endif %}
