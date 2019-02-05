@@ -13,7 +13,9 @@ die "ERROR: DDS_ROOT must be set" if !$ENV{'DDS_ROOT'};
 die "ERROR: ACE_ROOT must be set" if !$ENV{'ACE_ROOT'};
 
 my $build_config = "";
-GetOptions("build-config=s" => \$build_config);
+my $generator = "";
+GetOptions("build-config=s" => \$build_config,
+           "generator=s" => \$generator);
 
 for my $x (qw(Messenger_1 Messenger_2)) {
   my $build_dir="$ENV{'DDS_ROOT'}/tests/cmake_integration/Messenger/$x/build";
@@ -24,6 +26,10 @@ for my $x (qw(Messenger_1 Messenger_2)) {
                "-D", "CMAKE_PREFIX_PATH=$ENV{'DDS_ROOT'}",
                "-D", "CMAKE_VERBOSE_MAKEFILE:BOOL=ON", ".."],
               ["cmake", "--build", "."]);
+
+  if ($generator ne "") {
+    push @{$cmds[0]}, ("-G", qq("$generator"));
+  }
 
   sub run_cmd {
     my $cmd = shift;
