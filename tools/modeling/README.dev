@@ -37,11 +37,11 @@ One-time developer setup
 
 6. Create a new workspace located outside the DDS_ROOT checkout (this will hold
    the developer-specific .metadata directory).  Import the OpenDDS Modeling
-   projects into this workspace using File -> Import, General, Existing 
-   Projects Into Workspace, with the root directory of 
+   projects into this workspace using File -> Import, General, Existing
+   Projects Into Workspace, with the root directory of
    $DDS_ROOT/tools/modeling.
    Note: If you are using MPC's clone_build_tree.pl script, you will need
-   to have used the -f option to force cloning of build files (in this case 
+   to have used the -f option to force cloning of build files (in this case
    we need the .project and .classpath files).
 
 ************************************************************************
@@ -100,7 +100,7 @@ Running tests
      -l $DDS_ROOT/tools/modeling/tests/modeling_tests.lst
 
 ************************************************************************
-Source Projects (in repository https://svn.dre.vanderbilt.edu/DOC/DDS):
+Source Projects (in repository https://github.com/objectcomputing/OpenDDS):
 
   org.opendds.modeling.model    (at tools/modeling/plugins/org.opendds.modeling.model)
     - Segregated ecore metamodels and profile.
