@@ -30,7 +30,11 @@ for my $x (qw(Messenger_1 Messenger_2)) {
               ["cmake", "--build", "."]);
 
   if ($generator ne "") {
-    push @{$cmds[0]}, ("-G", qq("$generator"));
+    splice @{$cmds[0]}, 1, 0, ("-G", qq("$generator"));
+  }
+
+  if ($build_config ne "") {
+    splice @{$cmds[0]}, 1, 0, ("-D", "CMAKE_BUILD_TYPE=$build_config");
   }
 
   sub run_cmd {
