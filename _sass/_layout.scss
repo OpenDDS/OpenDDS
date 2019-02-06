@@ -474,6 +474,10 @@
 .release-summary {
     float: right;
     width: 45%;
+
+    .download-note {
+        font-size: 0.95em;
+    }
 }
 
 .post-date {

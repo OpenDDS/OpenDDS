@@ -17,7 +17,7 @@
     {% assign note = 'Linux/Solaris/MacOSX' %}
   {% endif %}
 
-  <p><a href="{{ a.browser_download_url }}">Download {{a.name}}</a> ({{ note }})</p>
+  <p><a href="{{ a.browser_download_url }}">Download {{a.name}}</a> <span class="download-note">({{ note }})</span></p>
 {% endfor %}
 
 <i class="post-date">Released on {{ latest_rel.published_at | date_to_long_string }}</i>
