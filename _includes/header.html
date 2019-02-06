@@ -46,11 +46,11 @@
               {% assign counter = counter | plus: 1 %}
                   <ul class="sub-menu">
                 {% if p.title == 'Documentation' %}
-                    <li><a class="page-link" href="/documents/">Index</a></li>
+                    <li><a class="page-link" href="/documents/">All Documentation</a></li>
                     <li><a class="page-link" href="{{ site.data.oci.download_uri }}/OpenDDS/OpenDDS-latest.pdf">Developer's Guide [PDF]</a></li>
                     <li><a class="page-link" href="{{ site.data.oci.download_uri }}/OpenDDS/Using_DDS_Security_in_OpenDDS_3_13.pdf">Using DDS Security in OpenDDS [PDF]</a></li>
                 {% else %}
-                    <li class="mobile"><a class="page-link" href="{{p.url | prepend: site.baseurl}}">Index</a></li>
+                    <li class="mobile"><a class="page-link" href="{{p.url | prepend: site.baseurl}}">{{ p.title }}</a></li>
                 {% endif %}
             {% else %}
                 <li><a class="page-link" href="{{p.url | prepend: site.baseurl}}">{{p.title}}</a></li>
