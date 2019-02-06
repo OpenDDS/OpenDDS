@@ -306,7 +306,6 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
 {
   const GuidConverter conv(local_id);
 
-  // TODO(jrw972):  Do we need a lock for the config?
   if (conv.isReader() && config().rtps_relay_address() != ACE_INET_Addr()) {
     relay_beacon_->schedule_enable();
   }
@@ -2582,11 +2581,10 @@ RtpsUdpDataLink::check_heartbeats()
 void
 RtpsUdpDataLink::send_relay_beacon()
 {
+  const bool no_relay = config().rtps_relay_address() == ACE_INET_Addr();
   {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-    // TODO(jr972): Do we need a lock for the config?
-    if (config().rtps_relay_address() == ACE_INET_Addr() &&
-        readers_.empty()) {
+    if (no_relay && readers_.empty()) {
       relay_beacon_->disable();
       return;
     }
