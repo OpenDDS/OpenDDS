@@ -39,7 +39,7 @@ public:
         // this code is here, despite the RTPS spec statement:
         // "sequence numbers never wrap"
         this->high_ = 0;
-        this->low_ = 0;
+        this->low_ = 1;
       } else {
         ++this->high_;
         this->low_ = 0;

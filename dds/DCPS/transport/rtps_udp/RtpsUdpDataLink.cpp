@@ -316,7 +316,7 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
     RtpsWriter& w = writers_[local_id];
     w.remote_readers_[remote_id].durable_ = remote_durable;
     w.durable_ = local_durable;
-    w.ready_to_hb_ = !(local_durable && remote_durable);
+    w.ready_to_hb_ = !remote_durable;
     enable_heartbeat = w.ready_to_hb_;
   } else if (conv.isReader()) {
     RtpsReaderMap::iterator rr = readers_.find(local_id);
