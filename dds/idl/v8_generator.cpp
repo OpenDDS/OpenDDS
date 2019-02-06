@@ -121,13 +121,14 @@ namespace {
           "  }\n";
         return;
 
-      } else if (v8Type == "Number") {
-        prefix = "static_cast<double>(";
-        suffix = ")";
-      } else if (v8Type == "String" && (pt == AST_PredefinedType::PT_longlong || pt == AST_PredefinedType::PT_ulonglong)) {
+      } else if (pt == AST_PredefinedType::PT_longlong || pt == AST_PredefinedType::PT_ulonglong) {
         prefix = "std::to_string(";
         suffix = ").c_str()";
         postNew = ".ToLocalChecked()";
+
+      } else if (v8Type == "Number") {
+        prefix = "static_cast<double>(";
+        suffix = ")";
       }
 
       strm <<
