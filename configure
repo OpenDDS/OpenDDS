@@ -48,7 +48,8 @@ my %platforminfo =
                'libpath' => 'PATH',
                'cl_versions' => {13.1 => 'vc71', 14 => 'vc8', 15 => 'vc9',
                                  16 => 'vc10', 17 => 'vc11', 18 => 'vc12',
-                                 19 => 'vc14', 19.1 => 'vs2017'},
+                                 19 => 'vc14', 19.1 => 'vs2017',
+                                 19.2 => 'vs2019'},
               },
    'macosx' => {
                 'compilers' => ['clang++'],
@@ -1242,7 +1243,8 @@ sub win32_cmake_generator {
              'vc11' => 'Visual Studio 11 2012',
              'vc12' => 'Visual Studio 12 2013',
              'vc14' => 'Visual Studio 14 2015',
-             'vs2017' => 'Visual Studio 15 2017');
+             'vs2017' => 'Visual Studio 2017',
+             'vs2019' => 'Visual Studio 2019');
 
   die "ERROR: Unsupported Visual Studio version '$ver' supplied.\nStopped"
     if ! exists $map{$ver};
