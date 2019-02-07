@@ -1,26 +1,27 @@
 #ifndef RTPSRELAY_STATISTICS_HANDLER_H_
 #define RTPSRELAY_STATISTICS_HANDLER_H_
 
-#include <ace/Event_Handler.h>
-
 #include "RelayHandler.h"
+
+#include <ace/Event_Handler.h>
 
 class StatisticsHandler : public ACE_Event_Handler {
 public:
-  StatisticsHandler(ACE_Reactor * a_reactor,
-                    RelayHandler * a_spdp_vertical, RelayHandler * a_spdp_horizontal,
-                    RelayHandler * a_sedp_vertical, RelayHandler * a_sedp_horizontal,
-                    RelayHandler * a_data_vertical, RelayHandler * a_data_horizontal);
+  StatisticsHandler(ACE_Reactor* a_reactor,
+                    RelayHandler* a_spdp_vertical, RelayHandler* a_spdp_horizontal,
+                    RelayHandler* a_sedp_vertical, RelayHandler* a_sedp_horizontal,
+                    RelayHandler* a_data_vertical, RelayHandler* a_data_horizontal);
   void open();
-  int handle_timeout(ACE_Time_Value const & a_now, void const *) override;
 
 private:
-  RelayHandler * const m_spdp_vertical;
-  RelayHandler * const m_spdp_horizontal;
-  RelayHandler * const m_sedp_vertical;
-  RelayHandler * const m_sedp_horizontal;
-  RelayHandler * const m_data_vertical;
-  RelayHandler * const m_data_horizontal;
+  int handle_timeout(const ACE_Time_Value& a_now, const void*) override;
+
+  RelayHandler* const spdp_vertical_;
+  RelayHandler* const spdp_horizontal_;
+  RelayHandler* const sedp_vertical_;
+  RelayHandler* const sedp_horizontal_;
+  RelayHandler* const data_vertical_;
+  RelayHandler* const data_horizontal_;
   ACE_Time_Value m_last_collection;
 };
 

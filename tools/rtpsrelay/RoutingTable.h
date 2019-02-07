@@ -1,33 +1,34 @@
 #ifndef RTPSRELAY_ROUTING_TABLE_H_
 #define RTPSRELAY_ROUTING_TABLE_H_
 
-#include <ace/INET_Addr.h>
-#include <dds/DCPS/Service_Participant.h>
-
 #include "RelayTypeSupportImpl.h"
 
-class RoutingTable
-{
- public:
-  RoutingTable(ACE_Time_Value const & a_renew_after,
-               ACE_Time_Value const & a_lifespan)
-    : m_renew_after(a_renew_after), m_lifespan(a_lifespan) {}
-  int initialize(DDS::DomainParticipant_var a_dp,
-                 std::string const & a_topic_name);
-  void update(std::string const & a_guid,
-              std::string const & a_horizontal_relay_address,
-              std::string const & a_address,
-              ACE_Time_Value const & a_now);
-  std::string horizontal_relay_address(std::string const & a_guid) const;
-  std::string address(std::string const & a_guid) const;
+#include <dds/DCPS/Service_Participant.h>
 
- private:
-  ACE_Time_Value const m_renew_after;
-  ACE_Time_Value const m_lifespan;
-  RtpsRelay::RoutingEntryDataWriter_ptr m_writer;
-  RtpsRelay::RoutingEntryDataReader_ptr m_reader;
+#include <ace/Time_Value.h>
 
-  bool fetch(RtpsRelay::RoutingEntry & a_entry) const;
+#include <string>
+
+class RoutingTable {
+public:
+  RoutingTable(const ACE_Time_Value& a_renew_after, const ACE_Time_Value& a_lifespan)
+    : renew_after_(a_renew_after), lifespan_(a_lifespan) {}
+
+  bool initialize(DDS::DomainParticipant_var a_dp, const std::string& a_topic_name);
+  void update(const std::string& a_guid,
+              const std::string& a_horizontal_relay_address,
+              const std::string& a_address,
+              const ACE_Time_Value& a_now);
+  std::string horizontal_relay_address(const std::string& a_guid) const;
+  std::string address(const std::string& a_guid) const;
+
+private:
+  const ACE_Time_Value renew_after_;
+  const ACE_Time_Value lifespan_;
+  RtpsRelay::RoutingEntryDataWriter_ptr writer_;
+  RtpsRelay::RoutingEntryDataReader_ptr reader_;
+
+  bool fetch(RtpsRelay::RoutingEntry& a_entry) const;
 };
 
 #endif // RTPSRELAY_ROUTING_TABLE_H_
