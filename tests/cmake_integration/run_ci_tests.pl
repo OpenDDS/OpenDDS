@@ -34,7 +34,7 @@ for my $x (qw(Messenger_1 Messenger_2)) {
   }
 
   if ($build_config ne "") {
-    splice @{$cmds[1]}, 2, 0, ("--config", "$build_config");
+    push @{$cmds[1]}, ("--config", "$build_config");
   }
 
   sub run_cmd {
