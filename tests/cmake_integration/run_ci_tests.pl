@@ -34,7 +34,7 @@ for my $x (qw(Messenger_1 Messenger_2)) {
   }
 
   if ($build_config ne "") {
-    splice @{$cmds[0]}, 1, 0, ("-D", "CMAKE_BUILD_TYPE=$build_config");
+    splice @{$cmds[1]}, 1, 0, ("--config", "$build_config");
   }
 
   sub run_cmd {
