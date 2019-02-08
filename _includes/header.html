@@ -32,8 +32,7 @@
           {% unless slash == empty
                       or slash[2] == 'main.css'
                       or p.sitemap == false
-                      or p.url == '/redirects.json'
-                      or p.url == '/all_news.html' %}
+                      or p.url == '/redirects.json' %}
             {% assign indent = slash.size %}
             {% assign level_m1 = level | minus: 1 %}
             {% for i in (indent..level_m1) %}</ul></li>{% endfor %}
