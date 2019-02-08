@@ -135,7 +135,7 @@ void RoutingTable::update(const std::string& a_guid,
                           const std::string& a_address,
                           const ACE_Time_Value& a_now)
 {
-  const RtpsRelay::RoutingEntry entry{a_guid, a_address, a_horizontal_relay_address, 
+  const RtpsRelay::RoutingEntry entry{a_guid, a_address, a_horizontal_relay_address,
     static_cast<uint32_t>((a_now + lifespan_).sec())};
 
   auto reader_handle = reader_->lookup_instance(entry);

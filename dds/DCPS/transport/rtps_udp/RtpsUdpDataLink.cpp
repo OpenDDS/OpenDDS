@@ -306,7 +306,7 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
   const GuidConverter conv(local_id);
 
   if (conv.isReader() && config().rtps_relay_address() != ACE_INET_Addr()) {
-    relay_beacon_->schedule_enable();
+    relay_beacon_->schedule_enable(false);
   }
 
   if (!local_reliable) {
