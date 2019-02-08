@@ -11,6 +11,7 @@
 #include <array>
 #include <cstring>
 #include <sstream>
+#include <string>
 
 namespace {
   const CORBA::UShort encap_LE = 0x0300; // {PL_CDR_LE} in LE
@@ -25,7 +26,8 @@ namespace {
 
   void parse_property(GroupTable::GroupSet& a_groups, const DDS::Property_t& a_property)
   {
-    if (std::strncmp(a_property.name, "OpenDDS.RtpsRelay.Groups", std::strlen(a_property.name)) == 0) {
+    static const std::string GROUPS_PROPERTY_NAME = "OpenDDS.RtpsRelay.Groups";
+    if (a_property.name.in() == GROUPS_PROPERTY_NAME) {
       std::string value(a_property.value);
       for (size_t idx = 0, limit = value.length(); idx != limit;) {
         size_t const n = value.find(',', idx);
