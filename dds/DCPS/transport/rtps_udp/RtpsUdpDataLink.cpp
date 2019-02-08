@@ -93,6 +93,7 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
                      config.heartbeat_response_delay_),
     heartbeat_(make_rch<HeartBeat>(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::send_heartbeats)),
     heartbeatchecker_(make_rch<HeartBeat>(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::check_heartbeats)),
+    relay_beacon_(make_rch<HeartBeat>(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::send_relay_beacon)),
 #ifdef OPENDDS_SECURITY
     held_data_delivery_handler_(this),
     security_config_(Security::SecurityRegistry::instance()->default_config()),
@@ -302,6 +303,12 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
                             bool local_reliable, bool remote_reliable,
                             bool local_durable, bool remote_durable)
 {
+  const GuidConverter conv(local_id);
+
+  if (conv.isReader() && config().rtps_relay_address() != ACE_INET_Addr()) {
+    relay_beacon_->schedule_enable(false);
+  }
+
   if (!local_reliable) {
     return;
   }
@@ -309,7 +316,6 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
   bool enable_heartbeat = false;
 
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  const GuidConverter conv(local_id);
   if (conv.isWriter() && remote_reliable) {
     // Insert count if not already there.
     heartbeat_counts_.insert(HeartBeatCountMapType::value_type(local_id, 0));
@@ -587,6 +593,8 @@ RtpsUdpDataLink::stop_i()
   nack_reply_.cancel();
   heartbeat_reply_.cancel();
   heartbeat_->disable();
+  heartbeatchecker_->disable();
+  relay_beacon_->disable();
   unicast_socket_.close();
   multicast_socket_.close();
 }
@@ -2590,6 +2598,22 @@ RtpsUdpDataLink::check_heartbeats()
     const InterestingRemote& remote = iter->second;
     remote.listener->writer_does_not_exist(rid, remote.localid);
   }
+}
+
+void
+RtpsUdpDataLink::send_relay_beacon()
+{
+  const bool no_relay = config().rtps_relay_address() == ACE_INET_Addr();
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    if (no_relay && readers_.empty()) {
+      relay_beacon_->disable();
+      return;
+    }
+  }
+
+  ACE_Message_Block mb(static_cast<size_t>(0));
+  send_strategy()->send_rtps_control(mb, config().rtps_relay_address());
 }
 
 void
