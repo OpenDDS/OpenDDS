@@ -1,0 +1,21 @@
+# This is used by gitrelease.pl to correct commit individual author info for
+# the gernation of the AUTHORS file
+#
+# See https://git-scm.com/docs/git-check-mailmap for how this works
+
+Justin Wilson <wilsonj@objectcomputing.com> <jrw972@gmail.com>
+Justin Wilson <wilsonj@objectcomputing.com> Justin R. Wilson
+
+Jeff Schmitz <schmitzj@ociweb.com> <jeffrey.j.schmitz@gmail.com>
+Jeff Schmitz <schmitzj@ociweb.com> iamtheschmitzer <schmitzj@ociweb.com>
+
+Brian Johnson <johnsonb@ociweb.com> johnsonb <johnsonb@ociweb.com>
+
+Paul Calabrese <calabrep@objectcomputing.com> <calabrese_p@ociweb.com>
+
+Huang-Ming Huang <huangh@ociweb.com> <huangming.huang@gmail.com>
+
+Fred Hornsey <hornseyf@objectcomputing.com> <fred@hornsey.us>
+Fred Hornsey <hornseyf@objectcomputing.com> Frederick Hornsey
+
+Doug Lewis <lewisdo@objectcomputing.com> unknown <lewisdo@objectcomputing.com>

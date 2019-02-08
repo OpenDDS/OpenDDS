@@ -28,7 +28,7 @@ class OpenDDS_Dcps_Export SequenceNumber {
 public:
   typedef ACE_INT64 Value;
   /// Construct with a value, default to one (starting point).
-  SequenceNumber(Value value = MIN_VALUE) {
+  SequenceNumber(Value value = INITIAL_VALUE) {
     setValue(value);
   }
 
@@ -59,7 +59,7 @@ public:
 
   SequenceNumber previous() const {
     SequenceNumber retVal(*this);
-    if ((this->low_ == 1) && (this->high_ == 0)) {
+    if ((this->low_ == 0) && (this->high_ == 0)) {
       retVal.high_ = ACE_INT32_MAX;
       retVal.low_  = ACE_UINT32_MAX;
       return retVal;
@@ -135,7 +135,8 @@ public:
   }
 
   static const Value MAX_VALUE = ACE_INT64_MAX;
-  static const Value MIN_VALUE = 1;
+  static const Value INITIAL_VALUE = 1;
+  static const Value MIN_VALUE = 0;
   static const Value LOW_BASE = 0x0000000100000000LL;
 
   friend ACE_CDR::Boolean operator>>(Serializer& s, SequenceNumber& x);
