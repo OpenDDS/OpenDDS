@@ -170,7 +170,7 @@ GroupTable::GuidSet GroupTable::guids(const std::string& a_group) const
   return retval;
 }
 
-GroupTable::GroupSet GroupTable::groups(const std::string& a_guid) const 
+GroupTable::GroupSet GroupTable::groups(const std::string& a_guid) const
 {
   DDS::StringSeq guid_query_parameters;
   guid_query_parameters.length(1);

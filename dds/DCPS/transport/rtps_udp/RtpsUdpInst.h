@@ -94,7 +94,7 @@ private:
 };
 
 inline void RtpsUdpInst::rtps_relay_address(const ACE_INET_Addr& address)
-{ 
+{
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   rtps_relay_address_ = address;
 }
