@@ -1,0 +1,23 @@
+
+<h2>Latest News</h2>
+{% assign post_limit = 4 %}
+{% assign posts = site.categories.news %}
+{% for post in posts limit: post_limit %}
+<div class="news-item">
+  <h3>{{ post.title }}</h3>
+
+  {{ post.excerpt }}
+
+  {% if post.excerpt.size < post.content.size %}
+    <a href="{{ post.url }}">Continue Reading...</a>
+  {% endif %}
+
+  <i class="post-date">Posted on {{ post.date | date_to_long_string }}</i>
+</div>
+{% endfor %}
+
+{% if posts.size > post_limit %}
+<div class="more-news">
+  <a href="/news.html"><h3>More News...</h3></a>
+</div>
+{% endif %}
