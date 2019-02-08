@@ -1,7 +1,8 @@
 ---
-layout: news
+layout: post
 title:  "Online Training"
 categories: news
+author: The OpenDDS Team
 ---
 
 OCI is offering the following live online OpenDDS training classes.  Each class consists of two 3-hour sessions.
