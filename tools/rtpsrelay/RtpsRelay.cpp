@@ -13,6 +13,7 @@
 #include <dds/DCPS/transport/framework/NetworkAddress.h>
 
 #include <ace/Arg_Shifter.h>
+#include <ace/Argv_Type_Converter.h>
 #include <ace/Reactor.h>
 
 #include <cstdlib>
@@ -43,7 +44,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   ACE_Time_Value renew_after(60); // 1 minute
   ACE_Time_Value lifespan(300);   // 5 minutes
 
-  ACE_Arg_Shifter args(argc, argv);
+  ACE_Argv_Type_Converter atc(argc, argv);
+  ACE_Arg_Shifter_T<char> args(atc.get_argc(), atc.get_ASCII_argv());
   while (args.is_anything_left()) {
     const char* arg = nullptr;
 
