@@ -54,9 +54,9 @@ bool dw_reliable() {
   return !(gc->instances_[0]->transport_type_ == "udp");
 }
 
-void append(DDS::PropertySeq& props, const char* name, const char* value)
+void append(DDS::PropertySeq& props, const char* name, const char* value, bool propagate = false)
 {
-  const DDS::Property_t prop = {name, value, false /*propagate*/};
+  const DDS::Property_t prop = {name, value, propagate};
   const unsigned int len = props.length();
   props.length(len + 1);
   props[len] = prop;
@@ -92,6 +92,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         append(props, DDSSEC_PROP_PERM_CA, perm_ca_file);
         append(props, DDSSEC_PROP_PERM_GOV_DOC, governance_file);
         append(props, DDSSEC_PROP_PERM_DOC, permissions_file);
+        append(props, "OpenDDS.RtpsRelay.Groups", "Messenger", true);
       }
 #endif
 

@@ -40,6 +40,8 @@ namespace {
       switch (p->pt()) {
       case AST_PredefinedType::PT_char:
       case AST_PredefinedType::PT_wchar:
+      case AST_PredefinedType::PT_longlong:  // Can't fully fit in a JS "number"
+      case AST_PredefinedType::PT_ulonglong: // Can't fully fit in a JS "number"
         return "String";
       case AST_PredefinedType::PT_boolean:
         return "Boolean";
@@ -118,6 +120,11 @@ namespace {
           "    " << propName << "Nan::New(str).ToLocalChecked());\n"
           "  }\n";
         return;
+
+      } else if (pt == AST_PredefinedType::PT_longlong || pt == AST_PredefinedType::PT_ulonglong) {
+        prefix = "std::to_string(";
+        suffix = ").c_str()";
+        postNew = ".ToLocalChecked()";
 
       } else if (v8Type == "Number") {
         prefix = "static_cast<double>(";

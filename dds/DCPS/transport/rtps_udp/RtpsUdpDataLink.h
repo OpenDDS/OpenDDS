@@ -239,8 +239,9 @@ private:
     //Only accessed with RtpsUdpDataLink lock held
     SnToTqeMap to_deliver_;
     bool durable_;
+    bool ready_to_hb_;
 
-    RtpsWriter() : durable_(false) {}
+    RtpsWriter() : durable_(false), ready_to_hb_(false) {}
     ~RtpsWriter();
     SequenceNumber heartbeat_high(const ReaderInfo&) const;
     void add_elem_awaiting_ack(TransportQueueElement* element);
@@ -267,7 +268,7 @@ private:
 
     WriterInfo()
       : ack_pending_(false), initial_hb_(true), heartbeat_recvd_count_(0),
-        hb_frag_recvd_count_(0), acknack_count_(0), nackfrag_count_(0) {}
+        hb_frag_recvd_count_(0), acknack_count_(0), nackfrag_count_(0) { hb_range_.second = SequenceNumber::ZERO(); }
 
     bool should_nack() const;
   };
@@ -375,6 +376,7 @@ private:
   void check_heartbeats();
   void send_heartbeats_manual(const TransportSendControlElement* tsce);
   void send_heartbeat_replies();
+  void send_relay_beacon();
 
   CORBA::Long best_effort_heartbeat_count_;
 
@@ -412,9 +414,9 @@ private:
       , function_(function)
       , enabled_(false) {}
 
-    void schedule_enable()
+    void schedule_enable(bool reenable)
     {
-      ScheduleEnableCommand c(this);
+      ScheduleEnableCommand c(this, reenable);
       execute_or_enqueue(c);
     }
 
@@ -429,7 +431,7 @@ private:
       return outer_->reactor_is_shut_down();
     }
 
-    void enable();
+    void enable(bool reenable);
     void disable();
 
     RtpsUdpDataLink* outer_;
@@ -437,21 +439,22 @@ private:
     bool enabled_;
 
     struct ScheduleEnableCommand : public Command {
-      ScheduleEnableCommand(HeartBeat* hb)
-        : heartbeat_(hb)
+      ScheduleEnableCommand(HeartBeat* hb, bool reenable)
+        : heartbeat_(hb), reenable_(reenable)
       { }
 
       virtual void execute()
       {
-        heartbeat_->enable();
+        heartbeat_->enable(reenable_);
       }
 
       HeartBeat* heartbeat_;
+      bool reenable_;
     };
 
   };
 
-  RcHandle<HeartBeat> heartbeat_, heartbeatchecker_;
+  RcHandle<HeartBeat> heartbeat_, heartbeatchecker_, relay_beacon_;
 
   /// Data structure representing an "interesting" remote entity for static discovery.
   struct InterestingRemote {
@@ -508,7 +511,7 @@ private:
   typedef OPENDDS_SET(InterestingAckNack) InterestingAckNackSetType;
   InterestingAckNackSetType interesting_ack_nacks_;
 
-  void send_ack_nacks(RtpsReaderMap::iterator rr, bool finalFlag = false);
+  void send_ack_nacks(RtpsReaderMap::value_type& rr, bool finalFlag = false);
 
   class HeldDataDeliveryHandler : public RcEventHandler {
   public:

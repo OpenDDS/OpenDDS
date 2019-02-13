@@ -72,6 +72,8 @@ public:
                          const RtpsDiscovery& disco,
                          DDS::DomainId_t domainId);
 
+  void rtps_relay_address(const ACE_INET_Addr& address);
+
 #ifdef OPENDDS_SECURITY
   DDS::ReturnCode_t init_security(DDS::Security::IdentityHandle id_handle,
                                   DDS::Security::PermissionsHandle perm_handle,
