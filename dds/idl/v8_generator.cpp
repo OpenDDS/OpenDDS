@@ -156,6 +156,116 @@ namespace {
     }
   }
 
+  void gen_copyfrom(const char* tgt, const char* src, AST_Type* type,
+                    const char* prop, bool prop_index = false, std::ostream& strm = be_global->impl_)
+  {
+    const Classification cls = classify(type);
+    AST_PredefinedType::PredefinedType pt = AST_PredefinedType::PT_void;
+    const std::string v8Type = getV8Type(type, &pt),
+      propName = prop_index ? std::string(tgt) + "[" + prop + "]" : std::string(tgt) + "." + prop;
+
+    if (cls & CL_SCALAR) {
+      std::string prefix, suffix, postNew, clines;
+
+      if (cls & CL_ENUM) {
+        const std::string underscores =
+          dds_generator::scoped_helper(type->name(), "_"),
+          array = "gen_" + underscores + "_names";
+        prefix = '(' + std::string(src) + " >= sizeof(" + array + ")/sizeof(" +
+          array + "[0])) ? \"<<invalid>>\" : " + array + "[static_cast<int>(";
+        suffix = ")]";
+        postNew = ".ToLocalChecked()";
+        clines += "      if (lv->IsString()) {\n";
+        clines += "        v8::Local<v8::String> ls = Nan::To<v8::String>(lv).ToLocalChecked();\n";
+        clines += "        std::string ss(ls->Length(), ' ');\n";
+        clines += "        ls->WriteUtf8(&ss[0]);\n";
+        clines += "        for (uint32_t i = 0; i < sizeof(" + array + ")/sizeof(" + array + "[0]); ++i) {\n";
+        clines += "          if (ss == " + array + "[i]) {\n";
+        clines += "            " + propName + " = static_cast<" + scoped(type->name()) + ">(i);\n";
+        clines += "            continue;\n";
+        clines += "          }\n";
+        clines += "        }\n";
+        clines += "      }\n";
+      } else if (cls & CL_STRING) {
+        clines += "      if (lv->IsString()) {\n";
+        clines += "        v8::Local<v8::String> ls = Nan::To<v8::String>(lv).ToLocalChecked();\n";
+        if (cls & CL_WIDE) {
+          clines += "        std::wstring ws(ls->Length(), ' ');\n";
+          clines += "        ls->Write(&ws[0]);\n";
+          clines += "        " + propName + " = ws.c_str();\n";
+        } else {
+          clines += "        std::string ss(ls->Length(), ' ');\n";
+          clines += "        ls->WriteUtf8(&ss[0]);\n";
+          clines += "        " + propName + " = ss.c_str();\n";
+        }
+        clines += "      }\n";
+      } else if (pt == AST_PredefinedType::PT_char) {
+        clines += "      if (lv->IsString()) {\n";
+        clines += "        v8::Local<v8::String> ls = Nan::To<v8::String>(lv).ToLocalChecked();\n";
+        clines += "        ls->WriteUtf8(&" + propName + ", 1);\n";
+        clines += "      }\n";
+      } else if (pt == AST_PredefinedType::PT_wchar) {
+        clines += "      if (lv->IsString()) {\n";
+        clines += "        v8::Local<v8::String> ls = Nan::To<v8::String>(lv).ToLocalChecked();\n";
+        clines += "        ls->Write(&" + propName + ", 1);\n";
+        clines += "      }\n";
+      } else if (pt == AST_PredefinedType::PT_longlong
+              || pt == AST_PredefinedType::PT_ulonglong) {
+        clines += "      if (lv->IsString()) {\n";
+        clines += "        v8::Local<v8::String> ls = Nan::To<v8::String>(lv).ToLocalChecked();\n";
+        clines += "        std::string ss(ls->Length(), ' ');\n";
+        clines += "        ls->WriteUtf8(&ss[0]);\n";
+        clines += "        std::istringstream iss(ss);";
+        clines += "        iss >> " + propName + ";\n";
+        clines += "      }\n";
+      } else if (pt == AST_PredefinedType::PT_octet
+              || pt == AST_PredefinedType::PT_ushort
+              || pt == AST_PredefinedType::PT_short
+              || pt == AST_PredefinedType::PT_ulong
+              || pt == AST_PredefinedType::PT_long) {
+        clines += "      if (lv->IsNumber()) {\n";
+        clines += "        v8::Local<v8::Number> ln = Nan::To<v8::Number>(lv).ToLocalChecked();\n";
+        clines += "        " + propName + " = ln->IntegerValue();\n";
+        clines += "      }\n";
+      } else if (pt == AST_PredefinedType::PT_boolean) {
+        clines += "      if (lv->IsBoolean()) {\n";
+        clines += "        v8::Local<v8::Boolean> lb = Nan::To<v8::Boolean>(lv).ToLocalChecked();\n";
+        clines += "        " + propName + " = lb->Value();\n";
+        clines += "      }\n";
+        prefix = "static_cast<double>(";
+        suffix = ")";
+      }
+
+      strm <<
+        "  {\n"
+        "    v8::Local<v8::String> field_str = Nan::New(\"" << prop << "\").ToLocalChecked();\n"
+        "    if (" << src << "->Has(field_str)) {\n"
+        "      v8::Local<v8::Value> lv = " << src << "->Get(field_str);\n"
+        << clines <<
+        "    }\n"
+        "  }\n";
+
+    } else if ((cls & CL_SEQUENCE) && builtInSeq(type)) {
+      AST_Type* real_type = resolveActualType(type);
+      AST_Sequence* seq = AST_Sequence::narrow_from_decl(real_type);
+      AST_Type* elem = seq->base_type();
+      strm <<
+        "  {\n"
+        "    const v8::Local<v8::Array> seq = Nan::New<v8::Array>(" << src
+                       << ".length());\n"
+        "    for (CORBA::ULong j = 0; j < " << src << ".length(); ++j) {\n";
+      gen_copyfrom("seq", (std::string(src) + "[j]").c_str(), elem, "j");
+      strm <<
+        "    }\n"
+        "    " << propName << "seq" << ");\n"
+        "  }\n";
+
+    } else { // struct, sequence, etc.
+      strm <<
+        "  copyFromV8(" << src << ", " << propName << ");\n";
+    }
+  }
+
   struct gen_field_copyto {
     gen_field_copyto(const char* tgt, const char* src) : tgt_(tgt), src_(src) {}
     const std::string tgt_, src_;
@@ -165,6 +275,19 @@ namespace {
         source = src_ + '.' + fieldName,
         prop = "Nan::New<v8::String>(\"" + fieldName + "\").ToLocalChecked()";
       gen_copyto(tgt_.c_str(), source.c_str(),
+                 field->field_type(), prop.c_str());
+    }
+  };
+
+  struct gen_field_copyfrom {
+    gen_field_copyfrom(const char* tgt, const char* src) : tgt_(tgt), src_(src) {}
+    const std::string tgt_, src_;
+    void operator()(AST_Field* field) const
+    {
+      const std::string fieldName = field->local_name()->get_string(),
+        source = src_,
+        prop = fieldName;
+      gen_copyfrom(tgt_.c_str(), source.c_str(),
                  field->field_type(), prop.c_str());
     }
   };
@@ -189,6 +312,16 @@ bool v8_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
       be_global->impl_ <<
         "  return stru;\n";
     }
+    {
+      Function vtc("copyFromV8", "void");
+      vtc.addArg("src", "const v8::Local<v8::Object>&");
+      vtc.addArg("out", clazz + '&');
+      vtc.endArgs();
+      std::for_each(fields.begin(), fields.end(),
+                    gen_field_copyfrom("out", "src"));
+      be_global->impl_ <<
+        "  return;\n";
+    }
   }
 
   if (idl_global->is_dcps_type(name)) {
@@ -205,6 +338,12 @@ bool v8_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
       "  {\n"
       "    return OpenDDS::DCPS::copyToV8(*static_cast<const " << lname
                << "*>(source));\n"
+      "  }\n\n"
+      "  void* fromV8(const v8::Local<v8::Object>& source) const\n"
+      "  {\n"
+      "    " << lname << "* result = new " << lname << "();\n"
+      "    OpenDDS::DCPS::copyFromV8(source, *result);\n"
+      "    return result;\n"
       "  }\n\n"
       "public:\n"
       "  struct Initializer {\n"
@@ -242,6 +381,24 @@ bool v8_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
       be_global->impl_ <<
         "  }\n"
         "  return tgt;\n";
+    }
+    {
+      Function vtc("copyFromV8", "void");
+      vtc.addArg("src", "const v8::Local<v8::Object>&");
+      vtc.addArg("out", cxx + '&');
+      vtc.endArgs();
+      be_global->impl_ <<
+        "  uint32_t length = 0;\n"
+        "  if (src->IsArray()) {\n"
+        "    length = src->Get(Nan::New(\"length\").ToLocalChecked())->ToObject()->Uint32Value();\n"
+        "  }\n"
+        "  out.length(length);\n"
+        "  for (uint32_t i = 0; i < length; ++i) {\n"
+        "  ";
+      gen_copyfrom("out", "src", elem, "i", true);
+      be_global->impl_ <<
+        "  }\n"
+        "  return;\n";
     }
     break;
   }
@@ -287,6 +444,20 @@ bool v8_generator::gen_union(AST_Union*, UTL_ScopedName* name,
                            "", "", clazz.c_str(), false, false);
     be_global->impl_ <<
       "  return uni;\n";
+  }
+  {
+    Function vtc("copyToV8", "void");
+    vtc.addArg("src", "const v8::Local<v8::Object>&");
+    vtc.addArg("out", clazz + '&');
+    vtc.endArgs();
+// TODO FIXME
+//    be_global->impl_ <<
+//      "  const v8::Local<v8::Object> uni = Nan::New<v8::Object>();\n";
+//    gen_copyto("uni", "src._d()", discriminator, "Nan::New<v8::String>(\"_d\").ToLocalChecked()");
+//    generateSwitchForUnion("src._d()", branchGen, branches, discriminator,
+//                           "", "", clazz.c_str(), false, false);
+//    be_global->impl_ <<
+//      "  return uni;\n";
   }
   return true;
 }
