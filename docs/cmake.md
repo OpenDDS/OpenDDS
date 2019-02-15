@@ -245,6 +245,8 @@ The following values impact the build in one way or another.
 |`OPENDDS_NO_INLINE`        | Inlining                                                           | OFF                 |
 |`OPENDDS_STATIC`           | Use static libraries                                               | OFF                 |
 |`OPENDDS_XERCES3`          | Adds dependencies to targets; required when OPENDDS_SECURITY is ON | OFF                 |
+|`OPENDDS_XERCES3`          | Adds dependencies to targets; required when OPENDDS_SECURITY is ON | OFF                 |
+|`OPENDDS_FEATURES`         | Semicolon-Separated list of additional features which impact the build. Currently supported are `versioned_namespace=1` (see [this](https://github.com/DOCGroup/ACE_TAO/blob/master/ACE/docs/Symbol_Versioning.html) document) and `uses_wchar=1` for wide-character support. | N/A |
 
 
 [Messenger with direct IDL inclusion]: ../tests/cmake_integration/Messenger/Messenger_1/CMakeLists.txt
