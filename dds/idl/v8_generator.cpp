@@ -157,7 +157,7 @@ namespace {
   }
 
   void gen_copyfrom(const char* tgt, const char* src, AST_Type* type,
-                    const char* prop, bool prop_index = false, std::ostream& strm = be_global->impl_)
+                    const char* prop, bool prop_index = false, bool prop_no_str = false, std::ostream& strm = be_global->impl_)
   {
     const Classification cls = classify(type);
     AST_PredefinedType::PredefinedType pt = AST_PredefinedType::PT_void;
@@ -165,16 +165,12 @@ namespace {
       propName = prop_index ? std::string(tgt) + "[" + prop + "]" : std::string(tgt) + "." + prop;
 
     if (cls & CL_SCALAR) {
-      std::string prefix, suffix, postNew, clines;
+      std::string clines;
 
       if (cls & CL_ENUM) {
         const std::string underscores =
           dds_generator::scoped_helper(type->name(), "_"),
           array = "gen_" + underscores + "_names";
-        prefix = '(' + std::string(src) + " >= sizeof(" + array + ")/sizeof(" +
-          array + "[0])) ? \"<<invalid>>\" : " + array + "[static_cast<int>(";
-        suffix = ")]";
-        postNew = ".ToLocalChecked()";
         clines += "      if (lv->IsString()) {\n";
         clines += "        v8::Local<v8::String> ls = Nan::To<v8::String>(lv).ToLocalChecked();\n";
         clines += "        std::string ss(ls->Length(), ' ');\n";
@@ -190,8 +186,12 @@ namespace {
         clines += "      if (lv->IsString()) {\n";
         clines += "        v8::Local<v8::String> ls = Nan::To<v8::String>(lv).ToLocalChecked();\n";
         if (cls & CL_WIDE) {
+          clines += "        std::vector<uint16_t> vwc(ls->Length(), 0);\n";
+          clines += "        ls->Write(&vwc[0]);\n";
           clines += "        std::wstring ws(ls->Length(), ' ');\n";
-          clines += "        ls->Write(&ws[0]);\n";
+          clines += "        for (size_t i = 0; i < vwc.size(); ++i) {\n";
+          clines += "          ws[i] = vwc[i];\n";
+          clines += "        }\n";
           clines += "        " + propName + " = ws.c_str();\n";
         } else {
           clines += "        std::string ss(ls->Length(), ' ');\n";
@@ -227,39 +227,79 @@ namespace {
         clines += "        v8::Local<v8::Number> ln = Nan::To<v8::Number>(lv).ToLocalChecked();\n";
         clines += "        " + propName + " = ln->IntegerValue();\n";
         clines += "      }\n";
+      } else if (pt == AST_PredefinedType::PT_float
+              || pt == AST_PredefinedType::PT_double
+              || pt == AST_PredefinedType::PT_longdouble) {
+        clines += "      if (lv->IsNumber()) {\n";
+        clines += "        v8::Local<v8::Number> ln = Nan::To<v8::Number>(lv).ToLocalChecked();\n";
+        clines += "        " + propName + " = ln->Value();\n";
+        clines += "      }\n";
       } else if (pt == AST_PredefinedType::PT_boolean) {
         clines += "      if (lv->IsBoolean()) {\n";
         clines += "        v8::Local<v8::Boolean> lb = Nan::To<v8::Boolean>(lv).ToLocalChecked();\n";
         clines += "        " + propName + " = lb->Value();\n";
         clines += "      }\n";
-        prefix = "static_cast<double>(";
-        suffix = ")";
       }
 
-      strm <<
-        "  {\n"
-        "    v8::Local<v8::String> field_str = Nan::New(\"" << prop << "\").ToLocalChecked();\n"
-        "    if (" << src << "->Has(field_str)) {\n"
-        "      v8::Local<v8::Value> lv = " << src << "->Get(field_str);\n"
-        << clines <<
-        "    }\n"
-        "  }\n";
+      if (prop_no_str) {
+        strm <<
+          "  {\n"
+          "      v8::Local<v8::Value> lv = " << src << "->Get(" << prop << ");\n"
+          << clines <<
+          "  }\n";
+      } else {
+        strm <<
+          "  {\n"
+          "    v8::Local<v8::String> field_str = Nan::New(\"" << prop << "\").ToLocalChecked();\n"
+          "    if (" << src << "->Has(field_str)) {\n"
+          "      v8::Local<v8::Value> lv = " << src << "->Get(field_str);\n"
+          << clines <<
+          "    }\n"
+          "  }\n";
+      }
 
     } else if ((cls & CL_SEQUENCE) && builtInSeq(type)) {
       AST_Type* real_type = resolveActualType(type);
       AST_Sequence* seq = AST_Sequence::narrow_from_decl(real_type);
       AST_Type* elem = seq->base_type();
-      strm <<
-        "  {\n"
-        "    const v8::Local<v8::Array> seq = Nan::New<v8::Array>(" << src
-                       << ".length());\n"
-        "    for (CORBA::ULong j = 0; j < " << src << ".length(); ++j) {\n";
-      gen_copyfrom("seq", (std::string(src) + "[j]").c_str(), elem, "j");
-      strm <<
-        "    }\n"
-        "    " << propName << "seq" << ");\n"
-        "  }\n";
-
+      if (prop_no_str) {
+        strm <<
+          "  {\n"
+          "      v8::Local<v8::Value> lv = " << src << "->Get(" << prop << ");\n"
+          "      if (lv->IsArray()) {\n"
+          "        uint32_t length = 0;\n"
+          "        v8::Local<v8::Object> lo = Nan::To<v8::Object>(lv).ToLocalChecked();\n"
+          "        length = lo->Get(Nan::New(\"length\").ToLocalChecked())->ToObject()->Uint32Value();\n"
+          "        " << scoped(type->name()) << "& temp = " << propName <<  ";\n"
+          "        temp.length(length);\n"
+          "        for (uint32_t i = 0; i < length; ++i) {\n"
+          "        ";
+          gen_copyfrom("temp", "lo", elem, "i", true, true);
+          strm <<
+          "        }\n"
+          "      }\n"
+          "  }\n";
+      } else {
+        strm <<
+          "  {\n"
+          "    v8::Local<v8::String> field_str = Nan::New(\"" << prop << "\").ToLocalChecked();\n"
+          "    if (" << src << "->Has(field_str)) {\n"
+          "      v8::Local<v8::Value> lv = " << src << "->Get(field_str);\n"
+          "      if (lv->IsArray()) {\n"
+          "        uint32_t length = 0;\n"
+          "        v8::Local<v8::Object> lo = Nan::To<v8::Object>(lv).ToLocalChecked();\n"
+          "        length = lo->Get(Nan::New(\"length\").ToLocalChecked())->ToObject()->Uint32Value();\n"
+          "        " << scoped(type->name()) << "& temp = " << propName <<  ";\n"
+          "        temp.length(length);\n"
+          "        for (uint32_t i = 0; i < length; ++i) {\n"
+          "        ";
+          gen_copyfrom("temp", "lo", elem, "i", true, true);
+          strm <<
+          "        }\n"
+          "      }\n"
+          "    }\n"
+          "  }\n";
+      }
     } else { // struct, sequence, etc.
       strm <<
         "  copyFromV8(" << src << ", " << propName << ");\n";
@@ -395,7 +435,7 @@ bool v8_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
         "  out.length(length);\n"
         "  for (uint32_t i = 0; i < length; ++i) {\n"
         "  ";
-      gen_copyfrom("out", "src", elem, "i", true);
+      gen_copyfrom("out", "src", elem, "i", true, true);
       be_global->impl_ <<
         "  }\n"
         "  return;\n";
@@ -446,7 +486,7 @@ bool v8_generator::gen_union(AST_Union*, UTL_ScopedName* name,
       "  return uni;\n";
   }
   {
-    Function vtc("copyToV8", "void");
+    Function vtc("copyFromV8", "void");
     vtc.addArg("src", "const v8::Local<v8::Object>&");
     vtc.addArg("out", clazz + '&');
     vtc.endArgs();
