@@ -171,6 +171,10 @@ namespace {
         const std::string underscores =
           dds_generator::scoped_helper(type->name(), "_"),
           array = "gen_" + underscores + "_names";
+        clines += "      if (lv->IsNumber()) {\n";
+        clines += "        v8::Local<v8::Integer> li = Nan::To<v8::Integer>(lv).ToLocalChecked();\n";
+        clines += "        " + propName + " = static_cast<" + scoped(type->name()) + ">(li->Value());\n";
+        clines += "      }\n";
         clines += "      if (lv->IsString()) {\n";
         clines += "        v8::Local<v8::String> ls = Nan::To<v8::String>(lv).ToLocalChecked();\n";
         clines += "        std::string ss(ls->Length(), ' ');\n";
@@ -217,6 +221,10 @@ namespace {
         clines += "        ls->WriteUtf8(&ss[0]);\n";
         clines += "        std::istringstream iss(ss);";
         clines += "        iss >> " + propName + ";\n";
+        clines += "      }\n";
+        clines += "      if (lv->IsNumber()) {\n";
+        clines += "        v8::Local<v8::Number> ln = Nan::To<v8::Number>(lv).ToLocalChecked();\n";
+        clines += "        " + propName + " = ln->IntegerValue();\n";
         clines += "      }\n";
       } else if (pt == AST_PredefinedType::PT_octet
               || pt == AST_PredefinedType::PT_ushort
@@ -301,8 +309,24 @@ namespace {
           "  }\n";
       }
     } else { // struct, sequence, etc.
-      strm <<
-        "  copyFromV8(" << src << ", " << propName << ");\n";
+      if (prop_no_str) {
+        strm <<
+          "  {\n"
+          "    v8::Local<v8::Value> lv = " << src << "->Get(" << prop << ");\n"
+          "    v8::Local<v8::Object> lo = Nan::To<v8::Object>(lv).ToLocalChecked();\n"
+          "    copyFromV8(lo, " << propName << ");\n"
+          "  }\n";
+      } else {
+        strm <<
+          "  {\n"
+          "    v8::Local<v8::String> field_str = Nan::New(\"" << prop << "\").ToLocalChecked();\n"
+          "    if (" << src << "->Has(field_str)) {\n"
+          "      v8::Local<v8::Value> lv = " << src << "->Get(field_str);\n"
+          "      v8::Local<v8::Object> lo = Nan::To<v8::Object>(lv).ToLocalChecked();\n"
+          "      copyFromV8(lo, " << propName << ");\n"
+          "    }\n"
+          "  }\n";
+      }
     }
   }
 
@@ -384,6 +408,26 @@ bool v8_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
       "    " << lname << "* result = new " << lname << "();\n"
       "    OpenDDS::DCPS::copyFromV8(source, *result);\n"
       "    return result;\n"
+      "  }\n\n"
+      "  DDS::InstanceHandle_t register_instance_helper(DDS::DataWriter* dw, const void* data) const\n"
+      "  {\n"
+      "    " << lname << "DataWriter* dw_t = dynamic_cast<" << lname << "DataWriter*>(dw);\n"
+      "    return dw_t->register_instance(*reinterpret_cast<const " << lname << "*>(data));\n"
+      "  }\n\n"
+      "  DDS::ReturnCode_t write_helper(DDS::DataWriter* dw, const void* data, DDS::InstanceHandle_t inst) const\n"
+      "  {\n"
+      "    " << lname << "DataWriter* dw_t = dynamic_cast<" << lname << "DataWriter*>(dw);\n"
+      "    return dw_t->write(*reinterpret_cast<const " << lname << "*>(data), inst);\n"
+      "  }\n\n"
+      "  DDS::ReturnCode_t unregister_instance_helper(DDS::DataWriter* dw, const void* data, DDS::InstanceHandle_t inst) const\n"
+      "  {\n"
+      "    " << lname << "DataWriter* dw_t = dynamic_cast<" << lname << "DataWriter*>(dw);\n"
+      "    return dw_t->unregister_instance(*reinterpret_cast<const " << lname << "*>(data), inst);\n"
+      "  }\n\n"
+      "  DDS::ReturnCode_t dispose_helper(DDS::DataWriter* dw, const void* data, DDS::InstanceHandle_t inst) const\n"
+      "  {\n"
+      "    " << lname << "DataWriter* dw_t = dynamic_cast<" << lname << "DataWriter*>(dw);\n"
+      "    return dw_t->dispose(*reinterpret_cast<const " << lname << "*>(data), inst);\n"
       "  }\n\n"
       "public:\n"
       "  struct Initializer {\n"
