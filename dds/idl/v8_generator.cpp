@@ -220,7 +220,11 @@ namespace {
         clines += "        std::string ss(ls->Length(), ' ');\n";
         clines += "        ls->WriteUtf8(&ss[0]);\n";
         clines += "        std::istringstream iss(ss);";
-        clines += "        iss >> " + propName + ";\n";
+        clines += "        if (ss.find(\"0x\") != std::string::npos) {\n";
+        clines += "          iss >> std::hex >> " + propName + ";\n";
+        clines += "        } else {\n";
+        clines += "          iss >> " + propName + ";\n";
+        clines += "        }\n";
         clines += "      }\n";
         clines += "      if (lv->IsNumber()) {\n";
         clines += "        v8::Local<v8::Number> ln = Nan::To<v8::Number>(lv).ToLocalChecked();\n";
