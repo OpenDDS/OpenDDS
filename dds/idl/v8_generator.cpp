@@ -161,8 +161,7 @@ namespace {
   {
     const Classification cls = classify(type);
     AST_PredefinedType::PredefinedType pt = AST_PredefinedType::PT_void;
-    const std::string v8Type = getV8Type(type, &pt),
-      propName = prop_index ? std::string(tgt) + "[" + prop + "]" : std::string(tgt) + "." + prop,
+    const std::string propName = prop_index ? std::string(tgt) + "[" + prop + "]" : std::string(tgt) + "." + prop,
       assign_prefix = fun_assign ? "(" : " = ",
       assign_suffix = fun_assign ? ")" : "";
 
