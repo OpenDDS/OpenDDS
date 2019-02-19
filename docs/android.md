@@ -1,5 +1,7 @@
 # OpenDDS and Android
 
+**How to build OpenDDS for Android and incorperate OpenDDS into Android apps.**
+
 **WARNING: Android support is experimental and not fully supported!**
 
 **This guide assumes the use of a Unix-like enviroment and Android Studio**
@@ -62,8 +64,15 @@ example, we can use `armeabi-v7a` [1](#footnote-1).
 ```
 cd $DDS_ROOT
 ./configure --no-tests --target=android --macros=ANDROID_ABI=armeabi-v7a
-PATH=$PATH:$TOOLCHAIN/bin make
+PATH=$PATH:$TOOLCHAIN/bin make # Pass -j/--jobs with an appropriate value or this'll take a while...
 ```
+
+If building for more than one architecture, which will be necessary to cover
+the largest number of Android devices possible, it might make sense to build a
+static build OpenDDS separately, which then can be passed using `--build-tools`
+to the configure script.
+
+<!-- TODO: Finish -->
 
 ### OpenDDS's Optional Dependencies
 
@@ -122,7 +131,7 @@ named after the `ANDROID_ABI` of the native libraries it contains.
 
 <!-- TODO -->
 
-### Permissions
+### Network Permissions and Availability
 
 In `AndroidManifest.xml` you will need to add the network permissions if they
 are not already there:
@@ -135,9 +144,73 @@ are not already there:
 Failure to do so will result in ACE failing to access any sockets and OpenDDS
 will not be able to function.
 
+In addition to this if no networks are active when OpenDDS is initialized, then
+the result will similar. It will be up to the app developer to assess
+network availability before initializing OpenDDS. On Android this can be done
+using the
+[ConnectivityManager](https://developer.android.com/reference/android/net/ConnectivityManager),
+but the exact method for doing so will depend on the API level and the needs of
+the app.
+
+<!-- TODO: Changes in Networks or Loss of Network? -->
+
 ### OpenDDS Configuration Files
 
-<!-- TODO -->
+OpenDDS can use several types of files: a main configuration file, security
+configuration files, and security certificate files, among others. On
+traditional platforms, distributing and reading these files is usually not an
+issue at all. On Android however, an app has no traditional files of it's own
+out of the box, so you can't give OpenDDS a path to a file without preparing
+beforehand.
+
+If you already have a preferred way to include files in your app, then that
+will work as long as you can give OpenDDS the path to the files.
+
+Android can open a file stream for resource and asset files. Ideally OpenDDS
+would be able to accept these streams, but it doesn't. One solution to this is
+reading the streams into memory and then writing them to files in the app's
+private directory. This example is using assets, but resources will also work
+with some slight modifications.
+
+```Java
+// ...
+    private String copyAsset(String asset_path) {
+        File new_file = new File(getFilesDir(), asset_path);
+        final String full_path = new_file.getAbsolutePath();
+        try {
+            InputStream in = getAssets().open(asset_path, AssetManager.ACCESS_BUFFER);
+            byte[] buffer = new byte[in.available()];
+            in.read(buffer);
+            in.close();
+            FileOutputStream out = new FileOutputStream(new_file);
+            out.write(buffer);
+            out.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return full_path;
+    }
+// ...
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        // ...
+
+        final String config_file = copyAsset("opendds_config.ini");
+        String[] args = new String[] {"-DCPSConfigFile", config_file};
+        StringSeqHolder argsHolder = new StringSeqHolder(args);
+        dpf = TheParticipantFactory.WithArgs(argsHolder);
+        // ...
+    }
+// ...
+```
+
+This example works but in production code the error handling should be improved
+and integrated with the app's initialization. Rewriting the file every time is
+not ideal, but OpenDDS's files are small and this method insures the files are
+up-to-date.
 
 ### Multithreading
 
