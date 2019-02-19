@@ -157,12 +157,14 @@ namespace {
   }
 
   void gen_copyfrom(const char* tgt, const char* src, AST_Type* type,
-                    const char* prop, bool prop_index = false, bool prop_no_str = false, std::ostream& strm = be_global->impl_)
+                    const char* prop, bool prop_index = false, bool fun_assign = false, std::ostream& strm = be_global->impl_)
   {
     const Classification cls = classify(type);
     AST_PredefinedType::PredefinedType pt = AST_PredefinedType::PT_void;
     const std::string v8Type = getV8Type(type, &pt),
-      propName = prop_index ? std::string(tgt) + "[" + prop + "]" : std::string(tgt) + "." + prop;
+      propName = prop_index ? std::string(tgt) + "[" + prop + "]" : std::string(tgt) + "." + prop,
+      assign_prefix = fun_assign ? "(" : " = ",
+      assign_suffix = fun_assign ? ")" : "";
 
     if (cls & CL_SCALAR) {
       std::string clines;
@@ -173,7 +175,7 @@ namespace {
           array = "gen_" + underscores + "_names";
         clines += "      if (lv->IsNumber()) {\n";
         clines += "        v8::Local<v8::Integer> li = Nan::To<v8::Integer>(lv).ToLocalChecked();\n";
-        clines += "        " + propName + " = static_cast<" + scoped(type->name()) + ">(li->Value());\n";
+        clines += "        " + propName + assign_prefix + "static_cast<" + scoped(type->name()) + ">(li->Value())" + assign_suffix + ";\n";
         clines += "      }\n";
         clines += "      if (lv->IsString()) {\n";
         clines += "        v8::Local<v8::String> ls = Nan::To<v8::String>(lv).ToLocalChecked();\n";
@@ -181,7 +183,7 @@ namespace {
         clines += "        ls->WriteUtf8(&ss[0]);\n";
         clines += "        for (uint32_t i = 0; i < sizeof(" + array + ")/sizeof(" + array + "[0]); ++i) {\n";
         clines += "          if (ss == " + array + "[i]) {\n";
-        clines += "            " + propName + " = static_cast<" + scoped(type->name()) + ">(i);\n";
+        clines += "            " + propName + assign_prefix + "static_cast<" + scoped(type->name()) + ">(i)" + assign_suffix + ";\n";
         clines += "            continue;\n";
         clines += "          }\n";
         clines += "        }\n";
@@ -196,22 +198,26 @@ namespace {
           clines += "        for (size_t i = 0; i < vwc.size(); ++i) {\n";
           clines += "          ws[i] = vwc[i];\n";
           clines += "        }\n";
-          clines += "        " + propName + " = ws.c_str();\n";
+          clines += "        " + propName + assign_prefix + "ws.c_str()" + assign_suffix + ";\n";
         } else {
           clines += "        std::string ss(ls->Length(), ' ');\n";
           clines += "        ls->WriteUtf8(&ss[0]);\n";
-          clines += "        " + propName + " = ss.c_str();\n";
+          clines += "        " + propName + assign_prefix + "ss.c_str()" + assign_suffix + ";\n";
         }
         clines += "      }\n";
       } else if (pt == AST_PredefinedType::PT_char) {
         clines += "      if (lv->IsString()) {\n";
         clines += "        v8::Local<v8::String> ls = Nan::To<v8::String>(lv).ToLocalChecked();\n";
-        clines += "        ls->WriteUtf8(&" + propName + ", 1);\n";
+        clines += "        char temp_c;\n";
+        clines += "        ls->WriteUtf8(&temp_c, 1);\n";
+        clines += "        " + propName + assign_prefix + "temp_c" + assign_suffix + ";\n";
         clines += "      }\n";
       } else if (pt == AST_PredefinedType::PT_wchar) {
         clines += "      if (lv->IsString()) {\n";
         clines += "        v8::Local<v8::String> ls = Nan::To<v8::String>(lv).ToLocalChecked();\n";
-        clines += "        ls->Write(&" + propName + ", 1);\n";
+        clines += "        wchar temp_wc;\n";
+        clines += "        ls->Write(&temp_wc, 1);\n";
+        clines += "        " + propName + assign_prefix + "temp_wc" + assign_suffix + ";\n";
         clines += "      }\n";
       } else if (pt == AST_PredefinedType::PT_longlong
               || pt == AST_PredefinedType::PT_ulonglong) {
@@ -220,15 +226,17 @@ namespace {
         clines += "        std::string ss(ls->Length(), ' ');\n";
         clines += "        ls->WriteUtf8(&ss[0]);\n";
         clines += "        std::istringstream iss(ss);";
+        clines += "        " + scoped(type->name()) + " temp_ll;\n";
         clines += "        if (ss.find(\"0x\") != std::string::npos) {\n";
-        clines += "          iss >> std::hex >> " + propName + ";\n";
+        clines += "          iss >> std::hex >> temp_ll;\n";
         clines += "        } else {\n";
-        clines += "          iss >> " + propName + ";\n";
+        clines += "          iss >> temp_ll;\n";
         clines += "        }\n";
+        clines += "        " + propName + assign_prefix + "temp_ll" + assign_suffix + ";\n";
         clines += "      }\n";
         clines += "      if (lv->IsNumber()) {\n";
         clines += "        v8::Local<v8::Number> ln = Nan::To<v8::Number>(lv).ToLocalChecked();\n";
-        clines += "        " + propName + " = ln->IntegerValue();\n";
+        clines += "        " + propName + assign_prefix + "ln->IntegerValue()" + assign_suffix + ";\n";
         clines += "      }\n";
       } else if (pt == AST_PredefinedType::PT_octet
               || pt == AST_PredefinedType::PT_ushort
@@ -237,23 +245,23 @@ namespace {
               || pt == AST_PredefinedType::PT_long) {
         clines += "      if (lv->IsNumber()) {\n";
         clines += "        v8::Local<v8::Number> ln = Nan::To<v8::Number>(lv).ToLocalChecked();\n";
-        clines += "        " + propName + " = ln->IntegerValue();\n";
+        clines += "        " + propName + assign_prefix + "ln->IntegerValue()" + assign_suffix + ";\n";
         clines += "      }\n";
       } else if (pt == AST_PredefinedType::PT_float
               || pt == AST_PredefinedType::PT_double
               || pt == AST_PredefinedType::PT_longdouble) {
         clines += "      if (lv->IsNumber()) {\n";
         clines += "        v8::Local<v8::Number> ln = Nan::To<v8::Number>(lv).ToLocalChecked();\n";
-        clines += "        " + propName + " = ln->Value();\n";
+        clines += "        " + propName + assign_prefix + "ln->Value()" + assign_suffix + ";\n";
         clines += "      }\n";
       } else if (pt == AST_PredefinedType::PT_boolean) {
         clines += "      if (lv->IsBoolean()) {\n";
         clines += "        v8::Local<v8::Boolean> lb = Nan::To<v8::Boolean>(lv).ToLocalChecked();\n";
-        clines += "        " + propName + " = lb->Value();\n";
+        clines += "        " + propName + assign_prefix + "lb->Value()" + assign_suffix + ";\n";
         clines += "      }\n";
       }
 
-      if (prop_no_str) {
+      if (prop_index) {
         strm <<
           "  {\n"
           "      v8::Local<v8::Value> lv = " << src << "->Get(" << prop << ");\n"
@@ -274,7 +282,7 @@ namespace {
       AST_Type* real_type = resolveActualType(type);
       AST_Sequence* seq = AST_Sequence::narrow_from_decl(real_type);
       AST_Type* elem = seq->base_type();
-      if (prop_no_str) {
+      if (prop_index) {
         strm <<
           "  {\n"
           "      v8::Local<v8::Value> lv = " << src << "->Get(" << prop << ");\n"
@@ -286,7 +294,7 @@ namespace {
           "        temp.length(length);\n"
           "        for (uint32_t i = 0; i < length; ++i) {\n"
           "        ";
-          gen_copyfrom("temp", "lo", elem, "i", true, true);
+          gen_copyfrom("temp", "lo", elem, "i", true);
           strm <<
           "        }\n"
           "      }\n"
@@ -305,7 +313,7 @@ namespace {
           "        temp.length(length);\n"
           "        for (uint32_t i = 0; i < length; ++i) {\n"
           "        ";
-          gen_copyfrom("temp", "lo", elem, "i", true, true);
+          gen_copyfrom("temp", "lo", elem, "i", true);
           strm <<
           "        }\n"
           "      }\n"
@@ -313,7 +321,7 @@ namespace {
           "  }\n";
       }
     } else { // struct, sequence, etc.
-      if (prop_no_str) {
+      if (prop_index) {
         strm <<
           "  {\n"
           "    v8::Local<v8::Value> lv = " << src << "->Get(" << prop << ");\n"
@@ -483,7 +491,7 @@ bool v8_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
         "  out.length(length);\n"
         "  for (uint32_t i = 0; i < length; ++i) {\n"
         "  ";
-      gen_copyfrom("out", "src", elem, "i", true, true);
+      gen_copyfrom("out", "src", elem, "i", true);
       be_global->impl_ <<
         "  }\n"
         "  return;\n";
@@ -501,15 +509,24 @@ bool v8_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
 }
 
 namespace {
-  std::string branchGen(const std::string& name, AST_Type* type,
-                        const std::string&, std::string&,
-                        const std::string&)
+  std::string branchGenTo(const std::string& name, AST_Type* type,
+                          const std::string&, std::string&,
+                          const std::string&)
   {
     const std::string source = "src." + name + "()",
       prop = "Nan::New<v8::String>(\"" + name + "\").ToLocalChecked()";
     std::ostringstream strm;
     strm << "  ";
     gen_copyto("uni", source.c_str(), type, prop.c_str(), strm);
+    return strm.str();
+  }
+  std::string branchGenFrom(const std::string& name, AST_Type* type,
+                            const std::string&, std::string&,
+                            const std::string&)
+  {
+    std::ostringstream strm;
+    strm << "  ";
+    gen_copyfrom("out", "src", type, name.c_str(), false, true, strm);
     return strm.str();
   }
 }
@@ -528,7 +545,7 @@ bool v8_generator::gen_union(AST_Union*, UTL_ScopedName* name,
     be_global->impl_ <<
       "  const v8::Local<v8::Object> uni = Nan::New<v8::Object>();\n";
     gen_copyto("uni", "src._d()", discriminator, "Nan::New<v8::String>(\"_d\").ToLocalChecked()");
-    generateSwitchForUnion("src._d()", branchGen, branches, discriminator,
+    generateSwitchForUnion("src._d()", branchGenTo, branches, discriminator,
                            "", "", clazz.c_str(), false, false);
     be_global->impl_ <<
       "  return uni;\n";
@@ -538,14 +555,10 @@ bool v8_generator::gen_union(AST_Union*, UTL_ScopedName* name,
     vtc.addArg("src", "const v8::Local<v8::Object>&");
     vtc.addArg("out", clazz + '&');
     vtc.endArgs();
-// TODO FIXME
-//    be_global->impl_ <<
-//      "  const v8::Local<v8::Object> uni = Nan::New<v8::Object>();\n";
-//    gen_copyto("uni", "src._d()", discriminator, "Nan::New<v8::String>(\"_d\").ToLocalChecked()");
-//    generateSwitchForUnion("src._d()", branchGen, branches, discriminator,
-//                           "", "", clazz.c_str(), false, false);
-//    be_global->impl_ <<
-//      "  return uni;\n";
+    gen_copyfrom("out", "src", discriminator, "_d", false, true);
+    generateSwitchForUnion("out._d()", branchGenFrom, branches, discriminator, "", "", clazz.c_str(), false, false);
+    be_global->impl_ <<
+      "  return;\n";
   }
   return true;
 }
