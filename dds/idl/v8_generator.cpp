@@ -167,113 +167,130 @@ namespace {
       assign_suffix = fun_assign ? ")" : "";
 
     if (cls & CL_SCALAR) {
-      std::string clines;
 
-      if (cls & CL_ENUM) {
-        const std::string underscores =
-          dds_generator::scoped_helper(type->name(), "_"),
-          array = "gen_" + underscores + "_names";
-        clines += "      if (lv->IsNumber()) {\n";
-        clines += "        v8::Local<v8::Integer> li = Nan::To<v8::Integer>(lv).ToLocalChecked();\n";
-        clines += "        " + propName + assign_prefix + "static_cast<" + scoped(type->name()) + ">(li->Value())" + assign_suffix + ";\n";
-        clines += "      }\n";
-        clines += "      if (lv->IsString()) {\n";
-        clines += "        v8::Local<v8::String> ls = Nan::To<v8::String>(lv).ToLocalChecked();\n";
-        clines += "        std::string ss(ls->Utf8Length(), ' ');\n";
-        clines += "        ls->WriteUtf8(&ss[0]);\n";
-        clines += "        for (uint32_t i = 0; i < sizeof(" + array + ")/sizeof(" + array + "[0]); ++i) {\n";
-        clines += "          if (ss == " + array + "[i]) {\n";
-        clines += "            " + propName + assign_prefix + "static_cast<" + scoped(type->name()) + ">(i)" + assign_suffix + ";\n";
-        clines += "            break;\n";
-        clines += "          }\n";
-        clines += "        }\n";
-        clines += "      }\n";
-      } else if (cls & CL_STRING) {
-        clines += "      if (lv->IsString()) {\n";
-        clines += "        v8::Local<v8::String> ls = Nan::To<v8::String>(lv).ToLocalChecked();\n";
-        if (cls & CL_WIDE) {
-          clines += "        std::vector<uint16_t> vwc(ls->Length(), 0);\n";
-          clines += "        ls->Write(&vwc[0]);\n";
-          clines += "        std::wstring ws(ls->Length(), ' ');\n";
-          clines += "        for (size_t i = 0; i < vwc.size(); ++i) {\n";
-          clines += "          ws[i] = vwc[i];\n";
-          clines += "        }\n";
-          clines += "        " + propName + assign_prefix + "ws.c_str()" + assign_suffix + ";\n";
-        } else {
-          clines += "        std::string ss(ls->Utf8Length(), ' ');\n";
-          clines += "        ls->WriteUtf8(&ss[0]);\n";
-          clines += "        " + propName + assign_prefix + "ss.c_str()" + assign_suffix + ";\n";
-        }
-        clines += "      }\n";
-      } else if (pt == AST_PredefinedType::PT_char) {
-        clines += "      if (lv->IsString()) {\n";
-        clines += "        v8::Local<v8::String> ls = Nan::To<v8::String>(lv).ToLocalChecked();\n";
-        clines += "        char temp_c;\n";
-        clines += "        ls->WriteUtf8(&temp_c, 1);\n";
-        clines += "        " + propName + assign_prefix + "temp_c" + assign_suffix + ";\n";
-        clines += "      }\n";
-      } else if (pt == AST_PredefinedType::PT_wchar) {
-        clines += "      if (lv->IsString()) {\n";
-        clines += "        v8::Local<v8::String> ls = Nan::To<v8::String>(lv).ToLocalChecked();\n";
-        clines += "        wchar temp_wc;\n";
-        clines += "        ls->Write(&temp_wc, 1);\n";
-        clines += "        " + propName + assign_prefix + "temp_wc" + assign_suffix + ";\n";
-        clines += "      }\n";
-      } else if (pt == AST_PredefinedType::PT_longlong
-              || pt == AST_PredefinedType::PT_ulonglong) {
-        clines += "      if (lv->IsString()) {\n";
-        clines += "        v8::Local<v8::String> ls = Nan::To<v8::String>(lv).ToLocalChecked();\n";
-        clines += "        std::string ss(ls->Utf8Length(), ' ');\n";
-        clines += "        ls->WriteUtf8(&ss[0]);\n";
-        clines += "        std::istringstream iss(ss);";
-        clines += "        " + scoped(type->name()) + " temp_ll;\n";
-        clines += "        if (ss.find(\"0x\") != std::string::npos) {\n";
-        clines += "          iss >> std::hex >> temp_ll;\n";
-        clines += "        } else {\n";
-        clines += "          iss >> temp_ll;\n";
-        clines += "        }\n";
-        clines += "        " + propName + assign_prefix + "temp_ll" + assign_suffix + ";\n";
-        clines += "      }\n";
-        clines += "      if (lv->IsNumber()) {\n";
-        clines += "        v8::Local<v8::Number> ln = Nan::To<v8::Number>(lv).ToLocalChecked();\n";
-        clines += "        " + propName + assign_prefix + "ln->IntegerValue()" + assign_suffix + ";\n";
-        clines += "      }\n";
-      } else if (pt == AST_PredefinedType::PT_octet
-              || pt == AST_PredefinedType::PT_ushort
-              || pt == AST_PredefinedType::PT_short
-              || pt == AST_PredefinedType::PT_ulong
-              || pt == AST_PredefinedType::PT_long) {
-        clines += "      if (lv->IsNumber()) {\n";
-        clines += "        v8::Local<v8::Number> ln = Nan::To<v8::Number>(lv).ToLocalChecked();\n";
-        clines += "        " + propName + assign_prefix + "ln->IntegerValue()" + assign_suffix + ";\n";
-        clines += "      }\n";
-      } else if (pt == AST_PredefinedType::PT_float
-              || pt == AST_PredefinedType::PT_double
-              || pt == AST_PredefinedType::PT_longdouble) {
-        clines += "      if (lv->IsNumber()) {\n";
-        clines += "        v8::Local<v8::Number> ln = Nan::To<v8::Number>(lv).ToLocalChecked();\n";
-        clines += "        " + propName + assign_prefix + "ln->Value()" + assign_suffix + ";\n";
-        clines += "      }\n";
-      } else if (pt == AST_PredefinedType::PT_boolean) {
-        clines += "      if (lv->IsBoolean()) {\n";
-        clines += "        v8::Local<v8::Boolean> lb = Nan::To<v8::Boolean>(lv).ToLocalChecked();\n";
-        clines += "        " + propName + assign_prefix + "lb->Value()" + assign_suffix + ";\n";
-        clines += "      }\n";
-      }
+      std::string ip; // indent prefix
 
       if (prop_index) {
         strm <<
           "  {\n"
-          "      v8::Local<v8::Value> lv = " << src << "->Get(" << prop << ");\n"
-          << clines <<
-          "  }\n";
+          "    v8::Local<v8::Value> lv = " << src << "->Get(" << prop << ");\n";
+        ip = std::string(6, ' ');
       } else {
         strm <<
           "  {\n"
           "    v8::Local<v8::String> field_str = Nan::New(\"" << prop << "\").ToLocalChecked();\n"
           "    if (" << src << "->Has(field_str)) {\n"
-          "      v8::Local<v8::Value> lv = " << src << "->Get(field_str);\n"
-          << clines <<
+          "      v8::Local<v8::Value> lv = " << src << "->Get(field_str);\n";
+        ip = std::string(8, ' ');
+      }
+
+      if (cls & CL_ENUM) {
+        const std::string underscores =
+          dds_generator::scoped_helper(type->name(), "_"),
+          array = "gen_" + underscores + "_names";
+        strm <<
+          ip << "if (lv->IsNumber()) {\n" <<
+          ip << "  v8::Local<v8::Integer> li = Nan::To<v8::Integer>(lv).ToLocalChecked();\n" <<
+          ip << "  " << propName << assign_prefix << "static_cast<" << scoped(type->name()) << ">(li->Value())" << assign_suffix << ";\n" <<
+          ip << "}\n" <<
+          ip << "if (lv->IsString()) {\n" <<
+          ip << "  v8::Local<v8::String> ls = Nan::To<v8::String>(lv).ToLocalChecked();\n" <<
+          ip << "  std::string ss(ls->Utf8Length(), ' ');\n" <<
+          ip << "  ls->WriteUtf8(&ss[0]);\n" <<
+          ip << "  for (uint32_t i = 0; i < sizeof(" << array << ")/sizeof(" << array << "[0]); ++i) {\n" <<
+          ip << "    if (ss == " << array << "[i]) {\n" <<
+          ip << "      " << propName << assign_prefix << "static_cast<" << scoped(type->name()) << ">(i)" << assign_suffix << ";\n" <<
+          ip << "      break;\n" <<
+          ip << "    }\n" <<
+          ip << "  }\n" <<
+          ip << "}\n";
+      } else if (cls & CL_STRING) {
+        strm <<
+          ip << "if (lv->IsString()) {\n" <<
+          ip << "  v8::Local<v8::String> ls = Nan::To<v8::String>(lv).ToLocalChecked();\n";
+        if (cls & CL_WIDE) {
+          strm <<
+            ip << "  std::vector<uint16_t> vwc(ls->Length(), 0);\n" <<
+            ip << "  ls->Write(&vwc[0]);\n" <<
+            ip << "  std::wstring ws(ls->Length(), ' ');\n" <<
+            ip << "  for (size_t i = 0; i < vwc.size(); ++i) {\n" <<
+            ip << "    ws[i] = vwc[i];\n" <<
+            ip << "  }\n" <<
+            ip << "  " << propName << assign_prefix << "ws.c_str()" << assign_suffix << ";\n";
+        } else {
+          strm <<
+            ip << "  std::string ss(ls->Utf8Length(), ' ');\n" <<
+            ip << "  ls->WriteUtf8(&ss[0]);\n" <<
+            ip << "  " << propName << assign_prefix << "ss.c_str()" << assign_suffix << ";\n";
+        }
+        strm <<
+          ip << "}\n";
+      } else if (pt == AST_PredefinedType::PT_char) {
+        strm <<
+          ip << "if (lv->IsString()) {\n" <<
+          ip << "  v8::Local<v8::String> ls = Nan::To<v8::String>(lv).ToLocalChecked();\n" <<
+          ip << "  char temp_c;\n" <<
+          ip << "  ls->WriteUtf8(&temp_c, 1);\n" <<
+          ip << "  " << propName << assign_prefix << "temp_c" << assign_suffix << ";\n" <<
+          ip << "}\n";
+      } else if (pt == AST_PredefinedType::PT_wchar) {
+        strm <<
+          ip << "if (lv->IsString()) {\n" <<
+          ip << "  v8::Local<v8::String> ls = Nan::To<v8::String>(lv).ToLocalChecked();\n" <<
+          ip << "  wchar temp_wc;\n" <<
+          ip << "  ls->Write(&temp_wc, 1);\n" <<
+          ip << "  " << propName << assign_prefix << "temp_wc" << assign_suffix << ";\n" <<
+          ip << "}\n";
+      } else if (pt == AST_PredefinedType::PT_longlong
+              || pt == AST_PredefinedType::PT_ulonglong
+              || pt == AST_PredefinedType::PT_octet
+              || pt == AST_PredefinedType::PT_ushort
+              || pt == AST_PredefinedType::PT_short
+              || pt == AST_PredefinedType::PT_ulong
+              || pt == AST_PredefinedType::PT_long) {
+        const std::string underscores =
+          dds_generator::scoped_helper(type->name(), "_"),
+          temp_type = scoped(type->name()),
+          temp_name = "temp_" + underscores;
+        strm <<
+          ip << "if (lv->IsString()) {\n" <<
+          ip << "  v8::Local<v8::String> ls = Nan::To<v8::String>(lv).ToLocalChecked();\n" <<
+          ip << "  std::string ss(ls->Utf8Length(), ' ');\n" <<
+          ip << "  ls->WriteUtf8(&ss[0]);\n" <<
+          ip << "  std::istringstream iss(ss);\n" <<
+          ip << "  " << (pt == AST_PredefinedType::PT_octet ? "uint16_t" : temp_type.c_str()) << " " << temp_name << ";\n" <<
+          ip << "  if (ss.find(\"0x\") != std::string::npos) {\n" <<
+          ip << "    iss >> std::hex >> " << temp_name << ";\n" <<
+          ip << "  } else {\n" <<
+          ip << "    iss >> " << temp_name << ";\n" <<
+          ip << "  }\n" <<
+          ip << "  " << propName << assign_prefix << temp_name << assign_suffix << ";\n" <<
+          ip << "}\n" <<
+          ip << "if (lv->IsNumber()) {\n" <<
+          ip << "  v8::Local<v8::Number> ln = Nan::To<v8::Number>(lv).ToLocalChecked();\n" <<
+          ip << "  " << propName << assign_prefix << "ln->IntegerValue()" << assign_suffix << ";\n" <<
+          ip << "}\n";
+      } else if (pt == AST_PredefinedType::PT_float
+              || pt == AST_PredefinedType::PT_double
+              || pt == AST_PredefinedType::PT_longdouble) {
+        strm <<
+          ip << "if (lv->IsNumber()) {\n" <<
+          ip << "  v8::Local<v8::Number> ln = Nan::To<v8::Number>(lv).ToLocalChecked();\n" <<
+          ip << "  " << propName << assign_prefix << "ln->Value()" << assign_suffix << ";\n" <<
+          ip << "}\n";
+      } else if (pt == AST_PredefinedType::PT_boolean) {
+        strm <<
+          ip << "if (lv->IsBoolean()) {\n" <<
+          ip << "  v8::Local<v8::Boolean> lb = Nan::To<v8::Boolean>(lv).ToLocalChecked();\n" <<
+          ip << "  " << propName << assign_prefix << "lb->Value()" << assign_suffix << ";\n" <<
+          ip << "}\n";
+      }
+
+      if (prop_index) {
+        strm <<
+          "  }\n";
+      } else {
+        strm <<
           "    }\n"
           "  }\n";
       }
