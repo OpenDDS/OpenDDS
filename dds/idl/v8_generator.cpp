@@ -179,12 +179,12 @@ namespace {
         clines += "      }\n";
         clines += "      if (lv->IsString()) {\n";
         clines += "        v8::Local<v8::String> ls = Nan::To<v8::String>(lv).ToLocalChecked();\n";
-        clines += "        std::string ss(ls->Length(), ' ');\n";
+        clines += "        std::string ss(ls->Utf8Length(), ' ');\n";
         clines += "        ls->WriteUtf8(&ss[0]);\n";
         clines += "        for (uint32_t i = 0; i < sizeof(" + array + ")/sizeof(" + array + "[0]); ++i) {\n";
         clines += "          if (ss == " + array + "[i]) {\n";
         clines += "            " + propName + assign_prefix + "static_cast<" + scoped(type->name()) + ">(i)" + assign_suffix + ";\n";
-        clines += "            continue;\n";
+        clines += "            break;\n";
         clines += "          }\n";
         clines += "        }\n";
         clines += "      }\n";
@@ -200,7 +200,7 @@ namespace {
           clines += "        }\n";
           clines += "        " + propName + assign_prefix + "ws.c_str()" + assign_suffix + ";\n";
         } else {
-          clines += "        std::string ss(ls->Length(), ' ');\n";
+          clines += "        std::string ss(ls->Utf8Length(), ' ');\n";
           clines += "        ls->WriteUtf8(&ss[0]);\n";
           clines += "        " + propName + assign_prefix + "ss.c_str()" + assign_suffix + ";\n";
         }
@@ -223,7 +223,7 @@ namespace {
               || pt == AST_PredefinedType::PT_ulonglong) {
         clines += "      if (lv->IsString()) {\n";
         clines += "        v8::Local<v8::String> ls = Nan::To<v8::String>(lv).ToLocalChecked();\n";
-        clines += "        std::string ss(ls->Length(), ' ');\n";
+        clines += "        std::string ss(ls->Utf8Length(), ' ');\n";
         clines += "        ls->WriteUtf8(&ss[0]);\n";
         clines += "        std::istringstream iss(ss);";
         clines += "        " + scoped(type->name()) + " temp_ll;\n";
@@ -360,11 +360,9 @@ namespace {
     const std::string tgt_, src_;
     void operator()(AST_Field* field) const
     {
-      const std::string fieldName = field->local_name()->get_string(),
-        source = src_,
-        prop = fieldName;
-      gen_copyfrom(tgt_.c_str(), source.c_str(),
-                 field->field_type(), prop.c_str());
+      const std::string fieldName = field->local_name()->get_string();
+      gen_copyfrom(tgt_.c_str(), src_.c_str(),
+                 field->field_type(), fieldName.c_str());
     }
   };
 }
@@ -395,8 +393,6 @@ bool v8_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
       vtc.endArgs();
       std::for_each(fields.begin(), fields.end(),
                     gen_field_copyfrom("out", "src"));
-      be_global->impl_ <<
-        "  return;\n";
     }
   }
 
@@ -420,6 +416,11 @@ bool v8_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
       "    " << lname << "* result = new " << lname << "();\n"
       "    OpenDDS::DCPS::copyFromV8(source, *result);\n"
       "    return result;\n"
+      "  }\n\n"
+      "  void deleteFromV8Result(void* val) const\n"
+      "  {\n"
+      "    " << lname << "* delete_me = static_cast< " << lname << "*>(val);\n"
+      "    delete delete_me;\n"
       "  }\n\n"
       "  DDS::InstanceHandle_t register_instance_helper(DDS::DataWriter* dw, const void* data) const\n"
       "  {\n"
@@ -493,8 +494,7 @@ bool v8_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
         "  ";
       gen_copyfrom("out", "src", elem, "i", true);
       be_global->impl_ <<
-        "  }\n"
-        "  return;\n";
+        "  }\n";
     }
     break;
   }
@@ -557,8 +557,6 @@ bool v8_generator::gen_union(AST_Union*, UTL_ScopedName* name,
     vtc.endArgs();
     gen_copyfrom("out", "src", discriminator, "_d", false, true);
     generateSwitchForUnion("out._d()", branchGenFrom, branches, discriminator, "", "", clazz.c_str(), false, false);
-    be_global->impl_ <<
-      "  return;\n";
   }
   return true;
 }

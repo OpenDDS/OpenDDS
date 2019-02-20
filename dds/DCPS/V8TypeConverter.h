@@ -17,6 +17,7 @@ namespace DCPS {
 
     virtual v8::Local<v8::Object> toV8(const void* source) const = 0;
     virtual void* fromV8(const v8::Local<v8::Object>& source) const = 0;
+    virtual void deleteFromV8Result(void* obj) const = 0;
 
     virtual DDS::InstanceHandle_t register_instance_helper(DDS::DataWriter* dw, const void* data) const = 0;
     virtual DDS::ReturnCode_t write_helper(DDS::DataWriter* dw, const void* data, DDS::InstanceHandle_t inst) const = 0;
