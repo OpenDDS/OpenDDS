@@ -90,6 +90,13 @@ OpenSSL is required for OpenDDS Security. Fortunately it comes with a
 configuration for Android, please read `NOTES.ANDROID` that comes with
 OpenSSL's source code for how to build OpenSSL for Android.
 
+Android preloads the system SSL library (either OpenSSL or BoringSSL) for the
+Java Android API, so OpenSSL **MUST** be statically linked to the OpenDDS
+security library. The static libraries will used if the shared libraries are
+not found. This can be accomplished by either disabling the generation of the
+shared libraries by passing `no-shared` to OpenSSL's `Configure` script or just
+deleting the `so` files after building OpenSSL.
+
 #### Xerces
 
 Xerces is also required for OpenDDS Security. It does not support Android
