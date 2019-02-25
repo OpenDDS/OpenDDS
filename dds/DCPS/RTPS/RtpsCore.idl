@@ -523,6 +523,7 @@ module OpenDDS {
       DCPS::LocatorSeq defaultMulticastLocatorList;
       DCPS::LocatorSeq defaultUnicastLocatorList;
       Count_t manualLivelinessCount;
+      DDS::PropertyQosPolicy property;
     };
 
     // top-level data type for SPDP
