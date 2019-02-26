@@ -1271,7 +1271,8 @@ Spdp::build_local_pdata(
       sedp_multicast_,
       nonEmptyList /*defaultMulticastLocatorList*/,
       nonEmptyList /*defaultUnicastLocatorList*/,
-      {0 /*manualLivelinessCount*/}   //FUTURE: implement manual liveliness
+      {0 /*manualLivelinessCount*/},   //FUTURE: implement manual liveliness
+      qos_.property
     },
     { // Duration_t (leaseDuration)
       static_cast<CORBA::Long>((disco_->resend_period() * LEASE_MULT).sec()),
