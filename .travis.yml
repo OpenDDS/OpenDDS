@@ -43,6 +43,7 @@ addons:
       - libxerces-c-dev
       - libssl-dev
       - g++-8
+      - cmake
 
 before_install:
   - mkdir ext
@@ -69,7 +70,7 @@ before_script:
   - if [ "$NO_TESTS" == "1" ]; then CONFIG_OPTIONS+=" --no-tests"; fi
   - if [ "$USES_WCHAR" == "1" ]; then CONFIG_OPTIONS+=" --features=uses_wchar=1"; fi
   - if [ "$XERCES3" == "1" ]; then CONFIG_OPTIONS+=" --xerces3"; fi
-  - if [ "$CXX" == "g++" ]; then CONFIG_OPTIONS+=" --macros=c++11=1"; fi
+  - if [ "$CXX" == "g++" ]; then CONFIG_OPTIONS+=" --std=c++11"; fi
   - if [ "$VERSIONED_NS" == 1 ]; then CONFIG_OPTIONS+=" --features=versioned_namespace=1"; fi
   - if [ "$DDS_SECURITY" == 1 ]; then CONFIG_OPTIONS+=" --security"; fi
   - ./configure --mpcopts="-workers 2" --compiler=$COMPILER $CONFIG_OPTIONS
@@ -80,6 +81,9 @@ before_script:
 
 script:
   - travis_wait 45 make -s -j 6
+  - if [ "$SAFETY_PROFILE" != "1" ]; then
+      $DDS_ROOT/tests/cmake_integration/run_ci_tests.pl;
+    fi
   - if [ "$SAFETY_PROFILE" == "1" ]; then
         cd build/target/tests/DCPS/Messenger && ./run_test.pl rtps_disc;
         cd $DDS_ROOT/build/target/tests/FACE/Messenger;
