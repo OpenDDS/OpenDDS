@@ -1,3 +1,4 @@
+<!-- TODO: Reorder for chronological order of operations -->
 # OpenDDS and Android
 
 **How to build OpenDDS for Android and incorperate OpenDDS into Android apps.**
@@ -69,8 +70,16 @@ PATH=$PATH:$TOOLCHAIN/bin make # Pass -j/--jobs with an appropriate value or thi
 
 If building for more than one architecture, which will be necessary to cover
 the largest number of Android devices possible, it might make sense to build a
-static build OpenDDS separately, which then can be passed using `--build-tools`
+static build OpenDDS separately, which then can be passed using `--host-tools`
 to the configure script.
+
+If you want to just want the mimunimum needed for host OpenDDS tools, these are
+the required binaries.
+
+ * `OpenDDS/bin/opendds_idl`
+ * `OpenDDS/bin/idl2jni` (if using the OpenDDS Java API)
+ * `ACE_TAO/bin/ace_gperf`
+ * `ACE_TAO/bin/tao_idl`
 
 <!-- TODO: Finish -->
 
@@ -167,8 +176,8 @@ OpenDDS can use several types of files: a main configuration file, security
 configuration files, and security certificate files, among others. On
 traditional platforms, distributing and reading these files is usually not an
 issue at all. On Android however, an app has no traditional files of it's own
-out of the box, so you can't give OpenDDS a path to a file without preparing
-beforehand.
+out of the box, so you can't give OpenDDS a path to a file you want to
+distribute with the app without preparing beforehand.
 
 If you already have a preferred way to include files in your app, then that
 will work as long as you can give OpenDDS the path to the files.
@@ -221,16 +230,76 @@ up-to-date.
 
 ### Multithreading
 
-<!-- TODO -->
+When using a `DataReaderListener`, the callbacks will be using a ACE reactor
+worker thread, which can't make changes to the Android GUI directly because
+it's not the main thread. To have these callbacks affect changes in the Android
+GUI, use something like
+[`android.os.Handler`](https://developer.android.com/reference/android/os/Handler):
 
-### Android Lifecycle
+```Java
+// ...
 
-<!-- TODO -->
+import android.os.Handler;
 
+// ...
+
+public class DataReaderListenerImpl extends DDS._DataReaderListenerLocalBase {
+
+    private MainActivity context;
+
+    public DataReaderListenerImpl(MainActivity context) {
+        super();
+        this.context = context;
+    }
+
+    public synchronized void on_data_available(DDS.DataReader reader) {
+        StatusDataReader mdr = StatusDataReaderHelper.narrow(reader);
+        if (mdr == null) {
+            return;
+        }
+        StatusHolder mh = new StatusHolder(new Status());
+        SampleInfoHolder sih = new SampleInfoHolder(new SampleInfo(0, 0, 0,
+                new DDS.Time_t(), 0, 0, 0, 0, 0, 0, 0, false, 0));
+        int status = mdr.take_next_sample(mh, sih);
+
+        if (status == RETCODE_OK.value) {
+
+            // ...
+
+            Handler handler = new Handler(context.getMainLooper());
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    context.tryToUpdateThermostat(thermostat_status);
+                }
+            });
+        }
+    }
+}
+```
+
+### Android Activity Lifecycle
+
+The [Android Activity
+Lifecycle](https://developer.android.com/guide/components/activities/activity-lifecycle)
+is something that affects all Android Apps. In the case of OpenDDS, the
+interaction gets more complicated because of the intersection of the similar,
+but distinct process lifecycle. The process hosts the activity, but isn't
+guaranteed to be kept alive after `onStop()` is called. What makes this worse
+for NDK applications is that there doesn't seem to be a way to be warned of
+this. For most applications of OpenDDS, this isn't a serious issue but it's not
+ideal. The authors recommends creating participants created in `onStart()` as
+might be expected, but deleting in `onStop()`, so that they may be created
+again in `onStart()`. The `DomainParticpantFactory` can be retrieved either in
+`onStart()` or more perhaps appropriately in
+[`Application.onStart()`](https://developer.android.com/reference/android/app/Application),
+given the singleton nature of both.
+
+<!-- 
+TODO
 ### Using C++
 
-<!-- TODO -->
-
+-->
 ### Using Java
 
 In your app's `build.gradle` (*NOT THE ONE OF THE SAME NAME IN THE ROOT OF THE
