@@ -70,11 +70,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   if (nic_horizontal == ACE_INET_Addr()) {
-    nic_horizontal = ACE_INET_Addr(get_bind_addr(11444));
+    nic_horizontal = get_bind_addr(11444);
   }
 
   if (nic_vertical == ACE_INET_Addr()) {
-    nic_vertical = ACE_INET_Addr(get_bind_addr(4444));
+    nic_vertical = ACE_INET_Addr(4444);
   }
 
   DDS::DomainParticipantFactory_var factory = TheParticipantFactoryWithArgs(argc, argv);
