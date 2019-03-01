@@ -18,7 +18,7 @@ WORKDIR /usr/src/gmock
 RUN cmake CMakeLists.txt && make && cp ./*.a /usr/lib
 
 RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
-    apt-get install -y --no-install-recommends nodejs=10.15.0-1nodesource1
+    apt-get install -y --no-install-recommends nodejs
 
 ADD . /opt/OpenDDS
 
