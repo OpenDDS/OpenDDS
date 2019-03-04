@@ -43,6 +43,7 @@ jobs:
       call configure -v --ace-github-latest --security --xerces3=$(VcPkgInst) --openssl=$(VcPkgInst) %OPT%
       if %BuildConfiguration%==Release (set SLN=DDS_TAOv2.sln) else set SLN=DDS_TAOv2_all.sln
       echo ##vso[task.setvariable variable=BuildSolution]%SLN%
+    failOnStderr: #
     displayName: Run configure script
   - task: BatchScript@1
     displayName: Setenv from configure script
