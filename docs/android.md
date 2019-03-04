@@ -43,8 +43,8 @@ are mostly for shorthand.
 
 To follow along this guide and build OpenDDS you will need:
 
- - A Unix system. This guide was developed on a Linux system, but theoretically
-   should work on macOS as well.
+ - A Unix system. This guide was developed on a Linux system, but should work
+   on macOS as well.
  - OpenDDS 3.14 or higher, or a clone of the master branch.
  - The latest [DOC Group ACE/TAO](https://github.com/DOCGroup/ACE_TAO) release.
    OCI ACE/TAO does not have the updated Android NDK support at the time of
@@ -57,7 +57,7 @@ To follow along this guide and build OpenDDS you will need:
  - Some knowledge about OpenDDS and Android development will be assumed, but
    more OpenDDS knowledge will be assumed than Android knowledge.
 
-In addionion to those, building OpenDDS with optional dependencies also
+In addition to those, building OpenDDS with optional dependencies also
 have requirements not listed here but will in their own sections.
 
 Integrating OpenDDS into a Android app assumes the use of Android Studio or at
@@ -97,6 +97,9 @@ the configure script must match according to this table:
 
 For example, to build OpenDDS with the toolchain generated in the previous
 example, we can use `armeabi-v7a` [1](#footnote-1).
+
+**NOTE**: If you want to use [Java](java) or [DDS Security](openssl), read
+those sections before configuring and building OpenDDS.
 
 ```Shell
 ./configure --no-tests --doc_group --target=android --macros=ANDROID_ABI=armeabi-v7a
@@ -236,6 +239,16 @@ the basic list of library file for OpenDDS are as follows:
  - `$ACE_ROOT/lib/libTAO_CodecFactory.so`
  - `$ACE_ROOT/lib/libTAO_PI.so`
 
+ - The following are the transport libraries, one for each transport type. You
+   will need at least one of these, depending on the transport(s) you want to
+   use:
+   - `$DDS_ROOT/lib/libOpenDDS_Multicast.so`
+   - `$DDS_ROOT/lib/libOpenDDS_Rtps.so`
+   - `$DDS_ROOT/lib/libOpenDDS_Rtps_Udp.so`
+   - `$DDS_ROOT/lib/libOpenDDS_Shmem.so`
+   - `$DDS_ROOT/lib/libOpenDDS_Tcp.so`
+   - `$DDS_ROOT/lib/libOpenDDS_Udp.so`
+
  - Required to use InfoRepo Peer Discovery:
    - `$DDS_ROOT/lib/libOpenDDS_InfoRepoDiscovery.so`
    - `$ACE_ROOT/lib/libTAO_PortableServer.so`
@@ -245,15 +258,6 @@ the basic list of library file for OpenDDS are as follows:
    - `$DDS_ROOT/lib/libOpenDDS_QOS_XML_XSC_Handler.so`
    - `libxerces-c-3.*.so`
    - `libiconv.so` if it is necessary to include it.
-
- - The following are the transport libraries, one for each transport type. You
-   will need at least one of these:
-   - `$DDS_ROOT/lib/libOpenDDS_Multicast.so`
-   - `$DDS_ROOT/lib/libOpenDDS_Rtps.so`
-   - `$DDS_ROOT/lib/libOpenDDS_Rtps_Udp.so`
-   - `$DDS_ROOT/lib/libOpenDDS_Shmem.so`
-   - `$DDS_ROOT/lib/libOpenDDS_Tcp.so`
-   - `$DDS_ROOT/lib/libOpenDDS_Udp.so`
 
  - The following are required for using the Java API:
    - `$DDS_ROOT/lib/libtao_java.so`
@@ -431,16 +435,18 @@ killing of the process the way Java application can rely on `onDestroyed()`.
 For most applications of OpenDDS, this isn't a serious issue but it's not
 ideal.
 
-The authors recommends creating participants in `onStart()` as might be
-expected, but always deleting them in `onStop()`, so that they may be created
-again in `onStart()`.  The `DomainParticpantFactory` can be retrieved either in
-`onStart()` or more perhaps appropriately in
+An easy way to make sure participants are cleaned up is created participants in
+`onStart()` as might be expected, but always deleting them in `onStop()`, so
+that they may be created again in `onStart()`. The `DomainParticpantFactory`
+can be retrieved either in `onStart()` or more perhaps appropriately in
 [`Application.onStart()`](https://developer.android.com/reference/android/app/Application),
 given the singleton nature of both.
 
-An alternative to this would be running OpenDDS within an [Android
+This might not be ideal or efficient though, because deleting and recreating
+participants will happen every the app loses focus, like during orientation
+changes. An alternative to this would be running OpenDDS within an [Android
 Sevice](https://developer.android.com/guide/components/services) separate from
-the main app, but this hasn't been fully explored by the author.
+the main app, but this hasn't been fully explored yet.
 
 ## Footnotes
 
