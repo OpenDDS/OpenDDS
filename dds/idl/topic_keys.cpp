@@ -12,22 +12,6 @@
 
 #include "topic_keys.h"
 
-static const char* root_type_to_string(TopicKeys::RootType root_type)
-{
-  switch (root_type) {
-  case TopicKeys::PrimitiveType:
-    return "PrimitiveType";
-  case TopicKeys::StructureType:
-    return "StructureType";
-  case TopicKeys::UnionType:
-    return "UnionType";
-  case TopicKeys::ArrayType:
-    return "ArrayType";
-  default:
-    return "InvalidType";
-  }
-}
-
 TopicKeys::RootType TopicKeys::root_type(AST_Type* type)
 {
   if (!type) {
@@ -76,13 +60,17 @@ TopicKeys::Error::Error(AST_Decl* node, const std::string& message)
   message_ = ss.str();
 }
 
+TopicKeys::Error::~Error() throw ()
+{
+}
+
 TopicKeys::Error& TopicKeys::Error::operator=(const TopicKeys::Error& error)
 {
   message_ = error.message_;
   return *this;
 }
 
-const char* TopicKeys::Error::what() const noexcept
+const char* TopicKeys::Error::what() const throw()
 {
   return message_.c_str();
 }

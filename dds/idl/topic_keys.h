@@ -49,11 +49,12 @@ public:
   public:
     Error();
     Error(const Error& error);
-    Error(const std::string& message);
+    explicit Error(const std::string& message);
     Error(AST_Decl* node, const std::string& message);
+    virtual ~Error() throw ();
 
     Error& operator=(const Error& error);
-    virtual const char* what() const noexcept;
+    virtual const char* what() const throw();
 
   private:
     std::string message_;
