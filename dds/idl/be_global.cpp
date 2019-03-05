@@ -580,14 +580,14 @@ BE_GlobalData::is_topic_type(AST_Decl* node)
 {
   if (node) {
     if (node->node_type() == AST_Decl::NT_struct) {
-      return UTL_find_annotation(node->annotations(), topic_annotation_);
+      return node->annotations().find(topic_annotation_);
     } else if (node->node_type() == AST_Decl::NT_union) {
-      return UTL_find_annotation(node->annotations(), topic_annotation_);
+      return node->annotations().find(topic_annotation_);
     } else if (node->node_type() == AST_Decl::NT_typedef) {
       AST_Type* type = dynamic_cast<AST_Type*>(node)->unaliased_type();
       if (type->node_type() == AST_Decl::NT_struct
           || type->node_type() == AST_Decl::NT_union) {
-        return UTL_find_annotation(node->annotations(), topic_annotation_);
+        return node->annotations().find(topic_annotation_);
       }
     }
   }
@@ -598,12 +598,12 @@ bool
 BE_GlobalData::is_key(AST_Field* node)
 {
   // Check for @key
-  return node && UTL_find_annotation(node->annotations(), key_annotation_);
+  return node && node->annotations().find(key_annotation_);
 }
 
 bool
 BE_GlobalData::has_key(AST_Union* node)
 {
   // Check for @key on the discriminator
-  return node && UTL_find_annotation(node->disc_annotations(), key_annotation_);
+  return node && node->disc_annotations().find(key_annotation_);
 }
