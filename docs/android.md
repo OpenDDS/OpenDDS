@@ -48,8 +48,8 @@ To follow along this guide and build OpenDDS you will need:
  - OpenDDS 3.14 or higher, or a clone of the master branch.
  - The latest [DOC Group ACE/TAO](https://github.com/DOCGroup/ACE_TAO) release.
    OCI ACE/TAO does not have the updated Android NDK support at the time of
-   writing. The OpenDDS `configure` script can use DOC Group ACE/TAO
-   automatically by passing `--doc_group`.
+   writing. The OpenDDS `configure` script will download and use DOC Group
+   ACE/TAO automatically if passed `--doc_group`.
  - [Android Native Development Kit (NDK)](https://developer.android.com/ndk/)
    r18 or higher. You can download it separately from android.com or using the
    SDK Manager that comes with Android Studio. If you download the NDK using the
@@ -98,7 +98,7 @@ the configure script must match according to this table:
 For example, to build OpenDDS with the toolchain generated in the previous
 example, we can use `armeabi-v7a` [1](#footnote-1).
 
-**NOTE**: If you want to use [Java](java) or [DDS Security](openssl), read
+**NOTE**: If you want to use [Java](#java) or [DDS Security](#openssl), read
 those sections before configuring and building OpenDDS.
 
 ```Shell
@@ -204,6 +204,10 @@ bug:
 
 ```Shell
 (source $DDS_ROOT/setenv.sh; PATH=$PATH:$TOOLCHAIN/bin make -f GNUmakefile.${PROJECT} ${MODULE}TypeSupportJC.h)
+
+# Run the normal make command again
+(source $DDS_ROOT/setenv.sh; PATH=$PATH:$TOOLCHAIN/bin make)
+
 (source $DDS_ROOT/setenv.sh; $DDS_ROOT/java/build_scripts/javac_wrapper.pl -sourcepath . -d classes -classpath . -implicit:none -classpath $DDS_ROOT/lib/i2jrt_compact.jar -classpath $DDS_ROOT/lib/i2jrt.jar -classpath $DDS_ROOT/lib/OpenDDS_DCPS.jar ${MODULE}/*
 ```
 
