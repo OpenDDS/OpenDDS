@@ -18,7 +18,6 @@
 #include "ast_field.h"
 #include "ast_union.h"
 #include "ast_annotation_decl.h"
-#include "utl_annotations.h"
 
 #include "ace/OS_NS_strings.h"
 #include "ace/OS_NS_sys_stat.h"
