@@ -43,9 +43,13 @@ are mostly for shorthand.
 
 To follow along this guide and build OpenDDS you will need:
 
- - A Unix system. This guide was developed on a Linux system, but should work
-   on macOS as well.
- - OpenDDS 3.14 or higher, or a clone of the master branch.
+ - A Unix system supported by both OpenDDS and the Android NDK.
+   - This guide was developed on a Linux system, but should work on macOS as
+     well.
+   - On Windows, a [virtual Unix system](#footnote-1) can be used to build the
+     OpenDDS and IDL libraries. Then they can be transfered to Windows where
+     they can be used in Android Studio as they would be used on Linux.
+ - OpenDDS 3.14 or higher.
  - The latest [DOC Group ACE/TAO](https://github.com/DOCGroup/ACE_TAO) release.
    OCI ACE/TAO does not have the updated Android NDK support at the time of
    writing. The OpenDDS `configure` script will download and use DOC Group
@@ -87,16 +91,17 @@ OpenDDS configure script. The `--arch` argument for
 `make_standalone_toolchain.py` and `--macros=ANDROID_ABI=<ARCH>` argument for
 the configure script must match according to this table:
 
-| `--arch` | `ANDROID_ABI`           | Description                                  |
-| -------- | ----------------------- | -------------------------------------------- |
-| `arm`    | `armeabi-v7a`           | 32-bit ARM                                   |
-| `arm`    | `armeabi-v7a-with-neon` | `armeabi-v7a` with NEON extensions enabled [1](#footnote-1) |
-| `arm64`  | `arm64-v8a`             | 64-bit ARM, Sometimes referred to as aarch64 |
-| `x86`    | `x86`                   | 32-bit x86                                   |
-| `x86_64` | `x86_64`                | 64-bit x86                                   |
+<a id="abi-table"/>
+| `--arch` | `ANDROID_ABI`           | `$ABI_PREFIX`           | Description                         |
+| -------- | ----------------------- | ----------------------- | ----------------------------------- |
+| `arm`    | `armeabi-v7a`           | `arm-linux-androideabi` | 32-bit ARM                          |
+| `arm`    | `armeabi-v7a-with-neon` | `arm-linux-androideabi` | 32-bit ARM with [NEON](#footnote-2) |
+| `arm64`  | `arm64-v8a`             | `aarch64-linux-android` | 64-bit ARM                          |
+| `x86`    | `x86`                   | `i686-linux-android`    | 32-bit x86                          |
+| `x86_64` | `x86_64`                | `x86_64-linux-android`  | 64-bit x86                          |
 
 For example, to build OpenDDS with the toolchain generated in the previous
-example, we can use `armeabi-v7a` [1](#footnote-1).
+example, we can use `armeabi-v7a` [2](#footnote-2).
 
 **NOTE**: If you want to use [Java](#java) or [DDS Security](#openssl), read
 those sections before configuring and building OpenDDS.
@@ -108,9 +113,9 @@ PATH=$PATH:$TOOLCHAIN/bin make # Pass -j/--jobs with an appropriate value or thi
 
 ### Host Tools
 
-To cross-compile OpenDDS, host tools are required. The example above generates
-two copies of OpenDDS, one in `OpenDDS/build/host` and another in
-`OpenDDS/build/target`. If this is the case, then `$HOST_DDS` will be the
+To cross-compile OpenDDS, host tools are required to process IDL. The example
+above generates two copies of OpenDDS, one in `OpenDDS/build/host` and another
+in `OpenDDS/build/target`. If this is the case, then `$HOST_DDS` will be the
 absolute path to `build/host` and `$DDS_ROOT` will be the absolute path to
 `build/target`.
 
@@ -190,12 +195,15 @@ you should be able to run:
 (source $DDS_ROOT/setenv.sh; mwc.pl -type gnuace . && PATH=$PATH:$TOOLCHAIN/bin make)
 ```
 
+The resulting native IDL library file must be included with the rest of the
+native library files.
+
 ### Java IDL Libraries
 
 Java support, assuming OpenDDS was built with Java, will available by
-inheriting `dcps_java` in your IDL MPC project. This would work with the same
+inheriting `dcps_java` in your IDL MPC project. This would be built by the same
 command as above, except as of writing there is a unresolved bug in the rules
-for building Jave IDL libraries.
+for building Java IDL libraries.
 
 You should run the command above first. Assuming that `$PROJECT` is assigned to
 the name of the MPC Project of the IDL code and `$MODULE` is assigned to the
@@ -210,6 +218,11 @@ bug:
 
 (source $DDS_ROOT/setenv.sh; $DDS_ROOT/java/build_scripts/javac_wrapper.pl -sourcepath . -d classes -classpath . -implicit:none -classpath $DDS_ROOT/lib/i2jrt_compact.jar -classpath $DDS_ROOT/lib/i2jrt.jar -classpath $DDS_ROOT/lib/OpenDDS_DCPS.jar ${MODULE}/*
 ```
+
+This will produce a library with two components: a Java `jar` library file and
+a supporting native library `so` file. This native library must be included
+with the other native library files, and is different than the regular native
+IDL type support library.
 
 ## Using OpenDDS in a Android App
 
@@ -235,6 +248,12 @@ named after the `ANDROID_ABI` of the native libraries it contains.
 The exact list of libraries to include depend on what features you're using but
 the basic list of library file for OpenDDS are as follows:
 
+ - If not already included because of a separate C++ NDK project, you must
+   include the Clang C++ Standard Library. This is located at
+   `$TOOLCHAIN/sysroot/usr/lib/$ABI_PREFIX/libc++_shared.so` where
+   `$ABI_PREFIX` is an identifier for the architecture and can be found in the
+   [ABI/architecture table](#abi-table).
+
  - `$DDS_ROOT/lib/libOpenDDS_Dcps.so`
  - `$ACE_ROOT/lib/libACE.so`
  - `$ACE_ROOT/lib/libTAO.so`
@@ -253,6 +272,8 @@ the basic list of library file for OpenDDS are as follows:
    - `$DDS_ROOT/lib/libOpenDDS_Tcp.so`
    - `$DDS_ROOT/lib/libOpenDDS_Udp.so`
 
+ - The [type support library for your IDL](#cross-compiling-idl-libraries)
+
  - Required to use InfoRepo Peer Discovery:
    - `$DDS_ROOT/lib/libOpenDDS_InfoRepoDiscovery.so`
    - `$ACE_ROOT/lib/libTAO_PortableServer.so`
@@ -263,10 +284,12 @@ the basic list of library file for OpenDDS are as follows:
    - `libxerces-c-3.*.so`
    - `libiconv.so` if it is necessary to include it.
 
- - The following are required for using the Java API:
+ - In addition to the jars listed below, the following native libraries are
+   required for using the Java API:
    - `$DDS_ROOT/lib/libtao_java.so`
    - `$DDS_ROOT/lib/libidl2jni_runtime.so`
    - `$DDS_ROOT/lib/libOpenDDS_DCPS_Java.so`
+   - The [native part of the Java library for your IDL](#java-idl-libraries)
 
 This list might not be complete especially if your using a major feature not
 listed here.
@@ -288,6 +311,7 @@ app's subdirectory. Create `libs` if it doesn't exist. Like `native_libs` the
  - `i2jrt_compact.jar`
  - `OpenDDS_DCPS.jar`
  - `tao_java.jar`
+ - The [Java part of the Java library for your IDL](#java-idl-libraries)
 
 Also copy the jar files from your IDL Libraries and sync with Gradle if your
 using Android Studio. After this OpenDDS Java API should be able to be used
@@ -456,6 +480,12 @@ the main app, but this hasn't been fully explored yet.
 
 <a id="footnote-1"/>
 
-1. The choice to support NEON or not is beyond the scope of this guide. See
+1. This can be Docker, Bash for Windows, or a traditional VM. The Android NDK
+   for Windows might work if the build was set up correctly but this hasn't
+   been tested.
+
+<a id="footnote-2"/>
+
+2. The choice to support NEON or not is beyond the scope of this guide. See
    ["NEON Support"](https://developer.android.com/ndk/guides/cpu-arm-neon) for
    more information.
