@@ -46,9 +46,10 @@ To follow along this guide and build OpenDDS you will need:
  - A Unix system supported by both OpenDDS and the Android NDK.
    - This guide was developed on a Linux system, but should work on macOS as
      well.
-   - On Windows, a [virtual Unix system](#footnote-1) can be used to build the
-     OpenDDS and IDL libraries. Then they can be transfered to Windows where
-     they can be used in Android Studio as they would be used on Linux.
+   - On Windows, a virtual Unix system <sup>[1](#footnote-1)</sup> can be used
+     to build the OpenDDS and IDL libraries. Then they can be transfered to
+     Windows where they can be used in Android Studio as they would be used on
+     Linux.
  - OpenDDS 3.14 or higher.
  - The latest [DOC Group ACE/TAO](https://github.com/DOCGroup/ACE_TAO) release.
    OCI ACE/TAO does not have the updated Android NDK support at the time of
@@ -92,6 +93,7 @@ OpenDDS configure script. The `--arch` argument for
 the configure script must match according to this table:
 
 <a id="abi-table"/>
+
 | `--arch` | `ANDROID_ABI`           | `$ABI_PREFIX`           | Description                         |
 | -------- | ----------------------- | ----------------------- | ----------------------------------- |
 | `arm`    | `armeabi-v7a`           | `arm-linux-androideabi` | 32-bit ARM                          |
@@ -101,7 +103,7 @@ the configure script must match according to this table:
 | `x86_64` | `x86_64`                | `x86_64-linux-android`  | 64-bit x86                          |
 
 For example, to build OpenDDS with the toolchain generated in the previous
-example, we can use `armeabi-v7a` [2](#footnote-2).
+example, we can use `armeabi-v7a` <sup>[2](#footnote-2)</sup>.
 
 **NOTE**: If you want to use [Java](#java) or [DDS Security](#openssl), read
 those sections before configuring and building OpenDDS.
@@ -291,7 +293,7 @@ the basic list of library file for OpenDDS are as follows:
    - `$DDS_ROOT/lib/libOpenDDS_DCPS_Java.so`
    - The [native part of the Java library for your IDL](#java-idl-libraries)
 
-This list might not be complete especially if your using a major feature not
+This list might not be complete, especially if your using a major feature not
 listed here.
 
 ### Adding OpenDDS Java Libraries to the App
