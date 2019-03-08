@@ -34,12 +34,6 @@ jobs:
       filename: '"C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvarsall.bat"'
       arguments: $(VcVarsArch)
       modifyEnvironment: true
-  - task: BatchScript@1
-    displayName: Put perl on PATH
-    inputs:
-      filename: tools\scripts\prepend_path
-      arguments: 'C:\Strawberry\perl\bin'
-      modifyEnvironment: true
   - script: |
       if %BuildConfiguration%==Release set OPT=--no-tests --no-debug --optimize
       call configure -v --ace-github-latest --security --xerces3=$(VcPkgInst) --openssl=$(VcPkgInst) %OPT%
