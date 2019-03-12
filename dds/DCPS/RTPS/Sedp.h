@@ -230,6 +230,9 @@ private:
     Msg(MsgType mt, DCPS::MessageId id, const DDS::Security::ParticipantGenericMessage* data)
       : type_(mt), id_(id), pgmdata_(data) {}
 #endif
+
+    static OPENDDS_STRING msgTypeToString(const MsgType type);
+    OPENDDS_STRING msgTypeToString() const;
   };
 
 
