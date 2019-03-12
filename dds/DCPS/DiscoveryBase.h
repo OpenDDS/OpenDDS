@@ -1007,9 +1007,10 @@ namespace OpenDDS {
               // It might not exist due to security attributes, and that's OK
               if (iter != local_writer_crypto_handles_.end()) {
                 DDS::Security::DatawriterCryptoHandle dwch = iter->second;
-                remote_reader_crypto_handles_[reader] =
+                DDS::Security::DatareaderCryptoHandle drch =
                   generate_remote_matched_reader_crypto_handle(
                     reader_participant, dwch, relay_only_readers_.count(reader));
+                remote_reader_crypto_handles_[reader] = drch;
                 DatareaderCryptoTokenSeqMap::iterator t_iter =
                   pending_remote_reader_crypto_tokens_.find(reader);
                 if (t_iter != pending_remote_reader_crypto_tokens_.end()) {

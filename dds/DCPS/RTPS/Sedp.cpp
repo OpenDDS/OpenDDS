@@ -38,6 +38,7 @@
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/DCPS_Utils.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
+#include "dds/DCPS/SafetyProfileStreams.h"
 
 #ifdef OPENDDS_SECURITY
 #include "dds/DdsSecurityCoreTypeSupportImpl.h"
@@ -3593,7 +3594,7 @@ Sedp::Task::svc()
   for (Msg* msg = 0; getq(msg) != -1; /*no increment*/) {
     if (DCPS::DCPS_debug_level > 5) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::Task::svc "
-        "got message from queue type %d\n", msg->type_));
+        "got message from queue type %C\n", msg->msgTypeToString().c_str()));
     }
     DCPS::unique_ptr<Msg> delete_the_msg(msg);
     switch (msg->type_) {
@@ -4154,6 +4155,51 @@ WaitForAcks::reset()
   acks_ = 0;
   // no need to signal, going back to zero won't ever
   // cause wait_for_acks() to exit it's loop
+}
+
+OPENDDS_STRING Sedp::Msg::msgTypeToString(const MsgType type) {
+  switch (type) {
+  case MSG_PARTICIPANT:
+    return "MSG_PARTICIPANT";
+  case MSG_WRITER:
+    return "MSG_WRITER";
+  case MSG_READER:
+    return "MSG_READER";
+  case MSG_PARTICIPANT_DATA:
+    return "MSG_PARTICIPANT_DATA";
+  case MSG_REMOVE_FROM_PUB_BIT:
+    return "MSG_REMOVE_FROM_PUB_BIT";
+  case MSG_REMOVE_FROM_SUB_BIT:
+    return "MSG_REMOVE_FROM_SUB_BIT";
+  case MSG_FINI_BIT:
+    return "MSG_FINI_BIT";
+  case MSG_STOP:
+    return "MSG_STOP";
+
+#ifdef OPENDDS_SECURITY
+  case MSG_PARTICIPANT_STATELESS_DATA:
+    return "MSG_PARTICIPANT_STATELESS_DATA";
+  case MSG_PARTICIPANT_VOLATILE_SECURE:
+    return "MSG_PARTICIPANT_VOLATILE_SECURE";
+  case MSG_PARTICIPANT_DATA_SECURE:
+    return "MSG_PARTICIPANT_DATA_SECURE";
+  case MSG_WRITER_SECURE:
+    return "MSG_WRITER_SECURE";
+  case MSG_READER_SECURE:
+    return "MSG_READER_SECURE";
+  case MSG_DCPS_PARTICIPANT_SECURE:
+    return "MSG_DCPS_PARTICIPANT_SECURE";
+#endif
+
+  default:
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Sedp::Msg::msgTypeToString() : ERROR: ")
+      ACE_TEXT("%u is not a valid queue type\n"), static_cast<unsigned>(type)));
+    return OpenDDS::DCPS::to_dds_string(static_cast<unsigned>(type));
+  }
+}
+
+OPENDDS_STRING Sedp::Msg::msgTypeToString() const {
+  return msgTypeToString(type_);
 }
 
 }
