@@ -83,6 +83,10 @@ public:
   /// and registers it with TransportRegistry singleton.
   void register_type(const TransportType_rch& type);
 
+  /// SPI (Service Provider Interface) for specific transport types:
+  /// Check if a type with this type's name has been registered
+  bool has_type(const TransportType_rch& type) const;
+
   /// For internal use by OpenDDS DCPS layer:
   /// Transfer the configuration in ACE_Configuration_Heap object to
   /// the TransportRegistry.  This is called by the Service_Participant
