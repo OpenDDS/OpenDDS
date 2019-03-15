@@ -267,9 +267,9 @@ the basic list of library file for OpenDDS are as follows:
  - The following are the transport libraries, one for each transport type. You
    will need at least one of these, depending on the transport(s) you want to
    use:
-   - `$DDS_ROOT/lib/libOpenDDS_Multicast.so`
-   - `$DDS_ROOT/lib/libOpenDDS_Rtps.so`
    - `$DDS_ROOT/lib/libOpenDDS_Rtps_Udp.so`
+     - You will also need `$DDS_ROOT/lib/libOpenDDS_Rtps.so`
+   - `$DDS_ROOT/lib/libOpenDDS_Multicast.so`
    - `$DDS_ROOT/lib/libOpenDDS_Shmem.so`
    - `$DDS_ROOT/lib/libOpenDDS_Tcp.so`
    - `$DDS_ROOT/lib/libOpenDDS_Udp.so`
