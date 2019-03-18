@@ -5,9 +5,10 @@ Released %TIMESTAMP%
 
 ### Additions:
 - Monitor and the ishapes demo now use Qt5
+- Expanded Android Documentation in `docs/android.md`
 
 ### Fixes:
-- TODO: Add your fixes here
+- Java API can now be used on Android
 
 ### Notes:
 - Removed outdated `-Gws` option of `opendds_idl`. This option produced sample
