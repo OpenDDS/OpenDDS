@@ -328,7 +328,7 @@ DatawriterCryptoHandle CryptoBuiltInImpl::register_local_datawriter(
   keys_[h] = keys;
   EntityInfo e(DATAWRITER_SUBMESSAGE, h);
   participant_to_entity_.insert(std::make_pair(participant_crypto, e));
-  writer_options_[h] = security_attributes;
+  encrypt_options_[h] = security_attributes;
 
   return h;
 }
@@ -412,7 +412,7 @@ DatareaderCryptoHandle CryptoBuiltInImpl::register_local_datareader(
   keys_[h] = keys;
   EntityInfo e(DATAREADER_SUBMESSAGE, h);
   participant_to_entity_.insert(std::make_pair(participant_crypto, e));
-  writer_options_[h] = security_attributes;
+  encrypt_options_[h] = security_attributes;
 
   return h;
 }
@@ -462,7 +462,7 @@ DatawriterCryptoHandle CryptoBuiltInImpl::register_matched_remote_datawriter(
 
   EntityInfo e(DATAWRITER_SUBMESSAGE, h);
   participant_to_entity_.insert(std::make_pair(remote_participant_crypto, e));
-  writer_options_[h] = writer_options_[local_datareader_crypto_handle];
+  encrypt_options_[h] = encrypt_options_[local_datareader_crypto_handle];
   return h;
 }
 
@@ -502,7 +502,7 @@ bool CryptoBuiltInImpl::unregister_datawriter(DatawriterCryptoHandle handle, Sec
   }
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  writer_options_.erase(handle);
+  encrypt_options_.erase(handle);
   clear_endpoint_data(handle);
   return true;
 }
@@ -515,6 +515,7 @@ bool CryptoBuiltInImpl::unregister_datareader(DatareaderCryptoHandle handle, Sec
   }
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  encrypt_options_.erase(handle);
   clear_endpoint_data(handle);
   return true;
 }
@@ -789,7 +790,7 @@ bool CryptoBuiltInImpl::encode_serialized_payload(
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   if (!keys_.count(sending_datawriter_crypto)
-      || !writer_options_[sending_datawriter_crypto].payload_) {
+      || !encrypt_options_[sending_datawriter_crypto].payload_) {
     encoded_buffer = plain_buffer;
     return true;
   }
@@ -1003,6 +1004,11 @@ bool CryptoBuiltInImpl::encode_submessage(
     return true;
   }
 
+  if (!encrypt_options_[sender_handle].submessage_) {
+    encoded_rtps_submessage = plain_rtps_submessage;
+    return true;
+  }
+
   bool ok;
   CryptoHeader header;
   CryptoFooter footer;
@@ -1131,7 +1137,7 @@ bool CryptoBuiltInImpl::encode_datawriter_submessage(
 
   NativeCryptoHandle encode_handle = sending_datawriter_crypto;
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  if (!writer_options_[encode_handle].submessage_) {
+  if (!encrypt_options_[encode_handle].submessage_) {
     encoded_rtps_submessage = plain_rtps_submessage;
     receiving_datareader_crypto_list_index = len;
     return true;
@@ -1518,6 +1524,11 @@ bool CryptoBuiltInImpl::decode_submessage(
   NativeCryptoHandle sender_handle,
   SecurityException& ex)
 {
+  if (!encrypt_options_[sender_handle].submessage_) {
+    plain_rtps_submessage = encoded_rtps_submessage;
+    return true;
+  }
+
   ACE_Message_Block mb_in(to_mb(encoded_rtps_submessage.get_buffer()),
                           encoded_rtps_submessage.length());
   mb_in.wr_ptr(encoded_rtps_submessage.length());
@@ -1639,7 +1650,7 @@ bool CryptoBuiltInImpl::decode_serialized_payload(
   }
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  if (!writer_options_[sending_datawriter_crypto].payload_) {
+  if (!encrypt_options_[sending_datawriter_crypto].payload_) {
     plain_buffer = encoded_buffer;
     return true;
   }

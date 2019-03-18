@@ -743,6 +743,8 @@ Sedp::associate_preauth(const Security::SPDPdiscoveredParticipantData& pdata)
   // be copied and modified for each of the (up to) four SEDP Endpoints.
   DCPS::AssociationData proto;
   create_association_data_proto(proto, pdata);
+  proto.remote_reliable_ = false;
+  proto.remote_durable_ = false;
 
   const BuiltinEndpointSet_t& avail =
     pdata.participantProxy.availableBuiltinEndpoints;
@@ -805,6 +807,8 @@ void Sedp::associate_volatile(const Security::SPDPdiscoveredParticipantData& pda
 
   DCPS::AssociationData proto;
   create_association_data_proto(proto, pdata);
+  /* proto.remote_reliable_ = true; */
+  /* proto.remote_durable_ = false; */
 
   DCPS::RepoId part = proto.remote_id_;
   part.entityId = ENTITYID_PARTICIPANT;

@@ -228,16 +228,19 @@ private:
   typedef std::map<DDS::Security::NativeCryptoHandle, KeySeq> KeyTable_t;
   KeyTable_t keys_;
 
-  struct WriterOpts {
+  /// Use CryptoHandles to Determine What Should Encrypted and Decrypted
+  ///@{
+  struct EncryptOpts {
     bool submessage_, payload_;
-    WriterOpts() : submessage_(false), payload_(false) {}
-    WriterOpts(const DDS::Security::EndpointSecurityAttributes& attribs)
+    EncryptOpts() : submessage_(false), payload_(false) {}
+    EncryptOpts(const DDS::Security::EndpointSecurityAttributes& attribs)
       : submessage_(attribs.is_submessage_protected)
       , payload_(attribs.is_payload_protected)
     {}
   };
-  typedef std::map<DDS::Security::DatawriterCryptoHandle, WriterOpts> Writers_t;
-  Writers_t writer_options_;
+  typedef std::map<DDS::Security::NativeCryptoHandle, EncryptOpts> EncryptOptions_t;
+  EncryptOptions_t encrypt_options_;
+  ///@}
 
   struct EntityInfo {
     DDS::Security::SecureSubmessageCategory_t category_;
