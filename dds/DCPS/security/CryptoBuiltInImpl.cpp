@@ -1004,11 +1004,6 @@ bool CryptoBuiltInImpl::encode_submessage(
     return true;
   }
 
-  if (!encrypt_options_[sender_handle].submessage_) {
-    encoded_rtps_submessage = plain_rtps_submessage;
-    return true;
-  }
-
   bool ok;
   CryptoHeader header;
   CryptoFooter footer;
@@ -1524,11 +1519,6 @@ bool CryptoBuiltInImpl::decode_submessage(
   NativeCryptoHandle sender_handle,
   SecurityException& ex)
 {
-  if (!encrypt_options_[sender_handle].submessage_) {
-    plain_rtps_submessage = encoded_rtps_submessage;
-    return true;
-  }
-
   ACE_Message_Block mb_in(to_mb(encoded_rtps_submessage.get_buffer()),
                           encoded_rtps_submessage.length());
   mb_in.wr_ptr(encoded_rtps_submessage.length());
