@@ -807,8 +807,8 @@ void Sedp::associate_volatile(const Security::SPDPdiscoveredParticipantData& pda
 
   DCPS::AssociationData proto;
   create_association_data_proto(proto, pdata);
-  /* proto.remote_reliable_ = true; */
-  /* proto.remote_durable_ = false; */
+  proto.remote_reliable_ = true;
+  proto.remote_durable_ = false;
 
   DCPS::RepoId part = proto.remote_id_;
   part.entityId = ENTITYID_PARTICIPANT;

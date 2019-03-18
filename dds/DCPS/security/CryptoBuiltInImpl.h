@@ -228,7 +228,7 @@ private:
   typedef std::map<DDS::Security::NativeCryptoHandle, KeySeq> KeyTable_t;
   KeyTable_t keys_;
 
-  /// Use CryptoHandles to Determine What Should Encrypted and Decrypted
+  /// Use CryptoHandles to Determine What Should Be Encrypted and Decrypted
   ///@{
   struct EncryptOpts {
     bool submessage_, payload_;
