@@ -379,6 +379,7 @@ DatareaderCryptoHandle CryptoBuiltInImpl::register_matched_remote_datareader(
 
   EntityInfo e(DATAREADER_SUBMESSAGE, h);
   participant_to_entity_.insert(std::make_pair(remote_participant_crypto, e));
+  encrypt_options_[h] = encrypt_options_[local_datawriter_crypto_handle];
   return h;
 }
 
