@@ -2,8 +2,6 @@
 
 **How to build OpenDDS for Android and incorperate OpenDDS into Android apps.**
 
-**WARNING: Android support is experimental and not fully supported!**
-
 * [Variables](#variables)
 * [Requirements](#requirements)
 * [Building OpenDDS for Android](#building-opendds-for-android)
@@ -33,6 +31,7 @@ are mostly for shorthand.
 | ------------ | ------------------------------------------------ |
 | `$DDS_ROOT`  | OpenDDS being built for Android                  |
 | `$HOST_DDS`  | [OpenDDS host to help build OpenDDS for Android](#host-tools) |
+| `$ACE_ROOT`  | ACE being built for Android                      |
 | `$NDK`       | The Android NDK                                  |
 | `$TOOLCHAIN` | The Generated Toolchain                          |
 | `$SDK`       | The Android SDK (By default `$HOME/Android/Sdk`) |
