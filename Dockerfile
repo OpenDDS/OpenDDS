@@ -18,12 +18,12 @@ WORKDIR /usr/src/gmock
 RUN cmake CMakeLists.txt && make && cp ./*.a /usr/lib
 
 RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
-    apt-get install -y --no-install-recommends nodejs=10.15.0-1nodesource1
+    apt-get install -y --no-install-recommends nodejs
 
 ADD . /opt/OpenDDS
 
 RUN cd /opt/OpenDDS && \
-    ./configure --prefix=/usr/local --security --doc_group --no-tests && \
+    ./configure --prefix=/usr/local --security --doc_group --no-tests --std=c++11 && \
     make && \
     make install && \
     cp -a /opt/OpenDDS/ACE_wrappers/MPC /usr/local/share/ace/MPC && \

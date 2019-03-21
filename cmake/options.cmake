@@ -73,12 +73,16 @@ endif()
 
 # ACE defines.
 
-if (OPENDDS_NO_DEBUG AND CMAKE_HOST_UNIX)
+if (OPENDDS_NO_DEBUG AND UNIX)
   _OPENDDS_APPEND_DEF(ACE_NDEBUG NDEBUG)
 endif()
 
-if (OPENDDS_NO_INLINE)
-  _OPENDDS_APPEND_DEF(ACE_NO_INLINE)
+if (NOT MSVC) # On MSVC, ACE sets this in config-win32-common.h
+  if (OPENDDS_INLINE)
+    _OPENDDS_APPEND_DEF(__ACE_INLINE__)
+  else()
+    _OPENDDS_APPEND_DEF(ACE_NO_INLINE)
+  endif()
 endif()
 
 if (OPENDDS_IPV6)
@@ -97,7 +101,7 @@ endif()
 
 # Force C++ standard.
 
-if (OPENDDS_STD AND CMAKE_HOST_UNIX)
+if (OPENDDS_STD AND UNIX)
   if("${OPENDDS_STD}" MATCHES "(03|98)$")
     set(CMAKE_CXX_STANDARD 98)
   elseif("${OPENDDS_STD}" MATCHES "(0x|11)$")
@@ -108,5 +112,17 @@ if (OPENDDS_STD AND CMAKE_HOST_UNIX)
     set(CMAKE_CXX_STANDARD 17)
   else()
     message(WARNING "Ignoring unknown OPENDDS_STD value '${OPENDDS_STD}'")
+  endif()
+endif()
+
+# Handle other features
+
+if (OPENDDS_FEATURES)
+  if ("${OPENDDS_FEATURES}" MATCHES "versioned_namespace=1")
+    list(APPEND OPENDDS_DCPS_COMPILE_DEFS ACE_HAS_VERSIONED_NAMESPACE=1)
+  endif()
+
+  if ("${OPENDDS_FEATURES}" MATCHES "uses_wchar=1")
+    list(APPEND OPENDDS_DCPS_COMPILE_DEFS ACE_USES_WCHAR)
   endif()
 endif()

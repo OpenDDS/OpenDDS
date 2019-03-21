@@ -5,13 +5,34 @@ Released %TIMESTAMP%
 
 ### Additions:
 - Monitor and the ishapes demo now use Qt5
+- Expanded Android Documentation in `docs/android.md`
 
 ### Fixes:
-- TODO: Add your fixes here
+- Java API can now be used on Android
 
 ### Notes:
 - Removed outdated `-Gws` option of `opendds_idl`. This option produced sample
   descriptions for the Wireshark dissector before OpenDDS v3.7.
+
+## Version 3.13.1 of OpenDDS
+
+### Fixes:
+- rtps_udp: enhanced generation of gaps for durable data (#1001)
+- rtps_udp transport: improved handling of socket errors (#1002)
+- Fixed a bug in contains_entity for DataReaders (#944)
+- Fixed set_qos method for not enabled DataWriters and DataReaders (#955)
+- Fixed requiring Conditions to be cleaned up in DataReaders (#958)
+- Fixed a locking issue in transport with Security enabled (#933)
+- Fixed total_count fields in on Offered/RequestedDeadlineMissed (#969)
+- Security: Fixing uninitialized values reported by valgrind
+- Support static builds with DDS Security enabled (#967)
+- Fixing build when no-builtin-topic and security flags are both configured
+- Configure: fixed detection of MSVC compiler versions
+- Configure on Windows: allow Perl to be located in a directory with spaces
+- Configure: follow redirects if using curl to download (#1025)
+- Configure: Android support (#964)
+- Configure: added for --host-tools option (part of #968)
+- Make install awareness of user_macros.GNU and improved Java bindings support (#1022)
 
 ## Version 3.13 of OpenDDS
 

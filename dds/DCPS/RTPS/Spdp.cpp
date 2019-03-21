@@ -130,6 +130,8 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
     sedp_multicast_.length(1);
     sedp_multicast_[0] = mc_locator;
   }
+
+  sedp_.rtps_relay_address(disco->sedp_rtps_relay_address());
 }
 
 
@@ -505,6 +507,12 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::data_received - ")
       ACE_TEXT("failed to convert from ParameterList to ")
       ACE_TEXT("SPDPdiscoveredParticipantData\n")));
+    return;
+  }
+
+  const DCPS::RepoId guid = make_guid(pdata.participantProxy.guidPrefix, DCPS::ENTITYID_PARTICIPANT);
+  if (guid == guid_) {
+    // About us, stop.
     return;
   }
 
@@ -1263,7 +1271,8 @@ Spdp::build_local_pdata(
       sedp_multicast_,
       nonEmptyList /*defaultMulticastLocatorList*/,
       nonEmptyList /*defaultUnicastLocatorList*/,
-      {0 /*manualLivelinessCount*/}   //FUTURE: implement manual liveliness
+      {0 /*manualLivelinessCount*/},   //FUTURE: implement manual liveliness
+      qos_.property
     },
     { // Duration_t (leaseDuration)
       static_cast<CORBA::Long>((disco_->resend_period() * LEASE_MULT).sec()),
@@ -1380,6 +1389,10 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer, bool securityGuids)
   for (iter it = outer_->disco_->spdp_send_addrs().begin(),
        end = outer_->disco_->spdp_send_addrs().end(); it != end; ++it) {
     send_addrs_.insert(ACE_INET_Addr(it->c_str()));
+  }
+
+  if (outer_->disco_->spdp_rtps_relay_address() != ACE_INET_Addr()) {
+    send_addrs_.insert(outer_->disco_->spdp_rtps_relay_address());
   }
 }
 

@@ -1,0 +1,30 @@
+/*
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+module RtpsRelay {
+
+#pragma DCPS_DATA_TYPE "RtpsRelay::GroupEntry"
+#pragma DCPS_DATA_KEY  "RtpsRelay::GroupEntry guid"
+#pragma DCPS_DATA_KEY  "RtpsRelay::GroupEntry group"
+
+  struct GroupEntry {
+    string guid;
+    string group;
+    unsigned long expiration_timestamp;
+  };
+
+#pragma DCPS_DATA_TYPE "RtpsRelay::RoutingEntry"
+#pragma DCPS_DATA_KEY  "RtpsRelay::RoutingEntry guid"
+
+  struct RoutingEntry {
+    string guid;
+    string address;
+    string horizontal_relay_address;
+    unsigned long expiration_timestamp;
+  };
+
+};

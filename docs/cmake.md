@@ -242,10 +242,12 @@ The following values impact the build in one way or another.
 |`OPENDDS_TAO`              | Location of TAO root dir.                                          | N/A                 |
 |`OPENDDS_STD`              | Forces C++ standard (Unix only). This option is used as a way for the configure script to inform CMake builds of the C/C++ standard used to build OpenDDS. To prevent weirdness, the C/C++ standards should match. The typical GCC -std values are supported. | Existing CMAKE_CXX_STANDARD value. |
 |`OPENDDS_NO_DEBUG`         | Sets NDEBUG flags on ACE for non-debug builds (Unix only)          | OFF                 |
-|`OPENDDS_NO_INLINE`        | Inlining                                                           | OFF                 |
+|`OPENDDS_INLINE`           | ACE's inline build flag                                            | See below           |
 |`OPENDDS_STATIC`           | Use static libraries                                               | OFF                 |
 |`OPENDDS_XERCES3`          | Adds dependencies to targets; required when OPENDDS_SECURITY is ON | OFF                 |
+|`OPENDDS_FEATURES`         | Semicolon-Separated list of additional features which impact the build. Currently supported are `versioned_namespace=1` (see [this](https://github.com/DOCGroup/ACE_TAO/blob/master/ACE/docs/Symbol_Versioning.html) document) and `uses_wchar=1` for wide-character support. | N/A |
 
+`OPENDDS_INLINE` should be explicitly set to `ON` or `OFF` (based on the ACE `platform_macros.GNU` variable `inline`) in `config.cmake` unless you will only be using a CMake Microsoft Visual Studio Generator.
 
 [Messenger with direct IDL inclusion]: ../tests/cmake_integration/Messenger/Messenger_1/CMakeLists.txt
 [Messenger with auxiliary IDL library]: ../tests/cmake_integration/Messenger/Messenger_2/CMakeLists.txt
