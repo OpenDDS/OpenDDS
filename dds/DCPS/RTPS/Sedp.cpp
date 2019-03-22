@@ -182,25 +182,34 @@ const bool Sedp::host_is_bigendian_(!ACE_CDR_BYTE_ORDER);
 Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock) :
   DCPS::EndpointManager<ParticipantData_t>(participant_id, lock),
   spdp_(owner),
-  publications_writer_(make_id(participant_id, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER), *this),
+  publications_writer_(
+    make_id(participant_id, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER), *this),
 
 #ifdef OPENDDS_SECURITY
-  publications_secure_writer_(make_id(participant_id, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER), *this),
+  publications_secure_writer_(
+    make_id(participant_id, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER), *this),
 #endif
 
-  subscriptions_writer_(make_id(participant_id, ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER), *this),
+  subscriptions_writer_(
+    make_id(participant_id, ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER), *this),
 
 #ifdef OPENDDS_SECURITY
-  subscriptions_secure_writer_(make_id(participant_id, ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER), *this),
+  subscriptions_secure_writer_(
+    make_id(participant_id, ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER), *this),
 #endif
 
-  participant_message_writer_(make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER), *this),
+  participant_message_writer_(
+    make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER), *this),
 
 #ifdef OPENDDS_SECURITY
-  participant_message_secure_writer_(make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER), *this),
-  participant_stateless_message_writer_(make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER), *this),
-  participant_volatile_message_secure_writer_(make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER), *this),
-  dcps_participant_secure_writer_(make_id(participant_id, ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER), *this),
+  participant_message_secure_writer_(
+    make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER), *this),
+  participant_stateless_message_writer_(
+    make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER), *this),
+  participant_volatile_message_secure_writer_(
+    make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER), *this),
+  dcps_participant_secure_writer_(
+    make_id(participant_id, ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER), *this),
 #endif
 
   publications_reader_(make_rch<Reader>(
@@ -936,7 +945,8 @@ void Sedp::associate_secure_readers_to_writers(const Security::SPDPdiscoveredPar
 }
 
 void
-Sedp::send_builtin_crypto_tokens(const DCPS::RepoId& dstParticipant, const DCPS::EntityId_t& dstEntity, const DCPS::RepoId& src)
+Sedp::send_builtin_crypto_tokens(
+  const DCPS::RepoId& dstParticipant, const DCPS::EntityId_t& dstEntity, const DCPS::RepoId& src)
 {
   DCPS::RepoId dst = dstParticipant;
   dst.entityId = dstEntity;
@@ -1626,8 +1636,10 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
             pub_data_sec.base.base = wdata.ddsPublicationData;
 
             if (security_info != NULL) {
-              pub_data_sec.base.security_info.endpoint_security_attributes = security_info->endpoint_security_attributes;
-              pub_data_sec.base.security_info.plugin_endpoint_security_attributes = security_info->plugin_endpoint_security_attributes;
+              pub_data_sec.base.security_info.endpoint_security_attributes =
+                security_info->endpoint_security_attributes;
+              pub_data_sec.base.security_info.plugin_endpoint_security_attributes =
+                security_info->plugin_endpoint_security_attributes;
             }
 
             if (topic_sec_attr.is_write_protected &&
@@ -1644,7 +1656,8 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
             ACE_ERROR((LM_WARNING,
               ACE_TEXT("(%P|%t) WARNING: ")
               ACE_TEXT("Sedp::data_received(dwd) - ")
-              ACE_TEXT("Unsupported remote participant authentication state for discovered datawriter '%C'. SecurityException[%d.%d]: %C\n"),
+              ACE_TEXT("Unsupported remote participant authentication state for discovered datawriter '%C'. ")
+              ACE_TEXT("SecurityException[%d.%d]: %C\n"),
               topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
             return;
           }
@@ -1906,13 +1919,16 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
             sub_data_sec.base.base = rdata.ddsSubscriptionData;
 
             if (security_info != NULL) {
-              sub_data_sec.base.security_info.endpoint_security_attributes = security_info->endpoint_security_attributes;
-              sub_data_sec.base.security_info.plugin_endpoint_security_attributes = security_info->plugin_endpoint_security_attributes;
+              sub_data_sec.base.security_info.endpoint_security_attributes =
+                security_info->endpoint_security_attributes;
+              sub_data_sec.base.security_info.plugin_endpoint_security_attributes =
+                security_info->plugin_endpoint_security_attributes;
             }
 
             bool relay_only = false;
             if (topic_sec_attr.is_read_protected &&
-                !get_access_control()->check_remote_datareader(remote_permissions, spdp_.get_domain_id(), sub_data_sec, relay_only, ex))
+                !get_access_control()->check_remote_datareader(
+                  remote_permissions, spdp_.get_domain_id(), sub_data_sec, relay_only, ex))
             {
               ACE_ERROR((LM_WARNING,
                 ACE_TEXT("(%P|%t) WARNING: ")
@@ -1931,7 +1947,8 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
             ACE_ERROR((LM_WARNING,
               ACE_TEXT("(%P|%t) WARNING: ")
               ACE_TEXT("Sedp::data_received(dwd) - ")
-              ACE_TEXT("Unsupported remote participant authentication state for discovered datawriter '%C'. SecurityException[%d.%d]: %C\n"),
+              ACE_TEXT("Unsupported remote participant authentication state for discovered datawriter '%C'. ")
+              ACE_TEXT("SecurityException[%d.%d]: %C\n"),
               topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
             return;
           }
@@ -3054,7 +3071,8 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
 
     } else if (sample.header_.publication_id_.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER) {
 
-      DCPS::unique_ptr<DDS::Security::ParticipantVolatileMessageSecure> data(new DDS::Security::ParticipantVolatileMessageSecure);
+      DCPS::unique_ptr<DDS::Security::ParticipantVolatileMessageSecure> data(
+        new DDS::Security::ParticipantVolatileMessageSecure);
       ser.reset_alignment(); // https://issues.omg.org/browse/DDSIRTP23-63
       if (!(ser >> *data)) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
@@ -3585,7 +3603,8 @@ Sedp::Task::enqueue_stateless_message(DCPS::MessageId id, DCPS::unique_ptr<DDS::
 }
 
 void
-Sedp::Task::enqueue_volatile_message_secure(DCPS::MessageId id, DCPS::unique_ptr<DDS::Security::ParticipantVolatileMessageSecure> data)
+Sedp::Task::enqueue_volatile_message_secure(
+  DCPS::MessageId id, DCPS::unique_ptr<DDS::Security::ParticipantVolatileMessageSecure> data)
 {
   if (spdp_->shutting_down()) { return; }
   putq(new Msg(Msg::MSG_PARTICIPANT_VOLATILE_SECURE, id, data.release()));
@@ -3895,7 +3914,8 @@ Sedp::defer_reader(const RepoId& reader,
 
 #ifdef OPENDDS_SECURITY
 DDS::Security::DatawriterCryptoHandle
-Sedp::generate_remote_matched_writer_crypto_handle(const RepoId& writer_part, const DDS::Security::DatareaderCryptoHandle& drch)
+Sedp::generate_remote_matched_writer_crypto_handle(
+  const RepoId& writer_part, const DDS::Security::DatareaderCryptoHandle& drch)
 {
   DDS::Security::DatawriterCryptoHandle result = DDS::HANDLE_NIL;
 
