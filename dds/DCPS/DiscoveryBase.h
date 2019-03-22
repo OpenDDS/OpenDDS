@@ -420,17 +420,16 @@ namespace OpenDDS {
         ACE_GUARD(ACE_Thread_Mutex, g, lock_);
         LocalPublicationIter iter = local_publications_.find(publicationId);
         if (iter != local_publications_.end()) {
-          if (DDS::RETCODE_OK == remove_publication_i(publicationId))
-            {
-              OPENDDS_STRING topic_name = topic_names_[iter->second.topic_id_];
-              local_publications_.erase(publicationId);
-              typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
-                topics_.find(topic_name);
-              if (top_it != topics_.end()) {
-                match_endpoints(publicationId, top_it->second, true /*remove*/);
-                top_it->second.endpoints_.erase(publicationId);
-              }
-            } else {
+          if (DDS::RETCODE_OK == remove_publication_i(publicationId)) {
+            OPENDDS_STRING topic_name = topic_names_[iter->second.topic_id_];
+            local_publications_.erase(publicationId);
+            typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
+              topics_.find(topic_name);
+            if (top_it != topics_.end()) {
+              match_endpoints(publicationId, top_it->second, true /*remove*/);
+              top_it->second.endpoints_.erase(publicationId);
+            }
+          } else {
             ACE_ERROR((LM_ERROR,
                        ACE_TEXT("(%P|%t) ERROR: EndpointManager::remove_publication - ")
                        ACE_TEXT("Failed to publish dispose msg\n")));
