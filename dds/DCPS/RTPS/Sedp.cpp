@@ -296,7 +296,7 @@ Sedp::init(const RepoId& guid,
     if (rtps_inst->multicast_group_address_.set(mc_port, mc_addr.c_str())) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::init - ")
-                 ACE_TEXT("failed setting multicast local_addr to port %hd\n"),
+                 ACE_TEXT("failed setting multicast local_addr to port %hu\n"),
                           mc_port));
       return DDS::RETCODE_ERROR;
     }
