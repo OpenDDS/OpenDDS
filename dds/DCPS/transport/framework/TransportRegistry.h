@@ -58,6 +58,10 @@ public:
   TransportInst_rch create_inst(const OPENDDS_STRING& name,
                                 const OPENDDS_STRING& transport_type);
   TransportInst_rch get_inst(const OPENDDS_STRING& name) const;
+
+  /// Removing a TransportInst from the registry shuts down the underlying
+  /// transport implementation (if one was started) and therefore should only
+  /// be attempted after DDS Entities using this transport have been deleted.
   void remove_inst(const TransportInst_rch& inst);
 
   static const char DEFAULT_CONFIG_NAME[];
