@@ -316,11 +316,15 @@ DatawriterCryptoHandle CryptoBuiltInImpl::register_local_datawriter(
       push_back(keys,
                 make_key(h, plugin_attribs & FLAG_IS_SUBMESSAGE_ENCRYPTED));
       used_h = true;
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) CryptoBuiltInImpl::register_local_datawriter ")
+        ACE_TEXT("created submessage key with id %x for LDWCH %d\n"), h, h));
     }
     if (security_attributes.is_payload_protected) {
       const unsigned int key_id = used_h ? generate_handle() : h;
       push_back(keys,
                 make_key(key_id, plugin_attribs & FLAG_IS_PAYLOAD_ENCRYPTED));
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) CryptoBuiltInImpl::register_local_datawriter ")
+        ACE_TEXT("created payload key with id %x for LDWCH %d\n"), key_id, h));
     }
   }
 
@@ -374,6 +378,8 @@ DatareaderCryptoHandle CryptoBuiltInImpl::register_matched_remote_datareader(
                                           "volatile remote reader");
       return DDS::HANDLE_NIL;
     }
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) CryptoBuiltInImpl::register_remote_datareader ")
+      ACE_TEXT("created volatile key for RDRCH %d\n"), h));
     keys_[h] = dr_keys;
   }
 
@@ -402,11 +408,11 @@ DatareaderCryptoHandle CryptoBuiltInImpl::register_local_datareader(
   if (is_builtin_volatile(properties)) {
     push_back(keys, make_volatile_placeholder());
 
-  } else {
-    if (security_attributes.is_submessage_protected) {
-      push_back(keys,
-                make_key(h, plugin_attribs & FLAG_IS_SUBMESSAGE_ENCRYPTED));
-    }
+  } else if (security_attributes.is_submessage_protected) {
+    push_back(keys,
+              make_key(h, plugin_attribs & FLAG_IS_SUBMESSAGE_ENCRYPTED));
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) CryptoBuiltInImpl::register_local_datareader ")
+      ACE_TEXT("create submessage key with id %x for LDRCH %d\n"), h, h));
   }
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
@@ -458,6 +464,8 @@ DatawriterCryptoHandle CryptoBuiltInImpl::register_matched_remote_datawriter(
                                           "volatile remote writer");
       return DDS::HANDLE_NIL;
     }
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) CryptoBuiltInImpl::register_remote_datawriter ")
+      ACE_TEXT("created volatile key for RDWCH %d\n"), h));
     keys_[h] = dw_keys;
   }
 
@@ -479,6 +487,7 @@ bool CryptoBuiltInImpl::unregister_participant(ParticipantCryptoHandle handle, S
 void CryptoBuiltInImpl::clear_endpoint_data(NativeCryptoHandle handle)
 {
   keys_.erase(handle);
+  encrypt_options_.erase(handle);
 
   typedef std::multimap<ParticipantCryptoHandle, EntityInfo>::iterator iter_t;
   for (iter_t it = participant_to_entity_.begin(); it != participant_to_entity_.end();) {
@@ -503,7 +512,6 @@ bool CryptoBuiltInImpl::unregister_datawriter(DatawriterCryptoHandle handle, Sec
   }
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  encrypt_options_.erase(handle);
   clear_endpoint_data(handle);
   return true;
 }
@@ -516,7 +524,6 @@ bool CryptoBuiltInImpl::unregister_datareader(DatareaderCryptoHandle handle, Sec
   }
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  encrypt_options_.erase(handle);
   clear_endpoint_data(handle);
   return true;
 }
