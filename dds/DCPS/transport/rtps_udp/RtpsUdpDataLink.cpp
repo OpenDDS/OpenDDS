@@ -2749,7 +2749,7 @@ RtpsUdpDataLink::populate_security_handles(const RepoId& local_id,
         handle = handle << 8 | prop.value[i];
       }
       peer_crypto_handles_[reader_id] = handle;
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::populate_security_handles ")
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::populate_security_handles() ")
                  ACE_TEXT("DRCH %C = %d\n"),
                  std::string(GuidConverter(reader_id)).c_str(), handle));
     }

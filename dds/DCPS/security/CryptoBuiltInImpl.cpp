@@ -412,7 +412,7 @@ DatareaderCryptoHandle CryptoBuiltInImpl::register_local_datareader(
     push_back(keys,
               make_key(h, plugin_attribs & FLAG_IS_SUBMESSAGE_ENCRYPTED));
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) CryptoBuiltInImpl::register_local_datareader ")
-      ACE_TEXT("create submessage key with id %x for LDRCH %d\n"), h, h));
+      ACE_TEXT("created submessage key with id %x for LDRCH %d\n"), h, h));
   }
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
