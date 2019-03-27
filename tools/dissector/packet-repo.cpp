@@ -375,7 +375,14 @@ namespace OpenDDS
               TopicStatus status = instance().add_topic_status (hf_topicStatus);
               const RepoId *rid = instance().add_repo_id (hf_topicId);
 
-              if (instance().pinfo_->fd->flags.visited)
+              frame_data* fd = instance().pinfo_->fd;
+              bool visited;
+#if WIRESHARK_VERSION >= WIRESHARK_VERSION_NUMBER(3, 0, 0)
+              visited = fd->visited;
+#else
+              visited = fd->flags.visited;
+#endif
+              if (visited)
                 {
                   return true;
                 }
@@ -406,7 +413,14 @@ namespace OpenDDS
           instance().add_string (hf_topicName);
           const char * dname = instance().add_string (hf_dataTypeName);
 //           instance().add_topic_qos (hf_qos, instance().ett_topic_qos_);
-          if (instance().pinfo_->fd->flags.visited)
+          frame_data* fd = instance().pinfo_->fd;
+          bool visited;
+#if WIRESHARK_VERSION >= WIRESHARK_VERSION_NUMBER(3, 0, 0)
+          visited = fd->visited;
+#else
+          visited = fd->flags.visited;
+#endif
+          if (visited)
             {
               return true;
             }
