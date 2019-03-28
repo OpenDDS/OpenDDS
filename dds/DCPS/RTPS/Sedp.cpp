@@ -296,7 +296,7 @@ Sedp::init(const RepoId& guid,
     if (rtps_inst->multicast_group_address_.set(mc_port, mc_addr.c_str())) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::init - ")
-                 ACE_TEXT("failed setting multicast local_addr to port %hd\n"),
+                 ACE_TEXT("failed setting multicast local_addr to port %hu\n"),
                           mc_port));
       return DDS::RETCODE_ERROR;
     }
@@ -318,60 +318,59 @@ Sedp::init(const RepoId& guid,
   OPENDDS_STRING config_name = DCPS::TransportRegistry::DEFAULT_INST_PREFIX +
                             OPENDDS_STRING("_SEDP_TransportCfg_") + key +
                             domainStr;
-  DCPS::TransportConfig_rch transport_cfg =
-    TheTransportRegistry->create_config(config_name.c_str());
-  transport_cfg->instances_.push_back(transport_inst_);
+  transport_cfg_ = TheTransportRegistry->create_config(config_name.c_str());
+  transport_cfg_->instances_.push_back(transport_inst_);
 
   // Configure and enable each reader/writer
   rtps_inst->opendds_discovery_default_listener_ = publications_reader_;
   rtps_inst->opendds_discovery_guid_ = guid;
-  const bool reliability = true, durability = true;
+  const bool reliable = true, durable = true;
 
 #ifdef OPENDDS_SECURITY
   const bool besteffort = false, nondurable = false;
 #endif
 
-  publications_writer_.enable_transport_using_config(reliability, durability, transport_cfg);
-  publications_reader_->enable_transport_using_config(reliability, durability, transport_cfg);
+  publications_writer_.enable_transport_using_config(reliable, durable, transport_cfg_);
+  publications_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
 
 #ifdef OPENDDS_SECURITY
   publications_secure_writer_.set_crypto_handles(spdp_.crypto_handle());
   publications_secure_reader_->set_crypto_handles(spdp_.crypto_handle());
-  publications_secure_writer_.enable_transport_using_config(reliability, durability, transport_cfg);
-  publications_secure_reader_->enable_transport_using_config(reliability, durability, transport_cfg);
+  publications_secure_writer_.enable_transport_using_config(reliable, durable, transport_cfg_);
+  publications_secure_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
 #endif
 
-  subscriptions_writer_.enable_transport_using_config(reliability, durability, transport_cfg);
-  subscriptions_reader_->enable_transport_using_config(reliability, durability, transport_cfg);
+  subscriptions_writer_.enable_transport_using_config(reliable, durable, transport_cfg_);
+  subscriptions_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
 
 #ifdef OPENDDS_SECURITY
   subscriptions_secure_writer_.set_crypto_handles(spdp_.crypto_handle());
   subscriptions_secure_reader_->set_crypto_handles(spdp_.crypto_handle());
-  subscriptions_secure_writer_.enable_transport_using_config(reliability, durability, transport_cfg);
-  subscriptions_secure_reader_->enable_transport_using_config(reliability, durability, transport_cfg);
+  subscriptions_secure_writer_.enable_transport_using_config(reliable, durable, transport_cfg_);
+  subscriptions_secure_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
 #endif
 
-  participant_message_writer_.enable_transport_using_config(reliability, durability, transport_cfg);
-  participant_message_reader_->enable_transport_using_config(reliability, durability, transport_cfg);
+  participant_message_writer_.enable_transport_using_config(reliable, durable, transport_cfg_);
+  participant_message_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
 
 #ifdef OPENDDS_SECURITY
   participant_message_secure_writer_.set_crypto_handles(spdp_.crypto_handle());
   participant_message_secure_reader_->set_crypto_handles(spdp_.crypto_handle());
-  participant_message_secure_writer_.enable_transport_using_config(reliability, durability, transport_cfg);
-  participant_message_secure_reader_->enable_transport_using_config(reliability, durability, transport_cfg);
+  participant_message_secure_writer_.enable_transport_using_config(reliable, durable, transport_cfg_);
+  participant_message_secure_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
 
-  participant_stateless_message_writer_.enable_transport_using_config(besteffort, nondurable, transport_cfg);
-  participant_stateless_message_reader_->enable_transport_using_config(besteffort, nondurable, transport_cfg);
+  participant_stateless_message_writer_.enable_transport_using_config(besteffort, nondurable, transport_cfg_);
+  participant_stateless_message_reader_->enable_transport_using_config(besteffort, nondurable, transport_cfg_);
 
   participant_volatile_message_secure_writer_.set_crypto_handles(spdp_.crypto_handle());
   participant_volatile_message_secure_reader_->set_crypto_handles(spdp_.crypto_handle());
-  participant_volatile_message_secure_writer_.enable_transport_using_config(reliability, nondurable, transport_cfg);
-  participant_volatile_message_secure_reader_->enable_transport_using_config(reliability, nondurable, transport_cfg);
+  participant_volatile_message_secure_writer_.enable_transport_using_config(reliable, nondurable, transport_cfg_);
+  participant_volatile_message_secure_reader_->enable_transport_using_config(reliable, nondurable, transport_cfg_);
 
   dcps_participant_secure_writer_.set_crypto_handles(spdp_.crypto_handle());
   dcps_participant_secure_reader_->set_crypto_handles(spdp_.crypto_handle());
-  dcps_participant_secure_writer_.enable_transport_using_config(reliability, durability, transport_cfg);
-  dcps_participant_secure_reader_->enable_transport_using_config(reliability, durability, transport_cfg);
+  dcps_participant_secure_writer_.enable_transport_using_config(reliable, durable, transport_cfg_);
+  dcps_participant_secure_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
 #endif
 
   return DDS::RETCODE_OK;
@@ -609,6 +608,12 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
   return result;
 }
 #endif
+
+Sedp::~Sedp()
+{
+  TheTransportRegistry->remove_config(transport_cfg_);
+  TheTransportRegistry->remove_inst(transport_inst_);
+}
 
 void
 Sedp::unicast_locators(DCPS::LocatorSeq& locators) const

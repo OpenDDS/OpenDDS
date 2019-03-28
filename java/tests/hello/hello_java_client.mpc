@@ -1,5 +1,6 @@
-project: idl2jni, conditional_idlflags {
+project: idl2jni {
 
+  idlflags += -SS
   idl2jniflags += -SS
 
   IDL_Files {
@@ -12,18 +13,11 @@ project: idl2jni, conditional_idlflags {
   }
 
   Java_Files {
-      Client.java << Test/Hello.java
+    Client.java << Test/Hello.java
   }
 
   specific {
-    jarname  = hello_java_client
-  }
-
-  // Older versions of Visual Studio will create the intermediate directories
-  // in all-lowercase, so we have to create them first to get the correct case.
-  specific(vc71, vc8) {
-    prebuild   += <%mkdir%> Test 2<%gt%> <%nul%> <%or%> <%cat%> <%nul%> <%gt%> <%nul%>
-    prebuild   += <%mkdir%> classes<%slash%>Test 2<%gt%> <%nul%> <%or%> <%cat%> <%nul%> <%gt%> <%nul%>
+    jarname = hello_java_client
   }
 
   postclean += <%rm%> Test
