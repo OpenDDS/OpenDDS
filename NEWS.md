@@ -6,6 +6,7 @@ Released %TIMESTAMP%
 ### Additions:
 - Monitor and the ishapes demo now use Qt5
 - Expanded Android Documentation in `docs/android.md`
+- Updated dissector to work with Wireshark 3.0
 
 ### Fixes:
 - Java API can now be used on Android
