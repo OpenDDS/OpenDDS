@@ -271,7 +271,7 @@ Service_Participant::shutdown()
       if (reactor_) {
         reactor_->end_reactor_event_loop();
         reactor_task_.wait();
-        reactor_ = 0;
+        reactor_.reset();
       }
 
       discoveryMap_.clear();
