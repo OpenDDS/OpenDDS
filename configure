@@ -1470,6 +1470,7 @@ if (exists $opts{'qt'}) {
   setEnv('QT5_INCDIR', $qt_include);
   setEnv('QT5_BINDIR', $qt_bin);
   setEnv('QT5_SUFFIX', $qt_bin_suffix);
+  setEnv('QT5_LIBDIR', $qt_lib);
   push_libpath(\%targetEnv, $qt_lib);
 } elsif (exists $opts{'qt-include'}) {
   die "ERROR: --qt-include requires --qt, stopped\n";
