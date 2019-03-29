@@ -2048,6 +2048,7 @@ sub write_cmake_file {
       ownership-kind-exclusive
       object-model-profile
       persistence-profile
+      inline
     );
 
     my %disabled_by_default = map {$_, 0} qw(

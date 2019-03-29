@@ -44,7 +44,9 @@ void ReactorInterceptor::wait()
 
   if (should_execute_immediately()) {
     handle_exception_i(guard);
-    reactor()->purge_pending_notifications(this);
+    if (!reactor_is_shut_down()) {
+      reactor()->purge_pending_notifications(this);
+    }
   } else {
     while (!command_queue_.empty()) {
       condition_.wait();

@@ -23,6 +23,7 @@ tests/DCPS/DestinationOrder/run_test.pl source: !DCPS_MIN !DDS_NO_OWNERSHIP_PROF
 tests/DCPS/Dispose/run_test.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/FooTest3_0/run_test.pl: !DDS_NO_OBJECT_MODEL_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/FooTest3_0/run_test.pl unregister: !DCPS_MIN !DDS_NO_OBJECT_MODEL_PROFILE !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/FooTest3_0/run_test.pl unregister_nil: !DCPS_MIN !DDS_NO_OBJECT_MODEL_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/FooTest3_0/run_test.pl dispose: !DCPS_MIN !DDS_NO_OBJECT_MODEL_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/FooTest3_0/run_test.pl dispose_qc: !DCPS_MIN !DDS_NO_OBJECT_MODEL_PROFILE !DDS_NO_QUERY_CONDITION !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/FooTest3_0/run_test.pl resume: !DCPS_MIN !DDS_NO_OBJECT_MODEL_PROFILE !DDS_NO_OWNERSHIP_PROFILE
@@ -112,6 +113,7 @@ tests/DCPS/Reconnect/run_test.pl restart_sub: !DCPS_MIN !OPENDDS_SAFETY_PROFILE 
 tests/DCPS/Reconnect/run_test.pl restart_pub: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/Reconnect/run_test.pl bp_timeout: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/Reconnect/run_test.pl sub_init_crash: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/Restart/run_test.pl: RTPS !OPENDDS_SAFETY_PROFILE
 tests/DCPS/sub_init_loop/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/TimeBasedFilter/run_test.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/TimeBasedFilter/run_test.pl -reliable: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
@@ -255,9 +257,9 @@ tests/DCPS/Priority/run_test.pl: !DCPS_MIN !QNX !OPENDDS_SAFETY_PROFILE !DDS_NO_
 tests/DCPS/Priority/run_test.pl --instances: !DCPS_MIN !QNX !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/LatencyBudget/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/LatencyBudget/run_test.pl late: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
-tests/DCPS/WaitForAck/run_test.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/WaitForAck/run_test.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_SAFETY_PROFILE
 tests/DCPS/WaitForAck/run_test.pl rtps: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
-tests/DCPS/WaitForAck/run_test.pl --publisher: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/WaitForAck/run_test.pl --publisher: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_SAFETY_PROFILE
 tests/DCPS/WaitForAck/run_test.pl rtps --publisher: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/Thrasher/run_test.pl single: !DCPS_MIN !LYNXOS
 tests/DCPS/Thrasher/run_test.pl default: !DCPS_MIN !LYNXOS

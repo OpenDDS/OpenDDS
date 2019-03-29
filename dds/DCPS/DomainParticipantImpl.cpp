@@ -2228,7 +2228,7 @@ DomainParticipantImpl::LivelinessTimer::LivelinessTimer(DomainParticipantImpl& i
 
 DomainParticipantImpl::LivelinessTimer::~LivelinessTimer()
 {
-  if (scheduled_) {
+  if (scheduled_ && TheServiceParticipant->timer()) {
     TheServiceParticipant->timer()->cancel_timer(this);
   }
 }

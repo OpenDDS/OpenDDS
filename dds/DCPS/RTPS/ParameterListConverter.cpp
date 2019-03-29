@@ -250,7 +250,6 @@ namespace {
     return qos != def_qos;
   }
 
-#ifdef OPENDDS_SECURITY
   bool not_default(const DDS::PropertyQosPolicy& qos) {
     for (unsigned int i = 0; i < qos.value.length(); ++i) {
       if (qos.value[i].propagate) {
@@ -260,7 +259,6 @@ namespace {
     // binary_value is not sent in the parameter list (DDSSEC12-37)
     return false;
   }
-#endif
 
   bool not_default(const DDS::TimeBasedFilterQosPolicy& qos)
   {
@@ -543,6 +541,13 @@ int to_param_list(const ParticipantProxy_t& proxy,
   ml_param.count(proxy.manualLivelinessCount);
   add_param(param_list, ml_param);
 
+  if (not_default(proxy.property))
+  {
+    Parameter param_p;
+    param_p.property(proxy.property);
+    add_param(param_list, param_p);
+  }
+
   return 0;
 }
 
@@ -645,6 +650,9 @@ int from_param_list(const ParameterList& param_list,
         set_port(proxy.metatrafficMulticastLocatorList,
                  mm_last_state,
                  param.udpv4_port());
+        break;
+      case PID_PROPERTY_LIST:
+        proxy.property = param.property();
         break;
       case PID_SENTINEL:
       case PID_PAD:

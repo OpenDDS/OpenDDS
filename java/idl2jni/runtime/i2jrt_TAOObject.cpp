@@ -15,7 +15,7 @@ CORBA::Object_ptr recoverTaoObject(JNIEnv *jni, jobject source)
 {
   if (!source) return CORBA::Object::_nil();
 
-  jclass clazz = findClass(jni, "i2jrt/TAOObject");
+  jclass clazz = jni->FindClass("i2jrt/TAOObject");
   jfieldID fid = jni->GetFieldID(clazz, "_jni_ptr", "J");
   jlong _jni_ptr = jni->GetLongField(source, fid);
   return reinterpret_cast<CORBA::Object_ptr>(_jni_ptr);

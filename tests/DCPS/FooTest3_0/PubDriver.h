@@ -23,6 +23,7 @@ class PubDriver : public ACE_Task_Base
     enum Test_Kind {
       REGISTER_TEST   ,
       UNREGISTER_TEST ,
+      UNREGISTER_NIL_TEST ,
       DISPOSE_TEST    ,
       RESUME_TEST     ,
       LISTENER_TEST   ,
@@ -40,6 +41,7 @@ class PubDriver : public ACE_Task_Base
     void register_test ();
     void dispose_test ();
     void unregister_test ();
+    void unregister_nil_test ();
     void resume_test ();
     void listener_test ();
     void allocator_test ();

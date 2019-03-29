@@ -68,6 +68,8 @@ public:
        Spdp& owner,
        ACE_Thread_Mutex& lock);
 
+  ~Sedp();
+
   DDS::ReturnCode_t init(const DCPS::RepoId& guid,
                          const RtpsDiscovery& disco,
                          DDS::DomainId_t domainId);
@@ -495,6 +497,7 @@ private:
 
   // Transport
   DCPS::TransportInst_rch transport_inst_;
+  DCPS::TransportConfig_rch transport_cfg_;
 
 #ifndef DDS_HAS_MINIMUM_BIT
   DCPS::TopicBuiltinTopicDataDataReaderImpl* topic_bit();
