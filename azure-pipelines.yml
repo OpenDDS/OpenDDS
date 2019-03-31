@@ -33,7 +33,7 @@ jobs:
   - task: BatchScript@1
     displayName: VcVars
     inputs:
-      filename: '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat"'
+      filename: '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\VC\Auxiliary\Build\vcvarsall.bat"'
       arguments: $(VcVarsArch)
       modifyEnvironment: true
   - task: BatchScript@1
