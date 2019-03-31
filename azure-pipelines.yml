@@ -66,7 +66,6 @@ jobs:
       perl "%DDS_ROOT%\tests\cmake_integration\run_ci_tests.pl" --build-config=$(BuildConfiguration) %GEN%
     displayName: Compile (and run) CMake Tests
 
-jobs:
 - job: VisualStudio2017
   timeoutInMinutes: 90
   pool:
