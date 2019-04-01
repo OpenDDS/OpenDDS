@@ -33,12 +33,19 @@ public:
 int
 RtpsUdpLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
 {
-  static bool initialized(false);
+  load();
+  return 0;
+}
 
-  if (initialized) return 0;  // already initialized
-
+void RtpsUdpLoader::load()
+{
   TransportRegistry* registry = TheTransportRegistry;
-  registry->register_type(make_rch<RtpsUdpType>());
+  TransportType_rch type = make_rch<RtpsUdpType>();
+  if (registry->has_type(type)) {
+    return;
+  }
+
+  registry->register_type(type);
   // Don't create a default for RTPS.  At least for the initial implementation,
   // the user needs to explicitly configure it...
 #ifdef OPENDDS_SAFETY_PROFILE
@@ -50,9 +57,6 @@ RtpsUdpLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
   registry->get_config(TransportRegistry::DEFAULT_CONFIG_NAME)
     ->sorted_insert(default_inst);
 #endif
-  initialized = true;
-
-  return 0;
 }
 
 ACE_FACTORY_DEFINE(OpenDDS_Rtps_Udp, RtpsUdpLoader);

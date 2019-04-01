@@ -1343,7 +1343,7 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer, bool securityGuids)
     ACE_DEBUG((
           LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::SpdpTransport() - ")
-          ACE_TEXT("failed setting default_multicast address %C:%hd %p\n"),
+          ACE_TEXT("failed setting default_multicast address %C:%hu %p\n"),
           mc_addr.c_str(), mc_port, ACE_TEXT("ACE_INET_Addr::set")));
     throw std::runtime_error("failed to set default_multicast address");
   }
@@ -1353,7 +1353,7 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer, bool securityGuids)
   if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((LM_INFO,
                ACE_TEXT("(%P|%t) Spdp::SpdpTransport::SpdpTransport ")
-               ACE_TEXT("joining group %C %C:%hd\n"),
+               ACE_TEXT("joining group %C %C:%hu\n"),
                net_if.c_str (),
                mc_addr.c_str (),
                mc_port));
@@ -1369,7 +1369,7 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer, bool securityGuids)
                                   ACE_TEXT_CHAR_TO_TCHAR(net_if.c_str()))) {
     ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::SpdpTransport() - ")
-        ACE_TEXT("failed to join multicast group %C:%hd %p\n"),
+        ACE_TEXT("failed to join multicast group %C:%hu %p\n"),
         mc_addr.c_str(), mc_port, ACE_TEXT("ACE_SOCK_Dgram_Mcast::join")));
     throw std::runtime_error("failed to join multicast group");
   }
@@ -1746,7 +1746,7 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_socket() - ")
                ACE_TEXT("failed to set TTL value to %d ")
-               ACE_TEXT("for port:%hd %p\n"),
+               ACE_TEXT("for port:%hu %p\n"),
                outer_->disco_->ttl(), uni_port, ACE_TEXT("DCPS::set_socket_multicast_ttl:")));
     throw std::runtime_error("failed to set TTL");
   }
