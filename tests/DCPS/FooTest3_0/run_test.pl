@@ -31,26 +31,30 @@ if ($ARGV[0] eq 'unregister') {
     $test_to_run = 1;
     $num_writes = 4;  # 1 unregister, 3 writes.
 }
-elsif ($ARGV[0] eq 'dispose') {
+elsif ($ARGV[0] eq 'unregister_nil') {
     $test_to_run = 2;
+    $num_writes = 4;  # 1 register, 2 writes, 2 unregister
+}
+elsif ($ARGV[0] eq 'dispose') {
+    $test_to_run = 3;
     $num_disposed = 1;
     $num_writes = 11;  # 1 dispose and 10 writes.
 }
 elsif ($ARGV[0] eq 'resume') {
-    $test_to_run = 3;
+    $test_to_run = 4;
     $num_writes = 10;  # 10 writes.
 }
 elsif ($ARGV[0] eq 'listener') {
-    $test_to_run = 4;
+    $test_to_run = 5;
     # Same number of writes as register_test
 }
 elsif ($ARGV[0] eq 'allocator') {
-    $test_to_run = 5;
+    $test_to_run = 6;
     $n_chunks = 2;
     $num_writes = 4;  # 4 writes - 2 allocate from pool and 2 allocate from heap.
 }
 elsif ($ARGV[0] eq 'liveliness') {
-    $test_to_run = 6;
+    $test_to_run = 7;
     $num_writes = 3;  # 3 writes
 }
 elsif ($ARGV[0] eq '') { # register test
