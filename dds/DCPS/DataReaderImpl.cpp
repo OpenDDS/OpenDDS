@@ -126,14 +126,6 @@ DataReaderImpl::DataReaderImpl()
 DataReaderImpl::~DataReaderImpl()
 {
   DBG_ENTRY_LVL("DataReaderImpl","~DataReaderImpl",6);
-
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-  OwnershipManagerPtr owner_manager = this->ownership_manager();
-  if (owner_manager) {
-    owner_manager->unregister_reader(topic_servant_->type_name(), this);
-  }
-#endif
-
 }
 
 // this method is called when delete_datareader is called.
@@ -145,6 +137,22 @@ DataReaderImpl::cleanup()
   // deleted
   set_listener(0, NO_STATUS_MASK);
 
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+  OwnershipManagerPtr owner_manager = this->ownership_manager();
+  if (owner_manager) {
+    owner_manager->unregister_reader(topic_servant_->type_name(), this);
+  }
+#endif
+
+  topic_servant_ = 0;
+
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+  content_filtered_topic_ = 0;
+#endif
+
+#ifndef OPENDDS_NO_MULTI_TOPIC
+  multi_topic_ = 0;
+#endif
 
 }
 
@@ -3140,6 +3148,14 @@ DDS::ContentFilteredTopic_ptr
 DataReaderImpl::get_cf_topic() const
 {
   return DDS::ContentFilteredTopic::_duplicate(content_filtered_topic_.get());
+}
+#endif
+
+#ifndef OPENDDS_NO_MULTI_TOPIC
+void
+DataReaderImpl::enable_multi_topic(MultiTopicImpl* mt)
+{
+  multi_topic_ = mt;
 }
 #endif
 
