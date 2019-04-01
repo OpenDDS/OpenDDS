@@ -33,7 +33,7 @@ jobs:
   - task: BatchScript@1
     displayName: VcVars
     inputs:
-      filename: 'C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\VC\Auxiliary\Build\vcvarsall.bat'
+      filename: '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\VC\Auxiliary\Build\vcvarsall.bat"'
       arguments: $(VcVarsArch)
       modifyEnvironment: true
   - task: BatchScript@1
@@ -85,9 +85,11 @@ jobs:
         BuildPlatform: Win32
         BuildConfiguration: Release
   variables:
-    VCPKG_ROOT: C:\vcpkg
+    VCPKG_ROOT: $(Build.SourcesDirectory)\vcpkg
   steps:
   - script: |
+      git clone -q --depth 1 git://github.com/Microsoft/vcpkg.git %VCPKG_ROOT%
+      %VCPKG_ROOT%\bootstrap-vcpkg.bat
       if %BuildPlatform%==x64 (set VCVARS_ARCH=x64) else set VCVARS_ARCH=x86
       set VCPKG_ARCH=%VCVARS_ARCH%-windows
       echo ##vso[task.setvariable variable=VcVarsArch]%VCVARS_ARCH%
