@@ -1,3 +1,14 @@
+Version 3.13.2 of OpenDDS
+
+##### Fixes:
+- Service Participant, Transport Registry, RTPS libs updated to support certain Restart scenarios (#1081)
+- Wrong entity_refs_ counter when deleting data reader in the TopicDescriptionImpl (#936)
+- Add an include required for std::back_inserter (#965)
+- DDS Security on VxWorks7 (#968)
+- Fix unregister with nil handle (#1064)
+- Install with java: Fix classpath for i2jrt.jar and i2jrt_compact.jar in .mpbs (#1079)
+
+_______________________________________________________________________________
 Version 3.13.1 of OpenDDS
 
 ##### Fixes:
