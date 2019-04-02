@@ -132,7 +132,7 @@ This release of OpenDDS has been tested under the following platforms:
 Linux family:
 * Red Hat EL and CentOS 6.6 and 6.9, x86\_64
 * Red Hat EL and CentOS 7.2 and 7.3, x86\_64
-* Fedora 24 and 28, x86\_64
+* Fedora 24 and 29, x86\_64
 * Debian 9.4, i686
 * Ubuntu 16.04 LTS, x86\_64
 * openSUSE 42.1, and 42.2, x86\_64
