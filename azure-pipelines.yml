@@ -23,6 +23,8 @@ jobs:
   - script: |
       git clone -q --depth 1 git://github.com/Microsoft/vcpkg.git %VCPKG_ROOT%
       %VCPKG_ROOT%\bootstrap-vcpkg.bat
+    displayName: Bootstrap vcpkg
+  - script: |
       if %BuildPlatform%==x64 (set VCVARS_ARCH=x64) else set VCVARS_ARCH=x86
       set VCPKG_ARCH=%VCVARS_ARCH%-windows
       echo ##vso[task.setvariable variable=VcVarsArch]%VCVARS_ARCH%
@@ -90,6 +92,8 @@ jobs:
   - script: |
       git clone -q --depth 1 git://github.com/Microsoft/vcpkg.git %VCPKG_ROOT%
       %VCPKG_ROOT%\bootstrap-vcpkg.bat
+    displayName: Bootstrap vcpkg
+  - script: |
       if %BuildPlatform%==x64 (set VCVARS_ARCH=x64) else set VCVARS_ARCH=x86
       set VCPKG_ARCH=%VCVARS_ARCH%-windows
       echo ##vso[task.setvariable variable=VcVarsArch]%VCVARS_ARCH%
