@@ -574,14 +574,14 @@ if (!$ace_src || !$tao_src) {
     my $urlbase = 'https://github.com/DOCGroup';
 
     print "Cloning git repo: $urlbase/ACE_TAO\n";
-    my $err = system("git clone --depth 1 $urlbase/ACE_TAO");
+    my $err = system("git clone -q --depth 1 $urlbase/ACE_TAO");
     die 'ERROR: Failed to clone ACE/TAO from GitHub'
       if $err ||
         ! -r 'ACE_TAO/ACE/ace/ACE.h' ||
           ! -r 'ACE_TAO/TAO/tao/ORB.h';
 
     print "Cloning git repo: $urlbase/MPC into ACE_TAO/ACE/MPC\n";
-    $err = system("git clone --depth 1 $urlbase/MPC ACE_TAO/ACE/MPC");
+    $err = system("git clone -q --depth 1 $urlbase/MPC ACE_TAO/ACE/MPC");
     die 'ERROR: Failed to clone MPC (into ACE_TAO/ACE/MPC) from GitHub'
       if $err ||
         ! -r 'ACE_TAO/ACE/MPC/mwc.pl';
