@@ -44,7 +44,7 @@ jobs:
       modifyEnvironment: true
   - script: |
       if %BuildConfiguration%==Release set OPT=--no-tests --no-debug --optimize
-      call configure -v --ace-github-latest --security --xerces3=$(VcPkgInst) --openssl=$(VcPkgInst) %OPT%
+      call configure -v --ace-github-latest --xerces3=$(VcPkgInst) %OPT%
       if %BuildConfiguration%==Release (set SLN=DDS_TAOv2.sln) else set SLN=DDS_TAOv2_all.sln
       echo ##vso[task.setvariable variable=BuildSolution]%SLN%
     failOnStderr: #
@@ -61,10 +61,6 @@ jobs:
       platform: $(BuildPlatform)
       configuration: $(BuildConfiguration)
       maximumCpuCount: true
-  - script: |
-      if %BuildPlatform%==x64 set GEN=--generator="Visual Studio 16 2019 Win64"
-      perl "%DDS_ROOT%\tests\cmake_integration\run_ci_tests.pl" --build-config=$(BuildConfiguration) %GEN%
-    displayName: Compile (and run) CMake Tests
 
 - job: VisualStudio2017
   timeoutInMinutes: 90
