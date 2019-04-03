@@ -1,0 +1,182 @@
+Tue Apr 02 22:18:02 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit fc6f791b922fc8e9b8c6066cd99c490e2883a9b1
+
+        * NEWS.md:
+
+          NEWS for 3.13.2
+
+Mon Apr 01 23:12:48 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit fa9f2fad43d3e1c2259c5ef029333c85d4c93d1e
+
+        * java/dds/dcps_java.mpc:
+
+          Merge pull request #1079 from simpsont-oci/i2jrt_install_fix
+
+          Install/java: Fix classpath for i2jrt.jar and i2jrt_compact.jar
+          in .mpbs
+
+          (cherry picked from commit
+          f391b5797d681c163c9e560c1cbde4e2ebd7fe7e)
+
+Mon Apr 01 23:11:22 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit 72538487c58ef25193aaacd62282f8f895c1107e
+
+        * dds/DCPS/DataWriterImpl_T.h:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest3_0/PubDriver.h:
+        * tests/DCPS/FooTest3_0/run_test.pl:
+
+          Merge pull request #1064 from
+          simpsont-oci/fix_unregister_with_nil_handle
+
+          Fix unregister with nil handle
+
+          (cherry picked from commit
+          5a2866b84dbaede2c1f02ec24fdbdd3843514b6a)
+
+          # Conflicts:
+          #       bin/dcps_tests.lst
+          #       tests/DCPS/FooTest3_0/run_test.pl
+
+Mon Apr 01 23:07:13 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit 49dddddea57b8a4b8fe3245385645c579dbe2aa9
+
+        * MPC/config/dds_openssl.mpb:
+        * MPC/config/opendds_security.mpb:
+        * dds/DCPS/security/DdsSecurity.mpc:
+
+          Merge pull request #968 from mitza-oci/vxw7ssl
+
+          DDS Security on VxWorks7
+
+          (cherry picked from commit
+          507d35616c0afcd66d0f00695a4645f4d640dcbc)
+
+          # Conflicts:
+          #       configure
+
+Mon Apr 01 23:00:05 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit c924a56038fdab3270363fd565e9472f6616ccdf
+
+        * dds/DCPS/transport/framework/BasicQueue_T.h:
+
+          Merge pull request #965 from mitza-oci/master
+
+          Add an include required for std::back_inserter
+
+          (cherry picked from commit
+          5d9f0a4b3fe6bcc00ea9015acf981b0a5d86a5e6)
+
+Mon Apr 01 22:54:24 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit adff1aa8da0e553ad77dbfdcc377a93ba76004c5
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/MultiTopicDataReaderBase.cpp:
+
+          Merge pull request #936 from jmmorato/master
+
+          Wrong entity_refs_ counter when deleting data reader in the
+          TopicDescriptionImpl
+
+          (cherry picked from commit
+          eb9e48390da54516e2768933c767f052db5a35e1)
+
+Mon Apr 01 15:07:12 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit 0dd6c1173a38b279c75181485210a3b93855a6c0
+
+          Merge pull request #1082 from objectcomputing/restart
+
+          PR1081 for the 3.13 branch: Service Participant, Transport
+          Registry, RTPS libs updated to support certain Restart scenarios
+
+Thu Mar 28 13:56:43 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit 6359fa4cfcad7ff946af325f083c71beb486404f
+
+        * dds/DCPS/Service_Participant.cpp:
+        * tests/DCPS/Restart/RestartTest.mpc:
+
+          fixed safety profile and other build issues
+
+Wed Mar 27 16:48:43 UTC 2019  Adam Mitz  <mitza@ociweb.com>
+        commit 6f962f12f482518f4b5e9da1be76cbdb5b547bec
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/Restart/.gitignore:
+        * tests/DCPS/Restart/Messenger.idl:
+        * tests/DCPS/Restart/RestartTest.cpp:
+        * tests/DCPS/Restart/RestartTest.mpc:
+        * tests/DCPS/Restart/run_test.pl:
+
+          New test: shutdown and restart the Service_Participant
+
+Wed Mar 27 15:18:46 UTC 2019  Adam Mitz  <mitza@ociweb.com>
+        commit 5d0dbbf28e9cc1ce59b143770ad2aed0762b4f1e
+
+        * java/tests/hello/conditional_idlflags.mpb:
+        * java/tests/hello/hello_java_client.mpc:
+
+          Java hello test: remove workarounds for older ACE+TAO and VC++
+          versions
+
+Tue Mar 26 22:13:45 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit 1b71b5d771934a24cac21730a2a81a9267b35739
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          DomainParticipantImpl: timer's reactor may be gone during
+          destruction
+
+Tue Mar 26 15:59:10 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit 25b6516d3bb38703d0baf01ea997b455641fa39f
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Rtps Discovery: log port numbers as unsigned
+
+Tue Mar 26 15:21:43 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit c3c2ac4024a6b9a2e7d20ecaa73acfee5430fcae
+
+        * dds/DCPS/transport/framework/TransportRegistry.h:
+        * dds/DCPS/transport/framework/TransportRegistry.inl:
+
+          TransportRegistry::remove_inst() calls shutdown on the transport
+          to avoid threads it created outliving it
+
+Tue Mar 26 15:20:31 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit 04e4a96fd5c3397f1c8914b78dc399e84f8e0109
+
+        * dds/DCPS/ReactorInterceptor.cpp:
+
+          ReactorInterceptor: wait() can run after reactor shutdown
+
+Tue Mar 26 15:19:35 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit d6b4a03713e7252b4fc99956258488c60e177055
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+
+          Sedp: remove transport when we're done
+
+          also some simple local var renames for consistency
+
+Wed Mar 13 20:35:21 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+        * dds/DCPS/transport/framework/TransportRegistry.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpLoader.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpLoader.h:
+
+          Support restarting the same Service_Participant object after
+          shutdown()
+
+          Updated RtpsUdpLoader to have an easy way to reload the
+          transport.
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:
