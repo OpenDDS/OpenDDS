@@ -84,7 +84,7 @@ was built or was acquired:
      supplying the path isn't necessary unless wireshark was installed
      else where.
 
-- The newer out-of-source method, `--wireshark_cmake`, should be used if
+- The newer out-of-source method, `--wireshark-cmake`, should be used if
   Wireshark was built using CMake, which can put "config.h" header and
   the Wireshark libraries somewhere other than the source tree. Before 3.0
   this was Wireshark's recommended method for Windows and macOS and can
@@ -93,11 +93,11 @@ was built or was acquired:
   CMake complicates things somewhat so two more options with arguments
   provided:
 
-  - `--wireshark_build`
+  - `--wireshark-build`
     - Is the build directory the user choose before building Wireshark.
       This is required and an absolute path.
 
-  - `--wireshark_lib`
+  - `--wireshark-lib`
     - Is the location of the Wireshark libraries RELATIVE to the build
       location. It's optional but it might have to be supplied depending
       on the version of Wireshark as these defaults are based on

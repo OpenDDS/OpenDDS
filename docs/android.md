@@ -53,7 +53,7 @@ To follow along this guide and build OpenDDS you will need:
  - The latest [DOC Group ACE/TAO](https://github.com/DOCGroup/ACE_TAO) release.
    OCI ACE/TAO does not have the updated Android NDK support at the time of
    writing. The OpenDDS `configure` script will download and use DOC Group
-   ACE/TAO automatically if passed `--doc_group`.
+   ACE/TAO automatically if passed `--doc-group`.
  - [Android Native Development Kit (NDK)](https://developer.android.com/ndk/)
    r18 or higher. You can download it separately from android.com or using the
    SDK Manager that comes with Android Studio. If you download the NDK using the
@@ -108,7 +108,7 @@ example, we can use `armeabi-v7a` <sup>[2](#footnote-2)</sup>.
 those sections before configuring and building OpenDDS.
 
 ```Shell
-./configure --no-tests --doc_group --target=android --macros=ANDROID_ABI=armeabi-v7a
+./configure --no-tests --doc-group --target=android --macros=ANDROID_ABI=armeabi-v7a
 PATH=$PATH:$TOOLCHAIN/bin make # Pass -j/--jobs with an appropriate value or this'll take a while...
 ```
 

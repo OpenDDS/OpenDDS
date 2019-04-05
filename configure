@@ -126,6 +126,18 @@ sub targetUsage {
 
 ## arg processing and usage
 
+my %aliases = (
+  '--doc_group' => '--doc-group',
+  '--wireshark_cmake' => '--wireshark-cmake',
+  '--wireshark_build' => '--wireshark-build',
+  '--wireshark_lib' => '--wireshark-lib',
+);
+for my $arg (@ARGV) {
+  if (exists $aliases{$arg}) {
+    $arg = $aliases{$arg};
+  }
+}
+
 my @specs = # Array of array-refs, each inner array is an option group which
             # has the format [Group Description, Opt1 Spec, Opt1 Description,
             # Opt2 Spec, Opt2 Description, ...]
@@ -156,7 +168,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'ace=s', 'ACE (use ACE_ROOT, ACE_wrappers, or download)',
     'tao=s', 'TAO (use TAO_ROOT, ACE_ROOT/TAO, or download)',
     'mpc=s', 'MPC (use MPC_ROOT, ACE_ROOT/MPC, or download)',
-    'doc_group!', 'Use the DOC Group release of TAO',
+    'doc-group!', 'Use the DOC Group release of TAO',
     'ace-github-latest!', 'Clone latest ACE/TAO/MPC from GitHub',
    ],
    ['Advanced configuration:',
@@ -170,9 +182,9 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'jboss:s', 'JBoss application server (use JBOSS_HOME)',
     'ant:s', 'Ant for JBoss (use ANT_HOME or system pkg)',
     'wireshark:s', 'Wireshark source, "non-CMake" based (use WIRESHARK_SRC)',
-    'wireshark_cmake:s', 'Wireshark built with CMake, requires wireshark_build and wireshark_lib (use WIRESHARK_SRC)',
-    'wireshark_build:s', 'Wireshark CMake Build Location',
-    'wireshark_lib:s', 'Wireshark CMake libraries location, relative to wireshark_build',
+    'wireshark-cmake:s', 'Wireshark built with CMake, requires wireshark-build and wireshark-lib (use WIRESHARK_SRC)',
+    'wireshark-build:s', 'Wireshark CMake Build Location',
+    'wireshark-lib:s', 'Wireshark CMake libraries location, relative to wireshark-build',
     'glib:s', 'GLib for Wireshark (use GLIB_ROOT or system pkg)',
     'rapidjson:s', 'RapidJSON for Wireshark Sample Dissection (optional)',
     'qt:s', 'Qt5 (use QTDIR or system pkg)',
@@ -592,7 +604,7 @@ if (!$ace_src || !$tao_src) {
   } else {
     my($urlbase, $file, $download_message);
 
-    if ($opts{'doc_group'}) {
+    if ($opts{'doc-group'}) {
       my $github_url_tao_version = $doc_tao_version;
       $github_url_tao_version =~ s/\./_/g;
       $urlbase = 'https://github.com/DOCGroup/ACE_TAO/releases/download/ACE%2BTAO-' . $github_url_tao_version . '/';
@@ -911,10 +923,10 @@ my %optdep =
    'jboss' =>     ['JBOSS_HOME',    'lib/jboss-common.jar'],
    'ant' =>       ['ANT_HOME',      'bin/ant'],
    'wireshark' => ['WIRESHARK_SRC', 'epan/packet.h',               'wireshark'],
-   'wireshark_cmake' =>['WIRESHARK_SRC', 'epan/packet.h',          'wireshark_cmake'],
-   'wireshark_build' =>
+   'wireshark-cmake' =>['WIRESHARK_SRC', 'epan/packet.h',          'wireshark_cmake'],
+   'wireshark-build' =>
                   ['WIRESHARK_BUILD', 'config.h'],
-   'wireshark_lib' =>
+   'wireshark-lib' =>
                   ['WIRESHARK_LIB'],
    'glib' =>      ['GLIB_ROOT',     'include/glib-2.0/glib.h'],
    'rapidjson' => ['RAPIDJSON_ROOT', 'include/rapidjson/rapidjson.h', 'no_itl=0'],
@@ -953,15 +965,15 @@ if (exists $opts{'wireshark'} && !defined $ENV{'WIRESHARK_SRC'} && $opts{'wiresh
 }
 
 my $wireshark_lib_defaulted = 0;
-if (exists $opts{'wirehshark_cmake'} && !exists $opts{'wireshark_lib'}) {
+if (exists $opts{'wireshark-cmake'} && !exists $opts{'wireshark-lib'}) {
   if ($^O =~ /MSWin32/) {
-    $opts{'wirehshark_lib'} = "run\\RelWithDebInfo";
+    $opts{'wireshark-lib'} = "run\\RelWithDebInfo";
   } elsif ($^O =~ /darwin/) {
-    $opts{'wirehshark_lib'} = "run/Wireshark.app/Contents/Frameworks";
+    $opts{'wireshark-lib'} = "run/Wireshark.app/Contents/Frameworks";
   } elsif ($^O =~ /linux/) {
-    $opts{'wirehshark_lib'} = "";
+    $opts{'wireshark-lib'} = "";
   } else {
-    die "ERROR: --wireshark_lib is needed because we couldn't decide on a default value";
+    die "ERROR: --wireshark-lib is needed because we couldn't decide on a default value";
   }
   $wireshark_lib_defaulted = 1;
 }
@@ -1303,38 +1315,38 @@ if (exists $opts{'jboss'} && !exists $opts{'ant'}) {
   die "ERROR: --ant is required for --jboss (OpenDDS JMS Provider).\nStopped";
 }
 
-if (exists $opts{'wireshark'} || exists $opts{'wireshark_cmake'}) {
+if (exists $opts{'wireshark'} || exists $opts{'wireshark-cmake'}) {
   if (!exists $opts{'glib'}) {
-    die "ERROR: --glib is required for --wireshark and --wireshark_cmake.\nStopped";
+    die "ERROR: --glib is required for --wireshark and --wireshark-cmake.\nStopped";
   }
 
-  if (exists $opts{'wireshark_cmake'}) {
+  if (exists $opts{'wireshark-cmake'}) {
 
     if (exists $opts{'wireshark'}) {
-      die "ERROR: --wireshark and --wireshark_cmake can not be used at the same time.\nStopped";
+      die "ERROR: --wireshark and --wireshark-cmake can not be used at the same time.\nStopped";
     }
 
-    if (! -d ($opts{'wireshark_build'} . '/' . $opts{'wireshark_lib'})) {
+    if (! -d ($opts{'wireshark-build'} . '/' . $opts{'wireshark-lib'})) {
       if ($wireshark_lib_defaulted) {
-        die "ERROR: The default value for wireshark_lib: " . $opts{'wireshark_lib'} .
-            " does not exist, please supply wireshark_lib with the correct value";
+        die "ERROR: The default value for wireshark-lib: " . $opts{'wireshark-lib'} .
+            " does not exist, please supply wireshark-lib with the correct value";
       } else {
-        die "ERROR: The supplied wireshark_lib: " . $opts{'wireshark_lib'} . " does not exist.";
+        die "ERROR: The supplied wireshark-lib: " . $opts{'wireshark-lib'} . " does not exist.";
       }
     }
   }
 }
 
-if (exists $opts{'wireshark_cmake'} && !exists $opts{'wireshark_build'}) {
-  die "ERROR: --wireshark_build are required with --wireshark_cmake.\nStopped";
+if (exists $opts{'wireshark-cmake'} && !exists $opts{'wireshark-build'}) {
+  die "ERROR: --wireshark-build are required with --wireshark-cmake.\nStopped";
 }
 
-if (exists $opts{'wireshark_lib'} && !exists $opts{'wireshark_cmake'}) {
-  die "ERROR: --wireshark_cmake and --wireshark_build is required for --wireshark_lib.\nStopped";
+if (exists $opts{'wireshark-lib'} && !exists $opts{'wireshark-cmake'}) {
+  die "ERROR: --wireshark-cmake and --wireshark-build is required for --wireshark-lib.\nStopped";
 }
 
-if (exists $opts{'wireshark_build'} && !exists $opts{'wireshark_cmake'}) {
-  die "ERROR: --wireshark_cmake is required for --wireshark_build.\nStopped";
+if (exists $opts{'wireshark-build'} && !exists $opts{'wireshark-cmake'}) {
+  die "ERROR: --wireshark-cmake is required for --wireshark-build.\nStopped";
 }
 
 if ($opts{'glib'}) {
