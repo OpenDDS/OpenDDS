@@ -47,7 +47,7 @@ public:
   {
   }
 
-  virtual void on_replayer_matched(OpenDDS::DCPS::                         Replayer*,
+  virtual void on_replayer_matched(OpenDDS::DCPS::Replayer*,
                                    const ::DDS::PublicationMatchedStatus & status)
   {
     if (status.current_count > 0 ) {
@@ -81,28 +81,25 @@ public:
   {
   }
 
-  virtual void on_sample_data_received(OpenDDS::DCPS::                     Recorder*,
+  virtual void on_sample_data_received(OpenDDS::DCPS::Recorder*,
                                        const OpenDDS::DCPS::RawDataSample& sample)
   {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("MessengerRecorderListener::on_sample_data_received\n")));
 
-    MessengerReplayerListener* replayer_listener =
-      static_cast<MessengerReplayerListener*>(replayer_->get_listener().in());
-
-    if (replayer_listener->connected_readers_.size()) {
-      // get the instance handle of one of the connected reader
-      DDS::InstanceHandle_t reader_handle = *(replayer_listener->connected_readers_.begin());
-
-      // Send to only one connected reader. To send to all readers, use
-      // replayer_->write(sample)
-      if (DDS::RETCODE_ERROR == replayer_->write_to_reader(reader_handle, sample)) {
-        ACE_DEBUG((LM_DEBUG, "Write Sample Error\n"));
-      }
-    }
+    //      replayer_->write(sample);
+    samples_.push_back(sample);
   }
 
-  virtual void on_recorder_matched(OpenDDS::DCPS::                         Recorder*,
+  void replay()
+  {
+    for (size_t i = 0; i < samples_.size(); ++i) {
+      replayer_->write(samples_[i]);
+    }
+    samples_.clear();
+  }
+
+  virtual void on_recorder_matched(OpenDDS::DCPS::Recorder*,
                                    const ::DDS::SubscriptionMatchedStatus& status )
   {
     if (status.current_count == 1) {
@@ -123,6 +120,7 @@ public:
 private:
   ACE_Thread_Semaphore sem_;
   OpenDDS::DCPS::Replayer_var replayer_;
+  std::vector<OpenDDS::DCPS::RawDataSample> samples_;
 };
 
 
@@ -255,6 +253,10 @@ int run_test(int argc, ACE_TCHAR *argv[]){
                           ACE_TEXT(" recorder timeout!\n")),
                          -1);
       }
+
+      ACE_OS::sleep(5);
+      recorder_listener->replay();
+      ACE_OS::sleep(5);
 
       service->delete_recorder(recorder);
       service->delete_replayer(replayer);

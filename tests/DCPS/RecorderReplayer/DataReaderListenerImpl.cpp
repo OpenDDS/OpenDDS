@@ -65,6 +65,7 @@ DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
     std::cout << "SampleInfo.instance_state = " << info.instance_state << std::endl;
 
     if (info.valid_data) {
+      ACE_DEBUG((LM_INFO, "DRLI::on_data_available has valid_data\n"));
       std::cout << "Message: subject    = " << message.subject.in() << std::endl
                 << "         subject_id = " << message.subject_id   << std::endl
                 << "         from       = " << message.from.in()    << std::endl

@@ -15,7 +15,7 @@ use strict;
 
 my $status = 0;
 
-my $dbg_lvl = '-ORBDebugLevel 1 -DCPSDebugLevel 4 -DCPSTransportDebugLevel 2 -DCPSPendingTimeout 3';
+my $dbg_lvl = '-ORBVerboseLogging 1 -ORBDebugLevel 1 -DCPSDebugLevel 4 -DCPSTransportDebugLevel 2 -DCPSPendingTimeout 3';
 my $pub_opts = "$dbg_lvl -ORBLogFile pub.log";
 my $sub_opts = "$dbg_lvl -ORBLogFile sub.log";
 my $relay_opts = "$dbg_lvl -ORBLogFile relay.log";
