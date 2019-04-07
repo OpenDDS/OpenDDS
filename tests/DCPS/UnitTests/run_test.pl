@@ -66,7 +66,6 @@ sub run_unit_tests {
         $test->start_process("$executable");
         my $retcode = $test->finish(60);
         if ($retcode != 0) {
-          print STDOUT "BOGUS\n";
           ++$status;
         }
       }
