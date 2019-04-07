@@ -13,6 +13,9 @@ use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 use FileHandle;
 use Cwd;
+use strict;
+
+my $single_test;
 
 if(defined $ARGV[0])
 {
@@ -23,6 +26,7 @@ if(defined $ARGV[0])
 }
 
 my $something_ran = 0;
+my $status = 0;
 
 sub run_unit_tests {
   if($single_test ne '') {
@@ -43,14 +47,15 @@ sub run_unit_tests {
     if (opendir($fh, $dir)) {
       foreach my $file (readdir($fh)) {
         my $test = new PerlDDS::TestFramework();
+        my $executable;
         if ($file =~ /$testExe/o) {
-          my $executable = $1;
+          $executable = $1;
           # each process runs to completion before the next starts
           my $LONE_PROCESS = 1;
           if ($executable eq "UnitTests_BIT_DataReader") {
-            $test->process ("$executable", "$executable", "-DCPSConfigFile rtps.ini", $LONE_PROCESS);
+            $test->process("$executable", "$executable", "-DCPSConfigFile rtps.ini", $LONE_PROCESS);
           } else {
-            $test->process ("$executable", "$executable", "", $LONE_PROCESS);
+            $test->process("$executable", "$executable", "", $LONE_PROCESS);
           }
         }
         else {
@@ -58,8 +63,10 @@ sub run_unit_tests {
         }
         $something_ran = 1;
         print STDOUT "Running $file\n";
+        $test->start_process("$executable");
         my $retcode = $test->finish(60);
         if ($retcode != 0) {
+          print STDOUT "BOGUS\n";
           ++$status;
         }
       }

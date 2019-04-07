@@ -129,7 +129,7 @@ DisjointSequence::insert(SequenceNumber value, CORBA::ULong num_bits,
         // skip ahead: next gap in sequence must be past iter->second
         CORBA::ULong next_i = CORBA::ULong(iter->second.getValue() - val);
         bit = next_i % 32;
-        if (next_i / 32 != i / 32) {
+        if (next_i / 32 != i / 32 && next_i < num_bits) {
           x = static_cast<CORBA::ULong>(bits[next_i / 32]);
         }
         i = next_i;
@@ -254,11 +254,10 @@ DisjointSequence::fill_bitmap_range(CORBA::ULong low, CORBA::ULong high,
   for (CORBA::ULong i = (num_bits + 31) / 32; i < idx_low; ++i) {
     bitmap[i] = 0;
   }
-
   // write the Long at idx_low, preserving bits that may already be there
-  CORBA::ULong x = bitmap[idx_low]; // use unsigned for bitwise operators
+  CORBA::ULong x = ((num_bits / 32) < idx_low) ? 0 : bitmap[idx_low]; // use unsigned for bitwise operators
   //    clear the bits in x in the range [bit_last, bit_low)
-  if (num_bits > 0) {
+  if ((num_bits % 32) != 0) {
     const size_t bit_last = ((num_bits - 1) / 32 == idx_low)
                             ? ((num_bits - 1) % 32 + 1) : 0;
     for (size_t m = bit_last; m < bit_low; ++m) {
