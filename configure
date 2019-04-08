@@ -126,28 +126,6 @@ sub targetUsage {
 
 ## arg processing and usage
 
-# Keep compatibility with old options
-# OLD_FLAG => NEW_FLAG
-my %aliases = (
-  '--doc_group' => '--doc-group',
-  '--wireshark_cmake' => '--wireshark-cmake',
-  '--wireshark_build' => '--wireshark-build',
-  '--wireshark_lib' => '--wireshark-lib',
-);
-for my $arg (@ARGV) {
-  my $flag;
-  my $value = '';
-  if ($arg =~ /^([A-Za-z0-9\-_]+)=(.*)$/) {
-    $flag = $1;
-    $value = "=$2";
-  } else {
-    $flag = $arg;
-  }
-  if (exists $aliases{$flag}) {
-    $arg = "$aliases{$flag}$value";
-  }
-}
-
 my @specs = # Array of array-refs, each inner array is an option group which
             # has the format [Group Description, Opt1 Spec, Opt1 Description,
             # Opt2 Spec, Opt2 Description, ...]
@@ -178,7 +156,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'ace=s', 'ACE (use ACE_ROOT, ACE_wrappers, or download)',
     'tao=s', 'TAO (use TAO_ROOT, ACE_ROOT/TAO, or download)',
     'mpc=s', 'MPC (use MPC_ROOT, ACE_ROOT/MPC, or download)',
-    'doc-group!', 'Use the DOC Group release of TAO',
+    'doc-group|doc_group!', 'Use the DOC Group release of TAO',
     'ace-github-latest!', 'Clone latest ACE/TAO/MPC from GitHub',
    ],
    ['Advanced configuration:',
@@ -192,9 +170,11 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'jboss:s', 'JBoss application server (use JBOSS_HOME)',
     'ant:s', 'Ant for JBoss (use ANT_HOME or system pkg)',
     'wireshark:s', 'Wireshark source, "non-CMake" based (use WIRESHARK_SRC)',
-    'wireshark-cmake:s', 'Wireshark built with CMake, requires wireshark-build and wireshark-lib (use WIRESHARK_SRC)',
-    'wireshark-build:s', 'Wireshark CMake Build Location',
-    'wireshark-lib:s', 'Wireshark CMake libraries location, relative to wireshark-build',
+    'wireshark-cmake|wireshark_cmake:s',
+      'Wireshark built with CMake, requires wireshark-build and wireshark-lib (use WIRESHARK_SRC)',
+    'wireshark-build|wireshark_build:s', 'Wireshark CMake Build Location',
+    'wireshark-lib|wireshark_lib:s',
+      'Wireshark CMake libraries location, relative to wireshark-build',
     'glib:s', 'GLib for Wireshark (use GLIB_ROOT or system pkg)',
     'rapidjson:s', 'RapidJSON for Wireshark Sample Dissection (optional)',
     'qt:s', 'Qt5 (use QTDIR or system pkg)',
