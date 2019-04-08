@@ -126,6 +126,8 @@ sub targetUsage {
 
 ## arg processing and usage
 
+# Keep compatibility with old options
+# OLD_FLAG => NEW_FLAG
 my %aliases = (
   '--doc_group' => '--doc-group',
   '--wireshark_cmake' => '--wireshark-cmake',
@@ -133,8 +135,16 @@ my %aliases = (
   '--wireshark_lib' => '--wireshark-lib',
 );
 for my $arg (@ARGV) {
-  if (exists $aliases{$arg}) {
-    $arg = $aliases{$arg};
+  my $flag;
+  my $value = '';
+  if ($arg =~ /^([A-Za-z0-9\-_]+)=(.*)$/) {
+    $flag = $1;
+    $value = "=$2";
+  } else {
+    $flag = $arg;
+  }
+  if (exists $aliases{$flag}) {
+    $arg = "$aliases{$flag}$value";
   }
 }
 
