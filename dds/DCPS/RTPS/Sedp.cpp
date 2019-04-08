@@ -206,10 +206,10 @@ Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock) :
     make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER), *this),
   participant_stateless_message_writer_(
     make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER), *this),
-  participant_volatile_message_secure_writer_(
-    make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER), *this),
   dcps_participant_secure_writer_(
     make_id(participant_id, ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER), *this),
+  participant_volatile_message_secure_writer_(
+    make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER), *this),
 #endif
 
   publications_reader_(make_rch<Reader>(
@@ -945,19 +945,59 @@ void Sedp::associate_secure_readers_to_writers(const Security::SPDPdiscoveredPar
 }
 
 void
+Sedp::create_and_send_datareader_crypto_tokens(
+  const DDS::Security::DatareaderCryptoHandle& drch, const DCPS::RepoId& local_reader,
+  const DDS::Security::DatawriterCryptoHandle& dwch, const DCPS::RepoId& remote_writer)
+{
+  DCPS::RepoId remote_participant;
+  std::memcpy(remote_participant.guidPrefix, remote_writer.guidPrefix, sizeof(GuidPrefix_t));
+  remote_participant.entityId = ENTITYID_PARTICIPANT;
+
+  RepeatOnceWriter::RemoteWriter info;
+  info.local_reader = local_reader;
+  info.remote_writer = remote_writer;
+  DDS::Security::DatareaderCryptoTokenSeq& drcts = info.reader_tokens;
+  create_datareader_crypto_tokens(drch, dwch, drcts);
+
+  send_datareader_crypto_tokens(local_reader, remote_writer, drcts);
+  participant_volatile_message_secure_writer_.
+    remote_writers_[remote_participant].push_back(info);
+}
+
+void
+Sedp::create_and_send_datawriter_crypto_tokens(
+  const DDS::Security::DatawriterCryptoHandle& dwch, const DCPS::RepoId& local_writer,
+  const DDS::Security::DatareaderCryptoHandle& drch, const DCPS::RepoId& remote_reader)
+{
+  DCPS::RepoId remote_participant;
+  std::memcpy(remote_participant.guidPrefix, remote_reader.guidPrefix, sizeof(GuidPrefix_t));
+  remote_participant.entityId = ENTITYID_PARTICIPANT;
+
+  RepeatOnceWriter::RemoteReader info;
+  info.local_writer = local_writer;
+  info.remote_reader = remote_reader;
+  DDS::Security::DatawriterCryptoTokenSeq& dwcts = info.writer_tokens;
+  create_datawriter_crypto_tokens(dwch, drch, dwcts);
+
+  send_datareader_crypto_tokens(local_writer, remote_reader, dwcts);
+  participant_volatile_message_secure_writer_.
+    remote_readers_[remote_participant].push_back(info);
+}
+
+void
 Sedp::send_builtin_crypto_tokens(
   const DCPS::RepoId& dstParticipant, const DCPS::EntityId_t& dstEntity, const DCPS::RepoId& src)
 {
   DCPS::RepoId dst = dstParticipant;
   dst.entityId = dstEntity;
   if (DCPS::GuidConverter(src).isReader()) {
-    create_and_send_datareader_crypto_tokens(local_reader_crypto_handles_[src],
-                                             src, remote_writer_crypto_handles_[dst],
-                                             dst);
+    create_and_send_datareader_crypto_tokens(
+      local_reader_crypto_handles_[src], src,
+      remote_writer_crypto_handles_[dst], dst);
   } else {
-    create_and_send_datawriter_crypto_tokens(local_writer_crypto_handles_[src],
-                                             src, remote_reader_crypto_handles_[dst],
-                                             dst);
+    create_and_send_datawriter_crypto_tokens(
+      local_writer_crypto_handles_[src], src,
+      remote_reader_crypto_handles_[dst], dst);
   }
 }
 
@@ -1243,10 +1283,7 @@ template<typename Map>
 void
 Sedp::remove_entities_belonging_to(Map& m, RepoId participant)
 {
-  participant.entityId.entityKey[0] = 0;
-  participant.entityId.entityKey[1] = 0;
-  participant.entityId.entityKey[2] = 0;
-  participant.entityId.entityKind = 0;
+  participant.entityId = ENTITYID_UNKNOWN;
   for (typename Map::iterator i = m.lower_bound(participant);
        i != m.end() && 0 == std::memcmp(i->first.guidPrefix,
                                         participant.guidPrefix,
@@ -2889,6 +2926,48 @@ Sedp::Writer::set_header_fields(DCPS::DataSampleHeader& dsh,
   dsh.source_timestamp_nanosec_ = now.usec() * 1000;
 }
 
+#ifdef OPENDDS_SECURITY
+Sedp::RepeatOnceWriter::RepeatOnceWriter(const RepoId& pub_id, Sedp& sedp)
+  : Writer(pub_id, sedp)
+{
+}
+
+void
+Sedp::RepeatOnceWriter::acknowledged_by_reader(const RepoId& rdr)
+{
+  RepoId remote_participant;
+  RTPS::assign(remote_participant.guidPrefix, rdr.guidPrefix);
+  remote_participant.entityId = ENTITYID_PARTICIPANT;
+
+  if (!std::memcmp(repo_id_.guidPrefix, rdr.guidPrefix, sizeof(DCPS::GuidPrefix_t))) {
+    return;
+  }
+
+  if (DCPS::DCPS_debug_level > 3) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::RepeatOnceWriter::acknowledged_by_reader(): %C\n",
+      OPENDDS_STRING(DCPS::GuidConverter(GuidConverterrdr)).c_str()));
+  }
+
+  if (remote_readers_.count(remote_participant)) {
+    RemoteReaderVector& remote_readers = remote_readers_[remote_participant];
+    typedef RemoteReaderVector::iterator iter_t;
+    for (iter_t i = remote_readers.begin(); i != remote_readers.end(); ++i) {
+      sedp_.send_datawriter_crypto_tokens(i->local_writer, i->remote_reader, i->writer_tokens);
+    }
+    remote_readers_.erase(remote_participant);
+  }
+
+  if (remote_writers_.count(remote_participant)) {
+    RemoteWriterVector& remote_writers = remote_writers_[remote_participant];
+    typedef RemoteWriterVector::iterator iter_t;
+    for (iter_t i = remote_writers.begin(); i != remote_writers.end(); ++i) {
+      sedp_.send_datareader_crypto_tokens(i->local_reader, i->remote_writer, i->reader_tokens);
+    }
+    remote_writers_.erase(remote_participant);
+  }
+}
+#endif
+
 //-------------------------------------------------------------------------
 
 Sedp::Reader::~Reader()
@@ -3965,24 +4044,27 @@ Sedp::generate_remote_matched_reader_crypto_handle(const RepoId& reader_part,
 }
 
 void
-Sedp::create_and_send_datareader_crypto_tokens(const DDS::Security::DatareaderCryptoHandle& drch,
-                                               const RepoId& local_reader,
-                                               const DDS::Security::DatawriterCryptoHandle& dwch,
-                                               const RepoId& remote_writer)
+Sedp::create_datareader_crypto_tokens(const DDS::Security::DatareaderCryptoHandle& drch,
+                                      const DDS::Security::DatawriterCryptoHandle& dwch,
+                                      DDS::Security::DatareaderCryptoTokenSeq& drcts)
 {
   DDS::Security::SecurityException se = {"", 0, 0};
   DDS::Security::CryptoKeyExchange_var key_exchange = spdp_.get_security_config()->get_crypto_key_exchange();
 
-  DDS::Security::DatareaderCryptoTokenSeq drcts;
-
   if (!key_exchange->create_local_datareader_crypto_tokens(drcts, drch, dwch, se)) {
     ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
-      ACE_TEXT("Sedp::create_and_send_datareader_crypto_tokens() - ")
+      ACE_TEXT("Sedp::create_datareader_crypto_tokens() - ")
       ACE_TEXT("Unable to create local datareader crypto tokens with crypto key exchange plugin. ")
       ACE_TEXT("Security Exception[%d.%d]: %C\n"), se.code, se.minor_code, se.message.in()));
     return;
   }
+}
 
+void
+Sedp::send_datareader_crypto_tokens(const RepoId& local_reader,
+                                    const RepoId& remote_writer,
+                                    const DDS::Security::DatareaderCryptoTokenSeq& drcts)
+{
   if (drcts.length() != 0) {
     DCPS::RepoId remote_part = remote_writer;
     remote_part.entityId = ENTITYID_PARTICIPANT;
@@ -4002,7 +4084,7 @@ Sedp::create_and_send_datareader_crypto_tokens(const DDS::Security::DatareaderCr
     msg.message_data = reinterpret_cast<const DDS::Security::DataHolderSeq&>(drcts);
 
     if (write_volatile_message(msg, remote_volatile_reader) != DDS::RETCODE_OK) {
-      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::create_and_send_datareader_crypto_tokens() - ")
+      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::send_datareader_crypto_tokens() - ")
         ACE_TEXT("Unable to write volatile message.\n")));
       return;
     }
@@ -4011,24 +4093,27 @@ Sedp::create_and_send_datareader_crypto_tokens(const DDS::Security::DatareaderCr
 }
 
 void
-Sedp::create_and_send_datawriter_crypto_tokens(const DDS::Security::DatawriterCryptoHandle& dwch,
-                                               const RepoId& local_writer,
-                                               const DDS::Security::DatareaderCryptoHandle& drch,
-                                               const RepoId& remote_reader)
+Sedp::create_datawriter_crypto_tokens(const DDS::Security::DatawriterCryptoHandle& dwch,
+                                      const DDS::Security::DatareaderCryptoHandle& drch,
+                                      DDS::Security::DatawriterCryptoTokenSeq& dwcts)
 {
   DDS::Security::SecurityException se = {"", 0, 0};
   DDS::Security::CryptoKeyExchange_var key_exchange = spdp_.get_security_config()->get_crypto_key_exchange();
 
-  DDS::Security::DatawriterCryptoTokenSeq dwcts;
-
   if (key_exchange->create_local_datawriter_crypto_tokens(dwcts, dwch, drch, se) == false) {
     ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
-      ACE_TEXT("Sedp::create_and_send_datawriter_crypto_tokens() - ")
+      ACE_TEXT("Sedp::create_datawriter_crypto_tokens() - ")
       ACE_TEXT("Unable to create local datawriter crypto tokens with crypto key exchange plugin. ")
       ACE_TEXT("Security Exception[%d.%d]: %C\n"), se.code, se.minor_code, se.message.in()));
     return;
   }
+}
 
+void
+Sedp::send_datawriter_crypto_tokens(const RepoId& local_writer,
+                                    const RepoId& remote_reader,
+                                    const DDS::Security::DatawriterCryptoTokenSeq& dwcts)
+{
   if (dwcts.length() != 0) {
     DCPS::RepoId remote_part = remote_reader;
     remote_part.entityId = ENTITYID_PARTICIPANT;
@@ -4048,7 +4133,7 @@ Sedp::create_and_send_datawriter_crypto_tokens(const DDS::Security::DatawriterCr
     msg.message_data = reinterpret_cast<const DDS::Security::DataHolderSeq&>(dwcts);
 
     if (write_volatile_message(msg, remote_volatile_reader) != DDS::RETCODE_OK) {
-      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::create_and_send_datawriter_crypto_tokens() - ")
+      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::send_datawriter_crypto_tokens() - ")
         ACE_TEXT("Unable to write volatile message.\n")));
       return;
     }

@@ -1697,6 +1697,11 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
     callbacks[i]->reader_exists(remote, local);
   }
 
+  TransportSendListener_rch tsl = send_listener_for(local);
+  if (tsl) {
+    tsl->acknowledged_by_reader(remote);
+  }
+
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   const RtpsWriterMap::iterator rw = writers_.find(local);
   if (rw == writers_.end()) {

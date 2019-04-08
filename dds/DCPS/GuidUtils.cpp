@@ -38,11 +38,26 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS { namespace DCPS {
 
 OPENDDS_STRING
+to_string(const EntityId_t& entityId)
+{
+  OPENDDS_STRING ret;
+
+  std::size_t len = sizeof(entityId.entityKey);
+  for (std::size_t i = 0; i < len; ++i) {
+    ret += to_dds_string(unsigned(entityId.entityKey[i]), true);
+  }
+
+  ret += to_dds_string(unsigned(entityId.entityKind), true);
+
+  return ret;
+}
+
+OPENDDS_STRING
 to_string(const GUID_t& guid)
 {
   OPENDDS_STRING ret;
-  std::size_t len = sizeof(guid.guidPrefix);
 
+  std::size_t len = sizeof(guid.guidPrefix);
   for (std::size_t i = 0; i < len; ++i) {
     ret += to_dds_string(unsigned(guid.guidPrefix[i]), true);
 
@@ -51,13 +66,7 @@ to_string(const GUID_t& guid)
     }
   }
 
-  len = sizeof(guid.entityId.entityKey);
-
-  for (std::size_t i = 0; i < len; ++i) {
-    ret += to_dds_string(unsigned(guid.entityId.entityKey[i]), true);
-  }
-
-  ret += to_dds_string(unsigned(guid.entityId.entityKind), true);
+  ret += to_string(guid.entityId);
 
   return ret;
 }

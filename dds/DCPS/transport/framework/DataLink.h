@@ -42,11 +42,11 @@ namespace OpenDDS {
 namespace DCPS {
 
 
-class  TransportQueueElement;
-class  ReceivedDataSample;
-class  DataSampleElement;
-class  ThreadPerConnectionSendTask;
-class  TransportClient;
+class TransportQueueElement;
+class ReceivedDataSample;
+class DataSampleElement;
+class ThreadPerConnectionSendTask;
+class TransportClient;
 class TransportImpl;
 
 typedef OPENDDS_MAP_CMP(RepoId, DataLinkSet_rch, GUID_tKeyLessThan) DataLinkSetMap;
@@ -290,7 +290,7 @@ protected:
   friend class ThreadPerConnectionSendTask;
 
   /// The implementation of the functions that accomplish the
-  /// sample or control message delivery. IThey just simply
+  /// sample or control message delivery. They just simply
   /// delegate to the send strategy.
   void send_start_i();
   virtual void send_i(TransportQueueElement* element, bool relink = true);
@@ -301,13 +301,13 @@ protected:
   /// knows about due to make_reservation().
   GUIDSeq* peer_ids(const RepoId& local_id) const;
 
+  TransportSendListener_rch send_listener_for(const RepoId& pub_id) const;
+  TransportReceiveListener_rch recv_listener_for(const RepoId& sub_id) const;
+
 private:
 
   /// Helper function to output the enum as a string to help debugging.
   const char* connection_notice_as_str(ConnectionNotice notice);
-
-  TransportSendListener_rch send_listener_for(const RepoId& pub_id) const;
-  TransportReceiveListener_rch recv_listener_for(const RepoId& sub_id) const;
 
   /// Save current sub and pub association maps for releasing and create
   /// empty maps for new associations.
