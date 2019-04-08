@@ -236,20 +236,17 @@ DisjointSequence::fill_bitmap_range(CORBA::ULong low, CORBA::ULong high,
                                     CORBA::ULong& num_bits)
 {
   bool clamped = false;
-  CORBA::ULong idx_nb = num_bits / 32, bit_nb = num_bits % 32,
-               idx_low = low / 32, bit_low = low % 32,
-               idx_high = high / 32, bit_high = high % 32;
-
-  if (idx_low >= length) {
+  if ((low / 32) >= length) {
     return false;
   }
-  if (idx_high >= length) {
-    // clamp to largest number we can represent
+  if ((high / 32) >= length) {
     high = length * 32 - 1;
-    idx_high = length - 1;
-    bit_high = high % 32;
     clamped = true;
   }
+
+  const CORBA::ULong idx_nb = num_bits / 32, bit_nb = num_bits % 32,
+                     idx_low = low / 32, bit_low = low % 32,
+                     idx_high = high / 32, bit_high = high % 32;
 
   static const CORBA::Long MNSLI = 0x80000000; // most negative signed long integer
 
