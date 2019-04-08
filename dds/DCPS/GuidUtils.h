@@ -191,6 +191,9 @@ struct EntityIdConverter {
 OpenDDS_Dcps_Export OPENDDS_STRING
 to_string(const GUID_t& guid);
 
+OpenDDS_Dcps_Export OPENDDS_STRING
+to_string(const EntityId_t& entityId);
+
 #ifndef OPENDDS_SAFETY_PROFILE
 // Serialize to ASCII Hex string: "xxxx.xxxx.xxxx.xxxx"
 OpenDDS_Dcps_Export std::ostream&

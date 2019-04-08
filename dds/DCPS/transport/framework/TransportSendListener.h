@@ -70,6 +70,14 @@ public:
 
   virtual void retrieve_inline_qos_data(InlineQosData& qos_data) const;
 
+  /**
+   * We have received an ACKNACK from a remote datareader.
+   *
+   * In the case of security, this means it can decrypt our messages. This was
+   * made for RepeatOnceWriter in Sedp.
+   */
+  virtual void acknowledged_by_reader(const RepoId& rdr);
+
 protected:
 
   TransportSendListener();
