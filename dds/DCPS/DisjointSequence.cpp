@@ -236,7 +236,8 @@ DisjointSequence::fill_bitmap_range(CORBA::ULong low, CORBA::ULong high,
                                     CORBA::ULong& num_bits)
 {
   bool clamped = false;
-  CORBA::ULong idx_low = low / 32, bit_low = low % 32,
+  CORBA::ULong idx_nb = num_bits / 32, bit_nb = num_bits % 32,
+               idx_low = low / 32, bit_low = low % 32,
                idx_high = high / 32, bit_high = high % 32;
 
   if (idx_low >= length) {
@@ -250,42 +251,41 @@ DisjointSequence::fill_bitmap_range(CORBA::ULong low, CORBA::ULong high,
     clamped = true;
   }
 
-  // clear any full Longs between the last bit we wrote and idx_low
-  for (CORBA::ULong i = (num_bits + 31) / 32; i < idx_low; ++i) {
+  static const CORBA::Long MNSLI = 0x80000000; // most negative signed long integer
+
+  // handle idx_nb zeros
+  if (bit_nb) {
+    bitmap[idx_nb] &= (MNSLI >> (bit_nb - 1));
+  } else {
+    bitmap[idx_nb] = 0;
+  }
+
+  // handle zeros between idx_nb and idx_low (if gap exists)
+  for (CORBA::ULong i = idx_nb + 1; i < idx_low; ++i) {
     bitmap[i] = 0;
   }
-  // write the Long at idx_low, preserving bits that may already be there
-  CORBA::ULong x = ((num_bits / 32) < idx_low) ? 0 : bitmap[idx_low]; // use unsigned for bitwise operators
-  //    clear the bits in x in the range [bit_last, bit_low)
-  if ((num_bits % 32) != 0) {
-    const size_t bit_last = ((num_bits - 1) / 32 == idx_low)
-                            ? ((num_bits - 1) % 32 + 1) : 0;
-    for (size_t m = bit_last; m < bit_low; ++m) {
-      x &= ~(1 << (31 - m));
+
+  // handle idx_nb ones
+  if (bit_low) {
+    if (idx_low > idx_nb) {
+      bitmap[idx_low] = ~(MNSLI >> (bit_low - 1));
+    } else {
+      bitmap[idx_low] |= ~(MNSLI >> (bit_low - 1));
     }
   } else {
-    x = 0;
-  }
-  //    set the bits in x in the range [bit_low, limit)
-  const size_t limit = (idx_high == idx_low) ? bit_high : 31;
-  for (size_t b = bit_low; b <= limit; ++b) {
-    x |= (1 << (31 - b));
-  }
-  bitmap[idx_low] = x;
-
-  // any full Longs inside the current range are set to all 1's
-  for (CORBA::ULong elt = idx_low + 1; elt < idx_high; ++elt) {
-    bitmap[elt] = 0xFFFFFFFF;
+    bitmap[idx_low] = 0xFFFFFFFF;
   }
 
+  // handle ones between idx_low and idx_high (if gap exists)
+  for (CORBA::ULong i = idx_low + 1; i < idx_high; ++i) {
+    bitmap[i] = 0xFFFFFFFF;
+  }
+
+  // handle idx_high
   if (idx_high > idx_low) {
-    // write the Long at idx_high, no need to preserve bits since this is
-    // the first iteration that's writing it
-    x = 0;
-    for (size_t b = 0; b <= bit_high; ++b) {
-      x |= (1 << (31 - b));
-    }
-    bitmap[idx_high] = x;
+    bitmap[idx_high] = MNSLI >> (bit_high);
+  } else {
+    bitmap[idx_high] &= MNSLI >> (bit_high);
   }
 
   num_bits = high + 1;
