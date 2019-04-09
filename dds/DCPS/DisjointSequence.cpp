@@ -248,11 +248,9 @@ DisjointSequence::fill_bitmap_range(CORBA::ULong low, CORBA::ULong high,
                      idx_low = low / 32, bit_low = low % 32,
                      idx_high = high / 32, bit_high = high % 32;
 
-  static const CORBA::Long MNSLI = 0x80000000; // most negative signed long integer
-
   // handle idx_nb zeros
   if (bit_nb) {
-    bitmap[idx_nb] &= (MNSLI >> (bit_nb - 1));
+    bitmap[idx_nb] &= ~((0x1u << (32 - bit_nb)) - 1);
   } else {
     bitmap[idx_nb] = 0;
   }
@@ -265,9 +263,9 @@ DisjointSequence::fill_bitmap_range(CORBA::ULong low, CORBA::ULong high,
   // handle idx_nb ones
   if (bit_low) {
     if (idx_low > idx_nb) {
-      bitmap[idx_low] = ~(MNSLI >> (bit_low - 1));
+      bitmap[idx_low] = (0x1u << (32 - bit_low)) - 1;
     } else {
-      bitmap[idx_low] |= ~(MNSLI >> (bit_low - 1));
+      bitmap[idx_low] |= (0x1u << (32 - bit_low)) - 1;
     }
   } else {
     bitmap[idx_low] = 0xFFFFFFFF;
@@ -279,10 +277,12 @@ DisjointSequence::fill_bitmap_range(CORBA::ULong low, CORBA::ULong high,
   }
 
   // handle idx_high
-  if (idx_high > idx_low) {
-    bitmap[idx_high] = MNSLI >> (bit_high);
-  } else {
-    bitmap[idx_high] &= MNSLI >> (bit_high);
+  if (bit_high < 31) {
+    if (idx_high > idx_low) {
+      bitmap[idx_high] = ~((0x1u << (31 - bit_high)) - 1);
+    } else {
+      bitmap[idx_high] &= ~((0x1u << (31 - bit_high)) - 1);
+    }
   }
 
   num_bits = high + 1;
