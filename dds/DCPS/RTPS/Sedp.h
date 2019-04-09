@@ -429,6 +429,9 @@ private:
       DCPS::RepoId, RemoteReaderVector, DCPS::GUID_tKeyLessThan) RemoteReaderVectors;
     RemoteReaderVectors remote_readers_;
 
+    /// Lock for remote_readers_ and remote_writers_
+    ACE_Thread_Mutex lock_;
+
   } participant_volatile_message_secure_writer_;
 #endif
 

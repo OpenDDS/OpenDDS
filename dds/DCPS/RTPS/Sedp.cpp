@@ -960,6 +960,7 @@ Sedp::create_and_send_datareader_crypto_tokens(
   create_datareader_crypto_tokens(drch, dwch, drcts);
 
   send_datareader_crypto_tokens(local_reader, remote_writer, drcts);
+  ACE_Guard<ACE_Thread_Mutex> g(participant_volatile_message_secure_writer_.lock_);
   participant_volatile_message_secure_writer_.
     remote_writers_[remote_participant].push_back(info);
 }
@@ -979,7 +980,8 @@ Sedp::create_and_send_datawriter_crypto_tokens(
   DDS::Security::DatawriterCryptoTokenSeq& dwcts = info.writer_tokens;
   create_datawriter_crypto_tokens(dwch, drch, dwcts);
 
-  send_datareader_crypto_tokens(local_writer, remote_reader, dwcts);
+  send_datawriter_crypto_tokens(local_writer, remote_reader, dwcts);
+  ACE_Guard<ACE_Thread_Mutex> g(participant_volatile_message_secure_writer_.lock_);
   participant_volatile_message_secure_writer_.
     remote_readers_[remote_participant].push_back(info);
 }
@@ -2948,6 +2950,7 @@ Sedp::RepeatOnceWriter::acknowledged_by_reader(const RepoId& rdr)
       OPENDDS_STRING(DCPS::GuidConverter(rdr)).c_str()));
   }
 
+  ACE_Guard<ACE_Thread_Mutex> g(lock_);
   if (remote_readers_.count(remote_participant)) {
     RemoteReaderVector& remote_readers = remote_readers_[remote_participant];
     typedef RemoteReaderVector::iterator iter_t;
@@ -4205,8 +4208,8 @@ Sedp::handle_datareader_crypto_tokens(const DDS::Security::ParticipantVolatileMe
   if (r_iter == remote_reader_crypto_handles_.end()) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Sedp::handle_datareader_crypto_tokens() - ")
-      ACE_TEXT("received tokens for unknown remote reader. Caching.\n")));
-
+      ACE_TEXT("received tokens for unknown remote reader: (%C). Caching.\n"),
+      OPENDDS_STRING(DCPS::GuidConverter(msg.source_endpoint_guid)).c_str()));
     pending_remote_reader_crypto_tokens_[msg.source_endpoint_guid] = drcts;
     return;
   }
