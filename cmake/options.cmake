@@ -73,12 +73,16 @@ endif()
 
 # ACE defines.
 
-if (OPENDDS_NO_DEBUG AND CMAKE_HOST_UNIX)
+if (OPENDDS_NO_DEBUG AND UNIX)
   _OPENDDS_APPEND_DEF(ACE_NDEBUG NDEBUG)
 endif()
 
-if (NOT OPENDDS_INLINE)
-  _OPENDDS_APPEND_DEF(ACE_NO_INLINE)
+if (NOT MSVC) # On MSVC, ACE sets this in config-win32-common.h
+  if (OPENDDS_INLINE)
+    _OPENDDS_APPEND_DEF(__ACE_INLINE__)
+  else()
+    _OPENDDS_APPEND_DEF(ACE_NO_INLINE)
+  endif()
 endif()
 
 if (OPENDDS_IPV6)
@@ -97,7 +101,7 @@ endif()
 
 # Force C++ standard.
 
-if (OPENDDS_STD AND CMAKE_HOST_UNIX)
+if (OPENDDS_STD AND UNIX)
   if("${OPENDDS_STD}" MATCHES "(03|98)$")
     set(CMAKE_CXX_STANDARD 98)
   elseif("${OPENDDS_STD}" MATCHES "(0x|11)$")

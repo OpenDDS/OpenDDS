@@ -48,7 +48,8 @@ my %platforminfo =
                'libpath' => 'PATH',
                'cl_versions' => {13.1 => 'vc71', 14 => 'vc8', 15 => 'vc9',
                                  16 => 'vc10', 17 => 'vc11', 18 => 'vc12',
-                                 19 => 'vc14', 19.1 => 'vs2017'},
+                                 19 => 'vc14', 19.1 => 'vs2017',
+                                 19.2 => 'vs2019'},
               },
    'macosx' => {
                 'compilers' => ['clang++'],
@@ -573,14 +574,14 @@ if (!$ace_src || !$tao_src) {
     my $urlbase = 'https://github.com/DOCGroup';
 
     print "Cloning git repo: $urlbase/ACE_TAO\n";
-    my $err = system("git clone --depth 1 $urlbase/ACE_TAO");
+    my $err = system("git clone -q --depth 1 $urlbase/ACE_TAO");
     die 'ERROR: Failed to clone ACE/TAO from GitHub'
       if $err ||
         ! -r 'ACE_TAO/ACE/ace/ACE.h' ||
           ! -r 'ACE_TAO/TAO/tao/ORB.h';
 
     print "Cloning git repo: $urlbase/MPC into ACE_TAO/ACE/MPC\n";
-    $err = system("git clone --depth 1 $urlbase/MPC ACE_TAO/ACE/MPC");
+    $err = system("git clone -q --depth 1 $urlbase/MPC ACE_TAO/ACE/MPC");
     die 'ERROR: Failed to clone MPC (into ACE_TAO/ACE/MPC) from GitHub'
       if $err ||
         ! -r 'ACE_TAO/ACE/MPC/mwc.pl';
@@ -1244,7 +1245,8 @@ sub win32_cmake_generator {
              'vc11' => 'Visual Studio 11 2012',
              'vc12' => 'Visual Studio 12 2013',
              'vc14' => 'Visual Studio 14 2015',
-             'vs2017' => 'Visual Studio 15 2017');
+             'vs2017' => 'Visual Studio 15 2017',
+             'vs2019' => 'Visual Studio 16 2019');
 
   die "ERROR: Unsupported Visual Studio version '$ver' supplied.\nStopped"
     if ! exists $map{$ver};
@@ -1470,6 +1472,7 @@ if (exists $opts{'qt'}) {
   setEnv('QT5_INCDIR', $qt_include);
   setEnv('QT5_BINDIR', $qt_bin);
   setEnv('QT5_SUFFIX', $qt_bin_suffix);
+  setEnv('QT5_LIBDIR', $qt_lib);
   push_libpath(\%targetEnv, $qt_lib);
 } elsif (exists $opts{'qt-include'}) {
   die "ERROR: --qt-include requires --qt, stopped\n";
