@@ -111,7 +111,7 @@ Use one of the following versions when building OpenDDS:
     * http://download.dre.vanderbilt.edu/
   * When using the configure script, this version can be downloaded using one
     of these arguments:
-    * `--doc_group` for the latest release
+    * `--doc-group` for the latest release
     * `--ace-github-latest` to use the master branches of ACE_TAO and MPC as is
 
 ### Perl
