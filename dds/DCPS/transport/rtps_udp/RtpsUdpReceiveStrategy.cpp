@@ -327,16 +327,25 @@ RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage)
     return;
 
   } else {
-    ACE_DEBUG((LM_WARNING, "(%P|%t) RtpsUdpReceiveStrategy: "
-               "preprocess_secure_submsg failed RPCH %d, [%d.%d]: %C\n",
+    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) RtpsUdpReceiveStrategy: ")
+               ACE_TEXT("preprocess_secure_submsg failed RPCH %d, [%d.%d]: %C\n"),
                peer_pch, ex.code, ex.minor_code, ex.message.in()));
     return;
   }
 
   if (!ok) {
-    ACE_DEBUG((LM_WARNING, "(%P|%t) RtpsUdpReceiveStrategy: "
-               "decode_datawriter/reader_submessage failed [%d.%d]: %C\n",
-               ex.code, ex.minor_code, ex.message.in()));
+    bool dw = category == DATAWRITER_SUBMESSAGE;
+    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) RtpsUdpReceiveStrategy: ")
+               ACE_TEXT("decode_data%C_submessage failed [%d.%d]: \"%C\" ")
+               ACE_TEXT("(rpch: %u, local d%cch: %u, remote d%cch: %u)\n"),
+               dw ? "writer" : "reader",
+               ex.code, ex.minor_code, ex.message.in(),
+               peer_pch,
+               dw ? 'r' : 'w',
+               dw ? drch : dwch,
+               dw ? 'w' : 'r',
+               dw ? dwch : drch
+               ));
     return;
   }
 

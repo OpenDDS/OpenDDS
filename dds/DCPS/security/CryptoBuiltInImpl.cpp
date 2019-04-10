@@ -14,6 +14,7 @@
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsSecurityParamsC.h"
 
+#include "dds/DCPS/debug.h"
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/Message_Block_Ptr.h"
 #include "dds/DCPS/Serializer.h"
@@ -134,12 +135,12 @@ ParticipantCryptoHandle CryptoBuiltInImpl::register_local_participant(
     return DDS::HANDLE_NIL;
   }
 
-  if (!participant_security_attributes.is_rtps_protected) {
-    return generate_handle();
+  if (participant_security_attributes.is_rtps_protected) {
+    CommonUtilities::set_security_error(ex, -1, 0, "RTPS protection is unsupported");
+    return DDS::HANDLE_NIL;
   }
 
-  CommonUtilities::set_security_error(ex, -1, 0, "Unsupported configuration");
-  return DDS::HANDLE_NIL;
+  return generate_handle();
 }
 
 ParticipantCryptoHandle CryptoBuiltInImpl::register_matched_remote_participant(

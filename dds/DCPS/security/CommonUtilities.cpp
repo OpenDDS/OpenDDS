@@ -79,6 +79,78 @@ void set_security_error(DDS::Security::SecurityException& ex,
   set_security_error(ex, code, minor_code, full.c_str());
 }
 
+OPENDDS_STRING ctk_to_dds_string(const CryptoTransformKind& keyKind)
+{
+  if (!keyKind[0] && !keyKind[1] && !keyKind[2]) {
+    switch (keyKind[3]) {
+    case CRYPTO_TRANSFORMATION_KIND_NONE:
+      return "CRYPTO_TRANSFORMATION_KIND_NONE";
+    case CRYPTO_TRANSFORMATION_KIND_AES128_GMAC:
+      return "CRYPTO_TRANSFORMATION_KIND_AES128_GMAC";
+    case CRYPTO_TRANSFORMATION_KIND_AES128_GCM:
+      return "CRYPTO_TRANSFORMATION_KIND_AES128_GCM";
+    case CRYPTO_TRANSFORMATION_KIND_AES256_GMAC:
+      return "CRYPTO_TRANSFORMATION_KIND_AES256_GMAC";
+    case CRYPTO_TRANSFORMATION_KIND_AES256_GCM:
+      return "CRYPTO_TRANSFORMATION_KIND_AES256_GCM";
+    }
+  }
+  OPENDDS_STRING rv("Unknown CryptoTransformKind ");
+  const size_t i = rv.size();
+  rv.resize(i + 11);
+  std::sprintf(&rv[i], "%.2x %.2x %.2x %.2x",
+    keyKind[0], keyKind[1], keyKind[2], keyKind[3]);
+  return rv;
+}
+
+OPENDDS_STRING ctki_to_dds_string(const CryptoTransformKeyId& keyId)
+{
+  OPENDDS_STRING rv('X', 12);
+  std::sprintf(&rv[0], "%.2x %.2x %.2x %.2x",
+    keyId[0], keyId[1], keyId[2], keyId[3]);
+  rv.resize(11);
+  return rv;
+}
+
+OPENDDS_STRING to_dds_string(const KeyOctetSeq& keyData)
+{
+  size_t l = keyData.length() * 2;
+  // For Spaces
+  if (l > 2) {
+    l += (l / 2) - 1;
+  }
+  OPENDDS_STRING rv;
+  rv.reserve(l);
+  for (size_t i = 0; i < keyData.length(); i++) {
+    char chars[3];
+    std::sprintf((char*) &chars, "%.2x", keyData[i]);
+    if (i) {
+      rv.push_back(' ');
+    }
+    rv.push_back(chars[0]);
+    rv.push_back(chars[1]);
+  }
+  return rv;
+}
+
+OPENDDS_STRING to_dds_string(const KeyMaterial_AES_GCM_GMAC& km)
+{
+  return
+    OPENDDS_STRING("transformation_kind: ") +
+    ctk_to_dds_string(km.transformation_kind) +
+    OPENDDS_STRING("\nmaster_salt:\n") +
+    to_dds_string(km.master_salt) +
+    OPENDDS_STRING("\nsender_key_id: ") +
+    ctki_to_dds_string(km.sender_key_id) +
+    OPENDDS_STRING("\nmaster_sender_key:\n") +
+    to_dds_string(km.master_sender_key) +
+    OPENDDS_STRING("\nreceiver_specific_key_id: ") +
+    ctki_to_dds_string(km.receiver_specific_key_id) +
+    OPENDDS_STRING("\nmaster_receiver_specific_key:\n") +
+    to_dds_string(km.master_receiver_specific_key) +
+    OPENDDS_STRING("\n");
+}
+
 }
 }
 }
