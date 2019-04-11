@@ -306,8 +306,6 @@ Spdp::write_secure_updates()
 {
   if (shutdown_flag_.value()) { return; }
 
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-
   const Security::SPDPdiscoveredParticipantData& pdata =
     build_local_pdata(Security::DPDK_SECURE);
 
