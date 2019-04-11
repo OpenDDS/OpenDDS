@@ -2704,9 +2704,9 @@ RtpsUdpDataLink::populate_security_handles(const RepoId& local_id,
   mb.wr_ptr(mb.space());
   DCPS::Serializer ser(&mb, ACE_CDR_BYTE_ORDER, DCPS::Serializer::ALIGN_CDR);
 
-  const EntityKind localKind(GuidConverter(local_id).entityKind());
-  const RepoId& writer_id = (localKind == KIND_WRITER) ? local_id : remote_id;
-  const RepoId& reader_id = (localKind == KIND_WRITER) ? remote_id : local_id;
+  const bool local_is_writer = GuidConverter(local_id).isWriter();
+  const RepoId& writer_id = local_is_writer ? local_id : remote_id;
+  const RepoId& reader_id = local_is_writer ? remote_id : local_id;
 
   while (mb.length()) {
     DDS::BinaryProperty_t prop;
