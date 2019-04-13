@@ -120,7 +120,7 @@ public:
                                            const DCPS::RepoId& reader);
 
   DDS::ReturnCode_t write_dcps_participant_secure(const Security::SPDPdiscoveredParticipantData& msg,
-                                                  const DCPS::RepoId& reader);
+                                                  const DCPS::RepoId& part);
 #endif
 
   DDS::ReturnCode_t write_dcps_participant_dispose(const DCPS::RepoId& part);

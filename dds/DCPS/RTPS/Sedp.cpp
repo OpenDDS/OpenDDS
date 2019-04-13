@@ -3362,14 +3362,14 @@ Sedp::write_volatile_message(DDS::Security::ParticipantVolatileMessageSecure& ms
 
 DDS::ReturnCode_t
 Sedp::write_dcps_participant_secure(const Security::SPDPdiscoveredParticipantData& msg,
-                                    const RepoId& reader)
+                                    const RepoId& part)
 {
   static DCPS::SequenceNumber sequence = 0;
 
-  DCPS::RepoId dcps_reader(reader);
-  dcps_reader.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER;
+  DCPS::RepoId remote_reader(part);
+  remote_reader.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER;
 
-  return dcps_participant_secure_writer_.write_dcps_participant_secure(msg, reader, ++sequence);
+  return dcps_participant_secure_writer_.write_dcps_participant_secure(msg, remote_reader, ++sequence);
 }
 
 DDS::ReturnCode_t

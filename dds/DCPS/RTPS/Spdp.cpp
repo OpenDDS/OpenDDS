@@ -445,7 +445,7 @@ Spdp::handle_participant_data(DCPS::MessageId id, const ParticipantData_t& cpdat
     match_unauthenticated(guid, dp);
 #endif
 
-  } else {
+  } else { // Existing Participant
 
 #ifdef OPENDDS_SECURITY
     // Non-secure updates for authenticated participants are used for liveliness but
