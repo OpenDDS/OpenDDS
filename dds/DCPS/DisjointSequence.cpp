@@ -91,6 +91,7 @@ DisjointSequence::insert(SequenceNumber value, CORBA::ULong num_bits,
 {
   bool inserted = false;
   RangeSet::iterator iter = sequences_.end();
+  bool range_start_is_valid = false;
   SequenceNumber::Value range_start = 0;
   const SequenceNumber::Value val = value.getValue();
 
@@ -113,17 +114,18 @@ DisjointSequence::insert(SequenceNumber value, CORBA::ULong num_bits,
     }
 
     if (x & (1 << (31 - bit))) {
-      if (range_start == 0) {
+      if (!range_start_is_valid) {
         range_start = val + i;
+        range_start_is_valid = true;
       }
-
-    } else if (range_start != 0) {
+    } else if (range_start_is_valid) {
       // this is a "0" bit and we've previously seen a "1": insert a range
       const SequenceNumber::Value to_insert = val + i - 1;
       if (insert_bitmap_range(iter, SequenceRange(range_start, to_insert))) {
         inserted = true;
       }
       range_start = 0;
+      range_start_is_valid = false;
 
       if (iter != sequences_.end() && iter->second.getValue() != to_insert) {
         // skip ahead: next gap in sequence must be past iter->second
@@ -137,7 +139,7 @@ DisjointSequence::insert(SequenceNumber value, CORBA::ULong num_bits,
     }
   }
 
-  if (range_start != 0) {
+  if (range_start_is_valid) {
     // iteration finished before we saw a "0" (inside a range)
     SequenceNumber range_end = (value + num_bits).previous();
     if (insert_bitmap_range(iter, SequenceRange(range_start, range_end))) {
@@ -160,7 +162,7 @@ DisjointSequence::insert_bitmap_range(RangeSet::iterator& iter,
 
   if (!sequences_.empty()) {
     if (iter == sequences_.end()) {
-      iter = sequences_.lower_bound(SequenceRange(1 /*ignored*/, previous));
+      iter = sequences_.lower_bound(SequenceRange(0 /*ignored*/, previous));
     } else {
       // start where we left off last time and get the lower_bound(previous)
       for (; iter != sequences_.end() && iter->second < previous; ++iter) ;

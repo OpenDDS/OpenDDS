@@ -396,6 +396,20 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
     }
     {
       DisjointSequence sequence;
+      CORBA::Long bits[] = { 3 << 30 }; // high bit is logical index '0'
+      TEST_CHECK(sequence.insert(0, 2 /*num_bits*/, bits));
+      TEST_CHECK(!sequence.empty() && !sequence.disjoint());
+      TEST_CHECK(sequence.low() == 0 && sequence.high() == 1);
+    }
+    {
+      DisjointSequence sequence;
+      CORBA::Long bits[] = { 3 << 29 }; // high bit is logical index '0'
+      TEST_CHECK(sequence.insert(0, 3 /*num_bits*/, bits));
+      TEST_CHECK(!sequence.empty() && !sequence.disjoint());
+      TEST_CHECK(sequence.low() == 1 && sequence.high() == 2);
+    }
+    {
+      DisjointSequence sequence;
       CORBA::Long bits[] = { 1 << 31 }; // high bit is logical index '0'
       TEST_CHECK(sequence.insert(5, 1 /*num_bits*/, bits));
       TEST_CHECK(!sequence.empty() && !sequence.disjoint());
