@@ -115,6 +115,22 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
         exit(1);
       }
 
+      DDS::DataWriterQos dw_qos;
+      if (dw->get_qos(dw_qos) != ::DDS::RETCODE_OK)
+      {
+        cerr << "DataWriter failed to get_qos when not enabled." << endl;
+        return 1;
+      }
+
+      dw_qos.user_data.value.length(1);
+      dw_qos.user_data.value[0] = 0x42;
+
+      if (dw->set_qos(dw_qos) != ::DDS::RETCODE_OK)
+      {
+        cerr << "DataWriter failed to set_qos when not enabled." << endl;
+        return 1;
+      }
+
       if (dw->enable () != ::DDS::RETCODE_PRECONDITION_NOT_MET)
       {
         cerr << "DataWriter can not be enabled because Publisher is not enabled." << endl;

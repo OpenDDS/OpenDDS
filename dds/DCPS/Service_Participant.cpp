@@ -264,12 +264,14 @@ Service_Participant::shutdown()
 
       if (dp_factory_servant_)
         dp_factory_servant_->cleanup();
+      dp_factory_servant_.reset();
 
       domainRepoMap_.clear();
 
       if (reactor_) {
         reactor_->end_reactor_event_loop();
         reactor_task_.wait();
+        reactor_.reset();
       }
 
       discoveryMap_.clear();
@@ -280,6 +282,7 @@ Service_Participant::shutdown()
   #endif
 
       discovery_types_.clear();
+      monitor_factory_ = 0;
     }
     TransportRegistry::close();
   } catch (const CORBA::Exception& ex) {
@@ -308,6 +311,7 @@ Service_Participant::get_domain_participant_factory(int &argc,
                      this->factory_lock_,
                      DDS::DomainParticipantFactory::_nil());
 
+    shut_down_ = false;
     if (!dp_factory_servant_) {
       // This used to be a call to ORB_init().  Since the ORB is now managed
       // by InfoRepoDiscovery, just save the -ORB* args for later use.
@@ -394,6 +398,8 @@ Service_Participant::get_domain_participant_factory(int &argc,
 
       if (!reactor_)
         reactor_.reset(new ACE_Reactor(new ACE_Select_Reactor, true));
+
+      reactor_task_.thr_mgr(ACE_Thread_Manager::instance());
 
       if (reactor_task_.activate(THR_NEW_LWP | THR_JOINABLE) == -1) {
         ACE_ERROR((LM_ERROR,

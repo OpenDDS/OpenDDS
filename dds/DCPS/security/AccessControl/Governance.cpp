@@ -9,6 +9,7 @@
 #include "xercesc/dom/DOM.hpp"
 #include "xercesc/sax/HandlerBase.hpp"
 #include "xercesc/framework/MemBufInputSource.hpp"
+#include "xercesc/util/PlatformUtils.hpp"
 
 #include "ace/OS_NS_strings.h"
 #include "ace/XML_Utils/XercesString.h"
@@ -29,6 +30,7 @@ int Governance::load(const SSL::SignedDocument& doc)
   using XML::XStr;
   static const char* gMemBufId = "gov buffer id";
 
+  xercesc::XMLPlatformUtils::Initialize();
   DCPS::unique_ptr<xercesc::XercesDOMParser> parser(new xercesc::XercesDOMParser());
 
   if (!parser) {

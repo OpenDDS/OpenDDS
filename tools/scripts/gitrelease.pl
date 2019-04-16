@@ -18,10 +18,25 @@ $ENV{TZ} = "UTC";
 Time::Piece::_tzset;
 my $timefmt = "%a %b %d %H:%M:%S %Z %Y";
 
+my $news_template = "# Version %s of OpenDDS\n" . <<"ENDOUT";
+
+##### Additions:
+- TODO: Add your features here
+
+##### Fixes:
+- TODO: Add your fixes here
+
+##### Notes:
+- TODO: Add your notes here
+
+_______________________________________________________________________________
+ENDOUT
+
 sub usage {
   return "gitrelease.pl <version> [options]\n" .
          "    version:  release version in a.b or a.b.c notation\n" .
          "options:\n" .
+         "  --help | -h        Print this message\n" .
          "  --list             just show step names (default perform check)\n" .
          "  --remedy           remediate problems where possible\n" .
          "  --remote=name      valid git remote for OpenDDS (default: origin)\n" .
@@ -29,7 +44,13 @@ sub usage {
          "  --github-user=name user or organization name for github updates (default: objectcomputing)\n" .
          "  --step=#           # of individual step to run (default: all)\n" .
          "  --force            keep going if possible (requires --step)\n" .
-         "  --no-devguide      no devguide issued for this release\n"
+         "  --micro            Do a patch/micro level release\n" .
+         "                     The difference is we skip the following:\n" .
+         "                         devguide, doxygen, website, and adding NEWS Template\n" .
+         "  --skip-devguide    Skip getting and including the devguide\n" .
+         "  --skip-doxygen     Skip generating and including the doxygen docs\n" .
+         "  --skip-website     Skip updating the website\n" .
+         "  --skip-ftp         Skip the FTP upload\n";
 }
 
 sub normalizePath {
@@ -41,7 +62,7 @@ sub normalizePath {
 sub email_announce_contents {
   my $settings = shift();
   my $devguide = "";
-  if (!$settings->{nodevguide}) {
+  if (!$settings->{skip_devguide}) {
     $devguide =
       "An updated version of the OpenDDS Developer's Guide is available\n" .
       "from the same site in PDF format.\n";
@@ -57,8 +78,47 @@ sub email_announce_contents {
 }
 
 sub news_contents_excerpt {
-  return "";
+  my @lines;
+  open(my $news, "NEWS.md") or die "Can't read NEWS.md file";
+  while (<$news>) {
+    if (/^(# )?Version/) {
+      next;
+    }
+    if (/^_____/) {
+      last;
+    }
+    push (@lines, $_);
+  }
+  close $news;
+  return join("",@lines);
 }
+
+# Run command, returns 0 if there was an error
+sub run_command ($;$) {
+  my $command = shift;
+  my $ignore_failure = shift;
+  if (!defined $ignore_failure) {
+      $ignore_failure = 0;
+  }
+
+  if (system ($command)) {
+      if (!$ignore_failure) {
+        my $error_message;
+        if ($? == -1) {
+            $error_message = "Failed to Run: $!";
+        } elsif ($? & 127) {
+            $error_message = sprintf ("Exited on Signal %d, %s coredump",
+              ($? & 127),  ($? & 128) ? 'with' : 'without');
+        } else {
+            $error_message = sprintf ("Returned %d", $? >> 8);
+        }
+        print STDERR "Command \"$command\" $error_message\n";
+      }
+      return $ignore_failure;
+  }
+  return 1;
+}
+
 ############################################################################
 sub parse_version {
   my $version = shift;
@@ -389,6 +449,9 @@ EOF
   return $changed;
 }
 ############################################################################
+
+my %missing_authors = ();
+
 sub verify_authors {
   my $status = 1;
   my $name = "";
@@ -399,11 +462,13 @@ sub verify_authors {
   my %author_email_aliases = (
     "jeffrey.j.schmitz\@gmail.com"               => "schmitzj\@ociweb.com",
     "jrw972\@users.noreply.github.com"           => "wilsonj\@ociweb.com",
-    "brianjohnson5972\@users.noreply.github.com" => "johnsonb\@ociweb.com"
+    "brianjohnson5972\@users.noreply.github.com" => "johnsonb\@ociweb.com",
+    "fred\@hornsey.us" => "hornseyf\@objectcomputing.com",
   );
   my %author_name_aliases = (
     "iamtheschmitzer" => "Jeff Schmitz",
     "johnsonb"        => "Brian Johnson",
+    "Frederick Hornsey" => "Fred Hornsey",
   );
   open(AUTHORS, "AUTHORS") or die "Opening $!";
   while (<AUTHORS>) {
@@ -418,24 +483,29 @@ sub verify_authors {
 
   open(CHANGELOG, $settings->{changelog}) or die "Opening $!";
   while (<CHANGELOG>) {
-    if (/[0-9:]{8} GMT [0-9]{4} (.*) <(.*)>/) {
+    if (/.*[0-9]{4}  (.*)  <(.*)>/) {
       $name = $1;
       $email = $2;
       $name =~ s/^\s+|\s+$//g;
       $email =~ s/^\s+|\s+$//g;
       $name = $author_name_aliases{$name} || $name;
+      my $missing = 0;
       unless ($author_names{$name}) {
         print "Could not find name '$name' in AUTHORS file\n";
-        $status = 0;
         # Add to hash so message goes away
         $author_names{$name} = 2;
+        $missing = 1;
       }
       $email = $author_email_aliases{$email} || $email;
       unless ($author_emails{$email}) {
         print "Could not find email '$email' in AUTHORS file\n";
-        $status = 0;
         # Add to hash so message goes away
         $author_emails{$email} = 2;
+        $missing = 1;
+      }
+      if ($missing) {
+        $status = 0;
+        $missing_authors{$email} = $name;
       }
       next unless $status;
     }
@@ -448,6 +518,16 @@ sub message_authors {
   return "AUTHORS file needs updating\n";
 }
 
+sub remedy_authors {
+  open(my $authors, '>>', "AUTHORS") or die "Opening $!";
+  while (my ($email, $name) = each %missing_authors) {
+    print $authors "$name <$email>\n";
+  }
+  close $authors;
+  %missing_authors = ();
+  return 1;
+}
+
 ############################################################################
 sub verify_news_file_section {
   my $settings = shift();
@@ -456,7 +536,7 @@ sub verify_news_file_section {
   my $metaversion = quotemeta($version);
   my $has_version = 0;
   while (<NEWS>) {
-    if ($_ =~ /Version $metaversion of OpenDDS/) {
+    if ($_ =~ /^(# )?Version $metaversion of OpenDDS/) {
       $has_version = 1;
     }
   }
@@ -479,18 +559,7 @@ sub remedy_news_file_section {
   my $timestamp = $settings->{timestamp};
   my $outline = "This is OpenDDS version $version, released $timestamp";
   open(NEWS, "+< NEWS.md")                 or die "Opening: $!";
-  my $out = "Version $version of OpenDDS\n" . <<"ENDOUT";
-
-##### Additions:
-- TODO: Add your features here
-
-##### Fixes:
-- TODO: Add your fixes here
-
-##### Notes:
-- TODO: Add your notes here
-_______________________________________________________________________________
-ENDOUT
+  my $out = sprintf($news_template, $version);
 
   $out .= join("", <NEWS>);
   seek(NEWS,0,0)                        or die "Seeking: $!";
@@ -509,7 +578,7 @@ sub verify_update_news_file {
   my $corrected_features = 1;
   my $corrected_fixes = 1;
   while (<NEWS>) {
-    if ($_ =~ /Version $metaversion of OpenDDS/) {
+    if ($_ =~ /^(# )?Version $metaversion of OpenDDS/) {
       $has_version = 1;
     } elsif ($_ =~ /TODO: Add your features here/) {
       $corrected_features = 0;
@@ -1008,12 +1077,8 @@ sub remedy_zip_doxygen {
 ############################################################################
 sub verify_devguide {
   my $settings = shift();
-  if (!$settings->{nodevguide}) {
-    return (-f "$settings->{parent_dir}/$settings->{devguide}" &&
-            -f "$settings->{parent_dir}/OpenDDS-latest.pdf");
-  } else {
-    return 1;
-  }
+  return (-f "$settings->{parent_dir}/$settings->{devguide_ver}" &&
+          -f "$settings->{parent_dir}/$settings->{devguide_lat}");
 }
 
 sub message_devguide {
@@ -1023,35 +1088,38 @@ sub message_devguide {
 
 sub remedy_devguide {
   my $settings = shift();
-  if (!$settings->{nodevguide}) {
-    my $devguide_url = "svn+ssh://svn.ociweb.com/devguide/opendds/trunk/$settings->{devguide}";
-    print "Downloading devguide\n$devguide_url\n";
-    my $result = system("svn cat $devguide_url > $settings->{parent_dir}/$settings->{devguide}");
-    $result = $result || system("svn cat $devguide_url > $settings->{parent_dir}/OpenDDS-latest.pdf");
-    return !$result;
-  } else {
-    return 1;
-  }
+  my $devguide_url = "svn+ssh://svn.ociweb.com/devguide/opendds/trunk/$settings->{devguide_ver}";
+  print "Downloading devguide\n$devguide_url\n";
+  my $result = system("svn cat $devguide_url > $settings->{parent_dir}/$settings->{devguide_ver}");
+  $result = $result || system("svn cat $devguide_url > $settings->{parent_dir}/$settings->{devguide_lat}");
+  return !$result;
 }
 
 ############################################################################
+sub get_release_files {
+  my $settings = shift();
+  my @files = (
+      $settings->{tgz_src},
+      $settings->{zip_src},
+      $settings->{md5_src},
+  );
+  if (!$settings->{skip_devguide}) {
+    push(@files , $settings->{devguide_ver});
+    push(@files , $settings->{devguide_lat});
+  }
+  if (!$settings->{skip_doxygen}) {
+    push(@files , $settings->{tgz_dox});
+    push(@files , $settings->{zip_dox});
+  }
+  return @files;
+}
+
 sub verify_ftp_upload {
   my $settings = shift();
   my $url = "http://download.ociweb.com/OpenDDS/";
   my $content = get($url);
 
-  my @files = (
-      "$settings->{base_name}-doxygen.tar.gz",
-      "$settings->{base_name}-doxygen.zip",
-      "$settings->{base_name}.tar.gz",
-      "$settings->{base_name}.zip",
-      "$settings->{base_name}.md5",
-      "OpenDDS-latest.pdf"
-  );
-  if (!$settings->{nodevguide}) {
-    push(@files , "$settings->{base_name}.pdf");
-  }
-  foreach my $file (@files) {
+  foreach my $file (get_release_files($settings)) {
     if ($content =~ /$file/) {
     } else {
       print "$file not found at $url\n";
@@ -1067,7 +1135,6 @@ sub message_ftp_upload {
 
 sub remedy_ftp_upload {
   my $settings = shift();
-  my $version = $settings->{version};
   my $FTP_DIR = "downloads/OpenDDS";
   my $PRIOR_RELEASE_PATH = 'previous-releases/';
 
@@ -1086,17 +1153,7 @@ sub remedy_ftp_upload {
 
   $ftp->binary;
 
-  my @new_release_files = (
-      "$settings->{base_name}-doxygen.tar.gz",
-      "$settings->{base_name}-doxygen.zip",
-      "$settings->{base_name}.tar.gz",
-      "$settings->{base_name}.zip",
-      "$settings->{base_name}.md5",
-      "OpenDDS-latest.pdf"
-  );
-  if (!$settings->{nodevguide}) {
-    push(@new_release_files , "$settings->{base_name}.pdf");
-  }
+  my @new_release_files = get_release_files($settings);
 
   my %release_file_map = map { $_ => 1 } @new_release_files;
 
@@ -1107,8 +1164,8 @@ sub remedy_ftp_upload {
     my $isDir = $ftp->isdir($file);
     next if $isDir;
 
-    # replace 'OpenDDS-latest.pdf'
-    if ($file eq 'OpenDDS-latest.pdf') {
+    # replace OpenDDS-latest.pdf
+    if ($file eq $settings->{devguide_lat}) {
       print "deleting $file\n";
       $ftp->delete($file);
 
@@ -1176,26 +1233,14 @@ sub remedy_github_upload {
       repo => $settings->{github_repo},
       token => $settings->{github_token}
   );
-  my @lines;
-  open(my $news, "NEWS.md") or die "Can't read NEWS.md file";
-  while (<$news>) {
-    if (/^Version/) {
-      next;
-    }
-    if (/^_____/) {
-      last;
-    }
-    push (@lines, $_);
-  }
-  close $news;
-  my $header  = "#### Release notes for Version $settings->{version} of OpenDDS\n";
-  my $middle = join("",@lines);
-  my $footer = "#### Using the GitHub \"releases\" page\nDownload $settings->{zip_src} (Windows) or $settings->{tgz_src} (Linux/Solaris/MacOSX) instead of using the GitHub-generated \"source code\" links.";
-  my $text = $header.$middle.$footer;
+  my $text =
+    "**Download $settings->{zip_src} (Windows) or $settings->{tgz_src} (Linux/macOS) " .
+      "instead of \"Source code (zip)\" or \"Source code (tar.gz)\".**\n\n" .
+    news_contents_excerpt();
   my $release = $ph->create(
       data => {
           name => 'OpenDDS ' . $settings->{version},
-          tag_name => 'DDS-' . $settings->{version},
+          tag_name => $settings->{git_tag},
           body => $text
       }
   );
@@ -1232,7 +1277,19 @@ sub verify_website_release {
   # verify there are no differences between website-next-release branch and gh-pages branch
   my $settings = shift();
   my $remote = $settings->{remote};
-  my $status = open(GITDIFF, 'git diff ' . $remote  . '/website-next-release ' . $remote . '/gh-pages|');
+  my $status;
+
+  # fetch remote branches so we have up to date versions
+  if ($status && !run_command("git fetch $remote website-next-release")) {
+    print STDERR "Couldn't fetch website-next-release!\n";
+    return 0;
+  }
+  if ($status && !run_command("git fetch $remote gh-pages")) {
+    print STDERR "Couldn't fetch gh-pages!\n";
+    return 0;
+  }
+
+  $status = open(GITDIFF, 'git diff ' . $remote  . '/website-next-release ' . $remote . '/gh-pages|');
   my $delta = "";
   while (<GITDIFF>) {
     if (/^...(.*)/) {
@@ -1254,20 +1311,79 @@ sub message_website_release {
 sub remedy_website_release {
   my $settings = shift();
   print "Releasing gh-pages website\n";
-  my $rc = 0;
-#  $rc = system('git checkout gh-pages');
-#  if (!$rc) {
-#    $rc = system('git merge website-next-release');
-#  }
-#  if (!$rc) {
-#    $rc =   system ('git push');
-#  }
-  return !$rc;
+  my $worktree = "$settings->{parent_dir}/temp_website";
+  my $remote = $settings->{remote};
+  my $rm_worktree = 0;
+  my $status = 1;
+
+  if (!run_command("git worktree add $worktree gh-pages")) {
+    print STDERR
+      "Couldn't create temporary website worktree!\n";
+    $status = 0;
+  }
+  $rm_worktree = 1;
+  my $prev_dir = getcwd;
+  chdir $worktree;
+
+  # Get the two branches merged with each other
+  if ($status && !run_command("git pull")) {
+    print STDERR "Couldn't pull gh-pages!\n";
+    $status = 0;
+  }
+  if ($status && !run_command("git checkout website-next-release")) {
+    print STDERR "Couldn't checkout website-next-release!\n";
+    $status = 0;
+  }
+  if ($status && !run_command("git pull")) {
+    print STDERR "Couldn't pull website-next-release!\n";
+    $status = 0;
+  }
+  if ($status && !run_command("git merge gh-pages")) {
+    print STDERR "Couldn't merge website-next-release into gh-pages\n";
+    $status = 0;
+  }
+  if ($status && !run_command("git push")) {
+    print STDERR "Couldn't push website-next-release!\n";
+    $status = 0;
+  }
+
+  if ($status && !run_command("git checkout gh-pages")) {
+    print STDERR "Couldn't checkout gh-pages!\n";
+    $status = 0;
+  }
+  if ($status && !run_command("git merge website-next-release")) {
+    print STDERR "Couldn't merge website-next-release into gh-pages\n";
+    $status = 0;
+  }
+  if ($status && !run_command("git push")) {
+    print STDERR "Couldn't push gh-pages!\n";
+    $status = 0;
+  }
+
+  chdir $prev_dir;
+  if ($rm_worktree && !run_command("git worktree remove $worktree")) {
+    print STDERR "Couldn't remove temporary worktree for website merge!\n";
+  }
+
+  if (!$status) {
+    print STDERR
+      "You must merge website-next-release with gh-pages on your own before you " .
+      "can continue\n";
+  }
+
+  return $status;
 }
 
 ############################################################################
 sub verify_email_list {
   # Can't verify
+  my $settings = shift;
+  return 'Email this text to dds-release-announce@ociweb.com' . "\n\n" .
+
+  "Approved: postthisrelease\n\n" .
+  email_announce_contents($settings) .
+  news_contents_excerpt();
+  return 1;
 }
 
 sub message_email_dds_release_announce {
@@ -1275,12 +1391,7 @@ sub message_email_dds_release_announce {
 }
 
 sub remedy_email_dds_release_announce {
-  my $settings = shift;
-  return 'Email this text to dds-release-announce@ociweb.com' . "\n\n" .
-
-  "Approved: postthisrelease\n\n" .
-  email_announce_contents($settings) .
-  news_contents_excerpt($settings);
+  return 1;
 }
 
 ############################################################################
@@ -1307,20 +1418,7 @@ sub remedy_news_template_file_section {
   print "  >> Adding next version template section to NEWS.md\n";
   print "  !! Manual update to NEWS.md needed\n";
   open(NEWS, "+< NEWS.md") or die "Opening: $!";
-  my $out = "Version X.Y of OpenDDS\n" . <<"ENDOUT";
-
-##### Additions:
-- TODO: Add your features here
-
-##### Fixes:
-- TODO: Add your fixes here
-
-##### Notes:
-- TODO: Add your notes here
-_______________________________________________________________________________
-ENDOUT
-
-  $out .= join("", <NEWS>);
+  my $out = sprintf($news_template, "X.Y") . join("", <NEWS>);
   seek(NEWS,0,0)            or die "Seeking: $!";
   print NEWS $out           or die "Printing: $!";
   truncate(NEWS,tell(NEWS)) or die "Truncating: $!";
@@ -1336,6 +1434,106 @@ sub ignore_step {
 }
 
 ############################################################################
+sub any_arg_is {
+  my $match = shift;
+  foreach my $arg (@ARGV) {
+    if ($arg eq $match) {
+      return 1;
+    }
+  }
+  return 0;
+}
+
+sub numeric_arg_value {
+  my $name = shift;
+  my @args = @ARGV[1..$#ARGV];
+  my $arg_str = join(" ", @args);
+  if ($arg_str =~ /$name ?=? ?([0-9]+)/) {
+    return $1;
+  }
+}
+
+sub string_arg_value {
+  my $name = shift;
+  my @args = @ARGV[1..$#ARGV];
+  my $arg_str = join(" ", @args);
+  if ($arg_str =~ /$name ?=? ?([^ ]+)/) {
+    return $1;
+  }
+}
+
+# Validate and Normalize Version String
+my %parsed_version = parse_version($ARGV[0] || "");
+my $version = "";
+if (%parsed_version) {
+  if ($parsed_version{micro} > 0) {
+    $version = sprintf("%d.%d.%d",
+      $parsed_version{major}, $parsed_version{minor}, $parsed_version{micro});
+  } else {
+    $version = sprintf("%d.%d",
+      $parsed_version{major}, $parsed_version{minor});
+  }
+}
+
+my %base_settings = (
+  base_name   => "OpenDDS-$version",
+  parent_dir  => '../OpenDDS-Release',
+  github_user => string_arg_value("--github-user") || "objectcomputing",
+);
+
+my $is_micro = any_arg_is("--micro");
+my $print_help = any_arg_is("-h") || any_arg_is("--help");
+my $status = 0;
+
+my %settings = (
+    list         => any_arg_is("--list"),
+    remedy       => any_arg_is("--remedy"),
+    force        => any_arg_is("--force"),
+    micro        => $is_micro,
+    step         => numeric_arg_value("--step"),
+    remote       => string_arg_value("--remote") || "origin",
+    branch       => string_arg_value("--branch") || "master",
+    github_user  => $base_settings{github_user},
+    version      => $version,
+    base_name    => $base_settings{base_name},
+    git_tag      => "DDS-$version",
+    parent_dir   => $base_settings{parent_dir},
+    clone_dir    => join("/", $base_settings{parent_dir}, $base_settings{base_name}),
+    tar_src      => "$base_settings{base_name}.tar",
+    tgz_src      => "$base_settings{base_name}.tar.gz",
+    zip_src      => "$base_settings{base_name}.zip",
+    md5_src      => "$base_settings{base_name}.md5",
+    tar_dox      => "$base_settings{base_name}-doxygen.tar",
+    tgz_dox      => "$base_settings{base_name}-doxygen.tar.gz",
+    zip_dox      => "$base_settings{base_name}-doxygen.zip",
+    devguide_ver => "$base_settings{base_name}.pdf",
+    devguide_lat => "OpenDDS-latest.pdf",
+    timestamp    => POSIX::strftime($timefmt, gmtime),
+    git_url      => "git\@github.com:$base_settings{github_user}/OpenDDS.git",
+    github_repo  => 'OpenDDS',
+    github_token => $ENV{GITHUB_TOKEN},
+    ftp_user     => $ENV{FTP_USERNAME},
+    ftp_password => $ENV{FTP_PASSWD},
+    ftp_host     => $ENV{FTP_HOST},
+    changelog    => "docs/history/ChangeLog-$version",
+    modified     => {"NEWS.md" => 1,
+        "PROBLEM-REPORT-FORM" => 1,
+        "VERSION" => 1,
+        "dds/Version.h" => 1,
+        "docs/history/ChangeLog-$version" => 1,
+        "tools/scripts/gitrelease.pl" => 1},
+    skip_ftp     => any_arg_is("--skip-ftp"),
+    skip_devguide=> any_arg_is("--skip-devguide") || $is_micro,
+    skip_doxygen => any_arg_is("--skip-doxygen") || $is_micro,
+    skip_website => any_arg_is("--skip-website") || $is_micro,
+);
+
+if (%parsed_version) {
+  $settings{major_version} = $parsed_version{major};
+  $settings{minor_version} = $parsed_version{minor};
+  $settings{micro_version} = $parsed_version{micro};
+}
+
 my %steps_run = ();
 
 my %release_step_hash  = (
@@ -1425,59 +1623,66 @@ my %release_step_hash  = (
   'Generate doxygen' => {
     verify  => sub{verify_gen_doxygen(@_)},
     message => sub{message_gen_doxygen(@_)},
-    remedy  => sub{remedy_gen_doxygen(@_)} # $ACE_ROOT/bin/generate_doxygen.pl
+    remedy  => sub{remedy_gen_doxygen(@_)}, # $ACE_ROOT/bin/generate_doxygen.pl
+    skip    => $settings{skip_doxygen},
   },
   'Create unix doxygen archive' => {
     verify  => sub{verify_tgz_doxygen(@_)},
     message => sub{message_tgz_doxygen(@_)},
-    remedy  => sub{remedy_tgz_doxygen(@_)}
+    remedy  => sub{remedy_tgz_doxygen(@_)},
+    skip    => $settings{skip_doxygen},
   },
   'Create windows doxygen archive' => {
     verify  => sub{verify_zip_doxygen(@_)},
     message => sub{message_zip_doxygen(@_)},
-    remedy  => sub{remedy_zip_doxygen(@_)}
+    remedy  => sub{remedy_zip_doxygen(@_)},
+    skip    => $settings{skip_doxygen},
   },
   'Create md5 checksum' => {
     verify  => sub{verify_md5_checksum(@_)},
     message => sub{message_md5_checksum(@_)},
-    remedy  => sub{remedy_md5_checksum(@_)}
+    remedy  => sub{remedy_md5_checksum(@_)},
   },
   'Download Devguide' => {
     verify  => sub{verify_devguide(@_)},
     message => sub{message_devguide(@_)},
     remedy  => sub{remedy_devguide(@_)},
+    skip    => $settings{skip_devguide},
   },
   'Upload to FTP Site' => {
     verify  => sub{verify_ftp_upload(@_)},
     message => sub{message_ftp_upload(@_)},
-    remedy => sub{remedy_ftp_upload(@_)}
+    remedy => sub{remedy_ftp_upload(@_)},
+    skip    => $settings{skip_ftp},
   },
   'Upload to GitHub' => {
-     verify  => sub{verify_github_upload(@_)},
-     message => sub{message_github_upload(@_)},
-     remedy  => sub{remedy_github_upload(@_)}
+    verify  => sub{verify_github_upload(@_)},
+    message => sub{message_github_upload(@_)},
+    remedy  => sub{remedy_github_upload(@_)}
   },
   'Release Website' => {
     verify  => sub{verify_website_release(@_)},
     message => sub{message_website_release(@_)},
     remedy  => sub{remedy_website_release(@_)},
+    skip    => $settings{skip_website},
+  },
+ 'Add NEWS Template Section' => {
+    verify  => sub{verify_news_template_file_section(@_)},
+    message => sub{message_news_template_file_section(@_)},
+    remedy  => sub{remedy_news_template_file_section(@_)},
+    skip    => $settings{micro},
+  },
+  'Commit NEWS Template Section' => {
+    verify  => sub{verify_git_status_clean(@_, 1)},
+    message => sub{message_commit_git_changes(@_)},
+    remedy  => sub{remedy_git_status_clean(@_)},
+    skip    => $settings{micro},
   },
   'Email DDS-Release-Announce list' => {
     verify  => sub{verify_email_list(@_)},
     message => sub{message_email_dds_release_announce(@_)},
     message => sub{remedy_email_dds_release_announce(@_)}
   },
- 'Add NEWS Template Section' => {
-    verify  => sub{verify_news_template_file_section(@_)},
-    message => sub{message_news_template_file_section(@_)},
-    remedy  => sub{remedy_news_template_file_section(@_)},
-  },
-  'Commit NEWS Template Section' => {
-    verify  => sub{verify_git_status_clean(@_, 1)},
-    message => sub{message_commit_git_changes(@_)},
-    remedy  => sub{remedy_git_status_clean(@_)}
-  }
-
 );
 
 my @ordered_steps = (
@@ -1504,83 +1709,9 @@ my @ordered_steps = (
   'Upload to FTP Site',
   'Upload to GitHub',
   'Release Website',
-  'Email DDS-Release-Announce list',
   'Add NEWS Template Section',
   'Commit NEWS Template Section',
-);
-
-sub any_arg_is {
-  my $match = shift;
-  foreach my $arg (@ARGV) {
-    if ($arg eq $match) {
-      return 1;
-    }
-  }
-  return 0;
-}
-
-sub numeric_arg_value {
-  my $name = shift;
-  my @args = @ARGV[1..$#ARGV];
-  my $arg_str = join(" ", @args);
-  if ($arg_str =~ /$name ?=? ?([0-9]+)/) {
-    return $1;
-  }
-}
-
-sub string_arg_value {
-  my $name = shift;
-  my @args = @ARGV[1..$#ARGV];
-  my $arg_str = join(" ", @args);
-  if ($arg_str =~ /$name ?=? ?([^ ]+)/) {
-    return $1;
-  }
-}
-
-my $version = $ARGV[0] || "";
-
-my %base_settings = (
-  base_name   => "OpenDDS-$version",
-  parent_dir  => '../OpenDDS-Release',
-  github_user => string_arg_value("--github-user") || "objectcomputing",
-);
-
-my %settings = (
-    list         => any_arg_is("--list"),
-    remedy       => any_arg_is("--remedy"),
-    force        => any_arg_is("--force"),
-    nodevguide   => any_arg_is("--no-devguide"),
-    step         => numeric_arg_value("--step"),
-    remote       => string_arg_value("--remote") || "origin",
-    branch       => string_arg_value("--branch") || "master",
-    github_user  => $base_settings{github_user},
-    version      => $version,
-    base_name    => $base_settings{base_name},
-    git_tag      => "DDS-$version",
-    parent_dir   => $base_settings{parent_dir},
-    clone_dir    => join("/", $base_settings{parent_dir}, $base_settings{base_name}),
-    tar_src      => "$base_settings{base_name}.tar",
-    tgz_src      => "$base_settings{base_name}.tar.gz",
-    zip_src      => "$base_settings{base_name}.zip",
-    md5_src      => "$base_settings{base_name}.md5",
-    tar_dox      => "$base_settings{base_name}-doxygen.tar",
-    tgz_dox      => "$base_settings{base_name}-doxygen.tar.gz",
-    zip_dox      => "$base_settings{base_name}-doxygen.zip",
-    devguide     => "$base_settings{base_name}.pdf",
-    timestamp    => POSIX::strftime($timefmt, gmtime),
-    git_url      => "git\@github.com:$base_settings{github_user}/OpenDDS.git",
-    github_repo  => 'OpenDDS',
-    github_token => $ENV{GITHUB_TOKEN},
-    ftp_user     => $ENV{FTP_USERNAME},
-    ftp_password => $ENV{FTP_PASSWD},
-    ftp_host     => $ENV{FTP_HOST},
-    changelog    => "docs/history/ChangeLog-$version",
-    modified     => {"NEWS.md" => 1,
-        "PROBLEM-REPORT-FORM" => 1,
-        "VERSION" => 1,
-        "dds/Version.h" => 1,
-        "docs/history/ChangeLog-$version" => 1,
-        "tools/scripts/gitrelease.pl" => 1}
+  'Email DDS-Release-Announce list',
 );
 
 my $half_divider = '-' x 40;
@@ -1602,6 +1733,11 @@ sub run_step {
 
   # Output the title
   print "$step_count: $title\n";
+  if (exists $step->{skip} && $step->{skip}) {
+    print "Skipping...\n";
+    print "$divider\n";
+    return;
+  }
   # Exit if we are just listing
   return if ($settings{list});
   # Run the verification
@@ -1649,22 +1785,7 @@ sub run_step {
   }
 }
 
-sub validate_version_arg {
-  my $version = $settings{version} || "";
-  my %result = parse_version($version);
-  if (%result) {
-    $settings{major_version} = $result{major};
-    $settings{minor_version} = $result{minor};
-    $settings{micro_version} = $result{micro};
-    return 1;
-  } elsif ($settings{list}) {
-    return 1;
-  } else {
-    return 0;
-  }
-}
-
-if ($settings{list} || validate_version_arg()) {
+if ($settings{list} || %parsed_version) {
   if (my $step_num = $settings{step}) {
     # Run one step
     my $step_name = $ordered_steps[$step_num - 1];
@@ -1679,6 +1800,13 @@ if ($settings{list} || validate_version_arg()) {
                $step_count, $step_name, \%release_step_hash, \%steps_run);
     }
   }
-} else {
+} elsif (!$print_help) {
+  $status = 1;
+  $print_help = 1;
+  print "Invalid Arguments\n";
+}
+
+if ($print_help) {
   print usage();
 }
+exit $status;

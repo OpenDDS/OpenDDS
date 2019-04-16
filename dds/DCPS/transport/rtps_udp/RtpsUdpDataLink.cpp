@@ -785,7 +785,12 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
   }
 
 #ifdef OPENDDS_SECURITY
-  send_strategy()->encode_payload(pub_id, data, subm);
+  {
+    GuardType guard(this->strategy_lock_);
+    if (this->send_strategy_) {
+      send_strategy()->encode_payload(pub_id, data, subm);
+    }
+  }
 #endif
 
   Message_Block_Ptr hdr(submsgs_to_msgblock(subm));
@@ -805,8 +810,9 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
           const GuidConverter conv(pub_id), sub_conv(sub);
           ACE_DEBUG((LM_DEBUG,
             "(%P|%t) RtpsUdpDataLink::customize_queue_element() - "
-            "storing durable data for local %C remote %C\n",
-            OPENDDS_STRING(conv).c_str(), OPENDDS_STRING(sub_conv).c_str()));
+            "storing durable data for local %C remote %C seq %q\n",
+            OPENDDS_STRING(conv).c_str(), OPENDDS_STRING(sub_conv).c_str(),
+            rtps->sequence().getValue()));
         }
         return 0;
       }
@@ -1718,6 +1724,11 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
     ack.setValue(acknack.readerSNState.bitmapBase.high,
                  acknack.readerSNState.bitmapBase.low);
     const SequenceNumber& dd_last = ri->second.durable_data_.rbegin()->first;
+    if (Transport_debug_level > 5) {
+      ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::received(ACKNACK) "
+                 "check ack %q against last durable %q\n",
+                 ack.getValue(), dd_last.getValue()));
+    }
     if (ack > dd_last) {
       // Reader acknowledges durable data, we no longer need to store it
       ri->second.durable_data_.swap(pendingCallbacks);
@@ -1762,14 +1773,17 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
           }
           lastSent = it->first;
         }
-        if (sent_some && lastSent < psr[i].second && psr[i].second < dd_last) {
+        if (lastSent < psr[i].second && psr[i].second < dd_last) {
           gaps.insert(SequenceRange(lastSent + 1, psr[i].second));
+          if (it != ri->second.durable_data_.end()) {
+            gaps.insert(SequenceRange(psr[i].second, it->first.previous()));
+          }
         }
       }
       if (!gaps.empty()) {
         if (Transport_debug_level > 5) {
           ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::received(ACKNACK) "
-                     "sending durability gaps: "));
+                     "sending durability gaps:\n"));
           gaps.dump();
         }
         send_durability_gaps(local, remote, gaps);
@@ -1783,7 +1797,7 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
           requests.insert(SequenceRange(requests.high(), dd_first.previous()));
         if (Transport_debug_level > 5) {
           ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::received(ACKNACK) "
-                     "sending durability gaps for all requests: "));
+                     "sending durability gaps for all requests:\n"));
           requests.dump();
         }
         send_durability_gaps(local, remote, requests);
@@ -1800,7 +1814,7 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
         }
         if (Transport_debug_level > 5) {
           ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::received(ACKNACK) "
-                     "sending durability gaps for some requests: "));
+                     "sending durability gaps for some requests:\n"));
           gaps.dump();
         }
         send_durability_gaps(local, remote, gaps);

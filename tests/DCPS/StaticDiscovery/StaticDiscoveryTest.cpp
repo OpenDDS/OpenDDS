@@ -412,6 +412,11 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     TheServiceParticipant->shutdown();
 
+  } catch (const OpenDDS::DCPS::Transport::Exception&) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("ERROR: %N:%l: main() -")
+                        ACE_TEXT("Unexpected Transport Exception!\n")),
+                       -1);
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
     return -1;
