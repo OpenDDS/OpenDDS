@@ -19,11 +19,86 @@
 
 #include "dds/DCPS/StaticIncludes.h"
 
+#include <iostream>
+
 namespace
 {
 
 static const size_t SAMPLES_PER_TEST = 100;
 
+class CallbackListener
+        : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> {
+
+    virtual void on_requested_deadline_missed(
+        DDS::DataReader_ptr /*reader*/,
+        const DDS::RequestedDeadlineMissedStatus& /*status*/) {}
+
+    virtual void on_requested_incompatible_qos(
+        DDS::DataReader_ptr /*reader*/,
+        const DDS::RequestedIncompatibleQosStatus& /*status*/) {}
+
+    virtual void on_sample_rejected(
+        DDS::DataReader_ptr /*reader*/,
+        const DDS::SampleRejectedStatus& /*status*/) {}
+
+    virtual void on_liveliness_changed(
+        DDS::DataReader_ptr /*reader*/,
+        const DDS::LivelinessChangedStatus& /*status*/) {}
+
+    void on_data_available(DDS::DataReader_ptr reader)
+    {
+        FooDataReader_var reader_i = FooDataReader::_narrow(reader);
+
+        if (!reader_i) {
+            ACE_ERROR((LM_ERROR,
+                ACE_TEXT("ERROR: %N:%l: on_data_available() -")
+                ACE_TEXT(" _narrow failed!\n")));
+            ACE_OS::exit(-1);
+        }
+
+        FooSeq fooSeq;
+        DDS::SampleInfoSeq info;
+
+        DDS::ReturnCode_t error;
+        if ((error = reader_i->take(fooSeq,
+                                    info,
+                                    DDS::LENGTH_UNLIMITED,
+                                    DDS::ANY_SAMPLE_STATE,
+                                    DDS::ANY_VIEW_STATE,
+                                    DDS::ANY_INSTANCE_STATE)) != DDS::RETCODE_OK)
+        {
+          ACE_ERROR((LM_ERROR,
+                     ACE_TEXT("%N:%l main()")
+                     ACE_TEXT(" ERROR: take failed %d\n"), error));
+          ACE_OS::exit(-1);
+        }
+
+        if (fooSeq.length() != SAMPLES_PER_TEST)
+        {
+          ACE_ERROR((LM_ERROR,
+                     ACE_TEXT("%N:%l main()")
+                     ACE_TEXT(" ERROR: Unexpected number of samples taken: %d.")
+                     ACE_TEXT(" Expected: %d. Printing samples:\n"), fooSeq.length(), SAMPLES_PER_TEST));
+
+          for (unsigned int i = 0; i < fooSeq.length(); ++i)
+          {
+            if (info[i].valid_data)
+              std::cout << "fooSeq[" << i << "].x: " << fooSeq[i].x << std::endl;
+          }
+
+          ACE_OS::exit(-1);
+        }
+        std::cout << std::endl;
+    }
+
+    virtual void on_subscription_matched(
+        DDS::DataReader_ptr /*reader*/,
+        const DDS::SubscriptionMatchedStatus& /*status*/) {}
+
+    virtual void on_sample_lost(
+        DDS::DataReader_ptr /*reader*/,
+        const DDS::SampleLostStatus& /*status*/) {}
+};
 } // namespace
 
 int
@@ -157,6 +232,28 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
                         ACE_TEXT(" ERROR: _narrow failed!\n")), -1);
     }
 
+    DDS::DataReaderListener_var listener(new CallbackListener());
+    DDS::DataReader_var reader2 =
+      subscriber->create_datareader(topic.in(),
+                                    reader_qos,
+                                    listener,
+                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+    if (CORBA::is_nil(reader2.in()))
+    {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("%N:%l main()")
+                        ACE_TEXT(" ERROR: create_datareader failed!\n")), -1);
+    }
+
+    FooDataReader_var reader2_i = FooDataReader::_narrow(reader2);
+    if (CORBA::is_nil(reader2_i))
+    {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("%N:%l main()")
+                        ACE_TEXT(" ERROR: _narrow failed!\n")), -1);
+    }
+
     // Create DataWriter
     DDS::DataWriter_var writer =
       publisher->create_datawriter(topic.in(),
@@ -223,7 +320,8 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
       for (size_t i = 0; i < SAMPLES_PER_TEST; ++i)
       {
-        const Foo foo = {0, 0, 0, 0};
+        Foo foo {0, 0, 0, 0};
+        foo.x = 100 + i;
         if (writer_i->write(foo, DDS::HANDLE_NIL) != DDS::RETCODE_OK)
         {
             ACE_ERROR_RETURN((LM_ERROR,
