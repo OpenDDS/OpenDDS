@@ -426,7 +426,7 @@ DataSampleHeader::split(const ACE_Message_Block& orig, size_t size,
     hdr.content_filter_ = (hdr.content_filter_entries_.length() > 0);
     hdr.message_length_ = static_cast<ACE_UINT32>(payload->total_length());
     *tail << hdr;
-    tail->cont(payload);
+    tail->cont(payload_head.release());
     if (hdr.content_filter_) {
       add_cfentries(&hdr.content_filter_entries_, tail.get());
     }
