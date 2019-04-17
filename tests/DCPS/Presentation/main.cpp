@@ -320,7 +320,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
       for (size_t i = 0; i < SAMPLES_PER_TEST; ++i)
       {
-        Foo foo {0, 0, 0, 0};
+        Foo foo = {0, 0, 0, 0};
         foo.x = 100 + i;
         if (writer_i->write(foo, DDS::HANDLE_NIL) != DDS::RETCODE_OK)
         {
