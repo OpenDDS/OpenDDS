@@ -132,7 +132,7 @@ public:
   }
 
 private:
-  unique_ptr(const unique_ptr&);
+  unique_ptr(const unique_ptr&) {};
   unique_ptr& operator=(const unique_ptr&);
 
   T* ptr_;
