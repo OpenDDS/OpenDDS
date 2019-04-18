@@ -40,35 +40,15 @@ namespace OpenDDS { namespace DCPS {
 OPENDDS_STRING
 to_string(const EntityId_t& entityId)
 {
-  OPENDDS_STRING ret;
-
-  std::size_t len = sizeof(entityId.entityKey);
-  for (std::size_t i = 0; i < len; ++i) {
-    ret += to_dds_string(unsigned(entityId.entityKey[i]), true);
-  }
-
-  ret += to_dds_string(unsigned(entityId.entityKind), true);
-
-  return ret;
+  return to_hex_dds_string(&entityId.entityKey[0], sizeof(EntityKey_t)) +
+    to_dds_string(unsigned(entityId.entityKind), true);
 }
 
 OPENDDS_STRING
 to_string(const GUID_t& guid)
 {
-  OPENDDS_STRING ret;
-
-  std::size_t len = sizeof(guid.guidPrefix);
-  for (std::size_t i = 0; i < len; ++i) {
-    ret += to_dds_string(unsigned(guid.guidPrefix[i]), true);
-
-    if ((i + 1) % 4 == 0) {
-      ret += '.';
-    }
-  }
-
-  ret += to_string(guid.entityId);
-
-  return ret;
+  return to_hex_dds_string(&guid.guidPrefix[0], sizeof(GuidPrefix_t), '.', 4) +
+    '.' + to_string(guid.entityId);
 }
 
 #ifndef OPENDDS_SAFETY_PROFILE

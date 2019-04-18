@@ -1,4 +1,5 @@
 #include "dds/DCPS/security/CommonUtilities.h"
+#include "dds/DCPS/SafetyProfileStreams.h"
 
 #include <string>
 #include <cstdio>
@@ -9,6 +10,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace Security {
 namespace CommonUtilities {
+
+using OpenDDS::DCPS::to_hex_dds_string;
 
 URI::URI(const std::string& src)
   : scheme(URI_UNKNOWN), everything_else("") //authority(), path(""), query(""), fragment("")
@@ -95,42 +98,18 @@ OPENDDS_STRING ctk_to_dds_string(const CryptoTransformKind& keyKind)
       return "CRYPTO_TRANSFORMATION_KIND_AES256_GCM";
     }
   }
-  OPENDDS_STRING rv("Unknown CryptoTransformKind ");
-  const size_t i = rv.size();
-  rv.resize(i + 11);
-  std::sprintf(&rv[i], "%.2x %.2x %.2x %.2x",
-    keyKind[0], keyKind[1], keyKind[2], keyKind[3]);
-  return rv;
+  return OPENDDS_STRING("Unknown CryptoTransformKind ") +
+    to_hex_dds_string(keyKind, sizeof(keyKind), ' ');
 }
 
 OPENDDS_STRING ctki_to_dds_string(const CryptoTransformKeyId& keyId)
 {
-  OPENDDS_STRING rv('X', 12);
-  std::sprintf(&rv[0], "%.2x %.2x %.2x %.2x",
-    keyId[0], keyId[1], keyId[2], keyId[3]);
-  rv.resize(11);
-  return rv;
+  return to_hex_dds_string(keyId, sizeof(keyId), ' ');
 }
 
 OPENDDS_STRING to_dds_string(const KeyOctetSeq& keyData)
 {
-  size_t l = keyData.length() * 2;
-  // For Spaces
-  if (l > 2) {
-    l += (l / 2) - 1;
-  }
-  OPENDDS_STRING rv;
-  rv.reserve(l);
-  for (size_t i = 0; i < keyData.length(); i++) {
-    char chars[3];
-    std::sprintf((char*) &chars, "%.2x", keyData[i]);
-    if (i) {
-      rv.push_back(' ');
-    }
-    rv.push_back(chars[0]);
-    rv.push_back(chars[1]);
-  }
-  return rv;
+  return to_hex_dds_string(&keyData[0], keyData.length(), '\n', 8);
 }
 
 OPENDDS_STRING to_dds_string(const KeyMaterial_AES_GCM_GMAC& km)
