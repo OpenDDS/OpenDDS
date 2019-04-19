@@ -109,7 +109,10 @@ OPENDDS_STRING ctki_to_dds_string(const CryptoTransformKeyId& keyId)
 
 OPENDDS_STRING to_dds_string(const KeyOctetSeq& keyData)
 {
-  return to_hex_dds_string(&keyData[0], keyData.length(), '\n', 8);
+  if (keyData.length()) {
+    return to_hex_dds_string(&keyData[0], keyData.length(), '\n', 8);
+  }
+  return "";
 }
 
 OPENDDS_STRING to_dds_string(const KeyMaterial_AES_GCM_GMAC& km)
@@ -127,6 +130,16 @@ OPENDDS_STRING to_dds_string(const KeyMaterial_AES_GCM_GMAC& km)
     ctki_to_dds_string(km.receiver_specific_key_id) +
     OPENDDS_STRING("\nmaster_receiver_specific_key:\n") +
     to_dds_string(km.master_receiver_specific_key) +
+    OPENDDS_STRING("\n");
+}
+
+OPENDDS_STRING to_dds_string(const CryptoTransformIdentifier& id)
+{
+  return
+    OPENDDS_STRING("transformation_kind: ") +
+    ctk_to_dds_string(id.transformation_kind) +
+    OPENDDS_STRING("\ntransformation_key_id: ") +
+    ctki_to_dds_string(id.transformation_key_id) +
     OPENDDS_STRING("\n");
 }
 

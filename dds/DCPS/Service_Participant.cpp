@@ -130,6 +130,8 @@ static bool got_bit_flag = false;
 
 #if defined(OPENDDS_SECURITY)
 static bool got_security_flag = false;
+static bool got_security_debug = false;
+static bool got_security_fake_encryption = false;
 #endif
 
 static bool got_publisher_content_filter = false;
@@ -588,6 +590,21 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
       security_enabled_ = ACE_OS::atoi(currentArg);
       arg_shifter.consume_arg();
       got_security_flag = true;
+
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSSecurityDebug"))) != 0) {
+      security_debug.parse_flags(currentArg);
+      arg_shifter.consume_arg();
+      got_security_debug = true;
+
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSSecurityDebugLevel"))) != 0) {
+      security_debug.set_debug_level(ACE_OS::atoi(currentArg));
+      arg_shifter.consume_arg();
+      got_security_debug = true;
+
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSSecurityFakeEncryption"))) != 0) {
+      security_debug.fake_encryption = ACE_OS::atoi(currentArg);
+      arg_shifter.consume_arg();
+      got_security_fake_encryption = true;
 #endif
 
     } else {
@@ -1442,7 +1459,7 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
 
   } else {
     const ACE_TCHAR* message =
-      ACE_TEXT("(%P|%t) NOTICE: using \"%s\" value from command option (overrides value if it's in config file)\n");
+      ACE_TEXT("(%P|%t) NOTICE: using %s value from command option (overrides value if it's in config file)\n");
 
     if (got_debug_level) {
       ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSDebugLevel")));
@@ -1525,6 +1542,38 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
       ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSSecurity")));
     } else {
       GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSSecurity"), this->security_enabled_, int)
+    }
+
+    if (got_security_debug) {
+      ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSSecurityDebug or DCPSSecurityDebugLevel")));
+    } else {
+      const ACE_TCHAR* debug_name = ACE_TEXT("DCPSSecurityDebug");
+      const ACE_TCHAR* debug_level_name = ACE_TEXT("DCPSSecurityDebugLevel");
+      bool got_value = false;
+      ACE_TString debug_level_value;
+      if (cf.get_string_value(sect, debug_level_name, debug_level_value) == -1) {
+        ACE_TString debug_value;
+        if (cf.get_string_value(sect, debug_name, debug_value) != -1) {
+          if (debug_value != ACE_TEXT("")) {
+            got_value = true;
+            security_debug.parse_flags(debug_value.c_str());
+          }
+        }
+      } else if (debug_level_value != ACE_TEXT("")) {
+        got_value = true;
+        security_debug.set_debug_level(ACE_OS::atoi(debug_level_value.c_str()));
+      }
+      if (!got_value && OpenDDS::DCPS::Transport_debug_level > 0) {
+        ACE_DEBUG((LM_NOTICE,
+          ACE_TEXT("(%P|%t) NOTICE: DCPSSecurityDebug and DCPSSecurityDebugLevel ")
+          ACE_TEXT("are not defined in config file or are blank - using code default.\n")));
+      }
+    }
+
+    if (got_security_fake_encryption) {
+      ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSSecurityFakeEncryption")));
+    } else {
+      GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSSecurityFakeEncryption"), security_debug.fake_encryption, int)
     }
 #endif
 

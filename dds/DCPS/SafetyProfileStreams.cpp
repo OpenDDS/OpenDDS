@@ -112,7 +112,7 @@ static inline
 char nibble_to_hex_char(char nibble)
 {
   nibble &= 0x0F;
-  return ((nibble < 0xA) ? '0' : 'A') + nibble;
+  return ((nibble < 0xA) ? '0' : ('a' - 0xA)) + nibble;
 }
 
 OPENDDS_STRING

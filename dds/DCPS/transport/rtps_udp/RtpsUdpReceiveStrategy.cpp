@@ -334,18 +334,20 @@ RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage)
   }
 
   if (!ok) {
-    bool dw = category == DATAWRITER_SUBMESSAGE;
-    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) RtpsUdpReceiveStrategy: ")
-               ACE_TEXT("decode_data%C_submessage failed [%d.%d]: \"%C\" ")
-               ACE_TEXT("(rpch: %u, local d%cch: %u, remote d%cch: %u)\n"),
-               dw ? "writer" : "reader",
-               ex.code, ex.minor_code, ex.message.in(),
-               peer_pch,
-               dw ? 'r' : 'w',
-               dw ? drch : dwch,
-               dw ? 'w' : 'r',
-               dw ? dwch : drch
-               ));
+    if (category != INFO_SUBMESSAGE) {
+      bool dw = category == DATAWRITER_SUBMESSAGE;
+      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) RtpsUdpReceiveStrategy: ")
+                 ACE_TEXT("decode_data%C_submessage failed [%d.%d]: \"%C\" ")
+                 ACE_TEXT("(rpch: %u, local d%cch: %u, remote d%cch: %u)\n"),
+                 dw ? "writer" : "reader",
+                 ex.code, ex.minor_code, ex.message.in(),
+                 peer_pch,
+                 dw ? 'r' : 'w',
+                 dw ? drch : dwch,
+                 dw ? 'w' : 'r',
+                 dw ? dwch : drch
+                 ));
+    }
     return;
   }
 

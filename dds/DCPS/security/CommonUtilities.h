@@ -57,6 +57,7 @@ OPENDDS_STRING ctk_to_dds_string(const CryptoTransformKind& keyKind);
 OPENDDS_STRING ctki_to_dds_string(const CryptoTransformKeyId& keyId);
 OPENDDS_STRING to_dds_string(const KeyOctetSeq& keyData);
 OPENDDS_STRING to_dds_string(const KeyMaterial_AES_GCM_GMAC& km);
+OPENDDS_STRING to_dds_string(const CryptoTransformIdentifier& id);
 
 }
 }

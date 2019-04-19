@@ -237,7 +237,7 @@ private:
       : type_(mt), id_(id), pgmdata_(data) {}
 #endif
 
-    static OPENDDS_STRING msgTypeToString(const MsgType type);
+    static OPENDDS_STRING msgTypeToString(MsgType type);
     OPENDDS_STRING msgTypeToString() const;
   };
 

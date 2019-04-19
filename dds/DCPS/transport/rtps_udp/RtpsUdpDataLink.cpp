@@ -2727,9 +2727,11 @@ RtpsUdpDataLink::populate_security_handles(const RepoId& local_id,
       RTPS::assign(remote_participant.guidPrefix, remote_id.guidPrefix);
       remote_participant.entityId = ENTITYID_PARTICIPANT;
       peer_crypto_handles_[remote_participant] = handle;
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::populate_security_handles() ")
-                 ACE_TEXT("RPCH %C = %d\n"),
-                 std::string(GuidConverter(remote_participant)).c_str(), handle));
+      if (security_debug.bookkeeping) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} RtpsUdpDataLink::populate_security_handles() ")
+                   ACE_TEXT("RPCH %C = %d\n"),
+                   OPENDDS_STRING(GuidConverter(remote_participant)).c_str(), handle));
+      }
     }
 
     else if (std::strcmp(prop.name.in(), RTPS::BLOB_PROP_DW_CRYPTO_HANDLE) == 0
@@ -2739,9 +2741,11 @@ RtpsUdpDataLink::populate_security_handles(const RepoId& local_id,
         handle = handle << 8 | prop.value[i];
       }
       peer_crypto_handles_[writer_id] = handle;
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::populate_security_handles() ")
-                 ACE_TEXT("DWCH %C = %d\n"),
-                 std::string(GuidConverter(writer_id)).c_str(), handle));
+      if (security_debug.bookkeeping) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} RtpsUdpDataLink::populate_security_handles() ")
+                   ACE_TEXT("DWCH %C = %d\n"),
+                   OPENDDS_STRING(GuidConverter(writer_id)).c_str(), handle));
+      }
     }
 
     else if (std::strcmp(prop.name.in(), RTPS::BLOB_PROP_DR_CRYPTO_HANDLE) == 0
@@ -2751,9 +2755,11 @@ RtpsUdpDataLink::populate_security_handles(const RepoId& local_id,
         handle = handle << 8 | prop.value[i];
       }
       peer_crypto_handles_[reader_id] = handle;
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::populate_security_handles() ")
-                 ACE_TEXT("DRCH %C = %d\n"),
-                 std::string(GuidConverter(reader_id)).c_str(), handle));
+      if (security_debug.bookkeeping) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} RtpsUdpDataLink::populate_security_handles() ")
+                   ACE_TEXT("DRCH %C = %d\n"),
+                   std::string(GuidConverter(reader_id)).c_str(), handle));
+      }
     }
 
   }
