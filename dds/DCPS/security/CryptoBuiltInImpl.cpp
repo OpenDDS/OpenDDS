@@ -316,7 +316,7 @@ DatawriterCryptoHandle CryptoBuiltInImpl::register_local_datawriter(
     // (requirements for which key appears first, etc.)
     bool used_h = false;
     if (security_attributes.is_submessage_protected) {
-      KeyMaterial_AES_GCM_GMAC key = make_key(h, plugin_attribs & FLAG_IS_SUBMESSAGE_ENCRYPTED);
+      const KeyMaterial_AES_GCM_GMAC key = make_key(h, plugin_attribs & FLAG_IS_SUBMESSAGE_ENCRYPTED);
       push_back(keys, key);
       used_h = true;
       if (security_debug.bookkeeping && !security_debug.showkeys) {
@@ -332,7 +332,7 @@ DatawriterCryptoHandle CryptoBuiltInImpl::register_local_datawriter(
     }
     if (security_attributes.is_payload_protected) {
       const unsigned int key_id = used_h ? generate_handle() : h;
-      KeyMaterial_AES_GCM_GMAC key = make_key(key_id, plugin_attribs & FLAG_IS_PAYLOAD_ENCRYPTED);
+      const KeyMaterial_AES_GCM_GMAC key = make_key(key_id, plugin_attribs & FLAG_IS_PAYLOAD_ENCRYPTED);
       push_back(keys, key);
       if (security_debug.bookkeeping && !security_debug.showkeys) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} CryptoBuiltInImpl::register_local_datawriter ")
@@ -435,7 +435,7 @@ DatareaderCryptoHandle CryptoBuiltInImpl::register_local_datareader(
     push_back(keys, make_volatile_placeholder());
 
   } else if (security_attributes.is_submessage_protected) {
-    KeyMaterial_AES_GCM_GMAC key = make_key(h, plugin_attribs & FLAG_IS_SUBMESSAGE_ENCRYPTED);
+    const KeyMaterial_AES_GCM_GMAC key = make_key(h, plugin_attribs & FLAG_IS_SUBMESSAGE_ENCRYPTED);
     if (security_debug.bookkeeping && !security_debug.showkeys) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} CryptoBuiltInImpl::register_local_datareader ")
         ACE_TEXT("created submessage key with id %C for LDRCH %d\n"),
@@ -1507,9 +1507,7 @@ bool CryptoBuiltInImpl::decrypt(const KeyMaterial& master, Session& sess,
 
   if (security_debug.fake_encryption) {
     out.length(n);
-    for (unsigned i = 0; i < n; i++) {
-      out[i] = ciphertext[i];
-    }
+    std::memcpy(out.get_buffer(), ciphertext, n);
     return true;
   }
 
@@ -1765,7 +1763,7 @@ bool CryptoBuiltInImpl::decode_serialized_payload(
     plain_buffer = encoded_buffer;
     if (security_debug.encdec) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {encdec} CryptoBuiltInImpl::decode_serialized_payload ")
-        ACE_TEXT("Sending datawriter should not be encrypting, returning input as plaintext\n"),
+        ACE_TEXT("Sending datawriter isn't encrypting as far as we know, returning input as plaintext\n"),
         sending_datawriter_crypto, receiving_datareader_crypto));
     }
     return true;

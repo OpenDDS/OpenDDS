@@ -2942,13 +2942,13 @@ Sedp::RepeatOnceWriter::RepeatOnceWriter(const RepoId& pub_id, Sedp& sedp)
 void
 Sedp::RepeatOnceWriter::acknowledged_by_reader(const RepoId& rdr)
 {
-  RepoId remote_participant;
-  RTPS::assign(remote_participant.guidPrefix, rdr.guidPrefix);
-  remote_participant.entityId = ENTITYID_PARTICIPANT;
-
   if (!std::memcmp(repo_id_.guidPrefix, rdr.guidPrefix, sizeof(DCPS::GuidPrefix_t))) {
     return;
   }
+
+  RepoId remote_participant;
+  RTPS::assign(remote_participant.guidPrefix, rdr.guidPrefix);
+  remote_participant.entityId = ENTITYID_PARTICIPANT;
 
   if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::RepeatOnceWriter::acknowledged_by_reader(): %C\n",
@@ -2956,22 +2956,23 @@ Sedp::RepeatOnceWriter::acknowledged_by_reader(const RepoId& rdr)
   }
 
   ACE_Guard<ACE_Thread_Mutex> g(lock_);
-  if (remote_readers_.count(remote_participant)) {
-    RemoteReaderVector& remote_readers = remote_readers_[remote_participant];
+
+  RemoteReaderVectors::iterator reader_map_iter = remote_readers_.find(remote_participant);
+  if (reader_map_iter != remote_readers_.end()) {
     typedef RemoteReaderVector::iterator iter_t;
-    for (iter_t i = remote_readers.begin(); i != remote_readers.end(); ++i) {
+    for (iter_t i = reader_map_iter->second.begin(); i != reader_map_iter->second.end(); ++i) {
       sedp_.send_datawriter_crypto_tokens(i->local_writer, i->remote_reader, i->writer_tokens);
     }
-    remote_readers_.erase(remote_participant);
+    remote_readers_.erase(reader_map_iter);
   }
 
-  if (remote_writers_.count(remote_participant)) {
-    RemoteWriterVector& remote_writers = remote_writers_[remote_participant];
+  RemoteWriterVectors::iterator writer_map_iter = remote_writers_.find(remote_participant);
+  if (writer_map_iter != remote_writers_.end()) {
     typedef RemoteWriterVector::iterator iter_t;
-    for (iter_t i = remote_writers.begin(); i != remote_writers.end(); ++i) {
+    for (iter_t i = writer_map_iter->second.begin(); i != writer_map_iter->second.end(); ++i) {
       sedp_.send_datareader_crypto_tokens(i->local_reader, i->remote_writer, i->reader_tokens);
     }
-    remote_writers_.erase(remote_participant);
+    remote_writers_.erase(writer_map_iter);
   }
 }
 #endif
