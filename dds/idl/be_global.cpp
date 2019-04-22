@@ -35,7 +35,9 @@ BE_GlobalData::BE_GlobalData()
   , suppress_idl_(false)
   , suppress_typecode_(false)
   , generate_itl_(false)
+  , no_default_gen_(false)
   , v8_(false)
+  , rapidjson_(false)
   , face_ts_(false)
   , seq_("Seq")
   , language_mapping_(LANGMAP_NONE)
@@ -123,6 +125,16 @@ ACE_CString BE_GlobalData::pch_include() const
   return this->pch_include_;
 }
 
+void BE_GlobalData::add_cpp_include(const std::string& str)
+{
+  this->cpp_includes_.insert(str);
+}
+
+const std::set<std::string>& BE_GlobalData::cpp_includes() const
+{
+  return this->cpp_includes_;
+}
+
 void BE_GlobalData::java_arg(const ACE_CString& str)
 {
   this->java_arg_ = str;
@@ -163,6 +175,16 @@ bool BE_GlobalData::java() const
   return this->java_;
 }
 
+void BE_GlobalData::no_default_gen(bool b)
+{
+  this->no_default_gen_ = b;
+}
+
+bool BE_GlobalData::no_default_gen() const
+{
+  return this->no_default_gen_;
+}
+
 void BE_GlobalData::v8(bool b)
 {
   this->v8_ = b;
@@ -171,6 +193,16 @@ void BE_GlobalData::v8(bool b)
 bool BE_GlobalData::v8() const
 {
   return this->v8_;
+}
+
+void BE_GlobalData::rapidjson(bool b)
+{
+  this->rapidjson_ = b;
+}
+
+bool BE_GlobalData::rapidjson() const
+{
+  return this->rapidjson_;
 }
 
 void BE_GlobalData::face_ts(bool b)
@@ -549,6 +581,7 @@ BE_GlobalData::get_include_block(BE_GlobalData::stream_enum_t which)
     break;
 
   case STREAM_CPP:
+    std::for_each(cpp_includes().begin(), cpp_includes().end(), InsertIncludes(ret));
     std::for_each(referenced_idl_.begin(), referenced_idl_.end(),
                   InsertRefIncludes(ret, "TypeSupportImpl.h"));
     break;

@@ -40,14 +40,17 @@ bool metaclass_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
 {
   ContentSubscriptionGuard csg(!be_global->v8());
   NamespaceGuard ng;
-  std::string decl = "const char* gen_" + scoped_helper(name, "_") + "_names[]";
-  be_global->header_ << "extern " << decl << ";\n";
-  be_global->impl_ << decl << " = {\n";
+  std::string array_decl = "const char* gen_" + scoped_helper(name, "_") + "_names[]";
+  std::string size_decl = "const CORBA::ULong gen_" + scoped_helper(name, "_") + "_names_size";
+  be_global->header_ << "extern " << array_decl << ";\n";
+  be_global->header_ << "extern " << size_decl << ";\n";
+  be_global->impl_ << array_decl << " = {\n";
   for (size_t i = 0; i < contents.size(); ++i) {
     be_global->impl_ << "  \"" << contents[i]->local_name()->get_string()
       << ((i < contents.size() - 1) ? "\",\n" : "\"\n");
   }
   be_global->impl_ << "};\n";
+  be_global->impl_ << size_decl << " = " << contents.size() << ";\n";
   return true;
 }
 

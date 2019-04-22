@@ -104,11 +104,20 @@ public:
   ACE_CString pch_include() const;
   void pch_include(const ACE_CString& str);
 
+  const std::set<std::string>& cpp_includes() const;
+  void add_cpp_include(const std::string& str);
+
   bool java() const;
   void java(bool b);
 
+  bool no_default_gen() const;
+  void no_default_gen(bool b);
+
   bool v8() const;
   void v8(bool b);
+
+  bool rapidjson() const;
+  void rapidjson(bool b);
 
   bool face_ts() const;
   void face_ts(bool b);
@@ -141,9 +150,10 @@ private:
   // Name of the IDL file we are processing.
 
   bool java_, suppress_idl_, suppress_typecode_,
-    generate_itl_, v8_, face_ts_;
+    generate_itl_, no_default_gen_, v8_, rapidjson_, face_ts_;
 
   ACE_CString export_macro_, export_include_, versioning_name_, versioning_begin_, versioning_end_, pch_include_, java_arg_, seq_;
+  std::set<std::string> cpp_includes_;
 
   LanguageMapping language_mapping_;
 };

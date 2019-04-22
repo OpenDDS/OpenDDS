@@ -5,21 +5,21 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "v8_generator.h"
+#include "rapidjson_generator.h"
 #include "be_extern.h"
 
 #include "utl_identifier.h"
 
 using namespace AstTypeClassification;
 
-void v8_generator::gen_includes()
+void rapidjson_generator::gen_includes()
 {
-  be_global->add_include("<v8.h>", BE_GlobalData::STREAM_H);
-  be_global->add_include("<nan.h>", BE_GlobalData::STREAM_CPP);
+  be_global->add_include("rapidjson/document.h", BE_GlobalData::STREAM_H);
+  be_global->add_include("rapidjson/stringbuffer.h", BE_GlobalData::STREAM_CPP);
   be_global->add_include("<sstream>", BE_GlobalData::STREAM_CPP);
 }
 
-bool v8_generator::gen_enum(AST_Enum*, UTL_ScopedName*,
+bool rapidjson_generator::gen_enum(AST_Enum*, UTL_ScopedName*,
                             const std::vector<AST_EnumVal*>&, const char*)
 {
   return true;
@@ -27,7 +27,7 @@ bool v8_generator::gen_enum(AST_Enum*, UTL_ScopedName*,
 
 namespace {
 
-  std::string getV8Type(AST_Type* type,
+  std::string getRapidJsonType(AST_Type* type,
                         AST_PredefinedType::PredefinedType* pt = 0)
   {
     const Classification cls = classify(type);
@@ -41,19 +41,22 @@ namespace {
       switch (p->pt()) {
       case AST_PredefinedType::PT_char:
       case AST_PredefinedType::PT_wchar:
-      case AST_PredefinedType::PT_longlong:  // Can't fully fit in a JS "number"
-      case AST_PredefinedType::PT_ulonglong: // Can't fully fit in a JS "number"
         return "String";
       case AST_PredefinedType::PT_boolean:
-        return "Boolean";
+        return "Bool";
+      case AST_PredefinedType::PT_short:
+      case AST_PredefinedType::PT_long:
+        return "Int";
       case AST_PredefinedType::PT_octet:
       case AST_PredefinedType::PT_ushort:
-      case AST_PredefinedType::PT_short:
       case AST_PredefinedType::PT_ulong:
-      case AST_PredefinedType::PT_long:
-        return "Integer";
+        return "Uint";
+      case AST_PredefinedType::PT_longlong:
+        return "Int64";
+      case AST_PredefinedType::PT_ulonglong:
+        return "Uint64";
       default:
-        return "Number";
+        return "Double";
       }
     }
     return "";
@@ -67,24 +70,30 @@ namespace {
     return name.rfind("Seq") == name.size() - 3;
   }
 
-  void gen_copyto(const char* tgt, const char* src, AST_Type* type,
-                  const char* prop, std::ostream& strm = be_global->impl_)
+  void gen_copyto(const char* tgt, const char* alloc, const char* src, AST_Type* type,
+                  const char* prop, bool prop_index = false, std::ostream& strm = be_global->impl_)
   {
     const Classification cls = classify(type);
     AST_PredefinedType::PredefinedType pt = AST_PredefinedType::PT_void;
-    const std::string v8Type = getV8Type(type, &pt),
-      propName = std::string(tgt) + "->Set(" + prop + ", ";
+    const std::string rapidJsonType = getRapidJsonType(type, &pt),
+      tgt_str = (prop_index ? (std::string(tgt) + "[" + prop + "]") : std::string(tgt)),
+      op_pre = (prop_index ? std::string(" = rapidjson::Value(") : (std::string(".AddMember(") + prop + std::string(", rapidjson::Value("))),
+      op_post = (prop_index ? std::string(").Move()") : std::string(").Move(), ") + alloc + std::string(")")),
+      propVal = (prop_index ? (std::string(tgt) + "[" + prop + "]") : (std::string(tgt) + std::string(".AddMember(") + prop + std::string(", rapidjson::Value(0).Move(), ") + alloc + std::string(")")));
 
     if (cls & CL_SCALAR) {
-      std::string prefix, suffix, postNew;
+      std::string prefix, suffix;
 
       if (cls & CL_ENUM) {
         const std::string underscores =
           dds_generator::scoped_helper(type->name(), "_"),
           array = "gen_" + underscores + "_names";
-        prefix = '(' + std::string(src) + " >= " + array + "_size) ? \"<<invalid>>\" : " + array + "[static_cast<int>(";
-        suffix = ")]";
-        postNew = ".ToLocalChecked()";
+        strm <<
+          "  {\n"
+          "    std::string str(" << src << " >= " << array << "_size ? \"<<invalid>>\" : " << array << "[static_cast<int>(" << src << ")]);\n" <<
+          "    " << tgt_str << op_pre << "str.c_str(), " << alloc << op_post << ";\n"
+          "  }\n";
+        return;
 
       } else if (cls & CL_STRING) {
         if (!std::strstr(src, "()")) {
@@ -93,23 +102,24 @@ namespace {
         if (cls & CL_WIDE) {
           strm <<
             "  {\n"
-            "    const size_t len = ACE_OS::strlen(" << src << suffix << ");\n"
-            "    uint16_t* const str = new uint16_t[len + 1];\n"
-            "    for (size_t i = 0; i <= len; ++i) {\n"
-            "      str[i] = " << src << "[i];\n"
+            "    rapidjson::GenericStringStream<rapidjson::UTF16<>> ins(" << src << suffix << ");\n"
+            "    rapidjson::GenericStringBuffer<rapidjson::UTF8<>> outs;\n"
+            "    while (ins.Peek() != '\\0') {\n"
+            "      rapidjson::Transcoder<rapidjson::UTF16<>, rapidjson::UTF8<>>::Transcode(ins, outs);\n"
             "    }\n"
-            "    " << propName << "Nan::New(str).ToLocalChecked());\n"
-            "    delete[] str;\n"
+            "    " << tgt_str << op_pre << "outs.GetString(), " << alloc << op_post << ";\n"
             "  }\n";
           return;
+        } else {
+          strm << "  " << tgt_str << op_pre << src << suffix << ", " << alloc << op_post << ";\n";
+          return;
         }
-        postNew = ".ToLocalChecked()";
 
       } else if (pt == AST_PredefinedType::PT_char) {
         strm <<
           "  {\n"
           "    const char str[] = {" << src << ", 0};\n"
-          "    " << propName << "Nan::New(str).ToLocalChecked());\n"
+          "    " << tgt_str << op_pre << "&str[0], " << alloc << op_post << ";\n"
           "  }\n";
         return;
 
@@ -117,42 +127,48 @@ namespace {
         strm <<
           "  {\n"
           "    const uint16_t str[] = {" << src << ", 0};\n"
-          "    " << propName << "Nan::New(str).ToLocalChecked());\n"
+          "    rapidjson::GenericStringStream<rapidjson::UTF16<>> ins(&str[0]);\n"
+          "    rapidjson::GenericStringBuffer<rapidjson::UTF8<>> outs;\n"
+          "    rapidjson::Transcoder<rapidjson::UTF16<>, rapidjson::UTF8<>>::Transcode(ins, outs);\n"
+          "    " << tgt_str << op_pre << "outs.GetString(), " << alloc << op_post << ";\n"
           "  }\n";
         return;
 
-      } else if (pt == AST_PredefinedType::PT_longlong || pt == AST_PredefinedType::PT_ulonglong) {
-        prefix = "std::to_string(";
-        suffix = ").c_str()";
-        postNew = ".ToLocalChecked()";
-
-      } else if (v8Type == "Number") {
+      } else if (pt == AST_PredefinedType::PT_short) {
+        prefix = "static_cast<int>(";
+        suffix = ")";
+      } else if (pt == AST_PredefinedType::PT_octet || pt == AST_PredefinedType::PT_ushort) {
+        prefix = "static_cast<unsigned int>(";
+        suffix = ")";
+      } else if (rapidJsonType == "Double") {
         prefix = "static_cast<double>(";
         suffix = ")";
       }
 
-      strm <<
-        "  " << propName << "Nan::New(" << prefix << src << suffix << ")"
-             << postNew << ");\n";
+      strm << "  " << tgt_str << op_pre << prefix << src << suffix << op_post << ";\n";
 
     } else if ((cls & CL_SEQUENCE) && builtInSeq(type)) {
       AST_Type* real_type = resolveActualType(type);
       AST_Sequence* seq = AST_Sequence::narrow_from_decl(real_type);
       AST_Type* elem = seq->base_type();
+      std::string make_obj = prop_index ? std::string("") : (tgt_str + op_pre + "0" + op_post + ".SetObject();\n    ");
       strm <<
         "  {\n"
-        "    const v8::Local<v8::Array> seq = Nan::New<v8::Array>(" << src
-                       << ".length());\n"
+        "    rapidjson::Value& val = " << propVal << ";\n"
+        "    val.SetArray();\n"
+        "    val.GetArray().Reserve(" << src << ".length(), " << alloc << ");\n"
         "    for (CORBA::ULong j = 0; j < " << src << ".length(); ++j) {\n";
-      gen_copyto("seq", (std::string(src) + "[j]").c_str(), elem, "j");
+      gen_copyto("val", alloc, (std::string(src) + "[j]").c_str(), elem, "j", true);
       strm <<
         "    }\n"
-        "    " << propName << "seq" << ");\n"
         "  }\n";
 
     } else { // struct, sequence, etc.
       strm <<
-        "  " << propName << "copyToV8(" << src << "));\n";
+        "  {\n"
+        "    rapidjson::Value& val = " << propVal << ";\n"
+        "    " << "copyToRapidJson(" << src << ", val, " << alloc << ");\n"
+        "  }\n";
     }
   }
 
@@ -161,7 +177,7 @@ namespace {
   {
     const Classification cls = classify(type);
     AST_PredefinedType::PredefinedType pt = AST_PredefinedType::PT_void;
-    getV8Type(type, &pt);
+    const std::string rapidJsonType = getRapidJsonType(type, &pt);
     const std::string propName = prop_index ? std::string(tgt) + "[" + prop + "]" : std::string(tgt) + "." + prop,
       assign_prefix = fun_assign ? "(" : " = ",
       assign_suffix = fun_assign ? ")" : "";
@@ -173,14 +189,15 @@ namespace {
       if (prop_index) {
         strm <<
           "  {\n"
-          "    v8::Local<v8::Value> lv = " << src << "->Get(" << prop << ");\n";
-        ip = std::string(6, ' ');
+          "    if (" << src << ".IsArray()) {\n"
+          "      const rapidjson::Value& val = " << src << ".GetArray()[" << prop << "];\n";
+        ip = std::string(8, ' ');
       } else {
         strm <<
           "  {\n"
-          "    v8::Local<v8::String> field_str = Nan::New(\"" << prop << "\").ToLocalChecked();\n"
-          "    if (" << src << "->Has(field_str)) {\n"
-          "      v8::Local<v8::Value> lv = " << src << "->Get(field_str);\n";
+          "    rapidjson::Value::ConstMemberIterator it = " << src << ".FindMember(\"" << prop << "\");\n"
+          "    if (it != " << src << ".MemberEnd()) {\n"
+          "      const rapidjson::Value& val = it->value;\n";
         ip = std::string(8, ' ');
       }
 
@@ -189,14 +206,11 @@ namespace {
           dds_generator::scoped_helper(type->name(), "_"),
           array = "gen_" + underscores + "_names";
         strm <<
-          ip << "if (lv->IsNumber()) {\n" <<
-          ip << "  v8::Local<v8::Integer> li = Nan::To<v8::Integer>(lv).ToLocalChecked();\n" <<
-          ip << "  " << propName << assign_prefix << "static_cast<" << scoped(type->name()) << ">(li->Value())" << assign_suffix << ";\n" <<
+          ip << "if (val.IsNumber()) {\n" <<
+          ip << "  " << propName << assign_prefix << "static_cast<" << scoped(type->name()) << ">(val.GetInt())" << assign_suffix << ";\n" <<
           ip << "}\n" <<
-          ip << "if (lv->IsString()) {\n" <<
-          ip << "  v8::Local<v8::String> ls = Nan::To<v8::String>(lv).ToLocalChecked();\n" <<
-          ip << "  std::string ss(ls->Utf8Length(), ' ');\n" <<
-          ip << "  ls->WriteUtf8(&ss[0]);\n" <<
+          ip << "if (val.IsString()) {\n" <<
+          ip << "  std::string ss(val.GetString());\n" <<
           ip << "  for (uint32_t i = 0; i < " << array << "_size; ++i) {\n" <<
           ip << "    if (ss == " << array << "[i]) {\n" <<
           ip << "      " << propName << assign_prefix << "static_cast<" << scoped(type->name()) << ">(i)" << assign_suffix << ";\n" <<
@@ -206,40 +220,33 @@ namespace {
           ip << "}\n";
       } else if (cls & CL_STRING) {
         strm <<
-          ip << "if (lv->IsString()) {\n" <<
-          ip << "  v8::Local<v8::String> ls = Nan::To<v8::String>(lv).ToLocalChecked();\n";
+          ip << "if (val.IsString()) {\n";
         if (cls & CL_WIDE) {
           strm <<
-            ip << "  std::vector<uint16_t> vwc(ls->Length(), 0);\n" <<
-            ip << "  ls->Write(&vwc[0]);\n" <<
-            ip << "  std::wstring ws(ls->Length(), ' ');\n" <<
-            ip << "  for (size_t i = 0; i < vwc.size(); ++i) {\n" <<
-            ip << "    ws[i] = vwc[i];\n" <<
+            ip << "  rapidjson::GenericStringStream<rapidjson::UTF8<>> ins(val.GetString());\n" <<
+            ip << "  rapidjson::GenericStringBuffer<rapidjson::UTF16<>> outs;\n" <<
+            ip << "  while (ins.Peek() != '\\0') {\n" <<
+            ip << "    rapidjson::Transcoder<rapidjson::UTF8<>, rapidjson::UTF16<>>::Transcode(ins, outs);\n" <<
             ip << "  }\n" <<
-            ip << "  " << propName << assign_prefix << "ws.c_str()" << assign_suffix << ";\n";
+            ip << "  " << propName << assign_prefix << "outs.GetString()" << assign_suffix << ";\n";
         } else {
           strm <<
-            ip << "  std::string ss(ls->Utf8Length(), ' ');\n" <<
-            ip << "  ls->WriteUtf8(&ss[0]);\n" <<
-            ip << "  " << propName << assign_prefix << "ss.c_str()" << assign_suffix << ";\n";
+            ip << "  " << propName << assign_prefix << "val.GetString()" << assign_suffix << ";\n";
         }
         strm <<
           ip << "}\n";
       } else if (pt == AST_PredefinedType::PT_char) {
         strm <<
-          ip << "if (lv->IsString()) {\n" <<
-          ip << "  v8::Local<v8::String> ls = Nan::To<v8::String>(lv).ToLocalChecked();\n" <<
-          ip << "  char temp_c;\n" <<
-          ip << "  ls->WriteUtf8(&temp_c, 1);\n" <<
-          ip << "  " << propName << assign_prefix << "temp_c" << assign_suffix << ";\n" <<
+          ip << "if (val.IsString()) {\n" <<
+          ip << "  " << propName << assign_prefix << "val.GetString()[0]" << assign_suffix << ";\n" <<
           ip << "}\n";
       } else if (pt == AST_PredefinedType::PT_wchar) {
         strm <<
-          ip << "if (lv->IsString()) {\n" <<
-          ip << "  v8::Local<v8::String> ls = Nan::To<v8::String>(lv).ToLocalChecked();\n" <<
-          ip << "  wchar temp_wc;\n" <<
-          ip << "  ls->Write(&temp_wc, 1);\n" <<
-          ip << "  " << propName << assign_prefix << "temp_wc" << assign_suffix << ";\n" <<
+          ip << "if (val.IsString()) {\n" <<
+          ip << "  rapidjson::GenericStringStream<rapidjson::UTF8<>> ins(val.GetString());\n" <<
+          ip << "  rapidjson::GenericStringBuffer<rapidjson::UTF16<>> outs;\n" <<
+          ip << "  rapidjson::Transcoder<rapidjson::UTF8<>, rapidjson::UTF16<>>::Transcode(ins, outs);\n" <<
+          ip << "  " << propName << assign_prefix << "outs.GetString()[0]" << assign_suffix << ";\n" <<
           ip << "}\n";
       } else if (pt == AST_PredefinedType::PT_longlong
               || pt == AST_PredefinedType::PT_ulonglong
@@ -253,10 +260,8 @@ namespace {
           temp_type = scoped(type->name()),
           temp_name = "temp_" + underscores;
         strm <<
-          ip << "if (lv->IsString()) {\n" <<
-          ip << "  v8::Local<v8::String> ls = Nan::To<v8::String>(lv).ToLocalChecked();\n" <<
-          ip << "  std::string ss(ls->Utf8Length(), ' ');\n" <<
-          ip << "  ls->WriteUtf8(&ss[0]);\n" <<
+          ip << "if (val.IsString()) {\n" <<
+          ip << "  std::string ss(val.GetString());\n" <<
           ip << "  std::istringstream iss(ss);\n" <<
           ip << "  " << (pt == AST_PredefinedType::PT_octet ? "uint16_t" : temp_type.c_str()) << " " << temp_name << ";\n" <<
           ip << "  if (ss.find(\"0x\") != std::string::npos) {\n" <<
@@ -266,28 +271,26 @@ namespace {
           ip << "  }\n" <<
           ip << "  " << propName << assign_prefix << temp_name << assign_suffix << ";\n" <<
           ip << "}\n" <<
-          ip << "if (lv->IsNumber()) {\n" <<
-          ip << "  v8::Local<v8::Number> ln = Nan::To<v8::Number>(lv).ToLocalChecked();\n" <<
-          ip << "  " << propName << assign_prefix << "ln->IntegerValue()" << assign_suffix << ";\n" <<
+          ip << "if (val.IsNumber()) {\n" <<
+          ip << "  " << propName << assign_prefix << "val.Get" << rapidJsonType << "()" << assign_suffix << ";\n" <<
           ip << "}\n";
       } else if (pt == AST_PredefinedType::PT_float
               || pt == AST_PredefinedType::PT_double
               || pt == AST_PredefinedType::PT_longdouble) {
         strm <<
-          ip << "if (lv->IsNumber()) {\n" <<
-          ip << "  v8::Local<v8::Number> ln = Nan::To<v8::Number>(lv).ToLocalChecked();\n" <<
-          ip << "  " << propName << assign_prefix << "ln->Value()" << assign_suffix << ";\n" <<
+          ip << "if (val.IsNumber()) {\n" <<
+          ip << "  " << propName << assign_prefix << "val.Get" << rapidJsonType << "()" << assign_suffix << ";\n" <<
           ip << "}\n";
       } else if (pt == AST_PredefinedType::PT_boolean) {
         strm <<
-          ip << "if (lv->IsBoolean()) {\n" <<
-          ip << "  v8::Local<v8::Boolean> lb = Nan::To<v8::Boolean>(lv).ToLocalChecked();\n" <<
-          ip << "  " << propName << assign_prefix << "lb->Value()" << assign_suffix << ";\n" <<
+          ip << "if (val.IsBool()) {\n" <<
+          ip << "  " << propName << assign_prefix << "val.Get" << rapidJsonType << "()" << assign_suffix << ";\n" <<
           ip << "}\n";
       }
 
       if (prop_index) {
         strm <<
+          "    }\n"
           "  }\n";
       } else {
         strm <<
@@ -302,36 +305,32 @@ namespace {
       if (prop_index) {
         strm <<
           "  {\n"
-          "      v8::Local<v8::Value> lv = " << src << "->Get(" << prop << ");\n"
-          "      if (lv->IsArray()) {\n"
-          "        uint32_t length = 0;\n"
-          "        v8::Local<v8::Object> lo = Nan::To<v8::Object>(lv).ToLocalChecked();\n"
-          "        length = lo->Get(Nan::New(\"length\").ToLocalChecked())->ToObject()->Uint32Value();\n"
-          "        " << scoped(type->name()) << "& temp = " << propName <<  ";\n"
-          "        temp.length(length);\n"
-          "        for (uint32_t i = 0; i < length; ++i) {\n"
-          "        ";
-          gen_copyfrom("temp", "lo", elem, "i", true);
-          strm <<
-          "        }\n"
+          "    if (" << src << ".IsArray()) {\n"
+          "      const rapidjson::Value& val = " << src << ".GetArray()[" << prop << "];\n"
+          "      uint32_t length = val.GetArray().Size();\n"
+          "      " << scoped(type->name()) << "& temp = " << propName <<  ";\n"
+          "      temp.length(length);\n"
+          "      for (uint32_t i = 0; i < length; ++i) {\n"
+          "      ";
+        gen_copyfrom("temp", "val", elem, "i", true);
+        strm <<
           "      }\n"
+          "    }\n"
           "  }\n";
       } else {
         strm <<
           "  {\n"
-          "    v8::Local<v8::String> field_str = Nan::New(\"" << prop << "\").ToLocalChecked();\n"
-          "    if (" << src << "->Has(field_str)) {\n"
-          "      v8::Local<v8::Value> lv = " << src << "->Get(field_str);\n"
-          "      if (lv->IsArray()) {\n"
-          "        uint32_t length = 0;\n"
-          "        v8::Local<v8::Object> lo = Nan::To<v8::Object>(lv).ToLocalChecked();\n"
-          "        length = lo->Get(Nan::New(\"length\").ToLocalChecked())->ToObject()->Uint32Value();\n"
+          "    rapidjson::Value::ConstMemberIterator it = " << src << ".FindMember(\"" << prop << "\");\n"
+          "    if (it != " << src << ".MemberEnd()) {\n"
+          "      const rapidjson::Value& val = it->value;\n"
+          "      if (val.IsArray()) {\n"
+          "        uint32_t length = val.GetArray().Size();\n"
           "        " << scoped(type->name()) << "& temp = " << propName <<  ";\n"
           "        temp.length(length);\n"
           "        for (uint32_t i = 0; i < length; ++i) {\n"
           "        ";
-          gen_copyfrom("temp", "lo", elem, "i", true);
-          strm <<
+        gen_copyfrom("temp", "val", elem, "i", true);
+        strm <<
           "        }\n"
           "      }\n"
           "    }\n"
@@ -341,18 +340,18 @@ namespace {
       if (prop_index) {
         strm <<
           "  {\n"
-          "    v8::Local<v8::Value> lv = " << src << "->Get(" << prop << ");\n"
-          "    v8::Local<v8::Object> lo = Nan::To<v8::Object>(lv).ToLocalChecked();\n"
-          "    copyFromV8(lo, " << (fun_assign ? propName + "()" : propName) << ");\n"
+          "    if (" << src << ".IsArray()) {\n"
+          "      const rapidjson::Value& val = " << src << ".GetArray()[" << prop << "];\n"
+          "      copyFromRapidJson(val, " << (fun_assign ? propName + "()" : propName) << ");\n"
+          "    }\n"
           "  }\n";
       } else {
         strm <<
           "  {\n"
-          "    v8::Local<v8::String> field_str = Nan::New(\"" << prop << "\").ToLocalChecked();\n"
-          "    if (" << src << "->Has(field_str)) {\n"
-          "      v8::Local<v8::Value> lv = " << src << "->Get(field_str);\n"
-          "      v8::Local<v8::Object> lo = Nan::To<v8::Object>(lv).ToLocalChecked();\n"
-          "      copyFromV8(lo, " << (fun_assign ? propName + "()" : propName) << ");\n"
+          "    rapidjson::Value::ConstMemberIterator it = " << src << ".FindMember(\"" << prop << "\");\n"
+          "    if (it != " << src << ".MemberEnd()) {\n"
+          "      const rapidjson::Value& val = it->value;\n"
+          "      copyFromRapidJson(val, " << (fun_assign ? propName + "()" : propName) << ");\n"
           "    }\n"
           "  }\n";
       }
@@ -360,14 +359,14 @@ namespace {
   }
 
   struct gen_field_copyto {
-    gen_field_copyto(const char* tgt, const char* src) : tgt_(tgt), src_(src) {}
-    const std::string tgt_, src_;
+    gen_field_copyto(const char* tgt, const char* alloc, const char* src) : tgt_(tgt), alloc_(alloc), src_(src) {}
+    const std::string tgt_, alloc_, src_;
     void operator()(AST_Field* field) const
     {
       const std::string fieldName = field->local_name()->get_string(),
         source = src_ + '.' + fieldName,
-        prop = "Nan::New<v8::String>(\"" + fieldName + "\").ToLocalChecked()";
-      gen_copyto(tgt_.c_str(), source.c_str(),
+        prop = "\"" + fieldName + "\"";
+      gen_copyto(tgt_.c_str(), alloc_.c_str(), source.c_str(),
                  field->field_type(), prop.c_str());
     }
   };
@@ -384,7 +383,7 @@ namespace {
   };
 }
 
-bool v8_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
+bool rapidjson_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
                               const std::vector<AST_Field*>& fields,
                               AST_Type::SIZE_TYPE, const char*)
 {
@@ -393,19 +392,16 @@ bool v8_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
     NamespaceGuard ng;
     const std::string clazz = scoped(name);
     {
-      Function ctv("copyToV8", "v8::Local<v8::Object>");
+      Function ctv("copyToRapidJson", "void");
       ctv.addArg("src", "const " + clazz + '&');
+      ctv.addArg("dst", "rapidjson::Value&");
+      ctv.addArg("alloc", "rapidjson::Value::AllocatorType&");
       ctv.endArgs();
-      be_global->impl_ <<
-        "  const v8::Local<v8::Object> stru = Nan::New<v8::Object>();\n";
-      std::for_each(fields.begin(), fields.end(),
-                    gen_field_copyto("stru", "src"));
-      be_global->impl_ <<
-        "  return stru;\n";
+      std::for_each(fields.begin(), fields.end(), gen_field_copyto("dst", "alloc", "src"));
     }
     {
-      Function vtc("copyFromV8", "void");
-      vtc.addArg("src", "const v8::Local<v8::Object>&");
+      Function vtc("copyFromRapidJson", "void");
+      vtc.addArg("src", "const rapidjson::Value&");
       vtc.addArg("out", clazz + '&');
       vtc.endArgs();
       std::for_each(fields.begin(), fields.end(),
@@ -414,27 +410,26 @@ bool v8_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
   }
 
   if (idl_global->is_dcps_type(name)) {
-    be_global->add_include("dds/DCPS/V8TypeConverter.h",
+    be_global->add_include("dds/DCPS/RapidJsonTypeConverter.h",
                            BE_GlobalData::STREAM_CPP);
     ScopedNamespaceGuard cppGuard(name, be_global->impl_);
     const std::string lname = name->last_component()->get_string(),
-      tsv8 = lname + "TypeSupportV8Impl";
+      ts_rj = lname + "TypeSupportRapidJsonImpl";
     be_global->impl_ <<
-      "class " << tsv8 << "\n"
+      "class " << ts_rj << "\n"
       "  : public virtual " << lname << "TypeSupportImpl\n"
-      "  , public virtual OpenDDS::DCPS::V8TypeConverter {\n\n"
-      "  v8::Local<v8::Object> toV8(const void* source) const\n"
+      "  , public virtual OpenDDS::DCPS::RapidJsonTypeConverter {\n\n"
+      "  void toRapidJson(const void* source, rapidjson::Value& dst, rapidjson::Value::AllocatorType& alloc) const\n"
       "  {\n"
-      "    return OpenDDS::DCPS::copyToV8(*static_cast<const " << lname
-               << "*>(source));\n"
+      "    OpenDDS::DCPS::copyToRapidJson(*static_cast<const " << lname << "*>(source), dst, alloc);\n"
       "  }\n\n"
-      "  void* fromV8(const v8::Local<v8::Object>& source) const\n"
+      "  void* fromRapidJson(const rapidjson::Value& source) const\n"
       "  {\n"
       "    " << lname << "* result = new " << lname << "();\n"
-      "    OpenDDS::DCPS::copyFromV8(source, *result);\n"
+      "    OpenDDS::DCPS::copyFromRapidJson(source, *result);\n"
       "    return result;\n"
       "  }\n\n"
-      "  void deleteFromV8Result(void* val) const\n"
+      "  void deleteFromRapidJsonResult(void* val) const\n"
       "  {\n"
       "    " << lname << "* delete_me = static_cast< " << lname << "*>(val);\n"
       "    delete delete_me;\n"
@@ -463,17 +458,17 @@ bool v8_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
       "  struct Initializer {\n"
       "    Initializer()\n"
       "    {\n"
-      "      " << lname << "TypeSupport_var ts = new " << tsv8 << ";\n"
+      "      " << lname << "TypeSupport_var ts = new " << ts_rj << ";\n"
       "      ts->register_type(0, \"\");\n"
       "    }\n"
       "  };\n"
       "};\n\n" <<
-      tsv8 << "::Initializer init_tsv8_" << lname << ";\n";
+      ts_rj << "::Initializer init_tsrapidjson_" << lname << ";\n";
   }
   return true;
 }
 
-bool v8_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
+bool rapidjson_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
                                AST_Type* type, const char* /*repoid*/)
 {
   gen_includes();
@@ -484,27 +479,29 @@ bool v8_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
     const std::string cxx = scoped(name);
     AST_Type* elem = seq->base_type();
     {
-      Function ctv("copyToV8", "v8::Local<v8::Object>");
+      Function ctv("copyToRapidJson", "void");
       ctv.addArg("src", "const " + cxx + '&');
+      ctv.addArg("dst", "rapidjson::Value&");
+      ctv.addArg("alloc", "rapidjson::Value::AllocatorType&");
       ctv.endArgs();
       be_global->impl_ <<
-        "  const v8::Local<v8::Array> tgt(Nan::New<v8::Array>(src.length()));\n"
+        "  dst.SetArray();\n"
+        "  dst.GetArray().Reserve(src.length(), alloc);\n"
         "  for (CORBA::ULong i = 0; i < src.length(); ++i) {\n"
         "  ";
-      gen_copyto("tgt", "src[i]", elem, "i");
+      gen_copyto("dst", "alloc", "src[i]", elem, "i", true);
       be_global->impl_ <<
-        "  }\n"
-        "  return tgt;\n";
+        "  }\n";
     }
     {
-      Function vtc("copyFromV8", "void");
-      vtc.addArg("src", "const v8::Local<v8::Object>&");
+      Function vtc("copyFromRapidJson", "void");
+      vtc.addArg("src", "const rapidjson::Value&");
       vtc.addArg("out", cxx + '&');
       vtc.endArgs();
       be_global->impl_ <<
         "  CORBA::ULong length = 0;\n"
-        "  if (src->IsArray()) {\n"
-        "    length = src->Get(Nan::New(\"length\").ToLocalChecked())->ToObject()->Uint32Value();\n"
+        "  if (src.IsArray()) {\n"
+        "    length = src.GetArray().Size();\n"
         "  }\n"
         "  out.length(length);\n"
         "  for (CORBA::ULong i = 0; i < length; ++i) {\n"
@@ -521,28 +518,30 @@ bool v8_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
     const std::string cxx = scoped(name);
     AST_Type* elem = array->base_type();
     {
-      Function ctv("copyToV8", "v8::Local<v8::Object>");
+      Function ctv("copyToRapidJson", "void");
       ctv.addArg("src", "const " + cxx + '&');
+      ctv.addArg("dst", "rapidjson::Value&");
+      ctv.addArg("alloc", "rapidjson::Value::AllocatorType&");
       ctv.endArgs();
       be_global->impl_ <<
         "  CORBA::ULong length = sizeof(src) / sizeof(src[0]);\n"
-        "  const v8::Local<v8::Array> tgt(Nan::New<v8::Array>(length));\n"
+        "  dst.SetArray();\n"
+        "  dst.GetArray().Reserve(length, alloc);\n"
         "  for (CORBA::ULong i = 0; i < length; ++i) {\n"
         "  ";
-      gen_copyto("tgt", "src[i]", elem, "i");
+      gen_copyto("dst", "alloc", "src[i]", elem, "i", true);
       be_global->impl_ <<
-        "  }\n"
-        "  return tgt;\n";
+        "  }\n";
     }
     {
-      Function vtc("copyFromV8", "void");
-      vtc.addArg("src", "const v8::Local<v8::Object>&");
+      Function vtc("copyFromRapidJson", "void");
+      vtc.addArg("src", "const rapidjson::Value&");
       vtc.addArg("out", cxx + '&');
       vtc.endArgs();
       be_global->impl_ <<
         "  CORBA::ULong length = 0;\n"
         "  if (src.IsArray()) {\n"
-        "    CORBA::ULong src_length = src->Get(Nan::New(\"length\").ToLocalChecked())->ToObject()->Uint32Value();\n"
+        "    CORBA::ULong src_length = src.GetArray().Size();\n"
         "    CORBA::ULong out_length = (sizeof(out) / sizeof(out[0]));\n"
         "    length = (src_length <= out_length) ? src_length : out_length;\n"
         "  }\n"
@@ -566,10 +565,10 @@ namespace {
                           const std::string&)
   {
     const std::string source = "src." + name + "()",
-      prop = "Nan::New<v8::String>(\"" + name + "\").ToLocalChecked()";
+      prop = "\"" + name + "\"";
     std::ostringstream strm;
     strm << "  ";
-    gen_copyto("uni", source.c_str(), type, prop.c_str(), strm);
+    gen_copyto("dst", "alloc", source.c_str(), type, prop.c_str(), false, strm);
     return strm.str();
   }
   std::string branchGenFrom(const std::string& name, AST_Type* type,
@@ -583,7 +582,7 @@ namespace {
   }
 }
 
-bool v8_generator::gen_union(AST_Union*, UTL_ScopedName* name,
+bool rapidjson_generator::gen_union(AST_Union*, UTL_ScopedName* name,
                              const std::vector<AST_UnionBranch*>& branches,
                              AST_Type* discriminator, const char* /*repoid*/)
 {
@@ -591,20 +590,17 @@ bool v8_generator::gen_union(AST_Union*, UTL_ScopedName* name,
   NamespaceGuard ng;
   const std::string clazz = scoped(name);
   {
-    Function ctv("copyToV8", "v8::Local<v8::Object>");
+    Function ctv("copyToRapidJson", "void");
     ctv.addArg("src", "const " + clazz + '&');
+    ctv.addArg("dst", "rapidjson::Value&");
+    ctv.addArg("alloc", "rapidjson::Value::AllocatorType&");
     ctv.endArgs();
-    be_global->impl_ <<
-      "  const v8::Local<v8::Object> uni = Nan::New<v8::Object>();\n";
-    gen_copyto("uni", "src._d()", discriminator, "Nan::New<v8::String>(\"_d\").ToLocalChecked()");
-    generateSwitchForUnion("src._d()", branchGenTo, branches, discriminator,
-                           "", "", clazz.c_str(), false, false);
-    be_global->impl_ <<
-      "  return uni;\n";
+    gen_copyto("dst", "alloc", "src._d()", discriminator, "\"_d\"");
+    generateSwitchForUnion("src._d()", branchGenTo, branches, discriminator, "", "", clazz.c_str(), false, false);
   }
   {
-    Function vtc("copyFromV8", "void");
-    vtc.addArg("src", "const v8::Local<v8::Object>&");
+    Function vtc("copyFromRapidJson", "void");
+    vtc.addArg("src", "const rapidjson::Value&");
     vtc.addArg("out", clazz + '&');
     vtc.endArgs();
     gen_copyfrom("out", "src", discriminator, "_d", false, true);

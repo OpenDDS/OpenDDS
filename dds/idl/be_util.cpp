@@ -35,12 +35,18 @@ be_util::prep_be_arg (char *arg)
   static const size_t SZ_WB_VERSIONING_END = sizeof(WB_VERSIONING_END) - 1;
   static const char WB_PCH_INCLUDE[] = "pch_include=";
   static const size_t SZ_WB_PCH_INCLUDE = sizeof(WB_PCH_INCLUDE) - 1;
+  static const char WB_CPP_INCLUDE[] = "cpp_include=";
+  static const size_t SZ_WB_CPP_INCLUDE = sizeof(WB_CPP_INCLUDE) - 1;
   static const char WB_JAVA[] = "java";
   static const size_t SZ_WB_JAVA = sizeof(WB_JAVA) - 1;
   static const char WB_TAO_INC_PRE[] = "tao_include_prefix=";
   static const size_t SZ_WB_TAO_INC_PRE = sizeof(WB_TAO_INC_PRE) - 1;
+  static const char WB_NO_DEFAULT_GEN[] = "no_default_gen";
+  static const size_t SZ_WB_NO_DEFAULT_GEN = sizeof(WB_NO_DEFAULT_GEN) - 1;
   static const char WB_V8[] = "v8";
   static const size_t SZ_WB_V8 = sizeof(WB_V8) - 1;
+  static const char WB_RAPIDJSON[] = "rapidjson";
+  static const size_t SZ_WB_RAPIDJSON = sizeof(WB_RAPIDJSON) - 1;
 
   if (0 == ACE_OS::strncasecmp(arg, WB_EXPORT_MACRO, SZ_WB_EXPORT_MACRO)) {
     be_global->export_macro(arg + SZ_WB_EXPORT_MACRO);
@@ -64,6 +70,9 @@ be_util::prep_be_arg (char *arg)
   } else if (0 == ACE_OS::strncasecmp(arg, WB_PCH_INCLUDE, SZ_WB_PCH_INCLUDE)) {
     be_global->pch_include(arg + SZ_WB_PCH_INCLUDE);
 
+  } else if (0 == ACE_OS::strncasecmp(arg, WB_CPP_INCLUDE, SZ_WB_CPP_INCLUDE)) {
+    be_global->add_cpp_include(arg + SZ_WB_CPP_INCLUDE);
+
   } else if (0 == ACE_OS::strncasecmp(arg, WB_JAVA, SZ_WB_JAVA)) {
     be_global->java(true);
     if (ACE_OS::strlen(arg + SZ_WB_JAVA)) {
@@ -73,8 +82,15 @@ be_util::prep_be_arg (char *arg)
   } else if (0 == ACE_OS::strncasecmp(arg, WB_TAO_INC_PRE, SZ_WB_TAO_INC_PRE)) {
     be_global->tao_inc_pre_ = arg + SZ_WB_TAO_INC_PRE;
 
+  } else if (0 == ACE_OS::strncasecmp(arg, WB_NO_DEFAULT_GEN, SZ_WB_NO_DEFAULT_GEN)) {
+    be_global->no_default_gen(true);
+
   } else if (0 == ACE_OS::strncasecmp(arg, WB_V8, SZ_WB_V8)) {
     be_global->v8(true);
+
+  } else if (0 == ACE_OS::strncasecmp(arg, WB_RAPIDJSON, SZ_WB_RAPIDJSON)) {
+    be_global->rapidjson(true);
+
   }
 }
 
@@ -113,8 +129,11 @@ be_util::usage (void)
     ACE_TEXT("except for special cases.\n")
     ACE_TEXT(" -Wb,tao_include_prefix=<path>\t\tPrefix for including the TAO-")
     ACE_TEXT("generated header file.\n")
+    ACE_TEXT(" -Wb,no_default_gen\t\texclude default TypeSupport generators from output\n")
     ACE_TEXT(" -Wb,v8\t\t\tgenerate TypeSupport for converting data samples ")
     ACE_TEXT("to v8 JavaScript objects\n")
+    ACE_TEXT(" -Wb,rapidjson\t\t\tgenerate TypeSupport for converting data samples ")
+    ACE_TEXT("to RapidJSON JavaScript objects\n")
     ACE_TEXT(" -ZC <include>\t\t\tadd <include> to *TypeSupportImpl.cpp\n")
   ));
 }

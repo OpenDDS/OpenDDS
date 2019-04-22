@@ -125,6 +125,8 @@ public:
 
   bool gen_union_fwd(AST_UnionFwd*, UTL_ScopedName* name, AST_Type::SIZE_TYPE size);
 
+  composite_generator() : components_() {}
+
   template <typename InputIterator>
   composite_generator(InputIterator begin, InputIterator end)
   : components_(begin, end) {}
