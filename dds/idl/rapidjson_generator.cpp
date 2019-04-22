@@ -151,7 +151,6 @@ namespace {
       AST_Type* real_type = resolveActualType(type);
       AST_Sequence* seq = AST_Sequence::narrow_from_decl(real_type);
       AST_Type* elem = seq->base_type();
-      std::string make_obj = prop_index ? std::string("") : (tgt_str + op_pre + "0" + op_post + ".SetObject();\n    ");
       strm <<
         "  {\n"
         "    rapidjson::Value& val = " << propVal << ";\n"
