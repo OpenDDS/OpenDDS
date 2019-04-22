@@ -34,10 +34,10 @@ BE_GlobalData::BE_GlobalData()
   , java_(false)
   , suppress_idl_(false)
   , suppress_typecode_(false)
-  , generate_itl_(false)
   , no_default_gen_(false)
-  , v8_(false)
-  , rapidjson_(false)
+  , generate_itl_(false)
+  , generate_v8_(false)
+  , generate_rapidjson_(false)
   , face_ts_(false)
   , seq_("Seq")
   , language_mapping_(LANGMAP_NONE)
@@ -185,24 +185,34 @@ bool BE_GlobalData::no_default_gen() const
   return this->no_default_gen_;
 }
 
+void BE_GlobalData::itl(bool b)
+{
+  this->generate_itl_ = b;
+}
+
+bool BE_GlobalData::itl() const
+{
+  return this->generate_itl_;
+}
+
 void BE_GlobalData::v8(bool b)
 {
-  this->v8_ = b;
+  this->generate_v8_ = b;
 }
 
 bool BE_GlobalData::v8() const
 {
-  return this->v8_;
+  return this->generate_v8_;
 }
 
 void BE_GlobalData::rapidjson(bool b)
 {
-  this->rapidjson_ = b;
+  this->generate_rapidjson_ = b;
 }
 
 bool BE_GlobalData::rapidjson() const
 {
-  return this->rapidjson_;
+  return this->generate_rapidjson_;
 }
 
 void BE_GlobalData::face_ts(bool b)
@@ -324,7 +334,7 @@ BE_GlobalData::parse_args(long& i, char** av)
     break;
   case 'G':
     if (0 == ACE_OS::strcmp(av[i], "-Gitl"))
-      generate_itl_ = true;
+      itl(true);
     else if (0 == ACE_OS::strcasecmp(av[i], "-GfaceTS"))
       face_ts(true);
     else {

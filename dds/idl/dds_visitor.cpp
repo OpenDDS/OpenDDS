@@ -59,10 +59,6 @@ namespace {
   rapidjson_generator rj_gen_;
   langmap_generator lm_gen_;
 
-  //dds_generator* generators_[] = {&mar_gen_, &key_gen_, &ts_gen_, &mc_gen_, &itl_gen_};
-  //const size_t N_MAP = sizeof(generators_) / sizeof(generators_[0]);
-  //composite_generator gen_target_(&generators_[0], &generators_[N_MAP]);
-
   template <typename T>
   void scope2vector(vector<T*>& v, UTL_Scope* s, AST_Decl::NodeType nt)
   {
@@ -97,6 +93,8 @@ dds_visitor::dds_visitor(AST_Decl* scope, bool java_ts_only)
     gen_target_.add_generator(&key_gen_);
     gen_target_.add_generator(&ts_gen_);
     gen_target_.add_generator(&mc_gen_);
+  }
+  if (be_global->itl()) {
     gen_target_.add_generator(&itl_gen_);
   }
   if (be_global->v8()) {
