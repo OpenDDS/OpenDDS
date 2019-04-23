@@ -432,9 +432,12 @@ private:
   Reader_rch dcps_participant_secure_reader_;
 #endif
 
+  static const size_t TASK_MQ_BYTES = sizeof(Msg) * 1024 * 32;
+
   struct Task : ACE_Task_Ex<ACE_MT_SYNCH, Msg> {
     explicit Task(Sedp* sedp)
-      : spdp_(&sedp->spdp_)
+      : ACE_Task_Ex<ACE_MT_SYNCH, Msg>(0, new ACE_Message_Queue_Ex<Msg, ACE_MT_SYNCH>(TASK_MQ_BYTES, TASK_MQ_BYTES))
+      , spdp_(&sedp->spdp_)
       , sedp_(sedp)
       , shutting_down_(false)
     {

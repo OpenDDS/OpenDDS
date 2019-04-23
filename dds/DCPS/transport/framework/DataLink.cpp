@@ -585,30 +585,30 @@ DataLink::data_received_i(ReceivedDataSample& sample,
   }
 
   ReceiveListenerSet_rch listener_set;
+  TransportReceiveListener_rch listener;
   {
     GuardType guard(this->pub_sub_maps_lock_);
     AssocByRemote::iterator iter = assoc_by_remote_.find(publication_id);
-    if (iter != assoc_by_remote_.end())
+    if (iter != assoc_by_remote_.end()) {
       listener_set = iter->second;
-
-    if (listener_set.is_nil()) {
-      TransportReceiveListener_rch listener = this->default_listener_.lock();
-      if (listener)
-        listener->data_received(sample);
-      return;
+    } else {
+      listener = this->default_listener_.lock();
     }
   }
 
   if (listener_set.is_nil()) {
-    // Nobody has any interest in this message.  Drop it on the floor.
-    if (Transport_debug_level > 4) {
-      const GuidConverter converter(publication_id);
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) DataLink::data_received_i: ")
-                 ACE_TEXT(" discarding sample from publication %C due to no listeners.\n"),
-                 OPENDDS_STRING(converter).c_str()));
+    if (listener) {
+      listener->data_received(sample);
+    } else {
+      // Nobody has any interest in this message.  Drop it on the floor.
+      if (Transport_debug_level > 4) {
+        const GuidConverter converter(publication_id);
+        ACE_DEBUG((LM_DEBUG,
+                   ACE_TEXT("(%P|%t) DataLink::data_received_i: ")
+                   ACE_TEXT(" discarding sample from publication %C due to no listeners.\n"),
+                   OPENDDS_STRING(converter).c_str()));
+      }
     }
-
     return;
   }
 
