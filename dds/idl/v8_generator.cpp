@@ -541,7 +541,7 @@ bool v8_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
       vtc.endArgs();
       be_global->impl_ <<
         "  CORBA::ULong length = 0;\n"
-        "  if (src.IsArray()) {\n"
+        "  if (src->IsArray()) {\n"
         "    CORBA::ULong src_length = src->Get(Nan::New(\"length\").ToLocalChecked())->ToObject()->Uint32Value();\n"
         "    CORBA::ULong out_length = (sizeof(out) / sizeof(out[0]));\n"
         "    length = (src_length <= out_length) ? src_length : out_length;\n"
