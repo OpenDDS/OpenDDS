@@ -71,15 +71,15 @@ namespace {
   }
 
   void gen_copyto(const char* tgt, const char* alloc, const char* src, AST_Type* type,
-                  const char* prop, bool prop_index = false, std::ostream& strm = be_global->impl_)
+                  const char* prop, bool prop_index = false, bool push_back = false, std::ostream& strm = be_global->impl_)
   {
     const Classification cls = classify(type);
     AST_PredefinedType::PredefinedType pt = AST_PredefinedType::PT_void;
     const std::string rapidJsonType = getRapidJsonType(type, &pt),
-      tgt_str = (prop_index ? (std::string(tgt) + "[" + prop + "]") : std::string(tgt)),
-      op_pre = (prop_index ? std::string(" = rapidjson::Value(") : (std::string(".AddMember(") + prop + std::string(", rapidjson::Value("))),
-      op_post = (prop_index ? std::string(").Move()") : std::string(").Move(), ") + alloc + std::string(")")),
-      propVal = (prop_index ? (std::string(tgt) + "[" + prop + "]") : (std::string(tgt) + std::string(".AddMember(") + prop + std::string(", rapidjson::Value(0).Move(), ") + alloc + std::string(")")));
+      tgt_str = ((prop_index && !push_back) ? (std::string(tgt) + "[" + prop + "]") : std::string(tgt)),
+      op_pre = (prop_index ? (push_back ? std::string(".PushBack(rapidjson::Value(") : std::string(" = rapidjson::Value(")) : (std::string(".AddMember(") + prop + std::string(", rapidjson::Value("))),
+      op_post = ((prop_index && !push_back) ? (std::string(").Move()")) : std::string(").Move(), ") + alloc + std::string(")")),
+      propVal = (prop_index ? (push_back ? (std::string(tgt) + ".PushBack(rapidjson::Value(0).Move(), " + alloc + ")[" + prop + "]") : (std::string(tgt) + "[" + prop + "]")) : (std::string(tgt) + std::string(".AddMember(") + prop + std::string(", rapidjson::Value(0).Move(), ") + alloc + std::string(")[") + prop + std::string("]")));
 
     if (cls & CL_SCALAR) {
       std::string prefix, suffix;
@@ -153,11 +153,11 @@ namespace {
       AST_Type* elem = seq->base_type();
       strm <<
         "  {\n"
-        "    rapidjson::Value& val = " << propVal << ";\n"
-        "    val.SetArray();\n"
-        "    val.GetArray().Reserve(" << src << ".length(), " << alloc << ");\n"
+        "    rapidjson::Value& valseq = " << propVal << ";\n"
+        "    valseq.SetArray();\n"
+        "    valseq.GetArray().Reserve(" << src << ".length(), " << alloc << ");\n"
         "    for (CORBA::ULong j = 0; j < " << src << ".length(); ++j) {\n";
-      gen_copyto("val", alloc, (std::string(src) + "[j]").c_str(), elem, "j", true);
+      gen_copyto("valseq", alloc, (std::string(src) + "[j]").c_str(), elem, "j", true, true);
       strm <<
         "    }\n"
         "  }\n";
@@ -165,8 +165,8 @@ namespace {
     } else { // struct, sequence, etc.
       strm <<
         "  {\n"
-        "    rapidjson::Value& val = " << propVal << ";\n"
-        "    " << "copyToRapidJson(" << src << ", val, " << alloc << ");\n"
+        "    rapidjson::Value& valzone = " << propVal << ".SetObject();\n"
+        "    " << "copyToRapidJson(" << src << ", valzone, " << alloc << ");\n"
         "  }\n";
     }
   }
@@ -305,13 +305,13 @@ namespace {
         strm <<
           "  {\n"
           "    if (" << src << ".IsArray()) {\n"
-          "      const rapidjson::Value& val = " << src << ".GetArray()[" << prop << "];\n"
-          "      uint32_t length = val.GetArray().Size();\n"
+          "      const rapidjson::Value& valseq = " << src << ".GetArray()[" << prop << "];\n"
+          "      uint32_t length = valseq.GetArray().Size();\n"
           "      " << scoped(type->name()) << "& temp = " << propName <<  ";\n"
           "      temp.length(length);\n"
           "      for (uint32_t i = 0; i < length; ++i) {\n"
           "      ";
-        gen_copyfrom("temp", "val", elem, "i", true);
+        gen_copyfrom("temp", "valseq", elem, "i", true);
         strm <<
           "      }\n"
           "    }\n"
@@ -321,14 +321,14 @@ namespace {
           "  {\n"
           "    rapidjson::Value::ConstMemberIterator it = " << src << ".FindMember(\"" << prop << "\");\n"
           "    if (it != " << src << ".MemberEnd()) {\n"
-          "      const rapidjson::Value& val = it->value;\n"
-          "      if (val.IsArray()) {\n"
-          "        uint32_t length = val.GetArray().Size();\n"
+          "      const rapidjson::Value& valseq = it->value;\n"
+          "      if (valseq.IsArray()) {\n"
+          "        uint32_t length = valseq.GetArray().Size();\n"
           "        " << scoped(type->name()) << "& temp = " << propName <<  ";\n"
           "        temp.length(length);\n"
           "        for (uint32_t i = 0; i < length; ++i) {\n"
           "        ";
-        gen_copyfrom("temp", "val", elem, "i", true);
+        gen_copyfrom("temp", "valseq", elem, "i", true);
         strm <<
           "        }\n"
           "      }\n"
@@ -340,8 +340,8 @@ namespace {
         strm <<
           "  {\n"
           "    if (" << src << ".IsArray()) {\n"
-          "      const rapidjson::Value& val = " << src << ".GetArray()[" << prop << "];\n"
-          "      copyFromRapidJson(val, " << (fun_assign ? propName + "()" : propName) << ");\n"
+          "      const rapidjson::Value& valzone = " << src << ".GetArray()[" << prop << "];\n"
+          "      copyFromRapidJson(valzone, " << (fun_assign ? propName + "()" : propName) << ");\n"
           "    }\n"
           "  }\n";
       } else {
@@ -349,8 +349,8 @@ namespace {
           "  {\n"
           "    rapidjson::Value::ConstMemberIterator it = " << src << ".FindMember(\"" << prop << "\");\n"
           "    if (it != " << src << ".MemberEnd()) {\n"
-          "      const rapidjson::Value& val = it->value;\n"
-          "      copyFromRapidJson(val, " << (fun_assign ? propName + "()" : propName) << ");\n"
+          "      const rapidjson::Value& valzone = it->value;\n"
+          "      copyFromRapidJson(valzone, " << (fun_assign ? propName + "()" : propName) << ");\n"
           "    }\n"
           "  }\n";
       }
@@ -486,9 +486,14 @@ bool rapidjson_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
       be_global->impl_ <<
         "  dst.SetArray();\n"
         "  dst.GetArray().Reserve(src.length(), alloc);\n"
-        "  for (CORBA::ULong i = 0; i < src.length(); ++i) {\n"
-        "  ";
+        "  for (CORBA::ULong i = 0; i < dst.Size(); ++i) {\n"
+        "    ";
       gen_copyto("dst", "alloc", "src[i]", elem, "i", true);
+      be_global->impl_ <<
+        "  }\n"
+        "  for (CORBA::ULong i = dst.Size(); i < src.length(); ++i) {\n"
+        "    ";
+      gen_copyto("dst", "alloc", "src[i]", elem, "i", true, true);
       be_global->impl_ <<
         "  }\n";
     }
@@ -526,9 +531,14 @@ bool rapidjson_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
         "  CORBA::ULong length = sizeof(src) / sizeof(src[0]);\n"
         "  dst.SetArray();\n"
         "  dst.GetArray().Reserve(length, alloc);\n"
-        "  for (CORBA::ULong i = 0; i < length; ++i) {\n"
+        "  for (CORBA::ULong i = 0; i < dst.Size(); ++i) {\n"
         "  ";
       gen_copyto("dst", "alloc", "src[i]", elem, "i", true);
+      be_global->impl_ <<
+        "  }\n"
+        "  for (CORBA::ULong i = dst.Size(); i < length; ++i) {\n"
+        "    ";
+      gen_copyto("dst", "alloc", "src[i]", elem, "i", true, true);
       be_global->impl_ <<
         "  }\n";
     }
@@ -567,7 +577,7 @@ namespace {
       prop = "\"" + name + "\"";
     std::ostringstream strm;
     strm << "  ";
-    gen_copyto("dst", "alloc", source.c_str(), type, prop.c_str(), false, strm);
+    gen_copyto("dst", "alloc", source.c_str(), type, prop.c_str(), false, false,  strm);
     return strm.str();
   }
   std::string branchGenFrom(const std::string& name, AST_Type* type,

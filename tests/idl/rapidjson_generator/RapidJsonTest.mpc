@@ -1,0 +1,15 @@
+project: dcpsexe, dcps_rapidjson, googletest {
+
+  exename = *
+
+  requires += no_opendds_safety_profile
+
+  Idl_Files {
+    RapidJsonTest.idl
+  }
+
+  TypeSupport_Files {
+    RapidJsonTest.idl
+  }
+}
+
