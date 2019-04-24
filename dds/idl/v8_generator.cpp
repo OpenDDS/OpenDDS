@@ -343,7 +343,7 @@ namespace {
           "  {\n"
           "    v8::Local<v8::Value> lv = " << src << "->Get(" << prop << ");\n"
           "    v8::Local<v8::Object> lo = Nan::To<v8::Object>(lv).ToLocalChecked();\n"
-          "    copyFromV8(lo, " << (fun_assign ? propName + "()" : propName) << ");\n"
+          "    copyFromV8(lo, " << propName << (fun_assign ? "())" : ")") << ";\n"
           "  }\n";
       } else {
         strm <<
@@ -352,7 +352,7 @@ namespace {
           "    if (" << src << "->Has(field_str)) {\n"
           "      v8::Local<v8::Value> lv = " << src << "->Get(field_str);\n"
           "      v8::Local<v8::Object> lo = Nan::To<v8::Object>(lv).ToLocalChecked();\n"
-          "      copyFromV8(lo, " << (fun_assign ? propName + "()" : propName) << ");\n"
+          "      copyFromV8(lo, " << propName << (fun_assign ? "())" : ")") << ";\n"
           "    }\n"
           "  }\n";
       }
