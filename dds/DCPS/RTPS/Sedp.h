@@ -441,6 +441,7 @@ private:
       , sedp_(sedp)
       , shutting_down_(false)
     {
+      delete_msg_queue_ = true;
       activate();
     }
     ~Task();
