@@ -36,6 +36,7 @@ SecurityDebug::SecurityDebug()
 void
 SecurityDebug::set_all_flags_to(bool value)
 {
+  warn = value;
   bookkeeping = value;
   encdec = value;
   showkeys = value;
@@ -53,6 +54,8 @@ SecurityDebug::parse_flags(const ACE_TCHAR* flags)
     if (flag.length()) {
       if (flag == "all") {
         set_all_flags_to(true);
+      } else if (flag == "warn") {
+        warn = true;
       } else if (flag == "bookkeeping") {
         bookkeeping = true;
       } else if (flag == "encdec") {
@@ -73,6 +76,7 @@ SecurityDebug::parse_flags(const ACE_TCHAR* flags)
 void
 SecurityDebug::set_debug_level(unsigned level)
 {
+  warn = level > 0;
   bookkeeping = level >= 4;
   encdec = level >= 8;
   showkeys = level >= 9;

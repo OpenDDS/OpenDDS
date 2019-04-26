@@ -1697,8 +1697,6 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
     callbacks[i]->reader_exists(remote, local);
   }
 
-  acknowledged_by_reader(local, remote);
-
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   const RtpsWriterMap::iterator rw = writers_.find(local);
   if (rw == writers_.end()) {
@@ -1735,6 +1733,12 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
   if (!ri->second.handshake_done_) {
     ri->second.handshake_done_ = true;
     invoke_on_start_callbacks(true);
+    {
+      // Unlock so the callback can use the datalink
+      ACE_Reverse_Lock<ACE_Thread_Mutex> ack_rev_lock(lock_);
+      ACE_Guard<ACE_Reverse_Lock<ACE_Thread_Mutex>> ack_rev_guard(ack_rev_lock);
+      first_acknowledged_by_reader(local, remote, acknack.count.value);
+    }
   }
 
   OPENDDS_MAP(SequenceNumber, TransportQueueElement*) pendingCallbacks;

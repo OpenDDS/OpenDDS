@@ -406,12 +406,15 @@ private:
     RepeatOnceWriter(const DCPS::RepoId& pub_id, Sedp& sedp);
 
     /**
-     * If a remote participant's volatile reader acks us, resend all keys (User
-     * and Builtin) for a second time.
+     * If a remote participant's volatile reader acks us for the fist time,
+     * resend all keys (User and Builtin) for a second time.
      *
      * Removes the participant's keys afterwards.
      */
-    void acknowledged_by_reader(const DCPS::RepoId& rdr);
+    void first_acknowledged_by_reader(const DCPS::RepoId& rdr, CORBA::Long count);
+
+    /// Erase anys keys pending repeat to this participant
+    void erase(const DCPS::RepoId& part);
 
     struct RemoteWriter {
       DCPS::RepoId local_reader, remote_writer;

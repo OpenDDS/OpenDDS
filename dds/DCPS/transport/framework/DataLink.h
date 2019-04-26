@@ -302,10 +302,10 @@ protected:
   GUIDSeq* peer_ids(const RepoId& local_id) const;
 
   /**
-   * For a given reader writer pair, call the acknowledged_by_reader callback
-   * on the TransportSendListener if there is one.
+   * For a given reader writer pair, call the first_acknowledged_by_reader
+   * callback on the TransportSendListener if there is one.
    */
-  void acknowledged_by_reader(const RepoId& localWriter, const RepoId& remoteReader);
+  void first_acknowledged_by_reader(const RepoId& localWriter, const RepoId& remoteReader, CORBA::Long count);
 
 private:
 

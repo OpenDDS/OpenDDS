@@ -1277,6 +1277,10 @@ Sedp::disassociate(const ParticipantData_t& pdata)
 
   }
 
+#ifdef OPENDDS_SECURITY
+  participant_volatile_message_secure_writer_.erase(part);
+#endif
+
   if (spdp_.has_discovered_participant(part)) {
     remove_entities_belonging_to(discovered_publications_, part);
     remove_entities_belonging_to(discovered_subscriptions_, part);
@@ -2940,7 +2944,7 @@ Sedp::RepeatOnceWriter::RepeatOnceWriter(const RepoId& pub_id, Sedp& sedp)
 }
 
 void
-Sedp::RepeatOnceWriter::acknowledged_by_reader(const RepoId& rdr)
+Sedp::RepeatOnceWriter::first_acknowledged_by_reader(const RepoId& rdr, CORBA::Long count)
 {
   if (!std::memcmp(repo_id_.guidPrefix, rdr.guidPrefix, sizeof(DCPS::GuidPrefix_t))) {
     return;
@@ -2951,8 +2955,8 @@ Sedp::RepeatOnceWriter::acknowledged_by_reader(const RepoId& rdr)
   remote_participant.entityId = ENTITYID_PARTICIPANT;
 
   if (DCPS::DCPS_debug_level > 3) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::RepeatOnceWriter::acknowledged_by_reader(): %C\n",
-      OPENDDS_STRING(DCPS::GuidConverter(rdr)).c_str()));
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::RepeatOnceWriter::first_acknowledged_by_reader(): %C, count is %lu\n",
+      OPENDDS_STRING(DCPS::GuidConverter(rdr)).c_str(), count));
   }
 
   ACE_Guard<ACE_Thread_Mutex> g(lock_);
@@ -2974,6 +2978,14 @@ Sedp::RepeatOnceWriter::acknowledged_by_reader(const RepoId& rdr)
     }
     remote_writers_.erase(writer_map_iter);
   }
+}
+
+void
+Sedp::RepeatOnceWriter::erase(const DCPS::RepoId& part)
+{
+  ACE_Guard<ACE_Thread_Mutex> g(lock_);
+  remote_readers_.erase(part);
+  remote_writers_.erase(part);
 }
 #endif
 

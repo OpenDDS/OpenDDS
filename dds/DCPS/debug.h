@@ -49,6 +49,7 @@ public:
   /**
    * Parse a comma delimited string and set the corresponding flags.
    * Unknown ones are ignored and "all" enables all the flags.
+   * Ex: "warn,encdec,showkeys"
    */
   void parse_flags(const ACE_TCHAR* flags);
 
@@ -61,6 +62,9 @@ public:
    * These are the categories of Security Debug Messages
    */
   ///@{
+  /// Security Related Warnings
+  bool warn;
+
   /// Generation and Tracking of Crypto Handles and Keys
   bool bookkeeping;
 

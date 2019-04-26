@@ -327,16 +327,18 @@ RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage)
     return;
 
   } else {
-    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) RtpsUdpReceiveStrategy: ")
-               ACE_TEXT("preprocess_secure_submsg failed RPCH %d, [%d.%d]: %C\n"),
-               peer_pch, ex.code, ex.minor_code, ex.message.in()));
+    if (security_debug.warn) {
+      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {warn} RtpsUdpReceiveStrategy: ")
+                 ACE_TEXT("preprocess_secure_submsg failed RPCH %d, [%d.%d]: %C\n"),
+                 peer_pch, ex.code, ex.minor_code, ex.message.in()));
+    }
     return;
   }
 
   if (!ok) {
-    if (category != INFO_SUBMESSAGE) {
-      bool dw = category == DATAWRITER_SUBMESSAGE;
-      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) RtpsUdpReceiveStrategy: ")
+    bool dw = category == DATAWRITER_SUBMESSAGE;
+    if (security_debug.warn) {
+      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {warn} RtpsUdpReceiveStrategy: ")
                  ACE_TEXT("decode_data%C_submessage failed [%d.%d]: \"%C\" ")
                  ACE_TEXT("(rpch: %u, local d%cch: %u, remote d%cch: %u)\n"),
                  dw ? "writer" : "reader",
@@ -466,8 +468,8 @@ bool RtpsUdpReceiveStrategy::decode_payload(ReceivedDataSample& sample,
       sample.header_.byte_order_ = RtpsSampleHeader::payload_byte_order(sample);
     }
 
-  } else {
-    ACE_DEBUG((LM_WARNING, "(%P|%t) RtpsUdpReceiveStrategy: "
+  } else if (security_debug.warn) {
+    ACE_DEBUG((LM_WARNING, "(%P|%t) {warn} RtpsUdpReceiveStrategy: "
                "decode_serialized_payload failed [%d.%d]: %C\n",
                ex.code, ex.minor_code, ex.message.in()));
   }

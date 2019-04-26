@@ -389,7 +389,7 @@ DataLink::send_final_acks (const RepoId& /*readerid*/)
 
 ACE_INLINE
 void
-DataLink::acknowledged_by_reader(const RepoId& localWriter, const RepoId& remoteReader)
+DataLink::first_acknowledged_by_reader(const RepoId& localWriter, const RepoId& remoteReader, CORBA::Long count)
 {
   TransportSendListener_rch tsl;
   {
@@ -397,7 +397,7 @@ DataLink::acknowledged_by_reader(const RepoId& localWriter, const RepoId& remote
     tsl = send_listener_for(localWriter);
   }
   if (tsl) {
-    tsl->acknowledged_by_reader(remoteReader);
+    tsl->first_acknowledged_by_reader(remoteReader, count);
   }
 }
 

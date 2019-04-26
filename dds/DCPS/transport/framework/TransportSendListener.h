@@ -76,7 +76,7 @@ public:
    * In the case of security, this means it can decrypt our messages. This was
    * made for RepeatOnceWriter in Sedp.
    */
-  virtual void acknowledged_by_reader(const RepoId& rdr);
+  virtual void first_acknowledged_by_reader(const RepoId& rdr, CORBA::Long count);
 
 protected:
 

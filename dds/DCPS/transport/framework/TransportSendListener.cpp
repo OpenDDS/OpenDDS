@@ -78,7 +78,7 @@ TransportSendListener::retrieve_inline_qos_data(InlineQosData& qos_data) const
 }
 
 void
-TransportSendListener::acknowledged_by_reader(const RepoId& /*rdr*/)
+TransportSendListener::first_acknowledged_by_reader(const RepoId& /*rdr*/, CORBA::Long /*count*/)
 {
 }
 
