@@ -1736,7 +1736,7 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
     {
       // Unlock so the callback can use the datalink
       ACE_Reverse_Lock<ACE_Thread_Mutex> ack_rev_lock(lock_);
-      ACE_Guard<ACE_Reverse_Lock<ACE_Thread_Mutex>> ack_rev_guard(ack_rev_lock);
+      ACE_Guard<ACE_Reverse_Lock<ACE_Thread_Mutex> > ack_rev_guard(ack_rev_lock);
       first_acknowledged_by_reader(local, remote, acknack.count.value);
     }
   }
