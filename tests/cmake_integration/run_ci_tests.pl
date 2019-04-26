@@ -14,9 +14,11 @@ die "ERROR: ACE_ROOT must be set" if !$ENV{'ACE_ROOT'};
 
 my $build_config = "";
 my $generator = "";
+my $arch = "";
 my $skip_run_test;
 GetOptions("build-config=s" => \$build_config,
            "generator=s" => \$generator,
+           "arch=s" => \$arch,
            "skip-run-test" => \$skip_run_test);
 
 for my $x (qw(Messenger_1 Messenger_2)) {
@@ -31,6 +33,10 @@ for my $x (qw(Messenger_1 Messenger_2)) {
 
   if ($generator ne "") {
     splice @{$cmds[0]}, 1, 0, ("-G", qq("$generator"));
+  }
+
+  if ($arch ne "") {
+    splice @{$cmds[0]}, 1, 0, ("-G", qq("$arch"));
   }
 
   if ($build_config ne "") {
