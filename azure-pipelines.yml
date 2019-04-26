@@ -62,7 +62,7 @@ jobs:
       configuration: $(BuildConfiguration)
       maximumCpuCount: true
   - script: |
-      if %BuildPlatform%==x64 set GEN=--generator="Visual Studio 16 2019 Win64"
+      if %BuildPlatform%==x64 set GEN=--generator="Visual Studio 16 2019"
       perl "%DDS_ROOT%\tests\cmake_integration\run_ci_tests.pl" --build-config=$(BuildConfiguration) %GEN%
     displayName: Compile (and run) CMake Tests
 
