@@ -1262,7 +1262,11 @@ sub win32_cmake_generator {
   die "ERROR: Unsupported Visual Studio version '$ver' supplied.\nStopped"
     if ! exists $map{$ver};
 
-  return $map{$ver} . ($arch eq 'x64' ? ' Win64' : '');
+  return $map{$ver};
+}
+
+sub win32_cmake_arch {
+  return ($arch eq 'x64' ? ' Win64' : 'Win32');
 }
 
 if ($opts{'security'} && $tests && $opts{'cmake'} && ! $opts{'gtest-precompiled'}) {
@@ -1277,6 +1281,8 @@ if ($opts{'security'} && $tests && $opts{'cmake'} && ! $opts{'gtest-precompiled'
                        "-D", "CMAKE_INSTALL_PREFIX=$install_dir",
                        "-G", win32_cmake_generator(
                                $opts{'compiler_version'},
+                               $opts{'compiler_target_architecture'}),
+                       "-A", win32_cmake_arch(
                                $opts{'compiler_target_architecture'}),
                        ".."] :
                       ["$cmake",
