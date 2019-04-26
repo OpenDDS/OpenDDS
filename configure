@@ -1266,6 +1266,8 @@ sub win32_cmake_generator {
 }
 
 sub win32_cmake_arch {
+  my $arch = shift;
+  
   return ($arch eq 'x64' ? ' Win64' : 'Win32');
 }
 
