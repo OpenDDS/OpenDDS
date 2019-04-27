@@ -1275,8 +1275,8 @@ if ($opts{'security'} && $tests && $opts{'cmake'} && ! $opts{'gtest-precompiled'
   my $build_dir = $opts{'gtest'} . $slash . 'build';
   my $install_dir = $build_dir . $slash . 'install';
   my $cmake = $opts{'cmake'};
-  my $cmake_gen = win32_cmake_generator($opts{'compiler_version'});
-  my $cmake_arch = win32_cmake_arch($opts{'compiler_target_architecture'});
+  my $cmake_gen = $is_windows ? win32_cmake_generator($opts{'compiler_version'}) : '';
+  my $cmake_arch = $is_windows ? win32_cmake_arch($opts{'compiler_target_architecture'}) : '';
   my @cmake_cmds = (($is_windows ?
                       ["$cmake",
                        "-D", "gtest_force_shared_crt=ON",
