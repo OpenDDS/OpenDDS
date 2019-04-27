@@ -1267,7 +1267,7 @@ sub win32_cmake_generator {
 sub win32_cmake_arch {
   my $arch = shift;
 
-  return ($arch eq 'x64' ? 'Win64' : 'Win32');
+  return ($arch eq 'x64' ? 'x64' : 'Win32');
 }
 
 if ($opts{'security'} && $tests && $opts{'cmake'} && ! $opts{'gtest-precompiled'}) {

@@ -62,8 +62,8 @@ jobs:
       configuration: $(BuildConfiguration)
       maximumCpuCount: true
   - script: |
-      if %BuildPlatform%==x64 set GEN=--generator="Visual Studio 16 2019" --arch="Win64"
-      perl "%DDS_ROOT%\tests\cmake_integration\run_ci_tests.pl" --build-config=$(BuildConfiguration) %GEN%
+      if %BuildPlatform%==x64 set ARCH=--arch="x64"
+      perl "%DDS_ROOT%\tests\cmake_integration\run_ci_tests.pl" --build-config=$(BuildConfiguration) --generator="Visual Studio 16 2019" %ARCH%
     displayName: Compile (and run) CMake Tests
 
 - job: VisualStudio2017
@@ -129,8 +129,8 @@ jobs:
       configuration: $(BuildConfiguration)
       maximumCpuCount: true
   - script: |
-      if %BuildPlatform%==x64 set GEN=--generator="Visual Studio 15 2017 Win64"
-      perl "%DDS_ROOT%\tests\cmake_integration\run_ci_tests.pl" --build-config=$(BuildConfiguration) %GEN%
+      if %BuildPlatform%==x64 set ARCH=--arch="x64"
+      perl "%DDS_ROOT%\tests\cmake_integration\run_ci_tests.pl" --build-config=$(BuildConfiguration) --generator="Visual Studio 15 2017" %ARCH%
     displayName: Compile (and run) CMake Tests
 
 - job: Linux
