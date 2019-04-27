@@ -36,7 +36,7 @@ for my $x (qw(Messenger_1 Messenger_2)) {
   }
 
   if ($arch ne "") {
-    splice @{$cmds[0]}, 1, 0, ("-G", qq("$arch"));
+    splice @{$cmds[0]}, 1, 0, ("-A", qq("$arch"));
   }
 
   if ($build_config ne "") {
