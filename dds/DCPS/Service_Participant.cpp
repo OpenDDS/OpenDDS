@@ -323,6 +323,19 @@ Service_Participant::get_domain_participant_factory(int &argc,
 #ifndef OPENDDS_SAFETY_PROFILE
       ORB_argv_.add(ACE_TEXT("unused_arg_0"));
 #endif
+      /* NOTE ABOUT ADDING NEW OPTIONS HERE ==================================
+       *
+       * The argument parsing here is simple. It will match substrings of
+       * options even if that isn't the whole option. For example; If
+       * "-DCPSSecurity" is checked before "-DCPSSecurityDebug" and
+       * "-DCPSSecurityDebug" is passed, it will match "-DCPSSecurity". Check
+       * to make sure the order is correct.
+       *
+       * TODO/TBD: Create or make use of a stricter command line argument
+       * parsing method/library. Something where we can define the format of
+       * the argument and it will handle it better. Maybe could be integrated
+       * into the config parsing, which has most of these options.
+       */
       ACE_Arg_Shifter shifter(argc, argv);
       while (shifter.is_anything_left()) {
         if (shifter.cur_arg_strncasecmp(ACE_TEXT("-ORBLogFile")) == 0) {
@@ -586,18 +599,13 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
       got_monitor = true;
 
 #if defined(OPENDDS_SECURITY)
-    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSSecurity"))) != 0) {
-      security_enabled_ = ACE_OS::atoi(currentArg);
-      arg_shifter.consume_arg();
-      got_security_flag = true;
-
-    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSSecurityDebug"))) != 0) {
-      security_debug.parse_flags(currentArg);
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSSecurityDebugLevel"))) != 0) {
+      security_debug.set_debug_level(ACE_OS::atoi(currentArg));
       arg_shifter.consume_arg();
       got_security_debug = true;
 
-    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSSecurityDebugLevel"))) != 0) {
-      security_debug.set_debug_level(ACE_OS::atoi(currentArg));
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSSecurityDebug"))) != 0) {
+      security_debug.parse_flags(currentArg);
       arg_shifter.consume_arg();
       got_security_debug = true;
 
@@ -605,6 +613,13 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
       security_debug.fake_encryption = ACE_OS::atoi(currentArg);
       arg_shifter.consume_arg();
       got_security_fake_encryption = true;
+
+    // Must be last "-DCPSSecurity*" option, see comment above this arg parsing loop
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSSecurity"))) != 0) {
+      security_enabled_ = ACE_OS::atoi(currentArg);
+      arg_shifter.consume_arg();
+      got_security_flag = true;
+
 #endif
 
     } else {
