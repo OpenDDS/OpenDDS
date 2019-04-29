@@ -1,19 +1,18 @@
 # OpenDDS Security
 
 This document is intended as a collection of high-level notes on OpenDDS
-Security. OpenDDS Security provides security controls and capabilities for RTPS
-including authentication of participants and encryption of messages. It an
-implementation of DDS Security Version 1.1 (OMG formal/2018-04-01). Please
-refer to the latest version of DDS Security for ultimately how security should
-work.
+Security. OpenDDS Security provides security controls and capabilities for
+RTPS, which includes authentication of participants and encryption of messages.
+It an implementation of DDS Security Version 1.1 (OMG formal/2018-04-01).
 
 ## Debug Logging
 
-Security has a debug logging like the rest of OpenDDS. As of writing there are
-sill many logging points still under `DCPSDebugLevel` and
-`DCPSTransportDebugLevel`. Security debug logging points are broken broken down
-into named categories which can be specified individually, but also can
-activated on the same 1 to 10 scale of accumulative levels as `DCPSDebugLevel`.
+OpenDDS Security has debug messages like the rest of OpenDDS, many are under
+the `DCPSSecurityDebug` but, as of writing, there are sill many messages still
+under `DCPSDebugLevel` and `DCPSTransportDebugLevel` and need to be
+transitioned. Security debug messages are broken broken down into named
+categories which can be specified individually or activated on the same
+accumulative 1 to 10 scale as `DCPSDebugLevel`.
 
 See OpenDDS Developer's Guide Section 7.2 "Common Configuration Options" for
 the categories and usage, or `dds/DCPS/debug.h` and `dds/DCPS/debug.cpp` for
@@ -22,7 +21,7 @@ the source.
 ## Authentication
 
 Authentication occurs after participants discover each other. It consists of a
-three-way handshake using the builtin SDP participant readers and writers.
+three-way handshake using the "builtin SDP participant" readers and writers.
 
 - Request
   - Based on GUIDs, one side takes the lead and starts the handshake by sending
