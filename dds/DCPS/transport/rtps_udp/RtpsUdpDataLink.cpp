@@ -1676,6 +1676,11 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
   const ACE_Time_Value now = ACE_OS::gettimeofday();
   OPENDDS_VECTOR(DiscoveryListener*) callbacks;
 
+  // For first_acknowledged_by_reader
+  SequenceNumber received_sn_base;
+  received_sn_base.setValue(acknack.readerSNState.bitmapBase.high, acknack.readerSNState.bitmapBase.low);
+  bool first_ack = false;
+
   {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
     for (InterestingRemoteMapType::iterator pos = interesting_readers_.lower_bound(remote),
@@ -1733,12 +1738,7 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
   if (!ri->second.handshake_done_) {
     ri->second.handshake_done_ = true;
     invoke_on_start_callbacks(true);
-    {
-      // Unlock so the callback can use the datalink
-      ACE_Reverse_Lock<ACE_Thread_Mutex> ack_rev_lock(lock_);
-      ACE_Guard<ACE_Reverse_Lock<ACE_Thread_Mutex> > ack_rev_guard(ack_rev_lock);
-      first_acknowledged_by_reader(local, remote, acknack.count.value);
-    }
+    first_ack = true;
   }
 
   OPENDDS_MAP(SequenceNumber, TransportQueueElement*) pendingCallbacks;
@@ -1875,6 +1875,9 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
   for (iter_t it = pendingCallbacks.begin();
        it != pendingCallbacks.end(); ++it) {
     it->second->data_delivered();
+  }
+  if (first_ack) {
+    first_acknowledged_by_reader(local, remote, received_sn_base);
   }
 }
 

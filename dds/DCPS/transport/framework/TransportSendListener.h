@@ -15,6 +15,7 @@
 #include "TransportDefs.h"
 #include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/PoolAllocator.h"
+#include "dds/DCPS/SequenceNumber.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Message_Block;
@@ -76,7 +77,7 @@ public:
    * In the case of security, this means it can decrypt our messages. This was
    * made for RepeatOnceWriter in Sedp.
    */
-  virtual void first_acknowledged_by_reader(const RepoId& rdr, CORBA::Long count);
+  virtual void first_acknowledged_by_reader(const RepoId& remoteReader, const SequenceNumber& sn_base);
 
 protected:
 

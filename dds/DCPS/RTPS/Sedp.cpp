@@ -2944,7 +2944,8 @@ Sedp::RepeatOnceWriter::RepeatOnceWriter(const RepoId& pub_id, Sedp& sedp)
 }
 
 void
-Sedp::RepeatOnceWriter::first_acknowledged_by_reader(const RepoId& rdr, CORBA::Long count)
+Sedp::RepeatOnceWriter::first_acknowledged_by_reader(
+  const DCPS::RepoId& rdr, const DCPS::SequenceNumber& sn_base)
 {
   if (!std::memcmp(repo_id_.guidPrefix, rdr.guidPrefix, sizeof(DCPS::GuidPrefix_t))) {
     return;
@@ -2954,9 +2955,11 @@ Sedp::RepeatOnceWriter::first_acknowledged_by_reader(const RepoId& rdr, CORBA::L
   RTPS::assign(remote_participant.guidPrefix, rdr.guidPrefix);
   remote_participant.entityId = ENTITYID_PARTICIPANT;
 
-  if (DCPS::DCPS_debug_level > 3) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::RepeatOnceWriter::first_acknowledged_by_reader(): %C, count is %lu\n",
-      OPENDDS_STRING(DCPS::GuidConverter(rdr)).c_str(), count));
+  if (DCPS::security_debug.bookkeeping) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} RepeatOnceWriter::first_acknowledged_by_reader: ")
+      ACE_TEXT("%C acked %u, resending any keys we have\n"),
+      OPENDDS_STRING(DCPS::GuidConverter(rdr)).c_str(),
+      sn_base.getValue()));
   }
 
   ACE_Guard<ACE_Thread_Mutex> g(lock_);

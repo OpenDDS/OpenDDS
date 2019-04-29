@@ -390,16 +390,10 @@ private:
 
   /**
    * Special Case for the Participant Volatile Message Secure Writer, which
-   * performs key exchange.
-   *
-   * When the auth initiator is much faster that the other side, the initiator
-   * might send the keys before the other side is ready to decrypt them. Given
-   * it is not durable, which means it will never ask for old data, the other
-   * side will never get the keys.
-   *
-   * The solution to this being used here is to wait until the first acknack is
-   * received, then send the keys again, just in case it didn't get them the
-   * first time.
+   * performs key exchange. This sends the keys after the first ACKNACK from a
+   * Reader to prevent a loss of keys in the transition between authentication
+   * and key exchange. See docs/design/security.md section titled "Slow
+   * Follower Key Exchange Issue" for details.
    */
   class RepeatOnceWriter : public Writer {
   public:
@@ -411,9 +405,10 @@ private:
      *
      * Removes the participant's keys afterwards.
      */
-    void first_acknowledged_by_reader(const DCPS::RepoId& rdr, CORBA::Long count);
+    void first_acknowledged_by_reader(
+      const DCPS::RepoId& rdr, const DCPS::SequenceNumber& sn_base);
 
-    /// Erase anys keys pending repeat to this participant
+    /// Erase any keys pending repeat to this participant
     void erase(const DCPS::RepoId& part);
 
     struct RemoteWriter {
