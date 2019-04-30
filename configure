@@ -1249,7 +1249,6 @@ if ($opts{'openssl'} && $opts{'openssl'} ne 'skip_version_check') {
 
 sub win32_cmake_generator {
   my $ver = shift;
-  my $arch = shift;
 
   my %map = ('vc9' => 'Visual Studio 9 2008',
              'vc10' => 'Visual Studio 10 2010',
@@ -1262,7 +1261,13 @@ sub win32_cmake_generator {
   die "ERROR: Unsupported Visual Studio version '$ver' supplied.\nStopped"
     if ! exists $map{$ver};
 
-  return $map{$ver} . ($arch eq 'x64' ? ' Win64' : '');
+  return $map{$ver};
+}
+
+sub win32_cmake_arch {
+  my $arch = shift;
+
+  return ($arch eq 'x64' ? 'x64' : 'Win32');
 }
 
 if ($opts{'security'} && $tests && $opts{'cmake'} && ! $opts{'gtest-precompiled'}) {
@@ -1270,14 +1275,15 @@ if ($opts{'security'} && $tests && $opts{'cmake'} && ! $opts{'gtest-precompiled'
   my $build_dir = $opts{'gtest'} . $slash . 'build';
   my $install_dir = $build_dir . $slash . 'install';
   my $cmake = $opts{'cmake'};
+  my $cmake_gen = $is_windows ? win32_cmake_generator($opts{'compiler_version'}) : '';
+  my $cmake_arch = $is_windows ? win32_cmake_arch($opts{'compiler_target_architecture'}) : '';
   my @cmake_cmds = (($is_windows ?
                       ["$cmake",
                        "-D", "gtest_force_shared_crt=ON",
                        "-D", "CMAKE_CXX_FLAGS=/D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING=1",
                        "-D", "CMAKE_INSTALL_PREFIX=$install_dir",
-                       "-G", win32_cmake_generator(
-                               $opts{'compiler_version'},
-                               $opts{'compiler_target_architecture'}),
+                       "-G", "\"$cmake_gen\"",
+                       "-A", "$cmake_arch",
                        ".."] :
                       ["$cmake",
                        "-D", "CMAKE_INSTALL_PREFIX=$install_dir",
