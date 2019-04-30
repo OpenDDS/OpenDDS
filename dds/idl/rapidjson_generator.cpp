@@ -102,10 +102,10 @@ namespace {
         if (cls & CL_WIDE) {
           strm <<
             "  {\n"
-            "    rapidjson::GenericStringStream<rapidjson::UTF16<>> ins(" << src << suffix << ");\n"
-            "    rapidjson::GenericStringBuffer<rapidjson::UTF8<>> outs;\n"
+            "    rapidjson::GenericStringStream<rapidjson::UTF16<> > ins(" << src << suffix << ");\n"
+            "    rapidjson::GenericStringBuffer<rapidjson::UTF8<> > outs;\n"
             "    while (ins.Peek() != '\\0') {\n"
-            "      rapidjson::Transcoder<rapidjson::UTF16<>, rapidjson::UTF8<>>::Transcode(ins, outs);\n"
+            "      rapidjson::Transcoder<rapidjson::UTF16<>, rapidjson::UTF8<> >::Transcode(ins, outs);\n"
             "    }\n"
             "    " << tgt_str << op_pre << "outs.GetString(), " << alloc << op_post << ";\n"
             "  }\n";
@@ -127,9 +127,9 @@ namespace {
         strm <<
           "  {\n"
           "    const uint16_t str[] = {" << src << ", 0};\n"
-          "    rapidjson::GenericStringStream<rapidjson::UTF16<>> ins(&str[0]);\n"
-          "    rapidjson::GenericStringBuffer<rapidjson::UTF8<>> outs;\n"
-          "    rapidjson::Transcoder<rapidjson::UTF16<>, rapidjson::UTF8<>>::Transcode(ins, outs);\n"
+          "    rapidjson::GenericStringStream<rapidjson::UTF16<> > ins(&str[0]);\n"
+          "    rapidjson::GenericStringBuffer<rapidjson::UTF8<> > outs;\n"
+          "    rapidjson::Transcoder<rapidjson::UTF16<>, rapidjson::UTF8<> >::Transcode(ins, outs);\n"
           "    " << tgt_str << op_pre << "outs.GetString(), " << alloc << op_post << ";\n"
           "  }\n";
         return;
@@ -222,10 +222,10 @@ namespace {
           ip << "if (val.IsString()) {\n";
         if (cls & CL_WIDE) {
           strm <<
-            ip << "  rapidjson::GenericStringStream<rapidjson::UTF8<>> ins(val.GetString());\n" <<
-            ip << "  rapidjson::GenericStringBuffer<rapidjson::UTF16<>> outs;\n" <<
+            ip << "  rapidjson::GenericStringStream<rapidjson::UTF8<> > ins(val.GetString());\n" <<
+            ip << "  rapidjson::GenericStringBuffer<rapidjson::UTF16<> > outs;\n" <<
             ip << "  while (ins.Peek() != '\\0') {\n" <<
-            ip << "    rapidjson::Transcoder<rapidjson::UTF8<>, rapidjson::UTF16<>>::Transcode(ins, outs);\n" <<
+            ip << "    rapidjson::Transcoder<rapidjson::UTF8<>, rapidjson::UTF16<> >::Transcode(ins, outs);\n" <<
             ip << "  }\n" <<
             ip << "  " << propName << assign_prefix << "outs.GetString()" << assign_suffix << ";\n";
         } else {
@@ -242,9 +242,9 @@ namespace {
       } else if (pt == AST_PredefinedType::PT_wchar) {
         strm <<
           ip << "if (val.IsString()) {\n" <<
-          ip << "  rapidjson::GenericStringStream<rapidjson::UTF8<>> ins(val.GetString());\n" <<
-          ip << "  rapidjson::GenericStringBuffer<rapidjson::UTF16<>> outs;\n" <<
-          ip << "  rapidjson::Transcoder<rapidjson::UTF8<>, rapidjson::UTF16<>>::Transcode(ins, outs);\n" <<
+          ip << "  rapidjson::GenericStringStream<rapidjson::UTF8<> > ins(val.GetString());\n" <<
+          ip << "  rapidjson::GenericStringBuffer<rapidjson::UTF16<> > outs;\n" <<
+          ip << "  rapidjson::Transcoder<rapidjson::UTF8<>, rapidjson::UTF16<> >::Transcode(ins, outs);\n" <<
           ip << "  " << propName << assign_prefix << "outs.GetString()[0]" << assign_suffix << ";\n" <<
           ip << "}\n";
       } else if (pt == AST_PredefinedType::PT_longlong
@@ -432,26 +432,6 @@ bool rapidjson_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
       "  {\n"
       "    " << lname << "* delete_me = static_cast< " << lname << "*>(val);\n"
       "    delete delete_me;\n"
-      "  }\n\n"
-      "  DDS::InstanceHandle_t register_instance_helper(DDS::DataWriter* dw, const void* data) const\n"
-      "  {\n"
-      "    " << lname << "DataWriter* dw_t = dynamic_cast<" << lname << "DataWriter*>(dw);\n"
-      "    return dw_t ? dw_t->register_instance(*static_cast<const " << lname << "*>(data)) : DDS::HANDLE_NIL;\n"
-      "  }\n\n"
-      "  DDS::ReturnCode_t write_helper(DDS::DataWriter* dw, const void* data, DDS::InstanceHandle_t inst) const\n"
-      "  {\n"
-      "    " << lname << "DataWriter* dw_t = dynamic_cast<" << lname << "DataWriter*>(dw);\n"
-      "    return dw_t ? dw_t->write(*static_cast<const " << lname << "*>(data), inst) : DDS::RETCODE_BAD_PARAMETER;\n"
-      "  }\n\n"
-      "  DDS::ReturnCode_t unregister_instance_helper(DDS::DataWriter* dw, const void* data, DDS::InstanceHandle_t inst) const\n"
-      "  {\n"
-      "    " << lname << "DataWriter* dw_t = dynamic_cast<" << lname << "DataWriter*>(dw);\n"
-      "    return dw_t ? dw_t->unregister_instance(*static_cast<const " << lname << "*>(data), inst) : DDS::RETCODE_BAD_PARAMETER;\n"
-      "  }\n\n"
-      "  DDS::ReturnCode_t dispose_helper(DDS::DataWriter* dw, const void* data, DDS::InstanceHandle_t inst) const\n"
-      "  {\n"
-      "    " << lname << "DataWriter* dw_t = dynamic_cast<" << lname << "DataWriter*>(dw);\n"
-      "    return dw_t ? dw_t->dispose(*static_cast<const " << lname << "*>(data), inst) : DDS::RETCODE_BAD_PARAMETER;\n"
       "  }\n\n"
       "public:\n"
       "  struct Initializer {\n"

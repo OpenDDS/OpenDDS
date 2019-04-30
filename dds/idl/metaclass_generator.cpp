@@ -42,8 +42,9 @@ bool metaclass_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
   NamespaceGuard ng;
   std::string array_decl = "const char* gen_" + scoped_helper(name, "_") + "_names[]";
   std::string size_decl = "const size_t gen_" + scoped_helper(name, "_") + "_names_size";
-  be_global->header_ << "extern " << array_decl << ";\n";
-  be_global->header_ << "extern " << size_decl << ";\n";
+  std::string decl_prefix = ((be_global->export_macro() == "") ? std::string("extern ") : (std::string(be_global->export_macro().c_str()) + " extern "));
+  be_global->header_ << decl_prefix << array_decl << ";\n";
+  be_global->header_ << decl_prefix << size_decl << ";\n";
   be_global->impl_ << array_decl << " = {\n";
   for (size_t i = 0; i < contents.size(); ++i) {
     be_global->impl_ << "  \"" << contents[i]->local_name()->get_string()
