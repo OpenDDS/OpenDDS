@@ -1,0 +1,41 @@
+#include "Builder.idl"
+
+module Stool {
+
+  typedef sequence<octet> OctetSeq;
+
+  // A common defintion of information required for audit purposes (when / where / who / why etc)
+  struct AuditInfo {
+    Builder::TimeStamp time;
+    string system;
+    string user;
+    string source;
+  };
+
+  typedef sequence<AuditInfo> AuditSeq;
+
+// ---
+// Data Section
+// ---
+
+#pragma DCPS_DATA_TYPE "Stool::Data"
+#pragma DCPS_DATA_KEY  "Stool::Data key"
+  struct Data {
+    long key;
+    long pid;
+    long seq;
+    long priority;
+    AuditInfo created;
+    AuditSeq relay_trail;
+    OctetSeq buffer;
+  };
+
+  struct WorkerConfig {
+    Builder::TimeStamp enable_time;
+    Builder::TimeStamp start_time;
+    Builder::TimeStamp stop_time;
+    Builder::ProcessConfig process;
+  };
+
+};
+

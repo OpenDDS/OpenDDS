@@ -1,0 +1,11 @@
+project: ../stool_builder_idl_lib {
+  after    += Stool_Builder
+  libs     += Stool_Builder
+  expand(STOOL_BUILDER_ROOT) {
+    $STOOL_BUILDER_ROOT
+    $(DDS_ROOT)/performance-tests/stool
+  }
+  includes += $(STOOL_BUILDER_ROOT)/builder
+  exename   = *
+}
+

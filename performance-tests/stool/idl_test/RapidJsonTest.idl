@@ -1,0 +1,69 @@
+#include <tao/LongSeq.pidl>
+#include <tao/ShortSeq.pidl>
+#include <tao/StringSeq.pidl>
+
+module Mod {
+
+  enum MyEnum {one, two, three};
+
+  struct BasicTypes {
+    octet o;
+    unsigned short us;
+    short s;
+    unsigned long ul;
+    long l;
+    unsigned long long ull;
+    long long ll;
+    float f;
+    double d;
+    long double ld;
+    boolean b;
+    char c;
+    // Not all supported C++ compilers handle the code generated from this type.
+    // wchar wc;
+    string str;
+    wstring wstr;
+  };
+
+  union MyUnion switch (MyEnum) {
+  case one:
+    long a;
+  case two:
+    boolean b;
+  case three:
+    double d;
+  };
+
+  typedef sequence<short> MySeq;
+  typedef sequence<CORBA::StringSeq> NestedSeq;
+  typedef sequence<NestedSeq> NestedNestedSeq;
+  typedef sequence<NestedNestedSeq> NestedNestedNestedSeq;
+
+#pragma DCPS_DATA_TYPE "Mod::Sample"
+#pragma DCPS_DATA_KEY "Mod::Sample id"
+  struct Sample {
+    long id;
+    string data;
+    MyEnum enu;
+    MyEnum enu2;
+    BasicTypes bt;
+    MySeq seq1;
+    CORBA::LongSeq seq2;
+    NestedSeq ns;
+    MyUnion mu;
+  };
+
+  typedef sequence<MyUnion> MyUnionSeq;
+
+  enum MyOtherEnum {small, medium, large};
+
+  union MyOtherUnion switch (MyOtherEnum) {
+  case small:
+    string one;
+  case medium:
+    NestedSeq two;
+  case large:
+    Sample three;
+  };
+
+};

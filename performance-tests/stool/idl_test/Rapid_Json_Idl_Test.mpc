@@ -1,0 +1,18 @@
+project: dcpslib, dcps_rapidjson {
+  idlflags      += -Wb,stub_export_include=../idl/Stool_Export.h \
+                   -Wb,stub_export_macro=Stool_Export
+  dcps_ts_flags += -Wb,stub_export_include=../idl/Stool_Export.h \
+                   -Wb,export_macro=Stool_Export
+  dynamicflags  += STOOL_BUILD_DLL
+
+  requires += no_opendds_safety_profile
+
+  Idl_Files {
+    RapidJsonTest.idl
+  }
+
+  TypeSupport_Files {
+    RapidJsonTest.idl
+  }
+}
+
