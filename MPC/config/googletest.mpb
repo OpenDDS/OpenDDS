@@ -6,7 +6,7 @@ project {
   includes += $(GTEST_ROOT)/include
   libpaths += $(GTEST_ROOT)/lib
 
-  lit_libs += gtest
+  libs += gtest
 
   specific (prop:microsoft) {
     macros += _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING
