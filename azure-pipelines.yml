@@ -175,6 +175,9 @@ jobs:
       GCC7:
         ConfigOpts: --compiler=g++-7 --no-inline
         PackageDeps: g++-7
+      GCC8:
+        ConfigOpts: --compiler=g++-8 --no-inline
+        PackageDeps: g++-8
   steps:
   - script: |
       wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|sudo apt-key add -
