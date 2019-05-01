@@ -1,4 +1,9 @@
 project : googletest {
 
-  lit_libs += gmock
+  specific(prop:windows) {
+    Debug::lit_libs += gmockd
+    Release::lit_libs += gmock
+  } else {
+    lit_libs += gmock
+  }
 }
