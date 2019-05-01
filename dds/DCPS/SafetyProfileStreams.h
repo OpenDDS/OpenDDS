@@ -27,6 +27,21 @@ OpenDDS_Dcps_Export OPENDDS_STRING to_dds_string(long long to_convert);
 OpenDDS_Dcps_Export OPENDDS_STRING to_dds_string(unsigned long long to_convert, bool as_hex = false);
 OpenDDS_Dcps_Export OPENDDS_STRING to_dds_string(unsigned long to_convert, bool as_hex = false);
 
+//@{
+/**
+ * Converts a series of bytes at data to a optionally delimited OPENDDS_STRING
+ * of hexadecimal numbers.
+ *
+ * If delim is '\0' (the default) or delim_every is 0, then the output will not
+ * be delimited.
+ */
+OpenDDS_Dcps_Export OPENDDS_STRING to_hex_dds_string(
+  const unsigned char* data, size_t size, char delim = '\0', size_t delim_every = 1);
+OpenDDS_Dcps_Export OPENDDS_STRING to_hex_dds_string(
+  const char* data, size_t size, char delim = '\0', size_t delim_every = 1);
+//@}
+
+/// Convert Pointer to OPENDDS_STRING
 template <typename T>
 inline OPENDDS_STRING
 to_dds_string(const T* to_convert)

@@ -14,6 +14,7 @@
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsSecurityParamsC.h"
 
+#include "dds/DCPS/debug.h"
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/Message_Block_Ptr.h"
 #include "dds/DCPS/Serializer.h"
@@ -31,8 +32,10 @@
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 using namespace DDS::Security;
+using namespace OpenDDS::Security::CommonUtilities;
 using OpenDDS::DCPS::Serializer;
 using OpenDDS::DCPS::Message_Block_Ptr;
+using OpenDDS::DCPS::security_debug;
 
 namespace OpenDDS {
 namespace Security {
@@ -134,12 +137,12 @@ ParticipantCryptoHandle CryptoBuiltInImpl::register_local_participant(
     return DDS::HANDLE_NIL;
   }
 
-  if (!participant_security_attributes.is_rtps_protected) {
-    return generate_handle();
+  if (participant_security_attributes.is_rtps_protected) {
+    CommonUtilities::set_security_error(ex, -1, 0, "RTPS protection is unsupported");
+    return DDS::HANDLE_NIL;
   }
 
-  CommonUtilities::set_security_error(ex, -1, 0, "Unsupported configuration");
-  return DDS::HANDLE_NIL;
+  return generate_handle();
 }
 
 ParticipantCryptoHandle CryptoBuiltInImpl::register_matched_remote_participant(
@@ -313,14 +316,34 @@ DatawriterCryptoHandle CryptoBuiltInImpl::register_local_datawriter(
     // (requirements for which key appears first, etc.)
     bool used_h = false;
     if (security_attributes.is_submessage_protected) {
-      push_back(keys,
-                make_key(h, plugin_attribs & FLAG_IS_SUBMESSAGE_ENCRYPTED));
+      const KeyMaterial_AES_GCM_GMAC key = make_key(h, plugin_attribs & FLAG_IS_SUBMESSAGE_ENCRYPTED);
+      push_back(keys, key);
       used_h = true;
+      if (security_debug.bookkeeping && !security_debug.showkeys) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} CryptoBuiltInImpl::register_local_datawriter ")
+          ACE_TEXT("created submessage key with id %C for LDWCH %d\n"),
+          ctki_to_dds_string(key.sender_key_id).c_str(), h));
+      }
+      if (security_debug.showkeys) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {showkeys} CryptoBuiltInImpl::register_local_datawriter ")
+          ACE_TEXT("created submessage key for LDWCH %d:\n%C"), h,
+          to_dds_string(key).c_str()));
+      }
     }
     if (security_attributes.is_payload_protected) {
       const unsigned int key_id = used_h ? generate_handle() : h;
-      push_back(keys,
-                make_key(key_id, plugin_attribs & FLAG_IS_PAYLOAD_ENCRYPTED));
+      const KeyMaterial_AES_GCM_GMAC key = make_key(key_id, plugin_attribs & FLAG_IS_PAYLOAD_ENCRYPTED);
+      push_back(keys, key);
+      if (security_debug.bookkeeping && !security_debug.showkeys) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} CryptoBuiltInImpl::register_local_datawriter ")
+          ACE_TEXT("created payload key with id %C for LDWCH %d\n"),
+          ctki_to_dds_string(key.sender_key_id).c_str(), h));
+      }
+      if (security_debug.showkeys) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {showkeys} CryptoBuiltInImpl::register_local_datawriter ")
+          ACE_TEXT("created payload key for LDWCH %d:\n%C"), h,
+          to_dds_string(key).c_str()));
+      }
     }
   }
 
@@ -328,7 +351,7 @@ DatawriterCryptoHandle CryptoBuiltInImpl::register_local_datawriter(
   keys_[h] = keys;
   EntityInfo e(DATAWRITER_SUBMESSAGE, h);
   participant_to_entity_.insert(std::make_pair(participant_crypto, e));
-  writer_options_[h] = security_attributes;
+  encrypt_options_[h] = security_attributes;
 
   return h;
 }
@@ -374,11 +397,21 @@ DatareaderCryptoHandle CryptoBuiltInImpl::register_matched_remote_datareader(
                                           "volatile remote reader");
       return DDS::HANDLE_NIL;
     }
+    if (security_debug.bookkeeping && !security_debug.showkeys) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} CryptoBuiltInImpl::register_remote_datareader ")
+        ACE_TEXT("created volatile key for RDRCH %d\n"), h));
+    }
+    if (security_debug.showkeys) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {showkeys} CryptoBuiltInImpl::register_remote_datareader ")
+        ACE_TEXT("created volatile key for RDRCH %d:\n%C"), h,
+        to_dds_string(dr_keys[0]).c_str()));
+    }
     keys_[h] = dr_keys;
   }
 
   EntityInfo e(DATAREADER_SUBMESSAGE, h);
   participant_to_entity_.insert(std::make_pair(remote_participant_crypto, e));
+  encrypt_options_[h] = encrypt_options_[local_datawriter_crypto_handle];
   return h;
 }
 
@@ -401,18 +434,26 @@ DatareaderCryptoHandle CryptoBuiltInImpl::register_local_datareader(
   if (is_builtin_volatile(properties)) {
     push_back(keys, make_volatile_placeholder());
 
-  } else {
-    if (security_attributes.is_submessage_protected) {
-      push_back(keys,
-                make_key(h, plugin_attribs & FLAG_IS_SUBMESSAGE_ENCRYPTED));
+  } else if (security_attributes.is_submessage_protected) {
+    const KeyMaterial_AES_GCM_GMAC key = make_key(h, plugin_attribs & FLAG_IS_SUBMESSAGE_ENCRYPTED);
+    if (security_debug.bookkeeping && !security_debug.showkeys) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} CryptoBuiltInImpl::register_local_datareader ")
+        ACE_TEXT("created submessage key with id %C for LDRCH %d\n"),
+        ctki_to_dds_string(key.sender_key_id).c_str(), h));
     }
+    if (security_debug.showkeys) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {showkeys} CryptoBuiltInImpl::register_local_datareader ")
+        ACE_TEXT("created submessage key for LDRCH %d:\n%C"), h,
+        to_dds_string(key).c_str()));
+    }
+    push_back(keys, key);
   }
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   keys_[h] = keys;
   EntityInfo e(DATAREADER_SUBMESSAGE, h);
   participant_to_entity_.insert(std::make_pair(participant_crypto, e));
-  writer_options_[h] = security_attributes;
+  encrypt_options_[h] = security_attributes;
 
   return h;
 }
@@ -457,12 +498,21 @@ DatawriterCryptoHandle CryptoBuiltInImpl::register_matched_remote_datawriter(
                                           "volatile remote writer");
       return DDS::HANDLE_NIL;
     }
+    if (security_debug.bookkeeping && !security_debug.showkeys) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} CryptoBuiltInImpl::register_remote_datawriter ")
+        ACE_TEXT("created volatile key for RDWCH %d\n"), h));
+    }
+    if (security_debug.showkeys) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {showkeys} CryptoBuiltInImpl::register_remote_datawriter ")
+        ACE_TEXT("created volatile key for RDWCH %d:\n%C"), h,
+        to_dds_string(dw_keys[0]).c_str()));
+    }
     keys_[h] = dw_keys;
   }
 
   EntityInfo e(DATAWRITER_SUBMESSAGE, h);
   participant_to_entity_.insert(std::make_pair(remote_participant_crypto, e));
-  writer_options_[h] = writer_options_[local_datareader_crypto_handle];
+  encrypt_options_[h] = encrypt_options_[local_datareader_crypto_handle];
   return h;
 }
 
@@ -478,6 +528,7 @@ bool CryptoBuiltInImpl::unregister_participant(ParticipantCryptoHandle handle, S
 void CryptoBuiltInImpl::clear_endpoint_data(NativeCryptoHandle handle)
 {
   keys_.erase(handle);
+  encrypt_options_.erase(handle);
 
   typedef std::multimap<ParticipantCryptoHandle, EntityInfo>::iterator iter_t;
   for (iter_t it = participant_to_entity_.begin(); it != participant_to_entity_.end();) {
@@ -502,7 +553,6 @@ bool CryptoBuiltInImpl::unregister_datawriter(DatawriterCryptoHandle handle, Sec
   }
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  writer_options_.erase(handle);
   clear_endpoint_data(handle);
   return true;
 }
@@ -789,7 +839,7 @@ bool CryptoBuiltInImpl::encode_serialized_payload(
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   if (!keys_.count(sending_datawriter_crypto)
-      || !writer_options_[sending_datawriter_crypto].payload_) {
+      || !encrypt_options_[sending_datawriter_crypto].payload_) {
     encoded_buffer = plain_buffer;
     return true;
   }
@@ -907,11 +957,22 @@ bool CryptoBuiltInImpl::encrypt(const KeyMaterial& master, Session& sess,
                                 CryptoHeader& header, CryptoFooter& footer,
                                 DDS::OctetSeq& out, SecurityException& ex)
 {
+  if (security_debug.showkeys) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {showkeys} CryptoBuiltInImpl::encrypt: ")
+      ACE_TEXT("Using this key to encrypt:\n%C"),
+      to_dds_string(master).c_str()));
+  }
+
   encauth_setup(master, sess, plain, header);
   static const int IV_LEN = 12, IV_SUFFIX_IDX = 4;
   unsigned char iv[IV_LEN];
   std::memcpy(iv, &sess.id_, sizeof sess.id_);
   std::memcpy(iv + IV_SUFFIX_IDX, &sess.iv_suffix_, sizeof sess.iv_suffix_);
+
+  if (security_debug.fake_encryption) {
+    out = plain;
+    return true;
+  }
 
   CipherContext ctx;
   const unsigned char* key = sess.key_.get_buffer();
@@ -1131,7 +1192,7 @@ bool CryptoBuiltInImpl::encode_datawriter_submessage(
 
   NativeCryptoHandle encode_handle = sending_datawriter_crypto;
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  if (!writer_options_[encode_handle].submessage_) {
+  if (!encrypt_options_[encode_handle].submessage_) {
     encoded_rtps_submessage = plain_rtps_submessage;
     receiving_datareader_crypto_list_index = len;
     return true;
@@ -1306,22 +1367,51 @@ bool CryptoBuiltInImpl::preprocess_secure_submsg(
   typedef std::multimap<ParticipantCryptoHandle, EntityInfo>::iterator iter_t;
   const std::pair<iter_t, iter_t> iters =
     participant_to_entity_.equal_range(sending_participant_crypto);
+  if (security_debug.chlookup) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {chlookup} CryptoBuiltInImpl::preprocess_secure_submsg: ")
+      ACE_TEXT("Looking for CH that matches transformation id:\n%C"),
+      to_dds_string(ch.transform_identifier).c_str()));
+  }
   for (iter_t iter = iters.first; iter != iters.second; ++iter) {
     const NativeCryptoHandle sending_entity_candidate = iter->second.handle_;
-    if (keys_.count(sending_entity_candidate)) {
+    const size_t haskeys = keys_.count(sending_entity_candidate);
+    if (security_debug.chlookup) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {chlookup} CryptoBuiltInImpl::preprocess_secure_submsg: ")
+        ACE_TEXT("  Looking at CH %u, has keys: %C\n"),
+        sending_entity_candidate, haskeys ? "true" : "false"));
+    }
+    if (haskeys) {
       const KeySeq& keyseq = keys_[sending_entity_candidate];
-      for (unsigned int i = 0; i < keyseq.length(); ++i) {
+      const unsigned keycount = keyseq.length();
+      if (security_debug.chlookup) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {chlookup} CryptoBuiltInImpl::preprocess_secure_submsg: ")
+          ACE_TEXT("  Number of keys: %u\n"), keycount));
+      }
+      for (unsigned int i = 0; i < keycount; ++i) {
+        if (security_debug.chlookup) {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {chlookup} CryptoBuiltInImpl::preprocess_secure_submsg: ")
+            ACE_TEXT("    Key: %C\n"),
+            (ctk_to_dds_string(keyseq[i].transformation_kind) + ", " +
+              ctki_to_dds_string(keyseq[i].sender_key_id)).c_str()));
+        }
         if (matches(keyseq[i], ch)) {
+          char chtype = '\0';
           secure_submessage_category = iter->second.category_;
           switch (secure_submessage_category) {
           case DATAWRITER_SUBMESSAGE:
             datawriter_crypto = iter->second.handle_;
+            chtype = 'W';
             break;
           case DATAREADER_SUBMESSAGE:
             datareader_crypto = iter->second.handle_;
+            chtype = 'R';
             break;
           default:
             break;
+          }
+          if (security_debug.chlookup && chtype) {
+            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {chlookup} CryptoBuiltInImpl::preprocess_secure_submsg: ")
+              ACE_TEXT("D%cCH Found!\n"), chtype));
           }
           return true;
         }
@@ -1393,6 +1483,12 @@ bool CryptoBuiltInImpl::decrypt(const KeyMaterial& master, Session& sess,
                                 SecurityException& ex)
 
 {
+  if (security_debug.showkeys) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {showkeys} CryptoBuiltInImpl::decrypt ")
+      ACE_TEXT("Using this key to decrypt:\n%C"),
+      to_dds_string(master).c_str()));
+  }
+
   const KeyOctetSeq sess_key = sess.get_key(master, header);
   if (!sess_key.length()) {
     CommonUtilities::set_security_error(ex, -1, 0, "no session key");
@@ -1407,6 +1503,12 @@ bool CryptoBuiltInImpl::decrypt(const KeyMaterial& master, Session& sess,
                "unsupported transformation kind %d\n",
                master.transformation_kind[TransformKindIndex]));
     return false;
+  }
+
+  if (security_debug.fake_encryption) {
+    out.length(n);
+    std::memcpy(out.get_buffer(), ciphertext, n);
+    return true;
   }
 
   CipherContext ctx;
@@ -1580,7 +1682,7 @@ bool CryptoBuiltInImpl::decode_submessage(
 bool CryptoBuiltInImpl::decode_datawriter_submessage(
   DDS::OctetSeq& plain_rtps_submessage,
   const DDS::OctetSeq& encoded_rtps_submessage,
-  DatareaderCryptoHandle /*receiving_datareader_crypto*/,
+  DatareaderCryptoHandle receiving_datareader_crypto,
   DatawriterCryptoHandle sending_datawriter_crypto,
   SecurityException& ex)
 {
@@ -1594,6 +1696,12 @@ bool CryptoBuiltInImpl::decode_datawriter_submessage(
     return false;
   }
 
+  if (security_debug.encdec) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {encdec} CryptoBuiltInImpl::decode_datawriter_submessage ")
+      ACE_TEXT("Sending DWCH is %u, Receiving DRCH is %u\n"),
+      sending_datawriter_crypto, receiving_datareader_crypto));
+  }
+
   return decode_submessage(plain_rtps_submessage, encoded_rtps_submessage,
                            sending_datawriter_crypto, ex);
 }
@@ -1601,7 +1709,7 @@ bool CryptoBuiltInImpl::decode_datawriter_submessage(
 bool CryptoBuiltInImpl::decode_datareader_submessage(
   DDS::OctetSeq& plain_rtps_submessage,
   const DDS::OctetSeq& encoded_rtps_submessage,
-  DatawriterCryptoHandle /*receiving_datawriter_crypto*/,
+  DatawriterCryptoHandle receiving_datawriter_crypto,
   DatareaderCryptoHandle sending_datareader_crypto,
   SecurityException& ex)
 {
@@ -1615,6 +1723,12 @@ bool CryptoBuiltInImpl::decode_datareader_submessage(
   //    return false;
   //  }
 
+  if (security_debug.encdec) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {encdec} CryptoBuiltInImpl::decode_datareader_submessage ")
+      ACE_TEXT("Sending DRCH is %u, Receiving DWCH is %u\n"),
+      sending_datareader_crypto, receiving_datawriter_crypto));
+  }
+
   return decode_submessage(plain_rtps_submessage, encoded_rtps_submessage,
                            sending_datareader_crypto, ex);
 }
@@ -1623,7 +1737,7 @@ bool CryptoBuiltInImpl::decode_serialized_payload(
   DDS::OctetSeq& plain_buffer,
   const DDS::OctetSeq& encoded_buffer,
   const DDS::OctetSeq& /*inline_qos*/,
-  DatareaderCryptoHandle /*receiving_datareader_crypto*/,
+  DatareaderCryptoHandle receiving_datareader_crypto,
   DatawriterCryptoHandle sending_datawriter_crypto,
   SecurityException& ex)
 {
@@ -1638,9 +1752,20 @@ bool CryptoBuiltInImpl::decode_serialized_payload(
     return false;
   }
 
+  if (security_debug.encdec) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {encdec} CryptoBuiltInImpl::decode_serialized_payload ")
+      ACE_TEXT("Sending DWCH is %u, Receiving DRCH is %u\n"),
+      sending_datawriter_crypto, receiving_datareader_crypto));
+  }
+
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  if (!writer_options_[sending_datawriter_crypto].payload_) {
+  if (!encrypt_options_[sending_datawriter_crypto].payload_) {
     plain_buffer = encoded_buffer;
+    if (security_debug.encdec) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {encdec} CryptoBuiltInImpl::decode_serialized_payload ")
+        ACE_TEXT("Sending datawriter isn't encrypting as far as we know, returning input as plaintext\n"),
+        sending_datawriter_crypto, receiving_datareader_crypto));
+    }
     return true;
   }
 
