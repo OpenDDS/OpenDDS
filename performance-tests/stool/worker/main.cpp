@@ -6,6 +6,7 @@
 
 #include "StoolC.h"
 #include "StoolTypeSupportImpl.h"
+#include "BuilderTypeSupportImpl.h"
 
 #include "TopicListener.h"
 #include "DataReaderListener.h"
@@ -408,8 +409,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   */
 
   // Register some Stool-specific types
+  Builder::TypeSupportRegistry::TypeSupportRegistration process_config_registration(new Builder::ProcessConfigTypeSupportImpl());
   Builder::TypeSupportRegistry::TypeSupportRegistration data_registration(new Stool::DataTypeSupportImpl());
-  //Builder::TypeSupportRegistry::TypeSupportRegistration process_config_registration(new Stool::ProcessConfigTypeSupportImpl());
 
   // Register some Stool-specific listener factories
   Builder::ListenerFactory<DDS::TopicListener>::Registration topic_registration("stool_tl", [](){ return DDS::TopicListener_var(new MyTopicListener()); });

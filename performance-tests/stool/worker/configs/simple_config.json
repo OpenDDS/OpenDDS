@@ -65,7 +65,7 @@
           { "name": "publisher_01",
             "listener_type_name": "stool_pl",
             "listener_status_mask": 4294967295,
-            "datareaders": [
+            "datawriters": [
               { "name": "datawriter_01",
                 "topic_name": "topic_01",
                 "listener_type_name": "stool_dwl",
