@@ -6,12 +6,7 @@ project {
   includes += $(GTEST_ROOT)/include
   libpaths += $(GTEST_ROOT)/lib
 
-  specific(prop:windows) {
-    Debug::lit_libs += gtestd
-    Release::lit_libs += gtest
-  } else {
-    lit_libs += gtest
-  }
+  libs += gtest
 
   specific (prop:microsoft) {
     macros += _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING
