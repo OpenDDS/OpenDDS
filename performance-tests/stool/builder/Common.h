@@ -13,6 +13,8 @@ Stool_Builder_Export extern const TimeStamp ZERO;
 
 Stool_Builder_Export TimeStamp get_time();
 
+Stool_Builder_Export double to_seconds_double(const TimeStamp& ts);
+
 Stool_Builder_Export std::chrono::milliseconds get_duration(const TimeStamp& ts);
 
 Stool_Builder_Export TimeStamp operator-(const TimeStamp& lhs, const TimeStamp& rhs);

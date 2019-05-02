@@ -30,11 +30,32 @@ module Stool {
     OctetSeq buffer;
   };
 
+  struct WorkerAction {
+    string name;
+    string type;
+    Builder::StringSeq readers;
+    Builder::StringSeq writers;
+    DDS::PropertySeq properties;
+  };
+
+  typedef sequence<WorkerAction> WorkerActionSeq;
+
   struct WorkerConfig {
     Builder::TimeStamp enable_time;
     Builder::TimeStamp start_time;
     Builder::TimeStamp stop_time;
     Builder::ProcessConfig process;
+  };
+
+  struct WorkerReport {
+    unsigned long undermatched_readers;
+    unsigned long undermatched_writers;
+    Builder::TimeStamp max_discovery_time_delta;
+    unsigned long long sample_count;
+    double latency_min;
+    double latency_max;
+    double latency_mean;
+    double latency_var_x_sample_count;
   };
 
 };

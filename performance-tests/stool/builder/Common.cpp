@@ -13,6 +13,10 @@ TimeStamp get_time() {
   return result;
 }
 
+double to_seconds_double(const TimeStamp& ts) {
+  return static_cast<double>(ts.sec) + (static_cast<double>(ts.nsec) * 1e-9);
+}
+
 std::chrono::milliseconds get_duration(const TimeStamp& ts) {
   return std::chrono::milliseconds(static_cast<int64_t>((static_cast<int64_t>(ts.sec) * 1000) + (static_cast<int64_t>(ts.nsec) / 1000)));
 }

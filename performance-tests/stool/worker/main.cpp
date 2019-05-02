@@ -18,6 +18,7 @@
 
 #include "json_2_builder.h"
 
+#include <cmath>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -64,7 +65,36 @@ public:
   void on_liveliness_changed(DDS::DataReader_ptr /*reader*/, const DDS::LivelinessChangedStatus& /*status*/) override {
   }
 
-  void on_data_available(DDS::DataReader_ptr /*reader*/) override {
+  void on_data_available(DDS::DataReader_ptr reader) override {
+    Stool::DataDataReader_var data_dr = Stool::DataDataReader::_narrow(reader);
+    if (data_dr) {
+      Stool::Data data;
+      DDS::SampleInfo si;
+      DDS::ReturnCode_t status = data_dr->take_next_sample(data, si);
+      if (status == DDS::RETCODE_OK && si.valid_data) {
+        const Builder::TimeStamp& now = Builder::get_time();
+        double latency = Builder::to_seconds_double(now - data.created.time);
+
+        std::unique_lock<std::mutex> lock(mutex_);
+        if (datareader_) {
+          auto prev_latency_mean = datareader_->get_report().latency_mean;
+          auto prev_latency_var_x_sample_count = datareader_->get_report().latency_var_x_sample_count;
+
+          ++datareader_->get_report().sample_count;
+
+          if (latency < datareader_->get_report().latency_min) {
+            datareader_->get_report().latency_min = latency;
+          }
+          if (datareader_->get_report().latency_max < latency) {
+            datareader_->get_report().latency_max = latency;
+          }
+          // Incremental mean calculation (doesn't require storing all the data)
+          datareader_->get_report().latency_mean = prev_latency_mean + ((latency - prev_latency_mean) / static_cast<double>(datareader_->get_report().sample_count));
+          // Incremental (variance * sample_count) calculation (doesn't require storing all the data, can be used to easily find variance / standard deviation)
+          datareader_->get_report().latency_var_x_sample_count = prev_latency_var_x_sample_count + ((latency - prev_latency_mean) * (latency - datareader_->get_report().latency_mean));
+        }
+      }
+    }
   }
 
   void on_subscription_matched(DDS::DataReader_ptr /*reader*/, const DDS::SubscriptionMatchedStatus& status) override {
@@ -91,6 +121,12 @@ public:
 
   void set_datareader(Builder::DataReader& datareader) override {
     datareader_ = &datareader;
+    datareader_->get_report().last_discovery_time = Builder::ZERO;
+    datareader_->get_report().sample_count = 0;
+    datareader_->get_report().latency_min = std::numeric_limits<double>::max();
+    datareader_->get_report().latency_max = 0.0;
+    datareader_->get_report().latency_mean = 0.0;
+    datareader_->get_report().latency_var_x_sample_count = 0.0;
   }
 
 protected:
@@ -312,7 +348,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     return 3;
   }
 
-  /* Manually building the config object
+  /* Manually building the ProcessConfig object
 
   config.config_sections.length(1);
   config.config_sections[0].name = "common";
@@ -427,7 +463,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   Builder::TimeStamp process_stop_begin_time = ZERO, process_stop_end_time = ZERO;
   Builder::TimeStamp process_destruction_begin_time = ZERO, process_destruction_end_time = ZERO;
 
-  Builder::ProcessReport report;
+  Builder::ProcessReport process_report;
 
   try {
     std::string line;
@@ -511,7 +547,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
     std::cout << "Process tests stopped." << std::endl << std::endl;
 
-    report = process.get_report();
+    process_report = process.get_report();
 
     std::cout << "Beginning process destruction / entity deletion." << std::endl;
 
@@ -528,46 +564,73 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   std::cout << "Process destruction / entity deletion complete." << std::endl << std::endl;
 
   // Some preliminary measurements and reporting (eventually will shift to another process?)
-  Builder::TimeStamp max_discovery_time_delta = ZERO;
+  Stool::WorkerReport worker_report;
+  worker_report.undermatched_readers = 0;
+  worker_report.undermatched_writers = 0;
+  worker_report.max_discovery_time_delta = ZERO;
+  worker_report.sample_count = 0;
+  worker_report.latency_min = std::numeric_limits<double>::max();
+  worker_report.latency_max = 0.0;
+  worker_report.latency_mean = 0.0;
+  worker_report.latency_var_x_sample_count = 0.0;
 
-  size_t undermatched_readers = 0;
-  size_t undermatched_writers = 0;
-
-  for (CORBA::ULong i = 0; i < report.participants.length(); ++i) {
-    for (CORBA::ULong j = 0; j < report.participants[i].subscribers.length(); ++j) {
-      for (CORBA::ULong k = 0; k < report.participants[i].subscribers[j].datareaders.length(); ++k) {
-        if (ZERO < report.participants[i].subscribers[j].datareaders[k].enable_time && ZERO < report.participants[i].subscribers[j].datareaders[k].last_discovery_time) {
-          auto delta = report.participants[i].subscribers[j].datareaders[k].last_discovery_time - report.participants[i].subscribers[j].datareaders[k].enable_time;
-          if (max_discovery_time_delta < delta) {
-            max_discovery_time_delta = delta;
+  for (CORBA::ULong i = 0; i < process_report.participants.length(); ++i) {
+    for (CORBA::ULong j = 0; j < process_report.participants[i].subscribers.length(); ++j) {
+      for (CORBA::ULong k = 0; k < process_report.participants[i].subscribers[j].datareaders.length(); ++k) {
+        const Builder::DataReaderReport& dr_report = process_report.participants[i].subscribers[j].datareaders[k];
+        if (ZERO < dr_report.enable_time && ZERO < dr_report.last_discovery_time) {
+          auto delta = dr_report.last_discovery_time - dr_report.enable_time;
+          if (worker_report.max_discovery_time_delta < delta) {
+            worker_report.max_discovery_time_delta = delta;
           }
         } else {
-          ++undermatched_readers;
+          ++worker_report.undermatched_readers;
         }
+        if (dr_report.latency_min < worker_report.latency_min) {
+          worker_report.latency_min = dr_report.latency_min;
+        }
+        if (worker_report.latency_max < dr_report.latency_max) {
+          worker_report.latency_max = dr_report.latency_max;
+        }
+        if ((worker_report.sample_count + dr_report.sample_count) > 0) {
+          worker_report.latency_mean = (worker_report.latency_mean * static_cast<double>(worker_report.sample_count) + dr_report.latency_mean * static_cast<double>(dr_report.sample_count)) / (worker_report.sample_count + dr_report.sample_count);
+        }
+        worker_report.latency_var_x_sample_count += dr_report.latency_var_x_sample_count;
+        worker_report.sample_count += dr_report.sample_count;
       }
     }
-    for (CORBA::ULong j = 0; j < report.participants[i].publishers.length(); ++j) {
-      for (CORBA::ULong k = 0; k < report.participants[i].publishers[j].datawriters.length(); ++k) {
-        if (ZERO < report.participants[i].publishers[j].datawriters[k].enable_time && ZERO < report.participants[i].publishers[j].datawriters[k].last_discovery_time) {
-          auto delta = report.participants[i].publishers[j].datawriters[k].last_discovery_time - report.participants[i].publishers[j].datawriters[k].enable_time;
-          if (max_discovery_time_delta < delta) {
-            max_discovery_time_delta = delta;
+    for (CORBA::ULong j = 0; j < process_report.participants[i].publishers.length(); ++j) {
+      for (CORBA::ULong k = 0; k < process_report.participants[i].publishers[j].datawriters.length(); ++k) {
+        if (ZERO < process_report.participants[i].publishers[j].datawriters[k].enable_time && ZERO < process_report.participants[i].publishers[j].datawriters[k].last_discovery_time) {
+          const Builder::DataWriterReport& dw_report = process_report.participants[i].publishers[j].datawriters[k];
+          auto delta = dw_report.last_discovery_time - dw_report.enable_time;
+          if (worker_report.max_discovery_time_delta < delta) {
+            worker_report.max_discovery_time_delta = delta;
           }
         } else {
-          ++undermatched_writers;
+          ++worker_report.undermatched_writers;
         }
       }
     }
   }
 
-  std::cout << "undermatched readers: " << undermatched_readers << ", undermatched writers: " << undermatched_writers << std::endl << std::endl;
+  std::cout << "undermatched readers: " << worker_report.undermatched_readers << ", undermatched writers: " << worker_report.undermatched_writers << std::endl << std::endl;
 
   std::cout << "construction_time: " << process_construction_end_time - process_construction_begin_time << std::endl;
   std::cout << "enable_time: " << process_enable_end_time - process_enable_begin_time << std::endl;
   //std::cout << "start_time: " << process_start_end_time - process_start_begin_time << std::endl;
   //std::cout << "stop_time: " << process_stop_end_time - process_stop_begin_time << std::endl;
   std::cout << "destruction_time: " << process_destruction_end_time - process_destruction_begin_time << std::endl;
-  std::cout << "max_discovery_time_delta: " << max_discovery_time_delta << std::endl;
+  std::cout << "max_discovery_time_delta: " << worker_report.max_discovery_time_delta << std::endl;
+
+  if (worker_report.sample_count > 0) {
+    std::cout << "--- Latency Statistics ---" << std::endl;
+    std::cout << "total sample count: " << worker_report.sample_count << std::endl;
+    std::cout << "minimum latency: " << worker_report.latency_min << " seconds" << std::endl;
+    std::cout << "maximum latency: " << worker_report.latency_max << " seconds" << std::endl;
+    std::cout << "mean latency: " << worker_report.latency_mean << " seconds" << std::endl;
+    std::cout << "latency standard deviation: " << std::sqrt(worker_report.latency_var_x_sample_count / static_cast<double>(worker_report.sample_count)) << " seconds" << std::endl;
+  }
 
   return 0;
 }
