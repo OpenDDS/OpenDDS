@@ -13,6 +13,9 @@ DataReader::DataReader(const DataReaderConfig& config, DataReaderReport& report,
   , transport_config_name_(config.transport_config_name.in())
   , report_(report)
   , subscriber_(subscriber)
+  , create_time_(get_or_create_property(report_.properties, "create_time", Builder::PVK_TIME))
+  , enable_time_(get_or_create_property(report_.properties, "enable_time", Builder::PVK_TIME))
+  , last_discovery_time_(get_or_create_property(report_.properties, "last_discovery_time", Builder::PVK_TIME))
 {
   //std::cout << "Creating datareader: '" << name_ << "' with topic name '" << topic_name_ << "' and listener type name '" << listener_type_name_ << "'" << std::endl;
 
@@ -75,10 +78,10 @@ DataReader::DataReader(const DataReaderConfig& config, DataReaderReport& report,
     }
   }
 
-  report_.enable_time = ZERO;
-  report_.last_discovery_time = ZERO;
+  enable_time_->value.time_prop(ZERO);
+  last_discovery_time_->value.time_prop(Builder::ZERO);
 
-  report_.create_time = get_time();
+  create_time_->value.time_prop(get_time());
   datareader_ = subscriber_->create_datareader(topic_, qos, listener_, listener_status_mask_);
   if (CORBA::is_nil(datareader_.in())) {
     throw std::runtime_error("datareader creation failed");
@@ -86,7 +89,7 @@ DataReader::DataReader(const DataReaderConfig& config, DataReaderReport& report,
 
   DDS::SubscriberQos subscriber_qos;
   if (subscriber_->get_qos(subscriber_qos) == DDS::RETCODE_OK && subscriber_qos.entity_factory.autoenable_created_entities == true) {
-    report_.enable_time = report_.create_time;
+    enable_time_->value.time_prop(create_time_->value.time_prop());
   }
 
   if (!transport_config_name_.empty()) {
@@ -101,8 +104,8 @@ DataReader::~DataReader() {
 }
 
 void DataReader::enable() {
-  if (report_.enable_time == ZERO) {
-    report_.enable_time = get_time();
+  if (enable_time_->value.time_prop() == ZERO) {
+    enable_time_->value.time_prop(get_time());
     datareader_->enable();
   }
 }

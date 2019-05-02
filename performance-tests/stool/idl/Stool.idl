@@ -33,9 +33,9 @@ module Stool {
   struct WorkerAction {
     string name;
     string type;
+    Builder::PropertySeq params;
     Builder::StringSeq readers;
     Builder::StringSeq writers;
-    DDS::PropertySeq properties;
   };
 
   typedef sequence<WorkerAction> WorkerActionSeq;

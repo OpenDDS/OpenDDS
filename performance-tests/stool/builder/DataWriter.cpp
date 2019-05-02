@@ -14,6 +14,9 @@ DataWriter::DataWriter(const DataWriterConfig& config, DataWriterReport& report,
   , transport_config_name_(config.transport_config_name.in())
   , report_(report)
   , publisher_(publisher)
+  , create_time_(get_or_create_property(report_.properties, "create_time", Builder::PVK_TIME))
+  , enable_time_(get_or_create_property(report_.properties, "enable_time", Builder::PVK_TIME))
+  , last_discovery_time_(get_or_create_property(report_.properties, "last_discovery_time", Builder::PVK_TIME))
 {
   //std::cout << "Creating datawriter: '" << name_ << "' with topic name '" << topic_name_ << "' and listener type name '" << listener_type_name_ << "'" << std::endl;
 
@@ -85,10 +88,10 @@ DataWriter::DataWriter(const DataWriterConfig& config, DataWriterReport& report,
     }
   }
 
-  report_.enable_time = ZERO;
-  report_.last_discovery_time = ZERO;
+  enable_time_->value.time_prop(ZERO);
+  last_discovery_time_->value.time_prop(Builder::ZERO);
 
-  report_.create_time = get_time();
+  create_time_->value.time_prop(get_time());
   datawriter_ = publisher_->create_datawriter(topic_, qos, listener_, listener_status_mask_);
   if (CORBA::is_nil(datawriter_.in())) {
     throw std::runtime_error("datawriter creation failed");
@@ -96,7 +99,7 @@ DataWriter::DataWriter(const DataWriterConfig& config, DataWriterReport& report,
 
   DDS::PublisherQos publisher_qos;
   if (publisher_->get_qos(publisher_qos) == DDS::RETCODE_OK && publisher_qos.entity_factory.autoenable_created_entities == true) {
-    report_.enable_time = report_.create_time;
+    enable_time_->value.time_prop(create_time_->value.time_prop());
   }
 
   if (!transport_config_name_.empty()) {
@@ -111,7 +114,10 @@ DataWriter::~DataWriter() {
 }
 
 void DataWriter::enable() {
-  datawriter_->enable();
+  if (enable_time_->value.time_prop() == ZERO) {
+    enable_time_->value.time_prop(get_time());
+    datawriter_->enable();
+  }
 }
 
 }

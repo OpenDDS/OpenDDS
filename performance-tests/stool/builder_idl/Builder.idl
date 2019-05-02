@@ -375,25 +375,33 @@ module Builder {
 // Report Section
 // ---
 
-  typedef sequence<double> DoubleSeq;
+  enum PropertyValueKind { PVK_TIME, PVK_STRING, PVK_DOUBLE, PVK_ULL };
+  union PropertyValue switch (PropertyValueKind) {
+    case PVK_TIME:
+      TimeStamp time_prop;
+    case PVK_STRING:
+      string string_prop;
+    case PVK_DOUBLE:
+      double double_prop;
+    case PVK_ULL:
+      unsigned long long ull_prop;
+  };
+
+  struct Property {
+    string name;
+    PropertyValue value;
+  };
+
+  typedef sequence<Property> PropertySeq;
 
   struct DataReaderReport {
-    TimeStamp create_time;
-    TimeStamp enable_time;
-    TimeStamp last_discovery_time;
-    unsigned long long sample_count;
-    double latency_min;
-    double latency_max;
-    double latency_mean;
-    double latency_var_x_sample_count;
+    PropertySeq properties;
   };
 
   typedef sequence<DataReaderReport> DataReaderReportSeq;
 
   struct DataWriterReport {
-    TimeStamp create_time;
-    TimeStamp enable_time;
-    TimeStamp last_discovery_time;
+    PropertySeq properties;
   };
 
   typedef sequence<DataWriterReport> DataWriterReportSeq;

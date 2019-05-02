@@ -27,6 +27,9 @@ protected:
   DDS::Topic_var topic_;
   DDS::DataReaderListener_var listener_;
   DDS::DataReader_var datareader_;
+  PropertyIndex create_time_;
+  PropertyIndex enable_time_;
+  PropertyIndex last_discovery_time_;
 };
 
 using ReaderMap = std::map<std::string, std::shared_ptr<DataReader>>;

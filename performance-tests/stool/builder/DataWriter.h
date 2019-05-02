@@ -31,6 +31,9 @@ protected:
   DDS::Topic_var topic_;
   DDS::DataWriterListener_var listener_;
   DDS::DataWriter_var datawriter_;
+  PropertyIndex create_time_;
+  PropertyIndex enable_time_;
+  PropertyIndex last_discovery_time_;
 };
 
 using WriterMap = std::map<std::string, std::shared_ptr<DataWriter>>;

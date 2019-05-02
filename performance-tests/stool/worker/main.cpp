@@ -77,21 +77,21 @@ public:
 
         std::unique_lock<std::mutex> lock(mutex_);
         if (datareader_) {
-          auto prev_latency_mean = datareader_->get_report().latency_mean;
-          auto prev_latency_var_x_sample_count = datareader_->get_report().latency_var_x_sample_count;
+          auto prev_latency_mean = latency_mean_->value.double_prop();
+          auto prev_latency_var_x_sample_count = latency_var_x_sample_count_->value.double_prop();
 
-          ++datareader_->get_report().sample_count;
+          sample_count_->value.ull_prop(sample_count_->value.ull_prop() + 1);
 
-          if (latency < datareader_->get_report().latency_min) {
-            datareader_->get_report().latency_min = latency;
+          if (latency < latency_min_->value.double_prop()) {
+            latency_min_->value.double_prop(latency);
           }
-          if (datareader_->get_report().latency_max < latency) {
-            datareader_->get_report().latency_max = latency;
+          if (latency_max_->value.double_prop() < latency) {
+            latency_max_->value.double_prop(latency);
           }
           // Incremental mean calculation (doesn't require storing all the data)
-          datareader_->get_report().latency_mean = prev_latency_mean + ((latency - prev_latency_mean) / static_cast<double>(datareader_->get_report().sample_count));
+          latency_mean_->value.double_prop(prev_latency_mean + ((latency - prev_latency_mean) / static_cast<double>(sample_count_->value.double_prop())));
           // Incremental (variance * sample_count) calculation (doesn't require storing all the data, can be used to easily find variance / standard deviation)
-          datareader_->get_report().latency_var_x_sample_count = prev_latency_var_x_sample_count + ((latency - prev_latency_mean) * (latency - datareader_->get_report().latency_mean));
+          latency_var_x_sample_count_->value.double_prop(prev_latency_var_x_sample_count + ((latency - prev_latency_mean) * (latency - latency_mean_->value.double_prop())));
         }
       }
     }
@@ -103,13 +103,13 @@ public:
       if (static_cast<size_t>(status.current_count) == expected_count_) {
         //std::cout << "MyDataReaderListener reached expected count!" << std::endl;
         if (datareader_) {
-          datareader_->get_report().last_discovery_time = Builder::get_time();
+          last_discovery_time_->value.time_prop(Builder::get_time());
         }
       }
     } else {
       if (static_cast<size_t>(status.current_count) > matched_count_) {
         if (datareader_) {
-          datareader_->get_report().last_discovery_time = Builder::get_time();
+          last_discovery_time_->value.time_prop(Builder::get_time());
         }
       }
     }
@@ -121,12 +121,18 @@ public:
 
   void set_datareader(Builder::DataReader& datareader) override {
     datareader_ = &datareader;
-    datareader_->get_report().last_discovery_time = Builder::ZERO;
-    datareader_->get_report().sample_count = 0;
-    datareader_->get_report().latency_min = std::numeric_limits<double>::max();
-    datareader_->get_report().latency_max = 0.0;
-    datareader_->get_report().latency_mean = 0.0;
-    datareader_->get_report().latency_var_x_sample_count = 0.0;
+    last_discovery_time_ = get_or_create_property(datareader_->get_report().properties, "last_discovery_time", Builder::PVK_TIME);
+
+    sample_count_ = get_or_create_property(datareader_->get_report().properties, "sample_count", Builder::PVK_ULL);
+    sample_count_->value.ull_prop(0);
+    latency_min_ = get_or_create_property(datareader_->get_report().properties, "latency_min", Builder::PVK_DOUBLE);
+    latency_min_->value.double_prop(std::numeric_limits<double>::max());
+    latency_max_ = get_or_create_property(datareader_->get_report().properties, "latency_max", Builder::PVK_DOUBLE);
+    latency_max_->value.double_prop(0.0);
+    latency_mean_ = get_or_create_property(datareader_->get_report().properties, "latency_mean", Builder::PVK_DOUBLE);
+    latency_mean_->value.double_prop(0.0);
+    latency_var_x_sample_count_ = get_or_create_property(datareader_->get_report().properties, "latency_var_x_sample_count", Builder::PVK_DOUBLE);
+    latency_var_x_sample_count_->value.double_prop(0.0);
   }
 
 protected:
@@ -134,6 +140,12 @@ protected:
   size_t expected_count_{0};
   size_t matched_count_{0};
   Builder::DataReader* datareader_{0};
+  Builder::PropertyIndex last_discovery_time_;
+  Builder::PropertyIndex sample_count_;
+  Builder::PropertyIndex latency_min_;
+  Builder::PropertyIndex latency_max_;
+  Builder::PropertyIndex latency_mean_;
+  Builder::PropertyIndex latency_var_x_sample_count_;
 };
 
 // MySubscriberListener
@@ -203,13 +215,13 @@ public:
       if (static_cast<size_t>(status.current_count) == expected_count_) {
         //std::cout << "MyDataWriterListener reached expected count!" << std::endl;
         if (datawriter_) {
-          datawriter_->get_report().last_discovery_time = Builder::get_time();
+          last_discovery_time_->value.time_prop(Builder::get_time());
         }
       }
     } else {
       if (static_cast<size_t>(status.current_count) > matched_count_) {
         if (datawriter_) {
-          datawriter_->get_report().last_discovery_time = Builder::get_time();
+          last_discovery_time_->value.time_prop(Builder::get_time());
         }
       }
     }
@@ -218,6 +230,7 @@ public:
 
   void set_datawriter(Builder::DataWriter& datawriter) override {
     datawriter_ = &datawriter;
+    last_discovery_time_ = get_or_create_property(datawriter_->get_report().properties, "last_discovery_time", Builder::PVK_TIME);
   }
 
 protected:
@@ -225,6 +238,7 @@ protected:
   size_t expected_count_{0};
   size_t matched_count_{0};
   Builder::DataWriter* datawriter_{0};
+  Builder::PropertyIndex last_discovery_time_;
 };
 
 // MyPublisherListener
@@ -577,33 +591,42 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   for (CORBA::ULong i = 0; i < process_report.participants.length(); ++i) {
     for (CORBA::ULong j = 0; j < process_report.participants[i].subscribers.length(); ++j) {
       for (CORBA::ULong k = 0; k < process_report.participants[i].subscribers[j].datareaders.length(); ++k) {
-        const Builder::DataReaderReport& dr_report = process_report.participants[i].subscribers[j].datareaders[k];
-        if (ZERO < dr_report.enable_time && ZERO < dr_report.last_discovery_time) {
-          auto delta = dr_report.last_discovery_time - dr_report.enable_time;
+        Builder::DataReaderReport& dr_report = process_report.participants[i].subscribers[j].datareaders[k];
+        const Builder::TimeStamp dr_enable_time = get_or_create_property(dr_report.properties, "enable_time", Builder::PVK_TIME)->value.time_prop();
+        const Builder::TimeStamp dr_last_discovery_time = get_or_create_property(dr_report.properties, "last_discovery_time", Builder::PVK_TIME)->value.time_prop();
+        const CORBA::ULongLong dr_sample_count = get_or_create_property(dr_report.properties, "sample_count", Builder::PVK_ULL)->value.ull_prop();
+        const double dr_latency_min = get_or_create_property(dr_report.properties, "latency_min", Builder::PVK_DOUBLE)->value.double_prop();
+        const double dr_latency_max = get_or_create_property(dr_report.properties, "latency_max", Builder::PVK_DOUBLE)->value.double_prop();
+        const double dr_latency_mean = get_or_create_property(dr_report.properties, "latency_mean", Builder::PVK_DOUBLE)->value.double_prop();
+        const double dr_latency_var_x_sample_count = get_or_create_property(dr_report.properties, "latency_var_x_sample_count", Builder::PVK_DOUBLE)->value.double_prop();
+        if (ZERO < dr_enable_time && ZERO < dr_last_discovery_time) {
+          auto delta = dr_last_discovery_time - dr_enable_time;
           if (worker_report.max_discovery_time_delta < delta) {
             worker_report.max_discovery_time_delta = delta;
           }
         } else {
           ++worker_report.undermatched_readers;
         }
-        if (dr_report.latency_min < worker_report.latency_min) {
-          worker_report.latency_min = dr_report.latency_min;
+        if (dr_latency_min < worker_report.latency_min) {
+          worker_report.latency_min = dr_latency_min;
         }
-        if (worker_report.latency_max < dr_report.latency_max) {
-          worker_report.latency_max = dr_report.latency_max;
+        if (worker_report.latency_max < dr_latency_max) {
+          worker_report.latency_max = dr_latency_max;
         }
-        if ((worker_report.sample_count + dr_report.sample_count) > 0) {
-          worker_report.latency_mean = (worker_report.latency_mean * static_cast<double>(worker_report.sample_count) + dr_report.latency_mean * static_cast<double>(dr_report.sample_count)) / (worker_report.sample_count + dr_report.sample_count);
+        if ((worker_report.sample_count + dr_sample_count) > 0) {
+          worker_report.latency_mean = (worker_report.latency_mean * static_cast<double>(worker_report.sample_count) + dr_latency_mean * static_cast<double>(dr_sample_count)) / (worker_report.sample_count + dr_sample_count);
         }
-        worker_report.latency_var_x_sample_count += dr_report.latency_var_x_sample_count;
-        worker_report.sample_count += dr_report.sample_count;
+        worker_report.latency_var_x_sample_count += dr_latency_var_x_sample_count;
+        worker_report.sample_count += dr_sample_count;
       }
     }
     for (CORBA::ULong j = 0; j < process_report.participants[i].publishers.length(); ++j) {
       for (CORBA::ULong k = 0; k < process_report.participants[i].publishers[j].datawriters.length(); ++k) {
-        if (ZERO < process_report.participants[i].publishers[j].datawriters[k].enable_time && ZERO < process_report.participants[i].publishers[j].datawriters[k].last_discovery_time) {
-          const Builder::DataWriterReport& dw_report = process_report.participants[i].publishers[j].datawriters[k];
-          auto delta = dw_report.last_discovery_time - dw_report.enable_time;
+        Builder::DataWriterReport& dw_report = process_report.participants[i].publishers[j].datawriters[k];
+        const Builder::TimeStamp dw_enable_time = get_or_create_property(dw_report.properties, "enable_time", Builder::PVK_TIME)->value.time_prop();
+        const Builder::TimeStamp dw_last_discovery_time = get_or_create_property(dw_report.properties, "last_discovery_time", Builder::PVK_TIME)->value.time_prop();
+        if (ZERO < dw_enable_time && ZERO < dw_last_discovery_time) {
+          auto delta = dw_last_discovery_time - dw_enable_time;
           if (worker_report.max_discovery_time_delta < delta) {
             worker_report.max_discovery_time_delta = delta;
           }

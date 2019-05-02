@@ -27,5 +27,18 @@ Stool_Builder_Export bool operator==(const TimeStamp& lhs, const TimeStamp& rhs)
 
 Stool_Builder_Export std::ostream& operator<<(std::ostream& out, const TimeStamp& ts);
 
+class Stool_Builder_Export PropertyIndex {
+public:
+  PropertyIndex();
+  PropertyIndex(PropertySeq& seq, uint32_t index);
+  const Property* operator->() const;
+  Property* operator->();
+protected:
+  PropertySeq* seq_;
+  uint32_t index_;
+};
+
+Stool_Builder_Export PropertyIndex get_or_create_property(PropertySeq& seq, const std::string& name, PropertyValueKind kind);
+
 }
 

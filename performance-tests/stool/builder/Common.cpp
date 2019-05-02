@@ -1,6 +1,7 @@
 #include "Common.h"
 
 #include <iomanip>
+#include <sstream>
 
 namespace Builder {
 
@@ -48,6 +49,40 @@ bool operator==(const TimeStamp& lhs, const TimeStamp& rhs) {
 std::ostream& operator<<(std::ostream& out, const TimeStamp& ts) {
   out << std::setprecision(3) << std::fixed << static_cast<double>(ts.sec) + (static_cast<double>(ts.nsec) / 1.0e9) << std::flush;
   return out;
+}
+
+PropertyIndex::PropertyIndex() : seq_(0), index_(0) {
+}
+
+PropertyIndex::PropertyIndex(PropertySeq& seq, uint32_t index) : seq_(&seq), index_(index) {
+}
+
+const Property* PropertyIndex::operator->() const {
+  return seq_ ? &((*seq_)[index_]) : NULL;
+}
+
+Property* PropertyIndex::operator->() {
+  return seq_ ? &((*seq_)[index_]) : NULL;
+}
+
+Builder::PropertyIndex get_or_create_property(Builder::PropertySeq& seq, const std::string& name, Builder::PropertyValueKind kind) {
+  for (uint32_t i = 0; i < seq.length(); ++i) {
+    if (std::string(seq[i].name.in()) == name) {
+      if (seq[i].value._d() == kind) {
+        return PropertyIndex(seq, i);
+      } else {
+        std::stringstream ss;
+        ss << "Property with name '" << name << " already defined with a different type." << std::flush;
+        throw std::runtime_error(ss.str());
+      }
+    }
+  }
+
+  uint32_t idx = seq.length();
+  seq.length(idx + 1);
+  seq[idx].name = name.c_str();
+  seq[idx].value._d(kind);
+  return PropertyIndex(seq, idx);
 }
 
 }
