@@ -317,8 +317,9 @@ TransportClient::initiate_connect_i(TransportImpl::AcceptConnectResult& result,
     //don't own the lock_ so can't release it...shouldn't happen
     GuidConverter local(repo_id_);
     GuidConverter remote_conv(remote.repo_id_);
-    VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::initiate_connect_i - "
-                        "guard was not locked, return false - initiate_connect_i between local %C and remote %C unsuccessful\n",
+    VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) TransportClient::initiate_connect_i ")
+                        ACE_TEXT("between local %C and remote %C unsuccessful because ")
+                        ACE_TEXT("guard was not locked\n"),
                         OPENDDS_STRING(local).c_str(),
                         OPENDDS_STRING(remote_conv).c_str()), 0);
     return false;
@@ -560,7 +561,7 @@ TransportClient::stop_associating(const GUID_t* repos, CORBA::ULong length)
 void
 TransportClient::send_final_acks()
 {
-  links_.send_final_acks (get_repo_id());
+  links_.send_final_acks(get_repo_id());
 }
 
 void
@@ -886,8 +887,9 @@ TransportClient::send_i(SendStateDataSampleList send_list, ACE_UINT64 transactio
     // send method.
     RepoId pub_id(repo_id_);
     send_links.send_stop(pub_id);
-    if (transaction_id != 0)
+    if (transaction_id != 0) {
       expected_transaction_id_ = max_transaction_id_seen_ + 1;
+    }
     max_transaction_tail_ = 0;
   }
 }

@@ -519,7 +519,7 @@ private:
       : link_(link) {
       }
 
-      //Reactor invokes this after being notified in schedule_stop or cancel_release
+    /// Reactor invokes this after being notified in schedule_stop or cancel_release
     int handle_exception(ACE_HANDLE /* fd */);
 
     void notify_delivery(const RepoId& readerId, WriterInfo& info);

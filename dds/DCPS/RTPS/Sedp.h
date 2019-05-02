@@ -101,7 +101,11 @@ public:
   void associate_volatile(const Security::SPDPdiscoveredParticipantData& pdata);
   void associate_secure_writers_to_readers(const Security::SPDPdiscoveredParticipantData& pdata);
   void associate_secure_readers_to_writers(const Security::SPDPdiscoveredParticipantData& pdata);
+
+  /// Create and send keys the first time
   void send_builtin_crypto_tokens(const Security::SPDPdiscoveredParticipantData& pdata);
+
+  /// Create and send keys for individual endpoints.
   void send_builtin_crypto_tokens(const DCPS::RepoId& dstParticipant,
                                   const DCPS::EntityId_t& dstEntity, const DCPS::RepoId& src);
 #endif
@@ -116,7 +120,7 @@ public:
                                            const DCPS::RepoId& reader);
 
   DDS::ReturnCode_t write_dcps_participant_secure(const Security::SPDPdiscoveredParticipantData& msg,
-                                                  const DCPS::RepoId& reader);
+                                                  const DCPS::RepoId& part);
 #endif
 
   DDS::ReturnCode_t write_dcps_participant_dispose(const DCPS::RepoId& part);
@@ -232,6 +236,9 @@ private:
     Msg(MsgType mt, DCPS::MessageId id, const DDS::Security::ParticipantGenericMessage* data)
       : type_(mt), id_(id), pgmdata_(data) {}
 #endif
+
+    static OPENDDS_STRING msgTypeToString(MsgType type);
+    OPENDDS_STRING msgTypeToString() const;
   };
 
 
@@ -379,8 +386,53 @@ private:
 #ifdef OPENDDS_SECURITY
   Writer participant_message_secure_writer_;
   Writer participant_stateless_message_writer_;
-  Writer participant_volatile_message_secure_writer_;
   Writer dcps_participant_secure_writer_;
+
+  /**
+   * Special Case for the Participant Volatile Message Secure Writer, which
+   * performs key exchange. This sends the keys after the first ACKNACK from a
+   * Reader to prevent a loss of keys in the transition between authentication
+   * and key exchange. See docs/design/security.md section titled "Slow
+   * Follower Key Exchange Issue" for details.
+   */
+  class RepeatOnceWriter : public Writer {
+  public:
+    RepeatOnceWriter(const DCPS::RepoId& pub_id, Sedp& sedp);
+
+    /**
+     * If a remote participant's volatile reader acks us for the fist time,
+     * resend all keys (User and Builtin) for a second time.
+     *
+     * Removes the participant's keys afterwards.
+     */
+    void first_acknowledged_by_reader(
+      const DCPS::RepoId& rdr, const DCPS::SequenceNumber& sn_base);
+
+    /// Erase any keys pending repeat to this participant
+    void erase(const DCPS::RepoId& part);
+
+    struct RemoteWriter {
+      DCPS::RepoId local_reader, remote_writer;
+      DDS::Security::DatareaderCryptoTokenSeq reader_tokens;
+    };
+    typedef OPENDDS_VECTOR(RemoteWriter) RemoteWriterVector;
+    typedef OPENDDS_MAP_CMP(
+      DCPS::RepoId, RemoteWriterVector, DCPS::GUID_tKeyLessThan) RemoteWriterVectors;
+    RemoteWriterVectors remote_writers_;
+
+    struct RemoteReader {
+      DCPS::RepoId local_writer, remote_reader;
+      DDS::Security::DatawriterCryptoTokenSeq writer_tokens;
+    };
+    typedef OPENDDS_VECTOR(RemoteReader) RemoteReaderVector;
+    typedef OPENDDS_MAP_CMP(
+      DCPS::RepoId, RemoteReaderVector, DCPS::GUID_tKeyLessThan) RemoteReaderVectors;
+    RemoteReaderVectors remote_readers_;
+
+    /// Lock for remote_readers_ and remote_writers_
+    ACE_Thread_Mutex lock_;
+
+  } participant_volatile_message_secure_writer_;
 #endif
 
   class Reader
@@ -432,12 +484,16 @@ private:
   Reader_rch dcps_participant_secure_reader_;
 #endif
 
+  static const size_t TASK_MQ_BYTES = sizeof(Msg) * 1024 * 32;
+
   struct Task : ACE_Task_Ex<ACE_MT_SYNCH, Msg> {
     explicit Task(Sedp* sedp)
-      : spdp_(&sedp->spdp_)
+      : ACE_Task_Ex<ACE_MT_SYNCH, Msg>(0, new ACE_Message_Queue_Ex<Msg, ACE_MT_SYNCH>(TASK_MQ_BYTES, TASK_MQ_BYTES))
+      , spdp_(&sedp->spdp_)
       , sedp_(sedp)
       , shutting_down_(false)
     {
+      delete_msg_queue_ = true;
       activate();
     }
     ~Task();
@@ -458,7 +514,8 @@ private:
 #ifdef OPENDDS_SECURITY
     void enqueue_participant_message_secure(DCPS::MessageId id, DCPS::unique_ptr<ParticipantMessageData> data);
     void enqueue_stateless_message(DCPS::MessageId id, DCPS::unique_ptr<DDS::Security::ParticipantStatelessMessage> data);
-    void enqueue_volatile_message_secure(DCPS::MessageId id, DCPS::unique_ptr<DDS::Security::ParticipantVolatileMessageSecure> data);
+    void enqueue_volatile_message_secure(
+      DCPS::MessageId id, DCPS::unique_ptr<DDS::Security::ParticipantVolatileMessageSecure> data);
 #endif
 
     void acknowledge();
@@ -683,10 +740,35 @@ private:
 protected:
 
 #ifdef OPENDDS_SECURITY
-  DDS::Security::DatawriterCryptoHandle generate_remote_matched_writer_crypto_handle(const DCPS::RepoId& writer_part, const DDS::Security::DatareaderCryptoHandle& drch);
-  DDS::Security::DatareaderCryptoHandle generate_remote_matched_reader_crypto_handle(const DCPS::RepoId& reader_part, const DDS::Security::DatawriterCryptoHandle& dwch, bool relay_only);
-  void create_and_send_datareader_crypto_tokens(const DDS::Security::DatareaderCryptoHandle& drch, const DCPS::RepoId& local_reader, const DDS::Security::DatawriterCryptoHandle& dwch, const DCPS::RepoId& remote_writer);
-  void create_and_send_datawriter_crypto_tokens(const DDS::Security::DatawriterCryptoHandle& dwch, const DCPS::RepoId& local_writer, const DDS::Security::DatareaderCryptoHandle& drch, const DCPS::RepoId& remote_reader);
+  DDS::Security::DatawriterCryptoHandle generate_remote_matched_writer_crypto_handle(
+    const DCPS::RepoId& writer_part, const DDS::Security::DatareaderCryptoHandle& drch);
+  DDS::Security::DatareaderCryptoHandle generate_remote_matched_reader_crypto_handle(
+    const DCPS::RepoId& reader_part, const DDS::Security::DatawriterCryptoHandle& dwch, bool relay_only);
+
+  void create_datareader_crypto_tokens(
+    const DDS::Security::DatareaderCryptoHandle& drch,
+    const DDS::Security::DatawriterCryptoHandle& dwch,
+    DDS::Security::DatareaderCryptoTokenSeq& drcts);
+  void send_datareader_crypto_tokens(
+    const DCPS::RepoId& local_reader,
+    const DCPS::RepoId& remote_writer,
+    const DDS::Security::DatareaderCryptoTokenSeq& drcts);
+  void create_and_send_datareader_crypto_tokens(
+    const DDS::Security::DatareaderCryptoHandle& drch, const DCPS::RepoId& local_reader,
+    const DDS::Security::DatawriterCryptoHandle& dwch, const DCPS::RepoId& remote_writer);
+
+  void create_datawriter_crypto_tokens(
+    const DDS::Security::DatawriterCryptoHandle& dwch,
+    const DDS::Security::DatareaderCryptoHandle& drch,
+    DDS::Security::DatawriterCryptoTokenSeq& dwcts);
+  void send_datawriter_crypto_tokens(
+    const DCPS::RepoId& local_writer,
+    const DCPS::RepoId& remote_reader,
+    const DDS::Security::DatawriterCryptoTokenSeq& dwcts);
+  void create_and_send_datawriter_crypto_tokens(
+    const DDS::Security::DatawriterCryptoHandle& dwch, const DCPS::RepoId& local_writer,
+    const DDS::Security::DatareaderCryptoHandle& drch, const DCPS::RepoId& remote_reader);
+
   void handle_datareader_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg);
   void handle_datawriter_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg);
 

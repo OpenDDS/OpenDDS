@@ -111,17 +111,17 @@ GuidBuilder::entityKind(EntityKind kind, bool makeBuiltin)
 
   // User Entities
 
-  case KIND_WRITER:
+  case KIND_USER_WRITER:
     guid_.entityId.entityKind = makeBuiltin ?
       ENTITYKIND_BUILTIN_WRITER_WITH_KEY : ENTITYKIND_USER_WRITER_WITH_KEY;
     break;
 
-  case KIND_READER:
+  case KIND_USER_READER:
     guid_.entityId.entityKind = makeBuiltin ?
       ENTITYKIND_BUILTIN_READER_WITH_KEY : ENTITYKIND_USER_READER_WITH_KEY;
     break;
 
-  case KIND_TOPIC:
+  case KIND_USER_TOPIC:
     guid_.entityId.entityKind = makeBuiltin ?
       ENTITYKIND_BUILTIN_TOPIC : ENTITYKIND_OPENDDS_TOPIC;
     break;
