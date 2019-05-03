@@ -73,14 +73,14 @@ before_script:
   - if [ "$CXX" == "g++" ]; then CONFIG_OPTIONS+=" --std=c++11"; fi
   - if [ "$VERSIONED_NS" == 1 ]; then CONFIG_OPTIONS+=" --features=versioned_namespace=1"; fi
   - if [ "$DDS_SECURITY" == 1 ]; then CONFIG_OPTIONS+=" --security"; fi
-  - ./configure --mpcopts="-workers 2" --compiler=$COMPILER $CONFIG_OPTIONS
+  - ./configure --mpcopts="-workers 4" --compiler=$COMPILER $CONFIG_OPTIONS
   - tools/scripts/show_build_config.pl
   - if [ "$SAFETY_PROFILE" == "1" ]; then
         export LD_LIBRARY_PATH+=:$TRAVIS_BUILD_DIR/build/target/ACE_TAO/ACE/lib:$TRAVIS_BUILD_DIR/build/target/lib;
     fi
 
 script:
-  - travis_wait 45 make -s -j 6
+  - travis_wait 47 make -s -j 4
   - if [ "$SAFETY_PROFILE" != "1" ]; then
       $DDS_ROOT/tests/cmake_integration/run_ci_tests.pl;
     fi
