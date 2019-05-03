@@ -30,7 +30,7 @@ module Stool {
     OctetSeq buffer;
   };
 
-  struct WorkerAction {
+  struct ActionConfig {
     string name;
     string type;
     Builder::PropertySeq params;
@@ -38,13 +38,20 @@ module Stool {
     Builder::StringSeq writers;
   };
 
-  typedef sequence<WorkerAction> WorkerActionSeq;
+  typedef sequence<ActionConfig> ActionConfigSeq;
+
+  struct ActionReport {
+    Builder::PropertySeq properties;
+  };
+
+  typedef sequence<ActionReport> ActionReportSeq;
 
   struct WorkerConfig {
     Builder::TimeStamp enable_time;
     Builder::TimeStamp start_time;
     Builder::TimeStamp stop_time;
     Builder::ProcessConfig process;
+    ActionConfigSeq actions;
   };
 
   struct WorkerReport {

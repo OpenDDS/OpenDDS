@@ -58,11 +58,11 @@ PropertyIndex::PropertyIndex(PropertySeq& seq, uint32_t index) : seq_(&seq), ind
 }
 
 const Property* PropertyIndex::operator->() const {
-  return seq_ ? &((*seq_)[index_]) : NULL;
+  return &((*seq_)[index_]);
 }
 
 Property* PropertyIndex::operator->() {
-  return seq_ ? &((*seq_)[index_]) : NULL;
+  return &((*seq_)[index_]);
 }
 
 Builder::PropertyIndex get_or_create_property(Builder::PropertySeq& seq, const std::string& name, Builder::PropertyValueKind kind) {

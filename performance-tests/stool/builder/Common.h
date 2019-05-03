@@ -27,12 +27,19 @@ Stool_Builder_Export bool operator==(const TimeStamp& lhs, const TimeStamp& rhs)
 
 Stool_Builder_Export std::ostream& operator<<(std::ostream& out, const TimeStamp& ts);
 
+// This class is intended to provide constant-time access into a potentially-growing sequence of properties
+// We want the names and content of the properties to be dynamic (set by the users of the builder API), but
+// for performance reasons it would be good to stay away from something with log-n access times (maps, etc)
 class Stool_Builder_Export PropertyIndex {
 public:
   PropertyIndex();
   PropertyIndex(PropertySeq& seq, uint32_t index);
   const Property* operator->() const;
   Property* operator->();
+
+  inline explicit operator bool() const { return seq_ != 0; }
+  inline bool operator!() const { return seq_ == 0; }
+
 protected:
   PropertySeq* seq_;
   uint32_t index_;

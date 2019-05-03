@@ -334,6 +334,138 @@ protected:
   Builder::Participant* participant_{0};
 };
 
+using Builder::ReaderMap;
+using Builder::WriterMap;
+
+// Action
+
+class Action {
+public:
+  virtual ~Action() {}
+  virtual bool init(const Stool::ActionConfig& config, Stool::ActionReport& report, ReaderMap& readers, WriterMap& writers);
+
+  virtual void start() = 0;
+  virtual void stop() = 0;
+
+protected:
+  const Stool::ActionConfig* config_{0};
+  Stool::ActionReport* report_{0};
+  ReaderMap readers_by_name_;
+  WriterMap writers_by_name_;
+  std::vector<std::shared_ptr<Builder::DataReader> > readers_by_index_;
+  std::vector<std::shared_ptr<Builder::DataWriter> > writers_by_index_;
+};
+
+bool Action::init(const Stool::ActionConfig& config, Stool::ActionReport& report, ReaderMap& reader_map, WriterMap& writer_map) {
+  config_ = &config;
+  report_ = &report;
+  for (CORBA::ULong j = 0; j < config.readers.length(); ++j) {
+    auto it = reader_map.find(config.readers[j].in());
+    if (it != reader_map.end()) {
+      readers_by_name_.insert(*it);
+      readers_by_index_.push_back(it->second);
+    } else {
+      return false;
+    }
+  }
+  for (CORBA::ULong j = 0; j < config.writers.length(); ++j) {
+    auto it = writer_map.find(config.writers[j].in());
+    if (it != writer_map.end()) {
+      writers_by_name_.insert(*it);
+      writers_by_index_.push_back(it->second);
+    } else {
+      return false;
+    }
+  }
+  return true;
+};
+
+// Action Manager
+
+class ActionManager {
+public:
+  explicit ActionManager(const Stool::ActionConfigSeq& configs, Stool::ActionReportSeq& reports, ReaderMap& reader_map, WriterMap& writer_map);
+
+  void start();
+  void stop();
+
+  using action_factory = std::function<std::shared_ptr<Action>()>;
+  using action_factory_map = std::map<std::string, action_factory>;
+
+  static bool register_action_factory(const std::string& name, const action_factory& factory) {
+    std::unique_lock<std::mutex> lock(s_mutex);
+    bool result = false;
+
+    auto it = s_factory_map.find(name);
+    if (it == s_factory_map.end()) {
+      s_factory_map[name] = factory;
+      result = true;
+    }
+    return result;
+  }
+
+  static std::shared_ptr<Action> create_action(const std::string& name) {
+    std::unique_lock<std::mutex> lock(s_mutex);
+    std::shared_ptr<Action> result;
+
+    auto it = s_factory_map.find(name);
+    if (it != s_factory_map.end()) {
+      result = (it->second)();
+    }
+    return result;
+  }
+
+  class Registration {
+  public:
+    Registration(const std::string& name, const action_factory& factory) {
+      std::cout << "Action registration created for name '" << name << "'" << std::endl;
+      if (!register_action_factory(name, factory)) {
+        std::stringstream ss;
+        ss << "unable to register action factory with name '" << name << "'" << std::flush;
+        throw std::runtime_error(ss.str());
+      }
+    }
+  };
+
+protected:
+  static std::mutex s_mutex;
+  static action_factory_map s_factory_map;
+
+  std::vector<std::shared_ptr<Action>> actions_;
+};
+
+std::mutex ActionManager::s_mutex;
+ActionManager::action_factory_map ActionManager::s_factory_map;
+
+ActionManager::ActionManager(const Stool::ActionConfigSeq& configs, Stool::ActionReportSeq& reports, ReaderMap& reader_map, WriterMap& writer_map) {
+  reports.length(configs.length());
+  for (CORBA::ULong i = 0; i < configs.length(); ++i) {
+    auto action = create_action(configs[i].type.in());
+    if (action) {
+      action->init(configs[i], reports[i], reader_map, writer_map);
+    }
+    actions_.push_back(action);
+  }
+}
+
+void ActionManager::start() {
+  for (auto it = actions_.begin(); it != actions_.end(); ++it) {
+    (*it)->start();
+  }
+}
+
+void ActionManager::stop() {
+  for (auto it = actions_.begin(); it != actions_.end(); ++it) {
+    (*it)->stop();
+  }
+}
+
+// WriteAction
+class WriteAction : public Action {
+public:
+
+};
+
 // Main
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
