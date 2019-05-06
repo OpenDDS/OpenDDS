@@ -52,6 +52,7 @@ module Stool {
     Builder::TimeStamp stop_time;
     Builder::ProcessConfig process;
     ActionConfigSeq actions;
+    ActionReportSeq action_reports;
   };
 
   struct WorkerReport {

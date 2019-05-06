@@ -1,3 +1,4 @@
 project: ../stool_builder_exe, ../stool_exe {
+  exename = worker
 }
 

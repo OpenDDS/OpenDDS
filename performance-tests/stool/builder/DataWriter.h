@@ -17,6 +17,9 @@ public:
 
   void enable();
 
+  DDS::DataWriter_var get_dds_datawriter() { return datawriter_; }
+  const DDS::DataWriter_var get_dds_datawriter() const { return datawriter_; }
+
   DataWriterReport& get_report() { return report_; }
   const DataWriterReport& get_report() const { return report_; }
 

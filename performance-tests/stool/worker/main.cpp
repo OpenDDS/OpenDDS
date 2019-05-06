@@ -1,12 +1,13 @@
 #include "dds/DCPS/Service_Participant.h"
 
-#include "ListenerFactory.h"
-
+#include <ace/Proactor.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 
 #include "StoolC.h"
 #include "StoolTypeSupportImpl.h"
 #include "BuilderTypeSupportImpl.h"
+
+#include "ListenerFactory.h"
 
 #include "TopicListener.h"
 #include "DataReaderListener.h"
@@ -17,18 +18,22 @@
 #include "Process.h"
 
 #include "json_2_builder.h"
+#include "ActionManager.h"
 
 #include <cmath>
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <mutex>
+#include <thread>
 #include <iomanip>
 #include <condition_variable>
 
-// MyTopicListener
+namespace Stool {
 
-class MyTopicListener : public Builder::TopicListener {
+// WorkerTopicListener
+
+class WorkerTopicListener : public Builder::TopicListener {
 public:
   void on_inconsistent_topic(DDS::Topic_ptr /*the_topic*/, const DDS::InconsistentTopicStatus& /*status*/) {
     std::unique_lock<std::mutex> lock(mutex_);
@@ -45,13 +50,14 @@ protected:
   size_t inconsistent_count_{0};
 };
 
-// MyDataReaderListener
+// WorkerDataReaderListener
 
-class MyDataReaderListener : public Builder::DataReaderListener {
+class WorkerDataReaderListener : public Builder::DataReaderListener {
 public:
 
-  MyDataReaderListener() {}
-  MyDataReaderListener(size_t expected) : expected_count_(expected) {}
+  WorkerDataReaderListener() {}
+
+  WorkerDataReaderListener(size_t expected) : expected_count_(expected) {}
 
   void on_requested_deadline_missed(DDS::DataReader_ptr /*reader*/, const DDS::RequestedDeadlineMissedStatus& /*status*/) override {
   }
@@ -66,14 +72,16 @@ public:
   }
 
   void on_data_available(DDS::DataReader_ptr reader) override {
-    Stool::DataDataReader_var data_dr = Stool::DataDataReader::_narrow(reader);
+    //std::cout << "WorkerDataReaderListener::on_data_available" << std::endl;
+    DataDataReader_var data_dr = DataDataReader::_narrow(reader);
     if (data_dr) {
-      Stool::Data data;
+      Data data;
       DDS::SampleInfo si;
       DDS::ReturnCode_t status = data_dr->take_next_sample(data, si);
       if (status == DDS::RETCODE_OK && si.valid_data) {
         const Builder::TimeStamp& now = Builder::get_time();
         double latency = Builder::to_seconds_double(now - data.created.time);
+        //std::cout << "WorkerDataReaderListener::on_data_available() - Valid Data :: Latency = " << std::fixed << std::setprecision(6) << latency << " seconds" << std::endl;
 
         std::unique_lock<std::mutex> lock(mutex_);
         if (datareader_) {
@@ -88,20 +96,26 @@ public:
           if (latency_max_->value.double_prop() < latency) {
             latency_max_->value.double_prop(latency);
           }
-          // Incremental mean calculation (doesn't require storing all the data)
-          latency_mean_->value.double_prop(prev_latency_mean + ((latency - prev_latency_mean) / static_cast<double>(sample_count_->value.double_prop())));
-          // Incremental (variance * sample_count) calculation (doesn't require storing all the data, can be used to easily find variance / standard deviation)
-          latency_var_x_sample_count_->value.double_prop(prev_latency_var_x_sample_count + ((latency - prev_latency_mean) * (latency - latency_mean_->value.double_prop())));
+          if (sample_count_->value.ull_prop() == 0) {
+            latency_mean_->value.double_prop(latency);
+            latency_var_x_sample_count_->value.double_prop(latency);
+          } else {
+            // Incremental mean calculation (doesn't require storing all the data)
+            latency_mean_->value.double_prop(prev_latency_mean + ((latency - prev_latency_mean) / static_cast<double>(sample_count_->value.ull_prop())));
+            // Incremental (variance * sample_count) calculation (doesn't require storing all the data, can be used to easily find variance / standard deviation)
+            latency_var_x_sample_count_->value.double_prop(prev_latency_var_x_sample_count + ((latency - prev_latency_mean) * (latency - latency_mean_->value.double_prop())));
+          }
         }
       }
     }
   }
 
   void on_subscription_matched(DDS::DataReader_ptr /*reader*/, const DDS::SubscriptionMatchedStatus& status) override {
+    //std::cout << "WorkerDataReaderListener::on_subscription_matched" << std::endl;
     std::unique_lock<std::mutex> lock(mutex_);
     if (expected_count_ != 0) {
       if (static_cast<size_t>(status.current_count) == expected_count_) {
-        //std::cout << "MyDataReaderListener reached expected count!" << std::endl;
+        //std::cout << "WorkerDataReaderListener reached expected count!" << std::endl;
         if (datareader_) {
           last_discovery_time_->value.time_prop(Builder::get_time());
         }
@@ -148,9 +162,9 @@ protected:
   Builder::PropertyIndex latency_var_x_sample_count_;
 };
 
-// MySubscriberListener
+// WorkerSubscriberListener
 
-class MySubscriberListener : public Builder::SubscriberListener {
+class WorkerSubscriberListener : public Builder::SubscriberListener {
 public:
 
   // From DDS::DataReaderListener
@@ -192,13 +206,13 @@ protected:
   Builder::Subscriber* subscriber_{0};
 };
 
-// MyDataWriterListener
+// WorkerDataWriterListener
 
-class MyDataWriterListener : public Builder::DataWriterListener {
+class WorkerDataWriterListener : public Builder::DataWriterListener {
 public:
 
-  MyDataWriterListener() {}
-  MyDataWriterListener(size_t expected) : expected_count_(expected) {}
+  WorkerDataWriterListener() {}
+  WorkerDataWriterListener(size_t expected) : expected_count_(expected) {}
 
   void on_offered_deadline_missed(DDS::DataWriter_ptr /*writer*/, const DDS::OfferedDeadlineMissedStatus& /*status*/) override {
   }
@@ -213,7 +227,7 @@ public:
     std::unique_lock<std::mutex> lock(mutex_);
     if (expected_count_ != 0) {
       if (static_cast<size_t>(status.current_count) == expected_count_) {
-        //std::cout << "MyDataWriterListener reached expected count!" << std::endl;
+        //std::cout << "WorkerDataWriterListener reached expected count!" << std::endl;
         if (datawriter_) {
           last_discovery_time_->value.time_prop(Builder::get_time());
         }
@@ -241,9 +255,9 @@ protected:
   Builder::PropertyIndex last_discovery_time_;
 };
 
-// MyPublisherListener
+// WorkerPublisherListener
 
-class MyPublisherListener : public Builder::PublisherListener {
+class WorkerPublisherListener : public Builder::PublisherListener {
 public:
 
   // From DDS::DataWriterListener
@@ -262,7 +276,7 @@ public:
 
   // From DDS::PublisherListener
 
-  // From Stool::PublisherListener
+  // From PublisherListener
 
   void set_publisher(Builder::Publisher& publisher) override {
     publisher_ = &publisher;
@@ -273,9 +287,9 @@ protected:
   Builder::Publisher* publisher_{0};
 };
 
-// MyParticipantListener
+// WorkerParticipantListener
 
-class MyParticipantListener : public Builder::ParticipantListener {
+class WorkerParticipantListener : public Builder::ParticipantListener {
 public:
 
   // From DDS::DataWriterListener
@@ -337,134 +351,123 @@ protected:
 using Builder::ReaderMap;
 using Builder::WriterMap;
 
-// Action
-
-class Action {
+template <typename T>
+class ProAction : public ACE_Handler {
 public:
-  virtual ~Action() {}
-  virtual bool init(const Stool::ActionConfig& config, Stool::ActionReport& report, ReaderMap& readers, WriterMap& writers);
+  ProAction(T&& to_call) : to_call_(to_call) {}
+  virtual ~ProAction() {}
+  ProAction(const ProAction&) = delete;
 
-  virtual void start() = 0;
-  virtual void stop() = 0;
+  void handle_time_out(const ACE_Time_Value& /*tv*/, const void* /*act*/) override {
+    to_call_();
+  }
 
 protected:
-  const Stool::ActionConfig* config_{0};
-  Stool::ActionReport* report_{0};
-  ReaderMap readers_by_name_;
-  WriterMap writers_by_name_;
-  std::vector<std::shared_ptr<Builder::DataReader> > readers_by_index_;
-  std::vector<std::shared_ptr<Builder::DataWriter> > writers_by_index_;
+  T to_call_;
 };
-
-bool Action::init(const Stool::ActionConfig& config, Stool::ActionReport& report, ReaderMap& reader_map, WriterMap& writer_map) {
-  config_ = &config;
-  report_ = &report;
-  for (CORBA::ULong j = 0; j < config.readers.length(); ++j) {
-    auto it = reader_map.find(config.readers[j].in());
-    if (it != reader_map.end()) {
-      readers_by_name_.insert(*it);
-      readers_by_index_.push_back(it->second);
-    } else {
-      return false;
-    }
-  }
-  for (CORBA::ULong j = 0; j < config.writers.length(); ++j) {
-    auto it = writer_map.find(config.writers[j].in());
-    if (it != writer_map.end()) {
-      writers_by_name_.insert(*it);
-      writers_by_index_.push_back(it->second);
-    } else {
-      return false;
-    }
-  }
-  return true;
-};
-
-// Action Manager
-
-class ActionManager {
-public:
-  explicit ActionManager(const Stool::ActionConfigSeq& configs, Stool::ActionReportSeq& reports, ReaderMap& reader_map, WriterMap& writer_map);
-
-  void start();
-  void stop();
-
-  using action_factory = std::function<std::shared_ptr<Action>()>;
-  using action_factory_map = std::map<std::string, action_factory>;
-
-  static bool register_action_factory(const std::string& name, const action_factory& factory) {
-    std::unique_lock<std::mutex> lock(s_mutex);
-    bool result = false;
-
-    auto it = s_factory_map.find(name);
-    if (it == s_factory_map.end()) {
-      s_factory_map[name] = factory;
-      result = true;
-    }
-    return result;
-  }
-
-  static std::shared_ptr<Action> create_action(const std::string& name) {
-    std::unique_lock<std::mutex> lock(s_mutex);
-    std::shared_ptr<Action> result;
-
-    auto it = s_factory_map.find(name);
-    if (it != s_factory_map.end()) {
-      result = (it->second)();
-    }
-    return result;
-  }
-
-  class Registration {
-  public:
-    Registration(const std::string& name, const action_factory& factory) {
-      std::cout << "Action registration created for name '" << name << "'" << std::endl;
-      if (!register_action_factory(name, factory)) {
-        std::stringstream ss;
-        ss << "unable to register action factory with name '" << name << "'" << std::flush;
-        throw std::runtime_error(ss.str());
-      }
-    }
-  };
-
-protected:
-  static std::mutex s_mutex;
-  static action_factory_map s_factory_map;
-
-  std::vector<std::shared_ptr<Action>> actions_;
-};
-
-std::mutex ActionManager::s_mutex;
-ActionManager::action_factory_map ActionManager::s_factory_map;
-
-ActionManager::ActionManager(const Stool::ActionConfigSeq& configs, Stool::ActionReportSeq& reports, ReaderMap& reader_map, WriterMap& writer_map) {
-  reports.length(configs.length());
-  for (CORBA::ULong i = 0; i < configs.length(); ++i) {
-    auto action = create_action(configs[i].type.in());
-    if (action) {
-      action->init(configs[i], reports[i], reader_map, writer_map);
-    }
-    actions_.push_back(action);
-  }
-}
-
-void ActionManager::start() {
-  for (auto it = actions_.begin(); it != actions_.end(); ++it) {
-    (*it)->start();
-  }
-}
-
-void ActionManager::stop() {
-  for (auto it = actions_.begin(); it != actions_.end(); ++it) {
-    (*it)->stop();
-  }
-}
 
 // WriteAction
 class WriteAction : public Action {
 public:
+  WriteAction(ACE_Proactor& proactor);
 
+  bool init(const ActionConfig& config, ActionReport& report, Builder::ReaderMap& readers, Builder::WriterMap& writers) override;
+
+  void start() override;
+  void stop() override;
+
+  void do_write();
+
+protected:
+  std::mutex mutex_;
+  ACE_Proactor& proactor_;
+  bool started_, stopped_;
+  DataDataWriter_var data_dw_;
+  Data data_;
+  ACE_Time_Value write_period_;
+  DDS::InstanceHandle_t instance_;
+  std::shared_ptr<ACE_Handler> handler_;
 };
+
+WriteAction::WriteAction(ACE_Proactor& proactor) : proactor_(proactor), started_(false), stopped_(false), write_period_(1, 0) {
+}
+
+uint32_t one_at_a_time_hash(const uint8_t* key, size_t length) {
+  size_t i = 0;
+  uint32_t hash = 0;
+  while (i != length) {
+    hash += key[i++];
+    hash += hash << 10;
+    hash ^= hash >> 6;
+  }
+  hash += hash << 3;
+  hash ^= hash >> 11;
+  hash += hash << 15;
+  return hash;
+}
+
+bool WriteAction::init(const ActionConfig& config, ActionReport& report, Builder::ReaderMap& readers, Builder::WriterMap& writers) {
+  std::unique_lock<std::mutex> lock(mutex_);
+  Action::init(config, report, readers, writers);
+  if (writers_by_index_.empty()) {
+    throw std::runtime_error("WriteAction is missing a writer");
+  }
+  std::string name(config.name.in());
+  data_.key = one_at_a_time_hash(reinterpret_cast<const uint8_t*>(name.data()), name.size());
+
+  size_t data_buffer_bytes = 256;
+  auto data_buffer_bytes_prop = get_property(config.params, "data_buffer_bytes", Builder::PVK_ULL);
+  if (data_buffer_bytes_prop) {
+std::cout << "found data_buffer_bytes!" << std::endl;
+    data_buffer_bytes = data_buffer_bytes_prop->value.ull_prop();
+  }
+  data_.buffer.length(data_buffer_bytes);
+
+  auto write_period_prop = get_property(config.params, "write_period", Builder::PVK_TIME);
+  if (write_period_prop) {
+std::cout << "found write period!" << std::endl;
+    write_period_ = ACE_Time_Value(write_period_prop->value.time_prop().sec, write_period_prop->value.time_prop().nsec / 1e3);
+  }
+
+  data_dw_ = DataDataWriter::_narrow(writers_by_index_[0]->get_dds_datawriter());
+  if (data_dw_) {
+    handler_.reset(new ProAction<decltype(std::bind(&WriteAction::do_write, this))>(std::bind(&WriteAction::do_write, this)));
+  }
+
+  return true;
+}
+
+void WriteAction::start() {
+  std::unique_lock<std::mutex> lock(mutex_);
+  if (!started_) {
+    instance_ = data_dw_->register_instance(data_);
+    started_ = true;
+    proactor_.schedule_timer(*handler_, nullptr, write_period_);
+  }
+}
+
+void WriteAction::stop() {
+  std::unique_lock<std::mutex> lock(mutex_);
+  if (started_ && !stopped_) {
+    stopped_ = true;
+    proactor_.cancel_timer(*handler_);
+    data_dw_->unregister_instance(data_, instance_);
+  }
+}
+
+void WriteAction::do_write() {
+  std::unique_lock<std::mutex> lock(mutex_);
+  if (started_ && !stopped_) {
+    data_.created.time = Builder::get_time();
+    DDS::ReturnCode_t result = data_dw_->write(data_, 0);
+    if (result != DDS::RETCODE_OK) {
+      std::cout << "Error during WriteAction::do_write()'s call to datawriter::write()" << std::endl;
+    }
+    proactor_.schedule_timer(*handler_, nullptr, write_period_);
+  }
+}
+
+} // namespace Stool
 
 // Main
 
@@ -595,12 +598,20 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   Builder::TypeSupportRegistry::TypeSupportRegistration data_registration(new Stool::DataTypeSupportImpl());
 
   // Register some Stool-specific listener factories
-  Builder::ListenerFactory<DDS::TopicListener>::Registration topic_registration("stool_tl", [](){ return DDS::TopicListener_var(new MyTopicListener()); });
-  Builder::ListenerFactory<DDS::DataReaderListener>::Registration datareader_registration("stool_drl", [&](){ return DDS::DataReaderListener_var(new MyDataReaderListener()); });
-  Builder::ListenerFactory<DDS::SubscriberListener>::Registration subscriber_registration("stool_sl", [](){ return DDS::SubscriberListener_var(new MySubscriberListener()); });
-  Builder::ListenerFactory<DDS::DataWriterListener>::Registration datawriter_registration("stool_dwl", [&](){ return DDS::DataWriterListener_var(new MyDataWriterListener()); });
-  Builder::ListenerFactory<DDS::PublisherListener>::Registration publisher_registration("stool_pl", [](){ return DDS::PublisherListener_var(new MyPublisherListener()); });
-  Builder::ListenerFactory<DDS::DomainParticipantListener>::Registration participant_registration("stool_partl", [](){ return DDS::DomainParticipantListener_var(new MyParticipantListener()); });
+  Builder::ListenerFactory<DDS::TopicListener>::Registration topic_registration("stool_tl", [](){ return DDS::TopicListener_var(new Stool::WorkerTopicListener()); });
+  Builder::ListenerFactory<DDS::DataReaderListener>::Registration datareader_registration("stool_drl", [&](){ return DDS::DataReaderListener_var(new Stool::WorkerDataReaderListener()); });
+  Builder::ListenerFactory<DDS::SubscriberListener>::Registration subscriber_registration("stool_sl", [](){ return DDS::SubscriberListener_var(new Stool::WorkerSubscriberListener()); });
+  Builder::ListenerFactory<DDS::DataWriterListener>::Registration datawriter_registration("stool_dwl", [&](){ return DDS::DataWriterListener_var(new Stool::WorkerDataWriterListener()); });
+  Builder::ListenerFactory<DDS::PublisherListener>::Registration publisher_registration("stool_pl", [](){ return DDS::PublisherListener_var(new Stool::WorkerPublisherListener()); });
+  Builder::ListenerFactory<DDS::DomainParticipantListener>::Registration participant_registration("stool_partl", [](){ return DDS::DomainParticipantListener_var(new Stool::WorkerParticipantListener()); });
+
+  // Disable some Proactor debug chatter to std out (eventually make this configurable?)
+  ACE_Log_Category::ace_lib().priority_mask(0);
+
+  ACE_Proactor proactor;
+
+  // Register actions
+  Stool::ActionManager::Registration write_action_registration("write", [&](){ return std::shared_ptr<Stool::Action>(new Stool::WriteAction(proactor)); });
 
   // Timestamps used to measure method call durations
   Builder::TimeStamp process_construction_begin_time = ZERO, process_construction_end_time = ZERO;
@@ -610,6 +621,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   Builder::TimeStamp process_destruction_begin_time = ZERO, process_destruction_end_time = ZERO;
 
   Builder::ProcessReport process_report;
+
+  const size_t THREAD_POOL_SIZE = 4;
+  std::vector<std::shared_ptr<std::thread> > thread_pool;
+  for (size_t i = 0; i < THREAD_POOL_SIZE; ++i) {
+    thread_pool.emplace_back(std::make_shared<std::thread>([&](){ proactor.proactor_run_event_loop(); }));
+  }
 
   try {
     std::string line;
@@ -623,6 +640,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     process_construction_end_time = Builder::get_time();
 
     std::cout << std::endl << "Process construction / entity creation complete." << std::endl << std::endl;
+
+    std::cout << "Beginning action construction / initialization." << std::endl;
+
+    Stool::ActionManager am(config.actions, config.action_reports, process.get_reader_map(), process.get_writer_map());
+
+    std::cout << "Action construction / initialization complete." << std::endl << std::endl;
 
     if (config.enable_time == ZERO) {
       std::cout << "No test enable time specified. Press any key to enable process entities." << std::endl;
@@ -665,7 +688,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     std::cout << "Starting process tests." << std::endl;
 
     process_start_begin_time = Builder::get_time();
-    //process.start();
+    am.start();
     process_start_end_time = Builder::get_time();
 
     std::cout << "Process tests started." << std::endl << std::endl;
@@ -688,10 +711,16 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     std::cout << "Stopping process tests." << std::endl;
 
     process_stop_begin_time = Builder::get_time();
-    //process.stop();
+    am.stop();
     process_stop_end_time = Builder::get_time();
 
     std::cout << "Process tests stopped." << std::endl << std::endl;
+
+    proactor.proactor_end_event_loop();
+    for (size_t i = 0; i < THREAD_POOL_SIZE; ++i) {
+      thread_pool[i]->join();
+    }
+    thread_pool.clear();
 
     process_report = process.get_report();
 
@@ -769,22 +798,28 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     }
   }
 
-  std::cout << "undermatched readers: " << worker_report.undermatched_readers << ", undermatched writers: " << worker_report.undermatched_writers << std::endl << std::endl;
+  std::cout << std::endl << "--- Process Statistics ---" << std::endl << std::endl;
 
   std::cout << "construction_time: " << process_construction_end_time - process_construction_begin_time << std::endl;
   std::cout << "enable_time: " << process_enable_end_time - process_enable_begin_time << std::endl;
-  //std::cout << "start_time: " << process_start_end_time - process_start_begin_time << std::endl;
-  //std::cout << "stop_time: " << process_stop_end_time - process_stop_begin_time << std::endl;
+  std::cout << "start_time: " << process_start_end_time - process_start_begin_time << std::endl;
+  std::cout << "stop_time: " << process_stop_end_time - process_stop_begin_time << std::endl;
   std::cout << "destruction_time: " << process_destruction_end_time - process_destruction_begin_time << std::endl;
+
+  std::cout << std::endl << "--- Discovery Statistics ---" << std::endl << std::endl;
+
+  std::cout << "undermatched readers: " << worker_report.undermatched_readers << ", undermatched writers: " << worker_report.undermatched_writers << std::endl << std::endl;
   std::cout << "max_discovery_time_delta: " << worker_report.max_discovery_time_delta << std::endl;
 
   if (worker_report.sample_count > 0) {
-    std::cout << "--- Latency Statistics ---" << std::endl;
+    std::cout << std::endl << "--- Latency Statistics ---" << std::endl << std::endl;
+
     std::cout << "total sample count: " << worker_report.sample_count << std::endl;
-    std::cout << "minimum latency: " << worker_report.latency_min << " seconds" << std::endl;
-    std::cout << "maximum latency: " << worker_report.latency_max << " seconds" << std::endl;
-    std::cout << "mean latency: " << worker_report.latency_mean << " seconds" << std::endl;
-    std::cout << "latency standard deviation: " << std::sqrt(worker_report.latency_var_x_sample_count / static_cast<double>(worker_report.sample_count)) << " seconds" << std::endl;
+    std::cout << "minimum latency: " << std::fixed << std::setprecision(6) << worker_report.latency_min << " seconds" << std::endl;
+    std::cout << "maximum latency: " << std::fixed << std::setprecision(6) << worker_report.latency_max << " seconds" << std::endl;
+    std::cout << "mean latency: " << std::fixed << std::setprecision(6) << worker_report.latency_mean << " seconds" << std::endl;
+    std::cout << "latency standard deviation: " << std::fixed << std::setprecision(6) << std::sqrt(worker_report.latency_var_x_sample_count / static_cast<double>(worker_report.sample_count)) << " seconds" << std::endl;
+    std::cout << std::endl;
   }
 
   return 0;

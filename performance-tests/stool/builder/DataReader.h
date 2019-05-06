@@ -13,6 +13,9 @@ public:
 
   void enable();
 
+  DDS::DataReader_var get_dds_datareader() { return datareader_; }
+  const DDS::DataReader_var get_dds_datareader() const { return datareader_; }
+
   DataReaderReport& get_report() { return report_; }
   const DataReaderReport& get_report() const { return report_; }
 

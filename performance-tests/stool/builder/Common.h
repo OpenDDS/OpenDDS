@@ -34,6 +34,7 @@ class Stool_Builder_Export PropertyIndex {
 public:
   PropertyIndex();
   PropertyIndex(PropertySeq& seq, uint32_t index);
+
   const Property* operator->() const;
   Property* operator->();
 
@@ -45,7 +46,24 @@ protected:
   uint32_t index_;
 };
 
+class Stool_Builder_Export ConstPropertyIndex {
+public:
+  ConstPropertyIndex();
+  ConstPropertyIndex(const PropertySeq& seq, uint32_t index);
+
+  const Property* operator->() const;
+
+  inline explicit operator bool() const { return seq_ != 0; }
+  inline bool operator!() const { return seq_ == 0; }
+
+protected:
+  const PropertySeq* seq_;
+  uint32_t index_;
+};
+
 Stool_Builder_Export PropertyIndex get_or_create_property(PropertySeq& seq, const std::string& name, PropertyValueKind kind);
+
+Stool_Builder_Export ConstPropertyIndex get_property(const PropertySeq& seq, const std::string& name, PropertyValueKind kind);
 
 }
 

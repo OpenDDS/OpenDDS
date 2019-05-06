@@ -166,16 +166,16 @@
                 "listener_type_name": "stool_drl",
                 "listener_status_mask": 4294967295,
 
-                "qos": { "reliability": { "kind": "DDS::RELIABLE_RELIABILITY_QOS" }},
-                "qos_mask": { "reliability": { "has_kind": "true"}}
+                "qos": { "reliability": { "kind": "RELIABLE_RELIABILITY_QOS" } },
+                "qos_mask": { "reliability": { "has_kind": true} }
               },
               { "name": "datareader_02_01_02",
                 "topic_name": "topic_02",
                 "listener_type_name": "stool_drl",
                 "listener_status_mask": 4294967295,
 
-                "qos": { "reliability": { "kind": "DDS::RELIABLE_RELIABILITY_QOS" }},
-                "qos_mask": { "reliability": { "has_kind": "true"}}
+                "qos": { "reliability": { "kind": "RELIABLE_RELIABILITY_QOS" } },
+                "qos_mask": { "reliability": { "has_kind": true} }
               }
             ]
           },
@@ -188,16 +188,16 @@
                 "listener_type_name": "stool_drl",
                 "listener_status_mask": 4294967295,
 
-                "qos": { "reliability": { "kind": "DDS::RELIABLE_RELIABILITY_QOS" }},
-                "qos_mask": { "reliability": { "has_kind": "true"}}
+                "qos": { "reliability": { "kind": "RELIABLE_RELIABILITY_QOS" } },
+                "qos_mask": { "reliability": { "has_kind": true} }
               },
               { "name": "datareader_02_02_02",
                 "topic_name": "topic_02",
                 "listener_type_name": "stool_drl",
                 "listener_status_mask": 4294967295,
 
-                "qos": { "reliability": { "kind": "DDS::RELIABLE_RELIABILITY_QOS" }},
-                "qos_mask": { "reliability": { "has_kind": "true"}}
+                "qos": { "reliability": { "kind": "RELIABLE_RELIABILITY_QOS" } },
+                "qos_mask": { "reliability": { "has_kind": true} }
               }
             ]
           }

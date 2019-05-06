@@ -1,7 +1,7 @@
 {
   "enable_time": { "sec": -1, "nsec": 0 },
   "start_time": { "sec": -3, "nsec": 0 },
-  "stop_time": { "sec": -3, "nsec": 0 },
+  "stop_time": { "sec": -10, "nsec": 0 },
 
   "process": {
     "config_sections": [
@@ -31,8 +31,6 @@
     "participants": [
       { "name": "participant_01",
         "domain": 7,
-        "listener_type_name": "stool_partl",
-        "listener_status_mask": 4294967295,
         "transport_config_name": "rtps_instance_01",
 
         "qos": { "entity_factory": { "autoenable_created_entities": false } },
@@ -40,15 +38,11 @@
 
         "topics": [
           { "name": "topic_01",
-            "type_name": "Stool::Data",
-            "listener_type_name": "stool_tl",
-            "listener_status_mask": 4294967295
+            "type_name": "Stool::Data"
           }
         ],
         "subscribers": [
           { "name": "subscriber_01",
-            "listener_type_name": "stool_sl",
-            "listener_status_mask": 4294967295,
             "datareaders": [
               { "name": "datareader_01",
                 "topic_name": "topic_01",
@@ -63,8 +57,6 @@
         ],
         "publishers": [
           { "name": "publisher_01",
-            "listener_type_name": "stool_pl",
-            "listener_status_mask": 4294967295,
             "datawriters": [
               { "name": "datawriter_01",
                 "topic_name": "topic_01",
@@ -76,5 +68,20 @@
         ]
       }
     ]
-  }
+  },
+  "actions" : [
+    {
+      "name": "write_action_01",
+      "type": "write",
+      "writers": [ "datawriter_01" ],
+      "params": [
+        { "name": "data_buffer_bytes",
+          "value" : { "_d": "PVK_ULL", "ull_prop": 512 }
+        },
+        { "name": "write_period",
+          "value" : { "_d": "PVK_TIME", "time_prop": { "sec": 0, "nsec": 330000000 } }
+        }
+      ]
+    }
+  ]
 }

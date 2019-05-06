@@ -8,9 +8,10 @@ namespace Builder {
 const TimeStamp ZERO = {0, 0};
 
 TimeStamp get_time() {
-  auto now = std::chrono::system_clock::now();
-  auto millisecs = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
-  TimeStamp result = {static_cast<CORBA::Long>(millisecs.count() / 1000), static_cast<CORBA::ULong>((millisecs.count() % 1000) * 10000000)};
+  auto now = std::chrono::high_resolution_clock::now();
+  auto seconds = std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch());
+  auto nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>((now - seconds).time_since_epoch());
+  TimeStamp result = {static_cast<CORBA::Long>(seconds.count()), static_cast<CORBA::ULong>(nanoseconds.count())};
   return result;
 }
 
@@ -65,6 +66,16 @@ Property* PropertyIndex::operator->() {
   return &((*seq_)[index_]);
 }
 
+ConstPropertyIndex::ConstPropertyIndex() : seq_(0), index_(0) {
+}
+
+ConstPropertyIndex::ConstPropertyIndex(const PropertySeq& seq, uint32_t index) : seq_(&seq), index_(index) {
+}
+
+const Property* ConstPropertyIndex::operator->() const {
+  return &((*seq_)[index_]);
+}
+
 Builder::PropertyIndex get_or_create_property(Builder::PropertySeq& seq, const std::string& name, Builder::PropertyValueKind kind) {
   for (uint32_t i = 0; i < seq.length(); ++i) {
     if (std::string(seq[i].name.in()) == name) {
@@ -83,6 +94,19 @@ Builder::PropertyIndex get_or_create_property(Builder::PropertySeq& seq, const s
   seq[idx].name = name.c_str();
   seq[idx].value._d(kind);
   return PropertyIndex(seq, idx);
+}
+
+Builder::ConstPropertyIndex get_property(const Builder::PropertySeq& seq, const std::string& name, Builder::PropertyValueKind kind) {
+  for (uint32_t i = 0; i < seq.length(); ++i) {
+    if (std::string(seq[i].name.in()) == name) {
+      if (seq[i].value._d() == kind) {
+        return ConstPropertyIndex(seq, i);
+      } else {
+        return ConstPropertyIndex();
+      }
+    }
+  }
+  return ConstPropertyIndex();
 }
 
 }
