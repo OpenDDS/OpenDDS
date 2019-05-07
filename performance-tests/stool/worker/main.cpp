@@ -1,5 +1,6 @@
 #include "dds/DCPS/Service_Participant.h"
 
+#include <ace/Reactor.h>
 #include <ace/Proactor.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 
@@ -73,11 +74,13 @@ public:
 
   void on_data_available(DDS::DataReader_ptr reader) override {
     //std::cout << "WorkerDataReaderListener::on_data_available" << std::endl;
-    DataDataReader_var data_dr = DataDataReader::_narrow(reader);
-    if (data_dr) {
+    if (reader != data_dr_.in()) {
+      data_dr_ = DataDataReader::_narrow(reader);
+    }
+    if (data_dr_) {
       Data data;
       DDS::SampleInfo si;
-      DDS::ReturnCode_t status = data_dr->take_next_sample(data, si);
+      DDS::ReturnCode_t status = data_dr_->take_next_sample(data, si);
       if (status == DDS::RETCODE_OK && si.valid_data) {
         const Builder::TimeStamp& now = Builder::get_time();
         double latency = Builder::to_seconds_double(now - data.created.time);
@@ -135,6 +138,7 @@ public:
 
   void set_datareader(Builder::DataReader& datareader) override {
     datareader_ = &datareader;
+
     last_discovery_time_ = get_or_create_property(datareader_->get_report().properties, "last_discovery_time", Builder::PVK_TIME);
 
     sample_count_ = get_or_create_property(datareader_->get_report().properties, "sample_count", Builder::PVK_ULL);
@@ -154,6 +158,7 @@ protected:
   size_t expected_count_{0};
   size_t matched_count_{0};
   Builder::DataReader* datareader_{0};
+  DataDataReader_var data_dr_;
   Builder::PropertyIndex last_discovery_time_;
   Builder::PropertyIndex sample_count_;
   Builder::PropertyIndex latency_min_;
@@ -354,22 +359,44 @@ using Builder::WriterMap;
 template <typename T>
 class ProAction : public ACE_Handler {
 public:
-  ProAction(T&& to_call) : to_call_(to_call) {}
+  ProAction(void (T::* fun)(void), T& obj) : fun_(fun), obj_(obj) {}
   virtual ~ProAction() {}
   ProAction(const ProAction&) = delete;
 
   void handle_time_out(const ACE_Time_Value& /*tv*/, const void* /*act*/) override {
-    to_call_();
+    (obj_.*fun_)();
   }
 
 protected:
-  T to_call_;
+  void (T::* fun_)(void);
+  T& obj_;
+};
+
+template <typename T>
+class ReAction : public ACE_Event_Handler {
+public:
+  ReAction(ACE_Reactor& reactor, void (T::* fun)(void), T& obj) : ACE_Event_Handler(&reactor), fun_(fun), obj_(obj) {
+std::cout << "Reaction::ReAction() called" << std::endl;
+  }
+  virtual ~ReAction() {}
+  ReAction(const ReAction&) = delete;
+
+  int handle_timeout(const ACE_Time_Value& /*tv*/, const void* /*act*/) override {
+std::cout << "Reaction::handle_timeout() called" << std::endl;
+    (obj_.*fun_)();
+    return 0;
+  }
+
+protected:
+  void (T::* fun_)(void);
+  T& obj_;
 };
 
 // WriteAction
 class WriteAction : public Action {
 public:
   WriteAction(ACE_Proactor& proactor);
+  //WriteAction(ACE_Reactor& reactor);
 
   bool init(const ActionConfig& config, ActionReport& report, Builder::ReaderMap& readers, Builder::WriterMap& writers) override;
 
@@ -381,16 +408,21 @@ public:
 protected:
   std::mutex mutex_;
   ACE_Proactor& proactor_;
+  //ACE_Reactor& reactor_;
   bool started_, stopped_;
   DataDataWriter_var data_dw_;
   Data data_;
   ACE_Time_Value write_period_;
   DDS::InstanceHandle_t instance_;
   std::shared_ptr<ACE_Handler> handler_;
+  //std::shared_ptr<ACE_Event_Handler> event_handler_;
 };
 
 WriteAction::WriteAction(ACE_Proactor& proactor) : proactor_(proactor), started_(false), stopped_(false), write_period_(1, 0) {
 }
+
+//WriteAction::WriteAction(ACE_Reactor& reactor) : reactor_(reactor), started_(false), stopped_(false), write_period_(1, 0) {
+//}
 
 uint32_t one_at_a_time_hash(const uint8_t* key, size_t length) {
   size_t i = 0;
@@ -407,32 +439,40 @@ uint32_t one_at_a_time_hash(const uint8_t* key, size_t length) {
 }
 
 bool WriteAction::init(const ActionConfig& config, ActionReport& report, Builder::ReaderMap& readers, Builder::WriterMap& writers) {
+
   std::unique_lock<std::mutex> lock(mutex_);
   Action::init(config, report, readers, writers);
+
   if (writers_by_index_.empty()) {
-    throw std::runtime_error("WriteAction is missing a writer");
+    std::stringstream ss;
+    ss << "WriteAction '" << config.name << "' is missing a writer" << std::flush;
+    throw std::runtime_error(ss.str());
   }
+
+  data_dw_ = DataDataWriter::_narrow(writers_by_index_[0]->get_dds_datawriter());
+  if (!data_dw_) {
+    std::stringstream ss;
+    ss << "WriteAction '" << config.name << "' is missing a valid Stool::Data datawriter" << std::flush;
+    throw std::runtime_error(ss.str());
+  }
+
   std::string name(config.name.in());
   data_.key = one_at_a_time_hash(reinterpret_cast<const uint8_t*>(name.data()), name.size());
 
   size_t data_buffer_bytes = 256;
   auto data_buffer_bytes_prop = get_property(config.params, "data_buffer_bytes", Builder::PVK_ULL);
   if (data_buffer_bytes_prop) {
-std::cout << "found data_buffer_bytes!" << std::endl;
     data_buffer_bytes = data_buffer_bytes_prop->value.ull_prop();
   }
   data_.buffer.length(data_buffer_bytes);
 
   auto write_period_prop = get_property(config.params, "write_period", Builder::PVK_TIME);
   if (write_period_prop) {
-std::cout << "found write period!" << std::endl;
     write_period_ = ACE_Time_Value(write_period_prop->value.time_prop().sec, write_period_prop->value.time_prop().nsec / 1e3);
   }
 
-  data_dw_ = DataDataWriter::_narrow(writers_by_index_[0]->get_dds_datawriter());
-  if (data_dw_) {
-    handler_.reset(new ProAction<decltype(std::bind(&WriteAction::do_write, this))>(std::bind(&WriteAction::do_write, this)));
-  }
+  handler_.reset(new ProAction<WriteAction>(&WriteAction::do_write, *this));
+  //event_handler_.reset(new ReAction<WriteAction>(reactor_, &WriteAction::do_write, *this));
 
   return true;
 }
@@ -443,6 +483,7 @@ void WriteAction::start() {
     instance_ = data_dw_->register_instance(data_);
     started_ = true;
     proactor_.schedule_timer(*handler_, nullptr, write_period_);
+    //reactor_.schedule_timer(event_handler_.get(), nullptr, write_period_);
   }
 }
 
@@ -451,6 +492,7 @@ void WriteAction::stop() {
   if (started_ && !stopped_) {
     stopped_ = true;
     proactor_.cancel_timer(*handler_);
+    //reactor_.cancel_timer(event_handler_.get());
     data_dw_->unregister_instance(data_, instance_);
   }
 }
@@ -464,6 +506,7 @@ void WriteAction::do_write() {
       std::cout << "Error during WriteAction::do_write()'s call to datawriter::write()" << std::endl;
     }
     proactor_.schedule_timer(*handler_, nullptr, write_period_);
+    //reactor_.schedule_timer(event_handler_.get(), nullptr, write_period_);
   }
 }
 
@@ -497,102 +540,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     return 3;
   }
 
-  /* Manually building the ProcessConfig object
-
-  config.config_sections.length(1);
-  config.config_sections[0].name = "common";
-  config.config_sections[0].properties.length(2);
-  config.config_sections[0].properties[0].name = "DCPSSecurity";
-  config.config_sections[0].properties[0].value = "0";
-  config.config_sections[0].properties[1].name = "DCPSDebugLevel";
-  config.config_sections[0].properties[1].value = "0";
-
-  config.discoveries.length(1);
-  config.discoveries[0].type = "rtps";
-  config.discoveries[0].name = "stool_test_rtps";
-  config.discoveries[0].domain = 7;
-
-  const size_t ips_per_proc_max = 10;
-  const size_t subs_per_ip_max = 5;
-  const size_t pubs_per_ip_max = 5;
-  const size_t drs_per_sub_max = 10;
-  const size_t dws_per_pub_max = 10;
-
-  const size_t expected_datareader_matches = ips_per_proc_max * pubs_per_ip_max * dws_per_pub_max;
-  const size_t expected_datawriter_matches = ips_per_proc_max * subs_per_ip_max * drs_per_sub_max;
-
-  config.instances.length(ips_per_proc_max);
-  config.participants.length(ips_per_proc_max);
-
-  for (size_t ip = 0; ip < ips_per_proc_max; ++ip) {
-    std::stringstream instance_name_ss;
-    instance_name_ss << "transport_" << ip << std::flush;
-    config.instances[ip].type = "rtps_udp";
-    config.instances[ip].name = instance_name_ss.str().c_str();
-    config.instances[ip].domain = 7;
-    std::stringstream participant_name_ss;
-    participant_name_ss << "participant_" << ip << std::flush;
-    config.participants[ip].name = participant_name_ss.str().c_str();
-    config.participants[ip].domain = 7;
-    config.participants[ip].listener_type_name = "stool_partl";
-    config.participants[ip].listener_status_mask = OpenDDS::DCPS::DEFAULT_STATUS_MASK;
-    //config.participants[ip].type_names.length(1);
-    //config.participants[ip].type_names[0] = "Stool::Data";
-    config.participants[ip].transport_config_name = instance_name_ss.str().c_str();
-
-    config.participants[ip].qos.entity_factory.autoenable_created_entities = false;
-    config.participants[ip].qos_mask.entity_factory.has_autoenable_created_entities = false;
-
-    config.participants[ip].topics.length(1);
-    std::stringstream topic_name_ss;
-    topic_name_ss << "topic" << std::flush;
-    config.participants[ip].topics[0].name = topic_name_ss.str().c_str();
-    //config.participants[ip].topics[0].type_name = "Stool::Data";
-    config.participants[ip].topics[0].listener_type_name = "stool_tl";
-    config.participants[ip].topics[0].listener_status_mask = OpenDDS::DCPS::DEFAULT_STATUS_MASK;
-
-    config.participants[ip].subscribers.length(subs_per_ip_max);
-    for (size_t sub = 0; sub < subs_per_ip_max; ++sub) {
-      std::stringstream subscriber_name_ss;
-      subscriber_name_ss << "subscriber_" << ip << "_" << sub << std::flush;
-      config.participants[ip].subscribers[sub].name = subscriber_name_ss.str().c_str();
-      config.participants[ip].subscribers[sub].listener_type_name = "stool_sl";
-      config.participants[ip].subscribers[sub].listener_status_mask = OpenDDS::DCPS::DEFAULT_STATUS_MASK;
-
-      config.participants[ip].subscribers[sub].datareaders.length(drs_per_sub_max);
-      for (size_t dr = 0; dr < drs_per_sub_max; ++dr) {
-        std::stringstream datareader_name_ss;
-        datareader_name_ss << "datareader_" << ip << "_" << sub << "_" << dr << std::flush;
-        config.participants[ip].subscribers[sub].datareaders[dr].name = datareader_name_ss.str().c_str();
-        config.participants[ip].subscribers[sub].datareaders[dr].topic_name = topic_name_ss.str().c_str();
-        config.participants[ip].subscribers[sub].datareaders[dr].listener_type_name = "stool_drl";
-        config.participants[ip].subscribers[sub].datareaders[dr].listener_status_mask = OpenDDS::DCPS::DEFAULT_STATUS_MASK;
-
-        config.participants[ip].subscribers[sub].datareaders[dr].qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-        config.participants[ip].subscribers[sub].datareaders[dr].qos_mask.reliability.has_kind = true;
-      }
-    }
-    config.participants[ip].publishers.length(pubs_per_ip_max);
-    for (size_t pub = 0; pub < pubs_per_ip_max; ++pub) {
-      std::stringstream publisher_name_ss;
-      publisher_name_ss << "publisher_" << ip << "_" << pub << std::flush;
-      config.participants[ip].publishers[pub].name = publisher_name_ss.str().c_str();
-      config.participants[ip].publishers[pub].listener_type_name = "stool_pl";
-      config.participants[ip].publishers[pub].listener_status_mask = OpenDDS::DCPS::DEFAULT_STATUS_MASK;
-
-      config.participants[ip].publishers[pub].datawriters.length(dws_per_pub_max);
-      for (size_t dw = 0; dw < dws_per_pub_max; ++dw) {
-        std::stringstream datawriter_name_ss;
-        datawriter_name_ss << "datawriter_" << ip << "_" << pub << "_" << dw << std::flush;
-        config.participants[ip].publishers[pub].datawriters[dw].name = datawriter_name_ss.str().c_str();
-        config.participants[ip].publishers[pub].datawriters[dw].topic_name = topic_name_ss.str().c_str();
-        config.participants[ip].publishers[pub].datawriters[dw].listener_type_name = "stool_dwl";
-        config.participants[ip].publishers[pub].datawriters[dw].listener_status_mask = OpenDDS::DCPS::DEFAULT_STATUS_MASK;
-      }
-    }
-  }
-  */
-
   // Register some Stool-specific types
   Builder::TypeSupportRegistry::TypeSupportRegistration process_config_registration(new Builder::ProcessConfigTypeSupportImpl());
   Builder::TypeSupportRegistry::TypeSupportRegistration data_registration(new Stool::DataTypeSupportImpl());
@@ -609,9 +556,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   ACE_Log_Category::ace_lib().priority_mask(0);
 
   ACE_Proactor proactor;
+  //ACE_Reactor reactor;
 
   // Register actions
   Stool::ActionManager::Registration write_action_registration("write", [&](){ return std::shared_ptr<Stool::Action>(new Stool::WriteAction(proactor)); });
+  //Stool::ActionManager::Registration write_action_registration("write", [&](){ return std::shared_ptr<Stool::Action>(new Stool::WriteAction(reactor)); });
 
   // Timestamps used to measure method call durations
   Builder::TimeStamp process_construction_begin_time = ZERO, process_construction_end_time = ZERO;
@@ -626,6 +575,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   std::vector<std::shared_ptr<std::thread> > thread_pool;
   for (size_t i = 0; i < THREAD_POOL_SIZE; ++i) {
     thread_pool.emplace_back(std::make_shared<std::thread>([&](){ proactor.proactor_run_event_loop(); }));
+    //thread_pool.emplace_back(std::make_shared<std::thread>([&](){ reactor.run_reactor_event_loop(); }));
   }
 
   try {
@@ -717,6 +667,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     std::cout << "Process tests stopped." << std::endl << std::endl;
 
     proactor.proactor_end_event_loop();
+    //reactor.end_reactor_event_loop();
     for (size_t i = 0; i < THREAD_POOL_SIZE; ++i) {
       thread_pool[i]->join();
     }
