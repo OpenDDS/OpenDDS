@@ -78,8 +78,8 @@
         { "name": "data_buffer_bytes",
           "value" : { "_d": "PVK_ULL", "ull_prop": 512 }
         },
-        { "name": "write_period",
-          "value" : { "_d": "PVK_TIME", "time_prop": { "sec": 0, "nsec": 330000000 } }
+        { "name": "write_frequency",
+          "value" : { "_d": "PVK_DOUBLE", "double_prop": 2.0 }
         }
       ]
     }

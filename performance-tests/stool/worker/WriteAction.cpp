@@ -18,6 +18,8 @@ uint32_t one_at_a_time_hash(const uint8_t* key, size_t length) {
   return hash;
 }
 
+const ACE_Time_Value ZERO(0, 0);
+
 }
 
 namespace Stool {
@@ -53,7 +55,28 @@ bool WriteAction::init(const ActionConfig& config, ActionReport& report, Builder
   }
   data_.buffer.length(data_buffer_bytes);
 
-  auto write_period_prop = get_property(config.params, "write_period", Builder::PVK_TIME);
+  // First check frequency as double (seconds)
+  auto write_frequency_prop = get_property(config.params, "write_frequency", Builder::PVK_DOUBLE);
+  if (write_frequency_prop) {
+    double period = 1.0 / write_frequency_prop->value.double_prop();
+    int64_t sec = static_cast<int64_t>(period);
+    uint64_t usec = static_cast<uint64_t>((period - static_cast<double>(sec)) * 1e6);
+    std::cout << "sec : " << sec << ", usec = " << usec << std::endl;
+    write_period_ = ACE_Time_Value(sec, usec);
+  }
+
+  // Then check period as double (seconds)
+  auto write_period_prop = get_property(config.params, "write_period", Builder::PVK_DOUBLE);
+  if (write_period_prop) {
+    double period = write_period_prop->value.double_prop();
+    int64_t sec = static_cast<int64_t>(period);
+    uint64_t usec = static_cast<uint64_t>((period - static_cast<double>(sec)) * 1e6);
+    std::cout << "sec : " << sec << ", usec = " << usec << std::endl;
+    write_period_ = ACE_Time_Value(sec, usec);
+  }
+
+  // Finally check period as TimeStamp
+  write_period_prop = get_property(config.params, "write_period", Builder::PVK_TIME);
   if (write_period_prop) {
     write_period_ = ACE_Time_Value(write_period_prop->value.time_prop().sec, write_period_prop->value.time_prop().nsec / 1e3);
   }
@@ -68,7 +91,7 @@ void WriteAction::start() {
   if (!started_) {
     instance_ = data_dw_->register_instance(data_);
     started_ = true;
-    proactor_.schedule_timer(*handler_, nullptr, write_period_);
+    proactor_.schedule_timer(*handler_, nullptr, ZERO);
   }
 }
 
@@ -89,7 +112,11 @@ void WriteAction::do_write() {
     if (result != DDS::RETCODE_OK) {
       std::cout << "Error during WriteAction::do_write()'s call to datawriter::write()" << std::endl;
     }
-    proactor_.schedule_timer(*handler_, nullptr, write_period_);
+    Builder::TimeStamp write_end_ts = Builder::get_time();
+    ACE_Time_Value write_begin(data_.created.time.sec, data_.created.time.nsec / 1e3);
+    ACE_Time_Value write_end(write_end_ts.sec, write_end_ts.nsec / 1e3);
+    ACE_Time_Value delta = write_period_ - (write_end - write_begin);
+    proactor_.schedule_timer(*handler_, nullptr, delta < ZERO ? ZERO : delta);
   }
 }
 
