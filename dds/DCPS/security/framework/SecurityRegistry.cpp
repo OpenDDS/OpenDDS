@@ -25,13 +25,13 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace Security {
 
-const OPENDDS_STRING SecurityRegistry::DEFAULT_CONFIG_NAME("_OPENDDS_DEFAULT_CONFIG");
-const OPENDDS_STRING SecurityRegistry::DEFAULT_INST_PREFIX("_OPENDDS_");
-const OPENDDS_STRING SecurityRegistry::DEFAULT_PLUGIN_NAME("BuiltIn");
-const OPENDDS_STRING SecurityRegistry::SECURITY_SECTION_NAME("security");
-const OPENDDS_STRING SecurityRegistry::ACCESS_CTRL_PLUGIN_NAME("access_ctrl_plugin");
-const OPENDDS_STRING SecurityRegistry::AUTHENTICATION_PLUGIN_NAME("auth_plugin");
-const OPENDDS_STRING SecurityRegistry::CRYPTO_PLUGIN_NAME("crypto_plugin");
+const char* SecurityRegistry::DEFAULT_CONFIG_NAME = "_OPENDDS_DEFAULT_CONFIG";
+const char* SecurityRegistry::DEFAULT_INST_PREFIX = "_OPENDDS_";
+const char* SecurityRegistry::DEFAULT_PLUGIN_NAME = "BuiltIn";
+const char* SecurityRegistry::SECURITY_SECTION_NAME = "security";
+const char* SecurityRegistry::ACCESS_CTRL_PLUGIN_NAME = "access_ctrl_plugin";
+const char* SecurityRegistry::AUTHENTICATION_PLUGIN_NAME = "auth_plugin";
+const char* SecurityRegistry::CRYPTO_PLUGIN_NAME = "crypto_plugin";
 
 
 SecurityRegistry::SecurityConfigEntry::SecurityConfigEntry(const OPENDDS_STRING& entryName)
@@ -56,9 +56,9 @@ void
 SecurityRegistry::SecurityConfigEntry::add_property(const OPENDDS_STRING& name, const OPENDDS_STRING& value)
 {
   // Move these up
-  static const OPENDDS_STRING AUTH_CONFIG_PROP_NAME("auth_config");
-  static const OPENDDS_STRING ACCESS_CTRL_CONFIG_PROP_NAME("access_ctrl_config");
-  static const OPENDDS_STRING CRYPTO_CONFIG_PROP_NAME("crypto_config");
+  //static const char* AUTH_CONFIG_PROP_NAME = "auth_config";
+  //static const char* ACCESS_CTRL_CONFIG_PROP_NAME = "access_ctrl_config";
+  //static const char* CRYPTO_CONFIG_PROP_NAME = "crypto_config";
 
   // Config properties can either identity a specific plugin, or
   // a configuration property for the security plugins
@@ -302,7 +302,7 @@ SecurityRegistry::load_security_configuration(ACE_Configuration_Heap& cf)
   ACE_TString sect_name;
 
   for (int index = 0; cf.enumerate_sections(root, index, sect_name) == 0; ++index) {
-    if (ACE_OS::strcmp(sect_name.c_str(), ACE_TEXT_CHAR_TO_TCHAR(SECURITY_SECTION_NAME.c_str())) == 0) {
+    if (ACE_OS::strcmp(sect_name.c_str(), ACE_TEXT_CHAR_TO_TCHAR(SECURITY_SECTION_NAME)) == 0) {
       // found the section, now iterate through subsections...
       ACE_Configuration_Section_Key sect;
       if (cf.open_section(root, sect_name.c_str(), 0, sect) != 0) {
