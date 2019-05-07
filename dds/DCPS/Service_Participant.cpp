@@ -263,9 +263,6 @@ Service_Participant::shutdown()
 
   shut_down_ = true;
   try {
-#if defined(OPENDDS_SECURITY)
-    OpenDDS::Security::SecurityRegistry::instance()->release();
-#endif
     TransportRegistry::instance()->release();
     {
       ACE_GUARD(TAO_SYNCH_MUTEX, guard, this->factory_lock_);
