@@ -1,6 +1,5 @@
 #include "dds/DCPS/Service_Participant.h"
 
-#include <ace/Reactor.h>
 #include <ace/Proactor.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 
@@ -27,6 +26,7 @@
 #include "WorkerSubscriberListener.h"
 #include "WorkerPublisherListener.h"
 #include "WorkerParticipantListener.h"
+#include "WriteAction.h"
 
 #include <cmath>
 #include <iostream>
@@ -36,169 +36,6 @@
 #include <thread>
 #include <iomanip>
 #include <condition_variable>
-
-namespace Stool {
-
-using Builder::ReaderMap;
-using Builder::WriterMap;
-
-template <typename T>
-class ProAction : public ACE_Handler {
-public:
-  ProAction(void (T::* fun)(void), T& obj) : fun_(fun), obj_(obj) {}
-  virtual ~ProAction() {}
-  ProAction(const ProAction&) = delete;
-
-  void handle_time_out(const ACE_Time_Value& /*tv*/, const void* /*act*/) override {
-    (obj_.*fun_)();
-  }
-
-protected:
-  void (T::* fun_)(void);
-  T& obj_;
-};
-
-template <typename T>
-class ReAction : public ACE_Event_Handler {
-public:
-  ReAction(ACE_Reactor& reactor, void (T::* fun)(void), T& obj) : ACE_Event_Handler(&reactor), fun_(fun), obj_(obj) {
-std::cout << "Reaction::ReAction() called" << std::endl;
-  }
-  virtual ~ReAction() {}
-  ReAction(const ReAction&) = delete;
-
-  int handle_timeout(const ACE_Time_Value& /*tv*/, const void* /*act*/) override {
-std::cout << "Reaction::handle_timeout() called" << std::endl;
-    (obj_.*fun_)();
-    return 0;
-  }
-
-protected:
-  void (T::* fun_)(void);
-  T& obj_;
-};
-
-// WriteAction
-class WriteAction : public Action {
-public:
-  WriteAction(ACE_Proactor& proactor);
-  //WriteAction(ACE_Reactor& reactor);
-
-  bool init(const ActionConfig& config, ActionReport& report, Builder::ReaderMap& readers, Builder::WriterMap& writers) override;
-
-  void start() override;
-  void stop() override;
-
-  void do_write();
-
-protected:
-  std::mutex mutex_;
-  ACE_Proactor& proactor_;
-  //ACE_Reactor& reactor_;
-  bool started_, stopped_;
-  DataDataWriter_var data_dw_;
-  Data data_;
-  ACE_Time_Value write_period_;
-  DDS::InstanceHandle_t instance_;
-  std::shared_ptr<ACE_Handler> handler_;
-  //std::shared_ptr<ACE_Event_Handler> event_handler_;
-};
-
-WriteAction::WriteAction(ACE_Proactor& proactor) : proactor_(proactor), started_(false), stopped_(false), write_period_(1, 0) {
-}
-
-//WriteAction::WriteAction(ACE_Reactor& reactor) : reactor_(reactor), started_(false), stopped_(false), write_period_(1, 0) {
-//}
-
-uint32_t one_at_a_time_hash(const uint8_t* key, size_t length) {
-  size_t i = 0;
-  uint32_t hash = 0;
-  while (i != length) {
-    hash += key[i++];
-    hash += hash << 10;
-    hash ^= hash >> 6;
-  }
-  hash += hash << 3;
-  hash ^= hash >> 11;
-  hash += hash << 15;
-  return hash;
-}
-
-bool WriteAction::init(const ActionConfig& config, ActionReport& report, Builder::ReaderMap& readers, Builder::WriterMap& writers) {
-
-  std::unique_lock<std::mutex> lock(mutex_);
-  Action::init(config, report, readers, writers);
-
-  if (writers_by_index_.empty()) {
-    std::stringstream ss;
-    ss << "WriteAction '" << config.name << "' is missing a writer" << std::flush;
-    throw std::runtime_error(ss.str());
-  }
-
-  data_dw_ = DataDataWriter::_narrow(writers_by_index_[0]->get_dds_datawriter());
-  if (!data_dw_) {
-    std::stringstream ss;
-    ss << "WriteAction '" << config.name << "' is missing a valid Stool::Data datawriter" << std::flush;
-    throw std::runtime_error(ss.str());
-  }
-
-  std::string name(config.name.in());
-  data_.key = one_at_a_time_hash(reinterpret_cast<const uint8_t*>(name.data()), name.size());
-
-  size_t data_buffer_bytes = 256;
-  auto data_buffer_bytes_prop = get_property(config.params, "data_buffer_bytes", Builder::PVK_ULL);
-  if (data_buffer_bytes_prop) {
-    data_buffer_bytes = data_buffer_bytes_prop->value.ull_prop();
-  }
-  data_.buffer.length(data_buffer_bytes);
-
-  auto write_period_prop = get_property(config.params, "write_period", Builder::PVK_TIME);
-  if (write_period_prop) {
-    write_period_ = ACE_Time_Value(write_period_prop->value.time_prop().sec, write_period_prop->value.time_prop().nsec / 1e3);
-  }
-
-  handler_.reset(new ProAction<WriteAction>(&WriteAction::do_write, *this));
-  //event_handler_.reset(new ReAction<WriteAction>(reactor_, &WriteAction::do_write, *this));
-
-  return true;
-}
-
-void WriteAction::start() {
-  std::unique_lock<std::mutex> lock(mutex_);
-  if (!started_) {
-    instance_ = data_dw_->register_instance(data_);
-    started_ = true;
-    proactor_.schedule_timer(*handler_, nullptr, write_period_);
-    //reactor_.schedule_timer(event_handler_.get(), nullptr, write_period_);
-  }
-}
-
-void WriteAction::stop() {
-  std::unique_lock<std::mutex> lock(mutex_);
-  if (started_ && !stopped_) {
-    stopped_ = true;
-    proactor_.cancel_timer(*handler_);
-    //reactor_.cancel_timer(event_handler_.get());
-    data_dw_->unregister_instance(data_, instance_);
-  }
-}
-
-void WriteAction::do_write() {
-  std::unique_lock<std::mutex> lock(mutex_);
-  if (started_ && !stopped_) {
-    data_.created.time = Builder::get_time();
-    DDS::ReturnCode_t result = data_dw_->write(data_, 0);
-    if (result != DDS::RETCODE_OK) {
-      std::cout << "Error during WriteAction::do_write()'s call to datawriter::write()" << std::endl;
-    }
-    proactor_.schedule_timer(*handler_, nullptr, write_period_);
-    //reactor_.schedule_timer(event_handler_.get(), nullptr, write_period_);
-  }
-}
-
-} // namespace Stool
-
-// Main
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
@@ -232,9 +69,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
   // Register some Stool-specific listener factories
   Builder::ListenerFactory<DDS::TopicListener>::Registration topic_registration("stool_tl", [](){ return DDS::TopicListener_var(new Stool::WorkerTopicListener()); });
-  Builder::ListenerFactory<DDS::DataReaderListener>::Registration datareader_registration("stool_drl", [&](){ return DDS::DataReaderListener_var(new Stool::WorkerDataReaderListener()); });
+  Builder::ListenerFactory<DDS::DataReaderListener>::Registration datareader_registration("stool_drl", [](){ return DDS::DataReaderListener_var(new Stool::WorkerDataReaderListener()); });
   Builder::ListenerFactory<DDS::SubscriberListener>::Registration subscriber_registration("stool_sl", [](){ return DDS::SubscriberListener_var(new Stool::WorkerSubscriberListener()); });
-  Builder::ListenerFactory<DDS::DataWriterListener>::Registration datawriter_registration("stool_dwl", [&](){ return DDS::DataWriterListener_var(new Stool::WorkerDataWriterListener()); });
+  Builder::ListenerFactory<DDS::DataWriterListener>::Registration datawriter_registration("stool_dwl", [](){ return DDS::DataWriterListener_var(new Stool::WorkerDataWriterListener()); });
   Builder::ListenerFactory<DDS::PublisherListener>::Registration publisher_registration("stool_pl", [](){ return DDS::PublisherListener_var(new Stool::WorkerPublisherListener()); });
   Builder::ListenerFactory<DDS::DomainParticipantListener>::Registration participant_registration("stool_partl", [](){ return DDS::DomainParticipantListener_var(new Stool::WorkerParticipantListener()); });
 
@@ -242,11 +79,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   ACE_Log_Category::ace_lib().priority_mask(0);
 
   ACE_Proactor proactor;
-  //ACE_Reactor reactor;
 
   // Register actions
   Stool::ActionManager::Registration write_action_registration("write", [&](){ return std::shared_ptr<Stool::Action>(new Stool::WriteAction(proactor)); });
-  //Stool::ActionManager::Registration write_action_registration("write", [&](){ return std::shared_ptr<Stool::Action>(new Stool::WriteAction(reactor)); });
 
   // Timestamps used to measure method call durations
   Builder::TimeStamp process_construction_begin_time = ZERO, process_construction_end_time = ZERO;
@@ -261,7 +96,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   std::vector<std::shared_ptr<std::thread> > thread_pool;
   for (size_t i = 0; i < THREAD_POOL_SIZE; ++i) {
     thread_pool.emplace_back(std::make_shared<std::thread>([&](){ proactor.proactor_run_event_loop(); }));
-    //thread_pool.emplace_back(std::make_shared<std::thread>([&](){ reactor.run_reactor_event_loop(); }));
   }
 
   try {
@@ -353,7 +187,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     std::cout << "Process tests stopped." << std::endl << std::endl;
 
     proactor.proactor_end_event_loop();
-    //reactor.end_reactor_event_loop();
     for (size_t i = 0; i < THREAD_POOL_SIZE; ++i) {
       thread_pool[i]->join();
     }
