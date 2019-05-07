@@ -56,9 +56,9 @@ void
 SecurityRegistry::SecurityConfigEntry::add_property(const OPENDDS_STRING& name, const OPENDDS_STRING& value)
 {
   // Move these up
-  static const char* AUTH_CONFIG_PROP_NAME = "auth_config";
-  static const char* ACCESS_CTRL_CONFIG_PROP_NAME = "access_ctrl_config";
-  static const char* CRYPTO_CONFIG_PROP_NAME = "crypto_config";
+  //static const char* AUTH_CONFIG_PROP_NAME = "auth_config";
+  //static const char* ACCESS_CTRL_CONFIG_PROP_NAME = "access_ctrl_config";
+  //static const char* CRYPTO_CONFIG_PROP_NAME = "crypto_config";
 
   // Config properties can either identity a specific plugin, or
   // a configuration property for the security plugins
