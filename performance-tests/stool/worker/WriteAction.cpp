@@ -61,7 +61,6 @@ bool WriteAction::init(const ActionConfig& config, ActionReport& report, Builder
     double period = 1.0 / write_frequency_prop->value.double_prop();
     int64_t sec = static_cast<int64_t>(period);
     uint64_t usec = static_cast<uint64_t>((period - static_cast<double>(sec)) * 1e6);
-    std::cout << "sec : " << sec << ", usec = " << usec << std::endl;
     write_period_ = ACE_Time_Value(sec, usec);
   }
 
@@ -71,7 +70,6 @@ bool WriteAction::init(const ActionConfig& config, ActionReport& report, Builder
     double period = write_period_prop->value.double_prop();
     int64_t sec = static_cast<int64_t>(period);
     uint64_t usec = static_cast<uint64_t>((period - static_cast<double>(sec)) * 1e6);
-    std::cout << "sec : " << sec << ", usec = " << usec << std::endl;
     write_period_ = ACE_Time_Value(sec, usec);
   }
 

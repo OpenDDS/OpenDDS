@@ -16,6 +16,9 @@ public:
   DDS::DataReader_var get_dds_datareader() { return datareader_; }
   const DDS::DataReader_var get_dds_datareader() const { return datareader_; }
 
+  DDS::DataReaderListener_var get_dds_datareaderlistener() { return listener_; }
+  const DDS::DataReaderListener_var get_dds_datareaderlistener() const { return listener_; }
+
   DataReaderReport& get_report() { return report_; }
   const DataReaderReport& get_report() const { return report_; }
 

@@ -20,6 +20,7 @@
 #include "json_2_builder.h"
 
 #include "ActionManager.h"
+#include "ForwardAction.h"
 #include "WorkerDataReaderListener.h"
 #include "WorkerDataWriterListener.h"
 #include "WorkerTopicListener.h"
@@ -82,6 +83,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
   // Register actions
   Stool::ActionManager::Registration write_action_registration("write", [&](){ return std::shared_ptr<Stool::Action>(new Stool::WriteAction(proactor)); });
+  Stool::ActionManager::Registration forward_action_registration("forward", [&](){ return std::shared_ptr<Stool::Action>(new Stool::ForwardAction(proactor)); });
 
   // Timestamps used to measure method call durations
   Builder::TimeStamp process_construction_begin_time = ZERO, process_construction_end_time = ZERO;

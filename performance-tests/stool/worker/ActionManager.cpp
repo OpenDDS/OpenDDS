@@ -9,9 +9,12 @@ ActionManager::ActionManager(const Stool::ActionConfigSeq& configs, Stool::Actio
   reports.length(configs.length());
   for (CORBA::ULong i = 0; i < configs.length(); ++i) {
     auto action = create_action(configs[i].type.in());
-    if (action) {
-      action->init(configs[i], reports[i], reader_map, writer_map);
+    if (!action) {
+      std::stringstream ss;
+      ss << "Invalid action name '" << configs[i].type << "'" << std::flush;
+      throw std::runtime_error(ss.str());
     }
+    action->init(configs[i], reports[i], reader_map, writer_map);
     actions_.push_back(action);
   }
 }

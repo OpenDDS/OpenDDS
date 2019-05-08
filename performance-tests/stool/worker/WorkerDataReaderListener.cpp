@@ -8,6 +8,24 @@ WorkerDataReaderListener::WorkerDataReaderListener() {
 WorkerDataReaderListener::WorkerDataReaderListener(size_t expected) : expected_count_(expected) {
 }
 
+void WorkerDataReaderListener::add_handler(DataHandler& handler) {
+  handlers_.push_back(&handler);
+}
+
+void WorkerDataReaderListener::remove_handler(const DataHandler& handler) {
+  bool found = true;
+  while (found) {
+    found = false;
+    for (auto it = handlers_.begin(); it != handlers_.end(); ++it) {
+      if (&handler == (*it)) {
+        handlers_.erase(it);
+        found = true;
+        break;
+      }
+    }
+  }
+}
+
 void WorkerDataReaderListener::on_requested_deadline_missed(DDS::DataReader_ptr /*reader*/, const DDS::RequestedDeadlineMissedStatus& /*status*/) {
 }
 
@@ -56,6 +74,9 @@ void WorkerDataReaderListener::on_data_available(DDS::DataReader_ptr reader) {
           // Incremental (variance * sample_count) calculation (doesn't require storing all the data, can be used to easily find variance / standard deviation)
           latency_var_x_sample_count_->value.double_prop(prev_latency_var_x_sample_count + ((latency - prev_latency_mean) * (latency - latency_mean_->value.double_prop())));
         }
+      }
+      for (auto it = handlers_.begin(); it != handlers_.end(); ++it) {
+        (*it)->on_data(data);
       }
     }
   }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "DataHandler.h"
 #include "DataReaderListener.h"
 #include "StoolTypeSupportImpl.h"
 
@@ -10,6 +11,9 @@ public:
 
   WorkerDataReaderListener();
   WorkerDataReaderListener(size_t expected);
+
+  void add_handler(DataHandler& handler);
+  void remove_handler(const DataHandler& handler);
 
   // From DDS::DataReaderListener
 
@@ -31,6 +35,7 @@ protected:
   size_t matched_count_{0};
   Builder::DataReader* datareader_{0};
   DataDataReader_var data_dr_;
+  std::vector<DataHandler*> handlers_;
   Builder::PropertyIndex last_discovery_time_;
   Builder::PropertyIndex sample_count_;
   Builder::PropertyIndex latency_min_;
