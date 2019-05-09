@@ -22,6 +22,10 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+OpenDDS_Dcps_Export
+bool
+is_wildcard(const char *str);
+
 /// Increments the count of occurances of the incompatible policy
 ///  for the status
 OpenDDS_Dcps_Export
