@@ -4,6 +4,8 @@
 #include "ace/Proactor.h"
 #include "StoolTypeSupportImpl.h"
 
+#include <random>
+
 namespace Stool {
 
 class WriteAction : public Action {
@@ -26,6 +28,7 @@ protected:
   ACE_Time_Value write_period_;
   DDS::InstanceHandle_t instance_;
   std::shared_ptr<ACE_Handler> handler_;
+  std::mt19937_64 mt_;
 };
 
 }

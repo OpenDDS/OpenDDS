@@ -125,8 +125,9 @@ void ForwardAction::on_data(const Data& data) {
 void ForwardAction::do_writes() {
   std::unique_lock<std::mutex> lock(mutex_);
   while (queue_first_ != queue_last_) {
-    const Data& data = data_queue_[queue_first_];
+    Data& data = data_queue_[queue_first_];
     for (auto it = data_dws_.begin(); it != data_dws_.end(); ++it) {
+      data.sent_time = Builder::get_time();
       (*it)->write(data, 0);
     }
     queue_first_ = (queue_first_ + 1) % data_queue_.size();

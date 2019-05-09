@@ -2,33 +2,30 @@
 
 module Stool {
 
-  typedef sequence<octet> OctetSeq;
-
-  // A common defintion of information required for audit purposes (when / where / who / why etc)
-  struct AuditInfo {
-    Builder::TimeStamp time;
-    string system;
-    string user;
-    string source;
+  struct UniqueId {
+    unsigned long long high;
+    unsigned long long low;
   };
 
-  typedef sequence<AuditInfo> AuditSeq;
+  typedef sequence<octet> OctetSeq;
 
 // ---
 // Data Section
 // ---
 
 #pragma DCPS_DATA_TYPE "Stool::Data"
-#pragma DCPS_DATA_KEY  "Stool::Data key"
+#pragma DCPS_DATA_KEY  "Stool::Data id.high"
+#pragma DCPS_DATA_KEY  "Stool::Data id.low"
   struct Data {
-    long key;
-    long pid;
-    long seq;
-    long priority;
-    AuditInfo created;
-    AuditSeq relay_trail;
+    UniqueId id;
+    Builder::TimeStamp created_time;
+    Builder::TimeStamp sent_time;
     OctetSeq buffer;
   };
+
+// ---
+// Action Section
+// ---
 
   struct ActionConfig {
     string name;
@@ -45,6 +42,10 @@ module Stool {
   };
 
   typedef sequence<ActionReport> ActionReportSeq;
+
+// ---
+// Worker Section
+// ---
 
   struct WorkerConfig {
     Builder::TimeStamp enable_time;

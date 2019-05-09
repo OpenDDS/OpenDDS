@@ -46,7 +46,13 @@ bool WriteAction::init(const ActionConfig& config, ActionReport& report, Builder
   }
 
   std::string name(config.name.in());
-  data_.key = one_at_a_time_hash(reinterpret_cast<const uint8_t*>(name.data()), name.size());
+
+  std::random_device r;
+  std::seed_seq seed{r(), one_at_a_time_hash(reinterpret_cast<const uint8_t*>(name.data()), name.size()), r(), r(), r(), r(), r(), r()}; 
+  mt_ = std::mt19937_64(seed);
+  
+  data_.id.high = mt_();
+  data_.id.low = mt_();
 
   size_t data_buffer_bytes = 256;
   auto data_buffer_bytes_prop = get_property(config.params, "data_buffer_bytes", Builder::PVK_ULL);
@@ -105,13 +111,13 @@ void WriteAction::stop() {
 void WriteAction::do_write() {
   std::unique_lock<std::mutex> lock(mutex_);
   if (started_ && !stopped_) {
-    data_.created.time = Builder::get_time();
+    data_.created_time = data_.sent_time = Builder::get_time();
     DDS::ReturnCode_t result = data_dw_->write(data_, 0);
     if (result != DDS::RETCODE_OK) {
       std::cout << "Error during WriteAction::do_write()'s call to datawriter::write()" << std::endl;
     }
     Builder::TimeStamp write_end_ts = Builder::get_time();
-    ACE_Time_Value write_begin(data_.created.time.sec, data_.created.time.nsec / 1e3);
+    ACE_Time_Value write_begin(data_.sent_time.sec, data_.sent_time.nsec / 1e3);
     ACE_Time_Value write_end(write_end_ts.sec, write_end_ts.nsec / 1e3);
     ACE_Time_Value delta = write_period_ - (write_end - write_begin);
     proactor_.schedule_timer(*handler_, nullptr, delta < ZERO ? ZERO : delta);

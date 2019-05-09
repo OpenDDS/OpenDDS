@@ -49,7 +49,7 @@ void WorkerDataReaderListener::on_data_available(DDS::DataReader_ptr reader) {
     DDS::ReturnCode_t status = data_dr_->take_next_sample(data, si);
     if (status == DDS::RETCODE_OK && si.valid_data) {
       const Builder::TimeStamp& now = Builder::get_time();
-      double latency = Builder::to_seconds_double(now - data.created.time);
+      double latency = Builder::to_seconds_double(now - data.sent_time);
       //std::cout << "WorkerDataReaderListener::on_data_available() - Valid Data :: Latency = " << std::fixed << std::setprecision(6) << latency << " seconds" << std::endl;
 
       std::unique_lock<std::mutex> lock(mutex_);
