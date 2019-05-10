@@ -1,4 +1,4 @@
-project: dcps, dcps_ts_defaults {
+project: dcps, dcps_ts_defaults, dcps_rtps_udp {
   TypeSupport_Files {
     DelayedDurable.idl
   }

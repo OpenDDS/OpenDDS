@@ -114,6 +114,8 @@ protected:
 
   void set_port_in_addr_string(OPENDDS_STRING& addr_str, u_short port_number);
 
+  mutable ACE_SYNCH_MUTEX lock_;
+
 private:
 
   /// Adjust the configuration values which gives warning on adjusted
@@ -130,7 +132,6 @@ private:
   const OPENDDS_STRING name_;
 
   TransportImpl_rch impl_;
-  ACE_SYNCH_MUTEX lock_;
 };
 
 } // namespace DCPS

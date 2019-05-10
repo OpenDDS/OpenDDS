@@ -24,8 +24,18 @@ const args = require('yargs')
     type: 'string',
     requiresArg: true
   })
+  .option('azure', {
+    describe: 'Get send addresses from Azure (resource group)',
+    type: 'string',
+    requiresArg: true
+  })
+  .option('aws', {
+    describe: 'Get send addresses from AWS (tag)',
+    type: 'string',
+    requiresArg: true
+  })
   .option('interval', {
-    describe: 'Polling interval in seconds for GCP',
+    describe: 'Polling interval in seconds for GCP/Azure/AWS',
     type: 'number',
     requiresArg: true,
     default: 60
@@ -64,6 +74,14 @@ if (args.send) {
 
 if (args.gcp) {
   require('./gcp.js')(args, sendTo)
+}
+
+if (args.azure) {
+  require('./azure.js')(args, sendTo)
+}
+
+if (args.aws) {
+  require('./aws.js')(args, sendTo)
 }
 
 const msock = dgram.createSocket({ type: 'udp4', reuseAddr: true })

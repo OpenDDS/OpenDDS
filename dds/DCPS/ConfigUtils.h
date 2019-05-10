@@ -26,6 +26,11 @@ namespace DCPS {
   typedef OPENDDS_LIST(SubsectionPair) KeyList;
 
 
+  /**
+   * Convert string s to value of integral type T.
+   *
+   * Returns true for success, false for error
+   */
   template <typename T>
   bool convertToInteger(const OPENDDS_STRING& s, T& value)
   {

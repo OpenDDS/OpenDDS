@@ -130,6 +130,8 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
     sedp_multicast_.length(1);
     sedp_multicast_[0] = mc_locator;
   }
+
+  sedp_.rtps_relay_address(disco->sedp_rtps_relay_address());
 }
 
 
@@ -304,8 +306,6 @@ Spdp::write_secure_updates()
 {
   if (shutdown_flag_.value()) { return; }
 
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-
   const Security::SPDPdiscoveredParticipantData& pdata =
     build_local_pdata(Security::DPDK_SECURE);
 
@@ -445,7 +445,7 @@ Spdp::handle_participant_data(DCPS::MessageId id, const ParticipantData_t& cpdat
     match_unauthenticated(guid, dp);
 #endif
 
-  } else {
+  } else { // Existing Participant
 
 #ifdef OPENDDS_SECURITY
     // Non-secure updates for authenticated participants are used for liveliness but
@@ -505,6 +505,12 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::data_received - ")
       ACE_TEXT("failed to convert from ParameterList to ")
       ACE_TEXT("SPDPdiscoveredParticipantData\n")));
+    return;
+  }
+
+  const DCPS::RepoId guid = make_guid(pdata.participantProxy.guidPrefix, DCPS::ENTITYID_PARTICIPANT);
+  if (guid == guid_) {
+    // About us, stop.
     return;
   }
 
@@ -826,10 +832,10 @@ Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileM
 
   dp.crypto_tokens_ = reinterpret_cast<const DDS::Security::ParticipantCryptoTokenSeq&>(msg.message_data);
 
-  if (key_exchange->set_remote_participant_crypto_tokens(crypto_handle_, dp.crypto_handle_, dp.crypto_tokens_, se) == false) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-      ACE_TEXT("(%P|%t) ERROR: Spdp::handle_participant_crypto_tokens() - ")
-      ACE_TEXT("Unable to set remote participant crypto tokens with crypto key exchange plugin. Security Exception[%d.%d]: %C\n"),
+  if (!key_exchange->set_remote_participant_crypto_tokens(crypto_handle_, dp.crypto_handle_, dp.crypto_tokens_, se)) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::handle_participant_crypto_tokens() - ")
+      ACE_TEXT("Unable to set remote participant crypto tokens with crypto key exchange plugin. ")
+      ACE_TEXT("Security Exception[%d.%d]: %C\n"),
         se.code, se.minor_code, se.message.in()));
     return;
   }
@@ -1263,7 +1269,8 @@ Spdp::build_local_pdata(
       sedp_multicast_,
       nonEmptyList /*defaultMulticastLocatorList*/,
       nonEmptyList /*defaultUnicastLocatorList*/,
-      {0 /*manualLivelinessCount*/}   //FUTURE: implement manual liveliness
+      {0 /*manualLivelinessCount*/},   //FUTURE: implement manual liveliness
+      qos_.property
     },
     { // Duration_t (leaseDuration)
       static_cast<CORBA::Long>((disco_->resend_period() * LEASE_MULT).sec()),
@@ -1343,7 +1350,7 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer, bool securityGuids)
     ACE_DEBUG((
           LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::SpdpTransport() - ")
-          ACE_TEXT("failed setting default_multicast address %C:%hd %p\n"),
+          ACE_TEXT("failed setting default_multicast address %C:%hu %p\n"),
           mc_addr.c_str(), mc_port, ACE_TEXT("ACE_INET_Addr::set")));
     throw std::runtime_error("failed to set default_multicast address");
   }
@@ -1353,7 +1360,7 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer, bool securityGuids)
   if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((LM_INFO,
                ACE_TEXT("(%P|%t) Spdp::SpdpTransport::SpdpTransport ")
-               ACE_TEXT("joining group %C %C:%hd\n"),
+               ACE_TEXT("joining group %C %C:%hu\n"),
                net_if.c_str (),
                mc_addr.c_str (),
                mc_port));
@@ -1369,7 +1376,7 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer, bool securityGuids)
                                   ACE_TEXT_CHAR_TO_TCHAR(net_if.c_str()))) {
     ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::SpdpTransport() - ")
-        ACE_TEXT("failed to join multicast group %C:%hd %p\n"),
+        ACE_TEXT("failed to join multicast group %C:%hu %p\n"),
         mc_addr.c_str(), mc_port, ACE_TEXT("ACE_SOCK_Dgram_Mcast::join")));
     throw std::runtime_error("failed to join multicast group");
   }
@@ -1380,6 +1387,10 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer, bool securityGuids)
   for (iter it = outer_->disco_->spdp_send_addrs().begin(),
        end = outer_->disco_->spdp_send_addrs().end(); it != end; ++it) {
     send_addrs_.insert(ACE_INET_Addr(it->c_str()));
+  }
+
+  if (outer_->disco_->spdp_rtps_relay_address() != ACE_INET_Addr()) {
+    send_addrs_.insert(outer_->disco_->spdp_rtps_relay_address());
   }
 }
 
@@ -1746,7 +1757,7 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_socket() - ")
                ACE_TEXT("failed to set TTL value to %d ")
-               ACE_TEXT("for port:%hd %p\n"),
+               ACE_TEXT("for port:%hu %p\n"),
                outer_->disco_->ttl(), uni_port, ACE_TEXT("DCPS::set_socket_multicast_ttl:")));
     throw std::runtime_error("failed to set TTL");
   }

@@ -39,15 +39,15 @@ DCPS_IR_Participant::DCPS_IR_Participant(const TAO_DDS_DCPSFederationId& federat
     topicIdGenerator_(
       federationId.id(),
       OpenDDS::DCPS::RepoIdConverter(id).participantId(),
-      isBit ? OpenDDS::DCPS::KIND_BUILTIN_TOPIC : OpenDDS::DCPS::KIND_TOPIC),
+      isBit ? OpenDDS::DCPS::KIND_BUILTIN_TOPIC : OpenDDS::DCPS::KIND_USER_TOPIC),
     publicationIdGenerator_(
       federationId.id(),
       OpenDDS::DCPS::RepoIdConverter(id).participantId(),
-      isBit ? OpenDDS::DCPS::KIND_BUILTIN_WRITER : OpenDDS::DCPS::KIND_WRITER),
+      isBit ? OpenDDS::DCPS::KIND_BUILTIN_WRITER : OpenDDS::DCPS::KIND_USER_WRITER),
     subscriptionIdGenerator_(
       federationId.id(),
       OpenDDS::DCPS::RepoIdConverter(id).participantId(),
-      isBit ? OpenDDS::DCPS::KIND_BUILTIN_READER : OpenDDS::DCPS::KIND_READER),
+      isBit ? OpenDDS::DCPS::KIND_BUILTIN_READER : OpenDDS::DCPS::KIND_USER_READER),
     um_(um),
     isBitPublisher_(isBit)
 {

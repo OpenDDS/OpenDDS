@@ -24,7 +24,7 @@ use warnings;
 ## Version of OCI's TAO to download
 my $oci_tao_version = '2.2a';
 ## Version of DOC Group ACE/TAO to download, uses the ACE version number
-my $doc_tao_version = '6.5.3';
+my $doc_tao_version = '6.5.5';
 
 # save args before Getopt modifies them
 my @ARGS = @ARGV;
@@ -48,7 +48,8 @@ my %platforminfo =
                'libpath' => 'PATH',
                'cl_versions' => {13.1 => 'vc71', 14 => 'vc8', 15 => 'vc9',
                                  16 => 'vc10', 17 => 'vc11', 18 => 'vc12',
-                                 19 => 'vc14', 19.1 => 'vs2017'},
+                                 19 => 'vc14', 19.1 => 'vs2017',
+                                 19.2 => 'vs2019'},
               },
    'macosx' => {
                 'compilers' => ['clang++'],
@@ -155,7 +156,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'ace=s', 'ACE (use ACE_ROOT, ACE_wrappers, or download)',
     'tao=s', 'TAO (use TAO_ROOT, ACE_ROOT/TAO, or download)',
     'mpc=s', 'MPC (use MPC_ROOT, ACE_ROOT/MPC, or download)',
-    'doc_group!', 'Use the DOC Group release of TAO',
+    'doc-group|doc_group!', 'Use the DOC Group release of TAO',
     'ace-github-latest!', 'Clone latest ACE/TAO/MPC from GitHub',
    ],
    ['Advanced configuration:',
@@ -169,9 +170,11 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'jboss:s', 'JBoss application server (use JBOSS_HOME)',
     'ant:s', 'Ant for JBoss (use ANT_HOME or system pkg)',
     'wireshark:s', 'Wireshark source, "non-CMake" based (use WIRESHARK_SRC)',
-    'wireshark_cmake:s', 'Wireshark built with CMake, requires wireshark_build and wireshark_lib (use WIRESHARK_SRC)',
-    'wireshark_build:s', 'Wireshark CMake Build Location',
-    'wireshark_lib:s', 'Wireshark CMake libraries location, relative to wireshark_build',
+    'wireshark-cmake|wireshark_cmake:s',
+      'Wireshark built with CMake, requires wireshark-build and wireshark-lib (use WIRESHARK_SRC)',
+    'wireshark-build|wireshark_build:s', 'Wireshark CMake Build Location',
+    'wireshark-lib|wireshark_lib:s',
+      'Wireshark CMake libraries location, relative to wireshark-build',
     'glib:s', 'GLib for Wireshark (use GLIB_ROOT or system pkg)',
     'rapidjson:s', 'RapidJSON for Wireshark Sample Dissection (optional)',
     'qt:s', 'Qt5 (use QTDIR or system pkg)',
@@ -299,6 +302,7 @@ my %specific =
 sub which {
   my $file = shift;
   for my $p (File::Spec->path()) {
+    next if $p eq '.';
     if (-x "$p/$file") {
       return "$p/$file";
     }
@@ -572,32 +576,33 @@ if (!$ace_src || !$tao_src) {
     my $urlbase = 'https://github.com/DOCGroup';
 
     print "Cloning git repo: $urlbase/ACE_TAO\n";
-    my $err = system("git clone --depth 1 $urlbase/ACE_TAO");
+    my $err = system("git clone -q --depth 1 $urlbase/ACE_TAO");
     die 'ERROR: Failed to clone ACE/TAO from GitHub'
       if $err ||
         ! -r 'ACE_TAO/ACE/ace/ACE.h' ||
           ! -r 'ACE_TAO/TAO/tao/ORB.h';
 
     print "Cloning git repo: $urlbase/MPC into ACE_TAO/ACE/MPC\n";
-    $err = system("git clone --depth 1 $urlbase/MPC ACE_TAO/ACE/MPC");
+    $err = system("git clone -q --depth 1 $urlbase/MPC ACE_TAO/ACE/MPC");
     die 'ERROR: Failed to clone MPC (into ACE_TAO/ACE/MPC) from GitHub'
       if $err ||
         ! -r 'ACE_TAO/ACE/MPC/mwc.pl';
 
     $ace_src = normalizePath('ACE_TAO/ACE');
     $tao_src = normalizePath('ACE_TAO/TAO');
-
-  } else {
+  }
+  else {
     my($urlbase, $file, $download_message);
 
-    if ($opts{'doc_group'}) {
+    if ($opts{'doc-group'}) {
       my $github_url_tao_version = $doc_tao_version;
       $github_url_tao_version =~ s/\./_/g;
       $urlbase = 'https://github.com/DOCGroup/ACE_TAO/releases/download/ACE%2BTAO-' . $github_url_tao_version . '/';
       $file = 'ACE+TAO-src-' . $doc_tao_version . '.'
         . ($is_windows ? 'zip' : 'tar.gz');
       $download_message = "Downloading $file";
-    } else {
+    }
+    else {
       $urlbase = 'http://download.ociweb.com/TAO-' . $oci_tao_version . '/';
       $file = 'ACE+TAO-' . $oci_tao_version . '_with_latest_patches_NO_makefiles.'
         . ($is_windows ? 'zip' : 'tar.gz');
@@ -667,16 +672,19 @@ if (!$ace_src || !$tao_src) {
         else {
           $err = system(($^O eq 'solaris' ? 'g' : '') . "tar xzf $ddsroot/$file");
         }
-      } else {
+      }
+      else {
         # Try Archive::Zip
         print "Archive::Extract isn't installed, trying Archive::Zip\n" if $opts{'verbose'};
         eval {require Archive::Zip};
         if ($@) {
           print "Neither Archive::Extract or Archive::Zip are installed\n" if $opts{'verbose'};
-        } else {
+        }
+        else {
           if ($opts{'dry-run'}) {
             print "Dry-run: would Archive::Zip $file\n";
-          } else {
+          }
+          else {
             my $zip = Archive::Zip->new();
             if ($zip->read( $file ) == Archive::Zip::AZ_OK() &&
               $zip->extractTree() == Archive::Zip::AZ_OK()) {
@@ -909,10 +917,10 @@ my %optdep =
    'jboss' =>     ['JBOSS_HOME',    'lib/jboss-common.jar'],
    'ant' =>       ['ANT_HOME',      'bin/ant'],
    'wireshark' => ['WIRESHARK_SRC', 'epan/packet.h',               'wireshark'],
-   'wireshark_cmake' =>['WIRESHARK_SRC', 'epan/packet.h',          'wireshark_cmake'],
-   'wireshark_build' =>
+   'wireshark-cmake' =>['WIRESHARK_SRC', 'epan/packet.h',          'wireshark_cmake'],
+   'wireshark-build' =>
                   ['WIRESHARK_BUILD', 'config.h'],
-   'wireshark_lib' =>
+   'wireshark-lib' =>
                   ['WIRESHARK_LIB'],
    'glib' =>      ['GLIB_ROOT',     'include/glib-2.0/glib.h'],
    'rapidjson' => ['RAPIDJSON_ROOT', 'include/rapidjson/rapidjson.h', 'no_itl=0'],
@@ -944,22 +952,26 @@ my $wireshark_install = '/usr/include/wireshark';
 if (exists $opts{'wireshark'} && !defined $ENV{'WIRESHARK_SRC'} && $opts{'wireshark'} eq '') {
   if (-d $wireshark_install) {
     $opts{'wireshark'} = $wireshark_install;
-  } else {
+  }
+  else {
     die "ERROR: --wireshark must be given a value because there is not a " .
         "development package installed at " . $wireshark_install . ", stopped";
   }
 }
 
 my $wireshark_lib_defaulted = 0;
-if (exists $opts{'wirehshark_cmake'} && !exists $opts{'wireshark_lib'}) {
+if (exists $opts{'wireshark-cmake'} && !exists $opts{'wireshark-lib'}) {
   if ($^O =~ /MSWin32/) {
-    $opts{'wirehshark_lib'} = "run\\RelWithDebInfo";
-  } elsif ($^O =~ /darwin/) {
-    $opts{'wirehshark_lib'} = "run/Wireshark.app/Contents/Frameworks";
-  } elsif ($^O =~ /linux/) {
-    $opts{'wirehshark_lib'} = "";
-  } else {
-    die "ERROR: --wireshark_lib is needed because we couldn't decide on a default value";
+    $opts{'wireshark-lib'} = "run\\RelWithDebInfo";
+  }
+  elsif ($^O =~ /darwin/) {
+    $opts{'wireshark-lib'} = "run/Wireshark.app/Contents/Frameworks";
+  }
+  elsif ($^O =~ /linux/) {
+    $opts{'wireshark-lib'} = "";
+  }
+  else {
+    die "ERROR: --wireshark-lib is needed because we couldn't decide on a default value";
   }
   $wireshark_lib_defaulted = 1;
 }
@@ -999,7 +1011,8 @@ if ($opts{'security'}) {
       }
     }
 
-    die "ERROR: CMake program does not exist..." unless -f $opts{'cmake'};
+    die "ERROR: CMake program $opts{'cmake'} does not exist..."
+      unless -f $opts{'cmake'};
 
     print "Using CMake '$opts{'cmake'}' to compile Google Test Framework\n"
       if $opts{'verbose'};
@@ -1037,7 +1050,8 @@ if (exists $opts{'gtest'}) {
 
     env_from_opt('gtest', 'GTEST_ROOT');
 
-  } else {
+  }
+  else {
     my $sm_dir = Cwd::abs_path('./tests/googletest');
     my $sm_src = File::Spec->catdir($sm_dir, 'googletest');
     my $sys_dir = File::Spec->catdir((system_default_install_dir(),
@@ -1047,8 +1061,8 @@ if (exists $opts{'gtest'}) {
       $opts{'gtest-precompiled'} = 0;
       $opts{'gtest'} = $sm_dir;
       # No need to set env. variable with submodule.
-
-    } elsif (-f File::Spec->catfile($sys_dir, $sanity)) {
+    }
+    elsif (-f File::Spec->catfile($sys_dir, $sanity)) {
       $opts{'gtest-precompiled'} = 1;
       $opts{'gtest'} = $sys_dir;
       env_from_opt('gtest', 'GTEST_ROOT');
@@ -1067,8 +1081,8 @@ if (exists $opts{'rapidjson'}) {
 
     if (-f File::Spec->catfile($sm_dir, $sanity)) {
       $opts{'rapidjson'} = $sm_dir;
-
-    } elsif (-f File::Spec->catfile($sys_dir, $sanity)) {
+    }
+    elsif (-f File::Spec->catfile($sys_dir, $sanity)) {
       $opts{'rapidjson'} = $sys_dir;
     }
     die "ERROR: rapidjson '$sanity' not found in submodule dir '$sm_dir' or default install dir '$sys_dir'"
@@ -1132,8 +1146,8 @@ for my $key (keys %optdep) {
 
       if (-d $dir) {
         $opts{$key} = $dir;
-
-      } else {
+      }
+      else {
         die "Default '$key' directory '$dir' not found.\nStopped";
       }
 
@@ -1235,19 +1249,25 @@ if ($opts{'openssl'} && $opts{'openssl'} ne 'skip_version_check') {
 
 sub win32_cmake_generator {
   my $ver = shift;
-  my $arch = shift;
 
   my %map = ('vc9' => 'Visual Studio 9 2008',
              'vc10' => 'Visual Studio 10 2010',
              'vc11' => 'Visual Studio 11 2012',
              'vc12' => 'Visual Studio 12 2013',
              'vc14' => 'Visual Studio 14 2015',
-             'vs2017' => 'Visual Studio 15 2017');
+             'vs2017' => 'Visual Studio 15 2017',
+             'vs2019' => 'Visual Studio 16 2019');
 
   die "ERROR: Unsupported Visual Studio version '$ver' supplied.\nStopped"
     if ! exists $map{$ver};
 
-  return $map{$ver} . ($arch eq 'x64' ? ' Win64' : '');
+  return $map{$ver};
+}
+
+sub win32_cmake_arch {
+  my $arch = shift;
+
+  return ($arch eq 'x64' ? 'x64' : 'Win32');
 }
 
 if ($opts{'security'} && $tests && $opts{'cmake'} && ! $opts{'gtest-precompiled'}) {
@@ -1255,18 +1275,16 @@ if ($opts{'security'} && $tests && $opts{'cmake'} && ! $opts{'gtest-precompiled'
   my $build_dir = $opts{'gtest'} . $slash . 'build';
   my $install_dir = $build_dir . $slash . 'install';
   my $cmake = $opts{'cmake'};
-  my @cmake_cmds = (($is_windows ?
-                      ["$cmake",
-                       "-D", "gtest_force_shared_crt=ON",
-                       "-D", "CMAKE_CXX_FLAGS=/D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING=1",
-                       "-D", "CMAKE_INSTALL_PREFIX=$install_dir",
-                       "-G", win32_cmake_generator(
-                               $opts{'compiler_version'},
-                               $opts{'compiler_target_architecture'}),
-                       ".."] :
-                      ["$cmake",
-                       "-D", "CMAKE_INSTALL_PREFIX=$install_dir",
-                       ".."]),
+  my @cmake_platform_args = $is_windows ?
+    ('-Dgtest_force_shared_crt=ON',
+     '-DCMAKE_CXX_FLAGS=/D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING=1',
+     '-G', '"' . win32_cmake_generator($opts{'compiler_version'}) . '"',
+     '-A', win32_cmake_arch($opts{'compiler_target_architecture'})) : ();
+  my @cmake_cmds = ([$cmake,
+                     "-DCMAKE_INSTALL_PREFIX=$install_dir",
+                     '-DCMAKE_INSTALL_LIBDIR=lib',
+                     @cmake_platform_args,
+                     '..'],
                     ["$cmake", "--build", ".", "--target", "install"]);
 
   mkdir($build_dir)
@@ -1299,38 +1317,39 @@ if (exists $opts{'jboss'} && !exists $opts{'ant'}) {
   die "ERROR: --ant is required for --jboss (OpenDDS JMS Provider).\nStopped";
 }
 
-if (exists $opts{'wireshark'} || exists $opts{'wireshark_cmake'}) {
+if (exists $opts{'wireshark'} || exists $opts{'wireshark-cmake'}) {
   if (!exists $opts{'glib'}) {
-    die "ERROR: --glib is required for --wireshark and --wireshark_cmake.\nStopped";
+    die "ERROR: --glib is required for --wireshark and --wireshark-cmake.\nStopped";
   }
 
-  if (exists $opts{'wireshark_cmake'}) {
+  if (exists $opts{'wireshark-cmake'}) {
 
     if (exists $opts{'wireshark'}) {
-      die "ERROR: --wireshark and --wireshark_cmake can not be used at the same time.\nStopped";
+      die "ERROR: --wireshark and --wireshark-cmake can not be used at the same time.\nStopped";
     }
 
-    if (! -d ($opts{'wireshark_build'} . '/' . $opts{'wireshark_lib'})) {
+    if (! -d ($opts{'wireshark-build'} . '/' . $opts{'wireshark-lib'})) {
       if ($wireshark_lib_defaulted) {
-        die "ERROR: The default value for wireshark_lib: " . $opts{'wireshark_lib'} .
-            " does not exist, please supply wireshark_lib with the correct value";
-      } else {
-        die "ERROR: The supplied wireshark_lib: " . $opts{'wireshark_lib'} . " does not exist.";
+        die "ERROR: The default value for wireshark-lib: " . $opts{'wireshark-lib'} .
+            " does not exist, please supply wireshark-lib with the correct value";
+      }
+      else {
+        die "ERROR: The supplied wireshark-lib: " . $opts{'wireshark-lib'} . " does not exist.";
       }
     }
   }
 }
 
-if (exists $opts{'wireshark_cmake'} && !exists $opts{'wireshark_build'}) {
-  die "ERROR: --wireshark_build are required with --wireshark_cmake.\nStopped";
+if (exists $opts{'wireshark-cmake'} && !exists $opts{'wireshark-build'}) {
+  die "ERROR: --wireshark-build are required with --wireshark-cmake.\nStopped";
 }
 
-if (exists $opts{'wireshark_lib'} && !exists $opts{'wireshark_cmake'}) {
-  die "ERROR: --wireshark_cmake and --wireshark_build is required for --wireshark_lib.\nStopped";
+if (exists $opts{'wireshark-lib'} && !exists $opts{'wireshark-cmake'}) {
+  die "ERROR: --wireshark-cmake and --wireshark-build is required for --wireshark-lib.\nStopped";
 }
 
-if (exists $opts{'wireshark_build'} && !exists $opts{'wireshark_cmake'}) {
-  die "ERROR: --wireshark_cmake is required for --wireshark_build.\nStopped";
+if (exists $opts{'wireshark-build'} && !exists $opts{'wireshark-cmake'}) {
+  die "ERROR: --wireshark-cmake is required for --wireshark-build.\nStopped";
 }
 
 if ($opts{'glib'}) {
@@ -1375,8 +1394,9 @@ sub push_libpath {
 if (exists $opts{'qt'}) {
   my $qglobal = "QtCore" . $slash . "qglobal.h";
   my $qt_include;
-  my $qt_bin;
-  my $qt_lib;
+  my $qt_bin; # location of Qt's code generators (like moc)
+  my $qt_lib; # where linker should look for input (location of .lib or .so)
+  my $qt_path; # add to PATH or LD_LIBRARY_PATH (location of .dll or .so.*)
   my $qt_bin_suffix = exists $ENV{'QT5_SUFFIX'} ? $ENV{'QT5_SUFFIX'} : '';
   my $qt_moc = "moc" . $qt_bin_suffix . $exeext;
   my $qt_default_suffix = "-qt5";
@@ -1400,28 +1420,33 @@ if (exists $opts{'qt'}) {
     $qt_lib = `pkg-config --variable=libdir Qt5Core`;
     die "ERROR: could not resolve system Qt lib location$qt_help_mesg" if ($!);
     chomp $qt_lib;
-  } else {
+  }
+  else {
     if (exists $opts{'qt-include'}) {
       if (!length($opts{'qt-include'})) {
         die "ERROR: --qt-include requires an argument$qt_help_mesg";
       }
       $qt_include = $opts{'qt-include'};
-    } else {
+    }
+    else {
       $qt_include = $targetEnv{'QTDIR'} . $slash . 'include';
     }
 
     if (exists $ENV{'QT5_BINDIR'}) {
       $qt_bin = $ENV{'QT5_BINDIR'};
-    } else {
+    }
+    else {
       $qt_bin = $targetEnv{'QTDIR'} . $slash . 'bin';
     }
 
     if (exists $ENV{'QT5_LIBDIR'}) {
       $qt_lib = $ENV{'QT5_LIBDIR'};
-    } else {
+    }
+    else {
       $qt_lib = $targetEnv{'QTDIR'} . $slash . ($is_windows ? 'bin' : 'lib');
     }
   }
+  $qt_path = $qt_lib;
 
   # Try to guess if Qt vcpkg is being used
   my $vcpkg_tools = join($slash, $targetEnv{'QTDIR'}, "tools", "qt5");
@@ -1432,8 +1457,8 @@ if (exists $opts{'qt'}) {
   if ($assume_vcpkg) {
     $qt_bin = $vcpkg_tools;
     if ($debug) {
-      setEnv('QT5_LIBDIR', join($slash, $targetEnv{'QTDIR'}, "debug", "lib"));
-      $qt_lib = join($slash, $targetEnv{'QTDIR'}, "debug",
+      $qt_lib = join($slash, $targetEnv{'QTDIR'}, "debug", "lib");
+      $qt_path = join($slash, $targetEnv{'QTDIR'}, "debug",
         ($is_windows ? 'bin' : 'lib'));
     }
   }
@@ -1447,7 +1472,8 @@ if (exists $opts{'qt'}) {
     my $qt_subdir = $qt_include . $slash . 'qt5';
     if (-r $qt_subdir . $slash . $qglobal) {
       $qt_include = $qt_subdir;
-    } else {
+    }
+    else {
       die "ERROR: Could not find Qt headers at $qt_include" .
         " ($qglobal could not be found)$qt_help_mesg";
     }
@@ -1459,7 +1485,8 @@ if (exists $opts{'qt'}) {
     if ((!exists $ENV{'QT5_SUFFIX'}) &&
       (-r $qt_bin . $slash . $qt_moc_default_suffix)) {
       $qt_bin_suffix = $qt_default_suffix;
-    } else {
+    }
+    else {
       die "ERROR: Could not find Qt build tools at $qt_bin" .
         " ($qt_moc could not be found)$qt_help_mesg";
     }
@@ -1468,8 +1495,10 @@ if (exists $opts{'qt'}) {
   setEnv('QT5_INCDIR', $qt_include);
   setEnv('QT5_BINDIR', $qt_bin);
   setEnv('QT5_SUFFIX', $qt_bin_suffix);
-  push_libpath(\%targetEnv, $qt_lib);
-} elsif (exists $opts{'qt-include'}) {
+  setEnv('QT5_LIBDIR', $qt_lib);
+  push_libpath(\%targetEnv, $qt_path);
+}
+elsif (exists $opts{'qt-include'}) {
   die "ERROR: --qt-include requires --qt, stopped\n";
 }
 
@@ -1576,7 +1605,8 @@ IDL2JNI_DEP = $(IDL2JNI)$(HOST_EXE_EXT)
 CROSS-COMPILE = 1
 EOT
       }
-    } elsif ($buildEnv->{'build'} eq 'host') {
+    }
+    elsif ($buildEnv->{'build'} eq 'host') {
       if ($cross_compile && $opts{'java'}) {
         print $UM "java:=1\n";
       }
@@ -1639,8 +1669,8 @@ EOT
         $requested_features{$key} = $value;
       }
       for my $f (@ace_features) {
-        if(defined $requested_features{$f}) {
-          if(!defined $existing_features{$f}) {
+        if (defined $requested_features{$f}) {
+          if (!defined $existing_features{$f}) {
             die "ERROR: Requested feature $f not defined for ACE/TAO";
           }
           elsif ($requested_features{$f} != $existing_features{$f}) {
@@ -1679,7 +1709,8 @@ EOT
         if (defined $requested_macros{$f}) {
           if (!defined $existing_macros{$f}) {
             die "ERROR: Requested macro $f not defined for ACE/TAO";
-          } elsif ($requested_macros{$f} != $existing_macros{$f}) {
+          }
+          elsif ($requested_macros{$f} != $existing_macros{$f}) {
             die "ERROR: Macro $f set to $requested_macros{$f} but has " .
               "value $existing_macros{$f} in ACE/TAO";
           }
@@ -2044,6 +2075,7 @@ sub write_cmake_file {
       ownership-kind-exclusive
       object-model-profile
       persistence-profile
+      inline
     );
 
     my %disabled_by_default = map {$_, 0} qw(
@@ -2074,14 +2106,14 @@ sub write_cmake_file {
 
       if (ref($val) eq 'ARRAY') {
         $result .= qq{set($var "${\( to_cmake_list($val))}")\n};
-
-      } else {
+      }
+      else {
         my $cmake_scalar = to_cmake_scalar($val);
 
         if ($cmake_scalar eq 'ON' || $cmake_scalar eq 'OFF') {
           $result .= qq{set($var $cmake_scalar)\n};
-
-        } else {
+        }
+        else {
           $result .= qq{set($var "$cmake_scalar")\n};
         }
       }

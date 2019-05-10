@@ -43,7 +43,7 @@ public:
   /// Close the singleton instance of this class.
   static void close();
 
-  static const OPENDDS_STRING DEFAULT_CONFIG_NAME;
+  static const char* DEFAULT_CONFIG_NAME;
 
   /// This will shutdown all Security plugin objects.
   ///
@@ -84,12 +84,12 @@ public:
 private:
   friend class ACE_Singleton<SecurityRegistry, ACE_Recursive_Thread_Mutex>;
 
-  static const OPENDDS_STRING DEFAULT_INST_PREFIX;
-  static const OPENDDS_STRING DEFAULT_PLUGIN_NAME;
-  static const OPENDDS_STRING SECURITY_SECTION_NAME;
-  static const OPENDDS_STRING ACCESS_CTRL_PLUGIN_NAME;
-  static const OPENDDS_STRING AUTHENTICATION_PLUGIN_NAME;
-  static const OPENDDS_STRING CRYPTO_PLUGIN_NAME;
+  static const char* DEFAULT_INST_PREFIX;
+  static const char* DEFAULT_PLUGIN_NAME;
+  static const char* SECURITY_SECTION_NAME;
+  static const char* ACCESS_CTRL_PLUGIN_NAME;
+  static const char* AUTHENTICATION_PLUGIN_NAME;
+  static const char* CRYPTO_PLUGIN_NAME;
 
   // Internal class used to store configuration information
   class SecurityConfigEntry : public DCPS::RcObject

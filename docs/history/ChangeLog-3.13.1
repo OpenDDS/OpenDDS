@@ -1,0 +1,448 @@
+Wed Jan 23 16:50:48 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit 944b59f3af6af16d73c020d5ce38d35ad2bdf53d
+
+        * NEWS.md:
+
+          Updated NEWS for 3.13.1
+
+Fri Nov 02 21:03:41 UTC 2018  Adam Mitz  <mitza@ociweb.com>
+        commit 1c93434bb73b3defeda26cd3fc175ced75d154a1
+
+        * configure:
+
+          configure: fix Perl warnings
+
+          (cherry picked from commit
+          ebfc62a1b1673139666d5c1fa7b365a3f13e66f2)
+
+Tue Jan 22 16:10:27 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit f536ddfd87367e58677102867306b5f771e815d8
+
+        * configure:
+
+          fix configure script for this branch
+
+Thu Nov 01 21:18:35 UTC 2018  Adam Mitz  <mitza@objectcomputing.com>
+        commit 3354808540a6481e254c58423e4e05b6654fd84a
+
+        * configure:
+
+          configure: support cross-compiles with pre-built host tools
+
+          (cherry picked from commit
+          3b146f68614fa8ed4fdf53af14c01785c28f0013)
+
+          # Conflicts:
+          #       configure
+
+Mon Jan 07 16:12:53 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit b11c64669976e233ca8cc1912f0c8f8017c895b3
+
+        * configure:
+
+          Merge pull request #1027 from mitza-oci/azureci-vcpkg
+
+          Configure script support for vcpkg-installed openssl and xerces3
+
+          (cherry picked from commit
+          1d1d4a9eee9b2fb6cab48db2febb42ee9f8f24f4)
+
+          # Conflicts:
+          #       azure-pipelines.yml
+          #       configure
+
+Tue Nov 06 23:16:22 UTC 2018  Adam Mitz  <mitza@objectcomputing.com>
+        commit dc46ef9af807b3694f9731e035b5b60505c7e904
+
+        * configure:
+        * docs/android.md:
+
+          Merge pull request #964 from iguessthislldo/igtd/android
+
+          Android support in the configure script
+
+          (cherry picked from commit
+          46e1e748b3ca86ee9e650169d2f8565989d1d459)
+
+          # Conflicts:
+          #       configure
+
+Mon Jan 21 22:06:41 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit 3e1502714ad9fd7076c10323e8886d2de905d84e
+
+          Merge branch 'test-delayed-durable' into branch-DDS-3.13
+
+Mon Jan 21 21:57:07 UTC 2019  Adam Mitz  <mitza@ociweb.com>
+        commit 2c8c709efddf06861b3976bd9bddba9449b09efc
+
+        * tests/DCPS/DelayedDurable/DelayedDurable.cpp:
+        * tests/DCPS/DelayedDurable/DelayedDurable.mpc:
+        * tests/DCPS/DelayedDurable/rtps_disc.ini:
+        * tests/DCPS/DelayedDurable/run_test.pl:
+
+          Updated DelayedDurable test for static and safety builds
+
+Fri Jan 18 18:54:52 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit 10724a8d8ad1c8ea11b4b529fda57cea0164a1ce
+
+        * NEWS.md:
+
+          NEWS for 3.13.1
+
+Fri Jan 18 18:35:36 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit bf75feb99170c39908d2c998997dde3cba870bb6
+
+          Merge branch 'test-delayed-durable' into branch-DDS-3.13
+
+Fri Jan 18 18:35:14 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit c2182dd3f1e3182fbc0f27afb22da7b11cac991f
+
+        * tests/DCPS/DelayedDurable/.gitignore:
+
+          Updated .gitignore for new test
+
+Wed Jan 16 17:40:43 UTC 2019  Adam Mitz  <mitza@ociweb.com>
+        commit 38107cd6070f0d18482d39cf77f42ffc78aa4d36
+
+        * MPC/config/dcps_ts_subdir.mpb:
+
+          Updated mpb to work with latest mpb in TAO
+
+          (cherry picked from commit
+          9398e3f4d7494a427de61ea3836cb12bc0a0aa9c)
+
+Tue Nov 06 23:16:32 UTC 2018  Adam Mitz  <mitza@objectcomputing.com>
+        commit fe038cf1c4be8cedcfe2f450c4cfddbecd408bd0
+
+        * dds/DCPS/OfferedDeadlineWatchdog.cpp:
+        * dds/DCPS/RequestedDeadlineWatchdog.cpp:
+        * tests/DCPS/Deadline/DataReaderListenerImpl.cpp:
+        * tests/DCPS/Deadline/DataReaderListenerImpl.h:
+        * tests/DCPS/Deadline/DataWriterListenerImpl.cpp:
+        * tests/DCPS/Deadline/DataWriterListenerImpl.h:
+        * tests/DCPS/Deadline/publisher.cpp:
+        * tests/DCPS/Deadline/subscriber.cpp:
+
+          Merge pull request #969 from
+          jwillemsen/jwi-totalcountchangefixes-619
+
+          The total_count_change value should be the incremental changes in
+          tot…
+
+          (cherry picked from commit
+          4c73012516b952017116d567ae4fb695075c74c0)
+
+Fri Oct 12 17:04:22 UTC 2018  Adam Mitz  <mitza@objectcomputing.com>
+        commit 7e0e0636f942e41d2cc45dc2539899ee7b544f68
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * tests/DCPS/Deadline/DataReaderListener.cpp:
+        * tests/DCPS/Deadline/DataReaderListenerImpl.cpp:
+        * tests/DCPS/Deadline/DataReaderListener.h  tests/DCPS/Deadline/DataReaderListenerImpl.h:
+        * tests/DCPS/Deadline/DataWriterListenerImpl.cpp:
+        * tests/DCPS/Deadline/DataWriterListenerImpl.h:
+        * tests/DCPS/Deadline/Deadline.mpc:
+        * tests/DCPS/Deadline/Writer.cpp:
+        * tests/DCPS/Deadline/publisher.cpp:
+        * tests/DCPS/Deadline/subscriber.cpp:
+        * tests/DCPS/StaticDiscovery/StaticDiscoveryTest.cpp:
+
+          Merge pull request #933 from simpsont-oci/master
+
+          Fixes for Deadline Test timing issues
+
+          (cherry picked from commit
+          2f75334792a29f4338c5dfdaaddb6ea2777421c8)
+
+          # Conflicts:
+          #       tests/DCPS/StaticDiscovery/StaticDiscoveryTest.cpp
+
+Thu Jan 03 21:18:34 UTC 2019  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 23c85506947f198b80e67b9d8dddb0ced35e48bf
+
+        * configure:
+
+          Merge pull request #1025 from jrw972/curl-redirect
+
+          (cherry picked from commit
+          a483f8490e4c4d39730b8f651d41fe9a90b49a8e)
+
+          # Conflicts:
+          #       configure
+
+Wed Jan 02 18:06:08 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit 4dae60ae1dce6359e8cd162c1a7e9899a09ce239
+
+        * dds/DdsDcps.mpc:
+        * java/dds/dcps_java.mpc:
+
+          Merge pull request #1022 from simpsont-oci/master
+
+          Make install awareness of user_macros.GNU and improved Java
+          bindings support
+
+          (cherry picked from commit
+          98d6c86951122307b8f7213dda9f64e8b94f75ec)
+
+          # Conflicts:
+          #       dds/DdsDcps.mpc
+
+Fri Nov 02 14:05:04 UTC 2018  Adam Mitz  <mitza@objectcomputing.com>
+        commit 55e94e767a0a2c1fd853da8403de767e32ebe164
+
+        * dds/DCPS/security/AccessControl/Governance.cpp:
+        * tests/DCPS/Messenger/Messenger.mpc:
+        * tests/DCPS/Messenger/optional_security.mpb:
+        * tests/DCPS/Messenger/publisher.cpp:
+        * tests/DCPS/Messenger/subscriber.cpp:
+
+          Merge pull request #967 from mitza-oci/security_static
+
+          support static builds with DDS Security enabled
+
+          (cherry picked from commit
+          428926f47145802de41c6d5984227e31f51c2817)
+
+Thu Oct 25 22:18:48 UTC 2018  Adam Mitz  <mitza@objectcomputing.com>
+        commit 64f62399ab0eab0b3304803f7ce547d58132e7eb
+
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/FACE/FaceTSS.cpp:
+        * tests/DCPS/QueryCondition/QueryConditionTest.cpp:
+        * tests/DCPS/ReadCondition/ReadConditionTest.cpp:
+
+          Merge pull request #958 from jmmorato/master
+
+          The deletion of a DataReader is not allowed if there are any
+          existing ReadCondition or QueryCondition objects that are
+          attached to the DataReader
+
+          (cherry picked from commit
+          d20d82548ae5630bce44c2dd2d8fe7a4ca48a80b)
+
+Tue Oct 16 22:10:37 UTC 2018  Adam Mitz  <mitza@objectcomputing.com>
+        commit 28de61a4f454b18f550eca5bff2f48a12e98290f
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * tests/DCPS/DPFactoryQos/publisher.cpp:
+        * tests/DCPS/DPFactoryQos/subscriber.cpp:
+
+          Merge pull request #955 from jmmorato/master
+
+          Fixed set_qos method for not enabled DataWriters and DataReaders
+
+          (cherry picked from commit
+          3df6dce0096a594e5fb5ed4f01c8572d039b0261)
+
+Fri Oct 12 21:47:16 UTC 2018  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 6bc0deab068fbc5d4e317b61759692355f35ffcd
+
+        * dds/DdsDcps.mpc:
+
+          adding documentation for new 4th scenario
+
+          (cherry picked from commit
+          42c3ccac3e5cb8fa01f9a5555a8da681a2a37153)
+
+Fri Oct 12 21:42:54 UTC 2018  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit e692c9a972aa9784412aef7fd88983295a2e22ee
+
+        * dds/DdsDcps.mpc:
+        * dds/dcps_optional_safety.mpb:
+
+          adding mpc idl gen support for safety profile without builtin
+          topics
+
+          (cherry picked from commit
+          78f8c52cfa83f231d1ba6277c8873eb84ddd8e01)
+
+Wed Oct 10 20:32:34 UTC 2018  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit a7d179bba1ed034f68b18bb7ac42c2cb55406aca
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          refactoring to use topicIsBIT from BuiltInTopicUtils.h
+
+          (cherry picked from commit
+          ba1fa4204d401402ede7b134d92ee73bb0530c4f)
+
+Wed Oct 10 20:05:02 UTC 2018  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 3ef1261dd8fd3f82aed71a4e0a3aa3d43b45dfa6
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Fixing build when no-builtin-topic and security flags are both
+          configured
+
+          (cherry picked from commit
+          55abd78464038a22265163fe518d5b25a8e199dd)
+
+Wed Oct 03 18:41:49 UTC 2018  jmmorato  <jmmorato@enxarxats.com>
+        commit 319b4a643a5407ab1ca48fe89c1ce0137ed4bccf
+
+        * tests/DCPS/FooTest3_0/SubDriver.cpp:
+
+          Check that the datareader is contained in the participant after
+          create it
+
+          (cherry picked from commit
+          ddab61f12287d2f1e2e32281b7c89e4ee2f6b4ec)
+
+Wed Oct 03 18:41:05 UTC 2018  jmmorato  <jmmorato@enxarxats.com>
+        commit 60cef313854f312a87d93fcea6ac2c27b9e8b5c2
+
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Use datareader_map_ to check for the contained readers
+
+          (cherry picked from commit
+          36d764c58037fbc2fa4c6e3c77e9a3df691917cf)
+
+Wed Oct 03 18:57:05 UTC 2018  Adam Mitz  <mitza@ociweb.com>
+        commit 9c8157c50fdb9c214900cac93ff3d2c862be6f5a
+
+        * configure.cmd:
+
+          configure.cmd: allow perl installed in a dir that has spaces
+
+          (cherry picked from commit
+          d5ef84945c6a885ff5bc2c6542a11e90590df19a)
+
+Wed Aug 29 20:13:34 UTC 2018  Adam Mitz  <mitza@ociweb.com>
+        commit deafe168650378c24dacdb34b5de2608f2b06e56
+
+        * dds/DCPS/StaticDiscovery.cpp:
+        * tests/DCPS/Messenger/publisher.cpp:
+        * tests/DCPS/Messenger/subscriber.cpp:
+
+          fixed unused variable warnings
+
+          (cherry picked from commit
+          292bdf223b9786c1552f6312a15f6d957243a945)
+
+Mon Aug 27 19:01:51 UTC 2018  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 7ff4cd17c543e748453deafd8d314da0b68dda72
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Fixing uninitialized conditional / jump reported by valgrind
+
+          (cherry picked from commit
+          a591d81d7ef33883cb833c83db73d5a5e356e332)
+
+Wed Jan 16 22:50:03 UTC 2019  Fred Hornsey  <fred@hornsey.us>
+        commit ab68555793e70d1288b09b93e82ba3abe5487b28
+
+        * tools/scripts/gitrelease.pl:
+
+          gitrelease.pl: Support Micro Release, Other Fixes
+
+          - `--micro` causes the script to skip the devguide, doxygen,
+          website,
+          and creating a new NEWS template. Added command line options for
+          the
+          former 3.
+          - If passed X.Y.0, transform it to X.Y to remain uniform with the
+          other
+          major releases.
+          - Tweaked the markdown being used for the NEWS template and
+          Github
+          release.
+          - Refactored some (but not all) of the duplicate code/info.
+          - Enabled and attempted to fix website update.
+          - Fixed AUTHORS verify and added rememdy for it.
+
+          (cherry picked from commit
+          0b034fdc284f0c00bf76569e707a485b83cd0f1c)
+
+Wed Jan 16 22:56:08 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit 4049e4ebaa871f9455392fef91d9510f117932ce
+
+          Merge remote-tracking branch 'origin/test-delayed-durable' into
+          branch-DDS-3.13
+
+Wed Jan 16 22:33:07 UTC 2019  Adam Mitz  <mitza@ociweb.com>
+        commit b9864bbbfe49f2c8b594ede24ca9ff61bafe15df
+
+        * MPC/config/dcps_ts_defaults.mpb:
+
+          with safety profile tao_idl will need -SS, promote to base
+          project
+
+Wed Jan 16 17:46:39 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit 4792ef9c21eeea801a6db5efbbb77641fbf53200
+
+          Merge branch 'test-delayed-durable' into branch-DDS-3.13
+
+Tue Jan 15 23:41:17 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit ae03437a2dc328e6380e4facdf693a16b2a9c824
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/DelayedDurable/.gitignore:
+        * tests/DCPS/DelayedDurable/DelayedDurable.cpp:
+        * tests/DCPS/DelayedDurable/DelayedDurable.idl:
+        * tests/DCPS/DelayedDurable/DelayedDurable.mpc:
+        * tests/DCPS/DelayedDurable/rtps_disc.ini:
+        * tests/DCPS/DelayedDurable/run_test.pl:
+
+          Test case for durable data taking too long to sync up (using
+          rtps_udp transport)
+
+          regression test for fix on branch rtps-durable
+
+Wed Dec 05 18:33:08 UTC 2018  Adam Mitz  <mitza@ociweb.com>
+        commit 99071e3ebb863a3134b811179494526457ebb257
+
+          Merge branch 'send-notavail' into branch-DDS-3.13
+
+Wed Dec 05 18:30:07 UTC 2018  Adam Mitz  <mitza@ociweb.com>
+        commit 38873fc8107f4a15ff71b65805f020786a7197d5
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.cpp:
+
+          Added another errno to the whitelist
+
+Thu Aug 30 15:02:03 UTC 2018  ajkerzner  <11799692+ajkerzner@users.noreply.github.com>
+        commit 03143a526bc912acf2619656fd3739147cbc64fa
+
+        * configure:
+
+          Fix detection of MSVC compiler x.x.x.x
+
+          A Microsoft C/C++ compiler version with 3 or more periods (e.g.
+          "Microsoft (R) C/C++ Optimizing Compiler Version 19.00.24215.1
+          for x64") will now be detected.
+
+          (cherry picked from commit
+          e03928265bd67674b370202963c32d73381c55f4)
+
+Fri Nov 30 21:00:54 UTC 2018  Adam Mitz  <mitza@ociweb.com>
+        commit d0eb652fd3f9f8428ad3d612f4f764416a0c470b
+
+          Merge branch 'send-notavail' into branch-DDS-3.13
+
+Fri Nov 30 20:56:52 UTC 2018  Adam Mitz  <mitza@ociweb.com>
+        commit 6b46d654d674eb72dbac823cb012f6b9a982f2e8
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.cpp:
+
+          rtps_udp transport: updated list of errnos which are not treated
+          as
+
+          errors when sending to include EADDRNOTAVAIL which is seen on
+          some platforms during (temporary) network outages
+
+Tue Nov 20 22:27:22 UTC 2018  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          rtps_udp: enhanced generation of gaps for durable data
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

@@ -1,25 +1,49 @@
-Version 3.14 of OpenDDS
+# OpenDDS Releases
 
-##### Additions:
+## Version 3.14 of OpenDDS
+Released %TIMESTAMP%
+
+### Additions:
 - Monitor and the ishapes demo now use Qt5
+- Expanded Android Documentation in `docs/android.md`
+- Updated dissector to work with Wireshark 3.0
 
-##### Fixes:
-- TODO: Add your fixes here
+### Fixes:
+- Java API can now be used on Android
 
-##### Notes:
+### Notes:
 - Removed outdated `-Gws` option of `opendds_idl`. This option produced sample
   descriptions for the Wireshark dissector before OpenDDS v3.7.
 
-_______________________________________________________________________________
-Version 3.13 of OpenDDS
+## Version 3.13.1 of OpenDDS
 
-##### Additions:
+### Fixes:
+- rtps_udp: enhanced generation of gaps for durable data (#1001)
+- rtps_udp transport: improved handling of socket errors (#1002)
+- Fixed a bug in contains_entity for DataReaders (#944)
+- Fixed set_qos method for not enabled DataWriters and DataReaders (#955)
+- Fixed requiring Conditions to be cleaned up in DataReaders (#958)
+- Fixed a locking issue in transport with Security enabled (#933)
+- Fixed total_count fields in on Offered/RequestedDeadlineMissed (#969)
+- Security: Fixing uninitialized values reported by valgrind
+- Support static builds with DDS Security enabled (#967)
+- Fixing build when no-builtin-topic and security flags are both configured
+- Configure: fixed detection of MSVC compiler versions
+- Configure on Windows: allow Perl to be located in a directory with spaces
+- Configure: follow redirects if using curl to download (#1025)
+- Configure: Android support (#964)
+- Configure: added for --host-tools option (part of #968)
+- Make install awareness of user_macros.GNU and improved Java bindings support (#1022)
+
+## Version 3.13 of OpenDDS
+
+### Additions:
 - Includes a beta implementation of the OMG DDS Security 1.1 specification
 - Monitor library can be enabled with -DCPSMonitor 1 or ini file
 - Updated Wireshark dissector now supports Wireshark version 2.x
 - MultiTopic: use Topic's QoS when creating constituent data readers
 
-##### Fixes:
+### Fixes:
 - Memory management improvements
 - Command-line argument -DCPSRTISerialization takes a 0/1 parameter
 - Further refined fix for RtpsUdpDataLink::remove_sample locking
@@ -36,13 +60,12 @@ Version 3.13 of OpenDDS
 - RTPS discovery: avoid skipping sequence numbers in SEDP
 - InfoRepo: improved persistence with Built-in Topics
 
-##### Notes:
+### Notes:
 - The contrib directory, which contained unmaintained code, was removed
 
-_______________________________________________________________________________
-Version 3.12 of OpenDDS
+## Version 3.12 of OpenDDS
 
-##### Fixes:
+### Fixes:
 - RtpsUdpDataLink::remove_sample locking
 - track latency only when needed for LatencyBudget QoS or statistics
 - corrected counters for sample rejected/lost liveliness lost total_count_change
@@ -54,23 +77,22 @@ Version 3.12 of OpenDDS
 - problem with multiple transport instances in a single transport config
 - EntityFactory QoS didn't enable child objects when the factory was enabled
 
-##### Notes:
+### Notes:
 - configure supports ACE+TAO from DOCGroup repository as an option
 - configure improvements for using external ACE+TAO, cross-compiling on Windows
 - coverity fixes
 - improved Bench performance test
 - Docker Hub now has an OpenDDS docker image
 
-_______________________________________________________________________________
-Version 3.11 of OpenDDS
+## Version 3.11 of OpenDDS
 
-##### Additions:
+### Additions:
 - Support for Visual Studio 2017
 - Content-filter expressions can now use 64-bit integer literals
 - tcp transport has a new wait_for_acknowledgements implementation
 - DataWriter's HISTORY QoS processing now allows replacing old samples with new ones without blocking
 
-##### Fixes:
+### Fixes:
 - Improved robustness of DEADLINE QoS processing
 - Uses of content-filter expressions are now checked for the correct number of parameters
 - Fixed versioned namespace support
@@ -79,13 +101,12 @@ Version 3.11 of OpenDDS
 - Use of the constant PARTICIPANT_QOS_DEFAULT no longer initializes the domain participant factory
 - Bug fixes in the OpenDDS Wireshark dissector (for sample dissection)
 
-##### Notes:
+### Notes:
 - The QoS XML Handler library is now decoupled from DDS4CCM, it requires xerces
 
-_______________________________________________________________________________
-Version 3.10 of OpenDDS
+## Version 3.10 of OpenDDS
 
-##### Additions:
+### Additions:
 - Added support for versioned namespaces
 - Reworked TypeSupport implementation in order to reduce exposure of internal headers to user code
 - Added `read/take_instance_w_condition` (not in DDS spec)
@@ -96,22 +117,21 @@ Version 3.10 of OpenDDS
 - RtpsDiscovery: allow config to specify which interface's MAC addr is used in GUIDs
 - Wireshark dissector updates: support for more IDL constructs in data sample dissection
 
-##### Fixes:
+### Fixes:
 - Liveliness QoS: fixed incorrect "liveliness lost" for automatic liveliness with sporadic writers
 - Fixed RTPS ParticipantMessageData entityIds used by automatic and by-participant liveliness
 - Fixed make install problem when DESTDIR is specified
 - Allow fallback to next transport implementation when active side fails to connect using the first one
 - Updated `TypeSupport::get_type_name()` to match the DDS spec
 
-##### Stability Improvements:
+### Stability Improvements:
 - Fixed many issues included in recent Coverity Scan defect reports
 - Fixed a few reference counting issues in internal classes
 
-##### Notes:
+### Notes:
 - This is the final version we will test with TAO 2.0a, please upgrade to a newer TAO (see README.md)
 
-_______________________________________________________________________________
-Version 3.9 of OpenDDS
+## Version 3.9 of OpenDDS
 
 - Updated how DataWriter QoS is interpreted by internal data structures:
   - RESOURCE\_LIMITS.max\_samples\_per\_instance controls total samples that can be
@@ -153,10 +173,9 @@ Version 3.9 of OpenDDS
 
 - cross-compilation now works with Java bindings, including use of JRE compact1
 
-_______________________________________________________________________________
 
 
-Version 3.8 of OpenDDS
+## Version 3.8 of OpenDDS
 
 - Improved support for Safety Profile
 
@@ -168,11 +187,10 @@ Version 3.8 of OpenDDS
 - Fixed bugs in transport framework, udp transport, InfoRepo discovery, static
   discovery, and the Liveliness and Durability QoS policies
 
-_______________________________________________________________________________
 
-Version 3.7 of OpenDDS
+## Version 3.7 of OpenDDS
 
-##### Additions:
+### Additions:
 - Implements FACE Transport Services API v2.1, FACE safety base and
   FACE safety extended profiles (Future Airborne Capability Environment).
 - Implements DDS 1.4 and RTPS 2.2.
@@ -203,7 +221,7 @@ Version 3.7 of OpenDDS
 - opendds\_idl command-line option -Gitl is a replacement for -Gws.  Wireshark
   dissector now reads ITL files, rather than .ini files.
 
-##### Fixes:
+### Fixes:
 - Fixed many tests for minimum profile builds.
 - Enforced correct behavior of a reliable data writer when history QoS
   is set to KEEP\_LAST with depth=1.
@@ -226,16 +244,15 @@ Version 3.7 of OpenDDS
 - Corrected reference counting scheme for Recorder and Replayer objects:
   the reference-counted handle types changed from \_rch to \_var.
 
-##### Notes:
+### Notes:
 - OCI no longer builds with vc71, vc8, and GCC 4.1.1.  If you require support
   of these older platforms contact sales@ociweb.com.
 - The project repository is now at https://github.com/objectcomputing/OpenDDS
 
-_______________________________________________________________________________
 
-Version 3.6 of OpenDDS
+## Version 3.6 of OpenDDS
 
-##### Notes:
+### Notes:
 - The discovery framework of OpenDDS has been refactored to be more
   asynchronous.  This should make discovery faster and more reliable
   for both publishing and subscribing clients, regardless of the
@@ -254,7 +271,7 @@ Version 3.6 of OpenDDS
   various operations of the data writer interface including the
   write and register operations.
 
-##### Additions:
+### Additions:
 - The wireshark dissector now supports wireshark versions 1.8.x, 1.10.x,
   1.12.x, and 1.99.1.
 
@@ -267,7 +284,7 @@ Version 3.6 of OpenDDS
   and publisher in the TcpReconnect test, but may also be useful in
   other deployment scenarios, especially using OpenDDS through a firewall.
 
-##### Fixes:
+### Fixes:
 - There were a number of concurrency and thread utilization improvements.
   These changes fixed a number of threading issues as well as improving
   the efficiency of publication.
@@ -283,7 +300,7 @@ Version 3.6 of OpenDDS
 
 - Fixed memory leak at shutdown time in modeling library.
 
-##### Tests:
+### Tests:
 - Many updates to make test results more complete and deterministic.
 
 - Added a TcpReconnect test that exercised the ability of the tcp
@@ -298,11 +315,10 @@ Version 3.6 of OpenDDS
 
 - Added a packet reassembly unit test.
 
-_______________________________________________________________________________
 
-Version 3.5.1 of OpenDDS
+## Version 3.5.1 of OpenDDS
 
-##### Notes:
+### Notes:
 
   - Due to addition control messages in the 3.5.1 release, mixing 3.5.0
   and 3.5.1 releases should work properly, but the 3.5.0 data readers can emit
@@ -311,7 +327,7 @@ Version 3.5.1 of OpenDDS
     ERROR: DataReaderImpl::data\_received unexpected message\_id = 11
     Upgrade all endpoints to 3.5.1 to remove this error message.
 
-##### Additions:
+### Additions:
 
 - Support later (>= 4.7) versions of GCC compilers, and later (>= 2.0a)
   builds of TAO. Configure script now downloads 2.2a by default.
@@ -321,7 +337,7 @@ Version 3.5.1 of OpenDDS
 
 - Updated UML design diagrams to reflect current code base.
 
-##### Fixes:
+### Fixes:
 
 - DCPSInfoRepo no longer informs a subscriber about a crashed or killed
   publisher.  This made associations of current publishers and subscribers
@@ -372,7 +388,7 @@ Version 3.5.1 of OpenDDS
   TransportSendControlElement will delete itself before it reports to the listener
   that the message has been delivered/dropped.
 
-##### Tests:
+### Tests:
 
 - Many updates to make test results more deterministic.
 
@@ -389,9 +405,8 @@ Version 3.5.1 of OpenDDS
 
 - Rewrite LargeSample test to make it verify message contents are as expected.
 
-_______________________________________________________________________________
 
-Version 3.5 of OpenDDS
+## Version 3.5 of OpenDDS
 
 - Updates to RTPS support resulting from both interoperability
   testing (March 2013 OMG meeting) and user feedback.
@@ -410,9 +425,8 @@ Version 3.5 of OpenDDS
 
 - Corrected a number of other bugs related to discovery and scaling.
 
-_______________________________________________________________________________
 
-Version 3.4.1 of OpenDDS
+## Version 3.4.1 of OpenDDS
 
 - Added a new option to opendds\_idl, -Wb,v8, which generates type support
   for copying DCPS structs from C++ objects to JavaScript objects -- requires
@@ -427,9 +441,8 @@ Version 3.4.1 of OpenDDS
 - Fixed a bug in the rtps\_udp transport, in certain cases an invalid Gap
   submessage was sent which can result in data samples not being received.
 
-_______________________________________________________________________________
 
-Version 3.4 of OpenDDS
+## Version 3.4 of OpenDDS
 
 - Added new OpenDDS-specific APIs for sending and receiving untyped data,
   (does not require code generation from IDL data structures).  See the
@@ -452,9 +465,8 @@ Version 3.4 of OpenDDS
   DDS spec (GROUPDATA and TRANSPORTPRIORITY ...\_QOS\_POLICY\_NAME).  These are
   not used anywhere in OpenDDS.
 
-_______________________________________________________________________________
 
-Version 3.3 of OpenDDS
+## Version 3.3 of OpenDDS
 
 - If an instance of a transport can't be set up, an exception is thrown so
   that different configuration parameters can be attempted by the user.
@@ -480,9 +492,8 @@ Version 3.3 of OpenDDS
 - The support for the generation of the DDS4CCM needed LEM library has been
   moved to CIAO DDS4CCM. This removed the optional dependency on CIAO.
 
-_______________________________________________________________________________
 
-Version 3.2 of OpenDDS
+## Version 3.2 of OpenDDS
 
 - Added a new transport type: Shared Memory
   Use shmem as the short name (in place of "tcp", "udp", "multicast", etc.).
@@ -518,9 +529,8 @@ Version 3.2 of OpenDDS
   profiles discussed in the Compliance section of the DDS spec. See
   section 1.3.3 in the Developer's Guide for more information.
 
-_______________________________________________________________________________
 
-Version 3.1 of OpenDDS
+## Version 3.1 of OpenDDS
 
 - This release includes the initial implementation of DDS Interoperability
   in OpenDDS, using the DDS-RTPS spec v2.1 from the OMG (formal/2010-11-01).
@@ -566,9 +576,8 @@ Version 3.1 of OpenDDS
   setting to get the DURABILITY QoS behavior matching that of OpenDDS v1.2
   and earlier.  It was not being used in any OpenDDS code.
 
-_______________________________________________________________________________
 
-Version 3.0.1 of OpenDDS
+## Version 3.0.1 of OpenDDS
 
 - The DCPSInfoRepo reassociates Built in Topic connections for existing
   datareaders and datawriters when restarted from persistence.
@@ -588,9 +597,8 @@ Version 3.0.1 of OpenDDS
 - New example Messenger.minimal - which is like messenger, but streamlined
   for new users to understand the whole easier.
 
-_______________________________________________________________________________
 
-Version 3.0 of OpenDDS
+## Version 3.0 of OpenDDS
 
 - Transport configuration has undergone a major redesign and any existing
   transport application code or transport configuration files need to be
@@ -630,12 +638,8 @@ Version 3.0 of OpenDDS
   view.  The Node view uses Qt gui elements to model the OpenDDS system.
   Users can manipulate Node view graphs before saving them to PNG files.
 
-_______________________________________________________________________________
-
-NEWS for Previous Major Versions
+## NEWS for Previous Major Versions
 
 - NEWS for OpenDDS release 2.X versions are archived in [docs/history/NEWS-2.md](docs/history/NEWS-2.md)
 - NEWS for OpenDDS release 1.X versions are archived in [docs/history/NEWS-1.md](docs/history/NEWS-1.md)
 - NEWS for OpenDDS release 0.X versions are archived in [docs/history/NEWS-0.md](docs/history/NEWS-0.md)
-
-_______________________________________________________________________________

@@ -69,6 +69,12 @@ public:
     set_port_in_addr_string(local_address_config_str_, port_number);
   }
 
+  /// Relay address may change, these use a mutex
+  ///{
+  void rtps_relay_address(const ACE_INET_Addr& address);
+  ACE_INET_Addr rtps_relay_address() const;
+  ///}
+
 private:
   friend class RtpsUdpType;
   template <typename T, typename U>
@@ -84,7 +90,20 @@ private:
 
   ACE_INET_Addr local_address_;
   OPENDDS_STRING local_address_config_str_;
+  ACE_INET_Addr rtps_relay_address_;
 };
+
+inline void RtpsUdpInst::rtps_relay_address(const ACE_INET_Addr& address)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  rtps_relay_address_ = address;
+}
+
+inline ACE_INET_Addr RtpsUdpInst::rtps_relay_address() const
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ACE_INET_Addr());
+  return rtps_relay_address_;
+}
 
 } // namespace DCPS
 } // namespace OpenDDS

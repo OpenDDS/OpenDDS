@@ -10,4 +10,8 @@ if "x%PERLPATH%"=="x" (
 )
 set PERLPATH=
 perl configure %*
+if %ERRORLEVEL% NEQ 0 (
+  echo ERROR: configure failed with errorcode %errorlevel%
+  exit /b %errorlevel%
+)
 if exist setenv.cmd call setenv.cmd
