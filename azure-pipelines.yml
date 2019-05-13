@@ -164,11 +164,20 @@ jobs:
       filename: '"C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat"'
       arguments: $(VcVarsArch)
       modifyEnvironment: true
+  - powershell: |
+      $client = new-object System.Net.WebClient
+      $client.DownloadFile("http://strawberryperl.com/download/5.28.0.1/strawberry-perl-5.28.0.1-64bit-portable.zip", "strawberry-perl.zip");
+    displayName: Download perl
+  - task: ExtractFiles@1
+    displayName: Extract perl
+    inputs:
+      archiveFilePatterns: strawberry-perl.zip
+      destinationFolder: ext\strawberry
   - task: BatchScript@1
     displayName: Put perl on PATH
     inputs:
       filename: tools\scripts\prepend_path
-      arguments: 'C:\Strawberry\perl\bin'
+      arguments: '%CD%\ext\strawberry\perl\bin'
       modifyEnvironment: true
   - script: |
       if %BuildConfiguration%==Release set OPT=--no-tests --no-debug --optimize
