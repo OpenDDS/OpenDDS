@@ -198,10 +198,6 @@ jobs:
       platform: $(BuildPlatform)
       configuration: $(BuildConfiguration)
       maximumCpuCount: true
-  - script: |
-      if %BuildPlatform%==x64 set ARCH=--arch="x64"
-      perl "%DDS_ROOT%\tests\cmake_integration\run_ci_tests.pl" --build-config=$(BuildConfiguration) --generator="Visual Studio 14 2015" %ARCH%
-    displayName: Compile (and run) CMake Tests
 
 - job: Linux
   timeoutInMinutes: 90
