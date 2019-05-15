@@ -57,6 +57,11 @@ module Stool {
   };
 
   struct WorkerReport {
+    Builder::TimeStamp construction_time;
+    Builder::TimeStamp enable_time;
+    Builder::TimeStamp start_time;
+    Builder::TimeStamp stop_time;
+    Builder::TimeStamp destruction_time;
     unsigned long undermatched_readers;
     unsigned long undermatched_writers;
     Builder::TimeStamp max_discovery_time_delta;
@@ -65,6 +70,7 @@ module Stool {
     double latency_max;
     double latency_mean;
     double latency_var_x_sample_count;
+    double latency_stdev;
   };
 
 };

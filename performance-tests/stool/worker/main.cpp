@@ -212,6 +212,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
   // Some preliminary measurements and reporting (eventually will shift to another process?)
   Stool::WorkerReport worker_report;
+  worker_report.construction_time = process_construction_end_time - process_construction_begin_time;
+  worker_report.enable_time = process_enable_end_time - process_enable_begin_time;
+  worker_report.start_time = process_start_end_time - process_start_begin_time;
+  worker_report.stop_time = process_stop_end_time - process_stop_begin_time;
+  worker_report.destruction_time = process_destruction_end_time - process_destruction_begin_time;
   worker_report.undermatched_readers = 0;
   worker_report.undermatched_writers = 0;
   worker_report.max_discovery_time_delta = ZERO;
@@ -220,6 +225,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   worker_report.latency_max = 0.0;
   worker_report.latency_mean = 0.0;
   worker_report.latency_var_x_sample_count = 0.0;
+  worker_report.latency_stdev = 0.0;
 
   for (CORBA::ULong i = 0; i < process_report.participants.length(); ++i) {
     for (CORBA::ULong j = 0; j < process_report.participants[i].subscribers.length(); ++j) {
@@ -270,28 +276,42 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     }
   }
 
-  std::cout << std::endl << "--- Process Statistics ---" << std::endl << std::endl;
+  worker_report.latency_stdev = std::sqrt(worker_report.latency_var_x_sample_count / static_cast<double>(worker_report.sample_count));
 
-  std::cout << "construction_time: " << process_construction_end_time - process_construction_begin_time << std::endl;
-  std::cout << "enable_time: " << process_enable_end_time - process_enable_begin_time << std::endl;
-  std::cout << "start_time: " << process_start_end_time - process_start_begin_time << std::endl;
-  std::cout << "stop_time: " << process_stop_end_time - process_stop_begin_time << std::endl;
-  std::cout << "destruction_time: " << process_destruction_end_time - process_destruction_begin_time << std::endl;
+  std::string output_file_name;
+  std::unique_ptr<std::ofstream> ofs;
+  if (argc > 2 && std::string(argv[2]) == "true") {
+    std::stringstream ss;
+    ss << "worker_" << getpid() << "_output.txt" << std::flush;
+    output_file_name = ss.str();
+    ofs.reset(new std::ofstream(output_file_name.c_str()));
+  }
 
-  std::cout << std::endl << "--- Discovery Statistics ---" << std::endl << std::endl;
+  std::ostream& os = output_file_name.empty() ? std::cout : *ofs;
 
-  std::cout << "undermatched readers: " << worker_report.undermatched_readers << ", undermatched writers: " << worker_report.undermatched_writers << std::endl << std::endl;
-  std::cout << "max_discovery_time_delta: " << worker_report.max_discovery_time_delta << std::endl;
+  os << std::endl << "--- Process Statistics ---" << std::endl << std::endl;
+
+  os << "construction time: " << process_construction_end_time - process_construction_begin_time << std::endl;
+  os << "enable time: " << process_enable_end_time - process_enable_begin_time << std::endl;
+  os << "start time: " << process_start_end_time - process_start_begin_time << std::endl;
+  os << "stop time: " << process_stop_end_time - process_stop_begin_time << std::endl;
+  os << "destruction time: " << process_destruction_end_time - process_destruction_begin_time << std::endl;
+
+  os << std::endl << "--- Discovery Statistics ---" << std::endl << std::endl;
+
+  os << "undermatched readers: " << worker_report.undermatched_readers << std::endl;
+  os << "undermatched writers: " << worker_report.undermatched_writers << std::endl << std::endl;
+  os << "max discovery time delta: " << worker_report.max_discovery_time_delta << std::endl;
 
   if (worker_report.sample_count > 0) {
-    std::cout << std::endl << "--- Latency Statistics ---" << std::endl << std::endl;
+    os << std::endl << "--- Latency Statistics ---" << std::endl << std::endl;
 
-    std::cout << "total sample count: " << worker_report.sample_count << std::endl;
-    std::cout << "minimum latency: " << std::fixed << std::setprecision(6) << worker_report.latency_min << " seconds" << std::endl;
-    std::cout << "maximum latency: " << std::fixed << std::setprecision(6) << worker_report.latency_max << " seconds" << std::endl;
-    std::cout << "mean latency: " << std::fixed << std::setprecision(6) << worker_report.latency_mean << " seconds" << std::endl;
-    std::cout << "latency standard deviation: " << std::fixed << std::setprecision(6) << std::sqrt(worker_report.latency_var_x_sample_count / static_cast<double>(worker_report.sample_count)) << " seconds" << std::endl;
-    std::cout << std::endl;
+    os << "total sample count: " << worker_report.sample_count << std::endl;
+    os << "minimum latency: " << std::fixed << std::setprecision(6) << worker_report.latency_min << " seconds" << std::endl;
+    os << "maximum latency: " << std::fixed << std::setprecision(6) << worker_report.latency_max << " seconds" << std::endl;
+    os << "mean latency: " << std::fixed << std::setprecision(6) << worker_report.latency_mean << " seconds" << std::endl;
+    os << "latency standard deviation: " << std::fixed << std::setprecision(6) << worker_report.latency_stdev << " seconds" << std::endl;
+    os << std::endl;
   }
 
   return 0;
