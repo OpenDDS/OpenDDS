@@ -292,12 +292,15 @@ bool itl_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* /*name*/,
   return true;
 }
 
-bool itl_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
+bool itl_generator::gen_struct(AST_Structure* node, UTL_ScopedName*,
                                const std::vector<AST_Field*>& fields,
                                AST_Type::SIZE_TYPE, const char* repoid)
 {
   if (!be_global->generate_itl())
     return true;
+
+  bool is_topic_type =
+    idl_global->is_dcps_type(node->name()) || be_global->is_topic_type(node);
 
   new_type();
   be_global->itl_ << Open(this)
@@ -308,7 +311,7 @@ bool itl_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
 
   // Check if this is defined as a primary data type
                   << Indent(this) << "\"note\" : { \"is_dcps_data_type\" : "
-                  << (idl_global->is_dcps_type(name) ? "true" : "false")
+                  << (is_topic_type ? "true" : "false")
                   << " },\n"
 
                   << Indent(this) << "\"type\" :\n"

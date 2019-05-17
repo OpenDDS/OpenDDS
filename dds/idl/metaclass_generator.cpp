@@ -10,6 +10,8 @@
 
 #include "utl_identifier.h"
 
+#include "topic_keys.h"
+
 using namespace AstTypeClassification;
 
 namespace {
@@ -364,143 +366,209 @@ namespace {
     be_global->impl_ << "    }\n";
   }
 
+  void gen_isDcpsKey_i(const char* key) {
+    be_global->impl_ <<
+      "    if (!ACE_OS::strcmp(field, \"" <<  key << "\")) {\n"
+      "      return true;\n"
+      "    }\n";
+  }
+
   void gen_isDcpsKey(IDL_GlobalData::DCPS_Data_Type_Info* info)
   {
-    if (info && info->key_list_.size()) {
-      IDL_GlobalData::DCPS_Key_List::CONST_ITERATOR i(info->key_list_);
-      for (ACE_TString* key = 0; i.next(key); i.advance()) {
-        be_global->impl_ <<
-          "    if (!ACE_OS::strcmp(field, \""
-        << ACE_TEXT_ALWAYS_CHAR(key->c_str()) << "\")) {\n"
-          "      return true;\n"
-          "    }\n";
-      }
-    } else {
-      be_global->impl_ << "    ACE_UNUSED_ARG(field);\n";
+    IDL_GlobalData::DCPS_Key_List::CONST_ITERATOR i(info->key_list_);
+    for (ACE_TString* key = 0; i.next(key); i.advance()) {
+      gen_isDcpsKey_i(ACE_TEXT_ALWAYS_CHAR(key->c_str()));
     }
-    be_global->impl_ << "    return false;\n";
+  }
+
+  void gen_isDcpsKey(TopicKeys& keys)
+  {
+    TopicKeys::Iterator finished = keys.end();
+    for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
+      gen_isDcpsKey_i(i.path().c_str());
+    }
+  }
+
+  bool generate_metaclass(AST_Decl* node, UTL_ScopedName* name,
+    const std::vector<AST_Field*>& fields, bool& first_struct_,
+    const std::string& clazz)
+  {
+    AST_Structure* struct_node = 0;
+    AST_Union* union_node = 0;
+    if (!node || !name) {
+      return false;
+    }
+    if (node->node_type() == AST_Decl::NT_struct) {
+      struct_node = dynamic_cast<AST_Structure*>(node);
+    } else if (node->node_type() == AST_Decl::NT_union) {
+      union_node = dynamic_cast<AST_Union*>(node);
+    } else {
+      return false;
+    }
+
+    if (first_struct_) {
+      be_global->header_ <<
+        "class MetaStruct;\n\n"
+        "template<typename T>\n"
+        "const MetaStruct& getMetaStruct();\n\n";
+      first_struct_ = false;
+    }
+
+    std::string decl = "const MetaStruct& getMetaStruct<" + clazz + ">()",
+      exp = be_global->export_macro().c_str();
+    be_global->header_ << "template<>\n" << exp << (exp.length() ? "\n" : "")
+      << decl << ";\n";
+
+    size_t key_count = 0;
+    IDL_GlobalData::DCPS_Data_Type_Info* info = 0;
+    bool is_topic_type = be_global->is_topic_type(node);
+    TopicKeys keys;
+    if (struct_node) {
+      info = idl_global->is_dcps_type(name);
+      keys = TopicKeys(struct_node);
+      if (info) {
+        key_count = info->key_list_.size();
+      } else if (is_topic_type) {
+        key_count = keys.count();
+      }
+    } else { // Union
+      key_count = be_global->has_key(union_node) ? 1 : 0;
+    }
+
+    be_global->impl_ <<
+      "template<>\n"
+      "struct MetaStructImpl<" << clazz << "> : MetaStruct {\n"
+      "  typedef " << clazz << " T;\n\n"
+      "#ifndef OPENDDS_NO_MULTI_TOPIC\n"
+      "  void* allocate() const { return new T; }\n\n"
+      "  void deallocate(void* stru) const { delete static_cast<T*>(stru); }\n\n"
+      "  size_t numDcpsKeys() const { return " << key_count << "; }\n\n"
+      "#endif /* OPENDDS_NO_MULTI_TOPIC */\n\n"
+      "  bool isDcpsKey(const char* field) const\n"
+      "  {\n";
+    {
+      if (struct_node && key_count) { // TODO: How to handle union disc?
+        if (info) {
+          gen_isDcpsKey(info);
+        } else {
+          gen_isDcpsKey(keys);
+        }
+      } else {
+        be_global->impl_ << "    ACE_UNUSED_ARG(field);\n";
+      }
+    }
+    be_global->impl_ <<
+      "    return false;\n"
+      "  }\n\n"
+      "  Value getValue(const void* stru, const char* field) const\n"
+      "  {\n"
+      "    const " << clazz << "& typed = *static_cast<const " << clazz
+      << "*>(stru);\n";
+    if (struct_node) {
+      std::for_each(fields.begin(), fields.end(), gen_field_getValue);
+    }
+    const std::string exception =
+      "    throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \" not "
+      "found or its type is not supported (in struct " + clazz + ")\");\n";
+    be_global->impl_ <<
+      "    ACE_UNUSED_ARG(typed);\n" <<
+      exception <<
+      "  }\n\n"
+      "  Value getValue(Serializer& ser, const char* field) const\n"
+      "  {\n";
+    if (struct_node) {
+      std::for_each(fields.begin(), fields.end(), gen_field_getValueFromSerialized);
+    }
+    be_global->impl_ <<
+      "    if (!field[0]) {\n"   // if 'field' is the empty string...
+      "      return 0;\n"        // ...we've skipped the entire struct
+      "    }\n"                  //    and the return value is ignored
+      "    throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \" not "
+      "valid for struct " << clazz << "\");\n"
+      "  }\n\n"
+      "  ComparatorBase::Ptr create_qc_comparator(const char* field, "
+      "ComparatorBase::Ptr next) const\n"
+      "  {\n"
+      "    ACE_UNUSED_ARG(next);\n";
+    be_global->add_include("<stdexcept>", BE_GlobalData::STREAM_CPP);
+    if (struct_node) {
+      std::for_each(fields.begin(), fields.end(), gen_field_createQC);
+    }
+    be_global->impl_ <<
+      exception <<
+      "  }\n\n"
+      "#ifndef OPENDDS_NO_MULTI_TOPIC\n"
+      "  const char** getFieldNames() const\n"
+      "  {\n"
+      "    static const char* names[] = {";
+    if (struct_node) {
+      std::for_each(fields.begin(), fields.end(), print_field_name);
+    }
+    be_global->impl_ <<
+      "0};\n"
+      "    return names;\n"
+      "  }\n\n"
+      "  const void* getRawField(const void* stru, const char* field) const\n"
+      "  {\n";
+    if (struct_node) {
+      std::for_each(fields.begin(), fields.end(), get_raw_field);
+    }
+    be_global->impl_ <<
+      exception <<
+      "  }\n\n"
+      "  void assign(void* lhs, const char* field, const void* rhs,\n"
+      "    const char* rhsFieldSpec, const MetaStruct& rhsMeta) const\n"
+      "  {\n"
+      "    ACE_UNUSED_ARG(lhs);\n"
+      "    ACE_UNUSED_ARG(field);\n"
+      "    ACE_UNUSED_ARG(rhs);\n"
+      "    ACE_UNUSED_ARG(rhsFieldSpec);\n"
+      "    ACE_UNUSED_ARG(rhsMeta);\n";
+    if (struct_node) {
+      std::for_each(fields.begin(), fields.end(), assign_field);
+    }
+    be_global->impl_ <<
+      exception <<
+      "  }\n"
+      "#endif /* OPENDDS_NO_MULTI_TOPIC */\n\n"
+      "  bool compare(const void* lhs, const void* rhs, const char* field) "
+      "const\n"
+      "  {\n"
+      "    ACE_UNUSED_ARG(lhs);\n"
+      "    ACE_UNUSED_ARG(field);\n"
+      "    ACE_UNUSED_ARG(rhs);\n";
+    if (struct_node) {
+      std::for_each(fields.begin(), fields.end(), compare_field);
+    }
+    be_global->impl_ <<
+      exception <<
+      "  }\n"
+      "};\n\n"
+      "template<>\n"
+      << decl << "\n"
+      "{\n"
+      "  static MetaStructImpl<" << clazz << "> msi;\n"
+      "  return msi;\n"
+      "}\n\n";
+    return true;
   }
 }
 
-bool metaclass_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
+bool metaclass_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
   const std::vector<AST_Field*>& fields, AST_Type::SIZE_TYPE, const char*)
 {
+  const std::string clazz = scoped(name);
   ContentSubscriptionGuard csg;
   NamespaceGuard ng;
   be_global->add_include("dds/DCPS/PoolAllocator.h",
     BE_GlobalData::STREAM_CPP);
   be_global->add_include("dds/DCPS/FilterEvaluator.h",
     BE_GlobalData::STREAM_CPP);
-  if (first_struct_) {
-    be_global->header_ <<
-      "class MetaStruct;\n\n"
-      "template<typename T>\n"
-      "const MetaStruct& getMetaStruct();\n\n";
-    first_struct_ = false;
+
+  if (!generate_metaclass(node, name, fields, first_struct_, clazz)) {
+    return false;
   }
 
-  size_t nKeys = 0;
-  IDL_GlobalData::DCPS_Data_Type_Info* info = idl_global->is_dcps_type(name);
-  if (info) {
-    nKeys = info->key_list_.size();
-  }
-
-  std::string clazz = scoped(name);
-  std::string decl = "const MetaStruct& getMetaStruct<" + clazz + ">()",
-    exp = be_global->export_macro().c_str();
-  be_global->header_ << "template<>\n" << exp << (exp.length() ? "\n" : "")
-    << decl << ";\n";
-
-  be_global->impl_ <<
-    "template<>\n"
-    "struct MetaStructImpl<" << clazz << "> : MetaStruct {\n"
-    "  typedef " << clazz << " T;\n\n"
-    "#ifndef OPENDDS_NO_MULTI_TOPIC\n"
-    "  void* allocate() const { return new T; }\n\n"
-    "  void deallocate(void* stru) const { delete static_cast<T*>(stru); }\n\n"
-    "  size_t numDcpsKeys() const { return " << nKeys << "; }\n\n"
-    "#endif /* OPENDDS_NO_MULTI_TOPIC */\n\n"
-    "  bool isDcpsKey(const char* field) const\n"
-    "  {\n";
-  gen_isDcpsKey(info);
-  be_global->impl_ <<
-    "  }\n\n"
-    "  Value getValue(const void* stru, const char* field) const\n"
-    "  {\n"
-    "    const " << clazz << "& typed = *static_cast<const " << clazz
-    << "*>(stru);\n";
-  std::for_each(fields.begin(), fields.end(), gen_field_getValue);
-  const std::string exception =
-    "    throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \" not "
-    "found or its type is not supported (in struct " + clazz + ")\");\n";
-  be_global->impl_ <<
-    "    ACE_UNUSED_ARG(typed);\n" <<
-    exception <<
-    "  }\n\n"
-    "  Value getValue(Serializer& ser, const char* field) const\n"
-    "  {\n";
-  std::for_each(fields.begin(), fields.end(), gen_field_getValueFromSerialized);
-  be_global->impl_ <<
-    "    if (!field[0]) {\n"   // if 'field' is the empty string...
-    "      return 0;\n"        // ...we've skipped the entire struct
-    "    }\n"                  //    and the return value is ignored
-    "    throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \" not "
-    "valid for struct " << clazz << "\");\n"
-    "  }\n\n"
-    "  ComparatorBase::Ptr create_qc_comparator(const char* field, "
-    "ComparatorBase::Ptr next) const\n"
-    "  {\n"
-    "    ACE_UNUSED_ARG(next);\n";
-  be_global->add_include("<stdexcept>", BE_GlobalData::STREAM_CPP);
-  std::for_each(fields.begin(), fields.end(), gen_field_createQC);
-  be_global->impl_ <<
-    exception <<
-    "  }\n\n"
-    "#ifndef OPENDDS_NO_MULTI_TOPIC\n"
-    "  const char** getFieldNames() const\n"
-    "  {\n"
-    "    static const char* names[] = {";
-  std::for_each(fields.begin(), fields.end(), print_field_name);
-  be_global->impl_ <<
-    "0};\n"
-    "    return names;\n"
-    "  }\n\n"
-    "  const void* getRawField(const void* stru, const char* field) const\n"
-    "  {\n";
-  std::for_each(fields.begin(), fields.end(), get_raw_field);
-  be_global->impl_ <<
-    exception <<
-    "  }\n\n"
-    "  void assign(void* lhs, const char* field, const void* rhs,\n"
-    "    const char* rhsFieldSpec, const MetaStruct& rhsMeta) const\n"
-    "  {\n"
-    "    ACE_UNUSED_ARG(lhs);\n"
-    "    ACE_UNUSED_ARG(field);\n"
-    "    ACE_UNUSED_ARG(rhs);\n"
-    "    ACE_UNUSED_ARG(rhsFieldSpec);\n"
-    "    ACE_UNUSED_ARG(rhsMeta);\n";
-  std::for_each(fields.begin(), fields.end(), assign_field);
-  be_global->impl_ <<
-    exception <<
-    "  }\n"
-    "#endif /* OPENDDS_NO_MULTI_TOPIC */\n\n"
-    "  bool compare(const void* lhs, const void* rhs, const char* field) "
-    "const\n"
-    "  {\n"
-    "    ACE_UNUSED_ARG(lhs);\n"
-    "    ACE_UNUSED_ARG(field);\n"
-    "    ACE_UNUSED_ARG(rhs);\n";
-  std::for_each(fields.begin(), fields.end(), compare_field);
-  be_global->impl_ <<
-    exception <<
-    "  }\n"
-    "};\n\n"
-    "template<>\n"
-    << decl << "\n"
-    "{\n"
-    "  static MetaStructImpl<" << clazz << "> msi;\n"
-    "  return msi;\n"
-    "}\n\n";
   {
     Function f("gen_skip_over", "bool");
     f.addArg("ser", "Serializer&");
@@ -643,26 +711,34 @@ static std::string func(const std::string&,
 }
 
 bool
-metaclass_generator::gen_union(AST_Union*, UTL_ScopedName* name,
+metaclass_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
   const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator,
   const char*)
 {
   const std::string clazz = scoped(name);
   ContentSubscriptionGuard csg;
   NamespaceGuard ng;
-  Function f("gen_skip_over", "bool");
-  f.addArg("ser", "Serializer&");
-  f.addArg("", clazz + "*");
-  f.endArgs();
-  be_global->impl_ <<
-    "  " << scoped(discriminator->name()) << " disc;\n"
-    "  if (!(ser >> " << getWrapper("disc", discriminator, WD_INPUT) << ")) {\n"
-    "    return false;\n"
-    "  }\n";
-  if (generateSwitchForUnion("disc", func, branches, discriminator, "", "", "",
-                             false, true, false)) {
+
+  std::vector<AST_Field*> dummy_field_list;
+  if (!generate_metaclass(node, name, dummy_field_list, first_struct_, clazz)) {
+    return false;
+  }
+
+  {
+    Function f("gen_skip_over", "bool");
+    f.addArg("ser", "Serializer&");
+    f.addArg("", clazz + "*");
+    f.endArgs();
     be_global->impl_ <<
-      "  return true;\n";
+      "  " << scoped(discriminator->name()) << " disc;\n"
+      "  if (!(ser >> " << getWrapper("disc", discriminator, WD_INPUT) << ")) {\n"
+      "    return false;\n"
+      "  }\n";
+    if (generateSwitchForUnion("disc", func, branches, discriminator, "", "", "",
+                               false, true, false)) {
+      be_global->impl_ <<
+        "  return true;\n";
+    }
   }
   return true;
 }

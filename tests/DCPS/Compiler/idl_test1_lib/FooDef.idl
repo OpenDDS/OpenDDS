@@ -53,11 +53,18 @@ module Xyz {
 
   typedef sequence<ArrayOfShorts> ArrayOfShortsSeq;
 
-#pragma DCPS_DATA_TYPE "Xyz::AStruct"
-#pragma DCPS_DATA_KEY "Xyz::AStruct v1"
   // +12
   typedef sequence<short> ShortSeq;
+#ifdef USE_TOPIC_ANNOTATIONS
+  @topic
+#else
+#  pragma DCPS_DATA_TYPE "Xyz::AStruct"
+#  pragma DCPS_DATA_KEY "Xyz::AStruct v1"
+#endif
   struct AStruct {
+#ifdef USE_TOPIC_ANNOTATIONS
+    @key
+#endif
     long v1;
     ShortSeq v2s; //,2 -- was bounded with
   };
@@ -111,7 +118,11 @@ module Xyz {
 
   typedef AStructSeqX ArrayOfAStructSeq[3];
 
-#pragma DCPS_DATA_TYPE "Xyz::StructContainingArrayOfAStructSeq"
+#ifdef USE_TOPIC_ANNOTATIONS
+  @topic
+#else
+#  pragma DCPS_DATA_TYPE "Xyz::StructContainingArrayOfAStructSeq"
+#endif
   struct StructContainingArrayOfAStructSeq {
     ArrayOfAStructSeq f1;
   };
@@ -119,18 +130,27 @@ module Xyz {
   // not currently supported by the TAO IDL compiler; even without -Gdcps
   //typedef fixed<10,4> AFixed;
 
-#pragma DCPS_DATA_TYPE "Xyz::Foo"
-#pragma DCPS_DATA_KEY "Xyz::Foo key"
-#pragma DCPS_DATA_KEY "Xyz::Foo xcolor"
-
   typedef octet OctetArray[3];
 
   // Example user defined "Foo" structure
+#ifdef USE_TOPIC_ANNOTATIONS
+  @topic
+#else
+#  pragma DCPS_DATA_TYPE "Xyz::Foo"
+#  pragma DCPS_DATA_KEY "Xyz::Foo key"
+#  pragma DCPS_DATA_KEY "Xyz::Foo xcolor"
+#endif
   struct Foo {
+#ifdef USE_TOPIC_ANNOTATIONS
+    @key
+#endif
     long key;  //4
 //    TheKeyType key; // no different than without typedef
     //ArrayOfShorts shorts;
     octet octer; //+1 > 5
+#ifdef USE_TOPIC_ANNOTATIONS
+    @key
+#endif
     ColorX xcolor; //+4 > 9
     OctetArray ooo; //+3 > 12
     UShortSeq ushrtseq; //+4+6 > 22
@@ -219,7 +239,11 @@ module N1 {
 
 //Need to verify that we can have a "Foo" (or in this case, a "Bar") outside
 //of a module in IDL.
-#pragma DCPS_DATA_TYPE "Bar"
+#ifdef USE_TOPIC_ANNOTATIONS
+  @topic
+#else
+#  pragma DCPS_DATA_TYPE "Bar"
+#endif
 struct Bar {
   unsigned long data;
 };

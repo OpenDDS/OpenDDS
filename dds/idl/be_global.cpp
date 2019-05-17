@@ -13,6 +13,12 @@
 #include "utl_err.h"
 #include "utl_string.h"
 
+#include "ast_decl.h"
+#include "ast_structure.h"
+#include "ast_field.h"
+#include "ast_union.h"
+#include "ast_annotation_decl.h"
+
 #include "ace/OS_NS_strings.h"
 #include "ace/OS_NS_sys_stat.h"
 #include "ace/ARGV.h"
@@ -39,6 +45,8 @@ BE_GlobalData::BE_GlobalData()
   , face_ts_(false)
   , seq_("Seq")
   , language_mapping_(LANGMAP_NONE)
+  , topic_annotation_(0)
+  , key_annotation_(0)
 {
 }
 
@@ -182,12 +190,6 @@ bool BE_GlobalData::face_ts() const
 {
   return this->face_ts_;
 }
-
-// bool
-// BE_GlobalData::do_included_files() const
-// {
-//   return false; //we never process included files
-// }
 
 void
 BE_GlobalData::open_streams(const char* filename)
@@ -557,4 +559,50 @@ BE_GlobalData::get_include_block(BE_GlobalData::stream_enum_t which)
   }
 
   return ret.str();
+}
+
+void
+BE_GlobalData::cache_topic_annotations()
+{
+  if (idl_global->idl_version_ >= IDL_VERSION_4) {
+    UTL_Scope* root = idl_global->scopes().bottom();
+    topic_annotation_ =
+      AST_Annotation_Decl::narrow_from_decl(
+        root->lookup_by_name("::@topic"));
+    key_annotation_ = AST_Annotation_Decl::narrow_from_decl(
+        root->lookup_by_name("::@key"));
+  }
+}
+
+bool
+BE_GlobalData::is_topic_type(AST_Decl* node)
+{
+  if (node) {
+    if (node->node_type() == AST_Decl::NT_struct) {
+      return node->annotations().find(topic_annotation_);
+    } else if (node->node_type() == AST_Decl::NT_union) {
+      return node->annotations().find(topic_annotation_);
+    } else if (node->node_type() == AST_Decl::NT_typedef) {
+      AST_Type* type = dynamic_cast<AST_Type*>(node)->unaliased_type();
+      if (type->node_type() == AST_Decl::NT_struct
+          || type->node_type() == AST_Decl::NT_union) {
+        return node->annotations().find(topic_annotation_);
+      }
+    }
+  }
+  return false;
+}
+
+bool
+BE_GlobalData::is_key(AST_Field* node)
+{
+  // Check for @key
+  return node && node->annotations().find(key_annotation_);
+}
+
+bool
+BE_GlobalData::has_key(AST_Union* node)
+{
+  // Check for @key on the discriminator
+  return node && node->disc_annotations().find(key_annotation_);
 }

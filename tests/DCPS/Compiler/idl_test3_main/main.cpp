@@ -1,6 +1,6 @@
-#include "../idl_test3_lib/FooDefTypeSupportImpl.h"
-#include "../idl_test3_lib/FooDef2TypeSupportImpl.h"
-#include "../idl_test3_lib/FooDef3TypeSupportImpl.h"
+#include "FooDefTypeSupportImpl.h"
+#include "FooDef2TypeSupportImpl.h"
+#include "FooDef3TypeSupportImpl.h"
 
 #include "tao/CDR.h"
 #include "ace/ACE.h"

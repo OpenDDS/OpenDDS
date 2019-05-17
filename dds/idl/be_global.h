@@ -9,6 +9,8 @@
 #define OPENDDS_IDL_BE_GLOBAL_H
 
 #include "ace/SString.h"
+#include "idl_defines.h"
+#include "utl_scoped_name.h"
 
 #include <string>
 #include <sstream>
@@ -18,7 +20,16 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+#ifndef TAO_IDL_HAS_ANNOTATIONS
+#  error "Annotation support in tao_idl is required, please use a newer version of TAO"
+#endif
+
 class AST_Generator;
+class AST_Decl;
+class AST_Structure;
+class AST_Field;
+class AST_Union;
+class AST_Annotation_Decl;
 
 // Defines a class containing all back end global data.
 
@@ -43,8 +54,6 @@ public:
 
   const char* filename() const;
   void filename(const char* fname);
-
-  //bool do_included_files() const;
 
   ACE_CString spawn_options();
   // Command line passed to ACE_Process::spawn. Different
@@ -136,6 +145,26 @@ public:
 
   static bool writeFile(const char* fileName, const std::string &content);
 
+  /**
+   * Cache @topic and @key
+   */
+  void cache_topic_annotations();
+
+  /**
+   * Check if a type has been declared a topic type.
+   */
+  bool is_topic_type(AST_Decl* node);
+
+  /**
+   * Check if a struct field has been declared a key.
+   */
+  bool is_key(AST_Field* node);
+
+  /**
+   * Check if the discriminator in a union has been declared a key.
+   */
+  bool has_key(AST_Union* node);
+
 private:
   const char* filename_;
   // Name of the IDL file we are processing.
@@ -143,9 +172,19 @@ private:
   bool java_, suppress_idl_, suppress_typecode_,
     generate_itl_, v8_, face_ts_;
 
-  ACE_CString export_macro_, export_include_, versioning_name_, versioning_begin_, versioning_end_, pch_include_, java_arg_, seq_;
+  ACE_CString export_macro_, export_include_,
+    versioning_name_, versioning_begin_, versioning_end_,
+    pch_include_, java_arg_, seq_;
 
   LanguageMapping language_mapping_;
+
+  /**
+   * Hold these for the convenience of not having to do a lookup for the nodes
+   */
+  ///{
+  AST_Annotation_Decl* topic_annotation_;
+  AST_Annotation_Decl* key_annotation_;
+  ///}
 };
 
 class BE_Comment_Guard {
