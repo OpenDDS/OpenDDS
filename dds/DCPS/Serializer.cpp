@@ -11,6 +11,8 @@
 #include <ace/OS_NS_string.h>
 #include <ace/OS_Memory.h>
 
+#include <stdexcept>
+
 #if !defined (__ACE_INLINE__)
 # include "Serializer.inl"
 #endif /* !__ACE_INLINE__ */
@@ -46,13 +48,29 @@ Serializer::reset_alignment()
   align_wshift_ = current_ ? ptrdiff_t(current_->wr_ptr()) % MAX_ALIGN : 0;
 }
 
+/**
+ * @author ceneblock
+ * @brief copies data from one pointer to another
+ * @input to the destination string
+ * @input from the source string
+ * @input n how much of the source string to throw
+ * @throws std::out_of_range in the event that the from string is null
+ */
 void
 Serializer::smemcpy(char* to, const char* from, size_t n)
 {
+  if(from)
+  {
     (void) ACE_OS::memcpy(
       reinterpret_cast<void*>(to),
       reinterpret_cast<const void*>(from),
       n);
+  }
+  else
+  {
+    throw std::out_of_range("Serializer::smemcpy(char* to, const char* from, size_t n): from has a null value");
+  }
+
 }
 
 void
