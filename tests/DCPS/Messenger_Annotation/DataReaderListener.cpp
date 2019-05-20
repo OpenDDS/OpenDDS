@@ -79,29 +79,25 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
         * @brief do a quick little switch case to determine the data type of the
         * union
         */
-       switch(message.base._d())
-       {
-         case Messenger::BASE_2:
-           {
+        switch(message.base._d()) {
+
+          case Messenger::BASE_2: {
             std::cout << "         base       = BASE_2"   << std::endl;
             break;
-           }
-         case Messenger::BASE_10:
-           {
+          }
+          case Messenger::BASE_10: {
             std::cout << "         base       = BASE_10"   << std::endl;
             break;
-           }
-         case Messenger::BASE_16:
-           {
+          }
+          case Messenger::BASE_16: {
             std::cout << "         base       = BASE_16"   << std::endl;
             break;
-           }
-         default:
-           {
+          }
+          default: {
             std::cout << "         base       = UNKNOWN"   << std::endl;
             break;
-           }
-       }
+          }
+        }
 
 
 

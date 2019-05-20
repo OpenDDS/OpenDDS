@@ -118,16 +118,13 @@ Writer::svc()
 
       message.count++;
 
-      if(message.count % (Messenger::BASE_2 + 1) == 0)
-      {
+      if(message.count % (Messenger::BASE_2 + 1) == 0) {
         message.base._d(Messenger::BASE_2);
       }
-      if(message.count % (Messenger::BASE_10 + 1) == 0)
-      {
+      if(message.count % (Messenger::BASE_10 + 1) == 0) {
         message.base._d(Messenger::BASE_10);
       }
-      if(message.count % (Messenger::BASE_16 + 1) == 0)
-      {
+      if(message.count % (Messenger::BASE_16 + 1) == 0) {
         message.base._d(Messenger::BASE_16);
         Messenger::hexadecimal_t data = {'H', 'i'};
         message.base.hexadecimal(data);

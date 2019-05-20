@@ -38,3 +38,24 @@ module Messenger {
     Data  base;
   };
 };
+
+module Base {
+
+  typedef char hexadecimal_t[2];
+  enum base_t {
+    BASE_2,
+    BASE_10,
+    BASE_16
+  };
+
+  @topic 
+  union Data switch(@key base_t)
+  {
+    case BASE_2:
+      boolean on_off;
+    case BASE_10:
+      short decimal;
+    case BASE_16:
+      hexadecimal_t hexadecimal;
+  };
+};
