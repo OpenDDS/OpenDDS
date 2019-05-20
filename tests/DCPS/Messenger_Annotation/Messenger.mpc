@@ -14,7 +14,7 @@ project(DDS*Annotated_Publisher): dcpsexe, dcps_transports_for_test, optional_se
 
   exename   = publisher
   after    += DDS*idl
-  libs     += DDS*idl
+  libs     += DDS*Annotated_idl
 
   Idl_Files {
   }
@@ -29,7 +29,7 @@ project(DDS*Annotated_Subscriber): dcpsexe, dcps_transports_for_test, optional_s
 
   exename   = subscriber
   after    += DDS*idl
-  libs     += DDS*idl
+  libs     += DDS*Annotated_idl
 
   Idl_Files {
   }
@@ -44,7 +44,7 @@ project(DDS*Annotated_StackSubscriber) : dcpsexe, dcps_transports_for_test {
 
   exename   = stack_subscriber
   after    += DDS*idl
-  libs     += DDS*idl
+  libs     += DDS*Annotated_idl
 
   Idl_Files {
   }
