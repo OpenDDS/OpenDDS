@@ -129,7 +129,15 @@ macro(OPENDDS_TARGET_SOURCES target)
     if(NOT "${_tao_options}" MATCHES "-Wb,stub_export_macro")
       list(APPEND _tao_options "-Wb,stub_export_macro=${target}_Export")
     endif()
+    
+    if(NOT "${_tao_options}" MATCHES "--idl-version")
+      list(APPEND _tao_options "--idl-version 4")
+    endif()
 
+    if(NOT "${_tao_options}" MATCHES "--unknown-annotations")
+      list(APPEND _tao_options "--unknown-annotations ignore")
+    endif()
+    
     if(NOT "${_opendds_options}" MATCHES "-Wb,export_macro")
       list(APPEND _opendds_options "-Wb,export_macro=${target}_Export")
     endif()
