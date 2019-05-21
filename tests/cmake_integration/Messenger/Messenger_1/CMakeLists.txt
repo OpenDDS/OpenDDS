@@ -19,6 +19,8 @@ OPENDDS_TARGET_SOURCES(publisher
     ${src}/Writer.cpp
     ${src}/Writer.h
     ${src}/Messenger.idl
+
+    TAO_IDL_OPTIONS --idl-version 4 --unknown-annotations ignore
 )
 
 # Subscriber
@@ -29,6 +31,8 @@ OPENDDS_TARGET_SOURCES(subscriber
     ${src}/DataReaderListener.cpp
     ${src}/DataReaderListener.h
     ${src}/Messenger.idl
+
+    TAO_IDL_OPTIONS --idl-version 4 --unknown-annotations ignore
 )
 
 foreach(t ${all_targets})
