@@ -13,10 +13,7 @@ set(all_targets publisher subscriber messenger)
 
 # Messenger library
 add_library(messenger)
-OPENDDS_TARGET_SOURCES(messenger ${src}/Messenger.idl
-  
-    TAO_IDL_OPTIONS --idl-version 4 --unknown-annotations ignore
-  )
+OPENDDS_TARGET_SOURCES(messenger ${src}/Messenger.idl)
 
 # Publisher
 add_executable(publisher
