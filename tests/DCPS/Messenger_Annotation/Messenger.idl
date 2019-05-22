@@ -41,7 +41,7 @@ module Messenger {
 
 module Base {
 
-  typedef char hexadecimal_t[2];
+  typedef char hexadecimal_t[8];
   enum base_t {
     BASE_2,
     BASE_10,

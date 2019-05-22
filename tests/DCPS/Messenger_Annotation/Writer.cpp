@@ -119,14 +119,14 @@ Writer::svc()
       message.count++;
 
       if(message.count % (Messenger::BASE_2 + 1) == 0) {
-        message.base._d(Messenger::BASE_2);
+        message.base.on_off(true);
       }
       if(message.count % (Messenger::BASE_10 + 1) == 0) {
-        message.base._d(Messenger::BASE_10);
+        message.base.decimal(42);
       }
       if(message.count % (Messenger::BASE_16 + 1) == 0) {
-        message.base._d(Messenger::BASE_16);
-        Messenger::hexadecimal_t data = {'H', 'i'};
+        //message.base._d(Messenger::BASE_16);
+        Messenger::hexadecimal_t data = {'0', 'F'};
         message.base.hexadecimal(data);
       }
     }
