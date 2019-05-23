@@ -50,7 +50,7 @@
                 "listener_status_mask": 4294967295,
 
                 "qos": { "reliability": { "kind": "RELIABLE_RELIABILITY_QOS" } },
-                "qos_mask": { "reliability": { "has_kind": true} }
+                "qos_mask": { "reliability": { "has_kind": true } }
               }
             ]
           }
@@ -69,17 +69,17 @@
       }
     ]
   },
-  "actions" : [
+  "actions": [
     {
       "name": "write_action_01",
       "type": "write",
       "writers": [ "datawriter_01" ],
       "params": [
         { "name": "data_buffer_bytes",
-          "value" : { "_d": "PVK_ULL", "ull_prop": 512 }
+          "value": { "_d": "PVK_ULL", "ull_prop": 512 }
         },
         { "name": "write_frequency",
-          "value" : { "_d": "PVK_DOUBLE", "double_prop": 2.0 }
+          "value": { "_d": "PVK_DOUBLE", "double_prop": 2.0 }
         }
       ]
     }

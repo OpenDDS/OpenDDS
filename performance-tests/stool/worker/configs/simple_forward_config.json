@@ -53,7 +53,7 @@
                 "listener_status_mask": 4294967295,
 
                 "qos": { "reliability": { "kind": "RELIABLE_RELIABILITY_QOS" } },
-                "qos_mask": { "reliability": { "has_kind": true} }
+                "qos_mask": { "reliability": { "has_kind": true } }
               },
               { "name": "datareader_02",
                 "topic_name": "topic_02",
@@ -61,7 +61,7 @@
                 "listener_status_mask": 4294967295,
 
                 "qos": { "reliability": { "kind": "RELIABLE_RELIABILITY_QOS" } },
-                "qos_mask": { "reliability": { "has_kind": true} }
+                "qos_mask": { "reliability": { "has_kind": true } }
               }
             ]
           }
@@ -85,17 +85,17 @@
       }
     ]
   },
-  "actions" : [
+  "actions": [
     {
       "name": "write_action_01",
       "type": "write",
       "writers": [ "datawriter_01" ],
       "params": [
         { "name": "data_buffer_bytes",
-          "value" : { "_d": "PVK_ULL", "ull_prop": 256 }
+          "value": { "_d": "PVK_ULL", "ull_prop": 256 }
         },
         { "name": "write_frequency",
-          "value" : { "_d": "PVK_DOUBLE", "double_prop": 1.0 }
+          "value": { "_d": "PVK_DOUBLE", "double_prop": 1.0 }
         }
       ]
     },

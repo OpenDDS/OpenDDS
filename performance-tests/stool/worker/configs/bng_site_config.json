@@ -65,7 +65,7 @@
                 "listener_status_mask": 4294967295,
 
                 "qos": { "reliability": { "kind": "RELIABLE_RELIABILITY_QOS" } },
-                "qos_mask": { "reliability": { "has_kind": true} }
+                "qos_mask": { "reliability": { "has_kind": true } }
               },
               { "name": "datareader_F",
                 "topic_name": "topic_F",
@@ -73,7 +73,7 @@
                 "listener_status_mask": 4294967295,
 
                 "qos": { "reliability": { "kind": "RELIABLE_RELIABILITY_QOS" } },
-                "qos_mask": { "reliability": { "has_kind": true} }
+                "qos_mask": { "reliability": { "has_kind": true } }
               }
             ]
           }
@@ -107,17 +107,17 @@
       }
     ]
   },
-  "actions" : [
+  "actions": [
     {
       "name": "write_action_A",
       "type": "write",
       "writers": [ "datawriter_A" ],
       "params": [
         { "name": "data_buffer_bytes",
-          "value" : { "_d": "PVK_ULL", "ull_prop": 512 }
+          "value": { "_d": "PVK_ULL", "ull_prop": 512 }
         },
         { "name": "write_period",
-          "value" : { "_d": "PVK_DOUBLE", "double_prop": 40.0 }
+          "value": { "_d": "PVK_DOUBLE", "double_prop": 40.0 }
         }
       ]
     },
@@ -127,10 +127,10 @@
       "writers": [ "datawriter_B" ],
       "params": [
         { "name": "data_buffer_bytes",
-          "value" : { "_d": "PVK_ULL", "ull_prop": 256 }
+          "value": { "_d": "PVK_ULL", "ull_prop": 256 }
         },
         { "name": "write_period",
-          "value" : { "_d": "PVK_DOUBLE", "double_prop": 20.0 }
+          "value": { "_d": "PVK_DOUBLE", "double_prop": 20.0 }
         }
       ]
     },
@@ -140,10 +140,10 @@
       "writers": [ "datawriter_C" ],
       "params": [
         { "name": "data_buffer_bytes",
-          "value" : { "_d": "PVK_ULL", "ull_prop": 128 }
+          "value": { "_d": "PVK_ULL", "ull_prop": 128 }
         },
         { "name": "write_period",
-          "value" : { "_d": "PVK_DOUBLE", "double_prop": 10.0 }
+          "value": { "_d": "PVK_DOUBLE", "double_prop": 10.0 }
         }
       ]
     },
@@ -153,10 +153,10 @@
       "writers": [ "datawriter_D" ],
       "params": [
         { "name": "data_buffer_bytes",
-          "value" : { "_d": "PVK_ULL", "ull_prop": 64 }
+          "value": { "_d": "PVK_ULL", "ull_prop": 64 }
         },
         { "name": "write_period",
-          "value" : { "_d": "PVK_DOUBLE", "double_prop": 5.0 }
+          "value": { "_d": "PVK_DOUBLE", "double_prop": 5.0 }
         }
       ]
     }
