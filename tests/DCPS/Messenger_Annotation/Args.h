@@ -22,11 +22,11 @@
 const int num_messages = 40;
 extern bool reliable;
 extern bool wait_for_acks;
-
+extern bool use_data;
 inline int
 parse_args(int argc, ACE_TCHAR *argv[])
 {
-  ACE_Get_Opt get_opts(argc, argv, ACE_TEXT("t:prw"));
+  ACE_Get_Opt get_opts(argc, argv, ACE_TEXT("t:prwm:"));
 
   OPENDDS_STRING transport_type;
   int c;
@@ -54,6 +54,11 @@ parse_args(int argc, ACE_TCHAR *argv[])
       break;
     case 'w':
       wait_for_acks = true;
+      break;
+    case 'm':
+      if(ACE_OS::strcmp(get_opts.opt_arg(), ACE_TEXT("data")) == 0) {
+        use_data = true;
+      }
       break;
     case '?':
     default:

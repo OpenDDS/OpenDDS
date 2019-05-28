@@ -22,9 +22,6 @@
 #include <dds/DCPS/transport/multicast/Multicast.h>
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #include <dds/DCPS/transport/shmem/Shmem.h>
-#  ifdef OPENDDS_SECURITY
-#  include "dds/DCPS/security/BuiltInPlugins.h"
-#  endif
 # endif
 #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
@@ -33,21 +30,8 @@
 #include "Writer.h"
 #include "Args.h"
 
-#ifdef OPENDDS_SECURITY
-const char auth_ca_file[] = "file:../../security/certs/identity/identity_ca_cert.pem";
-const char perm_ca_file[] = "file:../../security/certs/permissions/permissions_ca_cert.pem";
-const char id_cert_file[] = "file:../../security/certs/identity/test_participant_01_cert.pem";
-const char id_key_file[] = "file:../../security/certs/identity/test_participant_01_private_key.pem";
-const char governance_file[] = "file:./governance_signed.p7s";
-const char permissions_file[] = "file:./permissions_1_signed.p7s";
-
-const char DDSSEC_PROP_IDENTITY_CA[] = "dds.sec.auth.identity_ca";
-const char DDSSEC_PROP_IDENTITY_CERT[] = "dds.sec.auth.identity_certificate";
-const char DDSSEC_PROP_IDENTITY_PRIVKEY[] = "dds.sec.auth.private_key";
-const char DDSSEC_PROP_PERM_CA[] = "dds.sec.access.permissions_ca";
-const char DDSSEC_PROP_PERM_GOV_DOC[] = "dds.sec.access.governance";
-const char DDSSEC_PROP_PERM_DOC[] = "dds.sec.access.permissions";
-#endif
+#include <string>
+#include <variant>
 
 bool dw_reliable() {
   OpenDDS::DCPS::TransportConfig_rch gc = TheTransportRegistry->global_config();
@@ -64,6 +48,7 @@ void append(DDS::PropertySeq& props, const char* name, const char* value, bool p
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
+
   DDS::DomainParticipantFactory_var dpf;
   DDS::DomainParticipant_var participant;
 
@@ -86,16 +71,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       DDS::PropertySeq& props = part_qos.property.value;
       append(props, "OpenDDS.RtpsRelay.Groups", "Messenger", true);
 
-#if defined(OPENDDS_SECURITY)
-      if (TheServiceParticipant->get_security()) {
-        append(props, DDSSEC_PROP_IDENTITY_CA, auth_ca_file);
-        append(props, DDSSEC_PROP_IDENTITY_CERT, id_cert_file);
-        append(props, DDSSEC_PROP_IDENTITY_PRIVKEY, id_key_file);
-        append(props, DDSSEC_PROP_PERM_CA, perm_ca_file);
-        append(props, DDSSEC_PROP_PERM_GOV_DOC, governance_file);
-        append(props, DDSSEC_PROP_PERM_DOC, permissions_file);
-      }
-#endif
 
       // Create DomainParticipant
       participant = dpf->create_participant(4,
@@ -111,20 +86,41 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
 
       // Register TypeSupport (Messenger::Message)
-      Messenger::MessageTypeSupport_var mts =
-        new Messenger::MessageTypeSupportImpl();
+      std::variant<Messenger::MessageTypeSupport_var, Messenger::DataTypeSupport_var> mts;
+      CORBA::String_var type_name;
+      if(use_data)
+      {
+        mts = new Messenger::DataTypeSupportImpl();
+        type_name = std::get<Messenger::DataTypeSupport_var>(mts)->get_type_name();
 
-      if (mts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l: main()")
-                          ACE_TEXT(" ERROR: register_type failed!\n")),
-                         -1);
+        if (std::get<Messenger::DataTypeSupport_var>(mts)->register_type(participant.in(), "") != DDS::RETCODE_OK) {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            ACE_TEXT("%N:%l: main()")
+                            ACE_TEXT(" ERROR: register_type failed!\n")),
+                           -1);
+        }
+      }
+      else
+      {
+        mts = new Messenger::MessageTypeSupportImpl();
+        type_name = std::get<Messenger::MessageTypeSupport_var>(mts)->get_type_name();
+        if (std::get<Messenger::MessageTypeSupport_var>(mts)->register_type(participant.in(), "") != DDS::RETCODE_OK) {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            ACE_TEXT("%N:%l: main()")
+                            ACE_TEXT(" ERROR: register_type failed!\n")),
+                           -1);
+        }
       }
 
+
       // Create Topic
-      CORBA::String_var type_name = mts->get_type_name();
+      std::string topic_name = "Movie Discussion List";
+      if(use_data)
+      {
+        topic_name = "BinDecHex";
+      }
       DDS::Topic_var topic =
-        participant->create_topic("Movie Discussion List",
+        participant->create_topic(topic_name.c_str(),
                                   type_name.in(),
                                   TOPIC_QOS_DEFAULT,
                                   DDS::TopicListener::_nil(),
@@ -174,7 +170,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       // Start writing threads
       std::cout << "Creating Writer" << std::endl;
-      Writer* writer = new Writer(dw.in());
+      Writer* writer;
+      if(use_data) {
+        writer  = new Writer(dw.in(), Writer::message_t::data);
+      }
+      else {
+        writer  = new Writer(dw.in());
+      }
       std::cout << "Starting Writer" << std::endl;
       writer->start();
 

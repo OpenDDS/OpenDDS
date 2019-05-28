@@ -24,7 +24,7 @@
 
 bool reliable = false;
 bool wait_for_acks = false;
-
+bool use_data = false;
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
@@ -62,8 +62,13 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     // Create Topic (Movie Discussion List)
+    std::string topic_name = "Movie Discussion List";
+    if(use_data)
+    {
+      topic_name = "BinDecHex";
+    }
     DDS::Topic_var topic =
-      participant->create_topic("Movie Discussion List",
+      participant->create_topic(topic_name.c_str(),
                                 CORBA::String_var(ts->get_type_name()),
                                 TOPIC_QOS_DEFAULT,
                                 DDS::TopicListener::_nil(),

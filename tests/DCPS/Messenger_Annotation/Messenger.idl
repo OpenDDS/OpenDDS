@@ -7,10 +7,7 @@
 
 module Messenger {
 
-#pragma DCPS_DATA_TYPE "Messenger::Message"
-#pragma DCPS_DATA_KEY "Messenger::Message subject_id"
-
-  typedef char hexadecimal_t[2];
+  typedef char hexadecimal_t[8];
 
   enum Base {
     BASE_2,
@@ -29,33 +26,14 @@ module Messenger {
       hexadecimal_t hexadecimal;
   };
 
+  @topic
   struct Message {
     string from;
     string subject;
-    long long subject_id;
+    @key long long subject_id;
     string body;
     long   count;
     Data  base;
   };
 };
 
-module Base {
-
-  typedef char hexadecimal_t[8];
-  enum base_t {
-    BASE_2,
-    BASE_10,
-    BASE_16
-  };
-
-  @topic 
-  union Data switch(@key base_t)
-  {
-    case BASE_2:
-      boolean on_off;
-    case BASE_10:
-      short decimal;
-    case BASE_16:
-      hexadecimal_t hexadecimal;
-  };
-};

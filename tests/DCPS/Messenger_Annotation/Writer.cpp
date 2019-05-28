@@ -19,10 +19,10 @@
 const int num_instances_per_writer = 1;
 bool reliable = false;
 bool wait_for_acks = false;
-
-Writer::Writer(DDS::DataWriter_ptr writer)
+bool use_data = false;
+Writer::Writer(DDS::DataWriter_ptr writer, const Writer::message_t messageType)
   : writer_(DDS::DataWriter::_duplicate(writer)),
-    finished_instances_(0)
+    finished_instances_(0), messageType_(messageType)
 {
 }
 
@@ -84,53 +84,16 @@ Writer::svc()
     ws->detach_condition(condition);
 
     // Write samples
-    Messenger::MessageDataWriter_var message_dw
-      = Messenger::MessageDataWriter::_narrow(writer_.in());
-
-    if (CORBA::is_nil(message_dw.in())) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("%N:%l: svc()")
-                   ACE_TEXT(" ERROR: _narrow failed!\n")));
-        ACE_OS::exit(-1);
+    if(messageType_ == Writer::message_t::messenger)
+    {
+      std::cout << "Write messenger()\n";
+      writeMessenger();
     }
-
-    Messenger::Message message;
-    message.subject_id = 3145790066;
-
-    DDS::InstanceHandle_t handle = message_dw->register_instance(message);
-
-    message.from         = "Alice";
-    message.subject      = "Message";
-    message.body         = "It's a secret to everybody.";
-    message.count        = 0;
-
-    for (int i = 0; i < num_messages; i++) {
-      DDS::ReturnCode_t error;
-      do {
-        error = message_dw->write(message, handle);
-      } while (error == DDS::RETCODE_TIMEOUT);
-
-      if (error != DDS::RETCODE_OK) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("%N:%l: svc()")
-                   ACE_TEXT(" ERROR: write returned %d!\n"), error));
-      }
-
-      message.count++;
-
-      if(message.count % (Messenger::BASE_2 + 1) == 0) {
-        message.base.on_off(true);
-      }
-      if(message.count % (Messenger::BASE_10 + 1) == 0) {
-        message.base.decimal(42);
-      }
-      if(message.count % (Messenger::BASE_16 + 1) == 0) {
-        //message.base._d(Messenger::BASE_16);
-        Messenger::hexadecimal_t data = {'0', 'F'};
-        message.base.hexadecimal(data);
-      }
+    else if(messageType_ == Writer::message_t::data)
+    {
+      std::cout << "Write data()\n";
+      writeData();
     }
-
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in svc():");
   }
@@ -144,4 +107,100 @@ bool
 Writer::is_finished() const
 {
   return finished_instances_ == num_instances_per_writer;
+}
+
+/**
+ * @brief a helper function for svc to write the Messenger::Message
+ */ 
+void Writer::writeMessenger()
+{
+  Messenger::MessageDataWriter_var message_dw
+    = Messenger::MessageDataWriter::_narrow(writer_.in());
+
+  if (CORBA::is_nil(message_dw.in())) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("%N:%l: svc()")
+                 ACE_TEXT(" ERROR: _narrow failed!\n")));
+      ACE_OS::exit(-1);
+  }
+
+  Messenger::Message message;
+  message.subject_id = 3145790066;
+
+  DDS::InstanceHandle_t handle = message_dw->register_instance(message);
+
+  message.from         = "Alice";
+  message.subject      = "Message";
+  message.body         = "It's a secret to everybody.";
+  message.count        = 0;
+
+  for (int i = 0; i < num_messages; i++) {
+    DDS::ReturnCode_t error;
+    do {
+      error = message_dw->write(message, handle);
+    } while (error == DDS::RETCODE_TIMEOUT);
+
+    if (error != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("%N:%l: svc()")
+                 ACE_TEXT(" ERROR: write returned %d!\n"), error));
+    }
+
+    message.count++;
+
+    if(message.count % (Messenger::BASE_2 + 1) == 0) {
+      message.base.on_off(true);
+    }
+    if(message.count % (Messenger::BASE_10 + 1) == 0) {
+      message.base.decimal(42);
+    }
+    if(message.count % (Messenger::BASE_16 + 1) == 0) {
+      Messenger::hexadecimal_t data = {'0', 'F'};
+      message.base.hexadecimal(data);
+    }
+  }
+}
+
+/**
+ * @brief a helper function for svc to write the Messenger::Data
+ */ 
+void Writer::writeData()
+{
+  Messenger::DataDataWriter_var data_dw
+    = Messenger::DataDataWriter::_narrow(writer_.in());
+
+  if (CORBA::is_nil(data_dw.in())) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("%N:%l: svc()")
+                 ACE_TEXT(" ERROR: _narrow failed!\n")));
+      ACE_OS::exit(-1);
+  }
+
+  Messenger::Data data;
+
+  DDS::InstanceHandle_t handle = data_dw->register_instance(data);
+
+  for (int i = 0; i < num_messages; i++) {
+    DDS::ReturnCode_t error;
+    do {
+      error = data_dw->write(data, handle);
+    } while (error == DDS::RETCODE_TIMEOUT);
+
+    if (error != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("%N:%l: svc()")
+                 ACE_TEXT(" ERROR: write returned %d!\n"), error));
+    }
+
+    if(i % (Messenger::BASE_2 + 1) == 0) {
+      data.on_off(true);
+    }
+    if(i % (Messenger::BASE_10 + 1) == 0) {
+      data.decimal(42);
+    }
+    if(i % (Messenger::BASE_16 + 1) == 0) {
+      Messenger::hexadecimal_t hex = {'0', 'F'};
+      data.hexadecimal(hex);
+    }
+  }
 }

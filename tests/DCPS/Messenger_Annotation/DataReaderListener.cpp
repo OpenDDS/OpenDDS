@@ -42,45 +42,120 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
   ++num_reads_;
 
   try {
-    Messenger::MessageDataReader_var message_dr =
-      Messenger::MessageDataReader::_narrow(reader);
+    if(!use_data) {
+      Messenger::MessageDataReader_var message_dr =
+        Messenger::MessageDataReader::_narrow(reader);
 
-    if (CORBA::is_nil(message_dr.in())) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("%N:%l: on_data_available()")
-                 ACE_TEXT(" ERROR: _narrow failed!\n")));
-      ACE_OS::exit(-1);
-    }
+      if (CORBA::is_nil(message_dr.in())) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("%N:%l: on_data_available()")
+                   ACE_TEXT(" ERROR: _narrow failed!\n")));
+        ACE_OS::exit(-1);
+      }
 
-    Messenger::Message message;
-    DDS::SampleInfo si;
+      Messenger::Message message;
+      DDS::SampleInfo si;
+    
+      DDS::ReturnCode_t status = message_dr->take_next_sample(message, si) ;
 
-    DDS::ReturnCode_t status = message_dr->take_next_sample(message, si) ;
+      if (status == DDS::RETCODE_OK) {
+        std::cout << "SampleInfo.sample_rank = " << si.sample_rank << std::endl;
+        std::cout << "SampleInfo.instance_state = " << si.instance_state << std::endl;
 
-    if (status == DDS::RETCODE_OK) {
-      std::cout << "SampleInfo.sample_rank = " << si.sample_rank << std::endl;
-      std::cout << "SampleInfo.instance_state = " << si.instance_state << std::endl;
+        if (si.valid_data) {
+          if (!counts_.insert(message.count).second) {
+            std::cout << "ERROR: Repeat ";
+            valid_ = false;
+          }
 
-      if (si.valid_data) {
-        if (!counts_.insert(message.count).second) {
-          std::cout << "ERROR: Repeat ";
+          std::cout << "Message: subject    = " << message.subject.in() << std::endl
+                    << "         subject_id = " << message.subject_id   << std::endl
+                    << "         from       = " << message.from.in()    << std::endl
+                    << "         count      = " << message.count        << std::endl
+                    << "         body       = " << message.body.in()    << std::endl;
+          
+
+          /**
+          * @author ceneblock
+          * @brief do a quick little switch case to determine the data type of the
+          * union
+          */
+          switch(message.base._d()) {
+
+            case Messenger::BASE_2: {
+              std::cout << "         base       = BASE_2"   << std::endl;
+              break;
+            }
+            case Messenger::BASE_10: {
+              std::cout << "         base       = BASE_10"   << std::endl;
+              break;
+            }
+            case Messenger::BASE_16: {
+              std::cout << "         base       = BASE_16"   << std::endl;
+              break;
+            }
+            default: {
+              std::cout << "         base       = UNKNOWN"   << std::endl;
+              break;
+            }
+          }
+
+          if (std::string("Alice") != message.from.in() &&
+              std::string("OpenDDS-Java") != message.from.in()) {
+            std::cout << "ERROR: Invalid message.from" << std::endl;
+            valid_ = false;
+          }
+          if (std::string("Message") != message.subject.in()) {
+            std::cout << "ERROR: Invalid message.subject" << std::endl;
+            valid_ = false;
+          }
+          if (message.subject_id != 3145790066) {
+            std::cout << "ERROR: Invalid message.subject_id" << std::endl;
+            valid_ = false;
+          }
+        } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is disposed\n")));
+
+        } else if (si.instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE) {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is unregistered\n")));
+
+        } else {
+          ACE_ERROR((LM_ERROR,
+                     ACE_TEXT("%N:%l: on_data_available()")
+                     ACE_TEXT(" ERROR: unknown instance state: %d\n"),
+                     si.instance_state));
           valid_ = false;
         }
 
-        std::cout << "Message: subject    = " << message.subject.in() << std::endl
-                  << "         subject_id = " << message.subject_id   << std::endl
-                  << "         from       = " << message.from.in()    << std::endl
-                  << "         count      = " << message.count        << std::endl
-                  << "         body       = " << message.body.in()    << std::endl;
-        
+      } else {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("%N:%l: on_data_available()")
+                   ACE_TEXT(" ERROR: unexpected status: %d\n"),
+                   status));
+        valid_ = false;
+      }
+    } else { //if(use_data)
+      Messenger::DataDataReader_var data_dr =
+      Messenger::DataDataReader::_narrow(reader);
 
-       /**
-        * @author ceneblock
-        * @brief do a quick little switch case to determine the data type of the
-        * union
-        */
-        switch(message.base._d()) {
+      if (CORBA::is_nil(data_dr.in())) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("%N:%l: on_data_available()")
+                   ACE_TEXT(" ERROR: _narrow failed!\n")));
+        ACE_OS::exit(-1);
+      }
 
+      Messenger::Data data;
+      DDS::SampleInfo si;
+    
+      DDS::ReturnCode_t status = data_dr->take_next_sample(data, si) ;
+
+      if (status == DDS::RETCODE_OK) {
+        std::cout << "SampleInfo.sample_rank = " << si.sample_rank << std::endl;
+        std::cout << "SampleInfo.instance_state = " << si.instance_state << std::endl;
+
+      if (si.valid_data) {
+        switch(data._d()) {
           case Messenger::BASE_2: {
             std::cout << "         base       = BASE_2"   << std::endl;
             break;
@@ -99,43 +174,27 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
           }
         }
 
+        } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is disposed\n")));
 
+        } else if (si.instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE) {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is unregistered\n")));
 
-        if (std::string("Alice") != message.from.in() &&
-            std::string("OpenDDS-Java") != message.from.in()) {
-          std::cout << "ERROR: Invalid message.from" << std::endl;
+        } else {
+          ACE_ERROR((LM_ERROR,
+                     ACE_TEXT("%N:%l: on_data_available()")
+                     ACE_TEXT(" ERROR: unknown instance state: %d\n"),
+                     si.instance_state));
           valid_ = false;
         }
-        if (std::string("Message") != message.subject.in()) {
-          std::cout << "ERROR: Invalid message.subject" << std::endl;
-          valid_ = false;
-        }
-        if (message.subject_id != 3145790066) {
-          std::cout << "ERROR: Invalid message.subject_id" << std::endl;
-          valid_ = false;
-        }
-      } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is disposed\n")));
-
-      } else if (si.instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is unregistered\n")));
-
       } else {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("%N:%l: on_data_available()")
-                   ACE_TEXT(" ERROR: unknown instance state: %d\n"),
-                   si.instance_state));
+                   ACE_TEXT(" ERROR: unexpected status: %d\n"),
+                   status));
         valid_ = false;
       }
-
-    } else {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("%N:%l: on_data_available()")
-                 ACE_TEXT(" ERROR: unexpected status: %d\n"),
-                 status));
-      valid_ = false;
     }
-
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in on_data_available():");
     ACE_OS::exit(-1);

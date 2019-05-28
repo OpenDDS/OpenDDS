@@ -19,9 +19,6 @@
 #include <dds/DCPS/transport/multicast/Multicast.h>
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #include <dds/DCPS/transport/shmem/Shmem.h>
-#  ifdef OPENDDS_SECURITY
-#  include "dds/DCPS/security/BuiltInPlugins.h"
-#  endif
 # endif
 #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
@@ -32,26 +29,14 @@
 
 #include "DataReaderListener.h"
 #include "MessengerTypeSupportImpl.h"
+
 #include "Args.h"
 
-#ifdef OPENDDS_SECURITY
-const char auth_ca_file[] = "file:../../security/certs/identity/identity_ca_cert.pem";
-const char perm_ca_file[] = "file:../../security/certs/permissions/permissions_ca_cert.pem";
-const char id_cert_file[] = "file:../../security/certs/identity/test_participant_02_cert.pem";
-const char id_key_file[] = "file:../../security/certs/identity/test_participant_02_private_key.pem";
-const char governance_file[] = "file:./governance_signed.p7s";
-const char permissions_file[] = "file:./permissions_2_signed.p7s";
-
-const char DDSSEC_PROP_IDENTITY_CA[] = "dds.sec.auth.identity_ca";
-const char DDSSEC_PROP_IDENTITY_CERT[] = "dds.sec.auth.identity_certificate";
-const char DDSSEC_PROP_IDENTITY_PRIVKEY[] = "dds.sec.auth.private_key";
-const char DDSSEC_PROP_PERM_CA[] = "dds.sec.access.permissions_ca";
-const char DDSSEC_PROP_PERM_GOV_DOC[] = "dds.sec.access.governance";
-const char DDSSEC_PROP_PERM_DOC[] = "dds.sec.access.permissions";
-#endif
+#include <string>
 
 bool reliable = false;
 bool wait_for_acks = false;
+bool use_data =false ;
 
 void append(DDS::PropertySeq& props, const char* name, const char* value, bool propagate = false)
 {
@@ -81,16 +66,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     DDS::PropertySeq& props = part_qos.property.value;
     append(props, "OpenDDS.RtpsRelay.Groups", "Messenger", true);
 
-#if defined(OPENDDS_SECURITY)
-    if (TheServiceParticipant->get_security()) {
-      append(props, DDSSEC_PROP_IDENTITY_CA, auth_ca_file);
-      append(props, DDSSEC_PROP_IDENTITY_CERT, id_cert_file);
-      append(props, DDSSEC_PROP_IDENTITY_PRIVKEY, id_key_file);
-      append(props, DDSSEC_PROP_PERM_CA, perm_ca_file);
-      append(props, DDSSEC_PROP_PERM_GOV_DOC, governance_file);
-      append(props, DDSSEC_PROP_PERM_DOC, permissions_file);
-    }
-#endif
 
     // Create DomainParticipant
     DDS::DomainParticipant_var participant =
@@ -116,9 +91,15 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     // Create Topic (Movie Discussion List)
+    std::string topic_name = "Movie Discussion List";
+    if(use_data)
+    {
+      topic_name = "BinDecHex";
+    }
+    
     CORBA::String_var type_name = ts->get_type_name();
     DDS::Topic_var topic =
-      participant->create_topic("Movie Discussion List",
+      participant->create_topic(topic_name.c_str(),
                                 type_name.in(),
                                 TOPIC_QOS_DEFAULT,
                                 DDS::TopicListener::_nil(),
