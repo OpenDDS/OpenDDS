@@ -20,6 +20,7 @@ add_executable(publisher
     ${src}/publisher.cpp
     ${src}/Writer.cpp
     ${src}/Writer.h
+    
 )
 
 # Subscriber
@@ -27,6 +28,7 @@ add_executable(subscriber
     ${src}/subscriber.cpp
     ${src}/DataReaderListener.cpp
     ${src}/DataReaderListener.h
+
 )
 
 foreach(t ${all_targets})
