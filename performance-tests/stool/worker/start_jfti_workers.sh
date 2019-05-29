@@ -11,7 +11,7 @@ pid_file="/tmp/stool_worker_pids"
 function gather_pids()
 {
   new_job_started="$(jobs -n)"
-  if [ -n "$new_job_started" ];then
+  if [ -n "$new_job_started" ]; then
       echo $! >> ${pid_file}
   fi
 }
@@ -33,12 +33,27 @@ echo "site count = $site_count"
 jobs &>/dev/null
 exec &>/dev/null
 
+do_mutrace=0
+mutrace_args="mutrace --hash-size=2000000"
+
 for (( i=1; i<=$site_count; i++ ))
 do
-  ./worker configs/jfti_sim_daemon_config.json true &
-  gather_pids
-  ./worker configs/jfti_sim_worker_config.json true &
-  gather_pids
+  if [ x$do_mutrace = x1 ] && [ x$i = x1 ]; then
+    $mutrace_args ./worker configs/jfti_sim_daemon_config.json true &> mutrace_daemon_output.txt &
+    gather_pids
+    $mutrace_args ./worker configs/jfti_sim_worker_config.json true &> mutrace_worker_output.txt &
+    gather_pids
+  else
+    ./worker configs/jfti_sim_daemon_config.json true &
+    gather_pids
+    ./worker configs/jfti_sim_worker_config.json true &
+    gather_pids
+  fi
 done
-./worker configs/jfti_sim_master_config.json true &
-gather_pids
+if [ x$do_mutrace = x1 ]; then
+  $mutrace_args ./worker configs/jfti_sim_master_config.json true &> mutrace_master_output.txt &
+  gather_pids
+else
+  ./worker configs/jfti_sim_master_config.json true &
+  gather_pids
+fi
