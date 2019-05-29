@@ -43,7 +43,7 @@ be_util::prep_be_arg (char *arg)
   static const size_t SZ_WB_TAO_INC_PRE = sizeof(WB_TAO_INC_PRE) - 1;
   static const char WB_V8[] = "v8";
   static const size_t SZ_WB_V8 = sizeof(WB_V8) - 1;
-  static const char WB_TS_CPP_INCLUDE[] = "ts_cpp_include";
+  static const char WB_TS_CPP_INCLUDE[] = "ts_cpp_include=";
   static const size_t SZ_WB_TS_CPP_INCLUDE = sizeof(WB_TS_CPP_INCLUDE) - 1;
 
   if (0 == ACE_OS::strncasecmp(arg, WB_EXPORT_MACRO, SZ_WB_EXPORT_MACRO)) {
