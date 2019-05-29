@@ -1430,7 +1430,8 @@ RtpsUdpDataLink::send_ack_nacks(RtpsReaderMap::value_type& rr, bool finalFlag)
         ser << nack_frags[i]; // always 4-byte aligned
       }
 
-      if (!locators_.count(wi->first)) {
+      const OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan)::const_iterator iter = locators_.find(wi->first);
+      if (iter == locators_.end()) {
         if (Transport_debug_level) {
           const GuidConverter conv(wi->first);
           ACE_ERROR((LM_ERROR,
@@ -1439,7 +1440,7 @@ RtpsUdpDataLink::send_ack_nacks(RtpsReaderMap::value_type& rr, bool finalFlag)
         }
       } else {
         send_strategy()->send_rtps_control(mb_acknack,
-                                          locators_[wi->first].addr_);
+                                           iter->second.addr_);
       }
     }
   }
@@ -1959,8 +1960,9 @@ RtpsUdpDataLink::send_nack_replies()
       process_requested_changes(requests, writer, ri->second);
 
       if (!ri->second.requested_changes_.empty()) {
-        if (locators_.count(ri->first)) {
-          recipients.insert(locators_[ri->first].addr_);
+        const OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan)::const_iterator iter = locators_.find(ri->first);
+        if (iter != locators_.end()) {
+          recipients.insert(iter->second.addr_);
           if (Transport_debug_level > 5) {
             const GuidConverter local_conv(rw->first), remote_conv(ri->first);
             ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::send_nack_replies "
@@ -2027,11 +2029,16 @@ RtpsUdpDataLink::send_nackfrag_replies(RtpsWriter& writer,
   const ri_iter end = writer.remote_readers_.end();
   for (ri_iter ri = writer.remote_readers_.begin(); ri != end; ++ri) {
 
-    if (ri->second.requested_frags_.empty() || !locators_.count(ri->first)) {
+    if (ri->second.requested_frags_.empty()) {
       continue;
     }
 
-    const ACE_INET_Addr& remote_addr = locators_[ri->first].addr_;
+    OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan)::const_iterator iter = locators_.find(ri->first);
+    if (iter == locators_.end()) {
+      continue;
+    }
+
+    const ACE_INET_Addr& remote_addr = iter->second.addr_;
 
     typedef OPENDDS_MAP(SequenceNumber, RTPS::FragmentNumberSet)::iterator rf_iter;
     const rf_iter rf_end = ri->second.requested_frags_.end();
@@ -2096,7 +2103,8 @@ RtpsUdpDataLink::send_directed_nack_replies(const RepoId& writerId,
                                             const RepoId& readerId,
                                             ReaderInfo& reader)
 {
-  if (!locators_.count(readerId)) {
+  const OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan)::const_iterator iter = locators_.find(readerId);
+  if (iter == locators_.end()) {
     return;
   }
 
@@ -2105,7 +2113,7 @@ RtpsUdpDataLink::send_directed_nack_replies(const RepoId& writerId,
   reader.requested_changes_.clear();
 
   DisjointSequence gaps;
-  ACE_INET_Addr addr = locators_[readerId].addr_;
+  ACE_INET_Addr addr = iter->second.addr_;
 
   if (!requests.empty()) {
     if (writer.send_buff_.is_nil() || writer.send_buff_->empty()) {
@@ -2392,11 +2400,13 @@ RtpsUdpDataLink::send_heartbeats()
       typedef ReaderInfoMap::iterator ri_iter;
       const ri_iter end = rw->second.remote_readers_.end();
       for (ri_iter ri = rw->second.remote_readers_.begin(); ri != end; ++ri) {
-        if ((has_data || !ri->second.handshake_done_)
-            && locators_.count(ri->first)) {
-          recipients.insert(locators_[ri->first].addr_);
-          if (final && !ri->second.handshake_done_) {
-            final = false;
+        if (has_data || !ri->second.handshake_done_) {
+          const OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan)::const_iterator iter = locators_.find(ri->first);
+          if (iter != locators_.end()) {
+            recipients.insert(iter->second.addr_);
+            if (final && !ri->second.handshake_done_) {
+              final = false;
+            }
           }
         }
         if (!ri->second.durable_data_.empty()) {
@@ -2421,8 +2431,9 @@ RtpsUdpDataLink::send_heartbeats()
             if (ri->second.durable_data_.rbegin()->first > durable_max) {
               durable_max = ri->second.durable_data_.rbegin()->first;
             }
-            if (locators_.count(ri->first)) {
-              recipients.insert(locators_[ri->first].addr_);
+            const OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan)::const_iterator iter = locators_.find(ri->first);
+            if (iter != locators_.end()) {
+              recipients.insert(iter->second.addr_);
             }
           }
         }
