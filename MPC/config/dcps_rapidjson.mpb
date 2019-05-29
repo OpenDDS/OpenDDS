@@ -1,6 +1,6 @@
 project: dcps_ts_defaults {
 
-  dcps_ts_flags += -Wb,rapidjson
+  dcps_ts_flags += -Grapidjson
 
   expand(RAPIDJSON_ROOT) {
     $RAPIDJSON_ROOT

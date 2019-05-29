@@ -315,8 +315,9 @@ void invalid_option(char * option)
 void
 BE_GlobalData::parse_args(long& i, char** av)
 {
-  static const char WB_EXPORT_MACRO[] = "--export=";
-  static const size_t SZ_WB_EXPORT_MACRO = sizeof(WB_EXPORT_MACRO) - 1;
+  // This flag is provided for CIAO compatibility
+  static const char EXPORT_FLAG[] = "--export=";
+  static const size_t EXPORT_FLAG_SIZE = sizeof(EXPORT_FLAG) - 1;
 
   switch (av[i][1]) {
   case 'o':
@@ -332,15 +333,21 @@ BE_GlobalData::parse_args(long& i, char** av)
       output_dir_ = av[++i];
     }
     break;
+
   case 'G':
-    if (0 == ACE_OS::strcmp(av[i], "-Gitl"))
+    if (0 == ACE_OS::strcmp(av[i], "-Gitl")) {
       itl(true);
-    else if (0 == ACE_OS::strcasecmp(av[i], "-GfaceTS"))
+    } else if (0 == ACE_OS::strcasecmp(av[i], "-GfaceTS")) {
       face_ts(true);
-    else {
+    } else if (0 == ACE_OS::strcasecmp(av[i], "-Gv8")) {
+      be_global->v8(true);
+    } else if (0 == ACE_OS::strcasecmp(av[i], "-Grapidjson")) {
+      be_global->rapidjson(true);
+    } else {
       invalid_option(av[i]);
     }
     break;
+
   case 'L':
     if (0 == ACE_OS::strcasecmp(av[i], "-Lface"))
       language_mapping(LANGMAP_FACE_CXX);
@@ -353,7 +360,12 @@ BE_GlobalData::parse_args(long& i, char** av)
       invalid_option(av[i]);
     }
     break;
+
   case 'S':
+    if (0 == ACE_OS::strcasecmp(av[i], "-Sdefault")) {
+      no_default_gen_ = true;
+      break;
+    }
     if (av[i][2] && av[i][3]) {
       invalid_option(av[i]);
       break;
@@ -372,26 +384,15 @@ BE_GlobalData::parse_args(long& i, char** av)
       invalid_option(av[i]);
     }
     break;
-  case 'Z':
-    if (av[i][2] && av[i][3]) {
-      invalid_option(av[i]);
-      break;
-    }
-    switch (av[i][2]) {
-    case 'C':
-      add_include (av[++i], STREAM_CPP);
-      break;
-    default:
-      invalid_option(av[i]);
-    }
-    break;
+
   case '-':
-    if (0 == ACE_OS::strncasecmp(av[i], WB_EXPORT_MACRO, SZ_WB_EXPORT_MACRO)) {
-      this->export_macro(av[i] + SZ_WB_EXPORT_MACRO);
+    if (0 == ACE_OS::strncasecmp(av[i], EXPORT_FLAG, EXPORT_FLAG_SIZE)) {
+      this->export_macro(av[i] + EXPORT_FLAG_SIZE);
     } else {
       invalid_option(av[i]);
     }
     break;
+
   default:
     invalid_option(av[i]);
   }

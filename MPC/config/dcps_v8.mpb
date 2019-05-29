@@ -1,6 +1,6 @@
 project: dcps_ts_defaults {
 
-  dcps_ts_flags += -Wb,v8
+  dcps_ts_flags += -Gv8
 
   includes += $(V8_ROOT)/include/node $(NAN_ROOT)
 
