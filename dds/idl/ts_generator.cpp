@@ -256,21 +256,23 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
   }
   be_global->impl_ << be_global->versioning_end() << "\n";
 
+  if (be_global->face_ts()) {
+    if (node->node_type() == AST_Decl::NT_struct) {
+      face_ts_generator::generate(name);
+    } else {
+      idl_global->err()->misc_error(
+        "Generating FACE type support for Union topic types is not supported", node);
+      return false;
+    }
+  }
+
   return true;
 }
 
 bool ts_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
   const std::vector<AST_Field*>&, AST_Type::SIZE_TYPE, const char*)
 {
-  if (!generate_ts(node, name)) {
-    return false;
-  }
-
-  if (be_global->face_ts()) {
-    face_ts_generator::generate(name);
-  }
-
-  return true;
+  return generate_ts(node, name);
 }
 
 bool ts_generator::gen_union(AST_Union* node, UTL_ScopedName* name,

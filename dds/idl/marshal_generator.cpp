@@ -2179,9 +2179,9 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
   if (!is_topic_type) {
     if (has_key) {
-      std::cerr
-        << "Warning: Union " << cxx << " has a key on its discriminator, "
-        << "but it's not a topic type, ignoring it...\n";
+      idl_global->err()->misc_warning(
+        "Union has @key on its discriminator, "
+        "but it's not a topic type, ignoring it...", node);
     }
     return true;
   }
