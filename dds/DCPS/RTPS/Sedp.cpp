@@ -2044,6 +2044,7 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
         }
       }
     }
+#ifdef OPENDDS_ANNOUNCE_ASSOCIATED_WRITERS
     // For each associated opendds writer to this reader
     CORBA::ULong len = rdata.readerProxy.associatedWriters.length();
     for (CORBA::ULong writerIndex = 0; writerIndex < len; ++writerIndex)
@@ -2060,6 +2061,7 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
         }
       }
     }
+#endif
 
   } else if (message_id == DCPS::UNREGISTER_INSTANCE ||
              message_id == DCPS::DISPOSE_INSTANCE ||
@@ -2383,6 +2385,7 @@ Sedp::is_opendds(const GUID_t& endpoint) const
   return spdp_.is_opendds(participant);
 }
 
+#ifdef OPENDDS_ANNOUNCE_ASSOCIATED_WRITERS
 void
 Sedp::association_complete(const RepoId& localId,
                            const RepoId& remoteId)
@@ -2401,6 +2404,12 @@ Sedp::association_complete(const RepoId& localId,
       }
     }
   }
+#else
+void
+Sedp::association_complete(const RepoId& /*localId*/,
+                           const RepoId& /*remoteId*/)
+{
+#endif
 }
 
 void Sedp::signal_liveliness(DDS::LivelinessQosPolicyKind kind)
@@ -3154,6 +3163,7 @@ Sedp::populate_discovered_reader_msg(
   drd.contentFilterProperty.filterClassName = ""; // PLConverter adds default
   drd.contentFilterProperty.filterExpression = sub.filterProperties.filterExpression;
   drd.contentFilterProperty.expressionParameters = sub.filterProperties.expressionParameters;
+#ifdef OPENDDS_ANNOUNCE_ASSOCIATED_WRITERS
   for (DCPS::RepoIdSet::const_iterator writer =
         sub.remote_opendds_associations_.begin();
        writer != sub.remote_opendds_associations_.end();
@@ -3162,6 +3172,7 @@ Sedp::populate_discovered_reader_msg(
     drd.readerProxy.associatedWriters.length(len + 1);
     drd.readerProxy.associatedWriters[len] = *writer;
   }
+#endif
 }
 
 void

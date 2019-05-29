@@ -1037,7 +1037,11 @@ namespace OpenDDS {
           }
 
           // change this if 'writer_active' (above) changes
+#ifdef OPENDDS_ANNOUNCE_ASSOCIATED_WRITERS
           if (call_writer && !call_reader && !is_opendds(reader)) {
+#else
+          if (call_writer && !call_reader) {
+#endif
             if (DCPS::DCPS_debug_level > 3) {
               ACE_DEBUG((LM_DEBUG,
                          ACE_TEXT("(%P|%t) EndpointManager::match - ")

@@ -116,6 +116,7 @@ namespace {
     locator_port_only
   };
 
+#ifdef OPENDDS_ANNOUNCE_ASSOCIATED_WRITERS
   void append_associated_writer(DCPS::DiscoveredReaderData& reader_data,
                                 const Parameter& param)
   {
@@ -123,6 +124,7 @@ namespace {
     reader_data.readerProxy.associatedWriters.length(len + 1);
     reader_data.readerProxy.associatedWriters[len] = param.guid();
   }
+#endif
 
   void set_ipaddress(DCPS::LocatorSeq& locators,
                      LocatorState& last_state,
@@ -1416,7 +1418,9 @@ int from_param_list(const ParameterList& param_list,
                        param.opendds_locator());
         break;
       case PID_OPENDDS_ASSOCIATED_WRITER:
+#ifdef OPENDDS_ANNOUNCE_ASSOCIATED_WRITERS
         append_associated_writer(reader_data, param);
+#endif
         break;
       case PID_SENTINEL:
       case PID_PAD:
