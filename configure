@@ -126,6 +126,9 @@ sub targetUsage {
 
 ## arg processing and usage
 
+my $argPadding = 29;
+my $argIndent = "\n   " . (' ' x $argPadding);
+
 my @specs = # Array of array-refs, each inner array is an option group which
             # has the format [Group Description, Opt1 Spec, Opt1 Description,
             # Opt2 Spec, Opt2 Description, ...]
@@ -142,7 +145,8 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'std=s', 'C++ standard version (for compilers that use -std)',
     'target=s', 'Cross-compile target (none): see --target-help',
     'target-compiler=s', 'Compiler for target (if req\'d): see --target-help',
-    'host-tools=s', 'DDS_ROOT of host tools for cross compile (build them)',
+    'host-tools=s', 'DDS_ROOT of host tools for cross compile' .
+      $argIndent . '(build them)',
     'prefix=s', 'Installation prefix (none)',
    ],
    ['Build flags:',
@@ -169,22 +173,30 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'java:s', 'Java development kit (use JAVA_HOME)',
     'jboss:s', 'JBoss application server (use JBOSS_HOME)',
     'ant:s', 'Ant for JBoss (use ANT_HOME or system pkg)',
-    'wireshark:s', 'Wireshark source, "non-CMake" based (use WIRESHARK_SRC)',
+    'wireshark:s',
+      'Wireshark headers or source not built with' .
+      $argIndent . 'CMake (use WIRESHARK_SRC or system pkg)',
     'wireshark-cmake|wireshark_cmake:s',
-      'Wireshark built with CMake, requires wireshark-build and wireshark-lib (use WIRESHARK_SRC)',
+      'Wireshark source built with CMake, requires' .
+      $argIndent . 'wireshark-build. Requires wireshark-lib if' .
+      $argIndent . 'guessing fails (use WIRESHARK_SRC)',
     'wireshark-build|wireshark_build:s', 'Wireshark CMake Build Location',
     'wireshark-lib|wireshark_lib:s',
-      'Wireshark CMake libraries location, relative to wireshark-build',
+      'Optional Wireshark CMake libraries location' .
+      $argIndent .'relative to wireshark-build (guesses)',
     'glib:s', 'GLib for Wireshark (use GLIB_ROOT or system pkg)',
-    'rapidjson:s', 'RapidJSON for Wireshark Sample Dissection (optional)',
+    'rapidjson:s',
+      'RapidJSON for ITL and JSON Sample Serialization' .
+      $argIndent . '(use git submodle, RAPIDJSON_ROOT, or system pkg)',
     'qt:s', 'Qt5 (use QTDIR or system pkg)',
     'qt-include:s', 'Qt include dir (use QT5_INCDIR or QTDIR/include)',
     'boost:s', 'Boost (use BOOST_ROOT or system pkg)',
     'boost-version:s', 'Boost version (only if needed to find headers)',
-    'xerces3:s', 'Xerces-C++ 3 for QoS XML handling, DDS Security (optional)',
-    'openssl:s', 'OpenSSL for DDS Security (optional)',
-    'cmake:s', 'Path to cmake binary for compiling Google Test Framework (optional)',
-    'gtest:s', 'Path to Google Test Framework (optional)',
+    'xerces3:s', 'Xerces-C++ 3 for QoS XML handling, DDS Security',
+    'openssl:s', 'OpenSSL for DDS Security',
+    'cmake:s', 'Path to cmake binary for compiling Google Test' .
+      $argIndent . 'Framework',
+    'gtest:s', 'Path to Google Test Framework',
    ],
    ['Optional OpenDDS features:',
     'built-in-topics!', 'Built-in Topics (yes)',
@@ -248,7 +260,7 @@ EOT
             $optkey .= '[=VAL]' if $opt =~ /:s/;
             $optkey = "[no-]$optkey" if ($opt =~ /!$/ && $descr =~ / \(yes\)$/);
             $optkey .= '...' if $opt =~ /s\@$/;
-            my $pad = 27 - length $optkey;
+            my $pad = $argPadding - length $optkey;
             print "--$optkey" . ' ' x (($pad > 0) ? $pad : 0) . " $descr\n";
           }
          );
@@ -908,22 +920,23 @@ sub write_platform_macros {
 ## Optional OpenDDS dependencies
 
 my %optdep =
-# %opts key =>    [env var,         sanity check,                  MPC feature]
-  ('java' =>      ['JAVA_HOME',     'include/jni.h',               'java'],
-   'jboss' =>     ['JBOSS_HOME',    'lib/jboss-common.jar'],
-   'ant' =>       ['ANT_HOME',      'bin/ant'],
-   'wireshark' => ['WIRESHARK_SRC', 'epan/packet.h',               'wireshark'],
-   'wireshark-cmake' =>['WIRESHARK_SRC', 'epan/packet.h',          'wireshark_cmake'],
+# %opts key =>    [env var,           sanity check,                    MPC feature]
+  ('java' =>      ['JAVA_HOME',       'include/jni.h',                 'java'],
+   'jboss' =>     ['JBOSS_HOME',      'lib/jboss-common.jar'],
+   'ant' =>       ['ANT_HOME',        'bin/ant'],
+   'wireshark' => ['WIRESHARK_SRC',   'epan/packet.h',                 'wireshark'],
+   'wireshark-cmake' =>
+                  ['WIRESHARK_SRC',   'epan/packet.h',                 'wireshark_cmake'],
    'wireshark-build' =>
                   ['WIRESHARK_BUILD', 'config.h'],
    'wireshark-lib' =>
                   ['WIRESHARK_LIB'],
-   'glib' =>      ['GLIB_ROOT',     'include/glib-2.0/glib.h'],
-   'rapidjson' => ['RAPIDJSON_ROOT', 'include/rapidjson/rapidjson.h', 'no_itl=0'],
-   'qt' =>        ['QTDIR',       '',                            'qt5'],
-   'boost' =>     ['BOOST_ROOT',    'include/boost/version.hpp',   'boost'],
-   'xerces3' =>   ['XERCESCROOT',   'include/xercesc/dom/DOM.hpp', 'xerces3'],
-   'openssl' =>   ['SSL_ROOT',      'include/openssl/opensslv.h',  'ssl'],
+   'glib' =>      ['GLIB_ROOT',       'include/glib-2.0/glib.h'],
+   'rapidjson' => ['RAPIDJSON_ROOT',  'include/rapidjson/rapidjson.h', 'no_rapidjson=0'],
+   'qt' =>        ['QTDIR',           '',                              'qt5'],
+   'boost' =>     ['BOOST_ROOT',      'include/boost/version.hpp',     'boost'],
+   'xerces3' =>   ['XERCESCROOT',     'include/xercesc/dom/DOM.hpp',   'xerces3'],
+   'openssl' =>   ['SSL_ROOT',        'include/openssl/opensslv.h',    'ssl'],
   );
 
 # Use this to check if tests are enabled (instead of $opts{'tests'} directly).

@@ -1,10 +1,3 @@
-project: dcps_ts_defaults {
-
+project: dcps_ts_defaults, rapidjson {
   dcps_ts_flags += -Grapidjson
-
-  expand(RAPIDJSON_ROOT) {
-    $RAPIDJSON_ROOT
-    $(DDS_ROOT)/tools/IntermediateTypeLang/cpp/rapidjson
-  }
-  includes += $(RAPIDJSON_ROOT)/include
 }
