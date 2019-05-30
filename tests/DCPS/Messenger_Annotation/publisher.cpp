@@ -31,9 +31,15 @@
 #include "Args.h"
 
 #include <string>
-#include <variant>
 
-bool dw_reliable() {
+struct typeSupport
+{
+  Messenger::MessageTypeSupport_var m;
+  Messenger::DataTypeSupport_var d;
+}; 
+
+bool dw_reliable() 
+{
   OpenDDS::DCPS::TransportConfig_rch gc = TheTransportRegistry->global_config();
   return !(gc->instances_[0]->transport_type_ == "udp");
 }
@@ -86,25 +92,25 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
 
       // Register TypeSupport (Messenger::Message)
-      std::variant<Messenger::MessageTypeSupport_var, Messenger::DataTypeSupport_var> mts;
+      typeSupport mts;
       CORBA::String_var type_name;
-      if(use_data)
-      {
-        mts = new Messenger::DataTypeSupportImpl();
-        type_name = std::get<Messenger::DataTypeSupport_var>(mts)->get_type_name();
+      if(use_data) {
 
-        if (std::get<Messenger::DataTypeSupport_var>(mts)->register_type(participant.in(), "") != DDS::RETCODE_OK) {
+        mts.d = new Messenger::DataTypeSupportImpl();
+        type_name = mts.d->get_type_name();
+
+        if (mts.d->register_type(participant.in(), "") != DDS::RETCODE_OK) {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("%N:%l: main()")
                             ACE_TEXT(" ERROR: register_type failed!\n")),
                            -1);
         }
       }
-      else
-      {
-        mts = new Messenger::MessageTypeSupportImpl();
-        type_name = std::get<Messenger::MessageTypeSupport_var>(mts)->get_type_name();
-        if (std::get<Messenger::MessageTypeSupport_var>(mts)->register_type(participant.in(), "") != DDS::RETCODE_OK) {
+      else {
+
+        mts.m = new Messenger::MessageTypeSupportImpl();
+        type_name = mts.m->get_type_name();
+        if (mts.m->register_type(participant.in(), "") != DDS::RETCODE_OK) {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("%N:%l: main()")
                             ACE_TEXT(" ERROR: register_type failed!\n")),

@@ -158,14 +158,17 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
         switch(data._d()) {
           case Messenger::BASE_2: {
             std::cout << "         base       = BASE_2"   << std::endl;
+            std::cout << "         value      = " << data.on_off() << std::endl;
             break;
           }
           case Messenger::BASE_10: {
             std::cout << "         base       = BASE_10"   << std::endl;
+            std::cout << "         value      = " << data.decimal() << std::endl;
             break;
           }
           case Messenger::BASE_16: {
             std::cout << "         base       = BASE_16"   << std::endl;
+            std::cout << "         value      = " << data.hexadecimal() << std::endl;
             break;
           }
           default: {
@@ -287,7 +290,7 @@ bool DataReaderListenerImpl::is_valid() const
     valid_count = false;
   }
   // if didn't receive all the messages (for reliable transport) or didn't receive even get 1/4, then report error
-  else if ((int)counts_.size() < num_messages &&
+  else if (!use_data && (int)counts_.size() < num_messages &&
            (reliable_ || (int)(counts_.size() * 4) < num_messages)) {
     std::cout << "ERROR: received " << counts_.size() << " messages, but expected " << num_messages << std::endl;
     valid_count = false;
