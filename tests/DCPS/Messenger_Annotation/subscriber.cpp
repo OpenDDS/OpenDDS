@@ -33,6 +33,7 @@
 #include "Args.h"
 
 #include <string>
+#include <variant>
 
 bool reliable = false;
 bool wait_for_acks = false;
@@ -81,23 +82,34 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     // Register Type (Messenger::Message)
-    Messenger::MessageTypeSupport_var ts =
-      new Messenger::MessageTypeSupportImpl();
-
-    if (ts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: register_type() failed!\n")), -1);
-    }
-
-    // Create Topic (Movie Discussion List)
     std::string topic_name = "Movie Discussion List";
+    std::variant<Messenger::MessageTypeSupport_var, Messenger::DataTypeSupport_var> ts;
+    CORBA::String_var type_name;
     if(use_data)
     {
       topic_name = "BinDecHex";
+      
+      ts = new Messenger::DataTypeSupportImpl();
+      type_name = std::get<Messenger::DataTypeSupport_var>(ts)->get_type_name();
+
+      if (std::get<Messenger::DataTypeSupport_var>(ts)->register_type(participant.in(), "") != DDS::RETCODE_OK) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("%N:%l main()")
+                        ACE_TEXT(" ERROR: register_type() failed!\n")), -1);
+      }
     }
-    
-    CORBA::String_var type_name = ts->get_type_name();
+    else
+    {
+      ts = new Messenger::MessageTypeSupportImpl();
+      type_name = std::get<Messenger::MessageTypeSupport_var>(ts)->get_type_name();
+      if (std::get<Messenger::MessageTypeSupport_var>(ts)->register_type(participant.in(), "") != DDS::RETCODE_OK) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("%N:%l main()")
+                        ACE_TEXT(" ERROR: register_type() failed!\n")), -1);
+      }
+    }
+
+    // Create Topic (Movie Discussion List)
     DDS::Topic_var topic =
       participant->create_topic(topic_name.c_str(),
                                 type_name.in(),

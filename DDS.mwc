@@ -18,7 +18,7 @@ workspace {
     // tools/modeling/tests/modeling_tests.mwc.
     tools/modeling/tests
 
-    tests/FACE
+    tests/FACE 
   }
 }
 
