@@ -7,15 +7,16 @@ use lib "$ACE_ROOT/bin";
 use PerlACE::Run_Test;
 use strict;
 
-my $annotest_idl = new PerlACE::Process("RapidJsonTest", "");
-print $annotest_idl->CommandLine () . "\n";
-$annotest_idl->Spawn ();
-my $annotest_idl_result = $annotest_idl->WaitKill (10);
-if ($annotest_idl_result > 0) {
-  print STDERR "ERROR: annotest_idl returned $annotest_idl_result\n";
+my $name = "RapidJsonTest";
+my $test = new PerlACE::Process($name, "");
+print $test->CommandLine () . "\n";
+$test->Spawn ();
+my $result = $test->WaitKill (10);
+if ($result > 0) {
+  print STDERR "ERROR: $name returned $result\n";
 }
 
-my $status = 1 if $annotest_idl_result;
+my $status = 1 if $result;
 
 if ($status) {
   print STDERR "test FAILED\n";
