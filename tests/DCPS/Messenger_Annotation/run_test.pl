@@ -146,4 +146,54 @@ $test->start_process("publisher");
 # ignore this issue that is already being tracked in redmine
 $test->ignore_error("(Redmine Issue# 1446)");
 # start killing processes in 300 seconds
-exit $test->finish(120);
+my $test_rc = $test->finish(120);
+
+#Repeat everything, except with the union
+
+my $union_test = new PerlDDS::TestFramework();
+
+$union_test->{dcps_debug_level} = 4;
+$union_test->{dcps_transport_debug_level} = 2;
+# will manually set -DCPSConfigFile
+$union_test->{add_transport_config} = 0;
+
+if ($union_test->flag('thread_per')) {
+    $thread_per_connection = " -p ";
+}
+
+if ($union_test->flag('all')) {
+    @original_ARGV = grep { $_ ne 'all' } @original_ARGV;
+    my @union_tests = ('', qw/udp multicast default_tcp default_udp default_multicast
+                        nobits stack shmem
+                        rtps rtps_disc rtps_unicast rtps_disc_tcp/);
+    push(@union_tests, 'ipv6') if new PerlACE::ConfigList->check_config('IPV6');
+    for my $union_test (@union_tests) {
+        $status += system($^X, $0, @original_ARGV, $union_test);
+    }
+    exit $status;
+}
+else {
+    $flag_found = 0;
+    $pub_opts .= ' -m data';
+    $sub_opts .= ' -m data';
+}
+
+$union_test->report_unused_flags(!$flag_found);
+
+$pub_opts .= $thread_per_connection;
+
+$union_test->setup_discovery("-ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log " .
+                       "$repo_bit_opt") unless $is_rtps_disc;
+
+$union_test->process("publisher", "publisher", $pub_opts);
+my $sub_exe = ($stack_based ? 'stack_' : '') . "subscriber";
+$union_test->process("subscriber", $sub_exe, $sub_opts);
+
+$union_test->start_process("subscriber");
+$union_test->start_process("publisher");
+
+# ignore this issue that is already being tracked in redmine
+$union_test->ignore_error("(Redmine Issue# 1446)");
+# start killing processes in 300 seconds
+exit $union_test->finish(120) || $test_rc;
+

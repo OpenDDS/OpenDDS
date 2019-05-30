@@ -22,6 +22,14 @@
 #include "MessengerTypeSupportImpl.h"
 #include "Args.h"
 
+#include <string>
+
+struct typeSupport
+{
+  Messenger::MessageTypeSupport_var m;
+  Messenger::DataTypeSupport_var d;
+};
+
 bool reliable = false;
 bool wait_for_acks = false;
 bool use_data = false;
@@ -52,24 +60,35 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     // Register Type (Messenger::Message)
-    Messenger::MessageTypeSupport_var ts =
-      new Messenger::MessageTypeSupportImpl();
+    std::string topic_name = "Movie Discussion List";
+    typeSupport ts;
+    CORBA::String_var type_name;
+    if(use_data) {
+      topic_name = "BinDecHex";
+      
+      ts.d = new Messenger::DataTypeSupportImpl();
+      type_name = ts.d->get_type_name();
 
-    if (ts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
+      if (ts.d->register_type(participant.in(), "") != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
                         ACE_TEXT(" ERROR: register_type() failed!\n")), -1);
+      }
+    }
+    else {
+      ts.m = new Messenger::MessageTypeSupportImpl();
+      type_name = ts.m->get_type_name();
+      if (ts.m->register_type(participant.in(), "") != DDS::RETCODE_OK) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("%N:%l main()")
+                        ACE_TEXT(" ERROR: register_type() failed!\n")), -1);
+      }
     }
 
     // Create Topic (Movie Discussion List)
-    std::string topic_name = "Movie Discussion List";
-    if(use_data)
-    {
-      topic_name = "BinDecHex";
-    }
     DDS::Topic_var topic =
       participant->create_topic(topic_name.c_str(),
-                                CORBA::String_var(ts->get_type_name()),
+                                type_name.in(),
                                 TOPIC_QOS_DEFAULT,
                                 DDS::TopicListener::_nil(),
                                 OpenDDS::DCPS::DEFAULT_STATUS_MASK);

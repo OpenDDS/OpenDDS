@@ -42,7 +42,7 @@ struct typeSupport
 
 bool reliable = false;
 bool wait_for_acks = false;
-bool use_data =false ;
+bool use_data = false;
 
 void append(DDS::PropertySeq& props, const char* name, const char* value, bool propagate = false)
 {
