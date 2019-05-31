@@ -81,8 +81,7 @@ namespace {
   {
     AST_Decl::NodeType nt = f->field_type()->node_type();
     if (nt == AST_Decl::NT_array || nt == AST_Decl::NT_sequence) {
-      std::cerr << "ERROR: field " << f->local_name()->get_string()
-                << " in " << ct << " " << cn << " has an anonymous type.\n";
+      idl_global->err()->misc_error("field has an anonymous type.", f);
       return false;
     }
     return true;

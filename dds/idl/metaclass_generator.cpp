@@ -462,22 +462,21 @@ namespace {
       "  }\n\n"
       "  Value getValue(const void* stru, const char* field) const\n"
       "  {\n"
-      "    const " << clazz << "& typed = *static_cast<const " << clazz
-      << "*>(stru);\n";
-    if (struct_node) {
-      std::for_each(fields.begin(), fields.end(), gen_field_getValue);
-    }
+      "    const " << clazz << "& typed = *static_cast<const " << clazz << "*>(stru);\n"
+      "    ACE_UNUSED_ARG(typed);\n";
+    std::for_each(fields.begin(), fields.end(), gen_field_getValue);
     const std::string exception =
       "    throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \" not "
       "found or its type is not supported (in struct " + clazz + ")\");\n";
     be_global->impl_ <<
-      "    ACE_UNUSED_ARG(typed);\n" <<
       exception <<
       "  }\n\n"
       "  Value getValue(Serializer& ser, const char* field) const\n"
       "  {\n";
-    if (struct_node) {
+    if (struct_node && fields.size()) {
       std::for_each(fields.begin(), fields.end(), gen_field_getValueFromSerialized);
+    } else {
+      be_global->impl_ << "    ACE_UNUSED_ARG(ser);\n";
     }
     be_global->impl_ <<
       "    if (!field[0]) {\n"   // if 'field' is the empty string...
@@ -510,8 +509,10 @@ namespace {
       "  }\n\n"
       "  const void* getRawField(const void* stru, const char* field) const\n"
       "  {\n";
-    if (struct_node) {
+    if (struct_node && fields.size()) {
       std::for_each(fields.begin(), fields.end(), get_raw_field);
+    } else {
+      be_global->impl_ << "    ACE_UNUSED_ARG(stru);\n";
     }
     be_global->impl_ <<
       exception <<
