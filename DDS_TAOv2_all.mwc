@@ -18,7 +18,4 @@ workspace {
   examples
   performance-tests
   tests
-  exclude {
-    tests/FACE
-  }
 }
