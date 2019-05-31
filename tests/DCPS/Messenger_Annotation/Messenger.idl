@@ -1,0 +1,39 @@
+/*
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+module Messenger {
+
+  typedef char hexadecimal_t[8];
+
+  enum Base {
+    BASE_2,
+    BASE_10,
+    BASE_16
+  };
+ 
+  @topic 
+  union Data switch(@key Base)
+  {
+    case BASE_2:
+      boolean on_off;
+    case BASE_10:
+      short decimal;
+    case BASE_16:
+      hexadecimal_t hexadecimal;
+  };
+
+  @topic
+  struct Message {
+    string from;
+    string subject;
+    @key long long subject_id;
+    string body;
+    long   count;
+    Data  base;
+  };
+};
+
