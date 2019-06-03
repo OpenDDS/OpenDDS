@@ -14,7 +14,7 @@
 #include "Args.h"
 class Writer : public ACE_Task_Base {
 public:
-  enum class message_t {messenger, data};
+  enum message_t {messenger, data};
 
   Writer(DDS::DataWriter_ptr writer, const Writer::message_t messageType = Writer::message_t::messenger);
 
