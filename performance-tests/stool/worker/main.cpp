@@ -201,9 +201,21 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     process_destruction_begin_time = Builder::get_time();
   } catch (const std::exception& e) {
     std::cerr << "Exception caught trying to build process object: " << e.what() << std::endl;
+    TheServiceParticipant->shutdown();
+    proactor.proactor_end_event_loop();
+    for (size_t i = 0; i < THREAD_POOL_SIZE; ++i) {
+      thread_pool[i]->join();
+    }
+    thread_pool.clear();
     return 1;
   } catch (...) {
     std::cerr << "Unknown exception caught trying to build process object" << std::endl;
+    TheServiceParticipant->shutdown();
+    proactor.proactor_end_event_loop();
+    for (size_t i = 0; i < THREAD_POOL_SIZE; ++i) {
+      thread_pool[i]->join();
+    }
+    thread_pool.clear();
     return 1;
   }
   process_destruction_end_time = Builder::get_time();
