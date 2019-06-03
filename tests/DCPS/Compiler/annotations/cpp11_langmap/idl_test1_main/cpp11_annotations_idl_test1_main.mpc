@@ -6,6 +6,7 @@ project: dcpsexe, opendds_cxx11 {
   libs += cpp11_annotations_idl_test1_lib
   libpaths += ../idl_test1_lib
   after += cpp11_annotations_idl_test1_lib
+  after += cxx11_idl_test1_main
 
   Source_Files {
     ../../../C++11/idl_test1_main/main.cpp
