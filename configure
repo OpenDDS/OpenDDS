@@ -132,6 +132,9 @@ my $argIndent = "\n   " . (' ' x $argPadding);
 my @specs = # Array of array-refs, each inner array is an option group which
             # has the format [Group Description, Opt1 Spec, Opt1 Description,
             # Opt2 Spec, Opt2 Description, ...]
+# <default>OPT is a custom token marking a string option that
+# defaults to $opts{'OPT'} = '' and can be overridden by opts by passing
+# --no-OPT or --OPT with a value.
   (
    ['Options controlling the configure script:',
     'help|h|?', 'Show this help and exit',
@@ -169,7 +172,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'features=s@', 'Extra text for default.features',
     'mpcopts=s@', 'Extra command-line args for MPC',
    ],
-   ['Optional dependencies for OpenDDS:',
+   ['Optional dependencies for OpenDDS (disabled by default unless noted otherwise):',
     'java:s', 'Java development kit (use JAVA_HOME)',
     'jboss:s', 'JBoss application server (use JBOSS_HOME)',
     'ant:s', 'Ant for JBoss (use ANT_HOME or system pkg)',
@@ -187,9 +190,10 @@ my @specs = # Array of array-refs, each inner array is an option group which
       'Optional Wireshark CMake libraries location' .
       $argIndent .'relative to wireshark-build (guesses)',
     'glib:s', 'GLib for Wireshark (use GLIB_ROOT or system pkg)',
-    'rapidjson:s',
-      'RapidJSON for ITL and JSON Sample Serialization' .
-      $argIndent . '(use git submodle, RAPIDJSON_ROOT, or system pkg)',
+    '<default>rapidjson:s',
+      'RapidJSON for Wireshark dissector and JSON' .
+      $argIndent . 'Sample Serialization (Enabled by default,' .
+      $argIndent . 'use git submodle, RAPIDJSON_ROOT, or system pkg)',
     'qt:s', 'Qt5 (use QTDIR or system pkg)',
     'qt-include:s', 'Qt include dir (use QT5_INCDIR, QTDIR/include,' .
       $argIndent . 'or sysytem package)',
@@ -216,7 +220,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'safety-profile:s', 'Safety Profile: base or extended (none)',
     'tests!', 'Build tests, examples, and performance tests' .
       $argIndent . '(yes) Implies --gtest as tests require Google' .
-      $argIndent . 'Test',
+      $argIndent . 'Test and --cmake',
     'security!', 'DDS Security plugin (no) Implies --openssl and' .
       $argIndent . '--xerces3',
    ],
@@ -228,7 +232,8 @@ sub iterate {
     for my $n (1 .. (scalar @{$group} / 2)) {
       my $opt = ${$group}[$n * 2 - 1];
       my $descr = ${$group}[$n * 2];
-      my ($optkey) = ($opt =~ /([\w-]+)/);
+      $opt =~ /(\<\w+\>)?([\w-]+)/;
+      my $optkey = (defined $1 ? $1 : "") . $2;
       &$callback(${$group}[0], $opt, $descr, $optkey, @_);
     }
   }
@@ -267,6 +272,7 @@ EOT
             $optkey .= '=VAL' if $opt =~ /=s/;
             $optkey .= '[=VAL]' if $opt =~ /:s/;
             $optkey = "[no-]$optkey" if ($opt =~ /!$/ && $descr =~ / \(yes\)/);
+            $optkey =~ s/^\<default\>(.*)$/\[no-\]$1/g;
             $optkey .= '...' if $opt =~ /s\@$/;
             my $pad = $argPadding - length $optkey;
             print "--$optkey" . ' ' x (($pad > 0) ? $pad : 0) . " $descr\n";
@@ -275,11 +281,22 @@ EOT
   exit $status;
 }
 
+my $defaulted = {};
+
 sub parseArgs {
   my @getopts = ();
+  my @default = ();
   iterate(sub {
             my ($group, $opt, $descr, $optkey) = @_;
-            push @getopts, $opt;
+            if ($opt =~ /^<default>(.*)$/) {
+              push @getopts, $1;
+              $optkey =~ /^<default>(.*)$/;
+              push @getopts, "no-$1";
+              push @default, $1;
+            }
+            else  {
+              push @getopts, $opt;
+            }
           }
          );
 
@@ -297,6 +314,15 @@ sub parseArgs {
     print "Options:\n";
     new Dumpvalue()->dumpValue($opts);
   }
+
+  for my $opt (@default) {
+    if (!exists $opts->{$opt} && !exists $opts->{"no-$opt"}) {
+      $opts->{$opt} = '';
+      $defaulted->{$opt} = 1;
+      print("By default, --$opt is added to the options\n") if $opts->{'verbose'};
+    }
+  }
+
   return $opts;
 }
 
@@ -950,10 +976,10 @@ my %optdep =
 # Use this to check if tests are enabled (instead of $opts{'tests'} directly).
 my $tests = !exists $opts{'tests'} || $opts{'tests'};
 
-# --test implies --gtest
-if ($tests && !exists $opts{'gtest'}) {
-  $opts{'gtest'} = '';
-  print "--tests implies --gtest\n" if $opts{'verbose'};
+if ($tests) {
+  print "--tests implies --gtest and --cmake\n" if $opts{'verbose'};
+  $opts{'gtest'} = '' if (!exists $opts{'gtest'});
+  $opts{'cmake'} = '' if (!exists $opts{'cmake'});
 }
 
 my @ace_features = ('xerces3');
@@ -1067,7 +1093,8 @@ if (exists $opts{'gtest'}) {
                               $is_windows ? 'googletest-distribution' : ''));
 
     if (-f File::Spec->catfile($sm_src, $sanity)) {
-      $build_gtest = 1;
+      # Check for existing build
+      $build_gtest = ! -d File::Spec->catdir($sm_dir, 'build/install');
       $opts{'gtest'} = $sm_dir;
       # No need to set env. variable with submodule.
 
@@ -1075,8 +1102,9 @@ if (exists $opts{'gtest'}) {
       $opts{'gtest'} = $sys_dir;
       env_from_opt('gtest', 'GTEST_ROOT');
     }
-    die "ERROR: gtest '$sanity' not found in submodule src '$sm_src' or default install dir '$sys_dir'\nStopped"
-      if ! $opts{'gtest'};
+    else {
+      die "ERROR: Google Test '$sanity' not found in submodule src '$sm_src' or default install dir '$sys_dir'\nStopped"
+    }
   }
 }
 if ($build_gtest && !$has_cmake) {
@@ -1095,9 +1123,14 @@ if (exists $opts{'rapidjson'}) {
 
     } elsif (-f File::Spec->catfile($sys_dir, $sanity)) {
       $opts{'rapidjson'} = $sys_dir;
+    } elsif (exists $defaulted->{'rapidjson'}) {
+      print "RapidJSON '$sanity' not found in submodule dir '$sm_dir' or default install dir '$sys_dir', ' .
+        ' continuing without it.\n";
+      delete $opts{'rapidjson'};
     }
-    die "ERROR: rapidjson '$sanity' not found in submodule dir '$sm_dir' or default install dir '$sys_dir'\nStopped"
-      if ! $opts{'rapidjson'};
+    else {
+      die "ERROR: RapidJSON '$sanity' not found in submodule dir '$sm_dir' or default install dir '$sys_dir'\nStopped"
+    }
   }
 }
 
@@ -1139,7 +1172,7 @@ for my $key (keys %optdep) {
       $opts{$key} = $ENV{$optdep{$key}->[0]};
 
       if ($key eq 'java') {
-        ## when the environmental variable JAVA_HOME is set to a JRE location,
+        ## when the environment variable JAVA_HOME is set to a JRE location,
         ## try to resolve JAVA_HOME based on the location of javac
         my $java_home = default_java_home();
         my $jre_h_path = $opts{$key} . '/' . $optdep{'java'}->[1];
@@ -2029,7 +2062,7 @@ print " to compile ",
   "to set environment\nvariables for future shell sessions.\n";
 if ($is_windows && !$cross_compile) {
   print "Start Visual Studio from this command prompt so that it inherits ",
-    "the correct\nenvironment variables.\n";
+    "the correct\nenvironment variables. Try running \"devenv *.sln\".\n";
 }
 
 sub write_cmake_file {
