@@ -88,6 +88,7 @@ trademarks or registered trademarks of Sun Microsystems, Inc.
 
 using namespace std;
 
+
 // Clean up before exit, whether successful or not.
 // Need not be exported since it is called only from this file.
 void
@@ -106,6 +107,22 @@ BE_abort()
 }
 
 namespace {
+
+///Only warn once per run
+bool pragmaWarn = false;
+/**
+ * @brief prints a warning if a #pragma is detected based off of
+ * IDL_GlobalData::dcps_type_info_map_::cur_size_
+ * @author ceneblock
+ */
+void warnOnPragma()
+{
+  std::cerr << "WARNING: #pragma is discontinued\n" <<
+               "Use annotations for future uses\n" <<
+               "See: https://www.omg.org/spec/DDS-XTypes/About-DDS-XTypes/\n";
+
+  pragmaWarn = true;
+}
 
 /// generate a macro name for the #ifndef header-double-include protector
 string to_macro(const char* fn)
@@ -277,6 +294,7 @@ void postprocess(const char* fn, ostringstream& content,
 void
 BE_produce()
 {
+
   //search for #includes in the IDL, add them as #includes in the stubs/skels
   const char* idl_fn = idl_global->main_filename()->get_string();
 
@@ -291,6 +309,10 @@ BE_produce()
   while (idl) {
     idl.getline(buffer, buffer_sz);
 
+    ///short circuit. No point in doing anything if we aren't even going to print warnings.
+    if (idl_global->print_warnings() && !pragmaWarn && 0 == strncmp("#pragma DCPS_DATA_TYPE", buffer, 22)) {
+      warnOnPragma();
+    }
     if (0 == strncmp("#include", buffer, 8)) { //FUTURE: account for comments?
       string inc(buffer + 8);
       size_t delim1 = inc.find_first_of("<\"");
