@@ -146,9 +146,9 @@ public:
   static bool writeFile(const char* fileName, const std::string &content);
 
   /**
-   * Cache @topic and @key
+   * Cache @topic, @key, @nested
    */
-  void cache_topic_annotations();
+  void cache_annotations();
 
   /**
    * Check if a type has been declared a topic type.
@@ -164,6 +164,11 @@ public:
    * Check if the discriminator in a union has been declared a key.
    */
   bool has_key(AST_Union* node);
+
+  /**
+   * Check if a type has been declared a nested type.
+   */
+  bool is_nested_type(AST_Decl* node);
 
 private:
   const char* filename_;
@@ -184,6 +189,7 @@ private:
   ///{
   AST_Annotation_Decl* topic_annotation_;
   AST_Annotation_Decl* key_annotation_;
+  AST_Annotation_Decl* nested_annotation_;
   ///}
 };
 
