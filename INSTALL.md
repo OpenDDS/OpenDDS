@@ -43,6 +43,9 @@ supported platforms.
 configure
 ```
 
+**If you don't need the tests, which add Google Test as a dependency and take a
+long time to compile, pass the `--no-tests` option to `configure`.**
+
   Optionally add `--help` to the command line to see the advanced options
   available for this script.  The configure script will download ACE+TAO and
   configure it for your platform.  To use an existing ACE+TAO installation,
@@ -51,14 +54,18 @@ configure
   If configure runs successfully it will end with a message about the next
   steps for compiling OpenDDS.
 
+  OpenDDS supports parallel builds to speed up the build when using Make. To
+  use this pass `-j N` where `N` the max number of parallel jobs to run. If not
+  sure `N` should be, use the number of cores on the machine.
+
   The configure script creates an environment setup file called setenv (actually
   named `setenv.sh` or `setenv.cmd` depending on platform) that restores all the
   environment variables the build and test steps rely on.
   The main makefile for non-Windows builds temporarily sets the environment as
   well, so `setenv.sh` is not needed when running `make` from the top level.
   On Windows, the configure script modifies the environment of the command
-  prompt that ran it.
-
+  prompt that ran it. If using a new environment, use `setenv.cmd` to set the
+  required environment variables before running Visual Studio.
 
 ## Test
 
