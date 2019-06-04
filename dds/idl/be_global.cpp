@@ -638,10 +638,7 @@ BE_GlobalData::is_nested_type(AST_Decl* node)
   }
   if(rv && isTopic)
   {
-
-    ///critical failure, refusing to recover
-    idl_global->err()->misc_error("Unable to mix @topic and @nested annotation", node);
-    ACE_OS::exit(1);
+    idl_global->err()->misc_warning("Mixing of @topic and @nested annotation is discouraged", node);
   }
 
   return rv;
