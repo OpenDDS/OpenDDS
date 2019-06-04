@@ -430,19 +430,11 @@ private:
   Reader_rch dcps_participant_secure_reader_;
 #endif
 
-  static const size_t TASK_MQ_BYTES = sizeof(Msg) * 1024 * 32;
-
-  struct Task : ACE_Task_Ex<ACE_MT_SYNCH, Msg> {
-    explicit Task(Sedp* sedp)
-      : ACE_Task_Ex<ACE_MT_SYNCH, Msg>(0, new ACE_Message_Queue_Ex<Msg, ACE_MT_SYNCH>(TASK_MQ_BYTES, TASK_MQ_BYTES))
-      , spdp_(&sedp->spdp_)
-      , sedp_(sedp)
-      , shutting_down_(false)
-    {
-      delete_msg_queue_ = true;
-      activate();
-    }
+  struct Task : public ACE_Task_Ex<ACE_MT_SYNCH, Msg>, public DCPS::RcObject {
+    explicit Task(Sedp* sedp);
     ~Task();
+
+    void putq_helper(Msg* msg);
 
     void enqueue(DCPS::MessageId id, DCPS::unique_ptr<ParticipantData_t> pdata);
 
@@ -495,7 +487,11 @@ private:
     Spdp* spdp_;
     Sedp* sedp_;
     bool shutting_down_;
-  } task_;
+  };
+  DCPS::RcHandle<Task> task_;
+
+  unsigned long task_queue_size_;
+  ACE_Time_Value task_queue_timeout_delta_;
 
   // Transport
   DCPS::TransportInst_rch transport_inst_;

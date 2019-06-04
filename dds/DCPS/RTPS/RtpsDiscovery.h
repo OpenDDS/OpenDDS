@@ -122,6 +122,16 @@ public:
     sedp_multicast_ = sm;
   }
 
+  int sedp_task_queue_size() const { return sedp_task_queue_size_; }
+  void sedp_task_queue_size(int val) {
+    sedp_task_queue_size_ = val;
+  }
+
+  int sedp_task_queue_timeout() const { return sedp_task_queue_timeout_; }
+  void sedp_task_queue_timeout(int val) {
+    sedp_task_queue_timeout_ = val;
+  }
+
   OPENDDS_STRING multicast_interface() const { return multicast_interface_; }
   void multicast_interface(const OPENDDS_STRING& mi) {
     multicast_interface_ = mi;
@@ -145,6 +155,8 @@ private:
   u_short pb_, dg_, pg_, d0_, d1_, dx_;
   unsigned char ttl_;
   bool sedp_multicast_;
+  int sedp_task_queue_size_;
+  int sedp_task_queue_timeout_;
   OPENDDS_STRING multicast_interface_, sedp_local_address_, spdp_local_address_;
   OPENDDS_STRING default_multicast_group_;  /// FUTURE: handle > 1 group.
   OPENDDS_STRING guid_interface_;

@@ -241,7 +241,9 @@ Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock) :
       ref(*this))),
 #endif
 
-  task_(this),
+  task_(),
+  task_queue_size_(32 * 1024),
+  task_queue_timeout_delta_(0, 0),
 
 #ifdef OPENDDS_SECURITY
   secure_automatic_liveliness_seq_ (DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN()),
@@ -268,6 +270,7 @@ Sedp::init(const RepoId& guid,
            const RtpsDiscovery& disco,
            DDS::DomainId_t domainId)
 {
+
   char domainStr[16];
   ACE_OS::snprintf(domainStr, 16, "%d", domainId);
 
@@ -307,6 +310,11 @@ Sedp::init(const RepoId& guid,
   } else {
     rtps_inst->use_multicast_ = false;
   }
+
+  task_queue_size_ = disco.sedp_task_queue_size();
+  task_queue_timeout_delta_ = ACE_Time_Value(disco.sedp_task_queue_timeout(), 0);
+
+  task_ = make_rch<Task>(this);
 
   const OPENDDS_STRING sedp_addr = disco.sedp_local_address();
   if (!sedp_addr.empty()) {
@@ -791,7 +799,7 @@ Sedp::associate(const ParticipantData_t& pdata)
 
   DCPS::unique_ptr<ParticipantData_t> dpd(new ParticipantData_t(pdata));
 
-  task_.enqueue(DCPS::SAMPLE_DATA, move(dpd));
+  task_->enqueue(DCPS::SAMPLE_DATA, move(dpd));
 }
 
 #ifdef OPENDDS_SECURITY
@@ -1255,7 +1263,7 @@ void
 Sedp::remove_from_bit_i(const DiscoveredPublication& pub)
 {
 #ifndef DDS_HAS_MINIMUM_BIT
-  task_.enqueue(Msg::MSG_REMOVE_FROM_PUB_BIT, pub.bit_ih_);
+  task_->enqueue(Msg::MSG_REMOVE_FROM_PUB_BIT, pub.bit_ih_);
 #else
   ACE_UNUSED_ARG(pub);
 #endif /* DDS_HAS_MINIMUM_BIT */
@@ -1265,7 +1273,7 @@ void
 Sedp::remove_from_bit_i(const DiscoveredSubscription& sub)
 {
 #ifndef DDS_HAS_MINIMUM_BIT
-  task_.enqueue(Msg::MSG_REMOVE_FROM_SUB_BIT, sub.bit_ih_);
+  task_->enqueue(Msg::MSG_REMOVE_FROM_SUB_BIT, sub.bit_ih_);
 #else
   ACE_UNUSED_ARG(sub);
 #endif /* DDS_HAS_MINIMUM_BIT */
@@ -1508,7 +1516,7 @@ Sedp::update_subscription_params(const RepoId& subId,
 void
 Sedp::shutdown()
 {
-  task_.shutdown();
+  task_->shutdown();
   publications_reader_->shutting_down_ = true;
   subscriptions_reader_->shutting_down_ = true;
   participant_message_reader_->shutting_down_ = true;
@@ -1518,7 +1526,20 @@ void
 Sedp::Task::acknowledge()
 {
   // id is really a don't care, but just set to REQUEST_ACK
-  putq(new Msg(Msg::MSG_FINI_BIT, DCPS::REQUEST_ACK, 0));
+  putq_helper(new Msg(Msg::MSG_FINI_BIT, DCPS::REQUEST_ACK, 0));
+}
+
+void Sedp::Task::putq_helper(Msg* msg) {
+  if (sedp_->task_queue_timeout_delta_ != ACE_Time_Value::zero) {
+    ACE_Time_Value limit = ACE_OS::gettimeofday() + sedp_->task_queue_timeout_delta_;
+    if (putq(msg, &limit) < 0) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: Sedp::putq_helper - ")
+                 ACE_TEXT("Sedp task queue insertion timeout limit reached.\n")));
+    }
+  } else {
+    putq(msg);
+  }
 }
 
 void
@@ -1526,7 +1547,7 @@ Sedp::Task::shutdown()
 {
   if (!shutting_down_) {
     shutting_down_ = true;
-    putq(new Msg(Msg::MSG_STOP, DCPS::GRACEFUL_DISCONNECT, 0));
+    putq_helper(new Msg(Msg::MSG_STOP, DCPS::GRACEFUL_DISCONNECT, 0));
     wait();
   }
 }
@@ -2951,7 +2972,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
                    ACE_TEXT("to DiscoveredWriterData\n")));
         return;
       }
-      sedp_.task_.enqueue(id, move(wdata));
+      sedp_.task_->enqueue(id, move(wdata));
 
 #ifdef OPENDDS_SECURITY
     } else if (sample.header_.publication_id_.entityId == ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER) {
@@ -2971,7 +2992,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
                    ACE_TEXT("to DiscoveredWriterData_SecurityWrapper\n")));
         return;
       }
-      sedp_.task_.enqueue(id, move(wdata_secure));
+      sedp_.task_->enqueue(id, move(wdata_secure));
 #endif
 
     } else if (sample.header_.publication_id_.entityId == ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER) {
@@ -2993,7 +3014,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       if (rdata->readerProxy.expectsInlineQos) {
         set_inline_qos(rdata->readerProxy.allLocators);
       }
-      sedp_.task_.enqueue(id, move(rdata));
+      sedp_.task_->enqueue(id, move(rdata));
 
 #ifdef OPENDDS_SECURITY
     } else if (sample.header_.publication_id_.entityId == ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER) {
@@ -3016,7 +3037,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       if ((rdata->data).readerProxy.expectsInlineQos) {
         set_inline_qos((rdata->data).readerProxy.allLocators);
       }
-      sedp_.task_.enqueue(id, move(rdata));
+      sedp_.task_->enqueue(id, move(rdata));
 #endif
 
     } else if (sample.header_.publication_id_.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER
@@ -3027,7 +3048,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
                    ACE_TEXT("failed to deserialize data\n")));
         return;
       }
-      sedp_.task_.enqueue(id, move(data));
+      sedp_.task_->enqueue(id, move(data));
 
 #ifdef OPENDDS_SECURITY
     } else if (sample.header_.publication_id_.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER
@@ -3040,7 +3061,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
                    ACE_TEXT("failed to deserialize data\n")));
         return;
       }
-      sedp_.task_.enqueue_participant_message_secure(id, move(data));
+      sedp_.task_->enqueue_participant_message_secure(id, move(data));
 
     } else if (sample.header_.publication_id_.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER) {
 
@@ -3051,7 +3072,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
                    ACE_TEXT("failed to deserialize data\n")));
         return;
       }
-      sedp_.task_.enqueue_stateless_message(id, move(data));
+      sedp_.task_->enqueue_stateless_message(id, move(data));
 
     } else if (sample.header_.publication_id_.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER) {
 
@@ -3062,7 +3083,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
                    ACE_TEXT("failed to deserialize data\n")));
         return;
       }
-      sedp_.task_.enqueue_volatile_message_secure(id, move(data));
+      sedp_.task_->enqueue_volatile_message_secure(id, move(data));
 
     } else if (sample.header_.publication_id_.entityId == ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER) {
 
@@ -3082,7 +3103,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
                    ACE_TEXT("to Security::SPDPdiscoveredParticipantData\n")));
         return;
       }
-      sedp_.task_.enqueue(id, move(pdata));
+      sedp_.task_->enqueue(id, move(pdata));
 #endif
 
     }
@@ -3502,7 +3523,7 @@ Sedp::set_inline_qos(DCPS::TransportLocatorSeq& locators)
 void
 Sedp::acknowledge()
 {
-  task_.acknowledge();
+  task_->acknowledge();
 }
 
 void
@@ -3518,14 +3539,14 @@ Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<ParticipantData_t> pdat
   }
 #endif
 
-  putq(new Msg(type, id, pdata.release()));
+  putq_helper(new Msg(type, id, pdata.release()));
 }
 
 void
 Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<DCPS::DiscoveredWriterData> wdata)
 {
   if (spdp_->shutting_down()) { return; }
-  putq(new Msg(Msg::MSG_WRITER, id, wdata.release()));
+  putq_helper(new Msg(Msg::MSG_WRITER, id, wdata.release()));
 }
 
 #ifdef OPENDDS_SECURITY
@@ -3533,7 +3554,7 @@ void
 Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<DiscoveredWriterData_SecurityWrapper> wrapper)
 {
   if (spdp_->shutting_down()) { return; }
-  putq(new Msg(Msg::MSG_WRITER_SECURE, id, wrapper.release()));
+  putq_helper(new Msg(Msg::MSG_WRITER_SECURE, id, wrapper.release()));
 }
 #endif
 
@@ -3541,7 +3562,7 @@ void
 Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<DCPS::DiscoveredReaderData> rdata)
 {
   if (spdp_->shutting_down()) { return; }
-  putq(new Msg(Msg::MSG_READER, id, rdata.release()));
+  putq_helper(new Msg(Msg::MSG_READER, id, rdata.release()));
 }
 
 #ifdef OPENDDS_SECURITY
@@ -3549,7 +3570,7 @@ void
 Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<DiscoveredReaderData_SecurityWrapper> wrapper)
 {
   if (spdp_->shutting_down()) { return; }
-  putq(new Msg(Msg::MSG_READER_SECURE, id, wrapper.release()));
+  putq_helper(new Msg(Msg::MSG_READER_SECURE, id, wrapper.release()));
 }
 #endif
 
@@ -3557,7 +3578,7 @@ void
 Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<ParticipantMessageData> data)
 {
   if (spdp_->shutting_down()) { return; }
-  putq(new Msg(Msg::MSG_PARTICIPANT_DATA, id, data.release()));
+  putq_helper(new Msg(Msg::MSG_PARTICIPANT_DATA, id, data.release()));
 }
 
 void
@@ -3565,7 +3586,7 @@ Sedp::Task::enqueue(Msg::MsgType which_bit, const DDS::InstanceHandle_t bit_ih)
 {
 #ifndef DDS_HAS_MINIMUM_BIT
   if (spdp_->shutting_down()) { return; }
-  putq(new Msg(which_bit, DCPS::DISPOSE_INSTANCE, bit_ih));
+  putq_helper(new Msg(which_bit, DCPS::DISPOSE_INSTANCE, bit_ih));
 #else
   ACE_UNUSED_ARG(which_bit);
   ACE_UNUSED_ARG(bit_ih);
@@ -3577,21 +3598,21 @@ void
 Sedp::Task::enqueue_participant_message_secure(DCPS::MessageId id, DCPS::unique_ptr<ParticipantMessageData> data)
 {
   if (spdp_->shutting_down()) { return; }
-  putq(new Msg(Msg::MSG_PARTICIPANT_DATA_SECURE, id, data.release()));
+  putq_helper(new Msg(Msg::MSG_PARTICIPANT_DATA_SECURE, id, data.release()));
 }
 
 void
 Sedp::Task::enqueue_stateless_message(DCPS::MessageId id, DCPS::unique_ptr<DDS::Security::ParticipantStatelessMessage> data)
 {
   if (spdp_->shutting_down()) { return; }
-  putq(new Msg(Msg::MSG_PARTICIPANT_STATELESS_DATA, id, data.release()));
+  putq_helper(new Msg(Msg::MSG_PARTICIPANT_STATELESS_DATA, id, data.release()));
 }
 
 void
 Sedp::Task::enqueue_volatile_message_secure(DCPS::MessageId id, DCPS::unique_ptr<DDS::Security::ParticipantVolatileMessageSecure> data)
 {
   if (spdp_->shutting_down()) { return; }
-  putq(new Msg(Msg::MSG_PARTICIPANT_VOLATILE_SECURE, id, data.release()));
+  putq_helper(new Msg(Msg::MSG_PARTICIPANT_VOLATILE_SECURE, id, data.release()));
 }
 #endif
 
@@ -3680,6 +3701,16 @@ Sedp::Task::svc()
                         ACE_TEXT("Task exiting.\n")));
   }
   return 0;
+}
+
+Sedp::Task::Task(Sedp* sedp)
+  : ACE_Task_Ex<ACE_MT_SYNCH, Msg>(0, new ACE_Message_Queue_Ex<Msg, ACE_MT_SYNCH>(sizeof(Msg) * sedp->task_queue_size_, sizeof(Msg) * sedp->task_queue_size_))
+  , spdp_(&sedp->spdp_)
+  , sedp_(sedp)
+  , shutting_down_(false)
+{
+  delete_msg_queue_ = true;
+  activate();
 }
 
 Sedp::Task::~Task()

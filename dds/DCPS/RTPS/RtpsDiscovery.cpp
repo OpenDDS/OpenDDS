@@ -50,6 +50,8 @@ RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
   , dx_(2)
   , ttl_(1)
   , sedp_multicast_(true)
+  , sedp_task_queue_size_(32 * 1024)
+  , sedp_task_queue_timeout_(3)
   , default_multicast_group_("239.255.0.1")
 {
 }
@@ -95,6 +97,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
 
       int resend = 0;
       u_short pb = 0, dg = 0, pg = 0, d0 = 0, d1 = 0, dx = 0;
+      int sedp_task_queue_size = 0, sedp_task_queue_timeout = 0;
       unsigned char ttl = 0;
       AddrVec spdp_send_addrs;
       OPENDDS_STRING default_multicast_group = "239.255.0.1" /*RTPS v2.1 9.6.1.4.1*/;
@@ -102,7 +105,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
       OPENDDS_STRING spdpaddr;
       bool has_resend = false, has_pb = false, has_dg = false, has_pg = false,
         has_d0 = false, has_d1 = false, has_dx = false, has_sm = false,
-        has_ttl = false, sm = false;
+        has_ttl = false, has_sedp_task_queue_size = false, has_sedp_task_queue_timeout = false, sm = false;
 
       // spdpaddr defaults to DCPSDefaultAddress if set
       if (!TheServiceParticipant->default_address().empty()) {
@@ -228,6 +231,26 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
             spdp_send_addrs.push_back(value.substr(i, (n == OPENDDS_STRING::npos) ? n : n - i));
             i = value.find(',', i);
           } while (i++ != OPENDDS_STRING::npos); // skip past comma if there is one
+        } else if (name == "SedpTaskQueueSize") {
+          const OPENDDS_STRING& value = it->second;
+          has_sedp_task_queue_size = DCPS::convertToInteger(value, sedp_task_queue_size);
+          if (!has_sedp_task_queue_size) {
+            ACE_ERROR_RETURN((LM_ERROR,
+               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config ")
+               ACE_TEXT("Invalid entry (%C) for SedpTaskQueueSize in ")
+               ACE_TEXT("[rtps_discovery/%C] section.\n"),
+               value.c_str(), rtps_name.c_str()), -1);
+          }
+        } else if (name == "SedpTaskQueueTimeout") {
+          const OPENDDS_STRING& value = it->second;
+          has_sedp_task_queue_timeout = DCPS::convertToInteger(value, sedp_task_queue_timeout);
+          if (!has_sedp_task_queue_timeout) {
+            ACE_ERROR_RETURN((LM_ERROR,
+               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config ")
+               ACE_TEXT("Invalid entry (%C) for SedpTaskQueueTimeout in ")
+               ACE_TEXT("[rtps_discovery/%C] section.\n"),
+               value.c_str(), rtps_name.c_str()), -1);
+          }
         } else {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
@@ -247,6 +270,8 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
       if (has_dx) discovery->dx(dx);
       if (has_ttl) discovery->ttl(ttl);
       if (has_sm) discovery->sedp_multicast(sm);
+      if (has_sedp_task_queue_size) discovery->sedp_task_queue_size(sedp_task_queue_size);
+      if (has_sedp_task_queue_timeout) discovery->sedp_task_queue_timeout(sedp_task_queue_timeout);
       discovery->multicast_interface(mi);
       discovery->default_multicast_group(default_multicast_group);
       discovery->spdp_send_addrs().swap(spdp_send_addrs);
