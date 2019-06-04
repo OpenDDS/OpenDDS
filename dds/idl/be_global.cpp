@@ -47,6 +47,7 @@ BE_GlobalData::BE_GlobalData()
   , language_mapping_(LANGMAP_NONE)
   , topic_annotation_(0)
   , key_annotation_(0)
+  , nested_annotation_(0)
 {
 }
 
@@ -562,7 +563,7 @@ BE_GlobalData::get_include_block(BE_GlobalData::stream_enum_t which)
 }
 
 void
-BE_GlobalData::cache_topic_annotations()
+BE_GlobalData::cache_annotations()
 {
   if (idl_global->idl_version_ >= IDL_VERSION_4) {
     UTL_Scope* root = idl_global->scopes().bottom();
@@ -571,6 +572,8 @@ BE_GlobalData::cache_topic_annotations()
         root->lookup_by_name("::@topic"));
     key_annotation_ = AST_Annotation_Decl::narrow_from_decl(
         root->lookup_by_name("::@key"));
+    nested_annotation_ = AST_Annotation_Decl::narrow_from_decl(
+        root->lookup_by_name("::@nested"));
   }
 }
 
@@ -606,3 +609,42 @@ BE_GlobalData::has_key(AST_Union* node)
   // Check for @key on the discriminator
   return node && node->disc_annotations().find(key_annotation_);
 }
+  
+/**
+ * @brief checks to see if we are of type nested
+ * @param node the node to investigate
+ * @return if we are a nested node or not
+ * @author ceneblock
+ */
+bool
+BE_GlobalData::is_nested_type(AST_Decl* node)
+{
+  ///foolishly assuming that if we will call both in sucession.
+  bool isTopic = is_topic_type(node);
+
+  bool rv = false;
+  if (node) {
+    if (node->node_type() == AST_Decl::NT_struct) {
+      rv = node->annotations().find(nested_annotation_);
+    } else if (node->node_type() == AST_Decl::NT_union) {
+      rv = node->annotations().find(nested_annotation_);
+    } else if (node->node_type() == AST_Decl::NT_typedef) {
+      AST_Type* type = dynamic_cast<AST_Type*>(node)->unaliased_type();
+      if (type->node_type() == AST_Decl::NT_struct
+          || type->node_type() == AST_Decl::NT_union) {
+        rv = node->annotations().find(nested_annotation_);
+      }
+    }
+  }
+  if(rv && isTopic)
+  {
+
+    ///critical failure, refusing to recover
+    idl_global->err()->misc_error("Unable to mix @topic and @nested annotation", node);
+    ACE_OS::exit(1);
+  }
+
+  return rv;
+}
+
+

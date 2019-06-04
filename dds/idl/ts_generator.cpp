@@ -85,11 +85,19 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
     if (info) {
       key_count = info->key_list_.size();
     } else if (be_global->is_topic_type(struct_node)) {
+
+      ///Go ahead and bail if we see bad stuff
+      be_global->is_nested_type(node);
+
       key_count = TopicKeys(struct_node).count();
     } else {
       return true;
     }
   } else if (be_global->is_topic_type(union_node)) {
+
+    ///Go ahead and bail if we see bad stuff
+    be_global->is_nested_type(node);
+
     key_count = be_global->has_key(union_node) ? 1 : 0;
   } else {
     return true;
@@ -288,6 +296,8 @@ namespace java_ts_generator {
     UTL_ScopedName* name = node->name();
 
     if (!(idl_global->is_dcps_type(name) || be_global->is_topic_type(node))) {
+      ///Go ahead and bail if we see bad stuff
+      be_global->is_nested_type(node);
       return;
     }
 
