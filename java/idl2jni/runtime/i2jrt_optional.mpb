@@ -1,0 +1,4 @@
+feature(!java_pre_jpms): java {
+  after += idl2jni_corba
+  javacflags += -classpath $(DDS_ROOT)/lib/i2jrt_corba.jar
+}
