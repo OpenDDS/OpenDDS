@@ -4,6 +4,9 @@
 #include "dds/DdsSecurityCoreC.h"
 #include "dds/Versioned_Namespace.h"
 
+#include "dds/DCPS/PoolAllocator.h"
+#include "CryptoBuiltInC.h"
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
@@ -49,6 +52,12 @@ void set_security_error(DDS::Security::SecurityException& ex,
                         const char* message,
                         const unsigned char (&a1)[4],
                         const unsigned char (&a2)[4]);
+
+OPENDDS_STRING ctk_to_dds_string(const CryptoTransformKind& keyKind);
+OPENDDS_STRING ctki_to_dds_string(const CryptoTransformKeyId& keyId);
+OPENDDS_STRING to_dds_string(const KeyOctetSeq& keyData);
+OPENDDS_STRING to_dds_string(const KeyMaterial_AES_GCM_GMAC& km);
+OPENDDS_STRING to_dds_string(const CryptoTransformIdentifier& id);
 
 }
 }

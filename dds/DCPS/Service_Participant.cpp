@@ -18,6 +18,9 @@
 #include "RecorderImpl.h"
 #include "ReplayerImpl.h"
 #include "StaticDiscovery.h"
+#if defined(OPENDDS_SECURITY)
+#include "security/framework/SecurityRegistry.h"
+#endif
 
 #include "ace/Singleton.h"
 #include "ace/Arg_Shifter.h"
@@ -130,6 +133,8 @@ static bool got_bit_flag = false;
 
 #if defined(OPENDDS_SECURITY)
 static bool got_security_flag = false;
+static bool got_security_debug = false;
+static bool got_security_fake_encryption = false;
 #endif
 
 static bool got_publisher_content_filter = false;
@@ -285,6 +290,9 @@ Service_Participant::shutdown()
       monitor_factory_ = 0;
     }
     TransportRegistry::close();
+#if defined(OPENDDS_SECURITY)
+    OpenDDS::Security::SecurityRegistry::close();
+#endif
   } catch (const CORBA::Exception& ex) {
     ex._tao_print_exception("ERROR: Service_Participant::shutdown");
   }
@@ -321,6 +329,19 @@ Service_Participant::get_domain_participant_factory(int &argc,
 #ifndef OPENDDS_SAFETY_PROFILE
       ORB_argv_.add(ACE_TEXT("unused_arg_0"));
 #endif
+      /* NOTE ABOUT ADDING NEW OPTIONS HERE ==================================
+       *
+       * The argument parsing here is simple. It will match substrings of
+       * options even if that isn't the whole option. For example; If
+       * "-DCPSSecurity" is checked before "-DCPSSecurityDebug" and
+       * "-DCPSSecurityDebug" is passed, it will match "-DCPSSecurity". Check
+       * to make sure the order is correct.
+       *
+       * TODO/TBD: Create or make use of a stricter command line argument
+       * parsing method/library. Something where we can define the format of
+       * the argument and it will handle it better. Maybe could be integrated
+       * into the config parsing, which has most of these options.
+       */
       ACE_Arg_Shifter shifter(argc, argv);
       while (shifter.is_anything_left()) {
         if (shifter.cur_arg_strncasecmp(ACE_TEXT("-ORBLogFile")) == 0) {
@@ -584,10 +605,27 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
       got_monitor = true;
 
 #if defined(OPENDDS_SECURITY)
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSSecurityDebugLevel"))) != 0) {
+      security_debug.set_debug_level(ACE_OS::atoi(currentArg));
+      arg_shifter.consume_arg();
+      got_security_debug = true;
+
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSSecurityDebug"))) != 0) {
+      security_debug.parse_flags(currentArg);
+      arg_shifter.consume_arg();
+      got_security_debug = true;
+
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSSecurityFakeEncryption"))) != 0) {
+      security_debug.fake_encryption = ACE_OS::atoi(currentArg);
+      arg_shifter.consume_arg();
+      got_security_fake_encryption = true;
+
+    // Must be last "-DCPSSecurity*" option, see comment above this arg parsing loop
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSSecurity"))) != 0) {
       security_enabled_ = ACE_OS::atoi(currentArg);
       arg_shifter.consume_arg();
       got_security_flag = true;
+
 #endif
 
     } else {
@@ -1441,16 +1479,17 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
     return 0;
 
   } else {
+    const ACE_TCHAR* message =
+      ACE_TEXT("(%P|%t) NOTICE: using %s value from command option (overrides value if it's in config file)\n");
+
     if (got_debug_level) {
-      ACE_DEBUG((LM_NOTICE,
-                 ACE_TEXT("(%P|%t) NOTICE: using DCPSDebugLevel value from command option (overrides value if it's in config file).\n")));
+      ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSDebugLevel")));
     } else {
       GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSDebugLevel"), DCPS_debug_level, int)
     }
 
     if (got_info) {
-      ACE_DEBUG((LM_NOTICE,
-                 ACE_TEXT("(%P|%t) NOTICE: using DCPSInfoRepo value from command option (overrides value if it's in config file).\n")));
+      ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSInfoRepo")));
     } else {
       ACE_TString value;
       GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("DCPSInfoRepo"), value)
@@ -1460,8 +1499,7 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
     }
 
     if (got_use_rti_serialization) {
-      ACE_DEBUG((LM_NOTICE,
-                 ACE_TEXT("(%P|%t) NOTICE: using DCPSRTISerialization value from command option (overrides value if it's in config file).\n")));
+      ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSRTISerialization")));
     } else {
       bool should_use = false;
       GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSRTISerialization"), should_use, bool)
@@ -1469,50 +1507,43 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
     }
 
     if (got_chunks) {
-      ACE_DEBUG((LM_NOTICE,
-                 ACE_TEXT("(%P|%t) NOTICE: using DCPSChunks value from command option (overrides value if it's in config file).\n")));
+      ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSChunks")));
     } else {
       GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSChunks"), this->n_chunks_, size_t)
     }
 
     if (got_chunk_association_multiplier) {
-      ACE_DEBUG((LM_NOTICE,
-                 ACE_TEXT("(%P|%t) NOTICE: using DCPSChunkAssociationMutltiplier value from command option (overrides value if it's in config file).\n")));
+      ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSChunkAssociationMutltiplier")));
     } else {
       GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSChunkAssociationMutltiplier"), this->association_chunk_multiplier_, size_t)
     }
 
     if (got_bit_transport_port) {
-      ACE_DEBUG((LM_NOTICE,
-                 ACE_TEXT("(%P|%t) NOTICE: using DCPSBitTransportPort value from command option (overrides value if it's in config file).\n")));
+      ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSBitTransportPort")));
     } else {
       GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSBitTransportPort"), this->bit_transport_port_, int)
     }
 
     if (got_bit_transport_ip) {
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) NOTICE: using DCPSBitTransportIPAddress value from command option (overrides value if it's in config file).\n")));
+      ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSBitTransportIPAddress")));
     } else {
       GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("DCPSBitTransportIPAddress"), this->bit_transport_ip_)
     }
 
     if (got_liveliness_factor) {
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) NOTICE: using DCPSLivelinessFactor value from command option (overrides value if it's in config file).\n")));
+      ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSLivelinessFactor")));
     } else {
       GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSLivelinessFactor"), this->liveliness_factor_, int)
     }
 
     if (got_bit_lookup_duration_msec) {
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) NOTICE: using DCPSBitLookupDurationMsec value from command option (overrides value if it's in config file).\n")));
+      ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSBitLookupDurationMsec")));
     } else {
       GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSBitLookupDurationMsec"), this->bit_lookup_duration_msec_, int)
     }
 
     if (got_global_transport_config) {
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) NOTICE: using DCPSGlobalTransportConfig value from command option (overrides value if it's in config file).\n")));
+      ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSGlobalTransportConfig")));
     } else {
       GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("DCPSGlobalTransportConfig"), this->global_transport_config_);
       if (this->global_transport_config_ == ACE_TEXT("$file")) {
@@ -1522,32 +1553,60 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
     }
 
     if (got_bit_flag) {
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) NOTICE: using DCPSBit value from command option (overrides value if it's in config file).\n")));
+      ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSBit")));
     } else {
       GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSBit"), this->bit_enabled_, int)
     }
 
 #if defined(OPENDDS_SECURITY)
     if (got_security_flag) {
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) NOTICE: using DCPSSecurity value from command option (overrides value if it's in config file).\n")));
+      ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSSecurity")));
     } else {
       GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSSecurity"), this->security_enabled_, int)
+    }
+
+    if (got_security_debug) {
+      ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSSecurityDebug or DCPSSecurityDebugLevel")));
+    } else {
+      const ACE_TCHAR* debug_name = ACE_TEXT("DCPSSecurityDebug");
+      const ACE_TCHAR* debug_level_name = ACE_TEXT("DCPSSecurityDebugLevel");
+      bool got_value = false;
+      ACE_TString debug_level_value;
+      if (cf.get_string_value(sect, debug_level_name, debug_level_value) == -1) {
+        ACE_TString debug_value;
+        if (cf.get_string_value(sect, debug_name, debug_value) != -1) {
+          if (debug_value != ACE_TEXT("")) {
+            got_value = true;
+            security_debug.parse_flags(debug_value.c_str());
+          }
+        }
+      } else if (debug_level_value != ACE_TEXT("")) {
+        got_value = true;
+        security_debug.set_debug_level(ACE_OS::atoi(debug_level_value.c_str()));
+      }
+      if (!got_value && OpenDDS::DCPS::Transport_debug_level > 0) {
+        ACE_DEBUG((LM_NOTICE,
+          ACE_TEXT("(%P|%t) NOTICE: DCPSSecurityDebug and DCPSSecurityDebugLevel ")
+          ACE_TEXT("are not defined in config file or are blank - using code default.\n")));
+      }
+    }
+
+    if (got_security_fake_encryption) {
+      ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSSecurityFakeEncryption")));
+    } else {
+      GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSSecurityFakeEncryption"), security_debug.fake_encryption, int)
     }
 #endif
 
     if (got_transport_debug_level) {
-      ACE_DEBUG((LM_NOTICE,
-                 ACE_TEXT("(%P|%t) NOTICE: using DCPSTransportDebugLevel value from command option (overrides value if it's in config file).\n")));
+      ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSTransportDebugLevel")));
     } else {
       GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSTransportDebugLevel"), OpenDDS::DCPS::Transport_debug_level, int)
     }
 
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
     if (got_persistent_data_dir) {
-      ACE_DEBUG((LM_NOTICE,
-                 ACE_TEXT("(%P|%t) NOTICE: using DCPSPersistentDataDir value from command option (overrides value if it's in config file).\n")));
+      ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSPersistentDataDir")));
     } else {
       ACE_TString value;
       GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("DCPSPersistentDataDir"), value)
@@ -1556,8 +1615,7 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
 #endif
 
     if (got_pending_timeout) {
-      ACE_DEBUG((LM_NOTICE,
-                 ACE_TEXT("(%P|%t) NOTICE: using DCPSPendingTimeout value from command option (overrides value if it's in config file).\n")));
+      ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSPendingTimeout")));
     } else {
       int timeout = 0;
       GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSPendingTimeout"), timeout, int)
@@ -1565,10 +1623,7 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
     }
 
     if (got_publisher_content_filter) {
-      ACE_DEBUG((LM_NOTICE,
-                 ACE_TEXT("(%P|%t) NOTICE: using DCPSPublisherContentFilter ")
-                 ACE_TEXT("value from command option (overrides value if it's ")
-                 ACE_TEXT("in config file).\n")));
+      ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSPublisherContentFilter")));
     } else {
       GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSPublisherContentFilter"),
         this->publisher_content_filter_, bool)
@@ -1577,9 +1632,7 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
     if (got_default_discovery) {
       ACE_Configuration::VALUETYPE type;
       if (cf.find_value(sect, ACE_TEXT("DCPSDefaultDiscovery"), type) != -1) {
-        ACE_DEBUG((LM_NOTICE,
-                   ACE_TEXT("(%P|%t) NOTICE: using DCPSDefaultDiscovery value ")
-                   ACE_TEXT("from command option, overriding config file\n")));
+        ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSDefaultDiscovery")));
       }
     } else {
       GET_CONFIG_STRING_VALUE(cf, sect, ACE_TEXT("DCPSDefaultDiscovery"),
@@ -1589,9 +1642,7 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
     if (got_bidir_giop) {
       ACE_Configuration::VALUETYPE type;
       if (cf.find_value(sect, ACE_TEXT("DCPSBidirGIOP"), type) != -1) {
-        ACE_DEBUG((LM_NOTICE,
-          ACE_TEXT("(%P|%t) NOTICE: using DCPSBidirGIOP value ")
-          ACE_TEXT("from command option, overriding config file\n")));
+        ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSBidirGIOP")));
       }
     } else {
       GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSBidirGIOP"), bidir_giop_, bool)
@@ -1600,9 +1651,7 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
     ACE_Configuration::VALUETYPE type;
     if (got_log_fname) {
       if (cf.find_value(sect, ACE_TEXT("ORBLogFile"), type) != -1) {
-        ACE_DEBUG((LM_NOTICE,
-                   ACE_TEXT("(%P|%t) NOTICE: using ORBLogFile value ")
-                   ACE_TEXT("from command option, overriding config file\n")));
+        ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("ORBLogFile")));
       }
     } else {
       OPENDDS_STRING log_fname;
@@ -1614,9 +1663,7 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
 
     if (got_log_verbose) {
       if (cf.find_value(sect, ACE_TEXT("ORBVerboseLogging"), type) != -1) {
-        ACE_DEBUG((LM_NOTICE,
-                   ACE_TEXT("(%P|%t) NOTICE: using ORBVerboseLogging value ")
-                   ACE_TEXT("from command option, overriding config file\n")));
+        ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("ORBVerboseLogging")));
       }
     } else {
       unsigned long verbose_logging = 0;
@@ -1625,15 +1672,13 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
     }
 
     if (got_default_address) {
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) NOTICE: using DCPSDefaultAddress value from command option (overrides value if it's in config file).\n")));
+      ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSDefaultAddress")));
     } else {
       GET_CONFIG_STRING_VALUE(cf, sect, ACE_TEXT("DCPSDefaultAddress"), this->default_address_)
     }
 
     if (got_monitor) {
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) NOTICE: using DCPSMonitor value from command option (overrides value if it's in config file).\n")));
+      ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSMonitor")));
     } else {
       GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSMonitor"), monitor_enabled_, bool)
     }

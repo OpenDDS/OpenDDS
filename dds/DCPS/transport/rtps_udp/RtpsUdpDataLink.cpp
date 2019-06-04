@@ -1438,7 +1438,8 @@ RtpsUdpDataLink::send_ack_nacks(RtpsReaderMap::value_type& rr, bool finalFlag)
         ser << nack_frags[i]; // always 4-byte aligned
       }
 
-      if (!locators_.count(wi->first)) {
+      const OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan)::const_iterator iter = locators_.find(wi->first);
+      if (iter == locators_.end()) {
         if (Transport_debug_level) {
           const GuidConverter conv(wi->first);
           ACE_ERROR((LM_ERROR,
@@ -1447,7 +1448,7 @@ RtpsUdpDataLink::send_ack_nacks(RtpsReaderMap::value_type& rr, bool finalFlag)
         }
       } else {
         send_strategy()->send_rtps_control(mb_acknack,
-                                          locators_[wi->first].addr_);
+                                           iter->second.addr_);
       }
     }
   }
@@ -1676,6 +1677,11 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
   const ACE_Time_Value now = ACE_OS::gettimeofday();
   OPENDDS_VECTOR(DiscoveryListener*) callbacks;
 
+  // For first_acknowledged_by_reader
+  SequenceNumber received_sn_base;
+  received_sn_base.setValue(acknack.readerSNState.bitmapBase.high, acknack.readerSNState.bitmapBase.low);
+  bool first_ack = false;
+
   {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
     for (InterestingRemoteMapType::iterator pos = interesting_readers_.lower_bound(remote),
@@ -1733,6 +1739,7 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
   if (!ri->second.handshake_done_) {
     ri->second.handshake_done_ = true;
     invoke_on_start_callbacks(true);
+    first_ack = true;
   }
 
   OPENDDS_MAP(SequenceNumber, TransportQueueElement*) pendingCallbacks;
@@ -1870,6 +1877,9 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
        it != pendingCallbacks.end(); ++it) {
     it->second->data_delivered();
   }
+  if (first_ack) {
+    first_acknowledged_by_reader(local, remote, received_sn_base);
+  }
 }
 
 void
@@ -1967,8 +1977,9 @@ RtpsUdpDataLink::send_nack_replies()
       process_requested_changes(requests, writer, ri->second);
 
       if (!ri->second.requested_changes_.empty()) {
-        if (locators_.count(ri->first)) {
-          recipients.insert(locators_[ri->first].addr_);
+        const OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan)::const_iterator iter = locators_.find(ri->first);
+        if (iter != locators_.end()) {
+          recipients.insert(iter->second.addr_);
           if (Transport_debug_level > 5) {
             const GuidConverter local_conv(rw->first), remote_conv(ri->first);
             ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::send_nack_replies "
@@ -2035,11 +2046,17 @@ RtpsUdpDataLink::send_nackfrag_replies(RtpsWriter& writer,
   const ri_iter end = writer.remote_readers_.end();
   for (ri_iter ri = writer.remote_readers_.begin(); ri != end; ++ri) {
 
-    if (ri->second.requested_frags_.empty() || !locators_.count(ri->first)) {
+    if (ri->second.requested_frags_.empty()) {
       continue;
     }
 
-    const ACE_INET_Addr& remote_addr = locators_[ri->first].addr_;
+    const OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan)::const_iterator iter =
+      locators_.find(ri->first);
+    if (iter == locators_.end()) {
+      continue;
+    }
+
+    const ACE_INET_Addr& remote_addr = iter->second.addr_;
 
     typedef OPENDDS_MAP(SequenceNumber, RTPS::FragmentNumberSet)::iterator rf_iter;
     const rf_iter rf_end = ri->second.requested_frags_.end();
@@ -2104,7 +2121,8 @@ RtpsUdpDataLink::send_directed_nack_replies(const RepoId& writerId,
                                             const RepoId& readerId,
                                             ReaderInfo& reader)
 {
-  if (!locators_.count(readerId)) {
+  const OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan)::const_iterator iter = locators_.find(readerId);
+  if (iter == locators_.end()) {
     return;
   }
 
@@ -2113,7 +2131,7 @@ RtpsUdpDataLink::send_directed_nack_replies(const RepoId& writerId,
   reader.requested_changes_.clear();
 
   DisjointSequence gaps;
-  ACE_INET_Addr addr = locators_[readerId].addr_;
+  ACE_INET_Addr addr = iter->second.addr_;
 
   if (!requests.empty()) {
     if (writer.send_buff_.is_nil() || writer.send_buff_->empty()) {
@@ -2400,11 +2418,13 @@ RtpsUdpDataLink::send_heartbeats()
       typedef ReaderInfoMap::iterator ri_iter;
       const ri_iter end = rw->second.remote_readers_.end();
       for (ri_iter ri = rw->second.remote_readers_.begin(); ri != end; ++ri) {
-        if ((has_data || !ri->second.handshake_done_)
-            && locators_.count(ri->first)) {
-          recipients.insert(locators_[ri->first].addr_);
-          if (final && !ri->second.handshake_done_) {
-            final = false;
+        if (has_data || !ri->second.handshake_done_) {
+          const OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan)::const_iterator iter = locators_.find(ri->first);
+          if (iter != locators_.end()) {
+            recipients.insert(iter->second.addr_);
+            if (final && !ri->second.handshake_done_) {
+              final = false;
+            }
           }
         }
         if (!ri->second.durable_data_.empty()) {
@@ -2429,8 +2449,9 @@ RtpsUdpDataLink::send_heartbeats()
             if (ri->second.durable_data_.rbegin()->first > durable_max) {
               durable_max = ri->second.durable_data_.rbegin()->first;
             }
-            if (locators_.count(ri->first)) {
-              recipients.insert(locators_[ri->first].addr_);
+            const OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan)::const_iterator iter = locators_.find(ri->first);
+            if (iter != locators_.end()) {
+              recipients.insert(iter->second.addr_);
             }
           }
         }
@@ -2702,9 +2723,9 @@ RtpsUdpDataLink::populate_security_handles(const RepoId& local_id,
   mb.wr_ptr(mb.space());
   DCPS::Serializer ser(&mb, ACE_CDR_BYTE_ORDER, DCPS::Serializer::ALIGN_CDR);
 
-  const EntityKind localKind(GuidConverter(local_id).entityKind());
-  const RepoId& writer_id = (localKind == KIND_WRITER) ? local_id : remote_id;
-  const RepoId& reader_id = (localKind == KIND_WRITER) ? remote_id : local_id;
+  const bool local_is_writer = GuidConverter(local_id).isWriter();
+  const RepoId& writer_id = local_is_writer ? local_id : remote_id;
+  const RepoId& reader_id = local_is_writer ? remote_id : local_id;
 
   while (mb.length()) {
     DDS::BinaryProperty_t prop;
@@ -2725,8 +2746,11 @@ RtpsUdpDataLink::populate_security_handles(const RepoId& local_id,
       RTPS::assign(remote_participant.guidPrefix, remote_id.guidPrefix);
       remote_participant.entityId = ENTITYID_PARTICIPANT;
       peer_crypto_handles_[remote_participant] = handle;
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) RPCH %C = %d\n",
-                 std::string(GuidConverter(remote_participant)).c_str(), handle));
+      if (security_debug.bookkeeping) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} RtpsUdpDataLink::populate_security_handles() ")
+                   ACE_TEXT("RPCH %C = %d\n"),
+                   OPENDDS_STRING(GuidConverter(remote_participant)).c_str(), handle));
+      }
     }
 
     else if (std::strcmp(prop.name.in(), RTPS::BLOB_PROP_DW_CRYPTO_HANDLE) == 0
@@ -2736,8 +2760,11 @@ RtpsUdpDataLink::populate_security_handles(const RepoId& local_id,
         handle = handle << 8 | prop.value[i];
       }
       peer_crypto_handles_[writer_id] = handle;
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) DWCH %C = %d\n",
-                 std::string(GuidConverter(writer_id)).c_str(), handle));
+      if (security_debug.bookkeeping) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} RtpsUdpDataLink::populate_security_handles() ")
+                   ACE_TEXT("DWCH %C = %d\n"),
+                   OPENDDS_STRING(GuidConverter(writer_id)).c_str(), handle));
+      }
     }
 
     else if (std::strcmp(prop.name.in(), RTPS::BLOB_PROP_DR_CRYPTO_HANDLE) == 0
@@ -2747,8 +2774,11 @@ RtpsUdpDataLink::populate_security_handles(const RepoId& local_id,
         handle = handle << 8 | prop.value[i];
       }
       peer_crypto_handles_[reader_id] = handle;
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) DRCH %C = %d\n",
-                 std::string(GuidConverter(reader_id)).c_str(), handle));
+      if (security_debug.bookkeeping) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} RtpsUdpDataLink::populate_security_handles() ")
+                   ACE_TEXT("DRCH %C = %d\n"),
+                   std::string(GuidConverter(reader_id)).c_str(), handle));
+      }
     }
 
   }

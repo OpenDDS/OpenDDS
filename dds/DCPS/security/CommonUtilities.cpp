@@ -1,4 +1,5 @@
 #include "dds/DCPS/security/CommonUtilities.h"
+#include "dds/DCPS/SafetyProfileStreams.h"
 
 #include <string>
 #include <cstdio>
@@ -9,6 +10,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace Security {
 namespace CommonUtilities {
+
+using OpenDDS::DCPS::to_hex_dds_string;
 
 URI::URI(const std::string& src)
   : scheme(URI_UNKNOWN), everything_else("") //authority(), path(""), query(""), fragment("")
@@ -77,6 +80,67 @@ void set_security_error(DDS::Security::SecurityException& ex,
   std::sprintf(&full[i], " %.2x %.2x %.2x %.2x, %.2x %.2x %.2x %.2x",
                a1[0], a1[1], a1[2], a1[3], a2[0], a2[1], a2[2], a2[3]);
   set_security_error(ex, code, minor_code, full.c_str());
+}
+
+OPENDDS_STRING ctk_to_dds_string(const CryptoTransformKind& keyKind)
+{
+  if (!keyKind[0] && !keyKind[1] && !keyKind[2]) {
+    switch (keyKind[3]) {
+    case CRYPTO_TRANSFORMATION_KIND_NONE:
+      return "CRYPTO_TRANSFORMATION_KIND_NONE";
+    case CRYPTO_TRANSFORMATION_KIND_AES128_GMAC:
+      return "CRYPTO_TRANSFORMATION_KIND_AES128_GMAC";
+    case CRYPTO_TRANSFORMATION_KIND_AES128_GCM:
+      return "CRYPTO_TRANSFORMATION_KIND_AES128_GCM";
+    case CRYPTO_TRANSFORMATION_KIND_AES256_GMAC:
+      return "CRYPTO_TRANSFORMATION_KIND_AES256_GMAC";
+    case CRYPTO_TRANSFORMATION_KIND_AES256_GCM:
+      return "CRYPTO_TRANSFORMATION_KIND_AES256_GCM";
+    }
+  }
+  return OPENDDS_STRING("Unknown CryptoTransformKind ") +
+    to_hex_dds_string(keyKind, sizeof(keyKind), ' ');
+}
+
+OPENDDS_STRING ctki_to_dds_string(const CryptoTransformKeyId& keyId)
+{
+  return to_hex_dds_string(keyId, sizeof(keyId), ' ');
+}
+
+OPENDDS_STRING to_dds_string(const KeyOctetSeq& keyData)
+{
+  if (keyData.length()) {
+    return to_hex_dds_string(&keyData[0], keyData.length(), '\n', 8);
+  }
+  return "";
+}
+
+OPENDDS_STRING to_dds_string(const KeyMaterial_AES_GCM_GMAC& km)
+{
+  return
+    OPENDDS_STRING("transformation_kind: ") +
+    ctk_to_dds_string(km.transformation_kind) +
+    OPENDDS_STRING("\nmaster_salt:\n") +
+    to_dds_string(km.master_salt) +
+    OPENDDS_STRING("\nsender_key_id: ") +
+    ctki_to_dds_string(km.sender_key_id) +
+    OPENDDS_STRING("\nmaster_sender_key:\n") +
+    to_dds_string(km.master_sender_key) +
+    OPENDDS_STRING("\nreceiver_specific_key_id: ") +
+    ctki_to_dds_string(km.receiver_specific_key_id) +
+    OPENDDS_STRING("\nmaster_receiver_specific_key:\n") +
+    to_dds_string(km.master_receiver_specific_key) +
+    OPENDDS_STRING("\n");
+}
+
+OPENDDS_STRING to_dds_string(const CryptoTransformIdentifier& id)
+{
+  return
+    OPENDDS_STRING("transformation_kind: ") +
+    ctk_to_dds_string(id.transformation_kind) +
+    OPENDDS_STRING("\ntransformation_key_id: ") +
+    ctki_to_dds_string(id.transformation_key_id) +
+    OPENDDS_STRING("\n");
 }
 
 }

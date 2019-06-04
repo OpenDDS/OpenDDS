@@ -1,4 +1,4 @@
 project : googletest {
 
-  lit_libs += gmock
+  libs += gmock
 }

@@ -77,6 +77,11 @@ TransportSendListener::retrieve_inline_qos_data(InlineQosData& qos_data) const
   qos_data.topic_name = "";
 }
 
+void
+TransportSendListener::first_acknowledged_by_reader(const RepoId& /*rdr*/, const SequenceNumber& /*sn_base*/)
+{
+}
+
 } }
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
