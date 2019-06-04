@@ -154,6 +154,11 @@ public:
 #endif
 
 private:
+  void get_locators_i(const RepoId& local_id,
+                      OPENDDS_SET(ACE_INET_Addr)& addrs) const;
+
+  bool get_locator_i(const RepoId& remote_id, ACE_INET_Addr& addr) const;
+
   virtual void stop_i();
   virtual void send_i(TransportQueueElement* element, bool relink = true);
   RemoveResult remove_sample(const DataSampleElement* sample, void* context);
@@ -189,7 +194,9 @@ private:
     ACE_INET_Addr addr_;
     bool requires_inline_qos_;
   };
-  OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan) locators_;
+
+  typedef OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan) RemoteInfoMap;
+  RemoteInfoMap locators_;
 
   ACE_SOCK_Dgram unicast_socket_;
   ACE_SOCK_Dgram_Mcast multicast_socket_;
@@ -235,7 +242,7 @@ private:
 
   typedef OPENDDS_MAP_CMP(RepoId, ReaderInfo, GUID_tKeyLessThan) ReaderInfoMap;
 
-  struct RtpsWriter {
+  struct RtpsWriter : public RcObject {
     ReaderInfoMap remote_readers_;
     RcHandle<SingleSendBuffer> send_buff_;
     SequenceNumber expected_;
@@ -243,16 +250,19 @@ private:
     SnToTqeMap elems_not_acked_;
     //Only accessed with RtpsUdpDataLink lock held
     SnToTqeMap to_deliver_;
+    WeakRcHandle<RtpsUdpDataLink> link_;
+    RepoId id_;
     bool durable_;
     bool ready_to_hb_;
 
-    RtpsWriter() : durable_(false), ready_to_hb_(false) {}
+    explicit RtpsWriter(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable) : link_(link), id_(id), durable_(durable), ready_to_hb_(false) {}
     ~RtpsWriter();
     SequenceNumber heartbeat_high(const ReaderInfo&) const;
     void add_elem_awaiting_ack(TransportQueueElement* element);
   };
+  typedef RcHandle<RtpsWriter> RtpsWriter_rch;
 
-  typedef OPENDDS_MAP_CMP(RepoId, RtpsWriter, GUID_tKeyLessThan) RtpsWriterMap;
+  typedef OPENDDS_MAP_CMP(RepoId, RtpsWriter_rch, GUID_tKeyLessThan) RtpsWriterMap;
   RtpsWriterMap writers_;
 
   void end_historic_samples(RtpsWriterMap::iterator writer,
@@ -280,18 +290,54 @@ private:
 
   typedef OPENDDS_MAP_CMP(RepoId, WriterInfo, GUID_tKeyLessThan) WriterInfoMap;
 
-  struct RtpsReader {
-    WriterInfoMap remote_writers_;
-    bool durable_;
-    bool nack_durable(const WriterInfo& info);
+  typedef OPENDDS_VECTOR(RTPS::NackFragSubmessage) NackFragSubmessageVec;
+  struct AckNackTrio {
+    RepoId reader_guid_;
+    RepoId writer_guid_;
+    RTPS::InfoDestinationSubmessage info_dst_;
+    RTPS::AckNackSubmessage ack_nack_;
+    NackFragSubmessageVec nack_frag_vec_;
   };
+  typedef OPENDDS_VECTOR(AckNackTrio) AckNackTrioVec;
 
-  typedef OPENDDS_MAP_CMP(RepoId, RtpsReader, GUID_tKeyLessThan) RtpsReaderMap;
+  class RtpsReader : public RcObject {
+  public:
+    explicit RtpsReader(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable) : link_(link), id_(id), durable_(durable) {}
+
+    bool add_writer(const RepoId& id, const WriterInfo& info);
+    bool has_writer(const RepoId& id) const;
+    bool remove_writer(const RepoId& id);
+    size_t writer_count() const;
+
+    bool should_nack_durable(const WriterInfo& info);
+
+    bool process_heartbeat_i(const RTPS::HeartBeatSubmessage& heartbeat, const RepoId& src);
+    bool process_data_i(const RTPS::DataSubmessage& data, const RepoId& src);
+    bool process_gap_i(const RTPS::GapSubmessage& gap, const RepoId& src);
+    bool process_hb_frag_i(const RTPS::HeartBeatFragSubmessage& hb_frag, const RepoId& src);
+
+    void gather_ack_nacks(AckNackTrioVec& ant_vec, bool finalFlag = false);
+
+  protected:
+    void gather_ack_nacks_i(AckNackTrioVec& ant_vec, bool finalFlag = false);
+    void generate_nack_frags(NackFragSubmessageVec& nack_frags,
+                             WriterInfo& wi, const RepoId& pub_id);
+
+    mutable ACE_Thread_Mutex mutex_;
+    WeakRcHandle<RtpsUdpDataLink> link_;
+    RepoId id_;
+    bool durable_;
+    WriterInfoMap remote_writers_;
+  };
+  typedef RcHandle<RtpsReader> RtpsReader_rch;
+
+  void send_ack_nacks(AckNackTrioVec& ant_vec);
+
+  typedef OPENDDS_MAP_CMP(RepoId, RtpsReader_rch, GUID_tKeyLessThan) RtpsReaderMap;
   RtpsReaderMap readers_;
 
-  typedef OPENDDS_MULTIMAP_CMP(RepoId, RtpsReaderMap::iterator, GUID_tKeyLessThan)
-    RtpsReaderIndex;
-  RtpsReaderIndex reader_index_; // keys are remote data writer GUIDs
+  typedef OPENDDS_MULTIMAP_CMP(RepoId, RtpsReader_rch, GUID_tKeyLessThan) RtpsReaderMultiMap;
+  RtpsReaderMultiMap readers_of_writer_; // keys are remote data writer GUIDs
 
   void deliver_held_data(const RepoId& readerId, WriterInfo& info, bool durable);
 
@@ -299,9 +345,6 @@ private:
   /// (TransportReactorTask) and an external thread which is responsible
   /// for adding/removing associations from the DataLink.
   mutable ACE_Thread_Mutex lock_;
-
-  size_t generate_nack_frags(OPENDDS_VECTOR(RTPS::NackFragSubmessage)& nack_frags,
-                             WriterInfo& wi, const RepoId& pub_id);
 
   /// Extend the FragmentNumberSet to cover the fragments that are
   /// missing from our last known fragment to the extent
@@ -312,18 +355,6 @@ private:
   static void extend_bitmap_range(RTPS::FragmentNumberSet& fnSet,
                                   CORBA::ULong extent);
 
-  bool process_heartbeat_i(const RTPS::HeartBeatSubmessage& heartbeat,
-                           const RepoId& src, RtpsReaderMap::value_type& rr);
-
-  bool process_hb_frag_i(const RTPS::HeartBeatFragSubmessage& hb_frag,
-                         const RepoId& src, RtpsReaderMap::value_type& rr);
-
-  bool process_gap_i(const RTPS::GapSubmessage& gap, const RepoId& src,
-                     RtpsReaderMap::value_type& rr);
-
-  bool process_data_i(const RTPS::DataSubmessage& data, const RepoId& src,
-                      RtpsReaderMap::value_type& rr);
-
   void durability_resend(TransportQueueElement* element);
   void send_durability_gaps(const RepoId& writer, const RepoId& reader,
                             const DisjointSequence& gaps);
@@ -331,7 +362,7 @@ private:
                                   const DisjointSequence& gaps,
                                   bool durable = false);
 
-  void send_nackfrag_replies(RtpsWriterMap::iterator rw_iter, DisjointSequence& gaps,
+  void send_nackfrag_replies(RtpsWriter_rch writer, DisjointSequence& gaps,
                              OPENDDS_SET(ACE_INET_Addr)& gap_recipients);
 
   template<typename T, typename FN>
@@ -348,32 +379,34 @@ private:
     src.entityId = submessage.writerId;
 
     bool schedule_timer = false;
+    std::vector<RtpsReader_rch> to_call;
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
     if (local.entityId == ENTITYID_UNKNOWN) {
-      for (pair<RtpsReaderIndex::iterator, RtpsReaderIndex::iterator> iters =
-             reader_index_.equal_range(src);
-           iters.first != iters.second; ++iters.first) {
-        schedule_timer |= (this->*func)(submessage, src, *iters.first->second);
+      for (pair<RtpsReaderMultiMap::iterator, RtpsReaderMultiMap::iterator> iters = readers_of_writer_.equal_range(src); iters.first != iters.second; ++iters.first) {
+        to_call.push_back(iters.first->second);
       }
-
     } else {
       const RtpsReaderMap::iterator rr = readers_.find(local);
       if (rr == readers_.end()) {
         return;
       }
-      schedule_timer = (this->*func)(submessage, src, *rr);
+      to_call.push_back(rr->second);
     }
     g.release();
+    for (std::vector<RtpsReader_rch>::const_iterator it = to_call.begin(); it < to_call.end(); ++it) {
+      RtpsReader* reader = &(**it);
+      schedule_timer |= (reader->*func)(submessage, src);
+    }
     if (schedule_timer) {
       heartbeat_reply_.schedule();
     }
   }
 
   void send_nack_replies();
-  void send_directed_nack_replies(const RepoId& writerId, RtpsWriter& writer,
+  void send_directed_nack_replies(const RepoId& writerId, RtpsWriter_rch writer,
                                   const RepoId& readerId, ReaderInfo& reader);
   void process_requested_changes(DisjointSequence& requests,
-                                 const RtpsWriter& writer,
+                                 const RtpsWriter_rch writer,
                                  const ReaderInfo& reader);
   void process_acked_by_all_i(ACE_Guard<ACE_Thread_Mutex>& g, const RepoId& pub_id);
   void send_heartbeats();
@@ -515,8 +548,6 @@ private:
 
   typedef OPENDDS_SET(InterestingAckNack) InterestingAckNackSetType;
   InterestingAckNackSetType interesting_ack_nacks_;
-
-  void send_ack_nacks(RtpsReaderMap::value_type& rr, bool finalFlag = false);
 
   class HeldDataDeliveryHandler : public RcEventHandler {
   public:
