@@ -232,12 +232,18 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   worker_report.undermatched_readers = 0;
   worker_report.undermatched_writers = 0;
   worker_report.max_discovery_time_delta = ZERO;
-  worker_report.sample_count = 0;
+  worker_report.latency_sample_count = 0;
   worker_report.latency_min = std::numeric_limits<double>::max();
   worker_report.latency_max = 0.0;
   worker_report.latency_mean = 0.0;
   worker_report.latency_var_x_sample_count = 0.0;
   worker_report.latency_stdev = 0.0;
+  worker_report.jitter_sample_count = 0;
+  worker_report.jitter_min = std::numeric_limits<double>::max();
+  worker_report.jitter_max = 0.0;
+  worker_report.jitter_mean = 0.0;
+  worker_report.jitter_var_x_sample_count = 0.0;
+  worker_report.jitter_stdev = 0.0;
 
   for (CORBA::ULong i = 0; i < process_report.participants.length(); ++i) {
     for (CORBA::ULong j = 0; j < process_report.participants[i].subscribers.length(); ++j) {
@@ -245,11 +251,16 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
         Builder::DataReaderReport& dr_report = process_report.participants[i].subscribers[j].datareaders[k];
         const Builder::TimeStamp dr_enable_time = get_or_create_property(dr_report.properties, "enable_time", Builder::PVK_TIME)->value.time_prop();
         const Builder::TimeStamp dr_last_discovery_time = get_or_create_property(dr_report.properties, "last_discovery_time", Builder::PVK_TIME)->value.time_prop();
-        const CORBA::ULongLong dr_sample_count = get_or_create_property(dr_report.properties, "sample_count", Builder::PVK_ULL)->value.ull_prop();
+        const CORBA::ULongLong dr_latency_sample_count = get_or_create_property(dr_report.properties, "latency_sample_count", Builder::PVK_ULL)->value.ull_prop();
         const double dr_latency_min = get_or_create_property(dr_report.properties, "latency_min", Builder::PVK_DOUBLE)->value.double_prop();
         const double dr_latency_max = get_or_create_property(dr_report.properties, "latency_max", Builder::PVK_DOUBLE)->value.double_prop();
         const double dr_latency_mean = get_or_create_property(dr_report.properties, "latency_mean", Builder::PVK_DOUBLE)->value.double_prop();
         const double dr_latency_var_x_sample_count = get_or_create_property(dr_report.properties, "latency_var_x_sample_count", Builder::PVK_DOUBLE)->value.double_prop();
+        const CORBA::ULongLong dr_jitter_sample_count = get_or_create_property(dr_report.properties, "jitter_sample_count", Builder::PVK_ULL)->value.ull_prop();
+        const double dr_jitter_min = get_or_create_property(dr_report.properties, "jitter_min", Builder::PVK_DOUBLE)->value.double_prop();
+        const double dr_jitter_max = get_or_create_property(dr_report.properties, "jitter_max", Builder::PVK_DOUBLE)->value.double_prop();
+        const double dr_jitter_mean = get_or_create_property(dr_report.properties, "jitter_mean", Builder::PVK_DOUBLE)->value.double_prop();
+        const double dr_jitter_var_x_sample_count = get_or_create_property(dr_report.properties, "jitter_var_x_sample_count", Builder::PVK_DOUBLE)->value.double_prop();
         if (ZERO < dr_enable_time && ZERO < dr_last_discovery_time) {
           auto delta = dr_last_discovery_time - dr_enable_time;
           if (worker_report.max_discovery_time_delta < delta) {
@@ -258,17 +269,30 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
         } else {
           ++worker_report.undermatched_readers;
         }
+
         if (dr_latency_min < worker_report.latency_min) {
           worker_report.latency_min = dr_latency_min;
         }
         if (worker_report.latency_max < dr_latency_max) {
           worker_report.latency_max = dr_latency_max;
         }
-        if ((worker_report.sample_count + dr_sample_count) > 0) {
-          worker_report.latency_mean = (worker_report.latency_mean * static_cast<double>(worker_report.sample_count) + dr_latency_mean * static_cast<double>(dr_sample_count)) / (worker_report.sample_count + dr_sample_count);
+        if ((worker_report.latency_sample_count + dr_latency_sample_count) > 0) {
+          worker_report.latency_mean = (worker_report.latency_mean * static_cast<double>(worker_report.latency_sample_count) + dr_latency_mean * static_cast<double>(dr_latency_sample_count)) / (worker_report.latency_sample_count + dr_latency_sample_count);
         }
         worker_report.latency_var_x_sample_count += dr_latency_var_x_sample_count;
-        worker_report.sample_count += dr_sample_count;
+        worker_report.latency_sample_count += dr_latency_sample_count;
+
+        if (dr_jitter_min < worker_report.jitter_min) {
+          worker_report.jitter_min = dr_jitter_min;
+        }
+        if (worker_report.jitter_max < dr_jitter_max) {
+          worker_report.jitter_max = dr_jitter_max;
+        }
+        if ((worker_report.jitter_sample_count + dr_jitter_sample_count) > 0) {
+          worker_report.jitter_mean = (worker_report.jitter_mean * static_cast<double>(worker_report.jitter_sample_count) + dr_jitter_mean * static_cast<double>(dr_jitter_sample_count)) / (worker_report.jitter_sample_count + dr_jitter_sample_count);
+        }
+        worker_report.jitter_var_x_sample_count += dr_jitter_var_x_sample_count;
+        worker_report.jitter_sample_count += dr_jitter_sample_count;
       }
     }
     for (CORBA::ULong j = 0; j < process_report.participants[i].publishers.length(); ++j) {
@@ -288,7 +312,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     }
   }
 
-  worker_report.latency_stdev = std::sqrt(worker_report.latency_var_x_sample_count / static_cast<double>(worker_report.sample_count));
+  worker_report.latency_stdev = std::sqrt(worker_report.latency_var_x_sample_count / static_cast<double>(worker_report.latency_sample_count));
+  worker_report.jitter_stdev = std::sqrt(worker_report.jitter_var_x_sample_count / static_cast<double>(worker_report.jitter_sample_count));
 
   std::string output_file_name;
   std::unique_ptr<std::ofstream> ofs;
@@ -315,14 +340,24 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   os << "undermatched writers: " << worker_report.undermatched_writers << std::endl << std::endl;
   os << "max discovery time delta: " << worker_report.max_discovery_time_delta << std::endl;
 
-  if (worker_report.sample_count > 0) {
+  if (worker_report.latency_sample_count > 0) {
     os << std::endl << "--- Latency Statistics ---" << std::endl << std::endl;
 
-    os << "total sample count: " << worker_report.sample_count << std::endl;
+    os << "total (latency) sample count: " << worker_report.latency_sample_count << std::endl;
     os << "minimum latency: " << std::fixed << std::setprecision(6) << worker_report.latency_min << " seconds" << std::endl;
     os << "maximum latency: " << std::fixed << std::setprecision(6) << worker_report.latency_max << " seconds" << std::endl;
     os << "mean latency: " << std::fixed << std::setprecision(6) << worker_report.latency_mean << " seconds" << std::endl;
     os << "latency standard deviation: " << std::fixed << std::setprecision(6) << worker_report.latency_stdev << " seconds" << std::endl;
+  }
+
+  if (worker_report.jitter_sample_count > 0) {
+    os << std::endl << "--- Jitter Statistics ---" << std::endl << std::endl;
+
+    os << "total (jitter) sample count: " << worker_report.jitter_sample_count << std::endl;
+    os << "minimum jitter: " << std::fixed << std::setprecision(6) << worker_report.jitter_min << " seconds" << std::endl;
+    os << "maximum jitter: " << std::fixed << std::setprecision(6) << worker_report.jitter_max << " seconds" << std::endl;
+    os << "mean jitter: " << std::fixed << std::setprecision(6) << worker_report.jitter_mean << " seconds" << std::endl;
+    os << "jitter standard deviation: " << std::fixed << std::setprecision(6) << worker_report.jitter_stdev << " seconds" << std::endl;
     os << std::endl;
   }
 

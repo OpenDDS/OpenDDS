@@ -1,5 +1,5 @@
 #include "WorkerDataReaderListener.h"
-
+#include <cmath>
 namespace Stool {
 
 WorkerDataReaderListener::WorkerDataReaderListener() {
@@ -50,14 +50,22 @@ void WorkerDataReaderListener::on_data_available(DDS::DataReader_ptr reader) {
     if (status == DDS::RETCODE_OK && si.valid_data) {
       const Builder::TimeStamp& now = Builder::get_time();
       double latency = Builder::to_seconds_double(now - data.sent_time);
+      double jitter = -1.0;
       //std::cout << "WorkerDataReaderListener::on_data_available() - Valid Data :: Latency = " << std::fixed << std::setprecision(6) << latency << " seconds" << std::endl;
 
       std::unique_lock<std::mutex> lock(mutex_);
+      auto pl_it = previous_latency_map_.find(si.publication_handle);
+      if (pl_it == previous_latency_map_.end()) {
+        pl_it = previous_latency_map_.insert(std::unordered_map<DDS::InstanceHandle_t, double>::value_type(si.publication_handle, 0.0)).first;
+      } else {
+        jitter = std::fabs(pl_it->second - latency);
+      }
+      pl_it->second = latency;
       if (datareader_) {
         auto prev_latency_mean = latency_mean_->value.double_prop();
         auto prev_latency_var_x_sample_count = latency_var_x_sample_count_->value.double_prop();
 
-        sample_count_->value.ull_prop(sample_count_->value.ull_prop() + 1);
+        latency_sample_count_->value.ull_prop(latency_sample_count_->value.ull_prop() + 1);
 
         if (latency < latency_min_->value.double_prop()) {
           latency_min_->value.double_prop(latency);
@@ -65,14 +73,37 @@ void WorkerDataReaderListener::on_data_available(DDS::DataReader_ptr reader) {
         if (latency_max_->value.double_prop() < latency) {
           latency_max_->value.double_prop(latency);
         }
-        if (sample_count_->value.ull_prop() == 0) {
+        if (latency_sample_count_->value.ull_prop() == 0) {
           latency_mean_->value.double_prop(latency);
           latency_var_x_sample_count_->value.double_prop(latency);
         } else {
           // Incremental mean calculation (doesn't require storing all the data)
-          latency_mean_->value.double_prop(prev_latency_mean + ((latency - prev_latency_mean) / static_cast<double>(sample_count_->value.ull_prop())));
-          // Incremental (variance * sample_count) calculation (doesn't require storing all the data, can be used to easily find variance / standard deviation)
+          latency_mean_->value.double_prop(prev_latency_mean + ((latency - prev_latency_mean) / static_cast<double>(latency_sample_count_->value.ull_prop())));
+          // Incremental (variance * latency_sample_count) calculation (doesn't require storing all the data, can be used to easily find variance / standard deviation)
           latency_var_x_sample_count_->value.double_prop(prev_latency_var_x_sample_count + ((latency - prev_latency_mean) * (latency - latency_mean_->value.double_prop())));
+        }
+
+        if (jitter >= 0.0) {
+          auto prev_jitter_mean = jitter_mean_->value.double_prop();
+          auto prev_jitter_var_x_sample_count = jitter_var_x_sample_count_->value.double_prop();
+
+          jitter_sample_count_->value.ull_prop(jitter_sample_count_->value.ull_prop() + 1);
+
+          if (jitter < jitter_min_->value.double_prop()) {
+            jitter_min_->value.double_prop(jitter);
+          }
+          if (jitter_max_->value.double_prop() < jitter) {
+            jitter_max_->value.double_prop(jitter);
+          }
+          if (jitter_sample_count_->value.ull_prop() == 0) {
+            jitter_mean_->value.double_prop(jitter);
+            jitter_var_x_sample_count_->value.double_prop(jitter);
+          } else {
+            // Incremental mean calculation (doesn't require storing all the data)
+            jitter_mean_->value.double_prop(prev_jitter_mean + ((jitter - prev_jitter_mean) / static_cast<double>(jitter_sample_count_->value.ull_prop())));
+            // Incremental (variance * jitter_sample_count) calculation (doesn't require storing all the data, can be used to easily find variance / standard deviation)
+            jitter_var_x_sample_count_->value.double_prop(prev_jitter_var_x_sample_count + ((jitter - prev_jitter_mean) * (jitter - jitter_mean_->value.double_prop())));
+          }
         }
       }
       for (auto it = handlers_.begin(); it != handlers_.end(); ++it) {
@@ -110,8 +141,8 @@ void WorkerDataReaderListener::set_datareader(Builder::DataReader& datareader) {
 
   last_discovery_time_ = get_or_create_property(datareader_->get_report().properties, "last_discovery_time", Builder::PVK_TIME);
 
-  sample_count_ = get_or_create_property(datareader_->get_report().properties, "sample_count", Builder::PVK_ULL);
-  sample_count_->value.ull_prop(0);
+  latency_sample_count_ = get_or_create_property(datareader_->get_report().properties, "latency_sample_count", Builder::PVK_ULL);
+  latency_sample_count_->value.ull_prop(0);
   latency_min_ = get_or_create_property(datareader_->get_report().properties, "latency_min", Builder::PVK_DOUBLE);
   latency_min_->value.double_prop(std::numeric_limits<double>::max());
   latency_max_ = get_or_create_property(datareader_->get_report().properties, "latency_max", Builder::PVK_DOUBLE);
@@ -120,6 +151,16 @@ void WorkerDataReaderListener::set_datareader(Builder::DataReader& datareader) {
   latency_mean_->value.double_prop(0.0);
   latency_var_x_sample_count_ = get_or_create_property(datareader_->get_report().properties, "latency_var_x_sample_count", Builder::PVK_DOUBLE);
   latency_var_x_sample_count_->value.double_prop(0.0);
+  jitter_sample_count_ = get_or_create_property(datareader_->get_report().properties, "jitter_sample_count", Builder::PVK_ULL);
+  jitter_sample_count_->value.ull_prop(0);
+  jitter_min_ = get_or_create_property(datareader_->get_report().properties, "jitter_min", Builder::PVK_DOUBLE);
+  jitter_min_->value.double_prop(std::numeric_limits<double>::max());
+  jitter_max_ = get_or_create_property(datareader_->get_report().properties, "jitter_max", Builder::PVK_DOUBLE);
+  jitter_max_->value.double_prop(0.0);
+  jitter_mean_ = get_or_create_property(datareader_->get_report().properties, "jitter_mean", Builder::PVK_DOUBLE);
+  jitter_mean_->value.double_prop(0.0);
+  jitter_var_x_sample_count_ = get_or_create_property(datareader_->get_report().properties, "jitter_var_x_sample_count", Builder::PVK_DOUBLE);
+  jitter_var_x_sample_count_->value.double_prop(0.0);
 }
 
 }

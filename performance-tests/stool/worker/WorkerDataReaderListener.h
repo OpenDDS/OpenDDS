@@ -3,6 +3,7 @@
 #include "DataHandler.h"
 #include "DataReaderListener.h"
 #include "StoolTypeSupportImpl.h"
+#include <unordered_map>
 
 namespace Stool {
 
@@ -37,11 +38,17 @@ protected:
   DataDataReader_var data_dr_;
   std::vector<DataHandler*> handlers_;
   Builder::PropertyIndex last_discovery_time_;
-  Builder::PropertyIndex sample_count_;
+  Builder::PropertyIndex latency_sample_count_;
   Builder::PropertyIndex latency_min_;
   Builder::PropertyIndex latency_max_;
   Builder::PropertyIndex latency_mean_;
   Builder::PropertyIndex latency_var_x_sample_count_;
+  std::unordered_map<DDS::InstanceHandle_t, double> previous_latency_map_;
+  Builder::PropertyIndex jitter_sample_count_;
+  Builder::PropertyIndex jitter_min_;
+  Builder::PropertyIndex jitter_max_;
+  Builder::PropertyIndex jitter_mean_;
+  Builder::PropertyIndex jitter_var_x_sample_count_;
 };
 
 }
