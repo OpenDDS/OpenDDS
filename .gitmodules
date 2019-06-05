@@ -5,3 +5,4 @@
 [submodule "tests/googletest"]
 	path = tests/googletest
 	url = git://github.com/google/googletest
+	branch = v1.8.x
