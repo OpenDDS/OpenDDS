@@ -1427,7 +1427,7 @@ RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(AckNackTrioVec& ant_vec, bool fi
           },
           {++wi->second.acknack_count_}
         },
-        {}
+        NackFragSubmessageVec()
       };
 
       ant_vec.push_back(temp_trio);
@@ -1463,7 +1463,7 @@ RtpsUdpDataLink::send_ack_nacks(AckNackTrioVec& ant_vec)
   typedef OPENDDS_MAP_CMP(RepoId, AntVecIterVec, GUID_tKeyLessThan) AntIterRepoMap;
   typedef OPENDDS_MAP_CMP(RepoIdPair, AntIterRepoMap, less_RepoIdPair) AntIterMap;
   AntIterMap ant_map;
-  for (auto it = ant_vec.begin(); it != ant_vec.end(); ++it) {
+  for (AckNackTrioVec::iterator it = ant_vec.begin(); it != ant_vec.end(); ++it) {
     OPENDDS_SET(ACE_INET_Addr) addrs = get_addresses(it->reader_guid_, it->writer_guid_);
     if (addrs.empty()) {
       continue;
@@ -1475,12 +1475,12 @@ RtpsUdpDataLink::send_ack_nacks(AckNackTrioVec& ant_vec)
     ant_map[pair][dst].push_back(it);
   }
 
-  for (auto addr_it = ant_map.begin(); addr_it != ant_map.end(); ++addr_it) {
+  for (AntIterMap::const_iterator addr_it = ant_map.begin(); addr_it != ant_map.end(); ++addr_it) {
     size_t size = 0, padding = 0, prev_size = 0;
-    for (auto prefix_it = addr_it->second.begin(); prefix_it != addr_it->second.end(); ++prefix_it) {
+    for (AntIterRepoMap::const_iterator prefix_it = addr_it->second.begin(); prefix_it != addr_it->second.end(); ++prefix_it) {
       gen_find_size(prefix_it->second.front()->info_dst_, size, padding);
       prev_size = size;
-      for (auto it = prefix_it->second.begin(); it != prefix_it->second.end(); ++it) {
+      for (AntVecIterVec::const_iterator it = prefix_it->second.begin(); it != prefix_it->second.end(); ++it) {
         AckNackTrio& trio = **it;
         gen_find_size(trio.ack_nack_, size, padding);
         trio.ack_nack_.smHeader.submessageLength = static_cast<CORBA::UShort>(size - prev_size) - SMHDR_SZ;
@@ -1497,9 +1497,9 @@ RtpsUdpDataLink::send_ack_nacks(AckNackTrioVec& ant_vec)
     // byte swapping is handled in the operator<<() implementation
     Serializer ser(&mb_acknack, false, Serializer::ALIGN_CDR);
 
-    for (auto prefix_it = addr_it->second.begin(); prefix_it != addr_it->second.end(); ++prefix_it) {
+    for (AntIterRepoMap::const_iterator prefix_it = addr_it->second.begin(); prefix_it != addr_it->second.end(); ++prefix_it) {
       ser << prefix_it->second.front()->info_dst_;
-      for (auto it = prefix_it->second.begin(); it != prefix_it->second.end(); ++it) {
+      for (AntVecIterVec::const_iterator it = prefix_it->second.begin(); it != prefix_it->second.end(); ++it) {
         AckNackTrio& trio = **it;
         // Interoperability note: we used to insert INFO_REPLY submessage here, but
         // testing indicated that other DDS implementations didn't accept it.
