@@ -1476,10 +1476,10 @@ RtpsUdpDataLink::send_ack_nacks(AckNackTrioVec& ant_vec)
   }
 
   for (AntIterMap::const_iterator addr_it = ant_map.begin(); addr_it != ant_map.end(); ++addr_it) {
-    size_t size = 0, padding = 0, prev_size = 0;
+    size_t size = 0, padding = 0;
     for (AntIterRepoMap::const_iterator prefix_it = addr_it->second.begin(); prefix_it != addr_it->second.end(); ++prefix_it) {
       gen_find_size(prefix_it->second.front()->info_dst_, size, padding);
-      prev_size = size;
+      size_t prev_size = size;
       for (AntVecIterVec::const_iterator it = prefix_it->second.begin(); it != prefix_it->second.end(); ++it) {
         AckNackTrio& trio = **it;
         gen_find_size(trio.ack_nack_, size, padding);
