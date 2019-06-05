@@ -34,8 +34,8 @@ TEST(RapidJsonTest, ParseTest)
   ASSERT_EQ(sample.bt.s, -32765);
   ASSERT_EQ(sample.bt.ul, 2147483690);
   ASSERT_EQ(sample.bt.l, -2147483632);
-  ASSERT_EQ(sample.bt.ull, 9223372036854775810u);
-  ASSERT_EQ(sample.bt.ll, -9223372036854775806);
+  ASSERT_EQ(sample.bt.ull, 9223372036854775810ull);
+  ASSERT_EQ(sample.bt.ll, -9223372036854775806ll);
   ASSERT_LT(sample.bt.f, 0.00141 + 1e-6);
   ASSERT_GT(sample.bt.f, 0.00141 - 1e-6);
   ASSERT_LT(sample.bt.d, -0.00000141 + 1e-9);
@@ -94,8 +94,8 @@ TEST(RapidJsonTest, SerializeTest)
   sample.bt.s = -32765;
   sample.bt.ul = 2147483690u;
   sample.bt.l = -2147483632;
-  sample.bt.ull = 9223372036854775810u;
-  sample.bt.ll = -9223372036854775806;
+  sample.bt.ull = 9223372036854775810ull;
+  sample.bt.ll = -9223372036854775806ll;
   sample.bt.f = 0.00141;
   sample.bt.d = -0.00000141;
   sample.bt.ld = 1e34;
@@ -152,8 +152,8 @@ TEST(RapidJsonTest, SerializeTest)
   ASSERT_EQ(val["bt"]["s"], -32765);
   ASSERT_EQ(val["bt"]["ul"], 2147483690u);
   ASSERT_EQ(val["bt"]["l"], -2147483632);
-  ASSERT_EQ(val["bt"]["ull"], 9223372036854775810u);
-  ASSERT_EQ(val["bt"]["ll"], -9223372036854775806);
+  ASSERT_EQ(val["bt"]["ull"], 9223372036854775810ull);
+  ASSERT_EQ(val["bt"]["ll"], -9223372036854775806ll);
   ASSERT_LT(val["bt"]["f"].GetFloat(), 0.00141 + 1e-6);
   ASSERT_GT(val["bt"]["f"].GetFloat(), 0.00141 - 1e-6);
   ASSERT_LT(val["bt"]["d"].GetDouble(), -0.00000141 + 1e-9);
