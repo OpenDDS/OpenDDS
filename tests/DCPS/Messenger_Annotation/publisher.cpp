@@ -178,7 +178,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       std::cout << "Creating Writer" << std::endl;
       Writer* writer;
       if(use_data) {
-        writer  = new Writer(dw.in(), Writer::message_t::data);
+        writer  = new Writer(dw.in(), Writer::data);
       }
       else {
         writer  = new Writer(dw.in());

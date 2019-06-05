@@ -16,7 +16,7 @@ class Writer : public ACE_Task_Base {
 public:
   enum message_t {messenger, data};
 
-  Writer(DDS::DataWriter_ptr writer, const Writer::message_t messageType = Writer::message_t::messenger);
+  Writer(DDS::DataWriter_ptr writer, const Writer::message_t messageType = Writer::messenger);
 
   void start();
 
