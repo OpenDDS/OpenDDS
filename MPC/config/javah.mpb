@@ -14,6 +14,6 @@ feature(!java_pre_jpms): java {
 
   Define_Custom(JavaH) {
     automatic = 0
-    command = echo javah placeholder
+    command = echo
   }
 }
