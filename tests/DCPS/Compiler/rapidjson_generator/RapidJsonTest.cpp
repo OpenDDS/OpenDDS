@@ -152,10 +152,14 @@ TEST(RapidJsonTest, SerializeTest)
   ASSERT_EQ(val["bt"]["s"], -32765);
   ASSERT_EQ(val["bt"]["ul"], 2147483690u);
   ASSERT_EQ(val["bt"]["l"], -2147483632);
-  ASSERT_EQ(val["bt"]["ull"], 9223372036854775810ull);
-  ASSERT_EQ(val["bt"]["ll"], -9223372036854775806ll);
+  ASSERT_EQ(val["bt"]["ull"].IsUint64(), true);
+  ASSERT_EQ(val["bt"]["ull"].GetUint64(), 9223372036854775810ull);
+  ASSERT_EQ(val["bt"]["ll"].IsInt64(), true);
+  ASSERT_EQ(val["bt"]["ll"].GetInt64(), -9223372036854775806ll);
+  ASSERT_EQ(val["bt"]["f"].IsFloat(), true);
   ASSERT_LT(val["bt"]["f"].GetFloat(), 0.00141 + 1e-6);
   ASSERT_GT(val["bt"]["f"].GetFloat(), 0.00141 - 1e-6);
+  ASSERT_EQ(val["bt"]["d"].IsDouble(), true);
   ASSERT_LT(val["bt"]["d"].GetDouble(), -0.00000141 + 1e-9);
   ASSERT_GT(val["bt"]["d"].GetDouble(), -0.00000141 - 1e-9);
   ASSERT_EQ(val["bt"]["b"], false);
