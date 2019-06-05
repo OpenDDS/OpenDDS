@@ -38,7 +38,7 @@ namespace {
 bool metaclass_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
   const std::vector<AST_EnumVal*>& contents, const char*)
 {
-  ContentSubscriptionGuard csg(!be_global->v8());
+  ContentSubscriptionGuard csg(!(be_global->v8() || be_global->rapidjson()));
   NamespaceGuard ng;
   std::string array_decl = "const char* gen_" + scoped_helper(name, "_") + "_names[]";
   std::string size_decl = "const size_t gen_" + scoped_helper(name, "_") + "_names_size";
