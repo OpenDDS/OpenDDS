@@ -369,7 +369,7 @@ BE_produce()
   postprocess(be_global->impl_name_.c_str(),
               be_global->impl_, BE_GlobalData::STREAM_CPP);
 
-  if (be_global->generate_itl()) {
+  if (be_global->itl()) {
     if (!BE_GlobalData::writeFile(be_global->itl_name_.c_str(), be_global->itl_.str())) {
       BE_abort();  //error message already printed
     }

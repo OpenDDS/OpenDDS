@@ -40,7 +40,7 @@ sub perlOS_to_java_platform {
   return $^O;
 }
 
-my $targetUsageIndent = "\t\t";
+my $targetUsageIndent = "\n\t\t";
 
 my %platforminfo =
   ('win32' => {
@@ -101,8 +101,8 @@ my %platforminfo =
      'aceconfig' => 'android',
      'no_host' => 1,
      'usage' => [
-       "Use --macros=ANDROID_ABI=<ARCH> to specify the target archtecture.\n" .
-       "${targetUsageIndent}Defaults to armeabi-v7a which is 32-bit ARMv7.\n" .
+       "Use --macros=ANDROID_ABI=<ARCH> to specify the target archtecture." .
+       "${targetUsageIndent}Defaults to armeabi-v7a which is 32-bit ARMv7." .
        "${targetUsageIndent}See docs/android.md for details."
      ],
    },
@@ -126,9 +126,15 @@ sub targetUsage {
 
 ## arg processing and usage
 
+my $argPadding = 29;
+my $argIndent = "\n   " . (' ' x $argPadding);
+
 my @specs = # Array of array-refs, each inner array is an option group which
             # has the format [Group Description, Opt1 Spec, Opt1 Description,
             # Opt2 Spec, Opt2 Description, ...]
+# <default>OPT is a custom token marking a string option that
+# defaults to $opts{'OPT'} = '' and can be overridden by opts by passing
+# --no-OPT or --OPT with a value.
   (
    ['Options controlling the configure script:',
     'help|h|?', 'Show this help and exit',
@@ -142,7 +148,8 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'std=s', 'C++ standard version (for compilers that use -std)',
     'target=s', 'Cross-compile target (none): see --target-help',
     'target-compiler=s', 'Compiler for target (if req\'d): see --target-help',
-    'host-tools=s', 'DDS_ROOT of host tools for cross compile (build them)',
+    'host-tools=s', 'DDS_ROOT of host tools for cross compile' .
+      $argIndent . '(build them)',
     'prefix=s', 'Installation prefix (none)',
    ],
    ['Build flags:',
@@ -165,26 +172,40 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'features=s@', 'Extra text for default.features',
     'mpcopts=s@', 'Extra command-line args for MPC',
    ],
-   ['Optional dependencies for OpenDDS:',
+   ['Optional dependencies for OpenDDS (disabled by default unless noted otherwise):',
     'java:s', 'Java development kit (use JAVA_HOME)',
     'jboss:s', 'JBoss application server (use JBOSS_HOME)',
     'ant:s', 'Ant for JBoss (use ANT_HOME or system pkg)',
-    'wireshark:s', 'Wireshark source, "non-CMake" based (use WIRESHARK_SRC)',
+    'wireshark:s',
+      'Wireshark dev headers or source not built with' .
+      $argIndent . 'CMake (use WIRESHARK_SRC or system pkg)' .
+      $argIndent . 'Implies --glib',
     'wireshark-cmake|wireshark_cmake:s',
-      'Wireshark built with CMake, requires wireshark-build and wireshark-lib (use WIRESHARK_SRC)',
-    'wireshark-build|wireshark_build:s', 'Wireshark CMake Build Location',
-    'wireshark-lib|wireshark_lib:s',
-      'Wireshark CMake libraries location, relative to wireshark-build',
+      'Wireshark source built with CMake, requires' .
+      $argIndent . '--wireshark-build. Requires --wireshark-lib if' .
+      $argIndent . 'guessing fails (use WIRESHARK_SRC)' .
+      $argIndent . 'Implies --glib',
+    'wireshark-build|wireshark_build=s', 'Wireshark CMake Build Location',
+    'wireshark-lib|wireshark_lib=s',
+      'Optional Wireshark CMake libraries location' .
+      $argIndent .'relative to wireshark-build (guesses)',
     'glib:s', 'GLib for Wireshark (use GLIB_ROOT or system pkg)',
-    'rapidjson:s', 'RapidJSON for Wireshark Sample Dissection (optional)',
+    '<default>rapidjson:s',
+      'RapidJSON for Wireshark dissector and JSON' .
+      $argIndent . 'Sample Serialization (Enabled by default,' .
+      $argIndent . 'use git submodle, RAPIDJSON_ROOT, or system pkg)',
     'qt:s', 'Qt5 (use QTDIR or system pkg)',
-    'qt-include:s', 'Qt include dir (use QT5_INCDIR or QTDIR/include)',
+    'qt-include:s', 'Qt include dir (use QT5_INCDIR, QTDIR/include,' .
+      $argIndent . 'or sysytem package)',
     'boost:s', 'Boost (use BOOST_ROOT or system pkg)',
     'boost-version:s', 'Boost version (only if needed to find headers)',
-    'xerces3:s', 'Xerces-C++ 3 for QoS XML handling, DDS Security (optional)',
-    'openssl:s', 'OpenSSL for DDS Security (optional)',
-    'cmake:s', 'Path to cmake binary for compiling Google Test Framework (optional)',
-    'gtest:s', 'Path to Google Test Framework (optional)',
+    'xerces3:s', 'Xerces-C++ 3 for QoS XML handling, DDS Security',
+    'openssl:s', 'OpenSSL for DDS Security',
+    'cmake:s', 'Path to cmake binary for compiling Google Test' .
+      $argIndent . 'Framework. (Check Path and Check Normal' .
+      $argIndent . 'Locations)',
+    'gtest:s', 'Path to Google Test Framework, required for' .
+      $argIndent . 'tests (uses GTEST_ROOT or system package)',
    ],
    ['Optional OpenDDS features:',
     'built-in-topics!', 'Built-in Topics (yes)',
@@ -197,8 +218,11 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'object-model-profile!', 'Object Model Profile (yes)',
     'persistence-profile!', 'Persistence Profile (yes)',
     'safety-profile:s', 'Safety Profile: base or extended (none)',
-    'tests!', 'Build tests, examples, and performance tests (yes)',
-    'security!', 'DDS Security plugin (no)',
+    'tests!', 'Build tests, examples, and performance tests' .
+      $argIndent . '(yes) Implies --gtest as tests require Google' .
+      $argIndent . 'Test and --cmake',
+    'security!', 'DDS Security plugin (no) Implies --openssl and' .
+      $argIndent . '--xerces3',
    ],
   );
 
@@ -208,7 +232,8 @@ sub iterate {
     for my $n (1 .. (scalar @{$group} / 2)) {
       my $opt = ${$group}[$n * 2 - 1];
       my $descr = ${$group}[$n * 2];
-      my ($optkey) = ($opt =~ /([\w-]+)/);
+      $opt =~ /(\<\w+\>)?([\w-]+)/;
+      my $optkey = (defined $1 ? $1 : "") . $2;
       &$callback(${$group}[0], $opt, $descr, $optkey, @_);
     }
   }
@@ -246,20 +271,32 @@ EOT
             }
             $optkey .= '=VAL' if $opt =~ /=s/;
             $optkey .= '[=VAL]' if $opt =~ /:s/;
-            $optkey = "[no-]$optkey" if ($opt =~ /!$/ && $descr =~ / \(yes\)$/);
+            $optkey = "[no-]$optkey" if ($opt =~ /!$/ && $descr =~ / \(yes\)/);
+            $optkey =~ s/^\<default\>(.*)$/\[no-\]$1/g;
             $optkey .= '...' if $opt =~ /s\@$/;
-            my $pad = 27 - length $optkey;
+            my $pad = $argPadding - length $optkey;
             print "--$optkey" . ' ' x (($pad > 0) ? $pad : 0) . " $descr\n";
           }
          );
   exit $status;
 }
 
+my $defaulted = {};
+
 sub parseArgs {
   my @getopts = ();
+  my @default = ();
   iterate(sub {
             my ($group, $opt, $descr, $optkey) = @_;
-            push @getopts, $opt;
+            if ($opt =~ /^<default>(.*)$/) {
+              push @getopts, $1;
+              $optkey =~ /^<default>(.*)$/;
+              push @getopts, "no-$1";
+              push @default, $1;
+            }
+            else  {
+              push @getopts, $opt;
+            }
           }
          );
 
@@ -277,6 +314,15 @@ sub parseArgs {
     print "Options:\n";
     new Dumpvalue()->dumpValue($opts);
   }
+
+  for my $opt (@default) {
+    if (!exists $opts->{$opt} && !exists $opts->{"no-$opt"}) {
+      $opts->{$opt} = '';
+      $defaulted->{$opt} = 1;
+      print("By default, --$opt is added to the options\n") if $opts->{'verbose'};
+    }
+  }
+
   return $opts;
 }
 
@@ -912,26 +958,33 @@ sub write_platform_macros {
 ## Optional OpenDDS dependencies
 
 my %optdep =
-# %opts key =>    [env var,         sanity check,                  MPC feature]
-  ('java' =>      ['JAVA_HOME',     'include/jni.h',               'java'],
-   'jboss' =>     ['JBOSS_HOME',    'lib/jboss-common.jar'],
-   'ant' =>       ['ANT_HOME',      'bin/ant'],
-   'wireshark' => ['WIRESHARK_SRC', 'epan/packet.h',               'wireshark'],
-   'wireshark-cmake' =>['WIRESHARK_SRC', 'epan/packet.h',          'wireshark_cmake'],
+# %opts key =>    [env var,           sanity check,                    MPC feature]
+  ('java' =>      ['JAVA_HOME',       'include/jni.h',                 'java'],
+   'jboss' =>     ['JBOSS_HOME',      'lib/jboss-common.jar'],
+   'ant' =>       ['ANT_HOME',        'bin/ant'],
+   'wireshark' => ['WIRESHARK_SRC',   'epan/packet.h',                 'wireshark'],
+   'wireshark-cmake' =>
+                  ['WIRESHARK_SRC',   'epan/packet.h',                 'wireshark_cmake'],
    'wireshark-build' =>
                   ['WIRESHARK_BUILD', 'config.h'],
    'wireshark-lib' =>
                   ['WIRESHARK_LIB'],
-   'glib' =>      ['GLIB_ROOT',     'include/glib-2.0/glib.h'],
-   'rapidjson' => ['RAPIDJSON_ROOT', 'include/rapidjson/rapidjson.h', 'no_itl=0'],
-   'qt' =>        ['QTDIR',       '',                            'qt5'],
-   'boost' =>     ['BOOST_ROOT',    'include/boost/version.hpp',   'boost'],
-   'xerces3' =>   ['XERCESCROOT',   'include/xercesc/dom/DOM.hpp', 'xerces3'],
-   'openssl' =>   ['SSL_ROOT',      'include/openssl/opensslv.h',  'ssl'],
+   'glib' =>      ['GLIB_ROOT',       'include/glib-2.0/glib.h'],
+   'rapidjson' => ['RAPIDJSON_ROOT',  'include/rapidjson/rapidjson.h', 'no_rapidjson=0'],
+   'qt' =>        ['QTDIR',           '',                              'qt5'],
+   'boost' =>     ['BOOST_ROOT',      'include/boost/version.hpp',     'boost'],
+   'xerces3' =>   ['XERCESCROOT',     'include/xercesc/dom/DOM.hpp',   'xerces3'],
+   'openssl' =>   ['SSL_ROOT',        'include/openssl/opensslv.h',    'ssl'],
   );
 
 # Use this to check if tests are enabled (instead of $opts{'tests'} directly).
 my $tests = !exists $opts{'tests'} || $opts{'tests'};
+
+if ($tests) {
+  print "--tests implies --gtest and --cmake\n" if $opts{'verbose'};
+  $opts{'gtest'} = '' if (!exists $opts{'gtest'});
+  $opts{'cmake'} = '' if (!exists $opts{'cmake'});
+}
 
 my @ace_features = ('xerces3');
 
@@ -950,7 +1003,8 @@ $opts{'boost'} = '' if exists $opts{'boost-version'} && !exists $opts{'boost'};
 # supplied.
 my $wireshark_install = '/usr/include/wireshark';
 if (exists $opts{'wireshark'} && !defined $ENV{'WIRESHARK_SRC'} && $opts{'wireshark'} eq '') {
-  if (-d $wireshark_install) {
+  my $sanity = $optdep{'wireshark'}->[1];
+  if (-f File::Spec->catdir($wireshark_install, $sanity)) {
     $opts{'wireshark'} = $wireshark_install;
   }
   else {
@@ -985,38 +1039,31 @@ if ($opts{'security'}) {
     $opts{'xerces3'} = '';
     print "Forcing --xerces3 (security dependency)\n" if $opts{'verbose'};
   }
-  if ($tests) {
-    unless (exists $opts{'gtest'}) {
-      $opts{'gtest'} = '';
-      print "Forcing --gtest (security tests dependency)\n" if $opts{'verbose'};
-    }
+}
 
-    # CMake is required in order to compile the Google Test Framework.
-    unless ($opts{'cmake'}) {
-      print "--cmake not specified by user; searching path...\n" if $opts{'verbose'};
-      $opts{'cmake'} = which('cmake');
+# Try to find CMake
+unless ($opts{'cmake'}) {
+  print "--cmake not specified by user; searching path...\n" if $opts{'verbose'};
+  $opts{'cmake'} = which('cmake');
 
-      unless ($opts{'cmake'}) {
-        print "CMake not found in path; searching default location...\n"
-          if $opts{'verbose'};
-
-        my $cmake_default =
-          ($is_windows ?
-            (-f $ENV{'ProgramFiles'} . '\\CMake\\bin\\cmake.exe' ?
-                $ENV{'ProgramFiles'} . '\\CMake\\bin\\cmake.exe' :
-                $ENV{'ProgramFiles(x86)'} . '\\CMake\\bin\\cmake.exe') :
-            '/usr/bin/cmake');
-
-        $opts{'cmake'} = $cmake_default;
-      }
-    }
-
-    die "ERROR: CMake program $opts{'cmake'} does not exist..."
-      unless -f $opts{'cmake'};
-
-    print "Using CMake '$opts{'cmake'}' to compile Google Test Framework\n"
+  unless ($opts{'cmake'}) {
+    print "CMake not found in path; searching default location...\n"
       if $opts{'verbose'};
+
+    $opts{'cmake'} =
+      ($is_windows ?
+        (-f $ENV{'ProgramFiles'} . '\\CMake\\bin\\cmake.exe' ?
+            $ENV{'ProgramFiles'} . '\\CMake\\bin\\cmake.exe' :
+            $ENV{'ProgramFiles(x86)'} . '\\CMake\\bin\\cmake.exe') :
+        '/usr/bin/cmake');
   }
+}
+my $has_cmake = -f $opts{'cmake'};
+if ($has_cmake) {
+  print "Using CMake '$opts{'cmake'}' if needed\n" if $opts{'verbose'};
+}
+else {
+  print "Could not find CMake at '$opts{'cmake'}'\n" if $opts{'verbose'};
 }
 
 sub targets_win64 {
@@ -1037,16 +1084,13 @@ sub system_default_install_dir {
   return '/usr';
 }
 
+my $build_gtest = 0;
 if (exists $opts{'gtest'}) {
   my $sanity = 'include/gtest/gtest.h';
 
   if ($opts{'gtest'}) {
     die "ERROR: '$sanity' not found in supplied gtest directory '$opts{'gtest'}'"
       if ! -f File::Spec->catfile($opts{'gtest'}, $sanity);
-
-    # It is expected that the user has already compiled gtest since
-    # they have a custom location in mind...
-    $opts{'gtest-precompiled'} = 1;
 
     env_from_opt('gtest', 'GTEST_ROOT');
 
@@ -1058,18 +1102,22 @@ if (exists $opts{'gtest'}) {
                               $is_windows ? 'googletest-distribution' : ''));
 
     if (-f File::Spec->catfile($sm_src, $sanity)) {
-      $opts{'gtest-precompiled'} = 0;
+      # Check for existing build
+      $build_gtest = ! -d File::Spec->catdir($sm_dir, 'build/install');
       $opts{'gtest'} = $sm_dir;
       # No need to set env. variable with submodule.
     }
     elsif (-f File::Spec->catfile($sys_dir, $sanity)) {
-      $opts{'gtest-precompiled'} = 1;
       $opts{'gtest'} = $sys_dir;
       env_from_opt('gtest', 'GTEST_ROOT');
     }
-    die "ERROR: gtest '$sanity' not found in submodule src '$sm_src' or default install dir '$sys_dir'"
-      if ! $opts{'gtest'};
+    else {
+      die "ERROR: Google Test '$sanity' not found in submodule src '$sm_src' or default install dir '$sys_dir'\nStopped"
+    }
   }
+}
+if ($build_gtest && !$has_cmake) {
+  die "ERROR: Google Test in $opts{'gtest'} must be built but can't find CMake\nStopped";
 }
 
 if (exists $opts{'rapidjson'}) {
@@ -1085,8 +1133,14 @@ if (exists $opts{'rapidjson'}) {
     elsif (-f File::Spec->catfile($sys_dir, $sanity)) {
       $opts{'rapidjson'} = $sys_dir;
     }
-    die "ERROR: rapidjson '$sanity' not found in submodule dir '$sm_dir' or default install dir '$sys_dir'"
-      if ! $opts{'rapidjson'};
+    elsif (exists $defaulted->{'rapidjson'}) {
+      print "RapidJSON '$sanity' not found in submodule dir '$sm_dir' or default install dir '$sys_dir', ' .
+        ' continuing without it.\n";
+      delete $opts{'rapidjson'};
+    }
+    else {
+      die "ERROR: RapidJSON '$sanity' not found in submodule dir '$sm_dir' or default install dir '$sys_dir'\nStopped"
+    }
   }
 }
 
@@ -1128,7 +1182,7 @@ for my $key (keys %optdep) {
       $opts{$key} = $ENV{$optdep{$key}->[0]};
 
       if ($key eq 'java') {
-        ## when the environmental variable JAVA_HOME is set to a JRE location,
+        ## when the environment variable JAVA_HOME is set to a JRE location,
         ## try to resolve JAVA_HOME based on the location of javac
         my $java_home = default_java_home();
         my $jre_h_path = $opts{$key} . '/' . $optdep{'java'}->[1];
@@ -1270,7 +1324,7 @@ sub win32_cmake_arch {
   return ($arch eq 'x64' ? 'x64' : 'Win32');
 }
 
-if ($opts{'security'} && $tests && $opts{'cmake'} && ! $opts{'gtest-precompiled'}) {
+if ($build_gtest) {
   my $cwd = Cwd::getcwd();
   my $build_dir = $opts{'gtest'} . $slash . 'build';
   my $install_dir = $build_dir . $slash . 'install';
@@ -1308,7 +1362,6 @@ if ($opts{'security'} && $tests && $opts{'cmake'} && ! $opts{'gtest-precompiled'
     or die "ERROR '$!': failed to change back to $cwd.\nStopped";
 }
 
-
 if (exists $opts{'jboss'} && !exists $opts{'java'}) {
   die "ERROR: --java is required for --jboss (OpenDDS JMS Provider).\nStopped";
 }
@@ -1319,7 +1372,7 @@ if (exists $opts{'jboss'} && !exists $opts{'ant'}) {
 
 if (exists $opts{'wireshark'} || exists $opts{'wireshark-cmake'}) {
   if (!exists $opts{'glib'}) {
-    die "ERROR: --glib is required for --wireshark and --wireshark-cmake.\nStopped";
+    $opts{'glib'} = '';
   }
 
   if (exists $opts{'wireshark-cmake'}) {
@@ -2034,7 +2087,7 @@ print " to compile ",
   "to set environment\nvariables for future shell sessions.\n";
 if ($is_windows && !$cross_compile) {
   print "Start Visual Studio from this command prompt so that it inherits ",
-    "the correct\nenvironment variables.\n";
+    "the correct\nenvironment variables. Try running \"devenv *.sln\".\n";
 }
 
 sub write_cmake_file {

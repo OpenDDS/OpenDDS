@@ -107,23 +107,23 @@ was built or was acquired:
       - On Linux the default is an empty string as the libraries are in
         the build directory. For Wireshark 3.0 you should set this to `run`.
 
-Glib is also required to build the dissector, so `--glib` must be passed.
+Glib is also required to build the dissector.
 If Wireshark was not built with the system Glib or Glib is not installed,
-the install prefix of Glib must be passed as well:
+the install prefix of Glib must be passed using `--glib`:
  - On Windows this will be something like: `wireshark-win(32|64)-libs-*\gtk2`
  - On macOS it depends on if the built-in dependency script or a package
    manager like Homebrew was used to install Wireshark's dependencies.
  - On the average Linux, it shouldn't be necessary unless you needed to use
    a Glib that is not installed (in `/usr`) to build Wireshark.
 
-For optional sample payload dissection support, RapidJSON must be available
-and `--rapidjson` must be passed. It might already be available if OpenDDS
-was recursively cloned by a git client or RapidJSON is installed in a
-default include location (RapidJSON is header only library).
-If RapidJSON is not installed on the system, it must be downloaded using:
-`git submodule update --init --recursive` or equivalent for your git client
-or manually downloading and placing the
-library at `DDS_ROOT/tools/IntermediateTypeLang/cpp/rapidjson`.
+For optional sample payload dissection support, RapidJSON must be available.
+It might already be available if OpenDDS was recursively cloned by a git client
+or RapidJSON is installed in a default include location (RapidJSON is header
+only library). If RapidJSON is not installed on the system, it must be
+downloaded using: `git submodule update --init --recursive` or equivalent for
+your git client. If OpenDDS isn't a git repository (such as if it was
+downloaded from opendds.org) You can download RapidJSON source and pass it to
+the cofnigure script using `--rapidjson`.
 
 ### Build
 

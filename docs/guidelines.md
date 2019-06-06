@@ -74,6 +74,10 @@ take advantage of Doxygen when writing code in OpenDDS.
   data.
 - Perl is an interpreted language used in the configure script, the tests, and any
   other scripting in OpenDDS codebase.
+- Google Test is required for OpenDDS tests. By default, CMake will be used to
+  build a specific version of Google Test that we have as a submodule. An
+  appropriate prebuilt or system Google Test can also be used. Use `--no-tests`
+  to just build the OpenDDS libraries and the Developer's Guide examples.
 
 See [dependencies.md](dependencies.md) for all dependencies and details on how
 these are used in OpenDDS.
