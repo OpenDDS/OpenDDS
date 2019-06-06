@@ -98,7 +98,7 @@ TEST(RapidJsonTest, SerializeTest)
   sample.bt.ll = -9223372036854775806ll;
   sample.bt.f = 0.00141;
   sample.bt.d = -0.00000141;
-  sample.bt.ld = 1e34;
+  ACE_CDR_LONG_DOUBLE_ASSIGNMENT(sample.bt.ld, 1e34);
   sample.bt.b = false;
   sample.bt.c = '\r';
   sample.bt.str = "The most JSON of rapids";

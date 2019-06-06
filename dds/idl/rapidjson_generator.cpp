@@ -288,11 +288,9 @@ namespace {
       } else if (pt == AST_PredefinedType::PT_longdouble) {
         strm <<
           ip << "if (val.IsNumber()) {\n" <<
-          "#ifdef NONNATIVE_LONGDOUBLE\n" <<
-          ip << "  " << propName << assign_prefix << "static_cast<ACE_CDR::LongDouble::NativeImpl>(val.Get" << rapidJsonType << "())" << assign_suffix << ";\n" <<
-          "#else\n" <<
-          ip << "  " << propName << assign_prefix << "val.Get" << rapidJsonType << "()" << assign_suffix << ";\n" <<
-          "#endif\n" <<
+            ip << "  ACE_CDR::LongDouble temp;\n" <<
+            ip << "  ACE_CDR_LONG_DOUBLE_ASSIGNMENT(temp, val.Get" << rapidJsonType << "());\n" <<
+            ip << "  " << propName << assign_prefix << "temp" << assign_suffix << ";\n" <<
           ip << "}\n";
       } else if (pt == AST_PredefinedType::PT_boolean) {
         strm <<
