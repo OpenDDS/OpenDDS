@@ -140,6 +140,12 @@ namespace {
       } else if (pt == AST_PredefinedType::PT_octet || pt == AST_PredefinedType::PT_ushort) {
         prefix = "static_cast<unsigned int>(";
         suffix = ")";
+      } else if (pt == AST_PredefinedType::PT_longlong) {
+        prefix = "static_cast<int64_t>(";
+        suffix = ")";
+      } else if (pt == AST_PredefinedType::PT_ulonglong) {
+        prefix = "static_cast<uint64_t>(";
+        suffix = ")";
       } else if (rapidJsonType == "Double") {
         prefix = "static_cast<double>(";
         suffix = ")";
