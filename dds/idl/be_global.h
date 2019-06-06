@@ -170,6 +170,7 @@ public:
    */
   bool is_nested_type(AST_Decl* node);
 
+  bool default_nested;
 private:
   const char* filename_;
   // Name of the IDL file we are processing.
@@ -190,6 +191,7 @@ private:
   AST_Annotation_Decl* topic_annotation_;
   AST_Annotation_Decl* key_annotation_;
   AST_Annotation_Decl* nested_annotation_;
+  AST_Annotation_Decl* default_nested_annotation_;
   ///}
 };
 

@@ -36,7 +36,8 @@ using namespace std;
 BE_GlobalData* be_global = 0;
 
 BE_GlobalData::BE_GlobalData()
-  : filename_(0)
+  : default_nested(false)
+  , filename_(0)
   , java_(false)
   , suppress_idl_(false)
   , suppress_typecode_(false)
@@ -48,6 +49,7 @@ BE_GlobalData::BE_GlobalData()
   , topic_annotation_(0)
   , key_annotation_(0)
   , nested_annotation_(0)
+  , default_nested_annotation_(0)
 {
 }
 
@@ -279,6 +281,9 @@ BE_GlobalData::parse_args(long& i, char** av)
   static const char WB_EXPORT_MACRO[] = "--export=";
   static const size_t SZ_WB_EXPORT_MACRO = sizeof(WB_EXPORT_MACRO) - 1;
 
+  static const char DEFAULT_TS_MACRO[] = "--default_nested=";
+  static const size_t SZ_DEFAULT_TS_MACRO = sizeof(DEFAULT_TS_MACRO) - 1;
+
   switch (av[i][1]) {
   case 'o':
     idl_global->append_idl_flag(av[i + 1]);
@@ -349,6 +354,8 @@ BE_GlobalData::parse_args(long& i, char** av)
   case '-':
     if (0 == ACE_OS::strncasecmp(av[i], WB_EXPORT_MACRO, SZ_WB_EXPORT_MACRO)) {
       this->export_macro(av[i] + SZ_WB_EXPORT_MACRO);
+    } else if (0 == ACE_OS::strncasecmp(av[i], DEFAULT_TS_MACRO, SZ_DEFAULT_TS_MACRO)) {
+      istringstream(av[i] + SZ_DEFAULT_TS_MACRO) >> std::boolalpha >> default_nested;
     } else {
       invalid_option(av[i]);
     }
@@ -574,7 +581,9 @@ BE_GlobalData::cache_annotations()
         root->lookup_by_name("::@key"));
     nested_annotation_ = AST_Annotation_Decl::narrow_from_decl(
         root->lookup_by_name("::@nested"));
-  }
+    default_nested_annotation_ = AST_Annotation_Decl::narrow_from_decl(
+        root->lookup_by_name("::@default_nested"));
+ }
 }
 
 bool

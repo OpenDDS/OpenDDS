@@ -69,6 +69,9 @@ BE_post_init(char*[], long)
       "};\n"
       "@annotation nested {\n"
       "};\n"
+      "@annotation default_nested {\n"
+      "boolean value default TRUE;\n"
+      "};\n"
     );
     be_global->cache_annotations();
   }
