@@ -111,7 +111,7 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
   } else if(be_global->is_nested_type(node)) {
     ///Being explicit to prevent any confusion and allow for modification in
     //the future.
-    
+
     /**
      * @TODO: only run is_nested_type(node) and treat_as_topic(*_node) once
      */

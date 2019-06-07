@@ -613,7 +613,7 @@ bool
 BE_GlobalData::is_default_nested(AST_Decl* node)
 {
    AST_Annotation_Appl *default_nested_apply = dynamic_cast<AST_Decl *>(node -> defined_in()) -> annotations().find("::@default_nested");
-  
+
   if(default_nested_apply)
   {
     bool default_nested_apply_value = AST_Annotation_Member::narrow_from_decl ((*default_nested_apply)["value"]) -> value ()->ev ()->u.bval;
@@ -637,7 +637,7 @@ BE_GlobalData::is_topic_type(AST_Decl* node)
           || type->node_type() == AST_Decl::NT_union) {
         return node->annotations().find(topic_annotation_);
       }
-    } 
+    }
   }
   return false;
 }
@@ -655,7 +655,7 @@ BE_GlobalData::has_key(AST_Union* node)
   // Check for @key on the discriminator
   return node && node->disc_annotations().find(key_annotation_);
 }
-  
+
 /**
  * @brief checks to see if we are of type nested
  * @param node the node to investigate
