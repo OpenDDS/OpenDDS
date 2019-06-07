@@ -10,6 +10,7 @@
 #define OPENDDS_RTPS_STUN_H
 
 #include <map>
+#include <vector>
 
 #include "ace/INET_Addr.h"
 #include "dds/DCPS/Serializer.h"
