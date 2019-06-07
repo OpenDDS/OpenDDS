@@ -36,7 +36,7 @@ using namespace std;
 BE_GlobalData* be_global = 0;
 
 BE_GlobalData::BE_GlobalData()
-  : default_nested(false)
+  : default_nested_(true)
   , filename_(0)
   , java_(false)
   , suppress_idl_(false)
@@ -355,7 +355,7 @@ BE_GlobalData::parse_args(long& i, char** av)
     if (0 == ACE_OS::strncasecmp(av[i], WB_EXPORT_MACRO, SZ_WB_EXPORT_MACRO)) {
       this->export_macro(av[i] + SZ_WB_EXPORT_MACRO);
     } else if (0 == ACE_OS::strncasecmp(av[i], DEFAULT_TS_MACRO, SZ_DEFAULT_TS_MACRO)) {
-      istringstream(av[i] + SZ_DEFAULT_TS_MACRO) >> std::boolalpha >> default_nested;
+      istringstream(av[i] + SZ_DEFAULT_TS_MACRO) >> std::boolalpha >> default_nested_;
     } else {
       invalid_option(av[i]);
     }
@@ -586,6 +586,43 @@ BE_GlobalData::cache_annotations()
  }
 }
 
+/**
+ * @brief determines if we should treat a given node as a topic type. This could
+ * mean that it is explicitly a topic type or that @default_nested(FALSE) or
+ * --default_nested = false
+ * @param node the incomming node
+ * @return if type support should be generated
+ * @see BE_GlobalData::is_topic_type(AST_Decl* node)
+ * @see BE_GlobalData::is_default_nested(AST_Decl* node)
+ * @author ceneblock
+ */
+bool BE_GlobalData::treat_as_topic(AST_Decl *node)
+{
+  return is_topic_type(node) || !is_default_nested(node);
+}
+
+/**
+ * @brief determins if a given node is nested by default or not. This may be set
+ * by the module level of @default_nesed or through the --default_nested=
+ * @param node the node to be inspected
+ * @return if the node is default nested or not
+ * @note false means it should be considered nested.
+ * @author ceneblock
+ */
+bool
+BE_GlobalData::is_default_nested(AST_Decl* node)
+{
+   AST_Annotation_Appl *default_nested_apply = dynamic_cast<AST_Decl *>(node -> defined_in()) -> annotations().find("::@default_nested");
+  
+  if(default_nested_apply)
+  {
+    bool default_nested_apply_value = AST_Annotation_Member::narrow_from_decl ((*default_nested_apply)["value"]) -> value ()->ev ()->u.bval;
+    return default_nested_apply_value;
+  }
+
+  return default_nested_;
+}
+
 bool
 BE_GlobalData::is_topic_type(AST_Decl* node)
 {
@@ -600,7 +637,7 @@ BE_GlobalData::is_topic_type(AST_Decl* node)
           || type->node_type() == AST_Decl::NT_union) {
         return node->annotations().find(topic_annotation_);
       }
-    }
+    } 
   }
   return false;
 }

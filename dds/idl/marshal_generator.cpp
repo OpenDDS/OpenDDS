@@ -1664,7 +1664,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     be_global->impl_ << intro << "  return " << expr << ";\n";
   }
 
-  bool is_topic_type = be_global->is_topic_type(node) || (be_global->default_nested == false);
+  bool is_topic_type = be_global->treat_as_topic(node);
   TopicKeys keys(node);
   IDL_GlobalData::DCPS_Data_Type_Info* info = idl_global->is_dcps_type(name);
 
@@ -2175,7 +2175,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
   }
 
   const bool has_key = be_global->has_key(node);
-  const bool is_topic_type = be_global->is_topic_type(node) || (be_global->default_nested == false);
+  const bool is_topic_type = be_global->treat_as_topic(node);
 
   if (!is_topic_type) {
     if (has_key) {

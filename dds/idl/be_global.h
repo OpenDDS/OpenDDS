@@ -12,6 +12,10 @@
 #include "idl_defines.h"
 #include "utl_scoped_name.h"
 
+#include "ast_annotation_member.h"
+#include "utl_string.h"
+#include "ast_enum_val.h"
+
 #include <string>
 #include <sstream>
 #include <set>
@@ -151,10 +155,21 @@ public:
   void cache_annotations();
 
   /**
+   * Determine if a type should be treated like a topic.
+   */
+  bool treat_as_topic(AST_Decl *node);
+
+  /**
+   * Determine if a node should be seen as nested or not.
+   */
+  bool is_default_nested(AST_Decl*);
+
+  /**
    * Check if a type has been declared a topic type.
    */
   bool is_topic_type(AST_Decl* node);
 
+public:
   /**
    * Check if a struct field has been declared a key.
    */
@@ -170,7 +185,7 @@ public:
    */
   bool is_nested_type(AST_Decl* node);
 
-  bool default_nested;
+  bool default_nested_;
 private:
   const char* filename_;
   // Name of the IDL file we are processing.

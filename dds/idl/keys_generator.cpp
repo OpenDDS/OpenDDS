@@ -81,7 +81,7 @@ bool keys_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
   IDL_GlobalData::DCPS_Data_Type_Info* info = idl_global->is_dcps_type(name);
   if (info) {
     key_count = info->key_list_.size();
-  } else if (be_global->is_topic_type(node) || be_global->default_nested == false) {
+  } else if (be_global->treat_as_topic(node)) {
     key_count = keys.count();
   } else {
     return true;
@@ -133,7 +133,7 @@ bool keys_generator::gen_union(
   AST_Union* node, UTL_ScopedName* name,
   const std::vector<AST_UnionBranch*>&, AST_Type*, const char*)
 {
-  if (!be_global->is_topic_type(node)) {
+  if (!be_global->treat_as_topic(node)) {
     return true;
   }
 
