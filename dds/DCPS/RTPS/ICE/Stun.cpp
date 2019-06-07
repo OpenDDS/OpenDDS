@@ -497,7 +497,8 @@ std::vector<AttributeType> Message::unknown_comprehension_required_attributes() 
 {
   std::vector<AttributeType> retval;
 
-  for (const AttributesType::value_type& attribute : attributes_) {
+  for (AttributesType::const_iterator pos = attributes_.begin(), limit = attributes_.end(); pos != limit; ++pos) {
+    const AttributesType::value_type& attribute = *pos;
     switch (attribute.type) {
     case MAPPED_ADDRESS:
     case USERNAME:
