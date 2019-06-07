@@ -375,6 +375,7 @@ TopicKeys::TopicKeys()
   : root_(0),
     root_type_(InvalidType),
     counted_(false),
+    count_(0),
     recursive_(false)
 {
 }
@@ -388,6 +389,7 @@ TopicKeys::TopicKeys(AST_Structure* root, bool recursive)
   : root_(root),
     root_type_(StructureType),
     counted_(false),
+    count_(0),
     recursive_(recursive)
 {
   root_ = root;
@@ -397,6 +399,7 @@ TopicKeys::TopicKeys(AST_Union* root)
   : root_(root),
     root_type_(UnionType),
     counted_(false),
+    count_(0),
     recursive_(false)
 {
   root_ = root;

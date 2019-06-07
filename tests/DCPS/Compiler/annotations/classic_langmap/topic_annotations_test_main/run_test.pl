@@ -1,28 +1,25 @@
 eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
-    & eval 'exec perl -S $0 $argv:q'
-    if 0;
+     & eval 'exec perl -S $0 $argv:q'
+     if 0;
 
-use Env qw(ACE_ROOT);
+use Env (DDS_ROOT);
+use lib "$DDS_ROOT/bin";
+use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-use PerlACE::Run_Test;
+use PerlDDS::Run_Test;
 use strict;
 
-my $name = "topic_annotations_test";
-my $test = new PerlACE::Process($name, "");
-print $test->CommandLine() . "\n";
-$test->Spawn();
-my $result = $test->WaitKill(10);
-if ($result > 0) {
-  print STDERR "ERROR: $name returned $result\n";
-}
+my $name = 'topic_annotations_test';
 
-my $status = 1 if $result;
+PerlDDS::add_lib_path("../${name}_lib");
 
-if ($status) {
-  print STDERR "test FAILED\n";
-}
-else {
-  print "test PASSED\n";
+my $status = 0;
+my $TESTDVR = PerlDDS::create_process ($name);
+
+my $status = $TESTDVR->SpawnWaitKill (300);
+if ($status != 0) {
+    print STDERR "ERROR: $name returned $status\n";
+    $status = 1;
 }
 
 exit $status;
