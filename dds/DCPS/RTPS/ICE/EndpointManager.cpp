@@ -383,8 +383,8 @@ Checklist* EndpointManager::create_checklist(const AgentInfo& remote_agent_info)
   if (pos != deferred_triggered_checks_.end()) {
     const DeferredTriggeredCheckListType& list = pos->second;
 
-    for (DeferredTriggeredCheckListType::const_iterator pos = list.begin(), limit = list.end(); pos != limit; ++pos) {
-      checklist->generate_triggered_check(pos->local_address, pos->remote_address, pos->priority, pos->use_candidate);
+    for (DeferredTriggeredCheckListType::const_iterator pos2 = list.begin(), limit2 = list.end(); pos2 != limit2; ++pos2) {
+      checklist->generate_triggered_check(pos2->local_address, pos2->remote_address, pos2->priority, pos2->use_candidate);
     }
 
     deferred_triggered_checks_.erase(pos);
