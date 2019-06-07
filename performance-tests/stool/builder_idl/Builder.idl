@@ -355,7 +355,8 @@ module Builder {
 
   struct DiscoveryConfig {
     string name;
-    string type;
+    string type; // "rtps" or "repo"
+    string ior; // only used for info "repo", format as URI (e.g. "file://repo.ior")
     unsigned short domain;
   };
 

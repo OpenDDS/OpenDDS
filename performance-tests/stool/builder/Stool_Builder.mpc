@@ -1,4 +1,4 @@
 project: dcpslib, ../stool_builder_idl_lib {
-  dynamicflags  += STOOL_BUILDER_BUILD_DLL
+  dynamicflags += STOOL_BUILDER_BUILD_DLL
 }
 
