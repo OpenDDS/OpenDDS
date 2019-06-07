@@ -153,6 +153,8 @@ public:
     DataLink_rch link_;
   };
 
+  virtual ICE::Endpoint* get_ice_endpoint() { return 0; }
+
 protected:
   TransportImpl(TransportInst& config);
 

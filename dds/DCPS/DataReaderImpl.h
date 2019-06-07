@@ -382,8 +382,8 @@ public:
 
   virtual void dds_demarshal(const ReceivedDataSample& sample,
                              SubscriptionInstance_rch& instance,
-                             bool & is_new_instance,
-                             bool & filtered,
+                             bool& is_new_instance,
+                             bool& filtered,
                              MarshalingType marshaling_type)= 0;
 
   virtual void dispose_unregister(const ReceivedDataSample& sample,
@@ -556,6 +556,8 @@ public:
   virtual void unregister_for_writer(const RepoId& /*participant*/,
                                      const RepoId& /*readerid*/,
                                      const RepoId& /*writerid*/);
+
+  virtual ICE::Endpoint* get_ice_endpoint();
 
 protected:
   virtual void remove_associations_i(const WriterIdSeq& writers, bool callback);

@@ -260,45 +260,6 @@ RtpsUdpDataLink::add_locator(const RepoId& remote_id,
 }
 
 void
-RtpsUdpDataLink::get_locators(const RepoId& local_id,
-                              OPENDDS_SET(ACE_INET_Addr)& addrs) const
-{
-  typedef OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan)::const_iterator iter_t;
-
-  if (local_id == GUID_UNKNOWN) {
-    for (iter_t iter = locators_.begin(); iter != locators_.end(); ++iter) {
-      addrs.insert(iter->second.addr_);
-    }
-    return;
-  }
-
-  const GUIDSeq_var peers = peer_ids(local_id);
-  if (!peers.ptr()) {
-    return;
-  }
-  for (CORBA::ULong i = 0; i < peers->length(); ++i) {
-    const ACE_INET_Addr addr = get_locator(peers[i]);
-    if (addr != ACE_INET_Addr()) {
-      addrs.insert(addr);
-    }
-  }
-}
-
-ACE_INET_Addr
-RtpsUdpDataLink::get_locator(const RepoId& remote_id) const
-{
-  typedef OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan)::const_iterator iter_t;
-  const iter_t iter = locators_.find(remote_id);
-  if (iter == locators_.end()) {
-    const GuidConverter conv(remote_id);
-    ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpDataLink::get_locator_i() - "
-      "no locator found for peer %C\n", OPENDDS_STRING(conv).c_str()));
-    return ACE_INET_Addr();
-  }
-  return iter->second.addr_;
-}
-
-void
 RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
                             bool local_reliable, bool remote_reliable,
                             bool local_durable, bool remote_durable)
@@ -1438,17 +1399,16 @@ RtpsUdpDataLink::send_ack_nacks(RtpsReaderMap::value_type& rr, bool finalFlag)
         ser << nack_frags[i]; // always 4-byte aligned
       }
 
-      const OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan)::const_iterator iter = locators_.find(wi->first);
-      if (iter == locators_.end()) {
+      OPENDDS_SET(ACE_INET_Addr) addrs = get_addresses(rr.first, wi->first);
+      if (!addrs.empty()) {
+        send_strategy()->send_rtps_control(mb_acknack, addrs);
+      } else {
         if (Transport_debug_level) {
           const GuidConverter conv(wi->first);
           ACE_ERROR((LM_ERROR,
                      "(%P|%t) RtpsUdpDataLink::send_heartbeat_replies() - "
                      "no locator for remote %C\n", OPENDDS_STRING(conv).c_str()));
         }
-      } else {
-        send_strategy()->send_rtps_control(mb_acknack,
-                                           iter->second.addr_);
       }
     }
   }
@@ -1977,9 +1937,9 @@ RtpsUdpDataLink::send_nack_replies()
       process_requested_changes(requests, writer, ri->second);
 
       if (!ri->second.requested_changes_.empty()) {
-        const OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan)::const_iterator iter = locators_.find(ri->first);
-        if (iter != locators_.end()) {
-          recipients.insert(iter->second.addr_);
+        OPENDDS_SET(ACE_INET_Addr) addrs = get_addresses(rw->first, ri->first);
+        if (!addrs.empty()) {
+          recipients.insert(addrs.begin(), addrs.end());
           if (Transport_debug_level > 5) {
             const GuidConverter local_conv(rw->first), remote_conv(ri->first);
             ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::send_nack_replies "
@@ -2013,7 +1973,7 @@ RtpsUdpDataLink::send_nack_replies()
       }
     }
 
-    send_nackfrag_replies(writer, gaps, recipients);
+    send_nackfrag_replies(rw, gaps, recipients);
 
     if (!gaps.empty()) {
       if (Transport_debug_level > 5) {
@@ -2035,10 +1995,11 @@ RtpsUdpDataLink::send_nack_replies()
 }
 
 void
-RtpsUdpDataLink::send_nackfrag_replies(RtpsWriter& writer,
+RtpsUdpDataLink::send_nackfrag_replies(RtpsWriterMap::iterator rw_iter,
                                        DisjointSequence& gaps,
                                        OPENDDS_SET(ACE_INET_Addr)& gap_recipients)
 {
+  RtpsWriter& writer = rw_iter->second;
   typedef OPENDDS_MAP(SequenceNumber, DisjointSequence) FragmentInfo;
   OPENDDS_MAP(ACE_INET_Addr, FragmentInfo) requests;
 
@@ -2050,13 +2011,10 @@ RtpsUdpDataLink::send_nackfrag_replies(RtpsWriter& writer,
       continue;
     }
 
-    const OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan)::const_iterator iter =
-      locators_.find(ri->first);
-    if (iter == locators_.end()) {
+    OPENDDS_SET(ACE_INET_Addr) remote_addrs = get_addresses(rw_iter->first, ri->first);
+    if (remote_addrs.empty()) {
       continue;
     }
-
-    const ACE_INET_Addr& remote_addr = iter->second.addr_;
 
     typedef OPENDDS_MAP(SequenceNumber, RTPS::FragmentNumberSet)::iterator rf_iter;
     const rf_iter rf_end = ri->second.requested_frags_.end();
@@ -2064,12 +2022,15 @@ RtpsUdpDataLink::send_nackfrag_replies(RtpsWriter& writer,
 
       const SequenceNumber& seq = rf->first;
       if (writer.send_buff_->contains(seq)) {
-        FragmentInfo& fi = requests[remote_addr];
-        fi[seq].insert(rf->second.bitmapBase.value, rf->second.numBits,
-                       rf->second.bitmap.get_buffer());
+        for (OPENDDS_SET(ACE_INET_Addr)::const_iterator pos = remote_addrs.begin(), limit = remote_addrs.end();
+             pos != limit; ++pos) {
+          FragmentInfo& fi = requests[*pos];
+          fi[seq].insert(rf->second.bitmapBase.value, rf->second.numBits,
+                         rf->second.bitmap.get_buffer());
+        }
       } else {
         gaps.insert(seq);
-        gap_recipients.insert(remote_addr);
+        gap_recipients.insert(remote_addrs.begin(), remote_addrs.end());
       }
     }
     ri->second.requested_frags_.clear();
@@ -2121,8 +2082,8 @@ RtpsUdpDataLink::send_directed_nack_replies(const RepoId& writerId,
                                             const RepoId& readerId,
                                             ReaderInfo& reader)
 {
-  const OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan)::const_iterator iter = locators_.find(readerId);
-  if (iter == locators_.end()) {
+  OPENDDS_SET(ACE_INET_Addr) addrs = get_addresses(writerId, readerId);
+  if (addrs.empty()) {
     return;
   }
 
@@ -2131,7 +2092,6 @@ RtpsUdpDataLink::send_directed_nack_replies(const RepoId& writerId,
   reader.requested_changes_.clear();
 
   DisjointSequence gaps;
-  ACE_INET_Addr addr = iter->second.addr_;
 
   if (!requests.empty()) {
     if (writer.send_buff_.is_nil() || writer.send_buff_->empty()) {
@@ -2141,7 +2101,7 @@ RtpsUdpDataLink::send_directed_nack_replies(const RepoId& writerId,
       SingleSendBuffer& sb = *writer.send_buff_;
       ACE_GUARD(TransportSendBuffer::LockType, guard, sb.strategy_lock());
       const RtpsUdpSendStrategy::OverrideToken ot =
-        send_strategy()->override_destinations(addr);
+        send_strategy()->override_destinations(addrs);
       for (size_t i = 0; i < ranges.size(); ++i) {
         if (Transport_debug_level > 5) {
           ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::send_directed_nack_replies "
@@ -2163,7 +2123,7 @@ RtpsUdpDataLink::send_directed_nack_replies(const RepoId& writerId,
   ACE_Message_Block* mb_gap =
     marshal_gaps(writerId, readerId, gaps, writer.durable_);
   if (mb_gap) {
-    send_strategy()->send_rtps_control(*mb_gap, addr);
+    send_strategy()->send_rtps_control(*mb_gap, addrs);
     mb_gap->release();
   }
 }
@@ -2346,7 +2306,7 @@ RtpsUdpDataLink::durability_resend(TransportQueueElement* element)
 {
   ACE_Message_Block* msg = const_cast<ACE_Message_Block*>(element->msg());
   send_strategy()->send_rtps_control(*msg,
-                                    get_locator(element->subscription_id()));
+                                     get_addresses(element->publication_id(), element->subscription_id()));
 }
 
 void
@@ -2363,7 +2323,7 @@ RtpsUdpDataLink::send_durability_gaps(const RepoId& writer,
   std::memcpy(info_dst.guidPrefix, reader.guidPrefix, sizeof(GuidPrefix_t));
   ser << info_dst;
   mb.cont(marshal_gaps(writer, reader, gaps));
-  send_strategy()->send_rtps_control(mb, get_locator(reader));
+  send_strategy()->send_rtps_control(mb, get_addresses(writer, reader));
   mb.cont()->release();
 }
 
@@ -2419,12 +2379,10 @@ RtpsUdpDataLink::send_heartbeats()
       const ri_iter end = rw->second.remote_readers_.end();
       for (ri_iter ri = rw->second.remote_readers_.begin(); ri != end; ++ri) {
         if (has_data || !ri->second.handshake_done_) {
-          const OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan)::const_iterator iter = locators_.find(ri->first);
-          if (iter != locators_.end()) {
-            recipients.insert(iter->second.addr_);
-            if (final && !ri->second.handshake_done_) {
-              final = false;
-            }
+          OPENDDS_SET(ACE_INET_Addr) addrs = get_addresses(rw->first, ri->first);
+          recipients.insert(addrs.begin(), addrs.end());
+          if (final && !ri->second.handshake_done_) {
+            final = false;
           }
         }
         if (!ri->second.durable_data_.empty()) {
@@ -2449,9 +2407,9 @@ RtpsUdpDataLink::send_heartbeats()
             if (ri->second.durable_data_.rbegin()->first > durable_max) {
               durable_max = ri->second.durable_data_.rbegin()->first;
             }
-            const OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan)::const_iterator iter = locators_.find(ri->first);
-            if (iter != locators_.end()) {
-              recipients.insert(iter->second.addr_);
+            OPENDDS_SET(ACE_INET_Addr) addrs = get_addresses(rw->first, ri->first);
+            if (!addrs.empty()) {
+              recipients.insert(addrs.begin(), addrs.end());
             }
           }
         }
@@ -2578,7 +2536,10 @@ RtpsUdpDataLink::send_directed_heartbeats(OPENDDS_VECTOR(RTPS::HeartBeatSubmessa
           Serializer ser(mb.get(), false, Serializer::ALIGN_CDR);
           ser << idst;
           ser << *it;
-          send_strategy()->send_rtps_control(*mb, locators_[ri->first].addr_);
+          OPENDDS_SET(ACE_INET_Addr) addrs = get_addresses(rw->first, ri->first);
+          if (!addrs.empty()) {
+            send_strategy()->send_rtps_control(*mb, addrs);
+          }
         }
       }
       std::iter_swap(it, --last);
@@ -2645,8 +2606,7 @@ RtpsUdpDataLink::send_heartbeats_manual(const TransportSendControlElement* tsce)
   const RepoId pub_id = tsce->publication_id();
 
   // Populate the recipients.
-  OPENDDS_SET(ACE_INET_Addr) recipients;
-  get_locators(pub_id, recipients);
+  OPENDDS_SET(ACE_INET_Addr) recipients = get_addresses(pub_id);
   if (recipients.empty()) {
     return;
   }
@@ -2960,6 +2920,78 @@ OpenDDS::DCPS::RtpsUdpDataLink::receive_strategy()
   return static_cast<OpenDDS::DCPS::RtpsUdpReceiveStrategy*>(receive_strategy_.in());
 }
 
+OPENDDS_SET(ACE_INET_Addr)
+OpenDDS::DCPS::RtpsUdpDataLink::get_addresses(const RepoId& local, const RepoId& remote) const {
+  OPENDDS_SET(ACE_INET_Addr) retval;
+
+  accumulate_addresses(local, remote, retval);
+
+  return retval;
+}
+
+OPENDDS_SET(ACE_INET_Addr)
+OpenDDS::DCPS::RtpsUdpDataLink::get_addresses(const RepoId& local) const {
+  OPENDDS_SET(ACE_INET_Addr) retval;
+
+  const GUIDSeq_var peers = peer_ids(local);
+  if (peers.ptr()) {
+    for (CORBA::ULong i = 0; i < peers->length(); ++i) {
+      accumulate_addresses(local, peers[i], retval);
+    }
+  }
+
+  return retval;
+}
+
+void
+OpenDDS::DCPS::RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
+                                                     OPENDDS_SET(ACE_INET_Addr)& addresses) const {
+  assert(local != GUID_UNKNOWN);
+  assert(remote != GUID_UNKNOWN);
+
+  ACE_INET_Addr normal_addr;
+  ACE_INET_Addr ice_addr;
+  ACE_INET_Addr relay_addr;
+
+  typedef OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan)::const_iterator iter_t;
+  iter_t pos = locators_.find(remote);
+  if (pos != locators_.end()) {
+    normal_addr = pos->second.addr_;
+  }
+
+#if OPENDDS_SECURITY
+  ICE::Endpoint* endpoint = get_ice_endpoint();
+  if (endpoint) {
+    ice_addr = ICE::Agent::instance()->get_address(endpoint, local, remote);
+  }
+#endif
+
+  relay_addr = config().rtps_relay_address();
+
+  if (ice_addr == ACE_INET_Addr()) {
+    if (normal_addr != ACE_INET_Addr()) {
+      addresses.insert(normal_addr);
+    }
+    if (relay_addr != ACE_INET_Addr()) {
+      addresses.insert(relay_addr);
+    }
+    return;
+  }
+
+  if (ice_addr != normal_addr) {
+    addresses.insert(ice_addr);
+    return;
+  }
+
+  if (normal_addr != ACE_INET_Addr()) {
+    addresses.insert(normal_addr);
+  }
+}
+
+ICE::Endpoint*
+OpenDDS::DCPS::RtpsUdpDataLink::get_ice_endpoint() const {
+  return this->impl().get_ice_endpoint();
+}
 
 } // namespace DCPS
 } // namespace OpenDDS

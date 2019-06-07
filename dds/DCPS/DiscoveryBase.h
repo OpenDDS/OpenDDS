@@ -19,6 +19,7 @@
 
 #ifdef OPENDDS_SECURITY
 #include "dds/DdsSecurityCoreC.h"
+#include "dds/DCPS/ICE/Ice.h"
 #endif
 
 #include "ace/Select_Reactor.h"
@@ -120,12 +121,18 @@ namespace OpenDDS {
       struct DiscoveredSubscription {
         DiscoveredSubscription()
         : bit_ih_(DDS::HANDLE_NIL)
+#ifdef OPENDDS_SECURITY
+        , have_ice_agent_info_(false)
+#endif
         {
         }
 
         explicit DiscoveredSubscription(const OpenDDS::DCPS::DiscoveredReaderData& r)
         : reader_data_(r)
         , bit_ih_(DDS::HANDLE_NIL)
+#ifdef OPENDDS_SECURITY
+        , have_ice_agent_info_(false)
+#endif
         {
         }
 
@@ -134,6 +141,8 @@ namespace OpenDDS {
 
 #ifdef OPENDDS_SECURITY
         DDS::Security::EndpointSecurityAttributes security_attribs_;
+        bool have_ice_agent_info_;
+        ICE::AgentInfo ice_agent_info_;
 #endif
 
       };
@@ -146,12 +155,18 @@ namespace OpenDDS {
       struct DiscoveredPublication {
         DiscoveredPublication()
         : bit_ih_(DDS::HANDLE_NIL)
+#ifdef OPENDDS_SECURITY
+        , have_ice_agent_info_(false)
+#endif
         {
         }
 
         explicit DiscoveredPublication(const OpenDDS::DCPS::DiscoveredWriterData& w)
         : writer_data_(w)
         , bit_ih_(DDS::HANDLE_NIL)
+#ifdef OPENDDS_SECURITY
+        , have_ice_agent_info_(false)
+#endif
         {
         }
 
@@ -160,6 +175,8 @@ namespace OpenDDS {
 
 #ifdef OPENDDS_SECURITY
         DDS::Security::EndpointSecurityAttributes security_attribs_;
+        bool have_ice_agent_info_;
+        ICE::AgentInfo ice_agent_info_;
 #endif
 
       };
@@ -420,7 +437,7 @@ namespace OpenDDS {
         ACE_GUARD(ACE_Thread_Mutex, g, lock_);
         LocalPublicationIter iter = local_publications_.find(publicationId);
         if (iter != local_publications_.end()) {
-          if (DDS::RETCODE_OK == remove_publication_i(publicationId)) {
+          if (DDS::RETCODE_OK == remove_publication_i(publicationId, iter->second)) {
             OPENDDS_STRING topic_name = topic_names_[iter->second.topic_id_];
             local_publications_.erase(publicationId);
             typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
@@ -548,8 +565,7 @@ namespace OpenDDS {
         ACE_GUARD(ACE_Thread_Mutex, g, lock_);
         LocalSubscriptionIter iter = local_subscriptions_.find(subscriptionId);
         if (iter != local_subscriptions_.end()) {
-          if (DDS::RETCODE_OK == remove_subscription_i(subscriptionId)
-              /*subscriptions_writer_.write_unregister_dispose(subscriptionId)*/) {
+          if (DDS::RETCODE_OK == remove_subscription_i(subscriptionId, iter->second)) {
             OPENDDS_STRING topic_name = topic_names_[iter->second.topic_id_];
             local_subscriptions_.erase(subscriptionId);
             typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
@@ -580,12 +596,20 @@ namespace OpenDDS {
 
     protected:
       struct LocalEndpoint {
-        LocalEndpoint() : topic_id_(DCPS::GUID_UNKNOWN), sequence_(DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {}
+        LocalEndpoint() : topic_id_(DCPS::GUID_UNKNOWN), sequence_(DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN())
+#ifdef OPENDDS_SECURITY
+          , have_ice_agent_info(false)
+#endif
+        {}
         DCPS::RepoId topic_id_;
         DCPS::TransportLocatorSeq trans_info_;
         RepoIdSet matched_endpoints_;
         DCPS::SequenceNumber sequence_;
         RepoIdSet remote_opendds_associations_;
+#ifdef OPENDDS_SECURITY
+        bool have_ice_agent_info;
+        ICE::AgentInfo ice_agent_info;
+#endif
       };
 
       struct LocalPublication : LocalEndpoint {
@@ -681,7 +705,8 @@ namespace OpenDDS {
                                                        const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN)
       { ACE_UNUSED_ARG(reader); return DDS::RETCODE_OK; }
 
-      virtual DDS::ReturnCode_t remove_publication_i(const RepoId& publicationId) = 0;
+      virtual DDS::ReturnCode_t remove_publication_i(const RepoId& publicationId,
+                                                     LocalPublication& /*pub*/) = 0;
 
       virtual DDS::ReturnCode_t add_subscription_i(const DCPS::RepoId& /*rid*/,
                                                    LocalSubscription& /*pub*/)
@@ -692,7 +717,7 @@ namespace OpenDDS {
                                                         const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN)
       { ACE_UNUSED_ARG(reader); return DDS::RETCODE_OK; }
 
-      virtual DDS::ReturnCode_t remove_subscription_i(const RepoId& subscriptionId) = 0;
+      virtual DDS::ReturnCode_t remove_subscription_i(const RepoId& subscriptionId, LocalSubscription& /*sub*/) = 0;
 
       void match_endpoints(DCPS::RepoId repoId, const TopicDetails& td,
                            bool remove = false)
@@ -729,6 +754,7 @@ namespace OpenDDS {
             lsi->second.remote_opendds_associations_.erase(removing);
             lsi->second.subscription_->remove_associations(writer_seq,
                                                            false /*notify_lost*/);
+            remove_assoc_i(remove_from, lsi->second, removing);
             // Update writer
             write_subscription_data(remove_from, lsi->second);
           }
@@ -743,9 +769,19 @@ namespace OpenDDS {
             lpi->second.remote_opendds_associations_.erase(removing);
             lpi->second.publication_->remove_associations(reader_seq,
                                                           false /*notify_lost*/);
+            remove_assoc_i(remove_from, lpi->second, removing);
           }
         }
       }
+
+      virtual void add_assoc_i(const DCPS::RepoId& /* local_guid */, const LocalPublication& /* lpub */,
+                               const DCPS::RepoId& /* remote_guid */, const DiscoveredSubscription& /* dsub */) {}
+      virtual void remove_assoc_i(const DCPS::RepoId& /* local_guid */, const LocalPublication& /* lpub */,
+                                  const DCPS::RepoId& /* remote_guid */) {}
+      virtual void add_assoc_i(const DCPS::RepoId& /* local_guid */, const LocalSubscription& /* lsub */,
+                               const DCPS::RepoId& /* remote_guid */, const DiscoveredPublication& /* dpub */) {}
+      virtual void remove_assoc_i(const DCPS::RepoId& /* local_guid */, const LocalSubscription& /* lsub */,
+                                  const DCPS::RepoId& /* remote_guid */) {}
 
 #ifdef OPENDDS_SECURITY
       virtual DDS::Security::DatawriterCryptoHandle
@@ -956,6 +992,14 @@ namespace OpenDDS {
           if (reader_local) {
             call_reader = lsi->second.matched_endpoints_.insert(writer).second;
           }
+
+          if (writer_local && !reader_local) {
+            add_assoc_i(writer, lpi->second, reader, dsi->second);
+          }
+          if (reader_local && !writer_local) {
+            add_assoc_i(reader, lsi->second, writer, dpi->second);
+          }
+
           if (!call_writer && !call_reader) {
             return; // nothing more to do
           }
@@ -1106,6 +1150,12 @@ namespace OpenDDS {
           if (reader_local) {
             lsi->second.matched_endpoints_.erase(writer);
             lsi->second.remote_opendds_associations_.erase(writer);
+          }
+          if (writer_local && !reader_local) {
+            remove_assoc_i(writer, lpi->second, reader);
+          }
+          if (reader_local && !writer_local) {
+            remove_assoc_i(reader, lsi->second, writer);
           }
           ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
           if (writer_local) {

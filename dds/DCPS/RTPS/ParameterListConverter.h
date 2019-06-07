@@ -10,6 +10,8 @@
 #include "dds/DCPS/RTPS/rtps_export.h"
 #include "dds/DCPS/RTPS/RtpsCoreC.h"
 
+#include "dds/DCPS/RTPS/ICE/Ice.h"
+
 #ifdef OPENDDS_SECURITY
 #include "dds/DCPS/RTPS/RtpsSecurityC.h"
 #endif
@@ -20,8 +22,8 @@ namespace OpenDDS {
 namespace RTPS {
 
 #ifdef OPENDDS_SECURITY
-struct DiscoveredWriterData_SecurityWrapper;
-struct DiscoveredReaderData_SecurityWrapper;
+struct DiscoveredPublication_SecurityWrapper;
+struct DiscoveredSubscription_SecurityWrapper;
 #endif
 
 namespace ParameterListConverter {
@@ -120,7 +122,7 @@ int to_param_list(const DCPS::DiscoveredReaderData& reader_data,
 
 OpenDDS_Rtps_Export
 int from_param_list(const ParameterList& param_list,
-                   DCPS::DiscoveredReaderData& reader_data);
+                    DCPS::DiscoveredReaderData& reader_data);
 
 #ifdef OPENDDS_SECURITY
 // DDS::Security::EndpointSecurityInfo
@@ -143,28 +145,40 @@ OpenDDS_Rtps_Export
 int from_param_list(const ParameterList& param_list,
                     DDS::Security::DataTags& tags);
 
-// DiscoveredWriterData_SecurityWrapper
+// DiscoveredPublication_SecurityWrapper
 
 OpenDDS_Rtps_Export
-int to_param_list(const DiscoveredWriterData_SecurityWrapper& wrapper,
+int to_param_list(const DiscoveredPublication_SecurityWrapper& wrapper,
                   ParameterList& param_list,
                   bool map = false /*map IPV4 to IPV6 addr*/);
 
 OpenDDS_Rtps_Export
 int from_param_list(const ParameterList& param_list,
-                   DiscoveredWriterData_SecurityWrapper& wrapper);
+                    DiscoveredPublication_SecurityWrapper& wrapper);
 
-// DiscoveredReaderData_SecurityWrapper
+// DiscoveredSubscription_SecurityWrapper
 
 OpenDDS_Rtps_Export
-int to_param_list(const DiscoveredReaderData_SecurityWrapper& wrapper,
+int to_param_list(const DiscoveredSubscription_SecurityWrapper& wrapper,
                   ParameterList& param_list,
                   bool map = false /*map IPV4 to IPV6 addr*/);
 
 OpenDDS_Rtps_Export
 int from_param_list(const ParameterList& param_list,
-                   DiscoveredReaderData_SecurityWrapper& wrapper);
+                    DiscoveredSubscription_SecurityWrapper& wrapper);
 #endif
+
+
+// Extensions for ICE
+
+OpenDDS_Rtps_Export
+int to_param_list(const ICE::AgentInfo& agent_info,
+                  ParameterList& param_list);
+
+OpenDDS_Rtps_Export
+int from_param_list(const ParameterList& param_list,
+                    ICE::AgentInfo& agent_info,
+                    bool& have_agent_info);
 
 }
 }

@@ -346,15 +346,8 @@ StaticEndpointManager::add_publication_i(const RepoId& writerid,
 }
 
 DDS::ReturnCode_t
-StaticEndpointManager::remove_publication_i(const RepoId& writerid)
+StaticEndpointManager::remove_publication_i(const RepoId& writerid, LocalPublication& pub)
 {
-  LocalPublicationMap::const_iterator lp_pos = local_publications_.find(writerid);
-  if (lp_pos == local_publications_.end()) {
-    return DDS::RETCODE_ERROR;
-  }
-
-  const LocalPublication& pub = lp_pos->second;
-
   EndpointRegistry::WriterMapType::const_iterator pos = registry_.writer_map.find(writerid);
   if (pos == registry_.writer_map.end()) {
     return DDS::RETCODE_ERROR;
@@ -422,15 +415,9 @@ StaticEndpointManager::add_subscription_i(const RepoId& readerid,
 }
 
 DDS::ReturnCode_t
-StaticEndpointManager::remove_subscription_i(const RepoId& readerid)
+StaticEndpointManager::remove_subscription_i(const RepoId& readerid,
+                                             LocalSubscription& sub)
 {
-  LocalSubscriptionMap::const_iterator ls_pos = local_subscriptions_.find(readerid);
-  if (ls_pos == local_subscriptions_.end()) {
-    return DDS::RETCODE_ERROR;
-  }
-
-  const LocalSubscription& sub = ls_pos->second;
-
   EndpointRegistry::ReaderMapType::const_iterator pos = registry_.reader_map.find(readerid);
   if (pos == registry_.reader_map.end()) {
     return DDS::RETCODE_ERROR;

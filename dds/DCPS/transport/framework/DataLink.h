@@ -39,6 +39,11 @@ ACE_END_VERSIONED_NAMESPACE_DECL
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
+
+namespace ICE {
+  class Endpoint;
+}
+
 namespace DCPS {
 
 
@@ -254,6 +259,8 @@ public:
   void set_scheduling_release(bool scheduling_release);
 
   virtual void send_final_acks (const RepoId& readerid);
+
+  virtual ICE::Endpoint* get_ice_endpoint() const { return 0; }
 
 protected:
 
