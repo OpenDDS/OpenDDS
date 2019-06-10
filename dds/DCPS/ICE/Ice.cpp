@@ -60,7 +60,7 @@ make_server_reflexive_candidate(const ACE_INET_Addr& address, const ACE_INET_Add
 }
 
 Candidate
-make_peer_reflexive_candidate(const ACE_INET_Addr& address, const ACE_INET_Addr& base, const ACE_INET_Addr& server_address, uint32_t priority)
+make_peer_reflexive_candidate(const ACE_INET_Addr& address, const ACE_INET_Addr& base, const ACE_INET_Addr& server_address, ACE_UINT32 priority)
 {
   Candidate candidate;
   candidate.address = address;
@@ -72,7 +72,7 @@ make_peer_reflexive_candidate(const ACE_INET_Addr& address, const ACE_INET_Addr&
 }
 
 Candidate
-make_peer_reflexive_candidate(const ACE_INET_Addr& address, uint32_t priority, size_t q)
+make_peer_reflexive_candidate(const ACE_INET_Addr& address, ACE_UINT32 priority, size_t q)
 {
   Candidate candidate;
   candidate.address = address;
