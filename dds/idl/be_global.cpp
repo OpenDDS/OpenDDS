@@ -670,7 +670,7 @@ BE_GlobalData::is_nested_type(AST_Decl* node)
 
   bool rv = false;
 
-  AST_Annotation_Appl *nested_apply = nullptr;
+  AST_Annotation_Appl *nested_apply = NULL;
   if (node) {
     if (node->node_type() == AST_Decl::NT_struct) {
       nested_apply = node->annotations().find(nested_annotation_);
