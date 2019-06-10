@@ -598,7 +598,7 @@ BE_GlobalData::cache_annotations()
  */
 bool BE_GlobalData::treat_as_topic(AST_Decl *node)
 {
-  return is_topic_type(node) || !is_default_nested(node);
+  return is_topic_type(node) || !is_default_nested(node) || !is_nested_type(AST_Decl* node);
 }
 
 /**
