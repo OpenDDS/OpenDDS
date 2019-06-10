@@ -25,7 +25,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace STUN {
-namespace DCPS = OpenDDS::DCPS;
 
 enum Class {
   REQUEST          = 0,
@@ -43,7 +42,7 @@ enum Family {
   IPv6 = 0x02
 };
 
-const uint32_t MAGIC_COOKIE = 0x2112A442;
+const ACE_UINT32 MAGIC_COOKIE = 0x2112A442;
 
 enum AttributeType {
   MAPPED_ADDRESS     = 0x0001,
@@ -71,29 +70,29 @@ struct Attribute {
   std::string username; // USERNAME
   union {
     unsigned char message_integrity[20]; // MESSAGE_INTEGRITY
-    uint32_t fingerprint; // FINGERPRINT
-    uint32_t priority; // PRIORITY
+    ACE_UINT32 fingerprint; // FINGERPRINT
+    ACE_UINT32 priority; // PRIORITY
     ACE_UINT64 ice_tie_breaker; // ICE_CONTROLLED, ICE_CONTROLLING
   };
   struct {
-    uint16_t code;
+    ACE_UINT16 code;
     std::string reason;
   } error;
   std::vector<AttributeType> unknown_attributes;
 
-  uint16_t unknown_length;
+  ACE_UINT16 unknown_length;
 
-  uint16_t length() const;
+  ACE_UINT16 length() const;
 };
 
 Attribute make_mapped_address(const ACE_INET_Addr& addr);
 Attribute make_username(const std::string& username);
 Attribute make_message_integrity();
-Attribute make_error_code(uint16_t code, const std::string& reason);
+Attribute make_error_code(ACE_UINT16 code, const std::string& reason);
 Attribute make_unknown_attributes(const std::vector<AttributeType>& unknown_attributes);
 Attribute make_xor_mapped_address(const ACE_INET_Addr& addr);
-Attribute make_unknown_attribute(uint16_t type, uint16_t length);
-Attribute make_priority(uint32_t priority);
+Attribute make_unknown_attribute(ACE_UINT16 type, ACE_UINT16 length);
+Attribute make_priority(ACE_UINT32 priority);
 Attribute make_use_candidate();;
 
 Attribute make_fingerprint();
@@ -141,29 +140,29 @@ struct Message {
   {
     return attributes_.end();
   }
-  uint16_t length() const
+  ACE_UINT16 length() const
   {
     return length_;
   }
-  uint16_t length_for_message_integrity() const
+  ACE_UINT16 length_for_message_integrity() const
   {
     return length_for_message_integrity_;
   }
 
   std::vector<AttributeType> unknown_comprehension_required_attributes() const;
   bool get_mapped_address(ACE_INET_Addr& address) const;
-  bool get_priority(uint32_t& priority) const;
+  bool get_priority(ACE_UINT32& priority) const;
   bool get_username(std::string& username) const;
   bool has_message_integrity() const;
   bool verify_message_integrity(const std::string& password) const;
   void compute_message_integrity(const std::string& password, unsigned char message_integrity[20]) const;
   bool has_error_code() const;
-  uint16_t get_error_code() const;
+  ACE_UINT16 get_error_code() const;
   std::string get_error_reason() const;
   bool has_unknown_attributes() const;
   std::vector<AttributeType> get_unknown_attributes() const;
   bool has_fingerprint() const;
-  uint32_t compute_fingerprint() const;
+  ACE_UINT32 compute_fingerprint() const;
   bool has_ice_controlled() const;
   bool has_ice_controlling() const;
   bool has_use_candidate() const;
@@ -173,8 +172,8 @@ struct Message {
 
 private:
   AttributesType attributes_;
-  uint16_t length_;
-  uint16_t length_for_message_integrity_;
+  ACE_UINT16 length_;
+  ACE_UINT16 length_for_message_integrity_;
 };
 
 OpenDDS_Rtps_Export bool operator>>(DCPS::Serializer& serializer, Message& message);

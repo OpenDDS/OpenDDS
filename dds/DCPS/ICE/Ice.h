@@ -50,7 +50,7 @@ struct OpenDDS_Dcps_Export Candidate {
   // Transport - UDP or TCP
   std::string foundation;
   // Component ID
-  uint32_t priority;
+  ACE_UINT32 priority;
   CandidateType type;
   // Related Address and Port
   // Extensibility Parameters
@@ -72,8 +72,8 @@ bool candidates_equal(const Candidate& x, const Candidate& y);
 
 Candidate make_host_candidate(const ACE_INET_Addr& address);
 Candidate make_server_reflexive_candidate(const ACE_INET_Addr& address, const ACE_INET_Addr& base, const ACE_INET_Addr& server_address);
-Candidate make_peer_reflexive_candidate(const ACE_INET_Addr& address, const ACE_INET_Addr& base, const ACE_INET_Addr& server_address, uint32_t priority);
-Candidate make_peer_reflexive_candidate(const ACE_INET_Addr& address, uint32_t priority, size_t q);
+Candidate make_peer_reflexive_candidate(const ACE_INET_Addr& address, const ACE_INET_Addr& base, const ACE_INET_Addr& server_address, ACE_UINT32 priority);
+Candidate make_peer_reflexive_candidate(const ACE_INET_Addr& address, ACE_UINT32 priority, size_t q);
 
 struct OpenDDS_Dcps_Export AgentInfo {
   typedef std::vector<Candidate> CandidatesType;

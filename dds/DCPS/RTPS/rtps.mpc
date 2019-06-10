@@ -10,6 +10,11 @@ project(OpenDDS_Rtps): dcpslib, install, rtps_optional_safety {
     ICE
   }
 
+  Header_Files {
+    .
+    ICE
+  }
+
   specific {
     install_dir = dds/DCPS/RTPS
   }
