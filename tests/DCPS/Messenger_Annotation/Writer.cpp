@@ -84,12 +84,12 @@ Writer::svc()
     ws->detach_condition(condition);
 
     // Write samples
-    if(messageType_ == Writer::message_t::messenger)
+    if(messageType_ == Writer::messenger)
     {
       std::cout << "Write messenger()\n";
       writeMessenger();
     }
-    else if(messageType_ == Writer::message_t::data)
+    else if(messageType_ == Writer::data)
     {
       std::cout << "Write data()\n";
       writeData();

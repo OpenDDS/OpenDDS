@@ -84,21 +84,39 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
     IDL_GlobalData::DCPS_Data_Type_Info* info = idl_global->is_dcps_type(name);
     if (info) {
       key_count = info->key_list_.size();
-    } else if (be_global->is_topic_type(struct_node)) {
+    } else if (be_global->treat_as_topic(struct_node)) {
 
-      ///Go ahead and bail if we see bad stuff
+      ///Go ahead and warn if we see bad stuff
       be_global->is_nested_type(node);
 
       key_count = TopicKeys(struct_node).count();
+    } else if(be_global->is_nested_type(node)) {
+      ///Being explicit to prevent any confusion and allow for modification in
+      //the future.
+
+      /**
+       * @TODO: only run is_nested_type(node) and treat_as_topic(*_node) once
+       */
+      return true;
+
     } else {
       return true;
     }
-  } else if (be_global->is_topic_type(union_node)) {
+  } else if (be_global->treat_as_topic(union_node)) {
 
-    ///Go ahead and bail if we see bad stuff
+    ///Go ahead and warn if we see bad stuff
     be_global->is_nested_type(node);
 
     key_count = be_global->has_key(union_node) ? 1 : 0;
+  } else if(be_global->is_nested_type(node)) {
+    ///Being explicit to prevent any confusion and allow for modification in
+    //the future.
+
+    /**
+     * @TODO: only run is_nested_type(node) and treat_as_topic(*_node) once
+     */
+    return true;
+
   } else {
     return true;
   }
@@ -295,8 +313,12 @@ namespace java_ts_generator {
   void generate(AST_Structure* node) {
     UTL_ScopedName* name = node->name();
 
-    if (!(idl_global->is_dcps_type(name) || be_global->is_topic_type(node))) {
-      ///Go ahead and bail if we see bad stuff
+    /**
+     * @TODO: better understand this and how it applies to nested
+     * @author ceneblock
+     */
+    if (!(idl_global->is_dcps_type(name) || be_global->treat_as_topic(node))) {
+      ///Go ahead and warn if we see bad stuff
       be_global->is_nested_type(node);
       return;
     }

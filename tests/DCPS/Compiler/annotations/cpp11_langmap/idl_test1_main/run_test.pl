@@ -2,26 +2,24 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
      & eval 'exec perl -S $0 $argv:q'
      if 0;
 
-# -*- perl -*-
-
 use Env (DDS_ROOT);
 use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
+use strict;
 
-$status = 0;
+my $name = 'cpp11_annotations_idl_test1';
 
-PerlDDS::add_lib_path('../idl_test1_lib');
+PerlDDS::add_lib_path("../idl_test1_lib");
 
-$TESTDVR = PerlDDS::create_process ("cpp11_annotations_idl_test1");
+my $status = 0;
+my $TESTDVR = PerlDDS::create_process ($name);
 
-$status = $TESTDVR->SpawnWaitKill (300);
-
+my $status = $TESTDVR->SpawnWaitKill (300);
 if ($status != 0) {
-    print STDERR "ERROR: cpp11_annotations_idl_test1 returned $status\n";
+    print STDERR "ERROR: $name returned $status\n";
     $status = 1;
 }
-
 
 exit $status;

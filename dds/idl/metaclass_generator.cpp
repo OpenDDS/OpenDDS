@@ -421,7 +421,7 @@ namespace {
 
     size_t key_count = 0;
     IDL_GlobalData::DCPS_Data_Type_Info* info = 0;
-    bool is_topic_type = be_global->is_topic_type(node);
+    bool is_topic_type = be_global->treat_as_topic(node);
     TopicKeys keys;
     if (struct_node) {
       info = idl_global->is_dcps_type(name);
