@@ -669,22 +669,27 @@ BE_GlobalData::is_nested_type(AST_Decl* node)
   bool isTopic = is_topic_type(node);
 
   bool rv = false;
+
+  AST_Annotation_Appl *nested_apply = nullptr;
   if (node) {
     if (node->node_type() == AST_Decl::NT_struct) {
-      rv = node->annotations().find(nested_annotation_);
+      nested_apply = node->annotations().find(nested_annotation_);
     } else if (node->node_type() == AST_Decl::NT_union) {
-      rv = node->annotations().find(nested_annotation_);
+      nested_apply = node->annotations().find(nested_annotation_);
     } else if (node->node_type() == AST_Decl::NT_typedef) {
       AST_Type* type = dynamic_cast<AST_Type*>(node)->unaliased_type();
       if (type->node_type() == AST_Decl::NT_struct
           || type->node_type() == AST_Decl::NT_union) {
-        rv = node->annotations().find(nested_annotation_);
+        nested_apply = node->annotations().find(nested_annotation_);
       }
     }
   }
-  if(rv && isTopic)
-  {
+  if(nested_apply && isTopic) {
     idl_global->err()->misc_warning("Mixing of @topic and @nested annotation is discouraged", node);
+  }
+
+  if(nested_apply) {
+    rv = AST_Annotation_Member::narrow_from_decl ((*nested_apply)["value"]) -> value ()->ev ()->u.bval;
   }
 
   return rv;
