@@ -25,7 +25,7 @@ struct CandidatePair {
   Candidate const remote;
   FoundationType const foundation;
   bool const local_is_controlling;
-  uint64_t const priority;
+  ACE_UINT64 const priority;
   // 1) set the use_candidate when local is controlling and
   // 2) nominate when the response is successful (controlling and controlled)
   bool const use_candidate;
@@ -43,13 +43,13 @@ struct CandidatePair {
   }
 
 private:
-  uint64_t compute_priority();
+  ACE_UINT64 compute_priority();
 };
 
 struct ConnectivityCheck {
   ConnectivityCheck(const CandidatePair& a_candidate_pair,
                     const AgentInfo& a_local_agent_info, const AgentInfo& a_remote_agent_info,
-                    uint64_t a_ice_tie_breaker, const ACE_Time_Value& a_expiration_date);
+                    ACE_UINT64 a_ice_tie_breaker, const ACE_Time_Value& a_expiration_date);
 
   const CandidatePair& candidate_pair() const
   {
@@ -136,7 +136,7 @@ struct Checklist : public Task {
   void unfreeze(const FoundationType& a_foundation);
 
   void generate_triggered_check(const ACE_INET_Addr& a_local_address, const ACE_INET_Addr& a_remote_address,
-                                uint32_t a_priority,
+                                ACE_UINT32 a_priority,
                                 bool a_use_candidate);
 
   void success_response(const ACE_INET_Addr& a_local_address,

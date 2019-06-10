@@ -30,13 +30,13 @@ struct Checklist;
 struct DeferredTriggeredCheck {
   ACE_INET_Addr local_address;
   ACE_INET_Addr remote_address;
-  uint32_t priority;
+  ACE_UINT32 priority;
   bool use_candidate;
   ACE_Time_Value expiration_date;
 
   DeferredTriggeredCheck(const ACE_INET_Addr& a_local_address,
                          const ACE_INET_Addr& a_remote_address,
-                         uint32_t a_priority,
+                         ACE_UINT32 a_priority,
                          bool a_use_candidate,
                          const ACE_Time_Value& a_expiration_date)
   : local_address(a_local_address)

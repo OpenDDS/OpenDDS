@@ -16,7 +16,7 @@ namespace ICE {
 
 #if OPENDDS_SECURITY
 
-const uint32_t PEER_REFLEXIVE_PRIORITY = (110 << 24) + (65535 << 8) + ((256 - 1) << 0);  // No local preference, component 1.
+const ACE_UINT32 PEER_REFLEXIVE_PRIORITY = (110 << 24) + (65535 << 8) + ((256 - 1) << 0);  // No local preference, component 1.
 
 CandidatePair::CandidatePair(const Candidate& a_local,
                              const Candidate& a_remote,
@@ -41,16 +41,16 @@ bool CandidatePair::operator==(const CandidatePair& other) const
     this->use_candidate == other.use_candidate;
 }
 
-uint64_t CandidatePair::compute_priority()
+ACE_UINT64 CandidatePair::compute_priority()
 {
-  uint64_t const g = local_is_controlling ? local.priority : remote.priority;
-  uint64_t const d = local_is_controlling ? remote.priority : local.priority;
+  ACE_UINT64 const g = local_is_controlling ? local.priority : remote.priority;
+  ACE_UINT64 const d = local_is_controlling ? remote.priority : local.priority;
   return (std::min(g,d) << 32) + 2 * std::max(g,d) + (g > d ? 1 : 0);
 }
 
 ConnectivityCheck::ConnectivityCheck(const CandidatePair& a_candidate_pair,
                                      const AgentInfo& a_local_agent_info, const AgentInfo& a_remote_agent_info,
-                                     uint64_t a_ice_tie_breaker, const ACE_Time_Value& a_expiration_date)
+                                     ACE_UINT64 a_ice_tie_breaker, const ACE_Time_Value& a_expiration_date)
   : candiate_pair_(a_candidate_pair), cancelled_(false), expiration_date_(a_expiration_date)
 {
   request_.class_ = STUN::REQUEST;
@@ -323,7 +323,7 @@ void Checklist::remove_from_in_progress(const CandidatePair& a_candidate_pair)
 }
 
 void Checklist::generate_triggered_check(const ACE_INET_Addr& local_address, const ACE_INET_Addr& remote_address,
-                                         uint32_t priority,
+                                         ACE_UINT32 priority,
                                          bool use_candidate)
 {
   Candidate remote;
@@ -519,7 +519,7 @@ void Checklist::success_response(const ACE_INET_Addr& local_address,
 
   if (!get_local_candidate(mapped_address, local)) {
     // 7.2.5.3.1 Discovering Peer-Reflexive Candidates
-    uint32_t priority;
+    ACE_UINT32 priority;
     // Our message, no need to check.
     cc.request().get_priority(priority);
     local = make_peer_reflexive_candidate(mapped_address, cp.local.base, cp.remote.address, priority);

@@ -412,8 +412,8 @@ bool operator<<(DCPS::Serializer& serializer, const Attribute& attribute)
   break;
 
   case ERROR_CODE: {
-    uint8_t class_ = attribute.error.code / 100;
-    uint8_t num = attribute.error.code % 100;
+    ACE_UINT8 class_ = attribute.error.code / 100;
+    ACE_UINT8 num = attribute.error.code % 100;
     serializer << static_cast<ACE_CDR::Char>(0);
     serializer << static_cast<ACE_CDR::Char>(0);
     serializer << static_cast<ACE_CDR::Char>(class_);

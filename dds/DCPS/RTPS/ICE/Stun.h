@@ -103,7 +103,7 @@ bool operator>>(DCPS::Serializer& serializer, Attribute& attribute);
 bool operator<<(DCPS::Serializer& serializer, const Attribute& attribute);
 
 struct TransactionId {
-  uint8_t data[12];
+  ACE_UINT8 data[12];
   bool operator<(const TransactionId& other) const;
   bool operator==(const TransactionId& other) const;
   bool operator!=(const TransactionId& other) const;
