@@ -1,6 +1,6 @@
 project: dcps_rtps_udp, dcps_rapidjson {
-  after    += Stool_Idl Stool_Builder_Idl_Json Stool_Core_Idl_Json Stool_Builder Stool_Builder_Idl OpenDDS_InfoRepoDiscovery
-  libs     += Stool_Idl Stool_Builder_Idl_Json Stool_Core_Idl_Json Stool_Builder Stool_Builder_Idl OpenDDS_InfoRepoDiscovery
+  after    += Stool_Idl Stool_Builder_Idl_Json Stool_Core_Idl_Json Stool_Builder Stool_Builder_Idl
+  libs     += Stool_Idl Stool_Builder_Idl_Json Stool_Core_Idl_Json Stool_Builder Stool_Builder_Idl
   expand(STOOL_ROOT) {
     $STOOL_ROOT
     $(DDS_ROOT)/performance-tests/stool

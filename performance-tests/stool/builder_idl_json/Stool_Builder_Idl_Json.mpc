@@ -1,5 +1,5 @@
 project: dcpslib, dcps_rapidjson, ../stool_builder_idl_lib {
-  dcps_ts_flags += -Wb,no_default_gen \
+  dcps_ts_flags += -Sdefault \
                    -Wb,export_include=../builder_idl/Stool_Builder_Export.h \
                    -Wb,export_macro=Stool_Builder_Export \
                    -Wb,cpp_include=$(STOOL_BUILDER_ROOT)/builder_idl/BuilderC.h \
