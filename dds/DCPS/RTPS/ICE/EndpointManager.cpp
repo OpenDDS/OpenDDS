@@ -516,7 +516,7 @@ void EndpointManager::request(const ACE_INET_Addr& a_local_address,
     return;
   }
 
-  uint32_t priority;
+  ACE_UINT32 priority;
 
   if (!a_message.get_priority(priority)) {
     ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) EndpointManager::request: WARNING No PRIORITY attribute\n")));
