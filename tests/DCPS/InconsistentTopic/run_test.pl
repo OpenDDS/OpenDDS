@@ -13,12 +13,10 @@ use strict;
 
 my $test = new PerlDDS::TestFramework();
 
-$test->process('sub', 'subscriber');
-$test->process('pub', 'publisher');
+$test->process('pubsub', 'pubsub');
 
 $test->setup_discovery();
 
-$test->start_process('pub');
-$test->start_process('sub');
+$test->start_process('pubsub');
 
 exit $test->finish(300);

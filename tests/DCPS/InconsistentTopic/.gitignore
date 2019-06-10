@@ -1,8 +1,6 @@
 /MessengerTypeSupportImpl.cpp
 /MessengerTypeSupport.idl
-/publisher
 /MessengerTypeSupportImpl.h
-/subscriber
 /MessengerTypeSupportC.h
 /MessengerC.h
 /MessengerTypeSupportS.h
@@ -15,3 +13,4 @@
 /MessengerTypeSupportS.cpp
 /MessengerS.inl
 /MessengerS.cpp
+/pubsub
