@@ -50,7 +50,7 @@ my %platforminfo =
                                  16 => 'vc10', 17 => 'vc11', 18 => 'vc12',
                                  19 => 'vc14', 19.1 => 'vs2017',
                                  19.2 => 'vs2019'},
-               'cl_archs' = {'x64' => 1, 'Win32' => 1, 'ARM64' => 0, 'ARM' => 0}, # 1 if supported
+               'cl_archs' => {'x64' => 1, 'Win32' => 1, 'ARM64' => 0, 'ARM' => 0}, # 1 if supported
               },
    'macosx' => {
                 'compilers' => ['clang++'],
