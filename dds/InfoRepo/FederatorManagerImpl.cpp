@@ -712,7 +712,7 @@ ManagerImpl::initialize()
     // Install ior multicast handler.
     //
     // Get reactor instance from TAO.
-    ACE_Reactor *reactor = this->orb_->orb_core()->reactor();
+    ACE_Reactor* reactor = this->orb_->orb_core()->reactor();
 
     // See if the -ORBMulticastDiscoveryEndpoint option was specified.
     ACE_CString mde(this->orb_->orb_core()->orb_params()->mcast_discovery_endpoint());

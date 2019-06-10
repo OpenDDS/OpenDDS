@@ -1015,8 +1015,8 @@ protected:
 
   virtual void dds_demarshal(const OpenDDS::DCPS::ReceivedDataSample& sample,
                              OpenDDS::DCPS::SubscriptionInstance_rch& instance,
-                             bool & just_registered,
-                             bool & filtered,
+                             bool& just_registered,
+                             bool& filtered,
                              OpenDDS::DCPS::MarshalingType marshaling_type)
   {
     unique_ptr<MessageTypeWithAllocator> data(new (*data_allocator()) MessageTypeWithAllocator);
@@ -1611,8 +1611,8 @@ void store_instance_data(
                          unique_ptr<MessageTypeWithAllocator> instance_data,
                          const OpenDDS::DCPS::DataSampleHeader& header,
                          OpenDDS::DCPS::SubscriptionInstance_rch& instance_ptr,
-                         bool & just_registered,
-                         bool & filtered)
+                         bool& just_registered,
+                         bool& filtered)
 {
   const bool is_dispose_msg =
     header.message_id_ == OpenDDS::DCPS::DISPOSE_INSTANCE ||

@@ -19,6 +19,11 @@
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
+
+namespace ICE {
+  class Endpoint;
+}
+
 namespace DCPS {
 
 /**
@@ -59,6 +64,8 @@ public:
   virtual void unregister_for_writer(const RepoId& /*participant*/,
                                      const RepoId& /*readerid*/,
                                      const RepoId& /*writerid*/) { }
+
+  virtual ICE::Endpoint* get_ice_endpoint() = 0;
 };
 
 } // namespace DCPS

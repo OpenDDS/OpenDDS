@@ -1,13 +1,7 @@
-feature(!no_itl) {
+feature(!no_rapidjson) : rapidjson {
   includes += $(DDS_ROOT)/tools/IntermediateTypeLang/cpp
-
-  expand(RAPIDJSON_ROOT) {
-    $RAPIDJSON_ROOT
-    $(DDS_ROOT)/tools/IntermediateTypeLang/cpp/rapidjson
-  }
-  includes += $(RAPIDJSON_ROOT)/include
 }
 
-feature(no_itl) {
+feature(no_rapidjson) {
   macros += NO_ITL
 }

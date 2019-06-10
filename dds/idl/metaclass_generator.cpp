@@ -40,16 +40,20 @@ namespace {
 bool metaclass_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
   const std::vector<AST_EnumVal*>& contents, const char*)
 {
-  ContentSubscriptionGuard csg(!be_global->v8());
+  ContentSubscriptionGuard csg(!(be_global->v8() || be_global->rapidjson()));
   NamespaceGuard ng;
-  std::string decl = "const char* gen_" + scoped_helper(name, "_") + "_names[]";
-  be_global->header_ << "extern " << decl << ";\n";
-  be_global->impl_ << decl << " = {\n";
+  std::string array_decl = "const char* gen_" + scoped_helper(name, "_") + "_names[]";
+  std::string size_decl = "const size_t gen_" + scoped_helper(name, "_") + "_names_size";
+  std::string decl_prefix = ((be_global->export_macro() == "") ? std::string("extern ") : (std::string(be_global->export_macro().c_str()) + " extern "));
+  be_global->header_ << decl_prefix << array_decl << ";\n";
+  be_global->header_ << decl_prefix << size_decl << ";\n";
+  be_global->impl_ << array_decl << " = {\n";
   for (size_t i = 0; i < contents.size(); ++i) {
     be_global->impl_ << "  \"" << contents[i]->local_name()->get_string()
       << ((i < contents.size() - 1) ? "\",\n" : "\"\n");
   }
   be_global->impl_ << "};\n";
+  be_global->impl_ << size_decl << " = " << contents.size() << ";\n";
   return true;
 }
 

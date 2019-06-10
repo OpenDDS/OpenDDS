@@ -688,6 +688,24 @@ TransportClient::unregister_for_writer(const RepoId& participant,
   }
 }
 
+ICE::Endpoint*
+TransportClient::get_ice_endpoint()
+{
+  // The one-to-many relationship with impls implies that this should
+  // return a set of endpoints instead of a single endpoint or null.
+  // For now, we will assume a single impl.
+
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, lock_, 0);
+  for (ImplsType::iterator pos = impls_.begin(), limit = impls_.end();
+       pos != limit;
+       ++pos) {
+    ICE::Endpoint* endpoint = (*pos)->get_ice_endpoint();
+    if (endpoint) { return endpoint; }
+  }
+
+  return 0;
+}
+
 bool
 TransportClient::send_response(const RepoId& peer,
                                const DataSampleHeader& header,

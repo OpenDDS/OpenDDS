@@ -10,6 +10,7 @@
 
 #include "ast_visitor.h"
 #include "be_extern.h"
+#include "dds_generator.h"
 
 #include "tao/Basic_Types.h"
 #include "tao/Version.h"
@@ -135,6 +136,7 @@ protected:
   AST_Decl* scope_;
   bool error_;
   bool java_ts_only_;
+  composite_generator gen_target_;
 };
 
 #endif /* dds_visitor_H */

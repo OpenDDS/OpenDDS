@@ -153,9 +153,6 @@ void itl_generator::new_type()
 bool itl_generator::gen_enum(AST_Enum*, UTL_ScopedName* /*name*/,
                              const std::vector<AST_EnumVal*>& contents, const char* repoid)
 {
-  if (!be_global->generate_itl())
-    return true;
-
   new_type();
 
   be_global->itl_ << Open(this)
@@ -197,10 +194,8 @@ bool itl_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* /*name*/,
                                 AST_Type* base,
                                 const char* repoid)
 {
-  if (!be_global->generate_itl())
-    return true;
-
   new_type();
+
   switch (base->node_type()) {
   case AST_Decl::NT_sequence:
     {
@@ -296,13 +291,14 @@ bool itl_generator::gen_struct(AST_Structure* node, UTL_ScopedName*,
                                const std::vector<AST_Field*>& fields,
                                AST_Type::SIZE_TYPE, const char* repoid)
 {
-  if (!be_global->generate_itl())
+  if (!be_global->itl())
     return true;
 
   bool is_topic_type =
     idl_global->is_dcps_type(node->name()) || be_global->is_topic_type(node);
 
   new_type();
+
   be_global->itl_ << Open(this)
                   << Indent(this) << "{\n"
                   << Open(this)
@@ -361,10 +357,8 @@ bool itl_generator::gen_union(AST_Union*, UTL_ScopedName* /*name*/,
                               AST_Type* _d,
                               const char* repoid)
 {
-  if (!be_global->generate_itl())
-    return true;
-
   new_type();
+
   be_global->itl_ << Open(this)
                   << Indent(this) << "{\n"
                   << Open(this)

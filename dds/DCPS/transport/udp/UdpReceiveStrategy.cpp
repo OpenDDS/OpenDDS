@@ -38,7 +38,8 @@ ssize_t
 UdpReceiveStrategy::receive_bytes(iovec iov[],
                                   int n,
                                   ACE_INET_Addr& remote_address,
-                                  ACE_HANDLE /*fd*/)
+                                  ACE_HANDLE /*fd*/,
+                                  bool& /*stop*/)
 {
   const ssize_t ret = this->link_->socket().recv(iov, n, remote_address);
   remote_address_ = remote_address;
