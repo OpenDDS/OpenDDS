@@ -103,15 +103,17 @@ public:
   void add_locator(const RepoId& remote_id, const ACE_INET_Addr& address,
                    bool requires_inline_qos);
 
+  typedef OPENDDS_SET(ACE_INET_Addr) AddrSet;
+
   /// Given a 'local' id and a 'remote' id of a publication or
   /// subscription, return the set of addresses of the remote peers.
-  OPENDDS_SET(ACE_INET_Addr) get_addresses(const RepoId& local, const RepoId& remote) const;
+  AddrSet get_addresses(const RepoId& local, const RepoId& remote) const;
   /// Given a 'local' id, return the set of address for all remote peers.
-  OPENDDS_SET(ACE_INET_Addr) get_addresses(const RepoId& local) const;
+  AddrSet get_addresses(const RepoId& local) const;
 
   // Internal non-locking versions of the above
-  OPENDDS_SET(ACE_INET_Addr) get_addresses_i(const RepoId& local, const RepoId& remote) const;
-  OPENDDS_SET(ACE_INET_Addr) get_addresses_i(const RepoId& local) const;
+  AddrSet get_addresses_i(const RepoId& local, const RepoId& remote) const;
+  AddrSet get_addresses_i(const RepoId& local) const;
 
   void associated(const RepoId& local, const RepoId& remote,
                   bool local_reliable, bool remote_reliable,
@@ -159,7 +161,7 @@ public:
 
 private:
   void get_locators_i(const RepoId& local_id,
-                      OPENDDS_SET(ACE_INET_Addr)& addrs) const;
+                      AddrSet& addrs) const;
 
   bool get_locator_i(const RepoId& remote_id, ACE_INET_Addr& addr) const;
 
@@ -367,7 +369,7 @@ private:
                                   bool durable = false);
 
   void send_nackfrag_replies(RtpsWriter_rch writer, DisjointSequence& gaps,
-                             OPENDDS_SET(ACE_INET_Addr)& gap_recipients);
+                             AddrSet& gap_recipients);
 
   template<typename T, typename FN>
   void datareader_dispatch(const T& submessage, const GuidPrefix_t& src_prefix,
@@ -586,7 +588,7 @@ private:
                           GUID_tKeyLessThan)::const_iterator PeerHandlesCIter;
 #endif
 
-  void accumulate_addresses(const RepoId& local, const RepoId& remote, OPENDDS_SET(ACE_INET_Addr)& addresses) const;
+  void accumulate_addresses(const RepoId& local, const RepoId& remote, AddrSet& addresses) const;
 };
 
 } // namespace DCPS
