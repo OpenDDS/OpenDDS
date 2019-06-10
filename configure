@@ -50,6 +50,7 @@ my %platforminfo =
                                  16 => 'vc10', 17 => 'vc11', 18 => 'vc12',
                                  19 => 'vc14', 19.1 => 'vs2017',
                                  19.2 => 'vs2019'},
+               'cl_archs' = {'x64' => 1, 'Win32' => 1, 'ARM64' => 0, 'ARM' => 0}, # 1 if supported
               },
    'macosx' => {
                 'compilers' => ['clang++'],
@@ -471,13 +472,19 @@ if ($opts{'compiler'} =~ /cl(\.exe)?$/i) {
     $ENV{'PATH'} .= ";$clpath";
   }
 
-  # Have CL Tell Us Its Version
+  # Have CL Tell Us Its Target Architecture and Version
   my ($tmp_fd, $tmp_filename) = File::Temp::tempfile();
   my $cl_check = << "EOF";
 #ifdef _M_X64
 #  define ARCH x64
+#elif defined(_M_IX86)
+#  define ARCH Win32
+#elif defined(_M_ARM64)
+#  define ARCH ARM64
+#elif defined(_M_ARM)
+#  define ARCH ARM
 #else
-#  define ARCH x32
+#  define ARCH Unknown
 #endif
 CL is _MSC_VER ARCH
 EOF
@@ -507,8 +514,14 @@ EOF
   if (!$ver && !$arch) {
     die "cl version probe failed, invalid output from cl\nStopped";
   }
-  if (!($arch eq "x64") && !($arch eq "x32")) {
+  if ($arch eq 'Unknown') {
+    die "cl version probe failed, no known architecture macro was defined\nStopped";
+  }
+  if (!exists $platforminfo{'win32'}->{'cl_archs'}->{$arch}) {
     die "cl version probe failed, invalid architecture \"$arch\"\nStopped";
+  }
+  if (!$platforminfo{'win32'}->{'cl_archs'}->{$arch}) {
+    die "ERROR: Windows for $arch isn't supported\nStopped";
   }
   if (!exists $platforminfo{'win32'}->{'cl_versions'}->{$ver}) {
     die "ERROR: Unknown or unsupported Visual C++ compiler version: $ver\n"
@@ -1343,12 +1356,6 @@ sub win32_cmake_generator {
   return $map{$ver};
 }
 
-sub win32_cmake_arch {
-  my $arch = shift;
-
-  return ($arch eq 'x64' ? 'x64' : 'Win32');
-}
-
 if ($build_gtest) {
   my $cwd = Cwd::getcwd();
   my $build_dir = $opts{'gtest'} . $slash . 'build';
@@ -1358,7 +1365,7 @@ if ($build_gtest) {
     ('-Dgtest_force_shared_crt=ON',
      '-DCMAKE_CXX_FLAGS=/D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING=1',
      '-G', '"' . win32_cmake_generator($opts{'compiler_version'}) . '"',
-     '-A', win32_cmake_arch($opts{'compiler_target_architecture'})) : ();
+     '-A', $opts{'compiler_target_architecture'}) : ();
   my @cmake_cmds = ([$cmake,
                      "-DCMAKE_INSTALL_PREFIX=$install_dir",
                      '-DCMAKE_INSTALL_LIBDIR=lib',
