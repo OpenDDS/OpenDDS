@@ -109,6 +109,10 @@ public:
   /// Given a 'local' id, return the set of address for all remote peers.
   OPENDDS_SET(ACE_INET_Addr) get_addresses(const RepoId& local) const;
 
+  // Internal non-locking versions of the above
+  OPENDDS_SET(ACE_INET_Addr) get_addresses_i(const RepoId& local, const RepoId& remote) const;
+  OPENDDS_SET(ACE_INET_Addr) get_addresses_i(const RepoId& local) const;
+
   void associated(const RepoId& local, const RepoId& remote,
                   bool local_reliable, bool remote_reliable,
                   bool local_durable, bool remote_durable);

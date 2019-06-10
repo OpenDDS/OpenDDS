@@ -1461,7 +1461,8 @@ RtpsUdpDataLink::send_ack_nacks(AckNackTrioVec& ant_vec)
   using namespace RTPS;
   typedef OPENDDS_VECTOR(AckNackTrioVec::iterator) AntVecIterVec;
   typedef OPENDDS_MAP_CMP(RepoId, AntVecIterVec, GUID_tKeyLessThan) AntIterRepoMap;
-  typedef OPENDDS_MAP_CMP(RepoIdPair, AntIterRepoMap, less_RepoIdPair) AntIterMap;
+  typedef std::pair<OPENDDS_SET(ACE_INET_Addr), AntIterRepoMap> AntIterAddrPair;
+  typedef OPENDDS_MAP_CMP(RepoIdPair, AntIterAddrPair, less_RepoIdPair) AntIterMap;
   AntIterMap ant_map;
   for (AckNackTrioVec::iterator it = ant_vec.begin(); it != ant_vec.end(); ++it) {
     OPENDDS_SET(ACE_INET_Addr) addrs = get_addresses(it->reader_guid_, it->writer_guid_);
@@ -1472,12 +1473,13 @@ RtpsUdpDataLink::send_ack_nacks(AckNackTrioVec& ant_vec)
     RepoId dst;
     memcpy(dst.guidPrefix, it->writer_guid_.guidPrefix, sizeof(dst.guidPrefix));
     dst.entityId = ENTITYID_UNKNOWN;
-    ant_map[pair][dst].push_back(it);
+    ant_map[pair].first = addrs;
+    ant_map[pair].second[dst].push_back(it);
   }
 
   for (AntIterMap::const_iterator addr_it = ant_map.begin(); addr_it != ant_map.end(); ++addr_it) {
     size_t size = 0, padding = 0;
-    for (AntIterRepoMap::const_iterator prefix_it = addr_it->second.begin(); prefix_it != addr_it->second.end(); ++prefix_it) {
+    for (AntIterRepoMap::const_iterator prefix_it = addr_it->second.second.begin(); prefix_it != addr_it->second.second.end(); ++prefix_it) {
       gen_find_size(prefix_it->second.front()->info_dst_, size, padding);
       size_t prev_size = size;
       for (AntVecIterVec::const_iterator it = prefix_it->second.begin(); it != prefix_it->second.end(); ++it) {
@@ -1497,7 +1499,7 @@ RtpsUdpDataLink::send_ack_nacks(AckNackTrioVec& ant_vec)
     // byte swapping is handled in the operator<<() implementation
     Serializer ser(&mb_acknack, false, Serializer::ALIGN_CDR);
 
-    for (AntIterRepoMap::const_iterator prefix_it = addr_it->second.begin(); prefix_it != addr_it->second.end(); ++prefix_it) {
+    for (AntIterRepoMap::const_iterator prefix_it = addr_it->second.second.begin(); prefix_it != addr_it->second.second.end(); ++prefix_it) {
       ser << prefix_it->second.front()->info_dst_;
       for (AntVecIterVec::const_iterator it = prefix_it->second.begin(); it != prefix_it->second.end(); ++it) {
         AckNackTrio& trio = **it;
@@ -1510,10 +1512,7 @@ RtpsUdpDataLink::send_ack_nacks(AckNackTrioVec& ant_vec)
       }
     }
 
-    OPENDDS_SET(ACE_INET_Addr) addrs = get_addresses(addr_it->first.first, addr_it->first.second);
-    if (!addrs.empty()) {
-      send_strategy()->send_rtps_control(mb_acknack, addrs);
-    }
+    send_strategy()->send_rtps_control(mb_acknack, addr_it->second.first);
   }
 }
 
@@ -2040,7 +2039,7 @@ RtpsUdpDataLink::send_nack_replies()
       process_requested_changes(requests, writer, ri->second);
 
       if (!ri->second.requested_changes_.empty()) {
-        OPENDDS_SET(ACE_INET_Addr) addrs = get_addresses(rw->first, ri->first);
+        OPENDDS_SET(ACE_INET_Addr) addrs = get_addresses_i(rw->first, ri->first);
         if (!addrs.empty()) {
           recipients.insert(addrs.begin(), addrs.end());
           if (Transport_debug_level > 5) {
@@ -2113,7 +2112,7 @@ RtpsUdpDataLink::send_nackfrag_replies(RtpsWriter_rch writer,
       continue;
     }
 
-    OPENDDS_SET(ACE_INET_Addr) remote_addrs = get_addresses(writer->id_, ri->first);
+    OPENDDS_SET(ACE_INET_Addr) remote_addrs = get_addresses_i(writer->id_, ri->first);
     if (remote_addrs.empty()) {
       continue;
     }
@@ -2184,7 +2183,7 @@ RtpsUdpDataLink::send_directed_nack_replies(const RepoId& writerId,
                                             const RepoId& readerId,
                                             ReaderInfo& reader)
 {
-  OPENDDS_SET(ACE_INET_Addr) addrs = get_addresses(writerId, readerId);
+  OPENDDS_SET(ACE_INET_Addr) addrs = get_addresses_i(writerId, readerId);
   if (addrs.empty()) {
     return;
   }
@@ -2407,7 +2406,7 @@ void
 RtpsUdpDataLink::durability_resend(TransportQueueElement* element)
 {
   ACE_Message_Block* msg = const_cast<ACE_Message_Block*>(element->msg());
-  OPENDDS_SET(ACE_INET_Addr) addrs = get_addresses(element->publication_id(), element->subscription_id());
+  OPENDDS_SET(ACE_INET_Addr) addrs = get_addresses_i(element->publication_id(), element->subscription_id());
   if (addrs.empty()) {
     const GuidConverter conv(element->subscription_id());
     ACE_ERROR((LM_ERROR,
@@ -2432,7 +2431,7 @@ RtpsUdpDataLink::send_durability_gaps(const RepoId& writer,
   std::memcpy(info_dst.guidPrefix, reader.guidPrefix, sizeof(GuidPrefix_t));
   ser << info_dst;
   mb.cont(marshal_gaps(writer, reader, gaps));
-  OPENDDS_SET(ACE_INET_Addr) addrs = get_addresses(writer, reader);
+  OPENDDS_SET(ACE_INET_Addr) addrs = get_addresses_i(writer, reader);
   if (addrs.empty()) {
     const GuidConverter conv(reader);
     ACE_ERROR((LM_ERROR,
@@ -2496,7 +2495,7 @@ RtpsUdpDataLink::send_heartbeats()
       const ri_iter end = rw->second->remote_readers_.end();
       for (ri_iter ri = rw->second->remote_readers_.begin(); ri != end; ++ri) {
         if (has_data || !ri->second.handshake_done_) {
-          OPENDDS_SET(ACE_INET_Addr) addrs = get_addresses(rw->first, ri->first);
+          OPENDDS_SET(ACE_INET_Addr) addrs = get_addresses_i(rw->first, ri->first);
           recipients.insert(addrs.begin(), addrs.end());
             if (is_final && !ri->second.handshake_done_) {
               is_final = false;
@@ -2524,7 +2523,7 @@ RtpsUdpDataLink::send_heartbeats()
             if (ri->second.durable_data_.rbegin()->first > durable_max) {
               durable_max = ri->second.durable_data_.rbegin()->first;
             }
-            OPENDDS_SET(ACE_INET_Addr) addrs = get_addresses(rw->first, ri->first);
+            OPENDDS_SET(ACE_INET_Addr) addrs = get_addresses_i(rw->first, ri->first);
             if (!addrs.empty()) {
               recipients.insert(addrs.begin(), addrs.end());
             }
@@ -2653,7 +2652,7 @@ RtpsUdpDataLink::send_directed_heartbeats(OPENDDS_VECTOR(RTPS::HeartBeatSubmessa
           Serializer ser(mb.get(), false, Serializer::ALIGN_CDR);
           ser << idst;
           ser << *it;
-          OPENDDS_SET(ACE_INET_Addr) addrs = get_addresses(rw->first, ri->first);
+          OPENDDS_SET(ACE_INET_Addr) addrs = get_addresses_i(rw->first, ri->first);
           if (addrs.empty()) {
             const GuidConverter conv(ri->first);
             ACE_ERROR((LM_ERROR,
@@ -2728,7 +2727,7 @@ RtpsUdpDataLink::send_heartbeats_manual(const TransportSendControlElement* tsce)
   const RepoId pub_id = tsce->publication_id();
 
   // Populate the recipients.
-  OPENDDS_SET(ACE_INET_Addr) recipients = get_addresses(pub_id);
+  OPENDDS_SET(ACE_INET_Addr) recipients = get_addresses_i(pub_id);
   if (recipients.empty()) {
     return;
   }
@@ -3047,6 +3046,18 @@ OpenDDS::DCPS::RtpsUdpDataLink::receive_strategy()
 
 OPENDDS_SET(ACE_INET_Addr)
 OpenDDS::DCPS::RtpsUdpDataLink::get_addresses(const RepoId& local, const RepoId& remote) const {
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, OPENDDS_SET(ACE_INET_Addr)());
+  return get_addresses_i(local, remote);
+}
+
+OPENDDS_SET(ACE_INET_Addr)
+OpenDDS::DCPS::RtpsUdpDataLink::get_addresses(const RepoId& local) const {
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, OPENDDS_SET(ACE_INET_Addr)());
+  return get_addresses_i(local);
+}
+
+OPENDDS_SET(ACE_INET_Addr)
+OpenDDS::DCPS::RtpsUdpDataLink::get_addresses_i(const RepoId& local, const RepoId& remote) const {
   OPENDDS_SET(ACE_INET_Addr) retval;
 
   accumulate_addresses(local, remote, retval);
@@ -3055,7 +3066,7 @@ OpenDDS::DCPS::RtpsUdpDataLink::get_addresses(const RepoId& local, const RepoId&
 }
 
 OPENDDS_SET(ACE_INET_Addr)
-OpenDDS::DCPS::RtpsUdpDataLink::get_addresses(const RepoId& local) const {
+OpenDDS::DCPS::RtpsUdpDataLink::get_addresses_i(const RepoId& local) const {
   OPENDDS_SET(ACE_INET_Addr) retval;
 
   const GUIDSeq_var peers = peer_ids(local);
