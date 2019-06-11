@@ -573,6 +573,7 @@ private:
     HeldData held_data_;
   };
   HeldDataDeliveryHandler held_data_delivery_handler_;
+  const size_t max_bundle_size_;
 
 #ifdef OPENDDS_SECURITY
   Security::SecurityConfig_rch security_config_;

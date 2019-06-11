@@ -85,23 +85,22 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
   : DataLink(transport, // 3 data link "attributes", below, are unused
              0,         // priority
              false,     // is_loopback
-             false),    // is_active
-    reactor_task_(reactor_task),
-    multi_buff_(this, config.nak_depth_),
-    best_effort_heartbeat_count_(0),
-    nack_reply_(this, &RtpsUdpDataLink::send_nack_replies,
-                config.nak_response_delay_),
-    heartbeat_reply_(this, &RtpsUdpDataLink::send_heartbeat_replies,
-                     config.heartbeat_response_delay_),
-    heartbeat_(make_rch<HeartBeat>(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::send_heartbeats)),
-    heartbeatchecker_(make_rch<HeartBeat>(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::check_heartbeats)),
-    relay_beacon_(make_rch<HeartBeat>(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::send_relay_beacon)),
+             false)     // is_active
+  , reactor_task_(reactor_task)
+  , multi_buff_(this, config.nak_depth_)
+  , best_effort_heartbeat_count_(0)
+  , nack_reply_(this, &RtpsUdpDataLink::send_nack_replies,
+                config.nak_response_delay_)
+  , heartbeat_reply_(this, &RtpsUdpDataLink::send_heartbeat_replies,
+                     config.heartbeat_response_delay_)
+  , heartbeat_(make_rch<HeartBeat>(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::send_heartbeats))
+  , heartbeatchecker_(make_rch<HeartBeat>(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::check_heartbeats))
+  , relay_beacon_(make_rch<HeartBeat>(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::send_relay_beacon))
+  , held_data_delivery_handler_(this)
+  , max_bundle_size_(config.max_bundle_size_)
 #ifdef OPENDDS_SECURITY
-    held_data_delivery_handler_(this),
-    security_config_(Security::SecurityRegistry::instance()->default_config()),
-    local_crypto_handle_(DDS::HANDLE_NIL)
-#else
-    held_data_delivery_handler_(this)
+  , security_config_(Security::SecurityRegistry::instance()->default_config())
+  , local_crypto_handle_(DDS::HANDLE_NIL)
 #endif
 {
   this->send_strategy_ = make_rch<RtpsUdpSendStrategy>(this, local_prefix);
@@ -1443,6 +1442,11 @@ void
 RtpsUdpDataLink::send_bundled_responses(ResponseVec& responses)
 {
   using namespace RTPS;
+
+  if (responses.empty()) {
+    return;
+  }
+
   typedef OPENDDS_VECTOR(ResponseVec::iterator) ResponseIterVec;
   typedef OPENDDS_MAP_CMP(RepoId, ResponseIterVec, GUID_tKeyLessThan) DestResponseMap;
   typedef OPENDDS_MAP(AddrSet, DestResponseMap) AddrDestResponseMap;
@@ -1472,8 +1476,6 @@ RtpsUdpDataLink::send_bundled_responses(ResponseVec& responses)
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
   };
 
-  const size_t MAX_BUNDLE_SIZE = 1200;
-
   // Build bundles
   typedef OPENDDS_VECTOR(ResponseIterVec) ResponseIterVecVec;
   ResponseIterVecVec response_bundles; // a vector of vectors of iterators pointing to responses
@@ -1501,7 +1503,7 @@ RtpsUdpDataLink::send_bundled_responses(ResponseVec& responses)
           prev_dst = dest_it->first;
         }
         // If adding an INFO_DST prefix bumped us over the limit, push the size difference into the next bundle, reset prev_dst, and keep going
-        if ((size + padding) > MAX_BUNDLE_SIZE) {
+        if ((size + padding) > max_bundle_size_) {
           response_bundles.push_back(ResponseIterVec());
           response_addr_iters.push_back(addr_it);
           response_bundles_sizes.push_back(prev_size + prev_padding);
@@ -1529,7 +1531,7 @@ RtpsUdpDataLink::send_bundled_responses(ResponseVec& responses)
           }
         }
         // If adding the submessage bumped us over the limit, push the size difference into the next bundle, reset prev_dst, and keep going
-        if ((size + padding) > MAX_BUNDLE_SIZE) {
+        if ((size + padding) > max_bundle_size_) {
           response_bundles.push_back(ResponseIterVec());
           response_addr_iters.push_back(addr_it);
           response_bundles_sizes.push_back(prev_size + prev_padding);
@@ -1543,8 +1545,6 @@ RtpsUdpDataLink::send_bundled_responses(ResponseVec& responses)
     }
   }
   response_bundles_sizes.push_back(size + padding);
-
-  assert(response_bundles_sizes.size() == response_bundles.size());
 
   // Allocate buffers, seralize, and send bundles
   prev_dst = no_dst;
