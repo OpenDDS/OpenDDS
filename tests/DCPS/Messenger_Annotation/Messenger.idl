@@ -10,6 +10,11 @@ module Messenger {
 
   typedef char hexadecimal_t[8];
 
+  @nested
+  struct Hidden {
+    string hidden_message;
+  };
+
   enum Base {
     BASE_2,
     BASE_10,
@@ -33,7 +38,7 @@ module Messenger {
     @key long long subject_id;
     string body;
     long   count;
-    @nested Data  base;
+    Data  base;
   };
 };
 

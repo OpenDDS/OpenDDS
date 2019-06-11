@@ -108,17 +108,12 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
     be_global->is_nested_type(node);
 
     key_count = be_global->has_key(union_node) ? 1 : 0;
-  } else if(be_global->is_nested_type(node)) {
-    ///Being explicit to prevent any confusion and allow for modification in
-    //the future.
-
+  } else {
     /**
+     * @NOTE: this falls through if be_global->is_nested_type(node) == true)
      * @TODO: only run is_nested_type(node) and treat_as_topic(*_node) once
      */
-    return true;
-
-  } else {
-    return true;
+  return true;
   }
 
   const std::string cxxName = scoped(name);
