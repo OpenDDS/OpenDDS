@@ -656,14 +656,20 @@ bool BE_GlobalData::treat_as_topic(AST_Decl *node)
 bool
 BE_GlobalData::is_default_nested(AST_Decl* node)
 {
-   AST_Annotation_Appl *default_nested_apply = dynamic_cast<AST_Decl *>(node -> defined_in()) -> annotations().find("::@default_nested");
+  if(node->defined_in()){
 
-  if(default_nested_apply)
-  {
-    bool default_nested_apply_value = AST_Annotation_Member::narrow_from_decl ((*default_nested_apply)["value"]) -> value ()->ev ()->u.bval;
+    ///recurse to the top
+    bool default_nested_apply_value = is_default_nested(dynamic_cast<AST_Decl *>(node -> defined_in()));
+
+    ///check if we have a default value
+    AST_Annotation_Appl *default_nested_apply = dynamic_cast<AST_Decl *>(node -> defined_in()) -> annotations().find("::@default_nested");
+
+    ///if we have a default value, then overwrite the parent's.
+    if(default_nested_apply){
+      default_nested_apply_value = AST_Annotation_Member::narrow_from_decl ((*default_nested_apply)["value"]) -> value ()->ev ()->u.bval;
+    }
     return default_nested_apply_value;
   }
-
   return default_nested_;
 }
 
