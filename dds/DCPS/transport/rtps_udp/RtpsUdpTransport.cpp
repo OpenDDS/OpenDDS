@@ -306,7 +306,8 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
   // detect and report errors during DataReader/Writer setup instead
   // of during association.
 
-  if (!open_appropriate_socket_type(unicast_socket_, config.local_address())) {
+  int protocol_family = PF_UNSPEC;
+  if (!open_appropriate_socket_type(unicast_socket_, config.local_address(), &protocol_family)) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("RtpsUdpTransport::configure_i: open_appropriate_socket_type:")
@@ -314,14 +315,12 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
                       false);
   }
 
-#if defined (ACE_RECVPKTINFO)
-  int sockopt = 1;
-  if (unicast_socket_.set_option(IPPROTO_IP, ACE_RECVPKTINFO, &sockopt, sizeof sockopt) == -1) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("RtpsUdpTransport::configure_i: set_option:")
-                      ACE_TEXT("%m\n")),
-                     false);
+#ifdef ACE_RECVPKTINFO
+  if (protocol_family == PF_INET) {
+    int sockopt = 1;
+    if (unicast_socket_.set_option(IPPROTO_IP, ACE_RECVPKTINFO, &sockopt, sizeof sockopt) == -1) {
+      ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsUdpTransport::configure_i: set_option: %m\n")), false);
+    }
   }
 #endif
 
