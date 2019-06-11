@@ -36,7 +36,8 @@ using namespace std;
 BE_GlobalData* be_global = 0;
 
 BE_GlobalData::BE_GlobalData()
-  : filename_(0)
+  : default_nested_(true)
+  , filename_(0)
   , java_(false)
   , suppress_idl_(false)
   , suppress_typecode_(false)
@@ -49,6 +50,8 @@ BE_GlobalData::BE_GlobalData()
   , language_mapping_(LANGMAP_NONE)
   , topic_annotation_(0)
   , key_annotation_(0)
+  , nested_annotation_(0)
+  , default_nested_annotation_(0)
 {
 }
 
@@ -321,6 +324,9 @@ BE_GlobalData::parse_args(long& i, char** av)
   static const char EXPORT_FLAG[] = "--export=";
   static const size_t EXPORT_FLAG_SIZE = sizeof(EXPORT_FLAG) - 1;
 
+  static const char DEFAULT_TS_MACRO[] = "--default_nested=";
+  static const size_t SZ_DEFAULT_TS_MACRO = sizeof(DEFAULT_TS_MACRO) - 1;
+
   switch (av[i][1]) {
   case 'o':
     idl_global->append_idl_flag(av[i + 1]);
@@ -390,6 +396,8 @@ BE_GlobalData::parse_args(long& i, char** av)
   case '-':
     if (0 == ACE_OS::strncasecmp(av[i], EXPORT_FLAG, EXPORT_FLAG_SIZE)) {
       this->export_macro(av[i] + EXPORT_FLAG_SIZE);
+    } else if (0 == ACE_OS::strncasecmp(av[i], DEFAULT_TS_MACRO, SZ_DEFAULT_TS_MACRO)) {
+      istringstream(av[i] + SZ_DEFAULT_TS_MACRO) >> std::boolalpha >> default_nested_;
     } else {
       invalid_option(av[i]);
     }
@@ -606,7 +614,7 @@ BE_GlobalData::get_include_block(BE_GlobalData::stream_enum_t which)
 }
 
 void
-BE_GlobalData::cache_topic_annotations()
+BE_GlobalData::cache_annotations()
 {
   if (idl_global->idl_version_ >= IDL_VERSION_4) {
     UTL_Scope* root = idl_global->scopes().bottom();
@@ -615,7 +623,48 @@ BE_GlobalData::cache_topic_annotations()
         root->lookup_by_name("::@topic"));
     key_annotation_ = AST_Annotation_Decl::narrow_from_decl(
         root->lookup_by_name("::@key"));
+    nested_annotation_ = AST_Annotation_Decl::narrow_from_decl(
+        root->lookup_by_name("::@nested"));
+    default_nested_annotation_ = AST_Annotation_Decl::narrow_from_decl(
+        root->lookup_by_name("::@default_nested"));
+ }
+}
+
+/**
+ * @brief determines if we should treat a given node as a topic type. This could
+ * mean that it is explicitly a topic type or that @default_nested(FALSE) or
+ * --default_nested = false
+ * @param node the incomming node
+ * @return if type support should be generated
+ * @see BE_GlobalData::is_topic_type(AST_Decl* node)
+ * @see BE_GlobalData::is_default_nested(AST_Decl* node)
+ * @author ceneblock
+ */
+bool BE_GlobalData::treat_as_topic(AST_Decl *node)
+{
+  return is_topic_type(node) || !is_default_nested(node) || !is_nested_type(node);
+}
+
+/**
+ * @brief determins if a given node is nested by default or not. This may be set
+ * by the module level of @default_nesed or through the --default_nested=
+ * @param node the node to be inspected
+ * @return if the node is default nested or not
+ * @note false means it should be considered nested.
+ * @author ceneblock
+ */
+bool
+BE_GlobalData::is_default_nested(AST_Decl* node)
+{
+   AST_Annotation_Appl *default_nested_apply = dynamic_cast<AST_Decl *>(node -> defined_in()) -> annotations().find("::@default_nested");
+
+  if(default_nested_apply)
+  {
+    bool default_nested_apply_value = AST_Annotation_Member::narrow_from_decl ((*default_nested_apply)["value"]) -> value ()->ev ()->u.bval;
+    return default_nested_apply_value;
   }
+
+  return default_nested_;
 }
 
 bool
@@ -650,3 +699,44 @@ BE_GlobalData::has_key(AST_Union* node)
   // Check for @key on the discriminator
   return node && node->disc_annotations().find(key_annotation_);
 }
+
+/**
+ * @brief checks to see if we are of type nested
+ * @param node the node to investigate
+ * @return if we are a nested node or not
+ * @author ceneblock
+ */
+bool
+BE_GlobalData::is_nested_type(AST_Decl* node)
+{
+  ///foolishly assuming that if we will call both in sucession.
+  bool isTopic = is_topic_type(node);
+
+  bool rv = true;
+
+  AST_Annotation_Appl *nested_apply = NULL;
+  if (node) {
+    if (node->node_type() == AST_Decl::NT_struct) {
+      nested_apply = node->annotations().find(nested_annotation_);
+    } else if (node->node_type() == AST_Decl::NT_union) {
+      nested_apply = node->annotations().find(nested_annotation_);
+    } else if (node->node_type() == AST_Decl::NT_typedef) {
+      AST_Type* type = dynamic_cast<AST_Type*>(node)->unaliased_type();
+      if (type->node_type() == AST_Decl::NT_struct
+          || type->node_type() == AST_Decl::NT_union) {
+        nested_apply = node->annotations().find(nested_annotation_);
+      }
+    }
+  }
+  if(nested_apply && isTopic) {
+    idl_global->err()->misc_warning("Mixing of @topic and @nested annotation is discouraged", node);
+  }
+
+  if(nested_apply) {
+    rv = AST_Annotation_Member::narrow_from_decl ((*nested_apply)["value"]) -> value ()->ev ()->u.bval;
+  }
+
+  return rv;
+}
+
+

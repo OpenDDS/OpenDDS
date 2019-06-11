@@ -117,7 +117,7 @@ bool pragmaWarn = false;
  */
 void warnOnPragma()
 {
-  std::cerr << "WARNING: #pragma is discontinued\n" <<
+  std::cerr << "WARNING: #pragma is deprecated\n" <<
                "Use annotations for future uses\n" <<
                "See: https://www.omg.org/spec/DDS-XTypes/About-DDS-XTypes/\n";
 

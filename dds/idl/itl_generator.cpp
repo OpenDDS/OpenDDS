@@ -295,7 +295,7 @@ bool itl_generator::gen_struct(AST_Structure* node, UTL_ScopedName*,
     return true;
 
   bool is_topic_type =
-    idl_global->is_dcps_type(node->name()) || be_global->is_topic_type(node);
+    idl_global->is_dcps_type(node->name()) || be_global->treat_as_topic(node);
 
   new_type();
 
