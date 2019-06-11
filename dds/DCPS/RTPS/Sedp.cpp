@@ -1418,8 +1418,7 @@ Sedp::sub_bit()
 #endif /* DDS_HAS_MINIMUM_BIT */
 
 bool
-Sedp::update_topic_qos(const RepoId& topicId, const DDS::TopicQos& qos,
-                       OPENDDS_STRING& name)
+Sedp::update_topic_qos(const RepoId& topicId, const DDS::TopicQos& qos)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
   OPENDDS_MAP_CMP(RepoId, OPENDDS_STRING, DCPS::GUID_tKeyLessThan)::iterator iter =
@@ -1427,7 +1426,7 @@ Sedp::update_topic_qos(const RepoId& topicId, const DDS::TopicQos& qos,
   if (iter == topic_names_.end()) {
     return false;
   }
-  name = iter->second;
+  const OPENDDS_STRING& name = iter->second;
   TopicDetails& topic = topics_[name];
   using namespace DCPS;
   // If the TOPIC_DATA QoS changed our local endpoints must be resent
