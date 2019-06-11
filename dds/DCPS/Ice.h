@@ -35,7 +35,7 @@ enum CandidateType {
   RELAYED = 0x3,
 };
 
-struct OpenDDS_Dcps_Export Candidate {
+struct Candidate {
   ACE_INET_Addr address;
   // Transport - UDP or TCP
   std::string foundation;
@@ -57,7 +57,7 @@ struct OpenDDS_Dcps_Export Candidate {
   }
 };
 
-struct OpenDDS_Dcps_Export AgentInfo {
+struct AgentInfo {
   typedef std::vector<Candidate> CandidatesType;
   typedef CandidatesType::const_iterator const_iterator;
 
