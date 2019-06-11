@@ -115,6 +115,7 @@ RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
     (fd == link_->unicast_socket().get_handle())
     ? link_->unicast_socket() : link_->multicast_socket();
 #ifdef ACE_LACKS_SENDMSG
+  ACE_UNUSED_ARG(stop);
   char buffer[0x10000];
   ssize_t scatter = socket.recv(buffer, sizeof buffer, remote_address);
   char* iter = buffer;
