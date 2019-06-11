@@ -105,6 +105,10 @@
         ],
         "subscribers": [
           { "name": "subscriber_B1",
+
+            "qos": { "partition": { "name": [ "stool_jfti" ] } },
+            "qos_mask": { "partition": { "has_name": true } },
+
             "datareaders": [
               { "name": "datareader_B1_T1",
                 "topic_name": "topic_T1",
@@ -119,6 +123,10 @@
         ],
         "publishers": [
           { "name": "publisher_B1",
+
+            "qos": { "partition": { "name": [ "stool_jfti" ] } },
+            "qos_mask": { "partition": { "has_name": true } },
+
             "datawriters": [
               { "name": "datawriter_B1_T1",
                 "topic_name": "topic_T1",
@@ -146,6 +154,10 @@
         ],
         "subscribers": [
           { "name": "subscriber_B2",
+
+            "qos": { "partition": { "name": [ "stool_jfti" ] } },
+            "qos_mask": { "partition": { "has_name": true } },
+
             "datareaders": [
               { "name": "datareader_B2_T2",
                 "topic_name": "topic_T2",
@@ -168,6 +180,10 @@
         ],
         "publishers": [
           { "name": "publisher_B2",
+
+            "qos": { "partition": { "name": [ "stool_jfti" ] } },
+            "qos_mask": { "partition": { "has_name": true } },
+
             "datawriters": [
               { "name": "datawriter_B2_T2",
                 "topic_name": "topic_T2",

@@ -100,6 +100,10 @@
         ],
         "subscribers": [
           { "name": "subscriber_C1",
+
+            "qos": { "partition": { "name": [ "stool_jfti" ] } },
+            "qos_mask": { "partition": { "has_name": true } },
+
             "datareaders": [
               { "name": "datareader_C1_T3",
                 "topic_name": "topic_T3",
@@ -122,6 +126,10 @@
         ],
         "publishers": [
           { "name": "publisher_C1",
+
+            "qos": { "partition": { "name": [ "stool_jfti" ] } },
+            "qos_mask": { "partition": { "has_name": true } },
+
             "datawriters": [
               { "name": "datawriter_C1_T3",
                 "topic_name": "topic_T3",
