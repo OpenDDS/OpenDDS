@@ -1454,19 +1454,24 @@ RtpsUdpDataLink::send_bundled_responses(ResponseVec& responses)
 
   const RepoId no_dst = { { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, { { 0, 0, 0 }, 0 } };
 
-  // Sort responses by address set and destination
-  for (ResponseVec::iterator it = responses.begin(); it != responses.end(); ++it) {
-    AddrSet addrs = get_addresses(it->from_guid_, it->to_guid_);
-    if (addrs.empty()) {
-      continue;
-    }
-    if (it->to_guid_.guidPrefix != GUIDPREFIX_UNKNOWN) {
-      RepoId dst;
-      memcpy(dst.guidPrefix, it->to_guid_.guidPrefix, sizeof(dst.guidPrefix));
-      dst.entityId = ENTITYID_UNKNOWN;
-      adr_map[addrs][dst].push_back(it);
-    } else {
-      adr_map[addrs][no_dst].push_back(it);
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    AddrSet addrs;
+    // Sort responses by address set and destination
+    for (ResponseVec::iterator it = responses.begin(); it != responses.end(); ++it) {
+      accumulate_addresses(it->from_guid_, it->to_guid_, addrs);
+      if (addrs.empty()) {
+        continue;
+      }
+      if (it->to_guid_.guidPrefix != GUIDPREFIX_UNKNOWN) {
+        RepoId dst;
+        memcpy(dst.guidPrefix, it->to_guid_.guidPrefix, sizeof(dst.guidPrefix));
+        dst.entityId = ENTITYID_UNKNOWN;
+        adr_map[addrs][dst].push_back(it);
+      } else {
+        adr_map[addrs][no_dst].push_back(it);
+      }
+      addrs.clear();
     }
   }
 
@@ -3150,7 +3155,7 @@ OpenDDS::DCPS::RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const 
 
   ACE_INET_Addr normal_addr;
   ACE_INET_Addr ice_addr;
-  ACE_INET_Addr relay_addr;
+  static const ACE_INET_Addr NO_ADDR;
 
   typedef OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan)::const_iterator iter_t;
   iter_t pos = locators_.find(remote);
@@ -3165,13 +3170,12 @@ OpenDDS::DCPS::RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const 
   }
 #endif
 
-  relay_addr = config().rtps_relay_address();
-
-  if (ice_addr == ACE_INET_Addr()) {
-    if (normal_addr != ACE_INET_Addr()) {
+  if (ice_addr == NO_ADDR) {
+    if (normal_addr != NO_ADDR) {
       addresses.insert(normal_addr);
     }
-    if (relay_addr != ACE_INET_Addr()) {
+    ACE_INET_Addr relay_addr = config().rtps_relay_address();
+    if (relay_addr != NO_ADDR) {
       addresses.insert(relay_addr);
     }
     return;
@@ -3182,7 +3186,7 @@ OpenDDS::DCPS::RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const 
     return;
   }
 
-  if (normal_addr != ACE_INET_Addr()) {
+  if (normal_addr != NO_ADDR) {
     addresses.insert(normal_addr);
   }
 }
