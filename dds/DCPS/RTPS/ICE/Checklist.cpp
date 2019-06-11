@@ -8,6 +8,7 @@
 #include "Checklist.h"
 
 #include "EndpointManager.h"
+#include "Ice.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
