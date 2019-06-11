@@ -33,7 +33,7 @@ RtpsUdpTransport::RtpsUdpTransport(RtpsUdpInst& inst)
 #if defined(OPENDDS_SECURITY)
   , local_crypto_handle_(DDS::HANDLE_NIL)
 #endif
-#if OPENDDS_SECURITY
+#ifdef OPENDDS_SECURITY
   , ice_endpoint_(*this)
 #endif
 {
@@ -51,7 +51,7 @@ RtpsUdpTransport::config() const
 ICE::Endpoint*
 RtpsUdpTransport::get_ice_endpoint()
 {
-#if OPENDDS_SECURITY
+#ifdef OPENDDS_SECURITY
   return (config().use_ice_) ? &ice_endpoint_ : 0;
 #else
   return 0;
@@ -338,7 +338,7 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
 
   create_reactor_task();
 
-#if OPENDDS_SECURITY
+#ifdef OPENDDS_SECURITY
   if (config.use_ice_) {
     ICE::Agent::instance()->add_endpoint(&ice_endpoint_);
     if (reactor()->register_handler(unicast_socket_.get_handle(), &ice_endpoint_,
@@ -370,7 +370,7 @@ RtpsUdpTransport::shutdown_i()
   }
   link_.reset();
 
-#if OPENDDS_SECURITY
+#ifdef OPENDDS_SECURITY
   if(config().use_ice_) {
     ICE::Agent::instance()->remove_endpoint(&ice_endpoint_);
   }
@@ -397,7 +397,7 @@ RtpsUdpTransport::map_ipv4_to_ipv6() const
   return map;
 }
 
-#if OPENDDS_SECURITY
+#ifdef OPENDDS_SECURITY
 int
 RtpsUdpTransport::IceEndpoint::handle_input(ACE_HANDLE /*fd*/)
 {

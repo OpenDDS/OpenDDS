@@ -234,7 +234,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           discovery->spdp_rtps_relay_address(ACE_INET_Addr(it->second.c_str()));
         } else if (name == "SedpRtpsRelayAddress") {
           discovery->sedp_rtps_relay_address(ACE_INET_Addr(it->second.c_str()));
-#if OPENDDS_SECURITY
+#ifdef OPENDDS_SECURITY
         } else if (name == "SedpStunServerAddress") {
           discovery->sedp_stun_server_address(ACE_INET_Addr(it->second.c_str()));
         } else if (name == "UseIce") {

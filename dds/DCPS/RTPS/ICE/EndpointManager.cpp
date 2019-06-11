@@ -19,7 +19,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace ICE {
 
-#if OPENDDS_SECURITY
+#ifdef OPENDDS_SECURITY
 
 EndpointManager::EndpointManager(AgentImpl* a_agent_impl, Endpoint* a_endpoint) :
   agent_impl(a_agent_impl),

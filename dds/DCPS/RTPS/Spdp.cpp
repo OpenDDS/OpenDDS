@@ -1598,7 +1598,7 @@ Spdp::SpdpTransport::write_i()
   }
 
   if (outer_->disco_->spdp_rtps_relay_address() != ACE_INET_Addr()) {
-#if OPENDDS_SECURITY
+#ifdef OPENDDS_SECURITY
     ICE::Endpoint* endpoint = outer_->sedp_.get_ice_endpoint();
     if (endpoint) {
       const ICE::AgentInfo& agent_info = ICE::Agent::instance()->get_local_agent_info(endpoint);
