@@ -6,15 +6,17 @@
 #ifndef OPENDDS_DDS_DCPS_DISCOVERYBASE_H
 #define OPENDDS_DDS_DCPS_DISCOVERYBASE_H
 
-#include "dds/DCPS/Discovery.h"
-#include "dds/DCPS/GuidUtils.h"
-#include "dds/DCPS/DCPS_Utils.h"
-#include "dds/DCPS/DomainParticipantImpl.h"
-#include "dds/DCPS/Marked_Default_Qos.h"
-#include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
-#include "dds/DCPS/Registered_Data_Types.h"
 #include "dds/DCPS/DataReaderImpl_T.h"
+#include "dds/DCPS/DCPS_Utils.h"
+#include "dds/DCPS/Discovery.h"
+#include "dds/DCPS/DomainParticipantImpl.h"
+#include "dds/DCPS/GuidUtils.h"
+#include "dds/DCPS/Marked_Default_Qos.h"
+#include "dds/DCPS/PoolAllocationBase.h"
+#include "dds/DCPS/Registered_Data_Types.h"
+#include "dds/DCPS/SubscriberImpl.h"
+
 #include "dds/DdsDcpsCoreTypeSupportImpl.h"
 
 #ifdef OPENDDS_SECURITY
@@ -118,7 +120,7 @@ namespace OpenDDS {
     class EndpointManager {
     protected:
 
-      struct DiscoveredSubscription {
+      struct DiscoveredSubscription : PoolAllocationBase {
         DiscoveredSubscription()
         : bit_ih_(DDS::HANDLE_NIL)
 #ifdef OPENDDS_SECURITY
@@ -152,7 +154,7 @@ namespace OpenDDS {
 
       typedef typename DiscoveredSubscriptionMap::iterator DiscoveredSubscriptionIter;
 
-      struct DiscoveredPublication {
+      struct DiscoveredPublication : PoolAllocationBase {
         DiscoveredPublication()
         : bit_ih_(DDS::HANDLE_NIL)
 #ifdef OPENDDS_SECURITY
