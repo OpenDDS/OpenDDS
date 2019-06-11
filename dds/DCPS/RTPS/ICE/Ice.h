@@ -22,6 +22,14 @@ namespace ICE {
 
 typedef OPENDDS_VECTOR(ACE_INET_Addr) AddressListType;
 
+bool candidates_equal(const Candidate& x, const Candidate& y);
+bool candidates_sorted(const Candidate& x, const Candidate& y);
+
+Candidate make_host_candidate(const ACE_INET_Addr& address);
+Candidate make_server_reflexive_candidate(const ACE_INET_Addr& address, const ACE_INET_Addr& base, const ACE_INET_Addr& server_address);
+Candidate make_peer_reflexive_candidate(const ACE_INET_Addr& address, const ACE_INET_Addr& base, const ACE_INET_Addr& server_address, uint32_t priority);
+Candidate make_peer_reflexive_candidate(const ACE_INET_Addr& address, uint32_t priority, size_t q);
+
 class OpenDDS_Rtps_Export Endpoint {
 public:
   virtual ~Endpoint() {}

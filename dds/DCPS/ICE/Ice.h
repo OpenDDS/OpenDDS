@@ -14,8 +14,6 @@
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DCPS/GuidUtils.h"
 
-#include <sstream>
-
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
@@ -24,14 +22,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace ICE {
-
-template <typename T>
-std::string stringify(T x)
-{
-  std::stringstream str;
-  str << x;
-  return str.str();
-}
 
 enum AgentType {
   FULL = 0x0,
@@ -66,14 +56,6 @@ struct OpenDDS_Dcps_Export Candidate {
       this->type == other.type;
   }
 };
-
-bool candidates_sorted(const Candidate& x, const Candidate& y);
-bool candidates_equal(const Candidate& x, const Candidate& y);
-
-Candidate make_host_candidate(const ACE_INET_Addr& address);
-Candidate make_server_reflexive_candidate(const ACE_INET_Addr& address, const ACE_INET_Addr& base, const ACE_INET_Addr& server_address);
-Candidate make_peer_reflexive_candidate(const ACE_INET_Addr& address, const ACE_INET_Addr& base, const ACE_INET_Addr& server_address, ACE_UINT32 priority);
-Candidate make_peer_reflexive_candidate(const ACE_INET_Addr& address, ACE_UINT32 priority, size_t q);
 
 struct OpenDDS_Dcps_Export AgentInfo {
   typedef std::vector<Candidate> CandidatesType;

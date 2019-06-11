@@ -8,6 +8,7 @@
 #include "Ice.h"
 
 #include "AgentImpl.h"
+#include "dds/DCPS/SafetyProfileStreams.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -38,7 +39,8 @@ Candidate make_host_candidate(const ACE_INET_Addr& address)
 {
   Candidate candidate;
   candidate.address = address;
-  candidate.foundation += "H" + std::string(address.get_host_addr()) + "U";
+  candidate.foundation = std::string("H") + std::string(address.get_host_addr()) + "U";
+  // See https://tools.ietf.org/html/rfc8445#section-5.1.2.1 for an explanation of the formula below.
   candidate.priority = (126 << 24) + (65535 << 8) + ((256 - 1) << 0); // No local preference, component 1.
   candidate.type = HOST;
   candidate.base = address;
@@ -49,7 +51,8 @@ Candidate make_server_reflexive_candidate(const ACE_INET_Addr& address, const AC
 {
   Candidate candidate;
   candidate.address = address;
-  candidate.foundation += "S" + std::string(base.get_host_addr()) + "_" + std::string(server_address.get_host_addr()) + "U";
+  candidate.foundation = std::string("S") + std::string(base.get_host_addr()) + "_" + std::string(server_address.get_host_addr()) + "U";
+  // See https://tools.ietf.org/html/rfc8445#section-5.1.2.1 for an explanation of the formula below.
   candidate.priority = (100 << 24) + (65535 << 8) + ((256 - 1) << 0); // No local preference, component 1.
   candidate.type = SERVER_REFLEXIVE;
   candidate.base = base;
@@ -60,7 +63,7 @@ Candidate make_peer_reflexive_candidate(const ACE_INET_Addr& address, const ACE_
 {
   Candidate candidate;
   candidate.address = address;
-  candidate.foundation += "P" + std::string(base.get_host_addr()) + "_" + std::string(server_address.get_host_addr()) + "U";
+  candidate.foundation = std::string("P") + std::string(base.get_host_addr()) + "_" + std::string(server_address.get_host_addr()) + "U";
   candidate.priority = priority;
   candidate.type = PEER_REFLEXIVE;
   candidate.base = base;
@@ -71,21 +74,11 @@ Candidate make_peer_reflexive_candidate(const ACE_INET_Addr& address, uint32_t p
 {
   Candidate candidate;
   candidate.address = address;
-  candidate.foundation += "Q" + stringify(q) + "U";
+  candidate.foundation = std::string("Q") + OpenDDS::DCPS::to_dds_string(q) + "U";
   candidate.priority = priority;
   candidate.type = PEER_REFLEXIVE;
   return candidate;
 }
-
-// Candidate make_relayed_candidate(const ACE_INET_Addr& address, const ACE_INET_Addr& server_address) {
-//   Candidate candidate;
-//   candidate.address = address;
-//   candidate.foundation = "R" + std::string(address.get_host_addr()) + "_" + std::string(server_address.get_host_addr()) + "U";
-//   candidate.priority = (0 << 24) + (65535 << 8) + ((256 - 1) << 0); // No local preference, component 1.
-//   candidate.type = RELAYED;
-//   candidate.base = address;
-//   return candidate;
-// }
 
 Agent* Agent::instance()
 {
