@@ -297,14 +297,12 @@ private:
   typedef OPENDDS_MAP_CMP(RepoId, WriterInfo, GUID_tKeyLessThan) WriterInfoMap;
 
   typedef OPENDDS_VECTOR(RTPS::NackFragSubmessage) NackFragSubmessageVec;
-  struct AckNackTrio {
-    RepoId reader_guid_;
-    RepoId writer_guid_;
-    RTPS::InfoDestinationSubmessage info_dst_;
-    RTPS::AckNackSubmessage ack_nack_;
-    NackFragSubmessageVec nack_frag_vec_;
+  struct Response {
+    RepoId from_guid_;
+    RepoId to_guid_;
+    RTPS::Submessage sm_;
   };
-  typedef OPENDDS_VECTOR(AckNackTrio) AckNackTrioVec;
+  typedef OPENDDS_VECTOR(Response) ResponseVec;
 
   class RtpsReader : public RcObject {
   public:
@@ -322,10 +320,10 @@ private:
     bool process_gap_i(const RTPS::GapSubmessage& gap, const RepoId& src);
     bool process_hb_frag_i(const RTPS::HeartBeatFragSubmessage& hb_frag, const RepoId& src);
 
-    void gather_ack_nacks(AckNackTrioVec& ant_vec, bool finalFlag = false);
+    void gather_ack_nacks(ResponseVec& responses, bool finalFlag = false);
 
   protected:
-    void gather_ack_nacks_i(AckNackTrioVec& ant_vec, bool finalFlag = false);
+    void gather_ack_nacks_i(ResponseVec& responses, bool finalFlag = false);
     void generate_nack_frags(NackFragSubmessageVec& nack_frags,
                              WriterInfo& wi, const RepoId& pub_id);
 
@@ -337,7 +335,7 @@ private:
   };
   typedef RcHandle<RtpsReader> RtpsReader_rch;
 
-  void send_ack_nacks(AckNackTrioVec& ant_vec);
+  void send_bundled_responses(ResponseVec& responses);
 
   typedef OPENDDS_MAP_CMP(RepoId, RtpsReader_rch, GUID_tKeyLessThan) RtpsReaderMap;
   RtpsReaderMap readers_;

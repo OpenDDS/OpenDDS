@@ -1217,10 +1217,10 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
     info.ack_pending_ = true;
 
     if (immediate_reply) {
-      AckNackTrioVec ant_vec;
-      gather_ack_nacks_i(ant_vec);
+      ResponseVec responses;
+      gather_ack_nacks_i(responses);
       g.release();
-      link->send_ack_nacks(ant_vec);
+      link->send_bundled_responses(responses);
       return false;
     } else {
       return true; // timer will invoke send_heartbeat_replies()
@@ -1284,14 +1284,14 @@ RtpsUdpDataLink::RtpsReader::should_nack_durable(const WriterInfo& info)
 }
 
 void
-RtpsUdpDataLink::RtpsReader::gather_ack_nacks(AckNackTrioVec& ant_vec, bool finalFlag)
+RtpsUdpDataLink::RtpsReader::gather_ack_nacks(ResponseVec& responses, bool finalFlag)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-  gather_ack_nacks_i(ant_vec, finalFlag);
+  gather_ack_nacks_i(responses, finalFlag);
 }
 
 void
-RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(AckNackTrioVec& ant_vec, bool finalFlag)
+RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(ResponseVec& responses, bool finalFlag)
 {
   using namespace OpenDDS::RTPS;
 
@@ -1408,108 +1408,173 @@ RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(AckNackTrioVec& ant_vec, bool fi
 
       EntityId_t reader_id = id_.entityId, writer_id = wi->first.entityId;
 
-      AckNackTrio temp_trio = {
-        id_,
-        wi->first,
-        {
-          {INFO_DST, FLAG_E, INFO_DST_SZ},
-          {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+      Response response;
+      response.from_guid_ = id_;
+      response.to_guid_ = wi->first;
+      AckNackSubmessage acknack = {
+        {ACKNACK,
+         CORBA::Octet(FLAG_E | (final ? FLAG_F : 0)),
+         0 /*length*/},
+        id_.entityId,
+        wi->first.entityId,
+        { // SequenceNumberSet: acking bitmapBase - 1
+          {ack.getHigh(), ack.getLow()},
+          num_bits, bitmap
         },
-        {
-          {ACKNACK,
-           CORBA::Octet(FLAG_E | (final ? FLAG_F : 0)),
-           0 /*length*/},
-          id_.entityId,
-          wi->first.entityId,
-          { // SequenceNumberSet: acking bitmapBase - 1
-            {ack.getHigh(), ack.getLow()},
-            num_bits, bitmap
-          },
-          {++wi->second.acknack_count_}
-        },
-        NackFragSubmessageVec()
+        {++wi->second.acknack_count_}
       };
+      response.sm_.acknack_sm(acknack);
 
-      ant_vec.push_back(temp_trio);
-      AckNackTrio& trio = ant_vec.back();
+      responses.push_back(response);
 
-      std::memcpy(trio.info_dst_.guidPrefix, wi->first.guidPrefix, sizeof(GuidPrefix_t));
-      generate_nack_frags(trio.nack_frag_vec_, wi->second, wi->first);
-      for (size_t i = 0; i < trio.nack_frag_vec_.size(); ++i) {
-        trio.nack_frag_vec_[i].readerId = reader_id;
-        trio.nack_frag_vec_[i].writerId = writer_id;
+      NackFragSubmessageVec nfsv;
+      generate_nack_frags(nfsv, wi->second, wi->first);
+      for (size_t i = 0; i < nfsv.size(); ++i) {
+        nfsv[i].readerId = reader_id;
+        nfsv[i].writerId = writer_id;
+        response.sm_.nack_frag_sm(nfsv[i]);
+        responses.push_back(response);
       }
-
     }
   }
-}
-
-namespace {
-
-typedef std::pair<RepoId, RepoId> RepoIdPair;
-struct less_RepoIdPair {
-  bool operator() (const RepoIdPair& first, const RepoIdPair& second) const {
-    return std::memcmp(&first, &second, sizeof(RepoIdPair)) < 0;
-  }
-};
-
 }
 
 void
-RtpsUdpDataLink::send_ack_nacks(AckNackTrioVec& ant_vec)
+RtpsUdpDataLink::send_bundled_responses(ResponseVec& responses)
 {
   using namespace RTPS;
-  typedef OPENDDS_VECTOR(AckNackTrioVec::iterator) AntVecIterVec;
-  typedef OPENDDS_MAP_CMP(RepoId, AntVecIterVec, GUID_tKeyLessThan) AntIterRepoMap;
-  typedef OPENDDS_MAP(AddrSet, AntIterRepoMap) AntIterMap;
-  AntIterMap ant_map;
-  for (AckNackTrioVec::iterator it = ant_vec.begin(); it != ant_vec.end(); ++it) {
-    AddrSet addrs = get_addresses(it->reader_guid_, it->writer_guid_);
+  typedef OPENDDS_VECTOR(ResponseVec::iterator) ResponseIterVec;
+  typedef OPENDDS_MAP_CMP(RepoId, ResponseIterVec, GUID_tKeyLessThan) DestResponseMap;
+  typedef OPENDDS_MAP(AddrSet, DestResponseMap) AddrDestResponseMap;
+  AddrDestResponseMap adr_map;
+
+  const RepoId no_dst = { { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, { { 0, 0, 0 }, 0 } };
+
+  // Sort responses by address set and destination
+  for (ResponseVec::iterator it = responses.begin(); it != responses.end(); ++it) {
+    AddrSet addrs = get_addresses(it->from_guid_, it->to_guid_);
     if (addrs.empty()) {
       continue;
     }
-    RepoId dst;
-    memcpy(dst.guidPrefix, it->writer_guid_.guidPrefix, sizeof(dst.guidPrefix));
-    dst.entityId = ENTITYID_UNKNOWN;
-    ant_map[addrs][dst].push_back(it);
+    if (it->to_guid_.guidPrefix != GUIDPREFIX_UNKNOWN) {
+      RepoId dst;
+      memcpy(dst.guidPrefix, it->to_guid_.guidPrefix, sizeof(dst.guidPrefix));
+      dst.entityId = ENTITYID_UNKNOWN;
+      adr_map[addrs][dst].push_back(it);
+    } else {
+      adr_map[addrs][no_dst].push_back(it);
+    }
   }
 
-  for (AntIterMap::const_iterator addr_it = ant_map.begin(); addr_it != ant_map.end(); ++addr_it) {
-    size_t size = 0, padding = 0;
-    for (AntIterRepoMap::const_iterator prefix_it = addr_it->second.begin(); prefix_it != addr_it->second.end(); ++prefix_it) {
-      gen_find_size(prefix_it->second.front()->info_dst_, size, padding);
-      size_t prev_size = size;
-      for (AntVecIterVec::const_iterator it = prefix_it->second.begin(); it != prefix_it->second.end(); ++it) {
-        AckNackTrio& trio = **it;
-        gen_find_size(trio.ack_nack_, size, padding);
-        trio.ack_nack_.smHeader.submessageLength = static_cast<CORBA::UShort>(size - prev_size) - SMHDR_SZ;
-        prev_size = size;
-        for (size_t i = 0; i < trio.nack_frag_vec_.size(); ++i) {
-          gen_find_size(trio.nack_frag_vec_[i], size, padding);
-          trio.nack_frag_vec_[i].smHeader.submessageLength = static_cast<CORBA::UShort>(size - prev_size) - SMHDR_SZ;
-          prev_size = size;
+  // Reusable INFO_DST
+  InfoDestinationSubmessage idst = {
+    {INFO_DST, FLAG_E, INFO_DST_SZ},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+  };
+
+  const size_t MAX_BUNDLE_SIZE = 1200;
+
+  // Build bundles
+  typedef OPENDDS_VECTOR(ResponseIterVec) ResponseIterVecVec;
+  ResponseIterVecVec response_bundles; // a vector of vectors of iterators pointing to responses
+  OPENDDS_VECTOR(AddrDestResponseMap::const_iterator) response_addr_iters; // for pointing back to bundle's address set
+  OPENDDS_VECTOR(size_t) response_bundles_sizes; // for allocating the bundle's buffer
+  size_t size = 0, padding = 0, prev_size = 0, prev_padding = 0; // keep track of previous values in case we overshoot
+  RepoId prev_dst; // used to determine when we need to write a new info_dst
+  for (AddrDestResponseMap::iterator addr_it = adr_map.begin(); addr_it != adr_map.end(); ++addr_it) {
+
+    // A new address set always starts a new bundle
+    response_bundles.push_back(ResponseIterVec());
+    response_addr_iters.push_back(addr_it);
+    if (addr_it != adr_map.begin()) {
+      response_bundles_sizes.push_back(prev_size + prev_padding);
+      size -= prev_size; padding -= prev_padding; prev_size = 0; prev_padding = 0;
+    }
+    prev_dst = no_dst;
+
+    for (DestResponseMap::iterator dest_it = addr_it->second.begin(); dest_it != addr_it->second.end(); ++dest_it) {
+      size_t offset = size;
+      for (ResponseIterVec::iterator resp_it = dest_it->second.begin(); resp_it != dest_it->second.end(); ++resp_it) {
+        // Check before every response to see if we need to prefix a INFO_DST
+        if (dest_it->first != no_dst && dest_it->first != prev_dst) {
+          gen_find_size(idst, size, padding);
+          prev_dst = dest_it->first;
         }
+        // If adding an INFO_DST prefix bumped us over the limit, push the size difference into the next bundle, reset prev_dst, and keep going
+        if ((size + padding) > MAX_BUNDLE_SIZE) {
+          response_bundles.push_back(ResponseIterVec());
+          response_addr_iters.push_back(addr_it);
+          response_bundles_sizes.push_back(prev_size + prev_padding);
+          size -= prev_size; padding -= prev_padding; prev_size = 0; prev_padding = 0;
+          prev_dst = no_dst;
+        } else {
+          prev_size = size; prev_padding = padding;
+        }
+        // Attempt to add the submessage response to the bundle
+        offset = size;
+        Response& res = **resp_it;
+        switch (res.sm_._d()) {
+          case ACKNACK: {
+            gen_find_size(res.sm_.acknack_sm(), size, padding);
+            res.sm_.acknack_sm().smHeader.submessageLength = static_cast<CORBA::UShort>(size - offset) - SMHDR_SZ;
+            break;
+          }
+          case NACK_FRAG: {
+            gen_find_size(res.sm_.nack_frag_sm(), size, padding);
+            res.sm_.nack_frag_sm().smHeader.submessageLength = static_cast<CORBA::UShort>(size - offset) - SMHDR_SZ;
+            break;
+          }
+          default: {
+            break;
+          }
+        }
+        // If adding the submessage bumped us over the limit, push the size difference into the next bundle, reset prev_dst, and keep going
+        if ((size + padding) > MAX_BUNDLE_SIZE) {
+          response_bundles.push_back(ResponseIterVec());
+          response_addr_iters.push_back(addr_it);
+          response_bundles_sizes.push_back(prev_size + prev_padding);
+          size -= prev_size; padding -= prev_padding; prev_size = 0; prev_padding = 0;
+          prev_dst = no_dst;
+        } else {
+          prev_size = size; prev_padding = padding;
+        }
+        response_bundles.back().push_back(*resp_it);
       }
     }
+  }
+  response_bundles_sizes.push_back(size + padding);
 
-    ACE_Message_Block mb_acknack(size + padding); //FUTURE: allocators?
-    // byte swapping is handled in the operator<<() implementation
+  assert(response_bundles_sizes.size() == response_bundles.size());
+
+  // Allocate buffers, seralize, and send bundles
+  prev_dst = no_dst;
+  for (size_t i = 0; i < response_bundles.size(); ++i) {
+    ACE_Message_Block mb_acknack(response_bundles_sizes[i]); //FUTURE: allocators?
     Serializer ser(&mb_acknack, false, Serializer::ALIGN_CDR);
-
-    for (AntIterRepoMap::const_iterator prefix_it = addr_it->second.begin(); prefix_it != addr_it->second.end(); ++prefix_it) {
-      ser << prefix_it->second.front()->info_dst_;
-      for (AntVecIterVec::const_iterator it = prefix_it->second.begin(); it != prefix_it->second.end(); ++it) {
-        AckNackTrio& trio = **it;
-        // Interoperability note: we used to insert INFO_REPLY submessage here, but
-        // testing indicated that other DDS implementations didn't accept it.
-        ser << trio.ack_nack_;
-        for (size_t i = 0; i < trio.nack_frag_vec_.size(); ++i) {
-          ser << trio.nack_frag_vec_[i]; // always 4-byte aligned
+    for (ResponseIterVec::const_iterator it = response_bundles[i].begin(); it != response_bundles[i].end(); ++it) {
+      Response& res = **it;
+      RepoId dst = res.to_guid_;
+      dst.entityId = ENTITYID_UNKNOWN;
+      if (dst != no_dst && dst != prev_dst) {
+        memcpy(&idst.guidPrefix, dst.guidPrefix, sizeof(idst.guidPrefix));
+        ser << idst;
+        prev_dst = dst;
+      }
+      switch (res.sm_._d()) {
+        case ACKNACK: {
+          ser << res.sm_.acknack_sm();
+          break;
+        }
+        case NACK_FRAG: {
+          ser << res.sm_.nack_frag_sm();
+          break;
+        }
+        default: {
+          break;
         }
       }
     }
-
-    send_strategy()->send_rtps_control(mb_acknack, addr_it->first);
+    send_strategy()->send_rtps_control(mb_acknack, response_addr_iters[i]->first);
   }
 }
 
@@ -1565,13 +1630,13 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
   }
   interesting_ack_nacks_.clear();
 
-  AckNackTrioVec ant_vec;
+  ResponseVec responses;
   for (RtpsReaderMap::iterator rr = readers_.begin(); rr != readers_.end(); ++rr) {
-    rr->second->gather_ack_nacks(ant_vec);
+    rr->second->gather_ack_nacks(responses);
   }
   g.release();
 
-  send_ack_nacks(ant_vec);
+  send_bundled_responses(responses);
 }
 
 void
@@ -2972,12 +3037,12 @@ RtpsUdpDataLink::send_final_acks(const RepoId& readerid)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   RtpsReaderMap::iterator rr = readers_.find(readerid);
-  AckNackTrioVec ant_vec;
+  ResponseVec responses;
   if (rr != readers_.end()) {
-    rr->second->gather_ack_nacks(ant_vec, true);
+    rr->second->gather_ack_nacks(responses, true);
   }
   g.release();
-  send_ack_nacks(ant_vec);
+  send_bundled_responses(responses);
 }
 
 
