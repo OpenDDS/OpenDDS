@@ -60,12 +60,13 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
     return ret;
   }
 
-#if OPENDDS_SECURITY
+#ifdef OPENDDS_SECURITY
   if (endpoint && n > 0 && ret > 0 && iov[0].iov_len >= 4 && memcmp(iov[0].iov_base, "RTPS", 4) != 0) {
 # ifndef ACE_RECVPKTINFO
     ACE_ERROR((LM_ERROR, "ERROR: RtpsUdpReceiveStrategy::receive_bytes_helper potential STUN message "
                "received but this version of the ACE library doesn't support the local_address "
                "extension in ACE_SOCK_Dgram::recv\n"));
+    ACE_UNUSED_ARG(stop);
     ACE_NOTSUP_RETURN(-1);
 # else
     // Assume STUN
