@@ -1167,6 +1167,36 @@ for my $key (keys %optdep) {
   }
 }
 
+sub has_feature {
+  my $feat = shift;
+  if ($opts{'features'}) {
+    for my $f (@{$opts{'features'}}) {
+      my ($key, $value) = split(/=/, $f);
+      if ($key eq $feat) {
+        return 1;
+      }
+    }
+  }
+  return 0;
+}
+
+if ($opts{'java'}) {
+  my $feat = 'java_pre_jpms';
+  unless (has_feature($feat)) {
+    my $javac = File::Spec->catfile($opts{'java'}, 'bin', 'javac');
+    open(my $vers, "\"$javac\" -version |");
+    while (<$vers>) {
+      if (/javac (\d+)/) {
+        print "Found javac major version $1\n" if $opts{'verbose'};
+        if ($1 > 1) {
+          push(@{$opts{'features'}}, "$feat=0");
+          print "Feature $feat=0 due to Java version\n" if $opts{'verbose'};
+        }
+        last;
+      }
+    }
+  }
+}
 
 sub env_from_opt {
   my $key = shift;
