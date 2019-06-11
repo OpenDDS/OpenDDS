@@ -21,7 +21,7 @@
 
 #ifdef OPENDDS_SECURITY
 #include "dds/DdsSecurityCoreC.h"
-#include "dds/DCPS/ICE/Ice.h"
+#include "dds/DCPS/Ice.h"
 #endif
 
 #include "ace/Select_Reactor.h"

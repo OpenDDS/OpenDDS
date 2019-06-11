@@ -8,7 +8,7 @@
 #ifndef OPENDDS_RTPS_ICE_H
 #define OPENDDS_RTPS_ICE_H
 
-#include "dds/DCPS/ICE/Ice.h"
+#include "dds/DCPS/Ice.h"
 #include "dds/DCPS/RTPS/ICE/Stun.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
