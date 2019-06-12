@@ -8,6 +8,10 @@
 
 #include "dds/DCPS/SafetyProfileStreams.h"
 
+#ifdef OPENDDS_SECURITY
+#  include "dds/DdsSecurityCoreC.h"
+#endif
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -137,6 +141,50 @@ to_hex_dds_string(const char* data, size_t size, const char delim, const size_t 
     rv.push_back(nibble_to_hex_char(data[i]));
   }
   return rv;
+}
+
+OPENDDS_STRING
+retcode_to_dds_string(DDS::ReturnCode_t value)
+{
+  switch (value) {
+  case DDS::RETCODE_OK:
+    return OPENDDS_STRING("OK");
+  case DDS::RETCODE_ERROR:
+    return OPENDDS_STRING("Error");
+  case DDS::RETCODE_UNSUPPORTED:
+    return OPENDDS_STRING("Unsupported");
+  case DDS::RETCODE_BAD_PARAMETER:
+    return OPENDDS_STRING("Bad parameter");
+  case DDS::RETCODE_PRECONDITION_NOT_MET:
+    return OPENDDS_STRING("Precondition not met");
+  case DDS::RETCODE_OUT_OF_RESOURCES:
+    return OPENDDS_STRING("Out of resources");
+  case DDS::RETCODE_NOT_ENABLED:
+    return OPENDDS_STRING("Not enabled");
+  case DDS::RETCODE_IMMUTABLE_POLICY:
+    return OPENDDS_STRING("Immutable policy");
+  case DDS::RETCODE_INCONSISTENT_POLICY:
+    return OPENDDS_STRING("Inconsistent policy");
+  case DDS::RETCODE_ALREADY_DELETED:
+    return OPENDDS_STRING("Already deleted");
+  case DDS::RETCODE_TIMEOUT:
+    return OPENDDS_STRING("Timeout");
+  case DDS::RETCODE_NO_DATA:
+    return OPENDDS_STRING("No data");
+  case DDS::RETCODE_ILLEGAL_OPERATION:
+    return OPENDDS_STRING("Illegal operation");
+#ifdef OPENDDS_SECURITY
+  case DDS::RETCODE_NOT_ALLOWED_BY_SECURITY:
+    return OPENDDS_STRING("Not allowed by security");
+#endif
+  default:
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: OpenDDS::DCPS::retcode_to_dds_string: ")
+      ACE_TEXT("%d is either completely invalid or unknown to this function.\n"),
+      value
+      ));
+    return OPENDDS_STRING("(Unknown Return Code: ") + to_dds_string(value) + ")";
+  }
 }
 
 } // namespace DCPS
