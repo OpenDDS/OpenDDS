@@ -45,6 +45,7 @@ jobs:
   - script: |
       if %BuildConfiguration%==Release set OPT=--no-tests --no-debug --optimize
       call configure -v --ace-github-latest --security --xerces3=$(VcPkgInst) --openssl=$(VcPkgInst) %OPT%
+      perl tools\scripts\show_build_config.pl
       if %BuildConfiguration%==Release (set SLN=DDS_TAOv2.sln) else set SLN=DDS_TAOv2_all.sln
       echo ##vso[task.setvariable variable=BuildSolution]%SLN%
     failOnStderr: #
@@ -112,6 +113,7 @@ jobs:
   - script: |
       if %BuildConfiguration%==Release set OPT=--no-tests --no-debug --optimize
       call configure -v --ace-github-latest --security --xerces3=$(VcPkgInst) --openssl=$(VcPkgInst) %OPT%
+      perl tools\scripts\show_build_config.pl
       if %BuildConfiguration%==Release (set SLN=DDS_TAOv2.sln) else set SLN=DDS_TAOv2_all.sln
       echo ##vso[task.setvariable variable=BuildSolution]%SLN%
     failOnStderr: #
@@ -179,6 +181,7 @@ jobs:
   - script: |
       if %BuildConfiguration%==Release set OPT=--no-tests --no-debug --optimize
       call configure -v --ace-github-latest --security --xerces3=$(VcPkgInst) --openssl=$(VcPkgInst) %OPT%
+      perl tools\scripts\show_build_config.pl
       if %BuildConfiguration%==Release (set SLN=DDS_TAOv2.sln) else set SLN=DDS_TAOv2_all.sln
       echo ##vso[task.setvariable variable=BuildSolution]%SLN%
     failOnStderr: #
@@ -257,7 +260,9 @@ jobs:
       sudo apt-get --yes install libxerces-c-dev libssl-dev $(PackageDeps)
     displayName: Install system packages
     condition: and(succeeded(), ne(variables['PackageDeps'], ''))
-  - script: ./configure -v --mpcopts="-workers 4" --ace-github-latest $(ConfigOpts)
+  - script: |
+      ./configure -v --mpcopts="-workers 4" --ace-github-latest $(ConfigOpts)
+      tools/scripts/show_build_config.pl
     displayName: Run configure script
   - script: make -sj6
     displayName: Compile
@@ -284,7 +289,9 @@ jobs:
       Release:
         ConfigOpts: --no-debug --optimize
   steps:
-  - script: ./configure -v --ace-github-latest $(ConfigOpts)
+  - script: |
+      ./configure -v --ace-github-latest $(ConfigOpts)
+      tools/scripts/show_build_config.pl
     displayName: Run configure script
   - script: make -sj6
     displayName: Compile
