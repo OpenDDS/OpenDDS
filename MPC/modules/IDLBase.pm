@@ -225,7 +225,8 @@ sub cached_parse {
 
   ## If we have already processed this file, we will just delete the
   ## stored data and return it.
-  return delete $self->{'files'}->{$file} if (defined $self->{'files'}->{$file});
+  return delete $self->{'files'}->{$file}, delete $self->{'forwards'}->{$file}
+           if (defined $self->{'files'}->{$file});
 
   ## If the file is a DDS type support idl file, we will remove the
   ## TypeSupport portion and process the file from which it was created.
@@ -247,6 +248,7 @@ sub cached_parse {
     ## string that was obtained during the original parsing and return
     ## that data.
     $self->{'files'}->{$actual} = $data;
+    $self->{'forwards'}->{$actual} = $forwards;
     ($data) = $self->parse($file, $includes, $macros, $mparams, $ts_str);
   }
   elsif ($ts_str) {
