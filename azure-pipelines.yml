@@ -64,7 +64,7 @@ jobs:
   - script: |
       if %BuildPlatform%==x64 set ARCH=--arch="x64"
       perl "%DDS_ROOT%\tests\cmake_integration\run_ci_tests.pl" --build-config=$(BuildConfiguration) --generator="Visual Studio 16 2019" %ARCH%
-    displayName: Compile (and run) CMake Tests
+    displayName: Compile and run CMake tests
 
 - job: VisualStudio2017
   timeoutInMinutes: 90
@@ -131,7 +131,7 @@ jobs:
   - script: |
       if %BuildPlatform%==x64 set ARCH=--arch="x64"
       perl "%DDS_ROOT%\tests\cmake_integration\run_ci_tests.pl" --build-config=$(BuildConfiguration) --generator="Visual Studio 15 2017" %ARCH%
-    displayName: Compile (and run) CMake Tests
+    displayName: Compile and run CMake tests
 
 - job: VisualStudio2015
   timeoutInMinutes: 90
@@ -203,9 +203,9 @@ jobs:
   strategy:
     matrix:
       Debug:
-        ConfigOpts: --no-inline
+        ConfigOpts: --no-inline --java=/usr/lib/jvm/zulu-12-azure-amd64
       Release:
-        ConfigOpts: --no-debug --optimize
+        ConfigOpts: --no-debug --optimize --java=/usr/lib/jvm/zulu-12-azure-amd64
       Safety:
         ConfigOpts: --safety-profile
         DisableCMakeIntegrationTest: true
@@ -255,10 +255,8 @@ jobs:
       sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
       sudo apt-get --yes update
       sudo apt-get --yes install libxerces-c-dev libssl-dev $(PackageDeps)
-    displayName: install system package dependencies
+    displayName: Install system packages
     condition: and(succeeded(), ne(variables['PackageDeps'], ''))
-  - script: ls -l /usr/lib/jvm
-    displayName: Check installed JDKs
   - script: ./configure -v --mpcopts="-workers 4" --ace-github-latest $(ConfigOpts)
     displayName: Run configure script
   - script: make -sj6
@@ -269,7 +267,7 @@ jobs:
         export CC=/usr/bin/${CXX/++/}
       fi
       source $(Build.SourcesDirectory)/setenv.sh && $DDS_ROOT/tests/cmake_integration/run_ci_tests.pl
-    displayName: Compile (and run) CMake Tests
+    displayName: Compile and run CMake tests
     condition: >
       and(succeeded(),
           eq(false, variables['DisableCMakeIntegrationTest']))
@@ -293,4 +291,4 @@ jobs:
   - script: >
       source $(Build.SourcesDirectory)/setenv.sh &&
       $DDS_ROOT/tests/cmake_integration/run_ci_tests.pl
-    displayName: Compile (and run) CMake Tests
+    displayName: Compile and run CMake tests
