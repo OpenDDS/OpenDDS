@@ -1490,7 +1490,7 @@ Sedp::inconsistent_topic(const DCPS::RepoIdSet& eps) const
 DDS::ReturnCode_t
 Sedp::remove_publication_i(const RepoId& publicationId, LocalPublication& pub)
 {
-#if OPENDDS_SECURITY
+#ifdef OPENDDS_SECURITY
   ICE::Endpoint* endpoint = pub.publication_->get_ice_endpoint();
   if (endpoint) {
     ICE::Agent::instance()->remove_local_agent_info_listener(endpoint, publicationId);
@@ -1532,7 +1532,7 @@ DDS::ReturnCode_t
 Sedp::remove_subscription_i(const RepoId& subscriptionId,
                             LocalSubscription& sub)
 {
-#if OPENDDS_SECURITY
+#ifdef OPENDDS_SECURITY
   ICE::Endpoint* endpoint = sub.subscription_->get_ice_endpoint();
   if (endpoint) {
     ICE::Agent::instance()->remove_local_agent_info_listener(endpoint, subscriptionId);
@@ -3522,7 +3522,7 @@ DDS::ReturnCode_t
 Sedp::add_publication_i(const DCPS::RepoId& rid,
                         LocalPublication& pub)
 {
-#if OPENDDS_SECURITY
+#ifdef OPENDDS_SECURITY
   ICE::Endpoint* endpoint = pub.publication_->get_ice_endpoint();
   if (endpoint) {
     pub.have_ice_agent_info = true;
@@ -3657,7 +3657,7 @@ DDS::ReturnCode_t
 Sedp::add_subscription_i(const DCPS::RepoId& rid,
                          LocalSubscription& sub)
 {
-#if OPENDDS_SECURITY
+#ifdef OPENDDS_SECURITY
   ICE::Endpoint* endpoint = sub.subscription_->get_ice_endpoint();
   if (endpoint) {
     sub.have_ice_agent_info = true;
@@ -4461,7 +4461,7 @@ DDS::DomainId_t Sedp::get_domain_id() const {
 void
 Sedp::add_assoc_i(const DCPS::RepoId& local_guid, const LocalPublication& lpub,
                   const DCPS::RepoId& remote_guid, const DiscoveredSubscription& dsub) {
-#if OPENDDS_SECURITY
+#ifdef OPENDDS_SECURITY
   ICE::Endpoint* endpoint = lpub.publication_->get_ice_endpoint();
   if (endpoint && dsub.have_ice_agent_info_) {
     ICE::Agent::instance()->start_ice(endpoint, local_guid, remote_guid, dsub.ice_agent_info_);
@@ -4477,7 +4477,7 @@ Sedp::add_assoc_i(const DCPS::RepoId& local_guid, const LocalPublication& lpub,
 void
 Sedp::remove_assoc_i(const DCPS::RepoId& local_guid, const LocalPublication& lpub,
                      const DCPS::RepoId& remote_guid) {
-#if OPENDDS_SECURITY
+#ifdef OPENDDS_SECURITY
   ICE::Endpoint* endpoint = lpub.publication_->get_ice_endpoint();
   if (endpoint) {
     ICE::Agent::instance()->stop_ice(endpoint, local_guid, remote_guid);
@@ -4492,7 +4492,7 @@ Sedp::remove_assoc_i(const DCPS::RepoId& local_guid, const LocalPublication& lpu
 void
 Sedp::add_assoc_i(const DCPS::RepoId& local_guid, const LocalSubscription& lsub,
                   const DCPS::RepoId& remote_guid, const DiscoveredPublication& dpub) {
-#if OPENDDS_SECURITY
+#ifdef OPENDDS_SECURITY
   ICE::Endpoint* endpoint = lsub.subscription_->get_ice_endpoint();
   if (endpoint && dpub.have_ice_agent_info_) {
     ICE::Agent::instance()->start_ice(endpoint, local_guid, remote_guid, dpub.ice_agent_info_);
@@ -4508,7 +4508,7 @@ Sedp::add_assoc_i(const DCPS::RepoId& local_guid, const LocalSubscription& lsub,
 void
 Sedp::remove_assoc_i(const DCPS::RepoId& local_guid, const LocalSubscription& lsub,
                      const DCPS::RepoId& remote_guid) {
-#if OPENDDS_SECURITY
+#ifdef OPENDDS_SECURITY
   ICE::Endpoint* endpoint = lsub.subscription_->get_ice_endpoint();
   if (endpoint) {
     ICE::Agent::instance()->stop_ice(endpoint, local_guid, remote_guid);
@@ -4546,7 +4546,7 @@ Sedp::SubscriptionAgentInfoListener::update_agent_info(const DCPS::RepoId& a_loc
 
 void
 Sedp::start_ice(const DCPS::RepoId& guid, const LocalPublication& lpub) {
-#if OPENDDS_SECURITY
+#ifdef OPENDDS_SECURITY
   ICE::Endpoint* endpoint = lpub.publication_->get_ice_endpoint();
 
   if (!endpoint || !lpub.have_ice_agent_info) {
@@ -4573,7 +4573,7 @@ Sedp::start_ice(const DCPS::RepoId& guid, const LocalPublication& lpub) {
 
 void
 Sedp::start_ice(const DCPS::RepoId& guid, const LocalSubscription& lsub) {
-#if OPENDDS_SECURITY
+#ifdef OPENDDS_SECURITY
   ICE::Endpoint* endpoint = lsub.subscription_->get_ice_endpoint();
 
   if (!endpoint || !lsub.have_ice_agent_info) {
@@ -4600,7 +4600,7 @@ Sedp::start_ice(const DCPS::RepoId& guid, const LocalSubscription& lsub) {
 
 void
 Sedp::start_ice(const DCPS::RepoId& guid, const DiscoveredPublication& dpub) {
-#if OPENDDS_SECURITY
+#ifdef OPENDDS_SECURITY
   if (!dpub.have_ice_agent_info_) {
     return;
   }
@@ -4628,7 +4628,7 @@ Sedp::start_ice(const DCPS::RepoId& guid, const DiscoveredPublication& dpub) {
 
 void
 Sedp::start_ice(const DCPS::RepoId& guid, const DiscoveredSubscription& dsub) {
-#if OPENDDS_SECURITY
+#ifdef OPENDDS_SECURITY
   if (!dsub.have_ice_agent_info_) {
     return;
   }
@@ -4656,7 +4656,7 @@ Sedp::start_ice(const DCPS::RepoId& guid, const DiscoveredSubscription& dsub) {
 
 void
 Sedp::stop_ice(const DCPS::RepoId& guid, const DiscoveredPublication& dpub) {
-#if OPENDDS_SECURITY
+#ifdef OPENDDS_SECURITY
   if (!dpub.have_ice_agent_info_) {
     return;
   }
@@ -4684,7 +4684,7 @@ Sedp::stop_ice(const DCPS::RepoId& guid, const DiscoveredPublication& dpub) {
 
 void
 Sedp::stop_ice(const DCPS::RepoId& guid, const DiscoveredSubscription& dsub) {
-#if OPENDDS_SECURITY
+#ifdef OPENDDS_SECURITY
   if (!dsub.have_ice_agent_info_) {
     return;
   }

@@ -1598,7 +1598,7 @@ Spdp::SpdpTransport::write_i()
   }
 
   if (outer_->disco_->spdp_rtps_relay_address() != ACE_INET_Addr()) {
-#if OPENDDS_SECURITY
+#ifdef OPENDDS_SECURITY
     ICE::Endpoint* endpoint = outer_->sedp_.get_ice_endpoint();
     if (endpoint) {
       const ICE::AgentInfo& agent_info = ICE::Agent::instance()->get_local_agent_info(endpoint);
@@ -1990,6 +1990,7 @@ Spdp::add_send_addr(const ACE_INET_Addr& addr)
   tport_->insert_send_addr(addr);
 }
 
+#ifndef OPENDDS_SAFETY_PROFILE
 bool
 operator==(const DCPS::Locator_t& x, const DCPS::Locator_t& y)
 {
@@ -2001,6 +2002,7 @@ operator!=(const DCPS::Locator_t& x, const DCPS::Locator_t& y)
 {
   return x.kind != y.kind && x.port != y.port && x.address != y.address;
 }
+#endif
 
 void
 Spdp::remove_sedp_unicast(const ACE_INET_Addr& addr)

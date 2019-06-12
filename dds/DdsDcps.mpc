@@ -35,7 +35,6 @@ project(OpenDDS_Dcps): core, coverage_optional, \
     DCPS
     DCPS/transport/framework
     DCPS/security/framework
-    DCPS/ICE
   }
 
   Header_Files {

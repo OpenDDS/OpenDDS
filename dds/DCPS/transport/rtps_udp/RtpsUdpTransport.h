@@ -125,7 +125,7 @@ private:
   DDS::Security::ParticipantCryptoHandle local_crypto_handle_;
 #endif
 
-#if OPENDDS_SECURITY
+#ifdef OPENDDS_SECURITY
   struct IceEndpoint : public ACE_Event_Handler, public ICE::Endpoint {
     RtpsUdpTransport& transport;
 
