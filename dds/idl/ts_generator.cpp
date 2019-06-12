@@ -113,7 +113,7 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
      * @NOTE: this falls through if be_global->is_nested_type(node) == true)
      * @TODO: only run is_nested_type(node) and treat_as_topic(*_node) once
      */
-  return true;
+    return true;
   }
 
   const std::string cxxName = scoped(name);

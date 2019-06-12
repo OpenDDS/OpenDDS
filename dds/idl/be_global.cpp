@@ -36,7 +36,7 @@ using namespace std;
 BE_GlobalData* be_global = 0;
 
 BE_GlobalData::BE_GlobalData()
-  : default_nested_(true)
+  : default_nested_(false)
   , filename_(0)
   , java_(false)
   , suppress_idl_(false)
@@ -324,7 +324,7 @@ BE_GlobalData::parse_args(long& i, char** av)
   static const char EXPORT_FLAG[] = "--export=";
   static const size_t EXPORT_FLAG_SIZE = sizeof(EXPORT_FLAG) - 1;
 
-  static const char DEFAULT_TS_MACRO[] = "--default_nested=";
+  static const char DEFAULT_TS_MACRO[] = "--default-nested";
   static const size_t SZ_DEFAULT_TS_MACRO = sizeof(DEFAULT_TS_MACRO) - 1;
 
   switch (av[i][1]) {
@@ -397,7 +397,7 @@ BE_GlobalData::parse_args(long& i, char** av)
     if (0 == ACE_OS::strncasecmp(av[i], EXPORT_FLAG, EXPORT_FLAG_SIZE)) {
       this->export_macro(av[i] + EXPORT_FLAG_SIZE);
     } else if (0 == ACE_OS::strncasecmp(av[i], DEFAULT_TS_MACRO, SZ_DEFAULT_TS_MACRO)) {
-      istringstream(av[i] + SZ_DEFAULT_TS_MACRO) >> std::boolalpha >> default_nested_;
+      default_nested_ = true;
     } else {
       invalid_option(av[i]);
     }
