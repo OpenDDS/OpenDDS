@@ -1452,8 +1452,6 @@ RtpsUdpDataLink::send_bundled_responses(ResponseVec& responses)
   typedef OPENDDS_MAP(AddrSet, DestResponseMap) AddrDestResponseMap;
   AddrDestResponseMap adr_map;
 
-  const RepoId no_dst = { { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, { { 0, 0, 0 }, 0 } };
-
   {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
     AddrSet addrs;
@@ -1469,7 +1467,7 @@ RtpsUdpDataLink::send_bundled_responses(ResponseVec& responses)
         dst.entityId = ENTITYID_UNKNOWN;
         adr_map[addrs][dst].push_back(it);
       } else {
-        adr_map[addrs][no_dst].push_back(it);
+        adr_map[addrs][GUID_UNKNOWN].push_back(it);
       }
       addrs.clear();
     }
@@ -1497,13 +1495,13 @@ RtpsUdpDataLink::send_bundled_responses(ResponseVec& responses)
       response_bundles_sizes.push_back(prev_size + prev_padding);
       size -= prev_size; padding -= prev_padding; prev_size = 0; prev_padding = 0;
     }
-    prev_dst = no_dst;
+    prev_dst = GUID_UNKNOWN;
 
     for (DestResponseMap::iterator dest_it = addr_it->second.begin(); dest_it != addr_it->second.end(); ++dest_it) {
       size_t offset = size;
       for (ResponseIterVec::iterator resp_it = dest_it->second.begin(); resp_it != dest_it->second.end(); ++resp_it) {
         // Check before every response to see if we need to prefix a INFO_DST
-        if (dest_it->first != no_dst && dest_it->first != prev_dst) {
+        if (dest_it->first != GUID_UNKNOWN && dest_it->first != prev_dst) {
           gen_find_size(idst, size, padding);
           prev_dst = dest_it->first;
         }
@@ -1513,7 +1511,7 @@ RtpsUdpDataLink::send_bundled_responses(ResponseVec& responses)
           response_addr_iters.push_back(addr_it);
           response_bundles_sizes.push_back(prev_size + prev_padding);
           size -= prev_size; padding -= prev_padding; prev_size = 0; prev_padding = 0;
-          prev_dst = no_dst;
+          prev_dst = GUID_UNKNOWN;
         } else {
           prev_size = size; prev_padding = padding;
         }
@@ -1541,7 +1539,7 @@ RtpsUdpDataLink::send_bundled_responses(ResponseVec& responses)
           response_addr_iters.push_back(addr_it);
           response_bundles_sizes.push_back(prev_size + prev_padding);
           size -= prev_size; padding -= prev_padding; prev_size = 0; prev_padding = 0;
-          prev_dst = no_dst;
+          prev_dst = GUID_UNKNOWN;
         } else {
           prev_size = size; prev_padding = padding;
         }
@@ -1552,7 +1550,7 @@ RtpsUdpDataLink::send_bundled_responses(ResponseVec& responses)
   response_bundles_sizes.push_back(size + padding);
 
   // Allocate buffers, seralize, and send bundles
-  prev_dst = no_dst;
+  prev_dst = GUID_UNKNOWN;
   for (size_t i = 0; i < response_bundles.size(); ++i) {
     ACE_Message_Block mb_acknack(response_bundles_sizes[i]); //FUTURE: allocators?
     Serializer ser(&mb_acknack, false, Serializer::ALIGN_CDR);
@@ -1560,7 +1558,7 @@ RtpsUdpDataLink::send_bundled_responses(ResponseVec& responses)
       Response& res = **it;
       RepoId dst = res.to_guid_;
       dst.entityId = ENTITYID_UNKNOWN;
-      if (dst != no_dst && dst != prev_dst) {
+      if (dst != GUID_UNKNOWN && dst != prev_dst) {
         memcpy(&idst.guidPrefix, dst.guidPrefix, sizeof(idst.guidPrefix));
         ser << idst;
         prev_dst = dst;
