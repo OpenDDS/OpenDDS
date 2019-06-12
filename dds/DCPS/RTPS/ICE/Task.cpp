@@ -14,7 +14,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace ICE {
 
-#if OPENDDS_SECURITY
+#ifdef OPENDDS_SECURITY
 
 void Task::enqueue(const ACE_Time_Value& a_release_time)
 {

@@ -389,7 +389,7 @@ bool set_socket_multicast_ttl(const ACE_SOCK_Dgram& socket, const unsigned char&
   return true;
 }
 
-bool open_appropriate_socket_type(ACE_SOCK_Dgram& socket, const ACE_INET_Addr& local_address)
+bool open_appropriate_socket_type(ACE_SOCK_Dgram& socket, const ACE_INET_Addr& local_address, int* proto_family)
 {
 #if defined (ACE_HAS_IPV6) && defined (IPV6_V6ONLY)
   int protocol_family = ACE_PROTOCOL_FAMILY_INET;
@@ -462,8 +462,14 @@ bool open_appropriate_socket_type(ACE_SOCK_Dgram& socket, const ACE_INET_Addr& l
                           "failed to bind address to socket\n"), 2);
     return false;
   }
+  if (proto_family) {
+    *proto_family = protocol_family;
+  }
   return true;
 #else
+  if (proto_family) {
+    *proto_family = PF_INET;
+  }
   return socket.open(local_address) == 0;
 #endif
 }

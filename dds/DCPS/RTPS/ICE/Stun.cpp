@@ -15,9 +15,9 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace STUN {
 
-#if OPENDDS_SECURITY
+#ifdef OPENDDS_SECURITY
 
-uint16_t Attribute::length() const
+ACE_UINT16 Attribute::length() const
 {
   switch (type) {
   case MAPPED_ADDRESS:
@@ -81,7 +81,7 @@ Attribute make_message_integrity()
   return attribute;
 }
 
-Attribute make_error_code(uint16_t code, const std::string& reason)
+Attribute make_error_code(ACE_UINT16 code, const std::string& reason)
 {
   Attribute attribute;
   attribute.type = ERROR_CODE;
@@ -107,7 +107,7 @@ Attribute make_xor_mapped_address(const ACE_INET_Addr& addr)
   return attribute;
 }
 
-Attribute make_priority(uint32_t priority)
+Attribute make_priority(ACE_UINT32 priority)
 {
   Attribute attribute;
   attribute.type = PRIORITY;
@@ -145,7 +145,7 @@ Attribute make_ice_controlled(ACE_UINT64 ice_tie_breaker)
   return attribute;
 }
 
-Attribute make_unknown_attribute(uint16_t type, uint16_t length)
+Attribute make_unknown_attribute(ACE_UINT16 type, ACE_UINT16 length)
 {
   Attribute attribute;
   attribute.type = static_cast<AttributeType>(type);
@@ -155,8 +155,8 @@ Attribute make_unknown_attribute(uint16_t type, uint16_t length)
 
 bool operator>>(DCPS::Serializer& serializer, Attribute& attribute)
 {
-  uint16_t attribute_type;
-  uint16_t attribute_length;
+  ACE_UINT16 attribute_type;
+  ACE_UINT16 attribute_length;
 
   if (!(serializer >> attribute_type)) {
     return false;
@@ -169,7 +169,7 @@ bool operator>>(DCPS::Serializer& serializer, Attribute& attribute)
   switch (attribute_type) {
   case MAPPED_ADDRESS: {
     ACE_CDR::Char family;
-    uint16_t port;
+    ACE_UINT16 port;
 
     if (!serializer.skip(1)) {
       return false;
@@ -188,7 +188,7 @@ bool operator>>(DCPS::Serializer& serializer, Attribute& attribute)
         return false;
       }
 
-      uint32_t address;
+      ACE_UINT32 address;
 
       if (!(serializer >> address)) {
         return false;
@@ -228,25 +228,25 @@ bool operator>>(DCPS::Serializer& serializer, Attribute& attribute)
   break;
 
   case ERROR_CODE: {
-    uint32_t x;
+    ACE_UINT32 x;
 
     if (!(serializer >> x)) {
       return false;
     }
 
-    uint32_t class_ = (x & (0x7 << 8)) >> 8;
+    ACE_UINT32 class_ = (x & (0x7 << 8)) >> 8;
 
     if (class_ < 3 || class_ >= 7) {
       return false;
     }
 
-    uint32_t num = x & 0xFF;
+    ACE_UINT32 num = x & 0xFF;
 
     if (num > 100) {
       return false;
     }
 
-    uint16_t code = class_ * 100 + num;
+    ACE_UINT16 code = class_ * 100 + num;
 
     size_t reason_length = attribute_length - 4;
 
@@ -268,7 +268,7 @@ bool operator>>(DCPS::Serializer& serializer, Attribute& attribute)
     std::vector<AttributeType> unknown_attributes;
 
     for (size_t count = attribute_length / 2; count != 0; --count) {
-      uint16_t code;
+      ACE_UINT16 code;
 
       if (!(serializer >> code)) {
         return false;
@@ -283,7 +283,7 @@ bool operator>>(DCPS::Serializer& serializer, Attribute& attribute)
 
   case XOR_MAPPED_ADDRESS: {
     ACE_CDR::Char family;
-    uint16_t port;
+    ACE_UINT16 port;
 
     if (!serializer.skip(1)) {
       return false;
@@ -304,7 +304,7 @@ bool operator>>(DCPS::Serializer& serializer, Attribute& attribute)
         return false;
       }
 
-      uint32_t address;
+      ACE_UINT32 address;
 
       if (!(serializer >> address)) {
         return false;
@@ -321,7 +321,7 @@ bool operator>>(DCPS::Serializer& serializer, Attribute& attribute)
   break;
 
   case PRIORITY: {
-    uint32_t priority;
+    ACE_UINT32 priority;
 
     if (!(serializer >> priority)) {
       return false;
@@ -386,8 +386,8 @@ bool operator>>(DCPS::Serializer& serializer, Attribute& attribute)
 
 bool operator<<(DCPS::Serializer& serializer, const Attribute& attribute)
 {
-  uint16_t attribute_type = attribute.type;
-  uint16_t attribute_length = attribute.length();
+  ACE_UINT16 attribute_type = attribute.type;
+  ACE_UINT16 attribute_length = attribute.length();
   serializer << attribute_type;
   serializer << attribute_length;
 
@@ -395,7 +395,7 @@ bool operator<<(DCPS::Serializer& serializer, const Attribute& attribute)
   case MAPPED_ADDRESS: {
     serializer << static_cast<ACE_CDR::Char>(0);
     serializer << static_cast<ACE_CDR::Char>(IPv4);
-    serializer << static_cast<uint16_t>(attribute.mapped_address.get_port_number());
+    serializer << static_cast<ACE_UINT16>(attribute.mapped_address.get_port_number());
     serializer << attribute.mapped_address.get_ip_address();
     // TODO(jrw972):  Handle IPv6.
   }
@@ -412,8 +412,8 @@ bool operator<<(DCPS::Serializer& serializer, const Attribute& attribute)
   break;
 
   case ERROR_CODE: {
-    uint8_t class_ = attribute.error.code / 100;
-    uint8_t num = attribute.error.code % 100;
+    ACE_UINT8 class_ = attribute.error.code / 100;
+    ACE_UINT8 num = attribute.error.code % 100;
     serializer << static_cast<ACE_CDR::Char>(0);
     serializer << static_cast<ACE_CDR::Char>(0);
     serializer << static_cast<ACE_CDR::Char>(class_);
@@ -425,7 +425,7 @@ bool operator<<(DCPS::Serializer& serializer, const Attribute& attribute)
   case UNKNOWN_ATTRIBUTES: {
     for (std::vector<AttributeType>::const_iterator pos = attribute.unknown_attributes.begin(),
          limit = attribute.unknown_attributes.end(); pos != limit; ++pos) {
-      serializer << static_cast<uint16_t>(*pos);
+      serializer << static_cast<ACE_UINT16>(*pos);
     }
   }
   break;
@@ -433,7 +433,7 @@ bool operator<<(DCPS::Serializer& serializer, const Attribute& attribute)
   case XOR_MAPPED_ADDRESS: {
     serializer << static_cast<ACE_CDR::Char>(0);
     serializer << static_cast<ACE_CDR::Char>(IPv4);
-    serializer << static_cast<uint16_t>(attribute.mapped_address.get_port_number() ^ (MAGIC_COOKIE >> 16));
+    serializer << static_cast<ACE_UINT16>(attribute.mapped_address.get_port_number() ^ (MAGIC_COOKIE >> 16));
     serializer << (attribute.mapped_address.get_ip_address() ^ MAGIC_COOKIE);
     // TODO(jrw972):  Handle IPv6.
   }
@@ -539,7 +539,7 @@ bool Message::get_mapped_address(ACE_INET_Addr& address) const
   return false;
 }
 
-bool Message::get_priority(uint32_t& priority) const
+bool Message::get_priority(ACE_UINT32& priority) const
 {
   bool flag = false;
 
@@ -604,7 +604,7 @@ void Message::compute_message_integrity(const std::string& password, unsigned ch
 
   // Write the length and resize for hashing.
   block->wr_ptr(block->base() + 2);
-  uint16_t message_length = length_for_message_integrity();
+  ACE_UINT16 message_length = length_for_message_integrity();
   serializer << message_length;
   block->wr_ptr(block->base() + 20 + length_for_message_integrity() - 24);
 
@@ -630,7 +630,7 @@ bool Message::has_error_code() const
   return false;
 }
 
-uint16_t Message::get_error_code() const
+ACE_UINT16 Message::get_error_code() const
 {
   for (STUN::Message::const_iterator pos = begin(), limit = end(); pos != limit; ++pos) {
     if (pos->type == STUN::ERROR_CODE) {
@@ -685,7 +685,7 @@ bool Message::has_fingerprint() const
   return false;
 }
 
-uint32_t Message::compute_fingerprint() const
+ACE_UINT32 Message::compute_fingerprint() const
 {
   ACE_Message_Block* block = this->block->duplicate();
   block->rd_ptr(block->base());
@@ -695,7 +695,7 @@ uint32_t Message::compute_fingerprint() const
   block->wr_ptr(block->base() + 20 + length() - 8);
 
   // Compute the CRC-32
-  uint32_t crc = ACE::crc32(block->rd_ptr(), block->length());
+  ACE_UINT32 crc = ACE::crc32(block->rd_ptr(), block->length());
 
   block->release();
 
@@ -737,9 +737,9 @@ bool Message::has_use_candidate() const
 
 bool operator>>(DCPS::Serializer& serializer, Message& message)
 {
-  uint16_t message_type;
-  uint16_t message_length;
-  uint32_t magic_cookie;
+  ACE_UINT16 message_type;
+  ACE_UINT16 message_length;
+  ACE_UINT32 magic_cookie;
 
   if (!(serializer >> message_type)) {
     return false;
@@ -810,9 +810,9 @@ bool operator>>(DCPS::Serializer& serializer, Message& message)
 
 bool operator<<(DCPS::Serializer& serializer, const Message& message)
 {
-  uint16_t message_class = message.class_;
-  uint16_t message_method = message.method;
-  uint16_t message_type =
+  ACE_UINT16 message_class = message.class_;
+  ACE_UINT16 message_method = message.method;
+  ACE_UINT16 message_type =
     ((message_method & 0xF80) << 2) |
     ((message_class & 0x2) << 7) |
     ((message_method & 0x0070) << 1) |
@@ -820,7 +820,7 @@ bool operator<<(DCPS::Serializer& serializer, const Message& message)
     (message_method & 0x000F);
   serializer << message_type;
 
-  uint16_t message_length = message.length();
+  ACE_UINT16 message_length = message.length();
   serializer << message_length;
   serializer << MAGIC_COOKIE;
   serializer.write_octet_array(message.transaction_id.data, sizeof(message.transaction_id.data));

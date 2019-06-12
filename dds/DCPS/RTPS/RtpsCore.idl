@@ -19,7 +19,6 @@ module OpenDDS {
 
     typedef octet OctetArray2[2];
     typedef octet OctetArray4[4];
-    typedef octet OctetArray16[16];
 
     /* A list of filters that were applied to the sample.
        See section 9.6.3.1 for the signature-generation algorithm. */

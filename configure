@@ -50,6 +50,7 @@ my %platforminfo =
                                  16 => 'vc10', 17 => 'vc11', 18 => 'vc12',
                                  19 => 'vc14', 19.1 => 'vs2017',
                                  19.2 => 'vs2019'},
+               'cl_archs' => {'x64' => 1, 'Win32' => 1, 'ARM64' => 0, 'ARM' => 0}, # 1 if supported
               },
    'macosx' => {
                 'compilers' => ['clang++'],
@@ -470,32 +471,69 @@ if ($opts{'compiler'} =~ /cl(\.exe)?$/i) {
     $clpath =~ s/vc\\bin(\\(x86_)?amd64)?/common7\\ide/i;
     $ENV{'PATH'} .= ";$clpath";
   }
-  open(CL, "\"$opts{'compiler'}\" /v 2>&1 |");
-  while (<CL>) {
-    if (/version (\d+)\.(\d+)\.[\d\.]+ for (x\d+)/i) { # match i18n version strings
-      my $ver = ($2 == 0) ? $1 : "$1.$2";
-      my $arch = "$3";
-      $ver =~ s/0+$// unless $2 == 0;
-      $ver =~ s/\.(\d)\d*/.$1/; # only keep one digit after .
-      if (!exists $platforminfo{'win32'}->{'cl_versions'}->{$ver}) {
-        die "ERROR: Unknown or unsupported Visual C++ compiler version: $ver\n"
-          . "Stopped";
-      }
 
-      $opts{'compiler_version'} = $platforminfo{'win32'}->{'cl_versions'}->{$ver};
-      $opts{'compiler_target_architecture'} = $arch;
-
-      if ($ver >= 19) {
-        push(@{$opts{'features'}}, 'no_cxx11=0');
-        print "Visual C++ has C++11 support\n" if $opts{'verbose'};
-      }
+  # Have CL Tell Us Its Target Architecture and Version
+  my ($tmp_fd, $tmp_filename) = File::Temp::tempfile();
+  my $cl_check = << "EOF";
+#ifdef _M_X64
+#  define ARCH x64
+#elif defined(_M_IX86)
+#  define ARCH Win32
+#elif defined(_M_ARM64)
+#  define ARCH ARM64
+#elif defined(_M_ARM)
+#  define ARCH ARM
+#else
+#  define ARCH Unknown
+#endif
+CL is _MSC_VER ARCH
+EOF
+  print $tmp_fd $cl_check;
+  close($tmp_fd);
+  my $cl_command = "\"$opts{'compiler'}\" /EP $tmp_filename 2>&1";
+  print "Running $cl_command\n" if $opts{'verbose'};
+  open(my $cl_out_fd, "-|", $cl_command)
+    or die "ERROR: Could not detect Visual C++ version, try running this ".
+      "script from the Visual Studio Command Prompt.\nStopped";
+  my $ver = 0;
+  my $arch = '';
+  while (my $line = <$cl_out_fd>) {
+    chomp ($line);
+    print "CL says: $line\n" if $opts{'verbose'};
+    # Convert _MSC_VER to the form \d+\.\d
+    if ($line =~ /^CL is (\d+)\d (\w+)$/) {
+      $ver = int($1) / 10;
+      $arch = $2;
       last;
     }
   }
-  close CL;
-  if (!$opts{'compiler_version'}) {
-    die "ERROR: Could not detect Visual C++ version, try running this script ".
-      "from the Visual Studio Command Prompt.\nStopped";
+  close($cl_out_fd);
+  unlink($tmp_filename)
+    or warn "Unable to delete temporary file $tmp_filename: $!";
+  print "CL Version is $ver, architecture is $arch\n" if $opts{'verbose'};
+  if (!$ver && !$arch) {
+    die "cl version probe failed, invalid output from cl\nStopped";
+  }
+  if ($arch eq 'Unknown') {
+    die "cl version probe failed, no known architecture macro was defined\nStopped";
+  }
+  if (!exists $platforminfo{'win32'}->{'cl_archs'}->{$arch}) {
+    die "cl version probe failed, invalid architecture \"$arch\"\nStopped";
+  }
+  if (!$platforminfo{'win32'}->{'cl_archs'}->{$arch}) {
+    die "ERROR: Windows for $arch isn't supported\nStopped";
+  }
+  if (!exists $platforminfo{'win32'}->{'cl_versions'}->{$ver}) {
+    die "ERROR: Unknown or unsupported Visual C++ compiler version: $ver\n"
+      . "Stopped";
+  }
+
+  $opts{'compiler_version'} = $platforminfo{'win32'}->{'cl_versions'}->{$ver};
+  $opts{'compiler_target_architecture'} = $arch;
+
+  if ($ver >= 19) {
+    push(@{$opts{'features'}}, 'no_cxx11=0');
+    print "Visual C++ has C++11 support\n" if $opts{'verbose'};
   }
   $ENV{'PATH'} = $savepath;
   print "Detected Visual C++ version: $opts{'compiler_version'}\n"
@@ -1318,12 +1356,6 @@ sub win32_cmake_generator {
   return $map{$ver};
 }
 
-sub win32_cmake_arch {
-  my $arch = shift;
-
-  return ($arch eq 'x64' ? 'x64' : 'Win32');
-}
-
 if ($build_gtest) {
   my $cwd = Cwd::getcwd();
   my $build_dir = $opts{'gtest'} . $slash . 'build';
@@ -1333,7 +1365,7 @@ if ($build_gtest) {
     ('-Dgtest_force_shared_crt=ON',
      '-DCMAKE_CXX_FLAGS=/D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING=1',
      '-G', '"' . win32_cmake_generator($opts{'compiler_version'}) . '"',
-     '-A', win32_cmake_arch($opts{'compiler_target_architecture'})) : ();
+     '-A', $opts{'compiler_target_architecture'}) : ();
   my @cmake_cmds = ([$cmake,
                      "-DCMAKE_INSTALL_PREFIX=$install_dir",
                      '-DCMAKE_INSTALL_LIBDIR=lib',
@@ -2087,7 +2119,7 @@ print " to compile ",
   "to set environment\nvariables for future shell sessions.\n";
 if ($is_windows && !$cross_compile) {
   print "Start Visual Studio from this command prompt so that it inherits ",
-    "the correct\nenvironment variables. Try running \"devenv *.sln\".\n";
+    "the correct\nenvironment variables. Try running \"devenv $opts{'solution_file'}\".\n";
 }
 
 sub write_cmake_file {

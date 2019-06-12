@@ -16,7 +16,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace ICE {
 
-#if OPENDDS_SECURITY
+#ifdef OPENDDS_SECURITY
 
 bool AgentImpl::TaskCompare::operator()(const Task* x, const Task* y) const
 {

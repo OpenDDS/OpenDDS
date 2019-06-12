@@ -10,6 +10,7 @@
 #include <ace/Reverse_Lock_T.h>
 #include "dds/DCPS/security/framework/SecurityRegistry.h"
 #include "dds/DCPS/security/framework/SecurityConfig.h"
+#include "dds/DCPS/SafetyProfileStreams.h"
 
 #include "Checklist.h"
 
@@ -18,19 +19,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace ICE {
 
-#if OPENDDS_SECURITY
-
-std::string stringify(unsigned char x[16])
-{
-  char retval[32];
-
-  for (size_t idx = 0; idx != 16; ++idx) {
-    retval[2 * idx] = (x[idx] & 0x0F) + 97;
-    retval[2 * idx + 1] = ((x[idx] & 0xF0) >> 4) + 97;
-  }
-
-  return std::string(retval, 32);
-}
+#ifdef OPENDDS_SECURITY
 
 EndpointManager::EndpointManager(AgentImpl* a_agent_impl, Endpoint* a_endpoint) :
   agent_impl(a_agent_impl),
@@ -172,7 +161,7 @@ void EndpointManager::change_username()
   // Generate the username.
   unsigned char username[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
   TheSecurityRegistry->default_config()->get_utility()->generate_random_bytes(username, sizeof(username));
-  agent_info_.username = stringify(username);
+  agent_info_.username = OpenDDS::DCPS::to_hex_dds_string(username, 16, 0, 0);
   change_password(false);
 }
 
@@ -180,7 +169,7 @@ void EndpointManager::change_password(bool password_only)
 {
   unsigned char password[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
   TheSecurityRegistry->default_config()->get_utility()->generate_random_bytes(password, sizeof(password));
-  agent_info_.password = stringify(password);
+  agent_info_.password = OpenDDS::DCPS::to_hex_dds_string(password, 16, 0, 0);
   regenerate_agent_info(password_only);
 }
 
@@ -516,7 +505,7 @@ void EndpointManager::request(const ACE_INET_Addr& a_local_address,
     return;
   }
 
-  uint32_t priority;
+  ACE_UINT32 priority;
 
   if (!a_message.get_priority(priority)) {
     ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) EndpointManager::request: WARNING No PRIORITY attribute\n")));

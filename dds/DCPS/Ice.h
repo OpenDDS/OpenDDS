@@ -14,8 +14,6 @@
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DCPS/GuidUtils.h"
 
-#include <sstream>
-
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
@@ -24,14 +22,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace ICE {
-
-template <typename T>
-std::string stringify(T x)
-{
-  std::stringstream str;
-  str << x;
-  return str.str();
-}
 
 enum AgentType {
   FULL = 0x0,
@@ -45,12 +35,12 @@ enum CandidateType {
   RELAYED = 0x3,
 };
 
-struct OpenDDS_Dcps_Export Candidate {
+struct Candidate {
   ACE_INET_Addr address;
   // Transport - UDP or TCP
   std::string foundation;
   // Component ID
-  uint32_t priority;
+  ACE_UINT32 priority;
   CandidateType type;
   // Related Address and Port
   // Extensibility Parameters
@@ -67,15 +57,7 @@ struct OpenDDS_Dcps_Export Candidate {
   }
 };
 
-bool candidates_sorted(const Candidate& x, const Candidate& y);
-bool candidates_equal(const Candidate& x, const Candidate& y);
-
-Candidate make_host_candidate(const ACE_INET_Addr& address);
-Candidate make_server_reflexive_candidate(const ACE_INET_Addr& address, const ACE_INET_Addr& base, const ACE_INET_Addr& server_address);
-Candidate make_peer_reflexive_candidate(const ACE_INET_Addr& address, const ACE_INET_Addr& base, const ACE_INET_Addr& server_address, uint32_t priority);
-Candidate make_peer_reflexive_candidate(const ACE_INET_Addr& address, uint32_t priority, size_t q);
-
-struct OpenDDS_Dcps_Export AgentInfo {
+struct AgentInfo {
   typedef std::vector<Candidate> CandidatesType;
   typedef CandidatesType::const_iterator const_iterator;
 

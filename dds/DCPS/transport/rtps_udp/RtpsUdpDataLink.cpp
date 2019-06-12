@@ -2959,7 +2959,7 @@ OpenDDS::DCPS::RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const 
     normal_addr = pos->second.addr_;
   }
 
-#if OPENDDS_SECURITY
+#ifdef OPENDDS_SECURITY
   ICE::Endpoint* endpoint = get_ice_endpoint();
   if (endpoint) {
     ice_addr = ICE::Agent::instance()->get_address(endpoint, local, remote);
