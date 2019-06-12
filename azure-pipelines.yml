@@ -257,6 +257,8 @@ jobs:
       sudo apt-get --yes install libxerces-c-dev libssl-dev $(PackageDeps)
     displayName: install system package dependencies
     condition: and(succeeded(), ne(variables['PackageDeps'], ''))
+  - script: ls -l /usr/lib/jvm
+    displayName: Check installed JDKs
   - script: ./configure -v --mpcopts="-workers 4" --ace-github-latest $(ConfigOpts)
     displayName: Run configure script
   - script: make -sj6
