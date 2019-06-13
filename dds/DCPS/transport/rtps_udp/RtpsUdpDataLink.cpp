@@ -28,6 +28,8 @@
 
 #include "dds/DdsDcpsCoreTypeSupportImpl.h"
 
+#include "dds/DCPS/Definitions.h"
+
 #include "ace/Default_Constants.h"
 #include "ace/Log_Msg.h"
 #include "ace/Message_Block.h"
@@ -2946,8 +2948,8 @@ OpenDDS::DCPS::RtpsUdpDataLink::get_addresses(const RepoId& local) const {
 void
 OpenDDS::DCPS::RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
                                                      OPENDDS_SET(ACE_INET_Addr)& addresses) const {
-  assert(local != GUID_UNKNOWN);
-  assert(remote != GUID_UNKNOWN);
+  OPENDDS_ASSERT(local != GUID_UNKNOWN);
+  OPENDDS_ASSERT(remote != GUID_UNKNOWN);
 
   ACE_INET_Addr normal_addr;
   ACE_INET_Addr ice_addr;
