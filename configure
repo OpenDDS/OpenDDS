@@ -1161,10 +1161,14 @@ if ($build_gtest && !$has_cmake) {
 if (exists $opts{'rapidjson'}) {
   if ($opts{'rapidjson'} eq '') {
     my $sanity = $optdep{'rapidjson'}->[1];
-    my $sm_dir = Cwd::abs_path('./tools/IntermediateTypeLang/cpp/rapidjson');
+    my $sm_dir = Cwd::abs_path('./tools/rapidjson');
     my $sys_dir = File::Spec->catdir((system_default_install_dir(),
                               $is_windows ? 'RapidJSON' : ''));
 
+    my $rapidjson_msg =
+      "Could not find RapidJSON (using '$sanity') in:\n".
+      "    Git Submodule: '$sm_dir'\n" .
+      "    Default Install Prefix: '$sys_dir'\n";
     if (-f File::Spec->catfile($sm_dir, $sanity)) {
       $opts{'rapidjson'} = $sm_dir;
     }
@@ -1172,13 +1176,13 @@ if (exists $opts{'rapidjson'}) {
       $opts{'rapidjson'} = $sys_dir;
     }
     elsif (exists $defaulted->{'rapidjson'}) {
-      print "RapidJSON '$sanity' not found in submodule dir '$sm_dir' or default install dir '$sys_dir', ' .
-        ' continuing without it.\n";
+      print "${rapidjson_msg}Continuing without it.\n" if $opts{'verbose'};
       delete $opts{'rapidjson'};
     }
     else {
-      die "ERROR: RapidJSON '$sanity' not found in submodule dir '$sm_dir' or default install dir '$sys_dir'\nStopped"
+      die "ERROR: ${rapidjson_msg}Stopped";
     }
+    print "Using '$opts{'rapidjson'}' for RapidJSON\n" if $opts{'verbose'};
   }
 }
 

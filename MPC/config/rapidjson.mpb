@@ -3,7 +3,7 @@ project {
 
   expand(RAPIDJSON_ROOT) {
     $RAPIDJSON_ROOT
-    $(DDS_ROOT)/tools/IntermediateTypeLang/cpp/rapidjson
+    $(DDS_ROOT)/tools/rapidjson
   }
   includes += $(RAPIDJSON_ROOT)/include
 }
