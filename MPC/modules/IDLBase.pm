@@ -410,7 +410,7 @@ sub parse {
           ## This is a forward declaration.  Add it to the list of
           ## forward declarations to return back with the rest of the data.
           my $scope = $self->get_scope(\@state);
-          push(@forwards, join('/', @$scope) . $self->get_file_ext()); 
+          push(@forwards, join('/', @$scope) . $self->get_file_ext());
 
           pop(@state);
           $forward = undef;
