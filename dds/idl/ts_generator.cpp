@@ -84,14 +84,22 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
     IDL_GlobalData::DCPS_Data_Type_Info* info = idl_global->is_dcps_type(name);
     if (info) {
       key_count = info->key_list_.size();
-    } else if (be_global->is_topic_type(struct_node)) {
+    } else if (be_global->treat_as_topic(struct_node)) {
+
       key_count = TopicKeys(struct_node).count();
     } else {
+    /**
+     * @NOTE: this falls through if be_global->is_nested_type(node) == true)
+     */
       return true;
     }
-  } else if (be_global->is_topic_type(union_node)) {
+  } else if (be_global->treat_as_topic(union_node)) {
+
     key_count = be_global->has_key(union_node) ? 1 : 0;
   } else {
+    /**
+     * @NOTE: this falls through if be_global->is_nested_type(node) == true)
+     */
     return true;
   }
 
@@ -287,7 +295,11 @@ namespace java_ts_generator {
   void generate(AST_Structure* node) {
     UTL_ScopedName* name = node->name();
 
-    if (!(idl_global->is_dcps_type(name) || be_global->is_topic_type(node))) {
+    /**
+     * @TODO: better understand this and how it applies to nested
+     * @author ceneblock
+     */
+    if (!(idl_global->is_dcps_type(name) || be_global->treat_as_topic(node))) {
       return;
     }
 

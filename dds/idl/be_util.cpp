@@ -98,6 +98,7 @@ void
 be_util::usage (void)
 {
   ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT(" --default-nested\ttreat unannotated types as if they were nested\n")
     ACE_TEXT(" -o <dir>\t\tsets output directory for all files\n")
     ACE_TEXT(" -Lface\t\t\tgenerate FACE IDL to C++ mapping\n")
     ACE_TEXT(" -Lspcpp\t\tgenerate Safety Profile IDL to C++ mapping\n")

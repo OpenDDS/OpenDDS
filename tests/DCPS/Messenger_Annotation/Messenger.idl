@@ -5,6 +5,7 @@
  * See: http://www.opendds.org/license.html
  */
 
+@default_nested(FALSE)
 module Messenger {
 
   typedef char hexadecimal_t[8];
@@ -14,9 +15,8 @@ module Messenger {
     BASE_10,
     BASE_16
   };
- 
-  @topic 
-  union Data switch(@key Base)
+
+  union Data switch(Base)
   {
     case BASE_2:
       boolean on_off;

@@ -152,6 +152,9 @@ dds_visitor::visit_scope(UTL_Scope* node)
         continue;
       }
 
+      ///Give a little warning
+      be_global->is_nested_type(d);
+
       if (d->ast_accept(this) == -1) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%N:%l) dds_visitor::visit_")
