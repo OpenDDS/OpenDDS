@@ -194,11 +194,6 @@ public:
   static Agent* instance();
 };
 
-std::ostream& operator<<(std::ostream& stream, const ACE_INET_Addr& address);
-std::ostream& operator<<(std::ostream& stream, const STUN::TransactionId& tid);
-std::ostream& operator<<(std::ostream& stream, const ICE::Candidate& candidate);
-std::ostream& operator<<(std::ostream& stream, const ICE::AgentInfo& agent_info);
-
 } // namespace ICE
 } // namespace OpenDDS
 

@@ -85,44 +85,6 @@ Agent* Agent::instance()
   return ACE_Singleton<AgentImpl, ACE_SYNCH_MUTEX>::instance();
 }
 
-std::ostream& operator<<(std::ostream& stream, const ACE_INET_Addr& address)
-{
-  stream << address.get_host_addr() << ':' << address.get_port_number();
-  return stream;
-}
-
-std::ostream& operator<<(std::ostream& stream, const STUN::TransactionId& tid)
-{
-  for (size_t idx = 0; idx != 12; ++idx) {
-    stream << int(tid.data[idx]);
-  }
-
-  return stream;
-}
-
-std::ostream& operator<<(std::ostream& stream, const ICE::Candidate& candidate)
-{
-  stream << "address:    " << candidate.address << '\n'
-         << "foundation: " << candidate.foundation << '\n'
-         << "priority:   " << candidate.priority << '\n'
-         << "type:       " << candidate.type << '\n'
-         << "base:       " << candidate.base << '\n';
-  return stream;
-}
-
-std::ostream& operator<<(std::ostream& stream, const ICE::AgentInfo& agent_info)
-{
-  stream << "type:     " << agent_info.type     << '\n'
-         << "username: " << agent_info.username << '\n'
-         << "password: " << agent_info.password << '\n';
-
-  for (AgentInfo::const_iterator pos = agent_info.begin(), limit = agent_info.end(); pos != limit; ++pos) {
-    stream << *pos;
-  }
-
-  return stream;
-}
-
 #endif /* OPENDDS_SECURITY */
 
 } // namespace ICE
