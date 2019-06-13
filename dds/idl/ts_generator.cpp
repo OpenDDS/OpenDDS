@@ -86,32 +86,19 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
       key_count = info->key_list_.size();
     } else if (be_global->treat_as_topic(struct_node)) {
 
-      ///Go ahead and warn if we see bad stuff
-      be_global->is_nested_type(node);
-
       key_count = TopicKeys(struct_node).count();
-    } else if(be_global->is_nested_type(node)) {
-      ///Being explicit to prevent any confusion and allow for modification in
-      //the future.
-
-      /**
-       * @TODO: only run is_nested_type(node) and treat_as_topic(*_node) once
-       */
-      return true;
-
     } else {
+    /**
+     * @NOTE: this falls through if be_global->is_nested_type(node) == true)
+     */
       return true;
     }
   } else if (be_global->treat_as_topic(union_node)) {
-
-    ///Go ahead and warn if we see bad stuff
-    be_global->is_nested_type(node);
 
     key_count = be_global->has_key(union_node) ? 1 : 0;
   } else {
     /**
      * @NOTE: this falls through if be_global->is_nested_type(node) == true)
-     * @TODO: only run is_nested_type(node) and treat_as_topic(*_node) once
      */
     return true;
   }
@@ -313,8 +300,6 @@ namespace java_ts_generator {
      * @author ceneblock
      */
     if (!(idl_global->is_dcps_type(name) || be_global->treat_as_topic(node))) {
-      ///Go ahead and warn if we see bad stuff
-      be_global->is_nested_type(node);
       return;
     }
 
