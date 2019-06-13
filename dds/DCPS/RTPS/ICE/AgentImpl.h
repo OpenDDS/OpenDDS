@@ -14,7 +14,10 @@
 
 #include <ace/Time_Value.h>
 #include "dds/Versioned_Namespace.h"
+
+#include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/ReactorInterceptor.h"
+
 #include "Ice.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -38,7 +41,7 @@ public:
   void remove(const FoundationType& a_foundation)
   {
     FoundationsType::iterator pos = foundations_.find(a_foundation);
-    assert(pos != foundations_.end());
+    OPENDDS_ASSERT(pos != foundations_.end());
     pos->second -= 1;
 
     if (pos->second == 0) {
