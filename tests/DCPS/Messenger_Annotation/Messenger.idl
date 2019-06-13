@@ -10,11 +10,6 @@ module Messenger {
 
   typedef char hexadecimal_t[8];
 
-  @nested
-  struct Hidden {
-    string hidden_message;
-  };
-
   enum Base {
     BASE_2,
     BASE_10,
