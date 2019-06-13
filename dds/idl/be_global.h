@@ -13,10 +13,6 @@
 #include "utl_scoped_name.h"
 
 #include "ast_annotation_member.h"
-#include "utl_string.h"
-#include "ast_enum_val.h"
-
-#include "ast_annotation_member.h"
 
 #include <string>
 #include <sstream>
