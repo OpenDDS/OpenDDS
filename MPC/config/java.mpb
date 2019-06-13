@@ -22,15 +22,6 @@ project {
     keyword javacflags   = commandflags
   }
 
-  // JAVAHHelper.pm contains the logic to determine the output file name
-  Define_Custom(JavaH) {
-    automatic_in  = 0
-    automatic_out = 1
-    inputext      = .class
-    command       = perl
-    commandflags  = $(DDS_ROOT)/java/build_scripts/javah_wrapper.pl
-  }
-
   // Make the directory but ensure there are no error messages displayed and
   // a "0" is returned on all platforms.
   prebuild  += <%mkdir%> classes 2<%gt%> <%nul%> <%or%> <%cat%> <%nul%> <%gt%> <%nul%>
