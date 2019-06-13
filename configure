@@ -1166,7 +1166,7 @@ if (exists $opts{'rapidjson'}) {
                               $is_windows ? 'RapidJSON' : ''));
 
     my $rapidjson_msg =
-      "Checked for RapidJSON '$sanity' in:\n".
+      "Could not find RapidJSON (using '$sanity') in:\n".
       "    Git Submodule: '$sm_dir'\n" .
       "    Default Install Prefix: '$sys_dir'\n";
     if (-f File::Spec->catfile($sm_dir, $sanity)) {
@@ -1176,7 +1176,7 @@ if (exists $opts{'rapidjson'}) {
       $opts{'rapidjson'} = $sys_dir;
     }
     elsif (exists $defaulted->{'rapidjson'}) {
-      print "${rapidjson_msg}Could not find it, continuing without it.\n" if $opts{'verbose'};
+      print "${rapidjson_msg}Continuing without it.\n" if $opts{'verbose'};
       delete $opts{'rapidjson'};
     }
     else {
