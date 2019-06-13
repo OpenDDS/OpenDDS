@@ -151,7 +151,7 @@ sub get_output {
   my %seen;
 
   ## Parse the IDL file and get back the types and names
-  my $data = $self->do_cached_parse($file, $flags);
+  my($data, $fwd) = $self->do_cached_parse($file, $flags);
 
   ## Get the file names based on the type and name of each entry
   my @tmp;
@@ -161,8 +161,11 @@ sub get_output {
   }
   @filenames = grep(!$seen{$_}++, @tmp); # remove duplicates
 
-  ## Return the file name list
-  return \@filenames;
+  ## Return the file name list and a map of dependencies.  This dependency
+  ## map says that every generated file will depend on other generated files
+  ## based solely on forward declared elements.
+  my %forwards = map { $_ => $fwd } @filenames;
+  return \@filenames, {$self->get_component_name() => \%forwards};
 }
 
 sub get_filenames {
@@ -186,7 +189,7 @@ sub get_tied {
     }
   }
 
-  return $tied, $self->get_component_name;
+  return $tied, $self->get_component_name();
 }
 
 sub get_component_name {
@@ -222,7 +225,8 @@ sub cached_parse {
 
   ## If we have already processed this file, we will just delete the
   ## stored data and return it.
-  return delete $self->{'files'}->{$file} if (defined $self->{'files'}->{$file});
+  return delete $self->{'files'}->{$file}, delete $self->{'forwards'}->{$file}
+           if (defined $self->{'files'}->{$file});
 
   ## If the file is a DDS type support idl file, we will remove the
   ## TypeSupport portion and process the file from which it was created.
@@ -235,8 +239,8 @@ sub cached_parse {
   my $ts = defined $self->{'strs'}->{$actual} ||
            ($actual =~ /$tsreg$/ && -r $actual) ?
                    undef : ($actual =~ s/$tsreg$/.idl/);
-  my($data, $ts_str, $ts_pragma) = $self->parse($actual, $includes, $macros,
-                                                $mparams);
+  my($data, $forwards, $ts_str, $ts_pragma) =
+       $self->parse($actual, $includes, $macros, $mparams);
 
   if ($ts) {
     ## The file passed into this method was the type support file.  Store
@@ -244,8 +248,8 @@ sub cached_parse {
     ## string that was obtained during the original parsing and return
     ## that data.
     $self->{'files'}->{$actual} = $data;
-    ($data, $ts_str) = $self->parse($file, $includes,
-                                    $macros, $mparams, $ts_str);
+    $self->{'forwards'}->{$actual} = $forwards;
+    ($data) = $self->parse($file, $includes, $macros, $mparams, $ts_str);
   }
   elsif ($ts_str) {
     ## The file passed in was not a type support, but contained #pragma's
@@ -257,11 +261,12 @@ sub cached_parse {
     $self->{'strs'}->{$key} = [$ts_str, $ts_pragma];
   }
 
-  return $data;
+  return $data, $forwards;
 }
 
 sub parse {
   my($self, $file, $includes, $macros, $mparams, $str) = @_;
+  my @forwards;
 
   ## Preprocess the file into one huge string
   my $ts_str;
@@ -404,6 +409,11 @@ sub parse {
           $forward = undef;
         }
         elsif ($c eq ';') {
+          ## This is a forward declaration.  Add it to the list of
+          ## forward declarations to return back with the rest of the data.
+          my $scope = $self->get_scope(\@state);
+          push(@forwards, join('/', @$scope) . $self->get_file_ext());
+
           pop(@state);
           $forward = undef;
         }
@@ -443,7 +453,7 @@ sub parse {
     }
   }
 
-  return \@data, $ts_str, $ts_pragma;
+  return \@data, \@forwards, $ts_str, $ts_pragma;
 }
 
 # ************************************************************
