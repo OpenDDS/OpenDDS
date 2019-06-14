@@ -40,7 +40,7 @@ sub perlOS_to_java_platform {
   return $^O;
 }
 
-my $targetUsageIndent = "\n\t\t";
+my $targetUsageIndent = "\t\t";
 
 my %platforminfo =
   ('win32' => {
@@ -102,9 +102,9 @@ my %platforminfo =
      'aceconfig' => 'android',
      'no_host' => 1,
      'usage' => [
-       "Use --macros=ANDROID_ABI=<ARCH> to specify the target archtecture." .
-       "${targetUsageIndent}Defaults to armeabi-v7a which is 32-bit ARMv7." .
-       "${targetUsageIndent}See docs/android.md for details."
+       "Use --macros=ANDROID_ABI=<ARCH> to specify the target archtecture.",
+       "Defaults to armeabi-v7a which is 32-bit ARMv7.",
+       "See docs/android.md for details.",
      ],
    },
   );
@@ -151,6 +151,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'target-compiler=s', 'Compiler for target (if req\'d): see --target-help',
     'host-tools=s', 'DDS_ROOT of host tools for cross compile' .
       $argIndent . '(build them)',
+    'host-tools-only!', 'Just build the host tools (no)',
     'prefix=s', 'Installation prefix (none)',
    ],
    ['Build flags:',
@@ -1015,6 +1016,15 @@ my %optdep =
    'openssl' =>   ['SSL_ROOT',        'include/openssl/opensslv.h',    'ssl'],
   );
 
+my $host_tools_only = exists $opts{'host-tools-only'} && $opts{'host-tools-only'};
+if ($host_tools_only) {
+  print "--host-tools-only implies --static\n" if $opts{'verbose'};
+  $opts{'static'} = 1;
+  if ($cross_compile) {
+    die "ERROR: Can't use --host-tools-only for cross compile\nStopped";
+  }
+}
+
 # Use this to check if tests are enabled (instead of $opts{'tests'} directly).
 my $tests = !exists $opts{'tests'} || $opts{'tests'};
 
@@ -1027,7 +1037,7 @@ if ($tests) {
 my @ace_features = ('xerces3');
 
 if (exists $opts{'java'}) {
-  if ($opts{'static'}) {
+  if ($opts{'static'} && !$host_tools_only) {
     die "ERROR: --static can't be used with --java\nStopped";
   }
   setEnv('JAVA_PLATFORM', perlOS_to_java_platform());
@@ -2123,6 +2133,10 @@ else { # does not require cloned builds
     push_libpath(\%targetEnv, $targetEnv{'DDS_ROOT'} . $slash . 'lib');
 
     add_dependency_paths();
+  }
+
+  if ($host_tools_only) {
+    write_host_workspace(\%targetEnv);
   }
 
   configure_build(\%targetEnv);
