@@ -20,7 +20,6 @@ add_executable(publisher
     ${src}/publisher.cpp
     ${src}/Writer.cpp
     ${src}/Writer.h
-    
 )
 
 # Subscriber
