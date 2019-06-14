@@ -93,7 +93,9 @@ using namespace std;
 void
 BE_cleanup()
 {
-  idl_global->destroy();
+  if (idl_global) {
+    idl_global->destroy();
+  }
 }
 
 // Abort this run of the BE.
