@@ -55,7 +55,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 
       Messenger::Message message;
       DDS::SampleInfo si;
-    
+
       DDS::ReturnCode_t status = message_dr->take_next_sample(message, si) ;
 
       if (status == DDS::RETCODE_OK) {
@@ -73,7 +73,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
                     << "         from       = " << message.from.in()    << std::endl
                     << "         count      = " << message.count        << std::endl
                     << "         body       = " << message.body.in()    << std::endl;
-          
+
 
           /**
           * @author ceneblock
@@ -147,7 +147,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 
       Messenger::Data data;
       DDS::SampleInfo si;
-    
+
       DDS::ReturnCode_t status = data_dr->take_next_sample(data, si) ;
 
       if (status == DDS::RETCODE_OK) {

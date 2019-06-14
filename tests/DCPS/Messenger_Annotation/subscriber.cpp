@@ -38,7 +38,7 @@ struct typeSupport
 {
   Messenger::MessageTypeSupport_var m;
   Messenger::DataTypeSupport_var d;
-}; 
+};
 
 bool reliable = false;
 bool wait_for_acks = false;
@@ -92,7 +92,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     CORBA::String_var type_name;
     if(use_data) {
       topic_name = "BinDecHex";
-      
+
       ts.d = new Messenger::DataTypeSupportImpl();
       type_name = ts.d->get_type_name();
 

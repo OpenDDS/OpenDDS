@@ -111,7 +111,7 @@ Writer::is_finished() const
 
 /**
  * @brief a helper function for svc to write the Messenger::Message
- */ 
+ */
 void Writer::writeMessenger()
 {
   Messenger::MessageDataWriter_var message_dw
@@ -163,7 +163,7 @@ void Writer::writeMessenger()
 
 /**
  * @brief a helper function for svc to write the Messenger::Data
- */ 
+ */
 void Writer::writeData()
 {
   Messenger::DataDataWriter_var data_dw
