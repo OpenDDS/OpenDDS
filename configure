@@ -18,6 +18,7 @@ require File::Temp;
 use File::Temp ();
 use FileHandle;
 use Cwd;
+use POSIX;
 use strict;
 use warnings;
 
@@ -832,7 +833,8 @@ sub clone_host_and_target {
 sub backup_and_open {
   my $file = shift;
   if (!$opts{'dry-run'} && -r $file) {
-    my $backup = (-e $file . '.bak') ? ($file . '.bak') : $file . ".bak.$$";
+    my $date = strftime "%Y-%m-%d-%H-%M-%S", localtime time;
+    my $backup = (-e $file . '.bak') ? ($file . '.bak') : $file . ".bak.$date";
     copy($file, $backup);
     print "WARNING: overwriting existing $file (saved a backup copy as " .
       "$backup)\n";
