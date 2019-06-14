@@ -9,10 +9,14 @@
 #define OPENDDS_ICE_H
 
 #include "dds/DCPS/dcps_export.h"
-#include "ace/INET_Addr.h"
-#include "dds/DCPS/Serializer.h"
-#include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DCPS/GuidUtils.h"
+#include "dds/DCPS/PoolAllocationBase.h"
+#include "dds/DCPS/PoolAllocator.h"
+#include "dds/DCPS/Serializer.h"
+
+#include "dds/DdsDcpsInfoUtilsC.h"
+
+#include "ace/INET_Addr.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -35,7 +39,7 @@ enum CandidateType {
   RELAYED = 0x3,
 };
 
-struct Candidate {
+struct Candidate : DCPS::PoolAllocationBase {
   ACE_INET_Addr address;
   // Transport - UDP or TCP
   std::string foundation;
@@ -58,7 +62,7 @@ struct Candidate {
 };
 
 struct AgentInfo {
-  typedef std::vector<Candidate> CandidatesType;
+  typedef OPENDDS_VECTOR(Candidate) CandidatesType;
   typedef CandidatesType::const_iterator const_iterator;
 
   CandidatesType candidates;
