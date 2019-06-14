@@ -666,11 +666,20 @@ if (!$ace_src || !$tao_src) {
         ! -r 'ACE_TAO/ACE/ace/ACE.h' ||
           ! -r 'ACE_TAO/TAO/tao/ORB.h';
 
+    my $cur_dir = getcwd;
+    chdir('ACE_TAO');
+    system('git log -1 --oneline');
+    chdir($cur_dir);
+
     print "Cloning git repo: $urlbase/MPC into ACE_TAO/ACE/MPC\n";
     $err = system("git clone -q --depth 1 $urlbase/MPC ACE_TAO/ACE/MPC");
     die 'ERROR: Failed to clone MPC (into ACE_TAO/ACE/MPC) from GitHub'
       if $err ||
         ! -r 'ACE_TAO/ACE/MPC/mwc.pl';
+
+    chdir('ACE_TAO/ACE/MPC');
+    system('git log -1 --oneline');
+    chdir($cur_dir);
 
     $ace_src = normalizePath('ACE_TAO/ACE');
     $tao_src = normalizePath('ACE_TAO/TAO');
