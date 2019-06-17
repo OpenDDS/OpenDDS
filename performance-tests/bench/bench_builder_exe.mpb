@@ -1,0 +1,11 @@
+project: ../bench_builder_idl_lib {
+  after    += Bench_Builder
+  libs     += Bench_Builder
+  expand(BENCH_BUILDER_ROOT) {
+    $BENCH_BUILDER_ROOT
+    $(DDS_ROOT)/performance-tests/bench
+  }
+  includes += $(BENCH_BUILDER_ROOT)/builder
+  exename   = *
+}
+

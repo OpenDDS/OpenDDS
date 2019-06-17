@@ -1,0 +1,10 @@
+project: dcps_rtps_udp {
+  after    += Bench_Builder_Idl
+  libs     += Bench_Builder_Idl
+  expand(BENCH_BUILDER_ROOT) {
+    $BENCH_BUILDER_ROOT
+    $(DDS_ROOT)/performance-tests/bench
+  }
+  includes += $(BENCH_BUILDER_ROOT)/builder_idl
+}
+

@@ -1,4 +1,0 @@
-project: dcpslib, dcps_inforepodiscovery, ../stool_builder_idl_lib {
-  dynamicflags += STOOL_BUILDER_BUILD_DLL
-}
-

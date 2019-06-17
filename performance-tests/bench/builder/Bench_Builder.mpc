@@ -1,0 +1,4 @@
+project: dcpslib, dcps_inforepodiscovery, ../bench_builder_idl_lib {
+  dynamicflags += BENCH_BUILDER_BUILD_DLL
+}
+
