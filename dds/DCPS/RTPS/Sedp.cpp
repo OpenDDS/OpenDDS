@@ -1764,6 +1764,7 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
 #endif
 
         DiscoveredPublication& pub = discovered_publications_[guid] = prepub;
+        bool inconsistent = false;
 
         OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
           topics_.find(topic_name);
@@ -1787,12 +1788,14 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
               wdata.ddsPublicationData.type_name.in(),
               top_it->second.data_type_.c_str()));
           }
-          return;
+          inconsistent = true;
         }
 
-        TopicDetails& td = top_it->second;
-        topic_names_[td.repo_id_] = topic_name;
-        td.endpoints_.insert(guid);
+        if (!inconsistent) {
+          TopicDetails& td = top_it->second;
+          topic_names_[td.repo_id_] = topic_name;
+          td.endpoints_.insert(guid);
+        }
 
         std::memcpy(pub.writer_data_.ddsPublicationData.participant_key.value,
                     guid.guidPrefix, sizeof(DDS::BuiltinTopicKey_t));
@@ -2085,6 +2088,7 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
 #endif
 
         DiscoveredSubscription& sub = discovered_subscriptions_[guid] = presub;
+        bool inconsistent = false;
 
         OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
           topics_.find(topic_name);
@@ -2108,12 +2112,14 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
                        rdata.ddsSubscriptionData.type_name.in(),
                        top_it->second.data_type_.c_str()));
           }
-          return;
+          inconsistent = true;
         }
 
-        TopicDetails& td = top_it->second;
-        topic_names_[td.repo_id_] = topic_name;
-        td.endpoints_.insert(guid);
+        if (!inconsistent) {
+          TopicDetails& td = top_it->second;
+          topic_names_[td.repo_id_] = topic_name;
+          td.endpoints_.insert(guid);
+        }
 
         std::memcpy(sub.reader_data_.ddsSubscriptionData.participant_key.value,
                     guid.guidPrefix, sizeof(DDS::BuiltinTopicKey_t));
