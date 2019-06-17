@@ -39,7 +39,8 @@ OpenDDS::DCPS::TcpReceiveStrategy::receive_bytes(
   iovec iov[],
   int   n,
   ACE_INET_Addr& /*remote_address*/,
-  ACE_HANDLE /*fd*/)
+  ACE_HANDLE /*fd*/,
+  bool& /*stop*/)
 {
   DBG_ENTRY_LVL("TcpReceiveStrategy", "receive_bytes", 6);
 

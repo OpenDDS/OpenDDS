@@ -1,11 +1,11 @@
 project: java, dds_macros, install {
 
-  avoids += full_jre
+  avoids += java_pre_jpms
 
   libout = $(DDS_ROOT)/lib
 
   specific {
-    jarname = i2jrt_compact
+    jarname = i2jrt_corba
   }
 
   Java_Files {
@@ -13,6 +13,6 @@ project: java, dds_macros, install {
   }
 
   verbatim(gnuace, postinstall) {
-"	cp $(DDS_ROOT)/lib/i2jrt_compact.jar $(INSTALL_PREFIX)/lib"
+"	cp $(DDS_ROOT)/lib/i2jrt_corba.jar $(INSTALL_PREFIX)/lib"
   }
 }

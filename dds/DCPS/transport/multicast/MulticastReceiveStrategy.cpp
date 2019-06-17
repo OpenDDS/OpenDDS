@@ -43,7 +43,8 @@ ssize_t
 MulticastReceiveStrategy::receive_bytes(iovec iov[],
                                         int n,
                                         ACE_INET_Addr& remote_address,
-                                        ACE_HANDLE /*fd*/)
+                                        ACE_HANDLE /*fd*/,
+                                        bool& /*stop*/)
 {
   ACE_SOCK_Dgram_Mcast& socket = this->link_->socket();
   return socket.recv(iov, n, remote_address);

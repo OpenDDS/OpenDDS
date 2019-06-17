@@ -58,6 +58,7 @@ tests/DCPS/Compiler/idl_test3_main/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFIL
 tests/DCPS/Compiler/C++11/idl_test1_main/run_test.pl: !DCPS_MIN CXX11
 tests/DCPS/Compiler/C++11/idl_test3_main/run_test.pl: !DCPS_MIN CXX11
 tests/DCPS/C++11/Messenger/run_test.pl: !DCPS_MIN CXX11
+tests/DCPS/Compiler/rapidjson_generator/run_test.pl: RAPIDJSON
 
 tests/DCPS/DcpsIntegration/run_test-integration.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/DcpsIntegration/run_test-topic.pl: !DCPS_MIN !DDS_NO_PERSISTENCE_PROFILE !DDS_NO_OWNERSHIP_PROFILE
@@ -113,6 +114,7 @@ tests/DCPS/Reconnect/run_test.pl restart_sub: !DCPS_MIN !OPENDDS_SAFETY_PROFILE 
 tests/DCPS/Reconnect/run_test.pl restart_pub: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/Reconnect/run_test.pl bp_timeout: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/Reconnect/run_test.pl sub_init_crash: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/Restart/run_test.pl: RTPS !OPENDDS_SAFETY_PROFILE
 tests/DCPS/sub_init_loop/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/TimeBasedFilter/run_test.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/TimeBasedFilter/run_test.pl -reliable: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE

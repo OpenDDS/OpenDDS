@@ -39,14 +39,19 @@ ACE_END_VERSIONED_NAMESPACE_DECL
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
+
+namespace ICE {
+  class Endpoint;
+}
+
 namespace DCPS {
 
 
-class  TransportQueueElement;
-class  ReceivedDataSample;
-class  DataSampleElement;
-class  ThreadPerConnectionSendTask;
-class  TransportClient;
+class TransportQueueElement;
+class ReceivedDataSample;
+class DataSampleElement;
+class ThreadPerConnectionSendTask;
+class TransportClient;
 class TransportImpl;
 
 typedef OPENDDS_MAP_CMP(RepoId, DataLinkSet_rch, GUID_tKeyLessThan) DataLinkSetMap;
@@ -255,6 +260,8 @@ public:
 
   virtual void send_final_acks (const RepoId& readerid);
 
+  virtual ICE::Endpoint* get_ice_endpoint() const { return 0; }
+
 protected:
 
   /// This is how the subclass "announces" to this DataLink base class
@@ -290,7 +297,7 @@ protected:
   friend class ThreadPerConnectionSendTask;
 
   /// The implementation of the functions that accomplish the
-  /// sample or control message delivery. IThey just simply
+  /// sample or control message delivery. They just simply
   /// delegate to the send strategy.
   void send_start_i();
   virtual void send_i(TransportQueueElement* element, bool relink = true);
@@ -300,6 +307,12 @@ protected:
   /// of remote peer RepoIds (subscriptions or publications) that this link
   /// knows about due to make_reservation().
   GUIDSeq* peer_ids(const RepoId& local_id) const;
+
+  /**
+   * For a given reader writer pair, call the first_acknowledged_by_reader
+   * callback on the TransportSendListener if there is one.
+   */
+  void first_acknowledged_by_reader(const RepoId& localWriter, const RepoId& remoteReader, const SequenceNumber& sn_base);
 
 private:
 

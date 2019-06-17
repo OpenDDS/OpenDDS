@@ -1,6 +1,6 @@
 # OpenDDS Dependencies
 
-## Required to Build the OpenDDS Library
+## Required to Build the Core OpenDDS Libraries
 
 **NOTE: Perl is required to run the configure script; MPC, ACE, and TAO will be
 downloaded automatically by the configure script by default.**
@@ -23,7 +23,7 @@ MPC is the build system used by OpenDDS, used to configure the build and
 generate platform specific build files (Makefiles, VS solution files, etc.).
 
 The official repository is hosted on Github at
-[DOCGroup/MPC](https://github.com/DOCGroup/MPC).
+[`DOCGroup/MPC`](https://github.com/DOCGroup/MPC).
 
 ### ACE
 
@@ -33,7 +33,8 @@ example sockets, threads, and dynamic library loading, are provided by ACE.
 
 Some other features OpenDDS relies on ACE for:
 
-- ACE provides the `gnuace` type used by MPC
+- ACE provides the `gnuace` type used by MPC for generating Makefiles for
+  OpenDDS
 - ACE contains a script, `generate_export_file.pl`, which is used (along with
   MPC) to manage shared libraries' symbol visibility (also known as
   export/import)
@@ -53,79 +54,119 @@ Some other features OpenDDS relies on ACE for:
 The OCI page for ACE is https://objectcomputing.com/products/ace.
 
 The upstream DOC Group repository is hosted on Github at
-[DOCGroup/ACE\_TAO](https://github.com/DOCGroup/ACE_TAO), which it shares with
+[`DOCGroup/ACE_TAO`](https://github.com/DOCGroup/ACE_TAO), which it shares with
 TAO.
 
 ### TAO
 
 TAO is a C++ CORBA Implementation built on ACE.
 
-- TAO provides the IDL compiler `tao_idl` and non-generated classes which
+- TAO provides the `tao_idl` IDL compiler and non-generated classes which
   implement the IDL-to-C++ mapping.
 - TAO ORBs are only created for interaction with the DCPSInfoRepo, all other
   uses of TAO are basic types and local interfaces.
-- A separate library, OpenDDS\_InfoRepoDiscovery, encapsulates the participant
+- A separate library, `OpenDDS_InfoRepoDiscovery`, encapsulates the participant
   process's use of the ORB
-  - This is the only library which depends on TAO\_PortableServer
+  - This is the only library which depends on `TAO_PortableServer`
 
 The OCI page for TAO is https://objectcomputing.com/products/tao.
 
 The upstream DOC Group repository is hosted on Github at
-[DOCGroup/ACE\_TAO](https://github.com/DOCGroup/ACE_TAO), which it shares with
+[`DOCGroup/ACE_TAO`](https://github.com/DOCGroup/ACE_TAO), which it shares with
 ACE.
 
 ## Optional Dependencies
 
 ### CMake
 
-OpenDDS has a [CMake "FindPacakge" module included](../cmake). See
-[cmake.md](cmake.md) for how to make OpenDDS applications with CMake and
+OpenDDS has a [CMake `FindPacakge` module included](../cmake). See
+[`cmake.md`](cmake.md) for how to make OpenDDS applications with CMake and
 without the need to use MPC in your application.
 
-CMake is also used for the Google Test based DDS security unit tests. See
-[../tests/gtest_setup.txt](../tests/gtest_setup.txt).
+CMake is required to build Google Test for OpenDDS tests if a prebuilt Google
+Test is not found or provided. You can forgo having to have CMake by passing
+`--no-tests` to the OpenDDS configure script or building and/or installing
+Google Test separately.
+
+See [`../tests/gtest_setup.txt`](../tests/gtest_setup.txt) for details.
 
 ### Google Test
 
-Google Test is used for DDS security unit tests.
-See [../tests/gtest_setup.txt](../tests/gtest_setup.txt) for details.
+Google Test is required for OpenDDS tests. You can forgo this dependency by
+passing `--no-tests` to the OpenDDS configure script.
+
+Google Test is a git submodule that will be downloaded automatically if the
+repository was recursively cloned or submodules were initialized separately.
+
+**If OpenDDS was downloaded from opendds.org or another source that's not a git
+repository, Google Test will have to be downloaded separately and configured
+manually.**
+
+Google Test is available as package, at least in Debian based Linux
+distributions.
+
+See [`../tests/gtest_setup.txt`](../tests/gtest_setup.txt) for details.
 
 ### Java
 
 OpenDDS has optional Java bindings. It requires the Java Development Kit
-(JDK). See [../java/README](../java/README).
+(JDK). See [`../java/README`](../java/README).
 
 There is also support for Java Message Server (JMS) v1.1. In addition to the
-JDK, it requires Ant and JBoss 4.2.x. See [../java/jms](../java/jms/README).
+JDK, it requires Ant and JBoss 4.2.x. See [`../java/jms`](../java/jms/README).
 
 ### Qt
 
 Qt5 is used for the [monitor](../tools/monitor) utility program and the
 [ishapes](../examples/DCPS/ishapes) RTPS demo.
 
-See [qt.md](qt.md) for details on configuring OpenDDS to use Qt.
+See [`qt.md`](qt.md) for details on configuring OpenDDS to use Qt.
 
 ### Wireshark
 
-A Wireshark dissector plugin for OpenDDS's non-RTPS transports is included with
-OpenDDS. The dissector supports displaying and filtering by sample contents and
-works with Wireshark 1.x and 2.x.
+A Wireshark dissector plugin for OpenDDS' non-RTPS transports is included with
+OpenDDS. The dissector supports Wireshark 1.2 and onwards and supports
+displaying and filtering by sample contents and from Wireshark 1.12 onwards.
 
-See [../tools/dissector/README.md](../tools/dissector/README.md) for details.
+Because of Wireshark's use of Glib, Glib is also required to build the
+dissector.
+
+See [`../tools/dissector/README.md`](../tools/dissector/README.md) for details.
 
 ### RapidJSON
 
-RapidJSON is a C++ JSON Library used in the Wireshark dissector for sample
-dissection. Samples are described in what is called the Intermediate Type
-Language (ITL) which is JSON that can be generated by `opendds_idl` from IDL
-files.
+RapidJSON is a C++ JSON Library used for generating in ITL and RapidJSON type
+support. ITL is the Wireshark dissector for sample dissection. Samples are
+described in what is called the Intermediate Type Language (ITL) which is JSON
+that can be generated by `opendds_idl` from IDL files. RapidJSON support is
+enabled by default unless `--no-rapidjson` was passed.
 
 See
-[../tools/dissector/README.md#sample-dissection](../tools/dissector/README.md#sample-dissection)
+[`../tools/dissector/README.md#sample-dissection`](../tools/dissector/README.md#sample-dissection)
 for details.
+
+RapidJSON is a git submodule that will be downloaded automatically if the
+repository was recursively cloned or submodules were initialized separately.
+
+**If OpenDDS was downloaded from opendds.org or another source that's not a git
+repository, RapidJSON will have to be downloaded separately and configured
+manually.**
+
+RapidJSON is available as package, at least in Debian based Linux
+distributions.
 
 ### Boost
 
 Boost, as of writing, is just an optional dependency of the
 [ishapes](../examples/DCPS/ishapes) RTPS demo and only if C++11 is not
 available.
+
+### Xerces
+
+Apache Xerces ("Xerces 3 C++" specifically) is used for parsing QoS XML and
+security XML configuration files.
+
+### OpenSSL
+
+OpenSSL is used for DDS Security for verifying security configurations and
+encryption and decryption. Version 1.0 and version 1.1 are supported.

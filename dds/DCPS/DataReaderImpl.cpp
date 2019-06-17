@@ -1850,6 +1850,13 @@ CORBA::Long DataReaderImpl::total_samples() const
   return count;
 }
 
+void
+DataReaderImpl::LivelinessTimer::check_liveliness()
+{
+  CheckLivelinessCommand c(this);
+  execute_or_enqueue(c);
+}
+
 int
 DataReaderImpl::LivelinessTimer::handle_timeout(const ACE_Time_Value& tv,
                                                 const void * /*arg*/)
@@ -3273,6 +3280,12 @@ DataReaderImpl::unregister_for_writer(const RepoId& participant,
                                       const RepoId& writerid)
 {
   TransportClient::unregister_for_writer(participant, readerid, writerid);
+}
+
+ICE::Endpoint*
+DataReaderImpl::get_ice_endpoint()
+{
+  return TransportClient::get_ice_endpoint();
 }
 
 void DataReaderImpl::accept_sample_processing(const SubscriptionInstance_rch& instance, const DataSampleHeader& header, bool is_new_instance)

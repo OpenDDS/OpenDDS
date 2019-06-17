@@ -1633,14 +1633,6 @@ DomainParticipantImpl::enable()
     return DDS::RETCODE_OK;
   }
 
-  if (monitor_) {
-    monitor_->report();
-  }
-
-  if (TheServiceParticipant->monitor_) {
-    TheServiceParticipant->monitor_->report();
-  }
-
 #ifdef OPENDDS_SECURITY
   if (!security_config_ && TheServiceParticipant->get_security()) {
     security_config_ = TheSecurityRegistry->default_config();
@@ -1767,6 +1759,14 @@ DomainParticipantImpl::enable()
 
   dp_id_ = value.id;
   federated_ = value.federated;
+
+  if (monitor_) {
+    monitor_->report();
+  }
+
+  if (TheServiceParticipant->monitor_) {
+    TheServiceParticipant->monitor_->report();
+  }
 
   const DDS::ReturnCode_t ret = this->set_enabled();
 
@@ -2228,7 +2228,7 @@ DomainParticipantImpl::LivelinessTimer::LivelinessTimer(DomainParticipantImpl& i
 
 DomainParticipantImpl::LivelinessTimer::~LivelinessTimer()
 {
-  if (scheduled_) {
+  if (scheduled_ && TheServiceParticipant->timer()) {
     TheServiceParticipant->timer()->cancel_timer(this);
   }
 }

@@ -84,7 +84,7 @@ bool set_socket_multicast_ttl(const ACE_SOCK_Dgram& socket, const unsigned char&
 /// for IPV6 builds allows for setting IPV6_V6ONLY socket option to 0 before binding
 /// Otherwise defaults to opening a socket based on the type of local_address
 extern OpenDDS_Dcps_Export
-bool open_appropriate_socket_type(ACE_SOCK_Dgram& socket, const ACE_INET_Addr& local_address);
+bool open_appropriate_socket_type(ACE_SOCK_Dgram& socket, const ACE_INET_Addr& local_address, int* proto_family = 0);
 } // namespace DCPS
 } // namespace OpenDDS
 

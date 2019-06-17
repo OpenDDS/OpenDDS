@@ -107,12 +107,12 @@ Use one of the following versions when building OpenDDS:
     configure script.
 * DOC Group TAO 2.5.1
   * Available from:
-    * [github.com/DOCGroup/ACE_TAO](https://github.com/DOCGroup/ACE_TAO/releases)
+    * [`github.com/DOCGroup/ACE_TAO`](https://github.com/DOCGroup/ACE_TAO/releases)
     * http://download.dre.vanderbilt.edu/
   * When using the configure script, this version can be downloaded using one
     of these arguments:
-    * `--doc_group` for the latest release
-    * `--ace-github-latest` to use the master branches of ACE_TAO and MPC as is
+    * `--doc-group` for the latest release
+    * `--ace-github-latest` to use the master branches of ACE\_TAO and MPC as is
 
 ### Perl
 
@@ -123,6 +123,12 @@ files.
 On Windows we recommend the use of [ActiveState Perl](
 https://www.activestate.com/activeperl).
 
+### Google Test
+
+Starting with OpenDDS 3.14, Google Test is required for OpenDDS tests. Tests
+are built by default so that means Google Test is required unless `--no-tests`
+is passed to configure.
+
 ## Supported Platforms
 
 ### Operating Systems
@@ -132,7 +138,7 @@ This release of OpenDDS has been tested under the following platforms:
 Linux family:
 * Red Hat EL and CentOS 6.6 and 6.9, x86\_64
 * Red Hat EL and CentOS 7.2 and 7.3, x86\_64
-* Fedora 24 and 28, x86\_64
+* Fedora 24 and 29, x86\_64
 * Debian 9.4, i686
 * Ubuntu 16.04 LTS, x86\_64
 * openSUSE 42.1, and 42.2, x86\_64

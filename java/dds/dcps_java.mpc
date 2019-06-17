@@ -1,5 +1,5 @@
 // dcpslib needs to come after idl2jni to set libout correctly
-project: idl2jni, dcpslib, optional_jni_check, dcps_java_optional, dcps_tcp, dcps_udp, dcps_rtps_udp, install {
+project: idl2jni, javah, dcpslib, optional_jni_check, dcps_java_optional, dcps_tcp, dcps_udp, dcps_rtps_udp, install {
 
   sharedname    = OpenDDS_DCPS_Java
   after        += tao_java
@@ -110,6 +110,7 @@ project: idl2jni, dcpslib, optional_jni_check, dcps_java_optional, dcps_tcp, dcp
 
   verbatim(gnuace, postinstall) {
 "	cp $(DDS_ROOT)/lib/OpenDDS_DCPS.jar $(INSTALL_PREFIX)/lib"
+"	perl -pi -e 's!\\$$[(]DDS_ROOT[)]/lib!$(INSTALL_PREFIX)/lib!g' $(DESTDIR)$(INSTALL_PREFIX)/share/dds/MPC/config/idl2jni.mpb"
 "	perl -pi -e 's!\\$$[(]DDS_ROOT[)]/lib!$(INSTALL_PREFIX)/lib!g' $(DESTDIR)$(INSTALL_PREFIX)/share/dds/MPC/config/dcps_java.mpb"
 "	rm $(INSTALL_PREFIX)/dds/*.idl && rmdir $(INSTALL_PREFIX)/dds"
   }

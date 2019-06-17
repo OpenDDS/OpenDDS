@@ -60,6 +60,12 @@
 #define OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 #endif
 
+#ifdef OPENDDS_SAFETY_PROFILE
+#define OPENDDS_ASSERT(C) ((void) 0)
+#else
+#define OPENDDS_ASSERT(C) assert(C)
+#endif
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {

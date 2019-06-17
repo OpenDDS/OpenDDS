@@ -31,7 +31,13 @@ extern "C" {
  */
 #if WIRESHARK_VERSION >= WIRESHARK_VERSION_NUMBER(2, 5, 0)
   extern "C" dissector_Export const gchar plugin_version[] = DDS_VERSION;
+
+#  if WIRESHARK_VERSION < WIRESHARK_VERSION_NUMBER(3, 0, 0)
   extern "C" dissector_Export const gchar plugin_release[] = VERSION_RELEASE;
+#  else
+  extern "C" dissector_Export const int plugin_want_major = VERSION_MAJOR;
+  extern "C" dissector_Export const int plugin_want_minor = VERSION_MINOR;
+#  endif
 #else
   extern "C" dissector_Export const gchar version[] = DDS_VERSION;
 #endif

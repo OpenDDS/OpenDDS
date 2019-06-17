@@ -1,0 +1,3 @@
+project: dcps_ts_defaults, rapidjson {
+  dcps_ts_flags += -Grapidjson
+}

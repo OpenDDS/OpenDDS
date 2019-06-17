@@ -16,6 +16,7 @@ void v8_generator::gen_includes()
 {
   be_global->add_include("<v8.h>", BE_GlobalData::STREAM_H);
   be_global->add_include("<nan.h>", BE_GlobalData::STREAM_CPP);
+  be_global->add_include("<sstream>", BE_GlobalData::STREAM_CPP);
 }
 
 bool v8_generator::gen_enum(AST_Enum*, UTL_ScopedName*,
@@ -81,8 +82,7 @@ namespace {
         const std::string underscores =
           dds_generator::scoped_helper(type->name(), "_"),
           array = "gen_" + underscores + "_names";
-        prefix = '(' + std::string(src) + " >= sizeof(" + array + ")/sizeof(" +
-          array + "[0])) ? \"<<invalid>>\" : " + array + "[static_cast<int>(";
+        prefix = '(' + std::string(src) + " >= " + array + "_size) ? \"<<invalid>>\" : " + array + "[static_cast<int>(";
         suffix = ")]";
         postNew = ".ToLocalChecked()";
 
@@ -197,7 +197,7 @@ namespace {
           ip << "  v8::Local<v8::String> ls = Nan::To<v8::String>(lv).ToLocalChecked();\n" <<
           ip << "  std::string ss(ls->Utf8Length(), ' ');\n" <<
           ip << "  ls->WriteUtf8(&ss[0]);\n" <<
-          ip << "  for (uint32_t i = 0; i < sizeof(" << array << ")/sizeof(" << array << "[0]); ++i) {\n" <<
+          ip << "  for (uint32_t i = 0; i < " << array << "_size; ++i) {\n" <<
           ip << "    if (ss == " << array << "[i]) {\n" <<
           ip << "      " << propName << assign_prefix << "static_cast<" << scoped(type->name()) << ">(i)" << assign_suffix << ";\n" <<
           ip << "      break;\n" <<
@@ -343,7 +343,7 @@ namespace {
           "  {\n"
           "    v8::Local<v8::Value> lv = " << src << "->Get(" << prop << ");\n"
           "    v8::Local<v8::Object> lo = Nan::To<v8::Object>(lv).ToLocalChecked();\n"
-          "    copyFromV8(lo, " << propName << ");\n"
+          "    copyFromV8(lo, " << propName << (fun_assign ? "())" : ")") << ";\n"
           "  }\n";
       } else {
         strm <<
@@ -352,7 +352,7 @@ namespace {
           "    if (" << src << "->Has(field_str)) {\n"
           "      v8::Local<v8::Value> lv = " << src << "->Get(field_str);\n"
           "      v8::Local<v8::Object> lo = Nan::To<v8::Object>(lv).ToLocalChecked();\n"
-          "      copyFromV8(lo, " << propName << ");\n"
+          "      copyFromV8(lo, " << propName << (fun_assign ? "())" : ")") << ";\n"
           "    }\n"
           "  }\n";
       }
@@ -502,12 +502,12 @@ bool v8_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
       vtc.addArg("out", cxx + '&');
       vtc.endArgs();
       be_global->impl_ <<
-        "  uint32_t length = 0;\n"
+        "  CORBA::ULong length = 0;\n"
         "  if (src->IsArray()) {\n"
         "    length = src->Get(Nan::New(\"length\").ToLocalChecked())->ToObject()->Uint32Value();\n"
         "  }\n"
         "  out.length(length);\n"
-        "  for (uint32_t i = 0; i < length; ++i) {\n"
+        "  for (CORBA::ULong i = 0; i < length; ++i) {\n"
         "  ";
       gen_copyfrom("out", "src", elem, "i", true);
       be_global->impl_ <<
@@ -516,7 +516,42 @@ bool v8_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
     break;
   }
   case AST_Decl::NT_array: {
-    //TODO: support arrays
+    NamespaceGuard ng;
+    AST_Array* array = AST_Array::narrow_from_decl(type);
+    const std::string cxx = scoped(name);
+    AST_Type* elem = array->base_type();
+    {
+      Function ctv("copyToV8", "v8::Local<v8::Object>");
+      ctv.addArg("src", "const " + cxx + '&');
+      ctv.endArgs();
+      be_global->impl_ <<
+        "  CORBA::ULong length = sizeof(src) / sizeof(src[0]);\n"
+        "  const v8::Local<v8::Array> tgt(Nan::New<v8::Array>(length));\n"
+        "  for (CORBA::ULong i = 0; i < length; ++i) {\n"
+        "  ";
+      gen_copyto("tgt", "src[i]", elem, "i");
+      be_global->impl_ <<
+        "  }\n"
+        "  return tgt;\n";
+    }
+    {
+      Function vtc("copyFromV8", "void");
+      vtc.addArg("src", "const v8::Local<v8::Object>&");
+      vtc.addArg("out", cxx + '&');
+      vtc.endArgs();
+      be_global->impl_ <<
+        "  CORBA::ULong length = 0;\n"
+        "  if (src->IsArray()) {\n"
+        "    CORBA::ULong src_length = src->Get(Nan::New(\"length\").ToLocalChecked())->ToObject()->Uint32Value();\n"
+        "    CORBA::ULong out_length = (sizeof(out) / sizeof(out[0]));\n"
+        "    length = (src_length <= out_length) ? src_length : out_length;\n"
+        "  }\n"
+        "  for (CORBA::ULong i = 0; i < length; ++i) {\n"
+        "  ";
+      gen_copyfrom("out", "src", elem, "i", true);
+      be_global->impl_ <<
+        "  }\n";
+    }
     break;
   }
   default:

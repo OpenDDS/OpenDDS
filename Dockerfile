@@ -23,7 +23,7 @@ RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
 ADD . /opt/OpenDDS
 
 RUN cd /opt/OpenDDS && \
-    ./configure --prefix=/usr/local --security --doc_group --no-tests --std=c++11 && \
+    ./configure --prefix=/usr/local --security --doc-group --no-tests --std=c++11 && \
     make && \
     make install && \
     cp -a /opt/OpenDDS/ACE_wrappers/MPC /usr/local/share/ace/MPC && \

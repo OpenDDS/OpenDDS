@@ -317,8 +317,9 @@ TransportClient::initiate_connect_i(TransportImpl::AcceptConnectResult& result,
     //don't own the lock_ so can't release it...shouldn't happen
     GuidConverter local(repo_id_);
     GuidConverter remote_conv(remote.repo_id_);
-    VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::initiate_connect_i - "
-                        "guard was not locked, return false - initiate_connect_i between local %C and remote %C unsuccessful\n",
+    VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) TransportClient::initiate_connect_i ")
+                        ACE_TEXT("between local %C and remote %C unsuccessful because ")
+                        ACE_TEXT("guard was not locked\n"),
                         OPENDDS_STRING(local).c_str(),
                         OPENDDS_STRING(remote_conv).c_str()), 0);
     return false;
@@ -560,7 +561,7 @@ TransportClient::stop_associating(const GUID_t* repos, CORBA::ULong length)
 void
 TransportClient::send_final_acks()
 {
-  links_.send_final_acks (get_repo_id());
+  links_.send_final_acks(get_repo_id());
 }
 
 void
@@ -685,6 +686,24 @@ TransportClient::unregister_for_writer(const RepoId& participant,
        ++pos) {
     (*pos)->unregister_for_writer(participant, readerid, writerid);
   }
+}
+
+ICE::Endpoint*
+TransportClient::get_ice_endpoint()
+{
+  // The one-to-many relationship with impls implies that this should
+  // return a set of endpoints instead of a single endpoint or null.
+  // For now, we will assume a single impl.
+
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, lock_, 0);
+  for (ImplsType::iterator pos = impls_.begin(), limit = impls_.end();
+       pos != limit;
+       ++pos) {
+    ICE::Endpoint* endpoint = (*pos)->get_ice_endpoint();
+    if (endpoint) { return endpoint; }
+  }
+
+  return 0;
 }
 
 bool
@@ -886,8 +905,9 @@ TransportClient::send_i(SendStateDataSampleList send_list, ACE_UINT64 transactio
     // send method.
     RepoId pub_id(repo_id_);
     send_links.send_stop(pub_id);
-    if (transaction_id != 0)
+    if (transaction_id != 0) {
       expected_transaction_id_ = max_transaction_id_seen_ + 1;
+    }
     max_transaction_tail_ = 0;
   }
 }

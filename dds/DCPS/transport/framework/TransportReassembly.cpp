@@ -72,6 +72,8 @@ TransportReassembly::insert(OPENDDS_LIST(FragRange)& flist,
         for (last = data.sample_.get(); last->cont(); last = last->cont()) ;
         last->cont(fr.rec_ds_.sample_.release());
         fr.rec_ds_.sample_.reset(data.sample_.release());
+      } else {
+        fr.rec_ds_.sample_.reset();
       }
       data.sample_.reset();
       fr.transport_seq_.first = seqRange.first;

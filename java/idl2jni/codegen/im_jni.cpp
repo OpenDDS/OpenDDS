@@ -832,11 +832,10 @@ string jni_function_name(const char *jvmClass, const char *method,
   // a mangled method name
   name += escape_name(methodname);
 
-  if (params != 0) {
-    name += name_sep;
-    vector<string>::iterator it = params->begin();
+  if (params) {
+    name += string(2, name_sep);
 
-    for (; it != params->end(); ++it) {
+    for (vector<string>::iterator it = params->begin(); it != params->end(); ++it) {
       name += escape_name(*it);
     }
   }
@@ -1024,7 +1023,8 @@ void write_native_attribute_r(UTL_ScopedName *name, const char *javaStub,
 {
   const char *attrname = attr->local_name()->get_string();
   string cxx = idl_mapping_jni::scoped(name);
-  string fnName = jni_function_name(javaStub, attrname);
+  vector<string> params, *pparams = attr->readonly() ? 0 : &params;
+  string fnName = jni_function_name(javaStub, attrname, pparams);
   string retconv, ret_exception, tao_retconv, array_cast;
   string ret = idl_mapping_jni::type(attr->field_type());
   string retval = idl_mapping_jni::taoType(attr->field_type());

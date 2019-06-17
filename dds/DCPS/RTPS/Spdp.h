@@ -100,6 +100,11 @@ public:
 
 #ifdef OPENDDS_SECURITY
   void check_auth_states(const ACE_Time_Value& tv);
+  /**
+   * Write Secured Updated DP QOS
+   *
+   * lock_ must be aquired before calling this.
+   */
   void write_secure_updates();
   void write_secure_disposes();
   bool is_security_enabled() const { return security_enabled_; }
@@ -117,6 +122,11 @@ public:
 
   DCPS::AuthState lookup_participant_auth_state(const DCPS::RepoId& id) const;
 #endif
+
+  void remove_send_addr(const ACE_INET_Addr& addr);
+  void add_send_addr(const ACE_INET_Addr& addr);
+  void remove_sedp_unicast(const ACE_INET_Addr& addr);
+  void add_sedp_unicast(const ACE_INET_Addr& addr);
 
 protected:
   Sedp& endpoint_manager() { return sedp_; }
@@ -173,6 +183,8 @@ private:
     void dispose_unregister();
     bool open_unicast_socket(u_short port_common, u_short participant_id);
     void acknowledge();
+    void remove_send_addr(const ACE_INET_Addr& addr);
+    void insert_send_addr(const ACE_INET_Addr& addr);
 
     Spdp* outer_;
     Header hdr_;
@@ -216,6 +228,9 @@ private:
 
   DDS::Security::ParticipantSecurityAttributes participant_sec_attr_;
 #endif
+
+  void start_ice(ICE::Endpoint* endpoint, DCPS::RepoId remote, const BuiltinEndpointSet_t& avail, const ICE::AgentInfo& agent_info);
+  void stop_ice(ICE::Endpoint* endpoint, DCPS::RepoId remote, const BuiltinEndpointSet_t& avail);
 };
 
 }

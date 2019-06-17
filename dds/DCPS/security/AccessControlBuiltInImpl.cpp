@@ -329,12 +329,16 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ACPermsMap::iterator piter = local_ac_perms_.find(permissions_handle);
 
   if (piter == local_ac_perms_.end()) {
-    CommonUtilities::set_security_error(ex,-1, 0, "AccessControlBuiltInImpl::check_create_participant: No matching permissions handle present");
+    CommonUtilities::set_security_error(ex, -1, 0,
+      "AccessControlBuiltInImpl::check_create_participant: "
+      "No matching permissions handle present");
     return false;
   }
 
   if (domain_id != piter->second.domain_id) {
-    CommonUtilities::set_security_error(ex,-1, 0, "AccessControlBuiltInImpl::check_create_participant: Domain does not match validated permissions handle");
+    CommonUtilities::set_security_error(ex, -1, 0,
+      "AccessControlBuiltInImpl::check_create_participant: "
+      "Domain does not match validated permissions handle");
     return false;
   }
 
@@ -360,6 +364,9 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     }
   }
 
+  CommonUtilities::set_security_error(ex, -1, 0,
+    "AccessControlBuiltInImpl::check_create_participant: "
+    "No governance exists for this domain");
   return false;
 }
 
@@ -576,14 +583,14 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   Permissions::PermissionGrantRules::iterator pgr_iter;
   for (pgr_iter = ac_iter->second.perm->data().perm_rules.begin(); pgr_iter != ac_iter->second.perm->data().perm_rules.end(); ++pgr_iter) {
 
-    // Check to make sure our partcipant subject name matches the grant we're looking at
+    // Check to make sure our participant subject name matches the grant we're looking at
     if (pgr_iter->subject == ac_iter->second.subject) {
 
       // Iterate over allow / deny rules
       perm_topic_rules_iter ptr_iter;
       for (ptr_iter = pgr_iter->PermissionTopicRules.begin(); ptr_iter != pgr_iter->PermissionTopicRules.end(); ++ptr_iter) {
 
-        // Check that our domain is listed and the permissions type is ALLOW before checking futher
+        // Check that our domain is listed and the permissions type is ALLOW before checking further
         size_t d = ptr_iter->domain_list.count(domain_to_find);
         if ((d > 0) && (ptr_iter->ad_type == Permissions::ALLOW)) {
 
@@ -694,7 +701,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     }
   }
 
-  // Check the PluginClassName and MajorVersion of the local permmissions vs. remote  See Table 63 of spec
+  // Check the PluginClassName and MajorVersion of the local permissions vs. remote  See Table 63 of spec
   const std::string remote_class_id = participant_data.base.permissions_token.class_id.in();
 
   std::string local_plugin_class_name,
@@ -1010,14 +1017,14 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   Permissions::PermissionGrantRules::iterator pgr_iter;
   for (pgr_iter = ac_iter->second.perm->data().perm_rules.begin(); pgr_iter != ac_iter->second.perm->data().perm_rules.end(); ++pgr_iter) {
 
-    // Check to make sure our partcipant subject name matches the grant we're looking at
+    // Check to make sure our participant subject name matches the grant we're looking at
     if (pgr_iter->subject == ac_iter->second.subject) {
 
       // Iterate over allow / deny rules
       perm_topic_rules_iter ptr_iter;
       for (ptr_iter = pgr_iter->PermissionTopicRules.begin(); ptr_iter != pgr_iter->PermissionTopicRules.end(); ++ptr_iter) {
 
-        // Check that our domain is listed and the permissions type is ALLOW before checking futher
+        // Check that our domain is listed and the permissions type is ALLOW before checking further
         size_t d = ptr_iter->domain_list.count(domain_id);
         if ((d > 0) && (ptr_iter->ad_type == Permissions::ALLOW)) {
 
@@ -1944,13 +1951,15 @@ AccessControlBuiltInImpl::RevokePermissionsTimer::RevokePermissionsTimer(AccessC
     : impl_(impl)
     , scheduled_(false)
     , timer_id_(0)
-    , reactor_(0)
 { }
 
 AccessControlBuiltInImpl::RevokePermissionsTimer::~RevokePermissionsTimer()
 {
-  if (scheduled_) {
-      reactor_->cancel_timer(this);
+  ACE_Reactor_Timer_Interface* reactor = TheServiceParticipant->timer();
+
+  if (scheduled_ && reactor != NULL) {
+    reactor->cancel_timer(this);
+    scheduled_ = false;
   }
 }
 
@@ -1964,10 +1973,10 @@ bool AccessControlBuiltInImpl::RevokePermissionsTimer::start_timer(const ACE_Tim
   ::DDS::Security::PermissionsHandle *eh_params_ptr =
       new ::DDS::Security::PermissionsHandle(pm_handle);
 
-  reactor_ = TheServiceParticipant->timer();
+  ACE_Reactor_Timer_Interface* reactor = TheServiceParticipant->timer();
 
-  if (reactor_ != NULL) {
-    timer_id_ = reactor_->schedule_timer(this, eh_params_ptr, length);
+  if (reactor != NULL) {
+    timer_id_ = reactor->schedule_timer(this, eh_params_ptr, length);
 
     if (timer_id_ != -1) {
       scheduled_ = true;

@@ -1,0 +1,6 @@
+project: dcpsexe, dcps_rtps_udp {
+  requires += no_opendds_safety_profile
+  TypeSupport_Files {
+    Messenger.idl
+  }
+}

@@ -4,7 +4,7 @@ The OpenDDS DCPS Wireshark dissector supports the TCP/IP, UDP/IP, and IP
 multicast transports. Dissection of transport headers and encapsulated sample
 headers are fully supported. Optional dissection of sample payloads is also
 supported from Wireshark 1.12 on. The dissector is compatible with Wireshark
-1.2 up to at least 2.6 and has been tested with Windows, macOS, and Linux.
+1.2 up to at least 3.0 and has been tested with Windows, macOS, and Linux.
 
 If you need to dissect packets in RTPS DDS systems, all recent versions of
 Wireshark have a built-in RTPS dissector. This dissector, at least for the
@@ -46,8 +46,8 @@ from within Wireshark.
 <a name="building"></a>
 ## Building
 
-Follow the steps in the INSTALL file in the root of OpenDDS directory, along
-with the steps here.
+Follow the steps in the `INSTALL.md` file in the root of OpenDDS directory,
+along with the steps here.
 
 In addition, the Wireshark sources must be available and built locally
 according to the [Wireshark Developer's Guide](https://www.wireshark.org/docs/wsdg_html_chunked/)
@@ -56,6 +56,9 @@ like:
 
  - `wireshark-devel` on Fedora derived Linux distributions.
  - `wireshark-dev` on Debian derived Linux distributions.
+ - `wireshark-cli` on Arch Linux. This is the base Wireshark package, so the
+   development package is already installed if you installed the normal
+   Wireshark package, `wireshark-qt`.
 
 ### Configure
 
@@ -69,8 +72,8 @@ was built or was acquired:
   Wireshark headers and libraries. This should be used with:
 
    - Any version of Wireshark built with autoconf, which is try if you
-     ran autogen.sh. This is the recommended way to build on Linux as
-     of Wireshark 2.6.
+     ran `autogen.sh`. This is the recommended way to build on Linux before
+     Wireshark 3.0.
 
    - Wireshark 1.x built on Windows. Also `%WIRETAP_VERSION%` should also
      be set to the version of wiretap in the build.
@@ -81,18 +84,20 @@ was built or was acquired:
      supplying the path isn't necessary unless wireshark was installed
      else where.
 
-- The newer out-of-source method, `--wireshark_cmake`, should be used if
+- The newer out-of-source method, `--wireshark-cmake`, should be used if
   Wireshark was built using CMake, which can put "config.h" header and
-  the Wireshark libraries somewhere other than the source tree. This is
-  Wireshark's recommended method for Windows and macOS and can optionally
-  be used on Linux. This complicates things somewhat so two more
-  options with arguments provided:
+  the Wireshark libraries somewhere other than the source tree. Before 3.0
+  this was Wireshark's recommended method for Windows and macOS and can
+  optionally be used on Linux. After 3.0 CMake is the only way to build
+  Wireshark.
+  CMake complicates things somewhat so two more options with arguments
+  provided:
 
-  - `--wireshark_build`
+  - `--wireshark-build`
     - Is the build directory the user choose before building Wireshark.
       This is required and an absolute path.
 
-  - `--wireshark_lib`
+  - `--wireshark-lib`
     - Is the location of the Wireshark libraries RELATIVE to the build
       location. It's optional but it might have to be supplied depending
       on the version of Wireshark as these defaults are based on
@@ -100,33 +105,33 @@ was built or was acquired:
       - On Windows the default is `run\RelWithDebInfo`.
       - On macOS the default is `run/Wireshark.app/Contents/Frameworks`.
       - On Linux the default is an empty string as the libraries are in
-        the build directory.
+        the build directory. For Wireshark 3.0 you should set this to `run`.
 
-Glib is also required to build the dissector, so `--glib` must be passed.
+Glib is also required to build the dissector.
 If Wireshark was not built with the system Glib or Glib is not installed,
-the install prefix of Glib must be passed as well:
+the install prefix of Glib must be passed using `--glib`:
  - On Windows this will be something like: `wireshark-win(32|64)-libs-*\gtk2`
  - On macOS it depends on if the built-in dependency script or a package
    manager like Homebrew was used to install Wireshark's dependencies.
  - On the average Linux, it shouldn't be necessary unless you needed to use
    a Glib that is not installed (in `/usr`) to build Wireshark.
 
-For optional sample payload dissection support, RapidJSON must be available
-and `--rapidjson` must be passed. It might already be available if OpenDDS
-was recursively cloned by a git client or RapidJSON is installed in a
-default include location (RapidJSON is header only library).
-If RapidJSON is not installed on the system, it must be downloaded using:
-`git submodule update --init --recursive` or equivalent for your git client
-or manually downloading and placing the
-library at `DDS_ROOT/tools/IntermediateTypeLang/cpp/rapidjson`.
+For optional sample payload dissection support, RapidJSON must be available.
+It might already be available if OpenDDS was recursively cloned by a git client
+or RapidJSON is installed in a default include location (RapidJSON is header
+only library). If RapidJSON is not installed on the system, it must be
+downloaded using: `git submodule update --init --recursive` or equivalent for
+your git client. If OpenDDS isn't a git repository (such as if it was
+downloaded from opendds.org) You can download RapidJSON source and pass it to
+the cofnigure script using `--rapidjson`.
 
 ### Build
 
-Build normally as described in the `$DDS_ROOT/INSTALL document`.
+Build normally as described in the `$DDS_ROOT/INSTALL.md` document.
 
 ### Install Plugin
 
-To install the dissector plugin, copy the plugin file  from
+To install the dissector plugin, copy the plugin file from
 `DDS_ROOT/tools/dissector` to one of the plugin directories listed in the
 Folders section in Wireshark's "About" dialog which can be found in the "Help"
 menu. On Windows, the plugin file will be named `OpenDDS_Dissector.dll` or
@@ -135,7 +140,7 @@ On UNIX-like systems it will be named `OpenDDS_Dissector.so`.
 
 See [Wireshark User's Guide Page on Plugins Folders](
 https://www.wireshark.org/docs/wsug_html_chunked/ChPluginFolders.html)
-for details on where Wireshark looks for plugins. This page, if working
+for details on where Wireshark looks for plugins. This page, if working,
 will be accurate for the latest stable version, but maybe not previous
 versions.
 

@@ -101,6 +101,8 @@ public:
                              const RepoId& readerid,
                              const RepoId& writerid);
 
+  ICE::Endpoint* get_ice_endpoint();
+
   // Data transfer:
 
   bool send_response(const RepoId& peer,
