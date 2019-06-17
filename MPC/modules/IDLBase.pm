@@ -449,6 +449,14 @@ sub parse {
       ## forward declaration and we need to drop it.
       if ($forward) {
         if ($c eq '{') {
+          ## If this was previously forward declared, we can remove it
+          ## now that it has been fully declared as we no longer need to
+          ## create a dependency on it.
+          my $scope = $self->get_scope(\@state);
+          my $file = join('/', @$scope) . $self->get_file_ext();
+          if (grep(/^$file$/, @forwards)) {
+            @forwards = grep(!/^$file$/, @forwards);
+          }
           $forward = undef;
         }
         elsif ($c eq ';') {
