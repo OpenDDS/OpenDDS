@@ -1,14 +1,6 @@
 
-project(DDS*idl): dcps_test_lib {
-  idlflags      += -Wb,stub_export_include=InconsistentTopic_export.h \
-                   -Wb,stub_export_macro=InconsistentTopic_Export -SS
-  dcps_ts_flags += -Wb,export_macro=InconsistentTopic_Export
-  dynamicflags  += INCONSISTENTTOPIC_BUILD_DLL
-
-  TypeSupport_Files {
-    Messenger.idl
-  }
-}
+//project(DDS*idl): dcps_test_lib {
+//}
 
 project(DDS*PubblisherSubscriber) : dcpsexe, dcps_transports_for_test {
   exename = pubsub
@@ -21,5 +13,14 @@ project(DDS*PubblisherSubscriber) : dcpsexe, dcps_transports_for_test {
 
   Source_Files {
     pubsub.cpp
+  }
+
+  idlflags      += -Wb,stub_export_include=InconsistentTopic_export.h \
+                   -Wb,stub_export_macro=InconsistentTopic_Export -SS
+  dcps_ts_flags += -Wb,export_macro=InconsistentTopic_Export
+  dynamicflags  += INCONSISTENTTOPIC_BUILD_DLL
+
+  TypeSupport_Files {
+    Messenger.idl
   }
 }

@@ -344,7 +344,7 @@ namespace OpenDDS {
         ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::INTERNAL_ERROR);
         TopicNameMap::iterator name_iter = topic_names_.find(topicId);
         if (name_iter == topic_names_.end()) {
-          // TODO:  What is the correct recturn value?
+          return DCPS::NOT_FOUND;
         }
         const OPENDDS_STRING& name = name_iter->second;
 
