@@ -161,11 +161,8 @@ sub get_output {
   }
   @filenames = grep(!$seen{$_}++, @tmp); # remove duplicates
 
-  ## Return the file name list and a map of dependencies.  This dependency
-  ## map says that every generated file will depend on other generated files
-  ## based solely on forward declared elements.
-  my %forwards = map { $_ => $fwd } @filenames;
-  return \@filenames, {$self->get_component_name() => \%forwards};
+  ## Return the file name list and a map of dependencies.
+  return \@filenames, $self->get_dependencies(\@filenames, $fwd)
 }
 
 sub get_filenames {
@@ -196,6 +193,52 @@ sub get_component_name {
   ## This method is called with no arguments and expects a string
   ## containing the component name to tie generated files together.
   return "";
+}
+
+sub get_dependencies {
+  my($self, $filenames, $fwdarray) = @_;
+
+  ## There aren't any additional dependencies if there were no forward
+  ## declarations.
+  return undef if (scalar(@$fwdarray) == 0);
+
+  my %dependencies;
+  ## MPC v4.1.41 and older does not provide the ProjectCreator to the
+  ## CommandHelper.  If we don't have the creator, the best we can
+  ## do is say that the .java files depends on other .java files.
+  if (exists $self->{'creator'}) {
+    ## If we have been given a ProjectCreator, we can use the .java files
+    ## in the forward array to create .class file names which is what the
+    ## .java files are truly dependent upon.
+    my @genfiles;
+    foreach my $file (@$fwdarray) {
+      my $of = $self->{'creator'}->get_first_custom_output($file, 'java_files');
+      push(@genfiles, $of) if (defined $of && $of ne '');
+    }
+
+    ## Now that we have the .class files that each of the files listed in
+    ## @$filenames will be dependent upon, we must go through each file
+    ## and add it to the dependency map.  The files upon which each file
+    ## will be dependent must be custom tailored to remove the .class
+    ## that the file itself will create to avoid circular dependencies.
+    foreach my $file (@$filenames) {
+      my $of = $self->{'creator'}->get_first_custom_output($file, 'java_files');
+      if (defined $of && $of ne '') {
+        my $re = $self->{'creator'}->escape_regex_special($of);
+        my @arr = grep(!/^$re$/, @genfiles);
+        $dependencies{$file} = \@arr;
+      }
+      else {
+        $dependencies{$file} = \@genfiles;
+      }
+    }
+  }
+  else {
+    ## This dependency map says that every generated file will depend on
+    ## other generated files based solely on forward declared elements.
+    %dependencies = map { $_ => $fwdarray } @$filenames;
+  }
+  return {$self->get_component_name() => \%dependencies};
 }
 
 # ************************************************************
