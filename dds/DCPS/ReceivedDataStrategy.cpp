@@ -103,7 +103,7 @@ void
 ReceivedDataStrategy::accept_coherent(PublicationId& writer,
                                       RepoId& publisher)
 {
-  CoherentFilter    filter = CoherentFilter(writer, publisher);
+  CoherentFilter filter = CoherentFilter(writer, publisher);
   AcceptCoherent operation = AcceptCoherent(writer, publisher);
   this->rcvd_samples_.apply_all(filter, operation);
 }

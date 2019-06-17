@@ -2913,39 +2913,38 @@ DataReaderImpl::update_ownership_strength (const PublicationId& pub_id,
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 bool DataReaderImpl::verify_coherent_changes_completion (WriterInfo* writer)
 {
-  if (this->subqos_.presentation.access_scope == ::DDS::INSTANCE_PRESENTATION_QOS
-      || ! this->subqos_.presentation.coherent_access) {
-    this->accept_coherent (writer->writer_id_, writer->publisher_id_);
-    this->coherent_changes_completed (this);
-    return true;
+  bool completed = false;
+  if (subqos_.presentation.access_scope == ::DDS::INSTANCE_PRESENTATION_QOS
+      || !subqos_.presentation.coherent_access) {
+    completed = true;
+  } else {
+    // verify current coherent changes from single writer
+    Coherent_State state = writer->coherent_change_received();
+    completed = state == COMPLETED;
+    if (writer->group_coherent_) { // GROUP coherent
+      RcHandle<SubscriberImpl> subscriber = get_subscriber_servant();
+      if (subscriber && state != NOT_COMPLETED_YET) {
+        // verify if all readers received complete coherent changes in a group.
+        subscriber->coherent_change_received(writer->publisher_id_, this, state);
+      }
+    } else { // TOPIC coherent
+      if (state == REJECTED) {
+        reject_coherent(writer->writer_id_, writer->publisher_id_);
+      } else if (state == NOT_COMPLETED_YET) {
+        return false;
+      }
+
+      // decision made: either COMPLETED or REJECTED
+      writer->reset_coherent_info();
+    }
   }
 
-  // verify current coherent changes from single writer
-  Coherent_State state = writer->coherent_change_received();
-  if (writer->group_coherent_) { // GROUP coherent
-    RcHandle<SubscriberImpl> subscriber = get_subscriber_servant();
-    if (subscriber && state != NOT_COMPLETED_YET) {
-      // verify if all readers received complete coherent changes in a group.
-      subscriber->coherent_change_received (
-          writer->publisher_id_, this, state);
-    }
+  if (completed && !writer->group_coherent_) {
+    // If group, sub.coherent_change_received did this already
+    accept_coherent(writer->writer_id_, writer->publisher_id_);
+    coherent_changes_completed(this);
   }
-  else {  // TOPIC coherent
-    if (state == COMPLETED) {
-      this->accept_coherent (writer->writer_id_, writer->publisher_id_);
-    }
-    else if (state == REJECTED) {
-      this->reject_coherent (writer->writer_id_, writer->publisher_id_);
-    }
-    else {// NOT_COMPLETED
-      return false;
-    }
-
-    // decision made: either COMPLETED or REJECTED
-    writer->reset_coherent_info ();
-  }
-
-  return state == COMPLETED;
+  return completed;
 }
 
 
