@@ -282,7 +282,7 @@ private:
     void send_nackfrag_replies_i(DisjointSequence& gaps, AddrSet& gap_recipients);
 
   public:
-    explicit RtpsWriter(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable) : link_(link), id_(id), durable_(durable), ready_to_hb_(false), heartbeat_count_(0) {}
+    explicit RtpsWriter(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable, CORBA::Long hbc) : link_(link), id_(id), durable_(durable), ready_to_hb_(false), heartbeat_count_(hbc) {}
     ~RtpsWriter();
     SequenceNumber heartbeat_high(const ReaderInfo&) const;
     void add_elem_awaiting_ack(TransportQueueElement* element);

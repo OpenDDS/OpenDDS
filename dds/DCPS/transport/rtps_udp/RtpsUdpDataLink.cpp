@@ -299,11 +299,16 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   if (conv.isWriter() && remote_reliable) {
     // Insert count if not already there.
-    heartbeat_counts_.insert(HeartBeatCountMapType::value_type(local_id, 0));
     RtpsWriterMap::iterator rw = writers_.find(local_id);
     if (rw == writers_.end()) {
       RcHandle<RtpsUdpDataLink> link(this, OpenDDS::DCPS::inc_count());
-      RtpsWriter_rch writer = make_rch<RtpsWriter>(link, local_id, local_durable);
+      CORBA::Long hb_start = 0;
+      HeartBeatCountMapType::iterator hbc_it = heartbeat_counts_.find(local_id);
+      if (hbc_it != heartbeat_counts_.end()) {
+        hb_start = hbc_it->second;
+        heartbeat_counts_.erase(hbc_it);
+      }
+      RtpsWriter_rch writer = make_rch<RtpsWriter>(link, local_id, local_durable, hb_start);
       rw = writers_.insert(RtpsWriterMap::value_type(local_id, writer)).first;
     }
     rw->second->add_reader(remote_id, ReaderInfo(remote_durable));
@@ -1732,8 +1737,8 @@ RtpsUdpDataLink::send_bundled_responses(ResponseVec& responses)
   response_bundles_sizes.push_back(size + padding);
 
   // Allocate buffers, seralize, and send bundles
-  prev_dst = GUID_UNKNOWN;
   for (size_t i = 0; i < response_bundles.size(); ++i) {
+    prev_dst = GUID_UNKNOWN;
     ACE_Message_Block mb_acknack(response_bundles_sizes[i]); //FUTURE: allocators?
     Serializer ser(&mb_acknack, false, Serializer::ALIGN_CDR);
     for (ResponseIterVec::const_iterator it = response_bundles[i].begin(); it != response_bundles[i].end(); ++it) {
@@ -1775,6 +1780,9 @@ void
 RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
 {
   using namespace OpenDDS::RTPS;
+
+  ResponseVec responses;
+
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
   for (InterestingAckNackSetType::const_iterator pos = interesting_ack_nacks_.begin(),
@@ -1799,34 +1807,19 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
       {0 /* acknack count */}
     };
 
-    size_t size = 0, padding = 0;
-    gen_find_size(acknack, size, padding);
-    acknack.smHeader.submessageLength =
-      static_cast<CORBA::UShort>(size + padding) - SMHDR_SZ;
-    InfoDestinationSubmessage info_dst = {
-      {INFO_DST, FLAG_E, INFO_DST_SZ},
-      {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-    };
-    gen_find_size(info_dst, size, padding);
+    Response response;
+    response.from_guid_ = pos->readerid;
+    response.dst_guid_ = pos->writerid;
+    response.sm_.acknack_sm(acknack);
 
-    ACE_Message_Block mb_acknack(size + padding); //FUTURE: allocators?
-    // byte swapping is handled in the operator<<() implementation
-    Serializer ser(&mb_acknack, false, Serializer::ALIGN_CDR);
-    std::memcpy(info_dst.guidPrefix, pos->writerid.guidPrefix,
-                sizeof(GuidPrefix_t));
-    ser << info_dst;
-    // Interoperability note: we used to insert INFO_REPLY submessage here, but
-    // testing indicated that other DDS implementations didn't accept it.
-    ser << acknack;
-
-    send_strategy()->send_rtps_control(mb_acknack, pos->writer_address);
+    responses.push_back(response);
   }
   interesting_ack_nacks_.clear();
 
-  ResponseVec responses;
   for (RtpsReaderMap::iterator rr = readers_.begin(); rr != readers_.end(); ++rr) {
     rr->second->gather_ack_nacks(responses);
   }
+
   g.release();
 
   send_bundled_responses(responses);
@@ -2735,13 +2728,13 @@ RtpsUdpDataLink::send_heartbeats()
          limit = writers_to_advertise.end();
        pos != limit;
        ++pos) {
-    const SequenceNumber SN = 1;
+    const SequenceNumber SN = 1, lastSN = SequenceNumber::ZERO();
     const HeartBeatSubmessage hb = {
       {HEARTBEAT, FLAG_E, HEARTBEAT_SZ},
       ENTITYID_UNKNOWN, // any matched reader may be interested in this
       pos->first.entityId,
       {SN.getHigh(), SN.getLow()},
-      {SN.getHigh(), SN.getLow()},
+      {lastSN.getHigh(), lastSN.getLow()},
       {++heartbeat_counts_[pos->first]}
     };
 
@@ -3314,6 +3307,19 @@ OpenDDS::DCPS::RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const 
   iter_t pos = locators_.find(remote);
   if (pos != locators_.end()) {
     normal_addr = pos->second.addr_;
+  } else {
+    const GuidConverter conv(remote);
+    if (conv.isReader()) {
+      InterestingRemoteMapType::const_iterator ipos = interesting_readers_.find(remote);
+      if (ipos != interesting_readers_.end()) {
+        normal_addr = ipos->second.address;
+      }
+    } else if (conv.isWriter()) {
+      InterestingRemoteMapType::const_iterator ipos = interesting_writers_.find(remote);
+      if (ipos != interesting_readers_.end()) {
+        normal_addr = ipos->second.address;
+      }
+    }
   }
 
 #ifdef OPENDDS_SECURITY
