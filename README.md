@@ -1,4 +1,4 @@
-![OpenDDS Logo](docs/logo.svg)
+<img src="docs/logo.svg" alt="OpenDDS" width="200">
 
 # OpenDDS
 
