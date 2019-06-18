@@ -1,3 +1,5 @@
+![OpenDDS Logo](docs/logo.svg)
+
 # OpenDDS
 
 [![Build Status](https://travis-ci.org/objectcomputing/OpenDDS.svg?branch=master)](https://travis-ci.org/objectcomputing/OpenDDS)
