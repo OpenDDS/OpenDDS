@@ -300,7 +300,10 @@ namespace OpenDDS {
         ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::INTERNAL_ERROR);
         typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator iter =
           topics_.find(topicName);
-        if (iter != topics_.end()) { // types must match, RtpsDiscovery checked for us
+        if (iter != topics_.end()) {
+          if (iter->second.data_type_ != dataTypeName) {
+            return DCPS::CONFLICTING_TYPENAME;
+          }
           iter->second.qos_ = qos;
           iter->second.has_dcps_key_ = hasDcpsKey;
           topicId = iter->second.repo_id_;
