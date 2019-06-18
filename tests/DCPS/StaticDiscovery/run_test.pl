@@ -11,7 +11,7 @@ use strict;
 use warnings;
 
 my $result = 0;
-my $participant = 1;
+my $participant = 0;
 my $entity = 0;
 my $reliable = 1;
 my $test = new PerlDDS::TestFramework();
@@ -198,7 +198,7 @@ if ($test->flag('mp')) {
 } elsif ($test->flag('mpmrmw')) {
   # mpmrmw
   # 5 processes with 5 readers and 5 writers
-  runTest(2, 2, 2, 0, 0, 0, 0, 85000000);
+  runTest(5, 5, 5, 0, 0, 0, 0, 85000000);
 } else {
   # default
   # 1 process with 1 reader and 1 writer
