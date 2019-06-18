@@ -12,8 +12,6 @@
 #include "idl_defines.h"
 #include "utl_scoped_name.h"
 
-#include "ast_annotation_member.h"
-
 #include <string>
 #include <sstream>
 #include <set>
@@ -177,7 +175,6 @@ public:
    */
   bool is_topic_type(AST_Decl* node);
 
-public:
   /**
    * Check if a struct field has been declared a key.
    */
@@ -194,6 +191,12 @@ public:
   bool is_nested_type(AST_Decl* node);
 
   bool default_nested_;
+
+  /**
+   * Give a warning that looks like tao_idl's, but out of context of tao_idl.
+   */
+  void warning(const char* filename, unsigned lineno, const char* msg);
+
 private:
   const char* filename_;
   // Name of the IDL file we are processing.

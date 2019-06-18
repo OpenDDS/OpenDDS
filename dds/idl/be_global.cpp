@@ -18,6 +18,7 @@
 #include "ast_field.h"
 #include "ast_union.h"
 #include "ast_annotation_decl.h"
+#include "ast_annotation_member.h"
 
 #include "ace/OS_NS_strings.h"
 #include "ace/OS_NS_sys_stat.h"
@@ -721,7 +722,7 @@ BE_GlobalData::is_nested_type(AST_Decl* node)
   ///figure out what the default value is.
   bool rv = is_default_nested(node);
 
-  AST_Annotation_Appl *nested_apply = NULL;
+  AST_Annotation_Appl* nested_apply = NULL;
   if (node) {
     if (node->node_type() == AST_Decl::NT_struct) {
       nested_apply = node->annotations().find(nested_annotation_);
@@ -735,16 +736,24 @@ BE_GlobalData::is_nested_type(AST_Decl* node)
       }
     }
   }
-  if(nested_apply && isTopic) {
+  if (nested_apply && isTopic) {
     idl_global->err()->misc_warning("Mixing of @topic and @nested annotation is discouraged", node);
   }
 
   ///overwrite the default value if present.
-  if(nested_apply) {
-    rv = AST_Annotation_Member::narrow_from_decl ((*nested_apply)["value"]) -> value ()->ev ()->u.bval;
+  if (nested_apply) {
+    rv = AST_Annotation_Member::narrow_from_decl((*nested_apply)["value"])->value()->ev()->u.bval;
   }
 
   return rv;
 }
 
-
+void
+BE_GlobalData::warning(const char* filename, unsigned lineno, const char* msg)
+{
+  if (idl_global->print_warnings()) {
+    ACE_ERROR((LM_WARNING,
+      ACE_TEXT("Warning - %C: \"%C\", line %u: %C"),
+      idl_global->prog_name(), filename, lineno, msg));
+  }
+}
