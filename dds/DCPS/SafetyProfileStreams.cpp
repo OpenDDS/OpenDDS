@@ -174,7 +174,7 @@ retcode_to_dds_string(DDS::ReturnCode_t value)
   case DDS::RETCODE_ILLEGAL_OPERATION:
     return OPENDDS_STRING("Illegal operation");
 #ifdef OPENDDS_SECURITY
-  case DDS::RETCODE_NOT_ALLOWED_BY_SECURITY:
+  case DDS::Security::RETCODE_NOT_ALLOWED_BY_SECURITY:
     return OPENDDS_STRING("Not allowed by security");
 #endif
   default:
