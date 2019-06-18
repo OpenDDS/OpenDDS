@@ -356,7 +356,9 @@ RtpsUdpDataLink::register_for_reader(const RepoId& writerid,
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   bool enableheartbeat = interesting_readers_.empty();
   interesting_readers_.insert(InterestingRemoteMapType::value_type(readerid, InterestingRemote(writerid, address, listener)));
-  heartbeat_counts_[writerid] = 0;
+  if (heartbeat_counts_.find(writerid) == heartbeat_counts_.end()) {
+    heartbeat_counts_[writerid] = 0;
+  }
   g.release();
   if (enableheartbeat) {
     heartbeat_->schedule_enable(false);
@@ -508,7 +510,7 @@ RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
         RtpsWriter_rch writer = rw->second;
         rw->second->pre_stop_helper(to_deliver, to_drop);
 
-        heartbeat_counts_.erase(rw->first);
+        heartbeat_counts_[rw->first] = rw->second->get_heartbeat_count();
         writers_.erase(rw);
       } else {
         rw->second->process_acked_by_all();
@@ -3207,6 +3209,7 @@ RtpsUdpDataLink::HeldDataDeliveryHandler::handle_exception(ACE_HANDLE /* fd */)
     link_->data_received(itr->first, itr->second);
   }
   held_data_.clear();
+
   return 0;
 }
 
@@ -3316,7 +3319,7 @@ OpenDDS::DCPS::RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const 
       }
     } else if (conv.isWriter()) {
       InterestingRemoteMapType::const_iterator ipos = interesting_writers_.find(remote);
-      if (ipos != interesting_readers_.end()) {
+      if (ipos != interesting_writers_.end()) {
         normal_addr = ipos->second.address;
       }
     }

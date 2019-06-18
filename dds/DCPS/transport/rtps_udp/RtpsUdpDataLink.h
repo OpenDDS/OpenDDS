@@ -292,6 +292,7 @@ private:
     bool has_reader(const RepoId& id) const;
     bool remove_reader(const RepoId& id);
     size_t reader_count() const;
+    CORBA::Long get_heartbeat_count() const { return heartbeat_count_; }
 
     bool is_reader_handshake_done(const RepoId& id) const;
     void pre_stop_helper(OPENDDS_VECTOR(TransportQueueElement*)& to_deliver,
