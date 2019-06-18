@@ -197,7 +197,7 @@ sub get_component_name {
 
 sub get_dependencies {
   my($self, $filenames, $fwdarray) = @_;
-  
+
   ## There aren't any additional dependencies if there were no forward
   ## declarations.
   return undef if (scalar(@$fwdarray) == 0);
