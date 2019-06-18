@@ -12,6 +12,7 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+#include "dds/DCPS/Definitions.h"
 #include "dds/Versioned_Namespace.h"
 #include <ace/INET_Addr.h>
 
@@ -85,46 +86,46 @@ struct EndpointManager {
 
   void set_responsible_checklist(const STUN::TransactionId& a_transaction_id, Checklist* a_checklist)
   {
-    TransactionIdToChecklistType::const_iterator pos = transaction_id_to_checklist_.find(a_transaction_id);
-    assert(pos == transaction_id_to_checklist_.end());
+    OPENDDS_ASSERT(!transaction_id_to_checklist_.count(a_transaction_id));
     transaction_id_to_checklist_[a_transaction_id] = a_checklist;
   }
 
   void unset_responsible_checklist(const STUN::TransactionId& a_transaction_id, Checklist* a_checklist)
   {
     TransactionIdToChecklistType::iterator pos = transaction_id_to_checklist_.find(a_transaction_id);
-    assert(pos != transaction_id_to_checklist_.end());
-    assert(pos->second == a_checklist);
+    OPENDDS_ASSERT(pos != transaction_id_to_checklist_.end());
+    OPENDDS_ASSERT(pos->second == a_checklist);
+    ACE_UNUSED_ARG(a_checklist);
     transaction_id_to_checklist_.erase(pos);
   }
 
   void set_responsible_checklist(const GuidPair& a_guid_pair, Checklist* a_checklist)
   {
-    GuidPairToChecklistType::const_iterator pos = guid_pair_to_checklist_.find(a_guid_pair);
-    assert(pos == guid_pair_to_checklist_.end());
+    OPENDDS_ASSERT(!guid_pair_to_checklist_.count(a_guid_pair));
     guid_pair_to_checklist_[a_guid_pair] = a_checklist;
   }
 
   void unset_responsible_checklist(const GuidPair& a_guid_pair, Checklist* a_checklist)
   {
     GuidPairToChecklistType::iterator pos = guid_pair_to_checklist_.find(a_guid_pair);
-    assert(pos != guid_pair_to_checklist_.end());
-    assert(pos->second == a_checklist);
+    OPENDDS_ASSERT(pos != guid_pair_to_checklist_.end());
+    OPENDDS_ASSERT(pos->second == a_checklist);
+    ACE_UNUSED_ARG(a_checklist);
     guid_pair_to_checklist_.erase(pos);
   }
 
   void set_responsible_checklist(const std::string& a_username, Checklist* a_checklist)
   {
-    UsernameToChecklistType::const_iterator pos = username_to_checklist_.find(a_username);
-    assert(pos == username_to_checklist_.end());
+    OPENDDS_ASSERT(!username_to_checklist_.count(a_username));
     username_to_checklist_[a_username] = a_checklist;
   }
 
   void unset_responsible_checklist(const std::string& a_username, Checklist* a_checklist)
   {
     UsernameToChecklistType::iterator pos = username_to_checklist_.find(a_username);
-    assert(pos != username_to_checklist_.end());
-    assert(pos->second == a_checklist);
+    OPENDDS_ASSERT(pos != username_to_checklist_.end());
+    OPENDDS_ASSERT(pos->second == a_checklist);
+    ACE_UNUSED_ARG(a_checklist);
     username_to_checklist_.erase(pos);
   }
 

@@ -15,7 +15,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace STUN {
 
-#if OPENDDS_SECURITY
+#ifdef OPENDDS_SECURITY
 
 ACE_UINT16 Attribute::length() const
 {

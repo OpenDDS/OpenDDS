@@ -16,7 +16,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace ICE {
 
-#if OPENDDS_SECURITY
+#ifdef OPENDDS_SECURITY
 
 bool AgentImpl::TaskCompare::operator()(const Task* x, const Task* y) const
 {
@@ -119,7 +119,7 @@ AgentInfo AgentImpl::get_local_agent_info(Endpoint* a_endpoint) const
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, const_cast<ACE_Recursive_Thread_Mutex&>(mutex), AgentInfo());
   EndpointManagerMapType::const_iterator pos = endpoint_managers_.find(a_endpoint);
-  assert(pos != endpoint_managers_.end());
+  OPENDDS_ASSERT(pos != endpoint_managers_.end());
   return pos->second->agent_info();
 }
 
@@ -129,7 +129,7 @@ void AgentImpl::add_local_agent_info_listener(Endpoint* a_endpoint,
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, mutex);
   EndpointManagerMapType::const_iterator pos = endpoint_managers_.find(a_endpoint);
-  assert(pos != endpoint_managers_.end());
+  OPENDDS_ASSERT(pos != endpoint_managers_.end());
   pos->second->add_agent_info_listener(a_local_guid, a_agent_info_listener);
 }
 
@@ -138,7 +138,7 @@ void AgentImpl::remove_local_agent_info_listener(Endpoint* a_endpoint,
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, mutex);
   EndpointManagerMapType::const_iterator pos = endpoint_managers_.find(a_endpoint);
-  assert(pos != endpoint_managers_.end());
+  OPENDDS_ASSERT(pos != endpoint_managers_.end());
   pos->second->remove_agent_info_listener(a_local_guid);
 }
 
@@ -150,7 +150,7 @@ void  AgentImpl::start_ice(Endpoint* a_endpoint,
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, mutex);
   check_invariants();
   EndpointManagerMapType::const_iterator pos = endpoint_managers_.find(a_endpoint);
-  assert(pos != endpoint_managers_.end());
+  OPENDDS_ASSERT(pos != endpoint_managers_.end());
   pos->second->start_ice(a_local_guid, a_remote_guid, a_remote_agent_info);
   check_invariants();
 }
@@ -162,7 +162,7 @@ void AgentImpl::stop_ice(Endpoint* a_endpoint,
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, mutex);
   check_invariants();
   EndpointManagerMapType::const_iterator pos = endpoint_managers_.find(a_endpoint);
-  assert(pos != endpoint_managers_.end());
+  OPENDDS_ASSERT(pos != endpoint_managers_.end());
   pos->second->stop_ice(a_local_guid, a_remote_guid);
   check_invariants();
 }
@@ -173,7 +173,7 @@ ACE_INET_Addr  AgentImpl::get_address(Endpoint* a_endpoint,
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, const_cast<ACE_Recursive_Thread_Mutex&>(mutex), ACE_INET_Addr());
   EndpointManagerMapType::const_iterator pos = endpoint_managers_.find(a_endpoint);
-  assert(pos != endpoint_managers_.end());
+  OPENDDS_ASSERT(pos != endpoint_managers_.end());
   return pos->second->get_address(a_local_guid, a_remote_guid);
 }
 
@@ -186,7 +186,7 @@ void  AgentImpl::receive(Endpoint* a_endpoint,
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, mutex);
   check_invariants();
   EndpointManagerMapType::const_iterator pos = endpoint_managers_.find(a_endpoint);
-  assert(pos != endpoint_managers_.end());
+  OPENDDS_ASSERT(pos != endpoint_managers_.end());
   pos->second->receive(a_local_address, a_remote_address, a_message);
   check_invariants();
 }
@@ -209,7 +209,7 @@ void AgentImpl::check_invariants() const
     pos->second->check_invariants();
   }
 
-  assert(expected == active_foundations);
+  OPENDDS_ASSERT(expected == active_foundations);
 }
 
 #endif /* OPENDDS_SECURITY */

@@ -1,5 +1,5 @@
-feature(!full_jre) : java {
-  javacflags += -classpath $(DDS_ROOT)/lib/i2jrt_compact.jar
+feature(!java_pre_jpms) : java {
+  javacflags += -classpath $(DDS_ROOT)/lib/i2jrt_corba.jar
 }
 
 project: taolib_with_idl, portableserver, java, dds_macros {
@@ -45,10 +45,6 @@ project: taolib_with_idl, portableserver, java, dds_macros {
     optional(header_pre_extension) {
       commandflags(!-SS) += JS
     }
-  }
-
-  verbatim(gnuace, bottom) {
-    $(filter %.class, $(GENERATED_DIRTY)): $(filter %.java, $(GENERATED_DIRTY))
   }
 
 }

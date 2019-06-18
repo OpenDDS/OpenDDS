@@ -33,7 +33,7 @@ RtpsUdpTransport::RtpsUdpTransport(RtpsUdpInst& inst)
 #if defined(OPENDDS_SECURITY)
   , local_crypto_handle_(DDS::HANDLE_NIL)
 #endif
-#if OPENDDS_SECURITY
+#ifdef OPENDDS_SECURITY
   , ice_endpoint_(*this)
 #endif
 {
@@ -51,7 +51,7 @@ RtpsUdpTransport::config() const
 ICE::Endpoint*
 RtpsUdpTransport::get_ice_endpoint()
 {
-#if OPENDDS_SECURITY
+#ifdef OPENDDS_SECURITY
   return (config().use_ice_) ? &ice_endpoint_ : 0;
 #else
   return 0;
@@ -306,7 +306,8 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
   // detect and report errors during DataReader/Writer setup instead
   // of during association.
 
-  if (!open_appropriate_socket_type(unicast_socket_, config.local_address())) {
+  int protocol_family = PF_UNSPEC;
+  if (!open_appropriate_socket_type(unicast_socket_, config.local_address(), &protocol_family)) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("RtpsUdpTransport::configure_i: open_appropriate_socket_type:")
@@ -314,14 +315,12 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
                       false);
   }
 
-#if defined (ACE_RECVPKTINFO)
-  int sockopt = 1;
-  if (unicast_socket_.set_option(IPPROTO_IP, ACE_RECVPKTINFO, &sockopt, sizeof sockopt) == -1) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("RtpsUdpTransport::configure_i: set_option:")
-                      ACE_TEXT("%m\n")),
-                     false);
+#ifdef ACE_RECVPKTINFO
+  if (protocol_family == PF_INET) {
+    int sockopt = 1;
+    if (unicast_socket_.set_option(IPPROTO_IP, ACE_RECVPKTINFO, &sockopt, sizeof sockopt) == -1) {
+      ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsUdpTransport::configure_i: set_option: %m\n")), false);
+    }
   }
 #endif
 
@@ -338,7 +337,7 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
 
   create_reactor_task();
 
-#if OPENDDS_SECURITY
+#ifdef OPENDDS_SECURITY
   if (config.use_ice_) {
     ICE::Agent::instance()->add_endpoint(&ice_endpoint_);
     if (reactor()->register_handler(unicast_socket_.get_handle(), &ice_endpoint_,
@@ -370,7 +369,7 @@ RtpsUdpTransport::shutdown_i()
   }
   link_.reset();
 
-#if OPENDDS_SECURITY
+#ifdef OPENDDS_SECURITY
   if(config().use_ice_) {
     ICE::Agent::instance()->remove_endpoint(&ice_endpoint_);
   }
@@ -397,7 +396,7 @@ RtpsUdpTransport::map_ipv4_to_ipv6() const
   return map;
 }
 
-#if OPENDDS_SECURITY
+#ifdef OPENDDS_SECURITY
 int
 RtpsUdpTransport::IceEndpoint::handle_input(ACE_HANDLE /*fd*/)
 {

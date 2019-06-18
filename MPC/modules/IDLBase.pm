@@ -151,7 +151,7 @@ sub get_output {
   my %seen;
 
   ## Parse the IDL file and get back the types and names
-  my $data = $self->do_cached_parse($file, $flags);
+  my($data, $fwd) = $self->do_cached_parse($file, $flags);
 
   ## Get the file names based on the type and name of each entry
   my @tmp;
@@ -161,8 +161,8 @@ sub get_output {
   }
   @filenames = grep(!$seen{$_}++, @tmp); # remove duplicates
 
-  ## Return the file name list
-  return \@filenames;
+  ## Return the file name list and a map of dependencies.
+  return \@filenames, $self->get_dependencies(\@filenames, $fwd)
 }
 
 sub get_filenames {
@@ -186,13 +186,59 @@ sub get_tied {
     }
   }
 
-  return $tied, $self->get_component_name;
+  return $tied, $self->get_component_name();
 }
 
 sub get_component_name {
   ## This method is called with no arguments and expects a string
   ## containing the component name to tie generated files together.
   return "";
+}
+
+sub get_dependencies {
+  my($self, $filenames, $fwdarray) = @_;
+
+  ## There aren't any additional dependencies if there were no forward
+  ## declarations.
+  return undef if (scalar(@$fwdarray) == 0);
+
+  my %dependencies;
+  ## MPC v4.1.41 and older does not provide the ProjectCreator to the
+  ## CommandHelper.  If we don't have the creator, the best we can
+  ## do is say that the .java files depends on other .java files.
+  if (exists $self->{'creator'}) {
+    ## If we have been given a ProjectCreator, we can use the .java files
+    ## in the forward array to create .class file names which is what the
+    ## .java files are truly dependent upon.
+    my @genfiles;
+    foreach my $file (@$fwdarray) {
+      my $of = $self->{'creator'}->get_first_custom_output($file, 'java_files');
+      push(@genfiles, $of) if (defined $of && $of ne '');
+    }
+
+    ## Now that we have the .class files that each of the files listed in
+    ## @$filenames will be dependent upon, we must go through each file
+    ## and add it to the dependency map.  The files upon which each file
+    ## will be dependent must be custom tailored to remove the .class
+    ## that the file itself will create to avoid circular dependencies.
+    foreach my $file (@$filenames) {
+      my $of = $self->{'creator'}->get_first_custom_output($file, 'java_files');
+      if (defined $of && $of ne '') {
+        my $re = $self->{'creator'}->escape_regex_special($of);
+        my @arr = grep(!/^$re$/, @genfiles);
+        $dependencies{$file} = \@arr;
+      }
+      else {
+        $dependencies{$file} = \@genfiles;
+      }
+    }
+  }
+  else {
+    ## This dependency map says that every generated file will depend on
+    ## other generated files based solely on forward declared elements.
+    %dependencies = map { $_ => $fwdarray } @$filenames;
+  }
+  return {$self->get_component_name() => \%dependencies};
 }
 
 # ************************************************************
@@ -222,7 +268,8 @@ sub cached_parse {
 
   ## If we have already processed this file, we will just delete the
   ## stored data and return it.
-  return delete $self->{'files'}->{$file} if (defined $self->{'files'}->{$file});
+  return delete $self->{'files'}->{$file}, delete $self->{'forwards'}->{$file}
+           if (defined $self->{'files'}->{$file});
 
   ## If the file is a DDS type support idl file, we will remove the
   ## TypeSupport portion and process the file from which it was created.
@@ -235,8 +282,8 @@ sub cached_parse {
   my $ts = defined $self->{'strs'}->{$actual} ||
            ($actual =~ /$tsreg$/ && -r $actual) ?
                    undef : ($actual =~ s/$tsreg$/.idl/);
-  my($data, $ts_str, $ts_pragma) = $self->parse($actual, $includes, $macros,
-                                                $mparams);
+  my($data, $forwards, $ts_str, $ts_pragma) =
+       $self->parse($actual, $includes, $macros, $mparams);
 
   if ($ts) {
     ## The file passed into this method was the type support file.  Store
@@ -244,8 +291,8 @@ sub cached_parse {
     ## string that was obtained during the original parsing and return
     ## that data.
     $self->{'files'}->{$actual} = $data;
-    ($data, $ts_str) = $self->parse($file, $includes,
-                                    $macros, $mparams, $ts_str);
+    $self->{'forwards'}->{$actual} = $forwards;
+    ($data) = $self->parse($file, $includes, $macros, $mparams, $ts_str);
   }
   elsif ($ts_str) {
     ## The file passed in was not a type support, but contained #pragma's
@@ -257,11 +304,12 @@ sub cached_parse {
     $self->{'strs'}->{$key} = [$ts_str, $ts_pragma];
   }
 
-  return $data;
+  return $data, $forwards;
 }
 
 sub parse {
   my($self, $file, $includes, $macros, $mparams, $str) = @_;
+  my @forwards;
 
   ## Preprocess the file into one huge string
   my $ts_str;
@@ -401,9 +449,22 @@ sub parse {
       ## forward declaration and we need to drop it.
       if ($forward) {
         if ($c eq '{') {
+          ## If this was previously forward declared, we can remove it
+          ## now that it has been fully declared as we no longer need to
+          ## create a dependency on it.
+          my $scope = $self->get_scope(\@state);
+          my $file = join('/', @$scope) . $self->get_file_ext();
+          if (grep(/^$file$/, @forwards)) {
+            @forwards = grep(!/^$file$/, @forwards);
+          }
           $forward = undef;
         }
         elsif ($c eq ';') {
+          ## This is a forward declaration.  Add it to the list of
+          ## forward declarations to return back with the rest of the data.
+          my $scope = $self->get_scope(\@state);
+          push(@forwards, join('/', @$scope) . $self->get_file_ext());
+
           pop(@state);
           $forward = undef;
         }
@@ -443,7 +504,7 @@ sub parse {
     }
   }
 
-  return \@data, $ts_str, $ts_pragma;
+  return \@data, \@forwards, $ts_str, $ts_pragma;
 }
 
 # ************************************************************

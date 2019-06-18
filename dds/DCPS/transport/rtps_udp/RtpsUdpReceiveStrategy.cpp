@@ -50,14 +50,25 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
                                              bool& stop)
 {
   ACE_INET_Addr local_address;
-  const ssize_t ret = socket.recv(iov, n, remote_address, 0, &local_address);
+  const ssize_t ret = socket.recv(iov, n, remote_address, 0
+#ifdef ACE_RECVPKTINFO
+                                  , &local_address
+#endif
+  );
 
   if (ret == -1) {
     return ret;
   }
 
-#if OPENDDS_SECURITY
+#ifdef OPENDDS_SECURITY
   if (endpoint && n > 0 && ret > 0 && iov[0].iov_len >= 4 && memcmp(iov[0].iov_base, "RTPS", 4) != 0) {
+# ifndef ACE_RECVPKTINFO
+    ACE_ERROR((LM_ERROR, "ERROR: RtpsUdpReceiveStrategy::receive_bytes_helper potential STUN message "
+               "received but this version of the ACE library doesn't support the local_address "
+               "extension in ACE_SOCK_Dgram::recv\n"));
+    ACE_UNUSED_ARG(stop);
+    ACE_NOTSUP_RETURN(-1);
+# else
     // Assume STUN
     stop = true;
     size_t bytes = ret;
@@ -84,6 +95,7 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
     }
     head->release();
   }
+# endif
 #else
   ACE_UNUSED_ARG(endpoint);
   ACE_UNUSED_ARG(stop);
@@ -103,6 +115,7 @@ RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
     (fd == link_->unicast_socket().get_handle())
     ? link_->unicast_socket() : link_->multicast_socket();
 #ifdef ACE_LACKS_SENDMSG
+  ACE_UNUSED_ARG(stop);
   char buffer[0x10000];
   ssize_t scatter = socket.recv(buffer, sizeof buffer, remote_address);
   char* iter = buffer;

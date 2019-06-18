@@ -8,13 +8,16 @@
 #include "Checklist.h"
 
 #include "EndpointManager.h"
+#include "Ice.h"
+
+#include "dds/DCPS/Definitions.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace ICE {
 
-#if OPENDDS_SECURITY
+#ifdef OPENDDS_SECURITY
 
 const ACE_UINT32 PEER_REFLEXIVE_PRIORITY = (110 << 24) + (65535 << 8) + ((256 - 1) << 0);  // No local preference, component 1.
 
@@ -29,8 +32,8 @@ CandidatePair::CandidatePair(const Candidate& a_local,
     priority(compute_priority()),
     use_candidate(a_use_candidate)
 {
-  assert(!a_local.foundation.empty());
-  assert(!a_remote.foundation.empty());
+  OPENDDS_ASSERT(!a_local.foundation.empty());
+  OPENDDS_ASSERT(!a_remote.foundation.empty());
 }
 
 bool CandidatePair::operator==(const CandidatePair& other) const
@@ -169,7 +172,7 @@ void Checklist::compute_active_foundations(ActiveFoundationSet& active_foundatio
 void Checklist::check_invariants() const
 {
   for (CandidatePairsType::const_iterator pos = valid_list_.begin(), limit = valid_list_.end(); pos != limit; ++pos) {
-    assert(pos->use_candidate);
+    OPENDDS_ASSERT(pos->use_candidate);
   }
 }
 
@@ -211,7 +214,7 @@ void Checklist::unfreeze(const FoundationType& a_foundation)
 
 void Checklist::add_valid_pair(const CandidatePair& valid_pair)
 {
-  assert(valid_pair.use_candidate);
+  OPENDDS_ASSERT(valid_pair.use_candidate);
   valid_list_.push_back(valid_pair);
   valid_list_.sort(CandidatePair::priority_sorted);
 }
@@ -338,7 +341,7 @@ void Checklist::generate_triggered_check(const ACE_INET_Addr& local_address, con
   // 7.3.1.4
   Candidate local;
   bool flag = get_local_candidate(local_address, local);
-  assert(flag);
+  OPENDDS_ASSERT(flag);
 
   CandidatePair cp(local, remote, local_is_controlling_, use_candidate);
 
@@ -373,8 +376,8 @@ void Checklist::succeeded(const ConnectivityCheck& cc)
     if (local_is_controlling_) {
       nominated_ = nominating_;
       nominating_ = valid_list_.end();
-      assert(frozen_.empty());
-      assert(waiting_.empty());
+      OPENDDS_ASSERT(frozen_.empty());
+      OPENDDS_ASSERT(waiting_.empty());
     }
 
     else {
@@ -418,11 +421,11 @@ void Checklist::succeeded(const ConnectivityCheck& cc)
       }
     }
 
-    assert(frozen_.empty());
-    assert(waiting_.empty());
-    assert(triggered_check_queue_.empty());
-    assert(in_progress_.empty());
-    assert(connectivity_checks_.empty());
+    OPENDDS_ASSERT(frozen_.empty());
+    OPENDDS_ASSERT(waiting_.empty());
+    OPENDDS_ASSERT(triggered_check_queue_.empty());
+    OPENDDS_ASSERT(in_progress_.empty());
+    OPENDDS_ASSERT(connectivity_checks_.empty());
   }
 
   endpoint_manager_->agent_impl->unfreeze(cp.foundation);
@@ -447,7 +450,7 @@ void Checklist::success_response(const ACE_INET_Addr& local_address,
                                  const STUN::Message& a_message)
 {
   ConnectivityChecksType::iterator pos = std::find(connectivity_checks_.begin(), connectivity_checks_.end(), a_message.transaction_id);
-  assert(pos != connectivity_checks_.end());
+  OPENDDS_ASSERT(pos != connectivity_checks_.end());
 
   ConnectivityCheck const cc = *pos;
 
@@ -538,7 +541,7 @@ void Checklist::error_response(const ACE_INET_Addr& /*local_address*/,
                                const STUN::Message& a_message)
 {
   ConnectivityChecksType::iterator pos = std::find(connectivity_checks_.begin(), connectivity_checks_.end(), a_message.transaction_id);
-  assert(pos != connectivity_checks_.end());
+  OPENDDS_ASSERT(pos != connectivity_checks_.end());
 
   ConnectivityCheck const cc = *pos;
 

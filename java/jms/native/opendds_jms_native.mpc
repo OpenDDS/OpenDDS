@@ -2,7 +2,7 @@
 //
 
 // dcpslib has to be after dcps_java to ensure libout set correctly
-project: dcps_java, dcpslib, dcps_inforepodiscovery {
+project: dcps_java, javah, dcpslib, dcps_inforepodiscovery {
 
     // Ensure sharedname matches the opendds-jms jar naming scheme:
     sharedname       = opendds-jms-native

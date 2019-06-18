@@ -18,6 +18,7 @@ require File::Temp;
 use File::Temp ();
 use FileHandle;
 use Cwd;
+use POSIX;
 use strict;
 use warnings;
 
@@ -50,6 +51,7 @@ my %platforminfo =
                                  16 => 'vc10', 17 => 'vc11', 18 => 'vc12',
                                  19 => 'vc14', 19.1 => 'vs2017',
                                  19.2 => 'vs2019'},
+               'cl_archs' => {'x64' => 1, 'Win32' => 1, 'ARM64' => 0, 'ARM' => 0}, # 1 if supported
               },
    'macosx' => {
                 'compilers' => ['clang++'],
@@ -470,32 +472,69 @@ if ($opts{'compiler'} =~ /cl(\.exe)?$/i) {
     $clpath =~ s/vc\\bin(\\(x86_)?amd64)?/common7\\ide/i;
     $ENV{'PATH'} .= ";$clpath";
   }
-  open(CL, "\"$opts{'compiler'}\" /v 2>&1 |");
-  while (<CL>) {
-    if (/version (\d+)\.(\d+)\.[\d\.]+ for (x\d+)/i) { # match i18n version strings
-      my $ver = ($2 == 0) ? $1 : "$1.$2";
-      my $arch = "$3";
-      $ver =~ s/0+$// unless $2 == 0;
-      $ver =~ s/\.(\d)\d*/.$1/; # only keep one digit after .
-      if (!exists $platforminfo{'win32'}->{'cl_versions'}->{$ver}) {
-        die "ERROR: Unknown or unsupported Visual C++ compiler version: $ver\n"
-          . "Stopped";
-      }
 
-      $opts{'compiler_version'} = $platforminfo{'win32'}->{'cl_versions'}->{$ver};
-      $opts{'compiler_target_architecture'} = $arch;
-
-      if ($ver >= 19) {
-        push(@{$opts{'features'}}, 'no_cxx11=0');
-        print "Visual C++ has C++11 support\n" if $opts{'verbose'};
-      }
+  # Have CL Tell Us Its Target Architecture and Version
+  my ($tmp_fd, $tmp_filename) = File::Temp::tempfile();
+  my $cl_check = << "EOF";
+#ifdef _M_X64
+#  define ARCH x64
+#elif defined(_M_IX86)
+#  define ARCH Win32
+#elif defined(_M_ARM64)
+#  define ARCH ARM64
+#elif defined(_M_ARM)
+#  define ARCH ARM
+#else
+#  define ARCH Unknown
+#endif
+CL is _MSC_VER ARCH
+EOF
+  print $tmp_fd $cl_check;
+  close($tmp_fd);
+  my $cl_command = "\"$opts{'compiler'}\" /EP $tmp_filename 2>&1";
+  print "Running $cl_command\n" if $opts{'verbose'};
+  open(my $cl_out_fd, "-|", $cl_command)
+    or die "ERROR: Could not detect Visual C++ version, try running this ".
+      "script from the Visual Studio Command Prompt.\nStopped";
+  my $ver = 0;
+  my $arch = '';
+  while (my $line = <$cl_out_fd>) {
+    chomp ($line);
+    print "CL says: $line\n" if $opts{'verbose'};
+    # Convert _MSC_VER to the form \d+\.\d
+    if ($line =~ /^CL is (\d+)\d (\w+)$/) {
+      $ver = int($1) / 10;
+      $arch = $2;
       last;
     }
   }
-  close CL;
-  if (!$opts{'compiler_version'}) {
-    die "ERROR: Could not detect Visual C++ version, try running this script ".
-      "from the Visual Studio Command Prompt.\nStopped";
+  close($cl_out_fd);
+  unlink($tmp_filename)
+    or warn "Unable to delete temporary file $tmp_filename: $!";
+  print "CL Version is $ver, architecture is $arch\n" if $opts{'verbose'};
+  if (!$ver && !$arch) {
+    die "cl version probe failed, invalid output from cl\nStopped";
+  }
+  if ($arch eq 'Unknown') {
+    die "cl version probe failed, no known architecture macro was defined\nStopped";
+  }
+  if (!exists $platforminfo{'win32'}->{'cl_archs'}->{$arch}) {
+    die "cl version probe failed, invalid architecture \"$arch\"\nStopped";
+  }
+  if (!$platforminfo{'win32'}->{'cl_archs'}->{$arch}) {
+    die "ERROR: Windows for $arch isn't supported\nStopped";
+  }
+  if (!exists $platforminfo{'win32'}->{'cl_versions'}->{$ver}) {
+    die "ERROR: Unknown or unsupported Visual C++ compiler version: $ver\n"
+      . "Stopped";
+  }
+
+  $opts{'compiler_version'} = $platforminfo{'win32'}->{'cl_versions'}->{$ver};
+  $opts{'compiler_target_architecture'} = $arch;
+
+  if ($ver >= 19) {
+    push(@{$opts{'features'}}, 'no_cxx11=0');
+    print "Visual C++ has C++11 support\n" if $opts{'verbose'};
   }
   $ENV{'PATH'} = $savepath;
   print "Detected Visual C++ version: $opts{'compiler_version'}\n"
@@ -628,11 +667,20 @@ if (!$ace_src || !$tao_src) {
         ! -r 'ACE_TAO/ACE/ace/ACE.h' ||
           ! -r 'ACE_TAO/TAO/tao/ORB.h';
 
+    my $cur_dir = getcwd;
+    chdir('ACE_TAO');
+    system('git log -1 --oneline');
+    chdir($cur_dir);
+
     print "Cloning git repo: $urlbase/MPC into ACE_TAO/ACE/MPC\n";
     $err = system("git clone -q --depth 1 $urlbase/MPC ACE_TAO/ACE/MPC");
     die 'ERROR: Failed to clone MPC (into ACE_TAO/ACE/MPC) from GitHub'
       if $err ||
         ! -r 'ACE_TAO/ACE/MPC/mwc.pl';
+
+    chdir('ACE_TAO/ACE/MPC');
+    system('git log -1 --oneline');
+    chdir($cur_dir);
 
     $ace_src = normalizePath('ACE_TAO/ACE');
     $tao_src = normalizePath('ACE_TAO/TAO');
@@ -794,7 +842,8 @@ sub clone_host_and_target {
 sub backup_and_open {
   my $file = shift;
   if (!$opts{'dry-run'} && -r $file) {
-    my $backup = (-e $file . '.bak') ? ($file . '.bak') : $file . ".bak.$$";
+    my $date = strftime "%Y-%m-%d-%H-%M-%S", localtime time;
+    my $backup = (-e $file . '.bak') ? ($file . '.bak') : $file . ".bak.$date";
     copy($file, $backup);
     print "WARNING: overwriting existing $file (saved a backup copy as " .
       "$backup)\n";
@@ -1123,10 +1172,14 @@ if ($build_gtest && !$has_cmake) {
 if (exists $opts{'rapidjson'}) {
   if ($opts{'rapidjson'} eq '') {
     my $sanity = $optdep{'rapidjson'}->[1];
-    my $sm_dir = Cwd::abs_path('./tools/IntermediateTypeLang/cpp/rapidjson');
+    my $sm_dir = Cwd::abs_path('./tools/rapidjson');
     my $sys_dir = File::Spec->catdir((system_default_install_dir(),
                               $is_windows ? 'RapidJSON' : ''));
 
+    my $rapidjson_msg =
+      "Could not find RapidJSON (using '$sanity') in:\n".
+      "    Git Submodule: '$sm_dir'\n" .
+      "    Default Install Prefix: '$sys_dir'\n";
     if (-f File::Spec->catfile($sm_dir, $sanity)) {
       $opts{'rapidjson'} = $sm_dir;
     }
@@ -1134,13 +1187,13 @@ if (exists $opts{'rapidjson'}) {
       $opts{'rapidjson'} = $sys_dir;
     }
     elsif (exists $defaulted->{'rapidjson'}) {
-      print "RapidJSON '$sanity' not found in submodule dir '$sm_dir' or default install dir '$sys_dir', ' .
-        ' continuing without it.\n";
+      print "${rapidjson_msg}Continuing without it.\n" if $opts{'verbose'};
       delete $opts{'rapidjson'};
     }
     else {
-      die "ERROR: RapidJSON '$sanity' not found in submodule dir '$sm_dir' or default install dir '$sys_dir'\nStopped"
+      die "ERROR: ${rapidjson_msg}Stopped";
     }
+    print "Using '$opts{'rapidjson'}' for RapidJSON\n" if $opts{'verbose'};
   }
 }
 
@@ -1221,6 +1274,36 @@ for my $key (keys %optdep) {
   }
 }
 
+sub has_feature {
+  my $feat = shift;
+  if ($opts{'features'}) {
+    for my $f (@{$opts{'features'}}) {
+      my ($key, $value) = split(/=/, $f);
+      if ($key eq $feat) {
+        return 1;
+      }
+    }
+  }
+  return 0;
+}
+
+if ($opts{'java'}) {
+  my $feat = 'java_pre_jpms';
+  unless (has_feature($feat)) {
+    my $javac = File::Spec->catfile($opts{'java'}, 'bin', 'javac');
+    open(my $vers, "\"$javac\" -version |");
+    while (<$vers>) {
+      if (/javac (\d+)/) {
+        print "Found javac major version $1\n" if $opts{'verbose'};
+        if ($1 > 1) {
+          push(@{$opts{'features'}}, "$feat=0");
+          print "Feature $feat=0 due to Java version\n" if $opts{'verbose'};
+        }
+        last;
+      }
+    }
+  }
+}
 
 sub env_from_opt {
   my $key = shift;
@@ -1318,12 +1401,6 @@ sub win32_cmake_generator {
   return $map{$ver};
 }
 
-sub win32_cmake_arch {
-  my $arch = shift;
-
-  return ($arch eq 'x64' ? 'x64' : 'Win32');
-}
-
 if ($build_gtest) {
   my $cwd = Cwd::getcwd();
   my $build_dir = $opts{'gtest'} . $slash . 'build';
@@ -1333,7 +1410,7 @@ if ($build_gtest) {
     ('-Dgtest_force_shared_crt=ON',
      '-DCMAKE_CXX_FLAGS=/D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING=1',
      '-G', '"' . win32_cmake_generator($opts{'compiler_version'}) . '"',
-     '-A', win32_cmake_arch($opts{'compiler_target_architecture'})) : ();
+     '-A', $opts{'compiler_target_architecture'}) : ();
   my @cmake_cmds = ([$cmake,
                      "-DCMAKE_INSTALL_PREFIX=$install_dir",
                      '-DCMAKE_INSTALL_LIBDIR=lib',
@@ -2087,7 +2164,7 @@ print " to compile ",
   "to set environment\nvariables for future shell sessions.\n";
 if ($is_windows && !$cross_compile) {
   print "Start Visual Studio from this command prompt so that it inherits ",
-    "the correct\nenvironment variables. Try running \"devenv *.sln\".\n";
+    "the correct\nenvironment variables. Try running \"devenv $opts{'solution_file'}\".\n";
 }
 
 sub write_cmake_file {

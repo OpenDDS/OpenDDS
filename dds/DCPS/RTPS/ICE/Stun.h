@@ -9,9 +9,6 @@
 #ifndef OPENDDS_RTPS_STUN_H
 #define OPENDDS_RTPS_STUN_H
 
-#include <map>
-#include <vector>
-
 #include "ace/INET_Addr.h"
 #include "dds/DCPS/Serializer.h"
 
@@ -20,6 +17,10 @@
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
+
+#include <map>
+#include <string>
+#include <vector>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
