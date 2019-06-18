@@ -3,9 +3,6 @@ project(DDS*PubblisherSubscriber) : dcpsexe, dcps_transports_for_test {
   exename = pubsub
   requires += built_in_topics
 
-  Idl_Files {
-  }
-
   Source_Files {
     pubsub.cpp
   }
