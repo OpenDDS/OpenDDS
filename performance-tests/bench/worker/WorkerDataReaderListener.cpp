@@ -8,6 +8,9 @@ WorkerDataReaderListener::WorkerDataReaderListener() {
 WorkerDataReaderListener::WorkerDataReaderListener(size_t expected) : expected_count_(expected) {
 }
 
+WorkerDataReaderListener::~WorkerDataReaderListener() {
+}
+
 void WorkerDataReaderListener::add_handler(DataHandler& handler) {
   handlers_.push_back(&handler);
 }
@@ -105,6 +108,15 @@ void WorkerDataReaderListener::set_datareader(Builder::DataReader& datareader) {
 
   latency_stat_block_ = std::make_shared<PropertyStatBlock>(datareader_->get_report().properties, "latency", 1000);
   jitter_stat_block_ = std::make_shared<PropertyStatBlock>(datareader_->get_report().properties, "jitter", 1000);
+}
+
+void WorkerDataReaderListener::unset_datareader(Builder::DataReader& datareader) {
+  if (datareader_ == &datareader) {
+    latency_stat_block_->write_median();
+    jitter_stat_block_->write_median();
+
+    datareader_ = NULL;
+  }
 }
 
 }

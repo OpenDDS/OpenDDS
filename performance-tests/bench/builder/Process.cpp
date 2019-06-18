@@ -22,6 +22,15 @@ Process::~Process() {
   config_sections_.reset();
 }
 
+void Process::detach_listeners() {
+  for (auto it = reader_map_.begin(); it != reader_map_.end(); ++it) {
+    it->second->detach_listener();
+  }
+  for (auto it = writer_map_.begin(); it != writer_map_.end(); ++it) {
+    it->second->detach_listener();
+  }
+}
+
 void Process::enable_dds_entities() {
   participants_->enable();
 }

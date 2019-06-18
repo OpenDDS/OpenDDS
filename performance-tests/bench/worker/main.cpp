@@ -38,6 +38,26 @@
 #include <iomanip>
 #include <condition_variable>
 
+double weighted_median(std::vector<double> medians, std::vector<size_t> weights, double default_value) {
+  typedef std::multiset<std::pair<double, size_t> > WMMS;
+  WMMS wmms;
+  size_t total_weight = 0;
+  assert(medians.size() == weights.size());
+  for (size_t i = 0; i < medians.size(); ++i) {
+    wmms.insert(WMMS::value_type(medians[i], weights[i]));
+    total_weight += weights[i];
+  }
+  size_t mid_weight = total_weight / 2;
+  for (auto it = wmms.begin(); it != wmms.end(); ++it) {
+    if (mid_weight > it->second) {
+      mid_weight -= it->second;
+    } else {
+      return it->first;
+    }
+  }
+  return default_value;
+}
+
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
   if (argc < 2) {
@@ -194,6 +214,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     }
     thread_pool.clear();
 
+    process.detach_listeners();
+
     process_report = process.get_report();
 
     std::cout << "Beginning process destruction / entity deletion." << std::endl;
@@ -232,18 +254,30 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   worker_report.undermatched_readers = 0;
   worker_report.undermatched_writers = 0;
   worker_report.max_discovery_time_delta = ZERO;
+
   worker_report.latency_sample_count = 0;
   worker_report.latency_min = std::numeric_limits<double>::max();
-  worker_report.latency_max = 0.0;
+  worker_report.latency_max = std::numeric_limits<double>::min();
   worker_report.latency_mean = 0.0;
   worker_report.latency_var_x_sample_count = 0.0;
   worker_report.latency_stdev = 0.0;
+  worker_report.latency_weighted_median = 0.0;
+  worker_report.latency_weighted_median_overflow = 0;
+
   worker_report.jitter_sample_count = 0;
   worker_report.jitter_min = std::numeric_limits<double>::max();
-  worker_report.jitter_max = 0.0;
+  worker_report.jitter_max = std::numeric_limits<double>::min();
   worker_report.jitter_mean = 0.0;
   worker_report.jitter_var_x_sample_count = 0.0;
   worker_report.jitter_stdev = 0.0;
+  worker_report.jitter_weighted_median = 0.0;
+  worker_report.jitter_weighted_median_overflow = 0;
+
+  std::vector<double> latency_medians;
+  std::vector<size_t> latency_median_counts;
+
+  std::vector<double> jitter_medians;
+  std::vector<size_t> jitter_median_counts;
 
   for (CORBA::ULong i = 0; i < process_report.participants.length(); ++i) {
     for (CORBA::ULong j = 0; j < process_report.participants[i].subscribers.length(); ++j) {
@@ -251,16 +285,23 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
         Builder::DataReaderReport& dr_report = process_report.participants[i].subscribers[j].datareaders[k];
         const Builder::TimeStamp dr_enable_time = get_or_create_property(dr_report.properties, "enable_time", Builder::PVK_TIME)->value.time_prop();
         const Builder::TimeStamp dr_last_discovery_time = get_or_create_property(dr_report.properties, "last_discovery_time", Builder::PVK_TIME)->value.time_prop();
+
         const CORBA::ULongLong dr_latency_sample_count = get_or_create_property(dr_report.properties, "latency_sample_count", Builder::PVK_ULL)->value.ull_prop();
         const double dr_latency_min = get_or_create_property(dr_report.properties, "latency_min", Builder::PVK_DOUBLE)->value.double_prop();
         const double dr_latency_max = get_or_create_property(dr_report.properties, "latency_max", Builder::PVK_DOUBLE)->value.double_prop();
         const double dr_latency_mean = get_or_create_property(dr_report.properties, "latency_mean", Builder::PVK_DOUBLE)->value.double_prop();
         const double dr_latency_var_x_sample_count = get_or_create_property(dr_report.properties, "latency_var_x_sample_count", Builder::PVK_DOUBLE)->value.double_prop();
+        const double dr_latency_median = get_or_create_property(dr_report.properties, "latency_median", Builder::PVK_DOUBLE)->value.double_prop();
+        const CORBA::ULongLong dr_latency_median_sample_count = get_or_create_property(dr_report.properties, "latency_median_sample_count", Builder::PVK_ULL)->value.ull_prop();
+
         const CORBA::ULongLong dr_jitter_sample_count = get_or_create_property(dr_report.properties, "jitter_sample_count", Builder::PVK_ULL)->value.ull_prop();
         const double dr_jitter_min = get_or_create_property(dr_report.properties, "jitter_min", Builder::PVK_DOUBLE)->value.double_prop();
         const double dr_jitter_max = get_or_create_property(dr_report.properties, "jitter_max", Builder::PVK_DOUBLE)->value.double_prop();
         const double dr_jitter_mean = get_or_create_property(dr_report.properties, "jitter_mean", Builder::PVK_DOUBLE)->value.double_prop();
         const double dr_jitter_var_x_sample_count = get_or_create_property(dr_report.properties, "jitter_var_x_sample_count", Builder::PVK_DOUBLE)->value.double_prop();
+        const double dr_jitter_median = get_or_create_property(dr_report.properties, "jitter_median", Builder::PVK_DOUBLE)->value.double_prop();
+        const CORBA::ULongLong dr_jitter_median_sample_count = get_or_create_property(dr_report.properties, "jitter_median_sample_count", Builder::PVK_ULL)->value.ull_prop();
+
         if (ZERO < dr_enable_time && ZERO < dr_last_discovery_time) {
           auto delta = dr_last_discovery_time - dr_enable_time;
           if (worker_report.max_discovery_time_delta < delta) {
@@ -282,6 +323,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
         worker_report.latency_var_x_sample_count += dr_latency_var_x_sample_count;
         worker_report.latency_sample_count += dr_latency_sample_count;
 
+        latency_medians.push_back(dr_latency_median);
+        latency_median_counts.push_back(dr_latency_median_sample_count);
+        if (dr_latency_median_sample_count < dr_latency_sample_count) {
+          worker_report.latency_weighted_median_overflow += dr_latency_sample_count - dr_latency_median_sample_count;
+        }
+
         if (dr_jitter_min < worker_report.jitter_min) {
           worker_report.jitter_min = dr_jitter_min;
         }
@@ -293,6 +340,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
         }
         worker_report.jitter_var_x_sample_count += dr_jitter_var_x_sample_count;
         worker_report.jitter_sample_count += dr_jitter_sample_count;
+
+        jitter_medians.push_back(dr_jitter_median);
+        jitter_median_counts.push_back(dr_jitter_median_sample_count);
+        if (dr_jitter_median_sample_count < dr_jitter_sample_count) {
+          worker_report.jitter_weighted_median_overflow += dr_jitter_sample_count - dr_jitter_median_sample_count;
+        }
       }
     }
     for (CORBA::ULong j = 0; j < process_report.participants[i].publishers.length(); ++j) {
@@ -313,7 +366,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   }
 
   worker_report.latency_stdev = std::sqrt(worker_report.latency_var_x_sample_count / static_cast<double>(worker_report.latency_sample_count));
+  worker_report.latency_weighted_median = weighted_median(latency_medians, latency_median_counts, 0.0);
+
   worker_report.jitter_stdev = std::sqrt(worker_report.jitter_var_x_sample_count / static_cast<double>(worker_report.jitter_sample_count));
+  worker_report.jitter_weighted_median = weighted_median(jitter_medians, jitter_median_counts, 0.0);
 
   std::string output_file_name;
   std::unique_ptr<std::ofstream> ofs;
@@ -348,6 +404,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     os << "maximum latency: " << std::fixed << std::setprecision(6) << worker_report.latency_max << " seconds" << std::endl;
     os << "mean latency: " << std::fixed << std::setprecision(6) << worker_report.latency_mean << " seconds" << std::endl;
     os << "latency standard deviation: " << std::fixed << std::setprecision(6) << worker_report.latency_stdev << " seconds" << std::endl;
+    os << "latency weighted median: " << std::fixed << std::setprecision(6) << worker_report.latency_weighted_median << " seconds" << std::endl;
+    os << "latency weighted median overflow: " << worker_report.latency_weighted_median_overflow << std::endl;
   }
 
   if (worker_report.jitter_sample_count > 0) {
@@ -358,6 +416,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     os << "maximum jitter: " << std::fixed << std::setprecision(6) << worker_report.jitter_max << " seconds" << std::endl;
     os << "mean jitter: " << std::fixed << std::setprecision(6) << worker_report.jitter_mean << " seconds" << std::endl;
     os << "jitter standard deviation: " << std::fixed << std::setprecision(6) << worker_report.jitter_stdev << " seconds" << std::endl;
+    os << "jitter weighted median: " << std::fixed << std::setprecision(6) << worker_report.jitter_weighted_median << " seconds" << std::endl;
+    os << "jitter weighted median overflow: " << worker_report.jitter_weighted_median_overflow << std::endl;
     os << std::endl;
   }
 

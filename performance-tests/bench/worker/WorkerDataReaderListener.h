@@ -14,6 +14,7 @@ public:
 
   WorkerDataReaderListener();
   WorkerDataReaderListener(size_t expected);
+  virtual ~WorkerDataReaderListener();
 
   void add_handler(DataHandler& handler);
   void remove_handler(const DataHandler& handler);
@@ -31,6 +32,7 @@ public:
   // From Builder::DataReaderListener
 
   void set_datareader(Builder::DataReader& datareader) override;
+  void unset_datareader(Builder::DataReader& datareader) override;
 
 protected:
   std::mutex mutex_;

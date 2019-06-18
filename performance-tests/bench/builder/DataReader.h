@@ -13,6 +13,8 @@ public:
 
   void enable();
 
+  void detach_listener();
+
   DDS::DataReader_var get_dds_datareader() { return datareader_; }
   const DDS::DataReader_var get_dds_datareader() const { return datareader_; }
 

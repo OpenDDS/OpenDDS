@@ -48,9 +48,9 @@ bool WriteAction::init(const ActionConfig& config, ActionReport& report, Builder
   std::string name(config.name.in());
 
   std::random_device r;
-  std::seed_seq seed{r(), one_at_a_time_hash(reinterpret_cast<const uint8_t*>(name.data()), name.size()), r(), r(), r(), r(), r(), r()}; 
+  std::seed_seq seed{r(), one_at_a_time_hash(reinterpret_cast<const uint8_t*>(name.data()), name.size()), r(), r(), r(), r(), r(), r()};
   mt_ = std::mt19937_64(seed);
-  
+
   data_.id.high = mt_();
   data_.id.low = mt_();
 

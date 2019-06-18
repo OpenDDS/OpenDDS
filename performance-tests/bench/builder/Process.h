@@ -15,6 +15,8 @@ public:
 
   void enable_dds_entities();
 
+  void detach_listeners();
+
   ProcessReport& get_report() { return report_; }
   const ProcessReport& get_report() const { return report_; }
 

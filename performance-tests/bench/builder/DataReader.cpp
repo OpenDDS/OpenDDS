@@ -99,14 +99,25 @@ DataReader::DataReader(const DataReaderConfig& config, DataReaderReport& report,
 }
 
 DataReader::~DataReader() {
-  if (datareader_) {
-  }
 }
 
 void DataReader::enable() {
   if (enable_time_->value.time_prop() == ZERO) {
     enable_time_->value.time_prop(get_time());
     datareader_->enable();
+  }
+}
+
+void DataReader::detach_listener() {
+  if (listener_) {
+    DataReaderListener* savvy_listener_ = dynamic_cast<DataReaderListener*>(listener_.in());
+    if (savvy_listener_) {
+      savvy_listener_->unset_datareader(*this);
+    }
+    if (datareader_) {
+      datareader_->set_listener(DDS::DataReaderListener::_nil(), 0);
+    }
+    listener_ = DDS::DataReaderListener::_nil();
   }
 }
 

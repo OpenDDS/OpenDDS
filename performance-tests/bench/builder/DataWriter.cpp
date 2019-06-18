@@ -120,5 +120,18 @@ void DataWriter::enable() {
   }
 }
 
+void DataWriter::detach_listener() {
+  if (listener_) {
+    DataWriterListener* savvy_listener_ = dynamic_cast<DataWriterListener*>(listener_.in());
+    if (savvy_listener_) {
+      savvy_listener_->unset_datawriter(*this);
+    }
+    if (datawriter_) {
+      datawriter_->set_listener(DDS::DataWriterListener::_nil(), 0);
+    }
+    listener_ = DDS::DataWriterListener::_nil();
+  }
+}
+
 }
 

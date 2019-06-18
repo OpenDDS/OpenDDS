@@ -26,7 +26,7 @@ PropertyStatBlock::PropertyStatBlock(Builder::PropertySeq& seq, const std::strin
 
   median_sample_count_ = get_or_create_property(seq, prefix + "_median_sample_count", Builder::PVK_ULL);
   median_sample_count_->value.ull_prop(0);
-} 
+}
 
 void PropertyStatBlock::update(double value)
 {
@@ -68,7 +68,7 @@ void PropertyStatBlock::write_median()
     result = (median_buffer_[count / 2] + median_buffer_[(count / 2) + 1]) / 2.0;
   } else {
     result = median_buffer_[(count / 2) + 1];
-  } 
+  }
   median_->value.double_prop(result);
 }
 

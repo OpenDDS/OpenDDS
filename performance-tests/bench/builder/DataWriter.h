@@ -17,6 +17,8 @@ public:
 
   void enable();
 
+  void detach_listener();
+
   DDS::DataWriter_var get_dds_datawriter() { return datawriter_; }
   const DDS::DataWriter_var get_dds_datawriter() const { return datawriter_; }
 

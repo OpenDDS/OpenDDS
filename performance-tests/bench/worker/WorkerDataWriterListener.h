@@ -20,6 +20,7 @@ public:
   // From Builder::DataWriterListener
 
   void set_datawriter(Builder::DataWriter& datawriter) override;
+  void unset_datawriter(Builder::DataWriter& datawriter) override;
 
 protected:
   std::mutex mutex_;

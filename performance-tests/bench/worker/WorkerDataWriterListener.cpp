@@ -38,4 +38,10 @@ void WorkerDataWriterListener::set_datawriter(Builder::DataWriter& datawriter) {
   last_discovery_time_ = get_or_create_property(datawriter_->get_report().properties, "last_discovery_time", Builder::PVK_TIME);
 }
 
+void WorkerDataWriterListener::unset_datawriter(Builder::DataWriter& datawriter) {
+  if (datawriter_ == &datawriter) {
+    datawriter_ = NULL;
+  }
+}
+
 }
