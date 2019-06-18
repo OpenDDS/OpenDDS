@@ -74,7 +74,7 @@ namespace {
     }
   }
 
-  bool field_check_anon(AST_Field* f, const char* ct, const char* cn)
+  bool field_check_anon(AST_Field* f)
   {
     AST_Decl::NodeType nt = f->field_type()->node_type();
     if (nt == AST_Decl::NT_array || nt == AST_Decl::NT_sequence) {
@@ -250,7 +250,7 @@ dds_visitor::visit_structure(AST_Structure* node)
   for (CORBA::ULong i = 0; i < nfields; ++i) {
     AST_Field** f;
     node->field(f, i);
-    if (!field_check_anon(*f, "struct", name)) {
+    if (!field_check_anon(*f)) {
       error_ = true;
       return -1;
     }
@@ -403,7 +403,7 @@ dds_visitor::visit_union(AST_Union* node)
   for (CORBA::ULong i = 0; i < nfields; ++i) {
     AST_Field** f;
     node->field(f, i);
-    if (!field_check_anon(*f, "union", name)) {
+    if (!field_check_anon(*f)) {
       error_ = true;
       return -1;
     }
