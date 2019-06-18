@@ -316,8 +316,9 @@ private:
     void process_acked_by_all();
     void send_and_gather_nack_replies(ResponseVec& responses);
     bool gather_heartbeats(OPENDDS_VECTOR(TransportQueueElement*)& pendingCallbacks,
-                           ResponseVec& responses,
-                           bool allow_final);
+                           const RepoIdSet& additional_guids,
+                           bool allow_final,
+                           ResponseVec& responses);
   };
   typedef RcHandle<RtpsWriter> RtpsWriter_rch;
 

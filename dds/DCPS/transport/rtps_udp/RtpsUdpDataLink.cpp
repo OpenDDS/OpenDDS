@@ -2720,9 +2720,12 @@ RtpsUdpDataLink::send_heartbeats()
   typedef RtpsWriterMap::iterator rw_iter;
   for (rw_iter rw = writers.begin(); rw != writers.end(); ++rw) {
     WtaMap::iterator it = writers_to_advertise.find(rw->first);
-    bool heartbeat_handled = rw->second->gather_heartbeats(pendingCallbacks, responses, it == writers_to_advertise.end());
-    if (it != writers_to_advertise.end() && heartbeat_handled == true) {
-      writers_to_advertise.erase(it);
+    if (it == writers_to_advertise.end()) {
+      rw->second->gather_heartbeats(pendingCallbacks, RepoIdSet(), true, responses);
+    } else {
+      if (rw->second->gather_heartbeats(pendingCallbacks, it->second, false, responses)) {
+        writers_to_advertise.erase(it);
+      }
     }
   }
 
@@ -2765,8 +2768,9 @@ RtpsUdpDataLink::send_heartbeats()
 
 bool
 RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElement*)& pendingCallbacks,
-                                               ResponseVec& responses,
-                                               bool allow_final)
+                                               const RepoIdSet& additional_guids,
+                                               bool allow_final,
+                                               ResponseVec& responses)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
 
@@ -2783,6 +2787,7 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
   Response response;
   response.from_guid_ = id_;
   response.dst_guid_ = GUID_UNKNOWN;
+  response.to_guids_ = additional_guids;
 
   const ACE_Time_Value now = ACE_OS::gettimeofday();
   RtpsUdpInst& cfg = link->config();

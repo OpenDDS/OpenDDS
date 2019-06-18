@@ -15,7 +15,6 @@
 
 DataReaderListenerImpl::~DataReaderListenerImpl()
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
   ACE_DEBUG((LM_DEBUG, "(%P|%t) DataReader %C is done\n", id_.c_str()));
   if (expected_samples_ && received_samples_ != expected_samples_) {
     ACE_ERROR((LM_ERROR, "ERROR: expected %d but received %d\n",
@@ -66,8 +65,6 @@ DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
     ACE_OS::exit(-1);
   }
 
-  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-
   TestMsg message;
   DDS::SampleInfo info;
 
@@ -99,8 +96,6 @@ DataReaderListenerImpl::on_subscription_matched(
   DDS::DataReader_ptr /*reader*/,
   const DDS::SubscriptionMatchedStatus& /*status*/)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-
 #ifndef DDS_HAS_MINIMUM_BIT
   if (check_bits_) {
     DDS::PublicationBuiltinTopicDataDataReader_var rdr =
@@ -149,7 +144,6 @@ DataReaderListenerImpl::on_sample_lost(
 void DataReaderListenerImpl::set_builtin_datareader (
   DDS::DataReader_ptr builtin)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
   builtin_ = DDS::DataReader::_duplicate(builtin);
 }
 #endif /* DDS_HAS_MINIMUM_BIT */
