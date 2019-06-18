@@ -44,8 +44,8 @@ struct Candidate : DCPS::PoolAllocationBase {
   // Transport - UDP or TCP
   std::string foundation;
   // Component ID
-  ACE_UINT32 priority;
-  CandidateType type;
+  ACE_UINT32 priority{0};
+  CandidateType type{HOST};
   // Related Address and Port
   // Extensibility Parameters
 
@@ -66,7 +66,7 @@ struct AgentInfo {
   typedef CandidatesType::const_iterator const_iterator;
 
   CandidatesType candidates;
-  AgentType type;
+  AgentType type{FULL};
   // Connectivity-Check Pacing Value
   std::string username;
   std::string password;
