@@ -141,7 +141,7 @@ public:
     if (rc != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l setup_test() ERROR: ")
                         ACE_TEXT("get_default_subscriber_qos failed: %C\n"),
-                        retcode_to_dds_string(rc).c_str()), true);
+                        retcode_to_dds_string(rc).c_str()), false);
     }
 
     // TODO Currently only TOPIC access_scope is supported.
@@ -153,9 +153,9 @@ public:
       participant_->create_subscriber(subscriber_qos,
                                      DDS::SubscriberListener::_nil(),
                                      OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-    if (CORBA::is_nil(subscriber_.in())) {
+    if (!subscriber_) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l setup_test() ERROR: ")
-                        ACE_TEXT("create_subscriber failed!\n")), true);
+                        ACE_TEXT("create_subscriber failed!\n")), false);
     }
 
     // Create Publisher
@@ -164,7 +164,7 @@ public:
     if (rc != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l setup_test() ERROR: ")
                         ACE_TEXT("get_default_publisher_qos failed: %C\n"),
-                        retcode_to_dds_string(rc).c_str()), true);
+                        retcode_to_dds_string(rc).c_str()), false);
     }
 
     // TODO Currently only TOPIC access_scope is supported.
@@ -176,9 +176,9 @@ public:
       participant_->create_publisher(publisher_qos,
                                     DDS::PublisherListener::_nil(),
                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-    if (CORBA::is_nil(publisher_.in())) {
+    if (!publisher_) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l setup_test() ERROR: ")
-                        ACE_TEXT("create_publisher failed!\n")), true);
+                        ACE_TEXT("create_publisher failed!\n")), false);
     }
 
     // Common DataReader QOS
@@ -186,7 +186,7 @@ public:
     rc = subscriber_->get_default_datareader_qos(reader_qos);
     if (rc != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l setup_test() ERROR: ")
-                        ACE_TEXT("get_default_datareader_qos failed!\n")), true);
+                        ACE_TEXT("get_default_datareader_qos failed!\n")), false);
     }
     reader_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
 
@@ -196,9 +196,9 @@ public:
                                     reader_qos,
                                     DDS::DataReaderListener::_nil(),
                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-    if (CORBA::is_nil(reader1_.in())) {
+    if (!reader1_) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l setup_test() ERROR: ")
-                        ACE_TEXT("first create_datareader failed!\n")), true);
+                        ACE_TEXT("first create_datareader failed!\n")), false);
     }
 
     // Create Second DataReader Just for Coherent
@@ -209,9 +209,9 @@ public:
                                       reader_qos,
                                       listener,
                                       OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-      if (CORBA::is_nil(reader2_.in())) {
+      if (!reader2_) {
         ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l setup_test() ERROR: ")
-                          ACE_TEXT("second create_datareader failed!\n")), true);
+                          ACE_TEXT("second create_datareader failed!\n")), false);
       }
     }
 
@@ -221,7 +221,7 @@ public:
                                    DATAWRITER_QOS_DEFAULT,
                                    DDS::DataWriterListener::_nil(),
                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-    if (CORBA::is_nil(writer_.in())) {
+    if (!writer_) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l setup_test() ERROR: ")
                         ACE_TEXT("create_datawriter failed!\n")), true);
     }
@@ -239,27 +239,27 @@ public:
         if (rc != DDS::RETCODE_OK) {
           ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l setup_test() ERROR: ")
                             ACE_TEXT("wait failed: %C\n"),
-                            retcode_to_dds_string(rc).c_str()), true);
+                            retcode_to_dds_string(rc).c_str()), false);
         }
 
         rc = writer_->get_publication_matched_status(matches);
         if (rc != ::DDS::RETCODE_OK) {
           ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l setup_test() ERROR: ")
                             ACE_TEXT("Failed to get publication match status: %C\n"),
-                            retcode_to_dds_string(rc).c_str()), true);
+                            retcode_to_dds_string(rc).c_str()), false);
         }
       } while (matches.total_count < (coherent ? 2 : 1));
       ws->detach_condition(cond);
     }
 
-    return false;
+    return true;
   }
 
   ~Test()
   {
     DDS::ReturnCode_t rc;
 
-    if (!CORBA::is_nil(reader1_)) {
+    if (reader1_) {
       rc = subscriber_->delete_datareader(reader1_);
       if (rc != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l ~Test() ERROR: ")
@@ -268,8 +268,7 @@ public:
       }
     }
 
-    if (!CORBA::is_nil(reader2_)) {
-      reader2_->set_listener(0, 0);
+    if (reader2_) {
       rc = subscriber_->delete_datareader(reader2_);
       if (rc != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l ~Test() ERROR: ")
@@ -278,7 +277,7 @@ public:
       }
     }
 
-    if (!CORBA::is_nil(writer_)) {
+    if (writer_) {
       rc = publisher_->delete_datawriter(writer_);
       if (rc != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l ~Test() ERROR: ")
@@ -287,7 +286,7 @@ public:
       }
     }
 
-    if (!CORBA::is_nil(subscriber_)) {
+    if (subscriber_) {
       rc = participant_->delete_subscriber(subscriber_);
       if (rc != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l ~Test() ERROR: ")
@@ -296,7 +295,7 @@ public:
       }
     }
 
-    if (!CORBA::is_nil(publisher_)) {
+    if (publisher_) {
       rc = participant_->delete_publisher(publisher_);
       if (rc != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l ~Test() ERROR: ")
@@ -320,21 +319,21 @@ coherent_test(DDS::DomainParticipant_var& participant, DDS::Topic_var& topic)
   DDS::DataReader_var reader2;
   DDS::DataWriter_var writer;
   Test t(participant, publisher, subscriber, reader1, reader2, writer);
-  if (t.setup_test(topic, true)) {
+  if (!t.setup_test(topic, true)) {
     ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l coherent_test() ERROR: ")
-                      ACE_TEXT("setup_test failed!\n")), true);
+                      ACE_TEXT("setup_test failed!\n")), false);
   }
 
   FooDataReader_var reader1_i = FooDataReader::_narrow(reader1);
-  if (CORBA::is_nil(reader1_i)) {
+  if (!reader1_i) {
     ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l coherent_test() ERROR: ")
-                      ACE_TEXT("_narrow reader1 failed!\n")), true);
+                      ACE_TEXT("_narrow reader1 failed!\n")), false);
   }
 
   FooDataWriter_var writer_i = FooDataWriter::_narrow(writer);
-  if (CORBA::is_nil(writer_i)) {
+  if (!writer_i) {
     ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l coherent_test() ERROR: ")
-                      ACE_TEXT("_narrow writer failed!\n")), true);
+                      ACE_TEXT("_narrow writer failed!\n")), false);
   }
 
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("Writing...\n")));
@@ -346,7 +345,7 @@ coherent_test(DDS::DomainParticipant_var& participant, DDS::Topic_var& topic)
     if (rc != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l coherent_test() ERROR: ")
           ACE_TEXT("Unable to write sample %u: %C\n"),
-          retcode_to_dds_string(rc).c_str(), i), true);
+          retcode_to_dds_string(rc).c_str(), i), false);
     }
   }
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("Waiting...\n")));
@@ -362,11 +361,11 @@ coherent_test(DDS::DomainParticipant_var& participant, DDS::Topic_var& topic)
     if (rc == DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l coherent_test() ERROR: ")
         ACE_TEXT("Expected RETCODE_NO_DATA, but got RETCODE_OK and %u samples\n"),
-        foo.length()), true);
+        foo.length()), false);
     } else if (rc != DDS::RETCODE_NO_DATA) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l coherent_test() ERROR: ")
         ACE_TEXT("Expected RETCODE_NO_DATA, but error is: %C\n"),
-        retcode_to_dds_string(rc).c_str()), true);
+        retcode_to_dds_string(rc).c_str()), false);
     }
   }
 
@@ -385,7 +384,7 @@ coherent_test(DDS::DomainParticipant_var& participant, DDS::Topic_var& topic)
     if (rc != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l coherent_test() ERROR: ")
                         ACE_TEXT("wait failed: %C\n"),
-                        retcode_to_dds_string(rc).c_str()), true);
+                        retcode_to_dds_string(rc).c_str()), false);
     }
   }
 
@@ -399,12 +398,12 @@ coherent_test(DDS::DomainParticipant_var& participant, DDS::Topic_var& topic)
     if (rc != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l coherent_test() ERROR: ")
         ACE_TEXT("take error: %C\n"),
-        retcode_to_dds_string(rc).c_str()), true);
+        retcode_to_dds_string(rc).c_str()), false);
     }
     if (foo.length() != SAMPLES_PER_TEST) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l coherent_test() ERROR: ")
                         ACE_TEXT("Got %u samples, expected %u\n"),
-                        foo.length(), SAMPLES_PER_TEST), true);
+                        foo.length(), SAMPLES_PER_TEST), false);
     }
   }
 
@@ -413,17 +412,17 @@ coherent_test(DDS::DomainParticipant_var& participant, DDS::Topic_var& topic)
   ListenerImpl* listener_i = dynamic_cast<ListenerImpl*>(reader2->get_listener());
   if (!listener_i) {
     ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l coherent_test() ERROR: ")
-                      ACE_TEXT("failed to get listener!\n")), true);
+                      ACE_TEXT("failed to get listener!\n")), false);
   }
   for (int i = 0; (i < max_wait_time.sec) && !listener_i->done; i++) {
     ACE_OS::sleep(1);
   }
   if (!listener_i->done) {
     ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l coherent_test() ERROR: ")
-                      ACE_TEXT("Timed out waiting for listener\n")), true);
+                      ACE_TEXT("Timed out waiting for listener\n")), false);
   }
 
-  return false;
+  return !listener_i->error;
 }
 
 bool
@@ -439,21 +438,21 @@ ordered_test(DDS::DomainParticipant_var& participant, DDS::Topic_var& topic)
   DDS::DataReader_var reader2; // Unused
   DDS::DataWriter_var writer;
   Test t(participant, publisher, subscriber, reader1, reader2, writer);
-  if (t.setup_test(topic, false)) {
+  if (!t.setup_test(topic, false)) {
     ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l ordered_test() ERROR: ")
-                      ACE_TEXT("setup_test failed!\n")), true);
+                      ACE_TEXT("setup_test failed!\n")), false);
   }
 
   FooDataReader_var reader1_i = FooDataReader::_narrow(reader1);
-  if (CORBA::is_nil(reader1_i)) {
+  if (!reader1_i) {
     ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l ordered_test() ERROR: ")
-                      ACE_TEXT("_narrow reader1 failed!\n")), true);
+                      ACE_TEXT("_narrow reader1 failed!\n")), false);
   }
 
   FooDataWriter_var writer_i = FooDataWriter::_narrow(writer);
-  if (CORBA::is_nil(writer_i)) {
+  if (!writer_i) {
     ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l ordered_test() ERROR: ")
-                      ACE_TEXT("_narrow writer failed!\n")), true);
+                      ACE_TEXT("_narrow writer failed!\n")), false);
   }
 
   for (size_t i = 0; i < SAMPLES_PER_TEST / 2; ++i) {
@@ -463,7 +462,7 @@ ordered_test(DDS::DomainParticipant_var& participant, DDS::Topic_var& topic)
     if (rc != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l ordered_test() ERROR: ")
           ACE_TEXT("Unable to write sample %u: %C\n"),
-          retcode_to_dds_string(rc).c_str(), i * 2), true);
+          retcode_to_dds_string(rc).c_str(), i * 2), false);
     }
 
     // Write second instance
@@ -472,7 +471,7 @@ ordered_test(DDS::DomainParticipant_var& participant, DDS::Topic_var& topic)
     if (rc != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l ordered_test() ERROR: ")
           ACE_TEXT("Unable to write sample %u: %C\n"),
-          retcode_to_dds_string(rc).c_str(), i * 2 + 1), true);
+          retcode_to_dds_string(rc).c_str(), i * 2 + 1), false);
     }
   }
 
@@ -489,7 +488,7 @@ ordered_test(DDS::DomainParticipant_var& participant, DDS::Topic_var& topic)
     if (rc != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l ordered_test() ERROR: ")
                         ACE_TEXT("wait failed: %C\n"),
-                        retcode_to_dds_string(rc).c_str()), true);
+                        retcode_to_dds_string(rc).c_str()), false);
     }
   }
 
@@ -507,7 +506,7 @@ ordered_test(DDS::DomainParticipant_var& participant, DDS::Topic_var& topic)
     if (rc != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l ordered_test() ERROR: ")
                         ACE_TEXT("Unable to take samples: %C\n"),
-                        retcode_to_dds_string(rc).c_str()), true);
+                        retcode_to_dds_string(rc).c_str()), false);
     }
 
     DDS::Time_t last_timestamp = {0, 0};
@@ -516,13 +515,13 @@ ordered_test(DDS::DomainParticipant_var& participant, DDS::Topic_var& topic)
       if (info[i].source_timestamp < last_timestamp) {
         ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l ordered_test() ERROR: ")
                           ACE_TEXT("Samples taken out of order! (Starting at %d)\n"),
-                          i), true);
+                          i), false);
       }
       last_timestamp = info[i].source_timestamp;
     }
   }
 
-  return false;
+  return true;
 }
 } // namespace
 
@@ -536,13 +535,12 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
 
-    // Create Participant
     DDS::DomainParticipant_var participant =
       dpf->create_participant(42,
                               PARTICIPANT_QOS_DEFAULT,
                               DDS::DomainParticipantListener::_nil(),
                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-    if (CORBA::is_nil(participant.in())) {
+    if (!participant) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l main() ERROR: ")
                         ACE_TEXT("create_participant failed!\n")), 1);
     }
@@ -563,19 +561,19 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
                                 TOPIC_QOS_DEFAULT,
                                 DDS::TopicListener::_nil(),
                                 OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-    if (CORBA::is_nil(topic.in())) {
+    if (!topic) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l main() ERROR: ")
                         ACE_TEXT("create_topic failed!\n")), 1);
     }
 
     // Coherent Test
-    if (coherent_test(participant, topic)) {
+    if (!coherent_test(participant, topic)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("Coherent Test Failed\n")));
       test_failures++;
     }
 
     // Ordered Test
-    if (ordered_test(participant, topic)) {
+    if (!ordered_test(participant, topic)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("Ordered Test Failed\n")));
       test_failures++;
     }

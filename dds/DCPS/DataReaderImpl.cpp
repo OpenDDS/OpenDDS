@@ -2913,38 +2913,33 @@ DataReaderImpl::update_ownership_strength (const PublicationId& pub_id,
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 bool DataReaderImpl::verify_coherent_changes_completion (WriterInfo* writer)
 {
-  bool completed = false;
-  if (subqos_.presentation.access_scope == ::DDS::INSTANCE_PRESENTATION_QOS
-      || !subqos_.presentation.coherent_access) {
-    completed = true;
-  } else {
+  Coherent_State state = COMPLETED;
+
+  if (subqos_.presentation.access_scope != ::DDS::INSTANCE_PRESENTATION_QOS &&
+      subqos_.presentation.coherent_access) {
     // verify current coherent changes from single writer
-    Coherent_State state = writer->coherent_change_received();
-    completed = state == COMPLETED;
-    if (writer->group_coherent_) { // GROUP coherent
+    state = writer->coherent_change_received();
+    if (writer->group_coherent_) { // GROUP coherent any state
       RcHandle<SubscriberImpl> subscriber = get_subscriber_servant();
       if (subscriber && state != NOT_COMPLETED_YET) {
         // verify if all readers received complete coherent changes in a group.
         subscriber->coherent_change_received(writer->publisher_id_, this, state);
       }
-    } else { // TOPIC coherent
+    } else if (state != NOT_COMPLETED_YET) { // TOPIC coherent with final state
       if (state == REJECTED) {
         reject_coherent(writer->writer_id_, writer->publisher_id_);
-      } else if (state == NOT_COMPLETED_YET) {
-        return false;
       }
-
-      // decision made: either COMPLETED or REJECTED
       writer->reset_coherent_info();
     }
   }
 
-  if (completed && !writer->group_coherent_) {
+  if (state == COMPLETED && !writer->group_coherent_) {
     // If group, sub.coherent_change_received did this already
     accept_coherent(writer->writer_id_, writer->publisher_id_);
     coherent_changes_completed(this);
   }
-  return completed;
+
+  return state == COMPLETED;
 }
 
 

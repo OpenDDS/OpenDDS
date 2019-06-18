@@ -148,41 +148,40 @@ retcode_to_dds_string(DDS::ReturnCode_t value)
 {
   switch (value) {
   case DDS::RETCODE_OK:
-    return OPENDDS_STRING("OK");
+    return "OK";
   case DDS::RETCODE_ERROR:
-    return OPENDDS_STRING("Error");
+    return "Error";
   case DDS::RETCODE_UNSUPPORTED:
-    return OPENDDS_STRING("Unsupported");
+    return "Unsupported";
   case DDS::RETCODE_BAD_PARAMETER:
-    return OPENDDS_STRING("Bad parameter");
+    return "Bad parameter";
   case DDS::RETCODE_PRECONDITION_NOT_MET:
-    return OPENDDS_STRING("Precondition not met");
+    return "Precondition not met";
   case DDS::RETCODE_OUT_OF_RESOURCES:
-    return OPENDDS_STRING("Out of resources");
+    return "Out of resources";
   case DDS::RETCODE_NOT_ENABLED:
-    return OPENDDS_STRING("Not enabled");
+    return "Not enabled";
   case DDS::RETCODE_IMMUTABLE_POLICY:
-    return OPENDDS_STRING("Immutable policy");
+    return "Immutable policy";
   case DDS::RETCODE_INCONSISTENT_POLICY:
-    return OPENDDS_STRING("Inconsistent policy");
+    return "Inconsistent policy";
   case DDS::RETCODE_ALREADY_DELETED:
-    return OPENDDS_STRING("Already deleted");
+    return "Already deleted";
   case DDS::RETCODE_TIMEOUT:
-    return OPENDDS_STRING("Timeout");
+    return "Timeout";
   case DDS::RETCODE_NO_DATA:
-    return OPENDDS_STRING("No data");
+    return "No data";
   case DDS::RETCODE_ILLEGAL_OPERATION:
-    return OPENDDS_STRING("Illegal operation");
+    return "Illegal operation";
 #ifdef OPENDDS_SECURITY
   case DDS::Security::RETCODE_NOT_ALLOWED_BY_SECURITY:
-    return OPENDDS_STRING("Not allowed by security");
+    return "Not allowed by security";
 #endif
   default:
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: OpenDDS::DCPS::retcode_to_dds_string: ")
       ACE_TEXT("%d is either completely invalid or unknown to this function.\n"),
-      value
-      ));
+      value));
     return OPENDDS_STRING("(Unknown Return Code: ") + to_dds_string(value) + ")";
   }
 }
