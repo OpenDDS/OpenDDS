@@ -324,7 +324,7 @@ sub parse {
   my $included;
   ($str, $ts_str, $ts_pragma, $included) =
      $self->preprocess($file, $includes, $macros, $mparams) if (!defined $str);
-  my @forwards = @$included;
+  my @forwards = (defined $included ? @$included : []);
 
   ## Keep track of const's and typedef's with these variables
   my $single;
