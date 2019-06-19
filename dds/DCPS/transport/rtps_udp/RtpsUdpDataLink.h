@@ -644,6 +644,7 @@ private:
   const size_t max_bundle_size_;
 
 #ifdef OPENDDS_SECURITY
+  mutable ACE_Thread_Mutex ch_lock_;
   Security::SecurityConfig_rch security_config_;
   DDS::Security::ParticipantCryptoHandle local_crypto_handle_;
 

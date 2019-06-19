@@ -2865,7 +2865,7 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
     response.dst_guid_ = GUID_UNKNOWN;
     for (RepoIdSet::const_iterator it = guids.begin(); it != guids.end(); ++it) {
       response.to_guids_.clear();
-      response.to_guids_.insert(*it);
+      response.dst_guid_ = (*it);
       response.sm_.heartbeat_sm().readerId = it->entityId;
       responses.push_back(response);
     }
@@ -3027,6 +3027,8 @@ RtpsUdpDataLink::populate_security_handles(const RepoId& local_id,
   const bool local_is_writer = GuidConverter(local_id).isWriter();
   const RepoId& writer_id = local_is_writer ? local_id : remote_id;
   const RepoId& reader_id = local_is_writer ? remote_id : local_id;
+
+  ACE_GUARD(ACE_Thread_Mutex, g, ch_lock_);
 
   while (mb.length()) {
     DDS::BinaryProperty_t prop;
