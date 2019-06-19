@@ -25,16 +25,16 @@ ACE_UINT16 Attribute::length() const
     return 8;
 
   case USERNAME:
-    return username.size();
+    return static_cast<ACE_UINT16>(username.size());
 
   case MESSAGE_INTEGRITY:
     return 20;
 
   case ERROR_CODE:
-    return 4 + error.reason.size();
+    return static_cast<ACE_UINT16>(4 + error.reason.size());
 
   case UNKNOWN_ATTRIBUTES:
-    return 2 * unknown_attributes.size();
+    return static_cast<ACE_UINT16>(2 * unknown_attributes.size());
 
   case XOR_MAPPED_ADDRESS:
     // TODO(jrw972):  Handle IPv6.

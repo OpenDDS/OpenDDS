@@ -98,11 +98,11 @@ public:
     empty_()
   {
     size_t hello_len = std::strlen("hello");
-    hello_.length(hello_len);
+    hello_.length(static_cast<CORBA::ULong>(hello_len));
     std::memcpy(hello_.get_buffer(), "hello", hello_len);
 
     size_t world_len = std::strlen("world");
-    world_.length(world_len);
+    world_.length(static_cast<CORBA::ULong>(world_len));
     std::memcpy(world_.get_buffer(), "world", world_len);
   }
 

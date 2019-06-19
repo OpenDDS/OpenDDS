@@ -20,7 +20,7 @@ public:
 private:
   bool parse_args (int argc, ACE_TCHAR *argv[]);
 
-  std::auto_ptr<SyncServer_i> sync_server_;
+  std::unique_ptr<SyncServer_i> sync_server_;
 
   size_t pub_count_;
   size_t sub_count_;

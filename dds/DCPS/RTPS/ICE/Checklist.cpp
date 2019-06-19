@@ -152,7 +152,7 @@ void Checklist::generate_candidate_pairs()
 
   if (frozen_.size() != 0) {
     check_interval_ = endpoint_manager_->agent_impl->get_configuration().T_a();
-    double s = frozen_.size();
+    double s = static_cast<double>(frozen_.size());
     max_check_interval_ = endpoint_manager_->agent_impl->get_configuration().checklist_period() * (1.0 / s);
     enqueue(ACE_Time_Value().now());
   }

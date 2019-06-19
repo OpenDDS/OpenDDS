@@ -98,8 +98,8 @@ namespace {
   }
 
   Token token(string classid = "Test-Class-Id",
-              size_t proplen = 1,
-              size_t bproplen = 1,
+              CORBA::ULong proplen = 1,
+              CORBA::ULong bproplen = 1,
               bool propagate = true)
   {
     Token t;
@@ -107,7 +107,7 @@ namespace {
     t.class_id = classid.c_str();
 
     t.properties.length(proplen);
-    for (size_t i = 0; i < proplen; ++i) {
+    for (CORBA::ULong i = 0; i < proplen; ++i) {
         stringstream name, value;
         name << "Property " << i;
         value << "PropertyValue " << i;
@@ -118,7 +118,7 @@ namespace {
     }
 
     t.binary_properties.length(bproplen);
-    for (size_t i = 0; i < bproplen; ++i) {
+    for (CORBA::ULong i = 0; i < bproplen; ++i) {
         stringstream name, value;
         name << "BinaryProperty " << i;
         value << "BinaryPropertyValue " << i;
