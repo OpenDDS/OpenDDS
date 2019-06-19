@@ -244,8 +244,7 @@ void StaticEndpointManager::assign_subscription_key(RepoId& rid,
 
 bool
 StaticEndpointManager::update_topic_qos(const RepoId& /*topicId*/,
-                                        const DDS::TopicQos& /*qos*/,
-                                        OPENDDS_STRING& /*name*/)
+                                        const DDS::TopicQos& /*qos*/)
 {
   ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: StaticEndpointManager::update_topic_qos - ")
              ACE_TEXT("Not allowed\n")));

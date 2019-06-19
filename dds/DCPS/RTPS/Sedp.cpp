@@ -1418,8 +1418,7 @@ Sedp::sub_bit()
 #endif /* DDS_HAS_MINIMUM_BIT */
 
 bool
-Sedp::update_topic_qos(const RepoId& topicId, const DDS::TopicQos& qos,
-                       OPENDDS_STRING& name)
+Sedp::update_topic_qos(const RepoId& topicId, const DDS::TopicQos& qos)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
   OPENDDS_MAP_CMP(RepoId, OPENDDS_STRING, DCPS::GUID_tKeyLessThan)::iterator iter =
@@ -1427,7 +1426,7 @@ Sedp::update_topic_qos(const RepoId& topicId, const DDS::TopicQos& qos,
   if (iter == topic_names_.end()) {
     return false;
   }
-  name = iter->second;
+  const OPENDDS_STRING& name = iter->second;
   TopicDetails& topic = topics_[name];
   using namespace DCPS;
   // If the TOPIC_DATA QoS changed our local endpoints must be resent
@@ -1765,6 +1764,7 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
 #endif
 
         DiscoveredPublication& pub = discovered_publications_[guid] = prepub;
+        bool inconsistent = false;
 
         OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
           topics_.find(topic_name);
@@ -1788,12 +1788,14 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
               wdata.ddsPublicationData.type_name.in(),
               top_it->second.data_type_.c_str()));
           }
-          return;
+          inconsistent = true;
         }
 
-        TopicDetails& td = top_it->second;
-        topic_names_[td.repo_id_] = topic_name;
-        td.endpoints_.insert(guid);
+        if (!inconsistent) {
+          TopicDetails& td = top_it->second;
+          topic_names_[td.repo_id_] = topic_name;
+          td.endpoints_.insert(guid);
+        }
 
         std::memcpy(pub.writer_data_.ddsPublicationData.participant_key.value,
                     guid.guidPrefix, sizeof(DDS::BuiltinTopicKey_t));
@@ -2086,6 +2088,7 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
 #endif
 
         DiscoveredSubscription& sub = discovered_subscriptions_[guid] = presub;
+        bool inconsistent = false;
 
         OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
           topics_.find(topic_name);
@@ -2109,12 +2112,14 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
                        rdata.ddsSubscriptionData.type_name.in(),
                        top_it->second.data_type_.c_str()));
           }
-          return;
+          inconsistent = true;
         }
 
-        TopicDetails& td = top_it->second;
-        topic_names_[td.repo_id_] = topic_name;
-        td.endpoints_.insert(guid);
+        if (!inconsistent) {
+          TopicDetails& td = top_it->second;
+          topic_names_[td.repo_id_] = topic_name;
+          td.endpoints_.insert(guid);
+        }
 
         std::memcpy(sub.reader_data_.ddsSubscriptionData.participant_key.value,
                     guid.guidPrefix, sizeof(DDS::BuiltinTopicKey_t));
