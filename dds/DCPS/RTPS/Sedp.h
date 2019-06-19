@@ -666,8 +666,6 @@ private:
 
   DCPS::RepoIdSet defer_match_endpoints_, associated_participants_;
 
-  void inconsistent_topic(const DCPS::RepoIdSet& endpoints) const;
-
   virtual bool shutting_down() const;
 
   virtual void populate_transport_locator_sequence(DCPS::TransportLocatorSeq*& tls,

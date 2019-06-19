@@ -737,12 +737,6 @@ DataReaderImpl::update_incompatible_qos(const IncompatibleQosStatus& status)
 }
 
 void
-DataReaderImpl::inconsistent_topic()
-{
-  topic_servant_->inconsistent_topic();
-}
-
-void
 DataReaderImpl::signal_liveliness(const RepoId& remote_participant)
 {
   RepoId prefix = remote_participant;

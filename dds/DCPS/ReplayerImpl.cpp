@@ -825,12 +825,6 @@ ReplayerImpl::update_subscription_params(const RepoId&         readerId,
   ACE_UNUSED_ARG(params);
 }
 
-void
-ReplayerImpl::inconsistent_topic()
-{
-  topic_servant_->inconsistent_topic();
-}
-
 bool
 ReplayerImpl::check_transport_qos(const TransportInst&)
 {
