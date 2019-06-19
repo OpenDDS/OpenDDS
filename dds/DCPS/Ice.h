@@ -40,12 +40,15 @@ enum CandidateType {
 };
 
 struct Candidate : DCPS::PoolAllocationBase {
+
+  Candidate() : priority(0), type(HOST) {}
+
   ACE_INET_Addr address;
   // Transport - UDP or TCP
   std::string foundation;
   // Component ID
-  ACE_UINT32 priority{0};
-  CandidateType type{HOST};
+  ACE_UINT32 priority;
+  CandidateType type;
   // Related Address and Port
   // Extensibility Parameters
 
@@ -62,11 +65,14 @@ struct Candidate : DCPS::PoolAllocationBase {
 };
 
 struct AgentInfo {
+
+  AgentInfo() : type(FULL) {}
+
   typedef OPENDDS_VECTOR(Candidate) CandidatesType;
   typedef CandidatesType::const_iterator const_iterator;
 
   CandidatesType candidates;
-  AgentType type{FULL};
+  AgentType type;
   // Connectivity-Check Pacing Value
   std::string username;
   std::string password;
