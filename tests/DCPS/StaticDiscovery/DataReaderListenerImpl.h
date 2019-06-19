@@ -72,7 +72,6 @@ public:
 #endif /* DDS_HAS_MINIMUM_BIT */
 
 private:
-  ACE_Thread_Mutex mutex_;
   std::string id_;
   const std::vector<std::string>& writers_;
   const int total_writers_;
