@@ -94,8 +94,8 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
       ICE::Agent::instance()->receive(endpoint, local_address, remote_address, message);
     }
     head->release();
-  }
 # endif
+  }
 #else
   ACE_UNUSED_ARG(endpoint);
   ACE_UNUSED_ARG(stop);
