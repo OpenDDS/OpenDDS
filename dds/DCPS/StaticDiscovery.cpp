@@ -1522,8 +1522,8 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
     ValueMap values;
     pullValues(cf, it->second, values);
     int domain = 0;
-    unsigned char participant[6];
-    unsigned char entity[3];
+    unsigned char participant[6] = { 0 };
+    unsigned char entity[3] = { 0 };
     enum Type {
       Reader,
       Writer
@@ -1562,7 +1562,7 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
 #ifdef __SUNPRO_CC
         int count = 0; std::count_if(value.begin(), value.end(), isxdigit, count);
 #else
-        OPENDDS_STRING::difference_type count = std::count_if(value.begin(), value.end(), isxdigit);
+        const OPENDDS_STRING::difference_type count = std::count_if(value.begin(), value.end(), isxdigit);
 #endif
         if (value.size() != HEX_DIGITS_IN_PARTICIPANT || static_cast<size_t>(count) != HEX_DIGITS_IN_PARTICIPANT) {
           ACE_ERROR_RETURN((LM_ERROR,
@@ -1580,7 +1580,7 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
 #ifdef __SUNPRO_CC
         int count = 0; std::count_if(value.begin(), value.end(), isxdigit, count);
 #else
-        OPENDDS_STRING::difference_type count = std::count_if(value.begin(), value.end(), isxdigit);
+        const OPENDDS_STRING::difference_type count = std::count_if(value.begin(), value.end(), isxdigit);
 #endif
         if (value.size() != HEX_DIGITS_IN_ENTITY || static_cast<size_t>(count) != HEX_DIGITS_IN_ENTITY) {
           ACE_ERROR_RETURN((LM_ERROR,
