@@ -20,7 +20,11 @@ public:
 private:
   bool parse_args (int argc, ACE_TCHAR *argv[]);
 
+#if defined (ACE_HAS_CPP11)
   std::unique_ptr<SyncServer_i> sync_server_;
+#else
+  std::auto_ptr<SyncServer_i> sync_server_;
+#endif
 
   size_t pub_count_;
   size_t sub_count_;
