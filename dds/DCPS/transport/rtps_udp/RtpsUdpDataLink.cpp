@@ -2280,6 +2280,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
        it != pendingCallbacks.end(); ++it) {
     it->second->data_delivered();
   }
+  g.release();
   if (first_ack) {
     link->first_acknowledged_by_reader(id_, remote, received_sn_base);
   }
