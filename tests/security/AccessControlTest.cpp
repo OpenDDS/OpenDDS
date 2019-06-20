@@ -279,7 +279,7 @@ public:
 
   void add_property(Property_t p) {
       PropertySeq& seq = domain_participant_qos.property.value;
-      size_t len = seq.length();
+      const CORBA::ULong len = seq.length();
       seq.length(len + 1);
       seq[len] = p;
   }
@@ -394,12 +394,12 @@ TEST_F(AccessControlTest, validate_remote_permissions_Success)
   remote_apc_token.class_id = Expected_Permissions_Cred_Token_Class_Id;
   remote_apc_token.binary_properties.length(2);
   remote_apc_token.binary_properties[0].name = "c.id";
-  remote_apc_token.binary_properties[0].value.length(id.size());
+  remote_apc_token.binary_properties[0].value.length(static_cast<CORBA::ULong>(id.size()));
   memcpy(remote_apc_token.binary_properties[0].value.get_buffer(), id.c_str(), id.size());
   remote_apc_token.binary_properties[0].propagate = true;
 
   remote_apc_token.binary_properties[1].name = "c.perm";
-  remote_apc_token.binary_properties[1].value.length(pf.size());
+  remote_apc_token.binary_properties[1].value.length(static_cast<CORBA::ULong>(pf.size()));
   memcpy(remote_apc_token.binary_properties[1].value.get_buffer(), pf.c_str(), pf.size());
   remote_apc_token.binary_properties[1].propagate = true;
 
@@ -810,12 +810,12 @@ TEST_F(AccessControlTest, check_remote_participant_Success_Governance)
   remote_apc_token.class_id = Expected_Permissions_Cred_Token_Class_Id;
   remote_apc_token.binary_properties.length(2);
   remote_apc_token.binary_properties[0].name = "c.id";
-  remote_apc_token.binary_properties[0].value.length(id.size());
+  remote_apc_token.binary_properties[0].value.length(static_cast<CORBA::ULong>(id.size()));
   memcpy(remote_apc_token.binary_properties[0].value.get_buffer(), id.c_str(), id.size());
   remote_apc_token.binary_properties[0].propagate = true;
 
   remote_apc_token.binary_properties[1].name = "c.perm";
-  remote_apc_token.binary_properties[1].value.length(pf.size());
+  remote_apc_token.binary_properties[1].value.length(static_cast<CORBA::ULong>(pf.size()));
   memcpy(remote_apc_token.binary_properties[1].value.get_buffer(),pf.c_str(), pf.size());
   remote_apc_token.binary_properties[1].propagate = true;
 
@@ -851,12 +851,12 @@ TEST_F(AccessControlTest, check_remote_participant_Success_Permissions)
   remote_apc_token.class_id = Expected_Permissions_Cred_Token_Class_Id;
   remote_apc_token.binary_properties.length(2);
   remote_apc_token.binary_properties[0].name = "c.id";
-  remote_apc_token.binary_properties[0].value.length(id.size());
+  remote_apc_token.binary_properties[0].value.length(static_cast<CORBA::ULong>(id.size()));
   memcpy(remote_apc_token.binary_properties[0].value.get_buffer(), id.c_str(), id.size());
   remote_apc_token.binary_properties[0].propagate = true;
 
   remote_apc_token.binary_properties[1].name = "c.perm";
-  remote_apc_token.binary_properties[1].value.length(pf.size());
+  remote_apc_token.binary_properties[1].value.length(static_cast<CORBA::ULong>(pf.size()));
   memcpy(remote_apc_token.binary_properties[1].value.get_buffer(), pf.c_str(), pf.size());
   remote_apc_token.binary_properties[1].propagate = true;
 
@@ -899,11 +899,11 @@ TEST_F(AccessControlTest, check_remote_datawriter_Success)
   remote_apc_token.class_id = Expected_Permissions_Cred_Token_Class_Id;
   remote_apc_token.binary_properties.length(2);
   remote_apc_token.binary_properties[0].name = "c.id";
-  remote_apc_token.binary_properties[0].value.length(id.size());
+  remote_apc_token.binary_properties[0].value.length(static_cast<CORBA::ULong>(id.size()));
   memcpy(remote_apc_token.binary_properties[0].value.get_buffer(), id.c_str(), id.size());
   remote_apc_token.binary_properties[0].propagate = true;
   remote_apc_token.binary_properties[1].name = "c.perm";
-  remote_apc_token.binary_properties[1].value.length(pf.size());
+  remote_apc_token.binary_properties[1].value.length(static_cast<CORBA::ULong>(pf.size()));
   memcpy(remote_apc_token.binary_properties[1].value.get_buffer(), pf.c_str(), pf.size());
   remote_apc_token.binary_properties[1].propagate = true;
   get_inst().validate_local_permissions(auth_plugin_.get(), 1, 1, domain_participant_qos, ex);
@@ -950,11 +950,11 @@ TEST_F(AccessControlTest, check_remote_datareader_Success)
   remote_apc_token.class_id = Expected_Permissions_Cred_Token_Class_Id;
   remote_apc_token.binary_properties.length(2);
   remote_apc_token.binary_properties[0].name = "c.id";
-  remote_apc_token.binary_properties[0].value.length(id.size());
+  remote_apc_token.binary_properties[0].value.length(static_cast<CORBA::ULong>(id.size()));
   memcpy(remote_apc_token.binary_properties[0].value.get_buffer(), id.c_str(), id.size());
   remote_apc_token.binary_properties[0].propagate = true;
   remote_apc_token.binary_properties[1].name = "c.perm";
-  remote_apc_token.binary_properties[1].value.length(pf.size());
+  remote_apc_token.binary_properties[1].value.length(static_cast<CORBA::ULong>(pf.size()));
   memcpy(remote_apc_token.binary_properties[1].value.get_buffer(), pf.c_str(), pf.size());
   remote_apc_token.binary_properties[1].propagate = true;
   get_inst().validate_local_permissions(auth_plugin_.get(), 1, 1, domain_participant_qos, ex);
@@ -1005,12 +1005,12 @@ TEST_F(AccessControlTest, check_remote_topic_Success)
   remote_apc_token.class_id = Expected_Permissions_Cred_Token_Class_Id;
   remote_apc_token.binary_properties.length(2);
   remote_apc_token.binary_properties[0].name = "c.id";
-  remote_apc_token.binary_properties[0].value.length(id.size());
+  remote_apc_token.binary_properties[0].value.length(static_cast<CORBA::ULong>(id.size()));
   memcpy(remote_apc_token.binary_properties[0].value.get_buffer(), id.c_str(), id.size());
   remote_apc_token.binary_properties[0].propagate = true;
 
   remote_apc_token.binary_properties[1].name = "c.perm";
-  remote_apc_token.binary_properties[1].value.length(pf.size());
+  remote_apc_token.binary_properties[1].value.length(static_cast<CORBA::ULong>(pf.size()));
   memcpy(remote_apc_token.binary_properties[1].value.get_buffer(), pf.c_str(), pf.size());
   remote_apc_token.binary_properties[1].propagate = true;
 

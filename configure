@@ -669,7 +669,7 @@ if (!$ace_src || !$tao_src) {
 
     my $cur_dir = getcwd;
     chdir('ACE_TAO');
-    system('git log -1 --oneline');
+    system('git --no-pager log -1 --oneline');
     chdir($cur_dir);
 
     print "Cloning git repo: $urlbase/MPC into ACE_TAO/ACE/MPC\n";
@@ -679,7 +679,7 @@ if (!$ace_src || !$tao_src) {
         ! -r 'ACE_TAO/ACE/MPC/mwc.pl';
 
     chdir('ACE_TAO/ACE/MPC');
-    system('git log -1 --oneline');
+    system('git --no-pager log -1 --oneline');
     chdir($cur_dir);
 
     $ace_src = normalizePath('ACE_TAO/ACE');

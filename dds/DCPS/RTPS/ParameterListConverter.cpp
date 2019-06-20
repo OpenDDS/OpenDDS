@@ -1589,7 +1589,7 @@ int from_param_list(const ParameterList& param_list,
                     bool& have_agent_info)
 {
   have_agent_info = false;
-  for (size_t idx = 0, count = param_list.length(); idx != count; ++idx) {
+  for (CORBA::ULong idx = 0, count = param_list.length(); idx != count; ++idx) {
     const Parameter& parameter = param_list[idx];
     switch (parameter._d()) {
     case PID_OPENDDS_ICE_GENERAL: {

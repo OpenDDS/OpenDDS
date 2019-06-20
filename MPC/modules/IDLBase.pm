@@ -212,8 +212,16 @@ sub get_dependencies {
     ## .java files are truly dependent upon.
     my @genfiles;
     foreach my $file (@$fwdarray) {
-      my $of = $self->{'creator'}->get_first_custom_output($file, 'java_files');
-      push(@genfiles, $of) if (defined $of && $of ne '');
+      if ($file =~ /\.java$/) {
+        my $of = $self->{'creator'}->get_first_custom_output($file, 'java_files');
+        push(@genfiles, $of) if (defined $of && $of ne '');
+      }
+      elsif ($file =~ /\.idl$/) {
+        my @gen = $self->{'creator'}->generated_filenames(
+                     $self->{'creator'}->remove_wanted_extension($file, []),
+                     'idl2jni_files', 'header_files', $file);
+        push(@genfiles, $gen[0]) if ($#gen >= 0);
+      }
     }
 
     ## Now that we have the .class files that each of the files listed in
@@ -309,14 +317,14 @@ sub cached_parse {
 
 sub parse {
   my($self, $file, $includes, $macros, $mparams, $str) = @_;
-  my @forwards;
 
   ## Preprocess the file into one huge string
   my $ts_str;
   my $ts_pragma;
-  ($str, $ts_str, $ts_pragma) = $self->preprocess($file, $includes,
-                                                  $macros, $mparams)
-                                                            if (!defined $str);
+  my $included;
+  ($str, $ts_str, $ts_pragma, $included) =
+     $self->preprocess($file, $includes, $macros, $mparams) if (!defined $str);
+  my @forwards = (defined $included ? @$included : []);
 
   ## Keep track of const's and typedef's with these variables
   my $single;
@@ -518,6 +526,7 @@ sub preprocess {
   my $skip = [];
   my $ts_str = '';
   my $ts_pragma = '';
+  my @related;
 
   if (open($fh, $file)) {
     my $line;
@@ -665,6 +674,7 @@ sub preprocess {
               }
               else {
                 $self->include_file($file, $includes, $macros, $mparams);
+                push(@related, $file);
               }
             }
             elsif ($pline =~ /^define\s+(([a-z_]\w+)(\(([^\)]+)\))?)(\s+(.*))?$/i) {
@@ -723,6 +733,7 @@ sub preprocess {
           $file .= '.idl';
 
           $self->include_file($file, $includes, $macros, $mparams);
+          push(@related, $file);
         }
 
         if (!$$skip[scalar(@$skip) - 1] && !$included) {
@@ -737,7 +748,7 @@ sub preprocess {
     delete $self->{'strs'}->{$file};
   }
 
-  return $contents, $ts_str, $ts_pragma;
+  return $contents, $ts_str, $ts_pragma, \@related;
 }
 
 sub include_file {
