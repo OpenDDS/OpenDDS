@@ -33,7 +33,6 @@
 #include "ace/Default_Constants.h"
 #include "ace/Log_Msg.h"
 #include "ace/Message_Block.h"
-#include "ace/Reverse_Lock_T.h"
 #include "ace/Reactor.h"
 
 #include <string.h>
@@ -311,8 +310,10 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
       RtpsWriter_rch writer = make_rch<RtpsWriter>(link, local_id, local_durable, hb_start);
       rw = writers_.insert(RtpsWriterMap::value_type(local_id, writer)).first;
     }
-    rw->second->add_reader(remote_id, ReaderInfo(remote_durable));
+    RtpsWriter_rch writer = rw->second;
     enable_heartbeat = !remote_durable;
+    g.release();
+    writer->add_reader(remote_id, ReaderInfo(remote_durable));
   } else if (conv.isReader()) {
     RtpsReaderMap::iterator rr = readers_.find(local_id);
     if (rr == readers_.end()) {
@@ -320,11 +321,12 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
       RtpsReader_rch reader = make_rch<RtpsReader>(link, local_id, local_durable);
       rr = readers_.insert(RtpsReaderMap::value_type(local_id, reader)).first;
     }
-    rr->second->add_writer(remote_id, WriterInfo());
+    RtpsReader_rch reader = rr->second;
     readers_of_writer_.insert(RtpsReaderMultiMap::value_type(remote_id, rr->second));
+    g.release();
+    reader->add_writer(remote_id, WriterInfo());
   }
 
-  g.release();
   if (enable_heartbeat) {
     heartbeat_->schedule_enable(true);
   }
@@ -497,32 +499,39 @@ RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
 {
   OPENDDS_VECTOR(TransportQueueElement*) to_deliver;
   OPENDDS_VECTOR(TransportQueueElement*) to_drop;
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   using std::pair;
   const GuidConverter conv(local_id);
   if (conv.isWriter()) {
-    const RtpsWriterMap::iterator rw = writers_.find(local_id);
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    RtpsWriterMap::iterator rw = writers_.find(local_id);
 
     if (rw != writers_.end()) {
-      rw->second->remove_reader(remote_id);
+      RtpsWriter_rch writer = rw->second;
+      g.release();
+      writer->remove_reader(remote_id);
 
-      if (rw->second->reader_count() == 0) {
-        RtpsWriter_rch writer = rw->second;
-        rw->second->pre_stop_helper(to_deliver, to_drop);
+      if (writer->reader_count() == 0) {
+        writer->pre_stop_helper(to_deliver, to_drop);
+        CORBA::ULong hbc = writer->get_heartbeat_count();
 
-        heartbeat_counts_[rw->first] = rw->second->get_heartbeat_count();
-        writers_.erase(rw);
+        {
+          ACE_GUARD(ACE_Thread_Mutex, h, lock_);
+          rw = writers_.find(local_id);
+          if (rw != writers_.end()) {
+            heartbeat_counts_[rw->first] = hbc;
+            writers_.erase(rw);
+          }
+        }
       } else {
-        rw->second->process_acked_by_all();
+        writer->process_acked_by_all();
       }
     }
 
   } else if (conv.isReader()) {
-    const RtpsReaderMap::iterator rr = readers_.find(local_id);
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    RtpsReaderMap::iterator rr = readers_.find(local_id);
 
     if (rr != readers_.end()) {
-      rr->second->remove_writer(remote_id);
-
       for (pair<RtpsReaderMultiMap::iterator, RtpsReaderMultiMap::iterator> iters =
              readers_of_writer_.equal_range(remote_id);
            iters.first != iters.second;) {
@@ -533,12 +542,22 @@ RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
         }
       }
 
-      if (rr->second->writer_count() == 0) {
-        readers_.erase(rr);
+      RtpsReader_rch reader = rr->second;
+      g.release();
+      reader->remove_writer(remote_id);
+
+      if (reader->writer_count() == 0) {
+        {
+          ACE_GUARD(ACE_Thread_Mutex, h, lock_);
+          rr = readers_.find(local_id);
+          if (rr != readers_.end()) {
+            readers_.erase(rr);
+          }
+        }
       }
     }
   }
-  g.release();
+
   typedef OPENDDS_VECTOR(TransportQueueElement*)::iterator tqe_iter;
   tqe_iter deliver_it = to_deliver.begin();
   while (deliver_it != to_deliver.end()) {
