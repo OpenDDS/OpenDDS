@@ -265,7 +265,7 @@ void MultiTopicDataReaderBase::data_available(DDS::DataReader_ptr reader)
     return;
   } else if (rc != RETCODE_OK) {
     throw runtime_error("Incoming DataReader for " + topic +
-      " could not be read: " + retcode_to_dds_string(rc));
+      " could not be read: " + retcode_to_string(rc));
   }
   try {
     const MetaStruct& meta = metaStructFor(reader);

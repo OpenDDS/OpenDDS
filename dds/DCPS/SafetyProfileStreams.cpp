@@ -144,7 +144,7 @@ to_hex_dds_string(const char* data, size_t size, const char delim, const size_t 
 }
 
 OPENDDS_STRING
-retcode_to_dds_string(DDS::ReturnCode_t value)
+retcode_to_string(DDS::ReturnCode_t value)
 {
   switch (value) {
   case DDS::RETCODE_OK:
@@ -179,7 +179,7 @@ retcode_to_dds_string(DDS::ReturnCode_t value)
 #endif
   default:
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: OpenDDS::DCPS::retcode_to_dds_string: ")
+      ACE_TEXT("(%P|%t) ERROR: OpenDDS::DCPS::retcode_to_string: ")
       ACE_TEXT("%d is either completely invalid or unknown to this function.\n"),
       value));
     return OPENDDS_STRING("(Unknown Return Code: ") + to_dds_string(value) + ")";
