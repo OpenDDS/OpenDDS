@@ -41,7 +41,7 @@ sub perlOS_to_java_platform {
   return $^O;
 }
 
-my $targetUsageIndent = "\n\t\t";
+my $targetUsageIndent = "\t\t";
 
 my %platforminfo =
   ('win32' => {
@@ -103,10 +103,11 @@ my %platforminfo =
      'aceconfig' => 'android',
      'no_host' => 1,
      'usage' => [
-       "Use --macros=ANDROID_ABI=<ARCH> to specify the target archtecture." .
-       "${targetUsageIndent}Defaults to armeabi-v7a which is 32-bit ARMv7." .
-       "${targetUsageIndent}See docs/android.md for details."
+       "Use --macros=ANDROID_ABI=<ARCH> to specify the target archtecture.",
+       "Defaults to armeabi-v7a which is 32-bit ARMv7.",
+       "See docs/android.md for details.",
      ],
+     'needs_i2jrt_corba' => 1,
    },
   );
 
@@ -152,6 +153,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'target-compiler=s', 'Compiler for target (if req\'d): see --target-help',
     'host-tools=s', 'DDS_ROOT of host tools for cross compile' .
       $argIndent . '(build them)',
+    'host-tools-only!', 'Just build the host tools (no)',
     'prefix=s', 'Installation prefix (none)',
    ],
    ['Build flags:',
@@ -435,6 +437,10 @@ if ($platforminfo{$opts{'target'}}->{'compiler_root_env'}) {
   my $newpath = join($specific{'pathsep'}, grep {!/^$root_dir/} @oldpath);
   $hostEnv{'PATH'} =~
     s/\Q$specific{'refpre'}\EPATH\Q$specific{'refpost'}\E/$newpath/;
+}
+
+if (!exists $platforminfo{$opts{'target'}}->{'needs_i2jrt_corba'}) {
+  $platforminfo{$opts{'target'}}->{'needs_i2jrt_corba'} = 0;
 }
 
 ## compiler
@@ -1026,6 +1032,15 @@ my %optdep =
    'openssl' =>   ['SSL_ROOT',        'include/openssl/opensslv.h',    'ssl'],
   );
 
+my $host_tools_only = exists $opts{'host-tools-only'} && $opts{'host-tools-only'};
+if ($host_tools_only) {
+  print "--host-tools-only implies --static\n" if $opts{'verbose'};
+  $opts{'static'} = 1;
+  if ($cross_compile) {
+    die "ERROR: Can't use --host-tools-only for cross compile\nStopped";
+  }
+}
+
 # Use this to check if tests are enabled (instead of $opts{'tests'} directly).
 my $tests = !exists $opts{'tests'} || $opts{'tests'};
 
@@ -1038,7 +1053,7 @@ if ($tests) {
 my @ace_features = ('xerces3');
 
 if (exists $opts{'java'}) {
-  if ($opts{'static'}) {
+  if ($opts{'static'} && !$host_tools_only) {
     die "ERROR: --static can't be used with --java\nStopped";
   }
   setEnv('JAVA_PLATFORM', perlOS_to_java_platform());
@@ -1678,6 +1693,7 @@ my $buildtao;
 sub generate_workspace {
   my $buildEnv = shift;
   $buildtao = 0;
+  my $is_target = $buildEnv->{'build'} eq 'target';
 
   for my $feat (qw/built-in-topics ownership-profile/) {
     if (exists $opts{$feat} && !$opts{$feat}) {
@@ -1704,12 +1720,7 @@ sub generate_workspace {
     }
   }
 
-  if ($cross_compile && $opts{'java'} && $buildEnv->{'build'} eq 'target') {
-    disable_feature(\@features, "full_jre");
-  }
-
-  my $mpctype = (!$is_windows ||
-                  ($cross_compile && $buildEnv->{'build'} eq 'target'))
+  my $mpctype = (!$is_windows || ($cross_compile && $is_target))
                 ? 'gnuace' : $opts{'compiler_version'};
 
   if ($mpctype eq 'gnuace') {
@@ -1719,7 +1730,7 @@ sub generate_workspace {
         if $opts{'verbose'};
       $UM = backup_and_open($buildEnv->{'DDS_ROOT'} . '/user_macros.GNU');
     }
-    if ($buildEnv->{'build'} eq 'target') {
+    if ($is_target) {
       for my $feat (@features) {
         my $key = $feat;
         $key =~ s/=.*//;
@@ -1736,16 +1747,11 @@ CROSS-COMPILE = 1
 EOT
       }
     }
-    elsif ($buildEnv->{'build'} eq 'host') {
-      if ($cross_compile && $opts{'java'}) {
-        print $UM "java:=1\n";
-      }
-    }
     $UM->close if $UM;
     dump_and_unlink($UM) if $UM && $opts{'dry-run'};
   }
 
-  if ($opts{'safety-profile'} && $buildEnv->{'build'} eq 'target') {
+  if ($opts{'safety-profile'} && $is_target) {
     $buildtao = 0; # TAO will be built seperately
   }
   else {
@@ -1756,8 +1762,25 @@ EOT
   locate_mpc($ace_src);
 
   # Append to default.features
-  if ($buildEnv->{'build'} eq 'target') {
+  if ($is_target) {
     push(@features, 'cross_compile') if $cross_compile;
+
+    if ($platforminfo{$opts{'target'}}->{'needs_i2jrt_corba'} && $opts{'java'}) {
+      if ($opts{'verbose'}) {
+        print "Target platform needs i2jrt_corba.jar, forcing java_pre_jpms=0 to get it\n";
+      }
+      my $found = 0;
+      for my $i (0 .. scalar $#features) {
+        if ($features[$i] =~ /^java_pre_jpms/) {
+          $features[$i] = 'java_pre_jpms=0';
+          my $found = 1;
+        }
+      }
+      if (!$found) {
+        push(@features, "java_pre_jpms=0");
+      }
+    }
+
     if ($buildtao && @features) {
       my $df_file = $buildEnv->{'ACE_ROOT'} .
         '/bin/MakeProjectCreator/config/default.features';
@@ -2134,6 +2157,10 @@ else { # does not require cloned builds
     push_libpath(\%targetEnv, $targetEnv{'DDS_ROOT'} . $slash . 'lib');
 
     add_dependency_paths();
+  }
+
+  if ($host_tools_only) {
+    write_host_workspace(\%targetEnv);
   }
 
   configure_build(\%targetEnv);
