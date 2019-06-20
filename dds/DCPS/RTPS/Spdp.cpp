@@ -2013,9 +2013,9 @@ Spdp::remove_sedp_unicast(const ACE_INET_Addr& addr)
   RTPS::address_to_bytes(locator.address, addr);
 
   DCPS::LocatorSeq new_sedp_unicast;
-  for (size_t idx = 0; idx != sedp_unicast_.length(); ++idx) {
+  for (CORBA::ULong idx = 0; idx != sedp_unicast_.length(); ++idx) {
     if (sedp_unicast_[idx] != locator) {
-      size_t out_idx = new_sedp_unicast.length();
+      const CORBA::ULong out_idx = new_sedp_unicast.length();
       new_sedp_unicast.length(out_idx + 1);
       new_sedp_unicast[out_idx] = sedp_unicast_[idx];
     }
@@ -2032,7 +2032,7 @@ Spdp::add_sedp_unicast(const ACE_INET_Addr& addr)
   locator.port = addr.get_port_number();
   RTPS::address_to_bytes(locator.address, addr);
 
-  size_t idx = sedp_unicast_.length();
+  const CORBA::ULong idx = sedp_unicast_.length();
   sedp_unicast_.length(idx + 1);
   sedp_unicast_[idx] = locator;
 }
