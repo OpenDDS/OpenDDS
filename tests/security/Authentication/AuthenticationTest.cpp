@@ -82,14 +82,14 @@ struct MockParticipantData
 
   void add_property(Property_t p) {
     PropertySeq& seq = qos.property.value;
-    size_t len = seq.length();
+    const CORBA::ULong len = seq.length();
     seq.length(len + 1);
     seq[len] = p;
   }
 
   void add_binary_property(BinaryProperty_t p) {
     BinaryPropertySeq& seq = qos.property.binary_value;
-    size_t len = seq.length();
+    const CORBA::ULong len = seq.length();
     seq.length(len + 1);
     seq[len] = p;
   }
@@ -184,8 +184,8 @@ struct AuthenticationTest : public ::testing::Test
 
   static std::string value_of(const std::string& key, const PropertySeq& s)
   {
-    size_t n = s.length();
-    for (size_t i = 0; i < n; ++i) {
+    const CORBA::ULong n = s.length();
+    for (CORBA::ULong i = 0; i < n; ++i) {
         if (strcmp(s[i].name, key.c_str()) == 0)
           return static_cast<const char*>(s[i].value);
     }
@@ -194,8 +194,8 @@ struct AuthenticationTest : public ::testing::Test
 
   static const DDS::OctetSeq& value_of(const std::string& key, const BinaryPropertySeq& s)
   {
-    size_t n = s.length();
-    for (size_t i = 0; i < n; ++i) {
+    const CORBA::ULong n = s.length();
+    for (CORBA::ULong i = 0; i < n; ++i) {
         if (strcmp(s[i].name, key.c_str()) == 0)
           return s[i].value;
     }
@@ -229,7 +229,7 @@ struct AuthenticationTest : public ::testing::Test
 
     ASSERT_TRUE(serializer << params);
 
-    dst.length(buffer.length());
+    dst.length(static_cast<CORBA::ULong>(buffer.length()));
     std::memcpy(dst.get_buffer(), buffer.rd_ptr(), dst.length());
   }
 

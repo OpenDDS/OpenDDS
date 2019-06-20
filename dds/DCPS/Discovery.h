@@ -132,6 +132,7 @@ public:
 
   virtual TopicStatus find_topic(
     DDS::DomainId_t domainId,
+    const RepoId& participantId,
     const char* topicName,
     CORBA::String_out dataTypeName,
     DDS::TopicQos_out qos,

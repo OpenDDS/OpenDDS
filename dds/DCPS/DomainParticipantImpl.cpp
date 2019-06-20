@@ -668,6 +668,7 @@ DomainParticipantImpl::find_topic(
 
     Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
     TopicStatus status = disco->find_topic(domain_id_,
+                                           get_id(),
                                            topic_name,
                                            type_name.out(),
                                            qos.out(),

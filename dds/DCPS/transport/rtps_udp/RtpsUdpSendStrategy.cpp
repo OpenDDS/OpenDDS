@@ -371,6 +371,10 @@ RtpsUdpSendStrategy::encode_writer_submessage(const RepoId& receiver,
 {
   using namespace DDS::Security;
 
+  if (sender_dwch == DDS::HANDLE_NIL) {
+    return true;
+  }
+
   DatareaderCryptoHandleSeq readerHandles;
   if (std::memcmp(&GUID_UNKNOWN, &receiver, sizeof receiver)) {
     DatareaderCryptoHandle drch = link_->reader_crypto_handle(receiver);
@@ -410,6 +414,10 @@ RtpsUdpSendStrategy::encode_reader_submessage(const RepoId& receiver,
                                               CORBA::Octet msgId)
 {
   using namespace DDS::Security;
+
+  if (sender_drch == DDS::HANDLE_NIL) {
+    return true;
+  }
 
   DatawriterCryptoHandleSeq writerHandles;
   if (std::memcmp(&GUID_UNKNOWN, &receiver, sizeof receiver)) {
@@ -528,17 +536,12 @@ RtpsUdpSendStrategy::pre_send_packet(const ACE_Message_Block* plain)
         ok = false;
         break;
       }
-      DatawriterCryptoHandle sender_dwch = link_->writer_crypto_handle(sender);
-      if (sender_dwch == DDS::HANDLE_NIL) {
-        ok = false;
-        break;
-      }
 
       DDS::OctetSeq plain(toSeq(ser, msgId, flags, octetsToNextHeader, u2,
                                 receiver.entityId, sender.entityId, remaining));
       read = octetsToNextHeader;
       if (!encode_writer_submessage(receiver, replacements, crypto, plain,
-                                    sender_dwch, submessage_start, msgId)) {
+                                    link_->writer_crypto_handle(sender), submessage_start, msgId)) {
         ok = false;
       }
       break;
@@ -553,17 +556,12 @@ RtpsUdpSendStrategy::pre_send_packet(const ACE_Message_Block* plain)
         ok = false;
         break;
       }
-      DatareaderCryptoHandle sender_drch = link_->reader_crypto_handle(sender);
-      if (sender_drch == DDS::HANDLE_NIL) {
-        ok = false;
-        break;
-      }
 
       DDS::OctetSeq plain(toSeq(ser, msgId, flags, octetsToNextHeader, 0,
                                 sender.entityId, receiver.entityId, remaining));
       read = octetsToNextHeader;
       if (!encode_reader_submessage(receiver, replacements, crypto, plain,
-                                    sender_drch, submessage_start, msgId)) {
+                                    link_->reader_crypto_handle(sender), submessage_start, msgId)) {
         ok = false;
       }
       break;

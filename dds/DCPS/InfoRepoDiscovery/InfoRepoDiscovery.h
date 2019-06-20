@@ -126,6 +126,7 @@ public:
 
   virtual OpenDDS::DCPS::TopicStatus find_topic(
     DDS::DomainId_t domainId,
+    const OpenDDS::DCPS::RepoId& participantId,
     const char* topicName,
     CORBA::String_out dataTypeName,
     DDS::TopicQos_out qos,

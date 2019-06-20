@@ -30,7 +30,7 @@ struct LocalAuthCredentialDataTest : public ::testing::Test
 
   void add_property(Property_t p) {
     PropertySeq& seq = properties;
-    size_t len = seq.length();
+    const CORBA::ULong len = seq.length();
     seq.length(len + 1);
     seq[len] = p;
   }
