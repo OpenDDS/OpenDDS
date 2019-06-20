@@ -61,13 +61,15 @@ void PropertyStatBlock::update(double value)
 
 void PropertyStatBlock::write_median()
 {
-  size_t count = median_sample_count_->value.ull_prop();
-  std::sort(&median_buffer_[0], &median_buffer_[count - 1]);
   double result = 0.0;
-  if (count % 2) {
-    result = (median_buffer_[count / 2] + median_buffer_[(count / 2) + 1]) / 2.0;
-  } else {
-    result = median_buffer_[(count / 2) + 1];
+  size_t count = median_sample_count_->value.ull_prop();
+  if (count) {
+    std::sort(&median_buffer_[0], &median_buffer_[count - 1]);
+    if (count % 2) {
+      result = (median_buffer_[count / 2] + median_buffer_[(count / 2) + 1]) / 2.0;
+    } else {
+      result = median_buffer_[(count / 2) + 1];
+    }
   }
   median_->value.double_prop(result);
 }
