@@ -150,8 +150,7 @@ public:
                                        const DDS::DataReaderQos& qos);
 
   virtual bool update_topic_qos(const RepoId& /*topicId*/,
-                                const DDS::TopicQos& /*qos*/,
-                                OPENDDS_STRING& /*name*/);
+                                const DDS::TopicQos& /*qos*/);
 
   virtual bool update_publication_qos(const RepoId& /*publicationId*/,
                                       const DDS::DataWriterQos& /*qos*/,

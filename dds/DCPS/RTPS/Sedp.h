@@ -128,8 +128,7 @@ public:
   DDS::ReturnCode_t write_dcps_participant_dispose(const DCPS::RepoId& part);
 
   // Topic
-  bool update_topic_qos(const DCPS::RepoId& topicId, const DDS::TopicQos& qos,
-                        OPENDDS_STRING& name);
+  bool update_topic_qos(const DCPS::RepoId& topicId, const DDS::TopicQos& qos);
 
   // Publication
   bool update_publication_qos(const DCPS::RepoId& publicationId,
