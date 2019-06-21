@@ -254,33 +254,31 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
   DataReaderImpl_rch dr_servant = rchandle_from(dynamic_cast<DataReaderImpl*>(a_datareader));
 
   if (dr_servant) { // for MultiTopic this will be false
+    const ACE_TCHAR* reason = 0;
+    DDS::ReturnCode_t rc = DDS::RETCODE_OK;
     DDS::Subscriber_var dr_subscriber(dr_servant->get_subscriber());
-
     if (dr_subscriber.in() != this) {
-      GuidConverter converter(dr_servant->get_subscription_id());
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) SubscriberImpl::delete_datareader: ")
-                 ACE_TEXT("data reader %C doesn't belong to this subscriber.\n"),
-                 OPENDDS_STRING(converter).c_str()));
-      return DDS::RETCODE_PRECONDITION_NOT_MET;
+      reason = ACE_TEXT("doesn't belong to this subscriber.");
+      rc = DDS::RETCODE_PRECONDITION_NOT_MET;
+    } else if (dr_servant->has_zero_copies()) {
+      reason = ACE_TEXT("has outstanding zero-copy samples loaned out.");
+      rc = DDS::RETCODE_PRECONDITION_NOT_MET;
+    } else if (!dr_servant->read_conditions_.empty()) {
+      reason = ACE_TEXT("has read conditions attached.");
+      rc = DDS::RETCODE_PRECONDITION_NOT_MET;
     }
-
-    if (dr_servant->has_zero_copies()) {
-      GuidConverter converter(dr_servant->get_subscription_id());
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) SubscriberImpl::delete_datareader: ")
-                 ACE_TEXT("data reader %C has outstanding zero-copy samples loaned out\n"),
-                 OPENDDS_STRING(converter).c_str()));
-      return DDS::RETCODE_PRECONDITION_NOT_MET;
-    }
-
-    if (!dr_servant->read_conditions_.empty()) {
-      GuidConverter converter(dr_servant->get_subscription_id());
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) SubscriberImpl::delete_datareader: ")
-                 ACE_TEXT("data reader %C has attached read conditions\n"),
-                 OPENDDS_STRING(converter).c_str()));
-      return DDS::RETCODE_PRECONDITION_NOT_MET;
+    if (rc != DDS::RETCODE_OK) {
+      if (DCPS_debug_level) {
+        if (!reason) {
+          reason = ACE_TEXT(" (unknown reason)");
+        }
+        GuidConverter converter(dr_servant->get_subscription_id());
+        ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) SubscriberImpl::delete_datareader(%C): ")
+          ACE_TEXT("will return \"%C\" because datareader %s"),
+          OPENDDS_STRING(converter).c_str(), retcode_to_string(rc),
+          reason));
+      }
+      return rc;
     }
   }
   if (dr_servant) {
