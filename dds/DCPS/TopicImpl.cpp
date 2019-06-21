@@ -146,7 +146,7 @@ TopicImpl::enable()
                                              topic_name_.c_str(),
                                              type_name_.c_str(),
                                              qos_,
-                                             type_support_->has_dcps_key(),
+                                             type_support_ ? type_support_->has_dcps_key() : false,
                                              this);
     if (status != CREATED && status != FOUND) {
       ACE_ERROR((LM_ERROR,

@@ -136,6 +136,11 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
   // add a topic
   const char* tname = "MYtopic";
   const char* dname = "MYdataname";
+
+  struct Callbacks : public OpenDDS::DCPS::TopicCallbacks {
+    void inconsistent_topic(size_t /*count*/) {}
+  } callbacks;
+
   OpenDDS::DCPS::TopicStatus topicStatus = disc->assert_topic(pubTopicId,
                                                               domain,
                                                               pubPartId,
@@ -143,7 +148,7 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
                                                               dname,
                                                               topicQos.in(),
                                                               false,
-                                                              0);
+                                                              &callbacks);
 
   if (topicStatus != OpenDDS::DCPS::CREATED)
     {
@@ -247,7 +252,7 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
                                    dname,
                                    topicQos.in(),
                                    false,
-                                   0);
+                                   &callbacks);
 
   if (topicStatus != OpenDDS::DCPS::CREATED)
     {

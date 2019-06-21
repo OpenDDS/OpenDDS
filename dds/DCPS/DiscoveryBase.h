@@ -204,6 +204,8 @@ namespace OpenDDS {
                        const DDS::TopicQos& qos,
                        bool has_dcps_key,
                        TopicCallbacks* topic_callbacks) {
+          assert(topic_callbacks != 0);
+
           local_data_type_name_ = data_type_name;
           local_qos_ = qos;
           has_dcps_key_ = has_dcps_key;
@@ -233,7 +235,9 @@ namespace OpenDDS {
             }
           }
 
-          topic_callbacks_->inconsistent_topic(inconsistent_topic_count_);
+          if (inconsistent_topic_count_ != 0) {
+            topic_callbacks_->inconsistent_topic(inconsistent_topic_count_);
+          }
         }
 
         void unset_local() {
@@ -350,6 +354,7 @@ namespace OpenDDS {
         const DDS::TopicQos local_qos() const { return local_qos_; }
         DCPS::RepoId topic_id() const { return topic_id_; }
         bool has_dcps_key() const { return has_dcps_key_; }
+        bool local_is_set() const { return topic_callbacks_; }
         const RepoIdSet& endpoints() const { return endpoints_; }
 
         bool is_dead() const {
@@ -485,7 +490,7 @@ namespace OpenDDS {
         typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator iter =
           topics_.find(topicName);
         if (iter != topics_.end()) {
-          if (iter->second.local_data_type_name() != dataTypeName) {
+          if (iter->second.local_is_set() && iter->second.local_data_type_name() != dataTypeName) {
             return DCPS::CONFLICTING_TYPENAME;
           }
           topicId = iter->second.topic_id();
