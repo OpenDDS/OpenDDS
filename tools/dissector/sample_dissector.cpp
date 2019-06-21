@@ -126,8 +126,8 @@ namespace OpenDDS
     guint8*
     Wireshark_Bundle::get_remainder()
     {
-      gint remainder = ws_tvb_length(tvb) - offset;
-      return reinterpret_cast<guint8*>(ws_ep_tvb_memdup(tvb, offset, remainder));
+      gint remainder = static_cast<gint>(ws_tvb_length(tvb) - offset);
+      return reinterpret_cast<guint8*>(ws_ep_tvb_memdup(tvb, static_cast<gint>(offset), remainder));
     }
 
     const hf_register_info Field_Context::default_hf_register_info =
