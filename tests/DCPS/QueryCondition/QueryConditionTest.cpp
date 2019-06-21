@@ -674,7 +674,7 @@ bool run_single_dispose_filter_test(const DomainParticipant_var& dp,
   }
   unsigned num_valid = 0;
   unsigned num_invalid = 0;
-  for (size_t i = 0; i < infoseq.length(); i++) {
+  for (CORBA::ULong i = 0; i < infoseq.length(); i++) {
     if (infoseq[i].valid_data) {
       num_valid++;
     } else {

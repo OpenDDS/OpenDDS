@@ -340,7 +340,7 @@ coherent_test(DDS::DomainParticipant_var& participant, DDS::Topic_var& topic)
   publisher->begin_coherent_changes();
   for (size_t i = 0; i < SAMPLES_PER_TEST; ++i) {
     Foo foo = {0, 0, 0, 0};
-    foo.x = 100 + i;
+    foo.x = static_cast<CORBA::Float>(100 + i);
     rc = writer_i->write(foo, DDS::HANDLE_NIL);
     if (rc != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l coherent_test() ERROR: ")

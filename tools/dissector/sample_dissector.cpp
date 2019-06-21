@@ -126,8 +126,8 @@ namespace OpenDDS
     guint8*
     Wireshark_Bundle::get_remainder()
     {
-      gint remainder = ws_tvb_length(tvb) - offset;
-      return reinterpret_cast<guint8*>(ws_ep_tvb_memdup(tvb, offset, remainder));
+      gint remainder = static_cast<gint>(ws_tvb_length(tvb) - offset);
+      return reinterpret_cast<guint8*>(ws_ep_tvb_memdup(tvb, static_cast<gint>(offset), remainder));
     }
 
     const hf_register_info Field_Context::default_hf_register_info =
@@ -448,7 +448,7 @@ namespace OpenDDS
       p.offset += (p.buffer_pos() - location);
     }
 
-#define ADD_FIELD_PARAMS params.tree, hf, params.tvb, params.offset, (gint) len
+#define ADD_FIELD_PARAMS params.tree, hf, params.tvb, (gint) params.offset, (gint) len
     size_t Sample_Field::dissect_i(Wireshark_Bundle& params, bool recur)
     {
 

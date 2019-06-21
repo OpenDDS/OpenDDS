@@ -125,7 +125,7 @@ namespace {
 
         t.binary_properties[i].name = name.str().c_str();
 
-        size_t vlen = value.str().length();
+        const CORBA::ULong vlen = static_cast<CORBA::ULong>(value.str().length());
         t.binary_properties[i].value.length(vlen);
         memcpy(t.binary_properties[i].value.get_buffer(),  value.str().c_str(),  vlen);
 
