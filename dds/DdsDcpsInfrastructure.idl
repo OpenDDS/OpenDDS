@@ -63,7 +63,7 @@ module DDS {
     const ReturnCode_t RETCODE_ALREADY_DELETED = 9;
     const ReturnCode_t RETCODE_TIMEOUT = 10;
     const ReturnCode_t RETCODE_NO_DATA = 11;
-    const ReturnCode_t RETCODE_ILLEGAL_OPERATION     = 12;
+    const ReturnCode_t RETCODE_ILLEGAL_OPERATION = 12;
 
     // ----------------------------------------------------------------------
     // Status to support listeners and conditions
@@ -255,7 +255,7 @@ module DDS {
     const string LIFESPAN_QOS_POLICY_NAME            = "Lifespan";
     const string DURABILITYSERVICE_POLICY_NAME       = "DurabilityService";
 
-    const QosPolicyId_t INVALID_QOS_POLICY_ID              = 0;
+    const QosPolicyId_t INVALID_QOS_POLICY_ID             = 0;
     const QosPolicyId_t USERDATA_QOS_POLICY_ID            = 1;
     const QosPolicyId_t DURABILITY_QOS_POLICY_ID          = 2;
     const QosPolicyId_t PRESENTATION_QOS_POLICY_ID        = 3;
@@ -317,7 +317,7 @@ module OpenDDS
   module DCPS
   {
     const DDS::StatusMask ALL_STATUS_MASK = 0xffffffff;
-    const DDS::StatusMask NO_STATUS_MASK  = 0x00000000;
+    const DDS::StatusMask NO_STATUS_MASK = 0x00000000;
     const DDS::StatusMask DEFAULT_STATUS_MASK = ALL_STATUS_MASK;
   };
 };

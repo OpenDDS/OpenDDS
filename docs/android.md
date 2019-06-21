@@ -50,10 +50,6 @@ To follow along this guide and build OpenDDS you will need:
      Windows where they can be used in Android Studio as they would be used on
      Linux.
  - OpenDDS 3.14 or higher.
- - The latest [DOC Group ACE/TAO](https://github.com/DOCGroup/ACE_TAO) release.
-   OCI ACE/TAO does not have the updated Android NDK support at the time of
-   writing. The OpenDDS `configure` script will download and use DOC Group
-   ACE/TAO automatically if passed `--doc-group`.
  - [Android Native Development Kit (NDK)](https://developer.android.com/ndk/)
    r18 or higher. You can download it separately from android.com or using the
    SDK Manager that comes with Android Studio. If you download the NDK using the
@@ -64,8 +60,9 @@ To follow along this guide and build OpenDDS you will need:
 In addition to those, building OpenDDS with optional dependencies also
 have requirements not listed here but will in their own sections.
 
-Integrating OpenDDS into a Android app assumes the use of Android Studio or at
-least the Android SDK.
+The [\"Using OpenDDS in a Android App\"
+section](#using-opendds-in-a-android-app) assumes the use of Android Studio,
+but the will also work when just using the Android SDK.
 
 ## Building OpenDDS for Android
 
@@ -121,32 +118,29 @@ absolute path to `build/host` and `$DDS_ROOT` will be the absolute path to
 `build/target`.
 
 If building for more than one architecture, which will be necessary to cover
-the largest number of Android devices possible, it might make sense to build a
-*completely seperate* static build of OpenDDS to cut down on time.
+the largest number of Android devices possible, it might make sense to build
+the OpenDDS host tools separately to cut down on compile time and disk space.
 
 If this is the case, then `$HOST_DDS` will be the location of the static host
 tools built for the host platform and `$DDS_ROOT` will just be the location of
 the OpenDDS source code.
 
 This should be done with the same version of OpenDDS and ACE/TAO as what you
-want to build for Android. The configure script will create a static build if
-passed the `--static` option along with your normal options to configure.
+want to build for Android. Pass `--host-tools-only` to the configure script to
+generate static host tools. Also pass `--java $JDK` if you plan on using Java.
 
-If you want to just want the minimum needed for host OpenDDS tools and get rid
-of the rest since it's a static build, these are the required binaries:
+If you want to just the minimum needed for host OpenDDS tools and get rid of
+the rest of the source files, you can. These are the binaries that make up the
+OpenDDS host tools:
 
  * `$HOST_DDS/bin/opendds_idl`
  * `$HOST_DDS/bin/idl2jni` (if using the OpenDDS Java API)
  * `$HOST_DDS/ACE_TAO/bin/ace_gperf`
  * `$HOST_DDS/ACE_TAO/bin/tao_idl`
 
-The make targets for these are `TAO_IDL_EXE` and `opendds_idl`, and
-`idl2jni_codegen` if you want to use the OpenDDS Java API. `ace_gperf` will be
-built as a side-effect of building the other programs.
-
-The directory structure must be kept but other than that there no limitations
-like setting `setenv.sh` on running these binaries. To use these to build
-OpenDDS for Android, pass `--host-tools` to the configure script.
+These files can be separated from the rest of the OpenDDS and ACE/TAO source
+trees, but the directory structure must be kept. To use these to build OpenDDS
+for Android, pass `--host-tools $HOST_DDS` to the configure script.
 
 ### OpenDDS's Optional Dependencies
 
@@ -201,34 +195,23 @@ native library files.
 
 ### Java IDL Libraries
 
-Java support, assuming OpenDDS was built with Java, will available by
-inheriting `dcps_java` in your IDL MPC project. This would be built by the same
-command as above, except as of writing there is a unresolved bug in the rules
-for building Java IDL libraries.
+Java support for your IDL, assuming OpenDDS was built with Java, will available
+by inheriting `dcps_java` in your IDL MPC project and will be built along with
+the native IDL libraries using the command above.
 
-You should run the command above first. Assuming that `$PROJECT` is assigned to
-the name of the MPC Project of the IDL code and `$MODULE` is assigned to the
-name of the IDL module, these shell commands are a possible workaround for this
-bug:
-
-```Shell
-(source $DDS_ROOT/setenv.sh; PATH=$PATH:$TOOLCHAIN/bin make -f GNUmakefile.${PROJECT} ${MODULE}TypeSupportJC.h)
-
-# Run the normal make command again
-(source $DDS_ROOT/setenv.sh; PATH=$PATH:$TOOLCHAIN/bin make)
-
-(source $DDS_ROOT/setenv.sh; $DDS_ROOT/java/build_scripts/javac_wrapper.pl -sourcepath . -d classes -classpath . -implicit:none -classpath $DDS_ROOT/lib/i2jrt_compact.jar -classpath $DDS_ROOT/lib/i2jrt.jar -classpath $DDS_ROOT/lib/OpenDDS_DCPS.jar ${MODULE}/*
-```
-
-This will produce a library with two components: a Java `jar` library file and
-a supporting native library `so` file. This native library must be included
-with the other native library files, and is different than the regular native
-IDL type support library.
+Java IDL libraries consist of two components: a Java `jar` library file and a
+supporting native library `so` file. This native library must be included with
+the other native library files, and is different than the regular native IDL
+type support library.
 
 ## Using OpenDDS in a Android App
 
 After building OpenDDS and generating the IDL libraries, you will need to set
 up an app to be able to use OpenDDS.
+
+There is an OpenDDS demo for using OpenDDS over the Internet that includes an
+Android app built using these instructions:
+[github.com/oci-labs/opendds-smart-lock](https://github.com/oci-labs/opendds-smart-lock).
 
 ### Adding the OpenDDS Native Libraries to the App
 
@@ -244,7 +227,8 @@ PROJECT*) add this to the `android` section:
 ```
 
 `native_libs` is not a required name, but it needs to contain subdirectories
-named after the `ANDROID_ABI` of the native libraries it contains.
+named after the `ANDROID_ABI` of the native libraries it contains (See
+the [ABI/architecture table](#abi-table)).
 
 The exact list of libraries to include depend on what features you're using but
 the basic list of library file for OpenDDS are as follows:
@@ -292,7 +276,7 @@ the basic list of library file for OpenDDS are as follows:
    - `$DDS_ROOT/lib/libOpenDDS_DCPS_Java.so`
    - The [native part of the Java library for your IDL](#java-idl-libraries)
 
-This list might not be complete, especially if your using a major feature not
+This list might not be complete, especially if you're using a major feature not
 listed here.
 
 ### Adding OpenDDS Java Libraries to the App
@@ -309,12 +293,12 @@ app's subdirectory. Create `libs` if it doesn't exist. Like `native_libs` the
 `libs` name isn't required.
 
  - `i2jrt.jar`
- - `i2jrt_compact.jar`
+ - `i2jrt_corba.jar`
  - `OpenDDS_DCPS.jar`
  - `tao_java.jar`
  - The [Java part of the Java library for your IDL](#java-idl-libraries)
 
-Also copy the jar files from your IDL Libraries and sync with Gradle if your
+Also copy the jar files from your IDL Libraries and sync with Gradle if you're
 using Android Studio. After this OpenDDS Java API should be able to be used
 the same as if using OpenDDS with the Hotspot JVM. The exceptions and
 particulars to how Android can effect OpenDDS are described in the following
@@ -334,7 +318,7 @@ Failure to do so will result in ACE failing to access any sockets and OpenDDS
 will not be able to function.
 
 In addition to this if no networks are active when OpenDDS is initialized, then
-the result will similar. It will be up to the app developer to assess
+the result will similar. For now it will be up to the app developer to assess
 network availability before initializing OpenDDS. On Android this can be done
 using the
 [ConnectivityManager](https://developer.android.com/reference/android/net/ConnectivityManager),
@@ -472,18 +456,18 @@ can be retrieved either in `onStart()` or more perhaps appropriately in
 given the singleton nature of both.
 
 This might not be ideal or efficient though, because deleting and recreating
-participants will happen every the app loses focus, like during orientation
-changes. An alternative to this would be running OpenDDS within an [Android
-Sevice](https://developer.android.com/guide/components/services) separate from
-the main app, but this hasn't been fully explored yet.
+participants will happen every time the app loses focus, like during
+orientation changes. An alternative to this would be running OpenDDS within an
+[Android Sevice](https://developer.android.com/guide/components/services)
+separate from the main app, but this hasn't been fully explored yet.
 
 ## Footnotes
 
 <a id="footnote-1"/>
 
-1. This can be Docker, Bash for Windows, or a traditional VM. The Android NDK
-   for Windows might work if the build was set up correctly but this hasn't
-   been tested.
+1. This can be Docker, Windows Subsystem for Linux (WSL), or a traditional VM.
+   The Android NDK for Windows might work if the build was set up correctly but
+   this hasn't been tested.
 
 <a id="footnote-2"/>
 

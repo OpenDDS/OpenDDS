@@ -55,8 +55,6 @@ string idl_mapping_jni::taoType(AST_Type *decl)
       return "CORBA::Float";
     case AST_PredefinedType::PT_double:
       return "CORBA::Double";
-    default:
-      ;
     }
   }
   case AST_Decl::NT_string:
@@ -66,8 +64,6 @@ string idl_mapping_jni::taoType(AST_Type *decl)
   case AST_Decl::NT_interface:
   case AST_Decl::NT_interface_fwd:
     return scoped(decl->name()) + "_var";
-  default:
-    ;
   }
 
   return scoped(decl->name());
@@ -77,11 +73,11 @@ string idl_mapping_jni::taoParam(AST_Type *decl, AST_Argument::Direction dir,
                                  bool return_type)
 {
   string param = taoType(decl), name = scoped(decl->name());
-  bool addRef = !return_type && ((dir == AST_Argument::dir_INOUT)
-                                 || (dir == AST_Argument::dir_OUT)),
-                addConst = !return_type && dir == AST_Argument::dir_IN,
-                           variableOut = dir == AST_Argument::dir_OUT
-                                         && decl->size_type() == AST_Type::VARIABLE;
+  bool addRef = !return_type &&
+    ((dir == AST_Argument::dir_INOUT) || (dir == AST_Argument::dir_OUT));
+  bool addConst = !return_type && dir == AST_Argument::dir_IN;
+  bool variableOut = dir == AST_Argument::dir_OUT &&
+    decl->size_type() == AST_Type::VARIABLE;
   AST_Decl::NodeType effectiveType = decl->node_type();
 
   if (effectiveType == AST_Decl::NT_typedef) {
@@ -142,8 +138,6 @@ string idl_mapping_jni::taoParam(AST_Type *decl, AST_Argument::Direction dir,
 
     addRef = variableOut;
     break;
-  default:
-    ;
   }
 
   if (addRef) param += '&';
@@ -268,7 +262,6 @@ string idl_mapping_jni::jvmSignature(AST_Type *decl)
       return "F";
     case AST_PredefinedType::PT_double:
       return "D";
-    default:                                ;//fall through
     }
   }
   case AST_Decl::NT_string:
@@ -299,7 +292,6 @@ string idl_mapping_jni::jvmSignature(AST_Type *decl)
       return "[L" + elem + ";";
     }
   }
-  default: ;//fall through
   }
 
   cerr << "ERROR - unknown jvmSignature for IDL type: " <<
@@ -466,12 +458,12 @@ bool idl_mapping_jni::gen_struct(UTL_ScopedName *name,
   string fieldsToCxx, fieldsToJava;
 
   for (size_t i = 0; i < fields.size(); ++i) {
-    string fname = fields[i]->local_name()->get_string(),
-                   jvmSig = jvmSignature(fields[i]->field_type()),   // "I"
-                            jniFn = jniFnName(fields[i]->field_type()),   // "Int"
-                                    fieldID =
-                                      "    jfieldID fid = jni->GetFieldID (clazz, \"" + fname + "\", \""
-                                      + jvmSig + "\");\n";
+    string fname = fields[i]->local_name()->get_string();
+    string jvmSig = jvmSignature(fields[i]->field_type()); // "I"
+    string jniFn = jniFnName(fields[i]->field_type()); // "Int"
+    string fieldID =
+      "    jfieldID fid = jni->GetFieldID (clazz, \"" + fname + "\", \""
+      + jvmSig + "\");\n";
     fieldsToCxx += "  {\n" + fieldID;
     fieldsToJava += "  {\n" + fieldID;
 
@@ -575,7 +567,6 @@ bool idl_mapping_jni::gen_typedef(UTL_ScopedName *name, AST_Type *base,
     arrayLength = dim->ev()->u.ulval;
     break;
   }
-  default: ;//fall through
   }
 
   if (!element) return true;//nothing needed if it's not an array or a sequence
@@ -873,13 +864,13 @@ string arg_conversion(const char *name, AST_Type *type,
                       AST_Argument::Direction direction, string &argconv_in, string &argconv_out,
                       string &tao_argconv_in, string &tao_argconv_out)
 {
-  string tao = idl_mapping_jni::taoType(type),
-               tao_var = varify(tao),
-                         jni = idl_mapping_jni::type(type),
-                               jvmSig = idl_mapping_jni::jvmSignature(type),
-                                        holderSig = idl_mapping::scoped_helper(type->name(), "/") + "Holder",
-                                                    non_var = idl_mapping::scoped_helper(type->name(), "::"),
-                                                              suffix;
+  string tao = idl_mapping_jni::taoType(type);
+  string tao_var = varify(tao);
+  string jni = idl_mapping_jni::type(type);
+  string jvmSig = idl_mapping_jni::jvmSignature(type);
+  string holderSig = idl_mapping::scoped_helper(type->name(), "/") + "Holder";
+  string non_var = idl_mapping::scoped_helper(type->name(), "::");
+  string suffix;
 
   bool always_var(tao == tao_var);
 
@@ -1564,8 +1555,6 @@ bool idl_mapping_jni::gen_native(UTL_ScopedName *name, const char *)
     return gen_jarray_copies(name, "L" + elem + ";", "Object", "jobject",
                              "jobjectArray", elem_cxx, true, "source.length ()");
   }
-  default:
-    ; // fall through
   }
 
   return true;
@@ -1686,11 +1675,11 @@ bool idl_mapping_jni::gen_union(UTL_ScopedName *name,
       }
     }
 
-    string br_type = type(branches[i]->field_type()),
-                     br_sig = jvmSignature(branches[i]->field_type()),
-                              br_fn = jniFnName(branches[i]->field_type()),
-                                      br_tao = taoType(branches[i]->field_type()),
-                                               copyToCxx, jniCast, cxxCast, copyToJava, edisc;
+    string br_type = type(branches[i]->field_type());
+    string br_sig = jvmSignature(branches[i]->field_type());
+    string br_fn = jniFnName(branches[i]->field_type());
+    string br_tao = taoType(branches[i]->field_type());
+    string copyToCxx, jniCast, cxxCast, copyToJava, edisc;
 
     if (useExplicitDisc) {
       someBranchUsesExplicitDisc = true;

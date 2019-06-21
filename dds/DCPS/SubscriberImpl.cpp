@@ -257,8 +257,7 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
     DDS::Subscriber_var dr_subscriber(dr_servant->get_subscriber());
 
     if (dr_subscriber.in() != this) {
-      RepoId id = dr_servant->get_subscription_id();
-      GuidConverter converter(id);
+      GuidConverter converter(dr_servant->get_subscription_id());
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) SubscriberImpl::delete_datareader: ")
                  ACE_TEXT("data reader %C doesn't belong to this subscriber.\n"),
@@ -267,10 +266,20 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
     }
 
     if (dr_servant->has_zero_copies()) {
+      GuidConverter converter(dr_servant->get_subscription_id());
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) SubscriberImpl::delete_datareader: ")
+                 ACE_TEXT("data reader %C has outstanding zero-copy samples loaned out\n"),
+                 OPENDDS_STRING(converter).c_str()));
       return DDS::RETCODE_PRECONDITION_NOT_MET;
     }
 
     if (!dr_servant->read_conditions_.empty()) {
+      GuidConverter converter(dr_servant->get_subscription_id());
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) SubscriberImpl::delete_datareader: ")
+                 ACE_TEXT("data reader %C has attached read conditions\n"),
+                 OPENDDS_STRING(converter).c_str()));
       return DDS::RETCODE_PRECONDITION_NOT_MET;
     }
   }
