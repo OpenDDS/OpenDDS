@@ -448,7 +448,7 @@ namespace OpenDDS
       p.offset += (p.buffer_pos() - location);
     }
 
-#define ADD_FIELD_PARAMS params.tree, hf, params.tvb, params.offset, (gint) len
+#define ADD_FIELD_PARAMS params.tree, hf, params.tvb, (gint) params.offset, (gint) len
     size_t Sample_Field::dissect_i(Wireshark_Bundle& params, bool recur)
     {
 
