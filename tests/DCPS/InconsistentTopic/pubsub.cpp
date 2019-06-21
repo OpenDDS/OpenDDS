@@ -145,7 +145,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
         test_error = true;
       }
       if (status.total_count_change != 0) {
-        cerr << "ERROR: (alpha) participant 1 total_count_chnage should be 0 but is " << status.total_count_change << endl;
+        cerr << "ERROR: (alpha) participant 1 total_count_change should be 0 but is " << status.total_count_change << endl;
         test_error = true;
       }
 
