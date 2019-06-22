@@ -507,9 +507,11 @@ DomainParticipantImpl::create_topic_i(
       return new_topic;
 
     } else {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::create_topic, ")
-                 ACE_TEXT("assert_topic failed with return value %d.\n"), status));
+      if (DCPS_debug_level >= 1) {
+        ACE_ERROR((LM_ERROR,
+                  ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::create_topic, ")
+                  ACE_TEXT("assert_topic failed with return value %d.\n"), status));
+      }
       return DDS::Topic::_nil();
     }
   }
