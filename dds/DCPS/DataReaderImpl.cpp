@@ -2914,6 +2914,7 @@ DataReaderImpl::update_ownership_strength (const PublicationId& pub_id,
 bool DataReaderImpl::verify_coherent_changes_completion (WriterInfo* writer)
 {
   Coherent_State state = COMPLETED;
+  bool accept_here = true;
 
   if (subqos_.presentation.access_scope != ::DDS::INSTANCE_PRESENTATION_QOS &&
       subqos_.presentation.coherent_access) {
@@ -2924,6 +2925,7 @@ bool DataReaderImpl::verify_coherent_changes_completion (WriterInfo* writer)
       if (subscriber && state != NOT_COMPLETED_YET) {
         // verify if all readers received complete coherent changes in a group.
         subscriber->coherent_change_received(writer->publisher_id_, this, state);
+        accept_here = false; // coherent_change_received does that itself
       }
     } else if (state != NOT_COMPLETED_YET) { // TOPIC coherent with final state
       if (state == REJECTED) {
@@ -2933,8 +2935,7 @@ bool DataReaderImpl::verify_coherent_changes_completion (WriterInfo* writer)
     }
   }
 
-  if (state == COMPLETED && !writer->group_coherent_) {
-    // If group, sub.coherent_change_received did this already
+  if (state == COMPLETED && accept_here) {
     accept_coherent(writer->writer_id_, writer->publisher_id_);
     coherent_changes_completed(this);
   }

@@ -112,6 +112,7 @@ public:
   DDS::Subscriber_var& subscriber_;
   DDS::DataReader_var& reader1_;
   DDS::DataReader_var& reader2_;
+  DDS::DataReaderListener_var& listener_;
   DDS::DataWriter_var& writer_;
 
   Test(
@@ -120,12 +121,14 @@ public:
     DDS::Subscriber_var& subscriber,
     DDS::DataReader_var& reader1,
     DDS::DataReader_var& reader2,
+    DDS::DataReaderListener_var& listener,
     DDS::DataWriter_var& writer)
     : participant_(participant)
     , publisher_(publisher)
     , subscriber_(subscriber)
     , reader1_(reader1)
     , reader2_(reader2)
+    , listener_(listener)
     , writer_(writer)
   {
   }
@@ -149,10 +152,9 @@ public:
     subscriber_qos.presentation.coherent_access = coherent;
     subscriber_qos.presentation.ordered_access = !coherent;
 
-    subscriber_ =
-      participant_->create_subscriber(subscriber_qos,
-                                     DDS::SubscriberListener::_nil(),
-                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    subscriber_ = participant_->create_subscriber(
+      subscriber_qos, DDS::SubscriberListener::_nil(),
+      OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (!subscriber_) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l setup_test() ERROR: ")
                         ACE_TEXT("create_subscriber failed!\n")), false);
@@ -172,10 +174,9 @@ public:
     publisher_qos.presentation.coherent_access = coherent;
     publisher_qos.presentation.ordered_access = !coherent;
 
-    publisher_ =
-      participant_->create_publisher(publisher_qos,
-                                    DDS::PublisherListener::_nil(),
-                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    publisher_ = participant_->create_publisher(
+      publisher_qos, DDS::PublisherListener::_nil(),
+      OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (!publisher_) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l setup_test() ERROR: ")
                         ACE_TEXT("create_publisher failed!\n")), false);
@@ -191,11 +192,9 @@ public:
     reader_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
 
     // Create First DataReader for Both Tests
-    reader1_ =
-      subscriber_->create_datareader(topic.in(),
-                                    reader_qos,
-                                    DDS::DataReaderListener::_nil(),
-                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    reader1_ = subscriber_->create_datareader(
+      topic.in(), reader_qos, DDS::DataReaderListener::_nil(),
+      OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (!reader1_) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l setup_test() ERROR: ")
                         ACE_TEXT("first create_datareader failed!\n")), false);
@@ -203,12 +202,10 @@ public:
 
     // Create Second DataReader Just for Coherent
     if (coherent) {
-      DDS::DataReaderListener_var listener(new ListenerImpl());
-      reader2_ =
-        subscriber_->create_datareader(topic.in(),
-                                      reader_qos,
-                                      listener,
-                                      OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      listener_ = new ListenerImpl();
+      reader2_ = subscriber_->create_datareader(
+        topic.in(), reader_qos, listener_,
+        OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (!reader2_) {
         ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l setup_test() ERROR: ")
                           ACE_TEXT("second create_datareader failed!\n")), false);
@@ -216,11 +213,10 @@ public:
     }
 
     // Create DataWriter
-    writer_ =
-      publisher_->create_datawriter(topic.in(),
-                                   DATAWRITER_QOS_DEFAULT,
-                                   DDS::DataWriterListener::_nil(),
-                                   OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    writer_ = publisher_->create_datawriter(
+      topic.in(), DATAWRITER_QOS_DEFAULT,
+      DDS::DataWriterListener::_nil(),
+      OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (!writer_) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l setup_test() ERROR: ")
                         ACE_TEXT("create_datawriter failed!\n")), true);
@@ -317,8 +313,9 @@ coherent_test(DDS::DomainParticipant_var& participant, DDS::Topic_var& topic)
   DDS::Subscriber_var subscriber;
   DDS::DataReader_var reader1;
   DDS::DataReader_var reader2;
+  DDS::DataReaderListener_var listener;
   DDS::DataWriter_var writer;
-  Test t(participant, publisher, subscriber, reader1, reader2, writer);
+  Test t(participant, publisher, subscriber, reader1, reader2, listener, writer);
   if (!t.setup_test(topic, true)) {
     ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l coherent_test() ERROR: ")
                       ACE_TEXT("setup_test failed!\n")), false);
@@ -409,7 +406,7 @@ coherent_test(DDS::DomainParticipant_var& participant, DDS::Topic_var& topic)
 
   // Wait Until Listener is Done and Detach It
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("Waiting For Listener...\n")));
-  ListenerImpl* listener_i = dynamic_cast<ListenerImpl*>(reader2->get_listener());
+  ListenerImpl* listener_i = dynamic_cast<ListenerImpl*>(listener.in());
   if (!listener_i) {
     ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l coherent_test() ERROR: ")
                       ACE_TEXT("failed to get listener!\n")), false);
@@ -436,8 +433,9 @@ ordered_test(DDS::DomainParticipant_var& participant, DDS::Topic_var& topic)
   DDS::Subscriber_var subscriber;
   DDS::DataReader_var reader1;
   DDS::DataReader_var reader2; // Unused
+  DDS::DataReaderListener_var listener; // Unused
   DDS::DataWriter_var writer;
-  Test t(participant, publisher, subscriber, reader1, reader2, writer);
+  Test t(participant, publisher, subscriber, reader1, reader2, listener, writer);
   if (!t.setup_test(topic, false)) {
     ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l ordered_test() ERROR: ")
                       ACE_TEXT("setup_test failed!\n")), false);
