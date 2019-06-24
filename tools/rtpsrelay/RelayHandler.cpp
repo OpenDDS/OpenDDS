@@ -16,6 +16,7 @@
 namespace {
   const CORBA::UShort encap_LE = 0x0300; // {PL_CDR_LE} in LE
   const CORBA::UShort encap_BE = 0x0200; // {PL_CDR_BE} in LE
+  const size_t beacon_message_length = static_cast<size_t>(4);
 
   std::string guid_to_string(const OpenDDS::DCPS::GUID_t& a_guid)
   {
@@ -116,7 +117,9 @@ int RelayHandler::handle_input(ACE_HANDLE)
     ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::handle_input failed to deserialize RTPS header\n"));
     return 0;
   }
-  const auto empty_message = buffer->length() == 0;
+
+  // Beacon messages will be considered empty
+  const auto empty_message = buffer->length() == beacon_message_length;
 
   OpenDDS::DCPS::RepoId src_guid;
   std::memcpy(src_guid.guidPrefix, header.guidPrefix, sizeof(OpenDDS::DCPS::GuidPrefix_t));
