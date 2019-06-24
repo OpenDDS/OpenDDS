@@ -110,7 +110,7 @@ public:
   bool is_security_enabled() const { return security_enabled_; }
 #endif
 
-  bool is_opendds(const GUID_t& participant) const;
+  bool is_expectant_opendds(const GUID_t& participant) const;
 
 #ifdef OPENDDS_SECURITY
   typedef std::pair<DDS::Security::ParticipantCryptoHandle, DDS::Security::SharedSecretHandle_var> ParticipantCryptoInfoPair;

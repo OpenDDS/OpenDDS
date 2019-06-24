@@ -2204,19 +2204,22 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
         }
       }
     }
-    // For each associated opendds writer to this reader
-    CORBA::ULong len = rdata.readerProxy.associatedWriters.length();
-    for (CORBA::ULong writerIndex = 0; writerIndex < len; ++writerIndex)
-    {
-      GUID_t writerGuid = rdata.readerProxy.associatedWriters[writerIndex];
 
-      // If the associated writer is in this participant
-      LocalPublicationIter lp = local_publications_.find(writerGuid);
-      if (lp != local_publications_.end()) {
-        // If the local writer is not fully associated with the reader
-        if (lp->second.remote_opendds_associations_.insert(guid).second) {
-          // This is a new association
-          lp->second.publication_->association_complete(guid);
+    if (is_expectant_opendds(guid)) {
+      // For each associated opendds writer to this reader
+      CORBA::ULong len = rdata.readerProxy.associatedWriters.length();
+      for (CORBA::ULong writerIndex = 0; writerIndex < len; ++writerIndex)
+      {
+        GUID_t writerGuid = rdata.readerProxy.associatedWriters[writerIndex];
+
+        // If the associated writer is in this participant
+        LocalPublicationIter lp = local_publications_.find(writerGuid);
+        if (lp != local_publications_.end()) {
+          // If the local writer is not fully associated with the reader
+          if (lp->second.remote_expectant_opendds_associations_.insert(guid).second) {
+            // This is a new association
+            lp->second.publication_->association_complete(guid);
+          }
         }
       }
     }
@@ -2541,24 +2544,24 @@ Sedp::received_volatile_message_secure(DCPS::MessageId /* message_id */,
 #endif
 
 bool
-Sedp::is_opendds(const GUID_t& endpoint) const
+Sedp::is_expectant_opendds(const GUID_t& endpoint) const
 {
   GUID_t participant = endpoint;
   participant.entityId = DCPS::ENTITYID_PARTICIPANT;
-  return spdp_.is_opendds(participant);
+  return spdp_.is_expectant_opendds(participant);
 }
 
 void
 Sedp::association_complete(const RepoId& localId,
                            const RepoId& remoteId)
 {
-  // If the remote endpoint is an opendds endpoint
-  if (is_opendds(remoteId)) {
+  // If the remote endpoint is an opendds endpoint that expects associated datawriter announcements
+  if (is_expectant_opendds(remoteId)) {
     LocalSubscriptionIter sub = local_subscriptions_.find(localId);
     // If the local endpoint is a reader
     if (sub != local_subscriptions_.end()) {
       std::pair<DCPS::RepoIdSet::iterator, bool> result =
-          sub->second.remote_opendds_associations_.insert(remoteId);
+          sub->second.remote_expectant_opendds_associations_.insert(remoteId);
       // If this is a new association for the local reader
       if (result.second) {
         // Tell other participants
@@ -3412,8 +3415,8 @@ Sedp::populate_discovered_reader_msg(
   drd.contentFilterProperty.filterExpression = sub.filterProperties.filterExpression;
   drd.contentFilterProperty.expressionParameters = sub.filterProperties.expressionParameters;
   for (DCPS::RepoIdSet::const_iterator writer =
-        sub.remote_opendds_associations_.begin();
-       writer != sub.remote_opendds_associations_.end();
+        sub.remote_expectant_opendds_associations_.begin();
+       writer != sub.remote_expectant_opendds_associations_.end();
        ++writer) {
     CORBA::ULong len = drd.readerProxy.associatedWriters.length();
     drd.readerProxy.associatedWriters.length(len + 1);

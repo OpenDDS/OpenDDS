@@ -1207,14 +1207,15 @@ Spdp::wait_for_acks()
 }
 
 bool
-Spdp::is_opendds(const GUID_t& participant) const
+Spdp::is_expectant_opendds(const GUID_t& participant) const
 {
   const DiscoveredParticipantConstIter iter = participants_.find(participant);
   if (iter == participants_.end()) {
     return false;
   }
-  return 0 == std::memcmp(&iter->second.pdata_.participantProxy.vendorId,
+  bool is_opendds = 0 == std::memcmp(&iter->second.pdata_.participantProxy.vendorId,
                           DCPS::VENDORID_OCI, sizeof(VendorId_t));
+  return is_opendds && ((iter->second.pdata_.participantProxy.opendds_participant_flags.bits & RTPS::PFLAGS_NO_ASSOCIATED_WRITERS) == 0);
 }
 
 ParticipantData_t
@@ -1308,7 +1309,8 @@ Spdp::build_local_pdata(
       nonEmptyList /*defaultMulticastLocatorList*/,
       nonEmptyList /*defaultUnicastLocatorList*/,
       {0 /*manualLivelinessCount*/},   //FUTURE: implement manual liveliness
-      qos_.property
+      qos_.property,
+      {PFLAGS_NO_ASSOCIATED_WRITERS} // opendds_participant_flags
     },
     { // Duration_t (leaseDuration)
       static_cast<CORBA::Long>((disco_->resend_period() * LEASE_MULT).sec()),
