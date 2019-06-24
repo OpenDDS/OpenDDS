@@ -61,6 +61,20 @@ bool WriteAction::init(const ActionConfig& config, ActionReport& report, Builder
   }
   data_.buffer.length(data_buffer_bytes);
 
+  size_t total_hops = 0;
+  auto total_hops_prop = get_property(config.params, "total_hops", Builder::PVK_ULL);
+  if (total_hops_prop) {
+    total_hops = total_hops_prop->value.ull_prop();
+  }
+  data_.total_hops = total_hops;
+
+  size_t hop_count = 1;
+  auto hop_count_prop = get_property(config.params, "hop_count", Builder::PVK_ULL);
+  if (hop_count_prop) {
+    hop_count = hop_count_prop->value.ull_prop();
+  }
+  data_.hop_count = hop_count;
+
   // First check frequency as double (seconds)
   auto write_frequency_prop = get_property(config.params, "write_frequency", Builder::PVK_DOUBLE);
   if (write_frequency_prop) {

@@ -43,11 +43,20 @@ protected:
   std::vector<DataHandler*> handlers_;
 
   Builder::PropertyIndex last_discovery_time_;
+  Builder::PropertyIndex lost_sample_count_;
+  Builder::PropertyIndex rejected_sample_count_;
 
+  // Normal Latency / Jitter
   std::shared_ptr<PropertyStatBlock> latency_stat_block_;
   std::unordered_map<DDS::InstanceHandle_t, double> previous_latency_map_;
 
   std::shared_ptr<PropertyStatBlock> jitter_stat_block_;
+
+  // Round-Trip Latency / Jitter
+  std::shared_ptr<PropertyStatBlock> round_trip_latency_stat_block_;
+  std::unordered_map<DDS::InstanceHandle_t, double> previous_round_trip_latency_map_;
+
+  std::shared_ptr<PropertyStatBlock> round_trip_jitter_stat_block_;
 };
 
 }

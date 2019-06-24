@@ -18,6 +18,8 @@ module Bench {
 #pragma DCPS_DATA_KEY  "Bench::Data id.low"
   struct Data {
     UniqueId id;
+    unsigned long total_hops;
+    unsigned long hop_count;
     Builder::TimeStamp created_time;
     Builder::TimeStamp sent_time;
     OctetSeq buffer;
@@ -87,6 +89,26 @@ module Bench {
     double jitter_stdev;
     double jitter_weighted_median;
     unsigned long long jitter_weighted_median_overflow;
+
+    // Round-Trip Latency Stats
+    unsigned long long round_trip_latency_sample_count;
+    double round_trip_latency_min;
+    double round_trip_latency_max;
+    double round_trip_latency_mean;
+    double round_trip_latency_var_x_sample_count;
+    double round_trip_latency_stdev;
+    double round_trip_latency_weighted_median;
+    unsigned long long round_trip_latency_weighted_median_overflow;
+
+    // Round-Trip Jitter Stats
+    unsigned long long round_trip_jitter_sample_count;
+    double round_trip_jitter_min;
+    double round_trip_jitter_max;
+    double round_trip_jitter_mean;
+    double round_trip_jitter_var_x_sample_count;
+    double round_trip_jitter_stdev;
+    double round_trip_jitter_weighted_median;
+    unsigned long long round_trip_jitter_weighted_median_overflow;
   };
 
 };

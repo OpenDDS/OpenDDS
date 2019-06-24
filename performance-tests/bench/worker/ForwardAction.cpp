@@ -116,7 +116,21 @@ void ForwardAction::on_data(const Data& data) {
       proactor_.schedule_timer(*handler_, nullptr, ZERO);
     } else {
       for (auto it = data_dws_.begin(); it != data_dws_.end(); ++it) {
+
+        // Cache previous values of things we're going to tweak
+        Builder::TimeStamp old_sent_time = data.sent_time;
+        CORBA::ULong old_hop_count = data.hop_count;
+
+        // Temporarily break const promises to modify data for resending
+        Data& dangerous_data = const_cast<Data&>(data);
+        dangerous_data.sent_time = Builder::get_time();
+        dangerous_data.hop_count = old_hop_count + 1;
+
         (*it)->write(data, 0);
+
+        // Set it back in case anyone else really needed us to keep our promises
+        dangerous_data.sent_time = old_sent_time;
+        dangerous_data.hop_count = old_hop_count;
       }
     }
   }
@@ -126,6 +140,7 @@ void ForwardAction::do_writes() {
   std::unique_lock<std::mutex> lock(mutex_);
   while (queue_first_ != queue_last_) {
     Data& data = data_queue_[queue_first_];
+    data.hop_count += 1;
     for (auto it = data_dws_.begin(); it != data_dws_.end(); ++it) {
       data.sent_time = Builder::get_time();
       (*it)->write(data, 0);
