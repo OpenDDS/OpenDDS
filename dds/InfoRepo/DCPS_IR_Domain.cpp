@@ -843,7 +843,7 @@ int DCPS_IR_Domain::init_built_in_topics_transport(bool persistent)
 
   return 0;
 #else
-
+  ACE_UNUSED_ARG (persistent);
   return 1;
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 }
