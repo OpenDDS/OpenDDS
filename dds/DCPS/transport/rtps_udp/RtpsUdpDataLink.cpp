@@ -2587,7 +2587,8 @@ RtpsUdpDataLink::check_heartbeats()
 void
 RtpsUdpDataLink::send_relay_beacon()
 {
-  static const char beacon_msg[4] = { '\0', '\0', '\0', '\0' };
+  // Use a pad submessage with for the beacon
+  static const ::CORBA::Octet beacon_msg[] = { 1, 0, 0, 0 };
   static const size_t beacon_msg_size = sizeof(beacon_msg);
   
   const bool no_relay = config().rtps_relay_address() == ACE_INET_Addr();
@@ -2600,7 +2601,7 @@ RtpsUdpDataLink::send_relay_beacon()
   }
 
   // Create a message with a few bytes of data for the beacon
-  ACE_Message_Block mb(beacon_msg, beacon_msg_size);
+  ACE_Message_Block mb(reinterpret_cast<const char*>(beacon_msg), beacon_msg_size);
   mb.wr_ptr(beacon_msg_size);
   send_strategy()->send_rtps_control(mb, config().rtps_relay_address());
 }

@@ -16,7 +16,8 @@
 namespace {
   const CORBA::UShort encap_LE = 0x0300; // {PL_CDR_LE} in LE
   const CORBA::UShort encap_BE = 0x0200; // {PL_CDR_BE} in LE
-  const size_t beacon_message_length = static_cast<size_t>(4);
+  const CORBA::Octet beacon_message[] = { 1, 0, 0, 0 };
+  const size_t beacon_message_length = sizeof(beacon_message);
 
   std::string guid_to_string(const OpenDDS::DCPS::GUID_t& a_guid)
   {
@@ -118,8 +119,12 @@ int RelayHandler::handle_input(ACE_HANDLE)
     return 0;
   }
 
-  // Beacon messages will be considered empty
-  const auto empty_message = buffer->length() == beacon_message_length;
+  // Detect beacon messages and flag them as empty
+  bool is_beacon_message = false;
+  if ((buffer->length() == beacon_message_length)
+    && (static_cast<CORBA::Octet>(buffer->rd_ptr()[0]) == OpenDDS::RTPS::PAD)) {
+    is_beacon_message = true;
+  }
 
   OpenDDS::DCPS::RepoId src_guid;
   std::memcpy(src_guid.guidPrefix, header.guidPrefix, sizeof(OpenDDS::DCPS::GuidPrefix_t));
@@ -127,7 +132,7 @@ int RelayHandler::handle_input(ACE_HANDLE)
   const auto guid = guid_to_string(src_guid);
 
   buffer->rd_ptr(rd_ptr);
-  process_message(remote, ACE_Time_Value().now(), guid, buffer.get(), empty_message);
+  process_message(remote, ACE_Time_Value().now(), guid, buffer.get(), is_beacon_message);
   return 0;
 }
 
@@ -179,12 +184,12 @@ void VerticalHandler::process_message(const ACE_INET_Addr& a_remote,
                                       const ACE_Time_Value& a_now,
                                       const std::string& a_src_guid,
                                       ACE_Message_Block* a_msg,
-                                      bool a_empty_message)
+                                      bool is_beacon_message)
 {
   // Readers send empty messages so we know where they are.
   routing_table_.update(a_src_guid, horizontal_handler_->relay_address(), addr_to_string(a_remote), a_now);
 
-  if (a_empty_message) {
+  if (is_beacon_message) {
     return;
   }
 
@@ -239,9 +244,9 @@ void HorizontalHandler::process_message(const ACE_INET_Addr&,
                                         const ACE_Time_Value&,
                                         const std::string& a_src_guid,
                                         ACE_Message_Block* a_msg,
-                                        bool a_empty_message)
+                                        bool is_beacon_message)
 {
-  if (a_empty_message) {
+  if (is_beacon_message) {
     return;
   }
 
@@ -286,9 +291,9 @@ void SpdpHandler::process_message(const ACE_INET_Addr& a_remote,
                                   const ACE_Time_Value& a_now,
                                   const std::string& a_src_guid,
                                   ACE_Message_Block* a_buffer,
-                                  bool a_empty_message)
+                                  bool is_beacon_message)
 {
-  if (a_empty_message) {
+  if (is_beacon_message) {
     return;
   }
 
@@ -380,5 +385,5 @@ void SpdpHandler::process_message(const ACE_INET_Addr& a_remote,
   }
 
   a_buffer->rd_ptr(rd_ptr);
-  VerticalHandler::process_message(a_remote, a_now, a_src_guid, a_buffer, a_empty_message);
+  VerticalHandler::process_message(a_remote, a_now, a_src_guid, a_buffer, is_beacon_message);
 }
