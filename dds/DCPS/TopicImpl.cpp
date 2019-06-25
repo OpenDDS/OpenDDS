@@ -148,10 +148,12 @@ TopicImpl::enable()
                                              qos_,
                                              type_support_->has_dcps_key());
     if (status != CREATED && status != FOUND) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: TopicImpl::enable, ")
-                 ACE_TEXT("assert_topic failed with return value %d.\n"),
-                 status));
+      if (DCPS_debug_level >= 1) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: TopicImpl::enable, ")
+                   ACE_TEXT("assert_topic failed with return value %d.\n"),
+                   status));
+      }
       return DDS::RETCODE_ERROR;
     }
   }
