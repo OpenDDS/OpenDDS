@@ -41,7 +41,7 @@ TEST(SequenceIteratorTest, StdCopy_ToVector_Success)
 
   ASSERT_EQ(expected.length(), result.size());
 
-  for (size_t i = 0; i < expected.length(); ++i) {
+  for (CORBA::ULong i = 0; i < expected.length(); ++i) {
     ASSERT_EQ(expected[i], result[i]);
   }
 }
@@ -49,7 +49,7 @@ TEST(SequenceIteratorTest, StdCopy_ToVector_Success)
 TEST(SequenceIteratorTest, StdCopy_FromVector_Success)
 {
   std::vector<CORBA::Octet> expected;
-  for (size_t i = 0; i < 5; ++i) expected.push_back(i);
+  for (CORBA::Octet i = 0; i < 5; ++i) expected.push_back(i);
 
   DDS::OctetSeq result;
 
@@ -59,7 +59,7 @@ TEST(SequenceIteratorTest, StdCopy_FromVector_Success)
 
   ASSERT_EQ(result.length(), expected.size());
 
-  for (size_t i = 0; i < expected.size(); ++i) {
+  for (CORBA::ULong i = 0; i < expected.size(); ++i) {
     ASSERT_EQ(expected[i], result[i]);
   }
 }

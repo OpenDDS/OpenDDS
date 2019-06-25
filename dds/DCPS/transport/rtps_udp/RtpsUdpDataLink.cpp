@@ -2948,6 +2948,7 @@ OpenDDS::DCPS::RtpsUdpDataLink::get_addresses(const RepoId& local) const {
 void
 OpenDDS::DCPS::RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
                                                      OPENDDS_SET(ACE_INET_Addr)& addresses) const {
+  ACE_UNUSED_ARG(local);
   OPENDDS_ASSERT(local != GUID_UNKNOWN);
   OPENDDS_ASSERT(remote != GUID_UNKNOWN);
 

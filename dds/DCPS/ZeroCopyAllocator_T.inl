@@ -10,12 +10,20 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+#if defined (_MSC_VER) && (_MSC_VER >= 1400)
+# pragma warning (push)
+# pragma warning (disable:4351)
+#endif
+
 template<class T, std::size_t N> ACE_INLINE
 FirstTimeFastAllocator<T, N>::FirstTimeFastAllocator()
   : firstTime_(true)
   , pool_()
 {
 }
+#if defined (_MSC_VER) && (_MSC_VER >= 1400)
+# pragma warning (pop)
+#endif
 
 template<class T, std::size_t N> ACE_INLINE
 void *

@@ -659,7 +659,7 @@ namespace OpenDDS
           ACE_DEBUG ((LM_DEBUG,
             "DDS_Dissector::dissect_sample_payload: %C\n", e.what()
           ));
-          offset = params.offset + header.message_length_;
+          offset = static_cast<gint>(params.offset + header.message_length_);
         }
 
         // Clean Up
@@ -1016,7 +1016,7 @@ namespace OpenDDS
 
       proto_register_field_array(proto_opendds,
         Sample_Manager::instance().fields_array(),
-        Sample_Manager::instance().number_of_fields()
+        static_cast<int>(Sample_Manager::instance().number_of_fields())
       );
       proto_register_subtree_array(ett, array_length(ett));
 

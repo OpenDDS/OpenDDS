@@ -49,7 +49,7 @@ tests/DCPS/LivelinessTest/run_test.pl rtps_disc: !DCPS_MIN !DDS_NO_OWNERSHIP_PRO
 tests/DCPS/LivelinessTest/run_test.pl rtps_disc take: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE RTPS
 
 tests/DCPS/Inconsistent_Qos/run_test.pl: RTPS XERCES3 !STATIC
-tests/DCPS/InconsistentTopic/run_test.pl rtps_disc: RTPS
+tests/DCPS/InconsistentTopic/run_test.pl rtps_disc: RTPS !NO_BUILT_IN_TOPICS
 tests/DCPS/TopicReuse/run_test.pl: RTPS
 tests/DCPS/DpShutdown/run_test.pl: RTPS
 tests/DCPS/Serializer/run_test.pl: !DCPS_MIN

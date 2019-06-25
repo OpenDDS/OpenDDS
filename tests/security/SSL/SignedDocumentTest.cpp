@@ -78,7 +78,8 @@ TEST_F(SignedDocumentTest, LoadFromMemory)
   std::ostringstream mem;
   mem << file.rdbuf();
   const std::string str = mem.str();
-  DDS::OctetSeq seq(str.size(), str.size(),
+  DDS::OctetSeq seq(static_cast<CORBA::ULong>(str.size()),
+                    static_cast<CORBA::ULong>(str.size()),
                     reinterpret_cast<unsigned char*>(
                       const_cast<char*>(str.c_str())));
 

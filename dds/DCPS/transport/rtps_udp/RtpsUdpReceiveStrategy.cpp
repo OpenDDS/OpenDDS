@@ -94,8 +94,8 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
       ICE::Agent::instance()->receive(endpoint, local_address, remote_address, message);
     }
     head->release();
-  }
 # endif
+  }
 #else
   ACE_UNUSED_ARG(endpoint);
   ACE_UNUSED_ARG(stop);
@@ -742,6 +742,7 @@ RtpsUdpReceiveStrategy::has_fragments(const SequenceRange& range,
         p.first = sn;
         frag_info->push_back(p);
         RTPS::FragmentNumberSet& missing_frags = frag_info->back().second;
+        missing_frags.numBits = 0; // make sure this is a valid number before passing to get_gaps
         missing_frags.bitmap.length(8); // start at max length
         missing_frags.bitmapBase.value =
           reassembly_.get_gaps(sn, pub_id, missing_frags.bitmap.get_buffer(),

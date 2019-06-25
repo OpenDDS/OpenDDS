@@ -25,16 +25,16 @@ ACE_UINT16 Attribute::length() const
     return 8;
 
   case USERNAME:
-    return username.size();
+    return static_cast<ACE_UINT16>(username.size());
 
   case MESSAGE_INTEGRITY:
     return 20;
 
   case ERROR_CODE:
-    return 4 + error.reason.size();
+    return static_cast<ACE_UINT16>(4 + error.reason.size());
 
   case UNKNOWN_ATTRIBUTES:
-    return 2 * unknown_attributes.size();
+    return static_cast<ACE_UINT16>(2 * unknown_attributes.size());
 
   case XOR_MAPPED_ADDRESS:
     // TODO(jrw972):  Handle IPv6.
@@ -248,7 +248,7 @@ bool operator>>(DCPS::Serializer& serializer, Attribute& attribute)
 
     ACE_UINT16 code = class_ * 100 + num;
 
-    size_t reason_length = attribute_length - 4;
+    const ACE_CDR::ULong reason_length = attribute_length - 4;
 
     if (reason_length > 763) {
       return false;
@@ -402,7 +402,8 @@ bool operator<<(DCPS::Serializer& serializer, const Attribute& attribute)
   break;
 
   case USERNAME: {
-    serializer.write_octet_array(reinterpret_cast<const ACE_CDR::Octet*>(attribute.username.c_str()), attribute.username.size());
+    serializer.write_octet_array(reinterpret_cast<const ACE_CDR::Octet*>(attribute.username.c_str()),
+                                 static_cast<ACE_CDR::ULong>(attribute.username.size()));
   }
   break;
 
@@ -418,7 +419,8 @@ bool operator<<(DCPS::Serializer& serializer, const Attribute& attribute)
     serializer << static_cast<ACE_CDR::Char>(0);
     serializer << static_cast<ACE_CDR::Char>(class_);
     serializer << static_cast<ACE_CDR::Char>(num);
-    serializer.write_octet_array(reinterpret_cast<const ACE_CDR::Octet*>(attribute.error.reason.c_str()), attribute.error.reason.size());
+    serializer.write_octet_array(reinterpret_cast<const ACE_CDR::Octet*>(attribute.error.reason.c_str()),
+                                 static_cast<ACE_CDR::ULong>(attribute.error.reason.size()));
   }
   break;
 

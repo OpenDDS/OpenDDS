@@ -127,6 +127,7 @@ inline void *ws_ep_tvb_memdup(tvbuff_t *tvb, const gint offset, size_t remainder
 
 // Field Display Enum was created for 1.12 and is used many places in the
 // sample dissector, so we're disabling sample dissection.
+#undef NO_ITL
 #define NO_ITL
 typedef int field_display_e; // Dummy type for code outside NO_ITL blocks
 

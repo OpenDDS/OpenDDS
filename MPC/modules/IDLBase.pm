@@ -314,9 +314,9 @@ sub parse {
   ## Preprocess the file into one huge string
   my $ts_str;
   my $ts_pragma;
-  ($str, $ts_str, $ts_pragma) = $self->preprocess($file, $includes,
-                                                  $macros, $mparams)
-                                                            if (!defined $str);
+  my $included;
+  ($str, $ts_str, $ts_pragma) =
+     $self->preprocess($file, $includes, $macros, $mparams) if (!defined $str);
 
   ## Keep track of const's and typedef's with these variables
   my $single;
