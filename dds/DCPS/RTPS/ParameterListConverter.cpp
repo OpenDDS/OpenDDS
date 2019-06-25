@@ -272,7 +272,7 @@ namespace {
     return std::strlen(cfprop.filterExpression);
   }
 
-  bool not_default(const ParticipantFlags_t& flags)
+  bool not_default(const OpenDDSParticipantFlags_t& flags)
   {
     return flags.bits != PFLAGS_EMPTY;
   }

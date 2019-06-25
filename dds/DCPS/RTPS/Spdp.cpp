@@ -1213,8 +1213,8 @@ Spdp::is_expectant_opendds(const GUID_t& participant) const
   if (iter == participants_.end()) {
     return false;
   }
-  bool is_opendds = 0 == std::memcmp(&iter->second.pdata_.participantProxy.vendorId,
-                          DCPS::VENDORID_OCI, sizeof(VendorId_t));
+  const bool is_opendds = 0 == std::memcmp(&iter->second.pdata_.participantProxy.vendorId,
+                                           DCPS::VENDORID_OCI, sizeof(VendorId_t));
   return is_opendds && ((iter->second.pdata_.participantProxy.opendds_participant_flags.bits & RTPS::PFLAGS_NO_ASSOCIATED_WRITERS) == 0);
 }
 

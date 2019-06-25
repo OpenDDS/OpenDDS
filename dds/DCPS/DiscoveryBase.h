@@ -1161,7 +1161,7 @@ namespace OpenDDS {
           }
 
           // change this if 'writer_active' (above) changes
-          if (call_writer && !call_reader) {
+          if (call_writer && !call_reader && !is_expectant_opendds(reader)) {
             if (DCPS::DCPS_debug_level > 3) {
               ACE_DEBUG((LM_DEBUG,
                          ACE_TEXT("(%P|%t) EndpointManager::match - ")
@@ -1217,6 +1217,8 @@ namespace OpenDDS {
           }
         }
       }
+
+      virtual bool is_expectant_opendds(const GUID_t& endpoint) const = 0;
 
       virtual bool shutting_down() const = 0;
 

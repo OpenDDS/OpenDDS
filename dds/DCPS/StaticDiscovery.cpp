@@ -439,6 +439,14 @@ StaticEndpointManager::remove_subscription_i(const RepoId& readerid,
 }
 
 bool
+StaticEndpointManager::is_expectant_opendds(const GUID_t& /*endpoint*/) const
+{
+  // We can't propagate associated writers via SEDP announcments if we're
+  // using static discovery, so nobody ought to be "expecting" them
+  return false;
+}
+
+bool
 StaticEndpointManager::shutting_down() const
 {
   ACE_DEBUG((LM_NOTICE, ACE_TEXT("(%P|%t) StaticEndpointManager::shutting_down TODO\n")));

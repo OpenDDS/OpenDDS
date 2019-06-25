@@ -287,12 +287,12 @@ module OpenDDS {
     const ParameterId_t PIDMASK_VENDOR_SPECIFIC = 0x8000;
     const ParameterId_t PIDMASK_INCOMPATIBLE = 0x4000;
 
-    typedef unsigned long ParticipantFlagsBits_t;
-    const ParticipantFlagsBits_t PFLAGS_EMPTY = 0x0;
-    const ParticipantFlagsBits_t PFLAGS_NO_ASSOCIATED_WRITERS = 0x1;
+    typedef unsigned long OpenDDSParticipantFlagsBits_t;
+    const OpenDDSParticipantFlagsBits_t PFLAGS_EMPTY = 0x0;
+    const OpenDDSParticipantFlagsBits_t PFLAGS_NO_ASSOCIATED_WRITERS = 0x1;
 
-    struct ParticipantFlags_t {
-      ParticipantFlagsBits_t bits;
+    struct OpenDDSParticipantFlags_t {
+      OpenDDSParticipantFlagsBits_t bits;
     };
 
     // Vendor-specific parameters
@@ -409,7 +409,7 @@ module OpenDDS {
         DCPS::GUID_t guid;
 
       case PID_OPENDDS_PARTICIPANT_FLAGS:
-        ParticipantFlags_t participant_flags;
+        OpenDDSParticipantFlags_t participant_flags;
 
       case PID_PARTICIPANT_ENTITYID:
       case PID_GROUP_ENTITYID:
@@ -567,7 +567,7 @@ module OpenDDS {
       DCPS::LocatorSeq defaultUnicastLocatorList;
       Count_t manualLivelinessCount;
       DDS::PropertyQosPolicy property;
-      ParticipantFlags_t opendds_participant_flags;
+      OpenDDSParticipantFlags_t opendds_participant_flags;
     };
 
     // top-level data type for SPDP

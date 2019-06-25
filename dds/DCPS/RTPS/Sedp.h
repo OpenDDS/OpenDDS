@@ -744,7 +744,7 @@ private:
                                                    LocalParticipantMessage& part,
                                                    const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
 
-  bool is_expectant_opendds(const GUID_t& endpoint) const;
+  virtual bool is_expectant_opendds(const GUID_t& endpoint) const;
 
 #ifdef OPENDDS_SECURITY
   DCPS::SequenceNumber secure_automatic_liveliness_seq_;
