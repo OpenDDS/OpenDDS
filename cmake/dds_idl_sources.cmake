@@ -135,7 +135,7 @@ function(opendds_target_idl_sources target)
     unset(_ddsidl_cmd_arg_-o)
     unset(_ddsidl_cmd_arg_-Wb,java)
 
-    cmake_parse_arguments(_ddsidl_cmd_arg "-SI;-GfaceTS;-Wb,java --default-nested" "-o" "" ${_ddsidl_flags})
+    cmake_parse_arguments(_ddsidl_cmd_arg "-SI;-GfaceTS;-Wb,java" "-o" "" ${_ddsidl_flags})
 
     get_filename_component(noext_name ${input} NAME_WE)
     get_filename_component(abs_filename ${input} ABSOLUTE)

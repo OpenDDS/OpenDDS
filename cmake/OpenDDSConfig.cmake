@@ -81,6 +81,10 @@ find_program(OPENDDS_IDL
     ${_dds_bin_hints}
 )
 
+if(OPENDDS_DEFAULT_NESTED)
+  list(APPEND OPENDDS_DDS_BASE_IDL_FLAGS --default-nested)
+endif()
+
 find_program(TAO_IDL
   NAMES
     tao_idl

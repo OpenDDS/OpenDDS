@@ -62,9 +62,11 @@ within a CMakeLists.txt file. In addition, the following cache variables/options
 control the behavior of the OpenDDS CMake package.
 
 ### Cache Variables/Options Understood by OpenDDS
-|Cache Variable           | Description                                                |
-|------------------------ | ---------------------------------------------------------- |
-|`OPENDDS_CMAKE_VERBOSE`  | Print detailed status information at CMake-Generation time |
+
+| Cache Variable              | Description                                                | Default |
+| --------------------------- | ---------------------------------------------------------- | ------- |
+| `OPENDDS_CMAKE_VERBOSE`     | Print detailed status information at CMake-Generation time | `OFF`   |
+| `OPENDDS_NESTED_DEFAULT`    | Require topic types to be declared explicitly.             | `ON`    |
 
 ### Example Using OpenDDS Source Tree
 
