@@ -69,7 +69,7 @@ module TopicAnnotationsTest {
   };
 
   /*
-   * Case of a Union Key Nested inside a Struct
+   * Case of a Keyed Union
    * 1 Key
    */
   @topic
