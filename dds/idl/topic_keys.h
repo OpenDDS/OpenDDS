@@ -55,8 +55,10 @@ public:
 
     Error& operator=(const Error& error);
     virtual const char* what() const throw();
+    AST_Decl* node();
 
   private:
+    AST_Decl* node_;
     std::string message_;
   };
 
@@ -134,11 +136,6 @@ public:
     Iterator(AST_Type* root, Iterator* parent);
     Iterator(AST_Field* root, Iterator* parent);
 
-    /**
-     * Position in whatever node we are in.
-     *
-     * This means different things for different types of nodes.
-     */
     Iterator* parent_;
     size_t pos_;
     Iterator* child_;

@@ -38,26 +38,9 @@ TopicKeys::Error::Error()
 {
 }
 
-TopicKeys::Error::Error(const TopicKeys::Error& error)
-  : message_(error.message_)
-{
-}
-
-TopicKeys::Error::Error(const std::string& message)
-  : message_(message)
-{
-}
-
 TopicKeys::Error::Error(AST_Decl* node, const std::string& message)
+  : node_(node), message_(message)
 {
-  std::stringstream ss;
-  if (node) {
-    ss
-      << "Error on line " << node->line() << " in "
-      << node->file_name() << ": ";
-  }
-  ss << message;
-  message_ = ss.str();
 }
 
 TopicKeys::Error::~Error() throw ()
@@ -66,6 +49,7 @@ TopicKeys::Error::~Error() throw ()
 
 TopicKeys::Error& TopicKeys::Error::operator=(const TopicKeys::Error& error)
 {
+  node_ = error.node_;
   message_ = error.message_;
   return *this;
 }
@@ -73,6 +57,10 @@ TopicKeys::Error& TopicKeys::Error::operator=(const TopicKeys::Error& error)
 const char* TopicKeys::Error::what() const throw()
 {
   return message_.c_str();
+}
+
+AST_Decl* TopicKeys::Error::node() {
+  return node_;
 }
 
 TopicKeys::Iterator::Iterator()
@@ -227,7 +215,7 @@ TopicKeys::Iterator& TopicKeys::Iterator::operator++()
       if (child == Iterator()) {
         delete child_;
         child_ = 0;
-        throw Error(array_node, "array type is marked as key, but it's base type "
+        throw Error(array_node, "array type is marked as key, but its base type "
           "does not contain any keys.");
       } else {
         current_value_ = *child;

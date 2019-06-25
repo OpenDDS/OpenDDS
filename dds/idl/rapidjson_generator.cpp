@@ -457,7 +457,7 @@ bool rapidjson_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
     }
   }
 
-  if (idl_global->is_dcps_type(name) || be_global->treat_as_topic(node)) {
+  if (idl_global->is_dcps_type(name) || be_global->is_topic_type(node)) {
     gen_type_support(name);
   }
   return true;
@@ -611,7 +611,7 @@ bool rapidjson_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     gen_copyfrom("out", "src", discriminator, "_d", false, true);
     generateSwitchForUnion("out._d()", branchGenFrom, branches, discriminator, "", "", clazz.c_str(), false, false);
   }
-  if (be_global->treat_as_topic(node)) {
+  if (be_global->is_topic_type(node)) {
     gen_type_support(name);
   }
   return true;

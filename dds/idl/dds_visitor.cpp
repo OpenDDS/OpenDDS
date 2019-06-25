@@ -152,9 +152,6 @@ dds_visitor::visit_scope(UTL_Scope* node)
         continue;
       }
 
-      ///Give a little warning
-      be_global->is_nested_type(d);
-
       if (d->ast_accept(this) == -1) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%N:%l) dds_visitor::visit_")
@@ -239,9 +236,8 @@ dds_visitor::visit_structure(AST_Structure* node)
   try {
     TopicKeys(node).count();
   } catch (TopicKeys::Error& error) {
-    ACE_ERROR_RETURN((LM_ERROR,
-      ACE_TEXT("(%N:%l) dds_visitor::visit_structure: %C"),
-      error.what()), -1);
+    idl_global->err()->misc_error(error.what(), error.node());
+    return -1;
   }
 
   size_t nfields = node->nfields();

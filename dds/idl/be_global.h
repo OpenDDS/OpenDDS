@@ -26,6 +26,7 @@
 
 class AST_Generator;
 class AST_Decl;
+class UTL_Scope;
 class AST_Structure;
 class AST_Field;
 class AST_Union;
@@ -156,24 +157,23 @@ public:
   static bool writeFile(const char* fileName, const std::string &content);
 
   /**
-   * Cache @topic, @key, @nested
+   * Cache annotations for use during parsing.
    */
   void cache_annotations();
 
   /**
-   * Determine if a type should be treated like a topic.
-   */
-  bool treat_as_topic(AST_Decl *node);
-
-  /**
-   * Determine if a node should be seen as nested or not.
-   */
-  bool is_default_nested(AST_Decl*);
-
-  /**
-   * Check if a type has been declared a topic type.
+   * Based on annotations and global_default_nested_, determine if a type is a
+   * topic type and needs type support.
+   *
+   * Does not check for specific types of types (struct vs array).
    */
   bool is_topic_type(AST_Decl* node);
+
+  /**
+   * Global default for if a type is nested (is_nested_type = !is_topic_type)
+   * Set to true by passing --default-nested
+   */
+  bool global_default_nested_;
 
   /**
    * Check if a struct field has been declared a key.
@@ -186,20 +186,13 @@ public:
   bool has_key(AST_Union* node);
 
   /**
-   * Check if a type has been declared a nested type.
-   */
-  bool is_nested_type(AST_Decl* node);
-
-  bool default_nested_;
-
-  /**
    * Give a warning that looks like tao_idl's, but out of context of tao_idl.
    */
   void warning(const char* filename, unsigned lineno, const char* msg);
 
 private:
+  /// Name of the IDL file we are processing.
   const char* filename_;
-  // Name of the IDL file we are processing.
 
   bool java_, suppress_idl_, suppress_typecode_,
     no_default_gen_, generate_itl_, generate_v8_,
@@ -221,6 +214,9 @@ private:
   AST_Annotation_Decl* nested_annotation_;
   AST_Annotation_Decl* default_nested_annotation_;
   ///}
+
+  bool is_nested(AST_Decl* node);
+  bool is_default_nested(UTL_Scope* scope);
 };
 
 class BE_Comment_Guard {

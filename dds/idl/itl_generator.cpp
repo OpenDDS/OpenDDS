@@ -294,8 +294,8 @@ bool itl_generator::gen_struct(AST_Structure* node, UTL_ScopedName*,
   if (!be_global->itl())
     return true;
 
-  bool is_topic_type =
-    idl_global->is_dcps_type(node->name()) || be_global->treat_as_topic(node);
+  const bool is_topic_type =
+    idl_global->is_dcps_type(node->name()) || be_global->is_topic_type(node);
 
   new_type();
 
@@ -352,7 +352,7 @@ bool itl_generator::gen_struct(AST_Structure* node, UTL_ScopedName*,
 }
 
 
-bool itl_generator::gen_union(AST_Union*, UTL_ScopedName* /*name*/,
+bool itl_generator::gen_union(AST_Union* node, UTL_ScopedName* /*name*/,
                               const std::vector<AST_UnionBranch*>& cases,
                               AST_Type* _d,
                               const char* repoid)
@@ -370,6 +370,9 @@ bool itl_generator::gen_union(AST_Union*, UTL_ScopedName* /*name*/,
                   << Open(this)
                   << Indent(this) << "\"kind\" : \"union\",\n"
                   << Indent(this) << "\"discriminator\" : " << InlineType(_d) << ",\n"
+                  << Indent(this) << "\"note\" : { \"is_dcps_data_type\" : "
+                  << (be_global->is_topic_type(node) ? "true" : "false")
+                  << " },\n"
                   << Indent(this) << "\"fields\" :\n"
                   << Open(this)
                   << Indent(this) << "[\n";

@@ -79,10 +79,10 @@ bool keys_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
   TopicKeys keys(node);
   size_t key_count = 0;
   IDL_GlobalData::DCPS_Data_Type_Info* info = idl_global->is_dcps_type(name);
-  if (info) {
-    key_count = info->key_list_.size();
-  } else if (be_global->treat_as_topic(node)) {
+  if (be_global->is_topic_type(node)) {
     key_count = keys.count();
+  } else if (info) {
+    key_count = info->key_list_.size();
   } else {
     return true;
   }
@@ -102,22 +102,22 @@ bool keys_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
           "in global NS\n";
       }
 
-      if (info) {
-        IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
-        for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
-          string fname = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
-          if (use_cxx11) {
-            fname = insert_cxx11_accessor_parens(fname, false);
-          }
-          wrapper.key_compare(fname);
-        }
-      } else if (key_count) {
+      if (key_count) {
         TopicKeys::Iterator finished = keys.end();
         for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
           string fname = i.path();
           if (i.root_type() == TopicKeys::UnionType) {
             fname += "._d()";
           } else if (use_cxx11) {
+            fname = insert_cxx11_accessor_parens(fname, false);
+          }
+          wrapper.key_compare(fname);
+        }
+      } else if (info) {
+        IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
+        for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
+          string fname = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
+          if (use_cxx11) {
             fname = insert_cxx11_accessor_parens(fname, false);
           }
           wrapper.key_compare(fname);
@@ -133,11 +133,7 @@ bool keys_generator::gen_union(
   AST_Union* node, UTL_ScopedName* name,
   const std::vector<AST_UnionBranch*>&, AST_Type*, const char*)
 {
-  if (!be_global->treat_as_topic(node)) {
-    return true;
-  }
-
-  {
+  if (be_global->is_topic_type(node)) {
     KeyLessThanWrapper wrapper(name);
     const string cxx = scoped(name);
 
