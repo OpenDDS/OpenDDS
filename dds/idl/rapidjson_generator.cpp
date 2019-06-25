@@ -55,6 +55,8 @@ namespace {
         return "Int64";
       case AST_PredefinedType::PT_ulonglong:
         return "Uint64";
+      case AST_PredefinedType::PT_float:
+        return "Float";
       default:
         return "Double";
       }
@@ -90,7 +92,8 @@ namespace {
           array = "gen_" + underscores + "_names";
         strm <<
           "  {\n"
-          "    std::string str(" << src << " >= " << array << "_size ? \"<<invalid>>\" : " << array << "[static_cast<int>(" << src << ")]);\n" <<
+          "    const size_t index = static_cast<size_t>(" << src << ");\n"
+          "    std::string str(index >= " << array << "_size ? \"<<invalid>>\" : " << array << "[index]);\n" <<
           "    " << tgt_str << op_pre << "str.c_str(), " << alloc << op_post << ";\n"
           "  }\n";
         return;
@@ -264,17 +267,22 @@ namespace {
           dds_generator::scoped_helper(type->name(), "_"),
           temp_type = scoped(type->name()),
           temp_name = "temp_" + underscores;
+        const bool octet_type = (pt == AST_PredefinedType::PT_octet);
         strm <<
           ip << "if (val.IsString()) {\n" <<
           ip << "  std::string ss(val.GetString());\n" <<
           ip << "  std::istringstream iss(ss);\n" <<
-          ip << "  " << (pt == AST_PredefinedType::PT_octet ? "uint16_t" : temp_type.c_str()) << " " << temp_name << ";\n" <<
+          ip << "  " << (octet_type ? "uint16_t" : temp_type.c_str()) << " " << temp_name << ";\n" <<
           ip << "  if (ss.find(\"0x\") != std::string::npos) {\n" <<
           ip << "    iss >> std::hex >> " << temp_name << ";\n" <<
           ip << "  } else {\n" <<
           ip << "    iss >> " << temp_name << ";\n" <<
           ip << "  }\n" <<
-          ip << "  " << propName << assign_prefix << temp_name << assign_suffix << ";\n" <<
+          ip << "  " << propName << assign_prefix;
+        if (octet_type) {
+          strm << "static_cast<" << temp_type.c_str() << ">(";
+        }
+        strm << temp_name << (octet_type ? ")" : "") << assign_suffix << ";\n" <<
           ip << "}\n" <<
           ip << "if (val.IsNumber()) {\n" <<
           ip << "  " << propName << assign_prefix << "val.Get" << rapidJsonType << "()" << assign_suffix << ";\n" <<

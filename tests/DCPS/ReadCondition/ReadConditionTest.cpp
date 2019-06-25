@@ -177,8 +177,10 @@ int run_test_next_instance(DDS::DomainParticipant_ptr dp)
   ws->attach_condition(dr_rc2);
   MessageDataReader_var mdr = MessageDataReader::_narrow(dr);
   bool passed = true, done = false;
-  if (sub->delete_datareader(dr) != DDS::RETCODE_PRECONDITION_NOT_MET) {
-    cout << "ERROR: the deletion of a DataReader is not allowed if there are any existing ReadCondition objects that are attached to the DataReader." << endl;
+  ret = sub->delete_datareader(dr);
+  if (ret != DDS::RETCODE_PRECONDITION_NOT_MET) {
+    cerr << "ERROR: expected delete_datareader to return RETCODE_PRECONDITION_NOT_MET, "
+      "but it returned " << retcode_to_string(ret) << endl;
     passed = false;
     done = true;
   }
