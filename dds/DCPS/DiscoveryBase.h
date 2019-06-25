@@ -779,12 +779,14 @@ namespace OpenDDS {
             DCPS::WriterIdSeq writer_seq(1);
             writer_seq.length(1);
             writer_seq[0] = removing;
-            lsi->second.remote_expectant_opendds_associations_.erase(removing);
+            const size_t count = lsi->second.remote_expectant_opendds_associations_.erase(removing);
             lsi->second.subscription_->remove_associations(writer_seq,
                                                            false /*notify_lost*/);
             remove_assoc_i(remove_from, lsi->second, removing);
             // Update writer
-            write_subscription_data(remove_from, lsi->second);
+            if (count) {
+              write_subscription_data(remove_from, lsi->second);
+            }
           }
 
         } else {
