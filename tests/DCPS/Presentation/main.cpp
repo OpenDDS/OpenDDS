@@ -10,8 +10,14 @@
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
+#include <dds/DCPS/PublisherImpl.h>
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/SubscriberImpl.h>
+#include <dds/DCPS/SubscriptionInstance.h>
 #include <dds/DCPS/WaitSet.h>
+#include <dds/DCPS/transport/framework/TransportDefs.h>
 #include <dds/DCPS/SafetyProfileStreams.h>
+#include <dds/DCPS/StaticIncludes.h>
 
 #include "FooTypeTypeSupportImpl.h"
 
