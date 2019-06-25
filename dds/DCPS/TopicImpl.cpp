@@ -37,7 +37,6 @@ TopicImpl::TopicImpl(const char*                    topic_name,
     id_(GUID_UNKNOWN),
     monitor_(0)
 {
-  last_inconsistent_topic_count_ = 0;
   inconsistent_topic_status_.total_count = 0;
   inconsistent_topic_status_.total_count_change = 0;
   monitor_ =
@@ -188,10 +187,10 @@ TopicImpl::transport_config(const TransportConfig_rch&)
 }
 
 void
-TopicImpl::inconsistent_topic(size_t count)
+TopicImpl::inconsistent_topic(int count)
 {
+  inconsistent_topic_status_.total_count_change += count - inconsistent_topic_status_.total_count;
   inconsistent_topic_status_.total_count = count;
-  inconsistent_topic_status_.total_count_change = inconsistent_topic_status_.total_count - last_inconsistent_topic_count_;
 
   set_status_changed_flag(DDS::INCONSISTENT_TOPIC_STATUS, true);
 
@@ -202,7 +201,6 @@ TopicImpl::inconsistent_topic(size_t count)
 
   if (listener) {
     listener->on_inconsistent_topic(this, inconsistent_topic_status_);
-    last_inconsistent_topic_count_ = inconsistent_topic_status_.total_count;
     inconsistent_topic_status_.total_count_change = 0;
   }
 

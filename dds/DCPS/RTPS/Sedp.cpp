@@ -1753,7 +1753,7 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
         TopicDetails& td = top_it->second;
 
         // Upsert the remote topic.
-        td.add_pub_sub(guid, wdata.ddsPublicationData.type_name.in(), wdata.ddsPublicationData.topic_data);
+        td.add_pub_sub(guid, wdata.ddsPublicationData.type_name.in());
 
         std::memcpy(pub.writer_data_.ddsPublicationData.participant_key.value,
                     guid.guidPrefix, sizeof(DDS::BuiltinTopicKey_t));
@@ -2062,7 +2062,7 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
         TopicDetails& td = top_it->second;
 
         // Upsert the remote topic.
-        td.add_pub_sub(guid, rdata.ddsSubscriptionData.type_name.in(), rdata.ddsSubscriptionData.topic_data);
+        td.add_pub_sub(guid, rdata.ddsSubscriptionData.type_name.in());
 
         std::memcpy(sub.reader_data_.ddsSubscriptionData.participant_key.value,
                     guid.guidPrefix, sizeof(DDS::BuiltinTopicKey_t));

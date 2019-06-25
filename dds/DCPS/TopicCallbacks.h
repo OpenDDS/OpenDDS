@@ -8,8 +8,6 @@
 #ifndef OPENDDS_DCPS_TOPICCALLBACKS_H
 #define OPENDDS_DCPS_TOPICCALLBACKS_H
 
-#include "dds/DCPS/Definitions.h"
-#include "dds/DCPS/DiscoveryListener.h"
 #include "dds/DCPS/RcObject.h"
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -34,7 +32,8 @@ public:
 
   virtual ~TopicCallbacks() {}
 
-  virtual void inconsistent_topic(size_t count) = 0;
+  // Report the current number of inconsistent topics.
+  virtual void inconsistent_topic(int count) = 0;
 };
 
 } // namespace DCPS

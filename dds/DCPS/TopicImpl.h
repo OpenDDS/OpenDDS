@@ -79,7 +79,7 @@ public:
 
   virtual void transport_config(const TransportConfig_rch& cfg);
 
-  void inconsistent_topic(size_t count);
+  void inconsistent_topic(int count);
 
 private:
   /// The topic qos
@@ -100,8 +100,6 @@ private:
 
   /// Pointer to the monitor object for this entity
   Monitor* monitor_;
-
-  size_t last_inconsistent_topic_count_;
 };
 
 
