@@ -1521,7 +1521,7 @@ DataWriterImpl::register_instance_i(DDS::InstanceHandle_t& handle,
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::register_instance_i: ")
                       ACE_TEXT("register instance with container failed, returned <%C>.\n"),
-                      retcode_to_string(ret)),
+                      retcode_to_string(ret).c_str()),
                      ret);
   }
 
