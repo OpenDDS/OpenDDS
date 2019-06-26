@@ -1520,8 +1520,8 @@ DataWriterImpl::register_instance_i(DDS::InstanceHandle_t& handle,
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::register_instance_i: ")
-                      ACE_TEXT("register instance with container failed, returned %d.\n"),
-                      ret),
+                      ACE_TEXT("register instance with container failed, returned <%C>.\n"),
+                      retcode_to_string(ret)),
                      ret);
   }
 
@@ -1578,8 +1578,8 @@ DataWriterImpl::register_instance_from_durable_data(DDS::InstanceHandle_t& handl
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::register_instance_from_durable_data: ")
-                      ACE_TEXT("register instance with container failed, returned %d.\n"),
-                      ret),
+                      ACE_TEXT("register instance with container failed, returned <%C>.\n"),
+                      retcode_to_string(ret)),
                      ret);
   }
 
