@@ -190,7 +190,7 @@ namespace OpenDDS {
 
     public:
       typedef DiscoveredParticipantData_ DiscoveredParticipantData;
-      typedef TopicDetails TopicDetails;
+      typedef OpenDDS::DCPS::TopicDetails TopicDetails;
 
       EndpointManager(const RepoId& participant_id, ACE_Thread_Mutex& lock)
         : lock_(lock)
