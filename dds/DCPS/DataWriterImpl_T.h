@@ -108,43 +108,29 @@ namespace OpenDDS {
     }
 
   virtual DDS::ReturnCode_t unregister_instance_w_timestamp (
-      const MessageType & instance,
-      DDS::InstanceHandle_t handle,
+      const MessageType & instance_data,
+      DDS::InstanceHandle_t instance_handle,
       const DDS::Time_t & timestamp)
     {
-      DDS::InstanceHandle_t const registered_handle =
-        this->lookup_instance(instance);
-
-      if (registered_handle == DDS::HANDLE_NIL)
+      if (instance_handle == DDS::HANDLE_NIL)
         {
-          // This case could be the instance is not registered yet or
-          // already unregistered.
-          ACE_ERROR_RETURN ((LM_ERROR,
-                             ACE_TEXT("(%P|%t) ")
-                             ACE_TEXT("%CDataWriterImpl::")
-                             ACE_TEXT("unregister_instance_w_timestamp, ")
-                             ACE_TEXT("The instance is not registered.\n"),
-                             TraitsType::type_name()),
-                            DDS::RETCODE_ERROR);
-        }
-      else if (handle != DDS::HANDLE_NIL && handle != registered_handle)
-        {
-          ACE_ERROR_RETURN ((LM_ERROR,
-                             ACE_TEXT("(%P|%t) ")
-                             ACE_TEXT("%CDataWriterImpl::")
-                             ACE_TEXT("unregister_w_timestamp, ")
-                             ACE_TEXT("The given handle=%X is different from ")
-                             ACE_TEXT("registered handle=%X.\n"),
-                             TraitsType::type_name(),
-                             handle, registered_handle),
-                            DDS::RETCODE_ERROR);
+          instance_handle = this->lookup_instance(instance_data);
+          if (instance_handle == DDS::HANDLE_NIL)
+            {
+              ACE_ERROR_RETURN ((LM_ERROR,
+                                 ACE_TEXT("(%P|%t) ")
+                                 ACE_TEXT("%CDataWriterImpl::unregister_instance_w_timestamp, ")
+                                 ACE_TEXT("The instance sample is not registered.\n"),
+                                 TraitsType::type_name()),
+                                DDS::RETCODE_ERROR);
+            }
         }
 
       // DataWriterImpl::unregister_instance_i will call back to inform the
       // DataWriter.
       // That the instance handle is removed from there and hence
       // DataWriter can remove the instance here.
-      return OpenDDS::DCPS::DataWriterImpl::unregister_instance_i(handle, timestamp);
+      return OpenDDS::DCPS::DataWriterImpl::unregister_instance_i(instance_handle, timestamp);
     }
 
   //WARNING: If the handle is non-nil and the instance is not registered
@@ -236,7 +222,7 @@ namespace OpenDDS {
       DDS::InstanceHandle_t instance_handle,
       const DDS::Time_t & source_timestamp)
     {
-      if(instance_handle == DDS::HANDLE_NIL)
+      if (instance_handle == DDS::HANDLE_NIL)
         {
           instance_handle = this->lookup_instance(instance_data);
           if (instance_handle == DDS::HANDLE_NIL)

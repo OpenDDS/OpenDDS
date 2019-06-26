@@ -250,7 +250,6 @@ namespace {
     return qos != def_qos;
   }
 
-#ifdef OPENDDS_SECURITY
   bool not_default(const DDS::PropertyQosPolicy& qos) {
     for (unsigned int i = 0; i < qos.value.length(); ++i) {
       if (qos.value[i].propagate) {
@@ -260,7 +259,6 @@ namespace {
     // binary_value is not sent in the parameter list (DDSSEC12-37)
     return false;
   }
-#endif
 
   bool not_default(const DDS::TimeBasedFilterQosPolicy& qos)
   {
@@ -543,6 +541,13 @@ int to_param_list(const ParticipantProxy_t& proxy,
   ml_param.count(proxy.manualLivelinessCount);
   add_param(param_list, ml_param);
 
+  if (not_default(proxy.property))
+  {
+    Parameter param_p;
+    param_p.property(proxy.property);
+    add_param(param_list, param_p);
+  }
+
   return 0;
 }
 
@@ -645,6 +650,9 @@ int from_param_list(const ParameterList& param_list,
         set_port(proxy.metatrafficMulticastLocatorList,
                  mm_last_state,
                  param.udpv4_port());
+        break;
+      case PID_PROPERTY_LIST:
+        proxy.property = param.property();
         break;
       case PID_SENTINEL:
       case PID_PAD:
@@ -1499,7 +1507,7 @@ int from_param_list(const ParameterList& param_list,
   return 0;
 }
 
-int to_param_list(const DiscoveredWriterData_SecurityWrapper& wrapper,
+int to_param_list(const DiscoveredPublication_SecurityWrapper& wrapper,
                   ParameterList& param_list,
                   bool map)
 {
@@ -1512,7 +1520,7 @@ int to_param_list(const DiscoveredWriterData_SecurityWrapper& wrapper,
 }
 
 int from_param_list(const ParameterList& param_list,
-                    DiscoveredWriterData_SecurityWrapper& wrapper)
+                    DiscoveredPublication_SecurityWrapper& wrapper)
 {
   int result = from_param_list(param_list, wrapper.data) ||
                from_param_list(param_list, wrapper.security_info) ||
@@ -1521,7 +1529,7 @@ int from_param_list(const ParameterList& param_list,
   return result;
 }
 
-int to_param_list(const DiscoveredReaderData_SecurityWrapper& wrapper,
+int to_param_list(const DiscoveredSubscription_SecurityWrapper& wrapper,
                   ParameterList& param_list,
                   bool map)
 {
@@ -1534,7 +1542,7 @@ int to_param_list(const DiscoveredReaderData_SecurityWrapper& wrapper,
 }
 
 int from_param_list(const ParameterList& param_list,
-                    DiscoveredReaderData_SecurityWrapper& wrapper)
+                    DiscoveredSubscription_SecurityWrapper& wrapper)
 {
   int result = from_param_list(param_list, wrapper.data) ||
                from_param_list(param_list, wrapper.security_info) ||
@@ -1543,6 +1551,77 @@ int from_param_list(const ParameterList& param_list,
   return result;
 }
 #endif
+
+int to_param_list(const ICE::AgentInfo& agent_info,
+                  ParameterList& param_list)
+{
+  IceGeneral_t ice_general;
+  ice_general.agent_type = agent_info.type;
+  ice_general.username = agent_info.username.c_str();
+  ice_general.password = agent_info.password.c_str();
+
+  Parameter param_general;
+  param_general.ice_general(ice_general);
+  add_param(param_list, param_general);
+
+  for (ICE::AgentInfo::CandidatesType::const_iterator pos = agent_info.candidates.begin(),
+         limit = agent_info.candidates.end(); pos != limit; ++pos) {
+    IceCandidate_t ice_candidate;
+    ice_candidate.locator.kind = LOCATOR_KIND_UDPv4;
+    const sockaddr_in* in = static_cast<const sockaddr_in*>(pos->address.get_addr());
+    std::memset(&ice_candidate.locator.address[0], 0, 12);
+    std::memcpy(&ice_candidate.locator.address[12], &in->sin_addr, 4);
+    ice_candidate.locator.port = pos->address.get_port_number();
+    ice_candidate.foundation = pos->foundation.c_str();
+    ice_candidate.priority = pos->priority;
+    ice_candidate.type = pos->type;
+
+    Parameter param;
+    param.ice_candidate(ice_candidate);
+    add_param(param_list, param);
+  }
+
+  return 0;
+}
+
+int from_param_list(const ParameterList& param_list,
+                    ICE::AgentInfo& agent_info,
+                    bool& have_agent_info)
+{
+  have_agent_info = false;
+  for (CORBA::ULong idx = 0, count = param_list.length(); idx != count; ++idx) {
+    const Parameter& parameter = param_list[idx];
+    switch (parameter._d()) {
+    case PID_OPENDDS_ICE_GENERAL: {
+      have_agent_info = true;
+      const IceGeneral_t& ice_general = parameter.ice_general();
+      agent_info.type = static_cast<ICE::AgentType>(ice_general.agent_type);
+      agent_info.username = ice_general.username;
+      agent_info.password = ice_general.password;
+      break;
+    }
+    case PID_OPENDDS_ICE_CANDIDATE: {
+      have_agent_info = true;
+      const IceCandidate_t& ice_candidate = parameter.ice_candidate();
+      ICE::Candidate candidate;
+      candidate.address.set_type(AF_INET);
+      if (candidate.address.set_address(reinterpret_cast<const char*>(parameter.locator().address) + 12, 4, 0 /*network order*/) != 0) {
+        return -1;
+      }
+      candidate.address.set_port_number(parameter.locator().port);
+      candidate.foundation = ice_candidate.foundation;
+      candidate.priority = ice_candidate.priority;
+      candidate.type = static_cast<ICE::CandidateType>(ice_candidate.type);
+      agent_info.candidates.push_back(candidate);
+      break;
+    }
+    default:
+      // Do nothing.
+      break;
+    }
+  }
+  return 0;
+}
 
 } // ParameterListConverter
 } // RTPS

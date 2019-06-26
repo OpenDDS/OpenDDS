@@ -1,0 +1,9 @@
+project {
+  avoids += no_rapidjson
+
+  expand(RAPIDJSON_ROOT) {
+    $RAPIDJSON_ROOT
+    $(DDS_ROOT)/tools/rapidjson
+  }
+  includes += $(RAPIDJSON_ROOT)/include
+}

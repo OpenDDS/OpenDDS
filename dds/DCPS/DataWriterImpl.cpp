@@ -2694,6 +2694,12 @@ DataWriterImpl::send_control(const DataSampleHeader& header,
   return status;
 }
 
+ICE::Endpoint*
+DataWriterImpl::get_ice_endpoint()
+{
+  return TransportClient::get_ice_endpoint();
+}
+
 int
 LivenessTimer::handle_timeout(const ACE_Time_Value &tv,
                              const void *arg)

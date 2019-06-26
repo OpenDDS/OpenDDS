@@ -43,6 +43,10 @@ sub get_outputexts {
   return ['\\.java'];
 }
 
+sub get_file_ext {
+  return $ext;
+}
+
 sub get_filenames {
   my $self = shift;
   my($flags, $type, $scope, $name) = @_;

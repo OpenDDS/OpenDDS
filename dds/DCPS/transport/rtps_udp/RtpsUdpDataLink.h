@@ -44,6 +44,11 @@ class DDS_TEST;
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
+
+namespace ICE {
+  class Endpoint;
+}
+
 namespace DCPS {
 
 class RtpsUdpInst;
@@ -98,13 +103,11 @@ public:
   void add_locator(const RepoId& remote_id, const ACE_INET_Addr& address,
                    bool requires_inline_qos);
 
-  /// Given a 'local_id' of a publication or subscription, populate the set of
-  /// 'addrs' with the network addresses of any remote peers (or if 'local_id'
-  /// is GUID_UNKNOWN, all known addresses).
-  void get_locators(const RepoId& local_id,
-                    OPENDDS_SET(ACE_INET_Addr)& addrs) const;
-
-  ACE_INET_Addr get_locator(const RepoId& remote_id) const;
+  /// Given a 'local' id and a 'remote' id of a publication or
+  /// subscription, return the set of addresses of the remote peers.
+  OPENDDS_SET(ACE_INET_Addr) get_addresses(const RepoId& local, const RepoId& remote) const;
+  /// Given a 'local' id, return the set of address for all remote peers.
+  OPENDDS_SET(ACE_INET_Addr) get_addresses(const RepoId& local) const;
 
   void associated(const RepoId& local, const RepoId& remote,
                   bool local_reliable, bool remote_reliable,
@@ -131,6 +134,8 @@ public:
   virtual void pre_stop_i();
 
   virtual void send_final_acks(const RepoId& readerid);
+
+  virtual ICE::Endpoint* get_ice_endpoint() const;
 
 #ifdef OPENDDS_SECURITY
   Security::SecurityConfig_rch security_config() const
@@ -239,8 +244,9 @@ private:
     //Only accessed with RtpsUdpDataLink lock held
     SnToTqeMap to_deliver_;
     bool durable_;
+    bool ready_to_hb_;
 
-    RtpsWriter() : durable_(false) {}
+    RtpsWriter() : durable_(false), ready_to_hb_(false) {}
     ~RtpsWriter();
     SequenceNumber heartbeat_high(const ReaderInfo&) const;
     void add_elem_awaiting_ack(TransportQueueElement* element);
@@ -267,7 +273,7 @@ private:
 
     WriterInfo()
       : ack_pending_(false), initial_hb_(true), heartbeat_recvd_count_(0),
-        hb_frag_recvd_count_(0), acknack_count_(0), nackfrag_count_(0) {}
+        hb_frag_recvd_count_(0), acknack_count_(0), nackfrag_count_(0) { hb_range_.second = SequenceNumber::ZERO(); }
 
     bool should_nack() const;
   };
@@ -325,7 +331,7 @@ private:
                                   const DisjointSequence& gaps,
                                   bool durable = false);
 
-  void send_nackfrag_replies(RtpsWriter& writer, DisjointSequence& gaps,
+  void send_nackfrag_replies(RtpsWriterMap::iterator rw_iter, DisjointSequence& gaps,
                              OPENDDS_SET(ACE_INET_Addr)& gap_recipients);
 
   template<typename T, typename FN>
@@ -375,6 +381,7 @@ private:
   void check_heartbeats();
   void send_heartbeats_manual(const TransportSendControlElement* tsce);
   void send_heartbeat_replies();
+  void send_relay_beacon();
 
   CORBA::Long best_effort_heartbeat_count_;
 
@@ -412,9 +419,9 @@ private:
       , function_(function)
       , enabled_(false) {}
 
-    void schedule_enable()
+    void schedule_enable(bool reenable)
     {
-      ScheduleEnableCommand c(this);
+      ScheduleEnableCommand c(this, reenable);
       execute_or_enqueue(c);
     }
 
@@ -429,7 +436,7 @@ private:
       return outer_->reactor_is_shut_down();
     }
 
-    void enable();
+    void enable(bool reenable);
     void disable();
 
     RtpsUdpDataLink* outer_;
@@ -437,21 +444,22 @@ private:
     bool enabled_;
 
     struct ScheduleEnableCommand : public Command {
-      ScheduleEnableCommand(HeartBeat* hb)
-        : heartbeat_(hb)
+      ScheduleEnableCommand(HeartBeat* hb, bool reenable)
+        : heartbeat_(hb), reenable_(reenable)
       { }
 
       virtual void execute()
       {
-        heartbeat_->enable();
+        heartbeat_->enable(reenable_);
       }
 
       HeartBeat* heartbeat_;
+      bool reenable_;
     };
 
   };
 
-  RcHandle<HeartBeat> heartbeat_, heartbeatchecker_;
+  RcHandle<HeartBeat> heartbeat_, heartbeatchecker_, relay_beacon_;
 
   /// Data structure representing an "interesting" remote entity for static discovery.
   struct InterestingRemote {
@@ -508,7 +516,7 @@ private:
   typedef OPENDDS_SET(InterestingAckNack) InterestingAckNackSetType;
   InterestingAckNackSetType interesting_ack_nacks_;
 
-  void send_ack_nacks(RtpsReaderMap::iterator rr, bool finalFlag = false);
+  void send_ack_nacks(RtpsReaderMap::value_type& rr, bool finalFlag = false);
 
   class HeldDataDeliveryHandler : public RcEventHandler {
   public:
@@ -516,7 +524,7 @@ private:
       : link_(link) {
       }
 
-      //Reactor invokes this after being notified in schedule_stop or cancel_release
+    /// Reactor invokes this after being notified in schedule_stop or cancel_release
     int handle_exception(ACE_HANDLE /* fd */);
 
     void notify_delivery(const RepoId& readerId, WriterInfo& info);
@@ -543,6 +551,7 @@ private:
                           GUID_tKeyLessThan)::const_iterator PeerHandlesCIter;
 #endif
 
+  void accumulate_addresses(const RepoId& local, const RepoId& remote, OPENDDS_SET(ACE_INET_Addr)& addresses) const;
 };
 
 } // namespace DCPS

@@ -84,8 +84,8 @@ public:
   {
   }
 
-  virtual int handle_timeout(ACE_Time_Value const & /* current_time */,
-                             void const * /* act */) {
+  virtual int handle_timeout(const ACE_Time_Value& /* current_time */,
+                             const void* /* act */) {
     if (OpenDDS::DCPS::DCPS_debug_level >= 4) {
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) OpenDDS - Cleaning up ")

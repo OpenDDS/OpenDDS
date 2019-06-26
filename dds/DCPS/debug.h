@@ -9,6 +9,7 @@
 #define OPENDDS_DCPS_DEBUG_H
 
 #include "dcps_export.h"
+#include "ace/ace_wchar.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -33,6 +34,55 @@ extern OpenDDS_Dcps_Export unsigned int DCPS_debug_level;
 /// The proper way to set the DCPS_debug_level.
 /// This function allows for possible side-effects of setting the level.
 extern void OpenDDS_Dcps_Export set_DCPS_debug_level(unsigned int lvl);
+
+#ifdef OPENDDS_SECURITY
+/**
+ * Global Security Debug Settings
+ */
+class OpenDDS_Dcps_Export SecurityDebug {
+public:
+  SecurityDebug();
+
+  /// Set all security debug message flags to this value
+  void set_all_flags_to(bool value);
+
+  /**
+   * Parse a comma delimited string and set the corresponding flags.
+   * Unknown ones are ignored and "all" enables all the flags.
+   * Ex: "warn,encdec,showkeys"
+   */
+  void parse_flags(const ACE_TCHAR* flags);
+
+  /**
+   * Set debug level similarly to DCPSDebugLevel
+   */
+  void set_debug_level(unsigned level);
+
+  /** @name SecurityFlags
+   * These are the categories of Security Debug Messages
+   */
+  ///@{
+  /// Security Related Warnings
+  bool warn;
+
+  /// Generation and Tracking of Crypto Handles and Keys
+  bool bookkeeping;
+
+  /// Print Info When Encrypting and Decrypting
+  bool encdec;
+
+  /// Print the Key when Generating it or Using It
+  bool showkeys;
+
+  /// Print Verbose Search Info About Getting the Crypto Handle from a Key id
+  bool chlookup;
+  ///@}
+
+  /// Disable all encryption for security, even the required builtin encryption.
+  bool fake_encryption;
+};
+extern OpenDDS_Dcps_Export SecurityDebug security_debug;
+#endif
 
 } // namespace OpenDDS
 } // namespace DCPS

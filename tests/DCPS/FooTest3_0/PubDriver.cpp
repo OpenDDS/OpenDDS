@@ -425,6 +425,9 @@ void PubDriver::run_test (int test_to_run)
   case UNREGISTER_TEST :
     unregister_test ();
     break;
+  case UNREGISTER_NIL_TEST :
+    unregister_nil_test ();
+    break;
   case DISPOSE_TEST :
     dispose_test ();
     break;
@@ -587,6 +590,53 @@ PubDriver::unregister_test ()
                                handle);
 
   TEST_CHECK (ret == ::DDS::RETCODE_OK);
+
+  // Test control_dropped.
+  // Unregister_all will request transport to remove_all_control_msgs.
+  // which results the control_dropped call.
+  foo_datawriter_servant_->unregister_all ();
+
+  // The subscriber will wait a while after telling the
+  // publisher shutdown, so the unreigster message can still
+  // be sent out.
+  TEST_CHECK (foo_datawriter_servant_->controlTracker.dropped_count() == 0);
+}
+
+void
+PubDriver::unregister_nil_test ()
+{
+  ::DDS::ReturnCode_t ret = ::DDS::RETCODE_OK;
+
+  ::Xyz::Foo foo1;
+  foo1.a_long_value = 101010;
+  foo1.handle_value = -1;
+  foo1.sample_sequence = -1;
+  foo1.writer_id = -1;
+
+  ::DDS::InstanceHandle_t handle
+    = foo_datawriter_->register_instance(foo1);
+
+  ::Xyz::Foo foo2;
+  foo2.a_long_value = 10101;
+  foo2.handle_value = handle;
+  foo2.sample_sequence = 1;
+  foo2.writer_id = 0;
+
+  ret = foo_datawriter_->write(foo1, handle);
+
+  TEST_CHECK (ret == ::DDS::RETCODE_OK);
+
+  ret = foo_datawriter_->write(foo2, DDS::HANDLE_NIL);
+
+  TEST_CHECK (ret == ::DDS::RETCODE_OK);
+
+  ret = foo_datawriter_->unregister_instance(foo1, handle);
+
+  TEST_ASSERT (ret == ::DDS::RETCODE_OK);
+
+  ret = foo_datawriter_->unregister_instance(foo2, DDS::HANDLE_NIL);
+
+  TEST_ASSERT (ret == ::DDS::RETCODE_OK);
 
   // Test control_dropped.
   // Unregister_all will request transport to remove_all_control_msgs.

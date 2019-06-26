@@ -23,8 +23,7 @@
 // More strict check than ACE does: if we have GNU lib C++ without support for
 // wchar_t (std::wstring, std::wostream, etc.) then we don't have DDS_HAS_WCHAR
 #if defined (ACE_HAS_WCHAR) && \
-    (!defined (_GLIBCPP_VERSION) || defined(_GLIBCPP_USE_WCHAR_T)) && \
-    !defined (__ANDROID__)
+    (!defined (_GLIBCPP_VERSION) || defined(_GLIBCPP_USE_WCHAR_T))
 #define DDS_HAS_WCHAR
 #endif
 
@@ -59,6 +58,12 @@
 // three features depend on should not be built.
 #if defined(OPENDDS_NO_QUERY_CONDITION) && defined(OPENDDS_NO_CONTENT_FILTERED_TOPIC) && defined(OPENDDS_NO_MULTI_TOPIC)
 #define OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#endif
+
+#ifdef OPENDDS_SAFETY_PROFILE
+#define OPENDDS_ASSERT(C) ((void) 0)
+#else
+#define OPENDDS_ASSERT(C) assert(C)
 #endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL

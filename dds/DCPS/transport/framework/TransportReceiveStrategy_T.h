@@ -61,7 +61,8 @@ protected:
   virtual ssize_t receive_bytes(iovec          iov[],
                                 int            n,
                                 ACE_INET_Addr& remote_address,
-                                ACE_HANDLE     fd) = 0;
+                                ACE_HANDLE     fd,
+                                bool&          stop) = 0;
 
   /// Check the transport header for suitability.
   virtual bool check_header(const TH& header);

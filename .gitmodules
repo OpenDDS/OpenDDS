@@ -1,5 +1,5 @@
-[submodule "tools/IntermediateTypeLang/cpp/rapidjson"]
-	path = tools/IntermediateTypeLang/cpp/rapidjson
+[submodule "tools/rapidjson"]
+	path = tools/rapidjson
 	url = git://github.com/miloyip/rapidjson.git
 	branch = version1.1.0
 [submodule "tests/googletest"]

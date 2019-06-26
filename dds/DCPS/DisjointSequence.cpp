@@ -91,6 +91,7 @@ DisjointSequence::insert(SequenceNumber value, CORBA::ULong num_bits,
 {
   bool inserted = false;
   RangeSet::iterator iter = sequences_.end();
+  bool range_start_is_valid = false;
   SequenceNumber::Value range_start = 0;
   const SequenceNumber::Value val = value.getValue();
 
@@ -113,23 +114,24 @@ DisjointSequence::insert(SequenceNumber value, CORBA::ULong num_bits,
     }
 
     if (x & (1 << (31 - bit))) {
-      if (range_start == 0) {
+      if (!range_start_is_valid) {
         range_start = val + i;
+        range_start_is_valid = true;
       }
-
-    } else if (range_start != 0) {
+    } else if (range_start_is_valid) {
       // this is a "0" bit and we've previously seen a "1": insert a range
       const SequenceNumber::Value to_insert = val + i - 1;
       if (insert_bitmap_range(iter, SequenceRange(range_start, to_insert))) {
         inserted = true;
       }
       range_start = 0;
+      range_start_is_valid = false;
 
       if (iter != sequences_.end() && iter->second.getValue() != to_insert) {
         // skip ahead: next gap in sequence must be past iter->second
         CORBA::ULong next_i = CORBA::ULong(iter->second.getValue() - val);
         bit = next_i % 32;
-        if (next_i / 32 != i / 32) {
+        if (next_i / 32 != i / 32 && next_i < num_bits) {
           x = static_cast<CORBA::ULong>(bits[next_i / 32]);
         }
         i = next_i;
@@ -137,7 +139,7 @@ DisjointSequence::insert(SequenceNumber value, CORBA::ULong num_bits,
     }
   }
 
-  if (range_start != 0) {
+  if (range_start_is_valid) {
     // iteration finished before we saw a "0" (inside a range)
     SequenceNumber range_end = (value + num_bits).previous();
     if (insert_bitmap_range(iter, SequenceRange(range_start, range_end))) {
@@ -160,7 +162,7 @@ DisjointSequence::insert_bitmap_range(RangeSet::iterator& iter,
 
   if (!sequences_.empty()) {
     if (iter == sequences_.end()) {
-      iter = sequences_.lower_bound(SequenceRange(1 /*ignored*/, previous));
+      iter = sequences_.lower_bound(SequenceRange(0 /*ignored*/, previous));
     } else {
       // start where we left off last time and get the lower_bound(previous)
       for (; iter != sequences_.end() && iter->second < previous; ++iter) ;
@@ -236,57 +238,53 @@ DisjointSequence::fill_bitmap_range(CORBA::ULong low, CORBA::ULong high,
                                     CORBA::ULong& num_bits)
 {
   bool clamped = false;
-  CORBA::ULong idx_low = low / 32, bit_low = low % 32,
-               idx_high = high / 32, bit_high = high % 32;
-
-  if (idx_low >= length) {
+  if ((low / 32) >= length) {
     return false;
   }
-  if (idx_high >= length) {
-    // clamp to largest number we can represent
+  if ((high / 32) >= length) {
     high = length * 32 - 1;
-    idx_high = length - 1;
-    bit_high = high % 32;
     clamped = true;
   }
 
-  // clear any full Longs between the last bit we wrote and idx_low
-  for (CORBA::ULong i = (num_bits + 31) / 32; i < idx_low; ++i) {
+  const CORBA::ULong idx_nb = num_bits / 32, bit_nb = num_bits % 32,
+                     idx_low = low / 32, bit_low = low % 32,
+                     idx_high = high / 32, bit_high = high % 32;
+
+  // handle idx_nb zeros
+  if (bit_nb) {
+    bitmap[idx_nb] &= ~((0x1u << (32 - bit_nb)) - 1);
+  } else {
+    bitmap[idx_nb] = 0;
+  }
+
+  // handle zeros between idx_nb and idx_low (if gap exists)
+  for (CORBA::ULong i = idx_nb + 1; i < idx_low; ++i) {
     bitmap[i] = 0;
   }
 
-  // write the Long at idx_low, preserving bits that may already be there
-  CORBA::ULong x = bitmap[idx_low]; // use unsigned for bitwise operators
-  //    clear the bits in x in the range [bit_last, bit_low)
-  if (num_bits > 0) {
-    const size_t bit_last = ((num_bits - 1) / 32 == idx_low)
-                            ? ((num_bits - 1) % 32 + 1) : 0;
-    for (size_t m = bit_last; m < bit_low; ++m) {
-      x &= ~(1 << (31 - m));
+  // handle idx_nb ones
+  if (bit_low) {
+    if (idx_low > idx_nb) {
+      bitmap[idx_low] = (0x1u << (32 - bit_low)) - 1;
+    } else {
+      bitmap[idx_low] |= (0x1u << (32 - bit_low)) - 1;
     }
   } else {
-    x = 0;
-  }
-  //    set the bits in x in the range [bit_low, limit)
-  const size_t limit = (idx_high == idx_low) ? bit_high : 31;
-  for (size_t b = bit_low; b <= limit; ++b) {
-    x |= (1 << (31 - b));
-  }
-  bitmap[idx_low] = x;
-
-  // any full Longs inside the current range are set to all 1's
-  for (CORBA::ULong elt = idx_low + 1; elt < idx_high; ++elt) {
-    bitmap[elt] = 0xFFFFFFFF;
+    bitmap[idx_low] = 0xFFFFFFFF;
   }
 
-  if (idx_high > idx_low) {
-    // write the Long at idx_high, no need to preserve bits since this is
-    // the first iteration that's writing it
-    x = 0;
-    for (size_t b = 0; b <= bit_high; ++b) {
-      x |= (1 << (31 - b));
+  // handle ones between idx_low and idx_high (if gap exists)
+  for (CORBA::ULong i = idx_low + 1; i < idx_high; ++i) {
+    bitmap[i] = 0xFFFFFFFF;
+  }
+
+  // handle idx_high
+  if (bit_high < 31) {
+    if (idx_high > idx_low) {
+      bitmap[idx_high] = ~((0x1u << (31 - bit_high)) - 1);
+    } else {
+      bitmap[idx_high] &= ~((0x1u << (31 - bit_high)) - 1);
     }
-    bitmap[idx_high] = x;
   }
 
   num_bits = high + 1;

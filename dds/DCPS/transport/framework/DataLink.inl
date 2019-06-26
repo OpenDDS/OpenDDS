@@ -387,6 +387,20 @@ void
 DataLink::send_final_acks (const RepoId& /*readerid*/)
 { }
 
+ACE_INLINE
+void
+DataLink::first_acknowledged_by_reader(const RepoId& localWriter, const RepoId& remoteReader, const SequenceNumber& sn_base)
+{
+  TransportSendListener_rch tsl;
+  {
+    GuardType guard(pub_sub_maps_lock_);
+    tsl = send_listener_for(localWriter);
+  }
+  if (tsl) {
+    tsl->first_acknowledged_by_reader(remoteReader, sn_base);
+  }
+}
+
 }
 }
 

@@ -507,9 +507,11 @@ DomainParticipantImpl::create_topic_i(
       return new_topic;
 
     } else {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::create_topic, ")
-                 ACE_TEXT("assert_topic failed with return value %d.\n"), status));
+      if (DCPS_debug_level >= 1) {
+        ACE_ERROR((LM_ERROR,
+                  ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::create_topic, ")
+                  ACE_TEXT("assert_topic failed with return value %d.\n"), status));
+      }
       return DDS::Topic::_nil();
     }
   }
@@ -668,6 +670,7 @@ DomainParticipantImpl::find_topic(
 
     Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
     TopicStatus status = disco->find_topic(domain_id_,
+                                           get_id(),
                                            topic_name,
                                            type_name.out(),
                                            qos.out(),
@@ -1633,14 +1636,6 @@ DomainParticipantImpl::enable()
     return DDS::RETCODE_OK;
   }
 
-  if (monitor_) {
-    monitor_->report();
-  }
-
-  if (TheServiceParticipant->monitor_) {
-    TheServiceParticipant->monitor_->report();
-  }
-
 #ifdef OPENDDS_SECURITY
   if (!security_config_ && TheServiceParticipant->get_security()) {
     security_config_ = TheSecurityRegistry->default_config();
@@ -1767,6 +1762,14 @@ DomainParticipantImpl::enable()
 
   dp_id_ = value.id;
   federated_ = value.federated;
+
+  if (monitor_) {
+    monitor_->report();
+  }
+
+  if (TheServiceParticipant->monitor_) {
+    TheServiceParticipant->monitor_->report();
+  }
 
   const DDS::ReturnCode_t ret = this->set_enabled();
 
@@ -2228,7 +2231,7 @@ DomainParticipantImpl::LivelinessTimer::LivelinessTimer(DomainParticipantImpl& i
 
 DomainParticipantImpl::LivelinessTimer::~LivelinessTimer()
 {
-  if (scheduled_) {
+  if (scheduled_ && TheServiceParticipant->timer()) {
     TheServiceParticipant->timer()->cancel_timer(this);
   }
 }

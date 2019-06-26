@@ -538,8 +538,11 @@ InfoRepoDiscovery::assert_topic(DCPS::RepoId_out topicId, DDS::DomainId_t domain
 }
 
 DCPS::TopicStatus
-InfoRepoDiscovery::find_topic(DDS::DomainId_t domainId, const char* topicName,
-                              CORBA::String_out dataTypeName, DDS::TopicQos_out qos,
+InfoRepoDiscovery::find_topic(DDS::DomainId_t domainId,
+                              const DCPS::RepoId& /*participantId*/,
+                              const char* topicName,
+                              CORBA::String_out dataTypeName,
+                              DDS::TopicQos_out qos,
                               DCPS::RepoId_out topicId)
 {
   try {

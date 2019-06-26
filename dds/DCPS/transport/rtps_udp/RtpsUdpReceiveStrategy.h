@@ -18,12 +18,18 @@
 #include "dds/DCPS/RcEventHandler.h"
 
 #include "ace/INET_Addr.h"
+#include "ace/SOCK_Dgram.h"
 
 #include <cstring>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
+
+namespace ICE {
+  class Endpoint;
+}
+
 namespace DCPS {
 
 class RtpsUdpDataLink;
@@ -62,11 +68,19 @@ public:
   const ReceivedDataSample* withhold_data_from(const RepoId& sub_id);
   void do_not_withhold_data_from(const RepoId& sub_id);
 
+  static ssize_t receive_bytes_helper(iovec iov[],
+                                      int n,
+                                      const ACE_SOCK_Dgram& socket,
+                                      ACE_INET_Addr& remote_address,
+                                      ICE::Endpoint* endpoint,
+                                      bool& stop);
+
 private:
   virtual ssize_t receive_bytes(iovec iov[],
                                 int n,
                                 ACE_INET_Addr& remote_address,
-                                ACE_HANDLE fd);
+                                ACE_HANDLE fd,
+                                bool& stop);
 
   virtual void deliver_sample(ReceivedDataSample& sample,
                               const ACE_INET_Addr& remote_address);

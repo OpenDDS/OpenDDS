@@ -1850,6 +1850,13 @@ CORBA::Long DataReaderImpl::total_samples() const
   return count;
 }
 
+void
+DataReaderImpl::LivelinessTimer::check_liveliness()
+{
+  CheckLivelinessCommand c(this);
+  execute_or_enqueue(c);
+}
+
 int
 DataReaderImpl::LivelinessTimer::handle_timeout(const ACE_Time_Value& tv,
                                                 const void * /*arg*/)
@@ -2906,36 +2913,31 @@ DataReaderImpl::update_ownership_strength (const PublicationId& pub_id,
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 bool DataReaderImpl::verify_coherent_changes_completion (WriterInfo* writer)
 {
-  if (this->subqos_.presentation.access_scope == ::DDS::INSTANCE_PRESENTATION_QOS
-      || ! this->subqos_.presentation.coherent_access) {
-    this->accept_coherent (writer->writer_id_, writer->publisher_id_);
-    this->coherent_changes_completed (this);
-    return true;
+  Coherent_State state = COMPLETED;
+  bool accept_here = true;
+
+  if (subqos_.presentation.access_scope != ::DDS::INSTANCE_PRESENTATION_QOS &&
+      subqos_.presentation.coherent_access) {
+    // verify current coherent changes from single writer
+    state = writer->coherent_change_received();
+    if (writer->group_coherent_) { // GROUP coherent any state
+      RcHandle<SubscriberImpl> subscriber = get_subscriber_servant();
+      if (subscriber && state != NOT_COMPLETED_YET) {
+        // verify if all readers received complete coherent changes in a group.
+        subscriber->coherent_change_received(writer->publisher_id_, this, state);
+        accept_here = false; // coherent_change_received does that itself
+      }
+    } else if (state != NOT_COMPLETED_YET) { // TOPIC coherent with final state
+      if (state == REJECTED) {
+        reject_coherent(writer->writer_id_, writer->publisher_id_);
+      }
+      writer->reset_coherent_info();
+    }
   }
 
-  // verify current coherent changes from single writer
-  Coherent_State state = writer->coherent_change_received();
-  if (writer->group_coherent_) { // GROUP coherent
-    RcHandle<SubscriberImpl> subscriber = get_subscriber_servant();
-    if (subscriber && state != NOT_COMPLETED_YET) {
-      // verify if all readers received complete coherent changes in a group.
-      subscriber->coherent_change_received (
-          writer->publisher_id_, this, state);
-    }
-  }
-  else {  // TOPIC coherent
-    if (state == COMPLETED) {
-      this->accept_coherent (writer->writer_id_, writer->publisher_id_);
-    }
-    else if (state == REJECTED) {
-      this->reject_coherent (writer->writer_id_, writer->publisher_id_);
-    }
-    else {// NOT_COMPLETED
-      return false;
-    }
-
-    // decision made: either COMPLETED or REJECTED
-    writer->reset_coherent_info ();
+  if (state == COMPLETED && accept_here) {
+    accept_coherent(writer->writer_id_, writer->publisher_id_);
+    coherent_changes_completed(this);
   }
 
   return state == COMPLETED;
@@ -3273,6 +3275,12 @@ DataReaderImpl::unregister_for_writer(const RepoId& participant,
                                       const RepoId& writerid)
 {
   TransportClient::unregister_for_writer(participant, readerid, writerid);
+}
+
+ICE::Endpoint*
+DataReaderImpl::get_ice_endpoint()
+{
+  return TransportClient::get_ice_endpoint();
 }
 
 void DataReaderImpl::accept_sample_processing(const SubscriptionInstance_rch& instance, const DataSampleHeader& header, bool is_new_instance)

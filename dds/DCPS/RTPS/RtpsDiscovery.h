@@ -140,6 +140,36 @@ public:
   void guid_interface(const OPENDDS_STRING& gi) {
     guid_interface_ = gi;
   }
+
+  const ACE_INET_Addr& spdp_rtps_relay_address() const { return spdp_rtps_relay_address_; }
+  void spdp_rtps_relay_address(const ACE_INET_Addr& address) {
+    spdp_rtps_relay_address_ = address;
+  }
+
+  const ACE_INET_Addr& sedp_rtps_relay_address() const { return sedp_rtps_relay_address_; }
+  void sedp_rtps_relay_address(const ACE_INET_Addr& address) {
+    sedp_rtps_relay_address_ = address;
+  }
+
+  const ACE_INET_Addr& sedp_stun_server_address() const { return sedp_stun_server_address_; }
+  void sedp_stun_server_address(const ACE_INET_Addr& address) {
+    sedp_stun_server_address_ = address;
+  }
+
+  bool use_ice() const { return use_ice_; }
+  void use_ice(bool ui) {
+    use_ice_ = ui;
+  }
+
+  const ACE_Time_Value& max_spdp_timer_period() const { return max_spdp_timer_period_; }
+  void max_spdp_timer_period(const ACE_Time_Value& x) { max_spdp_timer_period_ = x; }
+
+  const ACE_Time_Value& max_auth_time() const { return max_auth_time_; }
+  void max_auth_time(const ACE_Time_Value& x) { max_auth_time_ = x; }
+
+  const ACE_Time_Value& auth_resend_period() const { return auth_resend_period_; }
+  void auth_resend_period(const ACE_Time_Value& x) { auth_resend_period_ = x; }
+
 private:
   ACE_Time_Value resend_period_;
   u_short pb_, dg_, pg_, d0_, d1_, dx_;
@@ -149,6 +179,14 @@ private:
   OPENDDS_STRING default_multicast_group_;  /// FUTURE: handle > 1 group.
   OPENDDS_STRING guid_interface_;
   AddrVec spdp_send_addrs_;
+  ACE_INET_Addr spdp_rtps_relay_address_;
+  ACE_INET_Addr sedp_rtps_relay_address_;
+  ACE_INET_Addr sedp_stun_server_address_;
+  bool use_ice_;
+  ACE_Time_Value max_spdp_timer_period_;
+  ACE_Time_Value max_auth_time_;
+  ACE_Time_Value auth_resend_period_;
+
 
   /// Guids will be unique within this RTPS configuration
   GuidGenerator guid_gen_;

@@ -15,6 +15,7 @@
 #include "TransportDefs.h"
 #include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/PoolAllocator.h"
+#include "dds/DCPS/SequenceNumber.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Message_Block;
@@ -69,6 +70,14 @@ public:
   };
 
   virtual void retrieve_inline_qos_data(InlineQosData& qos_data) const;
+
+  /**
+   * We have received an ACKNACK from a remote datareader.
+   *
+   * In the case of security, this means it can decrypt our messages. This was
+   * made for RepeatOnceWriter in Sedp.
+   */
+  virtual void first_acknowledged_by_reader(const RepoId& remoteReader, const SequenceNumber& sn_base);
 
 protected:
 

@@ -150,8 +150,7 @@ public:
                                        const DDS::DataReaderQos& qos);
 
   virtual bool update_topic_qos(const RepoId& /*topicId*/,
-                                const DDS::TopicQos& /*qos*/,
-                                OPENDDS_STRING& /*name*/);
+                                const DDS::TopicQos& /*qos*/);
 
   virtual bool update_publication_qos(const RepoId& /*publicationId*/,
                                       const DDS::DataWriterQos& /*qos*/,
@@ -172,12 +171,14 @@ public:
   virtual DDS::ReturnCode_t add_publication_i(const RepoId& /*rid*/,
                                               LocalPublication& /*pub*/);
 
-  virtual DDS::ReturnCode_t remove_publication_i(const RepoId& /*publicationId*/);
+  virtual DDS::ReturnCode_t remove_publication_i(const RepoId& /*publicationId*/,
+                                                 LocalPublication& /*pub*/);
 
   virtual DDS::ReturnCode_t add_subscription_i(const RepoId& /*rid*/,
                                                LocalSubscription& /*pub*/);
 
-  virtual DDS::ReturnCode_t remove_subscription_i(const RepoId& /*subscriptionId*/);
+  virtual DDS::ReturnCode_t remove_subscription_i(const RepoId& /*subscriptionId*/,
+                                                  LocalSubscription& /*sub*/);
 
   virtual bool shutting_down() const;
 

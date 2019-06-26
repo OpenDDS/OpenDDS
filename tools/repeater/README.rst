@@ -57,20 +57,27 @@ on B1 can serve B2.  Each multicast domain needs one repeater.
 Integration with Google Cloud Platform (GCP)
 --------------------------------------------
 
-A common use case for the repeater is to connect all of the instances
-in an instance group.  Instead of (or in addition to) using ``--send``
-to manually specify destination addresses, use ``--gcp zone:group``
-which will use GCP's API to find the IP addresses of all other
-instances in the group.  The instances need to have read permissions
-for the Compute Engine API.
+Instead of (or in addition to) using ``--send`` to manually specify
+destination addresses, one can use ``--gcp zone:group`` which will
+cause the repeater to use GCP's API to find the IP addresses of all
+other instances in the group.  The instances need to have read
+permissions for the Compute Engine API.
 
 Integration with Microsoft Azure
 --------------------------------
 
-A common use case for the repeater is to connect all of the instances
-in a resource group.  Instead of (or in addition to) using ``--send``
-to manually specify destination addresses, use ``--azure
-resource_group`` which will use Azure's API to find the IP addresses
-of all other instances in the resource group.  The VM running the
+Instead of (or in addition to) using ``--send`` to manually specify
+destination addresses, one can use ``--azure resource_group`` which
+will cause the repeater to use Azure's API to find the IP addresses of
+all other instances in the resource group.  The VM running the
 repeater needs to have read access to the network interfaces in the
 resource group.
+
+Integration with Amazon Web Services (AWS)
+------------------------------------------
+
+Instead of (or in addition to) using ``--send`` to manually specify
+destination addresses, one can use ``--aws tag`` which will cause the
+repeater to use AWS's API to find the IP addresses of all other
+instances with the given tag.  The VM running the repeater needs to
+have permission to `DescribeInstances`.

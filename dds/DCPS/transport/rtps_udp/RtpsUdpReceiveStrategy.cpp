@@ -21,7 +21,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link, const GuidPrefix_t& local_prefix)
+  RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link, const GuidPrefix_t& local_prefix)
   : link_(link)
   , last_received_()
   , recvd_sample_(0)
@@ -42,15 +42,80 @@ RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
 }
 
 ssize_t
+RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
+                                             int n,
+                                             const ACE_SOCK_Dgram& socket,
+                                             ACE_INET_Addr& remote_address,
+                                             ICE::Endpoint* endpoint,
+                                             bool& stop)
+{
+  ACE_INET_Addr local_address;
+  const ssize_t ret = socket.recv(iov, n, remote_address, 0
+#ifdef ACE_RECVPKTINFO
+                                  , &local_address
+#endif
+  );
+
+  if (ret == -1) {
+    return ret;
+  }
+
+#ifdef OPENDDS_SECURITY
+  if (endpoint && n > 0 && ret > 0 && iov[0].iov_len >= 4 && memcmp(iov[0].iov_base, "RTPS", 4) != 0) {
+# ifndef ACE_RECVPKTINFO
+    ACE_ERROR((LM_ERROR, "ERROR: RtpsUdpReceiveStrategy::receive_bytes_helper potential STUN message "
+               "received but this version of the ACE library doesn't support the local_address "
+               "extension in ACE_SOCK_Dgram::recv\n"));
+    ACE_UNUSED_ARG(stop);
+    ACE_NOTSUP_RETURN(-1);
+# else
+    // Assume STUN
+    stop = true;
+    size_t bytes = ret;
+    size_t block_size = std::min(bytes, static_cast<size_t>(iov[0].iov_len));
+    ACE_Message_Block* head = new ACE_Message_Block(static_cast<const char*>(iov[0].iov_base), block_size);
+    head->length(block_size);
+    bytes -= block_size;
+
+    ACE_Message_Block* tail = head;
+    for (int i = 1; i < n && bytes != 0; ++i) {
+      block_size = std::min(bytes, static_cast<size_t>(iov[i].iov_len));
+      ACE_Message_Block* mb = new ACE_Message_Block(static_cast<const char*>(iov[i].iov_base), block_size);
+      mb->length(block_size);
+      tail->cont(mb);
+      tail = mb;
+      bytes -= block_size;
+    }
+
+    DCPS::Serializer serializer(head, true);
+    STUN::Message message;
+    message.block = head;
+    if (serializer >> message) {
+      ICE::Agent::instance()->receive(endpoint, local_address, remote_address, message);
+    }
+    head->release();
+# endif
+  }
+#else
+  ACE_UNUSED_ARG(endpoint);
+  ACE_UNUSED_ARG(stop);
+#endif
+
+  return ret;
+}
+
+ssize_t
 RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
                                       int n,
                                       ACE_INET_Addr& remote_address,
-                                      ACE_HANDLE fd)
+                                      ACE_HANDLE fd,
+                                      bool& stop)
 {
   const ACE_SOCK_Dgram& socket =
     (fd == link_->unicast_socket().get_handle())
     ? link_->unicast_socket() : link_->multicast_socket();
 #ifdef ACE_LACKS_SENDMSG
+  ACE_UNUSED_ARG(stop);
   char buffer[0x10000];
   ssize_t scatter = socket.recv(buffer, sizeof buffer, remote_address);
   char* iter = buffer;
@@ -63,9 +128,10 @@ RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
   }
   const ssize_t ret = (scatter < 0) ? scatter : (iter - buffer);
 #else
-  const ssize_t ret = socket.recv(iov, n, remote_address);
+  const ssize_t ret = receive_bytes_helper(iov, n, socket, remote_address, link_->get_ice_endpoint(), stop);
 #endif
   remote_address_ = remote_address;
+
   return ret;
 }
 
@@ -141,9 +207,9 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
       if (!readers_withheld_.count(reader)) {
         if (Transport_debug_level > 5) {
           GuidConverter reader_conv(reader);
-          ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpReceiveStrategy[%@]::deliver_sample - calling DataLink::data_received for seq: %q to reader %C\n", this,
-                               sample.header_.sequence_.getValue(),
-                               OPENDDS_STRING(reader_conv).c_str()));
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpReceiveStrategy[%@]::deliver_sample - ")
+            ACE_TEXT("calling DataLink::data_received for seq: %q to reader %C\n"),
+            this, sample.header_.sequence_.getValue(), OPENDDS_STRING(reader_conv).c_str()));
         }
 #if defined(OPENDDS_SECURITY)
         if (decode_payload(sample, data)) {
@@ -173,14 +239,17 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
           first = false;
           ++iter2;
         }
-        ACE_DEBUG((LM_DEBUG, "(%P|%t)  - RtpsUdpReceiveStrategy[%@]::deliver_sample \nreaders_selected ids:\n%C\n", this, included_ids.c_str()));
-        ACE_DEBUG((LM_DEBUG, "(%P|%t)  - RtpsUdpReceiveStrategy[%@]::deliver_sample \nreaders_withheld ids:\n%C\n", this, excluded_ids.c_str()));
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t)  - RtpsUdpReceiveStrategy[%@]::deliver_sample:\n")
+          ACE_TEXT("  readers_selected ids:\n%C\n")
+          ACE_TEXT("  readers_withheld ids:\n%C\n"),
+          this, included_ids.c_str(), excluded_ids.c_str()));
       }
 
       if (readers_withheld_.empty() && readers_selected_.empty()) {
         if (Transport_debug_level > 5) {
-          ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpReceiveStrategy[%@]::deliver_sample - calling DataLink::data_received for seq: %q TO ALL, no exclusion or inclusion\n", this,
-                               sample.header_.sequence_.getValue()));
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpReceiveStrategy[%@]::deliver_sample - ")
+            ACE_TEXT("calling DataLink::data_received for seq: %q TO ALL, no exclusion or inclusion\n"),
+            this, sample.header_.sequence_.getValue()));
         }
 
 #if defined(OPENDDS_SECURITY)
@@ -193,8 +262,9 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
 
       } else {
         if (Transport_debug_level > 5) {
-          ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpReceiveStrategy[%@]::deliver_sample - calling DataLink::data_received_include for seq: %q to readers_selected_\n", this,
-                               sample.header_.sequence_.getValue()));
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpReceiveStrategy[%@]::deliver_sample - ")
+            ACE_TEXT("calling DataLink::data_received_include for seq: %q to readers_selected_\n"),
+            this, sample.header_.sequence_.getValue()));
         }
 
 #if defined(OPENDDS_SECURITY)
@@ -306,6 +376,11 @@ RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage)
   bool ok = crypto->preprocess_secure_submsg(dwch, drch, category, encoded_submsg,
                                              local_pch, peer_pch, ex);
 
+  if (ok) {
+    VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpReceiveStrategy::deliver_from_secure ")
+      ACE_TEXT("dwch is %d and drch is %d\n"), dwch, drch), 4);
+  }
+
   if (ok && category == DATAWRITER_SUBMESSAGE) {
     ok = crypto->decode_datawriter_submessage(plain_submsg, encoded_submsg,
                                               drch, dwch, ex);
@@ -318,16 +393,29 @@ RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage)
     return;
 
   } else {
-    ACE_DEBUG((LM_WARNING, "(%P|%t) RtpsUdpReceiveStrategy: "
-               "preprocess_secure_submsg failed RPCH %d, [%d.%d]: %C\n",
-               peer_pch, ex.code, ex.minor_code, ex.message.in()));
+    if (security_debug.warn) {
+      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {warn} RtpsUdpReceiveStrategy: ")
+                 ACE_TEXT("preprocess_secure_submsg failed RPCH %d, [%d.%d]: %C\n"),
+                 peer_pch, ex.code, ex.minor_code, ex.message.in()));
+    }
     return;
   }
 
   if (!ok) {
-    ACE_DEBUG((LM_WARNING, "(%P|%t) RtpsUdpReceiveStrategy: "
-               "decode_datawriter/reader_submessage failed [%d.%d]: %C\n",
-               ex.code, ex.minor_code, ex.message.in()));
+    bool dw = category == DATAWRITER_SUBMESSAGE;
+    if (security_debug.warn) {
+      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {warn} RtpsUdpReceiveStrategy: ")
+                 ACE_TEXT("decode_data%C_submessage failed [%d.%d]: \"%C\" ")
+                 ACE_TEXT("(rpch: %u, local d%cch: %u, remote d%cch: %u)\n"),
+                 dw ? "writer" : "reader",
+                 ex.code, ex.minor_code, ex.message.in(),
+                 peer_pch,
+                 dw ? 'r' : 'w',
+                 dw ? drch : dwch,
+                 dw ? 'w' : 'r',
+                 dw ? dwch : drch
+                 ));
+    }
     return;
   }
 
@@ -446,8 +534,8 @@ bool RtpsUdpReceiveStrategy::decode_payload(ReceivedDataSample& sample,
       sample.header_.byte_order_ = RtpsSampleHeader::payload_byte_order(sample);
     }
 
-  } else {
-    ACE_DEBUG((LM_WARNING, "(%P|%t) RtpsUdpReceiveStrategy: "
+  } else if (security_debug.warn) {
+    ACE_DEBUG((LM_WARNING, "(%P|%t) {warn} RtpsUdpReceiveStrategy: "
                "decode_serialized_payload failed [%d.%d]: %C\n",
                ex.code, ex.minor_code, ex.message.in()));
   }
@@ -654,6 +742,7 @@ RtpsUdpReceiveStrategy::has_fragments(const SequenceRange& range,
         p.first = sn;
         frag_info->push_back(p);
         RTPS::FragmentNumberSet& missing_frags = frag_info->back().second;
+        missing_frags.numBits = 0; // make sure this is a valid number before passing to get_gaps
         missing_frags.bitmap.length(8); // start at max length
         missing_frags.bitmapBase.value =
           reassembly_.get_gaps(sn, pub_id, missing_frags.bitmap.get_buffer(),

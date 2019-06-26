@@ -33,6 +33,9 @@ RtpsUdpTransport::RtpsUdpTransport(RtpsUdpInst& inst)
 #if defined(OPENDDS_SECURITY)
   , local_crypto_handle_(DDS::HANDLE_NIL)
 #endif
+#ifdef OPENDDS_SECURITY
+  , ice_endpoint_(*this)
+#endif
 {
   if (! (configure_i(inst) && open())) {
     throw Transport::UnableToCreate();
@@ -45,6 +48,16 @@ RtpsUdpTransport::config() const
   return static_cast<RtpsUdpInst&>(TransportImpl::config());
 }
 
+ICE::Endpoint*
+RtpsUdpTransport::get_ice_endpoint()
+{
+#ifdef OPENDDS_SECURITY
+  return (config().use_ice_) ? &ice_endpoint_ : 0;
+#else
+  return 0;
+#endif
+}
+
 RtpsUdpDataLink_rch
 RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
 {
@@ -55,6 +68,17 @@ RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
   link->local_crypto_handle(local_crypto_handle_);
 #endif
 
+  if (config().use_ice_) {
+    if (reactor()->remove_handler(unicast_socket_.get_handle(), ACE_Event_Handler::READ_MASK) != 0) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: ")
+                        ACE_TEXT("RtpsUdpReceiveStrategy::start_i: ")
+                        ACE_TEXT("failed to unregister handler for unicast ")
+                        ACE_TEXT("socket %d\n"),
+                        unicast_socket_.get_handle()),
+                       RtpsUdpDataLink_rch());
+    }
+  }
   if (!link->open(unicast_socket_)) {
     ACE_ERROR((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
@@ -282,13 +306,23 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
   // detect and report errors during DataReader/Writer setup instead
   // of during association.
 
-  if (!open_appropriate_socket_type(unicast_socket_, config.local_address())) {
+  int protocol_family = PF_UNSPEC;
+  if (!open_appropriate_socket_type(unicast_socket_, config.local_address(), &protocol_family)) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("RtpsUdpTransport::configure_i: open_appropriate_socket_type:")
                       ACE_TEXT("%m\n")),
                       false);
   }
+
+#ifdef ACE_RECVPKTINFO
+  if (protocol_family == PF_INET) {
+    int sockopt = 1;
+    if (unicast_socket_.set_option(IPPROTO_IP, ACE_RECVPKTINFO, &sockopt, sizeof sockopt) == -1) {
+      ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsUdpTransport::configure_i: set_option: %m\n")), false);
+    }
+  }
+#endif
 
   if (config.local_address().get_port_number() == 0) {
 
@@ -302,6 +336,22 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
   }
 
   create_reactor_task();
+
+#ifdef OPENDDS_SECURITY
+  if (config.use_ice_) {
+    ICE::Agent::instance()->add_endpoint(&ice_endpoint_);
+    if (reactor()->register_handler(unicast_socket_.get_handle(), &ice_endpoint_,
+                                    ACE_Event_Handler::READ_MASK) != 0) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: ")
+                        ACE_TEXT("RtpsUdpReceiveStrategy::start_i: ")
+                        ACE_TEXT("failed to register handler for unicast ")
+                        ACE_TEXT("socket %d\n"),
+                        unicast_socket_.get_handle()),
+                       false);
+    }
+  }
+#endif
 
   if (config.opendds_discovery_default_listener_) {
     link_= make_datalink(config.opendds_discovery_guid_.guidPrefix);
@@ -318,6 +368,12 @@ RtpsUdpTransport::shutdown_i()
     link_->transport_shutdown();
   }
   link_.reset();
+
+#ifdef OPENDDS_SECURITY
+  if(config().use_ice_) {
+    ICE::Agent::instance()->remove_endpoint(&ice_endpoint_);
+  }
+#endif
 }
 
 void
@@ -339,6 +395,91 @@ RtpsUdpTransport::map_ipv4_to_ipv6() const
   }
   return map;
 }
+
+#ifdef OPENDDS_SECURITY
+int
+RtpsUdpTransport::IceEndpoint::handle_input(ACE_HANDLE /*fd*/)
+{
+  struct iovec        iov[1];
+  char buffer[0x10000];
+  iov[0].iov_base = buffer;
+  iov[0].iov_len  = sizeof buffer;
+  ACE_INET_Addr remote_address;
+
+  bool stop;
+  RtpsUdpReceiveStrategy::receive_bytes_helper(iov, 1, transport.unicast_socket_, remote_address, transport.get_ice_endpoint(), stop);
+
+  return 0;
+}
+
+namespace {
+  bool shouldWarn(int code) {
+    return code == EPERM || code == EACCES || code == EINTR || code == ENOBUFS || code == ENOMEM;
+  }
+
+  ssize_t
+  send_single_i(ACE_SOCK_Dgram& socket, const iovec iov[], int n, const ACE_INET_Addr& addr)
+  {
+#ifdef ACE_LACKS_SENDMSG
+    char buffer[UDP_MAX_MESSAGE_SIZE];
+    char *iter = buffer;
+    for (int i = 0; i < n; ++i) {
+      if (size_t(iter - buffer + iov[i].iov_len) > UDP_MAX_MESSAGE_SIZE) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpSendStrategy::send_single_i() - "
+                   "message too large at index %d size %d\n", i, iov[i].iov_len));
+        return -1;
+      }
+      std::memcpy(iter, iov[i].iov_base, iov[i].iov_len);
+      iter += iov[i].iov_len;
+    }
+    const ssize_t result = socket.send(buffer, iter - buffer, addr);
+#else
+    const ssize_t result = socket.send(iov, n, addr);
+#endif
+    if (result < 0) {
+      ACE_TCHAR addr_buff[256] = {};
+      int err = errno;
+      addr.addr_to_string(addr_buff, 256, 0);
+      errno = err;
+      const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
+      ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_single_i() - "
+                 "destination %s failed %p\n", addr_buff, ACE_TEXT("send")));
+    }
+    return result;
+  }
+}
+
+ICE::AddressListType
+RtpsUdpTransport::IceEndpoint::host_addresses() const {
+  return transport.config().host_addresses();
+}
+
+void
+RtpsUdpTransport::IceEndpoint::send(const ACE_INET_Addr& destination, const STUN::Message& message)
+{
+  ACE_SOCK_Dgram& socket = (!transport.link_.is_nil()) ? transport.link_->unicast_socket() : transport.unicast_socket_;
+
+  ACE_Message_Block block(20 + message.length());
+  DCPS::Serializer serializer(&block, true);
+  const_cast<STUN::Message&>(message).block = &block;
+  serializer << message;
+
+  iovec iov[MAX_SEND_BLOCKS];
+  const int num_blocks = RtpsUdpSendStrategy::mb_to_iov(block, iov);
+  const ssize_t result = send_single_i(socket, iov, num_blocks, destination);
+  if (result < 0) {
+    const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
+    ACE_ERROR((prio, "(%P|%t) RtpsUdpTransport::send() - "
+               "failed to send STUN message\n"));
+  }
+}
+
+ACE_INET_Addr
+RtpsUdpTransport::IceEndpoint::stun_server_address() const {
+  return transport.config().stun_server_address();
+}
+#endif
+
 } // namespace DCPS
 } // namespace OpenDDS
 

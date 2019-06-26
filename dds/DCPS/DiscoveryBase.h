@@ -6,19 +6,22 @@
 #ifndef OPENDDS_DDS_DCPS_DISCOVERYBASE_H
 #define OPENDDS_DDS_DCPS_DISCOVERYBASE_H
 
-#include "dds/DCPS/Discovery.h"
-#include "dds/DCPS/GuidUtils.h"
-#include "dds/DCPS/DCPS_Utils.h"
-#include "dds/DCPS/DomainParticipantImpl.h"
-#include "dds/DCPS/Marked_Default_Qos.h"
-#include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
-#include "dds/DCPS/Registered_Data_Types.h"
 #include "dds/DCPS/DataReaderImpl_T.h"
+#include "dds/DCPS/DCPS_Utils.h"
+#include "dds/DCPS/Discovery.h"
+#include "dds/DCPS/DomainParticipantImpl.h"
+#include "dds/DCPS/GuidUtils.h"
+#include "dds/DCPS/Marked_Default_Qos.h"
+#include "dds/DCPS/PoolAllocationBase.h"
+#include "dds/DCPS/Registered_Data_Types.h"
+#include "dds/DCPS/SubscriberImpl.h"
+
 #include "dds/DdsDcpsCoreTypeSupportImpl.h"
 
 #ifdef OPENDDS_SECURITY
 #include "dds/DdsSecurityCoreC.h"
+#include "dds/DCPS/Ice.h"
 #endif
 
 #include "ace/Select_Reactor.h"
@@ -38,11 +41,16 @@ namespace OpenDDS {
     typedef DataReaderImpl_T<DDS::TopicBuiltinTopicData> TopicBuiltinTopicDataDataReaderImpl;
 
 #ifdef OPENDDS_SECURITY
-    typedef OPENDDS_MAP_CMP(DCPS::RepoId, DDS::Security::DatareaderCryptoHandle, DCPS::GUID_tKeyLessThan) DatareaderCryptoHandleMap;
-    typedef OPENDDS_MAP_CMP(DCPS::RepoId, DDS::Security::DatawriterCryptoHandle, DCPS::GUID_tKeyLessThan) DatawriterCryptoHandleMap;
-    typedef OPENDDS_MAP_CMP(DCPS::RepoId, DDS::Security::DatareaderCryptoTokenSeq, DCPS::GUID_tKeyLessThan) DatareaderCryptoTokenSeqMap;
-    typedef OPENDDS_MAP_CMP(DCPS::RepoId, DDS::Security::DatawriterCryptoTokenSeq, DCPS::GUID_tKeyLessThan) DatawriterCryptoTokenSeqMap;
-    typedef OPENDDS_MAP_CMP(DCPS::RepoId, DDS::Security::EndpointSecurityAttributes, DCPS::GUID_tKeyLessThan) EndpointSecurityAttributesMap;
+    typedef OPENDDS_MAP_CMP(DCPS::RepoId, DDS::Security::DatareaderCryptoHandle, DCPS::GUID_tKeyLessThan)
+      DatareaderCryptoHandleMap;
+    typedef OPENDDS_MAP_CMP(DCPS::RepoId, DDS::Security::DatawriterCryptoHandle, DCPS::GUID_tKeyLessThan)
+      DatawriterCryptoHandleMap;
+    typedef OPENDDS_MAP_CMP(DCPS::RepoId, DDS::Security::DatareaderCryptoTokenSeq, DCPS::GUID_tKeyLessThan)
+      DatareaderCryptoTokenSeqMap;
+    typedef OPENDDS_MAP_CMP(DCPS::RepoId, DDS::Security::DatawriterCryptoTokenSeq, DCPS::GUID_tKeyLessThan)
+      DatawriterCryptoTokenSeqMap;
+    typedef OPENDDS_MAP_CMP(DCPS::RepoId, DDS::Security::EndpointSecurityAttributes, DCPS::GUID_tKeyLessThan)
+      EndpointSecurityAttributesMap;
 
     enum AuthState {
       AS_UNKNOWN,
@@ -112,15 +120,21 @@ namespace OpenDDS {
     class EndpointManager {
     protected:
 
-      struct DiscoveredSubscription {
+      struct DiscoveredSubscription : PoolAllocationBase {
         DiscoveredSubscription()
         : bit_ih_(DDS::HANDLE_NIL)
+#ifdef OPENDDS_SECURITY
+        , have_ice_agent_info_(false)
+#endif
         {
         }
 
         explicit DiscoveredSubscription(const OpenDDS::DCPS::DiscoveredReaderData& r)
         : reader_data_(r)
         , bit_ih_(DDS::HANDLE_NIL)
+#ifdef OPENDDS_SECURITY
+        , have_ice_agent_info_(false)
+#endif
         {
         }
 
@@ -129,6 +143,8 @@ namespace OpenDDS {
 
 #ifdef OPENDDS_SECURITY
         DDS::Security::EndpointSecurityAttributes security_attribs_;
+        bool have_ice_agent_info_;
+        ICE::AgentInfo ice_agent_info_;
 #endif
 
       };
@@ -138,15 +154,21 @@ namespace OpenDDS {
 
       typedef typename DiscoveredSubscriptionMap::iterator DiscoveredSubscriptionIter;
 
-      struct DiscoveredPublication {
+      struct DiscoveredPublication : PoolAllocationBase {
         DiscoveredPublication()
         : bit_ih_(DDS::HANDLE_NIL)
+#ifdef OPENDDS_SECURITY
+        , have_ice_agent_info_(false)
+#endif
         {
         }
 
         explicit DiscoveredPublication(const OpenDDS::DCPS::DiscoveredWriterData& w)
         : writer_data_(w)
         , bit_ih_(DDS::HANDLE_NIL)
+#ifdef OPENDDS_SECURITY
+        , have_ice_agent_info_(false)
+#endif
         {
         }
 
@@ -155,6 +177,8 @@ namespace OpenDDS {
 
 #ifdef OPENDDS_SECURITY
         DDS::Security::EndpointSecurityAttributes security_attribs_;
+        bool have_ice_agent_info_;
+        ICE::AgentInfo ice_agent_info_;
 #endif
 
       };
@@ -276,7 +300,10 @@ namespace OpenDDS {
         ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::INTERNAL_ERROR);
         typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator iter =
           topics_.find(topicName);
-        if (iter != topics_.end()) { // types must match, RtpsDiscovery checked for us
+        if (iter != topics_.end()) {
+          if (iter->second.data_type_ != dataTypeName) {
+            return DCPS::CONFLICTING_TYPENAME;
+          }
           iter->second.qos_ = qos;
           iter->second.has_dcps_key_ = hasDcpsKey;
           topicId = iter->second.repo_id_;
@@ -295,12 +322,36 @@ namespace OpenDDS {
         return DCPS::CREATED;
       }
 
-      DCPS::TopicStatus remove_topic(const RepoId& topicId, OPENDDS_STRING& name)
+      DCPS::TopicStatus find_topic(const char* topicName,
+                                   CORBA::String_out dataTypeName,
+                                   DDS::TopicQos_out qos,
+                                   OpenDDS::DCPS::RepoId_out topicId)
       {
         ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::INTERNAL_ERROR);
-        name = topic_names_[topicId];
-        typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
-          topics_.find(name);
+        typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::const_iterator iter =
+          topics_.find(topicName);
+        if (iter == topics_.end()) {
+          return DCPS::NOT_FOUND;
+        }
+
+        const TopicDetails& td = iter->second;
+
+        dataTypeName = td.data_type_.c_str();
+        qos = new DDS::TopicQos(td.qos_);
+        topicId = td.repo_id_;
+        return DCPS::FOUND;
+      }
+
+      DCPS::TopicStatus remove_topic(const RepoId& topicId)
+      {
+        ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::INTERNAL_ERROR);
+        TopicNameMap::iterator name_iter = topic_names_.find(topicId);
+        if (name_iter == topic_names_.end()) {
+          return DCPS::NOT_FOUND;
+        }
+        const OPENDDS_STRING& name = name_iter->second;
+
+        typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it = topics_.find(name);
         if (top_it != topics_.end()) {
           TopicDetails& td = top_it->second;
           if (td.endpoints_.empty()) {
@@ -308,12 +359,11 @@ namespace OpenDDS {
           }
         }
 
-        topic_names_.erase(topicId);
+        topic_names_.erase(name_iter);
         return DCPS::REMOVED;
       }
 
-      virtual bool update_topic_qos(const DCPS::RepoId& topicId, const DDS::TopicQos& qos,
-                                    OPENDDS_STRING& name) = 0;
+      virtual bool update_topic_qos(const DCPS::RepoId& topicId, const DDS::TopicQos& qos) = 0;
 
       DCPS::RepoId add_publication(const DCPS::RepoId& topicId,
                                    DCPS::DataWriterCallbacks* publication,
@@ -339,7 +389,8 @@ namespace OpenDDS {
           DDS::Security::SecurityException ex;
 
           DDS::Security::TopicSecurityAttributes topic_sec_attr;
-          if (!get_access_control()->get_topic_sec_attributes(get_permissions_handle(), topic_name.data(), topic_sec_attr, ex)) {
+          DDS::Security::PermissionsHandle permh = get_permissions_handle();
+          if (!get_access_control()->get_topic_sec_attributes(permh, topic_name.data(), topic_sec_attr, ex)) {
             ACE_ERROR((LM_ERROR,
               ACE_TEXT("(%P|%t) ERROR: ")
               ACE_TEXT("DomainParticipant::add_publication, ")
@@ -349,31 +400,37 @@ namespace OpenDDS {
           }
 
           if (topic_sec_attr.is_write_protected == true) {
-            if (!get_access_control()->check_create_datawriter(get_permissions_handle(), get_domain_id(), topic_name.data(), qos,
-                                                               publisherQos.partition, DDS::Security::DataTagQosPolicy(), ex)) {
+            if (!get_access_control()->check_create_datawriter(
+                  permh, get_domain_id(), topic_name.data(), qos,
+                  publisherQos.partition, DDS::Security::DataTagQosPolicy(), ex)) {
               ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
                 ACE_TEXT("EndpointManager::add_publication() - ")
-                ACE_TEXT("Permissions check failed for local datawriter on topic '%C'. Security Exception[%d.%d]: %C\n"), topic_name.data(),
+                ACE_TEXT("Permissions check failed for local datawriter on topic '%C'. ")
+                ACE_TEXT("Security Exception[%d.%d]: %C\n"), topic_name.data(),
                   ex.code, ex.minor_code, ex.message.in()));
               return RepoId();
             }
           }
 
-          if (!get_access_control()->get_datawriter_sec_attributes(get_permissions_handle(), topic_name.data(),
+          if (!get_access_control()->get_datawriter_sec_attributes(permh, topic_name.data(),
               publisherQos.partition, DDS::Security::DataTagQosPolicy(), pb.security_attribs_, ex)) {
             ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
                        ACE_TEXT("EndpointManager::add_publication() - ")
-                       ACE_TEXT("Unable to get security attributes for local datawriter. Security Exception[%d.%d]: %C\n"),
+                       ACE_TEXT("Unable to get security attributes for local datawriter. ")
+                       ACE_TEXT("Security Exception[%d.%d]: %C\n"),
                        ex.code, ex.minor_code, ex.message.in()));
             return RepoId();
           }
 
           if (pb.security_attribs_.is_submessage_protected || pb.security_attribs_.is_payload_protected) {
-            DDS::Security::DatawriterCryptoHandle handle = get_crypto_key_factory()->register_local_datawriter(crypto_handle_, DDS::PropertySeq(), pb.security_attribs_, ex);
+            DDS::Security::DatawriterCryptoHandle handle =
+              get_crypto_key_factory()->register_local_datawriter(
+                crypto_handle_, DDS::PropertySeq(), pb.security_attribs_, ex);
             if (handle == DDS::HANDLE_NIL) {
               ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
                          ACE_TEXT("EndpointManager::add_publication() - ")
-                         ACE_TEXT("Unable to get local datawriter crypto handle. Security Exception[%d.%d]: %C\n"),
+                         ACE_TEXT("Unable to get local datawriter crypto handle. ")
+                         ACE_TEXT("Security Exception[%d.%d]: %C\n"),
                          ex.code, ex.minor_code, ex.message.in()));
             }
 
@@ -408,17 +465,16 @@ namespace OpenDDS {
         ACE_GUARD(ACE_Thread_Mutex, g, lock_);
         LocalPublicationIter iter = local_publications_.find(publicationId);
         if (iter != local_publications_.end()) {
-          if (DDS::RETCODE_OK == remove_publication_i(publicationId))
-            {
-              OPENDDS_STRING topic_name = topic_names_[iter->second.topic_id_];
-              local_publications_.erase(publicationId);
-              typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
-                topics_.find(topic_name);
-              if (top_it != topics_.end()) {
-                match_endpoints(publicationId, top_it->second, true /*remove*/);
-                top_it->second.endpoints_.erase(publicationId);
-              }
-            } else {
+          if (DDS::RETCODE_OK == remove_publication_i(publicationId, iter->second)) {
+            OPENDDS_STRING topic_name = topic_names_[iter->second.topic_id_];
+            local_publications_.erase(publicationId);
+            typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
+              topics_.find(topic_name);
+            if (top_it != topics_.end()) {
+              match_endpoints(publicationId, top_it->second, true /*remove*/);
+              top_it->second.endpoints_.erase(publicationId);
+            }
+          } else {
             ACE_ERROR((LM_ERROR,
                        ACE_TEXT("(%P|%t) ERROR: EndpointManager::remove_publication - ")
                        ACE_TEXT("Failed to publish dispose msg\n")));
@@ -460,21 +516,25 @@ namespace OpenDDS {
           DDS::Security::SecurityException ex;
 
           DDS::Security::TopicSecurityAttributes topic_sec_attr;
-          if (!get_access_control()->get_topic_sec_attributes(get_permissions_handle(), topic_name.data(), topic_sec_attr, ex)) {
+          if (!get_access_control()->get_topic_sec_attributes(
+              get_permissions_handle(), topic_name.data(), topic_sec_attr, ex)) {
             ACE_ERROR((LM_ERROR,
               ACE_TEXT("(%P|%t) ERROR: ")
               ACE_TEXT("DomainParticipant::add_subscription, ")
-              ACE_TEXT("Unable to get security attributes for topic '%C'. SecurityException[%d.%d]: %C\n"),
+              ACE_TEXT("Unable to get security attributes for topic '%C'. ")
+              ACE_TEXT("SecurityException[%d.%d]: %C\n"),
                 topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
             return RepoId();
           }
 
           if (topic_sec_attr.is_read_protected == true) {
-            if (!get_access_control()->check_create_datareader(get_permissions_handle(), get_domain_id(), topic_name.data(), qos,
-                                                               subscriberQos.partition, DDS::Security::DataTagQosPolicy(), ex)) {
+            if (!get_access_control()->check_create_datareader(
+              get_permissions_handle(), get_domain_id(), topic_name.data(), qos,
+              subscriberQos.partition, DDS::Security::DataTagQosPolicy(), ex)) {
               ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
                 ACE_TEXT("EndpointManager::add_subscription() - ")
-                ACE_TEXT("Permissions check failed for local datareader on topic '%C'. Security Exception[%d.%d]: %C\n"), topic_name.data(),
+                ACE_TEXT("Permissions check failed for local datareader on topic '%C'. ")
+                ACE_TEXT("Security Exception[%d.%d]: %C\n"), topic_name.data(),
                   ex.code, ex.minor_code, ex.message.in()));
               return RepoId();
             }
@@ -484,17 +544,21 @@ namespace OpenDDS {
               subscriberQos.partition, DDS::Security::DataTagQosPolicy(), sb.security_attribs_, ex)) {
             ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
                        ACE_TEXT("EndpointManager::add_subscription() - ")
-                       ACE_TEXT("Unable to get security attributes for local datareader. Security Exception[%d.%d]: %C\n"),
+                       ACE_TEXT("Unable to get security attributes for local datareader. ")
+                       ACE_TEXT("Security Exception[%d.%d]: %C\n"),
                        ex.code, ex.minor_code, ex.message.in()));
             return RepoId();
           }
 
           if (sb.security_attribs_.is_submessage_protected || sb.security_attribs_.is_payload_protected) {
-            DDS::Security::DatareaderCryptoHandle handle = get_crypto_key_factory()->register_local_datareader(crypto_handle_, DDS::PropertySeq(), sb.security_attribs_, ex);
+            DDS::Security::DatareaderCryptoHandle handle =
+              get_crypto_key_factory()->register_local_datareader(
+                crypto_handle_, DDS::PropertySeq(), sb.security_attribs_, ex);
             if (handle == DDS::HANDLE_NIL) {
               ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
                          ACE_TEXT("EndpointManager::add_subscription() - ")
-                         ACE_TEXT("Unable to get local datareader crypto handle. Security Exception[%d.%d]: %C\n"),
+                         ACE_TEXT("Unable to get local datareader crypto handle. ")
+                         ACE_TEXT("Security Exception[%d.%d]: %C\n"),
                          ex.code, ex.minor_code, ex.message.in()));
             }
 
@@ -529,8 +593,7 @@ namespace OpenDDS {
         ACE_GUARD(ACE_Thread_Mutex, g, lock_);
         LocalSubscriptionIter iter = local_subscriptions_.find(subscriptionId);
         if (iter != local_subscriptions_.end()) {
-          if (DDS::RETCODE_OK == remove_subscription_i(subscriptionId)
-              /*subscriptions_writer_.write_unregister_dispose(subscriptionId)*/) {
+          if (DDS::RETCODE_OK == remove_subscription_i(subscriptionId, iter->second)) {
             OPENDDS_STRING topic_name = topic_names_[iter->second.topic_id_];
             local_subscriptions_.erase(subscriptionId);
             typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
@@ -561,12 +624,20 @@ namespace OpenDDS {
 
     protected:
       struct LocalEndpoint {
-        LocalEndpoint() : topic_id_(DCPS::GUID_UNKNOWN), sequence_(DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {}
+        LocalEndpoint() : topic_id_(DCPS::GUID_UNKNOWN), sequence_(DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN())
+#ifdef OPENDDS_SECURITY
+          , have_ice_agent_info(false)
+#endif
+        {}
         DCPS::RepoId topic_id_;
         DCPS::TransportLocatorSeq trans_info_;
         RepoIdSet matched_endpoints_;
         DCPS::SequenceNumber sequence_;
         RepoIdSet remote_opendds_associations_;
+#ifdef OPENDDS_SECURITY
+        bool have_ice_agent_info;
+        ICE::AgentInfo ice_agent_info;
+#endif
       };
 
       struct LocalPublication : LocalEndpoint {
@@ -654,18 +725,27 @@ namespace OpenDDS {
       }
 
       virtual DDS::ReturnCode_t add_publication_i(const DCPS::RepoId& /*rid*/,
-                                                  LocalPublication& /*pub*/) { return DDS::RETCODE_OK; }
+                                                  LocalPublication& /*pub*/)
+      { return DDS::RETCODE_OK; }
+
       virtual DDS::ReturnCode_t write_publication_data(const DCPS::RepoId& /*rid*/,
                                                        LocalPublication& /*pub*/,
-                                                       const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN) { ACE_UNUSED_ARG(reader); return DDS::RETCODE_OK; }
-      virtual DDS::ReturnCode_t remove_publication_i(const RepoId& publicationId) = 0;
+                                                       const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN)
+      { ACE_UNUSED_ARG(reader); return DDS::RETCODE_OK; }
+
+      virtual DDS::ReturnCode_t remove_publication_i(const RepoId& publicationId,
+                                                     LocalPublication& /*pub*/) = 0;
 
       virtual DDS::ReturnCode_t add_subscription_i(const DCPS::RepoId& /*rid*/,
-                                                   LocalSubscription& /*pub*/) { return DDS::RETCODE_OK; };
+                                                   LocalSubscription& /*pub*/)
+      { return DDS::RETCODE_OK; };
+
       virtual DDS::ReturnCode_t write_subscription_data(const DCPS::RepoId& /*rid*/,
                                                         LocalSubscription& /*pub*/,
-                                                        const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN) { ACE_UNUSED_ARG(reader); return DDS::RETCODE_OK; }
-      virtual DDS::ReturnCode_t remove_subscription_i(const RepoId& subscriptionId) = 0;
+                                                        const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN)
+      { ACE_UNUSED_ARG(reader); return DDS::RETCODE_OK; }
+
+      virtual DDS::ReturnCode_t remove_subscription_i(const RepoId& subscriptionId, LocalSubscription& /*sub*/) = 0;
 
       void match_endpoints(DCPS::RepoId repoId, const TopicDetails& td,
                            bool remove = false)
@@ -702,6 +782,7 @@ namespace OpenDDS {
             lsi->second.remote_opendds_associations_.erase(removing);
             lsi->second.subscription_->remove_associations(writer_seq,
                                                            false /*notify_lost*/);
+            remove_assoc_i(remove_from, lsi->second, removing);
             // Update writer
             write_subscription_data(remove_from, lsi->second);
           }
@@ -716,9 +797,19 @@ namespace OpenDDS {
             lpi->second.remote_opendds_associations_.erase(removing);
             lpi->second.publication_->remove_associations(reader_seq,
                                                           false /*notify_lost*/);
+            remove_assoc_i(remove_from, lpi->second, removing);
           }
         }
       }
+
+      virtual void add_assoc_i(const DCPS::RepoId& /* local_guid */, const LocalPublication& /* lpub */,
+                               const DCPS::RepoId& /* remote_guid */, const DiscoveredSubscription& /* dsub */) {}
+      virtual void remove_assoc_i(const DCPS::RepoId& /* local_guid */, const LocalPublication& /* lpub */,
+                                  const DCPS::RepoId& /* remote_guid */) {}
+      virtual void add_assoc_i(const DCPS::RepoId& /* local_guid */, const LocalSubscription& /* lsub */,
+                               const DCPS::RepoId& /* remote_guid */, const DiscoveredPublication& /* dpub */) {}
+      virtual void remove_assoc_i(const DCPS::RepoId& /* local_guid */, const LocalSubscription& /* lsub */,
+                                  const DCPS::RepoId& /* remote_guid */) {}
 
 #ifdef OPENDDS_SECURITY
       virtual DDS::Security::DatawriterCryptoHandle
@@ -734,13 +825,17 @@ namespace OpenDDS {
       }
 
       virtual void
-      create_and_send_datareader_crypto_tokens(const DDS::Security::DatareaderCryptoHandle&, const DCPS::RepoId&, const DDS::Security::DatawriterCryptoHandle&, const DCPS::RepoId&)
+      create_and_send_datareader_crypto_tokens(
+        const DDS::Security::DatareaderCryptoHandle&, const DCPS::RepoId&,
+        const DDS::Security::DatawriterCryptoHandle&, const DCPS::RepoId&)
       {
         return;
       }
 
       virtual void
-      create_and_send_datawriter_crypto_tokens(const DDS::Security::DatawriterCryptoHandle&, const DCPS::RepoId&, const DDS::Security::DatareaderCryptoHandle&, const DCPS::RepoId&)
+      create_and_send_datawriter_crypto_tokens(
+        const DDS::Security::DatawriterCryptoHandle&, const DCPS::RepoId&,
+        const DDS::Security::DatareaderCryptoHandle&, const DCPS::RepoId&)
       {
         return;
       }
@@ -925,57 +1020,86 @@ namespace OpenDDS {
           if (reader_local) {
             call_reader = lsi->second.matched_endpoints_.insert(writer).second;
           }
+
+          if (writer_local && !reader_local) {
+            add_assoc_i(writer, lpi->second, reader, dsi->second);
+          }
+          if (reader_local && !writer_local) {
+            add_assoc_i(reader, lsi->second, writer, dpi->second);
+          }
+
           if (!call_writer && !call_reader) {
             return; // nothing more to do
           }
 
 #ifdef OPENDDS_SECURITY
           if (is_security_enabled()) {
+            DDS::Security::CryptoKeyExchange_var keyexg = get_crypto_key_exchange();
             if (call_reader) {
               RepoId writer_participant = writer;
               writer_participant.entityId = ENTITYID_PARTICIPANT;
-              DatareaderCryptoHandleMap::const_iterator iter = local_reader_crypto_handles_.find(reader);
-              if (iter != local_reader_crypto_handles_.end()) { // It might not exist due to security attributes, and that's OK
+              DatareaderCryptoHandleMap::const_iterator iter =
+                local_reader_crypto_handles_.find(reader);
+
+              // It might not exist due to security attributes, and that's OK
+              if (iter != local_reader_crypto_handles_.end()) {
                 DDS::Security::DatareaderCryptoHandle drch = iter->second;
-                remote_writer_crypto_handles_[writer] = generate_remote_matched_writer_crypto_handle(writer_participant, drch);
-                DatawriterCryptoTokenSeqMap::iterator t_iter = pending_remote_writer_crypto_tokens_.find(writer);
+                DDS::Security::DatawriterCryptoHandle dwch =
+                  generate_remote_matched_writer_crypto_handle(writer_participant, drch);
+                remote_writer_crypto_handles_[writer] = dwch;
+                DatawriterCryptoTokenSeqMap::iterator t_iter =
+                  pending_remote_writer_crypto_tokens_.find(writer);
                 if (t_iter != pending_remote_writer_crypto_tokens_.end()) {
                   DDS::Security::SecurityException se;
-                  if (get_crypto_key_exchange()->set_remote_datawriter_crypto_tokens(iter->second, remote_writer_crypto_handles_[writer], t_iter->second, se) == false) {
+                  if (!keyexg->set_remote_datawriter_crypto_tokens(iter->second, dwch, t_iter->second, se)) {
                     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("(%P|%t) ERROR: DiscoveryBase::match() - ")
-                      ACE_TEXT("Unable to set pending remote datawriter crypto tokens with crypto key exchange plugin. Security Exception[%d.%d]: %C\n"),
+                      ACE_TEXT("Unable to set pending remote datawriter crypto tokens with ")
+                      ACE_TEXT("crypto key exchange plugin. Security Exception[%d.%d]: %C\n"),
                         se.code, se.minor_code, se.message.in()));
                   }
                   pending_remote_writer_crypto_tokens_.erase(t_iter);
                 }
-                EndpointSecurityAttributesMap::const_iterator s_iter = local_reader_security_attribs_.find(reader);
-                if (s_iter != local_reader_security_attribs_.end() && s_iter->second.is_submessage_protected) { // Yes, this is different for remote datawriters than readers (see 8.8.9.3 vs 8.8.9.2)
-                  create_and_send_datareader_crypto_tokens(drch, reader, remote_writer_crypto_handles_[writer], writer);
+                EndpointSecurityAttributesMap::const_iterator s_iter =
+                  local_reader_security_attribs_.find(reader);
+                // Yes, this is different for remote datawriters than readers (see 8.8.9.3 vs 8.8.9.2)
+                if (s_iter != local_reader_security_attribs_.end() && s_iter->second.is_submessage_protected) {
+                  create_and_send_datareader_crypto_tokens(drch, reader, dwch, writer);
                 }
               }
             }
+
             if (call_writer) {
               RepoId reader_participant = reader;
               reader_participant.entityId = ENTITYID_PARTICIPANT;
-              DatawriterCryptoHandleMap::const_iterator iter = local_writer_crypto_handles_.find(writer);
-              if (iter != local_writer_crypto_handles_.end()) { // It might not exist due to security attributes, and that's OK
+              DatawriterCryptoHandleMap::const_iterator iter =
+                local_writer_crypto_handles_.find(writer);
+
+              // It might not exist due to security attributes, and that's OK
+              if (iter != local_writer_crypto_handles_.end()) {
                 DDS::Security::DatawriterCryptoHandle dwch = iter->second;
-                remote_reader_crypto_handles_[reader] = generate_remote_matched_reader_crypto_handle(reader_participant, dwch, (relay_only_readers_.count(reader) != 0));
-                DatareaderCryptoTokenSeqMap::iterator t_iter = pending_remote_reader_crypto_tokens_.find(reader);
+                DDS::Security::DatareaderCryptoHandle drch =
+                  generate_remote_matched_reader_crypto_handle(
+                    reader_participant, dwch, relay_only_readers_.count(reader));
+                remote_reader_crypto_handles_[reader] = drch;
+                DatareaderCryptoTokenSeqMap::iterator t_iter =
+                  pending_remote_reader_crypto_tokens_.find(reader);
                 if (t_iter != pending_remote_reader_crypto_tokens_.end()) {
                   DDS::Security::SecurityException se;
-                  if (get_crypto_key_exchange()->set_remote_datareader_crypto_tokens(iter->second, remote_reader_crypto_handles_[reader], t_iter->second, se) == false) {
+                  if (!keyexg->set_remote_datareader_crypto_tokens(iter->second, drch, t_iter->second, se)) {
                     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("(%P|%t) ERROR: DiscoveryBase::match() - ")
-                      ACE_TEXT("Unable to set pending remote datareader crypto tokens with crypto key exchange plugin. Security Exception[%d.%d]: %C\n"),
+                      ACE_TEXT("Unable to set pending remote datareader crypto tokens with crypto ")
+                      ACE_TEXT("key exchange plugin. Security Exception[%d.%d]: %C\n"),
                         se.code, se.minor_code, se.message.in()));
                   }
                   pending_remote_reader_crypto_tokens_.erase(t_iter);
                 }
-                EndpointSecurityAttributesMap::const_iterator s_iter = local_writer_security_attribs_.find(writer);
-                if (s_iter != local_writer_security_attribs_.end() && (s_iter->second.is_submessage_protected || s_iter->second.is_payload_protected)) {
-                  create_and_send_datawriter_crypto_tokens(dwch, writer, remote_reader_crypto_handles_[reader], reader);
+                EndpointSecurityAttributesMap::const_iterator s_iter =
+                  local_writer_security_attribs_.find(writer);
+                if (s_iter != local_writer_security_attribs_.end() &&
+                    (s_iter->second.is_submessage_protected || s_iter->second.is_payload_protected)) {
+                  create_and_send_datawriter_crypto_tokens(dwch, writer, drch, reader);
                 }
               }
             }
@@ -1054,6 +1178,12 @@ namespace OpenDDS {
           if (reader_local) {
             lsi->second.matched_endpoints_.erase(writer);
             lsi->second.remote_opendds_associations_.erase(writer);
+          }
+          if (writer_local && !reader_local) {
+            remove_assoc_i(writer, lpi->second, reader);
+          }
+          if (reader_local && !writer_local) {
+            remove_assoc_i(reader, lsi->second, writer);
           }
           ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
           if (writer_local) {
@@ -1319,9 +1449,18 @@ namespace OpenDDS {
       }
 
       DCPS::TopicStatus
-      remove_topic(const RepoId& topicId, OPENDDS_STRING& name)
+      find_topic(const char* topicName,
+                 CORBA::String_out dataTypeName,
+                 DDS::TopicQos_out qos,
+                 OpenDDS::DCPS::RepoId_out topicId)
       {
-        return endpoint_manager().remove_topic(topicId, name);
+        return endpoint_manager().find_topic(topicName, dataTypeName, qos, topicId);
+      }
+
+      DCPS::TopicStatus
+      remove_topic(const RepoId& topicId)
+      {
+        return endpoint_manager().remove_topic(topicId);
       }
 
       void
@@ -1332,10 +1471,9 @@ namespace OpenDDS {
       }
 
       bool
-      update_topic_qos(const RepoId& topicId, const DDS::TopicQos& qos,
-                       OPENDDS_STRING& name)
+      update_topic_qos(const RepoId& topicId, const DDS::TopicQos& qos)
       {
-        return endpoint_manager().update_topic_qos(topicId, qos, name);
+        return endpoint_manager().update_topic_qos(topicId, qos);
       }
 
       RepoId
@@ -1507,7 +1645,8 @@ namespace OpenDDS {
         DiscoveredParticipantConstIter;
 
 #ifdef OPENDDS_SECURITY
-      typedef OPENDDS_MAP_CMP(DCPS::RepoId, DDS::Security::AuthRequestMessageToken, DCPS::GUID_tKeyLessThan) PendingRemoteAuthTokenMap;
+      typedef OPENDDS_MAP_CMP(DCPS::RepoId, DDS::Security::AuthRequestMessageToken, DCPS::GUID_tKeyLessThan)
+        PendingRemoteAuthTokenMap;
 #endif
 
       virtual EndpointManagerType& endpoint_manager() = 0;
@@ -1686,56 +1825,22 @@ namespace OpenDDS {
                                              bool hasDcpsKey)
       {
         ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::INTERNAL_ERROR);
-        typename OPENDDS_MAP(DDS::DomainId_t,
-                             OPENDDS_MAP(OPENDDS_STRING, TopicDetails) )::iterator topic_it =
-          topics_.find(domainId);
-        if (topic_it != topics_.end()) {
-          const typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator it =
-            topic_it->second.find(topicName);
-          if (it != topic_it->second.end()
-              && it->second.data_type_ != dataTypeName) {
-            topicId = GUID_UNKNOWN;
-            return DCPS::CONFLICTING_TYPENAME;
-          }
-        }
 
         // Verified its safe to hold lock during call to assert_topic
-        const DCPS::TopicStatus stat =
-          participants_[domainId][participantId]->assert_topic(topicId, topicName,
-                                                               dataTypeName, qos,
-                                                               hasDcpsKey);
-        if (stat == DCPS::CREATED || stat == DCPS::FOUND) { // qos change (FOUND)
-          TopicDetails& td = topics_[domainId][topicName];
-          td.data_type_ = dataTypeName;
-          td.qos_ = qos;
-          td.repo_id_ = topicId;
-          ++topic_use_[domainId][topicName];
-        }
-        return stat;
+        return participants_[domainId][participantId]->assert_topic(topicId, topicName,
+                                                                    dataTypeName, qos,
+                                                                    hasDcpsKey);
       }
 
-      virtual DCPS::TopicStatus find_topic(DDS::DomainId_t domainId, const char* topicName,
-                                           CORBA::String_out dataTypeName, DDS::TopicQos_out qos,
+      virtual DCPS::TopicStatus find_topic(DDS::DomainId_t domainId,
+                                           const OpenDDS::DCPS::RepoId& participantId,
+                                           const char* topicName,
+                                           CORBA::String_out dataTypeName,
+                                           DDS::TopicQos_out qos,
                                            OpenDDS::DCPS::RepoId_out topicId)
       {
         ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::INTERNAL_ERROR);
-        typename OPENDDS_MAP(DDS::DomainId_t,
-                             OPENDDS_MAP(OPENDDS_STRING, TopicDetails) )::iterator topic_it =
-          topics_.find(domainId);
-        if (topic_it == topics_.end()) {
-          return DCPS::NOT_FOUND;
-        }
-        typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator iter =
-          topic_it->second.find(topicName);
-        if (iter == topic_it->second.end()) {
-          return DCPS::NOT_FOUND;
-        }
-        TopicDetails& td = iter->second;
-        dataTypeName = td.data_type_.c_str();
-        qos = new DDS::TopicQos(td.qos_);
-        topicId = td.repo_id_;
-        ++topic_use_[domainId][topicName];
-        return DCPS::FOUND;
+        return participants_[domainId][participantId]->find_topic(topicName, dataTypeName, qos, topicId);
       }
 
       virtual DCPS::TopicStatus remove_topic(DDS::DomainId_t domainId,
@@ -1743,31 +1848,8 @@ namespace OpenDDS {
                                              const OpenDDS::DCPS::RepoId& topicId)
       {
         ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::INTERNAL_ERROR);
-        typename OPENDDS_MAP(DDS::DomainId_t,
-                             OPENDDS_MAP(OPENDDS_STRING, TopicDetails) )::iterator topic_it =
-          topics_.find(domainId);
-        if (topic_it == topics_.end()) {
-          return DCPS::NOT_FOUND;
-        }
-
-        OPENDDS_STRING name;
         // Safe to hold lock while calling remove topic
-        const DCPS::TopicStatus stat =
-          participants_[domainId][participantId]->remove_topic(topicId, name);
-
-        if (stat == DCPS::REMOVED) {
-          if (0 == --topic_use_[domainId][name]) {
-            topic_use_[domainId].erase(name);
-            if (topic_it->second.empty()) {
-              topic_use_.erase(domainId);
-            }
-            topic_it->second.erase(name);
-            if (topic_it->second.empty()) {
-              topics_.erase(topic_it);
-            }
-          }
-        }
-        return stat;
+        return participants_[domainId][participantId]->remove_topic(topicId);
       }
 
       virtual bool ignore_topic(DDS::DomainId_t domainId, const OpenDDS::DCPS::RepoId& myParticipantId,
@@ -1781,14 +1863,8 @@ namespace OpenDDS {
                                     const OpenDDS::DCPS::RepoId& participantId, const DDS::TopicQos& qos)
       {
         ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
-        OPENDDS_STRING name;
         // Safe to hold lock while calling update_topic_qos
-        if (participants_[domainId][participantId]->update_topic_qos(topicId,
-                                                                     qos, name)) {
-          topics_[domainId][name].qos_ = qos;
-          return true;
-        }
-        return false;
+        return participants_[domainId][participantId]->update_topic_qos(topicId, qos);
       }
 
       virtual OpenDDS::DCPS::RepoId add_publication(DDS::DomainId_t domainId,
@@ -1839,7 +1915,9 @@ namespace OpenDDS {
                                                      const char* filterExpr,
                                                      const DDS::StringSeq& params)
       {
-        return get_part(domainId, participantId)->add_subscription(topicId, subscription, qos, transInfo, subscriberQos, filterClassName, filterExpr, params);
+        return get_part(domainId, participantId)->
+          add_subscription(
+            topicId, subscription, qos, transInfo, subscriberQos, filterClassName, filterExpr, params);
       }
 
       virtual bool remove_subscription(DDS::DomainId_t domainId,
@@ -1966,8 +2044,6 @@ namespace OpenDDS {
       } reactor_runner_;
 
       DomainParticipantMap participants_;
-      OPENDDS_MAP(DDS::DomainId_t, OPENDDS_MAP(OPENDDS_STRING, TopicDetails) ) topics_;
-      OPENDDS_MAP(DDS::DomainId_t, OPENDDS_MAP(OPENDDS_STRING, unsigned int) ) topic_use_;
     };
 
   } // namespace DCPS

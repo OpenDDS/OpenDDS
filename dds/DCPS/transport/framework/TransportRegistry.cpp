@@ -485,6 +485,14 @@ TransportRegistry::register_type(const TransportType_rch& type)
   }
 }
 
+bool TransportRegistry::has_type(const TransportType_rch& type) const
+{
+  DBG_ENTRY_LVL("TransportRegistry", "has_type", 6);
+  const OPENDDS_STRING name = type->name();
+  GuardType guard(lock_);
+  return type_map_.count(name);
+}
+
 
 void
 TransportRegistry::release()

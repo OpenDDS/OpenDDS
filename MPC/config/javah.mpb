@@ -1,0 +1,19 @@
+feature(java_pre_jpms) {
+  // JAVAHHelper.pm contains the logic to determine the output file name
+  Define_Custom(JavaH) {
+    automatic_in  = 0
+    automatic_out = 1
+    inputext      = .class
+    command       = perl
+    commandflags  = $(DDS_ROOT)/java/build_scripts/javah_wrapper.pl
+  }
+}
+
+feature(!java_pre_jpms): java {
+  javacflags += -h .
+
+  Define_Custom(JavaH) {
+    automatic = 0
+    command = echo
+  }
+}

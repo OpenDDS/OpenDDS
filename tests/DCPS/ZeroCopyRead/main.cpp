@@ -17,6 +17,7 @@
 #include "dds/DCPS/PublisherImpl.h"
 #include "SimpleTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
+#include "dds/DCPS/SafetyProfileStreams.h"
 
 #include "dds/DCPS/StaticIncludes.h"
 
@@ -24,6 +25,8 @@
 #include "ace/OS_NS_unistd.h"
 
 #include <string.h>
+
+using OpenDDS::DCPS::retcode_to_string;
 
 class TestException
 {
@@ -1609,13 +1612,12 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
             test_failed = 1;
         }
 
-        status =   sub->delete_datareader(dr.in ());
-
-        if (status != ::DDS::RETCODE_PRECONDITION_NOT_MET)
-        {
-            ACE_ERROR ((LM_ERROR,
-                    ACE_TEXT("(%P|%t) t10 ERROR: delete_datawrite should have returned PRECONDITION_NOT_MET but returned retcode %d.\n"), status ));
-            test_failed = 1;
+        status = sub->delete_datareader(dr.in());
+        if (status != ::DDS::RETCODE_PRECONDITION_NOT_MET) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) t10 ERROR: ")
+            ACE_TEXT("expected PRECONDITION_NOT_MET from delete_datareader, ")
+            ACE_TEXT("but it returned: %C\n"), retcode_to_string(status).c_str()));
+          test_failed = 1;
         }
 
         // Return the "loan" of read samples to datareader.
@@ -1630,16 +1632,13 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
         check_return_loan_status(status, data1, 0, 0, "t10 return_loan");
 
-        status =   sub->delete_datareader(dr.in ());
-
-        if (status != ::DDS::RETCODE_OK)
-        {
-            ACE_ERROR ((LM_ERROR,
-                    ACE_TEXT("(%P|%t) t10 ERROR: delete_datawrite failed with retcode %d.\n"), status ));
-            test_failed = 1;
+        status = sub->delete_datareader(dr.in ());
+        if (status != ::DDS::RETCODE_OK) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) t10 ERROR: ")
+            ACE_TEXT("delete_datareader returned: %C\n"),
+            retcode_to_string(status).c_str()));
+          test_failed = 1;
         }
-
-
       }
       {
         //=====================================================

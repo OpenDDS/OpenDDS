@@ -24,6 +24,8 @@ class OpenDDS_Rtps_Udp_Export RtpsUdpLoader
   : public ACE_Service_Object {
 public:
   virtual int init(int argc, ACE_TCHAR* argv[]);
+
+  static void load();
 };
 
 ACE_STATIC_SVC_DECLARE_EXPORT(OpenDDS_Rtps_Udp, RtpsUdpLoader)

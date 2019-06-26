@@ -244,8 +244,7 @@ void StaticEndpointManager::assign_subscription_key(RepoId& rid,
 
 bool
 StaticEndpointManager::update_topic_qos(const RepoId& /*topicId*/,
-                                        const DDS::TopicQos& /*qos*/,
-                                        OPENDDS_STRING& /*name*/)
+                                        const DDS::TopicQos& /*qos*/)
 {
   ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: StaticEndpointManager::update_topic_qos - ")
              ACE_TEXT("Not allowed\n")));
@@ -346,15 +345,8 @@ StaticEndpointManager::add_publication_i(const RepoId& writerid,
 }
 
 DDS::ReturnCode_t
-StaticEndpointManager::remove_publication_i(const RepoId& writerid)
+StaticEndpointManager::remove_publication_i(const RepoId& writerid, LocalPublication& pub)
 {
-  LocalPublicationMap::const_iterator lp_pos = local_publications_.find(writerid);
-  if (lp_pos == local_publications_.end()) {
-    return DDS::RETCODE_ERROR;
-  }
-
-  const LocalPublication& pub = lp_pos->second;
-
   EndpointRegistry::WriterMapType::const_iterator pos = registry_.writer_map.find(writerid);
   if (pos == registry_.writer_map.end()) {
     return DDS::RETCODE_ERROR;
@@ -422,15 +414,9 @@ StaticEndpointManager::add_subscription_i(const RepoId& readerid,
 }
 
 DDS::ReturnCode_t
-StaticEndpointManager::remove_subscription_i(const RepoId& readerid)
+StaticEndpointManager::remove_subscription_i(const RepoId& readerid,
+                                             LocalSubscription& sub)
 {
-  LocalSubscriptionMap::const_iterator ls_pos = local_subscriptions_.find(readerid);
-  if (ls_pos == local_subscriptions_.end()) {
-    return DDS::RETCODE_ERROR;
-  }
-
-  const LocalSubscription& sub = ls_pos->second;
-
   EndpointRegistry::ReaderMapType::const_iterator pos = registry_.reader_map.find(readerid);
   if (pos == registry_.reader_map.end()) {
     return DDS::RETCODE_ERROR;
@@ -1535,8 +1521,8 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
     ValueMap values;
     pullValues(cf, it->second, values);
     int domain = 0;
-    unsigned char participant[6];
-    unsigned char entity[3];
+    unsigned char participant[6] = { 0 };
+    unsigned char entity[3] = { 0 };
     enum Type {
       Reader,
       Writer
@@ -1575,7 +1561,7 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
 #ifdef __SUNPRO_CC
         int count = 0; std::count_if(value.begin(), value.end(), isxdigit, count);
 #else
-        int count = std::count_if(value.begin(), value.end(), isxdigit);
+        const OPENDDS_STRING::difference_type count = std::count_if(value.begin(), value.end(), isxdigit);
 #endif
         if (value.size() != HEX_DIGITS_IN_PARTICIPANT || static_cast<size_t>(count) != HEX_DIGITS_IN_PARTICIPANT) {
           ACE_ERROR_RETURN((LM_ERROR,
@@ -1593,7 +1579,7 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
 #ifdef __SUNPRO_CC
         int count = 0; std::count_if(value.begin(), value.end(), isxdigit, count);
 #else
-        int count = std::count_if(value.begin(), value.end(), isxdigit);
+        const OPENDDS_STRING::difference_type count = std::count_if(value.begin(), value.end(), isxdigit);
 #endif
         if (value.size() != HEX_DIGITS_IN_ENTITY || static_cast<size_t>(count) != HEX_DIGITS_IN_ENTITY) {
           ACE_ERROR_RETURN((LM_ERROR,
