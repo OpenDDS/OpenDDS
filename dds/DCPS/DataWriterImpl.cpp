@@ -1579,7 +1579,7 @@ DataWriterImpl::register_instance_from_durable_data(DDS::InstanceHandle_t& handl
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::register_instance_from_durable_data: ")
                       ACE_TEXT("register instance with container failed, returned <%C>.\n"),
-                      retcode_to_string(ret)),
+                      retcode_to_string(ret).c_str()),
                      ret);
   }
 
