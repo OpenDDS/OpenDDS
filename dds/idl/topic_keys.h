@@ -48,8 +48,6 @@ public:
   class Error : public std::exception {
   public:
     Error();
-    Error(const Error& error);
-    explicit Error(const std::string& message);
     Error(AST_Decl* node, const std::string& message);
     virtual ~Error() throw ();
 

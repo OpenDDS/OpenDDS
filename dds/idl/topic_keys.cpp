@@ -35,6 +35,7 @@ TopicKeys::RootType TopicKeys::root_type(AST_Type* type)
 }
 
 TopicKeys::Error::Error()
+  : node_(0)
 {
 }
 
