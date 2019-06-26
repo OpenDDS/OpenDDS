@@ -78,8 +78,9 @@ bool keys_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
 {
   TopicKeys keys(node);
   size_t key_count = 0;
+  const bool is_topic_type = be_global->is_topic_type(node);
   IDL_GlobalData::DCPS_Data_Type_Info* info = idl_global->is_dcps_type(name);
-  if (be_global->is_topic_type(node)) {
+  if (is_topic_type) {
     key_count = keys.count();
   } else if (info) {
     key_count = info->key_list_.size();
@@ -90,9 +91,7 @@ bool keys_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
   {
     KeyLessThanWrapper wrapper(name);
 
-    if (!key_count) {
-      wrapper.has_no_keys_signature();
-    } else {
+    if (key_count) {
       const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
 
       wrapper.has_keys_signature();
@@ -102,7 +101,7 @@ bool keys_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
           "in global NS\n";
       }
 
-      if (key_count) {
+      if (is_topic_type) {
         TopicKeys::Iterator finished = keys.end();
         for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
           string fname = i.path();
@@ -123,6 +122,8 @@ bool keys_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
           wrapper.key_compare(fname);
         }
       }
+    } else {
+      wrapper.has_no_keys_signature();
     }
   }
 

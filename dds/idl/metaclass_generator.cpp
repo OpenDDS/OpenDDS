@@ -429,11 +429,11 @@ namespace {
     TopicKeys keys;
     if (struct_node) {
       info = idl_global->is_dcps_type(name);
-      keys = TopicKeys(struct_node);
-      if (info) {
-        key_count = info->key_list_.size();
-      } else if (is_topic_type) {
+      if (is_topic_type) {
+        keys = TopicKeys(struct_node);
         key_count = keys.count();
+      } else if (info) {
+        key_count = info->key_list_.size();
       }
     } else { // Union
       key_count = be_global->has_key(union_node) ? 1 : 0;

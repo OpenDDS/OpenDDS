@@ -382,38 +382,10 @@ namespace {
                  field->field_type(), fieldName.c_str());
     }
   };
-}
 
-bool v8_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
-                              const std::vector<AST_Field*>& fields,
-                              AST_Type::SIZE_TYPE, const char*)
-{
-  gen_includes();
+  void
+  gen_type_support(UTL_ScopedName* name)
   {
-    NamespaceGuard ng;
-    const std::string clazz = scoped(name);
-    {
-      Function ctv("copyToV8", "v8::Local<v8::Object>");
-      ctv.addArg("src", "const " + clazz + '&');
-      ctv.endArgs();
-      be_global->impl_ <<
-        "  const v8::Local<v8::Object> stru = Nan::New<v8::Object>();\n";
-      std::for_each(fields.begin(), fields.end(),
-                    gen_field_copyto("stru", "src"));
-      be_global->impl_ <<
-        "  return stru;\n";
-    }
-    {
-      Function vtc("copyFromV8", "void");
-      vtc.addArg("src", "const v8::Local<v8::Object>&");
-      vtc.addArg("out", clazz + '&');
-      vtc.endArgs();
-      std::for_each(fields.begin(), fields.end(),
-                    gen_field_copyfrom("out", "src"));
-    }
-  }
-
-  if (idl_global->is_dcps_type(name) || be_global->is_topic_type(node)) {
     be_global->add_include("dds/DCPS/V8TypeConverter.h",
                            BE_GlobalData::STREAM_CPP);
     ScopedNamespaceGuard cppGuard(name, be_global->impl_);
@@ -469,6 +441,40 @@ bool v8_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
       "  };\n"
       "};\n\n" <<
       tsv8 << "::Initializer init_tsv8_" << lname << ";\n";
+  }
+}
+
+bool v8_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
+                              const std::vector<AST_Field*>& fields,
+                              AST_Type::SIZE_TYPE, const char*)
+{
+  gen_includes();
+  {
+    NamespaceGuard ng;
+    const std::string clazz = scoped(name);
+    {
+      Function ctv("copyToV8", "v8::Local<v8::Object>");
+      ctv.addArg("src", "const " + clazz + '&');
+      ctv.endArgs();
+      be_global->impl_ <<
+        "  const v8::Local<v8::Object> stru = Nan::New<v8::Object>();\n";
+      std::for_each(fields.begin(), fields.end(),
+                    gen_field_copyto("stru", "src"));
+      be_global->impl_ <<
+        "  return stru;\n";
+    }
+    {
+      Function vtc("copyFromV8", "void");
+      vtc.addArg("src", "const v8::Local<v8::Object>&");
+      vtc.addArg("out", clazz + '&');
+      vtc.endArgs();
+      std::for_each(fields.begin(), fields.end(),
+                    gen_field_copyfrom("out", "src"));
+    }
+  }
+
+  if (be_global->is_topic_type(node) || idl_global->is_dcps_type(name)) {
+    gen_type_support(name);
   }
   return true;
 }
@@ -583,7 +589,7 @@ namespace {
   }
 }
 
-bool v8_generator::gen_union(AST_Union*, UTL_ScopedName* name,
+bool v8_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
                              const std::vector<AST_UnionBranch*>& branches,
                              AST_Type* discriminator, const char* /*repoid*/)
 {
@@ -609,6 +615,9 @@ bool v8_generator::gen_union(AST_Union*, UTL_ScopedName* name,
     vtc.endArgs();
     gen_copyfrom("out", "src", discriminator, "_d", false, true);
     generateSwitchForUnion("out._d()", branchGenFrom, branches, discriminator, "", "", clazz.c_str(), false, false);
+  }
+  if (be_global->is_topic_type(node)) {
+    gen_type_support(name);
   }
   return true;
 }

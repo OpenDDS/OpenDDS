@@ -135,7 +135,7 @@ public:
     Iterator(AST_Field* root, Iterator* parent);
 
     Iterator* parent_;
-    size_t pos_;
+    unsigned pos_;
     Iterator* child_;
     /// Current value of the entire iterator stack
     value_type current_value_;

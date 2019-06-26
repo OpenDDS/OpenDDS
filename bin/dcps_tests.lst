@@ -62,6 +62,7 @@ tests/DCPS/Compiler/annotations/classic_langmap/idl_test3_main/run_test.pl: !DCP
 tests/DCPS/Compiler/annotations/classic_langmap/topic_annotations_test_main/run_test.pl: !DCPS_MIN
 tests/DCPS/Compiler/annotations/cpp11_langmap/idl_test1_main/run_test.pl: !DCPS_MIN CXX11
 tests/DCPS/Compiler/annotations/cpp11_langmap/idl_test3_main/run_test.pl: !DCPS_MIN CXX11
+tests/DCPS/Compiler/annotations/is_topic_type_test/run_test.pl: !DCPS_MIN
 tests/DCPS/C++11/Messenger/run_test.pl: !DCPS_MIN CXX11
 tests/DCPS/Compiler/rapidjson_generator/run_test.pl: RAPIDJSON
 

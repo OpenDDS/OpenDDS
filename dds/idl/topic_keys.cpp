@@ -176,7 +176,7 @@ TopicKeys::Iterator& TopicKeys::Iterator::operator++()
     // If we are recursive and at a structure, look for key fields
     if (recursive_ || level_ == 0) {
       AST_Structure* struct_root = dynamic_cast<AST_Structure*>(root_);
-      size_t field_count = struct_root->nfields();
+      ACE_CDR::ULong field_count = struct_root->nfields();
       for (; pos_ < field_count; ++pos_) {
         AST_Field** field_ptrptr;
         struct_root->field(field_ptrptr, pos_);
@@ -203,11 +203,11 @@ TopicKeys::Iterator& TopicKeys::Iterator::operator++()
   // If we are an array, use the base type and repeat for every element
   } else if (root_type_ == ArrayType) {
     AST_Array* array_node = dynamic_cast<AST_Array*>(root_);
-    size_t array_dimension_count = array_node->n_dims();
+    ACE_CDR::ULong array_dimension_count = array_node->n_dims();
     if (array_dimension_count > 1) {
       throw Error(root_, "using multidimensional arrays as keys is unsupported.");
     }
-    size_t element_count = array_node->dims()[0]->ev()->u.ulval;
+    unsigned element_count = array_node->dims()[0]->ev()->u.ulval;
     AST_Type* type_node = array_node->base_type();
     AST_Type* unaliased_type_node = type_node->unaliased_type();
     for (; pos_ < element_count; ++pos_) {

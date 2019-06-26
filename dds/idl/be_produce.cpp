@@ -110,23 +110,6 @@ BE_abort()
 
 namespace {
 
-///Only warn once per run
-bool pragmaWarn = false;
-/**
- * @brief warning to print if a #pragma DCPS_DATA_TYPE is detected
- * @author ceneblock
- */
-void
-warnOnPragma(const char* filename, unsigned lineno)
-{
-  be_global->warning(filename, lineno, "\n"
-    " DCPS_DATA_TYPE and DCPS_DATA_KEY pragma statements are deprecated; please\n"
-    " use @topic, @key, @nested, and @default_nested instead. See section 2.1.1,\n"
-    " \"Defining the Data Types\", of the OpenDDS Developer's Guide for more\n"
-    " information.\n");
-  pragmaWarn = true;
-}
-
 /// generate a macro name for the #ifndef header-double-include protector
 string to_macro(const char* fn)
 {
@@ -309,16 +292,18 @@ BE_produce()
   const size_t buffer_sz = 512;
   char buffer[buffer_sz];
   unsigned lineno = 0;
-  if (!idl_global->print_warnings()) {
-    pragmaWarn = true;
-  }
-
+  bool warned_dcps_data_type = !idl_global->print_warnings();
   while (idl) {
     idl.getline(buffer, buffer_sz);
     lineno++;
 
-    if (!(pragmaWarn || strncmp("#pragma DCPS_DATA_TYPE", buffer, 22))) {
-      warnOnPragma(idl_fn, lineno);
+    if (!(warned_dcps_data_type || strncmp("#pragma DCPS_DATA_TYPE", buffer, 22))) {
+      be_global->warning(idl_fn, lineno, "\n"
+        "  DCPS_DATA_TYPE and DCPS_DATA_KEY pragma statements are deprecated; please\n"
+        "  use @topic, @key, @nested, and @default_nested instead. See section 2.1.1,\n"
+        "  \"Defining the Data Types\", of the OpenDDS Developer's Guide for more\n"
+        "  information.");
+      warned_dcps_data_type = true;
     } else if (0 == strncmp("#include", buffer, 8)) { //FUTURE: account for comments?
       string inc(buffer + 8);
       size_t delim1 = inc.find_first_of("<\"");
@@ -349,8 +334,8 @@ BE_produce()
             && stb_inc.substr(stb_inc.size() - 7) == "/orbC.h") ) {
           be_global->warning(idl_fn, lineno,
             "Potential inclusion of TAO orbC.h\n"
-            " Include TAO orb.idl with path of tao/orb.idl"
-            " to prevent compilation errors\n");
+            "  Include TAO orb.idl with path of tao/orb.idl"
+            "  to prevent compilation errors");
         }
       }
 

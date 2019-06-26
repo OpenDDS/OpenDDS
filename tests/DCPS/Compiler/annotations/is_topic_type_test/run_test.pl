@@ -45,13 +45,14 @@ sub subtest {
   my $itl_text = <$f>;
   close $f;
 
+  # Check the Types in the ITL
   my $itl = decode_json($itl_text);
   my @types = @{$itl->{'types'}};
   foreach my $type (@types) {
     die "There's a type with no name" unless exists $type->{'name'};
     $type->{'name'} =~ /IDL:(.*):.*/;
     my $name = $1;
-    die "Type \"$name\" is not expected at all" unless exists $expected{$name};
+    die "Type \"$name\" was not expected at all" unless exists $expected{$name};
     die "Type \"$name\" does not have \"note\"" unless exists $type->{'note'};
     die "Type \"$name\" does not have \"is_dcps_data_type\"" unless exists $type->{'note'}->{'is_dcps_data_type'};
 
@@ -61,13 +62,14 @@ sub subtest {
     if ($expected_value != $itl_value) {
       my $exp = $expected_value ? "NOT " : "";
       my $act = $itl_value ? " NOT" : "";
-      print STDERR "ERROR for $mode: Expected \"$name\" ${exp}to be a topic type but it was${act}.\n";
+      print STDERR "ERROR in $mode: Expected \"$name\" ${exp}to be a topic type but it was${act}.\n";
       $status = 1;
     }
   }
+  # Make sure we found everything in %expected
   while (my ($k, $v) = each %expected) {
     if ($v->{not_found}) {
-      print STDERR "ERROR for $mode: $k was not found in ITL\n";
+      print STDERR "ERROR in $mode: $k was not found in ITL\n";
       $status = 1;
     }
     $v->{not_found} = 1;

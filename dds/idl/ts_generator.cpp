@@ -82,10 +82,10 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
   size_t key_count = 0;
   if (struct_node) {
     IDL_GlobalData::DCPS_Data_Type_Info* info = idl_global->is_dcps_type(name);
-    if (info) {
-      key_count = info->key_list_.size();
-    } else if (be_global->is_topic_type(struct_node)) {
+    if (be_global->is_topic_type(struct_node)) {
       key_count = TopicKeys(struct_node).count();
+    } else if (info) {
+      key_count = info->key_list_.size();
     } else {
       return true;
     }

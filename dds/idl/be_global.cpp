@@ -699,7 +699,7 @@ BE_GlobalData::warning(const char* filename, unsigned lineno, const char* msg)
 {
   if (idl_global->print_warnings()) {
     ACE_ERROR((LM_WARNING,
-      ACE_TEXT("Warning - %C: \"%C\", line %u: %C"),
+      ACE_TEXT("Warning - %C: \"%C\", line %u: %C\n"),
       idl_global->prog_name(), filename, lineno, msg));
   }
 }

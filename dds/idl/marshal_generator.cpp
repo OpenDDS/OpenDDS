@@ -1664,9 +1664,13 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     be_global->impl_ << intro << "  return " << expr << ";\n";
   }
 
-  const bool is_topic_type = be_global->is_topic_type(node);
-  TopicKeys keys(node);
   IDL_GlobalData::DCPS_Data_Type_Info* info = idl_global->is_dcps_type(name);
+  const bool is_topic_type = be_global->is_topic_type(node);
+  TopicKeys keys;
+  if (is_topic_type) {
+    keys = TopicKeys(node);
+    info = 0; // Annotations Override DCPS_DATA_TYPE
+  }
 
   // Only generate these methods if this is a topic type
   if (info || is_topic_type) {
