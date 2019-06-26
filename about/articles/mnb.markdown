@@ -6,6 +6,7 @@ categories: [opendds]
 ---
 OCI publishes Middleware News Brief and SETT (Software Engineering Tech Trends) articles on a number of topics.  The following are related to OpenDDS:
 
+- [Interoperable Internet-Enabled DDS Applications](https://objectcomputing.com/resources/publications/mnb/interoperable-internet-enabled-dds-applications)
 - [Bringing Multicast to the Cloud for Interoperable OpenDDS Applications](https://objectcomputing.com/resources/publications/sett/march-2019-multicast-to-cloud-for-dds-applications)
 - [Distributing Data Securely with OpenDDS](https://objectcomputing.com/resources/publications/sett/october-2018-distributing-data-securely-with-opendds)
 - [Using TAO and OpenDDS with .NET, Part I](http://www.objectcomputing.com/resources/publications/mnb/using-tao-and-opendds-with-net-part-1)
