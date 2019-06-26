@@ -530,7 +530,7 @@ namespace OpenDDS
               if (utf_fail) {
                 proto_tree_add_expert_format(
                     params.tree, params.info, params.warning_ef, params.tvb,
-                    params.offset, len, "%s", s.c_str()
+                    static_cast<gint>(params.offset), static_cast<gint>(len), "%s", s.c_str()
                 );
               }
 #endif
@@ -781,7 +781,7 @@ namespace OpenDDS
               if (utf_fail) {
                 proto_tree_add_expert_format(
                     params.tree, params.info, params.warning_ef, params.tvb,
-                    params.offset, len, "%s", s.c_str()
+                    static_cast<gint>(params.offset), static_cast<gint>(len), "%s", s.c_str()
                 );
               }
 #endif
@@ -1037,7 +1037,7 @@ namespace OpenDDS
     {
       params.use_index = false;
       is_root_ = true;
-      return params.offset + (gint) this->dissect_i(params);
+      return static_cast<gint>(params.offset + this->dissect_i(params));
     }
 
     Sample_Field::IDLTypeID
@@ -1119,7 +1119,7 @@ namespace OpenDDS
           outstream << " (length = " << count << ")";
           item = proto_tree_add_uint_format(
             ADD_FIELD_PARAMS,
-            count, "%s", outstream.str().c_str()
+            static_cast<guint32>(count), "%s", outstream.str().c_str()
           );
         }
       }
@@ -1457,7 +1457,7 @@ namespace OpenDDS
     size_t Sample_Fixed::dissect_i(Wireshark_Bundle &params) {
       // Based on FACE/Fixed.h
       // Fixed_T could not be used here because it is a templated class
-      size_t len = (digits_ + 2) / 2;
+      ACE_CDR::UShort len = static_cast<ACE_CDR::UShort>((digits_ + 2) / 2);
 
       if (params.get_size_only) {
         params.serializer.skip(len);
