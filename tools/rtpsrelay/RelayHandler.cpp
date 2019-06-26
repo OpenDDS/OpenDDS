@@ -1,5 +1,6 @@
 #include "RelayHandler.h"
 
+#include <dds/DCPS/RTPS/BaseMessageTypes.h>
 #include <dds/DCPS/RTPS/MessageTypes.h>
 #include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
 
@@ -16,8 +17,6 @@
 namespace {
   const CORBA::UShort encap_LE = 0x0300; // {PL_CDR_LE} in LE
   const CORBA::UShort encap_BE = 0x0200; // {PL_CDR_BE} in LE
-  const CORBA::Octet beacon_message[] = { 1, 0, 0, 0 };
-  const size_t beacon_message_length = sizeof(beacon_message);
 
   std::string guid_to_string(const OpenDDS::DCPS::GUID_t& a_guid)
   {
@@ -119,10 +118,10 @@ int RelayHandler::handle_input(ACE_HANDLE)
     return 0;
   }
 
-  // Detect beacon messages and flag them as empty
+  //
   bool is_beacon_message = false;
-  if ((buffer->length() == beacon_message_length)
-    && (static_cast<CORBA::Octet>(buffer->rd_ptr()[0]) == OpenDDS::RTPS::PAD)) {
+  if ((buffer->length() == OpenDDS::RTPS::BEACON_MESSAGE_LENGTH)
+    && (static_cast<CORBA::Octet>(buffer->rd_ptr()[0]) == OpenDDS::RTPS::BEACON_MSG_ID)) {
     is_beacon_message = true;
   }
 
