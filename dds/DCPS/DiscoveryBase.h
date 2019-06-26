@@ -633,7 +633,7 @@ namespace OpenDDS {
         DCPS::TransportLocatorSeq trans_info_;
         RepoIdSet matched_endpoints_;
         DCPS::SequenceNumber sequence_;
-        RepoIdSet remote_opendds_associations_;
+        RepoIdSet remote_expectant_opendds_associations_;
 #ifdef OPENDDS_SECURITY
         bool have_ice_agent_info;
         ICE::AgentInfo ice_agent_info;
@@ -779,12 +779,14 @@ namespace OpenDDS {
             DCPS::WriterIdSeq writer_seq(1);
             writer_seq.length(1);
             writer_seq[0] = removing;
-            lsi->second.remote_opendds_associations_.erase(removing);
+            const size_t count = lsi->second.remote_expectant_opendds_associations_.erase(removing);
             lsi->second.subscription_->remove_associations(writer_seq,
                                                            false /*notify_lost*/);
             remove_assoc_i(remove_from, lsi->second, removing);
             // Update writer
-            write_subscription_data(remove_from, lsi->second);
+            if (count) {
+              write_subscription_data(remove_from, lsi->second);
+            }
           }
 
         } else {
@@ -794,7 +796,7 @@ namespace OpenDDS {
             DCPS::ReaderIdSeq reader_seq(1);
             reader_seq.length(1);
             reader_seq[0] = removing;
-            lpi->second.remote_opendds_associations_.erase(removing);
+            lpi->second.remote_expectant_opendds_associations_.erase(removing);
             lpi->second.publication_->remove_associations(reader_seq,
                                                           false /*notify_lost*/);
             remove_assoc_i(remove_from, lpi->second, removing);
@@ -1161,7 +1163,7 @@ namespace OpenDDS {
           }
 
           // change this if 'writer_active' (above) changes
-          if (call_writer && !call_reader && !is_opendds(reader)) {
+          if (call_writer && !call_reader && !is_expectant_opendds(reader)) {
             if (DCPS::DCPS_debug_level > 3) {
               ACE_DEBUG((LM_DEBUG,
                          ACE_TEXT("(%P|%t) EndpointManager::match - ")
@@ -1173,11 +1175,11 @@ namespace OpenDDS {
         } else if (already_matched) { // break an existing associtaion
           if (writer_local) {
             lpi->second.matched_endpoints_.erase(reader);
-            lpi->second.remote_opendds_associations_.erase(reader);
+            lpi->second.remote_expectant_opendds_associations_.erase(reader);
           }
           if (reader_local) {
             lsi->second.matched_endpoints_.erase(writer);
-            lsi->second.remote_opendds_associations_.erase(writer);
+            lsi->second.remote_expectant_opendds_associations_.erase(writer);
           }
           if (writer_local && !reader_local) {
             remove_assoc_i(writer, lpi->second, reader);
@@ -1218,11 +1220,7 @@ namespace OpenDDS {
         }
       }
 
-      virtual bool is_opendds(const GUID_t& endpoint) const
-      {
-        return !std::memcmp(endpoint.guidPrefix, DCPS::VENDORID_OCI,
-                            sizeof(DCPS::VENDORID_OCI));
-      }
+      virtual bool is_expectant_opendds(const GUID_t& endpoint) const = 0;
 
       virtual bool shutting_down() const = 0;
 

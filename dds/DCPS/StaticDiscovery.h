@@ -180,6 +180,8 @@ public:
   virtual DDS::ReturnCode_t remove_subscription_i(const RepoId& /*subscriptionId*/,
                                                   LocalSubscription& /*sub*/);
 
+  virtual bool is_expectant_opendds(const GUID_t& endpoint) const;
+
   virtual bool shutting_down() const;
 
   virtual void populate_transport_locator_sequence(TransportLocatorSeq*& /*tls*/,
