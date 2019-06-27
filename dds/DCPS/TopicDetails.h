@@ -218,7 +218,7 @@ namespace OpenDDS {
       RepoIdSet endpoints_;
 
       RemoteTopicMap remote_topics_;
-      size_t inconsistent_topic_count_;
+      int inconsistent_topic_count_;
     };
 
   } // namespace DCPS
