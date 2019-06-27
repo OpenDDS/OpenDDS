@@ -11,8 +11,6 @@
 #include <ace/OS_NS_string.h>
 #include <ace/OS_Memory.h>
 
-#include <stdexcept>
-
 #if !defined (__ACE_INLINE__)
 # include "Serializer.inl"
 #endif /* !__ACE_INLINE__ */
