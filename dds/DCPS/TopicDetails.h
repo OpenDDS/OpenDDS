@@ -20,6 +20,14 @@ namespace OpenDDS {
   namespace DCPS {
 
     struct TopicDetails {
+
+      struct RemoteTopic {
+        OPENDDS_STRING data_type_name_;
+        bool inconsistent_;
+        RepoIdSet endpoints_;
+      };
+      typedef OPENDDS_MAP_CMP(DCPS::RepoId, RemoteTopic, DCPS::GUID_tKeyLessThan) RemoteTopicMap;
+
       TopicDetails() : topic_callbacks_(0) {}
 
       void init(const OPENDDS_STRING& name,
@@ -42,7 +50,7 @@ namespace OpenDDS {
         endpoints_.clear();
         inconsistent_topic_count_ = 0;
 
-        for (typename TopicDetails::RemoteTopicMap::iterator pos = remote_topics_.begin(), limit = remote_topics_.end();
+        for (RemoteTopicMap::iterator pos = remote_topics_.begin(), limit = remote_topics_.end();
              pos != limit; ++pos) {
           RemoteTopic& remote = pos->second;
           remote.inconsistent_ = !remote.data_type_name_.empty() && local_data_type_name_ != remote.data_type_name_;
@@ -74,7 +82,7 @@ namespace OpenDDS {
       void unset_local() {
         topic_callbacks_ = 0;
 
-        for (typename TopicDetails::RemoteTopicMap::iterator pos = remote_topics_.begin(), limit = remote_topics_.end();
+        for (RemoteTopicMap::iterator pos = remote_topics_.begin(), limit = remote_topics_.end();
              pos != limit; ++pos) {
           RemoteTopic& remote = pos->second;
           if (remote.data_type_name_.empty()) {
@@ -106,11 +114,11 @@ namespace OpenDDS {
 
         endpoints_.insert(guid);
 
-        typename RemoteTopicMap::iterator remote_topic_iter = remote_topics_.find(participant_id);
+        RemoteTopicMap::iterator remote_topic_iter = remote_topics_.find(participant_id);
         bool inconsistent_before;
         if (remote_topic_iter == remote_topics_.end()) {
           // Insert.
-          remote_topic_iter = remote_topics_.insert(std::make_pair(participant_id, TopicDetails::RemoteTopic())).first;
+          remote_topic_iter = remote_topics_.insert(std::make_pair(participant_id, RemoteTopic())).first;
           inconsistent_before = false;
         } else {
           inconsistent_before = remote_topic_iter->second.inconsistent_;
@@ -167,7 +175,7 @@ namespace OpenDDS {
         RepoId participant_id = guid;
         participant_id.entityId = ENTITYID_PARTICIPANT;
 
-        typename RemoteTopicMap::iterator remote_topic_iter = remote_topics_.find(participant_id);
+        RemoteTopicMap::iterator remote_topic_iter = remote_topics_.find(participant_id);
 
         if (remote_topic_iter == remote_topics_.end()) {
           // It was local.
@@ -209,12 +217,6 @@ namespace OpenDDS {
       TopicCallbacks* topic_callbacks_;
       RepoIdSet endpoints_;
 
-      struct RemoteTopic {
-        OPENDDS_STRING data_type_name_;
-        bool inconsistent_;
-        RepoIdSet endpoints_;
-      };
-      typedef OPENDDS_MAP_CMP(DCPS::RepoId, RemoteTopic, DCPS::GUID_tKeyLessThan) RemoteTopicMap;
       RemoteTopicMap remote_topics_;
       size_t inconsistent_topic_count_;
     };
