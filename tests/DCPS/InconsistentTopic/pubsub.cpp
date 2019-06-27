@@ -140,8 +140,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
         cerr << "ERROR: not able to retrieve topic status." << endl;
         exit(1);
       }
+      if (status.total_count != 0) {
+        cerr << "ERROR: (alpha) participant 1 total_count should be 0 but is " << status.total_count << endl;
+        test_error = true;
+      }
       if (status.total_count_change != 0) {
-        cerr << "ERROR: participant 1 saw an inconsistent topic when it should not (first)" << endl;
+        cerr << "ERROR: (alpha) participant 1 total_count_change should be 0 but is " << status.total_count_change << endl;
         test_error = true;
       }
 
@@ -150,8 +154,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
         cerr << "ERROR: not able to retrieve topic status." << endl;
         exit(1);
       }
-      if (status.total_count_change == 0) {
-        cerr << "ERROR: participant 2 did not see an inconsistent topic when it should have (first)" << endl;
+      if (status.total_count != 1) {
+        cerr << "ERROR: (alpha) participant 2 total_count should be 1 but is " << status.total_count << endl;
+        test_error = true;
+      }
+      if (status.total_count_change != 1) {
+        cerr << "ERROR: (alpha) participant 2 total_count_change should be 1 but is " << status.total_count_change << endl;
         test_error = true;
       }
 
@@ -173,7 +181,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
         exit(1);
       }
 
-      // Wait for p2 to see p1's datareader.
+      // Wait for p1 to see p2's datareader.
 
       for (;;) {
         DDS::SubscriptionBuiltinTopicDataSeq sub_data;
@@ -192,8 +200,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
         cerr << "ERROR: not able to retrieve topic status." << endl;
         exit(1);
       }
-      if (status.total_count_change == 0) {
-        cerr << "ERROR: participant 1 should have seen an inconsistent topic but did not (second)" << endl;
+      if (status.total_count != 1) {
+        cerr << "ERROR: (beta) participant 1 total_count should be 1 but is " << status.total_count << endl;
+        test_error = true;
+      }
+      if (status.total_count_change != 1) {
+        cerr << "ERROR: (beta) participant 1 total_count_change should be 1 but is " << status.total_count_change << endl;
         test_error = true;
       }
 
@@ -202,8 +214,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
         cerr << "ERROR: not able to retrieve topic status." << endl;
         exit(1);
       }
-      if (status.total_count_change == 0) {
-        cerr << "ERROR: participant 2 should have seen an inconsistent topic but did not (second)" << endl;
+      if (status.total_count != 1) {
+        cerr << "ERROR: (beta) participant 2 total_count should be 1 but is " << status.total_count << endl;
+        test_error = true;
+      }
+      if (status.total_count_change != 0) {
+        cerr << "ERROR: (beta) participant 2 total_count_change should be 0 but is " << status.total_count_change << endl;
         test_error = true;
       }
 

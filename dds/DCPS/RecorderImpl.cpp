@@ -790,12 +790,6 @@ RecorderImpl::update_incompatible_qos(const IncompatibleQosStatus& status)
 }
 
 void
-RecorderImpl::inconsistent_topic()
-{
-  topic_servant_->inconsistent_topic();
-}
-
-void
 RecorderImpl::signal_liveliness(const RepoId& remote_participant)
 {
   RepoId prefix = remote_participant;

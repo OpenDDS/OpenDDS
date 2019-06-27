@@ -400,7 +400,6 @@ private:
     int                    topic_mask);
 
   DDS::Topic_ptr create_new_topic(
-    const RepoId                   topic_id,
     const char *                   topic_name,
     const char *                   type_name,
     const DDS::TopicQos &          qos,
