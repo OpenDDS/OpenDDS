@@ -1,5 +1,6 @@
 #include "RelayHandler.h"
 
+#include <dds/DCPS/RTPS/BaseMessageTypes.h>
 #include <dds/DCPS/RTPS/MessageTypes.h>
 #include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
 
@@ -116,7 +117,13 @@ int RelayHandler::handle_input(ACE_HANDLE)
     ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::handle_input failed to deserialize RTPS header\n"));
     return 0;
   }
-  const auto empty_message = buffer->length() == 0;
+
+  //
+  bool is_beacon_message = false;
+  if ((buffer->length() == OpenDDS::RTPS::BEACON_MESSAGE_LENGTH)
+    && (static_cast<CORBA::Octet>(buffer->rd_ptr()[0]) == OpenDDS::RTPS::BEACON_MSG_ID)) {
+    is_beacon_message = true;
+  }
 
   OpenDDS::DCPS::RepoId src_guid;
   std::memcpy(src_guid.guidPrefix, header.guidPrefix, sizeof(OpenDDS::DCPS::GuidPrefix_t));
@@ -124,7 +131,7 @@ int RelayHandler::handle_input(ACE_HANDLE)
   const auto guid = guid_to_string(src_guid);
 
   buffer->rd_ptr(rd_ptr);
-  process_message(remote, ACE_Time_Value().now(), guid, buffer.get(), empty_message);
+  process_message(remote, ACE_Time_Value().now(), guid, buffer.get(), is_beacon_message);
   return 0;
 }
 
@@ -176,12 +183,12 @@ void VerticalHandler::process_message(const ACE_INET_Addr& a_remote,
                                       const ACE_Time_Value& a_now,
                                       const std::string& a_src_guid,
                                       ACE_Message_Block* a_msg,
-                                      bool a_empty_message)
+                                      bool is_beacon_message)
 {
   // Readers send empty messages so we know where they are.
   routing_table_.update(a_src_guid, horizontal_handler_->relay_address(), addr_to_string(a_remote), a_now);
 
-  if (a_empty_message) {
+  if (is_beacon_message) {
     return;
   }
 
@@ -236,9 +243,9 @@ void HorizontalHandler::process_message(const ACE_INET_Addr&,
                                         const ACE_Time_Value&,
                                         const std::string& a_src_guid,
                                         ACE_Message_Block* a_msg,
-                                        bool a_empty_message)
+                                        bool is_beacon_message)
 {
-  if (a_empty_message) {
+  if (is_beacon_message) {
     return;
   }
 
@@ -283,9 +290,9 @@ void SpdpHandler::process_message(const ACE_INET_Addr& a_remote,
                                   const ACE_Time_Value& a_now,
                                   const std::string& a_src_guid,
                                   ACE_Message_Block* a_buffer,
-                                  bool a_empty_message)
+                                  bool is_beacon_message)
 {
-  if (a_empty_message) {
+  if (is_beacon_message) {
     return;
   }
 
@@ -377,5 +384,5 @@ void SpdpHandler::process_message(const ACE_INET_Addr& a_remote,
   }
 
   a_buffer->rd_ptr(rd_ptr);
-  VerticalHandler::process_message(a_remote, a_now, a_src_guid, a_buffer, a_empty_message);
+  VerticalHandler::process_message(a_remote, a_now, a_src_guid, a_buffer, is_beacon_message);
 }
