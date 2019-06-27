@@ -42,7 +42,7 @@ namespace OpenDDS {
         endpoints_.clear();
         inconsistent_topic_count_ = 0;
 
-        for (typename TopicDetails::RemoteTopicMap::iterator pos = remote_topics_.begin(), limit = remote_topics_.end();
+        for (TopicDetails::RemoteTopicMap::iterator pos = remote_topics_.begin(), limit = remote_topics_.end();
              pos != limit; ++pos) {
           RemoteTopic& remote = pos->second;
           remote.inconsistent_ = !remote.data_type_name_.empty() && local_data_type_name_ != remote.data_type_name_;
@@ -74,7 +74,7 @@ namespace OpenDDS {
       void unset_local() {
         topic_callbacks_ = 0;
 
-        for (typename TopicDetails::RemoteTopicMap::iterator pos = remote_topics_.begin(), limit = remote_topics_.end();
+        for (TopicDetails::RemoteTopicMap::iterator pos = remote_topics_.begin(), limit = remote_topics_.end();
              pos != limit; ++pos) {
           RemoteTopic& remote = pos->second;
           if (remote.data_type_name_.empty()) {
@@ -106,7 +106,7 @@ namespace OpenDDS {
 
         endpoints_.insert(guid);
 
-        typename RemoteTopicMap::iterator remote_topic_iter = remote_topics_.find(participant_id);
+        RemoteTopicMap::iterator remote_topic_iter = remote_topics_.find(participant_id);
         bool inconsistent_before;
         if (remote_topic_iter == remote_topics_.end()) {
           // Insert.
@@ -167,7 +167,7 @@ namespace OpenDDS {
         RepoId participant_id = guid;
         participant_id.entityId = ENTITYID_PARTICIPANT;
 
-        typename RemoteTopicMap::iterator remote_topic_iter = remote_topics_.find(participant_id);
+        RemoteTopicMap::iterator remote_topic_iter = remote_topics_.find(participant_id);
 
         if (remote_topic_iter == remote_topics_.end()) {
           // It was local.
@@ -216,7 +216,7 @@ namespace OpenDDS {
       };
       typedef OPENDDS_MAP_CMP(DCPS::RepoId, RemoteTopic, DCPS::GUID_tKeyLessThan) RemoteTopicMap;
       RemoteTopicMap remote_topics_;
-      size_t inconsistent_topic_count_;
+      int inconsistent_topic_count_;
     };
 
   } // namespace DCPS
