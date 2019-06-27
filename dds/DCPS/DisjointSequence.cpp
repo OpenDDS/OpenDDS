@@ -274,7 +274,7 @@ DisjointSequence::fill_bitmap_range(CORBA::ULong low, CORBA::ULong high,
   }
 
   // handle ones between idx_low and idx_high (if gap exists)
-  for (CORBA::ULong i = idx_low + 1; i < idx_high; ++i) {
+  for (CORBA::ULong i = idx_low + 1; i < idx_high || (i == idx_high && bit_high == 31); ++i) {
     bitmap[i] = 0xFFFFFFFF;
   }
 
