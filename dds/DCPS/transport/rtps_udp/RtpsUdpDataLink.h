@@ -110,10 +110,6 @@ public:
   /// Given a 'local' id, return the set of address for all remote peers.
   AddrSet get_addresses(const RepoId& local) const;
 
-  // Internal non-locking versions of the above
-  AddrSet get_addresses_i(const RepoId& local, const RepoId& remote) const;
-  AddrSet get_addresses_i(const RepoId& local) const;
-
   void associated(const RepoId& local, const RepoId& remote,
                   bool local_reliable, bool remote_reliable,
                   bool local_durable, bool remote_durable);
@@ -159,14 +155,16 @@ public:
 #endif
 
 private:
+  // Internal non-locking versions of the above
+  AddrSet get_addresses_i(const RepoId& local, const RepoId& remote) const;
+  AddrSet get_addresses_i(const RepoId& local) const;
+
   void get_locators_i(const RepoId& local_id,
                       AddrSet& addrs) const;
 
   bool get_locator_i(const RepoId& remote_id, ACE_INET_Addr& addr) const;
 
   virtual void stop_i();
-  virtual void send_i(TransportQueueElement* element, bool relink = true);
-  RemoveResult remove_sample(const DataSampleElement* sample, void* context);
 
   virtual TransportQueueElement* customize_queue_element(
     TransportQueueElement* element);
@@ -210,7 +208,7 @@ private:
       , outer_(outer)
     {}
 
-    void retain_all(RepoId pub_id);
+    void retain_all(const RepoId& pub_id);
     void insert(SequenceNumber sequence,
                 TransportSendStrategy::QueueType* queue,
                 ACE_Message_Block* chain);
@@ -220,9 +218,13 @@ private:
   } multi_buff_;
 
   struct Response {
+    Response(const RepoId& from, const RepoId& dst)
+      : from_guid_(from), dst_guid_(dst) {}
+    Response(const RepoId& from, const RepoId& dst, const RepoIdSet& to)
+      : from_guid_(from), dst_guid_(dst), to_guids_(to) {}
     RepoId from_guid_;
-    RepoIdSet to_guids_;
     RepoId dst_guid_;
+    RepoIdSet to_guids_;
     RTPS::Submessage sm_;
   };
   typedef OPENDDS_VECTOR(Response) ResponseVec;
@@ -274,7 +276,7 @@ private:
     void send_heartbeats_manual_i(ResponseVec& responses);
 
     void gather_gaps_i(const RepoId& reader,
-                       DisjointSequence gaps,
+                       const DisjointSequence& gaps,
                        ResponseVec& responses);
     void process_acked_by_all_i();
     void send_directed_nack_replies_i(const RepoId& readerId, ReaderInfo& reader, ResponseVec& responses);
@@ -282,7 +284,7 @@ private:
     void send_nackfrag_replies_i(DisjointSequence& gaps, AddrSet& gap_recipients);
 
   public:
-    explicit RtpsWriter(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable, CORBA::Long hbc) : link_(link), id_(id), durable_(durable), ready_to_hb_(false), heartbeat_count_(hbc) {}
+    RtpsWriter(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable, CORBA::Long hbc) : link_(link), id_(id), durable_(durable), ready_to_hb_(false), heartbeat_count_(hbc) {}
     ~RtpsWriter();
     SequenceNumber heartbeat_high(const ReaderInfo&) const;
     void add_elem_awaiting_ack(TransportQueueElement* element);
@@ -297,7 +299,7 @@ private:
     bool is_reader_handshake_done(const RepoId& id) const;
     void pre_stop_helper(OPENDDS_VECTOR(TransportQueueElement*)& to_deliver,
                          OPENDDS_VECTOR(TransportQueueElement*)& to_drop);
-    void retain_all_helper(RepoId pub_id);
+    void retain_all_helper(const RepoId& pub_id);
     void msb_insert_helper(const TransportQueueElement* const tqe,
                            const SequenceNumber& seq,
                            TransportSendStrategy::QueueType* q,
@@ -350,7 +352,7 @@ private:
 
   class RtpsReader : public RcObject {
   public:
-    explicit RtpsReader(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable) : link_(link), id_(id), durable_(durable) {}
+    RtpsReader(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable) : link_(link), id_(id), durable_(durable) {}
 
     bool add_writer(const RepoId& id, const WriterInfo& info);
     bool has_writer(const RepoId& id) const;
@@ -379,6 +381,16 @@ private:
   };
   typedef RcHandle<RtpsReader> RtpsReader_rch;
 
+  typedef OPENDDS_VECTOR(ResponseVec::iterator) ResponseIterVec;
+  typedef OPENDDS_MAP_CMP(RepoId, ResponseIterVec, GUID_tKeyLessThan) DestResponseMap;
+  typedef OPENDDS_MAP(AddrSet, DestResponseMap) AddrDestResponseMap;
+  typedef OPENDDS_VECTOR(ResponseIterVec) ResponseIterVecVec;
+
+  void build_response_map(ResponseVec& responses, AddrDestResponseMap& adr_map);
+  void bundle_mapped_responses(AddrDestResponseMap& adr_map,
+                               ResponseIterVecVec& response_bundles,
+                               OPENDDS_VECTOR(AddrSet)& response_bundle_addrs,
+                               OPENDDS_VECTOR(size_t)& response_bundle_sizes);
   void send_bundled_responses(ResponseVec& responses);
 
   typedef OPENDDS_MAP_CMP(RepoId, RtpsReader_rch, GUID_tKeyLessThan) RtpsReaderMap;
@@ -428,8 +440,8 @@ private:
     }
     ResponseVec responses;
     for (OPENDDS_VECTOR(RtpsWriter_rch)::const_iterator it = to_call.begin(); it < to_call.end(); ++it) {
-      RtpsWriter* writer = &(**it);
-      (writer->*func)(submessage, src, responses);
+      RtpsWriter& writer = **it;
+      (writer.*func)(submessage, src, responses);
     }
     send_bundled_responses(responses);
   }
@@ -465,8 +477,8 @@ private:
     }
     ResponseVec responses;
     for (OPENDDS_VECTOR(RtpsReader_rch)::const_iterator it = to_call.begin(); it < to_call.end(); ++it) {
-      RtpsReader* reader = &(**it);
-      schedule_timer |= (reader->*func)(submessage, src, responses);
+      RtpsReader& reader = **it;
+      schedule_timer |= (reader.*func)(submessage, src, responses);
     }
     send_bundled_responses(responses);
     if (schedule_timer) {

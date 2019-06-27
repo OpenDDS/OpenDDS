@@ -246,11 +246,10 @@ RtpsUdpSendStrategy::add_delayed_notification(TransportQueueElement* element)
 
 RemoveResult
 RtpsUdpSendStrategy::do_remove_sample(const RepoId& pub_id,
-  const TransportQueueElement::MatchCriteria& criteria,
-  void* /*context*/)
+  const TransportQueueElement::MatchCriteria& criteria)
 {
   link_->do_remove_sample(pub_id, criteria);
-  return TransportSendStrategy::do_remove_sample(pub_id, criteria, 0);
+  return TransportSendStrategy::do_remove_sample(pub_id, criteria);
 }
 
 #if defined(OPENDDS_SECURITY)
