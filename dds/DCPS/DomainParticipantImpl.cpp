@@ -461,7 +461,6 @@ DomainParticipantImpl::create_topic_i(
   } else {
 
     OpenDDS::DCPS::TypeSupport_var type_support;
-    bool has_keys = (topic_mask & TOPIC_TYPE_HAS_KEYS);
 
     if (0 == topic_mask) {
        // creating a topic with compile time type
@@ -476,7 +475,6 @@ DomainParticipantImpl::create_topic_i(
         }
         return DDS::Topic::_nil();
       }
-      has_keys = type_support->has_dcps_key();
     }
 
     DDS::Topic_var new_topic = create_new_topic(topic_name,
