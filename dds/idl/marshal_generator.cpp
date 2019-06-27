@@ -2192,7 +2192,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
   const string key_only_wrap_out = getWrapper("uni.t._d()", discriminator, WD_OUTPUT);
 
-  bool is_bounded = is_bounded_type(node);
+  const bool is_bounded = is_bounded_type(node);
   {
     Function max_marsh("gen_max_marshaled_size", "size_t");
     max_marsh.addArg("uni", "const " + cxx + "&");
@@ -2293,7 +2293,8 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
   be_global->header_ <<
     "template <>\n"
     "struct MarshalTraits<" << cxx << "> {\n"
-    "  static bool gen_is_bounded_size() { return true; }\n"
+    "  static bool gen_is_bounded_size() { return " << (is_bounded ? "true" : "false") << "; }\n"
+    // Key is the discriminator, so its always bounded
     "  static bool gen_is_bounded_key_size() { return true; }\n"
     "};\n";
 
