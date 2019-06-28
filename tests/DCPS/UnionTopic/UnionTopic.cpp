@@ -11,15 +11,6 @@ using OpenDDS::DCPS::retcode_to_string;
 using namespace UnionTopic;
 
 #include <vector>
-#include <string>
-
-std::vector<UnionTopic::Candidate_t> candidates = {
-  {"Turtle", 20},
-  {"Monkey", 43},
-  {"Owl", 27},
-  {"Snake", 13},
-  {"Tiger", 67}
-};
 
 const DDS::Duration_t max_wait_time = {3, 0};
 const int domain = 142;
@@ -184,6 +175,13 @@ bool
 basic_test(DDS::DomainParticipant_var& participant, DDS::Topic_var& topic)
 {
   DDS::ReturnCode_t rc;
+
+  std::vector<UnionTopic::Candidate_t> candidates;
+  candidates.push_back({"Turtle", 20});
+  candidates.push_back({"Monkey", 43});
+  candidates.push_back({"Owl", 27});
+  candidates.push_back({"Snake", 13});
+  candidates.push_back({"Tiger", 67});
 
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("basic_test\n")));
 
