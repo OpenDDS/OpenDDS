@@ -1438,7 +1438,7 @@ Sedp::update_topic_qos(const RepoId& topicId, const DDS::TopicQos& qos)
   if (qos.topic_data != topic.local_qos().topic_data) {
     topic.update(qos);
     // For each endpoint associated on this topic
-    for (RepoIdSet::iterator topic_endpoints = topic.endpoints().begin();
+    for (RepoIdSet::const_iterator topic_endpoints = topic.endpoints().begin();
          topic_endpoints != topic.endpoints().end(); ++topic_endpoints) {
 
       const RepoId& rid = *topic_endpoints;
