@@ -1687,9 +1687,31 @@ RtpsUdpDataLink::bundle_mapped_responses(AddrDestResponseMap& adr_map,
         // Attempt to add the submessage response to the bundle
         offset = size;
         Response& res = **resp_it;
-        gen_find_size(res.sm_, size, padding);
-        // Pretend the message is a heartbeat just so we can set the submessage header length field (same position for all submessages)
-        res.sm_.heartbeat_sm().smHeader.submessageLength = static_cast<CORBA::UShort>(size - offset) - SMHDR_SZ;
+        switch (res.sm_._d()) {
+          case HEARTBEAT: {
+            gen_find_size(res.sm_.heartbeat_sm(), size, padding);
+            res.sm_.heartbeat_sm().smHeader.submessageLength = static_cast<CORBA::UShort>(size - offset) - SMHDR_SZ;
+            break;
+          }
+          case ACKNACK: {
+            gen_find_size(res.sm_.acknack_sm(), size, padding);
+            res.sm_.acknack_sm().smHeader.submessageLength = static_cast<CORBA::UShort>(size - offset) - SMHDR_SZ;
+            break;
+          }
+          case GAP: {
+            gen_find_size(res.sm_.gap_sm(), size, padding);
+            res.sm_.gap_sm().smHeader.submessageLength = static_cast<CORBA::UShort>(size - offset) - SMHDR_SZ;
+            break;
+          }
+          case NACK_FRAG: {
+            gen_find_size(res.sm_.nack_frag_sm(), size, padding);
+            res.sm_.nack_frag_sm().smHeader.submessageLength = static_cast<CORBA::UShort>(size - offset) - SMHDR_SZ;
+            break;
+          }
+          default: {
+            break;
+          }
+        }
 
         // If adding the submessage bumped us over the limit, push the size difference into the next bundle, reset prev_dst, and keep going
         if ((size + padding) > max_bundle_size_) {
