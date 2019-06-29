@@ -155,7 +155,8 @@ OPENDDS_TARGET_SOURCES(target
   [items...]
   [<INTERFACE|PUBLIC|PRIVATE> items...]
   [TAO_IDL_OPTIONS options...]
-  [OPENDDS_IDL_OPTIONS options...])
+  [OPENDDS_IDL_OPTIONS options...]
+  [DEFAULT_NESTED ON|OFF])
 ```
 
 ### Example
@@ -176,7 +177,7 @@ OPENDDS_TARGET_SOURCES(publisher
 ```
 
 Another snippet, based upon [Messenger with auxiliary IDL library], showcases how an
-auxiliary IDL library can be created for inclusion by other executables:
+auxiliary (or dynamic) IDL library can be created for inclusion by other executables:
 
 ```cmake
 add_library(messenger)
@@ -194,6 +195,17 @@ target_link_libraries(publisher messenger OpenDDS::OpenDDS)
 
 *Note:* This may issue a warning in earlier version of CMake due to the messenger library
 not having any sources added with it in the call to `add_library`.
+
+### `DEFAULT_NESTED`
+
+`DEFAULT_NESTED` overrides the global default, `OPENDDS_DEFAULT_NESTED`, which
+is `ON` by default. If this value is `ON`, then topic types for a given project
+must be declared using annotations. If it's `OFF`, then every valid type is
+assumed to be needed for use as a topic type by default, which might needlessly
+add code to the IDL type support libraries that will never be used.
+
+See section 2.1.1, "Defining the Data Types", of the OpenDDS Developer's Guide
+for more information.
 
 ## Advanced Usage
 
