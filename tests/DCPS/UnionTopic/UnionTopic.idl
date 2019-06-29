@@ -1,18 +1,18 @@
 module UnionTopic {
   struct Candidate_t {
     string name;
-    long votes;
+    unsigned long long votes;
   };
   typedef sequence<Candidate_t> CandidateSeq_t;
 
   struct ElectionStatus_t {
     CandidateSeq_t candidates;
-    long total_votes;
+    unsigned long total_votes;
   };
 
   struct ElectionResult_t {
     Candidate_t winner;
-    long total_votes;
+    unsigned long total_votes;
   };
 
   enum ElectionNewsType_t {
