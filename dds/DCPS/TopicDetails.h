@@ -9,6 +9,7 @@
 #include "dds/DCPS/TopicCallbacks.h"
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/debug.h"
+#include "dds/DCPS/Definitions.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -40,7 +41,7 @@ namespace OpenDDS {
                      const DDS::TopicQos& qos,
                      bool has_dcps_key,
                      TopicCallbacks* topic_callbacks) {
-        assert(topic_callbacks != 0);
+        OPENDDS_ASSERT(topic_callbacks != 0);
 
         local_data_type_name_ = data_type_name;
         local_qos_ = qos;
