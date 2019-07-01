@@ -20,12 +20,17 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
     DDS::DataWriter_var writer = model.writer( Elements::DataWriters::writer);
 
+    DDS::Topic_var topic = writer->get_topic();
+
     DDS::Publisher_var publisher = writer->get_publisher();
     if (publisher->enable() != DDS::RETCODE_OK) {
-      std::cout << "bad return code enabling publisher" << std::endl;
+      std::cout << "ERROR: bad return code enabling publisher" << std::endl;
+    }
+    if (topic->enable() != DDS::RETCODE_OK) {
+      std::cout << "ERROR: bad return code enabling topic" << std::endl;
     }
     if (writer->enable() != DDS::RETCODE_OK) {
-      std::cout << "bad return code enabling writer" << std::endl;
+      std::cout << "ERROR: bad return code enabling writer" << std::endl;
     }
 
     // START OF EXISTING MESSENGER EXAMPLE CODE

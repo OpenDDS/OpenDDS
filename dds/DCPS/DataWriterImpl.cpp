@@ -1269,6 +1269,10 @@ DataWriterImpl::enable()
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
+  if (!this->topic_servant_->is_enabled()) {
+    return DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
+
   RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
   if (participant) {
     dp_id_ = participant->get_id();

@@ -77,6 +77,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
     DDS::DataReader_var reader = model.reader( Elements::DataReaders::reader);
     DDS::Subscriber_var subscriber = reader->get_subscriber();
+    DDS::Topic_var topic = DDS::Topic::_narrow(reader->get_topicdescription());
 
     ACE_SYNCH_MUTEX lock;
     ACE_Condition<ACE_SYNCH_MUTEX> condition(lock);
@@ -116,10 +117,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
                          -1);
     } else {
       if (subscriber->enable() != DDS::RETCODE_OK) {
-        std::cout << "bad return code enabling subscriber" << std::endl;
+        std::cout << "ERROR: bad return code enabling subscriber" << std::endl;
+      }
+      if (topic->enable() != DDS::RETCODE_OK) {
+        std::cout << "ERROR: bad return code enabling topic" << std::endl;
       }
       if (reader->enable() != DDS::RETCODE_OK) {
-        std::cout << "bad return code enabling reader" << std::endl;
+        std::cout << "ERROR: bad return code enabling reader" << std::endl;
       }
     }
 

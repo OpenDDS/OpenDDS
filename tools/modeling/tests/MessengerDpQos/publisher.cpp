@@ -20,6 +20,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
     DDS::DataWriter_var writer = model.writer( Elements::DataWriters::writer);
     DDS::Publisher_var publisher = writer->get_publisher();
+    DDS::Topic_var topic = writer->get_topic();
     DDS::DomainParticipant_var participant = publisher->get_participant();
 
     DDS::DomainParticipantQos part_qos;
@@ -51,13 +52,16 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
     } else {
       std::cout << "enabling publisher" << std::endl;
       if (participant->enable() != DDS::RETCODE_OK) {
-        std::cout << "bad return code enabling participant" << std::endl;
+        std::cout << "ERROR; bad return code enabling participant" << std::endl;
       }
       if (publisher->enable() != DDS::RETCODE_OK) {
-        std::cout << "bad return code enabling publisher" << std::endl;
+        std::cout << "ERROR: bad return code enabling publisher" << std::endl;
+      }
+      if (topic->enable() != DDS::RETCODE_OK) {
+        std::cout << "ERROR: bad return code enabling topic" << std::endl;
       }
       if (writer->enable() != DDS::RETCODE_OK) {
-        std::cout << "bad return code enabling writer" << std::endl;
+        std::cout << "ERROR: bad return code enabling writer" << std::endl;
       }
     }
     char* buff = reinterpret_cast<char*>(part_qos.user_data.value.get_buffer());
