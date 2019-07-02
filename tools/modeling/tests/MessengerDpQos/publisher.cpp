@@ -52,7 +52,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
     } else {
       std::cout << "enabling publisher" << std::endl;
       if (participant->enable() != DDS::RETCODE_OK) {
-        std::cout << "ERROR; bad return code enabling participant" << std::endl;
+        std::cout << "ERROR: bad return code enabling participant" << std::endl;
       }
       if (publisher->enable() != DDS::RETCODE_OK) {
         std::cout << "ERROR: bad return code enabling publisher" << std::endl;
