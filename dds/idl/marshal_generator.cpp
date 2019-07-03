@@ -2282,9 +2282,10 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     extraction.endArgs();
 
     if (has_key) {
-      be_global->impl_ <<
-        "  " << scoped(discriminator->name()) << " disc;\n" <<
-        streamAndCheck(">> " + getWrapper("disc", discriminator, WD_INPUT));
+      be_global->impl_
+        << "  " << scoped(discriminator->name()) << " disc;\n"
+        << streamAndCheck(">> " + getWrapper("disc", discriminator, WD_INPUT))
+        << "  uni.t._d(disc);\n";
     }
 
     be_global->impl_ << "  return true;\n";
