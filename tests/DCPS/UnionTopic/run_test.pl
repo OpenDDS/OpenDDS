@@ -13,4 +13,4 @@ $test->enable_console_logging();
 $test->setup_discovery();
 $test->process('test', 'UnionTopic');
 $test->start_process('test');
-exit $test->finish(3000);
+exit $test->finish(30);

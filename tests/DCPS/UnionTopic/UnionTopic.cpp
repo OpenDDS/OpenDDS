@@ -10,7 +10,8 @@ using OpenDDS::DCPS::retcode_to_string;
 
 using namespace UnionTopic;
 
-#include <vector>
+#include <map>
+#include <string>
 
 const DDS::Duration_t max_wait_time = {10, 0};
 const int domain = 142;
@@ -47,15 +48,15 @@ public:
     rc = participant_->get_default_subscriber_qos(subscriber_qos);
     if (rc != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l setup_test() ERROR: ")
-                        ACE_TEXT("get_default_subscriber_qos failed: %C\n"),
-                        retcode_to_string(rc).c_str()), false);
+        ACE_TEXT("get_default_subscriber_qos failed: %C\n"),
+        retcode_to_string(rc).c_str()), false);
     }
     subscriber_ = participant_->create_subscriber(
       subscriber_qos, DDS::SubscriberListener::_nil(),
       OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (!subscriber_) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l setup_test() ERROR: ")
-                        ACE_TEXT("create_subscriber failed!\n")), false);
+        ACE_TEXT("create_subscriber failed!\n")), false);
     }
 
     // Create Publisher
@@ -63,15 +64,15 @@ public:
     rc = participant_->get_default_publisher_qos(publisher_qos);
     if (rc != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l setup_test() ERROR: ")
-                        ACE_TEXT("get_default_publisher_qos failed: %C\n"),
-                        retcode_to_string(rc).c_str()), false);
+        ACE_TEXT("get_default_publisher_qos failed: %C\n"),
+        retcode_to_string(rc).c_str()), false);
     }
     publisher_ = participant_->create_publisher(
       publisher_qos, DDS::PublisherListener::_nil(),
       OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (!publisher_) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l setup_test() ERROR: ")
-                        ACE_TEXT("create_publisher failed!\n")), false);
+        ACE_TEXT("create_publisher failed!\n")), false);
     }
 
     // Create DataReader
@@ -79,7 +80,7 @@ public:
     rc = subscriber_->get_default_datareader_qos(reader_qos);
     if (rc != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l setup_test() ERROR: ")
-                        ACE_TEXT("get_default_datareader_qos failed!\n")), false);
+        ACE_TEXT("get_default_datareader_qos failed!\n")), false);
     }
     reader_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
     reader_ = subscriber_->create_datareader(
@@ -87,7 +88,7 @@ public:
       OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (!reader_) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l setup_test() ERROR: ")
-                        ACE_TEXT("first create_datareader failed!\n")), false);
+        ACE_TEXT("first create_datareader failed!\n")), false);
     }
 
     // Create DataWriter
@@ -97,7 +98,7 @@ public:
       OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (!writer_) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l setup_test() ERROR: ")
-                        ACE_TEXT("create_datawriter failed!\n")), true);
+        ACE_TEXT("create_datawriter failed!\n")), true);
     }
 
     // Block until Subscriber is associated
@@ -112,15 +113,15 @@ public:
         rc = ws->wait(conditions, max_wait_time);
         if (rc != DDS::RETCODE_OK) {
           ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l setup_test() ERROR: ")
-                            ACE_TEXT("wait failed: %C\n"),
-                            retcode_to_string(rc).c_str()), false);
+            ACE_TEXT("wait failed: %C\n"),
+            retcode_to_string(rc).c_str()), false);
         }
 
         rc = writer_->get_publication_matched_status(matches);
         if (rc != ::DDS::RETCODE_OK) {
           ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l setup_test() ERROR: ")
-                            ACE_TEXT("Failed to get publication match status: %C\n"),
-                            retcode_to_string(rc).c_str()), false);
+            ACE_TEXT("Failed to get publication match status: %C\n"),
+            retcode_to_string(rc).c_str()), false);
         }
       } while (matches.total_count < 1);
       ws->detach_condition(cond);
@@ -171,6 +172,25 @@ public:
   }
 };
 
+bool wait_for_dispose(ElectionNews_tDataReader_var& reader_i) {
+  DDS::ReturnCode_t rc;
+  DDS::ReadCondition_var read_condition = reader_i->create_readcondition(
+    DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE,
+    DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
+  DDS::WaitSet_var ws = new DDS::WaitSet;
+  ws->attach_condition(read_condition);
+  DDS::ConditionSeq active;
+  rc = ws->wait(active, max_wait_time);
+  ws->detach_condition(read_condition);
+  reader_i->delete_readcondition(read_condition);
+  if (rc != DDS::RETCODE_OK) {
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l wait_for_dispose() ERROR: ")
+      ACE_TEXT("wait failed: %C\n"),
+      retcode_to_string(rc).c_str()), false);
+  }
+  return true;
+}
+
 bool
 basic_test(DDS::DomainParticipant_var& participant, DDS::Topic_var& topic)
 {
@@ -178,32 +198,27 @@ basic_test(DDS::DomainParticipant_var& participant, DDS::Topic_var& topic)
   DDS::ReturnCode_t rc;
 
   // The Candidates and their final tallies
-  Candidate_t c;
-  std::vector<Candidate_t> candidates;
-  c.name = "Turtle";
-  c.votes = 20;
-  candidates.push_back(c);
-  c.name = "Monkey";
-  c.votes = 43;
-  candidates.push_back(c);
-  c.name = "Owl";
-  c.votes = 27;
-  candidates.push_back(c);
-  c.name = "Snake";
-  c.votes = 13;
-  candidates.push_back(c);
-  c.name = "Tiger";
-  c.votes = 67;
-  candidates.push_back(c);
+  typedef std::map<std::string, Vote_t> Canonical;
+  Canonical canonical;
+  canonical["Turtle"] = 5;
+  canonical["Snake"] = 3;
+  canonical["Owl"] = 10;
+  canonical["Monkey"] = 2;
+  canonical["Tiger"] = 25;
 
   // Calculate the expected winner
   ElectionResult_t expected_result;
-  CORBA::ULong max = 0;
-  for (size_t i = 0; i < candidates.size(); i++) {
-    if (candidates[i].votes > max) {
-      expected_result.winner = candidates[i];
+  expected_result.total_votes = 0;
+  Vote_t max = 0;
+  Canonical::iterator i, finished = canonical.end();
+  for (i = canonical.begin(); i != finished; ++i) {
+    if (i->second > max) {
+      Candidate_t c;
+      c.name = i->first.c_str();
+      c.votes = i->second;
+      expected_result.winner = c;
     }
-    expected_result.total_votes += candidates[i].votes;
+    expected_result.total_votes += i->second;
   }
 
   // Setup Our DDS Entities
@@ -214,36 +229,34 @@ basic_test(DDS::DomainParticipant_var& participant, DDS::Topic_var& topic)
   Test t(participant, publisher, subscriber, reader, writer);
   if (!t.setup_test(topic)) {
     ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l basic_test() ERROR: ")
-                      ACE_TEXT("setup_test failed!\n")), false);
+      ACE_TEXT("setup_test failed!\n")), false);
   }
   ElectionNews_tDataReader_var reader_i = ElectionNews_tDataReader::_narrow(reader);
   if (!reader_i) {
     ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l basic_test() ERROR: ")
-                      ACE_TEXT("_narrow reader failed!\n")), false);
+      ACE_TEXT("_narrow reader failed!\n")), false);
   }
   ElectionNews_tDataWriter_var writer_i = ElectionNews_tDataWriter::_narrow(writer);
   if (!writer_i) {
     ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l basic_test() ERROR: ")
-                      ACE_TEXT("_narrow writer failed!\n")), false);
+      ACE_TEXT("_narrow writer failed!\n")), false);
   }
 
-  // Write and Read one Instance
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("Writing New Candidates...\n")));
+  // Write and Dispose an Instance
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("Writing Election Statuses...\n")));
   ElectionNews_t news;
-  for (size_t i = 0; i < candidates.size(); i++) {
-    c.name = candidates[i].name;
-    c.votes = 0;
-    news.new_candidate(c);
+  for (i = canonical.begin(); i != finished; ++i) {
+    Candidate_t c;
+    c.name = i->first.c_str();
+    c.votes = i->second;
+    news.status(c);
     rc = writer_i->write(news, DDS::HANDLE_NIL);
     if (rc != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l basic_test() ERROR: ")
-        ACE_TEXT("Unable to write sample %u: %C\n"),
-        retcode_to_string(rc).c_str(), i), false);
+        ACE_TEXT("Unable to write sample %C: %C\n"),
+        i->first.c_str(), retcode_to_string(rc).c_str()), false);
     }
   }
-
-  // TODO Confirm this is working
-  // Dispose of the NEW_CANDIDATE Instance
   rc = writer_i->dispose(news, DDS::HANDLE_NIL);
   if (rc != DDS::RETCODE_OK) {
     ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l basic_test() ERROR: ")
@@ -251,46 +264,56 @@ basic_test(DDS::DomainParticipant_var& participant, DDS::Topic_var& topic)
       retcode_to_string(rc).c_str()), false);
   }
 
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("Reading New Candidates...\n")));
-  size_t count = 0;
-  bool got_dispose = false;
-  while (true) {
-    ACE_OS::sleep(1);
-
-    ElectionNews_tSeq newsSeq;
-    DDS::SampleInfoSeq info;
-    rc = reader_i->take(
-      newsSeq, info,
-      DDS::LENGTH_UNLIMITED,
-      DDS::ANY_SAMPLE_STATE,
-      DDS::ANY_VIEW_STATE,
-      DDS::ANY_INSTANCE_STATE);
-    if (rc == DDS::RETCODE_OK) {
-      for (size_t i = 0; i < newsSeq.length(); i++) {
-        if (info[i].valid_data) {
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("  - %C\n"), newsSeq[i].new_candidate().name.in()));
-          count++;
-        } else {
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("  - INVALID\n")));
-          got_dispose = true;
-        }
-      }
-      if (got_dispose) {
-        if (count == candidates.size()) {
-          break;
-        } else if (count != candidates.size()) {
-          ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l basic_test() ERROR: ")
-                            ACE_TEXT("Unexpected number of samples!\n")), false);
-        }
-      }
-    } else if (rc != DDS::RETCODE_NO_DATA) {
-      ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l basic_test() ERROR: ")
-                        ACE_TEXT("take_next_sample: %C\n"),
-                        retcode_to_string(rc).c_str()), false);
-    }
+  // Wait for the Dispose and Read Them
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("Reading Election Statuses...\n")));
+  if (!wait_for_dispose(reader_i)) {
+    return false;
   }
-
-  // Write and Read Another Instance (TODO)
+  size_t count = 0;
+  Vote_t total = 0;
+  bool got_dispose = false;
+  ElectionNews_tSeq newsSeq;
+  DDS::SampleInfoSeq info;
+  rc = reader_i->take(
+    newsSeq, info,
+    DDS::LENGTH_UNLIMITED,
+    DDS::ANY_SAMPLE_STATE,
+    DDS::ANY_VIEW_STATE,
+    DDS::ANY_INSTANCE_STATE);
+  if (rc == DDS::RETCODE_OK) {
+    for (size_t i = 0; i < newsSeq.length(); i++) {
+      if (info[i].valid_data) {
+        const Vote_t votes = newsSeq[i].status().votes;
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("  - %C: %u\n"),
+          newsSeq[i].status().name.in(), votes));
+        count++;
+        total += votes;
+      } else {
+        const CORBA::ULong disc = newsSeq[i]._d();
+        if (disc != ELECTION_STATUS) {
+          ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l basic_test() ERROR: ")
+            ACE_TEXT("Disposed discriminator should be ELECTION_STATUS (%d) but it's %d\n"),
+            ELECTION_STATUS, disc), false);
+        }
+        got_dispose = true;
+      }
+    }
+    if (got_dispose) {
+      if (count != canonical.size()) {
+        ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l basic_test() ERROR: ")
+          ACE_TEXT("Unexpected number of samples!\n")), false);
+      }
+    }
+  } else if (rc != DDS::RETCODE_NO_DATA) {
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l basic_test() ERROR: ")
+      ACE_TEXT("take_next_sample: %C\n"),
+      retcode_to_string(rc).c_str()), false);
+  }
+  if (total != expected_result.total_votes) {
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l basic_test() ERROR: ")
+      ACE_TEXT("Expected %u total votes, got %u!\n"),
+      expected_result.total_votes, total), false);
+  }
 
   return true;
 }
@@ -306,7 +329,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
       TheParticipantFactoryWithArgs(argc, argv);
     if (!dpf) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l main() ERROR: ")
-                        ACE_TEXT("Participant Factory failed!\n")), 1);
+        ACE_TEXT("Participant Factory failed!\n")), 1);
     }
 
     DDS::DomainParticipant_var participant =
@@ -316,7 +339,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (!participant) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l main() ERROR: ")
-                        ACE_TEXT("create_participant failed!\n")), 1);
+        ACE_TEXT("create_participant failed!\n")), 1);
     }
 
     // Register Type
@@ -324,20 +347,21 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     rc = ts->register_type(participant.in(), "");
     if (rc != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l main() ERROR: ")
-                        ACE_TEXT("register_type failed: %C\n"),
-                        retcode_to_string(rc).c_str()), 1);
+        ACE_TEXT("register_type failed: %C\n"),
+        retcode_to_string(rc).c_str()), 1);
     }
 
     // Create Topic
     DDS::Topic_var topic =
-      participant->create_topic("Animal Kingdom Elections",
-                                CORBA::String_var(ts->get_type_name()),
-                                TOPIC_QOS_DEFAULT,
-                                DDS::TopicListener::_nil(),
-                                OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      participant->create_topic(
+        "Animal Kingdom Elections",
+        CORBA::String_var(ts->get_type_name()),
+        TOPIC_QOS_DEFAULT,
+        DDS::TopicListener::_nil(),
+        OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (!topic) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l main() ERROR: ")
-                        ACE_TEXT("create_topic failed!\n")), 1);
+        ACE_TEXT("create_topic failed!\n")), 1);
     }
 
     // Basic Test
@@ -350,15 +374,15 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     rc = participant->delete_contained_entities();
     if (rc != DDS::RETCODE_OK) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l: main() ERROR: ")
-                 ACE_TEXT("delete_contained_entities failed: %C\n"),
-                 retcode_to_string(rc).c_str()));
+        ACE_TEXT("delete_contained_entities failed: %C\n"),
+        retcode_to_string(rc).c_str()));
       status = 1;
     }
     rc = dpf->delete_participant(participant.in());
     if (rc != DDS::RETCODE_OK) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l: main() ERROR: ")
-                 ACE_TEXT("delete_participant failed: %C\n"),
-                 retcode_to_string(rc).c_str()));
+        ACE_TEXT("delete_participant failed: %C\n"),
+        retcode_to_string(rc).c_str()));
       status = 1;
     }
     TheServiceParticipant->shutdown();
