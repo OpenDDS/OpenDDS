@@ -1639,6 +1639,49 @@ RtpsUdpDataLink::build_response_map(ResponseVec& responses, AddrDestResponseMap&
   }
 }
 
+namespace {
+
+struct BundleHelper {
+  BundleHelper(size_t max_bundle_size, OPENDDS_VECTOR(size_t)& response_bundle_sizes) : max_bundle_size_(max_bundle_size), size_(0), padding_(0), prev_size_(0), prev_padding_(0), response_bundle_sizes_(response_bundle_sizes) {}
+
+  void end_bundle() {
+    response_bundle_sizes_.push_back(size_ + padding_);
+    size_ = 0; padding_ = 0; prev_size_ = 0; prev_padding_ = 0;
+  }
+
+  template <typename T>
+  void push_to_next_bundle(const T& val) {
+    response_bundle_sizes_.push_back(prev_size_ + prev_padding_);
+    size_ -= prev_size_; padding_ -= prev_padding_; prev_size_ = 0; prev_padding_ = 0;
+  }
+
+  template <typename T>
+  bool add_to_bundle(const T& val) {
+    prev_size_ = size_;
+    prev_padding_ = padding_;
+    gen_find_size(val, size_, padding_);
+    if ((size_ + padding_) > max_bundle_size_) {
+      push_to_next_bundle(val);
+      return false;
+    }
+    return true;
+  }
+
+  size_t prev_size_diff() const {
+    return size_ - prev_size_;
+  }
+
+  size_t prev_padding_diff() const {
+    return padding_ - prev_padding_;
+  }
+
+  size_t max_bundle_size_;
+  size_t size_, padding_, prev_size_, prev_padding_;
+  OPENDDS_VECTOR(size_t)& response_bundle_sizes_;
+};
+
+}
+
 void
 RtpsUdpDataLink::bundle_mapped_responses(AddrDestResponseMap& adr_map,
                                          ResponseIterVecVec& response_bundles,
@@ -1653,81 +1696,66 @@ RtpsUdpDataLink::bundle_mapped_responses(AddrDestResponseMap& adr_map,
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
   };
 
-  size_t size = 0, padding = 0, prev_size = 0, prev_padding = 0; // keep track of previous values in case we overshoot
+  BundleHelper helper(max_bundle_size_, response_bundle_sizes);
   RepoId prev_dst; // used to determine when we need to write a new info_dst
   for (AddrDestResponseMap::iterator addr_it = adr_map.begin(); addr_it != adr_map.end(); ++addr_it) {
 
     // A new address set always starts a new bundle
     response_bundles.push_back(ResponseIterVec());
     response_bundle_addrs.push_back(addr_it->first);
-    if (addr_it != adr_map.begin()) {
-      response_bundle_sizes.push_back(prev_size + prev_padding);
-      size -= prev_size; padding -= prev_padding; prev_size = 0; prev_padding = 0;
-    }
     prev_dst = GUID_UNKNOWN;
 
     for (DestResponseMap::iterator dest_it = addr_it->second.begin(); dest_it != addr_it->second.end(); ++dest_it) {
-      size_t offset = size;
       for (ResponseIterVec::iterator resp_it = dest_it->second.begin(); resp_it != dest_it->second.end(); ++resp_it) {
         // Check before every response to see if we need to prefix a INFO_DST
         if (dest_it->first != GUID_UNKNOWN && dest_it->first != prev_dst) {
-          gen_find_size(idst, size, padding);
-          prev_dst = dest_it->first;
-        }
-        // If adding an INFO_DST prefix bumped us over the limit, push the size difference into the next bundle, reset prev_dst, and keep going
-        if ((size + padding) > max_bundle_size_) {
-          response_bundles.push_back(ResponseIterVec());
-          response_bundle_addrs.push_back(addr_it->first);
-          response_bundle_sizes.push_back(prev_size + prev_padding);
-          size -= prev_size; padding -= prev_padding; prev_size = 0; prev_padding = 0;
-          prev_dst = GUID_UNKNOWN;
-        } else {
-          prev_size = size; prev_padding = padding;
+          // If adding an INFO_DST prefix bumped us over the limit, push the size difference into the next bundle, reset prev_dst, and keep going
+          if (!helper.add_to_bundle(idst)) {
+            response_bundles.push_back(ResponseIterVec());
+            response_bundle_addrs.push_back(addr_it->first);
+          }
         }
         // Attempt to add the submessage response to the bundle
-        offset = size;
+        bool result = false;
         Response& res = **resp_it;
         switch (res.sm_._d()) {
           case HEARTBEAT: {
-            gen_find_size(res.sm_.heartbeat_sm(), size, padding);
-            res.sm_.heartbeat_sm().smHeader.submessageLength = static_cast<CORBA::UShort>(size - offset) - SMHDR_SZ;
+            result = helper.add_to_bundle(res.sm_.heartbeat_sm());
+            res.sm_.heartbeat_sm().smHeader.submessageLength = static_cast<CORBA::UShort>(helper.prev_size_diff()) - SMHDR_SZ;
             break;
           }
           case ACKNACK: {
-            gen_find_size(res.sm_.acknack_sm(), size, padding);
-            res.sm_.acknack_sm().smHeader.submessageLength = static_cast<CORBA::UShort>(size - offset) - SMHDR_SZ;
+            result = helper.add_to_bundle(res.sm_.acknack_sm());
+            res.sm_.acknack_sm().smHeader.submessageLength = static_cast<CORBA::UShort>(helper.prev_size_diff()) - SMHDR_SZ;
             break;
           }
           case GAP: {
-            gen_find_size(res.sm_.gap_sm(), size, padding);
-            res.sm_.gap_sm().smHeader.submessageLength = static_cast<CORBA::UShort>(size - offset) - SMHDR_SZ;
+            result = helper.add_to_bundle(res.sm_.gap_sm());
+            res.sm_.gap_sm().smHeader.submessageLength = static_cast<CORBA::UShort>(helper.prev_size_diff()) - SMHDR_SZ;
             break;
           }
           case NACK_FRAG: {
-            gen_find_size(res.sm_.nack_frag_sm(), size, padding);
-            res.sm_.nack_frag_sm().smHeader.submessageLength = static_cast<CORBA::UShort>(size - offset) - SMHDR_SZ;
+            result = helper.add_to_bundle(res.sm_.nack_frag_sm());
+            res.sm_.nack_frag_sm().smHeader.submessageLength = static_cast<CORBA::UShort>(helper.prev_size_diff()) - SMHDR_SZ;
             break;
           }
           default: {
             break;
           }
         }
+        prev_dst = dest_it->first;
 
         // If adding the submessage bumped us over the limit, push the size difference into the next bundle, reset prev_dst, and keep going
-        if ((size + padding) > max_bundle_size_) {
+        if (!result) {
           response_bundles.push_back(ResponseIterVec());
           response_bundle_addrs.push_back(addr_it->first);
-          response_bundle_sizes.push_back(prev_size + prev_padding);
-          size -= prev_size; padding -= prev_padding; prev_size = 0; prev_padding = 0;
           prev_dst = GUID_UNKNOWN;
-        } else {
-          prev_size = size; prev_padding = padding;
         }
         response_bundles.back().push_back(*resp_it);
       }
     }
+    helper.end_bundle();
   }
-  response_bundle_sizes.push_back(size + padding);
 }
 
 void
@@ -1768,9 +1796,9 @@ RtpsUdpDataLink::send_bundled_responses(ResponseVec& responses)
       if (dst != GUID_UNKNOWN && dst != prev_dst) {
         std::memcpy(&idst.guidPrefix, dst.guidPrefix, sizeof(idst.guidPrefix));
         ser << idst;
-        prev_dst = dst;
       }
       ser << res.sm_;
+      prev_dst = dst;
     }
     send_strategy()->send_rtps_control(mb_acknack, response_bundle_addrs[i]);
   }
