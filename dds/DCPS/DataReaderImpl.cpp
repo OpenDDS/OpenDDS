@@ -1591,9 +1591,9 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
               && (instance)
               && (owner_manager->is_owner (instance->instance_handle_,
                   sample.header_.publication_id_)))
-                  || (this->is_exclusive_ownership_
-                      && (instance)
-                      && instance->instance_state_.is_last (sample.header_.publication_id_))) {
+          || (is_exclusive_ownership_
+              && (instance)
+              && instance->instance_state_.is_last (sample.header_.publication_id_))) {
 #endif
         if (instance) {
           this->watchdog_->cancel_timer(instance);

@@ -88,7 +88,6 @@ trademarks or registered trademarks of Sun Microsystems, Inc.
 
 using namespace std;
 
-
 // Clean up before exit, whether successful or not.
 // Need not be exported since it is called only from this file.
 void
@@ -280,7 +279,6 @@ void postprocess(const char* fn, ostringstream& content,
 void
 BE_produce()
 {
-
   //search for #includes in the IDL, add them as #includes in the stubs/skels
   const char* idl_fn = idl_global->main_filename()->get_string();
 

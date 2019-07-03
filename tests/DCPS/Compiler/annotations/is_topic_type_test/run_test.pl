@@ -4,7 +4,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 
 use strict;
 use JSON::PP;
- 
+
 # The expected results of is_topic_type()
 # dn and wo_dn refers to running opendds_idl with and without --default-nested
 my %expected = (
