@@ -1159,7 +1159,7 @@ DataReaderImpl::enable()
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
-  if (!topic_servant_->is_enabled()) {
+  if (topic_servant_ && !topic_servant_->is_enabled()) {
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
