@@ -77,7 +77,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
     DDS::DataReader_var reader = model.reader( Elements::DataReaders::reader);
     DDS::Subscriber_var subscriber = reader->get_subscriber();
-    DDS::TopicDescription_var topic_description = reader->get_topicdescription()
+    DDS::TopicDescription_var topic_description = reader->get_topicdescription();
     DDS::Topic_var topic = DDS::Topic::_narrow(topic_description);
 
     ACE_SYNCH_MUTEX lock;
