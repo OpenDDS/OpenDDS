@@ -200,25 +200,26 @@ basic_test(DDS::DomainParticipant_var& participant, DDS::Topic_var& topic)
   // The Candidates and their final tallies
   typedef std::map<std::string, Vote_t> Canonical;
   Canonical canonical;
-  canonical["Turtle"] = 5;
-  canonical["Snake"] = 3;
-  canonical["Owl"] = 10;
   canonical["Monkey"] = 2;
+  canonical["Owl"] = 10;
+  canonical["Snake"] = 3;
   canonical["Tiger"] = 25;
+  canonical["Turtle"] = 5;
 
-  // Calculate the expected winner
-  ElectionResult_t expected_result;
-  expected_result.total_votes = 0;
+  // Calculate the canonical expected winner
+  ElectionResult_t canonical_result;
+  canonical_result.total_votes = 0;
   Vote_t max = 0;
   Canonical::iterator i, finished = canonical.end();
   for (i = canonical.begin(); i != finished; ++i) {
-    if (i->second > max) {
+    Vote_t votes = i->second;
+    if (votes > max) {
       Candidate_t c;
       c.name = i->first.c_str();
-      c.votes = i->second;
-      expected_result.winner = c;
+      c.votes = max = votes;
+      canonical_result.winner = c;
     }
-    expected_result.total_votes += i->second;
+    canonical_result.total_votes += votes;
   }
 
   // Setup Our DDS Entities
@@ -245,8 +246,8 @@ basic_test(DDS::DomainParticipant_var& participant, DDS::Topic_var& topic)
   // Write and Dispose an Instance
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("Writing Election Statuses...\n")));
   ElectionNews_t news;
+  Candidate_t c;
   for (i = canonical.begin(); i != finished; ++i) {
-    Candidate_t c;
     c.name = i->first.c_str();
     c.votes = i->second;
     news.status(c);
@@ -269,10 +270,9 @@ basic_test(DDS::DomainParticipant_var& participant, DDS::Topic_var& topic)
   if (!wait_for_dispose(reader_i)) {
     return false;
   }
-  size_t count = 0;
-  Vote_t total = 0;
-  bool got_dispose = false;
+  max = 0;
   ElectionNews_tSeq newsSeq;
+  ElectionResult_t result_from_statuses;
   DDS::SampleInfoSeq info;
   rc = reader_i->take(
     newsSeq, info,
@@ -280,39 +280,103 @@ basic_test(DDS::DomainParticipant_var& participant, DDS::Topic_var& topic)
     DDS::ANY_SAMPLE_STATE,
     DDS::ANY_VIEW_STATE,
     DDS::ANY_INSTANCE_STATE);
-  if (rc == DDS::RETCODE_OK) {
-    for (size_t i = 0; i < newsSeq.length(); i++) {
-      if (info[i].valid_data) {
-        const Vote_t votes = newsSeq[i].status().votes;
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("  - %C: %u\n"),
-          newsSeq[i].status().name.in(), votes));
-        count++;
-        total += votes;
-      } else {
-        const CORBA::ULong disc = newsSeq[i]._d();
-        if (disc != ELECTION_STATUS) {
-          ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l basic_test() ERROR: ")
-            ACE_TEXT("Disposed discriminator should be ELECTION_STATUS (%d) but it's %d\n"),
-            ELECTION_STATUS, disc), false);
-        }
-        got_dispose = true;
-      }
-    }
-    if (got_dispose) {
-      if (count != canonical.size()) {
-        ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l basic_test() ERROR: ")
-          ACE_TEXT("Unexpected number of samples!\n")), false);
-      }
-    }
-  } else if (rc != DDS::RETCODE_NO_DATA) {
+  if (rc != DDS::RETCODE_OK) {
     ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l basic_test() ERROR: ")
-      ACE_TEXT("take_next_sample: %C\n"),
+      ACE_TEXT("Unable to read: %C\n"),
       retcode_to_string(rc).c_str()), false);
   }
-  if (total != expected_result.total_votes) {
+  size_t count = 0;
+  bool got_dispose = false;
+  for (size_t i = 0; i < newsSeq.length(); i++) {
+    const CORBA::ULong disc = newsSeq[i]._d();
+    if (disc != ELECTION_STATUS) {
+      ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l basic_test() ERROR: ")
+        ACE_TEXT("Discriminator should be ELECTION_STATUS (%d) but it's %d\n"),
+        ELECTION_STATUS, disc), false);
+    }
+    if (info[i].valid_data) {
+      const Vote_t votes = newsSeq[i].status().votes;
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("  - %C: %u\n"),
+        newsSeq[i].status().name.in(), votes));
+      count++;
+      result_from_statuses.total_votes += votes;
+      if (votes > max) {
+        result_from_statuses.winner = newsSeq[i].status();
+        max = votes;
+      }
+    } else {
+      got_dispose = true;
+    }
+  }
+  if (!got_dispose) {
     ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l basic_test() ERROR: ")
-      ACE_TEXT("Expected %u total votes, got %u!\n"),
-      expected_result.total_votes, total), false);
+      ACE_TEXT("No Dispose in Taken Samples\n")), false);
+  }
+  if (count != canonical.size()) {
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l basic_test() ERROR: ")
+      ACE_TEXT("Unexpected number of samples!\n")), false);
+  }
+
+  // Write and Dispose Another Instance
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("Writing Election Result...\n")));
+  news.result(result_from_statuses);
+  rc = writer_i->write(news, DDS::HANDLE_NIL);
+  if (rc != DDS::RETCODE_OK) {
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l basic_test() ERROR: ")
+      ACE_TEXT("Unable to write result sample: %C\n"),
+      retcode_to_string(rc).c_str()), false);
+  }
+  rc = writer_i->dispose(news, DDS::HANDLE_NIL);
+  if (rc != DDS::RETCODE_OK) {
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l basic_test() ERROR: ")
+      ACE_TEXT("Unable to dispose: %C\n"),
+      retcode_to_string(rc).c_str()), false);
+  }
+
+  // Wait for the Dispose and Read
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("Reading Election Result...\n")));
+  if (!wait_for_dispose(reader_i)) {
+    return false;
+  }
+  rc = reader_i->take(
+    newsSeq, info,
+    DDS::LENGTH_UNLIMITED,
+    DDS::ANY_SAMPLE_STATE,
+    DDS::ANY_VIEW_STATE,
+    DDS::ANY_INSTANCE_STATE);
+  if (rc != DDS::RETCODE_OK) {
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l basic_test() ERROR: ")
+      ACE_TEXT("Unable to read: %C\n"),
+      retcode_to_string(rc).c_str()), false);
+  }
+  if (newsSeq.length() != 2) {
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l basic_test() ERROR: ")
+      ACE_TEXT("Expected 2 samples, got %u\n"),
+      newsSeq.length()), false);
+  }
+  if (!info[0].valid_data || info[1].valid_data) {
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l basic_test() ERROR: ")
+      ACE_TEXT("Invalid valid_data values\n")), false);
+  }
+  for (size_t i = 0; i < 2; i++) {
+    const CORBA::ULong disc = newsSeq[i]._d();
+    if (disc != ELECTION_RESULT) {
+      ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l basic_test() ERROR: ")
+        ACE_TEXT("Discriminator should be ELECTION_RESULT (%d) but it's %d\n"),
+        ELECTION_STATUS, disc), false);
+    }
+  }
+  ElectionResult_t result_from_read = newsSeq[0].result();
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("New Animal Kingdom PM is %C with %u out of %u votes\n"),
+    result_from_read.winner.name.in(), result_from_read.winner.votes,
+    result_from_read.total_votes));
+  if (result_from_read.total_votes != canonical_result.total_votes ||
+    result_from_read.winner.votes != canonical_result.winner.votes ||
+    ACE_OS::strcmp(
+      result_from_read.winner.name.in(),
+      canonical_result.winner.name.in())) {
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l basic_test() ERROR: ")
+      ACE_TEXT("That's not the expected result!\n")), false);
   }
 
   return true;
