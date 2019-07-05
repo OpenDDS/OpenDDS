@@ -64,8 +64,10 @@ typedef Security::SPDPdiscoveredParticipantData ParticipantData_t;
 typedef SPDPdiscoveredParticipantData ParticipantData_t;
 #endif
 
-class Sedp : public DCPS::EndpointManager<ParticipantData_t> {
+class Sedp : public DCPS::EndpointManager<ParticipantData_t>
+           , public DCPS::DiscoveryListener {
 public:
+
   Sedp(const DCPS::RepoId& participant_id,
        Spdp& owner,
        ACE_Thread_Mutex& lock);
@@ -163,6 +165,12 @@ private:
 #ifdef OPENDDS_SECURITY
   DDS::Security::ParticipantSecurityAttributes participant_sec_attr_;
 #endif
+
+  // Implementing DiscoveryListener
+  void reader_exists(const DCPS::RepoId& readerid, const DCPS::RepoId& writerid);
+  void reader_does_not_exist(const DCPS::RepoId&, const DCPS::RepoId&) {}
+  void writer_exists(const DCPS::RepoId&, const DCPS::RepoId&) {}
+  void writer_does_not_exist(const DCPS::RepoId&, const DCPS::RepoId&) {}
 
   struct Msg : public DCPS::PoolAllocationBase {
     enum MsgType {
@@ -742,7 +750,8 @@ private:
                                                    LocalParticipantMessage& part,
                                                    const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
 
-  virtual bool is_expectant_opendds(const GUID_t& endpoint) const;
+  virtual DCPS::AssociationDelayKind delay_association_complete(const GUID_t& writer, const GUID_t& reader, const DDS::DataWriterQos&, const DDS::DataReaderQos&) const;
+  bool is_expectant_opendds(const GUID_t& endpoint) const;
 
 #ifdef OPENDDS_SECURITY
   DCPS::SequenceNumber secure_automatic_liveliness_seq_;

@@ -65,6 +65,12 @@ namespace OpenDDS {
     };
 #endif
 
+    enum AssociationDelayKind {
+      ADK_NONE = 0,
+      ADK_REGISTER = 1,
+      ADK_ANNOUNCEMENT = 2
+    };
+
     inline void assign(DCPS::EntityKey_t& lhs, unsigned int rhs)
     {
       lhs[0] = static_cast<CORBA::Octet>(rhs);
@@ -1157,13 +1163,23 @@ namespace OpenDDS {
           }
 
           // change this if 'writer_active' (above) changes
-          if (call_writer && !call_reader && !is_expectant_opendds(reader)) {
-            if (DCPS::DCPS_debug_level > 3) {
-              ACE_DEBUG((LM_DEBUG,
-                         ACE_TEXT("(%P|%t) EndpointManager::match - ")
-                         ACE_TEXT("calling writer association_complete\n")));
+          if (call_writer && !call_reader) {
+            DCPS::AssociationDelayKind delay = delay_association_complete(writer, reader, *dwQos, *drQos);
+            if (delay == ADK_REGISTER) {
+              RepoId writer_participant = writer;
+              writer_participant.entityId = ENTITYID_PARTICIPANT;
+              DiscoveryListener* dl = dynamic_cast<DiscoveryListener*>(this);
+              if (dl) {
+                dwr->register_for_reader_exists(writer_participant, writer, reader, dl);
+              }
+            } else if (delay == ADK_NONE){
+              if (DCPS::DCPS_debug_level > 3) {
+                ACE_DEBUG((LM_DEBUG,
+                           ACE_TEXT("(%P|%t) EndpointManager::match - ")
+                           ACE_TEXT("calling writer association_complete\n")));
+              }
+              dwr->association_complete(reader);
             }
-            dwr->association_complete(reader);
           }
 
         } else if (already_matched) { // break an existing associtaion
@@ -1214,7 +1230,7 @@ namespace OpenDDS {
         }
       }
 
-      virtual bool is_expectant_opendds(const GUID_t& endpoint) const = 0;
+      virtual AssociationDelayKind delay_association_complete(const GUID_t& writer, const GUID_t& reader, const DDS::DataWriterQos&, const DDS::DataReaderQos&) const = 0;
 
       virtual bool shutting_down() const = 0;
 

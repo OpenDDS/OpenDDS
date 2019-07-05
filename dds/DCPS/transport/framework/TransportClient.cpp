@@ -648,6 +648,20 @@ TransportClient::register_for_reader(const RepoId& participant,
 }
 
 void
+TransportClient::register_for_reader_exists(const RepoId& participant,
+                                            const RepoId& writerid,
+                                            const RepoId& readerid,
+                                            OpenDDS::DCPS::DiscoveryListener* listener)
+{
+  ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
+  for (ImplsType::iterator pos = impls_.begin(), limit = impls_.end();
+       pos != limit;
+       ++pos) {
+    (*pos)->register_for_reader_exists(participant, writerid, readerid, listener);
+  }
+}
+
+void
 TransportClient::unregister_for_reader(const RepoId& participant,
                                        const RepoId& writerid,
                                        const RepoId& readerid)

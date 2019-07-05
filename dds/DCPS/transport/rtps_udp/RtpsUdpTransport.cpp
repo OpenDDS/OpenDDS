@@ -252,6 +252,19 @@ RtpsUdpTransport::register_for_reader(const RepoId& participant,
 }
 
 void
+RtpsUdpTransport::register_for_reader_exists(const RepoId& participant,
+                                             const RepoId& writerid,
+                                             const RepoId& readerid,
+                                             OpenDDS::DCPS::DiscoveryListener* listener)
+{
+  if (!link_) {
+    link_ = make_datalink(participant.guidPrefix);
+  }
+
+  link_->register_for_reader_exists(writerid, readerid, listener);
+}
+
+void
 RtpsUdpTransport::unregister_for_reader(const RepoId& /*participant*/,
                                         const RepoId& writerid,
                                         const RepoId& readerid)

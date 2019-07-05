@@ -438,12 +438,10 @@ StaticEndpointManager::remove_subscription_i(const RepoId& readerid,
   return DDS::RETCODE_OK;
 }
 
-bool
-StaticEndpointManager::is_expectant_opendds(const GUID_t& /*endpoint*/) const
+AssociationDelayKind
+StaticEndpointManager::delay_association_complete(const GUID_t&, const GUID_t&, const DDS::DataWriterQos&, const DDS::DataReaderQos&) const
 {
-  // We can't propagate associated writers via SEDP announcments if we're
-  // using static discovery, so nobody ought to be "expecting" them
-  return false;
+  return ADK_NONE;
 }
 
 bool

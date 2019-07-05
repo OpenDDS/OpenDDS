@@ -180,7 +180,7 @@ public:
   virtual DDS::ReturnCode_t remove_subscription_i(const RepoId& /*subscriptionId*/,
                                                   LocalSubscription& /*sub*/);
 
-  virtual bool is_expectant_opendds(const GUID_t& endpoint) const;
+  virtual AssociationDelayKind delay_association_complete(const GUID_t& writer, const GUID_t& reader, const DDS::DataWriterQos&, const DDS::DataReaderQos&) const;
 
   virtual bool shutting_down() const;
 

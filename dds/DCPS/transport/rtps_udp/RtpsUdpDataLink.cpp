@@ -343,6 +343,31 @@ RtpsUdpDataLink::register_for_reader(const RepoId& writerid,
 }
 
 void
+RtpsUdpDataLink::register_for_reader_exists(const RepoId& writerId,
+                                            const RepoId& readerId,
+                                            OpenDDS::DCPS::DiscoveryListener* listener)
+{
+  bool call_listener_immediately = false;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    RtpsWriterMap::iterator rw = writers_.find(writerId);
+    if (rw != writers_.end()) {
+      ReaderInfoMap::iterator ri = rw->second.remote_readers_.find(readerId);
+      if (ri != rw->second.remote_readers_.end()) {
+        if (ri->second.handshake_done_) {
+          call_listener_immediately = true;
+        } else {
+          ri->second.listener_ = listener;
+        }
+      }
+    }
+  }
+  if (call_listener_immediately && listener) {
+    listener->reader_exists(readerId, writerId);
+  }
+}
+
+void
 RtpsUdpDataLink::unregister_for_reader(const RepoId& writerid,
                                        const RepoId& readerid)
 {
@@ -1178,32 +1203,32 @@ RtpsUdpDataLink::process_heartbeat_i(const RTPS::HeartBeatSubmessage& heartbeat,
   last.setValue(heartbeat.lastSN.high, heartbeat.lastSN.low);
   static const SequenceNumber starting, zero = SequenceNumber::ZERO();
 
-  DisjointSequence& recvd = info.recvd_;
-  if (!rr.second.durable_ && info.initial_hb_) {
-    if (last.getValue() < starting.getValue()) {
-      // this is an invalid heartbeat -- last must be positive
-      return false;
+  // Only 'apply' heartbeat ranges to received if the heartbeat is valid
+  if (last.getValue() >= starting.getValue()) {
+
+    DisjointSequence& recvd = info.recvd_;
+    if (!rr.second.durable_ && info.initial_hb_) {
+      // For the non-durable reader, the first received HB or DATA establishes
+      // a baseline of the lowest sequence number we'd ever need to NACK.
+      if (recvd.empty() || recvd.low() >= last) {
+        recvd.insert(SequenceRange(zero, last));
+      } else {
+        recvd.insert(SequenceRange(zero, recvd.low()));
+      }
+    } else if (!recvd.empty()) {
+      // All sequence numbers below 'first' should not be NACKed.
+      // The value of 'first' may not decrease with subsequent HBs.
+      recvd.insert(SequenceRange(zero,
+                                 (first > starting) ? first.previous() : zero));
     }
-    // For the non-durable reader, the first received HB or DATA establishes
-    // a baseline of the lowest sequence number we'd ever need to NACK.
-    if (recvd.empty() || recvd.low() >= last) {
-      recvd.insert(SequenceRange(zero, last));
-    } else {
-      recvd.insert(SequenceRange(zero, recvd.low()));
-    }
-  } else if (!recvd.empty()) {
-    // All sequence numbers below 'first' should not be NACKed.
-    // The value of 'first' may not decrease with subsequent HBs.
-    recvd.insert(SequenceRange(zero,
-                               (first > starting) ? first.previous() : zero));
+
+    deliver_held_data(rr.first, info, rr.second.durable_);
+
+    //FUTURE: to support wait_for_acks(), notify DCPS layer of the sequence
+    //        numbers we no longer expect to receive due to HEARTBEAT
+
+    info.initial_hb_ = false;
   }
-
-  deliver_held_data(rr.first, info, rr.second.durable_);
-
-  //FUTURE: to support wait_for_acks(), notify DCPS layer of the sequence
-  //        numbers we no longer expect to receive due to HEARTBEAT
-
-  info.initial_hb_ = false;
 
   const bool final = heartbeat.smHeader.flags & RTPS::FLAG_F,
     liveliness = heartbeat.smHeader.flags & RTPS::FLAG_L;
@@ -1664,6 +1689,7 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
   for (size_t i = 0; i < callbacks.size(); ++i) {
     callbacks[i]->reader_exists(remote, local);
   }
+  callbacks.clear();
 
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   const RtpsWriterMap::iterator rw = writers_.find(local);
@@ -1700,6 +1726,9 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
 
   if (!ri->second.handshake_done_) {
     ri->second.handshake_done_ = true;
+    if (ri->second.listener_) {
+      callbacks.push_back(ri->second.listener_);
+    }
     invoke_on_start_callbacks(true);
     first_ack = true;
   }
@@ -1841,6 +1870,9 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
   }
   if (first_ack) {
     first_acknowledged_by_reader(local, remote, received_sn_base);
+  }
+  for (size_t i = 0; i < callbacks.size(); ++i) {
+    callbacks[i]->reader_exists(remote, local);
   }
 }
 

@@ -87,6 +87,11 @@ public:
                            const TransportLocatorSeq& locators,
                            OpenDDS::DCPS::DiscoveryListener* listener);
 
+  void register_for_reader_exists(const RepoId& participant,
+                                  const RepoId& writerid,
+                                  const RepoId& readerid,
+                                  OpenDDS::DCPS::DiscoveryListener* listener);
+
   void unregister_for_reader(const RepoId& participant,
                              const RepoId& writerid,
                              const RepoId& readerid);

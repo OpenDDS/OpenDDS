@@ -120,6 +120,10 @@ public:
                            const ACE_INET_Addr& address,
                            OpenDDS::DCPS::DiscoveryListener* listener);
 
+  void register_for_reader_exists(const RepoId& writerid,
+                                  const RepoId& readerid,
+                                  OpenDDS::DCPS::DiscoveryListener* listener);
+
   void unregister_for_reader(const RepoId& writerid,
                              const RepoId& readerid);
 
@@ -221,12 +225,14 @@ private:
     bool handshake_done_, durable_;
     OPENDDS_MAP(SequenceNumber, TransportQueueElement*) durable_data_;
     ACE_Time_Value durable_timestamp_;
+    DCPS::DiscoveryListener* listener_;
 
     ReaderInfo()
       : acknack_recvd_count_(0)
       , nackfrag_recvd_count_(0)
       , handshake_done_(false)
       , durable_(false)
+      , listener_(NULL)
     {}
     ~ReaderInfo();
     void expire_durable_data();

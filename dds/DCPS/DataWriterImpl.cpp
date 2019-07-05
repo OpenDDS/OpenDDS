@@ -783,6 +783,16 @@ DataWriterImpl::register_for_reader(const RepoId& participant,
 }
 
 void
+DataWriterImpl::register_for_reader_exists(const RepoId& participant,
+                                           const RepoId& writerid,
+                                           const RepoId& readerid,
+                                           DiscoveryListener* listener)
+{
+  TransportClient::register_for_reader_exists(participant, writerid, readerid, listener);
+}
+
+
+void
 DataWriterImpl::unregister_for_reader(const RepoId& participant,
                                       const RepoId& writerid,
                                       const RepoId& readerid)

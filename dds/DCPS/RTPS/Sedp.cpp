@@ -2489,6 +2489,24 @@ Sedp::received_volatile_message_secure(DCPS::MessageId /* message_id */,
 }
 #endif
 
+DCPS::AssociationDelayKind
+Sedp::delay_association_complete(const GUID_t& local, const GUID_t& remote, const DDS::DataWriterQos& dwq, const DDS::DataReaderQos& drq) const
+{
+  DCPS::GuidConverter conv(local);
+  if (conv.isWriter()) {
+    if (is_expectant_opendds(remote)) {
+      return DCPS::ADK_ANNOUNCEMENT;
+    } else {
+      if (dwq.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS && drq.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS) {
+        return DCPS::ADK_REGISTER;
+      } else {
+        return DCPS::ADK_NONE;
+      }
+    }
+  }
+  return DCPS::ADK_NONE;
+}
+
 bool
 Sedp::is_expectant_opendds(const GUID_t& endpoint) const
 {
@@ -3489,6 +3507,21 @@ Sedp::add_publication_i(const DCPS::RepoId& rid,
   ACE_UNUSED_ARG(pub);
 #endif
   return DDS::RETCODE_OK;
+}
+
+void
+Sedp::reader_exists(const RepoId& readerId, const RepoId& writerId) {
+std::cout << "Sedp::reader_exists" << std::endl;
+  if (!is_expectant_opendds(readerId)) {
+    // If the associated writer is in this participant
+    LocalPublicationIter lp = local_publications_.find(writerId);
+    if (lp != local_publications_.end()) {
+      DCPS::RepoIdSet::const_iterator it = lp->second.matched_endpoints_.find(readerId);
+      if (it != lp->second.matched_endpoints_.end()) {
+        lp->second.publication_->association_complete(readerId);
+      }
+    }
+  }
 }
 
 DDS::ReturnCode_t
