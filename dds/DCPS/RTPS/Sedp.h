@@ -666,8 +666,6 @@ private:
 
   DCPS::RepoIdSet defer_match_endpoints_, associated_participants_;
 
-  void inconsistent_topic(const DCPS::RepoIdSet& endpoints) const;
-
   virtual bool shutting_down() const;
 
   virtual void populate_transport_locator_sequence(DCPS::TransportLocatorSeq*& tls,
@@ -744,7 +742,7 @@ private:
                                                    LocalParticipantMessage& part,
                                                    const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
 
-  bool is_opendds(const GUID_t& endpoint) const;
+  virtual bool is_expectant_opendds(const GUID_t& endpoint) const;
 
 #ifdef OPENDDS_SECURITY
   DCPS::SequenceNumber secure_automatic_liveliness_seq_;

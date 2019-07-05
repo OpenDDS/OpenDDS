@@ -232,6 +232,8 @@ std::string param_type(AST_Type *t, AST_Argument::Direction dir)
     case AST_PredefinedType::PT_double:
       builtin = true;
       capitalize = true;
+    default:
+      break;
     }
 
     break;
@@ -249,6 +251,8 @@ std::string param_type(AST_Type *t, AST_Argument::Direction dir)
 
     break;
   }
+  default:
+    break;
   }
 
   if (capitalize) type[0] = toupper(type[0]);
@@ -288,6 +292,8 @@ std::string idl_mapping_java::type(AST_Type *decl)
       return "float";
     case AST_PredefinedType::PT_double:
       return "double";
+    default:
+      break;
     }
   }
   case AST_Decl::NT_string:
@@ -312,6 +318,8 @@ std::string idl_mapping_java::type(AST_Type *decl)
     AST_Array *arr = AST_Array::narrow_from_decl(decl);
     return type(arr->base_type()) + "[]";
   }
+  default:
+    break;
   }
 
   cerr << "ERROR - unknown Java type " << decl->node_type()

@@ -64,6 +64,10 @@ namespace OpenDDS {
     const char BLOB_PROP_PART_CRYPTO_HANDLE[] = "ParticipantCryptoHandle";
     const char BLOB_PROP_DW_CRYPTO_HANDLE[] = "DatawriterCryptoHandle";
     const char BLOB_PROP_DR_CRYPTO_HANDLE[] = "DatareaderCryptoHandle";
+
+    const ::CORBA::Octet BEACON_MSG_ID = PAD;
+    const ::CORBA::Octet BEACON_MESSAGE[] = { BEACON_MSG_ID, 0, 0, 0 };
+    const size_t BEACON_MESSAGE_LENGTH = sizeof(BEACON_MESSAGE);
   }
 }
 

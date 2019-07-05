@@ -537,6 +537,11 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
               "Amount of transport packet bytes (remaining): %d.\n",
               this->pdu_remaining_));
       }
+
+      // The receive_transport_header_ assignment advanced the read index
+      //  that can be across the buffers. Advance the buffer index.
+      bool last_buffer = false;
+      update_buffer_index(last_buffer);
     }
 
     //

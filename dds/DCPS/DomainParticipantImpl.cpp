@@ -461,7 +461,6 @@ DomainParticipantImpl::create_topic_i(
   } else {
 
     OpenDDS::DCPS::TypeSupport_var type_support;
-    bool has_keys = (topic_mask & TOPIC_TYPE_HAS_KEYS);
 
     if (0 == topic_mask) {
        // creating a topic with compile time type
@@ -476,44 +475,25 @@ DomainParticipantImpl::create_topic_i(
         }
         return DDS::Topic::_nil();
       }
-      has_keys = type_support->has_dcps_key();
     }
 
-    RepoId topic_id = GUID_UNKNOWN;
-    TopicStatus status = TOPIC_DISABLED;
+    DDS::Topic_var new_topic = create_new_topic(topic_name,
+                                                type_name,
+                                                topic_qos,
+                                                a_listener,
+                                                mask,
+                                                type_support);
+    if ((this->enabled_ == true) && qos_.entity_factory.autoenable_created_entities) {
+      if (new_topic->enable() != DDS::RETCODE_OK) {
+        ACE_ERROR((LM_WARNING,
+                   ACE_TEXT("(%P|%t) WARNING: ")
+                   ACE_TEXT("DomainParticipantImpl::create_topic, ")
+                   ACE_TEXT("enable failed.\n")));
+        return DDS::Topic::_nil();
 
-    if (is_enabled()) {
-      Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
-      status = disco->assert_topic(topic_id,
-                                   domain_id_,
-                                   dp_id_,
-                                   topic_name,
-                                   type_name,
-                                   topic_qos,
-                                   has_keys);
-    }
-
-    if (status == CREATED || status == FOUND || status == TOPIC_DISABLED) {
-      DDS::Topic_ptr new_topic = create_new_topic(topic_id,
-                                                  topic_name,
-                                                  type_name,
-                                                  topic_qos,
-                                                  a_listener,
-                                                  mask,
-                                                  type_support);
-      if (this->monitor_) {
-        this->monitor_->report();
       }
-      return new_topic;
-
-    } else {
-      if (DCPS_debug_level >= 1) {
-        ACE_ERROR((LM_ERROR,
-                  ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::create_topic, ")
-                  ACE_TEXT("assert_topic failed with return value %d.\n"), status));
-      }
-      return DDS::Topic::_nil();
     }
+    return new_topic._retn();
   }
 }
 
@@ -691,8 +671,7 @@ DomainParticipantImpl::find_topic(
         return DDS::Topic::_nil();
       }
 
-      DDS::Topic_ptr new_topic = create_new_topic(topic_id,
-                                                  topic_name,
+      DDS::Topic_ptr new_topic = create_new_topic(topic_name,
                                                   type_name,
                                                   qos,
                                                   DDS::TopicListener::_nil(),
@@ -1869,7 +1848,6 @@ DomainParticipantImpl::get_repoid(const DDS::InstanceHandle_t& handle)
 
 DDS::Topic_ptr
 DomainParticipantImpl::create_new_topic(
-  const RepoId topic_id,
   const char * topic_name,
   const char * type_name,
   const DDS::TopicQos & qos,
@@ -1913,8 +1891,7 @@ DomainParticipantImpl::create_new_topic(
   TopicImpl* topic_servant = 0;
 
   ACE_NEW_RETURN(topic_servant,
-                 TopicImpl(topic_id,
-                           topic_name,
+                 TopicImpl(topic_name,
                            type_name,
                            type_support,
                            qos,

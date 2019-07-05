@@ -279,12 +279,10 @@ DisjointSequence::fill_bitmap_range(CORBA::ULong low, CORBA::ULong high,
   }
 
   // handle idx_high
-  if (bit_high < 31) {
-    if (idx_high > idx_low) {
-      bitmap[idx_high] = ~((0x1u << (31 - bit_high)) - 1);
-    } else {
-      bitmap[idx_high] &= ~((0x1u << (31 - bit_high)) - 1);
-    }
+  if (idx_high > idx_low) {
+    bitmap[idx_high] = ~((0x1u << (31 - bit_high)) - 1);
+  } else if (bit_high < 31) {
+    bitmap[idx_high] &= ~((0x1u << (31 - bit_high)) - 1);
   }
 
   num_bits = high + 1;

@@ -2596,7 +2596,9 @@ RtpsUdpDataLink::send_relay_beacon()
     }
   }
 
-  ACE_Message_Block mb(static_cast<size_t>(0));
+  // Create a message with a few bytes of data for the beacon
+  ACE_Message_Block mb(reinterpret_cast<const char*>(OpenDDS::RTPS::BEACON_MESSAGE), OpenDDS::RTPS::BEACON_MESSAGE_LENGTH);
+  mb.wr_ptr(OpenDDS::RTPS::BEACON_MESSAGE_LENGTH);
   send_strategy()->send_rtps_control(mb, config().rtps_relay_address());
 }
 

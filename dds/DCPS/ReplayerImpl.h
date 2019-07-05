@@ -143,8 +143,6 @@ public:
   virtual void update_subscription_params(const RepoId&         readerId,
                                           const DDS::StringSeq& exprParams);
 
-  virtual void inconsistent_topic();
-
   void remove_all_associations();
 
   virtual void register_for_reader(const RepoId& participant,
