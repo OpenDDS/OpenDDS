@@ -3511,7 +3511,6 @@ Sedp::add_publication_i(const DCPS::RepoId& rid,
 
 void
 Sedp::reader_exists(const RepoId& readerId, const RepoId& writerId) {
-std::cout << "Sedp::reader_exists" << std::endl;
   if (!is_expectant_opendds(readerId)) {
     // If the associated writer is in this participant
     LocalPublicationIter lp = local_publications_.find(writerId);
