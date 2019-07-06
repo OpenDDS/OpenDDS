@@ -273,6 +273,7 @@ basic_test(DDS::DomainParticipant_var& participant, DDS::Topic_var& topic)
   max = 0;
   ElectionNews_tSeq newsSeq;
   ElectionResult_t result_from_statuses;
+  result_from_statuses.total_votes = 0;
   DDS::SampleInfoSeq info;
   rc = reader_i->take(
     newsSeq, info,
