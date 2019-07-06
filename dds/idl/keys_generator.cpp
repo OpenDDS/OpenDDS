@@ -136,8 +136,6 @@ bool keys_generator::gen_union(
 {
   if (be_global->is_topic_type(node)) {
     KeyLessThanWrapper wrapper(name);
-    const string cxx = scoped(name);
-
     if (be_global->has_key(node)) {
       wrapper.has_keys_signature();
       wrapper.key_compare("_d()");
