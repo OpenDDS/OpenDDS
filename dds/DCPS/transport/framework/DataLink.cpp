@@ -150,7 +150,7 @@ DataLink::invoke_on_start_callbacks(bool success)
 }
 
 void
-DataLink::invoke_on_start_callbacks(const RepoId& remote, bool success)
+DataLink::invoke_on_start_callbacks(const RepoId& local, const RepoId& remote, bool success)
 {
   const DataLink_rch link(success ? this : 0, inc_count());
 
@@ -160,7 +160,8 @@ DataLink::invoke_on_start_callbacks(const RepoId& remote, bool success)
     GuardType guard(strategy_lock_);
 
     for (OPENDDS_VECTOR(OnStartCallback)::const_iterator it = on_start_callbacks_.begin(); it != on_start_callbacks_.end(); ++it) {
-      if (remote == it->second) {
+      TransportClient_rch client = it->first.lock();
+      if (client && local == client->get_repo_id() && remote == it->second) {
         to_call.push_back(*it);
       } else {
         not_to_call.push_back(*it);

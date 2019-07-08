@@ -289,7 +289,7 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
       w.ready_to_hb_ = !remote_durable;
       enable_heartbeat = w.ready_to_hb_;
     } else {
-      invoke_on_start_callbacks(remote_id, true);
+      invoke_on_start_callbacks(local_id, remote_id, true);
     }
   } else if (conv.isReader()) {
     RtpsReaderMap::iterator rr = readers_.find(local_id);
@@ -1704,7 +1704,7 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
 
   if (!ri->second.handshake_done_) {
     ri->second.handshake_done_ = true;
-    invoke_on_start_callbacks(remote, true);
+    invoke_on_start_callbacks(local, remote, true);
     first_ack = true;
   }
 
