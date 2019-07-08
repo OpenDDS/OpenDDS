@@ -9,10 +9,13 @@
 [![Azure DevOps](https://dev.azure.com/opendds/OpenDDS/_apis/build/status/objectcomputing.OpenDDS)](https://dev.azure.com/opendds/OpenDDS/_build/latest?definitionId=1)
 
 OpenDDS is an open-source C++ implementation of the Object Management Group's
-specification "Data Distribution Service for Real-time Systems".  Although
-OpenDDS is itself developed in C++, Java and JMS bindings are provided so
-that Java applications can use OpenDDS.  OpenDDS also includes support for the
-DDS Security specification.
+specification "Data Distribution Service for Real-time Systems" (DDS), as well
+as some other related specifications. These standards define a set of
+interfaces and protocols for developing distributed applications based on the
+publish-subscribe and distributed cache models. Although OpenDDS is itself
+developed in C++, Java and JMS bindings are provided so that Java applications
+can use OpenDDS.  OpenDDS also includes support for the DDS Security
+specification.
 
 OpenDDS is built on the [ACE](docs/dependencies.md#ace)
 abstraction layer to provide platform portability.  OpenDDS also leverages
@@ -21,8 +24,9 @@ and as the basis of the OpenDDS DCPS Information Repository (DCPSInfoRepo).
 
 The primary development of OpenDDS was done by
 [Object Computing, Incorporated](http://www.objectcomputing.com) in
-St. Louis and Phoenix.  It is released under the same generous license
-terms as ACE, TAO and MPC.  See the [LICENSE](LICENSE) file for details.
+St. Louis and Phoenix.  It is released under generous license
+terms similar to ACE, TAO and MPC.  See the [`LICENSE`](LICENSE) file for
+details.
 
 **Table of Contents:**
 
@@ -30,14 +34,14 @@ terms as ACE, TAO and MPC.  See the [LICENSE](LICENSE) file for details.
 * [Support](#support)
 * [Features](#features)
 * [Dependencies](#dependencies)
-  * [TAO](#tao)
+  * [ACE/TAO](#acetao)
   * [Perl](#perl)
+  * [Google Test](#google-test)
 * [Supported Platforms](#supported-platforms)
   * [Operating Systems](#operating-systems)
   * [Compilers](#compilers)
 * [Building and Installing](#building-and-installing)
 * [Quick Start with Docker](#quick-start-with-docker)
-
 
 ## Documentation
 
@@ -53,7 +57,7 @@ http://download.opendds.org/doxygen/.
 - For developers wanting to contribute to OpenDDS, please take the time to read
 [the developer's guidelines](docs/guidelines.md).
 
-Other documentation can be found in [docs directory](docs).
+Other documentation can be found in [`docs` directory](docs).
 
 ## Support
 
@@ -64,7 +68,6 @@ the [mailing list](http://opendds.org/support.html) or creating a
 [GitHub Issue](https://github.com/objectcomputing/OpenDDS/issues).
 
 For commercial support please see http://opendds.org/support.html.
-
 
 ## Features
 
@@ -87,34 +90,35 @@ information on OpenDDS compliance with the DDS specification. If you would like
 to contribute a feature or sponsor the developers to add a feature  please see
 the Support section above for contact information.
 
-
 ## Dependencies
 
 For a complete detailed list of dependencies, see
-[docs/dependencies.md](docs/dependencies.md).
+[`docs/dependencies.md`](docs/dependencies.md).
 
-### TAO
+### ACE/TAO
 
-OpenDDS requires TAO for both IDL compilation as well as interaction
-with the DCPSInfoRepo.  If you will be using the "configure" script for OpenDDS
-(see the [INSTALL.md](INSTALL.md) file for details), you do not need to download TAO first --
-the "configure" script will download it for you.
+OpenDDS requires TAO for both IDL compilation as well as interaction with the
+DCPSInfoRepo. ACE is also required, but is always included with TAO. If you
+will be using the `configure` script for OpenDDS (see the
+[`INSTALL.md`](INSTALL.md) file for details), you do not need to download TAO
+first -- the `configure` script will download it for you.
 
-Use one of the following versions when building OpenDDS:
+There are two distributions of ACE/TAO that can be used with OpenDDS:
 
-* OCI TAO 2.2a patch 15
-  * Available from:
-    * http://download.objectcomputing.com/TAO-2.2a_patches/
-  * This version will be automatically downloaded by default when using the
+* OCI ACE/TAO 2.2a patch 16
+  * This will be automatically downloaded by default when using the
     configure script.
-* DOC Group TAO 2.5.1
-  * Available from:
+  * Can be manually downloaded from:
+    * http://download.objectcomputing.com/TAO-2.2a_patches/
+* DOC Group ACE/TAO 2.5.5
+  * When using the configure script, DOG Group ACE/TAO can be downloaded using
+    one of these arguments:
+    * `--doc-group` for the latest release
+    * `--ace-github-latest` to use the master branch of ACE/TAO as is. This
+      also downloads the master branch of MPC as is.
+  * Can be manually downloaded from:
     * [`github.com/DOCGroup/ACE_TAO`](https://github.com/DOCGroup/ACE_TAO/releases)
     * http://download.dre.vanderbilt.edu/
-  * When using the configure script, this version can be downloaded using one
-    of these arguments:
-    * `--doc-group` for the latest release
-    * `--ace-github-latest` to use the master branches of ACE\_TAO and MPC as is
 
 ### Perl
 
@@ -152,12 +156,13 @@ Windows family:
 
 Others:
 * macOS 10.13 (High Sierra)
+* [Docker](docs/docker.md)
 
 Embedded/Mobile/IoT:
 * LynxOS-178 (OpenDDS Safety Profile)
 * VxWorks 6.9 and 7 (see below)
-* Linux on Raspberry Pi
-* [Android](docs/android.md)
+* [Linux on Raspberry Pi](http://opendds.org/quickstart/GettingStartedPi.html)
+* [Android 9.0 "Pie" (API Level 28)](docs/android.md)
 
 We have built OpenDDS for VxWorks 6.9 and 7 and have run basic
 system and performance tests (but not the entire regression test suite).
@@ -183,61 +188,13 @@ This release of OpenDDS has been tested using the following compilers:
 * gcc 8.1, 8.2
 * Clang 6.0 (llvm.org) and 9.0 (Apple)
 
-
 ## Building and Installing
 
 For building and installation instructions
-see the [INSTALL.md](INSTALL.md) file in this directory.
+see the [`INSTALL.md`](INSTALL.md) file in this directory.
 
 ## Quick Start with Docker
 
-Docker images containing a pre-built OpenDDS are available on
-[DockerHub](https://hub.docker.com/r/objectcomputing/opendds/).  An image
-corresponding to a particular release has a tag of the form `release-DDS-X.xx`,
-e.g., `release-DDS-3.12`.
-
-1. Check for prerequisites
-
-        docker --version
-        docker-compose --version
-
-2. Enter a container
-
-        docker run --rm -ti -v "$PWD:/opt/workspace" objectcomputing/opendds
-
-3. Copy the `Messenger` directory which contains an example from the [Developer's Guide](http://download.objectcomputing.com/OpenDDS/OpenDDS-latest.pdf)
-
-        cp -R /opt/OpenDDS/DevGuideExamples/DCPS/Messenger Messenger
-        cd Messenger
-
-4. Configure and build the Messenger example
-
-        mwc.pl -type gnuace
-        make
-
-5. Exit the container
-
-        exit
-
-6. Enter the `Messenger` directory
-
-        cd Messenger
-
-7. Create an `rtps.ini` file to control discovery with the following content
-
-        [common]
-        DCPSGlobalTransportConfig=$file
-        DCPSDefaultDiscovery=DEFAULT_RTPS
-
-        [transport/the_rtps_transport]
-        transport_type=rtps_udp
-
-8. Run the Messenger example with RTPS
-
-        docker-compose up
-
-9. Run the Messenger example with InfoRepo
-
-        docker-compose -f docker-compose-inforepo.yml up
-        # Use Control-C to kill the InfoRepo process
+See [`docs/docker.md`](docs/docker.md) for how to use the pre-built docker
+image.
 
