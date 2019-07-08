@@ -255,6 +255,7 @@ public:
   bool add_on_start_callback(const TransportClient_wrch& client, const RepoId& remote);
   void remove_on_start_callback(const TransportClient_wrch& client, const RepoId& remote);
   void invoke_on_start_callbacks(bool success);
+  void invoke_on_start_callbacks(const RepoId& remote, bool success);
 
   void set_scheduling_release(bool scheduling_release);
 

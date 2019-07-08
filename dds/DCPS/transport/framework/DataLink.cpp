@@ -149,6 +149,34 @@ DataLink::invoke_on_start_callbacks(bool success)
   }
 }
 
+void
+DataLink::invoke_on_start_callbacks(const RepoId& remote, bool success)
+{
+  const DataLink_rch link(success ? this : 0, inc_count());
+
+  OPENDDS_VECTOR(OnStartCallback) to_call, not_to_call;
+
+  {
+    GuardType guard(strategy_lock_);
+
+    for (OPENDDS_VECTOR(OnStartCallback)::const_iterator it = on_start_callbacks_.begin(); it != on_start_callbacks_.end(); ++it) {
+      if (remote == it->second) {
+        to_call.push_back(*it);
+      } else {
+        not_to_call.push_back(*it);
+      }
+    }
+    on_start_callbacks_.swap(not_to_call);
+  }
+
+  for (OPENDDS_VECTOR(OnStartCallback)::const_iterator it = to_call.begin(); it != to_call.end(); ++it) {
+    TransportClient_rch client = it->first.lock();
+    if (client) {
+      client->use_datalink(it->second, link);
+    }
+  }
+}
+
 //Reactor invokes this after being notified in schedule_stop or cancel_release
 int
 DataLink::handle_exception(ACE_HANDLE /* fd */)
