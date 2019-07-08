@@ -664,7 +664,7 @@ bool idl_mapping_jni::gen_jarray_copies(UTL_ScopedName *name,
         "      " + actualJniType + " obj = static_cast<" + actualJniType
         + "> (jni->GetObjectArrayElement (arr, i));\n";
       loopJava =
-        "      " + actualJniType + " obj;\n";
+        "      " + actualJniType + " obj = 0;\n";
       preNewArray =
         "      jclass clazz = findClass (jni, \"" + jvmSig + "\");\n";
       actualJniType = "jobject";
