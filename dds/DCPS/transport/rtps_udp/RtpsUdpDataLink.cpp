@@ -279,14 +279,18 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
   bool enable_heartbeat = false;
 
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  if (conv.isWriter() && remote_reliable) {
-    // Insert count if not already there.
-    heartbeat_counts_.insert(HeartBeatCountMapType::value_type(local_id, 0));
-    RtpsWriter& w = writers_[local_id];
-    w.remote_readers_[remote_id].durable_ = remote_durable;
-    w.durable_ = local_durable;
-    w.ready_to_hb_ = !remote_durable;
-    enable_heartbeat = w.ready_to_hb_;
+  if (conv.isWriter()) {
+    if (remote_reliable) {
+      // Insert count if not already there.
+      heartbeat_counts_.insert(HeartBeatCountMapType::value_type(local_id, 0));
+      RtpsWriter& w = writers_[local_id];
+      w.remote_readers_[remote_id].durable_ = remote_durable;
+      w.durable_ = local_durable;
+      w.ready_to_hb_ = !remote_durable;
+      enable_heartbeat = w.ready_to_hb_;
+    } else {
+      invoke_on_start_callbacks(remote_id, true);
+    }
   } else if (conv.isReader()) {
     RtpsReaderMap::iterator rr = readers_.find(local_id);
     if (rr == readers_.end()) {
@@ -1700,7 +1704,7 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
 
   if (!ri->second.handshake_done_) {
     ri->second.handshake_done_ = true;
-    invoke_on_start_callbacks(true);
+    invoke_on_start_callbacks(remote, true);
     first_ack = true;
   }
 
