@@ -40,3 +40,7 @@ project : dds_macros, taobaseidldefaults {
 feature(!no_opendds_safety_profile): taobaseidldefaults {
   idlflags += -SS
 }
+
+feature(!dcps_data_type_warnings) {
+  dcps_ts_flags += --no-dcps-data-type-warnings
+}

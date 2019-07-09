@@ -38,6 +38,7 @@ BE_GlobalData* be_global = 0;
 
 BE_GlobalData::BE_GlobalData()
   : global_default_nested_(false)
+  , no_dcps_data_type_warnings_(false)
   , filename_(0)
   , java_(false)
   , suppress_idl_(false)
@@ -328,6 +329,9 @@ BE_GlobalData::parse_args(long& i, char** av)
   static const char DEFAULT_NESTED_FLAG[] = "--default-nested";
   static const size_t DEFAULT_NESTED_FLAG_SIZE = sizeof(DEFAULT_NESTED_FLAG) - 1;
 
+  static const char NO_DCPS_DATA_TYPE_WARNINGS_FLAG[] = "--no-dcps-data-type-warnings";
+  static const size_t NO_DCPS_DATA_TYPE_WARNINGS_FLAG_SIZE = sizeof(NO_DCPS_DATA_TYPE_WARNINGS_FLAG) - 1;
+
   switch (av[i][1]) {
   case 'o':
     idl_global->append_idl_flag(av[i + 1]);
@@ -399,6 +403,8 @@ BE_GlobalData::parse_args(long& i, char** av)
       this->export_macro(av[i] + EXPORT_FLAG_SIZE);
     } else if (!ACE_OS::strncasecmp(av[i], DEFAULT_NESTED_FLAG, DEFAULT_NESTED_FLAG_SIZE)) {
       global_default_nested_ = true;
+    } else if (!ACE_OS::strncasecmp(av[i], NO_DCPS_DATA_TYPE_WARNINGS_FLAG, NO_DCPS_DATA_TYPE_WARNINGS_FLAG_SIZE)) {
+      no_dcps_data_type_warnings_ = true;
     } else {
       invalid_option(av[i]);
     }

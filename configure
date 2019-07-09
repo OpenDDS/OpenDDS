@@ -1695,6 +1695,8 @@ sub generate_workspace {
   $buildtao = 0;
   my $is_target = $buildEnv->{'build'} eq 'target';
 
+  disable_feature(\@features, 'dcps_data_type_warnings');
+
   for my $feat (qw/built-in-topics ownership-profile/) {
     if (exists $opts{$feat} && !$opts{$feat}) {
       disable_feature(\@features, $feat);

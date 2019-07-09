@@ -290,7 +290,9 @@ BE_produce()
   const size_t buffer_sz = 512;
   char buffer[buffer_sz];
   unsigned lineno = 0;
-  bool warned_dcps_data_type = !idl_global->print_warnings();
+  bool warned_dcps_data_type =
+    be_global->no_dcps_data_type_warnings_ ||
+    !idl_global->print_warnings();
   while (idl) {
     idl.getline(buffer, buffer_sz);
     lineno++;

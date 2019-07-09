@@ -190,6 +190,11 @@ public:
    */
   void warning(const char* filename, unsigned lineno, const char* msg);
 
+  /**
+   * If true, don't warn about #pragma DCPS_DATA_TYPE
+   */
+  bool no_dcps_data_type_warnings_;
+
 private:
   /// Name of the IDL file we are processing.
   const char* filename_;
