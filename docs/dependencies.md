@@ -1,5 +1,23 @@
 # OpenDDS Dependencies
 
+**Table of Contents:**
+
+* [Required to Build the Core OpenDDS Libraries](#required-to-build-the-core-opendds-libraries)
+  * [Perl](#perl)
+  * [MPC](#mpc)
+  * [ACE](#ace)
+  * [TAO](#tao)
+* [Optional Dependencies](#optional-dependencies)
+  * [CMake](#cmake)
+  * [Google Test](#google-test)
+  * [Java](#java)
+  * [Qt](#qt)
+  * [Wireshark](#wireshark)
+  * [RapidJSON](#rapidjson)
+  * [Boost](#boost)
+  * [Xerces](#xerces)
+  * [OpenSSL](#openssl)
+
 ## Required to Build the Core OpenDDS Libraries
 
 **NOTE: Perl is required to run the configure script; MPC, ACE, and TAO will be

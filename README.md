@@ -17,10 +17,10 @@ developed in C++, Java and JMS bindings are provided so that Java applications
 can use OpenDDS.  OpenDDS also includes support for the DDS Security
 specification.
 
-OpenDDS is built on the [ACE](docs/dependencies.md#ace)
-abstraction layer to provide platform portability.  OpenDDS also leverages
-capabilities of [TAO](docs/dependencies.md#tao), such as its IDL compiler
-and as the basis of the OpenDDS DCPS Information Repository (DCPSInfoRepo).
+OpenDDS is built on the [ACE](docs/dependencies.md#ace) abstraction layer to
+provide platform portability.  OpenDDS also leverages capabilities of
+[TAO](docs/dependencies.md#tao), such as its IDL compiler and as the basis of
+the OpenDDS DCPS Information Repository (DCPSInfoRepo).
 
 The primary development of OpenDDS was done by
 [Object Computing, Incorporated](http://www.objectcomputing.com) in
@@ -36,7 +36,7 @@ details.
 * [Dependencies](#dependencies)
   * [ACE/TAO](#acetao)
   * [Perl](#perl)
-  * [Google Test](#google-test)
+  * [Optional Dependencies](#optional-dependencies)
 * [Supported Platforms](#supported-platforms)
   * [Operating Systems](#operating-systems)
   * [Compilers](#compilers)
@@ -63,9 +63,8 @@ Other documentation can be found in [`docs` directory](docs).
 
 If you encounter any problems with this release please fill out the
 [PROBLEM-REPORT-FORM](PROBLEM-REPORT-FORM) file found in this directory and use
-it when posting to
-the [mailing list](http://opendds.org/support.html) or creating a
-[GitHub Issue](https://github.com/objectcomputing/OpenDDS/issues).
+it when posting to the [mailing list](http://opendds.org/support.html) or
+creating a [GitHub Issue](https://github.com/objectcomputing/OpenDDS/issues).
 
 For commercial support please see http://opendds.org/support.html.
 
@@ -106,11 +105,11 @@ first -- the `configure` script will download it for you.
 There are two distributions of ACE/TAO that can be used with OpenDDS:
 
 * OCI ACE/TAO 2.2a patch 16
-  * This will be automatically downloaded by default when using the
-    configure script.
+  * This will be automatically downloaded by default when using the configure
+    script.
   * Can be manually downloaded from:
     * http://download.objectcomputing.com/TAO-2.2a_patches/
-* DOC Group ACE/TAO 2.5.5
+* DOC Group ACE 6.5.5 / TAO 2.5.5
   * When using the configure script, DOG Group ACE/TAO can be downloaded using
     one of these arguments:
     * `--doc-group` for the latest release
@@ -129,11 +128,22 @@ files.
 On Windows we recommend the use of [ActiveState Perl](
 https://www.activestate.com/activeperl).
 
-### Google Test
+### Optional Dependencies
 
-Starting with OpenDDS 3.14, Google Test is required for OpenDDS tests. Tests
-are built by default so that means Google Test is required unless `--no-tests`
-is passed to configure.
+* [Google Test](docs/dependencies.md#google-test), for various tests.
+  * Starting with OpenDDS 3.14, Google Test is required for OpenDDS tests.
+    Tests are built by default, so that means Google Test is required unless
+    `--no-tests` is passed to `configure`.
+* [CMake](docs/dependencies.md#cmake), for building Google Test and the OpenDDS
+  CMake module.
+* [Java](docs/dependencies.md#java), for Java bindings.
+* [Qt](docs/dependencies.md#qt), for Monitor application and ishapes demo.
+* [Wireshark](docs/dependencies.md#wireshark), for the OpenDDS DCPS Wireshark
+  dissector.
+* [RapidJSON](docs/dependencies.md#rapidjson), for optional dissector sample
+  dissection support and JSON typesupport.
+* [Xerces](docs/dependencies.md#xerces), for XML QOS and DDS Security.
+* [OpenSSL](docs/dependencies.md#openssl), for DDS Security.
 
 ## Supported Platforms
 
@@ -148,6 +158,7 @@ Linux family:
 * Debian 9.4, i686
 * Ubuntu 16.04 LTS, x86\_64
 * openSUSE 42.1, and 42.2, x86\_64
+* [Docker](docs/docker.md)
 
 Windows family:
 * Windows 7 (32-bit, 64-bit)
@@ -156,7 +167,6 @@ Windows family:
 
 Others:
 * macOS 10.13 (High Sierra)
-* [Docker](docs/docker.md)
 
 Embedded/Mobile/IoT:
 * LynxOS-178 (OpenDDS Safety Profile)

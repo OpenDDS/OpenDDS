@@ -1,6 +1,6 @@
 <!--
-  This file was coverted mannually from codegen.html TiddlyWiki.
-  That had serveral pages in it's table of contents, of which only two were not
+  This file was converted manually from codegen.html TiddlyWiki.
+  That had several pages in it's table of contents, of which only two were not
   empty and were copied here.
 -->
 # OpenDDS Modeling SDK Code Generation
