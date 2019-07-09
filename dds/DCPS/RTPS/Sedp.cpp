@@ -2514,6 +2514,12 @@ Sedp::association_complete(const RepoId& localId,
         write_subscription_data(localId, sub->second);
       }
     }
+  } else if (remoteId.entityId == ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER) {
+    write_durable_publication_data(remoteId);
+  } else if (remoteId.entityId == ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER) {
+    write_durable_subscription_data(remoteId);
+  } else if (remoteId.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER) {
+    write_durable_participant_message_data(remoteId);
   }
 }
 
@@ -2648,6 +2654,19 @@ bool
 Sedp::Writer::assoc(const DCPS::AssociationData& subscription)
 {
   return associate(subscription, true);
+}
+
+void
+Sedp::Writer::transport_assoc_done(int flags, const RepoId& remote) {
+  if (!(flags & ASSOC_OK)) {
+    const DCPS::GuidConverter conv(remote);
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) Sedp::Writer::transport_assoc_done: ")
+               ACE_TEXT("ERROR: transport layer failed to associate %C\n"),
+               OPENDDS_STRING(conv).c_str()));
+    return;
+  }
+  sedp_.association_complete(repo_id_, remote);
 }
 
 void

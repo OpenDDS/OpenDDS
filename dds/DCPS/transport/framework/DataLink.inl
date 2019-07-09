@@ -236,7 +236,7 @@ DataLink::id() const
 
 ACE_INLINE int
 DataLink::start(const TransportSendStrategy_rch& send_strategy,
-                const TransportStrategy_rch& receive_strategy)
+                const TransportStrategy_rch& receive_strategy, bool invoke_all)
 {
   DBG_ENTRY_LVL("DataLink","start",6);
 
@@ -269,7 +269,9 @@ DataLink::start(const TransportSendStrategy_rch& send_strategy,
     this->send_strategy_    = send_strategy;
     this->receive_strategy_ = receive_strategy;
   }
-  invoke_on_start_callbacks(true);
+  if (invoke_all) {
+    invoke_on_start_callbacks(true);
+  }
   {
     //catch any associations added during initial invoke_on_start_callbacks
     //only after first use_datalink has resolved does datalink's state truly
@@ -279,7 +281,9 @@ DataLink::start(const TransportSendStrategy_rch& send_strategy,
   }
   //Now state transitioned to started so no new on_start_callbacks will be added
   //so resolve any added during transition to started.
-  invoke_on_start_callbacks(true);
+  if (invoke_all) {
+    invoke_on_start_callbacks(true);
+  }
   return 0;
 }
 

@@ -252,7 +252,7 @@ public:
 
   typedef WeakRcHandle<TransportClient> TransportClient_wrch;
   typedef std::pair<TransportClient_wrch, RepoId> OnStartCallback;
-  bool add_on_start_callback(const TransportClient_wrch& client, const RepoId& remote);
+  virtual bool add_on_start_callback(const TransportClient_wrch& client, const RepoId& remote);
   void remove_on_start_callback(const TransportClient_wrch& client, const RepoId& remote);
   void invoke_on_start_callbacks(bool success);
   void invoke_on_start_callbacks(const RepoId& local, const RepoId& remote, bool success);
@@ -278,7 +278,8 @@ protected:
   /// if one of the strategy objects was started successfully, then
   /// it will be stopped before the start() method returns -1.
   int start(const TransportSendStrategy_rch& send_strategy,
-            const TransportStrategy_rch& receive_strategy);
+            const TransportStrategy_rch& receive_strategy,
+            bool invoke_all = true);
 
   /// This announces the "stop" event to our subclass.  The "stop"
   /// event will occur when this DataLink is handling a

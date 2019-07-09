@@ -81,6 +81,8 @@ public:
 
   bool open(const ACE_SOCK_Dgram& unicast_socket);
 
+  virtual bool add_on_start_callback(const TransportClient_wrch& client, const RepoId& remote);
+
   void received(const RTPS::DataSubmessage& data,
                 const GuidPrefix_t& src_prefix);
 

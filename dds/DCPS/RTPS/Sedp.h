@@ -306,6 +306,7 @@ private:
     virtual ~Writer();
 
     bool assoc(const DCPS::AssociationData& subscription);
+    void transport_assoc_done(int flags, const DCPS::RepoId& remote);
 
     // Implementing TransportSendListener
     void data_delivered(const DCPS::DataSampleElement*);

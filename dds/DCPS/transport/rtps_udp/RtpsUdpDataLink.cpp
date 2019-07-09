@@ -241,7 +241,7 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
   send_strategy()->send_buffer(&multi_buff_);
 
   if (start(send_strategy_,
-            receive_strategy_) != 0) {
+            receive_strategy_, false) != 0) {
     stop_i();
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
@@ -249,6 +249,15 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
                      false);
   }
 
+  return true;
+}
+
+bool
+RtpsUdpDataLink::add_on_start_callback(const TransportClient_wrch& client, const RepoId& remote)
+{
+  GuardType guard(strategy_lock_);
+
+  on_start_callbacks_.push_back(std::make_pair(client, remote));
   return true;
 }
 
@@ -287,7 +296,7 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
       w.remote_readers_[remote_id].durable_ = remote_durable;
       w.durable_ = local_durable;
       w.ready_to_hb_ = !remote_durable;
-      enable_heartbeat = w.ready_to_hb_;
+      enable_heartbeat = true;
     } else {
       invoke_on_start_callbacks(local_id, remote_id, true);
     }
@@ -1182,32 +1191,33 @@ RtpsUdpDataLink::process_heartbeat_i(const RTPS::HeartBeatSubmessage& heartbeat,
   last.setValue(heartbeat.lastSN.high, heartbeat.lastSN.low);
   static const SequenceNumber starting, zero = SequenceNumber::ZERO();
 
-  DisjointSequence& recvd = info.recvd_;
-  if (!rr.second.durable_ && info.initial_hb_) {
-    if (last.getValue() < starting.getValue()) {
-      // this is an invalid heartbeat -- last must be positive
-      return false;
+  // Only 'apply' heartbeat ranges to received set if the heartbeat is valid
+  // But for the sake of speedy discovery / association we'll still respond to invalid non-final heartbeats
+  if (last.getValue() >= starting.getValue()) {
+
+    DisjointSequence& recvd = info.recvd_;
+    if (!rr.second.durable_ && info.initial_hb_) {
+      // For the non-durable reader, the first received HB or DATA establishes
+      // a baseline of the lowest sequence number we'd ever need to NACK.
+      if (recvd.empty() || recvd.low() >= last) {
+        recvd.insert(SequenceRange(zero, last));
+      } else {
+        recvd.insert(SequenceRange(zero, recvd.low()));
+      }
+    } else if (!recvd.empty()) {
+      // All sequence numbers below 'first' should not be NACKed.
+      // The value of 'first' may not decrease with subsequent HBs.
+      recvd.insert(SequenceRange(zero,
+                                 (first > starting) ? first.previous() : zero));
     }
-    // For the non-durable reader, the first received HB or DATA establishes
-    // a baseline of the lowest sequence number we'd ever need to NACK.
-    if (recvd.empty() || recvd.low() >= last) {
-      recvd.insert(SequenceRange(zero, last));
-    } else {
-      recvd.insert(SequenceRange(zero, recvd.low()));
-    }
-  } else if (!recvd.empty()) {
-    // All sequence numbers below 'first' should not be NACKed.
-    // The value of 'first' may not decrease with subsequent HBs.
-    recvd.insert(SequenceRange(zero,
-                               (first > starting) ? first.previous() : zero));
+
+    deliver_held_data(rr.first, info, rr.second.durable_);
+
+    //FUTURE: to support wait_for_acks(), notify DCPS layer of the sequence
+    //        numbers we no longer expect to receive due to HEARTBEAT
+
+    info.initial_hb_ = false;
   }
-
-  deliver_held_data(rr.first, info, rr.second.durable_);
-
-  //FUTURE: to support wait_for_acks(), notify DCPS layer of the sequence
-  //        numbers we no longer expect to receive due to HEARTBEAT
-
-  info.initial_hb_ = false;
 
   const bool final = heartbeat.smHeader.flags & RTPS::FLAG_F,
     liveliness = heartbeat.smHeader.flags & RTPS::FLAG_L;
@@ -1704,7 +1714,6 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
 
   if (!ri->second.handshake_done_) {
     ri->second.handshake_done_ = true;
-    invoke_on_start_callbacks(local, remote, true);
     first_ack = true;
   }
 
@@ -1844,6 +1853,7 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
     it->second->data_delivered();
   }
   if (first_ack) {
+    invoke_on_start_callbacks(local, remote, true);
     first_acknowledged_by_reader(local, remote, received_sn_base);
   }
 }
@@ -2434,13 +2444,9 @@ RtpsUdpDataLink::send_heartbeats()
         continue;
       }
 
-      if (!rw->second.ready_to_hb_) {
-        continue;
-      }
-
       const SequenceNumber firstSN = (rw->second.durable_ || !has_data)
                                      ? 1 : rw->second.send_buff_->low(),
-          lastSN = std::max(durable_max, has_data ? rw->second.send_buff_->high() : SequenceNumber::ZERO());
+          lastSN = rw->second.ready_to_hb_ ? std::max(durable_max, has_data ? rw->second.send_buff_->high() : SequenceNumber::ZERO()) : SequenceNumber::ZERO();
 
       const HeartBeatSubmessage hb = {
         {HEARTBEAT,
