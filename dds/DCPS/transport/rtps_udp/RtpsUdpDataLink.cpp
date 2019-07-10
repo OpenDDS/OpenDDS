@@ -2267,8 +2267,17 @@ RtpsUdpDataLink::marshal_gaps(const RepoId& writer, const RepoId& reader,
     static_cast<CORBA::UShort>(gap_size + padding) - SMHDR_SZ;
 
   // For durable writers, change a non-directed Gap into multiple directed gaps.
+#ifdef OPENDDS_SECURITY
+    const EntityId_t& pvs_writer =
+      RTPS::ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER;
+    const bool is_pvs_writer =
+      0 == std::memcmp(&pvs_writer, &writer.entityId, sizeof pvs_writer);
+#else
+    const bool is_pvs_writer = false;
+#endif
+
   OPENDDS_VECTOR(RepoId) readers;
-  if (durable && reader.entityId == ENTITYID_UNKNOWN) {
+  if (is_pvs_writer || (durable && reader.entityId == ENTITYID_UNKNOWN)) {
     if (Transport_debug_level > 5) {
       const GuidConverter local_conv(writer);
       ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::marshal_gaps local %C "

@@ -1101,12 +1101,6 @@ Sedp::Task::svc_i(const ParticipantData_t* ppdata)
     sedp_->participant_message_writer_.assoc(peer);
   }
 
-#ifdef OPENDDS_SECURITY
-  if (sedp_->is_security_enabled()) {
-    sedp_->associate_secure_readers_to_writers(*pdata);
-  }
-#endif
-
   //FUTURE: if/when topic propagation is supported, add it here
 
   // Process deferred publications and subscriptions.
@@ -1137,20 +1131,6 @@ Sedp::Task::svc_i(const ParticipantData_t* ppdata)
     sedp_->send_builtin_crypto_tokens(*pdata);
   }
 #endif
-
-  // Write durable data
-  if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR) {
-    proto.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER;
-    sedp_->write_durable_publication_data(proto.remote_id_);
-  }
-  if (avail & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR) {
-    proto.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER;
-    sedp_->write_durable_subscription_data(proto.remote_id_);
-  }
-  if (avail & BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER) {
-    proto.remote_id_.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER;
-    sedp_->write_durable_participant_message_data(proto.remote_id_);
-  }
 
   for (DCPS::RepoIdSet::iterator it = sedp_->defer_match_endpoints_.begin();
        it != sedp_->defer_match_endpoints_.end(); /*incremented in body*/) {
@@ -2516,6 +2496,15 @@ Sedp::association_complete(const RepoId& localId,
     }
   }
 
+#ifdef OPENDDS_SECURITY
+  if (remoteId.entityId == ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER) {
+    write_durable_publication_data(remoteId);
+  } else if (remoteId.entityId == ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER) {
+    write_durable_subscription_data(remoteId);
+  } else if (remoteId.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER) {
+    write_durable_participant_message_data(remoteId);
+  }
+#endif
   if (remoteId.entityId == ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER) {
     write_durable_publication_data(remoteId);
   } else if (remoteId.entityId == ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER) {
