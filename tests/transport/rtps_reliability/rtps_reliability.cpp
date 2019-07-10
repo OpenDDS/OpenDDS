@@ -56,7 +56,6 @@ struct SimpleTC: TransportClient {
       return;
     }
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-std::cout << "transport_assoc_done - " << OpenDDS::DCPS::GuidConverter(remote) << std::endl;
     associated_.insert(remote);
     cond_.broadcast();
   }
@@ -64,7 +63,6 @@ std::cout << "transport_assoc_done - " << OpenDDS::DCPS::GuidConverter(remote) <
   void wait_for_assoc(const RepoId& remote) {
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
     while (associated_.find(remote) == associated_.end()) {
-std::cout << "wait_for_assoc - not yet! - " << OpenDDS::DCPS::GuidConverter(remote) << std::endl;
       cond_.wait(mutex_);
     }
   }
