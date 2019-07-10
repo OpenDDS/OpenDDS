@@ -2514,7 +2514,9 @@ Sedp::association_complete(const RepoId& localId,
         write_subscription_data(localId, sub->second);
       }
     }
-  } else if (remoteId.entityId == ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER) {
+  }
+
+  if (remoteId.entityId == ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER) {
     write_durable_publication_data(remoteId);
   } else if (remoteId.entityId == ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER) {
     write_durable_subscription_data(remoteId);
