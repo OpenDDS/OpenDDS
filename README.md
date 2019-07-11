@@ -97,7 +97,7 @@ For a complete detailed list of dependencies, see
 ### ACE/TAO
 
 OpenDDS requires TAO for both IDL compilation as well as interaction with the
-DCPSInfoRepo. ACE is also required, but is always included with TAO. If you
+DCPSInfoRepo. ACE is also required, but it is always included with TAO. If you
 will be using the `configure` script for OpenDDS (see the
 [`INSTALL.md`](INSTALL.md) file for details), you do not need to download TAO
 first -- the `configure` script will download it for you.
