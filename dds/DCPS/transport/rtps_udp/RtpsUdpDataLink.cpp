@@ -295,7 +295,6 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
       RtpsWriter& w = writers_[local_id];
       w.remote_readers_[remote_id].durable_ = remote_durable;
       w.durable_ = local_durable;
-      w.ready_to_hb_ = !remote_durable;
       enable_heartbeat = true;
     } else {
       invoke_on_start_callbacks(local_id, remote_id, true);
@@ -851,7 +850,6 @@ RtpsUdpDataLink::end_historic_samples(RtpsWriterMap::iterator writer,
         }
       }
     }
-    writer->second.ready_to_hb_ = true;
     heartbeat_->schedule_enable(true);
   }
 }
@@ -2455,7 +2453,7 @@ RtpsUdpDataLink::send_heartbeats()
 
       const SequenceNumber firstSN = (rw->second.durable_ || !has_data)
                                      ? 1 : rw->second.send_buff_->low(),
-          lastSN = rw->second.ready_to_hb_ ? std::max(durable_max, has_data ? rw->second.send_buff_->high() : SequenceNumber::ZERO()) : SequenceNumber::ZERO();
+          lastSN = std::max(durable_max, has_data ? rw->second.send_buff_->high() : SequenceNumber::ZERO());
 
       const HeartBeatSubmessage hb = {
         {HEARTBEAT,
