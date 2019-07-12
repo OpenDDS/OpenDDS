@@ -227,6 +227,11 @@ Service_Participant::instance()
 int
 Service_Participant::ReactorTask::svc()
 {
+  // Ignore signals so the reactor does not get interrupted.
+  sigset_t set;
+  ACE_OS::sigfillset(&set);
+  ACE_OS::thr_sigsetmask(SIG_SETMASK, &set, NULL);
+
   Service_Participant* sp = instance();
   sp->reactor_->owner(ACE_Thread_Manager::instance()->thr_self());
   sp->reactor_owner_ = ACE_Thread_Manager::instance()->thr_self();
