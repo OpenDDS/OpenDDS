@@ -1651,9 +1651,6 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
   const ACE_Time_Value now = ACE_OS::gettimeofday();
   OPENDDS_VECTOR(DiscoveryListener*) callbacks;
 
-  // For first_acknowledged_by_reader
-  SequenceNumber received_sn_base;
-  received_sn_base.setValue(acknack.readerSNState.bitmapBase.high, acknack.readerSNState.bitmapBase.low);
   bool first_ack = false;
 
   {
@@ -1852,7 +1849,6 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
   }
   if (first_ack) {
     invoke_on_start_callbacks(local, remote, true);
-    first_acknowledged_by_reader(local, remote, received_sn_base);
   }
 }
 
