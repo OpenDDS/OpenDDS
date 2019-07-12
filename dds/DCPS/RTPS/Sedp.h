@@ -621,7 +621,7 @@ private:
 
   // Topic:
 
-  DCPS::RepoIdSet defer_match_endpoints_, associated_participants_;
+  DCPS::RepoIdSet associated_participants_;
 
   virtual bool shutting_down() const;
 
@@ -638,12 +638,6 @@ private:
   add_security_info(const DCPS::TransportLocatorSeq& locators,
                     const DCPS::RepoId& writer, const DCPS::RepoId& reader);
 #endif
-
-  virtual bool defer_writer(const DCPS::RepoId& writer,
-                            const DCPS::RepoId& writer_participant);
-
-  virtual bool defer_reader(const DCPS::RepoId& reader,
-                            const DCPS::RepoId& reader_participant);
 
   static DCPS::RepoId make_id(const DCPS::RepoId& participant_id,
                               const EntityId_t& entity);

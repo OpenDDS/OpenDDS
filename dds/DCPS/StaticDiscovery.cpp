@@ -472,24 +472,6 @@ StaticEndpointManager::populate_transport_locator_sequence(TransportLocatorSeq*&
   // TODO
 }
 
-bool
-StaticEndpointManager::defer_writer(const RepoId& /*writer*/,
-                                    const RepoId& /*writer_participant*/)
-{
-  ACE_DEBUG((LM_NOTICE, ACE_TEXT("(%P|%t) StaticEndpointManager::defer_writer TODO\n")));
-  // TODO
-  return false;
-}
-
-bool
-StaticEndpointManager::defer_reader(const RepoId& /*writer*/,
-                                    const RepoId& /*writer_participant*/)
-{
-  // TODO
-  ACE_DEBUG((LM_NOTICE, ACE_TEXT("(%P|%t) StaticEndpointManager::defer_reader TODO\n")));
-  return false;
-}
-
 void
 StaticEndpointManager::reader_exists(const RepoId& readerid, const RepoId& writerid)
 {

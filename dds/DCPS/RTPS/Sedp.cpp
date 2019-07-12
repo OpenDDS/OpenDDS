@@ -1134,48 +1134,6 @@ Sedp::Task::svc_i(const ParticipantData_t* ppdata)
   }
 #endif
 
-  for (DCPS::RepoIdSet::iterator it = sedp_->defer_match_endpoints_.begin();
-       it != sedp_->defer_match_endpoints_.end(); /*incremented in body*/) {
-    if (0 == std::memcmp(it->guidPrefix, proto.remote_id_.guidPrefix,
-                         sizeof(GuidPrefix_t))) {
-      OPENDDS_STRING topic;
-      if (it->entityId.entityKind & 4) {
-        DiscoveredSubscriptionIter dsi =
-          sedp_->discovered_subscriptions_.find(*it);
-        if (dsi != sedp_->discovered_subscriptions_.end()) {
-          topic = dsi->second.reader_data_.ddsSubscriptionData.topic_name;
-        }
-      } else {
-        DiscoveredPublicationIter dpi =
-          sedp_->discovered_publications_.find(*it);
-        if (dpi != sedp_->discovered_publications_.end()) {
-          topic = dpi->second.writer_data_.ddsPublicationData.topic_name;
-        }
-      }
-      if (DCPS::DCPS_debug_level > 3) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::AssociateTask::svc - ")
-          ACE_TEXT("processing deferred endpoints for topic %C\n"),
-          topic.c_str()));
-      }
-      if (!topic.empty()) {
-        OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator ti =
-          sedp_->topics_.find(topic);
-        if (ti != sedp_->topics_.end()) {
-          if (DCPS::DCPS_debug_level > 3) {
-            DCPS::GuidConverter conv(*it);
-            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::AssociateTask::svc - ")
-              ACE_TEXT("calling match_endpoints %C\n"),
-              OPENDDS_STRING(conv).c_str()));
-          }
-          sedp_->match_endpoints(*it, ti->second);
-          if (spdp_->shutting_down()) { return; }
-        }
-      }
-      sedp_->defer_match_endpoints_.erase(it++);
-    } else {
-      ++it;
-    }
-  }
 }
 
 #ifdef OPENDDS_SECURITY
@@ -3963,7 +3921,6 @@ Sedp::populate_transport_locator_sequence(DCPS::TransportLocatorSeq*& rTls,
                                participantExpectsInlineQos);
   if (!rTls->length()) {     // if no locators provided, add the default
     if (!participant_found) {
-      defer_match_endpoints_.insert(reader);
       return;
     } else if (locs.length()) {
       size_t size = 0, padding = 0;
@@ -4008,7 +3965,6 @@ Sedp::populate_transport_locator_sequence(DCPS::TransportLocatorSeq*& wTls,
                                participantExpectsInlineQos);
   if (!wTls->length()) {     // if no locators provided, add the default
     if (!participant_found) {
-      defer_match_endpoints_.insert(writer);
       return;
     } else if (locs.length()) {
       size_t size = 0, padding = 0;
@@ -4121,36 +4077,6 @@ Sedp::add_security_info(const DCPS::TransportLocatorSeq& locators,
   return newLoc ? newLoc : locators;
 }
 #endif
-
-bool
-Sedp::defer_writer(const RepoId& writer,
-                   const RepoId& writer_participant)
-{
-  if (!associated_participants_.count(writer_participant)) {
-    if (DCPS::DCPS_debug_level > 3) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::match - ")
-                 ACE_TEXT("remote writer deferred\n")));
-    }
-    defer_match_endpoints_.insert(writer);
-    return true;
-  }
-  return false;
-}
-
-bool
-Sedp::defer_reader(const RepoId& reader,
-                   const RepoId& reader_participant)
-{
-  if (!associated_participants_.count(reader_participant)) {
-    if (DCPS::DCPS_debug_level > 3) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::match - ")
-                 ACE_TEXT("remote reader deferred\n")));
-    }
-    defer_match_endpoints_.insert(reader);
-    return true;
-  }
-  return false;
-}
 
 #ifdef OPENDDS_SECURITY
 DDS::Security::DatawriterCryptoHandle
