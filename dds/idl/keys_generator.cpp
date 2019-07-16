@@ -20,7 +20,7 @@ struct KeyLessThanWrapper {
 
   explicit KeyLessThanWrapper(UTL_ScopedName* name)
     : n_(0),
-      cxx_name_(scoped(name))
+    , cxx_name_(scoped(name))
   {
     be_global->header_ << be_global->versioning_begin() << "\n";
 
@@ -39,7 +39,7 @@ struct KeyLessThanWrapper {
       name->last_component()->get_string() << "_OpenDDS_KeyLessThan {\n";
   }
 
-  void has_no_keys_signature() {
+  void has_no_keys_signature()
     be_global->header_ <<
       "  bool operator()(const " << cxx_name_ << "&, const " << cxx_name_
       << "&) const\n"

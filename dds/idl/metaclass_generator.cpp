@@ -370,7 +370,7 @@ namespace {
     be_global->impl_ << "    }\n";
   }
 
-  void gen_isDcpsKey_i(const char* key) {
+  void gen_isDcpsKey_i(const char* key)
     be_global->impl_ <<
       "    if (!ACE_OS::strcmp(field, \"" <<  key << "\")) {\n"
       "      return true;\n"

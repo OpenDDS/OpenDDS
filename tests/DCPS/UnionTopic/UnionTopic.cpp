@@ -101,7 +101,6 @@ public:
         ACE_TEXT("create_datawriter failed!\n")), true);
     }
 
-    // Block until Subscriber is associated
     {
       DDS::StatusCondition_var cond = writer_->get_statuscondition();
       cond->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
