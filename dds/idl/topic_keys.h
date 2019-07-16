@@ -1,5 +1,5 @@
-#ifndef SAMPLE_KEYS_HEADER
-#define SAMPLE_KEYS_HEADER
+#ifndef TOPIC_KEYS_HEADER
+#define TOPIC_KEYS_HEADER
 
 #include <string>
 #include <iterator>
@@ -73,7 +73,7 @@ public:
     typedef AST_Decl* value_type;
     typedef AST_Decl** pointer;
     typedef AST_Decl*& reference;
-    typedef std::output_iterator_tag iterator_category;
+    typedef std::input_iterator_tag iterator_category;
     ///}
 
     /**
@@ -97,7 +97,7 @@ public:
     Iterator& operator=(const Iterator& other);
     Iterator& operator++(); // Prefix
     Iterator operator++(int); // Postfix
-    value_type operator*() const;
+    AST_Decl* operator*() const;
     bool operator==(const Iterator& other) const;
     bool operator!=(const Iterator& other) const;
 
@@ -138,7 +138,7 @@ public:
     unsigned pos_;
     Iterator* child_;
     /// Current value of the entire iterator stack
-    value_type current_value_;
+    AST_Decl* current_value_;
     AST_Decl* root_;
     RootType root_type_;
     size_t level_;

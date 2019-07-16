@@ -607,7 +607,6 @@ BE_GlobalData::get_include_block(BE_GlobalData::stream_enum_t which)
     if (!export_include().empty())
       ret << "#include \"" << export_include() << "\"\n";
     break;
-
   case STREAM_CPP:
     std::for_each(cpp_includes().begin(), cpp_includes().end(), InsertIncludes(ret));
     std::for_each(referenced_idl_.begin(), referenced_idl_.end(),
@@ -639,25 +638,18 @@ BE_GlobalData::cache_annotations()
 bool
 BE_GlobalData::is_topic_type(AST_Decl* node)
 {
-  /* A type is a topic type and gets type support if it is annotated with
-   * @topic or else is not nested.
-   */
   return node->annotations().find(topic_annotation_) || !is_nested(node);
 }
 
 bool
 BE_GlobalData::is_nested(AST_Decl* node)
 {
-  // If annotated with @nested, then @nested.value is the type's nested value.
   AST_Annotation_Appl* nested = node->annotations().find(nested_annotation_);
   if (nested) {
     return dynamic_cast<AST_Annotation_Member*>((*nested)["value"])->
       value()->ev()->u.bval;
   }
 
-  /* Otherwise a type's nested value is the default nested value of the type's
-   * scope.
-   */
   return is_default_nested(node->defined_in());
 }
 
@@ -665,10 +657,7 @@ bool
 BE_GlobalData::is_default_nested(UTL_Scope* scope)
 {
   AST_Decl* module = dynamic_cast<AST_Decl*>(scope);
-  if (module) { // If scope is a module
-    /* If annotated with @default_nested, then @default_nested.value is
-     * the modules's default nested value.
-     */
+  if (module) {
     AST_Annotation_Appl* default_nested =
       module->annotations().find(default_nested_annotation_);
     if (default_nested) {
@@ -676,27 +665,21 @@ BE_GlobalData::is_default_nested(UTL_Scope* scope)
         value()->ev()->u.bval;
     }
 
-    // Otherwise the scope inherits from its parent.
     return is_default_nested(module->defined_in());
   }
 
-  /* Else this is the global/root scope and the default is true if
-   * --default-nested was passed, false if it wasn't.
-   */
-  return global_default_nested_;
+  return global_default_nested_; // True if --default-nested was passed
 }
 
 bool
 BE_GlobalData::is_key(AST_Field* node)
 {
-  // Check for @key
   return node && node->annotations().find(key_annotation_);
 }
 
 bool
 BE_GlobalData::has_key(AST_Union* node)
 {
-  // Check for @key on the discriminator
   return node && node->disc_annotations().find(key_annotation_);
 }
 

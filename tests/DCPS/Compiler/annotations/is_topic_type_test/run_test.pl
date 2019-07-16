@@ -3,7 +3,12 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
      if 0;
 
 use strict;
-use JSON::PP;
+
+eval('use JSON::PP;');
+if ($@) {
+  print STDERR "is_topic_type_test: JSON::PP not installed, skipping test and returning 0.\n";
+  exit(0);
+}
 
 # The expected results of is_topic_type()
 # dn and wo_dn refers to running opendds_idl with and without --default-nested

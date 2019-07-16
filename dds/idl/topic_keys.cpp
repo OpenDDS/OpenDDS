@@ -261,7 +261,7 @@ TopicKeys::Iterator TopicKeys::Iterator::operator++(int)
   return prev;
 }
 
-TopicKeys::Iterator::value_type TopicKeys::Iterator::operator*() const
+AST_Decl* TopicKeys::Iterator::operator*() const
 {
   return current_value_;
 }

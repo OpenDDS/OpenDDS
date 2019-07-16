@@ -49,11 +49,8 @@ Serializer::reset_alignment()
 void
 Serializer::smemcpy(char* to, const char* from, size_t n)
 {
-  ACE_ASSERT(from);
-  (void) ACE_OS::memcpy(
-    reinterpret_cast<void*>(to),
-    reinterpret_cast<const void*>(from),
-    n);
+  OPENDDS_ASSERT(from);
+  (void) ACE_OS::memcpy(to, from, n);
 }
 
 void
