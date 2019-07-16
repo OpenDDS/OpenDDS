@@ -201,7 +201,7 @@ not having any sources added with it in the call to `add_library`.
 `DEFAULT_NESTED` overrides the global default, `OPENDDS_DEFAULT_NESTED`, which
 is `ON` by default. If this value is `ON`, then topic types for a given project
 must be declared using annotations. If it's `OFF`, then every valid type is
-assumed to be needed for use as a topic type by default, which might needlessly
+assumed to be needed for use as a topic type by default, which might
 add code to the IDL type support libraries that will never be used.
 
 See section 2.1.1, "Defining the Data Types", of the OpenDDS Developer's Guide

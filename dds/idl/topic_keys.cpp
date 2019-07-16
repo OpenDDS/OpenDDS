@@ -86,7 +86,7 @@ TopicKeys::Iterator::Iterator(TopicKeys& parent)
 {
   root_ = parent.root();
   root_type_ = parent.root_type();
-  ++(*this);
+  ++*this;
 }
 
 TopicKeys::Iterator::Iterator(AST_Type* root, Iterator* parent)
@@ -120,7 +120,7 @@ TopicKeys::Iterator::Iterator(AST_Field* root, Iterator* parent)
   ++(*this);
 }
 
-TopicKeys::Iterator::Iterator(const TopicKeys::Iterator& other)
+TopicKeys::Iterator::Iterator(const Iterator& other)
   : pos_(0),
     child_(0),
     current_value_(0),

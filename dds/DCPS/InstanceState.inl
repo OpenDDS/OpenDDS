@@ -124,7 +124,7 @@ OpenDDS::DCPS::InstanceState::lively(const PublicationId& writer_id)
   if (instance_state_ == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE) {
     cancel_release(); // cancel unregister
 
-    no_writers_generation_count_++;
+    ++no_writers_generation_count_;
     instance_state_ = DDS::ALIVE_INSTANCE_STATE;
   }
 }
@@ -151,7 +151,7 @@ OpenDDS::DCPS::InstanceState::is_last (const PublicationId& pub)
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
 
-  return (writers_.size () == 1) && *(writers_.begin ()) == pub;
+  return writers_.size() == 1 && *writers_.begin() == pub;
 }
 
 ACE_INLINE
@@ -160,7 +160,7 @@ OpenDDS::DCPS::InstanceState::no_writer () const
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, true);
 
-  return writers_.size () == 0;
+  return writers_.empty();
 }
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

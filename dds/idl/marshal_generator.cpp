@@ -2222,7 +2222,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
     if (has_key) {
       size_t size = 0, padding = 0;
-      max_marshaled_size(node->disc_type (), size, padding);
+      max_marshaled_size(node->disc_type(), size, padding);
       if (padding) {
         be_global->impl_
           << "  return align ? " << size + padding << " : " << size << ";\n";

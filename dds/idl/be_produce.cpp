@@ -295,7 +295,7 @@ BE_produce()
     !idl_global->print_warnings();
   while (idl) {
     idl.getline(buffer, buffer_sz);
-    lineno++;
+    ++lineno;
 
     if (!(warned_dcps_data_type || strncmp("#pragma DCPS_DATA_TYPE", buffer, 22))) {
       be_global->warning(idl_fn, lineno, "\n"
