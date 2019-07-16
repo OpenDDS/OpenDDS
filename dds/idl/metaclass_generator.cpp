@@ -37,7 +37,8 @@ namespace {
   };
 }
 
-bool metaclass_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
+bool
+metaclass_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
   const std::vector<AST_EnumVal*>& contents, const char*)
 {
   ContentSubscriptionGuard csg(!(be_global->v8() || be_global->rapidjson()));
@@ -59,8 +60,9 @@ bool metaclass_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
 
 namespace {
 
-  void delegateToNested(const std::string& fieldName, AST_Field* field,
-                        const std::string& firstArg, bool skip = false)
+  void
+  delegateToNested(const std::string& fieldName, AST_Field* field,
+    const std::string& firstArg, bool skip = false)
   {
     const size_t n = fieldName.size() + 1 /* 1 for the dot */;
     const std::string fieldType = scoped(field->field_type()->name());
@@ -81,7 +83,8 @@ namespace {
     }
   }
 
-  void gen_field_getValue(AST_Field* field)
+  void
+  gen_field_getValue(AST_Field* field)
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const Classification cls = classify(field->field_type());
@@ -114,7 +117,8 @@ namespace {
     }
   }
 
-  std::string to_cxx_type(AST_Type* type, int& size)
+  std::string
+  to_cxx_type(AST_Type* type, int& size)
   {
     const Classification cls = classify(type);
     if (cls & CL_ENUM) {
@@ -176,7 +180,8 @@ namespace {
     return scoped(type->name());
   }
 
-  void gen_field_getValueFromSerialized(AST_Field* field)
+  void
+  gen_field_getValueFromSerialized(AST_Field* field)
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     AST_Type* type = field->field_type();
@@ -247,7 +252,8 @@ namespace {
     }
   }
 
-  void gen_field_createQC(AST_Field* field)
+  void
+  gen_field_createQC(AST_Field* field)
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     Classification cls = classify(field->field_type());
@@ -273,12 +279,14 @@ namespace {
     }
   }
 
-  void print_field_name(AST_Field* field)
+  void
+  print_field_name(AST_Field* field)
   {
     be_global->impl_ << '"' << field->local_name()->get_string() << '"' << ", ";
   }
 
-  void get_raw_field(AST_Field* field)
+  void
+  get_raw_field(AST_Field* field)
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const char* fieldName = field->local_name()->get_string();
@@ -290,7 +298,8 @@ namespace {
     be_global->add_include("<cstring>", BE_GlobalData::STREAM_CPP);
   }
 
-  void assign_field(AST_Field* field)
+  void
+  assign_field(AST_Field* field)
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     Classification cls = classify(field->field_type());
@@ -347,7 +356,8 @@ namespace {
     }
   }
 
-  void compare_field(AST_Field* field)
+  void
+  compare_field(AST_Field* field)
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     Classification cls = classify(field->field_type());
@@ -370,14 +380,17 @@ namespace {
     be_global->impl_ << "    }\n";
   }
 
-  void gen_isDcpsKey_i(const char* key)
+  void
+  gen_isDcpsKey_i(const char* key)
+  {
     be_global->impl_ <<
       "    if (!ACE_OS::strcmp(field, \"" <<  key << "\")) {\n"
       "      return true;\n"
       "    }\n";
   }
 
-  void gen_isDcpsKey(IDL_GlobalData::DCPS_Data_Type_Info* info)
+  void
+  gen_isDcpsKey(IDL_GlobalData::DCPS_Data_Type_Info* info)
   {
     IDL_GlobalData::DCPS_Key_List::CONST_ITERATOR i(info->key_list_);
     for (ACE_TString* key = 0; i.next(key); i.advance()) {
@@ -385,7 +398,8 @@ namespace {
     }
   }
 
-  void gen_isDcpsKey(TopicKeys& keys)
+  void
+  gen_isDcpsKey(TopicKeys& keys)
   {
     TopicKeys::Iterator finished = keys.end();
     for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
@@ -393,7 +407,8 @@ namespace {
     }
   }
 
-  bool generate_metaclass(AST_Decl* node, UTL_ScopedName* name,
+  bool
+  generate_metaclass(AST_Decl* node, UTL_ScopedName* name,
     const std::vector<AST_Field*>& fields, bool& first_struct_,
     const std::string& clazz)
   {
@@ -559,7 +574,8 @@ namespace {
   }
 }
 
-bool metaclass_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
+bool
+metaclass_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
   const std::vector<AST_Field*>& fields, AST_Type::SIZE_TYPE, const char*)
 {
   const std::string clazz = scoped(name);
@@ -587,7 +603,8 @@ bool metaclass_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
 }
 
 bool
-metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type* type, const char*)
+metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
+  AST_Type* type, const char*)
 {
   AST_Array* arr = AST_Array::narrow_from_decl(type);
   AST_Sequence* seq = 0;
@@ -673,11 +690,9 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type* t
   return true;
 }
 
-static std::string func(const std::string&,
-                        AST_Type* br_type,
-                        const std::string&,
-                        std::string&,
-                        const std::string&)
+static std::string
+func(const std::string&, AST_Type* br_type, const std::string&,
+  std::string&, const std::string&)
 {
   const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
   std::stringstream ss;

@@ -19,7 +19,7 @@ struct KeyLessThanWrapper {
   const string cxx_name_;
 
   explicit KeyLessThanWrapper(UTL_ScopedName* name)
-    : n_(0),
+    : n_(0)
     , cxx_name_(scoped(name))
   {
     be_global->header_ << be_global->versioning_begin() << "\n";
@@ -39,23 +39,27 @@ struct KeyLessThanWrapper {
       name->last_component()->get_string() << "_OpenDDS_KeyLessThan {\n";
   }
 
-  void has_no_keys_signature()
+  void
+  has_no_keys_signature()
+  {
     be_global->header_ <<
-      "  bool operator()(const " << cxx_name_ << "&, const " << cxx_name_
-      << "&) const\n"
+      "  bool operator()(const " << cxx_name_ << "&, const " << cxx_name_ << "&) const\n"
       "  {\n"
       "    // With no keys, return false to allow use of\n"
       "    // map with just one entry\n";
   }
 
-  void has_keys_signature() {
+  void
+  has_keys_signature()
+  {
     be_global->header_ <<
-      "  bool operator()(const " << cxx_name_ << "& v1, const " << cxx_name_
-      << "& v2) const\n"
+      "  bool operator()(const " << cxx_name_ << "& v1, const " << cxx_name_ << "& v2) const\n"
       "  {\n";
   }
 
-  void key_compare(const string& member) {
+  void
+  key_compare(const string& member)
+  {
     be_global->header_ <<
       "    if (v1." << member << " < v2." << member << ") return true;\n"
       "    if (v2." << member << " < v1." << member << ") return false;\n";
@@ -67,7 +71,9 @@ struct KeyLessThanWrapper {
       "    return false;\n"
       "  }\n};\n";
 
-    for (size_t i = 0; i < n_; ++i) be_global->header_ << "}\n";
+    for (size_t i = 0; i < n_; ++i) {
+      be_global->header_ << "}\n";
+    }
 
     be_global->header_ << be_global->versioning_end() << "\n";
   }
