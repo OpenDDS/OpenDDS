@@ -169,7 +169,6 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
 void
 TcpTransport::async_connect_failed(const PriorityKey& key)
 {
-
   ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Failed to make active connection.\n"));
   GuardType guard(links_lock_);
   TcpDataLink_rch link;
@@ -180,7 +179,19 @@ TcpTransport::async_connect_failed(const PriorityKey& key)
   if (link.in()) {
     link->invoke_on_start_callbacks(false);
   }
+}
 
+void
+TcpTransport::async_connect_succeeded(const PriorityKey& key)
+{
+  GuardType guard(links_lock_);
+  TcpDataLink_rch link;
+  links_.find(key, link);
+  guard.release();
+
+  if (link.in()) {
+    link->invoke_on_start_callbacks(true);
+  }
 }
 
 //Called with links_lock_ held
