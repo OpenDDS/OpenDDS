@@ -44,15 +44,8 @@ public:
     DDS::ReturnCode_t rc;
 
     // Create Subscriber
-    DDS::SubscriberQos subscriber_qos;
-    rc = participant_->get_default_subscriber_qos(subscriber_qos);
-    if (rc != DDS::RETCODE_OK) {
-      ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l setup_test() ERROR: ")
-        ACE_TEXT("get_default_subscriber_qos failed: %C\n"),
-        retcode_to_string(rc).c_str()), false);
-    }
     subscriber_ = participant_->create_subscriber(
-      subscriber_qos, DDS::SubscriberListener::_nil(),
+      SUBSCRIBER_QOS_DEFAULT, DDS::SubscriberListener::_nil(),
       OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (!subscriber_) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l setup_test() ERROR: ")
@@ -60,15 +53,8 @@ public:
     }
 
     // Create Publisher
-    DDS::PublisherQos publisher_qos;
-    rc = participant_->get_default_publisher_qos(publisher_qos);
-    if (rc != DDS::RETCODE_OK) {
-      ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l setup_test() ERROR: ")
-        ACE_TEXT("get_default_publisher_qos failed: %C\n"),
-        retcode_to_string(rc).c_str()), false);
-    }
     publisher_ = participant_->create_publisher(
-      publisher_qos, DDS::PublisherListener::_nil(),
+      PUBLISHER_QOS_DEFAULT, DDS::PublisherListener::_nil(),
       OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (!publisher_) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l setup_test() ERROR: ")
@@ -83,6 +69,7 @@ public:
         ACE_TEXT("get_default_datareader_qos failed!\n")), false);
     }
     reader_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
+    reader_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
     reader_ = subscriber_->create_datareader(
       topic.in(), reader_qos, DDS::DataReaderListener::_nil(),
       OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -92,8 +79,17 @@ public:
     }
 
     // Create DataWriter
+    DDS::DataWriterQos writer_qos;
+    rc = publisher_->get_default_datawriter_qos(writer_qos);
+    if (rc != DDS::RETCODE_OK) {
+      ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l setup_test() ERROR: ")
+        ACE_TEXT("get_default_datawriter_qos failed: %C\n"),
+        retcode_to_string(rc).c_str()), false);
+    }
+    writer_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
+    writer_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
     writer_ = publisher_->create_datawriter(
-      topic.in(), DATAWRITER_QOS_DEFAULT,
+      topic.in(), writer_qos,
       DDS::DataWriterListener::_nil(),
       OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (!writer_) {
