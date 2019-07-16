@@ -394,7 +394,7 @@ DataWriterImpl::association_complete(const RepoId& remote_id)
       GuidConverter reader_converter(remote_id);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataWriterImpl::association_complete - ")
-                 ACE_TEXT("bit %d local %C did not find pending reader: %C")
+                 ACE_TEXT("bit %d local %C did not find pending reader: %C ")
                  ACE_TEXT("defer association_complete_i until add_association resumes\n"),
                  is_bit_,
                  OPENDDS_STRING(writer_converter).c_str(),
