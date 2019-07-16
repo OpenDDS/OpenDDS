@@ -275,7 +275,7 @@ ZeroCopyDataSeq<Sample_T, DEF_MAX>::assign_ptr(
   CORBA::ULong ii,
   OpenDDS::DCPS::ReceivedDataElement* item)
 {
-  ACE_ASSERT(is_zero_copy());
+  OPENDDS_ASSERT(is_zero_copy());
   if (ptrs_[ii])
     ptrs_[ii]->dec_ref();
 
@@ -288,7 +288,7 @@ template <class Sample_T, size_t DEF_MAX> ACE_INLINE
 OpenDDS::DCPS::ReceivedDataElement*
 ZeroCopyDataSeq<Sample_T, DEF_MAX>::get_ptr(CORBA::ULong ii) const
 {
-  ACE_ASSERT(is_zero_copy());
+  OPENDDS_ASSERT(is_zero_copy());
   return ptrs_[ii];
 }
 
@@ -297,7 +297,7 @@ void
 ZeroCopyDataSeq<Sample_T, DEF_MAX>::assign_sample(
   CORBA::ULong ii, const Sample_T& sample)
 {
-  ACE_ASSERT(!is_zero_copy());
+  OPENDDS_ASSERT(!is_zero_copy());
   sc_buffer_[ii] = sample;
 }
 

@@ -29,7 +29,6 @@
 #include <ace/Time_Value.h>
 #include <ace/OS_NS_unistd.h>
 
-#include <cassert>
 using namespace std;
 
 static int const num_messages = 10;
@@ -205,7 +204,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       DDS::DataReaderQos dr_qos; // Good QoS.
       sub->get_default_datareader_qos(dr_qos);
 
-      assert (DEADLINE_PERIOD.sec > 1); // Requirement for the test.
+      OPENDDS_ASSERT(DEADLINE_PERIOD.sec > 1); // Requirement for the test.
 
       // Since there is a whole separate test for testing set_qos, just set these right away
       dr_qos.deadline.period.sec     = DEADLINE_PERIOD.sec;
