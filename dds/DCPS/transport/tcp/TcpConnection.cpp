@@ -126,6 +126,13 @@ OpenDDS::DCPS::TcpConnection::disconnect()
 
 }
 
+OpenDDS::DCPS::PriorityKey
+OpenDDS::DCPS::TcpConnection::get_key()
+{
+  const bool is_loop(local_address_ == remote_address_);
+  return PriorityKey(transport_priority_, remote_address_, is_loop, is_connector_);
+}
+
 int
 OpenDDS::DCPS::TcpConnection::open(void* arg)
 {
@@ -138,24 +145,17 @@ OpenDDS::DCPS::TcpConnection::open(void* arg)
 
     TcpTransport& transport = static_cast<TcpTransport&>(link_->impl());
 
-    const bool is_loop(local_address_ == remote_address_);
-    const PriorityKey key(transport_priority_, remote_address_,
-                          is_loop, true /* active */);
+    const PriorityKey key = get_key();
 
     int active_open_ = active_open();
 
     int connect_tcp_datalink_ = transport.connect_tcp_datalink(*link_, rchandle_from(this));
 
     if (active_open_ == -1 || connect_tcp_datalink_ == -1) {
-      // if (active_open() == -1 ||
-      //       transport->connect_tcp_datalink(link_, self) == -1) {
-
       transport.async_connect_failed(key);
-
       return -1;
     }
 
-    transport.async_connect_succeeded(key);
     return 0;
   }
 
