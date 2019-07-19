@@ -60,25 +60,6 @@ BE_post_init(char*[], long)
 
   if (idl_global->idl_version_ >= IDL_VERSION_4) {
     DRV_cpp_putarg("-D__OPENDDS_IDL_HAS_ANNOTATIONS");
-    ///New annotations will go here.
-    idl_global->eval(
-      "@annotation key {\n"
-      "  boolean value default TRUE;\n"
-      "};\n"
-      "\n"
-      "@annotation topic {\n"
-      "  string name default \"\";\n"
-      "  string platform default \"*\";\n"
-      "};\n"
-      "\n"
-      "@annotation nested {\n"
-      "  boolean value default TRUE;\n"
-      "};\n"
-      "\n"
-      "@annotation default_nested {\n"
-      "  boolean value default TRUE;\n"
-      "};\n"
-    );
-    be_global->cache_annotations();
+    be_global->builtin_annotations_.register_all();
   }
 }

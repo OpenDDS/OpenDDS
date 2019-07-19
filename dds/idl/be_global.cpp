@@ -50,10 +50,6 @@ BE_GlobalData::BE_GlobalData()
   , face_ts_(false)
   , seq_("Seq")
   , language_mapping_(LANGMAP_NONE)
-  , topic_annotation_(0)
-  , key_annotation_(0)
-  , nested_annotation_(0)
-  , default_nested_annotation_(0)
 {
 }
 
@@ -619,35 +615,19 @@ BE_GlobalData::get_include_block(BE_GlobalData::stream_enum_t which)
   return ret.str();
 }
 
-void
-BE_GlobalData::cache_annotations()
-{
-  if (idl_global->idl_version_ >= IDL_VERSION_4) {
-    UTL_Scope* root = idl_global->scopes().bottom();
-    topic_annotation_ = dynamic_cast<AST_Annotation_Decl*>(
-      root->lookup_by_name("::@topic"));
-    key_annotation_ = dynamic_cast<AST_Annotation_Decl*>(
-      root->lookup_by_name("::@key"));
-    nested_annotation_ = dynamic_cast<AST_Annotation_Decl*>(
-      root->lookup_by_name("::@nested"));
-    default_nested_annotation_ = dynamic_cast<AST_Annotation_Decl*>(
-      root->lookup_by_name("::@default_nested"));
-  }
-}
-
 bool
 BE_GlobalData::is_topic_type(AST_Decl* node)
 {
-  return node->annotations().find(topic_annotation_) || !is_nested(node);
+  return builtin_annotations_["::@topic"]->find_on(node) || !is_nested(node);
 }
 
 bool
 BE_GlobalData::is_nested(AST_Decl* node)
 {
-  AST_Annotation_Appl* nested = node->annotations().find(nested_annotation_);
-  if (nested) {
-    return dynamic_cast<AST_Annotation_Member*>((*nested)["value"])->
-      value()->ev()->u.bval;
+  NestedAnnotation* nested = dynamic_cast<NestedAnnotation*>(
+    builtin_annotations_["::@nested"]);
+  if (nested->find_on(node)) {
+    return nested->node_value(node);
   }
 
   return is_default_nested(node->defined_in());
@@ -657,12 +637,11 @@ bool
 BE_GlobalData::is_default_nested(UTL_Scope* scope)
 {
   AST_Decl* module = dynamic_cast<AST_Decl*>(scope);
+  DefaultNestedAnnotation* default_nested = dynamic_cast<DefaultNestedAnnotation*>(
+    builtin_annotations_["::@default_nested"]);
   if (module) {
-    AST_Annotation_Appl* default_nested =
-      module->annotations().find(default_nested_annotation_);
-    if (default_nested) {
-      return dynamic_cast<AST_Annotation_Member*>((*default_nested)["value"])->
-        value()->ev()->u.bval;
+    if (default_nested->find_on(module)) {
+      return default_nested->node_value(module);
     }
 
     return is_default_nested(module->defined_in());
@@ -674,13 +653,15 @@ BE_GlobalData::is_default_nested(UTL_Scope* scope)
 bool
 BE_GlobalData::is_key(AST_Field* node)
 {
-  return node && node->annotations().find(key_annotation_);
+  KeyAnnotation* key = dynamic_cast<KeyAnnotation*>(builtin_annotations_["::@key"]);
+  return key->node_value(dynamic_cast<AST_Decl*>(node));
 }
 
 bool
 BE_GlobalData::has_key(AST_Union* node)
 {
-  return node && node->disc_annotations().find(key_annotation_);
+  KeyAnnotation* key = dynamic_cast<KeyAnnotation*>(builtin_annotations_["::@key"]);
+  return key->union_value(node);
 }
 
 void

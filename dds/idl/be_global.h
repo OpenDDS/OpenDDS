@@ -23,6 +23,7 @@
 #ifndef TAO_IDL_HAS_ANNOTATIONS
 #  error "Annotation support in tao_idl is required, please use a newer version of TAO"
 #endif
+#include "annotations.h"
 
 class AST_Generator;
 class AST_Decl;
@@ -157,11 +158,6 @@ public:
   static bool writeFile(const char* fileName, const std::string &content);
 
   /**
-   * Cache annotations for use during parsing.
-   */
-  void cache_annotations();
-
-  /**
    * Based on annotations and global_default_nested_, determine if a type is a
    * topic type and needs type support.
    *
@@ -195,6 +191,8 @@ public:
    */
   bool no_dcps_data_type_warnings_;
 
+  BuiltinAnnotations builtin_annotations_;
+
 private:
   /// Name of the IDL file we are processing.
   const char* filename_;
@@ -209,16 +207,6 @@ private:
   std::set<std::string> cpp_includes_;
 
   LanguageMapping language_mapping_;
-
-  /**
-   * Hold these for the convenience of not having to do a lookup for the nodes
-   */
-  ///{
-  AST_Annotation_Decl* topic_annotation_;
-  AST_Annotation_Decl* key_annotation_;
-  AST_Annotation_Decl* nested_annotation_;
-  AST_Annotation_Decl* default_nested_annotation_;
-  ///}
 
   bool is_nested(AST_Decl* node);
   bool is_default_nested(UTL_Scope* scope);
