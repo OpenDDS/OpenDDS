@@ -466,7 +466,12 @@ namespace {
       "  bool isDcpsKey(const char* field) const\n"
       "  {\n";
     {
-      if (struct_node && key_count) { // TODO: How to handle union disc?
+      /* TODO: Unions are not handled here because we don't know how queries
+       * should work with unions or how this would work if they did. Maybe
+       * create a separate has_key method like be_global has, since the key
+       * would always be the union discriminator?
+       */
+      if (struct_node && key_count) {
         if (info) {
           gen_isDcpsKey(info);
         } else {
