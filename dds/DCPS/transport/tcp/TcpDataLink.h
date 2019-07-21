@@ -70,7 +70,6 @@ protected:
 private:
   bool handle_send_request_ack(TransportQueueElement* element);
   void send_graceful_disconnect_message();
-  void send_association_msg(bool active);
 
   ACE_INET_Addr           remote_address_;
   WeakRcHandle<TcpConnection> connection_;

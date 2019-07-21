@@ -112,7 +112,7 @@ OpenDDS::DCPS::TcpDataLink::connect(
 
   // And lastly, inform our base class (DataLink) that we are now "connected",
   // and it should start the strategy objects.
-  if (this->start(send_strategy, receive_strategy, !is_active_) != 0) {
+  if (this->start(send_strategy, receive_strategy, !connection->is_connector()) != 0) {
     // Our base (DataLink) class failed to start the strategy objects.
     // We need to "undo" some things here before we return -1 to indicate
     // that an error has taken place.
@@ -121,12 +121,6 @@ OpenDDS::DCPS::TcpDataLink::connect(
     this->connection_.reset();
 
     return -1;
-  }
-
-  if (is_active_) {
-    send_association_msg(true);
-  } else {
-    send_association_msg(false);
   }
 
   return 0;
@@ -355,15 +349,6 @@ OpenDDS::DCPS::TcpDataLink::handle_send_request_ack(TransportQueueElement* eleme
 void
 OpenDDS::DCPS::TcpDataLink::ack_received(const ReceivedDataSample& sample)
 {
-  if (sample.header_.sequence_ == -1) {
-    TcpTransport& transport = static_cast<TcpTransport&>(impl());
-    TcpConnection_rch connection(this->connection_.lock());
-    if (connection) {
-      transport.async_connect_succeeded(connection->get_key());
-    }
-    return;
-  }
-
   SequenceNumber sequence = sample.header_.sequence_;
 
   if (Transport_debug_level >= 1) {
@@ -402,10 +387,6 @@ OpenDDS::DCPS::TcpDataLink::ack_received(const ReceivedDataSample& sample)
 void
 OpenDDS::DCPS::TcpDataLink::request_ack_received(const ReceivedDataSample& sample)
 {
-  if (sample.header_.sequence_ == -1) {
-    return;
-  }
-
   DataSampleHeader header_data;
   // The message_id_ is the most important value for the DataSampleHeader.
   header_data.message_id_ = SAMPLE_ACK;
@@ -441,37 +422,6 @@ OpenDDS::DCPS::TcpDataLink::request_ack_received(const ReceivedDataSample& sampl
 
   // I don't want to rebuild a connection in order to send
   // a sample ack message
-  this->send_i(send_element, false);
-}
-
-void
-OpenDDS::DCPS::TcpDataLink::send_association_msg(bool active)
-{
-  DataSampleHeader header_data;
-  header_data.message_id_ = active ? REQUEST_ACK : SAMPLE_ACK;
-  header_data.byte_order_  = ACE_CDR_BYTE_ORDER;
-  header_data.message_length_ = 0;
-  header_data.sequence_ = -1;
-
-  size_t max_marshaled_size = header_data.max_marshaled_size();
-
-  Message_Block_Ptr message(
-    new ACE_Message_Block(max_marshaled_size,
-                          ACE_Message_Block::MB_DATA,
-                          0, //cont
-                          0, //data
-                          0, //allocator_strategy
-                          0, //locking_strategy
-                          ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
-                          ACE_Time_Value::zero,
-                          ACE_Time_Value::max_time,
-                          0,
-                          0));
-
-  *message << header_data;
-
-  TransportControlElement* send_element =  new TransportControlElement(move(message));
-
   this->send_i(send_element, false);
 }
 

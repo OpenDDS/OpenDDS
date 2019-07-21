@@ -21,7 +21,6 @@
 
 #include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/PoolAllocator.h"
-#include "dds/DCPS/transport/framework/PriorityKey.h"
 #include "dds/DCPS/transport/framework/TransportDefs.h"
 
 #include "ace/SOCK_Stream.h"
@@ -110,8 +109,6 @@ public:
   void notify_lost_on_backpressure_timeout();
 
   ACE_INET_Addr get_remote_address();
-
-  PriorityKey get_key();
 
   /// Reconnect initiated by send strategy
   void relink_from_send(bool do_suspend);
