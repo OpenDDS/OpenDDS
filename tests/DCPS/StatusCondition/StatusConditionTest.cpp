@@ -74,7 +74,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
 
   dp->delete_contained_entities();
   dpf->delete_participant(dp);
-  
+
   return passed ? 0 : 1;
 }
 
