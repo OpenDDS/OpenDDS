@@ -10,6 +10,8 @@ use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 
+PerlDDS::add_lib_path('../ConsolidatedMessengerIdl');
+
 $status = 0;
 
 ########################################

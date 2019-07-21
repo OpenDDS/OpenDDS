@@ -11,6 +11,8 @@ use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 use strict;
 
+PerlDDS::add_lib_path('../ConsolidatedMessengerIdl');
+
 my $test = new PerlDDS::TestFramework();
 $test->{'dcps_debug_level'} = $test->{'dcps_transport_debug_level'} = 0;
 $test->ignore_error('DataWriterImpl::register_instance_i: register instance ' .

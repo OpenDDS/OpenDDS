@@ -1,19 +1,5 @@
-
-project(*idl): dcps_test_lib {
-  idlflags      += -Wb,stub_export_include=SubInitLoop_export.h \
-                   -Wb,stub_export_macro=SubInitLoop_Export -SS
-  dcps_ts_flags += -Wb,export_macro=SubInitLoop_Export
-  dynamicflags  += SUBINITLOOP_BUILD_DLL
-
-  TypeSupport_Files {
-    Messenger.idl
-  }
-}
-
-project(*Publisher): dcpsexe, dcps_transports_for_test {
+project(*Publisher): dcpsexe, dcps_cm, dcps_transports_for_test {
   exename = publisher
-  libs   += *idl
-  after  += *idl
 
   Idl_Files {
   }
@@ -24,10 +10,8 @@ project(*Publisher): dcpsexe, dcps_transports_for_test {
   }
 }
 
-project(*Subscriber): dcpsexe, dcps_transports_for_test {
+project(*Subscriber): dcpsexe, dcps_cm, dcps_transports_for_test {
   exename = subscriber
-  libs   += *idl
-  after  += *idl
 
   Idl_Files {
   }
