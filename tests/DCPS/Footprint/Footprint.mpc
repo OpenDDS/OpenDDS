@@ -1,8 +1,6 @@
 project(DDS*RtpsPublisher): dcps_cm, dcps_rtps_udp {
 
   exename   = rtpspublisher
-  after    += DDS*idl
-  libs     += DDS*idl
 
   Idl_Files {
   }
@@ -16,8 +14,6 @@ project(DDS*RtpsPublisher): dcps_cm, dcps_rtps_udp {
 project(DDS*RtpsSubscriber): dcps_cm, dcps_rtps_udp {
 
   exename   = rtpssubscriber
-  after    += DDS*idl
-  libs     += DDS*idl
 
   Idl_Files {
   }
