@@ -11,8 +11,6 @@ use PerlDDS::Run_Test;
 use PerlDDS::Process_Java;
 use strict;
 
-PerlDDS::add_lib_path('../ConsolidatedMessengerIdl');
-
 my $status = 0;
 my $debug = '0';
 
@@ -64,7 +62,7 @@ my $SUB = PerlDDS::create_process("$DDS_ROOT/tests/DCPS/Messenger/subscriber",
                                   $sub_opts);
 
 PerlACE::add_lib_path("$DDS_ROOT/java/tests/messenger/messenger_idl");
-PerlACE::add_lib_path("$DDS_ROOT/tests/DCPS/Messenger");
+PerlACE::add_lib_path("$DDS_ROOT/tests/DCPS/ConsolidatedMessengerIdl");
 
 my $PUB = new PerlDDS::Process_Java('TestPublisher', $pub_opts,
             ["$DDS_ROOT/java/tests/messenger/messenger_idl/".
