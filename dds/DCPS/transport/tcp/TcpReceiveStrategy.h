@@ -11,7 +11,7 @@
 #include "TcpConnection_rch.h"
 #include "TcpDataLink_rch.h"
 #include "dds/DCPS/transport/framework/TransportReceiveStrategy_T.h"
-#include "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
+#include "dds/DCPS/ReactorTask_rch.h"
 #include "dds/DCPS/RcEventHandler.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -28,7 +28,7 @@ class TcpReceiveStrategy
 public:
 
   TcpReceiveStrategy(TcpDataLink& link,
-                     const TransportReactorTask_rch& task);
+                     const ReactorTask_rch& task);
 
   virtual ~TcpReceiveStrategy();
 
@@ -59,7 +59,7 @@ protected:
 private:
 
   TcpDataLink& link_;
-  TransportReactorTask_rch reactor_task_;
+  ReactorTask_rch reactor_task_;
 };
 
 } // namespace DCPS

@@ -20,7 +20,7 @@
 #include "ace/SOCK_Dgram.h"
 
 #include "dds/DCPS/transport/framework/DataLink.h"
-#include "dds/DCPS/transport/framework/TransportReactorTask.h"
+#include "dds/DCPS/ReactorTask.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -36,12 +36,12 @@ class OpenDDS_Udp_Export UdpDataLink
 public:
   UdpDataLink(UdpTransport& transport,
               Priority   priority,
-              TransportReactorTask* reactor_task,
+              ReactorTask* reactor_task,
               bool          active);
 
   bool active() const;
 
-  TransportReactorTask* reactor_task();
+  ReactorTask* reactor_task();
 
   ACE_Reactor* get_reactor();
 
@@ -57,7 +57,7 @@ public:
 protected:
   bool active_;
 
-  TransportReactorTask* reactor_task_;
+  ReactorTask* reactor_task_;
 
   UdpSendStrategy_rch send_strategy_;
   UdpReceiveStrategy_rch recv_strategy_;

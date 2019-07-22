@@ -5,7 +5,7 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "dds/DCPS/transport/framework/TransportReactorTask.h"
+#include "dds/DCPS/ReactorTask.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
