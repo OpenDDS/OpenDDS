@@ -994,20 +994,6 @@ namespace OpenDDS {
 
         if (DCPS::compatibleQOS(&writerStatus, &readerStatus, *wTls, *rTls,
                                 dwQos, drQos, pubQos, subQos)) {
-          if (!writer_local) {
-            RepoId writer_participant = writer;
-            writer_participant.entityId = ENTITYID_PARTICIPANT;
-            if (defer_writer(writer, writer_participant)) {
-              return;
-            }
-          }
-          if (!reader_local) {
-            RepoId reader_participant = reader;
-            reader_participant.entityId = ENTITYID_PARTICIPANT;
-            if (defer_reader(reader, reader_participant)) {
-              return;
-            }
-          }
 
           bool call_writer = false, call_reader = false;
           if (writer_local) {
@@ -1230,12 +1216,6 @@ namespace OpenDDS {
       add_security_info(const DCPS::TransportLocatorSeq& locators,
                         const RepoId& /*writer*/, const RepoId& /*reader*/)
       { return locators; }
-
-      virtual bool defer_writer(const RepoId& writer,
-                                const RepoId& writer_participant) = 0;
-
-      virtual bool defer_reader(const RepoId& writer,
-                                const RepoId& writer_participant) = 0;
 
       void remove_from_bit(const DiscoveredPublication& pub)
       {

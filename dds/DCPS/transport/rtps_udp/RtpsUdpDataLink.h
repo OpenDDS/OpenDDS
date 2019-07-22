@@ -81,6 +81,8 @@ public:
 
   bool open(const ACE_SOCK_Dgram& unicast_socket);
 
+  virtual bool add_on_start_callback(const TransportClient_wrch& client, const RepoId& remote);
+
   void received(const RTPS::DataSubmessage& data,
                 const GuidPrefix_t& src_prefix);
 
@@ -244,9 +246,8 @@ private:
     //Only accessed with RtpsUdpDataLink lock held
     SnToTqeMap to_deliver_;
     bool durable_;
-    bool ready_to_hb_;
 
-    RtpsWriter() : durable_(false), ready_to_hb_(false) {}
+    RtpsWriter() : durable_(false) {}
     ~RtpsWriter();
     SequenceNumber heartbeat_high(const ReaderInfo&) const;
     void add_elem_awaiting_ack(TransportQueueElement* element);

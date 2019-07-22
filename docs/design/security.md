@@ -62,24 +62,3 @@ fail. It can also be set in the common section of ini files. Refer to the RTPS
 and DDS Security specs for the structure of secure RTPS packets to aid in
 manually demarshaling them.
 
-## Slow Follower Key Exchange Issue
-   
-When the authentication leader participant (See "Authentication" above) is much
-faster that the follower (e.g. PC vs. Raspberry Pi), the leader might send the
-keys before the follower is ready to decrypt them. Even when it can finally
-decrypt messages on this topic, given key exchange is not durable, it will
-never ask for old data, so the follower will never get the keys.
-
-The solution, implemented as `Sedp::RepeatOnceWriter`, is to resend keys for a
-given participant when the first ACKNACK from the volatile reader is received.
-When we have the ACKNACK of any kind, that means the reader can decrypt
-messages from the writer and even if the resend is lost, reliability now works
-so it should eventually be received.
-
-This is not a good long term solution because it's wasteful and might not work
-right with other DDS's in some cases. Long term solutions discussed so far
-include a change in the security specification to cover this scenario and
-making special case in the RTPS Transport.
-
-Enable the `bookkeeping` security debug logging category to have OpenDDS log
-when it's resending keys.

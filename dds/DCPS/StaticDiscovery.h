@@ -192,12 +192,6 @@ public:
                                                    DiscoveredPublicationIter& /*iter*/,
                                                    const RepoId& /*reader*/);
 
-  virtual bool defer_writer(const RepoId& /*writer*/,
-                            const RepoId& /*writer_participant*/);
-
-  virtual bool defer_reader(const RepoId& /*writer*/,
-                            const RepoId& /*writer_participant*/);
-
   virtual void reader_exists(const RepoId& readerid, const RepoId& writerid);
   virtual void reader_does_not_exist(const RepoId& readerid, const RepoId& writerid);
   virtual void writer_exists(const RepoId& writerid, const RepoId& readerid);

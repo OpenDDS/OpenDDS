@@ -49,7 +49,23 @@ const size_t n_smkinds = sizeof(smkinds) / sizeof(smkinds[0]);
 
 
 struct SimpleTC: TransportClient {
-  explicit SimpleTC(const RepoId& local) : local_id_(local) {}
+  explicit SimpleTC(const RepoId& local) : local_id_(local), mutex_(), cond_(mutex_) {}
+
+  void transport_assoc_done(int flags, const RepoId& remote) override {
+    if (!(flags & ASSOC_OK)) {
+      return;
+    }
+    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+    associated_.insert(remote);
+    cond_.broadcast();
+  }
+
+  void wait_for_assoc(const RepoId& remote) {
+    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+    while (associated_.find(remote) == associated_.end()) {
+      cond_.wait(mutex_);
+    }
+  }
 
   using TransportClient::enable_transport;
   using TransportClient::associate;
@@ -63,6 +79,9 @@ struct SimpleTC: TransportClient {
   CORBA::Long get_priority_value(const AssociationData&) const { return 0; }
 
   RepoId local_id_;
+  RepoIdSet associated_;
+  ACE_Thread_Mutex mutex_;
+  ACE_Condition<ACE_Thread_Mutex> cond_;
 };
 
 
@@ -617,7 +636,12 @@ struct TestParticipant: ACE_Event_Handler {
     ACE_DEBUG((LM_INFO, "recv_hb() first = %d last = %d\n",
                hb.firstSN.low, hb.lastSN.low));
     const bool flag_f = hb.smHeader.flags & 2;
-    if (!flag_f && hb.firstSN.low == 1 && hb.lastSN.low == 1) {
+    if (!flag_f && hb.lastSN.low == 0) {
+      const SequenceNumber_t zero = {0, 0};
+      if (!send_an(hb.writerId, zero, peer, false)) {
+        return false;
+      }
+    } else if (!flag_f && hb.firstSN.low == 1 && hb.lastSN.low == 1) {
       const SequenceNumber_t one = {0, 1};
       if (!send_an(hb.writerId, one, peer, false)) {
         return false;
@@ -810,6 +834,7 @@ bool run_test()
                "SimpleDataReader(reader2) could not associate with writer1\n"));
     return false;
   }
+  sdr2.wait_for_assoc(writer1);
 
   const TransportLocatorSeq& part2_loc = sdr2.connection_info();
   if (part2_loc.length() < 1) {
@@ -946,6 +971,7 @@ bool run_test()
     sdr2.disassociate(writer1);
     return false;
   }
+  sdw2.wait_for_assoc(reader1);
   rt.wait();
 
   SequenceNumber seq_dw2;
