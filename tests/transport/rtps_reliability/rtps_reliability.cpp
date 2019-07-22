@@ -51,7 +51,7 @@ const size_t n_smkinds = sizeof(smkinds) / sizeof(smkinds[0]);
 struct SimpleTC: TransportClient {
   explicit SimpleTC(const RepoId& local) : local_id_(local), mutex_(), cond_(mutex_) {}
 
-  void transport_assoc_done(int flags, const RepoId& remote) override {
+  void transport_assoc_done(int flags, const RepoId& remote) {
     if (!(flags & ASSOC_OK)) {
       return;
     }
