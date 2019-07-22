@@ -83,10 +83,15 @@ void QosProfile::set_datareader_qos(const QosProfile::DataReaderQosInfo& info, c
   }
 }
 
+inline bool matchTopicName(const std::string& target, const std::string& cmp) {
+  return (OpenDDS::DCPS::is_wildcard(cmp.c_str()) && ACE::wild_match(target.c_str(), cmp.c_str(), true, true))
+    || target == cmp;
+}
+
 QosProfile::DataReaderQosInfo QosProfile::get_datareader_qos(const std::string& topic_name) const {
   if (!topic_name.empty()) {
     for (auto it = datareader_qos_vec_.begin(); it != datareader_qos_vec_.end(); ++it) {
-      if ((OpenDDS::DCPS::is_wildcard(it->first.c_str()) && ACE::wild_match(topic_name.c_str(), it->first.c_str(), true, true)) || it->first == topic_name) {
+      if (matchTopicName(topic_name, it->first)) {
         return std::make_pair(it->second.first, it->second.second);
       }
     }
@@ -106,7 +111,7 @@ void QosProfile::set_datawriter_qos(const QosProfile::DataWriterQosInfo& info, c
 QosProfile::DataWriterQosInfo QosProfile::get_datawriter_qos(const std::string& topic_name) const {
   if (!topic_name.empty()) {
     for (auto it = datawriter_qos_vec_.begin(); it != datawriter_qos_vec_.end(); ++it) {
-      if ((OpenDDS::DCPS::is_wildcard(it->first.c_str()) && ACE::wild_match(topic_name.c_str(), it->first.c_str(), true, true)) || it->first == topic_name) {
+      if (matchTopicName(topic_name, it->first)) {
         return std::make_pair(it->second.first, it->second.second);
       }
     }
@@ -126,7 +131,7 @@ void QosProfile::set_topic_qos(const QosProfile::TopicQosInfo& info, const std::
 QosProfile::TopicQosInfo QosProfile::get_topic_qos(const std::string& topic_name) const {
   if (!topic_name.empty()) {
     for (auto it = topic_qos_vec_.begin(); it != topic_qos_vec_.end(); ++it) {
-      if ((OpenDDS::DCPS::is_wildcard(it->first.c_str()) && ACE::wild_match(topic_name.c_str(), it->first.c_str(), true, true)) || it->first == topic_name) {
+      if (matchTopicName(topic_name, it->first)) {
         return std::make_pair(it->second.first, it->second.second);
       }
     }
@@ -192,8 +197,7 @@ bool json_2_builder(std::istream& is, Bench::WorkerConfig& config) {
   rapidjson::Document document;
   rapidjson::IStreamWrapper isw(is);
   document.ParseStream(isw);
-  if (!document.IsObject())
-  {
+  if (!document.IsObject()) {
     std::cerr << "Expected configuration file to contain JSON document object" << std::endl;
     return false;
   }

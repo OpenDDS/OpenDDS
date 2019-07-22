@@ -85,16 +85,36 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   }
 
   // Register some Bench-specific types
-  Builder::TypeSupportRegistry::TypeSupportRegistration process_config_registration(new Builder::ProcessConfigTypeSupportImpl());
-  Builder::TypeSupportRegistry::TypeSupportRegistration data_registration(new Bench::DataTypeSupportImpl());
+  Builder::TypeSupportRegistry::TypeSupportRegistration
+    process_config_registration(new Builder::ProcessConfigTypeSupportImpl());
+  Builder::TypeSupportRegistry::TypeSupportRegistration
+    data_registration(new Bench::DataTypeSupportImpl());
 
   // Register some Bench-specific listener factories
-  Builder::ListenerFactory<DDS::TopicListener>::Registration topic_registration("bench_tl", [](){ return DDS::TopicListener_var(new Bench::WorkerTopicListener()); });
-  Builder::ListenerFactory<DDS::DataReaderListener>::Registration datareader_registration("bench_drl", [](){ return DDS::DataReaderListener_var(new Bench::WorkerDataReaderListener()); });
-  Builder::ListenerFactory<DDS::SubscriberListener>::Registration subscriber_registration("bench_sl", [](){ return DDS::SubscriberListener_var(new Bench::WorkerSubscriberListener()); });
-  Builder::ListenerFactory<DDS::DataWriterListener>::Registration datawriter_registration("bench_dwl", [](){ return DDS::DataWriterListener_var(new Bench::WorkerDataWriterListener()); });
-  Builder::ListenerFactory<DDS::PublisherListener>::Registration publisher_registration("bench_pl", [](){ return DDS::PublisherListener_var(new Bench::WorkerPublisherListener()); });
-  Builder::ListenerFactory<DDS::DomainParticipantListener>::Registration participant_registration("bench_partl", [](){ return DDS::DomainParticipantListener_var(new Bench::WorkerParticipantListener()); });
+  Builder::ListenerFactory<DDS::TopicListener>::Registration
+    topic_registration("bench_tl", [](){
+      return DDS::TopicListener_var(new Bench::WorkerTopicListener());
+    });
+  Builder::ListenerFactory<DDS::DataReaderListener>::Registration
+    datareader_registration("bench_drl", [](){
+      return DDS::DataReaderListener_var(new Bench::WorkerDataReaderListener());
+    });
+  Builder::ListenerFactory<DDS::SubscriberListener>::Registration
+    subscriber_registration("bench_sl", [](){
+      return DDS::SubscriberListener_var(new Bench::WorkerSubscriberListener());
+    });
+  Builder::ListenerFactory<DDS::DataWriterListener>::Registration
+    datawriter_registration("bench_dwl", [](){
+      return DDS::DataWriterListener_var(new Bench::WorkerDataWriterListener());
+    });
+  Builder::ListenerFactory<DDS::PublisherListener>::Registration
+    publisher_registration("bench_pl", [](){
+      return DDS::PublisherListener_var(new Bench::WorkerPublisherListener());
+    });
+  Builder::ListenerFactory<DDS::DomainParticipantListener>::Registration
+    participant_registration("bench_partl", [](){
+      return DDS::DomainParticipantListener_var(new Bench::WorkerParticipantListener());
+    });
 
   // Disable some Proactor debug chatter to std out (eventually make this configurable?)
   ACE_Log_Category::ace_lib().priority_mask(0);
@@ -102,8 +122,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   ACE_Proactor proactor;
 
   // Register actions
-  Bench::ActionManager::Registration write_action_registration("write", [&](){ return std::shared_ptr<Bench::Action>(new Bench::WriteAction(proactor)); });
-  Bench::ActionManager::Registration forward_action_registration("forward", [&](){ return std::shared_ptr<Bench::Action>(new Bench::ForwardAction(proactor)); });
+  Bench::ActionManager::Registration
+    write_action_registration("write", [&](){
+      return std::shared_ptr<Bench::Action>(new Bench::WriteAction(proactor));
+    });
+  Bench::ActionManager::Registration
+    forward_action_registration("forward", [&](){
+      return std::shared_ptr<Bench::Action>(new Bench::ForwardAction(proactor));
+    });
 
   // Timestamps used to measure method call durations
   Builder::TimeStamp process_construction_begin_time = ZERO, process_construction_end_time = ZERO;
@@ -307,44 +333,97 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     for (CORBA::ULong j = 0; j < process_report.participants[i].subscribers.length(); ++j) {
       for (CORBA::ULong k = 0; k < process_report.participants[i].subscribers[j].datareaders.length(); ++k) {
         Builder::DataReaderReport& dr_report = process_report.participants[i].subscribers[j].datareaders[k];
-        const Builder::TimeStamp dr_enable_time = get_or_create_property(dr_report.properties, "enable_time", Builder::PVK_TIME)->value.time_prop();
-        const Builder::TimeStamp dr_last_discovery_time = get_or_create_property(dr_report.properties, "last_discovery_time", Builder::PVK_TIME)->value.time_prop();
+        const Builder::TimeStamp dr_enable_time =
+          get_or_create_property(dr_report.properties, "enable_time", Builder::PVK_TIME)->value.time_prop();
+        const Builder::TimeStamp dr_last_discovery_time =
+          get_or_create_property(dr_report.properties, "last_discovery_time", Builder::PVK_TIME)->value.time_prop();
 
         // Normal Latency
-        const CORBA::ULongLong dr_latency_sample_count = get_or_create_property(dr_report.properties, "latency_sample_count", Builder::PVK_ULL)->value.ull_prop();
-        const double dr_latency_min = get_or_create_property(dr_report.properties, "latency_min", Builder::PVK_DOUBLE)->value.double_prop();
-        const double dr_latency_max = get_or_create_property(dr_report.properties, "latency_max", Builder::PVK_DOUBLE)->value.double_prop();
-        const double dr_latency_mean = get_or_create_property(dr_report.properties, "latency_mean", Builder::PVK_DOUBLE)->value.double_prop();
-        const double dr_latency_var_x_sample_count = get_or_create_property(dr_report.properties, "latency_var_x_sample_count", Builder::PVK_DOUBLE)->value.double_prop();
-        const double dr_latency_median = get_or_create_property(dr_report.properties, "latency_median", Builder::PVK_DOUBLE)->value.double_prop();
-        const CORBA::ULongLong dr_latency_median_sample_count = get_or_create_property(dr_report.properties, "latency_median_sample_count", Builder::PVK_ULL)->value.ull_prop();
+        const CORBA::ULongLong dr_latency_sample_count =
+          get_or_create_property(dr_report.properties, "latency_sample_count", Builder::PVK_ULL)->value.ull_prop();
+        const double dr_latency_min =
+          get_or_create_property(dr_report.properties, "latency_min", Builder::PVK_DOUBLE)->value.double_prop();
+        const double dr_latency_max =
+          get_or_create_property(dr_report.properties, "latency_max", Builder::PVK_DOUBLE)->value.double_prop();
+        const double dr_latency_mean =
+          get_or_create_property(dr_report.properties, "latency_mean", Builder::PVK_DOUBLE)->value.double_prop();
+        const double dr_latency_var_x_sample_count =
+          get_or_create_property(dr_report.properties, "latency_var_x_sample_count", Builder::PVK_DOUBLE)->
+            value.double_prop();
+        const double dr_latency_median =
+          get_or_create_property(dr_report.properties, "latency_median", Builder::PVK_DOUBLE)->value.double_prop();
+        const CORBA::ULongLong dr_latency_median_sample_count =
+          get_or_create_property(dr_report.properties, "latency_median_sample_count", Builder::PVK_ULL)->
+            value.ull_prop();
 
         // Normal Jitter
-        const CORBA::ULongLong dr_jitter_sample_count = get_or_create_property(dr_report.properties, "jitter_sample_count", Builder::PVK_ULL)->value.ull_prop();
-        const double dr_jitter_min = get_or_create_property(dr_report.properties, "jitter_min", Builder::PVK_DOUBLE)->value.double_prop();
-        const double dr_jitter_max = get_or_create_property(dr_report.properties, "jitter_max", Builder::PVK_DOUBLE)->value.double_prop();
-        const double dr_jitter_mean = get_or_create_property(dr_report.properties, "jitter_mean", Builder::PVK_DOUBLE)->value.double_prop();
-        const double dr_jitter_var_x_sample_count = get_or_create_property(dr_report.properties, "jitter_var_x_sample_count", Builder::PVK_DOUBLE)->value.double_prop();
-        const double dr_jitter_median = get_or_create_property(dr_report.properties, "jitter_median", Builder::PVK_DOUBLE)->value.double_prop();
-        const CORBA::ULongLong dr_jitter_median_sample_count = get_or_create_property(dr_report.properties, "jitter_median_sample_count", Builder::PVK_ULL)->value.ull_prop();
+        const CORBA::ULongLong dr_jitter_sample_count =
+          get_or_create_property(dr_report.properties, "jitter_sample_count", Builder::PVK_ULL)->
+            value.ull_prop();
+        const double dr_jitter_min =
+          get_or_create_property(dr_report.properties, "jitter_min", Builder::PVK_DOUBLE)->
+          value.double_prop();
+        const double dr_jitter_max =
+          get_or_create_property(dr_report.properties, "jitter_max", Builder::PVK_DOUBLE)->
+            value.double_prop();
+        const double dr_jitter_mean =
+          get_or_create_property(dr_report.properties, "jitter_mean", Builder::PVK_DOUBLE)->
+            value.double_prop();
+        const double dr_jitter_var_x_sample_count =
+          get_or_create_property(dr_report.properties, "jitter_var_x_sample_count", Builder::PVK_DOUBLE)->
+            value.double_prop();
+        const double dr_jitter_median =
+          get_or_create_property(dr_report.properties, "jitter_median", Builder::PVK_DOUBLE)->
+            value.double_prop();
+        const CORBA::ULongLong dr_jitter_median_sample_count =
+          get_or_create_property(dr_report.properties, "jitter_median_sample_count", Builder::PVK_ULL)->
+          value.ull_prop();
 
         // Round-Trip Latency
-        const CORBA::ULongLong dr_round_trip_latency_sample_count = get_or_create_property(dr_report.properties, "round_trip_latency_sample_count", Builder::PVK_ULL)->value.ull_prop();
-        const double dr_round_trip_latency_min = get_or_create_property(dr_report.properties, "round_trip_latency_min", Builder::PVK_DOUBLE)->value.double_prop();
-        const double dr_round_trip_latency_max = get_or_create_property(dr_report.properties, "round_trip_latency_max", Builder::PVK_DOUBLE)->value.double_prop();
-        const double dr_round_trip_latency_mean = get_or_create_property(dr_report.properties, "round_trip_latency_mean", Builder::PVK_DOUBLE)->value.double_prop();
-        const double dr_round_trip_latency_var_x_sample_count = get_or_create_property(dr_report.properties, "round_trip_latency_var_x_sample_count", Builder::PVK_DOUBLE)->value.double_prop();
-        const double dr_round_trip_latency_median = get_or_create_property(dr_report.properties, "round_trip_latency_median", Builder::PVK_DOUBLE)->value.double_prop();
-        const CORBA::ULongLong dr_round_trip_latency_median_sample_count = get_or_create_property(dr_report.properties, "round_trip_latency_median_sample_count", Builder::PVK_ULL)->value.ull_prop();
+        const CORBA::ULongLong dr_round_trip_latency_sample_count =
+          get_or_create_property(dr_report.properties, "round_trip_latency_sample_count", Builder::PVK_ULL)->
+            value.ull_prop();
+        const double dr_round_trip_latency_min =
+          get_or_create_property(dr_report.properties, "round_trip_latency_min", Builder::PVK_DOUBLE)->
+            value.double_prop();
+        const double dr_round_trip_latency_max =
+          get_or_create_property(dr_report.properties, "round_trip_latency_max", Builder::PVK_DOUBLE)->
+            value.double_prop();
+        const double dr_round_trip_latency_mean =
+          get_or_create_property(dr_report.properties, "round_trip_latency_mean", Builder::PVK_DOUBLE)->
+            value.double_prop();
+        const double dr_round_trip_latency_var_x_sample_count =
+          get_or_create_property(dr_report.properties, "round_trip_latency_var_x_sample_count", Builder::PVK_DOUBLE)->
+            value.double_prop();
+        const double dr_round_trip_latency_median =
+          get_or_create_property(dr_report.properties, "round_trip_latency_median", Builder::PVK_DOUBLE)->
+            value.double_prop();
+        const CORBA::ULongLong dr_round_trip_latency_median_sample_count =
+          get_or_create_property(dr_report.properties, "round_trip_latency_median_sample_count", Builder::PVK_ULL)->
+            value.ull_prop();
 
         // Round-Trip Jitter
-        const CORBA::ULongLong dr_round_trip_jitter_sample_count = get_or_create_property(dr_report.properties, "round_trip_jitter_sample_count", Builder::PVK_ULL)->value.ull_prop();
-        const double dr_round_trip_jitter_min = get_or_create_property(dr_report.properties, "round_trip_jitter_min", Builder::PVK_DOUBLE)->value.double_prop();
-        const double dr_round_trip_jitter_max = get_or_create_property(dr_report.properties, "round_trip_jitter_max", Builder::PVK_DOUBLE)->value.double_prop();
-        const double dr_round_trip_jitter_mean = get_or_create_property(dr_report.properties, "round_trip_jitter_mean", Builder::PVK_DOUBLE)->value.double_prop();
-        const double dr_round_trip_jitter_var_x_sample_count = get_or_create_property(dr_report.properties, "round_trip_jitter_var_x_sample_count", Builder::PVK_DOUBLE)->value.double_prop();
-        const double dr_round_trip_jitter_median = get_or_create_property(dr_report.properties, "round_trip_jitter_median", Builder::PVK_DOUBLE)->value.double_prop();
-        const CORBA::ULongLong dr_round_trip_jitter_median_sample_count = get_or_create_property(dr_report.properties, "round_trip_jitter_median_sample_count", Builder::PVK_ULL)->value.ull_prop();
+        const CORBA::ULongLong dr_round_trip_jitter_sample_count =
+          get_or_create_property(dr_report.properties, "round_trip_jitter_sample_count", Builder::PVK_ULL)->
+            value.ull_prop();
+        const double dr_round_trip_jitter_min =
+          get_or_create_property(dr_report.properties, "round_trip_jitter_min", Builder::PVK_DOUBLE)->
+            value.double_prop();
+        const double dr_round_trip_jitter_max =
+          get_or_create_property(dr_report.properties, "round_trip_jitter_max", Builder::PVK_DOUBLE)->
+            value.double_prop();
+        const double dr_round_trip_jitter_mean =
+          get_or_create_property(dr_report.properties, "round_trip_jitter_mean", Builder::PVK_DOUBLE)->
+            value.double_prop();
+        const double dr_round_trip_jitter_var_x_sample_count =
+          get_or_create_property(dr_report.properties, "round_trip_jitter_var_x_sample_count", Builder::PVK_DOUBLE)->
+            value.double_prop();
+        const double dr_round_trip_jitter_median =
+          get_or_create_property(dr_report.properties, "round_trip_jitter_median", Builder::PVK_DOUBLE)->
+            value.double_prop();
+        const CORBA::ULongLong dr_round_trip_jitter_median_sample_count =
+          get_or_create_property(dr_report.properties, "round_trip_jitter_median_sample_count", Builder::PVK_ULL)->
+            value.ull_prop();
 
         if (ZERO < dr_enable_time && ZERO < dr_last_discovery_time) {
           auto delta = dr_last_discovery_time - dr_enable_time;
@@ -363,7 +442,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
           worker_report.latency_max = dr_latency_max;
         }
         if ((worker_report.latency_sample_count + dr_latency_sample_count) > 0) {
-          worker_report.latency_mean = (worker_report.latency_mean * static_cast<double>(worker_report.latency_sample_count) + dr_latency_mean * static_cast<double>(dr_latency_sample_count)) / (worker_report.latency_sample_count + dr_latency_sample_count);
+          worker_report.latency_mean =
+            (worker_report.latency_mean * static_cast<double>(worker_report.latency_sample_count) +
+              dr_latency_mean * static_cast<double>(dr_latency_sample_count)) /
+            (worker_report.latency_sample_count + dr_latency_sample_count);
         }
         worker_report.latency_var_x_sample_count += dr_latency_var_x_sample_count;
         worker_report.latency_sample_count += dr_latency_sample_count;
@@ -382,7 +464,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
           worker_report.jitter_max = dr_jitter_max;
         }
         if ((worker_report.jitter_sample_count + dr_jitter_sample_count) > 0) {
-          worker_report.jitter_mean = (worker_report.jitter_mean * static_cast<double>(worker_report.jitter_sample_count) + dr_jitter_mean * static_cast<double>(dr_jitter_sample_count)) / (worker_report.jitter_sample_count + dr_jitter_sample_count);
+          worker_report.jitter_mean =
+            (worker_report.jitter_mean * static_cast<double>(worker_report.jitter_sample_count) +
+              dr_jitter_mean * static_cast<double>(dr_jitter_sample_count)) /
+            (worker_report.jitter_sample_count + dr_jitter_sample_count);
         }
         worker_report.jitter_var_x_sample_count += dr_jitter_var_x_sample_count;
         worker_report.jitter_sample_count += dr_jitter_sample_count;
@@ -401,7 +486,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
           worker_report.round_trip_latency_max = dr_round_trip_latency_max;
         }
         if ((worker_report.round_trip_latency_sample_count + dr_round_trip_latency_sample_count) > 0) {
-          worker_report.round_trip_latency_mean = (worker_report.round_trip_latency_mean * static_cast<double>(worker_report.round_trip_latency_sample_count) + dr_round_trip_latency_mean * static_cast<double>(dr_round_trip_latency_sample_count)) / (worker_report.round_trip_latency_sample_count + dr_round_trip_latency_sample_count);
+          worker_report.round_trip_latency_mean =
+            (worker_report.round_trip_latency_mean * static_cast<double>(worker_report.round_trip_latency_sample_count) +
+              dr_round_trip_latency_mean * static_cast<double>(dr_round_trip_latency_sample_count)) /
+            (worker_report.round_trip_latency_sample_count + dr_round_trip_latency_sample_count);
         }
         worker_report.round_trip_latency_var_x_sample_count += dr_round_trip_latency_var_x_sample_count;
         worker_report.round_trip_latency_sample_count += dr_round_trip_latency_sample_count;
@@ -409,7 +497,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
         round_trip_latency_medians.push_back(dr_round_trip_latency_median);
         round_trip_latency_median_counts.push_back(dr_round_trip_latency_median_sample_count);
         if (dr_round_trip_latency_median_sample_count < dr_round_trip_latency_sample_count) {
-          worker_report.round_trip_latency_weighted_median_overflow += dr_round_trip_latency_sample_count - dr_round_trip_latency_median_sample_count;
+          worker_report.round_trip_latency_weighted_median_overflow +=
+            dr_round_trip_latency_sample_count - dr_round_trip_latency_median_sample_count;
         }
 
         // Round-Trip Jitter
@@ -420,7 +509,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
           worker_report.round_trip_jitter_max = dr_round_trip_jitter_max;
         }
         if ((worker_report.round_trip_jitter_sample_count + dr_round_trip_jitter_sample_count) > 0) {
-          worker_report.round_trip_jitter_mean = (worker_report.round_trip_jitter_mean * static_cast<double>(worker_report.round_trip_jitter_sample_count) + dr_round_trip_jitter_mean * static_cast<double>(dr_round_trip_jitter_sample_count)) / (worker_report.round_trip_jitter_sample_count + dr_round_trip_jitter_sample_count);
+          worker_report.round_trip_jitter_mean =
+            (worker_report.round_trip_jitter_mean * static_cast<double>(worker_report.round_trip_jitter_sample_count) +
+              dr_round_trip_jitter_mean * static_cast<double>(dr_round_trip_jitter_sample_count)) /
+            (worker_report.round_trip_jitter_sample_count + dr_round_trip_jitter_sample_count);
         }
         worker_report.round_trip_jitter_var_x_sample_count += dr_round_trip_jitter_var_x_sample_count;
         worker_report.round_trip_jitter_sample_count += dr_round_trip_jitter_sample_count;
@@ -428,7 +520,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
         round_trip_jitter_medians.push_back(dr_round_trip_jitter_median);
         round_trip_jitter_median_counts.push_back(dr_round_trip_jitter_median_sample_count);
         if (dr_round_trip_jitter_median_sample_count < dr_round_trip_jitter_sample_count) {
-          worker_report.round_trip_jitter_weighted_median_overflow += dr_round_trip_jitter_sample_count - dr_round_trip_jitter_median_sample_count;
+          worker_report.round_trip_jitter_weighted_median_overflow +=
+            dr_round_trip_jitter_sample_count - dr_round_trip_jitter_median_sample_count;
         }
       }
     }
@@ -436,8 +529,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     for (CORBA::ULong j = 0; j < process_report.participants[i].publishers.length(); ++j) {
       for (CORBA::ULong k = 0; k < process_report.participants[i].publishers[j].datawriters.length(); ++k) {
         Builder::DataWriterReport& dw_report = process_report.participants[i].publishers[j].datawriters[k];
-        const Builder::TimeStamp dw_enable_time = get_or_create_property(dw_report.properties, "enable_time", Builder::PVK_TIME)->value.time_prop();
-        const Builder::TimeStamp dw_last_discovery_time = get_or_create_property(dw_report.properties, "last_discovery_time", Builder::PVK_TIME)->value.time_prop();
+        const Builder::TimeStamp dw_enable_time =
+          get_or_create_property(dw_report.properties, "enable_time", Builder::PVK_TIME)->value.time_prop();
+        const Builder::TimeStamp dw_last_discovery_time =
+          get_or_create_property(dw_report.properties, "last_discovery_time", Builder::PVK_TIME)->value.time_prop();
         if (ZERO < dw_enable_time && ZERO < dw_last_discovery_time) {
           auto delta = dw_last_discovery_time - dw_enable_time;
           if (worker_report.max_discovery_time_delta < delta) {
@@ -450,17 +545,25 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     }
   }
 
-  worker_report.latency_stdev = std::sqrt(worker_report.latency_var_x_sample_count / static_cast<double>(worker_report.latency_sample_count));
+  worker_report.latency_stdev =
+    std::sqrt(worker_report.latency_var_x_sample_count / static_cast<double>(worker_report.latency_sample_count));
   worker_report.latency_weighted_median = weighted_median(latency_medians, latency_median_counts, 0.0);
 
-  worker_report.jitter_stdev = std::sqrt(worker_report.jitter_var_x_sample_count / static_cast<double>(worker_report.jitter_sample_count));
+  worker_report.jitter_stdev =
+    std::sqrt(worker_report.jitter_var_x_sample_count / static_cast<double>(worker_report.jitter_sample_count));
   worker_report.jitter_weighted_median = weighted_median(jitter_medians, jitter_median_counts, 0.0);
 
-  worker_report.round_trip_latency_stdev = std::sqrt(worker_report.round_trip_latency_var_x_sample_count / static_cast<double>(worker_report.round_trip_latency_sample_count));
-  worker_report.round_trip_latency_weighted_median = weighted_median(round_trip_latency_medians, round_trip_latency_median_counts, 0.0);
+  worker_report.round_trip_latency_stdev =
+    std::sqrt(worker_report.round_trip_latency_var_x_sample_count /
+      static_cast<double>(worker_report.round_trip_latency_sample_count));
+  worker_report.round_trip_latency_weighted_median =
+    weighted_median(round_trip_latency_medians, round_trip_latency_median_counts, 0.0);
 
-  worker_report.round_trip_jitter_stdev = std::sqrt(worker_report.round_trip_jitter_var_x_sample_count / static_cast<double>(worker_report.round_trip_jitter_sample_count));
-  worker_report.round_trip_jitter_weighted_median = weighted_median(round_trip_jitter_medians, round_trip_jitter_median_counts, 0.0);
+  worker_report.round_trip_jitter_stdev =
+    std::sqrt(worker_report.round_trip_jitter_var_x_sample_count /
+      static_cast<double>(worker_report.round_trip_jitter_sample_count));
+  worker_report.round_trip_jitter_weighted_median =
+    weighted_median(round_trip_jitter_medians, round_trip_jitter_median_counts, 0.0);
 
   std::string output_file_name;
   std::unique_ptr<std::ofstream> ofs;
