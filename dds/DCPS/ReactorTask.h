@@ -30,7 +30,7 @@ class OpenDDS_Dcps_Export ReactorTask : public virtual ACE_Task_Base,
 public virtual RcObject {
 public:
 
-  ReactorTask(bool useAsyncSend);
+  explicit ReactorTask(bool useAsyncSend);
   virtual ~ReactorTask();
 
   virtual int open(void*);
