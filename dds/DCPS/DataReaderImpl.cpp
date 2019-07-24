@@ -1850,6 +1850,13 @@ CORBA::Long DataReaderImpl::total_samples() const
   return count;
 }
 
+void
+DataReaderImpl::LivelinessTimer::check_liveliness()
+{
+  CheckLivelinessCommand c(this);
+  execute_or_enqueue(c);
+}
+
 int
 DataReaderImpl::LivelinessTimer::handle_timeout(const ACE_Time_Value& tv,
                                                 const void * /*arg*/)
