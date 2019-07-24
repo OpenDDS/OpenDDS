@@ -60,16 +60,18 @@ const GUID_t GUID_UNKNOWN = { { 0 }, { { 0 }, 0 } };
 enum EntityKind {     // EntityId_t.entityKind value(s)
 
   /// Represents ENTITYKIND_USER_UNKNOWN and ENTITYKIND_BUILTIN_UNKNOWN
-  KIND_UNKNOWN,       // 0x3f & 0x00 (and all other unspecified values)
+  KIND_UNKNOWN,
+
   /// Represents ENTITYKIND_BUILTIN_PARTICIPANT
-  KIND_PARTICIPANT,   // 0x3f & 0x01
+  KIND_PARTICIPANT,
 
   /// Represents ENTITYKIND_USER_WRITER_WITH_KEY and ENTITYKIND_USER_WRITER_NO_KEY
-  KIND_WRITER,        // Non-builtin writers
+  KIND_USER_WRITER,
   /// Represents ENTITYKIND_USER_READER_WITH_KEY and ENTITYKIND_USER_READER_NO_KEY
-  KIND_READER,        // Non-builtin readers
+  KIND_USER_READER,
+
   /// Represents ENTITYKIND_OPENDDS_TOPIC
-  KIND_TOPIC,         // 0x3f & 0x05
+  KIND_USER_TOPIC,
 
   /// Represents ENTITYKIND_BUILTIN_WRITER_WITH_KEY and ENTITYKIND_USER_WRITER_NO_KEY
   KIND_BUILTIN_WRITER,
@@ -190,6 +192,9 @@ struct EntityIdConverter {
 
 OpenDDS_Dcps_Export OPENDDS_STRING
 to_string(const GUID_t& guid);
+
+OpenDDS_Dcps_Export OPENDDS_STRING
+to_string(const EntityId_t& entityId);
 
 #ifndef OPENDDS_SAFETY_PROFILE
 // Serialize to ASCII Hex string: "xxxx.xxxx.xxxx.xxxx"

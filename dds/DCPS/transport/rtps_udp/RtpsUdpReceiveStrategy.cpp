@@ -141,9 +141,9 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
       if (!readers_withheld_.count(reader)) {
         if (Transport_debug_level > 5) {
           GuidConverter reader_conv(reader);
-          ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpReceiveStrategy[%@]::deliver_sample - calling DataLink::data_received for seq: %q to reader %C\n", this,
-                               sample.header_.sequence_.getValue(),
-                               OPENDDS_STRING(reader_conv).c_str()));
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpReceiveStrategy[%@]::deliver_sample - ")
+            ACE_TEXT("calling DataLink::data_received for seq: %q to reader %C\n"),
+            this, sample.header_.sequence_.getValue(), OPENDDS_STRING(reader_conv).c_str()));
         }
 #if defined(OPENDDS_SECURITY)
         if (decode_payload(sample, data)) {
@@ -173,14 +173,17 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
           first = false;
           ++iter2;
         }
-        ACE_DEBUG((LM_DEBUG, "(%P|%t)  - RtpsUdpReceiveStrategy[%@]::deliver_sample \nreaders_selected ids:\n%C\n", this, included_ids.c_str()));
-        ACE_DEBUG((LM_DEBUG, "(%P|%t)  - RtpsUdpReceiveStrategy[%@]::deliver_sample \nreaders_withheld ids:\n%C\n", this, excluded_ids.c_str()));
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t)  - RtpsUdpReceiveStrategy[%@]::deliver_sample:\n")
+          ACE_TEXT("  readers_selected ids:\n%C\n")
+          ACE_TEXT("  readers_withheld ids:\n%C\n"),
+          this, included_ids.c_str(), excluded_ids.c_str()));
       }
 
       if (readers_withheld_.empty() && readers_selected_.empty()) {
         if (Transport_debug_level > 5) {
-          ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpReceiveStrategy[%@]::deliver_sample - calling DataLink::data_received for seq: %q TO ALL, no exclusion or inclusion\n", this,
-                               sample.header_.sequence_.getValue()));
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpReceiveStrategy[%@]::deliver_sample - ")
+            ACE_TEXT("calling DataLink::data_received for seq: %q TO ALL, no exclusion or inclusion\n"),
+            this, sample.header_.sequence_.getValue()));
         }
 
 #if defined(OPENDDS_SECURITY)
@@ -193,8 +196,9 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
 
       } else {
         if (Transport_debug_level > 5) {
-          ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpReceiveStrategy[%@]::deliver_sample - calling DataLink::data_received_include for seq: %q to readers_selected_\n", this,
-                               sample.header_.sequence_.getValue()));
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpReceiveStrategy[%@]::deliver_sample - ")
+            ACE_TEXT("calling DataLink::data_received_include for seq: %q to readers_selected_\n"),
+            this, sample.header_.sequence_.getValue()));
         }
 
 #if defined(OPENDDS_SECURITY)
@@ -306,6 +310,11 @@ RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage)
   bool ok = crypto->preprocess_secure_submsg(dwch, drch, category, encoded_submsg,
                                              local_pch, peer_pch, ex);
 
+  if (ok) {
+    VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpReceiveStrategy::deliver_from_secure ")
+      ACE_TEXT("dwch is %d and drch is %d\n"), dwch, drch), 4);
+  }
+
   if (ok && category == DATAWRITER_SUBMESSAGE) {
     ok = crypto->decode_datawriter_submessage(plain_submsg, encoded_submsg,
                                               drch, dwch, ex);
@@ -318,16 +327,29 @@ RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage)
     return;
 
   } else {
-    ACE_DEBUG((LM_WARNING, "(%P|%t) RtpsUdpReceiveStrategy: "
-               "preprocess_secure_submsg failed RPCH %d, [%d.%d]: %C\n",
-               peer_pch, ex.code, ex.minor_code, ex.message.in()));
+    if (security_debug.warn) {
+      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {warn} RtpsUdpReceiveStrategy: ")
+                 ACE_TEXT("preprocess_secure_submsg failed RPCH %d, [%d.%d]: %C\n"),
+                 peer_pch, ex.code, ex.minor_code, ex.message.in()));
+    }
     return;
   }
 
   if (!ok) {
-    ACE_DEBUG((LM_WARNING, "(%P|%t) RtpsUdpReceiveStrategy: "
-               "decode_datawriter/reader_submessage failed [%d.%d]: %C\n",
-               ex.code, ex.minor_code, ex.message.in()));
+    bool dw = category == DATAWRITER_SUBMESSAGE;
+    if (security_debug.warn) {
+      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {warn} RtpsUdpReceiveStrategy: ")
+                 ACE_TEXT("decode_data%C_submessage failed [%d.%d]: \"%C\" ")
+                 ACE_TEXT("(rpch: %u, local d%cch: %u, remote d%cch: %u)\n"),
+                 dw ? "writer" : "reader",
+                 ex.code, ex.minor_code, ex.message.in(),
+                 peer_pch,
+                 dw ? 'r' : 'w',
+                 dw ? drch : dwch,
+                 dw ? 'w' : 'r',
+                 dw ? dwch : drch
+                 ));
+    }
     return;
   }
 
@@ -446,8 +468,8 @@ bool RtpsUdpReceiveStrategy::decode_payload(ReceivedDataSample& sample,
       sample.header_.byte_order_ = RtpsSampleHeader::payload_byte_order(sample);
     }
 
-  } else {
-    ACE_DEBUG((LM_WARNING, "(%P|%t) RtpsUdpReceiveStrategy: "
+  } else if (security_debug.warn) {
+    ACE_DEBUG((LM_WARNING, "(%P|%t) {warn} RtpsUdpReceiveStrategy: "
                "decode_serialized_payload failed [%d.%d]: %C\n",
                ex.code, ex.minor_code, ex.message.in()));
   }
