@@ -2020,12 +2020,14 @@ RtpsUdpDataLink::send_nackfrag_replies(RtpsWriter& writer,
   const ri_iter end = writer.remote_readers_.end();
   for (ri_iter ri = writer.remote_readers_.begin(); ri != end; ++ri) {
 
-    OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan)::const_iterator iter;
     if (ri->second.requested_frags_.empty()) {
-      iter = locators_.find(ri->first);
-      if (iter == locators_.end()) {
-        continue;
-      }
+      continue;
+    }
+
+    const OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan)::const_iterator iter =
+      locators_.find(ri->first);
+    if (iter == locators_.end()) {
+      continue;
     }
 
     const ACE_INET_Addr& remote_addr = iter->second.addr_;
