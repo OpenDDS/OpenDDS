@@ -66,12 +66,20 @@ BUILDING OpenDDS
   for building application code, and some users may prefer using it this way.
 
   After "make install" there is a second completely ready and useable OpenDDS
-  that's under the installation prefix directory.  It comes with a one-line
-  shell script in <prefix>/share/dds/dds-devel.sh that sets a DDS_ROOT which
-  is used for building an application using this installed OpenDDS.  The
-  analogous files for ACE and TAO are in <prefix>/share/ace/ace-devel.sh and
-  <prefix>/share/tao/tao-devel.sh.
+  that's under the installation prefix directory.   It contains the required
+  libraries, code generators, header files, IDL files, and associated scripts
+  and documentation.
 
+* Application Development with an Installed OpenDDS:
+
+  After "make install" completes, the shell script in
+  <prefix>/share/dds/dds-devel.sh is used to set the DDS_ROOT environment
+  variable.  The analogous files for ACE and TAO are
+  <prefix>/share/ace/ace-devel.sh and <prefix>/share/tao/tao-devel.sh.
+
+  The <prefix> tree does not contain a tool for makefile generation.  To use
+  MPC to generate application makefiles, the MPC_ROOT subdirectory from the
+  OpenDDS source tree can be used either in-place or copied elsewhere.
 
 * Cross Compiling:
 
