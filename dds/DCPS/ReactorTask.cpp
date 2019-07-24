@@ -6,10 +6,10 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
-#include "TransportReactorTask.h"
+#include "ReactorTask.h"
 
 #if !defined (__ACE_INLINE__)
-#include "TransportReactorTask.inl"
+#include "ReactorTask.inl"
 #endif /* __ACE_INLINE__ */
 
 #include <ace/Select_Reactor.h>
@@ -20,14 +20,12 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
-OpenDDS::DCPS::TransportReactorTask::TransportReactorTask(bool useAsyncSend)
+OpenDDS::DCPS::ReactorTask::ReactorTask(bool useAsyncSend)
   : barrier_(2)
   , state_(STATE_NOT_RUNNING)
   , condition_(this->lock_)
   , reactor_owner_(ACE_OS::NULL_thread)
 {
-  DBG_ENTRY_LVL("TransportReactorTask","TransportReactorTask",6);
-
 #if defined (ACE_WIN32) && defined (ACE_HAS_WIN32_OVERLAPPED_IO)
   // Set our reactor and proactor pointers to a new reactor/proactor objects.
   if (useAsyncSend) {
@@ -42,14 +40,12 @@ OpenDDS::DCPS::TransportReactorTask::TransportReactorTask(bool useAsyncSend)
   ACE_UNUSED_ARG(useAsyncSend);
 #endif
 
-  this->reactor_ = new ACE_Reactor(new ACE_Select_Reactor, 1);
+  this->reactor_ = new ACE_Reactor(new ACE_Select_Reactor, true);
   this->proactor_ = 0;
 }
 
-OpenDDS::DCPS::TransportReactorTask::~TransportReactorTask()
+OpenDDS::DCPS::ReactorTask::~ReactorTask()
 {
-  DBG_ENTRY_LVL("TransportReactorTask","~TransportReactorTask",6);
-
 #if defined (ACE_HAS_WIN32_OVERLAPPED_IO) || defined (ACE_HAS_AIO_CALLS)
   if (this->proactor_) {
     this->reactor_->remove_handler(this->proactor_->implementation()->get_handle(),
@@ -62,10 +58,8 @@ OpenDDS::DCPS::TransportReactorTask::~TransportReactorTask()
 }
 
 int
-OpenDDS::DCPS::TransportReactorTask::open(void*)
+OpenDDS::DCPS::ReactorTask::open(void*)
 {
-  DBG_ENTRY_LVL("TransportReactorTask","open",6);
-
   GuardType guard(this->lock_);
 
   // Reset our state.
@@ -80,7 +74,7 @@ OpenDDS::DCPS::TransportReactorTask::open(void*)
   // a hold on our lock while we do this.
   if (this->activate(THR_NEW_LWP | THR_JOINABLE,1) != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
-                      "(%P|%t) ERROR: TransportReactorTask Failed to activate "
+                      "(%P|%t) ERROR: ReactorTask Failed to activate "
                       "itself.\n"),
                      -1);
   }
@@ -101,10 +95,8 @@ OpenDDS::DCPS::TransportReactorTask::open(void*)
 }
 
 int
-OpenDDS::DCPS::TransportReactorTask::svc()
+OpenDDS::DCPS::ReactorTask::svc()
 {
-  DBG_ENTRY_LVL("TransportReactorTask","svc",6);
-
   // First off - We need to obtain our own reference to ourselves such
   // that we don't get deleted while still running in our own thread.
   // In essence, our current thread "owns" a copy of our reference.
@@ -153,20 +145,19 @@ OpenDDS::DCPS::TransportReactorTask::svc()
     this->reactor_->run_reactor_event_loop();
   } catch (const std::exception& e) {
     ACE_ERROR((LM_ERROR,
-               "(%P|%t) ERROR: TransportReactorTask::svc caught exception - %C.\n",
+               "(%P|%t) ERROR: ReactorTask::svc caught exception - %C.\n",
                e.what()));
   } catch (...) {
     ACE_ERROR((LM_ERROR,
-               "(%P|%t) ERROR: TransportReactorTask::svc caught exception.\n"));
+               "(%P|%t) ERROR: ReactorTask::svc caught exception.\n"));
   }
 
   return 0;
 }
 
 int
-OpenDDS::DCPS::TransportReactorTask::close(u_long flags)
+OpenDDS::DCPS::ReactorTask::close(u_long flags)
 {
-  DBG_ENTRY_LVL("TransportReactorTask","close",6);
   ACE_UNUSED_ARG(flags);
   // This is called after the reactor threads exit.
   // We should not set state here since we are not
@@ -184,9 +175,9 @@ OpenDDS::DCPS::TransportReactorTask::close(u_long flags)
 }
 
 void
-OpenDDS::DCPS::TransportReactorTask::stop()
+OpenDDS::DCPS::ReactorTask::stop()
 {
-  DBG_ENTRY_LVL("TransportReactorTask","stop",6);
+
   {
     GuardType guard(this->lock_);
 

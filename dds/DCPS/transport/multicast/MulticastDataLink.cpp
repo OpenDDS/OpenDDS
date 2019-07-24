@@ -38,7 +38,7 @@ MulticastDataLink::MulticastDataLink(MulticastTransport& transport,
     const MulticastSessionFactory_rch& session_factory,
     MulticastPeer local_peer,
     MulticastInst& config,
-    TransportReactorTask* reactor_task,
+    ReactorTask* reactor_task,
     bool is_active)
 : DataLink(transport, 0 /*priority*/, false /*loopback*/, is_active),
   session_factory_(session_factory),

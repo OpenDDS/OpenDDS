@@ -16,6 +16,7 @@
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/RcEventHandler.h"
+#include "dds/DCPS/ReactorTask.h"
 
 #include "RtpsCoreC.h"
 #include "Sedp.h"
@@ -146,9 +147,8 @@ private:
             const DDS::DomainParticipantQos& qos,
             RtpsDiscovery* disco);
 
-  ACE_Reactor* reactor() const;
-
   RtpsDiscovery* disco_;
+  DCPS::ReactorTask reactor_task_;
 
   // Participant:
   const DDS::DomainId_t domain_;

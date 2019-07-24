@@ -243,7 +243,7 @@ DataLink::schedule_stop(const ACE_Time_Value& schedule_to_stop_at)
 void
 DataLink::notify_reactor()
 {
-  TransportReactorTask_rch reactor(impl_.reactor_task());
+  ReactorTask_rch reactor(impl_.reactor_task());
   reactor->get_reactor()->notify(this);
 }
 

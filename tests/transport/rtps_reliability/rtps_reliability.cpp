@@ -964,7 +964,7 @@ bool run_test()
   AssociationData part1_reader = part1_writer;
   part1_reader.remote_id_ = reader1;
   part1_reader.remote_durable_ = false;
-  ReactorTask rt;
+  ::ReactorTask rt;
   if (!sdw2.associate(part1_reader, true /*active*/)) {
     ACE_DEBUG((LM_DEBUG,
                "SimpleDataWriter(writer2) could not associate with reader1\n"));

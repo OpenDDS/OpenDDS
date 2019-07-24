@@ -16,7 +16,7 @@
 #include "TcpConnection.h"
 #include "TcpConnection_rch.h"
 
-#include "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
+#include "dds/DCPS/ReactorTask_rch.h"
 #include "dds/DCPS/transport/framework/PriorityKey.h"
 
 #include "ace/INET_Addr.h"

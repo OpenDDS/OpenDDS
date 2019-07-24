@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_TRANSPORTREACTORTASK_H
-#define OPENDDS_DCPS_TRANSPORTREACTORTASK_H
+#ifndef OPENDDS_DCPS_REACTORTASK_H
+#define OPENDDS_DCPS_REACTORTASK_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/RcObject.h"
@@ -26,12 +26,12 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class OpenDDS_Dcps_Export TransportReactorTask : public virtual ACE_Task_Base,
+class OpenDDS_Dcps_Export ReactorTask : public virtual ACE_Task_Base,
 public virtual RcObject {
 public:
 
-  TransportReactorTask(bool useAsyncSend);
-  virtual ~TransportReactorTask();
+  explicit ReactorTask(bool useAsyncSend);
+  virtual ~ReactorTask();
 
   virtual int open(void*);
   virtual int svc();
@@ -76,7 +76,7 @@ private:
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #if defined (__ACE_INLINE__)
-#include "TransportReactorTask.inl"
+#include "ReactorTask.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif  /* OPENDDS_DCPS_TRANSPORTREACTORTASK_H */
+#endif  /* OPENDDS_DCPS_REACTORTASK_H */
