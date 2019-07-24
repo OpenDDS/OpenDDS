@@ -15,16 +15,17 @@
 using namespace OpenDDS::DCPS;
 
 namespace {
+  const SequenceNumber::Value INITIAL  = SequenceNumber::MIN_VALUE;
   const SequenceNumber::Value SN_MAX   = SequenceNumber::MAX_VALUE;
   const SequenceNumber::Value SN_MIN   = SequenceNumber::MIN_VALUE;
-  const SequenceNumber::Value SN_SEAM  = ACE_INT32_MAX;
+  const SequenceNumber::Value SN_SEAM  = ACE_UINT32_MAX;
 }
 
 int
 ACE_TMAIN(int, ACE_TCHAR*[])
 {
   // Construction (default)
-  TEST_CHECK(SequenceNumber(SN_MIN) == SequenceNumber());
+  TEST_CHECK(SequenceNumber(INITIAL) == SequenceNumber());
 
   TEST_CHECK(SequenceNumber::ZERO().getValue() == 0);
   TEST_CHECK(SequenceNumber::ZERO() < SequenceNumber());
@@ -55,10 +56,10 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   {
     SequenceNumber num(SN_MAX);
     TEST_CHECK(num.getValue() == SN_MAX);
-    TEST_CHECK((++num).getValue() == SN_MIN);
+    TEST_CHECK((++num).getValue() == INITIAL);
     // test post-incrementer
-    TEST_CHECK((num++).getValue() == SN_MIN);
-    TEST_CHECK(num.getValue() == SN_MIN+1);
+    TEST_CHECK((num++).getValue() == INITIAL);
+    TEST_CHECK(num.getValue() == INITIAL+1);
   }
 
   // Test SEQUENCENUMBER_UNKNOWN
