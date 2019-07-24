@@ -64,40 +64,49 @@ DH_2048_MODP_256_PRIME::~DH_2048_MODP_256_PRIME() {}
 class dh_constructor
 {
 public:
-  dh_constructor()
-    : result(0), params(0), keygen_ctx(0), dh_2048_256(0)
-  {
-  }
+  dh_constructor() : params(0), paramgen_ctx(0), keygen_ctx(0) {}
 
   ~dh_constructor()
   {
     EVP_PKEY_free(params);
+    EVP_PKEY_CTX_free(paramgen_ctx);
     EVP_PKEY_CTX_free(keygen_ctx);
-    DH_free(dh_2048_256);
   }
 
-  EVP_PKEY* operator()()
+  EVP_PKEY* get_key()
   {
+    EVP_PKEY* result = 0;
+
 #if OPENSSL_VERSION_NUMBER < 0x10002000L
-    OPENDDS_SSL_LOG_ERR("DH_get_2048_256 not provided by this OpenSSL library");
-    return 0;
+    OPENDDS_SSL_LOG_ERR("RFC 5114 2.3 - 2048-bit MODP Group with 256-bit Prime Order Subgroup - not provided by this OpenSSL library");
 #else
-    if (!(params = EVP_PKEY_new())) {
+
+    if (0 == (params = EVP_PKEY_new())) {
       OPENDDS_SSL_LOG_ERR("EVP_PKEY_new failed");
       return 0;
     }
 
-    if (0 == (dh_2048_256 = DH_get_2048_256())) {
-      OPENDDS_SSL_LOG_ERR("DH_get_2048_256 failed");
+    if (0 == (paramgen_ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_DHX, 0))) {
+      OPENDDS_SSL_LOG_ERR("EVP_PKEY_CTX_new_id");
       return 0;
     }
 
-    if (1 != EVP_PKEY_set1_DH(params, dh_2048_256)) {
-      OPENDDS_SSL_LOG_ERR("EVP_PKEY_set1_DH failed");
+    if (1 != EVP_PKEY_paramgen_init(paramgen_ctx)) {
+      OPENDDS_SSL_LOG_ERR("EVP_PKEY_paramgen_init failed");
       return 0;
     }
 
-    if (!(keygen_ctx = EVP_PKEY_CTX_new(params, 0))) {
+    if (1 != EVP_PKEY_CTX_set_dh_rfc5114(paramgen_ctx, 3)) {
+      OPENDDS_SSL_LOG_ERR("EVP_PKEY_CTX_set_dh_rfc5114 failed");
+      return 0;
+    }
+
+    if ((1 != EVP_PKEY_paramgen(paramgen_ctx, &params)) || params == 0) {
+      OPENDDS_SSL_LOG_ERR("EVP_PKEY_paramgen failed");
+      return 0;
+    }
+
+    if (0 == (keygen_ctx = EVP_PKEY_CTX_new(params, 0))) {
       OPENDDS_SSL_LOG_ERR("EVP_PKEY_CTX_new failed");
       return 0;
     }
@@ -112,15 +121,14 @@ public:
       return 0;
     }
 
-    return result;
 #endif
+    return result;
   }
 
 private:
-  EVP_PKEY* result;
   EVP_PKEY* params;
+  EVP_PKEY_CTX* paramgen_ctx;
   EVP_PKEY_CTX* keygen_ctx;
-  DH* dh_2048_256;
 };
 
 int DH_2048_MODP_256_PRIME::init()
@@ -128,7 +136,8 @@ int DH_2048_MODP_256_PRIME::init()
   if (k_) return 0;
 
   dh_constructor dh;
-  k_ = dh();
+  k_ = dh.get_key();
+
   return k_ ? 0 : 1;
 }
 
@@ -139,19 +148,17 @@ int DH_2048_MODP_256_PRIME::pub_key(DDS::OctetSeq& dst)
   if (k_) {
     DH_Handle dh(k_);
     if (dh) {
-      const BIGNUM *pubkey,
-        *privkey; /* Ignore the privkey but pass it in anyway since nothing
-                     documents what happens when a 0 gets passed in */
-      pubkey = privkey = 0;
+      const BIGNUM *pubkey = 0, *privkey = 0;
       DH_get0_key(dh, &pubkey, &privkey);
       if (pubkey) {
-        dst.length(DH_size(dh));
+        dst.length(BN_num_bytes(pubkey));
         if (0 < BN_bn2bin(pubkey, dst.get_buffer())) {
           result = 0;
-
         } else {
           OPENDDS_SSL_LOG_ERR("BN_bn2bin failed");
         }
+      } else {
+        OPENDDS_SSL_LOG_ERR("DH_get0_key failed");
       }
     }
   }
@@ -239,17 +246,17 @@ public:
     EVP_PKEY_CTX_free(keygen_ctx);
   }
 
-  EVP_PKEY* operator()()
+  EVP_PKEY* get_key()
   {
     EVP_PKEY* result = 0;
 
-    if (0 == (paramgen_ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_EC, 0))) {
-      OPENDDS_SSL_LOG_ERR("EVP_PKEY_CTX_new_id");
+    if (0 == (params = EVP_PKEY_new())) {
+      OPENDDS_SSL_LOG_ERR("EVP_PKEY_new failed");
       return 0;
     }
 
-    if (0 == (params = EVP_PKEY_new())) {
-      OPENDDS_SSL_LOG_ERR("EVP_PKEY_new failed");
+    if (0 == (paramgen_ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_EC, 0))) {
+      OPENDDS_SSL_LOG_ERR("EVP_PKEY_CTX_new_id");
       return 0;
     }
 
@@ -258,13 +265,12 @@ public:
       return 0;
     }
 
-    if (1 != EVP_PKEY_CTX_set_ec_paramgen_curve_nid(paramgen_ctx,
-                                                    NID_X9_62_prime256v1)) {
+    if (1 != EVP_PKEY_CTX_set_ec_paramgen_curve_nid(paramgen_ctx, NID_X9_62_prime256v1)) {
       OPENDDS_SSL_LOG_ERR("EVP_PKEY_CTX_set_ec_paramgen_curve_nid failed");
       return 0;
     }
 
-    if (1 != EVP_PKEY_paramgen(paramgen_ctx, &params)) {
+    if (1 != EVP_PKEY_paramgen(paramgen_ctx, &params) || params == 0) {
       OPENDDS_SSL_LOG_ERR("EVP_PKEY_paramgen failed");
       return 0;
     }
@@ -298,7 +304,7 @@ int ECDH_PRIME_256_V1_CEUM::init()
   if (k_) return 0;
 
   ecdh_constructor ecdh;
-  k_ = ecdh();
+  k_ = ecdh.get_key();
 
   return k_ ? 0 : 1;
 }
