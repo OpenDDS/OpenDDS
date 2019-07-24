@@ -18,6 +18,9 @@
 #include "RecorderImpl.h"
 #include "ReplayerImpl.h"
 #include "StaticDiscovery.h"
+#if defined(OPENDDS_SECURITY)
+#include "security/framework/SecurityRegistry.h"
+#endif
 
 #include "ace/Singleton.h"
 #include "ace/Arg_Shifter.h"
@@ -260,6 +263,9 @@ Service_Participant::shutdown()
 
   shut_down_ = true;
   try {
+#if defined(OPENDDS_SECURITY)
+    OpenDDS::Security::SecurityRegistry::instance()->release();
+#endif
     TransportRegistry::instance()->release();
     {
       ACE_GUARD(TAO_SYNCH_MUTEX, guard, this->factory_lock_);
@@ -287,6 +293,9 @@ Service_Participant::shutdown()
       monitor_factory_ = 0;
     }
     TransportRegistry::close();
+#if defined(OPENDDS_SECURITY)
+    OpenDDS::Security::SecurityRegistry::close();
+#endif
   } catch (const CORBA::Exception& ex) {
     ex._tao_print_exception("ERROR: Service_Participant::shutdown");
   }

@@ -1951,13 +1951,15 @@ AccessControlBuiltInImpl::RevokePermissionsTimer::RevokePermissionsTimer(AccessC
     : impl_(impl)
     , scheduled_(false)
     , timer_id_(0)
-    , reactor_(0)
 { }
 
 AccessControlBuiltInImpl::RevokePermissionsTimer::~RevokePermissionsTimer()
 {
-  if (scheduled_) {
-      reactor_->cancel_timer(this);
+  ACE_Reactor_Timer_Interface* reactor = TheServiceParticipant->timer();
+
+  if (scheduled_ && reactor != NULL) {
+    reactor->cancel_timer(this);
+    scheduled_ = false;
   }
 }
 
@@ -1971,10 +1973,10 @@ bool AccessControlBuiltInImpl::RevokePermissionsTimer::start_timer(const ACE_Tim
   ::DDS::Security::PermissionsHandle *eh_params_ptr =
       new ::DDS::Security::PermissionsHandle(pm_handle);
 
-  reactor_ = TheServiceParticipant->timer();
+  ACE_Reactor_Timer_Interface* reactor = TheServiceParticipant->timer();
 
-  if (reactor_ != NULL) {
-    timer_id_ = reactor_->schedule_timer(this, eh_params_ptr, length);
+  if (reactor != NULL) {
+    timer_id_ = reactor->schedule_timer(this, eh_params_ptr, length);
 
     if (timer_id_ != -1) {
       scheduled_ = true;

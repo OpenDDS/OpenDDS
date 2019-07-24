@@ -269,7 +269,6 @@ private:
     bool scheduled_;
     long timer_id_;
     ACE_Thread_Mutex lock_;
-    ACE_Reactor_Timer_Interface* reactor_;
   };
 
   RevokePermissionsTimer local_rp_timer_;
