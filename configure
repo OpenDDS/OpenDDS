@@ -1227,18 +1227,16 @@ if ($opts{'security'} && $tests && $opts{'cmake'} && ! $opts{'gtest-precompiled'
   my $build_dir = $opts{'gtest'} . $slash . 'build';
   my $install_dir = $build_dir . $slash . 'install';
   my $cmake = $opts{'cmake'};
-  my @cmake_cmds = ((is_windows() ?
-                      ["$cmake",
-                       "-D", "gtest_force_shared_crt=ON",
-                       "-D", "CMAKE_CXX_FLAGS=/D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING=1",
-                       "-D", "CMAKE_INSTALL_PREFIX=$install_dir",
-                       "-G", win32_cmake_generator(
-                               $opts{'compiler_version'},
-                               $opts{'compiler_target_architecture'}),
-                       ".."] :
-                      ["$cmake",
-                       "-D", "CMAKE_INSTALL_PREFIX=$install_dir",
-                       ".."]),
+  my @cmake_platform_args = $is_windows ?
+    ('-Dgtest_force_shared_crt=ON',
+     '-DCMAKE_CXX_FLAGS=/D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING=1',
+     '-G', '"' . win32_cmake_generator($opts{'compiler_version'}) . '"',
+     '-A', win32_cmake_arch($opts{'compiler_target_architecture'})) : ();
+  my @cmake_cmds = ([$cmake,
+                     "-DCMAKE_INSTALL_PREFIX=$install_dir",
+                     '-DCMAKE_INSTALL_LIBDIR=lib',
+                     @cmake_platform_args,
+                     '..'],
                     ["$cmake", "--build", ".", "--target", "install"]);
 
   mkdir($build_dir)
