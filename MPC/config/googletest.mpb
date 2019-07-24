@@ -10,7 +10,7 @@ project {
   includes += $(GTEST_ROOT)/../../googletest/include
   libpaths += $(GTEST_ROOT)/../googlemock/gtest/$(Configuration)
 
-  lit_libs += gtest
+  libs += gtest
 
   specific (prop:microsoft) {
     macros += _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING

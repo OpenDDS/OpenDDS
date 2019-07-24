@@ -4,5 +4,5 @@ project : googletest {
   includes += $(GTEST_ROOT)/../../googlemock/include
   libpaths += $(GTEST_ROOT)/../googlemock/$(Configuration)
 
-  lit_libs += gmock
+  libs += gmock
 }
