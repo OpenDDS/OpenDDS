@@ -224,22 +224,6 @@ Service_Participant::instance()
   return ACE_Singleton<Service_Participant, ACE_SYNCH_MUTEX>::instance();
 }
 
-// int
-// Service_Participant::ReactorTask::svc()
-// {
-//   // // Ignore signals so the reactor does not get interrupted.
-//   // sigset_t set;
-//   // ACE_OS::sigfillset(&set);
-//   // ACE_OS::thr_sigsetmask(SIG_SETMASK, &set, NULL);
-
-//   Service_Participant* sp = instance();
-//   sp->reactor_->owner(ACE_Thread_Manager::instance()->thr_self());
-//   sp->reactor_owner_ = ACE_Thread_Manager::instance()->thr_self();
-//   this->wait_for_startup();
-//   sp->reactor_->run_reactor_event_loop();
-//   return 0;
-// }
-
 ACE_Reactor_Timer_Interface*
 Service_Participant::timer()
 {

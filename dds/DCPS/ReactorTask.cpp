@@ -26,10 +26,6 @@ OpenDDS::DCPS::ReactorTask::ReactorTask(bool useAsyncSend)
   , condition_(this->lock_)
   , reactor_owner_(ACE_OS::NULL_thread)
 {
-  if (DCPS_debug_level >= 6) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ReactorTask::ReactorTask\n")));
-  }
-
 #if defined (ACE_WIN32) && defined (ACE_HAS_WIN32_OVERLAPPED_IO)
   // Set our reactor and proactor pointers to a new reactor/proactor objects.
   if (useAsyncSend) {
@@ -44,16 +40,12 @@ OpenDDS::DCPS::ReactorTask::ReactorTask(bool useAsyncSend)
   ACE_UNUSED_ARG(useAsyncSend);
 #endif
 
-  this->reactor_ = new ACE_Reactor(new ACE_Select_Reactor, 1);
+  this->reactor_ = new ACE_Reactor(new ACE_Select_Reactor, true);
   this->proactor_ = 0;
 }
 
 OpenDDS::DCPS::ReactorTask::~ReactorTask()
 {
-  if (DCPS_debug_level >= 6) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ReactorTask::~ReactorTask\n")));
-  }
-
 #if defined (ACE_HAS_WIN32_OVERLAPPED_IO) || defined (ACE_HAS_AIO_CALLS)
   if (this->proactor_) {
     this->reactor_->remove_handler(this->proactor_->implementation()->get_handle(),
@@ -68,10 +60,6 @@ OpenDDS::DCPS::ReactorTask::~ReactorTask()
 int
 OpenDDS::DCPS::ReactorTask::open(void*)
 {
-  if (DCPS_debug_level >= 6) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ReactorTask::open\n")));
-  }
-
   GuardType guard(this->lock_);
 
   // Reset our state.
@@ -109,10 +97,6 @@ OpenDDS::DCPS::ReactorTask::open(void*)
 int
 OpenDDS::DCPS::ReactorTask::svc()
 {
-  if (DCPS_debug_level >= 6) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ReactorTask::svc\n")));
-  }
-
   // First off - We need to obtain our own reference to ourselves such
   // that we don't get deleted while still running in our own thread.
   // In essence, our current thread "owns" a copy of our reference.
@@ -174,10 +158,6 @@ OpenDDS::DCPS::ReactorTask::svc()
 int
 OpenDDS::DCPS::ReactorTask::close(u_long flags)
 {
-  if (DCPS_debug_level >= 6) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ReactorTask::close\n")));
-  }
-
   ACE_UNUSED_ARG(flags);
   // This is called after the reactor threads exit.
   // We should not set state here since we are not
@@ -197,9 +177,6 @@ OpenDDS::DCPS::ReactorTask::close(u_long flags)
 void
 OpenDDS::DCPS::ReactorTask::stop()
 {
-  if (DCPS_debug_level >= 6) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ReactorTask::stop\n")));
-  }
 
   {
     GuardType guard(this->lock_);
