@@ -91,44 +91,12 @@ enum EntityKind {     // EntityId_t.entityKind value(s)
 struct OpenDDS_Dcps_Export GUID_tKeyLessThan {
   static bool entity_less(const EntityId_t& v1, const EntityId_t& v2)
   {
-    if (v1.entityKey[2] < v2.entityKey[2]) return true;
-    if (v2.entityKey[2] < v1.entityKey[2]) return false;
-    if (v1.entityKey[1] < v2.entityKey[1]) return true;
-    if (v2.entityKey[1] < v1.entityKey[1]) return false;
-    if (v1.entityKey[0] < v2.entityKey[0]) return true;
-    if (v2.entityKey[0] < v1.entityKey[0]) return false;
-    if (v1.entityKind < v2.entityKind) return true;
-    if (v2.entityKind < v1.entityKind) return false;
-    return false;
+    return std::memcmp(&v1, &v2, sizeof(EntityId_t)) < 0;
   }
 
   bool operator()(const GUID_t& v1, const GUID_t& v2) const
   {
-    if (v1.guidPrefix[11] < v2.guidPrefix[11]) return true;
-    if (v2.guidPrefix[11] < v1.guidPrefix[11]) return false;
-    if (v1.guidPrefix[10] < v2.guidPrefix[10]) return true;
-    if (v2.guidPrefix[10] < v1.guidPrefix[10]) return false;
-    if (v1.guidPrefix[ 9] < v2.guidPrefix[ 9]) return true;
-    if (v2.guidPrefix[ 9] < v1.guidPrefix[ 9]) return false;
-    if (v1.guidPrefix[ 8] < v2.guidPrefix[ 8]) return true;
-    if (v2.guidPrefix[ 8] < v1.guidPrefix[ 8]) return false;
-    if (v1.guidPrefix[ 7] < v2.guidPrefix[ 7]) return true;
-    if (v2.guidPrefix[ 7] < v1.guidPrefix[ 7]) return false;
-    if (v1.guidPrefix[ 6] < v2.guidPrefix[ 6]) return true;
-    if (v2.guidPrefix[ 6] < v1.guidPrefix[ 6]) return false;
-    if (v1.guidPrefix[ 5] < v2.guidPrefix[ 5]) return true;
-    if (v2.guidPrefix[ 5] < v1.guidPrefix[ 5]) return false;
-    if (v1.guidPrefix[ 4] < v2.guidPrefix[ 4]) return true;
-    if (v2.guidPrefix[ 4] < v1.guidPrefix[ 4]) return false;
-    if (v1.guidPrefix[ 3] < v2.guidPrefix[ 3]) return true;
-    if (v2.guidPrefix[ 3] < v1.guidPrefix[ 3]) return false;
-    if (v1.guidPrefix[ 2] < v2.guidPrefix[ 2]) return true;
-    if (v2.guidPrefix[ 2] < v1.guidPrefix[ 2]) return false;
-    if (v1.guidPrefix[ 1] < v2.guidPrefix[ 1]) return true;
-    if (v2.guidPrefix[ 1] < v1.guidPrefix[ 1]) return false;
-    if (v1.guidPrefix[ 0] < v2.guidPrefix[ 0]) return true;
-    if (v2.guidPrefix[ 0] < v1.guidPrefix[ 0]) return false;
-    return entity_less(v1.entityId, v2.entityId);
+    return std::memcmp(&v1, &v2, sizeof(GUID_t)) < 0;
   }
 };
 
