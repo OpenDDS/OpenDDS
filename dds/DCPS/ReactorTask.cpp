@@ -23,47 +23,54 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 OpenDDS::DCPS::ReactorTask::ReactorTask(bool useAsyncSend)
   : barrier_(2)
   , state_(STATE_NOT_RUNNING)
-  , condition_(this->lock_)
+  , condition_(lock_)
+  , reactor_(0)
   , reactor_owner_(ACE_OS::NULL_thread)
+  , proactor_(0)
+  , use_async_send_(useAsyncSend)
 {
-#if defined (ACE_WIN32) && defined (ACE_HAS_WIN32_OVERLAPPED_IO)
-  // Set our reactor and proactor pointers to a new reactor/proactor objects.
-  if (useAsyncSend) {
-    this->reactor_ = new ACE_Reactor(new ACE_WFMO_Reactor, 1);
-
-    ACE_WIN32_Proactor* proactor_impl = new ACE_WIN32_Proactor(0, 1);
-    this->proactor_ = new ACE_Proactor(proactor_impl, 1);
-    this->reactor_->register_handler(proactor_impl, proactor_impl->get_handle());
-    return;
-  }
-#else
-  ACE_UNUSED_ARG(useAsyncSend);
-#endif
-
-  this->reactor_ = new ACE_Reactor(new ACE_Select_Reactor, true);
-  this->proactor_ = 0;
 }
 
 OpenDDS::DCPS::ReactorTask::~ReactorTask()
 {
 #if defined (ACE_HAS_WIN32_OVERLAPPED_IO) || defined (ACE_HAS_AIO_CALLS)
-  if (this->proactor_) {
-    this->reactor_->remove_handler(this->proactor_->implementation()->get_handle(),
+  if (proactor_) {
+    reactor_->remove_handler(proactor_->implementation()->get_handle(),
                                    ACE_Event_Handler::DONT_CALL);
-    delete this->proactor_;
+    delete proactor_;
   }
 #endif
 
-  delete this->reactor_;
+  if (reactor_) {
+    delete reactor_;
+  }
 }
 
 int
 OpenDDS::DCPS::ReactorTask::open(void*)
 {
-  GuardType guard(this->lock_);
+
+  // Set our reactor and proactor pointers to a new reactor/proactor objects.
+  if (use_async_send_) {
+#if defined (ACE_WIN32) && defined (ACE_HAS_WIN32_OVERLAPPED_IO)
+    reactor_ = new ACE_Reactor(new ACE_WFMO_Reactor, 1);
+
+    ACE_WIN32_Proactor* proactor_impl = new ACE_WIN32_Proactor(0, 1);
+    proactor_ = new ACE_Proactor(proactor_impl, 1);
+    reactor_->register_handler(proactor_impl, proactor_impl->get_handle());
+#else
+    reactor_ = new ACE_Reactor(new ACE_Select_Reactor, true);
+    proactor_ = 0;
+#endif
+  } else {
+    reactor_ = new ACE_Reactor(new ACE_Select_Reactor, true);
+    proactor_ = 0;
+  }
+
+  GuardType guard(lock_);
 
   // Reset our state.
-  this->state_ = STATE_NOT_RUNNING;
+  state_ = STATE_NOT_RUNNING;
 
   // For now, we only support one thread to run the reactor event loop.
   // Parts of the logic in this class would need to change to support
@@ -72,23 +79,23 @@ OpenDDS::DCPS::ReactorTask::open(void*)
   // Attempt to activate ourselves.  If successful, a new thread will be
   // started and it will invoke our svc() method.  Note that we still have
   // a hold on our lock while we do this.
-  if (this->activate(THR_NEW_LWP | THR_JOINABLE,1) != 0) {
+  if (activate(THR_NEW_LWP | THR_JOINABLE,1) != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
                       "(%P|%t) ERROR: ReactorTask Failed to activate "
                       "itself.\n"),
                      -1);
   }
 
-  this->wait_for_startup();
+  wait_for_startup();
 
   // Here we need to wait until a condition is triggered by the new thread(s)
   // that we created.  Note that this will cause us to release the lock and
   // wait until the condition_ is signal()'ed.  When it is signaled, the
   // condition will attempt to obtain the lock again, and then return to us
   // here.  We can then go on.
-  if (this->state_ == STATE_NOT_RUNNING) {
-    this->state_ = STATE_OPENING;
-    this->condition_.wait();
+  if (state_ == STATE_NOT_RUNNING) {
+    state_ = STATE_OPENING;
+    condition_.wait();
   }
 
   return 0;
@@ -101,7 +108,7 @@ OpenDDS::DCPS::ReactorTask::svc()
   // that we don't get deleted while still running in our own thread.
   // In essence, our current thread "owns" a copy of our reference.
   // It's all done with the magic of intrusive reference counting!
-  this->_add_ref();
+  _add_ref();
 
   // Ignore all signals to avoid
   //     ERROR: <something descriptive> Interrupted system call
@@ -112,25 +119,25 @@ OpenDDS::DCPS::ReactorTask::svc()
 
   // VERY IMPORTANT!Tell the reactor that this task's thread will be
   //                  its "owner".
-  if (this->reactor_->owner(ACE_Thread_Manager::instance()->thr_self()) != 0) {
+  if (reactor_->owner(ACE_Thread_Manager::instance()->thr_self()) != 0) {
     ACE_ERROR((LM_ERROR,
                "(%P|%t) ERROR: Failed to change the reactor's owner().\n"));
   }
-  this->reactor_owner_ = ACE_Thread_Manager::instance()->thr_self();
-  this->wait_for_startup();
+  reactor_owner_ = ACE_Thread_Manager::instance()->thr_self();
+  wait_for_startup();
 
 
   {
     // Obtain the lock.  This should only happen once the open() has hit
     // the condition_.wait() line of code, and has released the lock.
-    GuardType guard(this->lock_);
+    GuardType guard(lock_);
 
-    if (this->state_ == STATE_OPENING) {
+    if (state_ == STATE_OPENING) {
       // Advance the state.
-      this->state_ = STATE_RUNNING;
+      state_ = STATE_RUNNING;
 
       // Signal the condition_ that we are here.
-      this->condition_.signal();
+      condition_.signal();
     }
   }
 
@@ -142,7 +149,7 @@ OpenDDS::DCPS::ReactorTask::svc()
 //MJM: Nevermind.
   try {
     // Tell the reactor to handle events.
-    this->reactor_->run_reactor_event_loop();
+    reactor_->run_reactor_event_loop();
   } catch (const std::exception& e) {
     ACE_ERROR((LM_ERROR,
                "(%P|%t) ERROR: ReactorTask::svc caught exception - %C.\n",
@@ -170,7 +177,7 @@ OpenDDS::DCPS::ReactorTask::close(u_long flags)
   // one reactor thread already exited.
 //MJM: Right.
 
-  this->_remove_ref();
+  _remove_ref();
   return 0;
 }
 
@@ -179,29 +186,29 @@ OpenDDS::DCPS::ReactorTask::stop()
 {
 
   {
-    GuardType guard(this->lock_);
+    GuardType guard(lock_);
 
-    if (this->state_ == STATE_NOT_RUNNING) {
+    if (state_ == STATE_NOT_RUNNING) {
       // We are already "stopped".  Just return.
       return;
     }
 
-    this->state_ = STATE_NOT_RUNNING;
+    state_ = STATE_NOT_RUNNING;
   }
 
 #if defined (ACE_HAS_WIN32_OVERLAPPED_IO) || defined (ACE_HAS_AIO_CALLS)
   // Remove the proactor handler so the reactor stops forwarding messages.
-  if (this->proactor_) {
-    this->reactor_->remove_handler(this->proactor_->implementation()->get_handle(),
+  if (proactor_) {
+    reactor_->remove_handler(proactor_->implementation()->get_handle(),
                                    ACE_Event_Handler::DONT_CALL);
   }
 #endif
 
-  this->reactor_->end_reactor_event_loop();
+  reactor_->end_reactor_event_loop();
 
   // Let's wait for the reactor task's thread to complete before we
   // leave this stop method.
-  this->wait();
+  wait();
 }
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
