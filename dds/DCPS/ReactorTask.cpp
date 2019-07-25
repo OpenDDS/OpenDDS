@@ -36,7 +36,7 @@ OpenDDS::DCPS::ReactorTask::~ReactorTask()
 #if defined (ACE_HAS_WIN32_OVERLAPPED_IO) || defined (ACE_HAS_AIO_CALLS)
   if (proactor_) {
     reactor_->remove_handler(proactor_->implementation()->get_handle(),
-			     ACE_Event_Handler::DONT_CALL);
+                                   ACE_Event_Handler::DONT_CALL);
     delete proactor_;
   }
 #endif
