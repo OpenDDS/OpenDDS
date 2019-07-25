@@ -200,7 +200,7 @@ OpenDDS::DCPS::ReactorTask::stop()
   // Remove the proactor handler so the reactor stops forwarding messages.
   if (proactor_) {
     reactor_->remove_handler(proactor_->implementation()->get_handle(),
-			     ACE_Event_Handler::DONT_CALL);
+                                   ACE_Event_Handler::DONT_CALL);
   }
 #endif
 
