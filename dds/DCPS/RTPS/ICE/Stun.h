@@ -65,6 +65,8 @@ enum AttributeType {
 };
 
 struct Attribute {
+  Attribute() : unknown_length(0) {}
+
   AttributeType type;
 
   ACE_INET_Addr mapped_address; // MAPPED_ADDRESS, XOR_MAPPED_ADDRESS
@@ -119,7 +121,7 @@ struct Message {
   TransactionId transaction_id;
 
   Message()
-  : block(0), length_(0), length_for_message_integrity_(0) {}
+  : class_(REQUEST), method(BINDING), block(0), length_(0), length_for_message_integrity_(0) {}
 
   void generate_transaction_id();
 
