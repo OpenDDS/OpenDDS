@@ -61,11 +61,12 @@ enum AttributeType {
   // ALTERNATE_SERVER   = 0x8023,
   FINGERPRINT        = 0x8028,
   ICE_CONTROLLED     = 0x8029,
-  ICE_CONTROLLING    = 0x802A
+  ICE_CONTROLLING    = 0x802A,
+  LAST_ATTRIBUTE     = 0xFFFF
 };
 
 struct Attribute {
-  Attribute() : unknown_length(0) {}
+  Attribute() : type(LAST_ATTRIBUTE), unknown_length(0) {}
 
   AttributeType type;
 
