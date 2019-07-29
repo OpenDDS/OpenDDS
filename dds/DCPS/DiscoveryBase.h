@@ -1971,6 +1971,11 @@ namespace OpenDDS {
         DDS::DomainParticipant_var participant = sub->get_participant();
         DomainParticipantImpl* participant_i =
           dynamic_cast<DomainParticipantImpl*>(participant.in());
+        if (participant_i == 0) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) PeerDiscovery::create_bit_dr")
+                     ACE_TEXT(" - Could not cast DomainParticipant to DomainParticipantImpl\n")));
+          return;
+        }
 
         TypeSupport_var type_support =
           Registered_Data_Types->lookup(participant, type);
