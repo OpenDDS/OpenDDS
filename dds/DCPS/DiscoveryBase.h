@@ -1957,6 +1957,11 @@ namespace OpenDDS {
         using namespace DCPS;
         TopicDescriptionImpl* bit_topic_i =
           dynamic_cast<TopicDescriptionImpl*>(topic);
+        if (bit_topic_i == 0) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) PeerDiscovery::create_bit_dr")
+                     ACE_TEXT(" - Could not cast TopicDescription to TopicDescriptionImpl\n")));
+          return;
+        }
 
         DDS::DomainParticipant_var participant = sub->get_participant();
         DomainParticipantImpl* participant_i =
