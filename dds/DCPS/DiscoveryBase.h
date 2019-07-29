@@ -1967,6 +1967,11 @@ namespace OpenDDS {
 
         DDS::DataReader_var dr = type_support->create_datareader();
         OpenDDS::DCPS::DataReaderImpl* dri = dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(dr.in());
+        if (dri == 0) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) PeerDiscovery::create_bit_dr")
+                     ACE_TEXT(" - Could not cast DataReader to DataReaderImpl\n")));
+          return;
+        }
 
         dri->init(bit_topic_i, qos, 0 /*listener*/, 0 /*mask*/, participant_i, sub);
         dri->disable_transport();
