@@ -1684,6 +1684,11 @@ namespace OpenDDS {
                                          DDS::SubscriberListener::_nil(),
                                          DEFAULT_STATUS_MASK);
         SubscriberImpl* sub = dynamic_cast<SubscriberImpl*>(bit_subscriber.in());
+        if (sub == 0) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) PeerDiscovery::init_bit")
+                     ACE_TEXT(" - Could not cast Subscriber to SubscriberImpl\n")));
+          return 0;
+        }
 
         DDS::DataReaderQos dr_qos;
         sub->get_default_datareader_qos(dr_qos);
