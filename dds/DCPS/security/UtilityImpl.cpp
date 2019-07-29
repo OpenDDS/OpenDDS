@@ -21,7 +21,7 @@ void UtilityImpl::generate_random_bytes(void* ptr, size_t size)
     char msg[256] = { 0 };
     ERR_error_string_n(err, msg, sizeof(msg));
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) Service_Participant::generate_random_bytes: ERROR '%C' returned by RAND_bytes(...)\n"),
+               ACE_TEXT("(%P|%t) UtilityImpl::generate_random_bytes: ERROR '%C' returned by RAND_bytes(...)\n"),
                msg));
   }
 }
