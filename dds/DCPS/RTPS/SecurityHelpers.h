@@ -111,7 +111,9 @@ struct DiscoveredPublication_SecurityWrapper {
   ICE::AgentInfo ice_agent_info;
 
   DiscoveredPublication_SecurityWrapper()
-    : have_ice_agent_info(false) {}
+    : have_ice_agent_info(false) {
+    security_info = { 0, 0 };
+  }
 };
 
 struct DiscoveredSubscription_SecurityWrapper {
@@ -122,7 +124,9 @@ struct DiscoveredSubscription_SecurityWrapper {
   ICE::AgentInfo ice_agent_info;
 
   DiscoveredSubscription_SecurityWrapper()
-    : have_ice_agent_info(false) {}
+    : have_ice_agent_info(false) {
+    security_info = { 0, 0 };
+  }
 };
 
 }
