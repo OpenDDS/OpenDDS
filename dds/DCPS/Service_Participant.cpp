@@ -162,7 +162,7 @@ Service_Participant::Service_Participant()
 #ifndef OPENDDS_SAFETY_PROFILE
     ORB_argv_(false /*substitute_env_args*/),
 #endif
-    reactor_owner_(ACE_OS::NULL_thread),
+    reactor_task_(false),
     defaultDiscovery_(DDS_DEFAULT_DISCOVERY_METHOD),
     n_chunks_(DEFAULT_NUM_CHUNKS),
     association_chunk_multiplier_(DEFAULT_CHUNK_MULTIPLIER),
@@ -224,33 +224,22 @@ Service_Participant::instance()
   return ACE_Singleton<Service_Participant, ACE_SYNCH_MUTEX>::instance();
 }
 
-int
-Service_Participant::ReactorTask::svc()
-{
-  Service_Participant* sp = instance();
-  sp->reactor_->owner(ACE_Thread_Manager::instance()->thr_self());
-  sp->reactor_owner_ = ACE_Thread_Manager::instance()->thr_self();
-  this->wait_for_startup();
-  sp->reactor_->run_reactor_event_loop();
-  return 0;
-}
-
 ACE_Reactor_Timer_Interface*
-Service_Participant::timer() const
+Service_Participant::timer()
 {
-  return reactor_.get();
+  return reactor_task_.get_reactor();
 }
 
 ACE_Reactor*
-Service_Participant::reactor() const
+Service_Participant::reactor()
 {
-  return reactor_.get();
+  return reactor_task_.get_reactor();
 }
 
 ACE_thread_t
 Service_Participant::reactor_owner() const
 {
-  return reactor_owner_;
+  return reactor_task_.get_reactor_owner();
 }
 
 void
@@ -273,11 +262,7 @@ Service_Participant::shutdown()
 
       domainRepoMap_.clear();
 
-      if (reactor_) {
-        reactor_->end_reactor_event_loop();
-        reactor_task_.wait();
-        reactor_.reset();
-      }
+      reactor_task_.stop();
 
       discoveryMap_.clear();
 
@@ -417,19 +402,7 @@ Service_Participant::get_domain_participant_factory(int &argc,
 
       dp_factory_servant_ = make_rch<DomainParticipantFactoryImpl>();
 
-      if (!reactor_)
-        reactor_.reset(new ACE_Reactor(new ACE_Select_Reactor, true));
-
-      reactor_task_.thr_mgr(ACE_Thread_Manager::instance());
-
-      if (reactor_task_.activate(THR_NEW_LWP | THR_JOINABLE) == -1) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("ERROR: Service_Participant::get_domain_participant_factory, ")
-                   ACE_TEXT("Failed to activate the reactor task.\n")));
-        return DDS::DomainParticipantFactory::_nil();
-      }
-
-      reactor_task_.wait_for_startup();
+      reactor_task_.open(0);
 
       if (this->monitor_enabled_) {
 #if !defined(ACE_AS_STATIC_LIBS)

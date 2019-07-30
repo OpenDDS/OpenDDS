@@ -23,6 +23,22 @@ module simple {
   typedef sequence<TestSeqTypedef> LongSeqSeq;
   typedef sequence<LongSeqSeq> LongSeqSeqSeq;
 
+  // Test of nested primitive arrays
+  typedef sequence<boolean> BoolSeq;
+  typedef sequence<BoolSeq> BoolSeqSeq;
+  typedef sequence<octet> ByteSeq;
+  typedef sequence<ByteSeq> ByteSeqSeq;
+  typedef sequence<char> CharSeq;
+  typedef sequence<CharSeq> CharSeqSeq;
+  typedef sequence<short> ShortSeq;
+  typedef sequence<ShortSeq> ShortSeqSeq;
+  typedef sequence<unsigned short> UShortSeq;
+  typedef sequence<UShortSeq> UShortSeqSeq;
+  typedef sequence<float> FloatSeq;
+  typedef sequence<FloatSeq> FloatSeqSeq;
+  typedef sequence<double> DoubleSeq;
+  typedef sequence<DoubleSeq> DoubleSeqSeq;
+
   struct TestStruct {
     long m1;
     unsigned long m2;

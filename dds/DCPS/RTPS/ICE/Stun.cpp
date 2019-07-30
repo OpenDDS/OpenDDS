@@ -52,6 +52,8 @@ ACE_UINT16 Attribute::length() const
   case ICE_CONTROLLED:
   case ICE_CONTROLLING:
     return 8;
+  default:
+    break;
   }
 
   return unknown_length;
@@ -779,10 +781,10 @@ bool operator>>(DCPS::Serializer& serializer, Message& message)
     return false;
   }
 
-  while (serializer.length() != 0) {
-    bool have_integrity = false;
-    bool have_fingerprint = false;
+  bool have_integrity = false;
+  bool have_fingerprint = false;
 
+  while (serializer.length() != 0) {
     Attribute attribute;
 
     if (!(serializer >> attribute)) {

@@ -25,7 +25,6 @@
 #include "dds/DCPS/Ice.h"
 #endif
 
-#include "ace/Select_Reactor.h"
 #include "ace/Condition_Thread_Mutex.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -994,20 +993,6 @@ namespace OpenDDS {
 
         if (DCPS::compatibleQOS(&writerStatus, &readerStatus, *wTls, *rTls,
                                 dwQos, drQos, pubQos, subQos)) {
-          if (!writer_local) {
-            RepoId writer_participant = writer;
-            writer_participant.entityId = ENTITYID_PARTICIPANT;
-            if (defer_writer(writer, writer_participant)) {
-              return;
-            }
-          }
-          if (!reader_local) {
-            RepoId reader_participant = reader;
-            reader_participant.entityId = ENTITYID_PARTICIPANT;
-            if (defer_reader(reader, reader_participant)) {
-              return;
-            }
-          }
 
           bool call_writer = false, call_reader = false;
           if (writer_local) {
@@ -1230,12 +1215,6 @@ namespace OpenDDS {
       add_security_info(const DCPS::TransportLocatorSeq& locators,
                         const RepoId& /*writer*/, const RepoId& /*reader*/)
       { return locators; }
-
-      virtual bool defer_writer(const RepoId& writer,
-                                const RepoId& writer_participant) = 0;
-
-      virtual bool defer_reader(const RepoId& writer,
-                                const RepoId& writer_participant) = 0;
 
       void remove_from_bit(const DiscoveredPublication& pub)
       {
@@ -1694,10 +1673,6 @@ namespace OpenDDS {
 
       explicit PeerDiscovery(const RepoKey& key) : Discovery(key) { }
 
-      ~PeerDiscovery() {
-        reactor_runner_.end();
-      }
-
       virtual DDS::Subscriber_ptr init_bit(DomainParticipantImpl* participant) {
         using namespace DCPS;
         if (create_bit_topics(participant) != DDS::RETCODE_OK) {
@@ -1709,6 +1684,11 @@ namespace OpenDDS {
                                          DDS::SubscriberListener::_nil(),
                                          DEFAULT_STATUS_MASK);
         SubscriberImpl* sub = dynamic_cast<SubscriberImpl*>(bit_subscriber.in());
+        if (sub == 0) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) PeerDiscovery::init_bit")
+                     ACE_TEXT(" - Could not cast Subscriber to SubscriberImpl\n")));
+          return 0;
+        }
 
         DDS::DataReaderQos dr_qos;
         sub->get_default_datareader_qos(dr_qos);
@@ -1953,17 +1933,6 @@ namespace OpenDDS {
         get_part(domainId, participantId)->association_complete(localId, remoteId);
       }
 
-      ACE_Reactor*
-      reactor()
-      {
-        ACE_GUARD_RETURN(ACE_Thread_Mutex, g, reactor_runner_.mtx_, 0);
-        if (!reactor_runner_.reactor_) {
-          reactor_runner_.reactor_.reset(new ACE_Reactor(new ACE_Select_Reactor, true));
-          reactor_runner_.activate();
-        }
-        return reactor_runner_.reactor_.get();
-      }
-
     protected:
 
       typedef DCPS::RcHandle<Participant> ParticipantHandle;
@@ -1993,16 +1962,31 @@ namespace OpenDDS {
         using namespace DCPS;
         TopicDescriptionImpl* bit_topic_i =
           dynamic_cast<TopicDescriptionImpl*>(topic);
+        if (bit_topic_i == 0) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) PeerDiscovery::create_bit_dr")
+                     ACE_TEXT(" - Could not cast TopicDescription to TopicDescriptionImpl\n")));
+          return;
+        }
 
         DDS::DomainParticipant_var participant = sub->get_participant();
         DomainParticipantImpl* participant_i =
           dynamic_cast<DomainParticipantImpl*>(participant.in());
+        if (participant_i == 0) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) PeerDiscovery::create_bit_dr")
+                     ACE_TEXT(" - Could not cast DomainParticipant to DomainParticipantImpl\n")));
+          return;
+        }
 
         TypeSupport_var type_support =
           Registered_Data_Types->lookup(participant, type);
 
         DDS::DataReader_var dr = type_support->create_datareader();
         OpenDDS::DCPS::DataReaderImpl* dri = dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(dr.in());
+        if (dri == 0) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) PeerDiscovery::create_bit_dr")
+                     ACE_TEXT(" - Could not cast DataReader to DataReaderImpl\n")));
+          return;
+        }
 
         dri->init(bit_topic_i, qos, 0 /*listener*/, 0 /*mask*/, participant_i, sub);
         dri->disable_transport();
@@ -2010,30 +1994,6 @@ namespace OpenDDS {
       }
 
       mutable ACE_Thread_Mutex lock_;
-
-      // Before participants_ so destroyed after.
-      struct ReactorRunner : ACE_Task_Base {
-      ReactorRunner()  {}
-
-        int svc()
-        {
-          reactor_->owner(ACE_Thread_Manager::instance()->thr_self());
-          reactor_->run_reactor_event_loop();
-          return 0;
-        }
-
-        void end()
-        {
-          ACE_GUARD(ACE_Thread_Mutex, g, mtx_);
-          if (reactor_) {
-            reactor_->end_reactor_event_loop();
-            wait();
-          }
-        }
-
-        unique_ptr<ACE_Reactor> reactor_;
-        ACE_Thread_Mutex mtx_;
-      } reactor_runner_;
 
       DomainParticipantMap participants_;
     };

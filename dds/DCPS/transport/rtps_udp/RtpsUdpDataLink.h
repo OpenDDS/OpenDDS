@@ -21,8 +21,8 @@
 #include "ace/SOCK_Dgram_Mcast.h"
 
 #include "dds/DCPS/transport/framework/DataLink.h"
-#include "dds/DCPS/transport/framework/TransportReactorTask.h"
-#include "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
+#include "dds/DCPS/ReactorTask.h"
+#include "dds/DCPS/ReactorTask_rch.h"
 #include "dds/DCPS/transport/framework/TransportSendBuffer.h"
 
 #include "dds/DCPS/DataSampleElement.h"
@@ -63,7 +63,7 @@ public:
   RtpsUdpDataLink(RtpsUdpTransport& transport,
                   const GuidPrefix_t& local_prefix,
                   const RtpsUdpInst& config,
-                  const TransportReactorTask_rch& reactor_task);
+                  const ReactorTask_rch& reactor_task);
 
   bool add_delayed_notification(TransportQueueElement* element);
 
@@ -80,6 +80,8 @@ public:
   ACE_SOCK_Dgram_Mcast& multicast_socket();
 
   bool open(const ACE_SOCK_Dgram& unicast_socket);
+
+  virtual bool add_on_start_callback(const TransportClient_wrch& client, const RepoId& remote);
 
   void received(const RTPS::DataSubmessage& data,
                 const GuidPrefix_t& src_prefix);
@@ -175,7 +177,7 @@ private:
                       const TransportQueueElement& tqe,
                       const DestToEntityMap& dtem);
 
-  TransportReactorTask_rch reactor_task_;
+  ReactorTask_rch reactor_task_;
 
   RtpsUdpSendStrategy* send_strategy();
   RtpsUdpReceiveStrategy* receive_strategy();
@@ -244,9 +246,8 @@ private:
     //Only accessed with RtpsUdpDataLink lock held
     SnToTqeMap to_deliver_;
     bool durable_;
-    bool ready_to_hb_;
 
-    RtpsWriter() : durable_(false), ready_to_hb_(false) {}
+    RtpsWriter() : durable_(false) {}
     ~RtpsWriter();
     SequenceNumber heartbeat_high(const ReaderInfo&) const;
     void add_elem_awaiting_ack(TransportQueueElement* element);

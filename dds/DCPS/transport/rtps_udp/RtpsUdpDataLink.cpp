@@ -81,7 +81,7 @@ namespace DCPS {
 RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
                                  const GuidPrefix_t& local_prefix,
                                  const RtpsUdpInst& config,
-                                 const TransportReactorTask_rch& reactor_task)
+                                 const ReactorTask_rch& reactor_task)
   : DataLink(transport, // 3 data link "attributes", below, are unused
              0,         // priority
              false,     // is_loopback
@@ -241,7 +241,7 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
   send_strategy()->send_buffer(&multi_buff_);
 
   if (start(send_strategy_,
-            receive_strategy_) != 0) {
+            receive_strategy_, false) != 0) {
     stop_i();
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
@@ -249,6 +249,15 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
                      false);
   }
 
+  return true;
+}
+
+bool
+RtpsUdpDataLink::add_on_start_callback(const TransportClient_wrch& client, const RepoId& remote)
+{
+  GuardType guard(strategy_lock_);
+
+  on_start_callbacks_.push_back(std::make_pair(client, remote));
   return true;
 }
 
@@ -279,14 +288,17 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
   bool enable_heartbeat = false;
 
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  if (conv.isWriter() && remote_reliable) {
-    // Insert count if not already there.
-    heartbeat_counts_.insert(HeartBeatCountMapType::value_type(local_id, 0));
-    RtpsWriter& w = writers_[local_id];
-    w.remote_readers_[remote_id].durable_ = remote_durable;
-    w.durable_ = local_durable;
-    w.ready_to_hb_ = !remote_durable;
-    enable_heartbeat = w.ready_to_hb_;
+  if (conv.isWriter()) {
+    if (remote_reliable) {
+      // Insert count if not already there.
+      heartbeat_counts_.insert(HeartBeatCountMapType::value_type(local_id, 0));
+      RtpsWriter& w = writers_[local_id];
+      w.remote_readers_[remote_id].durable_ = remote_durable;
+      w.durable_ = local_durable;
+      enable_heartbeat = true;
+    } else {
+      invoke_on_start_callbacks(local_id, remote_id, true);
+    }
   } else if (conv.isReader()) {
     RtpsReaderMap::iterator rr = readers_.find(local_id);
     if (rr == readers_.end()) {
@@ -838,7 +850,6 @@ RtpsUdpDataLink::end_historic_samples(RtpsWriterMap::iterator writer,
         }
       }
     }
-    writer->second.ready_to_hb_ = true;
     heartbeat_->schedule_enable(true);
   }
 }
@@ -1178,32 +1189,33 @@ RtpsUdpDataLink::process_heartbeat_i(const RTPS::HeartBeatSubmessage& heartbeat,
   last.setValue(heartbeat.lastSN.high, heartbeat.lastSN.low);
   static const SequenceNumber starting, zero = SequenceNumber::ZERO();
 
-  DisjointSequence& recvd = info.recvd_;
-  if (!rr.second.durable_ && info.initial_hb_) {
-    if (last.getValue() < starting.getValue()) {
-      // this is an invalid heartbeat -- last must be positive
-      return false;
+  // Only 'apply' heartbeat ranges to received set if the heartbeat is valid
+  // But for the sake of speedy discovery / association we'll still respond to invalid non-final heartbeats
+  if (last.getValue() >= starting.getValue()) {
+
+    DisjointSequence& recvd = info.recvd_;
+    if (!rr.second.durable_ && info.initial_hb_) {
+      // For the non-durable reader, the first received HB or DATA establishes
+      // a baseline of the lowest sequence number we'd ever need to NACK.
+      if (recvd.empty() || recvd.low() >= last) {
+        recvd.insert(SequenceRange(zero, last));
+      } else {
+        recvd.insert(SequenceRange(zero, recvd.low()));
+      }
+    } else if (!recvd.empty()) {
+      // All sequence numbers below 'first' should not be NACKed.
+      // The value of 'first' may not decrease with subsequent HBs.
+      recvd.insert(SequenceRange(zero,
+                                 (first > starting) ? first.previous() : zero));
     }
-    // For the non-durable reader, the first received HB or DATA establishes
-    // a baseline of the lowest sequence number we'd ever need to NACK.
-    if (recvd.empty() || recvd.low() >= last) {
-      recvd.insert(SequenceRange(zero, last));
-    } else {
-      recvd.insert(SequenceRange(zero, recvd.low()));
-    }
-  } else if (!recvd.empty()) {
-    // All sequence numbers below 'first' should not be NACKed.
-    // The value of 'first' may not decrease with subsequent HBs.
-    recvd.insert(SequenceRange(zero,
-                               (first > starting) ? first.previous() : zero));
+
+    deliver_held_data(rr.first, info, rr.second.durable_);
+
+    //FUTURE: to support wait_for_acks(), notify DCPS layer of the sequence
+    //        numbers we no longer expect to receive due to HEARTBEAT
+
+    info.initial_hb_ = false;
   }
-
-  deliver_held_data(rr.first, info, rr.second.durable_);
-
-  //FUTURE: to support wait_for_acks(), notify DCPS layer of the sequence
-  //        numbers we no longer expect to receive due to HEARTBEAT
-
-  info.initial_hb_ = false;
 
   const bool final = heartbeat.smHeader.flags & RTPS::FLAG_F,
     liveliness = heartbeat.smHeader.flags & RTPS::FLAG_L;
@@ -1639,9 +1651,6 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
   const ACE_Time_Value now = ACE_OS::gettimeofday();
   OPENDDS_VECTOR(DiscoveryListener*) callbacks;
 
-  // For first_acknowledged_by_reader
-  SequenceNumber received_sn_base;
-  received_sn_base.setValue(acknack.readerSNState.bitmapBase.high, acknack.readerSNState.bitmapBase.low);
   bool first_ack = false;
 
   {
@@ -1700,7 +1709,6 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
 
   if (!ri->second.handshake_done_) {
     ri->second.handshake_done_ = true;
-    invoke_on_start_callbacks(true);
     first_ack = true;
   }
 
@@ -1840,7 +1848,7 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
     it->second->data_delivered();
   }
   if (first_ack) {
-    first_acknowledged_by_reader(local, remote, received_sn_base);
+    invoke_on_start_callbacks(local, remote, true);
   }
 }
 
@@ -2253,8 +2261,17 @@ RtpsUdpDataLink::marshal_gaps(const RepoId& writer, const RepoId& reader,
     static_cast<CORBA::UShort>(gap_size + padding) - SMHDR_SZ;
 
   // For durable writers, change a non-directed Gap into multiple directed gaps.
+#ifdef OPENDDS_SECURITY
+    const EntityId_t& pvs_writer =
+      RTPS::ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER;
+    const bool is_pvs_writer =
+      0 == std::memcmp(&pvs_writer, &writer.entityId, sizeof pvs_writer);
+#else
+    const bool is_pvs_writer = false;
+#endif
+
   OPENDDS_VECTOR(RepoId) readers;
-  if (durable && reader.entityId == ENTITYID_UNKNOWN) {
+  if (is_pvs_writer || (durable && reader.entityId == ENTITYID_UNKNOWN)) {
     if (Transport_debug_level > 5) {
       const GuidConverter local_conv(writer);
       ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::marshal_gaps local %C "
@@ -2427,10 +2444,6 @@ RtpsUdpDataLink::send_heartbeats()
       }
 
       if (final && !has_data && !has_durable_data) {
-        continue;
-      }
-
-      if (!rw->second.ready_to_hb_) {
         continue;
       }
 

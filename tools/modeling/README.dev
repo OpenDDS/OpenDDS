@@ -1,21 +1,19 @@
 ************************************************************************
 One-time developer setup
 
-1. Download and install Oracle JDK 6 from http://www.oracle.com/technetwork/java/javasebusiness/downloads/java-archive-downloads-javase6-419409.html#jdk-6u45-oth-JPR
+1. Download and install the Java Development Kit (JDK)
 
-2. Download and install Eclipse 4.4 from
-   http://archive.eclipse.org/eclipse/downloads/drops4/R-4.4.1-201409250400
-   (see the "Eclipse SDK" link for your platform).
+2. Download and install "Eclipse SDK" from eclipse.org.
 
-3. Configure Eclipse to use JDK 6 as the default JDK: In
-   Window->Preferences->Java->Installed JREs choose Add, then Standard
-   VM, and add JDK 6.  Make sure to check the check box to make it the
-   default JRE.  In Window->Preferences->Java->Compiler, set the
-   Compiler compliance level to 1.6.
+3. Placeholder step for configuring Eclipse to use a certain JDK, no longer
+   seems to be necessary.
 
-4. Install new features in Eclipse (Help -> Install New Software, work with
-   All Available Sites, under Modeling):
+4. Install new features in Eclipse
 
+   a. Add a new Available Software Site for "GMF Tooling"
+      http://download.eclipse.org/modeling/gmp/gmf-tooling/updates/releases
+
+   b. Install these features from "All Available Sites"
      EMF - Eclipse Modeling Framework SDK
      Graphical Modeling Framework (GMF) Tooling SDK
 
@@ -27,7 +25,9 @@ One-time developer setup
    in the editor, perform "4. Export the plug-in in a format suitable
    for deployment using the Export Wizard" and direct the generated
    plugin jar file to be placed in the $ECLIPSE_HOME/dropins
-   directory.  After restarting Eclipse, you should be the following
+   directory.  It may be necessary to move the .jar file so that it's directly
+   in dropins (not dropins/plugins/).
+   After restarting Eclipse, you should see the following
    in the installed plugins list:
 
      Ant Support for GMF

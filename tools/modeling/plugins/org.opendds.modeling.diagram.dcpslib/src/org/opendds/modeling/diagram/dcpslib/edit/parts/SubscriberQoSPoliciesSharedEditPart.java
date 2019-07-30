@@ -32,8 +32,7 @@ import org.opendds.modeling.diagram.dcpslib.providers.OpenDDSDcpsLibElementTypes
 /**
  * @generated
  */
-public class SubscriberQoSPoliciesSharedEditPart extends
-		ListCompartmentEditPart {
+public class SubscriberQoSPoliciesSharedEditPart extends ListCompartmentEditPart {
 
 	/**
 	 * @generated
@@ -65,8 +64,7 @@ public class SubscriberQoSPoliciesSharedEditPart extends
 	 * @generated
 	 */
 	public IFigure createFigure() {
-		ResizableCompartmentFigure result = (ResizableCompartmentFigure) super
-				.createFigure();
+		ResizableCompartmentFigure result = (ResizableCompartmentFigure) super.createFigure();
 		result.setTitleVisibility(false);
 		return result;
 	}
@@ -76,17 +74,12 @@ public class SubscriberQoSPoliciesSharedEditPart extends
 	 */
 	protected void createDefaultEditPolicies() {
 		super.createDefaultEditPolicies();
-		installEditPolicy(EditPolicy.PRIMARY_DRAG_ROLE,
-				new ResizableCompartmentEditPolicy());
-		installEditPolicy(EditPolicyRoles.SEMANTIC_ROLE,
-				new SubscriberQoSPoliciesSharedItemSemanticEditPolicy());
+		installEditPolicy(EditPolicy.PRIMARY_DRAG_ROLE, new ResizableCompartmentEditPolicy());
+		installEditPolicy(EditPolicyRoles.SEMANTIC_ROLE, new SubscriberQoSPoliciesSharedItemSemanticEditPolicy());
 		installEditPolicy(EditPolicyRoles.CREATION_ROLE,
-				new CreationEditPolicyWithCustomReparent(
-						OpenDDSDcpsLibVisualIDRegistry.TYPED_INSTANCE));
-		installEditPolicy(EditPolicyRoles.DRAG_DROP_ROLE,
-				new DragDropEditPolicy());
-		installEditPolicy(EditPolicyRoles.CANONICAL_ROLE,
-				new SubscriberQoSPoliciesSharedCanonicalEditPolicy());
+				new CreationEditPolicyWithCustomReparent(OpenDDSDcpsLibVisualIDRegistry.TYPED_INSTANCE));
+		installEditPolicy(EditPolicyRoles.DRAG_DROP_ROLE, new DragDropEditPolicy());
+		installEditPolicy(EditPolicyRoles.CANONICAL_ROLE, new SubscriberQoSPoliciesSharedCanonicalEditPolicy());
 	}
 
 	/**
@@ -102,11 +95,9 @@ public class SubscriberQoSPoliciesSharedEditPart extends
 	 */
 	public EditPart getTargetEditPart(Request request) {
 		if (request instanceof CreateViewAndElementRequest) {
-			CreateElementRequestAdapter adapter = ((CreateViewAndElementRequest) request)
-					.getViewAndElementDescriptor()
+			CreateElementRequestAdapter adapter = ((CreateViewAndElementRequest) request).getViewAndElementDescriptor()
 					.getCreateElementRequestAdapter();
-			IElementType type = (IElementType) adapter
-					.getAdapter(IElementType.class);
+			IElementType type = (IElementType) adapter.getAdapter(IElementType.class);
 			if (type == OpenDDSDcpsLibElementTypes.EfQosPolicy_3017) {
 				return this;
 			}
@@ -133,8 +124,7 @@ public class SubscriberQoSPoliciesSharedEditPart extends
 	 */
 	@Override
 	protected java.util.List getModelChildren() {
-		return CompartmentChildrenFinder.filterPoliciesOwnedByDcpsLib(super
-				.getModelChildren());
+		return CompartmentChildrenFinder.filterPoliciesOwnedByDcpsLib(super.getModelChildren());
 	}
 
 }

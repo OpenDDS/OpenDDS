@@ -306,6 +306,7 @@ private:
     virtual ~Writer();
 
     bool assoc(const DCPS::AssociationData& subscription);
+    void transport_assoc_done(int flags, const DCPS::RepoId& remote);
 
     // Implementing TransportSendListener
     void data_delivered(const DCPS::DataSampleElement*);
@@ -392,51 +393,7 @@ private:
   Writer participant_stateless_message_writer_;
   Writer dcps_participant_secure_writer_;
 
-  /**
-   * Special Case for the Participant Volatile Message Secure Writer, which
-   * performs key exchange. This sends the keys after the first ACKNACK from a
-   * Reader to prevent a loss of keys in the transition between authentication
-   * and key exchange. See docs/design/security.md section titled "Slow
-   * Follower Key Exchange Issue" for details.
-   */
-  class RepeatOnceWriter : public Writer {
-  public:
-    RepeatOnceWriter(const DCPS::RepoId& pub_id, Sedp& sedp);
-
-    /**
-     * If a remote participant's volatile reader acks us for the fist time,
-     * resend all keys (User and Builtin) for a second time.
-     *
-     * Removes the participant's keys afterwards.
-     */
-    void first_acknowledged_by_reader(
-      const DCPS::RepoId& rdr, const DCPS::SequenceNumber& sn_base);
-
-    /// Erase any keys pending repeat to this participant
-    void erase(const DCPS::RepoId& part);
-
-    struct RemoteWriter {
-      DCPS::RepoId local_reader, remote_writer;
-      DDS::Security::DatareaderCryptoTokenSeq reader_tokens;
-    };
-    typedef OPENDDS_VECTOR(RemoteWriter) RemoteWriterVector;
-    typedef OPENDDS_MAP_CMP(
-      DCPS::RepoId, RemoteWriterVector, DCPS::GUID_tKeyLessThan) RemoteWriterVectors;
-    RemoteWriterVectors remote_writers_;
-
-    struct RemoteReader {
-      DCPS::RepoId local_writer, remote_reader;
-      DDS::Security::DatawriterCryptoTokenSeq writer_tokens;
-    };
-    typedef OPENDDS_VECTOR(RemoteReader) RemoteReaderVector;
-    typedef OPENDDS_MAP_CMP(
-      DCPS::RepoId, RemoteReaderVector, DCPS::GUID_tKeyLessThan) RemoteReaderVectors;
-    RemoteReaderVectors remote_readers_;
-
-    /// Lock for remote_readers_ and remote_writers_
-    ACE_Thread_Mutex lock_;
-
-  } participant_volatile_message_secure_writer_;
+  Writer participant_volatile_message_secure_writer_;
 #endif
 
   class Reader
@@ -664,7 +621,7 @@ private:
 
   // Topic:
 
-  DCPS::RepoIdSet defer_match_endpoints_, associated_participants_;
+  DCPS::RepoIdSet associated_participants_;
 
   virtual bool shutting_down() const;
 
@@ -681,12 +638,6 @@ private:
   add_security_info(const DCPS::TransportLocatorSeq& locators,
                     const DCPS::RepoId& writer, const DCPS::RepoId& reader);
 #endif
-
-  virtual bool defer_writer(const DCPS::RepoId& writer,
-                            const DCPS::RepoId& writer_participant);
-
-  virtual bool defer_reader(const DCPS::RepoId& reader,
-                            const DCPS::RepoId& reader_participant);
 
   static DCPS::RepoId make_id(const DCPS::RepoId& participant_id,
                               const EntityId_t& entity);
@@ -788,6 +739,27 @@ protected:
   void handle_datawriter_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg);
 
   DDS::DomainId_t get_domain_id() const;
+
+  DCPS::RepoIdSet associated_volatile_readers_;
+
+  struct RemoteWriter {
+    DCPS::RepoId local_reader, remote_writer;
+    DDS::Security::DatareaderCryptoTokenSeq reader_tokens;
+  };
+  typedef OPENDDS_VECTOR(RemoteWriter) RemoteWriterVector;
+  typedef OPENDDS_MAP_CMP(
+    DCPS::RepoId, RemoteWriterVector, DCPS::GUID_tKeyLessThan) RemoteWriterVectors;
+  RemoteWriterVectors datareader_crypto_tokens_;
+
+  struct RemoteReader {
+    DCPS::RepoId local_writer, remote_reader;
+    DDS::Security::DatawriterCryptoTokenSeq writer_tokens;
+  };
+  typedef OPENDDS_VECTOR(RemoteReader) RemoteReaderVector;
+  typedef OPENDDS_MAP_CMP(
+    DCPS::RepoId, RemoteReaderVector, DCPS::GUID_tKeyLessThan) RemoteReaderVectors;
+  RemoteReaderVectors datawriter_crypto_tokens_;
+
 #endif
 
 #ifdef OPENDDS_SECURITY

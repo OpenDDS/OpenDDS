@@ -1,0 +1,2 @@
+feature (!dds_suppress_anys) : anytypecode {
+}

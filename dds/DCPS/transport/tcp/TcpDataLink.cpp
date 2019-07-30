@@ -112,7 +112,7 @@ OpenDDS::DCPS::TcpDataLink::connect(
 
   // And lastly, inform our base class (DataLink) that we are now "connected",
   // and it should start the strategy objects.
-  if (this->start(send_strategy, receive_strategy) != 0) {
+  if (this->start(send_strategy, receive_strategy, !connection->is_connector()) != 0) {
     // Our base (DataLink) class failed to start the strategy objects.
     // We need to "undo" some things here before we return -1 to indicate
     // that an error has taken place.

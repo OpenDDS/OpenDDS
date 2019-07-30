@@ -67,8 +67,7 @@ import org.opendds.modeling.diagram.dcpslib.navigator.OpenDDSDcpsLibNavigatorIte
 /**
  * @generated
  */
-public class OpenDDSDcpsLibDiagramEditor extends DiagramDocumentEditor
-		implements IGotoMarker {
+public class OpenDDSDcpsLibDiagramEditor extends DiagramDocumentEditor implements IGotoMarker {
 
 	/**
 	 * @generated
@@ -141,10 +140,8 @@ public class OpenDDSDcpsLibDiagramEditor extends DiagramDocumentEditor
 	 * @generated
 	 */
 	protected IDocumentProvider getDocumentProvider(IEditorInput input) {
-		if (input instanceof IFileEditorInput
-				|| input instanceof URIEditorInput) {
-			return OpenDDSDcpsLibDiagramEditorPlugin.getInstance()
-					.getDocumentProvider();
+		if (input instanceof IFileEditorInput || input instanceof URIEditorInput) {
+			return OpenDDSDcpsLibDiagramEditorPlugin.getInstance().getDocumentProvider();
 		}
 		return super.getDocumentProvider(input);
 	}
@@ -153,8 +150,7 @@ public class OpenDDSDcpsLibDiagramEditor extends DiagramDocumentEditor
 	 * @generated
 	 */
 	public TransactionalEditingDomain getEditingDomain() {
-		IDocument document = getEditorInput() != null ? getDocumentProvider()
-				.getDocument(getEditorInput()) : null;
+		IDocument document = getEditorInput() != null ? getDocumentProvider().getDocument(getEditorInput()) : null;
 		if (document instanceof IDiagramDocument) {
 			return ((IDiagramDocument) document).getEditingDomain();
 		}
@@ -165,10 +161,8 @@ public class OpenDDSDcpsLibDiagramEditor extends DiagramDocumentEditor
 	 * @generated
 	 */
 	protected void setDocumentProvider(IEditorInput input) {
-		if (input instanceof IFileEditorInput
-				|| input instanceof URIEditorInput) {
-			setDocumentProvider(OpenDDSDcpsLibDiagramEditorPlugin.getInstance()
-					.getDocumentProvider());
+		if (input instanceof IFileEditorInput || input instanceof URIEditorInput) {
+			setDocumentProvider(OpenDDSDcpsLibDiagramEditorPlugin.getInstance().getDocumentProvider());
 		} else {
 			super.setDocumentProvider(input);
 		}
@@ -202,8 +196,7 @@ public class OpenDDSDcpsLibDiagramEditor extends DiagramDocumentEditor
 		Shell shell = getSite().getShell();
 		IEditorInput input = getEditorInput();
 		SaveAsDialog dialog = new SaveAsDialog(shell);
-		IFile original = input instanceof IFileEditorInput ? ((IFileEditorInput) input)
-				.getFile() : null;
+		IFile original = input instanceof IFileEditorInput ? ((IFileEditorInput) input).getFile() : null;
 		if (original != null) {
 			dialog.setOriginalFile(original);
 		}
@@ -214,9 +207,7 @@ public class OpenDDSDcpsLibDiagramEditor extends DiagramDocumentEditor
 			return;
 		}
 		if (provider.isDeleted(input) && original != null) {
-			String message = NLS.bind(
-					Messages.OpenDDSDcpsLibDiagramEditor_SavingDeletedFile,
-					original.getName());
+			String message = NLS.bind(Messages.OpenDDSDcpsLibDiagramEditor_SavingDeletedFile, original.getName());
 			dialog.setErrorMessage(null);
 			dialog.setMessage(message, IMessageProvider.WARNING);
 		}
@@ -237,35 +228,27 @@ public class OpenDDSDcpsLibDiagramEditor extends DiagramDocumentEditor
 		IFile file = workspaceRoot.getFile(filePath);
 		final IEditorInput newInput = new FileEditorInput(file);
 		// Check if the editor is already open
-		IEditorMatchingStrategy matchingStrategy = getEditorDescriptor()
-				.getEditorMatchingStrategy();
-		IEditorReference[] editorRefs = PlatformUI.getWorkbench()
-				.getActiveWorkbenchWindow().getActivePage()
+		IEditorMatchingStrategy matchingStrategy = getEditorDescriptor().getEditorMatchingStrategy();
+		IEditorReference[] editorRefs = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage()
 				.getEditorReferences();
 		for (int i = 0; i < editorRefs.length; i++) {
 			if (matchingStrategy.matches(editorRefs[i], newInput)) {
-				MessageDialog
-						.openWarning(
-								shell,
-								Messages.OpenDDSDcpsLibDiagramEditor_SaveAsErrorTitle,
-								Messages.OpenDDSDcpsLibDiagramEditor_SaveAsErrorMessage);
+				MessageDialog.openWarning(shell, Messages.OpenDDSDcpsLibDiagramEditor_SaveAsErrorTitle,
+						Messages.OpenDDSDcpsLibDiagramEditor_SaveAsErrorMessage);
 				return;
 			}
 		}
 		boolean success = false;
 		try {
 			provider.aboutToChange(newInput);
-			getDocumentProvider(newInput).saveDocument(progressMonitor,
-					newInput,
+			getDocumentProvider(newInput).saveDocument(progressMonitor, newInput,
 					getDocumentProvider().getDocument(getEditorInput()), true);
 			success = true;
 		} catch (CoreException x) {
 			IStatus status = x.getStatus();
 			if (status == null || status.getSeverity() != IStatus.CANCEL) {
-				ErrorDialog.openError(shell,
-						Messages.OpenDDSDcpsLibDiagramEditor_SaveErrorTitle,
-						Messages.OpenDDSDcpsLibDiagramEditor_SaveErrorMessage,
-						x.getStatus());
+				ErrorDialog.openError(shell, Messages.OpenDDSDcpsLibDiagramEditor_SaveErrorTitle,
+						Messages.OpenDDSDcpsLibDiagramEditor_SaveErrorMessage, x.getStatus());
 			}
 		} finally {
 			provider.changed(newInput);
@@ -299,8 +282,7 @@ public class OpenDDSDcpsLibDiagramEditor extends DiagramDocumentEditor
 		}
 		IFile file = WorkspaceSynchronizer.getFile(diagram.eResource());
 		if (file != null) {
-			OpenDDSDcpsLibNavigatorItem item = new OpenDDSDcpsLibNavigatorItem(
-					diagram, file, false);
+			OpenDDSDcpsLibNavigatorItem item = new OpenDDSDcpsLibNavigatorItem(diagram, file, false);
 			return new StructuredSelection(item);
 		}
 		return StructuredSelection.EMPTY;
@@ -311,16 +293,15 @@ public class OpenDDSDcpsLibDiagramEditor extends DiagramDocumentEditor
 	 */
 	protected void configureGraphicalViewer() {
 		super.configureGraphicalViewer();
-		DiagramEditorContextMenuProvider provider = new DiagramEditorContextMenuProvider(
-				this, getDiagramGraphicalViewer());
+		DiagramEditorContextMenuProvider provider = new DiagramEditorContextMenuProvider(this,
+				getDiagramGraphicalViewer());
 		getDiagramGraphicalViewer().setContextMenu(provider);
-		getSite().registerContextMenu(ActionIds.DIAGRAM_EDITOR_CONTEXT_MENU,
-				provider, getDiagramGraphicalViewer());
+		getSite().registerContextMenu(ActionIds.DIAGRAM_EDITOR_CONTEXT_MENU, provider, getDiagramGraphicalViewer());
 
 		// Custom code begin
 		org.eclipse.ui.IWorkbenchPage page = getSite().getPage();
-		org.eclipse.ui.IPartListener2 listener = new com.ociweb.gmf.part.SaveOnDeactivationListener(
-				this, ID, OpenDDSDcpsLibDiagramEditorPlugin.getInstance());
+		org.eclipse.ui.IPartListener2 listener = new com.ociweb.gmf.part.SaveOnDeactivationListener(this, ID,
+				OpenDDSDcpsLibDiagramEditorPlugin.getInstance());
 		page.addPartListener(listener);
 		// Custom code end
 	}
@@ -331,18 +312,15 @@ public class OpenDDSDcpsLibDiagramEditor extends DiagramDocumentEditor
 	protected void initializeGraphicalViewer() {
 		super.initializeGraphicalViewer();
 		getDiagramGraphicalViewer().addDropTargetListener(
-				new DropTargetListener(getDiagramGraphicalViewer(),
-						LocalSelectionTransfer.getTransfer()) {
+				new DropTargetListener(getDiagramGraphicalViewer(), LocalSelectionTransfer.getTransfer()) {
 
 					protected Object getJavaObject(TransferData data) {
-						return LocalSelectionTransfer.getTransfer()
-								.nativeToJava(data);
+						return LocalSelectionTransfer.getTransfer().nativeToJava(data);
 					}
 
 				});
 		getDiagramGraphicalViewer().addDropTargetListener(
-				new DropTargetListener(getDiagramGraphicalViewer(),
-						LocalTransfer.getInstance()) {
+				new DropTargetListener(getDiagramGraphicalViewer(), LocalTransfer.getInstance()) {
 
 					protected Object getJavaObject(TransferData data) {
 						return LocalTransfer.getInstance().nativeToJava(data);
@@ -407,13 +385,11 @@ public class OpenDDSDcpsLibDiagramEditor extends DiagramDocumentEditor
 				for (Iterator<?> it = selection.iterator(); it.hasNext();) {
 					Object nextSelectedObject = it.next();
 					if (nextSelectedObject instanceof OpenDDSDcpsLibNavigatorItem) {
-						View view = ((OpenDDSDcpsLibNavigatorItem) nextSelectedObject)
-								.getView();
+						View view = ((OpenDDSDcpsLibNavigatorItem) nextSelectedObject).getView();
 						nextSelectedObject = view.getElement();
 					} else if (nextSelectedObject instanceof IAdaptable) {
 						IAdaptable adaptable = (IAdaptable) nextSelectedObject;
-						nextSelectedObject = adaptable
-								.getAdapter(EObject.class);
+						nextSelectedObject = adaptable.getAdapter(EObject.class);
 					}
 
 					if (nextSelectedObject instanceof EObject) {
@@ -425,8 +401,7 @@ public class OpenDDSDcpsLibDiagramEditor extends DiagramDocumentEditor
 
 			ArrayList<EObject> result = new ArrayList<EObject>(uris.size());
 			for (URI nextURI : uris) {
-				EObject modelObject = getEditingDomain().getResourceSet()
-						.getEObject(nextURI, true);
+				EObject modelObject = getEditingDomain().getResourceSet().getEObject(nextURI, true);
 				result.add(modelObject);
 			}
 			return result;
