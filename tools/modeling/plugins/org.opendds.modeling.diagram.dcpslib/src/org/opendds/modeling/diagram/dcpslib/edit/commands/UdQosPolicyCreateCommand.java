@@ -31,8 +31,7 @@ public class UdQosPolicyCreateCommand extends EditElementCommand {
 	 * @generated
 	 */
 	protected EObject getElementToEdit() {
-		EObject container = ((CreateElementRequest) getRequest())
-				.getContainer();
+		EObject container = ((CreateElementRequest) getRequest()).getContainer();
 		if (container instanceof View) {
 			container = ((View) container).getElement();
 		}
@@ -50,16 +49,13 @@ public class UdQosPolicyCreateCommand extends EditElementCommand {
 	/**
 	 * @generated NOT
 	 */
-	protected CommandResult doExecuteWithResult(IProgressMonitor monitor,
-			IAdaptable info) throws ExecutionException {
+	protected CommandResult doExecuteWithResult(IProgressMonitor monitor, IAdaptable info) throws ExecutionException {
 
 		final String policyAssociationName = "user_data";
 
-		org.opendds.modeling.model.opendds.udQosPolicy newElement = OpenDDSFactory.eINSTANCE
-				.createudQosPolicy();
+		org.opendds.modeling.model.opendds.udQosPolicy newElement = OpenDDSFactory.eINSTANCE.createudQosPolicy();
 
-		QosPolicyCreationHelper.addPolicy(newElement, policyAssociationName,
-				getElementToEdit());
+		QosPolicyCreationHelper.addPolicy(newElement, policyAssociationName, getElementToEdit());
 
 		doConfigure(newElement, monitor, info);
 
@@ -71,19 +67,13 @@ public class UdQosPolicyCreateCommand extends EditElementCommand {
 	/**
 	 * @generated
 	 */
-	protected void doConfigure(
-			org.opendds.modeling.model.opendds.udQosPolicy newElement,
-			IProgressMonitor monitor, IAdaptable info)
-			throws ExecutionException {
-		IElementType elementType = ((CreateElementRequest) getRequest())
-				.getElementType();
-		ConfigureRequest configureRequest = new ConfigureRequest(
-				getEditingDomain(), newElement, elementType);
-		configureRequest.setClientContext(((CreateElementRequest) getRequest())
-				.getClientContext());
+	protected void doConfigure(org.opendds.modeling.model.opendds.udQosPolicy newElement, IProgressMonitor monitor,
+			IAdaptable info) throws ExecutionException {
+		IElementType elementType = ((CreateElementRequest) getRequest()).getElementType();
+		ConfigureRequest configureRequest = new ConfigureRequest(getEditingDomain(), newElement, elementType);
+		configureRequest.setClientContext(((CreateElementRequest) getRequest()).getClientContext());
 		configureRequest.addParameters(getRequest().getParameters());
-		ICommand configureCommand = elementType
-				.getEditCommand(configureRequest);
+		ICommand configureCommand = elementType.getEditCommand(configureRequest);
 		if (configureCommand != null && configureCommand.canExecute()) {
 			configureCommand.execute(monitor, info);
 		}
