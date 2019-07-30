@@ -15,8 +15,7 @@ module TopicAnnotationsTest {
    */
   @topic
   struct SimpleKeyStruct {
-    @key
-    long key;
+    @key long key;
     long value;
   };
 
@@ -26,10 +25,8 @@ module TopicAnnotationsTest {
    */
   @topic
   struct NestedKeyStruct {
-    @key
-    long non_nested_key;
-    @key
-    SimpleKeyStruct nested_key;
+    @key long non_nested_key;
+    @key SimpleKeyStruct nested_key;
   };
 
   /*
@@ -39,19 +36,17 @@ module TopicAnnotationsTest {
   typedef long LongArray[2];
   @topic
   struct LongArrayStruct {
-    @key
-    LongArray values;
+    @key LongArray values;
   };
 
   /*
-   * Case of an Array of Structs
+   * Case of an Array of Structures
    * 2 Keys
    */
   typedef SimpleKeyStruct SimpleKeyStructArray[2];
   @topic
   struct SimpleKeyArray {
-    @key
-    SimpleKeyStructArray values;
+    @key SimpleKeyStructArray values;
   };
 
   /*
@@ -88,9 +83,19 @@ module TopicAnnotationsTest {
    */
   @topic
   struct KeyedUnionStruct {
-    @key
-    KeyedUnion value;
-    @key
-    long another_key;
+    @key KeyedUnion value;
+    @key long another_key;
+  };
+
+  /*
+   * Struct with Multidimensional Array Keys
+   * 2*3 + 2*3*4 (30) Keys
+   */
+  typedef short A_2D_Array_t[2][3];
+  typedef short A_3D_Array_t[2][3][4];
+  @topic
+  struct MultidimensionalArrayStruct {
+    @key A_2D_Array_t array1;
+    @key A_3D_Array_t array2;
   };
 };

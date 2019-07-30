@@ -5,6 +5,8 @@
 #include "dds/DCPS/TypeSupportImpl.h"
 #include "dds/DCPS/FilterEvaluator.h"
 
+using namespace TopicAnnotationsTest;
+
 template <typename T>
 OpenDDS::DCPS::DDSTraits<T>& get_traits()
 {
@@ -73,33 +75,20 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   bool failed = false;
 
   // Check Key Counts
-  failed |= assert_key_count<TopicAnnotationsTest::UnkeyedStruct>(0);
-  failed |= assert_key_count<TopicAnnotationsTest::SimpleKeyStruct>(1);
-  failed |= assert_key_count<TopicAnnotationsTest::NestedKeyStruct>(2);
-  failed |= assert_key_count<TopicAnnotationsTest::LongArrayStruct>(2);
-  failed |= assert_key_count<TopicAnnotationsTest::SimpleKeyArray>(2);
-  failed |= assert_key_count<TopicAnnotationsTest::UnkeyedUnion>(0);
-  failed |= assert_key_count<TopicAnnotationsTest::KeyedUnion>(1);
-  failed |= assert_key_count<TopicAnnotationsTest::KeyedUnionStruct>(2);
+  failed |= assert_key_count<UnkeyedStruct>(0);
+  failed |= assert_key_count<SimpleKeyStruct>(1);
+  failed |= assert_key_count<NestedKeyStruct>(2);
+  failed |= assert_key_count<LongArrayStruct>(2);
+  failed |= assert_key_count<SimpleKeyArray>(2);
+  failed |= assert_key_count<UnkeyedUnion>(0);
+  failed |= assert_key_count<KeyedUnion>(1);
+  failed |= assert_key_count<KeyedUnionStruct>(2);
+  failed |= assert_key_count<MultidimensionalArrayStruct>(2 * 3 + 2 * 3 * 4);
 
   // Check KeyOnly for Unions
-  {
-    typedef TopicAnnotationsTest::UnkeyedUnion Data;
-    Data data;
-    failed |= assert_key_only_size(data, 0);
-  }
-
-  {
-    typedef TopicAnnotationsTest::KeyedUnion Data;
-    Data data;
-    failed |= assert_key_only_size(data, 4);
-  }
-
-  {
-    typedef TopicAnnotationsTest::KeyedUnionStruct Data;
-    Data data;
-    failed |= assert_key_only_size(data, 8);
-  }
+  failed |= assert_key_only_size(UnkeyedUnion(), 0);
+  failed |= assert_key_only_size(KeyedUnion(), 4);
+  failed |= assert_key_only_size(KeyedUnionStruct(), 8);
 
   return failed;
 }

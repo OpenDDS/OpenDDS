@@ -12,7 +12,8 @@
 
 #include "topic_keys.h"
 
-TopicKeys::RootType TopicKeys::root_type(AST_Type* type)
+TopicKeys::RootType
+TopicKeys::root_type(AST_Type* type)
 {
   if (!type) {
     return InvalidType;
@@ -55,12 +56,14 @@ TopicKeys::Error& TopicKeys::Error::operator=(const TopicKeys::Error& error)
   return *this;
 }
 
-const char* TopicKeys::Error::what() const throw()
+const char*
+TopicKeys::Error::what() const throw()
 {
   return message_.c_str();
 }
 
-AST_Decl* TopicKeys::Error::node() {
+AST_Decl*
+TopicKeys::Error::node() {
   return node_;
 }
 
@@ -72,7 +75,8 @@ TopicKeys::Iterator::Iterator()
     root_(0),
     root_type_(InvalidType),
     level_(0),
-    recursive_(false)
+    recursive_(false),
+    element_count_(0)
 {
 }
 
@@ -82,7 +86,8 @@ TopicKeys::Iterator::Iterator(TopicKeys& parent)
     child_(0),
     current_value_(0),
     level_(0),
-    recursive_(parent.recursive())
+    recursive_(parent.recursive()),
+    element_count_(0)
 {
   root_ = parent.root();
   root_type_ = parent.root_type();
@@ -95,7 +100,8 @@ TopicKeys::Iterator::Iterator(AST_Type* root, Iterator* parent)
     child_(0),
     current_value_(0),
     level_(parent->level() + 1),
-    recursive_(parent->recursive_)
+    recursive_(parent->recursive_),
+    element_count_(0)
 {
   root_type_ = TopicKeys::root_type(root);
   root_ = root;
@@ -108,7 +114,8 @@ TopicKeys::Iterator::Iterator(AST_Field* root, Iterator* parent)
     child_(0),
     current_value_(0),
     level_(parent->level() + 1),
-    recursive_(parent->recursive_)
+    recursive_(parent->recursive_),
+    element_count_(0)
 {
   AST_Type* type = root->field_type()->unaliased_type();
   root_type_ = TopicKeys::root_type(type);
@@ -127,7 +134,8 @@ TopicKeys::Iterator::Iterator(const Iterator& other)
     root_(0),
     root_type_(InvalidType),
     level_(0),
-    recursive_(false)
+    recursive_(false),
+    element_count_(0)
 {
   *this = other;
 }
@@ -137,7 +145,8 @@ TopicKeys::Iterator::~Iterator()
   cleanup();
 }
 
-TopicKeys::Iterator& TopicKeys::Iterator::operator=(const TopicKeys::Iterator& other)
+TopicKeys::Iterator&
+TopicKeys::Iterator::operator=(const TopicKeys::Iterator& other)
 {
   cleanup();
   parent_ = other.parent_;
@@ -147,11 +156,13 @@ TopicKeys::Iterator& TopicKeys::Iterator::operator=(const TopicKeys::Iterator& o
   root_type_ = other.root_type_;
   level_ = other.level_;
   recursive_ = other.recursive_;
+  dimensions_ = other.dimensions_;
   child_ = other.child_ ? new Iterator(*other.child_) : 0;
   return *this;
 }
 
-TopicKeys::Iterator& TopicKeys::Iterator::operator++()
+TopicKeys::Iterator&
+TopicKeys::Iterator::operator++()
 {
   // Nop if we are a invalid iterator of any type
   if (!root_ || root_type_ == InvalidType) {
@@ -162,7 +173,7 @@ TopicKeys::Iterator& TopicKeys::Iterator::operator++()
   if (child_) {
     Iterator& child = *child_;
     ++child;
-    if (child == Iterator()) {
+    if (child == end_value()) {
       delete child_;
       child_ = 0;
       pos_++;
@@ -184,7 +195,7 @@ TopicKeys::Iterator& TopicKeys::Iterator::operator++()
         if (be_global->is_key(field)) {
           child_ = new Iterator(field, this);
           Iterator& child = *child_;
-          if (child == Iterator()) {
+          if (child == end_value()) {
             delete child_;
             child_ = 0;
             throw Error(field, "field is marked as key, but does not contain any keys.");
@@ -203,14 +214,18 @@ TopicKeys::Iterator& TopicKeys::Iterator::operator++()
   // If we are an array, use the base type and repeat for every element
   } else if (root_type_ == ArrayType) {
     AST_Array* array_node = dynamic_cast<AST_Array*>(root_);
-    ACE_CDR::ULong array_dimension_count = array_node->n_dims();
-    if (array_dimension_count > 1) {
-      throw Error(root_, "using multidimensional arrays as keys is unsupported.");
+    if (element_count_ == 0) {
+      element_count_ = 1;
+      ACE_CDR::ULong array_dimension_count = array_node->n_dims();
+      for (unsigned i = 0; i < array_dimension_count; i++) {
+        ACE_CDR::ULong dimension = array_node->dims()[i]->ev()->u.ulval;
+        dimensions_.push_back(dimension);
+        element_count_ *= dimension;
+      }
     }
-    unsigned element_count = array_node->dims()[0]->ev()->u.ulval;
     AST_Type* type_node = array_node->base_type();
     AST_Type* unaliased_type_node = type_node->unaliased_type();
-    for (; pos_ < element_count; ++pos_) {
+    for (; pos_ < element_count_; ++pos_) {
       child_ = new Iterator(unaliased_type_node, this);
       Iterator& child = *child_;
       if (child == Iterator()) {
@@ -218,10 +233,8 @@ TopicKeys::Iterator& TopicKeys::Iterator::operator++()
         child_ = 0;
         throw Error(array_node, "array type is marked as key, but its base type "
           "does not contain any keys.");
-      } else {
-        current_value_ = *child;
-        return *this;
       }
+      current_value_ = *child;
       return *this;
     }
 
@@ -249,24 +262,27 @@ TopicKeys::Iterator& TopicKeys::Iterator::operator++()
   }
 
   // Nothing left to do, set this to null
-  *this = Iterator();
+  *this = end_value();
 
   return *this;
 }
 
-TopicKeys::Iterator TopicKeys::Iterator::operator++(int)
+TopicKeys::Iterator
+TopicKeys::Iterator::operator++(int)
 {
   Iterator prev(*this);
   ++(*this);
   return prev;
 }
 
-AST_Decl* TopicKeys::Iterator::operator*() const
+AST_Decl*
+TopicKeys::Iterator::operator*() const
 {
   return current_value_;
 }
 
-bool TopicKeys::Iterator::operator==(const TopicKeys::Iterator& other) const
+bool
+TopicKeys::Iterator::operator==(const TopicKeys::Iterator& other) const
 {
   return
     parent_ == other.parent_ &&
@@ -276,26 +292,30 @@ bool TopicKeys::Iterator::operator==(const TopicKeys::Iterator& other) const
     current_value_ == other.current_value_ &&
     level_ == other.level_ &&
     recursive_ == other.recursive_ &&
+    dimensions_ == other.dimensions_ &&
     (
       (child_ && other.child_) ? *child_ == *other.child_ : child_ == other.child_
     );
 }
 
-bool TopicKeys::Iterator::operator!=(const TopicKeys::Iterator& other) const
+bool
+TopicKeys::Iterator::operator!=(const TopicKeys::Iterator& other) const
 {
   return !(*this == other);
 }
 
-std::string TopicKeys::Iterator::path()
+std::string
+TopicKeys::Iterator::path()
 {
   std::stringstream ss;
   path_i(ss);
   return ss.str();
 }
 
-void TopicKeys::Iterator::path_i(std::stringstream& ss)
+void
+TopicKeys::Iterator::path_i(std::stringstream& ss)
 {
-  if (root_type_ == StructureType) {
+  if (root_type_ == StructureType) {;
     AST_Structure* struct_root = dynamic_cast<AST_Structure*>(root_);
     AST_Field** field_ptrptr;
     struct_root->field(field_ptrptr, child_ ? pos_ : pos_ - 1);
@@ -304,7 +324,21 @@ void TopicKeys::Iterator::path_i(std::stringstream& ss)
   } else if (root_type_ == UnionType) {
     // Nothing
   } else if (root_type_ == ArrayType) {
-    ss << '[' << pos_ << ']';
+    // Figure out what the vector version of the scalar pos_ is
+    std::vector<size_t>::reverse_iterator di, dfinished = dimensions_.rend();
+    size_t acc = pos_;
+    size_t div = 1;
+    std::list<size_t> results;
+    for (di = dimensions_.rbegin(); di != dfinished; ++di) {
+      acc /= div;
+      results.push_front(acc % *di);
+      div = *di;
+    }
+
+    std::list<size_t>::iterator ri = results.begin(), rfinished = results.end();
+    for (; ri != rfinished; ++ri) {
+      ss << '[' << *ri << ']';
+    }
   } else if (root_type_ != PrimitiveType) {
     throw Error(root_, "Can't get path for invalid topic key iterator!");
   }
@@ -313,27 +347,32 @@ void TopicKeys::Iterator::path_i(std::stringstream& ss)
   }
 }
 
-void TopicKeys::Iterator::cleanup()
+void
+TopicKeys::Iterator::cleanup()
 {
   delete child_;
 }
 
-TopicKeys::RootType TopicKeys::Iterator::root_type() const
+TopicKeys::RootType
+TopicKeys::Iterator::root_type() const
 {
   return child_ ? child_->root_type() : root_type_;
 }
 
-TopicKeys::RootType TopicKeys::Iterator::parents_root_type() const
+TopicKeys::RootType
+TopicKeys::Iterator::parents_root_type() const
 {
   return child_ ? child_->parents_root_type() : (parent_ ? parent_->root_type_ : InvalidType);
 }
 
-size_t TopicKeys::Iterator::level() const
+size_t
+TopicKeys::Iterator::level() const
 {
   return child_ ? child_->level() : level_;
 }
 
-AST_Type* TopicKeys::Iterator::get_ast_type() const
+AST_Type*
+TopicKeys::Iterator::get_ast_type() const
 {
   switch (root_type()) {
   case UnionType:
@@ -398,7 +437,8 @@ TopicKeys::~TopicKeys()
 {
 }
 
-TopicKeys& TopicKeys::operator=(const TopicKeys& other)
+TopicKeys&
+TopicKeys::operator=(const TopicKeys& other)
 {
   root_ = other.root_;
   root_type_ = other.root_type_;
@@ -408,27 +448,32 @@ TopicKeys& TopicKeys::operator=(const TopicKeys& other)
   return *this;
 }
 
-TopicKeys::Iterator TopicKeys::begin()
+TopicKeys::Iterator
+TopicKeys::begin()
 {
   return Iterator(*this);
 }
 
-TopicKeys::Iterator TopicKeys::end()
+TopicKeys::Iterator
+TopicKeys::end()
 {
-  return Iterator();
+  return Iterator::end_value();
 }
 
-AST_Decl* TopicKeys::root() const
+AST_Decl*
+TopicKeys::root() const
 {
   return root_;
 }
 
-TopicKeys::RootType TopicKeys::root_type() const
+TopicKeys::RootType
+TopicKeys::root_type() const
 {
   return root_type_;
 }
 
-size_t TopicKeys::count()
+size_t
+TopicKeys::count()
 {
   if (!counted_) {
     count_ = 0;
@@ -441,7 +486,15 @@ size_t TopicKeys::count()
   return count_;
 }
 
-bool TopicKeys::recursive() const
+bool
+TopicKeys::recursive() const
 {
   return recursive_;
+}
+
+TopicKeys::Iterator
+TopicKeys::Iterator::end_value()
+{
+  static Iterator end;
+  return end;
 }

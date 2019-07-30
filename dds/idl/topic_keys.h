@@ -5,6 +5,7 @@
 #include <iterator>
 #include <exception>
 #include <sstream>
+#include <vector>
 
 class AST_Decl;
 class AST_Structure;
@@ -130,6 +131,8 @@ public:
      */
     AST_Type* get_ast_type() const;
 
+    static Iterator end_value();
+
   private:
     Iterator(AST_Type* root, Iterator* parent);
     Iterator(AST_Field* root, Iterator* parent);
@@ -143,6 +146,10 @@ public:
     RootType root_type_;
     size_t level_;
     bool recursive_;
+    /// The Dimensions of the Array
+    std::vector<size_t> dimensions_;
+    /// Element Count in the Array
+    size_t element_count_;
 
     /**
      * Internal Recursive Impl. of path()
@@ -155,7 +162,7 @@ public:
   TopicKeys();
   TopicKeys(const TopicKeys& other);
   /**
-   * If recurive is false, do not recurse into other sturctures.
+   * If recursive is false, do a shallow iteration.
    */
   TopicKeys(AST_Structure* root, bool recursive = true);
   TopicKeys(AST_Union* root);
