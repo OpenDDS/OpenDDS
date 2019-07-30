@@ -1597,20 +1597,22 @@ namespace {
     if (!info) {
       TopicKeys::Iterator finished = keys.end();
       for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
+        string key_name = i.path();
         AST_Type* straight_ast_type = i.get_ast_type();
         AST_Type* ast_type;
         if (i.root_type() == TopicKeys::UnionType) {
           AST_Union* union_type = dynamic_cast<AST_Union*>(straight_ast_type);
           ast_type = dynamic_cast<AST_Type*>(union_type->disc_type());
+          key_name.append("._d()");
         } else {
           ast_type = straight_ast_type;
         }
-        fn(i.path(), ast_type, size, padding, expr, intro);
+        fn(key_name, ast_type, size, padding, expr, intro);
       }
     } else {
       IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
       for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
-        string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
+        const string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
         AST_Type* field_type = 0;
         try {
           field_type = find_type(fields, key_name);
