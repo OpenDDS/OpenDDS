@@ -1684,6 +1684,11 @@ namespace OpenDDS {
                                          DDS::SubscriberListener::_nil(),
                                          DEFAULT_STATUS_MASK);
         SubscriberImpl* sub = dynamic_cast<SubscriberImpl*>(bit_subscriber.in());
+        if (sub == 0) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) PeerDiscovery::init_bit")
+                     ACE_TEXT(" - Could not cast Subscriber to SubscriberImpl\n")));
+          return 0;
+        }
 
         DDS::DataReaderQos dr_qos;
         sub->get_default_datareader_qos(dr_qos);
@@ -1957,16 +1962,31 @@ namespace OpenDDS {
         using namespace DCPS;
         TopicDescriptionImpl* bit_topic_i =
           dynamic_cast<TopicDescriptionImpl*>(topic);
+        if (bit_topic_i == 0) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) PeerDiscovery::create_bit_dr")
+                     ACE_TEXT(" - Could not cast TopicDescription to TopicDescriptionImpl\n")));
+          return;
+        }
 
         DDS::DomainParticipant_var participant = sub->get_participant();
         DomainParticipantImpl* participant_i =
           dynamic_cast<DomainParticipantImpl*>(participant.in());
+        if (participant_i == 0) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) PeerDiscovery::create_bit_dr")
+                     ACE_TEXT(" - Could not cast DomainParticipant to DomainParticipantImpl\n")));
+          return;
+        }
 
         TypeSupport_var type_support =
           Registered_Data_Types->lookup(participant, type);
 
         DDS::DataReader_var dr = type_support->create_datareader();
         OpenDDS::DCPS::DataReaderImpl* dri = dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(dr.in());
+        if (dri == 0) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) PeerDiscovery::create_bit_dr")
+                     ACE_TEXT(" - Could not cast DataReader to DataReaderImpl\n")));
+          return;
+        }
 
         dri->init(bit_topic_i, qos, 0 /*listener*/, 0 /*mask*/, participant_i, sub);
         dri->disable_transport();

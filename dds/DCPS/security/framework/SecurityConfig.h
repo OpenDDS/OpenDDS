@@ -89,6 +89,7 @@ class OpenDDS_Dcps_Export SecurityConfig : public DCPS::RcObject {
                  CryptoKeyExchange_var key_exchange_plugin,
                  CryptoKeyFactory_var key_factory_plugin,
                  CryptoTransform_var transform_plugin,
+                 Utility* utility_plugin,
 #endif
                  const ConfigPropertyList& properties);
 

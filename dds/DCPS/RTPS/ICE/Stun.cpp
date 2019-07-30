@@ -52,6 +52,8 @@ ACE_UINT16 Attribute::length() const
   case ICE_CONTROLLED:
   case ICE_CONTROLLING:
     return 8;
+  default:
+    break;
   }
 
   return unknown_length;
