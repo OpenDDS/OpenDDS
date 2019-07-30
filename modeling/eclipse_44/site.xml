@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="http://download.opendds.org/modeling/eclipse_44/features/org.opendds.modeling.feature_3.6.0.201501221149.jar" id="org.opendds.modeling.feature" version="3.6.0.201501221149">
+   <feature url="http://download.opendds.org/modeling/eclipse_44/features/org.opendds.modeling.feature_3.13.0.201907301250.jar" id="org.opendds.modeling.feature" version="3.13.0.201907301250">
       <category name="org.opendds.modeling.category"/>
    </feature>
    <category-def name="org.opendds.modeling.category" label="OpenDDS Modeling SDK"/>
