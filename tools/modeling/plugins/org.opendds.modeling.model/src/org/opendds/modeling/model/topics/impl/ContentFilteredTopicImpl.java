@@ -22,16 +22,15 @@ import org.opendds.modeling.model.topics.TopicsPackage;
  * <!-- end-user-doc -->
  * <p>
  * The following features are implemented:
+ * </p>
  * <ul>
  *   <li>{@link org.opendds.modeling.model.topics.impl.ContentFilteredTopicImpl#getFilter_expression <em>Filter expression</em>}</li>
  *   <li>{@link org.opendds.modeling.model.topics.impl.ContentFilteredTopicImpl#getRelated_topic <em>Related topic</em>}</li>
  * </ul>
- * </p>
  *
  * @generated
  */
-public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements
-		ContentFilteredTopic {
+public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements ContentFilteredTopic {
 	/**
 	 * The default value of the '{@link #getFilter_expression() <em>Filter expression</em>}' attribute.
 	 * <!-- begin-user-doc -->
@@ -86,6 +85,7 @@ public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getFilter_expression() {
 		return filter_expression;
 	}
@@ -95,13 +95,13 @@ public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setFilter_expression(String newFilter_expression) {
 		String oldFilter_expression = filter_expression;
 		filter_expression = newFilter_expression;
 		if (eNotificationRequired())
 			eNotify(new ENotificationImpl(this, Notification.SET,
-					TopicsPackage.CONTENT_FILTERED_TOPIC__FILTER_EXPRESSION,
-					oldFilter_expression, filter_expression));
+					TopicsPackage.CONTENT_FILTERED_TOPIC__FILTER_EXPRESSION, oldFilter_expression, filter_expression));
 	}
 
 	/**
@@ -109,17 +109,15 @@ public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public Topic getRelated_topic() {
 		if (related_topic != null && related_topic.eIsProxy()) {
 			InternalEObject oldRelated_topic = (InternalEObject) related_topic;
 			related_topic = (Topic) eResolveProxy(oldRelated_topic);
 			if (related_topic != oldRelated_topic) {
 				if (eNotificationRequired())
-					eNotify(new ENotificationImpl(
-							this,
-							Notification.RESOLVE,
-							TopicsPackage.CONTENT_FILTERED_TOPIC__RELATED_TOPIC,
-							oldRelated_topic, related_topic));
+					eNotify(new ENotificationImpl(this, Notification.RESOLVE,
+							TopicsPackage.CONTENT_FILTERED_TOPIC__RELATED_TOPIC, oldRelated_topic, related_topic));
 			}
 		}
 		return related_topic;
@@ -139,12 +137,12 @@ public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setRelated_topic(Topic newRelated_topic) {
 		Topic oldRelated_topic = related_topic;
 		related_topic = newRelated_topic;
 		if (eNotificationRequired())
-			eNotify(new ENotificationImpl(this, Notification.SET,
-					TopicsPackage.CONTENT_FILTERED_TOPIC__RELATED_TOPIC,
+			eNotify(new ENotificationImpl(this, Notification.SET, TopicsPackage.CONTENT_FILTERED_TOPIC__RELATED_TOPIC,
 					oldRelated_topic, related_topic));
 	}
 
@@ -229,7 +227,7 @@ public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements
 		if (eIsProxy())
 			return super.toString();
 
-		StringBuffer result = new StringBuffer(super.toString());
+		StringBuilder result = new StringBuilder(super.toString());
 		result.append(" (filter_expression: ");
 		result.append(filter_expression);
 		result.append(')');
@@ -241,8 +239,7 @@ public class ContentFilteredTopicImpl extends TopicDescriptionImpl implements
 	 */
 	@Override
 	public org.eclipse.emf.common.util.EList<org.opendds.modeling.model.types.Type> getTypes() {
-		return com.ociweb.emf.util.ReferencesFinder.findInstancesOf(
-				org.opendds.modeling.model.types.Type.class, this);
+		return com.ociweb.emf.util.ReferencesFinder.findInstancesOf(org.opendds.modeling.model.types.Type.class, this);
 	}
 
 } //ContentFilteredTopicImpl

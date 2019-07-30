@@ -60,15 +60,11 @@ public class TopicDataTypeEditPart extends ListCompartmentEditPart {
 	 */
 	protected void createDefaultEditPolicies() {
 		super.createDefaultEditPolicies();
-		installEditPolicy(EditPolicyRoles.SEMANTIC_ROLE,
-				new TopicDataTypeItemSemanticEditPolicy());
+		installEditPolicy(EditPolicyRoles.SEMANTIC_ROLE, new TopicDataTypeItemSemanticEditPolicy());
 		installEditPolicy(EditPolicyRoles.CREATION_ROLE,
-				new CreationEditPolicyWithCustomReparent(
-						OpenDDSDcpsLibVisualIDRegistry.TYPED_INSTANCE));
-		installEditPolicy(EditPolicyRoles.DRAG_DROP_ROLE,
-				new DragDropEditPolicy());
-		installEditPolicy(EditPolicyRoles.CANONICAL_ROLE,
-				new TopicDataTypeCanonicalEditPolicy());
+				new CreationEditPolicyWithCustomReparent(OpenDDSDcpsLibVisualIDRegistry.TYPED_INSTANCE));
+		installEditPolicy(EditPolicyRoles.DRAG_DROP_ROLE, new DragDropEditPolicy());
+		installEditPolicy(EditPolicyRoles.CANONICAL_ROLE, new TopicDataTypeCanonicalEditPolicy());
 	}
 
 	/**
@@ -84,11 +80,9 @@ public class TopicDataTypeEditPart extends ListCompartmentEditPart {
 	 */
 	public EditPart getTargetEditPart(Request request) {
 		if (request instanceof CreateViewAndElementRequest) {
-			CreateElementRequestAdapter adapter = ((CreateViewAndElementRequest) request)
-					.getViewAndElementDescriptor()
+			CreateElementRequestAdapter adapter = ((CreateViewAndElementRequest) request).getViewAndElementDescriptor()
 					.getCreateElementRequestAdapter();
-			IElementType type = (IElementType) adapter
-					.getAdapter(IElementType.class);
+			IElementType type = (IElementType) adapter.getAdapter(IElementType.class);
 			if (type == OpenDDSDcpsLibElementTypes.Struct_3058) {
 				return this;
 			}
@@ -109,9 +103,9 @@ public class TopicDataTypeEditPart extends ListCompartmentEditPart {
 	protected void handleNotificationEvent(Notification notification) {
 		int type = notification.getEventType();
 		Object feature = notification.getFeature();
-		if (TopicsPackage.eINSTANCE.getTopic_Datatype().equals(feature)
-				&& (type == Notification.SET)) {
-			CanonicalEditPolicy canonicalEditPolicy = (CanonicalEditPolicy) getEditPolicy(EditPolicyRoles.CANONICAL_ROLE);
+		if (TopicsPackage.eINSTANCE.getTopic_Datatype().equals(feature) && (type == Notification.SET)) {
+			CanonicalEditPolicy canonicalEditPolicy = (CanonicalEditPolicy) getEditPolicy(
+					EditPolicyRoles.CANONICAL_ROLE);
 			canonicalEditPolicy.refresh();
 		}
 		super.handleNotificationEvent(notification);
