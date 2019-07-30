@@ -2,7 +2,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
     & eval 'exec perl -S $0 $argv:q'
     if 0;
 
-# Starting from a fresh svn checkout, build the OpenDDS Modeling SDK feature
+# Starting from a fresh checkout, build the OpenDDS Modeling SDK feature
 # and its constituent plugins.
 # Without --automated, just runs the code generation steps for EMF and GMF.
 #   (This is meant for use "interactively" by a developer who will then use

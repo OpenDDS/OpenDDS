@@ -100,8 +100,7 @@ public class OpenDDSCreationWizard extends Wizard implements INewWizard {
 	/**
 	 * @generated
 	 */
-	public void setOpenNewlyCreatedDiagramEditor(
-			boolean openNewlyCreatedDiagramEditor) {
+	public void setOpenNewlyCreatedDiagramEditor(boolean openNewlyCreatedDiagramEditor) {
 		this.openNewlyCreatedDiagramEditor = openNewlyCreatedDiagramEditor;
 	}
 
@@ -113,8 +112,8 @@ public class OpenDDSCreationWizard extends Wizard implements INewWizard {
 		this.selection = selection;
 		setWindowTitle(Messages.OpenDDSCreationWizardTitle);
 		// Custom code begin
-		setDefaultPageImageDescriptor(OpenDDSDiagramEditorPlugin
-				.getBundledImageDescriptor("platform:/plugin/org.opendds.modeling.common/icons/full/obj16/OpenDDS.gif")); //$NON-NLS-1$
+		setDefaultPageImageDescriptor(OpenDDSDiagramEditorPlugin.getBundledImageDescriptor(
+				"platform:/plugin/org.opendds.modeling.common/icons/full/obj16/OpenDDS.gif")); //$NON-NLS-1$
 		// Custom code end
 		setNeedsProgressMonitor(true);
 	}
@@ -130,32 +129,25 @@ public class OpenDDSCreationWizard extends Wizard implements INewWizard {
 		addPage(domainModelPage);
 		// Custom code end
 
-		diagramModelFilePage = new OpenDDSCreationWizardPage(
-				"DiagramModelFile", getSelection(), "opendds_diagram"); //$NON-NLS-1$ //$NON-NLS-2$
-		diagramModelFilePage
-				.setTitle(Messages.OpenDDSCreationWizard_DiagramModelFilePageTitle);
-		diagramModelFilePage
-				.setDescription(Messages.OpenDDSCreationWizard_DiagramModelFilePageDescription);
+		diagramModelFilePage = new OpenDDSCreationWizardPage("DiagramModelFile", getSelection(), "opendds_diagram"); //$NON-NLS-1$ //$NON-NLS-2$
+		diagramModelFilePage.setTitle(Messages.OpenDDSCreationWizard_DiagramModelFilePageTitle);
+		diagramModelFilePage.setDescription(Messages.OpenDDSCreationWizard_DiagramModelFilePageDescription);
 		addPage(diagramModelFilePage);
 
-		domainModelFilePage = new OpenDDSCreationWizardPage(
-				"DomainModelFile", getSelection(), "opendds") { //$NON-NLS-1$ //$NON-NLS-2$
+		domainModelFilePage = new OpenDDSCreationWizardPage("DomainModelFile", getSelection(), "opendds") { //$NON-NLS-1$ //$NON-NLS-2$
 
 			public void setVisible(boolean visible) {
 				if (visible) {
 					String fileName = diagramModelFilePage.getFileName();
-					fileName = fileName.substring(0, fileName.length()
-							- ".opendds_diagram".length()); //$NON-NLS-1$
-					setFileName(OpenDDSDiagramEditorUtil.getUniqueFileName(
-							getContainerFullPath(), fileName, "opendds")); //$NON-NLS-1$
+					fileName = fileName.substring(0, fileName.length() - ".opendds_diagram".length()); //$NON-NLS-1$
+					setFileName(
+							OpenDDSDiagramEditorUtil.getUniqueFileName(getContainerFullPath(), fileName, "opendds")); //$NON-NLS-1$
 				}
 				super.setVisible(visible);
 			}
 		};
-		domainModelFilePage
-				.setTitle(Messages.OpenDDSCreationWizard_DomainModelFilePageTitle);
-		domainModelFilePage
-				.setDescription(Messages.OpenDDSCreationWizard_DomainModelFilePageDescription);
+		domainModelFilePage.setTitle(Messages.OpenDDSCreationWizard_DomainModelFilePageTitle);
+		domainModelFilePage.setDescription(Messages.OpenDDSCreationWizard_DomainModelFilePageDescription);
 		addPage(domainModelFilePage);
 	}
 
@@ -165,17 +157,14 @@ public class OpenDDSCreationWizard extends Wizard implements INewWizard {
 	public boolean performFinish() {
 		IRunnableWithProgress op = new WorkspaceModifyOperation(null) {
 
-			protected void execute(IProgressMonitor monitor)
-					throws CoreException, InterruptedException {
-				diagram = OpenDDSDiagramEditorUtil.createDiagram(
-						diagramModelFilePage.getURI(),
+			protected void execute(IProgressMonitor monitor) throws CoreException, InterruptedException {
+				diagram = OpenDDSDiagramEditorUtil.createDiagram(diagramModelFilePage.getURI(),
 						domainModelFilePage.getURI(), monitor);
 				if (isOpenNewlyCreatedDiagramEditor() && diagram != null) {
 					try {
 						OpenDDSDiagramEditorUtil.openDiagram(diagram);
 					} catch (PartInitException e) {
-						ErrorDialog.openError(getContainer().getShell(),
-								Messages.OpenDDSCreationWizardOpenEditorError,
+						ErrorDialog.openError(getContainer().getShell(), Messages.OpenDDSCreationWizardOpenEditorError,
 								null, e.getStatus());
 					}
 				}
@@ -187,12 +176,10 @@ public class OpenDDSCreationWizard extends Wizard implements INewWizard {
 			return false;
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException() instanceof CoreException) {
-				ErrorDialog.openError(getContainer().getShell(),
-						Messages.OpenDDSCreationWizardCreationError, null,
+				ErrorDialog.openError(getContainer().getShell(), Messages.OpenDDSCreationWizardCreationError, null,
 						((CoreException) e.getTargetException()).getStatus());
 			} else {
-				OpenDDSDiagramEditorPlugin.getInstance().logError(
-						"Error creating diagram", e.getTargetException()); //$NON-NLS-1$
+				OpenDDSDiagramEditorPlugin.getInstance().logError("Error creating diagram", e.getTargetException()); //$NON-NLS-1$
 			}
 			return false;
 		}
@@ -215,8 +202,7 @@ public class OpenDDSCreationWizard extends Wizard implements INewWizard {
 
 		///// Get the OpenDDSModel object /////
 
-		IWorkbenchPage page = PlatformUI.getWorkbench()
-				.getActiveWorkbenchWindow().getActivePage();
+		IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 		IEditorPart activeEditor = page.getActiveEditor();
 		DiagramEditor diagramEditor = (DiagramEditor) activeEditor;
 		DiagramEditPart diagramEditPart = diagramEditor.getDiagramEditPart();
@@ -226,15 +212,12 @@ public class OpenDDSCreationWizard extends Wizard implements INewWizard {
 
 		///// Set the OpenDDSModel name attribute /////
 
-		SetRequest request = new SetRequest(modelObj, modelObj.eClass()
-				.getEStructuralFeature("name"), modelName);
+		SetRequest request = new SetRequest(modelObj, modelObj.eClass().getEStructuralFeature("name"), modelName);
 		SetValueCommand command = new SetValueCommand(request);
 		try {
-			OperationHistoryFactory.getOperationHistory().execute(command,
-					new NullProgressMonitor(), null);
+			OperationHistoryFactory.getOperationHistory().execute(command, new NullProgressMonitor(), null);
 		} catch (ExecutionException e) {
-			OpenDDSDiagramEditorPlugin.getInstance().logError(
-					"Unable to set model name", e); //$NON-NLS-1$
+			OpenDDSDiagramEditorPlugin.getInstance().logError("Unable to set model name", e); //$NON-NLS-1$
 		}
 		page.saveEditor(diagramEditor, false);
 	}

@@ -5,6 +5,5 @@ package org.opendds.modeling.diagram.datalib.sheet;
  * property section to be in the part package, even if a qualified name is used.
  * @generated NOT
  */
-public class ElementCommentPropertySection extends
-		org.opendds.modeling.common.gmf.ElementCommentPropertySection {
+public class ElementCommentPropertySection extends org.opendds.modeling.common.gmf.ElementCommentPropertySection {
 }
