@@ -1,3 +1,12 @@
 /main
-/Nsc*
-!/Nsc.idl
+/NscC.cpp
+/NscC.h
+/NscC.inl
+/NscS.h
+/NscTypeSupport.idl
+/NscTypeSupportC.cpp
+/NscTypeSupportC.h
+/NscTypeSupportC.inl
+/NscTypeSupportImpl.cpp
+/NscTypeSupportImpl.h
+/NscTypeSupportS.h

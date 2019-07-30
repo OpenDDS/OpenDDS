@@ -1,1 +1,13 @@
-/FooDef*
+/FooDefC.cpp
+/FooDefC.h
+/FooDefC.inl
+/FooDefS.cpp
+/FooDefS.h
+/FooDefTypeSupport.idl
+/FooDefTypeSupportC.cpp
+/FooDefTypeSupportC.h
+/FooDefTypeSupportC.inl
+/FooDefTypeSupportImpl.cpp
+/FooDefTypeSupportImpl.h
+/FooDefTypeSupportS.cpp
+/FooDefTypeSupportS.h

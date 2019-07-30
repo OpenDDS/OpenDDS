@@ -1,2 +1,11 @@
-/NestedTypesTest*
-!/NestedTypesTest.idl
+/NestedTypesTestC.cpp
+/NestedTypesTestC.h
+/NestedTypesTestC.inl
+/NestedTypesTestS.h
+/NestedTypesTestTypeSupport.idl
+/NestedTypesTestTypeSupportC.cpp
+/NestedTypesTestTypeSupportC.h
+/NestedTypesTestTypeSupportC.inl
+/NestedTypesTestTypeSupportImpl.cpp
+/NestedTypesTestTypeSupportImpl.h
+/NestedTypesTestTypeSupportS.h
