@@ -112,7 +112,8 @@ struct DiscoveredPublication_SecurityWrapper {
 
   DiscoveredPublication_SecurityWrapper()
     : have_ice_agent_info(false) {
-    security_info = { 0, 0 };
+    security_info.endpoint_security_attributes = 0;
+    security_info.plugin_endpoint_security_attributes = 0;
   }
 };
 
@@ -125,7 +126,8 @@ struct DiscoveredSubscription_SecurityWrapper {
 
   DiscoveredSubscription_SecurityWrapper()
     : have_ice_agent_info(false) {
-    security_info = { 0, 0 };
+    security_info.endpoint_security_attributes = 0;
+    security_info.plugin_endpoint_security_attributes = 0;
   }
 };
 
