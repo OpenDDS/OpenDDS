@@ -106,7 +106,7 @@ jobs:
       rmdir /s/q %VCPKG_ROOT%\packages %VCPKG_ROOT%\buildtrees
       echo ##vso[task.setvariable variable=VcPkgInst]%VCPKG_ROOT%\installed\%VCPKG_ARCH%
     displayName: Vcpkg
-    condition: and(ne(variables['BuildConfiguration'], 'Debug'), ne(variables['BuildPlatform'], 'x64'))
+    condition: not(and(eq(variables['BuildConfiguration'], 'Debug'), eq(variables['BuildPlatform'], 'x64')))
   - task: BatchScript@1
     displayName: VcVars
     inputs:
