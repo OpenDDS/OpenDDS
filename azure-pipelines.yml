@@ -106,6 +106,7 @@ jobs:
       rmdir /s/q %VCPKG_ROOT%\packages %VCPKG_ROOT%\buildtrees
       echo ##vso[task.setvariable variable=VcPkgInst]%VCPKG_ROOT%\installed\%VCPKG_ARCH%
     displayName: Vcpkg
+    condition: and(ne(variables['BuildConfiguration'], 'Debug'), ne(variables['BuildPlatform'], 'x64'))
   - task: BatchScript@1
     displayName: VcVars
     inputs:
@@ -120,7 +121,9 @@ jobs:
       modifyEnvironment: true
   - script: |
       if %BuildConfiguration%==Release set OPT=--no-tests --no-debug --optimize
-      call configure -v --ace-github-latest --security --xerces3=$(VcPkgInst) --openssl=$(VcPkgInst) %OPT%
+      set SEC=--security --xerces3=$(VcPkgInst) --openssl=$(VcPkgInst)
+      if %BuildConfiguration%==Debug if %BuildPlatform%==x64 set SEC= # Debug64 Fills up Disk with Security
+      call configure -v --ace-github-latest %SEC% %OPT%
       perl tools\scripts\show_build_config.pl
       if %BuildConfiguration%==Release (set SLN=DDS_TAOv2.sln) else set SLN=DDS_TAOv2_all.sln
       echo ##vso[task.setvariable variable=BuildSolution]%SLN%
