@@ -337,6 +337,8 @@ tests/DCPS/ManyTopicTest/run_test.pl rtps: !DCPS_MIN RTPS
 
 tests/DCPS/ManyTopicMultiProcess/run_test.pl: !DCPS_MIN
 
+tests/DCPS/Monitor/run_test.pl: !DCPS_MIN
+
 tests/DCPS/QoS_XML/dump/run_test.pl: XERCES3
 tests/DCPS/ManyToMany/run_test.pl tcp 12to12 small: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE !LYNXOS
 tests/DCPS/ManyToMany/run_test.pl tcp 12to12 large: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE !LYNXOS
