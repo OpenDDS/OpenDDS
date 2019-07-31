@@ -11,23 +11,28 @@ set(src "${CMAKE_CURRENT_SOURCE_DIR}/../../../DCPS/Messenger")
 set(dst ${CMAKE_CURRENT_BINARY_DIR})
 set(all_targets publisher subscriber messenger)
 
+foreach(file
+  Messenger.idl subscriber.cpp publisher.cpp Writer.cpp Writer.h Args.h
+  DataReaderListener.cpp DataReaderListener.h)
+  configure_file(${src}/${file} ${dst}/${file} COPYONLY)
+endforeach()
+
 # Messenger library
 add_library(messenger)
-OPENDDS_TARGET_SOURCES(messenger ${src}/Messenger.idl)
+OPENDDS_TARGET_SOURCES(messenger ${dst}/Messenger.idl)
 
 # Publisher
 add_executable(publisher
-    ${src}/publisher.cpp
-    ${src}/Writer.cpp
-    ${src}/Writer.h
+    ${dst}/publisher.cpp
+    ${dst}/Writer.cpp
+    ${dst}/Writer.h
 )
 
 # Subscriber
 add_executable(subscriber
-    ${src}/subscriber.cpp
-    ${src}/DataReaderListener.cpp
-    ${src}/DataReaderListener.h
-
+    ${dst}/subscriber.cpp
+    ${dst}/DataReaderListener.cpp
+    ${dst}/DataReaderListener.h
 )
 
 foreach(t ${all_targets})
