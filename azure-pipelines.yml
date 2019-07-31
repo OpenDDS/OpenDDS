@@ -35,7 +35,8 @@ jobs:
   - script: |
       git clone -q --depth 1 git://github.com/Microsoft/vcpkg.git %VCPKG_ROOT%
       call %VCPKG_ROOT%\bootstrap-vcpkg.bat
-      %VCPKG_ROOT%\vcpkg install --triplet $(VcVarsArch)-windows openssl xerces-c
+      set VCPKG_ARCH=$(VcVarsArch)-windows
+      %VCPKG_ROOT%\vcpkg install --triplet %VCPKG_ARCH% openssl xerces-c
       rmdir /s/q %VCPKG_ROOT%\packages %VCPKG_ROOT%\buildtrees
       echo ##vso[task.setvariable variable=VcPkgInst]%VCPKG_ROOT%\installed\%VCPKG_ARCH%
     displayName: Vcpkg
@@ -104,7 +105,8 @@ jobs:
   - script: |
       git clone -q --depth 1 git://github.com/Microsoft/vcpkg.git %VCPKG_ROOT%
       call %VCPKG_ROOT%\bootstrap-vcpkg.bat
-      %VCPKG_ROOT%\vcpkg install --triplet $(VcVarsArch)-windows openssl xerces-c
+      set VCPKG_ARCH=$(VcVarsArch)-windows
+      %VCPKG_ROOT%\vcpkg install --triplet %VCPKG_ARCH% openssl xerces-c
       rmdir /s/q %VCPKG_ROOT%\packages %VCPKG_ROOT%\buildtrees
       echo ##vso[task.setvariable variable=VcPkgInst]%VCPKG_ROOT%\installed\%VCPKG_ARCH%
     displayName: Vcpkg
@@ -167,7 +169,8 @@ jobs:
   - script: |
       git clone -q --depth 1 git://github.com/Microsoft/vcpkg.git %VCPKG_ROOT%
       call %VCPKG_ROOT%\bootstrap-vcpkg.bat
-      %VCPKG_ROOT%\vcpkg install --triplet $(VcVarsArch)-windows openssl xerces-c
+      set VCPKG_ARCH=$(VcVarsArch)-windows
+      %VCPKG_ROOT%\vcpkg install --triplet %VCPKG_ARCH% openssl xerces-c
       rmdir /s/q %VCPKG_ROOT%\packages %VCPKG_ROOT%\buildtrees
       echo ##vso[task.setvariable variable=VcPkgInst]%VCPKG_ROOT%\installed\%VCPKG_ARCH%
     displayName: Vcpkg
