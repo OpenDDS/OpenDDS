@@ -157,6 +157,7 @@ TopicKeys::Iterator::operator=(const TopicKeys::Iterator& other)
   recursive_ = other.recursive_;
   dimensions_ = other.dimensions_;
   child_ = other.child_ ? new Iterator(*other.child_) : 0;
+  element_count_ = other.element_count_;
   return *this;
 }
 
@@ -292,6 +293,7 @@ TopicKeys::Iterator::operator==(const TopicKeys::Iterator& other) const
     level_ == other.level_ &&
     recursive_ == other.recursive_ &&
     dimensions_ == other.dimensions_ &&
+    element_count_ == other.element_count_ &&
     (
       (child_ && other.child_) ? *child_ == *other.child_ : child_ == other.child_
     );

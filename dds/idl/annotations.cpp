@@ -29,6 +29,7 @@ BuiltinAnnotations::operator[](const std::string& annotation)
 }
 
 BuiltinAnnotation::BuiltinAnnotation()
+: declaration_(0)
 {
 }
 
