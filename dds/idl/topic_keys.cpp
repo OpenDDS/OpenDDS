@@ -1,7 +1,6 @@
 #include "idl_defines.h"
 
 #include <string>
-#include <list>
 
 #include "be_extern.h"
 #include "ast_structure.h"
@@ -315,7 +314,7 @@ TopicKeys::Iterator::path()
 void
 TopicKeys::Iterator::path_i(std::stringstream& ss)
 {
-  if (root_type_ == StructureType) {;
+  if (root_type_ == StructureType) {
     AST_Structure* struct_root = dynamic_cast<AST_Structure*>(root_);
     AST_Field** field_ptrptr;
     struct_root->field(field_ptrptr, child_ ? pos_ : pos_ - 1);
@@ -328,14 +327,16 @@ TopicKeys::Iterator::path_i(std::stringstream& ss)
     std::vector<size_t>::reverse_iterator di, dfinished = dimensions_.rend();
     size_t acc = pos_;
     size_t div = 1;
-    std::list<size_t> results;
+    std::vector<size_t> results;
     for (di = dimensions_.rbegin(); di != dfinished; ++di) {
       acc /= div;
-      results.push_front(acc % *di);
+      results.push_back(acc % *di);
       div = *di;
     }
 
-    std::list<size_t>::iterator ri = results.begin(), rfinished = results.end();
+    std::vector<size_t>::reverse_iterator
+      ri = results.rbegin(),
+      rfinished = results.rend();
     for (; ri != rfinished; ++ri) {
       ss << '[' << *ri << ']';
     }
