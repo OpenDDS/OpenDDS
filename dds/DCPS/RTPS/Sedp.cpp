@@ -1412,10 +1412,16 @@ Sedp::remove_publication_i(const RepoId& publicationId, LocalPublication& pub)
   if (endpoint) {
     ICE::Agent::instance()->remove_local_agent_info_listener(endpoint, publicationId);
   }
+
+  if (is_security_enabled() && pub.security_attribs_.base.is_discovery_protected) {
+    return publications_secure_writer_.write_unregister_dispose(publicationId);
+  } else {
+    return publications_writer_.write_unregister_dispose(publicationId);
+  }
 #else
   ACE_UNUSED_ARG(pub);
-#endif
   return publications_writer_.write_unregister_dispose(publicationId);
+#endif
 }
 
 bool
@@ -1454,10 +1460,16 @@ Sedp::remove_subscription_i(const RepoId& subscriptionId,
   if (endpoint) {
     ICE::Agent::instance()->remove_local_agent_info_listener(endpoint, subscriptionId);
   }
+
+  if (is_security_enabled() && sub.security_attribs_.base.is_discovery_protected) {
+    return subscriptions_secure_writer_.write_unregister_dispose(subscriptionId);
+  } else {
+    return subscriptions_writer_.write_unregister_dispose(subscriptionId);
+  }
 #else
   ACE_UNUSED_ARG(sub);
-#endif
   return subscriptions_writer_.write_unregister_dispose(subscriptionId);
+#endif
 }
 
 bool
