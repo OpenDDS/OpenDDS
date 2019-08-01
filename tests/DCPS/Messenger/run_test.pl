@@ -13,8 +13,6 @@ use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 use strict;
 
-PerlDDS::add_lib_path('../ConsolidatedMessengerIdl');
-
 my $status = 0;
 
 my $test = new PerlDDS::TestFramework();
