@@ -92,7 +92,7 @@ cmake --build .
 #### Windows
 
 The following assumes Visual Studio 2017 using 64-bit architecture (adjust the
-CMake -G parameter if using something different).
+CMake `-G` parameter if using something different).
 
 ```bat
 cd tests\cmake_integration\Messenger\Messenger_1
@@ -110,26 +110,22 @@ specified directory.  See the [INSTALL](../INSTALL) document for details.
 
 *Note:* Be sure to pass an absolute path to `--prefix`.
 
-Here is an example of: configure, compile, install, and generate/compile
-the Messenger_1 example from outside the source tree
-
 ```bash
 DDS_WORKSPACE=$(pwd)
 cd OpenDDS-src
 ./configure --prefix=$DDS_WORKSPACE/opendds-install
 make
 make install
-cp -ar tests/cmake_integration/Messenger ..
-cd ../Messenger/Messenger_1
+cd tests/Messenger/Messenger_1
 mkdir build
 cd build
 cmake -DCMAKE_PREFIX_PATH=$DDS_WORKSPACE/opendds-install ..
 cmake --build .
 ```
-*Note:* While this will build the Messenger\_1 example, the run_test.pl script will
+*Note:* While this will build the Messenger\_1 example, the `run_test.pl` script will
 not work due to missing Perl dependencies.
 
-## Adding IDL Sources with OPENDDS\_TARGET\_SOURCES
+## Adding IDL Sources with `OPENDDS_TARGET_SOURCES`
 
 Aside from importing the various OpenDDS targets, the OpenDDS Config Package
 provides an easy way to add IDL sources to CMake targets. This is achieved by
