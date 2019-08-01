@@ -24,35 +24,15 @@ module Xyz {
 
   // needed to call size methods on arrays
   struct StructOfArrayOfArrayOfBoolean { ArrayOfArrayOfBoolean f; };
-#ifdef USE_TOPIC_ANNOTATIONS
   @topic
-#else
-#  pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfArrayOfString"
-#endif
   struct StructOfArrayOfArrayOfString { ArrayOfArrayOfString f;};
-#ifdef USE_TOPIC_ANNOTATIONS
   @topic
-#else
-#  pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfArrayOfChar"
-#endif
   struct StructOfArrayOfArrayOfChar { ArrayOfArrayOfChar f;};
-#ifdef USE_TOPIC_ANNOTATIONS
   @topic
-#else
-#  pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfArrayOfOctet"
-#endif
   struct StructOfArrayOfArrayOfOctet { ArrayOfArrayOfOctet f;};
-#ifdef USE_TOPIC_ANNOTATIONS
   @topic
-#else
-#  pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfArrayOfLong"
-#endif
   struct StructOfArrayOfArrayOfLong { ArrayOfArrayOfLong f;};
-#ifdef USE_TOPIC_ANNOTATIONS
   @topic
-#else
-#  pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfArrayOfAnEnum"
-#endif
   struct StructOfArrayOfArrayOfAnEnum { ArrayOfArrayOfAnEnum f;};
 
   // sequences of sequences
@@ -66,11 +46,7 @@ module Xyz {
   // typedef of a "special" scalar type
   typedef octet OctetTypedef;
 
-#ifdef USE_TOPIC_ANNOTATIONS
   @topic
-#else
-#  pragma DCPS_DATA_TYPE "Xyz::StructOfSeqOfSeqOfLong"
-#endif
   struct StructOfSeqOfSeqOfLong { SeqOfSeqOfLong field; };
 
   typedef string<7> SevenStr;
@@ -252,11 +228,7 @@ module Xyz {
   };
 
   // for access to _dcps_* methods
-#ifdef USE_TOPIC_ANNOTATIONS
   @topic
-#else
-#  pragma DCPS_DATA_TYPE "Xyz::StructAUnion"
-#endif
   struct StructAUnion {
     AUnion sau_f1;
   };
@@ -279,24 +251,12 @@ module Xyz {
 
   typedef octet OctetArray[3];
 
-#ifdef USE_TOPIC_ANNOTATIONS
   @topic
-#else
-#  pragma DCPS_DATA_TYPE "Xyz::Foo"
-#  pragma DCPS_DATA_KEY "Xyz::Foo key"
-#  pragma DCPS_DATA_KEY "Xyz::Foo xcolor"
-#endif
   struct Foo {
-#ifdef USE_TOPIC_ANNOTATIONS
-    @key
-#endif
-    long key;
+    @key long key;
     octet octer;
     OctetTypedef theOctetTypedef;
-#ifdef USE_TOPIC_ANNOTATIONS
-    @key
-#endif
-    AnEnum xcolor;
+    @key AnEnum xcolor;
     OctetArray ooo;
     string theString;
     AStruct thestruct;

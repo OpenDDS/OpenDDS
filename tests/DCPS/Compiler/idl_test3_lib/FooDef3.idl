@@ -20,45 +20,21 @@ module Xyz {
   };
 
   // needed to call size methods on arrays
-#ifdef USE_TOPIC_ANNOTATIONS
   @topic
-#else
-#  pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfSeqOfBoolean"
-#endif
   struct StructOfArrayOfSeqOfBoolean { ArrayOfSeqOfBoolean f; };
 
-#ifdef USE_TOPIC_ANNOTATIONS
   @topic
-#else
-#  pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfSeqOfString"
-#endif
   struct StructOfArrayOfSeqOfString { ArrayOfSeqOfString f;};
 
-#ifdef USE_TOPIC_ANNOTATIONS
   @topic
-#else
-#  pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfSeqOfChar"
-#endif
   struct StructOfArrayOfSeqOfChar { ArrayOfSeqOfChar f;};
 
-#ifdef USE_TOPIC_ANNOTATIONS
   @topic
-#else
-#  pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfSeqOfOctet"
-#endif
   struct StructOfArrayOfSeqOfOctet { ArrayOfSeqOfOctet f;};
 
-#ifdef USE_TOPIC_ANNOTATIONS
   @topic
-#else
-#  pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfSeqOfLong"
-#endif
   struct StructOfArrayOfSeqOfLong { ArrayOfSeqOfLong f;};
 
-#ifdef USE_TOPIC_ANNOTATIONS
   @topic
-#else
-#  pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfSeqOfAnEnum"
-#endif
   struct StructOfArrayOfSeqOfAnEnum { ArrayOfSeqOfAnEnum f;};
 };

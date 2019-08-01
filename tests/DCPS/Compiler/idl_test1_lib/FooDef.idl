@@ -55,17 +55,9 @@ module Xyz {
 
   // +12
   typedef sequence<short> ShortSeq;
-#ifdef USE_TOPIC_ANNOTATIONS
   @topic
-#else
-#  pragma DCPS_DATA_TYPE "Xyz::AStruct"
-#  pragma DCPS_DATA_KEY "Xyz::AStruct v1"
-#endif
   struct AStruct {
-#ifdef USE_TOPIC_ANNOTATIONS
-    @key
-#endif
-    long v1;
+    @key long v1;
     ShortSeq v2s; //,2 -- was bounded with
   };
 
@@ -118,11 +110,7 @@ module Xyz {
 
   typedef AStructSeqX ArrayOfAStructSeq[3];
 
-#ifdef USE_TOPIC_ANNOTATIONS
   @topic
-#else
-#  pragma DCPS_DATA_TYPE "Xyz::StructContainingArrayOfAStructSeq"
-#endif
   struct StructContainingArrayOfAStructSeq {
     ArrayOfAStructSeq f1;
   };
@@ -133,25 +121,13 @@ module Xyz {
   typedef octet OctetArray[3];
 
   // Example user defined "Foo" structure
-#ifdef USE_TOPIC_ANNOTATIONS
   @topic
-#else
-#  pragma DCPS_DATA_TYPE "Xyz::Foo"
-#  pragma DCPS_DATA_KEY "Xyz::Foo key"
-#  pragma DCPS_DATA_KEY "Xyz::Foo xcolor"
-#endif
   struct Foo {
-#ifdef USE_TOPIC_ANNOTATIONS
-    @key
-#endif
-    long key;  //4
+    @key long key;  //4
 //    TheKeyType key; // no different than without typedef
     //ArrayOfShorts shorts;
     octet octer; //+1 > 5
-#ifdef USE_TOPIC_ANNOTATIONS
-    @key
-#endif
-    ColorX xcolor; //+4 > 9
+    @key ColorX xcolor; //+4 > 9
     OctetArray ooo; //+3 > 12
     UShortSeq ushrtseq; //+4+6 > 22
     AStruct thestruct; //+4+8 > 34
@@ -239,11 +215,7 @@ module N1 {
 
 //Need to verify that we can have a "Foo" (or in this case, a "Bar") outside
 //of a module in IDL.
-#ifdef USE_TOPIC_ANNOTATIONS
-  @topic
-#else
-#  pragma DCPS_DATA_TYPE "Bar"
-#endif
+@topic
 struct Bar {
   unsigned long data;
 };
