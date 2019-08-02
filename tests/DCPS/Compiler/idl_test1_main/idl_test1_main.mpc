@@ -1,6 +1,8 @@
 project: dcpsexe {
   requires += no_opendds_safety_profile
   exename   = idl_test1
+
+  includes += ../idl_test1_lib
   libs     +=  idl_test1_lib
   libpaths +=  ../idl_test1_lib
   after    += idl_test1_lib

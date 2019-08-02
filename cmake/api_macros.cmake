@@ -18,13 +18,14 @@ macro(OPENDDS_GET_SOURCES_AND_OPTIONS
   idl_prefix
   libs
   tao_options
-  opendds_options)
+  opendds_options
+  default_nested)
 
   set(_options_n
     PUBLIC PRIVATE INTERFACE
     TAO_IDL_OPTIONS OPENDDS_IDL_OPTIONS)
 
-  cmake_parse_arguments(_arg "" "" "${_options_n}" ${ARGN})
+  cmake_parse_arguments(_arg "" "DEFAULT_NESTED" "${_options_n}" ${ARGN})
 
   # Handle explicit sources per scope
   foreach (scope PUBLIC PRIVATE INTERFACE)
@@ -46,6 +47,12 @@ macro(OPENDDS_GET_SOURCES_AND_OPTIONS
 
   set(${tao_options} ${_arg_TAO_IDL_OPTIONS})
   set(${opendds_options} ${_arg_OPENDDS_IDL_OPTIONS})
+
+  if(DEFINED _arg_DEFAULT_NESTED)
+    set(${default_nested} ${_arg_DEFAULT_NESTED})
+  else()
+    set(${default_nested} ${OPENDDS_DEFAULT_NESTED})
+  endif()
 
   foreach(arg ${_arg_UNPARSED_ARGUMENTS})
     get_filename_component(arg ${arg} ABSOLUTE)
@@ -97,6 +104,7 @@ macro(OPENDDS_TARGET_SOURCES target)
     _libs
     _tao_options
     _opendds_options
+    _default_nested
     ${ARGN})
 
   if(_libs)
@@ -155,7 +163,8 @@ macro(OPENDDS_TARGET_SOURCES target)
         TAO_IDL_FLAGS ${_tao_options} ${OPENDDS_TAO_BASE_IDL_FLAGS}
         DDS_IDL_FLAGS ${_opendds_options} ${OPENDDS_DDS_BASE_IDL_FLAGS}
         IDL_FILES ${_idl_sources_${scope}}
-        SCOPE ${scope})
+        SCOPE ${scope}
+        DEFAULT_NESTED ${_default_nested})
     endif()
 
     # The above should add IDL-Generated sources; here, the

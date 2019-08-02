@@ -2880,7 +2880,7 @@ RtpsUdpDataLink::send_final_acks(const RepoId& readerid)
 int
 RtpsUdpDataLink::HeldDataDeliveryHandler::handle_exception(ACE_HANDLE /* fd */)
 {
-  ACE_ASSERT(link_->reactor_task_->get_reactor_owner() == ACE_Thread::self());
+  OPENDDS_ASSERT(link_->reactor_task_->get_reactor_owner() == ACE_Thread::self());
 
   HeldData::iterator itr;
   for (itr = held_data_.begin(); itr != held_data_.end(); ++itr) {
@@ -2892,7 +2892,7 @@ RtpsUdpDataLink::HeldDataDeliveryHandler::handle_exception(ACE_HANDLE /* fd */)
 
 void RtpsUdpDataLink::HeldDataDeliveryHandler::notify_delivery(const RepoId& readerId, WriterInfo& info)
 {
-  ACE_ASSERT(link_->reactor_task_->get_reactor_owner() == ACE_Thread::self());
+  OPENDDS_ASSERT(link_->reactor_task_->get_reactor_owner() == ACE_Thread::self());
 
   const SequenceNumber ca = info.recvd_.cumulative_ack();
   typedef OPENDDS_MAP(SequenceNumber, ReceivedDataSample)::iterator iter;

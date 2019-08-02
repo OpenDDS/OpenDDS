@@ -13,6 +13,13 @@
 #include "utl_err.h"
 #include "utl_string.h"
 
+#include "ast_decl.h"
+#include "ast_structure.h"
+#include "ast_field.h"
+#include "ast_union.h"
+#include "ast_annotation_decl.h"
+#include "ast_annotation_member.h"
+
 #include "ace/OS_NS_strings.h"
 #include "ace/OS_NS_sys_stat.h"
 #include "ace/ARGV.h"
@@ -30,7 +37,9 @@ using namespace std;
 BE_GlobalData* be_global = 0;
 
 BE_GlobalData::BE_GlobalData()
-  : filename_(0)
+  : global_default_nested_(false)
+  , no_dcps_data_type_warnings_(false)
+  , filename_(0)
   , java_(false)
   , suppress_idl_(false)
   , suppress_typecode_(false)
@@ -225,12 +234,6 @@ bool BE_GlobalData::face_ts() const
   return this->face_ts_;
 }
 
-// bool
-// BE_GlobalData::do_included_files() const
-// {
-//   return false; //we never process included files
-// }
-
 void
 BE_GlobalData::open_streams(const char* filename)
 {
@@ -319,6 +322,12 @@ BE_GlobalData::parse_args(long& i, char** av)
   static const char EXPORT_FLAG[] = "--export=";
   static const size_t EXPORT_FLAG_SIZE = sizeof(EXPORT_FLAG) - 1;
 
+  static const char DEFAULT_NESTED_FLAG[] = "--default-nested";
+  static const size_t DEFAULT_NESTED_FLAG_SIZE = sizeof(DEFAULT_NESTED_FLAG) - 1;
+
+  static const char NO_DCPS_DATA_TYPE_WARNINGS_FLAG[] = "--no-dcps-data-type-warnings";
+  static const size_t NO_DCPS_DATA_TYPE_WARNINGS_FLAG_SIZE = sizeof(NO_DCPS_DATA_TYPE_WARNINGS_FLAG) - 1;
+
   switch (av[i][1]) {
   case 'o':
     idl_global->append_idl_flag(av[i + 1]);
@@ -386,8 +395,12 @@ BE_GlobalData::parse_args(long& i, char** av)
     break;
 
   case '-':
-    if (0 == ACE_OS::strncasecmp(av[i], EXPORT_FLAG, EXPORT_FLAG_SIZE)) {
+    if (!ACE_OS::strncasecmp(av[i], EXPORT_FLAG, EXPORT_FLAG_SIZE)) {
       this->export_macro(av[i] + EXPORT_FLAG_SIZE);
+    } else if (!ACE_OS::strncasecmp(av[i], DEFAULT_NESTED_FLAG, DEFAULT_NESTED_FLAG_SIZE)) {
+      global_default_nested_ = true;
+    } else if (!ACE_OS::strncasecmp(av[i], NO_DCPS_DATA_TYPE_WARNINGS_FLAG, NO_DCPS_DATA_TYPE_WARNINGS_FLAG_SIZE)) {
+      no_dcps_data_type_warnings_ = true;
     } else {
       invalid_option(av[i]);
     }
@@ -590,7 +603,6 @@ BE_GlobalData::get_include_block(BE_GlobalData::stream_enum_t which)
     if (!export_include().empty())
       ret << "#include \"" << export_include() << "\"\n";
     break;
-
   case STREAM_CPP:
     std::for_each(cpp_includes().begin(), cpp_includes().end(), InsertIncludes(ret));
     std::for_each(referenced_idl_.begin(), referenced_idl_.end(),
@@ -601,4 +613,63 @@ BE_GlobalData::get_include_block(BE_GlobalData::stream_enum_t which)
   }
 
   return ret.str();
+}
+
+bool
+BE_GlobalData::is_topic_type(AST_Decl* node)
+{
+  return builtin_annotations_["::@topic"]->find_on(node) || !is_nested(node);
+}
+
+bool
+BE_GlobalData::is_nested(AST_Decl* node)
+{
+  NestedAnnotation* nested = dynamic_cast<NestedAnnotation*>(
+    builtin_annotations_["::@nested"]);
+  if (nested->find_on(node)) {
+    return nested->node_value(node);
+  }
+
+  return is_default_nested(node->defined_in());
+}
+
+bool
+BE_GlobalData::is_default_nested(UTL_Scope* scope)
+{
+  AST_Decl* module = dynamic_cast<AST_Decl*>(scope);
+  DefaultNestedAnnotation* default_nested = dynamic_cast<DefaultNestedAnnotation*>(
+    builtin_annotations_["::@default_nested"]);
+  if (module) {
+    if (default_nested->find_on(module)) {
+      return default_nested->node_value(module);
+    }
+
+    return is_default_nested(module->defined_in());
+  }
+
+  return global_default_nested_; // True if --default-nested was passed
+}
+
+bool
+BE_GlobalData::is_key(AST_Field* node)
+{
+  KeyAnnotation* key = dynamic_cast<KeyAnnotation*>(builtin_annotations_["::@key"]);
+  return key->node_value(dynamic_cast<AST_Decl*>(node));
+}
+
+bool
+BE_GlobalData::has_key(AST_Union* node)
+{
+  KeyAnnotation* key = dynamic_cast<KeyAnnotation*>(builtin_annotations_["::@key"]);
+  return key->union_value(node);
+}
+
+void
+BE_GlobalData::warning(const char* filename, unsigned lineno, const char* msg)
+{
+  if (idl_global->print_warnings()) {
+    ACE_ERROR((LM_WARNING,
+      ACE_TEXT("Warning - %C: \"%C\", line %u: %C\n"),
+      idl_global->prog_name(), filename, lineno, msg));
+  }
 }

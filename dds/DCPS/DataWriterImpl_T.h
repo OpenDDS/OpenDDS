@@ -7,6 +7,7 @@
 #include "dds/DCPS/Util.h"
 #include "dds/DCPS/TypeSupportImpl.h"
 #include "dcps_export.h"
+#include "dds/DCPS/SafetyProfileStreams.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -51,7 +52,7 @@ namespace OpenDDS {
         marshaled_size_ = 0; // should use gen_find_size when marshaling
       }
       if (MarshalTraitsType::gen_is_bounded_key_size()) {
-        OpenDDS::DCPS::KeyOnly<const MessageType > ko(data);
+        OpenDDS::DCPS::KeyOnly<const MessageType> ko(data);
         key_marshaled_size_ = 8 + TraitsType::gen_max_marshaled_size(ko, true);
         // worst case: CDR Encapsulation (4 bytes) + Padding for alignment (4 bytes)
       } else {
@@ -87,9 +88,9 @@ namespace OpenDDS {
                       ACE_TEXT("(%P|%t) ")
                       ACE_TEXT("%CDataWriterImpl::")
                       ACE_TEXT("register_instance_w_timestamp, ")
-                      ACE_TEXT("register failed error=%d.\n"),
+                      ACE_TEXT("register failed: %C.\n"),
                       TraitsType::type_name(),
-                      ret));
+                      retcode_to_string(ret).c_str()));
         }
 
       return registered_handle;
@@ -169,9 +170,9 @@ namespace OpenDDS {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) ")
                             ACE_TEXT("%CDataWriterImpl::write_w_timestamp, ")
-                            ACE_TEXT("register failed err=%d.\n"),
+                            ACE_TEXT("register failed: %C.\n"),
                             TraitsType::type_name(),
-                            ret),
+                            retcode_to_string(ret).c_str()),
                            ret);
         }
 
@@ -388,12 +389,15 @@ private:
           effective_size += padding;
         }
 
-        ACE_NEW_RETURN(tmp_mb, ACE_Message_Block(effective_size,
-                                             ACE_Message_Block::MB_DATA,
-                                             0, //cont
-                                             0, //data
-                                             0, //alloc_strategy
-                                             get_db_lock()), 0);
+        ACE_NEW_RETURN(tmp_mb,
+          ACE_Message_Block(
+            effective_size,
+            ACE_Message_Block::MB_DATA,
+            0, // cont
+            0, // data
+            0, // alloc_strategy
+            get_db_lock()),
+          0);
         mb.reset(tmp_mb);
         OpenDDS::DCPS::Serializer serializer(mb.get(), swap, cdr
                                              ? OpenDDS::DCPS::Serializer::ALIGN_CDR
@@ -427,24 +431,22 @@ private:
           effective_size += padding;
         }
 
-
         ACE_NEW_MALLOC_RETURN(tmp_mb,
-                              static_cast<ACE_Message_Block*>(
-                                                              mb_allocator_->malloc(
-                                                                                    sizeof(ACE_Message_Block))),
-                              ACE_Message_Block(
-                                                effective_size,
-                                                ACE_Message_Block::MB_DATA,
-                                                0, //cont
-                                                0, //data
-                                                data_allocator_.get(), //allocator_strategy
-                                                get_db_lock(), //data block locking_strategy
-                                                ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
-                                                ACE_Time_Value::zero,
-                                                ACE_Time_Value::max_time,
-                                                db_allocator_.get(),
-                                                mb_allocator_.get()),
-                              0);
+          static_cast<ACE_Message_Block*>(
+            mb_allocator_->malloc(sizeof(ACE_Message_Block))),
+          ACE_Message_Block(
+            effective_size,
+            ACE_Message_Block::MB_DATA,
+            0, // cont
+            0, // data
+            data_allocator_.get(), // allocator_strategy
+            get_db_lock(), // data block locking_strategy
+            ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
+            ACE_Time_Value::zero,
+            ACE_Time_Value::max_time,
+            db_allocator_.get(),
+            mb_allocator_.get()),
+          0);
         mb.reset(tmp_mb);
         OpenDDS::DCPS::Serializer serializer(mb.get(), swap, cdr
                                              ? OpenDDS::DCPS::Serializer::ALIGN_CDR
@@ -461,10 +463,11 @@ private:
           serializer.reset_alignment();
         }
 
-        if (! (serializer << instance_data)) {
+        if (!(serializer << instance_data)) {
           ACE_ERROR_RETURN((LM_ERROR,
-            ACE_TEXT("(%P|%t) OpenDDS::DCPS::DataWriterImpl::dds_marshal(), ")
-            ACE_TEXT("instance_data serialization error.\n")),
+            ACE_TEXT("(%P|%t) ERROR: %CDataWriterImpl::dds_marshal(): ")
+            ACE_TEXT("instance_data serialization error.\n"),
+            TraitsType::type_name()),
             0);
         }
       }
@@ -537,7 +540,7 @@ private:
                                      ACE_TEXT("(%P|%t) ")
                                      ACE_TEXT("%CDataWriterImpl::")
                                      ACE_TEXT("get_or_create_instance_handle, ")
-                                     ACE_TEXT("insert %C failed. \n"),
+                                     ACE_TEXT("insert %C failed.\n"),
                                      TraitsType::type_name(), TraitsType::type_name()),
                                     DDS::RETCODE_ERROR);
                 }
@@ -550,12 +553,12 @@ private:
       return DDS::RETCODE_OK;
     }
 
-    InstanceMap  instance_map_;
-    size_t       marshaled_size_;
-    size_t       key_marshaled_size_;
+    InstanceMap instance_map_;
+    size_t marshaled_size_;
+    size_t key_marshaled_size_;
     unique_ptr<DataAllocator> data_allocator_;
     unique_ptr<MessageBlockAllocator> mb_allocator_;
-    unique_ptr<DataBlockAllocator>    db_allocator_;
+    unique_ptr<DataBlockAllocator> db_allocator_;
 
     // A class, normally provided by an unit test, that needs access to
     // private methods/members.

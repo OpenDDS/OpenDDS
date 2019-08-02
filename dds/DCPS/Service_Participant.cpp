@@ -1114,7 +1114,7 @@ Service_Participant::repository_lost(Discovery::RepoKey key)
 
   // If we reach here, we have exceeded the total recovery time
   // specified.
-  ACE_ASSERT(recoveryFailedTime == ACE_Time_Value::zero);
+  OPENDDS_ASSERT(recoveryFailedTime == ACE_Time_Value::zero);
 }
 
 void

@@ -1179,12 +1179,10 @@ DataReaderImpl::enable()
 
   if (depth_ == DDS::LENGTH_UNLIMITED) {
     // DDS::LENGTH_UNLIMITED is negative so make it a positive
-    // value that is for all intents and purposes unlimited
+    // value that is, for all intents and purposes, unlimited
     // and we can use it for comparisons.
-    // use 2147483647L because that is the greatest value a signed
-    // CORBA::Long can have.
     // WARNING: The client risks running out of memory in this case.
-    depth_ = 2147483647L;
+    depth_ = ACE_INT32_MAX;
   }
 
   if (qos_.resource_limits.max_samples != DDS::LENGTH_UNLIMITED) {
@@ -1418,13 +1416,13 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       GuidConverter reader_converter(subscription_id_);
       GuidConverter writer_converter(header.publication_id_);
 
-      ACE_DEBUG ((LM_DEBUG,
+      ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataReaderImpl::data_received: reader %C writer %C ")
           ACE_TEXT("instance %d is_new_instance %d filtered %d \n"),
           OPENDDS_STRING(reader_converter).c_str(),
           OPENDDS_STRING(writer_converter).c_str(),
           instance ? instance->instance_handle_ : 0,
-              is_new_instance, filtered));
+          is_new_instance, filtered));
     }
 
     if (filtered) break; // sample filtered from instance
@@ -1591,9 +1589,9 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
               && (instance)
               && (owner_manager->is_owner (instance->instance_handle_,
                   sample.header_.publication_id_)))
-                  || (this->is_exclusive_ownership_
-                      && (instance)
-                      && instance->instance_state_.is_last (sample.header_.publication_id_))) {
+          || (is_exclusive_ownership_
+              && (instance)
+              && instance->instance_state_.is_last (sample.header_.publication_id_))) {
 #endif
         if (instance) {
           this->watchdog_->cancel_timer(instance);

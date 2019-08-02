@@ -196,6 +196,7 @@ public:
                         ACE_TEXT("get_default_datareader_qos failed!\n")), false);
     }
     reader_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
+    reader_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
     // Create First DataReader for Both Tests
     reader1_ = subscriber_->create_datareader(
