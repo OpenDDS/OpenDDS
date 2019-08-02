@@ -1,3 +1,9 @@
+/*
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 module Messenger {
 
@@ -9,6 +15,9 @@ module Messenger {
     string subject;
     long subject_id;
     string text;
-    long   count;
+    long count;
+    unsigned long long ull;
+    long source_pid;
   };
+
 };

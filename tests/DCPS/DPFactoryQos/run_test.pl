@@ -11,6 +11,8 @@ use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 use strict;
 
+PerlDDS::add_lib_path('../ConsolidatedMessengerIdl');
+
 my $test = new PerlDDS::TestFramework();
 
 $test->process('sub', 'subscriber');

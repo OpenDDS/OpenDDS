@@ -11,6 +11,8 @@ use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 use strict;
 
+PerlDDS::add_lib_path('../ConsolidatedMessengerIdl');
+
 my $send_interval = 0;
 my $test_duration = 300;
 if ($ARGV[0] eq 'long') {

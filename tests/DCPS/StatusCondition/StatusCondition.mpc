@@ -1,7 +1,10 @@
-project: dcpsexe, dcps_transports_for_test {
+project: dcpsexe, dcps_cm, dcps_transports_for_test {
   exename = StatusConditionTest
-  idlflags += -SS
-  TypeSupport_Files {
-    Messenger.idl
+
+  Idl_Files {
+  }
+
+  Source_Files {
+    StatusConditionTest.cpp
   }
 }

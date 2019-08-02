@@ -1,6 +1,12 @@
-project: dcpsexe, dcps_rtps_udp {
+project: dcpsexe, dcps_cm, dcps_rtps_udp {
+
   requires += no_opendds_safety_profile
-  TypeSupport_Files {
-    Messenger.idl
+
+  Idl_Files {
   }
+
+  Source_Files {
+    RestartTest.cpp
+  }
+
 }

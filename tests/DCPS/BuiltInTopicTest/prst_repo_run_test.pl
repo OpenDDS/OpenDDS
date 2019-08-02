@@ -12,6 +12,8 @@ use PerlDDS::Run_Test;
 use strict;
 use Getopt::Long;
 
+PerlDDS::add_lib_path('../ConsolidatedMessengerIdl');
+
 my $status = 0;
 
 my $force_local;

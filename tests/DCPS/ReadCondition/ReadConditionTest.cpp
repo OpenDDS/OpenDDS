@@ -6,7 +6,7 @@
 #include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DCPS/StaticIncludes.h"
 
-#include "GeneratedCode/MessengerTypeSupportImpl.h"
+#include "MessengerTypeSupportImpl.h"
 #include <iostream>
 using namespace std;
 
@@ -55,7 +55,7 @@ int run_test_instance(DDS::DomainParticipant_ptr dp)
   if (ret != RETCODE_OK) return ret;
 
   MessageDataWriter_var mdw = MessageDataWriter::_narrow(dw);
-  Message msg = {0};
+  Message msg = { "", "", 0, "", 0, 0, 0 };
   for (int i(0); i < 12; ++i) {
     ++msg.subject_id;
     ret = mdw->write(msg, HANDLE_NIL);
@@ -162,7 +162,7 @@ int run_test_next_instance(DDS::DomainParticipant_ptr dp)
   if (ret != RETCODE_OK) return ret;
 
   MessageDataWriter_var mdw = MessageDataWriter::_narrow(dw);
-  Message msg = {0};
+  Message msg = { "", "", 0, "", 0, 0, 0 };
   for (int i(0); i < 12; ++i) {
     ++msg.subject_id;
     ret = mdw->write(msg, HANDLE_NIL);
