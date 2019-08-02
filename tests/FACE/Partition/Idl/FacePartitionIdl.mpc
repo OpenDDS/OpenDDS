@@ -8,8 +8,4 @@ project: opendds_face {
   TypeSupport_Files {
     FaceMessage.idl
   }
-
-  IDL_Files {
-    FaceMessageTypeSupport.idl
-  }
 }

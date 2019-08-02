@@ -6,8 +6,4 @@ project: opendds_cxx11 {
   TypeSupport_Files {
     ../../idl_test1_lib/FooDef.idl
   }
-
-  IDL_Files {
-    FooDefTypeSupport.idl
-  }
 }
