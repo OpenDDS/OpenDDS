@@ -644,13 +644,8 @@ private:
 
   static void set_inline_qos(DCPS::TransportLocatorSeq& locators);
 
-  void write_durable_publication_data(const DCPS::RepoId& reader);
-  void write_durable_subscription_data(const DCPS::RepoId& reader);
-
-#ifdef OPENDDS_SECURITY
-  void write_durable_publication_data_secure(const DCPS::RepoId& reader);
-  void write_durable_subscription_data_secure(const DCPS::RepoId& reader);
-#endif
+  void write_durable_publication_data(const DCPS::RepoId& reader, bool secure);
+  void write_durable_subscription_data(const DCPS::RepoId& reader, bool secure);
 
   void write_durable_participant_message_data(const DCPS::RepoId& reader);
 
