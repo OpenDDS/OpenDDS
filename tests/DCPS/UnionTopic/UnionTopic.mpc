@@ -1,4 +1,5 @@
 project: dcpsexe, dcps_rtps_udp {
+  requires += ownership_profile
   TypeSupport_Files {
     UnionTopic.idl
   }
