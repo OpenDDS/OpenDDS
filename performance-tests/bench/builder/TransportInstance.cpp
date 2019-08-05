@@ -7,15 +7,27 @@ namespace Builder {
 TransportInstance::TransportInstance(const TransportInstanceConfig& config)
   : name_(config.name.in())
 {
-  std::cout << "Creating instance '" << name_ << "' of type " << config.type << std::endl;
-
-  if (std::string(config.type.in()) == "rtps_udp") {
+  config_ = OpenDDS::DCPS::TransportRegistry::instance()->get_config(config.name.in());
+  if (!config_) {
     config_ = OpenDDS::DCPS::TransportRegistry::instance()->create_config(config.name.in());
-    inst_ = OpenDDS::DCPS::TransportRegistry::instance()->create_inst(config.name.in(), "rtps_udp");
+    inst_ = OpenDDS::DCPS::TransportRegistry::instance()->get_inst(config.name.in());
+    if (!inst_) {
+      if (std::string(config.type.in()) == "rtps_udp") {
+        inst_ = OpenDDS::DCPS::TransportRegistry::instance()->create_inst(config.name.in(), "rtps_udp");
+        std::cout << "Creating instance config '" << name_ << "' of type " << config.type << std::endl;
+      } else {
+        throw std::runtime_error("unsupported transport instance type");
+      }
+    }
     config_->instances_.push_back(inst_);
     OpenDDS::DCPS::TransportRegistry::instance()->domain_default_config(config.domain, config_);
   } else {
-    throw std::runtime_error("unsupported transport instance type");
+    inst_ = OpenDDS::DCPS::TransportRegistry::instance()->get_inst(config.name.in());
+    if (inst_ && std::string(config.type.in()) == inst_->transport_type_) {
+      std::cout << "Using existing instance '" << name_ << "' of type " << inst_->transport_type_ << std::endl;
+    } else {
+      throw std::runtime_error("mismatched transport instance type");
+    }
   }
 }
 
