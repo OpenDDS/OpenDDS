@@ -7,9 +7,4 @@ project: opendds_cxx11 {
     ../../idl_test2_lib/FooDef.idl
     ../../idl_test2_lib/BazDef.idl
   }
-
-  IDL_Files {
-    FooDefTypeSupport.idl
-    BazDefTypeSupport.idl
-  }
 }

@@ -6,8 +6,4 @@ project: opendds_cxx11 {
   TypeSupport_Files {
     ../../idl_test_nested_types_lib/NestedTypesTest.idl
   }
-
-  IDL_Files {
-    NestedTypesTestTypeSupport.idl
-  }
 }

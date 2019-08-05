@@ -8,8 +8,4 @@ project: opendds_face {
   TypeSupport_Files {
     SampleModel.idl
   }
-
-  IDL_Files {
-    SampleModelTypeSupport.idl
-  }
 }

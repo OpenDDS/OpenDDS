@@ -3,8 +3,4 @@ project: dcps_rtps, opendds_cxx11 {
   TypeSupport_Files {
     Relay.idl
   }
-
-  IDL_Files {
-    RelayTypeSupport.idl
-  }
 }

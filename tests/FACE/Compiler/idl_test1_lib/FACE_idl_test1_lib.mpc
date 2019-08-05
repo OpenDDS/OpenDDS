@@ -6,8 +6,4 @@ project: opendds_face {
   TypeSupport_Files {
     ../../../DCPS/Compiler/idl_test1_lib/FooDef.idl
   }
-
-  IDL_Files {
-    FooDefTypeSupport.idl
-  }
 }

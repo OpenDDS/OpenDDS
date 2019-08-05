@@ -7,8 +7,4 @@ project: dcps_test_lib, opendds_cxx11 {
   TypeSupport_Files {
     Messenger.idl
   }
-
-  IDL_Files {
-    MessengerTypeSupport.idl
-  }
 }
