@@ -57,9 +57,13 @@ function(opendds_target_generated_dependencies target idl_file scope)
 endfunction()
 
 function(opendds_target_idl_sources target)
-  set(oneValueArgs SCOPE SKIP_TAO_IDL)
+  set(oneValueArgs SCOPE SKIP_TAO_IDL DEFAULT_NESTED)
   set(multiValueArgs TAO_IDL_FLAGS DDS_IDL_FLAGS IDL_FILES)
   cmake_parse_arguments(_arg "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+  if(${_arg_DEFAULT_NESTED})
+    list(APPEND _arg_DDS_IDL_FLAGS --default-nested)
+  endif()
 
   foreach(idl_file ${_arg_IDL_FILES})
     if (NOT IS_ABSOLUTE ${idl_file})

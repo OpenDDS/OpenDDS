@@ -1,0 +1,18 @@
+project: dcps {
+  dcps_ts_flags += -Gitl
+  dcps_ts_flags += --default-nested
+  idlflags += -I..
+
+  specific (vc9, vc10, vc11, vc12, vc14, vs2017, vs2019, nmake) {
+    compile_flags += /bigobj
+  }
+
+  TypeSupport_Files {
+    ../is_topic_type_test.idl
+  }
+
+  IDL_Files {
+    ../is_topic_type_test.idl
+    is_topic_type_testTypeSupport.idl
+  }
+}

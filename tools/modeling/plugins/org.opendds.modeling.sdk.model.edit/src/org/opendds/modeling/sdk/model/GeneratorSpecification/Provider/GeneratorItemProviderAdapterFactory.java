@@ -45,9 +45,8 @@ import org.opendds.modeling.sdk.model.GeneratorSpecification.Util.GeneratorAdapt
  * <!-- end-user-doc -->
  * @generated
  */
-public class GeneratorItemProviderAdapterFactory extends
-		GeneratorAdapterFactory implements ComposeableAdapterFactory,
-		IChangeNotifier, IDisposable, IChildCreationExtender {
+public class GeneratorItemProviderAdapterFactory extends GeneratorAdapterFactory
+		implements ComposeableAdapterFactory, IChangeNotifier, IDisposable, IChildCreationExtender {
 	/**
 	 * This keeps track of the root adapter factory that delegates to this adapter factory.
 	 * <!-- begin-user-doc -->
@@ -251,8 +250,7 @@ public class GeneratorItemProviderAdapterFactory extends
 	@Override
 	public Adapter createLocationVariableAdapter() {
 		if (locationVariableItemProvider == null) {
-			locationVariableItemProvider = new LocationVariableItemProvider(
-					this);
+			locationVariableItemProvider = new LocationVariableItemProvider(this);
 		}
 
 		return locationVariableItemProvider;
@@ -367,8 +365,7 @@ public class GeneratorItemProviderAdapterFactory extends
 	@Override
 	public Adapter createQueueMessagesPerPoolAdapter() {
 		if (queueMessagesPerPoolItemProvider == null) {
-			queueMessagesPerPoolItemProvider = new QueueMessagesPerPoolItemProvider(
-					this);
+			queueMessagesPerPoolItemProvider = new QueueMessagesPerPoolItemProvider(this);
 		}
 
 		return queueMessagesPerPoolItemProvider;
@@ -391,8 +388,7 @@ public class GeneratorItemProviderAdapterFactory extends
 	@Override
 	public Adapter createQueueInitialPoolAdapter() {
 		if (queueInitialPoolItemProvider == null) {
-			queueInitialPoolItemProvider = new QueueInitialPoolItemProvider(
-					this);
+			queueInitialPoolItemProvider = new QueueInitialPoolItemProvider(this);
 		}
 
 		return queueInitialPoolItemProvider;
@@ -438,8 +434,7 @@ public class GeneratorItemProviderAdapterFactory extends
 	@Override
 	public Adapter createMaxSamplesPerPacketAdapter() {
 		if (maxSamplesPerPacketItemProvider == null) {
-			maxSamplesPerPacketItemProvider = new MaxSamplesPerPacketItemProvider(
-					this);
+			maxSamplesPerPacketItemProvider = new MaxSamplesPerPacketItemProvider(this);
 		}
 
 		return maxSamplesPerPacketItemProvider;
@@ -462,8 +457,7 @@ public class GeneratorItemProviderAdapterFactory extends
 	@Override
 	public Adapter createOptimumPacketSizeAdapter() {
 		if (optimumPacketSizeItemProvider == null) {
-			optimumPacketSizeItemProvider = new OptimumPacketSizeItemProvider(
-					this);
+			optimumPacketSizeItemProvider = new OptimumPacketSizeItemProvider(this);
 		}
 
 		return optimumPacketSizeItemProvider;
@@ -486,8 +480,7 @@ public class GeneratorItemProviderAdapterFactory extends
 	@Override
 	public Adapter createThreadPerConnectionAdapter() {
 		if (threadPerConnectionItemProvider == null) {
-			threadPerConnectionItemProvider = new ThreadPerConnectionItemProvider(
-					this);
+			threadPerConnectionItemProvider = new ThreadPerConnectionItemProvider(this);
 		}
 
 		return threadPerConnectionItemProvider;
@@ -510,8 +503,7 @@ public class GeneratorItemProviderAdapterFactory extends
 	@Override
 	public Adapter createDatalinkReleaseDelayAdapter() {
 		if (datalinkReleaseDelayItemProvider == null) {
-			datalinkReleaseDelayItemProvider = new DatalinkReleaseDelayItemProvider(
-					this);
+			datalinkReleaseDelayItemProvider = new DatalinkReleaseDelayItemProvider(this);
 		}
 
 		return datalinkReleaseDelayItemProvider;
@@ -534,8 +526,7 @@ public class GeneratorItemProviderAdapterFactory extends
 	@Override
 	public Adapter createDatalinkControlChunksAdapter() {
 		if (datalinkControlChunksItemProvider == null) {
-			datalinkControlChunksItemProvider = new DatalinkControlChunksItemProvider(
-					this);
+			datalinkControlChunksItemProvider = new DatalinkControlChunksItemProvider(this);
 		}
 
 		return datalinkControlChunksItemProvider;
@@ -558,8 +549,7 @@ public class GeneratorItemProviderAdapterFactory extends
 	@Override
 	public Adapter createLocalAddressStringAdapter() {
 		if (localAddressStringItemProvider == null) {
-			localAddressStringItemProvider = new LocalAddressStringItemProvider(
-					this);
+			localAddressStringItemProvider = new LocalAddressStringItemProvider(this);
 		}
 
 		return localAddressStringItemProvider;
@@ -582,8 +572,7 @@ public class GeneratorItemProviderAdapterFactory extends
 	@Override
 	public Adapter createEnableNagleAlgorithmAdapter() {
 		if (enableNagleAlgorithmItemProvider == null) {
-			enableNagleAlgorithmItemProvider = new EnableNagleAlgorithmItemProvider(
-					this);
+			enableNagleAlgorithmItemProvider = new EnableNagleAlgorithmItemProvider(this);
 		}
 
 		return enableNagleAlgorithmItemProvider;
@@ -606,8 +595,7 @@ public class GeneratorItemProviderAdapterFactory extends
 	@Override
 	public Adapter createConnRetryInitialDelayAdapter() {
 		if (connRetryInitialDelayItemProvider == null) {
-			connRetryInitialDelayItemProvider = new ConnRetryInitialDelayItemProvider(
-					this);
+			connRetryInitialDelayItemProvider = new ConnRetryInitialDelayItemProvider(this);
 		}
 
 		return connRetryInitialDelayItemProvider;
@@ -630,8 +618,7 @@ public class GeneratorItemProviderAdapterFactory extends
 	@Override
 	public Adapter createConnRetryBackoffMultiplierAdapter() {
 		if (connRetryBackoffMultiplierItemProvider == null) {
-			connRetryBackoffMultiplierItemProvider = new ConnRetryBackoffMultiplierItemProvider(
-					this);
+			connRetryBackoffMultiplierItemProvider = new ConnRetryBackoffMultiplierItemProvider(this);
 		}
 
 		return connRetryBackoffMultiplierItemProvider;
@@ -654,8 +641,7 @@ public class GeneratorItemProviderAdapterFactory extends
 	@Override
 	public Adapter createConnRetryAttemptsAdapter() {
 		if (connRetryAttemptsItemProvider == null) {
-			connRetryAttemptsItemProvider = new ConnRetryAttemptsItemProvider(
-					this);
+			connRetryAttemptsItemProvider = new ConnRetryAttemptsItemProvider(this);
 		}
 
 		return connRetryAttemptsItemProvider;
@@ -678,8 +664,7 @@ public class GeneratorItemProviderAdapterFactory extends
 	@Override
 	public Adapter createMaxOutputPausePeriodAdapter() {
 		if (maxOutputPausePeriodItemProvider == null) {
-			maxOutputPausePeriodItemProvider = new MaxOutputPausePeriodItemProvider(
-					this);
+			maxOutputPausePeriodItemProvider = new MaxOutputPausePeriodItemProvider(this);
 		}
 
 		return maxOutputPausePeriodItemProvider;
@@ -702,8 +687,7 @@ public class GeneratorItemProviderAdapterFactory extends
 	@Override
 	public Adapter createPassiveReconnectDurationAdapter() {
 		if (passiveReconnectDurationItemProvider == null) {
-			passiveReconnectDurationItemProvider = new PassiveReconnectDurationItemProvider(
-					this);
+			passiveReconnectDurationItemProvider = new PassiveReconnectDurationItemProvider(this);
 		}
 
 		return passiveReconnectDurationItemProvider;
@@ -726,8 +710,7 @@ public class GeneratorItemProviderAdapterFactory extends
 	@Override
 	public Adapter createPassiveConnectDurationAdapter() {
 		if (passiveConnectDurationItemProvider == null) {
-			passiveConnectDurationItemProvider = new PassiveConnectDurationItemProvider(
-					this);
+			passiveConnectDurationItemProvider = new PassiveConnectDurationItemProvider(this);
 		}
 
 		return passiveConnectDurationItemProvider;
@@ -1118,8 +1101,7 @@ public class GeneratorItemProviderAdapterFactory extends
 	@Override
 	public Adapter createMulticastTransportAdapter() {
 		if (multicastTransportItemProvider == null) {
-			multicastTransportItemProvider = new MulticastTransportItemProvider(
-					this);
+			multicastTransportItemProvider = new MulticastTransportItemProvider(this);
 		}
 
 		return multicastTransportItemProvider;
@@ -1177,9 +1159,9 @@ public class GeneratorItemProviderAdapterFactory extends
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public ComposeableAdapterFactory getRootAdapterFactory() {
-		return parentAdapterFactory == null ? this : parentAdapterFactory
-				.getRootAdapterFactory();
+		return parentAdapterFactory == null ? this : parentAdapterFactory.getRootAdapterFactory();
 	}
 
 	/**
@@ -1188,8 +1170,8 @@ public class GeneratorItemProviderAdapterFactory extends
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	public void setParentAdapterFactory(
-			ComposedAdapterFactory parentAdapterFactory) {
+	@Override
+	public void setParentAdapterFactory(ComposedAdapterFactory parentAdapterFactory) {
 		this.parentAdapterFactory = parentAdapterFactory;
 	}
 
@@ -1223,8 +1205,7 @@ public class GeneratorItemProviderAdapterFactory extends
 	public Object adapt(Object object, Object type) {
 		if (isFactoryForType(type)) {
 			Object adapter = super.adapt(object, type);
-			if (!(type instanceof Class<?>)
-					|| (((Class<?>) type).isInstance(adapter))) {
+			if (!(type instanceof Class<?>) || (((Class<?>) type).isInstance(adapter))) {
 				return adapter;
 			}
 		}
@@ -1246,10 +1227,8 @@ public class GeneratorItemProviderAdapterFactory extends
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	public Collection<?> getNewChildDescriptors(Object object,
-			EditingDomain editingDomain) {
-		return childCreationExtenderManager.getNewChildDescriptors(object,
-				editingDomain);
+	public Collection<?> getNewChildDescriptors(Object object, EditingDomain editingDomain) {
+		return childCreationExtenderManager.getNewChildDescriptors(object, editingDomain);
 	}
 
 	/**
@@ -1267,6 +1246,7 @@ public class GeneratorItemProviderAdapterFactory extends
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void addListener(INotifyChangedListener notifyChangedListener) {
 		changeNotifier.addListener(notifyChangedListener);
 	}
@@ -1277,6 +1257,7 @@ public class GeneratorItemProviderAdapterFactory extends
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void removeListener(INotifyChangedListener notifyChangedListener) {
 		changeNotifier.removeListener(notifyChangedListener);
 	}
@@ -1287,6 +1268,7 @@ public class GeneratorItemProviderAdapterFactory extends
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void fireNotifyChanged(Notification notification) {
 		changeNotifier.fireNotifyChanged(notification);
 
@@ -1301,6 +1283,7 @@ public class GeneratorItemProviderAdapterFactory extends
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void dispose() {
 		if (codeGenItemProvider != null)
 			codeGenItemProvider.dispose();

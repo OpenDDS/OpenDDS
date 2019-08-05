@@ -11,6 +11,8 @@ use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 use strict;
 
+PerlDDS::add_lib_path('../ConsolidatedMessengerIdl');
+
 my $send_interval = 0;
 my $test_duration = 300;
 if ($ARGV[0] eq 'long') {
@@ -97,7 +99,7 @@ open(MONOUT,"mon.out");
 my @monout=<MONOUT>;close MONOUT;
 my $mon_count = grep /Report/,@monout;
 print STDOUT "mon_count=$mon_count\n";
-if ($mon_count < 150) {
+if ($mon_count < 145) {
     print STDERR "ERROR: Insufficient number of monitor messages seen\n";
     $status = 1;
 }

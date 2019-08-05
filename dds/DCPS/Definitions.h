@@ -61,9 +61,10 @@
 #endif
 
 #ifdef OPENDDS_SAFETY_PROFILE
-#define OPENDDS_ASSERT(C) ((void) 0)
+#  define OPENDDS_ASSERT(C) ((void) 0)
 #else
-#define OPENDDS_ASSERT(C) assert(C)
+#  include <cassert>
+#  define OPENDDS_ASSERT(C) assert(C)
 #endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL

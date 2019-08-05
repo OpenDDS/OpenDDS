@@ -25,7 +25,7 @@
 #include "dds/DCPS/PoolAllocator.h"
 
 #include "dds/DCPS/transport/framework/DataLink.h"
-#include "dds/DCPS/transport/framework/TransportReactorTask.h"
+#include "dds/DCPS/ReactorTask.h"
 #include "dds/DCPS/transport/framework/TransportSendBuffer.h"
 
 #include "ace/SOCK_Dgram_Mcast.h"
@@ -46,7 +46,7 @@ public:
                     const MulticastSessionFactory_rch& session_factory,
                     MulticastPeer local_peer,
                     MulticastInst& config,
-                    TransportReactorTask* reactor_task,
+                    ReactorTask* reactor_task,
                     bool is_active);
   virtual ~MulticastDataLink();
 
@@ -62,7 +62,7 @@ public:
 
   MulticastInst& config();
 
-  TransportReactorTask* reactor_task();
+  ReactorTask* reactor_task();
   ACE_Reactor* get_reactor();
   ACE_Proactor* get_proactor();
 
@@ -85,7 +85,7 @@ private:
 
   MulticastPeer local_peer_;
 
-  TransportReactorTask* reactor_task_;
+  ReactorTask* reactor_task_;
 
   MulticastSendStrategy_rch send_strategy_;
   MulticastReceiveStrategy_rch recv_strategy_;

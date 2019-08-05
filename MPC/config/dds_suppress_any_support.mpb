@@ -4,5 +4,5 @@ feature (dds_suppress_anys) : taoidldefaults, dcps_ts_defaults {
   dcps_ts_flags += -Sa -St
 }
 
-feature (!dds_suppress_anys) : taoidldefaults, anytypecode {
+feature (!dds_suppress_anys) : taoidldefaults, dds_any_support {
 }

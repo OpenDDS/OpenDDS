@@ -289,11 +289,22 @@ BE_produce()
   ifstream idl(idl_fn);
   const size_t buffer_sz = 512;
   char buffer[buffer_sz];
-
+  unsigned lineno = 0;
+  bool warned_dcps_data_type =
+    be_global->no_dcps_data_type_warnings_ ||
+    !idl_global->print_warnings();
   while (idl) {
     idl.getline(buffer, buffer_sz);
+    ++lineno;
 
-    if (0 == strncmp("#include", buffer, 8)) { //FUTURE: account for comments?
+    if (!(warned_dcps_data_type || strncmp("#pragma DCPS_DATA_TYPE", buffer, 22))) {
+      be_global->warning(idl_fn, lineno, "\n"
+        "  DCPS_DATA_TYPE and DCPS_DATA_KEY pragma statements are deprecated; please\n"
+        "  use @topic, @key, @nested, and @default_nested instead. See section 2.1.1,\n"
+        "  \"Defining the Data Types\", of the OpenDDS Developer's Guide for more\n"
+        "  information.");
+      warned_dcps_data_type = true;
+    } else if (0 == strncmp("#include", buffer, 8)) { //FUTURE: account for comments?
       string inc(buffer + 8);
       size_t delim1 = inc.find_first_of("<\"");
       size_t delim2 = inc.find_first_of(">\"", delim1 + 1);
@@ -321,10 +332,10 @@ BE_produce()
         if (stb_inc == "orbC.h" ||
             (stb_inc.size() >= 7
             && stb_inc.substr(stb_inc.size() - 7) == "/orbC.h") ) {
-          ACE_DEBUG((LM_WARNING,
-                     ACE_TEXT("Warning: (%s) Potential inclusion of TAO orbC.H ")
-                     ACE_TEXT(" Include TAO orb.idl with path of tao/orb.idl")
-                     ACE_TEXT(" to prevent compilation errors\n"), idl_fn));
+          be_global->warning(idl_fn, lineno,
+            "Potential inclusion of TAO orbC.h\n"
+            "  Include TAO orb.idl with path of tao/orb.idl"
+            "  to prevent compilation errors");
         }
       }
 

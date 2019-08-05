@@ -51,6 +51,9 @@ feature (built_in_topics): dcps_ts_defaults, idl2jni {
     keyword dcps_ts_java_flags = commandflags
   }
 
+  // Topic types must be declared using topic anotations
+  dcps_ts_java_flags += --default-nested
+
   TypeSupportJavaOnly_Files {
     dcps_ts_java_flags += -Wb,java=BitsJC.cpp
     $(DDS_ROOT)/dds/DdsDcpsCore.idl >> BitsJC.cpp DDS/ParticipantBuiltinTopicDataTypeSupportImpl.java DDS/TopicBuiltinTopicDataTypeSupportImpl.java DDS/PublicationBuiltinTopicDataTypeSupportImpl.java DDS/SubscriptionBuiltinTopicDataTypeSupportImpl.java

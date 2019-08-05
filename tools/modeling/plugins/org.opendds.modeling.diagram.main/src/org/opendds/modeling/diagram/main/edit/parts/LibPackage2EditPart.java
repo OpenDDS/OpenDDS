@@ -71,12 +71,10 @@ public class LibPackage2EditPart extends ShapeNodeEditPart {
 	 */
 	protected void createDefaultEditPolicies() {
 		// Custom code begin
-		installEditPolicy(EditPolicyRoles.CREATION_ROLE,
-				new CreationEditPolicy());
+		installEditPolicy(EditPolicyRoles.CREATION_ROLE, new CreationEditPolicy());
 		// Custom code end
 		super.createDefaultEditPolicies();
-		installEditPolicy(EditPolicyRoles.SEMANTIC_ROLE,
-				new LibPackage2ItemSemanticEditPolicy());
+		installEditPolicy(EditPolicyRoles.SEMANTIC_ROLE, new LibPackage2ItemSemanticEditPolicy());
 		installEditPolicy(EditPolicy.LAYOUT_ROLE, createLayoutEditPolicy());
 		// XXX need an SCR to runtime to have another abstract superclass that would let children add reasonable editpolicies
 		// removeEditPolicy(org.eclipse.gmf.runtime.diagram.ui.editpolicies.EditPolicyRoles.CONNECTION_HANDLES_ROLE);
@@ -89,8 +87,7 @@ public class LibPackage2EditPart extends ShapeNodeEditPart {
 		org.eclipse.gmf.runtime.diagram.ui.editpolicies.LayoutEditPolicy lep = new org.eclipse.gmf.runtime.diagram.ui.editpolicies.LayoutEditPolicy() {
 
 			protected EditPolicy createChildEditPolicy(EditPart child) {
-				EditPolicy result = child
-						.getEditPolicy(EditPolicy.PRIMARY_DRAG_ROLE);
+				EditPolicy result = child.getEditPolicy(EditPolicy.PRIMARY_DRAG_ROLE);
 				if (result == null) {
 					result = new NonResizableEditPolicy();
 				}
@@ -127,8 +124,7 @@ public class LibPackage2EditPart extends ShapeNodeEditPart {
 	 */
 	protected boolean addFixedChild(EditPart childEditPart) {
 		if (childEditPart instanceof LibPackageName2EditPart) {
-			((LibPackageName2EditPart) childEditPart)
-					.setLabel(getPrimaryShape().getFigureUmlPackageNameLabel());
+			((LibPackageName2EditPart) childEditPart).setLabel(getPrimaryShape().getFigureUmlPackageNameLabel());
 			return true;
 		}
 		return false;
@@ -261,8 +257,7 @@ public class LibPackage2EditPart extends ShapeNodeEditPart {
 	 * @generated
 	 */
 	public EditPart getPrimaryChildEditPart() {
-		return getChildBySemanticHint(OpenDDSVisualIDRegistry
-				.getType(LibPackageName2EditPart.VISUAL_ID));
+		return getChildBySemanticHint(OpenDDSVisualIDRegistry.getType(LibPackageName2EditPart.VISUAL_ID));
 	}
 
 	/**
@@ -271,26 +266,24 @@ public class LibPackage2EditPart extends ShapeNodeEditPart {
 	 */
 	public EditPart getTargetEditPart(Request request) {
 		if (request instanceof CreateViewAndElementRequest) {
-			CreateElementRequestAdapter adapter = ((CreateViewAndElementRequest) request)
-					.getViewAndElementDescriptor()
+			CreateElementRequestAdapter adapter = ((CreateViewAndElementRequest) request).getViewAndElementDescriptor()
 					.getCreateElementRequestAdapter();
-			IElementType type = (IElementType) adapter
-					.getAdapter(IElementType.class);
+			IElementType type = (IElementType) adapter.getAdapter(IElementType.class);
 			if (type == OpenDDSElementTypes.LibPackage_3001) {
-				return getChildBySemanticHint(OpenDDSVisualIDRegistry
-						.getType(LibPackageUmlPackageCompartment2EditPart.VISUAL_ID));
+				return getChildBySemanticHint(
+						OpenDDSVisualIDRegistry.getType(LibPackageUmlPackageCompartment2EditPart.VISUAL_ID));
 			}
 			if (type == OpenDDSElementTypes.DataLib_3002) {
-				return getChildBySemanticHint(OpenDDSVisualIDRegistry
-						.getType(LibPackageUmlPackageCompartment2EditPart.VISUAL_ID));
+				return getChildBySemanticHint(
+						OpenDDSVisualIDRegistry.getType(LibPackageUmlPackageCompartment2EditPart.VISUAL_ID));
 			}
 			if (type == OpenDDSElementTypes.DcpsLib_3003) {
-				return getChildBySemanticHint(OpenDDSVisualIDRegistry
-						.getType(LibPackageUmlPackageCompartment2EditPart.VISUAL_ID));
+				return getChildBySemanticHint(
+						OpenDDSVisualIDRegistry.getType(LibPackageUmlPackageCompartment2EditPart.VISUAL_ID));
 			}
 			if (type == OpenDDSElementTypes.PolicyLib_3004) {
-				return getChildBySemanticHint(OpenDDSVisualIDRegistry
-						.getType(LibPackageUmlPackageCompartment2EditPart.VISUAL_ID));
+				return getChildBySemanticHint(
+						OpenDDSVisualIDRegistry.getType(LibPackageUmlPackageCompartment2EditPart.VISUAL_ID));
 			}
 		}
 		return super.getTargetEditPart(request);
@@ -316,8 +309,7 @@ public class LibPackage2EditPart extends ShapeNodeEditPart {
 			layoutThis.makeColumnsEqualWidth = false;
 			this.setLayoutManager(layoutThis);
 
-			this.setBorder(new MarginBorder(getMapMode().DPtoLP(15),
-					getMapMode().DPtoLP(0), getMapMode().DPtoLP(0),
+			this.setBorder(new MarginBorder(getMapMode().DPtoLP(15), getMapMode().DPtoLP(0), getMapMode().DPtoLP(0),
 					getMapMode().DPtoLP(0)));
 			createContents();
 		}

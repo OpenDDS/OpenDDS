@@ -112,20 +112,24 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
   ::DDS::TopicQos_var topicQos = new ::DDS::TopicQos;
   *topicQos = TheServiceParticipant->initial_TopicQos();
 
+  struct Callbacks : public OpenDDS::DCPS::TopicCallbacks {
+    void inconsistent_topic(int /*count*/) {}
+  } callbacks;
+
   if (use_rtps) { // check that topic/type name string bounds are enforced
     const std::string longname(300, 'a');
     OpenDDS::DCPS::RepoId topicId;
     const bool key = false;
     OpenDDS::DCPS::TopicStatus ts =
       disc->assert_topic(topicId, domain, pubPartId,
-                         longname.c_str(), "shortname", topicQos, key);
+                         longname.c_str(), "shortname", topicQos, key, &callbacks);
     if (ts != OpenDDS::DCPS::PRECONDITION_NOT_MET) {
       failed = true;
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("ERROR: expected long topic name to be rejected\n")));
     }
     ts = disc->assert_topic(topicId, domain, pubPartId,
-                            "shortname", longname.c_str(), topicQos, key);
+                            "shortname", longname.c_str(), topicQos, key, &callbacks);
     if (ts != OpenDDS::DCPS::PRECONDITION_NOT_MET) {
       failed = true;
       ACE_ERROR((LM_ERROR,
@@ -136,13 +140,15 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
   // add a topic
   const char* tname = "MYtopic";
   const char* dname = "MYdataname";
+
   OpenDDS::DCPS::TopicStatus topicStatus = disc->assert_topic(pubTopicId,
-                                                       domain,
-                                                       pubPartId,
-                                                       tname,
-                                                       dname,
-                                                       topicQos.in(),
-                                                       false);
+                                                              domain,
+                                                              pubPartId,
+                                                              tname,
+                                                              dname,
+                                                              topicQos.in(),
+                                                              false,
+                                                              &callbacks);
 
   if (topicStatus != OpenDDS::DCPS::CREATED)
     {
@@ -196,7 +202,8 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
                                    tnameIncompatible,
                                    dnameIncompatible,
                                    topicQosIncompatible.in(),
-                                   false);
+                                   false,
+                                   0);
 
   if (topicStatus != OpenDDS::DCPS::CONFLICTING_TYPENAME)
     {
@@ -244,7 +251,8 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
                                    tname,
                                    dname,
                                    topicQos.in(),
-                                   false);
+                                   false,
+                                   &callbacks);
 
   if (topicStatus != OpenDDS::DCPS::CREATED)
     {

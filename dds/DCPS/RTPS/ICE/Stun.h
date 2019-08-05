@@ -61,10 +61,13 @@ enum AttributeType {
   // ALTERNATE_SERVER   = 0x8023,
   FINGERPRINT        = 0x8028,
   ICE_CONTROLLED     = 0x8029,
-  ICE_CONTROLLING    = 0x802A
+  ICE_CONTROLLING    = 0x802A,
+  LAST_ATTRIBUTE     = 0xFFFF
 };
 
 struct Attribute {
+  Attribute() : type(LAST_ATTRIBUTE), unknown_length(0) {}
+
   AttributeType type;
 
   ACE_INET_Addr mapped_address; // MAPPED_ADDRESS, XOR_MAPPED_ADDRESS
@@ -119,7 +122,7 @@ struct Message {
   TransactionId transaction_id;
 
   Message()
-  : block(0), length_(0), length_for_message_integrity_(0) {}
+  : class_(REQUEST), method(BINDING), block(0), length_(0), length_for_message_integrity_(0) {}
 
   void generate_transaction_id();
 

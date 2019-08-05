@@ -1,3 +1,11 @@
+schedules:
+- cron: "0 7 * * SUN"
+  displayName: Weekly Sunday
+  branches:
+    include:
+    - master
+  always: true
+
 jobs:
 - job: VisualStudio2019
   timeoutInMinutes: 90
@@ -21,11 +29,13 @@ jobs:
     VCPKG_ROOT: $(Build.SourcesDirectory)\vcpkg
   steps:
   - script: |
+      if %BuildPlatform%==x64 (set VCVARS_ARCH=x64) else set VCVARS_ARCH=x86
+      echo ##vso[task.setvariable variable=VcVarsArch]%VCVARS_ARCH%
+    displayName: Set VcVarsArch
+  - script: |
       git clone -q --depth 1 git://github.com/Microsoft/vcpkg.git %VCPKG_ROOT%
       call %VCPKG_ROOT%\bootstrap-vcpkg.bat
-      if %BuildPlatform%==x64 (set VCVARS_ARCH=x64) else set VCVARS_ARCH=x86
-      set VCPKG_ARCH=%VCVARS_ARCH%-windows
-      echo ##vso[task.setvariable variable=VcVarsArch]%VCVARS_ARCH%
+      set VCPKG_ARCH=$(VcVarsArch)-windows
       %VCPKG_ROOT%\vcpkg install --triplet %VCPKG_ARCH% openssl xerces-c
       rmdir /s/q %VCPKG_ROOT%\packages %VCPKG_ROOT%\buildtrees
       echo ##vso[task.setvariable variable=VcPkgInst]%VCPKG_ROOT%\installed\%VCPKG_ARCH%
@@ -89,15 +99,18 @@ jobs:
     VCPKG_ROOT: $(Build.SourcesDirectory)\vcpkg
   steps:
   - script: |
+      if %BuildPlatform%==x64 (set VCVARS_ARCH=x64) else set VCVARS_ARCH=x86
+      echo ##vso[task.setvariable variable=VcVarsArch]%VCVARS_ARCH%
+    displayName: Set VcVarsArch
+  - script: |
       git clone -q --depth 1 git://github.com/Microsoft/vcpkg.git %VCPKG_ROOT%
       call %VCPKG_ROOT%\bootstrap-vcpkg.bat
-      if %BuildPlatform%==x64 (set VCVARS_ARCH=x64) else set VCVARS_ARCH=x86
-      set VCPKG_ARCH=%VCVARS_ARCH%-windows
-      echo ##vso[task.setvariable variable=VcVarsArch]%VCVARS_ARCH%
+      set VCPKG_ARCH=$(VcVarsArch)-windows
       %VCPKG_ROOT%\vcpkg install --triplet %VCPKG_ARCH% openssl xerces-c
       rmdir /s/q %VCPKG_ROOT%\packages %VCPKG_ROOT%\buildtrees
       echo ##vso[task.setvariable variable=VcPkgInst]%VCPKG_ROOT%\installed\%VCPKG_ARCH%
     displayName: Vcpkg
+    condition: not(and(eq(variables['BuildConfiguration'], 'Debug'), eq(variables['BuildPlatform'], 'x64')))
   - task: BatchScript@1
     displayName: VcVars
     inputs:
@@ -112,7 +125,9 @@ jobs:
       modifyEnvironment: true
   - script: |
       if %BuildConfiguration%==Release set OPT=--no-tests --no-debug --optimize
-      call configure -v --ace-github-latest --security --xerces3=$(VcPkgInst) --openssl=$(VcPkgInst) %OPT%
+      set SEC=--security --xerces3=$(VcPkgInst) --openssl=$(VcPkgInst)
+      if %BuildConfiguration%==Debug if %BuildPlatform%==x64 set SEC= # Debug64 Fills up Disk with Security
+      call configure -v --ace-github-latest %SEC% %OPT%
       perl tools\scripts\show_build_config.pl
       if %BuildConfiguration%==Release (set SLN=DDS_TAOv2.sln) else set SLN=DDS_TAOv2_all.sln
       echo ##vso[task.setvariable variable=BuildSolution]%SLN%
@@ -148,11 +163,13 @@ jobs:
     VCPKG_ROOT: $(Build.SourcesDirectory)\vcpkg
   steps:
   - script: |
+      if %BuildPlatform%==x64 (set VCVARS_ARCH=x64) else set VCVARS_ARCH=x86
+      echo ##vso[task.setvariable variable=VcVarsArch]%VCVARS_ARCH%
+    displayName: Set VcVarsArch
+  - script: |
       git clone -q --depth 1 git://github.com/Microsoft/vcpkg.git %VCPKG_ROOT%
       call %VCPKG_ROOT%\bootstrap-vcpkg.bat
-      if %BuildPlatform%==x64 (set VCVARS_ARCH=x64) else set VCVARS_ARCH=x86
-      set VCPKG_ARCH=%VCVARS_ARCH%-windows
-      echo ##vso[task.setvariable variable=VcVarsArch]%VCVARS_ARCH%
+      set VCPKG_ARCH=$(VcVarsArch)-windows
       %VCPKG_ROOT%\vcpkg install --triplet %VCPKG_ARCH% openssl xerces-c
       rmdir /s/q %VCPKG_ROOT%\packages %VCPKG_ROOT%\buildtrees
       echo ##vso[task.setvariable variable=VcPkgInst]%VCPKG_ROOT%\installed\%VCPKG_ARCH%

@@ -44,8 +44,7 @@ public final class GeneratorEditPlugin extends EMFPlugin {
 	 * @generated NOT
 	 */
 	public GeneratorEditPlugin() {
-		super(new ResourceLocator[] { Plugin.INSTANCE
-				.getPluginResourceLocator() });
+		super(new ResourceLocator[] { Plugin.INSTANCE.getPluginResourceLocator() });
 	}
 
 	/**

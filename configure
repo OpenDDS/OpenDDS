@@ -25,7 +25,7 @@ use warnings;
 ## Version of OCI's TAO to download
 my $oci_tao_version = '2.2a';
 ## Version of DOC Group ACE/TAO to download, uses the ACE version number
-my $doc_tao_version = '6.5.5';
+my $doc_tao_version = '6.5.6';
 
 # save args before Getopt modifies them
 my @ARGS = @ARGV;
@@ -1694,6 +1694,8 @@ sub generate_workspace {
   my $buildEnv = shift;
   $buildtao = 0;
   my $is_target = $buildEnv->{'build'} eq 'target';
+
+  disable_feature(\@features, 'dcps_data_type_warnings');
 
   for my $feat (qw/built-in-topics ownership-profile/) {
     if (exists $opts{$feat} && !$opts{$feat}) {

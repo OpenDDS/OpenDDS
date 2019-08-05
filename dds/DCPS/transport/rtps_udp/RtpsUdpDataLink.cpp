@@ -80,7 +80,7 @@ namespace DCPS {
 RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
                                  const GuidPrefix_t& local_prefix,
                                  const RtpsUdpInst& config,
-                                 const TransportReactorTask_rch& reactor_task)
+                                 const ReactorTask_rch& reactor_task)
   : DataLink(transport, // 3 data link "attributes", below, are unused
              0,         // priority
              false,     // is_loopback
@@ -258,7 +258,7 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
   send_strategy()->send_buffer(&multi_buff_);
 
   if (start(send_strategy_,
-            receive_strategy_) != 0) {
+            receive_strategy_, false) != 0) {
     stop_i();
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
@@ -266,6 +266,15 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
                      false);
   }
 
+  return true;
+}
+
+bool
+RtpsUdpDataLink::add_on_start_callback(const TransportClient_wrch& client, const RepoId& remote)
+{
+  GuardType guard(strategy_lock_);
+
+  on_start_callbacks_.push_back(std::make_pair(client, remote));
   return true;
 }
 
@@ -296,24 +305,28 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
   bool enable_heartbeat = false;
 
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  if (conv.isWriter() && remote_reliable) {
-    // Insert count if not already there.
-    RtpsWriterMap::iterator rw = writers_.find(local_id);
-    if (rw == writers_.end()) {
-      RtpsUdpDataLink_rch link(this, OpenDDS::DCPS::inc_count());
-      CORBA::Long hb_start = 0;
-      HeartBeatCountMapType::iterator hbc_it = heartbeat_counts_.find(local_id);
-      if (hbc_it != heartbeat_counts_.end()) {
-        hb_start = hbc_it->second;
-        heartbeat_counts_.erase(hbc_it);
+  if (conv.isWriter()) {
+    if (remote_reliable) {
+      // Insert count if not already there.
+      RtpsWriterMap::iterator rw = writers_.find(local_id);
+      if (rw == writers_.end()) {
+        RtpsUdpDataLink_rch link(this, OpenDDS::DCPS::inc_count());
+        CORBA::Long hb_start = 0;
+        HeartBeatCountMapType::iterator hbc_it = heartbeat_counts_.find(local_id);
+        if (hbc_it != heartbeat_counts_.end()) {
+          hb_start = hbc_it->second;
+          heartbeat_counts_.erase(hbc_it);
+        }
+        RtpsWriter_rch writer = make_rch<RtpsWriter>(link, local_id, local_durable, hb_start);
+        rw = writers_.insert(RtpsWriterMap::value_type(local_id, writer)).first;
       }
-      RtpsWriter_rch writer = make_rch<RtpsWriter>(link, local_id, local_durable, hb_start);
-      rw = writers_.insert(RtpsWriterMap::value_type(local_id, writer)).first;
+      RtpsWriter_rch writer = rw->second;
+      enable_heartbeat = true;
+      g.release();
+      writer->add_reader(remote_id, ReaderInfo(remote_durable));
+    } else {
+      invoke_on_start_callbacks(local_id, remote_id, true);
     }
-    RtpsWriter_rch writer = rw->second;
-    enable_heartbeat = !remote_durable;
-    g.release();
-    writer->add_reader(remote_id, ReaderInfo(remote_durable));
   } else if (conv.isReader()) {
     RtpsReaderMap::iterator rr = readers_.find(local_id);
     if (rr == readers_.end()) {
@@ -970,7 +983,7 @@ RtpsUdpDataLink::RtpsWriter::end_historic_samples_i(const DataSampleHeader& head
         }
       }
     }
-    ready_to_hb_ = true;
+
     // This should always succeed, since this method is called by customize_queue_element_helper,
     // which already holds a RCH to the datalink... this is just to avoid adding another parameter to pass it
     RtpsUdpDataLink_rch link = link_.lock();
@@ -1313,32 +1326,33 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
   last.setValue(heartbeat.lastSN.high, heartbeat.lastSN.low);
   static const SequenceNumber starting, zero = SequenceNumber::ZERO();
 
-  DisjointSequence& recvd = info.recvd_;
+  // Only 'apply' heartbeat ranges to received set if the heartbeat is valid
+  // But for the sake of speedy discovery / association we'll still respond to invalid non-final heartbeats
+  if (last.getValue() >= starting.getValue()) {
+
+    DisjointSequence& recvd = info.recvd_;
   if (!durable_ && info.initial_hb_) {
-    if (last.getValue() < starting.getValue()) {
-      // this is an invalid heartbeat -- last must be positive
-      return false;
+      // For the non-durable reader, the first received HB or DATA establishes
+      // a baseline of the lowest sequence number we'd ever need to NACK.
+      if (recvd.empty() || recvd.low() >= last) {
+        recvd.insert(SequenceRange(zero, last));
+      } else {
+        recvd.insert(SequenceRange(zero, recvd.low()));
+      }
+    } else if (!recvd.empty()) {
+      // All sequence numbers below 'first' should not be NACKed.
+      // The value of 'first' may not decrease with subsequent HBs.
+      recvd.insert(SequenceRange(zero,
+                                 (first > starting) ? first.previous() : zero));
     }
-    // For the non-durable reader, the first received HB or DATA establishes
-    // a baseline of the lowest sequence number we'd ever need to NACK.
-    if (recvd.empty() || recvd.low() >= last) {
-      recvd.insert(SequenceRange(zero, last));
-    } else {
-      recvd.insert(SequenceRange(zero, recvd.low()));
-    }
-  } else if (!recvd.empty()) {
-    // All sequence numbers below 'first' should not be NACKed.
-    // The value of 'first' may not decrease with subsequent HBs.
-    recvd.insert(SequenceRange(zero,
-                               (first > starting) ? first.previous() : zero));
-  }
 
   link->deliver_held_data(id_, info, durable_);
 
-  //FUTURE: to support wait_for_acks(), notify DCPS layer of the sequence
-  //        numbers we no longer expect to receive due to HEARTBEAT
+    //FUTURE: to support wait_for_acks(), notify DCPS layer of the sequence
+    //        numbers we no longer expect to receive due to HEARTBEAT
 
-  info.initial_hb_ = false;
+    info.initial_hb_ = false;
+  }
 
   const bool is_final = heartbeat.smHeader.flags & RTPS::FLAG_F,
     liveliness = heartbeat.smHeader.flags & RTPS::FLAG_L;
@@ -1379,7 +1393,6 @@ RtpsUdpDataLink::RtpsWriter::add_reader(const RepoId& id, const ReaderInfo& info
   ReaderInfoMap::const_iterator iter = remote_readers_.find(id);
   if (iter == remote_readers_.end()) {
     remote_readers_.insert(ReaderInfoMap::value_type(id, info));
-    ready_to_hb_ = !info.durable_;
     return true;
   }
   return false;
@@ -1650,7 +1663,7 @@ struct BundleHelper {
   }
 
   template <typename T>
-  void push_to_next_bundle(const T& val) {
+  void push_to_next_bundle(const T&) {
     response_bundle_sizes_.push_back(prev_size_ + prev_padding_);
     size_ -= prev_size_; padding_ -= prev_padding_; prev_size_ = 0; prev_padding_ = 0;
   }
@@ -2304,7 +2317,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   }
   g.release();
   if (first_ack) {
-    link->first_acknowledged_by_reader(id_, remote, received_sn_base);
+    link->invoke_on_start_callbacks(id_, remote, true);
   }
 }
 
@@ -2853,13 +2866,8 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
     return true;
   }
 
-  if (!ready_to_hb_) {
-    return true;
-  }
-
   const SequenceNumber firstSN = (durable_ || !has_data) ? 1 : send_buff_->low(),
     lastSN = std::max(durable_max, has_data ? send_buff_->high() : SequenceNumber::ZERO());
-
   using namespace OpenDDS::RTPS;
 
   const HeartBeatSubmessage hb = {
@@ -2936,7 +2944,9 @@ RtpsUdpDataLink::send_relay_beacon()
     }
   }
 
-  ACE_Message_Block mb(static_cast<size_t>(0));
+  // Create a message with a few bytes of data for the beacon
+  ACE_Message_Block mb(reinterpret_cast<const char*>(OpenDDS::RTPS::BEACON_MESSAGE), OpenDDS::RTPS::BEACON_MESSAGE_LENGTH);
+  mb.wr_ptr(OpenDDS::RTPS::BEACON_MESSAGE_LENGTH);
   send_strategy()->send_rtps_control(mb, config().rtps_relay_address());
 }
 
@@ -3223,7 +3233,7 @@ RtpsUdpDataLink::send_final_acks(const RepoId& readerid)
 int
 RtpsUdpDataLink::HeldDataDeliveryHandler::handle_exception(ACE_HANDLE /* fd */)
 {
-  ACE_ASSERT(link_->reactor_task_->get_reactor_owner() == ACE_Thread::self());
+  OPENDDS_ASSERT(link_->reactor_task_->get_reactor_owner() == ACE_Thread::self());
 
   HeldData::iterator itr;
   for (itr = held_data_.begin(); itr != held_data_.end(); ++itr) {
@@ -3236,7 +3246,7 @@ RtpsUdpDataLink::HeldDataDeliveryHandler::handle_exception(ACE_HANDLE /* fd */)
 
 void RtpsUdpDataLink::HeldDataDeliveryHandler::notify_delivery(const RepoId& readerId, WriterInfo& info)
 {
-  ACE_ASSERT(link_->reactor_task_->get_reactor_owner() == ACE_Thread::self());
+  OPENDDS_ASSERT(link_->reactor_task_->get_reactor_owner() == ACE_Thread::self());
 
   const SequenceNumber ca = info.recvd_.cumulative_ack();
   typedef OPENDDS_MAP(SequenceNumber, ReceivedDataSample)::iterator iter;

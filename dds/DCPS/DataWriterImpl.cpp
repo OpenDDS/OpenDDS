@@ -394,7 +394,7 @@ DataWriterImpl::association_complete(const RepoId& remote_id)
       GuidConverter reader_converter(remote_id);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataWriterImpl::association_complete - ")
-                 ACE_TEXT("bit %d local %C did not find pending reader: %C")
+                 ACE_TEXT("bit %d local %C did not find pending reader: %C ")
                  ACE_TEXT("defer association_complete_i until add_association resumes\n"),
                  is_bit_,
                  OPENDDS_STRING(writer_converter).c_str(),
@@ -854,12 +854,6 @@ DataWriterImpl::update_subscription_params(const RepoId& readerId,
 #endif
 }
 
-void
-DataWriterImpl::inconsistent_topic()
-{
-  topic_servant_->inconsistent_topic();
-}
-
 DDS::ReturnCode_t
 DataWriterImpl::set_qos(const DDS::DataWriterQos & qos)
 {
@@ -1275,6 +1269,10 @@ DataWriterImpl::enable()
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
+  if (!topic_servant_->is_enabled()) {
+    return DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
+
   RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
   if (participant) {
     dp_id_ = participant->get_id();
@@ -1520,7 +1518,8 @@ DataWriterImpl::register_instance_i(DDS::InstanceHandle_t& handle,
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::register_instance_i: ")
-                      ACE_TEXT("register instance with container failed.\n")),
+                      ACE_TEXT("register instance with container failed, returned <%C>.\n"),
+                      retcode_to_string(ret).c_str()),
                      ret);
   }
 
@@ -1573,12 +1572,13 @@ DataWriterImpl::register_instance_from_durable_data(DDS::InstanceHandle_t& handl
                    get_lock(),
                    DDS::RETCODE_ERROR);
 
-  DDS::ReturnCode_t ret = register_instance_i(handle, move(data), source_timestamp);
+  const DDS::ReturnCode_t ret = register_instance_i(handle, move(data), source_timestamp);
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::register_instance_from_durable_data: ")
-                      ACE_TEXT("register instance with container failed.\n")),
-                      ret);
+                      ACE_TEXT("register instance with container failed, returned <%C>.\n"),
+                      retcode_to_string(ret).c_str()),
+                     ret);
   }
 
   send_all_to_flush_control(guard);

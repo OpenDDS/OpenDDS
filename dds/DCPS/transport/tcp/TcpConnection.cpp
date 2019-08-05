@@ -140,7 +140,7 @@ OpenDDS::DCPS::TcpConnection::open(void* arg)
 
     const bool is_loop(local_address_ == remote_address_);
     const PriorityKey key(transport_priority_, remote_address_,
-                          is_loop, false /* !active */);
+                          is_loop, true /* active */);
 
     int active_open_ = active_open();
 
@@ -155,6 +155,7 @@ OpenDDS::DCPS::TcpConnection::open(void* arg)
       return -1;
     }
 
+    transport.async_connect_succeeded(key);
     return 0;
   }
 

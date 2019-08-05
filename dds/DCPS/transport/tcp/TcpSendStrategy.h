@@ -13,7 +13,7 @@
 #include "TcpInst_rch.h"
 #include "TcpConnection_rch.h"
 #include "dds/DCPS/transport/framework/TransportSendStrategy.h"
-#include "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
+#include "dds/DCPS/ReactorTask_rch.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -28,7 +28,7 @@ public:
   TcpSendStrategy(std::size_t id,
                   TcpDataLink& link,
                   TcpSynchResource* synch_resource,
-                  const TransportReactorTask_rch& task,
+                  const ReactorTask_rch& task,
                   Priority priority);
   virtual ~TcpSendStrategy();
 
@@ -55,7 +55,7 @@ protected:
   virtual void add_delayed_notification(TransportQueueElement* element);
 private:
   TcpDataLink& link_;
-  TransportReactorTask_rch reactor_task_;
+  ReactorTask_rch reactor_task_;
 };
 
 } // namespace DCPS

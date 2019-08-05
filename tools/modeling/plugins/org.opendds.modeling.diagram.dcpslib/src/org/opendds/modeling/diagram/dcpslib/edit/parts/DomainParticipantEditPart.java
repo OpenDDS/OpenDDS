@@ -70,11 +70,9 @@ public class DomainParticipantEditPart extends ShapeNodeEditPart {
 	 */
 	protected void createDefaultEditPolicies() {
 		installEditPolicy(EditPolicyRoles.CREATION_ROLE,
-				new CreationEditPolicyWithCustomReparent(
-						OpenDDSDcpsLibVisualIDRegistry.TYPED_INSTANCE));
+				new CreationEditPolicyWithCustomReparent(OpenDDSDcpsLibVisualIDRegistry.TYPED_INSTANCE));
 		super.createDefaultEditPolicies();
-		installEditPolicy(EditPolicyRoles.SEMANTIC_ROLE,
-				new DomainParticipantItemSemanticEditPolicy());
+		installEditPolicy(EditPolicyRoles.SEMANTIC_ROLE, new DomainParticipantItemSemanticEditPolicy());
 		installEditPolicy(EditPolicy.LAYOUT_ROLE, createLayoutEditPolicy());
 		// XXX need an SCR to runtime to have another abstract superclass that would let children add reasonable editpolicies
 		// removeEditPolicy(org.eclipse.gmf.runtime.diagram.ui.editpolicies.EditPolicyRoles.CONNECTION_HANDLES_ROLE);
@@ -119,20 +117,17 @@ public class DomainParticipantEditPart extends ShapeNodeEditPart {
 	protected boolean addFixedChild(EditPart childEditPart) {
 		if (childEditPart instanceof DomainParticipantNameEditPart) {
 			((DomainParticipantNameEditPart) childEditPart)
-					.setLabel(getPrimaryShape()
-							.getFigureDomainParticipantNameFigure());
+					.setLabel(getPrimaryShape().getFigureDomainParticipantNameFigure());
 			return true;
 		}
 		if (childEditPart instanceof DomainParticipantName2EditPart) {
 			((DomainParticipantName2EditPart) childEditPart)
-					.setLabel(getPrimaryShape()
-							.getFigureDomainParticipantStereotypeFigure());
+					.setLabel(getPrimaryShape().getFigureDomainParticipantStereotypeFigure());
 			return true;
 		}
 		if (childEditPart instanceof DomainParticipantTransportConfigEditPart) {
 			((DomainParticipantTransportConfigEditPart) childEditPart)
-					.setLabel(getPrimaryShape()
-							.getFigureDomainParticipantTransportConfigFigure());
+					.setLabel(getPrimaryShape().getFigureDomainParticipantTransportConfigFigure());
 			return true;
 		}
 		return false;
@@ -271,8 +266,7 @@ public class DomainParticipantEditPart extends ShapeNodeEditPart {
 	 * @generated
 	 */
 	public EditPart getPrimaryChildEditPart() {
-		return getChildBySemanticHint(OpenDDSDcpsLibVisualIDRegistry
-				.getType(DomainParticipantNameEditPart.VISUAL_ID));
+		return getChildBySemanticHint(OpenDDSDcpsLibVisualIDRegistry.getType(DomainParticipantNameEditPart.VISUAL_ID));
 	}
 
 	/**
@@ -280,26 +274,24 @@ public class DomainParticipantEditPart extends ShapeNodeEditPart {
 	 */
 	public EditPart getTargetEditPart(Request request) {
 		if (request instanceof CreateViewAndElementRequest) {
-			CreateElementRequestAdapter adapter = ((CreateViewAndElementRequest) request)
-					.getViewAndElementDescriptor()
+			CreateElementRequestAdapter adapter = ((CreateViewAndElementRequest) request).getViewAndElementDescriptor()
 					.getCreateElementRequestAdapter();
-			IElementType type = (IElementType) adapter
-					.getAdapter(IElementType.class);
+			IElementType type = (IElementType) adapter.getAdapter(IElementType.class);
 			if (type == OpenDDSDcpsLibElementTypes.EfQosPolicy_3012) {
-				return getChildBySemanticHint(OpenDDSDcpsLibVisualIDRegistry
-						.getType(DomainParticipantQoSPoliciesCustomEditPart.VISUAL_ID));
+				return getChildBySemanticHint(
+						OpenDDSDcpsLibVisualIDRegistry.getType(DomainParticipantQoSPoliciesCustomEditPart.VISUAL_ID));
 			}
 			if (type == OpenDDSDcpsLibElementTypes.UdQosPolicy_3013) {
-				return getChildBySemanticHint(OpenDDSDcpsLibVisualIDRegistry
-						.getType(DomainParticipantQoSPoliciesCustomEditPart.VISUAL_ID));
+				return getChildBySemanticHint(
+						OpenDDSDcpsLibVisualIDRegistry.getType(DomainParticipantQoSPoliciesCustomEditPart.VISUAL_ID));
 			}
 			if (type == OpenDDSDcpsLibElementTypes.EfQosPolicy_3017) {
-				return getChildBySemanticHint(OpenDDSDcpsLibVisualIDRegistry
-						.getType(DomainParticipantQoSPoliciesSharedEditPart.VISUAL_ID));
+				return getChildBySemanticHint(
+						OpenDDSDcpsLibVisualIDRegistry.getType(DomainParticipantQoSPoliciesSharedEditPart.VISUAL_ID));
 			}
 			if (type == OpenDDSDcpsLibElementTypes.UdQosPolicy_3021) {
-				return getChildBySemanticHint(OpenDDSDcpsLibVisualIDRegistry
-						.getType(DomainParticipantQoSPoliciesSharedEditPart.VISUAL_ID));
+				return getChildBySemanticHint(
+						OpenDDSDcpsLibVisualIDRegistry.getType(DomainParticipantQoSPoliciesSharedEditPart.VISUAL_ID));
 			}
 			// Custom code begin
 			// Extend the region in the DomainParticipant which can be clicked no
@@ -308,12 +300,12 @@ public class DomainParticipantEditPart extends ShapeNodeEditPart {
 			// (If list layout were true for the pub/sub compartment this code would already
 			// be here. A bug in GMF 2.2.2?)
 			if (type == OpenDDSDcpsLibElementTypes.Publisher_3001) {
-				return getChildBySemanticHint(OpenDDSDcpsLibVisualIDRegistry
-						.getType(DomainParticipantDefaultCompartmentEditPart.VISUAL_ID));
+				return getChildBySemanticHint(
+						OpenDDSDcpsLibVisualIDRegistry.getType(DomainParticipantDefaultCompartmentEditPart.VISUAL_ID));
 			}
 			if (type == OpenDDSDcpsLibElementTypes.Subscriber_3002) {
-				return getChildBySemanticHint(OpenDDSDcpsLibVisualIDRegistry
-						.getType(DomainParticipantDefaultCompartmentEditPart.VISUAL_ID));
+				return getChildBySemanticHint(
+						OpenDDSDcpsLibVisualIDRegistry.getType(DomainParticipantDefaultCompartmentEditPart.VISUAL_ID));
 			}
 			// Custom code end
 		}
@@ -325,8 +317,7 @@ public class DomainParticipantEditPart extends ShapeNodeEditPart {
 	 */
 	protected void handleNotificationEvent(Notification event) {
 		if (event.getNotifier() == getModel()
-				&& EcorePackage.eINSTANCE.getEModelElement_EAnnotations()
-						.equals(event.getFeature())) {
+				&& EcorePackage.eINSTANCE.getEModelElement_EAnnotations().equals(event.getFeature())) {
 			handleMajorSemanticChange();
 		} else {
 			super.handleNotificationEvent(event);

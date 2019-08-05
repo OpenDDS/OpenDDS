@@ -16,7 +16,7 @@
 #include "TcpSynchResource.h"
 #include "TcpConnection.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
-#include "dds/DCPS/transport/framework/TransportReactorTask.h"
+#include "dds/DCPS/ReactorTask.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
 #include "dds/DCPS/AssociationData.h"
@@ -169,7 +169,6 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
 void
 TcpTransport::async_connect_failed(const PriorityKey& key)
 {
-
   ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Failed to make active connection.\n"));
   GuardType guard(links_lock_);
   TcpDataLink_rch link;
@@ -180,7 +179,19 @@ TcpTransport::async_connect_failed(const PriorityKey& key)
   if (link.in()) {
     link->invoke_on_start_callbacks(false);
   }
+}
 
+void
+TcpTransport::async_connect_succeeded(const PriorityKey& key)
+{
+  GuardType guard(links_lock_);
+  TcpDataLink_rch link;
+  links_.find(key, link);
+  guard.release();
+
+  if (link.in()) {
+    link->invoke_on_start_callbacks(true);
+  }
 }
 
 //Called with links_lock_ held
@@ -389,8 +400,13 @@ TcpTransport::configure_i(TcpInst& config)
   // qualified hostname and actual listening port number.
   if (config.local_address().is_any()) {
     std::string hostname = get_fully_qualified_hostname();
-
     config.local_address(port, hostname.c_str());
+    if (config.local_address() == ACE_INET_Addr()) {
+       ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: Failed to resolve a local address using fully qualified hostname '%C'\n"),
+                          hostname.c_str()),
+                          false);
+    }
   }
 
   // Now we got the actual listening port. Update the port number in the configuration

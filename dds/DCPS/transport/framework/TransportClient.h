@@ -127,12 +127,12 @@ public:
   bool remove_all_msgs();
 
   virtual void add_link(const DataLink_rch& link, const RepoId& peer);
+  virtual const RepoId& get_repo_id() const = 0;
 
 private:
 
   // Implemented by derived classes (DataReaderImpl/DataWriterImpl)
   virtual bool check_transport_qos(const TransportInst& inst) = 0;
-  virtual const RepoId& get_repo_id() const = 0;
   virtual DDS::DomainId_t domain_id() const = 0;
   virtual Priority get_priority_value(const AssociationData& data) const = 0;
   virtual void transport_assoc_done(int /*flags*/, const RepoId& /*remote*/) {}

@@ -38,7 +38,9 @@ CMake package with the required context it needs to integrate with the
 OpenDDS code generators and libraries.
 
 *Note:* With an installed version of OpenDDS (generated using `make install`),
-`config.cmake`  will be placed in `/path/to/install-prefix-dir/lib/cmake/OpenDDS`.  This location allows CMake to locate the file using `CMAKE_PREFIX_PATH`.
+`config.cmake`  will be placed in
+`/path/to/install-prefix-dir/lib/cmake/OpenDDS`.  This location allows CMake to
+locate the file using `CMAKE_PREFIX_PATH`.
 
 Not all of the variables in this file are used.  They are procedurally
 generated from variables in the configure script. However, to get a better
@@ -62,9 +64,11 @@ within a CMakeLists.txt file. In addition, the following cache variables/options
 control the behavior of the OpenDDS CMake package.
 
 ### Cache Variables/Options Understood by OpenDDS
-|Cache Variable           | Description                                                |
-|------------------------ | ---------------------------------------------------------- |
-|`OPENDDS_CMAKE_VERBOSE`  | Print detailed status information at CMake-Generation time |
+
+| Cache Variable              | Description                                                | Default |
+| --------------------------- | ---------------------------------------------------------- | ------- |
+| `OPENDDS_CMAKE_VERBOSE`     | Print detailed status information at CMake-Generation time | `OFF`   |
+| `OPENDDS_DEFAULT_NESTED`    | Require topic types to be declared explicitly.             | `ON`    |
 
 ### Example Using OpenDDS Source Tree
 
@@ -88,7 +92,7 @@ cmake --build .
 #### Windows
 
 The following assumes Visual Studio 2017 using 64-bit architecture (adjust the
-CMake -G parameter if using something different).
+CMake `-G` parameter if using something different).
 
 ```bat
 cd tests\cmake_integration\Messenger\Messenger_1
@@ -106,26 +110,22 @@ specified directory.  See the [INSTALL](../INSTALL) document for details.
 
 *Note:* Be sure to pass an absolute path to `--prefix`.
 
-Here is an example of: configure, compile, install, and generate/compile
-the Messenger_1 example from outside the source tree
-
 ```bash
 DDS_WORKSPACE=$(pwd)
 cd OpenDDS-src
 ./configure --prefix=$DDS_WORKSPACE/opendds-install
 make
 make install
-cp -ar tests/cmake_integration/Messenger ..
-cd ../Messenger/Messenger_1
+cd tests/Messenger/Messenger_1
 mkdir build
 cd build
 cmake -DCMAKE_PREFIX_PATH=$DDS_WORKSPACE/opendds-install ..
 cmake --build .
 ```
-*Note:* While this will build the Messenger\_1 example, the run_test.pl script will
+*Note:* While this will build the Messenger\_1 example, the `run_test.pl` script will
 not work due to missing Perl dependencies.
 
-## Adding IDL Sources with OPENDDS\_TARGET\_SOURCES
+## Adding IDL Sources with `OPENDDS_TARGET_SOURCES`
 
 Aside from importing the various OpenDDS targets, the OpenDDS Config Package
 provides an easy way to add IDL sources to CMake targets. This is achieved by
@@ -133,10 +133,10 @@ the `OPENDDS_TARGET_SOURCES` macro, which behaves similarly to the
 built-in [`target_sources`](https://cmake.org/cmake/help/latest/command/target_sources.html) command except for the following:
 
   - Items can be either C/C++ sources or IDL sources.
-  - The scope-qualifier (PUBLIC, PRIVATE, INTERFACE) is not required.
-    When it is omitted, PRIVATE is used by default.
+  - The scope-qualifier (`PUBLIC`, `PRIVATE`, `INTERFACE`) is not required.
+    When it is omitted, `PRIVATE` is used by default.
   - Command-line options can be supplied to the TAO/OpenDDS IDL compilers
-    using TAO\_IDL\_OPTIONS and/or OPENDDS\_IDL\_OPTIONS (if the default
+    using `TAO_IDL_OPTIONS` and/or `OPENDDS_IDL_OPTIONS` (if the default
     behavior is not suitable).
 
 When IDL sources are supplied, custom commands are generated which will
@@ -153,7 +153,8 @@ OPENDDS_TARGET_SOURCES(target
   [items...]
   [<INTERFACE|PUBLIC|PRIVATE> items...]
   [TAO_IDL_OPTIONS options...]
-  [OPENDDS_IDL_OPTIONS options...])
+  [OPENDDS_IDL_OPTIONS options...]
+  [DEFAULT_NESTED ON|OFF])
 ```
 
 ### Example
@@ -193,6 +194,17 @@ target_link_libraries(publisher messenger OpenDDS::OpenDDS)
 *Note:* This may issue a warning in earlier version of CMake due to the messenger library
 not having any sources added with it in the call to `add_library`.
 
+### `DEFAULT_NESTED`
+
+`DEFAULT_NESTED` overrides the global default, `OPENDDS_DEFAULT_NESTED`, which
+is `ON` by default. If this value is `ON`, then topic types for a given project
+must be declared using annotations. If it's `OFF`, then every valid type is
+assumed to be needed for use as a topic type by default, which might
+add code to the IDL type support libraries that will never be used.
+
+See section 2.1.1, "Defining the Data Types", of the OpenDDS Developer's Guide
+for more information.
+
 ## Advanced Usage
 
 ### Manually Creating config.cmake
@@ -221,16 +233,16 @@ CMake variable below should be set to either _ON_ or _OFF_ depending on the desi
 
 | CMake Variable                   | Notes (from configure script output)    | Default |
 |---                               | ---                                     | ---     |
-|`OPENDDS_BUILT_IN_TOPICS`         | Built-in Topics                         | ON      |
-|`OPENDDS_CONTENT_FILTERED_TOPIC`  | ContentFilteredTopic (CS Profile)       | ON      |
-|`OPENDDS_CONTENT_SUBSCRIPTION`    | Content-Subscription Profile. When this is set to OFF then CONTENT_FILTERED_TOPIC, MULTI_TOPIC, and QUERY_CONDITION will also be set to OFF. See the [OpenDDS Dev Guide] ch. 5 for info. | ON      |
-|`OPENDDS_MULTI_TOPIC`             | MultiTopic (CS Profile)                 | ON      |
-|`OPENDDS_OBJECT_MODEL_PROFILE`    | Object Model Profile                    | ON      |
-|`OPENDDS_OWNERSHIP_KIND_EXCLUSIVE`| Exclusive Ownership (Ownership Profile) | ON      |
-|`OPENDDS_OWNERSHIP_PROFILE`       | Ownership Profile. When this is set to OFF then OWNERSHIP_KIND_EXCLUSIVE will also be set to OFF. | ON      |
-|`OPENDDS_PERSISTENCE_PROFILE`     | Persistence Profile                     | ON      |
-|`OPENDDS_QUERY_CONDITION`         | QueryCondition (CS Profile)             | ON      |
-|`OPENDDS_SECURITY`                | DDS Security plugin                     | OFF     |
+|`OPENDDS_BUILT_IN_TOPICS`         | Built-in Topics                         | `ON`      |
+|`OPENDDS_CONTENT_FILTERED_TOPIC`  | ContentFilteredTopic (CS Profile)       | `ON`      |
+|`OPENDDS_CONTENT_SUBSCRIPTION`    | Content-Subscription Profile. When this is set to `OFF` then `CONTENT_FILTERED_TOPIC`, `MULTI_TOPIC`, and `QUERY_CONDITION` will also be set to `OFF`. See the [OpenDDS Dev Guide] ch. 5 for info. | `ON`      |
+|`OPENDDS_MULTI_TOPIC`             | MultiTopic (CS Profile)                 | `ON`      |
+|`OPENDDS_OBJECT_MODEL_PROFILE`    | Object Model Profile                    | `ON`      |
+|`OPENDDS_OWNERSHIP_KIND_EXCLUSIVE`| Exclusive Ownership (Ownership Profile) | `ON`      |
+|`OPENDDS_OWNERSHIP_PROFILE`       | Ownership Profile. When this is set to `OFF` then `OWNERSHIP_KIND_EXCLUSIVE` will also be set to `OFF`. | `ON` |
+|`OPENDDS_PERSISTENCE_PROFILE`     | Persistence Profile                     | `ON`      |
+|`OPENDDS_QUERY_CONDITION`         | QueryCondition (CS Profile)             | `ON`      |
+|`OPENDDS_SECURITY`                | DDS Security plugin                     | `OFF`     |
 
 #### Build-Related Options
 
@@ -240,11 +252,11 @@ The following values impact the build in one way or another.
 |---                        | ---                                                                | ---                 |
 |`OPENDDS_ACE`              | Location of ACE root dir.                                          | N/A                 |
 |`OPENDDS_TAO`              | Location of TAO root dir.                                          | N/A                 |
-|`OPENDDS_STD`              | Forces C++ standard (Unix only). This option is used as a way for the configure script to inform CMake builds of the C/C++ standard used to build OpenDDS. To prevent weirdness, the C/C++ standards should match. The typical GCC -std values are supported. | Existing CMAKE_CXX_STANDARD value. |
-|`OPENDDS_NO_DEBUG`         | Sets NDEBUG flags on ACE for non-debug builds (Unix only)          | OFF                 |
+|`OPENDDS_STD`              | Forces C++ standard (Unix only). This option is used as a way for the configure script to inform CMake builds of the C/C++ standard used to build OpenDDS. To prevent weirdness, the C/C++ standards should match. The typical GCC `-std` values are supported. | Existing `CMAKE_CXX_STANDARD` value. |
+|`OPENDDS_NO_DEBUG`         | Sets NDEBUG flags on ACE for non-debug builds (Unix only)          | `OFF`                 |
 |`OPENDDS_INLINE`           | ACE's inline build flag                                            | See below           |
-|`OPENDDS_STATIC`           | Use static libraries                                               | OFF                 |
-|`OPENDDS_XERCES3`          | Adds dependencies to targets; required when OPENDDS_SECURITY is ON | OFF                 |
+|`OPENDDS_STATIC`           | Use static libraries                                               | `OFF`                 |
+|`OPENDDS_XERCES3`          | Adds dependencies to targets; required when `OPENDDS_SECURITY` is `ON` | `OFF`                 |
 |`OPENDDS_FEATURES`         | Semicolon-Separated list of additional features which impact the build. Currently supported are `versioned_namespace=1` (see [this](https://github.com/DOCGroup/ACE_TAO/blob/master/ACE/docs/Symbol_Versioning.html) document) and `uses_wchar=1` for wide-character support. | N/A |
 
 `OPENDDS_INLINE` should be explicitly set to `ON` or `OFF` (based on the ACE `platform_macros.GNU` variable `inline`) in `config.cmake` unless you will only be using a CMake Microsoft Visual Studio Generator.

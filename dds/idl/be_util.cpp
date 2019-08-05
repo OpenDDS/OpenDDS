@@ -98,6 +98,7 @@ void
 be_util::usage (void)
 {
   ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT(" --default-nested\ttreat unannotated types as if they were nested\n")
     ACE_TEXT(" -o <dir>\t\tsets output directory for all files\n")
     ACE_TEXT(" -Lface\t\t\tgenerate FACE IDL to C++ mapping\n")
     ACE_TEXT(" -Lspcpp\t\tgenerate Safety Profile IDL to C++ mapping\n")
@@ -113,6 +114,7 @@ be_util::usage (void)
     ACE_TEXT("\t\t\t\t-Wb,v8 is an alternative form for this option\n")
     ACE_TEXT(" -Grapidjson\t\tgenerate TypeSupport for converting data samples ")
     ACE_TEXT("to RapidJSON JavaScript objects\n")
+    ACE_TEXT(" --no-dcps-data-type-warnings\t\tdon't warn about #pragma DCPS_DATA_TYPE\n")
     ACE_TEXT(" -Wb,export_macro=<macro name>\t\tsets export macro ")
     ACE_TEXT("for all files\n")
     ACE_TEXT("\t\t\t\t\t\t--export=<macro name> is an alternative form for this option\n")

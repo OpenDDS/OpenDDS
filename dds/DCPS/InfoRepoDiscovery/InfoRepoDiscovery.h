@@ -122,7 +122,8 @@ public:
     const char* topicName,
     const char* dataTypeName,
     const DDS::TopicQos& qos,
-    bool hasDcpsKey);
+    bool hasDcpsKey,
+    TopicCallbacks* topic_callbacks);
 
   virtual OpenDDS::DCPS::TopicStatus find_topic(
     DDS::DomainId_t domainId,

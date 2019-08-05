@@ -27,7 +27,6 @@
 #include <ace/Time_Value.h>
 #include <ace/OS_NS_unistd.h>
 
-#include <cassert>
 using namespace std;
 
 static ACE_Time_Value write_interval(0, 500000);

@@ -16,7 +16,7 @@
 #include "TcpConnection.h"
 #include "TcpConnection_rch.h"
 
-#include "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
+#include "dds/DCPS/ReactorTask_rch.h"
 #include "dds/DCPS/transport/framework/PriorityKey.h"
 
 #include "ace/INET_Addr.h"
@@ -81,6 +81,7 @@ private:
   virtual std::string transport_type() const { return "tcp"; }
 
   void async_connect_failed(const PriorityKey& key);
+  void async_connect_succeeded(const PriorityKey& key);
 
   /// The TcpConnection is our friend.  It tells us when it
   /// has been created (by our acceptor_), and is seeking the

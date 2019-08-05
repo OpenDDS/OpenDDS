@@ -29,7 +29,7 @@ namespace DCPS {
 
 UdpDataLink::UdpDataLink(UdpTransport& transport,
                          Priority   priority,
-                         TransportReactorTask* reactor_task,
+                         ReactorTask* reactor_task,
                          bool       active)
   : DataLink(transport,
              priority,

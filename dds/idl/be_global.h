@@ -9,6 +9,8 @@
 #define OPENDDS_IDL_BE_GLOBAL_H
 
 #include "ace/SString.h"
+#include "idl_defines.h"
+#include "utl_scoped_name.h"
 
 #include <string>
 #include <sstream>
@@ -18,7 +20,18 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+#ifndef TAO_IDL_HAS_ANNOTATIONS
+#  error "Annotation support in tao_idl is required, please use a newer version of TAO"
+#endif
+#include "annotations.h"
+
 class AST_Generator;
+class AST_Decl;
+class UTL_Scope;
+class AST_Structure;
+class AST_Field;
+class AST_Union;
+class AST_Annotation_Decl;
 
 // Defines a class containing all back end global data.
 
@@ -43,8 +56,6 @@ public:
 
   const char* filename() const;
   void filename(const char* fname);
-
-  //bool do_included_files() const;
 
   ACE_CString spawn_options();
   // Command line passed to ACE_Process::spawn. Different
@@ -146,17 +157,59 @@ public:
 
   static bool writeFile(const char* fileName, const std::string &content);
 
+  /**
+   * Based on annotations and global_default_nested_, determine if a type is a
+   * topic type and needs type support.
+   *
+   * Does not check for specific types of types (struct vs array).
+   */
+  bool is_topic_type(AST_Decl* node);
+
+  /**
+   * Global default for if a type is nested (is_nested_type = !is_topic_type)
+   * Set to true by passing --default-nested
+   */
+  bool global_default_nested_;
+
+  /**
+   * Check if a struct field has been declared a key.
+   */
+  bool is_key(AST_Field* node);
+
+  /**
+   * Check if the discriminator in a union has been declared a key.
+   */
+  bool has_key(AST_Union* node);
+
+  /**
+   * Give a warning that looks like tao_idl's, but out of context of tao_idl.
+   */
+  void warning(const char* filename, unsigned lineno, const char* msg);
+
+  /**
+   * If true, don't warn about #pragma DCPS_DATA_TYPE
+   */
+  bool no_dcps_data_type_warnings_;
+
+  BuiltinAnnotations builtin_annotations_;
+
 private:
+  /// Name of the IDL file we are processing.
   const char* filename_;
-  // Name of the IDL file we are processing.
 
   bool java_, suppress_idl_, suppress_typecode_,
-    no_default_gen_, generate_itl_, generate_v8_, generate_rapidjson_, face_ts_;
+    no_default_gen_, generate_itl_, generate_v8_,
+    generate_rapidjson_, face_ts_;
 
-  ACE_CString export_macro_, export_include_, versioning_name_, versioning_begin_, versioning_end_, pch_include_, java_arg_, seq_;
+  ACE_CString export_macro_, export_include_,
+    versioning_name_, versioning_begin_, versioning_end_,
+    pch_include_, java_arg_, seq_;
   std::set<std::string> cpp_includes_;
 
   LanguageMapping language_mapping_;
+
+  bool is_nested(AST_Decl* node);
+  bool is_default_nested(UTL_Scope* scope);
 };
 
 class BE_Comment_Guard {

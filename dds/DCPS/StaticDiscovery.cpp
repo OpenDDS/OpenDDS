@@ -439,6 +439,14 @@ StaticEndpointManager::remove_subscription_i(const RepoId& readerid,
 }
 
 bool
+StaticEndpointManager::is_expectant_opendds(const GUID_t& /*endpoint*/) const
+{
+  // We can't propagate associated writers via SEDP announcments if we're
+  // using static discovery, so nobody ought to be "expecting" them
+  return false;
+}
+
+bool
 StaticEndpointManager::shutting_down() const
 {
   ACE_DEBUG((LM_NOTICE, ACE_TEXT("(%P|%t) StaticEndpointManager::shutting_down TODO\n")));
@@ -462,24 +470,6 @@ StaticEndpointManager::populate_transport_locator_sequence(TransportLocatorSeq*&
 {
   ACE_DEBUG((LM_NOTICE, ACE_TEXT("(%P|%t) StaticEndpointManager::populate_transport_locator_sequence TODO\n")));
   // TODO
-}
-
-bool
-StaticEndpointManager::defer_writer(const RepoId& /*writer*/,
-                                    const RepoId& /*writer_participant*/)
-{
-  ACE_DEBUG((LM_NOTICE, ACE_TEXT("(%P|%t) StaticEndpointManager::defer_writer TODO\n")));
-  // TODO
-  return false;
-}
-
-bool
-StaticEndpointManager::defer_reader(const RepoId& /*writer*/,
-                                    const RepoId& /*writer_participant*/)
-{
-  // TODO
-  ACE_DEBUG((LM_NOTICE, ACE_TEXT("(%P|%t) StaticEndpointManager::defer_reader TODO\n")));
-  return false;
 }
 
 void

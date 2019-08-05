@@ -251,9 +251,10 @@ public:
 
   typedef WeakRcHandle<TransportClient> TransportClient_wrch;
   typedef std::pair<TransportClient_wrch, RepoId> OnStartCallback;
-  bool add_on_start_callback(const TransportClient_wrch& client, const RepoId& remote);
+  virtual bool add_on_start_callback(const TransportClient_wrch& client, const RepoId& remote);
   void remove_on_start_callback(const TransportClient_wrch& client, const RepoId& remote);
   void invoke_on_start_callbacks(bool success);
+  void invoke_on_start_callbacks(const RepoId& local, const RepoId& remote, bool success);
 
   void set_scheduling_release(bool scheduling_release);
 
@@ -276,7 +277,8 @@ protected:
   /// if one of the strategy objects was started successfully, then
   /// it will be stopped before the start() method returns -1.
   int start(const TransportSendStrategy_rch& send_strategy,
-            const TransportStrategy_rch& receive_strategy);
+            const TransportStrategy_rch& receive_strategy,
+            bool invoke_all = true);
 
   /// This announces the "stop" event to our subclass.  The "stop"
   /// event will occur when this DataLink is handling a
@@ -306,12 +308,6 @@ protected:
   /// of remote peer RepoIds (subscriptions or publications) that this link
   /// knows about due to make_reservation().
   GUIDSeq* peer_ids(const RepoId& local_id) const;
-
-  /**
-   * For a given reader writer pair, call the first_acknowledged_by_reader
-   * callback on the TransportSendListener if there is one.
-   */
-  void first_acknowledged_by_reader(const RepoId& localWriter, const RepoId& remoteReader, const SequenceNumber& sn_base);
 
 private:
 

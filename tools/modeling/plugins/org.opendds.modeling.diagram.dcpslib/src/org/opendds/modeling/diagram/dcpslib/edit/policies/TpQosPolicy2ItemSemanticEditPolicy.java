@@ -15,8 +15,7 @@ import org.opendds.modeling.diagram.dcpslib.providers.OpenDDSDcpsLibElementTypes
 /**
  * @generated
  */
-public class TpQosPolicy2ItemSemanticEditPolicy extends
-		OpenDDSDcpsLibBaseItemSemanticEditPolicy {
+public class TpQosPolicy2ItemSemanticEditPolicy extends OpenDDSDcpsLibBaseItemSemanticEditPolicy {
 
 	/**
 	 * @generated
@@ -32,12 +31,10 @@ public class TpQosPolicy2ItemSemanticEditPolicy extends
 	 * @generated NOT
 	 */
 	protected Command getDestroyElementCommand(DestroyElementRequest req) {
-		CompositeTransactionalCommand cmd = new CompositeTransactionalCommand(
-				getEditingDomain(), null);
+		CompositeTransactionalCommand cmd = new CompositeTransactionalCommand(getEditingDomain(), null);
 		cmd.setTransactionNestingEnabled(false);
 		cmd.add(com.ociweb.gmf.edit.commands.RequestToCommandConverter
-				.destroyElementRequestToDestroyReferenceCommand(req, getHost(),
-						getEditingDomain()));
+				.destroyElementRequestToDestroyReferenceCommand(req, getHost(), getEditingDomain()));
 		return getGEFWrapper(cmd);
 	}
 }

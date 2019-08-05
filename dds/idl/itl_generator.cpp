@@ -287,10 +287,16 @@ bool itl_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* /*name*/,
   return true;
 }
 
-bool itl_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
+bool itl_generator::gen_struct(AST_Structure* node, UTL_ScopedName*,
                                const std::vector<AST_Field*>& fields,
                                AST_Type::SIZE_TYPE, const char* repoid)
 {
+  if (!be_global->itl())
+    return true;
+
+  const bool is_topic_type =
+    idl_global->is_dcps_type(node->name()) || be_global->is_topic_type(node);
+
   new_type();
 
   be_global->itl_ << Open(this)
@@ -301,7 +307,7 @@ bool itl_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
 
   // Check if this is defined as a primary data type
                   << Indent(this) << "\"note\" : { \"is_dcps_data_type\" : "
-                  << (idl_global->is_dcps_type(name) ? "true" : "false")
+                  << (is_topic_type ? "true" : "false")
                   << " },\n"
 
                   << Indent(this) << "\"type\" :\n"
@@ -346,7 +352,7 @@ bool itl_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
 }
 
 
-bool itl_generator::gen_union(AST_Union*, UTL_ScopedName* /*name*/,
+bool itl_generator::gen_union(AST_Union* node, UTL_ScopedName* /*name*/,
                               const std::vector<AST_UnionBranch*>& cases,
                               AST_Type* _d,
                               const char* repoid)
@@ -364,6 +370,9 @@ bool itl_generator::gen_union(AST_Union*, UTL_ScopedName* /*name*/,
                   << Open(this)
                   << Indent(this) << "\"kind\" : \"union\",\n"
                   << Indent(this) << "\"discriminator\" : " << InlineType(_d) << ",\n"
+                  << Indent(this) << "\"note\" : { \"is_dcps_data_type\" : "
+                  << (be_global->is_topic_type(node) ? "true" : "false")
+                  << " },\n"
                   << Indent(this) << "\"fields\" :\n"
                   << Open(this)
                   << Indent(this) << "[\n";

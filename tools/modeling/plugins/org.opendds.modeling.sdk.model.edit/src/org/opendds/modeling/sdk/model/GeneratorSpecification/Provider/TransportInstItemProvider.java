@@ -39,9 +39,8 @@ import org.opendds.modeling.sdk.model.GeneratorSpecification.TransportInst;
  * <!-- end-user-doc -->
  * @generated
  */
-public class TransportInstItemProvider extends ItemProviderAdapter implements
-		IEditingDomainItemProvider, IStructuredItemContentProvider,
-		ITreeItemContentProvider, IItemLabelProvider, IItemPropertySource {
+public class TransportInstItemProvider extends ItemProviderAdapter implements IEditingDomainItemProvider,
+		IStructuredItemContentProvider, ITreeItemContentProvider, IItemLabelProvider, IItemPropertySource {
 	/**
 	 * This constructs an instance from a factory and a notifier.
 	 * <!-- begin-user-doc -->
@@ -75,16 +74,13 @@ public class TransportInstItemProvider extends ItemProviderAdapter implements
 	 * @generated
 	 */
 	protected void addNamePropertyDescriptor(Object object) {
-		itemPropertyDescriptors.add(createItemPropertyDescriptor(
-				((ComposeableAdapterFactory) adapterFactory)
-						.getRootAdapterFactory(),
-				getResourceLocator(),
-				getString("_UI_TransportInst_name_feature"),
-				getString("_UI_PropertyDescriptor_description",
-						"_UI_TransportInst_name_feature",
-						"_UI_TransportInst_type"),
-				GeneratorPackage.Literals.TRANSPORT_INST__NAME, true, false,
-				false, ItemPropertyDescriptor.GENERIC_VALUE_IMAGE, null, null));
+		itemPropertyDescriptors
+				.add(createItemPropertyDescriptor(((ComposeableAdapterFactory) adapterFactory).getRootAdapterFactory(),
+						getResourceLocator(), getString("_UI_TransportInst_name_feature"),
+						getString("_UI_PropertyDescriptor_description", "_UI_TransportInst_name_feature",
+								"_UI_TransportInst_type"),
+						GeneratorPackage.Literals.TRANSPORT_INST__NAME, true, false, false,
+						ItemPropertyDescriptor.GENERIC_VALUE_IMAGE, null, null));
 	}
 
 	/**
@@ -96,26 +92,17 @@ public class TransportInstItemProvider extends ItemProviderAdapter implements
 	 * @generated
 	 */
 	@Override
-	public Collection<? extends EStructuralFeature> getChildrenFeatures(
-			Object object) {
+	public Collection<? extends EStructuralFeature> getChildrenFeatures(Object object) {
 		if (childrenFeatures == null) {
 			super.getChildrenFeatures(object);
-			childrenFeatures
-					.add(GeneratorPackage.Literals.TRANSPORT_INST__QUEUE_MESSAGES_PER_POOL);
-			childrenFeatures
-					.add(GeneratorPackage.Literals.TRANSPORT_INST__QUEUE_INITIAL_POOLS);
-			childrenFeatures
-					.add(GeneratorPackage.Literals.TRANSPORT_INST__MAX_PACKET_SIZE);
-			childrenFeatures
-					.add(GeneratorPackage.Literals.TRANSPORT_INST__MAX_SAMPLES_PER_PACKET);
-			childrenFeatures
-					.add(GeneratorPackage.Literals.TRANSPORT_INST__OPTIMUM_PACKET_SIZE);
-			childrenFeatures
-					.add(GeneratorPackage.Literals.TRANSPORT_INST__THREAD_PER_CONNECTION);
-			childrenFeatures
-					.add(GeneratorPackage.Literals.TRANSPORT_INST__DATALINK_RELEASE_DELAY);
-			childrenFeatures
-					.add(GeneratorPackage.Literals.TRANSPORT_INST__DATALINK_CONTROL_CHUNKS);
+			childrenFeatures.add(GeneratorPackage.Literals.TRANSPORT_INST__QUEUE_MESSAGES_PER_POOL);
+			childrenFeatures.add(GeneratorPackage.Literals.TRANSPORT_INST__QUEUE_INITIAL_POOLS);
+			childrenFeatures.add(GeneratorPackage.Literals.TRANSPORT_INST__MAX_PACKET_SIZE);
+			childrenFeatures.add(GeneratorPackage.Literals.TRANSPORT_INST__MAX_SAMPLES_PER_PACKET);
+			childrenFeatures.add(GeneratorPackage.Literals.TRANSPORT_INST__OPTIMUM_PACKET_SIZE);
+			childrenFeatures.add(GeneratorPackage.Literals.TRANSPORT_INST__THREAD_PER_CONNECTION);
+			childrenFeatures.add(GeneratorPackage.Literals.TRANSPORT_INST__DATALINK_RELEASE_DELAY);
+			childrenFeatures.add(GeneratorPackage.Literals.TRANSPORT_INST__DATALINK_CONTROL_CHUNKS);
 		}
 		return childrenFeatures;
 	}
@@ -175,8 +162,7 @@ public class TransportInstItemProvider extends ItemProviderAdapter implements
 
 		switch (notification.getFeatureID(TransportInst.class)) {
 		case GeneratorPackage.TRANSPORT_INST__NAME:
-			fireNotifyChanged(new ViewerNotification(notification,
-					notification.getNotifier(), false, true));
+			fireNotifyChanged(new ViewerNotification(notification, notification.getNotifier(), false, true));
 			return;
 		case GeneratorPackage.TRANSPORT_INST__QUEUE_MESSAGES_PER_POOL:
 		case GeneratorPackage.TRANSPORT_INST__QUEUE_INITIAL_POOLS:
@@ -186,8 +172,7 @@ public class TransportInstItemProvider extends ItemProviderAdapter implements
 		case GeneratorPackage.TRANSPORT_INST__THREAD_PER_CONNECTION:
 		case GeneratorPackage.TRANSPORT_INST__DATALINK_RELEASE_DELAY:
 		case GeneratorPackage.TRANSPORT_INST__DATALINK_CONTROL_CHUNKS:
-			fireNotifyChanged(new ViewerNotification(notification,
-					notification.getNotifier(), true, false));
+			fireNotifyChanged(new ViewerNotification(notification, notification.getNotifier(), true, false));
 			return;
 		}
 		super.notifyChanged(notification);
@@ -201,47 +186,32 @@ public class TransportInstItemProvider extends ItemProviderAdapter implements
 	 * @generated
 	 */
 	@Override
-	protected void collectNewChildDescriptors(
-			Collection<Object> newChildDescriptors, Object object) {
+	protected void collectNewChildDescriptors(Collection<Object> newChildDescriptors, Object object) {
 		super.collectNewChildDescriptors(newChildDescriptors, object);
 
-		newChildDescriptors
-				.add(createChildParameter(
-						GeneratorPackage.Literals.TRANSPORT_INST__QUEUE_MESSAGES_PER_POOL,
-						GeneratorFactory.eINSTANCE.createQueueMessagesPerPool()));
+		newChildDescriptors.add(createChildParameter(GeneratorPackage.Literals.TRANSPORT_INST__QUEUE_MESSAGES_PER_POOL,
+				GeneratorFactory.eINSTANCE.createQueueMessagesPerPool()));
 
-		newChildDescriptors.add(createChildParameter(
-				GeneratorPackage.Literals.TRANSPORT_INST__QUEUE_INITIAL_POOLS,
+		newChildDescriptors.add(createChildParameter(GeneratorPackage.Literals.TRANSPORT_INST__QUEUE_INITIAL_POOLS,
 				GeneratorFactory.eINSTANCE.createQueueInitialPool()));
 
-		newChildDescriptors.add(createChildParameter(
-				GeneratorPackage.Literals.TRANSPORT_INST__MAX_PACKET_SIZE,
+		newChildDescriptors.add(createChildParameter(GeneratorPackage.Literals.TRANSPORT_INST__MAX_PACKET_SIZE,
 				GeneratorFactory.eINSTANCE.createMaxPacketSize()));
 
-		newChildDescriptors
-				.add(createChildParameter(
-						GeneratorPackage.Literals.TRANSPORT_INST__MAX_SAMPLES_PER_PACKET,
-						GeneratorFactory.eINSTANCE.createMaxSamplesPerPacket()));
+		newChildDescriptors.add(createChildParameter(GeneratorPackage.Literals.TRANSPORT_INST__MAX_SAMPLES_PER_PACKET,
+				GeneratorFactory.eINSTANCE.createMaxSamplesPerPacket()));
 
-		newChildDescriptors.add(createChildParameter(
-				GeneratorPackage.Literals.TRANSPORT_INST__OPTIMUM_PACKET_SIZE,
+		newChildDescriptors.add(createChildParameter(GeneratorPackage.Literals.TRANSPORT_INST__OPTIMUM_PACKET_SIZE,
 				GeneratorFactory.eINSTANCE.createOptimumPacketSize()));
 
-		newChildDescriptors
-				.add(createChildParameter(
-						GeneratorPackage.Literals.TRANSPORT_INST__THREAD_PER_CONNECTION,
-						GeneratorFactory.eINSTANCE.createThreadPerConnection()));
+		newChildDescriptors.add(createChildParameter(GeneratorPackage.Literals.TRANSPORT_INST__THREAD_PER_CONNECTION,
+				GeneratorFactory.eINSTANCE.createThreadPerConnection()));
 
-		newChildDescriptors
-				.add(createChildParameter(
-						GeneratorPackage.Literals.TRANSPORT_INST__DATALINK_RELEASE_DELAY,
-						GeneratorFactory.eINSTANCE.createDatalinkReleaseDelay()));
+		newChildDescriptors.add(createChildParameter(GeneratorPackage.Literals.TRANSPORT_INST__DATALINK_RELEASE_DELAY,
+				GeneratorFactory.eINSTANCE.createDatalinkReleaseDelay()));
 
-		newChildDescriptors
-				.add(createChildParameter(
-						GeneratorPackage.Literals.TRANSPORT_INST__DATALINK_CONTROL_CHUNKS,
-						GeneratorFactory.eINSTANCE
-								.createDatalinkControlChunks()));
+		newChildDescriptors.add(createChildParameter(GeneratorPackage.Literals.TRANSPORT_INST__DATALINK_CONTROL_CHUNKS,
+				GeneratorFactory.eINSTANCE.createDatalinkControlChunks()));
 	}
 
 	/**

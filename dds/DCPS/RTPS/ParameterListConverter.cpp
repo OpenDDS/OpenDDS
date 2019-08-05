@@ -272,6 +272,11 @@ namespace {
     return std::strlen(cfprop.filterExpression);
   }
 
+  bool not_default(const OpenDDSParticipantFlags_t& flags)
+  {
+    return flags.bits != PFLAGS_EMPTY;
+  }
+
   void normalize(DDS::Duration_t& dur)
   {
     // Interoperability note:
@@ -548,6 +553,12 @@ int to_param_list(const ParticipantProxy_t& proxy,
     add_param(param_list, param_p);
   }
 
+  if (not_default(proxy.opendds_participant_flags)) {
+    Parameter param_opf;
+    param_opf.participant_flags(proxy.opendds_participant_flags);
+    add_param(param_list, param_opf);
+  }
+
   return 0;
 }
 
@@ -653,6 +664,9 @@ int from_param_list(const ParameterList& param_list,
         break;
       case PID_PROPERTY_LIST:
         proxy.property = param.property();
+        break;
+      case PID_OPENDDS_PARTICIPANT_FLAGS:
+        proxy.opendds_participant_flags = param.participant_flags();
         break;
       case PID_SENTINEL:
       case PID_PAD:

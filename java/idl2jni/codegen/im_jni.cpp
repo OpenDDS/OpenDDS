@@ -55,6 +55,8 @@ string idl_mapping_jni::taoType(AST_Type *decl)
       return "CORBA::Float";
     case AST_PredefinedType::PT_double:
       return "CORBA::Double";
+    default:
+      break;
     }
   }
   case AST_Decl::NT_string:
@@ -64,6 +66,8 @@ string idl_mapping_jni::taoType(AST_Type *decl)
   case AST_Decl::NT_interface:
   case AST_Decl::NT_interface_fwd:
     return scoped(decl->name()) + "_var";
+  default:
+    break;
   }
 
   return scoped(decl->name());
@@ -137,6 +141,8 @@ string idl_mapping_jni::taoParam(AST_Type *decl, AST_Argument::Direction dir,
     if (return_type || variableOut) param += "_slice*";
 
     addRef = variableOut;
+    break;
+  default:
     break;
   }
 
@@ -262,6 +268,8 @@ string idl_mapping_jni::jvmSignature(AST_Type *decl)
       return "F";
     case AST_PredefinedType::PT_double:
       return "D";
+    default:
+      break;
     }
   }
   case AST_Decl::NT_string:
@@ -292,6 +300,8 @@ string idl_mapping_jni::jvmSignature(AST_Type *decl)
       return "[L" + elem + ";";
     }
   }
+  default:
+    break;
   }
 
   cerr << "ERROR - unknown jvmSignature for IDL type: " <<
@@ -567,6 +577,8 @@ bool idl_mapping_jni::gen_typedef(UTL_ScopedName *name, AST_Type *base,
     arrayLength = dim->ev()->u.ulval;
     break;
   }
+  default:
+    break;
   }
 
   if (!element) return true;//nothing needed if it's not an array or a sequence
@@ -652,7 +664,7 @@ bool idl_mapping_jni::gen_jarray_copies(UTL_ScopedName *name,
         "      " + actualJniType + " obj = static_cast<" + actualJniType
         + "> (jni->GetObjectArrayElement (arr, i));\n";
       loopJava =
-        "      " + actualJniType + " obj;\n";
+        "      " + actualJniType + " obj = 0;\n";
       preNewArray =
         "      jclass clazz = findClass (jni, \"" + jvmSig + "\");\n";
       actualJniType = "jobject";
@@ -1555,6 +1567,8 @@ bool idl_mapping_jni::gen_native(UTL_ScopedName *name, const char *)
     return gen_jarray_copies(name, "L" + elem + ";", "Object", "jobject",
                              "jobjectArray", elem_cxx, true, "source.length ()");
   }
+  default:
+    break;
   }
 
   return true;

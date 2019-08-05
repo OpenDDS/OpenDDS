@@ -1,4 +1,4 @@
-project : dds_macros {
+project : dds_macros, taobaseidldefaults {
 
   after += opendds_idl
 
@@ -27,8 +27,20 @@ project : dds_macros {
     // files and additional source and header files due to the -Gface option.
   }
 
+  // Have tao_idl use IDL 4 to match opendds_idl.
+  // Also To avoid multiple unnecessary warnings, have tao_idl ignore
+  // any OpenDDS annotations, all other unknown annotations will be caught by
+  // opendds_idl.
+  idlflags += --idl-version 4 --unknown-annotations ignore
+  
+  // Topic types must be declared using topic anotations
+  dcps_ts_flags += --default-nested
 }
 
 feature(!no_opendds_safety_profile): taobaseidldefaults {
   idlflags += -SS
+}
+
+feature(!dcps_data_type_warnings) {
+  dcps_ts_flags += --no-dcps-data-type-warnings
 }

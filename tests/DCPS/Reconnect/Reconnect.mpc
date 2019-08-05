@@ -1,20 +1,6 @@
-project(*idl): dcps_test_lib {
-  requires += no_opendds_safety_profile
-  idlflags      += -Wb,stub_export_include=Reconnect_export.h \
-                   -Wb,stub_export_macro=Reconnect_Export
-  dcps_ts_flags += -Wb,export_macro=Reconnect_Export
-  dynamicflags  += RECONNECT_BUILD_DLL
-
-  TypeSupport_Files {
-    Messenger.idl
-  }
-}
-
-project(*Publisher) : dcpsexe, dcps_tcp {
+project(*Publisher) : dcpsexe, dcps_cm, dcps_tcp {
   requires += no_opendds_safety_profile
   exename = publisher
-  after  += *idl
-  libs   += *idl
 
   Idl_Files {
   }
@@ -26,11 +12,9 @@ project(*Publisher) : dcpsexe, dcps_tcp {
   }
 }
 
-project(*Subscriber) : dcpsexe, dcps_tcp {
+project(*Subscriber) : dcpsexe, dcps_cm, dcps_tcp {
   requires += no_opendds_safety_profile
   exename = subscriber
-  after  += *idl
-  libs   += *idl
 
   Idl_Files {
   }

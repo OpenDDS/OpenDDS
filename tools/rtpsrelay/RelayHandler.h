@@ -31,7 +31,7 @@ protected:
                                const ACE_Time_Value& a_now,
                                const std::string& a_src_guid,
                                ACE_Message_Block* a_msg,
-                               bool a_empty_message) = 0;
+                               bool is_beacon_message) = 0;
 
 private:
   std::string relay_address_;
@@ -57,7 +57,7 @@ protected:
                        const ACE_Time_Value& a_now,
                        const std::string& a_src_guid,
                        ACE_Message_Block* a_msg,
-                       bool a_empty_message) override;
+                       bool is_beacon_message) override;
 };
 
 // Sends to and receives from other relays.
@@ -73,7 +73,7 @@ private:
                        const ACE_Time_Value& a_now,
                        const std::string& a_src_guid,
                        ACE_Message_Block* a_msg,
-                       bool a_empty_message) override;
+                       bool is_beacon_message) override;
 };
 
 class SpdpHandler : public VerticalHandler {
@@ -86,7 +86,7 @@ private:
                        const ACE_Time_Value& a_now,
                        const std::string& a_src_guid,
                        ACE_Message_Block* a_msg,
-                       bool a_empty_message) override;
+                       bool is_beacon_message) override;
 };
 
 #endif /* RTPSRELAY_RELAY_HANDLER_H_ */

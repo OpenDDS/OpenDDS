@@ -143,6 +143,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
 
   : DCPS::LocalParticipant<Sedp>(qos)
   , disco_(disco)
+  , reactor_task_(false)
   , domain_(domain)
   , guid_(guid)
   , tport_(new SpdpTransport(this, false))
@@ -177,6 +178,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
 
   : DCPS::LocalParticipant<Sedp>(qos)
   , disco_(disco)
+  , reactor_task_(false)
   , domain_(domain)
   , guid_(guid)
   , tport_(new SpdpTransport(this, true))
@@ -289,6 +291,8 @@ Spdp::~Spdp()
       }
     }
   }
+
+  reactor_task_.stop();
 
   // ensure sedp's task queue is drained before data members are being
   // deleted
@@ -1194,12 +1198,6 @@ Spdp::part_bit()
 }
 #endif /* DDS_HAS_MINIMUM_BIT */
 
-ACE_Reactor*
-Spdp::reactor() const
-{
-  return disco_->reactor();
-}
-
 WaitForAcks&
 Spdp::wait_for_acks()
 {
@@ -1207,14 +1205,15 @@ Spdp::wait_for_acks()
 }
 
 bool
-Spdp::is_opendds(const GUID_t& participant) const
+Spdp::is_expectant_opendds(const GUID_t& participant) const
 {
   const DiscoveredParticipantConstIter iter = participants_.find(participant);
   if (iter == participants_.end()) {
     return false;
   }
-  return 0 == std::memcmp(&iter->second.pdata_.participantProxy.vendorId,
-                          DCPS::VENDORID_OCI, sizeof(VendorId_t));
+  const bool is_opendds = 0 == std::memcmp(&iter->second.pdata_.participantProxy.vendorId,
+                                           DCPS::VENDORID_OCI, sizeof(VendorId_t));
+  return is_opendds && ((iter->second.pdata_.participantProxy.opendds_participant_flags.bits & RTPS::PFLAGS_NO_ASSOCIATED_WRITERS) == 0);
 }
 
 ParticipantData_t
@@ -1308,7 +1307,8 @@ Spdp::build_local_pdata(
       nonEmptyList /*defaultMulticastLocatorList*/,
       nonEmptyList /*defaultUnicastLocatorList*/,
       {0 /*manualLivelinessCount*/},   //FUTURE: implement manual liveliness
-      qos_.property
+      qos_.property,
+      {PFLAGS_NO_ASSOCIATED_WRITERS} // opendds_participant_flags
     },
     { // Duration_t (leaseDuration)
       static_cast<CORBA::Long>((disco_->resend_period() * LEASE_MULT).sec()),
@@ -1431,7 +1431,9 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer, bool securityGuids)
 void
 Spdp::SpdpTransport::open()
 {
-  ACE_Reactor* reactor = outer_->reactor();
+  outer_->reactor_task_.open(0);
+
+  ACE_Reactor* reactor = outer_->reactor_task_.get_reactor();
   if (reactor->register_handler(unicast_socket_.get_handle(),
                                 this, ACE_Event_Handler::READ_MASK) != 0) {
     throw std::runtime_error("failed to register unicast input handler");
@@ -1536,7 +1538,7 @@ Spdp::SpdpTransport::close()
   if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) SpdpTransport::close\n")));
   }
-  ACE_Reactor* reactor = outer_->reactor();
+  ACE_Reactor* reactor = outer_->reactor_task_.get_reactor();
   reactor->cancel_timer(this);
   const ACE_Reactor_Mask mask =
     ACE_Event_Handler::READ_MASK | ACE_Event_Handler::DONT_CALL;
@@ -1783,7 +1785,7 @@ Spdp::SpdpTransport::handle_exception(ACE_HANDLE)
 void
 Spdp::SpdpTransport::acknowledge()
 {
-  ACE_Reactor* reactor = outer_->reactor();
+  ACE_Reactor* reactor = outer_->reactor_task_.get_reactor();
   reactor->notify(this);
 }
 
