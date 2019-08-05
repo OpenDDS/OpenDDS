@@ -209,6 +209,9 @@ OpenDDS::DCPS::ReactorTask::stop()
   // Let's wait for the reactor task's thread to complete before we
   // leave this stop method.
   wait();
+
+  // Reset the thread manager in case it goes away before the next open.
+  this->thr_mgr(0);
 }
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
