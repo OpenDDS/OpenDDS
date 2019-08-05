@@ -164,6 +164,9 @@ public:
 int
 ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
+  ACE_UNUSED_ARG(argc);
+  ACE_UNUSED_ARG(argv);
+
   dds_root = ACE_OS::getenv("DDS_ROOT");
   if (dds_root.empty()) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("DDS_ROOT isn't defined\n")));
