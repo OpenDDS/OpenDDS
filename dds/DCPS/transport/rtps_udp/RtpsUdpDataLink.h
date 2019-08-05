@@ -219,17 +219,17 @@ private:
 
   } multi_buff_;
 
-  struct Response {
-    Response(const RepoId& from, const RepoId& dst)
+  struct MetaSubmessage {
+    MetaSubmessage(const RepoId& from, const RepoId& dst)
       : from_guid_(from), dst_guid_(dst) {}
-    Response(const RepoId& from, const RepoId& dst, const RepoIdSet& to)
+    MetaSubmessage(const RepoId& from, const RepoId& dst, const RepoIdSet& to)
       : from_guid_(from), dst_guid_(dst), to_guids_(to) {}
     RepoId from_guid_;
     RepoId dst_guid_;
     RepoIdSet to_guids_;
     RTPS::Submessage sm_;
   };
-  typedef OPENDDS_VECTOR(Response) ResponseVec;
+  typedef OPENDDS_VECTOR(MetaSubmessage) MetaSubmessageVec;
 
   // RTPS reliability support for local writers:
 
@@ -274,13 +274,13 @@ private:
                           const DestToEntityMap& dtem);
     void end_historic_samples_i(const DataSampleHeader& header,
                                 ACE_Message_Block* body);
-    void send_heartbeats_manual_i(ResponseVec& responses);
+    void send_heartbeats_manual_i(MetaSubmessageVec& meta_submessages);
 
     void gather_gaps_i(const RepoId& reader,
                        const DisjointSequence& gaps,
-                       ResponseVec& responses);
+                       MetaSubmessageVec& meta_submessages);
     void process_acked_by_all_i();
-    void send_directed_nack_replies_i(const RepoId& readerId, ReaderInfo& reader, ResponseVec& responses);
+    void send_directed_nack_replies_i(const RepoId& readerId, ReaderInfo& reader, MetaSubmessageVec& meta_submessages);
     void process_requested_changes_i(DisjointSequence& requests, const ReaderInfo& reader);
     void send_nackfrag_replies_i(DisjointSequence& gaps, AddrSet& gap_recipients);
 
@@ -307,21 +307,21 @@ private:
                            ACE_Message_Block* chain);
     TransportQueueElement* customize_queue_element_helper(TransportQueueElement* element,
                                                           bool requires_inline_qos,
-                                                          ResponseVec& responses,
+                                                          MetaSubmessageVec& meta_submessages,
                                                           bool& deliver_after_send);
 
     void process_acknack(const RTPS::AckNackSubmessage& acknack,
                          const RepoId& src,
-                         ResponseVec& responses);
+                         MetaSubmessageVec& meta_submessages);
     void process_nackfrag(const RTPS::NackFragSubmessage& nackfrag,
                           const RepoId& src,
-                          ResponseVec& responses);
+                          MetaSubmessageVec& meta_submessages);
     void process_acked_by_all();
-    void send_and_gather_nack_replies(ResponseVec& responses);
+    void send_and_gather_nack_replies(MetaSubmessageVec& meta_submessages);
     bool gather_heartbeats(OPENDDS_VECTOR(TransportQueueElement*)& pendingCallbacks,
                            const RepoIdSet& additional_guids,
                            bool allow_final,
-                           ResponseVec& responses);
+                           MetaSubmessageVec& meta_submessages);
   };
   typedef RcHandle<RtpsWriter> RtpsWriter_rch;
 
@@ -362,15 +362,15 @@ private:
 
     bool should_nack_durable(const WriterInfo& info);
 
-    bool process_heartbeat_i(const RTPS::HeartBeatSubmessage& heartbeat, const RepoId& src, ResponseVec& responses);
-    bool process_data_i(const RTPS::DataSubmessage& data, const RepoId& src, ResponseVec& responses);
-    bool process_gap_i(const RTPS::GapSubmessage& gap, const RepoId& src, ResponseVec& responses);
-    bool process_hb_frag_i(const RTPS::HeartBeatFragSubmessage& hb_frag, const RepoId& src, ResponseVec& responses);
+    bool process_heartbeat_i(const RTPS::HeartBeatSubmessage& heartbeat, const RepoId& src, MetaSubmessageVec& meta_submessages);
+    bool process_data_i(const RTPS::DataSubmessage& data, const RepoId& src, MetaSubmessageVec& meta_submessages);
+    bool process_gap_i(const RTPS::GapSubmessage& gap, const RepoId& src, MetaSubmessageVec& meta_submessages);
+    bool process_hb_frag_i(const RTPS::HeartBeatFragSubmessage& hb_frag, const RepoId& src, MetaSubmessageVec& meta_submessages);
 
-    void gather_ack_nacks(ResponseVec& responses, bool finalFlag = false);
+    void gather_ack_nacks(MetaSubmessageVec& meta_submessages, bool finalFlag = false);
 
   protected:
-    void gather_ack_nacks_i(ResponseVec& responses, bool finalFlag = false);
+    void gather_ack_nacks_i(MetaSubmessageVec& meta_submessages, bool finalFlag = false);
     void generate_nack_frags(NackFragSubmessageVec& nack_frags,
                              WriterInfo& wi, const RepoId& pub_id);
 
@@ -382,17 +382,17 @@ private:
   };
   typedef RcHandle<RtpsReader> RtpsReader_rch;
 
-  typedef OPENDDS_VECTOR(ResponseVec::iterator) ResponseIterVec;
-  typedef OPENDDS_MAP_CMP(RepoId, ResponseIterVec, GUID_tKeyLessThan) DestResponseMap;
-  typedef OPENDDS_MAP(AddrSet, DestResponseMap) AddrDestResponseMap;
-  typedef OPENDDS_VECTOR(ResponseIterVec) ResponseIterVecVec;
+  typedef OPENDDS_VECTOR(MetaSubmessageVec::iterator) MetaSubmessageIterVec;
+  typedef OPENDDS_MAP_CMP(RepoId, MetaSubmessageIterVec, GUID_tKeyLessThan) DestMetaSubmessageMap;
+  typedef OPENDDS_MAP(AddrSet, DestMetaSubmessageMap) AddrDestMetaSubmessageMap;
+  typedef OPENDDS_VECTOR(MetaSubmessageIterVec) MetaSubmessageIterVecVec;
 
-  void build_response_map(ResponseVec& responses, AddrDestResponseMap& adr_map);
-  void bundle_mapped_responses(AddrDestResponseMap& adr_map,
-                               ResponseIterVecVec& response_bundles,
-                               OPENDDS_VECTOR(AddrSet)& response_bundle_addrs,
-                               OPENDDS_VECTOR(size_t)& response_bundle_sizes);
-  void send_bundled_responses(ResponseVec& responses);
+  void build_meta_submessage_map(MetaSubmessageVec& meta_submessages, AddrDestMetaSubmessageMap& adr_map);
+  void bundle_mapped_meta_submessages(AddrDestMetaSubmessageMap& adr_map,
+                               MetaSubmessageIterVecVec& meta_submessage_bundles,
+                               OPENDDS_VECTOR(AddrSet)& meta_submessage_bundle_addrs,
+                               OPENDDS_VECTOR(size_t)& meta_submessage_bundle_sizes);
+  void send_bundled_submessages(MetaSubmessageVec& meta_submessages);
 
   typedef OPENDDS_MAP_CMP(RepoId, RtpsReader_rch, GUID_tKeyLessThan) RtpsReaderMap;
   RtpsReaderMap readers_;
@@ -439,12 +439,12 @@ private:
       }
       to_call.push_back(rw->second);
     }
-    ResponseVec responses;
+    MetaSubmessageVec meta_submessages;
     for (OPENDDS_VECTOR(RtpsWriter_rch)::const_iterator it = to_call.begin(); it < to_call.end(); ++it) {
       RtpsWriter& writer = **it;
-      (writer.*func)(submessage, src, responses);
+      (writer.*func)(submessage, src, meta_submessages);
     }
-    send_bundled_responses(responses);
+    send_bundled_submessages(meta_submessages);
   }
 
   template<typename T, typename FN>
@@ -476,12 +476,12 @@ private:
         to_call.push_back(rr->second);
       }
     }
-    ResponseVec responses;
+    MetaSubmessageVec meta_submessages;
     for (OPENDDS_VECTOR(RtpsReader_rch)::const_iterator it = to_call.begin(); it < to_call.end(); ++it) {
       RtpsReader& reader = **it;
-      schedule_timer |= (reader.*func)(submessage, src, responses);
+      schedule_timer |= (reader.*func)(submessage, src, meta_submessages);
     }
-    send_bundled_responses(responses);
+    send_bundled_submessages(meta_submessages);
     if (schedule_timer) {
       heartbeat_reply_.schedule();
     }
@@ -602,11 +602,11 @@ private:
 
   TransportQueueElement* customize_queue_element_non_reliable_i(TransportQueueElement* element,
                                                                 bool requires_inline_qos,
-                                                                ResponseVec& responses,
+                                                                MetaSubmessageVec& meta_submessages,
                                                                 bool& deliver_after_send);
 
   void send_heartbeats_manual_i(const TransportSendControlElement* tsce,
-                                ResponseVec& responses);
+                                MetaSubmessageVec& meta_submessages);
 
   typedef OPENDDS_MAP_CMP(RepoId, CORBA::Long, DCPS::GUID_tKeyLessThan) HeartBeatCountMapType;
   HeartBeatCountMapType heartbeat_counts_;
