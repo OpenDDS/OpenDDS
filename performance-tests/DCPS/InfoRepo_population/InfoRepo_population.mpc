@@ -16,7 +16,7 @@ project(*SyncServer) : taoexe, portableserver, iortable, coverage_optional, dds_
   exename   = syncServer
   includes += ../Sync
   libs     += SyncServer
-  libpaths += $(DDS_ROOT)/lib
+  libpaths += $(DDS_ROOT)/lib ../Sync
   after    += *idl Sync_ServerLib
   avoids   += minimum_corba
   idlflags += -I../Sync
@@ -35,6 +35,7 @@ project(*Publisher) : dcpsexe, dcps_tcp {
   requires += no_opendds_safety_profile
   exename   = publisher
   libs     += SyncClient
+  libpaths += ../Sync
   includes += ../Sync
   after    += *SyncServer Sync_ClientLib
   idlflags += -I../Sync
@@ -54,6 +55,7 @@ project(*Subscriber) : dcpsexe, dcps_tcp {
   requires += no_opendds_safety_profile
   exename   = subscriber
   libs     += SyncClient
+  libpaths += ../Sync
   includes += ../Sync
   after    += *Publisher Sync_ClientLib
   idlflags += -I../Sync
