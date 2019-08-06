@@ -1,6 +1,6 @@
-project: dcpsexe {
+project: dcpsexe, test_root {
   after       += TestFramework
-
   libs        += TestFramework
-  includes    += $(DDS_ROOT)/tests/DCPS/TestFramework
+  includes    += $(TEST_ROOT)/tests/DCPS/TestFramework
+  libpaths    += $(TEST_ROOT)/tests/DCPS/TestFramework
 }
