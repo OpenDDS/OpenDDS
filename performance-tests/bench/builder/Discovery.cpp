@@ -12,7 +12,7 @@ namespace Builder {
 Discovery::Discovery(const DiscoveryConfig& config)
   : name_(config.name.in())
 {
-  std::cout << "Creating discovery '" << name_ << "' of type " << config.type << std::endl;
+  Log::log() << "Creating discovery '" << name_ << "' of type " << config.type << std::endl;
   if (std::string(config.type.in()) == "rtps") {
     OpenDDS::RTPS::RtpsDiscovery_rch disc = OpenDDS::DCPS::make_rch<OpenDDS::RTPS::RtpsDiscovery>(config.name.in());
     TheServiceParticipant->add_discovery(OpenDDS::DCPS::static_rchandle_cast<OpenDDS::DCPS::Discovery>(disc));

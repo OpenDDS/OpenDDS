@@ -17,7 +17,8 @@ DataReader::DataReader(const DataReaderConfig& config, DataReaderReport& report,
   , enable_time_(get_or_create_property(report_.properties, "enable_time", Builder::PVK_TIME))
   , last_discovery_time_(get_or_create_property(report_.properties, "last_discovery_time", Builder::PVK_TIME))
 {
-  //std::cout << "Creating datareader: '" << name_ << "' with topic name '" << topic_name_ << "' and listener type name '" << listener_type_name_ << "'" << std::endl;
+  Log::log() << "Creating datareader: '" << name_ << "' with topic name '" << topic_name_
+    << "' and listener type name '" << listener_type_name_ << "'" << std::endl;
 
   auto topic_ptr = topics->get_topic_by_name(config.topic_name.in());
   if (!topic_ptr) {
@@ -68,7 +69,8 @@ DataReader::DataReader(const DataReaderConfig& config, DataReaderReport& report,
     listener_ = create_listener(listener_type_name_);
     if (!listener_) {
       std::stringstream ss;
-      ss << "datareader listener creation failed for datareader '" << name_ << "' with listener type name '" << listener_type_name_ << "'" << std::flush;
+      ss << "datareader listener creation failed for datareader '" << name_
+        << "' with listener type name '" << listener_type_name_ << "'" << std::flush;
       throw std::runtime_error(ss.str());
     } else {
       DataReaderListener* savvy_listener_ = dynamic_cast<DataReaderListener*>(listener_.in());
@@ -93,7 +95,7 @@ DataReader::DataReader(const DataReaderConfig& config, DataReaderReport& report,
   }
 
   if (!transport_config_name_.empty()) {
-    std::cout << "Binding config for datareader " << name_ << " (" << transport_config_name_ << ")"<< std::endl;
+    Log::log() << "Binding config for datareader " << name_ << " (" << transport_config_name_ << ")"<< std::endl;
     TheTransportRegistry->bind_config(transport_config_name_.c_str(), datareader_);
   }
 }

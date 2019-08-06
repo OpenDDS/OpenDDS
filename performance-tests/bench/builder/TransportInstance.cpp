@@ -7,7 +7,7 @@ namespace Builder {
 TransportInstance::TransportInstance(const TransportInstanceConfig& config)
   : name_(config.name.in())
 {
-  std::cout << "Creating instance '" << name_ << "' of type " << config.type << std::endl;
+  Log::log() << "Creating instance '" << name_ << "' of type " << config.type << std::endl;
 
   if (std::string(config.type.in()) == "rtps_udp") {
     config_ = OpenDDS::DCPS::TransportRegistry::instance()->create_config(config.name.in());

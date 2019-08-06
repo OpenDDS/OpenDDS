@@ -16,7 +16,9 @@ Topic::Topic(const TopicConfig& config, DDS::DomainParticipant_var& participant)
   , transport_config_name_(config.transport_config_name.in())
   , participant_(participant)
 {
-  std::cout << "Creating topic: '" << name_ << "' with type name '" << type_name_ << "' and listener type name '" << listener_type_name_ << "'" << std::endl;
+  Log::log()
+    << "Creating topic: '" << name_ << "' with type name '" << type_name_
+    << "' and listener type name '" << listener_type_name_ << "'" << std::endl;
 
   // Customize QoS Object
   DDS::TopicQos qos;
@@ -78,7 +80,7 @@ Topic::Topic(const TopicConfig& config, DDS::DomainParticipant_var& participant)
 
   // Bind Transport Config
   if (!transport_config_name_.empty()) {
-    std::cout << "Binding config for topic " << name_ << " (" << transport_config_name_ << ")"<< std::endl;
+    Log::log() << "Binding config for topic " << name_ << " (" << transport_config_name_ << ")"<< std::endl;
     TheTransportRegistry->bind_config(transport_config_name_.c_str(), topic_);
   }
 }

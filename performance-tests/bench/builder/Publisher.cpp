@@ -15,7 +15,7 @@ Publisher::Publisher(const PublisherConfig& config, PublisherReport& report, DDS
   , report_(report)
   , participant_(participant)
 {
-  std::cout << "Creating publisher: '" << name_ << "' and listener type name '" << listener_type_name_ << "'" << std::endl;
+  Log::log() << "Creating publisher: '" << name_ << "' and listener type name '" << listener_type_name_ << "'" << std::endl;
 
   // Customize QoS Object
   DDS::PublisherQos qos;
@@ -54,7 +54,7 @@ Publisher::Publisher(const PublisherConfig& config, PublisherReport& report, DDS
   }
 
   if (!transport_config_name_.empty()) {
-    std::cout << "Binding config for publisher " << name_ << " (" << transport_config_name_ << ")"<< std::endl;
+    Log::log() << "Binding config for publisher " << name_ << " (" << transport_config_name_ << ")"<< std::endl;
     TheTransportRegistry->bind_config(transport_config_name_.c_str(), publisher_);
   }
 

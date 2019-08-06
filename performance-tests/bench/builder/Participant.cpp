@@ -15,7 +15,7 @@ Participant::Participant(const ParticipantConfig& config, ParticipantReport& rep
   , transport_config_name_(config.transport_config_name.in())
   , report_(report)
 {
-  std::cout << "Creating participant: '" << name_ << "' in domain " << domain_ << std::endl;
+  Log::log() << "Creating participant: '" << name_ << "' in domain " << domain_ << std::endl;
 
   // Customize QoS Object
   DDS::DomainParticipantQos qos;
@@ -53,7 +53,7 @@ Participant::Participant(const ParticipantConfig& config, ParticipantReport& rep
 
   // Bind Transport Config
   if (!transport_config_name_.empty()) {
-    std::cout << "Binding config for participant " << name_ << " (" << transport_config_name_ << ")"<< std::endl;
+    Log::log() << "Binding config for participant " << name_ << " (" << transport_config_name_ << ")"<< std::endl;
     TheTransportRegistry->bind_config(transport_config_name_.c_str(), participant_);
   }
 
@@ -88,7 +88,7 @@ Participant::~Participant() {
   topics_.reset();
 
   if (participant_) {
-    std::cout << "deleting entities for participant " << name_ << std::endl;
+    Log::log() << "deleting entities for participant " << name_ << std::endl;
     participant_->delete_contained_entities();
     TheParticipantFactory->delete_participant(participant_.in());
   }

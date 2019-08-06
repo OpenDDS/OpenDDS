@@ -43,7 +43,7 @@ std::vector<std::string> TypeSupportRegistry::get_type_names() {
 TypeSupportRegistry::TypeSupportRegistration::TypeSupportRegistration(DDS::TypeSupport* ts) {
   if (ts) {
     CORBA::String_var type_name = ts->get_type_name();
-    std::cout << "TypeSupportRegistration created for name '" << type_name << "'" << std::endl;
+    Log::log() << "TypeSupportRegistration created for name '" << type_name << "'" << std::endl;
     if (!register_type_support(type_name.in(), ts)) {
       std::stringstream ss;
       ss << "unable to register type support with name '" << type_name << "'" << std::flush;

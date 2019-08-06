@@ -18,7 +18,8 @@ DataWriter::DataWriter(const DataWriterConfig& config, DataWriterReport& report,
   , enable_time_(get_or_create_property(report_.properties, "enable_time", Builder::PVK_TIME))
   , last_discovery_time_(get_or_create_property(report_.properties, "last_discovery_time", Builder::PVK_TIME))
 {
-  //std::cout << "Creating datawriter: '" << name_ << "' with topic name '" << topic_name_ << "' and listener type name '" << listener_type_name_ << "'" << std::endl;
+  Log::log() << "Creating datawriter: '" << name_ << "' with topic name '" << topic_name_
+    << "' and listener type name '" << listener_type_name_ << "'" << std::endl;
 
   auto topic_ptr = topics->get_topic_by_name(topic_name_);
   if (!topic_ptr) {
@@ -78,7 +79,8 @@ DataWriter::DataWriter(const DataWriterConfig& config, DataWriterReport& report,
     listener_ = create_listener(listener_type_name_);
     if (!listener_) {
       std::stringstream ss;
-      ss << "datareader listener creation failed for datawriter '" << name_ << "' with listener type name '" << listener_type_name_ << "'" << std::flush;
+      ss << "datareader listener creation failed for datawriter '" << name_
+        << "' with listener type name '" << listener_type_name_ << "'" << std::flush;
       throw std::runtime_error(ss.str());
     } else {
       DataWriterListener* savvy_listener_ = dynamic_cast<DataWriterListener*>(listener_.in());
@@ -103,7 +105,7 @@ DataWriter::DataWriter(const DataWriterConfig& config, DataWriterReport& report,
   }
 
   if (!transport_config_name_.empty()) {
-    std::cout << "Binding config for datawriter " << name_ << " (" << transport_config_name_ << ")"<< std::endl;
+    Log::log() << "Binding config for datawriter " << name_ << " (" << transport_config_name_ << ")"<< std::endl;
     TheTransportRegistry->bind_config(transport_config_name_.c_str(), datawriter_);
   }
 }

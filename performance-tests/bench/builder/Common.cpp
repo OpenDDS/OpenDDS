@@ -19,8 +19,11 @@ double to_seconds_double(const TimeStamp& ts) {
   return static_cast<double>(ts.sec) + (static_cast<double>(ts.nsec) * 1e-9);
 }
 
-std::chrono::milliseconds get_duration(const TimeStamp& ts) {
-  return std::chrono::milliseconds(static_cast<int64_t>((static_cast<int64_t>(ts.sec) * 1000) + (static_cast<int64_t>(ts.nsec) / 1000)));
+std::chrono::milliseconds
+get_duration(const TimeStamp& ts)
+{
+  return std::chrono::milliseconds(static_cast<int64_t>((static_cast<int64_t>(ts.sec) * 1000) +
+    (static_cast<int64_t>(ts.nsec) / 1000)));
 }
 
 TimeStamp operator-(const TimeStamp& lhs, const TimeStamp& rhs) {
@@ -47,15 +50,24 @@ bool operator==(const TimeStamp& lhs, const TimeStamp& rhs) {
   return lhs.sec == rhs.sec && lhs.sec == rhs.sec;
 }
 
-std::ostream& operator<<(std::ostream& out, const TimeStamp& ts) {
-  out << std::setprecision(3) << std::fixed << static_cast<double>(ts.sec) + (static_cast<double>(ts.nsec) / 1.0e9) << std::flush;
+std::ostream&
+operator<<(std::ostream& out, const TimeStamp& ts)
+{
+  out << std::setprecision(3) << std::fixed <<
+    static_cast<double>(ts.sec) + (static_cast<double>(ts.nsec) / 1.0e9) << std::flush;
   return out;
 }
 
-PropertyIndex::PropertyIndex() : seq_(0), index_(0) {
+PropertyIndex::PropertyIndex()
+: seq_(0)
+, index_(0)
+{
 }
 
-PropertyIndex::PropertyIndex(PropertySeq& seq, uint32_t index) : seq_(&seq), index_(index) {
+PropertyIndex::PropertyIndex(PropertySeq& seq, uint32_t index)
+: seq_(&seq)
+, index_(index)
+{
 }
 
 const Property* PropertyIndex::operator->() const {
@@ -66,17 +78,27 @@ Property* PropertyIndex::operator->() {
   return &((*seq_)[index_]);
 }
 
-ConstPropertyIndex::ConstPropertyIndex() : seq_(0), index_(0) {
+ConstPropertyIndex::ConstPropertyIndex()
+: seq_(0)
+, index_(0)
+{
 }
 
-ConstPropertyIndex::ConstPropertyIndex(const PropertySeq& seq, uint32_t index) : seq_(&seq), index_(index) {
+ConstPropertyIndex::ConstPropertyIndex(const PropertySeq& seq, uint32_t index)
+: seq_(&seq)
+, index_(index)
+{
 }
 
 const Property* ConstPropertyIndex::operator->() const {
   return &((*seq_)[index_]);
 }
 
-Builder::PropertyIndex get_or_create_property(Builder::PropertySeq& seq, const std::string& name, Builder::PropertyValueKind kind) {
+Builder::PropertyIndex
+get_or_create_property(
+  Builder::PropertySeq& seq,
+  const std::string& name, Builder::PropertyValueKind kind)
+{
   for (uint32_t i = 0; i < seq.length(); ++i) {
     if (std::string(seq[i].name.in()) == name) {
       if (seq[i].value._d() == kind) {
@@ -96,7 +118,11 @@ Builder::PropertyIndex get_or_create_property(Builder::PropertySeq& seq, const s
   return PropertyIndex(seq, idx);
 }
 
-Builder::ConstPropertyIndex get_property(const Builder::PropertySeq& seq, const std::string& name, Builder::PropertyValueKind kind) {
+Builder::ConstPropertyIndex
+get_property(
+  const Builder::PropertySeq& seq,
+  const std::string& name, Builder::PropertyValueKind kind)
+{
   for (uint32_t i = 0; i < seq.length(); ++i) {
     if (std::string(seq[i].name.in()) == name) {
       if (seq[i].value._d() == kind) {
@@ -109,5 +135,20 @@ Builder::ConstPropertyIndex get_property(const Builder::PropertySeq& seq, const 
   return ConstPropertyIndex();
 }
 
+int
+NullStream::overflow(int c)
+{
+  return c;
 }
 
+std::ostream* Log::stream = nullptr;
+
+std::ostream&
+Log::log()
+{
+  static NullStream null_stream_buf;
+  static std::ostream null_stream(&null_stream_buf);
+  return stream ? *stream : null_stream;
+}
+
+}

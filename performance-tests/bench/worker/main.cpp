@@ -38,6 +38,8 @@
 #include <iomanip>
 #include <condition_variable>
 
+using Builder::Log;
+
 double weighted_median(std::vector<double> medians, std::vector<size_t> weights, double default_value) {
   typedef std::multiset<std::pair<double, size_t> > WMMS;
   WMMS wmms;
@@ -58,18 +60,72 @@ double weighted_median(std::vector<double> medians, std::vector<size_t> weights,
   return default_value;
 }
 
-int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
+inline std::string
+get_option_argument(int& i, int argc, ACE_TCHAR* argv[])
+{
+  if (i == argc - 1) {
+    std::cerr << "Option " << ACE_TEXT_ALWAYS_CHAR(argv[i]) << " requires an argument" << std::endl;
+    throw int{1};
+  }
+  return ACE_TEXT_ALWAYS_CHAR(argv[++i]);
+}
 
-  if (argc < 2) {
-    std::cerr << "Configuration file expected as second argument." << std::endl;
+int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
+  Builder::NullStream null_stream_i;
+  std::ostream null_stream(&null_stream_i);
+
+  std::string log_file_path;
+  std::string report_file_path;
+  std::string config_file_path;
+
+  try {
+    for (int i = 1; i < argc; i++) {
+      const char* argument = ACE_TEXT_ALWAYS_CHAR(argv[i]);
+      if (!ACE_OS::strcmp(argument, "--log")) {
+        log_file_path = get_option_argument(i, argc, argv);
+      } else if (!ACE_OS::strcmp(argument, "--report")) {
+        report_file_path = get_option_argument(i, argc, argv);
+      } else if (config_file_path.empty()) {
+        config_file_path = argument;
+      } else {
+        std::cerr << "Invalid Argument: " << argument << std::endl;
+        return 1;
+      }
+    }
+  } catch(int value) {
+    return value;
+  }
+
+  if (config_file_path.empty()) {
+    std::cerr << "Must pass configuration file" << std::endl;
     return 1;
   }
 
-  std::ifstream ifs(argv[1]);
-  if (!ifs.good()) {
-    std::cerr << "Unable to open configuration file: '" << argv[1] << "'" << std::endl;
+  std::ifstream config_file(config_file_path);
+  if (!config_file.is_open()) {
+    std::cerr << "Unable to open configuration file: '" << config_file_path << "'" << std::endl;
     return 2;
   }
+
+  std::ofstream log_file;
+  if (!log_file_path.empty()) {
+    log_file.open(log_file_path);
+    if (!log_file.good()) {
+      std::cerr << "Unable to open log file: '" << log_file_path << "'" << std::endl;
+      return 2;
+    }
+    Log::stream = &log_file;
+  }
+
+  std::ofstream report_file_i;
+  if (!report_file_path.empty()) {
+    report_file_i.open(report_file_path);
+    if (!report_file_i.good()) {
+      std::cerr << "Unable to open report file: '" << report_file_path << "'" << std::endl;
+      return 2;
+    }
+  }
+  std::ostream& report_file = report_file_path.empty() ? std::cout : report_file_i;
 
   using Builder::ZERO;
 
@@ -79,8 +135,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   config.start_time = ZERO;
   config.stop_time = ZERO;
 
-  if (!json_2_builder(ifs, config)) {
-    std::cerr << "Unable to parse configuration file: '" << argv[1] << "'" << std::endl;
+  if (!json_2_builder(config_file, config)) {
+    std::cerr << "Unable to parse configuration" << std::endl;
     return 3;
   }
 
@@ -116,7 +172,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
       return DDS::DomainParticipantListener_var(new Bench::WorkerParticipantListener());
     });
 
-  // Disable some Proactor debug chatter to std out (eventually make this configurable?)
+  // Disable some Proactor debug chatter to stdout (eventually make this configurable?)
   ACE_Log_Category::ace_lib().priority_mask(0);
 
   ACE_Proactor proactor;
@@ -151,22 +207,22 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     std::condition_variable cv;
     std::mutex cv_mutex;
 
-    std::cout << "Beginning process construction / entity creation." << std::endl;
+    Log::log() << "Beginning process construction / entity creation." << std::endl;
 
     process_construction_begin_time = Builder::get_time();
     Builder::Process process(config.process);
     process_construction_end_time = Builder::get_time();
 
-    std::cout << std::endl << "Process construction / entity creation complete." << std::endl << std::endl;
+    Log::log() << std::endl << "Process construction / entity creation complete." << std::endl << std::endl;
 
-    std::cout << "Beginning action construction / initialization." << std::endl;
+    Log::log() << "Beginning action construction / initialization." << std::endl;
 
     Bench::ActionManager am(config.actions, config.action_reports, process.get_reader_map(), process.get_writer_map());
 
-    std::cout << "Action construction / initialization complete." << std::endl << std::endl;
+    Log::log() << "Action construction / initialization complete." << std::endl << std::endl;
 
     if (config.enable_time == ZERO) {
-      std::cout << "No test enable time specified. Press any key to enable process entities." << std::endl;
+      std::cerr << "No test enable time specified. Press any key to enable process entities." << std::endl;
       std::getline(std::cin, line);
     } else {
       if (config.enable_time < ZERO) {
@@ -180,16 +236,16 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
       }
     }
 
-    std::cout << "Enabling DDS entities (if not already enabled)." << std::endl;
+    Log::log() << "Enabling DDS entities (if not already enabled)." << std::endl;
 
     process_enable_begin_time = Builder::get_time();
     process.enable_dds_entities();
     process_enable_end_time = Builder::get_time();
 
-    std::cout << "DDS entities enabled." << std::endl << std::endl;
+    Log::log() << "DDS entities enabled." << std::endl << std::endl;
 
     if (config.start_time == ZERO) {
-      std::cout << "No test start time specified. Press any key to start process testing." << std::endl;
+      std::cerr << "No test start time specified. Press any key to start process testing." << std::endl;
       std::getline(std::cin, line);
     } else {
       if (config.start_time < ZERO) {
@@ -203,16 +259,16 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
       }
     }
 
-    std::cout << "Starting process tests." << std::endl;
+    Log::log() << "Starting process tests." << std::endl;
 
     process_start_begin_time = Builder::get_time();
     am.start();
     process_start_end_time = Builder::get_time();
 
-    std::cout << "Process tests started." << std::endl << std::endl;
+    Log::log() << "Process tests started." << std::endl << std::endl;
 
     if (config.stop_time == ZERO) {
-      std::cout << "No stop time specified. Press any key to stop process testing." << std::endl;
+      std::cerr << "No stop time specified. Press any key to stop process testing." << std::endl;
       std::getline(std::cin, line);
     } else {
       if (config.stop_time < ZERO) {
@@ -226,13 +282,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
       }
     }
 
-    std::cout << "Stopping process tests." << std::endl;
+    Log::log() << "Stopping process tests." << std::endl;
 
     process_stop_begin_time = Builder::get_time();
     am.stop();
     process_stop_end_time = Builder::get_time();
 
-    std::cout << "Process tests stopped." << std::endl << std::endl;
+    Log::log() << "Process tests stopped." << std::endl << std::endl;
 
     proactor.proactor_end_event_loop();
     for (size_t i = 0; i < THREAD_POOL_SIZE; ++i) {
@@ -244,7 +300,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
     process_report = process.get_report();
 
-    std::cout << "Beginning process destruction / entity deletion." << std::endl;
+    Log::log() << "Beginning process destruction / entity deletion." << std::endl;
 
     process_destruction_begin_time = Builder::get_time();
   } catch (const std::exception& e) {
@@ -268,7 +324,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   }
   process_destruction_end_time = Builder::get_time();
 
-  std::cout << "Process destruction / entity deletion complete." << std::endl << std::endl;
+  Log::log() << "Process destruction / entity deletion complete." << std::endl << std::endl;
 
   // Some preliminary measurements and reporting (eventually will shift to another process?)
   Bench::WorkerReport worker_report;
@@ -362,7 +418,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
             value.ull_prop();
         const double dr_jitter_min =
           get_or_create_property(dr_report.properties, "jitter_min", Builder::PVK_DOUBLE)->
-          value.double_prop();
+            value.double_prop();
         const double dr_jitter_max =
           get_or_create_property(dr_report.properties, "jitter_max", Builder::PVK_DOUBLE)->
             value.double_prop();
@@ -377,7 +433,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
             value.double_prop();
         const CORBA::ULongLong dr_jitter_median_sample_count =
           get_or_create_property(dr_report.properties, "jitter_median_sample_count", Builder::PVK_ULL)->
-          value.ull_prop();
+            value.ull_prop();
 
         // Round-Trip Latency
         const CORBA::ULongLong dr_round_trip_latency_sample_count =
@@ -565,79 +621,68 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   worker_report.round_trip_jitter_weighted_median =
     weighted_median(round_trip_jitter_medians, round_trip_jitter_median_counts, 0.0);
 
-  std::string output_file_name;
-  std::unique_ptr<std::ofstream> ofs;
-  if (argc > 2 && std::string(argv[2]) == "true") {
-    std::stringstream ss;
-    ss << "worker_" << getpid() << "_output.txt" << std::flush;
-    output_file_name = ss.str();
-    ofs.reset(new std::ofstream(output_file_name.c_str()));
-  }
+  report_file << std::endl << "--- Process Statistics ---" << std::endl << std::endl;
 
-  std::ostream& os = output_file_name.empty() ? std::cout : *ofs;
+  report_file << "construction time: " << process_construction_end_time - process_construction_begin_time << std::endl;
+  report_file << "enable time: " << process_enable_end_time - process_enable_begin_time << std::endl;
+  report_file << "start time: " << process_start_end_time - process_start_begin_time << std::endl;
+  report_file << "stop time: " << process_stop_end_time - process_stop_begin_time << std::endl;
+  report_file << "destruction time: " << process_destruction_end_time - process_destruction_begin_time << std::endl;
 
-  os << std::endl << "--- Process Statistics ---" << std::endl << std::endl;
+  report_file << std::endl << "--- Discovery Statistics ---" << std::endl << std::endl;
 
-  os << "construction time: " << process_construction_end_time - process_construction_begin_time << std::endl;
-  os << "enable time: " << process_enable_end_time - process_enable_begin_time << std::endl;
-  os << "start time: " << process_start_end_time - process_start_begin_time << std::endl;
-  os << "stop time: " << process_stop_end_time - process_stop_begin_time << std::endl;
-  os << "destruction time: " << process_destruction_end_time - process_destruction_begin_time << std::endl;
-
-  os << std::endl << "--- Discovery Statistics ---" << std::endl << std::endl;
-
-  os << "undermatched readers: " << worker_report.undermatched_readers << std::endl;
-  os << "undermatched writers: " << worker_report.undermatched_writers << std::endl << std::endl;
-  os << "max discovery time delta: " << worker_report.max_discovery_time_delta << std::endl;
+  report_file << "undermatched readers: " << worker_report.undermatched_readers << std::endl;
+  report_file << "undermatched writers: " << worker_report.undermatched_writers << std::endl << std::endl;
+  report_file << "max discovery time delta: " << worker_report.max_discovery_time_delta << std::endl;
 
   if (worker_report.latency_sample_count > 0) {
-    os << std::endl << "--- Latency Statistics ---" << std::endl << std::endl;
+    report_file << std::endl << "--- Latency Statistics ---" << std::endl << std::endl;
 
-    os << "total (latency) sample count: " << worker_report.latency_sample_count << std::endl;
-    os << "minimum latency: " << std::fixed << std::setprecision(6) << worker_report.latency_min << " seconds" << std::endl;
-    os << "maximum latency: " << std::fixed << std::setprecision(6) << worker_report.latency_max << " seconds" << std::endl;
-    os << "mean latency: " << std::fixed << std::setprecision(6) << worker_report.latency_mean << " seconds" << std::endl;
-    os << "latency standard deviation: " << std::fixed << std::setprecision(6) << worker_report.latency_stdev << " seconds" << std::endl;
-    os << "latency weighted median: " << std::fixed << std::setprecision(6) << worker_report.latency_weighted_median << " seconds" << std::endl;
-    os << "latency weighted median overflow: " << worker_report.latency_weighted_median_overflow << std::endl;
+    report_file << "total (latency) sample count: " << worker_report.latency_sample_count << std::endl;
+    report_file << "minimum latency: " << std::fixed << std::setprecision(6) << worker_report.latency_min << " seconds" << std::endl;
+    report_file << "maximum latency: " << std::fixed << std::setprecision(6) << worker_report.latency_max << " seconds" << std::endl;
+    report_file << "mean latency: " << std::fixed << std::setprecision(6) << worker_report.latency_mean << " seconds" << std::endl;
+    report_file << "latency standard deviation: " << std::fixed << std::setprecision(6) << worker_report.latency_stdev << " seconds" << std::endl;
+    report_file << "latency weighted median: " << std::fixed << std::setprecision(6) << worker_report.latency_weighted_median << " seconds" << std::endl;
+    report_file << "latency weighted median overflow: " << worker_report.latency_weighted_median_overflow << std::endl;
   }
 
   if (worker_report.jitter_sample_count > 0) {
-    os << std::endl << "--- Jitter Statistics ---" << std::endl << std::endl;
+    report_file << std::endl << "--- Jitter Statistics ---" << std::endl << std::endl;
 
-    os << "total (jitter) sample count: " << worker_report.jitter_sample_count << std::endl;
-    os << "minimum jitter: " << std::fixed << std::setprecision(6) << worker_report.jitter_min << " seconds" << std::endl;
-    os << "maximum jitter: " << std::fixed << std::setprecision(6) << worker_report.jitter_max << " seconds" << std::endl;
-    os << "mean jitter: " << std::fixed << std::setprecision(6) << worker_report.jitter_mean << " seconds" << std::endl;
-    os << "jitter standard deviation: " << std::fixed << std::setprecision(6) << worker_report.jitter_stdev << " seconds" << std::endl;
-    os << "jitter weighted median: " << std::fixed << std::setprecision(6) << worker_report.jitter_weighted_median << " seconds" << std::endl;
-    os << "jitter weighted median overflow: " << worker_report.jitter_weighted_median_overflow << std::endl;
-    os << std::endl;
+    report_file << "total (jitter) sample count: " << worker_report.jitter_sample_count << std::endl;
+    report_file << "minimum jitter: " << std::fixed << std::setprecision(6) << worker_report.jitter_min << " seconds" << std::endl;
+    report_file << "maximum jitter: " << std::fixed << std::setprecision(6) << worker_report.jitter_max << " seconds" << std::endl;
+    report_file << "mean jitter: " << std::fixed << std::setprecision(6) << worker_report.jitter_mean << " seconds" << std::endl;
+    report_file << "jitter standard deviation: " << std::fixed << std::setprecision(6) << worker_report.jitter_stdev << " seconds" << std::endl;
+    report_file << "jitter weighted median: " << std::fixed << std::setprecision(6) << worker_report.jitter_weighted_median << " seconds" << std::endl;
+    report_file << "jitter weighted median overflow: " << worker_report.jitter_weighted_median_overflow << std::endl;
+    report_file << std::endl;
   }
 
   if (worker_report.round_trip_latency_sample_count > 0) {
-    os << std::endl << "--- Round-Trip Latency Statistics ---" << std::endl << std::endl;
+    report_file << std::endl << "--- Round-Trip Latency Statistics ---" << std::endl << std::endl;
 
-    os << "total (round_trip_latency) sample count: " << worker_report.round_trip_latency_sample_count << std::endl;
-    os << "minimum round_trip_latency: " << std::fixed << std::setprecision(6) << worker_report.round_trip_latency_min << " seconds" << std::endl;
-    os << "maximum round_trip_latency: " << std::fixed << std::setprecision(6) << worker_report.round_trip_latency_max << " seconds" << std::endl;
-    os << "mean round_trip_latency: " << std::fixed << std::setprecision(6) << worker_report.round_trip_latency_mean << " seconds" << std::endl;
-    os << "round_trip_latency standard deviation: " << std::fixed << std::setprecision(6) << worker_report.round_trip_latency_stdev << " seconds" << std::endl;
-    os << "round_trip_latency weighted median: " << std::fixed << std::setprecision(6) << worker_report.round_trip_latency_weighted_median << " seconds" << std::endl;
-    os << "round_trip_latency weighted median overflow: " << worker_report.round_trip_latency_weighted_median_overflow << std::endl;
+    report_file << "total (round_trip_latency) sample count: " << worker_report.round_trip_latency_sample_count << std::endl;
+    report_file << "minimum round_trip_latency: " << std::fixed << std::setprecision(6) << worker_report.round_trip_latency_min << " seconds" << std::endl;
+    report_file << "maximum round_trip_latency: " << std::fixed << std::setprecision(6) << worker_report.round_trip_latency_max << " seconds" << std::endl;
+    report_file << "mean round_trip_latency: " << std::fixed << std::setprecision(6) << worker_report.round_trip_latency_mean << " seconds" << std::endl;
+    report_file << "round_trip_latency standard deviation: " << std::fixed << std::setprecision(6) << worker_report.round_trip_latency_stdev << " seconds" << std::endl;
+    report_file << "round_trip_latency weighted median: " << std::fixed << std::setprecision(6) << worker_report.round_trip_latency_weighted_median << " seconds" << std::endl;
+    report_file << "round_trip_latency weighted median overflow: " << worker_report.round_trip_latency_weighted_median_overflow << std::endl;
   }
 
   if (worker_report.round_trip_jitter_sample_count > 0) {
-    os << std::endl << "--- Round-Trip Jitter Statistics ---" << std::endl << std::endl;
+    report_file << std::endl << "--- Round-Trip Jitter Statistics ---" << std::endl << std::endl;
 
-    os << "total (round_trip_jitter) sample count: " << worker_report.round_trip_jitter_sample_count << std::endl;
-    os << "minimum round_trip_jitter: " << std::fixed << std::setprecision(6) << worker_report.round_trip_jitter_min << " seconds" << std::endl;
-    os << "maximum round_trip_jitter: " << std::fixed << std::setprecision(6) << worker_report.round_trip_jitter_max << " seconds" << std::endl;
-    os << "mean round_trip_jitter: " << std::fixed << std::setprecision(6) << worker_report.round_trip_jitter_mean << " seconds" << std::endl;
-    os << "round_trip_jitter standard deviation: " << std::fixed << std::setprecision(6) << worker_report.round_trip_jitter_stdev << " seconds" << std::endl;
-    os << "round_trip_jitter weighted median: " << std::fixed << std::setprecision(6) << worker_report.round_trip_jitter_weighted_median << " seconds" << std::endl;
-    os << "round_trip_jitter weighted median overflow: " << worker_report.round_trip_jitter_weighted_median_overflow << std::endl;
-    os << std::endl;
+    report_file << "total (round_trip_jitter) sample count: " << worker_report.round_trip_jitter_sample_count << std::endl;
+    report_file << "minimum round_trip_jitter: " << std::fixed << std::setprecision(6) << worker_report.round_trip_jitter_min << " seconds" << std::endl;
+    report_file << "maximum round_trip_jitter: " << std::fixed << std::setprecision(6) << worker_report.round_trip_jitter_max << " seconds" << std::endl;
+    report_file << "mean round_trip_jitter: " << std::fixed << std::setprecision(6) << worker_report.round_trip_jitter_mean << " seconds" << std::endl;
+    report_file << "round_trip_jitter standard deviation: " << std::fixed << std::setprecision(6) << worker_report.round_trip_jitter_stdev << " seconds" << std::endl;
+    report_file << "round_trip_jitter weighted median: " << std::fixed << std::setprecision(6) << worker_report.round_trip_jitter_weighted_median << " seconds" << std::endl;
+    report_file << "round_trip_jitter weighted median overflow: " << worker_report.round_trip_jitter_weighted_median_overflow << std::endl;
+    report_file << std::endl;
   }
 
   return 0;

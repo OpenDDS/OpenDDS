@@ -25,7 +25,10 @@ ConfigSectionManager::ConfigSectionManager(const ConfigSectionSeq& seq) {
       token = std::strtok(NULL, "/");
     }
     for (CORBA::ULong j = 0; j < section.properties.length(); ++j) {
-      std::cout << "Adding '" << section.properties[j].name << "' = '" << section.properties[j].value << "' to [" << section.name << "] configuration section" << std::endl;
+      Log::log()
+        << "Adding '" << section.properties[j].name
+        <<"' = '" << section.properties[j].value
+        << "' to [" << section.name << "] configuration section" << std::endl;
       ach.set_string_value(keys.back(), section.properties[j].name.in(), section.properties[j].value.in());
     }
   }

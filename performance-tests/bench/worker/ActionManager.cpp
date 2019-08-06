@@ -55,7 +55,7 @@ std::shared_ptr<Action> ActionManager::create_action(const std::string& name) {
 }
 
 ActionManager::Registration::Registration(const std::string& name, const ActionManager::action_factory& factory) {
-  std::cout << "Action registration created for name '" << name << "'" << std::endl;
+  Builder::Log::log() << "Action registration created for name '" << name << "'" << std::endl;
   if (!register_action_factory(name, factory)) {
     std::stringstream ss;
     ss << "unable to register action factory with name '" << name << "'" << std::flush;

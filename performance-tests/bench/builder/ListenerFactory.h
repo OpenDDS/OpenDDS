@@ -45,7 +45,7 @@ public:
   class Registration {
   public:
     Registration(const std::string& name, const listener_factory& factory) {
-      std::cout << "Listener registration created for name '" << name << "'" << std::endl;
+      Log::log() << "Listener registration created for name '" << name << "'" << std::endl;
       if (!register_listener_factory(name, factory)) {
         std::stringstream ss;
         ss << "unable to register listener factory with name '" << name << "'" << std::flush;

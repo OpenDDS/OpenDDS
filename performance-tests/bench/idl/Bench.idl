@@ -111,5 +111,29 @@ module Bench {
     unsigned long long round_trip_jitter_weighted_median_overflow;
   };
 
+  module NodeController {
+    typedef unsigned long NodeId;
+    typedef unsigned long WorkerId;
+
+    struct WorkerConfig {
+      WorkerId worker_id;
+      string config;
+    };
+    typedef sequence<WorkerConfig> WorkerConfigs;
+
+#pragma DCPS_DATA_TYPE "Bench::NodeController::Config"
+    struct Config {
+      NodeId node_id;
+      WorkerConfigs workers;
+    };
+
+#pragma DCPS_DATA_TYPE "Bench::NodeController::Report"
+    struct Report {
+      NodeId node_id;
+      WorkerId worker_id;
+      boolean failed;
+      string details;
+    };
+  };
 };
 
