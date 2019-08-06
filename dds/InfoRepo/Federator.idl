@@ -124,7 +124,7 @@ module OpenDDS { module Federator {
     // Subscription data updates
     //
 
-    @key
+    @topic
     struct SubscriptionUpdate {
       FederationId id;
       @key RepoKey sender;
