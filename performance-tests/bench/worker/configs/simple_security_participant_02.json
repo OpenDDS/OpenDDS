@@ -1,7 +1,7 @@
 {
   "enable_time": { "sec": -1, "nsec": 0 },
   "start_time": { "sec": -3, "nsec": 0 },
-  "stop_time": { "sec": -3, "nsec": 0 },
+  "stop_time": { "sec": -30, "nsec": 0 },
 
   "process": {
     "config_sections": [
@@ -9,9 +9,16 @@
         "properties": [
           { "name": "DCPSSecurity",
             "value": "1"
+          }
+        ]
+      },
+      { "name": "transport/rtps_instance_02",
+        "properties": [
+          { "name": "use_multicast",
+            "value": "0"
           },
-          { "name": "DCPSDebugLevel",
-            "value": "2"
+          { "name": "transport_type",
+            "value": "rtps_udp"
           }
         ]
       }
@@ -31,7 +38,6 @@
     "participants": [
       { "name": "participant_02",
         "domain": 0,
-        "listener_type_name": "bench_partl",
         "listener_status_mask": 4294967295,
         "transport_config_name": "rtps_instance_02",
 
@@ -55,13 +61,11 @@
         "topics": [
           { "name": "OD_OL_OA_EM_OD",
             "type_name": "Bench::Data",
-            "listener_type_name": "bench_tl",
             "listener_status_mask": 4294967295
           }
         ],
         "subscribers": [
           { "name": "subscriber_02",
-            "listener_type_name": "bench_sl",
             "listener_status_mask": 4294967295,
             "datareaders": [
               { "name": "datareader_02",
