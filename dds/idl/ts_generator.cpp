@@ -74,6 +74,12 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
     return false;
   }
 
+  if (!struct_node && !union_node) {
+    idl_global->err()->misc_error(
+      "Could not cast AST Nodes to valid types", node);
+    return false;
+  }
+
   size_t key_count = 0;
   if (struct_node) {
     IDL_GlobalData::DCPS_Data_Type_Info* info = idl_global->is_dcps_type(name);
