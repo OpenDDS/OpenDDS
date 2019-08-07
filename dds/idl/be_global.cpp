@@ -320,6 +320,9 @@ BE_GlobalData::parse_args(long& i, char** av)
   static const char DEFAULT_NESTED_FLAG[] = "--default-nested";
   static const size_t DEFAULT_NESTED_FLAG_SIZE = sizeof(DEFAULT_NESTED_FLAG) - 1;
 
+  static const char NO_DEFAULT_NESTED_FLAG[] = "--no-default-nested";
+  static const size_t NO_DEFAULT_NESTED_FLAG_SIZE = sizeof(NO_DEFAULT_NESTED_FLAG) - 1;
+
   static const char NO_DCPS_DATA_TYPE_WARNINGS_FLAG[] = "--no-dcps-data-type-warnings";
   static const size_t NO_DCPS_DATA_TYPE_WARNINGS_FLAG_SIZE = sizeof(NO_DCPS_DATA_TYPE_WARNINGS_FLAG) - 1;
 
@@ -394,6 +397,8 @@ BE_GlobalData::parse_args(long& i, char** av)
       this->export_macro(av[i] + EXPORT_FLAG_SIZE);
     } else if (!ACE_OS::strncasecmp(av[i], DEFAULT_NESTED_FLAG, DEFAULT_NESTED_FLAG_SIZE)) {
       root_default_nested_ = true;
+    } else if (!ACE_OS::strncasecmp(av[i], NO_DEFAULT_NESTED_FLAG, NO_DEFAULT_NESTED_FLAG_SIZE)) {
+      root_default_nested_ = false;
     } else if (!ACE_OS::strncasecmp(av[i], NO_DCPS_DATA_TYPE_WARNINGS_FLAG, NO_DCPS_DATA_TYPE_WARNINGS_FLAG_SIZE)) {
       default_no_dcps_data_type_warnings_ = true;
     } else {
