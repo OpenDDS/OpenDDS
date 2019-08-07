@@ -241,7 +241,6 @@ TopicKeys::Iterator::operator++()
           "does not contain any keys.");
       }
       current_value_ = *child;
-      ++pos_;
       return *this;
     }
 
