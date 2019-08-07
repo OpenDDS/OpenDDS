@@ -98,7 +98,7 @@ void
 be_util::usage()
 {
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT(" --default-nested\ttreat unannotated types as if they were nested\n")
+    ACE_TEXT(" --[no-]default-nested\ttreat unannotated types as if they were nested\n")
     ACE_TEXT(" -o <dir>\t\tsets output directory for all files\n")
     ACE_TEXT(" -Lface\t\t\tgenerate FACE IDL to C++ mapping\n")
     ACE_TEXT(" -Lspcpp\t\tgenerate Safety Profile IDL to C++ mapping\n")
@@ -157,24 +157,4 @@ be_util::dds_root()
     BE_abort();
   }
   return value;
-}
-
-bool
-be_util::path_startswith(const std::string& subject, const std::string& base)
-{
-  char* tmp = ACE_OS::realpath(subject.c_str(), 0);
-  if (!tmp) {
-    ACE_ERROR((LM_ERROR, "Error - Could not resolve real path of %C.\n", subject.c_str()));
-    BE_abort();
-  }
-  std::string real_subject(tmp);
-
-  tmp = ACE_OS::realpath(base.c_str(), 0);
-  if (!tmp) {
-    ACE_ERROR((LM_ERROR, "Error - Could not resolve real path of %C.\n", base.c_str()));
-    BE_abort();
-  }
-  std::string real_base(tmp);
-
-  return real_subject.find(real_base) == 0;
 }

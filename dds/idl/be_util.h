@@ -36,14 +36,8 @@ namespace be_util {
   /// Create an AST node generator.
   AST_Generator* generator_init();
 
-  /// Get DDS_ROOT or Error if it wasn't set
+  /// Get DDS_ROOT. It is a fatal error if it wasn't set.
   const std::string& dds_root();
-
-  /**
-   * Returns true if subject starts with base. Exits in error if
-   * realpath fails.
-   */
-  bool path_startswith(const std::string& subject, const std::string& base);
 };
 
 #endif // if !defined

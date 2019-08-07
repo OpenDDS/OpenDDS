@@ -1,7 +1,4 @@
-//
-//
-
-project : dcps_test, dcps_transports_for_test {
+project : dcps_test_framework, dcps_transports_for_test {
   exename = test
 
   Source_Files {

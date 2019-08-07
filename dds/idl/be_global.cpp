@@ -677,10 +677,6 @@ BE_GlobalData::warning(const char* filename, unsigned lineno, const char* msg)
 bool
 BE_GlobalData::no_dcps_data_type_warnings() const
 {
-  const std::string& dds_root = be_util::dds_root();
   return default_no_dcps_data_type_warnings_ ||
-    !idl_global->print_warnings() ||
-    be_util::path_startswith(filename_, dds_root + "/tests") ||
-    be_util::path_startswith(filename_, dds_root + "/performance-tests") ||
-    be_util::path_startswith(filename_, dds_root + "/java");
+    !idl_global->print_warnings();
 }

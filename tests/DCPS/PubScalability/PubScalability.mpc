@@ -1,4 +1,4 @@
-project(*Publisher): dcpsexe, dcps_transports_for_test {
+project(*Publisher): dcpsexe, dcps_test, dcps_transports_for_test {
   exename = publisher
   after       += *idl
   libs        += *idl
@@ -15,7 +15,7 @@ project(*Publisher): dcpsexe, dcps_transports_for_test {
   }
 }
 
-project(*Subscriber): dcpsexe, dcps_transports_for_test {
+project(*Subscriber): dcpsexe, dcps_test, dcps_transports_for_test {
   exename = subscriber
   after       += *idl
   libs        += *idl
@@ -31,7 +31,7 @@ project(*Subscriber): dcpsexe, dcps_transports_for_test {
   }
 }
 
-project (*idl) : dcps {
+project (*idl) : dcps_test_lib {
   libout         = .
   idlflags      += -Wb,export_macro=SampleTypeLib_Export -Wb,export_include=sampletypelib_export.h -SS
   dynamicflags   = SAMPLETYPELIB_BUILD_DLL

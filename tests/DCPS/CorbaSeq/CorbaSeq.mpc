@@ -12,7 +12,7 @@ project(*Idl): dcps_test_lib {
   }
 }
 
-project(*Publisher) : dcpsexe, dcps_transports_for_test {
+project(*Publisher) : dcpsexe, dcps_test, dcps_transports_for_test {
   requires += no_opendds_safety_profile
 
   after    += *Idl
@@ -28,7 +28,7 @@ project(*Publisher) : dcpsexe, dcps_transports_for_test {
   }
 }
 
-project(*Subscriber) : dcpsexe, dcps_transports_for_test {
+project(*Subscriber) : dcpsexe, dcps_test, dcps_transports_for_test {
   requires += no_opendds_safety_profile
 
   after    += *Idl

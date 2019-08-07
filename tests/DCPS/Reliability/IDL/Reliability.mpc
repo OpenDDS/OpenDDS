@@ -1,4 +1,4 @@
-project: dcps {
+project: dcps_test_lib {
 	idlflags +=	-Wb,stub_export_include=Reliability_Export.h \
 			-Wb,stub_export_macro=Reliability_Export -SS
 	dcps_ts_flags += -Wb,export_macro=Reliability_Export

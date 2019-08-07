@@ -1,4 +1,4 @@
-project: dcpsexe, dcps_transports_for_test {
+project: dcpsexe, dcps_test, dcps_transports_for_test {
   requires += ownership_profile
   idlflags += -SS
   TypeSupport_Files {

@@ -1,4 +1,4 @@
-project (Security*): dcpsexe, dcps_rtps, googletest {
+project (Security*): dcpsexe, dcps_test, dcps_rtps, googletest {
   requires += no_opendds_safety_profile
   avoids += no_opendds_security
   exename = *

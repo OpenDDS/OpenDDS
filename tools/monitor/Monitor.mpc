@@ -1,11 +1,7 @@
-project(*App): dcpsexe, dcps_tcp, dcps_monitor, qt5_widgets {
+project(*App): dcpsexe, dcps_tcp, dcps_monitor, qt5_widgets, msvc_bigobj {
   exename = monitor
   exeout  = $(DDS_ROOT)/bin
   requires += built_in_topics
-
-  specific (prop:microsoft) {
-    compile_flags += /bigobj
-  }
 
   MOC_Files {
     MonitorDataModel.h

@@ -1,5 +1,4 @@
-project : dcps {
-  libout       = .
+project : dcps_test_lib {
   dynamicflags = COMMON_BUILD_DLL
   pch_header   =
   pch_source   =

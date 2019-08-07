@@ -1,5 +1,6 @@
-project: opendds_cxx11 {
-  idlflags      += -Wb,export_macro=NestedTypesTest_Export -Wb,export_include=NestedTypesTest_export.h -I../../idl_test_nested_types_lib
+project: dcps_test_lib, opendds_cxx11 {
+  idlflags      += -Wb,export_macro=NestedTypesTest_Export -Wb,export_include=NestedTypesTest_export.h \
+                    -I../../idl_test_nested_types_lib
   dcps_ts_flags += -Wb,export_macro=NestedTypesTest_Export -Wb,export_include=NestedTypesTest_export.h
   dynamicflags  += NESTEDTYPESTEST_BUILD_DLL
 

@@ -10,7 +10,7 @@ project(DDS*idl): dcps_test_lib {
   }
 }
 
-project(DDS*Publisher): dcpsexe, dcps_rtps_udp {
+project(DDS*Publisher): dcpsexe, dcps_test, dcps_rtps_udp {
 
   exename   = publisher
   after    += DDS*idl
@@ -27,7 +27,7 @@ project(DDS*Publisher): dcpsexe, dcps_rtps_udp {
   }
 }
 
-project(DDS*Subscriber): dcpsexe, dcps_rtps_udp {
+project(DDS*Subscriber): dcpsexe, dcps_test, dcps_rtps_udp {
 
   exename   = subscriber
   after    += DDS*idl

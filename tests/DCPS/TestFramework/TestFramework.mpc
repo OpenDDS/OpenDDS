@@ -1,7 +1,4 @@
-//
-//
-
-project: dcpslib {
+project: dcps_test_lib, dcps {
   sharedname     = TestFramework
 
   dcps_ts_flags += -Wb,export_macro=TestFramework_Export

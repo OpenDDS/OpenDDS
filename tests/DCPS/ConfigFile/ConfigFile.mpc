@@ -1,7 +1,7 @@
 //
 //
 
-project(ConfigFile): dcpsexe, dcps_tcp, dcps_multicast, dcps_udp, dcps_rtps, dcps_inforepodiscovery {
+project(ConfigFile): dcpsexe, dcps_test, dcps_tcp, dcps_multicast, dcps_udp, dcps_rtps, dcps_inforepodiscovery {
   requires += no_opendds_safety_profile
   exename   = *
 

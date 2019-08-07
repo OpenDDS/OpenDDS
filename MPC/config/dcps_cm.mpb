@@ -1,4 +1,4 @@
-project : dcpsexe {
+project : dcpsexe, dcps_test {
   after    += ConsolidatedMessengerIdl
   libs     += ConsolidatedMessengerIdl
   libpaths += $(DDS_ROOT)/tests/DCPS/ConsolidatedMessengerIdl

@@ -1,4 +1,3 @@
-project: dcps {
-  libout         = .
+project: dcps_test_lib {
   dynamicflags   = TESTUTILS_BUILD_DLL
 }

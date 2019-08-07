@@ -24,7 +24,7 @@ project(DDS*RtpsSubscriber): dcps_cm, dcps_rtps_udp {
   }
 }
 
-project(DDS*TcpPublisher): dcpsexe, dcps_cm, dcps_transports_for_test {
+project(DDS*TcpPublisher): dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test {
 
   exename   = tcppublisher
 
@@ -37,7 +37,7 @@ project(DDS*TcpPublisher): dcpsexe, dcps_cm, dcps_transports_for_test {
   }
 }
 
-project(DDS*TcpSubscriber): dcpsexe, dcps_cm, dcps_transports_for_test {
+project(DDS*TcpSubscriber): dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test {
 
   exename   = tcpsubscriber
 
