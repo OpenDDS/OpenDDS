@@ -107,7 +107,13 @@ my $tsreg  = 'TypeSupport\.idl';
 # ************************************************************
 
 sub do_cached_parse {
-  my($self, $file, $flags) = @_;
+  my($self, $file, $flags, $called_from_base) = @_;
+
+  ## If we are being called from the base type (i.e., IDLBase::get_output)
+  ## we need to set the default_nested to true.  Otherwise, in certain
+  ## environments, we can get extra output files being added to the project
+  ## that are never going to exist.
+  $self->{'default_nested'} = $called_from_base;
 
   ## Set up the macros and include paths supplied in the command flags
   my %macros;
@@ -153,8 +159,10 @@ sub get_output {
   my @filenames;
   my %seen;
 
-  ## Parse the IDL file and get back the types and names
-  my($data, $fwd) = $self->do_cached_parse($file, $flags);
+  ## Parse the IDL file and get back the types and names.  We pass the
+  ## file, flags and a boolean that indicates that the method is being
+  ## called from the base project (and not from the TYPESUPPORTHelper).
+  my($data, $fwd) = $self->do_cached_parse($file, $flags, 1);
 
   ## Get the file names based on the type and name of each entry
   my @tmp;
