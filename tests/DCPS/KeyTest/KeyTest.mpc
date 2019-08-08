@@ -1,4 +1,4 @@
-project(DDS*idl): dcps_test_lib, msvc_bigobj {
+project(DDS*idl): dcps_test_idl_only_lib, msvc_bigobj {
   idlflags      += -Wb,export_include=KeyTest_export.h \
                    -Wb,export_macro=KeyTest_Export -SS
   dcps_ts_flags += -Wb,export_macro=KeyTest_Export

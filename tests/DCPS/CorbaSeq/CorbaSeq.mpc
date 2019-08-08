@@ -1,4 +1,4 @@
-project(*Idl): dcps_test_lib {
+project(*Idl): dcps_test_idl_only_lib {
   requires += no_opendds_safety_profile
 
   idlflags      += -Wb,stub_export_include=CorbaSeq_export.h \

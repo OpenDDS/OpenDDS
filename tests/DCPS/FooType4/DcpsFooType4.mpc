@@ -1,4 +1,4 @@
-project : dcps_test_lib {
+project : dcps_test_idl_only_lib {
   after         += DcpsFooType4
   idlflags      += -Wb,export_macro=FooLib_Export -Wb,export_include=foolib_export.h -SS
   dynamicflags   = FOOLIB_BUILD_DLL

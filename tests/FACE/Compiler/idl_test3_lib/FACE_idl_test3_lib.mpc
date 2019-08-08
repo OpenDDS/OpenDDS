@@ -1,4 +1,4 @@
-project: opendds_face, dcps_test_lib, face_idl_test_config, msvc_bigobj {
+project: opendds_face, dcps_test_idl_only_lib, face_idl_test_config, msvc_bigobj {
   idlflags      += -Wb,export_macro=FooLib_Export -Wb,export_include=foolib_export.h -I../../../DCPS/Compiler/idl_test3_lib
   dcps_ts_flags += -Wb,export_macro=FooLib_Export -Wb,export_include=foolib_export.h -I../../../DCPS/Compiler/idl_test3_lib
   dynamicflags  += FOOLIB_BUILD_DLL
