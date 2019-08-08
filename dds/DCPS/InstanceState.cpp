@@ -286,6 +286,12 @@ void InstanceState::reset_ownership(DDS::InstanceHandle_t instance)
   reader_->reset_ownership(instance);
 }
 
+bool InstanceState::most_recent_generation(ReceivedDataElement* item) const
+{
+  return item->disposed_generation_count_ == disposed_generation_count_
+    && item->no_writers_generation_count_ == no_writers_generation_count_;
+}
+
 bool InstanceState::reactor_is_shut_down() const
 {
   return TheServiceParticipant->is_shut_down();
