@@ -174,6 +174,7 @@ OPENDDS_TARGET_SOURCES(target
   [<INTERFACE|PUBLIC|PRIVATE> items...]
   [TAO_IDL_OPTIONS options...]
   [OPENDDS_IDL_OPTIONS options...]
+)
 ```
 
 ### Example
