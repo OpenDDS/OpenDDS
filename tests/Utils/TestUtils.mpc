@@ -1,3 +1,3 @@
-project: dcps_test_lib {
-  dynamicflags   = TESTUTILS_BUILD_DLL
+project: dcps_test {
+  dynamicflags = TESTUTILS_BUILD_DLL
 }
