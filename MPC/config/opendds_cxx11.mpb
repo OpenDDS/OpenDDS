@@ -5,8 +5,8 @@ project: dcps, dcps_ts_defaults {
   dcps_ts_flags += -Lc++11
   idlflags += -SS -Sa -St
 
-  Modify_Custom(Idl) {
-    automatic_in = 0
+  // Do not include *.idl files as inputs to tao_idl
+  IDL_Files {
   }
 
   Modify_Custom(TypeSupport) {

@@ -8,8 +8,4 @@ project: opendds_face, dcps_test_lib {
   TypeSupport_Files {
     SampleModel.idl
   }
-
-  IDL_Files {
-    SampleModelTypeSupport.idl
-  }
 }

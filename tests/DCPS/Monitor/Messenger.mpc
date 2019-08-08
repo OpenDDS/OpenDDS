@@ -1,5 +1,5 @@
 project(Monitor*Publisher): dcpsexe, dcps_test, dcps_cm, dcps_tcp, dcps_monitor {
-  requires += no_opendds_safety_profile
+  requires += no_opendds_safety_profile built_in_topics
   exename   = publisher
 
   Idl_Files {
@@ -12,7 +12,7 @@ project(Monitor*Publisher): dcpsexe, dcps_test, dcps_cm, dcps_tcp, dcps_monitor 
 }
 
 project(Monitor*Subscriber): dcpsexe, dcps_test, dcps_cm, dcps_tcp, dcps_monitor {
-  requires += no_opendds_safety_profile
+  requires += no_opendds_safety_profile built_in_topics
   exename   = subscriber
 
   Idl_Files {
@@ -25,7 +25,7 @@ project(Monitor*Subscriber): dcpsexe, dcps_test, dcps_cm, dcps_tcp, dcps_monitor
 }
 
 project(Monitor*monitor): dcpsexe, dcps_test, dcps_cm, dcps_tcp, dcps_monitor, msvc_bigobj {
-  requires += no_opendds_safety_profile
+  requires += no_opendds_safety_profile built_in_topics
   exename   = monitor
 
   Idl_Files {

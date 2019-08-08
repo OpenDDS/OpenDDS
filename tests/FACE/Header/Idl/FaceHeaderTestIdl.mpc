@@ -8,8 +8,4 @@ project: opendds_face, dcps_test_lib {
   TypeSupport_Files {
     FaceHeaderTestMsg.idl
   }
-
-  IDL_Files {
-    FaceHeaderTestMsgTypeSupport.idl
-  }
 }

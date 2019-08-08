@@ -1,4 +1,4 @@
-project: dcpsexe, dcps_test {
+project: dcpsexe, dcps_test, test_root {
   after       += TestFramework
   libs        += TestFramework
   libpaths    += $(DDS_ROOT)/tests/DCPS/TestFramework

@@ -9,11 +9,4 @@ project: dcps_test_lib, opendds_cxx11, msvc_bigobj {
     ../../idl_test3_lib/FooDef3.idl
     ../../idl_test3_lib/SharedTypes.idl
   }
-
-  IDL_Files {
-    FooDefTypeSupport.idl
-    FooDef2TypeSupport.idl
-    FooDef3TypeSupport.idl
-    SharedTypesTypeSupport.idl
-  }
 }

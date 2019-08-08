@@ -2,8 +2,4 @@ project: opendds_face, dcps_test {
   TypeSupport_Files {
     Fixed.idl
   }
-
-  IDL_Files {
-    FixedTypeSupport.idl
-  }
 }

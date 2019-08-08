@@ -7,9 +7,4 @@ project: opendds_face, dcps_test_lib {
     ../../../DCPS/Compiler/idl_test2_lib/FooDef.idl
     ../../../DCPS/Compiler/idl_test2_lib/BazDef.idl
   }
-
-  IDL_Files {
-    FooDefTypeSupport.idl
-    BazDefTypeSupport.idl
-  }
 }
