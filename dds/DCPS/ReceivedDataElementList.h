@@ -12,9 +12,10 @@
 #include "ace/Thread_Mutex.h"
 
 #include "dcps_export.h"
+#include "DataSampleHeader.h"
 #include "Definitions.h"
 #include "GuidUtils.h"
-#include "DataSampleHeader.h"
+#include "InstanceState.h"
 #include "Time_Helper.h"
 #include "unique_ptr.h"
 
@@ -28,8 +29,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
-
-class InstanceState;
 
 class OpenDDS_Dcps_Export ReceivedDataElement {
 public:
@@ -172,7 +171,7 @@ public:
 
 class OpenDDS_Dcps_Export ReceivedDataElementList {
 public:
-  ReceivedDataElementList(InstanceState *instance_state = 0) ;
+  explicit ReceivedDataElementList(InstanceState_rch instance_state = InstanceState_rch());
 
   ~ReceivedDataElementList() ;
 
@@ -200,7 +199,7 @@ public:
   ssize_t              size_ ;
 
 private:
-  InstanceState *instance_state_ ;
+  InstanceState_rch instance_state_;
 }; // ReceivedDataElementList
 
 } // namespace DCPS

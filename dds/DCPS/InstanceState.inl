@@ -54,6 +54,12 @@ OpenDDS::DCPS::InstanceState::view_state() const
 }
 
 ACE_INLINE
+bool OpenDDS::DCPS::InstanceState::match(DDS::ViewStateMask view, DDS::InstanceStateMask inst) const
+{
+  return (view_state_ & view) && (instance_state_ & inst);
+}
+
+ACE_INLINE
 size_t OpenDDS::DCPS::InstanceState::disposed_generation_count() const
 {
   return disposed_generation_count_ ;

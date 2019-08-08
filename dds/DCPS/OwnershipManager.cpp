@@ -129,7 +129,7 @@ OwnershipManager::remove_writer(const PublicationId& pub_id)
 }
 
 void
-OwnershipManager::remove_instance(InstanceState* instance_state)
+OwnershipManager::remove_instance(InstanceState_rch instance_state)
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, instance_lock_);
   const DDS::InstanceHandle_t ih = instance_state->instance_handle();
@@ -284,7 +284,7 @@ bool
 OwnershipManager::select_owner(const DDS::InstanceHandle_t& instance_handle,
                                const PublicationId& pub_id,
                                const CORBA::Long& ownership_strength,
-                               InstanceState* instance_state)
+                               InstanceState_rch instance_state)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, instance_lock_, false);
 

@@ -22,10 +22,15 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
-OpenDDS::DCPS::InstanceState::InstanceState(DataReaderImpl* reader,
-                                            ACE_Recursive_Thread_Mutex& lock,
-                                            DDS::InstanceHandle_t handle)
-  : lock_(lock),
+namespace OpenDDS {
+namespace DCPS {
+
+InstanceState::InstanceState(DataReaderImpl* reader,
+                             ACE_Recursive_Thread_Mutex& lock,
+                             DDS::InstanceHandle_t handle)
+  : ReactorInterceptor(TheServiceParticipant->reactor(),
+                       TheServiceParticipant->reactor_owner()),
+    lock_(lock),
     instance_state_(0),
     view_state_(0),
     disposed_generation_count_(0),
@@ -37,24 +42,23 @@ OpenDDS::DCPS::InstanceState::InstanceState(DataReaderImpl* reader,
     handle_(handle),
     owner_(GUID_UNKNOWN),
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-    exclusive_(reader->qos_.ownership.kind == ::DDS::EXCLUSIVE_OWNERSHIP_QOS),
+    exclusive_(reader->qos_.ownership.kind == DDS::EXCLUSIVE_OWNERSHIP_QOS),
 #endif
-    registered_ (false)
+    registered_(false)
 {}
 
-OpenDDS::DCPS::InstanceState::~InstanceState()
+InstanceState::~InstanceState()
 {
   cancel_release();
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   if (registered_) {
     DataReaderImpl::OwnershipManagerPtr om = reader_->ownership_manager();
-    if (om) om->remove_instance(this);
+    if (om) om->remove_instance(InstanceState_rch(this, inc_count()));
   }
 #endif
 }
 
-void OpenDDS::DCPS::InstanceState::sample_info(DDS::SampleInfo& si,
-                                               const ReceivedDataElement* de)
+void InstanceState::sample_info(DDS::SampleInfo& si, const ReceivedDataElement* de)
 {
   si.sample_state = de->sample_state_;
   si.view_state = view_state_;
@@ -65,7 +69,7 @@ void OpenDDS::DCPS::InstanceState::sample_info(DDS::SampleInfo& si,
     static_cast<CORBA::Long>(no_writers_generation_count_);
   si.source_timestamp = de->source_timestamp_;
   si.instance_handle = handle_;
-  RcHandle<DomainParticipantImpl> participant = this->reader_->participant_servant_.lock();
+  RcHandle<DomainParticipantImpl> participant = reader_->participant_servant_.lock();
   si.publication_handle = participant ? participant->id_to_handle(de->pub_) : 0;
   si.valid_data = de->registered_data_ != 0;
   /*
@@ -89,28 +93,23 @@ void OpenDDS::DCPS::InstanceState::sample_info(DDS::SampleInfo& si,
 
 // cannot ACE_INLINE because of #include loop
 
-int
-OpenDDS::DCPS::InstanceState::handle_timeout(const ACE_Time_Value& /* current_time */,
-                                             const void* /* arg */)
+int InstanceState::handle_timeout(const ACE_Time_Value&, const void*)
 {
-  if (OpenDDS::DCPS::DCPS_debug_level > 0) {
+  if (DCPS_debug_level) {
     ACE_DEBUG((LM_NOTICE,
                ACE_TEXT("(%P|%t) NOTICE:")
                ACE_TEXT(" InstanceState::handle_timeout:")
                ACE_TEXT(" autopurging samples with instance handle 0x%x!\n"),
-               this->handle_));
+               handle_));
   }
-  this->release();
+  release();
 
   return 0;
 }
 
-bool
-OpenDDS::DCPS::InstanceState::dispose_was_received(const PublicationId& writer_id)
+bool InstanceState::dispose_was_received(const PublicationId& writer_id)
 {
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                   guard, this->lock_, false);
-
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   writers_.erase(writer_id);
 
   //
@@ -118,13 +117,13 @@ OpenDDS::DCPS::InstanceState::dispose_was_received(const PublicationId& writer_i
   //
   // If disposed by owner then the owner is not re-elected, it can
   // resume if the writer sends message again.
-  if (this->instance_state_ & DDS::ALIVE_INSTANCE_STATE) {
+  if (instance_state_ & DDS::ALIVE_INSTANCE_STATE) {
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-    DataReaderImpl::OwnershipManagerPtr owner_manager = this->reader_->ownership_manager();
-    if (! this->exclusive_
-      || (owner_manager && owner_manager->is_owner (this->handle_, writer_id))) {
+    DataReaderImpl::OwnershipManagerPtr owner_manager = reader_->ownership_manager();
+    if (! exclusive_
+      || (owner_manager && owner_manager->is_owner (handle_, writer_id))) {
 #endif
-      this->instance_state_ = DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE;
+      instance_state_ = DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE;
       schedule_release();
       return true;
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
@@ -135,34 +134,29 @@ OpenDDS::DCPS::InstanceState::dispose_was_received(const PublicationId& writer_i
   return false;
 }
 
-bool
-OpenDDS::DCPS::InstanceState::unregister_was_received(const PublicationId& writer_id)
+bool InstanceState::unregister_was_received(const PublicationId& writer_id)
 {
-  if (OpenDDS::DCPS::DCPS_debug_level > 1) {
+  if (DCPS_debug_level > 1) {
     GuidConverter conv(writer_id);
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT(
-        "(%P|%t) InstanceState::unregister_was_received on %C\n"
-      ),
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) InstanceState::unregister_was_received on %C\n"),
       OPENDDS_STRING(conv).c_str()
     ));
   }
 
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                   guard, this->lock_, false);
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   writers_.erase(writer_id);
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-  if (this->exclusive_) {
+  if (exclusive_) {
     // If unregistered by owner then the ownership should be transferred to another
     // writer.
-    DataReaderImpl::OwnershipManagerPtr owner_manager = this->reader_->ownership_manager();
+    DataReaderImpl::OwnershipManagerPtr owner_manager = reader_->ownership_manager();
     if (owner_manager)
-      owner_manager->remove_writer (this->handle_, writer_id);
+      owner_manager->remove_writer (handle_, writer_id);
   }
 #endif
 
-  if (writers_.empty() && (this->instance_state_ & DDS::ALIVE_INSTANCE_STATE)) {
-    this->instance_state_ = DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE;
+  if (writers_.empty() && (instance_state_ & DDS::ALIVE_INSTANCE_STATE)) {
+    instance_state_ = DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE;
     schedule_release();
     return true;
   }
@@ -170,47 +164,37 @@ OpenDDS::DCPS::InstanceState::unregister_was_received(const PublicationId& write
   return false;
 }
 
-void
-OpenDDS::DCPS::InstanceState::writer_became_dead(
-  const PublicationId&  writer_id,
-  int                   /*num_alive_writers*/,
-  const ACE_Time_Value& /* when */)
+void InstanceState::writer_became_dead(const PublicationId& writer_id, int, const ACE_Time_Value&)
 {
-  if (OpenDDS::DCPS::DCPS_debug_level > 1) {
+  if (DCPS_debug_level > 1) {
     GuidConverter conv(writer_id);
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT(
-        "(%P|%t) InstanceState::writer_became_dead on %C\n"
-      ),
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) InstanceState::writer_became_dead on %C\n"),
       OPENDDS_STRING(conv).c_str()
     ));
   }
 
-  ACE_GUARD(ACE_Recursive_Thread_Mutex,
-            guard, this->lock_);
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
   writers_.erase(writer_id);
 
-  if (writers_.empty() && this->instance_state_ & DDS::ALIVE_INSTANCE_STATE) {
-    this->instance_state_ = DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE;
+  if (writers_.empty() && (instance_state_ & DDS::ALIVE_INSTANCE_STATE)) {
+    instance_state_ = DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE;
     schedule_release();
   }
 }
 
-void
-OpenDDS::DCPS::InstanceState::schedule_pending()
+void InstanceState::schedule_pending()
 {
-  this->release_pending_ = true;
+  release_pending_ = true;
 }
 
-void
-OpenDDS::DCPS::InstanceState::schedule_release()
+void InstanceState::schedule_release()
 {
   DDS::DataReaderQos qos;
-  this->reader_->get_qos(qos);
+  reader_->get_qos(qos);
 
   DDS::Duration_t delay;
 
-  switch (this->instance_state_) {
+  switch (instance_state_) {
   case DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE:
     delay = qos.reader_data_lifecycle.autopurge_nowriter_samples_delay;
     break;
@@ -223,7 +207,7 @@ OpenDDS::DCPS::InstanceState::schedule_release()
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: InstanceState::schedule_release:")
                ACE_TEXT(" Unsupported instance state: %d!\n"),
-               this->instance_state_));
+               instance_state_));
     return;
   }
 
@@ -231,16 +215,8 @@ OpenDDS::DCPS::InstanceState::schedule_release()
       delay.nanosec != DDS::DURATION_INFINITE_NSEC) {
     cancel_release();
 
-    ACE_Reactor_Timer_Interface* reactor = this->reader_->get_reactor();
-
-    this->release_timer_id_ =
-      reactor->schedule_timer(this, 0, duration_to_time_value(delay));
-
-    if (this->release_timer_id_ == -1) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: InstanceState::schedule_release:")
-                 ACE_TEXT(" Unable to schedule timer!\n")));
-    }
+    ScheduleCommand cmd(this, duration_to_time_value(delay));
+    execute_or_enqueue(cmd);
 
   } else {
     // N.B. instance transitions are always followed by a non-valid
@@ -251,24 +227,17 @@ OpenDDS::DCPS::InstanceState::schedule_release()
   }
 }
 
-void
-OpenDDS::DCPS::InstanceState::cancel_release()
+void InstanceState::cancel_release()
 {
-  this->release_pending_ = false;
-
-  if (this->release_timer_id_ != -1) {
-    ACE_Reactor_Timer_Interface* reactor = this->reader_->get_reactor();
-    reactor->cancel_timer(this->release_timer_id_);
-
-    this->release_timer_id_ = -1;
-  }
+  release_pending_ = false;
+  CancelCommand cmd(this);
+  execute_or_enqueue(cmd);
 }
 
-bool
-OpenDDS::DCPS::InstanceState::release_if_empty()
+bool InstanceState::release_if_empty()
 {
   bool released = false;
-  if (this->empty_ && this->writers_.empty()) {
+  if (empty_ && writers_.empty()) {
     release();
     released = true;
   } else {
@@ -277,76 +246,118 @@ OpenDDS::DCPS::InstanceState::release_if_empty()
   return released;
 }
 
-void
-OpenDDS::DCPS::InstanceState::release()
+void InstanceState::release()
 {
-  this->reader_->release_instance(this->handle_);
+  reader_->release_instance(handle_);
 }
 
-void
-OpenDDS::DCPS::InstanceState::set_owner (const PublicationId& owner)
+void InstanceState::set_owner(const PublicationId& owner)
 {
-  this->owner_ = owner;
+  owner_ = owner;
 }
 
-OpenDDS::DCPS::PublicationId&
-OpenDDS::DCPS::InstanceState::get_owner ()
+PublicationId& InstanceState::get_owner()
 {
-  return this->owner_;
+  return owner_;
 }
 
-bool
-OpenDDS::DCPS::InstanceState::is_exclusive () const
+bool InstanceState::is_exclusive() const
 {
-  return this->exclusive_;
+  return exclusive_;
 }
 
-bool
-OpenDDS::DCPS::InstanceState::registered()
+bool InstanceState::registered()
 {
-  bool ret = this->registered_;
-  this->registered_ = true;
+  const bool ret = registered_;
+  registered_ = true;
   return ret;
 }
 
-void
-OpenDDS::DCPS::InstanceState::registered (bool flag)
+void InstanceState::registered(bool flag)
 {
-  this->registered_ = flag;
+  registered_ = flag;
 }
 
-void
-OpenDDS::DCPS::InstanceState::reset_ownership (::DDS::InstanceHandle_t instance)
+void InstanceState::reset_ownership(DDS::InstanceHandle_t instance)
 {
-  this->owner_ = GUID_UNKNOWN;
-  this->registered_ = false;
+  owner_ = GUID_UNKNOWN;
+  registered_ = false;
 
-  this->reader_->reset_ownership(instance);
+  reader_->reset_ownership(instance);
 }
 
-OPENDDS_STRING
-OpenDDS::DCPS::InstanceState::instance_state_string(DDS::InstanceStateKind value)
+bool InstanceState::reactor_is_shut_down() const
+{
+  return TheServiceParticipant->is_shut_down();
+}
+
+void InstanceState::CancelCommand::execute()
+{
+  if (instance_state_->release_timer_id_ != -1) {
+    instance_state_->reactor()->cancel_timer(instance_state_);
+    instance_state_->release_timer_id_ = -1;  
+  }
+}
+
+void InstanceState::ScheduleCommand::execute()
+{
+  instance_state_->release_timer_id_ = instance_state_->reactor()->schedule_timer(instance_state_, 0, delay_);
+
+  if (instance_state_->release_timer_id_ == -1) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: InstanceState::ScheduleCommand::execute:")
+               ACE_TEXT(" Unable to schedule timer!\n")));
+  }
+}
+
+OPENDDS_STRING InstanceState::instance_state_string(DDS::InstanceStateKind value)
 {
   switch (value) {
   case DDS::ALIVE_INSTANCE_STATE:
-    return OPENDDS_STRING("ALIVE_INSTANCE_STATE");
+    return "ALIVE_INSTANCE_STATE";
   case DDS::NOT_ALIVE_INSTANCE_STATE:
-    return OPENDDS_STRING("NOT_ALIVE_INSTANCE_STATE");
+    return "NOT_ALIVE_INSTANCE_STATE";
   case DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE:
-    return OPENDDS_STRING("NOT_ALIVE_DISPOSED_INSTANCE_STATE");
+    return "NOT_ALIVE_DISPOSED_INSTANCE_STATE";
   case DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE:
-    return OPENDDS_STRING("NOT_ALIVE_NO_WRITERS_INSTANCE_STATE");
+    return "NOT_ALIVE_NO_WRITERS_INSTANCE_STATE";
   case DDS::ANY_INSTANCE_STATE:
-    return OPENDDS_STRING("ANY_INSTANCE_STATE");
+    return "ANY_INSTANCE_STATE";
   default:
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: OpenDDS::DCPS::InstanceState::instance_state_string(): ")
-      ACE_TEXT("%d is either completely invalid or at least not defined in this function.\n"),
+      ACE_TEXT("%d is either invalid or not recognized.\n"),
       value
     ));
 
-    return OPENDDS_STRING("(Unknown Instance State: ") + to_dds_string(value) + ")";
+    return "(Unknown Instance State: " + to_dds_string(value) + ")";
   }
+}
+
+OPENDDS_STRING InstanceState::instance_state_mask_string(DDS::InstanceStateMask mask)
+{
+  if (mask == DDS::ANY_INSTANCE_STATE) {
+    return instance_state_string(DDS::ANY_INSTANCE_STATE);
+  }
+  if (mask == DDS::NOT_ALIVE_INSTANCE_STATE) {
+    return instance_state_string(DDS::NOT_ALIVE_INSTANCE_STATE);
+  }
+  OPENDDS_STRING str;
+  if (mask & DDS::ALIVE_INSTANCE_STATE) {
+    str = instance_state_string(DDS::ALIVE_INSTANCE_STATE);
+  }
+  if (mask & DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
+    if (!str.empty()) str += " | ";
+    str += instance_state_string(DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
+  }
+  if (mask & DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE) {
+    if (!str.empty()) str += " | ";
+    str += instance_state_string(DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE);
+  }
+  return str;
+}
+
+}
 }
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

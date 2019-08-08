@@ -122,7 +122,7 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::execute(SubscriptionInstance_rch insta
             DDS::REQUESTED_DEADLINE_MISSED_STATUS);
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-        if (instance->instance_state_.is_exclusive()) {
+        if (instance->instance_state_->is_exclusive()) {
           DataReaderImpl::OwnershipManagerPtr owner_manager = reader->ownership_manager();
           if (owner_manager)
             owner_manager->remove_writers (instance->instance_handle_);

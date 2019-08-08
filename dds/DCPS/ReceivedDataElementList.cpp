@@ -52,7 +52,7 @@ void OpenDDS::DCPS::ReceivedDataElement::operator delete(void* memory, ACE_New_A
   operator delete(memory);
 }
 
-OpenDDS::DCPS::ReceivedDataElementList::ReceivedDataElementList(InstanceState *instance_state)
+OpenDDS::DCPS::ReceivedDataElementList::ReceivedDataElementList(InstanceState_rch instance_state)
   : head_(0), tail_(0), size_(0), instance_state_(instance_state)
 {
 }
