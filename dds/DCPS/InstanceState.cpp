@@ -49,11 +49,10 @@ InstanceState::InstanceState(DataReaderImpl* reader,
 
 InstanceState::~InstanceState()
 {
-  cancel_release();
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   if (registered_) {
     DataReaderImpl::OwnershipManagerPtr om = reader_->ownership_manager();
-    if (om) om->remove_instance(InstanceState_rch(this, inc_count()));
+    if (om) om->remove_instance(this);
   }
 #endif
 }

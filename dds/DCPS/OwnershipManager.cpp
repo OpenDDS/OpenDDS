@@ -129,7 +129,7 @@ OwnershipManager::remove_writer(const PublicationId& pub_id)
 }
 
 void
-OwnershipManager::remove_instance(InstanceState_rch instance_state)
+OwnershipManager::remove_instance(InstanceState* instance_state)
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, instance_lock_);
   const DDS::InstanceHandle_t ih = instance_state->instance_handle();
@@ -137,7 +137,7 @@ OwnershipManager::remove_instance(InstanceState_rch instance_state)
   if (i != instance_ownership_infos_.end()) {
     InstanceStateVec& states = i->second.instance_states_;
     for (size_t j = 0; j < states.size(); ++j) {
-      if (states[j] == instance_state) {
+      if (states[j].in() == instance_state) {
         states.erase(states.begin() + j);
         break;
       }
