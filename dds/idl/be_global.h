@@ -193,9 +193,9 @@ public:
   BuiltinAnnotations builtin_annotations_;
 
   /**
-   * If true, don't warn about #pragma DCPS_DATA_TYPE
+   * If true, warn about #pragma DCPS_DATA_TYPE
    */
-  bool no_dcps_data_type_warnings() const;
+  bool warn_about_dcps_data_type();
 
 private:
   /// Name of the IDL file we are processing.
@@ -213,7 +213,7 @@ private:
   LanguageMapping language_mapping_;
 
   bool root_default_nested_;
-  bool default_no_dcps_data_type_warnings_;
+  bool warn_about_dcps_data_type_;
 
   bool is_nested(AST_Decl* node);
   bool is_default_nested(UTL_Scope* scope);

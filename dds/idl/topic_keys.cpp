@@ -322,7 +322,7 @@ TopicKeys::Iterator::path()
 void
 TopicKeys::Iterator::path_i(std::stringstream& ss)
 {
-  const std::string& error_msg = "Can't get path for invalid topic key iterator!";
+  const char* error_msg = "Can't get path for invalid topic key iterator!";
   if (root_type_ == StructureType) {
     AST_Structure* struct_root = dynamic_cast<AST_Structure*>(root_);
     if (!struct_root) {

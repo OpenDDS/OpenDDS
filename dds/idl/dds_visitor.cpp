@@ -240,6 +240,15 @@ dds_visitor::visit_structure(AST_Structure* node)
     return -1;
   }
 
+  if (idl_global->is_dcps_type(node->name())) {
+    if (be_global->warn_about_dcps_data_type()) {
+      idl_global->err()->misc_warning("\n"
+        "  DCPS_DATA_TYPE and DCPS_DATA_KEY pragma statements are deprecated; please\n"
+        "  use @topic, @key, @nested, and @default_nested instead. See the OpenDDS\n"
+        "  Developer's Guide for more information.", node);
+    }
+  }
+
   size_t nfields = node->nfields();
   vector<AST_Field*> fields;
   fields.reserve(nfields);

@@ -51,7 +51,7 @@ BE_GlobalData::BE_GlobalData()
   , seq_("Seq")
   , language_mapping_(LANGMAP_NONE)
   , root_default_nested_(false)
-  , default_no_dcps_data_type_warnings_(false)
+  , warn_about_dcps_data_type_(true)
 {
 }
 
@@ -400,7 +400,7 @@ BE_GlobalData::parse_args(long& i, char** av)
     } else if (!ACE_OS::strncasecmp(av[i], NO_DEFAULT_NESTED_FLAG, NO_DEFAULT_NESTED_FLAG_SIZE)) {
       root_default_nested_ = false;
     } else if (!ACE_OS::strncasecmp(av[i], NO_DCPS_DATA_TYPE_WARNINGS_FLAG, NO_DCPS_DATA_TYPE_WARNINGS_FLAG_SIZE)) {
-      default_no_dcps_data_type_warnings_ = true;
+      warn_about_dcps_data_type_ = false;
     } else {
       invalid_option(av[i]);
     }
@@ -675,8 +675,11 @@ BE_GlobalData::warning(const char* filename, unsigned lineno, const char* msg)
 }
 
 bool
-BE_GlobalData::no_dcps_data_type_warnings() const
+BE_GlobalData::warn_about_dcps_data_type()
 {
-  return default_no_dcps_data_type_warnings_ ||
-    !idl_global->print_warnings();
+  if (!warn_about_dcps_data_type_) {
+    return false;
+  }
+  warn_about_dcps_data_type_ = false;
+  return idl_global->print_warnings();
 }

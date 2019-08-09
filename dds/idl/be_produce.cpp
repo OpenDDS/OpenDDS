@@ -275,43 +275,6 @@ void postprocess(const char* fn, ostringstream& content,
 
 } // namespace
 
-inline bool
-contains_dcps_data_type(const char* line)
-{
-  size_t i = 0;
-  while (true) {
-    if (line[i] == '#') {
-      i++;
-      break;
-    } else if (!isspace(line[i])) {
-      return false;
-    }
-    i++;
-  }
-  while (true) {
-    if (!strcmp("pragma", &line[i])) {
-      i += 6;
-      break;
-    } else if (!isspace(line[i]) ) {
-      return false;
-    }
-    i++;
-  }
-  if (!isspace(line[i++])) { // Required Space
-    return false;
-  }
-  while (true) {
-    if (!strcmp("DCPS_DATA_TYPE", &line[i])) {
-      i += 14;
-      break;
-    } else if (!isspace(line[i]) ) {
-      return false;
-    }
-    i++;
-  }
-  return true;
-}
-
 // Do the work of this BE. This is the starting point for code generation.
 void
 BE_produce()
@@ -327,21 +290,13 @@ BE_produce()
   const size_t buffer_sz = 512;
   char buffer[buffer_sz];
   unsigned lineno = 0;
-  bool warned_dcps_data_type = be_global->no_dcps_data_type_warnings();
 
   while (idl) {
     idl.getline(buffer, buffer_sz);
     ++lineno;
 
-    if (!(warned_dcps_data_type || !contains_dcps_data_type(buffer))) {
-      be_global->warning(idl_fn, lineno, "\n"
-        "  DCPS_DATA_TYPE and DCPS_DATA_KEY pragma statements are deprecated; please\n"
-        "  use @topic, @key, @nested, and @default_nested instead. See the OpenDDS\n"
-        "  Developer's Guide for more information.");
-      warned_dcps_data_type = true;
-
-    //search for #includes in the IDL, add them as #includes in the stubs/skels
-    } else if (0 == strncmp("#include", buffer, 8)) { //FUTURE: account for comments?
+    // search for #includes in the IDL, add them as #includes in the stubs/skels
+    if (0 == strncmp("#include", buffer, 8)) { //FUTURE: account for comments?
       string inc(buffer + 8);
       size_t delim1 = inc.find_first_of("<\"");
       size_t delim2 = inc.find_first_of(">\"", delim1 + 1);

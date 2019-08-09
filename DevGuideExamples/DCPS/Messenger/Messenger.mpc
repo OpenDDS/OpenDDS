@@ -1,8 +1,10 @@
-project(*idl): dcps_idl_only_lib {
+project(*idl): dcps {
   requires += no_opendds_safety_profile
   TypeSupport_Files {
     Messenger.idl
   }
+
+  custom_only = 1
 }
 
 project(*publisher) : dcpsexe, dcps_tcp {
