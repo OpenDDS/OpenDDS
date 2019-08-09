@@ -300,7 +300,7 @@ void InstanceState::CancelCommand::execute()
 {
   if (instance_state_->release_timer_id_ != -1) {
     instance_state_->reactor()->cancel_timer(instance_state_);
-    instance_state_->release_timer_id_ = -1;  
+    instance_state_->release_timer_id_ = -1;
   }
 }
 
