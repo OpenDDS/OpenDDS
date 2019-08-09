@@ -8,6 +8,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
 #include "ace/Log_Msg.h"
+#include "ace/Reverse_Lock_T.h"
 #include "ace/Synch.h"
 
 #include "ReactorInterceptor.h"
@@ -62,19 +63,21 @@ int ReactorInterceptor::handle_exception(ACE_HANDLE /*fd*/)
   return handle_exception_i(guard);
 }
 
-void ReactorInterceptor::process_command_queue()
+void ReactorInterceptor::process_command_queue_i(ACE_Guard<ACE_Thread_Mutex>&)
 {
+  ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(mutex_);
   while (!command_queue_.empty()) {
     CommandPtr command = move(command_queue_.front());
     command_queue_.pop();
+    ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rev_guard, rev_lock)
     if (command)
       command->execute();
   }
 }
 
-int ReactorInterceptor::handle_exception_i(ACE_Guard<ACE_Thread_Mutex>&)
+int ReactorInterceptor::handle_exception_i(ACE_Guard<ACE_Thread_Mutex>& guard)
 {
-  process_command_queue();
+  process_command_queue_i(guard);
   condition_.signal();
   return 0;
 }
