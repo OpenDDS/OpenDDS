@@ -9,6 +9,25 @@
 use Getopt::Long;
 use Cwd;
 
+sub run_command ($) {
+  my $command = shift;
+  print "Running $command\n";
+  if (system($command)) {
+    my $error_message;
+    if ($? == -1) {
+      $error_message = "Failed to Run: $!";
+    }
+    elsif ($? & 127) {
+      $error_message = sprintf("Exited on Signal %d", ($? & 127));
+      $error_message .= " and Created Coredump" if ($? & 128);
+    }
+    else {
+      $error_message = sprintf ("Returned %d", $? >> 8);
+    }
+    die "Command \"$command\" $error_message\n";
+  }
+}
+
 die "ERROR: DDS_ROOT must be set" if !$ENV{'DDS_ROOT'};
 die "ERROR: ACE_ROOT must be set" if !$ENV{'ACE_ROOT'};
 
@@ -16,10 +35,12 @@ my $build_config = "";
 my $generator = "";
 my $arch = "";
 my $skip_run_test;
-GetOptions("build-config=s" => \$build_config,
-           "generator=s" => \$generator,
-           "arch=s" => \$arch,
-           "skip-run-test" => \$skip_run_test);
+
+exit 1 if !GetOptions(
+    "build-config=s" => \$build_config,
+    "generator=s" => \$generator,
+    "arch=s" => \$arch,
+    "skip-run-test" => \$skip_run_test);
 
 for my $x (qw(Messenger_1 Messenger_2)) {
   my $build_dir="$ENV{'DDS_ROOT'}/tests/cmake_integration/Messenger/$x/build";
@@ -57,7 +78,7 @@ for my $x (qw(Messenger_1 Messenger_2)) {
   }
 
   for my $cmd (@cmds) {
-    run_cmd $cmd;
+    run_command("@{$cmd}");
   }
 
   if (! $skip_run_test) {
@@ -67,6 +88,6 @@ for my $x (qw(Messenger_1 Messenger_2)) {
       print "$run_dir";
       chdir($run_dir) or die "ERROR: '$!'";
     }
-    run_cmd ["perl", "run_test.pl"]
+    run_command("perl run_test.pl");
   }
 }
