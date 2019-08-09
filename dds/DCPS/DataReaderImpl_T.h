@@ -1309,7 +1309,7 @@ DDS::ReturnCode_t take_instance_i(MessageSequenceType& received_data,
 #ifndef OPENDDS_NO_QUERY_CONDITION
                                   DDS::QueryCondition_ptr a_condition)
 #else
-  ignored)
+  int)
 #endif
 {
   const SubscriptionInstance_rch inst = get_handle_instance(a_handle);
