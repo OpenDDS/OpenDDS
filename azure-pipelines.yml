@@ -284,10 +284,6 @@ jobs:
   - script: make -sj6
     displayName: Compile
   - script: |
-      if grep -q 'compiler=clang' <<<"$(ConfigOpts)"; then
-        export CXX=/usr/bin/$(grep -Eo 'clang\+\+-[0-9.]+' <<<"$(ConfigOpts)")
-        export CC=/usr/bin/${CXX/++/}
-      fi
       source $(Build.SourcesDirectory)/setenv.sh && $DDS_ROOT/tests/cmake_integration/run_ci_tests.pl
     displayName: Compile and run CMake tests
     condition: >

@@ -7,6 +7,8 @@ cmake_minimum_required(VERSION 3.8.2)
 
 find_package(OpenDDS)
 
+set(CMAKE_CXX_COMPILER ${OPENDDS_COMPILER})
+
 set(src "${CMAKE_CURRENT_SOURCE_DIR}/../../../DCPS/Messenger")
 set(dst ${CMAKE_CURRENT_BINARY_DIR})
 set(all_targets publisher subscriber)
