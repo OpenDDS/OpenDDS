@@ -44,7 +44,7 @@ OpenDDS::DCPS::TransportImpl::reactor() const
 ACE_INLINE ACE_thread_t
 OpenDDS::DCPS::TransportImpl::reactor_owner() const
 {
-  return this->reactor_task_ ? this->reactor_task_->get_reactor_owner() : -1;
+  return reactor_task_ ? reactor_task_->get_reactor_owner() : ACE_thread_t();
 }
 
 ACE_INLINE bool
