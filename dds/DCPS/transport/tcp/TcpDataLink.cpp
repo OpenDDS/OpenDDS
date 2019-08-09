@@ -481,8 +481,6 @@ OpenDDS::DCPS::TcpDataLink::do_association_actions()
 void
 OpenDDS::DCPS::TcpDataLink::send_association_msg(const RepoId& local, const RepoId& remote)
 {
-  DCPS::GuidConverter cl(local);
-  DCPS::GuidConverter cr(remote);
   DataSampleHeader header_data;
   header_data.message_id_ = REQUEST_ACK;
   header_data.byte_order_  = ACE_CDR_BYTE_ORDER;
@@ -542,7 +540,7 @@ OpenDDS::DCPS::TcpDataLink::make_reservation(const RepoId& remote_subscription_i
                                              const RepoId& local_publication_id,
                                              const TransportSendListener_wrch& send_listener)
 {
-  int result = OpenDDS::DCPS::DataLink::make_reservation(remote_subscription_id, local_publication_id, send_listener);
+  const int result = OpenDDS::DCPS::DataLink::make_reservation(remote_subscription_id, local_publication_id, send_listener);
   send_association_msg(local_publication_id, remote_subscription_id);
   return result;
 }
@@ -552,8 +550,7 @@ OpenDDS::DCPS::TcpDataLink::make_reservation(const RepoId& remote_publication_id
                                              const RepoId& local_subscription_id,
                                              const TransportReceiveListener_wrch& receive_listener)
 {
-  int result = OpenDDS::DCPS::DataLink::make_reservation(remote_publication_id, local_subscription_id, receive_listener);
-  //invoke_on_start_callbacks(local_subscription_id, remote_publication_id, true);
+  const int result = OpenDDS::DCPS::DataLink::make_reservation(remote_publication_id, local_subscription_id, receive_listener);
   send_association_msg(local_subscription_id, remote_publication_id);
   return result;
 }

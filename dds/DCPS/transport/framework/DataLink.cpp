@@ -117,7 +117,7 @@ DataLink::add_on_start_callback(const TransportClient_wrch& client, const RepoId
       RepoIdSet::iterator it2 = it->second.find(client_lock->get_repo_id());
       if (it2 != it->second.end()) {
         it->second.erase(it2);
-        if (!it->second.size()) {
+        if (it->second.empty()) {
           pending_on_starts_.erase(it);
         }
         guard.release();
@@ -149,7 +149,7 @@ DataLink::remove_on_start_callback(const TransportClient_wrch& client, const Rep
       RepoToClientMap::iterator it2 = it->second.find(client_lock->get_repo_id());
       if (it2 != it->second.end()) {
         it->second.erase(it2);
-        if (!it->second.size()) {
+        if (it->second.empty()) {
           on_start_callbacks_.erase(it);
         }
       }
@@ -179,7 +179,7 @@ DataLink::invoke_on_start_callbacks(bool success)
       if (it2 != it->second.end()) {
         client = it2->second;
         it->second.erase(it2);
-        if (!it->second.size()) {
+        if (it->second.empty()) {
           on_start_callbacks_.erase(it);
         }
       }
@@ -209,7 +209,7 @@ DataLink::invoke_on_start_callbacks(const RepoId& local, const RepoId& remote, b
       if (it2 != it->second.end()) {
         client = it2->second;
         it->second.erase(it2);
-        if (!it->second.size()) {
+        if (it->second.empty()) {
           on_start_callbacks_.erase(it);
         }
       } else {
