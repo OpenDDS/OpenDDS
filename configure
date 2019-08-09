@@ -1265,7 +1265,7 @@ if ($opts{'security'} && $tests && $opts{'cmake'} && ! $opts{'gtest-precompiled'
   my $build_dir = $opts{'gtest'} . $slash . 'build';
   my $install_dir = $build_dir . $slash . 'install';
   my $cmake = $opts{'cmake'};
-  my @cmake_platform_args = $is_windows ?
+  my @cmake_platform_args = is_windows() ?
     ('-Dgtest_force_shared_crt=ON',
      '-DCMAKE_CXX_FLAGS=/D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING=1',
      '-G', '"' . win32_cmake_generator($opts{'compiler_version'}) . '"',
