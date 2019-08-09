@@ -44,7 +44,7 @@ void ReactorInterceptor::wait()
   ACE_GUARD(ACE_Thread_Mutex, guard, this->mutex_);
 
   if (should_execute_immediately()) {
-    handle_exception_i(guard);
+    handle_exception_i();
     if (!reactor_is_shut_down()) {
       reactor()->purge_pending_notifications(this);
     }
@@ -60,10 +60,10 @@ int ReactorInterceptor::handle_exception(ACE_HANDLE /*fd*/)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, this->mutex_, 0);
 
-  return handle_exception_i(guard);
+  return handle_exception_i();
 }
 
-void ReactorInterceptor::process_command_queue_i(ACE_Guard<ACE_Thread_Mutex>&)
+void ReactorInterceptor::process_command_queue_i()
 {
   ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(mutex_);
   while (!command_queue_.empty()) {
@@ -75,9 +75,9 @@ void ReactorInterceptor::process_command_queue_i(ACE_Guard<ACE_Thread_Mutex>&)
   }
 }
 
-int ReactorInterceptor::handle_exception_i(ACE_Guard<ACE_Thread_Mutex>& guard)
+int ReactorInterceptor::handle_exception_i()
 {
-  process_command_queue_i(guard);
+  process_command_queue_i();
   condition_.signal();
   return 0;
 }
