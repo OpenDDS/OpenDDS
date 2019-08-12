@@ -10,7 +10,7 @@ find_package(OpenDDS)
 set(CMAKE_CXX_COMPILER ${OPENDDS_COMPILER})
 
 if (NOT OPENDDS_OWNERSHIP_PROFILE)
-  message(FATAL_ERROR "This tests require OpenDDS to be built with Ownership Profile enabled")
+  message(FATAL_ERROR "These tests require OpenDDS to be built with Ownership Profile enabled")
 endif()
 
 set(src "${CMAKE_CURRENT_SOURCE_DIR}/../../../DCPS/Messenger")
