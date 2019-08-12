@@ -64,19 +64,6 @@ for my $x (qw(Messenger_1 Messenger_2)) {
     push @{$cmds[1]}, ("--config", "$build_config");
   }
 
-  sub run_cmd {
-    my $cmd = shift;
-    print "Running @{$cmd}\n";
-    my $result = `@{$cmd} 2>&1`;
-
-    if (defined $result) {
-      print "$result\n";
-
-    } else {
-      die "ERROR: invoking @{$cmd} failed with error '$?'";
-    }
-  }
-
   for my $cmd (@cmds) {
     run_command("@{$cmd}");
   }
