@@ -524,6 +524,9 @@ Serializer::write_longdouble_array(const ACE_CDR::LongDouble* x,
 ACE_INLINE int
 Serializer::align_r(size_t al)
 {
+  if (!current_) {
+    return 0;
+  }
   const size_t len =
     (al - ptrdiff_t(this->current_->rd_ptr()) + this->align_rshift_) % al;
   this->skip(static_cast<ACE_CDR::UShort>(len));
@@ -533,6 +536,9 @@ Serializer::align_r(size_t al)
 ACE_INLINE int
 Serializer::align_w(size_t al)
 {
+  if (!current_) {
+    return 0;
+  }
   size_t len =
     (al - ptrdiff_t(this->current_->wr_ptr()) + this->align_wshift_) % al;
   while (len) {

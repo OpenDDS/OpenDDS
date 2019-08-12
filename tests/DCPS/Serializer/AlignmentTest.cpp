@@ -253,3 +253,28 @@ bool runAlignmentResetTest()
   }
   return ok;
 }
+
+bool runAlignmentOverrunTest()
+{
+  std::cerr << "\nRunning alignment overrun test...\n";
+  ACE_Message_Block mb(4);
+
+  Serializer s1(&mb, false, Serializer::ALIGN_CDR);
+  ACE_CDR::Long x = 42;
+  if (!(s1 << x)) {
+    return false;
+  }
+  if (s1 << x) {
+    return false;
+  }
+
+  Serializer s2(&mb, false, Serializer::ALIGN_CDR);
+  if (!(s2 >> x)) {
+    return false;
+  }
+  if (s2 >> x) {
+    return false;
+  }
+
+  return true;
+}
