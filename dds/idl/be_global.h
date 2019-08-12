@@ -166,10 +166,11 @@ public:
   bool is_topic_type(AST_Decl* node);
 
   /**
-   * Global default for if a type is nested (is_nested_type = !is_topic_type)
-   * Set to true by passing --default-nested
+   * Nested property of the root module. Assuming there are no annotations, all
+   * potential topic types inherit this value. True when --default-nested is
+   * passed, otherwise false.
    */
-  bool global_default_nested_;
+  bool root_default_nested() const;
 
   /**
    * Check if a struct field has been declared a key.
@@ -187,11 +188,14 @@ public:
   void warning(const char* filename, unsigned lineno, const char* msg);
 
   /**
-   * If true, don't warn about #pragma DCPS_DATA_TYPE
+   * Wrapper around built-in annotations, see annotations.h
    */
-  bool no_dcps_data_type_warnings_;
-
   BuiltinAnnotations builtin_annotations_;
+
+  /**
+   * If true, warn about #pragma DCPS_DATA_TYPE
+   */
+  bool warn_about_dcps_data_type();
 
 private:
   /// Name of the IDL file we are processing.
@@ -207,6 +211,9 @@ private:
   std::set<std::string> cpp_includes_;
 
   LanguageMapping language_mapping_;
+
+  bool root_default_nested_;
+  bool warn_about_dcps_data_type_;
 
   bool is_nested(AST_Decl* node);
   bool is_default_nested(UTL_Scope* scope);

@@ -7,42 +7,42 @@
 
 using namespace TopicAnnotationsTest;
 
-template <typename T>
-OpenDDS::DCPS::DDSTraits<T>& get_traits()
+template <typename T> OpenDDS::DCPS::DDSTraits<T>&
+get_traits()
 {
   static OpenDDS::DCPS::DDSTraits<T> traits;
   return traits;
 }
 
-template <typename T>
-const char* get_type_name()
+template <typename T> const char*
+get_type_name()
 {
   return get_traits<T>().type_name();
 }
 
-template <typename T>
-size_t get_key_count()
+template <typename T> size_t
+get_key_count()
 {
   return get_traits<T>().key_count();
 }
 
-template <typename T>
-bool assert_key_count(size_t expected) {
+template <typename T> bool
+assert_key_count(size_t expected)
+{
   size_t count = get_key_count<T>();
   if (count != expected) {
     const char* type_name = get_type_name<T>();
     ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: ")
-      ACE_TEXT("For DDSTraits<%C>::key_count(), expected %d keys but ")
-      ACE_TEXT("got %d!\n"),
-      type_name, expected, count
-      ));
+      ACE_TEXT("For DDSTraits<%C>::key_count(), expected %u keys but ")
+      ACE_TEXT("got %u!\n"),
+      type_name, expected, count));
     return true;
   }
   return false;
 }
 
-template <typename T>
-size_t find_size(const T& data, size_t& padding)
+template <typename T> size_t
+find_size(const T& data, size_t& padding)
 {
   size_t size = 0;
   padding = 0;
@@ -50,8 +50,9 @@ size_t find_size(const T& data, size_t& padding)
   return size;
 }
 
-template <typename Type>
-bool assert_key_only_size(const Type& data, size_t expected) {
+template <typename Type> bool
+assert_key_only_size(const Type& data, size_t expected)
+{
   typedef OpenDDS::DCPS::KeyOnly<const Type> KeyOnlyType;
   KeyOnlyType key_only_data(data);
 
@@ -60,18 +61,17 @@ bool assert_key_only_size(const Type& data, size_t expected) {
   if (size != expected) {
     const char* type_name = get_type_name<Type>();
     ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: ")
-      ACE_TEXT("For gen_find_size(OpenDDS::DCPS::KeyOnly<%C>), expected %d but ")
-      ACE_TEXT("got %d!\n"),
-      type_name, expected, size
-      ));
+      ACE_TEXT("For gen_find_size(OpenDDS::DCPS::KeyOnly<%C>), expected %u ")
+      ACE_TEXT("but got %u!\n"),
+      type_name, expected, size));
     return true;
   }
   return false;
 }
 
-int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
+int
+ACE_TMAIN(int, ACE_TCHAR**)
 {
-
   bool failed = false;
 
   // Check Key Counts

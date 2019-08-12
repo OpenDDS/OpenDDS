@@ -7,6 +7,7 @@
 
 #include "ts_generator.h"
 #include "be_extern.h"
+#include "be_util.h"
 #include "topic_keys.h"
 
 #include "utl_identifier.h"
@@ -22,12 +23,7 @@
 namespace {
   std::string read_template(const char* prefix)
   {
-    const char* dds_root = ACE_OS::getenv("DDS_ROOT");
-    if (!dds_root) {
-      ACE_ERROR((LM_ERROR, "The environment variable DDS_ROOT must be set.\n"));
-      BE_abort();
-    }
-    std::string path = dds_root;
+    std::string path = be_util::dds_root();
     path.append("/dds/idl/");
     path.append(prefix);
     path.append("Template.txt");
@@ -63,7 +59,6 @@ ts_generator::ts_generator()
 {
 }
 
-
 bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
 {
   AST_Structure* struct_node = 0;
@@ -76,6 +71,12 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
   } else if (node->node_type() == AST_Decl::NT_union) {
     union_node = dynamic_cast<AST_Union*>(node);
   } else {
+    return false;
+  }
+
+  if (!struct_node && !union_node) {
+    idl_global->err()->misc_error(
+      "Could not cast AST Nodes to valid types", node);
     return false;
   }
 

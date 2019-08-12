@@ -1,4 +1,4 @@
-project(SecurityConfigTest): dcpsexe, googlemock {
+project(SecurityConfigTest): dcpsexe, dcps_test, googlemock {
   requires += no_opendds_safety_profile
   exename = OpenDDS_SecurityConfigTest
   avoids += no_opendds_security

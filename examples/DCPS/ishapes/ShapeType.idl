@@ -5,8 +5,7 @@ module org {
 
         @topic
         struct ShapeType {
-          @key
-          string color;
+          @key string color;
           long x;
           long y;
           long shapesize;

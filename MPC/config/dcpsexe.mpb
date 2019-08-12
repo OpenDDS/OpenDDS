@@ -1,2 +1,2 @@
-project : dds_taolib, dcps, dcps_default_discovery {
+project : dcps, dcps_default_discovery {
 }

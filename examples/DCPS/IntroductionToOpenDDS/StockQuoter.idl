@@ -11,8 +11,7 @@ module StockQuoter {
 
   @topic
   struct Quote {
-    @key
-    string ticker;
+    @key string ticker;
     string exchange;
     string full_name;
     double value;
@@ -25,8 +24,7 @@ module StockQuoter {
                            TRADING_RESUMED };
   @topic
   struct ExchangeEvent {
-    @key
-    string exchange;
+    @key string exchange;
     ExchangeEventType event;
     TimeBase::TimeT timestamp;
   };

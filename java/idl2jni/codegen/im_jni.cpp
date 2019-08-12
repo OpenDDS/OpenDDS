@@ -58,13 +58,14 @@ string idl_mapping_jni::taoType(AST_Type *decl)
     default:
       break;
     }
+    break;
   }
   case AST_Decl::NT_string:
     return "CORBA::String_var";
   case AST_Decl::NT_enum:
     return scoped(decl->name());
   case AST_Decl::NT_interface:
-  case AST_Decl::NT_interface_fwd:
+  case AST_Decl::NT_interface_fwd: // fallthrough
     return scoped(decl->name()) + "_var";
   default:
     break;
@@ -271,14 +272,15 @@ string idl_mapping_jni::jvmSignature(AST_Type *decl)
     default:
       break;
     }
+    break;
   }
   case AST_Decl::NT_string:
     return "Ljava/lang/String;";
-  case AST_Decl::NT_enum:
-  case AST_Decl::NT_struct:
-  case AST_Decl::NT_struct_fwd:
-  case AST_Decl::NT_union:
-  case AST_Decl::NT_interface:
+  case AST_Decl::NT_enum: // fallthrough
+  case AST_Decl::NT_struct:  // fallthrough
+  case AST_Decl::NT_struct_fwd: // fallthrough
+  case AST_Decl::NT_union: // fallthrough
+  case AST_Decl::NT_interface: // fallthrough
   case AST_Decl::NT_interface_fwd:
     return "L" + scoped_helper(decl->name(), "/") + ";";
   case AST_Decl::NT_typedef: {

@@ -16,13 +16,21 @@
 #define HANDLE_TYPE_NATIVE long
 #define BUILTIN_TOPIC_KEY_TYPE_NATIVE long
 
+#if !defined (DDS_HAS_MINIMUM_BIT)
+#  define BUILT_IN_TOPIC_TYPE @topic
+#  define BUILT_IN_TOPIC_KEY @key
+#else
+#  define BUILT_IN_TOPIC_TYPE
+#  define BUILT_IN_TOPIC_KEY
+#endif
+
 module DDS {
 // Make the IDL compiler produce include of zero-copy read info
 // sequence template.
 #pragma DCPS_SUPPORT_ZERO_COPY_READ
 
     typedef sequence<string> StringSeq;
-    typedef HANDLE_TYPE_NATIVE    InstanceHandle_t;
+    typedef HANDLE_TYPE_NATIVE InstanceHandle_t;
     typedef BUILTIN_TOPIC_KEY_TYPE_NATIVE BuiltinTopicKeyValue[3];
 
     typedef sequence<InstanceHandle_t> InstanceHandleSeq;
@@ -287,32 +295,20 @@ module DDS {
                 };
 
     struct BuiltinTopicKey_t {
-                BuiltinTopicKeyValue value;
+                BUILT_IN_TOPIC_KEY BuiltinTopicKeyValue value;
                 };
 
     // ----------------------------------------------------------------------
-#if !defined (DDS_HAS_MINIMUM_BIT)
-// These pragmas are OpenDDS-specific.
-#pragma DCPS_DATA_TYPE "DDS::ParticipantBuiltinTopicData"
-#pragma DCPS_DATA_KEY  "DDS::ParticipantBuiltinTopicData key.value[0]"
-#pragma DCPS_DATA_KEY  "DDS::ParticipantBuiltinTopicData key.value[1]"
-#pragma DCPS_DATA_KEY  "DDS::ParticipantBuiltinTopicData key.value[2]"
-#endif
 
+    BUILT_IN_TOPIC_TYPE
     struct ParticipantBuiltinTopicData {
-      BuiltinTopicKey_t key;
+      BUILT_IN_TOPIC_KEY BuiltinTopicKey_t key;
       UserDataQosPolicy user_data;
     };
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
-// These pragmas are OpenDDS-specific.
-#pragma DCPS_DATA_TYPE "DDS::PublicationBuiltinTopicData"
-#pragma DCPS_DATA_KEY  "DDS::PublicationBuiltinTopicData key.value[0]"
-#pragma DCPS_DATA_KEY  "DDS::PublicationBuiltinTopicData key.value[1]"
-#pragma DCPS_DATA_KEY  "DDS::PublicationBuiltinTopicData key.value[2]"
-#endif
+    BUILT_IN_TOPIC_TYPE
     struct PublicationBuiltinTopicData {
-                BuiltinTopicKey_t key;
+                BUILT_IN_TOPIC_KEY BuiltinTopicKey_t key;
                 BuiltinTopicKey_t participant_key;
                 string topic_name;
                 string type_name;
@@ -333,15 +329,9 @@ module DDS {
                 GroupDataQosPolicy group_data;
                 };
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
-// These pragmas are OpenDDS-specific.
-#pragma DCPS_DATA_TYPE "DDS::SubscriptionBuiltinTopicData"
-#pragma DCPS_DATA_KEY  "DDS::SubscriptionBuiltinTopicData key.value[0]"
-#pragma DCPS_DATA_KEY  "DDS::SubscriptionBuiltinTopicData key.value[1]"
-#pragma DCPS_DATA_KEY  "DDS::SubscriptionBuiltinTopicData key.value[2]"
-#endif
+    BUILT_IN_TOPIC_TYPE
     struct SubscriptionBuiltinTopicData {
-                BuiltinTopicKey_t key;
+                BUILT_IN_TOPIC_KEY BuiltinTopicKey_t key;
                 BuiltinTopicKey_t participant_key;
                 string topic_name;
                 string type_name;
@@ -360,16 +350,9 @@ module DDS {
                 GroupDataQosPolicy group_data;
                 };
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
-// These pragmas are OpenDDS-specific.
-#pragma DCPS_DATA_TYPE "DDS::TopicBuiltinTopicData"
-#pragma DCPS_DATA_KEY  "DDS::TopicBuiltinTopicData key.value[0]"
-#pragma DCPS_DATA_KEY  "DDS::TopicBuiltinTopicData key.value[1]"
-#pragma DCPS_DATA_KEY  "DDS::TopicBuiltinTopicData key.value[2]"
-#endif
-
+    BUILT_IN_TOPIC_TYPE
     struct TopicBuiltinTopicData {
-                BuiltinTopicKey_t key;
+                BUILT_IN_TOPIC_KEY BuiltinTopicKey_t key;
                 string name;
                 string type_name;
                 DurabilityQosPolicy durability;
@@ -444,5 +427,8 @@ module DDS {
   typedef sequence<SampleInfo> SampleInfoSeq;
 
 };
+
+#undef BUILT_IN_TOPIC_TYPE
+#undef BUILT_IN_TOPIC_KEY
 
 #endif  /* OPENDDS_DCPS_CORE_IDL */

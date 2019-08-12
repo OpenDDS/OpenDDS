@@ -1,13 +1,11 @@
-
 module Messenger {
 
   @topic
   struct Message {
     string from;
     string subject;
-    @key
-    long subject_id;
+    @key long subject_id;
     string text;
-    long   count;
+    long count;
   };
 };

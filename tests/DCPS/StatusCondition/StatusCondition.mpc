@@ -1,4 +1,4 @@
-project: dcpsexe, dcps_cm, dcps_transports_for_test {
+project: dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test {
   exename = StatusConditionTest
 
   Idl_Files {

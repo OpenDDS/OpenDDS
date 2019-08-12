@@ -7,6 +7,7 @@
 
 #include "be_global.h"
 #include "be_util.h"
+#include "be_extern.h"
 #include "ast_generator.h"
 #include "global_extern.h"
 #include "idl_defines.h"
@@ -23,6 +24,7 @@
 #include "ace/OS_NS_strings.h"
 #include "ace/OS_NS_sys_stat.h"
 #include "ace/ARGV.h"
+#include "ace/OS_NS_stdlib.h"
 
 #include <algorithm>
 #include <iostream>
@@ -37,9 +39,7 @@ using namespace std;
 BE_GlobalData* be_global = 0;
 
 BE_GlobalData::BE_GlobalData()
-  : global_default_nested_(false)
-  , no_dcps_data_type_warnings_(false)
-  , filename_(0)
+  : filename_(0)
   , java_(false)
   , suppress_idl_(false)
   , suppress_typecode_(false)
@@ -50,6 +50,8 @@ BE_GlobalData::BE_GlobalData()
   , face_ts_(false)
   , seq_("Seq")
   , language_mapping_(LANGMAP_NONE)
+  , root_default_nested_(false)
+  , warn_about_dcps_data_type_(true)
 {
 }
 
@@ -237,26 +239,19 @@ bool BE_GlobalData::face_ts() const
 void
 BE_GlobalData::open_streams(const char* filename)
 {
-  this->filename(filename);
   size_t len = strlen(filename);
-
   if ((len < 5 || 0 != ACE_OS::strcasecmp(filename + len - 4, ".idl"))
       && (len < 6 || 0 != ACE_OS::strcasecmp(filename + len - 5, ".pidl"))) {
-    UTL_Error u;
-    UTL_String str("Input filename must end in \".idl\" or \".pidl\".");
-    u.back_end(0, &str);
-    exit(-1);
-    return;
+    ACE_ERROR((LM_ERROR, "Error - Input filename must end in \".idl\" or \".pidl\".\n"));
+    BE_abort();
   }
 
   string filebase(filename);
   filebase.erase(filebase.rfind('.'));
   size_t idx = filebase.find_last_of("/\\"); // allow either slash
-
   if (idx != string::npos) {
     filebase = filebase.substr(idx + 1);
   }
-
   header_name_ = (filebase + "TypeSupportImpl.h").c_str();
   impl_name_ = (filebase + "TypeSupportImpl.cpp").c_str();
   idl_name_ = (filebase + "TypeSupport.idl").c_str();
@@ -324,6 +319,9 @@ BE_GlobalData::parse_args(long& i, char** av)
 
   static const char DEFAULT_NESTED_FLAG[] = "--default-nested";
   static const size_t DEFAULT_NESTED_FLAG_SIZE = sizeof(DEFAULT_NESTED_FLAG) - 1;
+
+  static const char NO_DEFAULT_NESTED_FLAG[] = "--no-default-nested";
+  static const size_t NO_DEFAULT_NESTED_FLAG_SIZE = sizeof(NO_DEFAULT_NESTED_FLAG) - 1;
 
   static const char NO_DCPS_DATA_TYPE_WARNINGS_FLAG[] = "--no-dcps-data-type-warnings";
   static const size_t NO_DCPS_DATA_TYPE_WARNINGS_FLAG_SIZE = sizeof(NO_DCPS_DATA_TYPE_WARNINGS_FLAG) - 1;
@@ -398,9 +396,11 @@ BE_GlobalData::parse_args(long& i, char** av)
     if (!ACE_OS::strncasecmp(av[i], EXPORT_FLAG, EXPORT_FLAG_SIZE)) {
       this->export_macro(av[i] + EXPORT_FLAG_SIZE);
     } else if (!ACE_OS::strncasecmp(av[i], DEFAULT_NESTED_FLAG, DEFAULT_NESTED_FLAG_SIZE)) {
-      global_default_nested_ = true;
+      root_default_nested_ = true;
+    } else if (!ACE_OS::strncasecmp(av[i], NO_DEFAULT_NESTED_FLAG, NO_DEFAULT_NESTED_FLAG_SIZE)) {
+      root_default_nested_ = false;
     } else if (!ACE_OS::strncasecmp(av[i], NO_DCPS_DATA_TYPE_WARNINGS_FLAG, NO_DCPS_DATA_TYPE_WARNINGS_FLAG_SIZE)) {
-      no_dcps_data_type_warnings_ = true;
+      warn_about_dcps_data_type_ = false;
     } else {
       invalid_option(av[i]);
     }
@@ -647,7 +647,7 @@ BE_GlobalData::is_default_nested(UTL_Scope* scope)
     return is_default_nested(module->defined_in());
   }
 
-  return global_default_nested_; // True if --default-nested was passed
+  return root_default_nested_; // True if --default-nested was passed
 }
 
 bool
@@ -672,4 +672,14 @@ BE_GlobalData::warning(const char* filename, unsigned lineno, const char* msg)
       ACE_TEXT("Warning - %C: \"%C\", line %u: %C\n"),
       idl_global->prog_name(), filename, lineno, msg));
   }
+}
+
+bool
+BE_GlobalData::warn_about_dcps_data_type()
+{
+  if (!warn_about_dcps_data_type_) {
+    return false;
+  }
+  warn_about_dcps_data_type_ = false;
+  return idl_global->print_warnings();
 }

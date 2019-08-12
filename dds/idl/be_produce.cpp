@@ -279,8 +279,8 @@ void postprocess(const char* fn, ostringstream& content,
 void
 BE_produce()
 {
-  //search for #includes in the IDL, add them as #includes in the stubs/skels
   const char* idl_fn = idl_global->main_filename()->get_string();
+  be_global->filename(idl_fn);
 
   const BE_GlobalData::stream_enum_t out_stream =
     be_global->language_mapping() == BE_GlobalData::LANGMAP_NONE
@@ -290,21 +290,13 @@ BE_produce()
   const size_t buffer_sz = 512;
   char buffer[buffer_sz];
   unsigned lineno = 0;
-  bool warned_dcps_data_type =
-    be_global->no_dcps_data_type_warnings_ ||
-    !idl_global->print_warnings();
+
   while (idl) {
     idl.getline(buffer, buffer_sz);
     ++lineno;
 
-    if (!(warned_dcps_data_type || strncmp("#pragma DCPS_DATA_TYPE", buffer, 22))) {
-      be_global->warning(idl_fn, lineno, "\n"
-        "  DCPS_DATA_TYPE and DCPS_DATA_KEY pragma statements are deprecated; please\n"
-        "  use @topic, @key, @nested, and @default_nested instead. See section 2.1.1,\n"
-        "  \"Defining the Data Types\", of the OpenDDS Developer's Guide for more\n"
-        "  information.");
-      warned_dcps_data_type = true;
-    } else if (0 == strncmp("#include", buffer, 8)) { //FUTURE: account for comments?
+    // search for #includes in the IDL, add them as #includes in the stubs/skels
+    if (0 == strncmp("#include", buffer, 8)) { //FUTURE: account for comments?
       string inc(buffer + 8);
       size_t delim1 = inc.find_first_of("<\"");
       size_t delim2 = inc.find_first_of(">\"", delim1 + 1);

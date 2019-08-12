@@ -1,4 +1,4 @@
-project(Monitor*Publisher): dcpsexe, dcps_cm, dcps_tcp, dcps_monitor {
+project(Monitor*Publisher): dcpsexe, dcps_test, dcps_cm, dcps_tcp, dcps_monitor {
   requires += no_opendds_safety_profile built_in_topics
   exename   = publisher
 
@@ -11,7 +11,7 @@ project(Monitor*Publisher): dcpsexe, dcps_cm, dcps_tcp, dcps_monitor {
   }
 }
 
-project(Monitor*Subscriber): dcpsexe, dcps_cm, dcps_tcp, dcps_monitor {
+project(Monitor*Subscriber): dcpsexe, dcps_test, dcps_cm, dcps_tcp, dcps_monitor {
   requires += no_opendds_safety_profile built_in_topics
   exename   = subscriber
 
@@ -24,13 +24,9 @@ project(Monitor*Subscriber): dcpsexe, dcps_cm, dcps_tcp, dcps_monitor {
   }
 }
 
-project(Monitor*monitor): dcpsexe, dcps_cm, dcps_tcp, dcps_monitor {
+project(Monitor*monitor): dcpsexe, dcps_test, dcps_cm, dcps_tcp, dcps_monitor, msvc_bigobj {
   requires += no_opendds_safety_profile built_in_topics
   exename   = monitor
-
-  specific (vc9, vc10, vc11, vc12, vc14, vs2017, vs2019, nmake) {
-    compile_flags += /bigobj
-  }
 
   Idl_Files {
   }

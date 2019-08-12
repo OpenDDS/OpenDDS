@@ -1602,6 +1602,10 @@ namespace {
         AST_Type* ast_type;
         if (i.root_type() == TopicKeys::UnionType) {
           AST_Union* union_type = dynamic_cast<AST_Union*>(straight_ast_type);
+          if (!union_type) {
+            std::cerr << "ERROR: Invalid key iterator for: " << struct_name;
+            return false;
+          }
           ast_type = dynamic_cast<AST_Type*>(union_type->disc_type());
           key_name.append("._d()");
         } else {
@@ -1883,9 +1887,17 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           if (i.root_type() == TopicKeys::UnionType) {
             key_name.append("._d()");
             AST_Union* union_type = dynamic_cast<AST_Union*>(straight_ast_type);
+            if (!union_type) {
+              std::cerr << "ERROR: Invalid key iterator for: " << cxx;
+              return false;
+            }
             ast_type = dynamic_cast<AST_Type*>(union_type->disc_type());
           } else {
             ast_type = straight_ast_type;
+          }
+          if (!ast_type) {
+            std::cerr << "ERROR: Invalid key iterator for: " << cxx;
+            return false;
           }
           expr += streamCommon(key_name, ast_type, "<< stru.t", intro);
         }
@@ -1933,7 +1945,15 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           AST_Type* ast_type = i.get_ast_type();
           if (i.root_type() == TopicKeys::UnionType) {
             AST_Union* union_type = dynamic_cast<AST_Union*>(ast_type);
+            if (!union_type) {
+              std::cerr << "ERROR: Invalid key iterator for: " << cxx;
+              return false;
+            }
             AST_Type* disc_type = dynamic_cast<AST_Type*>(union_type->disc_type());
+            if (!disc_type) {
+              std::cerr << "ERROR: Invalid key iterator for: " << cxx;
+              return false;
+            }
             be_global->impl_ <<
               "  {\n"
               "    " << scoped(disc_type->name()) << " tmp;\n" <<

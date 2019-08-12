@@ -44,287 +44,124 @@ module OpenDDS {
     typedef sequence<NameValuePair> NVPSeq;
 
 
-#pragma DCPS_DATA_TYPE "OpenDDS::DCPS::ServiceParticipantReport"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::ServiceParticipantReport host"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::ServiceParticipantReport pid"
-
+    @topic
     struct ServiceParticipantReport {
       /// Host name
-      string    host;
+      @key string host;
       /// Process ID
-      long      pid;
-      GUIDSeq   domain_participants;
-      CORBA::ULongSeq  transports;
-      NVPSeq    values;
+      @key long pid;
+      GUIDSeq domain_participants;
+      CORBA::ULongSeq transports;
+      NVPSeq values;
     };
 
-#pragma DCPS_DATA_TYPE "OpenDDS::DCPS::DomainParticipantReport"
-// We just want to use the dp_id field as the key, but using structs
-// as keys is not currently supported.
-//#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DomainParticipantReport dp_id"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DomainParticipantReport dp_id.guidPrefix[11]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DomainParticipantReport dp_id.guidPrefix[10]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DomainParticipantReport dp_id.guidPrefix[ 9]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DomainParticipantReport dp_id.guidPrefix[ 8]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DomainParticipantReport dp_id.guidPrefix[ 7]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DomainParticipantReport dp_id.guidPrefix[ 6]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DomainParticipantReport dp_id.guidPrefix[ 5]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DomainParticipantReport dp_id.guidPrefix[ 4]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DomainParticipantReport dp_id.guidPrefix[ 3]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DomainParticipantReport dp_id.guidPrefix[ 2]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DomainParticipantReport dp_id.guidPrefix[ 1]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DomainParticipantReport dp_id.guidPrefix[ 0]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DomainParticipantReport dp_id.entityId.entityKey[2]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DomainParticipantReport dp_id.entityId.entityKey[1]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DomainParticipantReport dp_id.entityId.entityKey[0]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DomainParticipantReport dp_id.entityId.entityKind"
-
+    @topic
     struct DomainParticipantReport {
       /// Host name
-      string           host;
+      string host;
       /// Process ID
-      long             pid;
+      long pid;
       /// GUID of the Domain Participant
-      GUID_t           dp_id;
-      DDS::DomainId_t  domain_id;
-      GUIDSeq          topics;
-      NVPSeq           values;
+      @key GUID_t dp_id;
+      DDS::DomainId_t domain_id;
+      GUIDSeq topics;
+      NVPSeq values;
     };
 
-#pragma DCPS_DATA_TYPE "OpenDDS::DCPS::TopicReport"
-// We just want to use the topic_id field as the key, but using structs
-// as keys is not currently supported.
-//#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::TopicReport topic_id"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::TopicReport topic_id.guidPrefix[11]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::TopicReport topic_id.guidPrefix[10]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::TopicReport topic_id.guidPrefix[ 9]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::TopicReport topic_id.guidPrefix[ 8]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::TopicReport topic_id.guidPrefix[ 7]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::TopicReport topic_id.guidPrefix[ 6]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::TopicReport topic_id.guidPrefix[ 5]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::TopicReport topic_id.guidPrefix[ 4]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::TopicReport topic_id.guidPrefix[ 3]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::TopicReport topic_id.guidPrefix[ 2]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::TopicReport topic_id.guidPrefix[ 1]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::TopicReport topic_id.guidPrefix[ 0]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::TopicReport topic_id.entityId.entityKey[2]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::TopicReport topic_id.entityId.entityKey[1]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::TopicReport topic_id.entityId.entityKey[0]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::TopicReport topic_id.entityId.entityKind"
-
+    @topic
     struct TopicReport {
       /// GUID of the Domain Participant this Topic belongs to
-      GUID_t  dp_id;
+      GUID_t dp_id;
       /// GUID for the Topic
-      GUID_t  topic_id;
-      string  topic_name;
-      string  type_name;
-      NVPSeq  values;
+      @key GUID_t topic_id;
+      string topic_name;
+      string type_name;
+      NVPSeq values;
     };
 
-#pragma DCPS_DATA_TYPE "OpenDDS::DCPS::PublisherReport"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::PublisherReport handle"
-// We just want to use the dp_id field as the key, but using structs
-// as keys is not currently supported.
-//#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::PublisherReport dp_id"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::PublisherReport dp_id.guidPrefix[11]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::PublisherReport dp_id.guidPrefix[10]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::PublisherReport dp_id.guidPrefix[ 9]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::PublisherReport dp_id.guidPrefix[ 8]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::PublisherReport dp_id.guidPrefix[ 7]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::PublisherReport dp_id.guidPrefix[ 6]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::PublisherReport dp_id.guidPrefix[ 5]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::PublisherReport dp_id.guidPrefix[ 4]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::PublisherReport dp_id.guidPrefix[ 3]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::PublisherReport dp_id.guidPrefix[ 2]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::PublisherReport dp_id.guidPrefix[ 1]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::PublisherReport dp_id.guidPrefix[ 0]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::PublisherReport dp_id.entityId.entityKey[2]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::PublisherReport dp_id.entityId.entityKey[1]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::PublisherReport dp_id.entityId.entityKey[0]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::PublisherReport dp_id.entityId.entityKind"
-
+    @topic
     struct PublisherReport {
       /// Instance handle of this Publisher. Unique withing the DP.
-      DDS::InstanceHandle_t handle;
+      @key DDS::InstanceHandle_t handle;
       /// GUID of the Domain Participant this Publisher belongs to
-      GUID_t                dp_id;
-      unsigned long         transport_id;
-      GUIDSeq               writers;
-      NVPSeq                values;
+      @key GUID_t dp_id;
+      unsigned long transport_id;
+      GUIDSeq writers;
+      NVPSeq values;
     };
 
-#pragma DCPS_DATA_TYPE "OpenDDS::DCPS::SubscriberReport"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::SubscriberReport handle"
-// We just want to use the dp_id field as the key, but using structs
-// as keys is not currently supported.
-//#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::SubscriberReport dp_id"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::SubscriberReport dp_id.guidPrefix[11]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::SubscriberReport dp_id.guidPrefix[10]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::SubscriberReport dp_id.guidPrefix[ 9]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::SubscriberReport dp_id.guidPrefix[ 8]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::SubscriberReport dp_id.guidPrefix[ 7]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::SubscriberReport dp_id.guidPrefix[ 6]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::SubscriberReport dp_id.guidPrefix[ 5]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::SubscriberReport dp_id.guidPrefix[ 4]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::SubscriberReport dp_id.guidPrefix[ 3]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::SubscriberReport dp_id.guidPrefix[ 2]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::SubscriberReport dp_id.guidPrefix[ 1]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::SubscriberReport dp_id.guidPrefix[ 0]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::SubscriberReport dp_id.entityId.entityKey[2]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::SubscriberReport dp_id.entityId.entityKey[1]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::SubscriberReport dp_id.entityId.entityKey[0]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::SubscriberReport dp_id.entityId.entityKind"
-
+    @topic
     struct SubscriberReport {
       /// Instance handle of this Subscriber. Unique withing the DP.
-      DDS::InstanceHandle_t handle;
+      @key DDS::InstanceHandle_t handle;
       /// GUID of the Domain Participant this Subscriber belongs to
-      GUID_t                dp_id;
-      unsigned long         transport_id;
-      GUIDSeq               readers;
-      NVPSeq                values;
+      @key GUID_t dp_id;
+      unsigned long transport_id;
+      GUIDSeq readers;
+      NVPSeq values;
     };
-
-#pragma DCPS_DATA_TYPE "OpenDDS::DCPS::DataWriterReport"
-// We just want to use the dw_id field as the key, but using structs
-// as keys is not currently supported.
-//#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataWriterReport dw_id"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataWriterReport dw_id.guidPrefix[11]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataWriterReport dw_id.guidPrefix[10]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataWriterReport dw_id.guidPrefix[ 9]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataWriterReport dw_id.guidPrefix[ 8]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataWriterReport dw_id.guidPrefix[ 7]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataWriterReport dw_id.guidPrefix[ 6]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataWriterReport dw_id.guidPrefix[ 5]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataWriterReport dw_id.guidPrefix[ 4]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataWriterReport dw_id.guidPrefix[ 3]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataWriterReport dw_id.guidPrefix[ 2]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataWriterReport dw_id.guidPrefix[ 1]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataWriterReport dw_id.guidPrefix[ 0]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataWriterReport dw_id.entityId.entityKey[2]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataWriterReport dw_id.entityId.entityKey[1]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataWriterReport dw_id.entityId.entityKey[0]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataWriterReport dw_id.entityId.entityKind"
 
     struct DataWriterAssociation {
       GUID_t        dr_id;
     };
     typedef sequence<DataWriterAssociation> DWAssociations;
+
+    @topic
     struct DataWriterReport {
       /// GUID of the Domain Participant this Data Writer belongs to
-      GUID_t                 dp_id;
+      GUID_t dp_id;
       /// Instance handle of this Data Writer's Publisher
-      DDS::InstanceHandle_t  pub_handle;
+      DDS::InstanceHandle_t pub_handle;
       /// GUID for the Data Writer
-      GUID_t                 dw_id;
+      @key GUID_t dw_id;
       /// GUID for the Topic this Data Writer is using
-      GUID_t                 topic_id;
+      GUID_t topic_id;
       /// Sequence of instances that this Data Writer has registered
       DDS::InstanceHandleSeq instances;
       /// Sequence of Data Reader GUIDs that this Data Writer is associated with
-      DWAssociations         associations;
-      NVPSeq                 values;
+      DWAssociations associations;
+      NVPSeq values;
     };
-
-#pragma DCPS_DATA_TYPE "OpenDDS::DCPS::DataWriterPeriodicReport"
-// We just want to use the dw_id field as the key, but using structs
-// as keys is not currently supported.
-//#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataWriterPeriodicReport dw_id"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataWriterPeriodicReport dw_id.guidPrefix[11]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataWriterPeriodicReport dw_id.guidPrefix[10]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataWriterPeriodicReport dw_id.guidPrefix[ 9]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataWriterPeriodicReport dw_id.guidPrefix[ 8]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataWriterPeriodicReport dw_id.guidPrefix[ 7]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataWriterPeriodicReport dw_id.guidPrefix[ 6]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataWriterPeriodicReport dw_id.guidPrefix[ 5]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataWriterPeriodicReport dw_id.guidPrefix[ 4]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataWriterPeriodicReport dw_id.guidPrefix[ 3]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataWriterPeriodicReport dw_id.guidPrefix[ 2]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataWriterPeriodicReport dw_id.guidPrefix[ 1]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataWriterPeriodicReport dw_id.guidPrefix[ 0]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataWriterPeriodicReport dw_id.entityId.entityKey[2]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataWriterPeriodicReport dw_id.entityId.entityKey[1]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataWriterPeriodicReport dw_id.entityId.entityKey[0]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataWriterPeriodicReport dw_id.entityId.entityKind"
 
     struct DataWriterAssociationPeriodic {
       GUID_t        dr_id;
       unsigned long sequence_number;
     };
     typedef sequence<DataWriterAssociationPeriodic> DWAssociationsPeriodic;
+
+    @topic
     struct DataWriterPeriodicReport {
-      GUID_t        dw_id;
+      @key GUID_t dw_id;
       unsigned long data_dropped_count;
       unsigned long data_delivered_count;
       unsigned long control_dropped_count;
       unsigned long control_delivered_count;
       DWAssociationsPeriodic associations;
-      NVPSeq        values;
+      NVPSeq values;
     };
-
-#pragma DCPS_DATA_TYPE "OpenDDS::DCPS::DataReaderReport"
-// We just want to use the dr_id field as the key, but using structs
-// as keys is not currently supported.
-//#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataReaderReport dr_id"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataReaderReport dr_id.guidPrefix[11]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataReaderReport dr_id.guidPrefix[10]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataReaderReport dr_id.guidPrefix[ 9]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataReaderReport dr_id.guidPrefix[ 8]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataReaderReport dr_id.guidPrefix[ 7]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataReaderReport dr_id.guidPrefix[ 6]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataReaderReport dr_id.guidPrefix[ 5]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataReaderReport dr_id.guidPrefix[ 4]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataReaderReport dr_id.guidPrefix[ 3]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataReaderReport dr_id.guidPrefix[ 2]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataReaderReport dr_id.guidPrefix[ 1]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataReaderReport dr_id.guidPrefix[ 0]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataReaderReport dr_id.entityId.entityKey[2]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataReaderReport dr_id.entityId.entityKey[1]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataReaderReport dr_id.entityId.entityKey[0]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataReaderReport dr_id.entityId.entityKind"
 
     struct DataReaderAssociation {
       GUID_t        dw_id;
       short         state;
     };
     typedef sequence<DataReaderAssociation> DRAssociations;
+
+    @topic
     struct DataReaderReport {
       /// GUID of the Domain Participant this Data Reader belongs to
-      GUID_t                 dp_id;
+      GUID_t dp_id;
       /// Instance handle of this Data Reader's Subscriber
-      DDS::InstanceHandle_t  sub_handle;
+      DDS::InstanceHandle_t sub_handle;
       /// GUID for the Data Reader
-      GUID_t                 dr_id;
+      @key GUID_t dr_id;
       /// GUID for the Topic this Data Reader is using
-      GUID_t                 topic_id;
+      GUID_t topic_id;
       /// Sequence of instances that this Data Reader has received
       DDS::InstanceHandleSeq instances;
       /// Sequence of Data Writer GUIDs that this Data Reader is associated with
-      DRAssociations         associations;
-      NVPSeq                 values;
+      DRAssociations associations;
+      NVPSeq values;
     };
-
-#pragma DCPS_DATA_TYPE "OpenDDS::DCPS::DataReaderPeriodicReport"
-// We just want to use the dr_id field as the key, but using structs
-// as keys is not currently supported.
-//#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataReaderPeriodicReport dr_id"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataReaderPeriodicReport dr_id.guidPrefix[11]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataReaderPeriodicReport dr_id.guidPrefix[10]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataReaderPeriodicReport dr_id.guidPrefix[ 9]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataReaderPeriodicReport dr_id.guidPrefix[ 8]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataReaderPeriodicReport dr_id.guidPrefix[ 7]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataReaderPeriodicReport dr_id.guidPrefix[ 6]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataReaderPeriodicReport dr_id.guidPrefix[ 5]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataReaderPeriodicReport dr_id.guidPrefix[ 4]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataReaderPeriodicReport dr_id.guidPrefix[ 3]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataReaderPeriodicReport dr_id.guidPrefix[ 2]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataReaderPeriodicReport dr_id.guidPrefix[ 1]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataReaderPeriodicReport dr_id.guidPrefix[ 0]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataReaderPeriodicReport dr_id.entityId.entityKey[2]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataReaderPeriodicReport dr_id.entityId.entityKey[1]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataReaderPeriodicReport dr_id.entityId.entityKey[0]"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::DataReaderPeriodicReport dr_id.entityId.entityKind"
 
     struct DataReaderAssociationPeriodic {
       GUID_t        dw_id;
@@ -332,23 +169,21 @@ module OpenDDS {
       // Stats      latency_stats;
     };
     typedef sequence<DataReaderAssociationPeriodic> DRAssociationsPeriodic;
+
+    @topic
     struct DataReaderPeriodicReport {
-      GUID_t        dr_id;
+      @key GUID_t dr_id;
       DRAssociationsPeriodic associations;
-      NVPSeq        values;
+      NVPSeq values;
     };
 
-#pragma DCPS_DATA_TYPE "OpenDDS::DCPS::TransportReport"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::TransportReport host"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::TransportReport pid"
-#pragma DCPS_DATA_KEY  "OpenDDS::DCPS::TransportReport transport_id"
-
+    @topic
     struct TransportReport {
-      string        host;
-      long          pid;
-      unsigned long transport_id;
-      string        transport_type;
-      NVPSeq        values;
+      @key string host;
+      @key long pid;
+      @key unsigned long transport_id;
+      string transport_type;
+      NVPSeq values;
     };
 
     enum ReportType {

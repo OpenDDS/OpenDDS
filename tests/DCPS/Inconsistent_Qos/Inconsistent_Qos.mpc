@@ -1,4 +1,4 @@
-project(DDS*Inconsistent_Qos) : dcpsexe, dcps_cm, dcps_transports_for_test, dcps_qos_xml_handler {
+project(DDS*Inconsistent_Qos) : dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test, dcps_qos_xml_handler {
   exename = inconsistent_qos
 
   Idl_Files {

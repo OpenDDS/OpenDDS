@@ -1,4 +1,4 @@
-project: dcpsexe {
+project: dcpsexe, dcps_test {
   exename   = WriteDataContainerTest
   idlflags += -SS
   TypeSupport_Files {

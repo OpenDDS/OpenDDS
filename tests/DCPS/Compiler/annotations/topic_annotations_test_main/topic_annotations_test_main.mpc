@@ -1,4 +1,4 @@
-project: dcpsexe {
+project: dcps_test {
   exename = topic_annotations_test
   exeout = .
 

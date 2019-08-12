@@ -1,6 +1,4 @@
-project: dcpsexe, test_root {
-  after       += TestFramework
-  libs        += TestFramework
-  includes    += $(TEST_ROOT)/tests/DCPS/TestFramework
-  libpaths    += $(TEST_ROOT)/tests/DCPS/TestFramework
+// Properties common to all OpenDDS Tests
+project: dcps {
+  dcps_ts_flags += --no-dcps-data-type-warnings
 }

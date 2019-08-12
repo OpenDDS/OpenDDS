@@ -1,5 +1,4 @@
-project: opendds_face {
-
+project: opendds_face, dcps_test {
   TypeSupport_Files {
     Fixed.idl
   }

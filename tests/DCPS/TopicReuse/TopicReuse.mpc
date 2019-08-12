@@ -1,4 +1,4 @@
-project(DDS*TopicReuse) : dcpsexe, dcps_cm, dcps_transports_for_test {
+project(DDS*TopicReuse) : dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test {
   exename = tpreuse
 
   Idl_Files {
