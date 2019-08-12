@@ -31,14 +31,6 @@ OpenDDS::DCPS::InstanceState::accessed()
 }
 
 ACE_INLINE
-bool
-OpenDDS::DCPS::InstanceState::most_recent_generation(ReceivedDataElement* item) const
-{
-  return item->disposed_generation_count_ == disposed_generation_count_
-         && item->no_writers_generation_count_ == no_writers_generation_count_;
-}
-
-ACE_INLINE
 DDS::InstanceStateKind
 OpenDDS::DCPS::InstanceState::instance_state() const
 {
@@ -50,6 +42,12 @@ DDS::ViewStateKind
 OpenDDS::DCPS::InstanceState::view_state() const
 {
   return view_state_;
+}
+
+ACE_INLINE
+bool OpenDDS::DCPS::InstanceState::match(DDS::ViewStateMask view, DDS::InstanceStateMask inst) const
+{
+  return (view_state_ & view) && (instance_state_ & inst);
 }
 
 ACE_INLINE
