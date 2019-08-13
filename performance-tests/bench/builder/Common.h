@@ -34,9 +34,9 @@ Bench_Builder_Export std::ostream& operator<<(std::ostream& out, const TimeStamp
 
 /**
  * This class is intended to provide constant-time access into a
- * potentially-growing sequence of properties We want the names and content of
- * the properties to be dynamic (set by the users of the builder API), but
- * for performance reasons it would be good to stay away from something with log-n
+ * potentially-growing sequence of properties. We want the names and content of
+ * the properties to be dynamic (set by the users of the builder API), but for
+ * performance reasons it would be good to stay away from something with log-n
  * access times (maps, etc)
  */
 class Bench_Builder_Export PropertyIndex {
