@@ -18,4 +18,7 @@ project {
     macros += _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING
   }
 
+  specific(vc11) {
+    macros += _VARIADIC_MAX=10
+  }
 }
