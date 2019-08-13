@@ -540,7 +540,7 @@ OpenDDS::DCPS::TcpDataLink::make_reservation(const RepoId& remote_subscription_i
                                              const RepoId& local_publication_id,
                                              const TransportSendListener_wrch& send_listener)
 {
-  const int result = OpenDDS::DCPS::DataLink::make_reservation(remote_subscription_id, local_publication_id, send_listener);
+  const int result = DataLink::make_reservation(remote_subscription_id, local_publication_id, send_listener);
   send_association_msg(local_publication_id, remote_subscription_id);
   return result;
 }
@@ -550,7 +550,7 @@ OpenDDS::DCPS::TcpDataLink::make_reservation(const RepoId& remote_publication_id
                                              const RepoId& local_subscription_id,
                                              const TransportReceiveListener_wrch& receive_listener)
 {
-  const int result = OpenDDS::DCPS::DataLink::make_reservation(remote_publication_id, local_subscription_id, receive_listener);
+  const int result = DataLink::make_reservation(remote_publication_id, local_subscription_id, receive_listener);
   send_association_msg(local_subscription_id, remote_publication_id);
   return result;
 }
