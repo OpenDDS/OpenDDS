@@ -1214,7 +1214,7 @@ if (exists $opts{'rapidjson'}) {
     else {
       die "ERROR: ${rapidjson_msg}Stopped";
     }
-    if ($opts{'verbose'} && exists $opts->{'rapidjson'}) {
+    if ($opts{'verbose'} && exists $opts{'rapidjson'}) {
       print "Using '$opts{'rapidjson'}' for RapidJSON\n";
     }
   }
