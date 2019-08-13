@@ -163,32 +163,32 @@ bool run_multitopic_test(const Publisher_var& pub, const Subscriber_var& sub)
     waitForMatch(flightplan.dw_);
     PlanInfoDataWriter_var pidw = PlanInfoDataWriter::_narrow(flightplan.dw_);
     PlanInfo sample4;
-    sample4.flight_id1 = 100;
-    sample4.flight_id2 = 99;
-    sample4.flight_name = "Flight 100-99";
-    sample4.tailno = "N12345";
+    sample4.flight_id1() = 100;
+    sample4.flight_id2() = 99;
+    sample4.flight_name() = "Flight 100-99";
+    sample4.tailno() = "N12345";
     ret = pidw->write(sample4, HANDLE_NIL);
     if (ret != RETCODE_OK) return false;
     PlanInfo sample4_1(sample4);
-    sample4_1.flight_id2 = 97;
-    sample4_1.flight_name = "Flight 100-97";
+    sample4_1.flight_id2() = 97;
+    sample4_1.flight_name() = "Flight 100-97";
     ret = pidw->write(sample4_1, HANDLE_NIL);
     if (ret != RETCODE_OK) return false;
     PlanInfo sample4_2(sample4);
-    sample4_2.flight_id2 = 96;
-    sample4_2.flight_name = "Flight 100-96";
+    sample4_2.flight_id2() = 96;
+    sample4_2.flight_name() = "Flight 100-96";
     ret = pidw->write(sample4_2, HANDLE_NIL);
     if (ret != RETCODE_OK) return false;
 
     // Write samples (More)
 
     waitForMatch(more.dw_);
-    mi.flight_id1 = 12345;
-    mi.more = "Shouldn't see this";
+    mi.flight_id1() = 12345;
+    mi.more() = "Shouldn't see this";
     ret = midw->write(mi, HANDLE_NIL);
     if (ret != RETCODE_OK) return false;
-    mi.flight_id1 = 100;
-    mi.more = "Extra info for all flights with id1 == 100";
+    mi.flight_id1() = 100;
+    mi.more() = "Extra info for all flights with id1 == 100";
     ret = midw->write(mi, HANDLE_NIL);
     if (ret != RETCODE_OK) return false;
 
@@ -198,7 +198,7 @@ bool run_multitopic_test(const Publisher_var& pub, const Subscriber_var& sub)
     UnrelatedInfoDataWriter_var uidw =
       UnrelatedInfoDataWriter::_narrow(unrelated.dw_);
     UnrelatedInfo ui;
-    ui.misc = "Misc";
+    ui.misc() = "Misc";
     ret = uidw->write(ui, HANDLE_NIL);
     if (ret != RETCODE_OK) return false;
 
@@ -219,15 +219,15 @@ bool run_multitopic_test(const Publisher_var& pub, const Subscriber_var& sub)
     ret = res_dr->take_w_condition(data, info, LENGTH_UNLIMITED, rc);
     if (ret != RETCODE_OK) return false;
     if (data.length() > 1 || !info[0].valid_data) return false;
-    std::cout << "Received: " << data[0].flight_id1 << '-' <<
-      data[0].flight_id2 << " \"" << data[0].flight_name << "\" " << data[0].x <<
-      " " << data[0].y << " " << data[0].height << " \"" << data[0].more <<
-      "\" \"" << data[0].misc << "\"" << std::endl;
-    if (data[0].flight_id1 != sample4.flight_id1 || data[0].flight_id2 !=
-        sample4.flight_id2 || strcmp(data[0].flight_name, sample4.flight_name) ||
-        data[0].x != sample3.x || data[0].y != sample3.y ||
-        data[0].height != sample3.z || strcmp(data[0].more, mi.more) ||
-        strcmp(data[0].misc, ui.misc)) {
+    std::cout << "Received: " << data[0].flight_id1() << '-' <<
+      data[0].flight_id2() << " \"" << data[0].flight_name() << "\" " << data[0].x() <<
+      " " << data[0].y() << " " << data[0].height() << " \"" << data[0].more() <<
+      "\" \"" << data[0].misc() << "\"" << std::endl;
+    if (data[0].flight_id1() != sample4.flight_id1() || data[0].flight_id2() !=
+        sample4.flight_id2() || data[0].flight_name() != sample4.flight_name() ||
+        data[0].x() != sample3.x() || data[0].y() != sample3.y() ||
+        data[0].height() != sample3.z() || data[0].more() != mi.more() ||
+        data[0].misc() != ui.misc()) {
       return false;
     }
     // Check return get_key_value

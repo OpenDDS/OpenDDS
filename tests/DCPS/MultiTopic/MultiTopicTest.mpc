@@ -1,4 +1,4 @@
-project: dcpsexe, dcps_test, dcps_tcp, content_subscription {
+project: dcpsexe, dcps_test, dcps_tcp, content_subscription, opendds_cxx11 {
   requires += multi_topic
   TypeSupport_Files {
     MultiTopicTest.idl
