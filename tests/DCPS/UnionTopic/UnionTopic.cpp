@@ -3,7 +3,6 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/WaitSet.h>
 #include <dds/DCPS/SafetyProfileStreams.h>
-#include "dds/DCPS/StaticIncludes.h"
 #ifdef ACE_AS_STATIC_LIBS
 #  include "dds/DCPS/RTPS/RtpsDiscovery.h"
 #  include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"

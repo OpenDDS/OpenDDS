@@ -1,4 +1,4 @@
-project(*idl) : dcps_test_idl_only_lib {
+project(*idl) : dcps_test {
   requires += no_opendds_safety_profile
   idlflags += -I../Sync -I$(DDS_ROOT)
   after    += Sync_Idl
@@ -9,7 +9,6 @@ project(*idl) : dcps_test_idl_only_lib {
 
   custom_only = 1
 }
-
 
 project(*SyncServer) : taoexe, portableserver, iortable, coverage_optional, dds_macros {
   requires += no_opendds_safety_profile
