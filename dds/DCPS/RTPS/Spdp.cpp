@@ -140,6 +140,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
 
   : DCPS::LocalParticipant<Sedp>(qos)
   , disco_(disco)
+  , reactor_task_(false)
   , domain_(domain)
   , guid_(guid)
   , tport_(new SpdpTransport(this, false))
@@ -174,6 +175,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
 
   : DCPS::LocalParticipant<Sedp>(qos)
   , disco_(disco)
+  , reactor_task_(false)
   , domain_(domain)
   , guid_(guid)
   , tport_(new SpdpTransport(this, true))
@@ -282,6 +284,8 @@ Spdp::~Spdp()
       }
     }
   }
+
+  reactor_task_.stop();
 
   // ensure sedp's task queue is drained before data members are being
   // deleted
@@ -1148,12 +1152,6 @@ Spdp::part_bit()
 }
 #endif /* DDS_HAS_MINIMUM_BIT */
 
-ACE_Reactor*
-Spdp::reactor() const
-{
-  return disco_->reactor();
-}
-
 WaitForAcks&
 Spdp::wait_for_acks()
 {
@@ -1384,7 +1382,7 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer, bool securityGuids)
 void
 Spdp::SpdpTransport::open()
 {
-  ACE_Reactor* reactor = outer_->reactor();
+  ACE_Reactor* reactor = outer_->reactor_task_.get_reactor();
   if (reactor->register_handler(unicast_socket_.get_handle(),
                                 this, ACE_Event_Handler::READ_MASK) != 0) {
     throw std::runtime_error("failed to register unicast input handler");
@@ -1403,6 +1401,8 @@ Spdp::SpdpTransport::open()
   if (-1 == reactor->schedule_timer(this, 0, ACE_Time_Value(0), timer_period)) {
     throw std::runtime_error("failed to schedule timer with reactor");
   }
+
+  outer_->reactor_task_.open(0);
 }
 
 Spdp::SpdpTransport::~SpdpTransport()
@@ -1478,7 +1478,7 @@ Spdp::SpdpTransport::close()
   if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) SpdpTransport::close\n")));
   }
-  ACE_Reactor* reactor = outer_->reactor();
+  ACE_Reactor* reactor = outer_->reactor_task_.get_reactor();
   reactor->cancel_timer(this);
   const ACE_Reactor_Mask mask =
     ACE_Event_Handler::READ_MASK | ACE_Event_Handler::DONT_CALL;
@@ -1688,7 +1688,7 @@ Spdp::SpdpTransport::handle_exception(ACE_HANDLE)
 void
 Spdp::SpdpTransport::acknowledge()
 {
-  ACE_Reactor* reactor = outer_->reactor();
+  ACE_Reactor* reactor = outer_->reactor_task_.get_reactor();
   reactor->notify(this);
 }
 

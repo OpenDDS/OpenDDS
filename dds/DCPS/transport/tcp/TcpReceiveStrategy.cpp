@@ -22,7 +22,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 OpenDDS::DCPS::TcpReceiveStrategy::TcpReceiveStrategy(
   TcpDataLink& link,
-  const TransportReactorTask_rch& task)
+  const ReactorTask_rch& task)
   : link_(link)
   , reactor_task_(task)
 {
