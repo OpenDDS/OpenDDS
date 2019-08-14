@@ -1472,7 +1472,16 @@ Sedp::inconsistent_topic(const DCPS::RepoIdSet& eps) const
 DDS::ReturnCode_t
 Sedp::remove_publication_i(const RepoId& publicationId)
 {
+#ifdef OPENDDS_SECURITY
+  const LocalPublicationIter iter = local_publications_.find(publicationId);
+  if (is_security_enabled() && iter->second.security_attribs_.base.is_discovery_protected) {
+    return publications_secure_writer_.write_unregister_dispose(publicationId);
+  } else {
+    return publications_writer_.write_unregister_dispose(publicationId);
+  }
+#else
   return publications_writer_.write_unregister_dispose(publicationId);
+#endif
 }
 
 bool
@@ -1505,7 +1514,16 @@ Sedp::update_publication_qos(const RepoId& publicationId,
 DDS::ReturnCode_t
 Sedp::remove_subscription_i(const RepoId& subscriptionId)
 {
+#ifdef OPENDDS_SECURITY
+  const LocalSubscriptionIter iter = local_subscriptions_.find(subscriptionId);
+  if (is_security_enabled() && iter->second.security_attribs_.base.is_discovery_protected) {
+    return subscriptions_secure_writer_.write_unregister_dispose(subscriptionId);
+  } else {
+    return subscriptions_writer_.write_unregister_dispose(subscriptionId);
+  }
+#else
   return subscriptions_writer_.write_unregister_dispose(subscriptionId);
+#endif
 }
 
 bool
