@@ -101,6 +101,8 @@ ShmemTransport::stop_accepting_or_connecting(const TransportClient_wrch&, const 
 bool
 ShmemTransport::configure_i(ShmemInst& config)
 {
+  create_reactor_task();
+
 #ifdef OPENDDS_SHMEM_UNSUPPORTED
   ACE_UNUSED_ARG(config);
   ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
