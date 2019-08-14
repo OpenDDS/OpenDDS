@@ -2163,7 +2163,6 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
 
   if (!ri->second.handshake_done_) {
     ri->second.handshake_done_ = true;
-    link->invoke_on_start_callbacks(true);
     first_ack = true;
   }
 
