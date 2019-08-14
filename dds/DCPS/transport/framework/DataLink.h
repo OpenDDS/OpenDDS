@@ -259,6 +259,7 @@ public:
   void remove_on_start_callback(const TransportClient_wrch& client, const RepoId& remote);
   void invoke_on_start_callbacks(bool success);
   void invoke_on_start_callbacks(const RepoId& local, const RepoId& remote, bool success);
+  void remove_startup_callbacks(const RepoId& local, const RepoId& remote);
 
   class Interceptor : public ReactorInterceptor {
   public:

@@ -138,6 +138,33 @@ DataLink::add_on_start_callback(const TransportClient_wrch& client, const RepoId
 }
 
 void
+DataLink::remove_startup_callbacks(const RepoId& local, const RepoId& remote)
+{
+  GuardType guard(strategy_lock_);
+
+  OnStartCallbackMap::iterator oit = on_start_callbacks_.find(remote);
+  if (oit != on_start_callbacks_.end()) {
+    RepoToClientMap::iterator oit2 = oit->second.find(local);
+    if (oit2 != oit->second.end()) {
+      oit->second.erase(oit2);
+      if (oit->second.empty()) {
+        on_start_callbacks_.erase(oit);
+      }
+    }
+  }
+  PendingOnStartsMap::iterator pit = pending_on_starts_.find(remote);
+  if (pit != pending_on_starts_.end()) {
+    RepoIdSet::iterator pit2 = pit->second.find(local);
+    if (pit2 != pit->second.end()) {
+      pit->second.erase(pit2);
+      if (pit->second.empty()) {
+        pending_on_starts_.erase(pit);
+      }
+    }
+  }
+}
+
+void
 DataLink::remove_on_start_callback(const TransportClient_wrch& client, const RepoId& remote)
 {
   GuardType guard(strategy_lock_);
@@ -369,7 +396,7 @@ DataLink::make_reservation(const RepoId& remote_subscription_id,
       rls = make_rch<ReceiveListenerSet>();
     rls->insert(local_publication_id, TransportReceiveListener_rch());
 
-    send_listeners_.insert(std::make_pair(local_publication_id,send_listener));
+    send_listeners_.insert(std::make_pair(local_publication_id, send_listener));
   }
   return 0;
 }
@@ -461,6 +488,8 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
                OPENDDS_STRING(local).c_str(),
                OPENDDS_STRING(remote).c_str()));
   }
+
+  remove_startup_callbacks(local_id, remote_id);
 
   //let the specific class release its reservations
   //done this way to prevent deadlock of holding pub_sub_maps_lock_
