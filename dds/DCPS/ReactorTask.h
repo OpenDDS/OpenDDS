@@ -68,6 +68,7 @@ private:
   ACE_Reactor*  reactor_;
   ACE_thread_t  reactor_owner_;
   ACE_Proactor* proactor_;
+  bool          use_async_send_;
 };
 
 } // namespace DCPS

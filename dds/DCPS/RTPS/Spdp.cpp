@@ -1382,6 +1382,8 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer, bool securityGuids)
 void
 Spdp::SpdpTransport::open()
 {
+  outer_->reactor_task_.open(0);
+
   ACE_Reactor* reactor = outer_->reactor_task_.get_reactor();
   if (reactor->register_handler(unicast_socket_.get_handle(),
                                 this, ACE_Event_Handler::READ_MASK) != 0) {
@@ -1401,8 +1403,6 @@ Spdp::SpdpTransport::open()
   if (-1 == reactor->schedule_timer(this, 0, ACE_Time_Value(0), timer_period)) {
     throw std::runtime_error("failed to schedule timer with reactor");
   }
-
-  outer_->reactor_task_.open(0);
 }
 
 Spdp::SpdpTransport::~SpdpTransport()
