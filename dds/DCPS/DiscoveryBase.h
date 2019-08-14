@@ -579,23 +579,34 @@ namespace OpenDDS {
 
     protected:
       struct LocalEndpoint {
-        LocalEndpoint() : topic_id_(DCPS::GUID_UNKNOWN), sequence_(DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {}
+        LocalEndpoint() : topic_id_(DCPS::GUID_UNKNOWN), sequence_(DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN())
+#ifdef OPENDDS_SECURITY
+        {
+          security_attribs_.base.is_read_protected = false;
+          security_attribs_.base.is_write_protected = false;
+          security_attribs_.base.is_discovery_protected = false;
+          security_attribs_.base.is_liveliness_protected = false;
+          security_attribs_.is_submessage_protected = false;
+          security_attribs_.is_payload_protected = false;
+          security_attribs_.is_key_protected = false;
+          security_attribs_.plugin_endpoint_attributes = 0;
+        }
+#else
+        {}
+#endif
+
         DCPS::RepoId topic_id_;
         DCPS::TransportLocatorSeq trans_info_;
         RepoIdSet matched_endpoints_;
         DCPS::SequenceNumber sequence_;
         RepoIdSet remote_opendds_associations_;
+        DDS::Security::EndpointSecurityAttributes security_attribs_;
       };
 
       struct LocalPublication : LocalEndpoint {
         DCPS::DataWriterCallbacks* publication_;
         DDS::DataWriterQos qos_;
         DDS::PublisherQos publisher_qos_;
-
-#ifdef OPENDDS_SECURITY
-        DDS::Security::EndpointSecurityAttributes security_attribs_;
-#endif
-
       };
 
       struct LocalSubscription : LocalEndpoint {
@@ -603,11 +614,6 @@ namespace OpenDDS {
         DDS::DataReaderQos qos_;
         DDS::SubscriberQos subscriber_qos_;
         OpenDDS::DCPS::ContentFilterProperty_t filterProperties;
-
-#ifdef OPENDDS_SECURITY
-        DDS::Security::EndpointSecurityAttributes security_attribs_;
-#endif
-
       };
 
       typedef OPENDDS_MAP_CMP(DDS::BuiltinTopicKey_t, DCPS::RepoId,
