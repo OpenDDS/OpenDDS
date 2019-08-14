@@ -1,5 +1,5 @@
 
-project(DDS*Publisher): dcpsexe, dcps_transports_for_test {
+project(DDS*Publisher): dcpsexe, dcps_test, dcps_transports_for_test {
   exename   = publisher
   libpaths += ../LargeSample
   after    += DDS_LargeSample_Idl
@@ -14,7 +14,7 @@ project(DDS*Publisher): dcpsexe, dcps_transports_for_test {
   }
 }
 
-project(DDS*Subscriber): dcpsexe, dcps_transports_for_test {
+project(DDS*Subscriber): dcpsexe, dcps_test, dcps_transports_for_test {
   exename   = subscriber
   libpaths += ../LargeSample
   after    += DDS_LargeSample_Idl

@@ -1,14 +1,10 @@
-project(ExcelRTD): taolib, dcpslib, dcps_inforepodiscovery, dcps_tcp, dcps_monitor, qt5_widgets {
+project(ExcelRTD): taolib, dcpslib, dcps_inforepodiscovery, dcps_tcp, dcps_monitor, qt5_widgets, msvc_bigobj {
   requires += microsoft
   requires += built_in_topics
   includes += $(DDS_ROOT)/tools/monitor
 
   macros += _USRDLL RTDServer_EXPORTS
   macros += RTD_DLL_NAME=<%quote%>$(TargetFileName)<%quote%>
-
-  specific(prop:microsoft) {
-    compile_flags += /bigobj
-  }
 
   specific(nmake) {
     // This project doesn't build with -type nmake because the generated
@@ -18,8 +14,8 @@ project(ExcelRTD): taolib, dcpslib, dcps_inforepodiscovery, dcps_tcp, dcps_monit
   }
 
   sharedname = OpenDDS_ExcelRTD
-  dllout  = $(DDS_ROOT)/lib
-  libs  += OpenDDS_monitor
+  dllout = $(DDS_ROOT)/lib
+  libs += OpenDDS_monitor
 
   MOC_Files {
     gendir = .

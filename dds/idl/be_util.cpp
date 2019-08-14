@@ -21,7 +21,7 @@
 
 // Prepare an argument for a BE
 void
-be_util::prep_be_arg (char *arg)
+be_util::prep_be_arg(char* arg)
 {
   static const char WB_EXPORT_MACRO[] = "export_macro=";
   static const size_t SZ_WB_EXPORT_MACRO = sizeof(WB_EXPORT_MACRO) - 1;
@@ -90,15 +90,15 @@ be_util::prep_be_arg (char *arg)
 }
 
 void
-be_util::arg_post_proc (void)
+be_util::arg_post_proc()
 {
 }
 
 void
-be_util::usage (void)
+be_util::usage()
 {
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT(" --default-nested\ttreat unannotated types as if they were nested\n")
+    ACE_TEXT(" --[no-]default-nested\ttreat unannotated types as if they were nested\n")
     ACE_TEXT(" -o <dir>\t\tsets output directory for all files\n")
     ACE_TEXT(" -Lface\t\t\tgenerate FACE IDL to C++ mapping\n")
     ACE_TEXT(" -Lspcpp\t\tgenerate Safety Profile IDL to C++ mapping\n")
@@ -137,13 +137,24 @@ be_util::usage (void)
     ACE_TEXT(" -Wb,tao_include_prefix=<path>\t\tPrefix for including the TAO-")
     ACE_TEXT("generated header file.\n")
     ACE_TEXT(" -Wb,ts_cpp_include=<include>\t\tadd <include> to *TypeSupportImpl.cpp\n")
-  ));
+    ));
 }
 
-AST_Generator *
-be_util::generator_init (void)
+AST_Generator*
+be_util::generator_init()
 {
   AST_Generator* gen = 0;
   ACE_NEW_RETURN(gen, AST_Generator, 0);
   return gen;
+}
+
+const std::string&
+be_util::dds_root()
+{
+  static std::string value = ACE_OS::getenv("DDS_ROOT");
+  if (value.empty()) {
+    ACE_ERROR((LM_ERROR, "Error - The environment variable DDS_ROOT must be set.\n"));
+    BE_abort();
+  }
+  return value;
 }

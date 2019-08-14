@@ -124,11 +124,7 @@ RtpsUdpTransport::connect_datalink(const RemoteTransport& remote,
     return AcceptConnectResult(link);
   }
 
-  if (!link->add_on_start_callback(client, remote.repo_id_)) {
-     // link was started by the reactor thread before we could add a callback
-     VDBG_LVL((LM_DEBUG, "(%P|%t) RtpsUdpTransport::connect_datalink got link.\n"), 2);
-     return AcceptConnectResult(link);
-  }
+  link->add_on_start_callback(client, remote.repo_id_);
 
   GuardType guard(connections_lock_);
   add_pending_connection(client, link);

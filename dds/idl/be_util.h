@@ -16,30 +16,28 @@
 #ifndef OPENDDS_IDL_BE_UTIL_H
 #define OPENDDS_IDL_BE_UTIL_H
 
+#include <string>
+
 class TAO_OutStream;
-class be_module;
 class AST_Decl;
 class AST_Generator;
 
-class be_util
-{
-public:
+namespace be_util {
+
   /// Special BE arg call factored out of DRV_args.
-  static void
-  prep_be_arg (char *s);
+  void prep_be_arg(char* s);
 
   /// Checks made after parsing args.
-  static void
-  arg_post_proc (void);
+  void arg_post_proc();
 
   /// Display usage of BE-specific options.
-  static void
-  usage (void);
+  void usage();
 
   /// Create an AST node generator.
-  static AST_Generator *
-  generator_init (void);
+  AST_Generator* generator_init();
+
+  /// Get DDS_ROOT. It is a fatal error if it wasn't set.
+  const std::string& dds_root();
 };
 
 #endif // if !defined
-

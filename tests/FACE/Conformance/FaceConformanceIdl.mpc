@@ -1,4 +1,4 @@
-project: opendds_face {
+project: opendds_face, dcps_test_idl_only_lib {
   idlflags      += -Wb,export_include=SampleModel_Export.h \
                    -Wb,export_macro=SampleModel_Export
   dcps_ts_flags += -Wb,export_include=SampleModel_Export.h \
@@ -7,9 +7,5 @@ project: opendds_face {
 
   TypeSupport_Files {
     SampleModel.idl
-  }
-
-  IDL_Files {
-    SampleModelTypeSupport.idl
   }
 }

@@ -20,6 +20,13 @@ project(OpenDDS_Security): dcpslib, dcps_rtps, dds_openssl, ace_xml_utils, insta
     AccessControl
   }
 
+  Header_Files {
+    .
+    SSL
+    Authentication
+    AccessControl
+  }
+
   specific {
     install_dir = dds/DCPS/security
   }

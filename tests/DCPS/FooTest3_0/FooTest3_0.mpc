@@ -1,4 +1,4 @@
-project(*Publisher): dcpsexe, dcps_transports_for_test {
+project(*Publisher): dcpsexe, dcps_test, dcps_transports_for_test {
   exename = FooTest3_publisher
   after       += DcpsFooType3
   libs     +=  DcpsFooType3
@@ -13,7 +13,7 @@ project(*Publisher): dcpsexe, dcps_transports_for_test {
   }
 }
 
-project(*Subscriber): dcpsexe, dcps_transports_for_test {
+project(*Subscriber): dcpsexe, dcps_test, dcps_transports_for_test {
   exename = FooTest3_subscriber
   after       += DcpsFooType4 *Publisher
   libs     += DcpsFooType3

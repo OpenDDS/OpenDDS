@@ -7,21 +7,16 @@
 
 module RtpsRelay {
 
-#pragma DCPS_DATA_TYPE "RtpsRelay::GroupEntry"
-#pragma DCPS_DATA_KEY  "RtpsRelay::GroupEntry guid"
-#pragma DCPS_DATA_KEY  "RtpsRelay::GroupEntry group"
-
+  @topic
   struct GroupEntry {
-    string guid;
-    string group;
+    @key string guid;
+    @key string group;
     unsigned long expiration_timestamp;
   };
 
-#pragma DCPS_DATA_TYPE "RtpsRelay::RoutingEntry"
-#pragma DCPS_DATA_KEY  "RtpsRelay::RoutingEntry guid"
-
+  @topic
   struct RoutingEntry {
-    string guid;
+    @key string guid;
     string address;
     string horizontal_relay_address;
     unsigned long expiration_timestamp;

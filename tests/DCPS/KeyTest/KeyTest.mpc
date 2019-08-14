@@ -1,13 +1,8 @@
-
-project(DDS*idl): dcps_test_lib {
+project(DDS*idl): dcps_test_idl_only_lib, msvc_bigobj {
   idlflags      += -Wb,export_include=KeyTest_export.h \
                    -Wb,export_macro=KeyTest_Export -SS
   dcps_ts_flags += -Wb,export_macro=KeyTest_Export
   dynamicflags  += KEYTEST_BUILD_DLL
-
-  specific (vc9, vc10, vc11, vc12, vc14, vs2017, vs2019, nmake) {
-    compile_flags += /bigobj
-  }
 
   TypeSupport_Files {
     KeyTest.idl
@@ -25,7 +20,7 @@ project(DDS*idl): dcps_test_lib {
 }
 
 
-project(DDS*IsBounded) : dcpsexe, dcps_transports_for_test, dcps_rtps {
+project(DDS*IsBounded) : dcpsexe, dcps_test, dcps_transports_for_test, dcps_rtps {
 
   exename   = IsBounded
   after    += DDS*idl
@@ -40,7 +35,7 @@ project(DDS*IsBounded) : dcpsexe, dcps_transports_for_test, dcps_rtps {
 }
 
 
-project(DDS*KeyMarshalling) : dcpsexe, dcps_transports_for_test, dcps_rtps {
+project(DDS*KeyMarshalling) : dcpsexe, dcps_test, dcps_transports_for_test, dcps_rtps {
 
   exename   = KeyMarshalling
   after    += DDS*idl
@@ -55,7 +50,7 @@ project(DDS*KeyMarshalling) : dcpsexe, dcps_transports_for_test, dcps_rtps {
 }
 
 
-project(*MD5): dcps_rtpsexe {
+project(*MD5): dcps_rtpsexe, dcps_test {
   exename   = *
 
   Idl_Files {

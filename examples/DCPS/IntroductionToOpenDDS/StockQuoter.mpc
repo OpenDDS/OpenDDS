@@ -1,8 +1,6 @@
-
-project(*Common) : dcps {
+project(*Common) : dcps_idl_only_lib {
   sharedname     = StockQuoterCommon
   dynamicflags   = STOCKQUOTERCOMMON_BUILD_DLL
-  libout         = .
   requires += tao_orbsvcs
   requires += no_opendds_safety_profile
   after    += Svc_Utils
@@ -19,14 +17,6 @@ project(*Common) : dcps {
   IDL_Files {
     StockQuoterTypeSupport.idl
     StockQuoter.idl
-  }
-
-  // We only want the generated files
-  Header_Files {
-  }
-
-  // We only want the generated files
-  Source_Files {
   }
 }
 

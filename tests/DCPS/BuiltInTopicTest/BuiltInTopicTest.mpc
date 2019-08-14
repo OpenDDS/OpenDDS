@@ -1,4 +1,4 @@
-project(DDS*Publisher) : dcpsexe, dcps_cm, dcps_transports_for_test {
+project(DDS*Publisher) : dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test {
   exename = publisher
   requires += built_in_topics
 
@@ -11,7 +11,7 @@ project(DDS*Publisher) : dcpsexe, dcps_cm, dcps_transports_for_test {
   }
 }
 
-project(DDS*Subscriber) : dcpsexe, dcps_cm, dcps_transports_for_test {
+project(DDS*Subscriber) : dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test {
   exename = subscriber
   requires += built_in_topics
 
@@ -25,7 +25,7 @@ project(DDS*Subscriber) : dcpsexe, dcps_cm, dcps_transports_for_test {
 }
 
 
-project(DDS*Monitor) : dcpsexe, dcps_cm, dcps_transports_for_test {
+project(DDS*Monitor) : dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test {
   exename   = monitor
   requires += built_in_topics
 

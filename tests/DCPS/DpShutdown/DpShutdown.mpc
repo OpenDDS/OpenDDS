@@ -1,4 +1,4 @@
-project(DDS*) : dcpsexe, dcps_cm, dcps_transports_for_test {
+project(DDS*) : dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test {
   exename = dpshutdown
 
   Idl_Files {

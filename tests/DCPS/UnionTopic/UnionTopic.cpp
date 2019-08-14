@@ -3,6 +3,10 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/WaitSet.h>
 #include <dds/DCPS/SafetyProfileStreams.h>
+#ifdef ACE_AS_STATIC_LIBS
+#  include "dds/DCPS/RTPS/RtpsDiscovery.h"
+#  include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
+#endif
 
 using OpenDDS::DCPS::retcode_to_string;
 
@@ -283,7 +287,7 @@ basic_test(DDS::DomainParticipant_var& participant, DDS::Topic_var& topic)
   }
   size_t count = 0;
   bool got_dispose = false;
-  for (size_t i = 0; i < newsSeq.length(); i++) {
+  for (CORBA::ULong i = 0; i < newsSeq.length(); i++) {
     const CORBA::ULong disc = newsSeq[i]._d();
     if (disc != ELECTION_STATUS) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l basic_test() ERROR: ")
@@ -354,7 +358,7 @@ basic_test(DDS::DomainParticipant_var& participant, DDS::Topic_var& topic)
     ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l basic_test() ERROR: ")
       ACE_TEXT("Invalid valid_data values\n")), false);
   }
-  for (size_t i = 0; i < 2; i++) {
+  for (CORBA::ULong i = 0; i < 2; i++) {
     const CORBA::ULong disc = newsSeq[i]._d();
     if (disc != ELECTION_RESULT) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l basic_test() ERROR: ")

@@ -479,6 +479,7 @@ runTest(const Values& expected, const ArrayValues& expectedArray,
 
 bool runAlignmentTest();
 bool runAlignmentResetTest();
+bool runAlignmentOverrunTest();
 
 int
 ACE_TMAIN(int, ACE_TCHAR*[])
@@ -568,7 +569,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   runTest(expected, expectedArray, true /*swap*/, align);
   runTest(expected, expectedArray, false /*swap*/, align);
 
-  if (!runAlignmentTest() || !runAlignmentResetTest()) {
+  if (!runAlignmentTest() || !runAlignmentResetTest() || !runAlignmentOverrunTest()) {
     failed = true;
   }
 

@@ -7,6 +7,26 @@ targets (see comments [here](../cmake/OpenDDSConfig.cmake)), and by providing th
 [`OPENDDS_TARGET_SOURCES`](#adding-idl-sources-with-opendds_target_sources) macro
 which simplifies IDL compilation.
 
+**Table of Contents:**
+
+* [Requirements](#requirements)
+* [CMake Messenger Examples](#cmake-messenger-examples)
+* [Configure-Generated Variables](#configure-generated-variables)
+* [Using the OpenDDS CMake Package](#using-the-opendds-cmake-package)
+  * [Cache Variables/Options Understood by OpenDDS](#cache-variablesoptions-understood-by-opendds)
+  * [Example Using OpenDDS Source Tree](#example-using-opendds-source-tree)
+    * [Unix](#unix)
+    * [Windows](#windows)
+  * [Example Using Installed OpenDDS (Unix only)](#example-using-installed-opendds-unix-only)
+* [Adding IDL Sources with `OPENDDS_TARGET_SOURCES`](#adding-idl-sources-with-opendds_target_sources)
+  * [Usage Summary](#usage-summary)
+  * [Example](#example)
+* [Advanced Usage](#advanced-usage)
+  * [Manually Creating config.cmake](#manually-creating-configcmake)
+    * [Optional OpenDDS Features](#optional-opendds-features)
+    * [Build-Related Options](#build-related-options)
+  * [`OPENDDS_DEFAULT_NESTED`](#opendds_default_nested)
+
 ## Requirements
 
 In order to use the Config module, CMake version 3.3.2 or greater is required.
@@ -65,10 +85,10 @@ control the behavior of the OpenDDS CMake package.
 
 ### Cache Variables/Options Understood by OpenDDS
 
-| Cache Variable              | Description                                                | Default |
-| --------------------------- | ---------------------------------------------------------- | ------- |
-| `OPENDDS_CMAKE_VERBOSE`     | Print detailed status information at CMake-Generation time | `OFF`   |
-| `OPENDDS_DEFAULT_NESTED`    | Require topic types to be declared explicitly.             | `ON`    |
+| Cache Variable              | Description                                                         | Default |
+| --------------------------- | ------------------------------------------------------------------- | ------- |
+| `OPENDDS_CMAKE_VERBOSE`     | Print detailed status information at CMake-Generation time          | `OFF`   |
+| `OPENDDS_DEFAULT_NESTED`    | [Topic types must be declared explicitly.](#opendds_default_nested) | `ON`    |
 
 ### Example Using OpenDDS Source Tree
 
@@ -154,7 +174,7 @@ OPENDDS_TARGET_SOURCES(target
   [<INTERFACE|PUBLIC|PRIVATE> items...]
   [TAO_IDL_OPTIONS options...]
   [OPENDDS_IDL_OPTIONS options...]
-  [DEFAULT_NESTED ON|OFF])
+)
 ```
 
 ### Example
@@ -193,17 +213,6 @@ target_link_libraries(publisher messenger OpenDDS::OpenDDS)
 
 *Note:* This may issue a warning in earlier version of CMake due to the messenger library
 not having any sources added with it in the call to `add_library`.
-
-### `DEFAULT_NESTED`
-
-`DEFAULT_NESTED` overrides the global default, `OPENDDS_DEFAULT_NESTED`, which
-is `ON` by default. If this value is `ON`, then topic types for a given project
-must be declared using annotations. If it's `OFF`, then every valid type is
-assumed to be needed for use as a topic type by default, which might
-add code to the IDL type support libraries that will never be used.
-
-See section 2.1.1, "Defining the Data Types", of the OpenDDS Developer's Guide
-for more information.
 
 ## Advanced Usage
 
@@ -264,3 +273,27 @@ The following values impact the build in one way or another.
 [Messenger with direct IDL inclusion]: ../tests/cmake_integration/Messenger/Messenger_1/CMakeLists.txt
 [Messenger with auxiliary IDL library]: ../tests/cmake_integration/Messenger/Messenger_2/CMakeLists.txt
 [OpenDDS Dev Guide]: http://opendds.org/documents/
+
+### `OPENDDS_DEFAULT_NESTED`
+
+When parsing IDL, OpenDDS will determine if it should be prepared for a
+`struct` or `union` to be used in a topic if its "nested" value is false. See
+the OpenDDS Developer's Guide for more information.
+
+`OPENDDS_DEFAULT_NESTED` sets the global default for what the "nested" property
+is. If this value is `ON`, then topic types for a given project must be
+declared using annotations. If it's `OFF`, then every valid type is assumed to
+be needed for use as a topic type by default, which might add code to the IDL
+type support libraries that will never be used.
+
+This default can also be controlled on a finer level when calling
+`OPENDDS_TARGET_SOURCES` by passing `--default-nested` or `--no-default-nested`
+to `OPENDDS_IDL_OPTIONS`. For example:
+
+```cmake
+add_library(messenger)
+OPENDDS_TARGET_SOURCES(messenger
+  Messenger.idl
+  OPENDDS_IDL_OPTIONS --no-default-nested
+)
+```

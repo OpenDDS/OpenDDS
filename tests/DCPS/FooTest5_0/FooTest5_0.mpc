@@ -1,4 +1,4 @@
-project(DcpsFooTest5_0): dcpsexe {
+project(DcpsFooTest5_0): dcpsexe, dcps_test {
   exename   = main
   libpaths += ../FooType4
   libs     +=  DcpsFooType4

@@ -1,6 +1,6 @@
-project : dcpsexe {
+project : dcpsexe, dcps_test, test_root {
   after    += ConsolidatedMessengerIdl
   libs     += ConsolidatedMessengerIdl
-  libpaths += $(DDS_ROOT)/tests/DCPS/ConsolidatedMessengerIdl
-  includes += $(DDS_ROOT)/tests/DCPS/ConsolidatedMessengerIdl
+  libpaths += $(TEST_ROOT)/tests/DCPS/ConsolidatedMessengerIdl
+  includes += $(TEST_ROOT)/tests/DCPS/ConsolidatedMessengerIdl
 }

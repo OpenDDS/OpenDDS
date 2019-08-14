@@ -9,10 +9,6 @@ project(*idl): opendds_face {
     FaceMessage.idl
   }
 
-  IDL_Files {
-    FaceMessageTypeSupport.idl
-  }
-
   Source_Files {
   }
 }
