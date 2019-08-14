@@ -1,4 +1,4 @@
-#include "json_2_builder.h"
+#include "json_utils.h"
 
 #include "dds/DCPS/DCPS_Utils.h"
 
@@ -8,6 +8,8 @@
 
 #include "rapidjson/document.h"
 #include "rapidjson/istreamwrapper.h"
+#include "rapidjson/ostreamwrapper.h"
+#include "rapidjson/writer.h"
 #pragma GCC diagnostic pop
 
 // QosProfile
@@ -191,9 +193,9 @@ const QosProfile& QosLibrary::get_profile(const std::string& name) const {
   }
 }
 
-// json_2_builder
+// json_2_config
 
-bool json_2_builder(std::istream& is, Bench::WorkerConfig& config) {
+bool json_2_config(std::istream& is, Bench::WorkerConfig& config) {
   rapidjson::Document document;
   rapidjson::IStreamWrapper isw(is);
   document.ParseStream(isw);
@@ -204,6 +206,17 @@ bool json_2_builder(std::istream& is, Bench::WorkerConfig& config) {
 
   OpenDDS::DCPS::copyFromRapidJson(document, config);
 
+  return true;
+}
+
+bool report_2_json(const Bench::WorkerReport& report, std::ostream& os) {
+  rapidjson::Document document;
+  document.SetObject();
+  OpenDDS::DCPS::copyToRapidJson(report, document, document.GetAllocator());
+  rapidjson::OStreamWrapper osw(os);
+  rapidjson::Writer<rapidjson::OStreamWrapper> writer(osw);
+  document.Accept(writer);
+  osw.Flush();
   return true;
 }
 

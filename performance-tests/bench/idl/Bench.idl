@@ -65,6 +65,8 @@ module Bench {
     Builder::TimeStamp stop_time;
     Builder::TimeStamp destruction_time;
 
+    Builder::ProcessReport process_report;
+
     // Discovery Stats
     unsigned long undermatched_readers;
     unsigned long undermatched_writers;

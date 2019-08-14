@@ -17,7 +17,7 @@
 #include "ParticipantListener.h"
 #include "Process.h"
 
-#include "json_2_builder.h"
+#include "json_utils.h"
 
 #include "ActionManager.h"
 #include "ForwardAction.h"
@@ -115,17 +115,18 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
       return 2;
     }
     Log::stream = &log_file;
+  } else {
+    Log::stream = &std::cout;
   }
 
-  std::ofstream report_file_i;
+  std::ofstream report_file;
   if (!report_file_path.empty()) {
-    report_file_i.open(report_file_path);
-    if (!report_file_i.good()) {
+    report_file.open(report_file_path);
+    if (!report_file.good()) {
       std::cerr << "Unable to open report file: '" << report_file_path << "'" << std::endl;
       return 2;
     }
   }
-  std::ostream& report_file = report_file_path.empty() ? std::cout : report_file_i;
 
   using Builder::ZERO;
 
@@ -135,7 +136,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   config.start_time = ZERO;
   config.stop_time = ZERO;
 
-  if (!json_2_builder(config_file, config)) {
+  if (!json_2_config(config_file, config)) {
     std::cerr << "Unable to parse configuration" << std::endl;
     return 3;
   }
@@ -194,7 +195,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   Builder::TimeStamp process_stop_begin_time = ZERO, process_stop_end_time = ZERO;
   Builder::TimeStamp process_destruction_begin_time = ZERO, process_destruction_end_time = ZERO;
 
-  Builder::ProcessReport process_report;
+  Bench::WorkerReport worker_report;
+  Builder::ProcessReport& process_report = worker_report.process_report;
 
   const size_t THREAD_POOL_SIZE = 4;
   std::vector<std::shared_ptr<std::thread> > thread_pool;
@@ -327,7 +329,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   Log::log() << "Process destruction / entity deletion complete." << std::endl << std::endl;
 
   // Some preliminary measurements and reporting (eventually will shift to another process?)
-  Bench::WorkerReport worker_report;
   worker_report.construction_time = process_construction_end_time - process_construction_begin_time;
   worker_report.enable_time = process_enable_end_time - process_enable_begin_time;
   worker_report.start_time = process_start_end_time - process_start_begin_time;
@@ -601,88 +602,100 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     }
   }
 
-  worker_report.latency_stdev =
-    std::sqrt(worker_report.latency_var_x_sample_count / static_cast<double>(worker_report.latency_sample_count));
+  if (worker_report.latency_sample_count) {
+    worker_report.latency_stdev =
+      std::sqrt(worker_report.latency_var_x_sample_count / static_cast<double>(worker_report.latency_sample_count));
+  }
   worker_report.latency_weighted_median = weighted_median(latency_medians, latency_median_counts, 0.0);
 
-  worker_report.jitter_stdev =
-    std::sqrt(worker_report.jitter_var_x_sample_count / static_cast<double>(worker_report.jitter_sample_count));
+  if (worker_report.jitter_sample_count) {
+    worker_report.jitter_stdev =
+      std::sqrt(worker_report.jitter_var_x_sample_count / static_cast<double>(worker_report.jitter_sample_count));
+  }
   worker_report.jitter_weighted_median = weighted_median(jitter_medians, jitter_median_counts, 0.0);
 
-  worker_report.round_trip_latency_stdev =
-    std::sqrt(worker_report.round_trip_latency_var_x_sample_count /
-      static_cast<double>(worker_report.round_trip_latency_sample_count));
+  if (worker_report.round_trip_latency_sample_count) {
+    worker_report.round_trip_latency_stdev =
+      std::sqrt(worker_report.round_trip_latency_var_x_sample_count /
+        static_cast<double>(worker_report.round_trip_latency_sample_count));
+  }
   worker_report.round_trip_latency_weighted_median =
     weighted_median(round_trip_latency_medians, round_trip_latency_median_counts, 0.0);
 
-  worker_report.round_trip_jitter_stdev =
-    std::sqrt(worker_report.round_trip_jitter_var_x_sample_count /
-      static_cast<double>(worker_report.round_trip_jitter_sample_count));
+  if (worker_report.round_trip_jitter_sample_count) {
+    worker_report.round_trip_jitter_stdev =
+      std::sqrt(worker_report.round_trip_jitter_var_x_sample_count /
+        static_cast<double>(worker_report.round_trip_jitter_sample_count));
+  }
   worker_report.round_trip_jitter_weighted_median =
     weighted_median(round_trip_jitter_medians, round_trip_jitter_median_counts, 0.0);
 
-  report_file << std::endl << "--- Process Statistics ---" << std::endl << std::endl;
+  if (!report_file_path.empty()) {
+    report_2_json(worker_report, report_file);
+  }
 
-  report_file << "construction time: " << process_construction_end_time - process_construction_begin_time << std::endl;
-  report_file << "enable time: " << process_enable_end_time - process_enable_begin_time << std::endl;
-  report_file << "start time: " << process_start_end_time - process_start_begin_time << std::endl;
-  report_file << "stop time: " << process_stop_end_time - process_stop_begin_time << std::endl;
-  report_file << "destruction time: " << process_destruction_end_time - process_destruction_begin_time << std::endl;
+  Log::log() << std::endl << "--- Process Statistics ---" << std::endl << std::endl;
 
-  report_file << std::endl << "--- Discovery Statistics ---" << std::endl << std::endl;
+  Log::log() << "construction time: " << worker_report.construction_time << std::endl;
+  Log::log() << "enable time: " << worker_report.enable_time << std::endl;
+  Log::log() << "start time: " << worker_report.start_time << std::endl;
+  Log::log() << "stop time: " << worker_report.stop_time << std::endl;
+  Log::log() << "destruction time: " << worker_report.destruction_time << std::endl;
 
-  report_file << "undermatched readers: " << worker_report.undermatched_readers << std::endl;
-  report_file << "undermatched writers: " << worker_report.undermatched_writers << std::endl << std::endl;
-  report_file << "max discovery time delta: " << worker_report.max_discovery_time_delta << std::endl;
+  Log::log() << std::endl << "--- Discovery Statistics ---" << std::endl << std::endl;
+
+  Log::log() << "undermatched readers: " << worker_report.undermatched_readers << std::endl;
+  Log::log() << "undermatched writers: " << worker_report.undermatched_writers << std::endl << std::endl;
+  Log::log() << "max discovery time delta: " << worker_report.max_discovery_time_delta << std::endl;
 
   if (worker_report.latency_sample_count > 0) {
-    report_file << std::endl << "--- Latency Statistics ---" << std::endl << std::endl;
+    Log::log() << std::endl << "--- Latency Statistics ---" << std::endl << std::endl;
 
-    report_file << "total (latency) sample count: " << worker_report.latency_sample_count << std::endl;
-    report_file << "minimum latency: " << std::fixed << std::setprecision(6) << worker_report.latency_min << " seconds" << std::endl;
-    report_file << "maximum latency: " << std::fixed << std::setprecision(6) << worker_report.latency_max << " seconds" << std::endl;
-    report_file << "mean latency: " << std::fixed << std::setprecision(6) << worker_report.latency_mean << " seconds" << std::endl;
-    report_file << "latency standard deviation: " << std::fixed << std::setprecision(6) << worker_report.latency_stdev << " seconds" << std::endl;
-    report_file << "latency weighted median: " << std::fixed << std::setprecision(6) << worker_report.latency_weighted_median << " seconds" << std::endl;
-    report_file << "latency weighted median overflow: " << worker_report.latency_weighted_median_overflow << std::endl;
+    Log::log() << "total (latency) sample count: " << worker_report.latency_sample_count << std::endl;
+    Log::log() << "minimum latency: " << std::fixed << std::setprecision(6) << worker_report.latency_min << " seconds" << std::endl;
+    Log::log() << "maximum latency: " << std::fixed << std::setprecision(6) << worker_report.latency_max << " seconds" << std::endl;
+    Log::log() << "mean latency: " << std::fixed << std::setprecision(6) << worker_report.latency_mean << " seconds" << std::endl;
+    Log::log() << "latency standard deviation: " << std::fixed << std::setprecision(6) << worker_report.latency_stdev << " seconds" << std::endl;
+    Log::log() << "latency weighted median: " << std::fixed << std::setprecision(6) << worker_report.latency_weighted_median << " seconds" << std::endl;
+    Log::log() << "latency weighted median overflow: " << worker_report.latency_weighted_median_overflow << std::endl;
   }
 
   if (worker_report.jitter_sample_count > 0) {
-    report_file << std::endl << "--- Jitter Statistics ---" << std::endl << std::endl;
+    Log::log() << std::endl << "--- Jitter Statistics ---" << std::endl << std::endl;
 
-    report_file << "total (jitter) sample count: " << worker_report.jitter_sample_count << std::endl;
-    report_file << "minimum jitter: " << std::fixed << std::setprecision(6) << worker_report.jitter_min << " seconds" << std::endl;
-    report_file << "maximum jitter: " << std::fixed << std::setprecision(6) << worker_report.jitter_max << " seconds" << std::endl;
-    report_file << "mean jitter: " << std::fixed << std::setprecision(6) << worker_report.jitter_mean << " seconds" << std::endl;
-    report_file << "jitter standard deviation: " << std::fixed << std::setprecision(6) << worker_report.jitter_stdev << " seconds" << std::endl;
-    report_file << "jitter weighted median: " << std::fixed << std::setprecision(6) << worker_report.jitter_weighted_median << " seconds" << std::endl;
-    report_file << "jitter weighted median overflow: " << worker_report.jitter_weighted_median_overflow << std::endl;
-    report_file << std::endl;
+    Log::log() << "total (jitter) sample count: " << worker_report.jitter_sample_count << std::endl;
+    Log::log() << "minimum jitter: " << std::fixed << std::setprecision(6) << worker_report.jitter_min << " seconds" << std::endl;
+    Log::log() << "maximum jitter: " << std::fixed << std::setprecision(6) << worker_report.jitter_max << " seconds" << std::endl;
+    Log::log() << "mean jitter: " << std::fixed << std::setprecision(6) << worker_report.jitter_mean << " seconds" << std::endl;
+    Log::log() << "jitter standard deviation: " << std::fixed << std::setprecision(6) << worker_report.jitter_stdev << " seconds" << std::endl;
+    Log::log() << "jitter weighted median: " << std::fixed << std::setprecision(6) << worker_report.jitter_weighted_median << " seconds" << std::endl;
+    Log::log() << "jitter weighted median overflow: " << worker_report.jitter_weighted_median_overflow << std::endl;
+    Log::log() << std::endl;
   }
 
   if (worker_report.round_trip_latency_sample_count > 0) {
-    report_file << std::endl << "--- Round-Trip Latency Statistics ---" << std::endl << std::endl;
+    Log::log() << std::endl << "--- Round-Trip Latency Statistics ---" << std::endl << std::endl;
 
-    report_file << "total (round_trip_latency) sample count: " << worker_report.round_trip_latency_sample_count << std::endl;
-    report_file << "minimum round_trip_latency: " << std::fixed << std::setprecision(6) << worker_report.round_trip_latency_min << " seconds" << std::endl;
-    report_file << "maximum round_trip_latency: " << std::fixed << std::setprecision(6) << worker_report.round_trip_latency_max << " seconds" << std::endl;
-    report_file << "mean round_trip_latency: " << std::fixed << std::setprecision(6) << worker_report.round_trip_latency_mean << " seconds" << std::endl;
-    report_file << "round_trip_latency standard deviation: " << std::fixed << std::setprecision(6) << worker_report.round_trip_latency_stdev << " seconds" << std::endl;
-    report_file << "round_trip_latency weighted median: " << std::fixed << std::setprecision(6) << worker_report.round_trip_latency_weighted_median << " seconds" << std::endl;
-    report_file << "round_trip_latency weighted median overflow: " << worker_report.round_trip_latency_weighted_median_overflow << std::endl;
+    Log::log() << "total (round_trip_latency) sample count: " << worker_report.round_trip_latency_sample_count << std::endl;
+    Log::log() << "minimum round_trip_latency: " << std::fixed << std::setprecision(6) << worker_report.round_trip_latency_min << " seconds" << std::endl;
+    Log::log() << "maximum round_trip_latency: " << std::fixed << std::setprecision(6) << worker_report.round_trip_latency_max << " seconds" << std::endl;
+    Log::log() << "mean round_trip_latency: " << std::fixed << std::setprecision(6) << worker_report.round_trip_latency_mean << " seconds" << std::endl;
+    Log::log() << "round_trip_latency standard deviation: " << std::fixed << std::setprecision(6) << worker_report.round_trip_latency_stdev << " seconds" << std::endl;
+    Log::log() << "round_trip_latency weighted median: " << std::fixed << std::setprecision(6) << worker_report.round_trip_latency_weighted_median << " seconds" << std::endl;
+    Log::log() << "round_trip_latency weighted median overflow: " << worker_report.round_trip_latency_weighted_median_overflow << std::endl;
   }
 
   if (worker_report.round_trip_jitter_sample_count > 0) {
-    report_file << std::endl << "--- Round-Trip Jitter Statistics ---" << std::endl << std::endl;
+    Log::log() << std::endl << "--- Round-Trip Jitter Statistics ---" << std::endl << std::endl;
 
-    report_file << "total (round_trip_jitter) sample count: " << worker_report.round_trip_jitter_sample_count << std::endl;
-    report_file << "minimum round_trip_jitter: " << std::fixed << std::setprecision(6) << worker_report.round_trip_jitter_min << " seconds" << std::endl;
-    report_file << "maximum round_trip_jitter: " << std::fixed << std::setprecision(6) << worker_report.round_trip_jitter_max << " seconds" << std::endl;
-    report_file << "mean round_trip_jitter: " << std::fixed << std::setprecision(6) << worker_report.round_trip_jitter_mean << " seconds" << std::endl;
-    report_file << "round_trip_jitter standard deviation: " << std::fixed << std::setprecision(6) << worker_report.round_trip_jitter_stdev << " seconds" << std::endl;
-    report_file << "round_trip_jitter weighted median: " << std::fixed << std::setprecision(6) << worker_report.round_trip_jitter_weighted_median << " seconds" << std::endl;
-    report_file << "round_trip_jitter weighted median overflow: " << worker_report.round_trip_jitter_weighted_median_overflow << std::endl;
-    report_file << std::endl;
+    Log::log() << "total (round_trip_jitter) sample count: " << worker_report.round_trip_jitter_sample_count << std::endl;
+    Log::log() << "minimum round_trip_jitter: " << std::fixed << std::setprecision(6) << worker_report.round_trip_jitter_min << " seconds" << std::endl;
+    Log::log() << "maximum round_trip_jitter: " << std::fixed << std::setprecision(6) << worker_report.round_trip_jitter_max << " seconds" << std::endl;
+    Log::log() << "mean round_trip_jitter: " << std::fixed << std::setprecision(6) << worker_report.round_trip_jitter_mean << " seconds" << std::endl;
+    Log::log() << "round_trip_jitter standard deviation: " << std::fixed << std::setprecision(6) << worker_report.round_trip_jitter_stdev << " seconds" << std::endl;
+    Log::log() << "round_trip_jitter weighted median: " << std::fixed << std::setprecision(6) << worker_report.round_trip_jitter_weighted_median << " seconds" << std::endl;
+    Log::log() << "round_trip_jitter weighted median overflow: " << worker_report.round_trip_jitter_weighted_median_overflow << std::endl;
+    Log::log() << std::endl;
   }
 
   return 0;
