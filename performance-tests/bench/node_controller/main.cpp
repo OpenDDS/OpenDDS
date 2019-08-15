@@ -77,6 +77,14 @@ public:
     report.worker_id = worker_id_;
     report.failed = failed;
     report.details = "";
+    if (!failed) {
+      std::string filename = file_base_name_ + "_report.json";
+      std::ifstream file(filename);
+      if (file.good()) {
+        std::string str((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+        report.details = str.c_str();
+      }
+    }
     if (report_writer_impl->write(report, DDS::HANDLE_NIL)) {
       std::cerr << "Write report failed" << std::endl;
     }
@@ -88,7 +96,7 @@ public:
     ACE_Process_Options proc_opts;
     std::stringstream ss;
     ss << dds_root << "/performance-tests/bench/worker/worker " << config_filename_
-      << " --report " << file_base_name_ << "_report.txt"
+      << " --report " << file_base_name_ << "_report.json"
       << " --log " << file_base_name_ << "_log.txt";
     std::cerr << ss.str() << std::endl;
     proc_opts.command_line(ss.str().c_str());
