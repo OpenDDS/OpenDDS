@@ -158,8 +158,8 @@ RtpsUdpDataLink::RtpsWriter::do_remove_sample(const TransportQueueElement::Match
   if (!elems_not_acked_.empty()) {
     to_deliver.insert(to_deliver_.begin(), to_deliver_.end());
     to_deliver_.clear();
-    SnToTqeMap::iterator it = elems_not_acked_.begin();
     OPENDDS_SET(SequenceNumber) sns_to_release;
+    SnToTqeMap::iterator it = elems_not_acked_.begin();
     while (it != elems_not_acked_.end()) {
       if (criteria.matches(*it->second)) {
         sn_tqe_map.insert(RtpsWriter::SnToTqeMap::value_type(it->first, it->second));
@@ -2296,7 +2296,8 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
     ri->second.requested_changes_.push_back(acknack.readerSNState);
   }
 
-  process_acked_by_all_i();
+  SnToTqeMap to_deliver;
+  acked_by_all_helper_i(to_deliver);
 
   if (!is_final) {
     link->nack_reply_.schedule(); // timer will invoke send_nack_replies()
@@ -2307,6 +2308,13 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
     it->second->data_delivered();
   }
   g.release();
+
+  SnToTqeMap::iterator deliver_iter = to_deliver.begin();
+  while (deliver_iter != to_deliver.end()) {
+    deliver_iter->second->data_delivered();
+    ++deliver_iter;
+  }
+
   if (first_ack) {
     link->invoke_on_start_callbacks(id_, remote, true);
   }
@@ -2615,11 +2623,19 @@ void
 RtpsUdpDataLink::RtpsWriter::process_acked_by_all()
 {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-  process_acked_by_all_i();
+
+  SnToTqeMap to_deliver;
+  acked_by_all_helper_i(to_deliver);
+
+  SnToTqeMap::iterator deliver_iter = to_deliver.begin();
+  while (deliver_iter != to_deliver.end()) {
+    deliver_iter->second->data_delivered();
+    ++deliver_iter;
+  }
 }
 
 void
-RtpsUdpDataLink::RtpsWriter::process_acked_by_all_i()
+RtpsUdpDataLink::RtpsWriter::acked_by_all_helper_i(SnToTqeMap& to_deliver)
 {
   using namespace OpenDDS::RTPS;
   typedef OPENDDS_MULTIMAP(SequenceNumber, TransportQueueElement*)::iterator iter_t;
@@ -2647,14 +2663,12 @@ RtpsUdpDataLink::RtpsWriter::process_acked_by_all_i()
     if (all_readers_ack == SequenceNumber::MAX_VALUE) {
       return;
     }
-    OPENDDS_VECTOR(SequenceNumber) sns;
-    //if any messages fully acked, call data delivered and remove from map
 
-    iter_t it = elems_not_acked_.begin();
     OPENDDS_SET(SequenceNumber) sns_to_release;
+    iter_t it = elems_not_acked_.begin();
     while (it != elems_not_acked_.end()) {
       if (it->first < all_readers_ack) {
-        to_deliver_.insert(RtpsWriter::SnToTqeMap::value_type(it->first, it->second));
+        to_deliver.insert(RtpsWriter::SnToTqeMap::value_type(it->first, it->second));
         sns_to_release.insert(it->first);
         iter_t last = it;
         ++it;
@@ -2667,17 +2681,6 @@ RtpsUdpDataLink::RtpsWriter::process_acked_by_all_i()
     while (sns_it != sns_to_release.end()) {
       send_buff_->release_acked(*sns_it);
       ++sns_it;
-    }
-    TransportQueueElement* tqe_to_deliver;
-
-    while (true) {
-      iter_t to_deliver_iter = to_deliver_.begin();
-      if (to_deliver_iter == to_deliver_.end()) {
-        break;
-      }
-      tqe_to_deliver = to_deliver_iter->second;
-      to_deliver_.erase(to_deliver_iter);
-      tqe_to_deliver->data_delivered();
     }
   }
 }
