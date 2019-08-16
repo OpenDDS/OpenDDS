@@ -59,7 +59,10 @@ TransportClient::~TransportClient()
 
   for (PendingMap::iterator it = pending_.begin(); it != pending_.end(); ++it) {
     for (size_t i = 0; i < impls_.size(); ++i) {
-      impls_[i]->stop_accepting_or_connecting(*this, it->second->data_.remote_id_);
+      RcHandle<TransportImpl> impl = impls_[i].lock();
+      if (impl) {
+        impl->stop_accepting_or_connecting(*this, it->second->data_.remote_id_);
+      }
     }
 
     pending_assoc_timer_->cancel_timer(this, it->second);
@@ -136,7 +139,7 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
     TransportInst_rch inst = tc->instances_[i];
 
     if (check_transport_qos(*inst)) {
-      TransportImpl* impl = inst->impl();
+      TransportImpl_rch impl = inst->impl();
 
       if (impl) {
         impls_.push_back(impl);
@@ -183,7 +186,8 @@ TransportClient::associate(const AssociationData& data, bool active)
 
   bool all_impls_shut_down = true;
   for (size_t i = 0; i < impls_.size(); ++i) {
-    if (!impls_.at(i)->is_shut_down()) {
+    RcHandle<TransportImpl> impl = impls_[i].lock();
+    if (impl && !impl->is_shut_down()) {
       all_impls_shut_down = false;
       break;
     }
@@ -244,8 +248,9 @@ TransportClient::associate(const AssociationData& data, bool active)
 
     // call accept_datalink for each impl / blob pair of the same type
     for (size_t i = 0; i < impls_.size(); ++i) {
-      pend->impls_.push_back(impls_[i]);
-      const OPENDDS_STRING type = impls_[i]->transport_type();
+      RcHandle<TransportImpl> impl = impls_[i].lock();
+      pend->impls_.push_back(impl);
+      const OPENDDS_STRING type = impl->transport_type();
 
       for (CORBA::ULong j = 0; j < data.remote_data_.length(); ++j) {
         if (data.remote_data_[j].transport_type.in() == type) {
@@ -261,7 +266,7 @@ TransportClient::associate(const AssociationData& data, bool active)
             // Event handlers in the transport reactor may call passive_connection which calls use_datalink which acquires lock_.  The locking order in this case is transport reactor lock -> lock_.
             // To avoid deadlock, we must reverse the lock.
             ACE_GUARD_RETURN(Reverse_Lock_t, unlock_guard, reverse_lock_, false);
-            res = impls_[i]->accept_datalink(remote, pend->attribs_, rchandle_from(this));
+            res = impl->accept_datalink(remote, pend->attribs_, rchandle_from(this));
           }
 
           //NEED to check that pend is still valid here after you re-acquire the lock_ after accepting the datalink
@@ -286,7 +291,7 @@ TransportClient::associate(const AssociationData& data, bool active)
         }
       }
 
-      //pend->impls_.push_back(impls_[i]);
+      //pend->impls_.push_back(impl);
     }
 
     pending_assoc_timer_->schedule_timer(this, iter->second);
@@ -308,7 +313,7 @@ TransportClient::PendingAssoc::handle_timeout(const ACE_Time_Value&,
 
 bool
 TransportClient::initiate_connect_i(TransportImpl::AcceptConnectResult& result,
-                                    TransportImpl* impl,
+                                    TransportImpl_rch impl,
                                     const TransportImpl::RemoteTransport& remote,
                                     const TransportImpl::ConnectionAttribs& attribs_,
                                     Guard& guard)
@@ -370,7 +375,10 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
                       OPENDDS_STRING(remote).c_str()), 0);
   // find the next impl / blob entry that have matching types
   while (!impls_.empty()) {
-    TransportImpl* impl = impls_.back();
+    RcHandle<TransportImpl> impl = impls_.back().lock();
+    if (!impl) {
+      continue;
+    }
     const OPENDDS_STRING type = impl->transport_type();
 
     for (; blob_index_ < data_.remote_data_.length(); ++blob_index_) {
@@ -508,7 +516,10 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
   if (!pend->active_) {
 
     for (size_t i = 0; i < pend->impls_.size(); ++i) {
-      pend->impls_[i]->stop_accepting_or_connecting(*this, pend->data_.remote_id_);
+      RcHandle<TransportImpl> impl = pend->impls_[i].lock();
+      if (impl) {
+        impl->stop_accepting_or_connecting(*this, pend->data_.remote_id_);
+      }
     }
   }
 
@@ -643,7 +654,10 @@ TransportClient::register_for_reader(const RepoId& participant,
   for (ImplsType::iterator pos = impls_.begin(), limit = impls_.end();
        pos != limit;
        ++pos) {
-    (*pos)->register_for_reader(participant, writerid, readerid, locators, listener);
+    RcHandle<TransportImpl> impl = (*pos).lock();
+    if (impl) {
+      impl->register_for_reader(participant, writerid, readerid, locators, listener);
+    }
   }
 }
 
@@ -656,7 +670,10 @@ TransportClient::unregister_for_reader(const RepoId& participant,
   for (ImplsType::iterator pos = impls_.begin(), limit = impls_.end();
        pos != limit;
        ++pos) {
-    (*pos)->unregister_for_reader(participant, writerid, readerid);
+    RcHandle<TransportImpl> impl = (*pos).lock();
+    if (impl) {
+      impl->unregister_for_reader(participant, writerid, readerid);
+    }
   }
 }
 
@@ -671,7 +688,10 @@ TransportClient::register_for_writer(const RepoId& participant,
   for (ImplsType::iterator pos = impls_.begin(), limit = impls_.end();
        pos != limit;
        ++pos) {
-    (*pos)->register_for_writer(participant, readerid, writerid, locators, listener);
+    RcHandle<TransportImpl> impl = (*pos).lock();
+    if (impl) {
+      impl->register_for_writer(participant, readerid, writerid, locators, listener);
+    }
   }
 }
 
@@ -684,7 +704,10 @@ TransportClient::unregister_for_writer(const RepoId& participant,
   for (ImplsType::iterator pos = impls_.begin(), limit = impls_.end();
        pos != limit;
        ++pos) {
-    (*pos)->unregister_for_writer(participant, readerid, writerid);
+    RcHandle<TransportImpl> impl = (*pos).lock();
+    if (impl) {
+      impl->unregister_for_writer(participant, readerid, writerid);
+    }
   }
 }
 
@@ -699,8 +722,11 @@ TransportClient::get_ice_endpoint()
   for (ImplsType::iterator pos = impls_.begin(), limit = impls_.end();
        pos != limit;
        ++pos) {
-    ICE::Endpoint* endpoint = (*pos)->get_ice_endpoint();
-    if (endpoint) { return endpoint; }
+    RcHandle<TransportImpl> impl = (*pos).lock();
+    if (impl) {
+      ICE::Endpoint* endpoint = impl->get_ice_endpoint();
+      if (endpoint) { return endpoint; }
+    }
   }
 
   return 0;
