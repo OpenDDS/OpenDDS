@@ -119,7 +119,7 @@ public:
                           int num_alive_writers,
                           const ACE_Time_Value& when);
 
-  DataReaderImpl* data_reader() const;
+  WeakRcHandle<OpenDDS::DCPS::DataReaderImpl> data_reader() const;
 
   virtual int handle_timeout(const ACE_Time_Value& current_time,
                              const void* arg);
@@ -213,7 +213,7 @@ private:
    * instance.  It is also queried to determine if the DataReader is
    * empty -- that it contains no more sample data.
    */
-  DataReaderImpl* reader_;
+  WeakRcHandle<DataReaderImpl> reader_;
   DDS::InstanceHandle_t handle_;
 
   RepoIdSet writers_;
