@@ -74,9 +74,9 @@ void InstanceState::sample_info(DDS::SampleInfo& si, const ReceivedDataElement* 
   RcHandle<DataReaderImpl> reader = reader_.lock();
   if (reader) {
     RcHandle<DomainParticipantImpl> participant = reader->participant_servant_.lock();
-    si.publication_handle = participant ? participant->id_to_handle(de->pub_) : 0;
+    si.publication_handle = participant ? participant->id_to_handle(de->pub_) : DDS::HANDLE_NIL;
   } else {
-    si.publication_handle = 0;
+    si.publication_handle = DDS::HANDLE_NIL;
   }
   si.valid_data = de->valid_data_;
   /*
@@ -206,6 +206,9 @@ void InstanceState::schedule_release()
   RcHandle<DataReaderImpl> reader = reader_.lock();
   if (reader) {
     reader->get_qos(qos);
+  } else {
+    cancel_release();
+    return;
   }
 
   DDS::Duration_t delay;
