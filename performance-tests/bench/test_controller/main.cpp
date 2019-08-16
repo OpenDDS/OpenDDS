@@ -186,10 +186,23 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       return 1;
     }
 
-    reports_received += reports.length();
     for (size_t r = 0; r < reports.length(); r++) {
-      if (reports[r].failed) {
-        std::cerr << "Worker " << reports[r].worker_id << " of node " << reports[r].node_id << " failed" << std::endl;
+      if (info[r].valid_data) {
+        reports_received += 1;
+        if (reports[r].failed) {
+          std::cerr << "Worker " << reports[r].worker_id << " of node "
+            << reports[r].node_id << " failed" << std::endl;
+        } else {
+          std::stringstream ss;
+          ss << "n" << reports[r].node_id << "w" << reports[r].worker_id << "_report.json";
+          const std::string filename = ss.str();
+          std::ofstream file(filename);
+          if (file.is_open()) {
+            file << reports[r].details;
+          } else {
+            std::cerr << "Could not write " << filename << std::endl;
+          }
+        }
       }
     }
   }

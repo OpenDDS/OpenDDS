@@ -30,7 +30,7 @@ ReportDataWriter_var report_writer_impl;
 std::string
 create_config(const std::string& file_base_name, const char* contents)
 {
-  std::string filename = file_base_name + "_config.json";
+  const std::string filename = file_base_name + "_config.json";
   std::ofstream file(filename);
   if (file.is_open()) {
     file << contents;
