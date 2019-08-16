@@ -81,7 +81,6 @@ private:
   virtual std::string transport_type() const { return "tcp"; }
 
   void async_connect_failed(const PriorityKey& key);
-  void async_connect_succeeded(const PriorityKey& key);
 
   /// The TcpConnection is our friend.  It tells us when it
   /// has been created (by our acceptor_), and is seeking the

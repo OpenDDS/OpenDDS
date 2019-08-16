@@ -252,14 +252,6 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
   return true;
 }
 
-bool
-RtpsUdpDataLink::add_on_start_callback(const TransportClient_wrch& client, const RepoId& remote)
-{
-  GuardType guard(strategy_lock_);
-
-  on_start_callbacks_.push_back(std::make_pair(client, remote));
-  return true;
-}
 
 void
 RtpsUdpDataLink::add_locator(const RepoId& remote_id,
