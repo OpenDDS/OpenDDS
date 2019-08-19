@@ -17,7 +17,7 @@
 #include "ParticipantListener.h"
 #include "Process.h"
 
-#include "json_utils.h"
+#include "Utils.h"
 
 #include "ActionManager.h"
 #include "ForwardAction.h"
@@ -194,6 +194,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   Builder::TimeStamp process_start_begin_time = ZERO, process_start_end_time = ZERO;
   Builder::TimeStamp process_stop_begin_time = ZERO, process_stop_end_time = ZERO;
   Builder::TimeStamp process_destruction_begin_time = ZERO, process_destruction_end_time = ZERO;
+
+  set_global_properties(config.properties);
 
   Bench::WorkerReport worker_report;
   Builder::ProcessReport& process_report = worker_report.process_report;

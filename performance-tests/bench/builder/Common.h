@@ -50,6 +50,9 @@ public:
   inline explicit operator bool() const { return seq_ != 0; }
   inline bool operator!() const { return seq_ == 0; }
 
+  PropertySeq* get_seq() { return seq_; };
+  const PropertySeq* get_seq() const { return seq_; };
+
 protected:
   PropertySeq* seq_;
   uint32_t index_;
@@ -64,6 +67,8 @@ public:
 
   inline explicit operator bool() const { return seq_ != 0; }
   inline bool operator!() const { return seq_ == 0; }
+
+  const PropertySeq* get_seq() const { return seq_; };
 
 protected:
   const PropertySeq* seq_;

@@ -15,7 +15,7 @@ TransportInstance::TransportInstance(const TransportInstanceConfig& config)
     if (!inst_) {
       if (std::string(config.type.in()) == "rtps_udp") {
         inst_ = OpenDDS::DCPS::TransportRegistry::instance()->create_inst(config.name.in(), "rtps_udp");
-        std::cout << "Creating instance config '" << name_ << "' of type " << config.type << std::endl;
+        Log::log() << "Creating instance config '" << name_ << "' of type " << config.type << std::endl;
       } else {
         throw std::runtime_error("unsupported transport instance type");
       }
@@ -25,7 +25,7 @@ TransportInstance::TransportInstance(const TransportInstanceConfig& config)
   } else {
     inst_ = OpenDDS::DCPS::TransportRegistry::instance()->get_inst(config.name.in());
     if (inst_ && std::string(config.type.in()) == inst_->transport_type_) {
-      std::cout << "Using existing instance '" << name_ << "' of type " << inst_->transport_type_ << std::endl;
+      Log::log() << "Using existing instance '" << name_ << "' of type " << inst_->transport_type_ << std::endl;
     } else {
       throw std::runtime_error("mismatched transport instance type");
     }

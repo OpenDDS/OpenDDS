@@ -1,7 +1,11 @@
 #include "WorkerDataReaderListener.h"
+#include "Utils.h"
+
 #include <cmath>
 
 namespace Bench {
+
+const size_t DEFAULT_STAT_BLOCK_BUFFER_SIZE = 1000;
 
 WorkerDataReaderListener::WorkerDataReaderListener()
 {
@@ -176,14 +180,18 @@ WorkerDataReaderListener::set_datareader(Builder::DataReader& datareader)
   rejected_sample_count_ =
     get_or_create_property(datareader_->get_report().properties, "rejected_sample_count", Builder::PVK_ULL);
 
+  const Builder::PropertySeq& global_properties = get_global_properties();
+  Builder::ConstPropertyIndex buffer_size_prop = get_property(global_properties, "default_stat_median_buffer_size", Builder::PVK_ULL);
+  size_t buffer_size = buffer_size_prop ? buffer_size_prop->value.ull_prop() : DEFAULT_STAT_BLOCK_BUFFER_SIZE;
+
   latency_stat_block_ =
-    std::make_shared<PropertyStatBlock>(datareader_->get_report().properties, "latency", 1000);
+    std::make_shared<PropertyStatBlock>(datareader_->get_report().properties, "latency", buffer_size);
   jitter_stat_block_ =
-    std::make_shared<PropertyStatBlock>(datareader_->get_report().properties, "jitter", 1000);
+    std::make_shared<PropertyStatBlock>(datareader_->get_report().properties, "jitter", buffer_size);
   round_trip_latency_stat_block_ =
-    std::make_shared<PropertyStatBlock>(datareader_->get_report().properties, "round_trip_latency", 1000);
+    std::make_shared<PropertyStatBlock>(datareader_->get_report().properties, "round_trip_latency", buffer_size);
   round_trip_jitter_stat_block_ =
-    std::make_shared<PropertyStatBlock>(datareader_->get_report().properties, "round_trip_jitter", 1000);
+    std::make_shared<PropertyStatBlock>(datareader_->get_report().properties, "round_trip_jitter", buffer_size);
 }
 
 void
@@ -191,11 +199,15 @@ WorkerDataReaderListener::unset_datareader(Builder::DataReader& datareader)
 {
   if (datareader_ == &datareader) {
 
-    latency_stat_block_->write_median();
-    jitter_stat_block_->write_median();
+    const Builder::PropertySeq& global_properties = get_global_properties();
+    Builder::ConstPropertyIndex write_buffer_prop = get_property(global_properties, "write_full_median_buffer", Builder::PVK_ULL);
+    bool write_buffer = write_buffer_prop ? write_buffer_prop->value.ull_prop() != 0 : false;
 
-    round_trip_latency_stat_block_->write_median();
-    round_trip_jitter_stat_block_->write_median();
+    latency_stat_block_->write_median(write_buffer);
+    jitter_stat_block_->write_median(write_buffer);
+
+    round_trip_latency_stat_block_->write_median(write_buffer);
+    round_trip_jitter_stat_block_->write_median(write_buffer);
 
     datareader_ = nullptr;
   }

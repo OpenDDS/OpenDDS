@@ -1,5 +1,9 @@
 #include "PropertyStatBlock.h"
 
+#include <cmath>
+#include <iomanip>
+#include <sstream>
+
 namespace Bench {
 
 PropertyStatBlock::PropertyStatBlock(Builder::PropertySeq& seq, const std::string& prefix, size_t median_buffer_size)
@@ -59,11 +63,22 @@ void PropertyStatBlock::update(double value)
   median_buffer_[next_median_buffer_index] = value;
 }
 
-void PropertyStatBlock::write_median()
+void PropertyStatBlock::write_median(bool write_buffer)
 {
   double result = 0.0;
   size_t count = median_sample_count_->value.ull_prop();
+
   if (count) {
+    if (write_buffer) {
+      Builder::PropertyIndex buff_prop = get_or_create_property(*(median_.get_seq()), std::string(median_->name) + "_buffer", Builder::PVK_DOUBLE_SEQ);
+      Builder::DoubleSeq ds;
+      ds.length(count);
+      for (size_t i = 0; i < count; ++i) {
+        size_t pos = (count < median_buffer_.size() ? 0 : ((sample_count_->value.ull_prop() + 1 + i) % median_buffer_.size()));
+        ds[i] = median_buffer_[pos];
+      }
+    buff_prop->value.double_seq_prop(ds);
+    }
     std::sort(&median_buffer_[0], &median_buffer_[count - 1]);
     if (count % 2) {
       result = (median_buffer_[count / 2] + median_buffer_[(count / 2) + 1]) / 2.0;

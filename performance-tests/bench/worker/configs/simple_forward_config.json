@@ -1,7 +1,13 @@
 {
   "enable_time": { "sec": -1, "nsec": 0 },
   "start_time": { "sec": -3, "nsec": 0 },
-  "stop_time": { "sec": -10, "nsec": 0 },
+  "stop_time": { "sec": -15, "nsec": 0 },
+
+  "properties": [
+    { "name": "write_full_median_buffer",
+      "value": { "_d": "PVK_ULL", "ull_prop": 1 }
+    }
+  ],
 
   "process": {
     "config_sections": [

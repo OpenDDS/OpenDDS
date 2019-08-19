@@ -376,7 +376,9 @@ module Builder {
 // Report Section
 // ---
 
-  enum PropertyValueKind { PVK_TIME, PVK_STRING, PVK_DOUBLE, PVK_ULL };
+  typedef sequence<double> DoubleSeq;
+
+  enum PropertyValueKind { PVK_TIME, PVK_STRING, PVK_DOUBLE, PVK_DOUBLE_SEQ, PVK_ULL };
   union PropertyValue switch (PropertyValueKind) {
     case PVK_TIME:
       TimeStamp time_prop;
@@ -384,6 +386,8 @@ module Builder {
       string string_prop;
     case PVK_DOUBLE:
       double double_prop;
+    case PVK_DOUBLE_SEQ:
+       DoubleSeq double_seq_prop;
     case PVK_ULL:
       unsigned long long ull_prop;
   };

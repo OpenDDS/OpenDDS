@@ -1,4 +1,4 @@
-#include "json_utils.h"
+#include "Utils.h"
 
 #include "dds/DCPS/DCPS_Utils.h"
 
@@ -191,6 +191,18 @@ const QosProfile& QosLibrary::get_profile(const std::string& name) const {
   } else {
     return default_profile_;
   }
+}
+
+namespace {
+static Builder::PropertySeq properties_;
+}
+
+void set_global_properties(Builder::PropertySeq& properties) {
+  properties_ = properties;
+}
+
+const Builder::PropertySeq& get_global_properties() {
+  return properties_;
 }
 
 // json_2_config

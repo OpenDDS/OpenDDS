@@ -53,6 +53,7 @@ module Bench {
     Builder::TimeStamp enable_time;
     Builder::TimeStamp start_time;
     Builder::TimeStamp stop_time;
+    Builder::PropertySeq properties;
     Builder::ProcessConfig process;
     ActionConfigSeq actions;
     ActionReportSeq action_reports;

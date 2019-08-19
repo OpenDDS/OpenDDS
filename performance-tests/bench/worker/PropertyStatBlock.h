@@ -11,7 +11,7 @@ class PropertyStatBlock {
 public:
   PropertyStatBlock(Builder::PropertySeq& seq, const std::string& prefix, size_t median_buffer_size);
   void update(double value);
-  void write_median();
+  void write_median(bool write_buffer = false);
 
 private:
   Builder::PropertyIndex sample_count_;
