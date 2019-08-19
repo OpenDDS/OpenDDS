@@ -91,7 +91,7 @@ public:
   static int service_initialize();
 };
 
-static int OpenDDS_Requires_MonitorFactory_Initializer =
+static const int OpenDDS_Requires_MonitorFactory_Initializer =
   MonitorFactory::service_initialize();
 
 } // namespace DCPS
