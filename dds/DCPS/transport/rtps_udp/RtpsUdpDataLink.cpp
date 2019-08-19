@@ -2816,14 +2816,16 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
   const ACE_Time_Value now = ACE_OS::gettimeofday();
   RtpsUdpInst& cfg = link->config();
 
+  // Directed, non-final pre-association heartbeats
+  RepoIdSet pre_assoc_hb_guids;
+
   typedef ReaderInfoMap::iterator ri_iter;
   const ri_iter end = remote_readers_.end();
   for (ri_iter ri = remote_readers_.begin(); ri != end; ++ri) {
-    if (has_data || !ri->second.handshake_done_) {
+    if (has_data) {
       meta_submessage.to_guids_.insert(ri->first);
-      if (is_final && !ri->second.handshake_done_) {
-        is_final = false;
-      }
+    } else if (!ri->second.handshake_done_) {
+      pre_assoc_hb_guids.insert(ri->first);
     }
     if (!ri->second.durable_data_.empty()) {
       const ACE_Time_Value expiration =
@@ -2856,10 +2858,6 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
     is_final = false;
   }
 
-  if (is_final && !has_data && !has_durable_data) {
-    return true;
-  }
-
   const SequenceNumber firstSN = (durable_ || !has_data) ? 1 : send_buff_->low(),
     lastSN = std::max(durable_max, has_data ? send_buff_->high() : SequenceNumber::ZERO());
   using namespace OpenDDS::RTPS;
@@ -2876,14 +2874,27 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
   };
   meta_submessage.sm_.heartbeat_sm(hb);
 
+  // Directed, non-final pre-association heartbeats
+  MetaSubmessage pre_assoc_hb = meta_submessage;
+  pre_assoc_hb.to_guids_.clear();
+  pre_assoc_hb.sm_.heartbeat_sm().smHeader.flags &= ~(FLAG_F);
+  for (RepoIdSet::const_iterator it = pre_assoc_hb_guids.begin(); it != pre_assoc_hb_guids.end(); ++it) {
+    pre_assoc_hb.dst_guid_ = (*it);
+    pre_assoc_hb.sm_.heartbeat_sm().readerId = it->entityId;
+    meta_submessages.push_back(pre_assoc_hb);
+  }
+
+  if (is_final && !has_data && !has_durable_data) {
+    return true;
+  }
+
 #ifdef OPENDDS_SECURITY
   const EntityId_t& volatile_writer =
     RTPS::ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER;
   if (std::memcmp(&id_.entityId, &volatile_writer, sizeof(EntityId_t)) == 0) {
     RepoIdSet guids = meta_submessage.to_guids_;
-    meta_submessage.dst_guid_ = GUID_UNKNOWN;
+    meta_submessage.to_guids_.clear();
     for (RepoIdSet::const_iterator it = guids.begin(); it != guids.end(); ++it) {
-      meta_submessage.to_guids_.clear();
       meta_submessage.dst_guid_ = (*it);
       meta_submessage.sm_.heartbeat_sm().readerId = it->entityId;
       meta_submessages.push_back(meta_submessage);
