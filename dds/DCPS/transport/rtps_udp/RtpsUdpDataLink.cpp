@@ -1323,7 +1323,7 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
   if (last.getValue() >= starting.getValue()) {
 
     DisjointSequence& recvd = info.recvd_;
-  if (!durable_ && info.initial_hb_) {
+    if (!durable_ && info.initial_hb_) {
       // For the non-durable reader, the first received HB or DATA establishes
       // a baseline of the lowest sequence number we'd ever need to NACK.
       if (recvd.empty() || recvd.low() >= last) {
@@ -1338,7 +1338,7 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
                                  (first > starting) ? first.previous() : zero));
     }
 
-  link->deliver_held_data(id_, info, durable_);
+    link->deliver_held_data(id_, info, durable_);
 
     //FUTURE: to support wait_for_acks(), notify DCPS layer of the sequence
     //        numbers we no longer expect to receive due to HEARTBEAT
