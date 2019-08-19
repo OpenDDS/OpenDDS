@@ -110,18 +110,18 @@ OpenDDS::DCPS::TransportInst::shutdown()
   }
 }
 
-OpenDDS::DCPS::TransportImpl*
+OpenDDS::DCPS::TransportImpl_rch
 OpenDDS::DCPS::TransportInst::impl()
 {
-  ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, g, this->lock_, 0);
+  ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, g, this->lock_, TransportImpl_rch());
   if (!this->impl_) {
     try {
       this->impl_ = this->new_impl();
     } catch (const OpenDDS::DCPS::Transport::UnableToCreate& ) {
-      return 0;
+      return TransportImpl_rch();
     }
   }
-  return this->impl_.in();
+  return this->impl_;
 }
 
 void

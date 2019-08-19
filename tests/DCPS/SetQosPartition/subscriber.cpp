@@ -110,6 +110,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       DDS::DataReaderQos dr_qos;
       sub1->get_default_datareader_qos (dr_qos);
+      dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
       // Create first DataReader with listener.
       DDS::DataReaderListener_var listener1 (new DataReaderListenerImpl);
