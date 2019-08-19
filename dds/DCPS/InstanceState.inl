@@ -11,7 +11,7 @@
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 ACE_INLINE
-OpenDDS::DCPS::DataReaderImpl*
+OpenDDS::DCPS::WeakRcHandle<OpenDDS::DCPS::DataReaderImpl>
 OpenDDS::DCPS::InstanceState::data_reader() const
 {
   return reader_;
