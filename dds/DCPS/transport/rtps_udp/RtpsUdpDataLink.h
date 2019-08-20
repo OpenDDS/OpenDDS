@@ -500,7 +500,7 @@ private:
 
     TimedDelay(RtpsUdpDataLink* outer, PMF function,
                const ACE_Time_Value& timeout)
-      : outer_(outer), function_(function), timeout_(timeout), scheduled_(false)
+      : outer_(outer), function_(function), timeout_(timeout), scheduled_(ACE_Time_Value::zero)
     {}
 
     void schedule(const ACE_Time_Value& timeout = ACE_Time_Value::zero);
@@ -508,7 +508,7 @@ private:
 
     int handle_timeout(const ACE_Time_Value&, const void*)
     {
-      scheduled_ = false;
+      scheduled_ = ACE_Time_Value::zero;
       (outer_->*function_)();
       return 0;
     }
@@ -517,7 +517,6 @@ private:
     PMF function_;
     ACE_Time_Value timeout_;
     ACE_Time_Value scheduled_;
-    mutable ACE_Thread_Mutex mutex_;
 
   } nack_reply_, heartbeat_reply_;
 

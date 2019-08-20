@@ -1289,7 +1289,7 @@ RtpsUdpDataLink::received(const RTPS::HeartBeatSubmessage& heartbeat,
 bool
 RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage& heartbeat,
                                                  const RepoId& src,
-                                                 MetaSubmessageVec& /*meta_submessages*/)
+                                                 MetaSubmessageVec&) 
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
   RtpsUdpDataLink_rch link = link_.lock();
@@ -3175,12 +3175,11 @@ RtpsUdpDataLink::RtpsWriter::add_elem_awaiting_ack(TransportQueueElement* elemen
 void
 RtpsUdpDataLink::TimedDelay::schedule(const ACE_Time_Value& timeout)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
   const ACE_Time_Value& next_to = (timeout != ACE_Time_Value::zero && timeout < timeout_) ? timeout : timeout_;
 
-  if (scheduled_ != ACE_Time_Value::zero && ((ACE_Time_Value().now() + next_to) < scheduled_)) {
-    outer_->get_reactor()->cancel_timer(this);
-    scheduled_ = ACE_Time_Value::zero;
+  const ACE_Time_Value now = ACE_OS::gettimeofday();
+  if (scheduled_ != ACE_Time_Value::zero && ((now + next_to) < scheduled_)) {
+    cancel();
   }
 
   if (scheduled_ == ACE_Time_Value::zero) {
@@ -3190,7 +3189,7 @@ RtpsUdpDataLink::TimedDelay::schedule(const ACE_Time_Value& timeout)
       ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpDataLink::TimedDelay::schedule "
         "failed to schedule timer %p\n", ACE_TEXT("")));
     } else {
-      scheduled_ = ACE_Time_Value().now() + next_to;
+      scheduled_ = now + next_to;
     }
   }
 }
@@ -3198,8 +3197,7 @@ RtpsUdpDataLink::TimedDelay::schedule(const ACE_Time_Value& timeout)
 void
 RtpsUdpDataLink::TimedDelay::cancel()
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-  if (scheduled_) {
+  if (scheduled_ != ACE_Time_Value::zero) {
     outer_->get_reactor()->cancel_timer(this);
     scheduled_ = ACE_Time_Value::zero;
   }
