@@ -14,6 +14,7 @@
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "dds/DCPS/DataSampleHeader.h"
 #include "dds/DCPS/GuidConverter.h"
+#include "dds/DdsDcpsGuidTypeSupportImpl.h"
 #include "ace/Log_Msg.h"
 
 #if !defined (__ACE_INLINE__)
@@ -112,7 +113,7 @@ OpenDDS::DCPS::TcpDataLink::connect(
 
   // And lastly, inform our base class (DataLink) that we are now "connected",
   // and it should start the strategy objects.
-  if (this->start(send_strategy, receive_strategy, !connection->is_connector()) != 0) {
+  if (this->start(send_strategy, receive_strategy, false) != 0) {
     // Our base (DataLink) class failed to start the strategy objects.
     // We need to "undo" some things here before we return -1 to indicate
     // that an error has taken place.
@@ -123,6 +124,7 @@ OpenDDS::DCPS::TcpDataLink::connect(
     return -1;
   }
 
+  do_association_actions();
   return 0;
 }
 
@@ -177,6 +179,7 @@ OpenDDS::DCPS::TcpDataLink::reuse_existing_connection(const TcpConnection_rch& c
       int ss_result = ss->reset(true);
 
       if (rs_result == 0 && ss_result == 0) {
+        do_association_actions();
         return 0;
       }
     }
@@ -221,7 +224,11 @@ OpenDDS::DCPS::TcpDataLink::reconnect(const TcpConnection_rch& connection)
   }
 
   if (released) {
-    return static_cast<TcpTransport&>(impl()).connect_tcp_datalink(*this, connection);
+    int result = static_cast<TcpTransport&>(impl()).connect_tcp_datalink(*this, connection);
+    if (result == 0) {
+      do_association_actions();
+    }
+    return result;
   }
 
   this->connection_ = connection;
@@ -239,6 +246,7 @@ OpenDDS::DCPS::TcpDataLink::reconnect(const TcpConnection_rch& connection)
   int ss_result = ss->reset();
 
   if (rs_result == 0 && ss_result == 0) {
+    do_association_actions();
     return 0;
   }
 
@@ -351,6 +359,10 @@ OpenDDS::DCPS::TcpDataLink::ack_received(const ReceivedDataSample& sample)
 {
   SequenceNumber sequence = sample.header_.sequence_;
 
+  if (sample.header_.sequence_ == -1) {
+    return;
+  }
+
   if (Transport_debug_level >= 1) {
     const GuidConverter converter(sample.header_.publication_id_);
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TcpDataLink::ack_received() received sequence number %q, publiction_id=%C\n"),
@@ -387,6 +399,15 @@ OpenDDS::DCPS::TcpDataLink::ack_received(const ReceivedDataSample& sample)
 void
 OpenDDS::DCPS::TcpDataLink::request_ack_received(const ReceivedDataSample& sample)
 {
+  if (sample.header_.sequence_ == -1 && sample.header_.message_length_ == sizeof(RepoId)) {
+    RepoId local;
+    DCPS::Serializer ser(&(*sample.sample_));
+    if (ser >> local) {
+      invoke_on_start_callbacks(local, sample.header_.publication_id_, true);
+    }
+    return;
+  }
+
   DataSampleHeader header_data;
   // The message_id_ is the most important value for the DataSampleHeader.
   header_data.message_id_ = SAMPLE_ACK;
@@ -426,6 +447,73 @@ OpenDDS::DCPS::TcpDataLink::request_ack_received(const ReceivedDataSample& sampl
 }
 
 void
+OpenDDS::DCPS::TcpDataLink::do_association_actions()
+{
+  typedef std::vector<std::pair<RepoId, RepoId> > PairVec;
+  PairVec to_send;
+  PairVec to_call;
+
+  {
+    GuardType guard(strategy_lock_);
+
+    for (OnStartCallbackMap::const_iterator it = on_start_callbacks_.begin(); it != on_start_callbacks_.end(); ++it) {
+      for (RepoToClientMap::const_iterator it2 = it->second.begin(); it2 != it->second.end(); ++it2) {
+        GuidConverter conv(it2->first);
+        to_send.push_back(std::make_pair(it2->first, it->first));
+        if (!conv.isWriter()) {
+          to_call.push_back(std::make_pair(it2->first, it->first));
+        }
+      }
+    }
+  }
+
+  send_strategy_->link_released(false);
+
+  for (PairVec::const_iterator it = to_call.begin(); it != to_call.end(); ++it) {
+    invoke_on_start_callbacks(it->first, it->second, true);
+  }
+
+  for (PairVec::const_iterator it = to_send.begin(); it != to_send.end(); ++it) {
+    send_association_msg(it->first, it->second);
+  }
+}
+
+void
+OpenDDS::DCPS::TcpDataLink::send_association_msg(const RepoId& local, const RepoId& remote)
+{
+  DataSampleHeader header_data;
+  header_data.message_id_ = REQUEST_ACK;
+  header_data.byte_order_  = ACE_CDR_BYTE_ORDER;
+  header_data.message_length_ = sizeof(remote);
+  header_data.sequence_ = -1;
+  header_data.publication_id_ = local;
+  header_data.publisher_id_ = remote;
+
+  size_t max_marshaled_size = header_data.max_marshaled_size();
+
+  Message_Block_Ptr message(
+    new ACE_Message_Block(max_marshaled_size,
+                          ACE_Message_Block::MB_DATA,
+                          0, //cont
+                          0, //data
+                          0, //allocator_strategy
+                          0, //locking_strategy
+                          ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
+                          ACE_Time_Value::zero,
+                          ACE_Time_Value::max_time,
+                          0,
+                          0));
+
+  *message << header_data;
+  DCPS::Serializer ser(message.get());
+  ser << remote;
+
+  TransportControlElement* send_element = new TransportControlElement(move(message));
+
+  this->send_i(send_element, false);
+}
+
+void
 OpenDDS::DCPS::TcpDataLink::drop_pending_request_acks()
 {
   ACE_Guard<ACE_SYNCH_MUTEX> guard(pending_request_acks_lock_);
@@ -447,6 +535,24 @@ OpenDDS::DCPS::TcpDataLink::receive_strategy()
 {
   return static_rchandle_cast<OpenDDS::DCPS::TcpReceiveStrategy>(receive_strategy_);
 }
+int
+OpenDDS::DCPS::TcpDataLink::make_reservation(const RepoId& remote_subscription_id,
+                                             const RepoId& local_publication_id,
+                                             const TransportSendListener_wrch& send_listener)
+{
+  const int result = DataLink::make_reservation(remote_subscription_id, local_publication_id, send_listener);
+  send_association_msg(local_publication_id, remote_subscription_id);
+  return result;
+}
 
+int
+OpenDDS::DCPS::TcpDataLink::make_reservation(const RepoId& remote_publication_id,
+                                             const RepoId& local_subscription_id,
+                                             const TransportReceiveListener_wrch& receive_listener)
+{
+  const int result = DataLink::make_reservation(remote_publication_id, local_subscription_id, receive_listener);
+  send_association_msg(local_subscription_id, remote_publication_id);
+  return result;
+}
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

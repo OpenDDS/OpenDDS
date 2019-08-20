@@ -60,6 +60,14 @@ public:
   TcpSendStrategy_rch send_strategy();
   TcpReceiveStrategy_rch receive_strategy();
 
+  int make_reservation(const RepoId& remote_subscription_id,
+                       const RepoId& local_publication_id,
+                       const TransportSendListener_wrch& send_listener);
+
+  int make_reservation(const RepoId& remote_publication_id,
+                       const RepoId& local_subscription_id,
+                       const TransportReceiveListener_wrch& receive_listener);
+
 protected:
 
   /// Called when the DataLink is self-releasing because all of its
@@ -70,6 +78,8 @@ protected:
 private:
   bool handle_send_request_ack(TransportQueueElement* element);
   void send_graceful_disconnect_message();
+  void do_association_actions();
+  void send_association_msg(const RepoId& local, const RepoId& remote);
 
   ACE_INET_Addr           remote_address_;
   WeakRcHandle<TcpConnection> connection_;

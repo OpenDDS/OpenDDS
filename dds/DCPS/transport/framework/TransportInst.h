@@ -134,7 +134,7 @@ private:
 
   friend class TransportClient;
  protected:
-  TransportImpl* impl();
+  TransportImpl_rch impl();
  private:
   virtual TransportImpl_rch new_impl() = 0;
 
