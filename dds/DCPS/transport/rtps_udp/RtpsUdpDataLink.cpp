@@ -77,6 +77,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+const double QUICK_REPLY_DELAY_RATIO = 0.1;
+
 RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
                                  const GuidPrefix_t& local_prefix,
                                  const RtpsUdpInst& config,
@@ -97,6 +99,7 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
   , relay_beacon_(make_rch<HeartBeat>(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::send_relay_beacon))
   , held_data_delivery_handler_(this)
   , max_bundle_size_(config.max_bundle_size_)
+  , quick_reply_delay_(config.heartbeat_response_delay_ * QUICK_REPLY_DELAY_RATIO)
 #ifdef OPENDDS_SECURITY
   , security_config_(Security::SecurityRegistry::instance()->default_config())
   , local_crypto_handle_(DDS::HANDLE_NIL)
@@ -1286,7 +1289,7 @@ RtpsUdpDataLink::received(const RTPS::HeartBeatSubmessage& heartbeat,
 bool
 RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage& heartbeat,
                                                  const RepoId& src,
-                                                 MetaSubmessageVec& meta_submessages)
+                                                 MetaSubmessageVec& /*meta_submessages*/)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
   RtpsUdpDataLink_rch link = link_.lock();
@@ -1307,10 +1310,11 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
   hb_first.setValue(heartbeat.firstSN.high, heartbeat.firstSN.low);
   SequenceNumber hb_last;
   hb_last.setValue(heartbeat.lastSN.high, heartbeat.lastSN.low);
-  if (info.hb_range_.second.getValue() == 0 && hb_last.getValue() != 0) {
+  if (info.first_ever_hb_ || (info.hb_range_.second.getValue() == 0 && hb_last.getValue() != 0)) {
     immediate_reply = true;
   }
   info.heartbeat_recvd_count_ = heartbeat.count.value;
+  info.first_ever_hb_ = false;
 
   SequenceNumber& first = info.hb_range_.first;
   first.setValue(heartbeat.firstSN.high, heartbeat.firstSN.low);
@@ -1323,7 +1327,7 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
   if (last.getValue() >= starting.getValue()) {
 
     DisjointSequence& recvd = info.recvd_;
-    if (!durable_ && info.initial_hb_) {
+    if (!durable_ && info.first_valid_hb_) {
       // For the non-durable reader, the first received HB or DATA establishes
       // a baseline of the lowest sequence number we'd ever need to NACK.
       if (recvd.empty() || recvd.low() >= last) {
@@ -1343,7 +1347,7 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
     //FUTURE: to support wait_for_acks(), notify DCPS layer of the sequence
     //        numbers we no longer expect to receive due to HEARTBEAT
 
-    info.initial_hb_ = false;
+    info.first_valid_hb_ = false;
   }
 
   const bool is_final = heartbeat.smHeader.flags & RTPS::FLAG_F,
@@ -1355,7 +1359,7 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
     info.ack_pending_ = true;
 
     if (immediate_reply) {
-      gather_ack_nacks_i(meta_submessages);
+      link->heartbeat_reply_.schedule(link->quick_reply_delay_);
       return false;
     } else {
       return true; // timer will invoke send_heartbeat_replies()
@@ -3169,16 +3173,24 @@ RtpsUdpDataLink::RtpsWriter::add_elem_awaiting_ack(TransportQueueElement* elemen
 // Implementing TimedDelay and HeartBeat nested classes (for ACE timers)
 
 void
-RtpsUdpDataLink::TimedDelay::schedule()
+RtpsUdpDataLink::TimedDelay::schedule(const ACE_Time_Value& timeout)
 {
-  if (!scheduled_) {
-    const long timer = outer_->get_reactor()->schedule_timer(this, 0, timeout_);
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  const ACE_Time_Value& next_to = (timeout != ACE_Time_Value::zero && timeout < timeout_) ? timeout : timeout_;
+
+  if (scheduled_ != ACE_Time_Value::zero && ((ACE_Time_Value().now() + next_to) < scheduled_)) {
+    outer_->get_reactor()->cancel_timer(this);
+    scheduled_ = ACE_Time_Value::zero;
+  }
+
+  if (scheduled_ == ACE_Time_Value::zero) {
+    const long timer = outer_->get_reactor()->schedule_timer(this, 0, next_to);
 
     if (timer == -1) {
       ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpDataLink::TimedDelay::schedule "
         "failed to schedule timer %p\n", ACE_TEXT("")));
     } else {
-      scheduled_ = true;
+      scheduled_ = ACE_Time_Value().now() + next_to;
     }
   }
 }
@@ -3186,9 +3198,10 @@ RtpsUdpDataLink::TimedDelay::schedule()
 void
 RtpsUdpDataLink::TimedDelay::cancel()
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
   if (scheduled_) {
     outer_->get_reactor()->cancel_timer(this);
-    scheduled_ = false;
+    scheduled_ = ACE_Time_Value::zero;
   }
 }
 

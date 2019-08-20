@@ -334,12 +334,12 @@ private:
     OPENDDS_MAP(SequenceNumber, ReceivedDataSample) held_;
     SequenceRange hb_range_;
     OPENDDS_MAP(SequenceNumber, RTPS::FragmentNumber_t) frags_;
-    bool ack_pending_, initial_hb_;
+    bool ack_pending_, first_ever_hb_, first_valid_hb_;
     CORBA::Long heartbeat_recvd_count_, hb_frag_recvd_count_,
       acknack_count_, nackfrag_count_;
 
     WriterInfo()
-      : ack_pending_(false), initial_hb_(true), heartbeat_recvd_count_(0),
+      : ack_pending_(false), first_ever_hb_(true), first_valid_hb_(true), heartbeat_recvd_count_(0),
         hb_frag_recvd_count_(0), acknack_count_(0), nackfrag_count_(0) { hb_range_.second = SequenceNumber::ZERO(); }
 
     bool should_nack() const;
@@ -503,7 +503,7 @@ private:
       : outer_(outer), function_(function), timeout_(timeout), scheduled_(false)
     {}
 
-    void schedule();
+    void schedule(const ACE_Time_Value& timeout = ACE_Time_Value::zero);
     void cancel();
 
     int handle_timeout(const ACE_Time_Value&, const void*)
@@ -516,7 +516,8 @@ private:
     RtpsUdpDataLink* outer_;
     PMF function_;
     ACE_Time_Value timeout_;
-    bool scheduled_;
+    ACE_Time_Value scheduled_;
+    mutable ACE_Thread_Mutex mutex_;
 
   } nack_reply_, heartbeat_reply_;
 
@@ -653,6 +654,7 @@ private:
   };
   HeldDataDeliveryHandler held_data_delivery_handler_;
   const size_t max_bundle_size_;
+  ACE_Time_Value quick_reply_delay_;
 
 #ifdef OPENDDS_SECURITY
   mutable ACE_Thread_Mutex ch_lock_;
