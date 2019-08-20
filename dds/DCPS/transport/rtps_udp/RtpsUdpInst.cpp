@@ -35,6 +35,7 @@ RtpsUdpInst::RtpsUdpInst(const OPENDDS_STRING& name)
   , ttl_(1)
   , multicast_group_address_(7401, "239.255.0.2")
   , nak_depth_(32) // default nak_depth in OpenDDS_Multicast
+  , max_bundle_size_(TransportSendStrategy::UDP_MAX_MESSAGE_SIZE - RTPS::RTPSHDR_SZ) // default maximum bundled message size is max udp message size (see TransportStrategy) minus RTPS header
   , nak_response_delay_(0, 200*1000 /*microseconds*/) // default from RTPS
   , heartbeat_period_(1) // no default in RTPS spec
   , heartbeat_response_delay_(0, 500*1000 /*microseconds*/) // default from RTPS
@@ -86,6 +87,8 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
                           multicast_interface_);
 
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("nak_depth"), nak_depth_, size_t);
+
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("max_bundle_size"), max_bundle_size_, size_t);
 
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("ttl"), ttl_, unsigned char);
 
@@ -149,6 +152,7 @@ RtpsUdpInst::dump_to_str() const
       + ':' + to_dds_string(multicast_group_address_.get_port_number()) + '\n';
   ret += formatNameForDump("multicast_interface") + multicast_interface_ + '\n';
   ret += formatNameForDump("nak_depth") + to_dds_string(unsigned(nak_depth_)) + '\n';
+  ret += formatNameForDump("max_bundle_size") + to_dds_string(unsigned(max_bundle_size_)) + '\n';
   ret += formatNameForDump("nak_response_delay") + to_dds_string(nak_response_delay_.msec()) + '\n';
   ret += formatNameForDump("heartbeat_period") + to_dds_string(heartbeat_period_.msec()) + '\n';
   ret += formatNameForDump("heartbeat_response_delay") + to_dds_string(heartbeat_response_delay_.msec()) + '\n';
