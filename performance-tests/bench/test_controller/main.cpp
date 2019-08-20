@@ -9,7 +9,13 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/WaitSet.h>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
 #include "BenchTypeSupportImpl.h"
+
+#include "rapidjson/document.h"
+#include "rapidjson/istreamwrapper.h"
+#pragma GCC diagnostic pop
 
 using namespace Bench::NodeController;
 
@@ -32,10 +38,25 @@ read_file(const std::string& name)
   return ss.str();
 }
 
+bool
+json_2_report(std::istream& is, Bench::WorkerReport& report)
+{
+  rapidjson::Document document;
+  rapidjson::IStreamWrapper isw(is);
+  document.ParseStream(isw);
+  if (!document.IsObject()) {
+    std::cerr << "Expected report file to contain JSON document object" << std::endl;
+    return false;
+  }
+
+  OpenDDS::DCPS::copyFromRapidJson(document, report);
+
+  return true;
+}
+
 int
 ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
-  std::cout << "test_controller" << std::endl;
   dds_root = ACE_OS::getenv("DDS_ROOT");
   if (dds_root.empty()) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("DDS_ROOT isn't defined\n")));
@@ -157,6 +178,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   size_t reports_received = 0;
+  std::vector<std::string> report_filenames;
   while (reports_received < expected_workers) {
     DDS::ReturnCode_t rc;
 
@@ -192,6 +214,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         if (reports[r].failed) {
           std::cerr << "Worker " << reports[r].worker_id << " of node "
             << reports[r].node_id << " failed" << std::endl;
+          return 1;
         } else {
           std::stringstream ss;
           ss << "n" << reports[r].node_id << "w" << reports[r].worker_id << "_report.json";
@@ -201,9 +224,20 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
             file << reports[r].details;
           } else {
             std::cerr << "Could not write " << filename << std::endl;
+            return 1;
           }
+          report_filenames.push_back(filename);
         }
       }
+    }
+  }
+
+  for (auto report_filename : report_filenames) {
+    std::ifstream report_file(report_filename);
+    Bench::WorkerReport report;
+    if (report_file.is_open() && !json_2_report(report_file, report)) {
+      std::cerr << "Could not read " << report_filename << " into a report" << std::endl;
+      return 1;
     }
   }
 
