@@ -116,7 +116,7 @@ sub do_cached_parse {
   $self->{'default_nested'} = $called_from_base;
 
   ## Set up the macros and include paths supplied in the command flags
-  my %macros;
+  my %macros = ('__OPENDDS_IDL' => 1);
   my %mparams;
   my @include;
   if (defined $flags) {
@@ -859,7 +859,7 @@ sub evaluate_if {
   else {
     ## For #if, we only support defined, macro and numeric values.
     ## All others are considered a syntax error.
-    if ($value =~ /^(!)?\s*defined\s*\(\s*([_a-z]\w*)\s*\)$/i) {
+    if ($value =~ /^(!)?\s*defined\s*\(?\s*([_a-z]\w*)\s*\)?$/i) {
       my $not   = $1;
       my $macro = $2;
       $status = (defined $macros->{$macro} ? 1 : 0);
