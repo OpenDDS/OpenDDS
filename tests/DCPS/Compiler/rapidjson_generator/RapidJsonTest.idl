@@ -4,7 +4,7 @@
 
 module Mod {
 
-  enum MyEnum {one, two, three};
+  enum MyEnum { one, two, three, four };
 
   struct BasicTypes {
     octet o;
@@ -25,6 +25,9 @@ module Mod {
     wstring wstr;
   };
 
+  typedef sequence<short> MySeq;
+  typedef sequence<CORBA::StringSeq> NestedSeq;
+
   union MyUnion switch (MyEnum) {
   case one:
     long a;
@@ -32,10 +35,10 @@ module Mod {
     boolean b;
   case three:
     double d;
+  case four:
+    NestedSeq s;
   };
 
-  typedef sequence<short> MySeq;
-  typedef sequence<CORBA::StringSeq> NestedSeq;
   typedef sequence<NestedSeq> NestedNestedSeq;
   typedef sequence<NestedNestedSeq> NestedNestedNestedSeq;
 
@@ -60,7 +63,7 @@ module Mod {
 
   typedef sequence<MyUnion> MyUnionSeq;
 
-  enum MyOtherEnum {small, medium, large};
+  enum MyOtherEnum { small, medium, large };
 
   union MyOtherUnion switch (MyOtherEnum) {
   case small:

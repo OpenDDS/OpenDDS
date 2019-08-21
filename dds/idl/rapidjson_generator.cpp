@@ -577,6 +577,10 @@ namespace {
                             const std::string&)
   {
     std::ostringstream strm;
+    const Classification cls = classify(type);
+    if (cls & CL_STRUCTURE || cls & CL_SEQUENCE) {
+      strm << "  out." << name << "(" << scoped(type->name()) << "());\n";
+    }
     strm << "  ";
     gen_copyfrom("out", "src", type, name.c_str(), false, true, strm);
     return strm.str();

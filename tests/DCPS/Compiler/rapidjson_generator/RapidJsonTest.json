@@ -47,8 +47,20 @@
     ]
   ],
   "mu": {
-    "_d": "three",
-    "d": 5678
+    "_d": "four",
+    "s": [
+      [
+        "alpha",
+        "beta",
+        "gamma"
+      ],
+      [
+        "alef",
+        "bet",
+        "gimel",
+        "dalet"
+      ]
+    ]
   },
   "ca": [
     "f",
