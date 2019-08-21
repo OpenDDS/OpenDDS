@@ -27,13 +27,19 @@ ACE_Process_Manager* process_manager = ACE_Process_Manager::instance();
 std::string dds_root;
 ReportDataWriter_var report_writer_impl;
 
+ACE_TCHAR tempdir_template[] = "/tmp/nc_XXXXXX";
+ACE_TCHAR* tempdir = ACE_OS::mktemp(tempdir_template);
+int tempdir_mkdir_result = ACE_OS::mkdir(tempdir, S_IRWXU);
+
 std::string
 create_config(const std::string& file_base_name, const char* contents)
 {
-  const std::string filename = file_base_name + "_config.json";
+  ACE_TCHAR suffix_template[] = "_XXXXXX";
+  ACE_TCHAR* suffix = ACE_OS::mktemp(suffix_template);
+  const std::string filename = std::string(tempdir_mkdir_result ? "." : tempdir) + "/" + file_base_name + suffix + "_config.json";
   std::ofstream file(filename);
   if (file.is_open()) {
-    file << contents;
+    file << contents << std::flush;
   } else {
     std::cerr << "Could not write " << filename << std::endl;
   }
@@ -50,6 +56,8 @@ private:
   pid_t pid_;
   std::string file_base_name_;
   std::string config_filename_;
+  std::string report_filename_;
+  std::string log_filename_;
 
 public:
   Worker(NodeId node_id, const WorkerConfig& config)
@@ -61,6 +69,17 @@ public:
     ss << 'n' << node_id_ << 'w' << worker_id_;
     file_base_name_ = ss.str();
     config_filename_ = create_config(file_base_name_, config.config.in());
+    report_filename_ = config_filename_.substr(0, config_filename_.size() - 12) + "_report.json";
+    log_filename_ = config_filename_.substr(0, config_filename_.size() - 12) + "_log.txt";
+  }
+
+  ~Worker()
+  {
+    if (!config_filename_.empty()) {
+      ACE_OS::unlink(config_filename_.c_str());
+      ACE_OS::unlink(report_filename_.c_str());
+      ACE_OS::unlink(log_filename_.c_str());
+    }
   }
 
   WorkerId
@@ -78,8 +97,7 @@ public:
     report.failed = failed;
     report.details = "";
     if (!failed) {
-      std::string filename = file_base_name_ + "_report.json";
-      std::ifstream file(filename);
+      std::ifstream file(report_filename_);
       if (file.good()) {
         std::string str((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
         report.details = str.c_str();
@@ -94,11 +112,12 @@ public:
   run()
   {
     ACE_Process_Options proc_opts;
-    std::stringstream ss;
+    std::stringstream ss, ess;
     ss << dds_root << "/performance-tests/bench/worker/worker " << config_filename_
-      << " --report " << file_base_name_ << "_report.json"
-      << " --log " << file_base_name_ << "_log.txt";
-    std::cerr << ss.str() << std::endl;
+      << " --report " << report_filename_
+      << " --log " << log_filename_ << std::flush;
+    ess << ss.str() << std::endl;
+    std::cerr << ess.str() << std::flush;
     proc_opts.command_line(ss.str().c_str());
     pid_ = process_manager->spawn(proc_opts);
     bool failed = pid_ == ACE_INVALID_PID;
@@ -132,7 +151,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
   NodeId this_node_id;
-  std::vector<Worker> workers;
+  std::vector<std::shared_ptr<Worker>> workers;
   DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
 
   for (int i = 1; i < argc; i++) {
@@ -260,25 +279,31 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     for (size_t node = 0; node < configs.length(); node++) {
       if (configs[node].node_id == this_node_id) {
         for (size_t worker = 0; worker < configs[node].workers.length(); worker++) {
-          workers.emplace_back(this_node_id, configs[node].workers[worker]);
+          workers.push_back(std::make_shared<Worker>(this_node_id, configs[node].workers[worker]));
         }
         waiting = false;
       }
     }
   }
 
-  for (Worker& worker : workers) {
-    worker.run();
+  for (std::shared_ptr<Worker>& worker : workers) {
+    worker->run();
   }
 
-  for (Worker& worker : workers) {
-    worker.check();
+  for (std::shared_ptr<Worker>& worker : workers) {
+    worker->check();
   }
+
+  workers.clear();
 
   // Clean up OpenDDS
   participant->delete_contained_entities();
   dpf->delete_participant(participant);
   TheServiceParticipant->shutdown();
+
+  if (tempdir_mkdir_result == 0) {
+    ACE_OS::rmdir(tempdir);
+  }
 
   return 0;
 }
