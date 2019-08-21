@@ -578,7 +578,7 @@ namespace {
   {
     std::ostringstream strm;
     const Classification cls = classify(type);
-    if (cls & CL_STRUCTURE || cls & CL_SEQUENCE) {
+    if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_FIXED)) {
       strm << "  out." << name << "(" << scoped(type->name()) << "());\n";
     }
     strm << "  ";
