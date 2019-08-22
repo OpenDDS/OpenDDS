@@ -178,12 +178,12 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   size_t reports_received = 0;
-  std::vector<std::string> report_filenames;
+  std::vector<Bench::WorkerReport> parsed_reports;
   while (reports_received < expected_workers) {
     DDS::ReturnCode_t rc;
 
     DDS::ReadCondition_var read_condition = report_reader_impl->create_readcondition(
-        DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
+        DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
     DDS::WaitSet_var ws = new DDS::WaitSet;
     ws->attach_condition(read_condition);
     DDS::ConditionSeq active;
@@ -216,28 +216,32 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
             << reports[r].node_id << " failed" << std::endl;
           return 1;
         } else {
+          Bench::WorkerReport report;
           std::stringstream ss;
-          ss << "n" << reports[r].node_id << "w" << reports[r].worker_id << "_report.json";
-          const std::string filename = ss.str();
-          std::ofstream file(filename);
-          if (file.is_open()) {
-            file << reports[r].details;
+          ss << reports[r].details << std::flush;
+          if (json_2_report(ss, report)) {
+            parsed_reports.push_back(report);
           } else {
-            std::cerr << "Could not write " << filename << std::endl;
+            std::cerr << "Error parsing report details for node " << reports[r].node_id << ", worker " << reports[r].worker_id << std::endl;
             return 1;
           }
-          report_filenames.push_back(filename);
         }
       }
     }
   }
 
-  for (auto report_filename : report_filenames) {
-    std::ifstream report_file(report_filename);
-    Bench::WorkerReport report;
-    if (report_file.is_open() && !json_2_report(report_file, report)) {
-      std::cerr << "Could not read " << report_filename << " into a report" << std::endl;
-      return 1;
+  Bench::WorkerReport consolidated_report;
+  for (size_t r = 0; r < parsed_reports.size(); ++r) {
+    Builder::ProcessReport& process_report = parsed_reports[r].process_report;
+    std::cout << "I've got a parsed report " << r << std::endl;
+    for (CORBA::ULong i = 0; i < process_report.participants.length(); ++i) {
+      std::cout << " - I've got a parsed participant " << i << std::endl;
+      for (CORBA::ULong j = 0; j < process_report.participants[i].subscribers.length(); ++j) {
+        std::cout << "   - I've got a parsed subscriber " << j << std::endl;
+        for (CORBA::ULong k = 0; k < process_report.participants[i].subscribers[j].datareaders.length(); ++k) {
+          std::cout << "     - I've got a parsed datareader " << k << std::endl;
+        }
+      }
     }
   }
 
