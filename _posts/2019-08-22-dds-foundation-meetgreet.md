@@ -16,4 +16,4 @@ The session is for all levels of DDS enthusiasts. Learn how DDS works for autono
 
 [**REGISTER NOW**](https://www.omg.org/events/tn-19/special-events/DDS-Meet-Greet.htm)<br/>
 
-We hope to see you there!
+Members of [**Object Computing's**](https://www.objectcomputing.com) OpenDDS team will be there. We hope to see you there!
