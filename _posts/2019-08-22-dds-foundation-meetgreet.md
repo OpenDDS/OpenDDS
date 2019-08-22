@@ -5,7 +5,7 @@ categories: news
 author: The OpenDDS Team
 ---
 
-The [**DDS Foundation**](https://www.dds-foundation.org) and [**Object Management Group (OMG)**](https://www.omg.org) invite you to a [**free evening reception**](https://www.omg.org/events/tn-19/special-events/DDS-Meet-Greet.htm) for DDS practitioners and researchers who wish to gain the latest information and insights on DDS, the proven data connectivity standard for mission-critical, industrial-grade applications.
+The [DDS Foundation](https://www.dds-foundation.org) and [Object Management Group (OMG)](https://www.omg.org) invite you to a [free evening reception](https://www.omg.org/events/tn-19/special-events/DDS-Meet-Greet.htm) for DDS practitioners and researchers who wish to gain the latest information and insights on DDS, the proven data connectivity standard for mission-critical, industrial-grade applications.
 
 This 2-hour informal event will feature leading academic researchers discussing their work with DDS, posters of selected research projects, a panel presentation, and live demonstrations.
 
@@ -14,6 +14,6 @@ This 2-hour informal event will feature leading academic researchers discussing 
 
 The session is for all levels of DDS enthusiasts. Learn how DDS works for autonomous IIoT systems, and get answers to your specific DDS questions in a relaxed social setting. This is the perfect opportunity to meet the developers, researchers, and innovators supporting this widely adopted standard for secure, real-time data exchange.
 
-[**REGISTER NOW**](https://www.omg.org/events/tn-19/special-events/DDS-Meet-Greet.htm)<br/>
+[REGISTER NOW](https://www.omg.org/events/tn-19/special-events/DDS-Meet-Greet.htm)<br/>
 
-Members of [**Object Computing's**](https://www.objectcomputing.com) OpenDDS team will be there. We hope to see you there!
+Members of the [Object Computing, Inc. (OCI)](https://www.objectcomputing.com) OpenDDS team will be there. *We hope to see you there!*
