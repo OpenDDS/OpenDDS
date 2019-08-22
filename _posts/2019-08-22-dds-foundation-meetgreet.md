@@ -14,6 +14,6 @@ This 2-hour informal event will feature leading academic researchers discussing 
 
 The session is for all levels of DDS enthusiasts. Learn how DDS works for autonomous IIoT systems, and get answers to your specific DDS questions in a relaxed social setting. This is the perfect opportunity to meet the developers, researchers, and innovators supporting this widely adopted standard for secure, real-time data exchange.
 
--->[REGISTER NOW](https://www.omg.org/events/tn-19/special-events/DDS-Meet-Greet.htm)<br/>
+--> [REGISTER NOW](https://www.omg.org/events/tn-19/special-events/DDS-Meet-Greet.htm)<br/>
 
 Members of the [Object Computing, Inc. (OCI)](https://www.objectcomputing.com) OpenDDS team will be there. *We hope to see you there!*
