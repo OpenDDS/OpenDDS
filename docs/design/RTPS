@@ -78,3 +78,9 @@ Notes for Maintainers
   utility functions, and the Discovery implementation
 - OpenDDS_Rtps_Udp library (in dds/DCPS/transport/rtps_udp) contains the the
   implementation of the OpenDDS pluggable transport for the RTPS UDP/IP PSM
+
+Interoperability
+----------------
+- In when sending AckNack submessages, OpenDDS used to insert INFO_REPLY
+  submessages, but testing indicated that other DDS implementations didn't
+  accept it.

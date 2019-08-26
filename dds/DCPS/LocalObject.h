@@ -36,7 +36,7 @@ public:
   }
 };
 
-/// OpenDDS::DCPS::LocalObject resolves ambigously-inherited members like
+/// OpenDDS::DCPS::LocalObject resolves ambiguously-inherited members like
 /// _narrow and _ptr_type.  It is used from client code like so:
 /// class MyReaderListener
 ///   : public OpenDDS::DCPS::LocalObject<OpenDDS::DCPS::DataReaderListener> {...};

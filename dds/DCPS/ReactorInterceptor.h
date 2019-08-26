@@ -35,14 +35,15 @@ public:
   typedef container_supported_unique_ptr<Command> CommandPtr;
 
   bool should_execute_immediately();
-  void process_command_queue();
 
   template<typename T>
   void execute_or_enqueue(T& t)
   {
     if (should_execute_immediately()) {
-      ACE_GUARD(ACE_Thread_Mutex, guard, this->mutex_);
-      process_command_queue();
+      {
+        ACE_GUARD(ACE_Thread_Mutex, guard, this->mutex_);
+        process_command_queue_i();
+      }
       t.execute();
     } else {
       enqueue(t);
@@ -67,7 +68,9 @@ protected:
 
   virtual ~ReactorInterceptor();
   int handle_exception(ACE_HANDLE /*fd*/);
-  int handle_exception_i(ACE_Guard<ACE_Thread_Mutex>& guard);
+  int handle_exception_i();
+  void process_command_queue_i();
+
   ACE_thread_t owner_;
   ACE_Thread_Mutex mutex_;
   ACE_Condition_Thread_Mutex condition_;

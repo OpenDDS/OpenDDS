@@ -182,19 +182,6 @@ TcpTransport::async_connect_failed(const PriorityKey& key)
   }
 }
 
-void
-TcpTransport::async_connect_succeeded(const PriorityKey& key)
-{
-  GuardType guard(links_lock_);
-  TcpDataLink_rch link;
-  links_.find(key, link);
-  guard.release();
-
-  if (link.in()) {
-    link->invoke_on_start_callbacks(true);
-  }
-}
-
 //Called with links_lock_ held
 bool
 TcpTransport::find_datalink_i(const PriorityKey& key, TcpDataLink_rch& link,

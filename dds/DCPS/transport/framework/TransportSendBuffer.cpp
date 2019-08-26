@@ -133,7 +133,7 @@ SingleSendBuffer::release(BufferMap::iterator buffer_iter)
 }
 
 void
-SingleSendBuffer::retain_all(RepoId pub_id)
+SingleSendBuffer::retain_all(const RepoId& pub_id)
 {
   if (Transport_debug_level > 5) {
     GuidConverter converter(pub_id);

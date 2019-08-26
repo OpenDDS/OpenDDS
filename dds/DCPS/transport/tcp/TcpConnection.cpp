@@ -150,15 +150,10 @@ OpenDDS::DCPS::TcpConnection::open(void* arg)
     int connect_tcp_datalink_ = transport.connect_tcp_datalink(*link_, rchandle_from(this));
 
     if (active_open_ == -1 || connect_tcp_datalink_ == -1) {
-      // if (active_open() == -1 ||
-      //       transport->connect_tcp_datalink(link_, self) == -1) {
-
       transport.async_connect_failed(key);
-
       return -1;
     }
 
-    transport.async_connect_succeeded(key);
     return 0;
   }
 
