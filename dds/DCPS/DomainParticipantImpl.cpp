@@ -618,15 +618,13 @@ DomainParticipantImpl::delete_topic_i(
 //      because it will steal the framework's reference.
 DDS::Topic_ptr
 DomainParticipantImpl::find_topic(
-  const char * topic_name,
-  const DDS::Duration_t & timeout)
+  const char* topic_name,
+  const DDS::Duration_t& timeout)
 {
-  ACE_Time_Value timeout_tv
-  = ACE_OS::gettimeofday() + ACE_Time_Value(timeout.sec, timeout.nanosec/1000);
+  const ACE_Time_Value timeout_tv = duration_to_monotonic_time(timeout);
 
   bool first_time = true;
-
-  while (first_time || ACE_OS::gettimeofday() < timeout_tv) {
+  while (first_time || monotonic_time() < timeout_tv) {
     if (first_time) {
       first_time = false;
     }
@@ -656,7 +654,7 @@ DomainParticipantImpl::find_topic(
                                            qos.out(),
                                            topic_id);
 
-
+    const ACE_Time_Value now = monotonic_time();
     if (status == FOUND) {
       OpenDDS::DCPS::TypeSupport_var type_support =
         Registered_Data_Types->lookup(this, type_name.in());
@@ -684,18 +682,14 @@ DomainParticipantImpl::find_topic(
                  ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::find_topic - ")
                  ACE_TEXT("topic not found, discovery returned INTERNAL_ERROR!\n")));
       return DDS::Topic::_nil();
-    } else {
-      ACE_Time_Value now = ACE_OS::gettimeofday();
+    } else if (now < timeout_tv) {
+      const ACE_Time_Value remaining = timeout_tv - now;
 
-      if (now < timeout_tv) {
-        ACE_Time_Value remaining = timeout_tv - now;
+      if (remaining.sec() >= 1) {
+        ACE_OS::sleep(1);
 
-        if (remaining.sec() >= 1) {
-          ACE_OS::sleep(1);
-
-        } else {
-          ACE_OS::sleep(remaining);
-        }
+      } else {
+        ACE_OS::sleep(remaining);
       }
     }
   }
@@ -1350,7 +1344,7 @@ DomainParticipantImpl::assert_liveliness()
     it->svt_->assert_liveliness_by_participant();
   }
 
-  last_liveliness_activity_ = ACE_OS::gettimeofday();
+  last_liveliness_activity_ = monotonic_time();
 
   return DDS::RETCODE_OK;
 }
@@ -1419,12 +1413,9 @@ DomainParticipantImpl::get_default_topic_qos(
 }
 
 DDS::ReturnCode_t
-DomainParticipantImpl::get_current_time(
-  DDS::Time_t & current_time)
+DomainParticipantImpl::get_current_time(DDS::Time_t& current_time)
 {
-  current_time
-  = OpenDDS::DCPS::time_value_to_time(
-      ACE_OS::gettimeofday());
+  current_time = time_value_to_time(system_time());
   return DDS::RETCODE_OK;
 }
 
@@ -2216,11 +2207,9 @@ DomainParticipantImpl::LivelinessTimer::~LivelinessTimer()
 void
 DomainParticipantImpl::LivelinessTimer::add_adjust(OpenDDS::DCPS::DataWriterImpl* writer)
 {
-  ACE_GUARD(ACE_Thread_Mutex,
-            guard,
-            this->lock_);
+  ACE_GUARD(ACE_Thread_Mutex, guard, this->lock_);
 
-  const ACE_Time_Value now = ACE_OS::gettimeofday();
+  const ACE_Time_Value now = monotonic_time();
 
   // Calculate the time remaining to liveliness check.
   const ACE_Time_Value remaining = interval_ - (now - last_liveliness_check_);
@@ -2245,20 +2234,17 @@ DomainParticipantImpl::LivelinessTimer::add_adjust(OpenDDS::DCPS::DataWriterImpl
 void
 DomainParticipantImpl::LivelinessTimer::remove_adjust()
 {
-  ACE_GUARD(ACE_Thread_Mutex,
-            guard,
-            this->lock_);
+  ACE_GUARD(ACE_Thread_Mutex, guard, this->lock_);
 
   recalculate_interval_ = true;
 }
 
 int
-DomainParticipantImpl::LivelinessTimer::handle_timeout(const ACE_Time_Value & tv, const void* /* arg */)
+DomainParticipantImpl::LivelinessTimer::handle_timeout(
+  const ACE_Time_Value& tv,
+  const void* /* arg */)
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex,
-                   guard,
-                   this->lock_,
-                   0);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, this->lock_, 0);
 
   scheduled_ = false;
 

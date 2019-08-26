@@ -23,7 +23,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   duration.sec = ::DDS::DURATION_INFINITE_SEC;
   duration.nanosec = ::DDS::DURATION_INFINITE_NSEC;
   {
-    ACE_Time_Value tv = duration_to_time_value(duration);
+    const ACE_Time_Value tv = duration_to_time_value(duration);
     // see value.
     //time_t sec = tv.sec ();
     //suseconds_t usec = tv.usec ();
@@ -39,8 +39,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   }
 
   {
-    ACE_Time_Value now = ACE_OS::gettimeofday ();
-    ACE_Time_Value tv = duration_to_absolute_time_value(duration, now);
+    const ACE_Time_Value now = system_time();
+    const ACE_Time_Value tv = duration_to_absolute_time_value(duration, now);
     // see value.
     //time_t sec = tv.sec ();
     //suseconds_t usec = tv.usec ();
@@ -57,7 +57,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   {
     duration.sec = ::DDS::DURATION_INFINITE_SEC - 2;
     duration.nanosec = ::DDS::DURATION_INFINITE_NSEC;
-    ACE_Time_Value tv = duration_to_time_value(duration);
+    const ACE_Time_Value tv = duration_to_time_value(duration);
     // see value.
     //time_t sec = tv.sec ();
     //suseconds_t usec = tv.usec ();

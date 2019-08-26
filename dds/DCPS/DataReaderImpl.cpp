@@ -758,7 +758,7 @@ DataReaderImpl::signal_liveliness(const RepoId& remote_participant)
     }
   }
 
-  ACE_Time_Value when = ACE_OS::gettimeofday();
+  const ACE_Time_Value when = monotonic_time();
   for (WriterSet::iterator pos = writers.begin(), limit = writers.end();
        pos != limit;
        ++pos) {
@@ -1330,8 +1330,7 @@ DataReaderImpl::writer_activity(const DataSampleHeader& header)
   }
 
   if (!writer.is_nil()) {
-    ACE_Time_Value when = ACE_OS::gettimeofday();
-    writer->received_activity(when);
+    writer->received_activity(monotonic_time());
 
     if ((header.message_id_ == SAMPLE_DATA) ||
         (header.message_id_ == INSTANCE_REGISTRATION) ||
@@ -2085,7 +2084,7 @@ DataReaderImpl::writer_removed(WriterInfo& info)
   }
 
   liveliness_changed_status_.last_publication_handle = info.handle_;
-  instances_liveliness_update(info, ACE_OS::gettimeofday());
+  instances_liveliness_update(info, monotonic_time());
 
   if (liveliness_changed) {
     set_status_changed_flag(DDS::LIVELINESS_CHANGED_STATUS, true);
@@ -2292,12 +2291,12 @@ void DataReaderImpl::process_latency(const ReceivedDataSample& sample)
     if ((this->statistics_enabled()) ||
         (this->qos_.latency_budget.duration > zero)) {
       // This starts as the current time.
-      ACE_Time_Value latency = ACE_OS::gettimeofday();
+      ACE_Time_Value latency = system_time();
 
       // The time interval starts at the send end.
-      DDS::Duration_t then = {
-          sample.header_.source_timestamp_sec_,
-          sample.header_.source_timestamp_nanosec_
+      const DDS::Duration_t then = {
+        sample.header_.source_timestamp_sec_,
+        sample.header_.source_timestamp_nanosec_
       };
 
       // latency delay in ACE_Time_Value format.
@@ -2581,7 +2580,7 @@ DataReaderImpl::lookup_instance_handles(const WriterIdSeq& ids,
 bool
 DataReaderImpl::filter_sample(const DataSampleHeader& header)
 {
-  ACE_Time_Value now(ACE_OS::gettimeofday());
+  const ACE_Time_Value now(system_time());
 
   // Expire historic data if QoS indicates VOLATILE.
   if (!always_get_history_ && header.historic_sample_
@@ -2592,7 +2591,7 @@ DataReaderImpl::filter_sample(const DataSampleHeader& header)
           ACE_TEXT("Discarded historic data.\n")));
     }
 
-    return true;  // Data filtered.
+    return true; // Data filtered.
   }
 
   // The LIFESPAN_DURATION_FLAG is set when sample data is sent
@@ -2600,15 +2599,15 @@ DataReaderImpl::filter_sample(const DataSampleHeader& header)
   if (header.lifespan_duration_) {
     // Finite lifespan.  Check if data has expired.
 
-    DDS::Time_t const tmp = {
-        header.source_timestamp_sec_ + header.lifespan_duration_sec_,
-        header.source_timestamp_nanosec_ + header.lifespan_duration_nanosec_
+    const DDS::Time_t tmp = {
+      header.source_timestamp_sec_ + header.lifespan_duration_sec_,
+      header.source_timestamp_nanosec_ + header.lifespan_duration_nanosec_
     };
 
     // We assume that the publisher host's clock and subcriber host's
     // clock are synchronized (allowed by the spec).
-    ACE_Time_Value const expiration_time(
-        OpenDDS::DCPS::time_to_time_value(tmp));
+    const ACE_Time_Value expiration_time(
+      time_to_time_value(tmp));
 
     if (now >= expiration_time) {
       if (DCPS_debug_level >= 8) {
@@ -2620,7 +2619,7 @@ DataReaderImpl::filter_sample(const DataSampleHeader& header)
             diff.usec()));
       }
 
-      return true;  // Data filtered.
+      return true; // Data filtered.
     }
   }
 
@@ -2628,7 +2627,6 @@ DataReaderImpl::filter_sample(const DataSampleHeader& header)
 }
 
 bool
-
 DataReaderImpl::ownership_filter_instance(const SubscriptionInstance_rch& instance,
   const PublicationId& pubid)
 {
@@ -2707,7 +2705,7 @@ DataReaderImpl::ownership_filter_instance(const SubscriptionInstance_rch& instan
 bool
 DataReaderImpl::time_based_filter_instance(const SubscriptionInstance_rch& instance, ACE_Time_Value& filter_time_expired)
 {
-  ACE_Time_Value now(ACE_OS::gettimeofday());
+  const ACE_Time_Value now(monotonic_time());
 
   // TIME_BASED_FILTER processing; expire data samples
   // if minimum separation is not met for instance.
@@ -3319,7 +3317,7 @@ void DataReaderImpl::accept_sample_processing(const SubscriptionInstance_rch& in
 
   if (instance && watchdog_.in()) {
     instance->last_sample_tv_ = instance->cur_sample_tv_;
-    instance->cur_sample_tv_ = ACE_OS::gettimeofday();
+    instance->cur_sample_tv_ = monotonic_time();
 
     // Watchdog can't be called with sample_lock_ due to reactor deadlock
     ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);

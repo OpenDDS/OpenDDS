@@ -787,7 +787,7 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
       ReaderInfoMap::iterator ri = rw->second.remote_readers_.find(sub);
       if (ri != rw->second.remote_readers_.end()) {
         ri->second.durable_data_[rtps->sequence()] = rtps;
-        ri->second.durable_timestamp_ = ACE_OS::gettimeofday();
+        ri->second.durable_timestamp_ = monotonic_time();
         if (Transport_debug_level > 3) {
           const GuidConverter conv(pub_id), sub_conv(sub);
           ACE_DEBUG((LM_DEBUG,
@@ -818,7 +818,7 @@ RtpsUdpDataLink::end_historic_samples(RtpsWriterMap::iterator writer,
   // Set the ReaderInfo::durable_timestamp_ for the case where no
   // durable samples exist in the DataWriter.
   if (writer != writers_.end() && writer->second.durable_) {
-    const ACE_Time_Value now = ACE_OS::gettimeofday();
+    const ACE_Time_Value now = monotonic_time();
     RepoId sub = GUID_UNKNOWN;
     if (body && header.message_length_ >= sizeof(sub)) {
       std::memcpy(&sub, body->rd_ptr(), header.message_length_);
@@ -1110,7 +1110,7 @@ RtpsUdpDataLink::received(const RTPS::HeartBeatSubmessage& heartbeat,
   src.entityId = heartbeat.writerId;
 
   bool schedule_acknack = false;
-  const ACE_Time_Value now = ACE_OS::gettimeofday();
+  const ACE_Time_Value now = monotonic_time();
   OPENDDS_VECTOR(InterestingRemote) callbacks;
 
   {
@@ -1648,7 +1648,7 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
   std::memcpy(remote.guidPrefix, src_prefix, sizeof(GuidPrefix_t));
   remote.entityId = acknack.readerId;
 
-  const ACE_Time_Value now = ACE_OS::gettimeofday();
+  const ACE_Time_Value now = monotonic_time();
   OPENDDS_VECTOR(DiscoveryListener*) callbacks;
 
   bool first_ack = false;
@@ -2362,7 +2362,7 @@ RtpsUdpDataLink::send_heartbeats()
     using namespace OpenDDS::RTPS;
     OPENDDS_VECTOR(HeartBeatSubmessage) subm;
     OPENDDS_SET(ACE_INET_Addr) recipients;
-    const ACE_Time_Value now = ACE_OS::gettimeofday();
+    const ACE_Time_Value now = monotonic_time();
 
     RepoIdSet writers_to_advertise;
 
@@ -2574,7 +2574,7 @@ RtpsUdpDataLink::check_heartbeats()
   OPENDDS_VECTOR(CallbackType) writerDoesNotExistCallbacks;
 
   // Have any interesting writers timed out?
-  const ACE_Time_Value tv = ACE_OS::gettimeofday() - 10 * this->config().heartbeat_period_;
+  const ACE_Time_Value tv = monotonic_time() - 10 * this->config().heartbeat_period_;
   {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
@@ -2637,7 +2637,7 @@ RtpsUdpDataLink::send_heartbeats_manual(const TransportSendControlElement* tsce)
     // Reliable.
     const bool has_data = !pos->second.send_buff_.is_nil() && !pos->second.send_buff_->empty();
     SequenceNumber durable_max;
-    const ACE_Time_Value now = ACE_OS::gettimeofday();
+    const ACE_Time_Value now = monotonic_time();
     for (ReaderInfoMap::const_iterator ri = pos->second.remote_readers_.begin(), end = pos->second.remote_readers_.end();
          ri != end;
          ++ri) {

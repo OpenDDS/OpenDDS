@@ -79,7 +79,7 @@ OpenDDS::DCPS::OfferedDeadlineWatchdog::execute(
       missed = true;
 
     } else if (timer_called) { // handle_timeout is called
-      ACE_Time_Value diff = ACE_OS::gettimeofday() - instance->cur_sample_tv_;
+      ACE_Time_Value diff = monotonic_time() - instance->cur_sample_tv_;
       missed = diff >= this->interval_;
 
     } else if (instance->last_sample_tv_ != ACE_Time_Value::zero) { // upon writing sample.
@@ -103,7 +103,7 @@ OpenDDS::DCPS::OfferedDeadlineWatchdog::execute(
           writer.listener_for(
             DDS::OFFERED_DEADLINE_MISSED_STATUS);
 
-        if (! CORBA::is_nil(listener.in())) {
+        if (!listener) {
           // Copy before releasing the lock.
           DDS::OfferedDeadlineMissedStatus const status = this->status_;
 
@@ -112,8 +112,7 @@ OpenDDS::DCPS::OfferedDeadlineWatchdog::execute(
 
           // @todo Will this operation ever throw?  If so we may want to
           //       catch all exceptions, and act accordingly.
-          listener->on_offered_deadline_missed(&writer,
-                                              status);
+          listener->on_offered_deadline_missed(&writer, status);
 
           // We need to update the last total count value to our current total
           // so that the next time we will calculate the correct total_count_change;

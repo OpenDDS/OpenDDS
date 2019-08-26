@@ -811,11 +811,11 @@ RecorderImpl::signal_liveliness(const RepoId& remote_participant)
     }
   }
 
-  ACE_Time_Value when = ACE_OS::gettimeofday();
+  const ACE_Time_Value now = monotonic_time();
   for (WriterSet::iterator pos = writers.begin(), limit = writers.end();
        pos != limit;
        ++pos) {
-    pos->second->received_activity(when);
+    pos->second->received_activity(now);
   }
 }
 

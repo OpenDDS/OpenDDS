@@ -23,7 +23,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 OpenDDS::DCPS::ReactorTask::ReactorTask(bool useAsyncSend)
   : barrier_(2)
   , state_(STATE_NOT_RUNNING)
-  , condition_(lock_)
+  , condition_(lock_, condition_time_)
   , reactor_(0)
   , reactor_owner_(ACE_OS::NULL_thread)
   , proactor_(0)
@@ -35,8 +35,9 @@ OpenDDS::DCPS::ReactorTask::~ReactorTask()
 {
 #if defined (ACE_HAS_WIN32_OVERLAPPED_IO) || defined (ACE_HAS_AIO_CALLS)
   if (proactor_) {
-    reactor_->remove_handler(proactor_->implementation()->get_handle(),
-                                   ACE_Event_Handler::DONT_CALL);
+    reactor_->remove_handler(
+      proactor_->implementation()->get_handle(),
+      ACE_Event_Handler::DONT_CALL);
     delete proactor_;
   }
 #endif
@@ -67,6 +68,8 @@ OpenDDS::DCPS::ReactorTask::open(void*)
     proactor_ = 0;
   }
 
+  reactor_->timer_queue(&timer_queue_);
+
   GuardType guard(lock_);
 
   // Reset our state.
@@ -79,7 +82,7 @@ OpenDDS::DCPS::ReactorTask::open(void*)
   // Attempt to activate ourselves.  If successful, a new thread will be
   // started and it will invoke our svc() method.  Note that we still have
   // a hold on our lock while we do this.
-  if (activate(THR_NEW_LWP | THR_JOINABLE,1) != 0) {
+  if (activate(THR_NEW_LWP | THR_JOINABLE, 1) != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
                       "(%P|%t) ERROR: ReactorTask Failed to activate "
                       "itself.\n"),
@@ -200,7 +203,7 @@ OpenDDS::DCPS::ReactorTask::stop()
   // Remove the proactor handler so the reactor stops forwarding messages.
   if (proactor_) {
     reactor_->remove_handler(proactor_->implementation()->get_handle(),
-                                   ACE_Event_Handler::DONT_CALL);
+                             ACE_Event_Handler::DONT_CALL);
   }
 #endif
 

@@ -255,8 +255,10 @@ public:
   virtual DDS::ReturnCode_t get_default_topic_qos(
     DDS::TopicQos & qos);
 
-  virtual DDS::ReturnCode_t get_current_time(
-    DDS::Time_t & current_time);
+  /**
+   * Set Argument to Current System Time
+   */
+  virtual DDS::ReturnCode_t get_current_time(DDS::Time_t & current_time);
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
 

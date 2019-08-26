@@ -222,6 +222,7 @@ private:
     SequenceNumber cur_cumulative_ack_;
     bool handshake_done_, durable_;
     OPENDDS_MAP(SequenceNumber, TransportQueueElement*) durable_data_;
+    /// Montonic Time
     ACE_Time_Value durable_timestamp_;
 
     ReaderInfo()
@@ -470,7 +471,10 @@ private:
     ACE_INET_Addr address;
     /// Callback to invoke.
     DiscoveryListener* listener;
-    /// Timestamp indicating the last HeartBeat or AckNack received from the remote entity
+    /**
+     * Monotnic Timestamp indicating the last HeartBeat or AckNack received
+     * from the remote entity.
+     */
     ACE_Time_Value last_activity;
     /// Current status of the remote entity.
     enum { DOES_NOT_EXIST, EXISTS } status;

@@ -39,19 +39,19 @@ OpenDDS_Dcps_Export extern const char* const BUILT_IN_PUBLICATION_TOPIC_TYPE;
  */
 inline bool topicIsBIT(const char* name, const char* type)
 {
-    return (
-      !ACE_OS::strcmp(name, OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC) &&
-      !ACE_OS::strcmp(type, OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC_TYPE)
-    ) || (
-      !ACE_OS::strcmp(name, OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC) &&
-      !ACE_OS::strcmp(type, OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC_TYPE)
-    ) || (
-      !ACE_OS::strcmp(name, OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC) &&
-      !ACE_OS::strcmp(type, OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC_TYPE)
-    ) || (
-      !ACE_OS::strcmp(name, OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC) &&
-      !ACE_OS::strcmp(type, OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC_TYPE)
-    );
+  return (
+    !ACE_OS::strcmp(name, BUILT_IN_PARTICIPANT_TOPIC) &&
+    !ACE_OS::strcmp(type, BUILT_IN_PARTICIPANT_TOPIC_TYPE)
+  ) || (
+    !ACE_OS::strcmp(name, BUILT_IN_TOPIC_TOPIC) &&
+    !ACE_OS::strcmp(type, BUILT_IN_TOPIC_TOPIC_TYPE)
+  ) || (
+    !ACE_OS::strcmp(name, BUILT_IN_SUBSCRIPTION_TOPIC) &&
+    !ACE_OS::strcmp(type, BUILT_IN_SUBSCRIPTION_TOPIC_TYPE)
+  ) || (
+    !ACE_OS::strcmp(name, BUILT_IN_PUBLICATION_TOPIC) &&
+    !ACE_OS::strcmp(type, BUILT_IN_PUBLICATION_TOPIC_TYPE)
+  );
 }
 
 class DomainParticipantImpl;
@@ -88,7 +88,7 @@ DDS::ReturnCode_t instance_handle_to_bit_data(
   typedef typename BIT_Reader_var::_obj_type BIT_Reader;
   BIT_Reader_var bit_reader = BIT_Reader::_narrow(reader.in());
 
-  const ACE_Time_Value due = ACE_OS::gettimeofday() +
+  const ACE_Time_Value due = monotonic_time() +
     ACE_Time_Value(TheServiceParticipant->bit_lookup_duration_msec() / 1000,
                    (TheServiceParticipant->bit_lookup_duration_msec() % 1000)
                    * 1000);
@@ -124,8 +124,7 @@ DDS::ReturnCode_t instance_handle_to_bit_data(
                        ret);
     }
 
-    const ACE_Time_Value now = ACE_OS::gettimeofday();
-
+    const ACE_Time_Value now = monotonic_time();
     if (now < due) {
       if (DCPS_debug_level >= 10) {
         ACE_DEBUG((LM_DEBUG,

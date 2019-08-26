@@ -38,6 +38,7 @@ private:
   typedef ACE_SYNCH_MUTEX     LockType;
   typedef ACE_Guard<LockType> GuardType;
 
+  OpenDDS::DCPS::ConditionTime condition_time_;
   LockType lock_;
   ACE_Condition<ACE_SYNCH_MUTEX> condition_;
 

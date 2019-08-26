@@ -12,6 +12,10 @@
 #include "ace/Message_Block.h"
 #include "ace/Global_Macros.h"
 #include "ace/Null_Mutex.h"
+#include "ace/Monotonic_Time_Policy.h"
+#include "ace/Time_Value_T.h"
+#include "ace/Time_Policy.h"
+#include "ace/Condition_Attributes.h"
 
 #include <functional>
 #include <utility>
@@ -121,6 +125,27 @@ struct VarLess : public std::binary_function<V, V, bool> {
     return x.in() < y.in();
   }
 };
+
+/**
+ * ACE_Time_Policy that OpenDDS uses to define the system clock for external
+ * interactions.
+ */
+///@{
+typedef ACE_System_Time_Policy SystemTime;
+typedef ACE_Time_Value_T<SystemTime> SystemTimeValue;
+///@}
+
+/**
+ * ACE_Time_Policy that OpenDDS uses for internal timing.
+ *
+ * ACE_Monotonic_Time_Policy protects OpenDDS from being effected by changes to
+ * the system clock to a certain degree.
+ */
+///@{
+typedef ACE_Monotonic_Time_Policy MonotonicTime;
+typedef ACE_Condition_Attributes_T<MonotonicTime> ConditionTime;
+typedef ACE_Time_Value_T<MonotonicTime> MonotonicTimeValue;
+///@}
 
 } // namespace OpenDDS
 } // namespace DCPS

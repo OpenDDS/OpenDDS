@@ -9,7 +9,7 @@ using namespace std;
 
 DataWriterListenerImpl::DataWriterListenerImpl()
   : mutex_()
-  , matched_condition_(mutex_)
+  , matched_condition_(mutex_, condition_time_)
   , matched_(0)
   , offered_deadline_total_count_ (0)
 {

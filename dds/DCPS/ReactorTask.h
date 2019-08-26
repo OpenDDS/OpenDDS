@@ -10,11 +10,14 @@
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/RcObject.h"
+#include "dds/DCPS/Definitions.h"
 #include "ace/Task.h"
 #include "ace/Barrier.h"
 #include "ace/Synch_Traits.h"
 #include "ace/Condition_T.h"
 #include "ace/Condition_Thread_Mutex.h"
+#include "ace/Timer_List_T.h"
+#include "ace/Event_Handler_Handle_Timeout_Upcall.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Proactor;
@@ -58,6 +61,9 @@ private:
   typedef ACE_SYNCH_MUTEX         LockType;
   typedef ACE_Guard<LockType>     GuardType;
   typedef ACE_Condition<LockType> ConditionType;
+  typedef ACE_Timer_List_T<
+    ACE_Event_Handler*, ACE_Event_Handler_Handle_Timeout_Upcall,
+    LockType, MonotonicTime> TimerQueueType;
 
   enum State { STATE_NOT_RUNNING, STATE_OPENING, STATE_RUNNING };
 
@@ -65,10 +71,12 @@ private:
   LockType      lock_;
   State         state_;
   ConditionType condition_;
+  ConditionTime condition_time_;
   ACE_Reactor*  reactor_;
   ACE_thread_t  reactor_owner_;
   ACE_Proactor* proactor_;
   bool          use_async_send_;
+  TimerQueueType timer_queue_;
 };
 
 } // namespace DCPS

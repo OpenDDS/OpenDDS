@@ -82,9 +82,9 @@ public:
              const DDS::DataWriterQos& writer_qos);
 
   /// check to see if this writer is alive (called by handle_timeout).
-  /// @param now next time this DataWriter will become not active (not alive)
+  /// @param now next monotonic time this DataWriter will become not active (not alive)
   ///      if no sample or liveliness message is received.
-  /// @returns absolute time when the Writer will become not active (if no activity)
+  /// @returns montonic time when the Writer will become not active (if no activity)
   ///          of ACE_Time_Value::zero if the writer is already or became not alive
   ACE_Time_Value check_activity(const ACE_Time_Value& now);
 
@@ -173,6 +173,7 @@ public:
 
 };
 
+/// Takes Monotonic Time
 inline
 int
 OpenDDS::DCPS::WriterInfo::received_activity(const ACE_Time_Value& when)

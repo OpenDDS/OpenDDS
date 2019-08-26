@@ -209,8 +209,7 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
 #endif
 
   // Unregister all registered instances prior to deletion.
-  DDS::Time_t source_timestamp = time_value_to_time(ACE_OS::gettimeofday());
-  dw_servant->unregister_instances(source_timestamp);
+  dw_servant->unregister_instances(time_value_to_time(system_time()));
 
   // Wait for any control messages to be transported during
   // unregistering of instances.

@@ -195,7 +195,7 @@ DataLink::handle_exception(ACE_HANDLE /* fd */)
       }
     }
     return 0;
-  } else if (this->scheduled_to_stop_at_ <= ACE_OS::gettimeofday()) {
+  } else if (scheduled_to_stop_at_ <= monotonic_time()) {
     if (this->scheduling_release_) {
       if (DCPS_debug_level > 0) {
         ACE_DEBUG((LM_DEBUG,
@@ -216,7 +216,7 @@ DataLink::handle_exception(ACE_HANDLE /* fd */)
                  ACE_TEXT("(%P|%t) DataLink::handle_exception() - (delay) scheduling timer for future release\n")));
     }
     ACE_Reactor_Timer_Interface* reactor = impl_.timer();
-    ACE_Time_Value future_release_time = this->scheduled_to_stop_at_ - ACE_OS::gettimeofday();
+    ACE_Time_Value future_release_time = scheduled_to_stop_at_ - monotonic_time();
     reactor->schedule_timer(this, 0, future_release_time);
   }
   return 0;
@@ -472,7 +472,7 @@ DataLink::schedule_delayed_release()
     this->send_strategy_->clear();
   }
 
-  ACE_Time_Value future_release_time = ACE_OS::gettimeofday() + this->datalink_release_delay_;
+  ACE_Time_Value future_release_time = monotonic_time() + datalink_release_delay_;
   this->schedule_stop(future_release_time);
 }
 

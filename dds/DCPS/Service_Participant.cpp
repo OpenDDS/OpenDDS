@@ -1041,15 +1041,14 @@ Service_Participant::repository_lost(Discovery::RepoKey key)
   }
 
   // Calculate the bounding end time for attempts.
-  ACE_Time_Value recoveryFailedTime
-  = ACE_OS::gettimeofday()
+  const ACE_Time_Value recoveryFailedTime = monotonic_time()
     + ACE_Time_Value(this->federation_recovery_duration(), 0);
 
   // Backoff delay.
   int backoff = this->federation_initial_backoff_seconds();
 
   // Keep trying until the total recovery time specified is exceeded.
-  while (recoveryFailedTime > ACE_OS::gettimeofday()) {
+  while (recoveryFailedTime > monotonic_time()) {
 
     // Wrap to the beginning at the end of the list.
     if (current == this->discoveryMap_.end()) {

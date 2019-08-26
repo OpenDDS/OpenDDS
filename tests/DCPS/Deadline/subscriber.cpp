@@ -16,6 +16,7 @@
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/Qos_Helper.h>
 #include "dds/DCPS/WaitSet.h"
+#include <dds/DCPS/Time_Helper.h>
 #include "dds/DdsDcpsInfrastructureC.h"
 
 #include "dds/DCPS/StaticIncludes.h"
@@ -141,8 +142,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ws->attach_condition(cond);
         DDS::Duration_t four_sec = {4, 0};
         DDS::ConditionSeq active;
-        if (ws->wait(active, four_sec) != DDS::RETCODE_OK) {
-          cerr << "ERROR: Wait on waitset failed" << endl;
+        DDS::ReturnCode_t rc = ws->wait(active, four_sec);
+        if (rc != DDS::RETCODE_OK) {
+          cerr << "ERROR: Wait on waitset failed: " << OpenDDS::DCPS::retcode_to_string(rc) << endl;
           exit(1);
         }
 
@@ -232,12 +234,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         exit(1);
       }
 
-      ACE_Time_Value now(ACE_OS::gettimeofday());
-      ACE_Time_Value connect_deadline(now + OpenDDS::DCPS::duration_to_time_value(MATCHED_WAIT_MAX_DURATION));
-
+      const OpenDDS::DCPS::MonotonicTimeValue connect_deadline(
+        OpenDDS::DCPS::monotonic_time() +
+        OpenDDS::DCPS::duration_to_time_value(MATCHED_WAIT_MAX_DURATION));
       if (listener_servant->wait_matched(1, &connect_deadline) != 0)
       {
-        cerr << "ERROR: wait for subscription matching failed." << endl;
+        cerr << "ERROR: sub: wait for subscription matching failed." << endl;
         exit(1);
       }
 
@@ -270,7 +272,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         exit(1);
       }
 
-      ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) Subscriber: got missed")
+      ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) Subscriber: got missed ")
                             ACE_TEXT("deadline status \n")));
 
       Messenger::Message message;
@@ -358,7 +360,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         exit(1);
       }
 
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Subscriber: got missed")
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Subscriber: got missed ")
                            ACE_TEXT("deadline status \n")));
 
       if (deadline_status1.last_instance_handle != dr1_hd1

@@ -51,7 +51,7 @@ public:
 
   WaitSet()
     : lock_(),
-      cond_(lock_)
+      cond_(lock_, condition_time_)
   {}
 
   virtual ~WaitSet() {}
@@ -80,8 +80,9 @@ private:
   friend class OpenDDS::DCPS::ConditionImpl;
 
   ACE_Recursive_Thread_Mutex lock_;
+  OpenDDS::DCPS::ConditionTime condition_time_;
   ACE_Condition_Recursive_Thread_Mutex cond_;
-  ACE_Atomic_Op<ACE_Thread_Mutex, long> waiting_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, bool> waiting_;
 
   ConditionSet attached_conditions_;
   ConditionSet signaled_conditions_;

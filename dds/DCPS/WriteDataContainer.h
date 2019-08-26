@@ -17,6 +17,7 @@
 #include "PoolAllocator.h"
 #include "PoolAllocationBase.h"
 #include "Message_Block_Ptr.h"
+#include "Definitions.h"
 
 #include "ace/Synch_Traits.h"
 #include "ace/Condition_T.h"
@@ -474,6 +475,8 @@ private:
   /// The block waiting flag.
   bool                            waiting_on_release_;
 
+  ConditionTime condition_time_;
+
   /// This lock is used to protect the container and the map
   /// in the type-specific DataWriter.
   /// This lock can be accessible via the datawriter.
@@ -495,7 +498,7 @@ private:
 
   /// The number of chunks that sample_list_element_allocator_
   /// needs initialize.
-  size_t                                    n_chunks_;
+  size_t n_chunks_;
 
   /// The cached allocator to allocate DataSampleElement
   /// objects.

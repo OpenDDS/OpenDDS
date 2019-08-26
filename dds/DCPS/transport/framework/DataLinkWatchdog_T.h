@@ -17,6 +17,7 @@
 #include "ace/OS_NS_time.h"
 #include "ace/Reverse_Lock_T.h"
 #include "dds/DCPS/ReactorInterceptor.h"
+#include "dds/DCPS/Time_Helper.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -137,8 +138,8 @@ private:
     ACE_Time_Value delay;
     if (!nodelay) delay = next_interval();
 
-    if (this->epoch_ == ACE_Time_Value::zero) {
-      this->epoch_ = ACE_OS::gettimeofday();
+    if (epoch_ == ACE_Time_Value::zero) {
+      epoch_ = monotonic_time();
     }
 
     long timer_id = -1;

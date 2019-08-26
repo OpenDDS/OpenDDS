@@ -5,6 +5,7 @@
 #include "dds/DCPS/Service_Participant.h"
 
 #include <dds/DCPS/Qos_Helper.h>
+#include <dds/DCPS/Time_Helper.h>
 
 #include <ace/OS_NS_unistd.h>
 #include <ace/streams.h>
@@ -12,6 +13,8 @@
 
 using namespace Messenger;
 using namespace std;
+using OpenDDS::DCPS::monotonic_time;
+using OpenDDS::DCPS::MonotonicTimeValue;
 
 static int const num_messages = 10;
 static ACE_Time_Value write_interval(0, 500000);
@@ -28,7 +31,7 @@ Writer::Writer(::DDS::DataWriter_ptr writer,
                CORBA::Long key,
                ACE_Time_Value sleep_duration)
 : writer_(::DDS::DataWriter::_duplicate(writer)),
-  condition_(this->lock_),
+  condition_(lock_, condition_time_),
   associated_(false),
   dwl_servant_(0),
   instance_handle_(::DDS::HANDLE_NIL),
@@ -55,8 +58,7 @@ Writer::start()
 void
 Writer::end()
 {
-  ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("(%P|%t) Writer::end \n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::end \n")));
   wait();
 }
 
@@ -64,16 +66,13 @@ Writer::end()
 int
 Writer::svc()
 {
-  ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("(%P|%t) Writer::svc begins.\n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::svc begins.\n")));
 
-  try
-  {
-    ACE_Time_Value now(ACE_OS::gettimeofday());
-    ACE_Time_Value connect_deadline(now + OpenDDS::DCPS::duration_to_time_value(MATCHED_WAIT_MAX_DURATION));
-
-    if (dwl_servant_->wait_matched(2, &connect_deadline) != 0)
-    {
+  try {
+    MonotonicTimeValue connect_deadline(monotonic_time());
+    connect_deadline +=
+      OpenDDS::DCPS::duration_to_time_value(MATCHED_WAIT_MAX_DURATION);
+    if (dwl_servant_->wait_matched(2, &connect_deadline) != 0) {
       cerr << "ERROR: wait for subscription matching failed." << endl;
       exit(1);
     }
@@ -111,8 +110,8 @@ Writer::svc()
       ++message.count;
 
       ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("(%P|%t) Writer::svc write sample %d to instance %d.\n"),
-              message.count, this->instance_handle_));
+        ACE_TEXT("(%P|%t) Writer::svc write sample %d to instance %d.\n"),
+        message.count, this->instance_handle_));
 
       ::DDS::ReturnCode_t const ret = message_dw->write(message, this->instance_handle_);
 
@@ -155,11 +154,10 @@ bool Writer::wait_for_start()
 {
   GuardType guard(this->lock_);
 
-  if (! associated_)
-  {
-    ACE_Time_Value abs = ACE_OS::gettimeofday() + ACE_Time_Value(10);
-    if (this->condition_.wait(&abs) == -1)
-    {
+  if (!associated_) {
+    MonotonicTimeValue abs(monotonic_time());
+    abs += ACE_Time_Value(10);
+    if (condition_.wait(&abs) == -1) {
       return false;
     }
   }

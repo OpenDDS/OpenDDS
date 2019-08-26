@@ -24,6 +24,7 @@
 #include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/transport/framework/TransportClient.h"
+#include "dds/DCPS/Time_Helper.h"
 
 #include <sstream>
 
@@ -576,14 +577,12 @@ TcpTransport::release_datalink(DataLink* link)
   }
 
   // Actions are executed outside of the lock scope.
-  ACE_Time_Value cancel_now = ACE_OS::gettimeofday();
   switch (linkAction) {
   case StopLink:
-    link->schedule_stop(cancel_now);
+    link->schedule_stop(monotonic_time());
     break;
 
   case ScheduleLinkRelease:
-
     link->schedule_delayed_release();
     break;
 

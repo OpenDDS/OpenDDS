@@ -54,6 +54,7 @@ protected:
   virtual ~DataWriterListenerImpl (void);
 
 private:
+  OpenDDS::DCPS::ConditionTime condition_time_;
   mutable ACE_Thread_Mutex mutex_;
   mutable ACE_Condition<ACE_Thread_Mutex> matched_condition_;
   long matched_;

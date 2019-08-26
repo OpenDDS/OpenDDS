@@ -176,6 +176,7 @@ namespace OpenDDS {
 namespace RTPS {
 using DCPS::RepoId;
 using DCPS::make_rch;
+using DCPS::system_time;
 
 const bool Sedp::host_is_bigendian_(!ACE_CDR_BYTE_ORDER);
 
@@ -2983,7 +2984,7 @@ Sedp::Writer::set_header_fields(DCPS::DataSampleHeader& dsh,
 
   dsh.sequence_ = sequence;
 
-  const ACE_Time_Value now = ACE_OS::gettimeofday();
+  const ACE_Time_Value now = system_time();
   dsh.source_timestamp_sec_ = static_cast<ACE_INT32>(now.sec());
   dsh.source_timestamp_nanosec_ = now.usec() * 1000;
 }

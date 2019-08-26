@@ -56,9 +56,6 @@ class SendStateDataSampleList;
 struct AssociationData;
 class LivenessTimer;
 
-
-
-
 /**
 * @class DataWriterImpl
 *
@@ -99,16 +96,18 @@ public:
 
     AckToken(const DDS::Duration_t& max_wait,
              const SequenceNumber& sequence)
-      : tstamp_(ACE_OS::gettimeofday()),
+      : tstamp_(monotonic_time()),
         max_wait_(max_wait),
         sequence_(sequence) {}
 
     ~AckToken() {}
 
+    /// Returns Monotonic Time
     ACE_Time_Value deadline() const {
       return duration_to_absolute_time_value(this->max_wait_, this->tstamp_);
     }
 
+    /// Returns Monotonic Time
     DDS::Time_t timestamp() const {
       return time_value_to_time(this->tstamp_);
     }
@@ -212,6 +211,8 @@ public:
    * Delegate to the WriteDataContainer to register
    * Must tell the transport to broadcast the registered
    * instance upon returning.
+   *
+   * @param source_timestamp must come from system_time()
    */
   DDS::ReturnCode_t
   register_instance_i(
@@ -222,6 +223,8 @@ public:
   /**
    * Delegate to the WriteDataContainer to register and tell
    * the transport to broadcast the registered instance.
+   *
+   * @param source_timestamp must come from system_time()
    */
   DDS::ReturnCode_t
   register_instance_from_durable_data(
@@ -232,6 +235,8 @@ public:
   /**
    * Delegate to the WriteDataContainer to unregister and tell
    * the transport to broadcast the unregistered instance.
+   *
+   * @param source_timestamp must come from system_time()
    */
   DDS::ReturnCode_t
   unregister_instance_i(
@@ -241,6 +246,8 @@ public:
   /**
    * Unregister all registered instances and tell the transport
    * to broadcast the unregistered instances.
+   *
+   * @param source_timestamp must come from system_time()
    */
   void unregister_instances(const DDS::Time_t& source_timestamp);
 
@@ -251,6 +258,8 @@ public:
    *        or won't evaluate the filters), or a list of
    *        associated reader RepoIds that should NOT get the
    *        data sample due to content filtering.
+   *
+   * @param source_timestamp must come from system_time()
    */
   DDS::ReturnCode_t write(Message_Block_Ptr sample,
                           DDS::InstanceHandle_t handle,
@@ -261,6 +270,8 @@ public:
    * Delegate to the WriteDataContainer to dispose all data
    * samples for a given instance and tell the transport to
    * broadcast the disposed instance.
+   *
+   * @param source_timestamp must come from system_time()
    */
   DDS::ReturnCode_t dispose(DDS::InstanceHandle_t handle,
                             const DDS::Time_t & source_timestamp);
@@ -410,6 +421,8 @@ public:
    * needed. e.g. message id, length of whole message...
    * The fast allocator is used to allocate the message block,
    * data block and header.
+   *
+   * @param source_timestamp must come from system_time()
    */
   DDS::ReturnCode_t
   create_sample_data_message(Message_Block_Ptr data,
@@ -533,6 +546,8 @@ private:
    * the registered sample. The header contains the information
    * needed. e.g. message id, length of whole message...
    * The fast allocator is not used for the header.
+   *
+   * @param source_timestamp must come from system_time()
    */
   ACE_Message_Block*
   create_control_message(MessageId message_id,

@@ -13,6 +13,7 @@
 #include "ReactorInterceptor.h"
 #include "Service_Participant.h"
 #include "GuidConverter.h"
+#include "Time_Helper.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -106,10 +107,11 @@ void RemoveAssociationSweeper<T>::schedule_timer(OpenDDS::DCPS::RcHandle<OpenDDS
   info->notify_lost_ = callback;
   ACE_Time_Value time_to_deadline(info->activity_wait_period());
 
-  if (time_to_deadline > ACE_Time_Value(10))
+  if (time_to_deadline > ACE_Time_Value(10)) {
     time_to_deadline = ACE_Time_Value(10);
+  }
 
-  info->removal_deadline_ = ACE_OS::gettimeofday() + time_to_deadline;
+  info->removal_deadline_ = monotonic_time() + time_to_deadline;
   ScheduleCommand c(this, info);
   execute_or_enqueue(c);
 }
@@ -180,15 +182,22 @@ int RemoveAssociationSweeper<T>::handle_timeout(
 template <typename T>
 void RemoveAssociationSweeper<T>::ScheduleCommand::execute()
 {
-  //Pass pointer to writer info for timer to use, must decrease ref count when canceling timer
+  /*
+   * Pass pointer to writer info for timer to use, must decrease ref count when
+   * canceling timer
+   */
   const void* arg = reinterpret_cast<const void*>(this->info_.in());
   this->sweeper_->info_set_.push_back(this->info_);
 
-  this->info_->remove_association_timer_ = this->sweeper_->reactor()->schedule_timer(this->sweeper_,
-                                                                       arg,
-                                                                       this->info_->removal_deadline_ - ACE_OS::gettimeofday());
+  this->info_->remove_association_timer_ =
+    this->sweeper_->reactor()->schedule_timer(
+      this->sweeper_, arg,
+      this->info_->removal_deadline_ - monotonic_time());
   if (DCPS_debug_level) {
-    ACE_DEBUG((LM_INFO, "(%P|%t) RemoveAssociationSweeper::ScheduleCommand::execute() - Scheduled sweeper %d\n", this->info_->remove_association_timer_));
+    ACE_DEBUG((LM_INFO,
+      ACE_TEXT("(%P|%t) RemoveAssociationSweeper::ScheduleCommand::execute() - ")
+      ACE_TEXT("Scheduled sweeper %d\n"),
+      this->info_->remove_association_timer_));
   }
 }
 
