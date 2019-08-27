@@ -284,7 +284,16 @@ private:
     void send_nackfrag_replies_i(DisjointSequence& gaps, AddrSet& gap_recipients);
 
   public:
-    RtpsWriter(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable, CORBA::Long hbc) : link_(link), id_(id), durable_(durable), heartbeat_count_(hbc) {}
+    RtpsWriter(
+      RcHandle<RtpsUdpDataLink> link,
+      const RepoId& id,
+      bool durable,
+      CORBA::Long hbc)
+    : link_(link)
+    , id_(id)
+    , durable_(durable)
+    , heartbeat_count_(hbc)
+    {}
     ~RtpsWriter();
     SequenceNumber heartbeat_high(const ReaderInfo&) const;
     void add_elem_awaiting_ack(TransportQueueElement* element);
@@ -504,6 +513,7 @@ private:
       : outer_(outer), function_(function), timeout_(timeout), scheduled_(ACE_Time_Value::zero)
     {}
 
+    /// Uses Monotonic Time
     void schedule(const ACE_Time_Value& timeout = ACE_Time_Value::zero);
     void cancel();
 

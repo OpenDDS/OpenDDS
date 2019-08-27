@@ -94,9 +94,12 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
                 config.nak_response_delay_)
   , heartbeat_reply_(this, &RtpsUdpDataLink::send_heartbeat_replies,
                      config.heartbeat_response_delay_)
-  , heartbeat_(make_rch<HeartBeat>(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::send_heartbeats))
-  , heartbeatchecker_(make_rch<HeartBeat>(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::check_heartbeats))
-  , relay_beacon_(make_rch<HeartBeat>(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::send_relay_beacon))
+  , heartbeat_(make_rch<HeartBeat>(
+      reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::send_heartbeats))
+  , heartbeatchecker_(make_rch<HeartBeat>(
+      reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::check_heartbeats))
+  , relay_beacon_(make_rch<HeartBeat>(
+      reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::send_relay_beacon))
   , held_data_delivery_handler_(this)
   , max_bundle_size_(config.max_bundle_size_)
   , quick_reply_delay_(config.heartbeat_response_delay_ * QUICK_REPLY_DELAY_RATIO)
@@ -365,7 +368,10 @@ RtpsUdpDataLink::register_for_reader(const RepoId& writerid,
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   bool enableheartbeat = interesting_readers_.empty();
-  interesting_readers_.insert(InterestingRemoteMapType::value_type(readerid, InterestingRemote(writerid, address, listener)));
+  interesting_readers_.insert(
+    InterestingRemoteMapType::value_type(
+      readerid,
+      InterestingRemote(writerid, address, listener)));
   if (heartbeat_counts_.find(writerid) == heartbeat_counts_.end()) {
     heartbeat_counts_[writerid] = 0;
   }
@@ -400,7 +406,10 @@ RtpsUdpDataLink::register_for_writer(const RepoId& readerid,
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   bool enableheartbeatchecker = interesting_writers_.empty();
-  interesting_writers_.insert(InterestingRemoteMapType::value_type(writerid, InterestingRemote(readerid, address, listener)));
+  interesting_writers_.insert(
+    InterestingRemoteMapType::value_type(
+      writerid,
+      InterestingRemote(readerid, address, listener)));
   g.release();
   if (enableheartbeatchecker) {
     heartbeatchecker_->schedule_enable(false);
@@ -693,7 +702,11 @@ namespace {
 }
 
 TransportQueueElement*
-RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(TransportQueueElement* element, bool requires_inline_qos, MetaSubmessageVec& meta_submessages, bool& deliver_after_send)
+RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
+  TransportQueueElement* element,
+  bool requires_inline_qos,
+  MetaSubmessageVec& meta_submessages,
+  bool& deliver_after_send)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, 0);
 
@@ -835,7 +848,11 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(TransportQueueElemen
 }
 
 TransportQueueElement*
-RtpsUdpDataLink::customize_queue_element_non_reliable_i(TransportQueueElement* element, bool requires_inline_qos, MetaSubmessageVec& meta_submessages, bool& deliver_after_send)
+RtpsUdpDataLink::customize_queue_element_non_reliable_i(
+  TransportQueueElement* element,
+  bool requires_inline_qos,
+  MetaSubmessageVec& meta_submessages,
+  bool& deliver_after_send)
 {
   RTPS::SubmessageSeq subm;
 
@@ -1651,7 +1668,15 @@ RtpsUdpDataLink::build_meta_submessage_map(MetaSubmessageVec& meta_submessages, 
 namespace {
 
 struct BundleHelper {
-  BundleHelper(size_t max_bundle_size, OPENDDS_VECTOR(size_t)& meta_submessage_bundle_sizes) : max_bundle_size_(max_bundle_size), size_(0), padding_(0), prev_size_(0), prev_padding_(0), meta_submessage_bundle_sizes_(meta_submessage_bundle_sizes) {}
+  BundleHelper(size_t max_bundle_size, OPENDDS_VECTOR(size_t)& meta_submessage_bundle_sizes)
+  : max_bundle_size_(max_bundle_size)
+  , size_(0)
+  , padding_(0)
+  , prev_size_(0)
+  , prev_padding_(0)
+  , meta_submessage_bundle_sizes_(meta_submessage_bundle_sizes)
+  {
+  }
 
   void end_bundle() {
     meta_submessage_bundle_sizes_.push_back(size_ + padding_);
@@ -1718,7 +1743,9 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(AddrDestMetaSubmessageMap& adr_m
       for (MetaSubmessageIterVec::iterator resp_it = dest_it->second.begin(); resp_it != dest_it->second.end(); ++resp_it) {
         // Check before every meta_submessage to see if we need to prefix a INFO_DST
         if (dest_it->first != GUID_UNKNOWN && dest_it->first != prev_dst) {
-          // If adding an INFO_DST prefix bumped us over the limit, push the size difference into the next bundle, reset prev_dst, and keep going
+          // If adding an INFO_DST prefix bumped us over the limit, push the
+          // size difference into the next bundle, reset prev_dst, and keep
+          // going
           if (!helper.add_to_bundle(idst)) {
             meta_submessage_bundles.push_back(MetaSubmessageIterVec());
             meta_submessage_bundle_addrs.push_back(addr_it->first);
@@ -1730,12 +1757,14 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(AddrDestMetaSubmessageMap& adr_m
         switch (res.sm_._d()) {
           case HEARTBEAT: {
             result = helper.add_to_bundle(res.sm_.heartbeat_sm());
-            res.sm_.heartbeat_sm().smHeader.submessageLength = static_cast<CORBA::UShort>(helper.prev_size_diff()) - SMHDR_SZ;
+            res.sm_.heartbeat_sm().smHeader.submessageLength =
+              static_cast<CORBA::UShort>(helper.prev_size_diff()) - SMHDR_SZ;
             break;
           }
           case ACKNACK: {
             result = helper.add_to_bundle(res.sm_.acknack_sm());
-            res.sm_.acknack_sm().smHeader.submessageLength = static_cast<CORBA::UShort>(helper.prev_size_diff()) - SMHDR_SZ;
+            res.sm_.acknack_sm().smHeader.submessageLength =
+              static_cast<CORBA::UShort>(helper.prev_size_diff()) - SMHDR_SZ;
             break;
           }
           case GAP: {
@@ -1745,7 +1774,8 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(AddrDestMetaSubmessageMap& adr_m
           }
           case NACK_FRAG: {
             result = helper.add_to_bundle(res.sm_.nack_frag_sm());
-            res.sm_.nack_frag_sm().smHeader.submessageLength = static_cast<CORBA::UShort>(helper.prev_size_diff()) - SMHDR_SZ;
+            res.sm_.nack_frag_sm().smHeader.submessageLength =
+              static_cast<CORBA::UShort>(helper.prev_size_diff()) - SMHDR_SZ;
             break;
           }
           default: {
@@ -1754,7 +1784,8 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(AddrDestMetaSubmessageMap& adr_m
         }
         prev_dst = dest_it->first;
 
-        // If adding the submessage bumped us over the limit, push the size difference into the next bundle, reset prev_dst, and keep going
+        // If adding the submessage bumped us over the limit, push the size
+        // difference into the next bundle, reset prev_dst, and keep going
         if (!result) {
           meta_submessage_bundles.push_back(MetaSubmessageIterVec());
           meta_submessage_bundle_addrs.push_back(addr_it->first);
@@ -2710,21 +2741,14 @@ RtpsUdpDataLink::send_heartbeats()
   OPENDDS_VECTOR(CallbackType) readerDoesNotExistCallbacks;
   OPENDDS_VECTOR(TransportQueueElement*) pendingCallbacks;
 
-  const ACE_Time_Value now = ACE_OS::gettimeofday();
+  const ACE_Time_Value now = monotonic_time();
   RtpsWriterMap writers;
 
   typedef OPENDDS_MAP_CMP(RepoId, RepoIdSet, GUID_tKeyLessThan) WtaMap;
   WtaMap writers_to_advertise;
 
-<<<<<<< HEAD
-    using namespace OpenDDS::RTPS;
-    OPENDDS_VECTOR(HeartBeatSubmessage) subm;
-    OPENDDS_SET(ACE_INET_Addr) recipients;
-    const ACE_Time_Value now = monotonic_time();
-=======
   {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
->>>>>>> upstream/master
 
     RtpsUdpInst& cfg = config();
 
@@ -2824,7 +2848,7 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
   MetaSubmessage meta_submessage(id_, GUID_UNKNOWN);
   meta_submessage.to_guids_ = additional_guids;
 
-  const ACE_Time_Value now = ACE_OS::gettimeofday();
+  const ACE_Time_Value now = system_time();
   RtpsUdpInst& cfg = link->config();
 
   // Directed, non-final pre-association heartbeats
@@ -2925,11 +2949,7 @@ RtpsUdpDataLink::check_heartbeats()
   OPENDDS_VECTOR(CallbackType) writerDoesNotExistCallbacks;
 
   // Have any interesting writers timed out?
-<<<<<<< HEAD
-  const ACE_Time_Value tv = monotonic_time() - 10 * this->config().heartbeat_period_;
-=======
-  const ACE_Time_Value tv = ACE_OS::gettimeofday() - 10 * config().heartbeat_period_;
->>>>>>> upstream/master
+  const ACE_Time_Value tv = monotonic_time() - 10 * config().heartbeat_period_;
   {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
@@ -3013,27 +3033,10 @@ RtpsUdpDataLink::RtpsWriter::send_heartbeats_manual_i(MetaSubmessageVec& meta_su
 
   SequenceNumber firstSN, lastSN;
   CORBA::Long counter;
-<<<<<<< HEAD
-  RtpsWriterMap::iterator pos = writers_.find(pub_id);
-  if (pos != writers_.end()) {
-    // Reliable.
-    const bool has_data = !pos->second.send_buff_.is_nil() && !pos->second.send_buff_->empty();
-    SequenceNumber durable_max;
-    const ACE_Time_Value now = monotonic_time();
-    for (ReaderInfoMap::const_iterator ri = pos->second.remote_readers_.begin(), end = pos->second.remote_readers_.end();
-         ri != end;
-         ++ri) {
-      if (!ri->second.durable_data_.empty()) {
-        const ACE_Time_Value expiration = ri->second.durable_timestamp_ + config().durable_data_timeout_;
-        if (now <= expiration &&
-            ri->second.durable_data_.rbegin()->first > durable_max) {
-          durable_max = ri->second.durable_data_.rbegin()->first;
-        }
-=======
 
   const bool has_data = !send_buff_.is_nil() && !send_buff_->empty();
   SequenceNumber durable_max;
-  const ACE_Time_Value now = ACE_OS::gettimeofday();
+  const ACE_Time_Value now = monotonic_time();
   for (ReaderInfoMap::const_iterator ri = remote_readers_.begin(), end = remote_readers_.end();
        ri != end;
        ++ri) {
@@ -3042,7 +3045,6 @@ RtpsUdpDataLink::RtpsWriter::send_heartbeats_manual_i(MetaSubmessageVec& meta_su
       if (now <= expiration &&
           ri->second.durable_data_.rbegin()->first > durable_max) {
         durable_max = ri->second.durable_data_.rbegin()->first;
->>>>>>> upstream/master
       }
     }
   }
@@ -3175,10 +3177,14 @@ RtpsUdpDataLink::ReaderInfo::expecting_durable_data() const
 RtpsUdpDataLink::RtpsWriter::~RtpsWriter()
 {
   if (!to_deliver_.empty()) {
-    ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: RtpsWriter::~RtpsWriter - deleting with %d elements left to deliver\n", to_deliver_.size()));
+    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: RtpsWriter::~RtpsWriter - ")
+      ACE_TEXT("deleting with %d elements left to deliver\n"),
+      to_deliver_.size()));
   }
   if (!elems_not_acked_.empty()) {
-    ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: RtpsWriter::~RtpsWriter - deleting with %d elements left not fully acknowledged\n", elems_not_acked_.size()));
+    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: RtpsWriter::~RtpsWriter - ")
+      ACE_TEXT("deleting with %d elements left not fully acknowledged\n"),
+      elems_not_acked_.size()));
   }
 }
 
@@ -3206,7 +3212,7 @@ RtpsUdpDataLink::TimedDelay::schedule(const ACE_Time_Value& timeout)
 {
   const ACE_Time_Value& next_to = (timeout != ACE_Time_Value::zero && timeout < timeout_) ? timeout : timeout_;
 
-  const ACE_Time_Value now = ACE_OS::gettimeofday();
+  const ACE_Time_Value now = monotonic_time();
   if (scheduled_ != ACE_Time_Value::zero && ((now + next_to) < scheduled_)) {
     cancel();
   }
