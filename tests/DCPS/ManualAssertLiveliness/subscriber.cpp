@@ -133,6 +133,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       dr_qos.liveliness.lease_duration.sec = LEASE_DURATION_SEC ;
       dr_qos.liveliness.lease_duration.nanosec = 0 ;
+      dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
       // Create the Datareaders
       DDS::DataReader_var dr = sub->create_datareader(topic.in (),
