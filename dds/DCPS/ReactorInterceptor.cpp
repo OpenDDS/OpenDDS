@@ -78,7 +78,7 @@ void ReactorInterceptor::process_command_queue_i()
 int ReactorInterceptor::handle_exception_i()
 {
   process_command_queue_i();
-  condition_.signal();
+  condition_.broadcast();
   return 0;
 }
 
