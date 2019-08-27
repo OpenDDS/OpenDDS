@@ -283,7 +283,7 @@ private:
     void send_nackfrag_replies_i(DisjointSequence& gaps, AddrSet& gap_recipients);
 
   public:
-    RtpsWriter(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable, CORBA::Long hbc) : link_(link), id_(id), durable_(durable), heartbeat_count_(hbc) {}
+    RtpsWriter(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable, CORBA::Long hbc, size_t capacity);
     ~RtpsWriter();
     SequenceNumber heartbeat_high(const ReaderInfo&) const;
     void add_elem_awaiting_ack(TransportQueueElement* element);
@@ -298,11 +298,6 @@ private:
     bool is_reader_handshake_done(const RepoId& id) const;
     void pre_stop_helper(OPENDDS_VECTOR(TransportQueueElement*)& to_deliver,
                          OPENDDS_VECTOR(TransportQueueElement*)& to_drop);
-    void retain_all_helper(const RepoId& pub_id);
-    void msb_insert_helper(const TransportQueueElement* const tqe,
-                           const SequenceNumber& seq,
-                           TransportSendStrategy::QueueType* q,
-                           ACE_Message_Block* chain);
     TransportQueueElement* customize_queue_element_helper(TransportQueueElement* element,
                                                           bool requires_inline_qos,
                                                           MetaSubmessageVec& meta_submessages,
@@ -320,6 +315,7 @@ private:
                            const RepoIdSet& additional_guids,
                            bool allow_final,
                            MetaSubmessageVec& meta_submessages);
+    RcHandle<SingleSendBuffer> get_send_buff() { return send_buff_; }
   };
   typedef RcHandle<RtpsWriter> RtpsWriter_rch;
 
