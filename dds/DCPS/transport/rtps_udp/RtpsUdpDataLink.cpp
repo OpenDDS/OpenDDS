@@ -823,12 +823,6 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(TransportQueueElemen
         return 0;
       }
     }
-  } else if (durable && (Transport_debug_level)) {
-    const GuidConverter conv(pub_id);
-    ACE_ERROR((LM_ERROR,
-      "(%P|%t) RtpsUdpDataLink::customize_queue_element() - "
-      "WARNING: no RtpsWriter to store durable data for local %C\n",
-      OPENDDS_STRING(conv).c_str()));
   }
 
   return rtps;
