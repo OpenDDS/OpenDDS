@@ -199,15 +199,11 @@ WorkerDataReaderListener::unset_datareader(Builder::DataReader& datareader)
 {
   if (datareader_ == &datareader) {
 
-    const Builder::PropertySeq& global_properties = get_global_properties();
-    Builder::ConstPropertyIndex write_buffer_prop = get_property(global_properties, "write_full_median_buffer", Builder::PVK_ULL);
-    bool write_buffer = write_buffer_prop ? write_buffer_prop->value.ull_prop() != 0 : false;
+    latency_stat_block_->finalize();
+    jitter_stat_block_->finalize();
 
-    latency_stat_block_->write_median(write_buffer);
-    jitter_stat_block_->write_median(write_buffer);
-
-    round_trip_latency_stat_block_->write_median(write_buffer);
-    round_trip_jitter_stat_block_->write_median(write_buffer);
+    round_trip_latency_stat_block_->finalize();
+    round_trip_jitter_stat_block_->finalize();
 
     datareader_ = nullptr;
   }

@@ -3,12 +3,6 @@
   "start_time": { "sec": -3, "nsec": 0 },
   "stop_time": { "sec": -15, "nsec": 0 },
 
-  "properties": [
-    { "name": "write_full_median_buffer",
-      "value": { "_d": "PVK_ULL", "ull_prop": 1 }
-    }
-  ],
-
   "process": {
     "config_sections": [
       { "name": "common",
