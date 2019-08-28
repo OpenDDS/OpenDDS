@@ -34,7 +34,7 @@ public:
                            T* reader);
 
   void schedule_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info, bool callback);
-  void cancel_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info);
+  ReactorInterceptor::CommandPtr cancel_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info);
 
   // Arg will be PublicationId
   int handle_timeout(const ACE_Time_Value& current_time, const void* arg);
@@ -110,17 +110,15 @@ void RemoveAssociationSweeper<T>::schedule_timer(OpenDDS::DCPS::RcHandle<OpenDDS
     time_to_deadline = ACE_Time_Value(10);
 
   info->removal_deadline_ = ACE_OS::gettimeofday() + time_to_deadline;
-  ScheduleCommand c(this, info);
-  execute_or_enqueue(c);
+  execute_or_enqueue(new ScheduleCommand(this, info));
 }
 
 template <typename T>
-void RemoveAssociationSweeper<T>::cancel_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
+ReactorInterceptor::CommandPtr RemoveAssociationSweeper<T>::cancel_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
 {
   info->scheduled_for_removal_ = false;
   info->removal_deadline_ = ACE_Time_Value::zero;
-  CancelCommand c(this, info);
-  execute_or_enqueue(c);
+  return execute_or_enqueue(new CancelCommand(this, info));
 }
 
 template <typename T>

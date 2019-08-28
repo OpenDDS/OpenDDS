@@ -200,14 +200,12 @@ private:
 
     void schedule_timer(TransportClient* transport_client, const PendingAssoc_rch& pend)
     {
-      ScheduleCommand c(this, transport_client, pend);
-      execute_or_enqueue(c);
+      execute_or_enqueue(new ScheduleCommand(this, transport_client, pend));
     }
 
-    void cancel_timer(TransportClient* transport_client, const PendingAssoc_rch& pend)
+    ReactorInterceptor::CommandPtr cancel_timer(TransportClient* transport_client, const PendingAssoc_rch& pend)
     {
-      CancelCommand c(this, transport_client, pend);
-      execute_or_enqueue(c);
+      return execute_or_enqueue(new CancelCommand(this, transport_client, pend));
     }
 
     virtual bool reactor_is_shut_down() const
