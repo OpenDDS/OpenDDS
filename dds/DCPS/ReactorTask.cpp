@@ -42,9 +42,8 @@ OpenDDS::DCPS::ReactorTask::~ReactorTask()
   }
 #endif
 
-  if (reactor_) {
-    delete reactor_;
-  }
+  delete reactor_;
+  delete timer_queue_;
 }
 
 int
@@ -68,7 +67,8 @@ OpenDDS::DCPS::ReactorTask::open(void*)
     proactor_ = 0;
   }
 
-  reactor_->timer_queue(&timer_queue_);
+  timer_queue_ = new TimerQueueType();
+  reactor_->timer_queue(timer_queue_);
 
   GuardType guard(lock_);
 

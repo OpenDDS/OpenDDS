@@ -63,7 +63,7 @@ private:
   typedef ACE_Condition<LockType> ConditionType;
   typedef ACE_Timer_List_T<
     ACE_Event_Handler*, ACE_Event_Handler_Handle_Timeout_Upcall,
-    LockType, MonotonicTime> TimerQueueType;
+    ACE_SYNCH_RECURSIVE_MUTEX, MonotonicTime> TimerQueueType;
 
   enum State { STATE_NOT_RUNNING, STATE_OPENING, STATE_RUNNING };
 
@@ -76,7 +76,7 @@ private:
   ACE_thread_t  reactor_owner_;
   ACE_Proactor* proactor_;
   bool          use_async_send_;
-  TimerQueueType timer_queue_;
+  TimerQueueType* timer_queue_;
 };
 
 } // namespace DCPS
