@@ -78,6 +78,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 const double QUICK_REPLY_DELAY_RATIO = 0.1;
+const size_t ONE_SAMPLE_PER_PACKET = 1;
 
 RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
                                  const GuidPrefix_t& local_prefix,
@@ -577,24 +578,28 @@ RtpsUdpDataLink::stop_i()
   multicast_socket_.close();
 }
 
+RcHandle<SingleSendBuffer>
+RtpsUdpDataLink::get_writer_send_buffer(const RepoId& pub_id)
+{
+  RcHandle<SingleSendBuffer> result;
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, result);
+
+  const RtpsWriterMap::iterator wi = writers_.find(pub_id);
+  if (wi != writers_.end()) {
+    result = wi->second->get_send_buff();
+  }
+  return result;
+}
+
 // Implementing MultiSendBuffer nested class
 
 void
 RtpsUdpDataLink::MultiSendBuffer::retain_all(const RepoId& pub_id)
 {
-  RcHandle<SingleSendBuffer> send_buff;
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, outer_->lock_);
-    const RtpsWriterMap::iterator wi = outer_->writers_.find(pub_id);
-    if (wi == outer_->writers_.end()) {
-      return; // this datawriter is not reliable
-    }
-    send_buff = wi->second->get_send_buff();
-
-    OPENDDS_ASSERT(!send_buff.is_nil());
+  RcHandle<SingleSendBuffer> send_buff = outer_->get_writer_send_buffer(pub_id);
+  if (!send_buff.is_nil()) {
+    send_buff->retain_all(pub_id);
   }
-
-  send_buff->retain_all(pub_id);
 }
 
 void
@@ -603,7 +608,8 @@ RtpsUdpDataLink::MultiSendBuffer::insert(SequenceNumber /*transport_seq*/,
                                          ACE_Message_Block* chain)
 {
   // Called from TransportSendStrategy::send_packet().
-  // RtpsUdpDataLink is already locked.
+  // RtpsUdpDataLink is not locked at this point, and is only locked
+  // to grab the appropriate writer send buffer via get_writer_send_buffer()
   const TransportQueueElement* const tqe = q->peek();
   const SequenceNumber seq = tqe->sequence();
   if (seq == SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
@@ -612,16 +618,9 @@ RtpsUdpDataLink::MultiSendBuffer::insert(SequenceNumber /*transport_seq*/,
 
   const RepoId pub_id = tqe->publication_id();
 
-  RcHandle<SingleSendBuffer> send_buff;
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, outer_->lock_);
-    const RtpsWriterMap::iterator wi = outer_->writers_.find(pub_id);
-    if (wi == outer_->writers_.end()) {
-      return; // this datawriter is not reliable
-    }
-    send_buff = wi->second->get_send_buff();
-
-    OPENDDS_ASSERT(!send_buff.is_nil());
+  RcHandle<SingleSendBuffer> send_buff = outer_->get_writer_send_buffer(pub_id);
+  if (send_buff.is_nil()) {
+    return;
   }
 
   if (Transport_debug_level > 5) {
@@ -3126,7 +3125,7 @@ RtpsUdpDataLink::ReaderInfo::expecting_durable_data() const
 }
 
 RtpsUdpDataLink::RtpsWriter::RtpsWriter(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable, CORBA::Long hbc, size_t capacity)
- : send_buff_(make_rch<SingleSendBuffer>(capacity, 1))
+ : send_buff_(make_rch<SingleSendBuffer>(capacity, ONE_SAMPLE_PER_PACKET))
  , link_(link)
  , id_(id)
  , durable_(durable)

@@ -201,6 +201,8 @@ private:
   ACE_SOCK_Dgram unicast_socket_;
   ACE_SOCK_Dgram_Mcast multicast_socket_;
 
+  RcHandle<SingleSendBuffer> get_writer_send_buffer(const RepoId& pub_id);
+
   struct MultiSendBuffer : TransportSendBuffer {
 
     MultiSendBuffer(RtpsUdpDataLink* outer, size_t capacity)
