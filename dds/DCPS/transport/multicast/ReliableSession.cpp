@@ -12,12 +12,11 @@
 #include "MulticastReceiveStrategy.h"
 
 #include "ace/Global_Macros.h"
-#include "ace/Time_Value.h"
 #include "ace/Truncate.h"
 
 #include "dds/DCPS/Serializer.h"
 #include "dds/DCPS/GuidConverter.h"
-#include "dds/DCPS/Time_Helper.h"
+#include "dds/DCPS/TimeTypes.h"
 
 #include <cstdlib>
 
@@ -34,10 +33,10 @@ NakWatchdog::NakWatchdog(ACE_Reactor* reactor,
 {
 }
 
-ACE_Time_Value
+TimeDuration
 NakWatchdog::next_interval()
 {
-  ACE_Time_Value interval(this->session_->link()->config().nak_interval_);
+  TimeDuration interval(this->session_->link()->config().nak_interval_);
 
   // Apply random backoff to minimize potential collisions:
   interval *= static_cast<double>(std::rand()) /
@@ -260,7 +259,7 @@ ReliableSession::expire_naks()
 {
   if (this->nak_requests_.empty()) return; // nothing to expire
 
-  const ACE_Time_Value deadline = monotonic_time() - link_->config().nak_timeout_;
+  const MonotonicTimePoint deadline(-link_->config().nak_timeout_);
   NakRequestMap::iterator first(this->nak_requests_.begin());
   NakRequestMap::iterator last(this->nak_requests_.upper_bound(deadline));
 
@@ -349,7 +348,7 @@ ReliableSession::send_naks()
   // Record low-water mark for this interval; this value will
   // be used to reset the low-water mark in the event the remote
   // peer becomes unresponsive:
-  const ACE_Time_Value now(monotonic_time());
+  const MonotonicTimePoint now;
   if (this->nak_sequence_.low() > 1) {
     this->nak_requests_[now] = SequenceNumber();
   } else {

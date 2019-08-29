@@ -105,13 +105,13 @@ void RemoveAssociationSweeper<T>::schedule_timer(OpenDDS::DCPS::RcHandle<OpenDDS
 {
   info->scheduled_for_removal_ = true;
   info->notify_lost_ = callback;
-  ACE_Time_Value time_to_deadline(info->activity_wait_period());
-
-  if (time_to_deadline > ACE_Time_Value(10)) {
-    time_to_deadline = ACE_Time_Value(10);
+  TimeDuration time_to_deadline(info->activity_wait_period());
+  const TimeDuration max_time(10);
+  if (time_to_deadline > max_time) {
+    time_to_deadline = max_time;
   }
 
-  info->removal_deadline_ = monotonic_time() + time_to_deadline;
+  info->removal_deadline_ = MonotonicTimePoint(time_to_deadline);
   ScheduleCommand c(this, info);
   execute_or_enqueue(c);
 }
@@ -120,7 +120,7 @@ template <typename T>
 void RemoveAssociationSweeper<T>::cancel_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
 {
   info->scheduled_for_removal_ = false;
-  info->removal_deadline_ = ACE_Time_Value::zero;
+  info->removal_deadline_ = MonotonicTimePoint::zero_value;
   CancelCommand c(this, info);
   execute_or_enqueue(c);
 }
@@ -192,7 +192,7 @@ void RemoveAssociationSweeper<T>::ScheduleCommand::execute()
   this->info_->remove_association_timer_ =
     this->sweeper_->reactor()->schedule_timer(
       this->sweeper_, arg,
-      this->info_->removal_deadline_ - monotonic_time());
+      (this->info_->removal_deadline_ - MonotonicTimePoint()).value());
   if (DCPS_debug_level) {
     ACE_DEBUG((LM_INFO,
       ACE_TEXT("(%P|%t) RemoveAssociationSweeper::ScheduleCommand::execute() - ")

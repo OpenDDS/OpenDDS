@@ -44,7 +44,7 @@ static DDS::Duration_t const DEADLINE_PERIOD =
 static int NUM_EXPIRATIONS = 2;
 
 // Time to sleep waiting for deadline periods to expire
-static ACE_Time_Value SLEEP_DURATION(DEADLINE_PERIOD.sec * NUM_EXPIRATIONS + 1);
+const static TimeDuration SLEEP_DURATION(DEADLINE_PERIOD.sec * NUM_EXPIRATIONS + 1);
 
 static int NUM_WRITE_THREADS = 2;
 
@@ -151,10 +151,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]){
         }
 
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Publisher: sleep for %d milliseconds\n"),
-                             SLEEP_DURATION.msec()));
+                             SLEEP_DURATION.value().msec()));
 
         // Wait for a set of deadline periods to expire.
-        ACE_OS::sleep(SLEEP_DURATION);
+        ACE_OS::sleep(SLEEP_DURATION.value());
 
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Publisher: now verify missed ")
                              ACE_TEXT("deadline status\n")));
@@ -211,10 +211,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]){
         writer2->wait();
 
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Publisher: sleep for %d milliseconds\n"),
-                             SLEEP_DURATION.msec()));
+                             SLEEP_DURATION.value().msec()));
 
         // Wait for another set of deadline periods to expire.
-        ACE_OS::sleep(SLEEP_DURATION);
+        ACE_OS::sleep(SLEEP_DURATION.value());
 
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Publisher: now verify missed ")
                              ACE_TEXT("deadline status\n")));

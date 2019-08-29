@@ -811,7 +811,7 @@ RecorderImpl::signal_liveliness(const RepoId& remote_participant)
     }
   }
 
-  const ACE_Time_Value now = monotonic_time();
+  const MonotonicTimePoint now;
   for (WriterSet::iterator pos = writers.begin(), limit = writers.end();
        pos != limit;
        ++pos) {

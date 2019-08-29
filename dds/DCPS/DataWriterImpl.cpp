@@ -73,8 +73,8 @@ DataWriterImpl::DataWriterImpl()
     coherent_samples_(0),
     liveliness_lost_(false),
     reactor_(0),
-    liveliness_check_interval_(ACE_Time_Value::max_time),
-    last_liveliness_activity_time_(ACE_Time_Value::zero),
+    liveliness_check_interval_(TimeDuration::max_value),
+    last_liveliness_activity_time_(MonotonicTimePoint::zero_value),
     last_deadline_missed_total_count_(0),
     watchdog_(),
     is_bit_(false),
@@ -576,7 +576,7 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
       Message_Block_Ptr end_historic_samples(
         create_control_message(
           END_HISTORIC_SAMPLES, header, move(data),
-          time_value_to_time(system_time())));
+          SystemTimePoint().to_dds_time()));
 
       this->controlTracker.message_sent();
       guard.release();
@@ -917,7 +917,7 @@ DataWriterImpl::set_qos(const DDS::DataWriterQos & qos)
 
         } else {
           this->watchdog_->reset_interval(
-            duration_to_time_value(qos.deadline.period));
+            TimeDuration(qos.deadline.period));
         }
       }
 
@@ -1011,7 +1011,7 @@ DataWriterImpl::send_request_ack()
       REQUEST_ACK,
       element->get_header(),
       move(blk),
-      time_value_to_time(system_time())));
+      SystemTimePoint().to_dds_time()));
   element->set_sample(move(sample));
 
   ret = this->data_container_->enqueue_control(element);
@@ -1147,7 +1147,7 @@ DataWriterImpl::assert_liveliness()
     }
     break;
   case DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS:
-    if (send_liveliness(monotonic_time()) == false) {
+    if (send_liveliness(MonotonicTimePoint()) == false) {
       return DDS::RETCODE_ERROR;
     }
     break;
@@ -1169,18 +1169,18 @@ DataWriterImpl::assert_liveliness_by_participant()
   return DDS::RETCODE_OK;
 }
 
-ACE_Time_Value
+TimeDuration
 DataWriterImpl::liveliness_check_interval(DDS::LivelinessQosPolicyKind kind)
 {
   if (this->qos_.liveliness.kind == kind) {
     return liveliness_check_interval_;
   } else {
-    return ACE_Time_Value::max_time;
+    return TimeDuration::max_value;
   }
 }
 
 bool
-DataWriterImpl::participant_liveliness_activity_after(const ACE_Time_Value& tv)
+DataWriterImpl::participant_liveliness_activity_after(const MonotonicTimePoint& tv)
 {
   if (this->qos_.liveliness.kind == DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS) {
     return last_liveliness_activity_time_ > tv;
@@ -1373,17 +1373,18 @@ DataWriterImpl::enable()
 
   if (qos_.liveliness.lease_duration.sec != DDS::DURATION_INFINITE_SEC &&
       qos_.liveliness.lease_duration.nanosec != DDS::DURATION_INFINITE_NSEC) {
-    liveliness_check_interval_ = duration_to_time_value(qos_.liveliness.lease_duration);
+    liveliness_check_interval_ = TimeDuration(qos_.liveliness.lease_duration);
     liveliness_check_interval_ *= TheServiceParticipant->liveliness_factor()/100.0;
     // Must be at least 1 micro second.
-    if (liveliness_check_interval_ == ACE_Time_Value::zero) {
-      liveliness_check_interval_ = ACE_Time_Value (0, 1);
+    const TimeDuration min(0, 1);
+    if (liveliness_check_interval_ < min) {
+      liveliness_check_interval_ = min;
     }
 
     if (reactor_->schedule_timer(liveness_timer_.in(),
                                  0,
-                                 liveliness_check_interval_,
-                                 liveliness_check_interval_) == -1) {
+                                 liveliness_check_interval_.value(),
+                                 liveliness_check_interval_.value()) == -1) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::enable: %p.\n"),
                  ACE_TEXT("schedule_timer")));
@@ -1800,7 +1801,7 @@ DataWriterImpl::write(Message_Block_Ptr data,
                       ACE_TEXT("enqueue failed.\n")),
                      ret);
   }
-  last_liveliness_activity_time_ = monotonic_time();
+  last_liveliness_activity_time_ = MonotonicTimePoint();
 
   track_sequence_number(filter_out);
 
@@ -2298,7 +2299,7 @@ DataWriterImpl::end_coherent_changes(const GroupCoherentSamples& group_samples)
   Message_Block_Ptr control(
     create_control_message(
       END_COHERENT_CHANGES, header, move(data),
-      time_value_to_time(system_time())));
+      SystemTimePoint().to_dds_time()));
 
   this->coherent_ = false;
   this->coherent_samples_ = 0;
@@ -2355,22 +2356,23 @@ int
 DataWriterImpl::handle_timeout(const ACE_Time_Value& tv,
                                const void* /* arg */)
 {
+  const MonotonicTimePoint now(tv);
   bool liveliness_lost = false;
 
-  ACE_Time_Value elapsed = tv - last_liveliness_activity_time_;
+  TimeDuration elapsed = now - last_liveliness_activity_time_;
 
   // Do we need to send a liveliness message?
   if (elapsed >= liveliness_check_interval_) {
     switch (this->qos_.liveliness.kind) {
     case DDS::AUTOMATIC_LIVELINESS_QOS:
-      if (send_liveliness(tv) == false) {
+      if (send_liveliness(now) == false) {
         liveliness_lost = true;
       }
       break;
 
     case DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS:
       if (liveliness_asserted_) {
-        if (send_liveliness(tv) == false) {
+        if (send_liveliness(now) == false) {
           liveliness_lost = true;
         }
       }
@@ -2388,8 +2390,9 @@ DataWriterImpl::handle_timeout(const ACE_Time_Value& tv,
         ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::handle_timeout: %p.\n"),
         ACE_TEXT("cancel_timer")));
     }
-    if (reactor_->schedule_timer(liveness_timer_.in(), 0, liveliness_check_interval_ - elapsed,
-      liveliness_check_interval_) == -1)
+    if (reactor_->schedule_timer(liveness_timer_.in(), 0,
+      (liveliness_check_interval_ - elapsed).value(),
+      liveliness_check_interval_.value()) == -1)
     {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::handle_timeout: %p.\n"),
@@ -2399,10 +2402,10 @@ DataWriterImpl::handle_timeout(const ACE_Time_Value& tv,
   }
 
   liveliness_asserted_ = false;
-  elapsed = tv - last_liveliness_activity_time_;
+  elapsed = now - last_liveliness_activity_time_;
 
   // Have we lost liveliness?
-  if (elapsed >= duration_to_time_value(qos_.liveliness.lease_duration)) {
+  if (elapsed >= TimeDuration(qos_.liveliness.lease_duration)) {
     liveliness_lost = true;
   }
 
@@ -2424,7 +2427,7 @@ DataWriterImpl::handle_timeout(const ACE_Time_Value& tv,
 }
 
 bool
-DataWriterImpl::send_liveliness(const ACE_Time_Value& now)
+DataWriterImpl::send_liveliness(const MonotonicTimePoint& now)
 {
   if (this->qos_.liveliness.kind == DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS ||
       !TheServiceParticipant->get_discovery(domain_id_)->supports_liveliness()) {
@@ -2433,7 +2436,7 @@ DataWriterImpl::send_liveliness(const ACE_Time_Value& now)
     Message_Block_Ptr liveliness_msg(
       create_control_message(
         DATAWRITER_LIVELINESS, header, move(empty),
-        time_value_to_time(system_time())));
+        SystemTimePoint().to_dds_time()));
 
     if (this->send_control(header, move(liveliness_msg)) == SEND_CONTROL_ERROR) {
       ACE_ERROR_RETURN((LM_ERROR,
@@ -2707,8 +2710,7 @@ LivenessTimer::handle_timeout(const ACE_Time_Value &tv,
   DataWriterImpl_rch writer = this->writer_.lock();
   if (writer) {
     writer->handle_timeout(tv, arg);
-  }
-  else {
+  } else {
     this->reactor()->cancel_timer(this);
   }
   return 0;

@@ -255,17 +255,17 @@ private:
   public:
     RevokePermissionsTimer(AccessControlBuiltInImpl& impl);
     virtual ~RevokePermissionsTimer();
-    bool start_timer(const ACE_Time_Value length, DDS::Security::PermissionsHandle pm_handle);
+    bool start_timer(const TimeDuration& length, DDS::Security::PermissionsHandle pm_handle);
     virtual int handle_timeout(const ACE_Time_Value& tv, const void* arg);
     bool is_scheduled() { return scheduled_; }
 
   protected:
     AccessControlBuiltInImpl& impl_;
 
-    ACE_Time_Value interval() const { return interval_; }
+    const TimeDuration& interval() const { return interval_; }
 
   private:
-    ACE_Time_Value interval_;
+    TimeDuration interval_;
     bool scheduled_;
     long timer_id_;
     ACE_Thread_Mutex lock_;

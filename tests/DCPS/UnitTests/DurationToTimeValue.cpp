@@ -9,6 +9,7 @@
 #include "ace/Time_Value.h"
 
 #include "dds/DCPS/Qos_Helper.h"
+#include "dds/DCPS/TimeTypes.h"
 
 #include "../common/TestSupport.h"
 
@@ -39,7 +40,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   }
 
   {
-    const ACE_Time_Value now = system_time();
+    const ACE_Time_Value now = SystemTimePoint().value();
     const ACE_Time_Value tv = duration_to_absolute_time_value(duration, now);
     // see value.
     //time_t sec = tv.sec ();

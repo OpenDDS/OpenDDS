@@ -42,6 +42,7 @@
 #include "RcEventHandler.h"
 #include "TopicImpl.h"
 #include "DomainParticipantImpl.h"
+#include "TimeTypes.h"
 
 #include "ace/String_Base.h"
 #include "ace/Reverse_Lock_T.h"
@@ -89,7 +90,7 @@ public:
     DataCollector<double>::OnFull type = DataCollector<double>::KeepOldest);
 
   /// Add a datum to the latency statistics.
-  void add_stat(const ACE_Time_Value& delay);
+  void add_stat(const TimeDuration& delay);
 
   /// Extract the current latency statistics for this writer.
   LatencyStatistics get_stats() const;
@@ -238,13 +239,13 @@ public:
   /// The writer state is inout parameter, it has to be set ALIVE before
   /// handle_timeout is called since some subroutine use the state.
   void writer_became_alive(WriterInfo& info,
-                           const ACE_Time_Value& when);
+                           const MonotonicTimePoint& when);
 
   /// tell instances when a DataWriter transitions to DEAD
   /// The writer state is inout parameter, the state is set to DEAD
   /// when it returns.
   void writer_became_dead(WriterInfo& info,
-                          const ACE_Time_Value& when);
+                          const MonotonicTimePoint& when);
 
   /// tell instance when a DataWriter is removed.
   /// The liveliness status need update.
@@ -614,7 +615,7 @@ protected:
   bool ownership_filter_instance(const SubscriptionInstance_rch& instance,
                                  const PublicationId& pubid);
   bool time_based_filter_instance(const SubscriptionInstance_rch& instance,
-                                  ACE_Time_Value& filter_time_expired);
+                                  TimeDuration& filter_time_expired);
 
   void accept_sample_processing(const SubscriptionInstance_rch& instance, const DataSampleHeader& header, bool is_new_instance);
 
@@ -672,7 +673,7 @@ private:
                                DDS::InstanceHandleSeq& hdls);
 
   void instances_liveliness_update(WriterInfo& info,
-                                   const ACE_Time_Value& when);
+                                   const MonotonicTimePoint& when);
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   bool verify_coherent_changes_completion(WriterInfo* writer);
@@ -783,7 +784,7 @@ private:
 
     /// liveliness timer id; -1 if no timer is set
     long liveliness_timer_id_;
-    void check_liveliness_i(bool cancel, const ACE_Time_Value& current_time);
+    void check_liveliness_i(bool cancel, const MonotonicTimePoint& now);
 
     int handle_timeout(const ACE_Time_Value& current_time, const void* arg);
 
@@ -804,7 +805,7 @@ private:
       { }
       virtual void execute()
       {
-        timer_->check_liveliness_i(true, monotonic_time());
+        timer_->check_liveliness_i(true, MonotonicTimePoint());
       }
     };
 

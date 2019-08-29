@@ -49,17 +49,17 @@ resend_data_expired(const DataSampleElement& element,
       element.get_header().source_timestamp_sec_ + lifespan.duration.sec,
       element.get_header().source_timestamp_nanosec_ + lifespan.duration.nanosec
     };
-    const ACE_Time_Value expiration_time(time_to_time_value(tmp));
-    const ACE_Time_Value now(system_time());
+    const SystemTimePoint expiration_time(time_to_time_value(tmp));
+    const SystemTimePoint now;
 
     if (now >= expiration_time) {
       if (DCPS_debug_level >= 8) {
-        ACE_Time_Value const diff(now - expiration_time);
+        const TimeDuration diff = now - expiration_time;
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("OpenDDS (%P|%t) Data to be sent ")
                    ACE_TEXT("expired by %d seconds, %d microseconds.\n"),
-                   diff.sec(),
-                   diff.usec()));
+                   diff.value().sec(),
+                   diff.value().usec()));
       }
 
       return true; // Data expired.
@@ -192,7 +192,7 @@ WriteDataContainer::enqueue(
 
   if (this->writer_->watchdog_.in()) {
     instance->last_sample_tv_ = instance->cur_sample_tv_;
-    instance->cur_sample_tv_ = monotonic_time();
+    instance->cur_sample_tv_.set_to_now();
     this->writer_->watchdog_->execute(*this->writer_, instance, false);
   }
 
@@ -1036,7 +1036,7 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
   DDS::ReturnCode_t ret = DDS::RETCODE_OK;
 
   bool need_to_set_abs_timeout = true;
-  MonotonicTimeValue abs_timeout;
+  MonotonicTimePoint abs_timeout;
 
   //max_num_samples_ covers ResourceLimitsQosPolicy max_samples and
   //max_instances and max_instances * depth
@@ -1060,10 +1060,10 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
       }
       // Reliable writers can wait
       if (need_to_set_abs_timeout) {
-        abs_timeout = duration_to_monotonic_time(max_blocking_time_);
+        abs_timeout = MonotonicTimePoint(max_blocking_time_);
         need_to_set_abs_timeout = false;
       }
-      if (!shutdown_ && monotonic_time() < abs_timeout) {
+      if (!shutdown_ && MonotonicTimePoint() < abs_timeout) {
         if (DCPS_debug_level >= 2) {
           ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::obtain_buffer")
                                 ACE_TEXT(" instance %d waiting for samples to be released by transport\n"),
@@ -1071,7 +1071,7 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
         }
 
         waiting_on_release_ = true;
-        const int wait_result = condition_.wait(&abs_timeout);
+        const int wait_result = condition_.wait(&abs_timeout.value());
 
         if (wait_result == 0) {
           remove_excess_durable();
@@ -1368,18 +1368,18 @@ void WriteDataContainer::reschedule_deadline()
 void
 WriteDataContainer::wait_pending()
 {
-  MonotonicTimeValue pending_timeout(TheServiceParticipant->pending_timeout());
-  MonotonicTimeValue* pTimeout = 0;
+  const TimeDuration pending_timeout(TheServiceParticipant->pending_timeout());
+  const MonotonicTimePoint timeout_at(pending_timeout);
+  const ACE_Time_Value_T<MonotonicClock>* timeout_ptr = 0;
 
-  if (pending_timeout != ACE_Time_Value::zero) {
-    pTimeout = &pending_timeout;
-    pending_timeout += monotonic_time();
+  if (!pending_timeout.is_zero()) {
+    timeout_ptr = &timeout_at.value();
   }
 
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
   const bool report = DCPS_debug_level > 0 && pending_data();
   if (report) {
-    if (pending_timeout == ACE_Time_Value::zero) {
+    if (pending_timeout.is_zero()) {
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("%T (%P|%t) WriteDataContainer::wait_pending no timeout\n")));
     } else {
@@ -1394,7 +1394,7 @@ WriteDataContainer::wait_pending()
     if (!pending_data())
       break;
 
-    if (empty_condition_.wait(pTimeout) == -1 && pending_data()) {
+    if (empty_condition_.wait(timeout_ptr) == -1 && pending_data()) {
       if (DCPS_debug_level) {
         ACE_DEBUG((LM_INFO,
                    ACE_TEXT("(%P|%t) WriteDataContainer::wait_pending %p\n"),
@@ -1425,18 +1425,18 @@ WriteDataContainer::get_instance_handles(InstanceHandleVec& instance_handles)
 }
 
 DDS::ReturnCode_t
-WriteDataContainer::wait_ack_of_seq(const ACE_Time_Value& abs_deadline, const SequenceNumber& sequence)
+WriteDataContainer::wait_ack_of_seq(const MonotonicTimePoint& abs_deadline, const SequenceNumber& sequence)
 {
-  MonotonicTimeValue deadline(abs_deadline);
+  const MonotonicTimePoint deadline(abs_deadline);
   DDS::ReturnCode_t ret = DDS::RETCODE_OK;
   ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->wfa_lock_, DDS::RETCODE_ERROR);
 
-  while (monotonic_time() < deadline) {
+  while (MonotonicTimePoint() < deadline) {
 
     if (!sequence_acknowledged(sequence)) {
       // lock is released while waiting and acquired before returning
       // from wait.
-      int const wait_result = wfa_condition_.wait(&deadline);
+      int const wait_result = wfa_condition_.wait(&deadline.value());
 
       if (wait_result != 0) {
         if (errno == ETIME) {

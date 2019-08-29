@@ -10,13 +10,13 @@
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/RcObject.h"
-#include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/TimeTypes.h"
 #include "ace/Task.h"
 #include "ace/Barrier.h"
 #include "ace/Synch_Traits.h"
 #include "ace/Condition_T.h"
 #include "ace/Condition_Thread_Mutex.h"
-#include "ace/Timer_List_T.h"
+#include "ace/Timer_Heap_T.h"
 #include "ace/Event_Handler_Handle_Timeout_Upcall.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -61,9 +61,9 @@ private:
   typedef ACE_SYNCH_MUTEX         LockType;
   typedef ACE_Guard<LockType>     GuardType;
   typedef ACE_Condition<LockType> ConditionType;
-  typedef ACE_Timer_List_T<
+  typedef ACE_Timer_Heap_T<
     ACE_Event_Handler*, ACE_Event_Handler_Handle_Timeout_Upcall,
-    ACE_SYNCH_RECURSIVE_MUTEX, MonotonicTime> TimerQueueType;
+    ACE_SYNCH_RECURSIVE_MUTEX, MonotonicClock> TimerQueueType;
 
   enum State { STATE_NOT_RUNNING, STATE_OPENING, STATE_RUNNING };
 

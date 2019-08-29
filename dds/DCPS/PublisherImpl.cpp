@@ -45,7 +45,7 @@ PublisherImpl::PublisherImpl(DDS::InstanceHandle_t      handle,
   participant_(*participant),
   suspend_depth_count_(0),
   sequence_number_(),
-  aggregation_period_start_(ACE_Time_Value::zero),
+  aggregation_period_start_(MonotonicTimePoint::zero_value),
   reverse_pi_lock_(pi_lock_),
   monitor_(0),
   publisher_id_(id)
@@ -209,7 +209,7 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
 #endif
 
   // Unregister all registered instances prior to deletion.
-  dw_servant->unregister_instances(time_value_to_time(system_time()));
+  dw_servant->unregister_instances(SystemTimePoint().to_dds_time());
 
   // Wait for any control messages to be transported during
   // unregistering of instances.
@@ -873,19 +873,19 @@ PublisherImpl::assert_liveliness_by_participant()
   return ret;
 }
 
-ACE_Time_Value
+TimeDuration
 PublisherImpl::liveliness_check_interval(DDS::LivelinessQosPolicyKind kind)
 {
-  ACE_Time_Value tv = ACE_Time_Value::max_time;
+  TimeDuration tv = TimeDuration::max_value;
   for (DataWriterMap::iterator it(datawriter_map_.begin());
       it != datawriter_map_.end(); ++it) {
-    tv = std::min (tv, it->second->liveliness_check_interval(kind));
+    tv = std::min(tv, it->second->liveliness_check_interval(kind));
   }
   return tv;
 }
 
 bool
-PublisherImpl::participant_liveliness_activity_after(const ACE_Time_Value& tv)
+PublisherImpl::participant_liveliness_activity_after(const MonotonicTimePoint& tv)
 {
   for (DataWriterMap::iterator it(datawriter_map_.begin());
       it != datawriter_map_.end(); ++it) {

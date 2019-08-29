@@ -621,10 +621,10 @@ DomainParticipantImpl::find_topic(
   const char* topic_name,
   const DDS::Duration_t& timeout)
 {
-  const ACE_Time_Value timeout_tv = duration_to_monotonic_time(timeout);
+  const MonotonicTimePoint timeout_at(timeout);
 
   bool first_time = true;
-  while (first_time || monotonic_time() < timeout_tv) {
+  while (first_time || MonotonicTimePoint() < timeout_at) {
     if (first_time) {
       first_time = false;
     }
@@ -654,7 +654,7 @@ DomainParticipantImpl::find_topic(
                                            qos.out(),
                                            topic_id);
 
-    const ACE_Time_Value now = monotonic_time();
+    const MonotonicTimePoint now;
     if (status == FOUND) {
       OpenDDS::DCPS::TypeSupport_var type_support =
         Registered_Data_Types->lookup(this, type_name.in());
@@ -682,14 +682,14 @@ DomainParticipantImpl::find_topic(
                  ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::find_topic - ")
                  ACE_TEXT("topic not found, discovery returned INTERNAL_ERROR!\n")));
       return DDS::Topic::_nil();
-    } else if (now < timeout_tv) {
-      const ACE_Time_Value remaining = timeout_tv - now;
+    } else if (now < timeout_at) {
+      const TimeDuration remaining = timeout_at - now;
 
-      if (remaining.sec() >= 1) {
+      if (remaining.value().sec() >= 1) {
         ACE_OS::sleep(1);
 
       } else {
-        ACE_OS::sleep(remaining);
+        ACE_OS::sleep(remaining.value());
       }
     }
   }
@@ -1344,7 +1344,7 @@ DomainParticipantImpl::assert_liveliness()
     it->svt_->assert_liveliness_by_participant();
   }
 
-  last_liveliness_activity_ = monotonic_time();
+  last_liveliness_activity_ = MonotonicTimePoint();
 
   return DDS::RETCODE_OK;
 }
@@ -1415,7 +1415,7 @@ DomainParticipantImpl::get_default_topic_qos(
 DDS::ReturnCode_t
 DomainParticipantImpl::get_current_time(DDS::Time_t& current_time)
 {
-  current_time = time_value_to_time(system_time());
+  current_time = SystemTimePoint().to_dds_time();
   return DDS::RETCODE_OK;
 }
 
@@ -2192,7 +2192,7 @@ DomainParticipantImpl::LivelinessTimer::LivelinessTimer(DomainParticipantImpl& i
                                                         DDS::LivelinessQosPolicyKind kind)
   : impl_(impl)
   , kind_ (kind)
-  , interval_ (ACE_Time_Value::max_time)
+  , interval_ (TimeDuration::max_value)
   , recalculate_interval_ (false)
   , scheduled_ (false)
 { }
@@ -2209,13 +2209,13 @@ DomainParticipantImpl::LivelinessTimer::add_adjust(OpenDDS::DCPS::DataWriterImpl
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, this->lock_);
 
-  const ACE_Time_Value now = monotonic_time();
+  const MonotonicTimePoint now;
 
   // Calculate the time remaining to liveliness check.
-  const ACE_Time_Value remaining = interval_ - (now - last_liveliness_check_);
+  const TimeDuration remaining = interval_ - (now - last_liveliness_check_);
 
   // Adopt a smaller interval.
-  const ACE_Time_Value i = writer->liveliness_check_interval(kind_);
+  const TimeDuration i = writer->liveliness_check_interval(kind_);
   if (i < interval_) {
     interval_ = i;
   }
@@ -2223,9 +2223,9 @@ DomainParticipantImpl::LivelinessTimer::add_adjust(OpenDDS::DCPS::DataWriterImpl
   // Reschedule or schedule a timer if necessary.
   if (scheduled_ && interval_ < remaining) {
     TheServiceParticipant->timer()->cancel_timer(this);
-    TheServiceParticipant->timer()->schedule_timer(this, 0, interval_);
+    TheServiceParticipant->timer()->schedule_timer(this, 0, interval_.value());
   } else if (!scheduled_) {
-    TheServiceParticipant->timer()->schedule_timer(this, 0, interval_);
+    TheServiceParticipant->timer()->schedule_timer(this, 0, interval_.value());
     scheduled_ = true;
     last_liveliness_check_ = now;
   }
@@ -2244,6 +2244,8 @@ DomainParticipantImpl::LivelinessTimer::handle_timeout(
   const ACE_Time_Value& tv,
   const void* /* arg */)
 {
+  const MonotonicTimePoint now(tv);
+
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, this->lock_, 0);
 
   scheduled_ = false;
@@ -2253,10 +2255,10 @@ DomainParticipantImpl::LivelinessTimer::handle_timeout(
     recalculate_interval_ = false;
   }
 
-  if (interval_ != ACE_Time_Value::max_time) {
-    dispatch(tv);
-    last_liveliness_check_ = tv;
-    TheServiceParticipant->timer()->schedule_timer(this, 0, interval_);
+  if (interval_ != TimeDuration::max_value) {
+    dispatch(now);
+    last_liveliness_check_ = now;
+    TheServiceParticipant->timer()->schedule_timer(this, 0, interval_.value());
     scheduled_ = true;
   }
 
@@ -2268,7 +2270,7 @@ DomainParticipantImpl::AutomaticLivelinessTimer::AutomaticLivelinessTimer(Domain
 { }
 
 void
-DomainParticipantImpl::AutomaticLivelinessTimer::dispatch(const ACE_Time_Value& /* tv */)
+DomainParticipantImpl::AutomaticLivelinessTimer::dispatch(const MonotonicTimePoint& /* tv */)
 {
   impl_.signal_liveliness (kind_);
 }
@@ -2278,17 +2280,17 @@ DomainParticipantImpl::ParticipantLivelinessTimer::ParticipantLivelinessTimer(Do
 { }
 
 void
-DomainParticipantImpl::ParticipantLivelinessTimer::dispatch(const ACE_Time_Value& tv)
+DomainParticipantImpl::ParticipantLivelinessTimer::dispatch(const MonotonicTimePoint& tv)
 {
   if (impl_.participant_liveliness_activity_after (tv - interval())) {
     impl_.signal_liveliness (kind_);
   }
 }
 
-ACE_Time_Value
+TimeDuration
 DomainParticipantImpl::liveliness_check_interval(DDS::LivelinessQosPolicyKind kind)
 {
-  ACE_Time_Value tv = ACE_Time_Value::max_time;
+  TimeDuration tv(TimeDuration::max_value);
 
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     tao_mon,
@@ -2304,7 +2306,7 @@ DomainParticipantImpl::liveliness_check_interval(DDS::LivelinessQosPolicyKind ki
 }
 
 bool
-DomainParticipantImpl::participant_liveliness_activity_after(const ACE_Time_Value& tv)
+DomainParticipantImpl::participant_liveliness_activity_after(const MonotonicTimePoint& tv)
 {
   if (last_liveliness_activity_ > tv) {
     return true;
@@ -2313,7 +2315,7 @@ DomainParticipantImpl::participant_liveliness_activity_after(const ACE_Time_Valu
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     tao_mon,
                     this->publishers_protector_,
-                    tv);
+                    !tv.is_zero());
 
   for (PublisherSet::iterator it(publishers_.begin());
        it != publishers_.end(); ++it) {

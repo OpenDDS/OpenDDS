@@ -22,7 +22,7 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::RequestedDeadlineWatchdog(
   OpenDDS::DCPS::DataReaderImpl & reader_impl,
   DDS::RequestedDeadlineMissedStatus & status,
   CORBA::Long & last_total_count)
-  : Watchdog(duration_to_time_value(qos.period))
+  : Watchdog(TimeDuration(qos.period))
   , status_lock_(lock)
   , reverse_status_lock_(status_lock_)
   , reader_impl_(reader_impl)
@@ -87,16 +87,14 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::execute(SubscriptionInstance_rch insta
   if (instance->deadline_timer_id_ != -1) {
     bool missed = false;
 
-    if (instance->cur_sample_tv_  == ACE_Time_Value::zero) { // not received any sample.
+    if (instance->cur_sample_tv_.is_zero()) { // not received any sample.
       missed = true;
 
     } else if (timer_called) { // handle_timeout is called
-      ACE_Time_Value diff = monotonic_time() - instance->cur_sample_tv_;
-      missed = diff >= this->interval_;
+      missed = (MonotonicTimePoint() - instance->cur_sample_tv_) >= interval_;
 
     } else { // upon receiving sample.
-      ACE_Time_Value diff = instance->cur_sample_tv_ - instance->last_sample_tv_;
-      missed = diff > this->interval_;
+      missed = (instance->cur_sample_tv_ - instance->last_sample_tv_) > interval_;
     }
 
     if (missed) {

@@ -17,20 +17,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-ACE_INLINE ACE_Time_Value
-system_time()
-{
-  static SystemTime policy;
-  return policy();
-}
-
-ACE_INLINE ACE_Time_Value
-monotonic_time()
-{
-  static MonotonicTime policy;
-  return policy();
-}
-
 // These operators are used in some inline functions below.  Some
 // compilers require the inline definition to appear before its use.
 #ifndef OPENDDS_SAFETY_PROFILE
@@ -199,18 +185,6 @@ ACE_Time_Value duration_to_absolute_time_value(const DDS::Duration_t& t,
   else {
     return ACE_Time_Value(ACE_Utils::truncate_cast<time_t>(sec), usec);
   }
-}
-
-ACE_INLINE OpenDDS_Dcps_Export ACE_Time_Value
-duration_to_monotonic_time(const DDS::Duration_t& t)
-{
-  return duration_to_absolute_time_value(t, monotonic_time());
-}
-
-ACE_INLINE OpenDDS_Dcps_Export ACE_Time_Value
-duration_to_system_time(const DDS::Duration_t& t)
-{
-  return duration_to_absolute_time_value(t, system_time());
 }
 
 ACE_INLINE

@@ -244,7 +244,7 @@ private:
         if (timer_->reactor()) {
           timer_->reactor()->schedule_timer(assoc_.in(),
                                             transport_client_,
-                                            transport_client_->passive_connect_duration_);
+                                            transport_client_->passive_connect_duration_.value());
         }
       }
     };
@@ -294,7 +294,7 @@ private:
 
   bool swap_bytes_, cdr_encapsulation_, reliable_, durable_;
 
-  ACE_Time_Value passive_connect_duration_;
+  TimeDuration passive_connect_duration_;
 
   TransportLocatorSeq conn_info_;
 

@@ -5,7 +5,6 @@
 #include "dds/DCPS/Service_Participant.h"
 
 #include <dds/DCPS/Qos_Helper.h>
-#include <dds/DCPS/Time_Helper.h>
 
 #include <ace/OS_NS_unistd.h>
 #include <ace/streams.h>
@@ -13,23 +12,19 @@
 
 using namespace Messenger;
 using namespace std;
-using OpenDDS::DCPS::monotonic_time;
-using OpenDDS::DCPS::MonotonicTimeValue;
 
-static int const num_messages = 10;
-static ACE_Time_Value write_interval(0, 500000);
-extern ACE_Time_Value SLEEP_DURATION;
+static const int num_messages = 10;
+static const TimeDuration write_interval(0, 500000);
 
 // Wait for up to 10 seconds for subscription matched status.
-static DDS::Duration_t const MATCHED_WAIT_MAX_DURATION =
-{
+static const DDS::Duration_t MATCHED_WAIT_MAX_DURATION = {
   10, // seconds
   0   // nanoseconds
 };
 
 Writer::Writer(::DDS::DataWriter_ptr writer,
                CORBA::Long key,
-               ACE_Time_Value sleep_duration)
+               TimeDuration sleep_duration)
 : writer_(::DDS::DataWriter::_duplicate(writer)),
   condition_(lock_, condition_time_),
   associated_(false),
@@ -69,10 +64,8 @@ Writer::svc()
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::svc begins.\n")));
 
   try {
-    MonotonicTimeValue connect_deadline(monotonic_time());
-    connect_deadline +=
-      OpenDDS::DCPS::duration_to_time_value(MATCHED_WAIT_MAX_DURATION);
-    if (dwl_servant_->wait_matched(2, &connect_deadline) != 0) {
+    const MonotonicTimePoint connect_deadline(MATCHED_WAIT_MAX_DURATION);
+    if (dwl_servant_->wait_matched(2, &connect_deadline.value()) != 0) {
       cerr << "ERROR: wait for subscription matching failed." << endl;
       exit(1);
     }
@@ -101,9 +94,9 @@ Writer::svc()
 
     ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) Writer::svc sleep for %d seconds.\n"),
-              this->sleep_duration_.sec()));
+              sleep_duration_.value().sec()));
 
-    ACE_OS::sleep(this->sleep_duration_);
+    ACE_OS::sleep(sleep_duration_.value());
 
     for (int i = 0; i < num_messages; ++i)
     {
@@ -128,7 +121,7 @@ Writer::svc()
       // periods to expire.  Missed deadline should not occur since
       // the time between writes should be less than the offered
       // deadline period.
-      ACE_OS::sleep(write_interval);
+      ACE_OS::sleep(write_interval.value());
     }
   }
   catch (CORBA::Exception& e)
@@ -155,9 +148,8 @@ bool Writer::wait_for_start()
   GuardType guard(this->lock_);
 
   if (!associated_) {
-    MonotonicTimeValue abs(monotonic_time());
-    abs += ACE_Time_Value(10);
-    if (condition_.wait(&abs) == -1) {
+    const MonotonicTimePoint abs(TimeDuration(10));
+    if (condition_.wait(&abs.value()) == -1) {
       return false;
     }
   }

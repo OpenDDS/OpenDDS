@@ -16,6 +16,7 @@
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/ReactorInterceptor.h"
 #include "dds/DCPS/RepoIdTypes.h"
+#include "dds/DCPS/TimeTypes.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -117,7 +118,7 @@ public:
   /// tell this instance when a DataWriter transitions to NOT_ALIVE
   void writer_became_dead(const PublicationId& writer_id,
                           int num_alive_writers,
-                          const ACE_Time_Value& when);
+                          const MonotonicTimePoint& when);
 
   WeakRcHandle<OpenDDS::DCPS::DataReaderImpl> data_reader() const;
 
@@ -240,12 +241,12 @@ private:
   };
 
   struct ScheduleCommand : CommandBase {
-    ScheduleCommand(InstanceState* instance_state, const ACE_Time_Value& delay)
+    ScheduleCommand(InstanceState* instance_state, const TimeDuration& delay)
       : CommandBase(instance_state)
       , delay_(delay)
     {}
 
-    const ACE_Time_Value delay_;
+    const TimeDuration delay_;
     void execute();
   };
 

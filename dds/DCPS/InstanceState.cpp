@@ -177,7 +177,7 @@ bool InstanceState::unregister_was_received(const PublicationId& writer_id)
   return false;
 }
 
-void InstanceState::writer_became_dead(const PublicationId& writer_id, int, const ACE_Time_Value&)
+void InstanceState::writer_became_dead(const PublicationId& writer_id, int, const MonotonicTimePoint&)
 {
   if (DCPS_debug_level > 1) {
     GuidConverter conv(writer_id);
@@ -234,7 +234,7 @@ void InstanceState::schedule_release()
       delay.nanosec != DDS::DURATION_INFINITE_NSEC) {
     cancel_release();
 
-    ScheduleCommand cmd(this, duration_to_time_value(delay));
+    ScheduleCommand cmd(this, TimeDuration(delay));
     execute_or_enqueue(cmd);
 
   } else {
@@ -332,7 +332,8 @@ void InstanceState::CancelCommand::execute()
 
 void InstanceState::ScheduleCommand::execute()
 {
-  instance_state_->release_timer_id_ = instance_state_->reactor()->schedule_timer(instance_state_, 0, delay_);
+  instance_state_->release_timer_id_ =
+    instance_state_->reactor()->schedule_timer(instance_state_, 0, delay_.value());
 
   if (instance_state_->release_timer_id_ == -1) {
     ACE_ERROR((LM_ERROR,

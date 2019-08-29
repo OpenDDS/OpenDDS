@@ -64,18 +64,18 @@ MessageTracker::message_dropped()
 void
 MessageTracker::wait_messages_pending(OPENDDS_STRING& caller_message)
 {
-  MonotonicTimeValue pending_timeout(TheServiceParticipant->pending_timeout());
-  MonotonicTimeValue* pTimeout = 0;
+  const TimeDuration pending_timeout(TheServiceParticipant->pending_timeout());
+  const MonotonicTimePoint timeout_at(pending_timeout);
+  const ACE_Time_Value_T<MonotonicClock>* timeout_ptr = 0;
 
-  if (pending_timeout != ACE_Time_Value::zero) {
-    pTimeout = &pending_timeout;
-    pending_timeout += monotonic_time();
+  if (!pending_timeout.is_zero()) {
+    timeout_ptr = &timeout_at.value();
   }
 
   ACE_GUARD(ACE_Thread_Mutex, guard, this->lock_);
   const bool report = DCPS_debug_level > 0 && pending_messages();
   if (report) {
-    if (pTimeout != 0) {
+    if (timeout_ptr) {
       ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("%T (%P|%t) MessageTracker::wait_messages_pending ")
                 ACE_TEXT("from source=%C will wait until %#T.\n"),
@@ -90,7 +90,7 @@ MessageTracker::wait_messages_pending(OPENDDS_STRING& caller_message)
     if (!pending_messages())
       break;
 
-    if (done_condition_.wait(pTimeout) == -1 && pending_messages()) {
+    if (done_condition_.wait(timeout_ptr) == -1 && pending_messages()) {
       if (DCPS_debug_level) {
         ACE_DEBUG((LM_INFO,
                    ACE_TEXT("(%P|%t) %T MessageTracker::")

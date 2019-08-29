@@ -824,7 +824,7 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
       ReaderInfoMap::iterator ri = remote_readers_.find(sub);
       if (ri != remote_readers_.end()) {
         ri->second.durable_data_[rtps->sequence()] = rtps;
-        ri->second.durable_timestamp_ = monotonic_time();
+        ri->second.durable_timestamp_.set_to_now();
         if (Transport_debug_level > 3) {
           const GuidConverter conv(pub_id), sub_conv(sub);
           ACE_DEBUG((LM_DEBUG,
@@ -963,7 +963,7 @@ RtpsUdpDataLink::RtpsWriter::end_historic_samples_i(const DataSampleHeader& head
   // Set the ReaderInfo::durable_timestamp_ for the case where no
   // durable samples exist in the DataWriter.
   if (durable_) {
-    const ACE_Time_Value now = monotonic_time();
+    const MonotonicTimePoint now;
     RepoId sub = GUID_UNKNOWN;
     if (body && header.message_length_ >= sizeof(sub)) {
       std::memcpy(&sub, body->rd_ptr(), header.message_length_);
@@ -1257,7 +1257,7 @@ RtpsUdpDataLink::received(const RTPS::HeartBeatSubmessage& heartbeat,
   src.entityId = heartbeat.writerId;
 
   bool schedule_acknack = false;
-  const ACE_Time_Value now = monotonic_time();
+  const MonotonicTimePoint now;
   OPENDDS_VECTOR(InterestingRemote) callbacks;
 
   {
@@ -2051,7 +2051,7 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
   std::memcpy(remote.guidPrefix, src_prefix, sizeof(GuidPrefix_t));
   remote.entityId = acknack.readerId;
 
-  const ACE_Time_Value now = monotonic_time();
+  const MonotonicTimePoint now;
   OPENDDS_VECTOR(DiscoveryListener*) callbacks;
 
   {
@@ -2741,7 +2741,7 @@ RtpsUdpDataLink::send_heartbeats()
   OPENDDS_VECTOR(CallbackType) readerDoesNotExistCallbacks;
   OPENDDS_VECTOR(TransportQueueElement*) pendingCallbacks;
 
-  const ACE_Time_Value now = monotonic_time();
+  const MonotonicTimePoint now;
   RtpsWriterMap writers;
 
   typedef OPENDDS_MAP_CMP(RepoId, RepoIdSet, GUID_tKeyLessThan) WtaMap;
@@ -2752,8 +2752,8 @@ RtpsUdpDataLink::send_heartbeats()
 
     RtpsUdpInst& cfg = config();
 
-    const ACE_Time_Value tv = now - 10 * cfg.heartbeat_period_;
-    const ACE_Time_Value tv3 = now - 3 * cfg.heartbeat_period_;
+    const MonotonicTimePoint tv = now - 10 * cfg.heartbeat_period_;
+    const MonotonicTimePoint tv3 = now - 3 * cfg.heartbeat_period_;
 
     for (InterestingRemoteMapType::iterator pos = interesting_readers_.begin(),
            limit = interesting_readers_.end();
@@ -2848,7 +2848,7 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
   MetaSubmessage meta_submessage(id_, GUID_UNKNOWN);
   meta_submessage.to_guids_ = additional_guids;
 
-  const ACE_Time_Value now = system_time();
+  const MonotonicTimePoint now;
   RtpsUdpInst& cfg = link->config();
 
   // Directed, non-final pre-association heartbeats
@@ -2863,7 +2863,7 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
       pre_assoc_hb_guids.insert(ri->first);
     }
     if (!ri->second.durable_data_.empty()) {
-      const ACE_Time_Value expiration =
+      const MonotonicTimePoint expiration =
         ri->second.durable_timestamp_ + cfg.durable_data_timeout_;
       if (now > expiration) {
         typedef OPENDDS_MAP(SequenceNumber, TransportQueueElement*)::iterator
@@ -2949,7 +2949,7 @@ RtpsUdpDataLink::check_heartbeats()
   OPENDDS_VECTOR(CallbackType) writerDoesNotExistCallbacks;
 
   // Have any interesting writers timed out?
-  const ACE_Time_Value tv = monotonic_time() - 10 * config().heartbeat_period_;
+  const MonotonicTimePoint tv(-10 * config().heartbeat_period_);
   {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
@@ -3036,12 +3036,12 @@ RtpsUdpDataLink::RtpsWriter::send_heartbeats_manual_i(MetaSubmessageVec& meta_su
 
   const bool has_data = !send_buff_.is_nil() && !send_buff_->empty();
   SequenceNumber durable_max;
-  const ACE_Time_Value now = monotonic_time();
+  const MonotonicTimePoint now;
   for (ReaderInfoMap::const_iterator ri = remote_readers_.begin(), end = remote_readers_.end();
        ri != end;
        ++ri) {
     if (!ri->second.durable_data_.empty()) {
-      const ACE_Time_Value expiration = ri->second.durable_timestamp_ + link->config().durable_data_timeout_;
+      const MonotonicTimePoint expiration = ri->second.durable_timestamp_ + link->config().durable_data_timeout_;
       if (now <= expiration &&
           ri->second.durable_data_.rbegin()->first > durable_max) {
         durable_max = ri->second.durable_data_.rbegin()->first;
@@ -3170,8 +3170,8 @@ bool
 RtpsUdpDataLink::ReaderInfo::expecting_durable_data() const
 {
   return durable_ &&
-    (durable_timestamp_ == ACE_Time_Value::zero // DW hasn't resent yet
-     || !durable_data_.empty());                // DW resent, not sent to reader
+    (durable_timestamp_.is_zero() // DW hasn't resent yet
+     || !durable_data_.empty()); // DW resent, not sent to reader
 }
 
 RtpsUdpDataLink::RtpsWriter::~RtpsWriter()
@@ -3208,23 +3208,23 @@ RtpsUdpDataLink::RtpsWriter::add_elem_awaiting_ack(TransportQueueElement* elemen
 // Implementing TimedDelay and HeartBeat nested classes (for ACE timers)
 
 void
-RtpsUdpDataLink::TimedDelay::schedule(const ACE_Time_Value& timeout)
+RtpsUdpDataLink::TimedDelay::schedule(const TimeDuration& timeout)
 {
-  const ACE_Time_Value& next_to = (timeout != ACE_Time_Value::zero && timeout < timeout_) ? timeout : timeout_;
+  const TimeDuration& next_to = (!timeout.is_zero() && timeout < timeout_) ? timeout : timeout_;
+  const MonotonicTimePoint next_to_point(next_to);
 
-  const ACE_Time_Value now = monotonic_time();
-  if (scheduled_ != ACE_Time_Value::zero && ((now + next_to) < scheduled_)) {
+  if (!scheduled_.is_zero() && (next_to_point < scheduled_)) {
     cancel();
   }
 
-  if (scheduled_ == ACE_Time_Value::zero) {
-    const long timer = outer_->get_reactor()->schedule_timer(this, 0, next_to);
+  if (scheduled_.is_zero()) {
+    const long timer = outer_->get_reactor()->schedule_timer(this, 0, next_to.value());
 
     if (timer == -1) {
       ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpDataLink::TimedDelay::schedule "
         "failed to schedule timer %p\n", ACE_TEXT("")));
     } else {
-      scheduled_ = now + next_to;
+      scheduled_ = next_to_point;
     }
   }
 }
@@ -3232,9 +3232,9 @@ RtpsUdpDataLink::TimedDelay::schedule(const ACE_Time_Value& timeout)
 void
 RtpsUdpDataLink::TimedDelay::cancel()
 {
-  if (scheduled_ != ACE_Time_Value::zero) {
+  if (!scheduled_.is_zero()) {
     outer_->get_reactor()->cancel_timer(this);
-    scheduled_ = ACE_Time_Value::zero;
+    scheduled_ = MonotonicTimePoint::zero_value;
   }
 }
 
@@ -3242,9 +3242,9 @@ void
 RtpsUdpDataLink::HeartBeat::enable(bool reenable)
 {
   if (!enabled_) {
-    const ACE_Time_Value& per = outer_->config().heartbeat_period_;
+    const TimeDuration& per = outer_->config().heartbeat_period_;
     const long timer =
-      outer_->get_reactor()->schedule_timer(this, 0, ACE_Time_Value::zero, per);
+      outer_->get_reactor()->schedule_timer(this, 0, ACE_Time_Value::zero, per.value());
 
     if (timer == -1) {
       ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpDataLink::HeartBeat::enable"

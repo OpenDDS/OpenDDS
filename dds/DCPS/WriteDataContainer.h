@@ -18,6 +18,7 @@
 #include "PoolAllocationBase.h"
 #include "Message_Block_Ptr.h"
 #include "Definitions.h"
+#include "TimeTypes.h"
 
 #include "ace/Synch_Traits.h"
 #include "ace/Condition_T.h"
@@ -342,7 +343,7 @@ public:
   typedef OPENDDS_VECTOR(DDS::InstanceHandle_t) InstanceHandleVec;
   void get_instance_handles(InstanceHandleVec& instance_handles);
 
-  DDS::ReturnCode_t wait_ack_of_seq(const ACE_Time_Value& abs_deadline, const SequenceNumber& sequence);
+  DDS::ReturnCode_t wait_ack_of_seq(const MonotonicTimePoint& abs_deadline, const SequenceNumber& sequence);
 
   bool sequence_acknowledged(const SequenceNumber sequence);
 

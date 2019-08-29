@@ -16,7 +16,7 @@
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/Qos_Helper.h>
 #include "dds/DCPS/WaitSet.h"
-#include <dds/DCPS/Time_Helper.h>
+#include "dds/DCPS/TimeTypes.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 
 #include "dds/DCPS/StaticIncludes.h"
@@ -32,28 +32,29 @@
 
 using namespace std;
 
-static int const num_messages = 10;
-static ACE_Time_Value write_interval(0, 500000);
+using OpenDDS::DCPS::MonotonicTimePoint;
+using OpenDDS::DCPS::TimeDuration;
 
-long const NUM_EXPIRATIONS = 2;
+const static int num_messages = 10;
+const static TimeDuration write_interval(0, 500000);
+
+const long NUM_EXPIRATIONS = 2;
 const int NUM_INSTANCE = 2;
 
 // Wait for up to 10 seconds for subscription matched status.
-static DDS::Duration_t const MATCHED_WAIT_MAX_DURATION =
-{
+const static DDS::Duration_t MATCHED_WAIT_MAX_DURATION = {
   10, // seconds
   0   // nanoseconds
 };
 
 // Set up a 5 second recurring deadline.
-static DDS::Duration_t const DEADLINE_PERIOD =
-{
+const static DDS::Duration_t DEADLINE_PERIOD = {
   5, // seconds
   0  // nanoseconds
 };
 
 // Time to sleep waiting for deadline periods to expire
-ACE_Time_Value const SLEEP_DURATION(DEADLINE_PERIOD.sec * NUM_EXPIRATIONS + 1);
+const TimeDuration SLEEP_DURATION(DEADLINE_PERIOD.sec * NUM_EXPIRATIONS + 1);
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
@@ -234,11 +235,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         exit(1);
       }
 
-      const OpenDDS::DCPS::MonotonicTimeValue connect_deadline(
-        OpenDDS::DCPS::monotonic_time() +
-        OpenDDS::DCPS::duration_to_time_value(MATCHED_WAIT_MAX_DURATION));
-      if (listener_servant->wait_matched(1, &connect_deadline) != 0)
-      {
+      const MonotonicTimePoint connect_deadline(MATCHED_WAIT_MAX_DURATION);
+      if (listener_servant->wait_matched(1, &connect_deadline.value()) != 0) {
         cerr << "ERROR: sub: wait for subscription matching failed." << endl;
         exit(1);
       }
@@ -250,10 +248,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         Messenger::MessageDataReader::_narrow(dr2.in());
 
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Subscriber: sleep for %d milliseconds\n"),
-                           SLEEP_DURATION.msec()));
+                           SLEEP_DURATION.value().msec()));
 
       // Wait for deadline periods to expire.
-      ACE_OS::sleep (SLEEP_DURATION);
+      ACE_OS::sleep(SLEEP_DURATION.value());
 
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Subscriber: now verify missed ")
                            ACE_TEXT("deadline status \n")));
@@ -340,15 +338,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       // Here the writers should continue writes all samples with
       // .5 second interval.
-      ACE_Time_Value no_miss_period = num_messages * write_interval;
+      const TimeDuration no_miss_period = SLEEP_DURATION + (num_messages * write_interval);
 
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Subscriber: sleep for %d msec\n"),
-                           (SLEEP_DURATION + no_miss_period).msec()));
+                           no_miss_period.value().msec()));
 
       // Wait for another set of deadline periods(5 + 11 secs).
       // During this period, the writers continue write all samples with
       // .5 second interval.
-      ACE_OS::sleep(SLEEP_DURATION + no_miss_period);
+      ACE_OS::sleep(no_miss_period.value());
 
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Subscriber: now verify missed ")
                            ACE_TEXT("deadline status \n")));

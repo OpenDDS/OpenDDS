@@ -20,16 +20,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-/**
- * Get system time for external interactions
- */
-ACE_INLINE OpenDDS_Dcps_Export ACE_Time_Value system_time();
-
-/**
- * Get time for internal time calculations
- */
-ACE_INLINE OpenDDS_Dcps_Export ACE_Time_Value monotonic_time();
-
 ACE_INLINE OpenDDS_Dcps_Export
 ACE_Time_Value time_to_time_value(const DDS::Time_t& t);
 
@@ -42,12 +32,6 @@ ACE_Time_Value duration_to_time_value(const DDS::Duration_t& t);
 ACE_INLINE OpenDDS_Dcps_Export
 ACE_Time_Value duration_to_absolute_time_value(const DDS::Duration_t& t,
                                                const ACE_Time_Value& now);
-
-ACE_INLINE OpenDDS_Dcps_Export
-ACE_Time_Value duration_to_monotonic_time(const DDS::Duration_t& t);
-
-ACE_INLINE OpenDDS_Dcps_Export
-ACE_Time_Value duration_to_system_time(const DDS::Duration_t& t);
 
 ACE_INLINE OpenDDS_Dcps_Export
 DDS::Duration_t time_value_to_duration(const ACE_Time_Value& tv);

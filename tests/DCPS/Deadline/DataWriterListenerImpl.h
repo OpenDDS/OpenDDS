@@ -7,6 +7,7 @@
 #include "dds/DdsDcpsPublicationC.h"
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/LocalObject.h"
+#include "dds/DCPS/TimeTypes.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

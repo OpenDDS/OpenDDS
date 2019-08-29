@@ -418,10 +418,10 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   // Check the Permissions file
   time_t delta_time;
-
   if (!validate_date_time(ac_iter, delta_time, ex)) {
     return false;
   }
+  TimeDuration timer_length(delta_time);
 
   Permissions::PublishSubscribe_t publish = Permissions::PUBLISH;
   CORBA::Boolean successful = search_local_permissions(topic_name, domain_id, partition, publish, ac_iter, ex);
@@ -432,8 +432,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   if (!local_rp_timer_.is_scheduled()) {
     // Start timer
-    ACE_Time_Value timer_length(delta_time);
-
     if (!local_rp_timer_.start_timer(timer_length, permissions_handle)) {
       CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datawriter: Permissions timer could not be created.");
       return false;
@@ -494,10 +492,10 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   // Check the Permissions file
   time_t delta_time;
-
   if (!validate_date_time(ac_iter, delta_time, ex)) {
     return false;
   }
+  const TimeDuration timer_length(delta_time);
 
   Permissions::PublishSubscribe_t subscribe = Permissions::SUBSCRIBE;
   CORBA::Boolean successful = search_local_permissions(topic_name, domain_id, partition, subscribe, ac_iter, ex);
@@ -507,8 +505,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
   if (!local_rp_timer_.is_scheduled()) {
-    ACE_Time_Value timer_length(delta_time);
-
     if (!local_rp_timer_.start_timer(timer_length, permissions_handle)) {
       CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Permissions timer could not be created.");
       return false;
@@ -815,10 +811,10 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
   time_t delta_time;
-
   if (!validate_date_time(ac_iter, delta_time, ex)) {
     return false;
   }
+  const TimeDuration timer_length(delta_time);
 
   Permissions::PublishSubscribe_t publish = Permissions::PUBLISH;
 
@@ -829,8 +825,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
   if (!remote_rp_timer_.is_scheduled()) {
-    ACE_Time_Value timer_length(delta_time);
-
     if (!remote_rp_timer_.start_timer(timer_length, permissions_handle)) {
       CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Permissions timer could not be created.");
       return false;
@@ -885,10 +879,10 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
   time_t delta_time;
-
   if (!validate_date_time(ac_iter, delta_time, ex)) {
     return false;
   }
+  const TimeDuration timer_length(delta_time);
 
   Permissions::PublishSubscribe_t subscribe = Permissions::SUBSCRIBE;
 
@@ -899,8 +893,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
   if (!remote_rp_timer_.is_scheduled()) {
-    ACE_Time_Value timer_length(delta_time);
-
     if (!remote_rp_timer_.start_timer(timer_length, permissions_handle)) {
       CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Permissions timer could not be created.");
       return false;
@@ -1963,7 +1955,8 @@ AccessControlBuiltInImpl::RevokePermissionsTimer::~RevokePermissionsTimer()
   }
 }
 
-bool AccessControlBuiltInImpl::RevokePermissionsTimer::start_timer(const ACE_Time_Value length, ::DDS::Security::PermissionsHandle pm_handle)
+bool AccessControlBuiltInImpl::RevokePermissionsTimer::start_timer(
+  const TimeDuration& length, ::DDS::Security::PermissionsHandle pm_handle)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex,
       guard,
@@ -1990,15 +1983,14 @@ bool AccessControlBuiltInImpl::RevokePermissionsTimer::start_timer(const ACE_Tim
   return false;
 }
 
-int AccessControlBuiltInImpl::RevokePermissionsTimer::handle_timeout(const ACE_Time_Value & tv, const void * arg)
+int AccessControlBuiltInImpl::RevokePermissionsTimer::handle_timeout(const ACE_Time_Value& /*tv*/, const void* arg)
 {
-  ACE_UNUSED_ARG(tv);
   ACE_GUARD_RETURN(ACE_Thread_Mutex,
       guard,
       this->lock_,
       -1);
 
-  ::DDS::Security::PermissionsHandle *pm_handle = (::DDS::Security::PermissionsHandle *)arg;
+  ::DDS::Security::PermissionsHandle* pm_handle = dynamic_cast<::DDS::Security::PermissionsHandle*>(arg)
 
   scheduled_ = false;
 

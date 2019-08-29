@@ -9,7 +9,7 @@
 #define OPENDDS_DCPS_THREADSYNCHRESOURCE_H
 
 #include "dds/DCPS/dcps_export.h"
-#include "ace/Time_Value.h"
+#include "dds/DCPS/TimeTypes.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -30,7 +30,7 @@ protected:
 
   ThreadSynchResource();
   ACE_HANDLE handle_;
-  ACE_Time_Value* timeout_;
+  TimeDuration* timeout_;
 };
 
 } // namespace DCPS

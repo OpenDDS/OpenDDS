@@ -53,7 +53,7 @@ ACE_UINT64 CandidatePair::compute_priority()
 
 ConnectivityCheck::ConnectivityCheck(const CandidatePair& a_candidate_pair,
                                      const AgentInfo& a_local_agent_info, const AgentInfo& a_remote_agent_info,
-                                     ACE_UINT64 a_ice_tie_breaker, const ACE_Time_Value& a_expiration_date)
+                                     ACE_UINT64 a_ice_tie_breaker, const MonotonicTimePoint& a_expiration_date)
   : candiate_pair_(a_candidate_pair), cancelled_(false), expiration_date_(a_expiration_date)
 {
   request_.class_ = STUN::REQUEST;
@@ -117,8 +117,8 @@ void Checklist::reset()
   nominating_ = valid_list_.end();
   nominated_ = valid_list_.end();
   nominated_is_live_ = false;
-  check_interval_ = ACE_Time_Value();
-  max_check_interval_ = ACE_Time_Value();
+  check_interval_ = TimeDuration::zero_value;
+  max_check_interval_ = TimeDuration::zero_value;
   connectivity_checks_.clear();
 }
 
@@ -154,7 +154,7 @@ void Checklist::generate_candidate_pairs()
     check_interval_ = endpoint_manager_->agent_impl->get_configuration().T_a();
     double s = static_cast<double>(frozen_.size());
     max_check_interval_ = endpoint_manager_->agent_impl->get_configuration().checklist_period() * (1.0 / s);
-    enqueue(ACE_Time_Value().now());
+    enqueue(MonotonicTimePoint());
   }
 }
 
@@ -358,7 +358,7 @@ void Checklist::generate_triggered_check(const ACE_INET_Addr& local_address, con
   // This can move something from failed to in progress.
   // In that case, we need to schedule.
   check_interval_ = endpoint_manager_->agent_impl->get_configuration().T_a();
-  enqueue(ACE_Time_Value().now());
+  enqueue(MonotonicTimePoint());
 }
 
 void Checklist::succeeded(const ConnectivityCheck& cc)
@@ -406,7 +406,7 @@ void Checklist::succeeded(const ConnectivityCheck& cc)
     }
 
     nominated_is_live_ = true;
-    last_indication_ = ACE_Time_Value().now();
+    last_indication_ = MonotonicTimePoint();
 
     while (!connectivity_checks_.empty()) {
       ConnectivityCheck cc = connectivity_checks_.front();
@@ -600,7 +600,7 @@ void Checklist::error_response(const ACE_INET_Addr& /*local_address*/,
   }
 }
 
-void Checklist::do_next_check(const ACE_Time_Value& a_now)
+void Checklist::do_next_check(const MonotonicTimePoint& a_now)
 {
   // Triggered checks.
   if (!triggered_check_queue_.empty()) {
@@ -675,7 +675,7 @@ void Checklist::do_next_check(const ACE_Time_Value& a_now)
   check_interval_ = endpoint_manager_->agent_impl->get_configuration().checklist_period();
 }
 
-void Checklist::execute(const ACE_Time_Value& a_now)
+void Checklist::execute(const MontonicTimePoint& a_now)
 {
   if (scheduled_for_destruction_) {
     delete this;
@@ -695,7 +695,7 @@ void Checklist::execute(const ACE_Time_Value& a_now)
   }
 
   bool flag = false;
-  ACE_Time_Value interval = std::max(check_interval_, endpoint_manager_->agent_impl->get_configuration().indication_period());
+  TimeDuration interval = std::max(check_interval_, endpoint_manager_->agent_impl->get_configuration().indication_period());
 
   if (!triggered_check_queue_.empty() ||
       !frozen_.empty() ||
@@ -725,7 +725,7 @@ void Checklist::execute(const ACE_Time_Value& a_now)
   }
 
   if (flag) {
-    enqueue(ACE_Time_Value().now() + interval);
+    enqueue(MonotonicTimePoint() + interval);
   }
 
   // The checklist has failed.  Don't schedule.
@@ -750,7 +750,7 @@ void Checklist::remove_guid(const GuidPair& a_guid_pair)
 
     // Flush ourselves out of the task queue.
     // Schedule for now but it may be later.
-    enqueue(ACE_Time_Value().now());
+    enqueue(MonotonicTimePoint());
   }
 }
 
@@ -781,7 +781,7 @@ ACE_INET_Addr Checklist::selected_address() const
 
 void Checklist::indication()
 {
-  last_indication_ = ACE_Time_Value().now();
+  last_indication_ = MonotonicTimePoint();
 }
 
 #endif /* OPENDDS_SECURITY */

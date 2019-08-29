@@ -396,7 +396,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       if (use_rtps) {
         OpenDDS::RTPS::RtpsDiscovery_rch rtpsDisc(OpenDDS::DCPS::make_rch<OpenDDS::RTPS::RtpsDiscovery>("TestRtpsDiscovery"));
-        rtpsDisc->resend_period(ACE_Time_Value(1));
+        rtpsDisc->resend_period(OpenDDS::DCPS::TimeDuration(1));
         rtpsDisc->sedp_multicast(false);
         disc = rtpsDisc;
       } else {

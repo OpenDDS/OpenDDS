@@ -1557,7 +1557,7 @@ namespace OpenDDS {
 #endif
         }
 
-        DiscoveredParticipant(const DiscoveredParticipantData& p, const ACE_Time_Value& t) :
+        DiscoveredParticipant(const DiscoveredParticipantData& p, const MonotonicTimePoint& t) :
 #ifdef OPENDDS_SECURITY
           pdata_(p),
           last_seen_(t),
@@ -1583,15 +1583,15 @@ namespace OpenDDS {
         }
 
         DiscoveredParticipantData pdata_;
-        ACE_Time_Value last_seen_;
+        MonotonicTimePoint last_seen_;
         DDS::InstanceHandle_t bit_ih_;
 
 #ifdef OPENDDS_SECURITY
         bool has_last_stateless_msg_;
-        ACE_Time_Value last_stateless_msg_time_;
+        MonotonicTimePoint last_stateless_msg_time_;
         DDS::Security::ParticipantStatelessMessage last_stateless_msg_;
 
-        ACE_Time_Value auth_started_time_;
+        MonotonicTimePoint auth_started_time_;
         AuthState auth_state_;
 
         DDS::Security::IdentityToken identity_token_;

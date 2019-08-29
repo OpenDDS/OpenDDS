@@ -25,8 +25,8 @@ namespace {
   struct ScheduleCommand : CommandBase {
     ScheduleCommand(ReactorInterceptor* inter,
                     const void* act,
-                    const ACE_Time_Value& delay,
-                    const ACE_Time_Value& interval,
+                    const TimeDuration& delay,
+                    const TimeDuration& interval,
                     long* timer_id)
     : CommandBase(inter)
     , act_(act)
@@ -37,13 +37,13 @@ namespace {
 
     void execute()
     {
-      *timer_id_ = interceptor_->reactor()->schedule_timer(interceptor_, act_,
-                                                           delay_, interval_);
+      *timer_id_ = interceptor_->reactor()->schedule_timer(
+        interceptor_, act_, delay_.value(), interval_.value());
     }
 
     const void* const act_;
-    const ACE_Time_Value delay_;
-    const ACE_Time_Value interval_;
+    const TimeDuration delay_;
+    const TimeDuration interval_;
     long* timer_id_;
   };
 
@@ -67,7 +67,7 @@ namespace {
 
   struct ResetCommand : CommandBase {
     ResetCommand(ReactorInterceptor* inter, long timer_id,
-                 const ACE_Time_Value& interval)
+                 const TimeDuration& interval)
     : CommandBase(inter)
     , timer_id_(timer_id)
     , interval_(interval)
@@ -75,15 +75,15 @@ namespace {
 
     void execute()
     {
-      interceptor_->reactor()->reset_timer_interval(timer_id_, interval_);
+      interceptor_->reactor()->reset_timer_interval(timer_id_, interval_.value());
     }
 
     const long timer_id_;
-    const ACE_Time_Value interval_;
+    const TimeDuration interval_;
   };
 }
 
-Watchdog::Watchdog(const ACE_Time_Value& interval)
+Watchdog::Watchdog(const TimeDuration& interval)
   : ReactorInterceptor(TheServiceParticipant->reactor(),
                        TheServiceParticipant->reactor_owner())
   , interval_(interval)
@@ -99,7 +99,7 @@ bool Watchdog::reactor_is_shut_down() const
   return TheServiceParticipant->is_shut_down();
 }
 
-void Watchdog::reset_interval(const ACE_Time_Value& interval)
+void Watchdog::reset_interval(const TimeDuration& interval)
 {
   if (this->interval_ != interval) {
     this->interval_ = interval;
@@ -107,12 +107,12 @@ void Watchdog::reset_interval(const ACE_Time_Value& interval)
   }
 }
 
-long Watchdog::schedule_timer(const void* act, const ACE_Time_Value& interval)
+long Watchdog::schedule_timer(const void* act, const TimeDuration& interval)
 {
   return schedule_timer(act, interval, interval);
 }
 
-long Watchdog::schedule_timer(const void* act, const ACE_Time_Value& delay, const ACE_Time_Value& interval)
+long Watchdog::schedule_timer(const void* act, const TimeDuration& delay, const TimeDuration& interval)
 {
   long timer_id = -1;
   ScheduleCommand c(this, act, delay, interval, &timer_id);
