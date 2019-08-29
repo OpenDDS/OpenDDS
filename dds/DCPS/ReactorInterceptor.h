@@ -65,7 +65,7 @@ public:
 
   CommandPtr execute_or_enqueue(Command* c)
   {
-    assert(c);
+    OPENDDS_ASSERT(c);
     const bool immediate = should_execute_immediately();
     CommandPtr command = enqueue_i(c, immediate);
     if (immediate) {
@@ -76,7 +76,7 @@ public:
 
   CommandPtr enqueue(Command* c)
   {
-    assert(c);
+    OPENDDS_ASSERT(c);
     return enqueue_i(c, false);
   }
 
