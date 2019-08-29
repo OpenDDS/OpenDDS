@@ -51,11 +51,9 @@ void ReactorInterceptor::process_command_queue_i()
   while (!command_queue_.empty()) {
     CommandPtr command = command_queue_.front();
     command_queue_.pop();
-    {
-      ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rev_guard, rev_lock);
-      command->execute();
-      command->signal();
-    }
+    ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rev_guard, rev_lock);
+    command->execute();
+    command->executed();
   }
 }
 

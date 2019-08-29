@@ -33,22 +33,25 @@ public:
     virtual ~Command() { }
     virtual void execute() = 0;
 
-    void reset() {
+    void reset()
+    {
       ACE_GUARD(ACE_Thread_Mutex, guard, mutex_);
       executed_ = false;
     }
 
-    void wait() {
+    void wait()
+    {
       ACE_GUARD(ACE_Thread_Mutex, guard, mutex_);
       while (!executed_) {
         condition_.wait();
       }
     }
 
-    void signal() {
+    void executed()
+    {
       ACE_GUARD(ACE_Thread_Mutex, guard, mutex_);
       executed_ = true;
-      condition_.signal();
+      condition_.broadcast();
     }
 
   private:
@@ -62,15 +65,26 @@ public:
 
   CommandPtr execute_or_enqueue(Command* c)
   {
+    assert(c);
     const bool immediate = should_execute_immediately();
-    CommandPtr command = enqueue(c, immediate);
-    if (should_execute_immediately()) {
+    CommandPtr command = enqueue_i(c, immediate);
+    if (immediate) {
       process_command_queue_i();
     }
     return command;
   }
 
-  CommandPtr enqueue(Command* c, bool immediate = false)
+  CommandPtr enqueue(Command* c)
+  {
+    assert(c);
+    return enqueue_i(c, false);
+  }
+
+  virtual bool reactor_is_shut_down() const = 0;
+
+protected:
+
+  CommandPtr enqueue_i(Command* c, bool immediate)
   {
     c->reset();
     CommandPtr command = rchandle_from(c);
@@ -82,9 +96,6 @@ public:
     return command;
   }
 
-  virtual bool reactor_is_shut_down() const = 0;
-
-protected:
   ReactorInterceptor(ACE_Reactor* reactor,
                      ACE_thread_t owner);
 
