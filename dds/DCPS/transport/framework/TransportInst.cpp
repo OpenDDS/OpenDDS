@@ -104,9 +104,14 @@ OpenDDS::DCPS::TransportInst::dump_to_str() const
 void
 OpenDDS::DCPS::TransportInst::shutdown()
 {
-  ACE_GUARD(ACE_SYNCH_MUTEX, g, this->lock_);
-  if (!this->impl_.is_nil()) {
-    this->impl_->shutdown();
+  TransportImpl_rch impl;
+  {
+    ACE_GUARD(ACE_SYNCH_MUTEX, g, this->lock_);
+    impl_.swap(impl);
+    shutting_down_ = true;
+  }
+  if (!impl.is_nil()) {
+    impl->shutdown();
   }
 }
 
@@ -114,7 +119,7 @@ OpenDDS::DCPS::TransportImpl_rch
 OpenDDS::DCPS::TransportInst::impl()
 {
   ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, g, this->lock_, TransportImpl_rch());
-  if (!this->impl_) {
+  if (!this->impl_ && !shutting_down_) {
     try {
       this->impl_ = this->new_impl();
     } catch (const OpenDDS::DCPS::Transport::UnableToCreate& ) {
@@ -159,7 +164,8 @@ OpenDDS::DCPS::TransportInst::set_port_in_addr_string(OPENDDS_STRING& addr_str, 
 OpenDDS::ICE::Endpoint*
 OpenDDS::DCPS::TransportInst::get_ice_endpoint()
 {
-  return impl()->get_ice_endpoint();
+  OpenDDS::DCPS::TransportImpl_rch temp = impl();
+  return temp.is_nil() ? 0 : temp->get_ice_endpoint();
 }
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
