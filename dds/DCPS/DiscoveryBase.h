@@ -1678,11 +1678,19 @@ namespace OpenDDS {
 
       virtual DDS::Subscriber_ptr init_bit(DomainParticipantImpl* participant) {
         using namespace DCPS;
+
+        DDS::Subscriber_var bit_subscriber;
+#ifndef DDS_HAS_MINIMUM_BIT
+        if (!TheServiceParticipant->get_BIT()) {
+          get_part(participant->get_domain_id(), participant->get_id())->init_bit(bit_subscriber);
+          return 0;
+        }
+
         if (create_bit_topics(participant) != DDS::RETCODE_OK) {
           return 0;
         }
 
-        DDS::Subscriber_var bit_subscriber =
+        bit_subscriber =
           participant->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
                                          DDS::SubscriberListener::_nil(),
                                          DEFAULT_STATUS_MASK);
@@ -1697,7 +1705,6 @@ namespace OpenDDS {
         sub->get_default_datareader_qos(dr_qos);
         dr_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
 
-#ifndef DDS_HAS_MINIMUM_BIT
         DDS::TopicDescription_var bit_part_topic =
           participant->lookup_topicdescription(BUILT_IN_PARTICIPANT_TOPIC);
         create_bit_dr(bit_part_topic, BUILT_IN_PARTICIPANT_TOPIC_TYPE,

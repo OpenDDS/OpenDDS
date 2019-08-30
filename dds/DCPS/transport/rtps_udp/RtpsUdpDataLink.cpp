@@ -78,6 +78,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 const double QUICK_REPLY_DELAY_RATIO = 0.1;
+const size_t ONE_SAMPLE_PER_PACKET = 1;
 
 RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
                                  const GuidPrefix_t& local_prefix,
@@ -315,7 +316,7 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
           hb_start = hbc_it->second;
           heartbeat_counts_.erase(hbc_it);
         }
-        RtpsWriter_rch writer = make_rch<RtpsWriter>(link, local_id, local_durable, hb_start);
+        RtpsWriter_rch writer = make_rch<RtpsWriter>(link, local_id, local_durable, hb_start, multi_buff_.capacity());
         rw = writers_.insert(RtpsWriterMap::value_type(local_id, writer)).first;
       }
       RtpsWriter_rch writer = rw->second;
@@ -586,13 +587,17 @@ RtpsUdpDataLink::stop_i()
   multicast_socket_.close();
 }
 
-void
-RtpsUdpDataLink::RtpsWriter::retain_all_helper(const RepoId& pub_id)
+RcHandle<SingleSendBuffer>
+RtpsUdpDataLink::get_writer_send_buffer(const RepoId& pub_id)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-  if (!send_buff_.is_nil()) {
-    send_buff_->retain_all(pub_id);
+  RcHandle<SingleSendBuffer> result;
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, result);
+
+  const RtpsWriterMap::iterator wi = writers_.find(pub_id);
+  if (wi != writers_.end()) {
+    result = wi->second->get_send_buff();
   }
+  return result;
 }
 
 // Implementing MultiSendBuffer nested class
@@ -600,32 +605,31 @@ RtpsUdpDataLink::RtpsWriter::retain_all_helper(const RepoId& pub_id)
 void
 RtpsUdpDataLink::MultiSendBuffer::retain_all(const RepoId& pub_id)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, outer_->lock_);
-  const RtpsWriterMap::iterator wi = outer_->writers_.find(pub_id);
-  if (wi != outer_->writers_.end()) {
-    wi->second->retain_all_helper(pub_id);
+  RcHandle<SingleSendBuffer> send_buff = outer_->get_writer_send_buffer(pub_id);
+  if (!send_buff.is_nil()) {
+    send_buff->retain_all(pub_id);
   }
 }
 
 void
-RtpsUdpDataLink::RtpsWriter::msb_insert_helper(const TransportQueueElement* const tqe,
-                                               const SequenceNumber& seq,
-                                               TransportSendStrategy::QueueType* q,
-                                               ACE_Message_Block* chain)
+RtpsUdpDataLink::MultiSendBuffer::insert(SequenceNumber /*transport_seq*/,
+                                         TransportSendStrategy::QueueType* q,
+                                         ACE_Message_Block* chain)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-
-  RtpsUdpDataLink_rch link = link_.lock();
-  if (!link) {
+  // Called from TransportSendStrategy::send_packet().
+  // RtpsUdpDataLink is not locked at this point, and is only locked
+  // to grab the appropriate writer send buffer via get_writer_send_buffer()
+  const TransportQueueElement* const tqe = q->peek();
+  const SequenceNumber seq = tqe->sequence();
+  if (seq == SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
     return;
   }
 
   const RepoId pub_id = tqe->publication_id();
 
-  if (send_buff_.is_nil()) {
-    send_buff_ = make_rch<SingleSendBuffer>(SingleSendBuffer::UNLIMITED, 1 /*mspp*/);
-
-    send_buff_->bind(link->send_strategy());
+  RcHandle<SingleSendBuffer> send_buff = outer_->get_writer_send_buffer(pub_id);
+  if (send_buff.is_nil()) {
+    return;
   }
 
   if (Transport_debug_level > 5) {
@@ -639,7 +643,7 @@ RtpsUdpDataLink::RtpsWriter::msb_insert_helper(const TransportQueueElement* cons
     const RtpsCustomizedElement* const rce =
       dynamic_cast<const RtpsCustomizedElement*>(tqe);
     if (rce) {
-      send_buff_->insert_fragment(seq, rce->last_fragment(), q, chain);
+      send_buff->insert_fragment(seq, rce->last_fragment(), q, chain);
     } else if (Transport_debug_level) {
       const GuidConverter pub(pub_id);
       ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpDataLink::MultiSendBuffer::insert()"
@@ -647,31 +651,8 @@ RtpsUdpDataLink::RtpsWriter::msb_insert_helper(const TransportQueueElement* cons
         OPENDDS_STRING(pub).c_str(), seq.getValue()));
     }
   } else {
-    send_buff_->insert(seq, q, chain);
+    send_buff->insert(seq, q, chain);
   }
-}
-
-void
-RtpsUdpDataLink::MultiSendBuffer::insert(SequenceNumber /*transport_seq*/,
-                                         TransportSendStrategy::QueueType* q,
-                                         ACE_Message_Block* chain)
-{
-  // Called from TransportSendStrategy::send_packet().
-  // RtpsUdpDataLink is already locked.
-  const TransportQueueElement* const tqe = q->peek();
-  const SequenceNumber seq = tqe->sequence();
-  if (seq == SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
-    return;
-  }
-
-  const RepoId pub_id = tqe->publication_id();
-
-  const RtpsWriterMap::iterator wi = outer_->writers_.find(pub_id);
-  if (wi == outer_->writers_.end()) {
-    return; // this datawriter is not reliable
-  }
-  RtpsWriter_rch writer = wi->second;
-  writer->msb_insert_helper(tqe, seq, q, chain);
 }
 
 // Support for the send() data handling path
@@ -836,12 +817,6 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
         return 0;
       }
     }
-  } else if (durable && (Transport_debug_level)) {
-    const GuidConverter conv(pub_id);
-    ACE_ERROR((LM_ERROR,
-      "(%P|%t) RtpsUdpDataLink::customize_queue_element() - "
-      "WARNING: no RtpsWriter to store durable data for local %C\n",
-      OPENDDS_STRING(conv).c_str()));
   }
 
   return rtps;
@@ -3172,6 +3147,16 @@ RtpsUdpDataLink::ReaderInfo::expecting_durable_data() const
   return durable_ &&
     (durable_timestamp_.is_zero() // DW hasn't resent yet
      || !durable_data_.empty()); // DW resent, not sent to reader
+}
+
+RtpsUdpDataLink::RtpsWriter::RtpsWriter(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable, CORBA::Long hbc, size_t capacity)
+ : send_buff_(make_rch<SingleSendBuffer>(capacity, ONE_SAMPLE_PER_PACKET))
+ , link_(link)
+ , id_(id)
+ , durable_(durable)
+ , heartbeat_count_(hbc)
+{
+  send_buff_->bind(link->send_strategy());
 }
 
 RtpsUdpDataLink::RtpsWriter::~RtpsWriter()
