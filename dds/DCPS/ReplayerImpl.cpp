@@ -102,8 +102,7 @@ ReplayerImpl::cleanup()
 {
 
   //     // Unregister all registered instances prior to deletion.
-  //     // DDS::Time_t source_timestamp = time_value_to_time(ACE_OS::gettimeofday());
-  //     // this->unregister_instances(source_timestamp);
+  //     // this->unregister_instances(SystemTimePoint().to_dds_time());
   //
   //     // CORBA::String_var topic_name = this->get_Atopic_name();
   {

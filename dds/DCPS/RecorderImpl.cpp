@@ -396,14 +396,13 @@ RecorderImpl::add_association(const RepoId&            yourId,
     //   WriterMapType::iterator where = this->writers_.find(writer.writerId);
     //
     //   if (where != this->writers_.end()) {
-    //     const ACE_Time_Value now = ACE_OS::gettimeofday();
+    //     const MonotonicTimePoint now;
     //
     //     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
     //
     //     if (where->second->should_ack(now)) {
     //       const SequenceNumber sequence = where->second->ack_sequence();
-    //       const DDS::Time_t timenow = time_value_to_time(now);
-    //       if (this->send_sample_ack(writer.writerId, sequence, timenow)) {
+    //       if (this->send_sample_ack(writer.writerId, sequence, now.to_dds_time())) {
     //         where->second->clear_acks(sequence);
     //       }
     //     }
@@ -413,9 +412,9 @@ RecorderImpl::add_association(const RepoId&            yourId,
     //
     // LIVELINESS policy timers are managed here.
     //
-    // if (liveliness_lease_duration_ != ACE_Time_Value::zero) {
+    // if (liveliness_lease_duration_ != TimeDuration::zero) {
     //   // this call will start the timer if it is not already set
-    //   const ACE_Time_Value now = ACE_OS::gettimeofday();
+    //   const MonotonicTimePoint now;
     //
     //   if (DCPS_debug_level >= 5) {
     //     GuidConverter converter(subscription_id_);
