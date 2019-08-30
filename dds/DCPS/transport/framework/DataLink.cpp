@@ -121,8 +121,7 @@ DataLink::add_on_start_callback(const TransportClient_wrch& client, const RepoId
           pending_on_starts_.erase(it);
         }
         guard.release();
-        ImmediateStart cmd(link, client, remote);
-        interceptor_.execute_or_enqueue(cmd);
+        interceptor_.execute_or_enqueue(new ImmediateStart(link, client, remote));
       } else {
         on_start_callbacks_[remote][client_lock->get_repo_id()] = client;
       }

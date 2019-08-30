@@ -234,8 +234,7 @@ void InstanceState::schedule_release()
       delay.nanosec != DDS::DURATION_INFINITE_NSEC) {
     cancel_release();
 
-    ScheduleCommand cmd(this, duration_to_time_value(delay));
-    execute_or_enqueue(cmd);
+    execute_or_enqueue(new ScheduleCommand(this, duration_to_time_value(delay)));
 
   } else {
     // N.B. instance transitions are always followed by a non-valid
@@ -249,8 +248,7 @@ void InstanceState::schedule_release()
 void InstanceState::cancel_release()
 {
   release_pending_ = false;
-  CancelCommand cmd(this);
-  execute_or_enqueue(cmd);
+  execute_or_enqueue(new CancelCommand(this));
 }
 
 bool InstanceState::release_if_empty()
