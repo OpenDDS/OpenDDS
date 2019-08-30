@@ -2455,6 +2455,7 @@ void
 Sedp::association_complete(const RepoId& localId,
                            const RepoId& remoteId)
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   // If the remote endpoint is an opendds endpoint that expects associated datawriter announcements
   if (is_expectant_opendds(remoteId)) {
     LocalSubscriptionIter sub = local_subscriptions_.find(localId);
