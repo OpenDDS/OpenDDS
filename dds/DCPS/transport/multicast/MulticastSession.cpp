@@ -95,8 +95,8 @@ MulticastSession::MulticastSession(ACE_Reactor* reactor,
 
 MulticastSession::~MulticastSession()
 {
-  syn_watchdog_->cancel();
-  syn_watchdog_->wait();
+  ReactorInterceptor::CommandPtr command = syn_watchdog_->cancel();
+  command->wait();
 }
 
 bool

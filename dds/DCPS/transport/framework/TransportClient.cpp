@@ -57,6 +57,8 @@ TransportClient::~TransportClient()
 
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 
+  ReactorInterceptor::CommandPtr command;
+
   for (PendingMap::iterator it = pending_.begin(); it != pending_.end(); ++it) {
     for (size_t i = 0; i < impls_.size(); ++i) {
       RcHandle<TransportImpl> impl = impls_[i].lock();
@@ -65,11 +67,12 @@ TransportClient::~TransportClient()
       }
     }
 
-    pending_assoc_timer_->cancel_timer(this, it->second);
+    command = pending_assoc_timer_->cancel_timer(this, it->second);
   }
 
-  pending_assoc_timer_->wait();
-
+  if (command) {
+    command->wait();
+  }
 }
 
 void

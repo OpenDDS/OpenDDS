@@ -528,8 +528,7 @@ private:
 
     void schedule_enable(bool reenable)
     {
-      ScheduleEnableCommand c(this, reenable);
-      execute_or_enqueue(c);
+      execute_or_enqueue(new ScheduleEnableCommand(this, reenable));
     }
 
     int handle_timeout(const ACE_Time_Value&, const void*)

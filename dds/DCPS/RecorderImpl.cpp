@@ -86,6 +86,8 @@ RecorderImpl::RecorderImpl()
 RecorderImpl::~RecorderImpl()
 {
   DBG_ENTRY_LVL("RecorderImpl","~RecorderImpl",6);
+  ReactorInterceptor::CommandPtr command;
+
   {
     ACE_READ_GUARD(ACE_RW_Thread_Mutex,
                    read_guard,
@@ -93,11 +95,13 @@ RecorderImpl::~RecorderImpl()
     // Cancel any uncancelled sweeper timers to decrement reference count.
     WriterMapType::iterator writer;
     for (writer = writers_.begin(); writer != writers_.end(); ++writer) {
-      remove_association_sweeper_->cancel_timer(writer->second);
+      command = remove_association_sweeper_->cancel_timer(writer->second);
     }
   }
 
-  remove_association_sweeper_->wait();
+  if (command) {
+    command->wait();
+  }
 }
 
 
@@ -121,6 +125,8 @@ RecorderImpl::cleanup()
 
   this->remove_all_associations();
 
+  ReactorInterceptor::CommandPtr command;
+
   {
     ACE_READ_GUARD_RETURN(ACE_RW_Thread_Mutex,
                    read_guard,
@@ -129,11 +135,13 @@ RecorderImpl::cleanup()
     // Cancel any uncancelled sweeper timers
     WriterMapType::iterator writer;
     for (writer = writers_.begin(); writer != writers_.end(); ++writer) {
-      remove_association_sweeper_->cancel_timer(writer->second);
+      command = remove_association_sweeper_->cancel_timer(writer->second);
     }
   }
 
-  remove_association_sweeper_->wait();
+  if (command) {
+    command->wait();
+  }
   return DDS::RETCODE_OK;
 }
 

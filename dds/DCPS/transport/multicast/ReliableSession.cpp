@@ -69,8 +69,8 @@ ReliableSession::ReliableSession(ACE_Reactor* reactor,
 
 ReliableSession::~ReliableSession()
 {
-  nak_watchdog_->cancel();
-  nak_watchdog_->wait();
+  ReactorInterceptor::CommandPtr command = nak_watchdog_->cancel();
+  command->wait();
 }
 
 bool
