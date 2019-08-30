@@ -59,24 +59,6 @@ before_script:
   - if [ "$FUZZ" == "1" ]; then
         rm -rf tools/modeling/plugins tools/rapidjson tests/googletest;
         perl $DDS_ROOT/tools/scripts/dds_fuzz.pl;
-        print_time_message=false
-        if grep_results=$(grep -RnI --exclude='be_produce.cpp' 'gettimeofday' dds)
-        then
-            echo "ACE_OS::gettimeofday() is forbidden in the core libraries, but was found in the following places:" > /dev/stderr
-            echo -ne "$grep_results\n" > /dev/stderr
-            print_time_message=true
-        fi
-        if grep_results=$(grep -RnI --exclude='be_produce.cpp' 'ACE_Time_Value()\.now()' dds)
-        then
-            echo "ACE_Time_Value().now() is forbidden in the core libraries, but was found in the following places:" > /dev/stderr
-            echo -ne "$grep_results\n" > /dev/stderr
-            print_time_message=true
-        fi
-        if $print_time_message
-        then
-            echo "Instead use either system_time() or monotonic_time(), see dds/DCPS/Time_Helper.h to learn the difference." > /dev/stderr
-            travis_terminate 1
-        fi
     fi
   - if [ "$NO_INLINE" == "1" ]; then CONFIG_OPTIONS+=" --no-inline"; fi
   - if [ "$NO_BIT" == "1" ]; then CONFIG_OPTIONS+=" --no-built-in-topics"; fi
