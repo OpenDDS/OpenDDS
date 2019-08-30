@@ -1,5 +1,7 @@
 #include "TimePoint_T.h"
 
+#include "Time_Helper.h"
+
 namespace OpenDDS {
 namespace DCPS {
 
