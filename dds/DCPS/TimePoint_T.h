@@ -15,7 +15,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 /**
- * Represents a specific time in reference to a ACE_Time_Policy and based on
+ * Represents a specific time in reference to a ACE_Time_Policy and is based on
  * C++11 std::chrono::time_point.
  *
  * This wraps an ACE_Time_Value, but is designed to enforce the logic that this
@@ -25,7 +25,7 @@ namespace DCPS {
  * avoid careless implicit conversions.
  */
 template<typename AceClock>
-class OpenDDS_Dcps_Export TimePoint_T {
+class TimePoint_T {
 public:
   typedef AceClock ClockType;
   typedef ACE_Time_Value_T<AceClock> ValueType;
@@ -63,7 +63,7 @@ public:
 
   /**
    * Get and set the inner ACE_Time_Value based value. Use value() to pass this
-   * into ACE code that requires a point in time matching this one's clock
+   * into ACE code that requires a point in time matching this ones clock
    * type.
    */
   ///@{
@@ -88,7 +88,7 @@ public:
 
   /**
    * Convert to DDS::Time_t. This is probably only desirable for the system
-   * time version of this template class.
+   * time version of this template class, SystemTimePoint.
    */
   DDS::Time_t to_dds_time() const;
 
@@ -102,38 +102,37 @@ protected:
    */
   static ClockType clock;
 
-  /// Inner ACE_Type_Value
   ValueType value_;
 };
 
-template<typename AceClock> OpenDDS_Dcps_Export
+template<typename AceClock>
 TimePoint_T<AceClock> operator+(const TimeDuration& x, const TimePoint_T<AceClock>& y);
 
-template<typename AceClock> OpenDDS_Dcps_Export
+template<typename AceClock>
 TimePoint_T<AceClock> operator+(const TimePoint_T<AceClock>& x, const TimeDuration& y);
 
-template<typename AceClock> OpenDDS_Dcps_Export
+template<typename AceClock>
 TimeDuration operator-(const TimePoint_T<AceClock>& x, const TimePoint_T<AceClock>& y);
 
-template<typename AceClock> OpenDDS_Dcps_Export
+template<typename AceClock>
 TimePoint_T<AceClock> operator-(const TimePoint_T<AceClock>& x, const TimeDuration& y);
 
-template<typename AceClock> OpenDDS_Dcps_Export
+template<typename AceClock>
 bool operator<(const TimePoint_T<AceClock>& x, const TimePoint_T<AceClock>& y);
 
-template<typename AceClock> OpenDDS_Dcps_Export
+template<typename AceClock>
 bool operator>(const TimePoint_T<AceClock>& x, const TimePoint_T<AceClock>& y);
 
-template<typename AceClock> OpenDDS_Dcps_Export
+template<typename AceClock>
 bool operator<=(const TimePoint_T<AceClock>& x, const TimePoint_T<AceClock>& y);
 
-template<typename AceClock> OpenDDS_Dcps_Export
+template<typename AceClock>
 bool operator>=(const TimePoint_T<AceClock>& x, const TimePoint_T<AceClock>& y);
 
-template<typename AceClock> OpenDDS_Dcps_Export
+template<typename AceClock>
 bool operator==(const TimePoint_T<AceClock>& x, const TimePoint_T<AceClock>& y);
 
-template<typename AceClock> OpenDDS_Dcps_Export
+template<typename AceClock>
 bool operator!=(const TimePoint_T<AceClock>& x, const TimePoint_T<AceClock>& y);
 
 } // namespace DCPS

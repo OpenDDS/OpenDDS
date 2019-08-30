@@ -14,6 +14,7 @@
 #include "dds/DdsSecurityCoreC.h"
 #include "dds/Versioned_Namespace.h"
 #include "dds/DCPS/Service_Participant.h"
+#include "dds/DCPS/TimeTypes.h"
 
 #include "ace/Thread_Mutex.h"
 #include "ace/Reactor.h"
@@ -40,6 +41,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace Security {
 
+using OpenDDS::DCPS::TimeDuration;
 
 /**
 * @class AccessControlBuiltInImpl

@@ -1955,7 +1955,8 @@ AccessControlBuiltInImpl::RevokePermissionsTimer::~RevokePermissionsTimer()
   }
 }
 
-bool AccessControlBuiltInImpl::RevokePermissionsTimer::start_timer(
+bool
+AccessControlBuiltInImpl::RevokePermissionsTimer::start_timer(
   const TimeDuration& length, ::DDS::Security::PermissionsHandle pm_handle)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex,
@@ -1969,7 +1970,7 @@ bool AccessControlBuiltInImpl::RevokePermissionsTimer::start_timer(
   ACE_Reactor_Timer_Interface* reactor = TheServiceParticipant->timer();
 
   if (reactor != NULL) {
-    timer_id_ = reactor->schedule_timer(this, eh_params_ptr, length);
+    timer_id_ = reactor->schedule_timer(this, eh_params_ptr, length.value());
 
     if (timer_id_ != -1) {
       scheduled_ = true;
@@ -1983,22 +1984,25 @@ bool AccessControlBuiltInImpl::RevokePermissionsTimer::start_timer(
   return false;
 }
 
-int AccessControlBuiltInImpl::RevokePermissionsTimer::handle_timeout(const ACE_Time_Value& /*tv*/, const void* arg)
+int
+AccessControlBuiltInImpl::RevokePermissionsTimer::handle_timeout(
+  const ACE_Time_Value& /*tv*/, const void* arg)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex,
       guard,
       this->lock_,
       -1);
 
-  ::DDS::Security::PermissionsHandle* pm_handle = dynamic_cast<::DDS::Security::PermissionsHandle*>(arg)
+  const ::DDS::Security::PermissionsHandle* pm_handle =
+    reinterpret_cast<const ::DDS::Security::PermissionsHandle*>(arg);
 
   scheduled_ = false;
 
   ACPermsMap::iterator iter = impl_.local_ac_perms_.find(*pm_handle);
 
   if (iter == impl_.local_ac_perms_.end()) {
-    ACE_DEBUG((LM_ERROR, ACE_TEXT(
-        "(%P|%t) AccessControlBuiltInImpl::Revoke_Permissions_Timer::handle_timeout: pm_handle %d not found!\n"), *pm_handle));
+    ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) AccessControlBuiltInImpl::Revoke_Permissions_Timer::handle_timeout: ")
+      ACE_TEXT("pm_handle %d not found!\n"), *pm_handle));
     return -1;
   }
 
@@ -2007,8 +2011,8 @@ int AccessControlBuiltInImpl::RevokePermissionsTimer::handle_timeout(const ACE_T
   // If a listener exists, call on_revoke_permissions
   if (impl_.listener_ptr_ != NULL) {
     if (!impl_.listener_ptr_->on_revoke_permissions(&impl_, *pm_handle)) {
-      ACE_DEBUG((LM_ERROR, ACE_TEXT(
-          "(%P|%t) AccessControlBuiltInImpl::Revoke_Permissions_Timer::handle_timeout: on_revoke_permissions failed for pm_handle %d!\n"), *pm_handle));
+      ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) AccessControlBuiltInImpl::Revoke_Permissions_Timer::handle_timeout: ")
+        ACE_TEXT("on_revoke_permissions failed for pm_handle %d!\n"), *pm_handle));
       return -1;
     }
   }

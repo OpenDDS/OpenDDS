@@ -576,7 +576,10 @@ void Checklist::error_response(const ACE_INET_Addr& /*local_address*/,
   }
 
   if (a_message.has_error_code()) {
-    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) Checklist::error_response: WARNING STUN error response code=%d reason=%s\n"), a_message.get_error_code(), a_message.get_error_reason().c_str()));
+    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) Checklist::error_response: WARNING ")
+      ACE_TEXT("STUN error response code=%d reason=%s\n"),
+      a_message.get_error_code(),
+      a_message.get_error_reason().c_str()));
 
     if (a_message.get_error_code() == 420 && a_message.has_unknown_attributes()) {
       std::vector<STUN::AttributeType> unknown_attributes = a_message.get_unknown_attributes();
@@ -675,7 +678,7 @@ void Checklist::do_next_check(const MonotonicTimePoint& a_now)
   check_interval_ = endpoint_manager_->agent_impl->get_configuration().checklist_period();
 }
 
-void Checklist::execute(const MontonicTimePoint& a_now)
+void Checklist::execute(const MonotonicTimePoint& a_now)
 {
   if (scheduled_for_destruction_) {
     delete this;
