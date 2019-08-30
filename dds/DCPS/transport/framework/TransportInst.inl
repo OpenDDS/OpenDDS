@@ -25,7 +25,7 @@ OpenDDS::DCPS::TransportInst::TransportInst(const char* type,
     name_(name)
 {
   DBG_ENTRY_LVL("TransportInst", "TransportInst", 6);
-  this->adjust_config_value();
+  adjust_config_value();
 }
 
 ACE_INLINE
