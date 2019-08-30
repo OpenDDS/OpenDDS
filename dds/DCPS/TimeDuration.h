@@ -18,6 +18,9 @@ namespace DCPS {
  * Represents a length of time and based on C++11 std::chrono::duration.
  *
  * This wraps an ACE_Time_Value, and is designed to work with TimePoint_T.
+ *
+ * See the "Time" section in docs/guidelines.md for background and reasoning
+ * for this class.
  */
 class OpenDDS_Dcps_Export TimeDuration {
 public:

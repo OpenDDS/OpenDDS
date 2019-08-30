@@ -31,7 +31,7 @@ sub process_file {
   if ($gettimeofday) {
     $failed_checks .=
       " - ACE_OS::gettimeofday() and \"ACE_Time_Value().now()\" are forbidden in the core libraries.\n" .
-      "   Please use MonotonicTimePoint or SystemTimePoint defined in dds/DCPS/TimeTypes.h.\n";
+      "   See the \"Time\" section in docs/guidelines.md.\n";
   }
 
   if (length($failed_checks)) {

@@ -1,3 +1,8 @@
+/**
+ * See the "Time" section in docs/guidelines.md for background and reasoning
+ * for these types.
+ */
+
 #ifndef OPENDDS_DCPS_TIME_TYPES_HEADER
 #define OPENDDS_DCPS_TIME_TYPES_HEADER
 
@@ -34,7 +39,8 @@ typedef TimePoint_T<SystemClock> SystemTimePoint;
  * Reactor in handle_timeout.
  *
  * ConditionTime will have to be passed to ACE_Conditions to enable the
- * monotonic behavior.
+ * monotonic behavior. See the example in the "Time" section of
+ * docs/guidelines.md.
  */
 ///@{
 typedef ACE_Monotonic_Time_Policy MonotonicClock;

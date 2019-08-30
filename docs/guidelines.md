@@ -13,6 +13,8 @@ style](https://www.gnu.org/prep/standards/html_node/Writing-C.html) to the
 current, more conventional style, but automated tools can only cover a subset
 of the guidelines.
 
+**Table of Contents**
+
 * [Repository](#repository)
 * [Automated Build Systems](#automated-build-systems)
 * [Doxygen](#doxygen)
@@ -28,6 +30,8 @@ of the guidelines.
   * [Naming](#naming)
   * [Comments](#comments)
   * [Documenting Code for Doxygen](#documenting-code-for-doxygen)
+  * [Preprocessor Macros](#preprocessor-macros)
+  * [Time](#time)
 
 ## Repository
 
@@ -272,7 +276,7 @@ be used in non-trivial situations:
  * Everything else is the details.
  */
 class DoesStuff {
-...
+// ...
 };
 ```
 
@@ -310,3 +314,77 @@ For more information, see [the Doxygen manual](http://www.doxygen.nl/manual/).
 
 * Use `#ifdef MACRO` to test if `MACRO` is defined.
 * Use `#ifndef MACRO` to test if `MACRO` is not defined.
+
+### Time
+
+Measurements of time can be broken down into two basic classes: A specific
+point in time (Ex: 00:00 January 1, 1970) and a length or duration of time
+without context (Ex: 134 Seconds). In addition, a computer can change its clock
+while a program is running, which could mess up its time measurements. A
+solution to this is to use what's called the monotonic clock by the OS, which
+is independent to changes to the system clock the OS also provides.
+
+ACE can provide monotonic clock time and has a class for handling time
+measurements, `ACE_Time_Value`, but it doesn't differentiate between specific
+points in time and durations of time. It can differentiate between the system
+clock and the monotonic clock, but it does so poorly. OpenDDS provides three
+classes that wrap `ACE_Time_Value` to fill these roles: `TimeDuration`,
+`MonotonicTimePoint`, and `SystemTimePoint`. All three can be included through
+`dds/DCPS/TimeTypes.h`. Using `ACE_Time_Value` is discouraged unless directly
+dealing with ACE code which requires it. In addition, using
+`ACE_OS::gettimeofday()` in C++ code in `dds/DCPS` will be checked by the
+`dds_fuzz.pl` script.
+
+`MonotonicTimePoint` should be used when calculating time elapsed tracked
+internally, and when dealing with time points being returned by the
+`ACE_Reactor`s in OpenDDS. `ACE_Condition`s, like all ACE code will default to
+using system time. They must modified to use monotonic time using
+`ConditionTime` in `TimeTypes.h`, like this simplified form of
+`MessageTracker`:
+
+```C++
+// MessageTracker.h
+
+class MessageTracker {
+  // ...
+  ACE_Thread_Mutex lock_;
+  ConditionTime condition_time_;
+  ACE_Condition_Thread_Mutex done_condition_; // Must come after the lock and condition
+};
+
+// MessageTracker.cpp
+
+MessageTracker::MessageTracker(/* ... */)
+: /* ... */
+, done_condition_(lock_, condition_time_)
+{
+}
+
+// ...
+
+void
+MessageTracker::wait_messages_pending(/* ... */)
+{
+  const TimeDuration pending_timeout(TheServiceParticipant->pending_timeout());
+  const MonotonicTimePoint timeout_at(pending_timeout);
+  const ACE_Time_Value_T<MonotonicClock>* timeout_ptr = 0;
+
+  if (!pending_timeout.is_zero()) {
+    timeout_ptr = &timeout_at.value();
+  }
+
+  // ...
+
+  while (true) {
+    // ...
+    if (done_condition_.wait(timeout_ptr) == -1 && pending_messages()) {
+      // ...
+      break;
+    }
+  }
+  // ...
+}
+```
+
+`SystemTimePoint` should be used when dealing with the DDS API and timestamps
+on incoming and outgoing messages.

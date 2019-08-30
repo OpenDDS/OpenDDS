@@ -23,6 +23,9 @@ namespace DCPS {
  * TimePoints like you can add two ACE_Time_Values, because that wouldn't make
  * sense. Following this theme, all the constructors are to be explicit to
  * avoid careless implicit conversions.
+ *
+ * See the "Time" section in docs/guidelines.md for background and reasoning
+ * for this class.
  */
 template<typename AceClock>
 class TimePoint_T {
