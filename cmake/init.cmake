@@ -85,3 +85,6 @@ if (NOT DEFINED TAO_ROOT)
 else()
   _OPENDDS_RETURN_ERR("TAO_ROOT has already been set")
 endif()
+
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)

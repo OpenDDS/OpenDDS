@@ -235,18 +235,17 @@ endmacro()
 set(_suffix_RELEASE "")
 set(_suffix_DEBUG d)
 
-if(OPENDDS_STATIC)
-  if(MSVC)
-    list(APPEND ACE_DEPS iphlpapi)
+if(MSVC)
+  list(APPEND ACE_DEPS iphlpapi)
 
+  if(OPENDDS_STATIC)
     opendds_vs_force_static()
 
     set(_suffix_RELEASE s${_suffix_RELEASE})
     set(_suffix_DEBUG s${_suffix_DEBUG})
-
-  else()
-    list(APPEND ACE_DEPS pthread rt dl)
   endif()
+else()
+  list(APPEND ACE_DEPS rt dl)
 endif()
 
 foreach(_cfg  RELEASE  DEBUG)
@@ -289,13 +288,13 @@ foreach(_lib ${_all_libs})
 endforeach()
 
 set(_opendds_required_deps
-      OPENDDS_DCPS_LIBRARY
-      OPENDDS_IDL
-      ACE_LIBRARY
-      ACE_GPERF
-      TAO_LIBRARY
-      TAO_IDL
-      PERL
+  OPENDDS_DCPS_LIBRARY
+  OPENDDS_IDL
+  ACE_LIBRARY
+  ACE_GPERF
+  TAO_LIBRARY
+  TAO_IDL
+  PERL
 )
 
 foreach(_dep ${_opendds_required_deps})
@@ -367,10 +366,10 @@ endmacro()
 
 if(OPENDDS_FOUND)
   set(OPENDDS_INCLUDE_DIRS
-      ${OPENDDS_INCLUDE_DIR}
-      ${ACE_INCLUDE_DIR}
-      ${TAO_INCLUDE_DIR}
-      ${TAO_INCLUDE_DIR}/orbsvcs
+    ${OPENDDS_INCLUDE_DIR}
+    ${ACE_INCLUDE_DIR}
+    ${TAO_INCLUDE_DIR}
+    ${TAO_INCLUDE_DIR}/orbsvcs
   )
 
   _OPENDDS_ADD_TARGET_BINARY(opendds_idl "${OPENDDS_IDL}")
