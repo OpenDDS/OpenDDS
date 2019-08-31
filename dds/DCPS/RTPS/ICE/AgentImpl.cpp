@@ -46,8 +46,7 @@ void AgentImpl::enqueue(Task* a_task)
 
     if (a_task == tasks_.top()) {
       ACE_Time_Value const delay = std::max(get_configuration().T_a(), a_task->release_time_ - ACE_Time_Value().now());
-      ScheduleTimerCommand c(reactor(), this, delay);
-      execute_or_enqueue(c);
+      execute_or_enqueue(new ScheduleTimerCommand(reactor(), this, delay));
     }
   }
 }
@@ -74,8 +73,7 @@ int AgentImpl::handle_timeout(const ACE_Time_Value& a_now, const void* /*act*/)
 
   if (!tasks_.empty()) {
     ACE_Time_Value const delay = std::max(get_configuration().T_a(), tasks_.top()->release_time_ - a_now);
-    ScheduleTimerCommand c(reactor(), this, delay);
-    execute_or_enqueue(c);
+    execute_or_enqueue(new ScheduleTimerCommand(reactor(), this, delay));
   }
 
   check_invariants();

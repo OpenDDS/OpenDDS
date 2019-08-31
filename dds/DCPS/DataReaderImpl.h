@@ -767,8 +767,7 @@ private:
 
     void cancel_timer()
     {
-      CancelCommand c(this);
-      execute_or_enqueue(c);
+      execute_or_enqueue(new CancelCommand(this));
     }
 
     virtual bool reactor_is_shut_down() const

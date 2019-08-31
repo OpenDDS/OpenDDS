@@ -115,29 +115,26 @@ long Watchdog::schedule_timer(const void* act, const ACE_Time_Value& interval)
 long Watchdog::schedule_timer(const void* act, const ACE_Time_Value& delay, const ACE_Time_Value& interval)
 {
   long timer_id = -1;
-  ScheduleCommand c(this, act, delay, interval, &timer_id);
-  execute_or_enqueue(c);
-  wait();
+  ReactorInterceptor::CommandPtr command = execute_or_enqueue(new ScheduleCommand(this, act, delay, interval, &timer_id));
+  command->wait();
   return timer_id;
 }
 
 int Watchdog::cancel_timer(long timer_id)
 {
-  CancelCommand c(this, timer_id);
-  execute_or_enqueue(c);
+
+  execute_or_enqueue(new CancelCommand(this, timer_id));
   return 1;
 }
 
 void Watchdog::cancel_all()
 {
-  CancelCommand c(this, -1);
-  execute_or_enqueue(c);
+  execute_or_enqueue(new CancelCommand(this, -1));
 }
 
 int Watchdog::reset_timer_interval(long timer_id)
 {
-  ResetCommand c(this, timer_id, interval_);
-  execute_or_enqueue(c);
+  execute_or_enqueue(new ResetCommand(this, timer_id, interval_));
   return 0;
 }
 
