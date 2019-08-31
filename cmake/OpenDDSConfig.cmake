@@ -95,6 +95,9 @@ find_program(ACE_GPERF
     ${_ace_bin_hints}
 )
 
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+
 set(_ace_libs
   ACE_XML_Utils
   ACE
@@ -134,6 +137,22 @@ set(_opendds_libs
 )
 
 list(APPEND _all_libs ${_opendds_libs} ${_ace_libs} ${_tao_libs})
+
+macro(_OPENDDS_SYSTEM_LIBRARY name)
+  list(APPEND ACE_DEPS ${name})
+  string(TOUPPER "${name}" _cap_name)
+  find_library(${_cap_name}_LIBRARY ${name})
+  list(APPEND _opendds_required_deps ${_cap_name}_LIBRARY)
+endmacro()
+
+if(UNIX)
+  _OPENDDS_SYSTEM_LIBRARY(dl)
+  if(NOT APPLE)
+    _OPENDDS_SYSTEM_LIBRARY(rt)
+  endif()
+elseif(MSVC)
+  _OPENDDS_SYSTEM_LIBRARY(iphlpapi)
+endif()
 
 set(OPENDDS_IDL_DEPS
   TAO::IDL_FE
@@ -235,17 +254,11 @@ endmacro()
 set(_suffix_RELEASE "")
 set(_suffix_DEBUG d)
 
-if(MSVC)
-  list(APPEND ACE_DEPS iphlpapi)
+if(MSVC AND OPENDDS_STATIC)
+  opendds_vs_force_static()
 
-  if(OPENDDS_STATIC)
-    opendds_vs_force_static()
-
-    set(_suffix_RELEASE s${_suffix_RELEASE})
-    set(_suffix_DEBUG s${_suffix_DEBUG})
-  endif()
-else()
-  list(APPEND ACE_DEPS rt dl)
+  set(_suffix_RELEASE s${_suffix_RELEASE})
+  set(_suffix_DEBUG s${_suffix_DEBUG})
 endif()
 
 foreach(_cfg  RELEASE  DEBUG)
@@ -287,7 +300,7 @@ foreach(_lib ${_all_libs})
   select_library_configurations(${_LIB_VAR})
 endforeach()
 
-set(_opendds_required_deps
+list(APPEND _opendds_required_deps
   OPENDDS_DCPS_LIBRARY
   OPENDDS_IDL
   ACE_LIBRARY
