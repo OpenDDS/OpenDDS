@@ -66,6 +66,7 @@ public:
   TimeDuration& operator+=(const TimeDuration& other);
   TimeDuration& operator-=(const TimeDuration& other);
   TimeDuration& operator=(const TimeDuration& other);
+  TimeDuration& operator=(const time_t& other);
   TimeDuration& operator*=(double other);
 
 private:

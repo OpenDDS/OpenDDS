@@ -726,7 +726,7 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
         break;
 
       if (ret == -1) {
-        ACE_OS::sleep(TimeDuration::from_msec(retry_delay_msec).value());
+        ACE_OS::sleep(TimeDuration::from_msec(static_cast<ACE_UINT64>(retry_delay_msec)).value());
         retry_delay_msec *= this->tcp_config_->conn_retry_backoff_multiplier_;
 
       } else {

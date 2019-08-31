@@ -2,6 +2,8 @@
 
 #include "Time_Helper.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -106,6 +108,14 @@ TimeDuration::operator=(const TimeDuration& other)
 }
 
 ACE_INLINE
+TimeDuration&
+TimeDuration::operator=(const time_t& other)
+{
+  value_ = other;
+  return *this;
+}
+
+ACE_INLINE
 TimeDuration
 operator+(const TimeDuration& x, const TimeDuration& y)
 {
@@ -184,3 +194,5 @@ operator!=(const TimeDuration& x, const TimeDuration& y)
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

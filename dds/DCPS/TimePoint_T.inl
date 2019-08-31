@@ -2,6 +2,8 @@
 
 #include "Time_Helper.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -195,3 +197,5 @@ operator!=(const TimePoint_T<AceClock>& x, const TimePoint_T<AceClock>& y)
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

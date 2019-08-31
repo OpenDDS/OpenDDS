@@ -2,6 +2,8 @@
 
 #include "TimeDuration.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -10,6 +12,8 @@ const TimeDuration TimeDuration::max_value = TimeDuration(ACE_Time_Value::max_ti
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #if !defined (__ACE_INLINE__)
 #  include "TimeDuration.inl"

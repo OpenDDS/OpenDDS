@@ -1,5 +1,7 @@
 #include "TimePoint_T.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -14,6 +16,8 @@ AceClock TimePoint_T<AceClock>::clock;
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #if !defined (__ACE_INLINE__)
 #  include "TimePoint_T.inl"
