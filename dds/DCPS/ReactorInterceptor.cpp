@@ -23,7 +23,7 @@ ReactorInterceptor::ReactorInterceptor(ACE_Reactor* reactor,
   : owner_(owner)
 {
   if (reactor == 0) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ReactorInterceptor initialized with null reactor\n"));
+    ACE_DEBUG((LM_WARNING, "(%P|%t) ReactorInterceptor initialized with null reactor\n"));
   }
   this->reactor(reactor);
 }
