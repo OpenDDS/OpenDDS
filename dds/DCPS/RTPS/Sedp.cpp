@@ -2654,7 +2654,7 @@ Sedp::Writer::transport_assoc_done(int flags, const RepoId& remote) {
                OPENDDS_STRING(conv).c_str()));
     return;
   }
-  sedp_.association_complete(repo_id_, remote);
+  sedp_.spdp_.interceptor().enqueue(new AssociationComplete(&sedp_, repo_id_, remote));
 }
 
 void
@@ -4663,6 +4663,11 @@ OPENDDS_STRING Sedp::Msg::msgTypeToString(const MsgType type) {
 
 OPENDDS_STRING Sedp::Msg::msgTypeToString() const {
   return msgTypeToString(type_);
+}
+
+void
+Sedp::AssociationComplete::execute() {
+  sedp_->association_complete(local_, remote_);
 }
 
 }
