@@ -13,6 +13,10 @@
 #include <dds/DCPS/transport/framework/TransportType_rch.h>
 #include <dds/DCPS/transport/rtps_udp/RtpsUdpInst_rch.h>
 #include <dds/DCPS/transport/rtps_udp/RtpsUdpInst.h>
+#include <dds/DCPS/transport/tcp/TcpInst_rch.h>
+#include <dds/DCPS/transport/tcp/TcpInst.h>
+#include <dds/DCPS/transport/shmem/ShmemInst_rch.h>
+#include <dds/DCPS/transport/shmem/ShmemInst.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 #include <dds/DCPS/transport/framework/TransportConfig_rch.h>
 #include <dds/DCPS/transport/framework/TransportExceptions.h>
@@ -24,11 +28,14 @@
 
 #ifdef ACE_AS_STATIC_LIBS
 #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#include <dds/DCPS/transport/tcp/Tcp.h>
+#include <dds/DCPS/transport/shmem/Shmem.h>
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #endif
 
 #include "dds/DCPS/StaticIncludes.h"
 
+#include <ace/Arg_Shifter.h>
 #include <ace/streams.h>
 #include "tests/Utils/ExceptionStreams.h"
 #include "ace/Get_Opt.h"
@@ -36,29 +43,59 @@
 #include <memory>
 using namespace std;
 
-int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
+int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
+
+  std::basic_string<ACE_TCHAR> transport(ACE_TEXT("rtps_udp"));
+
+  ACE_Arg_Shifter arg_shifter(argc, argv);
+  const ACE_TCHAR* current_arg = 0;
+  while (arg_shifter.is_anything_left())
+  {
+    // The '-t' option for transport
+    if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-t")))) {
+      transport = current_arg;
+      ACE_DEBUG((LM_DEBUG, "Using transport:%C\n", transport.c_str()));
+      arg_shifter.consume_arg();
+    }
+    else {
+      arg_shifter.ignore_arg();
+    }
+  }
+
+  std::basic_string<ACE_TCHAR> config_1(ACE_TEXT("dds4ccm_"));
+  config_1 += transport + ACE_TEXT("_1");
+
+  std::basic_string<ACE_TCHAR> instance_1(ACE_TEXT("the_"));
+  instance_1 += transport + ACE_TEXT("_transport_1");
+
+  std::basic_string<ACE_TCHAR> config_2(ACE_TEXT("dds4ccm_"));
+  config_2 += transport + ACE_TEXT("_2");
+
+  std::basic_string<ACE_TCHAR> instance_2(ACE_TEXT("the_"));
+  instance_2 += transport + ACE_TEXT("_transport_2");
+
   try
     {
       DDS::DomainParticipantFactory_var dpf =
         TheParticipantFactoryWithArgs(argc, argv);
 
       OpenDDS::DCPS::TransportConfig_rch config =
-        OpenDDS::DCPS::TransportRegistry::instance()->get_config("dds4ccm_rtps");
+        OpenDDS::DCPS::TransportRegistry::instance()->get_config(config_1.c_str());
 
       if (config.is_nil())
         {
           config =
-            OpenDDS::DCPS::TransportRegistry::instance()->create_config("dds4ccm_rtps");
+            OpenDDS::DCPS::TransportRegistry::instance()->create_config(config_1.c_str());
         }
 
       OpenDDS::DCPS::TransportInst_rch inst =
-        OpenDDS::DCPS::TransportRegistry::instance()->get_inst("the_rtps_transport");
+        OpenDDS::DCPS::TransportRegistry::instance()->get_inst(instance_1.c_str());
 
       if (inst.is_nil())
         {
           inst =
-            OpenDDS::DCPS::TransportRegistry::instance()->create_inst("the_rtps_transport",
-                                                                "rtps_udp");
+            OpenDDS::DCPS::TransportRegistry::instance()->create_inst(instance_1.c_str(),
+                                                                      transport.c_str());
 
           config->instances_.push_back(inst);
 
@@ -68,22 +105,22 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
       // Create another transport instance for participant2 since RTPS transport instances
       // cannot be shared by domain participants.
       OpenDDS::DCPS::TransportConfig_rch config2 =
-        OpenDDS::DCPS::TransportRegistry::instance()->get_config("dds4ccm_rtps_2");
+        OpenDDS::DCPS::TransportRegistry::instance()->get_config(config_2.c_str());
 
       if (config2.is_nil())
         {
           config2 =
-            OpenDDS::DCPS::TransportRegistry::instance()->create_config("dds4ccm_rtps_2");
+            OpenDDS::DCPS::TransportRegistry::instance()->create_config(config_2.c_str());
         }
 
       OpenDDS::DCPS::TransportInst_rch inst2 =
-        OpenDDS::DCPS::TransportRegistry::instance()->get_inst("the_rtps_transport_2");
+        OpenDDS::DCPS::TransportRegistry::instance()->get_inst(instance_2.c_str());
 
       if (inst2.is_nil())
         {
           inst2 =
-            OpenDDS::DCPS::TransportRegistry::instance()->create_inst("the_rtps_transport_2",
-                                                                "rtps_udp");
+            OpenDDS::DCPS::TransportRegistry::instance()->create_inst(instance_2.c_str(),
+                                                                      transport.c_str());
           config2->instances_.push_back(inst2);
 
         }

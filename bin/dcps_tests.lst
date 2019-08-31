@@ -52,6 +52,10 @@ tests/DCPS/Inconsistent_Qos/run_test.pl: RTPS XERCES3 !STATIC
 tests/DCPS/InconsistentTopic/run_test.pl rtps_disc: RTPS !NO_BUILT_IN_TOPICS
 tests/DCPS/TopicReuse/run_test.pl: RTPS
 tests/DCPS/DpShutdown/run_test.pl: RTPS
+tests/DCPS/DpShutdown/run_test.pl tcp: RTPS
+tests/DCPS/DpShutdown/run_test.pl shmem: RTPS
+tests/DCPS/DpShutdown/run_test.pl udp: RTPS
+tests/DCPS/DpShutdown/run_test.pl multicast: RTPS
 tests/DCPS/Serializer/run_test.pl: !DCPS_MIN
 tests/DCPS/Compiler/idl_test1_main/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/Compiler/idl_test3_main/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
