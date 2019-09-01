@@ -1041,7 +1041,7 @@ OpenDDS::DCPS::TcpConnection::reconnect_thread_fun(void* arg)
 
   // Make sure the associated transport_config outlives the connection object.
   RcHandle<TransportInst> transport_config;
-  TcpConnection_rch connection(static_cast<TcpConnection*>(arg), keep_count());
+  const TcpConnection_rch connection(static_cast<TcpConnection*>(arg), keep_count());
   transport_config = RcHandle<TransportInst>(&connection->link_->impl().config(), keep_count());
 
   if (connection->reconnect() == -1) {
