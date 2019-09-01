@@ -11,12 +11,6 @@
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/transport/framework/TransportType_rch.h>
-#include <dds/DCPS/transport/rtps_udp/RtpsUdpInst_rch.h>
-#include <dds/DCPS/transport/rtps_udp/RtpsUdpInst.h>
-#include <dds/DCPS/transport/tcp/TcpInst_rch.h>
-#include <dds/DCPS/transport/tcp/TcpInst.h>
-#include <dds/DCPS/transport/shmem/ShmemInst_rch.h>
-#include <dds/DCPS/transport/shmem/ShmemInst.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 #include <dds/DCPS/transport/framework/TransportConfig_rch.h>
 #include <dds/DCPS/transport/framework/TransportExceptions.h>
@@ -28,8 +22,6 @@
 
 #ifdef ACE_AS_STATIC_LIBS
 #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
-#include <dds/DCPS/transport/tcp/Tcp.h>
-#include <dds/DCPS/transport/shmem/Shmem.h>
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #endif
 
@@ -45,7 +37,7 @@ using namespace std;
 
 int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
 
-  std::basic_string<ACE_TCHAR> transport(ACE_TEXT("rtps_udp"));
+  OPENDDS_STRING transport("rtps_udp");
 
   ACE_Arg_Shifter arg_shifter(argc, argv);
   const ACE_TCHAR* current_arg = 0;
@@ -53,7 +45,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
   {
     // The '-t' option for transport
     if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-t")))) {
-      transport = current_arg;
+      transport = ACE_TEXT_ALWAYS_CHAR(current_arg);
       ACE_DEBUG((LM_DEBUG, "Using transport:%C\n", transport.c_str()));
       arg_shifter.consume_arg();
     }
