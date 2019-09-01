@@ -40,9 +40,9 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
   OPENDDS_STRING transport("rtps_udp");
 
   ACE_Arg_Shifter arg_shifter(argc, argv);
-  const ACE_TCHAR* current_arg = 0;
   while (arg_shifter.is_anything_left())
   {
+    const ACE_TCHAR* current_arg = 0;
     // The '-t' option for transport
     if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-t")))) {
       transport = ACE_TEXT_ALWAYS_CHAR(current_arg);
