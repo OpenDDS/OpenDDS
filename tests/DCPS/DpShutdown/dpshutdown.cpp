@@ -54,17 +54,17 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
     }
   }
 
-  std::basic_string<ACE_TCHAR> config_1(ACE_TEXT("dds4ccm_"));
-  config_1 += transport + ACE_TEXT("_1");
+  OPENDDS_STRING config_1("dds4ccm_");
+  config_1 += transport + "_1";
 
-  std::basic_string<ACE_TCHAR> instance_1(ACE_TEXT("the_"));
-  instance_1 += transport + ACE_TEXT("_transport_1");
+  OPENDDS_STRING instance_1("the_");
+  instance_1 += transport + "_transport_1";
 
-  std::basic_string<ACE_TCHAR> config_2(ACE_TEXT("dds4ccm_"));
-  config_2 += transport + ACE_TEXT("_2");
+  OPENDDS_STRING config_2("dds4ccm_");
+  config_2 += transport + "_2";
 
-  std::basic_string<ACE_TCHAR> instance_2(ACE_TEXT("the_"));
-  instance_2 += transport + ACE_TEXT("_transport_2");
+  OPENDDS_STRING instance_2("the_");
+  instance_2 += transport + "_transport_2";
 
   try
     {
