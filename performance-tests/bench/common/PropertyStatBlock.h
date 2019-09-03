@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Bench_Common_Export.h"
 #include "Common.h"
 #include "BenchTypeSupportImpl.h"
 
@@ -7,7 +8,7 @@
 
 namespace Bench {
 
-struct SimpleStatBlock {
+struct Bench_Common_Export SimpleStatBlock {
   SimpleStatBlock();
 
   size_t sample_count_;
@@ -23,9 +24,9 @@ struct SimpleStatBlock {
   double median_absolute_deviation_;
 };
 
-SimpleStatBlock consolidate(const SimpleStatBlock& sb1, const SimpleStatBlock& sb2);
+Bench_Common_Export SimpleStatBlock consolidate(const SimpleStatBlock& sb1, const SimpleStatBlock& sb2);
 
-class PropertyStatBlock {
+class Bench_Common_Export PropertyStatBlock {
 public:
   // Constructor for initializing / writing PropertyStatBlock
   PropertyStatBlock(Builder::PropertySeq& seq, const std::string& prefix, size_t median_buffer_size);
@@ -49,7 +50,7 @@ private:
   Builder::PropertyIndex median_absolute_deviation_;
 };
 
-class ConstPropertyStatBlock {
+class Bench_Common_Export ConstPropertyStatBlock {
 public:
   // Constructor for reading PropertyStatBlock
   ConstPropertyStatBlock(const Builder::PropertySeq& seq, const std::string& prefix);

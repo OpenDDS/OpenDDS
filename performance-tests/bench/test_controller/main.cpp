@@ -12,6 +12,7 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 #include "BenchTypeSupportImpl.h"
+#include "PropertyStatBlock.h"
 
 #include "rapidjson/document.h"
 #include "rapidjson/istreamwrapper.h"
@@ -230,6 +231,11 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
   }
 
+  Bench::SimpleStatBlock consolidated_latency_stats;
+  Bench::SimpleStatBlock consolidated_jitter_stats;
+  Bench::SimpleStatBlock consolidated_round_trip_latency_stats;
+  Bench::SimpleStatBlock consolidated_round_trip_jitter_stats;
+
   Bench::WorkerReport consolidated_report;
   for (size_t r = 0; r < parsed_reports.size(); ++r) {
     Builder::ProcessReport& process_report = parsed_reports[r].process_report;
@@ -240,10 +246,28 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         std::cout << "   - I've got a parsed subscriber " << j << std::endl;
         for (CORBA::ULong k = 0; k < process_report.participants[i].subscribers[j].datareaders.length(); ++k) {
           std::cout << "     - I've got a parsed datareader " << k << std::endl;
+
+          const Builder::DataReaderReport& dr_report = process_report.participants[i].subscribers[j].datareaders[k];
+
+          Bench::ConstPropertyStatBlock dr_latency(dr_report.properties, "latency");
+          Bench::ConstPropertyStatBlock dr_jitter(dr_report.properties, "jitter");
+          Bench::ConstPropertyStatBlock dr_round_trip_latency(dr_report.properties, "round_trip_latency");
+          Bench::ConstPropertyStatBlock dr_round_trip_jitter(dr_report.properties, "round_trip_jitter");
+
+          std::cout << "       - datareader latency sample count = " << dr_latency.to_simple_stat_block().sample_count_ << std::endl;
+          std::cout << "       - mean datareader latency = " << dr_latency.to_simple_stat_block().mean_ << std::endl;
+
+          consolidated_latency_stats = consolidate(consolidated_latency_stats, dr_latency.to_simple_stat_block());
+          consolidated_jitter_stats = consolidate(consolidated_jitter_stats, dr_jitter.to_simple_stat_block());
+          consolidated_round_trip_latency_stats = consolidate(consolidated_round_trip_latency_stats, dr_round_trip_latency.to_simple_stat_block());
+          consolidated_round_trip_jitter_stats = consolidate(consolidated_round_trip_jitter_stats, dr_round_trip_jitter.to_simple_stat_block());
         }
       }
     }
   }
+
+  std::cout << "consolidated datareader latency sample count = " << consolidated_latency_stats.sample_count_ << std::endl;
+  std::cout << "consolidated mean datareader latency = " << consolidated_latency_stats.mean_ << std::endl;
 
   // Clean up OpenDDS
   participant->delete_contained_entities();
