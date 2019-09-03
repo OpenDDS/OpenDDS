@@ -2455,6 +2455,7 @@ void
 Sedp::association_complete(const RepoId& localId,
                            const RepoId& remoteId)
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   // If the remote endpoint is an opendds endpoint that expects associated datawriter announcements
   if (is_expectant_opendds(remoteId)) {
     LocalSubscriptionIter sub = local_subscriptions_.find(localId);
@@ -2653,7 +2654,7 @@ Sedp::Writer::transport_assoc_done(int flags, const RepoId& remote) {
                OPENDDS_STRING(conv).c_str()));
     return;
   }
-  sedp_.association_complete(repo_id_, remote);
+  sedp_.spdp_.interceptor().enqueue(new AssociationComplete(&sedp_, repo_id_, remote));
 }
 
 void
@@ -4662,6 +4663,11 @@ OPENDDS_STRING Sedp::Msg::msgTypeToString(const MsgType type) {
 
 OPENDDS_STRING Sedp::Msg::msgTypeToString() const {
   return msgTypeToString(type_);
+}
+
+void
+Sedp::AssociationComplete::execute() {
+  sedp_->association_complete(local_, remote_);
 }
 
 }

@@ -29,6 +29,7 @@
 
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/PoolAllocationBase.h"
+#include "dds/DCPS/ReactorInterceptor.h"
 
 #include "dds/DCPS/security/framework/SecurityConfig_rch.h"
 #ifdef OPENDDS_SECURITY
@@ -129,6 +130,8 @@ public:
   void remove_sedp_unicast(const ACE_INET_Addr& addr);
   void add_sedp_unicast(const ACE_INET_Addr& addr);
 
+  DCPS::ReactorInterceptor& interceptor() { return interceptor_; }
+
 protected:
   Sedp& endpoint_manager() { return sedp_; }
 
@@ -149,6 +152,14 @@ private:
 
   RtpsDiscovery* disco_;
   DCPS::ReactorTask reactor_task_;
+
+  class Interceptor : public DCPS::ReactorInterceptor {
+  public:
+    Interceptor(DCPS::ReactorTask* task, ACE_Reactor* reactor, ACE_thread_t owner) : ReactorInterceptor(reactor, owner), task_(task) {}
+    bool reactor_is_shut_down() const;
+  private:
+    DCPS::ReactorTask* task_;
+  } interceptor_;
 
   // Participant:
   const DDS::DomainId_t domain_;
