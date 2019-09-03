@@ -146,6 +146,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   : DCPS::LocalParticipant<Sedp>(qos)
   , disco_(disco)
   , reactor_task_(false)
+  , interceptor_(&reactor_task_, reactor_task_.reactor(), reactor_task_.get_reactor_owner())
   , domain_(domain)
   , guid_(guid)
   , tport_(new SpdpTransport(this, false))
@@ -181,6 +182,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   : DCPS::LocalParticipant<Sedp>(qos)
   , disco_(disco)
   , reactor_task_(false)
+  , interceptor_(&reactor_task_, reactor_task_.reactor(), reactor_task_.get_reactor_owner())
   , domain_(domain)
   , guid_(guid)
   , tport_(new SpdpTransport(this, true))
@@ -1435,6 +1437,7 @@ void
 Spdp::SpdpTransport::open()
 {
   outer_->reactor_task_.open(0);
+  outer_->interceptor_.reactor(outer_->reactor_task_.get_reactor());
 
   ACE_Reactor* reactor = outer_->reactor_task_.get_reactor();
   if (reactor->register_handler(unicast_socket_.get_handle(),
@@ -2251,6 +2254,11 @@ void Spdp::stop_ice(ICE::Endpoint* endpoint, DCPS::RepoId r, const BuiltinEndpoi
   ACE_UNUSED_ARG(r);
   ACE_UNUSED_ARG(avail);
 #endif
+}
+
+bool
+Spdp::Interceptor::reactor_is_shut_down() const {
+  return task_->is_shut_down();
 }
 
 }

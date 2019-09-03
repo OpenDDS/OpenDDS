@@ -87,7 +87,7 @@ protected:
   CommandPtr enqueue_i(Command* c, bool immediate)
   {
     c->reset();
-    CommandPtr command = rchandle_from(c);
+    const CommandPtr command(c, keep_count());
     ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, CommandPtr());
     command_queue_.push(command);
     if (!immediate) {

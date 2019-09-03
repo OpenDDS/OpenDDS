@@ -32,18 +32,18 @@ int
 OpenDDS::DCPS::TransportInst::load(ACE_Configuration_Heap& cf,
                                    ACE_Configuration_Section_Key& sect)
 {
-  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("queue_messages_per_pool"), this->queue_messages_per_pool_, size_t)
-  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("queue_initial_pools"), this->queue_initial_pools_, size_t)
-  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("max_packet_size"), this->max_packet_size_, ACE_UINT32)
-  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("max_samples_per_packet"), this->max_samples_per_packet_, size_t)
-  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("optimum_packet_size"), this->optimum_packet_size_, ACE_UINT32)
-  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("thread_per_connection"), this->thread_per_connection_, bool)
-  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("datalink_release_delay"), this->datalink_release_delay_, int)
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("queue_messages_per_pool"), queue_messages_per_pool_, size_t)
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("queue_initial_pools"), queue_initial_pools_, size_t)
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("max_packet_size"), max_packet_size_, ACE_UINT32)
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("max_samples_per_packet"), max_samples_per_packet_, size_t)
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("optimum_packet_size"), optimum_packet_size_, ACE_UINT32)
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("thread_per_connection"), thread_per_connection_, bool)
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("datalink_release_delay"), datalink_release_delay_, int)
 
   // Undocumented - this option is not in the Developer's Guide
   // Controls the number of chunks in the allocators used by the datalink
   // for control messages.
-  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("datalink_control_chunks"), this->datalink_control_chunks_, size_t)
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("datalink_control_chunks"), datalink_control_chunks_, size_t)
 
   ACE_TString stringvalue;
   if (cf.get_string_value (sect, ACE_TEXT("passive_connect_duration"), stringvalue) == 0) {
@@ -88,40 +88,45 @@ OPENDDS_STRING
 OpenDDS::DCPS::TransportInst::dump_to_str() const
 {
   OPENDDS_STRING ret;
-  ret += formatNameForDump("transport_type")          + this->transport_type_ + '\n';
-  ret += formatNameForDump("name")                    + this->name_ + '\n';
-  ret += formatNameForDump("queue_messages_per_pool") + to_dds_string(unsigned(this->queue_messages_per_pool_)) + '\n';
-  ret += formatNameForDump("queue_initial_pools")     + to_dds_string(unsigned(this->queue_initial_pools_)) + '\n';
-  ret += formatNameForDump("max_packet_size")         + to_dds_string(unsigned(this->max_packet_size_)) + '\n';
-  ret += formatNameForDump("max_samples_per_packet")  + to_dds_string(unsigned(this->max_samples_per_packet_)) + '\n';
-  ret += formatNameForDump("optimum_packet_size")     + to_dds_string(unsigned(this->optimum_packet_size_)) + '\n';
-  ret += formatNameForDump("thread_per_connection")   + (this->thread_per_connection_ ? "true" : "false") + '\n';
-  ret += formatNameForDump("datalink_release_delay")  + to_dds_string(this->datalink_release_delay_) + '\n';
-  ret += formatNameForDump("datalink_control_chunks") + to_dds_string(unsigned(this->datalink_control_chunks_)) + '\n';
+  ret += formatNameForDump("transport_type")          + transport_type_ + '\n';
+  ret += formatNameForDump("name")                    + name_ + '\n';
+  ret += formatNameForDump("queue_messages_per_pool") + to_dds_string(unsigned(queue_messages_per_pool_)) + '\n';
+  ret += formatNameForDump("queue_initial_pools")     + to_dds_string(unsigned(queue_initial_pools_)) + '\n';
+  ret += formatNameForDump("max_packet_size")         + to_dds_string(unsigned(max_packet_size_)) + '\n';
+  ret += formatNameForDump("max_samples_per_packet")  + to_dds_string(unsigned(max_samples_per_packet_)) + '\n';
+  ret += formatNameForDump("optimum_packet_size")     + to_dds_string(unsigned(optimum_packet_size_)) + '\n';
+  ret += formatNameForDump("thread_per_connection")   + (thread_per_connection_ ? "true" : "false") + '\n';
+  ret += formatNameForDump("datalink_release_delay")  + to_dds_string(datalink_release_delay_) + '\n';
+  ret += formatNameForDump("datalink_control_chunks") + to_dds_string(unsigned(datalink_control_chunks_)) + '\n';
   return ret;
 }
 
 void
 OpenDDS::DCPS::TransportInst::shutdown()
 {
-  ACE_GUARD(ACE_SYNCH_MUTEX, g, this->lock_);
-  if (!this->impl_.is_nil()) {
-    this->impl_->shutdown();
+  TransportImpl_rch impl;
+  {
+    ACE_GUARD(ACE_SYNCH_MUTEX, g, lock_);
+    impl_.swap(impl);
+    shutting_down_ = true;
+  }
+  if (impl) {
+    impl->shutdown();
   }
 }
 
 OpenDDS::DCPS::TransportImpl_rch
 OpenDDS::DCPS::TransportInst::impl()
 {
-  ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, g, this->lock_, TransportImpl_rch());
-  if (!this->impl_) {
+  ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, g, lock_, TransportImpl_rch());
+  if (!impl_ && !shutting_down_) {
     try {
-      this->impl_ = this->new_impl();
-    } catch (const OpenDDS::DCPS::Transport::UnableToCreate& ) {
+      impl_ = new_impl();
+    } catch (const OpenDDS::DCPS::Transport::UnableToCreate&) {
       return TransportImpl_rch();
     }
   }
-  return this->impl_;
+  return impl_;
 }
 
 void
@@ -159,7 +164,8 @@ OpenDDS::DCPS::TransportInst::set_port_in_addr_string(OPENDDS_STRING& addr_str, 
 OpenDDS::ICE::Endpoint*
 OpenDDS::DCPS::TransportInst::get_ice_endpoint()
 {
-  return impl()->get_ice_endpoint();
+  const OpenDDS::DCPS::TransportImpl_rch temp = impl();
+  return temp ? temp->get_ice_endpoint() : 0;
 }
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
