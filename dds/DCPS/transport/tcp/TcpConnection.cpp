@@ -1011,7 +1011,7 @@ OpenDDS::DCPS::TcpConnection::spawn_reconnect_thread()
   DBG_ENTRY_LVL("TcpConnection","spawn_reconnect_thread",6);
   GuardType guard(this->reconnect_lock_);
   TcpReceiveStrategy_rch recv_strat = receive_strategy();
-  if (!shutdown_ && reconnect_thread_ == 0 && recv_strat) {
+  if (!shutdown_ && recv_strat) {
     // Make sure the associated receive strategy outlives the connection object
     recv_strat->_add_ref();
     // Make sure the associated transport_config outlives the connection object.
@@ -1025,6 +1025,7 @@ OpenDDS::DCPS::TcpConnection::spawn_reconnect_thread()
                                               &reconnect_thread_) == -1){
       // we need to decrement the reference count when thread creation fails.
       this->_remove_ref();
+      recv_strat->_remove_ref();
       transport_config._remove_ref();
     }
   }
