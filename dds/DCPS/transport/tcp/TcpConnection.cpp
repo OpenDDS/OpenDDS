@@ -1010,7 +1010,10 @@ OpenDDS::DCPS::TcpConnection::spawn_reconnect_thread()
 {
   DBG_ENTRY_LVL("TcpConnection","spawn_reconnect_thread",6);
   GuardType guard(this->reconnect_lock_);
-  if (!shutdown_) {
+  TcpReceiveStrategy_rch recv_strat = receive_strategy();
+  if (!shutdown_ && reconnect_thread_ == 0 && recv_strat) {
+    // Make sure the associated receive strategy outlives the connection object
+    recv_strat->_add_ref();
     // Make sure the associated transport_config outlives the connection object.
     TransportInst& transport_config = this->link_->impl().config();
     transport_config._add_ref();
@@ -1039,9 +1042,11 @@ OpenDDS::DCPS::TcpConnection::reconnect_thread_fun(void* arg)
   ACE_OS::sigfillset(&set);
   ACE_OS::thr_sigsetmask(SIG_SETMASK, &set, NULL);
 
-  // Make sure the associated transport_config outlives the connection object.
+  // Make sure the associated transport_config and recv_strat outlive the connection object.
   RcHandle<TransportInst> transport_config;
-  const TcpConnection_rch connection(static_cast<TcpConnection*>(arg), keep_count());
+  TcpReceiveStrategy_rch recv_strat;
+  TcpConnection_rch connection(static_cast<TcpConnection*>(arg), keep_count());
+  recv_strat = TcpReceiveStrategy_rch(connection->receive_strategy().get(), keep_count());
   transport_config = RcHandle<TransportInst>(&connection->link_->impl().config(), keep_count());
 
   if (connection->reconnect() == -1) {
