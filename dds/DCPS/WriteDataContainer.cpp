@@ -1036,7 +1036,7 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
   DDS::ReturnCode_t ret = DDS::RETCODE_OK;
 
   bool need_to_set_abs_timeout = true;
-  MonotonicTimePoint abs_timeout;
+  MonotonicTimePoint abs_timeout(MonotonicTimePoint::zero_value);
 
   //max_num_samples_ covers ResourceLimitsQosPolicy max_samples and
   //max_instances and max_instances * depth

@@ -8,8 +8,6 @@
 #include "ace/OS_NS_string.h"
 #include "ace/Truncate.h"
 
-#include "dds/DCPS/Definitions.h"
-
 #include <cstring>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL

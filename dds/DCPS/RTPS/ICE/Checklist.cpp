@@ -406,7 +406,7 @@ void Checklist::succeeded(const ConnectivityCheck& cc)
     }
 
     nominated_is_live_ = true;
-    last_indication_ = MonotonicTimePoint();
+    last_indication_.set_to_now();
 
     while (!connectivity_checks_.empty()) {
       ConnectivityCheck cc = connectivity_checks_.front();
@@ -784,7 +784,7 @@ ACE_INET_Addr Checklist::selected_address() const
 
 void Checklist::indication()
 {
-  last_indication_ = MonotonicTimePoint();
+  last_indication_.set_to_now();
 }
 
 #endif /* OPENDDS_SECURITY */

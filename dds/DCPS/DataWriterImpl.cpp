@@ -1373,13 +1373,10 @@ DataWriterImpl::enable()
 
   if (qos_.liveliness.lease_duration.sec != DDS::DURATION_INFINITE_SEC &&
       qos_.liveliness.lease_duration.nanosec != DDS::DURATION_INFINITE_NSEC) {
-    liveliness_check_interval_ = TimeDuration(qos_.liveliness.lease_duration);
-    liveliness_check_interval_ *= TheServiceParticipant->liveliness_factor()/100.0;
     // Must be at least 1 micro second.
-    const TimeDuration min(0, 1);
-    if (liveliness_check_interval_ < min) {
-      liveliness_check_interval_ = min;
-    }
+    liveliness_check_interval_ = std::max(
+      TimeDuration(qos_.liveliness.lease_duration) * (TheServiceParticipant->liveliness_factor() / 100.0),
+      TimeDuration(0, 1));
 
     if (reactor_->schedule_timer(liveness_timer_.in(),
                                  0,
@@ -1801,7 +1798,7 @@ DataWriterImpl::write(Message_Block_Ptr data,
                       ACE_TEXT("enqueue failed.\n")),
                      ret);
   }
-  last_liveliness_activity_time_ = MonotonicTimePoint();
+  last_liveliness_activity_time_.set_to_now();
 
   track_sequence_number(filter_out);
 

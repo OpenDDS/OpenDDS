@@ -105,10 +105,6 @@ public:
     MonotonicTimePoint deadline() const {
       return tstamp_ + TimeDuration(max_wait_);
     }
-
-    DDS::Time_t timestamp() const {
-      return time_value_to_time(tstamp_.value());
-    }
   };
 
   DataWriterImpl();

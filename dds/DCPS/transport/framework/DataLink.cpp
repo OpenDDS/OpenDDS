@@ -256,7 +256,7 @@ int
 DataLink::handle_exception(ACE_HANDLE /* fd */)
 {
   const MonotonicTimePoint now;
-  if(scheduled_to_stop_at_.is_zero()) {
+  if (scheduled_to_stop_at_.is_zero()) {
     if (DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataLink::handle_exception() - not scheduling or stopping\n")));

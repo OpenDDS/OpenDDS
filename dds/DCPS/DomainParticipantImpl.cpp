@@ -1344,7 +1344,7 @@ DomainParticipantImpl::assert_liveliness()
     it->svt_->assert_liveliness_by_participant();
   }
 
-  last_liveliness_activity_ = MonotonicTimePoint();
+  last_liveliness_activity_.set_to_now();
 
   return DDS::RETCODE_OK;
 }
@@ -2191,10 +2191,10 @@ DomainParticipantImpl::remove_adjust_liveliness_timers()
 DomainParticipantImpl::LivelinessTimer::LivelinessTimer(DomainParticipantImpl& impl,
                                                         DDS::LivelinessQosPolicyKind kind)
   : impl_(impl)
-  , kind_ (kind)
-  , interval_ (TimeDuration::max_value)
-  , recalculate_interval_ (false)
-  , scheduled_ (false)
+  , kind_(kind)
+  , interval_(TimeDuration::max_value)
+  , recalculate_interval_(false)
+  , scheduled_(false)
 { }
 
 DomainParticipantImpl::LivelinessTimer::~LivelinessTimer()
@@ -2215,10 +2215,7 @@ DomainParticipantImpl::LivelinessTimer::add_adjust(OpenDDS::DCPS::DataWriterImpl
   const TimeDuration remaining = interval_ - (now - last_liveliness_check_);
 
   // Adopt a smaller interval.
-  const TimeDuration i = writer->liveliness_check_interval(kind_);
-  if (i < interval_) {
-    interval_ = i;
-  }
+  interval_ = std::min(interval_, writer->liveliness_check_interval(kind_));
 
   // Reschedule or schedule a timer if necessary.
   if (scheduled_ && interval_ < remaining) {
@@ -2255,7 +2252,7 @@ DomainParticipantImpl::LivelinessTimer::handle_timeout(
     recalculate_interval_ = false;
   }
 
-  if (interval_ != TimeDuration::max_value) {
+  if (!interval_.is_max()) {
     dispatch(now);
     last_liveliness_check_ = now;
     TheServiceParticipant->timer()->schedule_timer(this, 0, interval_.value());

@@ -17,7 +17,6 @@
 #include "PoolAllocator.h"
 #include "PoolAllocationBase.h"
 #include "Message_Block_Ptr.h"
-#include "Definitions.h"
 #include "TimeTypes.h"
 
 #include "ace/Synch_Traits.h"

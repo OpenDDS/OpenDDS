@@ -2144,7 +2144,7 @@ private:
         const bool NOT_UNREGISTER_MSG = false;
         // clear the message, since ownership is being transfered to finish_store_instance_data.
 
-        instance->last_accepted_ = MonotonicTimePoint();
+        instance->last_accepted_.set_to_now();
         const DataSampleHeader_ptr header = data->second.header;
         const bool new_instance = data->second.new_instance;
 

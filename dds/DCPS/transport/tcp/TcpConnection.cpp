@@ -629,9 +629,6 @@ OpenDDS::DCPS::TcpConnection::passive_reconnect_i()
     if (this->tcp_config_->passive_reconnect_duration_ == 0)
       return -1;
 
-    TimeDuration timeout(
-      tcp_config_->passive_reconnect_duration_ / 1000,
-      tcp_config_->passive_reconnect_duration_ % 1000 * 1000);
     this->reconnect_state_ = PASSIVE_WAITING_STATE;
     this->link_->notify(DataLink::DISCONNECTED);
 
@@ -641,8 +638,8 @@ OpenDDS::DCPS::TcpConnection::passive_reconnect_i()
     if (this->receive_strategy()) {
 
       // Give a copy to reactor.
-      this->passive_reconnect_timer_id_ = receive_strategy->get_reactor()->schedule_timer(this, 0, timeout.value());
-
+      passive_reconnect_timer_id_ = receive_strategy->get_reactor()->schedule_timer(
+        this, 0, TimeDuration::from_msec(tcp_config_->passive_reconnect_duration_).value());
       if (this->passive_reconnect_timer_id_ == -1) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: TcpConnection::passive_reconnect_i")
@@ -770,7 +767,7 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
       send_strategy->resume_send();
     }
 
-    last_reconnect_attempted_ = MonotonicTimePoint();
+    last_reconnect_attempted_.set_to_now();
   }
 
   return this->reconnect_state_ == LOST_STATE ? -1 : 0;

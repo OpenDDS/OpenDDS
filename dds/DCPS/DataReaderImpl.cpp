@@ -1911,8 +1911,6 @@ DataReaderImpl::LivelinessTimer::check_liveliness_i(bool cancel,
 
   // Iterate over each writer to this reader
   {
-    MonotonicTimePoint next_absolute(MonotonicTimePoint::max_value);
-
     ACE_READ_GUARD(ACE_RW_Thread_Mutex,
         read_guard,
         data_reader->writers_lock_);
@@ -1922,8 +1920,7 @@ DataReaderImpl::LivelinessTimer::check_liveliness_i(bool cancel,
         ++iter) {
       // deal with possibly not being alive or
       // tell when it will not be alive next (if no activity)
-      next_absolute = iter->second->check_activity(now);
-
+      const MonotonicTimePoint next_absolute(iter->second->check_activity(now));
       if (!next_absolute.is_max()) {
         alive_writers++;
         smallest = std::min(smallest, next_absolute);
@@ -1950,8 +1947,13 @@ DataReaderImpl::LivelinessTimer::check_liveliness_i(bool cancel,
   // Call into the reactor after releasing the sample lock.
   if (alive_writers) {
     // compare the time now with the earliest(smallest) deadline we found
-    liveliness_timer_id_ = this->reactor()->schedule_timer(this, 0,
-      std::min(smallest - now, TimeDuration(0,1)).value());
+    TimeDuration relative;
+    if (now < smallest) {
+      relative = smallest - now;
+    } else {
+      relative = TimeDuration(0, 1); // ASAP
+    }
+    liveliness_timer_id_ = this->reactor()->schedule_timer(this, 0, relative.value());
 
     if (liveliness_timer_id_ == -1) {
       ACE_ERROR((LM_ERROR,

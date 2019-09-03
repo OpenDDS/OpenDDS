@@ -202,8 +202,9 @@ OpenDDS::DCPS::ReactorTask::stop()
 #if defined (ACE_HAS_WIN32_OVERLAPPED_IO) || defined (ACE_HAS_AIO_CALLS)
   // Remove the proactor handler so the reactor stops forwarding messages.
   if (proactor_) {
-    reactor_->remove_handler(proactor_->implementation()->get_handle(),
-                             ACE_Event_Handler::DONT_CALL);
+    reactor_->remove_handler(
+      proactor_->implementation()->get_handle(),
+      ACE_Event_Handler::DONT_CALL);
   }
 #endif
 

@@ -829,7 +829,7 @@ Spdp::check_auth_states(const MonotonicTimePoint& tv) {
     if (pit != participants_.end()) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Spdp::check_auth_states() - ")
         ACE_TEXT("Removing discovered participant due to authentication timeout: %C\n"),
-        std::string(DCPS::GuidConverter(*it)).c_str()));
+        OPENDDS_STRING(DCPS::GuidConverter(*it)).c_str()));
       if (participant_sec_attr_.allow_unauthenticated_participants == false) {
         ICE::Endpoint* endpoint = sedp_.get_ice_endpoint();
         if (endpoint) {
@@ -1450,10 +1450,7 @@ Spdp::SpdpTransport::open()
   disco_resend_period_ = outer_->disco_->resend_period();
   last_disco_resend_ = MonotonicTimePoint::zero_value;
 
-  TimeDuration timer_period =
-    disco_resend_period_ < outer_->disco_->max_spdp_timer_period() ?
-      disco_resend_period_ : outer_->disco_->max_spdp_timer_period();
-
+  const TimeDuration timer_period = std::min(disco_resend_period_, outer_->disco_->max_spdp_timer_period());
   if (-1 == reactor->schedule_timer(this, 0, ACE_Time_Value(0), timer_period.value())) {
     throw std::runtime_error("failed to schedule timer with reactor");
   }

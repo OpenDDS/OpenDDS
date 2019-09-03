@@ -576,8 +576,8 @@ private:
     /// Callback to invoke.
     DiscoveryListener* listener;
     /**
-     * Monotnic Timestamp indicating the last HeartBeat or AckNack received
-     * from the remote entity.
+     * Timestamp indicating the last HeartBeat or AckNack received from the
+     * remote entity.
      */
     MonotonicTimePoint last_activity;
     /// Current status of the remote entity.

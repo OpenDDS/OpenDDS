@@ -624,21 +624,21 @@ protected:
   /// Data has arrived into the cache, unblock waiting ReadConditions
   void notify_read_conditions();
 
-  unique_ptr<ReceivedDataAllocator>  rd_allocator_;
-  DDS::DataReaderQos           qos_;
+  unique_ptr<ReceivedDataAllocator> rd_allocator_;
+  DDS::DataReaderQos qos_;
 
   // Status conditions accessible by subclasses.
   DDS::SampleRejectedStatus sample_rejected_status_;
   DDS::SampleLostStatus sample_lost_status_;
 
   /// lock protecting sample container as well as statuses.
-  ACE_Recursive_Thread_Mutex   sample_lock_;
+  ACE_Recursive_Thread_Mutex sample_lock_;
 
   typedef ACE_Reverse_Lock<ACE_Recursive_Thread_Mutex> Reverse_Lock_t;
   Reverse_Lock_t reverse_sample_lock_;
 
   WeakRcHandle<DomainParticipantImpl> participant_servant_;
-  TopicDescriptionPtr<TopicImpl>      topic_servant_;
+  TopicDescriptionPtr<TopicImpl> topic_servant_;
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   bool is_exclusive_ownership_;

@@ -87,6 +87,7 @@ private:
 
   friend class CancelCommand;
 };
+
 //Starting RemoveAssociationSweeper
 template <typename T>
 RemoveAssociationSweeper<T>::RemoveAssociationSweeper(ACE_Reactor* reactor,
@@ -105,18 +106,13 @@ void RemoveAssociationSweeper<T>::schedule_timer(OpenDDS::DCPS::RcHandle<OpenDDS
 {
   info->scheduled_for_removal_ = true;
   info->notify_lost_ = callback;
-  TimeDuration time_to_deadline(info->activity_wait_period());
-  const TimeDuration max_time(10);
-  if (time_to_deadline > max_time) {
-    time_to_deadline = max_time;
-  }
-
-  info->removal_deadline_ = MonotonicTimePoint(time_to_deadline);
+  info->removal_deadline_ = MonotonicTimePoint(std::min(info->activity_wait_period(), TimeDuration(10)));
   execute_or_enqueue(new ScheduleCommand(this, info));
 }
 
 template <typename T>
-ReactorInterceptor::CommandPtr RemoveAssociationSweeper<T>::cancel_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
+ReactorInterceptor::CommandPtr
+RemoveAssociationSweeper<T>::cancel_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
 {
   info->scheduled_for_removal_ = false;
   info->removal_deadline_ = MonotonicTimePoint::zero_value;
@@ -203,9 +199,11 @@ template <typename T>
 void RemoveAssociationSweeper<T>::CancelCommand::execute()
 {
   if (this->info_->remove_association_timer_ != WriterInfo::NO_TIMER) {
-      this->sweeper_->reactor()->cancel_timer(this->info_->remove_association_timer_);
+    this->sweeper_->reactor()->cancel_timer(this->info_->remove_association_timer_);
     if (DCPS_debug_level) {
-      ACE_DEBUG((LM_INFO, "(%P|%t) RemoveAssociationSweeper::CancelCommand::execute() - Unscheduled sweeper %d\n", this->info_->remove_association_timer_));
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) RemoveAssociationSweeper::CancelCommand::execute() - ")
+        ACE_TEXT("Unscheduled sweeper %d\n"),
+        this->info_->remove_association_timer_));
     }
     this->info_->remove_association_timer_ = WriterInfo::NO_TIMER;
     this->sweeper_->remove_info(this->info_.in());

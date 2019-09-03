@@ -876,9 +876,9 @@ void populate_header_received(const FACE::CONNECTION_ID_TYPE& connection_id,
   header.message_instance_guid = create_message_instance_guid(pub, sinfo.opendds_reserved_publication_seq);
 
   header.message_timestamp = convertTime(sinfo.source_timestamp);
-  const ACE_Time_Value now(ACE_OS::gettimeofday());
+  const OpenDDS::DCPS::SystemTimePoint now;
 
-  readers[connection_id]->sum_recvd_msgs_latency += (convertTime(OpenDDS::DCPS::time_value_to_time(now)) - header.message_timestamp);
+  readers[connection_id]->sum_recvd_msgs_latency += (convertTime(now.to_dds_time()) - header.message_timestamp);
   ++readers[connection_id]->total_msgs_recvd;
 
   if (OpenDDS::DCPS::DCPS_debug_level > 8) {
@@ -969,15 +969,14 @@ void populate_header_received(const FACE::CONNECTION_ID_TYPE& connection_id,
       lifespan.nanosec != DDS::DURATION_INFINITE_NSEC) {
     // Finite lifespan.  Check if data has expired.
 
-    DDS::Time_t const tmp = {
+    const DDS::Time_t tmp = {
       sinfo.source_timestamp.sec + lifespan.sec,
       sinfo.source_timestamp.nanosec + lifespan.nanosec
     };
 
     // We assume that the publisher host's clock and subscriber host's
     // clock are synchronized (allowed by the spec).
-    ACE_Time_Value const expiration_time(
-        OpenDDS::DCPS::time_to_time_value(tmp));
+    const OpenDDS::DCPS::SystemTimePoint expiration_time(tmp);
 
     if (now >= expiration_time) {
 //      ACE_DEBUG((LM_DEBUG, "(%P|%t) populate_header_received: Last message expired, setting message_validity to INVALID\n"));

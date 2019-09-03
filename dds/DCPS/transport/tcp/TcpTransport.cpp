@@ -24,7 +24,6 @@
 #include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/transport/framework/TransportClient.h"
-#include "dds/DCPS/Time_Helper.h"
 
 #include <sstream>
 
@@ -761,8 +760,7 @@ TcpTransport::unbind_link(DataLink* link)
 
   GuardType guard(this->links_lock_);
 
-  if (this->pending_release_links_.unbind(key) != 0 &&
-      link->datalink_release_delay() > TimeDuration::zero_value) {
+  if (pending_release_links_.unbind(key) && !link->datalink_release_delay().is_zero()) {
     ACE_ERROR((LM_ERROR,
                "(%P|%t) TcpTransport::unbind_link INTERNAL ERROR - "
                "Failed to find link %@ tcp_link %@ PriorityKey "

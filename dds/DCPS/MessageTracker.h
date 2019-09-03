@@ -10,7 +10,6 @@
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/PoolAllocator.h"
-#include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/TimeTypes.h"
 #include "ace/Thread_Mutex.h"
 #include "ace/Condition_Thread_Mutex.h"

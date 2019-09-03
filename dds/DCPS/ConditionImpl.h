@@ -12,7 +12,6 @@
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/WaitSet.h"
-#include "dds/DCPS/TimeTypes.h"
 
 #include "ace/Recursive_Thread_Mutex.h"
 
