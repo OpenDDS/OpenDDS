@@ -600,7 +600,9 @@ namespace OpenDDS {
         RepoIdSet matched_endpoints_;
         DCPS::SequenceNumber sequence_;
         RepoIdSet remote_opendds_associations_;
+#ifdef OPENDDS_SECURITY
         DDS::Security::EndpointSecurityAttributes security_attribs_;
+#endif
       };
 
       struct LocalPublication : LocalEndpoint {
