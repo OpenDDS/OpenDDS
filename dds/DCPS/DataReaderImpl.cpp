@@ -2689,15 +2689,14 @@ DataReaderImpl::time_based_filter_instance(
   TimeDuration& filter_time_expired)
 {
   const MonotonicTimePoint now;
+  const TimeDuration minimum_separation(qos_.time_based_filter.minimum_separation);
 
   // TIME_BASED_FILTER processing; expire data samples
   // if minimum separation is not met for instance.
-  const DDS::Duration_t zero = { DDS::DURATION_ZERO_SEC, DDS::DURATION_ZERO_NSEC };
-
-  if (qos_.time_based_filter.minimum_separation > zero) {
+  if (!minimum_separation.is_zero()) {
     filter_time_expired = now - instance->last_accepted_;
-    if (filter_time_expired.to_dds_duration() < qos_.time_based_filter.minimum_separation) {
-      return true;  // Data filtered.
+    if (filter_time_expired < minimum_separation) {
+      return true; // Data filtered.
     }
   }
 
