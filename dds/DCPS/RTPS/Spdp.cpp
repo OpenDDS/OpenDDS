@@ -858,6 +858,11 @@ Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileM
 
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
+  if (crypto_handle_ == DDS::HANDLE_NIL) {
+    // not configured for RTPS Protection, therefore doesn't support participant crypto tokens
+    return;
+  }
+
   // If discovery hasn't initialized / validated this participant yet, ignore volatile message
   DiscoveredParticipantIter iter = participants_.find(src_participant);
   if (iter == participants_.end()) {
@@ -935,18 +940,20 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp)
   dp.crypto_handle_ = key_factory->register_matched_remote_participant(crypto_handle_, dp.identity_handle_, dp.permissions_handle_, dp.shared_secret_handle_, se);
   if (dp.crypto_handle_ == DDS::HANDLE_NIL) {
     ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
-      ACE_TEXT("Spdp::match_authenticated() - ")
-      ACE_TEXT("Unable to register remote participant with crypto key factory plugin. Security Exception[%d.%d]: %C\n"),
-        se.code, se.minor_code, se.message.in()));
+               ACE_TEXT("Spdp::match_authenticated() - ")
+               ACE_TEXT("Unable to register remote participant with crypto key factory plugin. Security Exception[%d.%d]: %C\n"),
+               se.code, se.minor_code, se.message.in()));
     return false;
   }
 
-  if (key_exchange->create_local_participant_crypto_tokens(crypto_tokens_, crypto_handle_, dp.crypto_handle_, se) == false) {
-    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
-      ACE_TEXT("Spdp::match_authenticated() - ")
-      ACE_TEXT("Unable to create local participant crypto tokens with crypto key exchange plugin. Security Exception[%d.%d]: %C\n"),
-        se.code, se.minor_code, se.message.in()));
-    return false;
+  if (crypto_handle_ != DDS::HANDLE_NIL) {
+    if (key_exchange->create_local_participant_crypto_tokens(crypto_tokens_, crypto_handle_, dp.crypto_handle_, se) == false) {
+      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
+                 ACE_TEXT("Spdp::match_authenticated() - ")
+                 ACE_TEXT("Unable to create local participant crypto tokens with crypto key exchange plugin. Security Exception[%d.%d]: %C\n"),
+                 se.code, se.minor_code, se.message.in()));
+      return false;
+    }
   }
 
   // Must unlock when calling into part_bit() as it may call back into us

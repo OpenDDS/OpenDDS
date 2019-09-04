@@ -23,7 +23,8 @@ namespace OpenDDS {
       SMHDR_SZ = 4, // size of SubmessageHeader
       HEARTBEAT_SZ = 28, // size (octetsToNextHeader) of HeartBeatSubmessage
       INFO_DST_SZ = 12, // size (octetsToNextHeader) of InfoDestSubmessage
-      INFO_TS_SZ = 8; // size of InfoTimestampSubmessage with FLAG_I == 0
+      INFO_TS_SZ = 8, // size of InfoTimestampSubmessage with FLAG_I == 0
+      INFO_SRC_SZ = 20; // size (octetsToNextHeader) of InfoSourceSubmessage
 
     const OctetArray4
       PARTICIPANT_MESSAGE_DATA_KIND_UNKNOWN =

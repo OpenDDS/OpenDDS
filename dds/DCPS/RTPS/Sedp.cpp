@@ -1129,7 +1129,9 @@ Sedp::Task::svc_i(const ParticipantData_t* ppdata)
 
 #ifdef OPENDDS_SECURITY
   if (sedp_->is_security_enabled()) {
-    spdp_->send_participant_crypto_tokens(proto.remote_id_);
+    if (spdp_->crypto_handle() != DDS::HANDLE_NIL) {
+      spdp_->send_participant_crypto_tokens(proto.remote_id_);
+    }
     sedp_->send_builtin_crypto_tokens(*pdata);
   }
 #endif

@@ -21,16 +21,16 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-  RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link, const GuidPrefix_t& local_prefix)
+RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link, const GuidPrefix_t& local_prefix)
   : link_(link)
   , last_received_()
   , recvd_sample_(0)
   , receiver_(local_prefix)
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   , secure_sample_(0)
 #endif
 {
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   secure_prefix_.smHeader.submessageId = SUBMESSAGE_NONE;
 #endif
 }
@@ -149,7 +149,7 @@ RtpsUdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
 
   const RtpsSampleHeader& rsh = received_sample_header();
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   const SubmessageKind kind = rsh.submessage_._d();
 
   if ((secure_prefix_.smHeader.submessageId == SRTPS_PREFIX
@@ -159,8 +159,6 @@ RtpsUdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
     // secure envelope in progress, defer processing
     secure_submessages_.push_back(rsh.submessage_);
     if (kind == DATA) {
-      // SRTPS: once full-message protection is supported, this technique will
-      // need to be extended to support > 1 data payload (auth. only)
       secure_sample_ = sample;
     }
     return;
@@ -211,7 +209,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
             ACE_TEXT("calling DataLink::data_received for seq: %q to reader %C\n"),
             this, sample.header_.sequence_.getValue(), OPENDDS_STRING(reader_conv).c_str()));
         }
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
         if (decode_payload(sample, data)) {
           link_->data_received(sample, reader);
         }
@@ -252,7 +250,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
             this, sample.header_.sequence_.getValue()));
         }
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
         if (decode_payload(sample, data)) {
           link_->data_received(sample);
         }
@@ -267,7 +265,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
             this, sample.header_.sequence_.getValue()));
         }
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
         if (decode_payload(sample, data)) {
           link_->data_received_include(sample, readers_selected_);
         }
@@ -314,16 +312,9 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
      has successfully reassembled the fragments and we now have a DATA submsg
    */
 
-#if defined(OPENDDS_SECURITY)
-  case SRTPS_PREFIX:
+#ifdef OPENDDS_SECURITY
   case SEC_PREFIX:
     secure_prefix_ = submessage.security_sm();
-    break;
-
-  case SRTPS_POSTFIX:
-    secure_prefix_.smHeader.submessageId = SUBMESSAGE_NONE;
-    secure_sample_ = ReceivedDataSample(0);
-    ACE_ERROR((LM_ERROR, "ERROR: RtpsUdpReceiveStrategy SRTPS unsupported.\n"));
     break;
 
   case SEC_POSTFIX:
@@ -336,37 +327,27 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
   }
 }
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
 void
 RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage)
 {
   using namespace DDS::Security;
-  const ParticipantCryptoHandle local_pch = link_->local_crypto_handle();
+
+  const CryptoTransform_var crypto = link_->security_config()->get_crypto_transform();
+  if (!crypto) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RtpsUdpReceiveStrategy SEC_POSTFIX no CryptoTransform\n"));
+    return;
+  }
 
   RepoId peer;
   RTPS::assign(peer.guidPrefix, receiver_.source_guid_prefix_);
   peer.entityId = ENTITYID_PARTICIPANT;
   const ParticipantCryptoHandle peer_pch = link_->peer_crypto_handle(peer);
 
-  CryptoTransform_var crypto = link_->security_config()->get_crypto_transform();
-
   DDS::OctetSeq encoded_submsg, plain_submsg;
   sec_submsg_to_octets(encoded_submsg, submessage);
   secure_prefix_.smHeader.submessageId = SUBMESSAGE_NONE;
   secure_sample_ = ReceivedDataSample(0);
-
-  if (local_pch == DDS::HANDLE_NIL || !crypto) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RtpsUdpReceiveStrategy SEC_POSTFIX "
-               "precondition unmet %d %@\n", local_pch, crypto.in()));
-    return;
-  }
-
-  if (peer_pch == DDS::HANDLE_NIL) {
-    VDBG_LVL((LM_DEBUG, "(%P|%t) RtpsUdpReceiveStrategy SEC_POSTFIX "
-              "no crypto handle for %C\n",
-              OPENDDS_STRING(GuidConverter(peer)).c_str()), 2);
-    return;
-  }
 
   DatawriterCryptoHandle dwch = DDS::HANDLE_NIL;
   DatareaderCryptoHandle drch = DDS::HANDLE_NIL;
@@ -374,7 +355,7 @@ RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage)
   SecurityException ex = {"", 0, 0};
 
   bool ok = crypto->preprocess_secure_submsg(dwch, drch, category, encoded_submsg,
-                                             local_pch, peer_pch, ex);
+                                             link_->local_crypto_handle(), peer_pch, ex);
 
   if (ok) {
     VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpReceiveStrategy::deliver_from_secure ")
@@ -617,7 +598,7 @@ RtpsUdpReceiveStrategy::check_header(const RtpsTransportHeader& header)
 {
   receiver_.reset(remote_address_, header.header_);
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   secure_prefix_.smHeader.submessageId = SUBMESSAGE_NONE;
 #endif
 
@@ -628,7 +609,7 @@ bool
 RtpsUdpReceiveStrategy::check_header(const RtpsSampleHeader& header)
 {
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   if (secure_prefix_.smHeader.submessageId) {
     return header.valid();
   }

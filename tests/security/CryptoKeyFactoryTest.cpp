@@ -49,7 +49,7 @@ public:
     DDS::PropertySeq part_props;
     DDS::Security::ParticipantSecurityAttributes sec_attributes =
       {
-        false, false, false, false, false,
+        false, false, true, false, false,
         0, part_props
       };
     DDS::Security::SecurityException ex;
@@ -167,8 +167,8 @@ TEST_F(CryptoKeyFactoryFixture, TestRegisterLocal)
   // participants and check the return data.
   DDS::Security::CryptoKeyFactory_var test_class = new CryptoBuiltInImpl;
 
-  // RTPS not protected, returns a valid handle
-  EXPECT_FALSE(DDS::HANDLE_NIL == test_class->register_local_participant(
+  // RTPS not protected, returns a nil handle
+  EXPECT_TRUE(DDS::HANDLE_NIL == test_class->register_local_participant(
     part_id_handle,
     part_perm,
     part_props,
@@ -185,15 +185,15 @@ TEST_F(CryptoKeyFactoryFixture, TestRegisterLocal)
   //  ex));
 
   // RTPS Protected - returns valid handle
-  //  sec_attributes.is_rtps_protected = true;
-  //  ++part_id_handle;
-  //  ++part_perm;
-  //  EXPECT_FALSE(DDS::HANDLE_NIL == test_class->register_local_participant(
-  //    part_id_handle,
-  //    part_perm,
-  //    part_props,
-  //    sec_attributes,
-  //    ex));
+  sec_attributes.is_rtps_protected = true;
+  ++part_id_handle;
+  ++part_perm;
+  EXPECT_FALSE(DDS::HANDLE_NIL == test_class->register_local_participant(
+    part_id_handle,
+    part_perm,
+    part_props,
+    sec_attributes,
+    ex));
 }
 
 TEST_F(CryptoKeyFactoryFixture, RegisterRemoteParticipant)
@@ -222,7 +222,7 @@ TEST_F(CryptoKeyFactoryFixture, RegisterRemoteParticipant)
   ::DDS::Security::PermissionsHandle remote_perm_handle = 5;
 
   // Register with combinations of Null handles
-  EXPECT_TRUE(DDS::HANDLE_NIL == test_class->register_matched_remote_participant(
+  EXPECT_FALSE(DDS::HANDLE_NIL == test_class->register_matched_remote_participant(
     DDS::HANDLE_NIL,
     remote_id_handle,
     remote_perm_handle,
@@ -283,7 +283,7 @@ TEST_F(CryptoKeyFactoryFixture, RegisterLocalDataWriterRemoteReader)
   ::DDS::Security::SecurityException ex;
 
   // Register with a Null handle
-  EXPECT_TRUE(DDS::HANDLE_NIL == GetFactory().register_local_datawriter(
+  EXPECT_FALSE(DDS::HANDLE_NIL == GetFactory().register_local_datawriter(
     DDS::HANDLE_NIL,
     datawriter_properties,
     datawriter_security_attributes,
@@ -346,7 +346,7 @@ TEST_F(CryptoKeyFactoryFixture, RegisterDataReaderAndRemoteWriter)
   ::DDS::Security::SecurityException ex;
 
   // Register with a Null handle
-  EXPECT_TRUE(DDS::HANDLE_NIL == GetFactory().register_local_datareader(
+  EXPECT_FALSE(DDS::HANDLE_NIL == GetFactory().register_local_datareader(
     DDS::HANDLE_NIL,
     datareader_properties,
     datareader_security_attributes,
