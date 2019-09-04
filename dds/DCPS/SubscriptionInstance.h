@@ -47,10 +47,7 @@ public:
       last_sequence_(),
       rcvd_samples_(instance_state_),
       instance_handle_(handle),
-      last_sample_tv_(MonotonicTimePoint::zero_value),
-      cur_sample_tv_(MonotonicTimePoint::zero_value),
-      deadline_timer_id_(-1),
-      last_accepted_(MonotonicTimePoint::zero_value)
+      deadline_timer_id_(-1)
   {
     switch (qos.destination_order.kind) {
     case DDS::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS:

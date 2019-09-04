@@ -37,16 +37,10 @@ TimePoint_T<AceClock>::TimePoint_T(const DDS::Time_t& dds_time)
 
 template<typename AceClock>
 ACE_INLINE
-TimePoint_T<AceClock>::TimePoint_T(const TimeDuration& time_from_now)
-: value_(clock() + time_from_now.value())
+TimePoint_T<AceClock>
+TimePoint_T<AceClock>::now()
 {
-}
-
-template<typename AceClock>
-ACE_INLINE
-TimePoint_T<AceClock>::TimePoint_T(const DDS::Duration_t& time_from_now)
-: value_(clock() + duration_to_time_value(time_from_now))
-{
+  return TimePoint_T<AceClock>(clock());
 }
 
 template<typename AceClock>

@@ -89,8 +89,8 @@ DDS::ReturnCode_t instance_handle_to_bit_data(
   typedef typename BIT_Reader_var::_obj_type BIT_Reader;
   BIT_Reader_var bit_reader = BIT_Reader::_narrow(reader.in());
 
-  const MonotonicTimePoint due(TimeDuration::from_msec(
-    TheServiceParticipant->bit_lookup_duration_msec()));
+  const MonotonicTimePoint due(MonotonicTimePoint::now() +
+    TimeDuration::from_msec(TheServiceParticipant->bit_lookup_duration_msec()));
 
     // Look for the data from builtin topic datareader until we get results or
     // timeout.
@@ -123,7 +123,7 @@ DDS::ReturnCode_t instance_handle_to_bit_data(
                        ret);
     }
 
-    const MonotonicTimePoint now;
+    const MonotonicTimePoint now = MonotonicTimePoint::now();
     if (now < due) {
       if (DCPS_debug_level >= 10) {
         ACE_DEBUG((LM_DEBUG,

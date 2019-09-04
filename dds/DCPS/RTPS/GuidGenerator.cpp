@@ -46,15 +46,14 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace RTPS {
 
-using DCPS::MonotonicTimePoint;
+using DCPS::SystemTimePoint;
 
 GuidGenerator::GuidGenerator()
   : pid_(ACE_OS::getpid()),
     counter_(0)
 {
-
   if (pid_ == -1) {
-    unsigned seed = static_cast<unsigned>(MonotonicTimePoint().value().usec());
+    unsigned seed = static_cast<unsigned>(SystemTimePoint::now().value().usec());
     pid_ = static_cast<pid_t>(ACE_OS::rand_r(&seed));
   }
 

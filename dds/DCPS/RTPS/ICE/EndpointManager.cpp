@@ -542,7 +542,7 @@ void EndpointManager::request(const ACE_INET_Addr& a_local_address,
         deferred_triggered_checks_.insert(std::make_pair(remote_username, DeferredTriggeredCheckListType()));
       x.first->second.push_back(DeferredTriggeredCheck(
         a_local_address, a_remote_address, priority, use_candidate,
-        MonotonicTimePoint() + agent_impl->get_configuration().deferred_triggered_check_ttl()));
+        MonotonicTimePoint::now() + agent_impl->get_configuration().deferred_triggered_check_ttl()));
     }
   }
   break;
@@ -722,7 +722,7 @@ EndpointManager::ServerReflexiveTask::ServerReflexiveTask(EndpointManager* a_end
   : Task(a_endpoint_manager->agent_impl),
     endpoint_manager(a_endpoint_manager)
 {
-  enqueue(MonotonicTimePoint());
+  enqueue(MonotonicTimePoint::now());
 }
 
 void EndpointManager::ServerReflexiveTask::execute(const MonotonicTimePoint& a_now)
@@ -740,7 +740,7 @@ EndpointManager::ChangePasswordTask::ChangePasswordTask(EndpointManager* a_endpo
   : Task(a_endpoint_manager->agent_impl),
     endpoint_manager(a_endpoint_manager)
 {
-  enqueue(MonotonicTimePoint() + endpoint_manager->agent_impl->get_configuration().change_password_period());
+  enqueue(MonotonicTimePoint::now() + endpoint_manager->agent_impl->get_configuration().change_password_period());
 }
 
 void EndpointManager::ChangePasswordTask::execute(const MonotonicTimePoint& a_now)

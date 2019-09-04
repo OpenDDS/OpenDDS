@@ -235,7 +235,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         exit(1);
       }
 
-      const MonotonicTimePoint connect_deadline(MATCHED_WAIT_MAX_DURATION);
+      const MonotonicTimePoint connect_deadline(MonotonicTimePoint::now() + TimeDuration(MATCHED_WAIT_MAX_DURATION));
       if (listener_servant->wait_matched(1, &connect_deadline.value()) != 0) {
         cerr << "ERROR: sub: wait for subscription matching failed." << endl;
         exit(1);

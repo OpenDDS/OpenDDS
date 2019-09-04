@@ -64,7 +64,7 @@ Writer::svc()
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::svc begins.\n")));
 
   try {
-    const MonotonicTimePoint connect_deadline(MATCHED_WAIT_MAX_DURATION);
+    const MonotonicTimePoint connect_deadline(MonotonicTimePoint::now() + TimeDuration(MATCHED_WAIT_MAX_DURATION));
     if (dwl_servant_->wait_matched(2, &connect_deadline.value()) != 0) {
       cerr << "ERROR: wait for subscription matching failed." << endl;
       exit(1);
@@ -148,7 +148,7 @@ bool Writer::wait_for_start()
   GuardType guard(this->lock_);
 
   if (!associated_) {
-    const MonotonicTimePoint abs(TimeDuration(10));
+    const MonotonicTimePoint abs(MonotonincTimePoint::now() + TimeDuration(10));
     if (condition_.wait(&abs.value()) == -1) {
       return false;
     }

@@ -2162,7 +2162,7 @@ private:
         // store_instance_data received and delivered a sample, while this
         // method was waiting for the lock
         const TimeDuration interval(data_reader_impl->qos_.time_based_filter.minimum_separation);
-        if (MonotonicTimePoint() - instance->last_sample_tv_ >= interval) {
+        if (MonotonicTimePoint::now() - instance->last_sample_tv_ >= interval) {
           // nothing to process, so unregister this handle for timeout
           cancel_timer_id = data->second.timer_id;
           // no new data to process, so remove from container

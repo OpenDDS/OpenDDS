@@ -46,7 +46,7 @@ void AgentImpl::enqueue(Task* a_task)
     a_task->in_queue_ = true;
 
     if (a_task == tasks_.top()) {
-      const TimeDuration delay = std::max(get_configuration().T_a(), a_task->release_time_ - MonotonicTimePoint());
+      const TimeDuration delay = std::max(get_configuration().T_a(), a_task->release_time_ - MonotonicTimePoint::now());
       execute_or_enqueue(new ScheduleTimerCommand(reactor(), this, delay));
     }
   }

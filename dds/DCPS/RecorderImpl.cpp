@@ -396,7 +396,7 @@ RecorderImpl::add_association(const RepoId&            yourId,
     //   WriterMapType::iterator where = this->writers_.find(writer.writerId);
     //
     //   if (where != this->writers_.end()) {
-    //     const MonotonicTimePoint now;
+    //     const MonotonicTimePoint now = MonotonicTimePoint::now();
     //
     //     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
     //
@@ -414,7 +414,7 @@ RecorderImpl::add_association(const RepoId&            yourId,
     //
     // if (liveliness_lease_duration_ != TimeDuration::zero) {
     //   // this call will start the timer if it is not already set
-    //   const MonotonicTimePoint now;
+    //   const MonotonicTimePoint now = MonotonicTimePoint::now();
     //
     //   if (DCPS_debug_level >= 5) {
     //     GuidConverter converter(subscription_id_);
@@ -818,7 +818,7 @@ RecorderImpl::signal_liveliness(const RepoId& remote_participant)
     }
   }
 
-  const MonotonicTimePoint now;
+  const MonotonicTimePoint now = MonotonicTimePoint::now();
   for (WriterSet::iterator pos = writers.begin(), limit = writers.end();
        pos != limit;
        ++pos) {

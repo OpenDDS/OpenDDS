@@ -565,7 +565,7 @@ TcpTransport::release_datalink(DataLink* link)
   // Actions are executed outside of the lock scope.
   switch (linkAction) {
   case StopLink:
-    link->schedule_stop(MonotonicTimePoint());
+    link->schedule_stop(MonotonicTimePoint::now());
     break;
 
   case ScheduleLinkRelease:

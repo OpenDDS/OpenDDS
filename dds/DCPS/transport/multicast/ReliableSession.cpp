@@ -259,7 +259,7 @@ ReliableSession::expire_naks()
 {
   if (this->nak_requests_.empty()) return; // nothing to expire
 
-  const MonotonicTimePoint deadline(-link_->config().nak_timeout_);
+  const MonotonicTimePoint deadline(MonotonicTimePoint::now() - link_->config().nak_timeout_);
   NakRequestMap::iterator first(this->nak_requests_.begin());
   NakRequestMap::iterator last(this->nak_requests_.upper_bound(deadline));
 
@@ -348,7 +348,7 @@ ReliableSession::send_naks()
   // Record low-water mark for this interval; this value will
   // be used to reset the low-water mark in the event the remote
   // peer becomes unresponsive:
-  const MonotonicTimePoint now;
+  const MonotonicTimePoint now = MonotonicTimePoint::now();
   if (this->nak_sequence_.low() > 1) {
     this->nak_requests_[now] = SequenceNumber();
   } else {

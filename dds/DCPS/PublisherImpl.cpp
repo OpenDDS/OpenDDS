@@ -45,7 +45,6 @@ PublisherImpl::PublisherImpl(DDS::InstanceHandle_t      handle,
   participant_(*participant),
   suspend_depth_count_(0),
   sequence_number_(),
-  aggregation_period_start_(MonotonicTimePoint::zero_value),
   reverse_pi_lock_(pi_lock_),
   monitor_(0),
   publisher_id_(id)
@@ -209,7 +208,7 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
 #endif
 
   // Unregister all registered instances prior to deletion.
-  dw_servant->unregister_instances(SystemTimePoint().to_dds_time());
+  dw_servant->unregister_instances(SystemTimePoint::now().to_dds_time());
 
   // Wait for any control messages to be transported during
   // unregistering of instances.

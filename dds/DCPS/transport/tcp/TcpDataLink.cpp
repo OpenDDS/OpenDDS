@@ -274,7 +274,7 @@ OpenDDS::DCPS::TcpDataLink::send_graceful_disconnect_message()
   //header_data.message_length_ = 0;
   //header_data.sequence_ = 0;
   //DDS::Time_t source_timestamp
-  //  = SystemTimePoint().to_dds_time();
+  //  = SystemTimePoint::now().to_dds_time();
   //header_data.source_timestamp_sec_ = source_timestamp.sec;
   //header_data.source_timestamp_nanosec_ = source_timestamp.nanosec;
   //header_data.coherency_group_ = 0;

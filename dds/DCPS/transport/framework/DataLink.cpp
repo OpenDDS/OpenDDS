@@ -42,7 +42,6 @@ namespace DCPS {
 DataLink::DataLink(TransportImpl& impl, Priority priority, bool is_loopback,
                    bool is_active)
   : stopped_(false),
-    scheduled_to_stop_at_(MonotonicTimePoint::zero_value),
     impl_(impl),
     transport_priority_(priority),
     scheduling_release_(false),
@@ -255,7 +254,7 @@ DataLink::invoke_on_start_callbacks(const RepoId& local, const RepoId& remote, b
 int
 DataLink::handle_exception(ACE_HANDLE /* fd */)
 {
-  const MonotonicTimePoint now;
+  const MonotonicTimePoint now = MonotonicTimePoint::now();
   if (scheduled_to_stop_at_.is_zero()) {
     if (DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG,
@@ -548,7 +547,7 @@ DataLink::schedule_delayed_release()
     this->send_strategy_->clear();
   }
 
-  const MonotonicTimePoint future_release_time(datalink_release_delay_);
+  const MonotonicTimePoint future_release_time(MonotonicTimePoint::now() + datalink_release_delay_);
   this->schedule_stop(future_release_time);
 }
 

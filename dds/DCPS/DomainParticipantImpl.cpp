@@ -89,11 +89,12 @@ namespace DCPS {
 //      cannot be false.
 
 // Implementation skeleton constructor
-DomainParticipantImpl::DomainParticipantImpl(DomainParticipantFactoryImpl *     factory,
-                                             const DDS::DomainId_t&             domain_id,
-                                             const DDS::DomainParticipantQos &  qos,
-                                             DDS::DomainParticipantListener_ptr a_listener,
-                                             const DDS::StatusMask &            mask)
+DomainParticipantImpl::DomainParticipantImpl(
+  DomainParticipantFactoryImpl* factory,
+  const DDS::DomainId_t& domain_id,
+  const DDS::DomainParticipantQos& qos,
+  DDS::DomainParticipantListener_ptr a_listener,
+  const DDS::StatusMask& mask)
   : factory_(factory),
     default_topic_qos_(TheServiceParticipant->initial_TopicQos()),
     default_publisher_qos_(TheServiceParticipant->initial_PublisherQos()),
@@ -111,8 +112,8 @@ DomainParticipantImpl::DomainParticipantImpl(DomainParticipantFactoryImpl *     
     shutdown_complete_(false),
     monitor_(0),
     pub_id_gen_(dp_id_),
-    automatic_liveliness_timer_ (*this),
-    participant_liveliness_timer_ (*this)
+    automatic_liveliness_timer_(*this),
+    participant_liveliness_timer_(*this)
 {
   (void) this->set_listener(a_listener, mask);
   monitor_ = TheServiceParticipant->monitor_factory_->create_dp_monitor(this);
@@ -621,10 +622,10 @@ DomainParticipantImpl::find_topic(
   const char* topic_name,
   const DDS::Duration_t& timeout)
 {
-  const MonotonicTimePoint timeout_at(timeout);
+  const MonotonicTimePoint timeout_at(MonotonicTimePoint::now() + TimeDuration(timeout));
 
   bool first_time = true;
-  while (first_time || MonotonicTimePoint() < timeout_at) {
+  while (first_time || MonotonicTimePoint::now() < timeout_at) {
     if (first_time) {
       first_time = false;
     }
@@ -654,7 +655,7 @@ DomainParticipantImpl::find_topic(
                                            qos.out(),
                                            topic_id);
 
-    const MonotonicTimePoint now;
+    const MonotonicTimePoint now = MonotonicTimePoint::now();
     if (status == FOUND) {
       OpenDDS::DCPS::TypeSupport_var type_support =
         Registered_Data_Types->lookup(this, type_name.in());
@@ -1415,7 +1416,7 @@ DomainParticipantImpl::get_default_topic_qos(
 DDS::ReturnCode_t
 DomainParticipantImpl::get_current_time(DDS::Time_t& current_time)
 {
-  current_time = SystemTimePoint().to_dds_time();
+  current_time = SystemTimePoint::now().to_dds_time();
   return DDS::RETCODE_OK;
 }
 
@@ -2209,7 +2210,7 @@ DomainParticipantImpl::LivelinessTimer::add_adjust(OpenDDS::DCPS::DataWriterImpl
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, this->lock_);
 
-  const MonotonicTimePoint now;
+  const MonotonicTimePoint now = MonotonicTimePoint::now();
 
   // Calculate the time remaining to liveliness check.
   const TimeDuration remaining = interval_ - (now - last_liveliness_check_);
@@ -2309,10 +2310,7 @@ DomainParticipantImpl::participant_liveliness_activity_after(const MonotonicTime
     return true;
   }
 
-  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
-                    tao_mon,
-                    this->publishers_protector_,
-                    !tv.is_zero());
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, tao_mon, this->publishers_protector_, !tv.is_zero());
 
   for (PublisherSet::iterator it(publishers_.begin());
        it != publishers_.end(); ++it) {

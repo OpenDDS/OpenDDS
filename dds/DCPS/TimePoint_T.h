@@ -37,7 +37,8 @@ public:
   const static TimePoint_T<AceClock> max_value;
 
   /**
-   * Takes the current time of the AceClock Type.
+   * Set to zero_value, which is equal to the epoch (the starting point) of the
+   * AceClock.
    */
   TimePoint_T();
 
@@ -56,13 +57,9 @@ public:
   ///@}
 
   /**
-   * Takes the current time of the AceClock Type and adds the time_from_now
-   * argument to it.
+   * Get a TimePoint representing the current time of the AceClock.
    */
-  ///@{
-  explicit TimePoint_T(const TimeDuration& time_from_now);
-  explicit TimePoint_T(const DDS::Duration_t& time_from_now);
-  ///@}
+  static TimePoint_T<AceClock> now();
 
   /**
    * Get and set the inner ACE_Time_Value based value. Use value() to pass this

@@ -2985,7 +2985,7 @@ Sedp::Writer::set_header_fields(DCPS::DataSampleHeader& dsh,
 
   dsh.sequence_ = sequence;
 
-  const SystemTimePoint now;
+  const SystemTimePoint now = SystemTimePoint::now();
   dsh.source_timestamp_sec_ = static_cast<ACE_INT32>(now.value().sec());
   dsh.source_timestamp_nanosec_ = now.value().usec() * 1000;
 }

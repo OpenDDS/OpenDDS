@@ -258,7 +258,7 @@ public:
   /**
    * Set Argument to Current System Time
    */
-  virtual DDS::ReturnCode_t get_current_time(DDS::Time_t & current_time);
+  virtual DDS::ReturnCode_t get_current_time(DDS::Time_t& current_time);
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
 

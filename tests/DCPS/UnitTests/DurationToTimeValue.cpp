@@ -40,7 +40,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   }
 
   {
-    const ACE_Time_Value now = SystemTimePoint().value();
+    const ACE_Time_Value now = SystemTimePoint::now().value();
     const ACE_Time_Value tv = duration_to_absolute_time_value(duration, now);
     // see value.
     //time_t sec = tv.sec ();

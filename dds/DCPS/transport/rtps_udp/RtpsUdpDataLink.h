@@ -498,7 +498,9 @@ private:
 
     TimedDelay(RtpsUdpDataLink* outer, PMF function,
                const TimeDuration& timeout)
-      : outer_(outer), function_(function), timeout_(timeout), scheduled_(MonotonicTimePoint::zero_value)
+      : outer_(outer)
+      , function_(function)
+      , timeout_(timeout)
     {}
 
     void schedule(const TimeDuration& timeout = TimeDuration::zero_value);
@@ -588,7 +590,6 @@ private:
       : localid(w)
       , address(a)
       , listener(l)
-      //, heartbeat_count(0)
       , status(DOES_NOT_EXIST)
     { }
   };

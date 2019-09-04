@@ -91,7 +91,7 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::execute(SubscriptionInstance_rch insta
       missed = true;
 
     } else if (timer_called) { // handle_timeout is called
-      missed = (MonotonicTimePoint() - instance->cur_sample_tv_) >= interval_;
+      missed = (MonotonicTimePoint::now() - instance->cur_sample_tv_) >= interval_;
 
     } else { // upon receiving sample.
       missed = (instance->cur_sample_tv_ - instance->last_sample_tv_) > interval_;

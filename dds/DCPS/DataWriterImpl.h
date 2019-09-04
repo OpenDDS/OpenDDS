@@ -97,8 +97,11 @@ public:
 
     AckToken(const DDS::Duration_t& max_wait,
              const SequenceNumber& sequence)
-      : max_wait_(max_wait),
-        sequence_(sequence) {}
+      : tstamp_(MonotonicTimePoint::now())
+      , max_wait_(max_wait)
+      ,  sequence_(sequence)
+    {
+    }
 
     ~AckToken() {}
 

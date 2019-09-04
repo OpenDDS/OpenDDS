@@ -65,7 +65,7 @@ void
 MessageTracker::wait_messages_pending(OPENDDS_STRING& caller_message)
 {
   const TimeDuration pending_timeout(TheServiceParticipant->pending_timeout());
-  const MonotonicTimePoint timeout_at(pending_timeout);
+  const MonotonicTimePoint timeout_at(MonotonicTimePoint::now() + pending_timeout);
   const ACE_Time_Value_T<MonotonicClock>* timeout_ptr = 0;
 
   if (!pending_timeout.is_zero()) {

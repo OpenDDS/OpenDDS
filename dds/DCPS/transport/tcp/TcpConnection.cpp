@@ -51,7 +51,6 @@ OpenDDS::DCPS::TcpConnection::TcpConnection()
   , tcp_config_(0)
   , passive_reconnect_timer_id_(-1)
   , reconnect_state_(INIT_STATE)
-  , last_reconnect_attempted_(MonotonicTimePoint::zero_value)
   , transport_priority_(0)  // TRANSPORT_PRIORITY.value default value - 0.
   , shutdown_(false)
   , passive_setup_(false)
@@ -75,7 +74,6 @@ OpenDDS::DCPS::TcpConnection::TcpConnection(const ACE_INET_Addr& remote_address,
   , tcp_config_(&config)
   , passive_reconnect_timer_id_(-1)
   , reconnect_state_(INIT_STATE)
-  , last_reconnect_attempted_(MonotonicTimePoint::zero_value)
   , transport_priority_(priority)
   , shutdown_(false)
   , passive_setup_(false)
@@ -686,7 +684,7 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
   // We need reset the state to INIT_STATE if we are previously reconnected.
   // This would allow re-establishing connection after the re-established
   // connection lost again.
-  if (MonotonicTimePoint() - last_reconnect_attempted_ > reconnect_delay
+  if (MonotonicTimePoint::now() - last_reconnect_attempted_ > reconnect_delay
       && this->reconnect_state_ == RECONNECTED_STATE) {
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
           "We are in RECONNECTED_STATE and now flip reconnect state to INIT_STATE.\n"));

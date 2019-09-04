@@ -37,7 +37,7 @@ typedef ACE_UINT16 CoherencyGroup;
   *        from typed datawriter. The data will be duplicated for the register,
   *        unregister and dispose control message.
   */
-struct OpenDDS_Dcps_Export PublicationInstance  : public RcObject {
+struct OpenDDS_Dcps_Export PublicationInstance : public RcObject {
 
   PublicationInstance(Message_Block_Ptr registered_sample)
     : sequence_(),
@@ -46,7 +46,8 @@ struct OpenDDS_Dcps_Export PublicationInstance  : public RcObject {
       unregistered_(false),
       instance_handle_(0),
       deadline_timer_id_(-1),
-      durable_samples_remaining_(0) {
+      durable_samples_remaining_(0)
+  {
   }
 
   ~PublicationInstance() {

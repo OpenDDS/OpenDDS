@@ -804,7 +804,7 @@ private:
       { }
       virtual void execute()
       {
-        timer_->check_liveliness_i(true, MonotonicTimePoint());
+        timer_->check_liveliness_i(true, MonotonicTimePoint::now());
       }
     };
 

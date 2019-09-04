@@ -56,9 +56,9 @@ WriterInfoListener::writer_removed(WriterInfo&)
 WriterInfo::WriterInfo(WriterInfoListener*         reader,
                        const PublicationId&        writer_id,
                        const ::DDS::DataWriterQos& writer_qos)
-  : historic_samples_timer_(NO_TIMER),
+  : last_liveliness_activity_time_(MonotonicTimePoint::now()),
+  historic_samples_timer_(NO_TIMER),
   remove_association_timer_(NO_TIMER),
-  removal_deadline_(MonotonicTimePoint::zero_value),
   last_historic_seq_(SequenceNumber::SEQUENCENUMBER_UNKNOWN()),
   waiting_for_end_historic_samples_(false),
   scheduled_for_removal_(false),
@@ -193,7 +193,7 @@ WriterInfo::active() const
   if (period.is_zero()) {
     return false;
   }
-  return (MonotonicTimePoint() - last_liveliness_activity_time_) <= period;
+  return (MonotonicTimePoint::now() - last_liveliness_activity_time_) <= period;
 }
 
 

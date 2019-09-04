@@ -51,7 +51,7 @@ public:
       ref_count_(1),
       mx_(mx)
   {
-    destination_timestamp_ = SystemTimePoint().to_dds_time();
+    destination_timestamp_ = SystemTimePoint::now().to_dds_time();
 
     source_timestamp_.sec = header.source_timestamp_sec_;
     source_timestamp_.nanosec = header.source_timestamp_nanosec_;

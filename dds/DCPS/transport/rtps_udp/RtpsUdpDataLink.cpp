@@ -938,7 +938,7 @@ RtpsUdpDataLink::RtpsWriter::end_historic_samples_i(const DataSampleHeader& head
   // Set the ReaderInfo::durable_timestamp_ for the case where no
   // durable samples exist in the DataWriter.
   if (durable_) {
-    const MonotonicTimePoint now;
+    const MonotonicTimePoint now = MonotonicTimePoint::now();
     RepoId sub = GUID_UNKNOWN;
     if (body && header.message_length_ >= sizeof(sub)) {
       std::memcpy(&sub, body->rd_ptr(), header.message_length_);
@@ -1232,7 +1232,7 @@ RtpsUdpDataLink::received(const RTPS::HeartBeatSubmessage& heartbeat,
   src.entityId = heartbeat.writerId;
 
   bool schedule_acknack = false;
-  const MonotonicTimePoint now;
+  const MonotonicTimePoint now = MonotonicTimePoint::now();
   OPENDDS_VECTOR(InterestingRemote) callbacks;
 
   {
@@ -2026,7 +2026,7 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
   std::memcpy(remote.guidPrefix, src_prefix, sizeof(GuidPrefix_t));
   remote.entityId = acknack.readerId;
 
-  const MonotonicTimePoint now;
+  const MonotonicTimePoint now = MonotonicTimePoint::now();
   OPENDDS_VECTOR(DiscoveryListener*) callbacks;
 
   {
@@ -2716,7 +2716,7 @@ RtpsUdpDataLink::send_heartbeats()
   OPENDDS_VECTOR(CallbackType) readerDoesNotExistCallbacks;
   OPENDDS_VECTOR(TransportQueueElement*) pendingCallbacks;
 
-  const MonotonicTimePoint now;
+  const MonotonicTimePoint now = MonotonicTimePoint::now();
   RtpsWriterMap writers;
 
   typedef OPENDDS_MAP_CMP(RepoId, RepoIdSet, GUID_tKeyLessThan) WtaMap;
@@ -2823,7 +2823,7 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
   MetaSubmessage meta_submessage(id_, GUID_UNKNOWN);
   meta_submessage.to_guids_ = additional_guids;
 
-  const MonotonicTimePoint now;
+  const MonotonicTimePoint now = MonotonicTimePoint::now();
   RtpsUdpInst& cfg = link->config();
 
   // Directed, non-final pre-association heartbeats
@@ -2924,7 +2924,7 @@ RtpsUdpDataLink::check_heartbeats()
   OPENDDS_VECTOR(CallbackType) writerDoesNotExistCallbacks;
 
   // Have any interesting writers timed out?
-  const MonotonicTimePoint tv(-10 * config().heartbeat_period_);
+  const MonotonicTimePoint tv(MonotonicTimePoint::now() - 10 * config().heartbeat_period_);
   {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
@@ -3011,7 +3011,7 @@ RtpsUdpDataLink::RtpsWriter::send_heartbeats_manual_i(MetaSubmessageVec& meta_su
 
   const bool has_data = !send_buff_.is_nil() && !send_buff_->empty();
   SequenceNumber durable_max;
-  const MonotonicTimePoint now;
+  const MonotonicTimePoint now = MonotonicTimePoint::now();
   for (ReaderInfoMap::const_iterator ri = remote_readers_.begin(), end = remote_readers_.end();
        ri != end;
        ++ri) {
@@ -3196,7 +3196,7 @@ void
 RtpsUdpDataLink::TimedDelay::schedule(const TimeDuration& timeout)
 {
   const TimeDuration& next_to = (!timeout.is_zero() && timeout < timeout_) ? timeout : timeout_;
-  const MonotonicTimePoint next_to_point(next_to);
+  const MonotonicTimePoint next_to_point(MonotonicTimePoint::now() + next_to);
 
   if (!scheduled_.is_zero() && (next_to_point < scheduled_)) {
     cancel();

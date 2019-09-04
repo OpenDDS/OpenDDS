@@ -154,7 +154,7 @@ void Checklist::generate_candidate_pairs()
     check_interval_ = endpoint_manager_->agent_impl->get_configuration().T_a();
     double s = static_cast<double>(frozen_.size());
     max_check_interval_ = endpoint_manager_->agent_impl->get_configuration().checklist_period() * (1.0 / s);
-    enqueue(MonotonicTimePoint());
+    enqueue(MonotonicTimePoint::now());
   }
 }
 
@@ -358,7 +358,7 @@ void Checklist::generate_triggered_check(const ACE_INET_Addr& local_address, con
   // This can move something from failed to in progress.
   // In that case, we need to schedule.
   check_interval_ = endpoint_manager_->agent_impl->get_configuration().T_a();
-  enqueue(MonotonicTimePoint());
+  enqueue(MonotonicTimePoint::now());
 }
 
 void Checklist::succeeded(const ConnectivityCheck& cc)
@@ -728,7 +728,7 @@ void Checklist::execute(const MonotonicTimePoint& a_now)
   }
 
   if (flag) {
-    enqueue(MonotonicTimePoint() + interval);
+    enqueue(MonotonicTimePoint::now() + interval);
   }
 
   // The checklist has failed.  Don't schedule.
@@ -753,7 +753,7 @@ void Checklist::remove_guid(const GuidPair& a_guid_pair)
 
     // Flush ourselves out of the task queue.
     // Schedule for now but it may be later.
-    enqueue(MonotonicTimePoint());
+    enqueue(MonotonicTimePoint::now());
   }
 }
 

@@ -757,7 +757,7 @@ DataReaderImpl::signal_liveliness(const RepoId& remote_participant)
     }
   }
 
-  const MonotonicTimePoint when;
+  const MonotonicTimePoint when = MonotonicTimePoint::now();
   for (WriterSet::iterator pos = writers.begin(), limit = writers.end();
        pos != limit;
        ++pos) {
@@ -1328,7 +1328,7 @@ DataReaderImpl::writer_activity(const DataSampleHeader& header)
   }
 
   if (!writer.is_nil()) {
-    writer->received_activity(MonotonicTimePoint());
+    writer->received_activity(MonotonicTimePoint::now());
 
     if ((header.message_id_ == SAMPLE_DATA) ||
         (header.message_id_ == INSTANCE_REGISTRATION) ||
@@ -2073,7 +2073,7 @@ DataReaderImpl::writer_removed(WriterInfo& info)
   }
 
   liveliness_changed_status_.last_publication_handle = info.handle_;
-  instances_liveliness_update(info, MonotonicTimePoint());
+  instances_liveliness_update(info, MonotonicTimePoint::now());
 
   if (liveliness_changed) {
     set_status_changed_flag(DDS::LIVELINESS_CHANGED_STATUS, true);
@@ -2283,7 +2283,7 @@ void DataReaderImpl::process_latency(const ReceivedDataSample& sample)
         sample.header_.source_timestamp_sec_,
         sample.header_.source_timestamp_nanosec_
       };
-      const TimeDuration latency = SystemTimePoint() - SystemTimePoint(timestamp);
+      const TimeDuration latency = SystemTimePoint::now() - SystemTimePoint(timestamp);
 
       if (this->statistics_enabled()) {
         location->second.add_stat(latency);
@@ -2563,7 +2563,7 @@ DataReaderImpl::lookup_instance_handles(const WriterIdSeq& ids,
 bool
 DataReaderImpl::filter_sample(const DataSampleHeader& header)
 {
-  const SystemTimePoint now;
+  const SystemTimePoint now = SystemTimePoint::now();
 
   // Expire historic data if QoS indicates VOLATILE.
   if (!always_get_history_ && header.historic_sample_
@@ -2688,7 +2688,7 @@ DataReaderImpl::time_based_filter_instance(
   const SubscriptionInstance_rch& instance,
   TimeDuration& filter_time_expired)
 {
-  const MonotonicTimePoint now;
+  const MonotonicTimePoint now = MonotonicTimePoint::now();
   const TimeDuration minimum_separation(qos_.time_based_filter.minimum_separation);
 
   // TIME_BASED_FILTER processing; expire data samples

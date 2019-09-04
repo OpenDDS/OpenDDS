@@ -350,7 +350,7 @@ namespace {
 void
 Spdp::handle_participant_data(DCPS::MessageId id, const ParticipantData_t& cpdata)
 {
-  const MonotonicTimePoint now;
+  const MonotonicTimePoint now = MonotonicTimePoint::now();
 
   // Make a (non-const) copy so we can tweak values below
   ParticipantData_t pdata(cpdata);
@@ -1150,7 +1150,8 @@ Spdp::remove_expired_participants()
   {
     DiscoveredParticipantIter part = participants_.find(*participant_id);
     if (part != participants_.end()) {
-      const MonotonicTimePoint expr(TimeDuration(-part->second.pdata_.leaseDuration.seconds));
+      const MonotonicTimePoint expr(MonotonicTimePoint::now() -
+        rtps_time_to_time_duration(part->second.pdata_.leaseDuration));
       if (part->second.last_seen_ < expr) {
         if (DCPS::DCPS_debug_level > 1) {
           DCPS::GuidConverter conv(part->first);
@@ -1336,7 +1337,8 @@ bool Spdp::announce_domain_participant_qos()
 }
 
 Spdp::SpdpTransport::SpdpTransport(Spdp* outer, bool securityGuids)
-  : outer_(outer), lease_duration_(outer_->disco_->resend_period() * LEASE_MULT)
+  : outer_(outer)
+  , lease_duration_(outer_->disco_->resend_period() * LEASE_MULT)
   , buff_(64 * 1024)
   , wbuff_(64 * 1024)
 {

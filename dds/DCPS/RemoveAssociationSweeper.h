@@ -106,7 +106,8 @@ void RemoveAssociationSweeper<T>::schedule_timer(OpenDDS::DCPS::RcHandle<OpenDDS
 {
   info->scheduled_for_removal_ = true;
   info->notify_lost_ = callback;
-  info->removal_deadline_ = MonotonicTimePoint(std::min(info->activity_wait_period(), TimeDuration(10)));
+  info->removal_deadline_ = MonotonicTimePoint(MonotonicTimePoint::now() +
+    std::min(info->activity_wait_period(), TimeDuration(10)));
   execute_or_enqueue(new ScheduleCommand(this, info));
 }
 
@@ -186,7 +187,7 @@ void RemoveAssociationSweeper<T>::ScheduleCommand::execute()
   this->info_->remove_association_timer_ =
     this->sweeper_->reactor()->schedule_timer(
       this->sweeper_, arg,
-      (this->info_->removal_deadline_ - MonotonicTimePoint()).value());
+      (this->info_->removal_deadline_ - MonotonicTimePoint::now()).value());
   if (DCPS_debug_level) {
     ACE_DEBUG((LM_INFO,
       ACE_TEXT("(%P|%t) RemoveAssociationSweeper::ScheduleCommand::execute() - ")

@@ -46,7 +46,7 @@ public:
     TimeDuration timeout_in = next_timeout();
 
     if (!timeout_in.is_zero()) {
-      const MonotonicTimePoint timeout_at(timeout_in);
+      const MonotonicTimePoint timeout_at(MonotonicTimePoint::now() + timeout_in);
       if (now > timeout_at) {
         on_timeout(arg);
         {

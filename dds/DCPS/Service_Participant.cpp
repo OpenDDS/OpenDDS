@@ -1040,14 +1040,13 @@ Service_Participant::repository_lost(Discovery::RepoKey key)
 
   // Calculate the bounding end time for attempts.
   const TimeDuration td(federation_recovery_duration());
-  const MonotonicTimePoint recoveryFailedTime(td);
+  const MonotonicTimePoint recoveryFailedTime(MonotonicTimePoint::now() + td);
 
   // Backoff delay.
   int backoff = this->federation_initial_backoff_seconds();
 
   // Keep trying until the total recovery time specified is exceeded.
-  const MonotonicTimePoint now;
-  while (recoveryFailedTime > now) {
+  while (recoveryFailedTime > MonotonicTimePoint::now()) {
 
     // Wrap to the beginning at the end of the list.
     if (current == this->discoveryMap_.end()) {

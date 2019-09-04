@@ -50,7 +50,7 @@ resend_data_expired(const DataSampleElement& element,
       element.get_header().source_timestamp_nanosec_ + lifespan.duration.nanosec
     };
     const SystemTimePoint expiration_time(time_to_time_value(tmp));
-    const SystemTimePoint now;
+    const SystemTimePoint now = SystemTimePoint::now();
 
     if (now >= expiration_time) {
       if (DCPS_debug_level >= 8) {
@@ -1036,7 +1036,7 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
   DDS::ReturnCode_t ret = DDS::RETCODE_OK;
 
   bool need_to_set_abs_timeout = true;
-  MonotonicTimePoint abs_timeout(MonotonicTimePoint::zero_value);
+  MonotonicTimePoint abs_timeout;
 
   //max_num_samples_ covers ResourceLimitsQosPolicy max_samples and
   //max_instances and max_instances * depth
@@ -1060,10 +1060,10 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
       }
       // Reliable writers can wait
       if (need_to_set_abs_timeout) {
-        abs_timeout = MonotonicTimePoint(max_blocking_time_);
+        abs_timeout = MonotonicTimePoint(MonotonicTimePoint::now() + TimeDuration(max_blocking_time_));
         need_to_set_abs_timeout = false;
       }
-      if (!shutdown_ && MonotonicTimePoint() < abs_timeout) {
+      if (!shutdown_ && MonotonicTimePoint::now() < abs_timeout) {
         if (DCPS_debug_level >= 2) {
           ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::obtain_buffer")
                                 ACE_TEXT(" instance %d waiting for samples to be released by transport\n"),
@@ -1369,7 +1369,7 @@ void
 WriteDataContainer::wait_pending()
 {
   const TimeDuration pending_timeout(TheServiceParticipant->pending_timeout());
-  const MonotonicTimePoint timeout_at(pending_timeout);
+  const MonotonicTimePoint timeout_at(MonotonicTimePoint::now() + pending_timeout);
   const ACE_Time_Value_T<MonotonicClock>* timeout_ptr = 0;
 
   if (!pending_timeout.is_zero()) {
@@ -1431,7 +1431,7 @@ WriteDataContainer::wait_ack_of_seq(const MonotonicTimePoint& abs_deadline, cons
   DDS::ReturnCode_t ret = DDS::RETCODE_OK;
   ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->wfa_lock_, DDS::RETCODE_ERROR);
 
-  while (MonotonicTimePoint() < deadline) {
+  while (MonotonicTimePoint::now() < deadline) {
 
     if (!sequence_acknowledged(sequence)) {
       // lock is released while waiting and acquired before returning

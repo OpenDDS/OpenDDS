@@ -74,7 +74,6 @@ DataWriterImpl::DataWriterImpl()
     liveliness_lost_(false),
     reactor_(0),
     liveliness_check_interval_(TimeDuration::max_value),
-    last_liveliness_activity_time_(MonotonicTimePoint::zero_value),
     last_deadline_missed_total_count_(0),
     watchdog_(),
     is_bit_(false),
@@ -576,7 +575,7 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
       Message_Block_Ptr end_historic_samples(
         create_control_message(
           END_HISTORIC_SAMPLES, header, move(data),
-          SystemTimePoint().to_dds_time()));
+          SystemTimePoint::now().to_dds_time()));
 
       this->controlTracker.message_sent();
       guard.release();
@@ -1011,7 +1010,7 @@ DataWriterImpl::send_request_ack()
       REQUEST_ACK,
       element->get_header(),
       move(blk),
-      SystemTimePoint().to_dds_time()));
+      SystemTimePoint::now().to_dds_time()));
   element->set_sample(move(sample));
 
   ret = this->data_container_->enqueue_control(element);
@@ -1147,7 +1146,7 @@ DataWriterImpl::assert_liveliness()
     }
     break;
   case DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS:
-    if (send_liveliness(MonotonicTimePoint()) == false) {
+    if (send_liveliness(MonotonicTimePoint::now()) == false) {
       return DDS::RETCODE_ERROR;
     }
     break;
@@ -2296,7 +2295,7 @@ DataWriterImpl::end_coherent_changes(const GroupCoherentSamples& group_samples)
   Message_Block_Ptr control(
     create_control_message(
       END_COHERENT_CHANGES, header, move(data),
-      SystemTimePoint().to_dds_time()));
+      SystemTimePoint::now().to_dds_time()));
 
   this->coherent_ = false;
   this->coherent_samples_ = 0;
@@ -2433,7 +2432,7 @@ DataWriterImpl::send_liveliness(const MonotonicTimePoint& now)
     Message_Block_Ptr liveliness_msg(
       create_control_message(
         DATAWRITER_LIVELINESS, header, move(empty),
-        SystemTimePoint().to_dds_time()));
+        SystemTimePoint::now().to_dds_time()));
 
     if (this->send_control(header, move(liveliness_msg)) == SEND_CONTROL_ERROR) {
       ACE_ERROR_RETURN((LM_ERROR,

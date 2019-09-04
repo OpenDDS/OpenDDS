@@ -876,7 +876,7 @@ void populate_header_received(const FACE::CONNECTION_ID_TYPE& connection_id,
   header.message_instance_guid = create_message_instance_guid(pub, sinfo.opendds_reserved_publication_seq);
 
   header.message_timestamp = convertTime(sinfo.source_timestamp);
-  const OpenDDS::DCPS::SystemTimePoint now;
+  const OpenDDS::DCPS::SystemTimePoint now = OpenDDS::DCPS::SystemTimePoint::now();
 
   readers[connection_id]->sum_recvd_msgs_latency += (convertTime(now.to_dds_time()) - header.message_timestamp);
   ++readers[connection_id]->total_msgs_recvd;

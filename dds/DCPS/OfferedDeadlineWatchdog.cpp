@@ -79,7 +79,7 @@ OpenDDS::DCPS::OfferedDeadlineWatchdog::execute(
       missed = true;
 
     } else if (timer_called) { // handle_timeout is called
-      missed = MonotonicTimePoint() - instance->cur_sample_tv_ >= interval_;
+      missed = MonotonicTimePoint::now() - instance->cur_sample_tv_ >= interval_;
 
     } else if (!instance->last_sample_tv_.is_zero()) { // upon writing sample.
       missed = instance->cur_sample_tv_ - instance->last_sample_tv_ > interval_;
