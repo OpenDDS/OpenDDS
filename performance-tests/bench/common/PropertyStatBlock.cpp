@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <iomanip>
+#include <string>
 #include <sstream>
 
 namespace Bench {
@@ -18,6 +19,45 @@ SimpleStatBlock::SimpleStatBlock()
  , median_(0.0)
  , median_absolute_deviation_(0.0)
 {
+}
+
+namespace {
+char my_toupper(char ch)
+{
+    return static_cast<char>(std::toupper(static_cast<unsigned char>(ch)));
+}
+}
+
+void SimpleStatBlock::pretty_print(std::ostream& os, const std::string& name, const std::string& indent, size_t indent_level)
+{
+  std::string i1, i2;
+  for (size_t i = 0; i < indent_level; ++i) {
+    i1 += indent;
+  }
+  i2 = i1 + indent;
+
+  std::string uname = name;
+  for (size_t i = 0; i < uname.size(); ++i) {
+    if (i == 0 || uname[i - 1] == ' ') {
+      uname[i] = my_toupper(uname[i]);
+    }
+  }
+
+  os << i1 << uname << " Statitics:" << std::endl;
+  const size_t my_w = sample_count_ ? (median_sample_overflow_ ? 10 : 7) : 5;
+  os << i2 << name << std::setw(my_w) << " count" << " = " << sample_count_ << std::endl;
+  if (sample_count_) {
+    os << i2 << name << std::setw(my_w) << " min" << " = " << std::fixed << std::setprecision(6) << min_ << std::endl;
+    os << i2 << name << std::setw(my_w) << " max" << " = " << std::fixed << std::setprecision(6) << max_ << std::endl;
+    os << i2 << name << std::setw(my_w) << " mean" << " = " << std::fixed << std::setprecision(6) << mean_ << std::endl;
+    const double stdev = sample_count_ ? std::sqrt(var_x_sample_count_ / static_cast<double>(sample_count_)) : 0.0;
+    os << i2 << name << std::setw(my_w) << " stdev" << " = " << std::fixed << std::setprecision(6) << stdev << std::endl;
+    os << i2 << name << std::setw(my_w) << " median" << " = " << std::fixed << std::setprecision(6) << median_ << std::endl;
+    os << i2 << name << std::setw(my_w) << " madev" << " = " << std::fixed << std::setprecision(6) << median_absolute_deviation_ << std::endl;
+    if (median_sample_overflow_) {
+      os << i2 << name << std::setw(my_w) << " overflow" << " = " << median_sample_overflow_ << std::endl;
+    }
+  }
 }
 
 SimpleStatBlock consolidate(const SimpleStatBlock& sb1, const SimpleStatBlock& sb2)

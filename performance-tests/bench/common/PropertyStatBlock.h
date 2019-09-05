@@ -22,6 +22,8 @@ struct Bench_Common_Export SimpleStatBlock {
   size_t median_sample_overflow_;
   double median_;
   double median_absolute_deviation_;
+
+  void pretty_print(std::ostream& os, const std::string& prefix, const std::string& indentation = "  ", size_t indentation_level = 0);
 };
 
 Bench_Common_Export SimpleStatBlock consolidate(const SimpleStatBlock& sb1, const SimpleStatBlock& sb2);

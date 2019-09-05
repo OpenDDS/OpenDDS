@@ -231,21 +231,42 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
   }
 
+  using Builder::ZERO;
+
+  Builder::TimeStamp max_construction_time = ZERO;
+  Builder::TimeStamp max_enable_time = ZERO;
+  Builder::TimeStamp max_start_time = ZERO;
+  Builder::TimeStamp max_stop_time = ZERO;
+  Builder::TimeStamp max_destruction_time = ZERO;
+
+  size_t total_undermatched_readers = 0;
+  size_t total_undermatched_writers = 0;
+  Builder::TimeStamp max_discovery_time_delta = ZERO;
+
   Bench::SimpleStatBlock consolidated_latency_stats;
   Bench::SimpleStatBlock consolidated_jitter_stats;
   Bench::SimpleStatBlock consolidated_round_trip_latency_stats;
   Bench::SimpleStatBlock consolidated_round_trip_jitter_stats;
 
-  Bench::WorkerReport consolidated_report;
   for (size_t r = 0; r < parsed_reports.size(); ++r) {
-    Builder::ProcessReport& process_report = parsed_reports[r].process_report;
-    std::cout << "I've got a parsed report " << r << std::endl;
+
+    const Bench::WorkerReport& worker_report = parsed_reports[r];
+
+    max_construction_time = std::max(max_construction_time, worker_report.construction_time);
+    max_enable_time = std::max(max_enable_time, worker_report.enable_time);
+    max_start_time = std::max(max_start_time, worker_report.start_time);
+    max_stop_time = std::max(max_stop_time, worker_report.stop_time);
+    max_destruction_time = std::max(max_destruction_time, worker_report.destruction_time);
+
+    total_undermatched_readers += worker_report.undermatched_readers;
+    total_undermatched_writers += worker_report.undermatched_writers;
+    max_discovery_time_delta = std::max(max_discovery_time_delta, worker_report.max_discovery_time_delta);
+
+    const Builder::ProcessReport& process_report = worker_report.process_report;
+
     for (CORBA::ULong i = 0; i < process_report.participants.length(); ++i) {
-      std::cout << " - I've got a parsed participant " << i << std::endl;
       for (CORBA::ULong j = 0; j < process_report.participants[i].subscribers.length(); ++j) {
-        std::cout << "   - I've got a parsed subscriber " << j << std::endl;
         for (CORBA::ULong k = 0; k < process_report.participants[i].subscribers[j].datareaders.length(); ++k) {
-          std::cout << "     - I've got a parsed datareader " << k << std::endl;
 
           const Builder::DataReaderReport& dr_report = process_report.participants[i].subscribers[j].datareaders[k];
 
@@ -253,9 +274,6 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
           Bench::ConstPropertyStatBlock dr_jitter(dr_report.properties, "jitter");
           Bench::ConstPropertyStatBlock dr_round_trip_latency(dr_report.properties, "round_trip_latency");
           Bench::ConstPropertyStatBlock dr_round_trip_jitter(dr_report.properties, "round_trip_jitter");
-
-          std::cout << "       - datareader latency sample count = " << dr_latency.to_simple_stat_block().sample_count_ << std::endl;
-          std::cout << "       - mean datareader latency = " << dr_latency.to_simple_stat_block().mean_ << std::endl;
 
           consolidated_latency_stats = consolidate(consolidated_latency_stats, dr_latency.to_simple_stat_block());
           consolidated_jitter_stats = consolidate(consolidated_jitter_stats, dr_jitter.to_simple_stat_block());
@@ -266,8 +284,36 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
   }
 
-  std::cout << "consolidated datareader latency sample count = " << consolidated_latency_stats.sample_count_ << std::endl;
-  std::cout << "consolidated mean datareader latency = " << consolidated_latency_stats.mean_ << std::endl;
+  std::cout << std::endl;
+
+  std::cout << "Test Timing Stats:" << std::endl;
+  std::cout << "  Max Construction Time: " << max_construction_time << " seconds" << std::endl;
+  std::cout << "  Max Enable Time: " << max_enable_time << " seconds" << std::endl;
+  std::cout << "  Max Start Time: " << max_start_time << " seconds" << std::endl;
+  std::cout << "  Max Stop Time: " << max_stop_time << " seconds" << std::endl;
+  std::cout << "  Max Destruction Time: " << max_destruction_time << " seconds" << std::endl;
+
+  std::cout << std::endl;
+
+  std::cout << "Discovery Stats:" << std::endl;
+  std::cout << "  Total Undermatched Readers: " << total_undermatched_readers << ", Total Undermatched Writers: " << total_undermatched_writers << std::endl;
+  std::cout << "  Max Discovery Time Delta: " << max_discovery_time_delta << " seconds" << std::endl;
+
+  std::cout << std::endl;
+
+  consolidated_latency_stats.pretty_print(std::cout, "latency");
+
+  std::cout << std::endl;
+
+  consolidated_jitter_stats.pretty_print(std::cout, "jitter");
+
+  std::cout << std::endl;
+
+  consolidated_round_trip_latency_stats.pretty_print(std::cout, "round trip latency");
+
+  std::cout << std::endl;
+
+  consolidated_round_trip_jitter_stats.pretty_print(std::cout, "round trip jitter");
 
   // Clean up OpenDDS
   participant->delete_contained_entities();
