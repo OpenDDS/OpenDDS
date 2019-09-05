@@ -123,10 +123,11 @@ ReturnCode_t WaitSet::wait(ConditionSeq& active_conditions,
   }
 
   const TimeDuration deadline(timeout);
-  const MonotonicTimePoint timeout_at(MonotonicTimePoint::now() + deadline);
+  MonotonicTimePoint timeout_at;
   const ACE_Time_Value_T<MonotonicClock>* timeout_ptr = 0;
 
   if (timeout.sec != DURATION_INFINITE_SEC || timeout.nanosec != DURATION_INFINITE_NSEC) {
+    timeout_at = MonotonicTimePoint::now() + deadline;
     timeout_ptr = &timeout_at.value();
   }
 

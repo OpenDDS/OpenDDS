@@ -1369,10 +1369,11 @@ void
 WriteDataContainer::wait_pending()
 {
   const TimeDuration pending_timeout(TheServiceParticipant->pending_timeout());
-  const MonotonicTimePoint timeout_at(MonotonicTimePoint::now() + pending_timeout);
+  MonotonicTimePoint timeout_at;
   const ACE_Time_Value_T<MonotonicClock>* timeout_ptr = 0;
 
   if (!pending_timeout.is_zero()) {
+    timeout_at = MonotonicTimePoint::now() + pending_timeout;
     timeout_ptr = &timeout_at.value();
   }
 
@@ -1380,20 +1381,15 @@ WriteDataContainer::wait_pending()
   const bool report = DCPS_debug_level > 0 && pending_data();
   if (report) {
     if (pending_timeout.is_zero()) {
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("%T (%P|%t) WriteDataContainer::wait_pending no timeout\n")));
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::wait_pending no timeout\n")));
     } else {
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("%T (%P|%t) WriteDataContainer::wait_pending timeout ")
-                 ACE_TEXT("at %#T\n"),
-                 &pending_timeout));
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::wait_pending ")
+        ACE_TEXT("timeout at %#T\n"),
+        &pending_timeout.value()));
     }
   }
-  while (true) {
 
-    if (!pending_data())
-      break;
-
+  while (pending_data()) {
     if (empty_condition_.wait(timeout_ptr) == -1 && pending_data()) {
       if (DCPS_debug_level) {
         ACE_DEBUG((LM_INFO,
@@ -1405,8 +1401,7 @@ WriteDataContainer::wait_pending()
     }
   }
   if (report) {
-    ACE_DEBUG((LM_DEBUG,
-               "%T (%P|%t) WriteDataContainer::wait_pending done\n"));
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::wait_pending done\n")));
   }
 }
 

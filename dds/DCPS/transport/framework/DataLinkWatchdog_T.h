@@ -46,7 +46,7 @@ public:
     TimeDuration timeout_in = next_timeout();
 
     if (!timeout_in.is_zero()) {
-      const MonotonicTimePoint timeout_at(MonotonicTimePoint::now() + timeout_in);
+      const MonotonicTimePoint timeout_at(epoch_ + timeout_in);
       if (now > timeout_at) {
         on_timeout(arg);
         {
@@ -127,6 +127,7 @@ private:
 
   long timer_id_;
 
+  MonotonicTimePoint epoch_;
   bool cancelled_;
 
   bool schedule_i(const void* arg, bool nodelay) {
@@ -135,6 +136,10 @@ private:
     TimeDuration delay;
     if (!nodelay) {
       delay = next_interval();
+    }
+
+    if (epoch_.is_zero()) {
+      epoch_.set_to_now();
     }
 
     long timer_id = -1;
