@@ -75,7 +75,7 @@ void ReactorInterceptor::process_command_queue()
 int ReactorInterceptor::handle_exception_i(ACE_Guard<ACE_Thread_Mutex>&)
 {
   process_command_queue();
-  condition_.signal();
+  condition_.broadcast();
   return 0;
 }
 
