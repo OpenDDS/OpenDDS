@@ -24,12 +24,14 @@ namespace OpenDDS {
     // conversion factor from nanoseconds to NTP fractional (2^-32) seconds
     const double NANOS_TO_RTPS_FRACS = 4.294967296;
 
+#ifndef OPENDDS_SAFETY_PROFILE
     inline
     bool
     operator==(const Time_t& x, const Time_t& y)
     {
       return x.seconds == y.seconds && x.fraction == y.fraction;
     }
+#endif
 
     using OpenDDS::DCPS::TimeDuration;
     inline

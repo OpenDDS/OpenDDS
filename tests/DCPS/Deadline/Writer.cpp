@@ -148,7 +148,7 @@ bool Writer::wait_for_start()
   GuardType guard(this->lock_);
 
   if (!associated_) {
-    const MonotonicTimePoint abs(MonotonincTimePoint::now() + TimeDuration(10));
+    const MonotonicTimePoint abs(MonotonicTimePoint::now() + TimeDuration(10));
     if (condition_.wait(&abs.value()) == -1) {
       return false;
     }
