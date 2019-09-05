@@ -1011,14 +1011,13 @@ bool CryptoBuiltInImpl::authtag(const KeyMaterial& master, Session& sess,
 }
 
 namespace {
-  // Precondition: the bytes of 'plaintext' are a valid RTPS Message
-  // Returns the index of the final Submessage in the RTPS Message, or 0 if this can't be determined.
+  // Precondition: the bytes of 'plaintext' are a sequence of RTPS Submessages
+  // Returns the index of the final Submessage in the sequence, or 0 if this can't be determined.
   unsigned int findLastSubmessage(const DDS::OctetSeq& plaintext)
   {
     ACE_Message_Block mb_in(to_mb(plaintext.get_buffer()), plaintext.length());
     mb_in.wr_ptr(mb_in.size());
     Serializer ser_in(&mb_in);
-    ser_in.skip(RTPS::RTPSHDR_SZ);
     while (ser_in.available_r() >= RTPS::SMHDR_SZ) {
       const unsigned int sm_start = static_cast<unsigned int>(mb_in.rd_ptr() - mb_in.base());
 
@@ -1305,6 +1304,7 @@ bool CryptoBuiltInImpl::encode_rtps_message(
 
   // The input with its RTPS Header changed to an InfoSrc submessage acts as plaintext for encrypt/authenticate
   DDS::OctetSeq transformed(plain_rtps_message.length() + RTPS::SMHDR_SZ);
+  transformed.length(transformed.maximum());
   transformed[0] = RTPS::INFO_SRC;
   transformed[1] = 0; // flags: big-endian
   transformed[2] = 0; // high byte of octetsToNextHeader
@@ -1327,8 +1327,8 @@ bool CryptoBuiltInImpl::encode_rtps_message(
   } else if (authenticates(key)) {
     // the original message's last submsg may have octetsToNextHeader = 0 which
     // isn't valid when appending SEC_POSTFIX, patch in the actual submsg length
-    const unsigned int offsetFinal = findLastSubmessage(plain_rtps_message);
-    if (offsetFinal && setOctetsToNextHeader(out, plain_rtps_message, offsetFinal)) {
+    const unsigned int offsetFinal = findLastSubmessage(transformed);
+    if (offsetFinal && setOctetsToNextHeader(out, transformed, offsetFinal)) {
       pOut = &out;
     }
     ok = authtag(key, sessions_[sKey], *pOut, cryptoHdr, cryptoFooter, ex);

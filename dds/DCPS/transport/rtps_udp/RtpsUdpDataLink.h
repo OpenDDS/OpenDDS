@@ -255,7 +255,7 @@ private:
 
   typedef OPENDDS_MAP_CMP(RepoId, ReaderInfo, GUID_tKeyLessThan) ReaderInfoMap;
 
-  class  RtpsWriter : public RcObject {
+  class RtpsWriter : public RcObject {
   protected:
     ReaderInfoMap remote_readers_;
     RcHandle<SingleSendBuffer> send_buff_;
@@ -663,6 +663,9 @@ private:
 
   typedef OPENDDS_MAP_CMP(RepoId, DDS::Security::NativeCryptoHandle,
                           GUID_tKeyLessThan)::const_iterator PeerHandlesCIter;
+
+  static bool separate_message(EntityId_t entity);
+  const ACE_INET_Addr placeholder_address_;
 #endif
 
   void accumulate_addresses(const RepoId& local, const RepoId& remote, AddrSet& addresses) const;

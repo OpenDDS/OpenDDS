@@ -102,7 +102,8 @@ private:
                                 char* submessage_start, CORBA::Octet msgId);
 
   ACE_Message_Block* encode_submessages(const ACE_Message_Block* plain,
-                                        DDS::Security::CryptoTransform* crypto);
+                                        DDS::Security::CryptoTransform* crypto,
+                                        bool& stateless_or_volatile);
 
   ACE_Message_Block* encode_rtps_message(const ACE_Message_Block* plain,
                                          DDS::Security::CryptoTransform* crypto);

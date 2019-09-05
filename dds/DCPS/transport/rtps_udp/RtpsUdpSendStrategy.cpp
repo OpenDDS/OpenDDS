@@ -21,6 +21,10 @@
 
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
 
+#ifdef OPENDDS_SECURITY
+#include "dds/DCPS/RTPS/SecurityHelpers.h"
+#endif
+
 #include <cstring>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -350,9 +354,10 @@ RtpsUdpSendStrategy::pre_send_packet(const ACE_Message_Block* plain)
     return plain->duplicate();
   }
 
-  Message_Block_Ptr submessages(encode_submessages(plain, crypto));
+  bool stateless_or_volatile = false;
+  Message_Block_Ptr submessages(encode_submessages(plain, crypto, stateless_or_volatile));
 
-  if (!submessages || link_->local_crypto_handle() == DDS::HANDLE_NIL) {
+  if (!submessages || stateless_or_volatile || link_->local_crypto_handle() == DDS::HANDLE_NIL) {
     return submessages.release();
   }
 
@@ -422,6 +427,13 @@ namespace {
                  "[%d.%d]: %C\n", msgId, sender, ex.code, ex.minor_code,
                  ex.message.in()));
     }
+  }
+
+  void check_stateless_volatile(EntityId_t writerId, bool& stateless_or_volatile)
+  {
+    stateless_or_volatile |=
+      writerId == RTPS::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER ||
+      writerId == RTPS::ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER;
   }
 }
 
@@ -511,7 +523,9 @@ RtpsUdpSendStrategy::encode_reader_submessage(const RepoId& receiver,
 }
 
 ACE_Message_Block*
-RtpsUdpSendStrategy::encode_submessages(const ACE_Message_Block* plain, DDS::Security::CryptoTransform* crypto)
+RtpsUdpSendStrategy::encode_submessages(const ACE_Message_Block* plain,
+                                        DDS::Security::CryptoTransform* crypto,
+                                        bool& stateless_or_volatile)
 {
   // 'plain' contains a full RTPS Message on its way to the socket(s).
   // Let the crypto plugin examine each submessage and replace it with an
@@ -592,6 +606,7 @@ RtpsUdpSendStrategy::encode_submessages(const ACE_Message_Block* plain, DDS::Sec
         break;
       }
 
+      check_stateless_volatile(sender.entityId, stateless_or_volatile);
       DDS::OctetSeq plainSm(toSeq(ser, msgId, flags, octetsToNextHeader, u2,
                                   receiver.entityId, sender.entityId, remaining));
       read = octetsToNextHeader;
@@ -612,6 +627,7 @@ RtpsUdpSendStrategy::encode_submessages(const ACE_Message_Block* plain, DDS::Sec
         break;
       }
 
+      check_stateless_volatile(receiver.entityId, stateless_or_volatile);
       DDS::OctetSeq plainSm(toSeq(ser, msgId, flags, octetsToNextHeader, 0,
                                   sender.entityId, receiver.entityId, remaining));
       read = octetsToNextHeader;
