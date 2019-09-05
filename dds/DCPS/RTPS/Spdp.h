@@ -97,7 +97,9 @@ public:
   void handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg);
 #endif
 
-  void handle_participant_data(DCPS::MessageId id, const ParticipantData_t& pdata);
+  void handle_participant_data(DCPS::MessageId id, const ParticipantData_t& pdata, const SequenceNumber_t seq);
+
+  bool validateSequenceNumber(const DCPS::SequenceNumber& seq, DiscoveredParticipantIter& iter);
 
 #ifdef OPENDDS_SECURITY
   void check_auth_states(const ACE_Time_Value& tv);

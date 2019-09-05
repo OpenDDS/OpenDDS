@@ -63,6 +63,7 @@ private:
   pid_t pid_;
   ACE_Thread_Mutex counter_lock_;
   ACE_UINT16 counter_;
+  ACE_UINT16 init_counter_;
   OPENDDS_STRING interface_name_;
 };
 

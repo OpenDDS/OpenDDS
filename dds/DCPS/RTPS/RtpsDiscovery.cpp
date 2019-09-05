@@ -53,6 +53,7 @@ RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
   , default_multicast_group_("239.255.0.1") /*RTPS v2.1 9.6.1.4.1*/
   , use_ice_(false)
   , max_spdp_timer_period_(0, 10000)
+  , max_spdp_sequence_msg_reset_check_(3)
   , max_auth_time_(300, 0)
   , auth_resend_period_(1, 0)
 {
@@ -391,20 +392,38 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
                               string_value.c_str(), rtps_name.c_str()), -1);
           }
 #endif /* OPENDDS_SECURITY */
-        } else if (name == "MaxSpdpTimerPeriod") {
-          // In milliseconds.
-          const OPENDDS_STRING& string_value = it->second;
-          int int_value;
-          if (DCPS::convertToInteger(string_value, int_value)) {
-            discovery->max_spdp_timer_period(ACE_Time_Value(0, int_value * 1000));
-          } else {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-                              ACE_TEXT("Invalid entry (%C) for MaxSpdpTimerPeriod in ")
-                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
-                              string_value.c_str(), rtps_name.c_str()), -1);
-          }
-        }  else {
+		}
+		else if (name == "MaxSpdpTimerPeriod") {
+			// In milliseconds.
+			const OPENDDS_STRING& string_value = it->second;
+			int int_value;
+			if (DCPS::convertToInteger(string_value, int_value)) {
+				discovery->max_spdp_timer_period(ACE_Time_Value(0, int_value * 1000));
+			}
+			else {
+				ACE_ERROR_RETURN((LM_ERROR,
+					ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+					ACE_TEXT("Invalid entry (%C) for MaxSpdpTimerPeriod in ")
+					ACE_TEXT("[rtps_discovery/%C] section.\n"),
+					string_value.c_str(), rtps_name.c_str()), -1);
+			}
+		}
+		else if (name == "MaxSpdpSequenceMsgResetChecks"){
+
+			const OPENDDS_STRING& string_value = it->second;
+			u_short value;
+			if (DCPS::convertToInteger(string_value, value)) {
+				discovery->max_spdp_sequence_msg_reset_check(value);
+			}
+			else {
+				ACE_ERROR_RETURN((LM_ERROR,
+					ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+					ACE_TEXT("Invalid entry (%C) for MaxSpdpSequenceMsgResetChecks in ")
+					ACE_TEXT("[rtps_discovery/%C] section.\n"),
+					string_value.c_str(), rtps_name.c_str()), -1);
+			}
+        }  
+		else {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
                             ACE_TEXT("Unexpected entry (%C) in [rtps_discovery/%C] section.\n"),

@@ -99,7 +99,7 @@ public:
 
   u_short dx() const { return dx_; }
   void dx(u_short offset_two) {
-    dx_ = offset_two;
+	  dx_ = offset_two;
   }
 
   unsigned char ttl() const { return ttl_; }
@@ -170,9 +170,15 @@ public:
   const ACE_Time_Value& auth_resend_period() const { return auth_resend_period_; }
   void auth_resend_period(const ACE_Time_Value& x) { auth_resend_period_ = x; }
 
+  u_short max_spdp_sequence_msg_reset_check() const { return max_spdp_sequence_msg_reset_check_; }
+  void max_spdp_sequence_msg_reset_check(u_short reset_value) {
+	  max_spdp_sequence_msg_reset_check_ = reset_value;
+  }
+
 private:
   ACE_Time_Value resend_period_;
   u_short pb_, dg_, pg_, d0_, d1_, dx_;
+  u_short max_spdp_sequence_msg_reset_check_;
   unsigned char ttl_;
   bool sedp_multicast_;
   OPENDDS_STRING multicast_interface_, sedp_local_address_, spdp_local_address_;

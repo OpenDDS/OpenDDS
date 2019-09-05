@@ -16,10 +16,15 @@
 #include "ace/OS_NS_netdb.h"
 #include "ace/OS_NS_sys_socket.h"
 #include "ace/OS_NS_sys_time.h"
+#include "ace/Log_Msg.h"
 
 #include "ace/os_include/net/os_if.h"
 
 #include <cstring>
+
+#ifdef ACE_HAS_CPP11
+#include <random>
+#endif
 
 #ifdef ACE_LINUX
 # include <sys/types.h>
@@ -55,6 +60,22 @@ GuidGenerator::GuidGenerator()
     unsigned seed = static_cast<unsigned>(ACE_OS::gettimeofday().usec());
     pid_ = static_cast<pid_t>(ACE_OS::rand_r(&seed));
   }
+
+#ifdef ACE_HAS_CPP11
+
+    std::mt19937::result_type counter_seed = static_cast<unsigned>(ACE_OS::gettimeofday().usec());
+    std::mt19937 generator(counter_seed);
+    std::uniform_int_distribution<ACE_UINT16> distribution(0, 65535);
+
+    init_counter_ = distribution(generator);	
+
+#else
+	unsigned counter_seed = static_cast<unsigned>(ACE_OS::gettimeofday().usec());
+	init_counter_ = static_cast<ACE_UINT16>(ACE_OS::rand_r(&counter_seed));
+
+#endif
+
+  counter_ = init_counter_;
 
   ACE_OS::macaddr_node_t macaddress;
   const int result = ACE_OS::getmacaddress(&macaddress);

@@ -344,169 +344,242 @@ namespace {
 }
 
 void
-Spdp::handle_participant_data(DCPS::MessageId id, const ParticipantData_t& cpdata)
+Spdp::handle_participant_data(DCPS::MessageId id, const ParticipantData_t& cpdata, const SequenceNumber_t seq)
 {
-  const ACE_Time_Value now = ACE_OS::gettimeofday();
+	const ACE_Time_Value now = ACE_OS::gettimeofday();
 
-  // Make a (non-const) copy so we can tweak values below
-  ParticipantData_t pdata(cpdata);
+	// Make a (non-const) copy so we can tweak values below
+	ParticipantData_t pdata(cpdata);
 
-  const DCPS::RepoId guid = make_guid(pdata.participantProxy.guidPrefix, DCPS::ENTITYID_PARTICIPANT);
+	DCPS::SequenceNumber currentSeq;
+	currentSeq.setValue(seq.high, seq.low);
 
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  if (sedp_.ignoring(guid)) {
-    // Ignore, this is our domain participant or one that the user has
-    // asked us to ignore.
-    return;
-  }
+	const DCPS::RepoId guid = make_guid(pdata.participantProxy.guidPrefix, DCPS::ENTITYID_PARTICIPANT);
 
-  // Find the participant - iterator valid only as long as we hold the lock
-  DiscoveredParticipantIter iter = participants_.find(guid);
+	ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+	if (sedp_.ignoring(guid)) {
+		// Ignore, this is our domain participant or one that the user has
+		// asked us to ignore.
+		return;
+	}
 
-  if (iter == participants_.end()) {
+	// Find the participant - iterator valid only as long as we hold the lock
+	DiscoveredParticipantIter iter = participants_.find(guid);
 
-    // Trying to delete something that doesn't exist is a NOOP
-    if (id == DCPS::DISPOSE_INSTANCE || id == DCPS::DISPOSE_UNREGISTER_INSTANCE) {
-      return;
-    }
+	if (iter == participants_.end()) {
 
-    // copy guid prefix (octet[12]) into BIT key (long[3])
-    std::memcpy(partBitData(pdata).key.value,
-                pdata.participantProxy.guidPrefix,
-                sizeof(DDS::BuiltinTopicKey_t));
+		// Trying to delete something that doesn't exist is a NOOP
+		if (id == DCPS::DISPOSE_INSTANCE || id == DCPS::DISPOSE_UNREGISTER_INSTANCE) {
+			return;
+		}
 
-    if (DCPS::DCPS_debug_level) {
-      DCPS::GuidConverter local(guid_), remote(guid);
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Spdp::data_received - %C discovered %C lease %ds\n"),
-        OPENDDS_STRING(local).c_str(), OPENDDS_STRING(remote).c_str(),
-        pdata.leaseDuration.seconds));
-    }
+		// copy guid prefix (octet[12]) into BIT key (long[3])
+		std::memcpy(partBitData(pdata).key.value,
+			pdata.participantProxy.guidPrefix,
+			sizeof(DDS::BuiltinTopicKey_t));
 
-    // add a new participant
-    participants_[guid] = DiscoveredParticipant(pdata, now);
-    DiscoveredParticipant& dp = participants_[guid];
+		if (DCPS::DCPS_debug_level) {
+			DCPS::GuidConverter local(guid_), remote(guid);
+			ACE_DEBUG((LM_DEBUG,
+				ACE_TEXT("(%P|%t) Spdp::data_received - %C discovered %C lease %ds\n"),
+				OPENDDS_STRING(local).c_str(), OPENDDS_STRING(remote).c_str(),
+				pdata.leaseDuration.seconds));
+		}
+
+		// add a new participant
+		participants_[guid] = DiscoveredParticipant(pdata, now);
+		DiscoveredParticipant& dp = participants_[guid];
+
+		// initialize sequence number validation variables for new participant
+		dp.last_seq_.setValue(currentSeq.getValue());
+		dp.seqResetCandidate_.setValue(0);
+		dp.SeqResetChkCount_ = 0;
 
 #ifdef OPENDDS_SECURITY
-    if (is_security_enabled()) {
-      // Associate the stateless reader / writer for handshakes & auth requests
-      sedp_.associate_preauth(dp.pdata_);
+		if (is_security_enabled()) {
+			// Associate the stateless reader / writer for handshakes & auth requests
+			sedp_.associate_preauth(dp.pdata_);
 
-      // If we've gotten auth requests for this (previously undiscovered) participant, pull in the tokens now
-      PendingRemoteAuthTokenMap::iterator token_iter = pending_remote_auth_tokens_.find(guid);
-      if (token_iter != pending_remote_auth_tokens_.end()) {
-        dp.remote_auth_request_token_ = token_iter->second;
-        pending_remote_auth_tokens_.erase(token_iter);
-      }
-    }
+			// If we've gotten auth requests for this (previously undiscovered) participant, pull in the tokens now
+			PendingRemoteAuthTokenMap::iterator token_iter = pending_remote_auth_tokens_.find(guid);
+			if (token_iter != pending_remote_auth_tokens_.end()) {
+				dp.remote_auth_request_token_ = token_iter->second;
+				pending_remote_auth_tokens_.erase(token_iter);
+			}
+		}
 #endif
 
-    // Since we've just seen a new participant, let's send out our
-    // own announcement, so they don't have to wait.
-    this->tport_->write_i();
+		// Since we've just seen a new participant, let's send out our
+		// own announcement, so they don't have to wait.
+		this->tport_->write_i();
 
 #ifdef OPENDDS_SECURITY
-    if (is_security_enabled()) {
-      bool has_security_data = dp.pdata_.dataKind == Security::DPDK_ENHANCED ||
-                               dp.pdata_.dataKind == Security::DPDK_SECURE;
+		if (is_security_enabled()) {
+			bool has_security_data = dp.pdata_.dataKind == Security::DPDK_ENHANCED ||
+				dp.pdata_.dataKind == Security::DPDK_SECURE;
 
-      if (has_security_data == false) {
-        if (participant_sec_attr_.allow_unauthenticated_participants == false) {
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Spdp::data_received - ")
-            ACE_TEXT("Incompatible security attributes in discovered participant: %C\n"),
-            std::string(DCPS::GuidConverter(guid)).c_str()));
-            participants_.erase(guid);
-        } else { // allow_unauthenticated_participants == true
-          dp.auth_state_ = DCPS::AS_UNAUTHENTICATED;
-          match_unauthenticated(guid, dp);
-        }
-      } else { // has_security_data == true
-        dp.identity_token_ = pdata.ddsParticipantDataSecure.base.identity_token;
-        dp.permissions_token_ = pdata.ddsParticipantDataSecure.base.permissions_token;
-        dp.property_qos_ = pdata.ddsParticipantDataSecure.base.property;
-        dp.security_info_ = pdata.ddsParticipantDataSecure.base.security_info;
+			if (has_security_data == false) {
+				if (participant_sec_attr_.allow_unauthenticated_participants == false) {
+					ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Spdp::data_received - ")
+						ACE_TEXT("Incompatible security attributes in discovered participant: %C\n"),
+						std::string(DCPS::GuidConverter(guid)).c_str()));
+					participants_.erase(guid);
+				}
+				else { // allow_unauthenticated_participants == true
+					dp.auth_state_ = DCPS::AS_UNAUTHENTICATED;
+					match_unauthenticated(guid, dp);
+				}
+			}
+			else { // has_security_data == true
+				dp.identity_token_ = pdata.ddsParticipantDataSecure.base.identity_token;
+				dp.permissions_token_ = pdata.ddsParticipantDataSecure.base.permissions_token;
+				dp.property_qos_ = pdata.ddsParticipantDataSecure.base.property;
+				dp.security_info_ = pdata.ddsParticipantDataSecure.base.security_info;
 
-        attempt_authentication(guid, dp);
-        if (dp.auth_state_ == DCPS::AS_UNAUTHENTICATED) {
-          if (participant_sec_attr_.allow_unauthenticated_participants == false) {
-            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Spdp::data_received - ")
-              ACE_TEXT("Incompatible security attributes in discovered participant: %C\n"),
-              std::string(DCPS::GuidConverter(guid)).c_str()));
-            participants_.erase(guid);
-          } else { // allow_unauthenticated_participants == true
-            dp.auth_state_ = DCPS::AS_UNAUTHENTICATED;
-            match_unauthenticated(guid, dp);
-          }
-        } else if (dp.auth_state_ == DCPS::AS_AUTHENTICATED) {
-          if (match_authenticated(guid, dp) == false) {
-            participants_.erase(guid);
-          }
-        }
-        // otherwise just return, since we're waiting for input to finish authentication
-      }
-    } else {
+				attempt_authentication(guid, dp);
+				if (dp.auth_state_ == DCPS::AS_UNAUTHENTICATED) {
+					if (participant_sec_attr_.allow_unauthenticated_participants == false) {
+						ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Spdp::data_received - ")
+							ACE_TEXT("Incompatible security attributes in discovered participant: %C\n"),
+							std::string(DCPS::GuidConverter(guid)).c_str()));
+						participants_.erase(guid);
+					}
+					else { // allow_unauthenticated_participants == true
+						dp.auth_state_ = DCPS::AS_UNAUTHENTICATED;
+						match_unauthenticated(guid, dp);
+					}
+				}
+				else if (dp.auth_state_ == DCPS::AS_AUTHENTICATED) {
+					if (match_authenticated(guid, dp) == false) {
+						participants_.erase(guid);
+					}
+				}
+				// otherwise just return, since we're waiting for input to finish authentication
+			}
+		}
+		else {
 
-      dp.auth_state_ = DCPS::AS_UNAUTHENTICATED;
-      match_unauthenticated(guid, dp);
+			dp.auth_state_ = DCPS::AS_UNAUTHENTICATED;
+			match_unauthenticated(guid, dp);
 
-    }
+		}
 #else
-    match_unauthenticated(guid, dp);
+		match_unauthenticated(guid, dp);
 #endif
 
-  } else { // Existing Participant
+	}
+	else { // Existing Participant
 
 #ifdef OPENDDS_SECURITY
-    // Non-secure updates for authenticated participants are used for liveliness but
-    // are otherwise ignored. Non-secure dispose messages are ignored completely.
-    if (iter->second.auth_state_ == DCPS::AS_AUTHENTICATED &&
-        pdata.dataKind != Security::DPDK_SECURE &&
-        id != DCPS::DISPOSE_INSTANCE &&
-        id != DCPS::DISPOSE_UNREGISTER_INSTANCE)
-    {
-      iter->second.last_seen_ = now;
-      return;
-    }
+	// Non-secure updates for authenticated participants are used for liveliness but
+	// are otherwise ignored. Non-secure dispose messages are ignored completely.
+		if (iter->second.auth_state_ == DCPS::AS_AUTHENTICATED &&
+			pdata.dataKind != Security::DPDK_SECURE &&
+			id != DCPS::DISPOSE_INSTANCE &&
+			id != DCPS::DISPOSE_UNREGISTER_INSTANCE)
+		{
+			iter->second.last_seen_ = now;
+			return;
+		}
 #endif
 
-    if (id == DCPS::DISPOSE_INSTANCE || id == DCPS::DISPOSE_UNREGISTER_INSTANCE) {
-      ICE::Endpoint* endpoint = sedp_.get_ice_endpoint();
-      if (endpoint) {
-        stop_ice(endpoint, iter->first, iter->second.pdata_.participantProxy.availableBuiltinEndpoints);
-      }
-      remove_discovered_participant(iter);
-      return;
-    }
+		if (id == DCPS::DISPOSE_INSTANCE || id == DCPS::DISPOSE_UNREGISTER_INSTANCE) {
+			ICE::Endpoint* endpoint = sedp_.get_ice_endpoint();
+			if (endpoint) {
+				stop_ice(endpoint, iter->first, iter->second.pdata_.participantProxy.availableBuiltinEndpoints);
+			}
+			remove_discovered_participant(iter);
+			return;
+		}
 
-    // Must unlock when calling into part_bit() as it may call back into us
-    ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
+		// Checks if sequence numbers are increasing
 
-    // update an existing participant
-    DDS::ParticipantBuiltinTopicData& pdataBit = partBitData(pdata);
-    DDS::ParticipantBuiltinTopicData& discoveredBit = partBitData(iter->second.pdata_);
-    pdataBit.key = discoveredBit.key;
+		bool ValidSeq;
+
+		// Check if subroutne call is from Sedp Security
+
+		if (currentSeq.getValue() != 0)
+		{
+			ValidSeq = validateSequenceNumber(currentSeq, iter);
+		}
+		else
+		{
+			ValidSeq = true;
+		}
+
+		if (ValidSeq)
+		{
+
+			// Must unlock when calling into part_bit() as it may call back into us
+			ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
+
+			// update an existing participant
+			DDS::ParticipantBuiltinTopicData& pdataBit = partBitData(pdata);
+			DDS::ParticipantBuiltinTopicData& discoveredBit = partBitData(iter->second.pdata_);
+			pdataBit.key = discoveredBit.key;
 #ifndef OPENDDS_SAFETY_PROFILE
-    using DCPS::operator!=;
+			using DCPS::operator!=;
 #endif
-    if (discoveredBit.user_data != pdataBit.user_data) {
-      discoveredBit.user_data = pdataBit.user_data;
+			if (discoveredBit.user_data != pdataBit.user_data) {
+				discoveredBit.user_data = pdataBit.user_data;
 #ifndef DDS_HAS_MINIMUM_BIT
-      DCPS::ParticipantBuiltinTopicDataDataReaderImpl* bit = part_bit();
-      if (bit) {
-        ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
-        bit->store_synthetic_data(pdataBit, DDS::NOT_NEW_VIEW_STATE);
-      }
+				DCPS::ParticipantBuiltinTopicDataDataReaderImpl* bit = part_bit();
+				if (bit) {
+					ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
+					bit->store_synthetic_data(pdataBit, DDS::NOT_NEW_VIEW_STATE);
+				}
 #endif /* DDS_HAS_MINIMUM_BIT */
-      // Perform search again, so iterator becomes valid
-      iter = participants_.find(guid);
-    }
-    // Participant may have been removed while lock released
-    if (iter != participants_.end()) {
-      iter->second.pdata_ = pdata;
-      iter->second.last_seen_ = now;
-    }
-  }
+				// Perform search again, so iterator becomes valid
+				iter = participants_.find(guid);
+			}
+			// Participant may have been removed while lock released
+			if (iter != participants_.end()) {
+				iter->second.pdata_ = pdata;
+				iter->second.last_seen_ = now;
+				iter->second.last_seq_.setValue(currentSeq.getValue());
+			}
+
+		}
+		else
+		{
+			if (iter->second.SeqResetChkCount_ >= this->disco_->max_spdp_sequence_msg_reset_check())
+			{
+				remove_discovered_participant(iter);
+			}
+		}
+
+	}
+
 }
+bool
+Spdp::validateSequenceNumber(const DCPS::SequenceNumber& seq, DiscoveredParticipantIter& iter)
+{
+	if ((iter->second.last_seq_.getHigh() == ACE_INT32_MAX) &&
+		(iter->second.last_seq_.getLow() == ACE_UINT32_MAX))
+	{
+		return true;
+	}
+	else
+	{
+		if (seq.getValue() < iter->second.last_seq_.getValue())
+		{
+			iter->second.SeqResetChkCount_++;
+			iter->second.seqResetCandidate_.setValue(seq.getValue());	
+
+			return false;
+		}
+		else
+		{
+			if (iter->second.SeqResetChkCount_ > 0)
+			{
+				iter->second.SeqResetChkCount_--;
+			}
+			return true;
+		}
+
+	}	
+
+ }
 
 void
 Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
@@ -528,8 +601,8 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
   }
 
   DCPS::MessageId msg_id = (data.inlineQos.length() && disposed(data.inlineQos)) ? DCPS::DISPOSE_INSTANCE : DCPS::SAMPLE_DATA;
-
-  handle_participant_data(msg_id, pdata);
+  
+  handle_participant_data(msg_id, pdata, data.writerSN);
 
   ICE::Endpoint* endpoint = sedp_.get_ice_endpoint();
   if (!endpoint) {
