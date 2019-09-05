@@ -11,6 +11,7 @@
 #include "WriterInfo.h"
 #include "Time_Helper.h"
 #include "Service_Participant.h"
+#include "TimeTypes.h"
 
 #include "ace/OS_NS_sys_time.h"
 
@@ -59,7 +60,7 @@ WriterInfoListener::writer_removed(WriterInfo& )
 WriterInfo::WriterInfo(WriterInfoListener*         reader,
                        const PublicationId&        writer_id,
                        const ::DDS::DataWriterQos& writer_qos)
-  : last_liveliness_activity_time_(ACE_OS::gettimeofday()),
+  : last_liveliness_activity_time_(monotonic_time()),
   historic_samples_timer_(NO_TIMER),
   remove_association_timer_(NO_TIMER),
   removal_deadline_(ACE_Time_Value::zero),
@@ -198,7 +199,7 @@ WriterInfo::active() const
   if (activity_wait_period == ACE_Time_Value::zero) {
     return false;
   }
-  return (ACE_OS::gettimeofday() - last_liveliness_activity_time_) <= activity_wait_period;
+  return (monotonic_time() - last_liveliness_activity_time_) <= activity_wait_period;
 }
 
 

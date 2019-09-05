@@ -764,7 +764,7 @@ DataReaderImpl::signal_liveliness(const RepoId& remote_participant)
     }
   }
 
-  ACE_Time_Value when = ACE_OS::gettimeofday();
+  ACE_Time_Value when = monotonic_time();
   for (WriterSet::iterator pos = writers.begin(), limit = writers.end();
        pos != limit;
        ++pos) {
@@ -1334,7 +1334,7 @@ DataReaderImpl::writer_activity(const DataSampleHeader& header)
   }
 
   if (!writer.is_nil()) {
-    ACE_Time_Value when = ACE_OS::gettimeofday();
+    ACE_Time_Value when = monotonic_time();
     writer->received_activity(when);
 
     if ((header.message_id_ == SAMPLE_DATA) ||
@@ -2089,7 +2089,7 @@ DataReaderImpl::writer_removed(WriterInfo& info)
   }
 
   liveliness_changed_status_.last_publication_handle = info.handle_;
-  instances_liveliness_update(info, ACE_OS::gettimeofday());
+  instances_liveliness_update(info, monotonic_time());
 
   if (liveliness_changed) {
     set_status_changed_flag(DDS::LIVELINESS_CHANGED_STATUS, true);
@@ -2711,7 +2711,7 @@ DataReaderImpl::ownership_filter_instance(const SubscriptionInstance_rch& instan
 bool
 DataReaderImpl::time_based_filter_instance(const SubscriptionInstance_rch& instance, ACE_Time_Value& filter_time_expired)
 {
-  ACE_Time_Value now(ACE_OS::gettimeofday());
+  ACE_Time_Value now(monotonic_time());
 
   // TIME_BASED_FILTER processing; expire data samples
   // if minimum separation is not met for instance.
@@ -3322,7 +3322,7 @@ void DataReaderImpl::accept_sample_processing(const SubscriptionInstance_rch& in
 
   if (instance && watchdog_.in()) {
     instance->last_sample_tv_ = instance->cur_sample_tv_;
-    instance->cur_sample_tv_ = ACE_OS::gettimeofday();
+    instance->cur_sample_tv_ = monotonic_time();
 
     // Watchdog can't be called with sample_lock_ due to reactor deadlock
     ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);

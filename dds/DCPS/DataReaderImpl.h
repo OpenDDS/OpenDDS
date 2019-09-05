@@ -804,7 +804,7 @@ private:
       { }
       virtual void execute()
       {
-        timer_->check_liveliness_i(true, ACE_OS::gettimeofday());
+        timer_->check_liveliness_i(true, monotonic_time());
       }
     };
 

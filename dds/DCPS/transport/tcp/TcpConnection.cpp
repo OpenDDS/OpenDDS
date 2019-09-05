@@ -688,7 +688,7 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
   // We need reset the state to INIT_STATE if we are previously reconnected.
   // This would allow re-establishing connection after the re-established
   // connection lost again.
-  if (ACE_OS::gettimeofday() - this->last_reconnect_attempted_ > reconnect_delay
+  if (monotonic_time() - this->last_reconnect_attempted_ > reconnect_delay
       && this->reconnect_state_ == RECONNECTED_STATE) {
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
           "We are in RECONNECTED_STATE and now flip reconnect state to INIT_STATE.\n"));
@@ -771,7 +771,7 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
       send_strategy->resume_send();
     }
 
-    this->last_reconnect_attempted_ = ACE_OS::gettimeofday();
+    this->last_reconnect_attempted_ = monotonic_time();
   }
 
   return this->reconnect_state_ == LOST_STATE ? -1 : 0;

@@ -36,6 +36,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace RTPS {
 using DCPS::RepoId;
+using DCPS::monotonic_time;
 
 namespace {
   // Multiplier for resend period -> lease duration conversion,
@@ -339,7 +340,7 @@ namespace {
 void
 Spdp::handle_participant_data(DCPS::MessageId id, const ParticipantData_t& cpdata)
 {
-  const ACE_Time_Value now = ACE_OS::gettimeofday();
+  const ACE_Time_Value now = monotonic_time();
 
   // Make a (non-const) copy so we can tweak values below
   ParticipantData_t pdata(cpdata);
@@ -551,8 +552,6 @@ Spdp::handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg)
     return;
   }
 
-  const ACE_Time_Value time = ACE_OS::gettimeofday();
-
   RepoId guid = msg.message_identity.source_guid;
   guid.entityId = DCPS::ENTITYID_PARTICIPANT;
 
@@ -680,7 +679,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
         return;
       }
       dp.has_last_stateless_msg_ = true;
-      dp.last_stateless_msg_time_ = ACE_OS::gettimeofday();
+      dp.last_stateless_msg_time_ = monotonic_time();
       dp.last_stateless_msg_ = reply;
       dp.auth_state_ = DCPS::AS_HANDSHAKE_REPLY_SENT;
       return;
@@ -733,7 +732,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
         return;
       }
       dp.has_last_stateless_msg_ = true;
-      dp.last_stateless_msg_time_ = ACE_OS::gettimeofday();
+      dp.last_stateless_msg_time_ = monotonic_time();
       dp.last_stateless_msg_ = reply;
       // cache the outbound message, but don't change state, since roles shouldn't have changed?
     } else if (vr == DDS::Security::VALIDATION_OK_FINAL_MESSAGE) {
@@ -942,7 +941,7 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
   DDS::Security::SecurityException se = {"", 0, 0};
 
   if (dp.auth_state_ == DCPS::AS_UNKNOWN) {
-    dp.auth_started_time_ = ACE_OS::gettimeofday();
+    dp.auth_started_time_ = monotonic_time();
     dp.auth_state_ = DCPS::AS_VALIDATING_REMOTE;
   }
 
@@ -1079,7 +1078,7 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
       return;
     }
     dp.has_last_stateless_msg_ = true;
-    dp.last_stateless_msg_time_ = ACE_OS::gettimeofday();
+    dp.last_stateless_msg_time_ = monotonic_time();
     dp.last_stateless_msg_ = msg;
     dp.auth_state_ = DCPS::AS_HANDSHAKE_REQUEST_SENT;
   }
@@ -1104,7 +1103,7 @@ Spdp::remove_expired_participants()
     DiscoveredParticipantIter part = participants_.find(*participant_id);
     if (part != participants_.end()) {
       if (part->second.last_seen_ <
-          ACE_OS::gettimeofday() -
+          monotonic_time() -
           ACE_Time_Value(part->second.pdata_.leaseDuration.seconds)) {
         if (DCPS::DCPS_debug_level > 1) {
           DCPS::GuidConverter conv(part->first);

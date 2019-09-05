@@ -96,9 +96,9 @@ WriteDataContainer::WriteDataContainer(
     max_num_samples_(max_total_samples),
     max_blocking_time_(max_blocking_time),
     waiting_on_release_(false),
-    condition_(lock_),
-    empty_condition_(lock_),
-    wfa_condition_(this->wfa_lock_),
+    condition_(lock_, condition_time_),
+    empty_condition_(lock_, condition_time_),
+    wfa_condition_(this->wfa_lock_, condition_time_),
     n_chunks_(n_chunks),
     sample_list_element_allocator_(2 * n_chunks_),
     shutdown_(false),
@@ -193,7 +193,7 @@ WriteDataContainer::enqueue(
 
   if (this->writer_->watchdog_.in()) {
     instance->last_sample_tv_ = instance->cur_sample_tv_;
-    instance->cur_sample_tv_ = ACE_OS::gettimeofday();
+    instance->cur_sample_tv_ = monotonic_time();
     this->writer_->watchdog_->execute(*this->writer_, instance, false);
   }
 
@@ -1037,7 +1037,7 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
   DDS::ReturnCode_t ret = DDS::RETCODE_OK;
 
   bool need_to_set_abs_timeout = true;
-  ACE_Time_Value abs_timeout;
+  ACE_Time_Value_T<MonotonicClock> abs_timeout;
 
   //max_num_samples_ covers ResourceLimitsQosPolicy max_samples and
   //max_instances and max_instances * depth
@@ -1061,10 +1061,10 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
       }
       // Reliable writers can wait
       if (need_to_set_abs_timeout) {
-        abs_timeout = duration_to_absolute_time_value (max_blocking_time_);
+        abs_timeout = duration_to_absolute_time_value(max_blocking_time_, monotonic_time());
         need_to_set_abs_timeout = false;
       }
-      if (!shutdown_ && ACE_OS::gettimeofday() < abs_timeout) {
+      if (!shutdown_ && monotonic_time() < abs_timeout) {
         if (DCPS_debug_level >= 2) {
           ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::obtain_buffer")
                                 ACE_TEXT(" instance %d waiting for samples to be released by transport\n"),
@@ -1369,14 +1369,11 @@ void WriteDataContainer::reschedule_deadline()
 void
 WriteDataContainer::wait_pending()
 {
-  ACE_Time_Value pending_timeout =
-    TheServiceParticipant->pending_timeout();
-
-  ACE_Time_Value* pTimeout = 0;
-
+  ACE_Time_Value_T<MonotonicClock> pending_timeout(TheServiceParticipant->pending_timeout());
+  ACE_Time_Value_T<MonotonicClock>* pTimeout = 0;
   if (pending_timeout != ACE_Time_Value::zero) {
     pTimeout = &pending_timeout;
-    pending_timeout += ACE_OS::gettimeofday();
+    pending_timeout += monotonic_time();
   }
 
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
@@ -1430,11 +1427,11 @@ WriteDataContainer::get_instance_handles(InstanceHandleVec& instance_handles)
 DDS::ReturnCode_t
 WriteDataContainer::wait_ack_of_seq(const ACE_Time_Value& abs_deadline, const SequenceNumber& sequence)
 {
-  ACE_Time_Value deadline(abs_deadline);
+  ACE_Time_Value_T<MonotonicClock> deadline(abs_deadline);
   DDS::ReturnCode_t ret = DDS::RETCODE_OK;
   ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->wfa_lock_, DDS::RETCODE_ERROR);
 
-  while (ACE_OS::gettimeofday() < deadline) {
+  while (monotonic_time() < deadline) {
 
     if (!sequence_acknowledged(sequence)) {
       // lock is released while waiting and acquired before returning

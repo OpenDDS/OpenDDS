@@ -17,6 +17,7 @@
 #include "PoolAllocator.h"
 #include "PoolAllocationBase.h"
 #include "Message_Block_Ptr.h"
+#include "TimeTypes.h"
 
 #include "ace/Synch_Traits.h"
 #include "ace/Condition_T.h"
@@ -473,6 +474,8 @@ private:
 
   /// The block waiting flag.
   bool                            waiting_on_release_;
+
+  ConditionTime condition_time_;
 
   /// This lock is used to protect the container and the map
   /// in the type-specific DataWriter.
