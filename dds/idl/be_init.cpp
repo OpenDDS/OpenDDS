@@ -10,6 +10,7 @@
 #include "tao/Version.h"
 #include "global_extern.h"
 #include "be_extern.h"
+#include "be_util.h"
 #include "drv_extern.h"
 
 #include "ace/OS_NS_stdlib.h"
@@ -28,6 +29,7 @@ int
 BE_init(int&, ACE_TCHAR*[])
 {
   ACE_NEW_RETURN(be_global, BE_GlobalData, -1);
+  idl_global->default_idl_version_ = IDL_VERSION_4;
   return 0;
 }
 
@@ -45,15 +47,17 @@ BE_post_init(char*[], long)
   DRV_cpp_putarg("-D__OPENDDS_IDL_HAS_FIXED");
 #endif
 
-  const char* env = ACE_OS::getenv("DDS_ROOT");
-  if (env && env[0]) {
-    std::string dds_root = env;
-    if (dds_root.find(' ') != std::string::npos && dds_root[0] != '"') {
-      dds_root.insert(dds_root.begin(), '"');
-      dds_root.insert(dds_root.end(), '"');
-    }
-    be_global->add_inc_path(dds_root.c_str());
-    ACE_CString included;
-    DRV_add_include_path(included, dds_root.c_str(), 0, true);
+  std::string include_dds = be_util::dds_root();
+  if (include_dds.find(' ') != std::string::npos && include_dds[0] != '"') {
+    include_dds.insert(include_dds.begin(), '"');
+    include_dds.insert(include_dds.end(), '"');
+  }
+  be_global->add_inc_path(include_dds.c_str());
+  ACE_CString included;
+  DRV_add_include_path(included, include_dds.c_str(), 0, true);
+
+  if (idl_global->idl_version_ >= IDL_VERSION_4) {
+    DRV_cpp_putarg("-D__OPENDDS_IDL_HAS_ANNOTATIONS");
+    be_global->builtin_annotations_.register_all();
   }
 }

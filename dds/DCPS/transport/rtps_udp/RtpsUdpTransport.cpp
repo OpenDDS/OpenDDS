@@ -97,13 +97,17 @@ RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
 TransportImpl::AcceptConnectResult
 RtpsUdpTransport::connect_datalink(const RemoteTransport& remote,
                                    const ConnectionAttribs& attribs,
-                                   const TransportClient_rch& client )
+                                   const TransportClient_rch& client)
 {
-  GuardThreadType guard_links(this->links_lock_);
+  if (is_shut_down_) {
+    return AcceptConnectResult();
+  }
 
-  if (link_.is_nil()) {
-    link_ =  make_datalink(attribs.local_id_.guidPrefix);
-    if (link_.is_nil()) {
+  GuardThreadType guard_links(links_lock_);
+
+  if (!link_) {
+    link_ = make_datalink(attribs.local_id_.guidPrefix);
+    if (!link_) {
       return AcceptConnectResult();
     }
   }
@@ -124,11 +128,7 @@ RtpsUdpTransport::connect_datalink(const RemoteTransport& remote,
     return AcceptConnectResult(link);
   }
 
-  if (!link->add_on_start_callback(client, remote.repo_id_)) {
-     // link was started by the reactor thread before we could add a callback
-     VDBG_LVL((LM_DEBUG, "(%P|%t) RtpsUdpTransport::connect_datalink got link.\n"), 2);
-     return AcceptConnectResult(link);
-  }
+  link->add_on_start_callback(client, remote.repo_id_);
 
   GuardType guard(connections_lock_);
   add_pending_connection(client, link);
@@ -139,12 +139,17 @@ RtpsUdpTransport::connect_datalink(const RemoteTransport& remote,
 TransportImpl::AcceptConnectResult
 RtpsUdpTransport::accept_datalink(const RemoteTransport& remote,
                                   const ConnectionAttribs& attribs,
-                                  const TransportClient_rch& )
+                                  const TransportClient_rch&)
 {
-  GuardThreadType guard_links(this->links_lock_);
-  if (link_.is_nil()) {
-    link_=  make_datalink(attribs.local_id_.guidPrefix);
-    if (link_.is_nil()) {
+  GuardThreadType guard_links(links_lock_);
+
+  if (is_shut_down_) {
+    return AcceptConnectResult();
+  }
+
+  if (!link_) {
+    link_ = make_datalink(attribs.local_id_.guidPrefix);
+    if (!link_) {
       return AcceptConnectResult();
     }
   }
@@ -182,18 +187,21 @@ RtpsUdpTransport::use_datalink(const RepoId& local_id,
   unsigned int blob_bytes_read;
   ACE_INET_Addr addr = get_connection_addr(remote_data, &requires_inline_qos,
                                            &blob_bytes_read);
-  link_->add_locator(remote_id, addr, requires_inline_qos);
+
+  if (link_) {
+    link_->add_locator(remote_id, addr, requires_inline_qos);
 
 #if defined(OPENDDS_SECURITY)
-  if (remote_data.length() > blob_bytes_read) {
-    link_->populate_security_handles(local_id, remote_id,
-                                     remote_data.get_buffer() + blob_bytes_read,
-                                     remote_data.length() - blob_bytes_read);
-  }
+    if (remote_data.length() > blob_bytes_read) {
+      link_->populate_security_handles(local_id, remote_id,
+                                       remote_data.get_buffer() + blob_bytes_read,
+                                       remote_data.length() - blob_bytes_read);
+    }
 #endif
 
-  link_->associated(local_id, remote_id, local_reliable, remote_reliable,
-                    local_durable, remote_durable);
+    link_->associated(local_id, remote_id, local_reliable, remote_reliable,
+                      local_durable, remote_durable);
+  }
 }
 
 ACE_INET_Addr
@@ -227,7 +235,7 @@ RtpsUdpTransport::get_connection_addr(const TransportBLOB& remote,
 bool
 RtpsUdpTransport::connection_info_i(TransportLocator& info) const
 {
-  this->config().populate_locator(info);
+  config().populate_locator(info);
   return true;
 }
 
@@ -238,10 +246,16 @@ RtpsUdpTransport::register_for_reader(const RepoId& participant,
                                       const TransportLocatorSeq& locators,
                                       OpenDDS::DCPS::DiscoveryListener* listener)
 {
-  const TransportBLOB* blob = this->config().get_blob(locators);
+  const TransportBLOB* blob = config().get_blob(locators);
   if (!blob) {
     return;
   }
+
+  if (is_shut_down_) {
+    return;
+  }
+
+  GuardThreadType guard_links(links_lock_);
 
   if (!link_) {
     link_ = make_datalink(participant.guidPrefix);
@@ -268,10 +282,16 @@ RtpsUdpTransport::register_for_writer(const RepoId& participant,
                                       const TransportLocatorSeq& locators,
                                       DiscoveryListener* listener)
 {
-  const TransportBLOB* blob = this->config().get_blob(locators);
+  const TransportBLOB* blob = config().get_blob(locators);
   if (!blob) {
     return;
   }
+
+  if (is_shut_down_) {
+    return;
+  }
+
+  GuardThreadType guard_links(links_lock_);
 
   if (!link_) {
     link_ = make_datalink(participant.guidPrefix);
@@ -364,7 +384,8 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
 void
 RtpsUdpTransport::shutdown_i()
 {
-  if (!link_.is_nil()) {
+  GuardThreadType guard_links(links_lock_);
+  if (link_) {
     link_->transport_shutdown();
   }
   link_.reset();
@@ -389,7 +410,8 @@ RtpsUdpTransport::map_ipv4_to_ipv6() const
 {
   bool map = false;
   ACE_INET_Addr tmp;
-  link_->unicast_socket().get_local_addr(tmp);
+  const ACE_SOCK_Dgram& socket = link_ ? link_->unicast_socket() : unicast_socket_;
+  socket.get_local_addr(tmp);
   if (tmp.get_type() != AF_INET) {
     map = true;
   }
@@ -400,10 +422,10 @@ RtpsUdpTransport::map_ipv4_to_ipv6() const
 int
 RtpsUdpTransport::IceEndpoint::handle_input(ACE_HANDLE /*fd*/)
 {
-  struct iovec        iov[1];
+  struct iovec iov[1];
   char buffer[0x10000];
   iov[0].iov_base = buffer;
-  iov[0].iov_len  = sizeof buffer;
+  iov[0].iov_len = sizeof buffer;
   ACE_INET_Addr remote_address;
 
   bool stop;
@@ -457,7 +479,7 @@ RtpsUdpTransport::IceEndpoint::host_addresses() const {
 void
 RtpsUdpTransport::IceEndpoint::send(const ACE_INET_Addr& destination, const STUN::Message& message)
 {
-  ACE_SOCK_Dgram& socket = (!transport.link_.is_nil()) ? transport.link_->unicast_socket() : transport.unicast_socket_;
+  ACE_SOCK_Dgram& socket = transport.link_ ? transport.link_->unicast_socket() : transport.unicast_socket_;
 
   ACE_Message_Block block(20 + message.length());
   DCPS::Serializer serializer(&block, true);

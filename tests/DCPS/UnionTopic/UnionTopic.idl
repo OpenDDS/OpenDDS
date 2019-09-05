@@ -1,0 +1,25 @@
+module UnionTopic {
+  typedef unsigned long Vote_t;
+  struct Candidate_t {
+    string name;
+    Vote_t votes;
+  };
+
+  struct ElectionResult_t {
+    Candidate_t winner;
+    Vote_t total_votes;
+  };
+
+  enum ElectionNewsType_t {
+    ELECTION_STATUS,
+    ELECTION_RESULT
+  };
+
+  @topic
+  union ElectionNews_t switch (@key ElectionNewsType_t) {
+  case ELECTION_STATUS:
+    Candidate_t status;
+  case ELECTION_RESULT:
+    ElectionResult_t result;
+  };
+};

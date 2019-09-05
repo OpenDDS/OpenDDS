@@ -7,7 +7,7 @@
 #define OPENDDS_RCHANDLE_T_H
 
 #include "dds/Versioned_Namespace.h"
-#include <cassert>
+#include "dds/DCPS/Definitions.h"
 #include "unique_ptr.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -310,9 +310,7 @@ RcHandle<T> make_rch(U0 const& u0, U1 const& u1, U2 const& u2, U3 const& u3, U4 
 template<typename T>
 RcHandle<T> rchandle_from(T* pointer)
 {
-#ifndef OPENDDS_SAFETY_PROFILE
-  assert(pointer == 0 || pointer->ref_count() > 0);
-#endif
+  OPENDDS_ASSERT(pointer == 0 || pointer->ref_count() > 0);
   return RcHandle<T>(pointer, inc_count());
 }
 

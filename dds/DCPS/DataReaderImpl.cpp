@@ -774,7 +774,7 @@ DataReaderImpl::signal_liveliness(const RepoId& remote_participant)
            iter != instances_.end();
            ++iter) {
         SubscriptionInstance_rch ptr = iter->second;
-        ptr->instance_state_.lively(pos->first);
+        ptr->instance_state_->lively(pos->first);
       }
     }
   }
@@ -1179,12 +1179,10 @@ DataReaderImpl::enable()
 
   if (depth_ == DDS::LENGTH_UNLIMITED) {
     // DDS::LENGTH_UNLIMITED is negative so make it a positive
-    // value that is for all intents and purposes unlimited
+    // value that is, for all intents and purposes, unlimited
     // and we can use it for comparisons.
-    // use 2147483647L because that is the greatest value a signed
-    // CORBA::Long can have.
     // WARNING: The client risks running out of memory in this case.
-    depth_ = 2147483647L;
+    depth_ = ACE_INT32_MAX;
   }
 
   if (qos_.resource_limits.max_samples != DDS::LENGTH_UNLIMITED) {
@@ -1418,13 +1416,13 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       GuidConverter reader_converter(subscription_id_);
       GuidConverter writer_converter(header.publication_id_);
 
-      ACE_DEBUG ((LM_DEBUG,
+      ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataReaderImpl::data_received: reader %C writer %C ")
           ACE_TEXT("instance %d is_new_instance %d filtered %d \n"),
           OPENDDS_STRING(reader_converter).c_str(),
           OPENDDS_STRING(writer_converter).c_str(),
           instance ? instance->instance_handle_ : 0,
-              is_new_instance, filtered));
+          is_new_instance, filtered));
     }
 
     if (filtered) break; // sample filtered from instance
@@ -1506,7 +1504,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
           iter != instances_.end();
           ++iter) {
-        iter->second->instance_state_.lively(sample.header_.publication_id_);
+        iter->second->instance_state_->lively(sample.header_.publication_id_);
       }
     }
 
@@ -1530,7 +1528,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       if (! this->is_exclusive_ownership_
           || (owner_manager
               && (instance)
-              && (owner_manager->is_owner (instance->instance_handle_,
+              && (owner_manager->is_owner(instance->instance_handle_,
                   sample.header_.publication_id_)))) {
 #endif
         this->watchdog_->cancel_timer(instance);
@@ -1559,7 +1557,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
         if (! this->is_exclusive_ownership_
             || (this->is_exclusive_ownership_
-                && instance->instance_state_.is_last (sample.header_.publication_id_))) {
+                && instance->instance_state_->is_last(sample.header_.publication_id_))) {
 #endif
           this->watchdog_->cancel_timer(instance);
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
@@ -1591,9 +1589,9 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
               && (instance)
               && (owner_manager->is_owner (instance->instance_handle_,
                   sample.header_.publication_id_)))
-                  || (this->is_exclusive_ownership_
-                      && (instance)
-                      && instance->instance_state_.is_last (sample.header_.publication_id_))) {
+          || (is_exclusive_ownership_
+              && (instance)
+              && instance->instance_state_->is_last(sample.header_.publication_id_))) {
 #endif
         if (instance) {
           this->watchdog_->cancel_timer(instance);
@@ -1726,7 +1724,7 @@ DataReaderImpl::have_view_states(DDS::ViewStateMask view_states) const
       ++iter) {
     SubscriptionInstance_rch ptr = iter->second;
 
-    if (ptr->instance_state_.view_state() & view_states) {
+    if (ptr->instance_state_->view_state() & view_states) {
       return true;
     }
   }
@@ -1746,7 +1744,7 @@ bool DataReaderImpl::have_instance_states(
       ++iter) {
     SubscriptionInstance_rch ptr = iter->second;
 
-    if (ptr->instance_state_.instance_state() & instance_states) {
+    if (ptr->instance_state_->instance_state() & instance_states) {
       return true;
     }
   }
@@ -1760,16 +1758,13 @@ bool DataReaderImpl::contains_sample(DDS::SampleStateMask sample_states,
     DDS::ViewStateMask view_states, DDS::InstanceStateMask instance_states)
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, sample_lock_, false);
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_,false);
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_,false);
 
-  for (SubscriptionInstanceMapType::iterator iter = instances_.begin(),
-      end = instances_.end(); iter != end; ++iter) {
+  for (SubscriptionInstanceMapType::iterator iter = instances_.begin(), end = instances_.end(); iter != end; ++iter) {
     SubscriptionInstance& inst = *iter->second;
 
-    if ((inst.instance_state_.view_state() & view_states) &&
-        (inst.instance_state_.instance_state() & instance_states)) {
-      for (ReceivedDataElement* item = inst.rcvd_samples_.head_; item != 0;
-          item = item->next_data_sample_) {
+    if (inst.instance_state_->match(view_states, instance_states)) {
+      for (ReceivedDataElement* item = inst.rcvd_samples_.head_; item != 0; item = item->next_data_sample_) {
         if (item->sample_state_ & sample_states
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
             && !item->coherent_change_
@@ -1851,8 +1846,7 @@ CORBA::Long DataReaderImpl::total_samples() const
 void
 DataReaderImpl::LivelinessTimer::check_liveliness()
 {
-  CheckLivelinessCommand c(this);
-  execute_or_enqueue(c);
+  execute_or_enqueue(new CheckLivelinessCommand(this));
 }
 
 int
@@ -2255,7 +2249,7 @@ DataReaderImpl::instances_liveliness_update(WriterInfo& info,
   for (SubscriptionInstanceMapType::iterator iter = instances_.begin(),
       next = iter; iter != instances_.end(); iter = next) {
     ++next;
-    iter->second->instance_state_.writer_became_dead(
+    iter->second->instance_state_->writer_became_dead(
         info.writer_id_, liveliness_changed_status_.alive_count, when);
   }
 }
@@ -2661,7 +2655,7 @@ DataReaderImpl::ownership_filter_instance(const SubscriptionInstance_rch& instan
 
     // Evaulate the owner of the instance if not selected and filter
     // current message if it's not from owner writer.
-    if ( instance->instance_state_.get_owner () == GUID_UNKNOWN
+    if ( instance->instance_state_->get_owner() == GUID_UNKNOWN
         || ! iter->second->is_owner_evaluated (instance->instance_handle_)) {
       OwnershipManagerPtr owner_manager = this->ownership_manager();
 
@@ -2669,14 +2663,14 @@ DataReaderImpl::ownership_filter_instance(const SubscriptionInstance_rch& instan
         instance->instance_handle_,
         iter->second->writer_id_,
         iter->second->writer_qos_.ownership_strength.value,
-        &instance->instance_state_);
+        instance->instance_state_);
       iter->second->set_owner_evaluated (instance->instance_handle_, true);
 
       if (! is_owner) {
         if (DCPS_debug_level >= 1) {
           GuidConverter reader_converter(subscription_id_);
           GuidConverter writer_converter(pubid);
-          GuidConverter owner_converter (instance->instance_state_.get_owner ());
+          GuidConverter owner_converter(instance->instance_state_->get_owner());
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) DataReaderImpl::ownership_filter_instance: ")
                      ACE_TEXT("reader %C writer %C is not elected as owner %C\n"),
@@ -2687,11 +2681,11 @@ DataReaderImpl::ownership_filter_instance(const SubscriptionInstance_rch& instan
         return true;
       }
     }
-    else if (! (instance->instance_state_.get_owner () == pubid)) {
+    else if (! (instance->instance_state_->get_owner() == pubid)) {
       if (DCPS_debug_level >= 1) {
         GuidConverter reader_converter(subscription_id_);
         GuidConverter writer_converter(pubid);
-        GuidConverter owner_converter (instance->instance_state_.get_owner ());
+        GuidConverter owner_converter(instance->instance_state_->get_owner());
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) DataReaderImpl::ownership_filter_instance: ")
                    ACE_TEXT("reader %C writer %C is not owner %C\n"),
@@ -3102,25 +3096,22 @@ void DataReaderImpl::end_access()
 }
 
 
-void DataReaderImpl::get_ordered_data (GroupRakeData& data,
+void DataReaderImpl::get_ordered_data(GroupRakeData& data,
     DDS::SampleStateMask sample_states,
     DDS::ViewStateMask view_states,
     DDS::InstanceStateMask instance_states)
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
-  ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_);
 
-  for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
-      iter != instances_.end(); ++iter) {
+  for (SubscriptionInstanceMapType::iterator iter = instances_.begin(); iter != instances_.end(); ++iter) {
     SubscriptionInstance_rch ptr = iter->second;
-    if ((ptr->instance_state_.view_state() & view_states) &&
-        (ptr->instance_state_.instance_state() & instance_states)) {
+    if (ptr->instance_state_->match(view_states, instance_states)) {
       size_t i(0);
-      for (OpenDDS::DCPS::ReceivedDataElement *item = ptr->rcvd_samples_.head_;
-          item != 0; item = item->next_data_sample_) {
+      for (ReceivedDataElement* item = ptr->rcvd_samples_.head_; item != 0; item = item->next_data_sample_) {
         if ((item->sample_state_ & sample_states) && !item->coherent_change_) {
           data.insert_sample(item, ptr, ++i);
-          this->group_coherent_ordered_data_.insert_sample(item, ptr, ++i);
+          group_coherent_ordered_data_.insert_sample(item, ptr, ++i);
         }
       }
     }
@@ -3364,15 +3355,13 @@ EndHistoricSamplesMissedSweeper::~EndHistoricSamplesMissedSweeper()
 void EndHistoricSamplesMissedSweeper::schedule_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
 {
   info->waiting_for_end_historic_samples_ = true;
-  ScheduleCommand c(this, info);
-  execute_or_enqueue(c);
+  execute_or_enqueue(new ScheduleCommand(this, info));
 }
 
 void EndHistoricSamplesMissedSweeper::cancel_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
 {
   info->waiting_for_end_historic_samples_ = false;
-  CancelCommand c(this, info);
-  execute_or_enqueue(c);
+  execute_or_enqueue(new CancelCommand(this, info));
 }
 
 int EndHistoricSamplesMissedSweeper::handle_timeout(

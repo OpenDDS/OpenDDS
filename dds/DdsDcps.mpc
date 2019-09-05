@@ -1,7 +1,7 @@
 project(OpenDDS_Dcps): core, coverage_optional, \
         dcps_optional_features, dcps_optional_safety, dds_macros, \
         dds_suppress_any_support, dds_taolib, gen_ostream, install, valgrind, \
-        dds_vc_warnings, dds_versioning_idl_defaults {
+        dds_vc_warnings, dds_versioning_idl_defaults, msvc_bigobj {
   sharedname   = OpenDDS_Dcps
   dynamicflags = OPENDDS_DCPS_BUILD_DLL
   libout       = $(DDS_ROOT)/lib
@@ -9,10 +9,6 @@ project(OpenDDS_Dcps): core, coverage_optional, \
   pch_header   = DCPS/DdsDcps_pch.h
   pch_source   = DCPS/DdsDcps_pch.cpp
   macros      += NOMINMAX         //don't #define min and max in Win32 headers
-
-  specific (vc9, vc10, vc11, vc12, vc14, vs2017, vs2019, nmake) {
-    compile_flags += /bigobj
-  }
 
   //The following is only to make the PCH work, client projects should not have
   //this as an include path.

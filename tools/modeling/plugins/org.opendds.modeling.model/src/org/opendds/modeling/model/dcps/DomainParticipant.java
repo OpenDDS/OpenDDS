@@ -20,6 +20,7 @@ import org.opendds.modeling.model.qos.UserDataQosPolicy;
  *
  * <p>
  * The following features are supported:
+ * </p>
  * <ul>
  *   <li>{@link org.opendds.modeling.model.dcps.DomainParticipant#getDomain <em>Domain</em>}</li>
  *   <li>{@link org.opendds.modeling.model.dcps.DomainParticipant#getPublishers <em>Publishers</em>}</li>
@@ -27,7 +28,6 @@ import org.opendds.modeling.model.qos.UserDataQosPolicy;
  *   <li>{@link org.opendds.modeling.model.dcps.DomainParticipant#getEntity_factory <em>Entity factory</em>}</li>
  *   <li>{@link org.opendds.modeling.model.dcps.DomainParticipant#getUser_data <em>User data</em>}</li>
  * </ul>
- * </p>
  *
  * @see org.opendds.modeling.model.dcps.DCPSPackage#getDomainParticipant()
  * @model

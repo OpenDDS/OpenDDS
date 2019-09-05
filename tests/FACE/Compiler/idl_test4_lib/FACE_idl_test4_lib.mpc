@@ -1,14 +1,8 @@
-project: opendds_face, face_idl_test_config {
+project: opendds_face, dcps_test_idl_only_lib, face_idl_test_config {
   TypeSupport_Files {
     top.idl
     typedef_only.idl
     struct_only.idl
-  }
-
-  IDL_Files {
-    topTypeSupport.idl
-    typedef_onlyTypeSupport.idl
-    struct_onlyTypeSupport.idl
   }
 }
 

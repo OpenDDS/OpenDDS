@@ -1,0 +1,6 @@
+project: dcpsexe, dcps_test, test_root {
+  after       += TestFramework
+  libs        += TestFramework
+  libpaths    += $(TEST_ROOT)/tests/DCPS/TestFramework
+  includes    += $(TEST_ROOT)/tests/DCPS/TestFramework
+}

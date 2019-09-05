@@ -11,6 +11,8 @@ use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 use strict;
 
+PerlDDS::add_lib_path('../ConsolidatedMessengerIdl');
+
 my $test = new PerlDDS::TestFramework();
 $test->{'dcps_debug_level'} = 4; # $test->{'dcps_transport_debug_level'} = 10;
 $test->setup_discovery();

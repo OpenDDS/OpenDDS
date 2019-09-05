@@ -1,4 +1,4 @@
-project(*Publisher): dcpsexe, dcps_tcp, dcps_shmem {
+project(*Publisher): dcpsexe, dcps_test, dcps_tcp, dcps_shmem {
   requires += no_opendds_safety_profile
   exename = simple_publisher
 
@@ -9,7 +9,7 @@ project(*Publisher): dcpsexe, dcps_tcp, dcps_shmem {
   }
 }
 
-project(*Subscriber): dcpsexe, dcps_tcp, dcps_shmem {
+project(*Subscriber): dcpsexe, dcps_test, dcps_tcp, dcps_shmem {
   requires += no_opendds_safety_profile
   exename = simple_subscriber
 

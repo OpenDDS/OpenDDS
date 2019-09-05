@@ -1415,10 +1415,16 @@ Sedp::remove_publication_i(const RepoId& publicationId, LocalPublication& pub)
   if (endpoint) {
     ICE::Agent::instance()->remove_local_agent_info_listener(endpoint, publicationId);
   }
+
+  if (is_security_enabled() && pub.security_attribs_.base.is_discovery_protected) {
+    return publications_secure_writer_.write_unregister_dispose(publicationId);
+  } else {
+    return publications_writer_.write_unregister_dispose(publicationId);
+  }
 #else
   ACE_UNUSED_ARG(pub);
-#endif
   return publications_writer_.write_unregister_dispose(publicationId);
+#endif
 }
 
 bool
@@ -1457,10 +1463,16 @@ Sedp::remove_subscription_i(const RepoId& subscriptionId,
   if (endpoint) {
     ICE::Agent::instance()->remove_local_agent_info_listener(endpoint, subscriptionId);
   }
+
+  if (is_security_enabled() && sub.security_attribs_.base.is_discovery_protected) {
+    return subscriptions_secure_writer_.write_unregister_dispose(subscriptionId);
+  } else {
+    return subscriptions_writer_.write_unregister_dispose(subscriptionId);
+  }
 #else
   ACE_UNUSED_ARG(sub);
-#endif
   return subscriptions_writer_.write_unregister_dispose(subscriptionId);
+#endif
 }
 
 bool
@@ -2450,6 +2462,7 @@ void
 Sedp::association_complete(const RepoId& localId,
                            const RepoId& remoteId)
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   // If the remote endpoint is an opendds endpoint that expects associated datawriter announcements
   if (is_expectant_opendds(remoteId)) {
     LocalSubscriptionIter sub = local_subscriptions_.find(localId);
@@ -2467,9 +2480,9 @@ Sedp::association_complete(const RepoId& localId,
 
 #ifdef OPENDDS_SECURITY
   if (remoteId.entityId == ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER) {
-    write_durable_publication_data(remoteId);
+    write_durable_publication_data(remoteId, true);
   } else if (remoteId.entityId == ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER) {
-    write_durable_subscription_data(remoteId);
+    write_durable_subscription_data(remoteId, true);
   } else if (remoteId.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER) {
     write_durable_participant_message_data(remoteId);
   } else if (remoteId.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER) {
@@ -2497,9 +2510,9 @@ Sedp::association_complete(const RepoId& localId,
   }
 #endif
   if (remoteId.entityId == ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER) {
-    write_durable_publication_data(remoteId);
+    write_durable_publication_data(remoteId, false);
   } else if (remoteId.entityId == ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER) {
-    write_durable_subscription_data(remoteId);
+    write_durable_subscription_data(remoteId, false);
   } else if (remoteId.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER) {
     write_durable_participant_message_data(remoteId);
   }
@@ -2648,7 +2661,7 @@ Sedp::Writer::transport_assoc_done(int flags, const RepoId& remote) {
                OPENDDS_STRING(conv).c_str()));
     return;
   }
-  sedp_.association_complete(repo_id_, remote);
+  sedp_.spdp_.interceptor().enqueue(new AssociationComplete(&sedp_, repo_id_, remote));
 }
 
 void
@@ -3319,58 +3332,60 @@ Sedp::populate_discovered_reader_msg(
 }
 
 void
-Sedp::write_durable_publication_data(const RepoId& reader)
+Sedp::write_durable_publication_data(const RepoId& reader, bool secure)
 {
-  LocalPublicationIter pub, end = local_publications_.end();
-  for (pub = local_publications_.begin(); pub != end; ++pub) {
-    write_publication_data(pub->first, pub->second, reader);
-  }
-  publications_writer_.end_historic_samples(reader);
-
+  if (secure) {
 #ifdef OPENDDS_SECURITY
-  publications_secure_writer_.end_historic_samples(reader);
+    LocalPublicationIter pub, end = local_publications_.end();
+    for (pub = local_publications_.begin(); pub != end; ++pub) {
+      if (pub->second.security_attribs_.base.is_discovery_protected) {
+        write_publication_data_secure(pub->first, pub->second, reader);
+      }
+    }
+    publications_secure_writer_.end_historic_samples(reader);
 #endif
-
+  } else {
+    LocalPublicationIter pub, end = local_publications_.end();
+    for (pub = local_publications_.begin(); pub != end; ++pub) {
+#ifdef OPENDDS_SECURITY
+      if (!pub->second.security_attribs_.base.is_discovery_protected) {
+        write_publication_data(pub->first, pub->second, reader);
+      }
+#else
+      write_publication_data(pub->first, pub->second, reader);
+#endif
+    }
+    publications_writer_.end_historic_samples(reader);
+  }
 }
 
-#ifdef OPENDDS_SECURITY
 void
-Sedp::write_durable_publication_data_secure(const RepoId& reader)
+Sedp::write_durable_subscription_data(const RepoId& reader, bool secure)
 {
-  LocalPublicationIter pub, end = local_publications_.end();
-  for (pub = local_publications_.begin(); pub != end; ++pub) {
-    write_publication_data(pub->first, pub->second, reader);
-  }
-  publications_secure_writer_.end_historic_samples(reader);
-}
-#endif
-
-void
-Sedp::write_durable_subscription_data(const RepoId& reader)
-{
-  LocalSubscriptionIter sub, end = local_subscriptions_.end();
-  for (sub = local_subscriptions_.begin(); sub != end; ++sub) {
-    write_subscription_data(sub->first, sub->second, reader);
-  }
-  subscriptions_writer_.end_historic_samples(reader);
-
+  if (secure) {
 #ifdef OPENDDS_SECURITY
-  subscriptions_secure_writer_.end_historic_samples(reader);
+    LocalSubscriptionIter sub, end = local_subscriptions_.end();
+    for (sub = local_subscriptions_.begin(); sub != end; ++sub) {
+      if (is_security_enabled() && sub->second.security_attribs_.base.is_discovery_protected) {
+        write_subscription_data_secure(sub->first, sub->second, reader);
+      }
+    }
+    subscriptions_secure_writer_.end_historic_samples(reader);
 #endif
-
-}
-
+  } else {
+    LocalSubscriptionIter sub, end = local_subscriptions_.end();
+    for (sub = local_subscriptions_.begin(); sub != end; ++sub) {
 #ifdef OPENDDS_SECURITY
-void
-Sedp::write_durable_subscription_data_secure(const RepoId& reader)
-{
-  LocalSubscriptionIter sub, end = local_subscriptions_.end();
-  for (sub = local_subscriptions_.begin(); sub != end; ++sub) {
-    write_subscription_data(sub->first, sub->second, reader);
-  }
-  subscriptions_secure_writer_.end_historic_samples(reader);
-}
+      if (!(is_security_enabled() && sub->second.security_attribs_.base.is_discovery_protected)) {
+        write_subscription_data(sub->first, sub->second, reader);
+      }
+#else
+      write_subscription_data(sub->first, sub->second, reader);
 #endif
+    }
+    subscriptions_writer_.end_historic_samples(reader);
+  }
+}
 
 void
 Sedp::write_durable_participant_message_data(const RepoId& reader)
@@ -4658,6 +4673,11 @@ OPENDDS_STRING Sedp::Msg::msgTypeToString(const MsgType type) {
 
 OPENDDS_STRING Sedp::Msg::msgTypeToString() const {
   return msgTypeToString(type_);
+}
+
+void
+Sedp::AssociationComplete::execute() {
+  sedp_->association_complete(local_, remote_);
 }
 
 }

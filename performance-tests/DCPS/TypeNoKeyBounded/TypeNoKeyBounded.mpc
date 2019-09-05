@@ -1,4 +1,4 @@
-project(DCPS_Perf*) : dcps {
+project(DCPS_Perf*) : dcps_test_idl_only_lib {
   libout         = .
   idlflags      += -Wb,export_macro=PTTypeLib_Export -Wb,export_include=PTTypeLib_Export.h -SS
   dynamicflags   = PTTYPELIB_BUILD_DLL

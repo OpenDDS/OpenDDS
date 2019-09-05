@@ -1,6 +1,3 @@
-//
-//
-
 // dcpslib has to be after dcps_java to ensure libout set correctly
 project: dcps_java, javah, dcpslib, dcps_inforepodiscovery {
 

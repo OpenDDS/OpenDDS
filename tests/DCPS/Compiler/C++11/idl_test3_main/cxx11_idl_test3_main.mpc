@@ -1,4 +1,4 @@
-project: dcpsexe, opendds_cxx11 {
+project: dcpsexe, dcps_test, opendds_cxx11 {
   exename   = idl_test3
   libs     += cxx11_idl_test3_lib
   libpaths += ../idl_test3_lib

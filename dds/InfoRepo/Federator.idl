@@ -42,121 +42,111 @@ module OpenDDS { module Federator {
     // Ownership updates
     //
 
-// These pragmas are TAO specific
-#pragma DCPS_DATA_TYPE "OpenDDS::Federator::OwnerUpdate"
-#pragma DCPS_DATA_KEY  "OpenDDS::Federator::OwnerUpdate sender"
+    @topic
     struct OwnerUpdate {
-      RepoKey         sender;
-      RepoKey         owner;
-      FederationId    participant;
+      @key RepoKey sender;
+      RepoKey owner;
+      FederationId participant;
       DDS::DomainId_t domain;
-      UpdateType      action;
+      UpdateType action;
     };
 
     // Constant values.
-    const string  OWNERUPDATETOPICNAME = "OwnerUpdate";
-    const string  OWNERUPDATETYPENAME  = "OwnerUpdate";
+    const string OWNERUPDATETOPICNAME = "OwnerUpdate";
+    const string OWNERUPDATETYPENAME  = "OwnerUpdate";
 
     ////////////////////////////////////////////////////////////////////
     //
     // Topic data updates
     //
 
-// These pragmas are TAO specific
-#pragma DCPS_DATA_TYPE "OpenDDS::Federator::TopicUpdate"
-#pragma DCPS_DATA_KEY  "OpenDDS::Federator::TopicUpdate sender"
+    @topic
     struct TopicUpdate {
-      FederationId    id;
-      RepoKey         sender;
-      FederationId    participant;
+      FederationId id;
+      @key RepoKey sender;
+      FederationId participant;
       DDS::DomainId_t domain;
-      UpdateType      action;
-      string          topic;
-      string          datatype;
-      DDS::TopicQos   qos;
+      UpdateType action;
+      string topic;
+      string datatype;
+      DDS::TopicQos qos;
     };
 
     // Constant values.
-    const string  TOPICUPDATETOPICNAME = "TopicUpdate";
-    const string  TOPICUPDATETYPENAME  = "TopicUpdate";
+    const string TOPICUPDATETOPICNAME = "TopicUpdate";
+    const string TOPICUPDATETYPENAME  = "TopicUpdate";
 
     ////////////////////////////////////////////////////////////////////
     //
     // Participant data updates
     //
 
-// These pragmas are TAO specific
-#pragma DCPS_DATA_TYPE "OpenDDS::Federator::ParticipantUpdate"
-#pragma DCPS_DATA_KEY  "OpenDDS::Federator::ParticipantUpdate sender"
+    @topic
     struct ParticipantUpdate {
-      FederationId              id;
-      RepoKey                   sender;
-      RepoKey                   owner;
-      DDS::DomainId_t           domain;
-      UpdateType                action;
+      FederationId id;
+      @key RepoKey sender;
+      RepoKey owner;
+      DDS::DomainId_t domain;
+      UpdateType action;
       DDS::DomainParticipantQos qos;
     };
 
     // Constant values.
-    const string  PARTICIPANTUPDATETOPICNAME = "ParticipantUpdate";
-    const string  PARTICIPANTUPDATETYPENAME  = "ParticipantUpdate";
+    const string PARTICIPANTUPDATETOPICNAME = "ParticipantUpdate";
+    const string PARTICIPANTUPDATETYPENAME  = "ParticipantUpdate";
 
     ////////////////////////////////////////////////////////////////////
     //
     // Publication data updates
     //
 
-// These pragmas are TAO specific
-#pragma DCPS_DATA_TYPE "OpenDDS::Federator::PublicationUpdate"
-#pragma DCPS_DATA_KEY  "OpenDDS::Federator::PublicationUpdate sender"
+    @topic
     struct PublicationUpdate {
-      FederationId                        id;
-      RepoKey                             sender;
-      FederationId                        topic;
-      FederationId                        participant;
-      DDS::DomainId_t                     domain;
-      UpdateType                          action;
-      string                              callback;
-      DDS::PublisherQos                   publisher_qos;
-      DDS::DataWriterQos                  datawriter_qos;
+      FederationId id;
+      @key RepoKey sender;
+      FederationId topic;
+      FederationId participant;
+      DDS::DomainId_t domain;
+      UpdateType action;
+      string callback;
+      DDS::PublisherQos publisher_qos;
+      DDS::DataWriterQos datawriter_qos;
 
       OpenDDS::DCPS::TransportLocatorSeq  transport_info;
     };
 
     // Constant values.
-    const string  PUBLICATIONUPDATETOPICNAME = "PublicationUpdate";
-    const string  PUBLICATIONUPDATETYPENAME  = "PublicationUpdate";
+    const string PUBLICATIONUPDATETOPICNAME = "PublicationUpdate";
+    const string PUBLICATIONUPDATETYPENAME  = "PublicationUpdate";
 
     ////////////////////////////////////////////////////////////////////
     //
     // Subscription data updates
     //
 
-// These pragmas are TAO specific
-#pragma DCPS_DATA_TYPE "OpenDDS::Federator::SubscriptionUpdate"
-#pragma DCPS_DATA_KEY  "OpenDDS::Federator::SubscriptionUpdate sender"
+    @topic
     struct SubscriptionUpdate {
-      FederationId                        id;
-      RepoKey                             sender;
-      FederationId                        topic;
-      FederationId                        participant;
-      DDS::DomainId_t                     domain;
-      UpdateType                          action;
-      string                              callback;
-      DDS::SubscriberQos                  subscriber_qos;
-      DDS::DataReaderQos                  datareader_qos;
+      FederationId id;
+      @key RepoKey sender;
+      FederationId topic;
+      FederationId participant;
+      DDS::DomainId_t domain;
+      UpdateType action;
+      string callback;
+      DDS::SubscriberQos subscriber_qos;
+      DDS::DataReaderQos datareader_qos;
 
-      OpenDDS::DCPS::TransportLocatorSeq  transport_info;
+      OpenDDS::DCPS::TransportLocatorSeq transport_info;
 
       // The following are for Content-Subscription Profile
-      string                              filter_class_name;
-      string                              filter_expression;
-      DDS::StringSeq                      expression_params;
+      string filter_class_name;
+      string filter_expression;
+      DDS::StringSeq expression_params;
     };
 
     // Constant values.
-    const string  SUBSCRIPTIONUPDATETOPICNAME = "SubscriptionUpdate";
-    const string  SUBSCRIPTIONUPDATETYPENAME  = "SubscriptionUpdate";
+    const string SUBSCRIPTIONUPDATETOPICNAME = "SubscriptionUpdate";
+    const string SUBSCRIPTIONUPDATETYPENAME  = "SubscriptionUpdate";
 
     //
     // Exceptions.
@@ -177,7 +167,7 @@ module OpenDDS { module Federator {
       // Initiates the discovery process to establish connectivity with a
       // federation having the specified DomainId value.
       //
-      boolean discover_federation( in string ior) raises( Incomplete);
+      boolean discover_federation(in string ior) raises(Incomplete);
 
       //
       // Called to join a federation initially or to redirect the active
@@ -186,13 +176,13 @@ module OpenDDS { module Federator {
       Manager join_federation(
                 in Manager          peer,
                 in FederationDomain federation
-              ) raises( Incomplete);
+              ) raises(Incomplete);
 
       //
       // Called to leave a federation to allow the federation to cleanup
       // storage associated with the repository leaving the federation.
       //
-      void leave_federation( in RepoKey id) raises( Incomplete);
+      void leave_federation(in RepoKey id) raises(Incomplete);
 
       //
       // Return the FederationId value for the managed repository.  This
@@ -215,11 +205,11 @@ module OpenDDS { module Federator {
       //      starting the next call.
       //
 
-      void initializeOwner(        in        OwnerUpdate data) raises( Incomplete);
-      void initializeTopic(        in        TopicUpdate data) raises( Incomplete);
-      void initializeParticipant(  in  ParticipantUpdate data) raises( Incomplete);
-      void initializePublication(  in  PublicationUpdate data) raises( Incomplete);
-      void initializeSubscription( in SubscriptionUpdate data) raises( Incomplete);
+      void initializeOwner(in OwnerUpdate data) raises(Incomplete);
+      void initializeTopic(in TopicUpdate data) raises(Incomplete);
+      void initializeParticipant(in ParticipantUpdate data) raises(Incomplete);
+      void initializePublication(in PublicationUpdate data) raises(Incomplete);
+      void initializeSubscription(in SubscriptionUpdate data) raises(Incomplete);
 
       //////////////////////////////////
       //
@@ -229,14 +219,14 @@ module OpenDDS { module Federator {
       //
       // Leave the federation gracefully and shutdown the repository.
       //
-      void leave_and_shutdown() raises( Incomplete);
+      void leave_and_shutdown() raises(Incomplete);
 
       //
       // Shutdown without leaving the federation.  This leaves existing
       // application associations in place and their management will
       // transfer to a different repository within the federation.
       //
-      void shutdown()           raises( Incomplete);
+      void shutdown() raises(Incomplete);
 
       //
       //////////////////////////////////

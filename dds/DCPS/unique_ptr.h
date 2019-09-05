@@ -11,15 +11,14 @@
 #include "ace/config-lite.h"
 
 #ifdef ACE_HAS_CPP11
-#define HAS_STD_UNIQUE_PTR
+#  define HAS_STD_UNIQUE_PTR
 #endif
 
 #ifdef HAS_STD_UNIQUE_PTR
-#include <memory>
+#  include <memory>
 #else
-#include "ace/Atomic_Op.h"
-#include "ace/Synch_Traits.h"
-#include <cassert>
+#  include "ace/Atomic_Op.h"
+#  include "ace/Synch_Traits.h"
 #  ifdef ACE_HAS_CPP11
 #    include <utility>
 #  else
@@ -333,9 +332,7 @@ private:
 template <typename T>
 typename unique_ptr<T>::rv_reference move(container_supported_unique_ptr<T>& ptr)
 {
-# ifndef OPENDDS_SAFETY_PROFILE
-  assert(ptr->ref_count() == 1);
-# endif
+  OPENDDS_ASSERT(ptr->ref_count() == 1);
   return reinterpret_cast<typename unique_ptr<T>::rv_reference>(ptr);
 }
 

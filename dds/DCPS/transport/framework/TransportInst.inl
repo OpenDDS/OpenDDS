@@ -21,10 +21,11 @@ OpenDDS::DCPS::TransportInst::TransportInst(const char* type,
     thread_per_connection_(0),
     datalink_release_delay_(10000),
     datalink_control_chunks_(32),
+    shutting_down_(false),
     name_(name)
 {
   DBG_ENTRY_LVL("TransportInst", "TransportInst", 6);
-  this->adjust_config_value();
+  adjust_config_value();
 }
 
 ACE_INLINE

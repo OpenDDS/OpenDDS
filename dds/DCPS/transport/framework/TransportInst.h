@@ -122,6 +122,7 @@ protected:
   void set_port_in_addr_string(OPENDDS_STRING& addr_str, u_short port_number);
 
   mutable ACE_SYNCH_MUTEX lock_;
+  bool shutting_down_;
 
 private:
 
@@ -134,7 +135,7 @@ private:
 
   friend class TransportClient;
  protected:
-  TransportImpl* impl();
+  TransportImpl_rch impl();
  private:
   virtual TransportImpl_rch new_impl() = 0;
 

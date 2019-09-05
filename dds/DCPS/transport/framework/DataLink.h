@@ -24,6 +24,7 @@
 #include "TransportSendListener.h"
 #include "TransportReceiveListener.h"
 #include "dds/DCPS/transport/framework/QueueTaskBase_T.h"
+#include "dds/DCPS/ReactorInterceptor.h"
 
 #include "ace/Event_Handler.h"
 #include "ace/Synch_Traits.h"
@@ -107,17 +108,17 @@ public:
   ///
   /// Return Codes: 0 means successful reservation made.
   ///              -1 means failure.
-  int make_reservation(const RepoId& remote_subscription_id,
-                       const RepoId& local_publication_id,
-                       const TransportSendListener_wrch& send_listener);
+  virtual int make_reservation(const RepoId& remote_subscription_id,
+                               const RepoId& local_publication_id,
+                               const TransportSendListener_wrch& send_listener);
 
   /// Only called by our TransportImpl object.
   ///
   /// Return Codes: 0 means successful reservation made.
   ///              -1 means failure.
-  int make_reservation(const RepoId& remote_publication_id,
-                       const RepoId& local_subscription_id,
-                       const TransportReceiveListener_wrch& receive_listener);
+  virtual int make_reservation(const RepoId& remote_publication_id,
+                               const RepoId& local_subscription_id,
+                               const TransportReceiveListener_wrch& receive_listener);
 
   // ciju: Called by LinkSet with locks held
   /// This will release reservations that were made by one of the
@@ -151,8 +152,7 @@ public:
   /// This method is essentially an "undo_send()" method.  It's goal
   /// is to remove all traces of the sample from this DataLink (if
   /// the sample is even known to the DataLink).
-  virtual RemoveResult remove_sample(const DataSampleElement* sample,
-                                     void* context);
+  virtual RemoveResult remove_sample(const DataSampleElement* sample);
 
   // ciju: Called by LinkSet with locks held
   void remove_all_msgs(RepoId pub_id);
@@ -252,10 +252,29 @@ public:
 
   typedef WeakRcHandle<TransportClient> TransportClient_wrch;
   typedef std::pair<TransportClient_wrch, RepoId> OnStartCallback;
-  virtual bool add_on_start_callback(const TransportClient_wrch& client, const RepoId& remote);
+
+  void add_pending_on_start(const RepoId& local, const RepoId& remote);
+  bool add_on_start_callback(const TransportClient_wrch& client, const RepoId& remote);
   void remove_on_start_callback(const TransportClient_wrch& client, const RepoId& remote);
   void invoke_on_start_callbacks(bool success);
   void invoke_on_start_callbacks(const RepoId& local, const RepoId& remote, bool success);
+  void remove_startup_callbacks(const RepoId& local, const RepoId& remote);
+
+  class Interceptor : public ReactorInterceptor {
+  public:
+    Interceptor(ACE_Reactor* reactor, ACE_thread_t owner) : ReactorInterceptor(reactor, owner) {}
+    bool reactor_is_shut_down() const;
+  };
+
+  class ImmediateStart : public ReactorInterceptor::Command {
+  public:
+    ImmediateStart(RcHandle<DataLink> link, WeakRcHandle<TransportClient> client, const RepoId& remote) : link_(link), client_(client), remote_(remote) {}
+    void execute();
+  private:
+    RcHandle<DataLink> link_;
+    WeakRcHandle<TransportClient> client_;
+    RepoId remote_;
+  };
 
   void set_scheduling_release(bool scheduling_release);
 
@@ -404,7 +423,11 @@ protected:
   TransportSendStrategy_rch send_strategy_;
 
   LockType strategy_lock_;
-  OPENDDS_VECTOR(OnStartCallback) on_start_callbacks_;
+  typedef OPENDDS_MAP_CMP(RepoId, TransportClient_wrch, GUID_tKeyLessThan) RepoToClientMap;
+  typedef OPENDDS_MAP_CMP(RepoId, RepoToClientMap, GUID_tKeyLessThan) OnStartCallbackMap;
+  OnStartCallbackMap on_start_callbacks_;
+  typedef OPENDDS_MAP_CMP(RepoId, RepoIdSet, GUID_tKeyLessThan) PendingOnStartsMap;
+  PendingOnStartsMap pending_on_starts_;
 
   /// Configurable delay in milliseconds that the datalink
   /// should be released after all associations are removed.
@@ -423,6 +446,8 @@ protected:
 
   /// Listener for TransportSendControlElements created in send_control
   SendResponseListener send_response_listener_;
+
+  Interceptor interceptor_;
 };
 
 } // namespace DCPS

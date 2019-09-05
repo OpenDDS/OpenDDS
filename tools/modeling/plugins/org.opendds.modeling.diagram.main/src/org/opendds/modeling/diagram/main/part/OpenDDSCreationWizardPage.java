@@ -29,8 +29,7 @@ public class OpenDDSCreationWizardPage extends WizardNewFileCreationPage {
 	/**
 	 * @generated
 	 */
-	public OpenDDSCreationWizardPage(String pageName,
-			IStructuredSelection selection, String fileExtension) {
+	public OpenDDSCreationWizardPage(String pageName, IStructuredSelection selection, String fileExtension) {
 		super(pageName, selection);
 		this.fileExtension = fileExtension;
 	}
@@ -71,8 +70,7 @@ public class OpenDDSCreationWizardPage extends WizardNewFileCreationPage {
 	 */
 	public void createControl(Composite parent) {
 		super.createControl(parent);
-		setFileName(OpenDDSDiagramEditorUtil.getUniqueFileName(
-				getContainerFullPath(), getFileName(), getExtension()));
+		setFileName(OpenDDSDiagramEditorUtil.getUniqueFileName(getContainerFullPath(), getFileName(), getExtension()));
 		setPageComplete(validatePage());
 	}
 
@@ -84,11 +82,8 @@ public class OpenDDSCreationWizardPage extends WizardNewFileCreationPage {
 			return false;
 		}
 		String extension = getExtension();
-		if (extension != null
-				&& !getFilePath().toString().endsWith("." + extension)) {
-			setErrorMessage(NLS
-					.bind(Messages.OpenDDSCreationWizardPageExtensionError,
-							extension));
+		if (extension != null && !getFilePath().toString().endsWith("." + extension)) {
+			setErrorMessage(NLS.bind(Messages.OpenDDSCreationWizardPageExtensionError, extension));
 			return false;
 		}
 		return true;
@@ -99,8 +94,7 @@ public class OpenDDSCreationWizardPage extends WizardNewFileCreationPage {
 	 */
 	public void setFileBaseName(String fileBaseName) {
 		this.fileBaseName = fileBaseName;
-		setFileName(OpenDDSDiagramEditorUtil.getUniqueFileName(
-				getContainerFullPath(), fileBaseName, getExtension()));
+		setFileName(OpenDDSDiagramEditorUtil.getUniqueFileName(getContainerFullPath(), fileBaseName, getExtension()));
 	}
 
 	/**

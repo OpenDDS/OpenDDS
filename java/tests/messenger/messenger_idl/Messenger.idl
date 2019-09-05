@@ -11,14 +11,12 @@ module Messenger {
 // but the file is copied here to more accurately reflect a
 // user's project setup.
 
-#pragma DCPS_DATA_TYPE "Messenger::Message"
-#pragma DCPS_DATA_KEY "Messenger::Message subject_id"
-
+  @topic
   struct Message {
     string from;
     string subject;
-    long subject_id;
+    @key long subject_id;
     string text;
-    long   count;
+    long count;
   };
 };

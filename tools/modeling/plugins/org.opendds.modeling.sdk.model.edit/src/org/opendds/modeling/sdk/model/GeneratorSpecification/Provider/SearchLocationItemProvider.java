@@ -39,10 +39,9 @@ import org.opendds.modeling.sdk.model.GeneratorSpecification.SearchPaths;
  * <!-- end-user-doc -->
  * @generated
  */
-public class SearchLocationItemProvider extends ItemProviderAdapter implements
-		IEditingDomainItemProvider, IStructuredItemContentProvider,
-		ITreeItemContentProvider, IItemLabelProvider, IItemPropertySource,
-		ITableItemLabelProvider {
+public class SearchLocationItemProvider extends ItemProviderAdapter
+		implements IEditingDomainItemProvider, IStructuredItemContentProvider, ITreeItemContentProvider,
+		IItemLabelProvider, IItemPropertySource, ITableItemLabelProvider {
 	/**
 	 * This constructs an instance from a factory and a notifier.
 	 * <!-- begin-user-doc -->
@@ -77,14 +76,11 @@ public class SearchLocationItemProvider extends ItemProviderAdapter implements
 	 * @generated
 	 */
 	@Override
-	public Collection<? extends EStructuralFeature> getChildrenFeatures(
-			Object object) {
+	public Collection<? extends EStructuralFeature> getChildrenFeatures(Object object) {
 		if (childrenFeatures == null) {
 			super.getChildrenFeatures(object);
-			childrenFeatures
-					.add(GeneratorPackage.Literals.SEARCH_LOCATION__VARIABLE);
-			childrenFeatures
-					.add(GeneratorPackage.Literals.SEARCH_LOCATION__PATH);
+			childrenFeatures.add(GeneratorPackage.Literals.SEARCH_LOCATION__VARIABLE);
+			childrenFeatures.add(GeneratorPackage.Literals.SEARCH_LOCATION__PATH);
 		}
 		return childrenFeatures;
 	}
@@ -110,12 +106,8 @@ public class SearchLocationItemProvider extends ItemProviderAdapter implements
 	 */
 	@Override
 	public Object getImage(Object object) {
-		return overlayImage(
-				object,
-				getResourceLocator().getImage(
-						"full/obj16/"
-								+ Plugin.INSTANCE
-										.imageMapping("SearchLocation")));
+		return overlayImage(object,
+				getResourceLocator().getImage("full/obj16/" + Plugin.INSTANCE.imageMapping("SearchLocation")));
 	}
 
 	@Override
@@ -128,8 +120,7 @@ public class SearchLocationItemProvider extends ItemProviderAdapter implements
 			if (variable == null) {
 				return null;
 			}
-			itemLabelProvider = (IItemLabelProvider) adapterFactory.adapt(
-					variable, IItemLabelProvider.class);
+			itemLabelProvider = (IItemLabelProvider) adapterFactory.adapt(variable, IItemLabelProvider.class);
 			return itemLabelProvider.getImage(variable);
 
 		case 1:
@@ -137,17 +128,12 @@ public class SearchLocationItemProvider extends ItemProviderAdapter implements
 			if (path == null) {
 				return null;
 			}
-			itemLabelProvider = (IItemLabelProvider) adapterFactory.adapt(path,
-					IItemLabelProvider.class);
+			itemLabelProvider = (IItemLabelProvider) adapterFactory.adapt(path, IItemLabelProvider.class);
 			return itemLabelProvider.getImage(path);
 
 		default:
-			return overlayImage(
-					object,
-					getResourceLocator().getImage(
-							"full/obj16/"
-									+ Plugin.INSTANCE
-											.imageMapping("SearchLocation")));
+			return overlayImage(object,
+					getResourceLocator().getImage("full/obj16/" + Plugin.INSTANCE.imageMapping("SearchLocation")));
 		}
 	}
 
@@ -194,8 +180,7 @@ public class SearchLocationItemProvider extends ItemProviderAdapter implements
 		switch (notification.getFeatureID(SearchLocation.class)) {
 		case GeneratorPackage.SEARCH_LOCATION__VARIABLE:
 		case GeneratorPackage.SEARCH_LOCATION__PATH:
-			fireNotifyChanged(new ViewerNotification(notification,
-					notification.getNotifier(), true, false));
+			fireNotifyChanged(new ViewerNotification(notification, notification.getNotifier(), true, false));
 			return;
 		}
 		super.notifyChanged(notification);
@@ -209,16 +194,13 @@ public class SearchLocationItemProvider extends ItemProviderAdapter implements
 	 * @generated
 	 */
 	@Override
-	protected void collectNewChildDescriptors(
-			Collection<Object> newChildDescriptors, Object object) {
+	protected void collectNewChildDescriptors(Collection<Object> newChildDescriptors, Object object) {
 		super.collectNewChildDescriptors(newChildDescriptors, object);
 
-		newChildDescriptors.add(createChildParameter(
-				GeneratorPackage.Literals.SEARCH_LOCATION__VARIABLE,
+		newChildDescriptors.add(createChildParameter(GeneratorPackage.Literals.SEARCH_LOCATION__VARIABLE,
 				GeneratorFactory.eINSTANCE.createLocationVariable()));
 
-		newChildDescriptors.add(createChildParameter(
-				GeneratorPackage.Literals.SEARCH_LOCATION__PATH,
+		newChildDescriptors.add(createChildParameter(GeneratorPackage.Literals.SEARCH_LOCATION__PATH,
 				GeneratorFactory.eINSTANCE.createLocationPath()));
 	}
 

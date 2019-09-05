@@ -1,0 +1,11 @@
+// Base project for libraries that only contains IDL Typesupport
+
+project: dcps {
+  libout = .
+
+  Header_Files {
+  }
+
+  Source_Files {
+  }
+}

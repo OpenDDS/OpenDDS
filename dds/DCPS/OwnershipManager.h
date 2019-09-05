@@ -12,6 +12,7 @@
 
 #include "Definitions.h"
 #include "GuidUtils.h"
+#include "InstanceState.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "PoolAllocator.h"
 #include "RepoIdTypes.h"
@@ -26,7 +27,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class InstanceState;
 class DataReaderImpl;
 
 class OpenDDS_Dcps_Export OwnershipManager {
@@ -65,7 +65,7 @@ public:
   };
 
   typedef OPENDDS_VECTOR(WriterInfo) WriterInfos;
-  typedef OPENDDS_VECTOR(InstanceState*) InstanceStateVec;
+  typedef OPENDDS_VECTOR(InstanceState_rch) InstanceStateVec;
 
   struct OwnershipWriterInfos {
     WriterInfo owner_;
@@ -139,7 +139,7 @@ public:
   bool select_owner(const DDS::InstanceHandle_t& instance_handle,
                     const PublicationId& pub_id,
                     const CORBA::Long& ownership_strength,
-                    InstanceState* instance_state);
+                    InstanceState_rch instance_state);
 
   /**
   * Remove an owner of the specified instance.

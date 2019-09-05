@@ -1,7 +1,4 @@
-//
-//
-
-project(*idl): dcps_test_lib {
+project(*idl): dcps_test_idl_only_lib {
   requires += no_opendds_safety_profile
   idlflags      += -Wb,stub_export_include=Messenger_ZeroCopy_export.h \
                    -Wb,stub_export_macro=Messenger_ZeroCopy_Export

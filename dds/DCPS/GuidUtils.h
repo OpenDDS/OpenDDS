@@ -112,8 +112,7 @@ gen_max_marshaled_size(const GUID_t&)
 inline bool
 operator==(const GUID_t& lhs, const GUID_t& rhs)
 {
-  GUID_tKeyLessThan lessThan;
-  return !lessThan(lhs, rhs) && !lessThan(rhs, lhs);
+  return memcmp(&lhs, &rhs, sizeof(GUID_t)) == 0;
 }
 
 inline bool
@@ -136,8 +135,7 @@ struct GuidPrefixEqual {
 inline bool
 operator==(const EntityId_t& lhs, const EntityId_t& rhs)
 {
-  return !GUID_tKeyLessThan::entity_less(lhs, rhs)
-    && !GUID_tKeyLessThan::entity_less(rhs, lhs);
+  return memcmp(&lhs, &rhs, sizeof(EntityId_t)) == 0;
 }
 
 inline bool

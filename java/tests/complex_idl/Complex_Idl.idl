@@ -5,9 +5,6 @@
  * See: http://www.opendds.org/license.html
  */
 
-#pragma DCPS_DATA_TYPE "Complex_Idl::Data"
-#pragma DCPS_DATA_KEY "Complex_Idl::Data id"
-
 #include "tao/OctetSeq.pidl"
 #include "tao/StringSeq.pidl"
 
@@ -34,8 +31,9 @@ module Complex_Idl {
         case DATA_STREAM:   CORBA::OctetSeq stream;
     };
 
+    @topic
     struct Data {
-        long id;
+        @key long id;
         DataUnion payload;
     };
 };

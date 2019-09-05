@@ -1,4 +1,3 @@
-
 // note the following predefined types often have special cases:
 //    char, octet, boolean, string
 // where as all of the integer and float types are just one case.
@@ -25,15 +24,15 @@ module Xyz {
 
   // needed to call size methods on arrays
   struct StructOfArrayOfArrayOfBoolean { ArrayOfArrayOfBoolean f; };
-#pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfArrayOfString"
+  @topic
   struct StructOfArrayOfArrayOfString { ArrayOfArrayOfString f;};
-#pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfArrayOfChar"
+  @topic
   struct StructOfArrayOfArrayOfChar { ArrayOfArrayOfChar f;};
-#pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfArrayOfOctet"
+  @topic
   struct StructOfArrayOfArrayOfOctet { ArrayOfArrayOfOctet f;};
-#pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfArrayOfLong"
+  @topic
   struct StructOfArrayOfArrayOfLong { ArrayOfArrayOfLong f;};
-#pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfArrayOfAnEnum"
+  @topic
   struct StructOfArrayOfArrayOfAnEnum { ArrayOfArrayOfAnEnum f;};
 
   // sequences of sequences
@@ -47,7 +46,7 @@ module Xyz {
   // typedef of a "special" scalar type
   typedef octet OctetTypedef;
 
-#pragma DCPS_DATA_TYPE "Xyz::StructOfSeqOfSeqOfLong"
+  @topic
   struct StructOfSeqOfSeqOfLong { SeqOfSeqOfLong field; };
 
   typedef string<7> SevenStr;
@@ -55,12 +54,12 @@ module Xyz {
     double  f1;
     float   f2;
     boolean f3;
-   SevenStr f4;
-       char f5;
-      octet f6;
+    SevenStr f4;
+    char f5;
+    octet f6;
     OctetTypedef f6a;
-       long f7;
-     AnEnum f8;
+    long f7;
+    AnEnum f8;
     ArrayOfBoolean f10;
     ArrayOfString f11;
     ArrayOfChar f12;
@@ -229,7 +228,7 @@ module Xyz {
   };
 
   // for access to _dcps_* methods
-#pragma DCPS_DATA_TYPE "Xyz::StructAUnion"
+  @topic
   struct StructAUnion {
     AUnion sau_f1;
   };
@@ -252,14 +251,12 @@ module Xyz {
 
   typedef octet OctetArray[3];
 
-#pragma DCPS_DATA_TYPE "Xyz::Foo"
-#pragma DCPS_DATA_KEY "Xyz::Foo key"
-#pragma DCPS_DATA_KEY "Xyz::Foo xcolor"
+  @topic
   struct Foo {
-    long key;
+    @key long key;
     octet octer;
     OctetTypedef theOctetTypedef;
-    AnEnum xcolor;
+    @key AnEnum xcolor;
     OctetArray ooo;
     string theString;
     AStruct thestruct;

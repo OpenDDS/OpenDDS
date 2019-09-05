@@ -1,0 +1,5 @@
+project {
+  specific (vc9, vc10, vc11, vc12, vc14, vs2017, vs2019, nmake) {
+    compile_flags += /bigobj
+  }
+}

@@ -1,4 +1,4 @@
-project: idl2jni {
+project: idl2jni, dcps_test {
 
   idlflags += -SS
   idl2jniflags += -SS

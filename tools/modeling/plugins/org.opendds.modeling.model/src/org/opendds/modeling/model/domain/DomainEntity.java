@@ -17,10 +17,10 @@ import org.opendds.modeling.model.qos.QosPolicy;
  *
  * <p>
  * The following features are supported:
+ * </p>
  * <ul>
  *   <li>{@link org.opendds.modeling.model.domain.DomainEntity#getTransportConfig <em>Transport Config</em>}</li>
  * </ul>
- * </p>
  *
  * @see org.opendds.modeling.model.domain.DomainPackage#getDomainEntity()
  * @model

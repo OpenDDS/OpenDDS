@@ -1,0 +1,11 @@
+// The TEST_ROOT variable provided by this base project is used by other base
+// projects to get an absolute path to a location within tests/ (or some other
+// directory that's not installed) when DDS_ROOT is the installed tree.
+// When building the tests outside of DDS_ROOT, set the TEST_ROOT environment
+// variable to the source repository containing the tests.
+project {
+  expand(TEST_ROOT) {
+    $TEST_ROOT
+    $DDS_ROOT
+  }
+}

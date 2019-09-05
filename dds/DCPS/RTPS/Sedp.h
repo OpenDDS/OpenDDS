@@ -27,6 +27,7 @@
 #include "dds/DCPS/DataSampleHeader.h"
 #include "dds/DCPS/PoolAllocationBase.h"
 #include "dds/DCPS/DiscoveryBase.h"
+#include "dds/DCPS/ReactorInterceptor.h"
 
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/framework/TransportSendListener.h"
@@ -158,6 +159,16 @@ public:
   ICE::Endpoint* get_ice_endpoint();
 
 private:
+
+  class AssociationComplete : public DCPS::ReactorInterceptor::Command {
+  public:
+    AssociationComplete(Sedp* sedp, const DCPS::RepoId& local, const DCPS::RepoId& remote) : sedp_(sedp), local_(local), remote_(remote) {}
+    void execute();
+  private:
+    Sedp* sedp_;
+    DCPS::RepoId local_, remote_;
+  };
+
   Spdp& spdp_;
 
 #ifdef OPENDDS_SECURITY
@@ -644,13 +655,8 @@ private:
 
   static void set_inline_qos(DCPS::TransportLocatorSeq& locators);
 
-  void write_durable_publication_data(const DCPS::RepoId& reader);
-  void write_durable_subscription_data(const DCPS::RepoId& reader);
-
-#ifdef OPENDDS_SECURITY
-  void write_durable_publication_data_secure(const DCPS::RepoId& reader);
-  void write_durable_subscription_data_secure(const DCPS::RepoId& reader);
-#endif
+  void write_durable_publication_data(const DCPS::RepoId& reader, bool secure);
+  void write_durable_subscription_data(const DCPS::RepoId& reader, bool secure);
 
   void write_durable_participant_message_data(const DCPS::RepoId& reader);
 

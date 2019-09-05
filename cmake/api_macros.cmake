@@ -99,6 +99,14 @@ macro(OPENDDS_TARGET_SOURCES target)
     _opendds_options
     ${ARGN})
 
+  if(NOT _opendds_options MATCHES "--(no-)?default-nested")
+    if (OPENDDS_DEFAULT_NESTED)
+      list(APPEND _opendds_options "--default-nested")
+    else()
+      list(APPEND _opendds_options "--no-default-nested")
+    endif()
+  endif()
+
   if(_libs)
     message(WARNING "Ignoring libs '${_libs}' passed into OPENDDS_TARGET_SOURCES.")
   endif()

@@ -9,6 +9,7 @@ use lib "$ENV{DDS_ROOT}/bin";
 use PerlDDS::Run_Test;
 use strict;
 
+PerlDDS::add_lib_path('../ConsolidatedMessengerIdl');
 
 my $dcpsrepo_ior = "repo.ior";
 unlink $dcpsrepo_ior;

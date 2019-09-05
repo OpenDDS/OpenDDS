@@ -1,4 +1,4 @@
-project(AuthenticationTest): dcpsexe, opendds_security, googletest {
+project(AuthenticationTest): dcpsexe, dcps_test, opendds_security, googletest {
   requires += no_opendds_safety_profile
   exename = OpenDDS_AuthenticationTest
 
@@ -7,7 +7,7 @@ project(AuthenticationTest): dcpsexe, opendds_security, googletest {
   }
 }
 
-project(AccessControlTest): dcpsexe, opendds_security, googlemock {
+project(AccessControlTest): dcpsexe, dcps_test, opendds_security, googlemock {
   requires += no_opendds_safety_profile
   exename = OpenDDS_AccessControlTest
 
@@ -16,7 +16,7 @@ project(AccessControlTest): dcpsexe, opendds_security, googlemock {
   }
 }
 
-project(CryptoKeyFactoryTest): dcpsexe, opendds_security, googletest {
+project(CryptoKeyFactoryTest): dcpsexe, dcps_test, opendds_security, googletest {
   requires += no_opendds_safety_profile
   exename = OpenDDS_CryptoKeyFactoryTest
 
@@ -25,7 +25,7 @@ project(CryptoKeyFactoryTest): dcpsexe, opendds_security, googletest {
   }
 }
 
-project(CryptoKeyExchangeTest): dcpsexe, opendds_security, googletest {
+project(CryptoKeyExchangeTest): dcpsexe, dcps_test, opendds_security, googletest {
   requires += no_opendds_safety_profile
   exename = OpenDDS_CryptoKeyExchangeTest
 
@@ -34,7 +34,7 @@ project(CryptoKeyExchangeTest): dcpsexe, opendds_security, googletest {
   }
 }
 
-project(CryptoTransformTest): dcpsexe, opendds_security, googletest {
+project(CryptoTransformTest): dcpsexe, dcps_test, opendds_security, googletest {
   requires += no_opendds_safety_profile
   exename = OpenDDS_CryptoTransformTest
 

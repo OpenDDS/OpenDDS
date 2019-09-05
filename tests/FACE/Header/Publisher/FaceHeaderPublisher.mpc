@@ -1,4 +1,4 @@
-project: dcps_rtps_udp, opendds_face {
+project: dcps_rtps_udp, opendds_face, dcps_test {
   exename = publisher
   after += FaceHeaderTestIdl
   libs  += FaceHeaderTestIdl

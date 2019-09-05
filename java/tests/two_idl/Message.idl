@@ -1,9 +1,7 @@
-#pragma DCPS_DATA_TYPE "Message"
-#pragma DCPS_DATA_KEY "Message id"
-
 #include "Common.idl"
 
+@topic
 struct Message {
-    long id;
+    @key long id;
     Quote payload;
 };

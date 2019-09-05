@@ -29,11 +29,13 @@ jobs:
     VCPKG_ROOT: $(Build.SourcesDirectory)\vcpkg
   steps:
   - script: |
+      if %BuildPlatform%==x64 (set VCVARS_ARCH=x64) else set VCVARS_ARCH=x86
+      echo ##vso[task.setvariable variable=VcVarsArch]%VCVARS_ARCH%
+    displayName: Set VcVarsArch
+  - script: |
       git clone -q --depth 1 git://github.com/Microsoft/vcpkg.git %VCPKG_ROOT%
       call %VCPKG_ROOT%\bootstrap-vcpkg.bat
-      if %BuildPlatform%==x64 (set VCVARS_ARCH=x64) else set VCVARS_ARCH=x86
-      set VCPKG_ARCH=%VCVARS_ARCH%-windows
-      echo ##vso[task.setvariable variable=VcVarsArch]%VCVARS_ARCH%
+      set VCPKG_ARCH=$(VcVarsArch)-windows
       %VCPKG_ROOT%\vcpkg install --triplet %VCPKG_ARCH% openssl xerces-c
       rmdir /s/q %VCPKG_ROOT%\packages %VCPKG_ROOT%\buildtrees
       echo ##vso[task.setvariable variable=VcPkgInst]%VCPKG_ROOT%\installed\%VCPKG_ARCH%
@@ -71,8 +73,7 @@ jobs:
       configuration: $(BuildConfiguration)
       maximumCpuCount: true
   - script: |
-      if %BuildPlatform%==x64 set ARCH=--arch="x64"
-      perl "%DDS_ROOT%\tests\cmake_integration\run_ci_tests.pl" --build-config=$(BuildConfiguration) --generator="Visual Studio 16 2019" %ARCH%
+      perl "%DDS_ROOT%\tests\cmake_integration\run_ci_tests.pl" --build-config=$(BuildConfiguration) --generator="Visual Studio 16 2019" --arch $(BuildPlatform)
     displayName: Compile and run CMake tests
 
 - job: VisualStudio2017
@@ -97,15 +98,18 @@ jobs:
     VCPKG_ROOT: $(Build.SourcesDirectory)\vcpkg
   steps:
   - script: |
+      if %BuildPlatform%==x64 (set VCVARS_ARCH=x64) else set VCVARS_ARCH=x86
+      echo ##vso[task.setvariable variable=VcVarsArch]%VCVARS_ARCH%
+    displayName: Set VcVarsArch
+  - script: |
       git clone -q --depth 1 git://github.com/Microsoft/vcpkg.git %VCPKG_ROOT%
       call %VCPKG_ROOT%\bootstrap-vcpkg.bat
-      if %BuildPlatform%==x64 (set VCVARS_ARCH=x64) else set VCVARS_ARCH=x86
-      set VCPKG_ARCH=%VCVARS_ARCH%-windows
-      echo ##vso[task.setvariable variable=VcVarsArch]%VCVARS_ARCH%
+      set VCPKG_ARCH=$(VcVarsArch)-windows
       %VCPKG_ROOT%\vcpkg install --triplet %VCPKG_ARCH% openssl xerces-c
       rmdir /s/q %VCPKG_ROOT%\packages %VCPKG_ROOT%\buildtrees
       echo ##vso[task.setvariable variable=VcPkgInst]%VCPKG_ROOT%\installed\%VCPKG_ARCH%
     displayName: Vcpkg
+    condition: not(and(eq(variables['BuildConfiguration'], 'Debug'), eq(variables['BuildPlatform'], 'x64')))
   - task: BatchScript@1
     displayName: VcVars
     inputs:
@@ -120,7 +124,9 @@ jobs:
       modifyEnvironment: true
   - script: |
       if %BuildConfiguration%==Release set OPT=--no-tests --no-debug --optimize
-      call configure -v --ace-github-latest --security --xerces3=$(VcPkgInst) --openssl=$(VcPkgInst) %OPT%
+      set SEC=--security --xerces3=$(VcPkgInst) --openssl=$(VcPkgInst)
+      if %BuildConfiguration%==Debug if %BuildPlatform%==x64 set SEC= # Debug64 Fills up Disk with Security
+      call configure -v --ace-github-latest %SEC% %OPT%
       perl tools\scripts\show_build_config.pl
       if %BuildConfiguration%==Release (set SLN=DDS_TAOv2.sln) else set SLN=DDS_TAOv2_all.sln
       echo ##vso[task.setvariable variable=BuildSolution]%SLN%
@@ -139,8 +145,7 @@ jobs:
       configuration: $(BuildConfiguration)
       maximumCpuCount: true
   - script: |
-      if %BuildPlatform%==x64 set ARCH=--arch="x64"
-      perl "%DDS_ROOT%\tests\cmake_integration\run_ci_tests.pl" --build-config=$(BuildConfiguration) --generator="Visual Studio 15 2017" %ARCH%
+      perl "%DDS_ROOT%\tests\cmake_integration\run_ci_tests.pl" --build-config=$(BuildConfiguration) --generator="Visual Studio 15 2017" --arch $(BuildPlatform)
     displayName: Compile and run CMake tests
 
 - job: VisualStudio2015
@@ -156,11 +161,13 @@ jobs:
     VCPKG_ROOT: $(Build.SourcesDirectory)\vcpkg
   steps:
   - script: |
+      if %BuildPlatform%==x64 (set VCVARS_ARCH=x64) else set VCVARS_ARCH=x86
+      echo ##vso[task.setvariable variable=VcVarsArch]%VCVARS_ARCH%
+    displayName: Set VcVarsArch
+  - script: |
       git clone -q --depth 1 git://github.com/Microsoft/vcpkg.git %VCPKG_ROOT%
       call %VCPKG_ROOT%\bootstrap-vcpkg.bat
-      if %BuildPlatform%==x64 (set VCVARS_ARCH=x64) else set VCVARS_ARCH=x86
-      set VCPKG_ARCH=%VCVARS_ARCH%-windows
-      echo ##vso[task.setvariable variable=VcVarsArch]%VCVARS_ARCH%
+      set VCPKG_ARCH=$(VcVarsArch)-windows
       %VCPKG_ROOT%\vcpkg install --triplet %VCPKG_ARCH% openssl xerces-c
       rmdir /s/q %VCPKG_ROOT%\packages %VCPKG_ROOT%\buildtrees
       echo ##vso[task.setvariable variable=VcPkgInst]%VCPKG_ROOT%\installed\%VCPKG_ARCH%
@@ -219,10 +226,8 @@ jobs:
         ConfigOpts: --no-debug --optimize --java=/usr/lib/jvm/zulu-12-azure-amd64
       Safety:
         ConfigOpts: --safety-profile
-        DisableCMakeIntegrationTest: true
       SafetyBaseNoBuiltinTopics:
         ConfigOpts: --safety-profile=base --no-built-in-topics
-        DisableCMakeIntegrationTest: true
       Security:
         ConfigOpts: --security --features=versioned_namespace=1
         PackageDeps: libxerces-c-dev libssl-dev cmake
@@ -275,15 +280,12 @@ jobs:
   - script: make -sj6
     displayName: Compile
   - script: |
-      if grep -q 'compiler=clang' <<<"$(ConfigOpts)"; then
-        export CXX=/usr/bin/$(grep -Eo 'clang\+\+-[0-9.]+' <<<"$(ConfigOpts)")
-        export CC=/usr/bin/${CXX/++/}
-      fi
       source $(Build.SourcesDirectory)/setenv.sh && $DDS_ROOT/tests/cmake_integration/run_ci_tests.pl
     displayName: Compile and run CMake tests
     condition: >
       and(succeeded(),
-          eq(false, variables['DisableCMakeIntegrationTest']))
+          not(contains(variables['ConfigOpts'], '--safety-profile')),
+          not(contains(variables['ConfigOpts'], '--no-ownership-profile')))
 
 - job: macOS
   timeoutInMinutes: 90

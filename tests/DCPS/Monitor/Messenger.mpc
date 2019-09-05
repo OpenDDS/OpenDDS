@@ -1,22 +1,6 @@
-
-project(Monitor*idl): dcps_test_lib {
-  requires += no_opendds_safety_profile
-  idlflags      += -Wb,stub_export_include=Messenger_export.h \
-                   -Wb,stub_export_macro=Messenger_Export
-  dcps_ts_flags += -Wb,export_macro=Messenger_Export
-  dynamicflags  += MESSENGER_BUILD_DLL
-
-  TypeSupport_Files {
-    Messenger.idl
-  }
-}
-
-
-project(Monitor*Publisher): dcpsexe, dcps_tcp, dcps_monitor {
-  requires += no_opendds_safety_profile
+project(Monitor*Publisher): dcpsexe, dcps_test, dcps_cm, dcps_tcp, dcps_monitor {
+  requires += no_opendds_safety_profile built_in_topics
   exename   = publisher
-  after    += Monitor*idl
-  libs     += Monitor*idl
 
   Idl_Files {
   }
@@ -27,11 +11,9 @@ project(Monitor*Publisher): dcpsexe, dcps_tcp, dcps_monitor {
   }
 }
 
-project(Monitor*Subscriber): dcpsexe, dcps_tcp, dcps_monitor {
-  requires += no_opendds_safety_profile
+project(Monitor*Subscriber): dcpsexe, dcps_test, dcps_cm, dcps_tcp, dcps_monitor {
+  requires += no_opendds_safety_profile built_in_topics
   exename   = subscriber
-  after    += Monitor*idl
-  libs     += Monitor*idl
 
   Idl_Files {
   }
@@ -42,15 +24,9 @@ project(Monitor*Subscriber): dcpsexe, dcps_tcp, dcps_monitor {
   }
 }
 
-project(Monitor*monitor): dcpsexe, dcps_tcp, dcps_monitor {
-  requires += no_opendds_safety_profile
+project(Monitor*monitor): dcpsexe, dcps_test, dcps_cm, dcps_tcp, dcps_monitor, msvc_bigobj {
+  requires += no_opendds_safety_profile built_in_topics
   exename   = monitor
-  after    += Monitor*idl
-  libs     += Monitor*idl
-
-  specific (vc9, vc10, vc11, vc12, vc14, vs2017, vs2019, nmake) {
-    compile_flags += /bigobj
-  }
 
   Idl_Files {
   }

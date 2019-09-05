@@ -120,11 +120,12 @@ public:
     DDS::StatusMask mask = OpenDDS::DCPS::DEFAULT_STATUS_MASK)
   {
     determine_participant(participant);
-    return create_topic_facade<Traits>(topic_name,
-                                                    participant,
-                                                    TOPIC_QOS_DEFAULT,
-                                                    listener,
-                                                    mask);
+    return create_topic_facade<Traits>(
+      topic_name,
+      participant,
+      TOPIC_QOS_DEFAULT,
+      listener,
+      mask);
   }
 
   template<typename Traits, typename QosFunc>
@@ -138,11 +139,12 @@ public:
     DDS::TopicQos qos;
     participant->get_default_topic_qos(qos);
     qos_func(qos);
-    return create_topic_facade<Traits>(topic_name,
-                                                    participant,
-                                                    qos,
-                                                    listener,
-                                                    mask);
+    return create_topic_facade<Traits>(
+      topic_name,
+      participant,
+      qos,
+      listener,
+      mask);
   }
 
   template<typename MessageType, typename QosFunc>

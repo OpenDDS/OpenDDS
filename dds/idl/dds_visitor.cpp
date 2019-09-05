@@ -41,6 +41,7 @@
 #include "v8_generator.h"
 #include "rapidjson_generator.h"
 #include "langmap_generator.h"
+#include "topic_keys.h"
 
 #include <iostream>
 #include <vector>
@@ -73,12 +74,11 @@ namespace {
     }
   }
 
-  bool field_check_anon(AST_Field* f, const char* ct, const char* cn)
+  bool field_check_anon(AST_Field* f)
   {
     AST_Decl::NodeType nt = f->field_type()->node_type();
     if (nt == AST_Decl::NT_array || nt == AST_Decl::NT_sequence) {
-      std::cerr << "ERROR: field " << f->local_name()->get_string()
-                << " in " << ct << " " << cn << " has an anonymous type.\n";
+      idl_global->err()->misc_error("field has an anonymous type.", f);
       return false;
     }
     return true;
@@ -230,17 +230,32 @@ dds_visitor::visit_structure(AST_Structure* node)
   const char* name = node->local_name()->get_string();
 
   BE_Comment_Guard g("STRUCT", name);
-
   ACE_UNUSED_ARG(g);
+
+  // Check That Sample Keys Are Valid
+  try {
+    TopicKeys(node).count();
+  } catch (TopicKeys::Error& error) {
+    idl_global->err()->misc_error(error.what(), error.node());
+    return -1;
+  }
+
+  if (idl_global->is_dcps_type(node->name())) {
+    if (be_global->warn_about_dcps_data_type()) {
+      idl_global->err()->misc_warning("\n"
+        "  DCPS_DATA_TYPE and DCPS_DATA_KEY pragma statements are deprecated; please\n"
+        "  use @topic, @key, @nested, and @default_nested instead. See the OpenDDS\n"
+        "  Developer's Guide for more information.", node);
+    }
+  }
 
   size_t nfields = node->nfields();
   vector<AST_Field*> fields;
   fields.reserve(nfields);
-
   for (CORBA::ULong i = 0; i < nfields; ++i) {
     AST_Field** f;
     node->field(f, i);
-    if (!field_check_anon(*f, "struct", name)) {
+    if (!field_check_anon(*f)) {
       error_ = true;
       return -1;
     }
@@ -253,7 +268,7 @@ dds_visitor::visit_structure(AST_Structure* node)
   }
 
   if (be_global->java()) {
-    java_ts_generator::generate(node->name());
+    java_ts_generator::generate(node);
   }
 
   return 0;
@@ -393,7 +408,7 @@ dds_visitor::visit_union(AST_Union* node)
   for (CORBA::ULong i = 0; i < nfields; ++i) {
     AST_Field** f;
     node->field(f, i);
-    if (!field_check_anon(*f, "union", name)) {
+    if (!field_check_anon(*f)) {
       error_ = true;
       return -1;
     }
