@@ -1537,7 +1537,7 @@ namespace OpenDDS {
       struct DiscoveredParticipant {
 
         DiscoveredParticipant()
-        : bit_ih_(0)
+        : bit_ih_(DDS::HANDLE_NIL)
 #ifdef OPENDDS_SECURITY
         , has_last_stateless_msg_(false)
         , auth_state_(AS_UNKNOWN)
@@ -1558,11 +1558,11 @@ namespace OpenDDS {
         , last_seen_(t)
         , bit_ih_(DDS::HANDLE_NIL)
 #ifdef OPENDDS_SECURITY
-        , has_last_stateless_msg_(false),
-        , auth_state_(AS_UNKNOWN),
-        , identity_handle_(DDS::HANDLE_NIL),
-        , handshake_handle_(DDS::HANDLE_NIL),
-        , permissions_handle_(DDS::HANDLE_NIL),
+        , has_last_stateless_msg_(false)
+        , auth_state_(AS_UNKNOWN)
+        , identity_handle_(DDS::HANDLE_NIL)
+        , handshake_handle_(DDS::HANDLE_NIL)
+        , permissions_handle_(DDS::HANDLE_NIL)
         , crypto_handle_(DDS::HANDLE_NIL)
 #endif
         {
