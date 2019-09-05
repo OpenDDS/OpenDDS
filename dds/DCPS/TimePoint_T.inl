@@ -10,7 +10,7 @@ namespace DCPS {
 template<typename AceClock>
 ACE_INLINE
 TimePoint_T<AceClock>::TimePoint_T()
-: value_(clock())
+: value_(zero_value.value())
 {
 }
 

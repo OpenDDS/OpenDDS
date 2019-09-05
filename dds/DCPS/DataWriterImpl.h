@@ -99,7 +99,7 @@ public:
              const SequenceNumber& sequence)
       : tstamp_(MonotonicTimePoint::now())
       , max_wait_(max_wait)
-      ,  sequence_(sequence)
+      , sequence_(sequence)
     {
     }
 
