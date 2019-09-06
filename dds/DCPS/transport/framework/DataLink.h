@@ -396,7 +396,7 @@ private:
   typedef OPENDDS_MAP_CMP(RepoId, RepoIdSet, GUID_tKeyLessThan) AssocByLocal;
   AssocByLocal assoc_by_local_;
 
-  /// A (smart) pointer to the TransportImpl that created this DataLink.
+  /// A reference to the TransportImpl that created this DataLink.
   TransportImpl& impl_;
 
   /// The id for this DataLink
