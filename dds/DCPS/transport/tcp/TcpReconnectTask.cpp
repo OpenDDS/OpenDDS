@@ -5,19 +5,18 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "Tcp_pch.h"
-#include "TcpReconnectTask.h"
-#include "TcpConnection.h"
-#include "TcpSendStrategy.h"
+#include "dds/DCPS/transport/tcp/TcpReconnectTask.h"
+#include "dds/DCPS/transport/tcp/TcpConnection.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
-OpenDDS::DCPS::TcpReconnectTask::TcpReconnectTask(
-  OpenDDS::DCPS::TcpConnection* connection)
-  : connection_(connection)
+namespace OpenDDS {
+namespace DCPS {
+
+TcpReconnectTask::TcpReconnectTask() : connection_(), mutex_(), cv_(mutex_)
 {
-  DBG_ENTRY_LVL("TcpReconnectTask","TcpReconnectTask",6);
+  DBG_ENTRY_LVL("TcpReconnectTask", "TcpReconnectTask", 6);
   if (open()) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: Reconnect task failed to open : %p\n"),
@@ -25,29 +24,53 @@ OpenDDS::DCPS::TcpReconnectTask::TcpReconnectTask(
   }
 }
 
-OpenDDS::DCPS::TcpReconnectTask::~TcpReconnectTask()
+TcpReconnectTask::~TcpReconnectTask()
 {
-  DBG_ENTRY_LVL("TcpReconnectTask","~TcpReconnectTask",6);
+  DBG_ENTRY_LVL("TcpReconnectTask", "~TcpReconnectTask", 6);
 }
 
-void OpenDDS::DCPS::TcpReconnectTask::execute(ReconnectOpType& op)
+bool TcpReconnectTask::reconnect(TcpConnection_rch connection)
 {
-  DBG_ENTRY_LVL("TcpReconnectTask","execute",6);
-
-  // Ignore all signals to avoid
-  //     ERROR: <something descriptive> Interrupted system call
-  // The main thread will handle signals.
-  sigset_t set;
-  ACE_OS::sigfillset(&set);
-  ACE_OS::thr_sigsetmask(SIG_SETMASK, &set, NULL);
-
-  if (op == DO_RECONNECT) {
-    if (this->connection_->reconnect() == -1) {
-      this->connection_->tear_link();
-    }
-
-  } else
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TcpReconnectTask::svc unknown operation %d\n", op));
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, 0);
+  if (!connection_) {
+    connection_ = connection;
+    activate(1);
+  }
+  return false;
 }
+
+void TcpReconnectTask::wait_complete()
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  while (connection_) {
+    cv_.wait();
+  }
+}
+
+int TcpReconnectTask::svc()
+{
+  DBG_ENTRY_LVL("TcpReconnectTask", "svc", 6);
+
+  TcpConnection_rch connection;
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, 0);
+    connection = connection_;
+  }
+
+  if (connection && connection->reconnect() == -1) {
+    connection->tear_link();
+  }
+
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, 0);
+    connection_.reset();
+    cv_.broadcast();
+  }
+
+  return 0;
+}
+
+} // namespace DCPS
+} // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

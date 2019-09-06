@@ -152,15 +152,13 @@ private:
   const std::string& config_name() const;
 
   void spawn_reconnect_thread();
-  static ACE_THR_FUNC_RETURN reconnect_thread_fun(void* conn);
-
 
   typedef ACE_SYNCH_MUTEX     LockType;
   typedef ACE_Guard<LockType> GuardType;
 
   /// Lock to avoid the reconnect() called multiple times when
   /// both send() and recv() fail.
-  LockType  reconnect_lock_;
+  LockType reconnect_lock_;
 
   /// Flag indicates if connected or disconnected. It's set to true
   /// when actively connecting or passively accepting succeeds and set
@@ -181,6 +179,9 @@ private:
 
   /// Datalink object which is needed for connection lost callback.
   TcpDataLink_rch link_;
+
+  /// Impl object which is needed for connection objects and reconnect task
+  TcpTransport_rch impl_;
 
   /// The id of the scheduled timer. The timer is scheduled to check if the connection
   /// is re-established during the passive_reconnect_duration_. This id controls
@@ -206,7 +207,8 @@ private:
 
   /// Small unique identifying value.
   std::size_t id_;
-  ACE_thread_t reconnect_thread_;
+  //ACE_thread_t reconnect_thread_;
+  TcpReconnectTask reconnect_task_;
 
   /// Get name of the current reconnect state as a string.
   OPENDDS_STRING reconnect_state_string() const;

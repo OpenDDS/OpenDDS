@@ -54,10 +54,8 @@ OpenDDS::DCPS::TcpConnection::TcpConnection()
   , passive_setup_buffer_(sizeof(ACE_UINT32))
   , transport_during_setup_(0)
   , id_(0)
-  , reconnect_thread_(0)
 {
   DBG_ENTRY_LVL("TcpConnection","TcpConnection",6);
-
   this->reference_counting_policy().value(ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
 }
 
@@ -77,23 +75,29 @@ OpenDDS::DCPS::TcpConnection::TcpConnection(const ACE_INET_Addr& remote_address,
   , passive_setup_(false)
   , transport_during_setup_(0)
   , id_(0)
-  , reconnect_thread_(0)
 {
   DBG_ENTRY_LVL("TcpConnection","TcpConnection",6);
   this->reference_counting_policy().value(ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
-
 }
+
 OpenDDS::DCPS::TcpConnection::~TcpConnection()
 {
   DBG_ENTRY_LVL("TcpConnection","~TcpConnection",6);
-  if (reconnect_thread_ &&
-    // This is for Windows, where join doesn't check if the thread is the same
-    // and the thread will hang itself if it tries to join itself.
-    !ACE_OS::thr_equal(ACE_OS::thr_self(), reconnect_thread_)
-  ) {
-    ACE_Thread_Manager::instance()->join(reconnect_thread_);
+}
+
+void
+OpenDDS::DCPS::TcpConnection::set_datalink(const OpenDDS::DCPS::TcpDataLink_rch& link)
+{
+  DBG_ENTRY_LVL("TcpConnection","set_datalink",6);
+  // Keep a "copy" of the reference to the data link for ourselves.
+  link_ = link;
+  if (link_) {
+    impl_ = RcHandle<TcpTransport>(static_cast<TcpTransport*>(&link_->impl()), inc_count());
+  } else {
+    impl_.reset();
   }
 }
+
 
 OpenDDS::DCPS::TcpSendStrategy_rch
 OpenDDS::DCPS::TcpConnection::send_strategy()
@@ -342,7 +346,7 @@ OpenDDS::DCPS::TcpConnection::close(u_long)
 const std::string&
 OpenDDS::DCPS::TcpConnection::config_name() const
 {
-  return this->link_->impl().config().name();
+  return impl_->config().name();
 }
 
 int
@@ -890,16 +894,16 @@ OpenDDS::DCPS::TcpConnection::transfer(TcpConnection* connection)
                ACE_TEXT(" should NOT be called by the connector side \n")));
   }
 
-  if (reconnect_thread_) {
-      ACE_Thread_Manager::instance()->join(reconnect_thread_);
-      reconnect_thread_ = 0;
-  }
+  // Does nothing if not reconnecting
+  reconnect_task_.wait_complete();
+
   // connection->receive_strategy_ = this->receive_strategy_;
   // connection->send_strategy_ = this->send_strategy_;
   connection->remote_address_ = this->remote_address_;
   connection->local_address_ = this->local_address_;
   connection->tcp_config_ = this->tcp_config_;
   connection->link_ = this->link_;
+  connection->impl_ = this->impl_;
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "transfer(%C:%d->%C:%d) passive reconnected. new con %@   "
@@ -1009,52 +1013,10 @@ void
 OpenDDS::DCPS::TcpConnection::spawn_reconnect_thread()
 {
   DBG_ENTRY_LVL("TcpConnection","spawn_reconnect_thread",6);
-  GuardType guard(this->reconnect_lock_);
-  TcpReceiveStrategy_rch recv_strat = receive_strategy();
-  if (!shutdown_ && recv_strat) {
-    // Make sure the associated receive strategy outlives the connection object
-    recv_strat->_add_ref();
-    // Make sure the associated transport_config outlives the connection object.
-    TransportInst& transport_config = this->link_->impl().config();
-    transport_config._add_ref();
-    // add the reference count to be picked up from the new thread
-    this->_add_ref();
-    if (ACE_Thread_Manager::instance()->spawn(&reconnect_thread_fun,
-                                              this,
-                                              THR_NEW_LWP|THR_JOINABLE|THR_INHERIT_SCHED,
-                                              &reconnect_thread_) == -1){
-      // we need to decrement the reference count when thread creation fails.
-      this->_remove_ref();
-      recv_strat->_remove_ref();
-      transport_config._remove_ref();
-    }
+  GuardType guard(reconnect_lock_);
+  if (!shutdown_) {
+    reconnect_task_.reconnect(RcHandle<TcpConnection>(this, inc_count()));
   }
-}
-
-ACE_THR_FUNC_RETURN
-OpenDDS::DCPS::TcpConnection::reconnect_thread_fun(void* arg)
-{
-  DBG_ENTRY_LVL("TcpConnection","reconnect_thread_fun",6);
-
-  // Ignore all signals to avoid
-  //     ERROR: <something descriptive> Interrupted system call
-  // The main thread will handle signals.
-  sigset_t set;
-  ACE_OS::sigfillset(&set);
-  ACE_OS::thr_sigsetmask(SIG_SETMASK, &set, NULL);
-
-  // Make sure the associated transport_config and recv_strat outlive the connection object.
-  RcHandle<TransportInst> transport_config;
-  TcpReceiveStrategy_rch recv_strat;
-  TcpConnection_rch connection(static_cast<TcpConnection*>(arg), keep_count());
-  recv_strat = TcpReceiveStrategy_rch(connection->receive_strategy().get(), keep_count());
-  transport_config = RcHandle<TransportInst>(&connection->link_->impl().config(), keep_count());
-
-  if (connection->reconnect() == -1) {
-    connection->tear_link();
-  }
-
-  return 0;
 }
 
 OPENDDS_STRING
