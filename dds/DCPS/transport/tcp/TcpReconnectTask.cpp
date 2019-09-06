@@ -5,6 +5,7 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include "Tcp_pch.h"
 #include "dds/DCPS/transport/tcp/TcpReconnectTask.h"
 #include "dds/DCPS/transport/tcp/TcpConnection.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
