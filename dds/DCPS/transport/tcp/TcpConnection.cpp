@@ -988,11 +988,11 @@ OpenDDS::DCPS::TcpConnection::tear_link()
 void
 OpenDDS::DCPS::TcpConnection::shutdown()
 {
-  DBG_ENTRY_LVL("TcpConnection","shutdown",6);
-  GuardType guard(this->reconnect_lock_);
-  this->shutdown_ = true;
+  DBG_ENTRY_LVL("TcpConnection", "shutdown", 6);
+  GuardType guard(reconnect_lock_);
+  shutdown_ = true;
+  reconnect_task_.wait_complete();
   ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH>::shutdown();
-
 }
 
 ACE_Event_Handler::Reference_Count

@@ -433,6 +433,9 @@ TcpTransport::shutdown_i()
   {
     GuardType guard(this->connections_lock_);
 
+    for (ConnectionMap::iterator it = connections_.begin(); it != connections_.end(); ++it) {
+      it->second->shutdown();
+    }
     this->connections_.clear();
     this->pending_connections_.clear();
   }
