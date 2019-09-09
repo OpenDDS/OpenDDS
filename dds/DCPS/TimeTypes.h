@@ -35,18 +35,28 @@ typedef TimePoint_T<SystemClock> SystemTimePoint;
  * ACE_Time_Policy that OpenDDS uses for internal timing.
  *
  * ACE_Monotonic_Time_Policy protects OpenDDS from being effected by changes to
- * the system clock to a certain degree. This is what will be passed from the
- * Reactor in handle_timeout.
- *
- * ConditionTime will have to be passed to ACE_Conditions to enable the
- * monotonic behavior. See the example in the "Time" section of
- * docs/guidelines.md.
+ * the system clock to a certain degree.
  */
 ///@{
+#if defined(__APPLE__) && defined(__MACH__)
+/*
+ * As of writing, ACE_Monotonic_Time_Policy doesn't support Darwin systems like
+ * macOS. Use SystemClock instead, because ACE_Monotonic_Time_Policy falls back
+ * to returing ACE_Time_Value::zero for some reason.
+ */
+typedef SystemClock MonotonicClock;
+#else
 typedef ACE_Monotonic_Time_Policy MonotonicClock;
+#endif
 typedef TimePoint_T<MonotonicClock> MonotonicTimePoint;
-typedef ACE_Condition_Attributes_T<MonotonicClock> ConditionTime;
 ///@}
+
+/**
+ * ConditionTime will have to be passed to ACE_Condition for it to intrepret
+ * the ACE_Time_Value* argument of wait as monotonic time. See the example in
+ * the "Time" section of docs/guidelines.md.
+ */
+typedef ACE_Condition_Attributes_T<MonotonicClock> ConditionTime;
 
 } // namespace DCPS
 } // namespace OpenDDS
