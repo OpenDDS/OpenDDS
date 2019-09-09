@@ -45,10 +45,7 @@ RtpsUdpSendStrategy::RtpsUdpSendStrategy(RtpsUdpDataLink* link,
                     rtps_header_data_, 0, 0, ACE_Message_Block::DONT_DELETE, 0),
     rtps_header_mb_(&rtps_header_db_, ACE_Message_Block::DONT_DELETE)
 {
-  rtps_header_.prefix[0] = 'R';
-  rtps_header_.prefix[1] = 'T';
-  rtps_header_.prefix[2] = 'P';
-  rtps_header_.prefix[3] = 'S';
+  std::memcpy(rtps_header_.prefix, RTPS::PROTOCOL_RTPS, sizeof RTPS::PROTOCOL_RTPS);
   rtps_header_.version = OpenDDS::RTPS::PROTOCOLVERSION;
   rtps_header_.vendorId = OpenDDS::RTPS::VENDORID_OPENDDS;
   std::memcpy(rtps_header_.guidPrefix, local_prefix,

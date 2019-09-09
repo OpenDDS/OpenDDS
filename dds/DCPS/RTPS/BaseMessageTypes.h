@@ -52,6 +52,8 @@ namespace OpenDDS {
 
     const LocatorUDPv4_t LOCATORUDPv4_INVALID = { 0, 0 };
 
+    const ACE_CDR::Octet PROTOCOL_RTPS[] = {'R', 'T', 'P', 'S'};
+
     const ProtocolVersion_t PROTOCOLVERSION_1_0 = { 1, 0 };
     const ProtocolVersion_t PROTOCOLVERSION_1_1 = { 1, 1 };
     const ProtocolVersion_t PROTOCOLVERSION_2_0 = { 2, 0 };

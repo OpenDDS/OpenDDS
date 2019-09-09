@@ -18,6 +18,7 @@
 #include "dds/DCPS/Message_Block_Ptr.h"
 #include "dds/DCPS/Serializer.h"
 
+#include "dds/DCPS/RTPS/BaseMessageTypes.h"
 #include "dds/DCPS/RTPS/MessageTypes.h"
 #include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
 
@@ -1664,10 +1665,10 @@ bool CryptoBuiltInImpl::decode_rtps_message(
   SecurityException& ex)
 {
   if (DDS::HANDLE_NIL == receiving_participant_crypto) {
-    return CommonUtilities::set_security_error(ex, -1, 0, "Invalid Receiving Participant handle");
+    return CommonUtilities::set_security_error(ex, -1, 0, "No Receiving Participant handle");
   }
   if (DDS::HANDLE_NIL == sending_participant_crypto) {
-    return CommonUtilities::set_security_error(ex, -1, 0, "No Sending Participant handle");
+    return CommonUtilities::set_security_error(ex, -1, 1, "No Sending Participant handle");
   }
 
   ACE_Message_Block mb_in(to_mb(encoded_buffer.get_buffer()), encoded_buffer.length());
@@ -1676,9 +1677,130 @@ bool CryptoBuiltInImpl::decode_rtps_message(
 
   RTPS::Header rtpsHeader;
   if (!(de_ser >> rtpsHeader)) {
-    return CommonUtilities::set_security_error(ex, -1, 0, "Failed to deserialize Header");
+    return CommonUtilities::set_security_error(ex, -2, 0, "Failed to deserialize Header");
   }
 
+  CryptoHeader ch;
+  CryptoFooter cf;
+  bool haveCryptoHeader = false, haveCryptoFooter = false;
+  char* afterSrtpsPrefix;
+  unsigned int sizeOfAuthenticated, sizeOfEncrypted;
+  char* encrypted = 0;
+
+  for (int i = 0; de_ser.available_r(); ++i) {
+    if (de_ser.available_r() < RTPS::SMHDR_SZ) {
+      return CommonUtilities::set_security_error(ex, -3, i, "Failed to deserialize SubmessageHeader");
+    }
+
+    ACE_CDR::Octet type, flags;
+    de_ser >> ACE_InputCDR::to_octet(type);
+    de_ser >> ACE_InputCDR::to_octet(flags);
+    de_ser.swap_bytes((flags & RTPS::FLAG_E) != ACE_CDR_BYTE_ORDER);
+    ACE_CDR::UShort octetsToNext;
+    de_ser >> octetsToNext;
+    de_ser.swap_bytes(Serializer::SWAP_BE);
+
+    if (i == 0 && type == RTPS::SRTPS_PREFIX) {
+      if (!(de_ser >> ch)) {
+        return CommonUtilities::set_security_error(ex, -4, i, "Failed to deserialize CryptoHeader");
+      }
+      if (octetsToNext < CRYPTO_HEADER_LENGTH || !de_ser.skip(octetsToNext - CRYPTO_HEADER_LENGTH)) {
+        return CommonUtilities::set_security_error(ex, -5, i, "Failed to find submessage after SRTPS_PREFIX");
+      }
+      afterSrtpsPrefix = mb_in.rd_ptr();
+      haveCryptoHeader = true;
+
+    } else if (haveCryptoHeader && type == RTPS::SEC_BODY) {
+      if (!(de_ser >> sizeOfEncrypted)) {
+        return CommonUtilities::set_security_error(ex, -13, i, "Failed to deserialize CryptoContent length");
+      }
+      const unsigned short sz = static_cast<unsigned short>(DCPS::max_marshaled_size_ulong());
+      if (sizeOfEncrypted + sz > octetsToNext) {
+        return CommonUtilities::set_security_error(ex, -14, i, "CryptoContent length out of bounds");
+      }
+      encrypted = mb_in.rd_ptr();
+      if (octetsToNext < sz || !de_ser.skip(octetsToNext - sz)) {
+        return CommonUtilities::set_security_error(ex, -15, i, "Failed to find submessage after SEC_BODY");
+      }
+
+    } else if (haveCryptoHeader && type == RTPS::SRTPS_POSTFIX) {
+      sizeOfAuthenticated = static_cast<unsigned int>(mb_in.rd_ptr() - afterSrtpsPrefix - RTPS::SMHDR_SZ);
+      const size_t availablePreFooter = de_ser.available_r();
+      if (!(de_ser >> cf)) {
+        return CommonUtilities::set_security_error(ex, -7, i, "Failed to deserialize CryptoFooter");
+      }
+      if (octetsToNext && availablePreFooter != octetsToNext) {
+        return CommonUtilities::set_security_error(ex, -8, i, "SRTPS_POSTFIX was not the final submessage");
+      }
+      haveCryptoFooter = true;
+      break;
+
+    } else if (octetsToNext == 0 && type != RTPS::PAD && type != RTPS::INFO_TS) {
+      break;
+
+    } else {
+      if (!de_ser.skip(octetsToNext)) {
+        return CommonUtilities::set_security_error(ex, -6, i, "Failed to find next submessage");
+      }
+    }
+  }
+
+  if (!haveCryptoHeader || !haveCryptoFooter) {
+    return CommonUtilities::set_security_error(ex, -9, 0, "Failed to find SRTPS_PREFIX/POSTFIX wrapper");
+  }
+
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  const KeySeq& keyseq = keys_[sending_participant_crypto];
+  bool foundKey = false;
+  DDS::OctetSeq transformed;
+  for (unsigned int i = 0; !foundKey && i < keyseq.length(); ++i) {
+    if (matches(keyseq[i], ch)) {
+      const KeyId_t sKey = std::make_pair(sending_participant_crypto, i);
+
+      if (encrypts(keyseq[i])) {
+        if (!encrypted) {
+          return CommonUtilities::set_security_error(ex, -15, 0, "Failed to find SEC_BODY submessage");
+        }
+        foundKey = true;
+        if (!decrypt(keyseq[i], sessions_[sKey], encrypted, sizeOfEncrypted,
+                     ch, cf, transformed, ex)) {
+          return false;
+        }
+
+      } else if (authenticates(keyseq[i])) {
+        foundKey = true;
+        if (!verify(keyseq[i], sessions_[sKey], afterSrtpsPrefix, sizeOfAuthenticated,
+                    ch, cf, transformed, ex)) {
+          return false;
+        }
+
+      } else {
+        return CommonUtilities::set_security_error(ex, -10, 2, "Key transform kind unrecognized");
+      }
+    }
+  }
+
+  if (!foundKey) {
+    return CommonUtilities::set_security_error(ex, -10, 1, "Crypto Key not found");
+  }
+
+  if (transformed.length() < RTPS::SMHDR_SZ + RTPS::INFO_SRC_SZ
+      || transformed[0] != RTPS::INFO_SRC) {
+    return CommonUtilities::set_security_error(ex, -11, 0, "Plaintext doesn't start with INFO_SRC");
+  }
+
+  static const int GuidPrefixOffset = 8; // "RTPS", Version(2), Vendor(2)
+  if (std::memcmp(transformed.get_buffer() + RTPS::SMHDR_SZ + GuidPrefixOffset,
+                  encoded_buffer.get_buffer() + GuidPrefixOffset,
+                  sizeof(DCPS::GuidPrefix_t))) {
+    return CommonUtilities::set_security_error(ex, -12, 0, "Header GUID Prefix doesn't match INFO_SRC");
+  }
+
+  plain_buffer.length(transformed.length() - RTPS::SMHDR_SZ);
+  std::memcpy(plain_buffer.get_buffer(), RTPS::PROTOCOL_RTPS, sizeof RTPS::PROTOCOL_RTPS);
+  std::memcpy(plain_buffer.get_buffer() + sizeof RTPS::PROTOCOL_RTPS,
+              transformed.get_buffer() + RTPS::SMHDR_SZ + sizeof RTPS::PROTOCOL_RTPS,
+              plain_buffer.length() - sizeof RTPS::PROTOCOL_RTPS);
   return true;
 }
 

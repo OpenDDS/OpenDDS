@@ -16,6 +16,9 @@
 
 #include "ace/Reactor.h"
 
+#include <algorithm>
+#include <cstring>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -131,6 +134,68 @@ RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
   const ssize_t ret = receive_bytes_helper(iov, n, socket, remote_address, link_->get_ice_endpoint(), stop);
 #endif
   remote_address_ = remote_address;
+
+#ifdef OPENDDS_SECURITY
+  using namespace DDS::Security;
+  const ParticipantCryptoHandle receiver = link_->local_crypto_handle();
+  if (ret > 0 && receiver != DDS::HANDLE_NIL) {
+
+    if (ret < RTPS::RTPSHDR_SZ) {
+      //TODO
+    }
+
+    const CryptoTransform_var crypto = link_->security_config()->get_crypto_transform();
+    if (!crypto) {
+      //TODO
+    }
+
+    const unsigned int encLen = static_cast<unsigned int>(ret);
+    DDS::OctetSeq encoded(encLen);
+    encoded.length(encLen);
+    unsigned char* const encBuf = encoded.get_buffer();
+    size_t copied = 0;
+    for (int i = 0; i < n && copied < encLen; ++i) {
+      const size_t chunk = std::min(static_cast<size_t>(iov[i].iov_len),
+                                    static_cast<size_t>(encLen - copied));
+      std::memcpy(encBuf + copied, iov[i].iov_base, chunk);
+      copied += chunk;
+    }
+
+    if (copied != encLen) {
+      errno = ENOBUFS;
+      return -1;
+    }
+
+    GUID_t peer;
+    static const int GuidPrefixOffset = 8; // "RTPS", Version(2), Vendor(2)
+    std::memcpy(peer.guidPrefix, encBuf + GuidPrefixOffset, sizeof peer.guidPrefix);
+    peer.entityId = RTPS::ENTITYID_PARTICIPANT;
+    const ParticipantCryptoHandle sender = link_->peer_crypto_handle(peer);
+
+    DDS::OctetSeq plain;
+    SecurityException ex;
+    if (!crypto->decode_rtps_message(plain, encoded, receiver, sender, ex)) {
+      //TODO
+    }
+
+    copied = 0;
+    const size_t plainLen = plain.length();
+    const unsigned char* const plainBuf = plain.get_buffer();
+    for (int i = 0; i < n && copied < plainLen; ++i) {
+      const size_t chunk = std::min(static_cast<size_t>(iov[i].iov_len),
+                                    plainLen - copied);
+      std::memcpy(iov[i].iov_base, plainBuf + copied, chunk);
+      copied += chunk;
+    }
+
+    if (copied != plainLen) {
+      errno = ENOBUFS;
+      return -1;
+    }
+
+    return plainLen;
+  }
+#endif
 
   return ret;
 }
