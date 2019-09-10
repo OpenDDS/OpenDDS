@@ -6,6 +6,11 @@ project: ../bench_builder_idl_lib {
     $(DDS_ROOT)/performance-tests/bench
   }
   includes += $(BENCH_BUILDER_ROOT)/builder
+
+  specific(gnuace) {
+    compile_flags += -Wno-pragmas
+  }
+
   exename   = *
 }
 
