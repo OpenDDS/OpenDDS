@@ -93,6 +93,7 @@ before_install:
 branches:
   only:
     - master
+    - /^branch-DDS-\d+\.\d+$/
 
 before_script:
   - export
