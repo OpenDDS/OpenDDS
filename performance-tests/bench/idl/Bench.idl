@@ -118,6 +118,21 @@ module Bench {
     typedef unsigned long NodeId;
     typedef unsigned long WorkerId;
 
+    const short default_control_domain = 89;
+
+    enum StateEnum {
+      AVAILABLE,
+      BUSY
+    };
+
+#pragma DCPS_DATA_TYPE "Bench::NodeController::Status"
+#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id"
+    struct Status {
+      NodeId node_id;
+      StateEnum state;
+    };
+    const string status_topic_name = "Node_Controller_Status";
+
     struct WorkerConfig {
       WorkerId worker_id;
       string config;
@@ -129,6 +144,7 @@ module Bench {
       NodeId node_id;
       WorkerConfigs workers;
     };
+    const string config_topic_name = "Node_Controller_Config";
 
 #pragma DCPS_DATA_TYPE "Bench::NodeController::Report"
     struct Report {
@@ -137,6 +153,7 @@ module Bench {
       boolean failed;
       string details;
     };
+    const string report_topic_name = "Node_Controller_Report";
   };
 };
 

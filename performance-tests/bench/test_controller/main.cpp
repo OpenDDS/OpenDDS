@@ -20,10 +20,6 @@
 
 using namespace Bench::NodeController;
 
-const int DOMAIN = 89;
-const std::string CONFIG_TOPIC_NAME = "Node_Controller_Config";
-const std::string REPORT_TOPIC_NAME = "Node_Controller_Report";
-
 std::string dds_root;
 
 std::string
@@ -55,6 +51,92 @@ json_2_report(std::istream& is, Bench::WorkerReport& report)
   return true;
 }
 
+class StatusListener : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> {
+public:
+  StatusListener()
+  {
+  }
+
+  virtual ~StatusListener()
+  {
+  }
+
+  virtual void
+  on_requested_deadline_missed(
+    DDS::DataReader_ptr /* reader */,
+    const DDS::RequestedDeadlineMissedStatus& /* status */)
+  {
+  }
+
+  virtual void
+  on_requested_incompatible_qos(
+    DDS::DataReader_ptr /* reader */,
+    const DDS::RequestedIncompatibleQosStatus& /* status */)
+  {
+  }
+
+  virtual void
+  on_liveliness_changed(
+    DDS::DataReader_ptr /* reader */,
+    const DDS::LivelinessChangedStatus& /* status */)
+  {
+  }
+
+  virtual void
+  on_subscription_matched(
+    DDS::DataReader_ptr /* reader */,
+    const DDS::SubscriptionMatchedStatus& /* status */)
+  {
+  }
+
+  virtual void
+  on_sample_rejected(
+    DDS::DataReader_ptr /* reader */,
+    const DDS::SampleRejectedStatus& /* status */)
+  {
+  }
+
+  virtual void
+  on_data_available(DDS::DataReader_ptr reader)
+  {
+    StatusDataReader_var status_reader_impl = StatusDataReader::_narrow(reader);
+    if (!status_reader_impl) {
+      std::cerr << "narrow status reader failed" << std::endl;
+      ACE_OS::exit(1);
+    }
+
+    StatusSeq statuses;
+    DDS::SampleInfoSeq info;
+    DDS::ReturnCode_t rc = status_reader_impl->take(
+      statuses, info,
+      DDS::LENGTH_UNLIMITED,
+      DDS::ANY_SAMPLE_STATE,
+      DDS::ANY_VIEW_STATE,
+      DDS::ANY_INSTANCE_STATE);
+    if (rc != DDS::RETCODE_OK) {
+      std::cerr << "Take failed" << std::endl;
+      ACE_OS::exit(1);
+    }
+
+    for (size_t i = 0; i < statuses.length(); i++) {
+      if (info[i].valid_data) {
+        if (statuses[i].state == AVAILABLE) {
+          std::cout << "Found Node " << statuses[i].node_id << std::endl;
+        }
+      }
+    }
+  }
+
+  virtual void
+  on_sample_lost(
+    DDS::DataReader_ptr /* reader */,
+    const DDS::SampleLostStatus& /* status */)
+  {
+  }
+};
+
+void handle_reports(std::vector<Bench::WorkerReport> parsed_reports);
+
 int
 ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
@@ -64,13 +146,56 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
 
-  // DDS Entities
+  // Parse Arguments
   DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
+
+  unsigned wait_for_nodes = 3;
+  int domain = default_control_domain;
+
+  for (int i = 1; i < argc; i++) {
+    const char* argument = ACE_TEXT_ALWAYS_CHAR(argv[i]);
+    if (!ACE_OS::strcmp(argument, "--domain")) {
+      argument = ACE_TEXT_ALWAYS_CHAR(argv[++i]);
+      try {
+        domain = std::stoll(argument);
+      } catch (const std::exception&) {
+        std::cerr << "Invalid argument for --domain: " << argument << std::endl;
+        return 1;
+      }
+    } else if (!ACE_OS::strcmp(argument, "--wait-for-nodes")) {
+      argument = ACE_TEXT_ALWAYS_CHAR(argv[++i]);
+      try {
+        wait_for_nodes = std::stoull(argument);
+      } catch (const std::exception&) {
+        std::cerr << "Invalid argument for --wait-for-nodes: " << argument << std::endl;
+        return 1;
+      }
+    } else {
+      std::cerr << "Invalid option: " << argument << std::endl;
+      return 1;
+    }
+  }
+
+  // Create Participant
   DDS::DomainParticipant_var participant = dpf->create_participant(
-    DOMAIN, PARTICIPANT_QOS_DEFAULT, 0,
+    domain, PARTICIPANT_QOS_DEFAULT, 0,
     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!participant) {
     std::cerr << "create_participant failed" << std::endl;
+    return 1;
+  }
+
+  // Create Topics
+  StatusTypeSupport_var status_ts = new StatusTypeSupportImpl;
+  if (status_ts->register_type(participant, "")) {
+    std::cerr << "register_type failed for Status" << std::endl;
+    return 1;
+  }
+  DDS::Topic_var status_topic = participant->create_topic(
+    status_topic_name, status_ts->get_type_name(), TOPIC_QOS_DEFAULT, 0,
+    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  if (!status_topic) {
+    std::cerr << "create_topic status failed" << std::endl;
     return 1;
   }
   ConfigTypeSupport_var config_ts = new ConfigTypeSupportImpl;
@@ -79,7 +204,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
   DDS::Topic_var config_topic = participant->create_topic(
-    CONFIG_TOPIC_NAME.c_str(), config_ts->get_type_name(), TOPIC_QOS_DEFAULT, 0,
+    config_topic_name, config_ts->get_type_name(), TOPIC_QOS_DEFAULT, 0,
     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!config_topic) {
     std::cerr << "create_topic config failed" << std::endl;
@@ -91,12 +216,14 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
   DDS::Topic_var report_topic = participant->create_topic(
-    REPORT_TOPIC_NAME.c_str(), report_ts->get_type_name(), TOPIC_QOS_DEFAULT, 0,
+    report_topic_name, report_ts->get_type_name(), TOPIC_QOS_DEFAULT, 0,
     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!report_topic) {
     std::cerr << "create_topic report failed" << std::endl;
     return 1;
   }
+
+  // Create DataWriters
   DDS::Publisher_var publisher = participant->create_publisher(
     PUBLISHER_QOS_DEFAULT, 0, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!publisher) {
@@ -119,6 +246,8 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     std::cerr << "narrow writer config failed" << std::endl;
     return 1;
   }
+
+  // Create DataReaders
   DDS::Subscriber_var subscriber = participant->create_subscriber(
     SUBSCRIBER_QOS_DEFAULT, 0, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!subscriber) {
@@ -129,6 +258,19 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   subscriber->get_default_datareader_qos(dr_qos);
   dr_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
   dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+  StatusListener status_listener;
+  DDS::DataReader_var status_reader = subscriber->create_datareader(
+    status_topic, dr_qos, &status_listener,
+    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  if (!status_reader) {
+    std::cerr << "create_datareader status failed" << std::endl;
+    return 1;
+  }
+  StatusDataReader_var status_reader_impl = StatusDataReader::_narrow(status_reader);
+  if (!status_reader_impl) {
+    std::cerr << "narrow status reader failed" << std::endl;
+    return 1;
+  }
   DDS::DataReader_var report_reader = subscriber->create_datareader(
     report_topic, dr_qos, 0,
     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -142,8 +284,21 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
 
-  ACE_OS::sleep(1);
+  // Wait for a Time and make sure we found Nodes
+  ACE_OS::sleep(wait_for_nodes);
+  DDS::SubscriptionMatchedStatus sub_status{};
+  if (status_reader->get_subscription_matched_status(sub_status) != DDS::RETCODE_OK) {
+    std::cerr << "get_subscription_matched_status failed" << std::endl;
+    return 1;
+  }
+  unsigned node_count = sub_status.current_count;
+  if (node_count == 0) {
+    std::cerr << "Error: no nodes found during wait" << std::endl;
+    return 1;
+  }
+  std::cout << "Found " << node_count << " nodes, continuing with scenario..." << std::endl;
 
+  // Begin Hardcoded Scenerio
   WorkerConfig worker;
   Config config;
   const std::string configs = dds_root + "/performance-tests/bench/worker/configs/";
@@ -177,6 +332,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     std::cerr << "2nd write failed" << std::endl;
     return 1;
   }
+  // End Hardcoded Scenerio
 
   size_t reports_received = 0;
   std::vector<Bench::WorkerReport> parsed_reports;
@@ -223,7 +379,8 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
           if (json_2_report(ss, report)) {
             parsed_reports.push_back(report);
           } else {
-            std::cerr << "Error parsing report details for node " << reports[r].node_id << ", worker " << reports[r].worker_id << std::endl;
+            std::cerr << "Error parsing report details for node "
+              << reports[r].node_id << ", worker " << reports[r].worker_id << std::endl;
             return 1;
           }
         }
@@ -231,6 +388,19 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
   }
 
+  handle_reports(parsed_reports);
+
+  // Clean up OpenDDS
+  participant->delete_contained_entities();
+  dpf->delete_participant(participant);
+  TheServiceParticipant->shutdown();
+
+  return 0;
+}
+
+void
+handle_reports(std::vector<Bench::WorkerReport> parsed_reports)
+{
   using Builder::ZERO;
 
   Builder::TimeStamp max_construction_time = ZERO;
@@ -314,11 +484,4 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   std::cout << std::endl;
 
   consolidated_round_trip_jitter_stats.pretty_print(std::cout, "round trip jitter");
-
-  // Clean up OpenDDS
-  participant->delete_contained_entities();
-  dpf->delete_participant(participant);
-  TheServiceParticipant->shutdown();
-
-  return 0;
 }

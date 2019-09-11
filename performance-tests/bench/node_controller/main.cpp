@@ -19,10 +19,6 @@
 
 using namespace Bench::NodeController;
 
-const int DOMAIN = 89;
-const std::string CONFIG_TOPIC_NAME = "Node_Controller_Config";
-const std::string REPORT_TOPIC_NAME = "Node_Controller_Report";
-
 ACE_Process_Manager* process_manager = ACE_Process_Manager::instance();
 std::string dds_root;
 ReportDataWriter_var report_writer_impl;
@@ -150,13 +146,25 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     std::cerr << "ERROR: DDS_ROOT isn't defined" << std::endl;
     return 1;
   }
+
+  // Parse Arguments
+  DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
+
+  int domain = default_control_domain;
   NodeId this_node_id;
   std::vector<std::shared_ptr<Worker>> workers;
-  DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
 
   for (int i = 1; i < argc; i++) {
     const char* argument = ACE_TEXT_ALWAYS_CHAR(argv[i]);
-    if (!ACE_OS::strcmp(argument, "--id")) {
+    if (!ACE_OS::strcmp(argument, "--domain")) {
+      argument = ACE_TEXT_ALWAYS_CHAR(argv[++i]);
+      try {
+        domain = std::stoll(argument);
+      } catch (const std::exception&) {
+        std::cerr << "Invalid argument for --domain: " << argument << std::endl;
+        return 1;
+      }
+    } else if (!ACE_OS::strcmp(argument, "--id")) {
       argument = ACE_TEXT_ALWAYS_CHAR(argv[++i]);
       try {
         this_node_id = std::stoull(argument);
@@ -170,12 +178,26 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
   }
 
-  // DDS Entities
+  // Create Participant
   DDS::DomainParticipant_var participant = dpf->create_participant(
-    DOMAIN, PARTICIPANT_QOS_DEFAULT, 0,
+    domain, PARTICIPANT_QOS_DEFAULT, 0,
     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!participant) {
     std::cerr << "create_participant failed" << std::endl;
+    return 1;
+  }
+
+  // Create Topics
+  StatusTypeSupport_var status_ts = new StatusTypeSupportImpl;
+  if (status_ts->register_type(participant, "")) {
+    std::cerr << "register_type failed for Status" << std::endl;
+    return 1;
+  }
+  DDS::Topic_var status_topic = participant->create_topic(
+    status_topic_name, status_ts->get_type_name(), TOPIC_QOS_DEFAULT, 0,
+    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  if (!status_topic) {
+    std::cerr << "create_topic status failed" << std::endl;
     return 1;
   }
   ConfigTypeSupport_var config_ts = new ConfigTypeSupportImpl;
@@ -184,7 +206,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
   DDS::Topic_var config_topic = participant->create_topic(
-    CONFIG_TOPIC_NAME.c_str(), config_ts->get_type_name(), TOPIC_QOS_DEFAULT, 0,
+    config_topic_name, config_ts->get_type_name(), TOPIC_QOS_DEFAULT, 0,
     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!config_topic) {
     std::cerr << "create_topic config failed" << std::endl;
@@ -196,12 +218,14 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
   DDS::Topic_var report_topic = participant->create_topic(
-    REPORT_TOPIC_NAME.c_str(), report_ts->get_type_name(), TOPIC_QOS_DEFAULT, 0,
+    report_topic_name, report_ts->get_type_name(), TOPIC_QOS_DEFAULT, 0,
     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!report_topic) {
     std::cerr << "create_topic report failed" << std::endl;
     return 1;
   }
+
+  // Create DataReaders
   DDS::Subscriber_var subscriber = participant->create_subscriber(
     SUBSCRIBER_QOS_DEFAULT, 0, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!subscriber) {
@@ -224,6 +248,8 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     std::cerr << "narrow config reader failed" << std::endl;
     return 1;
   }
+
+  // Create DataWriters
   DDS::Publisher_var publisher = participant->create_publisher(
     PUBLISHER_QOS_DEFAULT, 0, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!publisher) {
@@ -234,6 +260,17 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   publisher->get_default_datawriter_qos(dw_qos);
   dw_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
   dw_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+  DDS::DataWriter_var status_writer = publisher->create_datawriter(
+    status_topic, dw_qos, 0, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  if (!status_writer) {
+    std::cerr << "create_datawriter status failed" << std::endl;
+    return 1;
+  }
+  StatusDataWriter_var status_writer_impl = StatusDataWriter::_narrow(status_writer);
+  if (!status_writer_impl) {
+    std::cerr << "narrow writer status failed" << std::endl;
+    return 1;
+  }
   DDS::DataWriter_var report_writer = publisher->create_datawriter(
     report_topic, dw_qos, 0, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!report_writer) {
@@ -244,6 +281,38 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   if (!report_writer_impl) {
     std::cerr << "narrow writer report failed" << std::endl;
     return 1;
+  }
+
+  // Wait for Status Publication with Test Controller and Write Status
+  {
+    DDS::StatusCondition_var condition = status_writer->get_statuscondition();
+    condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
+    DDS::WaitSet_var ws = new DDS::WaitSet;
+    ws->attach_condition(condition);
+    DDS::Duration_t timeout = {
+      DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC
+    };
+    DDS::ConditionSeq conditions;
+    DDS::PublicationMatchedStatus match{};
+    while (match.current_count == 0) {
+      if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
+        std::cerr << "wait for Test Controller failed" << std::endl;
+        return 1;
+      }
+      if (status_writer->get_publication_matched_status(match) != DDS::RETCODE_OK) {
+        std::cerr << "get_publication_matched_status failed" << std::endl;
+        return 1;
+      }
+    }
+    ws->detach_condition(condition);
+
+    Status status;
+    status.state = AVAILABLE;
+    status.node_id = this_node_id;
+    if (status_writer_impl->write(status, DDS::HANDLE_NIL)) {
+      std::cerr << "Write status failed" << std::endl;
+      return 1;
+    }
   }
 
   bool waiting = true;
