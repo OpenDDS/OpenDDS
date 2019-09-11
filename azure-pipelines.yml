@@ -6,6 +6,10 @@ schedules:
     - master
   always: true
 
+pr:
+  - master
+  - branch-DDS-3.13
+
 jobs:
 - job: VisualStudio2019
   timeoutInMinutes: 90
