@@ -22,7 +22,7 @@ namespace DCPS {
 /**
  * ACE_Time_Policy that OpenDDS uses for internal timing.
  *
- * ACE_Monotonic_Time_Policy protects OpenDDS from being effected by changes to
+ * ACE_Monotonic_Time_Policy protects OpenDDS from being affected by changes to
  * the system clock to a certain degree.
  */
 ///@{
@@ -30,7 +30,7 @@ namespace DCPS {
 /*
  * As of writing, ACE_Monotonic_Time_Policy doesn't support Darwin systems like
  * macOS. Use ACE_System_Time_Policy instead, because ACE_Monotonic_Time_Policy
- * falls back to retuning ACE_Time_Value::zero for some reason.
+ * falls back to returning ACE_Time_Value::zero for some reason.
  */
 typedef ACE_System_Time_Policy MonotonicClock;
 #else
