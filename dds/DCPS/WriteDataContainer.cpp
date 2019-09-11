@@ -20,6 +20,7 @@
 #include "Time_Helper.h"
 #include "GuidConverter.h"
 #include "OfferedDeadlineWatchdog.h"
+#include "TimeTypes.h"
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
 #include "dds/DCPS/transport/framework/TransportCustomizedElement.h"
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
@@ -96,9 +97,9 @@ WriteDataContainer::WriteDataContainer(
     max_num_samples_(max_total_samples),
     max_blocking_time_(max_blocking_time),
     waiting_on_release_(false),
-    condition_(lock_, condition_time_),
-    empty_condition_(lock_, condition_time_),
-    wfa_condition_(this->wfa_lock_, condition_time_),
+    condition_(lock_, ConditionAttributesMonotonic()),
+    empty_condition_(lock_, ConditionAttributesMonotonic()),
+    wfa_condition_(this->wfa_lock_, ConditionAttributesMonotonic()),
     n_chunks_(n_chunks),
     sample_list_element_allocator_(2 * n_chunks_),
     shutdown_(false),

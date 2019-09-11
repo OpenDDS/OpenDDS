@@ -1,5 +1,5 @@
 /**
- * Monotonic Time Backport for 3.14. Just provides the bare minimum needed for
+ * Monotonic Time Backport for 3.13. Just provides the bare minimum needed for
  * monotonic time.
  */
 
@@ -30,7 +30,7 @@ namespace DCPS {
 /*
  * As of writing, ACE_Monotonic_Time_Policy doesn't support Darwin systems like
  * macOS. Use ACE_System_Time_Policy instead, because ACE_Monotonic_Time_Policy
- * falls back to returing ACE_Time_Value::zero for some reason.
+ * falls back to retuning ACE_Time_Value::zero for some reason.
  */
 typedef ACE_System_Time_Policy MonotonicClock;
 #else
@@ -46,10 +46,10 @@ monotonic_time()
 ///@}
 
 /**
- * ConditionTime will have to be passed to ACE_Condition for it to intrepret
- * the ACE_Time_Value* argument of wait as monotonic time.
+ * ConditionAttributesMonotonic will have to be passed to ACE_Condition for
+ * it to interpret the ACE_Time_Value* argument of wait as monotonic time.
  */
-typedef ACE_Condition_Attributes_T<MonotonicClock> ConditionTime;
+typedef ACE_Condition_Attributes_T<MonotonicClock> ConditionAttributesMonotonic;
 
 } // namespace DCPS
 } // namespace OpenDDS
