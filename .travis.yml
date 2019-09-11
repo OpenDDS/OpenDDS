@@ -1,4 +1,3 @@
-sudo: false
 language: cpp
 
 compiler:
@@ -6,12 +5,10 @@ compiler:
 
 env:
   matrix:
-    - FUZZ=1 STATIC=1 XERCES3=1 NO_TESTS=1
+    - COMPILER=g++ FUZZ=1 STATIC=1 XERCES3=1 NO_TESTS=1
     - NO_INLINE=1 NO_BIT=1
-    - NO_INLINE=1 VERSIONED_NS=1 DDS_SECURITY=1
     - NO_DEBUG=1 NO_TESTS=1
     - SAFETY_PROFILE=1
-    - NO_INLINE=1 USES_WCHAR=1
     - NO_INLINE=1 NO_MULTITOPIC=1 XERCES3=1
   global:
     - ACE_ROOT=$TRAVIS_BUILD_DIR/ACE_TAO/ACE
@@ -31,48 +28,10 @@ matrix:
           packages:
             - libxerces-c-dev
             - g++-6
-            - openjdk-7-jdk
+            - openjdk-8-jdk-headless
       env: COMPILER=g++-6 USE_JAVA=1 NO_DEBUG=1 NO_TESTS=1
-    - compiler: clang
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-5.0
-          packages:
-            - libxerces-c-dev
-            - clang++-5.0
-      env: COMPILER=clang++-5.0 NO_INLINE=1
-    - compiler: clang
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-6.0
-          packages:
-            - libxerces-c-dev
-            - clang++-6.0
-      env: COMPILER=clang++-6.0 NO_INLINE=1
-    - compiler: gcc
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - libxerces-c-dev
-            - g++-6
-      env: COMPILER=g++-6 NO_INLINE=1
-    - compiler: gcc
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - libxerces-c-dev
-            - g++-7
-      env: COMPILER=g++-7 NO_INLINE=1
     - os: osx
-      osx_image: xcode9.1
+      osx_image: xcode10.1
       compiler: clang
       env: COMPILER=clang++ NO_INLINE=1
 
@@ -84,6 +43,7 @@ addons:
       - libxerces-c-dev
       - libssl-dev
       - g++-8
+      - cmake
 
 before_install:
   - mkdir ext
@@ -98,7 +58,7 @@ branches:
 before_script:
   - export
   - if [ "$FUZZ" == "1" ]; then
-        rm -rf tools/modeling/plugins tools/IntermediateTypeLang/cpp/rapidjson tests/googletest;
+        rm -rf tools/modeling/plugins tools/rapidjson tests/googletest;
         perl $DDS_ROOT/tools/scripts/dds_fuzz.pl;
     fi
   - if [ "$NO_INLINE" == "1" ]; then CONFIG_OPTIONS+=" --no-inline"; fi
@@ -111,17 +71,17 @@ before_script:
   - if [ "$NO_TESTS" == "1" ]; then CONFIG_OPTIONS+=" --no-tests"; fi
   - if [ "$USES_WCHAR" == "1" ]; then CONFIG_OPTIONS+=" --features=uses_wchar=1"; fi
   - if [ "$XERCES3" == "1" ]; then CONFIG_OPTIONS+=" --xerces3"; fi
-  - if [ "$CXX" == "g++" ]; then CONFIG_OPTIONS+=" --macros=c++11=1"; fi
+  - if [ "$CXX" == "g++" ]; then CONFIG_OPTIONS+=" --std=c++11"; fi
   - if [ "$VERSIONED_NS" == 1 ]; then CONFIG_OPTIONS+=" --features=versioned_namespace=1"; fi
   - if [ "$DDS_SECURITY" == 1 ]; then CONFIG_OPTIONS+=" --security"; fi
-  - ./configure --mpcopts="-workers 2" --compiler=$COMPILER $CONFIG_OPTIONS
+  - ./configure --mpcopts="-workers 4" --compiler=$COMPILER $CONFIG_OPTIONS
   - tools/scripts/show_build_config.pl
   - if [ "$SAFETY_PROFILE" == "1" ]; then
         export LD_LIBRARY_PATH+=:$TRAVIS_BUILD_DIR/build/target/ACE_TAO/ACE/lib:$TRAVIS_BUILD_DIR/build/target/lib;
     fi
 
 script:
-  - travis_wait 45 make -s -j 6
+  - travis_wait 47 make -s -j 3
   - if [ "$SAFETY_PROFILE" == "1" ]; then
         cd build/target/tests/DCPS/Messenger && ./run_test.pl rtps_disc;
         cd $DDS_ROOT/build/target/tests/FACE/Messenger;
