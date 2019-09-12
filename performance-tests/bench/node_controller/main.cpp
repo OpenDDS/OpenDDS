@@ -6,12 +6,13 @@
 #include <sstream>
 #include <cstdint>
 
-#include "ace/Process_Manager.h"
-#include "ace/OS_NS_stdlib.h"
+#include <ace/Process_Manager.h>
+#include <ace/OS_NS_stdlib.h>
 
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DdsDcpsPublicationC.h>
 #include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/DomainParticipantImpl.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/WaitSet.h>
 
@@ -138,6 +139,29 @@ public:
   }
 };
 
+inline std::string
+get_option_argument(int& i, int argc, ACE_TCHAR* argv[])
+{
+  if (i == argc - 1) {
+    std::cerr << "Option " << ACE_TEXT_ALWAYS_CHAR(argv[i]) << " requires an argument" << std::endl;
+    throw int{1};
+  }
+  return ACE_TEXT_ALWAYS_CHAR(argv[++i]);
+}
+
+inline int
+get_option_argument_int(int& i, int argc, ACE_TCHAR* argv[])
+{
+  int value;
+  try {
+    value = std::stoll(get_option_argument(i, argc, argv));
+  } catch (const std::exception&) {
+    std::cerr << "Option " << ACE_TEXT_ALWAYS_CHAR(argv[i]) << " requires an argument that's a valid number" << std::endl;
+    throw 1;
+  }
+  return value;
+}
+
 int
 ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
@@ -147,35 +171,29 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
 
+  std::vector<std::shared_ptr<Worker>> workers;
+  NodeId this_node_id;
+
   // Parse Arguments
   DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
 
   int domain = default_control_domain;
-  NodeId this_node_id;
-  std::vector<std::shared_ptr<Worker>> workers;
+  std::string name;
 
-  for (int i = 1; i < argc; i++) {
-    const char* argument = ACE_TEXT_ALWAYS_CHAR(argv[i]);
-    if (!ACE_OS::strcmp(argument, "--domain")) {
-      argument = ACE_TEXT_ALWAYS_CHAR(argv[++i]);
-      try {
-        domain = std::stoll(argument);
-      } catch (const std::exception&) {
-        std::cerr << "Invalid argument for --domain: " << argument << std::endl;
+  try {
+    for (int i = 1; i < argc; i++) {
+      const char* argument = ACE_TEXT_ALWAYS_CHAR(argv[i]);
+      if (!ACE_OS::strcmp(argument, "--domain")) {
+        domain = get_option_argument_int(i, argc, argv);
+      } else if (!ACE_OS::strcmp(argument, "--name")) {
+        name = get_option_argument(i, argc, argv);
+      } else {
+        std::cerr << "Invalid Option: " << argument << std::endl;
         return 1;
       }
-    } else if (!ACE_OS::strcmp(argument, "--id")) {
-      argument = ACE_TEXT_ALWAYS_CHAR(argv[++i]);
-      try {
-        this_node_id = std::stoull(argument);
-      } catch (const std::exception&) {
-        std::cerr << "Invalid Id: " << argument << std::endl;
-        return 1;
-      }
-    } else {
-      std::cerr << "Invalid Option: " << argument << std::endl;
-      return 1;
     }
+  } catch(int value) {
+    return value;
   }
 
   // Create Participant
@@ -186,6 +204,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     std::cerr << "create_participant failed" << std::endl;
     return 1;
   }
+  this_node_id = reinterpret_cast<OpenDDS::DCPS::DomainParticipantImpl*>(participant.in())->get_id();
 
   // Create Topics
   StatusTypeSupport_var status_ts = new StatusTypeSupportImpl;
@@ -307,14 +326,16 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     ws->detach_condition(condition);
 
     Status status;
-    status.state = AVAILABLE;
     status.node_id = this_node_id;
+    status.state = AVAILABLE;
+    status.name = name.c_str();
     if (status_writer_impl->write(status, DDS::HANDLE_NIL)) {
       std::cerr << "Write status failed" << std::endl;
       return 1;
     }
   }
 
+  // Wait for Our Worker Configs
   bool waiting = true;
   while (waiting) {
     DDS::ReturnCode_t rc;
@@ -355,6 +376,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
   }
 
+  // Run The Workers
   for (std::shared_ptr<Worker>& worker : workers) {
     worker->run();
   }

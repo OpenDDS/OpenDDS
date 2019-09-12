@@ -3,6 +3,7 @@ project: dcpslib, dcps_rapidjson {
                    -Wb,export_include=../builder_idl/Bench_Builder_Export.h \
                    -Wb,export_macro=Bench_Builder_Export \
                    -Wb,cpp_include=dds/DdsDcpsCoreTypeSupportImpl.h \
+                   -Wb,cpp_include=dds/DdsDcpsGuidTypeSupportImpl.h \
                    -I$(DDS_ROOT)/dds
 
   dynamicflags  += BENCH_BUILDER_BUILD_DLL
@@ -16,6 +17,7 @@ project: dcpslib, dcps_rapidjson {
 
   TypeSupport_Files {
     ../../../dds/DdsDcpsCore.idl
+    ../../../dds/DdsDcpsGuid.idl
   }
 }
 

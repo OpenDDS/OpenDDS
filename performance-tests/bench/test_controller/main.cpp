@@ -2,6 +2,8 @@
 #include <sstream>
 #include <iostream>
 #include <fstream>
+#include <map>
+#include <mutex>
 
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DdsDcpsPublicationC.h>
@@ -19,6 +21,20 @@
 #pragma GCC diagnostic pop
 
 using namespace Bench::NodeController;
+
+struct Node {
+  NodeId node_id;
+  std::string name;
+};
+typedef std::map<NodeId, Node, OpenDDS::DCPS::GUID_tKeyLessThan> Nodes;
+std::ostream& operator<<(std::ostream& os, const Node& node)
+{
+  os << node.node_id;
+  if (node.name.size()) {
+    os << " \"" << node.name << '\'';
+  }
+  return os;
+}
 
 std::string dds_root;
 
@@ -53,7 +69,8 @@ json_2_report(std::istream& is, Bench::WorkerReport& report)
 
 class StatusListener : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> {
 public:
-  StatusListener()
+  StatusListener(Nodes& nodes)
+  : nodes_(nodes)
   {
   }
 
@@ -99,6 +116,8 @@ public:
   virtual void
   on_data_available(DDS::DataReader_ptr reader)
   {
+    std::lock_guard<std::mutex> lock(discovery_mutex);
+
     StatusDataReader_var status_reader_impl = StatusDataReader::_narrow(reader);
     if (!status_reader_impl) {
       std::cerr << "narrow status reader failed" << std::endl;
@@ -119,10 +138,22 @@ public:
     }
 
     for (size_t i = 0; i < statuses.length(); i++) {
-      if (info[i].valid_data) {
-        if (statuses[i].state == AVAILABLE) {
-          std::cout << "Found Node " << statuses[i].node_id << std::endl;
+      Nodes::iterator iter = nodes_.find(statuses[i].node_id);
+      bool discovered = iter != nodes_.end();
+      if (info[i].valid_data && statuses[i].state == AVAILABLE) {
+        Node node;
+        node.node_id = statuses[i].node_id;
+        node.name = statuses[i].name;
+        if (!discovered) {
+          if (in_discovery_period_) {
+            std::cout << "Discovered Node " << node << std::endl;
+            nodes_[node.node_id] = node;
+          } else {
+            std::cerr << "Warning: Discovered node " << node << " outside discovery period" << std::endl;
+          }
         }
+      } else if (info[i].instance_state & DDS::NOT_ALIVE_INSTANCE_STATE && discovered) {
+        nodes_.erase(iter);
       }
     }
   }
@@ -133,9 +164,58 @@ public:
     const DDS::SampleLostStatus& /* status */)
   {
   }
+
+  void
+  end_discovery()
+  {
+    std::lock_guard<std::mutex> lock(discovery_mutex);
+    in_discovery_period_ = false;
+  }
+
+private:
+  Nodes& nodes_;
+  std::mutex discovery_mutex;
+  bool in_discovery_period_ = true;
 };
 
 void handle_reports(std::vector<Bench::WorkerReport> parsed_reports);
+
+inline std::string
+get_option_argument(int& i, int argc, ACE_TCHAR* argv[])
+{
+  if (i == argc - 1) {
+    std::cerr << "Option " << ACE_TEXT_ALWAYS_CHAR(argv[i]) << " requires an argument" << std::endl;
+    throw int{1};
+  }
+  return ACE_TEXT_ALWAYS_CHAR(argv[++i]);
+}
+
+inline int
+get_option_argument_int(int& i, int argc, ACE_TCHAR* argv[])
+{
+  int value;
+  try {
+    value = std::stoll(get_option_argument(i, argc, argv));
+  } catch (const std::exception&) {
+    std::cerr << "Option " << ACE_TEXT_ALWAYS_CHAR(argv[i]) << " requires an argument that's a valid number" << std::endl;
+    throw 1;
+  }
+  return value;
+}
+
+inline unsigned
+get_option_argument_uint(int& i, int argc, ACE_TCHAR* argv[])
+{
+  unsigned value;
+  try {
+    value = std::stoull(get_option_argument(i, argc, argv));
+  } catch (const std::exception&) {
+    std::cerr << "Option " << ACE_TEXT_ALWAYS_CHAR(argv[i]) << " requires an argument that's a valid positive number"
+      << std::endl;
+    throw 1;
+  }
+  return value;
+}
 
 int
 ACE_TMAIN(int argc, ACE_TCHAR* argv[])
@@ -146,34 +226,28 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
 
+  Nodes nodes;
+
   // Parse Arguments
   DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
 
   unsigned wait_for_nodes = 3;
   int domain = default_control_domain;
 
-  for (int i = 1; i < argc; i++) {
-    const char* argument = ACE_TEXT_ALWAYS_CHAR(argv[i]);
-    if (!ACE_OS::strcmp(argument, "--domain")) {
-      argument = ACE_TEXT_ALWAYS_CHAR(argv[++i]);
-      try {
-        domain = std::stoll(argument);
-      } catch (const std::exception&) {
-        std::cerr << "Invalid argument for --domain: " << argument << std::endl;
+  try {
+    for (int i = 1; i < argc; i++) {
+      const char* argument = ACE_TEXT_ALWAYS_CHAR(argv[i]);
+      if (!ACE_OS::strcmp(argument, "--domain")) {
+        domain = get_option_argument_int(i, argc, argv);
+      } else if (!ACE_OS::strcmp(argument, "--wait-for-nodes")) {
+        wait_for_nodes = get_option_argument_uint(i, argc, argv);
+      } else {
+        std::cerr << "Invalid Option: " << argument << std::endl;
         return 1;
       }
-    } else if (!ACE_OS::strcmp(argument, "--wait-for-nodes")) {
-      argument = ACE_TEXT_ALWAYS_CHAR(argv[++i]);
-      try {
-        wait_for_nodes = std::stoull(argument);
-      } catch (const std::exception&) {
-        std::cerr << "Invalid argument for --wait-for-nodes: " << argument << std::endl;
-        return 1;
-      }
-    } else {
-      std::cerr << "Invalid option: " << argument << std::endl;
-      return 1;
     }
+  } catch(int value) {
+    return value;
   }
 
   // Create Participant
@@ -258,7 +332,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   subscriber->get_default_datareader_qos(dr_qos);
   dr_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
   dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-  StatusListener status_listener;
+  StatusListener status_listener(nodes);
   DDS::DataReader_var status_reader = subscriber->create_datareader(
     status_topic, dr_qos, &status_listener,
     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -284,27 +358,30 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
 
-  // Wait for a Time and make sure we found Nodes
+  // Discovery Period: wait a period of time while nodes are discovered
+  std::cout << "Waiting for nodes for " << wait_for_nodes << " seconds..." << std::endl;
   ACE_OS::sleep(wait_for_nodes);
-  DDS::SubscriptionMatchedStatus sub_status{};
-  if (status_reader->get_subscription_matched_status(sub_status) != DDS::RETCODE_OK) {
-    std::cerr << "get_subscription_matched_status failed" << std::endl;
-    return 1;
-  }
-  unsigned node_count = sub_status.current_count;
+  status_listener.end_discovery();
+  size_t node_count = nodes.size();
   if (node_count == 0) {
-    std::cerr << "Error: no nodes found during wait" << std::endl;
+    std::cerr << "Error: no nodes discovered during wait" << std::endl;
     return 1;
   }
-  std::cout << "Found " << node_count << " nodes, continuing with scenario..." << std::endl;
+  std::cout << "Discovered " << node_count << " nodes, continuing with scenario..." << std::endl;
 
-  // Begin Hardcoded Scenerio
+  // Begin Hardcoded Scenario
+  if (node_count < 2) {
+    std::cerr << "Error: Expecting at least 2 Nodes" << std::endl;
+    return 1;
+  }
+
   WorkerConfig worker;
   Config config;
   const std::string configs = dds_root + "/performance-tests/bench/worker/configs/";
   const size_t expected_workers = 3;
 
-  config.node_id = 1;
+  Nodes::iterator ni = nodes.begin();
+  config.node_id = ni->first;
   config.workers.length(2);
 
   worker.worker_id = 1;
@@ -322,7 +399,9 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
 
-  config.node_id = 2;
+  ++ni;
+
+  config.node_id = ni->first;
   config.workers.length(1);
   worker.worker_id = 1;
   std::string master_config = read_file(configs + "jfti_sim_master_config.json");
@@ -332,7 +411,10 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     std::cerr << "2nd write failed" << std::endl;
     return 1;
   }
-  // End Hardcoded Scenerio
+  // End Hardcoded Scenario
+
+  // Wait for reports
+  std::cout << "Distributed node configs, waiting for reports..." << std::endl;
 
   size_t reports_received = 0;
   std::vector<Bench::WorkerReport> parsed_reports;

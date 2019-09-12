@@ -1,4 +1,5 @@
 #include "Builder.idl"
+#include "dds/DdsDcpsGuid.idl"
 
 module Bench {
 
@@ -115,7 +116,7 @@ module Bench {
   };
 
   module NodeController {
-    typedef unsigned long NodeId;
+    typedef OpenDDS::DCPS::GUID_t NodeId;
     typedef unsigned long WorkerId;
 
     const short default_control_domain = 89;
@@ -126,10 +127,26 @@ module Bench {
     };
 
 #pragma DCPS_DATA_TYPE "Bench::NodeController::Status"
-#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id"
+#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.guidPrefix[11]"
+#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.guidPrefix[10]"
+#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.guidPrefix[9]"
+#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.guidPrefix[8]"
+#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.guidPrefix[7]"
+#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.guidPrefix[6]"
+#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.guidPrefix[5]"
+#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.guidPrefix[4]"
+#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.guidPrefix[3]"
+#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.guidPrefix[2]"
+#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.guidPrefix[1]"
+#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.guidPrefix[0]"
+#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.entityId.entityKey[2]"
+#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.entityId.entityKey[1]"
+#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.entityId.entityKey[0]"
+#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.entityId.entityKind"
     struct Status {
       NodeId node_id;
       StateEnum state;
+      string name;
     };
     const string status_topic_name = "Node_Controller_Status";
 

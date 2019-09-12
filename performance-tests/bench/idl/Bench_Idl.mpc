@@ -5,6 +5,7 @@ project: dcpslib, ../bench_builder_idl_lib, dcps_rapidjson {
                    -I$(BENCH_BUILDER_ROOT)/builder_idl
   dcps_ts_flags += -Wb,export_macro=Bench_Export \
                    -Wb,cpp_include=$(BENCH_BUILDER_ROOT)/core_idl_json/DdsDcpsCoreTypeSupportImpl.h \
+                   -Wb,cpp_include=$(BENCH_BUILDER_ROOT)/core_idl_json/DdsDcpsGuidTypeSupportImpl.h \
                    -Wb,cpp_include=$(BENCH_BUILDER_ROOT)/builder_idl_json/BuilderTypeSupportImpl.h \
                    -I$(BENCH_BUILDER_ROOT)/builder_idl
   dynamicflags  += BENCH_BUILD_DLL
