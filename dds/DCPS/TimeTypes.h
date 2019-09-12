@@ -42,7 +42,7 @@ typedef TimePoint_T<SystemClock> SystemTimePoint;
 /*
  * As of writing, ACE_Monotonic_Time_Policy doesn't support Darwin systems like
  * macOS. Use SystemClock instead, because ACE_Monotonic_Time_Policy falls back
- * to returing ACE_Time_Value::zero for some reason.
+ * to returning ACE_Time_Value::zero for some reason.
  */
 typedef SystemClock MonotonicClock;
 #else
@@ -52,11 +52,11 @@ typedef TimePoint_T<MonotonicClock> MonotonicTimePoint;
 ///@}
 
 /**
- * ConditionTime will have to be passed to ACE_Condition for it to intrepret
- * the ACE_Time_Value* argument of wait as monotonic time. See the example in
- * the "Time" section of docs/guidelines.md.
+ * ConditionAttributesMonotonic() will have to be passed as the second argument
+ * in an ACE_Condition constructor for it to interpret argument of
+ * wait(ACE_Time_Value*) as monotonic time.
  */
-typedef ACE_Condition_Attributes_T<MonotonicClock> ConditionTime;
+typedef ACE_Condition_Attributes_T<MonotonicClock> ConditionAttributesMonotonic;
 
 } // namespace DCPS
 } // namespace OpenDDS

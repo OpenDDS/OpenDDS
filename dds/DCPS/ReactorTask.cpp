@@ -23,11 +23,12 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 OpenDDS::DCPS::ReactorTask::ReactorTask(bool useAsyncSend)
   : barrier_(2)
   , state_(STATE_NOT_RUNNING)
-  , condition_(lock_, condition_time_)
+  , condition_(lock_)
   , reactor_(0)
   , reactor_owner_(ACE_OS::NULL_thread)
   , proactor_(0)
   , use_async_send_(useAsyncSend)
+  , timer_queue_(0)
 {
 }
 

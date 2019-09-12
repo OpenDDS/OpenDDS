@@ -475,8 +475,6 @@ private:
   /// The block waiting flag.
   bool                            waiting_on_release_;
 
-  ConditionTime condition_time_;
-
   /// This lock is used to protect the container and the map
   /// in the type-specific DataWriter.
   /// This lock can be accessible via the datawriter.

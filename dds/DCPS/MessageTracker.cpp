@@ -7,7 +7,7 @@
 #include "ace/Synch.h"
 #include <dds/DCPS/MessageTracker.h>
 #include <dds/DCPS/Service_Participant.h>
-#include <dds/DCPS/Time_Helper.h>
+#include <dds/DCPS/TimeTypes.h>
 #include "ace/ACE.h"
 #include "ace/Guard_T.h"
 #include "ace/OS_NS_time.h"
@@ -21,7 +21,7 @@ MessageTracker::MessageTracker(const OPENDDS_STRING& msg_src)
 , dropped_count_(0)
 , delivered_count_(0)
 , sent_count_(0)
-, done_condition_(lock_, condition_time_)
+, done_condition_(lock_, ConditionAttributesMonotonic())
 {
 }
 

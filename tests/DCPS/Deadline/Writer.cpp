@@ -26,7 +26,7 @@ Writer::Writer(::DDS::DataWriter_ptr writer,
                CORBA::Long key,
                TimeDuration sleep_duration)
 : writer_(::DDS::DataWriter::_duplicate(writer)),
-  condition_(lock_, condition_time_),
+  condition_(lock_, OpenDDS::DCPS::ConditionAttributesMonotonic()),
   associated_(false),
   dwl_servant_(0),
   instance_handle_(::DDS::HANDLE_NIL),

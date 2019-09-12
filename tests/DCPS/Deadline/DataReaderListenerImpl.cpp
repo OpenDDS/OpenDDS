@@ -2,12 +2,13 @@
 #include "MessengerTypeSupportC.h"
 #include "MessengerTypeSupportImpl.h"
 #include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/TimeTypes.h>
 
 using namespace Messenger;
 
 DataReaderListenerImpl::DataReaderListenerImpl()
   : mutex_()
-  , matched_condition_(mutex_, condition_time_)
+  , matched_condition_(mutex_, OpenDDS::DCPS::ConditionAttributesMonotonic())
   , matched_(0)
   , num_arrived_(0)
   , requested_deadline_total_count_ (0)
@@ -31,22 +32,19 @@ DataReaderListenerImpl::on_requested_deadline_missed(
     DDS::DataReader_ptr /* reader */,
     DDS::RequestedDeadlineMissedStatus const & status)
 {
-  if ((requested_deadline_total_count_ + status.total_count_change) != status.total_count)
-    {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_requested_deadline_missed:")
-        ACE_TEXT("Received incorrect total_count_change, previous total count %d ")
-        ACE_TEXT("new total_count=%d total_count_change=%d last_instance_handle=%d\n"),
-        requested_deadline_total_count_, status.total_count, status.total_count_change,
-        status.last_instance_handle));
-    }
-  else
-    {
-      ACE_DEBUG((LM_DEBUG,
-                ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_requested_deadline_missed:")
-                ACE_TEXT("total_count=%d total_count_change=%d last_instance_handle=%d\n"),
-        status.total_count, status.total_count_change, status.last_instance_handle));
-    }
+  if ((requested_deadline_total_count_ + status.total_count_change) != status.total_count) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_requested_deadline_missed:")
+      ACE_TEXT("Received incorrect total_count_change, previous total count %d ")
+      ACE_TEXT("new total_count=%d total_count_change=%d last_instance_handle=%d\n"),
+      requested_deadline_total_count_, status.total_count, status.total_count_change,
+      status.last_instance_handle));
+  } else {
+    ACE_DEBUG((LM_DEBUG,
+              ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_requested_deadline_missed:")
+              ACE_TEXT("total_count=%d total_count_change=%d last_instance_handle=%d\n"),
+      status.total_count, status.total_count_change, status.last_instance_handle));
+  }
   requested_deadline_total_count_ += status.total_count_change;
 }
 

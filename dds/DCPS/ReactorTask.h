@@ -70,7 +70,6 @@ private:
   ACE_Barrier   barrier_;
   LockType      lock_;
   State         state_;
-  ConditionTime condition_time_;
   ConditionType condition_;
   ACE_Reactor*  reactor_;
   ACE_thread_t  reactor_owner_;

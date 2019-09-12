@@ -14,7 +14,6 @@
 
 using OpenDDS::DCPS::TimeDuration;
 using OpenDDS::DCPS::MonotonicTimePoint;
-using OpenDDS::DCPS::ConditionTime;
 
 class Writer : public ACE_Task_Base
 {
@@ -41,7 +40,6 @@ private:
   typedef ACE_SYNCH_MUTEX     LockType;
   typedef ACE_Guard<LockType> GuardType;
 
-  ConditionTime condition_time_;
   LockType lock_;
   ACE_Condition<ACE_SYNCH_MUTEX> condition_;
 
