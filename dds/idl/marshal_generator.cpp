@@ -871,6 +871,10 @@ namespace {
       string field_name = fields[i]->local_name()->get_string();
       if (field_name == key_base) {
         AST_Type* field_type = fields[i]->field_type();
+        AST_Typedef* typedef_node = dynamic_cast<AST_Typedef*>(field_type);
+        if (typedef_node) {
+          field_type = typedef_node->primitive_base_type();
+        }
         if (!is_array && key_rem.empty()) {
           // The requested key field matches this one.  We do not allow
           // arrays (must be indexed specifically) or structs (must
@@ -879,23 +883,14 @@ namespace {
           if (sub_struct != 0) {
             throw string("Structs not allowed as keys");
           }
-          AST_Typedef* typedef_node = dynamic_cast<AST_Typedef*>(field_type);
-          if (typedef_node != 0) {
-            AST_Array* array_node =
-              dynamic_cast<AST_Array*>(typedef_node->base_type());
-            if (array_node != 0) {
-              throw string("Arrays not allowed as keys");
-            }
+          AST_Array* array_node = dynamic_cast<AST_Array*>(field_type);
+          if (array_node != 0) {
+            throw string("Arrays not allowed as keys");
           }
           return field_type;
         } else if (is_array) {
           // must be a typedef of an array
-          AST_Typedef* typedef_node = dynamic_cast<AST_Typedef*>(field_type);
-          if (typedef_node == 0) {
-            throw string("Indexing for non-array type");
-          }
-          AST_Array* array_node =
-            dynamic_cast<AST_Array*>(typedef_node->base_type());
+          AST_Array* array_node = dynamic_cast<AST_Array*>(field_type);
           if (array_node == 0) {
             throw string("Indexing for non-array type");
           }
