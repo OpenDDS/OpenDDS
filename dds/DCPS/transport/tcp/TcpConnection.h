@@ -21,6 +21,8 @@
 
 #include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/PoolAllocator.h"
+#include "dds/DCPS/ReactorInterceptor.h"
+#include "dds/DCPS/ReactorTask.h"
 #include "dds/DCPS/transport/framework/TransportDefs.h"
 
 #include "ace/SOCK_Stream.h"
@@ -123,6 +125,8 @@ public:
 
   void shutdown();
 
+  TcpTransport_rch impl() { return impl_; }
+
   /// Access TRANSPORT_PRIORITY.value policy value if set.
   Priority& transport_priority();
   Priority  transport_priority() const;
@@ -134,6 +138,50 @@ public:
 
 private:
 
+  class Interceptor : public ReactorInterceptor {
+  public:
+    Interceptor(ReactorTask* task, ACE_Reactor* reactor, ACE_thread_t owner) : ReactorInterceptor(reactor, owner), task_(task) {}
+    bool reactor_is_shut_down() const;
+  private:
+    ReactorTask* task_;
+  };
+
+  class RegisterHandler : public ReactorInterceptor::ResultCommand<int> {
+  public:
+    RegisterHandler(ACE_Event_Handler* handler, ACE_Reactor_Mask mask) : handler_(handler), mask_(mask) {}
+    void execute();
+  private:
+    ACE_Event_Handler* handler_;
+    ACE_Reactor_Mask mask_;
+  };
+
+  class RemoveHandler : public ReactorInterceptor::ResultCommand<int> {
+  public:
+    RemoveHandler(ACE_Event_Handler* handler, ACE_Reactor_Mask mask) : handler_(handler), mask_(mask) {}
+    void execute();
+  private:
+    ACE_Event_Handler* handler_;
+    ACE_Reactor_Mask mask_;
+  };
+
+  class ScheduleTimer : public ReactorInterceptor::ResultCommand<long> {
+  public:
+    ScheduleTimer(ACE_Event_Handler* handler, void* arg, const ACE_Time_Value& delay, const ACE_Time_Value& interval = ACE_Time_Value::zero) : handler_(handler), arg_(arg), delay_(delay), interval_(interval) {}
+    void execute();
+  private:
+    ACE_Event_Handler* handler_;
+    void* arg_;
+    ACE_Time_Value delay_, interval_;
+  };
+
+  class CancelTimer : public ReactorInterceptor::ResultCommand<int> {
+  public:
+    CancelTimer(ACE_Event_Handler* handler) : handler_(handler) {}
+    void execute();
+  private:
+    ACE_Event_Handler* handler_;
+  };
+
   /// Attempt an active connection establishment to the remote address.
   /// The local address is sent to the remote (passive) side to
   /// identify ourselves to the remote side.
@@ -144,6 +192,7 @@ private:
   int active_reconnect_i();
   int passive_reconnect_i();
   int active_reconnect_on_new_association();
+  void set_passive_reconnect_timer_id(long id);
 
   /// During the connection setup phase, the passive side sets passive_setup_,
   /// redirecting handle_input() events here (there is no recv strategy yet).
@@ -183,6 +232,8 @@ private:
   /// Impl object which is needed for connection objects and reconnect task
   TcpTransport_rch impl_;
 
+  RcHandle<Interceptor> interceptor_;
+
   /// The id of the scheduled timer. The timer is scheduled to check if the connection
   /// is re-established during the passive_reconnect_duration_. This id controls
   /// that the timer is just scheduled once when there are multiple threads detect
@@ -207,7 +258,7 @@ private:
 
   /// Small unique identifying value.
   std::size_t id_;
-  //ACE_thread_t reconnect_thread_;
+
   TcpReconnectTask reconnect_task_;
 
   /// Get name of the current reconnect state as a string.

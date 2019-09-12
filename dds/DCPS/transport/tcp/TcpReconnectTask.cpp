@@ -15,7 +15,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-TcpReconnectTask::TcpReconnectTask() : connection_(), mutex_(), cv_(mutex_)
+TcpReconnectTask::TcpReconnectTask() : connection_(), mutex_(), cv_(mutex_), shutdown_(false)
 {
   DBG_ENTRY_LVL("TcpReconnectTask", "TcpReconnectTask", 6);
   if (open()) {
@@ -28,20 +28,34 @@ TcpReconnectTask::TcpReconnectTask() : connection_(), mutex_(), cv_(mutex_)
 TcpReconnectTask::~TcpReconnectTask()
 {
   DBG_ENTRY_LVL("TcpReconnectTask", "~TcpReconnectTask", 6);
+  shutdown();
+  wait();
 }
 
-bool TcpReconnectTask::reconnect(TcpConnection_rch connection)
+void TcpReconnectTask::reconnect(TcpConnection_rch connection)
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, 0);
-  if (!connection_) {
+  DBG_ENTRY_LVL("TcpReconnectTask", "reconnect", 6);
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  if (!shutdown_ && !connection_) {
     connection_ = connection;
     activate(1);
   }
-  return false;
+}
+
+bool TcpReconnectTask::active() {
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
+  return connection_;
+}
+
+void TcpReconnectTask::shutdown() {
+  DBG_ENTRY_LVL("TcpReconnectTask", "shutdown", 6);
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  shutdown_ = true;
 }
 
 void TcpReconnectTask::wait_complete()
 {
+  DBG_ENTRY_LVL("TcpReconnectTask", "wait_complete", 6);
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
   while (connection_) {
     cv_.wait();
@@ -52,21 +66,25 @@ int TcpReconnectTask::svc()
 {
   DBG_ENTRY_LVL("TcpReconnectTask", "svc", 6);
 
-  TcpConnection_rch connection;
-  {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, 0);
-    connection = connection_;
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, 0);
+
+  // The order here matters for destruction if we're the last reference holders by the end
+  TcpTransport_rch impl = connection_->impl();
+  TcpConnection_rch connection = connection_;
+
+  ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(mutex_);
+
+  if (connection) {
+    ACE_GUARD_RETURN(ACE_Reverse_Lock<ACE_Thread_Mutex>, rev_guard, rev_lock, 0);
+    if (connection->reconnect() == -1) {
+      connection->tear_link();
+    }
   }
 
-  if (connection && connection->reconnect() == -1) {
-    connection->tear_link();
-  }
+  connection_.reset();
+  cv_.broadcast();
 
-  {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, 0);
-    connection_.reset();
-    cv_.broadcast();
-  }
+  g.release();
 
   return 0;
 }

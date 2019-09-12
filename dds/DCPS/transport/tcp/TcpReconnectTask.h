@@ -10,6 +10,7 @@
 
 #include /**/ "ace/pre.h"
 
+#include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/transport/tcp/TcpConnection_rch.h"
 #include "ace/Condition_Thread_Mutex.h"
 #include "ace/Task.h"
@@ -38,8 +39,10 @@ public:
 
   virtual ~TcpReconnectTask();
 
-  bool reconnect(TcpConnection_rch con);
+  void reconnect(TcpConnection_rch con);
+  bool active();
   void wait_complete();
+  void shutdown();
 
 private:
 
@@ -47,9 +50,10 @@ private:
   int svc();
 
   /// The connection that needs be re-established.
-  RcHandle<TcpConnection> connection_;
+  TcpConnection_rch connection_;
   ACE_Thread_Mutex mutex_;
   ACE_Condition_Thread_Mutex cv_;
+  bool shutdown_;
 };
 
 } // namespace DCPS
