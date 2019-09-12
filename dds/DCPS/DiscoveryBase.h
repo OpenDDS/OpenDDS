@@ -1585,9 +1585,9 @@ namespace OpenDDS {
         DiscoveredParticipantData pdata_;
         ACE_Time_Value last_seen_;
         DDS::InstanceHandle_t bit_ih_;
-		DCPS::SequenceNumber last_seq_;
-		DCPS::SequenceNumber seqResetCandidate_;
-		uint16_t SeqResetChkCount_;
+        DCPS::SequenceNumber last_seq_;
+        DCPS::SequenceNumber seqResetCandidate_;
+        uint16_t SeqResetChkCount_;
 
 #ifdef OPENDDS_SECURITY
         bool has_last_stateless_msg_;

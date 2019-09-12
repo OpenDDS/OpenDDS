@@ -63,11 +63,11 @@ GuidGenerator::GuidGenerator()
 
 #ifdef ACE_HAS_CPP11
 
-    std::mt19937::result_type counter_seed = static_cast<unsigned>(ACE_OS::gettimeofday().usec());
-    std::mt19937 generator(counter_seed);
-    std::uniform_int_distribution<ACE_UINT16> distribution(0, 65535);
+  std::mt19937::result_type counter_seed = static_cast<unsigned>(ACE_OS::gettimeofday().usec());
+  std::mt19937 generator(counter_seed);
+  std::uniform_int_distribution<ACE_UINT16> distribution(0, 65535);
 
-    init_counter_ = distribution(generator);	
+  init_counter_ = distribution(generator);
 
 #else
 	unsigned counter_seed = static_cast<unsigned>(ACE_OS::gettimeofday().usec());

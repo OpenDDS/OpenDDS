@@ -1752,10 +1752,9 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
       }
 
     } else if (qosChanged(iter->second.writer_data_.ddsPublicationData,
-                          wdata.ddsPublicationData)) 
+                          wdata.ddsPublicationData))
     { // update existing
 
-	  
 #ifndef DDS_HAS_MINIMUM_BIT
       DCPS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
       if (bit) { // bit may be null if the DomainParticipant is shutting down
@@ -1808,7 +1807,7 @@ Sedp::data_received(DCPS::MessageId message_id,
                     const DiscoveredPublication& dpub)
 {
   if (spdp_.shutting_down()) { return; }
-  
+
   const DCPS::DiscoveredWriterData& wdata = dpub.writer_data_;
   const RepoId& guid = wdata.writerProxy.remoteWriterGuid;
   RepoId guid_participant = guid;
@@ -1845,7 +1844,6 @@ void
 Sedp::Task::svc_i(DCPS::MessageId message_id,
                   const DiscoveredPublication_SecurityWrapper* data)
 {
-  
   DCPS::unique_ptr<const DiscoveredPublication_SecurityWrapper> delete_the_data(data);
   sedp_->data_received(message_id, *data);
 }
@@ -3033,8 +3031,10 @@ void
 Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
 {
   
-  if (shutting_down_.value()) return;
-
+  if (shutting_down_.value()) {
+    return;
+  }
+  
   switch (sample.header_.message_id_) {
   case DCPS::SAMPLE_DATA:
   case DCPS::DISPOSE_INSTANCE:
@@ -3841,7 +3841,7 @@ Sedp::Task::svc()
       ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::Task::svc "
         "got message from queue type %C\n", msg->msgTypeToString().c_str()));
     }
-	
+
     DCPS::unique_ptr<Msg> delete_the_msg(msg);
     switch (msg->type_) {
       case Msg::MSG_PARTICIPANT:

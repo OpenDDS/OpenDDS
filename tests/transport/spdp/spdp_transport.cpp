@@ -41,8 +41,7 @@ const char* smkinds[] = {"RESERVED_0", "PAD", "RESERVED_2", "RESERVED_3",
 const size_t n_smkinds = sizeof(smkinds) / sizeof(smkinds[0]);
 
 struct TestParticipant: ACE_Event_Handler {
-  TestParticipant(ACE_SOCK_Dgram& sock,																																																																																																																																	
-                  const OpenDDS::DCPS::GuidPrefix_t& prefix)
+  TestParticipant(ACE_SOCK_Dgram& sock,	const OpenDDS::DCPS::GuidPrefix_t& prefix)
     : sock_(sock)
     , recv_mb_(64 * 1024)
   {
@@ -91,25 +90,25 @@ struct TestParticipant: ACE_Event_Handler {
     size_t size = 0, padding = 0;
     gen_find_size(hdr_, size, padding);
     gen_find_size(ds, size, padding);
-	
-    size += sizeof(ParameterList); // CDR encap header + 4 bytes of data
-	size += 200;
+
+    size += sizeof(plist);
+    size +=200;
     ACE_Message_Block mb(size + padding);
     Serializer ser(&mb, host_is_bigendian, Serializer::ALIGN_CDR);
 
-	const ACE_CDR::ULong encap = 0x00000300; // {CDR_LE, options} in BE format
-	
-	const bool ok = (ser << hdr_) && (ser << ds) && (ser << encap);
+    const ACE_CDR::ULong encap = 0x00000300; // {CDR_LE, options} in BE format
+
+    const bool ok = (ser << hdr_) && (ser << ds) && (ser << encap);
     if (!ok) {
       ACE_DEBUG((LM_DEBUG, "ERROR: failed to serialize data\n"));
       return false;
     }
 
-	const bool ok2 = (ser << plist);
-	if (!ok2) {
-		ACE_DEBUG((LM_DEBUG, "ERROR: failed to serialize data\n"));
-		return false;
-	}
+    const bool ok2 = (ser << plist);
+    if (!ok2) {
+      ACE_DEBUG((LM_DEBUG, "ERROR: failed to serialize data\n"));
+      return false;
+    }
 
     return send(mb, send_to);
   }
@@ -227,40 +226,42 @@ bool run_test()
   test_part_addr.set(test_part_addr.get_port_number(), "localhost");
 #endif
 
-  ACE_INET_Addr send_addr{ "239.255.0.1:7400" }; 
+  ACE_INET_Addr send_addr{ "239.255.0.1:7400" };
 
   GuidGenerator gen;
   GUID_t test_part_guid;
   gen.populate(test_part_guid);
   test_part_guid.entityId = ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER;
-
+  
   TestParticipant part1(test_part_sock, test_part_guid.guidPrefix);
 
   // Create and initialize RtpsDiscovery
 
   RtpsDiscovery rd("test");
   const DDS::DomainId_t domain = 0;
-  const DDS::DomainParticipantQos qos = TheServiceParticipant->initial_DomainParticipantQos(); 
+  const DDS::DomainParticipantQos qos = TheServiceParticipant->initial_DomainParticipantQos();
 
 
   OpenDDS::DCPS::RepoId id = rd.generate_participant_guid();
 
   const GuidPrefix_t& gp = test_part_guid.guidPrefix;
 
-  const RcHandle<Spdp> spdp(make_rch<Spdp>(domain, ref(id), qos, &rd)); 
+  const RcHandle<Spdp> spdp(make_rch<Spdp>(domain, ref(id), qos, &rd));
+
+ 
 
   OpenDDS::RTPS::ParameterList plist;
 
   BuiltinEndpointSet_t availableBuiltinEndpoints =
-	  DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER |
-	  DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR |
-	  DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER |
-	  DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR |
-	  DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER |
-	  DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR |
-	  BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER |
-	  BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER
-	  ;
+    DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER |
+    DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR |
+    DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER |
+    DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR |
+    DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER |
+    DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR |
+    BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER |
+    BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER
+  ;
 
   OpenDDS::DCPS::LocatorSeq nonEmptyList(1);
   nonEmptyList.length(1);
@@ -275,143 +276,124 @@ bool run_test()
   OpenDDS::DCPS::LocatorSeq sedp_unicast_, sedp_multicast_;  
 
   const OpenDDS::RTPS::SPDPdiscoveredParticipantData pdata = {
-	{ 
-		 DDS::BuiltinTopicKey_t(),
-         qos.user_data
-	},
-	{ 
-		 PROTOCOLVERSION,
-		 {
-	        gp[0], gp[1], gp[2], gp[3], gp[4], gp[5],
-	        gp[6], gp[7], gp[8], gp[9], gp[10], gp[11]
-         },
-	     VENDORID_OPENDDS,
-	     false /*expectsIQoS*/,
-	     availableBuiltinEndpoints,
-		 sedp_multicast_,
-		 sedp_unicast_,
-	     nonEmptyList /*defaultMulticastLocatorList*/,
-	     nonEmptyList /*defaultUnicastLocatorList*/,
-	     { 0 /*manualLivelinessCount*/ },   //FUTURE: implement manual liveliness
-	     qos.property,
-	     {PFLAGS_NO_ASSOCIATED_WRITERS} // opendds_participant_flags
-	},
-	{ // Duration_t (leaseDuration)
-	     static_cast<CORBA::Long>((rd.resend_period() * 10).sec()),
-	     0 // we are not supporting fractional seconds in the lease duration
-	}
+    { 
+      DDS::BuiltinTopicKey_t(),
+      qos.user_data
+    },
+    {
+      PROTOCOLVERSION,
+      {gp[0], gp[1], gp[2], gp[3], gp[4], gp[5],
+       gp[6], gp[7], gp[8], gp[9], gp[10], gp[11]},
+      VENDORID_OPENDDS,
+      false /*expectsIQoS*/,
+      availableBuiltinEndpoints,
+      sedp_multicast_,
+      sedp_unicast_,
+      nonEmptyList /*defaultMulticastLocatorList*/,
+      nonEmptyList /*defaultUnicastLocatorList*/,
+      { 0 /*manualLivelinessCount*/ },   //FUTURE: implement manual liveliness
+      qos.property,
+      {PFLAGS_NO_ASSOCIATED_WRITERS} // opendds_participant_flags
+    },
+    { // Duration_t (leaseDuration)
+       static_cast<CORBA::Long>((rd.resend_period() * 10).sec()),
+       0 // we are not supporting fractional seconds in the lease duration
+    }
   };
-
 
   int irtn = OpenDDS::RTPS::ParameterListConverter::to_param_list(pdata, plist);
 
   if (irtn < 0) {
-	  ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-		  ACE_TEXT("spdp_transport - run_test - ")
-		  ACE_TEXT("failed to convert from SPDPdiscoveredParticipantData ")
-		  ACE_TEXT("to ParameterList\n")));
-	  return false;
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+      ACE_TEXT("spdp_transport - run_test - ")
+      ACE_TEXT("failed to convert from SPDPdiscoveredParticipantData ")
+     ACE_TEXT("to ParameterList\n")));
+     return false;
   }
-    
-  const DDS::Subscriber_var sVar;  
 
-  spdp->init_bit(sVar);  
- 
+  const DDS::Subscriber_var sVar;
+
+  spdp->init_bit(sVar);
 
   SequenceNumber_t first_seq = {0, 1}, seq = first_seq;
   bool bfirst = true;
 
-  // Test for performing sequence reset.  
+  // Test for performing sequence reset.
 
   for (;;)
   {
-	  if (!part1.send_data(test_part_guid.entityId, seq, plist, send_addr)) {
-		  return false;
-	  }
+    if (!part1.send_data(test_part_guid.entityId, seq, plist, send_addr)) {
+      return false;
+    }
 
-	  if (seq.low == 5)
-	  {
-		  if (bfirst)
-		  {
-			  seq.low = 1;
-			  bfirst = false;
-		  }
-		  else
-		  {
-			  seq.low++;
-		  }
-	  }
-	  else
-	  {
-		  seq.low++;
-	  }
+    if (seq.low == 5) {
+      if (bfirst) {
+        seq.low = 1;
+        bfirst = false;
+      } else {
+        ++seq.low;
+      }
+    } else {
+      ++seq.low;
+    }
 
-	  reactor_wait();
+    reactor_wait();
 
-	  if (seq.low == 8)
-		  break;
+    if (seq.low == 8) {
+      break;
+    }
   }
 
-  // Sequence number starts at 8 and reverts to 6 to verify default reset 
-  // limits.    
+  // Sequence number starts at 8 and reverts to 6 to verify default reset
+  // limits.
 
   bfirst = true;
 
-  for (;;)
-  {
-	  if (!part1.send_data(test_part_guid.entityId, seq, plist, send_addr)) {
-		  return false;
-	  }
+  for (;;) {
+    if (!part1.send_data(test_part_guid.entityId, seq, plist, send_addr)) {
+      return false;
+    }
 
-	  if ((seq.low == 8) && (bfirst))
-	  {
-		  seq.low = 6;
-		  bfirst = false;
-	  }
-	  else
-	  {
-		  seq.low++;
-	  }
+    if ((seq.low == 8) && (bfirst)) {
+      seq.low = 6;
+      bfirst = false;
+    } else {
+      ++seq.low;
+    }
 
-	  reactor_wait();
+    reactor_wait();
 
-	  if (seq.low == 10)
-	  {
-		  break;
-	  }
-
-  } 
+    if (seq.low == 10) {
+      break;
+    }
+  }
 
   // Test for possible routing issues when data is arriving via multiple paths.
   // Resends sequence numbers but does not cause a reset.
  
   seq = first_seq;
 
-  for (;;)
-  {
-	  if (!part1.send_data(test_part_guid.entityId, seq, plist, send_addr)) {
-		  return false;
-	  }
+  for (;;) {
+    if (!part1.send_data(test_part_guid.entityId, seq, plist, send_addr)) {
+      return false;
+    }
 
-	  reactor_wait();
+    reactor_wait();
 
-	  for (int i = 0; i < 3; i++)
-	  {
-		  seq.low++;
-		  if (!part1.send_data(test_part_guid.entityId, seq, plist, send_addr)) {
-			  return false;
-		  }
+    for (int i = 0; i < 3; i++)
+    {
+      ++seq.low;
+      if (!part1.send_data(test_part_guid.entityId, seq, plist, send_addr)) {
+        return false;
+      }
+      reactor_wait();
+    }
 
-		  reactor_wait();
-		  
-	  }
-
-	  if (seq.low == 8)
-	  {
-		  break;
-	  }
-
-	  seq.low -= 2;
+    if (seq.low == 8)
+    {
+      break;
+    }
+    seq.low -= 2;
   }
 
   // Test for checking for sequence rollover.  A reset should not occur 
@@ -420,26 +402,22 @@ bool run_test()
   SequenceNumber_t max_seq = { 1, (ACE_UINT32_MAX - 5) };
   seq = max_seq;
 
-  for (;;)
-  {
-	  if (!part1.send_data(test_part_guid.entityId, seq, plist, send_addr)) {
-		  return false;
-	  }
+  for (;;) {
+    if (!part1.send_data(test_part_guid.entityId, seq, plist, send_addr)) {
+      return false;
+    }
 
-	  if (seq.low == ACE_UINT32_MAX)
-	  {
-		  seq.high++;
+    if (seq.low == ACE_UINT32_MAX) {
+      ++seq.high;
 
-		  if (seq.high < 0)
-			  seq.high = 0;
-	  }
-
-	  seq.low++;
-
-	  reactor_wait();
-
+      if (seq.high < 0) {
+        seq.high = 0;
+      }
+    }
+    ++seq.low;
+    reactor_wait();
   }
-  
+
   reactor_wait();
 
   return true;
@@ -447,17 +425,13 @@ bool run_test()
 
 int ACE_TMAIN(int, ACE_TCHAR*[])
 {
-
-	try
-	{
-		::DDS::DomainParticipantFactory_var dpf =
-			TheServiceParticipant->get_domain_participant_factory();
-	}
-	catch (const CORBA::BAD_PARAM& ex)
-	{
-		ex._tao_print_exception("Exception caught in rtps_reliability.cpp:");
-		return 1;
-	}
+  try {
+    ::DDS::DomainParticipantFactory_var dpf =
+        TheServiceParticipant->get_domain_participant_factory();
+  } catch (const CORBA::BAD_PARAM& ex) {
+    ex._tao_print_exception("Exception caught in rtps_reliability.cpp:");
+    return 1;
+  }
 
   bool ok = false;
   try {

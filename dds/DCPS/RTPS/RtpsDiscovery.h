@@ -99,7 +99,7 @@ public:
 
   u_short dx() const { return dx_; }
   void dx(u_short offset_two) {
-	  dx_ = offset_two;
+    dx_ = offset_two;
   }
 
   unsigned char ttl() const { return ttl_; }
@@ -172,7 +172,7 @@ public:
 
   u_short max_spdp_sequence_msg_reset_check() const { return max_spdp_sequence_msg_reset_check_; }
   void max_spdp_sequence_msg_reset_check(u_short reset_value) {
-	  max_spdp_sequence_msg_reset_check_ = reset_value;
+    max_spdp_sequence_msg_reset_check_ = reset_value;
   }
 
 private:
