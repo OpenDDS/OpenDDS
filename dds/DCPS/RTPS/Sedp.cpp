@@ -3030,11 +3030,11 @@ decode_parameter_list(const DCPS::ReceivedDataSample& sample,
 void
 Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
 {
-  
+ 
   if (shutting_down_.value()) {
     return;
   }
-  
+ 
   switch (sample.header_.message_id_) {
   case DCPS::SAMPLE_DATA:
   case DCPS::DISPOSE_INSTANCE:

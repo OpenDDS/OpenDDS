@@ -536,7 +536,7 @@ Spdp::handle_participant_data(DCPS::MessageId id, const ParticipantData_t& cpdat
 bool
 Spdp::validateSequenceNumber(const DCPS::SequenceNumber& seq, DiscoveredParticipantIter& iter)
 {
-  if ((iter->second.last_seq_.getHigh() == ACE_INT32_MAX) && 
+  if ((iter->second.last_seq_.getHigh() == ACE_INT32_MAX) &&
      (iter->second.last_seq_.getLow() == ACE_UINT32_MAX)) {
     return true;
   } else {
@@ -573,7 +573,7 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
   }
 
   DCPS::MessageId msg_id = (data.inlineQos.length() && disposed(data.inlineQos)) ? DCPS::DISPOSE_INSTANCE : DCPS::SAMPLE_DATA;
-  
+ 
   handle_participant_data(msg_id, pdata, data.writerSN);
 
   ICE::Endpoint* endpoint = sedp_.get_ice_endpoint();

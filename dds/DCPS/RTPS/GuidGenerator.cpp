@@ -70,8 +70,8 @@ GuidGenerator::GuidGenerator()
   init_counter_ = distribution(generator);
 
 #else
-	unsigned counter_seed = static_cast<unsigned>(ACE_OS::gettimeofday().usec());
-	init_counter_ = static_cast<ACE_UINT16>(ACE_OS::rand_r(&counter_seed));
+  unsigned counter_seed = static_cast<unsigned>(ACE_OS::gettimeofday().usec());
+  init_counter_ = static_cast<ACE_UINT16>(ACE_OS::rand_r(&counter_seed));
 
 #endif
 

@@ -41,7 +41,7 @@ const char* smkinds[] = {"RESERVED_0", "PAD", "RESERVED_2", "RESERVED_3",
 const size_t n_smkinds = sizeof(smkinds) / sizeof(smkinds[0]);
 
 struct TestParticipant: ACE_Event_Handler {
-  TestParticipant(ACE_SOCK_Dgram& sock,	const OpenDDS::DCPS::GuidPrefix_t& prefix)
+  TestParticipant(ACE_SOCK_Dgram& sock, const OpenDDS::DCPS::GuidPrefix_t& prefix)
     : sock_(sock)
     , recv_mb_(64 * 1024)
   {
@@ -232,7 +232,7 @@ bool run_test()
   GUID_t test_part_guid;
   gen.populate(test_part_guid);
   test_part_guid.entityId = ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER;
-  
+ 
   TestParticipant part1(test_part_sock, test_part_guid.guidPrefix);
 
   // Create and initialize RtpsDiscovery
@@ -248,7 +248,7 @@ bool run_test()
 
   const RcHandle<Spdp> spdp(make_rch<Spdp>(domain, ref(id), qos, &rd));
 
- 
+
 
   OpenDDS::RTPS::ParameterList plist;
 
@@ -273,10 +273,10 @@ bool run_test()
   nonEmptyList[0].address[14] = 0;
   nonEmptyList[0].address[15] = 1;
 
-  OpenDDS::DCPS::LocatorSeq sedp_unicast_, sedp_multicast_;  
+  OpenDDS::DCPS::LocatorSeq sedp_unicast_, sedp_multicast_;
 
   const OpenDDS::RTPS::SPDPdiscoveredParticipantData pdata = {
-    { 
+    {
       DDS::BuiltinTopicKey_t(),
       qos.user_data
     },
@@ -370,7 +370,7 @@ bool run_test()
 
   // Test for possible routing issues when data is arriving via multiple paths.
   // Resends sequence numbers but does not cause a reset.
- 
+
   seq = first_seq;
 
   for (;;) {
@@ -396,7 +396,7 @@ bool run_test()
     seq.low -= 2;
   }
 
-  // Test for checking for sequence rollover.  A reset should not occur 
+  // Test for checking for sequence rollover.  A reset should not occur
   // when the sequence number rolls over to zero from the max value.
 
   SequenceNumber_t max_seq = { 1, (ACE_UINT32_MAX - 5) };
