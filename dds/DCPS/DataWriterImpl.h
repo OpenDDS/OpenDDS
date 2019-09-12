@@ -99,7 +99,7 @@ public:
 
     AckToken(const DDS::Duration_t& max_wait,
              const SequenceNumber& sequence)
-      : tstamp_(ACE_OS::gettimeofday()),
+      : tstamp_(monotonic_time()),
         max_wait_(max_wait),
         sequence_(sequence) {}
 

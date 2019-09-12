@@ -2145,7 +2145,7 @@ private:
         const bool NOT_UNREGISTER_MSG = false;
         // clear the message, since ownership is being transfered to finish_store_instance_data.
 
-        instance->last_accepted_ = ACE_OS::gettimeofday();
+        instance->last_accepted_ = monotonic_time();
         const DataSampleHeader_ptr header = data->second.header;
         const bool new_instance = data->second.new_instance;
 
@@ -2162,7 +2162,7 @@ private:
         // this check is performed to handle the corner case where store_instance_data received and delivered a sample, while this
         // method was waiting for the lock
         const ACE_Time_Value interval = duration_to_time_value(data_reader_impl->qos_.time_based_filter.minimum_separation);
-        if (ACE_OS::gettimeofday() - instance->last_sample_tv_ >= interval) {
+        if (monotonic_time() - instance->last_sample_tv_ >= interval) {
           // nothing to process, so unregister this handle for timeout
           cancel_timer_id = data->second.timer_id;
           // no new data to process, so remove from container

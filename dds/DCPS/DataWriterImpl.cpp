@@ -1149,7 +1149,7 @@ DataWriterImpl::assert_liveliness()
       return DDS::RETCODE_OK;
     }
   case DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS:
-    if (this->send_liveliness(ACE_OS::gettimeofday()) == false) {
+    if (this->send_liveliness(monotonic_time()) == false) {
       return DDS::RETCODE_ERROR;
     }
     break;
@@ -1793,7 +1793,7 @@ DataWriterImpl::write(Message_Block_Ptr data,
                       ACE_TEXT("enqueue failed.\n")),
                      ret);
   }
-  this->last_liveliness_activity_time_ = ACE_OS::gettimeofday();
+  this->last_liveliness_activity_time_ = monotonic_time();
 
   track_sequence_number(filter_out);
 

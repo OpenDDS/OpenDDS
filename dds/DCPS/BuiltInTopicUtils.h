@@ -15,6 +15,7 @@
 #include "dds/DdsDcpsCoreC.h"
 #include "Service_Participant.h"
 #include "DomainParticipantImpl.h"
+#include "TimeTypes.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -88,7 +89,7 @@ DDS::ReturnCode_t instance_handle_to_bit_data(
   typedef typename BIT_Reader_var::_obj_type BIT_Reader;
   BIT_Reader_var bit_reader = BIT_Reader::_narrow(reader.in());
 
-  const ACE_Time_Value due = ACE_OS::gettimeofday() +
+  const ACE_Time_Value due = monotonic_time() +
     ACE_Time_Value(TheServiceParticipant->bit_lookup_duration_msec() / 1000,
                    (TheServiceParticipant->bit_lookup_duration_msec() % 1000)
                    * 1000);
@@ -124,7 +125,7 @@ DDS::ReturnCode_t instance_handle_to_bit_data(
                        ret);
     }
 
-    const ACE_Time_Value now = ACE_OS::gettimeofday();
+    const ACE_Time_Value now = monotonic_time();
 
     if (now < due) {
       if (DCPS_debug_level >= 10) {

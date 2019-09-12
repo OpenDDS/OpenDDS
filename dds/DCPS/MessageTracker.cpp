@@ -7,6 +7,7 @@
 #include "ace/Synch.h"
 #include <dds/DCPS/MessageTracker.h>
 #include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/TimeTypes.h>
 #include "ace/ACE.h"
 #include "ace/Guard_T.h"
 #include "ace/OS_NS_time.h"
@@ -20,7 +21,7 @@ MessageTracker::MessageTracker(const OPENDDS_STRING& msg_src)
 , dropped_count_(0)
 , delivered_count_(0)
 , sent_count_(0)
-, done_condition_(lock_)
+, done_condition_(lock_, ConditionAttributesMonotonic())
 {
 }
 
@@ -63,14 +64,11 @@ MessageTracker::message_dropped()
 void
 MessageTracker::wait_messages_pending(OPENDDS_STRING& caller_message)
 {
-  ACE_Time_Value pending_timeout =
-    TheServiceParticipant->pending_timeout();
-
-  ACE_Time_Value* pTimeout = 0;
-
+  ACE_Time_Value_T<MonotonicClock> pending_timeout(TheServiceParticipant->pending_timeout());
+  ACE_Time_Value_T<MonotonicClock>* pTimeout = 0;
   if (pending_timeout != ACE_Time_Value::zero) {
     pTimeout = &pending_timeout;
-    pending_timeout += ACE_OS::gettimeofday();
+    pending_timeout += monotonic_time();
   }
 
   ACE_GUARD(ACE_Thread_Mutex, guard, this->lock_);

@@ -110,17 +110,20 @@ ReturnCode_t WaitSet::get_conditions(ConditionSeq& conds)
 ReturnCode_t WaitSet::wait(ConditionSeq& active_conditions,
                            const Duration_t& timeout)
 {
+  using OpenDDS::DCPS::MonotonicClock;
+  using OpenDDS::DCPS::monotonic_time;
+
   if (waiting_.value()) return RETCODE_PRECONDITION_NOT_MET;
 
   if (!OpenDDS::DCPS::non_negative_duration(timeout))
     return DDS::RETCODE_BAD_PARAMETER;
 
-  ACE_Time_Value deadline;
-  ACE_Time_Value* p_deadline = 0;
+  ACE_Time_Value_T<MonotonicClock> deadline;
+  ACE_Time_Value_T<MonotonicClock>* p_deadline = 0;
 
   if (timeout.sec != DURATION_INFINITE_SEC ||
       timeout.nanosec != DURATION_INFINITE_NSEC) {
-    deadline = OpenDDS::DCPS::duration_to_absolute_time_value(timeout);
+    deadline = OpenDDS::DCPS::duration_to_absolute_time_value(timeout, monotonic_time());
     p_deadline = &deadline;
   }
 

@@ -259,7 +259,7 @@ ReliableSession::expire_naks()
 {
   if (this->nak_requests_.empty()) return; // nothing to expire
 
-  ACE_Time_Value deadline(ACE_OS::gettimeofday());
+  ACE_Time_Value deadline(monotonic_time());
   deadline -= this->link_->config().nak_timeout_;
 
   NakRequestMap::iterator first(this->nak_requests_.begin());
@@ -349,7 +349,7 @@ ReliableSession::send_naks()
     return;  // nothing to send
   }
 
-  ACE_Time_Value now(ACE_OS::gettimeofday());
+  ACE_Time_Value now(monotonic_time());
 
   // Record low-water mark for this interval; this value will
   // be used to reset the low-water mark in the event the remote

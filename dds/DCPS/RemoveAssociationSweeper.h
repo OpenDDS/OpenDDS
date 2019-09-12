@@ -109,7 +109,7 @@ void RemoveAssociationSweeper<T>::schedule_timer(OpenDDS::DCPS::RcHandle<OpenDDS
   if (time_to_deadline > ACE_Time_Value(10))
     time_to_deadline = ACE_Time_Value(10);
 
-  info->removal_deadline_ = ACE_OS::gettimeofday() + time_to_deadline;
+  info->removal_deadline_ = monotonic_time() + time_to_deadline;
   ScheduleCommand c(this, info);
   execute_or_enqueue(c);
 }
@@ -186,7 +186,7 @@ void RemoveAssociationSweeper<T>::ScheduleCommand::execute()
 
   this->info_->remove_association_timer_ = this->sweeper_->reactor()->schedule_timer(this->sweeper_,
                                                                        arg,
-                                                                       this->info_->removal_deadline_ - ACE_OS::gettimeofday());
+                                                                       this->info_->removal_deadline_ - monotonic_time());
   if (DCPS_debug_level) {
     ACE_DEBUG((LM_INFO, "(%P|%t) RemoveAssociationSweeper::ScheduleCommand::execute() - Scheduled sweeper %d\n", this->info_->remove_association_timer_));
   }

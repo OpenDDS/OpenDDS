@@ -626,11 +626,11 @@ DomainParticipantImpl::find_topic(
   const DDS::Duration_t & timeout)
 {
   ACE_Time_Value timeout_tv
-  = ACE_OS::gettimeofday() + ACE_Time_Value(timeout.sec, timeout.nanosec/1000);
+  = monotonic_time() + ACE_Time_Value(timeout.sec, timeout.nanosec/1000);
 
   bool first_time = true;
 
-  while (first_time || ACE_OS::gettimeofday() < timeout_tv) {
+  while (first_time || monotonic_time() < timeout_tv) {
     if (first_time) {
       first_time = false;
     }
@@ -689,7 +689,7 @@ DomainParticipantImpl::find_topic(
                  ACE_TEXT("topic not found, discovery returned INTERNAL_ERROR!\n")));
       return DDS::Topic::_nil();
     } else {
-      ACE_Time_Value now = ACE_OS::gettimeofday();
+      ACE_Time_Value now = monotonic_time();
 
       if (now < timeout_tv) {
         ACE_Time_Value remaining = timeout_tv - now;
@@ -1354,7 +1354,7 @@ DomainParticipantImpl::assert_liveliness()
     it->svt_->assert_liveliness_by_participant();
   }
 
-  last_liveliness_activity_ = ACE_OS::gettimeofday();
+  last_liveliness_activity_ = monotonic_time();
 
   return DDS::RETCODE_OK;
 }
@@ -2226,7 +2226,7 @@ DomainParticipantImpl::LivelinessTimer::add_adjust(OpenDDS::DCPS::DataWriterImpl
             guard,
             this->lock_);
 
-  const ACE_Time_Value now = ACE_OS::gettimeofday();
+  const ACE_Time_Value now = monotonic_time();
 
   // Calculate the time remaining to liveliness check.
   const ACE_Time_Value remaining = interval_ - (now - last_liveliness_check_);

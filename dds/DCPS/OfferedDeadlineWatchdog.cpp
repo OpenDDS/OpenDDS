@@ -79,7 +79,7 @@ OpenDDS::DCPS::OfferedDeadlineWatchdog::execute(
       missed = true;
 
     } else if (timer_called) { // handle_timeout is called
-      ACE_Time_Value diff = ACE_OS::gettimeofday() - instance->cur_sample_tv_;
+      ACE_Time_Value diff = monotonic_time() - instance->cur_sample_tv_;
       missed = diff >= this->interval_;
 
     } else if (instance->last_sample_tv_ != ACE_Time_Value::zero) { // upon writing sample.

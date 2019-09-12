@@ -565,7 +565,7 @@ TcpTransport::release_datalink(DataLink* link)
   }
 
   // Actions are executed outside of the lock scope.
-  ACE_Time_Value cancel_now = ACE_OS::gettimeofday();
+  ACE_Time_Value cancel_now = monotonic_time();
   switch (linkAction) {
   case StopLink:
     link->schedule_stop(cancel_now);
