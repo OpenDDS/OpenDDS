@@ -226,13 +226,13 @@ bool run_test()
   test_part_addr.set(test_part_addr.get_port_number(), "localhost");
 #endif
 
-  ACE_INET_Addr send_addr{ "239.255.0.1:7400" };
+  ACE_INET_Addr send_addr("239.255.0.1:7400");
 
   GuidGenerator gen;
   GUID_t test_part_guid;
   gen.populate(test_part_guid);
   test_part_guid.entityId = ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER;
- 
+
   TestParticipant part1(test_part_sock, test_part_guid.guidPrefix);
 
   // Create and initialize RtpsDiscovery
