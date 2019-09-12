@@ -28,6 +28,7 @@ OpenDDS::DCPS::ReactorTask::ReactorTask(bool useAsyncSend)
   , reactor_owner_(ACE_OS::NULL_thread)
   , proactor_(0)
   , use_async_send_(useAsyncSend)
+  , timer_queue_(0)
 {
 }
 
