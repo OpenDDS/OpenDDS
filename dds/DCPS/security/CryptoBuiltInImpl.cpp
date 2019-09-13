@@ -1958,7 +1958,9 @@ bool CryptoBuiltInImpl::decode_serialized_payload(
   mb_in.wr_ptr(encoded_buffer.length());
   Serializer de_ser(&mb_in, Serializer::SWAP_BE, Serializer::ALIGN_CDR);
   CryptoHeader ch;
-  de_ser >> ch;
+  if (!(de_ser >> ch)) {
+    return CommonUtilities::set_security_error(ex, -3, 4, "Failed to deserialize CryptoHeader");
+  }
 
   const KeySeq& keyseq = keys_[sending_datawriter_crypto];
   for (unsigned int i = 0; i < keyseq.length(); ++i) {
@@ -1966,13 +1968,18 @@ bool CryptoBuiltInImpl::decode_serialized_payload(
       const KeyId_t sKey = std::make_pair(sending_datawriter_crypto, i);
       if (encrypts(keyseq[i])) {
         ACE_CDR::ULong n;
-        de_ser >> n;
-        const char* ciphertext = mb_in.rd_ptr();
-        de_ser.skip(n);
+        if (!(de_ser >> n)) {
+          return CommonUtilities::set_security_error(ex, -3, 5, "Failed to deserialize CryptoContent length");
+        }
+        const char* const ciphertext = mb_in.rd_ptr();
+        if (!de_ser.skip(n)) {
+          return CommonUtilities::set_security_error(ex, -3, 7, "Failed to locate CryptoFooter");
+        }
         CryptoFooter cf;
-        de_ser >> cf;
-        return decrypt(keyseq[i], sessions_[sKey], ciphertext, n, ch, cf,
-                       plain_buffer, ex);
+        if (!(de_ser >> cf)) {
+          return CommonUtilities::set_security_error(ex, -3, 6, "Failed to deserialize CryptoFooter");
+        }
+        return decrypt(keyseq[i], sessions_[sKey], ciphertext, n, ch, cf, plain_buffer, ex);
 
       } else if (authenticates(keyseq[i])) {
         return CommonUtilities::set_security_error(ex, -3, 3, "Auth-only payload "

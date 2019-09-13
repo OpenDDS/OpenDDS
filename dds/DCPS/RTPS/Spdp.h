@@ -235,7 +235,6 @@ private:
   DDS::Security::IdentityStatusToken identity_status_token_;
   DDS::Security::PermissionsToken permissions_token_;
   DDS::Security::PermissionsCredentialToken permissions_credential_token_;
-  DDS::Security::ParticipantCryptoTokenSeq crypto_tokens_;
 
   DDS::Security::ParticipantSecurityAttributes participant_sec_attr_;
 #endif

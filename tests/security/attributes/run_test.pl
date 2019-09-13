@@ -178,6 +178,16 @@ if (!($scenario eq "")) {
     @topic_names = ("OD_OL_RWA_OM_OD");
     $pub_expect = "~15";
     $sub_expect = "~25";
+  } elsif ($scenario eq "FullMsgSign") {
+    @gov_files = ("governance/governance_PU_PA_ED_NL_SR_signed.p7s");
+    @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
+    @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
+    @topic_names = ("PD_OL_OA_OM_OD");
+  } elsif ($scenario eq "FullMsgEncrypt") {
+    @gov_files = ("governance/governance_PU_PA_ED_NL_ER_signed.p7s");
+    @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
+    @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
+    @topic_names = ("PD_OL_OA_OM_OD");
   } elsif ($scenario eq "NetProfiling_sec_off") {
     $pub_cfg_file = "unsec_base.ini";
     $sub_cfg_file = "unsec_base.ini";

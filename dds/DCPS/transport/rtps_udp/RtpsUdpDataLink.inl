@@ -81,6 +81,17 @@ RtpsUdpDataLink::reader_crypto_handle(const RepoId& reader) const
   const PeerHandlesCIter it = peer_crypto_handles_.find(reader);
   return (it == peer_crypto_handles_.end()) ? DDS::HANDLE_NIL : it->second;
 }
+
+ACE_INLINE DDS::Security::EndpointSecurityAttributesMask
+RtpsUdpDataLink::security_attributes(const RepoId& endpoint) const
+{
+  static const DDS::Security::EndpointSecurityAttributesMask inval = 0;
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, ch_lock_, inval);
+  typedef OPENDDS_MAP_CMP(RepoId, DDS::Security::EndpointSecurityAttributesMask,
+                          GUID_tKeyLessThan)::const_iterator iter_t;
+  const iter_t it = endpoint_security_attributes_.find(endpoint);
+  return (it == endpoint_security_attributes_.end()) ? inval : it->second;
+}
 #endif
 
 } // namespace DCPS
