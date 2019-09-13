@@ -228,6 +228,8 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   Nodes nodes;
 
+  TheServiceParticipant->default_configuration_file("rtps_disc.ini");
+
   // Parse Arguments
   DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
 

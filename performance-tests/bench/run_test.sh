@@ -10,10 +10,9 @@ fi
 #exec &>/dev/null
 
 cd node_controller
-./node_controller --id 1 -DCPSConfigFile rtps_disc.ini &
-./node_controller --id 2 -DCPSConfigFile rtps_disc.ini &
+./node_controller --name Jessie &
+./node_controller --name James &
 cd ../test_controller
-sleep 5
-./test_controller -DCPSConfigFile rtps_disc.ini
+./test_controller &
 wait
 
