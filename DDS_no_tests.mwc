@@ -1,6 +1,13 @@
 workspace {
+
   dds
-  tests/DCPS/Messenger
-  tests/DCPS/ConsolidatedMessengerIdl
-  tests/DCPS/Deadline
+  java
+  tools
+  DevGuideExamples
+
+  exclude {
+    java/jms
+    tools/modeling/tests
+  }
+
 }
