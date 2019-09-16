@@ -78,15 +78,31 @@ private:
 
 class SpdpHandler : public VerticalHandler {
 public:
-  SpdpHandler(ACE_Reactor* a_reactor, GroupTable& a_group_table, RoutingTable& a_routing_table);
+  SpdpHandler(ACE_Reactor* a_reactor,
+              GroupTable& a_group_table,
+              RoutingTable& a_routing_table,
+              const OpenDDS::DCPS::RepoId& application_participant_guid,
+              const ACE_Time_Value& lifespan,
+              const ACE_Time_Value& purge_period);
 
 private:
   GroupTable& mutable_group_table_;
+  std::string application_participant_addr_;
+  const std::string application_participant_guid_;
+
   void process_message(const ACE_INET_Addr& a_remote,
                        const ACE_Time_Value& a_now,
                        const std::string& a_src_guid,
                        ACE_Message_Block* a_msg,
                        bool is_beacon_message) override;
+
+  typedef std::map<std::string, ACE_Time_Value> AddrExpirationMap;
+  AddrExpirationMap addr_expiration_map_;
+  typedef std::multimap<ACE_Time_Value, std::string> ExpirationAddrMap;
+  ExpirationAddrMap expiration_addr_map_;
+  ACE_Time_Value const lifespan_;
+
+  int handle_timeout(const ACE_Time_Value& a_now, const void*) override;
 };
 
 #endif /* RTPSRELAY_RELAY_HANDLER_H_ */

@@ -11,6 +11,7 @@
 #include "StatisticsHandler.h"
 
 #include <dds/DCPS/transport/framework/NetworkAddress.h>
+#include <dds/DCPS/DomainParticipantImpl.h>
 
 #include <ace/Arg_Shifter.h>
 #include <ace/Argv_Type_Converter.h>
@@ -39,10 +40,12 @@ namespace {
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
-  DDS::DomainId_t domain = 0;
+  DDS::DomainId_t relay_domain = 0;
+  DDS::DomainId_t application_domain = 1;
   ACE_INET_Addr nic_horizontal, nic_vertical;
   ACE_Time_Value renew_after(60); // 1 minute
   ACE_Time_Value lifespan(300);   // 5 minutes
+  ACE_Time_Value purge_period(60);       // 1 minute
 
   ACE_Argv_Type_Converter atc(argc, argv);
   ACE_Arg_Shifter_T<char> args(atc.get_argc(), atc.get_ASCII_argv());
@@ -55,14 +58,20 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     } else if ((arg = args.get_the_parameter("-VerticalAddress"))) {
       nic_vertical = ACE_INET_Addr(arg);
       args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-Domain"))) {
-      domain = ACE_OS::atoi(arg);
+    } else if ((arg = args.get_the_parameter("-RelayDomain"))) {
+      relay_domain = ACE_OS::atoi(arg);
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-ApplicationDomain"))) {
+      application_domain = ACE_OS::atoi(arg);
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-RenewAfter"))) {
       renew_after = ACE_Time_Value(ACE_OS::atoi(arg));
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-Lifespan"))) {
       lifespan = ACE_Time_Value(ACE_OS::atoi(arg));
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-PurgePeriod"))) {
+      purge_period = ACE_Time_Value(ACE_OS::atoi(arg));
       args.consume_arg();
     } else {
       args.ignore_arg();
@@ -86,11 +95,24 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  DDS::DomainParticipant_var participant = factory->create_participant(domain, qos, nullptr,
-                                                                       OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  DDS::DomainParticipant_var application_participant = factory->create_participant(application_domain, qos, nullptr,
+                                                                                   OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  if (!application_participant) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: Failed to create application participant\n"));
+    return EXIT_FAILURE;
+  }
 
-  if (!participant) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: Failed to create participant\n"));
+  OpenDDS::DCPS::DomainParticipantImpl* application_participant_impl =
+    dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(application_participant.in());
+  if (application_participant_impl == 0) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: Failed to get application participant impl\n"));
+    return EXIT_FAILURE;
+  }
+
+  DDS::DomainParticipant_var relay_participant = factory->create_participant(relay_domain, qos, nullptr,
+                                                                             OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  if (!relay_participant) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: Failed to create relay participant\n"));
     return EXIT_FAILURE;
   }
 
@@ -99,22 +121,22 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   RoutingTable sedp_table(renew_after, lifespan);
   RoutingTable data_table(renew_after, lifespan);
 
-  if (!group_table.initialize(participant, "Group Info")) {
+  if (!group_table.initialize(relay_participant, "Group Info")) {
     ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: Failed to initialize group table\n"));
     return EXIT_FAILURE;
   }
 
-  if (!spdp_table.initialize(participant, "Spdp Routing Info")) {
+  if (!spdp_table.initialize(relay_participant, "Spdp Routing Info")) {
     ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: Failed to initialize SPDP routing table\n"));
     return EXIT_FAILURE;
   }
 
-  if (!sedp_table.initialize(participant, "Sedp Routing Info")) {
+  if (!sedp_table.initialize(relay_participant, "Sedp Routing Info")) {
     ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: Failed to initialize SEDP routing table\n"));
     return EXIT_FAILURE;
   }
 
-  if (!data_table.initialize(participant, "Data Routing Info")) {
+  if (!data_table.initialize(relay_participant, "Data Routing Info")) {
     ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: Failed to initialize data routing table\n"));
     return EXIT_FAILURE;
   }
@@ -137,7 +159,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   HorizontalHandler sedp_horizontal_handler(reactor, group_table, sedp_table);
   HorizontalHandler data_horizontal_handler(reactor, group_table, data_table);
 
-  SpdpHandler spdp_vertical_handler(reactor, group_table, spdp_table);
+  SpdpHandler spdp_vertical_handler(reactor, group_table, spdp_table, application_participant_impl->get_id(), lifespan, purge_period);
   VerticalHandler sedp_vertical_handler(reactor, group_table, sedp_table);
   VerticalHandler data_vertical_handler(reactor, group_table, data_table);
 
