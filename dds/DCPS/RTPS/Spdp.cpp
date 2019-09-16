@@ -402,7 +402,8 @@ Spdp::handle_participant_data(DCPS::MessageId id, const ParticipantData_t& cpdat
       // Associate the stateless reader / writer for handshakes & auth requests
       sedp_.associate_preauth(dp.pdata_);
 
-    // If we've gotten auth requests for this (previously undiscovered) participant, pull in the tokens now
+      // If we've gotten auth requests for this (previously undiscovered) participant, 
+      // pull in the tokens now
       PendingRemoteAuthTokenMap::iterator token_iter = pending_remote_auth_tokens_.find(guid);
       if (token_iter != pending_remote_auth_tokens_.end()) {
         dp.remote_auth_request_token_ = token_iter->second;
@@ -487,17 +488,7 @@ Spdp::handle_participant_data(DCPS::MessageId id, const ParticipantData_t& cpdat
 
     // Checks if sequence numbers are increasing
 
-    bool ValidSeq;
-
-    // Check if subroutne call is from Sedp Security
-
-    if (currentSeq.getValue() != 0) {
-      ValidSeq = validateSequenceNumber(currentSeq, iter);
-    } else {
-      ValidSeq = true;
-    }
-
-    if (ValidSeq) {
+    if (validateSequenceNumber(currentSeq, iter)) {
       // Must unlock when calling into part_bit() as it may call back into us
       ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
 
@@ -536,13 +527,18 @@ Spdp::handle_participant_data(DCPS::MessageId id, const ParticipantData_t& cpdat
 bool
 Spdp::validateSequenceNumber(const DCPS::SequenceNumber& seq, DiscoveredParticipantIter& iter)
 {
+  if (seq.getValue() == 0) {
+    return true;
+  }
+
   if ((iter->second.last_seq_.getHigh() == ACE_INT32_MAX) &&
      (iter->second.last_seq_.getLow() == ACE_UINT32_MAX)) {
     return true;
   } else {
     if (seq.getValue() < iter->second.last_seq_.getValue()) {
       ++iter->second.SeqResetChkCount_;
-      iter->second.seqResetCandidate_.setValue(seq.getValue());
+      //iter->second.seqResetCandidate_.setValue(seq.getValue());
+      iter->second.seqResetCandidate_ = seq;
       return false;
     } else {
       if (iter->second.SeqResetChkCount_ > 0) {

@@ -221,7 +221,7 @@ bool run_test()
   }
   test_part_sock.get_local_addr(test_part_addr);
 #ifdef OPENDDS_SAFETY_PROFILE
-  part1_addr.set(test_part_addr.get_port_number(), "127.0.0.1");
+  test_part_addr.set(test_part_addr.get_port_number(), "127.0.0.1");
 #else
   test_part_addr.set(test_part_addr.get_port_number(), "localhost");
 #endif
@@ -307,8 +307,8 @@ bool run_test()
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
       ACE_TEXT("spdp_transport - run_test - ")
       ACE_TEXT("failed to convert from SPDPdiscoveredParticipantData ")
-     ACE_TEXT("to ParameterList\n")));
-     return false;
+      ACE_TEXT("to ParameterList\n")));
+    return false;
   }
 
   const DDS::Subscriber_var sVar;
@@ -320,8 +320,7 @@ bool run_test()
 
   // Test for performing sequence reset.
 
-  for (;;)
-  {
+  for (;;) {
     if (!part1.send_data(test_part_guid.entityId, seq, plist, send_addr)) {
       return false;
     }
@@ -399,7 +398,7 @@ bool run_test()
   // Test for checking for sequence rollover.  A reset should not occur
   // when the sequence number rolls over to zero from the max value.
 
-  SequenceNumber_t max_seq = { 1, (ACE_UINT32_MAX - 5) };
+  SequenceNumber_t max_seq = { ACE_INT32_MAX, (ACE_UINT32_MAX - 5) };
   seq = max_seq;
 
   for (;;) {
@@ -416,6 +415,10 @@ bool run_test()
     }
     ++seq.low;
     reactor_wait();
+
+    if (seq.low == 2) {
+      break;
+    }
   }
 
   reactor_wait();

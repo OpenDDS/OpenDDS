@@ -1587,7 +1587,7 @@ namespace OpenDDS {
         DDS::InstanceHandle_t bit_ih_;
         DCPS::SequenceNumber last_seq_;
         DCPS::SequenceNumber seqResetCandidate_;
-        uint16_t SeqResetChkCount_;
+        ACE_UINT16 SeqResetChkCount_;
 
 #ifdef OPENDDS_SECURITY
         bool has_last_stateless_msg_;

@@ -65,7 +65,7 @@ GuidGenerator::GuidGenerator()
 
   std::mt19937::result_type counter_seed = static_cast<unsigned>(ACE_OS::gettimeofday().usec());
   std::mt19937 generator(counter_seed);
-  std::uniform_int_distribution<ACE_UINT16> distribution(0, 65535);
+  std::uniform_int_distribution<ACE_UINT16> distribution(0, ACE_UINT16_MAX);
 
   init_counter_ = distribution(generator);
 
