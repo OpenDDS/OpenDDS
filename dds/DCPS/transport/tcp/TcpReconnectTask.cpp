@@ -8,6 +8,7 @@
 #include "Tcp_pch.h"
 #include "dds/DCPS/transport/tcp/TcpReconnectTask.h"
 #include "dds/DCPS/transport/tcp/TcpConnection.h"
+#include "dds/DCPS/transport/tcp/TcpTransport.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 #include "ace/Reverse_Lock_T.h"
