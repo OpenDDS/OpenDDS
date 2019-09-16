@@ -148,38 +148,38 @@ private:
 
   class RegisterHandler : public ReactorInterceptor::ResultCommand<int> {
   public:
-    RegisterHandler(ACE_Event_Handler* handler, ACE_Reactor_Mask mask) : handler_(handler), mask_(mask) {}
+    RegisterHandler(TcpConnection_rch con, ACE_Reactor_Mask mask) : con_(con), mask_(mask) {}
     void execute();
   private:
-    ACE_Event_Handler* handler_;
+    TcpConnection_rch con_;
     ACE_Reactor_Mask mask_;
   };
 
   class RemoveHandler : public ReactorInterceptor::ResultCommand<int> {
   public:
-    RemoveHandler(ACE_Event_Handler* handler, ACE_Reactor_Mask mask) : handler_(handler), mask_(mask) {}
+    RemoveHandler(TcpConnection_rch con, ACE_Reactor_Mask mask) : con_(con), mask_(mask) {}
     void execute();
   private:
-    ACE_Event_Handler* handler_;
+    TcpConnection_rch con_;
     ACE_Reactor_Mask mask_;
   };
 
   class ScheduleTimer : public ReactorInterceptor::ResultCommand<long> {
   public:
-    ScheduleTimer(ACE_Event_Handler* handler, void* arg, const ACE_Time_Value& delay, const ACE_Time_Value& interval = ACE_Time_Value::zero) : handler_(handler), arg_(arg), delay_(delay), interval_(interval) {}
+    ScheduleTimer(TcpConnection_rch con, void* arg, const ACE_Time_Value& delay, const ACE_Time_Value& interval = ACE_Time_Value::zero) : con_(con), arg_(arg), delay_(delay), interval_(interval) {}
     void execute();
   private:
-    ACE_Event_Handler* handler_;
+    TcpConnection_rch con_;
     void* arg_;
     ACE_Time_Value delay_, interval_;
   };
 
   class CancelTimer : public ReactorInterceptor::ResultCommand<int> {
   public:
-    CancelTimer(ACE_Event_Handler* handler) : handler_(handler) {}
+    CancelTimer(TcpConnection_rch con) : con_(con) {}
     void execute();
   private:
-    ACE_Event_Handler* handler_;
+    TcpConnection_rch con_;
   };
 
   /// Attempt an active connection establishment to the remote address.
@@ -212,7 +212,7 @@ private:
   /// Flag indicates if connected or disconnected. It's set to true
   /// when actively connecting or passively accepting succeeds and set
   /// to false whenever the peer stream is closed.
-  ACE_Atomic_Op<ACE_SYNCH_MUTEX, bool>  connected_;
+  ACE_Atomic_Op<ACE_SYNCH_MUTEX, bool> connected_;
 
   /// Flag indicate this connection object is the connector or acceptor.
   bool is_connector_;
@@ -238,7 +238,7 @@ private:
   /// is re-established during the passive_reconnect_duration_. This id controls
   /// that the timer is just scheduled once when there are multiple threads detect
   /// the lost connection.
-  int passive_reconnect_timer_id_;
+  ACE_Atomic_Op<ACE_SYNCH_MUTEX, int> passive_reconnect_timer_id_;
 
   /// The state indicates each step of the reconnecting.
   ReconnectState reconnect_state_;
@@ -259,7 +259,7 @@ private:
   /// Small unique identifying value.
   std::size_t id_;
 
-  TcpReconnectTask reconnect_task_;
+  RcHandle<TcpReconnectTask> reconnect_task_;
 
   /// Get name of the current reconnect state as a string.
   OPENDDS_STRING reconnect_state_string() const;

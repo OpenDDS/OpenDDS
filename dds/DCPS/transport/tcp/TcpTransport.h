@@ -57,6 +57,9 @@ public:
   virtual void unbind_link(DataLink* link);
   TcpInst& config() const;
 
+  void add_reconnect_task(RcHandle<TcpReconnectTask> task);
+  void remove_reconnect_task(RcHandle<TcpReconnectTask> task);
+
 private:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
                                                const ConnectionAttribs& attribs,
@@ -162,6 +165,9 @@ private:
   /// TODO: reuse the reconnect_task in the TcpConnection
   ///       for new connection checking.
   unique_ptr<TcpConnectionReplaceTask> con_checker_;
+
+  typedef OPENDDS_SET( RcHandle<TcpReconnectTask> ) RC_TASK_SET;
+  RC_TASK_SET rc_tasks_;
 };
 
 } // namespace DCPS

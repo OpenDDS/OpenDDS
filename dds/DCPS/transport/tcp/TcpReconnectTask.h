@@ -33,7 +33,7 @@ namespace DCPS {
  *  the caller threads (thread to send or reactor thread) blocking on reconnect.
  *  This reconnect task has the same lifetime as the paired TcpConnection object.
  */
-class TcpReconnectTask : public ACE_Task_Base {
+class TcpReconnectTask : public ACE_Task_Base, public RcObject {
 public:
   TcpReconnectTask();
 

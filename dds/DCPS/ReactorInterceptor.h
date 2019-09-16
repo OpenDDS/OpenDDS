@@ -59,7 +59,7 @@ public:
     ACE_Reactor* reactor() { return reactor_; }
 
   private:
-    friend OpenDDS::DCPS::ReactorInterceptor;
+    friend class OpenDDS::DCPS::ReactorInterceptor;
     void set_reactor(ACE_Reactor* reactor) { reactor_ = reactor; }
 
     bool executed_;

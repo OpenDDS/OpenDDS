@@ -10,6 +10,8 @@
 #include "dds/DCPS/transport/tcp/TcpConnection.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
+#include "ace/Reverse_Lock_T.h"
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -69,8 +71,8 @@ int TcpReconnectTask::svc()
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, 0);
 
   // The order here matters for destruction if we're the last reference holders by the end
-  TcpTransport_rch impl = connection_->impl();
-  TcpConnection_rch connection = connection_;
+  TcpTransport_rch impl(connection_->impl());
+  TcpConnection_rch connection(connection_);
 
   ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(mutex_);
 
