@@ -2208,7 +2208,7 @@ DomainParticipantImpl::LivelinessTimer::~LivelinessTimer()
 void
 DomainParticipantImpl::LivelinessTimer::add_adjust(OpenDDS::DCPS::DataWriterImpl* writer)
 {
-  ACE_GUARD(ACE_Thread_Mutex, guard, this->lock_);
+  ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 
   const MonotonicTimePoint now = MonotonicTimePoint::now();
 

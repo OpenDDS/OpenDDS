@@ -21,19 +21,17 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace ICE {
 
-using OpenDDS::DCPS::MonotonicTimePoint;
-
 class AgentImpl;
 
 struct Task {
   Task(AgentImpl* a_agent_impl) : agent_impl_(a_agent_impl), in_queue_(false) {}
   virtual ~Task() {};
-  virtual void execute(const MonotonicTimePoint& a_now) = 0;
-  void enqueue(const MonotonicTimePoint& release_time);
+  virtual void execute(const DCPS::MonotonicTimePoint& a_now) = 0;
+  void enqueue(const DCPS::MonotonicTimePoint& release_time);
 private:
   friend class AgentImpl;
   AgentImpl* agent_impl_;
-  MonotonicTimePoint release_time_;
+  DCPS::MonotonicTimePoint release_time_;
   bool in_queue_;
 };
 

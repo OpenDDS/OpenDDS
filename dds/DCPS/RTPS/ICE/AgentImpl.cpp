@@ -19,6 +19,9 @@ namespace ICE {
 
 #ifdef OPENDDS_SECURITY
 
+using DCPS::TimeDuration;
+using DCPS::MonotonicTimePoint;
+
 bool AgentImpl::TaskCompare::operator()(const Task* x, const Task* y) const
 {
   return x->release_time_ > y->release_time_;

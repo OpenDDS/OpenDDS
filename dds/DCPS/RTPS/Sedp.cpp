@@ -176,6 +176,8 @@ namespace OpenDDS {
 namespace RTPS {
 using DCPS::RepoId;
 using DCPS::make_rch;
+using DCPS::TimeDuration;
+using DCPS::MonotonicTimePoint;
 using DCPS::SystemTimePoint;
 
 const bool Sedp::host_is_bigendian_(!ACE_CDR_BYTE_ORDER);

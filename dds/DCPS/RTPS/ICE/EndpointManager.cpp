@@ -21,6 +21,8 @@ namespace ICE {
 
 #ifdef OPENDDS_SECURITY
 
+using DCPS::MonotonicTimePoint;
+
 EndpointManager::EndpointManager(AgentImpl* a_agent_impl, Endpoint* a_endpoint) :
   agent_impl(a_agent_impl),
   endpoint(a_endpoint),

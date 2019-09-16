@@ -39,6 +39,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace RTPS {
 
+using DCPS::TimeDuration;
+
 RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
   : DCPS::PeerDiscovery<Spdp>(key)
   , resend_period_(30 /*seconds*/) // see RTPS v2.1 9.6.1.4.2

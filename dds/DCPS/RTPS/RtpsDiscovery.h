@@ -67,8 +67,8 @@ public:
 
   // configuration parameters:
 
-  TimeDuration resend_period() const { return resend_period_; }
-  void resend_period(const TimeDuration& period) {
+  DCPS::TimeDuration resend_period() const { return resend_period_; }
+  void resend_period(const DCPS::TimeDuration& period) {
     resend_period_ = period;
   }
 
@@ -161,17 +161,17 @@ public:
     use_ice_ = ui;
   }
 
-  const TimeDuration& max_spdp_timer_period() const { return max_spdp_timer_period_; }
-  void max_spdp_timer_period(const TimeDuration& x) { max_spdp_timer_period_ = x; }
+  const DCPS::TimeDuration& max_spdp_timer_period() const { return max_spdp_timer_period_; }
+  void max_spdp_timer_period(const DCPS::TimeDuration& x) { max_spdp_timer_period_ = x; }
 
-  const TimeDuration& max_auth_time() const { return max_auth_time_; }
-  void max_auth_time(const TimeDuration& x) { max_auth_time_ = x; }
+  const DCPS::TimeDuration& max_auth_time() const { return max_auth_time_; }
+  void max_auth_time(const DCPS::TimeDuration& x) { max_auth_time_ = x; }
 
-  const TimeDuration& auth_resend_period() const { return auth_resend_period_; }
-  void auth_resend_period(const TimeDuration& x) { auth_resend_period_ = x; }
+  const DCPS::TimeDuration& auth_resend_period() const { return auth_resend_period_; }
+  void auth_resend_period(const DCPS::TimeDuration& x) { auth_resend_period_ = x; }
 
 private:
-  TimeDuration resend_period_;
+  DCPS::TimeDuration resend_period_;
   u_short pb_, dg_, pg_, d0_, d1_, dx_;
   unsigned char ttl_;
   bool sedp_multicast_;
@@ -183,9 +183,9 @@ private:
   ACE_INET_Addr sedp_rtps_relay_address_;
   ACE_INET_Addr sedp_stun_server_address_;
   bool use_ice_;
-  TimeDuration max_spdp_timer_period_;
-  TimeDuration max_auth_time_;
-  TimeDuration auth_resend_period_;
+  DCPS::TimeDuration max_spdp_timer_period_;
+  DCPS::TimeDuration max_auth_time_;
+  DCPS::TimeDuration auth_resend_period_;
 
 
   /// Guids will be unique within this RTPS configuration

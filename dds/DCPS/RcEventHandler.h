@@ -30,13 +30,13 @@ public:
 
   }
 
-  virtual ACE_Event_Handler::Reference_Count add_reference()
+  ACE_Event_Handler::Reference_Count add_reference()
   {
     RcObject::_add_ref();
     return 1;
   }
 
-  virtual ACE_Event_Handler::Reference_Count remove_reference()
+  ACE_Event_Handler::Reference_Count remove_reference()
   {
     RcObject::_remove_ref();
     return 1;

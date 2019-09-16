@@ -34,6 +34,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace Security {
 
+using DCPS::TimeDuration;
+
 typedef Governance::GovernanceAccessRules::iterator gov_iter;
 typedef Permissions::PermissionGrantRules::iterator perm_grant_iter;
 typedef Permissions::TopicRules::iterator perm_topic_rules_iter;
@@ -56,7 +58,7 @@ AccessControlBuiltInImpl::AccessControlBuiltInImpl()
   , handle_mutex_()
   , gen_handle_mutex_()
   , next_handle_(1)
-  , listener_ptr_(NULL)
+  , listener_ptr_(0)
 {  }
 
 AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
@@ -125,7 +127,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   OpenDDS::Security::SSL::SubjectName sn_id;
 
-  if (id_sn == NULL || sn_id.parse(id_sn) != 0 || !permissions->contains_subject_name(sn_id)) {
+  if (!id_sn || sn_id.parse(id_sn) != 0 || !permissions->contains_subject_name(sn_id)) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: No permissions subject name matches identity subject name");
     return DDS::HANDLE_NIL;
   }
@@ -417,22 +419,18 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
   // Check the Permissions file
-  time_t delta_time;
+  TimeDuration delta_time;
   if (!validate_date_time(ac_iter, delta_time, ex)) {
     return false;
   }
-  TimeDuration timer_length(delta_time);
 
-  Permissions::PublishSubscribe_t publish = Permissions::PUBLISH;
-  CORBA::Boolean successful = search_local_permissions(topic_name, domain_id, partition, publish, ac_iter, ex);
-
-  if (!successful) {
+  if (!search_local_permissions(topic_name, domain_id, partition, Permissions::PUBLISH, ac_iter, ex)) {
     return false;
   }
 
   if (!local_rp_timer_.is_scheduled()) {
     // Start timer
-    if (!local_rp_timer_.start_timer(timer_length, permissions_handle)) {
+    if (!local_rp_timer_.start_timer(delta_time, permissions_handle)) {
       CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datawriter: Permissions timer could not be created.");
       return false;
     }
@@ -491,21 +489,17 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
   // Check the Permissions file
-  time_t delta_time;
+  TimeDuration delta_time;
   if (!validate_date_time(ac_iter, delta_time, ex)) {
     return false;
   }
-  const TimeDuration timer_length(delta_time);
 
-  Permissions::PublishSubscribe_t subscribe = Permissions::SUBSCRIBE;
-  CORBA::Boolean successful = search_local_permissions(topic_name, domain_id, partition, subscribe, ac_iter, ex);
-
-  if (!successful) {
+  if (!search_local_permissions(topic_name, domain_id, partition, Permissions::SUBSCRIBE, ac_iter, ex)) {
     return false;
   }
 
   if (!local_rp_timer_.is_scheduled()) {
-    if (!local_rp_timer_.start_timer(timer_length, permissions_handle)) {
+    if (!local_rp_timer_.start_timer(delta_time, permissions_handle)) {
       CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Permissions timer could not be created.");
       return false;
     }
@@ -569,8 +563,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
   // Check the Permissions file for grants
-  time_t delta_time;
-
+  TimeDuration delta_time;
   if (!validate_date_time(ac_iter, delta_time, ex)) {
     return false;
   }
@@ -810,22 +803,17 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     }
   }
 
-  time_t delta_time;
+  TimeDuration delta_time;
   if (!validate_date_time(ac_iter, delta_time, ex)) {
     return false;
   }
-  const TimeDuration timer_length(delta_time);
 
-  Permissions::PublishSubscribe_t publish = Permissions::PUBLISH;
-
-  CORBA::Boolean successful = search_remote_permissions(publication_data.base.base.topic_name, domain_id, ac_iter, publish, ex);
-
-  if (!successful) {
+  if (!search_remote_permissions(publication_data.base.base.topic_name, domain_id, ac_iter, Permissions::PUBLISH, ex)) {
     return false;
   }
 
   if (!remote_rp_timer_.is_scheduled()) {
-    if (!remote_rp_timer_.start_timer(timer_length, permissions_handle)) {
+    if (!remote_rp_timer_.start_timer(delta_time, permissions_handle)) {
       CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Permissions timer could not be created.");
       return false;
     }
@@ -878,22 +866,17 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     }
   }
 
-  time_t delta_time;
+  TimeDuration delta_time;
   if (!validate_date_time(ac_iter, delta_time, ex)) {
     return false;
   }
-  const TimeDuration timer_length(delta_time);
 
-  Permissions::PublishSubscribe_t subscribe = Permissions::SUBSCRIBE;
-
-  CORBA::Boolean successful = search_remote_permissions(subscription_data.base.base.topic_name, domain_id, ac_iter, subscribe, ex);
-
-  if (!successful) {
+  if (!search_remote_permissions(subscription_data.base.base.topic_name, domain_id, ac_iter, Permissions::SUBSCRIBE, ex)) {
     return false;
   }
 
   if (!remote_rp_timer_.is_scheduled()) {
-    if (!remote_rp_timer_.start_timer(timer_length, permissions_handle)) {
+    if (!remote_rp_timer_.start_timer(delta_time, permissions_handle)) {
       CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Permissions timer could not be created.");
       return false;
     }
@@ -999,8 +982,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
   // Check the Permissions file for grants
-  time_t delta_time;
-
+  TimeDuration delta_time;
   if (!validate_date_time(ac_iter, delta_time, ex)) {
     return false;
   }
@@ -1487,9 +1469,10 @@ time_t AccessControlBuiltInImpl::convert_permissions_time(const std::string& tim
   return mktime(&permission_tm);
 }
 
-::CORBA::Boolean AccessControlBuiltInImpl::validate_date_time(const ACPermsMap::iterator ac_iter,
-  time_t & delta_time,
-  ::DDS::Security::SecurityException & ex)
+bool AccessControlBuiltInImpl::validate_date_time(
+  const ACPermsMap::iterator ac_iter,
+  TimeDuration& delta_time,
+  DDS::Security::SecurityException& ex)
 {
   time_t after_time = 0, cur_utc_time = 0;
   time_t current_date_time = time(0);
@@ -1528,7 +1511,7 @@ time_t AccessControlBuiltInImpl::convert_permissions_time(const std::string& tim
 
   }
 
-  delta_time = after_time - cur_utc_time;
+  delta_time = TimeDuration(after_time - cur_utc_time);
   return true;
 }
 
@@ -1709,7 +1692,6 @@ CORBA::Boolean AccessControlBuiltInImpl::search_local_permissions(
           perm_topic_ps_rules_iter tpsr_iter;
 
           for (tpsr_iter = ptr_iter->topic_ps_rules.begin(); tpsr_iter != ptr_iter->topic_ps_rules.end(); ++tpsr_iter) {
-//            if (tpsr_iter->ps_type == Permissions::PUBLISH) {
             if (tpsr_iter->ps_type == pub_or_sub) {
               std::vector<std::string>::iterator tl_iter; // topic list
 
@@ -1725,7 +1707,6 @@ CORBA::Boolean AccessControlBuiltInImpl::search_local_permissions(
                         perm_partition_ps_iter pps_iter;
 
                         for (pps_iter = pp_iter->partition_ps.begin(); pps_iter != pp_iter->partition_ps.end(); ++pps_iter) {
-//                          if (pps_iter->ps_type == Permissions::PUBLISH) {
                           if (pps_iter->ps_type == pub_or_sub) {
                             std::vector<std::string>::iterator pl_iter; // partition list
                             num_param_partitions = static_cast<unsigned int>(pps_iter->partition_list.size());
@@ -1949,7 +1930,7 @@ AccessControlBuiltInImpl::RevokePermissionsTimer::~RevokePermissionsTimer()
 {
   ACE_Reactor_Timer_Interface* reactor = TheServiceParticipant->timer();
 
-  if (scheduled_ && reactor != NULL) {
+  if (scheduled_ && reactor) {
     reactor->cancel_timer(this);
     scheduled_ = false;
   }
@@ -1959,17 +1940,14 @@ bool
 AccessControlBuiltInImpl::RevokePermissionsTimer::start_timer(
   const TimeDuration& length, ::DDS::Security::PermissionsHandle pm_handle)
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex,
-      guard,
-      this->lock_,
-      false);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, lock_, false);
 
   ::DDS::Security::PermissionsHandle *eh_params_ptr =
       new ::DDS::Security::PermissionsHandle(pm_handle);
 
   ACE_Reactor_Timer_Interface* reactor = TheServiceParticipant->timer();
 
-  if (reactor != NULL) {
+  if (reactor) {
     timer_id_ = reactor->schedule_timer(this, eh_params_ptr, length.value());
 
     if (timer_id_ != -1) {
@@ -1988,13 +1966,10 @@ int
 AccessControlBuiltInImpl::RevokePermissionsTimer::handle_timeout(
   const ACE_Time_Value& /*tv*/, const void* arg)
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex,
-      guard,
-      this->lock_,
-      -1);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, lock_, -1);
 
-  const ::DDS::Security::PermissionsHandle* pm_handle =
-    reinterpret_cast<const ::DDS::Security::PermissionsHandle*>(arg);
+  const DDS::Security::PermissionsHandle* pm_handle =
+    static_cast<const DDS::Security::PermissionsHandle*>(arg);
 
   scheduled_ = false;
 
@@ -2009,12 +1984,10 @@ AccessControlBuiltInImpl::RevokePermissionsTimer::handle_timeout(
   impl_.local_ac_perms_.erase(iter);
 
   // If a listener exists, call on_revoke_permissions
-  if (impl_.listener_ptr_ != NULL) {
-    if (!impl_.listener_ptr_->on_revoke_permissions(&impl_, *pm_handle)) {
-      ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) AccessControlBuiltInImpl::Revoke_Permissions_Timer::handle_timeout: ")
-        ACE_TEXT("on_revoke_permissions failed for pm_handle %d!\n"), *pm_handle));
-      return -1;
-    }
+  if (impl_.listener_ptr_ && !impl_.listener_ptr_->on_revoke_permissions(&impl_, *pm_handle)) {
+    ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) AccessControlBuiltInImpl::Revoke_Permissions_Timer::handle_timeout: ")
+      ACE_TEXT("on_revoke_permissions failed for pm_handle %d!\n"), *pm_handle));
+    return -1;
   }
 
   if (OpenDDS::DCPS::DCPS_debug_level > 0) {

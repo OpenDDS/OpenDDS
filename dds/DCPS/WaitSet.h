@@ -82,7 +82,8 @@ private:
 
   ACE_Recursive_Thread_Mutex lock_;
   ACE_Condition_Recursive_Thread_Mutex cond_;
-  ACE_Atomic_Op<ACE_Thread_Mutex, bool> waiting_;
+  // Treat as a boolean value.
+  ACE_Atomic_Op<ACE_Thread_Mutex, long> waiting_;
 
   ConditionSet attached_conditions_;
   ConditionSet signaled_conditions_;

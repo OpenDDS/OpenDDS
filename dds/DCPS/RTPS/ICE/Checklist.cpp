@@ -19,6 +19,9 @@ namespace ICE {
 
 #ifdef OPENDDS_SECURITY
 
+using OpenDDS::DCPS::MonotonicTimePoint;
+using OpenDDS::DCPS::TimeDuration;
+
 const ACE_UINT32 PEER_REFLEXIVE_PRIORITY = (110 << 24) + (65535 << 8) + ((256 - 1) << 0);  // No local preference, component 1.
 
 CandidatePair::CandidatePair(const Candidate& a_local,
@@ -125,8 +128,12 @@ void Checklist::reset()
 void Checklist::generate_candidate_pairs()
 {
   // Add the candidate pairs.
-  for (AgentInfo::CandidatesType::const_iterator local_pos = local_agent_info_.candidates.begin(), local_limit = local_agent_info_.candidates.end(); local_pos != local_limit; ++local_pos) {
-    for (AgentInfo::CandidatesType::const_iterator remote_pos = remote_agent_info_.candidates.begin(), remote_limit = remote_agent_info_.candidates.end(); remote_pos != remote_limit; ++remote_pos) {
+  AgentInfo::CandidatesType::const_iterator local_pos = local_agent_info_.candidates.begin();
+  AgentInfo::CandidatesType::const_iterator local_limit = local_agent_info_.candidates.end();
+  for (; local_pos != local_limit; ++local_pos) {
+    AgentInfo::CandidatesType::const_iterator remote_pos = remote_agent_info_.candidates.begin();
+    AgentInfo::CandidatesType::const_iterator remote_limit = remote_agent_info_.candidates.end();
+    for (; remote_pos != remote_limit; ++remote_pos) {
       frozen_.push_back(CandidatePair(*local_pos, *remote_pos, local_is_controlling_));
     }
   }

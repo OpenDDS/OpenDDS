@@ -33,13 +33,13 @@ struct DeferredTriggeredCheck {
   ACE_INET_Addr remote_address;
   ACE_UINT32 priority;
   bool use_candidate;
-  MonotonicTimePoint expiration_date;
+  DCPS::MonotonicTimePoint expiration_date;
 
   DeferredTriggeredCheck(const ACE_INET_Addr& a_local_address,
                          const ACE_INET_Addr& a_remote_address,
                          ACE_UINT32 a_priority,
                          bool a_use_candidate,
-                         const MonotonicTimePoint& a_expiration_date)
+                         const DCPS::MonotonicTimePoint& a_expiration_date)
   : local_address(a_local_address)
   , remote_address(a_remote_address)
   , priority(a_priority)
@@ -181,7 +181,7 @@ private:
 
   void regenerate_agent_info(bool password_only);
 
-  void server_reflexive_task(const MonotonicTimePoint & a_now);
+  void server_reflexive_task(const DCPS::MonotonicTimePoint & a_now);
 
   bool success_response(const STUN::Message& a_message);
 
@@ -215,13 +215,13 @@ private:
   struct ServerReflexiveTask : public Task {
     EndpointManager* endpoint_manager;
     ServerReflexiveTask(EndpointManager* a_endpoint_manager);
-    void execute(const MonotonicTimePoint& a_now);
+    void execute(const DCPS::MonotonicTimePoint& a_now);
   } server_reflexive_task_;
 
   struct ChangePasswordTask : public Task {
     EndpointManager* endpoint_manager;
     ChangePasswordTask(EndpointManager* a_endpoint_manager);
-    void execute(const MonotonicTimePoint& a_now);
+    void execute(const DCPS::MonotonicTimePoint& a_now);
   } change_password_task_;
 };
 
