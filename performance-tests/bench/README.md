@@ -7,7 +7,10 @@
 - `--domain N`: The DDS Domain to use. The default is 89.
 
 - `--wait-for-nodes N`: The number of seconds to wait for nodes before
-  broadcasting the scenario to them. The default is 3 seconds.
+  broadcasting the scenario to them. The default is 10 seconds.
+
+- `--wait-for-reports N`: The number of seconds to wait for a report to come in
+  before timing out. The default is 120 seconds.
 
 ## Node Controller
 

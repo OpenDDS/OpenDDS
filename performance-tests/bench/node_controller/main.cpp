@@ -21,7 +21,7 @@
 using namespace Bench::NodeController;
 
 ACE_Process_Manager* process_manager = ACE_Process_Manager::instance();
-std::string dds_root;
+std::string bench_root;
 ReportDataWriter_var report_writer_impl;
 
 ACE_TCHAR tempdir_template[] = "/tmp/nc_XXXXXX";
@@ -79,14 +79,12 @@ public:
     }
   }
 
-  WorkerId
-  id()
+  WorkerId id()
   {
     return worker_id_;
   }
 
-  void
-  write_report(bool failed)
+  void write_report(bool failed)
   {
     Report report;
     report.node_id = node_id_;
@@ -105,12 +103,11 @@ public:
     }
   }
 
-  void
-  run()
+  void run()
   {
     ACE_Process_Options proc_opts;
     std::stringstream ss, ess;
-    ss << dds_root << "/performance-tests/bench/worker/worker " << config_filename_
+    ss << bench_root << "/worker/worker " << config_filename_
       << " --report " << report_filename_
       << " --log " << log_filename_ << std::flush;
     ess << ss.str() << std::endl;
@@ -124,8 +121,7 @@ public:
     }
   }
 
-  void
-  check()
+  void check()
   {
     if (pid_ == ACE_INVALID_PID) {
       return;
@@ -139,8 +135,7 @@ public:
   }
 };
 
-inline std::string
-get_option_argument(int& i, int argc, ACE_TCHAR* argv[])
+inline std::string get_option_argument(int& i, int argc, ACE_TCHAR* argv[])
 {
   if (i == argc - 1) {
     std::cerr << "Option " << ACE_TEXT_ALWAYS_CHAR(argv[i]) << " requires an argument" << std::endl;
@@ -149,8 +144,7 @@ get_option_argument(int& i, int argc, ACE_TCHAR* argv[])
   return ACE_TEXT_ALWAYS_CHAR(argv[++i]);
 }
 
-inline int
-get_option_argument_int(int& i, int argc, ACE_TCHAR* argv[])
+inline int get_option_argument_int(int& i, int argc, ACE_TCHAR* argv[])
 {
   int value;
   try {
@@ -162,19 +156,25 @@ get_option_argument_int(int& i, int argc, ACE_TCHAR* argv[])
   return value;
 }
 
-int
-ACE_TMAIN(int argc, ACE_TCHAR* argv[])
+int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
-  dds_root = ACE_OS::getenv("DDS_ROOT");
-  if (dds_root.empty()) {
-    std::cerr << "ERROR: DDS_ROOT isn't defined" << std::endl;
-    return 1;
+  const char* cstr = ACE_OS::getenv("BENCH_ROOT");
+  bench_root = cstr ? cstr : "";
+  if (bench_root.empty()) {
+    cstr = ACE_OS::getenv("DDS_ROOT");
+    const std::string dds_root{cstr ? cstr : ""};
+    if (dds_root.empty()) {
+      std::cerr << "ERROR: BENCH_ROOT or DDS_ROOT must be defined" << std::endl;
+      return 1;
+    }
+    bench_root = dds_root + "/performance-tests/bench";
   }
 
   std::vector<std::shared_ptr<Worker>> workers;
   NodeId this_node_id;
 
-  TheServiceParticipant->default_configuration_file("rtps_disc.ini");
+  TheServiceParticipant->default_configuration_file(
+    ACE_TEXT_CHAR_TO_TCHAR((bench_root + "/control_opendds_config.ini").c_str()));
 
   // Parse Arguments
   DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
@@ -374,7 +374,19 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
           workers.push_back(std::make_shared<Worker>(this_node_id, configs[node].workers[worker]));
         }
         waiting = false;
+        break;
       }
+    }
+  }
+
+  // Report Busy Status
+  {
+    Status status;
+    status.node_id = this_node_id;
+    status.state = BUSY;
+    if (status_writer_impl->write(status, DDS::HANDLE_NIL)) {
+      std::cerr << "Write status failed" << std::endl;
+      return 1;
     }
   }
 
