@@ -402,7 +402,7 @@ Spdp::handle_participant_data(DCPS::MessageId id, const ParticipantData_t& cpdat
       // Associate the stateless reader / writer for handshakes & auth requests
       sedp_.associate_preauth(dp.pdata_);
 
-      // If we've gotten auth requests for this (previously undiscovered) participant, 
+      // If we've gotten auth requests for this (previously undiscovered) participant,
       // pull in the tokens now
       PendingRemoteAuthTokenMap::iterator token_iter = pending_remote_auth_tokens_.find(guid);
       if (token_iter != pending_remote_auth_tokens_.end()) {
