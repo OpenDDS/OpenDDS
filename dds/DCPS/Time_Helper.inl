@@ -155,7 +155,6 @@ DDS::Time_t time_value_to_time(const ACE_Time_Value& tv)
   return t;
 }
 
-
 ACE_INLINE
 ACE_Time_Value duration_to_time_value(const DDS::Duration_t& t)
 {
@@ -169,7 +168,6 @@ ACE_Time_Value duration_to_time_value(const DDS::Duration_t& t)
     return ACE_Time_Value(ACE_Utils::truncate_cast<time_t>(sec), usec);
   }
 }
-
 
 ACE_INLINE
 ACE_Time_Value duration_to_absolute_time_value(const DDS::Duration_t& t,
@@ -186,7 +184,6 @@ ACE_Time_Value duration_to_absolute_time_value(const DDS::Duration_t& t,
     return ACE_Time_Value(ACE_Utils::truncate_cast<time_t>(sec), usec);
   }
 }
-
 
 ACE_INLINE
 DDS::Duration_t time_value_to_duration(const ACE_Time_Value& tv)

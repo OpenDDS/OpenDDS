@@ -127,7 +127,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
 
       // The recommended value for the resend period is 2 seconds for
       // the current implementation of OpenDDS.
-      disc->resend_period(ACE_Time_Value(2));
+      disc->resend_period(OpenDDS::DCPS::TimeDuration(2));
 
       TheServiceParticipant->add_discovery(disc);
       TheServiceParticipant->set_repo_domain(11, disc->key());

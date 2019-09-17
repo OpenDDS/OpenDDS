@@ -954,7 +954,7 @@ namespace OpenDDS {
         const DDS::Duration_t zero = { DDS::DURATION_ZERO_SEC, DDS::DURATION_ZERO_NSEC };
         if (qos_.time_based_filter.minimum_separation != zero) {
           if (qos.time_based_filter.minimum_separation != zero) {
-            const ACE_Time_Value new_interval = duration_to_time_value(qos.time_based_filter.minimum_separation);
+            const TimeDuration new_interval(qos.time_based_filter.minimum_separation);
             filter_delayed_handler_->reset_interval(new_interval);
           } else {
             filter_delayed_handler_->cancel();
@@ -1641,13 +1641,12 @@ void store_instance_data(
     {
       filtered = ownership_filter_instance(instance_ptr, header.publication_id_);
 
-      ACE_Time_Value filter_time_expired;
-      if (!filtered &&
-          time_based_filter_instance(instance_ptr, filter_time_expired)) {
+      TimeDuration filter_time_expired;
+      if (!filtered && time_based_filter_instance(instance_ptr, filter_time_expired)) {
         filtered = true;
         if (this->qos_.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS) {
-          filter_delayed_handler_->delay_sample(handle, move(instance_data), header, just_registered, filter_time_expired);
-
+          filter_delayed_handler_->delay_sample(
+            handle, move(instance_data), header, just_registered, filter_time_expired);
         }
       } else {
         // nothing time based filtered now
@@ -1655,8 +1654,7 @@ void store_instance_data(
 
       }
 
-      if (filtered)
-      {
+      if (filtered) {
         return;
       }
     }
@@ -2008,7 +2006,7 @@ class FilterDelayedHandler : public Watchdog {
 public:
   FilterDelayedHandler(DataReaderImpl_T<MessageType>& data_reader_impl)
   // Watchdog's interval_ only used for resetting current intervals
-  : Watchdog(ACE_Time_Value(0))
+  : Watchdog(TimeDuration::zero_value)
   , data_reader_impl_(data_reader_impl)
   {
   }
@@ -2027,7 +2025,7 @@ public:
                     unique_ptr<MessageTypeWithAllocator> data,
                     const OpenDDS::DCPS::DataSampleHeader& header,
                     const bool just_registered,
-                    const ACE_Time_Value& filter_time_expired)
+                    const TimeDuration& filter_time_expired)
   {
     // sample_lock_ should already be held
     RcHandle<DataReaderImpl_T<MessageType> > data_reader_impl(data_reader_impl_.lock());
@@ -2055,11 +2053,12 @@ public:
 #endif
       FilterDelayedSample& sample = result.first->second;
 
-      const ACE_Time_Value interval = duration_to_time_value(
+      const TimeDuration interval(
         data_reader_impl->qos_.time_based_filter.minimum_separation);
 
-      const ACE_Time_Value filter_time_remaining = duration_to_time_value(
-        data_reader_impl->qos_.time_based_filter.minimum_separation) - filter_time_expired;
+      const TimeDuration filter_time_remaining =
+        TimeDuration(data_reader_impl->qos_.time_based_filter.minimum_separation) -
+        filter_time_expired;
 
       long timer_id = -1;
 
@@ -2116,20 +2115,19 @@ public:
 
 private:
 
-
-
   int handle_timeout(const ACE_Time_Value&, const void* act)
   {
     DDS::InstanceHandle_t handle = static_cast<DDS::InstanceHandle_t>(reinterpret_cast<intptr_t>(act));
 
     RcHandle<DataReaderImpl_T<MessageType> > data_reader_impl(data_reader_impl_.lock());
-    if (!data_reader_impl)
+    if (!data_reader_impl) {
       return -1;
+    }
 
     SubscriptionInstance_rch instance = data_reader_impl->get_handle_instance(handle);
-
-    if (!instance)
+    if (!instance) {
       return 0;
+    }
 
     long cancel_timer_id = -1;
 
@@ -2146,7 +2144,7 @@ private:
         const bool NOT_UNREGISTER_MSG = false;
         // clear the message, since ownership is being transfered to finish_store_instance_data.
 
-        instance->last_accepted_ = ACE_OS::gettimeofday();
+        instance->last_accepted_.set_to_now();
         const DataSampleHeader_ptr header = data->second.header;
         const bool new_instance = data->second.new_instance;
 
@@ -2160,10 +2158,11 @@ private:
 
         data_reader_impl->accept_sample_processing(instance, *header, new_instance);
       } else {
-        // this check is performed to handle the corner case where store_instance_data received and delivered a sample, while this
+        // this check is performed to handle the corner case where
+        // store_instance_data received and delivered a sample, while this
         // method was waiting for the lock
-        const ACE_Time_Value interval = duration_to_time_value(data_reader_impl->qos_.time_based_filter.minimum_separation);
-        if (ACE_OS::gettimeofday() - instance->last_sample_tv_ >= interval) {
+        const TimeDuration interval(data_reader_impl->qos_.time_based_filter.minimum_separation);
+        if (MonotonicTimePoint::now() - instance->last_sample_tv_ >= interval) {
           // nothing to process, so unregister this handle for timeout
           cancel_timer_id = data->second.timer_id;
           // no new data to process, so remove from container

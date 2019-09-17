@@ -14,6 +14,7 @@
 #include "dds/DdsSecurityCoreC.h"
 #include "dds/Versioned_Namespace.h"
 #include "dds/DCPS/Service_Participant.h"
+#include "dds/DCPS/TimeTypes.h"
 
 #include "ace/Thread_Mutex.h"
 #include "ace/Reactor.h"
@@ -39,7 +40,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace Security {
-
 
 /**
 * @class AccessControlBuiltInImpl
@@ -255,17 +255,17 @@ private:
   public:
     RevokePermissionsTimer(AccessControlBuiltInImpl& impl);
     virtual ~RevokePermissionsTimer();
-    bool start_timer(const ACE_Time_Value length, DDS::Security::PermissionsHandle pm_handle);
+    bool start_timer(const DCPS::TimeDuration& length, DDS::Security::PermissionsHandle pm_handle);
     virtual int handle_timeout(const ACE_Time_Value& tv, const void* arg);
     bool is_scheduled() { return scheduled_; }
 
   protected:
     AccessControlBuiltInImpl& impl_;
 
-    ACE_Time_Value interval() const { return interval_; }
+    const DCPS::TimeDuration& interval() const { return interval_; }
 
   private:
-    ACE_Time_Value interval_;
+    DCPS::TimeDuration interval_;
     bool scheduled_;
     long timer_id_;
     ACE_Thread_Mutex lock_;
@@ -286,7 +286,7 @@ private:
   time_t convert_permissions_time(const std::string& timeString);
 
   bool validate_date_time(ACPermsMap::iterator ac_iter,
-                          time_t& delta_time,
+                          DCPS::TimeDuration& delta_time,
                           DDS::Security::SecurityException& ex);
 
   bool get_sec_attributes(DDS::Security::PermissionsHandle permissions_handle,

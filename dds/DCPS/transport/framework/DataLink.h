@@ -25,6 +25,7 @@
 #include "TransportReceiveListener.h"
 #include "dds/DCPS/transport/framework/QueueTaskBase_T.h"
 #include "dds/DCPS/ReactorInterceptor.h"
+#include "dds/DCPS/TimeTypes.h"
 
 #include "ace/Event_Handler.h"
 #include "ace/Synch_Traits.h"
@@ -90,13 +91,13 @@ public:
   DataLink(TransportImpl& impl, Priority priority, bool is_loopback, bool is_active);
   virtual ~DataLink();
 
-  //Reactor invokes this after being notified in schedule_stop or cancel_release
+  /// Reactor invokes this after being notified in schedule_stop or cancel_release
   int handle_exception(ACE_HANDLE /* fd */);
 
-  //Allows DataLink::stop to be done on the reactor thread so that
-  //this thread avoids possibly deadlocking trying to access reactor
-  //to stop strategies or schedule timers
-  void schedule_stop(const ACE_Time_Value& schedule_to_stop_at);
+  /// Allows DataLink::stop to be done on the reactor thread so that
+  /// this thread avoids possibly deadlocking trying to access reactor
+  /// to stop strategies or schedule timers
+  void schedule_stop(const MonotonicTimePoint& schedule_to_stop_at);
   /// The stop method is used to stop the DataLink prior to shutdown.
   void stop();
 
@@ -131,7 +132,7 @@ public:
 
   void schedule_delayed_release();
 
-  const ACE_Time_Value& datalink_release_delay() const;
+  const TimeDuration& datalink_release_delay() const;
 
   /// Either send or receive listener for this local_id should be
   /// removed from internal DataLink structures so it no longer
@@ -373,7 +374,7 @@ private:
   /// A boolean indicating if the DataLink has been stopped. This
   /// value is protected by the strategy_lock_.
   bool stopped_;
-  ACE_Time_Value scheduled_to_stop_at_;
+  MonotonicTimePoint scheduled_to_stop_at_;
 
   /// Map publication Id value to TransportSendListener.
   typedef OPENDDS_MAP_CMP(RepoId, TransportSendListener_wrch, GUID_tKeyLessThan) IdToSendListenerMap;
@@ -431,7 +432,7 @@ protected:
 
   /// Configurable delay in milliseconds that the datalink
   /// should be released after all associations are removed.
-  ACE_Time_Value datalink_release_delay_;
+  TimeDuration datalink_release_delay_;
 
   /// Allocators for data and message blocks used by transport
   /// control samples when send_control is called.

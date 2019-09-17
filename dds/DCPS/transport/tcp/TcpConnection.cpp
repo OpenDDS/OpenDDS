@@ -15,6 +15,10 @@
 #include "TcpReconnectTask.h"
 #include "dds/DCPS/transport/framework/DirectPriorityMapper.h"
 #include "dds/DCPS/transport/framework/PriorityKey.h"
+#include "dds/DCPS/Time_Helper.h"
+
+using ::OpenDDS::DCPS::MonotonicTimePoint;
+using ::OpenDDS::DCPS::TimeDuration;
 
 #include "ace/os_include/netinet/os_tcp.h"
 #include "ace/OS_NS_arpa_inet.h"
@@ -39,7 +43,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 // The reconnect delay is the period from the last time the reconnect attempt
 // completes to when the reconnect request is dequeued.
-const ACE_Time_Value reconnect_delay(2);
+const TimeDuration reconnect_delay(2);
 
 OpenDDS::DCPS::TcpConnection::TcpConnection()
   : connected_(false)
@@ -47,7 +51,6 @@ OpenDDS::DCPS::TcpConnection::TcpConnection()
   , tcp_config_(0)
   , passive_reconnect_timer_id_(-1)
   , reconnect_state_(INIT_STATE)
-  , last_reconnect_attempted_(ACE_Time_Value::zero)
   , transport_priority_(0)  // TRANSPORT_PRIORITY.value default value - 0.
   , shutdown_(false)
   , passive_setup_(false)
@@ -71,7 +74,6 @@ OpenDDS::DCPS::TcpConnection::TcpConnection(const ACE_INET_Addr& remote_address,
   , tcp_config_(&config)
   , passive_reconnect_timer_id_(-1)
   , reconnect_state_(INIT_STATE)
-  , last_reconnect_attempted_(ACE_Time_Value::zero)
   , transport_priority_(priority)
   , shutdown_(false)
   , passive_setup_(false)
@@ -625,8 +627,6 @@ OpenDDS::DCPS::TcpConnection::passive_reconnect_i()
     if (this->tcp_config_->passive_reconnect_duration_ == 0)
       return -1;
 
-    ACE_Time_Value timeout(this->tcp_config_->passive_reconnect_duration_/1000,
-                           this->tcp_config_->passive_reconnect_duration_%1000 * 1000);
     this->reconnect_state_ = PASSIVE_WAITING_STATE;
     this->link_->notify(DataLink::DISCONNECTED);
 
@@ -636,8 +636,8 @@ OpenDDS::DCPS::TcpConnection::passive_reconnect_i()
     if (this->receive_strategy()) {
 
       // Give a copy to reactor.
-      this->passive_reconnect_timer_id_ = receive_strategy->get_reactor()->schedule_timer(this, 0, timeout);
-
+      passive_reconnect_timer_id_ = receive_strategy->get_reactor()->schedule_timer(
+        this, 0, TimeDuration::from_msec(tcp_config_->passive_reconnect_duration_).value());
       if (this->passive_reconnect_timer_id_ == -1) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: TcpConnection::passive_reconnect_i")
@@ -684,7 +684,7 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
   // We need reset the state to INIT_STATE if we are previously reconnected.
   // This would allow re-establishing connection after the re-established
   // connection lost again.
-  if (ACE_OS::gettimeofday() - this->last_reconnect_attempted_ > reconnect_delay
+  if (MonotonicTimePoint::now() - last_reconnect_attempted_ > reconnect_delay
       && this->reconnect_state_ == RECONNECTED_STATE) {
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
           "We are in RECONNECTED_STATE and now flip reconnect state to INIT_STATE.\n"));
@@ -721,9 +721,7 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
         break;
 
       if (ret == -1) {
-        ACE_Time_Value delay_tv(((int)retry_delay_msec)/1000,
-                                ((int)retry_delay_msec)%1000*1000);
-        ACE_OS::sleep(delay_tv);
+        ACE_OS::sleep(TimeDuration::from_msec(static_cast<ACE_UINT64>(retry_delay_msec)).value());
         retry_delay_msec *= this->tcp_config_->conn_retry_backoff_multiplier_;
 
       } else {
@@ -767,7 +765,7 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
       send_strategy->resume_send();
     }
 
-    this->last_reconnect_attempted_ = ACE_OS::gettimeofday();
+    last_reconnect_attempted_.set_to_now();
   }
 
   return this->reconnect_state_ == LOST_STATE ? -1 : 0;

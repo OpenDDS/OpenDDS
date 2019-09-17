@@ -39,7 +39,7 @@ public:
 
   size_t nak_depth_;
   size_t max_bundle_size_;
-  ACE_Time_Value nak_response_delay_, heartbeat_period_,
+  TimeDuration nak_response_delay_, heartbeat_period_,
     heartbeat_response_delay_, handshake_timeout_, durable_data_timeout_;
 
   virtual int load(ACE_Configuration_Heap& cf,

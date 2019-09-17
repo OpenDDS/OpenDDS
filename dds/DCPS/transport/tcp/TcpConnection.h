@@ -22,6 +22,7 @@
 #include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/transport/framework/TransportDefs.h"
+#include "dds/DCPS/TimeTypes.h"
 
 #include "ace/SOCK_Stream.h"
 #include "ace/Svc_Handler.h"
@@ -192,7 +193,7 @@ private:
   ReconnectState reconnect_state_;
 
   /// Last time the connection is re-established.
-  ACE_Time_Value last_reconnect_attempted_;
+  MonotonicTimePoint last_reconnect_attempted_;
 
   /// TRANSPORT_PRIORITY.value policy value.
   Priority transport_priority_;

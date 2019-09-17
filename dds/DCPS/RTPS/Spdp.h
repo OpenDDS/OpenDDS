@@ -101,7 +101,7 @@ public:
   void handle_participant_data(DCPS::MessageId id, const ParticipantData_t& pdata);
 
 #ifdef OPENDDS_SECURITY
-  void check_auth_states(const ACE_Time_Value& tv);
+  void check_auth_states(const DCPS::MonotonicTimePoint& tv);
   /**
    * Write Secured Updated DP QOS
    *
@@ -201,13 +201,13 @@ private:
     Header hdr_;
     DataSubmessage data_;
     DCPS::SequenceNumber seq_;
-    ACE_Time_Value lease_duration_;
+    DCPS::TimeDuration lease_duration_;
     ACE_SOCK_Dgram unicast_socket_;
     ACE_SOCK_Dgram_Mcast multicast_socket_;
     OPENDDS_SET(ACE_INET_Addr) send_addrs_;
     ACE_Message_Block buff_, wbuff_;
-    ACE_Time_Value disco_resend_period_;
-    ACE_Time_Value last_disco_resend_;
+    DCPS::TimeDuration disco_resend_period_;
+    DCPS::MonotonicTimePoint last_disco_resend_;
   } *tport_;
 
   ACE_Event_Handler_var eh_; // manages our refcount on tport_

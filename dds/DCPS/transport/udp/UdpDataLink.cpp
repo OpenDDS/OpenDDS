@@ -236,8 +236,8 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
     char buff[size];
     // Default this timeout to 30.  We may want to make this settable
     // or use another settable timeout value here.
-    ACE_Time_Value tv(30);
-    const ssize_t recvd = socket().recv(buff, size, this->remote_address_, 0, &tv);
+    const TimeDuration tv(30);
+    const ssize_t recvd = socket().recv(buff, size, this->remote_address_, 0, &tv.value());
     if (recvd == 1) {
       // Expected value
       VDBG_LVL((LM_DEBUG,

@@ -240,7 +240,7 @@ private:
     SequenceNumber cur_cumulative_ack_;
     bool handshake_done_, durable_;
     OPENDDS_MAP(SequenceNumber, TransportQueueElement*) durable_data_;
-    ACE_Time_Value durable_timestamp_;
+    MonotonicTimePoint durable_timestamp_;
 
     explicit ReaderInfo(bool durable)
       : acknack_recvd_count_(0)
@@ -497,24 +497,26 @@ private:
   struct TimedDelay : ACE_Event_Handler {
 
     TimedDelay(RtpsUdpDataLink* outer, PMF function,
-               const ACE_Time_Value& timeout)
-      : outer_(outer), function_(function), timeout_(timeout), scheduled_(ACE_Time_Value::zero)
+               const TimeDuration& timeout)
+      : outer_(outer)
+      , function_(function)
+      , timeout_(timeout)
     {}
 
-    void schedule(const ACE_Time_Value& timeout = ACE_Time_Value::zero);
+    void schedule(const TimeDuration& timeout = TimeDuration::zero_value);
     void cancel();
 
     int handle_timeout(const ACE_Time_Value&, const void*)
     {
-      scheduled_ = ACE_Time_Value::zero;
+      scheduled_ = MonotonicTimePoint::zero_value;
       (outer_->*function_)();
       return 0;
     }
 
     RtpsUdpDataLink* outer_;
     PMF function_;
-    ACE_Time_Value timeout_;
-    ACE_Time_Value scheduled_;
+    TimeDuration timeout_;
+    MonotonicTimePoint scheduled_;
 
   } nack_reply_, heartbeat_reply_;
 
@@ -575,8 +577,11 @@ private:
     ACE_INET_Addr address;
     /// Callback to invoke.
     DiscoveryListener* listener;
-    /// Timestamp indicating the last HeartBeat or AckNack received from the remote entity
-    ACE_Time_Value last_activity;
+    /**
+     * Timestamp indicating the last HeartBeat or AckNack received from the
+     * remote entity.
+     */
+    MonotonicTimePoint last_activity;
     /// Current status of the remote entity.
     enum { DOES_NOT_EXIST, EXISTS } status;
 
@@ -585,7 +590,6 @@ private:
       : localid(w)
       , address(a)
       , listener(l)
-      //, heartbeat_count(0)
       , status(DOES_NOT_EXIST)
     { }
   };
@@ -650,7 +654,7 @@ private:
   };
   HeldDataDeliveryHandler held_data_delivery_handler_;
   const size_t max_bundle_size_;
-  ACE_Time_Value quick_reply_delay_;
+  TimeDuration quick_reply_delay_;
 
 #ifdef OPENDDS_SECURITY
   mutable ACE_Thread_Mutex ch_lock_;

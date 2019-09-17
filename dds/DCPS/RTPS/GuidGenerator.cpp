@@ -8,6 +8,7 @@
 #include "dds/DCPS/RTPS/GuidGenerator.h"
 
 #include "dds/DCPS/GuidUtils.h"
+#include "dds/DCPS/TimeTypes.h"
 
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
 
@@ -15,7 +16,6 @@
 #include "ace/OS_NS_stdlib.h"
 #include "ace/OS_NS_netdb.h"
 #include "ace/OS_NS_sys_socket.h"
-#include "ace/OS_NS_sys_time.h"
 
 #include "ace/os_include/net/os_if.h"
 
@@ -44,15 +44,16 @@
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
-  namespace RTPS {
+namespace RTPS {
+
+using DCPS::SystemTimePoint;
 
 GuidGenerator::GuidGenerator()
   : pid_(ACE_OS::getpid()),
     counter_(0)
 {
-
   if (pid_ == -1) {
-    unsigned seed = static_cast<unsigned>(ACE_OS::gettimeofday().usec());
+    unsigned seed = static_cast<unsigned>(SystemTimePoint::now().value().usec());
     pid_ = static_cast<pid_t>(ACE_OS::rand_r(&seed));
   }
 

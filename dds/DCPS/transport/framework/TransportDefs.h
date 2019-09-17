@@ -153,13 +153,13 @@ ACE_END_VERSIONED_NAMESPACE_DECL
   }
 
 /// Macro to get the individual configuration value
-///  from ACE_Configuration_Heap as ACE_Time_Value
+///  from ACE_Configuration_Heap as TimeDuration
 ///  using milliseconds.
 #define GET_CONFIG_TIME_VALUE(CF, SECT, KEY, VALUE)                              \
   {                                                                              \
     long tv = -1;                                                                \
     GET_CONFIG_VALUE(CF, SECT, KEY, tv, long);                                   \
-    if (tv != -1) VALUE.msec(tv);                                                \
+    if (tv != -1) VALUE = TimeDuration::from_msec(tv); \
   }
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL

@@ -146,7 +146,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
       }
     }
 
-    disc->resend_period(ACE_Time_Value(resend));
+    disc->resend_period(TimeDuration(resend));
     disc->sedp_multicast(multicast);
     TheServiceParticipant->add_discovery(static_rchandle_cast<Discovery>(disc));
     TheServiceParticipant->set_repo_domain(domain, disc->key());
