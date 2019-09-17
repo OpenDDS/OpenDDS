@@ -70,10 +70,11 @@ public:
   typedef RcHandle<Command> CommandPtr;
 
   template <typename T>
-  class ResultCommand : public ReactorInterceptor::Command {
+  class ResultCommand : public Command {
   public:
     T result() const { return result_; }
     T wait_result() const { wait(); return result(); }
+    static T wait_result(const CommandPtr& cmd) { return static_rchandle_cast<ReactorInterceptor::ResultCommand<T> >(cmd)->wait_result();}
   protected:
     void result(T result) { result_ = result; }
   private:

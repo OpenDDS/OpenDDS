@@ -13,6 +13,7 @@
 #include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/transport/tcp/TcpConnection_rch.h"
 #include "ace/Condition_Thread_Mutex.h"
+#include "ace/Reverse_Lock_T.h"
 #include "ace/Task.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -44,6 +45,17 @@ public:
   void wait_complete();
   void shutdown();
 
+  template <typename T>
+  void wait_complete(T& lockable) {
+    ACE_Reverse_Lock<T> rev_lock(lockable);
+    while (active()) {
+      ACE_GUARD(ACE_Reverse_Lock<T>, rev_guard, rev_lock);
+      wait_complete();
+    }
+  }
+
+  bool is_task_thread() { return ACE_Thread::self() == id_; }
+
 private:
 
   /// Handle reconnect requests.
@@ -54,6 +66,7 @@ private:
   ACE_Thread_Mutex mutex_;
   ACE_Condition_Thread_Mutex cv_;
   bool shutdown_;
+  ACE_thread_t id_;
 };
 
 } // namespace DCPS

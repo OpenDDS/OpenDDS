@@ -86,8 +86,11 @@ OpenDDS::DCPS::TcpConnection::~TcpConnection()
 {
   DBG_ENTRY_LVL("TcpConnection","~TcpConnection",6);
   shutdown();
-  if (impl_) {
-    impl_->remove_reconnect_task(reconnect_task_);
+  if (!reconnect_task_->is_task_thread()) {
+    if (impl_) {
+      impl_->remove_reconnect_task(reconnect_task_);
+    }
+    reconnect_task_->wait();
   }
 }
 
@@ -98,12 +101,12 @@ OpenDDS::DCPS::TcpConnection::set_datalink(const OpenDDS::DCPS::TcpDataLink_rch&
 
   GuardType guard(reconnect_lock_);
 
-  // Keep a "copy" of the reference to the data link for ourselves.
   link_ = link;
   if (link_) {
-    impl_ = RcHandle<TcpTransport>(static_cast<TcpTransport*>(&link_->impl()), inc_count());
+    impl_ = TcpTransport_rch(static_cast<TcpTransport*>(&link_->impl()), inc_count());
     if (impl_) {
-      interceptor_ = make_rch<Interceptor>(impl_->reactor_task().get(), impl_->reactor_task()->get_reactor(), impl_->reactor_task()->get_reactor_owner());
+      ReactorTask_rch rt = impl_->reactor_task();
+      interceptor_ = make_rch<Interceptor>(rt.get(), rt->get_reactor(), rt->get_reactor_owner());
     } else {
       interceptor_.reset();
     }
@@ -133,7 +136,8 @@ OpenDDS::DCPS::TcpConnection::disconnect()
   this->connected_ = false;
 
   if (interceptor_) {
-    ReactorInterceptor::CommandPtr cmd = interceptor_->execute_or_enqueue(new RemoveHandler(RcHandle<TcpConnection>(this, inc_count()), READ_MASK | DONT_CALL));
+    TcpConnection_rch con(this, inc_count());
+    ReactorInterceptor::CommandPtr cmd = interceptor_->execute_or_enqueue(new RemoveHandler(con, READ_MASK | DONT_CALL));
     cmd->wait();
   }
 
@@ -649,9 +653,10 @@ OpenDDS::DCPS::TcpConnection::passive_reconnect_i()
     this->link_->notify(DataLink::DISCONNECTED);
 
     if (interceptor_ && passive_reconnect_timer_id_ == -1) {
-      ReactorInterceptor::CommandPtr cmd = interceptor_->execute_or_enqueue(new ScheduleTimer(RcHandle<TcpConnection>(this, inc_count()), 0, timeout));
+      TcpConnection_rch con(this, inc_count());
+      ReactorInterceptor::CommandPtr cmd = interceptor_->execute_or_enqueue(new ScheduleTimer(con, 0, timeout));
       guard.release();
-      long result = static_rchandle_cast<ReactorInterceptor::ResultCommand<long> >(cmd)->wait_result();
+      const long result = ReactorInterceptor::ResultCommand<long>::wait_result(cmd);
       guard.acquire();
       passive_reconnect_timer_id_ = result;
 
@@ -774,8 +779,9 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
 
       int result = -1;
       if (interceptor_) {
-        ReactorInterceptor::CommandPtr cmd = interceptor_->execute_or_enqueue(new RegisterHandler(RcHandle<TcpConnection>(this, inc_count()), READ_MASK));
-        result = static_rchandle_cast<ReactorInterceptor::ResultCommand<int> >(cmd)->wait_result();
+        TcpConnection_rch con(this, inc_count());
+        ReactorInterceptor::CommandPtr cmd = interceptor_->execute_or_enqueue(new RegisterHandler(con, READ_MASK));
+        result = ReactorInterceptor::ResultCommand<int>::wait_result(cmd);
       }
 
       if (result == -1) {
@@ -859,11 +865,8 @@ OpenDDS::DCPS::TcpConnection::transfer(TcpConnection* connection)
 {
   DBG_ENTRY_LVL("TcpConnection","transfer",6);
   GuardType guard(reconnect_lock_);
-  ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(reconnect_lock_);
-  while (reconnect_task_->active()) {
-    ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rev_guard, rev_lock);
-    reconnect_task_->wait_complete();
-  }
+
+  reconnect_task_->wait_complete(reconnect_lock_);
 
   if (shutdown_)
     return;
@@ -893,9 +896,10 @@ OpenDDS::DCPS::TcpConnection::transfer(TcpConnection* connection)
     int result = -1;
 
     if (interceptor_) {
-      ReactorInterceptor::CommandPtr cmd = interceptor_->execute_or_enqueue(new CancelTimer(RcHandle<TcpConnection>(this, inc_count())));
+      TcpConnection_rch con(this, inc_count());
+      ReactorInterceptor::CommandPtr cmd = interceptor_->execute_or_enqueue(new CancelTimer(con ));
       guard.release();
-      result = static_rchandle_cast<ReactorInterceptor::ResultCommand<int> >(cmd)->wait_result();
+      result = ReactorInterceptor::ResultCommand<int>::wait_result(cmd);
       guard.acquire();
     }
     if (result == -1) {
@@ -1026,12 +1030,7 @@ OpenDDS::DCPS::TcpConnection::shutdown()
   shutdown_ = true;
 
   reconnect_task_->shutdown();
-
-  ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(reconnect_lock_);
-  while (reconnect_task_->active()) {
-    ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rev_guard, rev_lock);
-    reconnect_task_->wait_complete();
-  }
+  reconnect_task_->wait_complete(reconnect_lock_);
 
   ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH>::shutdown();
 }
@@ -1058,7 +1057,8 @@ OpenDDS::DCPS::TcpConnection::spawn_reconnect_thread()
   GuardType guard(reconnect_lock_);
   if (!shutdown_ && impl_) {
     impl_->add_reconnect_task(reconnect_task_);
-    reconnect_task_->reconnect(RcHandle<TcpConnection>(this, inc_count()));
+    TcpConnection_rch con(this, inc_count());
+    reconnect_task_->reconnect(con);
   }
 }
 

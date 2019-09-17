@@ -11,14 +11,12 @@
 #include "dds/DCPS/transport/tcp/TcpTransport.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
-#include "ace/Reverse_Lock_T.h"
-
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
 
-TcpReconnectTask::TcpReconnectTask() : connection_(), mutex_(), cv_(mutex_), shutdown_(false)
+TcpReconnectTask::TcpReconnectTask() : connection_(), mutex_(), cv_(mutex_), shutdown_(false), id_(ACE_OS::NULL_thread)
 {
   DBG_ENTRY_LVL("TcpReconnectTask", "TcpReconnectTask", 6);
   if (open()) {
@@ -41,7 +39,20 @@ void TcpReconnectTask::reconnect(TcpConnection_rch connection)
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
   if (!shutdown_ && !connection_) {
     connection_ = connection;
-    activate(1);
+
+    // We want to set the number of threads (1)  and capture the thread id, but
+    // unfortunately this means we have to manually specify most of the defaults
+    activate(THR_NEW_LWP | THR_JOINABLE | THR_INHERIT_SCHED, //flags
+             1, //n_threads
+             0, //force_active
+             ACE_DEFAULT_THREAD_PRIORITY, //priority
+             -1, //grp_id
+             0, //task
+             0, //thread_handles[]
+             0, //stack[]
+             0, //stack_size[]
+             &id_, //thread_ids[]
+             0); //thr_name
   }
 }
 
@@ -68,7 +79,6 @@ void TcpReconnectTask::wait_complete()
 int TcpReconnectTask::svc()
 {
   DBG_ENTRY_LVL("TcpReconnectTask", "svc", 6);
-
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, 0);
 
   // The order here matters for destruction if we're the last reference holders by the end
@@ -87,6 +97,7 @@ int TcpReconnectTask::svc()
   connection_.reset();
   cv_.broadcast();
 
+  // So we're not holding the mutex if/when we're the last one holding reference to TcpConnection
   g.release();
 
   return 0;
