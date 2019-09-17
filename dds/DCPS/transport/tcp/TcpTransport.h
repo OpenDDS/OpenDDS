@@ -168,6 +168,7 @@ private:
 
   typedef OPENDDS_SET( RcHandle<TcpReconnectTask> ) RC_TASK_SET;
   RC_TASK_SET rc_tasks_;
+  LockType rc_tasks_lock_;
 };
 
 } // namespace DCPS

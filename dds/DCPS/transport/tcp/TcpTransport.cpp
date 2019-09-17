@@ -159,8 +159,6 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
     return AcceptConnectResult(link);
   }
 
-  GuardType connections_guard(connections_lock_);
-
   add_pending_connection(client, link);
   VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::connect_datalink pending.\n"), 0);
   return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
@@ -199,6 +197,7 @@ TcpTransport::find_datalink_i(const PriorityKey& key, TcpDataLink_rch& link,
 
     VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) TcpTransport::find_datalink_i ")
               ACE_TEXT("link[%@] found, add to pending connections.\n"), link.in()), 0);
+
     add_pending_connection(client, link);
     link.reset(); // don't return link to TransportClient
     return true;
@@ -239,7 +238,6 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
             std::string(local_conv).c_str(),
             std::string(remote_conv).c_str()), 5);
 
-  GuardType guard(connections_lock_);
   const PriorityKey key =
     blob_to_key(remote.blob_, attribs.priority_, false /* !active */);
 
@@ -272,11 +270,14 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
   }
 
   TcpConnection_rch connection;
-  const ConnectionMap::iterator iter = connections_.find(key);
+  {
+    GuardType guard(connections_lock_);
+    const ConnectionMap::iterator iter = connections_.find(key);
 
-  if (iter != connections_.end()) {
-    connection = iter->second;
-    connections_.erase(iter);
+    if (iter != connections_.end()) {
+      connection = iter->second;
+      connections_.erase(iter);
+    }
   }
 
   if (connection.is_nil()) {
@@ -294,8 +295,6 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
     // no link ready, passive_connection will complete later
     return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
   }
-
-  guard.release(); // connect_tcp_datalink() isn't called with connections_lock_
 
   if (connect_tcp_datalink(*link, connection) == -1) {
     GuardType guard(links_lock_);
@@ -317,7 +316,7 @@ TcpTransport::stop_accepting_or_connecting(const TransportClient_wrch& client,
             "stop connecting to remote: %C\n",
             std::string(remote_converted).c_str()), 5);
 
-  GuardType guard(connections_lock_);
+  GuardType guard(pending_connections_lock_);
   typedef PendConnMap::iterator iter_t;
   const std::pair<iter_t, iter_t> range =
     pending_connections_.equal_range(client);
@@ -413,11 +412,11 @@ TcpTransport::shutdown_i()
   DBG_ENTRY_LVL("TcpTransport","shutdown_i",6);
 
   {
-    GuardType guard(this->links_lock_);
+    GuardType guard(links_lock_);
 
     AddrLinkMap::ENTRY* entry;
 
-    for (AddrLinkMap::ITERATOR itr(this->links_);
+    for (AddrLinkMap::ITERATOR itr(links_);
          itr.next(entry);
          itr.advance()) {
       entry->int_id_->pre_stop_i();
@@ -425,47 +424,52 @@ TcpTransport::shutdown_i()
   }
 
   // Don't accept any more connections.
-  this->acceptor_->close();
-  this->acceptor_->transport_shutdown();
+  acceptor_->close();
+  acceptor_->transport_shutdown();
 
-  this->con_checker_->close(1);
+  con_checker_->close(1);
 
   {
-    GuardType guard(this->connections_lock_);
+    {
+      GuardType guard(connections_lock_);
 
-    for (ConnectionMap::iterator it = connections_.begin(); it != connections_.end(); ++it) {
-      it->second->shutdown();
+      for (ConnectionMap::iterator it = connections_.begin(); it != connections_.end(); ++it) {
+        it->second->shutdown();
+      }
+      connections_.clear();
     }
-    this->connections_.clear();
-    this->pending_connections_.clear();
+    {
+      GuardType guard(pending_connections_lock_);
+      pending_connections_.clear();
+    }
   }
 
   // Disconnect all of our DataLinks, and clear our links_ collection.
   {
-    GuardType guard(this->links_lock_);
+    GuardType guard(links_lock_);
 
     AddrLinkMap::ENTRY* entry;
 
-    for (AddrLinkMap::ITERATOR itr(this->links_);
+    for (AddrLinkMap::ITERATOR itr(links_);
          itr.next(entry);
          itr.advance()) {
       entry->int_id_->transport_shutdown();
     }
 
-    this->links_.unbind_all();
+    links_.unbind_all();
 
-    for (AddrLinkMap::ITERATOR itr(this->pending_release_links_);
+    for (AddrLinkMap::ITERATOR itr(pending_release_links_);
          itr.next(entry);
          itr.advance()) {
       entry->int_id_->transport_shutdown();
     }
 
-    this->pending_release_links_.unbind_all();
+    pending_release_links_.unbind_all();
   }
 
   // Tell our acceptor about this event so that it can drop its reference
   // it holds to this TcpTransport object (via smart-pointer).
-  this->acceptor_->transport_shutdown();
+  acceptor_->transport_shutdown();
 }
 
 bool
@@ -783,13 +787,13 @@ TcpTransport::unbind_link(DataLink* link)
 
 void
 TcpTransport::add_reconnect_task(RcHandle<TcpReconnectTask> task) {
-  GuardType connections_guard(connections_lock_);
+  GuardType connections_guard(rc_tasks_lock_);
   rc_tasks_.insert(task);
 }
 
 void
 TcpTransport::remove_reconnect_task(RcHandle<TcpReconnectTask> task) {
-  GuardType connections_guard(connections_lock_);
+  GuardType connections_guard(rc_tasks_lock_);
   RC_TASK_SET::iterator it = rc_tasks_.begin();
   while (it != rc_tasks_.end()) {
     if (it->get() == task.get()) {

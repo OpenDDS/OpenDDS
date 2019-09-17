@@ -201,6 +201,12 @@ protected:
   /// returned.
   ReactorTask_rch reactor_task();
 
+  typedef ACE_SYNCH_MUTEX     LockType;
+  typedef ACE_Guard<LockType> GuardType;
+
+  /// Lock to protect the pending_connections_ data member
+  mutable LockType pending_connections_lock_;
+
   typedef OPENDDS_MULTIMAP(TransportClient_wrch, DataLink_rch) PendConnMap;
   PendConnMap pending_connections_;
   void add_pending_connection(const TransportClient_rch& client, DataLink_rch link);
@@ -257,9 +263,6 @@ public:
   /// with this TransportImpl's connection information (ie, how
   /// another process would connect to this TransportImpl).
   bool connection_info(TransportLocator& local_info) const;
-
-  typedef ACE_SYNCH_MUTEX     LockType;
-  typedef ACE_Guard<LockType> GuardType;
 
   /// Lock to protect the config_ and reactor_task_ data members.
   mutable LockType lock_;
