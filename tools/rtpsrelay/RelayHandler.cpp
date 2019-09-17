@@ -281,10 +281,17 @@ void HorizontalHandler::process_message(const ACE_INET_Addr&,
 
 SpdpHandler::SpdpHandler(ACE_Reactor* a_reactor,
                          GroupTable& a_group_table,
-                         RoutingTable& a_routing_table)
+                         RoutingTable& a_routing_table,
+                         const OpenDDS::DCPS::RepoId& application_participant_guid,
+                         const ACE_Time_Value& lifespan,
+                         const ACE_Time_Value& purge_period)
   : VerticalHandler(a_reactor, a_group_table, a_routing_table)
   , mutable_group_table_(a_group_table)
-{}
+  , application_participant_guid_(guid_to_string(application_participant_guid))
+  , lifespan_(lifespan)
+{
+  reactor()->schedule_timer(this, 0, purge_period, purge_period);
+}
 
 void SpdpHandler::process_message(const ACE_INET_Addr& a_remote,
                                   const ACE_Time_Value& a_now,
@@ -292,8 +299,45 @@ void SpdpHandler::process_message(const ACE_INET_Addr& a_remote,
                                   ACE_Message_Block* a_buffer,
                                   bool is_beacon_message)
 {
+  const std::string remote_str = addr_to_string(a_remote);
+
+  const ACE_Time_Value expiration = a_now + lifespan_;
+  std::pair<AddrExpirationMap::iterator, bool> res = addr_expiration_map_.insert(std::make_pair(remote_str, expiration));
+  if (!res.second) {
+    // Exists.  Cleanup the expiration map.
+    const ACE_Time_Value previous_expiration = res.first->second;
+    std::pair<ExpirationAddrMap::iterator, ExpirationAddrMap::iterator> r = expiration_addr_map_.equal_range(previous_expiration);
+    while (r.first != r.second && r.first->second != remote_str) {
+      ++r.first;
+    }
+    expiration_addr_map_.erase(r.first);
+    // Assign the new expiration time.
+    res.first->second = expiration;
+  }
+  expiration_addr_map_.insert(std::make_pair(expiration, remote_str));
+
   if (is_beacon_message) {
     return;
+  }
+
+  if (a_src_guid == application_participant_guid_) {
+    if (application_participant_addr_.empty()) {
+      application_participant_addr_ = remote_str;
+      ACE_DEBUG((LM_INFO, "(%P|%t) %N:%l SpdpHandler::handle_input application participant %C has address %C\n", application_participant_guid_.c_str(), application_participant_addr_.c_str()));
+    }
+    // Forward to all peers except the application participant.
+    for (const auto p : addr_expiration_map_) {
+      if (p.first != application_participant_addr_) {
+        enqueue_message(p.first, a_buffer);
+      }
+    }
+
+    return;
+  }
+
+  // Always send to the application participant.
+  if (!application_participant_addr_.empty()) {
+    enqueue_message(application_participant_addr_, a_buffer);
   }
 
   const auto rd_ptr = a_buffer->rd_ptr();
@@ -385,4 +429,12 @@ void SpdpHandler::process_message(const ACE_INET_Addr& a_remote,
 
   a_buffer->rd_ptr(rd_ptr);
   VerticalHandler::process_message(a_remote, a_now, a_src_guid, a_buffer, is_beacon_message);
+}
+
+int SpdpHandler::handle_timeout(const ACE_Time_Value& a_now, const void*) {
+  for (ExpirationAddrMap::iterator pos = expiration_addr_map_.begin(), limit = expiration_addr_map_.end(); pos != limit && pos->first < a_now;) {
+    addr_expiration_map_.erase(pos->second);
+    expiration_addr_map_.erase(pos++);
+  }
+  return 0;
 }

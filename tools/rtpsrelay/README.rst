@@ -53,27 +53,27 @@ Architecture
 
 The following diagram shows the major components of an RtpsRelay::
 
-    +-------------------------+   +-------------------------+
-    | RtpsRelay               |   | RtpsRelay               |
-    |                         |   |                         |
-    |  +-------------------+  |   |  +-------------------+  |
-    |  | Relay Participant |<-+---+->| Relay Participant |  |
-    |  +-------------------+  |   |  +-------------------+  |
-    |                         |   |                         |
-    |   +-----------------+   |   |   +-----------------+   |
-    |   | Horizontal Port |<--+---+-->| Horizontal Port |   |
-    |   +-----------------+   |   |   +-----------------+   |
-    |                         |   |                         |
-    |    +---------------+    |   |    +---------------+    |
-    |    | Vertical Port |    |   |    | Vertical Port |    |
-    |    +---------------+    |   |    +---------------+    |
-    |            ^            |   |            ^            |
-    |            |            |   |            |            |
-    +------------+------------+   +------------+------------+
-                 |                             |
-          +------+------+               +------+------+
-          | Participant |               | Participant |
-          +-------------+               +-------------+
+    +-----------------------------------------------------+   +-----------------------------------------------------+
+    | RtpsRelay                                           |   | RtpsRelay                                           |
+    |                                                     |   |                                                     |
+    |                              +-------------------+  |   |                              +-------------------+  |
+    |                              | Relay Participant |<-+---+----------------------------->| Relay Participant |  |
+    |                              +-------------------+  |   |                              +-------------------+  |
+    |                                                     |   |                                                     |
+    |                               +-----------------+   |   |                               +-----------------+   |
+    |                               | Horizontal Port |<--+---+------------------------------>| Horizontal Port |   |
+    |                               +-----------------+   |   |                               +-----------------+   |
+    |                                                     |   |                                                     |
+    | +-------------------------+    +---------------+    |   | +-------------------------+    +---------------+    |
+    | | Application Participant |<-->| Vertical Port |    |   | | Application Participant |<-->| Vertical Port |    |
+    | +-------------------------+    +---------------+    |   | +-------------------------+    +---------------+    |
+    |                                        ^            |   |                                        ^            |
+    |                                        |            |   |                                        |            |
+    +----------------------------------------+------------+   +----------------------------------------+------------+
+                                             |                                                         |
+                                      +------+------+                                           +------+------+
+                                      | Participant |                                           | Participant |
+                                      +-------------+                                           +-------------+
 
 * Relay Participant - A DDS Participant that the relays use to
   exchange information about participant groups and addresses.
@@ -81,18 +81,22 @@ The following diagram shows the major components of an RtpsRelay::
   RTPS messages with other relays.
 * Vertical Port - A UDP port that the relays use to send and receive
   RTPS messages with participants.
+* Application Participant - A DDS Participant in the application's
+  domain.  This allows the relay to participate in (secure) discovery.
+  An Application Participant only communicates the Participants that
+  use the corresponding relay.
 
-A participant should be associated with a single relay.  When a
-participant sends a message to a relay, a couple of things happen.
-First, if the participant is behind a NAT, then the NAT bindings are
-updated to allow traffic from the relay back to the participant.
-Second, the relay records the public address of the participant and
-its group information (if an SPDP message).  It shares the group and
-address information with the other relays via a DDS topic.  Third, the
-relay makes a forwarding decision that might involve sending the
-message to other participants that are using the relay in question or
-forwarding the message to other relays because they have participants
-that should receive the message.
+A participant should use a single relay.  When a participant sends a
+message to a relay, a couple of things happen.  First, if the
+participant is behind a NAT, then the NAT bindings are updated to
+allow traffic from the relay back to the participant.  Second, the
+relay records the public address of the participant and its group
+information (if an SPDP message).  It shares the group and address
+information with the other relays via a DDS topic.  Third, the relay
+makes a forwarding decision that might involve sending the message to
+other participants that are using the relay in question or forwarding
+the message to other relays because they have participants that should
+receive the message.
 
 If a relay receives a message from another relay, it forwards the
 message to any participants that it serves that should be recipients
@@ -124,14 +128,19 @@ Arguments
   use for the vertical SPDP port.  The SEDP port will listen at port +
   1 and the data port will listen at port + 2.  The default port
   is 444.
-* :code:`-Domain` - The DDS domain to use for the Relay Participant.
+* :code:`-RelayDomain` - The DDS domain to use for the Relay Participant.
   The default is 0.
+* :code:`-ApplicationDomain` - The DDS domain to use for Application Participant.
+  The default is 1.
 * :code:`-RenewAfter` - Time in seconds after which the relay will
   renew group and routing information for an active participant.  The
   default is 60 seconds.
 * :code:`-Lifespan` - Time in seconds after which the relay will purge
   group and routing information for an inactive participant.  The
   default is 300 seconds.
+* :code:`-PurgePeriod` - Time in seconds between purges of inactive
+  SPDP clients.  The default is 60 seconds.
+
 
 Participant Configuration
 =========================
