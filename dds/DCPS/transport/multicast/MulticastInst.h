@@ -58,12 +58,12 @@ public:
   /// The minimum number of milliseconds to wait between handshake
   /// attempts during association.
   /// The default value is: 250.
-  ACE_Time_Value syn_interval_;
+  TimeDuration syn_interval_;
 
   /// The maximum number of milliseconds to wait before giving up
   /// on a handshake response during association.
   /// The default value is: 30000 (30 seconds).
-  ACE_Time_Value syn_timeout_;
+  TimeDuration syn_timeout_;
 
   /// The number of datagrams to retain in order to service repair
   /// requests (reliable only).
@@ -73,7 +73,7 @@ public:
   /// The minimum number of milliseconds to wait between repair
   /// requests (reliable only).
   /// The default value is: 500.
-  ACE_Time_Value nak_interval_;
+  TimeDuration nak_interval_;
 
   /// The number of interval's between nak's for a sample
   /// (after initial nak).
@@ -87,7 +87,7 @@ public:
   /// The maximum number of milliseconds to wait before giving up
   /// on a repair response (reliable only).
   /// The default value is: 30000 (30 seconds).
-  ACE_Time_Value nak_timeout_;
+  TimeDuration nak_timeout_;
 
   /// time-to-live.
   /// The default value is: 1 (in same subnet)

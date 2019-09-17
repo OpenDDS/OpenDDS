@@ -44,7 +44,7 @@ static DDS::Duration_t const DEADLINE_PERIOD =
 static int NUM_EXPIRATIONS = 2;
 
 // Time to sleep waiting for deadline periods to expire
-static ACE_Time_Value SLEEP_DURATION(DEADLINE_PERIOD.sec * NUM_EXPIRATIONS + 1);
+const static TimeDuration SLEEP_DURATION(DEADLINE_PERIOD.sec * NUM_EXPIRATIONS + 1);
 
 static int NUM_WRITE_THREADS = 2;
 
@@ -145,20 +145,19 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]){
         // ----------------------------------------------
 
         // Wait for fully associate with DataReaders.
-        if (writer1->wait_for_start() == false || writer2->wait_for_start() == false)
-        {
-          cerr << "ERROR: took too long to associate. " << endl;
+        if (writer1->wait_for_start() == false || writer2->wait_for_start() == false) {
+          cerr << "ERROR: took too long to associate." << endl;
           exit(1);
         }
 
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Publisher: sleep for %d milliseconds\n"),
-                             SLEEP_DURATION.msec()));
+                             SLEEP_DURATION.value().msec()));
 
         // Wait for a set of deadline periods to expire.
-        ACE_OS::sleep(SLEEP_DURATION);
+        ACE_OS::sleep(SLEEP_DURATION.value());
 
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Publisher: now verify missed ")
-                             ACE_TEXT("deadline status \n")));
+                             ACE_TEXT("deadline status\n")));
 
         ::DDS::InstanceHandle_t handle1 = writer1->get_instance_handle();
         ::DDS::InstanceHandle_t handle2 = writer2->get_instance_handle();
@@ -170,14 +169,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]){
            exit(1);
         }
 
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Publisher: got missed")
-                             ACE_TEXT("deadline status \n")));
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Publisher: got missed ")
+                             ACE_TEXT("deadline status\n")));
 
-        if (deadline_status.total_count != NUM_EXPIRATIONS * NUM_WRITE_THREADS)
+        CORBA::Long expected = NUM_EXPIRATIONS * NUM_WRITE_THREADS;
+        if (deadline_status.total_count != expected)
         {
           cerr << "ERROR: Unexpected number of missed offered "
-            << "deadlines (" << deadline_status.total_count
-            << " instead of " << NUM_EXPIRATIONS * NUM_WRITE_THREADS << ") "
+            << "deadlines (" << deadline_status.total_count << ") "
+            << "instead of " << expected
             << endl;
 
           exit(1);
@@ -185,12 +185,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]){
 
         // Check if the total count changed is correctly giving the change between
         // the last time our listener got invoked and our manual call now
-        if (deadline_status.total_count_change != (deadline_status.total_count - typed_listener_ptr->offered_deadline_total_count()))
-        {
+        expected =
+          deadline_status.total_count - typed_listener_ptr->offered_deadline_total_count();
+        if (deadline_status.total_count_change != expected) {
           cerr << "ERROR: Incorrect missed offered "
             << "deadline count change ("
             << deadline_status.total_count_change
-            << ") instead of " << (deadline_status.total_count - typed_listener_ptr->offered_deadline_total_count())
+            << ") instead of " << expected
             << endl;
 
           exit(1);
@@ -210,13 +211,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]){
         writer2->wait();
 
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Publisher: sleep for %d milliseconds\n"),
-                              SLEEP_DURATION.msec()));
+                             SLEEP_DURATION.value().msec()));
 
         // Wait for another set of deadline periods to expire.
-        ACE_OS::sleep(SLEEP_DURATION);
+        ACE_OS::sleep(SLEEP_DURATION.value());
 
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Publisher: now verify missed ")
-                             ACE_TEXT("deadline status \n")));
+                             ACE_TEXT("deadline status\n")));
 
         if (dw->get_offered_deadline_missed_status(deadline_status) != ::DDS::RETCODE_OK)
         {
@@ -224,14 +225,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]){
            exit(1);
         }
 
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Publisher: got missed")
-                             ACE_TEXT("deadline status \n")));
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Publisher: got missed ")
+                             ACE_TEXT("deadline status\n")));
 
-        if (deadline_status.total_count != (NUM_EXPIRATIONS + 2) * NUM_WRITE_THREADS)
-        {
+        expected = (NUM_EXPIRATIONS + 2) * NUM_WRITE_THREADS;
+        if (deadline_status.total_count != expected) {
           cerr << "ERROR: Unexpected number of missed offered "
-            << "deadlines (" << deadline_status.total_count
-            << " instead of " << (deadline_status.total_count - typed_listener_ptr->offered_deadline_total_count()) << ") "
+            << "deadlines (" << deadline_status.total_count << ") "
+            << "instead of " << expected
             << endl;
 
           exit(1);
@@ -239,12 +240,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]){
 
         // Check if the total count changed is correctly giving the change between
         // the last time our listener got invoked and our manual call now
-        if (deadline_status.total_count_change != (deadline_status.total_count - typed_listener_ptr->offered_deadline_total_count()))
-        {
+        expected =
+          deadline_status.total_count - typed_listener_ptr->offered_deadline_total_count();
+        if (deadline_status.total_count_change != expected) {
           cerr << "ERROR: Incorrect missed offered "
             << "deadline count change ("
             << deadline_status.total_count_change
-            << ") instead of " << NUM_WRITE_THREADS * 2
+            << ") instead of " << expected
             << endl;
 
           exit(1);

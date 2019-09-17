@@ -134,8 +134,8 @@ public:
   DDS::PublisherListener_ptr listener_for(::DDS::StatusKind kind);
 
   DDS::ReturnCode_t assert_liveliness_by_participant();
-  ACE_Time_Value liveliness_check_interval(DDS::LivelinessQosPolicyKind kind);
-  bool participant_liveliness_activity_after(const ACE_Time_Value& tv);
+  TimeDuration liveliness_check_interval(DDS::LivelinessQosPolicyKind kind);
+  bool participant_liveliness_activity_after(const MonotonicTimePoint& tv);
 
   typedef OPENDDS_VECTOR(PublicationId) PublicationIdVec;
   /// Populates a std::vector with the PublicationIds (GUIDs)
@@ -193,7 +193,7 @@ private:
   /// -  NOT USED IN FIRST IMPL - not supporting GROUP scope
   SequenceNumber               sequence_number_;
   /// Start of current aggregation period. - NOT USED IN FIRST IMPL
-  ACE_Time_Value               aggregation_period_start_;
+  MonotonicTimePoint aggregation_period_start_;
 
   typedef ACE_Recursive_Thread_Mutex  lock_type;
   typedef ACE_Reverse_Lock<lock_type> reverse_lock_type;

@@ -41,6 +41,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace RTPS {
 using DCPS::RepoId;
+using DCPS::MonotonicTimePoint;
+using DCPS::TimeDuration;
 
 namespace {
   // Multiplier for resend period -> lease duration conversion,
@@ -351,7 +353,7 @@ namespace {
 void
 Spdp::handle_participant_data(DCPS::MessageId id, const ParticipantData_t& cpdata)
 {
-  const ACE_Time_Value now = ACE_OS::gettimeofday();
+  const MonotonicTimePoint now = MonotonicTimePoint::now();
 
   // Make a (non-const) copy so we can tweak values below
   ParticipantData_t pdata(cpdata);
@@ -593,8 +595,6 @@ Spdp::handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg)
     return;
   }
 
-  const ACE_Time_Value time = ACE_OS::gettimeofday();
-
   RepoId guid = msg.message_identity.source_guid;
   guid.entityId = DCPS::ENTITYID_PARTICIPANT;
 
@@ -722,7 +722,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
         return;
       }
       dp.has_last_stateless_msg_ = true;
-      dp.last_stateless_msg_time_ = ACE_OS::gettimeofday();
+      dp.last_stateless_msg_time_.set_to_now();
       dp.last_stateless_msg_ = reply;
       dp.auth_state_ = DCPS::AS_HANDSHAKE_REPLY_SENT;
       return;
@@ -775,7 +775,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
         return;
       }
       dp.has_last_stateless_msg_ = true;
-      dp.last_stateless_msg_time_ = ACE_OS::gettimeofday();
+      dp.last_stateless_msg_time_.set_to_now();
       dp.last_stateless_msg_ = reply;
       // cache the outbound message, but don't change state, since roles shouldn't have changed?
     } else if (vr == DDS::Security::VALIDATION_OK_FINAL_MESSAGE) {
@@ -798,16 +798,18 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
 }
 
 void
-Spdp::check_auth_states(const ACE_Time_Value& tv) {
+Spdp::check_auth_states(const MonotonicTimePoint& tv) {
+  typedef OPENDDS_SET_CMP(RepoId, DCPS::GUID_tKeyLessThan) GuidSet;
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  OPENDDS_SET_CMP(RepoId, DCPS::GUID_tKeyLessThan) to_erase;
+  GuidSet to_erase;
   for (DiscoveredParticipantIter pi = participants_.begin(); pi != participants_.end(); ++pi) {
     switch (pi->second.auth_state_) {
       case DCPS::AS_HANDSHAKE_REQUEST_SENT:
       case DCPS::AS_HANDSHAKE_REPLY_SENT:
         if (tv > pi->second.auth_started_time_ + disco_->max_auth_time()) {
           to_erase.insert(pi->first);
-        } else if (pi->second.has_last_stateless_msg_ && (tv > (pi->second.last_stateless_msg_time_ + disco_->auth_resend_period()))) {
+        } else if (pi->second.has_last_stateless_msg_ &&
+            (tv > (pi->second.last_stateless_msg_time_ + disco_->auth_resend_period()))) {
           RepoId reader = pi->first;
           reader.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
           pi->second.last_stateless_msg_time_ = tv;
@@ -827,10 +829,12 @@ Spdp::check_auth_states(const ACE_Time_Value& tv) {
         break;
     }
   }
-  for (OPENDDS_SET_CMP(RepoId, DCPS::GUID_tKeyLessThan)::const_iterator it = to_erase.begin(); it != to_erase.end(); ++it) {
+  for (GuidSet::const_iterator it = to_erase.begin(); it != to_erase.end(); ++it) {
     DiscoveredParticipantIter pit = participants_.find(*it);
     if (pit != participants_.end()) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Spdp::check_auth_states()      - Removing discovered participant due to authentication timeout: %C\n"), std::string(DCPS::GuidConverter(*it)).c_str()));
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Spdp::check_auth_states() - ")
+        ACE_TEXT("Removing discovered participant due to authentication timeout: %C\n"),
+        OPENDDS_STRING(DCPS::GuidConverter(*it)).c_str()));
       if (participant_sec_attr_.allow_unauthenticated_participants == false) {
         ICE::Endpoint* endpoint = sedp_.get_ice_endpoint();
         if (endpoint) {
@@ -996,7 +1000,7 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
   DDS::Security::SecurityException se = {"", 0, 0};
 
   if (dp.auth_state_ == DCPS::AS_UNKNOWN) {
-    dp.auth_started_time_ = ACE_OS::gettimeofday();
+    dp.auth_started_time_.set_to_now();
     dp.auth_state_ = DCPS::AS_VALIDATING_REMOTE;
   }
 
@@ -1133,7 +1137,7 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
       return;
     }
     dp.has_last_stateless_msg_ = true;
-    dp.last_stateless_msg_time_ = ACE_OS::gettimeofday();
+    dp.last_stateless_msg_time_.set_to_now();
     dp.last_stateless_msg_ = msg;
     dp.auth_state_ = DCPS::AS_HANDSHAKE_REQUEST_SENT;
   }
@@ -1157,9 +1161,9 @@ Spdp::remove_expired_participants()
   {
     DiscoveredParticipantIter part = participants_.find(*participant_id);
     if (part != participants_.end()) {
-      if (part->second.last_seen_ <
-          ACE_OS::gettimeofday() -
-          ACE_Time_Value(part->second.pdata_.leaseDuration.seconds)) {
+      const MonotonicTimePoint expr(MonotonicTimePoint::now() -
+        rtps_time_to_time_duration(part->second.pdata_.leaseDuration));
+      if (part->second.last_seen_ < expr) {
         if (DCPS::DCPS_debug_level > 1) {
           DCPS::GuidConverter conv(part->first);
           ACE_DEBUG((LM_WARNING,
@@ -1324,7 +1328,7 @@ Spdp::build_local_pdata(
       {PFLAGS_NO_ASSOCIATED_WRITERS} // opendds_participant_flags
     },
     { // Duration_t (leaseDuration)
-      static_cast<CORBA::Long>((disco_->resend_period() * LEASE_MULT).sec()),
+      static_cast<CORBA::Long>((disco_->resend_period() * LEASE_MULT).value().sec()),
       0 // we are not supporting fractional seconds in the lease duration
     }
   };
@@ -1344,7 +1348,8 @@ bool Spdp::announce_domain_participant_qos()
 }
 
 Spdp::SpdpTransport::SpdpTransport(Spdp* outer, bool securityGuids)
-  : outer_(outer), lease_duration_(outer_->disco_->resend_period() * LEASE_MULT)
+  : outer_(outer)
+  , lease_duration_(outer_->disco_->resend_period() * LEASE_MULT)
   , buff_(64 * 1024)
   , wbuff_(64 * 1024)
 {
@@ -1459,11 +1464,10 @@ Spdp::SpdpTransport::open()
   }
 
   disco_resend_period_ = outer_->disco_->resend_period();
-  last_disco_resend_ = 0;
+  last_disco_resend_ = MonotonicTimePoint::zero_value;
 
-  ACE_Time_Value timer_period = disco_resend_period_ < outer_->disco_->max_spdp_timer_period() ? disco_resend_period_ : outer_->disco_->max_spdp_timer_period();
-
-  if (-1 == reactor->schedule_timer(this, 0, ACE_Time_Value(0), timer_period)) {
+  const TimeDuration timer_period = std::min(disco_resend_period_, outer_->disco_->max_spdp_timer_period());
+  if (-1 == reactor->schedule_timer(this, 0, ACE_Time_Value(0), timer_period.value())) {
     throw std::runtime_error("failed to schedule timer with reactor");
   }
 }
@@ -1654,14 +1658,15 @@ Spdp::SpdpTransport::write_i()
 int
 Spdp::SpdpTransport::handle_timeout(const ACE_Time_Value& tv, const void*)
 {
-  if (tv > last_disco_resend_ + disco_resend_period_) {
+  const MonotonicTimePoint now(tv);
+  if (now > last_disco_resend_ + disco_resend_period_) {
     write();
     outer_->remove_expired_participants();
-    last_disco_resend_ = tv;
+    last_disco_resend_ = now;
   }
 
 #ifdef OPENDDS_SECURITY
-  outer_->check_auth_states(tv);
+  outer_->check_auth_states(now);
 #endif
 
   return 0;

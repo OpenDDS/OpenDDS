@@ -13,6 +13,7 @@
 #include "ReactorInterceptor.h"
 #include "Service_Participant.h"
 #include "GuidConverter.h"
+#include "TimeTypes.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -86,6 +87,7 @@ private:
 
   friend class CancelCommand;
 };
+
 //Starting RemoveAssociationSweeper
 template <typename T>
 RemoveAssociationSweeper<T>::RemoveAssociationSweeper(ACE_Reactor* reactor,
@@ -104,20 +106,17 @@ void RemoveAssociationSweeper<T>::schedule_timer(OpenDDS::DCPS::RcHandle<OpenDDS
 {
   info->scheduled_for_removal_ = true;
   info->notify_lost_ = callback;
-  ACE_Time_Value time_to_deadline(info->activity_wait_period());
-
-  if (time_to_deadline > ACE_Time_Value(10))
-    time_to_deadline = ACE_Time_Value(10);
-
-  info->removal_deadline_ = ACE_OS::gettimeofday() + time_to_deadline;
+  info->removal_deadline_ = MonotonicTimePoint(MonotonicTimePoint::now() +
+    std::min(info->activity_wait_period(), TimeDuration(10)));
   execute_or_enqueue(new ScheduleCommand(this, info));
 }
 
 template <typename T>
-ReactorInterceptor::CommandPtr RemoveAssociationSweeper<T>::cancel_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
+ReactorInterceptor::CommandPtr
+RemoveAssociationSweeper<T>::cancel_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
 {
   info->scheduled_for_removal_ = false;
-  info->removal_deadline_ = ACE_Time_Value::zero;
+  info->removal_deadline_ = MonotonicTimePoint::zero_value;
   return execute_or_enqueue(new CancelCommand(this, info));
 }
 
@@ -178,15 +177,22 @@ int RemoveAssociationSweeper<T>::handle_timeout(
 template <typename T>
 void RemoveAssociationSweeper<T>::ScheduleCommand::execute()
 {
-  //Pass pointer to writer info for timer to use, must decrease ref count when canceling timer
+  /*
+   * Pass pointer to writer info for timer to use, must decrease ref count when
+   * canceling timer
+   */
   const void* arg = reinterpret_cast<const void*>(this->info_.in());
   this->sweeper_->info_set_.push_back(this->info_);
 
-  this->info_->remove_association_timer_ = this->sweeper_->reactor()->schedule_timer(this->sweeper_,
-                                                                       arg,
-                                                                       this->info_->removal_deadline_ - ACE_OS::gettimeofday());
+  this->info_->remove_association_timer_ =
+    this->sweeper_->reactor()->schedule_timer(
+      this->sweeper_, arg,
+      (this->info_->removal_deadline_ - MonotonicTimePoint::now()).value());
   if (DCPS_debug_level) {
-    ACE_DEBUG((LM_INFO, "(%P|%t) RemoveAssociationSweeper::ScheduleCommand::execute() - Scheduled sweeper %d\n", this->info_->remove_association_timer_));
+    ACE_DEBUG((LM_INFO,
+      ACE_TEXT("(%P|%t) RemoveAssociationSweeper::ScheduleCommand::execute() - ")
+      ACE_TEXT("Scheduled sweeper %d\n"),
+      this->info_->remove_association_timer_));
   }
 }
 
@@ -194,9 +200,11 @@ template <typename T>
 void RemoveAssociationSweeper<T>::CancelCommand::execute()
 {
   if (this->info_->remove_association_timer_ != WriterInfo::NO_TIMER) {
-      this->sweeper_->reactor()->cancel_timer(this->info_->remove_association_timer_);
+    this->sweeper_->reactor()->cancel_timer(this->info_->remove_association_timer_);
     if (DCPS_debug_level) {
-      ACE_DEBUG((LM_INFO, "(%P|%t) RemoveAssociationSweeper::CancelCommand::execute() - Unscheduled sweeper %d\n", this->info_->remove_association_timer_));
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) RemoveAssociationSweeper::CancelCommand::execute() - ")
+        ACE_TEXT("Unscheduled sweeper %d\n"),
+        this->info_->remove_association_timer_));
     }
     this->info_->remove_association_timer_ = WriterInfo::NO_TIMER;
     this->sweeper_->remove_info(this->info_.in());

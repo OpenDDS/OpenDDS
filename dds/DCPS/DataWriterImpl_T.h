@@ -64,13 +64,11 @@ namespace OpenDDS {
     {
     }
 
-  virtual DDS::InstanceHandle_t register_instance (
-      const MessageType & instance)
-    {
-      DDS::Time_t const timestamp =
-        ::OpenDDS::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
-      return register_instance_w_timestamp (instance, timestamp);
-    }
+  virtual DDS::InstanceHandle_t
+  register_instance(const MessageType& instance)
+  {
+    return register_instance_w_timestamp(instance, SystemTimePoint::now().to_dds_time());
+  }
 
   virtual DDS::InstanceHandle_t register_instance_w_timestamp (
       const MessageType & instance,
@@ -96,17 +94,11 @@ namespace OpenDDS {
       return registered_handle;
     }
 
-  virtual DDS::ReturnCode_t unregister_instance (
-      const MessageType & instance,
-      DDS::InstanceHandle_t handle)
-    {
-      DDS::Time_t const timestamp =
-        ::OpenDDS::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
-
-      return unregister_instance_w_timestamp (instance,
-                                              handle,
-                                              timestamp);
-    }
+  virtual DDS::ReturnCode_t
+  unregister_instance(const MessageType& instance, DDS::InstanceHandle_t handle)
+  {
+    return unregister_instance_w_timestamp(instance, handle, SystemTimePoint::now().to_dds_time());
+  }
 
   virtual DDS::ReturnCode_t unregister_instance_w_timestamp (
       const MessageType & instance_data,
@@ -137,17 +129,11 @@ namespace OpenDDS {
   //WARNING: If the handle is non-nil and the instance is not registered
   //         then this operation may cause an access violation.
   //         This lack of safety helps performance.
-  virtual DDS::ReturnCode_t write (
-      const MessageType & instance_data,
-      DDS::InstanceHandle_t handle)
-    {
-      DDS::Time_t const source_timestamp =
-        ::OpenDDS::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
-      return write_w_timestamp (instance_data,
-                                handle,
-                                source_timestamp);
-    }
-
+  virtual DDS::ReturnCode_t
+  write(const MessageType& instance_data, DDS::InstanceHandle_t handle)
+  {
+    return write_w_timestamp(instance_data, handle, SystemTimePoint::now().to_dds_time());
+  }
 
   //WARNING: If the handle is non-nil and the instance is not registered
   //         then this operation may cause an access violation.
@@ -207,16 +193,11 @@ namespace OpenDDS {
                                                   filter_out._retn());
     }
 
-  virtual DDS::ReturnCode_t dispose (
-      const MessageType & instance_data,
-      DDS::InstanceHandle_t instance_handle)
-    {
-      DDS::Time_t const source_timestamp =
-        ::OpenDDS::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
-      return dispose_w_timestamp (instance_data,
-                                  instance_handle,
-                                  source_timestamp);
-    }
+  virtual DDS::ReturnCode_t
+  dispose(const MessageType& instance_data, DDS::InstanceHandle_t instance_handle)
+  {
+    return dispose_w_timestamp(instance_data, instance_handle, SystemTimePoint::now().to_dds_time());
+  }
 
   virtual DDS::ReturnCode_t dispose_w_timestamp (
       const MessageType & instance_data,

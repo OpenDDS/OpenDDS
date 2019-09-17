@@ -253,7 +253,7 @@ public:
   //@}
 
   /// Accessor for pending data timeout.
-  ACE_Time_Value pending_timeout() const;
+  TimeDuration pending_timeout() const;
 
   /// Accessors for priority extremums for the current scheduler.
   //@{
@@ -556,7 +556,7 @@ private:
   ACE_TString schedulerString_;
 
   /// Scheduler time slice from configuration file.
-  ACE_Time_Value schedulerQuantum_;
+  TimeDuration schedulerQuantum_;
 
 #if defined OPENDDS_SAFETY_PROFILE && defined ACE_HAS_ALLOC_HOOKS
   /// Pool size from configuration file.
@@ -593,7 +593,7 @@ private:
 
   /// Number of seconds to wait on pending samples to be sent
   /// or dropped.
-  ACE_Time_Value pending_timeout_;
+  TimeDuration pending_timeout_;
 
   /// Enable TAO's Bidirectional GIOP?
   bool bidir_giop_;
