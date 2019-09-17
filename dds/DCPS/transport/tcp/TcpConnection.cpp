@@ -868,8 +868,9 @@ OpenDDS::DCPS::TcpConnection::transfer(TcpConnection* connection)
 
   reconnect_task_->wait_complete(reconnect_lock_);
 
-  if (shutdown_)
+  if (shutdown_) {
     return;
+  }
 
   bool notify_reconnect = false;
 
