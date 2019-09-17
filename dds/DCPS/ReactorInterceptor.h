@@ -29,7 +29,7 @@ public:
   class Command
   : public RcObject {
   public:
-    Command() : executed_(false), condition_(mutex_), reactor_(NULL) {}
+    Command() : executed_(false), condition_(mutex_), reactor_(0) {}
     virtual ~Command() { }
     virtual void execute() = 0;
 
