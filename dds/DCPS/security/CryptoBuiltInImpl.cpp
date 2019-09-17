@@ -377,11 +377,12 @@ DatareaderCryptoHandle CryptoBuiltInImpl::register_matched_remote_datareader(
 
   const DatareaderCryptoHandle h = generate_handle();
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  if (!keys_.count(local_datawriter_crypto_handle)) {
+  const KeyTable_t::const_iterator iter = keys_.find(local_datawriter_crypto_handle);
+  if (iter == keys_.end()) {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid Local DataWriter Crypto Handle");
     return DDS::HANDLE_NIL;
   }
-  const KeySeq& dw_keys = keys_[local_datawriter_crypto_handle];
+  const KeySeq& dw_keys = iter->second;
 
   if (dw_keys.length() == 1 && is_volatile_placeholder(dw_keys[0])) {
     // Create a key from SharedSecret and track it as if Key Exchange happened
@@ -475,11 +476,12 @@ DatawriterCryptoHandle CryptoBuiltInImpl::register_matched_remote_datawriter(
 
   const DatareaderCryptoHandle h = generate_handle();
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  if (!keys_.count(local_datareader_crypto_handle)) {
+  const KeyTable_t::const_iterator iter = keys_.find(local_datareader_crypto_handle);
+  if (iter == keys_.end()) {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid Local DataReader Crypto Handle");
     return DDS::HANDLE_NIL;
   }
-  const KeySeq& dr_keys = keys_[local_datareader_crypto_handle];
+  const KeySeq& dr_keys = iter->second;
 
   if (dr_keys.length() == 1 && is_volatile_placeholder(dr_keys[0])) {
     // Create a key from SharedSecret and track it as if Key Exchange happened
@@ -642,8 +644,9 @@ bool CryptoBuiltInImpl::create_local_participant_crypto_tokens(
   }
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  if (keys_.count(local_participant_crypto)) {
-    local_participant_crypto_tokens = keys_to_tokens(keys_[local_participant_crypto]);
+  const KeyTable_t::const_iterator iter = keys_.find(local_participant_crypto);
+  if (iter != keys_.end()) {
+    local_participant_crypto_tokens = keys_to_tokens(iter->second);
   } else {
     // There may not be any keys_ for this participant (depends on config)
     local_participant_crypto_tokens.length(0);
@@ -684,8 +687,9 @@ bool CryptoBuiltInImpl::create_local_datawriter_crypto_tokens(
   }
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  if (keys_.count(local_datawriter_crypto)) {
-    local_datawriter_crypto_tokens = keys_to_tokens(keys_[local_datawriter_crypto]);
+  const KeyTable_t::const_iterator iter = keys_.find(local_datawriter_crypto);
+  if (iter != keys_.end()) {
+    local_datawriter_crypto_tokens = keys_to_tokens(iter->second);
   } else {
     local_datawriter_crypto_tokens.length(0);
   }
@@ -725,8 +729,9 @@ bool CryptoBuiltInImpl::create_local_datareader_crypto_tokens(
   }
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  if (keys_.count(local_datareader_crypto)) {
-    local_datareader_crypto_tokens = keys_to_tokens(keys_[local_datareader_crypto]);
+  const KeyTable_t::const_iterator iter = keys_.find(local_datareader_crypto);
+  if (iter != keys_.end()) {
+    local_datareader_crypto_tokens = keys_to_tokens(iter->second);
   } else {
     local_datareader_crypto_tokens.length(0);
   }
@@ -812,13 +817,13 @@ bool CryptoBuiltInImpl::encode_serialized_payload(
   }
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  if (!keys_.count(sending_datawriter_crypto)
-      || !encrypt_options_[sending_datawriter_crypto].payload_) {
+  const KeyTable_t::const_iterator iter = keys_.find(sending_datawriter_crypto);
+  if (iter == keys_.end() || !encrypt_options_[sending_datawriter_crypto].payload_) {
     encoded_buffer = plain_buffer;
     return true;
   }
 
-  const KeySeq& keyseq = keys_[sending_datawriter_crypto];
+  const KeySeq& keyseq = iter->second;
   if (!keyseq.length()) {
     encoded_buffer = plain_buffer;
     return true;
@@ -1103,12 +1108,13 @@ bool CryptoBuiltInImpl::encode_submessage(
   SecurityException& ex)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  if (!keys_.count(sender_handle)) {
+  const KeyTable_t::const_iterator iter = keys_.find(sender_handle);
+  if (iter == keys_.end()) {
     encoded_rtps_submessage = plain_rtps_submessage;
     return true;
   }
 
-  const KeySeq& keyseq = keys_[sender_handle];
+  const KeySeq& keyseq = iter->second;
   if (!keyseq.length()) {
     encoded_rtps_submessage = plain_rtps_submessage;
     return true;
@@ -1157,7 +1163,7 @@ bool CryptoBuiltInImpl::encode_submessage(
   }
 
   size += pOut->length(); // submessage inside wrapper
-  align(4, size, padding);
+  align(SM_ALIGN, size, padding);
 
   size += RTPS::SMHDR_SZ; // postfix submessage header
   const size_t preFooter = size + padding;
@@ -1179,7 +1185,7 @@ bool CryptoBuiltInImpl::encode_submessage(
   }
 
   ser.write_octet_array(pOut->get_buffer(), pOut->length());
-  ser.align_w(4);
+  ser.align_w(SM_ALIGN);
 
   smHdr.submessageId = RTPS::SEC_POSTFIX;
   smHdr.submessageLength = static_cast<ACE_UINT16>(size + padding - preFooter);
@@ -1227,8 +1233,9 @@ bool CryptoBuiltInImpl::encode_datawriter_submessage(
   }
 
   if (receiving_datareader_crypto_list.length() == 1) {
-    if (keys_.count(encode_handle)) {
-      const KeySeq& dw_keys = keys_[encode_handle];
+    const KeyTable_t::const_iterator iter = keys_.find(encode_handle);
+    if (iter != keys_.end()) {
+      const KeySeq& dw_keys = iter->second;
       if (dw_keys.length() == 1 && is_volatile_placeholder(dw_keys[0])) {
         encode_handle = receiving_datareader_crypto_list[0];
       }
@@ -1265,8 +1272,9 @@ bool CryptoBuiltInImpl::encode_datareader_submessage(
   NativeCryptoHandle encode_handle = sending_datareader_crypto;
   if (receiving_datawriter_crypto_list.length() == 1) {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-    if (keys_.count(encode_handle)) {
-      const KeySeq& dr_keys = keys_[encode_handle];
+    const KeyTable_t::const_iterator iter = keys_.find(encode_handle);
+    if (iter != keys_.end()) {
+      const KeySeq& dr_keys = iter->second;
       if (dr_keys.length() == 1 && is_volatile_placeholder(dr_keys[0])) {
         encode_handle = receiving_datawriter_crypto_list[0];
       }
@@ -1294,11 +1302,12 @@ bool CryptoBuiltInImpl::encode_rtps_message(
   }
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  if (!keys_.count(sending_participant_crypto)) {
+  const KeyTable_t::const_iterator iter = keys_.find(sending_participant_crypto);
+  if (iter == keys_.end()) {
     return CommonUtilities::set_security_error(ex, -1, 0, "No entry for sending_participant_crypto");
   }
 
-  const KeySeq& keyseq = keys_[sending_participant_crypto];
+  const KeySeq& keyseq = iter->second;
   if (!keyseq.length()) {
     return CommonUtilities::set_security_error(ex, -1, 0, "No key for sending_participant_crypto");
   }
@@ -1353,7 +1362,7 @@ bool CryptoBuiltInImpl::encode_rtps_message(
   }
 
   size += pOut->length();
-  align(4, size, padding);
+  align(SM_ALIGN, size, padding);
 
   size += RTPS::SMHDR_SZ; // SRTPS Postfix
   gen_find_size(cryptoFooter, size, padding);
@@ -1376,7 +1385,7 @@ bool CryptoBuiltInImpl::encode_rtps_message(
   }
 
   ser.write_octet_array(pOut->get_buffer(), pOut->length());
-  ser.align_w(4);
+  ser.align_w(SM_ALIGN);
 
   smHdr.submessageId = RTPS::SRTPS_POSTFIX;
   smHdr.submessageLength = 0; // final submessage doesn't need a length
@@ -1431,14 +1440,14 @@ bool CryptoBuiltInImpl::preprocess_secure_submsg(
   }
   for (iter_t iter = iters.first; iter != iters.second; ++iter) {
     const NativeCryptoHandle sending_entity_candidate = iter->second.handle_;
-    const size_t haskeys = keys_.count(sending_entity_candidate);
+    const KeyTable_t::const_iterator kiter = keys_.find(sending_entity_candidate);
     if (security_debug.chlookup) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {chlookup} CryptoBuiltInImpl::preprocess_secure_submsg: ")
         ACE_TEXT("  Looking at CH %u, has keys: %C\n"),
-        sending_entity_candidate, haskeys ? "true" : "false"));
+        sending_entity_candidate, kiter == keys_.end() ? "false" : "true"));
     }
-    if (haskeys) {
-      const KeySeq& keyseq = keys_[sending_entity_candidate];
+    if (kiter != keys_.end()) {
+      const KeySeq& keyseq = kiter->second;
       const unsigned keycount = keyseq.length();
       if (security_debug.chlookup) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {chlookup} CryptoBuiltInImpl::preprocess_secure_submsg: ")
@@ -1750,7 +1759,11 @@ bool CryptoBuiltInImpl::decode_rtps_message(
   }
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  const KeySeq& keyseq = keys_[sending_participant_crypto];
+  const KeyTable_t::const_iterator iter = keys_.find(sending_participant_crypto);
+  if (iter == keys_.end()) {
+    return CommonUtilities::set_security_error(ex, -1, 2, "No key for Sending Participant handle");
+  }
+  const KeySeq& keyseq = iter->second;
   bool foundKey = false;
   DDS::OctetSeq transformed;
   for (unsigned int i = 0; !foundKey && i < keyseq.length(); ++i) {
@@ -1781,7 +1794,8 @@ bool CryptoBuiltInImpl::decode_rtps_message(
   }
 
   if (!foundKey) {
-    return CommonUtilities::set_security_error(ex, -10, 1, "Crypto Key not found");
+    return CommonUtilities::set_security_error(ex, OPENDDS_EXCEPTION_CODE_NO_KEY,
+                                               OPENDDS_EXCEPTION_MINOR_CODE_NO_KEY, "Crypto Key not found");
   }
 
   if (transformed.length() < RTPS::SMHDR_SZ + RTPS::INFO_SRC_SZ
@@ -1855,7 +1869,7 @@ bool CryptoBuiltInImpl::decode_submessage(
         de_ser >> n;
         return decrypt(keyseq[i], sessions_[sKey], mb_in.rd_ptr(), n, ch, cf,
                        plain_rtps_submessage, ex);
-  
+
       } else if (authenticates(keyseq[i])) {
         return verify(keyseq[i], sessions_[sKey], mb_in.rd_ptr() - RTPS::SMHDR_SZ,
                       RTPS::SMHDR_SZ + octetsToNext, ch, cf, plain_rtps_submessage, ex);
@@ -1943,6 +1957,10 @@ bool CryptoBuiltInImpl::decode_serialized_payload(
   }
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  const KeyTable_t::const_iterator iter = keys_.find(sending_datawriter_crypto);
+  if (iter == keys_.end()) {
+    return CommonUtilities::set_security_error(ex, -1, 1, "No key for DataWriter crypto handle");
+  }
   if (!encrypt_options_[sending_datawriter_crypto].payload_) {
     plain_buffer = encoded_buffer;
     if (security_debug.encdec) {
@@ -1962,7 +1980,7 @@ bool CryptoBuiltInImpl::decode_serialized_payload(
     return CommonUtilities::set_security_error(ex, -3, 4, "Failed to deserialize CryptoHeader");
   }
 
-  const KeySeq& keyseq = keys_[sending_datawriter_crypto];
+  const KeySeq& keyseq = iter->second;
   for (unsigned int i = 0; i < keyseq.length(); ++i) {
     if (matches(keyseq[i], ch)) {
       const KeyId_t sKey = std::make_pair(sending_datawriter_crypto, i);

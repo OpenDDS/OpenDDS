@@ -210,7 +210,7 @@ RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
         ACE_DEBUG((LM_WARNING, "decode_rtps_message SecurityException [%d.%d]: %C\n",
                    ex.code, ex.minor_code, ex.message.in()));
       }
-      if (ex.code == -10 && ex.minor_code == 1) {
+      if (ex.code == OPENDDS_EXCEPTION_CODE_NO_KEY && ex.minor_code == OPENDDS_EXCEPTION_MINOR_CODE_NO_KEY) {
         if (security_debug.warn) {
           ACE_DEBUG((LM_WARNING, "decode_rtps_message remote participant has crypto handle but no key, dropping\n"));
         }

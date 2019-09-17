@@ -670,8 +670,6 @@ private:
   typedef OPENDDS_MAP_CMP(RepoId, DDS::Security::EndpointSecurityAttributesMask,
                           GUID_tKeyLessThan) EndpointSecurityAttributesMap;
   EndpointSecurityAttributesMap endpoint_security_attributes_;
-
-  const ACE_INET_Addr placeholder_address_;
 #endif
 
   void accumulate_addresses(const RepoId& local, const RepoId& remote, AddrSet& addresses) const;

@@ -1593,6 +1593,12 @@ RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(MetaSubmessageVec& meta_submessa
   }
 }
 
+#ifdef OPENDDS_SECURITY
+namespace {
+  const ACE_INET_Addr BUNDLING_PLACEHOLDER;
+}
+#endif
+
 void
 RtpsUdpDataLink::build_meta_submessage_map(MetaSubmessageVec& meta_submessages, AddrDestMetaSubmessageMap& adr_map)
 {
@@ -1614,7 +1620,7 @@ RtpsUdpDataLink::build_meta_submessage_map(MetaSubmessageVec& meta_submessages, 
 
 #ifdef OPENDDS_SECURITY
     if (local_crypto_handle() != DDS::HANDLE_NIL && separate_message(it->from_guid_.entityId)) {
-      addrs.insert(placeholder_address_); // removed in bundle_mapped_meta_submessages
+      addrs.insert(BUNDLING_PLACEHOLDER); // removed in bundle_mapped_meta_submessages
     }
 #endif
 
@@ -1711,7 +1717,7 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(AddrDestMetaSubmessageMap& adr_m
 
 #ifdef OPENDDS_SECURITY
     if (local_crypto_handle() != DDS::HANDLE_NIL) {
-      meta_submessage_bundle_addrs.back().erase(placeholder_address_);
+      meta_submessage_bundle_addrs.back().erase(BUNDLING_PLACEHOLDER);
     }
 #endif
 
