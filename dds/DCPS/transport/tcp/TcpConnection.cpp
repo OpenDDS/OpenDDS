@@ -654,12 +654,12 @@ OpenDDS::DCPS::TcpConnection::passive_reconnect_i()
 
     if (interceptor_ && passive_reconnect_timer_id_ == -1) {
       TcpConnection_rch con(this, inc_count());
-      ReactorInterceptor::CommandPtr cmd = interceptor_->execute_or_enqueue(new ScheduleTimer(con, 0, TimeDuration::from_msec(tcp_config_->passive_reconnect_duration).value()));
+      TimeDuration delay = TimeDuration::from_msec(tcp_config_->passive_reconnect_duration_);
+      ReactorInterceptor::CommandPtr cmd = interceptor_->execute_or_enqueue(new ScheduleTimer(con, 0, delay));
       guard.release();
       const long result = ReactorInterceptor::ResultCommand<long>::wait_result(cmd);
       guard.acquire();
       passive_reconnect_timer_id_ = result;
-        this, 0, TimeDuration::from_msec(tcp_config_->passive_reconnect_duration_).value());
       if (passive_reconnect_timer_id_ == -1) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: TcpConnection::passive_reconnect_i")
@@ -1115,7 +1115,7 @@ OpenDDS::DCPS::TcpConnection::RemoveHandler::execute() {
 
 void
 OpenDDS::DCPS::TcpConnection::ScheduleTimer::execute() {
-  result(reactor()->schedule_timer(con_.get(), arg_, delay_, interval_));
+  result(reactor()->schedule_timer(con_.get(), arg_, delay_.value(), interval_.value()));
 }
 
 void

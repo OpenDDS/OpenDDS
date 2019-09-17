@@ -167,12 +167,12 @@ private:
 
   class ScheduleTimer : public ReactorInterceptor::ResultCommand<long> {
   public:
-    ScheduleTimer(TcpConnection_rch con, void* arg, const ACE_Time_Value& delay, const ACE_Time_Value& interval = ACE_Time_Value::zero) : con_(con), arg_(arg), delay_(delay), interval_(interval) {}
+    ScheduleTimer(TcpConnection_rch con, void* arg, const TimeDuration& delay, const TimeDuration& interval = TimeDuration::zero_value) : con_(con), arg_(arg), delay_(delay), interval_(interval) {}
     void execute();
   private:
     TcpConnection_rch con_;
     void* arg_;
-    ACE_Time_Value delay_, interval_;
+    TimeDuration delay_, interval_;
   };
 
   class CancelTimer : public ReactorInterceptor::ResultCommand<int> {
