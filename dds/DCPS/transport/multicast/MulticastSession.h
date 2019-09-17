@@ -43,10 +43,10 @@ public:
   virtual bool reactor_is_shut_down() const;
 
 protected:
-  virtual ACE_Time_Value next_interval();
+  virtual TimeDuration next_interval();
   virtual void on_interval(const void* arg);
 
-  virtual ACE_Time_Value next_timeout();
+  virtual TimeDuration next_timeout();
   virtual void on_timeout(const void* arg);
 
 private:

@@ -97,7 +97,7 @@ ACE.
 
 ### CMake
 
-OpenDDS has a [CMake `FindPacakge` module included](../cmake). See
+OpenDDS has a [CMake `FindPackage` module included](../cmake). See
 [`cmake.md`](cmake.md) for how to make OpenDDS applications with CMake and
 without the need to use MPC in your application.
 

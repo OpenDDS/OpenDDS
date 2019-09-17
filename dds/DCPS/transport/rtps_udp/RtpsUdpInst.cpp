@@ -153,10 +153,10 @@ RtpsUdpInst::dump_to_str() const
   ret += formatNameForDump("multicast_interface") + multicast_interface_ + '\n';
   ret += formatNameForDump("nak_depth") + to_dds_string(unsigned(nak_depth_)) + '\n';
   ret += formatNameForDump("max_bundle_size") + to_dds_string(unsigned(max_bundle_size_)) + '\n';
-  ret += formatNameForDump("nak_response_delay") + to_dds_string(nak_response_delay_.msec()) + '\n';
-  ret += formatNameForDump("heartbeat_period") + to_dds_string(heartbeat_period_.msec()) + '\n';
-  ret += formatNameForDump("heartbeat_response_delay") + to_dds_string(heartbeat_response_delay_.msec()) + '\n';
-  ret += formatNameForDump("handshake_timeout") + to_dds_string(handshake_timeout_.msec()) + '\n';
+  ret += formatNameForDump("nak_response_delay") + to_dds_string(nak_response_delay_.value().msec()) + '\n';
+  ret += formatNameForDump("heartbeat_period") + to_dds_string(heartbeat_period_.value().msec()) + '\n';
+  ret += formatNameForDump("heartbeat_response_delay") + to_dds_string(heartbeat_response_delay_.value().msec()) + '\n';
+  ret += formatNameForDump("handshake_timeout") + to_dds_string(handshake_timeout_.value().msec()) + '\n';
   return ret;
 }
 

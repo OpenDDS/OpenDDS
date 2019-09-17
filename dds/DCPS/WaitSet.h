@@ -17,6 +17,7 @@
 #include "dds/DCPS/LocalObject.h"
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/PoolAllocator.h"
+#include "dds/DCPS/TimeTypes.h"
 
 #include "ace/Thread_Mutex.h"
 #include "ace/Atomic_Op.h"
@@ -51,7 +52,7 @@ public:
 
   WaitSet()
     : lock_(),
-      cond_(lock_)
+      cond_(lock_, OpenDDS::DCPS::ConditionAttributesMonotonic())
   {}
 
   virtual ~WaitSet() {}
@@ -81,6 +82,7 @@ private:
 
   ACE_Recursive_Thread_Mutex lock_;
   ACE_Condition_Recursive_Thread_Mutex cond_;
+  // Treat as a boolean value.
   ACE_Atomic_Op<ACE_Thread_Mutex, long> waiting_;
 
   ConditionSet attached_conditions_;

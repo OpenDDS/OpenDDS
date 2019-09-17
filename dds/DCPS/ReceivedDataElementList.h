@@ -51,10 +51,10 @@ public:
       ref_count_(1),
       mx_(mx)
   {
-    this->destination_timestamp_ = time_value_to_time(ACE_OS::gettimeofday());
+    destination_timestamp_ = SystemTimePoint::now().to_dds_time();
 
-    this->source_timestamp_.sec = header.source_timestamp_sec_;
-    this->source_timestamp_.nanosec = header.source_timestamp_nanosec_;
+    source_timestamp_.sec = header.source_timestamp_sec_;
+    source_timestamp_.nanosec = header.source_timestamp_nanosec_;
 
     /*
      * In some situations, we will not have data to give to the user and

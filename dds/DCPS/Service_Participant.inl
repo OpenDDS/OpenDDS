@@ -307,7 +307,7 @@ Service_Participant::scheduler() const
 }
 
 ACE_INLINE
-ACE_Time_Value
+TimeDuration
 Service_Participant::pending_timeout() const
 {
   return this->pending_timeout_;

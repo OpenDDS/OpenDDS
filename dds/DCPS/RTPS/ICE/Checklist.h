@@ -12,6 +12,8 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+#include "dds/DCPS/TimeTypes.h"
+
 #include "Task.h"
 #include "AgentImpl.h"
 
@@ -49,7 +51,7 @@ private:
 struct ConnectivityCheck {
   ConnectivityCheck(const CandidatePair& a_candidate_pair,
                     const AgentInfo& a_local_agent_info, const AgentInfo& a_remote_agent_info,
-                    ACE_UINT64 a_ice_tie_breaker, const ACE_Time_Value& a_expiration_date);
+                    ACE_UINT64 a_ice_tie_breaker, const DCPS::MonotonicTimePoint& a_expiration_date);
 
   const CandidatePair& candidate_pair() const
   {
@@ -67,7 +69,7 @@ struct ConnectivityCheck {
   {
     return cancelled_;
   }
-  ACE_Time_Value expiration_date() const
+  DCPS::MonotonicTimePoint expiration_date() const
   {
     return expiration_date_;
   }
@@ -79,7 +81,7 @@ private:
   CandidatePair candiate_pair_;
   STUN::Message request_;
   bool cancelled_;
-  ACE_Time_Value expiration_date_;
+  DCPS::MonotonicTimePoint expiration_date_;
 };
 
 inline bool operator==(const ConnectivityCheck& a_cc, const STUN::TransactionId& a_tid)
@@ -198,10 +200,10 @@ private:
   // These are iterators into valid_list_.
   CandidatePairsType::const_iterator nominating_;
   CandidatePairsType::const_iterator nominated_;
-  ACE_Time_Value nominated_is_live_;
-  ACE_Time_Value last_indication_;
-  ACE_Time_Value check_interval_;
-  ACE_Time_Value max_check_interval_;
+  bool nominated_is_live_;
+  DCPS::MonotonicTimePoint last_indication_;
+  DCPS::TimeDuration check_interval_;
+  DCPS::TimeDuration max_check_interval_;
   typedef std::list<ConnectivityCheck> ConnectivityChecksType;
   ConnectivityChecksType connectivity_checks_;
 
@@ -243,9 +245,9 @@ private:
     return frozen_.size() + waiting_.size() + in_progress_.size();
   }
 
-  void do_next_check(const ACE_Time_Value& a_now);
+  void do_next_check(const DCPS::MonotonicTimePoint& a_now);
 
-  void execute(const ACE_Time_Value& a_now);
+  void execute(const DCPS::MonotonicTimePoint& a_now);
 };
 
 } // namespace ICE

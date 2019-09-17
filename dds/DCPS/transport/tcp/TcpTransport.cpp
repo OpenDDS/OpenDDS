@@ -528,14 +528,14 @@ TcpTransport::release_datalink(DataLink* link)
 
   if (this->links_.unbind(key, released_link) != 0) {
     //No op
-  } else if (link->datalink_release_delay() > ACE_Time_Value::zero) {
+  } else if (link->datalink_release_delay() > TimeDuration::zero_value) {
     link->set_scheduling_release(true);
 
     VDBG_LVL((LM_DEBUG,
               "(%P|%t) TcpTransport::release_datalink datalink_release_delay "
               "is %: sec %d usec\n",
-              link->datalink_release_delay().sec(),
-              link->datalink_release_delay().usec()), 4);
+              link->datalink_release_delay().value().sec(),
+              link->datalink_release_delay().value().usec()), 4);
 
     // Atomic value update, safe to perform here.
     released_link->set_release_pending(true);
@@ -570,14 +570,12 @@ TcpTransport::release_datalink(DataLink* link)
   }
 
   // Actions are executed outside of the lock scope.
-  ACE_Time_Value cancel_now = ACE_OS::gettimeofday();
   switch (linkAction) {
   case StopLink:
-    link->schedule_stop(cancel_now);
+    link->schedule_stop(MonotonicTimePoint::now());
     break;
 
   case ScheduleLinkRelease:
-
     link->schedule_delayed_release();
     break;
 
@@ -769,8 +767,7 @@ TcpTransport::unbind_link(DataLink* link)
 
   GuardType guard(this->links_lock_);
 
-  if (this->pending_release_links_.unbind(key) != 0 &&
-      link->datalink_release_delay() > ACE_Time_Value::zero) {
+  if (pending_release_links_.unbind(key) && !link->datalink_release_delay().is_zero()) {
     ACE_ERROR((LM_ERROR,
                "(%P|%t) TcpTransport::unbind_link INTERNAL ERROR - "
                "Failed to find link %@ tcp_link %@ PriorityKey "

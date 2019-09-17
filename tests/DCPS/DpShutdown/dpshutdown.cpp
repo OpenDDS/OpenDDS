@@ -22,6 +22,9 @@
 
 #ifdef ACE_AS_STATIC_LIBS
 #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#include <dds/DCPS/transport/shmem/Shmem.h>
+#include <dds/DCPS/transport/udp/Udp.h>
+#include <dds/DCPS/transport/multicast/Multicast.h>
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #endif
 
@@ -124,7 +127,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
 
       // The recommended value for the resend period is 2 seconds for
       // the current implementation of OpenDDS.
-      disc->resend_period(ACE_Time_Value(2));
+      disc->resend_period(OpenDDS::DCPS::TimeDuration(2));
 
       TheServiceParticipant->add_discovery(disc);
       TheServiceParticipant->set_repo_domain(11, disc->key());
