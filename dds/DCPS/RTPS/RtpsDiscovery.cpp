@@ -53,6 +53,7 @@ RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
   , ttl_(1)
   , sedp_multicast_(true)
   , default_multicast_group_("239.255.0.1") /*RTPS v2.1 9.6.1.4.1*/
+  , rtps_relay_only_(false)
   , use_ice_(false)
   , max_spdp_timer_period_(0, 10000)
   , max_auth_time_(300, 0)
@@ -236,6 +237,17 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           discovery->spdp_rtps_relay_address(ACE_INET_Addr(it->second.c_str()));
         } else if (name == "SedpRtpsRelayAddress") {
           discovery->sedp_rtps_relay_address(ACE_INET_Addr(it->second.c_str()));
+        } else if (name == "RtpsRelayOnly") {
+          const OPENDDS_STRING& value = it->second;
+          int smInt;
+          if (!DCPS::convertToInteger(value, smInt)) {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config ")
+                              ACE_TEXT("Invalid entry (%C) for RtpsRelayOnly in ")
+                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+                              value.c_str(), rtps_name.c_str()), -1);
+          }
+          discovery->rtps_relay_only(bool(smInt));
 #ifdef OPENDDS_SECURITY
         } else if (name == "SedpStunServerAddress") {
           discovery->sedp_stun_server_address(ACE_INET_Addr(it->second.c_str()));

@@ -42,6 +42,7 @@ RtpsUdpInst::RtpsUdpInst(const OPENDDS_STRING& name)
   , handshake_timeout_(30) // default syn_timeout in OpenDDS_Multicast
   , durable_data_timeout_(60)
   , opendds_discovery_guid_(GUID_UNKNOWN)
+  , rtps_relay_only_(false)
   , use_ice_(false)
 {
 }
@@ -108,6 +109,8 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
     ACE_INET_Addr addr(rtps_relay_address_s.c_str());
     rtps_relay_address(addr);
   }
+
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("RtpsRelayOnly"), rtps_relay_only_, bool);
 
   ACE_TString stun_server_address_s;
   GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("DataStunServerAddress"),

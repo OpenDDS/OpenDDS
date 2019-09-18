@@ -239,9 +239,9 @@ RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
     std::memcpy(iter, iov[i].iov_base, iov[i].iov_len);
     iter += iov[i].iov_len;
   }
-  const ssize_t result = link_->unicast_socket().send(buffer, iter - buffer, addr);
+  const ssize_t result = link_->unicast_socket().send(buffer, iter - buffer, link_->config().rtps_relay_only() ? link_->config().rtps_relay_address() : addr);
 #else
-  const ssize_t result = link_->unicast_socket().send(iov, n, addr);
+  const ssize_t result = link_->unicast_socket().send(iov, n, link_->config().rtps_relay_only() ? link_->config().rtps_relay_address() : addr);
 #endif
   if (result < 0) {
     ACE_TCHAR addr_buff[256] = {};

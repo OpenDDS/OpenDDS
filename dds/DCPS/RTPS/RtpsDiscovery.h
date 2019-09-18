@@ -151,6 +151,9 @@ public:
     sedp_rtps_relay_address_ = address;
   }
 
+  bool rtps_relay_only() const { return rtps_relay_only_; }
+  void rtps_relay_only(bool f) { rtps_relay_only_ = f; }
+
   const ACE_INET_Addr& sedp_stun_server_address() const { return sedp_stun_server_address_; }
   void sedp_stun_server_address(const ACE_INET_Addr& address) {
     sedp_stun_server_address_ = address;
@@ -181,6 +184,7 @@ private:
   AddrVec spdp_send_addrs_;
   ACE_INET_Addr spdp_rtps_relay_address_;
   ACE_INET_Addr sedp_rtps_relay_address_;
+  bool rtps_relay_only_;
   ACE_INET_Addr sedp_stun_server_address_;
   bool use_ice_;
   DCPS::TimeDuration max_spdp_timer_period_;

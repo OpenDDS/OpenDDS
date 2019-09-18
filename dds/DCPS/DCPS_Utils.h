@@ -55,6 +55,11 @@ compatibleQOS(const DDS::PublisherQos * pubQos,
               OpenDDS::DCPS::IncompatibleQosStatus* writerStatus,
               OpenDDS::DCPS::IncompatibleQosStatus* readerStatus);
 
+OpenDDS_Dcps_Export
+bool
+matching_partitions(const DDS::PartitionQosPolicy& pub,
+                    const DDS::PartitionQosPolicy& sub);
+
 // Should check the association of the entity QoS ?
 // The changeable QoS that is supported currently and affect the association
 // establishment is deadline QoS and partition QoS.
