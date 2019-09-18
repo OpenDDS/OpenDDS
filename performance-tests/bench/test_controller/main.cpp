@@ -11,6 +11,8 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/WaitSet.h>
 
+#include <util.h>
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 #include "BenchTypeSupportImpl.h"
@@ -21,6 +23,9 @@
 #pragma GCC diagnostic pop
 
 using namespace Bench::NodeController;
+using Bench::get_option_argument_int;
+using Bench::get_option_argument_uint;
+using Bench::join_path;
 
 struct Node {
   NodeId node_id;
@@ -65,6 +70,85 @@ bool json_2_report(std::istream& is, Bench::WorkerReport& report)
 
   return true;
 }
+
+class Scenario {
+public:
+  class NodeConfig {
+  public:
+    void add_worker_config(const std::string& config_contents, size_t count = 1) {
+      if (config_contents.empty() || count == 0) {
+        throw std::runtime_error("Invalid arguments to add_worker_config.");
+      }
+      WorkerConfig worker;
+      worker.worker_id = worker_count_ + 1;
+      worker.config = config_contents.c_str();
+      worker.count = count;
+      worker_configs_.push_back(worker);
+      worker_count_ += count;
+    };
+
+    unsigned copy_to(Config& config) {
+      config.workers.length(worker_configs_.size());
+      unsigned i = 0;
+      for (auto& worker : worker_configs_) {
+        config.workers[i++] = worker;
+      }
+      return worker_count_;
+    }
+
+  private:
+    std::vector<WorkerConfig> worker_configs_;
+    unsigned worker_count_ = 0;
+  };
+
+  void add_node_config(NodeConfig& config) {
+    node_configs_.push_back(config);
+  }
+
+  void add_any_node_config(NodeConfig& config) {
+    if (got_any_) {
+      throw std::runtime_error("Already defined a \"Any Node\" config for the scenario!");
+    }
+    got_any_ = true;
+    any_node_config_ = config;
+  }
+
+  size_t distribute(ConfigDataWriter_var config_writer, Nodes& available_nodes) {
+    const size_t minimum_nodes = node_configs_.size() + got_any_ ? 1 : 0;
+    if (available_nodes.size() < minimum_nodes) {
+      std::stringstream ss;
+      ss << "At least " << minimum_nodes << " available nodes are required for this scenario";
+      throw std::runtime_error(ss.str());
+    }
+
+    size_t expected_reports = 0;
+    Nodes::iterator ni = available_nodes.begin();
+    Config config;
+    for (auto& node_config : node_configs_) {
+      config.node_id = ni->first;
+      expected_reports += node_config.copy_to(config);
+      if (config_writer->write(config, DDS::HANDLE_NIL)) {
+        throw std::runtime_error("Config write failed!");
+      }
+      ++ni;
+    }
+    if (got_any_) {
+      for (; ni != available_nodes.end(); ++ni) {
+        config.node_id = ni->first;
+        expected_reports += any_node_config_.copy_to(config);
+        if (config_writer->write(config, DDS::HANDLE_NIL)) {
+          throw std::runtime_error("Config write failed!");
+        }
+      }
+    }
+    return expected_reports;
+  }
+
+private:
+  std::vector<NodeConfig> node_configs_;
+  NodeConfig any_node_config_;
+  bool got_any_ = false;
+};
 
 class StatusListener : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> {
 public:
@@ -177,40 +261,6 @@ private:
 
 void handle_reports(std::vector<Bench::WorkerReport> parsed_reports);
 
-inline std::string get_option_argument(int& i, int argc, ACE_TCHAR* argv[])
-{
-  if (i == argc - 1) {
-    std::cerr << "Option " << ACE_TEXT_ALWAYS_CHAR(argv[i]) << " requires an argument" << std::endl;
-    throw int{1};
-  }
-  return ACE_TEXT_ALWAYS_CHAR(argv[++i]);
-}
-
-inline int get_option_argument_int(int& i, int argc, ACE_TCHAR* argv[])
-{
-  int value;
-  try {
-    value = std::stoll(get_option_argument(i, argc, argv));
-  } catch (const std::exception&) {
-    std::cerr << "Option " << ACE_TEXT_ALWAYS_CHAR(argv[i]) << " requires an argument that's a valid number" << std::endl;
-    throw 1;
-  }
-  return value;
-}
-
-inline unsigned get_option_argument_uint(int& i, int argc, ACE_TCHAR* argv[])
-{
-  unsigned value;
-  try {
-    value = std::stoull(get_option_argument(i, argc, argv));
-  } catch (const std::exception&) {
-    std::cerr << "Option " << ACE_TEXT_ALWAYS_CHAR(argv[i]) << " requires an argument that's a valid positive number"
-      << std::endl;
-    throw 1;
-  }
-  return value;
-}
-
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   const char* cstr = ACE_OS::getenv("BENCH_ROOT");
@@ -222,11 +272,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       std::cerr << "ERROR: BENCH_ROOT or DDS_ROOT must be defined" << std::endl;
       return 1;
     }
-    bench_root = dds_root + "/performance-tests/bench";
+    bench_root = join_path(dds_root, "performance-tests", "bench");
   }
 
   TheServiceParticipant->default_configuration_file(
-    ACE_TEXT_CHAR_TO_TCHAR((bench_root + "/control_opendds_config.ini").c_str()));
+    ACE_TEXT_CHAR_TO_TCHAR(join_path(bench_root, "control_opendds_config.ini").c_str()));
 
   // Parse Arguments
   DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
@@ -257,7 +307,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   // Create Participant
   DDS::DomainParticipant_var participant = dpf->create_participant(
-    domain, PARTICIPANT_QOS_DEFAULT, 0,
+    domain, PARTICIPANT_QOS_DEFAULT, nullptr,
     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!participant) {
     std::cerr << "create_participant failed" << std::endl;
@@ -271,7 +321,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
   DDS::Topic_var status_topic = participant->create_topic(
-    status_topic_name, status_ts->get_type_name(), TOPIC_QOS_DEFAULT, 0,
+    status_topic_name, status_ts->get_type_name(), TOPIC_QOS_DEFAULT, nullptr,
     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!status_topic) {
     std::cerr << "create_topic status failed" << std::endl;
@@ -283,7 +333,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
   DDS::Topic_var config_topic = participant->create_topic(
-    config_topic_name, config_ts->get_type_name(), TOPIC_QOS_DEFAULT, 0,
+    config_topic_name, config_ts->get_type_name(), TOPIC_QOS_DEFAULT, nullptr,
     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!config_topic) {
     std::cerr << "create_topic config failed" << std::endl;
@@ -295,7 +345,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
   DDS::Topic_var report_topic = participant->create_topic(
-    report_topic_name, report_ts->get_type_name(), TOPIC_QOS_DEFAULT, 0,
+    report_topic_name, report_ts->get_type_name(), TOPIC_QOS_DEFAULT, nullptr,
     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!report_topic) {
     std::cerr << "create_topic report failed" << std::endl;
@@ -304,7 +354,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   // Create DataWriters
   DDS::Publisher_var publisher = participant->create_publisher(
-    PUBLISHER_QOS_DEFAULT, 0, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    PUBLISHER_QOS_DEFAULT, nullptr, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!publisher) {
     std::cerr << "create_publisher failed" << std::endl;
     return 1;
@@ -314,7 +364,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   dw_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
   dw_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
   DDS::DataWriter_var config_writer = publisher->create_datawriter(
-    config_topic, dw_qos, 0,
+    config_topic, dw_qos, nullptr,
     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!config_writer) {
     std::cerr << "create_datawriter config failed" << std::endl;
@@ -328,7 +378,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   // Create DataReaders
   DDS::Subscriber_var subscriber = participant->create_subscriber(
-    SUBSCRIBER_QOS_DEFAULT, 0, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    SUBSCRIBER_QOS_DEFAULT, nullptr, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!subscriber) {
     std::cerr << "create_subscriber failed" << std::endl;
     return 1;
@@ -351,7 +401,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
   DDS::DataReader_var report_reader = subscriber->create_datareader(
-    report_topic, dr_qos, 0,
+    report_topic, dr_qos, nullptr,
     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!report_reader) {
     std::cerr << "create_datareader report failed" << std::endl;
@@ -373,57 +423,32 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
   std::cout << "Discovered " << available_nodes.size() << " nodes, continuing with scenario..." << std::endl;
 
-  size_t expected_reports = 0;
+  // Distrubute Configs
+  Scenario scenario;
+  size_t expected_reports;
 
-  // Begin Hardcoded Scenario
-  if (available_nodes.size() < 2) {
-    std::cerr << "Error: Expecting at least 2 Nodes" << std::endl;
+  try {
+    // Begin Hardcoded Scenario
+    const std::string configs = join_path(bench_root, "worker", "configs");
+
+    Scenario::NodeConfig master_node;
+    master_node.add_worker_config(read_file(join_path(configs, "jfti_sim_master_config.json")));
+    scenario.add_node_config(master_node);
+
+    Scenario::NodeConfig site_node;
+    site_node.add_worker_config(read_file(join_path(configs, "jfti_sim_daemon_config.json")));
+    site_node.add_worker_config(read_file(join_path(configs, "jfti_sim_worker_config.json")));
+    scenario.add_any_node_config(site_node);
+    // End Hardcoded Scenario
+
+    expected_reports = scenario.distribute(config_writer_impl, available_nodes);
+  } catch (const std::runtime_error& r) {
+    std::cerr << "Error Compiling and Distributing Scenario: " << r.what() << std::endl;
     return 1;
   }
-
-  WorkerConfig worker;
-  Config config;
-  const std::string configs = bench_root + "/worker/configs/";
-
-  Nodes::iterator ni = available_nodes.begin();
-  config.node_id = ni->first;
-  config.workers.length(1);
-  worker.worker_id = 1;
-  std::string master_config = read_file(configs + "jfti_sim_master_config.json");
-  worker.config = master_config.c_str();
-  config.workers[0] = worker;
-
-  if (config_writer_impl->write(config, DDS::HANDLE_NIL)) {
-    std::cerr << "Config write failed" << std::endl;
-    return 1;
-  }
-  ++ni;
-  expected_reports += 1;
-
-  config.workers.length(2);
-
-  worker.worker_id = 1;
-  const std::string daemon_config = read_file(configs + "jfti_sim_daemon_config.json");
-  worker.config = daemon_config.c_str();
-  config.workers[0] = worker;
-
-  worker.worker_id = 2;
-  const std::string worker_config = read_file(configs + "jfti_sim_worker_config.json");
-  worker.config = worker_config.c_str();
-  config.workers[1] = worker;
-
-  for (; ni != available_nodes.end(); ++ni) {
-    config.node_id = ni->first;
-    if (config_writer_impl->write(config, DDS::HANDLE_NIL)) {
-      std::cerr << "Config write failed" << std::endl;
-      return 1;
-    }
-    expected_reports += 2;
-  }
-  // End Hardcoded Scenario
 
   // Wait for reports
-  std::cout << "Distributed node configs, waiting for reports..." << std::endl;
+  std::cout << "Distributed node configs, waiting for " << expected_reports << " reports..." << std::endl;
 
   std::vector<Bench::WorkerReport> parsed_reports;
   while (parsed_reports.size() < expected_reports) {
@@ -473,7 +498,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
             return 1;
           }
         }
-        std::cout << "Got " << parsed_reports.size() << " out of " << expected_reports << " expected reports" << std::endl;
+        std::cout << "Got " << parsed_reports.size() << " out of "
+          << expected_reports << " expected reports" << std::endl;
       }
     }
   }

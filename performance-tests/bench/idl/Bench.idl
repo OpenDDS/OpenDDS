@@ -146,13 +146,18 @@ module Bench {
     struct Status {
       NodeId node_id;
       StateEnum state;
+      // Optional Human Friendly Name
       string name;
     };
     const string status_topic_name = "Node_Controller_Status";
 
     struct WorkerConfig {
-      WorkerId worker_id;
+      // JSON Serialized Bench::WorkerConfig
       string config;
+      // Number of workers to spawn using this config (Must be >=1)
+      unsigned long count;
+      // If count > 1, then this is were the range of worker ids start
+      WorkerId worker_id;
     };
     typedef sequence<WorkerConfig> WorkerConfigs;
 
@@ -168,6 +173,7 @@ module Bench {
       NodeId node_id;
       WorkerId worker_id;
       boolean failed;
+      // JSON Serialized Bench::WorkerReport
       string details;
     };
     const string report_topic_name = "Node_Controller_Report";

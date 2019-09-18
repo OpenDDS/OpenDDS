@@ -1,4 +1,9 @@
-#include <vector>
+/*
+ * TODO:
+ * - Use Reactor with Process Manager for handling worker finishing
+ * - Handle errors and interrupts more gracefully
+ */
+#include <map>
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -16,24 +21,25 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/WaitSet.h>
 
+#include <util.h>
+
 #include "BenchTypeSupportImpl.h"
 
 using namespace Bench::NodeController;
+using Bench::get_option_argument_int;
+using Bench::get_option_argument;
+using Bench::join_path;
+using Bench::create_temp_dir;
 
 ACE_Process_Manager* process_manager = ACE_Process_Manager::instance();
 std::string bench_root;
+std::string temp_dir;
+std::string output_dir;
 ReportDataWriter_var report_writer_impl;
 
-ACE_TCHAR tempdir_template[] = "/tmp/nc_XXXXXX";
-ACE_TCHAR* tempdir = ACE_OS::mktemp(tempdir_template);
-int tempdir_mkdir_result = ACE_OS::mkdir(tempdir, S_IRWXU);
-
-std::string
-create_config(const std::string& file_base_name, const char* contents)
+std::string create_config(const std::string& file_base_name, const char* contents)
 {
-  ACE_TCHAR suffix_template[] = "_XXXXXX";
-  ACE_TCHAR* suffix = ACE_OS::mktemp(suffix_template);
-  const std::string filename = std::string(tempdir_mkdir_result ? "." : tempdir) + "/" + file_base_name + suffix + "_config.json";
+  const std::string filename = join_path(output_dir, file_base_name + "_config.json");
   std::ofstream file(filename);
   if (file.is_open()) {
     file << contents << std::flush;
@@ -43,14 +49,11 @@ create_config(const std::string& file_base_name, const char* contents)
   return filename;
 }
 
-/**
- * Manager for Worker
- */
 class Worker {
 private:
   NodeId node_id_;
   WorkerId worker_id_;
-  pid_t pid_;
+  pid_t pid_ = ACE_INVALID_PID;
   std::string file_base_name_;
   std::string config_filename_;
   std::string report_filename_;
@@ -60,14 +63,13 @@ public:
   Worker(NodeId node_id, const WorkerConfig& config)
   : node_id_(node_id)
   , worker_id_(config.worker_id)
-  , pid_(ACE_INVALID_PID)
   {
     std::stringstream ss;
     ss << 'n' << node_id_ << 'w' << worker_id_;
     file_base_name_ = ss.str();
     config_filename_ = create_config(file_base_name_, config.config.in());
-    report_filename_ = config_filename_.substr(0, config_filename_.size() - 12) + "_report.json";
-    log_filename_ = config_filename_.substr(0, config_filename_.size() - 12) + "_log.txt";
+    report_filename_ = join_path(output_dir, file_base_name_ + "_report.json");
+    log_filename_ = join_path(output_dir, file_base_name_ + "_log.txt");
   }
 
   ~Worker()
@@ -106,16 +108,16 @@ public:
   void run()
   {
     ACE_Process_Options proc_opts;
-    std::stringstream ss, ess;
-    ss << bench_root << "/worker/worker " << config_filename_
+    std::stringstream ss;
+    ss << join_path(bench_root, "worker", "worker")
+      << " " << config_filename_
       << " --report " << report_filename_
       << " --log " << log_filename_ << std::flush;
-    ess << ss.str() << std::endl;
-    std::cerr << ess.str() << std::flush;
-    proc_opts.command_line(ss.str().c_str());
+    std::string command = ss.str();
+    std::cerr << command << std::endl << std::flush;
+    proc_opts.command_line(command.c_str());
     pid_ = process_manager->spawn(proc_opts);
-    bool failed = pid_ == ACE_INVALID_PID;
-    if (failed) {
+    if (pid_ == ACE_INVALID_PID) {
       std::cerr << "Failed to run worker " << id() << std::endl;
       write_report(true);
     }
@@ -135,27 +137,6 @@ public:
   }
 };
 
-inline std::string get_option_argument(int& i, int argc, ACE_TCHAR* argv[])
-{
-  if (i == argc - 1) {
-    std::cerr << "Option " << ACE_TEXT_ALWAYS_CHAR(argv[i]) << " requires an argument" << std::endl;
-    throw int{1};
-  }
-  return ACE_TEXT_ALWAYS_CHAR(argv[++i]);
-}
-
-inline int get_option_argument_int(int& i, int argc, ACE_TCHAR* argv[])
-{
-  int value;
-  try {
-    value = std::stoll(get_option_argument(i, argc, argv));
-  } catch (const std::exception&) {
-    std::cerr << "Option " << ACE_TEXT_ALWAYS_CHAR(argv[i]) << " requires an argument that's a valid number" << std::endl;
-    throw 1;
-  }
-  return value;
-}
-
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   const char* cstr = ACE_OS::getenv("BENCH_ROOT");
@@ -167,14 +148,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       std::cerr << "ERROR: BENCH_ROOT or DDS_ROOT must be defined" << std::endl;
       return 1;
     }
-    bench_root = dds_root + "/performance-tests/bench";
+    bench_root = join_path(dds_root, "performance-tests", "bench");
   }
 
-  std::vector<std::shared_ptr<Worker>> workers;
+  std::map<WorkerId, std::shared_ptr<Worker>> workers;
   NodeId this_node_id;
 
   TheServiceParticipant->default_configuration_file(
-    ACE_TEXT_CHAR_TO_TCHAR((bench_root + "/control_opendds_config.ini").c_str()));
+    ACE_TEXT_CHAR_TO_TCHAR(join_path(bench_root, "control_opendds_config.ini").c_str()));
 
   // Parse Arguments
   DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
@@ -184,13 +165,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   try {
     for (int i = 1; i < argc; i++) {
-      const char* argument = ACE_TEXT_ALWAYS_CHAR(argv[i]);
-      if (!ACE_OS::strcmp(argument, "--domain")) {
+      if (!ACE_OS::strcmp(argv[i], ACE_TEXT("--domain"))) {
         domain = get_option_argument_int(i, argc, argv);
-      } else if (!ACE_OS::strcmp(argument, "--name")) {
+      } else if (!ACE_OS::strcmp(argv[i], ACE_TEXT("--name"))) {
         name = get_option_argument(i, argc, argv);
       } else {
-        std::cerr << "Invalid Option: " << argument << std::endl;
+        std::cerr << "Invalid Option: " << ACE_TEXT_ALWAYS_CHAR(argv[i]) << std::endl;
         return 1;
       }
     }
@@ -198,9 +178,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return value;
   }
 
+  // Try to get a temp_dir
+  temp_dir = create_temp_dir("opendds_bench_nc");
+  output_dir = temp_dir.empty() ? "." : temp_dir;
+
   // Create Participant
   DDS::DomainParticipant_var participant = dpf->create_participant(
-    domain, PARTICIPANT_QOS_DEFAULT, 0,
+    domain, PARTICIPANT_QOS_DEFAULT, nullptr,
     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!participant) {
     std::cerr << "create_participant failed" << std::endl;
@@ -215,7 +199,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
   DDS::Topic_var status_topic = participant->create_topic(
-    status_topic_name, status_ts->get_type_name(), TOPIC_QOS_DEFAULT, 0,
+    status_topic_name, status_ts->get_type_name(), TOPIC_QOS_DEFAULT, nullptr,
     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!status_topic) {
     std::cerr << "create_topic status failed" << std::endl;
@@ -227,7 +211,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
   DDS::Topic_var config_topic = participant->create_topic(
-    config_topic_name, config_ts->get_type_name(), TOPIC_QOS_DEFAULT, 0,
+    config_topic_name, config_ts->get_type_name(), TOPIC_QOS_DEFAULT, nullptr,
     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!config_topic) {
     std::cerr << "create_topic config failed" << std::endl;
@@ -239,7 +223,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
   DDS::Topic_var report_topic = participant->create_topic(
-    report_topic_name, report_ts->get_type_name(), TOPIC_QOS_DEFAULT, 0,
+    report_topic_name, report_ts->get_type_name(), TOPIC_QOS_DEFAULT, nullptr,
     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!report_topic) {
     std::cerr << "create_topic report failed" << std::endl;
@@ -248,7 +232,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   // Create DataReaders
   DDS::Subscriber_var subscriber = participant->create_subscriber(
-    SUBSCRIBER_QOS_DEFAULT, 0, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    SUBSCRIBER_QOS_DEFAULT, nullptr, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!subscriber) {
     std::cerr << "create_subscriber failed" << std::endl;
     return 1;
@@ -258,7 +242,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   dr_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
   dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
   DDS::DataReader_var config_reader = subscriber->create_datareader(
-    config_topic, dr_qos, 0,
+    config_topic, dr_qos, nullptr,
     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!config_reader) {
     std::cerr << "create_datareader config failed" << std::endl;
@@ -272,7 +256,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   // Create DataWriters
   DDS::Publisher_var publisher = participant->create_publisher(
-    PUBLISHER_QOS_DEFAULT, 0, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    PUBLISHER_QOS_DEFAULT, nullptr, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!publisher) {
     std::cerr << "create_publisher failed" << std::endl;
     return 1;
@@ -282,7 +266,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   dw_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
   dw_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
   DDS::DataWriter_var status_writer = publisher->create_datawriter(
-    status_topic, dw_qos, 0, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    status_topic, dw_qos, nullptr, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!status_writer) {
     std::cerr << "create_datawriter status failed" << std::endl;
     return 1;
@@ -293,7 +277,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
   DDS::DataWriter_var report_writer = publisher->create_datawriter(
-    report_topic, dw_qos, 0, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    report_topic, dw_qos, nullptr, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!report_writer) {
     std::cerr << "create_datawriter report failed" << std::endl;
     return 1;
@@ -370,8 +354,18 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
     for (size_t node = 0; node < configs.length(); node++) {
       if (configs[node].node_id == this_node_id) {
-        for (size_t worker = 0; worker < configs[node].workers.length(); worker++) {
-          workers.push_back(std::make_shared<Worker>(this_node_id, configs[node].workers[worker]));
+        size_t config_count = configs[node].workers.length();
+        for (size_t config = 0; config < config_count; config++) {
+          WorkerId& id = configs[node].workers[config].worker_id;
+          const WorkerId end = id + configs[node].workers[config].count;
+          for (; id < end; id++) {
+            if (workers.count(id)) {
+              std::cerr << "Received the same worker id twice: " << id << std::endl;
+              return 1;
+            } else {
+              workers[id] = std::make_shared<Worker>(this_node_id, configs[node].workers[config]);
+            }
+          }
         }
         waiting = false;
         break;
@@ -384,6 +378,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     Status status;
     status.node_id = this_node_id;
     status.state = BUSY;
+    status.name = name.c_str();
     if (status_writer_impl->write(status, DDS::HANDLE_NIL)) {
       std::cerr << "Write status failed" << std::endl;
       return 1;
@@ -391,12 +386,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   // Run The Workers
-  for (std::shared_ptr<Worker>& worker : workers) {
-    worker->run();
+  for (auto& worker : workers) {
+    worker.second->run();
   }
 
-  for (std::shared_ptr<Worker>& worker : workers) {
-    worker->check();
+  for (auto& worker : workers) {
+    worker.second->check();
   }
 
   workers.clear();
@@ -406,8 +401,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   dpf->delete_participant(participant);
   TheServiceParticipant->shutdown();
 
-  if (tempdir_mkdir_result == 0) {
-    ACE_OS::rmdir(tempdir);
+  if (temp_dir.size()) {
+    ACE_OS::rmdir(temp_dir.c_str());
   }
 
   return 0;

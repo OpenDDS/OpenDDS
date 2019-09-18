@@ -39,7 +39,10 @@
 #include <iomanip>
 #include <condition_variable>
 
+#include <util.h>
+
 using Builder::Log;
+using Bench::get_option_argument;
 
 double weighted_median(std::vector<double> medians, std::vector<size_t> weights, double default_value) {
   typedef std::multiset<std::pair<double, size_t> > WMMS;
@@ -61,16 +64,6 @@ double weighted_median(std::vector<double> medians, std::vector<size_t> weights,
   return default_value;
 }
 
-inline std::string
-get_option_argument(int& i, int argc, ACE_TCHAR* argv[])
-{
-  if (i == argc - 1) {
-    std::cerr << "Option " << ACE_TEXT_ALWAYS_CHAR(argv[i]) << " requires an argument" << std::endl;
-    throw int{1};
-  }
-  return ACE_TEXT_ALWAYS_CHAR(argv[++i]);
-}
-
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   Builder::NullStream null_stream_i;
   std::ostream null_stream(&null_stream_i);
@@ -82,14 +75,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   try {
     for (int i = 1; i < argc; i++) {
       const char* argument = ACE_TEXT_ALWAYS_CHAR(argv[i]);
-      if (!ACE_OS::strcmp(argument, "--log")) {
+      if (!ACE_OS::strcmp(argv[i], ACE_TEXT("--log"))) {
         log_file_path = get_option_argument(i, argc, argv);
-      } else if (!ACE_OS::strcmp(argument, "--report")) {
+      } else if (!ACE_OS::strcmp(argv[i], ACE_TEXT("--report"))) {
         report_file_path = get_option_argument(i, argc, argv);
       } else if (config_file_path.empty()) {
         config_file_path = argument;
       } else {
-        std::cerr << "Invalid Argument: " << argument << std::endl;
+        std::cerr << "Invalid Option: " << argument << std::endl;
         return 1;
       }
     }
