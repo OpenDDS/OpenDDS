@@ -23,6 +23,7 @@
 
 #ifdef OPENDDS_SECURITY
 #include "dds/DCPS/RTPS/SecurityHelpers.h"
+#include <vector>
 #endif
 
 #include <cstring>
@@ -390,22 +391,22 @@ RtpsUdpSendStrategy::encode_rtps_message(const ACE_Message_Block* plain, DDS::Se
 }
 
 namespace {
-  DDS::OctetSeq toSeq(Serializer& ser1, CORBA::Octet msgId, CORBA::Octet flags,
-                      CORBA::UShort octetsToNextHeader, CORBA::ULong dataWord2,
-                      EntityId_t readerId, EntityId_t writerId, size_t remain)
+  DDS::OctetSeq toSeq(Serializer& ser1, RTPS::SubmessageHeader smHdr, CORBA::ULong dataExtra,
+                      EntityId_t readerId, EntityId_t writerId, unsigned int remain)
   {
+    const int msgId = smHdr.submessageId;
+    const unsigned int octetsToNextHeader = smHdr.submessageLength;
     const bool shortMsg = (msgId == RTPS::PAD || msgId == RTPS::INFO_TS);
-    CORBA::ULong size = RTPS::SMHDR_SZ +
-      ((octetsToNextHeader == 0 && !shortMsg) ? static_cast<unsigned int>(remain) : octetsToNextHeader);
+    const CORBA::ULong size = RTPS::SMHDR_SZ + ((octetsToNextHeader == 0 && !shortMsg) ? remain : octetsToNextHeader);
     DDS::OctetSeq out(size);
     out.length(size);
     ACE_Message_Block mb(reinterpret_cast<const char*>(out.get_buffer()), size);
     Serializer ser2(&mb, ser1.swap_bytes(), Serializer::ALIGN_CDR);
-    ser2 << ACE_OutputCDR::from_octet(msgId);
-    ser2 << ACE_OutputCDR::from_octet(flags);
-    ser2 << octetsToNextHeader;
+    ser2 << ACE_OutputCDR::from_octet(smHdr.submessageId);
+    ser2 << ACE_OutputCDR::from_octet(smHdr.flags);
+    ser2 << smHdr.submessageLength;
     if (msgId == RTPS::DATA || msgId == RTPS::DATA_FRAG) {
-      ser2 << dataWord2;
+      ser2 << dataExtra;
     }
     ser2 << readerId;
     ser2 << writerId;
@@ -440,7 +441,7 @@ RtpsUdpSendStrategy::encode_writer_submessage(const RepoId& receiver,
                                               DDS::Security::CryptoTransform* crypto,
                                               const DDS::OctetSeq& plain,
                                               DDS::Security::DatawriterCryptoHandle sender_dwch,
-                                              char* submessage_start,
+                                              const char* submessage_start,
                                               CORBA::Octet msgId)
 {
   using namespace DDS::Security;
@@ -483,7 +484,7 @@ RtpsUdpSendStrategy::encode_reader_submessage(const RepoId& receiver,
                                               DDS::Security::CryptoTransform* crypto,
                                               const DDS::OctetSeq& plain,
                                               DDS::Security::DatareaderCryptoHandle sender_drch,
-                                              char* submessage_start,
+                                              const char* submessage_start,
                                               CORBA::Octet msgId)
 {
   using namespace DDS::Security;
@@ -526,16 +527,13 @@ RtpsUdpSendStrategy::encode_submessages(const ACE_Message_Block* plain,
 {
   // 'plain' contains a full RTPS Message on its way to the socket(s).
   // Let the crypto plugin examine each submessage and replace it with an
-  // encoded version.  First, parse through the message using the 'in'
+  // encoded version.  First, parse through the message using the 'plain'
   // message block chain.  Instead of changing the messsage in place,
   // modifications are stored in the 'replacements' which will end up
   // changing the message when the 'out' message block is created in the
   // helper method replace_chunks().
-  Message_Block_Ptr in(plain->duplicate());
-  ACE_Message_Block* current = in.get();
-  Serializer ser(current);
-  RTPS::Header header;
-  bool ok = ser >> header;
+  RTPS::MessageParser parser(*plain);
+  bool ok = parser.parseHeader();
 
   RepoId sender = GUID_UNKNOWN;
   RTPS::assign(sender.guidPrefix, link_->local_prefix());
@@ -544,49 +542,32 @@ RtpsUdpSendStrategy::encode_submessages(const ACE_Message_Block* plain,
 
   OPENDDS_VECTOR(Chunk) replacements;
 
-  while (ok && in->total_length()) {
-    while (current && !current->length()) {
-      current = current->cont();
-    }
+  while (ok && parser.remaining()) {
 
-    if (!current) {
+    const char* const submessage_start = parser.current();
+
+    if (!parser.parseSubmessageHeader()) {
       ok = false;
       break;
     }
 
-    char* submessage_start = current->rd_ptr();
+    const unsigned int remaining = static_cast<unsigned int>(parser.remaining());
+    const RTPS::SubmessageHeader smhdr = parser.submessageHeader();
 
-    CORBA::Octet msgId, flags;
-    if (!(ser >> ACE_InputCDR::to_octet(msgId)) ||
-        !(ser >> ACE_InputCDR::to_octet(flags))) {
-      ok = false;
-      break;
-    }
+    CORBA::ULong dataExtra = 0;
 
-    ser.swap_bytes(ACE_CDR_BYTE_ORDER != (flags & RTPS::FLAG_E));
-    CORBA::UShort octetsToNextHeader;
-    if (!(ser >> octetsToNextHeader)) {
-      ok = false;
-      break;
-    }
-
-    const size_t remaining = in->total_length();
-    int read = 0;
-    CORBA::ULong u2 = 0;
-
-    switch (msgId) {
+    switch (smhdr.submessageId) {
     case RTPS::INFO_DST: {
       GuidPrefix_t_forany guidPrefix(receiver.guidPrefix);
-      if (!(ser >> guidPrefix)) {
+      if (!(parser >> guidPrefix)) {
         ok = false;
         break;
       }
-      read += RTPS::INFO_DST_SZ;
       break;
     }
     case RTPS::DATA:
     case RTPS::DATA_FRAG:
-      if (!(ser >> u2)) { // extraFlags|octetsToInlineQos
+      if (!(parser >> dataExtra)) { // extraFlags|octetsToInlineQos
         ok = false;
         break;
       }
@@ -594,42 +575,38 @@ RtpsUdpSendStrategy::encode_submessages(const ACE_Message_Block* plain,
     case RTPS::HEARTBEAT:
     case RTPS::GAP:
     case RTPS::HEARTBEAT_FRAG: {
-      if (!(ser >> receiver.entityId)) { // readerId
+      if (!(parser >> receiver.entityId)) { // readerId
         ok = false;
         break;
       }
-      if (!(ser >> sender.entityId)) { // writerId
+      if (!(parser >> sender.entityId)) { // writerId
         ok = false;
         break;
       }
 
       check_stateless_volatile(sender.entityId, stateless_or_volatile);
-      DDS::OctetSeq plainSm(toSeq(ser, msgId, flags, octetsToNextHeader, u2,
-                                  receiver.entityId, sender.entityId, remaining));
-      read = octetsToNextHeader;
+      DDS::OctetSeq plainSm(toSeq(parser.serializer(), smhdr, dataExtra, receiver.entityId, sender.entityId, remaining));
       if (!encode_writer_submessage(receiver, replacements, crypto, plainSm,
-                                    link_->writer_crypto_handle(sender), submessage_start, msgId)) {
+                                    link_->writer_crypto_handle(sender), submessage_start, smhdr.submessageId)) {
         ok = false;
       }
       break;
     }
     case RTPS::ACKNACK:
     case RTPS::NACK_FRAG: {
-      if (!(ser >> sender.entityId)) { // readerId
+      if (!(parser >> sender.entityId)) { // readerId
         ok = false;
         break;
       }
-      if (!(ser >> receiver.entityId)) { // writerId
+      if (!(parser >> receiver.entityId)) { // writerId
         ok = false;
         break;
       }
 
       check_stateless_volatile(receiver.entityId, stateless_or_volatile);
-      DDS::OctetSeq plainSm(toSeq(ser, msgId, flags, octetsToNextHeader, 0,
-                                  sender.entityId, receiver.entityId, remaining));
-      read = octetsToNextHeader;
+      DDS::OctetSeq plainSm(toSeq(parser.serializer(), smhdr, 0, sender.entityId, receiver.entityId, remaining));
       if (!encode_reader_submessage(receiver, replacements, crypto, plainSm,
-                                    link_->reader_crypto_handle(sender), submessage_start, msgId)) {
+                                    link_->reader_crypto_handle(sender), submessage_start, smhdr.submessageId)) {
         ok = false;
       }
       break;
@@ -638,14 +615,12 @@ RtpsUdpSendStrategy::encode_submessages(const ACE_Message_Block* plain,
       break;
     }
 
-    if (!ok || (octetsToNextHeader == 0 && msgId != RTPS::PAD && msgId != RTPS::INFO_TS)) {
+    if (!ok || !parser.hasNextSubmessage()) {
       break;
     }
 
-    if (octetsToNextHeader > read) {
-      if (!ser.skip(octetsToNextHeader - read)) {
-        ok = false;
-      }
+    if (!parser.skipToNextSubmessage()) {
+      ok = false;
     }
   }
 

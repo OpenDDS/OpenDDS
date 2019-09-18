@@ -19,6 +19,7 @@
 #include "dds/DCPS/Serializer.h"
 
 #include "dds/DCPS/RTPS/BaseMessageTypes.h"
+#include "dds/DCPS/RTPS/BaseMessageUtils.h"
 #include "dds/DCPS/RTPS/MessageTypes.h"
 #include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
 
@@ -1021,29 +1022,21 @@ namespace {
   // Returns the index of the final Submessage in the sequence, or 0 if this can't be determined.
   unsigned int findLastSubmessage(const DDS::OctetSeq& plaintext)
   {
-    ACE_Message_Block mb_in(to_mb(plaintext.get_buffer()), plaintext.length());
-    mb_in.wr_ptr(mb_in.size());
-    Serializer ser_in(&mb_in);
-    while (ser_in.available_r() >= RTPS::SMHDR_SZ) {
-      const unsigned int sm_start = static_cast<unsigned int>(mb_in.rd_ptr() - mb_in.base());
+    RTPS::MessageParser parser(plaintext);
+    const char* const start = parser.current();
 
-      unsigned char smId;
-      ser_in >> ACE_InputCDR::to_octet(smId);
+    while (parser.remaining() >= RTPS::SMHDR_SZ) {
+      const unsigned int sm_start = static_cast<unsigned int>(parser.current() - start);
 
-      unsigned char flags;
-      ser_in >> ACE_InputCDR::to_octet(flags);
-      const int flag_e = flags & RTPS::FLAG_E;
-      ser_in.swap_bytes(ACE_CDR_BYTE_ORDER != flag_e);
+      if (!parser.parseSubmessageHeader()) {
+        return 0;
+      }
 
-      ACE_UINT16 submessageLength;
-      ser_in >> submessageLength;
-
-      if ((submessageLength == ser_in.available_r()) ||
-          (submessageLength == 0 && smId != RTPS::PAD && smId != RTPS::INFO_TS)) {
+      if (!parser.hasNextSubmessage()) {
         return sm_start;
       }
 
-      ser_in.skip(submessageLength);
+      parser.skipToNextSubmessage();
     }
 
     return 0;
@@ -1680,76 +1673,69 @@ bool CryptoBuiltInImpl::decode_rtps_message(
     return CommonUtilities::set_security_error(ex, -1, 1, "No Sending Participant handle");
   }
 
-  ACE_Message_Block mb_in(to_mb(encoded_buffer.get_buffer()), encoded_buffer.length());
-  mb_in.wr_ptr(mb_in.size());
-  Serializer de_ser(&mb_in, false, Serializer::ALIGN_CDR);
+  RTPS::MessageParser parser(encoded_buffer);
 
-  RTPS::Header rtpsHeader;
-  if (!(de_ser >> rtpsHeader)) {
+  if (!parser.parseHeader()) {
     return CommonUtilities::set_security_error(ex, -2, 0, "Failed to deserialize Header");
   }
 
   CryptoHeader ch;
   CryptoFooter cf;
   bool haveCryptoHeader = false, haveCryptoFooter = false;
-  char* afterSrtpsPrefix;
+  const char* afterSrtpsPrefix;
   unsigned int sizeOfAuthenticated, sizeOfEncrypted;
-  char* encrypted = 0;
+  const char* encrypted = 0;
 
-  for (int i = 0; de_ser.available_r(); ++i) {
-    if (de_ser.available_r() < RTPS::SMHDR_SZ) {
+  for (int i = 0; parser.remaining(); ++i) {
+    if (parser.remaining() < RTPS::SMHDR_SZ || !parser.parseSubmessageHeader()) {
       return CommonUtilities::set_security_error(ex, -3, i, "Failed to deserialize SubmessageHeader");
     }
 
-    ACE_CDR::Octet type, flags;
-    de_ser >> ACE_InputCDR::to_octet(type);
-    de_ser >> ACE_InputCDR::to_octet(flags);
-    de_ser.swap_bytes((flags & RTPS::FLAG_E) != ACE_CDR_BYTE_ORDER);
-    ACE_CDR::UShort octetsToNext;
-    de_ser >> octetsToNext;
-    de_ser.swap_bytes(Serializer::SWAP_BE);
+    parser.serializer().swap_bytes(Serializer::SWAP_BE);
+    const int type = parser.submessageHeader().submessageId;
 
     if (i == 0 && type == RTPS::SRTPS_PREFIX) {
-      if (!(de_ser >> ch)) {
+      if (!(parser >> ch)) {
         return CommonUtilities::set_security_error(ex, -4, i, "Failed to deserialize CryptoHeader");
       }
-      if (octetsToNext < CRYPTO_HEADER_LENGTH || !de_ser.skip(octetsToNext - CRYPTO_HEADER_LENGTH)) {
+      haveCryptoHeader = true;
+      if (!parser.skipToNextSubmessage()) {
         return CommonUtilities::set_security_error(ex, -5, i, "Failed to find submessage after SRTPS_PREFIX");
       }
-      afterSrtpsPrefix = mb_in.rd_ptr();
-      haveCryptoHeader = true;
+      afterSrtpsPrefix = parser.current();
 
     } else if (haveCryptoHeader && type == RTPS::SEC_BODY) {
-      if (!(de_ser >> sizeOfEncrypted)) {
+      if (!(parser >> sizeOfEncrypted)) {
         return CommonUtilities::set_security_error(ex, -13, i, "Failed to deserialize CryptoContent length");
       }
       const unsigned short sz = static_cast<unsigned short>(DCPS::max_marshaled_size_ulong());
-      if (sizeOfEncrypted + sz > octetsToNext) {
+      if (sizeOfEncrypted + sz > parser.submessageHeader().submessageLength) {
         return CommonUtilities::set_security_error(ex, -14, i, "CryptoContent length out of bounds");
       }
-      encrypted = mb_in.rd_ptr();
-      if (octetsToNext < sz || !de_ser.skip(octetsToNext - sz)) {
+      encrypted = parser.current();
+      if (!parser.skipToNextSubmessage()) {
         return CommonUtilities::set_security_error(ex, -15, i, "Failed to find submessage after SEC_BODY");
       }
 
     } else if (haveCryptoHeader && type == RTPS::SRTPS_POSTFIX) {
-      sizeOfAuthenticated = static_cast<unsigned int>(mb_in.rd_ptr() - afterSrtpsPrefix - RTPS::SMHDR_SZ);
-      const size_t availablePreFooter = de_ser.available_r();
-      if (!(de_ser >> cf)) {
+      sizeOfAuthenticated = static_cast<unsigned int>(parser.current() - afterSrtpsPrefix - RTPS::SMHDR_SZ);
+      const size_t availablePreFooter = parser.remaining();
+      if (!(parser >> cf)) {
         return CommonUtilities::set_security_error(ex, -7, i, "Failed to deserialize CryptoFooter");
       }
-      if (octetsToNext && availablePreFooter != octetsToNext) {
+      if (parser.hasNextSubmessage()) {
         return CommonUtilities::set_security_error(ex, -8, i, "SRTPS_POSTFIX was not the final submessage");
       }
       haveCryptoFooter = true;
       break;
 
-    } else if (octetsToNext == 0 && type != RTPS::PAD && type != RTPS::INFO_TS) {
-      break;
-
     } else {
-      if (!de_ser.skip(octetsToNext)) {
-        return CommonUtilities::set_security_error(ex, -6, i, "Failed to find next submessage");
+      if (parser.hasNextSubmessage()) {
+        if (!parser.skipToNextSubmessage()) {
+          return CommonUtilities::set_security_error(ex, -6, i, "Failed to find next submessage");
+        }
+      } else {
+        break;
       }
     }
   }

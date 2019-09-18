@@ -82,7 +82,7 @@ private:
   ACE_Message_Block* pre_send_packet(const ACE_Message_Block* plain);
 
   struct Chunk {
-    char* start_;
+    const char* start_;
     unsigned int length_;
     DDS::OctetSeq encoded_;
   };
@@ -92,14 +92,14 @@ private:
                                 DDS::Security::CryptoTransform* crypto,
                                 const DDS::OctetSeq& plain,
                                 DDS::Security::DatawriterCryptoHandle sender_dwch,
-                                char* submessage_start, CORBA::Octet msgId);
+                                const char* submessage_start, CORBA::Octet msgId);
 
   bool encode_reader_submessage(const RepoId& receiver,
                                 OPENDDS_VECTOR(Chunk)& replacements,
                                 DDS::Security::CryptoTransform* crypto,
                                 const DDS::OctetSeq& plain,
                                 DDS::Security::DatareaderCryptoHandle sender_drch,
-                                char* submessage_start, CORBA::Octet msgId);
+                                const char* submessage_start, CORBA::Octet msgId);
 
   ACE_Message_Block* encode_submessages(const ACE_Message_Block* plain,
                                         DDS::Security::CryptoTransform* crypto,
