@@ -102,7 +102,8 @@ TransportImpl::open()
 void
 TransportImpl::add_pending_connection(const TransportClient_rch& client, DataLink_rch link)
 {
-  pending_connections_.insert( PendConnMap::value_type(client, link));
+  GuardType guard(pending_connections_lock_);
+  pending_connections_.insert( PendConnMap::value_type(client, link) );
 }
 
 void

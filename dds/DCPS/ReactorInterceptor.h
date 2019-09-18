@@ -29,7 +29,7 @@ public:
   class Command
   : public RcObject {
   public:
-    Command() : executed_(false), condition_(mutex_) {}
+    Command() : executed_(false), condition_(mutex_), reactor_(0) {}
     virtual ~Command() { }
     virtual void execute() = 0;
 
@@ -39,7 +39,7 @@ public:
       executed_ = false;
     }
 
-    void wait()
+    void wait() const
     {
       ACE_GUARD(ACE_Thread_Mutex, guard, mutex_);
       while (!executed_) {
@@ -54,12 +54,32 @@ public:
       condition_.broadcast();
     }
 
+  protected:
+    const ACE_Reactor* reactor() const { return reactor_; }
+    ACE_Reactor* reactor() { return reactor_; }
+
   private:
+    friend class OpenDDS::DCPS::ReactorInterceptor;
+    void set_reactor(ACE_Reactor* reactor) { reactor_ = reactor; }
+
     bool executed_;
-    ACE_Thread_Mutex mutex_;
-    ACE_Condition_Thread_Mutex condition_;
+    mutable ACE_Thread_Mutex mutex_;
+    mutable ACE_Condition_Thread_Mutex condition_;
+    ACE_Reactor* reactor_;
   };
   typedef RcHandle<Command> CommandPtr;
+
+  template <typename T>
+  class ResultCommand : public Command {
+  public:
+    T result() const { return result_; }
+    T wait_result() const { wait(); return result(); }
+    static T wait_result(const CommandPtr& cmd) { return static_rchandle_cast<ReactorInterceptor::ResultCommand<T> >(cmd)->wait_result();}
+  protected:
+    void result(T result) { result_ = result; }
+  private:
+    T result_;
+  };
 
   bool should_execute_immediately();
 
@@ -87,6 +107,7 @@ protected:
   CommandPtr enqueue_i(Command* c, bool immediate)
   {
     c->reset();
+    c->set_reactor(reactor());
     const CommandPtr command(c, keep_count());
     ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, CommandPtr());
     command_queue_.push(command);

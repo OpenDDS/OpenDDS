@@ -35,13 +35,6 @@ OpenDDS::DCPS::TcpConnection::is_connected() const
   return this->connected_.value();
 }
 
-ACE_INLINE void
-OpenDDS::DCPS::TcpConnection::set_datalink(const OpenDDS::DCPS::TcpDataLink_rch& link)
-{
-  // Keep a "copy" of the reference to the data link for ourselves.
-  this->link_ = link;
-}
-
 ACE_INLINE ACE_INET_Addr
 OpenDDS::DCPS::TcpConnection::get_remote_address()
 {

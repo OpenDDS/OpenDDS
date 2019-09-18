@@ -21,6 +21,8 @@
 
 #include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/PoolAllocator.h"
+#include "dds/DCPS/ReactorInterceptor.h"
+#include "dds/DCPS/ReactorTask.h"
 #include "dds/DCPS/transport/framework/TransportDefs.h"
 #include "dds/DCPS/TimeTypes.h"
 
@@ -124,6 +126,8 @@ public:
 
   void shutdown();
 
+  TcpTransport_rch impl() { return impl_; }
+
   /// Access TRANSPORT_PRIORITY.value policy value if set.
   Priority& transport_priority();
   Priority  transport_priority() const;
@@ -135,6 +139,50 @@ public:
 
 private:
 
+  class Interceptor : public ReactorInterceptor {
+  public:
+    Interceptor(ReactorTask* task, ACE_Reactor* reactor, ACE_thread_t owner) : ReactorInterceptor(reactor, owner), task_(task) {}
+    bool reactor_is_shut_down() const;
+  private:
+    ReactorTask* task_;
+  };
+
+  class RegisterHandler : public ReactorInterceptor::ResultCommand<int> {
+  public:
+    RegisterHandler(TcpConnection_rch con, ACE_Reactor_Mask mask) : con_(con), mask_(mask) {}
+    void execute();
+  private:
+    TcpConnection_rch con_;
+    ACE_Reactor_Mask mask_;
+  };
+
+  class RemoveHandler : public ReactorInterceptor::ResultCommand<int> {
+  public:
+    RemoveHandler(TcpConnection_rch con, ACE_Reactor_Mask mask) : con_(con), mask_(mask) {}
+    void execute();
+  private:
+    TcpConnection_rch con_;
+    ACE_Reactor_Mask mask_;
+  };
+
+  class ScheduleTimer : public ReactorInterceptor::ResultCommand<long> {
+  public:
+    ScheduleTimer(TcpConnection_rch con, void* arg, const TimeDuration& delay, const TimeDuration& interval = TimeDuration::zero_value) : con_(con), arg_(arg), delay_(delay), interval_(interval) {}
+    void execute();
+  private:
+    TcpConnection_rch con_;
+    void* arg_;
+    TimeDuration delay_, interval_;
+  };
+
+  class CancelTimer : public ReactorInterceptor::ResultCommand<int> {
+  public:
+    CancelTimer(TcpConnection_rch con) : con_(con) {}
+    void execute();
+  private:
+    TcpConnection_rch con_;
+  };
+
   /// Attempt an active connection establishment to the remote address.
   /// The local address is sent to the remote (passive) side to
   /// identify ourselves to the remote side.
@@ -145,6 +193,7 @@ private:
   int active_reconnect_i();
   int passive_reconnect_i();
   int active_reconnect_on_new_association();
+  void set_passive_reconnect_timer_id(long id);
 
   /// During the connection setup phase, the passive side sets passive_setup_,
   /// redirecting handle_input() events here (there is no recv strategy yet).
@@ -153,20 +202,18 @@ private:
   const std::string& config_name() const;
 
   void spawn_reconnect_thread();
-  static ACE_THR_FUNC_RETURN reconnect_thread_fun(void* conn);
-
 
   typedef ACE_SYNCH_MUTEX     LockType;
   typedef ACE_Guard<LockType> GuardType;
 
   /// Lock to avoid the reconnect() called multiple times when
   /// both send() and recv() fail.
-  LockType  reconnect_lock_;
+  LockType reconnect_lock_;
 
   /// Flag indicates if connected or disconnected. It's set to true
   /// when actively connecting or passively accepting succeeds and set
   /// to false whenever the peer stream is closed.
-  ACE_Atomic_Op<ACE_SYNCH_MUTEX, bool>  connected_;
+  ACE_Atomic_Op<ACE_SYNCH_MUTEX, bool> connected_;
 
   /// Flag indicate this connection object is the connector or acceptor.
   bool is_connector_;
@@ -183,11 +230,16 @@ private:
   /// Datalink object which is needed for connection lost callback.
   TcpDataLink_rch link_;
 
+  /// Impl object which is needed for connection objects and reconnect task
+  TcpTransport_rch impl_;
+
+  RcHandle<Interceptor> interceptor_;
+
   /// The id of the scheduled timer. The timer is scheduled to check if the connection
   /// is re-established during the passive_reconnect_duration_. This id controls
   /// that the timer is just scheduled once when there are multiple threads detect
   /// the lost connection.
-  int passive_reconnect_timer_id_;
+  ACE_Atomic_Op<ACE_SYNCH_MUTEX, int> passive_reconnect_timer_id_;
 
   /// The state indicates each step of the reconnecting.
   ReconnectState reconnect_state_;
@@ -207,7 +259,8 @@ private:
 
   /// Small unique identifying value.
   std::size_t id_;
-  ACE_thread_t reconnect_thread_;
+
+  RcHandle<TcpReconnectTask> reconnect_task_;
 
   /// Get name of the current reconnect state as a string.
   OPENDDS_STRING reconnect_state_string() const;
