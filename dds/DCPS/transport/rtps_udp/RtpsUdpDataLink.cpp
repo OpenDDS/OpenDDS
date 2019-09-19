@@ -123,10 +123,17 @@ RtpsUdpDataLink::config() const
 bool
 RtpsUdpDataLink::add_delayed_notification(TransportQueueElement* element)
 {
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
+  RtpsWriter_rch writer;
   RtpsWriterMap::iterator iter = writers_.find(element->publication_id());
   if (iter != writers_.end()) {
+    writer = iter->second;
+  }
 
-    iter->second->add_elem_awaiting_ack(element);
+  g.release();
+
+  if (writer) {
+    writer->add_elem_awaiting_ack(element);
     return true;
   }
   return false;
@@ -3161,6 +3168,7 @@ RtpsUdpDataLink::RtpsWriter::RtpsWriter(RcHandle<RtpsUdpDataLink> link, const Re
 
 RtpsUdpDataLink::RtpsWriter::~RtpsWriter()
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
   if (!to_deliver_.empty()) {
     ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: RtpsWriter::~RtpsWriter - ")
       ACE_TEXT("deleting with %d elements left to deliver\n"),
@@ -3186,6 +3194,7 @@ RtpsUdpDataLink::RtpsWriter::heartbeat_high(const ReaderInfo& ri) const
 void
 RtpsUdpDataLink::RtpsWriter::add_elem_awaiting_ack(TransportQueueElement* element)
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
   elems_not_acked_.insert(SnToTqeMap::value_type(element->sequence(), element));
 }
 
