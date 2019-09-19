@@ -173,8 +173,6 @@ cd %DDS_ROOT%\DevGuideExamples\DCPS\Messenger
 perl run_test.pl
 ```
 
-See [the notes in section "Test", above](#test), for options to `run_test.pl`.
-
   The Perl script will start 3 processes, the DCPSInfoRepo, one publisher, and
   one subscriber.  Note that the command lines used to spawn these processes
   are echoed back to standard output.  The options and config files used here
