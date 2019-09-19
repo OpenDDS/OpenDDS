@@ -1,5 +1,6 @@
 project: dcps_rtps, opendds_cxx11 {
 
+  exeout = $(DDS_ROOT)/bin
   TypeSupport_Files {
     Relay.idl
   }
