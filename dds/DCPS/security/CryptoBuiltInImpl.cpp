@@ -298,7 +298,7 @@ DatawriterCryptoHandle CryptoBuiltInImpl::register_local_datawriter(
   ParticipantCryptoHandle participant_crypto,
   const DDS::PropertySeq& properties,
   const EndpointSecurityAttributes& security_attributes,
-  SecurityException& ex)
+  SecurityException&)
 {
   const NativeCryptoHandle h = generate_handle();
   const PluginEndpointSecurityAttributesMask plugin_attribs =
@@ -420,7 +420,7 @@ DatareaderCryptoHandle CryptoBuiltInImpl::register_local_datareader(
   ParticipantCryptoHandle participant_crypto,
   const DDS::PropertySeq& properties,
   const EndpointSecurityAttributes& security_attributes,
-  SecurityException& ex)
+  SecurityException&)
 {
   const NativeCryptoHandle h = generate_handle();
   const PluginEndpointSecurityAttributesMask plugin_attribs = security_attributes.plugin_endpoint_attributes;
@@ -1719,7 +1719,6 @@ bool CryptoBuiltInImpl::decode_rtps_message(
 
     } else if (haveCryptoHeader && type == RTPS::SRTPS_POSTFIX) {
       sizeOfAuthenticated = static_cast<unsigned int>(parser.current() - afterSrtpsPrefix - RTPS::SMHDR_SZ);
-      const size_t availablePreFooter = parser.remaining();
       if (!(parser >> cf)) {
         return CommonUtilities::set_security_error(ex, -7, i, "Failed to deserialize CryptoFooter");
       }
