@@ -72,6 +72,7 @@ public:
   template <typename T>
   class ResultCommand : public Command {
   public:
+    ResultCommand() : result_() {}
     T result() const { return result_; }
     T wait_result() const { wait(); return result(); }
     static T wait_result(const CommandPtr& cmd) { return static_rchandle_cast<ReactorInterceptor::ResultCommand<T> >(cmd)->wait_result();}
