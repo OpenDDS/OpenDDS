@@ -38,7 +38,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")
                         ACE_TEXT(" create_participant failed!\n")),
-                       -1);
+                       1);
     }
 
     // Register TypeSupport (Messenger::Message)
@@ -49,7 +49,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")
                         ACE_TEXT(" register_type failed!\n")),
-                       -1);
+                       1);
     }
 
     // Create Topic (Movie Discussion List)
@@ -65,7 +65,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")
                         ACE_TEXT(" create_topic failed!\n")),
-                       -1);
+                       1);
     }
 
     // Create Publisher
@@ -78,13 +78,18 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")
                         ACE_TEXT(" create_publisher failed!\n")),
-                       -1);
+                       1);
     }
 
     // Create DataWriter
+    DDS::DataWriterQos writer_qos;
+    publisher->get_default_datawriter_qos(writer_qos);
+    writer_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+    writer_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
+
     DDS::DataWriter_var writer =
       publisher->create_datawriter(topic,
-                                   DATAWRITER_QOS_DEFAULT,
+                                   writer_qos,
                                    0,
                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
@@ -92,7 +97,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")
                         ACE_TEXT(" create_datawriter failed!\n")),
-                       -1);
+                       1);
     }
 
     Messenger::MessageDataWriter_var message_writer =
@@ -102,7 +107,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")
                         ACE_TEXT(" _narrow failed!\n")),
-                       -1);
+                       1);
     }
 
     // Block until Subscriber is available
@@ -118,7 +123,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("ERROR: %N:%l: main() -")
                           ACE_TEXT(" get_publication_matched_status failed!\n")),
-                         -1);
+                         1);
       }
 
       if (matches.current_count >= 1) {
@@ -131,7 +136,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("ERROR: %N:%l: main() -")
                           ACE_TEXT(" wait failed!\n")),
-                         -1);
+                         1);
       }
     }
 
@@ -164,7 +169,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")
                         ACE_TEXT(" wait_for_acknowledgments failed!\n")),
-                       -1);
+                       1);
     }
 
     // Clean-up!
@@ -175,7 +180,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
-    return -1;
+    return 1;
   }
 
   return 0;
