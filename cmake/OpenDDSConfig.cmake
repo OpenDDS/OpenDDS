@@ -151,7 +151,10 @@ if(UNIX)
     _OPENDDS_SYSTEM_LIBRARY(rt)
   endif()
 elseif(MSVC)
-  _OPENDDS_SYSTEM_LIBRARY(iphlpapi)
+  # For some reason CMake can't find this in some cases, but we know it should
+  # be there, so just link to it without a check.
+  set(IPHLPAPI_LIBRARY iphlpapi)
+  list(APPEND _opendds_required_deps IPHLPAPI_LIBRARY)
 endif()
 
 set(OPENDDS_IDL_DEPS
