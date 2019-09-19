@@ -1752,8 +1752,7 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
       }
 
     } else if (qosChanged(iter->second.writer_data_.ddsPublicationData,
-                          wdata.ddsPublicationData))
-    { // update existing
+                          wdata.ddsPublicationData)) { // update existing
 
 #ifndef DDS_HAS_MINIMUM_BIT
       DCPS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();

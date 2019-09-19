@@ -248,8 +248,6 @@ bool run_test()
 
   const RcHandle<Spdp> spdp(make_rch<Spdp>(domain, ref(id), qos, &rd));
 
-
-
   OpenDDS::RTPS::ParameterList plist;
 
   BuiltinEndpointSet_t availableBuiltinEndpoints =
@@ -318,12 +316,17 @@ bool run_test()
   SequenceNumber_t first_seq = {0, 1}, seq = first_seq;
   bool bfirst = true;
 
+  bool bFound = spdp->find_part(test_part_guid);
+
   // Test for performing sequence reset.
 
   for (;;) {
     if (!part1.send_data(test_part_guid.entityId, seq, plist, send_addr)) {
+
       return false;
     }
+
+    bFound = spdp->find_part(test_part_guid);
 
     if (seq.low == 5) {
       if (bfirst) {

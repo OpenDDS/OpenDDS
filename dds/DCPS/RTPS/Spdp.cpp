@@ -346,7 +346,7 @@ namespace {
 }
 
 void
-Spdp::handle_participant_data(DCPS::MessageId id, const ParticipantData_t& cpdata, const SequenceNumber_t seq)
+Spdp::handle_participant_data(DCPS::MessageId id, const ParticipantData_t& cpdata, const SequenceNumber_t& seq)
 {
   const ACE_Time_Value now = ACE_OS::gettimeofday();
 
@@ -535,9 +535,8 @@ Spdp::validateSequenceNumber(const DCPS::SequenceNumber& seq, DiscoveredParticip
      (iter->second.last_seq_.getLow() == ACE_UINT32_MAX)) {
     return true;
   } else {
-    if (seq.getValue() < iter->second.last_seq_.getValue()) {
+    if (seq < iter->second.last_seq_) {
       ++iter->second.SeqResetChkCount_;
-      //iter->second.seqResetCandidate_.setValue(seq.getValue());
       iter->second.seqResetCandidate_ = seq;
       return false;
     } else {
@@ -1898,6 +1897,21 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
                ACE_TEXT("for port:%hu %p\n"),
                outer_->disco_->ttl(), uni_port, ACE_TEXT("DCPS::set_socket_multicast_ttl:")));
     throw std::runtime_error("failed to set TTL");
+  }
+  return true;
+}
+
+bool
+Spdp::find_part(const DCPS::RepoId& part_id)
+{
+  const DCPS::RepoId guid = make_guid(part_id.guidPrefix, DCPS::ENTITYID_PARTICIPANT);
+
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
+
+  DiscoveredParticipantIter  part = participants_.find(guid);
+
+  if (part == participants_.end()) {
+    return false;
   }
   return true;
 }
