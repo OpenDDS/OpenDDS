@@ -10,11 +10,11 @@ class CryptoTransformTest : public Test
 {
 public:
   CryptoTransformTest()
-  : test_class_()
-  , test_buffer_()
-  , readers_()
-  , writers_()
-  , participants_()
+    : test_class_()
+    , test_buffer_()
+    , readers_()
+    , writers_()
+    , participants_()
   {
   }
 
@@ -73,7 +73,7 @@ public:
     return participants_;
   }
 
-private:
+protected:
 
   template<class T>
   void init_seq(T& seq, CORBA::ULong length)
@@ -89,6 +89,12 @@ private:
   DDS::Security::DatareaderCryptoHandleSeq readers_;
   DDS::Security::DatawriterCryptoHandleSeq writers_;
   DDS::Security::ParticipantCryptoHandleSeq participants_;
+
+  struct SharedSecret : DDS::Security::SharedSecretHandle {
+    DDS::OctetSeq* challenge1() { return 0; }
+    DDS::OctetSeq* challenge2() { return 0; }
+    DDS::OctetSeq* sharedSecret() { return 0; }
+  } shared_secret_;
 };
 
 
@@ -488,13 +494,26 @@ TEST_F(CryptoTransformTest, decode_serialized_payload_NilHandles)
 
 TEST_F(CryptoTransformTest, decode_serialized_payload_Success)
 {
-  ::DDS::OctetSeq output;
-  ::DDS::OctetSeq inline_qos;
-  ::DDS::Security::SecurityException ex;
+  using namespace DDS::Security;
+  CryptoKeyFactory& kef = dynamic_cast<CryptoKeyFactory&>(get_inst());
+  CryptoKeyExchange& kex = dynamic_cast<CryptoKeyExchange&>(get_inst());
+
+  DDS::PropertySeq no_properties;
+  EndpointSecurityAttributes esa = {{false, false, false, false}, true, false, false, 0, no_properties};
+  SecurityException ex;
+  const DatareaderCryptoHandle drch = kef.register_local_datareader(0, no_properties, esa, ex);
+  const ParticipantCryptoHandle rpch = kef.register_matched_remote_participant(0, 1, 2, &shared_secret_, ex);
+  const DatawriterCryptoHandle dwch = kef.register_matched_remote_datawriter(drch, rpch, &shared_secret_, ex);
+
+  const DatawriterCryptoHandle peer_dwch = kef.register_local_datawriter(0, no_properties, esa, ex);
+  DatawriterCryptoTokenSeq dwct;
+  kex.create_local_datawriter_crypto_tokens(dwct, peer_dwch, 99, ex);
+  kex.set_remote_datawriter_crypto_tokens(drch, dwch, dwct, ex);
 
   init_buffer(294, 17);
-
-  EXPECT_TRUE(get_inst().decode_serialized_payload(output, get_buffer(), inline_qos, 1, 2, ex));
+  DDS::OctetSeq output;
+  DDS::OctetSeq inline_qos;
+  EXPECT_TRUE(get_inst().decode_serialized_payload(output, get_buffer(), inline_qos, drch, dwch, ex));
   EXPECT_EQ(get_buffer(), output);
 }
 
