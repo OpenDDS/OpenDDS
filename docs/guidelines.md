@@ -80,8 +80,7 @@ take advantage of Doxygen when writing code in OpenDDS.
   other scripting in OpenDDS codebase.
 - Google Test is required for OpenDDS tests. By default, CMake will be used to
   build a specific version of Google Test that we have as a submodule. An
-  appropriate prebuilt or system Google Test can also be used. Use `--no-tests`
-  to just build the OpenDDS libraries and the Developer's Guide examples.
+  appropriate prebuilt or system Google Test can also be used.
 
 See [dependencies.md](dependencies.md) for all dependencies and details on how
 these are used in OpenDDS.

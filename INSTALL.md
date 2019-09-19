@@ -1,21 +1,23 @@
 # Building and Installing OpenDDS
 
+**Table of Contents:**
+
 * [Java](#java)
-* [Supported platforms](#supported-platforms)
+* [Supported Platforms](#supported-platforms)
 * [Compiling](#compiling)
 * [Test](#test)
 * [Installation](#installation)
 * [Cross Compiling](#cross-compiling)
   * [Raspberry Pi](#raspberry-pi)
   * [Android](#android)
-* [Building your own applications:](#building-your-own-applications)
+* [Building Your Own Applications](#building-your-own-applications)
 
 ## Java
 
 If you're building OpenDDS for use by Java applications, please see the file
 [java/INSTALL](java/INSTALL) instead of this one.
 
-## Supported platforms
+## Supported Platforms
 
 We have built OpenDDS on number of different platforms and compilers.  See
 [README.md](README.md#supported-platforms) for a complete description of
@@ -43,9 +45,6 @@ supported platforms.
 configure
 ```
 
-**If you don't need the tests, which add Google Test as a dependency and take a
-long time to compile, pass the `--no-tests` option to `configure`.**
-
   Optionally add `--help` to the command line to see the advanced options
   available for this script.  The configure script will download ACE+TAO and
   configure it for your platform.  To use an existing ACE+TAO installation,
@@ -69,6 +68,9 @@ long time to compile, pass the `--no-tests` option to `configure`.**
 
 ## Test
 
+**NOTE: Tests are not built by default, `--tests` must be passed to the
+configure script.**
+
   Optionally, you can run the entire OpenDDS regression test suite with one
   Perl command.
 
@@ -84,7 +86,7 @@ bin/auto_run_tests.pl
 **For Windows:**
 
 ```
-bin\auto_run_tests.pl
+perl bin\auto_run_tests.pl
 ```
 
   If you built static libraries, add `-Config STATIC` to this command.
@@ -151,7 +153,7 @@ The instructions for building for the Raspberry Pi are on
 
 Android support is documented in [`docs/android.md`](docs/android.md).
 
-## Building your own applications:
+## Building Your Own Applications
 
 See the [OpenDDS Developer's Guide](
     http://download.ociweb.com/OpenDDS/OpenDDS-latest.pdf)
@@ -165,8 +167,9 @@ cd $DDS_ROOT/DevGuideExamples/DCPS/Messenger
 ```
 
 **For Windows:**
+
 ```
-cd %DDS_ROOT\DevGuideExamples\DCPS\Messenger
+cd %DDS_ROOT%\DevGuideExamples\DCPS\Messenger
 perl run_test.pl
 ```
 
@@ -177,4 +180,3 @@ See [the notes in section "Test", above](#test), for options to `run_test.pl`.
   are echoed back to standard output.  The options and config files used here
   are helpful starting points for developing and running your own OpenDDS
   applications.
-

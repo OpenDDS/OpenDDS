@@ -195,7 +195,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'wireshark-build|wireshark_build=s', 'Wireshark CMake Build Location',
     'wireshark-lib|wireshark_lib=s',
       'Optional Wireshark CMake libraries location' .
-      $argIndent .'relative to wireshark-build (guesses)',
+      $argIndent . 'relative to wireshark-build (guesses)',
     'glib:s', 'GLib for Wireshark (use GLIB_ROOT or system pkg)',
     '<default>rapidjson:s',
       'RapidJSON for Wireshark dissector and JSON' .
@@ -211,8 +211,9 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'cmake:s', 'Path to cmake binary for compiling Google Test' .
       $argIndent . 'Framework. (Check Path and Check Normal' .
       $argIndent . 'Locations)',
-    'gtest:s', 'Path to Google Test Framework, required for' .
-      $argIndent . 'tests (uses GTEST_ROOT or system package)',
+    'gtest=s', 'Path to Google Test Framework, required for' .
+      $argIndent . 'tests (uses GTEST_ROOT).' .
+      $argIndent . 'If not built, will try to build using CMake.',
    ],
    ['Optional OpenDDS features:',
     'built-in-topics!', 'Built-in Topics (yes)',
@@ -225,9 +226,9 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'object-model-profile!', 'Object Model Profile (yes)',
     'persistence-profile!', 'Persistence Profile (yes)',
     'safety-profile:s', 'Safety Profile: base or extended (none)',
-    'tests!', 'Build tests, examples, and performance tests' .
-      $argIndent . '(yes) Implies --gtest as tests require Google' .
-      $argIndent . 'Test and --cmake',
+    'tests!', 'Build tests and performance tests (no)' .
+      $argIndent . 'Requires --gtest if missing git submodule',
+    'examples!', 'Build examples and DevGuideExamples (yes)',
     'security!', 'DDS Security plugin (no) Implies --openssl and' .
       $argIndent . '--xerces3',
    ],
@@ -373,6 +374,71 @@ sub addCurLibPathRef {
   my $libpathname = $platforminfo{$platform}->{'libpath'};
   my $curLibPathRef = $specific{'refpre'} . $libpathname . $specific{'refpost'};
   $buildEnvRef->{$libpathname} = $curLibPathRef;
+}
+
+sub run_command {
+  my $command = shift;
+  my %args = (
+    DUMP_OUTPUT_ON_ERROR => 0,
+    @_,
+  );
+
+  print "Running $command\n" if $opts{'verbose'};
+  my $saved_stdout;
+  my $saved_stderr;
+  my $tmp_fd;
+  my $tmp_path;
+
+  if ($args{DUMP_OUTPUT_ON_ERROR}) {
+    ($tmp_fd, $tmp_path) = File::Temp::tempfile();
+    open($saved_stdout, '>&', STDOUT);
+    open(STDOUT, '>&', $tmp_fd);
+    open($saved_stderr, '>&', STDERR);
+    open(STDERR, '>&', $tmp_fd);
+  }
+
+  my $failed = system($command) ? 1 : 0;
+  my $system_status = $?;
+  my $system_error = $!;
+
+  if ($args{DUMP_OUTPUT_ON_ERROR}) {
+    open(STDOUT, '>&', $saved_stdout);
+    open(STDERR, '>&', $saved_stderr);
+    close($tmp_fd);
+  }
+
+  if ($failed) {
+    my $error_message;
+    my $ran = 1;
+    if ($system_status == -1) {
+      $error_message = "Failed to Run: $system_error";
+      $ran = 0;
+    }
+    elsif ($system_status & 127) {
+      $error_message = sprintf("Exited on Signal %d", ($system_status & 127));
+      $error_message .= " and Created Coredump" if ($system_status & 128);
+    }
+    else {
+      $error_message = sprintf("Returned %d", $system_status >> 8);
+    }
+    print STDERR "Command \"$command\" $error_message\n";
+
+    if ($ran and $args{DUMP_OUTPUT_ON_ERROR}) {
+      open($tmp_fd, $tmp_path);
+      print STDERR "Dumping Output from Failed Command\n";
+      while (my $line = <$tmp_fd>) {
+        print STDERR "$line";
+      }
+      print STDERR "\nEnd of Dumped Output from Failed Command\n";
+      close($tmp_fd);
+    }
+  }
+
+  if ($args{DUMP_OUTPUT_ON_ERROR}) {
+    unlink($tmp_path);
+  }
+
+  return $failed;
 }
 
 my $curpathRef = $specific{'refpre'} . 'PATH' . $specific{'refpost'};
@@ -671,25 +737,25 @@ if (!$ace_src || !$tao_src) {
     my $urlbase = 'https://github.com/DOCGroup';
 
     print "Cloning git repo: $urlbase/ACE_TAO\n";
-    my $err = system("git clone -q --depth 1 $urlbase/ACE_TAO");
-    die 'ERROR: Failed to clone ACE/TAO from GitHub'
+    my $err = run_command("git clone -q --depth 1 $urlbase/ACE_TAO");
+    die "ERROR: Failed to clone ACE/TAO from GitHub\nStopped"
       if $err ||
         ! -r 'ACE_TAO/ACE/ace/ACE.h' ||
           ! -r 'ACE_TAO/TAO/tao/ORB.h';
 
     my $cur_dir = getcwd;
     chdir('ACE_TAO');
-    system('git --no-pager log -1 --oneline');
+    run_command('git --no-pager log -1 --oneline');
     chdir($cur_dir);
 
     print "Cloning git repo: $urlbase/MPC into ACE_TAO/ACE/MPC\n";
-    $err = system("git clone -q --depth 1 $urlbase/MPC ACE_TAO/ACE/MPC");
-    die 'ERROR: Failed to clone MPC (into ACE_TAO/ACE/MPC) from GitHub'
+    $err = run_command("git clone -q --depth 1 $urlbase/MPC ACE_TAO/ACE/MPC");
+    die "ERROR: Failed to clone MPC (into ACE_TAO/ACE/MPC) from GitHub\nStopped"
       if $err ||
         ! -r 'ACE_TAO/ACE/MPC/mwc.pl';
 
     chdir('ACE_TAO/ACE/MPC');
-    system('git --no-pager log -1 --oneline');
+    run_command('git --no-pager log -1 --oneline');
     chdir($cur_dir);
 
     $ace_src = normalizePath('ACE_TAO/ACE');
@@ -739,7 +805,7 @@ if (!$ace_src || !$tao_src) {
           if ($opts{'dry-run'}) {
             print "Dry-run: would run wget $urlbase$file\n";
           }
-          elsif (system("wget $urlbase$file")) {
+          elsif (run_command("wget $urlbase$file")) {
             die "ERROR from wget, stopped";
           }
         }
@@ -748,7 +814,7 @@ if (!$ace_src || !$tao_src) {
           if ($opts{'dry-run'}) {
             print "Dry-run: would run curl -L $urlbase$file -o $file\n";
           }
-          elsif (system("curl -L $urlbase$file -o $file")) {
+          elsif (run_command("curl -L $urlbase$file -o $file")) {
             die "ERROR: from curl, stopped";
           }
         }
@@ -774,7 +840,7 @@ if (!$ace_src || !$tao_src) {
           $err = 0;
         }
         else {
-          $err = system(($^O eq 'solaris' ? 'g' : '') . "tar xzf $ddsroot/$file");
+          $err = run_command(($^O eq 'solaris' ? 'g' : '') . "tar xzf $ddsroot/$file");
         }
       }
       else {
@@ -840,7 +906,7 @@ sub clone_host_and_target {
   print "cloning build tree\n" if $opts{'verbose'};
   if (!$opts{'dry-run'}) {
     eval {
-      system("$targetEnv{'MPC_ROOT'}/clone_build_tree.pl host target");
+      run_command("$targetEnv{'MPC_ROOT'}/clone_build_tree.pl host target");
     };
   }
   if ($source_dir ne '.') {
@@ -1048,13 +1114,7 @@ if ($host_tools_only) {
 }
 
 # Use this to check if tests are enabled (instead of $opts{'tests'} directly).
-my $tests = !exists $opts{'tests'} || $opts{'tests'};
-
-if ($tests) {
-  print "--tests implies --gtest and --cmake\n" if $opts{'verbose'};
-  $opts{'gtest'} = '' if (!exists $opts{'gtest'});
-  $opts{'cmake'} = '' if (!exists $opts{'cmake'});
-}
+my $tests = exists $opts{'tests'} && $opts{'tests'};
 
 my @ace_features = ('xerces3');
 
@@ -1155,12 +1215,12 @@ sub system_default_install_dir {
 }
 
 my $build_gtest = 0;
-if (exists $opts{'gtest'}) {
-  my $sanity = 'include/gtest/gtest.h';
+if (exists $opts{'gtest'} || $tests) {
+  my $gtest_sanity = 'include/gtest/gtest.h';
 
   if ($opts{'gtest'}) {
-    die "ERROR: '$sanity' not found in supplied gtest directory '$opts{'gtest'}'"
-      if ! -f File::Spec->catfile($opts{'gtest'}, $sanity);
+    die "ERROR: '$gtest_sanity' not found in supplied gtest directory '$opts{'gtest'}'"
+      if ! -f File::Spec->catfile($opts{'gtest'}, $gtest_sanity);
 
     env_from_opt('gtest', 'GTEST_ROOT');
 
@@ -1171,18 +1231,19 @@ if (exists $opts{'gtest'}) {
     my $sys_dir = File::Spec->catdir((system_default_install_dir(),
                               $is_windows ? 'googletest-distribution' : ''));
 
-    if (-f File::Spec->catfile($sm_src, $sanity)) {
+    if (-f File::Spec->catfile($sm_src, $gtest_sanity)) {
       # Check for existing build
       $build_gtest = ! -d File::Spec->catdir($sm_dir, 'build/install');
       $opts{'gtest'} = $sm_dir;
       # No need to set env. variable with submodule.
     }
-    elsif (-f File::Spec->catfile($sys_dir, $sanity)) {
+    elsif (-f File::Spec->catfile($sys_dir, $gtest_sanity)) {
       $opts{'gtest'} = $sys_dir;
       env_from_opt('gtest', 'GTEST_ROOT');
     }
     else {
-      die "ERROR: Google Test '$sanity' not found in submodule src '$sm_src' or default install dir '$sys_dir'\nStopped"
+      die "ERROR: Google Test '$gtest_sanity' not found in submodule src '$sm_src' or " .
+        "default install dir '$sys_dir', please pass a correct version of Google Test to --gtest\nStopped";
     }
   }
 }
@@ -1425,6 +1486,8 @@ sub win32_cmake_generator {
 }
 
 if ($build_gtest) {
+  print("Building Google Test...\n");
+
   my $cwd = Cwd::getcwd();
   my $build_dir = $opts{'gtest'} . $slash . 'build';
   my $install_dir = $build_dir . $slash . 'install';
@@ -1453,13 +1516,14 @@ if ($build_gtest) {
     or  die "ERROR '$!': failed to change into $build_dir from $cwd.\nStopped";
 
   for my $cmd (@cmake_cmds) {
-    print "Running @{$cmd}...\n";
-    system(@{$cmd}) == 0
-      or die "ERROR: Invoking @{$cmd} failed with error '$?'.\nStopped";
+    run_command("@{$cmd}", DUMP_OUTPUT_ON_ERROR => !$opts{'verbose'}) == 0
+      or die "ERROR: Invoking @{$cmd} failed.\nStopped";
   }
 
   chdir($cwd)
     or die "ERROR '$!': failed to change back to $cwd.\nStopped";
+
+  print("Done Building Google Test\n");
 }
 
 if (exists $opts{'jboss'} && !exists $opts{'java'}) {
@@ -1917,11 +1981,10 @@ EOT
     }
   }
 
-  print "OpenDDS mwc command line: $mwcargs\n" if $opts{'verbose'};
   print 'Running MPC to generate ', ($mpctype eq 'gnuace' ? 'makefiles' :
                                      'project files'), ".\n";
   if (!$opts{'dry-run'}) {
-    if (system("perl $ENV{'ACE_ROOT'}/bin/mwc.pl $mwcargs") != 0) {
+    if (run_command("perl $ENV{'ACE_ROOT'}/bin/mwc.pl $mwcargs") != 0) {
       die "ERROR: Error from MPC, stopped";
     }
   }
@@ -1935,7 +1998,7 @@ EOT
     print "ACE mwc command line: $mwcargs\n" if $opts{'verbose'};
 
     if (!$opts{'dry-run'}) {
-      if (system("perl $ENV{'ACE_ROOT'}/bin/mwc.pl $mwcargs") != 0) {
+      if (run_command("perl $ENV{'ACE_ROOT'}/bin/mwc.pl $mwcargs") != 0) {
         die "ERROR: Error from MPC, stopped";
       }
     }
