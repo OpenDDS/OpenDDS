@@ -1620,17 +1620,15 @@ DomainParticipantImpl::enable()
 
   if (disco.is_nil()) {
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("DomainParticipantImpl::enable, ")
-               ACE_TEXT("no repository found for domain id: %d.\n"), domain_id_));
+               ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable, ")
+               ACE_TEXT("no discovery found for domain id: %d.\n"), domain_id_));
     return DDS::RETCODE_ERROR;
   }
 
 #ifdef OPENDDS_SECURITY
   if (TheServiceParticipant->get_security() && !security_config_) {
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("DomainParticipantImpl::enable, ")
+               ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable, ")
                ACE_TEXT("DCPSSecurity flag is set, but unable to load security plugin configuration.\n")));
     return DDS::RETCODE_ERROR;
   }
@@ -1649,8 +1647,7 @@ DomainParticipantImpl::enable()
     /* TODO - Handle VALIDATION_PENDING_RETRY */
     if (val_res != DDS::Security::VALIDATION_OK) {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("DomainParticipantImpl::enable, ")
+        ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable, ")
         ACE_TEXT("Unable to validate local identity. SecurityException[%d.%d]: %C\n"),
           se.code, se.minor_code, se.message.in()));
       return DDS::Security::RETCODE_NOT_ALLOWED_BY_SECURITY;
@@ -1662,8 +1659,7 @@ DomainParticipantImpl::enable()
 
     if (perm_handle_ == DDS::HANDLE_NIL) {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("DomainParticipantImpl::enable, ")
+        ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable, ")
         ACE_TEXT("Unable to validate local permissions. SecurityException[%d.%d]: %C\n"),
           se.code, se.minor_code, se.message.in()));
       return DDS::Security::RETCODE_NOT_ALLOWED_BY_SECURITY;
@@ -1672,8 +1668,7 @@ DomainParticipantImpl::enable()
     bool check_create = access->check_create_participant(perm_handle_, domain_id_, qos_, se);
     if (!check_create) {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("DomainParticipantImpl::enable, ")
+        ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable, ")
         ACE_TEXT("Unable to create participant. SecurityException[%d.%d]: %C\n"),
           se.code, se.minor_code, se.message.in()));
       return DDS::Security::RETCODE_NOT_ALLOWED_BY_SECURITY;
@@ -1684,32 +1679,40 @@ DomainParticipantImpl::enable()
 
     if (!check_part_sec_attr) {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("DomainParticipantImpl::enable, ")
+        ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable,")
         ACE_TEXT("Unable to get participant security attributes. SecurityException[%d.%d]: %C\n"),
           se.code, se.minor_code, se.message.in()));
       return DDS::RETCODE_ERROR;
     }
 
-    Security::CryptoKeyFactory_var crypto = security_config_->get_crypto_key_factory();
+    if (part_sec_attr.is_rtps_protected) { // DDS-Security v1.1 8.4.2.4 Table 27 is_rtps_protected
+      if (part_sec_attr.allow_unauthenticated_participants) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable, ")
+                   ACE_TEXT("allow_unauthenticated_participants is not possible with is_rtps_protected\n")));
+        return DDS::Security::RETCODE_NOT_ALLOWED_BY_SECURITY;
+      }
 
-    part_crypto_handle_ = crypto->register_local_participant(id_handle_, perm_handle_,
-      Util::filter_properties(qos_.property.value, "dds.sec.crypto."), part_sec_attr, se);
-    if (part_crypto_handle_ == DDS::HANDLE_NIL) {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("DomainParticipantImpl::enable, ")
-        ACE_TEXT("Unable to register local participant. SecurityException[%d.%d]: %C\n"),
-          se.code, se.minor_code, se.message.in()));
-      return DDS::RETCODE_ERROR;
+      const Security::CryptoKeyFactory_var crypto = security_config_->get_crypto_key_factory();
+      part_crypto_handle_ = crypto->register_local_participant(id_handle_, perm_handle_,
+        Util::filter_properties(qos_.property.value, "dds.sec.crypto."), part_sec_attr, se);
+      if (part_crypto_handle_ == DDS::HANDLE_NIL) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable, ")
+                   ACE_TEXT("Unable to register local participant. SecurityException[%d.%d]: %C\n"),
+                   se.code, se.minor_code, se.message.in()));
+        return DDS::RETCODE_ERROR;
+      }
+
+    } else {
+      part_crypto_handle_ = DDS::HANDLE_NIL;
     }
 
     value = disco->add_domain_participant_secure(domain_id_, qos_, dp_id_, id_handle_, perm_handle_, part_crypto_handle_);
 
     if (value.id == GUID_UNKNOWN) {
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("DomainParticipantImpl::enable, ")
+                 ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable, ")
                  ACE_TEXT("add_domain_participant_secure returned invalid id.\n")));
       return DDS::RETCODE_ERROR;
     }
@@ -1721,8 +1724,7 @@ DomainParticipantImpl::enable()
 
     if (value.id == GUID_UNKNOWN) {
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("DomainParticipantImpl::enable, ")
+                 ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable, ")
                  ACE_TEXT("add_domain_participant returned invalid id.\n")));
       return DDS::RETCODE_ERROR;
     }

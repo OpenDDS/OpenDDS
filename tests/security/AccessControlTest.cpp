@@ -277,11 +277,24 @@ public:
     DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(arg_count, const_cast<char**>(params));
   }
 
-  void add_property(Property_t p) {
-      PropertySeq& seq = domain_participant_qos.property.value;
-      const CORBA::ULong len = seq.length();
-      seq.length(len + 1);
-      seq[len] = p;
+  void add_property(const Property_t& p)
+  {
+    PropertySeq& seq = domain_participant_qos.property.value;
+    const CORBA::ULong len = seq.length();
+    seq.length(len + 1);
+    seq[len] = p;
+  }
+
+  void add_or_replace_property(const Property_t& p)
+  {
+    PropertySeq& seq = domain_participant_qos.property.value;
+    for (unsigned int i = 0; i < seq.length(); ++i) {
+      if (std::strcmp(seq[i].name, p.name) == 0) {
+        seq[i] = p;
+        return;
+      }
+    }
+    add_property(p);
   }
 
   std::string extract_file_name(const std::string& file_parm) {
@@ -469,7 +482,7 @@ TEST_F(AccessControlTest, check_create_datawriter_Success)
   ::DDS::Security::SecurityException ex;
 
   set_up_service_participant();
-  add_property(AccessControlTest::gov_6_p7s_);
+  add_or_replace_property(AccessControlTest::gov_6_p7s_);
 
   ::DDS::Security::PermissionsHandle out_handle =
           get_inst().validate_local_permissions(auth_plugin_.get(), 1, 0, domain_participant_qos, ex);
@@ -497,7 +510,7 @@ TEST_F(AccessControlTest, check_create_datawriter_default_Success)
   ::DDS::Security::SecurityException ex;
 
   set_up_service_participant();
-  add_property(AccessControlTest::gov_6_p7s_);
+  add_or_replace_property(AccessControlTest::gov_6_p7s_);
 
   ::DDS::Security::PermissionsHandle out_handle =
       get_inst().validate_local_permissions(auth_plugin_.get(), 1, 0, domain_participant_qos, ex);
@@ -523,8 +536,8 @@ TEST_F(AccessControlTest, check_create_datawriter_date_Fail)
     ::DDS::Security::SecurityException ex;
 
     set_up_service_participant();
-    add_property(AccessControlTest::gov_6_p7s_);
-    add_property(AccessControlTest::perm_date_p7s_);
+    add_or_replace_property(AccessControlTest::gov_6_p7s_);
+    add_or_replace_property(AccessControlTest::perm_date_p7s_);
 
     ::DDS::Security::PermissionsHandle out_handle =
         get_inst().validate_local_permissions(auth_plugin_.get(), 1, 0, domain_participant_qos, ex);
@@ -581,7 +594,7 @@ TEST_F(AccessControlTest, check_create_datareader_Success)
   ::DDS::Security::SecurityException ex;
 
   set_up_service_participant();
-  add_property(AccessControlTest::gov_6_p7s_);
+  add_or_replace_property(AccessControlTest::gov_6_p7s_);
 
   ::DDS::Security::PermissionsHandle permissions_handle =
           get_inst().validate_local_permissions(auth_plugin_.get(), 1, 0, domain_participant_qos, ex);
@@ -611,7 +624,7 @@ TEST_F(AccessControlTest, check_create_datareader_Success)
 //    ::DDS::Security::SecurityException ex;
 //
 //    set_up_service_participant();
-//    add_property(AccessControlTest::gov_6_p7s_);
+//    add_or_replace_property(AccessControlTest::gov_6_p7s_);
 //
 //    ::DDS::Security::PermissionsHandle permissions_handle =
 //        get_inst().validate_local_permissions(auth_plugin_.get(), 1, 0, domain_participant_qos, ex);
@@ -658,7 +671,7 @@ TEST_F(AccessControlTest, check_create_datareader_default_Success)
   ::DDS::Security::SecurityException ex;
 
   set_up_service_participant();
-  add_property(AccessControlTest::gov_6_p7s_);
+  add_or_replace_property(AccessControlTest::gov_6_p7s_);
 
   ::DDS::Security::PermissionsHandle permissions_handle =
       get_inst().validate_local_permissions(auth_plugin_.get(), 1, 0, domain_participant_qos, ex);
@@ -836,7 +849,7 @@ TEST_F(AccessControlTest, check_remote_participant_Success_Permissions)
   ::DDS::Security::AuthenticatedPeerCredentialToken remote_apc_token;
   ::DDS::Security::SecurityException ex;
 
-  add_property(AccessControlTest::gov_6_p7s_);
+  add_or_replace_property(AccessControlTest::gov_6_p7s_);
 
   participant_data.base.permissions_token.class_id = Expected_Permissions_Token_Class_Id;
 

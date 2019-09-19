@@ -70,6 +70,8 @@ namespace OpenDDS {
 
     const LocatorUDPv4_t LOCATORUDPv4_INVALID = { 0, 0 };
 
+    const ACE_CDR::Octet PROTOCOL_RTPS[] = {'R', 'T', 'P', 'S'};
+
     const ProtocolVersion_t PROTOCOLVERSION_1_0 = { 1, 0 };
     const ProtocolVersion_t PROTOCOLVERSION_1_1 = { 1, 1 };
     const ProtocolVersion_t PROTOCOLVERSION_2_0 = { 2, 0 };
@@ -82,6 +84,7 @@ namespace OpenDDS {
     const char BLOB_PROP_PART_CRYPTO_HANDLE[] = "ParticipantCryptoHandle";
     const char BLOB_PROP_DW_CRYPTO_HANDLE[] = "DatawriterCryptoHandle";
     const char BLOB_PROP_DR_CRYPTO_HANDLE[] = "DatareaderCryptoHandle";
+    const char BLOB_PROP_ENDPOINT_SEC_ATTR[] = "EndpointSecurityAttributes";
 
     const ::CORBA::Octet BEACON_MSG_ID = PAD;
     const ::CORBA::Octet BEACON_MESSAGE[] = { BEACON_MSG_ID, 0, 0, 0 };

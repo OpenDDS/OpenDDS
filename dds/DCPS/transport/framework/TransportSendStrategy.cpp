@@ -1690,10 +1690,14 @@ TransportSendStrategy::do_send_packet(const ACE_Message_Block* packet, int& bp)
   }
   DBG_ENTRY_LVL("TransportSendStrategy", "do_send_packet", 6);
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   // pre_send_packet may provide different data that takes the place of the
   // original "packet" (used for security encryption/authentication)
   Message_Block_Ptr substitute(pre_send_packet(packet));
+  if (!substitute) {
+    VDBG((LM_DEBUG, "(%P|%t) DBG:   pre_send_packet returned NULL, dropping.\n"));
+    return packet->total_length();
+  }
 #endif
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
@@ -1701,8 +1705,8 @@ TransportSendStrategy::do_send_packet(const ACE_Message_Block* packet, int& bp)
 
   iovec iov[MAX_SEND_BLOCKS];
 
-#if defined(OPENDDS_SECURITY)
-  const int num_blocks = mb_to_iov(substitute ? *substitute : *packet, iov);
+#ifdef OPENDDS_SECURITY
+  const int num_blocks = mb_to_iov(*substitute, iov);
 #else
   const int num_blocks = mb_to_iov(*packet, iov);
 #endif
@@ -1720,8 +1724,8 @@ TransportSendStrategy::do_send_packet(const ACE_Message_Block* packet, int& bp)
             "The send_bytes() said that num_bytes_sent == [%d].\n",
             num_bytes_sent), 5);
 
-#if defined(OPENDDS_SECURITY)
-  if (substitute && num_bytes_sent > 0) {
+#ifdef OPENDDS_SECURITY
+  if (num_bytes_sent > 0 && packet->data_block() != substitute->data_block()) {
     // Although the "substitute" data took the place of "packet", the rest
     // of the framework needs to account for the bytes in "packet" being taken
     // care of, as if they were actually sent.

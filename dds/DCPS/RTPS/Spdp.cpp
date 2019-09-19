@@ -158,6 +158,9 @@ Spdp::Spdp(DDS::DomainId_t domain,
 #ifdef OPENDDS_SECURITY
   , security_config_()
   , security_enabled_(false)
+  , identity_handle_(DDS::HANDLE_NIL)
+  , permissions_handle_(DDS::HANDLE_NIL)
+  , crypto_handle_(DDS::HANDLE_NIL)
 #endif
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
@@ -862,6 +865,11 @@ Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileM
 
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
+  if (crypto_handle_ == DDS::HANDLE_NIL) {
+    // not configured for RTPS Protection, therefore doesn't support participant crypto tokens
+    return;
+  }
+
   // If discovery hasn't initialized / validated this participant yet, ignore volatile message
   DiscoveredParticipantIter iter = participants_.find(src_participant);
   if (iter == participants_.end()) {
@@ -873,9 +881,10 @@ Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileM
   }
   DiscoveredParticipant& dp = iter->second;
 
-  dp.crypto_tokens_ = reinterpret_cast<const DDS::Security::ParticipantCryptoTokenSeq&>(msg.message_data);
+  const DDS::Security::ParticipantCryptoTokenSeq& inboundTokens =
+    reinterpret_cast<const DDS::Security::ParticipantCryptoTokenSeq&>(msg.message_data);
 
-  if (!key_exchange->set_remote_participant_crypto_tokens(crypto_handle_, dp.crypto_handle_, dp.crypto_tokens_, se)) {
+  if (!key_exchange->set_remote_participant_crypto_tokens(crypto_handle_, dp.crypto_handle_, inboundTokens, se)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::handle_participant_crypto_tokens() - ")
       ACE_TEXT("Unable to set remote participant crypto tokens with crypto key exchange plugin. ")
       ACE_TEXT("Security Exception[%d.%d]: %C\n"),
@@ -939,18 +948,20 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp)
   dp.crypto_handle_ = key_factory->register_matched_remote_participant(crypto_handle_, dp.identity_handle_, dp.permissions_handle_, dp.shared_secret_handle_, se);
   if (dp.crypto_handle_ == DDS::HANDLE_NIL) {
     ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
-      ACE_TEXT("Spdp::match_authenticated() - ")
-      ACE_TEXT("Unable to register remote participant with crypto key factory plugin. Security Exception[%d.%d]: %C\n"),
-        se.code, se.minor_code, se.message.in()));
+               ACE_TEXT("Spdp::match_authenticated() - ")
+               ACE_TEXT("Unable to register remote participant with crypto key factory plugin. Security Exception[%d.%d]: %C\n"),
+               se.code, se.minor_code, se.message.in()));
     return false;
   }
 
-  if (key_exchange->create_local_participant_crypto_tokens(crypto_tokens_, crypto_handle_, dp.crypto_handle_, se) == false) {
-    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
-      ACE_TEXT("Spdp::match_authenticated() - ")
-      ACE_TEXT("Unable to create local participant crypto tokens with crypto key exchange plugin. Security Exception[%d.%d]: %C\n"),
-        se.code, se.minor_code, se.message.in()));
-    return false;
+  if (crypto_handle_ != DDS::HANDLE_NIL) {
+    if (key_exchange->create_local_participant_crypto_tokens(dp.crypto_tokens_, crypto_handle_, dp.crypto_handle_, se) == false) {
+      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
+                 ACE_TEXT("Spdp::match_authenticated() - ")
+                 ACE_TEXT("Unable to create local participant crypto tokens with crypto key exchange plugin. Security Exception[%d.%d]: %C\n"),
+                 se.code, se.minor_code, se.message.in()));
+      return false;
+    }
   }
 
   // Must unlock when calling into part_bit() as it may call back into us
@@ -1938,27 +1949,36 @@ Spdp::lookup_participant_crypto_info(const DCPS::RepoId& id) const
 void
 Spdp::send_participant_crypto_tokens(const DCPS::RepoId& id)
 {
-  if (crypto_tokens_.length() != 0) {
+  DCPS::RepoId peer = id;
+  peer.entityId = ENTITYID_PARTICIPANT;
+  const DiscoveredParticipantConstIter iter = participants_.find(peer);
+  if (iter == participants_.end()) {
+    const DCPS::GuidConverter conv(peer);
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::send_participant_crypto_tokens() - ")
+               ACE_TEXT("Discovered participant %C not found.\n"), OPENDDS_STRING(conv).c_str()));
+  }
+  const DDS::Security::ParticipantCryptoTokenSeq& pcts = iter->second.crypto_tokens_;
+
+  if (pcts.length() != 0) {
     DCPS::RepoId writer = guid_;
     writer.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER;
 
-    DCPS::RepoId reader = id;
+    DCPS::RepoId reader = peer;
     reader.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER;
 
     DDS::Security::ParticipantVolatileMessageSecure msg;
     msg.message_identity.source_guid = writer;
     msg.message_class_id = DDS::Security::GMCLASSID_SECURITY_PARTICIPANT_CRYPTO_TOKENS;
-    msg.destination_participant_guid = id;
+    msg.destination_participant_guid = peer;
     msg.destination_endpoint_guid = GUID_UNKNOWN; // unknown = whole participant
     msg.source_endpoint_guid = GUID_UNKNOWN;
-    msg.message_data = reinterpret_cast<const DDS::Security::DataHolderSeq&>(crypto_tokens_);
+    msg.message_data = reinterpret_cast<const DDS::Security::DataHolderSeq&>(pcts);
 
     if (sedp_.write_volatile_message(msg, reader) != DDS::RETCODE_OK) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::send_participant_crypto_tokens() - ")
         ACE_TEXT("Unable to write volatile message.\n")));
     }
   }
-  return;
 }
 
 DDS::Security::PermissionsHandle

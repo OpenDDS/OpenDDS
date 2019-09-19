@@ -161,6 +161,10 @@ module DDS {
       long    minor_code;
     };
 
+    // These are not in the spec, but are significant for the DDS core
+    const long OPENDDS_EXCEPTION_CODE_NO_KEY = -10;
+    const long OPENDDS_EXCEPTION_MINOR_CODE_NO_KEY = 1;
+
     enum ValidationResult_t {
       VALIDATION_OK,
       VALIDATION_FAILED,
