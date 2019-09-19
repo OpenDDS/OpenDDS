@@ -5,21 +5,85 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include "dds/DdsDcpsCore.idl"
+
 module RtpsRelay {
 
-  @topic
-  struct GroupEntry {
-    @key string guid;
-    @key string group;
-    unsigned long expiration_timestamp;
+  // Vendor Id value from RTPS specification.
+  typedef octet GuidVendorId_t[2];
+
+  // GUID prefix bytes - uniquely specify the participant.
+  typedef octet GuidPrefix_t[12];
+
+  // Key portion of Entity identifier.
+  typedef octet EntityKey_t[3];
+
+  // Uniquely identify each entity within a participant.
+  struct EntityId_t {
+    @key EntityKey_t entityKey;
+    @key octet entityKind;
+  };
+
+  const octet ENTITYKIND_BUILTIN_UNKNOWN         = 0xc0;
+  const octet ENTITYKIND_BUILTIN_PARTICIPANT     = 0xc1;
+  const octet ENTITYKIND_BUILTIN_WRITER_WITH_KEY = 0xc2;
+  const octet ENTITYKIND_BUILTIN_WRITER_NO_KEY   = 0xc3;
+  const octet ENTITYKIND_BUILTIN_READER_NO_KEY   = 0xc4;
+  const octet ENTITYKIND_BUILTIN_READER_WITH_KEY = 0xc7;
+  const octet ENTITYKIND_BUILTIN_TOPIC           = 0xc5;
+
+  const octet ENTITYKIND_USER_UNKNOWN         = 0x00;
+  const octet ENTITYKIND_USER_WRITER_WITH_KEY = 0x02;
+  const octet ENTITYKIND_USER_WRITER_NO_KEY   = 0x03;
+  const octet ENTITYKIND_USER_READER_NO_KEY   = 0x04;
+  const octet ENTITYKIND_USER_READER_WITH_KEY = 0x07;
+
+  // Vendor specific Kinds have the following bit pattern: 01xx_xxxx
+  const octet ENTITYKIND_OPENDDS_SUBSCRIBER   = 0x41;
+  const octet ENTITYKIND_OPENDDS_PUBLISHER    = 0x42;
+
+  const octet ENTITYKIND_OPENDDS_TOPIC        = 0x45;
+  const octet ENTITYKIND_OPENDDS_USER         = 0x4a;
+
+  // Used in testing.
+  const octet ENTITYKIND_OPENDDS_NIL_WRITER = 0x4e;
+
+  // The actual GUID itself.
+  struct GUID_t {
+    @key GuidPrefix_t guidPrefix;
+    @key EntityId_t entityId;
+  };
+
+  typedef sequence<GUID_t> GUIDSeq;
+
+  struct RelayAddresses {
+    string spdp_relay_address;
+    string sedp_relay_address;
+    string data_relay_address;
   };
 
   @topic
-  struct RoutingEntry {
-    @key string guid;
-    string address;
-    string horizontal_relay_address;
-    unsigned long expiration_timestamp;
+  struct WriterEntry {
+    @key GUID_t guid;
+
+    string topic_name;
+    string type_name;
+    DDS::DataWriterQos data_writer_qos;
+    DDS::PublisherQos publisher_qos;
+
+    RelayAddresses relay_addresses;
+  };
+
+  @topic
+  struct ReaderEntry {
+    @key GUID_t guid;
+
+    string topic_name;
+    string type_name;
+    DDS::DataReaderQos data_reader_qos;
+    DDS::SubscriberQos subscriber_qos;
+
+    RelayAddresses relay_addresses;
   };
 
 };
