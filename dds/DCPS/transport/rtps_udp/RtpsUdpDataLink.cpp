@@ -2121,7 +2121,7 @@ RtpsUdpDataLink::RtpsWriter::gather_gaps_i(const RepoId& reader,
       }
     }
     for (size_t i = 0; i < readers.size(); ++i) {
-      std::memcpy(meta_submessage.dst_guid_.guidPrefix, readers[i].guidPrefix, sizeof(GuidPrefix_t));
+      meta_submessage.dst_guid_ = readers[i];
       gap.readerId = readers[i].entityId;
       // potentially multiple meta_submessages, but all directed
       meta_submessages.push_back(meta_submessage);
