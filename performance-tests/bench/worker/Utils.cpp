@@ -1,16 +1,10 @@
 #include "Utils.h"
 
+#include <string>
+#include <map>
+#include <vector>
+
 #include "dds/DCPS/DCPS_Utils.h"
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
-#include "../idl/BenchTypeSupportImpl.h"
-
-#include "rapidjson/document.h"
-#include "rapidjson/istreamwrapper.h"
-#include "rapidjson/ostreamwrapper.h"
-#include "rapidjson/writer.h"
-#pragma GCC diagnostic pop
 
 // QosProfile
 
@@ -204,31 +198,3 @@ void set_global_properties(Builder::PropertySeq& properties) {
 const Builder::PropertySeq& get_global_properties() {
   return properties_;
 }
-
-// json_2_config
-
-bool json_2_config(std::istream& is, Bench::WorkerConfig& config) {
-  rapidjson::Document document;
-  rapidjson::IStreamWrapper isw(is);
-  document.ParseStream(isw);
-  if (!document.IsObject()) {
-    std::cerr << "Expected configuration file to contain JSON document object" << std::endl;
-    return false;
-  }
-
-  OpenDDS::DCPS::copyFromRapidJson(document, config);
-
-  return true;
-}
-
-bool report_2_json(const Bench::WorkerReport& report, std::ostream& os) {
-  rapidjson::Document document;
-  document.SetObject();
-  OpenDDS::DCPS::copyToRapidJson(report, document, document.GetAllocator());
-  rapidjson::OStreamWrapper osw(os);
-  rapidjson::Writer<rapidjson::OStreamWrapper> writer(osw);
-  document.Accept(writer);
-  osw.Flush();
-  return true;
-}
-

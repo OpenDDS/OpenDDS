@@ -11,21 +11,20 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/WaitSet.h>
 
-#include <util.h>
-
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 #include "BenchTypeSupportImpl.h"
 #include "PropertyStatBlock.h"
-
-#include "rapidjson/document.h"
-#include "rapidjson/istreamwrapper.h"
 #pragma GCC diagnostic pop
+
+#include <util.h>
+#include <json_conversion.h>
 
 using namespace Bench::NodeController;
 using Bench::get_option_argument_int;
 using Bench::get_option_argument_uint;
 using Bench::join_path;
+using Bench::json_2_idl;
 
 struct Node {
   NodeId node_id;
@@ -54,21 +53,6 @@ std::string read_file(const std::string& name)
     std::cerr << "Couldn't open " << name << std::endl;
   }
   return ss.str();
-}
-
-bool json_2_report(std::istream& is, Bench::WorkerReport& report)
-{
-  rapidjson::Document document;
-  rapidjson::IStreamWrapper isw(is);
-  document.ParseStream(isw);
-  if (!document.IsObject()) {
-    std::cerr << "Expected report file to contain JSON document object" << std::endl;
-    return false;
-  }
-
-  OpenDDS::DCPS::copyFromRapidJson(document, report);
-
-  return true;
 }
 
 class Scenario {
@@ -490,7 +474,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
           Bench::WorkerReport report;
           std::stringstream ss;
           ss << reports[r].details << std::flush;
-          if (json_2_report(ss, report)) {
+          if (json_2_idl(ss, report)) {
             parsed_reports.push_back(report);
           } else {
             std::cerr << "Error parsing report details for node "

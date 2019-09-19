@@ -40,6 +40,7 @@
 #include <condition_variable>
 
 #include <util.h>
+#include <json_conversion.h>
 
 using Builder::Log;
 using Bench::get_option_argument;
@@ -130,7 +131,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   config.start_time = ZERO;
   config.stop_time = ZERO;
 
-  if (!json_2_config(config_file, config)) {
+  if (!json_2_idl(config_file, config)) {
     std::cerr << "Unable to parse configuration" << std::endl;
     return 3;
   }
@@ -504,7 +505,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   // If requested, write out worker report to file
 
   if (!report_file_path.empty()) {
-    report_2_json(worker_report, report_file);
+    idl_2_json(worker_report, report_file);
   }
 
   // Log / print a few of the stats
