@@ -41,12 +41,12 @@ struct URI {
 
 int increment_handle(int& next);
 
-void set_security_error(DDS::Security::SecurityException& ex,
+bool set_security_error(DDS::Security::SecurityException& ex,
                         int code,
                         int minor_code,
                         const char* message);
 
-void set_security_error(DDS::Security::SecurityException& ex,
+bool set_security_error(DDS::Security::SecurityException& ex,
                         int code,
                         int minor_code,
                         const char* message,

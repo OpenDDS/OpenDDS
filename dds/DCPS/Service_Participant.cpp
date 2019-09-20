@@ -185,7 +185,6 @@ Service_Participant::Service_Participant()
     federation_initial_backoff_seconds_(DEFAULT_FEDERATION_INITIAL_BACKOFF_SECONDS),
     federation_backoff_multiplier_(DEFAULT_FEDERATION_BACKOFF_MULTIPLIER),
     federation_liveliness_(DEFAULT_FEDERATION_LIVELINESS),
-    schedulerQuantum_(ACE_Time_Value::zero),
 #if defined OPENDDS_SAFETY_PROFILE && defined ACE_HAS_ALLOC_HOOKS
     pool_size_(1024*1024*16),
     pool_granularity_(8),
@@ -197,7 +196,6 @@ Service_Participant::Service_Participant()
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
     persistent_data_dir_(DEFAULT_PERSISTENT_DATA_DIR),
 #endif
-    pending_timeout_(ACE_Time_Value::zero),
     bidir_giop_(true),
     monitor_enabled_(false),
     shut_down_(false)
@@ -522,7 +520,7 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
 #endif
 
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSPendingTimeout"))) != 0) {
-      this->pending_timeout_ = ACE_OS::atoi(currentArg);
+      pending_timeout_ = TimeDuration(ACE_OS::atoi(currentArg));
       arg_shifter.consume_arg();
       got_pending_timeout = true;
 
@@ -798,7 +796,7 @@ Service_Participant::initializeScheduling()
       ace_scheduler,
       ACE_Sched_Params::priority_min(ace_scheduler),
       ACE_SCOPE_THREAD,
-      this->schedulerQuantum_);
+      schedulerQuantum_.value());
 
     if (ACE_OS::sched_params(params) != 0) {
       if (ACE_OS::last_error() == EPERM) {
@@ -1041,15 +1039,14 @@ Service_Participant::repository_lost(Discovery::RepoKey key)
   }
 
   // Calculate the bounding end time for attempts.
-  ACE_Time_Value recoveryFailedTime
-  = ACE_OS::gettimeofday()
-    + ACE_Time_Value(this->federation_recovery_duration(), 0);
+  const TimeDuration td(federation_recovery_duration());
+  const MonotonicTimePoint recoveryFailedTime(MonotonicTimePoint::now() + td);
 
   // Backoff delay.
   int backoff = this->federation_initial_backoff_seconds();
 
   // Keep trying until the total recovery time specified is exceeded.
-  while (recoveryFailedTime > ACE_OS::gettimeofday()) {
+  while (recoveryFailedTime > MonotonicTimePoint::now()) {
 
     // Wrap to the beginning at the end of the list.
     if (current == this->discoveryMap_.end()) {
@@ -1114,7 +1111,7 @@ Service_Participant::repository_lost(Discovery::RepoKey key)
 
   // If we reach here, we have exceeded the total recovery time
   // specified.
-  OPENDDS_ASSERT(recoveryFailedTime == ACE_Time_Value::zero);
+  OPENDDS_ASSERT(recoveryFailedTime.is_zero());
 }
 
 void
@@ -1592,7 +1589,7 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
     } else {
       int timeout = 0;
       GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSPendingTimeout"), timeout, int)
-      this->pending_timeout_ = timeout;
+      pending_timeout_ = TimeDuration(timeout);
     }
 
     if (got_publisher_content_filter) {
@@ -1676,8 +1673,9 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
 
     GET_CONFIG_VALUE(cf, sect, ACE_TEXT("scheduler_slice"), usec, suseconds_t)
 
-    if (usec > 0)
-      this->schedulerQuantum_.usec(usec);
+    if (usec > 0) {
+      schedulerQuantum_ = TimeDuration(0, usec);
+    }
   }
 
   return 0;

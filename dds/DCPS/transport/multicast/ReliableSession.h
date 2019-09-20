@@ -36,7 +36,7 @@ public:
   virtual bool reactor_is_shut_down() const;
 
 protected:
-  virtual ACE_Time_Value next_interval();
+  virtual TimeDuration next_interval();
   virtual void on_interval(const void* arg);
 
 private:
@@ -85,7 +85,7 @@ private:
 
   DisjointSequence nak_sequence_;
 
-  typedef OPENDDS_MAP(ACE_Time_Value, SequenceNumber) NakRequestMap;
+  typedef OPENDDS_MAP(MonotonicTimePoint, SequenceNumber) NakRequestMap;
   NakRequestMap nak_requests_;
 
   ACE_Thread_Mutex held_lock_;

@@ -5,6 +5,7 @@
 #include "dds/DCPS/PublisherImpl.h"
 #include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DCPS/StaticIncludes.h"
+#include "dds/DCPS/SafetyProfileStreams.h"
 #include "MessengerTypeSupportImpl.h"
 
 #ifdef ACE_AS_STATIC_LIBS
@@ -54,8 +55,9 @@ public:
     MessageDataReader_var mdr = MessageDataReader::_narrow(reader);
     MessageSeq data;
     SampleInfoSeq infoseq;
-    if (mdr->read_w_condition(data, infoseq, LENGTH_UNLIMITED, rc_) == RETCODE_ERROR) {
-      cerr << "ERROR: read_w_condition failed" << endl;
+    ReturnCode_t rc = mdr->read_w_condition(data, infoseq, LENGTH_UNLIMITED, rc_);
+    if (rc != RETCODE_OK && rc != RETCODE_NO_DATA) {
+      cerr << "ERROR: read_w_condition failed: " << retcode_to_string(rc) << endl;
     }
   }
 
@@ -74,16 +76,28 @@ bool test_setup(const DomainParticipant_var& dp,
   Topic_var topic = dp->create_topic(topicName, typeName,
                                      TOPIC_QOS_DEFAULT, 0,
                                      DEFAULT_STATUS_MASK);
+  if (!topic) {
+    cerr << "ERROR: test_setup: create_topic failed" << endl;
+    return false;
+  }
 
   DataWriterQos dw_qos;
   pub->get_default_datawriter_qos(dw_qos);
   dw_qos.history.kind = KEEP_ALL_HISTORY_QOS;
   dw = pub->create_datawriter(topic, dw_qos, 0, DEFAULT_STATUS_MASK);
+  if (!dw) {
+    cerr << "ERROR: test_setup: create_datawriter failed" << endl;
+    return false;
+  }
 
   DataReaderQos dr_qos;
   sub->get_default_datareader_qos(dr_qos);
   dr_qos.history.kind = KEEP_ALL_HISTORY_QOS;
   dr = sub->create_datareader(topic, dr_qos, 0, DEFAULT_STATUS_MASK);
+  if (!dr) {
+    cerr << "ERROR: test_setup: create_datareader failed" << endl;
+    return false;
+  }
 
   StatusCondition_var dw_sc = dw->get_statuscondition();
   dw_sc->set_enabled_statuses(PUBLICATION_MATCHED_STATUS);
@@ -107,6 +121,10 @@ bool complex_test_setup(const DomainParticipant_var& dp,
   Topic_var topic = dp->create_topic(topicName, typeName,
                                      TOPIC_QOS_DEFAULT, 0,
                                      DEFAULT_STATUS_MASK);
+  if (!topic) {
+    cerr << "ERROR: complex_test_setup: create_topic failed" << endl;
+    return false;
+  }
 
   DataWriterQos dw_qos;
   pub->get_default_datawriter_qos(dw_qos);
@@ -114,6 +132,10 @@ bool complex_test_setup(const DomainParticipant_var& dp,
   dw_qos.durability.kind = TRANSIENT_DURABILITY_QOS;
   dw_qos.reliability.kind = RELIABLE_RELIABILITY_QOS;
   dw = pub->create_datawriter(topic, dw_qos, 0, DEFAULT_STATUS_MASK);
+  if (!dw) {
+    cerr << "ERROR: complex_test_setup: create_datawriter failed" << endl;
+    return false;
+  }
 
   DataReaderQos dr_qos;
   sub->get_default_datareader_qos(dr_qos);
@@ -121,7 +143,15 @@ bool complex_test_setup(const DomainParticipant_var& dp,
   dr_qos.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
   dr_qos.reliability.kind = RELIABLE_RELIABILITY_QOS;
   dr1 = sub->create_datareader(topic, dr_qos, 0, DEFAULT_STATUS_MASK);
+  if (!dr1) {
+    cerr << "ERROR: complex_test_setup: 1st create_datareader failed" << endl;
+    return false;
+  }
   dr2 = sub->create_datareader(topic, dr_qos, 0, DEFAULT_STATUS_MASK);
+  if (!dr2) {
+    cerr << "ERROR: complex_test_setup: 2nd create_datareader failed" << endl;
+    return false;
+  }
 
   StatusCondition_var dw_sc = dw->get_statuscondition();
   dw_sc->set_enabled_statuses(PUBLICATION_MATCHED_STATUS);
@@ -145,23 +175,21 @@ bool test_cleanup(
   Topic_var topic = dw->get_topic();
   ReturnCode_t r = sub->delete_datareader(dr);
   if (r != DDS::RETCODE_OK) {
-    cerr << "ERROR: "
-      << (complex_test ? "complex_" : "") << "test_cleanup: "
+    cerr << "ERROR: " << (complex_test ? "complex_" : "") << "test_cleanup: "
       << "delete " << (complex_test ? "1st " : "")
-      <<"datareader failed (" << r << ')' << endl;
+      << "datareader failed: " << retcode_to_string(r) << endl;
+    return false;
   }
   r = pub->delete_datawriter(dw);
   if (r != DDS::RETCODE_OK) {
-    cerr << "ERROR: "
-      << (complex_test ? "complex_" : "") << "test_cleanup: "
-      << "delete datawriter failed (" << r << ')' << endl;
+    cerr << "ERROR: " << (complex_test ? "complex_" : "") << "test_cleanup: "
+      << "delete datawriter failed: " << retcode_to_string(r) << endl;
     return false;
   }
   r = dp->delete_topic(topic);
   if (r != DDS::RETCODE_OK) {
-    cerr << "ERROR: "
-      << (complex_test ? "complex_" : "") << "test_cleanup: "
-      << "delete topic failed (" << r << ')' << endl;
+    cerr << "ERROR: " << (complex_test ? "complex_" : "") << "test_cleanup: "
+      << "delete topic failed: " << retcode_to_string(r) << endl;
     return false;
   }
   return true;
@@ -172,9 +200,10 @@ bool complex_test_cleanup(
   const Publisher_var& pub, const Subscriber_var& sub,
   DataWriter_var& dw, DataReader_var& dr1, DataReader_var& dr2)
 {
-  if (sub->delete_datareader(dr2) != DDS::RETCODE_OK) {
-    cerr << "ERROR: complex_test_cleanup: "
-      << "delete 2nd datareader failed" << endl;
+  ReturnCode_t rc = sub->delete_datareader(dr2);
+  if (rc != DDS::RETCODE_OK) {
+    cerr << "ERROR: complex_test_cleanup: delete 2nd datareader failed: "
+      << retcode_to_string(rc) << endl;
     return false;
   }
   return test_cleanup(dp, pub, sub, dw, dr1, true);
@@ -213,7 +242,10 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   Message sample;
   sample.key = 1;
   ReturnCode_t ret = mdw->write(sample, HANDLE_NIL);
-  if (ret != RETCODE_OK) return false;
+  if (ret != RETCODE_OK) {
+    cerr << "ERROR: run_filtering_test: write failed: " << retcode_to_string(ret) << endl;
+    return false;
+  }
   if (!waitForSample(dr)) return false;
 
   ReadCondition_var dr_qc = dr->create_querycondition(ANY_SAMPLE_STATE,
@@ -238,18 +270,23 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   SampleInfoSeq infoseq;
   ret = mdr->take_w_condition(data, infoseq, LENGTH_UNLIMITED, dr_qc);
   if (ret != RETCODE_NO_DATA) {
-    cerr << "ERROR: take_w_condition(qc) shouldn't have returned data" << endl;
+    cerr << "ERROR: expected no data, but take_w_condition(qc) returned: "
+      << retcode_to_string(ret) << endl;
     return false;
   }
 
   SampleInfo info;
   if (mdr->take_next_sample(sample, info) != RETCODE_OK) {
-    cerr << "ERROR: take_next_sample() should have returned data" << endl;
+    cerr << "ERROR: take_next_sample() failed: " << retcode_to_string(ret) << endl;
     return false;
   }
 
   sample.key = 2;
-  if (mdw->write(sample, HANDLE_NIL) != RETCODE_OK) return false;
+  ret = mdw->write(sample, HANDLE_NIL);
+  if (ret != RETCODE_OK) {
+    cerr << "ERROR: take_next_sample() failed: " << retcode_to_string(ret) << endl;
+    return false;
+  }
   if (!waitForSample(dr)) return false;
 
   ws->attach_condition(dr_qc);
@@ -262,11 +299,15 @@ bool run_filtering_test(const DomainParticipant_var& dp,
 
   ret = mdr->take_w_condition(data, infoseq, LENGTH_UNLIMITED, dr_qc);
   if (ret != RETCODE_OK) {
-    cerr << "ERROR: take_w_condition(qc) should have returned data" << endl;
+    cerr << "ERROR: take_w_condition(qc) failed: " << retcode_to_string(ret) << endl;
     return false;
   }
 
-  dr->delete_readcondition(dr_qc);
+  ret = dr->delete_readcondition(dr_qc);
+  if (ret != RETCODE_OK) {
+    cerr << "ERROR: delete dr_qc failed: " << retcode_to_string(ret) << endl;
+    return false;
+  }
   if (!test_cleanup(dp, pub, sub, dw, dr)) {
     cerr << "ERROR: run_filtering_test: cleanup failed" << endl;
     return false;
@@ -313,12 +354,12 @@ bool run_complex_filtering_test(const DomainParticipant_var& dp,
   SampleInfoSeq infoseq;
   ReturnCode_t ret = mdr1->take_w_condition(data, infoseq, LENGTH_UNLIMITED, dr_qc1);
   if (ret != RETCODE_NO_DATA) {
-    cerr << "ERROR: take_w_condition(qc1) shouldn't have returned data" << endl;
+    cerr << "ERROR: take_w_condition(qc1): expected no data but got: " << retcode_to_string(ret) << endl;
     return false;
   }
   ret = mdr2->take_w_condition(data, infoseq, LENGTH_UNLIMITED, dr_qc2);
   if (ret != RETCODE_NO_DATA) {
-    cerr << "ERROR: take_w_condition(qc2) shouldn't have returned data" << endl;
+    cerr << "ERROR: take_w_condition(qc2): expected no data but got: " << retcode_to_string(ret) << endl;
     return false;
   }
 
@@ -341,7 +382,12 @@ bool run_complex_filtering_test(const DomainParticipant_var& dp,
         return false;
       }
       sample.iteration = j;
-      if (mdw->write(sample, hnd) != RETCODE_OK) return false;
+      ret = mdw->write(sample, hnd);
+      if (ret != RETCODE_OK) {
+        cerr << "ERROR: run_complex_filtering_test: write failed: "
+          << retcode_to_string(ret) << endl;
+        return false;
+      }
     }
   }
 
@@ -352,18 +398,33 @@ bool run_complex_filtering_test(const DomainParticipant_var& dp,
       cerr << "ERROR: Lookup instance failed" << endl;
       return false;
     }
-    if (mdw->dispose(sample, hnd) != RETCODE_OK) {
-      cerr << "ERROR: Dispose instance failed" << endl;
+    ret = mdw->dispose(sample, hnd);
+    if (ret != RETCODE_OK) {
+      cerr << "ERROR: Dispose instance " << i << " failed: " << retcode_to_string(ret) << endl;
       return false;
     }
-    if (mdw->unregister_instance(sample, hnd) != RETCODE_OK) {
-      cerr << "ERROR: Unregistering instance failed" << endl;
+    ret = mdw->unregister_instance(sample, hnd);
+    if (ret != RETCODE_OK) {
+      cerr << "ERROR: Unregistering instance " << i << " failed: "<< retcode_to_string(ret) << endl;
       return false;
     }
   }
 
-  dr1->delete_readcondition(dr_qc1);
-  dr2->delete_readcondition(dr_qc2);
+  mdr1->set_listener(0, 0);
+  mdr2->set_listener(0, 0);
+  mdr1 = 0;
+  mdr2 = 0;
+
+  ret = dr1->delete_readcondition(dr_qc1);
+  if (ret != RETCODE_OK) {
+    cerr << "ERROR: delete dr_qc1 failed: " << retcode_to_string(ret) << endl;
+    return false;
+  }
+  ret = dr2->delete_readcondition(dr_qc2);
+  if (ret != RETCODE_OK) {
+    cerr << "ERROR: delete dr_qc2 failed: " << retcode_to_string(ret) << endl;
+    return false;
+  }
   if (!complex_test_cleanup(dp, pub, sub, dw, dr1, dr2)) {
     cerr << "ERROR: run_complex_filtering_test: cleanup failed" << endl;
     return false;
@@ -419,7 +480,8 @@ bool run_sorting_test(const DomainParticipant_var& dp,
   Duration_t five_seconds = {5, 0};
   bool passed = true, done = false;
   if (sub->delete_datareader(dr) != DDS::RETCODE_PRECONDITION_NOT_MET) {
-    cerr << "ERROR: the deletion of a DataReader is not allowed if there are any existing QueryCondition objects that are attached to the DataReader." << endl;
+    cerr << "ERROR: the deletion of a DataReader is not allowed if there are "
+      "any existing QueryCondition objects that are attached to the DataReader." << endl;
     passed = false;
     done = true;
   }
@@ -649,12 +711,18 @@ bool run_single_dispose_filter_test(const DomainParticipant_var& dp,
   sample.iteration = 0;
   ret = mdw->write(sample, HANDLE_NIL);
   if (ret != RETCODE_OK) {
-    cerr << "ERROR: run_single_dispose_filter_test: write failed" << endl;
+    cerr << "ERROR: run_single_dispose_filter_test: write failed: "
+      << retcode_to_string(ret) << endl;
     return false;
   }
 
   // Create Dispose Sample with Invalid Data by Disposing the Sample Instance
-  mdw->dispose(sample, HANDLE_NIL);
+  ret = mdw->dispose(sample, HANDLE_NIL);
+  if (ret != RETCODE_OK) {
+    cerr << "ERROR: run_single_dispose_filter_test: "
+      "Dispose instance failed: " << retcode_to_string(ret) << endl;
+    return false;
+  }
 
   // Wait for samples matching the query from the disposed instance
   if (ws->wait(active, max_wait_time) != RETCODE_OK) {
@@ -669,7 +737,8 @@ bool run_single_dispose_filter_test(const DomainParticipant_var& dp,
   SampleInfoSeq infoseq;
   ret = mdr->take_w_condition(data, infoseq, LENGTH_UNLIMITED, dr_qc);
   if (ret != RETCODE_OK) {
-    cerr << "ERROR: run_single_dispose_filter_test: take_w_condition failed" << endl;
+    cerr << "ERROR: run_single_dispose_filter_test: take_w_condition failed: "
+      << retcode_to_string(ret) << endl;
     return false;
   }
   unsigned num_valid = 0;
@@ -696,7 +765,11 @@ bool run_single_dispose_filter_test(const DomainParticipant_var& dp,
   }
 
   // Cleanup
-  dr->delete_readcondition(dr_qc);
+  ret = dr->delete_readcondition(dr_qc);
+  if (ret != RETCODE_OK) {
+    cerr << "ERROR: run_single_dispose_filter_test: delete_readcondition failed: "
+        << retcode_to_string(ret) << endl;
+  }
   if (!test_cleanup(dp, pub, sub, dw, dr)) {
     cerr << "ERROR: run_single_dispose_filter_test: setup failed" << endl;
     return false;

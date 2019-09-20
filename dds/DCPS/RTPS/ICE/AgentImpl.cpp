@@ -8,6 +8,7 @@
 #include "AgentImpl.h"
 
 #include "dds/DCPS/Service_Participant.h"
+#include "dds/DCPS/TimeTypes.h"
 #include "Task.h"
 #include "EndpointManager.h"
 
@@ -18,6 +19,9 @@ namespace ICE {
 
 #ifdef OPENDDS_SECURITY
 
+using DCPS::TimeDuration;
+using DCPS::MonotonicTimePoint;
+
 bool AgentImpl::TaskCompare::operator()(const Task* x, const Task* y) const
 {
   return x->release_time_ > y->release_time_;
@@ -26,15 +30,15 @@ bool AgentImpl::TaskCompare::operator()(const Task* x, const Task* y) const
 struct ScheduleTimerCommand : public DCPS::ReactorInterceptor::Command {
   ACE_Reactor* reactor;
   ACE_Event_Handler* event_handler;
-  ACE_Time_Value delay;
+  TimeDuration delay;
 
-  ScheduleTimerCommand(ACE_Reactor* a_reactor, ACE_Event_Handler* a_event_handler, const ACE_Time_Value& a_delay) :
+  ScheduleTimerCommand(ACE_Reactor* a_reactor, ACE_Event_Handler* a_event_handler, const TimeDuration& a_delay) :
     reactor(a_reactor), event_handler(a_event_handler), delay(a_delay) {}
 
   void execute()
   {
     reactor->cancel_timer(event_handler, 0);
-    reactor->schedule_timer(event_handler, 0, delay);
+    reactor->schedule_timer(event_handler, 0, delay.value());
   }
 };
 
@@ -45,7 +49,7 @@ void AgentImpl::enqueue(Task* a_task)
     a_task->in_queue_ = true;
 
     if (a_task == tasks_.top()) {
-      ACE_Time_Value const delay = std::max(get_configuration().T_a(), a_task->release_time_ - ACE_Time_Value().now());
+      const TimeDuration delay = std::max(get_configuration().T_a(), a_task->release_time_ - MonotonicTimePoint::now());
       execute_or_enqueue(new ScheduleTimerCommand(reactor(), this, delay));
     }
   }
@@ -58,6 +62,7 @@ bool AgentImpl::reactor_is_shut_down() const
 
 int AgentImpl::handle_timeout(const ACE_Time_Value& a_now, const void* /*act*/)
 {
+  const MonotonicTimePoint now(a_now);
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, mutex, 0);
   check_invariants();
 
@@ -69,10 +74,10 @@ int AgentImpl::handle_timeout(const ACE_Time_Value& a_now, const void* /*act*/)
   tasks_.pop();
   task->in_queue_ = false;
 
-  task->execute(a_now);
+  task->execute(now);
 
   if (!tasks_.empty()) {
-    ACE_Time_Value const delay = std::max(get_configuration().T_a(), tasks_.top()->release_time_ - a_now);
+    const TimeDuration delay = std::max(get_configuration().T_a(), tasks_.top()->release_time_ - now);
     execute_or_enqueue(new ScheduleTimerCommand(reactor(), this, delay));
   }
 

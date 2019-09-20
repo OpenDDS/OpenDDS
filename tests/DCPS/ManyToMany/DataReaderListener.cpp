@@ -79,6 +79,8 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
         if (si.valid_data) {
           const Messenger::Message& message = messages[i];
 
+          ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+
           // output for console to consume
           std::stringstream ss;
           ss << "Message: from writer " << message.process_id.in()
@@ -109,6 +111,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
               break;
             }
           }
+
           if (!options_.no_validation) {
             std::string process_id(message.process_id.in());
             processes_[process_id][message.participant_id][message.writer_id].insert(message.sample_id);
@@ -197,6 +200,8 @@ void DataReaderListenerImpl::report_errors() const
 
 bool DataReaderListenerImpl::done(bool report) const
 {
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
+
   bool valid_and_done = true;
   if (expected_num_samples_ > 0) {
     const bool complete = num_samples_ >= expected_num_samples_;

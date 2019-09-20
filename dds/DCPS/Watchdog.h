@@ -15,8 +15,7 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 #include "dds/DCPS/ReactorInterceptor.h"
-
-#include "ace/Time_Value.h"
+#include "dds/DCPS/TimeDuration.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -35,7 +34,7 @@ namespace DCPS {
 class OpenDDS_Dcps_Export Watchdog : public ReactorInterceptor {
 protected:
 
-  explicit Watchdog(const ACE_Time_Value& interval);
+  explicit Watchdog(const TimeDuration& interval);
 
   virtual ~Watchdog();
 
@@ -54,15 +53,15 @@ public:
    *       expiration.  This behavior is dictated by the
    *       @c ACE_Reactor.
    */
-  void reset_interval(const ACE_Time_Value& interval);
+  void reset_interval(const TimeDuration& interval);
 
   /// Schedule with the @c Watchdog timer interval, i.e. time between
   /// recurring timer expirations.
-  long schedule_timer(const void* act, const ACE_Time_Value& interval);
+  long schedule_timer(const void* act, const TimeDuration& interval);
 
   /// Schedule with the @c Watchdog timer delay and timer interval,
   /// i.e. time between recurring timer expirations.
-  long schedule_timer(const void* act, const ACE_Time_Value& delay, const ACE_Time_Value& interval);
+  long schedule_timer(const void* act, const TimeDuration& delay, const TimeDuration& interval);
 
   /// Cancel a specific timer.
   int cancel_timer(long timer_id);
@@ -75,7 +74,7 @@ public:
 
 protected:
   /// Current time interval.
-  ACE_Time_Value interval_;
+  TimeDuration interval_;
 };
 
 } // namespace DCPS

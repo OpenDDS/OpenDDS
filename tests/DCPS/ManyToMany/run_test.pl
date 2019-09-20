@@ -263,14 +263,15 @@ print "sub_opts=$sub_opts\n";
 
 $test->setup_discovery();
 
-for ($index = 0; $index < $sub_processes; ++$index) {
-    $test->process("subscriber #$index", "subscriber", $sub_opts .
-                   ($PerlDDS::SafetyProfile ? "-p $index" : ''));
-}
 for ($index = 0; $index < $pub_processes; ++$index) {
     $test->process("publisher #$index", "publisher", $pub_opts .
                    ($PerlDDS::SafetyProfile ? '-p '.
                     ($sub_processes + $index) : ''));
+}
+
+for ($index = 0; $index < $sub_processes; ++$index) {
+    $test->process("subscriber #$index", "subscriber", $sub_opts .
+                   ($PerlDDS::SafetyProfile ? "-p $index" : ''));
 }
 
 for ($index = 0; $index < $pub_processes; ++$index) {
@@ -283,9 +284,9 @@ for ($index = 0; $index < $sub_processes; ++$index) {
 
 # first subscriber process needs to be killed a little after the
 # total expected duration
-my $wait_to_kill = $total_duration_msec / 1000 + 1;
+my $wait_to_kill = $total_duration_msec / 1000 + 10;
 print "wait_to_kill=$wait_to_kill\n";
 # ignore this issue that is already being tracked in redmine
 $test->ignore_error("(Redmine Issue# 1446)");
-$test->{wait_after_first_proc} = 1;
+$test->{wait_after_first_proc} = 10;
 exit $test->finish($wait_to_kill);

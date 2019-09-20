@@ -42,7 +42,6 @@ namespace DCPS {
 DataLink::DataLink(TransportImpl& impl, Priority priority, bool is_loopback,
                    bool is_active)
   : stopped_(false),
-    scheduled_to_stop_at_(ACE_Time_Value::zero),
     impl_(impl),
     transport_priority_(priority),
     scheduling_release_(false),
@@ -54,8 +53,7 @@ DataLink::DataLink(TransportImpl& impl, Priority priority, bool is_loopback,
 {
   DBG_ENTRY_LVL("DataLink", "DataLink", 6);
 
-  datalink_release_delay_.sec(impl.config().datalink_release_delay_ / 1000);
-  datalink_release_delay_.usec(impl.config().datalink_release_delay_ % 1000 * 1000);
+  datalink_release_delay_ = TimeDuration::from_msec(impl.config().datalink_release_delay_);
 
   id_ = DataLink::get_next_datalink_id();
 
@@ -256,7 +254,8 @@ DataLink::invoke_on_start_callbacks(const RepoId& local, const RepoId& remote, b
 int
 DataLink::handle_exception(ACE_HANDLE /* fd */)
 {
-  if(this->scheduled_to_stop_at_ == ACE_Time_Value::zero) {
+  const MonotonicTimePoint now = MonotonicTimePoint::now();
+  if (scheduled_to_stop_at_.is_zero()) {
     if (DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataLink::handle_exception() - not scheduling or stopping\n")));
@@ -269,7 +268,7 @@ DataLink::handle_exception(ACE_HANDLE /* fd */)
       }
     }
     return 0;
-  } else if (this->scheduled_to_stop_at_ <= ACE_OS::gettimeofday()) {
+  } else if (scheduled_to_stop_at_ <= now) {
     if (this->scheduling_release_) {
       if (DCPS_debug_level > 0) {
         ACE_DEBUG((LM_DEBUG,
@@ -290,8 +289,8 @@ DataLink::handle_exception(ACE_HANDLE /* fd */)
                  ACE_TEXT("(%P|%t) DataLink::handle_exception() - (delay) scheduling timer for future release\n")));
     }
     ACE_Reactor_Timer_Interface* reactor = impl_.timer();
-    ACE_Time_Value future_release_time = this->scheduled_to_stop_at_ - ACE_OS::gettimeofday();
-    reactor->schedule_timer(this, 0, future_release_time);
+    const TimeDuration future_release_time = scheduled_to_stop_at_ - now;
+    reactor->schedule_timer(this, 0, future_release_time.value());
   }
   return 0;
 }
@@ -300,9 +299,9 @@ DataLink::handle_exception(ACE_HANDLE /* fd */)
 //this thread avoids possibly deadlocking trying to access reactor
 //to stop strategies or schedule timers
 void
-DataLink::schedule_stop(const ACE_Time_Value& schedule_to_stop_at)
+DataLink::schedule_stop(const MonotonicTimePoint& schedule_to_stop_at)
 {
-  if (!this->stopped_ && this->scheduled_to_stop_at_ == ACE_Time_Value::zero) {
+  if (!stopped_ && scheduled_to_stop_at_.is_zero()) {
     this->scheduled_to_stop_at_ = schedule_to_stop_at;
     notify_reactor();
     // reactor will invoke our DataLink::handle_exception()
@@ -351,7 +350,7 @@ DataLink::stop()
 
   this->stop_i();
   this->stopped_ = true;
-  this->scheduled_to_stop_at_ = ACE_Time_Value::zero;
+  scheduled_to_stop_at_ = MonotonicTimePoint::zero_value;
 }
 
 void
@@ -548,7 +547,7 @@ DataLink::schedule_delayed_release()
     this->send_strategy_->clear();
   }
 
-  ACE_Time_Value future_release_time = ACE_OS::gettimeofday() + this->datalink_release_delay_;
+  const MonotonicTimePoint future_release_time(MonotonicTimePoint::now() + datalink_release_delay_);
   this->schedule_stop(future_release_time);
 }
 
@@ -567,7 +566,7 @@ DataLink::cancel_release()
       ACE_DEBUG((LM_DEBUG, "(%P|%t) DataLink::cancel_release - link[%@] currently scheduling release, notify reactor of cancel\n", this));
     }
     this->set_scheduling_release(false);
-    this->scheduled_to_stop_at_ = ACE_Time_Value::zero;
+    scheduled_to_stop_at_ = MonotonicTimePoint::zero_value;
     notify_reactor();
   }
   return true;
@@ -784,7 +783,7 @@ DataLink::transport_shutdown()
 
   //this->cancel_release();
   this->set_scheduling_release(false);
-  this->scheduled_to_stop_at_ = ACE_Time_Value::zero;
+  scheduled_to_stop_at_ = MonotonicTimePoint::zero_value;
 
   ACE_Reactor_Timer_Interface* reactor = impl_.timer();
   reactor->cancel_timer(this);
@@ -1029,7 +1028,7 @@ void DataLink::clear_associations()
 int
 DataLink::handle_timeout(const ACE_Time_Value& /*tv*/, const void* /*arg*/)
 {
-  if (this->scheduled_to_stop_at_ != ACE_Time_Value::zero) {
+  if (!scheduled_to_stop_at_.is_zero()) {
     VDBG_LVL((LM_DEBUG, "(%P|%t) DataLink::handle_timeout called\n"), 4);
     impl_.unbind_link(this);
 

@@ -17,8 +17,7 @@ Writer::Writer(::DDS::DataWriter_ptr writer)
 int
 Writer::run_test (const ACE_Time_Value& duration)
 {
-  ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("(%P|%t) Writer::run_test begins.\n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::run_test begins.\n")));
 
   ACE_Time_Value started = ACE_OS::gettimeofday ();
   unsigned int pass = 0;
@@ -35,22 +34,19 @@ Writer::run_test (const ACE_Time_Value& duration)
 
       foo.key = default_key;
 
-      ::Xyz::FooDataWriter_var foo_dw
-        = ::Xyz::FooDataWriter::_narrow(writer_.in ());
-      TEST_CHECK (! CORBA::is_nil (foo_dw.in ()));
+      ::Xyz::FooDataWriter_var foo_dw = ::Xyz::FooDataWriter::_narrow(writer_.in());
+      TEST_CHECK(!CORBA::is_nil(foo_dw.in()));
 
       ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("(%P|%t) %T Writer::run_test starting to write pass %d\n"),
                 pass));
 
-      ::DDS::InstanceHandle_t handle
-          = foo_dw->register_instance(foo);
+      ::DDS::InstanceHandle_t handle = foo_dw->register_instance(foo);
 
       foo.x = 5.0;
-      foo.y = (float)(pass) ;
+      foo.y = (float)(pass);
 
-      foo_dw->write(foo,
-                    handle);
+      foo_dw->write(foo, handle);
 
       ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("(%P|%t) %T Writer::run_test done writing.\n")));

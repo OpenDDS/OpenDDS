@@ -41,6 +41,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace RTPS {
 using DCPS::RepoId;
+using DCPS::MonotonicTimePoint;
+using DCPS::TimeDuration;
 
 namespace {
   // Multiplier for resend period -> lease duration conversion,
@@ -156,6 +158,9 @@ Spdp::Spdp(DDS::DomainId_t domain,
 #ifdef OPENDDS_SECURITY
   , security_config_()
   , security_enabled_(false)
+  , identity_handle_(DDS::HANDLE_NIL)
+  , permissions_handle_(DDS::HANDLE_NIL)
+  , crypto_handle_(DDS::HANDLE_NIL)
 #endif
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
@@ -348,7 +353,7 @@ namespace {
 void
 Spdp::handle_participant_data(DCPS::MessageId id, const ParticipantData_t& cpdata, const SequenceNumber_t& seq)
 {
-  const ACE_Time_Value now = ACE_OS::gettimeofday();
+  const MonotonicTimePoint now = MonotonicTimePoint::now();
 
   // Make a (non-const) copy so we can tweak values below
   ParticipantData_t pdata(cpdata);
@@ -628,8 +633,6 @@ Spdp::handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg)
     return;
   }
 
-  const ACE_Time_Value time = ACE_OS::gettimeofday();
-
   RepoId guid = msg.message_identity.source_guid;
   guid.entityId = DCPS::ENTITYID_PARTICIPANT;
 
@@ -757,7 +760,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
         return;
       }
       dp.has_last_stateless_msg_ = true;
-      dp.last_stateless_msg_time_ = ACE_OS::gettimeofday();
+      dp.last_stateless_msg_time_.set_to_now();
       dp.last_stateless_msg_ = reply;
       dp.auth_state_ = DCPS::AS_HANDSHAKE_REPLY_SENT;
       return;
@@ -810,7 +813,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
         return;
       }
       dp.has_last_stateless_msg_ = true;
-      dp.last_stateless_msg_time_ = ACE_OS::gettimeofday();
+      dp.last_stateless_msg_time_.set_to_now();
       dp.last_stateless_msg_ = reply;
       // cache the outbound message, but don't change state, since roles shouldn't have changed?
     } else if (vr == DDS::Security::VALIDATION_OK_FINAL_MESSAGE) {
@@ -833,16 +836,18 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
 }
 
 void
-Spdp::check_auth_states(const ACE_Time_Value& tv) {
+Spdp::check_auth_states(const MonotonicTimePoint& tv) {
+  typedef OPENDDS_SET_CMP(RepoId, DCPS::GUID_tKeyLessThan) GuidSet;
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  OPENDDS_SET_CMP(RepoId, DCPS::GUID_tKeyLessThan) to_erase;
+  GuidSet to_erase;
   for (DiscoveredParticipantIter pi = participants_.begin(); pi != participants_.end(); ++pi) {
     switch (pi->second.auth_state_) {
       case DCPS::AS_HANDSHAKE_REQUEST_SENT:
       case DCPS::AS_HANDSHAKE_REPLY_SENT:
         if (tv > pi->second.auth_started_time_ + disco_->max_auth_time()) {
           to_erase.insert(pi->first);
-        } else if (pi->second.has_last_stateless_msg_ && (tv > (pi->second.last_stateless_msg_time_ + disco_->auth_resend_period()))) {
+        } else if (pi->second.has_last_stateless_msg_ &&
+            (tv > (pi->second.last_stateless_msg_time_ + disco_->auth_resend_period()))) {
           RepoId reader = pi->first;
           reader.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
           pi->second.last_stateless_msg_time_ = tv;
@@ -862,10 +867,12 @@ Spdp::check_auth_states(const ACE_Time_Value& tv) {
         break;
     }
   }
-  for (OPENDDS_SET_CMP(RepoId, DCPS::GUID_tKeyLessThan)::const_iterator it = to_erase.begin(); it != to_erase.end(); ++it) {
+  for (GuidSet::const_iterator it = to_erase.begin(); it != to_erase.end(); ++it) {
     DiscoveredParticipantIter pit = participants_.find(*it);
     if (pit != participants_.end()) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Spdp::check_auth_states()      - Removing discovered participant due to authentication timeout: %C\n"), std::string(DCPS::GuidConverter(*it)).c_str()));
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Spdp::check_auth_states() - ")
+        ACE_TEXT("Removing discovered participant due to authentication timeout: %C\n"),
+        OPENDDS_STRING(DCPS::GuidConverter(*it)).c_str()));
       if (participant_sec_attr_.allow_unauthenticated_participants == false) {
         ICE::Endpoint* endpoint = sedp_.get_ice_endpoint();
         if (endpoint) {
@@ -896,6 +903,11 @@ Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileM
 
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
+  if (crypto_handle_ == DDS::HANDLE_NIL) {
+    // not configured for RTPS Protection, therefore doesn't support participant crypto tokens
+    return;
+  }
+
   // If discovery hasn't initialized / validated this participant yet, ignore volatile message
   DiscoveredParticipantIter iter = participants_.find(src_participant);
   if (iter == participants_.end()) {
@@ -907,9 +919,10 @@ Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileM
   }
   DiscoveredParticipant& dp = iter->second;
 
-  dp.crypto_tokens_ = reinterpret_cast<const DDS::Security::ParticipantCryptoTokenSeq&>(msg.message_data);
+  const DDS::Security::ParticipantCryptoTokenSeq& inboundTokens =
+    reinterpret_cast<const DDS::Security::ParticipantCryptoTokenSeq&>(msg.message_data);
 
-  if (!key_exchange->set_remote_participant_crypto_tokens(crypto_handle_, dp.crypto_handle_, dp.crypto_tokens_, se)) {
+  if (!key_exchange->set_remote_participant_crypto_tokens(crypto_handle_, dp.crypto_handle_, inboundTokens, se)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::handle_participant_crypto_tokens() - ")
       ACE_TEXT("Unable to set remote participant crypto tokens with crypto key exchange plugin. ")
       ACE_TEXT("Security Exception[%d.%d]: %C\n"),
@@ -973,18 +986,20 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp)
   dp.crypto_handle_ = key_factory->register_matched_remote_participant(crypto_handle_, dp.identity_handle_, dp.permissions_handle_, dp.shared_secret_handle_, se);
   if (dp.crypto_handle_ == DDS::HANDLE_NIL) {
     ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
-      ACE_TEXT("Spdp::match_authenticated() - ")
-      ACE_TEXT("Unable to register remote participant with crypto key factory plugin. Security Exception[%d.%d]: %C\n"),
-        se.code, se.minor_code, se.message.in()));
+               ACE_TEXT("Spdp::match_authenticated() - ")
+               ACE_TEXT("Unable to register remote participant with crypto key factory plugin. Security Exception[%d.%d]: %C\n"),
+               se.code, se.minor_code, se.message.in()));
     return false;
   }
 
-  if (key_exchange->create_local_participant_crypto_tokens(crypto_tokens_, crypto_handle_, dp.crypto_handle_, se) == false) {
-    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
-      ACE_TEXT("Spdp::match_authenticated() - ")
-      ACE_TEXT("Unable to create local participant crypto tokens with crypto key exchange plugin. Security Exception[%d.%d]: %C\n"),
-        se.code, se.minor_code, se.message.in()));
-    return false;
+  if (crypto_handle_ != DDS::HANDLE_NIL) {
+    if (key_exchange->create_local_participant_crypto_tokens(dp.crypto_tokens_, crypto_handle_, dp.crypto_handle_, se) == false) {
+      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
+                 ACE_TEXT("Spdp::match_authenticated() - ")
+                 ACE_TEXT("Unable to create local participant crypto tokens with crypto key exchange plugin. Security Exception[%d.%d]: %C\n"),
+                 se.code, se.minor_code, se.message.in()));
+      return false;
+    }
   }
 
   // Must unlock when calling into part_bit() as it may call back into us
@@ -1023,7 +1038,7 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
   DDS::Security::SecurityException se = {"", 0, 0};
 
   if (dp.auth_state_ == DCPS::AS_UNKNOWN) {
-    dp.auth_started_time_ = ACE_OS::gettimeofday();
+    dp.auth_started_time_.set_to_now();
     dp.auth_state_ = DCPS::AS_VALIDATING_REMOTE;
   }
 
@@ -1160,7 +1175,7 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
       return;
     }
     dp.has_last_stateless_msg_ = true;
-    dp.last_stateless_msg_time_ = ACE_OS::gettimeofday();
+    dp.last_stateless_msg_time_.set_to_now();
     dp.last_stateless_msg_ = msg;
     dp.auth_state_ = DCPS::AS_HANDSHAKE_REQUEST_SENT;
   }
@@ -1184,9 +1199,9 @@ Spdp::remove_expired_participants()
   {
     DiscoveredParticipantIter part = participants_.find(*participant_id);
     if (part != participants_.end()) {
-      if (part->second.last_seen_ <
-          ACE_OS::gettimeofday() -
-          ACE_Time_Value(part->second.pdata_.leaseDuration.seconds)) {
+      const MonotonicTimePoint expr(MonotonicTimePoint::now() -
+        rtps_time_to_time_duration(part->second.pdata_.leaseDuration));
+      if (part->second.last_seen_ < expr) {
         if (DCPS::DCPS_debug_level > 1) {
           DCPS::GuidConverter conv(part->first);
           ACE_DEBUG((LM_WARNING,
@@ -1351,7 +1366,7 @@ Spdp::build_local_pdata(
       {PFLAGS_NO_ASSOCIATED_WRITERS} // opendds_participant_flags
     },
     { // Duration_t (leaseDuration)
-      static_cast<CORBA::Long>((disco_->resend_period() * LEASE_MULT).sec()),
+      static_cast<CORBA::Long>((disco_->resend_period() * LEASE_MULT).value().sec()),
       0 // we are not supporting fractional seconds in the lease duration
     }
   };
@@ -1371,7 +1386,8 @@ bool Spdp::announce_domain_participant_qos()
 }
 
 Spdp::SpdpTransport::SpdpTransport(Spdp* outer, bool securityGuids)
-  : outer_(outer), lease_duration_(outer_->disco_->resend_period() * LEASE_MULT)
+  : outer_(outer)
+  , lease_duration_(outer_->disco_->resend_period() * LEASE_MULT)
   , buff_(64 * 1024)
   , wbuff_(64 * 1024)
 {
@@ -1486,11 +1502,10 @@ Spdp::SpdpTransport::open()
   }
 
   disco_resend_period_ = outer_->disco_->resend_period();
-  last_disco_resend_ = 0;
+  last_disco_resend_ = MonotonicTimePoint::zero_value;
 
-  ACE_Time_Value timer_period = disco_resend_period_ < outer_->disco_->max_spdp_timer_period() ? disco_resend_period_ : outer_->disco_->max_spdp_timer_period();
-
-  if (-1 == reactor->schedule_timer(this, 0, ACE_Time_Value(0), timer_period)) {
+  const TimeDuration timer_period = std::min(disco_resend_period_, outer_->disco_->max_spdp_timer_period());
+  if (-1 == reactor->schedule_timer(this, 0, ACE_Time_Value(0), timer_period.value())) {
     throw std::runtime_error("failed to schedule timer with reactor");
   }
 }
@@ -1681,14 +1696,15 @@ Spdp::SpdpTransport::write_i()
 int
 Spdp::SpdpTransport::handle_timeout(const ACE_Time_Value& tv, const void*)
 {
-  if (tv > last_disco_resend_ + disco_resend_period_) {
+  const MonotonicTimePoint now(tv);
+  if (now > last_disco_resend_ + disco_resend_period_) {
     write();
     outer_->remove_expired_participants();
-    last_disco_resend_ = tv;
+    last_disco_resend_ = now;
   }
 
 #ifdef OPENDDS_SECURITY
-  outer_->check_auth_states(tv);
+  outer_->check_auth_states(now);
 #endif
 
   return 0;
@@ -1986,27 +2002,36 @@ Spdp::lookup_participant_crypto_info(const DCPS::RepoId& id) const
 void
 Spdp::send_participant_crypto_tokens(const DCPS::RepoId& id)
 {
-  if (crypto_tokens_.length() != 0) {
+  DCPS::RepoId peer = id;
+  peer.entityId = ENTITYID_PARTICIPANT;
+  const DiscoveredParticipantConstIter iter = participants_.find(peer);
+  if (iter == participants_.end()) {
+    const DCPS::GuidConverter conv(peer);
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::send_participant_crypto_tokens() - ")
+               ACE_TEXT("Discovered participant %C not found.\n"), OPENDDS_STRING(conv).c_str()));
+  }
+  const DDS::Security::ParticipantCryptoTokenSeq& pcts = iter->second.crypto_tokens_;
+
+  if (pcts.length() != 0) {
     DCPS::RepoId writer = guid_;
     writer.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER;
 
-    DCPS::RepoId reader = id;
+    DCPS::RepoId reader = peer;
     reader.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER;
 
     DDS::Security::ParticipantVolatileMessageSecure msg;
     msg.message_identity.source_guid = writer;
     msg.message_class_id = DDS::Security::GMCLASSID_SECURITY_PARTICIPANT_CRYPTO_TOKENS;
-    msg.destination_participant_guid = id;
+    msg.destination_participant_guid = peer;
     msg.destination_endpoint_guid = GUID_UNKNOWN; // unknown = whole participant
     msg.source_endpoint_guid = GUID_UNKNOWN;
-    msg.message_data = reinterpret_cast<const DDS::Security::DataHolderSeq&>(crypto_tokens_);
+    msg.message_data = reinterpret_cast<const DDS::Security::DataHolderSeq&>(pcts);
 
     if (sedp_.write_volatile_message(msg, reader) != DDS::RETCODE_OK) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::send_participant_crypto_tokens() - ")
         ACE_TEXT("Unable to write volatile message.\n")));
     }
   }
-  return;
 }
 
 DDS::Security::PermissionsHandle

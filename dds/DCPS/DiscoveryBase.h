@@ -1536,19 +1536,15 @@ namespace OpenDDS {
 
       struct DiscoveredParticipant {
 
-        DiscoveredParticipant() :
+        DiscoveredParticipant()
+        : bit_ih_(DDS::HANDLE_NIL)
 #ifdef OPENDDS_SECURITY
-          bit_ih_(0),
-          has_last_stateless_msg_(false),
-          last_stateless_msg_time_(0, 0),
-          auth_started_time_(0, 0),
-          auth_state_(AS_UNKNOWN),
-          identity_handle_(DDS::HANDLE_NIL),
-          handshake_handle_(DDS::HANDLE_NIL),
-          permissions_handle_(DDS::HANDLE_NIL),
-          crypto_handle_(DDS::HANDLE_NIL)
-#else
-          bit_ih_(0)
+        , has_last_stateless_msg_(false)
+        , auth_state_(AS_UNKNOWN)
+        , identity_handle_(DDS::HANDLE_NIL)
+        , handshake_handle_(DDS::HANDLE_NIL)
+        , permissions_handle_(DDS::HANDLE_NIL)
+        , crypto_handle_(DDS::HANDLE_NIL)
 #endif
         {
 #ifdef OPENDDS_SECURITY
@@ -1557,23 +1553,17 @@ namespace OpenDDS {
 #endif
         }
 
-        DiscoveredParticipant(const DiscoveredParticipantData& p, const ACE_Time_Value& t) :
+        DiscoveredParticipant(const DiscoveredParticipantData& p, const MonotonicTimePoint& t)
+        : pdata_(p)
+        , last_seen_(t)
+        , bit_ih_(DDS::HANDLE_NIL)
 #ifdef OPENDDS_SECURITY
-          pdata_(p),
-          last_seen_(t),
-          bit_ih_(DDS::HANDLE_NIL),
-          has_last_stateless_msg_(false),
-          last_stateless_msg_time_(0, 0),
-          auth_started_time_(0, 0),
-          auth_state_(AS_UNKNOWN),
-          identity_handle_(DDS::HANDLE_NIL),
-          handshake_handle_(DDS::HANDLE_NIL),
-          permissions_handle_(DDS::HANDLE_NIL),
-          crypto_handle_(DDS::HANDLE_NIL)
-#else
-          pdata_(p),
-          last_seen_(t),
-          bit_ih_(DDS::HANDLE_NIL)
+        , has_last_stateless_msg_(false)
+        , auth_state_(AS_UNKNOWN)
+        , identity_handle_(DDS::HANDLE_NIL)
+        , handshake_handle_(DDS::HANDLE_NIL)
+        , permissions_handle_(DDS::HANDLE_NIL)
+        , crypto_handle_(DDS::HANDLE_NIL)
 #endif
         {
 #ifdef OPENDDS_SECURITY
@@ -1583,7 +1573,7 @@ namespace OpenDDS {
         }
 
         DiscoveredParticipantData pdata_;
-        ACE_Time_Value last_seen_;
+        MonotonicTimePoint last_seen_;
         DDS::InstanceHandle_t bit_ih_;
         DCPS::SequenceNumber last_seq_;
         DCPS::SequenceNumber seqResetCandidate_;
@@ -1591,10 +1581,10 @@ namespace OpenDDS {
 
 #ifdef OPENDDS_SECURITY
         bool has_last_stateless_msg_;
-        ACE_Time_Value last_stateless_msg_time_;
+        MonotonicTimePoint last_stateless_msg_time_;
         DDS::Security::ParticipantStatelessMessage last_stateless_msg_;
 
-        ACE_Time_Value auth_started_time_;
+        MonotonicTimePoint auth_started_time_;
         AuthState auth_state_;
 
         DDS::Security::IdentityToken identity_token_;

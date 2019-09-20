@@ -134,7 +134,7 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
         ACE_TEXT("default value\n")));
     }
   }
-  passive_connect_duration_.set(duration / 1000, (duration % 1000) * 1000);
+  passive_connect_duration_ = TimeDuration::from_msec(duration);
 
   const size_t n = tc->instances_.size();
 

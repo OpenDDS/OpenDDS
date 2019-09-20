@@ -171,11 +171,12 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       if (listener_servant.num_liveliness_change_callbacks () != num_liveliness_change_callbacks)
       {
-         cerr
-         << "ERROR: did not receive liveliness change callbacks as expected.("
-         << listener_servant.num_liveliness_change_callbacks () << "/"
-         << num_liveliness_change_callbacks << ")" << endl;
-         return 1;
+        cerr
+         << "ERROR: Expected " << num_liveliness_change_callbacks
+         << " liveliness change callbacks, but got "
+         << listener_servant.num_liveliness_change_callbacks()
+         << endl;
+        return 1;
       }
     }
   catch (CORBA::Exception& e)

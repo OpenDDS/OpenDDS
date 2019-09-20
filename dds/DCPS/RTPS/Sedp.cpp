@@ -176,6 +176,9 @@ namespace OpenDDS {
 namespace RTPS {
 using DCPS::RepoId;
 using DCPS::make_rch;
+using DCPS::TimeDuration;
+using DCPS::MonotonicTimePoint;
+using DCPS::SystemTimePoint;
 
 const bool Sedp::host_is_bigendian_(!ACE_CDR_BYTE_ORDER);
 
@@ -1129,7 +1132,6 @@ Sedp::Task::svc_i(const ParticipantData_t* ppdata)
 
 #ifdef OPENDDS_SECURITY
   if (sedp_->is_security_enabled()) {
-    spdp_->send_participant_crypto_tokens(proto.remote_id_);
     sedp_->send_builtin_crypto_tokens(*pdata);
   }
 #endif
@@ -2486,6 +2488,8 @@ Sedp::association_complete(const RepoId& localId,
 
     if (associated_volatile_readers_.insert(remoteId).second) {
 
+      spdp_.send_participant_crypto_tokens(remoteId);
+
       RemoteReaderVectors::iterator reader_map_iter = datawriter_crypto_tokens_.find(remoteId);
       if (reader_map_iter != datawriter_crypto_tokens_.end()) {
         typedef RemoteReaderVector::iterator iter_t;
@@ -2988,9 +2992,9 @@ Sedp::Writer::set_header_fields(DCPS::DataSampleHeader& dsh,
 
   dsh.sequence_ = sequence;
 
-  const ACE_Time_Value now = ACE_OS::gettimeofday();
-  dsh.source_timestamp_sec_ = static_cast<ACE_INT32>(now.sec());
-  dsh.source_timestamp_nanosec_ = now.usec() * 1000;
+  const SystemTimePoint now = SystemTimePoint::now();
+  dsh.source_timestamp_sec_ = static_cast<ACE_INT32>(now.value().sec());
+  dsh.source_timestamp_nanosec_ = now.value().usec() * 1000;
 }
 
 //-------------------------------------------------------------------------
@@ -4021,6 +4025,7 @@ Sedp::add_security_info(const DCPS::TransportLocatorSeq& locators,
                         const RepoId& writer, const RepoId& reader)
 {
   using DCPS::Serializer;
+  using namespace DDS::Security;
 
   if (std::memcmp(writer.guidPrefix, reader.guidPrefix,
                   sizeof(DCPS::GuidPrefix_t)) == 0) {
@@ -4028,29 +4033,38 @@ Sedp::add_security_info(const DCPS::TransportLocatorSeq& locators,
     return locators;
   }
 
-  DDS::Security::ParticipantCryptoHandle part_handle = DDS::HANDLE_NIL;
-  DDS::Security::DatawriterCryptoHandle dw_handle = DDS::HANDLE_NIL;
-  DDS::Security::DatareaderCryptoHandle dr_handle = DDS::HANDLE_NIL;
+  DCPS::RepoId remote_part;
+  const DCPS::RepoId local_part = spdp_.guid();
+  if (std::memcmp(writer.guidPrefix, local_part.guidPrefix, sizeof writer.guidPrefix) == 0) {
+    remote_part = reader;
+  } else if (std::memcmp(reader.guidPrefix, local_part.guidPrefix, sizeof reader.guidPrefix) == 0) {
+    remote_part = writer;
+  } else {
+    return locators;
+  }
+
+  remote_part.entityId = ENTITYID_PARTICIPANT;
+  ParticipantCryptoHandle part_handle = spdp_.lookup_participant_crypto_info(remote_part).first;
+
+  if (part_handle == DDS::HANDLE_NIL) {
+    // security not enabled for this discovered participant
+    return locators;
+  }
+
+  DatawriterCryptoHandle dw_handle = DDS::HANDLE_NIL;
+  DatareaderCryptoHandle dr_handle = DDS::HANDLE_NIL;
+  EndpointSecurityAttributesMask mask = 0;
 
   if (local_reader_crypto_handles_.find(reader) != local_reader_crypto_handles_.end() &&
       remote_writer_crypto_handles_.find(writer) != remote_writer_crypto_handles_.end()) {
     dr_handle = local_reader_crypto_handles_[reader];
     dw_handle = remote_writer_crypto_handles_[writer];
-    DCPS::RepoId part = writer;
-    part.entityId = ENTITYID_PARTICIPANT;
-    part_handle = spdp_.lookup_participant_crypto_info(part).first;
+    mask = security_attributes_to_bitmask(local_reader_security_attribs_[reader]);
   } else if (local_writer_crypto_handles_.find(writer) != local_writer_crypto_handles_.end() &&
              remote_reader_crypto_handles_.find(reader) != remote_reader_crypto_handles_.end()) {
     dw_handle = local_writer_crypto_handles_[writer];
     dr_handle = remote_reader_crypto_handles_[reader];
-    DCPS::RepoId part = reader;
-    part.entityId = ENTITYID_PARTICIPANT;
-    part_handle = spdp_.lookup_participant_crypto_info(part).first;
-  }
-
-  if (part_handle == DDS::HANDLE_NIL) {
-    // security not enabled for this discovered participant
-    return locators;
+    mask = security_attributes_to_bitmask(local_writer_security_attribs_[writer]);
   }
 
   DCPS::TransportLocatorSeq_var newLoc;
@@ -4069,6 +4083,11 @@ Sedp::add_security_info(const DCPS::TransportLocatorSeq& locators,
         DDS::OctetSeq handleOctetsDr = handle_to_octets(dr_handle);
         const DDS::BinaryProperty_t dr_p = {BLOB_PROP_DR_CRYPTO_HANDLE,
                                             handleOctetsDr, true /*serialize*/};
+        DDS::OctetSeq endpointSecAttr(static_cast<unsigned int>(DCPS::max_marshaled_size_ulong()));
+        endpointSecAttr.length(endpointSecAttr.maximum());
+        std::memcpy(endpointSecAttr.get_buffer(), &mask, endpointSecAttr.length());
+        const DDS::BinaryProperty_t esa_p = {BLOB_PROP_ENDPOINT_SEC_ATTR,
+                                             endpointSecAttr, true /*serialize*/};
         size_t size = 0, padding = 0;
         DCPS::gen_find_size(prop, size, padding);
         if (dw_handle != DDS::HANDLE_NIL) {
@@ -4077,6 +4096,7 @@ Sedp::add_security_info(const DCPS::TransportLocatorSeq& locators,
         if (dr_handle != DDS::HANDLE_NIL) {
           DCPS::gen_find_size(dr_p, size, padding);
         }
+        DCPS::gen_find_size(esa_p, size, padding);
         ACE_Message_Block mb(size + padding);
         Serializer ser(&mb, ACE_CDR_BYTE_ORDER, Serializer::ALIGN_CDR);
         ser << prop;
@@ -4086,6 +4106,7 @@ Sedp::add_security_info(const DCPS::TransportLocatorSeq& locators,
         if (dr_handle != DDS::HANDLE_NIL) {
           ser << dr_p;
         }
+        ser << esa_p;
         added.length(static_cast<unsigned int>(mb.size()));
         std::memcpy(added.get_buffer(), mb.rd_ptr(), mb.size());
       }

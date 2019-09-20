@@ -20,7 +20,7 @@ OpenDDS::DCPS::OfferedDeadlineWatchdog::OfferedDeadlineWatchdog(
   OpenDDS::DCPS::DataWriterImpl & writer_impl,
   DDS::OfferedDeadlineMissedStatus & status,
   CORBA::Long & last_total_count)
-  : Watchdog(duration_to_time_value(qos.period))
+  : Watchdog(TimeDuration(qos.period))
   , status_lock_(lock)
   , reverse_status_lock_(status_lock_)
   , writer_impl_(writer_impl)
@@ -38,7 +38,7 @@ OpenDDS::DCPS::OfferedDeadlineWatchdog::schedule_timer(OpenDDS::DCPS::Publicatio
 {
   if (instance->deadline_timer_id_ == -1) {
     intptr_t handle = instance->instance_handle_;
-    instance->deadline_timer_id_ = Watchdog::schedule_timer(reinterpret_cast<const void*>(handle), this->interval_);
+    instance->deadline_timer_id_ = Watchdog::schedule_timer(reinterpret_cast<const void*>(handle), interval_);
   }
 }
 
@@ -75,16 +75,14 @@ OpenDDS::DCPS::OfferedDeadlineWatchdog::execute(
   if (instance->deadline_timer_id_ != -1) {
     bool missed = false;
 
-    if (instance->cur_sample_tv_  == ACE_Time_Value::zero) { // not write any sample.
+    if (instance->cur_sample_tv_.is_zero()) { // not write any sample.
       missed = true;
 
     } else if (timer_called) { // handle_timeout is called
-      ACE_Time_Value diff = ACE_OS::gettimeofday() - instance->cur_sample_tv_;
-      missed = diff >= this->interval_;
+      missed = MonotonicTimePoint::now() - instance->cur_sample_tv_ >= interval_;
 
-    } else if (instance->last_sample_tv_ != ACE_Time_Value::zero) { // upon writing sample.
-      ACE_Time_Value diff = instance->cur_sample_tv_ - instance->last_sample_tv_;
-      missed = diff > this->interval_;
+    } else if (!instance->last_sample_tv_.is_zero()) { // upon writing sample.
+      missed = instance->cur_sample_tv_ - instance->last_sample_tv_ > interval_;
     }
 
     if (missed) {
@@ -103,7 +101,7 @@ OpenDDS::DCPS::OfferedDeadlineWatchdog::execute(
           writer.listener_for(
             DDS::OFFERED_DEADLINE_MISSED_STATUS);
 
-        if (! CORBA::is_nil(listener.in())) {
+        if (listener) {
           // Copy before releasing the lock.
           DDS::OfferedDeadlineMissedStatus const status = this->status_;
 
@@ -112,8 +110,7 @@ OpenDDS::DCPS::OfferedDeadlineWatchdog::execute(
 
           // @todo Will this operation ever throw?  If so we may want to
           //       catch all exceptions, and act accordingly.
-          listener->on_offered_deadline_missed(&writer,
-                                              status);
+          listener->on_offered_deadline_missed(&writer, status);
 
           // We need to update the last total count value to our current total
           // so that the next time we will calculate the correct total_count_change;

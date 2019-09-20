@@ -166,7 +166,7 @@ void
 RtpsUdpTransport::stop_accepting_or_connecting(const TransportClient_wrch& client,
                                                const RepoId& remote_id)
 {
-  GuardType guard(connections_lock_);
+  GuardType guard(pending_connections_lock_);
   typedef PendConnMap::iterator iter_t;
   const std::pair<iter_t, iter_t> range =
         pending_connections_.equal_range(client);

@@ -13,6 +13,7 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 #include "dds/Versioned_Namespace.h"
+#include "dds/DCPS/TimeTypes.h"
 #include <ace/Time_Value.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -25,12 +26,12 @@ class AgentImpl;
 struct Task {
   Task(AgentImpl* a_agent_impl) : agent_impl_(a_agent_impl), in_queue_(false) {}
   virtual ~Task() {};
-  virtual void execute(const ACE_Time_Value& a_now) = 0;
-  void enqueue(const ACE_Time_Value& release_time);
+  virtual void execute(const DCPS::MonotonicTimePoint& a_now) = 0;
+  void enqueue(const DCPS::MonotonicTimePoint& release_time);
 private:
   friend class AgentImpl;
   AgentImpl* agent_impl_;
-  ACE_Time_Value release_time_;
+  DCPS::MonotonicTimePoint release_time_;
   bool in_queue_;
 };
 

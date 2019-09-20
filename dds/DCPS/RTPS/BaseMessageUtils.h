@@ -11,6 +11,7 @@
 #include "RtpsCoreTypeSupportImpl.h"
 #include "rtps_export.h"
 
+#include "dds/DCPS/Message_Block_Ptr.h"
 #include "dds/DCPS/Serializer.h"
 #include "dds/DCPS/TypeSupportImpl.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
@@ -152,6 +153,35 @@ void message_block_to_sequence(const ACE_Message_Block& mb_locator, T& out)
   std::memcpy (out.get_buffer(), mb_locator.rd_ptr(), mb_locator.length());
 }
 
+/// Utility for iterating through a contiguous buffer (either really contiguous
+/// or virtually contiguous using message block chaining) of RTPS Submessages
+/// optionally prefixed by the RTPS Header
+class OpenDDS_Rtps_Export MessageParser {
+public:
+  explicit MessageParser(const ACE_Message_Block& in);
+  explicit MessageParser(const DDS::OctetSeq& in);
+
+  bool parseHeader();
+  bool parseSubmessageHeader();
+  bool hasNextSubmessage() const;
+  bool skipToNextSubmessage();
+
+  SubmessageHeader submessageHeader() const { return sub_; }
+  size_t remaining() const { return in_ ? in_->total_length() : fromSeq_.length(); }
+  const char* current() const { return ser_.pos_rd(); }
+
+  DCPS::Serializer& serializer() { return ser_; }
+
+  template <typename T>
+  bool operator>>(T& rhs) { return ser_ >> rhs; }
+
+private:
+  ACE_Message_Block fromSeq_;
+  DCPS::Message_Block_Ptr in_;
+  DCPS::Serializer ser_;
+  SubmessageHeader sub_;
+  size_t smContentStart_;
+};
 
 }
 }

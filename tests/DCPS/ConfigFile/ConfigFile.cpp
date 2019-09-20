@@ -48,7 +48,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     TEST_CHECK(TheServiceParticipant->bit_lookup_duration_msec() == 1000);
     TEST_CHECK(TheServiceParticipant->get_BIT() == false);
     TEST_CHECK(OpenDDS::DCPS::Transport_debug_level == 1);
-    TEST_CHECK(TheServiceParticipant->pending_timeout() == ACE_Time_Value(10));
+    TEST_CHECK(TheServiceParticipant->pending_timeout() == TimeDuration(10));
     TEST_CHECK(TheServiceParticipant->publisher_content_filter() == false);
     TEST_CHECK(TheServiceParticipant->get_default_discovery() == "MyDefaultDiscovery");
     TEST_CHECK(TheServiceParticipant->federation_recovery_duration() == 800);
@@ -194,7 +194,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       OpenDDS::RTPS::RtpsDiscovery_rch rd =
         dynamic_rchandle_cast<OpenDDS::RTPS::RtpsDiscovery>(discovery);
       TEST_CHECK(!rd.is_nil());
-      TEST_CHECK(rd->resend_period().sec() == 29);
+      TEST_CHECK(rd->resend_period().value().sec() == 29);
       TEST_CHECK(rd->pb() == 7399);
       TEST_CHECK(rd->dg() == 249);
       TEST_CHECK(rd->pg() == 2);

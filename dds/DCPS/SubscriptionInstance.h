@@ -81,13 +81,13 @@ public:
   /// The instance handle for the registered object
   DDS::InstanceHandle_t instance_handle_;
 
-  ACE_Time_Value   last_sample_tv_;
+  MonotonicTimePoint last_sample_tv_;
 
-  ACE_Time_Value   cur_sample_tv_;
+  MonotonicTimePoint cur_sample_tv_;
 
-  long             deadline_timer_id_;
+  long deadline_timer_id_;
 
-  ACE_Time_Value   last_accepted_;
+  MonotonicTimePoint last_accepted_;
 };
 
 typedef RcHandle<SubscriptionInstance> SubscriptionInstance_rch;
