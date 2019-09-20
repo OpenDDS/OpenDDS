@@ -226,9 +226,8 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'object-model-profile!', 'Object Model Profile (yes)',
     'persistence-profile!', 'Persistence Profile (yes)',
     'safety-profile:s', 'Safety Profile: base or extended (none)',
-    'tests!', 'Build tests and performance tests (no)' .
+    'tests!', 'Build tests, examples, and performance tests (no)' .
       $argIndent . 'Requires --gtest if missing git submodule',
-    'examples!', 'Build examples and DevGuideExamples (yes)',
     'security!', 'DDS Security plugin (no) Implies --openssl and' .
       $argIndent . '--xerces3',
    ],
@@ -377,13 +376,20 @@ sub addCurLibPathRef {
 }
 
 sub run_command {
-  my $command = shift;
+  my $command_ref = shift;
+  my @command = @{$command_ref};
+  my $command_str = join(' ', @command);
   my %args = (
     DUMP_OUTPUT_ON_ERROR => 0,
     @_,
   );
 
-  print "Running $command\n" if $opts{'verbose'};
+  if ($opts{'dry-run'}) {
+    print "Dry-run: Would run \"$command_str\"\n";
+    return 0;
+  }
+
+  print "Running \"$command_str\"\n" if $opts{'verbose'};
   my $saved_stdout;
   my $saved_stderr;
   my $tmp_fd;
@@ -397,7 +403,7 @@ sub run_command {
     open(STDERR, '>&', $tmp_fd);
   }
 
-  my $failed = system($command) ? 1 : 0;
+  my $failed = system(@command) ? 1 : 0;
   my $system_status = $?;
   my $system_error = $!;
 
@@ -421,7 +427,7 @@ sub run_command {
     else {
       $error_message = sprintf("Returned %d", $system_status >> 8);
     }
-    print STDERR "Command \"$command\" $error_message\n";
+    print STDERR "Command \"$command_str\" $error_message\n";
 
     if ($ran and $args{DUMP_OUTPUT_ON_ERROR}) {
       open($tmp_fd, $tmp_path);
@@ -737,7 +743,7 @@ if (!$ace_src || !$tao_src) {
     my $urlbase = 'https://github.com/DOCGroup';
 
     print "Cloning git repo: $urlbase/ACE_TAO\n";
-    my $err = run_command("git clone -q --depth 1 $urlbase/ACE_TAO");
+    my $err = run_command(['git', 'clone', '-q', '--depth=1', "$urlbase/ACE_TAO"]);
     die "ERROR: Failed to clone ACE/TAO from GitHub\nStopped"
       if $err ||
         ! -r 'ACE_TAO/ACE/ace/ACE.h' ||
@@ -745,17 +751,17 @@ if (!$ace_src || !$tao_src) {
 
     my $cur_dir = getcwd;
     chdir('ACE_TAO');
-    run_command('git --no-pager log -1 --oneline');
+    run_command(['git', '--no-pager', 'log', '-1', '--oneline']);
     chdir($cur_dir);
 
     print "Cloning git repo: $urlbase/MPC into ACE_TAO/ACE/MPC\n";
-    $err = run_command("git clone -q --depth 1 $urlbase/MPC ACE_TAO/ACE/MPC");
+    $err = run_command(['git', 'clone', '-q', '--depth=1', "$urlbase/MPC", 'ACE_TAO/ACE/MPC']);
     die "ERROR: Failed to clone MPC (into ACE_TAO/ACE/MPC) from GitHub\nStopped"
       if $err ||
         ! -r 'ACE_TAO/ACE/MPC/mwc.pl';
 
     chdir('ACE_TAO/ACE/MPC');
-    run_command('git --no-pager log -1 --oneline');
+    run_command(['git', '--no-pager', 'log', '-1', '--oneline']);
     chdir($cur_dir);
 
     $ace_src = normalizePath('ACE_TAO/ACE');
@@ -802,19 +808,13 @@ if (!$ace_src || !$tao_src) {
       if ($@) {
         if (which('wget')) {
           print $download_message . " (using wget)\n";
-          if ($opts{'dry-run'}) {
-            print "Dry-run: would run wget $urlbase$file\n";
-          }
-          elsif (run_command("wget $urlbase$file")) {
+          if (run_command(['wget', "$urlbase$file"])) {
             die "ERROR from wget, stopped";
           }
         }
         elsif (which('curl')) {
           print $download_message . " (using curl)\n";
-          if ($opts{'dry-run'}) {
-            print "Dry-run: would run curl -L $urlbase$file -o $file\n";
-          }
-          elsif (run_command("curl -L $urlbase$file -o $file")) {
+          if (run_command(['curl', '-L', "$urlbase$file", '-o', "$file"])) {
             die "ERROR: from curl, stopped";
           }
         }
@@ -834,14 +834,7 @@ if (!$ace_src || !$tao_src) {
       my $err = 1;
       my $ddsroot = getcwd;
       if (!$is_windows) {
-        if ($opts{'dry-run'}) {
-          print "Dry-run: would run " . ($^O eq 'solaris' ? 'g' : '') .
-            "tar xzf $ddsroot/$file\n";
-          $err = 0;
-        }
-        else {
-          $err = run_command(($^O eq 'solaris' ? 'g' : '') . "tar xzf $ddsroot/$file");
-        }
+        $err = run_command([($^O eq 'solaris' ? 'g' : '') . 'tar', 'xzf', "$ddsroot/$file"]);
       }
       else {
         # Try Archive::Zip
@@ -904,11 +897,7 @@ sub clone_host_and_target {
     chdir($source_dir);
   }
   print "cloning build tree\n" if $opts{'verbose'};
-  if (!$opts{'dry-run'}) {
-    eval {
-      run_command("$targetEnv{'MPC_ROOT'}/clone_build_tree.pl host target");
-    };
-  }
+  run_command(["$targetEnv{'MPC_ROOT'}/clone_build_tree.pl", 'host', 'target']);
   if ($source_dir ne '.') {
     print "Changing dir back to $cur_dir\n" if $opts{'verbose'};
     chdir($cur_dir);
@@ -1516,7 +1505,7 @@ if ($build_gtest) {
     or  die "ERROR '$!': failed to change into $build_dir from $cwd.\nStopped";
 
   for my $cmd (@cmake_cmds) {
-    run_command("@{$cmd}", DUMP_OUTPUT_ON_ERROR => !$opts{'verbose'}) == 0
+    run_command($cmd, DUMP_OUTPUT_ON_ERROR => !$opts{'verbose'}) == 0
       or die "ERROR: Invoking @{$cmd} failed.\nStopped";
   }
 
@@ -1959,8 +1948,7 @@ EOT
   }
 
   my $static = (($opts{'static'} && $is_windows) ||
-    ($cross_compile && $buildEnv->{'build'} eq 'host' && $mpctype ne 'gnuace'))
-    ? '-static' : '';
+    ($cross_compile && $buildEnv->{'build'} eq 'host' && $mpctype ne 'gnuace'));
 
   # We are not using CIAO or DAnCE, but MPC.cfg expands $CIAO_ROOT and
   # $DANCE_ROOT so leaving them empty/undefined would cause /MPC/config
@@ -1973,34 +1961,38 @@ EOT
   print "ENV: saving current environment\n" if $opts{'verbose'};
   mergeToEnv($buildEnv);
 
-  my $mwcargs = "-type $mpctype $buildEnv->{'DDS_ROOT'}$slash$ws $static";
-  $mwcargs .= ' ' . join(' ', @{$opts{'mpcopts'}}) if defined $opts{'mpcopts'};
+  my @mwccmd = ('perl', "$ENV{'ACE_ROOT'}/bin/mwc.pl", '-type', "$mpctype");
+  if ($static) {
+    push(@mwccmd, '-static');
+  }
+
+  my @mwcargs = ("$buildEnv->{'DDS_ROOT'}$slash$ws");
+  if (defined $opts{'mpcopts'}) {
+    push(@mwcargs, @{$opts{'mpcopts'}});
+  }
   if (!$buildtao && @features) {
     for my $feature (@features) {
-      $mwcargs .= " -features " . ($feature =~ /=/ ? $feature : "$feature=1");
+      push(@mwcargs, '-features', ($feature =~ /=/ ? $feature : "$feature=1"));
     }
   }
 
   print 'Running MPC to generate ', ($mpctype eq 'gnuace' ? 'makefiles' :
                                      'project files'), ".\n";
-  if (!$opts{'dry-run'}) {
-    if (run_command("perl $ENV{'ACE_ROOT'}/bin/mwc.pl $mwcargs") != 0) {
-      die "ERROR: Error from MPC, stopped";
-    }
+  if (run_command([@mwccmd, @mwcargs])) {
+    die "ERROR: Error from MPC, stopped";
   }
   $buildEnv->{'mpctype'} = $mpctype;
 
   # If this is a target safety profile build
   if (defined $opts{'no-opendds-safety-profile'}) {
     # Generate ACE workspace separately, to exclude TAO
-    my $mwcargs = "-type $mpctype $static " . $buildEnv->{'ACE_ROOT'}. "/ace";
-    $mwcargs .= ' ' . join(' ', @{$opts{'mpcopts'}}) if defined $opts{'mpcopts'};
-    print "ACE mwc command line: $mwcargs\n" if $opts{'verbose'};
+    my @cmd = (@mwccmd, "$buildEnv->{'ACE_ROOT'}/ace");
+    if (defined $opts{'mpcopts'}) {
+      push(@cmd, @{$opts{'mpcopts'}});
+    }
 
-    if (!$opts{'dry-run'}) {
-      if (run_command("perl $ENV{'ACE_ROOT'}/bin/mwc.pl $mwcargs") != 0) {
-        die "ERROR: Error from MPC, stopped";
-      }
+    if (run_command(\@cmd)) {
+      die "ERROR: Error from MPC, stopped";
     }
   }
 
