@@ -1950,6 +1950,11 @@ EOT
   my $static = (($opts{'static'} && $is_windows) ||
     ($cross_compile && $buildEnv->{'build'} eq 'host' && $mpctype ne 'gnuace'));
 
+  my @mpcopts = ();
+  if (defined $opts{'mpcopts'}) {
+    @mpcopts = @{$opts{'mpcopts'}};
+  }
+
   # We are not using CIAO or DAnCE, but MPC.cfg expands $CIAO_ROOT and
   # $DANCE_ROOT so leaving them empty/undefined would cause /MPC/config
   # to be on the include path for .mpb files.
@@ -1966,10 +1971,7 @@ EOT
     push(@mwccmd, '-static');
   }
 
-  my @mwcargs = ("$buildEnv->{'DDS_ROOT'}$slash$ws");
-  if (defined $opts{'mpcopts'}) {
-    push(@mwcargs, @{$opts{'mpcopts'}});
-  }
+  my @mwcargs = ("$buildEnv->{'DDS_ROOT'}$slash$ws", @mpcopts);
   if (!$buildtao && @features) {
     for my $feature (@features) {
       push(@mwcargs, '-features', ($feature =~ /=/ ? $feature : "$feature=1"));
@@ -1986,12 +1988,7 @@ EOT
   # If this is a target safety profile build
   if (defined $opts{'no-opendds-safety-profile'}) {
     # Generate ACE workspace separately, to exclude TAO
-    my @cmd = (@mwccmd, "$buildEnv->{'ACE_ROOT'}/ace");
-    if (defined $opts{'mpcopts'}) {
-      push(@cmd, @{$opts{'mpcopts'}});
-    }
-
-    if (run_command(\@cmd)) {
+    if (run_command([@mwccmd, "$buildEnv->{'ACE_ROOT'}/ace", @mpcopts])) {
       die "ERROR: Error from MPC, stopped";
     }
   }
