@@ -1952,7 +1952,9 @@ EOT
 
   my @mpcopts = ();
   if (defined $opts{'mpcopts'}) {
-    @mpcopts = @{$opts{'mpcopts'}};
+    for my $i (@{$opts{'mpcopts'}}) {
+      push(@mpcopts, split(/ /, $i));
+    }
   }
 
   # We are not using CIAO or DAnCE, but MPC.cfg expands $CIAO_ROOT and
