@@ -1,4 +1,4 @@
-project: dcps_rtps, opendds_cxx11 {
+project: dcps_rtps, opendds_cxx11, optional_security {
 
   exeout = $(DDS_ROOT)/bin
   TypeSupport_Files {

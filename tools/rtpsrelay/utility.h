@@ -10,11 +10,11 @@ inline std::string guid_to_string(const OpenDDS::DCPS::GUID_t& a_guid)
   return ss.str();
 }
 
-inline std::string guid_to_string(const RtpsRelay::GUID_t& a_guid)
+inline OpenDDS::DCPS::RepoId guid_to_guid(const RtpsRelay::GUID_t& a_guid)
 {
-  OpenDDS::DCPS::GUID_t g;
-  std::memcpy(&g, &a_guid, sizeof(RtpsRelay::GUID_t));
-  return guid_to_string(g);
+  OpenDDS::DCPS::RepoId retval;
+  std::memcpy(&retval, &a_guid, sizeof(OpenDDS::DCPS::RepoId));
+  return retval;
 }
 
 inline bool operator==(const RtpsRelay::RelayAddresses& x,
@@ -47,23 +47,6 @@ struct RelayAddressesLessThan {
   }
 };
 
-inline bool operator==(const RtpsRelay::GUID_t& v1, const RtpsRelay::GUID_t& v2) {
-  return std::memcmp(&v1, &v2, sizeof(RtpsRelay::GUID_t)) == 0;
-}
-
-inline bool operator!=(const RtpsRelay::GUID_t& v1, const RtpsRelay::GUID_t& v2) {
-  return std::memcmp(&v1, &v2, sizeof(RtpsRelay::GUID_t)) != 0;
-}
-
-struct GUID_tKeyLessThan {
-  bool operator()(const RtpsRelay::GUID_t& v1, const RtpsRelay::GUID_t& v2) const
-  {
-    return std::memcmp(&v1, &v2, sizeof(RtpsRelay::GUID_t)) < 0;
-  }
-};
-
-typedef std::set<RtpsRelay::GUID_t, GUID_tKeyLessThan> GuidSet;
-
-const RtpsRelay::EntityId_t ENTITYID_UNKNOWN                                = { {0x00,0x00,0x00}, 0x00};
+typedef std::set<OpenDDS::DCPS::RepoId, OpenDDS::DCPS::GUID_tKeyLessThan> GuidSet;
 
 #endif // RTPSRELAY_UTILITY_H_

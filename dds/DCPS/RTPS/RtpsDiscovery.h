@@ -173,6 +173,13 @@ public:
   const DCPS::TimeDuration& auth_resend_period() const { return auth_resend_period_; }
   void auth_resend_period(const DCPS::TimeDuration& x) { auth_resend_period_ = x; }
 
+  DDS::Security::ParticipantCryptoHandle get_crypto_handle(DDS::DomainId_t domain,
+                                                           const DCPS::RepoId& local_participant) const;
+
+  DDS::Security::ParticipantCryptoHandle get_crypto_handle(DDS::DomainId_t domain,
+                                                           const DCPS::RepoId& local_participant,
+                                                           const DCPS::RepoId& remote_participant) const;
+
 private:
   DCPS::TimeDuration resend_period_;
   u_short pb_, dg_, pg_, d0_, d1_, dx_;

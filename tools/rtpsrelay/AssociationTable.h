@@ -15,28 +15,28 @@ public:
   void relay_addresses(const RtpsRelay::RelayAddresses& relay_addresses) { relay_addresses_ = relay_addresses; }
   const RtpsRelay::RelayAddresses& relay_addresses() const { return relay_addresses_; }
 
-  void get_guids_from_local(const RtpsRelay::GUID_t& guid, GuidSet& guids) const;
-  void get_guids_to_local(const RtpsRelay::GUID_t& guid, GuidSet& guids) const;
-  RtpsRelay::RelayAddresses get_relay_addresses(const RtpsRelay::GUID_t& guid) const;
+  void get_guids_from_local(const OpenDDS::DCPS::RepoId& guid, GuidSet& guids) const;
+  void get_guids_to_local(const OpenDDS::DCPS::RepoId& guid, GuidSet& guids) const;
+  RtpsRelay::RelayAddresses get_relay_addresses(const OpenDDS::DCPS::RepoId& guid) const;
 
 private:
   void attempt_match(const RtpsRelay::WriterEntry& writer,
                      bool writer_local,
                      const RtpsRelay::ReaderEntry& reader,
                      bool reader_local);
-  void record_next_hop(const RtpsRelay::GUID_t& local_guid,
-                       const RtpsRelay::GUID_t& other_guid);
-  void erase_next_hop(const RtpsRelay::GUID_t& local_guid,
-                      const RtpsRelay::GUID_t& other_guid);
-  void remove_local(const RtpsRelay::GUID_t& guid);
-  void remove_remote(const RtpsRelay::GUID_t& guid);
+  void record_next_hop(const OpenDDS::DCPS::RepoId& local_guid,
+                       const OpenDDS::DCPS::RepoId& other_guid);
+  void erase_next_hop(const OpenDDS::DCPS::RepoId& local_guid,
+                      const OpenDDS::DCPS::RepoId& other_guid);
+  void remove_local(const OpenDDS::DCPS::RepoId& guid);
+  void remove_remote(const OpenDDS::DCPS::RepoId& guid);
 
   RtpsRelay::RelayAddresses relay_addresses_;
 
-  typedef std::map<RtpsRelay::GUID_t, RtpsRelay::WriterEntry, GUID_tKeyLessThan> WritersMap;
+  typedef std::map<OpenDDS::DCPS::RepoId, RtpsRelay::WriterEntry, OpenDDS::DCPS::GUID_tKeyLessThan> WritersMap;
   WritersMap local_writers_;
   WritersMap remote_writers_;
-  typedef std::map<RtpsRelay::GUID_t, RtpsRelay::ReaderEntry, GUID_tKeyLessThan> ReadersMap;
+  typedef std::map<OpenDDS::DCPS::RepoId, RtpsRelay::ReaderEntry, OpenDDS::DCPS::GUID_tKeyLessThan> ReadersMap;
   ReadersMap local_readers_;
   ReadersMap remote_readers_;
 
@@ -61,12 +61,12 @@ private:
     symmetric.  This is a class invariant.
    */
   // Key is guid of local reader or writer.
-  typedef std::map<RtpsRelay::GUID_t, GuidSet, GUID_tKeyLessThan> ForwardMap;
+  typedef std::map<OpenDDS::DCPS::RepoId, GuidSet, OpenDDS::DCPS::GUID_tKeyLessThan> ForwardMap;
   ForwardMap forward_map_;
 
   // Key is guid of reader or writer.
   // Value is set of the local guids.
-  typedef std::map<RtpsRelay::GUID_t, GuidSet, GUID_tKeyLessThan> ReverseMap;
+  typedef std::map<OpenDDS::DCPS::RepoId, GuidSet, OpenDDS::DCPS::GUID_tKeyLessThan> ReverseMap;
   ReverseMap reverse_map_;
 };
 

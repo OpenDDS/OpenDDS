@@ -34,12 +34,12 @@
 #include "MessengerTypeSupportImpl.h"
 
 #ifdef OPENDDS_SECURITY
-const char auth_ca_file[] = "file:../../security/certs/identity/identity_ca_cert.pem";
-const char perm_ca_file[] = "file:../../security/certs/permissions/permissions_ca_cert.pem";
-const char id_cert_file[] = "file:../../security/certs/identity/test_participant_02_cert.pem";
-const char id_key_file[] = "file:../../security/certs/identity/test_participant_02_private_key.pem";
+const char auth_ca_file[] = "file:../../../security/certs/identity/identity_ca_cert.pem";
+const char perm_ca_file[] = "file:../../../security/certs/permissions/permissions_ca_cert.pem";
+const char id_cert_file[] = "file:../../../security/certs/identity/test_participant_03_cert.pem";
+const char id_key_file[] = "file:../../../security/certs/identity/test_participant_03_private_key.pem";
 const char governance_file[] = "file:./governance_signed.p7s";
-const char permissions_file[] = "file:./permissions_2_signed.p7s";
+const char permissions_file[] = "file:./permissions_subscriber_signed.p7s";
 
 const char DDSSEC_PROP_IDENTITY_CA[] = "dds.sec.auth.identity_ca";
 const char DDSSEC_PROP_IDENTITY_CERT[] = "dds.sec.auth.identity_certificate";

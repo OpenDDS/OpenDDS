@@ -24,6 +24,21 @@
 #include <cstdlib>
 #include <iostream>
 
+#ifdef OPENDDS_SECURITY
+#include <dds/DCPS/security/framework/Properties.h>
+
+namespace {
+  void append(DDS::PropertySeq& props, const char* name, const std::string& value, bool propagate = false)
+  {
+    const DDS::Property_t prop = {name, value.c_str(), propagate};
+    const unsigned int len = props.length();
+    props.length(len + 1);
+    props[len] = prop;
+  }
+}
+
+#endif
+
 namespace {
   ACE_INET_Addr get_bind_addr(unsigned short port)
   {
@@ -50,11 +65,21 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   ACE_Time_Value lifespan(300);   // 5 minutes
   ACE_Time_Value purge_period(60);       // 1 minute
 
+#ifdef OPENDDS_SECURITY
+  std::string identity_ca_file;
+  std::string permissions_ca_file;
+  std::string identity_certificate_file;
+  std::string identity_key_file;
+  std::string governance_file;
+  std::string permissions_file;
+  bool secure = false;
+#endif
+
   ACE_Argv_Type_Converter atc(argc, argv);
   ACE_Arg_Shifter_T<char> args(atc.get_argc(), atc.get_ASCII_argv());
   while (args.is_anything_left()) {
     const char* arg = nullptr;
-
+    const std::string file = "file:";
     if ((arg = args.get_the_parameter("-HorizontalAddress"))) {
       nic_horizontal = ACE_INET_Addr(arg);
       args.consume_arg();
@@ -73,6 +98,32 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     } else if ((arg = args.get_the_parameter("-PurgePeriod"))) {
       purge_period = ACE_Time_Value(ACE_OS::atoi(arg));
       args.consume_arg();
+#ifdef OPENDDS_SECURITY
+    } else if ((arg = args.get_the_parameter("-IdentityCA"))) {
+      identity_ca_file = file + arg;
+      secure = true;
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-PermissionsCA"))) {
+      permissions_ca_file = file + arg;
+      secure = true;
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-IdentityCertificate"))) {
+      identity_certificate_file = file + arg;
+      secure = true;
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-IdentityKey"))) {
+      identity_key_file = file + arg;
+      secure = true;
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-Goverance"))) {
+      governance_file = file + arg;
+      secure = true;
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-Permissions"))) {
+      permissions_file = file + arg;
+      secure = true;
+      args.consume_arg();
+#endif
     } else {
       args.ignore_arg();
     }
@@ -86,16 +137,63 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     nic_vertical = ACE_INET_Addr(4444);
   }
 
-  DDS::DomainParticipantFactory_var factory = TheParticipantFactoryWithArgs(argc, argv);
-  DDS::DomainParticipantQos qos;
-  factory->get_default_participant_qos(qos);
+#ifdef OPENDDS_SECURITY
+  if (secure) {
+    if (identity_ca_file.empty()) {
+      ACE_ERROR((LM_ERROR, "ERROR: -IdentityCA is empty\n"));
+      return EXIT_FAILURE;
+    }
+    if (permissions_ca_file.empty()) {
+      ACE_ERROR((LM_ERROR, "ERROR: -PermissionsCA is empty\n"));
+      return EXIT_FAILURE;
+    }
+    if (identity_certificate_file.empty()) {
+      ACE_ERROR((LM_ERROR, "ERROR: -IdentityCertificate is empty\n"));
+      return EXIT_FAILURE;
+    }
+    if (identity_key_file.empty()) {
+      ACE_ERROR((LM_ERROR, "ERROR: -IdentityKey is empty\n"));
+      return EXIT_FAILURE;
+    }
+    if (governance_file.empty()) {
+      ACE_ERROR((LM_ERROR, "ERROR: -Governance is empty\n"));
+      return EXIT_FAILURE;
+    }
+    if (permissions_file.empty()) {
+      ACE_ERROR((LM_ERROR, "ERROR: -Permissions is empty\n"));
+      return EXIT_FAILURE;
+    }
+  }
+#endif
 
+  DDS::DomainParticipantFactory_var factory = TheParticipantFactoryWithArgs(argc, argv);
   if (!factory) {
     ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: Failed to initialize participant factory\n"));
     return EXIT_FAILURE;
   }
 
-  DDS::DomainParticipant_var application_participant = factory->create_participant(application_domain, qos, nullptr,
+  if (secure && !TheServiceParticipant->get_security()) {
+    ACE_ERROR((LM_ERROR, "ERROR: Security documents provided but security is not enabled\n"));
+    return EXIT_FAILURE;
+  }
+
+  DDS::DomainParticipantQos participant_qos;
+  factory->get_default_participant_qos(participant_qos);
+
+  DDS::PropertySeq& properties = participant_qos.property.value;
+
+#if defined(OPENDDS_SECURITY)
+  if (secure) {
+    append(properties, DDS_SEC_AUTH_IDENTITY_CA, identity_ca_file);
+    append(properties, DDS_SEC_ACCESS_PERMISSIONS_CA, permissions_ca_file);
+    append(properties, DDS_SEC_AUTH_IDENTITY_CERTIFICATE, identity_certificate_file);
+    append(properties, DDS_SEC_AUTH_PRIVATE_KEY, identity_key_file);
+    append(properties, DDS_SEC_ACCESS_GOVERNANCE, governance_file);
+    append(properties, DDS_SEC_ACCESS_PERMISSIONS, permissions_file);
+  }
+#endif
+
+  DDS::DomainParticipant_var application_participant = factory->create_participant(application_domain, participant_qos, nullptr,
                                                                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!application_participant) {
     ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: Failed to create application participant\n"));
@@ -109,7 +207,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  DDS::DomainParticipant_var relay_participant = factory->create_participant(relay_domain, qos, nullptr,
+  factory->get_default_participant_qos(participant_qos);
+  DDS::DomainParticipant_var relay_participant = factory->create_participant(relay_domain, participant_qos, nullptr,
                                                                              OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!relay_participant) {
     ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: Failed to create relay participant\n"));
@@ -136,14 +235,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   HorizontalHandler sedp_horizontal_handler(reactor, association_table);
   HorizontalHandler data_horizontal_handler(reactor, association_table);
 
-  OpenDDS::DCPS::RepoId id = application_participant_impl->get_id();
-  RtpsRelay::GUID_t application_participant_id;
-  std::memcpy(&application_participant_id, id.guidPrefix, sizeof(OpenDDS::DCPS::GuidPrefix_t));
-  application_participant_id.entityId(ENTITYID_UNKNOWN);
+  OpenDDS::DCPS::Discovery_rch discovery = TheServiceParticipant->get_discovery(application_domain);
+  auto rtps_discovery = OpenDDS::DCPS::dynamic_rchandle_cast<OpenDDS::RTPS::RtpsDiscovery>(discovery);
 
-  SpdpHandler spdp_vertical_handler(reactor, association_table, lifespan, purge_period, application_participant_id);
-  SedpHandler sedp_vertical_handler(reactor, association_table, lifespan, purge_period, application_participant_id);
-  DataHandler data_vertical_handler(reactor, association_table, lifespan, purge_period);
+  OpenDDS::DCPS::RepoId application_participant_id = application_participant_impl->get_id();
+
+  SpdpHandler spdp_vertical_handler(reactor, association_table, lifespan, purge_period, rtps_discovery, application_domain, application_participant_id);
+  SedpHandler sedp_vertical_handler(reactor, association_table, lifespan, purge_period, rtps_discovery, application_domain, application_participant_id);
+  DataHandler data_vertical_handler(reactor, association_table, lifespan, purge_period, rtps_discovery, application_domain, application_participant_id);
 
   spdp_horizontal_handler.vertical_handler(&spdp_vertical_handler);
   sedp_horizontal_handler.vertical_handler(&sedp_vertical_handler);

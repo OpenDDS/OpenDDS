@@ -30,6 +30,7 @@
 #ifdef OPENDDS_SECURITY
 #include "dds/DCPS/security/framework/SecurityRegistry.h"
 #include "dds/DCPS/security/framework/SecurityConfig.h"
+#include "dds/DCPS/security/framework/Properties.h"
 #endif
 
 #include "RecorderImpl.h"
@@ -82,12 +83,12 @@ namespace Util {
     const DDS::PropertySeq& properties = qos.property.value;
     for (unsigned int idx = 0; idx != properties.length(); ++idx) {
       const char* name = properties[idx].name.in();
-      if (std::strcmp("dds.sec.auth.identity_ca", name) == 0 ||
-          std::strcmp("dds.sec.auth.identity_certificate", name) == 0 ||
-          std::strcmp("dds.sec.auth.private_key", name) == 0 ||
-          std::strcmp("dds.sec.access.permissions_ca", name) == 0 ||
-          std::strcmp("dds.sec.access.governance", name) == 0 ||
-          std::strcmp("dds.sec.access.permissions", name) == 0) {
+      if (std::strcmp(DDS_SEC_AUTH_IDENTITY_CA, name) == 0 ||
+          std::strcmp(DDS_SEC_AUTH_IDENTITY_CERTIFICATE, name) == 0 ||
+          std::strcmp(DDS_SEC_AUTH_PRIVATE_KEY, name) == 0 ||
+          std::strcmp(DDS_SEC_ACCESS_PERMISSIONS_CA, name) == 0 ||
+          std::strcmp(DDS_SEC_ACCESS_GOVERNANCE, name) == 0 ||
+          std::strcmp(DDS_SEC_ACCESS_PERMISSIONS, name) == 0) {
         return true;
       }
     }

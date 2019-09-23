@@ -4,7 +4,9 @@
  */
 
 #include "LocalAccessCredentialData.h"
+
 #include "dds/DCPS/security/CommonUtilities.h"
+#include "dds/DCPS/security/framework/Properties.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -28,13 +30,13 @@ bool LocalAccessCredentialData::load(const DDS::PropertySeq& props,
     const std::string name(props[i].name);
     const std::string value(props[i].value);
 
-    if (name == "dds.sec.access.permissions_ca") {
+    if (name == DDS_SEC_ACCESS_PERMISSIONS_CA) {
       ca_cert_.reset(new SSL::Certificate(value));
 
-    } else if (name == "dds.sec.access.governance") {
+    } else if (name == DDS_SEC_ACCESS_GOVERNANCE) {
       governance_doc_.reset(new SSL::SignedDocument(value));
 
-    } else if (name == "dds.sec.access.permissions") {
+    } else if (name == DDS_SEC_ACCESS_PERMISSIONS) {
       permissions_doc_.reset(new SSL::SignedDocument(value));
     }
   }

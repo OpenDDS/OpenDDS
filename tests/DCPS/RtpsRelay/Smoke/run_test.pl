@@ -22,10 +22,17 @@ $test->{dcps_transport_debug_level} = 1;
 # will manually set -DCPSConfigFile
 $test->{add_transport_config} = 0;
 
-$test->process("relay1", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-DCPSConfigFile relay1.ini -ApplicationDomain 42 -VerticalAddress 4444 -HorizontalAddress 127.0.0.1:11444");
-$test->process("relay2", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-DCPSConfigFile relay2.ini -ApplicationDomain 42 -VerticalAddress 5444 -HorizontalAddress 127.0.0.1:11544");
-$test->process("publisher", "publisher", "-ORBDebugLevel 1 -DCPSConfigFile pub_rtps.ini");
-$test->process("subscriber", "subscriber", "-ORBDebugLevel 1 -DCPSConfigFile sub_rtps.ini");
+my $relay_security_opts = "";
+my $pub_sub_security_opts = "";
+if ($test->flag('secure')) {
+    $relay_security_opts = " -IdentityCA ../../../security/certs/identity/identity_ca_cert.pem -PermissionsCA ../../../security/certs/permissions/permissions_ca_cert.pem -IdentityCertificate ../../../security/certs/identity/test_participant_01_cert.pem -IdentityKey ../../../security/certs/identity/test_participant_01_private_key.pem -Goverance governance_signed.p7s -Permissions permissions_relay_signed.p7s -DCPSSecurity 1";
+    $pub_sub_security_opts = " -DCPSSecurity 1";
+}
+
+$test->process("relay1", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-DCPSConfigFile relay1.ini -ApplicationDomain 42 -VerticalAddress 4444 -HorizontalAddress 127.0.0.1:11444" . $relay_security_opts);
+$test->process("relay2", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-DCPSConfigFile relay2.ini -ApplicationDomain 42 -VerticalAddress 5444 -HorizontalAddress 127.0.0.1:11544" . $relay_security_opts);
+$test->process("publisher", "publisher", "-ORBDebugLevel 1 -DCPSConfigFile pub_rtps.ini" . $pub_sub_security_opts);
+$test->process("subscriber", "subscriber", "-ORBDebugLevel 1 -DCPSConfigFile sub_rtps.ini" . $pub_sub_security_opts);
 
 $test->start_process("relay1");
 $test->start_process("relay2");
