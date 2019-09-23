@@ -180,10 +180,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   DDS::DomainParticipantQos participant_qos;
   factory->get_default_participant_qos(participant_qos);
 
-  DDS::PropertySeq& properties = participant_qos.property.value;
-
 #if defined(OPENDDS_SECURITY)
   if (secure) {
+    DDS::PropertySeq& properties = participant_qos.property.value;
     append(properties, DDS_SEC_AUTH_IDENTITY_CA, identity_ca_file);
     append(properties, DDS_SEC_ACCESS_PERMISSIONS_CA, permissions_ca_file);
     append(properties, DDS_SEC_AUTH_IDENTITY_CERTIFICATE, identity_certificate_file);

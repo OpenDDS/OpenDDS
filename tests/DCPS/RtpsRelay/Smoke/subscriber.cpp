@@ -34,23 +34,14 @@
 #include "MessengerTypeSupportImpl.h"
 
 #ifdef OPENDDS_SECURITY
+#include <dds/DCPS/security/framework/Properties.h>
+
 const char auth_ca_file[] = "file:../../../security/certs/identity/identity_ca_cert.pem";
 const char perm_ca_file[] = "file:../../../security/certs/permissions/permissions_ca_cert.pem";
 const char id_cert_file[] = "file:../../../security/certs/identity/test_participant_03_cert.pem";
 const char id_key_file[] = "file:../../../security/certs/identity/test_participant_03_private_key.pem";
 const char governance_file[] = "file:./governance_signed.p7s";
 const char permissions_file[] = "file:./permissions_subscriber_signed.p7s";
-
-const char DDSSEC_PROP_IDENTITY_CA[] = "dds.sec.auth.identity_ca";
-const char DDSSEC_PROP_IDENTITY_CERT[] = "dds.sec.auth.identity_certificate";
-const char DDSSEC_PROP_IDENTITY_PRIVKEY[] = "dds.sec.auth.private_key";
-const char DDSSEC_PROP_PERM_CA[] = "dds.sec.access.permissions_ca";
-const char DDSSEC_PROP_PERM_GOV_DOC[] = "dds.sec.access.governance";
-const char DDSSEC_PROP_PERM_DOC[] = "dds.sec.access.permissions";
-#endif
-
-bool reliable = false;
-bool wait_for_acks = false;
 
 void append(DDS::PropertySeq& props, const char* name, const char* value, bool propagate = false)
 {
@@ -59,6 +50,10 @@ void append(DDS::PropertySeq& props, const char* name, const char* value, bool p
   props.length(len + 1);
   props[len] = prop;
 }
+#endif
+
+bool reliable = false;
+bool wait_for_acks = false;
 
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
@@ -72,16 +67,15 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     DDS::DomainParticipantQos part_qos;
     dpf->get_default_participant_qos(part_qos);
 
-    DDS::PropertySeq& props = part_qos.property.value;
-
 #if defined(OPENDDS_SECURITY)
     if (TheServiceParticipant->get_security()) {
-      append(props, DDSSEC_PROP_IDENTITY_CA, auth_ca_file);
-      append(props, DDSSEC_PROP_IDENTITY_CERT, id_cert_file);
-      append(props, DDSSEC_PROP_IDENTITY_PRIVKEY, id_key_file);
-      append(props, DDSSEC_PROP_PERM_CA, perm_ca_file);
-      append(props, DDSSEC_PROP_PERM_GOV_DOC, governance_file);
-      append(props, DDSSEC_PROP_PERM_DOC, permissions_file);
+      DDS::PropertySeq& props = part_qos.property.value;
+      append(props, DDS_SEC_AUTH_IDENTITY_CA, auth_ca_file);
+      append(props, DDS_SEC_AUTH_IDENTITY_CERTIFICATE, id_cert_file);
+      append(props, DDS_SEC_AUTH_PRIVATE_KEY, id_key_file);
+      append(props, DDS_SEC_ACCESS_PERMISSIONS_CA, perm_ca_file);
+      append(props, DDS_SEC_ACCESS_GOVERNANCE, governance_file);
+      append(props, DDS_SEC_ACCESS_PERMISSIONS, permissions_file);
     }
 #endif
 
