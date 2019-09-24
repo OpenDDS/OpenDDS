@@ -79,17 +79,13 @@ void AssociationTable::attempt_match(const RtpsRelay::WriterEntry& writer,
                                      const RtpsRelay::ReaderEntry& reader,
                                      bool reader_local)
 {
-  // Not used.  Null cannot be passed to compatibleQOS.
-  OpenDDS::DCPS::IncompatibleQosStatus writer_status;
-  OpenDDS::DCPS::IncompatibleQosStatus reader_status;
-
   const OpenDDS::DCPS::RepoId writer_guid = guid_to_guid(writer.guid());
   const OpenDDS::DCPS::RepoId reader_guid = guid_to_guid(reader.guid());
 
   if (writer.topic_name() == reader.topic_name() &&
       writer.type_name() == reader.type_name() &&
-      OpenDDS::DCPS::compatibleQOS(&writer._data_writer_qos, &reader._data_reader_qos, &writer_status, &reader_status) &&
-      OpenDDS::DCPS::compatibleQOS(&writer._publisher_qos, &reader._subscriber_qos, &writer_status, &reader_status) &&
+      OpenDDS::DCPS::compatibleQOS(&writer._data_writer_qos, &reader._data_reader_qos, nullptr, nullptr) &&
+      OpenDDS::DCPS::compatibleQOS(&writer._publisher_qos, &reader._subscriber_qos, nullptr, nullptr) &&
       OpenDDS::DCPS::matching_partitions(writer._publisher_qos.partition, reader._subscriber_qos.partition)) {
     if (writer_local) {
       record_next_hop(writer_guid, reader_guid);
