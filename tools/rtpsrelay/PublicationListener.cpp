@@ -10,23 +10,23 @@ PublicationListener::PublicationListener(OpenDDS::DCPS::DomainParticipantImpl* p
   association_table_(association_table)
 {}
 
-void PublicationListener::on_requested_deadline_missed(::DDS::DataReader_ptr /*reader*/,
-                                                       const ::DDS::RequestedDeadlineMissedStatus & /*status*/)
+void PublicationListener::on_requested_deadline_missed(DDS::DataReader_ptr /*reader*/,
+                                                       const DDS::RequestedDeadlineMissedStatus & /*status*/)
 {}
 
-void PublicationListener::on_requested_incompatible_qos(::DDS::DataReader_ptr /*reader*/,
-                                                        const ::DDS::RequestedIncompatibleQosStatus & /*status*/)
+void PublicationListener::on_requested_incompatible_qos(DDS::DataReader_ptr /*reader*/,
+                                                        const DDS::RequestedIncompatibleQosStatus & /*status*/)
 {}
 
-void PublicationListener::on_sample_rejected(::DDS::DataReader_ptr /*reader*/,
-                                             const ::DDS::SampleRejectedStatus & /*status*/)
+void PublicationListener::on_sample_rejected(DDS::DataReader_ptr /*reader*/,
+                                             const DDS::SampleRejectedStatus & /*status*/)
 {}
 
-void PublicationListener::on_liveliness_changed(::DDS::DataReader_ptr /*reader*/,
-                                                const ::DDS::LivelinessChangedStatus & /*status*/)
+void PublicationListener::on_liveliness_changed(DDS::DataReader_ptr /*reader*/,
+                                                const DDS::LivelinessChangedStatus & /*status*/)
 {}
 
-void PublicationListener::on_data_available(::DDS::DataReader_ptr reader)
+void PublicationListener::on_data_available(DDS::DataReader_ptr reader)
 {
   DDS::PublicationBuiltinTopicDataDataReader_var dr = DDS::PublicationBuiltinTopicDataDataReader::_narrow(reader);
   if (!dr) {
@@ -60,12 +60,12 @@ void PublicationListener::on_data_available(::DDS::DataReader_ptr reader)
   }
 }
 
-void PublicationListener::on_subscription_matched(::DDS::DataReader_ptr /*reader*/,
-                                                  const ::DDS::SubscriptionMatchedStatus & /*status*/)
+void PublicationListener::on_subscription_matched(DDS::DataReader_ptr /*reader*/,
+                                                  const DDS::SubscriptionMatchedStatus & /*status*/)
 {}
 
-void PublicationListener::on_sample_lost(::DDS::DataReader_ptr /*reader*/,
-                                         const ::DDS::SampleLostStatus & /*status*/)
+void PublicationListener::on_sample_lost(DDS::DataReader_ptr /*reader*/,
+                                         const DDS::SampleLostStatus & /*status*/)
 {}
 
 void PublicationListener::write_sample(const DDS::PublicationBuiltinTopicData& data,
@@ -101,13 +101,13 @@ void PublicationListener::write_sample(const DDS::PublicationBuiltinTopicData& d
   const RtpsRelay::WriterEntry entry {
     guid,
 
-      data.topic_name.in(),
-      data.type_name.in(),
-      data_writer_qos,
-      publisher_qos,
+    data.topic_name.in(),
+    data.type_name.in(),
+    data_writer_qos,
+    publisher_qos,
 
-      association_table_.relay_addresses()
-      };
+    association_table_.relay_addresses()
+  };
 
   DDS::ReturnCode_t ret = writer_->write(entry, DDS::HANDLE_NIL);
   if (ret != DDS::RETCODE_OK) {

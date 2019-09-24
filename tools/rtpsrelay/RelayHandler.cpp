@@ -193,31 +193,36 @@ void VerticalHandler::process_message(const ACE_INET_Addr& a_remote,
     return;
   }
 
+  bool verified;
 
 #ifdef OPENDDS_SECURITY
-  // Verify the message.
-  bool verified = false;
+  if (TheServiceParticipant->get_security()) {
+    // Verify the message.
+    verified = false;
 
-  DDS::Security::ParticipantCryptoHandle application_participant_crypto_handle = rtps_discovery_->get_crypto_handle(application_domain_, application_participant_guid_);
-  DDS::Security::ParticipantCryptoHandle remote_crypto_handle = rtps_discovery_->get_crypto_handle(application_domain_, application_participant_guid_, a_src_guid);
+    DDS::Security::ParticipantCryptoHandle application_participant_crypto_handle = rtps_discovery_->get_crypto_handle(application_domain_, application_participant_guid_);
+    DDS::Security::ParticipantCryptoHandle remote_crypto_handle = rtps_discovery_->get_crypto_handle(application_domain_, application_participant_guid_, a_src_guid);
 
-  if (application_participant_crypto_handle &&
-      remote_crypto_handle) {
-    OpenDDS::Security::SecurityConfig_rch conf = TheSecurityRegistry->default_config();
-    DDS::Security::CryptoTransform_var crypto = conf->get_crypto_transform();
-    DDS::OctetSeq encoded_buffer, plain_buffer;
-    DDS::Security::SecurityException ex;
+    if (application_participant_crypto_handle &&
+        remote_crypto_handle) {
+      OpenDDS::Security::SecurityConfig_rch conf = TheSecurityRegistry->default_config();
+      DDS::Security::CryptoTransform_var crypto = conf->get_crypto_transform();
+      DDS::OctetSeq encoded_buffer, plain_buffer;
+      DDS::Security::SecurityException ex;
 
-    encoded_buffer.length(a_msg->length());
-    std::memcpy(encoded_buffer.get_buffer(), a_msg->rd_ptr(), a_msg->length());
-    verified = crypto->decode_rtps_message(plain_buffer, encoded_buffer, application_participant_crypto_handle, remote_crypto_handle, ex);
+      encoded_buffer.length(a_msg->length());
+      std::memcpy(encoded_buffer.get_buffer(), a_msg->rd_ptr(), a_msg->length());
+      verified = crypto->decode_rtps_message(plain_buffer, encoded_buffer, application_participant_crypto_handle, remote_crypto_handle, ex);
 
-    if (!verified) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: Message could not be verified failed [%d.%d]: \"%C\"\n", ex.code, ex.minor_code, ex.message.in()));
+      if (!verified) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: Message could not be verified failed [%d.%d]: \"%C\"\n", ex.code, ex.minor_code, ex.message.in()));
+      }
     }
+  } else {
+#endif
+    verified = true;
+#ifdef OPENDDS_SECURITY
   }
-#else
-  bool verified = true;
 #endif
 
   std::set<std::string> addrs;

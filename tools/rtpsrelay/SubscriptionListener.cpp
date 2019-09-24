@@ -10,23 +10,23 @@ SubscriptionListener::SubscriptionListener(OpenDDS::DCPS::DomainParticipantImpl*
   association_table_(association_table)
 {}
 
-void SubscriptionListener::on_requested_deadline_missed(::DDS::DataReader_ptr /*reader*/,
-                                                        const ::DDS::RequestedDeadlineMissedStatus & /*status*/)
+void SubscriptionListener::on_requested_deadline_missed(DDS::DataReader_ptr /*reader*/,
+                                                        const DDS::RequestedDeadlineMissedStatus & /*status*/)
 {}
 
-void SubscriptionListener::on_requested_incompatible_qos(::DDS::DataReader_ptr /*reader*/,
-                                                         const ::DDS::RequestedIncompatibleQosStatus & /*status*/)
+void SubscriptionListener::on_requested_incompatible_qos(DDS::DataReader_ptr /*reader*/,
+                                                         const DDS::RequestedIncompatibleQosStatus & /*status*/)
 {}
 
-void SubscriptionListener::on_sample_rejected(::DDS::DataReader_ptr /*reader*/,
-                                              const ::DDS::SampleRejectedStatus & /*status*/)
+void SubscriptionListener::on_sample_rejected(DDS::DataReader_ptr /*reader*/,
+                                              const DDS::SampleRejectedStatus & /*status*/)
 {}
 
-void SubscriptionListener::on_liveliness_changed(::DDS::DataReader_ptr /*reader*/,
-                                                 const ::DDS::LivelinessChangedStatus & /*status*/)
+void SubscriptionListener::on_liveliness_changed(DDS::DataReader_ptr /*reader*/,
+                                                 const DDS::LivelinessChangedStatus & /*status*/)
 {}
 
-void SubscriptionListener::on_data_available(::DDS::DataReader_ptr reader)
+void SubscriptionListener::on_data_available(DDS::DataReader_ptr reader)
 {
   DDS::SubscriptionBuiltinTopicDataDataReader_var dr = DDS::SubscriptionBuiltinTopicDataDataReader::_narrow(reader);
   if (!dr) {
@@ -60,12 +60,12 @@ void SubscriptionListener::on_data_available(::DDS::DataReader_ptr reader)
   }
 }
 
-void SubscriptionListener::on_subscription_matched(::DDS::DataReader_ptr /*reader*/,
-                                                   const ::DDS::SubscriptionMatchedStatus & /*status*/)
+void SubscriptionListener::on_subscription_matched(DDS::DataReader_ptr /*reader*/,
+                                                   const DDS::SubscriptionMatchedStatus & /*status*/)
 {}
 
-void SubscriptionListener::on_sample_lost(::DDS::DataReader_ptr /*reader*/,
-                                          const ::DDS::SampleLostStatus & /*status*/)
+void SubscriptionListener::on_sample_lost(DDS::DataReader_ptr /*reader*/,
+                                          const DDS::SampleLostStatus & /*status*/)
 {}
 
 void SubscriptionListener::write_sample(const DDS::SubscriptionBuiltinTopicData& data,
@@ -98,13 +98,13 @@ void SubscriptionListener::write_sample(const DDS::SubscriptionBuiltinTopicData&
   const RtpsRelay::ReaderEntry entry {
     guid,
 
-      data.topic_name.in(),
-      data.type_name.in(),
-      data_reader_qos,
-      subscriber_qos,
+    data.topic_name.in(),
+    data.type_name.in(),
+    data_reader_qos,
+    subscriber_qos,
 
-      association_table_.relay_addresses()
-      };
+    association_table_.relay_addresses()
+  };
 
   DDS::ReturnCode_t ret = writer_->write(entry, DDS::HANDLE_NIL);
   if (ret != DDS::RETCODE_OK) {
