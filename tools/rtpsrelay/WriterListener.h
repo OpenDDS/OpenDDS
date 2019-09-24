@@ -6,7 +6,7 @@
 
 class WriterListener : public DDS::DataReaderListener {
 public:
-  WriterListener(AssociationTable& association_table);
+  explicit WriterListener(AssociationTable& association_table);
 
 private:
   void on_requested_deadline_missed(DDS::DataReader_ptr /*reader*/,
