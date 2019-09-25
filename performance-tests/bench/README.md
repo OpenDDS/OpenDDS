@@ -4,6 +4,13 @@
 
 ### Command Line Arguments
 
+Usage: `test_controller [-h|--help] | TEST_CONTEXT SCENARIO_ID [OPTIONS...]`
+
+- `TEST_CONTEXT`: Path to the directory of the test configurations and artifacts
+
+- `SCENARIO_ID`: Name of the scenario file in the test context without the
+  `.json` extension.
+
 - `--domain N`: The DDS Domain to use. The default is 89.
 
 - `--wait-for-nodes N`: The number of seconds to wait for nodes before
@@ -11,6 +18,12 @@
 
 - `--wait-for-reports N`: The number of seconds to wait for a report to come in
   before timing out. The default is 120 seconds.
+
+- `--prealloc-scenario-output PATH`: Instead of running the scenario, write
+  directives (in JSON) that would have been sent to the node controllers to the
+  file given by this path.
+
+- `--pretty`: Write the JSON output of `--prealloc-scenario-output` with indentation.
 
 ## Node Controller
 

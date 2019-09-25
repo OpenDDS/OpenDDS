@@ -16,13 +16,12 @@ int Bench_Common_Export get_option_argument_int(int& i, int argc, ACE_TCHAR* arg
 unsigned Bench_Common_Export get_option_argument_uint(int& i, int argc, ACE_TCHAR* argv[]);
 
 // Filesytem
-std::string join_path(const std::string& arg) {
-  return arg;
-}
+std::string Bench_Common_Export join_path(const std::string& arg);
 template <typename... Args>
 std::string join_path(const std::string& arg, Args... args) {
   return arg + (arg.back() == ACE_DIRECTORY_SEPARATOR_CHAR ? "" : ACE_DIRECTORY_SEPARATOR_STR) + join_path(args...);
 }
+
 std::string Bench_Common_Export create_temp_dir(const std::string& prefix);
 
 }

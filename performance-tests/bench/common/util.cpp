@@ -44,6 +44,10 @@ unsigned get_option_argument_uint(int& i, int argc, ACE_TCHAR* argv[])
   return value;
 }
 
+std::string join_path(const std::string& arg) {
+  return arg;
+}
+
 std::string create_temp_dir(const std::string& prefix)
 {
   // Create Template for mktemp

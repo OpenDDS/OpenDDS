@@ -115,6 +115,9 @@ module Bench {
     unsigned long long round_trip_jitter_weighted_median_overflow;
   };
 
+  /*
+   * Interface between the Test Controller and the Node Controllers
+   */
   module NodeController {
     typedef OpenDDS::DCPS::GUID_t NodeId;
     typedef unsigned long WorkerId;
@@ -167,6 +170,7 @@ module Bench {
       WorkerConfigs workers;
     };
     const string config_topic_name = "Node_Controller_Config";
+    typedef sequence<Config> Configs;
 
 #pragma DCPS_DATA_TYPE "Bench::NodeController::Report"
     struct Report {
@@ -178,5 +182,43 @@ module Bench {
     };
     const string report_topic_name = "Node_Controller_Report";
   };
-};
 
+  /*
+   * Scenario Format for the Test Controller
+   */
+  module TestController {
+    struct WorkerPrototype {
+      // Filename of the JSON Serialized Bench::WorkerConfig
+      string config;
+      // Number of workers to spawn using this prototype (Must be >=1)
+      unsigned long count;
+    };
+    typedef sequence<WorkerPrototype> WorkerPrototypes;
+
+    struct NodePrototype {
+      WorkerPrototypes workers;
+      // Number of Nodes to spawn using this prototype (Must be >=1)
+      unsigned long count;
+      // This NodePrototype must have a Node to itself
+      boolean exclusive;
+    };
+    typedef sequence<NodePrototype> NodePrototypes;
+
+    // This is the type of the scenario configuration
+    struct ScenarioPrototype {
+      // Unused Metadata
+      string name;
+      string desc;
+      // Workers that must be deployed in sets
+      NodePrototypes nodes;
+      // Workers that can be assigned to any node
+      WorkerPrototypes any_node;
+    };
+
+    // Result of Applying a Scenario Prototype to a List of Discovered Nodes
+    struct AllocatedScenario {
+      NodeController::Configs configs;
+      unsigned long expected_reports;
+    };
+  };
+};

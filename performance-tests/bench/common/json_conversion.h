@@ -9,6 +9,7 @@
 #include "rapidjson/istreamwrapper.h"
 #include "rapidjson/ostreamwrapper.h"
 #include "rapidjson/writer.h"
+#include "rapidjson/prettywriter.h"
 #pragma GCC diagnostic pop
 
 namespace Bench {
@@ -29,13 +30,18 @@ bool json_2_idl(std::istream& is, IDL_Type& idl_value) {
 }
 
 template<typename IDL_Type>
-bool idl_2_json(const IDL_Type& idl_value, std::ostream& os) {
+bool idl_2_json(const IDL_Type& idl_value, std::ostream& os, bool pretty = false) {
   rapidjson::Document document;
   document.SetObject();
   OpenDDS::DCPS::copyToRapidJson(idl_value, document, document.GetAllocator());
   rapidjson::OStreamWrapper osw(os);
   rapidjson::Writer<rapidjson::OStreamWrapper> writer(osw);
-  document.Accept(writer);
+  rapidjson::PrettyWriter<rapidjson::OStreamWrapper> pretty_writer(osw);
+  if (pretty) { // Tried this with a ternary but that doesn't work right.
+    document.Accept(pretty_writer);
+  } else {
+    document.Accept(writer);
+  }
   osw.Flush();
   return true;
 }

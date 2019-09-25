@@ -23,5 +23,4 @@ cd node_controller
 ./node_controller --name James &
 ./node_controller --name Meowth &
 cd ../test_controller
-./test_controller &
-wait
+./test_controller ../example example --wait-for-nodes 4
