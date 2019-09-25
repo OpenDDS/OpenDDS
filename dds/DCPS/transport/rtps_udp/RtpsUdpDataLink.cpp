@@ -922,8 +922,9 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
   TransportQueueElement* result;
   bool deliver_after_send = false;
   if (rw != writers_.end()) {
+    writer = rw->second;
     g.release();
-    result = rw->second->customize_queue_element_helper(element, requires_inline_qos, meta_submessages, deliver_after_send);
+    result = writer->customize_queue_element_helper(element, requires_inline_qos, meta_submessages, deliver_after_send);
   } else {
     result = customize_queue_element_non_reliable_i(element, requires_inline_qos, meta_submessages, deliver_after_send);
     g.release();
