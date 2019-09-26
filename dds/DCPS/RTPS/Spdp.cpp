@@ -2283,6 +2283,7 @@ void Spdp::stop_ice(ICE::Endpoint* endpoint, DCPS::RepoId r, const BuiltinEndpoi
 #endif
 }
 
+#ifdef OPENDDS_SECURITY
 DDS::Security::ParticipantCryptoHandle
 Spdp::get_crypto_handle(const DCPS::RepoId& remote_participant) const
 {
@@ -2292,6 +2293,7 @@ Spdp::get_crypto_handle(const DCPS::RepoId& remote_participant) const
   }
   return DDS::Security::ParticipantCryptoHandle();
 }
+#endif
 
 bool
 Spdp::Interceptor::reactor_is_shut_down() const {
