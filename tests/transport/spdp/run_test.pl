@@ -10,7 +10,7 @@ use strict;
 my $test = new PerlDDS::TestFramework();
 $test->process('spdp_transport', 'spdp_transport');
 $test->start_process('spdp_transport');
-my $result = $test->finish (60);
+my $result = $test->finish(60);
 if ($result != 0) {
   print STDERR "ERROR: test returned $result\n";
   exit 1;

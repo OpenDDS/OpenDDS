@@ -92,7 +92,7 @@ struct TestParticipant: ACE_Event_Handler {
     gen_find_size(ds, size, padding);
 
     size += sizeof(plist);
-    size +=200;
+    size += 200;
     ACE_Message_Block mb(size + padding);
     Serializer ser(&mb, host_is_bigendian, Serializer::ALIGN_CDR);
 
@@ -216,15 +216,17 @@ bool run_test()
   ACE_SOCK_Dgram test_part_sock;
   ACE_INET_Addr test_part_addr;
   if (!open_appropriate_socket_type(test_part_sock, test_part_addr)) {
-    std::cerr << "ERROR: run_test() unable to open test_part_sock" << std::endl;
-    exit(1);
+    ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: run_test() unable to open test_part_sock\n")));
+    return false;
   }
   test_part_sock.get_local_addr(test_part_addr);
+  test_part_addr.set(test_part_addr.get_port_number(),
 #ifdef OPENDDS_SAFETY_PROFILE
-  test_part_addr.set(test_part_addr.get_port_number(), "127.0.0.1");
+    "127.0.0.1"
 #else
-  test_part_addr.set(test_part_addr.get_port_number(), "localhost");
+    "localhost"
 #endif
+    );
 
   ACE_INET_Addr send_addr("239.255.0.1:7400");
 
@@ -294,8 +296,8 @@ bool run_test()
       {PFLAGS_NO_ASSOCIATED_WRITERS} // opendds_participant_flags
     },
     { // Duration_t (leaseDuration)
-       static_cast<CORBA::Long>((rd.resend_period() * 10).sec()),
-       0 // we are not supporting fractional seconds in the lease duration
+      static_cast<CORBA::Long>((rd.resend_period() * 10).value().sec()),
+      0 // we are not supporting fractional seconds in the lease duration
     }
   };
 
@@ -382,8 +384,7 @@ bool run_test()
 
     reactor_wait();
 
-    for (int i = 0; i < 3; i++)
-    {
+    for (int i = 0; i < 3; i++) {
       ++seq.low;
       if (!part1.send_data(test_part_guid.entityId, seq, plist, send_addr)) {
         return false;

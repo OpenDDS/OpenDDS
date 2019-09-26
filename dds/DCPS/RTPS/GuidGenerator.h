@@ -7,6 +7,10 @@
 #ifndef OPENDDS_RTPS_GUIDGENERATOR_H
 #define OPENDDS_RTPS_GUIDGENERATOR_H
 
+#if !defined (ACE_LACKS_PRAGMA_ONCE)
+#pragma once
+#endif /* ACE_LACKS_PRAGMA_ONCE */
+
 #include "dds/DdsDcpsGuidC.h"
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/RTPS/rtps_export.h"
