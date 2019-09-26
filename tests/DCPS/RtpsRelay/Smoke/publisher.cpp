@@ -122,8 +122,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
 
       // Create Publisher
+      DDS::PublisherQos publisher_qos;
+      participant->get_default_publisher_qos(publisher_qos);
+      publisher_qos.partition.name.length(1);
+      publisher_qos.partition.name[0] = "OCI";
+
       DDS::Publisher_var pub =
-        participant->create_publisher(PUBLISHER_QOS_DEFAULT,
+        participant->create_publisher(publisher_qos,
                                       DDS::PublisherListener::_nil(),
                                       OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 

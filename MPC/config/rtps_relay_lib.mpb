@@ -1,0 +1,4 @@
+project {
+  after += RtpsRelayLib
+  libs  += RtpsRelayLib
+}

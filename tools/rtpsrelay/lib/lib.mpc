@@ -1,0 +1,7 @@
+project(RtpsRelayLib): dcpslib, opendds_cxx11 {
+  sharedname = RtpsRelayLib
+
+  TypeSupport_Files {
+    Relay.idl
+  }
+}

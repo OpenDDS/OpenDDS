@@ -3,7 +3,7 @@
 
 #include "AssociationTable.h"
 #include "ListenerBase.h"
-#include "RelayTypeSupportImpl.h"
+#include "lib/RelayTypeSupportImpl.h"
 
 namespace RtpsRelay {
 

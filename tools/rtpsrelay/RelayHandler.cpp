@@ -183,16 +183,19 @@ void VerticalHandler::process_message(const ACE_INET_Addr& a_remote,
   std::set<std::string> addrs;
   std::set<std::string> horizontal_relay_addrs;
 
-  GuidSet guids;
-  association_table_.get_guids_from_local(a_src_guid, guids);
+  GuidSet local_guids, remote_guids;
+  association_table_.get_guids(a_src_guid, local_guids, remote_guids);
 
-  for (const auto& guid : guids) {
+  for (const auto& guid : local_guids) {
     auto p = find(guid);
     if (p != end()) {
-      // Local.
       addrs.insert(p->second);
-      continue;
+    } else {
+      ACE_ERROR((LM_WARNING, "(%P|%t) %N:%l WARNING: VerticalHandler::process_message failed to get address\n"));
     }
+  }
+
+  for (const auto& guid : remote_guids) {
     auto addresses = association_table_.get_relay_addresses_for_participant(guid);
     horizontal_relay_addrs.insert(extract_relay_address(addresses));
   }
@@ -231,14 +234,12 @@ void HorizontalHandler::process_message(const ACE_INET_Addr&,
 {
   std::set<std::string> addrs;
 
-  GuidSet guids;
-  association_table_.get_guids_to_local(a_src_guid, guids);
+  GuidSet local_guids, remote_guids;
+  association_table_.get_guids(a_src_guid, local_guids, remote_guids);
 
-  for (auto guid : guids) {
+  for (auto guid : local_guids) {
     auto p = vertical_handler_->find(guid);
-
     if (p != vertical_handler_->end()) {
-      // Local.
       addrs.insert(p->second);
     } else {
       ACE_ERROR((LM_WARNING, "(%P|%t) %N:%l WARNING: HorizontalHandler::process_message failed to get address\n"));

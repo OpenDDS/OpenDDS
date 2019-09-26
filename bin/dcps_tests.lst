@@ -392,5 +392,6 @@ tests/DCPS/UnregisterType/run_test.pl: !DCPS_MIN
 
 tools/repeater/tests/basic_forward.pl: NODEJS
 
+tests/DCPS/RtpsRelay/Unit/run_test.pl: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE
 tests/DCPS/RtpsRelay/Smoke/run_test.pl: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE
 tests/DCPS/RtpsRelay/Smoke/run_test.pl secure: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE
