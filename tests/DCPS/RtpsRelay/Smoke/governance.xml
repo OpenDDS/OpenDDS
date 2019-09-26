@@ -7,9 +7,9 @@
       </domains>
       <allow_unauthenticated_participants>FALSE</allow_unauthenticated_participants>
       <enable_join_access_control>TRUE</enable_join_access_control>
-      <discovery_protection_kind>NONE</discovery_protection_kind>
-      <liveliness_protection_kind>SIGN</liveliness_protection_kind>
-      <rtps_protection_kind>NONE</rtps_protection_kind> <!-- signed or encrypted -->
+      <discovery_protection_kind>ENCRYPT</discovery_protection_kind>
+      <liveliness_protection_kind>NONE</liveliness_protection_kind>
+      <rtps_protection_kind>SIGN</rtps_protection_kind>
       <topic_access_rules>
         <topic_rule>
           <topic_expression>*</topic_expression>

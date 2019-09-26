@@ -6,15 +6,15 @@
 
 class AssociationTable {
 public:
-  AssociationTable() {}
+  AssociationTable(const RtpsRelay::RelayAddresses& relay_addresses) :
+    relay_addresses_(relay_addresses)
+  {}
   void insert(const RtpsRelay::WriterEntry& entry);
   void remove(const RtpsRelay::WriterEntry& entry);
   void insert(const RtpsRelay::ReaderEntry& entry);
   void remove(const RtpsRelay::ReaderEntry& entry);
 
-  void relay_addresses(const RtpsRelay::RelayAddresses& relay_addresses) { relay_addresses_ = relay_addresses; }
   const RtpsRelay::RelayAddresses& relay_addresses() const { return relay_addresses_; }
-
   void get_guids_from_local(const OpenDDS::DCPS::RepoId& guid, GuidSet& guids) const;
   void get_guids_to_local(const OpenDDS::DCPS::RepoId& guid, GuidSet& guids) const;
   RtpsRelay::RelayAddresses get_relay_addresses(const OpenDDS::DCPS::RepoId& guid) const;

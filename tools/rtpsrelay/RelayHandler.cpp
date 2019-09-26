@@ -17,18 +17,6 @@
 #include <dds/DCPS/security/framework/SecurityRegistry.h>
 #endif
 
-namespace {
-  std::string addr_to_string(const ACE_INET_Addr& a_addr)
-  {
-    std::array<ACE_TCHAR, 256> as_string{};
-    if (a_addr.addr_to_string(as_string.data(), as_string.size()) != 0) {
-      ACE_ERROR((LM_ERROR, "(%P:%t) %N:%l ERROR: addr_to_string failed to convert address to string"));
-      return "";
-    }
-    return ACE_TEXT_ALWAYS_CHAR(as_string.data());
-  }
-}
-
 RelayHandler::RelayHandler(ACE_Reactor* a_reactor,
                            const AssociationTable& a_association_table)
   : ACE_Event_Handler(a_reactor)
@@ -170,7 +158,8 @@ void VerticalHandler::process_message(const ACE_INET_Addr& a_remote,
                                       ACE_Message_Block* a_msg,
                                       bool is_beacon_message)
 {
-  guid_addr_map_[a_src_guid] = addr_to_string(a_remote);
+  const std::string addr_str = addr_to_string(a_remote);
+  guid_addr_map_[a_src_guid] = addr_str;
   // Compute the new expiration time for this SPDP client.
   const ACE_Time_Value expiration = a_now + lifespan_;
   std::pair<GuidExpirationMap::iterator, bool> res = guid_expiration_map_.insert(std::make_pair(a_src_guid, expiration));
@@ -215,7 +204,7 @@ void VerticalHandler::process_message(const ACE_INET_Addr& a_remote,
       verified = crypto->decode_rtps_message(plain_buffer, encoded_buffer, application_participant_crypto_handle, remote_crypto_handle, ex);
 
       if (!verified) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: Message could not be verified failed [%d.%d]: \"%C\"\n", ex.code, ex.minor_code, ex.message.in()));
+        ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: Message from %C at %C could not be verified [%d.%d]: \"%C\"\n", guid_to_string(a_src_guid).c_str(), addr_str.c_str(), ex.code, ex.minor_code, ex.message.in()));
       }
     }
   } else {

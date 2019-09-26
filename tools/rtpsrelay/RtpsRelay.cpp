@@ -228,56 +228,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   const auto reactor = ACE_Reactor::instance();
 
-  AssociationTable association_table;
-
-  HorizontalHandler spdp_horizontal_handler(reactor, association_table);
-  HorizontalHandler sedp_horizontal_handler(reactor, association_table);
-  HorizontalHandler data_horizontal_handler(reactor, association_table);
-
-  OpenDDS::DCPS::Discovery_rch discovery = TheServiceParticipant->get_discovery(application_domain);
-  auto rtps_discovery = OpenDDS::DCPS::dynamic_rchandle_cast<OpenDDS::RTPS::RtpsDiscovery>(discovery);
-
-  OpenDDS::DCPS::RepoId application_participant_id = application_participant_impl->get_id();
-
-  SpdpHandler spdp_vertical_handler(reactor, association_table, lifespan, purge_period, rtps_discovery, application_domain, application_participant_id);
-  SedpHandler sedp_vertical_handler(reactor, association_table, lifespan, purge_period, rtps_discovery, application_domain, application_participant_id);
-  DataHandler data_vertical_handler(reactor, association_table, lifespan, purge_period, rtps_discovery, application_domain, application_participant_id);
-
-  spdp_horizontal_handler.vertical_handler(&spdp_vertical_handler);
-  sedp_horizontal_handler.vertical_handler(&sedp_vertical_handler);
-  data_horizontal_handler.vertical_handler(&data_vertical_handler);
-
-  spdp_vertical_handler.horizontal_handler(&spdp_horizontal_handler);
-  sedp_vertical_handler.horizontal_handler(&sedp_horizontal_handler);
-  data_vertical_handler.horizontal_handler(&data_horizontal_handler);
-
-  spdp_horizontal_handler.open(spdp_horizontal_addr);
-  sedp_horizontal_handler.open(sedp_horizontal_addr);
-  data_horizontal_handler.open(data_horizontal_addr);
-
-  spdp_vertical_handler.open(spdp_vertical_addr);
-  sedp_vertical_handler.open(sedp_vertical_addr);
-  data_vertical_handler.open(data_vertical_addr);
-
-  std::cout << "SPDP Horizontal listening on " << spdp_horizontal_handler.relay_address() << '\n'
-    << "SEDP Horizontal listening on " << sedp_horizontal_handler.relay_address() << '\n'
-    << "Data Horizontal listening on " << data_horizontal_handler.relay_address() << '\n'
-    << "SPDP Vertical listening on " << spdp_vertical_handler.relay_address() << '\n'
-    << "SEDP Vertical listening on " << sedp_vertical_handler.relay_address() << '\n'
-    << "Data Vertical listening on " << data_vertical_handler.relay_address() << std::endl;
-
-  StatisticsHandler statistics_h(reactor,
-                                 &spdp_vertical_handler, &spdp_horizontal_handler,
-                                 &sedp_vertical_handler, &sedp_horizontal_handler,
-                                 &data_vertical_handler, &data_horizontal_handler);
-  statistics_h.open();
-
   RtpsRelay::RelayAddresses relay_addresses {
-    spdp_horizontal_handler.relay_address(),
-      sedp_horizontal_handler.relay_address(),
-      data_horizontal_handler.relay_address()
-      };
-  association_table.relay_addresses(relay_addresses);
+    addr_to_string(spdp_horizontal_addr),
+    addr_to_string(sedp_horizontal_addr),
+    addr_to_string(data_horizontal_addr)
+  };
+
+  AssociationTable association_table(relay_addresses);
 
   DDS::Subscriber_var bit_subscriber = application_participant->get_builtin_subscriber();
   {
@@ -467,6 +424,48 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       return EXIT_FAILURE;
     }
   }
+
+  HorizontalHandler spdp_horizontal_handler(reactor, association_table);
+  HorizontalHandler sedp_horizontal_handler(reactor, association_table);
+  HorizontalHandler data_horizontal_handler(reactor, association_table);
+
+  OpenDDS::DCPS::Discovery_rch discovery = TheServiceParticipant->get_discovery(application_domain);
+  auto rtps_discovery = OpenDDS::DCPS::dynamic_rchandle_cast<OpenDDS::RTPS::RtpsDiscovery>(discovery);
+
+  OpenDDS::DCPS::RepoId application_participant_id = application_participant_impl->get_id();
+
+  SpdpHandler spdp_vertical_handler(reactor, association_table, lifespan, purge_period, rtps_discovery, application_domain, application_participant_id);
+  SedpHandler sedp_vertical_handler(reactor, association_table, lifespan, purge_period, rtps_discovery, application_domain, application_participant_id);
+  DataHandler data_vertical_handler(reactor, association_table, lifespan, purge_period, rtps_discovery, application_domain, application_participant_id);
+
+  spdp_horizontal_handler.vertical_handler(&spdp_vertical_handler);
+  sedp_horizontal_handler.vertical_handler(&sedp_vertical_handler);
+  data_horizontal_handler.vertical_handler(&data_vertical_handler);
+
+  spdp_vertical_handler.horizontal_handler(&spdp_horizontal_handler);
+  sedp_vertical_handler.horizontal_handler(&sedp_horizontal_handler);
+  data_vertical_handler.horizontal_handler(&data_horizontal_handler);
+
+  spdp_horizontal_handler.open(spdp_horizontal_addr);
+  sedp_horizontal_handler.open(sedp_horizontal_addr);
+  data_horizontal_handler.open(data_horizontal_addr);
+
+  spdp_vertical_handler.open(spdp_vertical_addr);
+  sedp_vertical_handler.open(sedp_vertical_addr);
+  data_vertical_handler.open(data_vertical_addr);
+
+  std::cout << "SPDP Horizontal listening on " << spdp_horizontal_handler.relay_address() << '\n'
+    << "SEDP Horizontal listening on " << sedp_horizontal_handler.relay_address() << '\n'
+    << "Data Horizontal listening on " << data_horizontal_handler.relay_address() << '\n'
+    << "SPDP Vertical listening on " << spdp_vertical_handler.relay_address() << '\n'
+    << "SEDP Vertical listening on " << sedp_vertical_handler.relay_address() << '\n'
+    << "Data Vertical listening on " << data_vertical_handler.relay_address() << std::endl;
+
+  StatisticsHandler statistics_h(reactor,
+                                 &spdp_vertical_handler, &spdp_horizontal_handler,
+                                 &sedp_vertical_handler, &sedp_horizontal_handler,
+                                 &data_vertical_handler, &data_horizontal_handler);
+  statistics_h.open();
 
   reactor->run_reactor_event_loop();
 
