@@ -54,8 +54,6 @@ public:
                   const AssociationTable& a_association_table,
                   const ACE_Time_Value& lifespan,
                   const ACE_Time_Value& purge_period,
-                  const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
-                  DDS::DomainId_t application_domain,
                   const OpenDDS::DCPS::RepoId& application_participant_guid);
   void horizontal_handler(HorizontalHandler* a_horizontal_handler) { horizontal_handler_ = a_horizontal_handler; }
 
@@ -87,8 +85,6 @@ protected:
   typedef std::multimap<ACE_Time_Value, OpenDDS::DCPS::RepoId> ExpirationGuidMap;
   ExpirationGuidMap expiration_guid_map_;
   ACE_Time_Value const lifespan_;
-  OpenDDS::RTPS::RtpsDiscovery_rch rtps_discovery_;
-  const DDS::DomainId_t application_domain_;
   const OpenDDS::DCPS::RepoId application_participant_guid_;
 
   int handle_timeout(const ACE_Time_Value& a_now, const void*) override;
@@ -115,8 +111,6 @@ public:
               const AssociationTable& a_association_table,
               const ACE_Time_Value& lifespan,
               const ACE_Time_Value& purge_period,
-              const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
-              DDS::DomainId_t application_domain,
               const OpenDDS::DCPS::RepoId& application_participant_guid);
 
 private:
@@ -135,8 +129,6 @@ public:
               const AssociationTable& a_association_table,
               const ACE_Time_Value& lifespan,
               const ACE_Time_Value& purge_period,
-              const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
-              DDS::DomainId_t application_domain,
               const OpenDDS::DCPS::RepoId& application_participant_guid);
 
 private:
@@ -155,8 +147,6 @@ public:
               const AssociationTable& a_association_table,
               const ACE_Time_Value& lifespan,
               const ACE_Time_Value& purge_period,
-              const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
-              DDS::DomainId_t application_domain,
               const OpenDDS::DCPS::RepoId& application_participant_guid);
 
 private:

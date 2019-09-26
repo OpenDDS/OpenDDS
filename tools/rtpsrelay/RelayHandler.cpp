@@ -139,14 +139,10 @@ VerticalHandler::VerticalHandler(ACE_Reactor* a_reactor,
                                  const AssociationTable& a_association_table,
                                  const ACE_Time_Value& lifespan,
                                  const ACE_Time_Value& purge_period,
-                                 const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
-                                 DDS::DomainId_t application_domain,
                                  const OpenDDS::DCPS::RepoId& application_participant_guid)
   : RelayHandler(a_reactor, a_association_table)
   , horizontal_handler_(nullptr)
   , lifespan_(lifespan)
-  , rtps_discovery_(rtps_discovery)
-  , application_domain_(application_domain)
   , application_participant_guid_(application_participant_guid)
 {
   reactor()->schedule_timer(this, 0, purge_period, purge_period);
@@ -182,55 +178,21 @@ void VerticalHandler::process_message(const ACE_INET_Addr& a_remote,
     return;
   }
 
-  bool verified;
-
-#ifdef OPENDDS_SECURITY
-  if (TheServiceParticipant->get_security()) {
-    // Verify the message.
-    verified = false;
-
-    DDS::Security::ParticipantCryptoHandle application_participant_crypto_handle = rtps_discovery_->get_crypto_handle(application_domain_, application_participant_guid_);
-    DDS::Security::ParticipantCryptoHandle remote_crypto_handle = rtps_discovery_->get_crypto_handle(application_domain_, application_participant_guid_, a_src_guid);
-
-    if (application_participant_crypto_handle &&
-        remote_crypto_handle) {
-      OpenDDS::Security::SecurityConfig_rch conf = TheSecurityRegistry->default_config();
-      DDS::Security::CryptoTransform_var crypto = conf->get_crypto_transform();
-      DDS::OctetSeq encoded_buffer, plain_buffer;
-      DDS::Security::SecurityException ex;
-
-      encoded_buffer.length(a_msg->length());
-      std::memcpy(encoded_buffer.get_buffer(), a_msg->rd_ptr(), a_msg->length());
-      verified = crypto->decode_rtps_message(plain_buffer, encoded_buffer, application_participant_crypto_handle, remote_crypto_handle, ex);
-
-      if (!verified) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: Message from %C at %C could not be verified [%d.%d]: \"%C\"\n", guid_to_string(a_src_guid).c_str(), addr_str.c_str(), ex.code, ex.minor_code, ex.message.in()));
-      }
-    }
-  } else {
-#endif
-    verified = true;
-#ifdef OPENDDS_SECURITY
-  }
-#endif
-
   std::set<std::string> addrs;
   std::set<std::string> horizontal_relay_addrs;
 
-  if (verified) {
-    GuidSet guids;
-    association_table_.get_guids_from_local(a_src_guid, guids);
+  GuidSet guids;
+  association_table_.get_guids_from_local(a_src_guid, guids);
 
-    for (const auto& guid : guids) {
-      auto p = find(guid);
-      if (p != end()) {
-        // Local.
-        addrs.insert(p->second);
-        continue;
-      }
-      auto addresses = association_table_.get_relay_addresses(guid);
-      horizontal_relay_addrs.insert(extract_relay_address(addresses));
+  for (const auto& guid : guids) {
+    auto p = find(guid);
+    if (p != end()) {
+      // Local.
+      addrs.insert(p->second);
+      continue;
     }
+    auto addresses = association_table_.get_relay_addresses(guid);
+    horizontal_relay_addrs.insert(extract_relay_address(addresses));
   }
 
   add_addresses(a_remote, a_src_guid, addrs);
@@ -290,10 +252,8 @@ SpdpHandler::SpdpHandler(ACE_Reactor* a_reactor,
                          const AssociationTable& a_association_table,
                          const ACE_Time_Value& lifespan,
                          const ACE_Time_Value& purge_period,
-                         const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
-                         DDS::DomainId_t application_domain,
                          const OpenDDS::DCPS::RepoId& application_participant_guid)
-  : VerticalHandler(a_reactor, a_association_table, lifespan, purge_period, rtps_discovery, application_domain, application_participant_guid)
+  : VerticalHandler(a_reactor, a_association_table, lifespan, purge_period, application_participant_guid)
 {}
 
 std::string SpdpHandler::extract_relay_address(const RtpsRelay::RelayAddresses& relay_addresses) const
@@ -332,10 +292,8 @@ SedpHandler::SedpHandler(ACE_Reactor* a_reactor,
                          const AssociationTable& a_association_table,
                          const ACE_Time_Value& lifespan,
                          const ACE_Time_Value& purge_period,
-                         const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
-                         DDS::DomainId_t application_domain,
                          const OpenDDS::DCPS::RepoId& application_participant_guid)
-  : VerticalHandler(a_reactor, a_association_table, lifespan, purge_period, rtps_discovery, application_domain, application_participant_guid)
+  : VerticalHandler(a_reactor, a_association_table, lifespan, purge_period, application_participant_guid)
 {}
 
 std::string SedpHandler::extract_relay_address(const RtpsRelay::RelayAddresses& relay_addresses) const
@@ -374,10 +332,8 @@ DataHandler::DataHandler(ACE_Reactor* a_reactor,
                          const AssociationTable& a_association_table,
                          const ACE_Time_Value& lifespan,
                          const ACE_Time_Value& purge_period,
-                         const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
-                         DDS::DomainId_t application_domain,
                          const OpenDDS::DCPS::RepoId& application_participant_guid)
-  : VerticalHandler(a_reactor, a_association_table, lifespan, purge_period, rtps_discovery, application_domain, application_participant_guid)
+  : VerticalHandler(a_reactor, a_association_table, lifespan, purge_period, application_participant_guid)
 {}
 
 std::string DataHandler::extract_relay_address(const RtpsRelay::RelayAddresses& relay_addresses) const

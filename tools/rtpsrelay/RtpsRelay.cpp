@@ -429,14 +429,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   HorizontalHandler sedp_horizontal_handler(reactor, association_table);
   HorizontalHandler data_horizontal_handler(reactor, association_table);
 
-  OpenDDS::DCPS::Discovery_rch discovery = TheServiceParticipant->get_discovery(application_domain);
-  auto rtps_discovery = OpenDDS::DCPS::dynamic_rchandle_cast<OpenDDS::RTPS::RtpsDiscovery>(discovery);
-
   OpenDDS::DCPS::RepoId application_participant_id = application_participant_impl->get_id();
 
-  SpdpHandler spdp_vertical_handler(reactor, association_table, lifespan, purge_period, rtps_discovery, application_domain, application_participant_id);
-  SedpHandler sedp_vertical_handler(reactor, association_table, lifespan, purge_period, rtps_discovery, application_domain, application_participant_id);
-  DataHandler data_vertical_handler(reactor, association_table, lifespan, purge_period, rtps_discovery, application_domain, application_participant_id);
+  SpdpHandler spdp_vertical_handler(reactor, association_table, lifespan, purge_period, application_participant_id);
+  SedpHandler sedp_vertical_handler(reactor, association_table, lifespan, purge_period, application_participant_id);
+  DataHandler data_vertical_handler(reactor, association_table, lifespan, purge_period, application_participant_id);
 
   spdp_horizontal_handler.vertical_handler(&spdp_vertical_handler);
   sedp_horizontal_handler.vertical_handler(&sedp_vertical_handler);
