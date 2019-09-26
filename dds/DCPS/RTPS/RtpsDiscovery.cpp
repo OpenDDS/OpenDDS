@@ -523,6 +523,7 @@ RtpsDiscovery::signal_liveliness(const DDS::DomainId_t domain_id,
   get_part(domain_id, part_id)->signal_liveliness(kind);
 }
 
+#ifdef OPENDDS_SECURITY
 DDS::Security::ParticipantCryptoHandle
 RtpsDiscovery::get_crypto_handle(DDS::DomainId_t domain,
                                  const DCPS::RepoId& local_participant) const
@@ -534,7 +535,6 @@ RtpsDiscovery::get_crypto_handle(DDS::DomainId_t domain,
 
   return DDS::Security::ParticipantCryptoHandle();
 }
-
 
 DDS::Security::ParticipantCryptoHandle
 RtpsDiscovery::get_crypto_handle(DDS::DomainId_t domain,
@@ -548,6 +548,7 @@ RtpsDiscovery::get_crypto_handle(DDS::DomainId_t domain,
 
   return DDS::Security::ParticipantCryptoHandle();
 }
+#endif
 
 RtpsDiscovery::StaticInitializer::StaticInitializer()
 {
