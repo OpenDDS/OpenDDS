@@ -37,6 +37,12 @@ std::string temp_dir;
 std::string output_dir;
 ReportDataWriter_var report_writer_impl;
 
+int run_cycle(
+  const std::string& name,
+  DDS::DomainParticipant_var participant,
+  StatusDataWriter_var status_writer_impl,
+  ConfigDataReader_var config_reader_impl);
+
 std::string create_config(const std::string& file_base_name, const char* contents)
 {
   const std::string filename = join_path(output_dir, file_base_name + "_config.json");
@@ -137,6 +143,12 @@ public:
   }
 };
 
+enum class RunMode {
+  one_shot,
+  daemon,
+  daemon_exit_on_error,
+};
+
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   const char* cstr = ACE_OS::getenv("BENCH_ROOT");
@@ -151,30 +163,46 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     bench_root = join_path(dds_root, "performance-tests", "bench");
   }
 
-  std::map<WorkerId, std::shared_ptr<Worker>> workers;
-  NodeId this_node_id;
-
   TheServiceParticipant->default_configuration_file(
     ACE_TEXT_CHAR_TO_TCHAR(join_path(bench_root, "control_opendds_config.ini").c_str()));
 
   // Parse Arguments
   DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
 
+  RunMode run_mode;
   int domain = default_control_domain;
   std::string name;
 
   try {
-    for (int i = 1; i < argc; i++) {
+    if (argc == 1) {
+      std::cerr << "A valid run type is required" << std::endl;
+      throw 1;
+    }
+
+    const char* run_mode_arg = ACE_TEXT_ALWAYS_CHAR(argv[1]);
+    if (!ACE_OS::strcmp(run_mode_arg, ACE_TEXT("one-shot"))) {
+      run_mode = RunMode::one_shot;
+    } else if (!ACE_OS::strcmp(run_mode_arg, ACE_TEXT("daemon"))) {
+      run_mode = RunMode::daemon;
+    } else if (!ACE_OS::strcmp(run_mode_arg, ACE_TEXT("daemon-exit-on-error"))) {
+      run_mode = RunMode::daemon_exit_on_error;
+    } else {
+      std::cerr << "Invalid run type: " << run_mode_arg << std::endl;
+      throw 1;
+    }
+
+    for (int i = 2; i < argc; i++) {
       if (!ACE_OS::strcmp(argv[i], ACE_TEXT("--domain"))) {
         domain = get_option_argument_int(i, argc, argv);
       } else if (!ACE_OS::strcmp(argv[i], ACE_TEXT("--name"))) {
         name = get_option_argument(i, argc, argv);
       } else {
-        std::cerr << "Invalid Option: " << ACE_TEXT_ALWAYS_CHAR(argv[i]) << std::endl;
+        std::cerr << "Invalid option: " << ACE_TEXT_ALWAYS_CHAR(argv[i]) << std::endl;
         return 1;
       }
     }
   } catch(int value) {
+    std::cerr << "See DDS_ROOT/performance-tests/bench/README.md for usage" << std::endl;
     return value;
   }
 
@@ -190,7 +218,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     std::cerr << "create_participant failed" << std::endl;
     return 1;
   }
-  this_node_id = reinterpret_cast<OpenDDS::DCPS::DomainParticipantImpl*>(participant.in())->get_id();
 
   // Create Topics
   StatusTypeSupport_var status_ts = new StatusTypeSupportImpl;
@@ -289,9 +316,39 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
 
+  // Wait For and Run Node Configurations
+  int exit_status = 0;
+  while (true) {
+    exit_status = run_cycle(name, participant, status_writer_impl, config_reader_impl);
+    if (run_mode == RunMode::one_shot || (run_mode == RunMode::daemon_exit_on_error && exit_status != 0)) {
+      break;
+    }
+  }
+
+  // Clean up OpenDDS
+  participant->delete_contained_entities();
+  dpf->delete_participant(participant);
+  TheServiceParticipant->shutdown();
+
+  if (temp_dir.size()) {
+    ACE_OS::rmdir(temp_dir.c_str());
+  }
+
+  return exit_status;
+}
+
+int run_cycle(
+  const std::string& name,
+  DDS::DomainParticipant_var participant,
+  StatusDataWriter_var status_writer_impl,
+  ConfigDataReader_var config_reader_impl)
+{
+  std::map<WorkerId, std::shared_ptr<Worker>> workers;
+  NodeId this_node_id = reinterpret_cast<OpenDDS::DCPS::DomainParticipantImpl*>(participant.in())->get_id();
+
   // Wait for Status Publication with Test Controller and Write Status
   {
-    DDS::StatusCondition_var condition = status_writer->get_statuscondition();
+    DDS::StatusCondition_var condition = status_writer_impl->get_statuscondition();
     condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
     DDS::WaitSet_var ws = new DDS::WaitSet;
     ws->attach_condition(condition);
@@ -305,7 +362,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         std::cerr << "wait for Test Controller failed" << std::endl;
         return 1;
       }
-      if (status_writer->get_publication_matched_status(match) != DDS::RETCODE_OK) {
+      if (status_writer_impl->get_publication_matched_status(match) != DDS::RETCODE_OK) {
         std::cerr << "get_publication_matched_status failed" << std::endl;
         return 1;
       }
@@ -393,17 +450,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   for (auto& worker : workers) {
     worker.second->check();
-  }
-
-  workers.clear();
-
-  // Clean up OpenDDS
-  participant->delete_contained_entities();
-  dpf->delete_participant(participant);
-  TheServiceParticipant->shutdown();
-
-  if (temp_dir.size()) {
-    ACE_OS::rmdir(temp_dir.c_str());
   }
 
   return 0;

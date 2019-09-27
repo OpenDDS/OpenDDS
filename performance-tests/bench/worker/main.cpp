@@ -83,17 +83,18 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
       } else if (config_file_path.empty()) {
         config_file_path = argument;
       } else {
-        std::cerr << "Invalid Option: " << argument << std::endl;
+        std::cerr << "Invalid option: " << argument << std::endl;
         return 1;
       }
     }
-  } catch(int value) {
-    return value;
-  }
 
-  if (config_file_path.empty()) {
-    std::cerr << "Must pass configuration file" << std::endl;
-    return 1;
+    if (config_file_path.empty()) {
+      std::cerr << "Must pass a configuration file" << std::endl;
+      throw 1;
+    }
+  } catch(int value) {
+    std::cerr << "See DDS_ROOT/performance-tests/bench/README.md for usage" << std::endl;
+    return value;
   }
 
   std::ifstream config_file(config_file_path);

@@ -118,7 +118,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       } else if (scenario_id.empty() && argument[0] != '-') {
         scenario_id = argument;
       } else {
-        std::cerr << "Invalid Option: " << argument << std::endl;
+        std::cerr << "Invalid option: " << argument << std::endl;
         throw 1;
       }
     }
