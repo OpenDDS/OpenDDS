@@ -178,7 +178,6 @@ public:
 private:
   DCPS::TimeDuration resend_period_;
   u_short pb_, dg_, pg_, d0_, d1_, dx_;
-  u_short max_spdp_sequence_msg_reset_check_;
   unsigned char ttl_;
   bool sedp_multicast_;
   OPENDDS_STRING multicast_interface_, sedp_local_address_, spdp_local_address_;
@@ -192,6 +191,7 @@ private:
   DCPS::TimeDuration max_spdp_timer_period_;
   DCPS::TimeDuration max_auth_time_;
   DCPS::TimeDuration auth_resend_period_;
+  u_short max_spdp_sequence_msg_reset_check_;
 
 
   /// Guids will be unique within this RTPS configuration

@@ -55,9 +55,9 @@ RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
   , default_multicast_group_("239.255.0.1") /*RTPS v2.1 9.6.1.4.1*/
   , use_ice_(false)
   , max_spdp_timer_period_(0, 10000)
-  , max_spdp_sequence_msg_reset_check_(3)
   , max_auth_time_(300, 0)
   , auth_resend_period_(1, 0)
+  , max_spdp_sequence_msg_reset_check_(3)
 {
 }
 

@@ -102,7 +102,7 @@ public:
 
   bool find_part(const DCPS::RepoId& part_id);
 
-  bool validateSequenceNumber(const DCPS::SequenceNumber& seq, DiscoveredParticipantIter& iter);
+  static bool validateSequenceNumber(const DCPS::SequenceNumber& seq, DiscoveredParticipantIter& iter);
 
 #ifdef OPENDDS_SECURITY
   void check_auth_states(const DCPS::MonotonicTimePoint& tv);

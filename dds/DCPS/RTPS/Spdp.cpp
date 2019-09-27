@@ -400,7 +400,7 @@ Spdp::handle_participant_data(DCPS::MessageId id, const ParticipantData_t& cpdat
     // initialize sequence number validation variables for new participant
     dp.last_seq_.setValue(currentSeq.getValue());
     dp.seqResetCandidate_.setValue(0);
-    dp.SeqResetChkCount_ = 0;
+    dp.seqResetChkCount_ = 0;
 
 #ifdef OPENDDS_SECURITY
     if (is_security_enabled()) {
@@ -491,8 +491,7 @@ Spdp::handle_participant_data(DCPS::MessageId id, const ParticipantData_t& cpdat
       return;
     }
 
-    // Checks if sequence numbers are increasing
-
+    // Check if sequence numbers are increasing
     if (validateSequenceNumber(currentSeq, iter)) {
       // Must unlock when calling into part_bit() as it may call back into us
       ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
@@ -522,13 +521,13 @@ Spdp::handle_participant_data(DCPS::MessageId id, const ParticipantData_t& cpdat
         iter->second.last_seen_ = now;
         iter->second.last_seq_.setValue(currentSeq.getValue());
       }
-    } else {
-      if (iter->second.SeqResetChkCount_ >= this->disco_->max_spdp_sequence_msg_reset_check()) {
-        remove_discovered_participant(iter);
-      }
+    // Else a reset has occured and check if we should remove the participant
+    } else if (iter->second.seqResetChkCount_ >= disco_->max_spdp_sequence_msg_reset_check()) {
+      remove_discovered_participant(iter);
     }
   }
 }
+
 bool
 Spdp::validateSequenceNumber(const DCPS::SequenceNumber& seq, DiscoveredParticipantIter& iter)
 {
@@ -536,22 +535,18 @@ Spdp::validateSequenceNumber(const DCPS::SequenceNumber& seq, DiscoveredParticip
     return true;
   }
 
-  if ((iter->second.last_seq_.getHigh() == ACE_INT32_MAX) &&
-     (iter->second.last_seq_.getLow() == ACE_UINT32_MAX)) {
-    return true;
-  } else {
+  if ((iter->second.last_seq_.getHigh() != ACE_INT32_MAX) &&
+      (iter->second.last_seq_.getLow() != ACE_UINT32_MAX)) {
     if (seq < iter->second.last_seq_) {
-      ++iter->second.SeqResetChkCount_;
+      ++iter->second.seqResetChkCount_;
       iter->second.seqResetCandidate_ = seq;
       return false;
-    } else {
-      if (iter->second.SeqResetChkCount_ > 0) {
-        --iter->second.SeqResetChkCount_;
-      }
-      return true;
+    } else if (iter->second.seqResetChkCount_ > 0) {
+      --iter->second.seqResetChkCount_;
     }
   }
- }
+  return true;
+}
 
 void
 Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
