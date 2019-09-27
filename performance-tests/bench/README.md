@@ -19,11 +19,15 @@ Usage: `test_controller [-h|--help] | TEST_CONTEXT SCENARIO_ID [OPTIONS...]`
 - `--wait-for-reports N`: The number of seconds to wait for a report to come in
   before timing out. The default is 120 seconds.
 
-- `--prealloc-scenario-output PATH`: Instead of running the scenario, write
+- `--prealloc-scenario-out PATH`: Instead of running the scenario, write
   directives (in JSON) that would have been sent to the node controllers to the
   file given by this path.
 
 - `--pretty`: Write the JSON output of `--prealloc-scenario-output` with indentation.
+
+- `--prealloc-scenario-in PATH`: Take result of `--prealloc-scneario-out` and
+  use that to run the scenario instead of discovering nodes. This might fail if
+  the nodes go offline after the preallocated scenario is saved.
 
 ## Node Controller
 

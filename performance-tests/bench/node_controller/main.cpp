@@ -241,6 +241,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   subscriber->get_default_datareader_qos(dr_qos);
   dr_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
   dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+  dr_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
   DDS::DataReader_var config_reader = subscriber->create_datareader(
     config_topic, dr_qos, nullptr,
     OpenDDS::DCPS::DEFAULT_STATUS_MASK);

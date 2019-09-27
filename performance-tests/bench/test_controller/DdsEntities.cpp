@@ -64,6 +64,7 @@ DdsEntities::DdsEntities(
   publisher_->get_default_datawriter_qos(dw_qos);
   dw_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
   dw_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+  dw_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
   config_writer_ = publisher_->create_datawriter(
     config_topic_, dw_qos, nullptr,
     OpenDDS::DCPS::DEFAULT_STATUS_MASK);

@@ -57,10 +57,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   /// Max time to wait inbetween reports comming in.
   unsigned wait_for_reports = 120;
 
-  /// Stop After Allocation and Output the Allocation to File
+  /// If not empty, Stop After Allocation and Output the Allocation to File
   std::string preallocated_scenario_output_path;
   /// Pretty Print the Preallocated Scenario JSON
   bool pretty = false;
+  /// If not empty, Don't Discover Nodes, Send Out an Existing Set of Node Configs
+  std::string preallocated_scenario_input_path;
 
   /// Location of Test Artifacts and Configurations
   std::string test_context_path;
@@ -81,28 +83,34 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       } else if (!ACE_OS::strcmp(argument, "--help") || !ACE_OS::strcmp(argument, "-h")) {
         std::cout << usage << std::endl
           << std::endl
+//            ################################################################################
           << "TEST_CONTEXT is the path to the directory of the test configurations and" << std::endl
           << "artifacts." << std::endl
-          << "SCENARIO_ID is the name of the scenario file in the test context to use" << std::endl
-          << "without the `.json` extension." << std::endl
+          << "SCENARIO_ID is the name of the scenario file in the test context to use without" << std::endl
+          << "the `.json` extension." << std::endl
           << std::endl
           << "OPTIONS:" << std::endl
-          << "--domain N                       The DDS Domain to use. The default is 89." << std::endl
-          << "--wait-for-nodes N               The number of seconds to wait for nodes before" << std::endl
-          << "                                 broadcasting the scenario to them. The default" << std::endl
-          << "                                 is 10 seconds." << std::endl
-          << "--wait-for-reports N             The number of seconds to wait for a report to" << std::endl
-          << "                                 come in before timing out. The default is 120" << std::endl
-          << "                                 seconds." << std::endl
-          << "--prealloc-scenario-output PATH  Instead of running the scenario, write" << std::endl
-          << "                                 directives (in JSON) that would have been sent" << std::endl
-          << "                                 to the node controllers to the file at this" << std::endl
-          << "                                 path." << std::endl
-          << "--pretty                         Write the JSON output of" << std::endl
-          << "                                 `--prealloc-scenario-output` with indentation." << std::endl;
+          << "--domain N                   The DDS Domain to use. The default is 89." << std::endl
+          << "--wait-for-nodes N           The number of seconds to wait for nodes before" << std::endl
+          << "                             broadcasting the scenario to them. The default is" << std::endl
+          << "                             10 seconds." << std::endl
+          << "--wait-for-reports N         The number of seconds to wait for a report to come" << std::endl
+          << "                             in before timing out. The default is 120 seconds." << std::endl
+          << "--prealloc-scenario-out PATH Instead of running the scenario, write the" << std::endl
+          << "                             directives (in JSON) that would have been sent to" << std::endl
+          << "                             the node controllers to the file at this path." << std::endl
+          << "--pretty                     Write the JSON output of `--prealloc-scenario-out`" << std::endl
+          << "                             with indentation." << std::endl
+          << "--prealloc-scenario-in PATH  Take result of --prealloc-scneario-out and use that" << std::endl
+          << "                             to run the scenario instead of discovering nodes." << std::endl
+          << "                             This might fail if the nodes go offline after the" << std::endl
+          << "                             preallocated scenario is saved." << std::endl;
+//            ################################################################################
         return 0;
-      } else if (!ACE_OS::strcmp(argument, "--prealloc-scenario-output")) {
+      } else if (!ACE_OS::strcmp(argument, "--prealloc-scenario-out")) {
         preallocated_scenario_output_path = get_option_argument(i, argc, argv);
+      } else if (!ACE_OS::strcmp(argument, "--prealloc-scenario-in")) {
+        preallocated_scenario_input_path = get_option_argument(i, argc, argv);
       } else if (!ACE_OS::strcmp(argument, "--pretty")) {
         pretty = true;
       } else if (test_context_path.empty() && argument[0] != '-') {
@@ -146,8 +154,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   // Print Scenerio File, Name, and Description
   {
     std::cout << "Using " << scenario_path;
-    std::string name = scenario_prototype.name.in();
-    std::string desc = scenario_prototype.desc.in();
+    const std::string name = scenario_prototype.name.in();
+    const std::string desc = scenario_prototype.desc.in();
     if (!name.empty() || !desc.empty()) {
       std::cout << ':';
       if (!name.empty()) {
@@ -165,11 +173,23 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     DdsEntities dds_entities(dpf, domain);
     ScenarioManager scenario_manager(bench_root, test_context_path, dds_entities);
 
-    std::cout << "Waiting for nodes for " << wait_for_nodes << " seconds..." << std::endl;
-    Nodes available_nodes = scenario_manager.discover_nodes(wait_for_nodes);
-    std::cout << "Discovered " << available_nodes.size() << " nodes" << std::endl;
-
-    AllocatedScenario allocated_scenario = scenario_manager.allocate_scenario(scenario_prototype, available_nodes);
+    AllocatedScenario allocated_scenario;
+    if (preallocated_scenario_input_path.size()) {
+      std::cout << "Loading Scenario Allcoation from File..." << std::endl;
+      std::ifstream file(preallocated_scenario_input_path);
+      if (file.is_open()) {
+        if (!json_2_idl(file, allocated_scenario)) {
+          throw std::runtime_error("Could not decode allocated scenario");
+        }
+      } else {
+        throw std::runtime_error("Could not open file for reading allocated scenario");
+      }
+    } else {
+      std::cout << "Waiting for nodes for " << wait_for_nodes << " seconds..." << std::endl;
+      Nodes available_nodes = scenario_manager.discover_nodes(wait_for_nodes);
+      std::cout << "Discovered " << available_nodes.size() << " nodes" << std::endl;
+      allocated_scenario = scenario_manager.allocate_scenario(scenario_prototype, available_nodes);
+    }
 
     if (preallocated_scenario_output_path.size()) {
       std::cout << "Saving Scenario Allcoation to File..." << std::endl;
@@ -178,7 +198,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         if (!idl_2_json(allocated_scenario, file, pretty)) {
           throw std::runtime_error("Could not encode allocated scenario");
         }
-        file << std::endl;
       } else {
         throw std::runtime_error("Could not open file for writing allocated scenario");
       }

@@ -43,6 +43,7 @@ bool idl_2_json(const IDL_Type& idl_value, std::ostream& os, bool pretty = false
     document.Accept(writer);
   }
   osw.Flush();
+  os << std::endl;
   return true;
 }
 
