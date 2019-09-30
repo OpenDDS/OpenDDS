@@ -102,14 +102,6 @@ namespace {
     attr.ac_endpoint_properties.length(0);
   }
 #endif
-
-  GUID_t make_guid(const DCPS::GuidPrefix_t prefix, const DCPS::EntityId_t entity)
-  {
-    GUID_t result;
-    std::memcpy(result.guidPrefix, prefix, sizeof(GuidPrefix_t));
-    std::memcpy(&result.entityId, &entity, sizeof(EntityId_t));
-    return result;
-  }
 }
 
 void Spdp::init(DDS::DomainId_t /*domain*/,
@@ -398,8 +390,7 @@ Spdp::handle_participant_data(DCPS::MessageId id, const ParticipantData_t& cpdat
     DiscoveredParticipant& dp = participants_[guid];
 
     // initialize sequence number validation variables for new participant
-    dp.last_seq_.setValue(currentSeq.getValue());
-    dp.seqResetCandidate_.setValue(0);
+    dp.last_seq_ = currentSeq;
     dp.seqResetChkCount_ = 0;
 
 #ifdef OPENDDS_SECURITY
@@ -519,7 +510,6 @@ Spdp::handle_participant_data(DCPS::MessageId id, const ParticipantData_t& cpdat
       if (iter != participants_.end()) {
         iter->second.pdata_ = pdata;
         iter->second.last_seen_ = now;
-        iter->second.last_seq_.setValue(currentSeq.getValue());
       }
     // Else a reset has occured and check if we should remove the participant
     } else if (iter->second.seqResetChkCount_ >= disco_->max_spdp_sequence_msg_reset_check()) {
@@ -531,21 +521,19 @@ Spdp::handle_participant_data(DCPS::MessageId id, const ParticipantData_t& cpdat
 bool
 Spdp::validateSequenceNumber(const DCPS::SequenceNumber& seq, DiscoveredParticipantIter& iter)
 {
-  if (seq.getValue() == 0) {
-    return true;
-  }
-
-  if ((iter->second.last_seq_.getHigh() != ACE_INT32_MAX) &&
-      (iter->second.last_seq_.getLow() != ACE_UINT32_MAX)) {
+  bool valid = true;
+  if (seq.getValue() != 0 && iter->second.last_seq_ != DCPS::SequenceNumber::MAX_VALUE) {
     if (seq < iter->second.last_seq_) {
       ++iter->second.seqResetChkCount_;
-      iter->second.seqResetCandidate_ = seq;
-      return false;
+      valid = false;
     } else if (iter->second.seqResetChkCount_ > 0) {
       --iter->second.seqResetChkCount_;
     }
   }
-  return true;
+  if (valid) {
+    iter->second.last_seq_ = seq;
+  }
+  return valid;
 }
 
 void
@@ -1913,21 +1901,6 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
 }
 
 bool
-Spdp::find_part(const DCPS::RepoId& part_id)
-{
-  const DCPS::RepoId guid = make_guid(part_id.guidPrefix, DCPS::ENTITYID_PARTICIPANT);
-
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
-
-  DiscoveredParticipantIter  part = participants_.find(guid);
-
-  if (part == participants_.end()) {
-    return false;
-  }
-  return true;
-}
-
-bool
 Spdp::get_default_locators(const RepoId& part_id, DCPS::LocatorSeq& target,
                            bool& inlineQos)
 {
@@ -1967,7 +1940,6 @@ Spdp::has_discovered_participant(const DCPS::RepoId& guid)
 {
   return participants_.find(guid) != participants_.end();
 }
-
 
 void
 Spdp::get_discovered_participant_ids(DCPS::RepoIdSet& results) const

@@ -100,8 +100,6 @@ public:
 
   void handle_participant_data(DCPS::MessageId id, const ParticipantData_t& pdata, const SequenceNumber_t& seq);
 
-  bool find_part(const DCPS::RepoId& part_id);
-
   static bool validateSequenceNumber(const DCPS::SequenceNumber& seq, DiscoveredParticipantIter& iter);
 
 #ifdef OPENDDS_SECURITY
@@ -245,6 +243,8 @@ private:
 
   void start_ice(ICE::Endpoint* endpoint, DCPS::RepoId remote, const BuiltinEndpointSet_t& avail, const ICE::AgentInfo& agent_info);
   void stop_ice(ICE::Endpoint* endpoint, DCPS::RepoId remote, const BuiltinEndpointSet_t& avail);
+
+  friend class ::DDS_TEST;
 };
 
 }

@@ -1576,7 +1576,6 @@ namespace OpenDDS {
         MonotonicTimePoint last_seen_;
         DDS::InstanceHandle_t bit_ih_;
         DCPS::SequenceNumber last_seq_;
-        DCPS::SequenceNumber seqResetCandidate_;
         ACE_UINT16 seqResetChkCount_;
 
 #ifdef OPENDDS_SECURITY

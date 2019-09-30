@@ -32,6 +32,40 @@
 using namespace OpenDDS::DCPS;
 using namespace OpenDDS::RTPS;
 
+// Declared as spdp_friend. Used to Interact Directly with Spdp.
+class DDS_TEST {
+public:
+  DDS_TEST(const RcHandle<Spdp>& spdp, const GUID_t& guid)
+  : spdp_(spdp)
+  , guid_(make_guid(guid.guidPrefix, ENTITYID_PARTICIPANT))
+  {
+  }
+
+  bool check_for_participant(bool expect_participant)
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, spdp_->lock_, true);
+    const bool error = spdp_->has_discovered_participant(guid_) != expect_participant;
+    if (error) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("Error: expected to %Cfind participant, but did%C\n"),
+        expect_participant ? "" : "not ",
+        expect_participant ? "n't" : ""));
+    }
+    return error;
+  }
+
+  void remove_participant()
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, spdp_->lock_);
+    Spdp::DiscoveredParticipantIter iter = spdp_->participants_.find(guid_);
+    if (iter != spdp_->participants_.end()) {
+      spdp_->remove_discovered_participant(iter);
+    }
+  }
+
+  const RcHandle<Spdp>(spdp_);
+  const GUID_t guid_;
+};
+
 const bool host_is_bigendian = !ACE_CDR_BYTE_ORDER;
 const char* smkinds[] = {"RESERVED_0", "PAD", "RESERVED_2", "RESERVED_3",
   "RESERVED_4", "RESERVED_5", "ACKNACK", "HEARTBEAT", "GAP", "INFO_TS",
@@ -187,8 +221,8 @@ struct TestParticipant: ACE_Event_Handler {
 
 void reactor_wait()
 {
-  ACE_Time_Value one(1);
-  ACE_Reactor::instance()->run_reactor_event_loop(one);
+  ACE_Time_Value half_second(0, ACE_ONE_SECOND_IN_USECS / 2);
+  ACE_Reactor::instance()->run_reactor_event_loop(half_second);
 }
 
 struct ReactorTask : ACE_Task_Base {
@@ -212,7 +246,7 @@ struct ReactorTask : ACE_Task_Base {
 bool run_test()
 {
   // Create a "test participant" which will use sockets directly
-
+  // This will act like a remote participant.
   ACE_SOCK_Dgram test_part_sock;
   ACE_INET_Addr test_part_addr;
   if (!open_appropriate_socket_type(test_part_sock, test_part_addr)) {
@@ -238,18 +272,19 @@ bool run_test()
   TestParticipant part1(test_part_sock, test_part_guid.guidPrefix);
 
   // Create and initialize RtpsDiscovery
-
   RtpsDiscovery rd("test");
   const DDS::DomainId_t domain = 0;
   const DDS::DomainParticipantQos qos = TheServiceParticipant->initial_DomainParticipantQos();
-
-
-  OpenDDS::DCPS::RepoId id = rd.generate_participant_guid();
-
+  RepoId id = rd.generate_participant_guid();
   const GuidPrefix_t& gp = test_part_guid.guidPrefix;
-
   const RcHandle<Spdp> spdp(make_rch<Spdp>(domain, ref(id), qos, &rd));
 
+  DDS_TEST spdp_friend(spdp, test_part_guid);
+
+  const DDS::Subscriber_var sVar;
+  spdp->init_bit(sVar);
+
+  // Create a Parameter List
   OpenDDS::RTPS::ParameterList plist;
 
   BuiltinEndpointSet_t availableBuiltinEndpoints =
@@ -273,8 +308,6 @@ bool run_test()
   nonEmptyList[0].address[14] = 0;
   nonEmptyList[0].address[15] = 1;
 
-  OpenDDS::DCPS::LocatorSeq sedp_unicast_, sedp_multicast_;
-
   const OpenDDS::RTPS::SPDPdiscoveredParticipantData pdata = {
     {
       DDS::BuiltinTopicKey_t(),
@@ -287,8 +320,8 @@ bool run_test()
       VENDORID_OPENDDS,
       false /*expectsIQoS*/,
       availableBuiltinEndpoints,
-      sedp_multicast_,
-      sedp_unicast_,
+      LocatorSeq() /* sedp_multicast */,
+      LocatorSeq() /* sedp_unicast */,
       nonEmptyList /*defaultMulticastLocatorList*/,
       nonEmptyList /*defaultUnicastLocatorList*/,
       { 0 /*manualLivelinessCount*/ },   //FUTURE: implement manual liveliness
@@ -301,9 +334,7 @@ bool run_test()
     }
   };
 
-  int irtn = OpenDDS::RTPS::ParameterListConverter::to_param_list(pdata, plist);
-
-  if (irtn < 0) {
+  if (OpenDDS::RTPS::ParameterListConverter::to_param_list(pdata, plist) < 0) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
       ACE_TEXT("spdp_transport - run_test - ")
       ACE_TEXT("failed to convert from SPDPdiscoveredParticipantData ")
@@ -311,50 +342,55 @@ bool run_test()
     return false;
   }
 
-  const DDS::Subscriber_var sVar;
-
-  spdp->init_bit(sVar);
-
-  SequenceNumber_t first_seq = {0, 1}, seq = first_seq;
+  const SequenceNumber_t first_seq = {0, 1};
+  SequenceNumber_t seq;
   bool bfirst = true;
+  bool expect_participant = true;
 
-  bool bFound = spdp->find_part(test_part_guid);
+  if (spdp_friend.check_for_participant(false)) {
+    return false;
+  }
 
   // Test for performing sequence reset.
-
-  for (;;) {
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("Basic Reset Test\n")));
+  for (seq = first_seq; seq.low < 8;) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("seq: %d\n"), seq.low));
     if (!part1.send_data(test_part_guid.entityId, seq, plist, send_addr)) {
-
+      return false;
+    }
+    reactor_wait();
+    if (spdp_friend.check_for_participant(expect_participant)) {
       return false;
     }
 
-    bFound = spdp->find_part(test_part_guid);
-
-    if (seq.low == 5) {
-      if (bfirst) {
-        seq.low = 1;
-        bfirst = false;
-      } else {
-        ++seq.low;
-      }
+    if (bfirst && seq.low == 5) {
+      seq.low = 1;
+      bfirst = false;
     } else {
       ++seq.low;
     }
 
-    reactor_wait();
-
-    if (seq.low == 8) {
-      break;
+    if (!bfirst) {
+      if (seq.low == 3) {
+        expect_participant = false;
+      } else if (seq.low == 4) {
+        expect_participant = true;
+      }
     }
   }
 
   // Sequence number starts at 8 and reverts to 6 to verify default reset
   // limits.
-
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("Reset Within Limits Test\n")));
   bfirst = true;
-
-  for (;;) {
+  expect_participant = true;
+  for (; seq.low < 10;) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("seq: %d\n"), seq.low));
     if (!part1.send_data(test_part_guid.entityId, seq, plist, send_addr)) {
+      return false;
+    }
+    reactor_wait();
+    if (spdp_friend.check_for_participant(expect_participant)) {
       return false;
     }
 
@@ -364,49 +400,48 @@ bool run_test()
     } else {
       ++seq.low;
     }
-
-    reactor_wait();
-
-    if (seq.low == 10) {
-      break;
-    }
   }
+
+  spdp_friend.remove_participant();
 
   // Test for possible routing issues when data is arriving via multiple paths.
   // Resends sequence numbers but does not cause a reset.
-
-  seq = first_seq;
-
-  for (;;) {
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("Duplicate Sequence Numbers Test\n")));
+  for (seq = first_seq; seq.low < 6; seq.low -= 2) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("seq: %d\n"), seq.low));
     if (!part1.send_data(test_part_guid.entityId, seq, plist, send_addr)) {
       return false;
     }
-
     reactor_wait();
+    if (spdp_friend.check_for_participant(expect_participant)) {
+      return false;
+    }
 
     for (int i = 0; i < 3; i++) {
       ++seq.low;
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("  seq: %d\n"), seq.low));
       if (!part1.send_data(test_part_guid.entityId, seq, plist, send_addr)) {
         return false;
       }
       reactor_wait();
+      if (spdp_friend.check_for_participant(expect_participant)) {
+        return false;
+      }
     }
-
-    if (seq.low == 8)
-    {
-      break;
-    }
-    seq.low -= 2;
   }
+
+  spdp_friend.remove_participant();
 
   // Test for checking for sequence rollover.  A reset should not occur
   // when the sequence number rolls over to zero from the max value.
-
-  SequenceNumber_t max_seq = { ACE_INT32_MAX, (ACE_UINT32_MAX - 5) };
-  seq = max_seq;
-
-  for (;;) {
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("Overflow Test\n")));
+  for (seq = { ACE_INT32_MAX, (ACE_UINT32_MAX - 5) }; seq.low != 4; seq.low++) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("  seq: %d %u\n"), seq.high, seq.low));
     if (!part1.send_data(test_part_guid.entityId, seq, plist, send_addr)) {
+      return false;
+    }
+    reactor_wait();
+    if (spdp_friend.check_for_participant(expect_participant)) {
       return false;
     }
 
@@ -417,15 +452,7 @@ bool run_test()
         seq.high = 0;
       }
     }
-    ++seq.low;
-    reactor_wait();
-
-    if (seq.low == 2) {
-      break;
-    }
   }
-
-  reactor_wait();
 
   return true;
 }
