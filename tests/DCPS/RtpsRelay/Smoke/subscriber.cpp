@@ -33,6 +33,8 @@
 #include "DataReaderListener.h"
 #include "MessengerTypeSupportImpl.h"
 
+#include <iostream>
+
 #ifdef OPENDDS_SECURITY
 #include <dds/DCPS/security/framework/Properties.h>
 

@@ -172,10 +172,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
+#if defined(OPENDDS_SECURITY)
   if (secure && !TheServiceParticipant->get_security()) {
     ACE_ERROR((LM_ERROR, "ERROR: Security documents provided but security is not enabled\n"));
     return EXIT_FAILURE;
   }
+#endif
 
   DDS::DomainParticipantQos participant_qos;
   factory->get_default_participant_qos(participant_qos);
