@@ -3,9 +3,12 @@
 #include <ace/Proactor.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
 #include "BenchC.h"
 #include "BenchTypeSupportImpl.h"
 #include "BuilderTypeSupportImpl.h"
+#pragma GCC diagnostic pop
 
 #include "ListenerFactory.h"
 
