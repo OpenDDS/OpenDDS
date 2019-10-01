@@ -2447,6 +2447,7 @@ RtpsUdpDataLink::RtpsWriter::send_and_gather_nack_replies(MetaSubmessageVec& met
     0 == std::memcmp(&pvs_writer, &id_.entityId, sizeof pvs_writer);
 #endif
 
+  bool gaps_ok = true;
   typedef ReaderInfoMap::iterator ri_iter;
   const ri_iter end = remote_readers_.end();
   for (ri_iter ri = remote_readers_.begin(); ri != end; ++ri) {
@@ -2468,6 +2469,9 @@ RtpsUdpDataLink::RtpsWriter::send_and_gather_nack_replies(MetaSubmessageVec& met
       AddrSet addrs = link->get_addresses(id_, ri->first);
       if (!addrs.empty()) {
         recipients.insert(addrs.begin(), addrs.end());
+        if (ri->second.expecting_durable_data()) {
+          gaps_ok = false;
+        }
         if (Transport_debug_level > 5) {
           const GuidConverter local_conv(id_), remote_conv(ri->first);
           ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::send_nack_replies "
@@ -2503,7 +2507,7 @@ RtpsUdpDataLink::RtpsWriter::send_and_gather_nack_replies(MetaSubmessageVec& met
 
   send_nackfrag_replies_i(gaps, recipients);
 
-  if (!gaps.empty()) {
+  if (gaps_ok && !gaps.empty()) {
     if (Transport_debug_level > 5) {
       ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::send_nack_replies "
                  "GAPs:"));
