@@ -47,15 +47,15 @@ void SimpleStatBlock::pretty_print(std::ostream& os, const std::string& name, co
   const size_t my_w = sample_count_ ? (median_sample_overflow_ ? 10 : 7) : 5;
   os << i2 << name << std::setw(my_w) << " count" << " = " << sample_count_ << std::endl;
   if (sample_count_) {
-    os << i2 << name << std::setw(my_w) << " min" << " = " << std::fixed << std::setprecision(6) << min_ << std::endl;
-    os << i2 << name << std::setw(my_w) << " max" << " = " << std::fixed << std::setprecision(6) << max_ << std::endl;
-    os << i2 << name << std::setw(my_w) << " mean" << " = " << std::fixed << std::setprecision(6) << mean_ << std::endl;
+    os << i2 << name << std::setw(my_w) << std::setfill(' ') << " min" << " = " << std::fixed << std::setprecision(6) << min_ << std::endl;
+    os << i2 << name << std::setw(my_w) << std::setfill(' ') << " max" << " = " << std::fixed << std::setprecision(6) << max_ << std::endl;
+    os << i2 << name << std::setw(my_w) << std::setfill(' ') << " mean" << " = " << std::fixed << std::setprecision(6) << mean_ << std::endl;
     const double stdev = sample_count_ ? std::sqrt(var_x_sample_count_ / static_cast<double>(sample_count_)) : 0.0;
-    os << i2 << name << std::setw(my_w) << " stdev" << " = " << std::fixed << std::setprecision(6) << stdev << std::endl;
-    os << i2 << name << std::setw(my_w) << " median" << " = " << std::fixed << std::setprecision(6) << median_ << std::endl;
-    os << i2 << name << std::setw(my_w) << " madev" << " = " << std::fixed << std::setprecision(6) << median_absolute_deviation_ << std::endl;
+    os << i2 << name << std::setw(my_w) << std::setfill(' ') << " stdev" << " = " << std::fixed << std::setprecision(6) << stdev << std::endl;
+    os << i2 << name << std::setw(my_w) << std::setfill(' ') << " median" << " = " << std::fixed << std::setprecision(6) << median_ << std::endl;
+    os << i2 << name << std::setw(my_w) << std::setfill(' ') << " madev" << " = " << std::fixed << std::setprecision(6) << median_absolute_deviation_ << std::endl;
     if (median_sample_overflow_) {
-      os << i2 << name << std::setw(my_w) << " overflow" << " = " << median_sample_overflow_ << std::endl;
+      os << i2 << name << std::setw(my_w) << std::setfill(' ') << " overflow" << " = " << median_sample_overflow_ << std::endl;
     }
   }
 }
