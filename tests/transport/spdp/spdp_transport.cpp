@@ -167,7 +167,7 @@ struct TestParticipant: ACE_Event_Handler {
         if (!recv_data(ser, peer)) return false;
         break;
       default:
-#ifdef OPENDDS_SAFETY_PROFILE
+#ifdef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
         ACE_DEBUG((LM_INFO, "Received submessage type: %u\n", unsigned(subm)));
 #else
         if (static_cast<size_t>(subm) < gen_OpenDDS_RTPS_SubmessageKind_names_size) {
