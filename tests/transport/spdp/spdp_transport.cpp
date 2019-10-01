@@ -167,13 +167,17 @@ struct TestParticipant: ACE_Event_Handler {
         if (!recv_data(ser, peer)) return false;
         break;
       default:
+#ifdef OPENDDS_SAFETY_PROFILE
+        ACE_DEBUG((LM_INFO, "Received submessage type: %u\n", unsigned(subm)));
+#else
         if (static_cast<size_t>(subm) < gen_OpenDDS_RTPS_SubmessageKind_names_size) {
           ACE_DEBUG((LM_INFO, "Received submessage type: %C\n",
                      gen_OpenDDS_RTPS_SubmessageKind_names[static_cast<size_t>(subm)]));
         } else {
-          ACE_ERROR((LM_ERROR, "ERROR: Received unknown submessage type: %d\n",
-                     int(subm)));
+          ACE_ERROR((LM_ERROR, "ERROR: Received unknown submessage type: %u\n",
+                     unsigned(subm)));
         }
+#endif
         SubmessageHeader smh;
         if (!(ser >> smh)) {
           ACE_ERROR((LM_ERROR, "ERROR: in handle_input() failed to deserialize "
@@ -429,7 +433,8 @@ bool run_test()
   // Test for checking for sequence rollover.  A reset should not occur
   // when the sequence number rolls over to zero from the max value.
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("Overflow Test\n")));
-  for (seq = { ACE_INT32_MAX, (ACE_UINT32_MAX - 5) }; seq.low != 4; seq.low++) {
+  const SequenceNumber_t overflow_start = { ACE_INT32_MAX, ACE_UINT32_MAX - 5 };
+  for (seq = overflow_start; seq.low != 4; seq.low++) {
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("  seq: %d %u\n"), seq.high, seq.low));
     if (!part1.send_data(test_part_guid.entityId, seq, plist, send_addr)) {
       return false;

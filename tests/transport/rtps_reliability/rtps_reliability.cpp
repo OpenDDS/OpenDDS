@@ -491,13 +491,17 @@ struct TestParticipant: ACE_Event_Handler {
         if (!recv_nackfrag(ser, peer)) return false;
         break;
       default:
+#ifdef OPENDDS_SAFETY_PROFILE
+        ACE_DEBUG((LM_INFO, "Received submessage type: %u\n", unsigned(subm)));
+#else
         if (static_cast<size_t>(subm) < gen_OpenDDS_RTPS_SubmessageKind_names_size) {
           ACE_DEBUG((LM_INFO, "Received submessage type: %C\n",
                      gen_OpenDDS_RTPS_SubmessageKind_names[static_cast<size_t>(subm)]));
         } else {
-          ACE_ERROR((LM_ERROR, "ERROR: Received unknown submessage type: %d\n",
-                     int(subm)));
+          ACE_ERROR((LM_ERROR, "ERROR: Received unknown submessage type: %u\n",
+                     unsigned(subm)));
         }
+#endif
         SubmessageHeader smh;
         if (!(ser >> smh)) {
           ACE_ERROR((LM_ERROR, "ERROR: in handle_input() failed to deserialize "
