@@ -546,7 +546,7 @@ RtpsDiscovery::get_crypto_handle(DDS::DomainId_t domain,
     return p->get_crypto_handle(remote_participant);
   }
 
-  return DDS::Security::ParticipantCryptoHandle();
+  return DDS::HANDLE_NIL;
 }
 #endif
 
