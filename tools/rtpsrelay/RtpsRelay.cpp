@@ -73,13 +73,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   std::string governance_file;
   std::string permissions_file;
   bool secure = false;
+  const std::string file = "file:";
 #endif
 
   ACE_Argv_Type_Converter atc(argc, argv);
   ACE_Arg_Shifter_T<char> args(atc.get_argc(), atc.get_ASCII_argv());
   while (args.is_anything_left()) {
     const char* arg = nullptr;
-    const std::string file = "file:";
     if ((arg = args.get_the_parameter("-HorizontalAddress"))) {
       nic_horizontal = ACE_INET_Addr(arg);
       args.consume_arg();
