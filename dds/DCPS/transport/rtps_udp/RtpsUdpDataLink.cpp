@@ -169,6 +169,8 @@ RtpsUdpDataLink::RtpsWriter::do_remove_sample(const TransportQueueElement::Match
     return;
   }
 
+  ACE_GUARD(ACE_Thread_Mutex, g2, elems_not_acked_mutex_);
+
   if (!elems_not_acked_.empty()) {
     to_deliver.insert(to_deliver_.begin(), to_deliver_.end());
     to_deliver_.clear();
@@ -192,6 +194,7 @@ RtpsUdpDataLink::RtpsWriter::do_remove_sample(const TransportQueueElement::Match
     }
   }
 
+  g2.release();
   g.release();
 
   SnToTqeMap::iterator deliver_iter = to_deliver.begin();
@@ -456,6 +459,9 @@ RtpsUdpDataLink::RtpsWriter::pre_stop_helper(OPENDDS_VECTOR(TransportQueueElemen
       iter = to_deliver_.begin();
     }
   }
+
+  ACE_GUARD(ACE_Thread_Mutex, g2, elems_not_acked_mutex_);
+
   if (!elems_not_acked_.empty()) {
     OPENDDS_SET(SequenceNumber) sns_to_release;
     iter_t iter = elems_not_acked_.begin();
@@ -2703,6 +2709,8 @@ RtpsUdpDataLink::RtpsWriter::acked_by_all_helper_i(SnToTqeMap& to_deliver)
     return;
   }
 
+  ACE_GUARD(ACE_Thread_Mutex, g2, elems_not_acked_mutex_);
+
   if (!elems_not_acked_.empty()) {
 
     //start with the max sequence number writer knows about and decrease
@@ -2910,8 +2918,12 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
     }
   }
 
-  if (!elems_not_acked_.empty()) {
-    is_final = false;
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g2, elems_not_acked_mutex_, false);
+
+    if (!elems_not_acked_.empty()) {
+      is_final = false;
+    }
   }
 
   const SequenceNumber firstSN = (durable_ || !has_data) ? 1 : send_buff_->low(),
@@ -3212,11 +3224,15 @@ RtpsUdpDataLink::RtpsWriter::RtpsWriter(RcHandle<RtpsUdpDataLink> link, const Re
 RtpsUdpDataLink::RtpsWriter::~RtpsWriter()
 {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+
   if (!to_deliver_.empty()) {
     ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: RtpsWriter::~RtpsWriter - ")
       ACE_TEXT("deleting with %d elements left to deliver\n"),
       to_deliver_.size()));
   }
+
+  ACE_GUARD(ACE_Thread_Mutex, g2, elems_not_acked_mutex_);
+
   if (!elems_not_acked_.empty()) {
     ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: RtpsWriter::~RtpsWriter - ")
       ACE_TEXT("deleting with %d elements left not fully acknowledged\n"),
@@ -3237,7 +3253,7 @@ RtpsUdpDataLink::RtpsWriter::heartbeat_high(const ReaderInfo& ri) const
 void
 RtpsUdpDataLink::RtpsWriter::add_elem_awaiting_ack(TransportQueueElement* element)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  ACE_GUARD(ACE_Thread_Mutex, g, elems_not_acked_mutex_);
   elems_not_acked_.insert(SnToTqeMap::value_type(element->sequence(), element));
 }
 

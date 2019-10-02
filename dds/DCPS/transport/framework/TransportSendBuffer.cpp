@@ -64,14 +64,16 @@ SingleSendBuffer::~SingleSendBuffer()
 void
 SingleSendBuffer::release_all()
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
   for (BufferMap::iterator it(this->buffers_.begin());
        it != this->buffers_.end();) {
-    release(it++);
+    release_i(it++);
   }
 }
 
 void
 SingleSendBuffer::release_acked(SequenceNumber seq) {
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
   BufferMap::iterator buffer_iter = buffers_.begin();
   BufferType& buffer(buffer_iter->second);
 
@@ -84,7 +86,7 @@ SingleSendBuffer::release_acked(SequenceNumber seq) {
   }
   while (buffer_iter != buffers_.end()) {
     if (buffer_iter->first == seq) {
-      release(buffer_iter);
+      release_i(buffer_iter);
       return;
     }
     ++buffer_iter;
@@ -92,7 +94,7 @@ SingleSendBuffer::release_acked(SequenceNumber seq) {
 }
 
 void
-SingleSendBuffer::release(BufferMap::iterator buffer_iter)
+SingleSendBuffer::release_i(BufferMap::iterator buffer_iter)
 {
   BufferType& buffer(buffer_iter->second);
   if (Transport_debug_level > 5) {
@@ -143,6 +145,7 @@ SingleSendBuffer::retain_all(const RepoId& pub_id)
       OPENDDS_STRING(converter).c_str()
     ));
   }
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
   for (BufferMap::iterator it(this->buffers_.begin());
        it != this->buffers_.end();) {
     if (it->second.first && it->second.second) {
@@ -153,7 +156,7 @@ SingleSendBuffer::retain_all(const RepoId& pub_id)
                    ACE_TEXT("SingleSendBuffer::retain_all: ")
                    ACE_TEXT("failed to retain data from publication: %C!\n"),
                    OPENDDS_STRING(converter).c_str()));
-        release(it++);
+        release_i(it++);
       } else {
         ++it;
       }
@@ -170,7 +173,7 @@ SingleSendBuffer::retain_all(const RepoId& pub_id)
                        ACE_TEXT("SingleSendBuffer::retain_all: failed to ")
                        ACE_TEXT("retain fragment data from publication: %C!\n"),
                        OPENDDS_STRING(converter).c_str()));
-            release(bm_it++);
+            release_i(bm_it++);
           } else {
             ++bm_it;
           }
@@ -200,7 +203,8 @@ SingleSendBuffer::insert(SequenceNumber sequence,
                          TransportSendStrategy::QueueType* queue,
                          ACE_Message_Block* chain)
 {
-  check_capacity();
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  check_capacity_i();
 
   BufferType& buffer = this->buffers_[sequence];
   insert_buffer(buffer, queue, chain);
@@ -252,7 +256,8 @@ SingleSendBuffer::insert_fragment(SequenceNumber sequence,
                                   TransportSendStrategy::QueueType* queue,
                                   ACE_Message_Block* chain)
 {
-  check_capacity();
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  check_capacity_i();
 
   // Insert into buffers_ so that the overall capacity is maintained
   // The entry in buffers_ with two null pointers indicates that the
@@ -274,7 +279,7 @@ SingleSendBuffer::insert_fragment(SequenceNumber sequence,
 }
 
 void
-SingleSendBuffer::check_capacity()
+SingleSendBuffer::check_capacity_i()
 {
   if (this->capacity_ == SingleSendBuffer::UNLIMITED) {
     return;
@@ -294,7 +299,7 @@ SingleSendBuffer::check_capacity()
     }
 
     destinations_.erase(it->first);
-    release(it);
+    release_i(it);
   }
 }
 
@@ -321,6 +326,7 @@ SingleSendBuffer::resend_i(const SequenceRange& range, DisjointSequence* gaps,
 
   for (SequenceNumber sequence(range.first);
        sequence <= range.second; ++sequence) {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
     // Re-send requested sample if still buffered; missing samples
     // will be scored against the given DisjointSequence:
     BufferMap::iterator it(buffers_.find(sequence));
