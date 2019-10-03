@@ -50,7 +50,7 @@ class HorizontalHandler;
 // Sends to and receives from peers.
 class VerticalHandler : public RelayHandler {
 public:
-  typedef std::map<OpenDDS::DCPS::RepoId, std::string, OpenDDS::DCPS::GUID_tKeyLessThan> GuidAddrMap;
+  typedef std::map<OpenDDS::DCPS::RepoId, std::set<std::string>, OpenDDS::DCPS::GUID_tKeyLessThan> GuidAddrMap;
 
   VerticalHandler(ACE_Reactor* a_reactor,
                   const AssociationTable& a_association_table,
@@ -73,18 +73,18 @@ protected:
   virtual bool do_normal_processing(const ACE_INET_Addr& /*a_remote*/,
                                     const OpenDDS::DCPS::RepoId& /*a_src_guid*/,
                                     ACE_Message_Block* /*a_msg*/) { return true; }
-  virtual void purge(const OpenDDS::DCPS::RepoId& /*guid*/) {}
-
-  HorizontalHandler* horizontal_handler_;
+  virtual void purge(const GuidAddr& /*ga*/) {}
   void process_message(const ACE_INET_Addr& a_remote,
                        const ACE_Time_Value& a_now,
                        const OpenDDS::DCPS::RepoId& a_src_guid,
                        ACE_Message_Block* a_msg,
                        bool is_beacon_message) override;
+
+  HorizontalHandler* horizontal_handler_;
   GuidAddrMap guid_addr_map_;
-  typedef std::map<OpenDDS::DCPS::RepoId, ACE_Time_Value, OpenDDS::DCPS::GUID_tKeyLessThan> GuidExpirationMap;
+  typedef std::map<GuidAddr, ACE_Time_Value> GuidExpirationMap;
   GuidExpirationMap guid_expiration_map_;
-  typedef std::multimap<ACE_Time_Value, OpenDDS::DCPS::RepoId> ExpirationGuidMap;
+  typedef std::multimap<ACE_Time_Value, GuidAddr> ExpirationGuidMap;
   ExpirationGuidMap expiration_guid_map_;
   ACE_Time_Value const lifespan_;
   const OpenDDS::DCPS::RepoId application_participant_guid_;
@@ -130,7 +130,7 @@ private:
                             const OpenDDS::DCPS::RepoId& a_src_guid,
                             ACE_Message_Block* a_msg) override;
 
-  void purge(const OpenDDS::DCPS::RepoId& guid) override;
+  void purge(const GuidAddr& ga) override;
 };
 
 class SedpHandler : public VerticalHandler {
