@@ -187,12 +187,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 #ifdef OPENDDS_SECURITY
   if (secure) {
     DDS::PropertySeq& properties = participant_qos.property.value;
-    append(properties, DDS_SEC_AUTH_IDENTITY_CA, identity_ca_file);
-    append(properties, DDS_SEC_ACCESS_PERMISSIONS_CA, permissions_ca_file);
-    append(properties, DDS_SEC_AUTH_IDENTITY_CERTIFICATE, identity_certificate_file);
-    append(properties, DDS_SEC_AUTH_PRIVATE_KEY, identity_key_file);
-    append(properties, DDS_SEC_ACCESS_GOVERNANCE, governance_file);
-    append(properties, DDS_SEC_ACCESS_PERMISSIONS, permissions_file);
+    append(properties, DDS::Security::Properties::AuthIdentityCA, identity_ca_file);
+    append(properties, DDS::Security::Properties::AccessPermissionsCA, permissions_ca_file);
+    append(properties, DDS::Security::Properties::AuthIdentityCertificate, identity_certificate_file);
+    append(properties, DDS::Security::Properties::AuthPrivateKey, identity_key_file);
+    append(properties, DDS::Security::Properties::AccessGovernance, governance_file);
+    append(properties, DDS::Security::Properties::AccessPermissions, permissions_file);
   }
 #endif
 

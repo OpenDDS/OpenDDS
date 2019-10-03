@@ -106,16 +106,16 @@ bool LocalAuthCredentialData::load_credentials(const DDS::PropertySeq& props, DD
                  i, name.c_str(), value.c_str()));
     }
 
-    if (name == DDS_SEC_AUTH_IDENTITY_CA) {
+    if (name == DDS::Security::Properties::AuthIdentityCA) {
       ca_cert_.reset(new SSL::Certificate(value));
 
-    } else if (name == DDS_SEC_AUTH_PRIVATE_KEY) {
+    } else if (name == DDS::Security::Properties::AuthPrivateKey) {
       pkey_uri = value;
 
-    } else if (name == DDS_SEC_AUTH_IDENTITY_CERTIFICATE) {
+    } else if (name == DDS::Security::Properties::AuthIdentityCertificate) {
       participant_cert_.reset(new SSL::Certificate(value));
 
-    } else if (name == DDS_SEC_AUTH_PASSWORD) {
+    } else if (name == DDS::Security::Properties::AuthPassword) {
       password = value;
 
     }

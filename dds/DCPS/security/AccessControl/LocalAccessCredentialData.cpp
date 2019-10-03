@@ -30,13 +30,13 @@ bool LocalAccessCredentialData::load(const DDS::PropertySeq& props,
     const std::string name(props[i].name);
     const std::string value(props[i].value);
 
-    if (name == DDS_SEC_ACCESS_PERMISSIONS_CA) {
+    if (name == DDS::Security::Properties::AccessPermissionsCA) {
       ca_cert_.reset(new SSL::Certificate(value));
 
-    } else if (name == DDS_SEC_ACCESS_GOVERNANCE) {
+    } else if (name == DDS::Security::Properties::AccessGovernance) {
       governance_doc_.reset(new SSL::SignedDocument(value));
 
-    } else if (name == DDS_SEC_ACCESS_PERMISSIONS) {
+    } else if (name == DDS::Security::Properties::AccessPermissions) {
       permissions_doc_.reset(new SSL::SignedDocument(value));
     }
   }

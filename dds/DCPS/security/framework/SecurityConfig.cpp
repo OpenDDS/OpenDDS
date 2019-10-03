@@ -64,12 +64,12 @@ bool SecurityConfig::qos_implies_security(const DDS::DomainParticipantQos& qos) 
   const DDS::PropertySeq& properties = qos.property.value;
   for (unsigned int idx = 0; idx != properties.length(); ++idx) {
     const char* name = properties[idx].name.in();
-    if (std::strcmp(DDS_SEC_AUTH_IDENTITY_CA, name) == 0 ||
-        std::strcmp(DDS_SEC_AUTH_IDENTITY_CERTIFICATE, name) == 0 ||
-        std::strcmp(DDS_SEC_AUTH_PRIVATE_KEY, name) == 0 ||
-        std::strcmp(DDS_SEC_ACCESS_PERMISSIONS_CA, name) == 0 ||
-        std::strcmp(DDS_SEC_ACCESS_GOVERNANCE, name) == 0 ||
-        std::strcmp(DDS_SEC_ACCESS_PERMISSIONS, name) == 0) {
+    if (std::strcmp(DDS::Security::Properties::AuthIdentityCA, name) == 0 ||
+        std::strcmp(DDS::Security::Properties::AuthIdentityCertificate, name) == 0 ||
+        std::strcmp(DDS::Security::Properties::AuthPrivateKey, name) == 0 ||
+        std::strcmp(DDS::Security::Properties::AccessPermissionsCA, name) == 0 ||
+        std::strcmp(DDS::Security::Properties::AccessGovernance, name) == 0 ||
+        std::strcmp(DDS::Security::Properties::AccessPermissions, name) == 0) {
       return true;
     }
   }
