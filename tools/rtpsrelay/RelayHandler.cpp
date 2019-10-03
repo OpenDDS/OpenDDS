@@ -17,6 +17,8 @@
 #include <dds/DCPS/security/framework/SecurityRegistry.h>
 #endif
 
+namespace RtpsRelay {
+
 RelayHandler::RelayHandler(ACE_Reactor* a_reactor,
                            const AssociationTable& a_association_table)
   : ACE_Event_Handler(a_reactor)
@@ -39,7 +41,7 @@ int RelayHandler::open(const ACE_INET_Addr& a_local)
   }
 
   int send_buffer_size = 16384;
-#if defined (ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
+#ifdef ACE_DEFAULT_MAX_SOCKET_BUFSIZ
   send_buffer_size = ACE_DEFAULT_MAX_SOCKET_BUFSIZ;
 #endif
 
@@ -191,7 +193,7 @@ void VerticalHandler::process_message(const ACE_INET_Addr& a_remote,
       addrs.insert(p->second);
       continue;
     }
-    auto addresses = association_table_.get_relay_addresses(guid);
+    auto addresses = association_table_.get_relay_addresses_for_participant(guid);
     horizontal_relay_addrs.insert(extract_relay_address(addresses));
   }
 
@@ -256,7 +258,7 @@ SpdpHandler::SpdpHandler(ACE_Reactor* a_reactor,
   : VerticalHandler(a_reactor, a_association_table, lifespan, purge_period, application_participant_guid)
 {}
 
-std::string SpdpHandler::extract_relay_address(const RtpsRelay::RelayAddresses& relay_addresses) const
+std::string SpdpHandler::extract_relay_address(const RelayAddresses& relay_addresses) const
 {
   return relay_addresses.spdp_relay_address();
 }
@@ -296,7 +298,7 @@ SedpHandler::SedpHandler(ACE_Reactor* a_reactor,
   : VerticalHandler(a_reactor, a_association_table, lifespan, purge_period, application_participant_guid)
 {}
 
-std::string SedpHandler::extract_relay_address(const RtpsRelay::RelayAddresses& relay_addresses) const
+std::string SedpHandler::extract_relay_address(const RelayAddresses& relay_addresses) const
 {
   return relay_addresses.sedp_relay_address();
 }
@@ -336,7 +338,9 @@ DataHandler::DataHandler(ACE_Reactor* a_reactor,
   : VerticalHandler(a_reactor, a_association_table, lifespan, purge_period, application_participant_guid)
 {}
 
-std::string DataHandler::extract_relay_address(const RtpsRelay::RelayAddresses& relay_addresses) const
+std::string DataHandler::extract_relay_address(const RelayAddresses& relay_addresses) const
 {
   return relay_addresses.data_relay_address();
+}
+
 }

@@ -176,11 +176,9 @@ public:
 
 #ifdef OPENDDS_SECURITY
   DDS::Security::ParticipantCryptoHandle get_crypto_handle(DDS::DomainId_t domain,
-                                                           const DCPS::RepoId& local_participant) const;
-
-  DDS::Security::ParticipantCryptoHandle get_crypto_handle(DDS::DomainId_t domain,
                                                            const DCPS::RepoId& local_participant,
-                                                           const DCPS::RepoId& remote_participant) const;
+                                                           const DCPS::RepoId& remote_participant = GUID_UNKNOWN) const;
+
 #endif
 
 private:

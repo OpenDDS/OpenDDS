@@ -13,6 +13,8 @@
 #include <string>
 #include <utility>
 
+namespace RtpsRelay {
+
 class RelayHandler : public ACE_Event_Handler {
 public:
   RelayHandler(ACE_Reactor* a_reactor, const AssociationTable& a_association_table);
@@ -68,7 +70,7 @@ public:
   }
 
 protected:
-  virtual std::string extract_relay_address(const RtpsRelay::RelayAddresses& relay_addresses) const = 0;
+  virtual std::string extract_relay_address(const RelayAddresses& relay_addresses) const = 0;
   virtual void add_addresses(const ACE_INET_Addr& /*a_remote*/,
                              const OpenDDS::DCPS::RepoId& /*a_src_guid*/,
                              std::set<std::string>& /* a_addrs*/) {}
@@ -116,7 +118,7 @@ public:
 private:
   std::string application_participant_addr_;
 
-  std::string extract_relay_address(const RtpsRelay::RelayAddresses& relay_addresses) const override;
+  std::string extract_relay_address(const RelayAddresses& relay_addresses) const override;
 
   void add_addresses(const ACE_INET_Addr& a_remote,
                      const OpenDDS::DCPS::RepoId& a_src_guid,
@@ -134,7 +136,7 @@ public:
 private:
   std::string application_participant_addr_;
 
-  std::string extract_relay_address(const RtpsRelay::RelayAddresses& relay_addresses) const override;
+  std::string extract_relay_address(const RelayAddresses& relay_addresses) const override;
 
   void add_addresses(const ACE_INET_Addr& a_remote,
                      const OpenDDS::DCPS::RepoId& a_src_guid,
@@ -150,7 +152,9 @@ public:
               const OpenDDS::DCPS::RepoId& application_participant_guid);
 
 private:
-  std::string extract_relay_address(const RtpsRelay::RelayAddresses& relay_addresses) const override;
+  std::string extract_relay_address(const RelayAddresses& relay_addresses) const override;
 };
+
+}
 
 #endif /* RTPSRELAY_RELAY_HANDLER_H_ */

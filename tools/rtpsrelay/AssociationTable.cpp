@@ -2,7 +2,9 @@
 
 #include "dds/DCPS/DCPS_Utils.h"
 
-void AssociationTable::insert(const RtpsRelay::WriterEntry& writer)
+namespace RtpsRelay {
+
+void AssociationTable::insert(const WriterEntry& writer)
 {
   const OpenDDS::DCPS::RepoId writer_guid = guid_to_guid(writer.guid());
 
@@ -24,7 +26,7 @@ void AssociationTable::insert(const RtpsRelay::WriterEntry& writer)
   }
 }
 
-void AssociationTable::remove(const RtpsRelay::WriterEntry& writer)
+void AssociationTable::remove(const WriterEntry& writer)
 {
   const OpenDDS::DCPS::RepoId writer_guid = guid_to_guid(writer.guid());
 
@@ -38,7 +40,7 @@ void AssociationTable::remove(const RtpsRelay::WriterEntry& writer)
   }
 }
 
-void AssociationTable::insert(const RtpsRelay::ReaderEntry& reader)
+void AssociationTable::insert(const ReaderEntry& reader)
 {
   const OpenDDS::DCPS::RepoId reader_guid = guid_to_guid(reader.guid());
 
@@ -60,7 +62,7 @@ void AssociationTable::insert(const RtpsRelay::ReaderEntry& reader)
   }
 }
 
-void AssociationTable::remove(const RtpsRelay::ReaderEntry& reader)
+void AssociationTable::remove(const ReaderEntry& reader)
 {
   const OpenDDS::DCPS::RepoId reader_guid = guid_to_guid(reader.guid());
 
@@ -74,9 +76,9 @@ void AssociationTable::remove(const RtpsRelay::ReaderEntry& reader)
   }
 }
 
-void AssociationTable::attempt_match(const RtpsRelay::WriterEntry& writer,
+void AssociationTable::attempt_match(const WriterEntry& writer,
                                      bool writer_local,
-                                     const RtpsRelay::ReaderEntry& reader,
+                                     const ReaderEntry& reader,
                                      bool reader_local)
 {
   const OpenDDS::DCPS::RepoId writer_guid = guid_to_guid(writer.guid());
@@ -106,24 +108,25 @@ void AssociationTable::attempt_match(const RtpsRelay::WriterEntry& writer,
 void AssociationTable::record_next_hop(const OpenDDS::DCPS::RepoId& local_guid,
                                        const OpenDDS::DCPS::RepoId& other_guid)
 {
-  auto p = forward_map_.insert(std::make_pair(local_guid, GuidSet()));
+  const auto p = forward_map_.insert(std::make_pair(local_guid, GuidSet()));
   p.first->second.insert(other_guid);
 
-  auto q = reverse_map_.insert(std::make_pair(other_guid, GuidSet()));
+  const auto q = reverse_map_.insert(std::make_pair(other_guid, GuidSet()));
   q.first->second.insert(local_guid);
 }
 
 void AssociationTable::erase_next_hop(const OpenDDS::DCPS::RepoId& local_guid,
                                       const OpenDDS::DCPS::RepoId& other_guid)
 {
-  auto pos = forward_map_.find(local_guid);
+  const auto pos = forward_map_.find(local_guid);
   if (pos != forward_map_.end()) {
-    if (pos->second.count(other_guid) != 0) {
-      pos->second.erase(other_guid);
-      auto pos2 = reverse_map_.find(other_guid);
-      pos2->second.erase(local_guid);
-      if (pos2->second.empty()) {
-        reverse_map_.erase(pos2);
+    const auto pos2 = pos->second.find(other_guid);
+    if (pos2 != pos->second.end()) {
+      pos->second.erase(pos2);
+      const auto pos3 = reverse_map_.find(other_guid);
+      pos3->second.erase(local_guid);
+      if (pos3->second.empty()) {
+        reverse_map_.erase(pos3);
       }
     }
   }
@@ -131,10 +134,10 @@ void AssociationTable::erase_next_hop(const OpenDDS::DCPS::RepoId& local_guid,
 
 void AssociationTable::remove_local(const OpenDDS::DCPS::RepoId& guid)
 {
-  auto pos = forward_map_.find(guid);
+  const auto pos = forward_map_.find(guid);
   if (pos != forward_map_.end()) {
     for (const auto remote : pos->second) {
-      auto pos2 = reverse_map_.find(remote);
+      const auto pos2 = reverse_map_.find(remote);
       pos2->second.erase(guid);
       if (pos2->second.empty()) {
         reverse_map_.erase(pos2);
@@ -146,10 +149,10 @@ void AssociationTable::remove_local(const OpenDDS::DCPS::RepoId& guid)
 
 void AssociationTable::remove_remote(const OpenDDS::DCPS::RepoId& guid)
 {
-  auto pos = reverse_map_.find(guid);
+  const auto pos = reverse_map_.find(guid);
   if (pos != reverse_map_.end()) {
     for (const auto local_guid : pos->second) {
-      auto pos2 = forward_map_.find(local_guid);
+      const auto pos2 = forward_map_.find(local_guid);
       pos2->second.erase(guid);
       if (pos2->second.empty()) {
         forward_map_.erase(pos2);
@@ -159,24 +162,24 @@ void AssociationTable::remove_remote(const OpenDDS::DCPS::RepoId& guid)
   }
 }
 
-RtpsRelay::RelayAddresses AssociationTable::get_relay_addresses(const OpenDDS::DCPS::RepoId& guid) const
+RelayAddresses AssociationTable::get_relay_addresses_for_participant(const OpenDDS::DCPS::RepoId& guid) const
 {
   OpenDDS::DCPS::RepoId prefix(guid);
   prefix.entityId = OpenDDS::DCPS::ENTITYID_UNKNOWN;
 
   {
-    auto pos = remote_writers_.lower_bound(prefix);
+    const auto pos = remote_writers_.lower_bound(prefix);
     if (pos != remote_writers_.end()) {
       return pos->second.relay_addresses();
     }
   }
   {
-    auto pos = remote_readers_.lower_bound(prefix);
+    const auto pos = remote_readers_.lower_bound(prefix);
     if (pos != remote_readers_.end()) {
       return pos->second.relay_addresses();
     }
   }
-  return RtpsRelay::RelayAddresses();
+  return {};
 }
 
 void AssociationTable::get_guids_from_local(const OpenDDS::DCPS::RepoId& guid, GuidSet& guids) const
@@ -207,4 +210,6 @@ void AssociationTable::get_guids_to_local(const OpenDDS::DCPS::RepoId& guid, Gui
       guids.insert(x);
     }
   }
+}
+
 }

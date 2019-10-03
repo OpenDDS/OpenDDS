@@ -4,25 +4,27 @@
 #include "RelayTypeSupportImpl.h"
 #include "utility.h"
 
+namespace RtpsRelay {
+
 class AssociationTable {
 public:
-  AssociationTable(const RtpsRelay::RelayAddresses& relay_addresses) :
+  explicit AssociationTable(const RelayAddresses& relay_addresses) :
     relay_addresses_(relay_addresses)
   {}
-  void insert(const RtpsRelay::WriterEntry& entry);
-  void remove(const RtpsRelay::WriterEntry& entry);
-  void insert(const RtpsRelay::ReaderEntry& entry);
-  void remove(const RtpsRelay::ReaderEntry& entry);
+  void insert(const WriterEntry& entry);
+  void remove(const WriterEntry& entry);
+  void insert(const ReaderEntry& entry);
+  void remove(const ReaderEntry& entry);
 
-  const RtpsRelay::RelayAddresses& relay_addresses() const { return relay_addresses_; }
+  const RelayAddresses& local_relay_addresses() const { return relay_addresses_; }
   void get_guids_from_local(const OpenDDS::DCPS::RepoId& guid, GuidSet& guids) const;
   void get_guids_to_local(const OpenDDS::DCPS::RepoId& guid, GuidSet& guids) const;
-  RtpsRelay::RelayAddresses get_relay_addresses(const OpenDDS::DCPS::RepoId& guid) const;
+  RelayAddresses get_relay_addresses_for_participant(const OpenDDS::DCPS::RepoId& guid) const;
 
 private:
-  void attempt_match(const RtpsRelay::WriterEntry& writer,
+  void attempt_match(const WriterEntry& writer,
                      bool writer_local,
-                     const RtpsRelay::ReaderEntry& reader,
+                     const ReaderEntry& reader,
                      bool reader_local);
   void record_next_hop(const OpenDDS::DCPS::RepoId& local_guid,
                        const OpenDDS::DCPS::RepoId& other_guid);
@@ -31,12 +33,12 @@ private:
   void remove_local(const OpenDDS::DCPS::RepoId& guid);
   void remove_remote(const OpenDDS::DCPS::RepoId& guid);
 
-  RtpsRelay::RelayAddresses relay_addresses_;
+  RelayAddresses relay_addresses_;
 
-  typedef std::map<OpenDDS::DCPS::RepoId, RtpsRelay::WriterEntry, OpenDDS::DCPS::GUID_tKeyLessThan> WritersMap;
+  typedef std::map<OpenDDS::DCPS::RepoId, WriterEntry, OpenDDS::DCPS::GUID_tKeyLessThan> WritersMap;
   WritersMap local_writers_;
   WritersMap remote_writers_;
-  typedef std::map<OpenDDS::DCPS::RepoId, RtpsRelay::ReaderEntry, OpenDDS::DCPS::GUID_tKeyLessThan> ReadersMap;
+  typedef std::map<OpenDDS::DCPS::RepoId, ReaderEntry, OpenDDS::DCPS::GUID_tKeyLessThan> ReadersMap;
   ReadersMap local_readers_;
   ReadersMap remote_readers_;
 
@@ -69,5 +71,7 @@ private:
   typedef std::map<OpenDDS::DCPS::RepoId, GuidSet, OpenDDS::DCPS::GUID_tKeyLessThan> ReverseMap;
   ReverseMap reverse_map_;
 };
+
+}
 
 #endif // RTPSRELAY_ASSOCIATION_TABLE_H_

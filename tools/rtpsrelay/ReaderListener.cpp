@@ -1,34 +1,20 @@
 #include "ReaderListener.h"
 
+namespace RtpsRelay {
+
 ReaderListener::ReaderListener(AssociationTable& association_table) :
   association_table_(association_table)
 {}
 
-void ReaderListener::on_requested_deadline_missed(DDS::DataReader_ptr /*reader*/,
-                                                  const DDS::RequestedDeadlineMissedStatus & /*status*/)
-{}
-
-void ReaderListener::on_requested_incompatible_qos(DDS::DataReader_ptr /*reader*/,
-                                                   const DDS::RequestedIncompatibleQosStatus & /*status*/)
-{}
-
-void ReaderListener::on_sample_rejected(DDS::DataReader_ptr /*reader*/,
-                                        const DDS::SampleRejectedStatus & /*status*/)
-{}
-
-void ReaderListener::on_liveliness_changed(DDS::DataReader_ptr /*reader*/,
-                                           const DDS::LivelinessChangedStatus & /*status*/)
-{}
-
 void ReaderListener::on_data_available(DDS::DataReader_ptr reader)
 {
-  RtpsRelay::ReaderEntryDataReader_var dr = RtpsRelay::ReaderEntryDataReader::_narrow(reader);
+  ReaderEntryDataReader_var dr = ReaderEntryDataReader::_narrow(reader);
   if (!dr) {
     ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: ReaderListener::on_data_available failed to narrow RtpsRelay::ReaderEntryDataReader\n"));
     return;
   }
 
-  RtpsRelay::ReaderEntrySeq data;
+  ReaderEntrySeq data;
   DDS::SampleInfoSeq infos;
   DDS::ReturnCode_t ret = dr->read(data,
                                    infos,
@@ -54,10 +40,4 @@ void ReaderListener::on_data_available(DDS::DataReader_ptr reader)
   }
 }
 
-void ReaderListener::on_subscription_matched(DDS::DataReader_ptr /*reader*/,
-                                             const DDS::SubscriptionMatchedStatus & /*status*/)
-{}
-
-void ReaderListener::on_sample_lost(DDS::DataReader_ptr /*reader*/,
-                                    const DDS::SampleLostStatus & /*status*/)
-{}
+}

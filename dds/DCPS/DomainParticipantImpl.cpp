@@ -78,24 +78,6 @@ namespace Util {
     return result;
   }
 
-#ifdef OPENDDS_SECURITY
-  bool qos_implies_security(const DDS::DomainParticipantQos& qos) {
-    const DDS::PropertySeq& properties = qos.property.value;
-    for (unsigned int idx = 0; idx != properties.length(); ++idx) {
-      const char* name = properties[idx].name.in();
-      if (std::strcmp(DDS_SEC_AUTH_IDENTITY_CA, name) == 0 ||
-          std::strcmp(DDS_SEC_AUTH_IDENTITY_CERTIFICATE, name) == 0 ||
-          std::strcmp(DDS_SEC_AUTH_PRIVATE_KEY, name) == 0 ||
-          std::strcmp(DDS_SEC_ACCESS_PERMISSIONS_CA, name) == 0 ||
-          std::strcmp(DDS_SEC_ACCESS_GOVERNANCE, name) == 0 ||
-          std::strcmp(DDS_SEC_ACCESS_PERMISSIONS, name) == 0) {
-        return true;
-      }
-    }
-    return false;
-  }
-#endif
-
 } // namespace Util
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -1627,7 +1609,7 @@ DomainParticipantImpl::enable()
   }
 
 #ifdef OPENDDS_SECURITY
-  if (!security_config_ && TheServiceParticipant->get_security() && Util::qos_implies_security(qos_)) {
+  if (!security_config_ && TheServiceParticipant->get_security()) {
     security_config_ = TheSecurityRegistry->default_config();
     if (!security_config_) {
       security_config_ = TheSecurityRegistry->fix_empty_default();
@@ -1645,7 +1627,7 @@ DomainParticipantImpl::enable()
   }
 
 #ifdef OPENDDS_SECURITY
-  if (TheServiceParticipant->get_security() && !security_config_ && Util::qos_implies_security(qos_)) {
+  if (TheServiceParticipant->get_security() && !security_config_) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable, ")
                ACE_TEXT("DCPSSecurity flag is set, but unable to load security plugin configuration.\n")));
@@ -1656,7 +1638,7 @@ DomainParticipantImpl::enable()
   AddDomainStatus value = {GUID_UNKNOWN, false};
 
 #ifdef OPENDDS_SECURITY
-  if (TheServiceParticipant->get_security() && Util::qos_implies_security(qos_)) {
+  if (TheServiceParticipant->get_security() && security_config_->qos_implies_security(qos_)) {
     Security::Authentication_var auth = security_config_->get_authentication();
 
     DDS::Security::SecurityException se;
@@ -1874,7 +1856,7 @@ DomainParticipantImpl::create_new_topic(
                    DDS::Topic::_nil());
 
 #ifdef OPENDDS_SECURITY
-  if (TheServiceParticipant->get_security() && perm_handle_ && !topicIsBIT(topic_name, type_name)) {
+  if (perm_handle_ && !topicIsBIT(topic_name, type_name)) {
     Security::AccessControl_var access = security_config_->get_access_control();
 
     DDS::Security::SecurityException se;

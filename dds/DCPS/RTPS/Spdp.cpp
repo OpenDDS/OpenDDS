@@ -2285,13 +2285,13 @@ void Spdp::stop_ice(ICE::Endpoint* endpoint, DCPS::RepoId r, const BuiltinEndpoi
 
 #ifdef OPENDDS_SECURITY
 DDS::Security::ParticipantCryptoHandle
-Spdp::get_crypto_handle(const DCPS::RepoId& remote_participant) const
+Spdp::remote_crypto_handle(const DCPS::RepoId& remote_participant) const
 {
   DiscoveredParticipantMap::const_iterator pos = participants_.find(remote_participant);
   if (pos != participants_.end()) {
     return pos->second.crypto_handle_;
   }
-  return DDS::Security::ParticipantCryptoHandle();
+  return DDS::HANDLE_NIL;
 }
 #endif
 

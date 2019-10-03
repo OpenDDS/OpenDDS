@@ -5,6 +5,8 @@
 
 #include <ace/Event_Handler.h>
 
+namespace RtpsRelay {
+
 class StatisticsHandler : public ACE_Event_Handler {
 public:
   StatisticsHandler(ACE_Reactor* a_reactor,
@@ -24,5 +26,7 @@ private:
   RelayHandler* const data_horizontal_;
   ACE_Time_Value m_last_collection;
 };
+
+}
 
 #endif /* RTPSRELAY_STATISTICS_HANDLER_H_ */

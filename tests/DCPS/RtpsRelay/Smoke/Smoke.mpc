@@ -1,4 +1,4 @@
-project(DDS*Publisher): dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test {
+project(RtpsRelayPublisher): dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test, dcps_rtps, opendds_cxx11 {
 
   exename   = publisher
 
@@ -11,7 +11,7 @@ project(DDS*Publisher): dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test {
   }
 }
 
-project(DDS*Subscriber): dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test {
+project(RtpsRelaySubscriber): dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test, dcps_rtps, opendds_cxx11 {
 
   exename   = subscriber
 

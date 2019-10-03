@@ -27,6 +27,8 @@
 #ifdef OPENDDS_SECURITY
 #include <dds/DCPS/security/framework/Properties.h>
 
+using namespace RtpsRelay;
+
 namespace {
   void append(DDS::PropertySeq& props, const char* name, const std::string& value, bool propagate = false)
   {
@@ -172,7 +174,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   if (secure && !TheServiceParticipant->get_security()) {
     ACE_ERROR((LM_ERROR, "ERROR: Security documents provided but security is not enabled\n"));
     return EXIT_FAILURE;
@@ -182,7 +184,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   DDS::DomainParticipantQos participant_qos;
   factory->get_default_participant_qos(participant_qos);
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   if (secure) {
     DDS::PropertySeq& properties = participant_qos.property.value;
     append(properties, DDS_SEC_AUTH_IDENTITY_CA, identity_ca_file);
@@ -230,7 +232,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   const auto reactor = ACE_Reactor::instance();
 
-  RtpsRelay::RelayAddresses relay_addresses {
+  RelayAddresses relay_addresses {
     addr_to_string(spdp_horizontal_addr),
     addr_to_string(sedp_horizontal_addr),
     addr_to_string(data_horizontal_addr)
@@ -240,8 +242,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   DDS::Subscriber_var bit_subscriber = application_participant->get_builtin_subscriber();
   {
-    RtpsRelay::ReaderEntryTypeSupportImpl::_var_type reader_entry_ts =
-      new RtpsRelay::ReaderEntryTypeSupportImpl;
+    ReaderEntryTypeSupportImpl::_var_type reader_entry_ts =
+      new ReaderEntryTypeSupportImpl;
     if (reader_entry_ts->register_type(relay_participant, "") != DDS::RETCODE_OK) {
       ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: failed to register ReaderEntry type\n"));
       return EXIT_FAILURE;
@@ -286,7 +288,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       return EXIT_FAILURE;
     }
 
-    RtpsRelay::ReaderEntryDataWriter_ptr reader_writer = RtpsRelay::ReaderEntryDataWriter::_narrow(writer);
+    ReaderEntryDataWriter_ptr reader_writer = ReaderEntryDataWriter::_narrow(writer);
 
     if (!reader_writer) {
       ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: failed to narrow Reader data writer\n"));
@@ -299,34 +301,20 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     reader_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
     reader_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
-    DDS::DataReader_var reader = subscriber->create_datareader(topic, reader_qos, nullptr,
-                                                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    DDS::DataReader_var reader = subscriber->create_datareader(topic, reader_qos,
+                                                               new ReaderListener(association_table),
+                                                               DDS::DATA_AVAILABLE_STATUS);
 
     if (!reader) {
       ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: failed to create Reader data reader\n"));
       return EXIT_FAILURE;
     }
 
-    RtpsRelay::ReaderEntryDataReader_ptr reader_reader = RtpsRelay::ReaderEntryDataReader::_narrow(reader);
-
-    if (!reader_reader) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: failed to narrow Reader data reader\n"));
-      return EXIT_FAILURE;
-    }
-
-    DDS::DataReaderListener_var reader_listener(new ReaderListener(association_table));
-    DDS::ReturnCode_t ret = reader_reader->set_listener(reader_listener, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-    if (ret != DDS::RETCODE_OK) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: Failed to set listener on Reader data reader\n"));
-      return EXIT_FAILURE;
-    }
-
     DDS::DataReader_var dr = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC);
-    DDS::SubscriptionBuiltinTopicDataDataReader_var sub_dr = DDS::SubscriptionBuiltinTopicDataDataReader::_narrow(dr);
     DDS::DataReaderListener_var subscription_listener(new SubscriptionListener(application_participant_impl,
                                                                                reader_writer,
                                                                                association_table));
-    ret = sub_dr->set_listener(subscription_listener, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    DDS::ReturnCode_t ret = dr->set_listener(subscription_listener, DDS::DATA_AVAILABLE_STATUS);
     if (ret != DDS::RETCODE_OK) {
       ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: Failed to set listener on SubscriptionBuiltinTopicDataDataReader\n"));
       return EXIT_FAILURE;
@@ -334,8 +322,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   {
-    RtpsRelay::WriterEntryTypeSupportImpl::_var_type writer_entry_ts =
-      new RtpsRelay::WriterEntryTypeSupportImpl;
+    WriterEntryTypeSupportImpl::_var_type writer_entry_ts =
+      new WriterEntryTypeSupportImpl;
     if (writer_entry_ts->register_type(relay_participant, "") != DDS::RETCODE_OK) {
       ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: failed to register WriterEntry type\n"));
       return EXIT_FAILURE;
@@ -380,7 +368,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       return EXIT_FAILURE;
     }
 
-    RtpsRelay::WriterEntryDataWriter_ptr writer_writer = RtpsRelay::WriterEntryDataWriter::_narrow(writer);
+    WriterEntryDataWriter_ptr writer_writer = WriterEntryDataWriter::_narrow(writer);
 
     if (!writer_writer) {
       ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: failed to narrow Writer data writer\n"));
@@ -393,34 +381,19 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     reader_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
     reader_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
-    DDS::DataReader_var reader = subscriber->create_datareader(topic, reader_qos, nullptr,
-                                                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
+    DDS::DataReader_var reader = subscriber->create_datareader(topic, reader_qos,
+                                                               new WriterListener(association_table),
+                                                               DDS::DATA_AVAILABLE_STATUS);
     if (!reader) {
       ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: failed to create Writer data reader\n"));
       return EXIT_FAILURE;
     }
 
-    RtpsRelay::WriterEntryDataReader_ptr writer_reader = RtpsRelay::WriterEntryDataReader::_narrow(reader);
-
-    if (!writer_reader) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: failed to narrow Writer data reader\n"));
-      return EXIT_FAILURE;
-    }
-
-    DDS::DataReaderListener_var writer_listener(new WriterListener(association_table));
-    DDS::ReturnCode_t ret = writer_reader->set_listener(writer_listener, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-    if (ret != DDS::RETCODE_OK) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: Failed to set listener on Writer data reader\n"));
-      return EXIT_FAILURE;
-    }
-
     DDS::DataReader_var dr = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC);
-    DDS::PublicationBuiltinTopicDataDataReader_var pub_dr = DDS::PublicationBuiltinTopicDataDataReader::_narrow(dr);
     DDS::DataReaderListener_var publication_listener(new PublicationListener(application_participant_impl,
                                                                              writer_writer,
                                                                              association_table));
-    ret = pub_dr->set_listener(publication_listener, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    DDS::ReturnCode_t ret = dr->set_listener(publication_listener, DDS::DATA_AVAILABLE_STATUS);
     if (ret != DDS::RETCODE_OK) {
       ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: Failed to set listener on PublicationBuiltinTopicDataDataReader\n"));
       return EXIT_FAILURE;
