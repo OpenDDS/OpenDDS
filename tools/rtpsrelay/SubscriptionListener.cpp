@@ -6,10 +6,10 @@ namespace RtpsRelay {
 
 SubscriptionListener::SubscriptionListener(OpenDDS::DCPS::DomainParticipantImpl* participant,
                                            ReaderEntryDataWriter_ptr writer,
-                                           const AssociationTable& association_table) :
+                                           const RelayAddresses& relay_addresses) :
   participant_(participant),
   writer_(writer),
-  association_table_(association_table)
+  relay_addresses_(relay_addresses)
 {}
 
 void SubscriptionListener::on_data_available(DDS::DataReader_ptr reader)
@@ -40,7 +40,7 @@ void SubscriptionListener::on_data_available(DDS::DataReader_ptr reader)
       break;
     case DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE:
     case DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE:
-      write_dispose(infos[idx]);
+      unregister_instance(infos[idx]);
       break;
     }
   }
@@ -81,7 +81,7 @@ void SubscriptionListener::write_sample(const DDS::SubscriptionBuiltinTopicData&
     data_reader_qos,
     subscriber_qos,
 
-    association_table_.local_relay_addresses()
+    relay_addresses_
   };
 
   DDS::ReturnCode_t ret = writer_->write(entry, DDS::HANDLE_NIL);
@@ -90,7 +90,7 @@ void SubscriptionListener::write_sample(const DDS::SubscriptionBuiltinTopicData&
   }
 }
 
-void SubscriptionListener::write_dispose(const DDS::SampleInfo& info)
+void SubscriptionListener::unregister_instance(const DDS::SampleInfo& info)
 {
   const OpenDDS::DCPS::RepoId id = participant_->get_repoid(info.instance_handle);
   GUID_t guid;
@@ -101,7 +101,7 @@ void SubscriptionListener::write_dispose(const DDS::SampleInfo& info)
 
   DDS::ReturnCode_t ret = writer_->dispose(entry, DDS::HANDLE_NIL);
   if (ret != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: SubscriptionListener::write_dispose failed to dispose\n"));
+    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: SubscriptionListener::unregister_instance failed to unregister_instance\n"));
   }
 }
 

@@ -135,6 +135,12 @@ public:
 
   DCPS::ReactorInterceptor& interceptor() { return interceptor_; }
 
+  u_short get_spdp_port() const { return tport_ ? tport_->uni_port_ : 0; }
+
+  u_short get_sedp_port() const { return sedp_.local_address().get_port_number(); }
+
+  void schedule_send(const ACE_Time_Value& delay);
+
 protected:
   Sedp& endpoint_manager() { return sedp_; }
 
@@ -205,6 +211,7 @@ private:
     DataSubmessage data_;
     DCPS::SequenceNumber seq_;
     DCPS::TimeDuration lease_duration_;
+    u_short uni_port_;
     ACE_SOCK_Dgram unicast_socket_;
     ACE_INET_Addr default_multicast_;
     ACE_SOCK_Dgram_Mcast multicast_socket_;

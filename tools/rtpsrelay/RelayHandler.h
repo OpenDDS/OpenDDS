@@ -55,7 +55,6 @@ public:
   VerticalHandler(ACE_Reactor* a_reactor,
                   const AssociationTable& a_association_table,
                   const ACE_Time_Value& lifespan,
-                  const ACE_Time_Value& purge_period,
                   const OpenDDS::DCPS::RepoId& application_participant_guid);
   void horizontal_handler(HorizontalHandler* a_horizontal_handler) { horizontal_handler_ = a_horizontal_handler; }
 
@@ -71,9 +70,10 @@ public:
 
 protected:
   virtual std::string extract_relay_address(const RelayAddresses& relay_addresses) const = 0;
-  virtual void add_addresses(const ACE_INET_Addr& /*a_remote*/,
-                             const OpenDDS::DCPS::RepoId& /*a_src_guid*/,
-                             std::set<std::string>& /* a_addrs*/) {}
+  virtual bool do_normal_processing (const ACE_INET_Addr& /*a_remote*/,
+                                     const OpenDDS::DCPS::RepoId& /*a_src_guid*/,
+                                     ACE_Message_Block* /*a_msg*/) { return true;}
+  virtual void purge(const OpenDDS::DCPS::RepoId& /*guid*/) {}
 
   HorizontalHandler* horizontal_handler_;
   void process_message(const ACE_INET_Addr& a_remote,
@@ -88,8 +88,6 @@ protected:
   ExpirationGuidMap expiration_guid_map_;
   ACE_Time_Value const lifespan_;
   const OpenDDS::DCPS::RepoId application_participant_guid_;
-
-  int handle_timeout(const ACE_Time_Value& a_now, const void*) override;
 };
 
 // Sends to and receives from other relays.
@@ -112,17 +110,27 @@ public:
   SpdpHandler(ACE_Reactor* a_reactor,
               const AssociationTable& a_association_table,
               const ACE_Time_Value& lifespan,
-              const ACE_Time_Value& purge_period,
-              const OpenDDS::DCPS::RepoId& application_participant_guid);
+              const OpenDDS::DCPS::RepoId& application_participant_guid,
+              const ACE_INET_Addr& application_participant_addr);
+
+  void replay(const OpenDDS::DCPS::RepoId& guid,
+              const GuidSet& local_guids,
+              const RelayAddressesSet& relay_addresses);
 
 private:
-  std::string application_participant_addr_;
+  const ACE_INET_Addr application_participant_addr_;
+  const std::string application_participant_addr_str_;
+  ACE_Message_Block* spdp_message_;
+  typedef std::map<OpenDDS::DCPS::RepoId, ACE_Message_Block*, OpenDDS::DCPS::GUID_tKeyLessThan> SpdpMessages;
+  SpdpMessages spdp_messages_;
 
   std::string extract_relay_address(const RelayAddresses& relay_addresses) const override;
 
-  void add_addresses(const ACE_INET_Addr& a_remote,
-                     const OpenDDS::DCPS::RepoId& a_src_guid,
-                     std::set<std::string>& a_addrs) override;
+  bool do_normal_processing(const ACE_INET_Addr& a_remote,
+                            const OpenDDS::DCPS::RepoId& a_src_guid,
+                            ACE_Message_Block* a_msg) override;
+
+  void purge(const OpenDDS::DCPS::RepoId& guid) override;
 };
 
 class SedpHandler : public VerticalHandler {
@@ -130,17 +138,18 @@ public:
   SedpHandler(ACE_Reactor* a_reactor,
               const AssociationTable& a_association_table,
               const ACE_Time_Value& lifespan,
-              const ACE_Time_Value& purge_period,
-              const OpenDDS::DCPS::RepoId& application_participant_guid);
+              const OpenDDS::DCPS::RepoId& application_participant_guid,
+              const ACE_INET_Addr& application_participant_addr);
 
 private:
-  std::string application_participant_addr_;
+  const ACE_INET_Addr application_participant_addr_;
+  const std::string application_participant_addr_str_;
 
   std::string extract_relay_address(const RelayAddresses& relay_addresses) const override;
 
-  void add_addresses(const ACE_INET_Addr& a_remote,
-                     const OpenDDS::DCPS::RepoId& a_src_guid,
-                     std::set<std::string>& a_addrs) override;
+  bool do_normal_processing(const ACE_INET_Addr& a_remote,
+                            const OpenDDS::DCPS::RepoId& a_src_guid,
+                            ACE_Message_Block* a_msg) override;
 };
 
 class DataHandler : public VerticalHandler {
@@ -148,7 +157,6 @@ public:
   DataHandler(ACE_Reactor* a_reactor,
               const AssociationTable& a_association_table,
               const ACE_Time_Value& lifespan,
-              const ACE_Time_Value& purge_period,
               const OpenDDS::DCPS::RepoId& application_participant_guid);
 
 private:

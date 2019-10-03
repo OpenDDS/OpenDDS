@@ -560,6 +560,41 @@ RtpsDiscovery::StaticInitializer::StaticInitializer()
   TheServiceParticipant->register_discovery_type("rtps_discovery", new Config);
 }
 
+u_short
+RtpsDiscovery::get_spdp_port(DDS::DomainId_t domain,
+                             const DCPS::RepoId& local_participant) const
+{
+  ParticipantHandle p = get_part(domain, local_participant);
+  if (p) {
+    return p->get_spdp_port();
+  }
+
+  return 0;
+}
+
+u_short
+RtpsDiscovery::get_sedp_port(DDS::DomainId_t domain,
+                             const DCPS::RepoId& local_participant) const
+{
+  ParticipantHandle p = get_part(domain, local_participant);
+  if (p) {
+    return p->get_sedp_port();
+  }
+
+  return 0;
+}
+
+void
+RtpsDiscovery::schedule_send(DDS::DomainId_t domain,
+                             const DCPS::RepoId& local_participant,
+                             const ACE_Time_Value& delay) const
+{
+  ParticipantHandle p = get_part(domain, local_participant);
+  if (p) {
+    p->schedule_send(delay);
+  }
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
 

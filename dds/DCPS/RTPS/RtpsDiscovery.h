@@ -184,6 +184,14 @@ public:
     max_spdp_sequence_msg_reset_check_ = reset_value;
   }
 
+  u_short get_spdp_port(DDS::DomainId_t domain,
+                        const DCPS::RepoId& local_participant) const;
+  u_short get_sedp_port(DDS::DomainId_t domain,
+                        const DCPS::RepoId& local_participant) const;
+  void schedule_send(DDS::DomainId_t domain,
+                     const DCPS::RepoId& local_participant,
+                     const ACE_Time_Value& delay) const;
+
 private:
   DCPS::TimeDuration resend_period_;
   u_short pb_, dg_, pg_, d0_, d1_, dx_;

@@ -12,16 +12,16 @@ class SubscriptionListener : public ListenerBase {
 public:
   SubscriptionListener(OpenDDS::DCPS::DomainParticipantImpl* participant,
                        ReaderEntryDataWriter_ptr writer,
-                       const AssociationTable& association_table);
+                       const RelayAddresses& relay_addresses);
 private:
   void on_data_available(DDS::DataReader_ptr /*reader*/) override;
   void write_sample(const DDS::SubscriptionBuiltinTopicData& data,
                     const DDS::SampleInfo& info);
-  void write_dispose(const DDS::SampleInfo& info);
+  void unregister_instance(const DDS::SampleInfo& info);
 
   OpenDDS::DCPS::DomainParticipantImpl* participant_;
   ReaderEntryDataWriter_ptr writer_;
-  const AssociationTable& association_table_;
+  const RelayAddresses& relay_addresses_;
 };
 
 }
