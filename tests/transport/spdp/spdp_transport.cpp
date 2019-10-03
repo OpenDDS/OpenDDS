@@ -46,9 +46,9 @@ public:
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, spdp_->lock_, true);
     const bool error = spdp_->has_discovered_participant(guid_) != expect_participant;
     if (error) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("Error: expected to %Cfind participant, but did%C\n"),
-        expect_participant ? "" : "not ",
-        expect_participant ? "n't" : ""));
+      ACE_ERROR((LM_ERROR, ACE_TEXT("Error: %C\n"), expect_participant ?
+        "Expected to find the participant, but didn't" :
+        "Expected not to find the participant, but did"));
     }
     return error;
   }
@@ -62,7 +62,21 @@ public:
     }
   }
 
-  const RcHandle<Spdp>(spdp_);
+  bool get_multicast_address(ACE_INET_Addr& addr) {
+    if (!spdp_->tport_) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Null SPDP Transport\n")));
+      return false;
+    }
+    OPENDDS_SET(ACE_INET_Addr)& send_addrs = spdp_->tport_->send_addrs_;
+    if (send_addrs.size() != 1) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Expected a Single Address in SPDP Transport\n")));
+      return false;
+    }
+    addr = *send_addrs.cbegin();
+    return true;
+  }
+
+  const RcHandle<Spdp> spdp_;
   const GUID_t guid_;
 };
 
@@ -118,9 +132,9 @@ struct TestParticipant: ACE_Event_Handler {
     size_t size = 0, padding = 0;
     gen_find_size(hdr_, size, padding);
     gen_find_size(ds, size, padding);
+    find_size_ulong(size, padding);
+    gen_find_size(plist, size, padding);
 
-    size += sizeof(plist);
-    size += 200;
     ACE_Message_Block mb(size + padding);
     Serializer ser(&mb, host_is_bigendian, Serializer::ALIGN_CDR);
 
@@ -153,43 +167,43 @@ struct TestParticipant: ACE_Event_Handler {
       return -1;
     }
     recv_mb_.wr_ptr(ret);
-    Serializer ser(&recv_mb_, host_is_bigendian, Serializer::ALIGN_CDR);
-    if (!(ser >> recv_hdr_)) {
+    MessageParser mp(recv_mb_);
+    if (!mp.parseHeader()) {
       ACE_ERROR((LM_ERROR,
         "ERROR: in handle_input() failed to deserialize RTPS Header\n"));
       return -1;
     }
-    while (recv_mb_.length() > 3) {
-      char subm = recv_mb_.rd_ptr()[0], flags = recv_mb_.rd_ptr()[1];
-      ser.swap_bytes((flags & FLAG_E) != ACE_CDR_BYTE_ORDER);
-      switch (subm) {
-      case DATA:
-        if (!recv_data(ser, peer)) return false;
+    bool ok = true;
+    while (ok && mp.remaining()) {
+      if (!mp.parseSubmessageHeader()) {
+        ok = false;
         break;
-      default:
+      }
+
+      const SubmessageHeader smhdr = mp.submessageHeader();
+      if (smhdr.submessageId == DATA) {
+        ok = recv_data(mp.serializer(), peer);
+      } else {
 #ifdef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-        ACE_DEBUG((LM_INFO, "Received submessage type: %u\n", unsigned(subm)));
+        ACE_DEBUG((LM_INFO, "Received submessage type: %u\n", unsigned(smhdr.submessageId)));
 #else
-        if (static_cast<size_t>(subm) < gen_OpenDDS_RTPS_SubmessageKind_names_size) {
+        if (static_cast<size_t>(smhdr.submessageId) < gen_OpenDDS_RTPS_SubmessageKind_names_size) {
           ACE_DEBUG((LM_INFO, "Received submessage type: %C\n",
-                     gen_OpenDDS_RTPS_SubmessageKind_names[static_cast<size_t>(subm)]));
+                     gen_OpenDDS_RTPS_SubmessageKind_names[static_cast<size_t>(smhdr.submessageId)]));
         } else {
           ACE_ERROR((LM_ERROR, "ERROR: Received unknown submessage type: %u\n",
-                     unsigned(subm)));
+                     unsigned(smhdr.submessageId)));
         }
 #endif
-        SubmessageHeader smh;
-        if (!(ser >> smh)) {
-          ACE_ERROR((LM_ERROR, "ERROR: in handle_input() failed to deserialize "
-                               "SubmessageHeader\n"));
-          return -1;
-        }
-        if (smh.submessageLength == 0) {
-          return 0;
-        }
-        recv_mb_.rd_ptr(smh.submessageLength);
       }
+
+      if (!ok || !mp.hasNextSubmessage()) {
+        break;
+      }
+
+      ok = mp.skipToNextSubmessage();
     }
+
     return 0;
   }
 
@@ -243,6 +257,16 @@ struct ReactorTask : ACE_Task_Base {
 
 bool run_test()
 {
+  // Create and initialize RtpsDiscovery
+  RtpsDiscovery rd("test");
+  const DDS::DomainId_t domain = 0;
+  const DDS::DomainParticipantQos qos = TheServiceParticipant->initial_DomainParticipantQos();
+  RepoId id = rd.generate_participant_guid();
+  const RcHandle<Spdp> spdp(make_rch<Spdp>(domain, ref(id), qos, &rd));
+
+  const DDS::Subscriber_var sVar;
+  spdp->init_bit(sVar);
+
   // Create a "test participant" which will use sockets directly
   // This will act like a remote participant.
   ACE_SOCK_Dgram test_part_sock;
@@ -260,32 +284,24 @@ bool run_test()
 #endif
     );
 
-  ACE_INET_Addr send_addr("239.255.0.1:7400");
-
   GuidGenerator gen;
   GUID_t test_part_guid;
   gen.populate(test_part_guid);
   test_part_guid.entityId = ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER;
-
-  TestParticipant part1(test_part_sock, test_part_guid.guidPrefix);
-
-  // Create and initialize RtpsDiscovery
-  RtpsDiscovery rd("test");
-  const DDS::DomainId_t domain = 0;
-  const DDS::DomainParticipantQos qos = TheServiceParticipant->initial_DomainParticipantQos();
-  RepoId id = rd.generate_participant_guid();
   const GuidPrefix_t& gp = test_part_guid.guidPrefix;
-  const RcHandle<Spdp> spdp(make_rch<Spdp>(domain, ref(id), qos, &rd));
+  TestParticipant part1(test_part_sock, gp);
 
   DDS_TEST spdp_friend(spdp, test_part_guid);
 
-  const DDS::Subscriber_var sVar;
-  spdp->init_bit(sVar);
+  ACE_INET_Addr send_addr;
+  if (!spdp_friend.get_multicast_address(send_addr)) {
+    return false;
+  }
 
   // Create a Parameter List
   OpenDDS::RTPS::ParameterList plist;
 
-  BuiltinEndpointSet_t availableBuiltinEndpoints =
+  const BuiltinEndpointSet_t availableBuiltinEndpoints =
     DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER |
     DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR |
     DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER |
@@ -322,7 +338,7 @@ bool run_test()
       LocatorSeq() /* sedp_unicast */,
       nonEmptyList /*defaultMulticastLocatorList*/,
       nonEmptyList /*defaultUnicastLocatorList*/,
-      { 0 /*manualLivelinessCount*/ },   //FUTURE: implement manual liveliness
+      { 0 /*manualLivelinessCount*/ },
       qos.property,
       {PFLAGS_NO_ASSOCIATED_WRITERS} // opendds_participant_flags
     },
@@ -382,7 +398,7 @@ bool run_test()
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("Reset Within Limits Test\n")));
   bfirst = true;
   expect_participant = true;
-  for (; seq.low < 10;) {
+  while (seq.low < 10) {
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("seq: %d\n"), seq.low));
     if (!part1.send_data(test_part_guid.entityId, seq, plist, send_addr)) {
       return false;

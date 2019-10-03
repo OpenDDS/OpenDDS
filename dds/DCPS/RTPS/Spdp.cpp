@@ -343,15 +343,12 @@ namespace {
 }
 
 void
-Spdp::handle_participant_data(DCPS::MessageId id, const ParticipantData_t& cpdata, const SequenceNumber_t& seq)
+Spdp::handle_participant_data(DCPS::MessageId id, const ParticipantData_t& cpdata, const DCPS::SequenceNumber& seq)
 {
   const MonotonicTimePoint now = MonotonicTimePoint::now();
 
   // Make a (non-const) copy so we can tweak values below
   ParticipantData_t pdata(cpdata);
-
-  DCPS::SequenceNumber currentSeq;
-  currentSeq.setValue(seq.high, seq.low);
 
   const DCPS::RepoId guid = make_guid(pdata.participantProxy.guidPrefix, DCPS::ENTITYID_PARTICIPANT);
 
@@ -390,7 +387,7 @@ Spdp::handle_participant_data(DCPS::MessageId id, const ParticipantData_t& cpdat
     DiscoveredParticipant& dp = participants_[guid];
 
     // initialize sequence number validation variables for new participant
-    dp.last_seq_ = currentSeq;
+    dp.last_seq_ = seq;
     dp.seqResetChkCount_ = 0;
 
 #ifdef OPENDDS_SECURITY
@@ -483,7 +480,7 @@ Spdp::handle_participant_data(DCPS::MessageId id, const ParticipantData_t& cpdat
     }
 
     // Check if sequence numbers are increasing
-    if (validateSequenceNumber(currentSeq, iter)) {
+    if (validateSequenceNumber(seq, iter)) {
       // Must unlock when calling into part_bit() as it may call back into us
       ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
 
@@ -521,19 +518,16 @@ Spdp::handle_participant_data(DCPS::MessageId id, const ParticipantData_t& cpdat
 bool
 Spdp::validateSequenceNumber(const DCPS::SequenceNumber& seq, DiscoveredParticipantIter& iter)
 {
-  bool valid = true;
   if (seq.getValue() != 0 && iter->second.last_seq_ != DCPS::SequenceNumber::MAX_VALUE) {
     if (seq < iter->second.last_seq_) {
       ++iter->second.seqResetChkCount_;
-      valid = false;
+      return false;
     } else if (iter->second.seqResetChkCount_ > 0) {
       --iter->second.seqResetChkCount_;
     }
   }
-  if (valid) {
-    iter->second.last_seq_ = seq;
-  }
-  return valid;
+  iter->second.last_seq_ = seq;
+  return true;
 }
 
 void
@@ -555,9 +549,10 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
     return;
   }
 
-  DCPS::MessageId msg_id = (data.inlineQos.length() && disposed(data.inlineQos)) ? DCPS::DISPOSE_INSTANCE : DCPS::SAMPLE_DATA;
-
-  handle_participant_data(msg_id, pdata, data.writerSN);
+  handle_participant_data(
+    (data.inlineQos.length() && disposed(data.inlineQos)) ?  DCPS::DISPOSE_INSTANCE : DCPS::SAMPLE_DATA,
+    pdata,
+    DCPS::SequenceNumber(data.writerSN.high, data.writerSN.low));
 
   ICE::Endpoint* endpoint = sedp_.get_ice_endpoint();
   if (!endpoint) {

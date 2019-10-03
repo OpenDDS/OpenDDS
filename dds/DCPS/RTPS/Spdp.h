@@ -98,7 +98,7 @@ public:
   void handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg);
 #endif
 
-  void handle_participant_data(DCPS::MessageId id, const ParticipantData_t& pdata, const SequenceNumber_t& seq);
+  void handle_participant_data(DCPS::MessageId id, const ParticipantData_t& pdata, const DCPS::SequenceNumber& seq);
 
   static bool validateSequenceNumber(const DCPS::SequenceNumber& seq, DiscoveredParticipantIter& iter);
 

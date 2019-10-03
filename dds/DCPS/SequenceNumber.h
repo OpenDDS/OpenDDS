@@ -32,6 +32,10 @@ public:
     setValue(value);
   }
 
+  SequenceNumber(ACE_INT32 high, ACE_UINT32 low)
+    : high_(high), low_(low) {
+  }
+
   /// Pre-increment.
   SequenceNumber& operator++() {
     if (this->low_ == ACE_UINT32_MAX) {
@@ -142,12 +146,6 @@ public:
   friend ACE_CDR::Boolean operator>>(Serializer& s, SequenceNumber& x);
 
 private:
-
-  // Private constructor used to force construction of SEQUENCENUMBER_UNKNOWN.
-  // Also used by operator>> to allow deserialization of the same value.
-  SequenceNumber(ACE_INT32 high, ACE_UINT32 low)
-    : high_(high), low_(low) {
-  }
 
   ACE_INT32  high_;
   ACE_UINT32 low_;

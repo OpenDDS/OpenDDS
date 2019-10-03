@@ -55,8 +55,7 @@ namespace RTPS {
 using DCPS::SystemTimePoint;
 
 GuidGenerator::GuidGenerator()
-  : pid_(ACE_OS::getpid()),
-    counter_(0)
+  : pid_(ACE_OS::getpid())
 {
   unsigned seed = static_cast<unsigned>(SystemTimePoint::now().value().usec());
 
@@ -67,12 +66,10 @@ GuidGenerator::GuidGenerator()
 #ifdef ACE_HAS_CPP11
   std::mt19937 generator(seed);
   std::uniform_int_distribution<ACE_UINT16> distribution(0, ACE_UINT16_MAX);
-  init_counter_ = distribution(generator);
+  counter_ = distribution(generator);
 #else
-  init_counter_ = static_cast<ACE_UINT16>(ACE_OS::rand_r(&seed));
+  counter_ = static_cast<ACE_UINT16>(ACE_OS::rand_r(&seed));
 #endif
-
-  counter_ = init_counter_;
 
   ACE_OS::macaddr_node_t macaddress;
   const int result = ACE_OS::getmacaddress(&macaddress);

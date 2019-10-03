@@ -173,7 +173,7 @@ operator>>(std::istream& is, GUID_t& rhs);
 #endif
 
 OpenDDS_Dcps_Export inline GUID_t make_guid(
-  const GuidPrefix_t prefix, const EntityId_t entity)
+  const GuidPrefix_t& prefix, const EntityId_t& entity)
 {
   GUID_t result;
   std::memcpy(result.guidPrefix, prefix, sizeof(GuidPrefix_t));
