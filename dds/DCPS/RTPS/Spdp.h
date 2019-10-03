@@ -205,6 +205,7 @@ private:
     DCPS::SequenceNumber seq_;
     DCPS::TimeDuration lease_duration_;
     ACE_SOCK_Dgram unicast_socket_;
+    ACE_INET_Addr default_multicast_;
     ACE_SOCK_Dgram_Mcast multicast_socket_;
     OPENDDS_SET(ACE_INET_Addr) send_addrs_;
     ACE_Message_Block buff_, wbuff_;

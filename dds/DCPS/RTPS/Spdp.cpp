@@ -549,10 +549,11 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
     return;
   }
 
+  DCPS::SequenceNumber seq;
+  seq.setValue(data.writerSN.high, data.writerSN.low);
   handle_participant_data(
-    (data.inlineQos.length() && disposed(data.inlineQos)) ?  DCPS::DISPOSE_INSTANCE : DCPS::SAMPLE_DATA,
-    pdata,
-    DCPS::SequenceNumber(data.writerSN.high, data.writerSN.low));
+    (data.inlineQos.length() && disposed(data.inlineQos)) ? DCPS::DISPOSE_INSTANCE : DCPS::SAMPLE_DATA,
+    pdata, seq);
 
   ICE::Endpoint* endpoint = sedp_.get_ice_endpoint();
   if (!endpoint) {
@@ -1417,8 +1418,7 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer, bool securityGuids)
 #endif
 
   OPENDDS_STRING mc_addr = outer_->disco_->default_multicast_group();
-  ACE_INET_Addr default_multicast;
-  if (0 != default_multicast.set(mc_port, mc_addr.c_str())) {
+  if (0 != default_multicast_.set(mc_port, mc_addr.c_str())) {
     ACE_DEBUG((
           LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::SpdpTransport() - ")
@@ -1443,7 +1443,7 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer, bool securityGuids)
                          ACE_SOCK_Dgram_Mcast::DEFOPT_NULLIFACE);
 #endif
 
-  if (0 != multicast_socket_.join(default_multicast, 1,
+  if (0 != multicast_socket_.join(default_multicast_, 1,
                                   net_if.empty() ? 0 :
                                   ACE_TEXT_CHAR_TO_TCHAR(net_if.c_str()))) {
     ACE_ERROR((LM_ERROR,
@@ -1453,7 +1453,7 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer, bool securityGuids)
     throw std::runtime_error("failed to join multicast group");
   }
 
-  send_addrs_.insert(default_multicast);
+  send_addrs_.insert(default_multicast_);
 
   typedef RtpsDiscovery::AddrVec::iterator iter;
   for (iter it = outer_->disco_->spdp_send_addrs().begin(),

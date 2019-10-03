@@ -67,12 +67,7 @@ public:
       ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Null SPDP Transport\n")));
       return false;
     }
-    OPENDDS_SET(ACE_INET_Addr)& send_addrs = spdp_->tport_->send_addrs_;
-    if (send_addrs.size() != 1) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Expected a Single Address in SPDP Transport\n")));
-      return false;
-    }
-    addr = *send_addrs.cbegin();
+    addr = spdp_->tport_->default_multicast_;
     return true;
   }
 

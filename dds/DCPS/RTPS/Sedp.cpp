@@ -1144,7 +1144,7 @@ Sedp::Task::svc_secure_i(DCPS::MessageId id,
                          const Security::SPDPdiscoveredParticipantData* ppdata)
 {
   DCPS::unique_ptr<const Security::SPDPdiscoveredParticipantData> pdata(ppdata);
-  spdp_->handle_participant_data(id, *pdata, DCPS::SequenceNumber(0));
+  spdp_->handle_participant_data(id, *pdata, DCPS::SequenceNumber::ZERO());
 }
 #endif
 
