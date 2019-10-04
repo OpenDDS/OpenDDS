@@ -122,8 +122,7 @@ MessageParser::MessageParser(const DDS::OctetSeq& in)
 
 bool MessageParser::parseHeader()
 {
-  Header hdr;
-  return ser_ >> hdr;
+  return ser_ >> header_;
 }
 
 bool MessageParser::parseSubmessageHeader()

@@ -543,7 +543,7 @@ RtpsDiscovery::get_crypto_handle(DDS::DomainId_t domain,
 {
   ParticipantHandle p = get_part(domain, local_participant);
   if (p) {
-    if (remote_participant == GUID_UNKNOWN) {
+    if (remote_participant == GUID_UNKNOWN || remote_participant == local_participant) {
       return p->crypto_handle();
     } else {
       return p->remote_crypto_handle(remote_participant);

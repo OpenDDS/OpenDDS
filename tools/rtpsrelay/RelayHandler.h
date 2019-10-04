@@ -17,7 +17,9 @@ namespace RtpsRelay {
 
 class RelayHandler : public ACE_Event_Handler {
 public:
-  RelayHandler(ACE_Reactor* a_reactor, const AssociationTable& a_association_table);
+  RelayHandler(ACE_Reactor* a_reactor,
+               const AssociationTable& a_association_table);
+
   int open(const ACE_INET_Addr& a_local);
   int handle_input(ACE_HANDLE a_handle) override;
   int handle_output(ACE_HANDLE a_handle) override;
@@ -33,9 +35,7 @@ protected:
   virtual void process_message(const ACE_INET_Addr& a_remote,
                                const ACE_Time_Value& a_now,
                                const OpenDDS::DCPS::RepoId& a_src_guid,
-                               ACE_Message_Block* a_msg,
-                               bool is_beacon_message) = 0;
-
+                               ACE_Message_Block* a_msg) = 0;
 private:
   std::string relay_address_;
   ACE_SOCK_Dgram socket_;
@@ -55,7 +55,13 @@ public:
   VerticalHandler(ACE_Reactor* a_reactor,
                   const AssociationTable& a_association_table,
                   const ACE_Time_Value& lifespan,
-                  const OpenDDS::DCPS::RepoId& application_participant_guid);
+                  const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
+                  DDS::DomainId_t application_domain,
+                  const OpenDDS::DCPS::RepoId& application_participant_guid
+#ifdef OPENDDS_SECURITY
+                  ,const DDS::Security::CryptoTransform_var& crypto
+#endif
+                  );
   void horizontal_handler(HorizontalHandler* a_horizontal_handler) { horizontal_handler_ = a_horizontal_handler; }
 
   GuidAddrMap::const_iterator find(const OpenDDS::DCPS::RepoId& guid) const
@@ -75,12 +81,11 @@ protected:
                                     ACE_Message_Block* /*a_msg*/) { return true; }
   virtual void purge(const OpenDDS::DCPS::RepoId& /*guid*/) {}
 
-  HorizontalHandler* horizontal_handler_;
   void process_message(const ACE_INET_Addr& a_remote,
                        const ACE_Time_Value& a_now,
                        const OpenDDS::DCPS::RepoId& a_src_guid,
-                       ACE_Message_Block* a_msg,
-                       bool is_beacon_message) override;
+                       ACE_Message_Block* a_msg) override;
+
   GuidAddrMap guid_addr_map_;
   typedef std::map<OpenDDS::DCPS::RepoId, ACE_Time_Value, OpenDDS::DCPS::GUID_tKeyLessThan> GuidExpirationMap;
   GuidExpirationMap guid_expiration_map_;
@@ -88,12 +93,26 @@ protected:
   ExpirationGuidMap expiration_guid_map_;
   ACE_Time_Value const lifespan_;
   const OpenDDS::DCPS::RepoId application_participant_guid_;
+  HorizontalHandler* horizontal_handler_;
+
+private:
+  bool parse_message(OpenDDS::RTPS::MessageParser& message_parser,
+                     ACE_Message_Block* msg,
+                     bool& is_pad_only,
+                     bool check_submessages);
+  OpenDDS::RTPS::RtpsDiscovery_rch rtps_discovery_;
+  const DDS::DomainId_t application_domain_;
+#ifdef OPENDDS_SECURITY
+  const DDS::Security::CryptoTransform_var crypto_;
+  const DDS::Security::ParticipantCryptoHandle application_participant_crypto_handle_;
+#endif
 };
 
 // Sends to and receives from other relays.
 class HorizontalHandler : public RelayHandler {
 public:
-  HorizontalHandler(ACE_Reactor* a_reactor, const AssociationTable& a_association_table);
+  HorizontalHandler(ACE_Reactor* a_reactor,
+                    const AssociationTable& a_association_table);
   void vertical_handler(VerticalHandler* a_vertical_handler) { vertical_handler_ = a_vertical_handler; }
 
 private:
@@ -101,17 +120,21 @@ private:
   void process_message(const ACE_INET_Addr& a_remote,
                        const ACE_Time_Value& a_now,
                        const OpenDDS::DCPS::RepoId& a_src_guid,
-                       ACE_Message_Block* a_msg,
-                       bool is_beacon_message) override;
+                       ACE_Message_Block* a_msg) override;
 };
 
 class SpdpHandler : public VerticalHandler {
 public:
-  SpdpHandler(ACE_Reactor* a_reactor,
-              const AssociationTable& a_association_table,
-              const ACE_Time_Value& lifespan,
-              const OpenDDS::DCPS::RepoId& application_participant_guid,
-              const ACE_INET_Addr& application_participant_addr);
+  SpdpHandler(ACE_Reactor* a_reactor
+              ,const AssociationTable& a_association_table
+              ,const ACE_Time_Value& lifespan
+              ,const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery
+              ,DDS::DomainId_t application_domain
+              ,const OpenDDS::DCPS::RepoId& application_participant_guid
+#ifdef OPENDDS_SECURITY
+              ,const DDS::Security::CryptoTransform_var& crypto
+#endif
+              ,const ACE_INET_Addr& application_participant_addr);
 
   void replay(const OpenDDS::DCPS::RepoId& guid,
               const GuidSet& local_guids,
@@ -135,11 +158,16 @@ private:
 
 class SedpHandler : public VerticalHandler {
 public:
-  SedpHandler(ACE_Reactor* a_reactor,
-              const AssociationTable& a_association_table,
-              const ACE_Time_Value& lifespan,
-              const OpenDDS::DCPS::RepoId& application_participant_guid,
-              const ACE_INET_Addr& application_participant_addr);
+  SedpHandler(ACE_Reactor* a_reactor
+              ,const AssociationTable& a_association_table
+              ,const ACE_Time_Value& lifespan
+              ,const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery
+              ,DDS::DomainId_t application_domain
+              ,const OpenDDS::DCPS::RepoId& application_participant_guid
+#ifdef OPENDDS_SECURITY
+              ,const DDS::Security::CryptoTransform_var& crypto
+#endif
+              ,const ACE_INET_Addr& application_participant_addr);
 
 private:
   const ACE_INET_Addr application_participant_addr_;
@@ -157,7 +185,13 @@ public:
   DataHandler(ACE_Reactor* a_reactor,
               const AssociationTable& a_association_table,
               const ACE_Time_Value& lifespan,
-              const OpenDDS::DCPS::RepoId& application_participant_guid);
+              const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
+              DDS::DomainId_t application_domain,
+              const OpenDDS::DCPS::RepoId& application_participant_guid
+#ifdef OPENDDS_SECURITY
+              ,const DDS::Security::CryptoTransform_var& crypto
+#endif
+              );
 
 private:
   std::string extract_relay_address(const RelayAddresses& relay_addresses) const override;

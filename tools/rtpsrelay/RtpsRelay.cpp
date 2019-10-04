@@ -32,6 +32,7 @@
 
 #ifdef OPENDDS_SECURITY
 #include <dds/DCPS/security/framework/Properties.h>
+#include <dds/DCPS/security/framework/SecurityRegistry.h>
 
 namespace {
   void append(DDS::PropertySeq& props, const char* name, const std::string& value, bool propagate = false)
@@ -259,9 +260,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   ACE_INET_Addr spdp(rtps_discovery->get_spdp_port(application_domain, application_participant_id), "127.0.0.1");
   ACE_INET_Addr sedp(rtps_discovery->get_sedp_port(application_domain, application_participant_id), "127.0.0.1");
 
-  SpdpHandler spdp_vertical_handler(reactor, association_table, lifespan, application_participant_id, spdp);
-  SedpHandler sedp_vertical_handler(reactor, association_table, lifespan, application_participant_id, sedp);
-  DataHandler data_vertical_handler(reactor, association_table, lifespan, application_participant_id);
+  OpenDDS::Security::SecurityConfig_rch conf = TheSecurityRegistry->default_config();
+  DDS::Security::CryptoTransform_var crypto = conf->get_crypto_transform();
+
+  SpdpHandler spdp_vertical_handler(reactor, association_table, lifespan, rtps_discovery, application_domain, application_participant_id, crypto, spdp);
+  SedpHandler sedp_vertical_handler(reactor, association_table, lifespan, rtps_discovery, application_domain, application_participant_id, crypto, sedp);
+  DataHandler data_vertical_handler(reactor, association_table, lifespan, rtps_discovery, application_domain, application_participant_id, crypto);
 
   spdp_horizontal_handler.vertical_handler(&spdp_vertical_handler);
   sedp_horizontal_handler.vertical_handler(&sedp_vertical_handler);
