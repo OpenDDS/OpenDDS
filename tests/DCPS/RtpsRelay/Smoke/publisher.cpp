@@ -72,12 +72,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 #if defined(OPENDDS_SECURITY)
       if (TheServiceParticipant->get_security()) {
         DDS::PropertySeq& props = part_qos.property.value;
-        append(props, DDS_SEC_AUTH_IDENTITY_CA, auth_ca_file);
-        append(props, DDS_SEC_AUTH_IDENTITY_CERTIFICATE, id_cert_file);
-        append(props, DDS_SEC_AUTH_PRIVATE_KEY, id_key_file);
-        append(props, DDS_SEC_ACCESS_PERMISSIONS_CA, perm_ca_file);
-        append(props, DDS_SEC_ACCESS_GOVERNANCE, governance_file);
-        append(props, DDS_SEC_ACCESS_PERMISSIONS, permissions_file);
+        append(props, DDS::Security::Properties::AuthIdentityCA, auth_ca_file);
+        append(props, DDS::Security::Properties::AuthIdentityCertificate, id_cert_file);
+        append(props, DDS::Security::Properties::AuthPrivateKey, id_key_file);
+        append(props, DDS::Security::Properties::AccessPermissionsCA, perm_ca_file);
+        append(props, DDS::Security::Properties::AccessGovernance, governance_file);
+        append(props, DDS::Security::Properties::AccessPermissions, permissions_file);
       }
 #endif
 
