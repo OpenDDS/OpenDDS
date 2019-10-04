@@ -1164,7 +1164,7 @@ Sedp::Task::svc_secure_i(DCPS::MessageId id,
                          const Security::SPDPdiscoveredParticipantData* ppdata)
 {
   DCPS::unique_ptr<const Security::SPDPdiscoveredParticipantData> pdata(ppdata);
-  spdp_->handle_participant_data(id, *pdata);
+  spdp_->handle_participant_data(id, *pdata, DCPS::SequenceNumber::ZERO());
 }
 #endif
 
@@ -1772,6 +1772,7 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
 
     } else if (qosChanged(iter->second.writer_data_.ddsPublicationData,
                           wdata.ddsPublicationData)) { // update existing
+
 #ifndef DDS_HAS_MINIMUM_BIT
       DCPS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
       if (bit) { // bit may be null if the DomainParticipant is shutting down
@@ -3033,6 +3034,7 @@ decode_parameter_list(const DCPS::ReceivedDataSample& sample,
                       const ACE_CDR::Octet& encap,
                       ParameterList& data)
 {
+
   if (sample.header_.key_fields_only_ && encap < 2) {
     GUID_t guid;
     if (!(ser >> guid)) return false;
@@ -3048,7 +3050,9 @@ decode_parameter_list(const DCPS::ReceivedDataSample& sample,
 void
 Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
 {
-  if (shutting_down_.value()) return;
+  if (shutting_down_.value()) {
+    return;
+  }
 
   switch (sample.header_.message_id_) {
   case DCPS::SAMPLE_DATA:
@@ -3856,6 +3860,7 @@ Sedp::Task::svc()
       ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::Task::svc "
         "got message from queue type %C\n", msg->msgTypeToString().c_str()));
     }
+
     DCPS::unique_ptr<Msg> delete_the_msg(msg);
     switch (msg->type_) {
       case Msg::MSG_PARTICIPANT:
