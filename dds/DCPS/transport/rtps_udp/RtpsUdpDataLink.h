@@ -272,6 +272,7 @@ private:
     bool durable_;
     CORBA::Long heartbeat_count_;
     mutable ACE_Thread_Mutex mutex_;
+    mutable ACE_Thread_Mutex elems_not_acked_mutex_;
 
     void add_gap_submsg_i(RTPS::SubmessageSeq& msg,
                           const TransportQueueElement& tqe,

@@ -31,6 +31,8 @@ RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link, const Guid
   , receiver_(local_prefix)
 #ifdef OPENDDS_SECURITY
   , secure_sample_(0)
+  , encoded_rtps_(false)
+  , encoded_submsg_(false)
 #endif
 {
 #ifdef OPENDDS_SECURITY

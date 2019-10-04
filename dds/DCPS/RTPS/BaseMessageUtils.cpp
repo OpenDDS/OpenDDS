@@ -107,11 +107,15 @@ void locators_to_blob(const DCPS::LocatorSeq& locators,
 MessageParser::MessageParser(const ACE_Message_Block& in)
   : in_(in.duplicate())
   , ser_(in_.get(), false, DCPS::Serializer::ALIGN_CDR)
+  , sub_()
+  , smContentStart_(0)
 {}
 
 MessageParser::MessageParser(const DDS::OctetSeq& in)
   : fromSeq_(reinterpret_cast<const char*>(in.get_buffer()), in.length())
   , ser_(&fromSeq_, false, DCPS::Serializer::ALIGN_CDR)
+  , sub_()
+  , smContentStart_(0)
 {
   fromSeq_.wr_ptr(fromSeq_.size());
 }

@@ -173,13 +173,16 @@ public:
   const DCPS::TimeDuration& auth_resend_period() const { return auth_resend_period_; }
   void auth_resend_period(const DCPS::TimeDuration& x) { auth_resend_period_ = x; }
 
-
 #ifdef OPENDDS_SECURITY
   DDS::Security::ParticipantCryptoHandle get_crypto_handle(DDS::DomainId_t domain,
                                                            const DCPS::RepoId& local_participant,
                                                            const DCPS::RepoId& remote_participant = GUID_UNKNOWN) const;
-
 #endif
+
+  u_short max_spdp_sequence_msg_reset_check() const { return max_spdp_sequence_msg_reset_check_; }
+  void max_spdp_sequence_msg_reset_check(u_short reset_value) {
+    max_spdp_sequence_msg_reset_check_ = reset_value;
+  }
 
 private:
   DCPS::TimeDuration resend_period_;
@@ -198,6 +201,7 @@ private:
   DCPS::TimeDuration max_spdp_timer_period_;
   DCPS::TimeDuration max_auth_time_;
   DCPS::TimeDuration auth_resend_period_;
+  u_short max_spdp_sequence_msg_reset_check_;
 
 
   /// Guids will be unique within this RTPS configuration

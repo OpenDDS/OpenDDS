@@ -58,6 +58,7 @@ RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
   , max_spdp_timer_period_(0, 10000)
   , max_auth_time_(300, 0)
   , auth_resend_period_(1, 0)
+  , max_spdp_sequence_msg_reset_check_(3)
 {
 }
 
@@ -413,17 +414,28 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
             discovery->max_spdp_timer_period(TimeDuration::from_msec(int_value));
           } else {
             ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-                              ACE_TEXT("Invalid entry (%C) for MaxSpdpTimerPeriod in ")
-                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
-                              string_value.c_str(), rtps_name.c_str()), -1);
+              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+              ACE_TEXT("Invalid entry (%C) for MaxSpdpTimerPeriod in ")
+              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+              string_value.c_str(), rtps_name.c_str()), -1);
           }
-        }  else {
+        } else if (name == "MaxSpdpSequenceMsgResetChecks") {
+          const OPENDDS_STRING& string_value = it->second;
+          u_short value;
+          if (DCPS::convertToInteger(string_value, value)) {
+            discovery->max_spdp_sequence_msg_reset_check(value);
+          } else {
+            ACE_ERROR_RETURN((LM_ERROR,
+              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+              ACE_TEXT("Invalid entry (%C) for MaxSpdpSequenceMsgResetChecks in ")
+              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+              string_value.c_str(), rtps_name.c_str()), -1);
+          }
+        } else {
           ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-                            ACE_TEXT("Unexpected entry (%C) in [rtps_discovery/%C] section.\n"),
-                            name.c_str(), rtps_name.c_str()),
-                           -1);
+            ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+            ACE_TEXT("Unexpected entry (%C) in [rtps_discovery/%C] section.\n"),
+            name.c_str(), rtps_name.c_str()), -1);
         }
       }
 

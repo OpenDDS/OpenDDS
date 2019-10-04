@@ -169,6 +169,8 @@ RtpsUdpDataLink::RtpsWriter::do_remove_sample(const TransportQueueElement::Match
     return;
   }
 
+  ACE_GUARD(ACE_Thread_Mutex, g2, elems_not_acked_mutex_);
+
   if (!elems_not_acked_.empty()) {
     to_deliver.insert(to_deliver_.begin(), to_deliver_.end());
     to_deliver_.clear();
@@ -192,6 +194,7 @@ RtpsUdpDataLink::RtpsWriter::do_remove_sample(const TransportQueueElement::Match
     }
   }
 
+  g2.release();
   g.release();
 
   SnToTqeMap::iterator deliver_iter = to_deliver.begin();
@@ -456,6 +459,9 @@ RtpsUdpDataLink::RtpsWriter::pre_stop_helper(OPENDDS_VECTOR(TransportQueueElemen
       iter = to_deliver_.begin();
     }
   }
+
+  ACE_GUARD(ACE_Thread_Mutex, g2, elems_not_acked_mutex_);
+
   if (!elems_not_acked_.empty()) {
     OPENDDS_SET(SequenceNumber) sns_to_release;
     iter_t iter = elems_not_acked_.begin();
@@ -922,8 +928,9 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
   TransportQueueElement* result;
   bool deliver_after_send = false;
   if (rw != writers_.end()) {
+    writer = rw->second;
     g.release();
-    result = rw->second->customize_queue_element_helper(element, requires_inline_qos, meta_submessages, deliver_after_send);
+    result = writer->customize_queue_element_helper(element, requires_inline_qos, meta_submessages, deliver_after_send);
   } else {
     result = customize_queue_element_non_reliable_i(element, requires_inline_qos, meta_submessages, deliver_after_send);
     g.release();
@@ -2446,6 +2453,7 @@ RtpsUdpDataLink::RtpsWriter::send_and_gather_nack_replies(MetaSubmessageVec& met
     0 == std::memcmp(&pvs_writer, &id_.entityId, sizeof pvs_writer);
 #endif
 
+  bool gaps_ok = true;
   typedef ReaderInfoMap::iterator ri_iter;
   const ri_iter end = remote_readers_.end();
   for (ri_iter ri = remote_readers_.begin(); ri != end; ++ri) {
@@ -2467,6 +2475,9 @@ RtpsUdpDataLink::RtpsWriter::send_and_gather_nack_replies(MetaSubmessageVec& met
       AddrSet addrs = link->get_addresses(id_, ri->first);
       if (!addrs.empty()) {
         recipients.insert(addrs.begin(), addrs.end());
+        if (ri->second.expecting_durable_data()) {
+          gaps_ok = false;
+        }
         if (Transport_debug_level > 5) {
           const GuidConverter local_conv(id_), remote_conv(ri->first);
           ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::send_nack_replies "
@@ -2502,7 +2513,7 @@ RtpsUdpDataLink::RtpsWriter::send_and_gather_nack_replies(MetaSubmessageVec& met
 
   send_nackfrag_replies_i(gaps, recipients);
 
-  if (!gaps.empty()) {
+  if (gaps_ok && !gaps.empty()) {
     if (Transport_debug_level > 5) {
       ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::send_nack_replies "
                  "GAPs:"));
@@ -2697,6 +2708,8 @@ RtpsUdpDataLink::RtpsWriter::acked_by_all_helper_i(SnToTqeMap& to_deliver)
   if (!link) {
     return;
   }
+
+  ACE_GUARD(ACE_Thread_Mutex, g2, elems_not_acked_mutex_);
 
   if (!elems_not_acked_.empty()) {
 
@@ -2905,8 +2918,12 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
     }
   }
 
-  if (!elems_not_acked_.empty()) {
-    is_final = false;
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g2, elems_not_acked_mutex_, false);
+
+    if (!elems_not_acked_.empty()) {
+      is_final = false;
+    }
   }
 
   const SequenceNumber firstSN = (durable_ || !has_data) ? 1 : send_buff_->low(),
@@ -3207,11 +3224,15 @@ RtpsUdpDataLink::RtpsWriter::RtpsWriter(RcHandle<RtpsUdpDataLink> link, const Re
 RtpsUdpDataLink::RtpsWriter::~RtpsWriter()
 {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+
   if (!to_deliver_.empty()) {
     ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: RtpsWriter::~RtpsWriter - ")
       ACE_TEXT("deleting with %d elements left to deliver\n"),
       to_deliver_.size()));
   }
+
+  ACE_GUARD(ACE_Thread_Mutex, g2, elems_not_acked_mutex_);
+
   if (!elems_not_acked_.empty()) {
     ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: RtpsWriter::~RtpsWriter - ")
       ACE_TEXT("deleting with %d elements left not fully acknowledged\n"),
@@ -3232,7 +3253,7 @@ RtpsUdpDataLink::RtpsWriter::heartbeat_high(const ReaderInfo& ri) const
 void
 RtpsUdpDataLink::RtpsWriter::add_elem_awaiting_ack(TransportQueueElement* element)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  ACE_GUARD(ACE_Thread_Mutex, g, elems_not_acked_mutex_);
   elems_not_acked_.insert(SnToTqeMap::value_type(element->sequence(), element));
 }
 
