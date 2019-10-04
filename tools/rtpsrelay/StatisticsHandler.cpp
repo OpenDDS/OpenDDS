@@ -4,6 +4,8 @@
 
 #include <iostream>
 
+namespace RtpsRelay {
+
 namespace {
   const ACE_Time_Value STATISTICS_INTERVAL(60);
 }
@@ -70,4 +72,6 @@ int StatisticsHandler::handle_timeout(const ACE_Time_Value& a_now, const void*)
   data_horizontal_->reset_byte_counts();
 
   return 0;
+}
+
 }

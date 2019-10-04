@@ -151,6 +151,9 @@ public:
     sedp_rtps_relay_address_ = address;
   }
 
+  bool rtps_relay_only() const { return rtps_relay_only_; }
+  void rtps_relay_only(bool f) { rtps_relay_only_ = f; }
+
   const ACE_INET_Addr& sedp_stun_server_address() const { return sedp_stun_server_address_; }
   void sedp_stun_server_address(const ACE_INET_Addr& address) {
     sedp_stun_server_address_ = address;
@@ -170,6 +173,12 @@ public:
   const DCPS::TimeDuration& auth_resend_period() const { return auth_resend_period_; }
   void auth_resend_period(const DCPS::TimeDuration& x) { auth_resend_period_ = x; }
 
+#ifdef OPENDDS_SECURITY
+  DDS::Security::ParticipantCryptoHandle get_crypto_handle(DDS::DomainId_t domain,
+                                                           const DCPS::RepoId& local_participant,
+                                                           const DCPS::RepoId& remote_participant = GUID_UNKNOWN) const;
+#endif
+
   u_short max_spdp_sequence_msg_reset_check() const { return max_spdp_sequence_msg_reset_check_; }
   void max_spdp_sequence_msg_reset_check(u_short reset_value) {
     max_spdp_sequence_msg_reset_check_ = reset_value;
@@ -186,6 +195,7 @@ private:
   AddrVec spdp_send_addrs_;
   ACE_INET_Addr spdp_rtps_relay_address_;
   ACE_INET_Addr sedp_rtps_relay_address_;
+  bool rtps_relay_only_;
   ACE_INET_Addr sedp_stun_server_address_;
   bool use_ice_;
   DCPS::TimeDuration max_spdp_timer_period_;

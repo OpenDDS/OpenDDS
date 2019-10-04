@@ -4,10 +4,13 @@
  */
 
 #include "LocalAuthCredentialData.h"
+
+#include "dds/DCPS/SequenceIterator.h"
+#include "dds/DCPS/debug.h"
 #include "dds/DCPS/security/CommonUtilities.h"
 #include "dds/DCPS/security/TokenReader.h"
-#include "dds/DCPS/debug.h"
-#include "dds/DCPS/SequenceIterator.h"
+#include "dds/DCPS/security/framework/Properties.h"
+
 #include <algorithm>
 #include <cstring>
 #include <cerrno>
@@ -103,16 +106,16 @@ bool LocalAuthCredentialData::load_credentials(const DDS::PropertySeq& props, DD
                  i, name.c_str(), value.c_str()));
     }
 
-    if (name == "dds.sec.auth.identity_ca") {
+    if (name == DDS::Security::Properties::AuthIdentityCA) {
       ca_cert_.reset(new SSL::Certificate(value));
 
-    } else if (name == "dds.sec.auth.private_key") {
+    } else if (name == DDS::Security::Properties::AuthPrivateKey) {
       pkey_uri = value;
 
-    } else if (name == "dds.sec.auth.identity_certificate") {
+    } else if (name == DDS::Security::Properties::AuthIdentityCertificate) {
       participant_cert_.reset(new SSL::Certificate(value));
 
-    } else if (name == "dds.sec.auth.password") {
+    } else if (name == DDS::Security::Properties::AuthPassword) {
       password = value;
 
     }

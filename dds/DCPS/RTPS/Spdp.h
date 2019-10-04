@@ -92,6 +92,7 @@ public:
 #ifdef OPENDDS_SECURITY
   Security::SecurityConfig_rch get_security_config() const { return security_config_; }
   DDS::Security::ParticipantCryptoHandle crypto_handle() const { return crypto_handle_; }
+  DDS::Security::ParticipantCryptoHandle remote_crypto_handle(const DCPS::RepoId& remote_participant) const;
 
   void handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg);
   void handle_handshake_message(const DDS::Security::ParticipantStatelessMessage& msg);

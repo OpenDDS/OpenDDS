@@ -30,6 +30,7 @@
 #ifdef OPENDDS_SECURITY
 #include "dds/DCPS/security/framework/SecurityRegistry.h"
 #include "dds/DCPS/security/framework/SecurityConfig.h"
+#include "dds/DCPS/security/framework/Properties.h"
 #endif
 
 #include "RecorderImpl.h"
@@ -1637,7 +1638,7 @@ DomainParticipantImpl::enable()
   AddDomainStatus value = {GUID_UNKNOWN, false};
 
 #ifdef OPENDDS_SECURITY
-  if (TheServiceParticipant->get_security()) {
+  if (TheServiceParticipant->get_security() && security_config_->qos_implies_security(qos_)) {
     Security::Authentication_var auth = security_config_->get_authentication();
 
     DDS::Security::SecurityException se;
@@ -1855,7 +1856,7 @@ DomainParticipantImpl::create_new_topic(
                    DDS::Topic::_nil());
 
 #ifdef OPENDDS_SECURITY
-  if (TheServiceParticipant->get_security() && !topicIsBIT(topic_name, type_name)) {
+  if (perm_handle_ && !topicIsBIT(topic_name, type_name)) {
     Security::AccessControl_var access = security_config_->get_access_control();
 
     DDS::Security::SecurityException se;

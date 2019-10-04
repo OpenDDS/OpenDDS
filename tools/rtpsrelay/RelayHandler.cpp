@@ -1,11 +1,10 @@
 #include "RelayHandler.h"
 
+#include <dds/DCPS/Message_Block_Ptr.h>
 #include <dds/DCPS/RTPS/BaseMessageTypes.h>
 #include <dds/DCPS/RTPS/MessageTypes.h>
 #include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
-
 #include <dds/DdsDcpsCoreTypeSupportImpl.h>
-#include <dds/DCPS/Message_Block_Ptr.h>
 
 #include <ace/Reactor.h>
 
@@ -14,59 +13,16 @@
 #include <sstream>
 #include <string>
 
-namespace {
-  const CORBA::UShort encap_LE = 0x0300; // {PL_CDR_LE} in LE
-  const CORBA::UShort encap_BE = 0x0200; // {PL_CDR_BE} in LE
+#ifdef OPENDDS_SECURITY
+#include <dds/DCPS/security/framework/SecurityRegistry.h>
+#endif
 
-  std::string guid_to_string(const OpenDDS::DCPS::GUID_t& a_guid)
-  {
-    std::stringstream ss;
-    ss << a_guid;
-    return ss.str();
-  }
-
-  void parse_property(GroupTable::GroupSet& a_groups, const DDS::Property_t& a_property)
-  {
-    static const std::string GROUPS_PROPERTY_NAME = "OpenDDS.RtpsRelay.Groups";
-    if (a_property.name.in() == GROUPS_PROPERTY_NAME) {
-      std::string value(a_property.value);
-      for (size_t idx = 0, limit = value.length(); idx != limit;) {
-        size_t const n = value.find(',', idx);
-        a_groups.insert(value.substr(idx, (n == std::string::npos) ? n : n - idx));
-        idx = (n == std::string::npos) ? limit : n + 1;
-      }
-    }
-  }
-
-  void parse_property_seq(GroupTable::GroupSet& a_groups, const DDS::PropertySeq& a_property_seq)
-  {
-    for (auto idx = 0u, count = a_property_seq.length(); idx != count; ++idx) {
-      parse_property(a_groups, a_property_seq[idx]);
-    }
-  }
-
-  void parse_rtps_parameter(GroupTable::GroupSet& a_groups, const OpenDDS::RTPS::Parameter& a_parameter)
-  {
-    if (a_parameter._d() == OpenDDS::RTPS::PID_PROPERTY_LIST) {
-      parse_property_seq(a_groups, a_parameter.property().value);
-    }
-  }
-
-  std::string addr_to_string(const ACE_INET_Addr& a_addr)
-  {
-    std::array<ACE_TCHAR, 256> as_string{};
-    if (a_addr.addr_to_string(as_string.data(), as_string.size()) != 0) {
-      ACE_ERROR((LM_ERROR, "(%P:%t) %N:%l ERROR: addr_to_string failed to convert address to string"));
-      return "";
-    }
-    return ACE_TEXT_ALWAYS_CHAR(as_string.data());
-  }
-}
+namespace RtpsRelay {
 
 RelayHandler::RelayHandler(ACE_Reactor* a_reactor,
-                           const GroupTable& a_group_table)
+                           const AssociationTable& a_association_table)
   : ACE_Event_Handler(a_reactor)
-  , group_table_(a_group_table)
+  , association_table_(a_association_table)
   , bytes_received_(0)
   , bytes_sent_(0)
 {}
@@ -83,6 +39,21 @@ int RelayHandler::open(const ACE_INET_Addr& a_local)
     ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::open failed to enable ACE_NONBLOCK\n"));
     return -1;
   }
+
+  int send_buffer_size = 16384;
+#ifdef ACE_DEFAULT_MAX_SOCKET_BUFSIZ
+  send_buffer_size = ACE_DEFAULT_MAX_SOCKET_BUFSIZ;
+#endif
+
+  if (socket_.set_option(SOL_SOCKET,
+                         SO_SNDBUF,
+                         (void *) &send_buffer_size,
+                         sizeof(send_buffer_size)) < 0
+      && errno != ENOTSUP) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::open: failed to set the send buffer size to %d errno %m\n", send_buffer_size));
+    return -1;
+  }
+
   if (reactor()->register_handler(this, READ_MASK) != 0) {
     ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::open failed to register READ_MASK handler\n"));
     return -1;
@@ -118,20 +89,15 @@ int RelayHandler::handle_input(ACE_HANDLE)
     return 0;
   }
 
-  //
-  bool is_beacon_message = false;
-  if ((buffer->length() == OpenDDS::RTPS::BEACON_MESSAGE_LENGTH)
-    && (static_cast<CORBA::Octet>(buffer->rd_ptr()[0]) == OpenDDS::RTPS::BEACON_MSG_ID)) {
-    is_beacon_message = true;
-  }
+  bool is_beacon_message = buffer->length() == OpenDDS::RTPS::BEACON_MESSAGE_LENGTH &&
+    static_cast<CORBA::Octet>(buffer->rd_ptr()[0]) == OpenDDS::RTPS::BEACON_MSG_ID;
 
   OpenDDS::DCPS::RepoId src_guid;
   std::memcpy(src_guid.guidPrefix, header.guidPrefix, sizeof(OpenDDS::DCPS::GuidPrefix_t));
   src_guid.entityId = OpenDDS::DCPS::ENTITYID_PARTICIPANT;
-  const auto guid = guid_to_string(src_guid);
 
   buffer->rd_ptr(rd_ptr);
-  process_message(remote, ACE_Time_Value().now(), guid, buffer.get(), is_beacon_message);
+  process_message(remote, ACE_Time_Value().now(), src_guid, buffer.get(), is_beacon_message);
   return 0;
 }
 
@@ -144,7 +110,7 @@ int RelayHandler::handle_output(ACE_HANDLE)
     const auto bytes = socket_.send(out.second->rd_ptr(), out.second->length(), addr, 0, 0);
 
     if (bytes < 0) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::handle_output failed to send to %C\n", out.first.c_str()));
+      ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::handle_output failed to send to %C: %m\n", out.first.c_str()));
     } else {
       bytes_sent_ += bytes;
     }
@@ -172,22 +138,44 @@ void RelayHandler::enqueue_message(const std::string& a_addr, ACE_Message_Block*
 }
 
 VerticalHandler::VerticalHandler(ACE_Reactor* a_reactor,
-                                 const GroupTable& a_group_table,
-                                 RoutingTable& a_routing_table)
-  : RelayHandler(a_reactor, a_group_table)
-  , routing_table_(a_routing_table)
+                                 const AssociationTable& a_association_table,
+                                 const ACE_Time_Value& lifespan,
+                                 const ACE_Time_Value& purge_period,
+                                 const OpenDDS::DCPS::RepoId& application_participant_guid)
+  : RelayHandler(a_reactor, a_association_table)
   , horizontal_handler_(nullptr)
-{}
+  , lifespan_(lifespan)
+  , application_participant_guid_(application_participant_guid)
+{
+  reactor()->schedule_timer(this, 0, purge_period, purge_period);
+}
 
 void VerticalHandler::process_message(const ACE_INET_Addr& a_remote,
                                       const ACE_Time_Value& a_now,
-                                      const std::string& a_src_guid,
+                                      const OpenDDS::DCPS::RepoId& a_src_guid,
                                       ACE_Message_Block* a_msg,
                                       bool is_beacon_message)
 {
-  // Readers send empty messages so we know where they are.
-  routing_table_.update(a_src_guid, horizontal_handler_->relay_address(), addr_to_string(a_remote), a_now);
+  const std::string addr_str = addr_to_string(a_remote);
+  guid_addr_map_[a_src_guid] = addr_str;
+  // Compute the new expiration time for this SPDP client.
+  const ACE_Time_Value expiration = a_now + lifespan_;
+  std::pair<GuidExpirationMap::iterator, bool> res = guid_expiration_map_.insert(std::make_pair(a_src_guid, expiration));
+  if (!res.second) {
+    // The SPDP client already exists.  Remove the previous expiration.
+    const ACE_Time_Value previous_expiration = res.first->second;
+    std::pair<ExpirationGuidMap::iterator, ExpirationGuidMap::iterator> r = expiration_guid_map_.equal_range(previous_expiration);
+    while (r.first != r.second && r.first->second != a_src_guid) {
+      ++r.first;
+    }
+    expiration_guid_map_.erase(r.first);
+    // Assign the new expiration time.
+    res.first->second = expiration;
+  }
+  // Assign the new expiration time.
+  expiration_guid_map_.insert(std::make_pair(expiration, a_src_guid));
 
+  // Readers send empty messages so we know where they are.
   if (is_beacon_message) {
     return;
   }
@@ -195,32 +183,21 @@ void VerticalHandler::process_message(const ACE_INET_Addr& a_remote,
   std::set<std::string> addrs;
   std::set<std::string> horizontal_relay_addrs;
 
-  for (const auto& group : group_table_.groups(a_src_guid)) {
-    for (const auto& guid : group_table_.guids(group)) {
-      // Don't reflect.
-      if (guid == a_src_guid) {
-        continue;
-      }
+  GuidSet guids;
+  association_table_.get_guids_from_local(a_src_guid, guids);
 
-      auto addr = routing_table_.horizontal_relay_address(guid);
-      if (addr.empty()) {
-        ACE_ERROR((LM_WARNING, "(%P|%t) %N:%l WARNING: VerticalHandler::process_message failed to get horizontal relay address for %C\n", guid.c_str()));
-        continue;
-      }
-
-      if (addr == horizontal_handler_->relay_address()) {
-        // Replace with local.
-        addr = routing_table_.address(guid);
-        if (addr.empty()) {
-          ACE_ERROR((LM_WARNING, "(%P|%t) %N:%l WARNING: VerticalHandler::process_message failed to get address for %C\n", addr.c_str()));
-          continue;
-        }
-        addrs.insert(addr);
-      } else {
-        horizontal_relay_addrs.insert(addr);
-      }
+  for (const auto& guid : guids) {
+    auto p = find(guid);
+    if (p != end()) {
+      // Local.
+      addrs.insert(p->second);
+      continue;
     }
+    auto addresses = association_table_.get_relay_addresses_for_participant(guid);
+    horizontal_relay_addrs.insert(extract_relay_address(addresses));
   }
+
+  add_addresses(a_remote, a_src_guid, addrs);
 
   for (const auto& addr : addrs) {
     enqueue_message(addr, a_msg);
@@ -231,46 +208,40 @@ void VerticalHandler::process_message(const ACE_INET_Addr& a_remote,
   }
 }
 
+int VerticalHandler::handle_timeout(const ACE_Time_Value& a_now, const void*) {
+  for (ExpirationGuidMap::iterator pos = expiration_guid_map_.begin(), limit = expiration_guid_map_.end(); pos != limit && pos->first < a_now;) {
+    guid_addr_map_.erase(pos->second);
+    guid_expiration_map_.erase(pos->second);
+    expiration_guid_map_.erase(pos++);
+  }
+  return 0;
+}
+
 HorizontalHandler::HorizontalHandler(ACE_Reactor* a_reactor,
-                                     const GroupTable& a_group_table,
-                                     const RoutingTable& a_routing_table)
-  : RelayHandler(a_reactor, a_group_table)
-  , routing_table_(a_routing_table)
+                                     const AssociationTable& a_association_table)
+  : RelayHandler(a_reactor, a_association_table)
   , vertical_handler_(nullptr)
 {}
 
 void HorizontalHandler::process_message(const ACE_INET_Addr&,
                                         const ACE_Time_Value&,
-                                        const std::string& a_src_guid,
+                                        const OpenDDS::DCPS::RepoId& a_src_guid,
                                         ACE_Message_Block* a_msg,
-                                        bool is_beacon_message)
+                                        bool /*is_beacon_message*/)
 {
-  if (is_beacon_message) {
-    return;
-  }
-
   std::set<std::string> addrs;
 
-  for (auto group : group_table_.groups(a_src_guid)) {
-    for (auto guid : group_table_.guids(group)) {
-      // Don't reflect.
-      if (guid == a_src_guid) {
-        continue;
-      }
+  GuidSet guids;
+  association_table_.get_guids_to_local(a_src_guid, guids);
 
-      auto addr = routing_table_.horizontal_relay_address(guid);
-      if (addr != relay_address()) {
-        continue;
-      }
+  for (auto guid : guids) {
+    auto p = vertical_handler_->find(guid);
 
-      // Replace with local.
-      addr = routing_table_.address(guid);
-      if (addr.empty()) {
-        ACE_ERROR((LM_WARNING, "(%P|%t) %N:%l WARNING: HorizontalHandler::process_message failed to get address for %C\n", guid.c_str()));
-        continue;
-      }
-
-      addrs.insert(addr);
+    if (p != vertical_handler_->end()) {
+      // Local.
+      addrs.insert(p->second);
+    } else {
+      ACE_ERROR((LM_WARNING, "(%P|%t) %N:%l WARNING: HorizontalHandler::process_message failed to get address\n"));
     }
   }
 
@@ -280,161 +251,96 @@ void HorizontalHandler::process_message(const ACE_INET_Addr&,
 }
 
 SpdpHandler::SpdpHandler(ACE_Reactor* a_reactor,
-                         GroupTable& a_group_table,
-                         RoutingTable& a_routing_table,
-                         const OpenDDS::DCPS::RepoId& application_participant_guid,
+                         const AssociationTable& a_association_table,
                          const ACE_Time_Value& lifespan,
-                         const ACE_Time_Value& purge_period)
-  : VerticalHandler(a_reactor, a_group_table, a_routing_table)
-  , mutable_group_table_(a_group_table)
-  , application_participant_guid_(guid_to_string(application_participant_guid))
-  , lifespan_(lifespan)
+                         const ACE_Time_Value& purge_period,
+                         const OpenDDS::DCPS::RepoId& application_participant_guid)
+  : VerticalHandler(a_reactor, a_association_table, lifespan, purge_period, application_participant_guid)
+{}
+
+std::string SpdpHandler::extract_relay_address(const RelayAddresses& relay_addresses) const
 {
-  reactor()->schedule_timer(this, 0, purge_period, purge_period);
+  return relay_addresses.spdp_relay_address();
 }
 
-void SpdpHandler::process_message(const ACE_INET_Addr& a_remote,
-                                  const ACE_Time_Value& a_now,
-                                  const std::string& a_src_guid,
-                                  ACE_Message_Block* a_buffer,
-                                  bool is_beacon_message)
+void SpdpHandler::add_addresses(const ACE_INET_Addr& a_remote,
+                                const OpenDDS::DCPS::RepoId& a_src_guid,
+                                std::set<std::string>& a_addrs)
 {
-  const std::string remote_str = addr_to_string(a_remote);
-
-  const ACE_Time_Value expiration = a_now + lifespan_;
-  std::pair<AddrExpirationMap::iterator, bool> res = addr_expiration_map_.insert(std::make_pair(remote_str, expiration));
-  if (!res.second) {
-    // Exists.  Cleanup the expiration map.
-    const ACE_Time_Value previous_expiration = res.first->second;
-    std::pair<ExpirationAddrMap::iterator, ExpirationAddrMap::iterator> r = expiration_addr_map_.equal_range(previous_expiration);
-    while (r.first != r.second && r.first->second != remote_str) {
-      ++r.first;
-    }
-    expiration_addr_map_.erase(r.first);
-    // Assign the new expiration time.
-    res.first->second = expiration;
-  }
-  expiration_addr_map_.insert(std::make_pair(expiration, remote_str));
-
-  if (is_beacon_message) {
-    return;
-  }
-
   if (a_src_guid == application_participant_guid_) {
-    if (application_participant_addr_.empty()) {
-      application_participant_addr_ = remote_str;
-      ACE_DEBUG((LM_INFO, "(%P|%t) %N:%l SpdpHandler::handle_input application participant %C has address %C\n", application_participant_guid_.c_str(), application_participant_addr_.c_str()));
-    }
+    // SPDP message is from the application participant.
     // Forward to all peers except the application participant.
-    for (const auto p : addr_expiration_map_) {
-      if (p.first != application_participant_addr_) {
-        enqueue_message(p.first, a_buffer);
+    if (application_participant_addr_.empty()) {
+      application_participant_addr_ = addr_to_string(a_remote);
+      ACE_DEBUG((LM_INFO, "(%P|%t) %N:%l SpdpHandler::add_addresses application participant has address %C\n", application_participant_addr_.c_str()));
+    }
+    for (const auto p : guid_addr_map_) {
+      if (p.first != application_participant_guid_) {
+        a_addrs.insert(p.second);
       }
     }
 
     return;
   }
 
-  // Always send to the application participant.
+  // SPDP message is from a client.
+  // Forward to the application participant.
   if (!application_participant_addr_.empty()) {
-    enqueue_message(application_participant_addr_, a_buffer);
+    a_addrs.insert(application_participant_addr_);
   }
-
-  const auto rd_ptr = a_buffer->rd_ptr();
-
-  OpenDDS::DCPS::Serializer serializer(a_buffer, false, OpenDDS::DCPS::Serializer::ALIGN_CDR);
-  OpenDDS::RTPS::Header header;
-  if (!(serializer >> header)) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: SpdpHandler::handle_input failed to deserialize RTPS header\n"));
-    return;
-  }
-
-  while (a_buffer->length() > 3) {
-    const auto subm = a_buffer->rd_ptr()[0], flags = a_buffer->rd_ptr()[1];
-    serializer.swap_bytes((flags & OpenDDS::RTPS::FLAG_E) != ACE_CDR_BYTE_ORDER);
-    const auto start = a_buffer->length();
-    CORBA::UShort submessageLength = 0;
-    switch (subm) {
-    case OpenDDS::RTPS::DATA: {
-      OpenDDS::RTPS::DataSubmessage data;
-      if (!(serializer >> data)) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: SpdpHandler::handle_input failed to deserialize RTPS data header\n"));
-        return;
-      }
-      submessageLength = data.smHeader.submessageLength;
-
-      if (data.writerId != OpenDDS::DCPS::ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER) {
-        // Not our message: this could be the same multicast group used
-        // for SEDP and other traffic.
-        break;
-      }
-
-      OpenDDS::RTPS::ParameterList plist;
-      if (data.smHeader.flags & (OpenDDS::RTPS::FLAG_D | OpenDDS::RTPS::FLAG_K_IN_DATA)) {
-        serializer.swap_bytes(!ACE_CDR_BYTE_ORDER); // read "encap" itself in LE
-        CORBA::UShort encap, options;
-        if (!(serializer >> encap) || (encap != encap_LE && encap != encap_BE)) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: SpdpHandler::handle_input failed to deserialize RTPS encapsulation header\n"));
-          return;
-        }
-        serializer >> options;
-        // bit 8 in encap is on if it's PL_CDR_LE
-        serializer.swap_bytes(((encap & 0x100) >> 8) != ACE_CDR_BYTE_ORDER);
-        if (!(serializer >> plist)) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: SpdpHandler::handle_input failed to deserialize RTPS data payload\n"));
-          return;
-        }
-      } else {
-        plist.length(1);
-        OpenDDS::DCPS::RepoId guid;
-        std::memcpy(guid.guidPrefix, header.guidPrefix, sizeof(OpenDDS::DCPS::GuidPrefix_t));
-        guid.entityId = OpenDDS::DCPS::ENTITYID_PARTICIPANT;
-        plist[0].guid(guid);
-        plist[0]._d(OpenDDS::RTPS::PID_PARTICIPANT_GUID);
-      }
-
-      GroupTable::GroupSet groups;
-
-      for (auto idx = 0u, count = plist.length(); idx != count; ++idx) {
-        parse_rtps_parameter(groups, plist[idx]);
-      }
-
-      mutable_group_table_.update(a_src_guid, groups, a_now);
-
-      break;
-    }
-    default:
-      OpenDDS::RTPS::SubmessageHeader smHeader;
-      if (!(serializer >> smHeader)) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: SpdpHandler::handle_input failed to deserialize RTPS submessage header\n"));
-        return;
-      }
-      submessageLength = smHeader.submessageLength;
-      break;
-    }
-
-    if (submessageLength && a_buffer->length()) {
-      const auto read = start - a_buffer->length();
-      if (read < static_cast<size_t>(submessageLength + OpenDDS::RTPS::SMHDR_SZ)) {
-        if (!serializer.skip(static_cast<CORBA::UShort>(submessageLength + OpenDDS::RTPS::SMHDR_SZ
-                                                        - read))) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: SpdpHandler::handle_input failed to skip submessage length\n"));
-          return;
-        }
-      }
-    } else if (!submessageLength) {
-      break; // submessageLength of 0 indicates the last submessage
-    }
-  }
-
-  a_buffer->rd_ptr(rd_ptr);
-  VerticalHandler::process_message(a_remote, a_now, a_src_guid, a_buffer, is_beacon_message);
 }
 
-int SpdpHandler::handle_timeout(const ACE_Time_Value& a_now, const void*) {
-  for (ExpirationAddrMap::iterator pos = expiration_addr_map_.begin(), limit = expiration_addr_map_.end(); pos != limit && pos->first < a_now;) {
-    addr_expiration_map_.erase(pos->second);
-    expiration_addr_map_.erase(pos++);
+SedpHandler::SedpHandler(ACE_Reactor* a_reactor,
+                         const AssociationTable& a_association_table,
+                         const ACE_Time_Value& lifespan,
+                         const ACE_Time_Value& purge_period,
+                         const OpenDDS::DCPS::RepoId& application_participant_guid)
+  : VerticalHandler(a_reactor, a_association_table, lifespan, purge_period, application_participant_guid)
+{}
+
+std::string SedpHandler::extract_relay_address(const RelayAddresses& relay_addresses) const
+{
+  return relay_addresses.sedp_relay_address();
+}
+
+void SedpHandler::add_addresses(const ACE_INET_Addr& a_remote,
+                                const OpenDDS::DCPS::RepoId& a_src_guid,
+                                std::set<std::string>& a_addrs)
+{
+  if (a_src_guid == application_participant_guid_) {
+    // SEDP message is from the application participant.
+    // Forward to all peers except the application participant.
+    if (application_participant_addr_.empty()) {
+      application_participant_addr_ = addr_to_string(a_remote);
+      ACE_DEBUG((LM_INFO, "(%P|%t) %N:%l SedpHandler::add_addresses application participant has address %C\n", application_participant_addr_.c_str()));
+    }
+    for (const auto p : guid_addr_map_) {
+      if (p.first != application_participant_guid_) {
+        a_addrs.insert(p.second);
+      }
+    }
+
+    return;
   }
-  return 0;
+
+  // SEDP message is from a client.
+  // Forward to the application participant.
+  if (!application_participant_addr_.empty()) {
+    a_addrs.insert(application_participant_addr_);
+  }
+}
+
+DataHandler::DataHandler(ACE_Reactor* a_reactor,
+                         const AssociationTable& a_association_table,
+                         const ACE_Time_Value& lifespan,
+                         const ACE_Time_Value& purge_period,
+                         const OpenDDS::DCPS::RepoId& application_participant_guid)
+  : VerticalHandler(a_reactor, a_association_table, lifespan, purge_period, application_participant_guid)
+{}
+
+std::string DataHandler::extract_relay_address(const RelayAddresses& relay_addresses) const
+{
+  return relay_addresses.data_relay_address();
+}
+
 }

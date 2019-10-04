@@ -76,6 +76,8 @@ public:
   ///{
   void rtps_relay_address(const ACE_INET_Addr& address);
   ACE_INET_Addr rtps_relay_address() const;
+  void rtps_relay_only(bool flag) { rtps_relay_only_ = flag; }
+  bool rtps_relay_only() const { return rtps_relay_only_; }
   void stun_server_address(const ACE_INET_Addr& address);
   ACE_INET_Addr stun_server_address() const;
   ///}
@@ -96,6 +98,7 @@ private:
   ACE_INET_Addr local_address_;
   OPENDDS_STRING local_address_config_str_;
   ACE_INET_Addr rtps_relay_address_;
+  bool rtps_relay_only_;
   bool use_ice_;
   ACE_INET_Addr stun_server_address_;
 

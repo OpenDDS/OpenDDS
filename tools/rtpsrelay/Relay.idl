@@ -5,21 +5,56 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include "dds/DdsDcpsCore.idl"
+
 module RtpsRelay {
 
-  @topic
-  struct GroupEntry {
-    @key string guid;
-    @key string group;
-    unsigned long expiration_timestamp;
+  // GUID prefix bytes - uniquely specify the participant.
+  typedef octet GuidPrefix_t[12];
+
+  // Key portion of Entity identifier.
+  typedef octet EntityKey_t[3];
+
+  // Uniquely identify each entity within a participant.
+  struct EntityId_t {
+    @key EntityKey_t entityKey;
+    @key octet entityKind;
+  };
+
+  // The actual GUID itself.
+  struct GUID_t {
+    @key GuidPrefix_t guidPrefix;
+    @key EntityId_t entityId;
+  };
+
+  struct RelayAddresses {
+    string spdp_relay_address;
+    string sedp_relay_address;
+    string data_relay_address;
   };
 
   @topic
-  struct RoutingEntry {
-    @key string guid;
-    string address;
-    string horizontal_relay_address;
-    unsigned long expiration_timestamp;
+  struct WriterEntry {
+    @key GUID_t guid;
+
+    string topic_name;
+    string type_name;
+    DDS::DataWriterQos data_writer_qos;
+    DDS::PublisherQos publisher_qos;
+
+    RelayAddresses relay_addresses;
+  };
+
+  @topic
+  struct ReaderEntry {
+    @key GUID_t guid;
+
+    string topic_name;
+    string type_name;
+    DDS::DataReaderQos data_reader_qos;
+    DDS::SubscriberQos subscriber_qos;
+
+    RelayAddresses relay_addresses;
   };
 
 };

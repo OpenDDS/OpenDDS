@@ -227,6 +227,7 @@ ssize_t
 RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
                                    const ACE_INET_Addr& addr)
 {
+  const ACE_INET_Addr a = link_->config().rtps_relay_only() ? link_->config().rtps_relay_address() : addr;
 #ifdef ACE_LACKS_SENDMSG
   char buffer[UDP_MAX_MESSAGE_SIZE];
   char *iter = buffer;
@@ -239,14 +240,14 @@ RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
     std::memcpy(iter, iov[i].iov_base, iov[i].iov_len);
     iter += iov[i].iov_len;
   }
-  const ssize_t result = link_->unicast_socket().send(buffer, iter - buffer, addr);
+  const ssize_t result = link_->unicast_socket().send(buffer, iter - buffer, a);
 #else
-  const ssize_t result = link_->unicast_socket().send(iov, n, addr);
+  const ssize_t result = link_->unicast_socket().send(iov, n, a);
 #endif
   if (result < 0) {
     ACE_TCHAR addr_buff[256] = {};
     int err = errno;
-    addr.addr_to_string(addr_buff, 256, 0);
+    a.addr_to_string(addr_buff, 256, 0);
     errno = err;
     const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
     ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_single_i() - "

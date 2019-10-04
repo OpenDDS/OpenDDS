@@ -127,6 +127,7 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
   }
 
   sedp_.rtps_relay_address(disco->sedp_rtps_relay_address());
+  sedp_.rtps_relay_only(disco->rtps_relay_only());
 }
 
 
@@ -1541,16 +1542,18 @@ Spdp::SpdpTransport::dispose_unregister()
     return;
   }
 
-  typedef OPENDDS_SET(ACE_INET_Addr)::const_iterator iter_t;
-  for (iter_t iter = send_addrs_.begin(); iter != send_addrs_.end(); ++iter) {
-    const ssize_t res =
-      unicast_socket_.send(wbuff_.rd_ptr(), wbuff_.length(), *iter);
-    if (res < 0) {
-      ACE_TCHAR addr_buff[256] = {};
-      iter->addr_to_string(addr_buff, 256, 0);
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::dispose_unregister() - ")
-        ACE_TEXT("destination %s failed %p\n"), addr_buff, ACE_TEXT("send")));
+  if (!outer_->disco_->rtps_relay_only()) {
+    typedef OPENDDS_SET(ACE_INET_Addr)::const_iterator iter_t;
+    for (iter_t iter = send_addrs_.begin(); iter != send_addrs_.end(); ++iter) {
+      const ssize_t res =
+        unicast_socket_.send(wbuff_.rd_ptr(), wbuff_.length(), *iter);
+      if (res < 0) {
+        ACE_TCHAR addr_buff[256] = {};
+        iter->addr_to_string(addr_buff, 256, 0);
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::dispose_unregister() - ")
+                   ACE_TEXT("destination %s failed %p\n"), addr_buff, ACE_TEXT("send")));
+      }
     }
   }
   if (outer_->disco_->spdp_rtps_relay_address() != ACE_INET_Addr()) {
@@ -1620,16 +1623,18 @@ Spdp::SpdpTransport::write_i()
     return;
   }
 
-  typedef OPENDDS_SET(ACE_INET_Addr)::const_iterator iter_t;
-  for (iter_t iter = send_addrs_.begin(); iter != send_addrs_.end(); ++iter) {
-    const ssize_t res =
-      unicast_socket_.send(wbuff_.rd_ptr(), wbuff_.length(), *iter);
-    if (res < 0) {
-      ACE_TCHAR addr_buff[256] = {};
-      iter->addr_to_string(addr_buff, 256, 0);
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::write() - ")
-        ACE_TEXT("destination %s failed %p\n"), addr_buff, ACE_TEXT("send")));
+  if (!outer_->disco_->rtps_relay_only()) {
+    typedef OPENDDS_SET(ACE_INET_Addr)::const_iterator iter_t;
+    for (iter_t iter = send_addrs_.begin(); iter != send_addrs_.end(); ++iter) {
+      const ssize_t res =
+        unicast_socket_.send(wbuff_.rd_ptr(), wbuff_.length(), *iter);
+      if (res < 0) {
+        ACE_TCHAR addr_buff[256] = {};
+        iter->addr_to_string(addr_buff, 256, 0);
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::write() - ")
+                   ACE_TEXT("destination %s failed %p\n"), addr_buff, ACE_TEXT("send")));
+      }
     }
   }
 
@@ -2294,6 +2299,18 @@ void Spdp::stop_ice(ICE::Endpoint* endpoint, DCPS::RepoId r, const BuiltinEndpoi
   ACE_UNUSED_ARG(avail);
 #endif
 }
+
+#ifdef OPENDDS_SECURITY
+DDS::Security::ParticipantCryptoHandle
+Spdp::remote_crypto_handle(const DCPS::RepoId& remote_participant) const
+{
+  DiscoveredParticipantMap::const_iterator pos = participants_.find(remote_participant);
+  if (pos != participants_.end()) {
+    return pos->second.crypto_handle_;
+  }
+  return DDS::HANDLE_NIL;
+}
+#endif
 
 bool
 Spdp::Interceptor::reactor_is_shut_down() const {
