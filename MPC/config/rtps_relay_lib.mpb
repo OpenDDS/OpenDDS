@@ -1,4 +1,5 @@
 project {
   after += RtpsRelayLib
   libs  += RtpsRelayLib
+  includes += $(DDS_ROOT)/tools/rtpsrelay/lib
 }
