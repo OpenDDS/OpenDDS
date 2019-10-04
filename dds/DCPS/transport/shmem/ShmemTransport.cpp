@@ -67,12 +67,12 @@ ShmemTransport::connect_datalink(const RemoteTransport& remote,
   ShmemDataLinkMap::iterator iter = links_.find(key.second);
   if (iter != links_.end()) {
     ShmemDataLink_rch link = iter->second;
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ShmemTransport::connect_datalink ")
-              ACE_TEXT("link found.\n")));
+    VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) ShmemTransport::connect_datalink ")
+              ACE_TEXT("link found.\n")), 2);
     return AcceptConnectResult(link);
   }
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ShmemTransport::connect_datalink ")
-            ACE_TEXT("new link.\n")));
+  VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) ShmemTransport::connect_datalink ")
+            ACE_TEXT("new link.\n")), 2);
   return AcceptConnectResult(add_datalink(key.second));
 }
 
