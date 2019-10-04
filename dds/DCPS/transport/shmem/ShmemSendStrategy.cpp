@@ -41,16 +41,19 @@ ShmemSendStrategy::start_i()
   const size_t n_elems = datalink_control_size_ / sizeof(ShmemData),
     extra = datalink_control_size_ % sizeof(ShmemData);
 
-  void* mem = alloc->calloc(datalink_control_size_);
-  if (mem == 0) {
+  void* mem = 0;
+  if (alloc == 0 || (mem = alloc->calloc(datalink_control_size_)) == 0) {
     VDBG_LVL((LM_ERROR, "(%P|%t) ERROR: ShmemSendStrategy for link %@ failed "
               "to allocate %B bytes for control\n", link_, datalink_control_size_), 0);
     return false;
   }
 
   ShmemData* data = reinterpret_cast<ShmemData*>(mem);
-  data[(extra >= sizeof(int)) ? n_elems : (n_elems - 1)].status_ =
-    SHMEM_DATA_END_OF_ALLOC;
+  const size_t limit = (extra >= sizeof(int)) ? n_elems : (n_elems - 1);
+  for (size_t i = 0; i < limit; ++i) {
+    data[i].status_ = SHMEM_DATA_FREE;
+  }
+  data[limit].status_ = SHMEM_DATA_END_OF_ALLOC;
   alloc->bind(bound_name_.c_str(), mem);
 
   ShmemAllocator* peer = link_->peer_allocator();
@@ -101,8 +104,8 @@ ShmemSendStrategy::send_bytes_i(const iovec iov[], int n)
   }
 
   ShmemAllocator* alloc = link_->local_allocator();
-  void* from_pool = alloc->malloc(pool_alloc_size);
-  if (from_pool == 0) {
+  void* from_pool = 0;
+  if (alloc == 0 || (from_pool = alloc->malloc(pool_alloc_size)) == 0) {
     VDBG_LVL((LM_ERROR, "(%P|%t) ERROR: ShmemSendStrategy for link %@ failed "
               "to allocate %B bytes for data\n", link_, pool_alloc_size), 0);
     errno = ENOMEM;
@@ -117,7 +120,12 @@ ShmemSendStrategy::send_bytes_i(const iovec iov[], int n)
   }
 
   void* mem = 0;
-  alloc->find(bound_name_.c_str(), mem);
+  if (-1 == alloc->find(bound_name_.c_str(), mem) || mem == 0) {
+    VDBG_LVL((LM_ERROR, "(%P|%t) ERROR: ShmemSendStrategy for link %@ failed "
+              "to find control segment with bound name %C\n", link_, bound_name_.c_str()), 0);
+    errno = ENOENT;
+    return -1;
+  }
 
   for (ShmemData* iter = reinterpret_cast<ShmemData*>(mem);
        iter->status_ != SHMEM_DATA_END_OF_ALLOC; ++iter) {

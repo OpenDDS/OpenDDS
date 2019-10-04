@@ -95,7 +95,7 @@ public:
   pid_t peer_pid();
 
   ShmemAllocator* local_allocator();
-  ShmemAllocator* peer_allocator() { return peer_alloc_; }
+  ShmemAllocator* peer_allocator();
 
   void read() { recv_strategy_->read(); }
   void signal_semaphore();
@@ -112,6 +112,7 @@ protected:
 private:
   std::string peer_address_;
   ShmemAllocator* peer_alloc_;
+  ACE_Thread_Mutex mutex_;
 };
 
 } // namespace DCPS
