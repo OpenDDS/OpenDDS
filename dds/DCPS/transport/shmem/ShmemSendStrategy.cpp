@@ -50,9 +50,6 @@ ShmemSendStrategy::start_i()
 
   ShmemData* data = reinterpret_cast<ShmemData*>(mem);
   const size_t limit = (extra >= sizeof(int)) ? n_elems : (n_elems - 1);
-  for (size_t i = 0; i < limit; ++i) {
-    data[i].status_ = SHMEM_DATA_FREE;
-  }
   data[limit].status_ = SHMEM_DATA_END_OF_ALLOC;
   alloc->bind(bound_name_.c_str(), mem);
 
