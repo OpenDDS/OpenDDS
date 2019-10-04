@@ -1956,7 +1956,9 @@ Spdp::send_participant_crypto_tokens(const DCPS::RepoId& id)
     const DCPS::GuidConverter conv(peer);
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::send_participant_crypto_tokens() - ")
                ACE_TEXT("Discovered participant %C not found.\n"), OPENDDS_STRING(conv).c_str()));
+    return;
   }
+
   const DDS::Security::ParticipantCryptoTokenSeq& pcts = iter->second.crypto_tokens_;
 
   if (pcts.length() != 0) {

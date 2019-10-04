@@ -473,7 +473,9 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
 
       h = key_factory->register_local_datawriter(crypto_handle, writer_props, dw_sec_attr, ex);
       participant_volatile_message_secure_writer_.set_crypto_handles(crypto_handle, h);
-      local_writer_crypto_handles_[participant_volatile_message_secure_writer_.get_repo_id()] = h;
+      const RepoId pvms_writer = participant_volatile_message_secure_writer_.get_repo_id();
+      local_writer_crypto_handles_[pvms_writer] = h;
+      local_writer_security_attribs_[pvms_writer] = dw_sec_attr;
 
       EndpointSecurityAttributes dr_sec_attr(default_sec_attr);
       ok = acl->get_datareader_sec_attributes(perm_handle, "DCPSParticipantVolatileMessageSecure",
@@ -487,7 +489,9 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
 
       h = key_factory->register_local_datareader(crypto_handle, reader_props, dr_sec_attr, ex);
       participant_volatile_message_secure_reader_->set_crypto_handles(crypto_handle, h);
-      local_reader_crypto_handles_[participant_volatile_message_secure_reader_->get_repo_id()] = h;
+      const RepoId pvms_reader = participant_volatile_message_secure_reader_->get_repo_id();
+      local_reader_crypto_handles_[pvms_reader] = h;
+      local_reader_security_attribs_[pvms_reader] = dr_sec_attr;
     }
 
     // DCPS-Participant-Message-Secure
@@ -506,7 +510,9 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
 
       h = key_factory->register_local_datawriter(crypto_handle, writer_props, dw_sec_attr, ex);
       participant_message_secure_writer_.set_crypto_handles(crypto_handle, h);
-      local_writer_crypto_handles_[participant_message_secure_writer_.get_repo_id()] = h;
+      const RepoId pms_writer = participant_message_secure_writer_.get_repo_id();
+      local_writer_crypto_handles_[pms_writer] = h;
+      local_writer_security_attribs_[pms_writer] = dw_sec_attr;
 
       EndpointSecurityAttributes dr_sec_attr(default_sec_attr);
       ok = acl->get_datareader_sec_attributes(perm_handle, "DCPSParticipantMessageSecure",
@@ -520,7 +526,9 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
 
       h = key_factory->register_local_datareader(crypto_handle, reader_props, dr_sec_attr, ex);
       participant_message_secure_reader_->set_crypto_handles(crypto_handle, h);
-      local_reader_crypto_handles_[participant_message_secure_reader_->get_repo_id()] = h;
+      const RepoId pms_reader = participant_message_secure_reader_->get_repo_id();
+      local_reader_crypto_handles_[pms_reader] = h;
+      local_reader_security_attribs_[pms_reader] = dr_sec_attr;
     }
 
     // DCPS-Publications-Secure
@@ -539,7 +547,9 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
 
       h = key_factory->register_local_datawriter(crypto_handle, writer_props, dw_sec_attr, ex);
       publications_secure_writer_.set_crypto_handles(crypto_handle, h);
-      local_writer_crypto_handles_[publications_secure_writer_.get_repo_id()] = h;
+      const RepoId ps_writer = publications_secure_writer_.get_repo_id();
+      local_writer_crypto_handles_[ps_writer] = h;
+      local_writer_security_attribs_[ps_writer] = dw_sec_attr;
 
       EndpointSecurityAttributes dr_sec_attr(default_sec_attr);
       ok = acl->get_datareader_sec_attributes(perm_handle, "DCPSPublicationsSecure",
@@ -553,7 +563,9 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
 
       h = key_factory->register_local_datareader(crypto_handle, reader_props, dr_sec_attr, ex);
       publications_secure_reader_->set_crypto_handles(crypto_handle, h);
-      local_reader_crypto_handles_[publications_secure_reader_->get_repo_id()] = h;
+      const RepoId ps_reader = publications_secure_reader_->get_repo_id();
+      local_reader_crypto_handles_[ps_reader] = h;
+      local_reader_security_attribs_[ps_reader] = dr_sec_attr;
     }
 
     // DCPS-Subscriptions-Secure
@@ -572,7 +584,9 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
 
       h = key_factory->register_local_datawriter(crypto_handle, writer_props, dw_sec_attr, ex);
       subscriptions_secure_writer_.set_crypto_handles(crypto_handle, h);
-      local_writer_crypto_handles_[subscriptions_secure_writer_.get_repo_id()] = h;
+      const RepoId ss_writer = subscriptions_secure_writer_.get_repo_id();
+      local_writer_crypto_handles_[ss_writer] = h;
+      local_writer_security_attribs_[ss_writer] = dw_sec_attr;
 
       EndpointSecurityAttributes dr_sec_attr(default_sec_attr);
       ok = acl->get_datareader_sec_attributes(perm_handle, "DCPSSubscriptionsSecure",
@@ -586,7 +600,9 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
 
       h = key_factory->register_local_datareader(crypto_handle, reader_props, dr_sec_attr, ex);
       subscriptions_secure_reader_->set_crypto_handles(crypto_handle, h);
-      local_reader_crypto_handles_[subscriptions_secure_reader_->get_repo_id()] = h;
+      const RepoId ss_reader = subscriptions_secure_reader_->get_repo_id();
+      local_reader_crypto_handles_[ss_reader] = h;
+      local_reader_security_attribs_[ss_reader] = dr_sec_attr;
     }
 
     // DCPS-Participants-Secure
@@ -605,7 +621,9 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
 
       h = key_factory->register_local_datawriter(crypto_handle, writer_props, dw_sec_attr, ex);
       dcps_participant_secure_writer_.set_crypto_handles(crypto_handle, h);
-      local_writer_crypto_handles_[dcps_participant_secure_writer_.get_repo_id()] = h;
+      const RepoId dps_writer = dcps_participant_secure_writer_.get_repo_id();
+      local_writer_crypto_handles_[dps_writer] = h;
+      local_writer_security_attribs_[dps_writer] = dw_sec_attr;
 
       EndpointSecurityAttributes dr_sec_attr(default_sec_attr);
       ok = acl->get_datareader_sec_attributes(perm_handle, "DCPSParticipantSecure",
@@ -619,7 +637,9 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
 
       h = key_factory->register_local_datareader(crypto_handle, reader_props, dr_sec_attr, ex);
       dcps_participant_secure_reader_->set_crypto_handles(crypto_handle, h);
-      local_reader_crypto_handles_[dcps_participant_secure_reader_->get_repo_id()] = h;
+      const RepoId dps_reader = dcps_participant_secure_reader_->get_repo_id();
+      local_reader_crypto_handles_[dps_reader] = h;
+      local_reader_security_attribs_[dps_reader] = dr_sec_attr;
     }
 
   } else {
