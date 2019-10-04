@@ -24,10 +24,10 @@
 #include <cstdlib>
 #include <iostream>
 
+using namespace RtpsRelay;
+
 #ifdef OPENDDS_SECURITY
 #include <dds/DCPS/security/framework/Properties.h>
-
-using namespace RtpsRelay;
 
 namespace {
   void append(DDS::PropertySeq& props, const char* name, const std::string& value, bool propagate = false)
