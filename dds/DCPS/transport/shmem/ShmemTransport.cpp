@@ -268,7 +268,7 @@ ShmemTransport::ReadTask::stop()
   }
   stopped_ = true;
   ACE_OS::sema_post(&semaphore_);
-  ACE_Task_Base::wait();
+  wait();
 }
 
 void
