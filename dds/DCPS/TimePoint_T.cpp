@@ -6,10 +6,10 @@ namespace OpenDDS {
 namespace DCPS {
 
 template<typename AceClock>
-const TimePoint_T<AceClock> TimePoint_T<AceClock>::zero_value = TimePoint_T<AceClock>(ACE_Time_Value::zero);
+const TimePoint_T<AceClock> TimePoint_T<AceClock>::zero_value(ACE_Time_Value(0, 0));
 
 template<typename AceClock>
-const TimePoint_T<AceClock> TimePoint_T<AceClock>::max_value = TimePoint_T<AceClock>(ACE_Time_Value::max_time);
+const TimePoint_T<AceClock> TimePoint_T<AceClock>::max_value(ACE_Time_Value(ACE_Numeric_Limits<time_t>::max(), ACE_ONE_SECOND_IN_USECS));
 
 template<typename AceClock>
 AceClock TimePoint_T<AceClock>::clock;
