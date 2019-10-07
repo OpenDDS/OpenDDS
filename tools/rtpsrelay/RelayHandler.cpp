@@ -76,7 +76,7 @@ int RelayHandler::handle_input(ACE_HANDLE)
 
   bytes_received_ += bytes;
 
-  const auto data_block = 
+  const auto data_block =
     new (ACE_Allocator::instance()->malloc(sizeof(ACE_Data_Block))) ACE_Data_Block(bytes, ACE_Message_Block::MB_DATA,
                                                                                    static_cast<const char*>(iov.iov_base), 0, 0, 0, 0);
   Message_Block_Ptr buffer(new ACE_Message_Block(data_block));
