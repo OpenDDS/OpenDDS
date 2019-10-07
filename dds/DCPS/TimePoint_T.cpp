@@ -9,7 +9,7 @@ template<typename AceClock>
 const TimePoint_T<AceClock> TimePoint_T<AceClock>::zero_value(ACE_Time_Value(0, 0));
 
 template<typename AceClock>
-const TimePoint_T<AceClock> TimePoint_T<AceClock>::max_value(ACE_Time_Value(ACE_Numeric_Limits<time_t>::max(), ACE_ONE_SECOND_IN_USECS));
+const TimePoint_T<AceClock> TimePoint_T<AceClock>::max_value(ACE_Time_Value(ACE_Numeric_Limits<time_t>::max(), ACE_ONE_SECOND_IN_USECS - 1));
 
 template<typename AceClock>
 AceClock TimePoint_T<AceClock>::clock;
