@@ -1,4 +1,4 @@
-project: dcps_rtps, opendds_cxx11, optional_security {
+project: dcps_rtps_udp, opendds_cxx11, optional_security {
 
   exeout = $(DDS_ROOT)/bin
   requires += built_in_topics
