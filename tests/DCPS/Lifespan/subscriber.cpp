@@ -61,6 +61,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       participant->get_default_topic_qos(topic_qos);
       topic_qos.lifespan.duration.sec = 10;
       topic_qos.lifespan.duration.nanosec = 0;
+      topic_qos.reliability.kind = ::DDS::RELIABLE_RELIABILITY_QOS;
       topic_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
       DDS::Topic_var topic =
         participant->create_topic ("Movie Discussion List",
