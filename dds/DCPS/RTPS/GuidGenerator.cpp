@@ -16,10 +16,15 @@
 #include "ace/OS_NS_netdb.h"
 #include "ace/OS_NS_sys_socket.h"
 #include "ace/OS_NS_sys_time.h"
+#include "ace/Log_Msg.h"
 
 #include "ace/os_include/net/os_if.h"
 
 #include <cstring>
+
+#ifdef ACE_HAS_CPP11
+#include <random>
+#endif
 
 #ifdef ACE_LINUX
 # include <sys/types.h>
@@ -47,14 +52,22 @@ namespace OpenDDS {
   namespace RTPS {
 
 GuidGenerator::GuidGenerator()
-  : pid_(ACE_OS::getpid()),
-    counter_(0)
+  : pid_(ACE_OS::getpid())
 {
 
+  unsigned seed = static_cast<unsigned>(ACE_OS::gettimeofday().usec());
+
   if (pid_ == -1) {
-    unsigned seed = static_cast<unsigned>(ACE_OS::gettimeofday().usec());
     pid_ = static_cast<pid_t>(ACE_OS::rand_r(&seed));
   }
+
+#ifdef ACE_HAS_CPP11
+  std::mt19937 generator(seed);
+  std::uniform_int_distribution<ACE_UINT16> distribution(0, ACE_UINT16_MAX);
+  counter_ = distribution(generator);
+#else
+  counter_ = static_cast<ACE_UINT16>(ACE_OS::rand_r(&seed));
+#endif
 
   ACE_OS::macaddr_node_t macaddress;
   const int result = ACE_OS::getmacaddress(&macaddress);

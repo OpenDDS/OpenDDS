@@ -97,7 +97,9 @@ public:
   void handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg);
 #endif
 
-  void handle_participant_data(DCPS::MessageId id, const ParticipantData_t& pdata);
+  void handle_participant_data(DCPS::MessageId id, const ParticipantData_t& pdata, const DCPS::SequenceNumber& seq);
+
+  static bool validateSequenceNumber(const DCPS::SequenceNumber& seq, DiscoveredParticipantIter& iter);
 
 #ifdef OPENDDS_SECURITY
   void check_auth_states(const ACE_Time_Value& tv);
@@ -185,6 +187,7 @@ private:
     DCPS::SequenceNumber seq_;
     ACE_Time_Value lease_duration_;
     ACE_SOCK_Dgram unicast_socket_;
+    ACE_INET_Addr default_multicast_;
     ACE_SOCK_Dgram_Mcast multicast_socket_;
     OPENDDS_SET(ACE_INET_Addr) send_addrs_;
     ACE_Message_Block buff_, wbuff_;
@@ -221,6 +224,8 @@ private:
 
   DDS::Security::ParticipantSecurityAttributes participant_sec_attr_;
 #endif
+
+  friend class ::DDS_TEST;
 };
 
 }

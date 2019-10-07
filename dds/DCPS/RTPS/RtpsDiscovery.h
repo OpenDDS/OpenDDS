@@ -140,6 +140,11 @@ public:
   void guid_interface(const OPENDDS_STRING& gi) {
     guid_interface_ = gi;
   }
+  u_short max_spdp_sequence_msg_reset_check() const { return max_spdp_sequence_msg_reset_check_; }
+  void max_spdp_sequence_msg_reset_check(u_short reset_value) {
+    max_spdp_sequence_msg_reset_check_ = reset_value;
+  }
+
 private:
   ACE_Time_Value resend_period_;
   u_short pb_, dg_, pg_, d0_, d1_, dx_;
@@ -149,6 +154,7 @@ private:
   OPENDDS_STRING default_multicast_group_;  /// FUTURE: handle > 1 group.
   OPENDDS_STRING guid_interface_;
   AddrVec spdp_send_addrs_;
+  u_short max_spdp_sequence_msg_reset_check_;
 
   /// Guids will be unique within this RTPS configuration
   GuidGenerator guid_gen_;

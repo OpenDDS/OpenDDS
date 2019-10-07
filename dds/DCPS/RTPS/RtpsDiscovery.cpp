@@ -51,6 +51,7 @@ RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
   , ttl_(1)
   , sedp_multicast_(true)
   , default_multicast_group_("239.255.0.1")
+  , max_spdp_sequence_msg_reset_check_(3)
 {
 }
 
@@ -100,9 +101,10 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
       OPENDDS_STRING default_multicast_group = "239.255.0.1" /*RTPS v2.1 9.6.1.4.1*/;
       OPENDDS_STRING mi, sla, gi;
       OPENDDS_STRING spdpaddr;
+      u_short mssmrc;
       bool has_resend = false, has_pb = false, has_dg = false, has_pg = false,
         has_d0 = false, has_d1 = false, has_dx = false, has_sm = false,
-        has_ttl = false, sm = false;
+        has_ttl = false, sm = false, has_mssmrc = false;
 
       // spdpaddr defaults to DCPSDefaultAddress if set
       if (!TheServiceParticipant->default_address().empty()) {
@@ -228,12 +230,22 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
             spdp_send_addrs.push_back(value.substr(i, (n == OPENDDS_STRING::npos) ? n : n - i));
             i = value.find(',', i);
           } while (i++ != OPENDDS_STRING::npos); // skip past comma if there is one
+        } else if (name == "MaxSpdpSequenceMsgResetChecks") {
+          const OPENDDS_STRING& string_value = it->second;
+          if (DCPS::convertToInteger(string_value, mssmrc)) {
+            has_mssmrc = true;
+          } else {
+            ACE_ERROR_RETURN((LM_ERROR,
+              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+              ACE_TEXT("Invalid entry (%C) for MaxSpdpSequenceMsgResetChecks in ")
+              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+              string_value.c_str(), rtps_name.c_str()), -1);
+          }
         } else {
           ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-                            ACE_TEXT("Unexpected entry (%C) in [rtps_discovery/%C] section.\n"),
-                            name.c_str(), rtps_name.c_str()),
-                           -1);
+            ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+            ACE_TEXT("Unexpected entry (%C) in [rtps_discovery/%C] section.\n"),
+            name.c_str(), rtps_name.c_str()), -1);
         }
       }
 
@@ -253,6 +265,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
       discovery->sedp_local_address(sla);
       discovery->guid_interface(gi);
       discovery->spdp_local_address(spdpaddr);
+      if (has_mssmrc) discovery->max_spdp_sequence_msg_reset_check(mssmrc);
       TheServiceParticipant->add_discovery(discovery);
     }
   }

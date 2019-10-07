@@ -173,6 +173,16 @@ operator<<(std::ostream& os, const GUID_t& rhs);
 OpenDDS_Dcps_Export std::istream&
 operator>>(std::istream& is, GUID_t& rhs);
 #endif
+
+OpenDDS_Dcps_Export inline GUID_t make_guid(
+  const GuidPrefix_t& prefix, const EntityId_t& entity)
+{
+  GUID_t result;
+  std::memcpy(result.guidPrefix, prefix, sizeof(GuidPrefix_t));
+  std::memcpy(&result.entityId, &entity, sizeof(EntityId_t));
+  return result;
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
 
