@@ -22,9 +22,6 @@ ReactorInterceptor::ReactorInterceptor(ACE_Reactor* reactor,
                                        ACE_thread_t owner)
   : owner_(owner)
 {
-  if (reactor == 0) {
-    ACE_DEBUG((LM_WARNING, "(%P|%t) ReactorInterceptor initialized with null reactor\n"));
-  }
   this->reactor(reactor);
 }
 
