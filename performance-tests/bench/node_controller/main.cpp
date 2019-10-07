@@ -1,6 +1,8 @@
 /*
+ * The Node Controller takes directives from Test Controllers and spawns
+ * Workers, and reports the results back.
+ *
  * TODO:
- * - Use Reactor with Process Manager for handling worker finishing
  * - Handle errors and interrupts more gracefully
  */
 #include <map>
@@ -10,6 +12,8 @@
 #include <memory>
 #include <sstream>
 #include <cstdint>
+#include <mutex>
+#include <thread>
 
 #include <ace/Process_Manager.h>
 #include <ace/OS_NS_stdlib.h>
@@ -31,17 +35,17 @@ using Bench::get_option_argument;
 using Bench::join_path;
 using Bench::create_temp_dir;
 
-ACE_Process_Manager* process_manager = ACE_Process_Manager::instance();
 std::string bench_root;
 std::string temp_dir;
 std::string output_dir;
-ReportDataWriter_var report_writer_impl;
 
 int run_cycle(
   const std::string& name,
+  ACE_Process_Manager& process_manager,
   DDS::DomainParticipant_var participant,
   StatusDataWriter_var status_writer_impl,
-  ConfigDataReader_var config_reader_impl);
+  ConfigDataReader_var config_reader_impl,
+  ReportDataWriter_var report_writer_impl);
 
 std::string create_config(const std::string& file_base_name, const char* contents)
 {
@@ -56,17 +60,8 @@ std::string create_config(const std::string& file_base_name, const char* content
 }
 
 class Worker {
-private:
-  NodeId node_id_;
-  WorkerId worker_id_;
-  pid_t pid_ = ACE_INVALID_PID;
-  std::string file_base_name_;
-  std::string config_filename_;
-  std::string report_filename_;
-  std::string log_filename_;
-
 public:
-  Worker(NodeId node_id, const WorkerConfig& config)
+  Worker(const NodeId& node_id, const WorkerConfig& config)
   : node_id_(node_id)
   , worker_id_(config.worker_id)
   {
@@ -92,14 +87,14 @@ public:
     return worker_id_;
   }
 
-  void write_report(bool failed)
+  void write_report(ReportDataWriter_var report_writer_impl)
   {
     Report report;
     report.node_id = node_id_;
     report.worker_id = worker_id_;
-    report.failed = failed;
+    report.failed = pid_ == ACE_INVALID_PID || exit_status_ != 0;
     report.details = "";
-    if (!failed) {
+    if (!report.failed) {
       std::ifstream file(report_filename_);
       if (file.good()) {
         std::string str((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
@@ -111,7 +106,7 @@ public:
     }
   }
 
-  void run()
+  ACE_Process_Options get_proc_opts() const
   {
     ACE_Process_Options proc_opts;
     std::stringstream ss;
@@ -122,25 +117,117 @@ public:
     std::string command = ss.str();
     std::cerr << command << std::endl << std::flush;
     proc_opts.command_line(command.c_str());
-    pid_ = process_manager->spawn(proc_opts);
-    if (pid_ == ACE_INVALID_PID) {
-      std::cerr << "Failed to run worker " << id() << std::endl;
-      write_report(true);
+    return proc_opts;
+  }
+
+  void set_pid(pid_t pid)
+  {
+    pid_ = pid;
+  }
+
+  void set_exit_status(int exit_status)
+  {
+    exit_status_ = exit_status;
+  }
+
+private:
+  NodeId node_id_;
+  WorkerId worker_id_;
+  pid_t pid_ = ACE_INVALID_PID;
+  int exit_status_ = 0;
+  std::string file_base_name_;
+  std::string config_filename_;
+  std::string report_filename_;
+  std::string log_filename_;
+};
+
+using WorkerPtr = std::shared_ptr<Worker>;
+
+class WorkerManager : public ACE_Event_Handler {
+public:
+  bool add_worker(const NodeId& node_id, const WorkerConfig& config)
+  {
+    std::lock_guard<std::mutex> ul(lock_);
+    if (all_workers_.count(config.worker_id)) {
+      std::cerr << "Received the same worker id twice: " << config.worker_id << std::endl;
+      return true;
+    }
+    all_workers_[config.worker_id] = std::make_shared<Worker>(node_id, config);
+    remaining_workers_++;
+    return false;
+  }
+
+  // Must hold lock_
+  void worker_is_finished(WorkerPtr& worker)
+  {
+    remaining_workers_--;
+    finished_workers_.push_back(worker);
+  }
+
+  void run_workers(ACE_Process_Manager& process_manager, ReportDataWriter_var report_writer_impl)
+  {
+    // Spawn Workers
+    {
+      std::lock_guard<std::mutex> guard(lock_);
+      for (auto worker_i : all_workers_) {
+        auto& worker = worker_i.second;
+        ACE_Process_Options proc_opts = worker->get_proc_opts();
+        pid_t pid = process_manager.spawn(proc_opts);
+        if (pid != ACE_INVALID_PID) {
+          worker->set_pid(pid);
+          pid_to_worker_id_[pid] = worker->id();
+        } else {
+          std::cerr << "Failed to run worker " << worker->id() << std::endl;
+          worker_is_finished(worker);
+        }
+      }
+    }
+
+    // Wait For Them to Finish, Writing Reports As They Do
+    bool running = true;
+    while (running) {
+      std::list<WorkerPtr> finished_workers;
+
+      {
+        std::lock_guard<std::mutex> guard(lock_);
+        finished_workers = finished_workers_;
+        finished_workers_.clear();
+        running = remaining_workers_;
+      }
+
+      for (auto& i : finished_workers) {
+        i->write_report(report_writer_impl);
+      }
+
+      ACE_OS::sleep(1);
     }
   }
 
-  void check()
+  virtual int handle_exit(ACE_Process* process)
   {
-    if (pid_ == ACE_INVALID_PID) {
-      return;
+    pid_t pid = process->getpid();
+
+    std::lock_guard<std::mutex> guard(lock_);
+
+    const auto i = pid_to_worker_id_.find(pid);
+    if (i != pid_to_worker_id_.end()) {
+      auto& worker = all_workers_[i->second];
+      worker->set_exit_status(process->return_value());
+      remaining_workers_--;
+      finished_workers_.push_back(worker);
+    } else {
+      std::cerr << "WorkerManager::handle_exit() received an unknown PID: " << pid << std::endl;
     }
-    ACE_exitcode status;
-    bool failed = process_manager->wait(pid_, &status) == ACE_INVALID_PID || status != 0;
-    if (failed) {
-      std::cerr << "Worker " << id() << " returned a " << status << " status code" << std::endl;
-    }
-    write_report(failed);
+
+    return 0;
   }
+
+private:
+  std::mutex lock_;
+  std::map<WorkerId, WorkerPtr> all_workers_;
+  size_t remaining_workers_ = 0;
+  std::map<pid_t, WorkerId> pid_to_worker_id_;
+  std::list<WorkerPtr> finished_workers_;
 };
 
 enum class RunMode {
@@ -310,22 +397,37 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     std::cerr << "create_datawriter report failed" << std::endl;
     return 1;
   }
-  report_writer_impl = ReportDataWriter::_narrow(report_writer);
+  ReportDataWriter_var report_writer_impl = ReportDataWriter::_narrow(report_writer);
   if (!report_writer_impl) {
     std::cerr << "narrow writer report failed" << std::endl;
     return 1;
   }
 
   // Wait For and Run Node Configurations
+  std::thread reactor_thread([]() {
+    if (ACE_Reactor::instance()->owner(ACE_Thread_Manager::instance()->thr_self())) {
+      std::cerr << "Error setting Reactor Thread" << std::endl;
+    }
+    ACE_Reactor::instance()->run_reactor_event_loop();
+  });
+  ACE_Process_Manager process_manager(ACE_Process_Manager::DEFAULT_SIZE, ACE_Reactor::instance());
   int exit_status = 0;
   while (true) {
-    exit_status = run_cycle(name, participant, status_writer_impl, config_reader_impl);
+    exit_status = run_cycle(name, process_manager, participant,
+      status_writer_impl, config_reader_impl, report_writer_impl);
+
+    // Unregister any Exit Handler
+    process_manager.register_handler(nullptr);
+
     if (run_mode == RunMode::one_shot || (run_mode == RunMode::daemon_exit_on_error && exit_status != 0)) {
       break;
     }
   }
 
-  // Clean up OpenDDS
+  // Clean up
+  ACE_Reactor::instance()->end_reactor_event_loop();
+  reactor_thread.join();
+
   participant->delete_contained_entities();
   dpf->delete_participant(participant);
   TheServiceParticipant->shutdown();
@@ -339,11 +441,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
 int run_cycle(
   const std::string& name,
+  ACE_Process_Manager& process_manager,
   DDS::DomainParticipant_var participant,
   StatusDataWriter_var status_writer_impl,
-  ConfigDataReader_var config_reader_impl)
+  ConfigDataReader_var config_reader_impl,
+  ReportDataWriter_var report_writer_impl)
 {
-  std::map<WorkerId, std::shared_ptr<Worker>> workers;
   NodeId this_node_id = reinterpret_cast<OpenDDS::DCPS::DomainParticipantImpl*>(participant.in())->get_id();
 
   // Wait for Status Publication with Test Controller and Write Status
@@ -378,6 +481,9 @@ int run_cycle(
       return 1;
     }
   }
+
+  WorkerManager worker_manager;
+  process_manager.register_handler(&worker_manager);
 
   // Wait for Our Worker Configs
   bool waiting = true;
@@ -417,11 +523,8 @@ int run_cycle(
           WorkerId& id = configs[node].workers[config].worker_id;
           const WorkerId end = id + configs[node].workers[config].count;
           for (; id < end; id++) {
-            if (workers.count(id)) {
-              std::cerr << "Received the same worker id twice: " << id << std::endl;
+            if (worker_manager.add_worker(this_node_id, configs[node].workers[config])) {
               return 1;
-            } else {
-              workers[id] = std::make_shared<Worker>(this_node_id, configs[node].workers[config]);
             }
           }
         }
@@ -443,14 +546,8 @@ int run_cycle(
     }
   }
 
-  // Run The Workers
-  for (auto& worker : workers) {
-    worker.second->run();
-  }
-
-  for (auto& worker : workers) {
-    worker.second->check();
-  }
+  // Run Workers and Wait for Them to Finish
+  worker_manager.run_workers(process_manager, report_writer_impl);
 
   return 0;
 }
