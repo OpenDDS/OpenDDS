@@ -1,6 +1,6 @@
 project(RtpsRelayLib): dcpslib, opendds_cxx11 {
   idlflags      += -Wb,export_macro=RtpsRelayLib_Export -Wb,export_include=export.h -SS
-  dcps_ts_flags += -Wb,export_macro=RtpsRelayLib_Export -Wb,export_include=export.h -SI
+  dcps_ts_flags += -Wb,export_macro=RtpsRelayLib_Export -Wb,export_include=export.h
   dynamicflags  += RTPSRELAYLIB_BUILD_DLL
   sharedname = RtpsRelayLib
 
