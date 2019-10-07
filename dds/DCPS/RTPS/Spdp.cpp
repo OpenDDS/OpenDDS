@@ -719,7 +719,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
     reply.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
     reply.related_message_identity = msg.message_identity;
     reply.destination_participant_guid = src_participant;
-    reply.destination_endpoint_guid = reader;
+    reply.destination_endpoint_guid = GUID_UNKNOWN;
     reply.source_endpoint_guid = GUID_UNKNOWN;
     reply.message_data.length(1);
     reply.message_data[0] = msg.message_data[0];
@@ -769,7 +769,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
     reply.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
     reply.related_message_identity = msg.message_identity;
     reply.destination_participant_guid = src_participant;
-    reply.destination_endpoint_guid = reader;
+    reply.destination_endpoint_guid = GUID_UNKNOWN;
     reply.source_endpoint_guid = GUID_UNKNOWN;
     reply.message_data.length(1);
 
@@ -1142,7 +1142,7 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
     msg.message_identity.source_guid = guid_;
     msg.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
     msg.destination_participant_guid = guid;
-    msg.destination_endpoint_guid = reader;
+    msg.destination_endpoint_guid = GUID_UNKNOWN;
     msg.source_endpoint_guid = GUID_UNKNOWN;
     msg.related_message_identity.source_guid = GUID_UNKNOWN;
     msg.related_message_identity.sequence_number = 0;
