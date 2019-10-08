@@ -4,6 +4,8 @@
 #include "Name.h"
 #include "RelayTypeSupportImpl.h"
 
+namespace RtpsRelay {
+
 class NoIndex;
 
 struct RtpsRelayLib_Export Writer {
@@ -1144,5 +1146,7 @@ private:
   typedef std::map<std::pair<std::string, std::string>, SubIndex> Entities;
   Entities entities_;
 };
+
+}
 
 #endif // RTPSRELAY_QOS_INDEX_H_

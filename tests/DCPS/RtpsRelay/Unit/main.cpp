@@ -5,6 +5,8 @@
 
 #include <iostream>
 
+using namespace RtpsRelay;
+
 void test_valid(int& status, const std::string& s, const Name& expected)
 {
   Name actual(s);

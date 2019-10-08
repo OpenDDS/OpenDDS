@@ -2,6 +2,8 @@
 
 #include "dds/DCPS/DCPS_Utils.h"
 
+namespace RtpsRelay {
+
 void NoIndex::match(Writers::iterator pos)
 {
   Writer* writer = pos->first;
@@ -59,4 +61,6 @@ void NoIndex::match(Readers::iterator pos)
       }
     }
   }
+}
+
 }

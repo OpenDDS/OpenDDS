@@ -2,6 +2,8 @@
 
 #include <ostream>
 
+namespace RtpsRelay {
+
 static void output_character(std::ostream& out, char c) {
   switch (c) {
   case '[':
@@ -188,4 +190,6 @@ std::ostream& operator<<(std::ostream& out, const Name& name) {
     out << atom;
   }
   return out;
+}
+
 }

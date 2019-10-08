@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 
+namespace RtpsRelay {
+
 class RtpsRelayLib_Export Atom {
 public:
   enum Kind {
@@ -140,5 +142,7 @@ private:
 };
 
 RtpsRelayLib_Export std::ostream& operator<<(std::ostream& out, const Name& name);
+
+}
 
 #endif // RTPSRELAY_NAME_H_
