@@ -35,7 +35,8 @@ typedef std::set<Reader*> ReaderSet;
 
 class RtpsRelayLib_Export NoIndex {
 public:
-  ~NoIndex() {
+  ~NoIndex()
+  {
     for (Writers::const_iterator pos = writers_.begin(), limit = writers_.end(); pos != limit; ++pos) {
       pos->first->indexes.erase(this);
     }
@@ -229,7 +230,8 @@ class Pattern {
 public:
   typedef Literal<SubIndex> LiteralType;
 
-  ~Pattern() {
+  ~Pattern()
+  {
     for (LiteralType* literal : literals_) {
       literal->erase(this);
     }
@@ -331,7 +333,8 @@ public:
 
   TrieNode() : literal_(nullptr), pattern_(nullptr) {}
 
-  ~TrieNode() {
+  ~TrieNode()
+  {
     if (literal_) {
       delete literal_;
     }
