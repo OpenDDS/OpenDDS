@@ -117,7 +117,7 @@ public:
   }
 
   void push_back(const Atom& atom) {
-    // Don't allow consecute globs.
+    // Don't allow consecutive globs.
     if (atom.kind() == Atom::GLOB && !atoms_.empty() && atoms_.back().kind() == Atom::GLOB) {
       return;
     }
