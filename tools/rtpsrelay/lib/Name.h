@@ -94,7 +94,7 @@ public:
 
   Name() : is_pattern_(false), is_valid_(true) {}
 
-  Name(const std::string& name) : is_pattern_(false), is_valid_(true)
+  explicit Name(const std::string& name) : is_pattern_(false), is_valid_(true)
   {
     size_t idx = 0;
     parse(*this, name, idx);
