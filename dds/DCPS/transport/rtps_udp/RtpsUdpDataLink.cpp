@@ -109,8 +109,8 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
   , local_crypto_handle_(DDS::HANDLE_NIL)
 #endif
 {
-  this->send_strategy_ = make_rch<RtpsUdpSendStrategy>(this, local_prefix);
-  this->receive_strategy_ = make_rch<RtpsUdpReceiveStrategy>(this, local_prefix);
+  send_strategy_ = make_rch<RtpsUdpSendStrategy>(this, local_prefix);
+  receive_strategy_ = make_rch<RtpsUdpReceiveStrategy>(this, local_prefix);
   std::memcpy(local_prefix_, local_prefix, sizeof(GuidPrefix_t));
 }
 
@@ -1109,7 +1109,14 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
                                             MetaSubmessageVec&)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
+
   RtpsUdpDataLink_rch link = link_.lock();
+
+  GuardType guard(link->strategy_lock_);
+  if (link->receive_strategy() == 0) {
+    return false;
+  }
+
   const WriterInfoMap::iterator wi = remote_writers_.find(src);
   if (wi != remote_writers_.end() && link) {
     WriterInfo& info = wi->second;
@@ -1298,7 +1305,14 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
                                                  MetaSubmessageVec&)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
+
   RtpsUdpDataLink_rch link = link_.lock();
+
+  GuardType guard(link->strategy_lock_);
+  if (link->receive_strategy() == 0) {
+    return false;
+  }
+
   const WriterInfoMap::iterator wi = remote_writers_.find(src);
   if (wi == remote_writers_.end() || !link) {
     // we may not be associated yet, even if the writer thinks we are
@@ -1483,6 +1497,11 @@ RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(MetaSubmessageVec& meta_submessa
 
   RtpsUdpDataLink_rch link = link_.lock();
 
+  GuardType guard(link->strategy_lock_);
+  if (link->receive_strategy() == 0) {
+    return;
+  }
+
   for (WriterInfoMap::iterator wi = remote_writers_.begin(); wi != remote_writers_.end(); ++wi) {
 
     // if we have some negative acknowledgments, we'll ask for a reply
@@ -1613,7 +1632,7 @@ RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(MetaSubmessageVec& meta_submessa
       meta_submessages.push_back(meta_submessage);
 
       NackFragSubmessageVec nfsv;
-      generate_nack_frags(nfsv, wi->second, wi->first);
+      generate_nack_frags_i(nfsv, wi->second, wi->first);
       for (size_t i = 0; i < nfsv.size(); ++i) {
         nfsv[i].readerId = reader_id;
         nfsv[i].writerId = writer_id;
@@ -1915,13 +1934,15 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
 }
 
 void
-RtpsUdpDataLink::RtpsReader::generate_nack_frags(NackFragSubmessageVec& nf,
-                                                 WriterInfo& wi, const RepoId& pub_id)
+RtpsUdpDataLink::RtpsReader::generate_nack_frags_i(NackFragSubmessageVec& nf,
+                                                   WriterInfo& wi, const RepoId& pub_id)
 {
   typedef OPENDDS_MAP(SequenceNumber, RTPS::FragmentNumber_t)::iterator iter_t;
   typedef RtpsUdpReceiveStrategy::FragmentInfo::value_type Frag_t;
   RtpsUdpReceiveStrategy::FragmentInfo frag_info;
 
+  // This is an internal method, locks already locked,
+  // we just need a local handle to the link
   RtpsUdpDataLink_rch link = link_.lock();
 
   // Populate frag_info with two possible sources of NackFrags:

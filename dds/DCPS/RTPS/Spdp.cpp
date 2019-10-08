@@ -719,7 +719,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
     reply.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
     reply.related_message_identity = msg.message_identity;
     reply.destination_participant_guid = src_participant;
-    reply.destination_endpoint_guid = reader;
+    reply.destination_endpoint_guid = GUID_UNKNOWN;
     reply.source_endpoint_guid = GUID_UNKNOWN;
     reply.message_data.length(1);
     reply.message_data[0] = msg.message_data[0];
@@ -769,7 +769,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
     reply.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
     reply.related_message_identity = msg.message_identity;
     reply.destination_participant_guid = src_participant;
-    reply.destination_endpoint_guid = reader;
+    reply.destination_endpoint_guid = GUID_UNKNOWN;
     reply.source_endpoint_guid = GUID_UNKNOWN;
     reply.message_data.length(1);
 
@@ -1142,7 +1142,7 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
     msg.message_identity.source_guid = guid_;
     msg.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
     msg.destination_participant_guid = guid;
-    msg.destination_endpoint_guid = reader;
+    msg.destination_endpoint_guid = GUID_UNKNOWN;
     msg.source_endpoint_guid = GUID_UNKNOWN;
     msg.related_message_identity.source_guid = GUID_UNKNOWN;
     msg.related_message_identity.sequence_number = 0;
@@ -1705,15 +1705,15 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
   if (bytes > 0) {
     buff_.wr_ptr(bytes);
   } else if (bytes == 0) {
-    return -1;
+    return 0;
   } else {
     ACE_DEBUG((
-          LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
+          LM_WARNING,
+          ACE_TEXT("(%P|%t) WARNING: Spdp::SpdpTransport::handle_input() - ")
           ACE_TEXT("error reading from %C socket %p\n")
           , (h == unicast_socket_.get_handle()) ? "unicast" : "multicast",
           ACE_TEXT("ACE_SOCK_Dgram::recv")));
-    return -1;
+    return 0;
   }
 
   // Handle some RTI protocol multicast to the same address

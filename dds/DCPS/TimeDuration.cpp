@@ -7,8 +7,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-const TimeDuration TimeDuration::zero_value = TimeDuration(ACE_Time_Value::zero);
-const TimeDuration TimeDuration::max_value = TimeDuration(ACE_Time_Value::max_time);
+const TimeDuration TimeDuration::zero_value(0, 0);
+const TimeDuration TimeDuration::max_value(ACE_Numeric_Limits<time_t>::max(), ACE_ONE_SECOND_IN_USECS - 1);
 
 }
 }
