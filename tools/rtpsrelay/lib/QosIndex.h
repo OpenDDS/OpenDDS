@@ -113,8 +113,8 @@ public:
   }
 
 private:
-  typedef std::map<Writer*, ReaderSet > Writers;
-  typedef std::map<Reader*, WriterSet > Readers;
+  typedef std::map<Writer*, ReaderSet> Writers;
+  typedef std::map<Reader*, WriterSet> Readers;
 
   void match(Writers::iterator pos);
   void match(Readers::iterator pos);
