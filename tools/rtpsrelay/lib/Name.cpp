@@ -48,7 +48,7 @@ std::ostream& operator<<(std::ostream& out, const Atom& atom)
 
 void Name::parse(Name& name, const std::string& buffer, size_t& idx)
 {
-  if (!name.is_valid_ || idx == buffer.length()) {
+  if (!name.is_valid_ || idx == buffer.size()) {
     return;
   }
 
@@ -72,14 +72,14 @@ void Name::parse(Name& name, const std::string& buffer, size_t& idx)
 
 char Name::parse_character(Name& name, const std::string& buffer, size_t& idx)
 {
-  if (idx == buffer.length()) {
+  if (idx == buffer.size()) {
     name.is_valid_ = false;
     return 0;
   }
 
   char c = buffer[idx++];
   if (c == '\\') {
-    if (idx == buffer.length()) {
+    if (idx == buffer.size()) {
       name.is_valid_ = false;
       return 0;
     }
@@ -91,7 +91,7 @@ char Name::parse_character(Name& name, const std::string& buffer, size_t& idx)
 
 Atom Name::parse_character_class(Name& name, const std::string& buffer, size_t& idx)
 {
-  if (idx == buffer.length()) {
+  if (idx == buffer.size()) {
     name.is_valid_ = false;
     return Atom(0);
   }
@@ -104,7 +104,7 @@ Atom Name::parse_character_class(Name& name, const std::string& buffer, size_t& 
 
   bool negated = false;
 
-  if (idx == buffer.length()) {
+  if (idx == buffer.size()) {
     name.is_valid_ = false;
     return Atom(0);
   }
@@ -125,7 +125,7 @@ Atom Name::parse_character_class(Name& name, const std::string& buffer, size_t& 
 
 void Name::parse_character_class_tail(Name& name, const std::string& buffer, size_t& idx, std::set<char>& characters)
 {
-  if (idx == buffer.length()) {
+  if (idx == buffer.size()) {
     name.is_valid_ = false;
     return;
   }
@@ -142,14 +142,14 @@ void Name::parse_character_class_tail(Name& name, const std::string& buffer, siz
 
 void Name::parse_character_or_range(Name& name, const std::string& buffer, size_t& idx, std::set<char>& characters)
 {
-  if (idx == buffer.length()) {
+  if (idx == buffer.size()) {
     name.is_valid_ = false;
     return;
   }
 
   char first = parse_character(name, buffer, idx);
 
-  if (idx == buffer.length()) {
+  if (idx == buffer.size()) {
     name.is_valid_ = false;
     return;
   }
