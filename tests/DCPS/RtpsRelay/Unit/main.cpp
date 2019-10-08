@@ -16,8 +16,8 @@ void test_valid(int& status, const std::string& s, const Name& expected)
 
   if (actual != expected) {
     std::cout << "ERROR: Test " << '\'' << s << '\'' << ':'
-              << " expected=" << expected << " pattern=" << expected.is_pattern() << " valid=" << expected.is_valid()
-              << " actual=" << actual << " pattern=" << actual.is_pattern() << " valid=" << actual.is_valid() << std::endl;
+              << " expected=" << expected << " pattern=" << std::boolalpha << expected.is_pattern() << " valid=" << std::boolalpha << expected.is_valid()
+              << " actual=" << actual << " pattern=" << std::boolalpha <<  actual.is_pattern() << " valid=" << std::boolalpha << actual.is_valid() << std::endl;
     status = EXIT_FAILURE;
     return;
   }
