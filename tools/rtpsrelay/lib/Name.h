@@ -85,7 +85,7 @@ private:
   std::set<char> characters_; // For CHARACTER_CLASS and NEGATED_CHARACTER_CLASS.
 };
 
-std::ostream& operator<<(std::ostream& out, const Atom& atom);
+RtpsRelayLib_Export std::ostream& operator<<(std::ostream& out, const Atom& atom);
 
 class RtpsRelayLib_Export Name {
 public:
@@ -138,6 +138,6 @@ private:
   static void parse_character_or_range(Name& name, const std::string& buffer, size_t& idx, std::set<char>& characters);
 };
 
-std::ostream& operator<<(std::ostream& out, const Name& name);
+RtpsRelayLib_Export std::ostream& operator<<(std::ostream& out, const Name& name);
 
 #endif // RTPSRELAY_NAME_H_
