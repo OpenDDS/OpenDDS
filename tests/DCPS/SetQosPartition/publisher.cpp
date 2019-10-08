@@ -111,7 +111,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
         OpenDDS::DCPS::unique_ptr<Writer> writer (new Writer (dw.in ()));
 
         cout << "Pub waiting for match on A partition." << std::endl;
-        if (OpenDDS::Model::WriterSync::wait_match(dw)) {
+        if (OpenDDS::Model::WriterSync::wait_match(dw, 1)) {
           cerr << "Error waiting for match on A partition" << std::endl;
           return 1;
         }
@@ -163,7 +163,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
         OpenDDS::DCPS::unique_ptr<Writer> writer (new Writer (dw.in ()));
 
         cout << "Pub waiting for match on B partition." << std::endl;
-        if (OpenDDS::Model::WriterSync::wait_match(dw)) {
+        if (OpenDDS::Model::WriterSync::wait_match(dw, 1)) {
           cerr << "Error waiting for match on B partition" << std::endl;
           return 1;
         }
@@ -196,6 +196,11 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
       {
         OpenDDS::DCPS::unique_ptr<Writer> writer (new Writer (dw.in ()));
 
+        cout << "Pub waiting for additional match on B partition." << std::endl;
+        if (OpenDDS::Model::WriterSync::wait_match(dw, 2)) {
+          cerr << "Error waiting for additional match on B partition" << std::endl;
+          return 1;
+        }
         attempts = 1;
         while (attempts != max_attempts)
         {
