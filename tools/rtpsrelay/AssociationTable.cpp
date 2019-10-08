@@ -54,22 +54,14 @@ RelayAddresses AssociationTable::get_relay_addresses_for_participant(const OpenD
   prefix.entityId = OpenDDS::DCPS::ENTITYID_UNKNOWN;
 
   {
-    auto pos = writers_.lower_bound(prefix);
-    for (auto limit = writers_.end();
-         pos != limit && std::memcmp(pos->first.guidPrefix, prefix.guidPrefix, sizeof(prefix.guidPrefix)) < 0;
-         ++pos)
-      ;;
+    const auto pos = writers_.lower_bound(prefix);
     if (pos != writers_.end() && std::memcmp(pos->first.guidPrefix, prefix.guidPrefix, sizeof(prefix.guidPrefix)) == 0) {
       return pos->second->writer_entry.relay_addresses();
     }
   }
 
   {
-    auto pos = readers_.lower_bound(prefix);
-    for (auto limit = readers_.end();
-         pos != limit && std::memcmp(pos->first.guidPrefix, prefix.guidPrefix, sizeof(prefix.guidPrefix)) < 0;
-         ++pos)
-      ;;
+    const auto pos = readers_.lower_bound(prefix);
     if (pos != readers_.end() && std::memcmp(pos->first.guidPrefix, prefix.guidPrefix, sizeof(prefix.guidPrefix)) == 0) {
       return pos->second->reader_entry.relay_addresses();
     }
