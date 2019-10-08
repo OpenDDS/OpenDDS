@@ -1,6 +1,7 @@
 # OpenDDS Releases
 
 ## Version 3.13.3 of OpenDDS
+Released %TIMESTAMP%
 
 ### Fixes:
 - Updated IDL V8 generation to use decimal strings (#1055)
