@@ -17,8 +17,8 @@ public:
     GLOB
   };
 
-  Atom(Kind kind) : kind_(kind) {}
-  Atom(char c) : kind_(CHARACTER), character_(c) {}
+  explicit Atom(Kind kind) : kind_(kind) {}
+  explicit Atom(char c) : kind_(CHARACTER), character_(c) {}
   Atom(bool negated, const std::set<char>& characters) : kind_(negated ? NEGATED_CHARACTER_CLASS : CHARACTER_CLASS), characters_(characters) {}
 
   Kind kind() const { return kind_; }
@@ -132,7 +132,7 @@ private:
   bool is_valid_;
 
   static void parse(Name& name, const std::string& buffer, size_t& idx);
-  static Atom parse_pattern(Name& name, const std::string& buffer, size_t& idx, char expected, Atom::Kind kind);
+  static Atom::Kind parse_pattern(Name& name, const std::string& buffer, size_t& idx, char expected, Atom::Kind kind);
   static char parse_character(Name& name, const std::string& buffer, size_t& idx);
   static Atom parse_character_class(Name& name, const std::string& buffer, size_t& idx);
   static void parse_character_class_tail(Name& name, const std::string& buffer, size_t& idx, std::set<char>& characters);
