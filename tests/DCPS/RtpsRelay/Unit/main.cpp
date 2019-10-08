@@ -504,6 +504,8 @@ void unmatched_then_reader_changes_topic(int& status)
   reader.reader_entry.type_name("the type");
   reader.reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
   reader.reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
+  reader.reader_entry.subscriber_qos().partition.name.length(1);
+  reader.reader_entry.subscriber_qos().partition.name[0] = "";
 
   Index index;
   index.insert(&writer);

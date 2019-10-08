@@ -603,16 +603,18 @@ public:
   typedef Literal<SubIndex> LiteralType;
   typedef Pattern<SubIndex> PatternType;
 
+  PartitionIndex()
+  {
+    empty_qos_.name.length(1);
+    empty_qos_.name[0] = "";
+  }
+
   void insert(Writer* writer)
   {
-    const DDS::PartitionQosPolicy& qos = writer->writer_entry._publisher_qos.partition;
-    if (qos.name.length() == 0) {
-      index_.insert(writer);
-      return;
-    }
+    const DDS::PartitionQosPolicy* qos = choose_qos(&writer->writer_entry._publisher_qos.partition);
 
-    for (int idx = 0, limit = qos.name.length(); idx != limit; ++idx) {
-      Name name(qos.name[idx].in());
+    for (int idx = 0, limit = qos->name.length(); idx != limit; ++idx) {
+      Name name(qos->name[idx].in());
       if (!name.is_valid()) {
         continue;
       }
@@ -642,57 +644,12 @@ public:
 
   void reinsert(Writer* writer, const RtpsRelay::WriterEntry& writer_entry)
   {
-    const DDS::PartitionQosPolicy& old_qos = writer->writer_entry._publisher_qos.partition;
-    const DDS::PartitionQosPolicy& new_qos = writer_entry._publisher_qos.partition;
+    const DDS::PartitionQosPolicy* old_qos = choose_qos(&writer->writer_entry._publisher_qos.partition);
+    const DDS::PartitionQosPolicy* new_qos = choose_qos(&writer_entry._publisher_qos.partition);
 
-    if (old_qos.name.length() == 0 && new_qos.name.length() == 0) {
-      index_.reinsert(writer, writer_entry);
-      return;
-    }
-
-    if (old_qos.name.length() != 0 && new_qos.name.length() == 0) {
-      // Removed partitions.
-      for (int idx = 0, limit = old_qos.name.length(); idx != limit; ++idx) {
-        Name name(old_qos.name[idx].in());
-        if (!name.is_valid()) {
-          continue;
-        }
-
-        if (name.is_literal()) {
-          LiteralType* literal = node_.find_literal(name);
-          literal->erase_literal(writer);
-          if (literal->empty()) {
-            node_.remove(name);
-            delete literal;
-          }
-        } else {
-          PatternType* pattern = node_.find_pattern(name);
-          pattern->erase(writer);
-          if (pattern->empty()) {
-            node_.remove(name);
-            delete pattern;
-          }
-        }
-      }
-
-      writer->writer_entry = writer_entry;
-      index_.insert(writer);
-
-      return;
-    }
-
-    if (old_qos.name.length() == 0 && new_qos.name.length() != 0) {
-      // Added partitions.
-      index_.erase(writer);
-      writer->writer_entry = writer_entry;
-      insert(writer);
-      return;
-    }
-
-    // Changed partitions.
     std::set<Name> old_names;
-    for (int idx = 0, limit = old_qos.name.length(); idx != limit; ++idx) {
-      Name name(old_qos.name[idx].in());
+    for (int idx = 0, limit = old_qos->name.length(); idx != limit; ++idx) {
+      Name name(old_qos->name[idx].in());
       if (!name.is_valid()) {
         continue;
       }
@@ -700,8 +657,8 @@ public:
     }
 
     std::set<Name> new_names;
-    for (int idx = 0, limit = new_qos.name.length(); idx != limit; ++idx) {
-      Name name(new_qos.name[idx].in());
+    for (int idx = 0, limit = new_qos->name.length(); idx != limit; ++idx) {
+      Name name(new_qos->name[idx].in());
       if (!name.is_valid()) {
         continue;
       }
@@ -767,14 +724,10 @@ public:
 
   void erase(Writer* writer)
   {
-    const DDS::PartitionQosPolicy& qos = writer->writer_entry._publisher_qos.partition;
-    if (qos.name.length() == 0) {
-      index_.erase(writer);
-      return;
-    }
+    const DDS::PartitionQosPolicy* qos = choose_qos(&writer->writer_entry._publisher_qos.partition);
 
-    for (int idx = 0, limit = qos.name.length(); idx != limit; ++idx) {
-      Name name(qos.name[idx].in());
+    for (int idx = 0, limit = qos->name.length(); idx != limit; ++idx) {
+      Name name(qos->name[idx].in());
       if (!name.is_valid()) {
         continue;
       }
@@ -798,14 +751,10 @@ public:
 
   void insert(Reader* reader)
   {
-    const DDS::PartitionQosPolicy& qos = reader->reader_entry._subscriber_qos.partition;
-    if (qos.name.length() == 0) {
-      index_.insert(reader);
-      return;
-    }
+    const DDS::PartitionQosPolicy* qos = choose_qos(&reader->reader_entry._subscriber_qos.partition);
 
-    for (int idx = 0, limit = qos.name.length(); idx != limit; ++idx) {
-      Name name(qos.name[idx].in());
+    for (int idx = 0, limit = qos->name.length(); idx != limit; ++idx) {
+      Name name(qos->name[idx].in());
       if (!name.is_valid()) {
         continue;
       }
@@ -836,57 +785,13 @@ public:
 
   void reinsert(Reader* reader, const RtpsRelay::ReaderEntry& reader_entry)
   {
-    const DDS::PartitionQosPolicy& old_qos = reader->reader_entry._subscriber_qos.partition;
-    const DDS::PartitionQosPolicy& new_qos = reader_entry._subscriber_qos.partition;
-
-    if (old_qos.name.length() == 0 && new_qos.name.length() == 0) {
-      index_.reinsert(reader, reader_entry);
-      return;
-    }
-
-    if (old_qos.name.length() != 0 && new_qos.name.length() == 0) {
-      // Removed partitions.
-      for (int idx = 0, limit = old_qos.name.length(); idx != limit; ++idx) {
-        Name name(old_qos.name[idx].in());
-        if (!name.is_valid()) {
-          continue;
-        }
-
-        if (name.is_literal()) {
-          LiteralType* literal = node_.find_literal(name);
-          literal->erase_literal(reader);
-          if (literal->empty()) {
-            node_.remove(name);
-            delete literal;
-          }
-        } else {
-          PatternType* pattern = node_.find_pattern(name);
-          pattern->erase(reader);
-          if (pattern->empty()) {
-            node_.remove(name);
-            delete pattern;
-          }
-        }
-      }
-
-      reader->reader_entry = reader_entry;
-      index_.insert(reader);
-
-      return;
-    }
-
-    if (old_qos.name.length() == 0 && new_qos.name.length() != 0) {
-      // Added partitions.
-      index_.erase(reader);
-      reader->reader_entry = reader_entry;
-      insert(reader);
-      return;
-    }
+    const DDS::PartitionQosPolicy* old_qos = choose_qos(&reader->reader_entry._subscriber_qos.partition);
+    const DDS::PartitionQosPolicy* new_qos = choose_qos(&reader_entry._subscriber_qos.partition);
 
     // Changed partitions.
     std::set<Name> old_names;
-    for (int idx = 0, limit = old_qos.name.length(); idx != limit; ++idx) {
-      Name name(old_qos.name[idx].in());
+    for (int idx = 0, limit = old_qos->name.length(); idx != limit; ++idx) {
+      Name name(old_qos->name[idx].in());
       if (!name.is_valid()) {
         continue;
       }
@@ -894,8 +799,8 @@ public:
     }
 
     std::set<Name> new_names;
-    for (int idx = 0, limit = new_qos.name.length(); idx != limit; ++idx) {
-      Name name(new_qos.name[idx].in());
+    for (int idx = 0, limit = new_qos->name.length(); idx != limit; ++idx) {
+      Name name(new_qos->name[idx].in());
       if (!name.is_valid()) {
         continue;
       }
@@ -961,14 +866,10 @@ public:
 
   void erase(Reader* reader)
   {
-    const DDS::PartitionQosPolicy& qos = reader->reader_entry._subscriber_qos.partition;
-    if (qos.name.length() == 0) {
-      index_.erase(reader);
-      return;
-    }
+    const DDS::PartitionQosPolicy* qos = choose_qos(&reader->reader_entry._subscriber_qos.partition);
 
-    for (int idx = 0, limit = qos.name.length(); idx != limit; ++idx) {
-      Name name(qos.name[idx].in());
+    for (int idx = 0, limit = qos->name.length(); idx != limit; ++idx) {
+      Name name(qos->name[idx].in());
       if (!name.is_valid()) {
         continue;
       }
@@ -990,18 +891,14 @@ public:
     }
   }
 
-  bool empty() const { return node_.empty() && index_.empty(); }
+  bool empty() const { return node_.empty(); }
 
   void get_readers(Writer* writer, ReaderSet& readers) const
   {
-    const DDS::PartitionQosPolicy& qos = writer->writer_entry.publisher_qos().partition;
-    if (qos.name.length() == 0) {
-      index_.get_readers(writer, readers);
-      return;
-    }
+    const DDS::PartitionQosPolicy* qos = choose_qos(&writer->writer_entry.publisher_qos().partition);
 
-    for (int idx = 0, limit = qos.name.length(); idx != limit; ++idx) {
-      Name name(qos.name[idx].in());
+    for (int idx = 0, limit = qos->name.length(); idx != limit; ++idx) {
+      Name name(qos->name[idx].in());
       if (!name.is_valid()) {
         continue;
       }
@@ -1021,14 +918,10 @@ public:
 
   void get_writers(Reader* reader, WriterSet& writers) const
   {
-    const DDS::PartitionQosPolicy& qos = reader->reader_entry.subscriber_qos().partition;
-    if (qos.name.length() == 0) {
-      index_.get_writers(reader, writers);
-      return;
-    }
+    const DDS::PartitionQosPolicy* qos = choose_qos(&reader->reader_entry.subscriber_qos().partition);
 
-    for (int idx = 0, limit = qos.name.length(); idx != limit; ++idx) {
-      Name name(qos.name[idx].in());
+    for (int idx = 0, limit = qos->name.length(); idx != limit; ++idx) {
+      Name name(qos->name[idx].in());
       if (!name.is_valid()) {
         continue;
       }
@@ -1047,8 +940,17 @@ public:
   }
 
 private:
+  const DDS::PartitionQosPolicy* choose_qos(const DDS::PartitionQosPolicy* qos) const
+  {
+    if (qos->name.length() == 0) {
+      return &empty_qos_;
+    } else {
+      return qos;
+    }
+  }
+
   TrieNode<SubIndex> node_;
-  SubIndex index_; // For no partitions.
+  DDS::PartitionQosPolicy empty_qos_;
 };
 
 template <typename SubIndex>
