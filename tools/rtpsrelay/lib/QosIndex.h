@@ -15,7 +15,7 @@ struct RtpsRelayLib_Export Writer {
   bool remote() const { return !local_; }
 
 private:
-  bool const local_;
+  const bool local_;
 };
 
 struct RtpsRelayLib_Export Reader {
@@ -27,7 +27,7 @@ struct RtpsRelayLib_Export Reader {
   bool remote() const { return !local_; }
 
 private:
-  bool const local_;
+  const bool local_;
 };
 
 typedef std::set<Writer*> WriterSet;
