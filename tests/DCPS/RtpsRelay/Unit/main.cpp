@@ -603,7 +603,7 @@ void qos_index_test(int& status)
 
 int main()
 {
-  int status = 0;
+  int status = EXIT_SUCCESS;
 
   std::set<char> digits;
   for (char c = '0'; c <= '9'; ++c) {
