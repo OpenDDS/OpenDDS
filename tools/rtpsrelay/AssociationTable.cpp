@@ -10,7 +10,7 @@ void AssociationTable::insert(const WriterEntry& writer_entry)
   auto p = writers_.find(writer_guid);
   if (p == writers_.end()) {
     Writer* writer = new Writer(writer_entry, writer_entry.relay_addresses() == relay_addresses_);
-    writers_.insert(std::make_pair(writer_guid, writer));
+    writers_[writer_guid] = writer;
     index_.insert(writer);
   } else {
     index_.reinsert(p->second, writer_entry);
@@ -32,7 +32,7 @@ void AssociationTable::insert(const ReaderEntry& reader_entry)
   auto p = readers_.find(reader_guid);
   if (p == readers_.end()) {
     Reader* reader = new Reader(reader_entry, reader_entry.relay_addresses() == relay_addresses_);
-    readers_.insert(std::make_pair(reader_guid, reader));
+    readers_[reader_guid] = reader;
     index_.insert(reader);
   } else {
     index_.reinsert(p->second, reader_entry);
