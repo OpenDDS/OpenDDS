@@ -7,7 +7,7 @@
 class NoIndex;
 
 struct RtpsRelayLib_Export Writer {
-  explicit Writer(const RtpsRelay::WriterEntry& we, bool local) : writer_entry(we), local_(local) {}
+  Writer(const RtpsRelay::WriterEntry& we, bool local) : writer_entry(we), local_(local) {}
   RtpsRelay::WriterEntry writer_entry;
   std::set<NoIndex*> indexes;
 
@@ -19,7 +19,7 @@ private:
 };
 
 struct RtpsRelayLib_Export Reader {
-  explicit Reader(const RtpsRelay::ReaderEntry& re, bool local) : reader_entry(re), local_(local) {}
+  Reader(const RtpsRelay::ReaderEntry& re, bool local) : reader_entry(re), local_(local) {}
   RtpsRelay::ReaderEntry reader_entry;
   std::set<NoIndex*> indexes;
 
