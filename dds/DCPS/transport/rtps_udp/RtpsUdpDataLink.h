@@ -372,8 +372,8 @@ private:
 
   protected:
     void gather_ack_nacks_i(MetaSubmessageVec& meta_submessages, bool finalFlag = false);
-    void generate_nack_frags(NackFragSubmessageVec& nack_frags,
-                             WriterInfo& wi, const RepoId& pub_id);
+    void generate_nack_frags_i(NackFragSubmessageVec& nack_frags,
+                               WriterInfo& wi, const RepoId& pub_id);
 
     mutable ACE_Thread_Mutex mutex_;
     WeakRcHandle<RtpsUdpDataLink> link_;
