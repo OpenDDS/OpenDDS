@@ -526,20 +526,20 @@ namespace {
 
   std::string make_relative(const std::string& absolute)
   {
-    std::string canidate = absolute;
+    std::string candidate = absolute;
     for (Includes_t::const_iterator iter = inc_path_.begin(),
         end = inc_path_.upper_bound(absolute); iter != end; ++iter) {
       if (absolute.find(*iter) == 0) {
         string rel = absolute.substr(iter->size());
-        if (rel.size() < canidate.size()) {
-          canidate = rel;
+        if (rel.size() < candidate.size()) {
+          candidate = rel;
         }
       }
     }
-    if (canidate != absolute && (canidate[0] == '/' || canidate[0] == '\\')) {
-      canidate.erase(0, 1);
+    if (candidate != absolute && (candidate[0] == '/' || candidate[0] == '\\')) {
+      candidate.erase(0, 1);
     }
-    return canidate;
+    return candidate;
   }
 
   struct InsertIncludes {
