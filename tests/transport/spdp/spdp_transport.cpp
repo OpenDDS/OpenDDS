@@ -178,18 +178,6 @@ struct TestParticipant: ACE_Event_Handler {
       const SubmessageHeader smhdr = mp.submessageHeader();
       if (smhdr.submessageId == DATA) {
         ok = recv_data(mp.serializer(), peer);
-      } else {
-#ifdef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-        ACE_DEBUG((LM_INFO, "Received submessage type: %u\n", unsigned(smhdr.submessageId)));
-#else
-        if (static_cast<size_t>(smhdr.submessageId) < gen_OpenDDS_RTPS_SubmessageKind_names_size) {
-          ACE_DEBUG((LM_INFO, "Received submessage type: %C\n",
-                     gen_OpenDDS_RTPS_SubmessageKind_names[static_cast<size_t>(smhdr.submessageId)]));
-        } else {
-          ACE_ERROR((LM_ERROR, "ERROR: Received unknown submessage type: %u\n",
-                     unsigned(smhdr.submessageId)));
-        }
-#endif
       }
 
       if (!ok || !mp.hasNextSubmessage()) {
@@ -334,11 +322,9 @@ bool run_test()
       nonEmptyList /*defaultMulticastLocatorList*/,
       nonEmptyList /*defaultUnicastLocatorList*/,
       { 0 /*manualLivelinessCount*/ },
-      qos.property,
-      {PFLAGS_NO_ASSOCIATED_WRITERS} // opendds_participant_flags
     },
     { // Duration_t (leaseDuration)
-      static_cast<CORBA::Long>((rd.resend_period() * 10).value().sec()),
+      static_cast<CORBA::Long>((rd.resend_period() * 10).sec()),
       0 // we are not supporting fractional seconds in the lease duration
     }
   };
