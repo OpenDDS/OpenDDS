@@ -1,7 +1,7 @@
 #include "tools/rtpsrelay/lib/Name.h"
 #include "tools/rtpsrelay/lib/QosIndex.h"
 
-#include "dds/DCPS/Marked_Default_Qos.h"
+#include "dds/DCPS/Service_Participant.h"
 
 #include <iostream>
 
@@ -71,16 +71,16 @@ void writer_then_matched_reader(int& status)
   Writer writer(RtpsRelay::WriterEntry(), true);
   writer.writer_entry.topic_name("the topic");
   writer.writer_entry.type_name("the type");
-  writer.writer_entry.data_writer_qos(DATAWRITER_QOS_DEFAULT);
-  writer.writer_entry.publisher_qos(PUBLISHER_QOS_DEFAULT);
+  writer.writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
+  writer.writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
   writer.writer_entry.publisher_qos().partition.name.length(1);
   writer.writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
 
   Reader reader(RtpsRelay::ReaderEntry(), true);
   reader.reader_entry.topic_name("the topic");
   reader.reader_entry.type_name("the type");
-  reader.reader_entry.data_reader_qos(DATAREADER_QOS_DEFAULT);
-  reader.reader_entry.subscriber_qos(SUBSCRIBER_QOS_DEFAULT);
+  reader.reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
+  reader.reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
   reader.reader_entry.subscriber_qos().partition.name.length(1);
   reader.reader_entry.subscriber_qos().partition.name[0] = "?bjec[!s] *, [Ii]nc.";
 
@@ -97,16 +97,16 @@ void reader_then_matched_writer(int& status)
   Writer writer(RtpsRelay::WriterEntry(), true);
   writer.writer_entry.topic_name("the topic");
   writer.writer_entry.type_name("the type");
-  writer.writer_entry.data_writer_qos(DATAWRITER_QOS_DEFAULT);
-  writer.writer_entry.publisher_qos(PUBLISHER_QOS_DEFAULT);
+  writer.writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
+  writer.writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
   writer.writer_entry.publisher_qos().partition.name.length(1);
   writer.writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
 
   Reader reader(RtpsRelay::ReaderEntry(), true);
   reader.reader_entry.topic_name("the topic");
   reader.reader_entry.type_name("the type");
-  reader.reader_entry.data_reader_qos(DATAREADER_QOS_DEFAULT);
-  reader.reader_entry.subscriber_qos(SUBSCRIBER_QOS_DEFAULT);
+  reader.reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
+  reader.reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
   reader.reader_entry.subscriber_qos().partition.name.length(1);
   reader.reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
 
@@ -123,18 +123,18 @@ void matched_then_writer_changes_reliability(int& status)
   Writer writer(RtpsRelay::WriterEntry(), true);
   writer.writer_entry.topic_name("the topic");
   writer.writer_entry.type_name("the type");
-  writer.writer_entry.data_writer_qos(DATAWRITER_QOS_DEFAULT);
+  writer.writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
   writer.writer_entry.data_writer_qos().reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-  writer.writer_entry.publisher_qos(PUBLISHER_QOS_DEFAULT);
+  writer.writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
   writer.writer_entry.publisher_qos().partition.name.length(1);
   writer.writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
 
   Reader reader(RtpsRelay::ReaderEntry(), true);
   reader.reader_entry.topic_name("the topic");
   reader.reader_entry.type_name("the type");
-  reader.reader_entry.data_reader_qos(DATAREADER_QOS_DEFAULT);
+  reader.reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
   reader.reader_entry.data_reader_qos().reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-  reader.reader_entry.subscriber_qos(SUBSCRIBER_QOS_DEFAULT);
+  reader.reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
   reader.reader_entry.subscriber_qos().partition.name.length(1);
   reader.reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
 
@@ -158,18 +158,18 @@ void matched_then_reader_changes_reliability(int& status)
   Writer writer(RtpsRelay::WriterEntry(), true);
   writer.writer_entry.topic_name("the topic");
   writer.writer_entry.type_name("the type");
-  writer.writer_entry.data_writer_qos(DATAWRITER_QOS_DEFAULT);
+  writer.writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
   writer.writer_entry.data_writer_qos().reliability.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
-  writer.writer_entry.publisher_qos(PUBLISHER_QOS_DEFAULT);
+  writer.writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
   writer.writer_entry.publisher_qos().partition.name.length(1);
   writer.writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
 
   Reader reader(RtpsRelay::ReaderEntry(), true);
   reader.reader_entry.topic_name("the topic");
   reader.reader_entry.type_name("the type");
-  reader.reader_entry.data_reader_qos(DATAREADER_QOS_DEFAULT);
+  reader.reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
   reader.reader_entry.data_reader_qos().reliability.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
-  reader.reader_entry.subscriber_qos(SUBSCRIBER_QOS_DEFAULT);
+  reader.reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
   reader.reader_entry.subscriber_qos().partition.name.length(1);
   reader.reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
 
@@ -193,16 +193,16 @@ void matched_then_writer_changes_partition(int& status)
   Writer writer(RtpsRelay::WriterEntry(), true);
   writer.writer_entry.topic_name("the topic");
   writer.writer_entry.type_name("the type");
-  writer.writer_entry.data_writer_qos(DATAWRITER_QOS_DEFAULT);
-  writer.writer_entry.publisher_qos(PUBLISHER_QOS_DEFAULT);
+  writer.writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
+  writer.writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
   writer.writer_entry.publisher_qos().partition.name.length(1);
   writer.writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
 
   Reader reader(RtpsRelay::ReaderEntry(), true);
   reader.reader_entry.topic_name("the topic");
   reader.reader_entry.type_name("the type");
-  reader.reader_entry.data_reader_qos(DATAREADER_QOS_DEFAULT);
-  reader.reader_entry.subscriber_qos(SUBSCRIBER_QOS_DEFAULT);
+  reader.reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
+  reader.reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
   reader.reader_entry.subscriber_qos().partition.name.length(1);
   reader.reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
 
@@ -226,16 +226,16 @@ void matched_then_reader_changes_partition(int& status)
   Writer writer(RtpsRelay::WriterEntry(), true);
   writer.writer_entry.topic_name("the topic");
   writer.writer_entry.type_name("the type");
-  writer.writer_entry.data_writer_qos(DATAWRITER_QOS_DEFAULT);
-  writer.writer_entry.publisher_qos(PUBLISHER_QOS_DEFAULT);
+  writer.writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
+  writer.writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
   writer.writer_entry.publisher_qos().partition.name.length(1);
   writer.writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
 
   Reader reader(RtpsRelay::ReaderEntry(), true);
   reader.reader_entry.topic_name("the topic");
   reader.reader_entry.type_name("the type");
-  reader.reader_entry.data_reader_qos(DATAREADER_QOS_DEFAULT);
-  reader.reader_entry.subscriber_qos(SUBSCRIBER_QOS_DEFAULT);
+  reader.reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
+  reader.reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
   reader.reader_entry.subscriber_qos().partition.name.length(1);
   reader.reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
 
@@ -259,16 +259,16 @@ void matched_then_writer_changes_topic(int& status)
   Writer writer(RtpsRelay::WriterEntry(), true);
   writer.writer_entry.topic_name("the topic");
   writer.writer_entry.type_name("the type");
-  writer.writer_entry.data_writer_qos(DATAWRITER_QOS_DEFAULT);
-  writer.writer_entry.publisher_qos(PUBLISHER_QOS_DEFAULT);
+  writer.writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
+  writer.writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
   writer.writer_entry.publisher_qos().partition.name.length(1);
   writer.writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
 
   Reader reader(RtpsRelay::ReaderEntry(), true);
   reader.reader_entry.topic_name("the topic");
   reader.reader_entry.type_name("the type");
-  reader.reader_entry.data_reader_qos(DATAREADER_QOS_DEFAULT);
-  reader.reader_entry.subscriber_qos(SUBSCRIBER_QOS_DEFAULT);
+  reader.reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
+  reader.reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
   reader.reader_entry.subscriber_qos().partition.name.length(1);
   reader.reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
 
@@ -292,16 +292,16 @@ void matched_then_reader_changes_topic(int& status)
   Writer writer(RtpsRelay::WriterEntry(), true);
   writer.writer_entry.topic_name("the topic");
   writer.writer_entry.type_name("the type");
-  writer.writer_entry.data_writer_qos(DATAWRITER_QOS_DEFAULT);
-  writer.writer_entry.publisher_qos(PUBLISHER_QOS_DEFAULT);
+  writer.writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
+  writer.writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
   writer.writer_entry.publisher_qos().partition.name.length(1);
   writer.writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
 
   Reader reader(RtpsRelay::ReaderEntry(), true);
   reader.reader_entry.topic_name("the topic");
   reader.reader_entry.type_name("the type");
-  reader.reader_entry.data_reader_qos(DATAREADER_QOS_DEFAULT);
-  reader.reader_entry.subscriber_qos(SUBSCRIBER_QOS_DEFAULT);
+  reader.reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
+  reader.reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
   reader.reader_entry.subscriber_qos().partition.name.length(1);
   reader.reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
 
@@ -325,18 +325,18 @@ void unmatched_then_writer_changes_reliability(int& status)
   Writer writer(RtpsRelay::WriterEntry(), true);
   writer.writer_entry.topic_name("the topic");
   writer.writer_entry.type_name("the type");
-  writer.writer_entry.data_writer_qos(DATAWRITER_QOS_DEFAULT);
+  writer.writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
   writer.writer_entry.data_writer_qos().reliability.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
-  writer.writer_entry.publisher_qos(PUBLISHER_QOS_DEFAULT);
+  writer.writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
   writer.writer_entry.publisher_qos().partition.name.length(1);
   writer.writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
 
   Reader reader(RtpsRelay::ReaderEntry(), true);
   reader.reader_entry.topic_name("the topic");
   reader.reader_entry.type_name("the type");
-  reader.reader_entry.data_reader_qos(DATAREADER_QOS_DEFAULT);
+  reader.reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
   reader.reader_entry.data_reader_qos().reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-  reader.reader_entry.subscriber_qos(SUBSCRIBER_QOS_DEFAULT);
+  reader.reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
   reader.reader_entry.subscriber_qos().partition.name.length(1);
   reader.reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
 
@@ -360,18 +360,18 @@ void unmatched_then_reader_changes_reliability(int& status)
   Writer writer(RtpsRelay::WriterEntry(), true);
   writer.writer_entry.topic_name("the topic");
   writer.writer_entry.type_name("the type");
-  writer.writer_entry.data_writer_qos(DATAWRITER_QOS_DEFAULT);
+  writer.writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
   writer.writer_entry.data_writer_qos().reliability.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
-  writer.writer_entry.publisher_qos(PUBLISHER_QOS_DEFAULT);
+  writer.writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
   writer.writer_entry.publisher_qos().partition.name.length(1);
   writer.writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
 
   Reader reader(RtpsRelay::ReaderEntry(), true);
   reader.reader_entry.topic_name("the topic");
   reader.reader_entry.type_name("the type");
-  reader.reader_entry.data_reader_qos(DATAREADER_QOS_DEFAULT);
+  reader.reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
   reader.reader_entry.data_reader_qos().reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-  reader.reader_entry.subscriber_qos(SUBSCRIBER_QOS_DEFAULT);
+  reader.reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
   reader.reader_entry.subscriber_qos().partition.name.length(1);
   reader.reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
 
@@ -395,16 +395,16 @@ void unmatched_then_writer_changes_partition(int& status)
   Writer writer(RtpsRelay::WriterEntry(), true);
   writer.writer_entry.topic_name("the topic");
   writer.writer_entry.type_name("the type");
-  writer.writer_entry.data_writer_qos(DATAWRITER_QOS_DEFAULT);
-  writer.writer_entry.publisher_qos(PUBLISHER_QOS_DEFAULT);
+  writer.writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
+  writer.writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
   writer.writer_entry.publisher_qos().partition.name.length(1);
   writer.writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
 
   Reader reader(RtpsRelay::ReaderEntry(), true);
   reader.reader_entry.topic_name("the topic");
   reader.reader_entry.type_name("the type");
-  reader.reader_entry.data_reader_qos(DATAREADER_QOS_DEFAULT);
-  reader.reader_entry.subscriber_qos(SUBSCRIBER_QOS_DEFAULT);
+  reader.reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
+  reader.reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
   reader.reader_entry.subscriber_qos().partition.name.length(1);
   reader.reader_entry.subscriber_qos().partition.name[0] = "OCI";
 
@@ -428,16 +428,16 @@ void unmatched_then_reader_changes_partition(int& status)
   Writer writer(RtpsRelay::WriterEntry(), true);
   writer.writer_entry.topic_name("the topic");
   writer.writer_entry.type_name("the type");
-  writer.writer_entry.data_writer_qos(DATAWRITER_QOS_DEFAULT);
-  writer.writer_entry.publisher_qos(PUBLISHER_QOS_DEFAULT);
+  writer.writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
+  writer.writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
   writer.writer_entry.publisher_qos().partition.name.length(1);
   writer.writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
 
   Reader reader(RtpsRelay::ReaderEntry(), true);
   reader.reader_entry.topic_name("the topic");
   reader.reader_entry.type_name("the type");
-  reader.reader_entry.data_reader_qos(DATAREADER_QOS_DEFAULT);
-  reader.reader_entry.subscriber_qos(SUBSCRIBER_QOS_DEFAULT);
+  reader.reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
+  reader.reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
   reader.reader_entry.subscriber_qos().partition.name.length(1);
   reader.reader_entry.subscriber_qos().partition.name[0] = "OCI";
 
@@ -461,16 +461,16 @@ void unmatched_then_writer_changes_topic(int& status)
   Writer writer(RtpsRelay::WriterEntry(), true);
   writer.writer_entry.topic_name("wrong topic");
   writer.writer_entry.type_name("the type");
-  writer.writer_entry.data_writer_qos(DATAWRITER_QOS_DEFAULT);
-  writer.writer_entry.publisher_qos(PUBLISHER_QOS_DEFAULT);
+  writer.writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
+  writer.writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
   writer.writer_entry.publisher_qos().partition.name.length(1);
   writer.writer_entry.publisher_qos().partition.name[0] = "O*C*I*";
 
   Reader reader(RtpsRelay::ReaderEntry(), true);
   reader.reader_entry.topic_name("the topic");
   reader.reader_entry.type_name("the type");
-  reader.reader_entry.data_reader_qos(DATAREADER_QOS_DEFAULT);
-  reader.reader_entry.subscriber_qos(SUBSCRIBER_QOS_DEFAULT);
+  reader.reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
+  reader.reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
   reader.reader_entry.subscriber_qos().partition.name.length(1);
   reader.reader_entry.subscriber_qos().partition.name[0] = "Object Computing, Inc.";
 
@@ -494,14 +494,14 @@ void unmatched_then_reader_changes_topic(int& status)
   Writer writer(RtpsRelay::WriterEntry(), true);
   writer.writer_entry.topic_name("the topic");
   writer.writer_entry.type_name("the type");
-  writer.writer_entry.data_writer_qos(DATAWRITER_QOS_DEFAULT);
-  writer.writer_entry.publisher_qos(PUBLISHER_QOS_DEFAULT);
+  writer.writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
+  writer.writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
 
   Reader reader(RtpsRelay::ReaderEntry(), true);
   reader.reader_entry.topic_name("wrong topic");
   reader.reader_entry.type_name("the type");
-  reader.reader_entry.data_reader_qos(DATAREADER_QOS_DEFAULT);
-  reader.reader_entry.subscriber_qos(SUBSCRIBER_QOS_DEFAULT);
+  reader.reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
+  reader.reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
 
   Index index;
   index.insert(&writer);
@@ -523,16 +523,16 @@ void matched_then_writer_disappears(int& status)
   Writer writer(RtpsRelay::WriterEntry(), true);
   writer.writer_entry.topic_name("the topic");
   writer.writer_entry.type_name("the type");
-  writer.writer_entry.data_writer_qos(DATAWRITER_QOS_DEFAULT);
-  writer.writer_entry.publisher_qos(PUBLISHER_QOS_DEFAULT);
+  writer.writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
+  writer.writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
   writer.writer_entry.publisher_qos().partition.name.length(1);
   writer.writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
 
   Reader reader(RtpsRelay::ReaderEntry(), true);
   reader.reader_entry.topic_name("the topic");
   reader.reader_entry.type_name("the type");
-  reader.reader_entry.data_reader_qos(DATAREADER_QOS_DEFAULT);
-  reader.reader_entry.subscriber_qos(SUBSCRIBER_QOS_DEFAULT);
+  reader.reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
+  reader.reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
   reader.reader_entry.subscriber_qos().partition.name.length(1);
   reader.reader_entry.subscriber_qos().partition.name[0] = "O*C*I*";
 
@@ -553,16 +553,16 @@ void matched_then_reader_disappears(int& status)
   Writer writer(RtpsRelay::WriterEntry(), true);
   writer.writer_entry.topic_name("the topic");
   writer.writer_entry.type_name("the type");
-  writer.writer_entry.data_writer_qos(DATAWRITER_QOS_DEFAULT);
-  writer.writer_entry.publisher_qos(PUBLISHER_QOS_DEFAULT);
+  writer.writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
+  writer.writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
   writer.writer_entry.publisher_qos().partition.name.length(1);
   writer.writer_entry.publisher_qos().partition.name[0] = "O*C*I*";
 
   Reader reader(RtpsRelay::ReaderEntry(), true);
   reader.reader_entry.topic_name("the topic");
   reader.reader_entry.type_name("the type");
-  reader.reader_entry.data_reader_qos(DATAREADER_QOS_DEFAULT);
-  reader.reader_entry.subscriber_qos(SUBSCRIBER_QOS_DEFAULT);
+  reader.reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
+  reader.reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
   reader.reader_entry.subscriber_qos().partition.name.length(1);
   reader.reader_entry.subscriber_qos().partition.name[0] = "Object Computing, Inc.";
 
