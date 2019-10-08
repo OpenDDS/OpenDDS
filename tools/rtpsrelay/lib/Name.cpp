@@ -29,7 +29,7 @@ std::ostream& operator<<(std::ostream& out, const Atom& atom)
     out << ']';
     break;
   case Atom::NEGATED_CHARACTER_CLASS:
-    out << "![";
+    out << "[!";
     for (char c : atom.characters()) {
       output_character(out, c);
     }
