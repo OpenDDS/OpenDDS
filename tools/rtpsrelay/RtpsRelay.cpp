@@ -15,16 +15,20 @@
 #include <dds/DCPS/BuiltInTopicUtils.h>
 #include <dds/DCPS/DomainParticipantImpl.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
+
 #include <dds/DCPS/transport/framework/NetworkAddress.h>
+
+#ifdef ACE_AS_STATIC_LIBS
+#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#endif
 
 #include <ace/Arg_Shifter.h>
 #include <ace/Argv_Type_Converter.h>
 #include <ace/Reactor.h>
+#include <ace/Select_Reactor.h>
 
 #include <cstdlib>
 #include <iostream>
-
-using namespace RtpsRelay;
 
 #ifdef OPENDDS_SECURITY
 #include <dds/DCPS/security/framework/Properties.h>
@@ -40,6 +44,8 @@ namespace {
 }
 
 #endif
+
+using namespace RtpsRelay;
 
 namespace {
   ACE_INET_Addr get_bind_addr(unsigned short port)
@@ -230,7 +236,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   const ACE_INET_Addr sedp_vertical_addr(port_vertical++, addr_vertical);
   const ACE_INET_Addr data_vertical_addr(port_vertical++, addr_vertical);
 
-  const auto reactor = ACE_Reactor::instance();
+  ACE_Reactor reactor_(new ACE_Select_Reactor, true);
+  const auto reactor = &reactor_;
 
   RelayAddresses relay_addresses {
     addr_to_string(spdp_horizontal_addr),

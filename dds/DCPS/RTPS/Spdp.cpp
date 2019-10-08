@@ -1705,15 +1705,15 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
   if (bytes > 0) {
     buff_.wr_ptr(bytes);
   } else if (bytes == 0) {
-    return -1;
+    return 0;
   } else {
     ACE_DEBUG((
-          LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
+          LM_WARNING,
+          ACE_TEXT("(%P|%t) WARNING: Spdp::SpdpTransport::handle_input() - ")
           ACE_TEXT("error reading from %C socket %p\n")
           , (h == unicast_socket_.get_handle()) ? "unicast" : "multicast",
           ACE_TEXT("ACE_SOCK_Dgram::recv")));
-    return -1;
+    return 0;
   }
 
   // Handle some RTI protocol multicast to the same address
