@@ -274,6 +274,8 @@ bool run_test()
   test_part_addr.set(test_part_addr.get_port_number(),
 #ifdef OPENDDS_SAFETY_PROFILE
     "127.0.0.1"
+#elif defined(ACE_HAS_IPV6)
+    "::1/128"
 #else
     "localhost"
 #endif
