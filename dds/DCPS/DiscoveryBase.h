@@ -1538,6 +1538,7 @@ namespace OpenDDS {
 
         DiscoveredParticipant()
         : bit_ih_(DDS::HANDLE_NIL)
+        , seq_reset_count_(0)
 #ifdef OPENDDS_SECURITY
         , has_last_stateless_msg_(false)
         , auth_state_(AS_UNKNOWN)
@@ -1553,10 +1554,15 @@ namespace OpenDDS {
 #endif
         }
 
-        DiscoveredParticipant(const DiscoveredParticipantData& p, const MonotonicTimePoint& t)
+        DiscoveredParticipant(
+          const DiscoveredParticipantData& p,
+          const MonotonicTimePoint& t,
+          const DCPS::SequenceNumber& seq)
         : pdata_(p)
         , last_seen_(t)
         , bit_ih_(DDS::HANDLE_NIL)
+        , last_seq_(seq)
+        , seq_reset_count_(0)
 #ifdef OPENDDS_SECURITY
         , has_last_stateless_msg_(false)
         , auth_state_(AS_UNKNOWN)
@@ -1576,7 +1582,7 @@ namespace OpenDDS {
         MonotonicTimePoint last_seen_;
         DDS::InstanceHandle_t bit_ih_;
         DCPS::SequenceNumber last_seq_;
-        ACE_UINT16 seqResetChkCount_;
+        ACE_UINT16 seq_reset_count_;
 
 #ifdef OPENDDS_SECURITY
         bool has_last_stateless_msg_;

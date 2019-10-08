@@ -221,7 +221,7 @@ struct TestParticipant: ACE_Event_Handler {
   }
 
   ACE_SOCK_Dgram& sock_;
-  Header hdr_, recv_hdr_;
+  Header hdr_;
   ACE_Message_Block recv_mb_;
 };
 
