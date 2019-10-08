@@ -109,16 +109,19 @@ public:
   const_iterator end() const { return atoms_.end(); }
 
   bool operator<(const Name& other) const { return atoms_ < other.atoms_; }
-  bool operator==(const Name& other) const {
+  bool operator==(const Name& other) const
+  {
     return is_pattern_ == other.is_pattern_ &&
       is_valid_ == other.is_valid_ &&
       atoms_ == other.atoms_;
   }
-  bool operator!=(const Name& other) const {
+  bool operator!=(const Name& other) const
+  {
     return !(*this == other);
   }
 
-  void push_back(const Atom& atom) {
+  void push_back(const Atom& atom)
+  {
     // Don't allow consecutive globs.
     if (atom.kind() == Atom::GLOB && !atoms_.empty() && atoms_.back().kind() == Atom::GLOB) {
       return;

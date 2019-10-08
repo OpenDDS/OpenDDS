@@ -6,12 +6,12 @@ namespace RtpsRelay {
 
 void NoIndex::match(Writers::iterator pos)
 {
-  Writer* writer = pos->first;
-  ReaderSet& matched_readers = pos->second;
+  const auto writer = pos->first;
+  auto& matched_readers = pos->second;
 
-  for (Readers::iterator pos = readers_.begin(), limit = readers_.end(); pos != limit; ++pos) {
-    Reader* reader = pos->first;
-    std::set<Writer*>& matched_writers = pos->second;
+  for (auto pos = readers_.begin(), limit = readers_.end(); pos != limit; ++pos) {
+    const auto reader = pos->first;
+    auto& matched_writers = pos->second;
     if (writer->remote() && reader->remote()) {
       continue;
     }
@@ -36,12 +36,12 @@ void NoIndex::match(Writers::iterator pos)
 
 void NoIndex::match(Readers::iterator pos)
 {
-  Reader* reader = pos->first;
-  std::set<Writer*>& matched_writers = pos->second;
+  const auto reader = pos->first;
+  auto& matched_writers = pos->second;
 
   for (Writers::iterator pos = writers_.begin(), limit = writers_.end(); pos != limit; ++pos) {
-    Writer* writer = pos->first;
-    std::set<Reader*>& matched_readers = pos->second;
+    const auto writer = pos->first;
+    auto& matched_readers = pos->second;
     if (reader->remote() && writer->remote()) {
       continue;
     }

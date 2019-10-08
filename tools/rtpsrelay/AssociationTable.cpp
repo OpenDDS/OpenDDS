@@ -6,10 +6,10 @@ namespace RtpsRelay {
 
 void AssociationTable::insert(const WriterEntry& writer_entry)
 {
-  const OpenDDS::DCPS::RepoId writer_guid = guid_to_guid(writer_entry.guid());
-  auto p = writers_.find(writer_guid);
+  const auto writer_guid = guid_to_guid(writer_entry.guid());
+  const auto p = writers_.find(writer_guid);
   if (p == writers_.end()) {
-    Writer* writer = new Writer(writer_entry, writer_entry.relay_addresses() == relay_addresses_);
+    const auto writer = new Writer(writer_entry, writer_entry.relay_addresses() == relay_addresses_);
     writers_[writer_guid] = writer;
     index_.insert(writer);
   } else {
@@ -19,8 +19,8 @@ void AssociationTable::insert(const WriterEntry& writer_entry)
 
 void AssociationTable::remove(const WriterEntry& writer)
 {
-  const OpenDDS::DCPS::RepoId writer_guid = guid_to_guid(writer.guid());
-  WritersMap::const_iterator pos = writers_.find(writer_guid);
+  const auto writer_guid = guid_to_guid(writer.guid());
+  const auto pos = writers_.find(writer_guid);
   index_.erase(pos->second);
   delete pos->second;
   writers_.erase(pos);
@@ -28,10 +28,10 @@ void AssociationTable::remove(const WriterEntry& writer)
 
 void AssociationTable::insert(const ReaderEntry& reader_entry)
 {
-  const OpenDDS::DCPS::RepoId reader_guid = guid_to_guid(reader_entry.guid());
-  auto p = readers_.find(reader_guid);
+  const auto reader_guid = guid_to_guid(reader_entry.guid());
+  const auto p = readers_.find(reader_guid);
   if (p == readers_.end()) {
-    Reader* reader = new Reader(reader_entry, reader_entry.relay_addresses() == relay_addresses_);
+    const auto reader = new Reader(reader_entry, reader_entry.relay_addresses() == relay_addresses_);
     readers_[reader_guid] = reader;
     index_.insert(reader);
   } else {
@@ -41,8 +41,8 @@ void AssociationTable::insert(const ReaderEntry& reader_entry)
 
 void AssociationTable::remove(const ReaderEntry& reader)
 {
-  const OpenDDS::DCPS::RepoId reader_guid = guid_to_guid(reader.guid());
-  ReadersMap::const_iterator pos = readers_.find(reader_guid);
+  const auto reader_guid = guid_to_guid(reader.guid());
+  const auto pos = readers_.find(reader_guid);
   index_.erase(pos->second);
   delete pos->second;
   readers_.erase(pos);
@@ -80,10 +80,10 @@ void AssociationTable::get_guids(const OpenDDS::DCPS::RepoId& guid,
   for (auto pos = writers_.lower_bound(prefix), limit = writers_.end();
        pos != limit && std::memcmp(pos->first.guidPrefix, prefix.guidPrefix, sizeof(prefix.guidPrefix)) == 0; ++pos) {
     ReaderSet readers;
-    for (auto index : pos->second->indexes) {
+    for (const auto index : pos->second->indexes) {
       index->get_readers(pos->second, readers);
     }
-    for (auto reader : readers) {
+    for (const auto reader : readers) {
       OpenDDS::DCPS::RepoId x = guid_to_guid(reader->reader_entry.guid());
       x.entityId = OpenDDS::DCPS::ENTITYID_PARTICIPANT;
       if (reader->local()) {
@@ -97,11 +97,11 @@ void AssociationTable::get_guids(const OpenDDS::DCPS::RepoId& guid,
   for (auto pos = readers_.lower_bound(prefix), limit = readers_.end();
        pos != limit && std::memcmp(pos->first.guidPrefix, prefix.guidPrefix, sizeof(prefix.guidPrefix)) == 0; ++pos) {
     WriterSet writers;
-    for (auto index : pos->second->indexes) {
+    for (const auto index : pos->second->indexes) {
       index->get_writers(pos->second, writers);
     }
 
-    for (auto writer : writers) {
+    for (const auto writer : writers) {
       OpenDDS::DCPS::RepoId x = guid_to_guid(writer->writer_entry.guid());
       x.entityId = OpenDDS::DCPS::ENTITYID_PARTICIPANT;
       if (writer->local()) {
