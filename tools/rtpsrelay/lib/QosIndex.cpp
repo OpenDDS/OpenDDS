@@ -15,8 +15,8 @@ void NoIndex::match(Writers::iterator pos)
     }
     if (writer->writer_entry.topic_name() == reader->reader_entry.topic_name() &&
         writer->writer_entry.type_name() == reader->reader_entry.type_name() &&
-        OpenDDS::DCPS::compatibleQOS(&writer->writer_entry._data_writer_qos, &reader->reader_entry._data_reader_qos, nullptr, nullptr) &&
-        OpenDDS::DCPS::compatibleQOS(&writer->writer_entry._publisher_qos, &reader->reader_entry._subscriber_qos, nullptr, nullptr) &&
+        OpenDDS::DCPS::compatibleQOS(&writer->writer_entry._data_writer_qos, &reader->reader_entry._data_reader_qos) &&
+        OpenDDS::DCPS::compatibleQOS(&writer->writer_entry._publisher_qos, &reader->reader_entry._subscriber_qos) &&
         OpenDDS::DCPS::matching_partitions(writer->writer_entry._publisher_qos.partition, reader->reader_entry._subscriber_qos.partition)) {
 
       if (matched_readers.count(reader) == 0) {
