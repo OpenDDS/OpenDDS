@@ -132,6 +132,7 @@ private:
   bool is_valid_;
 
   static void parse(Name& name, const std::string& buffer, size_t& idx);
+  static Atom parse_pattern(Name& name, const std::string& buffer, size_t& idx, char expected, Atom::Kind kind);
   static char parse_character(Name& name, const std::string& buffer, size_t& idx);
   static Atom parse_character_class(Name& name, const std::string& buffer, size_t& idx);
   static void parse_character_class_tail(Name& name, const std::string& buffer, size_t& idx, std::set<char>& characters);

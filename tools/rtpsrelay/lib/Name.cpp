@@ -54,13 +54,9 @@ void Name::parse(Name& name, const std::string& buffer, size_t& idx)
 
   char c = buffer[idx];
   if (c == '?') {
-    ++idx;
-    name.is_pattern_ = true;
-    name.push_back(Atom(Atom::WILDCARD));
+    name.push_back(parse_pattern(name, buffer, idx, '?', Atom::WILDCARD));
   } else if (c == '*') {
-    ++idx;
-    name.is_pattern_ = true;
-    name.push_back(Atom(Atom::GLOB));
+    name.push_back(parse_pattern(name, buffer, idx, '*', Atom::GLOB));
   } else if (c == '[') {
     name.push_back(parse_character_class(name, buffer, idx));
   } else {
@@ -68,6 +64,22 @@ void Name::parse(Name& name, const std::string& buffer, size_t& idx)
   }
 
   parse(name, buffer, idx);
+}
+
+Atom Name::parse_pattern(Name& name, const std::string& buffer, size_t& idx, char expected, Atom::Kind kind)
+{
+  if (idx == buffer.size()) {
+    name.is_valid_ = false;
+    return 0;
+  }
+
+  char c = buffer[idx++];
+  if (c == expected) {
+    name.is_pattern_ = true;
+    return Atom(kind);
+  }
+
+  return Atom(0);
 }
 
 char Name::parse_character(Name& name, const std::string& buffer, size_t& idx)
