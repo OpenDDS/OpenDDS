@@ -120,8 +120,13 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     // Create Subscriber
+    DDS::SubscriberQos subscriber_qos;
+    participant->get_default_subscriber_qos(subscriber_qos);
+    subscriber_qos.partition.name.length(1);
+    subscriber_qos.partition.name[0] = "?CI";
+
     DDS::Subscriber_var sub =
-      participant->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
+      participant->create_subscriber(subscriber_qos,
                                      DDS::SubscriberListener::_nil(),
                                      OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
