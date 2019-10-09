@@ -24,9 +24,9 @@ public:
 private:
   RelayAddresses relay_addresses_;
 
-  typedef std::map<OpenDDS::DCPS::RepoId, Writer*, OpenDDS::DCPS::GUID_tKeyLessThan> WritersMap;
+  typedef std::map<OpenDDS::DCPS::RepoId, WriterPtr, OpenDDS::DCPS::GUID_tKeyLessThan> WritersMap;
   WritersMap writers_;
-  typedef std::map<OpenDDS::DCPS::RepoId, Reader*, OpenDDS::DCPS::GUID_tKeyLessThan> ReadersMap;
+  typedef std::map<OpenDDS::DCPS::RepoId, ReaderPtr, OpenDDS::DCPS::GUID_tKeyLessThan> ReadersMap;
   ReadersMap readers_;
 
   TopicIndex<PartitionIndex<NoIndex> > index_;

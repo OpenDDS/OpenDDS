@@ -36,16 +36,16 @@ void test_invalid(int& status, const std::string& s)
 }
 
 #define ASSERT_MATCHED do { \
-  std::set<Reader*> actual_readers, expected_readers;                   \
-  index.get_readers(&writer, actual_readers);                           \
-  expected_readers.insert(&reader);                                     \
+  ReaderSet actual_readers, expected_readers;                           \
+  index.get_readers(writer, actual_readers);                            \
+  expected_readers.insert(reader);                                      \
   if (actual_readers != expected_readers) {                             \
     std::cout << "ERROR: " <<  __func__ << " failed: writer does not match reader" << std::endl; \
     status = EXIT_FAILURE;                                              \
   }                                                                     \
-  std::set<Writer*> actual_writers, expected_writers;                   \
-  index.get_writers(&reader, actual_writers);                           \
-  expected_writers.insert(&writer);                                     \
+  WriterSet actual_writers, expected_writers;                           \
+  index.get_writers(reader, actual_writers);                           \
+  expected_writers.insert(writer);                                     \
   if (actual_writers != expected_writers) {                             \
     std::cout << "ERROR: " << __func__ << " failed: reader does not match writer" << std::endl; \
     status = EXIT_FAILURE; \
@@ -53,14 +53,14 @@ void test_invalid(int& status, const std::string& s)
 } while(0);
 
 #define ASSERT_NOT_MATCHED do { \
-  std::set<Reader*> actual_readers, expected_readers;                   \
-  index.get_readers(&writer, actual_readers);                           \
+  ReaderSet actual_readers, expected_readers;                   \
+  index.get_readers(writer, actual_readers);                           \
   if (actual_readers != expected_readers) {                             \
     std::cout << "ERROR: " << __func__ << " failed: writer matches reader" << std::endl; \
     status = EXIT_FAILURE;                                              \
   }                                                                     \
-  std::set<Writer*> actual_writers, expected_writers;                   \
-  index.get_writers(&reader, actual_writers);                           \
+  WriterSet actual_writers, expected_writers;                   \
+  index.get_writers(reader, actual_writers);                           \
   if (actual_writers != expected_writers) {                             \
     std::cout << "ERROR: " << __func__ << " failed: reader matches writer" << std::endl; \
     status = EXIT_FAILURE; \
@@ -70,25 +70,25 @@ void test_invalid(int& status, const std::string& s)
 template <typename Index>
 void writer_then_matched_reader(int& status)
 {
-  Writer writer(RtpsRelay::WriterEntry(), true);
-  writer.writer_entry.topic_name("the topic");
-  writer.writer_entry.type_name("the type");
-  writer.writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
-  writer.writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
-  writer.writer_entry.publisher_qos().partition.name.length(1);
-  writer.writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
+  WriterPtr writer(new Writer(RtpsRelay::WriterEntry(), true));
+  writer->writer_entry.topic_name("the topic");
+  writer->writer_entry.type_name("the type");
+  writer->writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
+  writer->writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
+  writer->writer_entry.publisher_qos().partition.name.length(1);
+  writer->writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
 
-  Reader reader(RtpsRelay::ReaderEntry(), true);
-  reader.reader_entry.topic_name("the topic");
-  reader.reader_entry.type_name("the type");
-  reader.reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
-  reader.reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
-  reader.reader_entry.subscriber_qos().partition.name.length(1);
-  reader.reader_entry.subscriber_qos().partition.name[0] = "?bjec[!s] *, [Ii]nc.";
+  ReaderPtr reader(new Reader(RtpsRelay::ReaderEntry(), true));
+  reader->reader_entry.topic_name("the topic");
+  reader->reader_entry.type_name("the type");
+  reader->reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
+  reader->reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
+  reader->reader_entry.subscriber_qos().partition.name.length(1);
+  reader->reader_entry.subscriber_qos().partition.name[0] = "?bjec[!s] *, [Ii]nc.";
 
   Index index;
-  index.insert(&writer);
-  index.insert(&reader);
+  index.insert(writer);
+  index.insert(reader);
 
   ASSERT_MATCHED;
 }
@@ -96,25 +96,25 @@ void writer_then_matched_reader(int& status)
 template <typename Index>
 void reader_then_matched_writer(int& status)
 {
-  Writer writer(RtpsRelay::WriterEntry(), true);
-  writer.writer_entry.topic_name("the topic");
-  writer.writer_entry.type_name("the type");
-  writer.writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
-  writer.writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
-  writer.writer_entry.publisher_qos().partition.name.length(1);
-  writer.writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
+  WriterPtr writer(new Writer(RtpsRelay::WriterEntry(), true));
+  writer->writer_entry.topic_name("the topic");
+  writer->writer_entry.type_name("the type");
+  writer->writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
+  writer->writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
+  writer->writer_entry.publisher_qos().partition.name.length(1);
+  writer->writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
 
-  Reader reader(RtpsRelay::ReaderEntry(), true);
-  reader.reader_entry.topic_name("the topic");
-  reader.reader_entry.type_name("the type");
-  reader.reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
-  reader.reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
-  reader.reader_entry.subscriber_qos().partition.name.length(1);
-  reader.reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
+  ReaderPtr reader(new Reader(RtpsRelay::ReaderEntry(), true));
+  reader->reader_entry.topic_name("the topic");
+  reader->reader_entry.type_name("the type");
+  reader->reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
+  reader->reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
+  reader->reader_entry.subscriber_qos().partition.name.length(1);
+  reader->reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
 
   Index index;
-  index.insert(&reader);
-  index.insert(&writer);
+  index.insert(reader);
+  index.insert(writer);
 
   ASSERT_MATCHED;
 }
@@ -122,34 +122,34 @@ void reader_then_matched_writer(int& status)
 template <typename Index>
 void matched_then_writer_changes_reliability(int& status)
 {
-  Writer writer(RtpsRelay::WriterEntry(), true);
-  writer.writer_entry.topic_name("the topic");
-  writer.writer_entry.type_name("the type");
-  writer.writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
-  writer.writer_entry.data_writer_qos().reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-  writer.writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
-  writer.writer_entry.publisher_qos().partition.name.length(1);
-  writer.writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
+  WriterPtr writer(new Writer(RtpsRelay::WriterEntry(), true));
+  writer->writer_entry.topic_name("the topic");
+  writer->writer_entry.type_name("the type");
+  writer->writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
+  writer->writer_entry.data_writer_qos().reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+  writer->writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
+  writer->writer_entry.publisher_qos().partition.name.length(1);
+  writer->writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
 
-  Reader reader(RtpsRelay::ReaderEntry(), true);
-  reader.reader_entry.topic_name("the topic");
-  reader.reader_entry.type_name("the type");
-  reader.reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
-  reader.reader_entry.data_reader_qos().reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-  reader.reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
-  reader.reader_entry.subscriber_qos().partition.name.length(1);
-  reader.reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
+  ReaderPtr reader(new Reader(RtpsRelay::ReaderEntry(), true));
+  reader->reader_entry.topic_name("the topic");
+  reader->reader_entry.type_name("the type");
+  reader->reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
+  reader->reader_entry.data_reader_qos().reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+  reader->reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
+  reader->reader_entry.subscriber_qos().partition.name.length(1);
+  reader->reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
 
   Index index;
-  index.insert(&writer);
-  index.insert(&reader);
+  index.insert(writer);
+  index.insert(reader);
 
   ASSERT_MATCHED;
 
-  RtpsRelay::WriterEntry entry(writer.writer_entry);
+  RtpsRelay::WriterEntry entry(writer->writer_entry);
   entry.data_writer_qos().reliability.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
 
-  index.reinsert(&writer, entry);
+  index.reinsert(writer, entry);
 
   ASSERT_NOT_MATCHED;
 }
@@ -157,34 +157,34 @@ void matched_then_writer_changes_reliability(int& status)
 template <typename Index>
 void matched_then_reader_changes_reliability(int& status)
 {
-  Writer writer(RtpsRelay::WriterEntry(), true);
-  writer.writer_entry.topic_name("the topic");
-  writer.writer_entry.type_name("the type");
-  writer.writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
-  writer.writer_entry.data_writer_qos().reliability.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
-  writer.writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
-  writer.writer_entry.publisher_qos().partition.name.length(1);
-  writer.writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
+  WriterPtr writer(new Writer(RtpsRelay::WriterEntry(), true));
+  writer->writer_entry.topic_name("the topic");
+  writer->writer_entry.type_name("the type");
+  writer->writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
+  writer->writer_entry.data_writer_qos().reliability.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
+  writer->writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
+  writer->writer_entry.publisher_qos().partition.name.length(1);
+  writer->writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
 
-  Reader reader(RtpsRelay::ReaderEntry(), true);
-  reader.reader_entry.topic_name("the topic");
-  reader.reader_entry.type_name("the type");
-  reader.reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
-  reader.reader_entry.data_reader_qos().reliability.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
-  reader.reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
-  reader.reader_entry.subscriber_qos().partition.name.length(1);
-  reader.reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
+  ReaderPtr reader(new Reader(RtpsRelay::ReaderEntry(), true));
+  reader->reader_entry.topic_name("the topic");
+  reader->reader_entry.type_name("the type");
+  reader->reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
+  reader->reader_entry.data_reader_qos().reliability.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
+  reader->reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
+  reader->reader_entry.subscriber_qos().partition.name.length(1);
+  reader->reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
 
   Index index;
-  index.insert(&writer);
-  index.insert(&reader);
+  index.insert(writer);
+  index.insert(reader);
 
   ASSERT_MATCHED;
 
-  RtpsRelay::ReaderEntry entry(reader.reader_entry);
+  RtpsRelay::ReaderEntry entry(reader->reader_entry);
   entry.data_reader_qos().reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
-  index.reinsert(&reader, entry);
+  index.reinsert(reader, entry);
 
   ASSERT_NOT_MATCHED;
 }
@@ -192,32 +192,32 @@ void matched_then_reader_changes_reliability(int& status)
 template <typename Index>
 void matched_then_writer_changes_partition(int& status)
 {
-  Writer writer(RtpsRelay::WriterEntry(), true);
-  writer.writer_entry.topic_name("the topic");
-  writer.writer_entry.type_name("the type");
-  writer.writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
-  writer.writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
-  writer.writer_entry.publisher_qos().partition.name.length(1);
-  writer.writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
+  WriterPtr writer(new Writer(RtpsRelay::WriterEntry(), true));
+  writer->writer_entry.topic_name("the topic");
+  writer->writer_entry.type_name("the type");
+  writer->writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
+  writer->writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
+  writer->writer_entry.publisher_qos().partition.name.length(1);
+  writer->writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
 
-  Reader reader(RtpsRelay::ReaderEntry(), true);
-  reader.reader_entry.topic_name("the topic");
-  reader.reader_entry.type_name("the type");
-  reader.reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
-  reader.reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
-  reader.reader_entry.subscriber_qos().partition.name.length(1);
-  reader.reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
+  ReaderPtr reader(new Reader(RtpsRelay::ReaderEntry(), true));
+  reader->reader_entry.topic_name("the topic");
+  reader->reader_entry.type_name("the type");
+  reader->reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
+  reader->reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
+  reader->reader_entry.subscriber_qos().partition.name.length(1);
+  reader->reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
 
   Index index;
-  index.insert(&writer);
-  index.insert(&reader);
+  index.insert(writer);
+  index.insert(reader);
 
   ASSERT_MATCHED;
 
-  RtpsRelay::WriterEntry entry(writer.writer_entry);
+  RtpsRelay::WriterEntry entry(writer->writer_entry);
   entry.publisher_qos().partition.name[0] = "Object";
 
-  index.reinsert(&writer, entry);
+  index.reinsert(writer, entry);
 
   ASSERT_NOT_MATCHED;
 }
@@ -225,32 +225,32 @@ void matched_then_writer_changes_partition(int& status)
 template <typename Index>
 void matched_then_reader_changes_partition(int& status)
 {
-  Writer writer(RtpsRelay::WriterEntry(), true);
-  writer.writer_entry.topic_name("the topic");
-  writer.writer_entry.type_name("the type");
-  writer.writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
-  writer.writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
-  writer.writer_entry.publisher_qos().partition.name.length(1);
-  writer.writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
+  WriterPtr writer(new Writer(RtpsRelay::WriterEntry(), true));
+  writer->writer_entry.topic_name("the topic");
+  writer->writer_entry.type_name("the type");
+  writer->writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
+  writer->writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
+  writer->writer_entry.publisher_qos().partition.name.length(1);
+  writer->writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
 
-  Reader reader(RtpsRelay::ReaderEntry(), true);
-  reader.reader_entry.topic_name("the topic");
-  reader.reader_entry.type_name("the type");
-  reader.reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
-  reader.reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
-  reader.reader_entry.subscriber_qos().partition.name.length(1);
-  reader.reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
+  ReaderPtr reader(new Reader(RtpsRelay::ReaderEntry(), true));
+  reader->reader_entry.topic_name("the topic");
+  reader->reader_entry.type_name("the type");
+  reader->reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
+  reader->reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
+  reader->reader_entry.subscriber_qos().partition.name.length(1);
+  reader->reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
 
   Index index;
-  index.insert(&writer);
-  index.insert(&reader);
+  index.insert(writer);
+  index.insert(reader);
 
   ASSERT_MATCHED;
 
-  RtpsRelay::ReaderEntry entry(reader.reader_entry);
+  RtpsRelay::ReaderEntry entry(reader->reader_entry);
   entry.subscriber_qos().partition.name[0] = "Object";
 
-  index.reinsert(&reader, entry);
+  index.reinsert(reader, entry);
 
   ASSERT_NOT_MATCHED;
 }
@@ -258,32 +258,32 @@ void matched_then_reader_changes_partition(int& status)
 template <typename Index>
 void matched_then_writer_changes_topic(int& status)
 {
-  Writer writer(RtpsRelay::WriterEntry(), true);
-  writer.writer_entry.topic_name("the topic");
-  writer.writer_entry.type_name("the type");
-  writer.writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
-  writer.writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
-  writer.writer_entry.publisher_qos().partition.name.length(1);
-  writer.writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
+  WriterPtr writer(new Writer(RtpsRelay::WriterEntry(), true));
+  writer->writer_entry.topic_name("the topic");
+  writer->writer_entry.type_name("the type");
+  writer->writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
+  writer->writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
+  writer->writer_entry.publisher_qos().partition.name.length(1);
+  writer->writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
 
-  Reader reader(RtpsRelay::ReaderEntry(), true);
-  reader.reader_entry.topic_name("the topic");
-  reader.reader_entry.type_name("the type");
-  reader.reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
-  reader.reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
-  reader.reader_entry.subscriber_qos().partition.name.length(1);
-  reader.reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
+  ReaderPtr reader(new Reader(RtpsRelay::ReaderEntry(), true));
+  reader->reader_entry.topic_name("the topic");
+  reader->reader_entry.type_name("the type");
+  reader->reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
+  reader->reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
+  reader->reader_entry.subscriber_qos().partition.name.length(1);
+  reader->reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
 
   Index index;
-  index.insert(&writer);
-  index.insert(&reader);
+  index.insert(writer);
+  index.insert(reader);
 
   ASSERT_MATCHED;
 
-  RtpsRelay::WriterEntry entry(writer.writer_entry);
+  RtpsRelay::WriterEntry entry(writer->writer_entry);
   entry.topic_name("a new topic");
 
-  index.reinsert(&writer, entry);
+  index.reinsert(writer, entry);
 
   ASSERT_NOT_MATCHED;
 }
@@ -291,32 +291,32 @@ void matched_then_writer_changes_topic(int& status)
 template <typename Index>
 void matched_then_reader_changes_topic(int& status)
 {
-  Writer writer(RtpsRelay::WriterEntry(), true);
-  writer.writer_entry.topic_name("the topic");
-  writer.writer_entry.type_name("the type");
-  writer.writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
-  writer.writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
-  writer.writer_entry.publisher_qos().partition.name.length(1);
-  writer.writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
+  WriterPtr writer(new Writer(RtpsRelay::WriterEntry(), true));
+  writer->writer_entry.topic_name("the topic");
+  writer->writer_entry.type_name("the type");
+  writer->writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
+  writer->writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
+  writer->writer_entry.publisher_qos().partition.name.length(1);
+  writer->writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
 
-  Reader reader(RtpsRelay::ReaderEntry(), true);
-  reader.reader_entry.topic_name("the topic");
-  reader.reader_entry.type_name("the type");
-  reader.reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
-  reader.reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
-  reader.reader_entry.subscriber_qos().partition.name.length(1);
-  reader.reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
+  ReaderPtr reader(new Reader(RtpsRelay::ReaderEntry(), true));
+  reader->reader_entry.topic_name("the topic");
+  reader->reader_entry.type_name("the type");
+  reader->reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
+  reader->reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
+  reader->reader_entry.subscriber_qos().partition.name.length(1);
+  reader->reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
 
   Index index;
-  index.insert(&writer);
-  index.insert(&reader);
+  index.insert(writer);
+  index.insert(reader);
 
   ASSERT_MATCHED;
 
-  RtpsRelay::ReaderEntry entry(reader.reader_entry);
+  RtpsRelay::ReaderEntry entry(reader->reader_entry);
   entry.topic_name("a new topic");
 
-  index.reinsert(&reader, entry);
+  index.reinsert(reader, entry);
 
   ASSERT_NOT_MATCHED;
 }
@@ -324,34 +324,34 @@ void matched_then_reader_changes_topic(int& status)
 template <typename Index>
 void unmatched_then_writer_changes_reliability(int& status)
 {
-  Writer writer(RtpsRelay::WriterEntry(), true);
-  writer.writer_entry.topic_name("the topic");
-  writer.writer_entry.type_name("the type");
-  writer.writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
-  writer.writer_entry.data_writer_qos().reliability.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
-  writer.writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
-  writer.writer_entry.publisher_qos().partition.name.length(1);
-  writer.writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
+  WriterPtr writer(new Writer(RtpsRelay::WriterEntry(), true));
+  writer->writer_entry.topic_name("the topic");
+  writer->writer_entry.type_name("the type");
+  writer->writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
+  writer->writer_entry.data_writer_qos().reliability.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
+  writer->writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
+  writer->writer_entry.publisher_qos().partition.name.length(1);
+  writer->writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
 
-  Reader reader(RtpsRelay::ReaderEntry(), true);
-  reader.reader_entry.topic_name("the topic");
-  reader.reader_entry.type_name("the type");
-  reader.reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
-  reader.reader_entry.data_reader_qos().reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-  reader.reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
-  reader.reader_entry.subscriber_qos().partition.name.length(1);
-  reader.reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
+  ReaderPtr reader(new Reader(RtpsRelay::ReaderEntry(), true));
+  reader->reader_entry.topic_name("the topic");
+  reader->reader_entry.type_name("the type");
+  reader->reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
+  reader->reader_entry.data_reader_qos().reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+  reader->reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
+  reader->reader_entry.subscriber_qos().partition.name.length(1);
+  reader->reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
 
   Index index;
-  index.insert(&writer);
-  index.insert(&reader);
+  index.insert(writer);
+  index.insert(reader);
 
   ASSERT_NOT_MATCHED;
 
-  RtpsRelay::WriterEntry entry(writer.writer_entry);
+  RtpsRelay::WriterEntry entry(writer->writer_entry);
   entry.data_writer_qos().reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
-  index.reinsert(&writer, entry);
+  index.reinsert(writer, entry);
 
   ASSERT_MATCHED;
 }
@@ -359,34 +359,34 @@ void unmatched_then_writer_changes_reliability(int& status)
 template <typename Index>
 void unmatched_then_reader_changes_reliability(int& status)
 {
-  Writer writer(RtpsRelay::WriterEntry(), true);
-  writer.writer_entry.topic_name("the topic");
-  writer.writer_entry.type_name("the type");
-  writer.writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
-  writer.writer_entry.data_writer_qos().reliability.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
-  writer.writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
-  writer.writer_entry.publisher_qos().partition.name.length(1);
-  writer.writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
+  WriterPtr writer(new Writer(RtpsRelay::WriterEntry(), true));
+  writer->writer_entry.topic_name("the topic");
+  writer->writer_entry.type_name("the type");
+  writer->writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
+  writer->writer_entry.data_writer_qos().reliability.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
+  writer->writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
+  writer->writer_entry.publisher_qos().partition.name.length(1);
+  writer->writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
 
-  Reader reader(RtpsRelay::ReaderEntry(), true);
-  reader.reader_entry.topic_name("the topic");
-  reader.reader_entry.type_name("the type");
-  reader.reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
-  reader.reader_entry.data_reader_qos().reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-  reader.reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
-  reader.reader_entry.subscriber_qos().partition.name.length(1);
-  reader.reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
+  ReaderPtr reader(new Reader(RtpsRelay::ReaderEntry(), true));
+  reader->reader_entry.topic_name("the topic");
+  reader->reader_entry.type_name("the type");
+  reader->reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
+  reader->reader_entry.data_reader_qos().reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+  reader->reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
+  reader->reader_entry.subscriber_qos().partition.name.length(1);
+  reader->reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
 
   Index index;
-  index.insert(&writer);
-  index.insert(&reader);
+  index.insert(writer);
+  index.insert(reader);
 
   ASSERT_NOT_MATCHED;
 
-  RtpsRelay::ReaderEntry entry(reader.reader_entry);
+  RtpsRelay::ReaderEntry entry(reader->reader_entry);
   entry.data_reader_qos().reliability.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
 
-  index.reinsert(&reader, entry);
+  index.reinsert(reader, entry);
 
   ASSERT_MATCHED;
 }
@@ -394,32 +394,32 @@ void unmatched_then_reader_changes_reliability(int& status)
 template <typename Index>
 void unmatched_then_writer_changes_partition(int& status)
 {
-  Writer writer(RtpsRelay::WriterEntry(), true);
-  writer.writer_entry.topic_name("the topic");
-  writer.writer_entry.type_name("the type");
-  writer.writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
-  writer.writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
-  writer.writer_entry.publisher_qos().partition.name.length(1);
-  writer.writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
+  WriterPtr writer(new Writer(RtpsRelay::WriterEntry(), true));
+  writer->writer_entry.topic_name("the topic");
+  writer->writer_entry.type_name("the type");
+  writer->writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
+  writer->writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
+  writer->writer_entry.publisher_qos().partition.name.length(1);
+  writer->writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
 
-  Reader reader(RtpsRelay::ReaderEntry(), true);
-  reader.reader_entry.topic_name("the topic");
-  reader.reader_entry.type_name("the type");
-  reader.reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
-  reader.reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
-  reader.reader_entry.subscriber_qos().partition.name.length(1);
-  reader.reader_entry.subscriber_qos().partition.name[0] = "OCI";
+  ReaderPtr reader(new Reader(RtpsRelay::ReaderEntry(), true));
+  reader->reader_entry.topic_name("the topic");
+  reader->reader_entry.type_name("the type");
+  reader->reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
+  reader->reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
+  reader->reader_entry.subscriber_qos().partition.name.length(1);
+  reader->reader_entry.subscriber_qos().partition.name[0] = "OCI";
 
   Index index;
-  index.insert(&writer);
-  index.insert(&reader);
+  index.insert(writer);
+  index.insert(reader);
 
   ASSERT_NOT_MATCHED;
 
-  RtpsRelay::WriterEntry entry(writer.writer_entry);
+  RtpsRelay::WriterEntry entry(writer->writer_entry);
   entry.publisher_qos().partition.name[0] = "OCI";
 
-  index.reinsert(&writer, entry);
+  index.reinsert(writer, entry);
 
   ASSERT_MATCHED;
 }
@@ -427,32 +427,32 @@ void unmatched_then_writer_changes_partition(int& status)
 template <typename Index>
 void unmatched_then_reader_changes_partition(int& status)
 {
-  Writer writer(RtpsRelay::WriterEntry(), true);
-  writer.writer_entry.topic_name("the topic");
-  writer.writer_entry.type_name("the type");
-  writer.writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
-  writer.writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
-  writer.writer_entry.publisher_qos().partition.name.length(1);
-  writer.writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
+  WriterPtr writer(new Writer(RtpsRelay::WriterEntry(), true));
+  writer->writer_entry.topic_name("the topic");
+  writer->writer_entry.type_name("the type");
+  writer->writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
+  writer->writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
+  writer->writer_entry.publisher_qos().partition.name.length(1);
+  writer->writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
 
-  Reader reader(RtpsRelay::ReaderEntry(), true);
-  reader.reader_entry.topic_name("the topic");
-  reader.reader_entry.type_name("the type");
-  reader.reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
-  reader.reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
-  reader.reader_entry.subscriber_qos().partition.name.length(1);
-  reader.reader_entry.subscriber_qos().partition.name[0] = "OCI";
+  ReaderPtr reader(new Reader(RtpsRelay::ReaderEntry(), true));
+  reader->reader_entry.topic_name("the topic");
+  reader->reader_entry.type_name("the type");
+  reader->reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
+  reader->reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
+  reader->reader_entry.subscriber_qos().partition.name.length(1);
+  reader->reader_entry.subscriber_qos().partition.name[0] = "OCI";
 
   Index index;
-  index.insert(&writer);
-  index.insert(&reader);
+  index.insert(writer);
+  index.insert(reader);
 
   ASSERT_NOT_MATCHED;
 
-  RtpsRelay::ReaderEntry entry(reader.reader_entry);
+  RtpsRelay::ReaderEntry entry(reader->reader_entry);
   entry.subscriber_qos().partition.name[0] = "Object Computing, Inc.";
 
-  index.reinsert(&reader, entry);
+  index.reinsert(reader, entry);
 
   ASSERT_MATCHED;
 }
@@ -460,32 +460,32 @@ void unmatched_then_reader_changes_partition(int& status)
 template <typename Index>
 void unmatched_then_writer_changes_topic(int& status)
 {
-  Writer writer(RtpsRelay::WriterEntry(), true);
-  writer.writer_entry.topic_name("wrong topic");
-  writer.writer_entry.type_name("the type");
-  writer.writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
-  writer.writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
-  writer.writer_entry.publisher_qos().partition.name.length(1);
-  writer.writer_entry.publisher_qos().partition.name[0] = "O*C*I*";
+  WriterPtr writer(new Writer(RtpsRelay::WriterEntry(), true));
+  writer->writer_entry.topic_name("wrong topic");
+  writer->writer_entry.type_name("the type");
+  writer->writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
+  writer->writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
+  writer->writer_entry.publisher_qos().partition.name.length(1);
+  writer->writer_entry.publisher_qos().partition.name[0] = "O*C*I*";
 
-  Reader reader(RtpsRelay::ReaderEntry(), true);
-  reader.reader_entry.topic_name("the topic");
-  reader.reader_entry.type_name("the type");
-  reader.reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
-  reader.reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
-  reader.reader_entry.subscriber_qos().partition.name.length(1);
-  reader.reader_entry.subscriber_qos().partition.name[0] = "Object Computing, Inc.";
+  ReaderPtr reader(new Reader(RtpsRelay::ReaderEntry(), true));
+  reader->reader_entry.topic_name("the topic");
+  reader->reader_entry.type_name("the type");
+  reader->reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
+  reader->reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
+  reader->reader_entry.subscriber_qos().partition.name.length(1);
+  reader->reader_entry.subscriber_qos().partition.name[0] = "Object Computing, Inc.";
 
   Index index;
-  index.insert(&writer);
-  index.insert(&reader);
+  index.insert(writer);
+  index.insert(reader);
 
   ASSERT_NOT_MATCHED;
 
-  RtpsRelay::WriterEntry entry(writer.writer_entry);
+  RtpsRelay::WriterEntry entry(writer->writer_entry);
   entry.topic_name("the topic");
 
-  index.reinsert(&writer, entry);
+  index.reinsert(writer, entry);
 
   ASSERT_MATCHED;
 }
@@ -493,30 +493,30 @@ void unmatched_then_writer_changes_topic(int& status)
 template <typename Index>
 void unmatched_then_reader_changes_topic(int& status)
 {
-  Writer writer(RtpsRelay::WriterEntry(), true);
-  writer.writer_entry.topic_name("the topic");
-  writer.writer_entry.type_name("the type");
-  writer.writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
-  writer.writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
+  WriterPtr writer(new Writer(RtpsRelay::WriterEntry(), true));
+  writer->writer_entry.topic_name("the topic");
+  writer->writer_entry.type_name("the type");
+  writer->writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
+  writer->writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
 
-  Reader reader(RtpsRelay::ReaderEntry(), true);
-  reader.reader_entry.topic_name("wrong topic");
-  reader.reader_entry.type_name("the type");
-  reader.reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
-  reader.reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
-  reader.reader_entry.subscriber_qos().partition.name.length(1);
-  reader.reader_entry.subscriber_qos().partition.name[0] = "";
+  ReaderPtr reader(new Reader(RtpsRelay::ReaderEntry(), true));
+  reader->reader_entry.topic_name("wrong topic");
+  reader->reader_entry.type_name("the type");
+  reader->reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
+  reader->reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
+  reader->reader_entry.subscriber_qos().partition.name.length(1);
+  reader->reader_entry.subscriber_qos().partition.name[0] = "";
 
   Index index;
-  index.insert(&writer);
-  index.insert(&reader);
+  index.insert(writer);
+  index.insert(reader);
 
   ASSERT_NOT_MATCHED;
 
-  RtpsRelay::ReaderEntry entry(reader.reader_entry);
+  RtpsRelay::ReaderEntry entry(reader->reader_entry);
   entry.topic_name("the topic");
 
-  index.reinsert(&reader, entry);
+  index.reinsert(reader, entry);
 
   ASSERT_MATCHED;
 }
@@ -524,29 +524,29 @@ void unmatched_then_reader_changes_topic(int& status)
 template <typename Index>
 void matched_then_writer_disappears(int& status)
 {
-  Writer writer(RtpsRelay::WriterEntry(), true);
-  writer.writer_entry.topic_name("the topic");
-  writer.writer_entry.type_name("the type");
-  writer.writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
-  writer.writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
-  writer.writer_entry.publisher_qos().partition.name.length(1);
-  writer.writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
+  WriterPtr writer(new Writer(RtpsRelay::WriterEntry(), true));
+  writer->writer_entry.topic_name("the topic");
+  writer->writer_entry.type_name("the type");
+  writer->writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
+  writer->writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
+  writer->writer_entry.publisher_qos().partition.name.length(1);
+  writer->writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
 
-  Reader reader(RtpsRelay::ReaderEntry(), true);
-  reader.reader_entry.topic_name("the topic");
-  reader.reader_entry.type_name("the type");
-  reader.reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
-  reader.reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
-  reader.reader_entry.subscriber_qos().partition.name.length(1);
-  reader.reader_entry.subscriber_qos().partition.name[0] = "O*C*I*";
+  ReaderPtr reader(new Reader(RtpsRelay::ReaderEntry(), true));
+  reader->reader_entry.topic_name("the topic");
+  reader->reader_entry.type_name("the type");
+  reader->reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
+  reader->reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
+  reader->reader_entry.subscriber_qos().partition.name.length(1);
+  reader->reader_entry.subscriber_qos().partition.name[0] = "O*C*I*";
 
   Index index;
-  index.insert(&writer);
-  index.insert(&reader);
+  index.insert(writer);
+  index.insert(reader);
 
   ASSERT_MATCHED;
 
-  index.erase(&writer);
+  index.erase(writer);
 
   ASSERT_NOT_MATCHED;
 }
@@ -554,29 +554,28 @@ void matched_then_writer_disappears(int& status)
 template <typename Index>
 void matched_then_reader_disappears(int& status)
 {
-  Writer writer(RtpsRelay::WriterEntry(), true);
-  writer.writer_entry.topic_name("the topic");
-  writer.writer_entry.type_name("the type");
-  writer.writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
-  writer.writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
-  writer.writer_entry.publisher_qos().partition.name.length(1);
-  writer.writer_entry.publisher_qos().partition.name[0] = "O*C*I*";
+  WriterPtr writer(new Writer(RtpsRelay::WriterEntry(), true));
+  writer->writer_entry.topic_name("the topic");
+  writer->writer_entry.type_name("the type");
+  writer->writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
+  writer->writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
+  writer->writer_entry.publisher_qos().partition.name.length(1);
+  writer->writer_entry.publisher_qos().partition.name[0] = "O*C*I*";
 
-  Reader reader(RtpsRelay::ReaderEntry(), true);
-  reader.reader_entry.topic_name("the topic");
-  reader.reader_entry.type_name("the type");
-  reader.reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
-  reader.reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
-  reader.reader_entry.subscriber_qos().partition.name.length(1);
-  reader.reader_entry.subscriber_qos().partition.name[0] = "Object Computing, Inc.";
-
+  ReaderPtr reader(new Reader(RtpsRelay::ReaderEntry(), true));
+  reader->reader_entry.topic_name("the topic");
+  reader->reader_entry.type_name("the type");
+  reader->reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
+  reader->reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
+  reader->reader_entry.subscriber_qos().partition.name.length(1);
+  reader->reader_entry.subscriber_qos().partition.name[0] = "Object Computing, Inc.";
   Index index;
-  index.insert(&writer);
-  index.insert(&reader);
+  index.insert(writer);
+  index.insert(reader);
 
   ASSERT_MATCHED;
 
-  index.erase(&reader);
+  index.erase(reader);
 
   ASSERT_NOT_MATCHED;
 }

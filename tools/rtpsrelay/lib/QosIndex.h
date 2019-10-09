@@ -20,6 +20,9 @@ private:
   const bool local_;
 };
 
+typedef std::shared_ptr<Writer> WriterPtr;
+typedef std::set<WriterPtr> WriterSet;
+
 struct RtpsRelayLib_Export Reader {
   Reader(const RtpsRelay::ReaderEntry& re, bool local) : reader_entry(re), local_(local) {}
   RtpsRelay::ReaderEntry reader_entry;
@@ -32,8 +35,8 @@ private:
   const bool local_;
 };
 
-typedef std::set<Writer*> WriterSet;
-typedef std::set<Reader*> ReaderSet;
+typedef std::shared_ptr<Reader> ReaderPtr;
+typedef std::set<ReaderPtr> ReaderSet;
 
 class RtpsRelayLib_Export NoIndex {
 public:
@@ -47,20 +50,20 @@ public:
     }
   }
 
-  void insert(Writer* writer)
+  void insert(WriterPtr writer)
   {
     const auto p = writers_.insert(std::make_pair(writer, ReaderSet()));
     writer->indexes.insert(this);
     match(p.first);
   }
 
-  void reinsert(Writer* writer, const RtpsRelay::WriterEntry& writer_entry)
+  void reinsert(WriterPtr writer, const RtpsRelay::WriterEntry& writer_entry)
   {
     writer->writer_entry = writer_entry;
     match(writers_.find(writer));
   }
 
-  void erase(Writer* writer)
+  void erase(WriterPtr writer)
   {
     const auto pos = writers_.find(writer);
     for (const auto reader : pos->second) {
@@ -70,20 +73,20 @@ public:
     writer->indexes.erase(this);
   }
 
-  void insert(Reader* reader)
+  void insert(ReaderPtr reader)
   {
     const auto p = readers_.insert(std::make_pair(reader, WriterSet()));
     reader->indexes.insert(this);
     match(p.first);
   }
 
-  void reinsert(Reader* reader, const RtpsRelay::ReaderEntry& reader_entry)
+  void reinsert(ReaderPtr reader, const RtpsRelay::ReaderEntry& reader_entry)
   {
     reader->reader_entry = reader_entry;
     match(readers_.find(reader));
   }
 
-  void erase(Reader* reader)
+  void erase(ReaderPtr reader)
   {
     const auto pos = readers_.find(reader);
     for (const auto writer : pos->second) {
@@ -98,7 +101,7 @@ public:
     return writers_.empty() && readers_.empty();
   }
 
-  void get_readers(Writer* writer, ReaderSet& readers) const
+  void get_readers(WriterPtr writer, ReaderSet& readers) const
   {
     const auto pos = writers_.find(writer);
     if (pos != writers_.end()) {
@@ -106,7 +109,7 @@ public:
     }
   }
 
-  void get_writers(Reader* reader, WriterSet& writers) const
+  void get_writers(ReaderPtr reader, WriterSet& writers) const
   {
     const auto pos = readers_.find(reader);
     if (pos != readers_.end()) {
@@ -115,8 +118,8 @@ public:
   }
 
 private:
-  typedef std::map<Writer*, ReaderSet> Writers;
-  typedef std::map<Reader*, WriterSet> Readers;
+  typedef std::map<WriterPtr, ReaderSet> Writers;
+  typedef std::map<ReaderPtr, WriterSet> Readers;
 
   void match(Writers::iterator pos);
   void match(Readers::iterator pos);
@@ -131,77 +134,79 @@ class Pattern;
 template <typename SubIndex>
 class Literal {
 public:
-  typedef Pattern<SubIndex> PatternType;
+  typedef std::shared_ptr<Literal> LiteralPtr;
+  typedef std::shared_ptr<Pattern<SubIndex> > PatternPtr;
 
   Literal() : literal_count_(0) {}
 
-  ~Literal()
+  static void remove_from_patterns(LiteralPtr literal)
   {
-    for (PatternType* pattern : patterns_) {
-      pattern->erase(this);
+    for (PatternPtr pattern : literal->patterns_) {
+      pattern->erase(literal);
     }
+    literal->patterns_.clear();
   }
 
-  void insert(PatternType* pattern)
+  void insert(PatternPtr pattern)
   {
     patterns_.insert(pattern);
   }
 
-  void erase(PatternType* pattern)
+  void erase(PatternPtr pattern)
   {
     patterns_.erase(pattern);
   }
 
-  void insert_literal(Writer* writer)
+  void insert_literal(WriterPtr writer)
   {
     index_.insert(writer);
     ++literal_count_;
   }
 
-  void insert_pattern(Writer* writer)
+  void insert_pattern(WriterPtr writer)
   {
     index_.insert(writer);
   }
 
-  void reinsert(Writer* writer, const RtpsRelay::WriterEntry& writer_entry)
+  void reinsert(WriterPtr writer, const RtpsRelay::WriterEntry& writer_entry)
   {
     index_.reinsert(writer, writer_entry);
   }
 
-  void erase_literal(Writer* writer)
+  void erase_literal(WriterPtr writer)
   {
     index_.erase(writer);
     --literal_count_;
   }
 
-  void erase_pattern(Writer* writer)
+  void erase_pattern(WriterPtr writer)
   {
     index_.erase(writer);
   }
 
-  void insert_literal(Reader* reader)
+  void insert_literal(ReaderPtr reader)
   {
     index_.insert(reader);
     ++literal_count_;
   }
 
-  void insert_pattern(Reader* reader)
+  void insert_pattern(ReaderPtr reader)
   {
     index_.insert(reader);
   }
 
-  void reinsert(Reader* reader, const RtpsRelay::ReaderEntry& reader_entry)
+  void reinsert(ReaderPtr reader, const RtpsRelay::ReaderEntry& reader_entry)
   {
     index_.reinsert(reader, reader_entry);
   }
 
-  void erase_literal(Reader* reader)
+  void erase_literal(ReaderPtr reader)
   {
     index_.erase(reader);
     --literal_count_;
   }
 
-  void erase_pattern(Reader* reader)
+  void erase_pattern(ReaderPtr reader)
   {
     index_.erase(reader);
   }
@@ -211,12 +216,12 @@ public:
     return literal_count_ == 0;
   }
 
-  void get_readers(Writer* writer, ReaderSet& readers) const
+  void get_readers(WriterPtr writer, ReaderSet& readers) const
   {
     index_.get_readers(writer, readers);
   }
 
-  void get_writers(Reader* reader, WriterSet& writers) const
+  void get_writers(ReaderPtr reader, WriterSet& writers) const
   {
     index_.get_writers(reader, writers);
   }
@@ -224,39 +229,42 @@ public:
 private:
   SubIndex index_;
   size_t literal_count_;
-  std::set<PatternType*> patterns_;
+  std::set<PatternPtr> patterns_;
 };
 
 template <typename SubIndex>
 class Pattern {
 public:
+  typedef std::shared_ptr<Pattern> PatternPtr;
   typedef Literal<SubIndex> LiteralType;
+  typedef std::shared_ptr<LiteralType> LiteralPtr;
 
-  ~Pattern()
+  static void remove_from_literals(PatternPtr pattern)
   {
-    for (const auto literal : literals_) {
-      literal->erase(this);
+    for (const auto literal : pattern->literals_) {
+      literal->erase(pattern);
     }
+    pattern->literals_.clear();
   }
 
-  void insert(LiteralType* literal)
+  static void insert(PatternPtr pattern, LiteralPtr literal)
   {
-    literals_.insert(literal);
-    literal->insert(this);
-    for (const auto writer : writers_) {
+    pattern->literals_.insert(literal);
+    literal->insert(pattern);
+    for (const auto writer : pattern->writers_) {
       literal->insert_pattern(writer);
     }
-    for (const auto reader : readers_) {
+    for (const auto reader : pattern->readers_) {
       literal->insert_pattern(reader);
     }
   }
 
-  void erase(LiteralType* literal)
+  void erase(LiteralPtr literal)
   {
     literals_.erase(literal);
   }
 
-  void insert(Writer* writer)
+  void insert(WriterPtr writer)
   {
     writers_.insert(writer);
     for (const auto literal : literals_) {
@@ -264,14 +272,14 @@ public:
     }
   }
 
-  void reinsert(Writer* writer, const RtpsRelay::WriterEntry& writer_entry)
+  void reinsert(WriterPtr writer, const RtpsRelay::WriterEntry& writer_entry)
   {
     for (const auto literal : literals_) {
       literal->reinsert(writer, writer_entry);
     }
   }
 
-  void erase(Writer* writer)
+  void erase(WriterPtr writer)
   {
     for (const auto literal : literals_) {
       literal->erase_pattern(writer);
@@ -279,7 +287,7 @@ public:
     writers_.erase(writer);
   }
 
-  void insert(Reader* reader)
+  void insert(ReaderPtr reader)
   {
     readers_.insert(reader);
     for (const auto literal : literals_) {
@@ -287,14 +295,14 @@ public:
     }
   }
 
-  void reinsert(Reader* reader, const RtpsRelay::ReaderEntry& reader_entry)
+  void reinsert(ReaderPtr reader, const RtpsRelay::ReaderEntry& reader_entry)
   {
     for (const auto literal : literals_) {
       literal->reinsert(reader, reader_entry);
     }
   }
 
-  void erase(Reader* reader)
+  void erase(ReaderPtr reader)
   {
     for (const auto literal : literals_) {
       literal->erase_pattern(reader);
@@ -307,14 +315,14 @@ public:
     return writers_.empty() && readers_.empty();
   }
 
-  void get_readers(Writer* writer, ReaderSet& readers) const
+  void get_readers(WriterPtr writer, ReaderSet& readers) const
   {
     for (const auto literal : literals_) {
       literal->get_readers(writer, readers);
     }
   }
 
-  void get_writers(Reader* reader, WriterSet& writers) const
+  void get_writers(ReaderPtr reader, WriterSet& writers) const
   {
     for (const auto literal : literals_) {
       literal->get_writers(reader, writers);
@@ -322,40 +330,38 @@ public:
   }
 
 private:
-  std::set<LiteralType*> literals_;
-  std::set<Writer*> writers_;
-  std::set<Reader*> readers_;
+  std::set<LiteralPtr> literals_;
+  WriterSet writers_;
+  ReaderSet readers_;
 };
 
 template <typename SubIndex>
 class TrieNode {
 public:
   typedef Literal<SubIndex> LiteralType;
+  typedef std::shared_ptr<LiteralType> LiteralPtr;
   typedef Pattern<SubIndex> PatternType;
+  typedef std::shared_ptr<PatternType> PatternPtr;
+  typedef std::shared_ptr<TrieNode> NodePtr;
 
-  TrieNode() : literal_(nullptr), pattern_(nullptr) {}
+  TrieNode() : pattern_(nullptr) {}
 
   ~TrieNode()
   {
     if (literal_) {
-      delete literal_;
+      LiteralType::remove_from_patterns(literal_);
     }
     if (pattern_) {
-      delete pattern_;
-    }
-    for (auto p : children_) {
-      delete p.second;
+      PatternType::remove_from_literals(pattern_);
     }
   }
 
-  void insert(const Name& name, LiteralType* literal)
+  static void insert(NodePtr node, const Name& name, LiteralPtr literal)
   {
-    TrieNode* node = this;
-
     for (const auto& atom : name) {
       const auto iter = node->children_.find(atom);
       if (iter == node->children_.end()) {
-        auto child = new TrieNode();
+        NodePtr child(new TrieNode());
         node->children_[atom] = child;
         node = child;
       } else {
@@ -366,13 +372,11 @@ public:
     node->literal_ = literal;
   }
 
-  LiteralType* find_literal(const Name& name) const
+  static LiteralPtr find_literal(NodePtr node, const Name& name)
   {
     if (!name.is_literal()) {
       return nullptr;
     }
-
-    const TrieNode* node = this;
 
     for (const auto& atom : name) {
       const auto iter = node->children_.find(atom);
@@ -386,27 +390,25 @@ public:
     return node->literal_;
   }
 
-  std::set<LiteralType*> find_literals(const Name& name) const
+  static std::set<LiteralPtr> find_literals(NodePtr node, const Name& name)
   {
-    std::set<LiteralType*> literals;
+    std::set<LiteralPtr> literals;
 
     if (!name.is_pattern()) {
       return literals;
     }
 
-    find_literals(literals, this, name.begin(), name.end());
+    find_literals(literals, node, name.begin(), name.end());
 
     return literals;
   }
 
-  void insert(const Name& name, PatternType* pattern)
+  static void insert(NodePtr node, const Name& name, PatternPtr pattern)
   {
-    TrieNode* node = this;
-
     for (const auto& atom : name) {
       const auto iter = node->children_.find(atom);
       if (iter == node->children_.end()) {
-        auto child = new TrieNode();
+        NodePtr child(new TrieNode());
         node->children_[atom] = child;
         node = child;
       } else {
@@ -417,13 +419,11 @@ public:
     node->pattern_ = pattern;
   }
 
-  PatternType* find_pattern(const Name& name) const
+  static PatternPtr find_pattern(NodePtr node, const Name& name)
   {
     if (!name.is_pattern()) {
       return nullptr;
     }
-
-    const TrieNode* node = this;
 
     for (const auto& atom : name) {
       const auto iter = node->children_.find(atom);
@@ -437,22 +437,22 @@ public:
     return node->pattern_;
   }
 
-  std::set<PatternType*> find_patterns(const Name& name) const
+  static std::set<PatternPtr> find_patterns(NodePtr node, const Name& name)
   {
-    std::set<PatternType*> patterns;
+    std::set<PatternPtr> patterns;
 
     if (!name.is_literal()) {
       return patterns;
     }
 
-    find_patterns(patterns, this, name.begin(), name.end());
+    find_patterns(patterns, node, name.begin(), name.end());
 
     return patterns;
   }
 
-  void remove(const Name& name)
+  static void remove(NodePtr node, const Name& name)
   {
-    remove(this, name.begin(), name.end());
+    remove(node, name.begin(), name.end());
   }
 
   bool empty() const
@@ -461,12 +461,12 @@ public:
   }
 
 private:
-  typedef std::map<Atom, TrieNode*> ChildrenType;
+  typedef std::map<Atom, NodePtr> ChildrenType;
   ChildrenType children_;
-  LiteralType* literal_;
-  PatternType* pattern_;
+  LiteralPtr literal_;
+  PatternPtr pattern_;
 
-  static void find_literals(std::set<LiteralType*>& literals, const TrieNode* node, Name::const_iterator begin, Name::const_iterator end)
+  static void find_literals(std::set<LiteralPtr>& literals, NodePtr node, Name::const_iterator begin, Name::const_iterator end)
   {
     if (begin == end) {
       if (node->literal_) {
@@ -524,7 +524,7 @@ private:
     }
   }
 
-  static void find_patterns(std::set<PatternType*>& patterns, const TrieNode* node, Name::const_iterator begin, Name::const_iterator end)
+  static void find_patterns(std::set<PatternPtr>& patterns, NodePtr node, Name::const_iterator begin, Name::const_iterator end)
   {
     if (begin == end) {
       if (node->pattern_) {
@@ -572,7 +572,7 @@ private:
     }
   }
 
-  static void remove(TrieNode* node, Name::const_iterator begin, Name::const_iterator end)
+  static void remove(NodePtr node, Name::const_iterator begin, Name::const_iterator end)
   {
     if (begin == end) {
       node->literal_ = nullptr;
@@ -585,7 +585,6 @@ private:
     if (pos != node->children_.end()) {
       remove(pos->second, std::next(begin), end);
       if (pos->second->empty()) {
-        delete pos->second;
         node->children_.erase(pos);
       }
     }
@@ -597,15 +596,18 @@ template <typename SubIndex>
 class PartitionIndex {
 public:
   typedef Literal<SubIndex> LiteralType;
+  typedef std::shared_ptr<LiteralType> LiteralPtr;
   typedef Pattern<SubIndex> PatternType;
+  typedef std::shared_ptr<PatternType> PatternPtr;
+  typedef TrieNode<SubIndex> NodeType;
 
-  PartitionIndex()
+  PartitionIndex() : node_(new NodeType())
   {
     empty_qos_.name.length(1);
     empty_qos_.name[0] = "";
   }
 
-  void insert(Writer* writer)
+  void insert(WriterPtr writer)
   {
     const auto qos = choose_qos(&writer->writer_entry._publisher_qos.partition);
 
@@ -615,22 +617,22 @@ public:
         continue;
       }
       if (name.is_literal()) {
-        auto literal = node_.find_literal(name);
+        auto literal = NodeType::find_literal(node_, name);
         if (literal == nullptr) {
-          literal = new LiteralType();
-          node_.insert(name, literal);
-          for (const auto pattern : node_.find_patterns(name)) {
-            pattern->insert(literal);
+          literal = LiteralPtr(new LiteralType());
+          NodeType::insert(node_, name, literal);
+          for (const auto pattern : NodeType::find_patterns(node_, name)) {
+            PatternType::insert(pattern, literal);
           }
         }
         literal->insert_literal(writer);
       } else {
-        auto pattern = node_.find_pattern(name);
+        auto pattern = NodeType::find_pattern(node_, name);
         if (pattern == nullptr) {
-          pattern = new PatternType();
-          node_.insert(name, pattern);
-          for (const auto literal : node_.find_literals(name)) {
-            pattern->insert(literal);
+          pattern = PatternPtr(new PatternType());
+          NodeType::insert(node_, name, pattern);
+          for (const auto literal : NodeType::find_literals(node_, name)) {
+            PatternType::insert(pattern, literal);
           }
         }
         pattern->insert(writer);
@@ -638,7 +640,7 @@ public:
     }
   }
 
-  void reinsert(Writer* writer, const RtpsRelay::WriterEntry& writer_entry)
+  void reinsert(WriterPtr writer, const RtpsRelay::WriterEntry& writer_entry)
   {
     const auto old_qos = choose_qos(&writer->writer_entry._publisher_qos.partition);
     const auto new_qos = choose_qos(&writer_entry._publisher_qos.partition);
@@ -664,26 +666,26 @@ public:
     for (Name name : old_names) {
       if (new_names.count(name) == 0) {
         if (name.is_literal()) {
-          const auto literal = node_.find_literal(name);
+          const auto literal = NodeType::find_literal(node_, name);
           literal->erase_literal(writer);
           if (literal->empty()) {
-            node_.remove(name);
-            delete literal;
+            NodeType::remove(node_, name);
+            LiteralType::remove_from_patterns(literal);
           }
         } else {
-          const auto pattern = node_.find_pattern(name);
+          const auto pattern = NodeType::find_pattern(node_, name);
           pattern->erase(writer);
           if (pattern->empty()) {
-            node_.remove(name);
-            delete pattern;
+            NodeType::remove(node_, name);
+            PatternType::remove_from_literals(pattern);
           }
         }
       } else {
         if (name.is_literal()) {
-          const auto literal = node_.find_literal(name);
+          const auto literal = NodeType::find_literal(node_, name);
           literal->reinsert(writer, writer_entry);
         } else {
-          const auto pattern = node_.find_pattern(name);
+          const auto pattern = NodeType::find_pattern(node_, name);
           pattern->reinsert(writer, writer_entry);
         }
       }
@@ -694,22 +696,22 @@ public:
     for (Name name : new_names) {
       if (old_names.count(name) == 0) {
         if (name.is_literal()) {
-          auto literal = node_.find_literal(name);
+          auto literal = NodeType::find_literal(node_, name);
           if (literal == nullptr) {
-            literal = new LiteralType();
-            node_.insert(name, literal);
-            for (const auto pattern : node_.find_patterns(name)) {
-              pattern->insert(literal);
+            literal = LiteralPtr(new LiteralType());
+            NodeType::insert(node_, name, literal);
+            for (const auto pattern : NodeType::find_patterns(node_, name)) {
+              PatternType::insert(pattern, literal);
             }
           }
           literal->insert_literal(writer);
         } else {
-          auto pattern = node_.find_pattern(name);
+          auto pattern = NodeType::find_pattern(node_, name);
           if (pattern == nullptr) {
-            pattern = new PatternType();
-            node_.insert(name, pattern);
-            for (const auto literal : node_.find_literals(name)) {
-              pattern->insert(literal);
+            pattern = PatternPtr(new PatternType());
+            NodeType::insert(node_, name, pattern);
+            for (const auto literal : NodeType::find_literals(node_, name)) {
+              PatternType::insert(pattern, literal);
             }
           }
           pattern->insert(writer);
@@ -718,7 +720,7 @@ public:
     }
   }
 
-  void erase(Writer* writer)
+  void erase(WriterPtr writer)
   {
     const auto qos = choose_qos(&writer->writer_entry._publisher_qos.partition);
 
@@ -728,24 +730,24 @@ public:
         continue;
       }
       if (name.is_literal()) {
-        const auto literal = node_.find_literal(name);
+        const auto literal = NodeType::find_literal(node_, name);
         literal->erase_literal(writer);
         if (literal->empty()) {
-          node_.remove(name);
-          delete literal;
+          NodeType::remove(node_, name);
+          LiteralType::remove_from_patterns(literal);
         }
       } else {
-        const auto pattern = node_.find_pattern(name);
+        const auto pattern = NodeType::find_pattern(node_, name);
         pattern->erase(writer);
         if (pattern->empty()) {
-          node_.remove(name);
-          delete pattern;
+          NodeType::remove(node_, name);
+          PatternType::remove_from_literals(pattern);
         }
       }
     }
   }
 
-  void insert(Reader* reader)
+  void insert(ReaderPtr reader)
   {
     const auto qos = choose_qos(&reader->reader_entry._subscriber_qos.partition);
 
@@ -756,22 +758,22 @@ public:
       }
 
       if (name.is_literal()) {
-        auto literal = node_.find_literal(name);
+        auto literal = NodeType::find_literal(node_, name);
         if (literal == nullptr) {
-          literal = new LiteralType();
-          node_.insert(name, literal);
-          for (const auto pattern : node_.find_patterns(name)) {
-            pattern->insert(literal);
+          literal = LiteralPtr(new LiteralType());
+          NodeType::insert(node_, name, literal);
+          for (const auto pattern : NodeType::find_patterns(node_, name)) {
+            PatternType::insert(pattern, literal);
           }
         }
         literal->insert_literal(reader);
       } else {
-        auto pattern = node_.find_pattern(name);
+        auto pattern = NodeType::find_pattern(node_, name);
         if (pattern == nullptr) {
-          pattern = new PatternType();
-          node_.insert(name, pattern);
-          for (const auto literal : node_.find_literals(name)) {
-            pattern->insert(literal);
+          pattern = PatternPtr(new PatternType());
+          NodeType::insert(node_, name, pattern);
+          for (const auto literal : NodeType::find_literals(node_, name)) {
+            PatternType::insert(pattern, literal);
           }
         }
         pattern->insert(reader);
@@ -779,7 +781,7 @@ public:
     }
   }
 
-  void reinsert(Reader* reader, const RtpsRelay::ReaderEntry& reader_entry)
+  void reinsert(ReaderPtr reader, const RtpsRelay::ReaderEntry& reader_entry)
   {
     const auto old_qos = choose_qos(&reader->reader_entry._subscriber_qos.partition);
     const auto new_qos = choose_qos(&reader_entry._subscriber_qos.partition);
@@ -806,26 +808,26 @@ public:
     for (const Name& name : old_names) {
       if (new_names.count(name) == 0) {
         if (name.is_literal()) {
-          const auto literal = node_.find_literal(name);
+          const auto literal = NodeType::find_literal(node_, name);
           literal->erase_literal(reader);
           if (literal->empty()) {
-            node_.remove(name);
-            delete literal;
+            NodeType::remove(node_, name);
+            LiteralType::remove_from_patterns(literal);
           }
         } else {
-          const auto pattern = node_.find_pattern(name);
+          const auto pattern = NodeType::find_pattern(node_, name);
           pattern->erase(reader);
           if (pattern->empty()) {
-            node_.remove(name);
-            delete pattern;
+            NodeType::remove(node_, name);
+            PatternType::remove_from_literals(pattern);
           }
         }
       } else {
         if (name.is_literal()) {
-          const auto literal = node_.find_literal(name);
+          const auto literal = NodeType::find_literal(node_, name);
           literal->reinsert(reader, reader_entry);
         } else {
-          const auto pattern = node_.find_pattern(name);
+          const auto pattern = NodeType::find_pattern(node_, name);
           pattern->reinsert(reader, reader_entry);
         }
       }
@@ -836,22 +838,22 @@ public:
     for (const Name& name : new_names) {
       if (old_names.count(name) == 0) {
         if (name.is_literal()) {
-          auto literal = node_.find_literal(name);
+          auto literal = NodeType::find_literal(node_, name);
           if (literal == nullptr) {
-            literal = new LiteralType();
-            node_.insert(name, literal);
-            for (const auto pattern : node_.find_patterns(name)) {
-              pattern->insert(literal);
+            literal = LiteralPtr(new LiteralType());
+            NodeType::insert(node_, name, literal);
+            for (const auto pattern : NodeType::find_patterns(node_, name)) {
+              PatternType::insert(pattern, literal);
             }
           }
           literal->insert_literal(reader);
         } else {
-          auto pattern = node_.find_pattern(name);
+          auto pattern = NodeType::find_pattern(node_, name);
           if (pattern == nullptr) {
-            pattern = new PatternType();
-            node_.insert(name, pattern);
-            for (const auto literal : node_.find_literals(name)) {
-              pattern->insert(literal);
+            pattern = PatternPtr(new PatternType());
+            NodeType::insert(node_, name, pattern);
+            for (const auto literal : NodeType::find_literals(node_, name)) {
+              PatternType::insert(pattern, literal);
             }
           }
           pattern->insert(reader);
@@ -860,7 +862,7 @@ public:
     }
   }
 
-  void erase(Reader* reader)
+  void erase(ReaderPtr reader)
   {
     const auto qos = choose_qos(&reader->reader_entry._subscriber_qos.partition);
 
@@ -870,26 +872,26 @@ public:
         continue;
       }
       if (name.is_literal()) {
-        const auto literal = node_.find_literal(name);
+        const auto literal = NodeType::find_literal(node_, name);
         literal->erase_literal(reader);
         if (literal->empty()) {
-          node_.remove(name);
-          delete literal;
+          NodeType::remove(node_, name);
+          LiteralType::remove_from_patterns(literal);
         }
       } else {
-        const auto pattern = node_.find_pattern(name);
+        const auto pattern = NodeType::find_pattern(node_, name);
         pattern->erase(reader);
         if (pattern->empty()) {
-          node_.remove(name);
-          delete pattern;
+          NodeType::remove(node_, name);
+          PatternType::remove_from_literals(pattern);
         }
       }
     }
   }
 
-  bool empty() const { return node_.empty(); }
+  bool empty() const { return node_->empty(); }
 
-  void get_readers(Writer* writer, ReaderSet& readers) const
+  void get_readers(WriterPtr writer, ReaderSet& readers) const
   {
     const auto qos = choose_qos(&writer->writer_entry.publisher_qos().partition);
 
@@ -899,12 +901,12 @@ public:
         continue;
       }
       if (name.is_literal()) {
-        const auto literal = node_.find_literal(name);
+        const auto literal = NodeType::find_literal(node_, name);
         if (literal) {
           literal->get_readers(writer, readers);
         }
       } else {
-        const auto pattern = node_.find_pattern(name);
+        const auto pattern = NodeType::find_pattern(node_, name);
         if (pattern) {
           pattern->get_readers(writer, readers);
         }
@@ -912,7 +914,7 @@ public:
     }
   }
 
-  void get_writers(Reader* reader, WriterSet& writers) const
+  void get_writers(ReaderPtr reader, WriterSet& writers) const
   {
     const auto qos = choose_qos(&reader->reader_entry.subscriber_qos().partition);
 
@@ -922,12 +924,12 @@ public:
         continue;
       }
       if (name.is_literal()) {
-        const auto literal = node_.find_literal(name);
+        const auto literal = NodeType::find_literal(node_, name);
         if (literal) {
           literal->get_writers(reader, writers);
         }
       } else {
-        const auto pattern = node_.find_pattern(name);
+        const auto pattern = NodeType::find_pattern(node_, name);
         if (pattern) {
           pattern->get_writers(reader, writers);
         }
@@ -945,7 +947,7 @@ private:
     }
   }
 
-  TrieNode<SubIndex> node_;
+  typename NodeType::NodePtr node_;
   DDS::PartitionQosPolicy empty_qos_;
 };
 
@@ -954,14 +956,14 @@ class TopicIndex {
 public:
   typedef std::pair<std::string, std::string> KeyType;
 
-  void insert(Writer* writer)
+  void insert(WriterPtr writer)
   {
     const auto key = std::make_pair(writer->writer_entry.topic_name(), writer->writer_entry.type_name());
     auto p = entities_.insert(std::make_pair(key, SubIndex()));
     p.first->second.insert(writer);
   }
 
-  void reinsert(Writer* writer, const RtpsRelay::WriterEntry& writer_entry)
+  void reinsert(WriterPtr writer, const RtpsRelay::WriterEntry& writer_entry)
   {
     const auto old_key = std::make_pair(writer->writer_entry.topic_name(), writer->writer_entry.type_name());
     const auto new_key = std::make_pair(writer_entry.topic_name(), writer_entry.type_name());
@@ -978,7 +980,7 @@ public:
     }
   }
 
-  void erase(Writer* writer)
+  void erase(WriterPtr writer)
   {
     const auto key = std::make_pair(writer->writer_entry.topic_name(), writer->writer_entry.type_name());
     const auto pos = entities_.find(key);
@@ -988,14 +990,14 @@ public:
     }
   }
 
-  void insert(Reader* reader)
+  void insert(ReaderPtr reader)
   {
     const auto key = std::make_pair(reader->reader_entry.topic_name(), reader->reader_entry.type_name());
     const auto p = entities_.insert(std::make_pair(key, SubIndex()));
     p.first->second.insert(reader);
   }
 
-  void reinsert(Reader* reader, const RtpsRelay::ReaderEntry& reader_entry)
+  void reinsert(ReaderPtr reader, const RtpsRelay::ReaderEntry& reader_entry)
   {
     const auto old_key = std::make_pair(reader->reader_entry.topic_name(), reader->reader_entry.type_name());
     const auto new_key = std::make_pair(reader_entry.topic_name(), reader_entry.type_name());
@@ -1012,7 +1014,7 @@ public:
     }
   }
 
-  void erase(Reader* reader)
+  void erase(ReaderPtr reader)
   {
     const auto key = std::make_pair(reader->reader_entry.topic_name(), reader->reader_entry.type_name());
     const auto pos = entities_.find(key);
@@ -1022,7 +1024,7 @@ public:
     }
   }
 
-  void get_readers(Writer* writer, ReaderSet& readers) const
+  void get_readers(WriterPtr writer, ReaderSet& readers) const
   {
     const auto key = std::make_pair(writer->writer_entry.topic_name(), writer->writer_entry.type_name());
     const auto pos = entities_.find(key);
@@ -1031,7 +1033,7 @@ public:
     }
   }
 
-  void get_writers(Reader* reader, WriterSet& writers) const
+  void get_writers(ReaderPtr reader, WriterSet& writers) const
   {
     const auto key = std::make_pair(reader->reader_entry.topic_name(), reader->reader_entry.type_name());
     const auto pos = entities_.find(key);

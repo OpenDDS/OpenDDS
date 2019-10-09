@@ -9,7 +9,7 @@ void AssociationTable::insert(const WriterEntry& writer_entry)
   const auto writer_guid = guid_to_guid(writer_entry.guid());
   const auto p = writers_.find(writer_guid);
   if (p == writers_.end()) {
-    const auto writer = new Writer(writer_entry, writer_entry.relay_addresses() == relay_addresses_);
+    WriterPtr writer(new Writer(writer_entry, writer_entry.relay_addresses() == relay_addresses_));
     writers_[writer_guid] = writer;
     index_.insert(writer);
   } else {
@@ -22,7 +22,6 @@ void AssociationTable::remove(const WriterEntry& writer)
   const auto writer_guid = guid_to_guid(writer.guid());
   const auto pos = writers_.find(writer_guid);
   index_.erase(pos->second);
-  delete pos->second;
   writers_.erase(pos);
 }
 
@@ -31,7 +30,7 @@ void AssociationTable::insert(const ReaderEntry& reader_entry)
   const auto reader_guid = guid_to_guid(reader_entry.guid());
   const auto p = readers_.find(reader_guid);
   if (p == readers_.end()) {
-    const auto reader = new Reader(reader_entry, reader_entry.relay_addresses() == relay_addresses_);
+    ReaderPtr reader(new Reader(reader_entry, reader_entry.relay_addresses() == relay_addresses_));
     readers_[reader_guid] = reader;
     index_.insert(reader);
   } else {
@@ -44,7 +43,6 @@ void AssociationTable::remove(const ReaderEntry& reader)
   const auto reader_guid = guid_to_guid(reader.guid());
   const auto pos = readers_.find(reader_guid);
   index_.erase(pos->second);
-  delete pos->second;
   readers_.erase(pos);
 }
 
