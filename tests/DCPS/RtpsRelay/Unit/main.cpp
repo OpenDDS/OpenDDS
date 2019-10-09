@@ -604,8 +604,11 @@ void qos_index_test(int& status)
   matched_then_reader_disappears<Index>(status);
 }
 
-int main()
+int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
+  ACE_UNUSED_ARG(argc);
+  ACE_UNUSED_ARG(argv);
+
   int status = EXIT_SUCCESS;
 
   std::set<char> digits;
