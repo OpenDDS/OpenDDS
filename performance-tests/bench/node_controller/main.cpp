@@ -145,6 +145,18 @@ using WorkerPtr = std::shared_ptr<Worker>;
 
 class WorkerManager : public ACE_Event_Handler {
 public:
+
+  WorkerManager(ACE_Process_Manager& process_manager)
+  : process_manager_(process_manager)
+  {
+    process_manager.register_handler(this);
+  }
+
+  ~WorkerManager()
+  {
+    process_manager_.register_handler(nullptr);
+  }
+
   bool add_worker(const NodeId& node_id, const WorkerConfig& config)
   {
     std::lock_guard<std::mutex> ul(lock_);
@@ -164,7 +176,7 @@ public:
     finished_workers_.push_back(worker);
   }
 
-  void run_workers(ACE_Process_Manager& process_manager, ReportDataWriter_var report_writer_impl)
+  void run_workers(ReportDataWriter_var report_writer_impl)
   {
     // Spawn Workers
     {
@@ -172,7 +184,7 @@ public:
       for (auto worker_i : all_workers_) {
         auto& worker = worker_i.second;
         ACE_Process_Options proc_opts = worker->get_proc_opts();
-        pid_t pid = process_manager.spawn(proc_opts);
+        pid_t pid = process_manager_.spawn(proc_opts);
         if (pid != ACE_INVALID_PID) {
           worker->set_pid(pid);
           pid_to_worker_id_[pid] = worker->id();
@@ -203,6 +215,7 @@ public:
     }
   }
 
+  /// Used to the Handle Exit of a Worker
   virtual int handle_exit(ACE_Process* process)
   {
     pid_t pid = process->getpid();
@@ -228,6 +241,7 @@ private:
   size_t remaining_workers_ = 0;
   std::map<pid_t, WorkerId> pid_to_worker_id_;
   std::list<WorkerPtr> finished_workers_;
+  ACE_Process_Manager& process_manager_;
 };
 
 enum class RunMode {
@@ -274,7 +288,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     } else if (!ACE_OS::strcmp(run_mode_arg, ACE_TEXT("daemon-exit-on-error"))) {
       run_mode = RunMode::daemon_exit_on_error;
     } else {
-      std::cerr << "Invalid run type: " << run_mode_arg << std::endl;
+      std::cerr << "Invalid run mode: " << run_mode_arg << std::endl;
       throw 1;
     }
 
@@ -416,9 +430,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     exit_status = run_cycle(name, process_manager, participant,
       status_writer_impl, config_reader_impl, report_writer_impl);
 
-    // Unregister any Exit Handler
-    process_manager.register_handler(nullptr);
-
     if (run_mode == RunMode::one_shot || (run_mode == RunMode::daemon_exit_on_error && exit_status != 0)) {
       break;
     }
@@ -482,8 +493,7 @@ int run_cycle(
     }
   }
 
-  WorkerManager worker_manager;
-  process_manager.register_handler(&worker_manager);
+  WorkerManager worker_manager(process_manager);
 
   // Wait for Our Worker Configs
   bool waiting = true;
@@ -547,7 +557,7 @@ int run_cycle(
   }
 
   // Run Workers and Wait for Them to Finish
-  worker_manager.run_workers(process_manager, report_writer_impl);
+  worker_manager.run_workers(report_writer_impl);
 
   return 0;
 }

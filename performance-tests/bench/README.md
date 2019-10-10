@@ -32,6 +32,13 @@ Usage: `test_controller [-h|--help] | TEST_CONTEXT SCENARIO_ID [OPTIONS...]`
     use that to run the scenario instead of discovering nodes. This might fail
     if the nodes go offline after the preallocated scenario is saved.
 
+  - `--result-id ID`: Name to store the results under. By default incrementing
+    numbers are assigned, but `ID` doesn't have to be a valid number, just a
+    valid file name.
+
+  - `--overwrite-result`: Write the result when using `--result-id`, even if it
+    would overwrite another result.
+
 ## Node Controller
 
 ### Command Line Arguments

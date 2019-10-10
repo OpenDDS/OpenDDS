@@ -2,11 +2,15 @@
 
 #include <iostream>
 #include <exception>
+#include <sstream>
+#include <chrono> // For std::chrono::system_clock
+#include <iomanip> // For std::put_time
 
 #include <ace/Lib_Find.h> // For ACE::get_temp_dir
 #include <ace/OS_NS_string.h> // For ACE_OS::strcpy
-#include <ace/OS_NS_sys_stat.h> // For ACE_OS::mkdir
+#include <ace/OS_NS_sys_stat.h> // For ACE_OS::mkdir and ACE_OS::stat
 #include <ace/OS_NS_stdlib.h> // For ACE_OS::mktemp
+#include <ace/OS_NS_dirent.h> // For ACE_OS::opendir and friends
 
 namespace Bench {
 
@@ -70,6 +74,47 @@ std::string create_temp_dir(const std::string& prefix)
   }
 
   return buffer;
+}
+
+std::string iso8601()
+{
+  using namespace std::chrono;
+  std::stringstream ss;
+  const std::time_t now = system_clock::to_time_t(system_clock::now());
+  ss << std::put_time(gmtime(&now), "%FT%TZ");
+  return ss.str();
+}
+
+std::vector<std::string> get_dir_contents(const std::string& path)
+{
+  std::vector<std::string> rv;
+  ACE_DIR* dir = ACE_OS::opendir(path.c_str());
+  if (dir) {
+    ACE_DIRENT* entry;
+    while ((entry = ACE_OS::readdir(dir))) {
+      rv.push_back(entry->d_name);
+    }
+    ACE_OS::closedir(dir);
+  } else {
+    std::stringstream ss;
+    ss << "getting contents of " << path << ": " << ACE_OS::strerror(errno);
+    throw std::runtime_error(ss.str());
+  }
+  return rv;
+}
+
+bool file_exits(const std::string& path)
+{
+  ACE_stat stat_result;
+  if (ACE_OS::stat(path.c_str(), &stat_result) == -1) {
+    if (errno != ENOENT) {
+      std::stringstream ss;
+      ss << "checking if " << path << " exists: " << ACE_OS::strerror(errno);
+      throw std::runtime_error(ss.str());
+    }
+    return false;
+  }
+  return true;
 }
 
 }

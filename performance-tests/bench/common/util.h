@@ -2,6 +2,7 @@
 #define BENCH_UTIL_HEADER
 
 #include <string>
+#include <vector>
 
 #include <ace/ace_wchar.h> // For ACE_TCHAR
 #include <ace/Default_Constants.h> // For ACE_DIRECTORY_SEPARATOR_*
@@ -26,6 +27,13 @@ std::string join_path(const std::string& arg, Args... args) {
 }
 
 std::string Bench_Common_Export create_temp_dir(const std::string& prefix);
+std::vector<std::string> Bench_Common_Export get_dir_contents(const std::string& path);
+bool Bench_Common_Export file_exits(const std::string& path);
+
+/**
+ * Get Current UTC Time in ISO8601
+ */
+std::string Bench_Common_Export iso8601();
 
 }
 
