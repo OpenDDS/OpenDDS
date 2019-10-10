@@ -97,7 +97,7 @@ Attribute make_unknown_attributes(const std::vector<AttributeType>& unknown_attr
 Attribute make_xor_mapped_address(const ACE_INET_Addr& addr);
 Attribute make_unknown_attribute(ACE_UINT16 type, ACE_UINT16 length);
 Attribute make_priority(ACE_UINT32 priority);
-Attribute make_use_candidate();;
+Attribute make_use_candidate();
 
 Attribute make_fingerprint();
 Attribute make_ice_controlling(ACE_UINT64 ice_tie_breaker);
