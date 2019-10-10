@@ -384,12 +384,8 @@ Spdp::handle_participant_data(DCPS::MessageId id, const ParticipantData_t& cpdat
     }
 
     // add a new participant
-    participants_[guid] = DiscoveredParticipant(pdata, now);
+    participants_[guid] = DiscoveredParticipant(pdata, now, seq);
     DiscoveredParticipant& dp = participants_[guid];
-
-    // initialize sequence number validation variables for new participant
-    dp.last_seq_ = seq;
-    dp.seqResetChkCount_ = 0;
 
 #ifdef OPENDDS_SECURITY
     if (is_security_enabled()) {
@@ -510,7 +506,7 @@ Spdp::handle_participant_data(DCPS::MessageId id, const ParticipantData_t& cpdat
         iter->second.last_seen_ = now;
       }
     // Else a reset has occured and check if we should remove the participant
-    } else if (iter->second.seqResetChkCount_ >= disco_->max_spdp_sequence_msg_reset_check()) {
+    } else if (iter->second.seq_reset_count_ >= disco_->max_spdp_sequence_msg_reset_check()) {
       remove_discovered_participant(iter);
     }
   }
@@ -521,10 +517,10 @@ Spdp::validateSequenceNumber(const DCPS::SequenceNumber& seq, DiscoveredParticip
 {
   if (seq.getValue() != 0 && iter->second.last_seq_ != DCPS::SequenceNumber::MAX_VALUE) {
     if (seq < iter->second.last_seq_) {
-      ++iter->second.seqResetChkCount_;
+      ++iter->second.seq_reset_count_;
       return false;
-    } else if (iter->second.seqResetChkCount_ > 0) {
-      --iter->second.seqResetChkCount_;
+    } else if (iter->second.seq_reset_count_ > 0) {
+      --iter->second.seq_reset_count_;
     }
   }
   iter->second.last_seq_ = seq;
