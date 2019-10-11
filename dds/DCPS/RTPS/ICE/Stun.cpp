@@ -494,7 +494,7 @@ bool TransactionId::operator!=(const TransactionId& other) const
 
 void Message::generate_transaction_id()
 {
-  TheSecurityRegistry->default_config()->get_utility()->generate_random_bytes(transaction_id.data, sizeof(transaction_id.data));
+  TheSecurityRegistry->fix_empty_default()->get_utility()->generate_random_bytes(transaction_id.data, sizeof(transaction_id.data));
 }
 
 std::vector<AttributeType> Message::unknown_comprehension_required_attributes() const
@@ -613,7 +613,7 @@ void Message::compute_message_integrity(const std::string& password, unsigned ch
   block->wr_ptr(block->base() + 20 + length_for_message_integrity() - 24);
 
   // Compute the SHA1.
-  TheSecurityRegistry->default_config()->get_utility()->hmac(message_integrity, block->rd_ptr(), block->length(), password);
+  TheSecurityRegistry->fix_empty_default()->get_utility()->hmac(message_integrity, block->rd_ptr(), block->length(), password);
 
   // Write the correct length.
   block->wr_ptr(block->base() + 2);

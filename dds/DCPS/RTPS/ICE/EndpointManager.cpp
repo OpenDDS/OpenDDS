@@ -36,7 +36,7 @@ EndpointManager::EndpointManager(AgentImpl* a_agent_impl, Endpoint* a_endpoint) 
   // Set the type.
   agent_info_.type = FULL;
 
-  TheSecurityRegistry->default_config()->get_utility()->generate_random_bytes(&ice_tie_breaker_, sizeof(ice_tie_breaker_));
+  TheSecurityRegistry->fix_empty_default()->get_utility()->generate_random_bytes(&ice_tie_breaker_, sizeof(ice_tie_breaker_));
 
   change_username();
   set_host_addresses(endpoint->host_addresses());
@@ -162,7 +162,7 @@ void EndpointManager::change_username()
 {
   // Generate the username.
   unsigned char username[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-  TheSecurityRegistry->default_config()->get_utility()->generate_random_bytes(username, sizeof(username));
+  TheSecurityRegistry->fix_empty_default()->get_utility()->generate_random_bytes(username, sizeof(username));
   agent_info_.username = OpenDDS::DCPS::to_hex_dds_string(username, 16, 0, 0);
   change_password(false);
 }
@@ -170,7 +170,7 @@ void EndpointManager::change_username()
 void EndpointManager::change_password(bool password_only)
 {
   unsigned char password[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-  TheSecurityRegistry->default_config()->get_utility()->generate_random_bytes(password, sizeof(password));
+  TheSecurityRegistry->fix_empty_default()->get_utility()->generate_random_bytes(password, sizeof(password));
   agent_info_.password = OpenDDS::DCPS::to_hex_dds_string(password, 16, 0, 0);
   regenerate_agent_info(password_only);
 }

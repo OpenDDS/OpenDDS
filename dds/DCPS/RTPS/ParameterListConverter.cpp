@@ -1619,10 +1619,10 @@ int from_param_list(const ParameterList& param_list,
       const IceCandidate_t& ice_candidate = parameter.ice_candidate();
       ICE::Candidate candidate;
       candidate.address.set_type(AF_INET);
-      if (candidate.address.set_address(reinterpret_cast<const char*>(parameter.locator().address) + 12, 4, 0 /*network order*/) != 0) {
+      if (candidate.address.set_address(reinterpret_cast<const char*>(ice_candidate.locator.address) + 12, 4, 0 /*network order*/) != 0) {
         return -1;
       }
-      candidate.address.set_port_number(parameter.locator().port);
+      candidate.address.set_port_number(ice_candidate.locator.port);
       candidate.foundation = ice_candidate.foundation;
       candidate.priority = ice_candidate.priority;
       candidate.type = static_cast<ICE::CandidateType>(ice_candidate.type);
