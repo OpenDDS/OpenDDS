@@ -39,7 +39,11 @@ namespace {
     const DDS::Property_t prop = {name, value.c_str(), propagate};
     const unsigned int len = props.length();
     props.length(len + 1);
-    props[len] = prop;
+    try {
+      props[len] = prop;
+    } catch (const CORBA::BAD_PARAM& ex) {
+      ACE_ERROR((LM_ERROR, "Exception caught when appending parameter\n"));
+    }
   }
 }
 
