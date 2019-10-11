@@ -1608,6 +1608,20 @@ Spdp::SpdpTransport::write_i()
     return;
   }
 
+#ifdef OPENDDS_SECURITY
+    ICE::Endpoint* endpoint = outer_->sedp_.get_ice_endpoint();
+    if (endpoint) {
+      const ICE::AgentInfo& agent_info = ICE::Agent::instance()->get_local_agent_info(endpoint);
+      if (ParameterListConverter::to_param_list(agent_info, plist) < 0) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                   ACE_TEXT("Spdp::SpdpTransport::write() - ")
+                   ACE_TEXT("failed to convert from ICE::AgentInfo ")
+                   ACE_TEXT("to ParameterList\n")));
+        return;
+      }
+    }
+#endif
+
   wbuff_.reset();
   CORBA::UShort options = 0;
   DCPS::Serializer ser(&wbuff_, false, DCPS::Serializer::ALIGN_CDR);
@@ -1635,31 +1649,6 @@ Spdp::SpdpTransport::write_i()
   }
 
   if (outer_->disco_->spdp_rtps_relay_address() != ACE_INET_Addr()) {
-#ifdef OPENDDS_SECURITY
-    ICE::Endpoint* endpoint = outer_->sedp_.get_ice_endpoint();
-    if (endpoint) {
-      const ICE::AgentInfo& agent_info = ICE::Agent::instance()->get_local_agent_info(endpoint);
-      if (ParameterListConverter::to_param_list(agent_info, plist) < 0) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-                   ACE_TEXT("Spdp::SpdpTransport::write() - ")
-                   ACE_TEXT("failed to convert from ICE::AgentInfo ")
-                   ACE_TEXT("to ParameterList\n")));
-        return;
-      }
-    }
-#endif
-
-    wbuff_.reset();
-    CORBA::UShort options = 0;
-    DCPS::Serializer ser(&wbuff_, false, DCPS::Serializer::ALIGN_CDR);
-    if (!(ser << hdr_) || !(ser << data_) || !(ser << encap_LE) || !(ser << options)
-        || !(ser << plist)) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::write() - ")
-                 ACE_TEXT("failed to serialize headers for SPDP\n")));
-      return;
-    }
-
     const ssize_t res =
       unicast_socket_.send(wbuff_.rd_ptr(), wbuff_.length(), outer_->disco_->spdp_rtps_relay_address());
     if (res < 0) {
