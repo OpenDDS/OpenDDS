@@ -71,7 +71,7 @@ class RtpsRelayLib_Export Writer {
     writer_entry_ = we;
     local_ = local;
   }
-  
+
   std::set<NoIndex*> indexes;
 
   const OpenDDS::DCPS::RepoId participant_guid() const { return participant_guid_; }
