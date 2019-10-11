@@ -1,0 +1,1107 @@
+Fri Oct 11 15:30:17 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit ef34ec63cb7b4e51e20abb16de8291c24bbfdec4
+
+        * NEWS.md:
+
+          Updated NEWS with links to PRs
+
+Thu Oct 10 14:13:26 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit e70dad32e271d8fabe6a300a44dcf52d02f0b291
+
+          Merge pull request #1313 from
+          iguessthislldo/igtd/release_script_3.13
+
+          Bring master Release Script Changes into 3.13
+
+Thu Oct 10 14:10:56 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit b0e8c7c9667c178f09fefec66660802e2b99b0d2
+
+        * dds/DCPS/DiscoveryBase.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * tests/transport/spdp/spdp_transport.cpp:
+
+          Merge pull request #1312 from iguessthislldo/igtd/pr1274
+
+          Fixes for 1274
+
+          (cherry picked from commit
+          429e810f535688c946a0852b87c5a33fdee7b7f6)
+
+          # Conflicts:
+          #  dds/DCPS/DiscoveryBase.h
+          #  tools/IntermediateTypeLang/cpp/rapidjson
+
+Tue Oct 08 18:42:32 UTC 2019  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 992a87862034b3483472d7d037fa320094bcce7c
+
+        * NEWS.md:
+
+          Add missing timestamp template to NEWS.md
+
+Wed Jan 30 22:00:17 UTC 2019  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit af3a762a2001bdabcc3f3f6a100c9c7e03e28828
+
+        * .mailmap:
+        * AUTHORS:
+        * NEWS.md:
+        * tools/scripts/gitrelease.pl:
+
+          Improvements and Fixes for gitrelease.pl
+
+          Attempt to improve release script. These changes include:
+
+          - Fixes for #1041
+          - More proper markdown format of NEWS.md file, add timestamp to
+          release
+          template.
+          - Redo how AUTHORS file is handled, try to leverage git's builtin
+          system
+          for correcting author info: .mailmap.
+          - Add missing entires to AUTHORS
+          - Explicit workspace for intermediate files
+          - Download ACE/TAO automatically when needed (Doxygen)
+          - Optionally define steps to perform using a notation listed in
+          --help
+          - Removed --step option
+          - Expanded --help message
+
+          Created .mailmap and modified AUTHORS and NEWS.md to reflect
+          these changes.
+
+Wed Jan 30 21:53:48 UTC 2019  Tim Bradley  <bradley_t@ociweb.com>
+        commit d10eed274d57e775ae8edee4378e9eb91407f775
+
+          Empty Commit by Fred Hornsey
+
+          I'm making a change to gitrelease.pl to use git shortlog to
+          gather the
+          author info for the AUTHORS file. This wouldn't be a problems
+          except one
+          of the names currently listed in AUTHORS isn't in git's history:
+          Tim Bradley <bradley_t@ociweb.com>
+
+          To remedy this, I'm adding this empty commit with Tim listed as
+          the
+          author so he'll always show up.
+
+Tue Oct 08 17:55:59 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit 78bdc74405b6bd2dbb88e519339fe1dadbf03d9b
+
+        * tests/security/permissions/permissions_test_participant_01_NotBefore.xml:
+        * tests/security/permissions/permissions_test_participant_01_NotBeforeOffset.xml:
+        * tests/security/permissions/permissions_test_participant_01_NotBeforeOffset_signed.p7s:
+        * tests/security/permissions/permissions_test_participant_01_NotBefore_signed.p7s:
+
+          Merge pull request #1279 from mitza-oci/master
+
+          Security tests: updated NotBefore dates in test permissions
+
+          (cherry picked from commit
+          24d265b8b3ce6eab89cffdd5a6e09b1dbe9b258c)
+
+          # Conflicts:
+          #  tools/IntermediateTypeLang/cpp/rapidjson
+
+Tue Oct 08 14:47:41 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit e1fdb12d1d5dca70e42f5ead6ce6cb1427cb922c
+
+        * NEWS.md:
+
+          NEWS for 3.13.3
+
+Tue Oct 08 14:46:55 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit 6733a0359afdf361428ccf59cf1a844870959fc8
+
+        * tests/transport/spdp/spdp_transport.cpp:
+
+          SPDP transport test: cleaned up remaining merge issues
+
+Mon Oct 07 22:13:19 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit c8a2787cb71c82f62e3ac3da98567e61da716420
+
+        * bin/dcps_tests.lst:
+        * dds/DCPS/DiscoveryBase.h:
+        * dds/DCPS/GuidUtils.h:
+        * dds/DCPS/RTPS/BaseMessageUtils.cpp:
+        * dds/DCPS/RTPS/BaseMessageUtils.h:
+        * dds/DCPS/RTPS/GuidGenerator.cpp:
+        * dds/DCPS/RTPS/GuidGenerator.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/Serializer.h:
+        * tests/transport/spdp/.gitignore:
+        * tests/transport/spdp/DDS_transport_spdp.mpc:
+        * tests/transport/spdp/run_test.pl:
+        * tests/transport/spdp/spdp_transport.cpp:
+
+          Merge pull request #1274 from wilsongOCI/master
+
+          SPDP participant sequence check
+
+          (cherry picked from commit
+          ced9220e2a2552f8a0bedccf18014e56604dabd5)
+
+          # Conflicts:
+          #  dds/DCPS/RTPS/GuidGenerator.cpp
+          #  dds/DCPS/RTPS/RtpsDiscovery.cpp
+          #  dds/DCPS/RTPS/RtpsDiscovery.h
+          #  dds/DCPS/RTPS/Spdp.cpp
+          #  dds/DCPS/RTPS/Spdp.h
+          #  tools/IntermediateTypeLang/cpp/rapidjson
+
+Thu Sep 12 20:06:40 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit f93aa00569b0d9d75081981a72c2730ab46e7a75
+
+          Merge pull request #1277 from iguessthislldo/igtd/monotonic_3.13
+
+          [3.13] ReactorTask: Init timer_queue_ to null
+
+Thu Sep 12 20:06:31 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit 20b3cf9be1cc00e097a28135d9e790ab8c60f820
+
+          Merge pull request #1276 from mitza-oci/branch-DDS-3.13
+
+          [3.13] Updated travis config for this branch
+
+Thu Sep 12 18:48:40 UTC 2019  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit d9fa3da0997f26831721a6f15574d9325ad763c0
+
+        * dds/DCPS/ReactorTask.cpp:
+
+          ReactorTask: Init timer_queue_ to null
+
+Thu Sep 12 15:38:04 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit 7751e6694f43fe8d4f39c457af28457a570037b0
+
+        * azure-pipelines.yml:
+
+          Updated Azure Pipelines config for this branch
+
+Thu Sep 12 15:32:34 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit e61d03cfafd88971391e7cd5dc5275aac3b18a62
+
+        * tools/scripts/prepend_path.cmd:
+
+          Copied script from master for Azure Pipelines
+
+Thu Sep 12 15:11:34 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit ea423bf2b5db8a23301937db262438cf64281527
+
+        * .travis.yml:
+
+          Updated travis config for this branch
+
+Thu Sep 12 01:14:59 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit d7996162b18c879b9fef20d38dfa47c38c02074b
+
+        * dds/DCPS/InstanceState.cpp:
+
+          fixed trailing whitespace
+
+Thu Sep 12 01:14:05 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit 1b72d862fd1fc16442741ae2bb7cf012234ea429
+
+          Merge pull request #1272 from iguessthislldo/igtd/monotonic_3.13
+
+          [3.13] Use Monotonic Time where Possible
+
+Wed Sep 11 22:52:05 UTC 2019  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit fa191921b60b117fa89d228ed582f23486d4ebf3
+
+        * dds/DCPS/TimeTypes.h:
+
+          TimeTypes.h: Spelling
+
+Wed Sep 11 22:49:01 UTC 2019  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 6c61b127ebe963f2ce5d01d4f5c0040ccbf42b7d
+
+        * azure-pipelines.yml:
+
+          azure-pipelines.yml: Try Syntax From Azure Docs
+
+Wed Sep 11 22:29:40 UTC 2019  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 6c086a56116ba9a0b488a45eb77e4fa513d8301e
+
+        * .travis.yml:
+        * azure-pipelines.yml:
+
+          CI almost like master
+
+Wed Sep 11 20:13:18 UTC 2019  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 3619340fdfe08dad8fd71fa1502559168ba7bdb3
+
+        * dds/DCPS/MessageTracker.cpp:
+        * dds/DCPS/MessageTracker.h:
+        * dds/DCPS/TimeTypes.h:
+        * dds/DCPS/WaitSet.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+
+          Made Changes Requested
+
+Wed Sep 11 19:47:13 UTC 2019  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 946a48f9c00bb1dc471c6d1af041a85df6a451df
+
+        * .travis.yml:
+        * appveyor.yml:
+
+          Add Release Branches to Travis and Appveyor
+
+Mon Sep 09 22:47:53 UTC 2019  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 0df288ffdaf72419ce264783a09e2612baa7a74a
+
+        * dds/DCPS/TimeTypes.h:
+
+          Dont Use Monotonic on Apple/Darwin/macOS
+
+Mon Sep 09 17:09:19 UTC 2019  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit c609fb6562ff7afbaa214e9ea04182d2cdd6a368
+
+        * dds/DCPS/ReactorTask.cpp:
+        * dds/DCPS/ReactorTask.h:
+
+          Forgot to Make Reactor Use Monotonic /:
+
+Thu Sep 05 22:50:45 UTC 2019  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit cd4e061aaaed9a3a3faf2284874e2c5094b3b0ea
+
+        * dds/DCPS/BuiltInTopicUtils.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl_T.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/MessageTracker.cpp:
+        * dds/DCPS/MessageTracker.h:
+        * dds/DCPS/OfferedDeadlineWatchdog.cpp:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/ReactorTask.h:
+        * dds/DCPS/RecorderImpl.cpp:
+        * dds/DCPS/RemoveAssociationSweeper.h:
+        * dds/DCPS/RequestedDeadlineWatchdog.cpp:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/TimeTypes.h:
+        * dds/DCPS/Time_Helper.h:
+        * dds/DCPS/WaitSet.cpp:
+        * dds/DCPS/WaitSet.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriterInfo.cpp:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkWatchdog_T.h:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Use Monotonic Time where Possible
+
+          Based on changes being made to 3.14 in
+          https://github.com/objectcomputing/OpenDDS/pull/1256
+
+Thu Sep 05 17:08:58 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit 2e9e0d30585d59a6a2fc1f25693f93139b9911fe
+
+          Merge pull request #1270 from
+          objectcomputing/313-reactorinterceptor-broadcast
+
+          [3.13] ReactorInterceptor: use condition variable broadcast
+
+Thu Sep 05 16:25:45 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit 73914dca2cd7ab4fbc7991e5e3c8583ea0766d12
+
+        * dds/DCPS/ReactorInterceptor.cpp:
+
+          ReactorInterceptor: use condition variable broadcast
+
+Wed Sep 04 19:29:22 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit f3c7eaec2ffd8eb04446badde7c6a755313e01d9
+
+          Merge pull request #1267 from Snowman0602/branch-DDS-3.13
+
+          [3.13] Only include DDS Security member when OPENDDS_SECURITY is
+          set
+
+Wed Sep 04 15:58:32 UTC 2019  matthew.mueller  <matthew.a.mueller@navy.mil>
+        commit c854bf6582fd9f3dbd7185607e6e094c35ab2422
+
+        * dds/DCPS/DiscoveryBase.h:
+
+          Only include DDS Security member when OPENDDS_SECURITY is set
+
+          This is handled in every other place, but not here. It prevented
+          me from building on Windows.
+
+Mon Aug 19 17:59:52 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit 2fb28964b3a9a9743cdebae6c312c18c8167f41d
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportInst.cpp:
+        * dds/DCPS/transport/framework/TransportInst.h:
+        * tests/DCPS/ConfigTransports/DDSTEST.cpp:
+        * tests/DCPS/SetQosPartition/subscriber.cpp:
+
+          Merge pull request #1249 from
+          simpsont-oci/setqospartion_test_reliable_datareader
+
+          Setqospartion test reliable datareader
+
+          (cherry picked from commit
+          7e2ee4497d470e97d164c9d5be57f574721f6a37)
+
+          # Conflicts:
+          #  dds/DCPS/transport/framework/TransportClient.cpp
+          #  dds/DCPS/transport/framework/TransportInst.h
+          #  tools/IntermediateTypeLang/cpp/rapidjson
+
+Mon Aug 19 17:28:31 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit c7631cb2cdfa11ae024088fcef9a371674f8d0ab
+
+        * dds/DCPS/GroupRakeData.cpp:
+        * dds/DCPS/InstanceState.cpp:
+        * dds/DCPS/InstanceState.h:
+        * dds/DCPS/InstanceState.inl:
+
+          Merge pull request #1248 from
+          simpsont-oci/fix_instance_state_invalid_read
+
+          switching InstanceState::reader_ from DataReaderImpl* to
+          WeakRcHandle
+
+          (cherry picked from commit
+          243e1dad30fc15c7c985521633c835b7bad9e789)
+
+          # Conflicts:
+          #  dds/DCPS/InstanceState.cpp
+          #  tools/IntermediateTypeLang/cpp/rapidjson
+
+Wed Aug 14 16:18:00 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit fffa5425690ec0ff60e28fb56a37d0a1c0a0b7b2
+
+        * dds/DCPS/DiscoveryBase.h:
+
+          Merge pull request #1232 from mitza-oci/sedp-secattribs
+
+          Use LocalEndpoint to store endpoint security attribs, init them
+
+          (cherry picked from commit
+          7519ed7327b1fbe62530a09ec5263621f5a0e78e)
+
+          # Conflicts:
+          #  dds/DCPS/DiscoveryBase.h
+          #  tools/IntermediateTypeLang/cpp/rapidjson
+
+Wed Aug 14 16:13:36 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit fb1c72e6d4ffa486ce77962c968f4bd75bf9f229
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+
+          Merge pull request #1227 from
+          jrw972/sedp-secure-unregister-dispose
+
+          Secure SEDP association_complete
+
+          (cherry picked from commit
+          fa120a4d1dd2083dab41b87cfbfc81ccd093c2c0)
+
+          # Conflicts:
+          #  dds/DCPS/RTPS/Sedp.cpp
+          #  tools/IntermediateTypeLang/cpp/rapidjson
+
+Wed Aug 14 15:51:19 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit 736f5758dd66040fd6cf98a181c37559368286f7
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Merge pull request #1225 from
+          jrw972/sedp-secure-unregister-dispose
+
+          Secure endpoint discovery dispose/unregister messages
+
+          (cherry picked from commit
+          1a9b7dff5e942f5e4b18fbab035a1cd3c0211e41)
+
+          # Conflicts:
+          #  dds/DCPS/RTPS/Sedp.cpp
+          #  tools/IntermediateTypeLang/cpp/rapidjson
+
+Wed Aug 14 15:43:32 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit b29ccb939916632051d2577a920457a38cc113e5
+
+        * dds/DCPS/ReactorTask.cpp:
+
+          Merge pull request #1231 from jrw972/reactor-task-reference
+
+          Reactor task in Service Participant has stale reference
+
+          (cherry picked from commit
+          2bd9d321b4878a14d4b45f435d35f082e48a560e)
+
+          # Conflicts:
+          #  tools/IntermediateTypeLang/cpp/rapidjson
+
+Wed Aug 14 15:33:35 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit 5c411d1c57fbaef7403efa8171ebac1d051aaac1
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/ReactorTask.cpp:
+        * dds/DCPS/ReactorTask.h:
+
+          Merge pull request #1215 from
+          jrw972/service-participant-thread-signals
+
+          InfoRepo does not start correctly on Windows
+
+          (cherry picked from commit
+          d1f21aed3b08e5969962ded98345907e90608d5d)
+
+          # Conflicts:
+          #  tools/IntermediateTypeLang/cpp/rapidjson
+
+Wed Aug 14 15:27:30 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit 7af098d0594581270fc5bbf115010a2c1e3b812f
+
+        * dds/DCPS/DiscoveryBase.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/ReactorTask.cpp:
+        * dds/DCPS/ReactorTask.h:
+        * dds/DCPS/ReactorTask.inl:
+        * dds/DCPS/ReactorTask_rch.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.inl:
+        * dds/DCPS/transport/framework/TransportReactorTask.cpp:
+        * dds/DCPS/transport/framework/TransportReactorTask.h:
+        * dds/DCPS/transport/framework/TransportReactorTask.inl:
+        * dds/DCPS/transport/framework/TransportReactorTask_rch.h:
+        * dds/DCPS/transport/framework/TransportRegistry.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.inl:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/tcp/TcpReceiveStrategy.cpp:
+        * dds/DCPS/transport/tcp/TcpReceiveStrategy.h:
+        * dds/DCPS/transport/tcp/TcpReceiveStrategy.inl:
+        * dds/DCPS/transport/tcp/TcpSendStrategy.cpp:
+        * dds/DCPS/transport/tcp/TcpSendStrategy.h:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.h:
+        * dds/DCPS/transport/udp/UdpDataLink.cpp:
+        * dds/DCPS/transport/udp/UdpDataLink.h:
+        * dds/DCPS/transport/udp/UdpDataLink.inl:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+
+          delete_contained_entities hangs when Service Participant thread
+          is interrupted (#1206)
+
+          An interrupt delivered to the Service Participant thread causes
+          the
+          run_reactor_event_loop function to return with an "interrupted
+          system
+          call" error.  An attempt to shutdown will notify the now stopped
+          reactor.  Since the reactor isn't running,
+          DomainParticipantImpl::handle_exception is never called.  Since
+          handle_exception is never called, the condition variable is not
+          released and shutdown hangs.
+
+          The solution is to block signals in the Service Participant
+          thread (and
+          other threads that are running the reactor event loop). This was
+          already
+          being done in the transport reactor task so it was promoted and
+          similar
+          classes were consolidated.
+
+          (cherry picked from commit
+          da94acf16f08d9d4a9e065cea74c080b2cde4ab0)
+
+          # Conflicts:
+          #  tools/IntermediateTypeLang/cpp/rapidjson
+
+Fri Aug 09 19:22:32 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit e23b2826bc44f33bdcd6782fae7c3e2000678fd1
+
+          Merge branch 'serializer-check-align' into branch-DDS-3.13
+
+Fri Aug 09 19:19:11 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit f0a937df41365dbaa769029b2a85cb7894570e42
+
+        * dds/DCPS/Serializer.inl:
+        * tests/DCPS/Serializer/AlignmentTest.cpp:
+        * tests/DCPS/Serializer/SerializerTest.cpp:
+
+          Serializer: check for valid buffer during alignment
+
+Fri Aug 09 18:24:07 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit c409d002aaec1828898ce4139337ad5440dbfeeb
+
+          Merge branch 'instancestate-reactorinterceptor' into
+          branch-DDS-3.13
+
+Fri Aug 09 18:23:40 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit 8cdd7dc70e0155f883cea69a9cd5176f1dbe6f9e
+
+        * dds/DCPS/DataReaderImpl_T.h:
+
+          fixed typo
+
+Fri Aug 09 13:53:33 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit f50de542caf1499bfafcf7c569f459a0081d8d92
+
+        * configure:
+
+          Fixed configure script for this branch
+
+Thu Aug 08 21:59:41 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit 594d0504b2da78d10fac7477efe745f5f4f5801b
+
+          Merge branch 'instancestate-reactorinterceptor' into
+          branch-DDS-3.13
+
+Thu Aug 08 21:58:41 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit 4054fbe2b8b01ffaa3d4fc9fce62528998897936
+
+        * dds/DCPS/InstanceState.cpp:
+        * dds/DCPS/OwnershipManager.cpp:
+        * dds/DCPS/OwnershipManager.h:
+
+          InstanceState destructor interaction with timer and
+          OwnershipManager
+
+Thu Aug 08 20:26:27 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit 3b2261ca8358e9817ce000fff759cf1a2965015d
+
+        * dds/DCPS/InstanceState.cpp:
+        * dds/DCPS/InstanceState.inl:
+
+          fixed inline build
+
+Thu Aug 08 19:21:46 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit cffffe944014b5979abc0e4debeb1b848dabd532
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl_T.h:
+        * dds/DCPS/GroupRakeData.cpp:
+        * dds/DCPS/InstanceState.cpp:
+        * dds/DCPS/InstanceState.h:
+        * dds/DCPS/InstanceState.inl:
+        * dds/DCPS/OwnershipManager.cpp:
+        * dds/DCPS/OwnershipManager.h:
+        * dds/DCPS/RakeResults_T.cpp:
+        * dds/DCPS/ReceivedDataElementList.cpp:
+        * dds/DCPS/ReceivedDataElementList.h:
+        * dds/DCPS/RequestedDeadlineWatchdog.cpp:
+        * dds/DCPS/StaticDiscovery.cpp:
+        * dds/DCPS/SubscriptionInstance.h:
+
+          InstanceState: use the ReactorInterceptor to mediate threading
+          with the ACE Recator
+
+          made the InstanceState an RcObject and cleaned up its uses in
+          OpenDDS_Dcps
+
+Tue Jul 30 18:08:22 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit ef59c4b300ae0d7f712701df47a11093399581a6
+
+          Merge branch 'modeling-eclipse-plugins' into branch-DDS-3.13
+
+Tue Jul 30 17:37:48 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit 8cb39dbcd75177446068d1b041eb1c23958515be
+
+        * tools/modeling/features/org.opendds.modeling.feature/feature.xml:
+        * tools/modeling/features/org.opendds.modeling.site/site.xml:
+        * tools/modeling/plugins/com.ociweb.emf.util/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/com.ociweb.gmf/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.common/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.common/about.properties:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/PolicyLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.graphics/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.help/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.model/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.validation/META-INF/MANIFEST.MF:
+
+          Modeling SDK: Updated Eclipse plugin version numbers to 3.13
+
+Tue Jul 30 17:36:38 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit 464cbdd96673b571452589b004289ea0278e188c
+
+        * tools/modeling/README.dev:
+        * tools/modeling/build.pl:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/diagram/datalib/edit/parts/StructFieldsEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/diagram/datalib/edit/parts/StructKeysEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/diagram/datalib/part/OpenDDSDataLibDiagramEditor.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/diagram/datalib/preferences/DiagramPreferenceInitializer.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/diagram/datalib/providers/.gitignore:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/diagram/datalib/sheet/ElementCommentPropertySection.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/DeadlineQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/DestinationOrderQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/DsQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/DurabilityQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/EfQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/GdQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/HistoryQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/LbQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/LifespanQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/LivelinessQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/OsQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/OwnershipQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/PartitionQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/PresentationQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/RdlQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/ReliabilityQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/RlQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/TbfQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/TpQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/UdQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/WdlQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/DataReaderQoSPoliciesCustomEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/DataReaderQoSPoliciesSharedEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/DataWriterQoSPoliciesCustomEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/DataWriterQoSPoliciesSharedEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/DomainParticipantEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/DomainParticipantQoSPoliciesCustomEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/DomainParticipantQoSPoliciesSharedEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/MultiTopicDataTypeEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/PublisherQoSPoliciesCustomEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/PublisherQoSPoliciesSharedEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/SubscriberQoSPoliciesCustomEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/SubscriberQoSPoliciesSharedEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/TopicDataTypeEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/TopicQoSPoliciesCustomEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/TopicQoSPoliciesSharedEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/DeadlineQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/DestinationOrderQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/DsQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/DurabilityQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/EfQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/GdQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/HistoryQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/LbQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/LifespanQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/LivelinessQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/OsQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/OwnershipQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/PartitionQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/PresentationQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/RdlQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/ReliabilityQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/RlQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/StructItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/TbfQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/TdQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/TpQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/UdQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/WdlQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/part/OpenDDSDcpsLibDiagramEditor.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/preferences/DiagramPreferenceInitializer.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/sheet/ElementCommentPropertySection.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/edit/parts/LibPackage2EditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/edit/parts/LibPackageEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/edit/parts/OpenDDSModelEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/part/OpenDDSCreationWizard.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/part/OpenDDSCreationWizardPage.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/part/OpenDDSDiagramEditor.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/preferences/DiagramPreferenceInitializer.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/sheet/ElementCommentPropertySection.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/diagram/policylib/edit/parts/DestinationOrderQosPolicyKindEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/diagram/policylib/edit/parts/DsQosPolicyHistory_kindEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/diagram/policylib/edit/parts/DurabilityQosPolicyKindEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/diagram/policylib/edit/parts/HistoryQosPolicyKindEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/diagram/policylib/edit/parts/LivelinessQosPolicyKindEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/diagram/policylib/edit/parts/OwnershipQosPolicyKindEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/diagram/policylib/edit/parts/PresentationQosPolicyAccess_scopeEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/diagram/policylib/edit/parts/ReliabilityQosPolicyKindEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/diagram/policylib/part/OpenDDSPolicyLibDiagramEditor.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/diagram/policylib/preferences/DiagramPreferenceInitializer.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/diagram/policylib/sheet/ElementCommentPropertySection.java:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/src/org/opendds/modeling/model/opendds/provider/OpenDDSEditPlugin.java:
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/src/org/opendds/modeling/model/opendds/presentation/OpenDDSEditor.java:
+        * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/dcps/DomainParticipant.java:
+        * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/domain/DomainEntity.java:
+        * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/domain/impl/DomainEntityImpl.java:
+        * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/opendds/impl/publisherImpl.java:
+        * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/opendds/impl/subscriberImpl.java:
+        * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/topics/impl/ContentFilteredTopicImpl.java:
+        * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/topics/impl/MultiTopicImpl.java:
+        * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/topics/impl/TopicImpl.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Provider/GeneratorEditPlugin.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Provider/GeneratorItemProviderAdapterFactory.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Provider/LocationPathItemProvider.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Provider/LocationVariableItemProvider.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Provider/SearchLocationItemProvider.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Provider/TransportInstItemProvider.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Provider/TransportRefItemProvider.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/.classpath:
+
+          Updated Modeling SDK Eclipse plugins with Eclipse 4.12
+
+Wed Jul 24 17:22:08 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit b30e4c3bbc632f3f61c92e4eebb57b9953283712
+
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Merge pull request #1209 from
+          simpsont-oci/tcp_transport_local_address_resolution_failure
+
+          adding configure_i failure for fqdn resolution failure for
+          TcpTransport
+
+          (cherry picked from commit
+          f5430ba88d1979b5859af27e3e3d4535719371dd)
+
+          # Conflicts:
+          #  tools/IntermediateTypeLang/cpp/rapidjson
+
+Wed Jul 24 17:20:28 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit 7b18af388ea5842e76d44f1d1cd6dfa7309f2d02
+
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.cpp:
+
+          Merge pull request #1192 from oth3r1if3/master
+
+          Update current buffer after reading header to handle case where
+          heade…
+
+          (cherry picked from commit
+          d5a61af9379bd6cb0e716bc34f09d2d4f66ba62c)
+
+          # Conflicts:
+          #  tools/IntermediateTypeLang/cpp/rapidjson
+
+Wed Jul 24 17:18:11 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit 1bb7bcf614fd32411f51078059f3bd13bf6e8b88
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.cpp:
+
+          Merge pull request #1166 from jrw972/mixed-rtps
+
+          Serialization error when mixing secure and plain RTPS submessages
+
+          (cherry picked from commit
+          f9a608e5d2ced141f5cc7d5bb8d61bb36f3f1be3)
+
+          # Conflicts:
+          #  tools/IntermediateTypeLang/cpp/rapidjson
+
+Wed Jul 24 17:01:53 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit 804c546100694909eeb713402fe923fce382854d
+
+        * configure:
+
+          Merge pull request #1141 from iguessthislldo/igtd/configure
+
+          configure: Detect MSVC Version Using C Macro
+          (cherry picked from commit
+          6903ff49ff35a3b8186447f0f054d6460cfcb3ee)
+
+          # Conflicts:
+          #  configure
+
+Wed Jul 24 16:51:29 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit 4dfdb4945f1b444c5e4a9cbf908c08412b9d81a9
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Merge pull request #1132 from objectcomputing/opendds-issue-1100
+
+          Issue 1100: Domain Participant interaction with Monitoring
+          library
+
+          (cherry picked from commit
+          475aecc649bc353486cf67110aa3310f7d987a0b)
+
+Wed Jul 24 16:49:29 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit 13a9545ca103f8c0154a4fad29f2a0c4f5735251
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Merge pull request #1133 from mitza-oci/pr1128-fix
+
+          Fixed an issue in #1128 with fragmentation
+
+          (cherry picked from commit
+          7b98a762dcfc29965bce8bf758a2059c8a4deda9)
+
+Wed Jul 24 16:48:44 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit 69996a9fc39243264eb5fff97a88ae8d18525852
+
+        * dds/DCPS/GuidUtils.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Merge pull request #1128 from simpsont-oci/guid_memcmp
+
+          Improve GUID lookup / comparison performance
+
+          (cherry picked from commit
+          b0899654509c98fdf88be3a2186653eed155ce12)
+
+Wed Jul 24 16:47:34 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit b81e7fa2e246f52058312e26fd5b1cac4c4cf7ac
+
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/security/framework/SecurityRegistry.cpp:
+        * dds/DCPS/security/framework/SecurityRegistry.h:
+
+          Merge pull request #1118 from
+          simpsont-oci/security_registry_instance_fix
+
+          Fix security registry instance creation during shutdown issues
+
+          (cherry picked from commit
+          344cc26688440f7f5a329b57232f3f74da0b092e)
+
+Wed Jul 24 16:46:33 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit 5172835c27407396059d28b069acefbb3c27c7a7
+
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/security/AccessControlBuiltInImpl.cpp:
+        * dds/DCPS/security/AccessControlBuiltInImpl.h:
+
+          Merge pull request #1101 from simpsont-oci/fix_messenger_leaks
+
+          Security Registry and cleanup
+
+          (cherry picked from commit
+          b8cd6eafde0abd4e732da12171cb4887528781ac)
+
+Wed Jul 24 16:45:25 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit 895bcc6299e41fab2ca99f299f5c6ceaf1a21551
+
+        * dds/DCPS/ConfigUtils.h:
+        * dds/DCPS/DiscoveryBase.h:
+        * dds/DCPS/GuidBuilder.cpp:
+        * dds/DCPS/GuidConverter.cpp:
+        * dds/DCPS/GuidUtils.cpp:
+        * dds/DCPS/GuidUtils.h:
+        * dds/DCPS/RTPS/SecurityHelpers.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/md5.cpp:
+        * dds/DCPS/RTPS/md5.h:
+        * dds/DCPS/SafetyProfileStreams.cpp:
+        * dds/DCPS/SafetyProfileStreams.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/debug.cpp:
+        * dds/DCPS/debug.h:
+        * dds/DCPS/security/AccessControlBuiltInImpl.cpp:
+        * dds/DCPS/security/CommonUtilities.cpp:
+        * dds/DCPS/security/CommonUtilities.h:
+        * dds/DCPS/security/CryptoBuiltInImpl.cpp:
+        * dds/DCPS/security/CryptoBuiltInImpl.h:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportSendListener.cpp:
+        * dds/DCPS/transport/framework/TransportSendListener.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+        * docs/design/security.md:
+
+          Merge pull request #1091 from iguessthislldo/igtd/security
+
+          Security Fixes
+
+          (cherry picked from commit
+          88774412aabf5db07e4bedf6b4c1a04b4b0b0f45)
+
+          # Conflicts:
+          #  dds/DCPS/GuidUtils.cpp
+          #  dds/DCPS/Service_Participant.cpp
+
+Wed Jul 24 16:11:32 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit c92fefd65b69485773942aea13a8957b8f2d674f
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+
+          Merge pull request #1096 from jmmorato/master
+
+          Visual Studio /clr leads to linking errors
+
+          (cherry picked from commit
+          d7cb947b5cf6d8c0a9e53b3b5247747163861317)
+
+Wed Jul 24 16:09:52 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit 7471b520c84c6a83a3f251d661448a48bd8409a3
+
+        * dds/DCPS/DisjointSequence.cpp:
+        * tests/DCPS/UnitTests/DisjointSequence.cpp:
+
+          Merge pull request #1194 from mitza-oci/disjoint-range
+
+          DisjointSequence fill_bitmap_range bug fix
+
+          (cherry picked from commit
+          f28d6ba2546f3a27e3bdb6e647f17d96454dd89b)
+
+Wed Jul 24 16:03:08 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit 77aa5b5dc6e03abc96a6e3acae4b0251aeafe90e
+
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/DisjointSequence.cpp:
+        * dds/DCPS/transport/framework/TransportReassembly.cpp:
+        * tests/DCPS/UnitTests/DisjointSequence.cpp:
+        * tests/DCPS/UnitTests/SequenceNumber.cpp:
+        * tests/DCPS/UnitTests/run_test.pl:
+        * tests/DCPS/common/TestSupport.h:
+
+          Merge pull request #1089 from
+          simpsont-oci/unit_tests_and_valgrind_issues_cleanup
+
+          Unit tests and valgrind issues cleanup
+
+          (cherry picked from commit
+          681663f260836d8ab9d666af0e4bd9e1a08d96cc)
+
+Wed Jul 24 15:31:06 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit 107ad7f867b98a3cdc35aec72b5052dcbdd77f7a
+
+        * dds/DCPS/security/SSL/DiffieHellman.cpp:
+
+          Merge pull request #1092 from
+          simpsont-oci/diffie_hellman_test_fix
+
+          Fix Periodic Diffie Hellman Test Failure
+
+          (cherry picked from commit
+          a57e953b1b3119d047f221ada0871485086ef134)
+
+Wed Jul 24 15:29:03 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit 49dd691a91e8e85f3f6ec7ecdd2d7d23d16f106b
+
+        * INSTALL:
+
+          Merge pull request #1086 from mitza-oci/master
+
+          INSTALL.md: extended "make install" documentation
+
+          (cherry picked from commit
+          b477cd5219dcea458193f00d103163e83fa0169d)
+
+          # Conflicts:
+          #  INSTALL.md
+
+Wed Jul 24 14:46:05 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit b320457bf2dbbe0696a64355f39b6ced6d678ce5
+
+        * tools/dissector/packet-repo.cpp:
+        * tools/dissector/plugin.cpp:
+
+          Merge pull request #1080 from iguessthislldo/igtd/wireshark
+
+          Updated Dissector for Wireshark 3.0
+
+          (cherry picked from commit
+          e9f3528cfab6607317e8a7a8cad1642190ec7d5e)
+
+          # Conflicts:
+          #  NEWS.md
+          #  tools/dissector/README.md
+
+Wed Jul 24 14:41:14 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit 1e524cd38f094820e2c5bd753c1f718f189f58d4
+
+        * configure:
+        * tests/googletest:
+
+          Merge pull request #1115 from mitza-oci/googletest181
+
+          Update googletest submodule to a commit on their 1.8.x branch
+          after 1.8.1
+
+          (cherry picked from commit
+          d3df5839b7324a21b3ddcd6e6071c748ea51c945)
+
+          # Conflicts:
+          #  configure
+
+Wed Jul 24 14:37:26 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit bfd658ed058b638e7397877f96f23c015f2b1764
+
+        * MPC/config/googlemock.mpb:
+        * MPC/config/googletest.mpb:
+        * tests/googletest:
+
+          Merge pull request #1112 from mitza-oci/googletest181
+
+          Use GoogleTest 1.8.1
+
+          (cherry picked from commit
+          b59829a947c563ab1048f1b5b3a23e6342c73fac)
+
+          # Conflicts:
+          #  MPC/config/googlemock.mpb
+          #  MPC/config/googletest.mpb
+
+Tue Jul 23 22:07:54 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+        commit 8385beb94e7b86b774f33ea8ce9f54b00c28d1c3
+
+        * MPC/config/dds_vc_warnings.mpb:
+        * configure:
+        * dds/DdsDcps.mpc:
+        * dds/monitor/monitor.mpc:
+        * tests/DCPS/Compiler/idl_test3_lib/idl_test3_lib.mpc:
+        * tests/DCPS/KeyTest/KeyTest.mpc:
+        * tests/DCPS/Monitor/Messenger.mpc:
+        * tests/FACE/Compiler/idl_test3_lib/FACE_idl_test3_lib.mpc:
+
+          Merge pull request #1053 from jwillemsen/jwi-vs2019
+
+          Add support for Visual Studio 2019
+
+          (cherry picked from commit
+          ba476ddb0f792c074e5a712ff051743b4249ffc7)
+
+          # Conflicts:
+          #  azure-pipelines.yml
+          #  configure
+          # tests/DCPS/Compiler/C++11/idl_test3_lib/cxx11_idl_test3_lib.mpc
+
+Tue Jul 23 21:59:58 UTC 2019  Adam Mitz  <mitza@objectcomputing.com>
+
+        * dds/idl/v8_generator.cpp:
+
+          Merge pull request #1055 from
+          simpsont-oci/v8_64bit_integers_to_string
+
+          update idl v8 generation to use decimal strings for signed and
+          unsign…
+
+          (cherry picked from commit
+          eeb96ef9ce1b8361c4fd5dd7f04b15f6ba8cca8c)
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

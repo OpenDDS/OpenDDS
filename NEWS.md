@@ -1,7 +1,7 @@
 # OpenDDS Releases
 
 ## Version 3.13.3 of OpenDDS
-Released %TIMESTAMP%
+Released Fri Oct 11 16:13:35 UTC 2019
 
 ### Fixes:
 - Updated IDL V8 generation to use decimal strings (#1055)
