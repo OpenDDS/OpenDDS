@@ -1921,7 +1921,7 @@ my %global_settings = (
     skip_doxygen => any_arg_is("--skip-doxygen") || $is_micro,
     skip_website => any_arg_is("--skip-website") || $is_micro,
     workspace    => $workspace,
-    download_url => remove_end_slash(string_arg_value("--download-url")),
+    download_url => remove_end_slash(string_arg_value("--download-url")) || $default_download_url,
     ace_root     => "$workspace/$ace_root"
 );
 
