@@ -247,10 +247,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   HorizontalHandler sedp_horizontal_handler(reactor, association_table);
   HorizontalHandler data_horizontal_handler(reactor, association_table);
 
-  OpenDDS::DCPS::RepoId application_participant_id = application_participant_impl->get_id();
+  const auto application_participant_id = application_participant_impl->get_id();
 
-  OpenDDS::DCPS::Discovery_rch discovery = TheServiceParticipant->get_discovery(application_domain);
-  OpenDDS::RTPS::RtpsDiscovery_rch rtps_discovery = OpenDDS::DCPS::dynamic_rchandle_cast<OpenDDS::RTPS::RtpsDiscovery>(discovery);
+  const auto discovery = TheServiceParticipant->get_discovery(application_domain);
+  const auto rtps_discovery = OpenDDS::DCPS::dynamic_rchandle_cast<OpenDDS::RTPS::RtpsDiscovery>(discovery);
 
   ACE_INET_Addr spdp(rtps_discovery->get_spdp_port(application_domain, application_participant_id), "127.0.0.1");
   ACE_INET_Addr sedp(rtps_discovery->get_sedp_port(application_domain, application_participant_id), "127.0.0.1");
@@ -476,7 +476,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
                                  &data_vertical_handler, &data_horizontal_handler);
   statistics_h.open();
 
-  rtps_discovery->schedule_send(application_domain, application_participant_id, ACE_Time_Value(1,0));
+  rtps_discovery->schedule_send(application_domain, application_participant_id, OpenDDS::DCPS::TimeDuration(1));
 
   reactor->run_reactor_event_loop();
 

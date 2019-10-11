@@ -587,7 +587,7 @@ RtpsDiscovery::get_sedp_port(DDS::DomainId_t domain,
 void
 RtpsDiscovery::schedule_send(DDS::DomainId_t domain,
                              const DCPS::RepoId& local_participant,
-                             const ACE_Time_Value& delay) const
+                             const DCPS::TimeDuration& delay) const
 {
   ParticipantHandle p = get_part(domain, local_participant);
   if (p) {

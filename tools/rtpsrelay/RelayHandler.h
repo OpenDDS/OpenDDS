@@ -70,9 +70,9 @@ public:
 
 protected:
   virtual std::string extract_relay_address(const RelayAddresses& relay_addresses) const = 0;
-  virtual bool do_normal_processing (const ACE_INET_Addr& /*a_remote*/,
-                                     const OpenDDS::DCPS::RepoId& /*a_src_guid*/,
-                                     ACE_Message_Block* /*a_msg*/) { return true;}
+  virtual bool do_normal_processing(const ACE_INET_Addr& /*a_remote*/,
+                                    const OpenDDS::DCPS::RepoId& /*a_src_guid*/,
+                                    ACE_Message_Block* /*a_msg*/) { return true; }
   virtual void purge(const OpenDDS::DCPS::RepoId& /*guid*/) {}
 
   HorizontalHandler* horizontal_handler_;

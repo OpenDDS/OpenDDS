@@ -2317,21 +2317,21 @@ Spdp::Interceptor::reactor_is_shut_down() const {
 }
 
 void
-Spdp::schedule_send(const ACE_Time_Value& delay)
+Spdp::schedule_send(const DCPS::TimeDuration& delay)
 {
   class ScheduleCommand : public DCPS::ReactorInterceptor::Command {
   public:
-    ScheduleCommand(Spdp* spdp, const ACE_Time_Value& delay) : spdp_(spdp), delay_(delay) {}
+    ScheduleCommand(Spdp* spdp, const DCPS::TimeDuration& delay) : spdp_(spdp), delay_(delay) {}
 
   private:
     void execute() {
-      if (-1 == spdp_->tport_->reactor()->schedule_timer(spdp_->tport_, this, delay_)) {
+      if (-1 == spdp_->tport_->reactor()->schedule_timer(spdp_->tport_, this, delay_.value())) {
         throw std::runtime_error("failed to schedule timer with reactor");
       }
     }
 
     Spdp* const spdp_;
-    ACE_Time_Value const delay_;
+    const DCPS::TimeDuration delay_;
   };
 
   interceptor_.execute_or_enqueue(new ScheduleCommand(this, delay));

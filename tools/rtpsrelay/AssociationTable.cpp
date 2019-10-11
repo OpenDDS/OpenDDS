@@ -8,7 +8,7 @@ void AssociationTable::insert(const WriterEntry& writer_entry,
                               GuidSet& local_guids,
                               RelayAddressesSet& relay_addresses)
 {
-  const bool local = writer_entry.relay_addresses() == relay_addresses_;
+  const auto local = writer_entry.relay_addresses() == relay_addresses_;
   const auto writer_guid = guid_to_guid(writer_entry.guid());
   const auto p = writers_.find(writer_guid);
   if (p == writers_.end()) {
@@ -32,7 +32,7 @@ void AssociationTable::insert(const ReaderEntry& reader_entry,
                               GuidSet& local_guids,
                               RelayAddressesSet& relay_addresses)
 {
-  const bool local = reader_entry.relay_addresses() == relay_addresses_;
+  const auto local = reader_entry.relay_addresses() == relay_addresses_;
   const auto reader_guid = guid_to_guid(reader_entry.guid());
   const auto p = readers_.find(reader_guid);
   if (p == readers_.end()) {

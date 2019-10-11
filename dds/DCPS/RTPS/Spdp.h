@@ -139,7 +139,7 @@ public:
 
   u_short get_sedp_port() const { return sedp_.local_address().get_port_number(); }
 
-  void schedule_send(const ACE_Time_Value& delay);
+  void schedule_send(const DCPS::TimeDuration& delay);
 
 protected:
   Sedp& endpoint_manager() { return sedp_; }

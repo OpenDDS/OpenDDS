@@ -190,7 +190,7 @@ public:
                         const DCPS::RepoId& local_participant) const;
   void schedule_send(DDS::DomainId_t domain,
                      const DCPS::RepoId& local_participant,
-                     const ACE_Time_Value& delay) const;
+                     const DCPS::TimeDuration& delay) const;
 
 private:
   DCPS::TimeDuration resend_period_;

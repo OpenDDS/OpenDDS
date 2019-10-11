@@ -9,8 +9,8 @@ namespace RtpsRelay {
 
 class ReaderListener : public ListenerBase {
 public:
-  explicit ReaderListener(AssociationTable& association_table,
-                          SpdpHandler& spdp_handler);
+  ReaderListener(AssociationTable& association_table,
+                 SpdpHandler& spdp_handler);
 
 private:
   void on_data_available(DDS::DataReader_ptr /*reader*/) override;

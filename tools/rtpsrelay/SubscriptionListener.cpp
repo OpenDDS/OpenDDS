@@ -6,10 +6,10 @@ namespace RtpsRelay {
 
 SubscriptionListener::SubscriptionListener(OpenDDS::DCPS::DomainParticipantImpl* participant,
                                            ReaderEntryDataWriter_ptr writer,
-                                           const RelayAddresses& relay_addresses) :
-  participant_(participant),
-  writer_(writer),
-  relay_addresses_(relay_addresses)
+                                           const RelayAddresses& relay_addresses)
+  : participant_(participant)
+  , writer_(writer)
+  , relay_addresses_(relay_addresses)
 {}
 
 void SubscriptionListener::on_data_available(DDS::DataReader_ptr reader)

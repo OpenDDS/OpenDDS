@@ -322,7 +322,7 @@ public:
                       GuidSet& local_guids,
                       RelayAddressesSet& relay_addresses)
   {
-    return index_.insert(reader, local_guids, relay_addresses);
+    index_.insert(reader, local_guids, relay_addresses);
   }
 
   void reinsert(ReaderPtr reader,
