@@ -40,8 +40,7 @@ public:
     case CHARACTER_CLASS:
     case NEGATED_CHARACTER_CLASS:
       return characters_ < other.characters_;
-    case WILDCARD:
-    case GLOB:
+    default:
       return false;
     }
   }
@@ -57,8 +56,7 @@ public:
     case CHARACTER_CLASS:
     case NEGATED_CHARACTER_CLASS:
       return characters_ == other.characters_;
-    case WILDCARD:
-    case GLOB:
+    default:
       return true;
     }
   }
