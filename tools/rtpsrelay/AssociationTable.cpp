@@ -4,16 +4,19 @@
 
 namespace RtpsRelay {
 
-void AssociationTable::insert(const WriterEntry& writer_entry)
+void AssociationTable::insert(const WriterEntry& writer_entry,
+                              GuidSet& local_guids,
+                              RelayAddressesSet& relay_addresses)
 {
+  const auto local = writer_entry.relay_addresses() == relay_addresses_;
   const auto writer_guid = guid_to_guid(writer_entry.guid());
   const auto p = writers_.find(writer_guid);
   if (p == writers_.end()) {
-    WriterPtr writer(new Writer(writer_entry, writer_entry.relay_addresses() == relay_addresses_));
+    WriterPtr writer(new Writer(writer_entry, local));
     writers_[writer_guid] = writer;
-    index_.insert(writer);
+    index_.insert(writer, local_guids, relay_addresses);
   } else {
-    index_.reinsert(p->second, writer_entry);
+    index_.reinsert(p->second, writer_entry, local, local_guids, relay_addresses);
   }
 }
 
@@ -25,16 +28,19 @@ void AssociationTable::remove(const WriterEntry& writer)
   writers_.erase(pos);
 }
 
-void AssociationTable::insert(const ReaderEntry& reader_entry)
+void AssociationTable::insert(const ReaderEntry& reader_entry,
+                              GuidSet& local_guids,
+                              RelayAddressesSet& relay_addresses)
 {
+  const auto local = reader_entry.relay_addresses() == relay_addresses_;
   const auto reader_guid = guid_to_guid(reader_entry.guid());
   const auto p = readers_.find(reader_guid);
   if (p == readers_.end()) {
     ReaderPtr reader(new Reader(reader_entry, reader_entry.relay_addresses() == relay_addresses_));
     readers_[reader_guid] = reader;
-    index_.insert(reader);
+    index_.insert(reader, local_guids, relay_addresses);
   } else {
-    index_.reinsert(p->second, reader_entry);
+    index_.reinsert(p->second, reader_entry, local, local_guids, relay_addresses);
   }
 }
 
@@ -46,30 +52,9 @@ void AssociationTable::remove(const ReaderEntry& reader)
   readers_.erase(pos);
 }
 
-RelayAddresses AssociationTable::get_relay_addresses_for_participant(const OpenDDS::DCPS::RepoId& guid) const
-{
-  OpenDDS::DCPS::RepoId prefix(guid);
-  prefix.entityId = OpenDDS::DCPS::ENTITYID_UNKNOWN;
-
-  {
-    const auto pos = writers_.lower_bound(prefix);
-    if (pos != writers_.end() && std::memcmp(pos->first.guidPrefix, prefix.guidPrefix, sizeof(prefix.guidPrefix)) == 0) {
-      return pos->second->writer_entry.relay_addresses();
-    }
-  }
-
-  {
-    const auto pos = readers_.lower_bound(prefix);
-    if (pos != readers_.end() && std::memcmp(pos->first.guidPrefix, prefix.guidPrefix, sizeof(prefix.guidPrefix)) == 0) {
-      return pos->second->reader_entry.relay_addresses();
-    }
-  }
-  return {};
-}
-
 void AssociationTable::get_guids(const OpenDDS::DCPS::RepoId& guid,
                                  GuidSet& local_guids,
-                                 GuidSet& remote_guids) const
+                                 RelayAddressesSet& relay_addresses) const
 {
   // Match on the prefix.
   OpenDDS::DCPS::RepoId prefix(guid);
@@ -82,13 +67,7 @@ void AssociationTable::get_guids(const OpenDDS::DCPS::RepoId& guid,
       index->get_readers(pos->second, readers);
     }
     for (const auto reader : readers) {
-      OpenDDS::DCPS::RepoId x = guid_to_guid(reader->reader_entry.guid());
-      x.entityId = OpenDDS::DCPS::ENTITYID_PARTICIPANT;
-      if (reader->local()) {
-        local_guids.insert(x);
-      } else {
-        remote_guids.insert(x);
-      }
+      add_reader(reader, local_guids, relay_addresses);
     }
   }
 
@@ -100,13 +79,7 @@ void AssociationTable::get_guids(const OpenDDS::DCPS::RepoId& guid,
     }
 
     for (const auto writer : writers) {
-      OpenDDS::DCPS::RepoId x = guid_to_guid(writer->writer_entry.guid());
-      x.entityId = OpenDDS::DCPS::ENTITYID_PARTICIPANT;
-      if (writer->local()) {
-        local_guids.insert(x);
-      } else {
-        remote_guids.insert(x);
-      }
+      add_writer(writer, local_guids, relay_addresses);
     }
   }
 }

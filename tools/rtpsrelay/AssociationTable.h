@@ -12,17 +12,19 @@ public:
   explicit AssociationTable(const RelayAddresses& relay_addresses) :
     relay_addresses_(relay_addresses)
   {}
-  void insert(const WriterEntry& entry);
+  void insert(const WriterEntry& entry,
+              GuidSet& local_guids,
+              RelayAddressesSet& relay_addresses);
   void remove(const WriterEntry& entry);
-  void insert(const ReaderEntry& entry);
+  void insert(const ReaderEntry& entry,
+              GuidSet& local_guids,
+              RelayAddressesSet& relay_addresses);
   void remove(const ReaderEntry& entry);
 
-  const RelayAddresses& local_relay_addresses() const { return relay_addresses_; }
-  void get_guids(const OpenDDS::DCPS::RepoId& guid, GuidSet& local_guids, GuidSet& remote_guids) const;
-  RelayAddresses get_relay_addresses_for_participant(const OpenDDS::DCPS::RepoId& guid) const;
+  void get_guids(const OpenDDS::DCPS::RepoId& guid, GuidSet& local_guids, RelayAddressesSet& relay_addresses) const;
 
 private:
-  RelayAddresses relay_addresses_;
+  const RelayAddresses& relay_addresses_;
 
   typedef std::map<OpenDDS::DCPS::RepoId, WriterPtr, OpenDDS::DCPS::GUID_tKeyLessThan> WritersMap;
   WritersMap writers_;

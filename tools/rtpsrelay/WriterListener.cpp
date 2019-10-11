@@ -2,8 +2,10 @@
 
 namespace RtpsRelay {
 
-WriterListener::WriterListener(AssociationTable& association_table) :
-  association_table_(association_table)
+WriterListener::WriterListener(AssociationTable& association_table,
+                               SpdpHandler& spdp_handler)
+  : association_table_(association_table)
+  , spdp_handler_(spdp_handler)
 {}
 
 void WriterListener::on_data_available(DDS::DataReader_ptr reader)
@@ -30,7 +32,12 @@ void WriterListener::on_data_available(DDS::DataReader_ptr reader)
   for (size_t idx = 0; idx != infos.length(); ++idx) {
     switch (infos[idx].instance_state) {
     case DDS::ALIVE_INSTANCE_STATE:
-      association_table_.insert(data[idx]);
+      {
+        GuidSet local_guids;
+        RelayAddressesSet relay_addresses;
+        association_table_.insert(data[idx], local_guids, relay_addresses);
+        spdp_handler_.replay(guid_to_guid(data[idx].guid()), local_guids, relay_addresses);
+      }
       break;
     case DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE:
     case DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE:

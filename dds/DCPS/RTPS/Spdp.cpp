@@ -1662,10 +1662,10 @@ Spdp::SpdpTransport::write_i()
 }
 
 int
-Spdp::SpdpTransport::handle_timeout(const ACE_Time_Value& tv, const void*)
+Spdp::SpdpTransport::handle_timeout(const ACE_Time_Value& tv, const void* arg)
 {
   const MonotonicTimePoint now(tv);
-  if (now > last_disco_resend_ + disco_resend_period_) {
+  if (arg || now > last_disco_resend_ + disco_resend_period_) {
     write();
     outer_->remove_expired_participants();
     last_disco_resend_ = now;
@@ -1836,8 +1836,7 @@ bool
 Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
                                          u_short participant_id)
 {
-  const u_short uni_port = port_common + outer_->disco_->d1() +
-                           (outer_->disco_->pg() * participant_id);
+  uni_port_ = port_common + outer_->disco_->d1() + (outer_->disco_->pg() * participant_id);
 
   ACE_INET_Addr local_addr;
   OPENDDS_STRING spdpaddr = outer_->disco_->spdp_local_address().c_str();
@@ -1846,12 +1845,12 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
     spdpaddr = "0.0.0.0";
   }
 
-  if (0 != local_addr.set(uni_port, spdpaddr.c_str())) {
+  if (0 != local_addr.set(uni_port_, spdpaddr.c_str())) {
     ACE_DEBUG((
           LM_ERROR,
           ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_socket() - ")
           ACE_TEXT("failed setting unicast local_addr to port %d %p\n"),
-          uni_port, ACE_TEXT("ACE_INET_Addr::set")));
+          uni_port_, ACE_TEXT("ACE_INET_Addr::set")));
     throw std::runtime_error("failed to set unicast local address");
   }
 
@@ -1862,7 +1861,7 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
             ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_socket() - ")
             ACE_TEXT("failed to open_appropriate_socket_type unicast socket on port %d %p.  ")
             ACE_TEXT("Trying next participantId...\n"),
-            uni_port, ACE_TEXT("ACE_SOCK_Dgram::open")));
+            uni_port_, ACE_TEXT("ACE_SOCK_Dgram::open")));
     }
     return false;
 
@@ -1871,7 +1870,7 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
           LM_INFO,
           ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_socket() - ")
           ACE_TEXT("opened unicast socket on port %d\n"),
-          uni_port));
+          uni_port_));
   }
 
   if (!DCPS::set_socket_multicast_ttl(unicast_socket_, outer_->disco_->ttl())) {
@@ -1879,7 +1878,7 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
                ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_socket() - ")
                ACE_TEXT("failed to set TTL value to %d ")
                ACE_TEXT("for port:%hu %p\n"),
-               outer_->disco_->ttl(), uni_port, ACE_TEXT("DCPS::set_socket_multicast_ttl:")));
+               outer_->disco_->ttl(), uni_port_, ACE_TEXT("DCPS::set_socket_multicast_ttl:")));
     throw std::runtime_error("failed to set TTL");
   }
   return true;
@@ -2301,6 +2300,28 @@ bool
 Spdp::Interceptor::reactor_is_shut_down() const {
   return task_->is_shut_down();
 }
+
+void
+Spdp::schedule_send(const DCPS::TimeDuration& delay)
+{
+  class ScheduleCommand : public DCPS::ReactorInterceptor::Command {
+  public:
+    ScheduleCommand(Spdp* spdp, const DCPS::TimeDuration& delay) : spdp_(spdp), delay_(delay) {}
+
+  private:
+    void execute() {
+      if (-1 == spdp_->tport_->reactor()->schedule_timer(spdp_->tport_, this, delay_.value())) {
+        throw std::runtime_error("failed to schedule timer with reactor");
+      }
+    }
+
+    Spdp* const spdp_;
+    const DCPS::TimeDuration delay_;
+  };
+
+  interceptor_.execute_or_enqueue(new ScheduleCommand(this, delay));
+}
+
 
 }
 }

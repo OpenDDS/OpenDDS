@@ -3,18 +3,20 @@
 
 #include "AssociationTable.h"
 #include "ListenerBase.h"
-#include "lib/RelayTypeSupportImpl.h"
+#include "RelayHandler.h"
 
 namespace RtpsRelay {
 
 class WriterListener : public ListenerBase {
 public:
-  explicit WriterListener(AssociationTable& association_table);
+  WriterListener(AssociationTable& association_table,
+                 SpdpHandler& spdp_handler);
 
 private:
   void on_data_available(DDS::DataReader_ptr /*reader*/) override;
 
   AssociationTable& association_table_;
+  SpdpHandler& spdp_handler_;
 };
 
 }

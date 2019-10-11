@@ -39,7 +39,11 @@ namespace {
     const DDS::Property_t prop = {name, value.c_str(), propagate};
     const unsigned int len = props.length();
     props.length(len + 1);
-    props[len] = prop;
+    try {
+      props[len] = prop;
+    } catch (const CORBA::BAD_PARAM& ex) {
+      ACE_ERROR((LM_ERROR, "Exception caught when appending parameter\n"));
+    }
   }
 }
 
@@ -70,8 +74,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   DDS::DomainId_t relay_domain = 0;
   DDS::DomainId_t application_domain = 1;
   ACE_INET_Addr nic_horizontal, nic_vertical;
-  ACE_Time_Value lifespan(300);   // 5 minutes
-  ACE_Time_Value purge_period(60);       // 1 minute
+  ACE_Time_Value lifespan(60);   // 1 minute
 
 #ifdef OPENDDS_SECURITY
   std::string identity_ca_file;
@@ -102,9 +105,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-Lifespan"))) {
       lifespan = ACE_Time_Value(ACE_OS::atoi(arg));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-PurgePeriod"))) {
-      purge_period = ACE_Time_Value(ACE_OS::atoi(arg));
       args.consume_arg();
 #ifdef OPENDDS_SECURITY
     } else if ((arg = args.get_the_parameter("-IdentityCA"))) {
@@ -247,6 +247,45 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   AssociationTable association_table(relay_addresses);
 
+  HorizontalHandler spdp_horizontal_handler(reactor, association_table);
+  HorizontalHandler sedp_horizontal_handler(reactor, association_table);
+  HorizontalHandler data_horizontal_handler(reactor, association_table);
+
+  const auto application_participant_id = application_participant_impl->get_id();
+
+  const auto discovery = TheServiceParticipant->get_discovery(application_domain);
+  const auto rtps_discovery = OpenDDS::DCPS::dynamic_rchandle_cast<OpenDDS::RTPS::RtpsDiscovery>(discovery);
+
+  ACE_INET_Addr spdp(rtps_discovery->get_spdp_port(application_domain, application_participant_id), "127.0.0.1");
+  ACE_INET_Addr sedp(rtps_discovery->get_sedp_port(application_domain, application_participant_id), "127.0.0.1");
+
+  SpdpHandler spdp_vertical_handler(reactor, association_table, lifespan, application_participant_id, spdp);
+  SedpHandler sedp_vertical_handler(reactor, association_table, lifespan, application_participant_id, sedp);
+  DataHandler data_vertical_handler(reactor, association_table, lifespan, application_participant_id);
+
+  spdp_horizontal_handler.vertical_handler(&spdp_vertical_handler);
+  sedp_horizontal_handler.vertical_handler(&sedp_vertical_handler);
+  data_horizontal_handler.vertical_handler(&data_vertical_handler);
+
+  spdp_vertical_handler.horizontal_handler(&spdp_horizontal_handler);
+  sedp_vertical_handler.horizontal_handler(&sedp_horizontal_handler);
+  data_vertical_handler.horizontal_handler(&data_horizontal_handler);
+
+  spdp_horizontal_handler.open(spdp_horizontal_addr);
+  sedp_horizontal_handler.open(sedp_horizontal_addr);
+  data_horizontal_handler.open(data_horizontal_addr);
+
+  spdp_vertical_handler.open(spdp_vertical_addr);
+  sedp_vertical_handler.open(sedp_vertical_addr);
+  data_vertical_handler.open(data_vertical_addr);
+
+  std::cout << "SPDP Horizontal listening on " << spdp_horizontal_handler.relay_address() << '\n'
+    << "SEDP Horizontal listening on " << sedp_horizontal_handler.relay_address() << '\n'
+    << "Data Horizontal listening on " << data_horizontal_handler.relay_address() << '\n'
+    << "SPDP Vertical listening on " << spdp_vertical_handler.relay_address() << '\n'
+    << "SEDP Vertical listening on " << sedp_vertical_handler.relay_address() << '\n'
+    << "Data Vertical listening on " << data_vertical_handler.relay_address() << std::endl;
+
   DDS::Subscriber_var bit_subscriber = application_participant->get_builtin_subscriber();
   {
     ReaderEntryTypeSupportImpl::_var_type reader_entry_ts =
@@ -309,7 +348,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     reader_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
     DDS::DataReader_var reader = subscriber->create_datareader(topic, reader_qos,
-                                                               new ReaderListener(association_table),
+                                                               new ReaderListener(association_table, spdp_vertical_handler),
                                                                DDS::DATA_AVAILABLE_STATUS);
 
     if (!reader) {
@@ -317,11 +356,25 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       return EXIT_FAILURE;
     }
 
+    ReaderEntryDataReader_ptr reader_reader = ReaderEntryDataReader::_narrow(reader);
+
+    if (!reader_reader) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: failed to narrow Reader data reader\n"));
+      return EXIT_FAILURE;
+    }
+
+    DDS::DataReaderListener_var reader_listener(new ReaderListener(association_table, spdp_vertical_handler));
+    DDS::ReturnCode_t ret = reader_reader->set_listener(reader_listener, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    if (ret != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: Failed to set listener on Reader data reader\n"));
+      return EXIT_FAILURE;
+    }
+
     DDS::DataReader_var dr = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC);
     DDS::DataReaderListener_var subscription_listener(new SubscriptionListener(application_participant_impl,
                                                                                reader_writer,
-                                                                               association_table));
-    DDS::ReturnCode_t ret = dr->set_listener(subscription_listener, DDS::DATA_AVAILABLE_STATUS);
+                                                                               relay_addresses));
+    ret = dr->set_listener(subscription_listener, DDS::DATA_AVAILABLE_STATUS);
     if (ret != DDS::RETCODE_OK) {
       ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: Failed to set listener on SubscriptionBuiltinTopicDataDataReader\n"));
       return EXIT_FAILURE;
@@ -389,62 +442,45 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     reader_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
     DDS::DataReader_var reader = subscriber->create_datareader(topic, reader_qos,
-                                                               new WriterListener(association_table),
+                                                               new WriterListener(association_table, spdp_vertical_handler),
                                                                DDS::DATA_AVAILABLE_STATUS);
     if (!reader) {
       ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: failed to create Writer data reader\n"));
       return EXIT_FAILURE;
     }
 
+    WriterEntryDataReader_ptr writer_reader = WriterEntryDataReader::_narrow(reader);
+
+    if (!writer_reader) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: failed to narrow Writer data reader\n"));
+      return EXIT_FAILURE;
+    }
+
+    DDS::DataReaderListener_var writer_listener(new WriterListener(association_table, spdp_vertical_handler));
+    DDS::ReturnCode_t ret = writer_reader->set_listener(writer_listener, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    if (ret != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: Failed to set listener on Writer data reader\n"));
+      return EXIT_FAILURE;
+    }
+
     DDS::DataReader_var dr = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC);
     DDS::DataReaderListener_var publication_listener(new PublicationListener(application_participant_impl,
                                                                              writer_writer,
-                                                                             association_table));
-    DDS::ReturnCode_t ret = dr->set_listener(publication_listener, DDS::DATA_AVAILABLE_STATUS);
+                                                                             relay_addresses));
+    ret = dr->set_listener(publication_listener, DDS::DATA_AVAILABLE_STATUS);
     if (ret != DDS::RETCODE_OK) {
       ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: Failed to set listener on PublicationBuiltinTopicDataDataReader\n"));
       return EXIT_FAILURE;
     }
   }
 
-  HorizontalHandler spdp_horizontal_handler(reactor, association_table);
-  HorizontalHandler sedp_horizontal_handler(reactor, association_table);
-  HorizontalHandler data_horizontal_handler(reactor, association_table);
-
-  OpenDDS::DCPS::RepoId application_participant_id = application_participant_impl->get_id();
-
-  SpdpHandler spdp_vertical_handler(reactor, association_table, lifespan, purge_period, application_participant_id);
-  SedpHandler sedp_vertical_handler(reactor, association_table, lifespan, purge_period, application_participant_id);
-  DataHandler data_vertical_handler(reactor, association_table, lifespan, purge_period, application_participant_id);
-
-  spdp_horizontal_handler.vertical_handler(&spdp_vertical_handler);
-  sedp_horizontal_handler.vertical_handler(&sedp_vertical_handler);
-  data_horizontal_handler.vertical_handler(&data_vertical_handler);
-
-  spdp_vertical_handler.horizontal_handler(&spdp_horizontal_handler);
-  sedp_vertical_handler.horizontal_handler(&sedp_horizontal_handler);
-  data_vertical_handler.horizontal_handler(&data_horizontal_handler);
-
-  spdp_horizontal_handler.open(spdp_horizontal_addr);
-  sedp_horizontal_handler.open(sedp_horizontal_addr);
-  data_horizontal_handler.open(data_horizontal_addr);
-
-  spdp_vertical_handler.open(spdp_vertical_addr);
-  sedp_vertical_handler.open(sedp_vertical_addr);
-  data_vertical_handler.open(data_vertical_addr);
-
-  std::cout << "SPDP Horizontal listening on " << spdp_horizontal_handler.relay_address() << '\n'
-    << "SEDP Horizontal listening on " << sedp_horizontal_handler.relay_address() << '\n'
-    << "Data Horizontal listening on " << data_horizontal_handler.relay_address() << '\n'
-    << "SPDP Vertical listening on " << spdp_vertical_handler.relay_address() << '\n'
-    << "SEDP Vertical listening on " << sedp_vertical_handler.relay_address() << '\n'
-    << "Data Vertical listening on " << data_vertical_handler.relay_address() << std::endl;
-
   StatisticsHandler statistics_h(reactor,
                                  &spdp_vertical_handler, &spdp_horizontal_handler,
                                  &sedp_vertical_handler, &sedp_horizontal_handler,
                                  &data_vertical_handler, &data_horizontal_handler);
   statistics_h.open();
+
+  rtps_discovery->schedule_send(application_domain, application_participant_id, OpenDDS::DCPS::TimeDuration(1));
 
   reactor->run_reactor_event_loop();
 

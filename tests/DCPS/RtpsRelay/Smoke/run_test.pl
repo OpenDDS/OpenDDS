@@ -38,6 +38,8 @@ $test->process("subscriber", "subscriber", "-ORBDebugLevel 1 -DCPSConfigFile sub
 
 $test->start_process("relay1");
 $test->start_process("relay2");
+sleep 3;
+
 $test->start_process("subscriber");
 $test->start_process("publisher");
 

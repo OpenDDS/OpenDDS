@@ -130,11 +130,8 @@ Arguments
 * :code:`-ApplicationDomain` - The DDS domain to use for Application Participant.
   The default is 1.
 * :code:`-Lifespan` - Time in seconds after which the relay will purge
-  IP:port information for an inactive participant.  The default is 300
+  IP:port information for an inactive participant.  The default is 60
   seconds.
-* :code:`-PurgePeriod` - Time in seconds between purges of inactive
-  participants.  The default is 60 seconds.
-
 
 Participant Configuration
 =========================

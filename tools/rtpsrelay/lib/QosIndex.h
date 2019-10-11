@@ -4,39 +4,141 @@
 #include "Name.h"
 #include "RelayTypeSupportImpl.h"
 
+#include "dds/DCPS/GuidUtils.h"
+
 namespace RtpsRelay {
+
+inline OpenDDS::DCPS::RepoId guid_to_guid(const GUID_t& a_guid)
+{
+  OpenDDS::DCPS::RepoId retval;
+  std::memcpy(&retval, &a_guid, sizeof(OpenDDS::DCPS::RepoId));
+  return retval;
+}
+
+inline OpenDDS::DCPS::RepoId to_participant_guid(const OpenDDS::DCPS::RepoId& guid)
+{
+  OpenDDS::DCPS::RepoId retval(guid);
+  retval.entityId = OpenDDS::DCPS::ENTITYID_PARTICIPANT;
+  return retval;
+}
+
+typedef std::set<OpenDDS::DCPS::RepoId, OpenDDS::DCPS::GUID_tKeyLessThan> GuidSet;
+
+inline bool operator==(const RelayAddresses& x,
+                       const RelayAddresses& y)
+{
+  return x.spdp_relay_address() == y.spdp_relay_address() &&
+    x.sedp_relay_address() == y.sedp_relay_address() &&
+    x.data_relay_address() == y.data_relay_address();
+}
+
+inline bool operator!=(const RelayAddresses& x,
+                       const RelayAddresses& y)
+{
+  return x.spdp_relay_address() != y.spdp_relay_address() ||
+    x.sedp_relay_address() != y.sedp_relay_address() ||
+    x.data_relay_address() != y.data_relay_address();
+}
+
+inline bool operator<(const RelayAddresses& x,
+                      const RelayAddresses& y)
+{
+  if (x.spdp_relay_address() != y.spdp_relay_address()) {
+    return x.spdp_relay_address() < y.spdp_relay_address();
+  }
+  if (x.sedp_relay_address() != y.sedp_relay_address()) {
+    return x.sedp_relay_address() < y.sedp_relay_address();
+  }
+  return x.data_relay_address() < y.data_relay_address();
+}
+
+extern RelayAddresses local_relay_addresses;
+
+typedef std::set<RelayAddresses> RelayAddressesSet;
 
 class NoIndex;
 
-struct RtpsRelayLib_Export Writer {
-  Writer(const RtpsRelay::WriterEntry& we, bool local) : writer_entry(we), local_(local) {}
-  RtpsRelay::WriterEntry writer_entry;
+class RtpsRelayLib_Export Writer {
+ public:
+  Writer(const WriterEntry& we, bool local)
+    : participant_guid_(to_participant_guid(guid_to_guid(we.guid())))
+    {
+      reset(we, local);
+    }
+
+  void reset(const WriterEntry& we, bool local)
+  {
+    writer_entry_ = we;
+    local_ = local;
+  }
+
   std::set<NoIndex*> indexes;
 
+  const OpenDDS::DCPS::RepoId participant_guid() const { return participant_guid_; }
+  const WriterEntry& writer_entry() const { return writer_entry_; }
   bool local() const { return local_; }
   bool remote() const { return !local_; }
 
 private:
-  const bool local_;
+  const OpenDDS::DCPS::RepoId participant_guid_;
+  WriterEntry writer_entry_;
+  bool local_;
 };
 
 typedef std::shared_ptr<Writer> WriterPtr;
 typedef std::set<WriterPtr> WriterSet;
 
-struct RtpsRelayLib_Export Reader {
-  Reader(const RtpsRelay::ReaderEntry& re, bool local) : reader_entry(re), local_(local) {}
-  RtpsRelay::ReaderEntry reader_entry;
+inline void add_writer(WriterPtr writer,
+                       GuidSet& local_guids,
+                       RelayAddressesSet& relay_addresses)
+{
+  if (writer->local()) {
+    local_guids.insert(writer->participant_guid());
+  } else {
+    relay_addresses.insert(writer->writer_entry().relay_addresses());
+  }
+}
+
+class RtpsRelayLib_Export Reader {
+ public:
+  Reader(const ReaderEntry& re, bool local)
+    : participant_guid_(to_participant_guid(guid_to_guid(re.guid())))
+    {
+      reset(re, local);
+    }
+
+  void reset(const ReaderEntry& re, bool local)
+  {
+    reader_entry_ = re;
+    local_ = local;
+  }
   std::set<NoIndex*> indexes;
 
+  const OpenDDS::DCPS::RepoId participant_guid() const { return participant_guid_; }
+  const ReaderEntry& reader_entry() const { return reader_entry_; }
   bool local() const { return local_; }
   bool remote() const { return !local_; }
 
 private:
-  const bool local_;
+  const OpenDDS::DCPS::RepoId participant_guid_;
+  ReaderEntry reader_entry_;
+  bool local_;
 };
 
 typedef std::shared_ptr<Reader> ReaderPtr;
 typedef std::set<ReaderPtr> ReaderSet;
+
+inline void add_reader(ReaderPtr reader,
+                       GuidSet& local_guids,
+                       RelayAddressesSet& relay_addresses)
+{
+  if (reader->local()) {
+    local_guids.insert(reader->participant_guid());
+  } else {
+    relay_addresses.insert(reader->reader_entry().relay_addresses());
+  }
+}
+
 
 class RtpsRelayLib_Export NoIndex {
 public:
@@ -50,17 +152,23 @@ public:
     }
   }
 
-  void insert(WriterPtr writer)
+  void insert(WriterPtr writer,
+              GuidSet& local_guids,
+              RelayAddressesSet& relay_addresses)
   {
     const auto p = writers_.insert(std::make_pair(writer, ReaderSet()));
     writer->indexes.insert(this);
-    match(p.first);
+    match(p.first, local_guids, relay_addresses);
   }
 
-  void reinsert(WriterPtr writer, const RtpsRelay::WriterEntry& writer_entry)
+  void reinsert(WriterPtr writer,
+                const WriterEntry& writer_entry,
+                bool local,
+                GuidSet& local_guids,
+                RelayAddressesSet& relay_addresses)
   {
-    writer->writer_entry = writer_entry;
-    match(writers_.find(writer));
+    writer->reset(writer_entry, local);
+    match(writers_.find(writer), local_guids, relay_addresses);
   }
 
   void erase(WriterPtr writer)
@@ -73,17 +181,23 @@ public:
     writer->indexes.erase(this);
   }
 
-  void insert(ReaderPtr reader)
+  void insert(ReaderPtr reader,
+              GuidSet& local_guids,
+              RelayAddressesSet& relay_addresses)
   {
     const auto p = readers_.insert(std::make_pair(reader, WriterSet()));
     reader->indexes.insert(this);
-    match(p.first);
+    match(p.first, local_guids, relay_addresses);
   }
 
-  void reinsert(ReaderPtr reader, const RtpsRelay::ReaderEntry& reader_entry)
+  void reinsert(ReaderPtr reader,
+                const ReaderEntry& reader_entry,
+                bool local,
+                GuidSet& local_guids,
+                RelayAddressesSet& relay_addresses)
   {
-    reader->reader_entry = reader_entry;
-    match(readers_.find(reader));
+    reader->reset(reader_entry, local);
+    match(readers_.find(reader), local_guids, relay_addresses);
   }
 
   void erase(ReaderPtr reader)
@@ -121,8 +235,12 @@ private:
   typedef std::map<WriterPtr, ReaderSet> Writers;
   typedef std::map<ReaderPtr, WriterSet> Readers;
 
-  void match(Writers::iterator pos);
-  void match(Readers::iterator pos);
+  void match(Writers::iterator pos,
+             GuidSet& local_guids,
+             RelayAddressesSet& relay_addresses);
+  void match(Readers::iterator pos,
+             GuidSet& local_guids,
+             RelayAddressesSet& relay_addresses);
 
   Writers writers_;
   Readers readers_;
@@ -157,20 +275,28 @@ public:
     patterns_.erase(pattern);
   }
 
-  void insert_literal(WriterPtr writer)
+  void insert_literal(WriterPtr writer,
+                      GuidSet& local_guids,
+                      RelayAddressesSet& relay_addresses)
   {
-    index_.insert(writer);
     ++literal_count_;
+    index_.insert(writer, local_guids, relay_addresses);
   }
 
-  void insert_pattern(WriterPtr writer)
+  void insert_pattern(WriterPtr writer,
+                      GuidSet& local_guids,
+                      RelayAddressesSet& relay_addresses)
   {
-    index_.insert(writer);
+    index_.insert(writer, local_guids, relay_addresses);
   }
 
-  void reinsert(WriterPtr writer, const RtpsRelay::WriterEntry& writer_entry)
+  void reinsert(WriterPtr writer,
+                const WriterEntry& writer_entry,
+                bool local,
+                GuidSet& local_guids,
+                RelayAddressesSet& relay_addresses)
   {
-    index_.reinsert(writer, writer_entry);
+    index_.reinsert(writer, writer_entry, local, local_guids, relay_addresses);
   }
 
   void erase_literal(WriterPtr writer)
@@ -184,20 +310,28 @@ public:
     index_.erase(writer);
   }
 
-  void insert_literal(ReaderPtr reader)
+  void insert_literal(ReaderPtr reader,
+                      GuidSet& local_guids,
+                      RelayAddressesSet& relay_addresses)
   {
-    index_.insert(reader);
     ++literal_count_;
+    index_.insert(reader, local_guids, relay_addresses);
   }
 
-  void insert_pattern(ReaderPtr reader)
+  void insert_pattern(ReaderPtr reader,
+                      GuidSet& local_guids,
+                      RelayAddressesSet& relay_addresses)
   {
-    index_.insert(reader);
+    index_.insert(reader, local_guids, relay_addresses);
   }
 
-  void reinsert(ReaderPtr reader, const RtpsRelay::ReaderEntry& reader_entry)
+  void reinsert(ReaderPtr reader,
+                const ReaderEntry& reader_entry,
+                bool local,
+                GuidSet& local_guids,
+                RelayAddressesSet& relay_addresses)
   {
-    index_.reinsert(reader, reader_entry);
+    index_.reinsert(reader, reader_entry, local, local_guids, relay_addresses);
   }
 
   void erase_literal(ReaderPtr reader)
@@ -247,15 +381,17 @@ public:
     pattern->literals_.clear();
   }
 
-  static void insert(PatternPtr pattern, LiteralPtr literal)
+  static void insert(PatternPtr pattern, LiteralPtr literal,
+                     GuidSet& local_guids,
+                     RelayAddressesSet& relay_addresses)
   {
     pattern->literals_.insert(literal);
     literal->insert(pattern);
     for (const auto writer : pattern->writers_) {
-      literal->insert_pattern(writer);
+      literal->insert_pattern(writer, local_guids, relay_addresses);
     }
     for (const auto reader : pattern->readers_) {
-      literal->insert_pattern(reader);
+      literal->insert_pattern(reader, local_guids, relay_addresses);
     }
   }
 
@@ -264,18 +400,24 @@ public:
     literals_.erase(literal);
   }
 
-  void insert(WriterPtr writer)
+  void insert(WriterPtr writer,
+              GuidSet& local_guids,
+              RelayAddressesSet& relay_addresses)
   {
     writers_.insert(writer);
     for (const auto literal : literals_) {
-      literal->insert_pattern(writer);
+      literal->insert_pattern(writer, local_guids, relay_addresses);
     }
   }
 
-  void reinsert(WriterPtr writer, const RtpsRelay::WriterEntry& writer_entry)
+  void reinsert(WriterPtr writer,
+                const WriterEntry& writer_entry,
+                bool local,
+                GuidSet& local_guids,
+                RelayAddressesSet& relay_addresses)
   {
     for (const auto literal : literals_) {
-      literal->reinsert(writer, writer_entry);
+      literal->reinsert(writer, writer_entry, local, local_guids, relay_addresses);
     }
   }
 
@@ -287,18 +429,24 @@ public:
     writers_.erase(writer);
   }
 
-  void insert(ReaderPtr reader)
+  void insert(ReaderPtr reader,
+              GuidSet& local_guids,
+              RelayAddressesSet& relay_addresses)
   {
     readers_.insert(reader);
     for (const auto literal : literals_) {
-      literal->insert_pattern(reader);
+      literal->insert_pattern(reader, local_guids, relay_addresses);
     }
   }
 
-  void reinsert(ReaderPtr reader, const RtpsRelay::ReaderEntry& reader_entry)
+  void reinsert(ReaderPtr reader,
+                const ReaderEntry& reader_entry,
+                bool local,
+                GuidSet& local_guids,
+                RelayAddressesSet& relay_addresses)
   {
     for (const auto literal : literals_) {
-      literal->reinsert(reader, reader_entry);
+      literal->reinsert(reader, reader_entry, local, local_guids, relay_addresses);
     }
   }
 
@@ -607,42 +755,49 @@ public:
     empty_qos_.name[0] = "";
   }
 
-  void insert(WriterPtr writer)
+  void insert(WriterPtr writer,
+              GuidSet& local_guids,
+              RelayAddressesSet& relay_addresses)
   {
-    const auto qos = choose_qos(&writer->writer_entry._publisher_qos.partition);
+    const auto qos = choose_qos(&writer->writer_entry()._publisher_qos.partition);
 
     for (int idx = 0, limit = qos->name.length(); idx != limit; ++idx) {
       Name name(qos->name[idx].in());
       if (!name.is_valid()) {
         continue;
       }
+
       if (name.is_literal()) {
         auto literal = NodeType::find_literal(node_, name);
         if (literal == nullptr) {
           literal = LiteralPtr(new LiteralType());
           NodeType::insert(node_, name, literal);
           for (const auto pattern : NodeType::find_patterns(node_, name)) {
-            PatternType::insert(pattern, literal);
+            PatternType::insert(pattern, literal, local_guids, relay_addresses);
           }
         }
-        literal->insert_literal(writer);
+        literal->insert_literal(writer, local_guids, relay_addresses);
       } else {
         auto pattern = NodeType::find_pattern(node_, name);
         if (pattern == nullptr) {
           pattern = PatternPtr(new PatternType());
           NodeType::insert(node_, name, pattern);
           for (const auto literal : NodeType::find_literals(node_, name)) {
-            PatternType::insert(pattern, literal);
+            PatternType::insert(pattern, literal, local_guids, relay_addresses);
           }
         }
-        pattern->insert(writer);
+        pattern->insert(writer, local_guids, relay_addresses);
       }
     }
   }
 
-  void reinsert(WriterPtr writer, const RtpsRelay::WriterEntry& writer_entry)
+  void reinsert(WriterPtr writer,
+                const WriterEntry& writer_entry,
+                bool local,
+                GuidSet& local_guids,
+                RelayAddressesSet& relay_addresses)
   {
-    const auto old_qos = choose_qos(&writer->writer_entry._publisher_qos.partition);
+    const auto old_qos = choose_qos(&writer->writer_entry()._publisher_qos.partition);
     const auto new_qos = choose_qos(&writer_entry._publisher_qos.partition);
 
     std::set<Name> old_names;
@@ -683,15 +838,15 @@ public:
       } else {
         if (name.is_literal()) {
           const auto literal = NodeType::find_literal(node_, name);
-          literal->reinsert(writer, writer_entry);
+          literal->reinsert(writer, writer_entry, local, local_guids, relay_addresses);
         } else {
           const auto pattern = NodeType::find_pattern(node_, name);
-          pattern->reinsert(writer, writer_entry);
+          pattern->reinsert(writer, writer_entry, local, local_guids, relay_addresses);
         }
       }
     }
 
-    writer->writer_entry = writer_entry;
+    writer->reset(writer_entry, local);
 
     for (Name name : new_names) {
       if (old_names.count(name) == 0) {
@@ -701,20 +856,20 @@ public:
             literal = LiteralPtr(new LiteralType());
             NodeType::insert(node_, name, literal);
             for (const auto pattern : NodeType::find_patterns(node_, name)) {
-              PatternType::insert(pattern, literal);
+              PatternType::insert(pattern, literal, local_guids, relay_addresses);
             }
           }
-          literal->insert_literal(writer);
+          literal->insert_literal(writer, local_guids, relay_addresses);
         } else {
           auto pattern = NodeType::find_pattern(node_, name);
           if (pattern == nullptr) {
             pattern = PatternPtr(new PatternType());
             NodeType::insert(node_, name, pattern);
             for (const auto literal : NodeType::find_literals(node_, name)) {
-              PatternType::insert(pattern, literal);
+              PatternType::insert(pattern, literal, local_guids, relay_addresses);
             }
           }
-          pattern->insert(writer);
+          pattern->insert(writer, local_guids, relay_addresses);
         }
       }
     }
@@ -722,7 +877,7 @@ public:
 
   void erase(WriterPtr writer)
   {
-    const auto qos = choose_qos(&writer->writer_entry._publisher_qos.partition);
+    const auto qos = choose_qos(&writer->writer_entry()._publisher_qos.partition);
 
     for (int idx = 0, limit = qos->name.length(); idx != limit; ++idx) {
       Name name(qos->name[idx].in());
@@ -747,9 +902,11 @@ public:
     }
   }
 
-  void insert(ReaderPtr reader)
+  void insert(ReaderPtr reader,
+              GuidSet& local_guids,
+              RelayAddressesSet& relay_addresses)
   {
-    const auto qos = choose_qos(&reader->reader_entry._subscriber_qos.partition);
+    const auto qos = choose_qos(&reader->reader_entry()._subscriber_qos.partition);
 
     for (int idx = 0, limit = qos->name.length(); idx != limit; ++idx) {
       Name name(qos->name[idx].in());
@@ -763,27 +920,31 @@ public:
           literal = LiteralPtr(new LiteralType());
           NodeType::insert(node_, name, literal);
           for (const auto pattern : NodeType::find_patterns(node_, name)) {
-            PatternType::insert(pattern, literal);
+            PatternType::insert(pattern, literal, local_guids, relay_addresses);
           }
         }
-        literal->insert_literal(reader);
+        literal->insert_literal(reader, local_guids, relay_addresses);
       } else {
         auto pattern = NodeType::find_pattern(node_, name);
         if (pattern == nullptr) {
           pattern = PatternPtr(new PatternType());
           NodeType::insert(node_, name, pattern);
           for (const auto literal : NodeType::find_literals(node_, name)) {
-            PatternType::insert(pattern, literal);
+            PatternType::insert(pattern, literal, local_guids, relay_addresses);
           }
         }
-        pattern->insert(reader);
+        pattern->insert(reader, local_guids, relay_addresses);
       }
     }
   }
 
-  void reinsert(ReaderPtr reader, const RtpsRelay::ReaderEntry& reader_entry)
+  void reinsert(ReaderPtr reader,
+                const ReaderEntry& reader_entry,
+                bool local,
+                GuidSet& local_guids,
+                RelayAddressesSet& relay_addresses)
   {
-    const auto old_qos = choose_qos(&reader->reader_entry._subscriber_qos.partition);
+    const auto old_qos = choose_qos(&reader->reader_entry()._subscriber_qos.partition);
     const auto new_qos = choose_qos(&reader_entry._subscriber_qos.partition);
 
     // Changed partitions.
@@ -825,15 +986,15 @@ public:
       } else {
         if (name.is_literal()) {
           const auto literal = NodeType::find_literal(node_, name);
-          literal->reinsert(reader, reader_entry);
+          literal->reinsert(reader, reader_entry, local, local_guids, relay_addresses);
         } else {
           const auto pattern = NodeType::find_pattern(node_, name);
-          pattern->reinsert(reader, reader_entry);
+          pattern->reinsert(reader, reader_entry, local, local_guids, relay_addresses);
         }
       }
     }
 
-    reader->reader_entry = reader_entry;
+    reader->reset(reader_entry, local);
 
     for (const Name& name : new_names) {
       if (old_names.count(name) == 0) {
@@ -843,20 +1004,20 @@ public:
             literal = LiteralPtr(new LiteralType());
             NodeType::insert(node_, name, literal);
             for (const auto pattern : NodeType::find_patterns(node_, name)) {
-              PatternType::insert(pattern, literal);
+              PatternType::insert(pattern, literal, local_guids, relay_addresses);
             }
           }
-          literal->insert_literal(reader);
+          literal->insert_literal(reader, local_guids, relay_addresses);
         } else {
           auto pattern = NodeType::find_pattern(node_, name);
           if (pattern == nullptr) {
             pattern = PatternPtr(new PatternType());
             NodeType::insert(node_, name, pattern);
             for (const auto literal : NodeType::find_literals(node_, name)) {
-              PatternType::insert(pattern, literal);
+              PatternType::insert(pattern, literal, local_guids, relay_addresses);
             }
           }
-          pattern->insert(reader);
+          pattern->insert(reader, local_guids, relay_addresses);
         }
       }
     }
@@ -864,7 +1025,7 @@ public:
 
   void erase(ReaderPtr reader)
   {
-    const auto qos = choose_qos(&reader->reader_entry._subscriber_qos.partition);
+    const auto qos = choose_qos(&reader->reader_entry()._subscriber_qos.partition);
 
     for (int idx = 0, limit = qos->name.length(); idx != limit; ++idx) {
       Name name(qos->name[idx].in());
@@ -893,7 +1054,7 @@ public:
 
   void get_readers(WriterPtr writer, ReaderSet& readers) const
   {
-    const auto qos = choose_qos(&writer->writer_entry.publisher_qos().partition);
+    const auto qos = choose_qos(&writer->writer_entry().publisher_qos().partition);
 
     for (int idx = 0, limit = qos->name.length(); idx != limit; ++idx) {
       Name name(qos->name[idx].in());
@@ -916,7 +1077,7 @@ public:
 
   void get_writers(ReaderPtr reader, WriterSet& writers) const
   {
-    const auto qos = choose_qos(&reader->reader_entry.subscriber_qos().partition);
+    const auto qos = choose_qos(&reader->reader_entry().subscriber_qos().partition);
 
     for (int idx = 0, limit = qos->name.length(); idx != limit; ++idx) {
       Name name(qos->name[idx].in());
@@ -956,33 +1117,39 @@ class TopicIndex {
 public:
   typedef std::pair<std::string, std::string> KeyType;
 
-  void insert(WriterPtr writer)
+  void insert(WriterPtr writer,
+              GuidSet& local_guids,
+              RelayAddressesSet& relay_addresses)
   {
-    const auto key = std::make_pair(writer->writer_entry.topic_name(), writer->writer_entry.type_name());
+    const auto key = std::make_pair(writer->writer_entry().topic_name(), writer->writer_entry().type_name());
     auto p = entities_.insert(std::make_pair(key, SubIndex()));
-    p.first->second.insert(writer);
+    p.first->second.insert(writer, local_guids, relay_addresses);
   }
 
-  void reinsert(WriterPtr writer, const RtpsRelay::WriterEntry& writer_entry)
+  void reinsert(WriterPtr writer,
+                const WriterEntry& writer_entry,
+                bool local,
+                GuidSet& local_guids,
+                RelayAddressesSet& relay_addresses)
   {
-    const auto old_key = std::make_pair(writer->writer_entry.topic_name(), writer->writer_entry.type_name());
+    const auto old_key = std::make_pair(writer->writer_entry().topic_name(), writer->writer_entry().type_name());
     const auto new_key = std::make_pair(writer_entry.topic_name(), writer_entry.type_name());
     const auto pos = entities_.find(old_key);
     if (old_key == new_key) {
-      pos->second.reinsert(writer, writer_entry);
+      pos->second.reinsert(writer, writer_entry, local, local_guids, relay_addresses);
     } else {
       pos->second.erase(writer);
       if (pos->second.empty()) {
         entities_.erase(pos);
       }
-      writer->writer_entry = writer_entry;
-      insert(writer);
+      writer->reset(writer_entry, local);
+      insert(writer, local_guids, relay_addresses);
     }
   }
 
   void erase(WriterPtr writer)
   {
-    const auto key = std::make_pair(writer->writer_entry.topic_name(), writer->writer_entry.type_name());
+    const auto key = std::make_pair(writer->writer_entry().topic_name(), writer->writer_entry().type_name());
     const auto pos = entities_.find(key);
     pos->second.erase(writer);
     if (pos->second.empty()) {
@@ -990,33 +1157,39 @@ public:
     }
   }
 
-  void insert(ReaderPtr reader)
+  void insert(ReaderPtr reader,
+              GuidSet& local_guids,
+              RelayAddressesSet& relay_addresses)
   {
-    const auto key = std::make_pair(reader->reader_entry.topic_name(), reader->reader_entry.type_name());
+    const auto key = std::make_pair(reader->reader_entry().topic_name(), reader->reader_entry().type_name());
     const auto p = entities_.insert(std::make_pair(key, SubIndex()));
-    p.first->second.insert(reader);
+    p.first->second.insert(reader, local_guids, relay_addresses);
   }
 
-  void reinsert(ReaderPtr reader, const RtpsRelay::ReaderEntry& reader_entry)
+  void reinsert(ReaderPtr reader,
+                const ReaderEntry& reader_entry,
+                bool local,
+                GuidSet& local_guids,
+                RelayAddressesSet& relay_addresses)
   {
-    const auto old_key = std::make_pair(reader->reader_entry.topic_name(), reader->reader_entry.type_name());
+    const auto old_key = std::make_pair(reader->reader_entry().topic_name(), reader->reader_entry().type_name());
     const auto new_key = std::make_pair(reader_entry.topic_name(), reader_entry.type_name());
     const auto pos = entities_.find(old_key);
     if (old_key == new_key) {
-      pos->second.reinsert(reader, reader_entry);
+      pos->second.reinsert(reader, reader_entry, local, local_guids, relay_addresses);
     } else {
       pos->second.erase(reader);
       if (pos->second.empty()) {
         entities_.erase(pos);
       }
-      reader->reader_entry = reader_entry;
-      insert(reader);
+      reader->reset(reader_entry, local);
+      insert(reader, local_guids, relay_addresses);
     }
   }
 
   void erase(ReaderPtr reader)
   {
-    const auto key = std::make_pair(reader->reader_entry.topic_name(), reader->reader_entry.type_name());
+    const auto key = std::make_pair(reader->reader_entry().topic_name(), reader->reader_entry().type_name());
     const auto pos = entities_.find(key);
     pos->second.erase(reader);
     if (pos->second.empty()) {
@@ -1026,7 +1199,7 @@ public:
 
   void get_readers(WriterPtr writer, ReaderSet& readers) const
   {
-    const auto key = std::make_pair(writer->writer_entry.topic_name(), writer->writer_entry.type_name());
+    const auto key = std::make_pair(writer->writer_entry().topic_name(), writer->writer_entry().type_name());
     const auto pos = entities_.find(key);
     if (pos != entities_.end()) {
       pos->second.get_readers(writer, readers);
@@ -1035,7 +1208,7 @@ public:
 
   void get_writers(ReaderPtr reader, WriterSet& writers) const
   {
-    const auto key = std::make_pair(reader->reader_entry.topic_name(), reader->reader_entry.type_name());
+    const auto key = std::make_pair(reader->reader_entry().topic_name(), reader->reader_entry().type_name());
     const auto pos = entities_.find(key);
     if (pos != entities_.end()) {
       pos->second.get_writers(reader, writers);
