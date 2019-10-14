@@ -63,6 +63,20 @@ namespace {
     }
   }
 
+  void add_single_protoworker_to_node(
+    const WorkerPrototype& protoworker,
+    const std::map<std::string, std::string>& worker_configs,
+    Config& node)
+  {
+    unsigned worker_i = node.workers.length();
+    WorkerId worker_id = worker_i ? (node.workers[worker_i - 1].worker_id + node.workers[worker_i - 1].count) : 1;
+    node.workers.length(node.workers.length() + 1);
+    auto& worker = node.workers[worker_i];
+    worker.config = worker_configs.find(protoworker.config.in())->second.c_str();
+    worker.count = 1;
+    worker.worker_id = worker_id;
+  }
+
   unsigned add_protoworkers_to_node(
     const WorkerPrototypes& protoworkers,
     const std::map<std::string, std::string>& worker_configs,
@@ -90,12 +104,14 @@ namespace {
   }
 }
 
-AllocatedScenario ScenarioManager::allocate_scenario(const ScenarioPrototype& scenario_prototype, Nodes& available_nodes)
+AllocatedScenario ScenarioManager::allocate_scenario(
+  const ScenarioPrototype& scenario_prototype, Nodes& available_nodes, bool debug_alloc)
 {
   if (scenario_prototype.nodes.length() == 0 && scenario_prototype.any_node.length() == 0) {
     throw std::runtime_error("Scenario Prototype is empty!");
   }
-  unsigned minimum_nodes = 0;
+
+  // Get Maximum and Exclusive Node Counts
   unsigned maximum_nodes = 0;
   unsigned exclusive_nodes = 0;
   for (unsigned i = 0; i < scenario_prototype.nodes.length(); i++) {
@@ -104,13 +120,19 @@ AllocatedScenario ScenarioManager::allocate_scenario(const ScenarioPrototype& sc
     }
     maximum_nodes += scenario_prototype.nodes[i].count;
   }
-  minimum_nodes = exclusive_nodes;
-  if (scenario_prototype.any_node.length()) {
-    maximum_nodes += scenario_prototype.any_node.length();
+  // If there are enough nodes, each any node worker can get one to itself.
+  for (unsigned protoworker_i = 0; protoworker_i < scenario_prototype.any_node.length(); protoworker_i++) {
+    maximum_nodes += scenario_prototype.any_node[protoworker_i].count;
   }
+
+  // Get Minimum Node Count
+  unsigned minimum_nodes = 0;
+  minimum_nodes = exclusive_nodes;
   if (maximum_nodes - exclusive_nodes) { // If there are any non-exclusive node configs
     minimum_nodes++; // Then there just has to be at least one node for them
   }
+
+  // Make Sure We Have Enough Nodes
   if (available_nodes.size() < minimum_nodes) {
     std::stringstream ss;
     ss
@@ -119,6 +141,7 @@ AllocatedScenario ScenarioManager::allocate_scenario(const ScenarioPrototype& sc
     throw std::runtime_error(ss.str());
   }
 
+  // Start Building the Scenario
   const unsigned node_count = std::min(static_cast<unsigned>(available_nodes.size()), maximum_nodes);
   AllocatedScenario allocated_scenario;
   allocated_scenario.expected_reports = 0;
@@ -134,10 +157,26 @@ AllocatedScenario ScenarioManager::allocate_scenario(const ScenarioPrototype& sc
 
   // Read in Worker Config Files
   std::map<std::string, std::string> worker_configs; // This is filename (no dirs) to the contents
-  for (unsigned protonode_i = 0; protonode_i < scenario_prototype.nodes.length(); protonode_i++) {
-    read_protoworker_configs(test_context_, scenario_prototype.nodes[protonode_i].workers, worker_configs);
+  if (debug_alloc) {
+    // Just Fill in the Config Field with the Filename
+    for (unsigned protonode_i = 0; protonode_i < scenario_prototype.nodes.length(); protonode_i++) {
+      const WorkerPrototypes& protoworkers = scenario_prototype.nodes[protonode_i].workers;
+      for (unsigned protoworker_i = 0; protoworker_i < protoworkers.length(); protoworker_i++) {
+        const std::string filename = protoworkers[protoworker_i].config.in();
+        worker_configs[filename] = filename;
+      }
+    }
+    for (unsigned protoworker_i = 0; protoworker_i < scenario_prototype.any_node.length(); protoworker_i++) {
+      const std::string filename = scenario_prototype.any_node[protoworker_i].config.in();
+      worker_configs[filename] = filename;
+    }
+  } else {
+    // Do the Real Thing
+    for (unsigned protonode_i = 0; protonode_i < scenario_prototype.nodes.length(); protonode_i++) {
+      read_protoworker_configs(test_context_, scenario_prototype.nodes[protonode_i].workers, worker_configs);
+    }
+    read_protoworker_configs(test_context_, scenario_prototype.any_node, worker_configs);
   }
-  read_protoworker_configs(test_context_, scenario_prototype.any_node, worker_configs);
 
   // Allocate Exclusive Node Configs First
   unsigned node_i = 0; // iter for allocated_scenario.configs
@@ -167,14 +206,14 @@ AllocatedScenario ScenarioManager::allocate_scenario(const ScenarioPrototype& sc
   }
 
   // Finally Allocate Any-Node Worker Configs
-  WorkerPrototypes any_node_worker;
-  any_node_worker.length(1);
-  for (unsigned any_node_i = 0; any_node_i < scenario_prototype.any_node.length(); any_node_i++) {
-    any_node_worker[0] = scenario_prototype.any_node[any_node_i];
-    allocated_scenario.expected_reports += add_protoworkers_to_node(
-      any_node_worker, worker_configs, allocated_scenario.configs[node_i++]);
-    if (node_i >= node_count) {
-      node_i = nonexclusive_start;
+  for (unsigned protoworker_i = 0; protoworker_i < scenario_prototype.any_node.length(); protoworker_i++) {
+    const WorkerPrototype& protoworker = scenario_prototype.any_node[protoworker_i];
+    allocated_scenario.expected_reports += protoworker.count;
+    for (unsigned count_i = 0; count_i < protoworker.count; count_i++) {
+      add_single_protoworker_to_node(protoworker, worker_configs, allocated_scenario.configs[node_i++]);
+      if (node_i >= node_count) {
+        node_i = nonexclusive_start;
+      }
     }
   }
 

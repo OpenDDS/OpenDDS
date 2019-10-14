@@ -28,6 +28,9 @@ Usage: `test_controller [-h|--help] | TEST_CONTEXT SCENARIO_ID [OPTIONS...]`
   - `--pretty`: Write the JSON output of `--prealloc-scenario-output` with
     indentation.
 
+  - `--debug-alloc`: Print out a debug version of what is saved with
+    `--prealloc-scenario-out` and exit.
+
   - `--prealloc-scenario-in PATH`: Take result of `--prealloc-scneario-out` and
     use that to run the scenario instead of discovering nodes. This might fail
     if the nodes go offline after the preallocated scenario is saved.

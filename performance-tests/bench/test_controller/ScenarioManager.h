@@ -32,7 +32,7 @@ public:
    */
   Bench::TestController::AllocatedScenario allocate_scenario(
     const Bench::TestController::ScenarioPrototype& scenario_prototype,
-    Nodes& available_nodes);
+    Nodes& available_nodes, bool debug_alloc);
 
   /**
    * Execute a Scenario by sending out the node configurations and wait for the

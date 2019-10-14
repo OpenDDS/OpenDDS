@@ -61,6 +61,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   std::string preallocated_scenario_output_path;
   /// Pretty Print the Preallocated Scenario JSON
   bool pretty = false;
+  /// Print out debug allocation to the screen and exit.
+  bool debug_alloc = false;
   /// If not empty, Don't Discover Nodes, Send Out an Existing Set of Node Configs
   std::string preallocated_scenario_input_path;
 
@@ -109,6 +111,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
           << "                             the node controllers to the file at this path." << std::endl
           << "--pretty                     Write the JSON output of `--prealloc-scenario-out`" << std::endl
           << "                             with indentation." << std::endl
+          << "--debug-alloc                Print out a debug version of what is saved with" << std::endl
+          << "                             --prealloc-scenario-out and exit." << std::endl
           << "--prealloc-scenario-in PATH  Take result of --prealloc-scneario-out and use that" << std::endl
           << "                             to run the scenario instead of discovering nodes." << std::endl
           << "                             This might fail if the nodes go offline after the" << std::endl
@@ -126,6 +130,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         preallocated_scenario_input_path = get_option_argument(i, argc, argv);
       } else if (!ACE_OS::strcmp(argument, "--pretty")) {
         pretty = true;
+      } else if (!ACE_OS::strcmp(argument, "--debug-alloc")) {
+        debug_alloc = true;
       } else if (!ACE_OS::strcmp(argument, "--result-id")) {
         result_id = get_option_argument(i, argc, argv);
       } else if (!ACE_OS::strcmp(argument, "--overwrite-result")) {
@@ -245,7 +251,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       std::cout << "Waiting for nodes for " << wait_for_nodes << " seconds..." << std::endl;
       Nodes available_nodes = scenario_manager.discover_nodes(wait_for_nodes);
       std::cout << "Discovered " << available_nodes.size() << " nodes" << std::endl;
-      allocated_scenario = scenario_manager.allocate_scenario(scenario_prototype, available_nodes);
+      allocated_scenario = scenario_manager.allocate_scenario(scenario_prototype, available_nodes, debug_alloc);
     }
 
     // Part 2: Broadcast the Directives and Wait for Reports
@@ -258,6 +264,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         }
       } else {
         throw std::runtime_error("Could not open file for writing allocated scenario");
+      }
+    } else if (debug_alloc) {
+      if (!idl_2_json(allocated_scenario, std::cout, true)) {
+        throw std::runtime_error("Could not encode allocated scenario");
       }
     } else {
       std::cout << "Running the Scenario..." << std::endl;
