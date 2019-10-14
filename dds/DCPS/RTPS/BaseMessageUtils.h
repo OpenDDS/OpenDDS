@@ -163,8 +163,10 @@ public:
 
   bool parseHeader();
   bool parseSubmessageHeader();
+  bool parseSubmessage();
   bool hasNextSubmessage() const;
   bool skipToNextSubmessage();
+  bool skipSubmessageContent();
 
   const Header& header() const { return header_; }
   SubmessageHeader submessageHeader() const { return sub_; }

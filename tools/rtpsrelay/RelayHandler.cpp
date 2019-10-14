@@ -170,6 +170,7 @@ void VerticalHandler::process_message(const ACE_INET_Addr& a_remote,
   const auto rd_ptr = a_msg->rd_ptr();
   OpenDDS::RTPS::MessageParser mp(*a_msg);
   if (!parse_message(mp, a_msg, is_beacon, true)) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: VerticalHandler::process_message failed to parse_message\n"));
     return;
   }
   a_msg->rd_ptr(rd_ptr);
@@ -330,12 +331,7 @@ bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser
   std::memcpy(src_guid.guidPrefix, header.guidPrefix, sizeof(OpenDDS::DCPS::GuidPrefix_t));
   src_guid.entityId = OpenDDS::DCPS::ENTITYID_PARTICIPANT;
 
-  do {
-    if (!message_parser.parseSubmessageHeader()) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::parse_message failed to deserialize RTPS submessage header\n"));
-      return false;
-    }
-
+  while (message_parser.parseSubmessage()) {
     const auto submessage_header = message_parser.submessageHeader();
 
     if (submessage_header.submessageId != OpenDDS::RTPS::PAD) {
@@ -361,6 +357,11 @@ bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser
           DDS::OctetSeq encoded_buffer, plain_buffer;
           DDS::Security::SecurityException ex;
 
+          if (msg->cont() != nullptr) {
+            ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::parse_message does not support message block chaining\n"));
+            return false;
+          }
+
           encoded_buffer.length(msg->length());
           std::memcpy(encoded_buffer.get_buffer(), msg->rd_ptr(), msg->length());
 
@@ -379,8 +380,11 @@ bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser
         {
           unsigned short extraFlags;
           unsigned short octetsToInlineQos;
-          message_parser >> extraFlags;
-          message_parser >> octetsToInlineQos;
+          if (!(message_parser >> extraFlags) ||
+              !(message_parser >> octetsToInlineQos)) {
+            ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: could not parse submessage\n"));
+            return false;
+          }
         }
         // Fall through.
       case OpenDDS::RTPS::HEARTBEAT:
@@ -391,8 +395,11 @@ bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser
         {
           OpenDDS::DCPS::EntityId_t readerId;
           OpenDDS::DCPS::EntityId_t writerId;
-          message_parser >> readerId;
-          message_parser >> writerId;
+          if (!(message_parser >> readerId) ||
+              !(message_parser >> writerId)) {
+            ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: could not parse submessage\n"));
+            return false;
+          }
           if (rtps_discovery_->get_crypto_handle(application_domain_, application_participant_guid_) != DDS::HANDLE_NIL &&
               !(OpenDDS::DCPS::RtpsUdpDataLink::separate_message(writerId) ||
                 writerId == OpenDDS::DCPS::ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER)) {
@@ -407,8 +414,13 @@ bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser
 #endif
     }
 
-    message_parser.skipToNextSubmessage();
-  } while (message_parser.hasNextSubmessage());
+    message_parser.skipSubmessageContent();
+  }
+
+  if (message_parser.remaining() != 0) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::parse_message trailing bytes\n"));
+    return false;
+  }
 
   return true;
 }

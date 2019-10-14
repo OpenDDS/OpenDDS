@@ -141,6 +141,15 @@ bool MessageParser::parseSubmessageHeader()
   return true;
 }
 
+bool MessageParser::parseSubmessage()
+{
+  if (!parseSubmessageHeader()) {
+    return false;
+  }
+
+  return sub_.submessageLength == 0 || sub_.submessageLength <= ser_.length();
+}
+
 bool MessageParser::hasNextSubmessage() const
 {
   if (sub_.submessageLength == 0) {
@@ -156,6 +165,16 @@ bool MessageParser::skipToNextSubmessage()
 {
   const size_t read = smContentStart_ - ser_.length();
   return ser_.skip(static_cast<unsigned short>(sub_.submessageLength - read));
+}
+
+bool MessageParser::skipSubmessageContent()
+{
+  if (sub_.submessageLength) {
+    const size_t read = smContentStart_ - ser_.length();
+    return ser_.skip(static_cast<unsigned short>(sub_.submessageLength - read));
+  } else {
+    return ser_.skip(static_cast<unsigned short>(ser_.length()));
+  }
 }
 
 }
