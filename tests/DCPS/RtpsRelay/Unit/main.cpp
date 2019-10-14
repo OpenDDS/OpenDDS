@@ -799,11 +799,16 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   test_invalid(status, "[a-]");
   test_invalid(status, "[b-a]");
 
-  qos_index_test<NoIndex>(status);
-  qos_index_test<PartitionIndex<NoIndex> >(status);
-  qos_index_test<TopicIndex<NoIndex> >(status);
-  qos_index_test<TopicIndex<PartitionIndex<NoIndex> > >(status);
-  qos_index_test<PartitionIndex<TopicIndex<NoIndex> > >(status);
+  try {
+    qos_index_test<NoIndex>(status);
+    qos_index_test<PartitionIndex<NoIndex> >(status);
+    qos_index_test<TopicIndex<NoIndex> >(status);
+    qos_index_test<TopicIndex<PartitionIndex<NoIndex> > >(status);
+    qos_index_test<PartitionIndex<TopicIndex<NoIndex> > >(status);
+  } catch (const CORBA::BAD_PARAM& ex) {
+    std::cout << "Exception" << std::endl;
+    status = EXIT_FAILURE;
+  }
 
   if (!status) {
     std::cout << "SUCCESS" << std::endl;
