@@ -1,6 +1,6 @@
 #include "QosIndex.h"
 
-#include "dds/DCPS/DCPS_Utils.h"
+#include <dds/DCPS/DCPS_Utils.h>
 
 namespace RtpsRelay {
 

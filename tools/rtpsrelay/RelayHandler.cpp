@@ -6,6 +6,7 @@
 #include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
 #include <dds/DdsDcpsCoreTypeSupportImpl.h>
 
+#include <ace/Global_Macros.h>
 #include <ace/Reactor.h>
 
 #include <array>
@@ -105,6 +106,8 @@ int RelayHandler::handle_input(ACE_HANDLE)
 
 int RelayHandler::handle_output(ACE_HANDLE)
 {
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, outgoing_mutex_, 0);
+
   if (!outgoing_.empty()) {
     const auto& out = outgoing_.front();
 
@@ -130,6 +133,8 @@ int RelayHandler::handle_output(ACE_HANDLE)
 
 void RelayHandler::enqueue_message(const std::string& a_addr, ACE_Message_Block* a_msg)
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, outgoing_mutex_);
+
   const auto empty = outgoing_.empty();
 
   outgoing_.push(std::make_pair(a_addr, a_msg->duplicate()));
@@ -271,6 +276,7 @@ bool SpdpHandler::do_normal_processing(const ACE_INET_Addr& a_remote,
 
   // SPDP message is from a client.
   // Cache it.
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, spdp_messages_mutex_, false);
   auto p = spdp_messages_.insert(std::make_pair(a_src_guid, nullptr));
   if (p.first->second) {
     p.first->second->release();
@@ -290,6 +296,7 @@ bool SpdpHandler::do_normal_processing(const ACE_INET_Addr& a_remote,
 
 void SpdpHandler::purge(const OpenDDS::DCPS::RepoId& guid)
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, spdp_messages_mutex_);
   SpdpMessages::iterator pos = spdp_messages_.find(guid);
   if (pos != spdp_messages_.end()) {
     pos->second->release();
@@ -306,6 +313,8 @@ void SpdpHandler::replay(const OpenDDS::DCPS::RepoId& x,
   }
 
   const OpenDDS::DCPS::RepoId a_src_guid = to_participant_guid(x);
+
+  ACE_GUARD(ACE_Thread_Mutex, g, spdp_messages_mutex_);
 
   SpdpMessages::const_iterator pos = spdp_messages_.find(a_src_guid);
   if (pos == spdp_messages_.end()) {
