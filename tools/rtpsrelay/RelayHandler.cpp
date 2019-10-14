@@ -157,7 +157,7 @@ void VerticalHandler::process_message(const ACE_INET_Addr& a_remote,
 {
   const std::string addr_str = addr_to_string(a_remote);
   guid_addr_map_[a_src_guid].insert(addr_str);
-  GuidAddr ga(a_src_guid, addr_str);
+  const GuidAddr ga(a_src_guid, addr_str);
 
   // Compute the new expiration time for this SPDP client.
   const ACE_Time_Value expiration = a_now + lifespan_;

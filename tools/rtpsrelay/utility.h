@@ -1,9 +1,14 @@
 #ifndef RTPSRELAY_UTILITY_H_
 #define RTPSRELAY_UTILITY_H_
 
+#include "lib/RelayC.h"
+
+#include "dds/DCPS/GuidUtils.h"
+
 #include <ace/INET_Addr.h>
 
 #include <sstream>
+#include <string>
 
 namespace RtpsRelay {
 
@@ -25,8 +30,8 @@ inline std::string guid_to_string(const OpenDDS::DCPS::GUID_t& a_guid)
 }
 
 struct RelayAddressesLessThan {
-  inline bool operator()(const RtpsRelay::RelayAddresses& x,
-                         const RtpsRelay::RelayAddresses& y) const
+  inline bool operator()(const RelayAddresses& x,
+                         const RelayAddresses& y) const
   {
     if (x.spdp_relay_address() != y.spdp_relay_address()) {
       return x.spdp_relay_address() < y.spdp_relay_address();

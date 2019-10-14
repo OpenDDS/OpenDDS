@@ -9,7 +9,9 @@
 #include <ace/SOCK_Dgram.h>
 #include <ace/Time_Value.h>
 
+#include <map>
 #include <queue>
+#include <set>
 #include <string>
 #include <utility>
 
