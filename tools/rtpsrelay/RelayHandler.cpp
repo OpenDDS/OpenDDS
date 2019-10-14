@@ -143,11 +143,8 @@ VerticalHandler::VerticalHandler(ACE_Reactor* a_reactor,
                                  const ACE_Time_Value& lifespan,
                                  const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
                                  DDS::DomainId_t application_domain,
-                                 const OpenDDS::DCPS::RepoId& application_participant_guid
-#ifdef OPENDDS_SECURITY
-                                 ,const DDS::Security::CryptoTransform_var& crypto
-#endif
-                                 )
+                                 const OpenDDS::DCPS::RepoId& application_participant_guid,
+                                 const CRYPTO_TYPE& crypto)
   : RelayHandler(a_reactor, a_association_table)
   , lifespan_(lifespan)
   , application_participant_guid_(application_participant_guid)
@@ -158,7 +155,9 @@ VerticalHandler::VerticalHandler(ACE_Reactor* a_reactor,
   , crypto_(crypto)
   , application_participant_crypto_handle_(rtps_discovery_->get_crypto_handle(application_domain_, application_participant_guid_))
 #endif
-{}
+{
+  ACE_UNUSED_ARG(crypto);
+}
 
 void VerticalHandler::process_message(const ACE_INET_Addr& a_remote,
                                       const ACE_Time_Value& a_now,
@@ -252,21 +251,15 @@ void HorizontalHandler::process_message(const ACE_INET_Addr&,
   }
 }
 
-SpdpHandler::SpdpHandler(ACE_Reactor* a_reactor
-                         ,const AssociationTable& a_association_table
-                         ,const ACE_Time_Value& lifespan
-                         ,const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery
-                         ,DDS::DomainId_t application_domain
-                         ,const OpenDDS::DCPS::RepoId& application_participant_guid
-#ifdef OPENDDS_SECURITY
-                         ,const DDS::Security::CryptoTransform_var& crypto
-#endif
-                         ,const ACE_INET_Addr& application_participant_addr)
-: VerticalHandler(a_reactor, a_association_table, lifespan, rtps_discovery, application_domain, application_participant_guid
-#ifdef OPENDDS_SECURITY
-                  , crypto
-#endif
-                  )
+SpdpHandler::SpdpHandler(ACE_Reactor* a_reactor,
+                         const AssociationTable& a_association_table,
+                         const ACE_Time_Value& lifespan,
+                         const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
+                         DDS::DomainId_t application_domain,
+                         const OpenDDS::DCPS::RepoId& application_participant_guid,
+                         const CRYPTO_TYPE& crypto,
+                         const ACE_INET_Addr& application_participant_addr)
+  : VerticalHandler(a_reactor, a_association_table, lifespan, rtps_discovery, application_domain, application_participant_guid , crypto)
   , application_participant_addr_(application_participant_addr)
   , application_participant_addr_str_(addr_to_string(application_participant_addr))
   , spdp_message_(nullptr)
@@ -463,21 +456,15 @@ void SpdpHandler::replay(const OpenDDS::DCPS::RepoId& x,
   }
 }
 
-SedpHandler::SedpHandler(ACE_Reactor* a_reactor
-                         ,const AssociationTable& a_association_table
-                         ,const ACE_Time_Value& lifespan
-                         ,const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery
-                         ,DDS::DomainId_t application_domain
-                         ,const OpenDDS::DCPS::RepoId& application_participant_guid
-#ifdef OPENDDS_SECURITY
-                         ,const DDS::Security::CryptoTransform_var& crypto
-#endif
-                         ,const ACE_INET_Addr& application_participant_addr)
-: VerticalHandler(a_reactor, a_association_table, lifespan, rtps_discovery, application_domain, application_participant_guid
-#ifdef OPENDDS_SECURITY
-                  , crypto
-#endif
-                  )
+SedpHandler::SedpHandler(ACE_Reactor* a_reactor,
+                         const AssociationTable& a_association_table,
+                         const ACE_Time_Value& lifespan,
+                         const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
+                         DDS::DomainId_t application_domain,
+                         const OpenDDS::DCPS::RepoId& application_participant_guid,
+                         const CRYPTO_TYPE& crypto,
+                         const ACE_INET_Addr& application_participant_addr)
+  : VerticalHandler(a_reactor, a_association_table, lifespan, rtps_discovery, application_domain, application_participant_guid, crypto)
   , application_participant_addr_(application_participant_addr)
   , application_participant_addr_str_(addr_to_string(application_participant_addr))
 {}
@@ -519,16 +506,10 @@ DataHandler::DataHandler(ACE_Reactor* a_reactor,
                          const ACE_Time_Value& lifespan,
                          const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
                          DDS::DomainId_t application_domain,
-                         const OpenDDS::DCPS::RepoId& application_participant_guid
-#ifdef OPENDDS_SECURITY
-                         ,const DDS::Security::CryptoTransform_var& crypto
-#endif
+                         const OpenDDS::DCPS::RepoId& application_participant_guid,
+                         const CRYPTO_TYPE& crypto
                          )
-: VerticalHandler(a_reactor, a_association_table, lifespan, rtps_discovery, application_domain, application_participant_guid
-#ifdef OPENDDS_SECURITY
-                  , crypto
-#endif
-                  )
+  : VerticalHandler(a_reactor, a_association_table, lifespan, rtps_discovery, application_domain, application_participant_guid, crypto)
 {}
 
 std::string DataHandler::extract_relay_address(const RelayAddresses& relay_addresses) const

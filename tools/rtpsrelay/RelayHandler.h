@@ -13,6 +13,12 @@
 #include <string>
 #include <utility>
 
+#ifdef OPENDDS_SECURITY
+#define CRYPTO_TYPE DDS::Security::CryptoTransform_var
+#else
+#define CRYPTO_TYPE int
+#endif
+
 namespace RtpsRelay {
 
 class RelayHandler : public ACE_Event_Handler {
@@ -57,11 +63,8 @@ public:
                   const ACE_Time_Value& lifespan,
                   const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
                   DDS::DomainId_t application_domain,
-                  const OpenDDS::DCPS::RepoId& application_participant_guid
-#ifdef OPENDDS_SECURITY
-                  ,const DDS::Security::CryptoTransform_var& crypto
-#endif
-                  );
+                  const OpenDDS::DCPS::RepoId& application_participant_guid,
+                  const CRYPTO_TYPE& crypto);
   void horizontal_handler(HorizontalHandler* a_horizontal_handler) { horizontal_handler_ = a_horizontal_handler; }
 
   GuidAddrMap::const_iterator find(const OpenDDS::DCPS::RepoId& guid) const
@@ -125,16 +128,14 @@ private:
 
 class SpdpHandler : public VerticalHandler {
 public:
-  SpdpHandler(ACE_Reactor* a_reactor
-              ,const AssociationTable& a_association_table
-              ,const ACE_Time_Value& lifespan
-              ,const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery
-              ,DDS::DomainId_t application_domain
-              ,const OpenDDS::DCPS::RepoId& application_participant_guid
-#ifdef OPENDDS_SECURITY
-              ,const DDS::Security::CryptoTransform_var& crypto
-#endif
-              ,const ACE_INET_Addr& application_participant_addr);
+  SpdpHandler(ACE_Reactor* a_reactor,
+              const AssociationTable& a_association_table,
+              const ACE_Time_Value& lifespan,
+              const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
+              DDS::DomainId_t application_domain,
+              const OpenDDS::DCPS::RepoId& application_participant_guid,
+              const CRYPTO_TYPE& crypto,
+              const ACE_INET_Addr& application_participant_addr);
 
   void replay(const OpenDDS::DCPS::RepoId& guid,
               const GuidSet& local_guids,
@@ -158,16 +159,14 @@ private:
 
 class SedpHandler : public VerticalHandler {
 public:
-  SedpHandler(ACE_Reactor* a_reactor
-              ,const AssociationTable& a_association_table
-              ,const ACE_Time_Value& lifespan
-              ,const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery
-              ,DDS::DomainId_t application_domain
-              ,const OpenDDS::DCPS::RepoId& application_participant_guid
-#ifdef OPENDDS_SECURITY
-              ,const DDS::Security::CryptoTransform_var& crypto
-#endif
-              ,const ACE_INET_Addr& application_participant_addr);
+  SedpHandler(ACE_Reactor* a_reactor,
+              const AssociationTable& a_association_table,
+              const ACE_Time_Value& lifespan,
+              const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
+              DDS::DomainId_t application_domain,
+              const OpenDDS::DCPS::RepoId& application_participant_guid,
+              const CRYPTO_TYPE& crypto,
+              const ACE_INET_Addr& application_participant_addr);
 
 private:
   const ACE_INET_Addr application_participant_addr_;
@@ -187,10 +186,8 @@ public:
               const ACE_Time_Value& lifespan,
               const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
               DDS::DomainId_t application_domain,
-              const OpenDDS::DCPS::RepoId& application_participant_guid
-#ifdef OPENDDS_SECURITY
-              ,const DDS::Security::CryptoTransform_var& crypto
-#endif
+              const OpenDDS::DCPS::RepoId& application_participant_guid,
+              const CRYPTO_TYPE& crypto
               );
 
 private:

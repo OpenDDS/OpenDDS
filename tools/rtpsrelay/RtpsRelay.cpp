@@ -260,8 +260,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   ACE_INET_Addr spdp(rtps_discovery->get_spdp_port(application_domain, application_participant_id), "127.0.0.1");
   ACE_INET_Addr sedp(rtps_discovery->get_sedp_port(application_domain, application_participant_id), "127.0.0.1");
 
+#ifdef OPENDDS_SECURITY
   OpenDDS::Security::SecurityConfig_rch conf = TheSecurityRegistry->default_config();
   DDS::Security::CryptoTransform_var crypto = conf->get_crypto_transform();
+#else
+  const int crypto = 0;
+#endif
 
   SpdpHandler spdp_vertical_handler(reactor, association_table, lifespan, rtps_discovery, application_domain, application_participant_id, crypto, spdp);
   SedpHandler sedp_vertical_handler(reactor, association_table, lifespan, rtps_discovery, application_domain, application_participant_id, crypto, sedp);
