@@ -1,5 +1,5 @@
 project: dcpslib, opendds_cxx11 {
-  after += RtpsRelayLib
-  libs  += RtpsRelayLib
+  after += OpenDDS_RtpsRelay
+  libs  += OpenDDS_RtpsRelay
   includes += $(DDS_ROOT)/tools/rtpsrelay/lib
 }
