@@ -75,7 +75,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   DDS::DomainId_t relay_domain = 0;
   DDS::DomainId_t application_domain = 1;
   ACE_INET_Addr nic_horizontal, nic_vertical;
-  ACE_Time_Value lifespan(60);   // 1 minute
+  OpenDDS::DCPS::TimeDuration lifespan(60);   // 1 minute
 
 #ifdef OPENDDS_SECURITY
   std::string identity_ca_file;
@@ -105,7 +105,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       application_domain = ACE_OS::atoi(arg);
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-Lifespan"))) {
-      lifespan = ACE_Time_Value(ACE_OS::atoi(arg));
+      lifespan = OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg));
       args.consume_arg();
 #ifdef OPENDDS_SECURITY
     } else if ((arg = args.get_the_parameter("-IdentityCA"))) {

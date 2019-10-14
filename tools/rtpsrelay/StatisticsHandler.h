@@ -3,6 +3,8 @@
 
 #include "RelayHandler.h"
 
+#include <dds/DCPS/TimeTypes.h>
+
 #include <ace/Event_Handler.h>
 
 namespace RtpsRelay {
@@ -24,7 +26,7 @@ private:
   RelayHandler* const sedp_horizontal_;
   RelayHandler* const data_vertical_;
   RelayHandler* const data_horizontal_;
-  ACE_Time_Value m_last_collection;
+  OpenDDS::DCPS::MonotonicTimePoint m_last_collection;
 };
 
 }

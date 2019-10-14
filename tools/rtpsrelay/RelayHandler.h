@@ -39,7 +39,7 @@ public:
 protected:
   const AssociationTable& association_table_;
   virtual void process_message(const ACE_INET_Addr& a_remote,
-                               const ACE_Time_Value& a_now,
+                               const OpenDDS::DCPS::MonotonicTimePoint& a_now,
                                const OpenDDS::DCPS::RepoId& a_src_guid,
                                ACE_Message_Block* a_msg) = 0;
 private:
@@ -60,7 +60,7 @@ public:
 
   VerticalHandler(ACE_Reactor* a_reactor,
                   const AssociationTable& a_association_table,
-                  const ACE_Time_Value& lifespan,
+                  const OpenDDS::DCPS::TimeDuration& lifespan,
                   const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
                   DDS::DomainId_t application_domain,
                   const OpenDDS::DCPS::RepoId& application_participant_guid,
@@ -85,16 +85,16 @@ protected:
   virtual void purge(const OpenDDS::DCPS::RepoId& /*guid*/) {}
 
   void process_message(const ACE_INET_Addr& a_remote,
-                       const ACE_Time_Value& a_now,
+                       const OpenDDS::DCPS::MonotonicTimePoint& a_now,
                        const OpenDDS::DCPS::RepoId& a_src_guid,
                        ACE_Message_Block* a_msg) override;
 
   GuidAddrMap guid_addr_map_;
-  typedef std::map<OpenDDS::DCPS::RepoId, ACE_Time_Value, OpenDDS::DCPS::GUID_tKeyLessThan> GuidExpirationMap;
+  typedef std::map<OpenDDS::DCPS::RepoId, OpenDDS::DCPS::MonotonicTimePoint, OpenDDS::DCPS::GUID_tKeyLessThan> GuidExpirationMap;
   GuidExpirationMap guid_expiration_map_;
-  typedef std::multimap<ACE_Time_Value, OpenDDS::DCPS::RepoId> ExpirationGuidMap;
+  typedef std::multimap<OpenDDS::DCPS::MonotonicTimePoint, OpenDDS::DCPS::RepoId> ExpirationGuidMap;
   ExpirationGuidMap expiration_guid_map_;
-  ACE_Time_Value const lifespan_;
+  const OpenDDS::DCPS::TimeDuration lifespan_;
   const OpenDDS::DCPS::RepoId application_participant_guid_;
   HorizontalHandler* horizontal_handler_;
 
@@ -121,7 +121,7 @@ public:
 private:
   VerticalHandler* vertical_handler_;
   void process_message(const ACE_INET_Addr& a_remote,
-                       const ACE_Time_Value& a_now,
+                       const OpenDDS::DCPS::MonotonicTimePoint& a_now,
                        const OpenDDS::DCPS::RepoId& a_src_guid,
                        ACE_Message_Block* a_msg) override;
 };
@@ -130,7 +130,7 @@ class SpdpHandler : public VerticalHandler {
 public:
   SpdpHandler(ACE_Reactor* a_reactor,
               const AssociationTable& a_association_table,
-              const ACE_Time_Value& lifespan,
+              const OpenDDS::DCPS::TimeDuration& lifespan,
               const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
               DDS::DomainId_t application_domain,
               const OpenDDS::DCPS::RepoId& application_participant_guid,
@@ -161,7 +161,7 @@ class SedpHandler : public VerticalHandler {
 public:
   SedpHandler(ACE_Reactor* a_reactor,
               const AssociationTable& a_association_table,
-              const ACE_Time_Value& lifespan,
+              const OpenDDS::DCPS::TimeDuration& lifespan,
               const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
               DDS::DomainId_t application_domain,
               const OpenDDS::DCPS::RepoId& application_participant_guid,
@@ -183,7 +183,7 @@ class DataHandler : public VerticalHandler {
 public:
   DataHandler(ACE_Reactor* a_reactor,
               const AssociationTable& a_association_table,
-              const ACE_Time_Value& lifespan,
+              const OpenDDS::DCPS::TimeDuration& lifespan,
               const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
               DDS::DomainId_t application_domain,
               const OpenDDS::DCPS::RepoId& application_participant_guid,

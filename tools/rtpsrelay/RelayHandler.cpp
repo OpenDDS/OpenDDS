@@ -4,6 +4,7 @@
 #include <dds/DCPS/RTPS/BaseMessageTypes.h>
 #include <dds/DCPS/RTPS/MessageTypes.h>
 #include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
+#include <dds/DCPS/TimeTypes.h>
 #include <dds/DdsDcpsCoreTypeSupportImpl.h>
 #include <dds/DdsDcpsGuidTypeSupportImpl.h>
 
@@ -89,7 +90,7 @@ int RelayHandler::handle_input(ACE_HANDLE)
   OpenDDS::DCPS::RepoId src_guid;
   OpenDDS::RTPS::MessageParser mp(*buffer);
   if (!mp.parseHeader()) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::parse_message failed to deserialize RTPS header\n"));
+    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::handle_input failed to deserialize RTPS header\n"));
     return 0;
   }
 
@@ -98,7 +99,7 @@ int RelayHandler::handle_input(ACE_HANDLE)
   src_guid.entityId = OpenDDS::DCPS::ENTITYID_PARTICIPANT;
 
   buffer->rd_ptr(rd_ptr);
-  process_message(remote, ACE_Time_Value().now(), src_guid, buffer.get());
+  process_message(remote, OpenDDS::DCPS::MonotonicTimePoint::now(), src_guid, buffer.get());
   return 0;
 }
 
@@ -140,7 +141,7 @@ void RelayHandler::enqueue_message(const std::string& a_addr, ACE_Message_Block*
 
 VerticalHandler::VerticalHandler(ACE_Reactor* a_reactor,
                                  const AssociationTable& a_association_table,
-                                 const ACE_Time_Value& lifespan,
+                                 const OpenDDS::DCPS::TimeDuration& lifespan,
                                  const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
                                  DDS::DomainId_t application_domain,
                                  const OpenDDS::DCPS::RepoId& application_participant_guid,
@@ -160,7 +161,7 @@ VerticalHandler::VerticalHandler(ACE_Reactor* a_reactor,
 }
 
 void VerticalHandler::process_message(const ACE_INET_Addr& a_remote,
-                                      const ACE_Time_Value& a_now,
+                                      const OpenDDS::DCPS::MonotonicTimePoint& a_now,
                                       const OpenDDS::DCPS::RepoId& a_src_guid,
                                       ACE_Message_Block* a_msg)
 {
@@ -177,11 +178,11 @@ void VerticalHandler::process_message(const ACE_INET_Addr& a_remote,
   const std::string addr_str = addr_to_string(a_remote);
   guid_addr_map_[a_src_guid] = addr_str;
   // Compute the new expiration time for this SPDP client.
-  const ACE_Time_Value expiration = a_now + lifespan_;
+  const auto expiration = a_now + lifespan_;
   std::pair<GuidExpirationMap::iterator, bool> res = guid_expiration_map_.insert(std::make_pair(a_src_guid, expiration));
   if (!res.second) {
     // The SPDP client already exists.  Remove the previous expiration.
-    const ACE_Time_Value previous_expiration = res.first->second;
+    const auto previous_expiration = res.first->second;
     std::pair<ExpirationGuidMap::iterator, ExpirationGuidMap::iterator> r = expiration_guid_map_.equal_range(previous_expiration);
     while (r.first != r.second && r.first->second != a_src_guid) {
       ++r.first;
@@ -233,7 +234,7 @@ HorizontalHandler::HorizontalHandler(ACE_Reactor* a_reactor,
 {}
 
 void HorizontalHandler::process_message(const ACE_INET_Addr&,
-                                        const ACE_Time_Value&,
+                                        const OpenDDS::DCPS::MonotonicTimePoint&,
                                         const OpenDDS::DCPS::RepoId& a_src_guid,
                                         ACE_Message_Block* a_msg)
 {
@@ -253,7 +254,7 @@ void HorizontalHandler::process_message(const ACE_INET_Addr&,
 
 SpdpHandler::SpdpHandler(ACE_Reactor* a_reactor,
                          const AssociationTable& a_association_table,
-                         const ACE_Time_Value& lifespan,
+                         const OpenDDS::DCPS::TimeDuration& lifespan,
                          const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
                          DDS::DomainId_t application_domain,
                          const OpenDDS::DCPS::RepoId& application_participant_guid,
@@ -458,7 +459,7 @@ void SpdpHandler::replay(const OpenDDS::DCPS::RepoId& x,
 
 SedpHandler::SedpHandler(ACE_Reactor* a_reactor,
                          const AssociationTable& a_association_table,
-                         const ACE_Time_Value& lifespan,
+                         const OpenDDS::DCPS::TimeDuration& lifespan,
                          const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
                          DDS::DomainId_t application_domain,
                          const OpenDDS::DCPS::RepoId& application_participant_guid,
@@ -503,7 +504,7 @@ bool SedpHandler::do_normal_processing(const ACE_INET_Addr& a_remote,
 
 DataHandler::DataHandler(ACE_Reactor* a_reactor,
                          const AssociationTable& a_association_table,
-                         const ACE_Time_Value& lifespan,
+                         const OpenDDS::DCPS::TimeDuration& lifespan,
                          const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
                          DDS::DomainId_t application_domain,
                          const OpenDDS::DCPS::RepoId& application_participant_guid,
