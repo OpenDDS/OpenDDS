@@ -1,6 +1,8 @@
 #include "AssociationTable.h"
 
-#include "dds/DCPS/DCPS_Utils.h"
+#include <dds/DCPS/DCPS_Utils.h>
+
+#include <ace/Global_Macros.h>
 
 namespace RtpsRelay {
 
@@ -8,6 +10,7 @@ void AssociationTable::insert(const WriterEntry& writer_entry,
                               GuidSet& local_guids,
                               RelayAddressesSet& relay_addresses)
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
   const auto local = writer_entry.relay_addresses() == relay_addresses_;
   const auto writer_guid = guid_to_guid(writer_entry.guid());
   const auto p = writers_.find(writer_guid);
@@ -22,6 +25,7 @@ void AssociationTable::insert(const WriterEntry& writer_entry,
 
 void AssociationTable::remove(const WriterEntry& writer)
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
   const auto writer_guid = guid_to_guid(writer.guid());
   const auto pos = writers_.find(writer_guid);
   index_.erase(pos->second);
@@ -32,6 +36,7 @@ void AssociationTable::insert(const ReaderEntry& reader_entry,
                               GuidSet& local_guids,
                               RelayAddressesSet& relay_addresses)
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
   const auto local = reader_entry.relay_addresses() == relay_addresses_;
   const auto reader_guid = guid_to_guid(reader_entry.guid());
   const auto p = readers_.find(reader_guid);
@@ -46,6 +51,7 @@ void AssociationTable::insert(const ReaderEntry& reader_entry,
 
 void AssociationTable::remove(const ReaderEntry& reader)
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
   const auto reader_guid = guid_to_guid(reader.guid());
   const auto pos = readers_.find(reader_guid);
   index_.erase(pos->second);
@@ -56,6 +62,7 @@ void AssociationTable::get_guids(const OpenDDS::DCPS::RepoId& guid,
                                  GuidSet& local_guids,
                                  RelayAddressesSet& relay_addresses) const
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, const_cast<ACE_Thread_Mutex&>(mutex_));
   // Match on the prefix.
   OpenDDS::DCPS::RepoId prefix(guid);
   prefix.entityId = OpenDDS::DCPS::ENTITYID_UNKNOWN;

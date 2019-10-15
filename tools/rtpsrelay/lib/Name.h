@@ -19,9 +19,12 @@ public:
     GLOB
   };
 
-  explicit Atom(Kind kind) : kind_(kind) {}
+  explicit Atom(Kind kind) : kind_(kind), character_(0) {}
   explicit Atom(char c) : kind_(CHARACTER), character_(c) {}
-  Atom(bool negated, const std::set<char>& characters) : kind_(negated ? NEGATED_CHARACTER_CLASS : CHARACTER_CLASS), characters_(characters) {}
+  Atom(bool negated, const std::set<char>& characters)
+    : kind_(negated ? NEGATED_CHARACTER_CLASS : CHARACTER_CLASS)
+    , character_(0)
+    , characters_(characters) {}
 
   Kind kind() const { return kind_; }
 

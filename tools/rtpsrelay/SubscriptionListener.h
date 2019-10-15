@@ -4,7 +4,7 @@
 #include "AssociationTable.h"
 #include "ListenerBase.h"
 
-#include "dds/DCPS/DomainParticipantImpl.h"
+#include <dds/DCPS/DomainParticipantImpl.h>
 
 namespace RtpsRelay {
 
