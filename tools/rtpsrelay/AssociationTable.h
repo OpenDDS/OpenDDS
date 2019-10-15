@@ -15,15 +15,15 @@ public:
     relay_addresses_(relay_addresses)
   {}
   void insert(const WriterEntry& entry,
-              GuidSet& local_guids,
-              RelayAddressesSet& relay_addresses);
+              RelayAddressesMap& relay_addresses_map);
   void remove(const WriterEntry& entry);
   void insert(const ReaderEntry& entry,
-              GuidSet& local_guids,
-              RelayAddressesSet& relay_addresses);
+              RelayAddressesMap& relay_addresses_map);
   void remove(const ReaderEntry& entry);
 
-  void get_guids(const OpenDDS::DCPS::RepoId& guid, GuidSet& local_guids, RelayAddressesSet& relay_addresses) const;
+  void populate_relay_addresses_map(RelayAddressesMap& relay_addresses_map,
+                                    const OpenDDS::DCPS::RepoId& from,
+                                    const GuidSet& to) const;
 
 private:
   const RelayAddresses& relay_addresses_;

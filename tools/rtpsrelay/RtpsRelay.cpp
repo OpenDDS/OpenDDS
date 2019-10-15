@@ -267,9 +267,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   const int crypto = 0;
 #endif
 
-  SpdpHandler spdp_vertical_handler(reactor, association_table, lifespan, rtps_discovery, application_domain, application_participant_id, crypto, spdp);
-  SedpHandler sedp_vertical_handler(reactor, association_table, lifespan, rtps_discovery, application_domain, application_participant_id, crypto, sedp);
-  DataHandler data_vertical_handler(reactor, association_table, lifespan, rtps_discovery, application_domain, application_participant_id, crypto);
+  SpdpHandler spdp_vertical_handler(reactor, relay_addresses, association_table, lifespan, rtps_discovery, application_domain, application_participant_id, crypto, spdp);
+  SedpHandler sedp_vertical_handler(reactor, relay_addresses, association_table, lifespan, rtps_discovery, application_domain, application_participant_id, crypto, sedp);
+  DataHandler data_vertical_handler(reactor, relay_addresses, association_table, lifespan, rtps_discovery, application_domain, application_participant_id, crypto);
 
   spdp_horizontal_handler.vertical_handler(&spdp_vertical_handler);
   sedp_horizontal_handler.vertical_handler(&sedp_vertical_handler);
@@ -364,25 +364,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       return EXIT_FAILURE;
     }
 
-    ReaderEntryDataReader_ptr reader_reader = ReaderEntryDataReader::_narrow(reader);
-
-    if (!reader_reader) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: failed to narrow Reader data reader\n"));
-      return EXIT_FAILURE;
-    }
-
-    DDS::DataReaderListener_var reader_listener(new ReaderListener(association_table, spdp_vertical_handler));
-    DDS::ReturnCode_t ret = reader_reader->set_listener(reader_listener, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-    if (ret != DDS::RETCODE_OK) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: Failed to set listener on Reader data reader\n"));
-      return EXIT_FAILURE;
-    }
-
     DDS::DataReader_var dr = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC);
     DDS::DataReaderListener_var subscription_listener(new SubscriptionListener(application_participant_impl,
                                                                                reader_writer,
                                                                                relay_addresses));
-    ret = dr->set_listener(subscription_listener, DDS::DATA_AVAILABLE_STATUS);
+    DDS::ReturnCode_t ret = dr->set_listener(subscription_listener, DDS::DATA_AVAILABLE_STATUS);
     if (ret != DDS::RETCODE_OK) {
       ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: Failed to set listener on SubscriptionBuiltinTopicDataDataReader\n"));
       return EXIT_FAILURE;
@@ -457,25 +443,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       return EXIT_FAILURE;
     }
 
-    WriterEntryDataReader_ptr writer_reader = WriterEntryDataReader::_narrow(reader);
-
-    if (!writer_reader) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: failed to narrow Writer data reader\n"));
-      return EXIT_FAILURE;
-    }
-
-    DDS::DataReaderListener_var writer_listener(new WriterListener(association_table, spdp_vertical_handler));
-    DDS::ReturnCode_t ret = writer_reader->set_listener(writer_listener, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-    if (ret != DDS::RETCODE_OK) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: Failed to set listener on Writer data reader\n"));
-      return EXIT_FAILURE;
-    }
-
     DDS::DataReader_var dr = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC);
     DDS::DataReaderListener_var publication_listener(new PublicationListener(application_participant_impl,
                                                                              writer_writer,
                                                                              relay_addresses));
-    ret = dr->set_listener(publication_listener, DDS::DATA_AVAILABLE_STATUS);
+    DDS::ReturnCode_t ret = dr->set_listener(publication_listener, DDS::DATA_AVAILABLE_STATUS);
     if (ret != DDS::RETCODE_OK) {
       ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: Failed to set listener on PublicationBuiltinTopicDataDataReader\n"));
       return EXIT_FAILURE;

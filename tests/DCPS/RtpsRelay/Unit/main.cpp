@@ -38,7 +38,7 @@ void test_invalid(int& status, const std::string& s)
 #define ASSERT_MATCHED(x) do {                                          \
   GuidSet expected_local_guids;                                       \
   expected_local_guids.insert(x->participant_guid());                 \
-  if (local_guids != expected_local_guids) { \
+  if (relay_addresses_map[RelayAddresses()] != expected_local_guids) { \
     std::cout << "ERROR: " <<  __func__ << " failed: local guids do not match" << std::endl; \
     status = EXIT_FAILURE;                                              \
   } \
@@ -59,7 +59,7 @@ void test_invalid(int& status, const std::string& s)
 } while(0);
 
 #define ASSERT_NOT_MATCHED do { \
-  if (!local_guids.empty()) {                    \
+  if (!relay_addresses_map.empty()) {                    \
     std::cout << "ERROR: " <<  __func__ << " failed: local guids should be empty" << std::endl; \
     status = EXIT_FAILURE;                                              \
   } \
@@ -99,10 +99,9 @@ void writer_then_matched_reader(int& status)
   ReaderPtr reader(new Reader(reader_entry, true));
 
   Index index;
-  GuidSet local_guids;
-  RelayAddressesSet relay_addresses;
-  index.insert(writer, local_guids, relay_addresses);
-  index.insert(reader, local_guids, relay_addresses);
+  RelayAddressesMap relay_addresses_map;
+  index.insert(writer, relay_addresses_map);
+  index.insert(reader, relay_addresses_map);
 
   ASSERT_MATCHED(writer);
 }
@@ -129,10 +128,9 @@ void reader_then_matched_writer(int& status)
   ReaderPtr reader(new Reader(reader_entry, true));
 
   Index index;
-  GuidSet local_guids;
-  RelayAddressesSet relay_addresses;
-  index.insert(reader, local_guids, relay_addresses);
-  index.insert(writer, local_guids, relay_addresses);
+  RelayAddressesMap relay_addresses_map;
+  index.insert(reader, relay_addresses_map);
+  index.insert(writer, relay_addresses_map);
 
   ASSERT_MATCHED(reader);
 }
@@ -161,18 +159,16 @@ void matched_then_writer_changes_reliability(int& status)
   ReaderPtr reader(new Reader(reader_entry, true));
 
   Index index;
-  GuidSet local_guids;
-  RelayAddressesSet relay_addresses;
-  index.insert(writer, local_guids, relay_addresses);
-  index.insert(reader, local_guids, relay_addresses);
+  RelayAddressesMap relay_addresses_map;
+  index.insert(writer, relay_addresses_map);
+  index.insert(reader, relay_addresses_map);
 
   ASSERT_MATCHED(writer);
 
   writer_entry.data_writer_qos().reliability.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
 
-  local_guids.clear();
-  relay_addresses.clear();
-  index.reinsert(writer, writer_entry, true, local_guids, relay_addresses);
+  relay_addresses_map.clear();
+  index.reinsert(writer, writer_entry, true, relay_addresses_map);
   ASSERT_NOT_MATCHED;
 }
 
@@ -200,18 +196,16 @@ void matched_then_reader_changes_reliability(int& status)
   ReaderPtr reader(new Reader(reader_entry, true));
 
   Index index;
-  GuidSet local_guids;
-  RelayAddressesSet relay_addresses;
-  index.insert(writer, local_guids, relay_addresses);
-  index.insert(reader, local_guids, relay_addresses);
+  RelayAddressesMap relay_addresses_map;
+  index.insert(writer, relay_addresses_map);
+  index.insert(reader, relay_addresses_map);
 
   ASSERT_MATCHED(writer);
 
   reader_entry.data_reader_qos().reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
-  local_guids.clear();
-  relay_addresses.clear();
-  index.reinsert(reader, reader_entry, true, local_guids, relay_addresses);
+  relay_addresses_map.clear();
+  index.reinsert(reader, reader_entry, true, relay_addresses_map);
 
   ASSERT_NOT_MATCHED;
 }
@@ -238,18 +232,16 @@ void matched_then_writer_changes_partition(int& status)
   ReaderPtr reader(new Reader(reader_entry, true));
 
   Index index;
-  GuidSet local_guids;
-  RelayAddressesSet relay_addresses;
-  index.insert(writer, local_guids, relay_addresses);
-  index.insert(reader, local_guids, relay_addresses);
+  RelayAddressesMap relay_addresses_map;
+  index.insert(writer, relay_addresses_map);
+  index.insert(reader, relay_addresses_map);
 
   ASSERT_MATCHED(writer);
 
   writer_entry.publisher_qos().partition.name[0] = "Object";
 
-  local_guids.clear();
-  relay_addresses.clear();
-  index.reinsert(writer, writer_entry, true, local_guids, relay_addresses);
+  relay_addresses_map.clear();
+  index.reinsert(writer, writer_entry, true, relay_addresses_map);
 
   ASSERT_NOT_MATCHED;
 }
@@ -276,18 +268,16 @@ void matched_then_reader_changes_partition(int& status)
   ReaderPtr reader(new Reader(reader_entry, true));
 
   Index index;
-  GuidSet local_guids;
-  RelayAddressesSet relay_addresses;
-  index.insert(writer, local_guids, relay_addresses);
-  index.insert(reader, local_guids, relay_addresses);
+  RelayAddressesMap relay_addresses_map;
+  index.insert(writer, relay_addresses_map);
+  index.insert(reader, relay_addresses_map);
 
   ASSERT_MATCHED(writer);
 
   reader_entry.subscriber_qos().partition.name[0] = "Object";
 
-  local_guids.clear();
-  relay_addresses.clear();
-  index.reinsert(reader, reader_entry, true, local_guids, relay_addresses);
+  relay_addresses_map.clear();
+  index.reinsert(reader, reader_entry, true, relay_addresses_map);
 
   ASSERT_NOT_MATCHED;
 }
@@ -314,18 +304,16 @@ void matched_then_writer_changes_topic(int& status)
   ReaderPtr reader(new Reader(reader_entry, true));
 
   Index index;
-  GuidSet local_guids;
-  RelayAddressesSet relay_addresses;
-  index.insert(writer, local_guids, relay_addresses);
-  index.insert(reader, local_guids, relay_addresses);
+  RelayAddressesMap relay_addresses_map;
+  index.insert(writer, relay_addresses_map);
+  index.insert(reader, relay_addresses_map);
 
   ASSERT_MATCHED(writer);
 
   writer_entry.topic_name("a new topic");
 
-  local_guids.clear();
-  relay_addresses.clear();
-  index.reinsert(writer, writer_entry, true, local_guids, relay_addresses);
+  relay_addresses_map.clear();
+  index.reinsert(writer, writer_entry, true, relay_addresses_map);
 
   ASSERT_NOT_MATCHED;
 }
@@ -352,18 +340,16 @@ void matched_then_reader_changes_topic(int& status)
   ReaderPtr reader(new Reader(reader_entry, true));
 
   Index index;
-  GuidSet local_guids;
-  RelayAddressesSet relay_addresses;
-  index.insert(writer, local_guids, relay_addresses);
-  index.insert(reader, local_guids, relay_addresses);
+  RelayAddressesMap relay_addresses_map;
+  index.insert(writer, relay_addresses_map);
+  index.insert(reader, relay_addresses_map);
 
   ASSERT_MATCHED(writer);
 
   reader_entry.topic_name("a new topic");
 
-  local_guids.clear();
-  relay_addresses.clear();
-  index.reinsert(reader, reader_entry, true, local_guids, relay_addresses);
+  relay_addresses_map.clear();
+  index.reinsert(reader, reader_entry, true, relay_addresses_map);
 
   ASSERT_NOT_MATCHED;
 }
@@ -392,16 +378,15 @@ void unmatched_then_writer_changes_reliability(int& status)
   ReaderPtr reader(new Reader(reader_entry, true));
 
   Index index;
-  GuidSet local_guids;
-  RelayAddressesSet relay_addresses;
-  index.insert(writer, local_guids, relay_addresses);
-  index.insert(reader, local_guids, relay_addresses);
+  RelayAddressesMap relay_addresses_map;
+  index.insert(writer, relay_addresses_map);
+  index.insert(reader, relay_addresses_map);
 
   ASSERT_NOT_MATCHED;
 
   writer_entry.data_writer_qos().reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
-  index.reinsert(writer, writer_entry, true, local_guids, relay_addresses);
+  index.reinsert(writer, writer_entry, true, relay_addresses_map);
 
   ASSERT_MATCHED(reader);
 }
@@ -430,16 +415,15 @@ void unmatched_then_reader_changes_reliability(int& status)
   ReaderPtr reader(new Reader(reader_entry, true));
 
   Index index;
-  GuidSet local_guids;
-  RelayAddressesSet relay_addresses;
-  index.insert(writer, local_guids, relay_addresses);
-  index.insert(reader, local_guids, relay_addresses);
+  RelayAddressesMap relay_addresses_map;
+  index.insert(writer, relay_addresses_map);
+  index.insert(reader, relay_addresses_map);
 
   ASSERT_NOT_MATCHED;
 
   reader_entry.data_reader_qos().reliability.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
 
-  index.reinsert(reader, reader_entry, true, local_guids, relay_addresses);
+  index.reinsert(reader, reader_entry, true, relay_addresses_map);
 
   ASSERT_MATCHED(writer);
 }
@@ -466,16 +450,15 @@ void unmatched_then_writer_changes_partition(int& status)
   ReaderPtr reader(new Reader(reader_entry, true));
 
   Index index;
-  GuidSet local_guids;
-  RelayAddressesSet relay_addresses;
-  index.insert(writer, local_guids, relay_addresses);
-  index.insert(reader, local_guids, relay_addresses);
+  RelayAddressesMap relay_addresses_map;
+  index.insert(writer, relay_addresses_map);
+  index.insert(reader, relay_addresses_map);
 
   ASSERT_NOT_MATCHED;
 
   writer_entry.publisher_qos().partition.name[0] = "OCI";
 
-  index.reinsert(writer, writer_entry, true, local_guids, relay_addresses);
+  index.reinsert(writer, writer_entry, true, relay_addresses_map);
 
   ASSERT_MATCHED(reader);
 }
@@ -502,16 +485,15 @@ void unmatched_then_reader_changes_partition(int& status)
   ReaderPtr reader(new Reader(reader_entry, true));
 
   Index index;
-  GuidSet local_guids;
-  RelayAddressesSet relay_addresses;
-  index.insert(writer, local_guids, relay_addresses);
-  index.insert(reader, local_guids, relay_addresses);
+  RelayAddressesMap relay_addresses_map;
+  index.insert(writer, relay_addresses_map);
+  index.insert(reader, relay_addresses_map);
 
   ASSERT_NOT_MATCHED;
 
   reader_entry.subscriber_qos().partition.name[0] = "Object Computing, Inc.";
 
-  index.reinsert(reader, reader_entry, true, local_guids, relay_addresses);
+  index.reinsert(reader, reader_entry, true, relay_addresses_map);
 
   ASSERT_MATCHED(writer);
 }
@@ -538,16 +520,15 @@ void unmatched_then_writer_changes_topic(int& status)
   ReaderPtr reader(new Reader(reader_entry, true));
 
   Index index;
-  GuidSet local_guids;
-  RelayAddressesSet relay_addresses;
-  index.insert(writer, local_guids, relay_addresses);
-  index.insert(reader, local_guids, relay_addresses);
+  RelayAddressesMap relay_addresses_map;
+  index.insert(writer, relay_addresses_map);
+  index.insert(reader, relay_addresses_map);
 
   ASSERT_NOT_MATCHED;
 
   writer_entry.topic_name("the topic");
 
-  index.reinsert(writer, writer_entry, true, local_guids, relay_addresses);
+  index.reinsert(writer, writer_entry, true, relay_addresses_map);
 
   ASSERT_MATCHED(reader);
 }
@@ -572,16 +553,15 @@ void unmatched_then_reader_changes_topic(int& status)
   ReaderPtr reader(new Reader(reader_entry, true));
 
   Index index;
-  GuidSet local_guids;
-  RelayAddressesSet relay_addresses;
-  index.insert(writer, local_guids, relay_addresses);
-  index.insert(reader, local_guids, relay_addresses);
+  RelayAddressesMap relay_addresses_map;
+  index.insert(writer, relay_addresses_map);
+  index.insert(reader, relay_addresses_map);
 
   ASSERT_NOT_MATCHED;
 
   reader_entry.topic_name("the topic");
 
-  index.reinsert(reader, reader_entry, true, local_guids, relay_addresses);
+  index.reinsert(reader, reader_entry, true, relay_addresses_map);
 
   ASSERT_MATCHED(writer);
 }
@@ -608,17 +588,15 @@ void matched_then_writer_disappears(int& status)
   ReaderPtr reader(new Reader(reader_entry, true));
 
   Index index;
-  GuidSet local_guids;
-  RelayAddressesSet relay_addresses;
-  index.insert(writer, local_guids, relay_addresses);
-  index.insert(reader, local_guids, relay_addresses);
+  RelayAddressesMap relay_addresses_map;
+  index.insert(writer, relay_addresses_map);
+  index.insert(reader, relay_addresses_map);
 
   ASSERT_MATCHED(writer);
 
   index.erase(writer);
 
-  local_guids.clear();
-  relay_addresses.clear();
+  relay_addresses_map.clear();
 
   ASSERT_NOT_MATCHED;
 }
@@ -645,16 +623,14 @@ void matched_then_reader_disappears(int& status)
   ReaderPtr reader(new Reader(reader_entry, true));
 
   Index index;
-  GuidSet local_guids;
-  RelayAddressesSet relay_addresses;
-  index.insert(writer, local_guids, relay_addresses);
-  index.insert(reader, local_guids, relay_addresses);
+  RelayAddressesMap relay_addresses_map;
+  index.insert(writer, relay_addresses_map);
+  index.insert(reader, relay_addresses_map);
   ASSERT_MATCHED(writer);
 
   index.erase(reader);
 
-  local_guids.clear();
-  relay_addresses.clear();
+  relay_addresses_map.clear();
 
   ASSERT_NOT_MATCHED;
 }

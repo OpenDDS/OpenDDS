@@ -4,11 +4,8 @@
 
 namespace RtpsRelay {
 
-RelayAddresses local_relay_addresses;
-
 void NoIndex::match(Writers::iterator pos,
-                    GuidSet& local_guids,
-                    RelayAddressesSet& relay_addresses)
+                    RelayAddressesMap& relay_addresses_map)
 {
   const auto writer = pos->first;
   auto& matched_readers = pos->second;
@@ -25,7 +22,7 @@ void NoIndex::match(Writers::iterator pos,
       if (matched_readers.count(reader) == 0) {
         matched_readers.insert(reader);
         matched_writers.insert(writer);
-        add_reader(reader, local_guids, relay_addresses);
+        add_reader(reader, relay_addresses_map);
       }
     } else {
       if (matched_readers.count(reader) == 1) {
@@ -37,8 +34,7 @@ void NoIndex::match(Writers::iterator pos,
 }
 
 void NoIndex::match(Readers::iterator pos,
-                    GuidSet& local_guids,
-                    RelayAddressesSet& relay_addresses)
+                    RelayAddressesMap& relay_addresses_map)
 {
   const auto reader = pos->first;
   auto& matched_writers = pos->second;
@@ -55,7 +51,7 @@ void NoIndex::match(Readers::iterator pos,
       if (matched_writers.count(writer) == 0) {
         matched_writers.insert(writer);
         matched_readers.insert(reader);
-        add_writer(writer, local_guids, relay_addresses);
+        add_writer(writer, relay_addresses_map);
       }
     } else {
       if (matched_writers.count(writer) == 1) {
