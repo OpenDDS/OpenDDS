@@ -7,6 +7,7 @@
 * [Compiling](#compiling)
 * [Test](#test)
 * [Installation](#installation)
+  * [Application Development with an Installed OpenDDS](#application-development-with-an-installed-opendds)
 * [Cross Compiling](#cross-compiling)
   * [Raspberry Pi](#raspberry-pi)
   * [Android](#android)
@@ -86,7 +87,7 @@ bin/auto_run_tests.pl
 **For Windows:**
 
 ```
-perl bin\auto_run_tests.pl
+bin\auto_run_tests.pl
 ```
 
   If you built static libraries, add `-Config STATIC` to this command.
