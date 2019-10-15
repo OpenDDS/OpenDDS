@@ -3,8 +3,12 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
 
 #include <dds/DCPS/WaitSet.h>
+#include <dds/DCPS/GuardCondition.h>
 
 #include <util.h>
 #include <json_conversion.h>
@@ -145,6 +149,7 @@ AllocatedScenario ScenarioManager::allocate_scenario(
   const unsigned node_count = std::min(static_cast<unsigned>(available_nodes.size()), maximum_nodes);
   AllocatedScenario allocated_scenario;
   allocated_scenario.expected_reports = 0;
+  allocated_scenario.timeout = scenario_prototype.timeout;
   allocated_scenario.configs.length(node_count);
 
   // Set the Node IDs and Initialize Worker Length
@@ -220,9 +225,7 @@ AllocatedScenario ScenarioManager::allocate_scenario(
   return allocated_scenario;
 }
 
-std::vector<WorkerReport> ScenarioManager::execute(
-  const AllocatedScenario& allocated_scenario,
-  unsigned wait_for_reports)
+std::vector<WorkerReport> ScenarioManager::execute(const AllocatedScenario& allocated_scenario)
 {
   // Write Configs
   for (unsigned i = 0; i < allocated_scenario.configs.length(); i++) {
@@ -231,23 +234,45 @@ std::vector<WorkerReport> ScenarioManager::execute(
     }
   }
 
+  // Set up Waiting for Reading Reports or the Scenario Timeout
+  DDS::WaitSet_var wait_set = new DDS::WaitSet;
+  DDS::ReadCondition_var read_condition = dds_entities_.report_reader_impl_->create_readcondition(
+    DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+  wait_set->attach_condition(read_condition);
+  DDS::GuardCondition_var guard_condition = new DDS::GuardCondition;
+  wait_set->attach_condition(guard_condition);
+
+  // Timeout Thread
+  std::condition_variable timeout_cv;
+  const std::chrono::seconds timeout(allocated_scenario.timeout);
+  std::thread timeout_thread;
+  if (timeout.count() > 0) {
+    std::thread temp([&] {
+      std::mutex mutex;
+      std::unique_lock<std::mutex> lock(mutex);
+      if (timeout_cv.wait_for(lock, timeout) == std::cv_status::timeout) {
+        guard_condition->set_trigger_value(true);
+      }
+    });
+    timeout_thread.swap(temp);
+  }
+
   // Wait for reports
   std::vector<WorkerReport> parsed_reports;
   while (parsed_reports.size() < allocated_scenario.expected_reports) {
     DDS::ReturnCode_t rc;
 
-    DDS::ReadCondition_var read_condition = dds_entities_.report_reader_impl_->create_readcondition(
-      DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
-    DDS::WaitSet_var ws = new DDS::WaitSet;
-    ws->attach_condition(read_condition);
     DDS::ConditionSeq active;
-    rc = ws->wait(active, {static_cast<int>(wait_for_reports), 0});
-    ws->detach_condition(read_condition);
-    dds_entities_.report_reader_impl_->delete_readcondition(read_condition);
-    if (rc != DDS::RETCODE_OK) {
-      std::stringstream ss;
-      ss << "Waiting for " << wait_for_reports << " seconds between reports failed" << std::endl;
-      throw std::runtime_error(ss.str());
+    const DDS::Duration_t infinity = { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
+    wait_set->wait(active, infinity);
+    for (unsigned i = 0; i < active.length(); i++) {
+      if (active[i] == guard_condition) {
+        timeout_cv.notify_all();
+        timeout_thread.join();
+        std::stringstream ss;
+        ss << "Timedout waiting for the scenario to complete";
+        throw std::runtime_error(ss.str());
+      }
     }
 
     ReportSeq reports;
@@ -259,9 +284,7 @@ std::vector<WorkerReport> ScenarioManager::execute(
       DDS::ANY_VIEW_STATE,
       DDS::ANY_INSTANCE_STATE);
     if (rc != DDS::RETCODE_OK) {
-      std::stringstream ss;
-      ss << "Take from Report Reader failed";
-      throw std::runtime_error(ss.str());
+      throw std::runtime_error("Take from report reader failed");
     }
 
     for (size_t r = 0; r < reports.length(); r++) {
@@ -288,6 +311,15 @@ std::vector<WorkerReport> ScenarioManager::execute(
       }
     }
   }
+
+  if (timeout.count() > 0) {
+    timeout_cv.notify_all();
+    timeout_thread.join();
+  }
+
+  wait_set->detach_condition(read_condition);
+  dds_entities_.report_reader_impl_->delete_readcondition(read_condition);
+  wait_set->detach_condition(guard_condition);
 
   return parsed_reports;
 }

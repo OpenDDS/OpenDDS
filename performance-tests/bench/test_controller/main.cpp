@@ -54,8 +54,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   int domain = default_control_domain;
   /// How much time for the node discovery period.
   unsigned wait_for_nodes = 10;
-  /// Max time to wait in-between reports coming in.
-  unsigned wait_for_reports = 120;
+  /// Max time to wait for the scenario to complete
+  bool timeout_passed = false;
+  unsigned timeout = 0; // Default defined in scenario config or alloc
 
   /// If not empty, Stop After Allocation and Output the Allocation to File
   std::string preallocated_scenario_output_path;
@@ -88,8 +89,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         domain = get_option_argument_int(i, argc, argv);
       } else if (!ACE_OS::strcmp(argument, "--wait-for-nodes")) {
         wait_for_nodes = get_option_argument_uint(i, argc, argv);
-      } else if (!ACE_OS::strcmp(argument, "--wait-for-reports")) {
-        wait_for_reports = get_option_argument_uint(i, argc, argv);
+      } else if (!ACE_OS::strcmp(argument, "--timeout")) {
+        timeout = get_option_argument_uint(i, argc, argv);
+        timeout_passed = true;
       } else if (!ACE_OS::strcmp(argument, "--help") || !ACE_OS::strcmp(argument, "-h")) {
         std::cout << usage << std::endl
           << std::endl
@@ -104,8 +106,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
           << "--wait-for-nodes N           The number of seconds to wait for nodes before" << std::endl
           << "                             broadcasting the scenario to them. The default is" << std::endl
           << "                             10 seconds." << std::endl
-          << "--wait-for-reports N         The number of seconds to wait for a report to come" << std::endl
-          << "                             in before timing out. The default is 120 seconds." << std::endl
+          << "--timeout N                  The number of seconds to wait for a scenario to" << std::endl
+          << "                             complete. Overrides the value defined in the" << std::endl
+          << "                             scenario. If N is 0, there is no timeout." << std::endl
           << "--prealloc-scenario-out PATH Instead of running the scenario, write the" << std::endl
           << "                             directives (in JSON) that would have been sent to" << std::endl
           << "                             the node controllers to the file at this path." << std::endl
@@ -254,6 +257,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       allocated_scenario = scenario_manager.allocate_scenario(scenario_prototype, available_nodes, debug_alloc);
     }
 
+    if (timeout_passed) {
+      allocated_scenario.timeout = timeout;
+    }
+
     // Part 2: Broadcast the Directives and Wait for Reports
     if (preallocated_scenario_output_path.size()) {
       std::cout << "Saving Scenario Allocation to File..." << std::endl;
@@ -283,7 +290,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       }
       std::cout << scenario_start;
 
-      std::vector<Bench::WorkerReport> reports = scenario_manager.execute(allocated_scenario, wait_for_reports);
+      std::vector<Bench::WorkerReport> reports = scenario_manager.execute(allocated_scenario);
 
       std::ofstream result_file(result_path);
       if (!result_file.is_open()) {

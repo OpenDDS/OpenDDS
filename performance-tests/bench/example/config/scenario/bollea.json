@@ -11,5 +11,6 @@
       "config": "bollea_aggregator.json",
       "count": 4
     }
-  ]
+  ],
+  "timeout": 180
 }

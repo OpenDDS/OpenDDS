@@ -22,5 +22,6 @@
       "config": "master.json",
       "count": 1
     }
-  ]
+  ],
+  "timeout": 120
 }

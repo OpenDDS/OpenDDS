@@ -18,8 +18,9 @@ Usage: `test_controller [-h|--help] | TEST_CONTEXT SCENARIO_ID [OPTIONS...]`
   - `--wait-for-nodes N`: The number of seconds to wait for nodes before
     broadcasting the scenario to them. The default is 10 seconds.
 
-  - `--wait-for-reports N`: The number of seconds to wait for a report to come
-    in before timing out. The default is 120 seconds.
+  - `--timeout N`: The number of seconds to wait for a scenario to complete.
+    Overrides the value defined in the scenario. If N is 0, there is no
+    timeout.
 
   - `--prealloc-scenario-out PATH`: Instead of running the scenario, write
     directives (in JSON) that would have been sent to the node controllers to

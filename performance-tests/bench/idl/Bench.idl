@@ -213,12 +213,18 @@ module Bench {
       NodePrototypes nodes;
       // Workers that can be assigned to any node
       WorkerPrototypes any_node;
+      /*
+       * Number of seconds to wait for the scenario to end before deeming it
+       * hopeless. 0 means never timeout.
+       */
+      unsigned long timeout;
     };
 
     // Result of Applying a Scenario Prototype to a List of Discovered Nodes
     struct AllocatedScenario {
       NodeController::Configs configs;
       unsigned long expected_reports;
+      unsigned long timeout;
     };
   };
 };
