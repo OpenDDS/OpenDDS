@@ -50,7 +50,7 @@ namespace DCPS {
     bool expired_;
   };
 
-  class RcObject : public PoolAllocationBase {
+  class OpenDDS_Dcps_Export RcObject : public PoolAllocationBase {
   public:
 
     virtual ~RcObject(){
