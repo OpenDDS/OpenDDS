@@ -674,16 +674,6 @@ Sedp::unicast_locators(DCPS::LocatorSeq& locators) const
 
   CORBA::ULong idx = 0;
 
-  // multicast first so it's preferred by remote peers
-  if (rtps_inst->use_multicast_ && rtps_inst->multicast_group_address_ != ACE_INET_Addr()) {
-    idx = locators.length();
-    locators.length(idx + 1);
-    locators[idx].kind = address_to_kind(rtps_inst->multicast_group_address_);
-    locators[idx].port = rtps_inst->multicast_group_address_.get_port_number();
-    RTPS::address_to_bytes(locators[idx].address,
-      rtps_inst->multicast_group_address_);
-  }
-
   //if local_address_string is empty, or only the port has been set
   //need to get interface addresses to populate into the locator
   if (rtps_inst->local_address_config_str_.empty() ||
