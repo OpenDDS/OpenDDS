@@ -1,7 +1,7 @@
 #ifndef RTPSRELAY_LISTENER_BASE_H_
 #define RTPSRELAY_LISTENER_BASE_H_
 
-#include "dds/DdsDcpsSubscriptionC.h"
+#include <dds/DdsDcpsSubscriptionC.h>
 
 namespace RtpsRelay {
 

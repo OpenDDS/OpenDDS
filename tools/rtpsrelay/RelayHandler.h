@@ -7,9 +7,12 @@
 
 #include <ace/Message_Block.h>
 #include <ace/SOCK_Dgram.h>
+#include <ace/Thread_Mutex.h>
 #include <ace/Time_Value.h>
 
+#include <map>
 #include <queue>
+#include <set>
 #include <string>
 #include <utility>
 
@@ -23,30 +26,31 @@ namespace RtpsRelay {
 
 class RelayHandler : public ACE_Event_Handler {
 public:
-  RelayHandler(ACE_Reactor* a_reactor,
-               const AssociationTable& a_association_table);
-
   int open(const ACE_INET_Addr& a_local);
-  int handle_input(ACE_HANDLE a_handle) override;
-  int handle_output(ACE_HANDLE a_handle) override;
-  ACE_HANDLE get_handle() const override { return socket_.get_handle(); }
+  void enqueue_message(const std::string& a_addr, ACE_Message_Block* a_msg);
   const std::string& relay_address() const { return relay_address_; }
   size_t bytes_received() const { return bytes_received_; }
   size_t bytes_sent() const { return bytes_sent_; }
   void reset_byte_counts() { bytes_received_ = 0; bytes_sent_ = 0; }
-  void enqueue_message(const std::string& a_addr, ACE_Message_Block* a_msg);
 
 protected:
-  const AssociationTable& association_table_;
+  RelayHandler(ACE_Reactor* a_reactor, const AssociationTable& a_association_table);
+  int handle_input(ACE_HANDLE a_handle) override;
+  int handle_output(ACE_HANDLE a_handle) override;
+  ACE_HANDLE get_handle() const override { return socket_.get_handle(); }
   virtual void process_message(const ACE_INET_Addr& a_remote,
                                const OpenDDS::DCPS::MonotonicTimePoint& a_now,
                                const OpenDDS::DCPS::RepoId& a_src_guid,
                                ACE_Message_Block* a_msg) = 0;
+
+  const AssociationTable& association_table_;
+
 private:
   std::string relay_address_;
   ACE_SOCK_Dgram socket_;
   typedef std::queue<std::pair<std::string, ACE_Message_Block*>> OutgoingType;
   OutgoingType outgoing_;
+  ACE_Thread_Mutex outgoing_mutex_;
   size_t bytes_received_;
   size_t bytes_sent_;
 };
@@ -56,7 +60,7 @@ class HorizontalHandler;
 // Sends to and receives from peers.
 class VerticalHandler : public RelayHandler {
 public:
-  typedef std::map<OpenDDS::DCPS::RepoId, std::string, OpenDDS::DCPS::GUID_tKeyLessThan> GuidAddrMap;
+  typedef std::map<OpenDDS::DCPS::RepoId, std::set<std::string>, OpenDDS::DCPS::GUID_tKeyLessThan> GuidAddrMap;
 
   VerticalHandler(ACE_Reactor* a_reactor,
                   const AssociationTable& a_association_table,
@@ -82,21 +86,20 @@ protected:
   virtual bool do_normal_processing(const ACE_INET_Addr& /*a_remote*/,
                                     const OpenDDS::DCPS::RepoId& /*a_src_guid*/,
                                     ACE_Message_Block* /*a_msg*/) { return true; }
-  virtual void purge(const OpenDDS::DCPS::RepoId& /*guid*/) {}
-
+  virtual void purge(const GuidAddr& /*ga*/) {}
   void process_message(const ACE_INET_Addr& a_remote,
                        const OpenDDS::DCPS::MonotonicTimePoint& a_now,
                        const OpenDDS::DCPS::RepoId& a_src_guid,
                        ACE_Message_Block* a_msg) override;
 
+  HorizontalHandler* horizontal_handler_;
   GuidAddrMap guid_addr_map_;
-  typedef std::map<OpenDDS::DCPS::RepoId, OpenDDS::DCPS::MonotonicTimePoint, OpenDDS::DCPS::GUID_tKeyLessThan> GuidExpirationMap;
+  typedef std::map<GuidAddr, OpenDDS::DCPS::MonotonicTimePoint> GuidExpirationMap;
   GuidExpirationMap guid_expiration_map_;
-  typedef std::multimap<OpenDDS::DCPS::MonotonicTimePoint, OpenDDS::DCPS::RepoId> ExpirationGuidMap;
+  typedef std::multimap<OpenDDS::DCPS::MonotonicTimePoint, GuidAddr> ExpirationGuidMap;
   ExpirationGuidMap expiration_guid_map_;
   const OpenDDS::DCPS::TimeDuration lifespan_;
   const OpenDDS::DCPS::RepoId application_participant_guid_;
-  HorizontalHandler* horizontal_handler_;
 
 private:
   bool parse_message(OpenDDS::RTPS::MessageParser& message_parser,
@@ -147,6 +150,7 @@ private:
   ACE_Message_Block* spdp_message_;
   typedef std::map<OpenDDS::DCPS::RepoId, ACE_Message_Block*, OpenDDS::DCPS::GUID_tKeyLessThan> SpdpMessages;
   SpdpMessages spdp_messages_;
+  ACE_Thread_Mutex spdp_messages_mutex_;
 
   std::string extract_relay_address(const RelayAddresses& relay_addresses) const override;
 
@@ -154,7 +158,7 @@ private:
                             const OpenDDS::DCPS::RepoId& a_src_guid,
                             ACE_Message_Block* a_msg) override;
 
-  void purge(const OpenDDS::DCPS::RepoId& guid) override;
+  void purge(const GuidAddr& ga) override;
 };
 
 class SedpHandler : public VerticalHandler {

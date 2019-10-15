@@ -5,6 +5,8 @@
 #include "utility.h"
 #include "lib/QosIndex.h"
 
+#include <ace/Thread_Mutex.h>
+
 namespace RtpsRelay {
 
 class AssociationTable {
@@ -32,6 +34,8 @@ private:
   ReadersMap readers_;
 
   TopicIndex<PartitionIndex<NoIndex> > index_;
+
+  ACE_Thread_Mutex mutex_;
 };
 
 }

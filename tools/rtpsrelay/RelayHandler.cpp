@@ -8,6 +8,7 @@
 #include <dds/DdsDcpsCoreTypeSupportImpl.h>
 #include <dds/DdsDcpsGuidTypeSupportImpl.h>
 
+#include <ace/Global_Macros.h>
 #include <ace/Reactor.h>
 
 #include <array>
@@ -105,6 +106,8 @@ int RelayHandler::handle_input(ACE_HANDLE)
 
 int RelayHandler::handle_output(ACE_HANDLE)
 {
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, outgoing_mutex_, 0);
+
   if (!outgoing_.empty()) {
     const auto& out = outgoing_.front();
 
@@ -130,6 +133,8 @@ int RelayHandler::handle_output(ACE_HANDLE)
 
 void RelayHandler::enqueue_message(const std::string& a_addr, ACE_Message_Block* a_msg)
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, outgoing_mutex_);
+
   const auto empty = outgoing_.empty();
 
   outgoing_.push(std::make_pair(a_addr, a_msg->duplicate()));
@@ -147,9 +152,9 @@ VerticalHandler::VerticalHandler(ACE_Reactor* a_reactor,
                                  const OpenDDS::DCPS::RepoId& application_participant_guid,
                                  const CRYPTO_TYPE& crypto)
   : RelayHandler(a_reactor, a_association_table)
+  , horizontal_handler_(nullptr)
   , lifespan_(lifespan)
   , application_participant_guid_(application_participant_guid)
-  , horizontal_handler_(nullptr)
   , rtps_discovery_(rtps_discovery)
   , application_domain_(application_domain)
 #ifdef OPENDDS_SECURITY
@@ -176,15 +181,17 @@ void VerticalHandler::process_message(const ACE_INET_Addr& a_remote,
   a_msg->rd_ptr(rd_ptr);
 
   const std::string addr_str = addr_to_string(a_remote);
-  guid_addr_map_[a_src_guid] = addr_str;
+  guid_addr_map_[a_src_guid].insert(addr_str);
+  const GuidAddr ga(a_src_guid, addr_str);
+
   // Compute the new expiration time for this SPDP client.
   const auto expiration = a_now + lifespan_;
-  std::pair<GuidExpirationMap::iterator, bool> res = guid_expiration_map_.insert(std::make_pair(a_src_guid, expiration));
+  const auto res = guid_expiration_map_.insert(std::make_pair(ga, expiration));
   if (!res.second) {
     // The SPDP client already exists.  Remove the previous expiration.
     const auto previous_expiration = res.first->second;
-    std::pair<ExpirationGuidMap::iterator, ExpirationGuidMap::iterator> r = expiration_guid_map_.equal_range(previous_expiration);
-    while (r.first != r.second && r.first->second != a_src_guid) {
+    auto r = expiration_guid_map_.equal_range(previous_expiration);
+    while (r.first != r.second && r.first->second != ga) {
       ++r.first;
     }
     expiration_guid_map_.erase(r.first);
@@ -192,12 +199,12 @@ void VerticalHandler::process_message(const ACE_INET_Addr& a_remote,
     res.first->second = expiration;
   }
   // Assign the new expiration time.
-  expiration_guid_map_.insert(std::make_pair(expiration, a_src_guid));
+  expiration_guid_map_.insert(std::make_pair(expiration, ga));
 
   // Process expirations.
-  for (ExpirationGuidMap::iterator pos = expiration_guid_map_.begin(), limit = expiration_guid_map_.end(); pos != limit && pos->first < a_now;) {
+  for (auto pos = expiration_guid_map_.begin(), limit = expiration_guid_map_.end(); pos != limit && pos->first < a_now;) {
     purge(pos->second);
-    guid_addr_map_.erase(pos->second);
+    guid_addr_map_.erase(pos->second.guid);
     guid_expiration_map_.erase(pos->second);
     expiration_guid_map_.erase(pos++);
   }
@@ -215,7 +222,9 @@ void VerticalHandler::process_message(const ACE_INET_Addr& a_remote,
     for (const auto& guid : local_guids) {
       auto p = find(guid);
       if (p != end()) {
-        enqueue_message(p->second, a_msg);
+        for (const auto& addr : p->second) {
+          enqueue_message(addr, a_msg);
+        }
       } else {
         ACE_ERROR((LM_WARNING, "(%P|%t) %N:%l WARNING: VerticalHandler::process_message failed to get address\n"));
       }
@@ -245,7 +254,9 @@ void HorizontalHandler::process_message(const ACE_INET_Addr&,
   for (auto guid : local_guids) {
     auto p = vertical_handler_->find(guid);
     if (p != vertical_handler_->end()) {
-      vertical_handler_->enqueue_message(p->second, a_msg);
+      for (const auto& addr : p->second) {
+        vertical_handler_->enqueue_message(addr, a_msg);
+      }
     } else {
       ACE_ERROR((LM_WARNING, "(%P|%t) %N:%l WARNING: HorizontalHandler::process_message failed to get address\n"));
     }
@@ -293,6 +304,7 @@ bool SpdpHandler::do_normal_processing(const ACE_INET_Addr& a_remote,
 
   // SPDP message is from a client.
   // Cache it.
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, spdp_messages_mutex_, false);
   auto p = spdp_messages_.insert(std::make_pair(a_src_guid, nullptr));
   if (p.first->second) {
     p.first->second->release();
@@ -419,9 +431,10 @@ bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser
   return true;
 }
 
-void SpdpHandler::purge(const OpenDDS::DCPS::RepoId& guid)
+void SpdpHandler::purge(const GuidAddr& ga)
 {
-  SpdpMessages::iterator pos = spdp_messages_.find(guid);
+  ACE_GUARD(ACE_Thread_Mutex, g, spdp_messages_mutex_);
+  const auto pos = spdp_messages_.find(ga.guid);
   if (pos != spdp_messages_.end()) {
     pos->second->release();
     spdp_messages_.erase(pos);
@@ -438,6 +451,8 @@ void SpdpHandler::replay(const OpenDDS::DCPS::RepoId& x,
 
   const OpenDDS::DCPS::RepoId a_src_guid = to_participant_guid(x);
 
+  ACE_GUARD(ACE_Thread_Mutex, g, spdp_messages_mutex_);
+
   SpdpMessages::const_iterator pos = spdp_messages_.find(a_src_guid);
   if (pos == spdp_messages_.end()) {
     return;
@@ -446,7 +461,9 @@ void SpdpHandler::replay(const OpenDDS::DCPS::RepoId& x,
   for (const auto& guid : local_guids) {
     auto p = find(guid);
     if (p != end()) {
-      enqueue_message(p->second, pos->second);
+      for (const auto& addr : p->second) {
+        enqueue_message(addr, pos->second);
+      }
     } else {
       ACE_ERROR((LM_WARNING, "(%P|%t) %N:%l WARNING: VerticalHandler::process_message failed to get address\n"));
     }
@@ -487,9 +504,11 @@ bool SedpHandler::do_normal_processing(const ACE_INET_Addr& a_remote,
 
     // SEDP message is from the application participant.
     // Forward to all peers except the application participant.
-    for (const auto p : guid_addr_map_) {
+    for (const auto& p : guid_addr_map_) {
       if (p.first != application_participant_guid_) {
-        enqueue_message(p.second, a_msg);
+        for (const auto& addr : p.second) {
+          enqueue_message(addr, a_msg);
+        }
       }
     }
 

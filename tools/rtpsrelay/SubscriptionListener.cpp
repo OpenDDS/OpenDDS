@@ -99,7 +99,7 @@ void SubscriptionListener::unregister_instance(const DDS::SampleInfo& info)
   ReaderEntry entry;
   entry.guid(guid);
 
-  DDS::ReturnCode_t ret = writer_->dispose(entry, DDS::HANDLE_NIL);
+  DDS::ReturnCode_t ret = writer_->unregister_instance(entry, DDS::HANDLE_NIL);
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: SubscriptionListener::unregister_instance failed to unregister_instance\n"));
   }

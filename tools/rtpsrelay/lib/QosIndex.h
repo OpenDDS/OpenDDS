@@ -4,7 +4,7 @@
 #include "Name.h"
 #include "RelayTypeSupportImpl.h"
 
-#include "dds/DCPS/GuidUtils.h"
+#include <dds/DCPS/GuidUtils.h>
 
 namespace RtpsRelay {
 
