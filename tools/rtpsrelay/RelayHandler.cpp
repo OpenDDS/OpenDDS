@@ -4,7 +4,9 @@
 #include <dds/DCPS/RTPS/BaseMessageTypes.h>
 #include <dds/DCPS/RTPS/MessageTypes.h>
 #include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
+#include <dds/DCPS/TimeTypes.h>
 #include <dds/DdsDcpsCoreTypeSupportImpl.h>
+#include <dds/DdsDcpsGuidTypeSupportImpl.h>
 
 #include <ace/Global_Macros.h>
 #include <ace/Reactor.h>
@@ -16,6 +18,7 @@
 
 #ifdef OPENDDS_SECURITY
 #include <dds/DCPS/security/framework/SecurityRegistry.h>
+#include <dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h>
 #endif
 
 namespace RtpsRelay {
@@ -85,22 +88,19 @@ int RelayHandler::handle_input(ACE_HANDLE)
 
   const auto rd_ptr = buffer->rd_ptr();
 
-  OpenDDS::DCPS::Serializer serializer(buffer.get(), false, OpenDDS::DCPS::Serializer::ALIGN_CDR);
-  OpenDDS::RTPS::Header header;
-  if (!(serializer >> header)) {
+  OpenDDS::DCPS::RepoId src_guid;
+  OpenDDS::RTPS::MessageParser mp(*buffer);
+  if (!mp.parseHeader()) {
     ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::handle_input failed to deserialize RTPS header\n"));
     return 0;
   }
 
-  bool is_beacon_message = buffer->length() == OpenDDS::RTPS::BEACON_MESSAGE_LENGTH &&
-    static_cast<CORBA::Octet>(buffer->rd_ptr()[0]) == OpenDDS::RTPS::BEACON_MSG_ID;
-
-  OpenDDS::DCPS::RepoId src_guid;
+  const auto& header = mp.header();
   std::memcpy(src_guid.guidPrefix, header.guidPrefix, sizeof(OpenDDS::DCPS::GuidPrefix_t));
   src_guid.entityId = OpenDDS::DCPS::ENTITYID_PARTICIPANT;
 
   buffer->rd_ptr(rd_ptr);
-  process_message(remote, ACE_Time_Value().now(), src_guid, buffer.get(), is_beacon_message);
+  process_message(remote, OpenDDS::DCPS::MonotonicTimePoint::now(), src_guid, buffer.get());
   return 0;
 }
 
@@ -146,26 +146,46 @@ void RelayHandler::enqueue_message(const std::string& a_addr, ACE_Message_Block*
 
 VerticalHandler::VerticalHandler(ACE_Reactor* a_reactor,
                                  const AssociationTable& a_association_table,
-                                 const ACE_Time_Value& lifespan,
-                                 const OpenDDS::DCPS::RepoId& application_participant_guid)
+                                 const OpenDDS::DCPS::TimeDuration& lifespan,
+                                 const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
+                                 DDS::DomainId_t application_domain,
+                                 const OpenDDS::DCPS::RepoId& application_participant_guid,
+                                 const CRYPTO_TYPE& crypto)
   : RelayHandler(a_reactor, a_association_table)
   , horizontal_handler_(nullptr)
   , lifespan_(lifespan)
   , application_participant_guid_(application_participant_guid)
-{}
+  , rtps_discovery_(rtps_discovery)
+  , application_domain_(application_domain)
+#ifdef OPENDDS_SECURITY
+  , crypto_(crypto)
+  , application_participant_crypto_handle_(rtps_discovery_->get_crypto_handle(application_domain_, application_participant_guid_))
+#endif
+{
+  ACE_UNUSED_ARG(crypto);
+}
 
 void VerticalHandler::process_message(const ACE_INET_Addr& a_remote,
-                                      const ACE_Time_Value& a_now,
+                                      const OpenDDS::DCPS::MonotonicTimePoint& a_now,
                                       const OpenDDS::DCPS::RepoId& a_src_guid,
-                                      ACE_Message_Block* a_msg,
-                                      bool is_beacon_message)
+                                      ACE_Message_Block* a_msg)
 {
+  bool is_beacon = true;
+
+  const auto rd_ptr = a_msg->rd_ptr();
+  OpenDDS::RTPS::MessageParser mp(*a_msg);
+  if (!parse_message(mp, a_msg, is_beacon, true)) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: VerticalHandler::process_message failed to parse_message\n"));
+    return;
+  }
+  a_msg->rd_ptr(rd_ptr);
+
   const std::string addr_str = addr_to_string(a_remote);
   guid_addr_map_[a_src_guid].insert(addr_str);
   const GuidAddr ga(a_src_guid, addr_str);
 
   // Compute the new expiration time for this SPDP client.
-  const ACE_Time_Value expiration = a_now + lifespan_;
+  const auto expiration = a_now + lifespan_;
   const auto res = guid_expiration_map_.insert(std::make_pair(ga, expiration));
   if (!res.second) {
     // The SPDP client already exists.  Remove the previous expiration.
@@ -190,7 +210,7 @@ void VerticalHandler::process_message(const ACE_INET_Addr& a_remote,
   }
 
   // Readers send empty messages so we know where they are.
-  if (is_beacon_message) {
+  if (is_beacon) {
     return;
   }
 
@@ -223,10 +243,9 @@ HorizontalHandler::HorizontalHandler(ACE_Reactor* a_reactor,
 {}
 
 void HorizontalHandler::process_message(const ACE_INET_Addr&,
-                                        const ACE_Time_Value&,
+                                        const OpenDDS::DCPS::MonotonicTimePoint&,
                                         const OpenDDS::DCPS::RepoId& a_src_guid,
-                                        ACE_Message_Block* a_msg,
-                                        bool /*is_beacon_message*/)
+                                        ACE_Message_Block* a_msg)
 {
   GuidSet local_guids;
   RelayAddressesSet relay_addresses;
@@ -246,10 +265,13 @@ void HorizontalHandler::process_message(const ACE_INET_Addr&,
 
 SpdpHandler::SpdpHandler(ACE_Reactor* a_reactor,
                          const AssociationTable& a_association_table,
-                         const ACE_Time_Value& lifespan,
+                         const OpenDDS::DCPS::TimeDuration& lifespan,
+                         const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
+                         DDS::DomainId_t application_domain,
                          const OpenDDS::DCPS::RepoId& application_participant_guid,
+                         const CRYPTO_TYPE& crypto,
                          const ACE_INET_Addr& application_participant_addr)
-  : VerticalHandler(a_reactor, a_association_table, lifespan, application_participant_guid)
+  : VerticalHandler(a_reactor, a_association_table, lifespan, rtps_discovery, application_domain, application_participant_guid , crypto)
   , application_participant_addr_(application_participant_addr)
   , application_participant_addr_str_(addr_to_string(application_participant_addr))
   , spdp_message_(nullptr)
@@ -300,6 +322,115 @@ bool SpdpHandler::do_normal_processing(const ACE_INET_Addr& a_remote,
   return true;
 }
 
+bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser,
+                                    ACE_Message_Block* msg,
+                                    bool& is_beacon,
+                                    bool check_submessages)
+{
+  if (!message_parser.parseHeader()) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::parse_message failed to deserialize RTPS header\n"));
+    return false;
+  }
+
+  const auto& header = message_parser.header();
+  OpenDDS::DCPS::RepoId src_guid;
+  std::memcpy(src_guid.guidPrefix, header.guidPrefix, sizeof(OpenDDS::DCPS::GuidPrefix_t));
+  src_guid.entityId = OpenDDS::DCPS::ENTITYID_PARTICIPANT;
+
+  while (message_parser.parseSubmessageHeader()) {
+    const auto submessage_header = message_parser.submessageHeader();
+
+    if (submessage_header.submessageId != OpenDDS::RTPS::PAD) {
+      is_beacon = false;
+    }
+
+    if (check_submessages && src_guid != application_participant_guid_) {
+#ifdef OPENDDS_SECURITY
+      switch (submessage_header.submessageId) {
+      case OpenDDS::RTPS::SRTPS_PREFIX:
+        {
+          if (application_participant_crypto_handle_ == DDS::HANDLE_NIL) {
+            ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::parse_message no crypto handle for application participant\n"));
+            return false;
+          }
+
+          DDS::Security::ParticipantCryptoHandle remote_crypto_handle = rtps_discovery_->get_crypto_handle(application_domain_, application_participant_guid_, src_guid);
+          if (remote_crypto_handle == DDS::HANDLE_NIL) {
+            ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::parse_message no crypto handle for client %C\n", guid_to_string(src_guid).c_str()));
+            return false;
+          }
+
+          DDS::OctetSeq encoded_buffer, plain_buffer;
+          DDS::Security::SecurityException ex;
+
+          if (msg->cont() != nullptr) {
+            ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::parse_message does not support message block chaining\n"));
+            return false;
+          }
+
+          encoded_buffer.length(msg->length());
+          std::memcpy(encoded_buffer.get_buffer(), msg->rd_ptr(), msg->length());
+
+          if (!crypto_->decode_rtps_message(plain_buffer, encoded_buffer, application_participant_crypto_handle_, remote_crypto_handle, ex)) {
+            ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: Message from %C could not be verified [%d.%d]: \"%C\"\n", guid_to_string(src_guid).c_str(), ex.code, ex.minor_code, ex.message.in()));
+            return false;
+          }
+
+          OpenDDS::RTPS::MessageParser mp(plain_buffer);
+          is_beacon = true;
+          return parse_message(mp, msg, is_beacon, false);
+        }
+        break;
+      case OpenDDS::RTPS::DATA:
+      case OpenDDS::RTPS::DATA_FRAG:
+        {
+          unsigned short extraFlags;
+          unsigned short octetsToInlineQos;
+          if (!(message_parser >> extraFlags) ||
+              !(message_parser >> octetsToInlineQos)) {
+            ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: could not parse submessage\n"));
+            return false;
+          }
+        }
+        // Fall through.
+      case OpenDDS::RTPS::HEARTBEAT:
+      case OpenDDS::RTPS::HEARTBEAT_FRAG:
+      case OpenDDS::RTPS::GAP:
+      case OpenDDS::RTPS::ACKNACK:
+      case OpenDDS::RTPS::NACK_FRAG:
+        {
+          OpenDDS::DCPS::EntityId_t readerId;
+          OpenDDS::DCPS::EntityId_t writerId;
+          if (!(message_parser >> readerId) ||
+              !(message_parser >> writerId)) {
+            ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: could not parse submessage\n"));
+            return false;
+          }
+          if (rtps_discovery_->get_crypto_handle(application_domain_, application_participant_guid_) != DDS::HANDLE_NIL &&
+              !(OpenDDS::DCPS::RtpsUdpDataLink::separate_message(writerId) ||
+                writerId == OpenDDS::DCPS::ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER)) {
+            ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: submessage %d could not be verified writerId=%02X%02X%02X%02X\n", submessage_header.submessageId, writerId.entityKey[0], writerId.entityKey[1], writerId.entityKey[2], writerId.entityKind));
+            return false;
+          }
+        }
+        break;
+      default:
+        break;
+      }
+#endif
+    }
+
+    message_parser.skipSubmessageContent();
+  }
+
+  if (message_parser.remaining() != 0) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::parse_message trailing bytes\n"));
+    return false;
+  }
+
+  return true;
+}
+
 void SpdpHandler::purge(const GuidAddr& ga)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, spdp_messages_mutex_);
@@ -345,10 +476,13 @@ void SpdpHandler::replay(const OpenDDS::DCPS::RepoId& x,
 
 SedpHandler::SedpHandler(ACE_Reactor* a_reactor,
                          const AssociationTable& a_association_table,
-                         const ACE_Time_Value& lifespan,
+                         const OpenDDS::DCPS::TimeDuration& lifespan,
+                         const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
+                         DDS::DomainId_t application_domain,
                          const OpenDDS::DCPS::RepoId& application_participant_guid,
+                         const CRYPTO_TYPE& crypto,
                          const ACE_INET_Addr& application_participant_addr)
-  : VerticalHandler(a_reactor, a_association_table, lifespan, application_participant_guid)
+  : VerticalHandler(a_reactor, a_association_table, lifespan, rtps_discovery, application_domain, application_participant_guid, crypto)
   , application_participant_addr_(application_participant_addr)
   , application_participant_addr_str_(addr_to_string(application_participant_addr))
 {}
@@ -389,9 +523,13 @@ bool SedpHandler::do_normal_processing(const ACE_INET_Addr& a_remote,
 
 DataHandler::DataHandler(ACE_Reactor* a_reactor,
                          const AssociationTable& a_association_table,
-                         const ACE_Time_Value& lifespan,
-                         const OpenDDS::DCPS::RepoId& application_participant_guid)
-  : VerticalHandler(a_reactor, a_association_table, lifespan, application_participant_guid)
+                         const OpenDDS::DCPS::TimeDuration& lifespan,
+                         const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
+                         DDS::DomainId_t application_domain,
+                         const OpenDDS::DCPS::RepoId& application_participant_guid,
+                         const CRYPTO_TYPE& crypto
+                         )
+  : VerticalHandler(a_reactor, a_association_table, lifespan, rtps_discovery, application_domain, application_participant_guid, crypto)
 {}
 
 std::string DataHandler::extract_relay_address(const RelayAddresses& relay_addresses) const

@@ -16,6 +16,12 @@
 #include <string>
 #include <utility>
 
+#ifdef OPENDDS_SECURITY
+#define CRYPTO_TYPE DDS::Security::CryptoTransform_var
+#else
+#define CRYPTO_TYPE int
+#endif
+
 namespace RtpsRelay {
 
 class RelayHandler : public ACE_Event_Handler {
@@ -33,10 +39,9 @@ protected:
   int handle_output(ACE_HANDLE a_handle) override;
   ACE_HANDLE get_handle() const override { return socket_.get_handle(); }
   virtual void process_message(const ACE_INET_Addr& a_remote,
-                               const ACE_Time_Value& a_now,
+                               const OpenDDS::DCPS::MonotonicTimePoint& a_now,
                                const OpenDDS::DCPS::RepoId& a_src_guid,
-                               ACE_Message_Block* a_msg,
-                               bool is_beacon_message) = 0;
+                               ACE_Message_Block* a_msg) = 0;
 
   const AssociationTable& association_table_;
 
@@ -59,8 +64,11 @@ public:
 
   VerticalHandler(ACE_Reactor* a_reactor,
                   const AssociationTable& a_association_table,
-                  const ACE_Time_Value& lifespan,
-                  const OpenDDS::DCPS::RepoId& application_participant_guid);
+                  const OpenDDS::DCPS::TimeDuration& lifespan,
+                  const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
+                  DDS::DomainId_t application_domain,
+                  const OpenDDS::DCPS::RepoId& application_participant_guid,
+                  const CRYPTO_TYPE& crypto);
   void horizontal_handler(HorizontalHandler* a_horizontal_handler) { horizontal_handler_ = a_horizontal_handler; }
 
   GuidAddrMap::const_iterator find(const OpenDDS::DCPS::RepoId& guid) const
@@ -80,42 +88,56 @@ protected:
                                     ACE_Message_Block* /*a_msg*/) { return true; }
   virtual void purge(const GuidAddr& /*ga*/) {}
   void process_message(const ACE_INET_Addr& a_remote,
-                       const ACE_Time_Value& a_now,
+                       const OpenDDS::DCPS::MonotonicTimePoint& a_now,
                        const OpenDDS::DCPS::RepoId& a_src_guid,
-                       ACE_Message_Block* a_msg,
-                       bool is_beacon_message) override;
+                       ACE_Message_Block* a_msg) override;
 
   HorizontalHandler* horizontal_handler_;
   GuidAddrMap guid_addr_map_;
-  typedef std::map<GuidAddr, ACE_Time_Value> GuidExpirationMap;
+  typedef std::map<GuidAddr, OpenDDS::DCPS::MonotonicTimePoint> GuidExpirationMap;
   GuidExpirationMap guid_expiration_map_;
-  typedef std::multimap<ACE_Time_Value, GuidAddr> ExpirationGuidMap;
+  typedef std::multimap<OpenDDS::DCPS::MonotonicTimePoint, GuidAddr> ExpirationGuidMap;
   ExpirationGuidMap expiration_guid_map_;
-  ACE_Time_Value const lifespan_;
+  const OpenDDS::DCPS::TimeDuration lifespan_;
   const OpenDDS::DCPS::RepoId application_participant_guid_;
+
+private:
+  bool parse_message(OpenDDS::RTPS::MessageParser& message_parser,
+                     ACE_Message_Block* msg,
+                     bool& is_pad_only,
+                     bool check_submessages);
+  OpenDDS::RTPS::RtpsDiscovery_rch rtps_discovery_;
+  const DDS::DomainId_t application_domain_;
+#ifdef OPENDDS_SECURITY
+  const DDS::Security::CryptoTransform_var crypto_;
+  const DDS::Security::ParticipantCryptoHandle application_participant_crypto_handle_;
+#endif
 };
 
 // Sends to and receives from other relays.
 class HorizontalHandler : public RelayHandler {
 public:
-  HorizontalHandler(ACE_Reactor* a_reactor, const AssociationTable& a_association_table);
+  HorizontalHandler(ACE_Reactor* a_reactor,
+                    const AssociationTable& a_association_table);
   void vertical_handler(VerticalHandler* a_vertical_handler) { vertical_handler_ = a_vertical_handler; }
 
 private:
   VerticalHandler* vertical_handler_;
   void process_message(const ACE_INET_Addr& a_remote,
-                       const ACE_Time_Value& a_now,
+                       const OpenDDS::DCPS::MonotonicTimePoint& a_now,
                        const OpenDDS::DCPS::RepoId& a_src_guid,
-                       ACE_Message_Block* a_msg,
-                       bool is_beacon_message) override;
+                       ACE_Message_Block* a_msg) override;
 };
 
 class SpdpHandler : public VerticalHandler {
 public:
   SpdpHandler(ACE_Reactor* a_reactor,
               const AssociationTable& a_association_table,
-              const ACE_Time_Value& lifespan,
+              const OpenDDS::DCPS::TimeDuration& lifespan,
+              const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
+              DDS::DomainId_t application_domain,
               const OpenDDS::DCPS::RepoId& application_participant_guid,
+              const CRYPTO_TYPE& crypto,
               const ACE_INET_Addr& application_participant_addr);
 
   void replay(const OpenDDS::DCPS::RepoId& guid,
@@ -143,8 +165,11 @@ class SedpHandler : public VerticalHandler {
 public:
   SedpHandler(ACE_Reactor* a_reactor,
               const AssociationTable& a_association_table,
-              const ACE_Time_Value& lifespan,
+              const OpenDDS::DCPS::TimeDuration& lifespan,
+              const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
+              DDS::DomainId_t application_domain,
               const OpenDDS::DCPS::RepoId& application_participant_guid,
+              const CRYPTO_TYPE& crypto,
               const ACE_INET_Addr& application_participant_addr);
 
 private:
@@ -162,8 +187,12 @@ class DataHandler : public VerticalHandler {
 public:
   DataHandler(ACE_Reactor* a_reactor,
               const AssociationTable& a_association_table,
-              const ACE_Time_Value& lifespan,
-              const OpenDDS::DCPS::RepoId& application_participant_guid);
+              const OpenDDS::DCPS::TimeDuration& lifespan,
+              const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
+              DDS::DomainId_t application_domain,
+              const OpenDDS::DCPS::RepoId& application_participant_guid,
+              const CRYPTO_TYPE& crypto
+              );
 
 private:
   std::string extract_relay_address(const RelayAddresses& relay_addresses) const override;

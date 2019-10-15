@@ -32,6 +32,7 @@
 
 #ifdef OPENDDS_SECURITY
 #include <dds/DCPS/security/framework/Properties.h>
+#include <dds/DCPS/security/framework/SecurityRegistry.h>
 
 namespace {
   void append(DDS::PropertySeq& props, const char* name, const std::string& value, bool propagate = false)
@@ -74,7 +75,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   DDS::DomainId_t relay_domain = 0;
   DDS::DomainId_t application_domain = 1;
   ACE_INET_Addr nic_horizontal, nic_vertical;
-  ACE_Time_Value lifespan(60);   // 1 minute
+  OpenDDS::DCPS::TimeDuration lifespan(60);   // 1 minute
 
 #ifdef OPENDDS_SECURITY
   std::string identity_ca_file;
@@ -104,7 +105,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       application_domain = ACE_OS::atoi(arg);
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-Lifespan"))) {
-      lifespan = ACE_Time_Value(ACE_OS::atoi(arg));
+      lifespan = OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg));
       args.consume_arg();
 #ifdef OPENDDS_SECURITY
     } else if ((arg = args.get_the_parameter("-IdentityCA"))) {
@@ -259,9 +260,16 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   ACE_INET_Addr spdp(rtps_discovery->get_spdp_port(application_domain, application_participant_id), "127.0.0.1");
   ACE_INET_Addr sedp(rtps_discovery->get_sedp_port(application_domain, application_participant_id), "127.0.0.1");
 
-  SpdpHandler spdp_vertical_handler(reactor, association_table, lifespan, application_participant_id, spdp);
-  SedpHandler sedp_vertical_handler(reactor, association_table, lifespan, application_participant_id, sedp);
-  DataHandler data_vertical_handler(reactor, association_table, lifespan, application_participant_id);
+#ifdef OPENDDS_SECURITY
+  OpenDDS::Security::SecurityConfig_rch conf = TheSecurityRegistry->default_config();
+  DDS::Security::CryptoTransform_var crypto = conf->get_crypto_transform();
+#else
+  const int crypto = 0;
+#endif
+
+  SpdpHandler spdp_vertical_handler(reactor, association_table, lifespan, rtps_discovery, application_domain, application_participant_id, crypto, spdp);
+  SedpHandler sedp_vertical_handler(reactor, association_table, lifespan, rtps_discovery, application_domain, application_participant_id, crypto, sedp);
+  DataHandler data_vertical_handler(reactor, association_table, lifespan, rtps_discovery, application_domain, application_participant_id, crypto);
 
   spdp_horizontal_handler.vertical_handler(&spdp_vertical_handler);
   sedp_horizontal_handler.vertical_handler(&sedp_vertical_handler);

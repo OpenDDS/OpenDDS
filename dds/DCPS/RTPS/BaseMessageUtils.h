@@ -165,7 +165,9 @@ public:
   bool parseSubmessageHeader();
   bool hasNextSubmessage() const;
   bool skipToNextSubmessage();
+  bool skipSubmessageContent();
 
+  const Header& header() const { return header_; }
   SubmessageHeader submessageHeader() const { return sub_; }
   size_t remaining() const { return in_ ? in_->total_length() : fromSeq_.length(); }
   const char* current() const { return ser_.pos_rd(); }
@@ -179,6 +181,7 @@ private:
   ACE_Message_Block fromSeq_;
   DCPS::Message_Block_Ptr in_;
   DCPS::Serializer ser_;
+  Header header_;
   SubmessageHeader sub_;
   size_t smContentStart_;
 };

@@ -122,8 +122,7 @@ MessageParser::MessageParser(const DDS::OctetSeq& in)
 
 bool MessageParser::parseHeader()
 {
-  Header hdr;
-  return ser_ >> hdr;
+  return ser_ >> header_;
 }
 
 bool MessageParser::parseSubmessageHeader()
@@ -139,7 +138,7 @@ bool MessageParser::parseSubmessageHeader()
   }
 
   smContentStart_ = ser_.length();
-  return true;
+  return sub_.submessageLength <= ser_.length();
 }
 
 bool MessageParser::hasNextSubmessage() const
@@ -157,6 +156,18 @@ bool MessageParser::skipToNextSubmessage()
 {
   const size_t read = smContentStart_ - ser_.length();
   return ser_.skip(static_cast<unsigned short>(sub_.submessageLength - read));
+}
+
+bool MessageParser::skipSubmessageContent()
+{
+  if (sub_.submessageLength) {
+    const size_t read = smContentStart_ - ser_.length();
+    return ser_.skip(static_cast<unsigned short>(sub_.submessageLength - read));
+  } else if (sub_.submessageId == PAD || sub_.submessageId == INFO_TS) {
+    return true;
+  } else {
+    return ser_.skip(static_cast<unsigned short>(ser_.length()));
+  }
 }
 
 }
