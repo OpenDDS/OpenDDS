@@ -163,7 +163,6 @@ public:
 
   bool parseHeader();
   bool parseSubmessageHeader();
-  bool parseSubmessage();
   bool hasNextSubmessage() const;
   bool skipToNextSubmessage();
   bool skipSubmessageContent();

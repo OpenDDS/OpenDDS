@@ -325,7 +325,7 @@ bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser
   std::memcpy(src_guid.guidPrefix, header.guidPrefix, sizeof(OpenDDS::DCPS::GuidPrefix_t));
   src_guid.entityId = OpenDDS::DCPS::ENTITYID_PARTICIPANT;
 
-  while (message_parser.parseSubmessage()) {
+  while (message_parser.parseSubmessageHeader()) {
     const auto submessage_header = message_parser.submessageHeader();
 
     if (submessage_header.submessageId != OpenDDS::RTPS::PAD) {
