@@ -243,14 +243,15 @@ std::vector<WorkerReport> ScenarioManager::execute(const AllocatedScenario& allo
   wait_set->attach_condition(guard_condition);
 
   // Timeout Thread
+  unsigned reports_left = allocated_scenario.expected_reports;
+  std::mutex reports_left_mutex;
   std::condition_variable timeout_cv;
   const std::chrono::seconds timeout(allocated_scenario.timeout);
   std::thread timeout_thread;
   if (timeout.count() > 0) {
-    std::thread temp([&] {
-      std::mutex mutex;
-      std::unique_lock<std::mutex> lock(mutex);
-      if (timeout_cv.wait_for(lock, timeout) == std::cv_status::timeout) {
+    std::thread temp([&reports_left, &reports_left_mutex, &timeout_cv, &timeout, &guard_condition]  {
+      std::unique_lock<std::mutex> lock(reports_left_mutex);
+      if (!timeout_cv.wait_for(lock, timeout, [&reports_left] {return reports_left == 0;})) {
         guard_condition->set_trigger_value(true);
       }
     });
@@ -259,7 +260,7 @@ std::vector<WorkerReport> ScenarioManager::execute(const AllocatedScenario& allo
 
   // Wait for reports
   std::vector<WorkerReport> parsed_reports;
-  while (parsed_reports.size() < allocated_scenario.expected_reports) {
+  while (true) {
     DDS::ReturnCode_t rc;
 
     DDS::ConditionSeq active;
@@ -308,6 +309,13 @@ std::vector<WorkerReport> ScenarioManager::execute(const AllocatedScenario& allo
         }
         std::cout << "Got " << parsed_reports.size() << " out of "
           << allocated_scenario.expected_reports << " expected reports" << std::endl;
+      }
+    }
+    {
+      std::lock_guard<std::mutex> guard(reports_left_mutex);
+      reports_left = allocated_scenario.expected_reports - parsed_reports.size();
+      if (reports_left == 0) {
+        break;
       }
     }
   }
