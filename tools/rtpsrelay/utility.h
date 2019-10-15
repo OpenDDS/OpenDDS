@@ -1,9 +1,14 @@
 #ifndef RTPSRELAY_UTILITY_H_
 #define RTPSRELAY_UTILITY_H_
 
+#include "lib/RelayC.h"
+
+#include "dds/DCPS/GuidUtils.h"
+
 #include <ace/INET_Addr.h>
 
 #include <sstream>
+#include <string>
 
 namespace RtpsRelay {
 
@@ -23,6 +28,50 @@ inline std::string guid_to_string(const OpenDDS::DCPS::GUID_t& a_guid)
   ss << a_guid;
   return ss.str();
 }
+
+struct RelayAddressesLessThan {
+  inline bool operator()(const RelayAddresses& x,
+                         const RelayAddresses& y) const
+  {
+    if (x.spdp_relay_address() != y.spdp_relay_address()) {
+      return x.spdp_relay_address() < y.spdp_relay_address();
+    }
+    if (x.sedp_relay_address() != y.sedp_relay_address()) {
+      return x.sedp_relay_address() < y.sedp_relay_address();
+    }
+    return x.data_relay_address() < y.data_relay_address();
+  }
+};
+
+struct GuidAddr {
+  OpenDDS::DCPS::RepoId guid;
+  std::string address;
+
+  GuidAddr() : guid(OpenDDS::DCPS::GUID_UNKNOWN) {}
+  GuidAddr(const OpenDDS::DCPS::RepoId& a_guid, const std::string& a_address)
+    : guid(a_guid)
+    , address(a_address)
+  {}
+
+  bool operator==(const GuidAddr& other) const
+  {
+    return guid == other.guid && address == other.address;
+  }
+
+  bool operator!=(const GuidAddr& other) const
+  {
+    return guid != other.guid || address != other.address;
+  }
+
+  bool operator<(const GuidAddr& other) const
+  {
+    if (guid != other.guid) {
+      OpenDDS::DCPS::GUID_tKeyLessThan gc;
+      return gc(guid, other.guid);
+    }
+    return address < other.address;
+  }
+};
 
 }
 
