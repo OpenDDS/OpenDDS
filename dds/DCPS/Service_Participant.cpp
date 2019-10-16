@@ -2000,25 +2000,23 @@ Service_Participant::delete_replayer(Replayer_ptr replayer)
   return ret;
 }
 
-DDS::Topic_ptr
-Service_Participant::create_typeless_topic(
+DDS::Topic_ptr Service_Participant::create_typeless_topic(
   DDS::DomainParticipant_ptr participant,
-  const char * topic_name,
-  const char * type_name,
+  const char* topic_name,
+  const char* type_name,
   bool type_has_keys,
-  const DDS::TopicQos & qos,
+  const DDS::TopicQos& qos,
   DDS::TopicListener_ptr a_listener,
   DDS::StatusMask mask)
 {
   DomainParticipantImpl* participant_servant = dynamic_cast<DomainParticipantImpl*>(participant);
-  if (! participant_servant) {
+  if (!participant_servant) {
     return 0;
   }
   return participant_servant->create_typeless_topic(topic_name, type_name, type_has_keys, qos, a_listener, mask);
 }
 
-void
-Service_Participant::default_configuration_file(const ACE_TCHAR* path)
+void Service_Participant::default_configuration_file(const ACE_TCHAR* path)
 {
   default_configuration_file_ = path;
 }
