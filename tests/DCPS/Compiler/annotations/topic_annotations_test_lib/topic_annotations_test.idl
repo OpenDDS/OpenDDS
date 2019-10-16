@@ -36,7 +36,7 @@ module TopicAnnotationsTest {
   typedef SimpleKeyStruct MyStructTypedef;
   @topic
   struct TypedefStructKeyStruct {
-    long a_key_value;
+    @key long a_key_value;
     @key MyStructTypedef my_struct_typedef_key;
   };
 
