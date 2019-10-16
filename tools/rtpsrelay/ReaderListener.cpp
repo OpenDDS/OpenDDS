@@ -35,7 +35,7 @@ void ReaderListener::on_data_available(DDS::DataReader_ptr reader)
       {
         RelayAddressesMap relay_addresses_map;
         association_table_.insert(data[idx], relay_addresses_map);
-        spdp_handler_.replay(guid_to_guid(data[idx].guid()), relay_addresses_map);
+        spdp_handler_.replay(guid_to_repoid(data[idx].guid()), relay_addresses_map);
       }
       break;
     case DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE:

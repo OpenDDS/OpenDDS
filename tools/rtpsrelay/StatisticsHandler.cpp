@@ -83,12 +83,12 @@ int StatisticsHandler::handle_timeout(const ACE_Time_Value& a_now, const void*)
             << data_horizontal_->max_fan_out() << " max fan out "
             << duration.value().sec() << '.' << duration.value().usec() << " seconds" << std::endl;
 
-  spdp_vertical_->reset_byte_counts();
-  spdp_horizontal_->reset_byte_counts();
-  sedp_vertical_->reset_byte_counts();
-  sedp_horizontal_->reset_byte_counts();
-  data_vertical_->reset_byte_counts();
-  data_horizontal_->reset_byte_counts();
+  spdp_vertical_->reset_counters();
+  spdp_horizontal_->reset_counters();
+  sedp_vertical_->reset_counters();
+  sedp_horizontal_->reset_counters();
+  data_vertical_->reset_counters();
+  data_horizontal_->reset_counters();
 
   return 0;
 }

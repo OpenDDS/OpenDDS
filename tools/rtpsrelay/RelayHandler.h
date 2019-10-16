@@ -27,14 +27,21 @@ namespace RtpsRelay {
 class RelayHandler : public ACE_Event_Handler {
 public:
   int open(const ACE_INET_Addr& local);
-  void enqueue_message(const std::string& addr, ACE_Message_Block* msg);
+  void enqueue_message(const std::string& addr, const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg);
   const std::string& relay_address() const { return relay_address_; }
   size_t bytes_received() const { return bytes_received_; }
   size_t messages_received() const { return messages_received_; }
   size_t bytes_sent() const { return bytes_sent_; }
   size_t messages_sent() const { return messages_sent_; }
   size_t max_fan_out() const { return max_fan_out_; }
-  void reset_byte_counts() { bytes_received_ = 0; messages_received_ = 0; bytes_sent_ = 0; messages_sent_ = 0; max_fan_out_ = 0; }
+  void reset_counters()
+  {
+    bytes_received_ = 0;
+    messages_received_ = 0;
+    bytes_sent_ = 0;
+    messages_sent_ = 0;
+    max_fan_out_ = 0;
+  }
 
   void max_fan_out(size_t fan_out) { max_fan_out_ = std::max(max_fan_out_, fan_out); }
 
@@ -49,11 +56,11 @@ protected:
   const AssociationTable& association_table_;
   virtual void process_message(const ACE_INET_Addr& remote,
                                const OpenDDS::DCPS::MonotonicTimePoint& now,
-                               ACE_Message_Block* msg) = 0;
+                               const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg) = 0;
 private:
   std::string relay_address_;
   ACE_SOCK_Dgram socket_;
-  typedef std::queue<std::pair<std::string, ACE_Message_Block*>> OutgoingType;
+  typedef std::queue<std::pair<std::string, OpenDDS::DCPS::Message_Block_Shared_Ptr>> OutgoingType;
   OutgoingType outgoing_;
   ACE_Thread_Mutex outgoing_mutex_;
   size_t bytes_received_;
@@ -95,12 +102,14 @@ protected:
   virtual bool do_normal_processing(const ACE_INET_Addr& /*remote*/,
                                     const OpenDDS::DCPS::RepoId& /*src_guid*/,
                                     const GuidSet& /*to*/,
-                                    ACE_Message_Block* /*msg*/) { return true; }
+                                    const OpenDDS::DCPS::Message_Block_Shared_Ptr& /*msg*/) { return true; }
   virtual void purge(const GuidAddr& /*ga*/) {}
 
   void process_message(const ACE_INET_Addr& remote,
                        const OpenDDS::DCPS::MonotonicTimePoint& now,
-                       ACE_Message_Block* msg) override;
+                       const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg) override;
+  void send(const RelayAddressesMap& relay_addresses_map,
+            const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg);
 
   const RelayAddresses& relay_addresses_;
   HorizontalHandler* horizontal_handler_;
@@ -114,7 +123,7 @@ protected:
 
 private:
   bool parse_message(OpenDDS::RTPS::MessageParser& message_parser,
-                     ACE_Message_Block* msg,
+                     const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
                      OpenDDS::DCPS::RepoId& src_guid,
                      GuidSet& to,
                      bool& is_pad_only,
@@ -136,13 +145,13 @@ public:
   void vertical_handler(VerticalHandler* vertical_handler) { vertical_handler_ = vertical_handler; }
   void enqueue_message(const std::string& addr,
                        const GuidSet& to,
-                       ACE_Message_Block* msg);
+                       const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg);
 
 private:
   VerticalHandler* vertical_handler_;
   void process_message(const ACE_INET_Addr& remote,
                        const OpenDDS::DCPS::MonotonicTimePoint& now,
-                       ACE_Message_Block* msg) override;
+                       const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg) override;
 };
 
 class SpdpHandler : public VerticalHandler {
@@ -163,8 +172,8 @@ public:
 private:
   const ACE_INET_Addr application_participant_addr_;
   const std::string application_participant_addr_str_;
-  ACE_Message_Block* spdp_message_;
-  typedef std::map<OpenDDS::DCPS::RepoId, ACE_Message_Block*, OpenDDS::DCPS::GUID_tKeyLessThan> SpdpMessages;
+  OpenDDS::DCPS::Message_Block_Shared_Ptr spdp_message_;
+  typedef std::map<OpenDDS::DCPS::RepoId, OpenDDS::DCPS::Message_Block_Shared_Ptr, OpenDDS::DCPS::GUID_tKeyLessThan> SpdpMessages;
   SpdpMessages spdp_messages_;
   ACE_Thread_Mutex spdp_messages_mutex_;
 
@@ -173,7 +182,7 @@ private:
   bool do_normal_processing(const ACE_INET_Addr& remote,
                             const OpenDDS::DCPS::RepoId& src_guid,
                             const GuidSet& to,
-                            ACE_Message_Block* msg) override;
+                            const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg) override;
 
   void purge(const GuidAddr& ga) override;
 };
@@ -199,7 +208,7 @@ private:
   bool do_normal_processing(const ACE_INET_Addr& remote,
                             const OpenDDS::DCPS::RepoId& src_guid,
                             const GuidSet& to,
-                            ACE_Message_Block* msg) override;
+                            const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg) override;
 };
 
 class DataHandler : public VerticalHandler {

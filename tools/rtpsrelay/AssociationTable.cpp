@@ -11,7 +11,7 @@ void AssociationTable::insert(const WriterEntry& writer_entry,
 {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
   const auto local = writer_entry.relay_addresses() == relay_addresses_;
-  const auto writer_guid = guid_to_guid(writer_entry.guid());
+  const auto writer_guid = guid_to_repoid(writer_entry.guid());
   const auto p = writers_.find(writer_guid);
   if (p == writers_.end()) {
     WriterPtr writer(new Writer(writer_entry, local));
@@ -25,7 +25,7 @@ void AssociationTable::insert(const WriterEntry& writer_entry,
 void AssociationTable::remove(const WriterEntry& writer)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-  const auto writer_guid = guid_to_guid(writer.guid());
+  const auto writer_guid = guid_to_repoid(writer.guid());
   const auto pos = writers_.find(writer_guid);
   index_.erase(pos->second);
   writers_.erase(pos);
@@ -36,7 +36,7 @@ void AssociationTable::insert(const ReaderEntry& reader_entry,
 {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
   const auto local = reader_entry.relay_addresses() == relay_addresses_;
-  const auto reader_guid = guid_to_guid(reader_entry.guid());
+  const auto reader_guid = guid_to_repoid(reader_entry.guid());
   const auto p = readers_.find(reader_guid);
   if (p == readers_.end()) {
     ReaderPtr reader(new Reader(reader_entry, reader_entry.relay_addresses() == relay_addresses_));
@@ -50,7 +50,7 @@ void AssociationTable::insert(const ReaderEntry& reader_entry,
 void AssociationTable::remove(const ReaderEntry& reader)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-  const auto reader_guid = guid_to_guid(reader.guid());
+  const auto reader_guid = guid_to_repoid(reader.guid());
   const auto pos = readers_.find(reader_guid);
   index_.erase(pos->second);
   readers_.erase(pos);
@@ -60,7 +60,7 @@ void AssociationTable::remove(const ReaderEntry& reader)
                                                       const OpenDDS::DCPS::RepoId& from,
                                                       const GuidSet& to) const
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, const_cast<ACE_Thread_Mutex&>(mutex_));
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
   if (!to.empty()) {
     for (const auto& guid : to) {

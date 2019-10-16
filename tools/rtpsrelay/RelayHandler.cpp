@@ -73,7 +73,6 @@ int RelayHandler::open(const ACE_INET_Addr& local)
 
 int RelayHandler::handle_input(ACE_HANDLE)
 {
-  using OpenDDS::DCPS::Message_Block_Ptr;
   ACE_INET_Addr remote;
   iovec iov;
   const auto bytes = socket_.recv(&iov, remote);
@@ -89,10 +88,10 @@ int RelayHandler::handle_input(ACE_HANDLE)
   const auto data_block =
     new (ACE_Allocator::instance()->malloc(sizeof(ACE_Data_Block))) ACE_Data_Block(bytes, ACE_Message_Block::MB_DATA,
                                                                                    static_cast<const char*>(iov.iov_base), 0, 0, 0, 0);
-  Message_Block_Ptr buffer(new ACE_Message_Block(data_block));
+  OpenDDS::DCPS::Message_Block_Shared_Ptr buffer(new ACE_Message_Block(data_block));
   buffer->length(bytes);
 
-  process_message(remote, OpenDDS::DCPS::MonotonicTimePoint::now(), buffer.get());
+  process_message(remote, OpenDDS::DCPS::MonotonicTimePoint::now(), buffer);
   return 0;
 }
 
@@ -103,10 +102,11 @@ int RelayHandler::handle_output(ACE_HANDLE)
   if (!outgoing_.empty()) {
     const auto& out = outgoing_.front();
 
-    int idx = 0;
-    iovec buffers[2];
+    const int BUFFERS_SIZE = 2;
+    iovec buffers[BUFFERS_SIZE];
 
-    for (ACE_Message_Block* block = out.second; block != nullptr; block = block->cont(), ++idx) {
+    int idx = 0;
+    for (ACE_Message_Block* block = out.second.get(); block && idx < BUFFERS_SIZE; block = block->cont(), ++idx) {
       buffers[idx].iov_base = block->rd_ptr();
       buffers[idx].iov_len = block->length();
     }
@@ -121,7 +121,6 @@ int RelayHandler::handle_output(ACE_HANDLE)
       ++messages_sent_;
     }
 
-    out.second->release();
     outgoing_.pop();
   }
 
@@ -132,13 +131,13 @@ int RelayHandler::handle_output(ACE_HANDLE)
   return 0;
 }
 
-void RelayHandler::enqueue_message(const std::string& addr, ACE_Message_Block* msg)
+void RelayHandler::enqueue_message(const std::string& addr, const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, outgoing_mutex_);
 
   const auto empty = outgoing_.empty();
 
-  outgoing_.push(std::make_pair(addr, msg->duplicate()));
+  outgoing_.push(std::make_pair(addr, msg));
 
   if (empty) {
     reactor()->register_handler(this, WRITE_MASK);
@@ -170,7 +169,7 @@ VerticalHandler::VerticalHandler(ACE_Reactor* reactor,
 
 void VerticalHandler::process_message(const ACE_INET_Addr& remote,
                                       const OpenDDS::DCPS::MonotonicTimePoint& now,
-                                      ACE_Message_Block* msg)
+                                      const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg)
 {
   OpenDDS::DCPS::RepoId src_guid;
   GuidSet to;
@@ -220,32 +219,12 @@ void VerticalHandler::process_message(const ACE_INET_Addr& remote,
     RelayAddressesMap relay_addresses_map;
     association_table_.populate_relay_addresses_map(relay_addresses_map, src_guid, to);
 
-    size_t fan_out = 0;
-    for (const auto& p : relay_addresses_map) {
-      const auto& addrs = p.first;
-      const auto& guids = p.second;
-      fan_out += guids.size();
-      if (addrs != relay_addresses_) {
-        horizontal_handler_->enqueue_message(extract_relay_address(addrs), guids, msg);
-      } else {
-        for (const auto& guid : guids) {
-          const auto p = find(guid);
-          if (p != end()) {
-            for (const auto& addr : p->second) {
-              enqueue_message(addr, msg);
-            }
-          } else {
-            ACE_ERROR((LM_WARNING, "(%P|%t) %N:%l WARNING: VerticalHandler::process_message failed to get address\n"));
-          }
-        }
-      }
-    }
-    max_fan_out(fan_out);
+    send(relay_addresses_map, msg);
   }
 }
 
 bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser,
-                                    ACE_Message_Block* msg,
+                                    const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
                                     OpenDDS::DCPS::RepoId& src_guid,
                                     GuidSet& to,
                                     bool& is_beacon,
@@ -366,6 +345,32 @@ bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser
   return true;
 }
 
+void VerticalHandler::send(const RelayAddressesMap& relay_addresses_map,
+                           const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg)
+{
+  size_t fan_out = 0;
+  for (const auto& p : relay_addresses_map) {
+    const auto& addrs = p.first;
+    const auto& guids = p.second;
+    fan_out += guids.size();
+    if (addrs != relay_addresses_) {
+      horizontal_handler_->enqueue_message(extract_relay_address(addrs), guids, msg);
+    } else {
+      for (const auto& guid : guids) {
+        const auto p = find(guid);
+        if (p != end()) {
+          for (const auto& addr : p->second) {
+            enqueue_message(addr, msg);
+          }
+        } else {
+          ACE_ERROR((LM_WARNING, "(%P|%t) %N:%l WARNING: VerticalHandler::send failed to get address\n"));
+        }
+      }
+    }
+  }
+  max_fan_out(fan_out);
+}
+
 HorizontalHandler::HorizontalHandler(ACE_Reactor* reactor,
                                      const AssociationTable& association_table)
   : RelayHandler(reactor, association_table)
@@ -374,34 +379,37 @@ HorizontalHandler::HorizontalHandler(ACE_Reactor* reactor,
 
 void HorizontalHandler::enqueue_message(const std::string& addr,
                                         const GuidSet& guids,
-                                        ACE_Message_Block* msg)
+                                        const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg)
 {
-  // Determine how many guids we can pack into a UDP message.
-  const auto max_guids = (65536 - msg->length()) / sizeof (OpenDDS::DCPS::RepoId) - 1;
+  // Determine how many guids we can pack into a single UDP message.
+  const auto max_guids_per_message = (OpenDDS::DCPS::TransportSendStrategy::UDP_MAX_MESSAGE_SIZE - msg->length() - 4) / sizeof(OpenDDS::DCPS::RepoId);
 
+  auto remaining = guids.size();
   auto pos = guids.begin();
-  const auto limit = guids.end();
 
-  while (pos != limit) {
-    ACE_Message_Block* header_block = new ACE_Message_Block(256);
-    OpenDDS::DCPS::Serializer ser(header_block);
+  while (remaining) {
+    auto guids_in_message = std::min(max_guids_per_message, remaining);
+    remaining -= guids_in_message;
 
     RelayHeader relay_header;
     auto& to = relay_header.to();
-    while (pos != limit && to.size() < max_guids) {
-      to.push_back(guid_to_guid(*pos));
-      ++pos;
+    for (; guids_in_message; --guids_in_message, ++pos) {
+      to.push_back(repoid_to_guid(*pos));
     }
-    ser << relay_header;
 
-    header_block->cont(msg);
-    RelayHandler::enqueue_message(addr, header_block);
+    size_t size = 0, padding = 0;
+    OpenDDS::DCPS::gen_find_size(relay_header, size, padding);
+    ACE_Message_Block* header_block = new ACE_Message_Block(size + padding);
+    OpenDDS::DCPS::Serializer ser(header_block);
+    ser << relay_header;
+    header_block->cont(msg.get()->duplicate());
+    RelayHandler::enqueue_message(addr, OpenDDS::DCPS::Message_Block_Shared_Ptr(header_block));
   }
 }
 
 void HorizontalHandler::process_message(const ACE_INET_Addr&,
                                         const OpenDDS::DCPS::MonotonicTimePoint&,
-                                        ACE_Message_Block* msg)
+                                        const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg)
 {
   OpenDDS::RTPS::MessageParser mp(*msg);
 
@@ -418,7 +426,7 @@ void HorizontalHandler::process_message(const ACE_INET_Addr&,
   msg->rd_ptr(size_before_header - size_after_header);
 
   for (const auto& guid : relay_header.to()) {
-    const auto p = vertical_handler_->find(guid_to_guid(guid));
+    const auto p = vertical_handler_->find(guid_to_repoid(guid));
     if (p != vertical_handler_->end()) {
       for (const auto& addr : p->second) {
         vertical_handler_->enqueue_message(addr, msg);
@@ -453,7 +461,7 @@ std::string SpdpHandler::extract_relay_address(const RelayAddresses& relay_addre
 bool SpdpHandler::do_normal_processing(const ACE_INET_Addr& remote,
                                        const OpenDDS::DCPS::RepoId& src_guid,
                                        const GuidSet& /*to*/,
-                                       ACE_Message_Block* msg)
+                                       const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg)
 {
   if (src_guid == application_participant_guid_) {
     if (remote != application_participant_addr_) {
@@ -463,10 +471,7 @@ bool SpdpHandler::do_normal_processing(const ACE_INET_Addr& remote,
 
     // SPDP message is from the application participant.
     // Cache the SPDP announcement from the application participant.
-    if (spdp_message_) {
-      spdp_message_->release();
-    }
-    spdp_message_ = msg->duplicate();
+    spdp_message_ = msg;
 
     return false;
   }
@@ -474,11 +479,7 @@ bool SpdpHandler::do_normal_processing(const ACE_INET_Addr& remote,
   // SPDP message is from a client.
   // Cache it.
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, spdp_messages_mutex_, false);
-  auto p = spdp_messages_.insert(std::make_pair(src_guid, nullptr));
-  if (p.first->second) {
-    p.first->second->release();
-  }
-  p.first->second = msg->duplicate();
+  spdp_messages_[src_guid] = msg;
 
   // Forward to the application participant.
   enqueue_message(application_participant_addr_str_, msg);
@@ -509,7 +510,7 @@ void SpdpHandler::replay(const OpenDDS::DCPS::RepoId& x,
     return;
   }
 
-  const OpenDDS::DCPS::RepoId src_guid = to_participant_guid(x);
+  const auto src_guid = to_participant_guid(x);
 
   ACE_GUARD(ACE_Thread_Mutex, g, spdp_messages_mutex_);
 
@@ -518,27 +519,7 @@ void SpdpHandler::replay(const OpenDDS::DCPS::RepoId& x,
     return;
   }
 
-  size_t fan_out = 0;
-  for (const auto& p : relay_addresses_map) {
-    const auto& addrs = p.first;
-    const auto& guids = p.second;
-    fan_out += guids.size();
-    if (addrs != relay_addresses_) {
-      horizontal_handler_->enqueue_message(extract_relay_address(addrs), guids, pos->second);
-    } else {
-      for (const auto& guid : guids) {
-        const auto p = find(guid);
-        if (p != end()) {
-          for (const auto& addr : p->second) {
-            enqueue_message(addr, pos->second);
-          }
-        } else {
-          ACE_ERROR((LM_WARNING, "(%P|%t) %N:%l WARNING: VerticalHandler::process_message failed to get address\n"));
-        }
-      }
-    }
-  }
-  max_fan_out(fan_out);
+  send(relay_addresses_map, pos->second);
 }
 
 SedpHandler::SedpHandler(ACE_Reactor* reactor,
@@ -563,7 +544,7 @@ std::string SedpHandler::extract_relay_address(const RelayAddresses& relay_addre
 bool SedpHandler::do_normal_processing(const ACE_INET_Addr& remote,
                                        const OpenDDS::DCPS::RepoId& src_guid,
                                        const GuidSet& to,
-                                       ACE_Message_Block* msg)
+                                       const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg)
 {
   if (src_guid == application_participant_guid_) {
     if (remote != application_participant_addr_) {

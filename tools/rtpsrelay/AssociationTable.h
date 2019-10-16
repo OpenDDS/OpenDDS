@@ -35,7 +35,7 @@ private:
 
   TopicIndex<PartitionIndex<NoIndex> > index_;
 
-  ACE_Thread_Mutex mutex_;
+  mutable ACE_Thread_Mutex mutex_;
 };
 
 }

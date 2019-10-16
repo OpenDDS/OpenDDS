@@ -8,14 +8,14 @@
 
 namespace RtpsRelay {
 
-inline OpenDDS::DCPS::RepoId guid_to_guid(const GUID_t& a_guid)
+inline OpenDDS::DCPS::RepoId guid_to_repoid(const GUID_t& a_guid)
 {
   OpenDDS::DCPS::RepoId retval;
   std::memcpy(&retval, &a_guid, sizeof(OpenDDS::DCPS::RepoId));
   return retval;
 }
 
-inline GUID_t guid_to_guid(const OpenDDS::DCPS::RepoId& a_guid)
+inline GUID_t repoid_to_guid(const OpenDDS::DCPS::RepoId& a_guid)
 {
   GUID_t retval;
   std::memcpy(&retval, &a_guid, sizeof(OpenDDS::DCPS::RepoId));
@@ -66,7 +66,7 @@ class NoIndex;
 class RtpsRelayLib_Export Writer {
  public:
   Writer(const WriterEntry& we, bool local)
-    : participant_guid_(to_participant_guid(guid_to_guid(we.guid())))
+    : participant_guid_(to_participant_guid(guid_to_repoid(we.guid())))
     {
       reset(we, local);
     }
@@ -102,7 +102,7 @@ inline void add_writer(WriterPtr writer,
 class RtpsRelayLib_Export Reader {
  public:
   Reader(const ReaderEntry& re, bool local)
-    : participant_guid_(to_participant_guid(guid_to_guid(re.guid())))
+    : participant_guid_(to_participant_guid(guid_to_repoid(re.guid())))
     {
       reset(re, local);
     }
