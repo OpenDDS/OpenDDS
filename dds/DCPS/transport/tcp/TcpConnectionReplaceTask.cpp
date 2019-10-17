@@ -30,7 +30,9 @@ void OpenDDS::DCPS::TcpConnectionReplaceTask::execute(TcpConnection_rch& con)
 {
   DBG_ENTRY_LVL("TcpConnectionReplaceTask","execute",6);
 
-  this->trans_->fresh_link(con);
+  if (!is_shutdown_initiated()) {
+    trans_->fresh_link(con);
+  }
 }
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
