@@ -870,11 +870,7 @@ namespace {
     for (size_t i = 0; i < fields.size(); ++i) {
       string field_name = fields[i]->local_name()->get_string();
       if (field_name == key_base) {
-        AST_Type* field_type = fields[i]->field_type();
-        AST_Typedef* typedef_node = dynamic_cast<AST_Typedef*>(field_type);
-        if (typedef_node) {
-          field_type = typedef_node->primitive_base_type();
-        }
+        AST_Type* field_type = resolveActualType(fields[i]->field_type());
         if (!is_array && key_rem.empty()) {
           // The requested key field matches this one.  We do not allow
           // arrays (must be indexed specifically) or structs (must
