@@ -710,6 +710,10 @@ TcpTransport::fresh_link(TcpConnection_rch connection)
   TcpDataLink_rch link;
   GuardType guard(this->links_lock_);
 
+  if (is_shut_down()) {
+    return 0;
+  }
+
   PriorityKey key(connection->transport_priority(),
                   connection->get_remote_address(),
                   connection->get_remote_address() == this->config().local_address(),
