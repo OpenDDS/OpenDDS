@@ -51,7 +51,8 @@ public:
 
   static void swap(Message_Block_Shared_Ptr& a, Message_Block_Shared_Ptr& b)
   {
-    std::swap(a.msg_, b.msg_);
+    using std::swap;
+    swap(a.msg_, b.msg_);
   }
 
  private:

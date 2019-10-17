@@ -399,11 +399,11 @@ void HorizontalHandler::enqueue_message(const std::string& addr,
 
     size_t size = 0, padding = 0;
     OpenDDS::DCPS::gen_find_size(relay_header, size, padding);
-    ACE_Message_Block* header_block = new ACE_Message_Block(size + padding);
-    OpenDDS::DCPS::Serializer ser(header_block);
+    OpenDDS::DCPS::Message_Block_Shared_Ptr header_block(new ACE_Message_Block(size + padding));
+    OpenDDS::DCPS::Serializer ser(header_block.get());
     ser << relay_header;
     header_block->cont(msg.get()->duplicate());
-    RelayHandler::enqueue_message(addr, OpenDDS::DCPS::Message_Block_Shared_Ptr(header_block));
+    RelayHandler::enqueue_message(addr, header_block);
   }
 }
 
