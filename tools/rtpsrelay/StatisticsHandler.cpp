@@ -37,40 +37,58 @@ int StatisticsHandler::handle_timeout(const ACE_Time_Value& a_now, const void*)
 
   std::cout << "SPDP VERTICAL "
             << spdp_vertical_->bytes_received() << " bytes in "
+            << spdp_vertical_->messages_received() << " messages in "
             << spdp_vertical_->bytes_sent() << " bytes out "
+            << spdp_vertical_->messages_sent() << " messages out "
+            << spdp_vertical_->max_fan_out() << " max fan out "
             << duration.value().sec() << '.' << duration.value().usec() << " seconds" << std::endl;
 
   std::cout << "SPDP HORIZONTAL "
             << spdp_horizontal_->bytes_received() << " bytes in "
+            << spdp_horizontal_->messages_received() << " messages in "
             << spdp_horizontal_->bytes_sent() << " bytes out "
+            << spdp_horizontal_->messages_sent() << " messages out "
+            << spdp_horizontal_->max_fan_out() << " max fan out "
             << duration.value().sec() << '.' << duration.value().usec() << " seconds" << std::endl;
 
   std::cout << "SEDP VERTICAL "
             << sedp_vertical_->bytes_received() << " bytes in "
+            << sedp_vertical_->messages_received() << " messages in "
             << sedp_vertical_->bytes_sent() << " bytes out "
+            << sedp_vertical_->messages_sent() << " messages out "
+            << sedp_vertical_->max_fan_out() << " max fan out "
             << duration.value().sec() << '.' << duration.value().usec() << " seconds" << std::endl;
 
   std::cout << "SEDP HORIZONTAL "
             << sedp_horizontal_->bytes_received() << " bytes in "
+            << sedp_horizontal_->messages_received() << " messages in "
             << sedp_horizontal_->bytes_sent() << " bytes out "
+            << sedp_horizontal_->messages_sent() << " messages out "
+            << sedp_horizontal_->max_fan_out() << " max fan out "
             << duration.value().sec() << '.' << duration.value().usec() << " seconds" << std::endl;
 
   std::cout << "DATA VERTICAL "
             << data_vertical_->bytes_received() << " bytes in "
+            << data_vertical_->messages_received() << " messages in "
             << data_vertical_->bytes_sent() << " bytes out "
+            << data_vertical_->messages_sent() << " messages out "
+            << data_vertical_->max_fan_out() << " max fan out "
             << duration.value().sec() << '.' << duration.value().usec() << " seconds" << std::endl;
 
   std::cout << "DATA HORIZONTAL "
             << data_horizontal_->bytes_received() << " bytes in "
+            << data_horizontal_->messages_received() << " messages in "
             << data_horizontal_->bytes_sent() << " bytes out "
+            << data_horizontal_->messages_sent() << " messages out "
+            << data_horizontal_->max_fan_out() << " max fan out "
             << duration.value().sec() << '.' << duration.value().usec() << " seconds" << std::endl;
 
-  spdp_vertical_->reset_byte_counts();
-  spdp_horizontal_->reset_byte_counts();
-  sedp_vertical_->reset_byte_counts();
-  sedp_horizontal_->reset_byte_counts();
-  data_vertical_->reset_byte_counts();
-  data_horizontal_->reset_byte_counts();
+  spdp_vertical_->reset_counters();
+  spdp_horizontal_->reset_counters();
+  sedp_vertical_->reset_counters();
+  sedp_horizontal_->reset_counters();
+  data_vertical_->reset_counters();
+  data_horizontal_->reset_counters();
 
   return 0;
 }

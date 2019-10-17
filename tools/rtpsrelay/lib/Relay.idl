@@ -57,4 +57,10 @@ module RtpsRelay {
     RelayAddresses relay_addresses;
   };
 
+typedef sequence<GUID_t> GuidSequence;
+
+  struct RelayHeader {
+    GuidSequence to;
+  };
+
 };
