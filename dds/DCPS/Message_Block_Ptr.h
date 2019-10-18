@@ -41,7 +41,7 @@ public:
     return *this;
   }
 
-  explicit operator bool() const { return msg_.get(); }
+  operator bool() const { return msg_.get(); }
 
   ACE_Message_Block& operator*() const { return *msg_; }
 
