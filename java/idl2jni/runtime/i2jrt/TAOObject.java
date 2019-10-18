@@ -25,10 +25,10 @@ public class TAOObject implements org.omg.CORBA.Object {
 
   @Override
   public boolean equals(java.lang.Object o) {
-    if ((o != null) && (o instanceof TAOObject)) {
+    if (o instanceof TAOObject) {
       return _jni_ptr == ((TAOObject)o)._jni_ptr;
     }
-    return this == o;
+    return false;
   }
 
   @Override
