@@ -4443,6 +4443,7 @@ Sedp::remove_assoc_i(const DCPS::RepoId& local_guid, const LocalSubscription& ls
 void
 Sedp::PublicationAgentInfoListener::update_agent_info(const DCPS::RepoId& a_local_guid,
                                                       const ICE::AgentInfo& a_agent_info) {
+  ACE_GUARD(ACE_Thread_Mutex, g, sedp.lock_);
   LocalPublicationIter pos = sedp.local_publications_.find(a_local_guid);
   if (pos != sedp.local_publications_.end()) {
     pos->second.have_ice_agent_info = true;
@@ -4454,6 +4455,7 @@ Sedp::PublicationAgentInfoListener::update_agent_info(const DCPS::RepoId& a_loca
 void
 Sedp::SubscriptionAgentInfoListener::update_agent_info(const DCPS::RepoId& a_local_guid,
                                                        const ICE::AgentInfo& a_agent_info) {
+  ACE_GUARD(ACE_Thread_Mutex, g, sedp.lock_);
   LocalSubscriptionIter pos = sedp.local_subscriptions_.find(a_local_guid);
   if (pos != sedp.local_subscriptions_.end()) {
     pos->second.have_ice_agent_info = true;

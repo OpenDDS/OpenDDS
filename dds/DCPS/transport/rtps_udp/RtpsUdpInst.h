@@ -101,6 +101,7 @@ private:
   bool rtps_relay_only_;
   bool use_ice_;
   ACE_INET_Addr stun_server_address_;
+  mutable ACE_SYNCH_MUTEX stun_server_address_lock_;
 
   ICE::AddressListType host_addresses() const;
 };
@@ -119,13 +120,13 @@ inline ACE_INET_Addr RtpsUdpInst::rtps_relay_address() const
 
 inline void RtpsUdpInst::stun_server_address(const ACE_INET_Addr& address)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  ACE_GUARD(ACE_Thread_Mutex, g, stun_server_address_lock_);
   stun_server_address_ = address;
 }
 
 inline ACE_INET_Addr RtpsUdpInst::stun_server_address() const
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ACE_INET_Addr());
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, stun_server_address_lock_, ACE_INET_Addr());
   return stun_server_address_;
 }
 
