@@ -33,6 +33,9 @@
 #ifdef OPENDDS_SECURITY
 #include <dds/DCPS/security/framework/Properties.h>
 #include <dds/DCPS/security/framework/SecurityRegistry.h>
+#endif
+
+using namespace RtpsRelay;
 
 namespace {
   void append(DDS::PropertySeq& props, const char* name, const std::string& value, bool propagate = false)
@@ -46,13 +49,7 @@ namespace {
       ACE_ERROR((LM_ERROR, "Exception caught when appending parameter\n"));
     }
   }
-}
 
-#endif
-
-using namespace RtpsRelay;
-
-namespace {
   ACE_INET_Addr get_bind_addr(unsigned short port)
   {
     std::vector<ACE_INET_Addr> nics;
@@ -191,9 +188,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   DDS::DomainParticipantQos participant_qos;
   factory->get_default_participant_qos(participant_qos);
 
+  DDS::PropertySeq& properties = participant_qos.property.value;
+  append(properties, "OpenDDS.Rtps.Discovery.DisableWriters", "true");
+
 #ifdef OPENDDS_SECURITY
   if (secure) {
-    DDS::PropertySeq& properties = participant_qos.property.value;
     append(properties, DDS::Security::Properties::AuthIdentityCA, identity_ca_file);
     append(properties, DDS::Security::Properties::AccessPermissionsCA, permissions_ca_file);
     append(properties, DDS::Security::Properties::AuthIdentityCertificate, identity_certificate_file);

@@ -106,9 +106,56 @@ namespace {
 
 void Spdp::init(DDS::DomainId_t /*domain*/,
                        DCPS::RepoId& guid,
-                       const DDS::DomainParticipantQos& /*qos*/,
+                       const DDS::DomainParticipantQos& qos,
                        RtpsDiscovery* disco)
 {
+  bool disable_writers = false;
+
+  const DDS::PropertySeq& properties = qos.property.value;
+  for (unsigned int idx = 0; idx != properties.length(); ++idx) {
+    const char* name = properties[idx].name.in();
+    if (std::strcmp("OpenDDS.Rtps.Discovery.DisableWriters", name) == 0) {
+      disable_writers = true;
+    }
+  }
+
+  available_builtin_endpoints_ =
+    DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER |
+    DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR |
+    DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR |
+    DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR |
+    BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER |
+    BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER
+    ;
+
+  if (!disable_writers) {
+    available_builtin_endpoints_ |=
+      DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER |
+      DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER;
+  }
+
+#ifdef OPENDDS_SECURITY
+  if (is_security_enabled()) {
+    available_builtin_endpoints_ |=
+      DDS::Security::SEDP_BUILTIN_PUBLICATIONS_SECURE_READER |
+      DDS::Security::SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER |
+      DDS::Security::BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER |
+      DDS::Security::BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER |
+      DDS::Security::BUILTIN_PARTICIPANT_STATELESS_MESSAGE_WRITER |
+      DDS::Security::BUILTIN_PARTICIPANT_STATELESS_MESSAGE_READER |
+      DDS::Security::BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_WRITER |
+      DDS::Security::BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_READER |
+      DDS::Security::SPDP_BUILTIN_PARTICIPANT_SECURE_WRITER |
+      DDS::Security::SPDP_BUILTIN_PARTICIPANT_SECURE_READER
+      ;
+    if (!disable_writers) {
+      available_builtin_endpoints_ |=
+        DDS::Security::SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER |
+        DDS::Security::SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER;
+    }
+  }
+#endif
+
   guid = guid_; // may have changed in SpdpTransport constructor
   sedp_.ignore(guid);
   sedp_.init(guid_, *disco, domain_);
@@ -1254,36 +1301,6 @@ Spdp::build_local_pdata(
 #endif
                         )
 {
-  BuiltinEndpointSet_t availableBuiltinEndpoints =
-    DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER |
-    DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR |
-    DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER |
-    DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR |
-    DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER |
-    DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR |
-    BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER |
-    BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER
-    ;
-
-#ifdef OPENDDS_SECURITY
-  if (is_security_enabled()) {
-    availableBuiltinEndpoints |=
-      DDS::Security::SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER |
-      DDS::Security::SEDP_BUILTIN_PUBLICATIONS_SECURE_READER |
-      DDS::Security::SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER |
-      DDS::Security::SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER |
-      DDS::Security::BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER |
-      DDS::Security::BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER |
-      DDS::Security::BUILTIN_PARTICIPANT_STATELESS_MESSAGE_WRITER |
-      DDS::Security::BUILTIN_PARTICIPANT_STATELESS_MESSAGE_READER |
-      DDS::Security::BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_WRITER |
-      DDS::Security::BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_READER |
-      DDS::Security::SPDP_BUILTIN_PARTICIPANT_SECURE_WRITER |
-      DDS::Security::SPDP_BUILTIN_PARTICIPANT_SECURE_READER
-    ;
-  }
-#endif
-
   // The RTPS spec has no constants for the builtinTopics{Writer,Reader}
 
   // This locator list should not be empty, but we won't actually be using it.
@@ -1332,7 +1349,7 @@ Spdp::build_local_pdata(
        gp[6], gp[7], gp[8], gp[9], gp[10], gp[11]},
       VENDORID_OPENDDS,
       false /*expectsIQoS*/,
-      availableBuiltinEndpoints,
+      available_builtin_endpoints_,
       sedp_unicast_,
       sedp_multicast_,
       nonEmptyList /*defaultMulticastLocatorList*/,
