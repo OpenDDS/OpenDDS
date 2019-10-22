@@ -84,6 +84,8 @@ int ACE_TMAIN(int, ACE_TCHAR**)
   failed |= assert_key_count<KeyedUnion>(1);
   failed |= assert_key_count<KeyedUnionStruct>(2);
   failed |= assert_key_count<MultidimensionalArrayStruct>(2 * 3 + 2 * 3 * 4);
+  failed |= assert_key_count<ImpliedKeys::StructA>(5);
+  failed |= assert_key_count<ImpliedKeys::StructB>(6);
 
   // Check KeyOnly for Unions
   failed |= assert_key_only_size(UnkeyedUnion(), 0);

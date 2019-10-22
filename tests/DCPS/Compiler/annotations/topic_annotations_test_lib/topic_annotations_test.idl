@@ -109,4 +109,48 @@ module TopicAnnotationsTest {
     @key A_2D_Array_t array1;
     @key A_3D_Array_t array2;
   };
+
+  /*
+   * Implied Keys
+   * If a nested struct marked as a key has no keys, all the fields are implied
+   * to be keys.
+   */
+  module ImpliedKeys {
+
+    struct NoKeysStruct {
+      short a;
+      long b;
+      float c;
+    };
+
+    struct OneKeyStruct {
+      @key short a;
+      long b;
+      float c;
+    };
+
+    /*
+     * Basic Usage
+     * 5 keys
+     */
+    @topic
+    struct StructA {
+      @key NoKeysStruct nested_no_keys;
+      @key OneKeyStruct nested_one_key;
+      @key long non_nested;
+    };
+
+    /*
+     * Make Sure This Works Recursively
+     * 6 keys
+     */
+    @topic
+    struct StructB {
+      @key StructA as_key;
+      StructA not_as_key;
+      @key long yet_another_key;
+    };
+
+  };
+
 };

@@ -75,7 +75,8 @@ TopicKeys::Iterator::Iterator()
     root_type_(InvalidType),
     level_(0),
     recursive_(false),
-    element_count_(0)
+    element_count_(0),
+    implied_keys_(false)
 {
 }
 
@@ -86,7 +87,8 @@ TopicKeys::Iterator::Iterator(TopicKeys& parent)
     current_value_(0),
     level_(0),
     recursive_(parent.recursive()),
-    element_count_(0)
+    element_count_(0),
+    implied_keys_(false)
 {
   root_ = parent.root();
   root_type_ = parent.root_type();
@@ -100,7 +102,8 @@ TopicKeys::Iterator::Iterator(AST_Type* root, Iterator* parent)
     current_value_(0),
     level_(parent->level() + 1),
     recursive_(parent->recursive_),
-    element_count_(0)
+    element_count_(0),
+    implied_keys_(false)
 {
   root_type_ = TopicKeys::root_type(root);
   root_ = root;
@@ -114,7 +117,8 @@ TopicKeys::Iterator::Iterator(AST_Field* root, Iterator* parent)
     current_value_(0),
     level_(parent->level() + 1),
     recursive_(parent->recursive_),
-    element_count_(0)
+    element_count_(0),
+    implied_keys_(false)
 {
   AST_Type* type = root->field_type()->unaliased_type();
   root_type_ = TopicKeys::root_type(type);
@@ -134,7 +138,8 @@ TopicKeys::Iterator::Iterator(const Iterator& other)
     root_type_(InvalidType),
     level_(0),
     recursive_(false),
-    element_count_(0)
+    element_count_(0),
+    implied_keys_(false)
 {
   *this = other;
 }
@@ -190,17 +195,37 @@ TopicKeys::Iterator::operator++()
       if (!struct_root) {
         throw Error(root_, "Invalid Key Iterator");
       }
-      ACE_CDR::ULong field_count = struct_root->nfields();
+      const ACE_CDR::ULong field_count = struct_root->nfields();
+      // If a nested struct marked as a key has no keys, all the fields are
+      // implied to be keys.
+      if (pos_ == 0) {
+        if (level_ > 0) {
+          implied_keys_ = true;
+          for (; pos_ < field_count && implied_keys_; ++pos_) {
+            AST_Field** field_ptrptr;
+            struct_root->field(field_ptrptr, pos_);
+            AST_Field* field = *field_ptrptr;
+            if (be_global->is_key(field)) {
+              implied_keys_ = false;
+            }
+          }
+          pos_ = 0;
+        } else {
+          implied_keys_ = false;
+        }
+      }
+      // Iterate over the fields
       for (; pos_ < field_count; ++pos_) {
         AST_Field** field_ptrptr;
         struct_root->field(field_ptrptr, pos_);
         AST_Field* field = *field_ptrptr;
-        if (be_global->is_key(field)) {
+        if (be_global->is_key(field) || implied_keys_) {
           child_ = new Iterator(field, this);
           Iterator& child = *child_;
           if (child == end_value()) {
             delete child_;
             child_ = 0;
+            // Even with implied keys, keep this as a safety check
             throw Error(field, "field is marked as key, but does not contain any keys.");
           } else {
             current_value_ = *child;
