@@ -75,7 +75,7 @@ public:
     DDS::DomainParticipantFactoryQos & qos);
 
   /// Expose the participants for reading.
-  const DPMap& participants() const;
+  DPMap participants() const;
 
   void cleanup();
 
@@ -92,7 +92,7 @@ private:
   /// Protect the participant collection.
   /// Use recursive mutex to allow nested acquisition and
   /// release of a mutex that occurs in the same thread.
-  ACE_Recursive_Thread_Mutex  participants_protector_;
+  mutable ACE_Recursive_Thread_Mutex  participants_protector_;
 };
 
 } // namespace DCPS
