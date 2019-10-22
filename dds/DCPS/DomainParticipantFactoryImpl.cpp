@@ -274,7 +274,7 @@ DomainParticipantFactoryImpl::get_qos(
   return DDS::RETCODE_OK;
 }
 
-const DomainParticipantFactoryImpl::DPMap
+DomainParticipantFactoryImpl::DPMap
 DomainParticipantFactoryImpl::participants() const
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex,
