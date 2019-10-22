@@ -78,7 +78,7 @@ DomainParticipantFactoryImpl::create_participant(
     }
   }
 
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+  ACE_GUARD_RETURN(ACE_Thread_Mutex,
                    tao_mon,
                    participants_protector_,
                    DDS::DomainParticipant::_nil());
@@ -135,7 +135,7 @@ DomainParticipantFactoryImpl::delete_participant(
   DPSet* entry = 0;
 
   {
-    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+    ACE_GUARD_RETURN(ACE_Thread_Mutex,
                      tao_mon,
                      participants_protector_,
                      DDS::RETCODE_ERROR);
@@ -197,7 +197,7 @@ DDS::DomainParticipant_ptr
 DomainParticipantFactoryImpl::lookup_participant(
   DDS::DomainId_t domainId)
 {
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+  ACE_GUARD_RETURN(ACE_Thread_Mutex,
                    tao_mon,
                    participants_protector_,
                    DDS::DomainParticipant::_nil());
@@ -274,10 +274,10 @@ DomainParticipantFactoryImpl::get_qos(
   return DDS::RETCODE_OK;
 }
 
-DomainParticipantFactoryImpl::DPMap
+const DomainParticipantFactoryImpl::DPMap
 DomainParticipantFactoryImpl::participants() const
 {
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+  ACE_GUARD_RETURN(ACE_Thread_Mutex,
                    tao_mon,
                    participants_protector_,
                    DomainParticipantFactoryImpl::DPMap());
@@ -287,7 +287,7 @@ DomainParticipantFactoryImpl::participants() const
 
 void DomainParticipantFactoryImpl::cleanup()
 {
-  ACE_GUARD(ACE_Recursive_Thread_Mutex,
+  ACE_GUARD(ACE_Thread_Mutex,
             tao_mon,
             participants_protector_);
 
