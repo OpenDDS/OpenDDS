@@ -157,7 +157,7 @@ macro(OPENDDS_TARGET_SOURCES target)
     target_link_libraries(${target} ${OPENDDS_DCPS_LINK_DEPS})
   endif()
 
-  target_link_libraries(${target} Threads::Threads)
+  target_link_libraries(${target} PUBLIC Threads::Threads)
 
   foreach(scope PUBLIC PRIVATE INTERFACE)
     if(_idl_sources_${scope})
