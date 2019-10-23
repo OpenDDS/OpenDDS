@@ -10,6 +10,8 @@ Released %TIMESTAMP%
     favor of the `@topic` and `@key` IDL annotations.
   - See section 2.1.1 of the OpenDDS 3.14 Developer's Guide for more
     information on both of these features.
+  - See `docs/migrating_to_topic_annotations.md` for a guide on how to migrate
+    existing IDL to use topic annotations.
 - Monitor and the ishapes demo now use Qt5
 - Expanded Android Documentation in `docs/android.md`
 - Updated dissector to work with Wireshark 3.0
