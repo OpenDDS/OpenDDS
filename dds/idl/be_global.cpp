@@ -664,16 +664,6 @@ BE_GlobalData::has_key(AST_Union* node)
   return key->union_value(node);
 }
 
-void
-BE_GlobalData::warning(const char* filename, unsigned lineno, const char* msg)
-{
-  if (idl_global->print_warnings()) {
-    ACE_ERROR((LM_WARNING,
-      ACE_TEXT("Warning - %C: \"%C\", line %u: %C\n"),
-      idl_global->prog_name(), filename, lineno, msg));
-  }
-}
-
 bool
 BE_GlobalData::warn_about_dcps_data_type()
 {
