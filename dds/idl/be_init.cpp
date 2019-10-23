@@ -7,13 +7,16 @@
 
 #include "../Version.h"
 
-#include "tao/Version.h"
-#include "global_extern.h"
+#include <ace/OS_NS_stdlib.h>
+
+#include <tao/Version.h>
+
+#include <global_extern.h>
+#include <drv_extern.h>
+#include <utl_err.h>
+
 #include "be_extern.h"
 #include "be_util.h"
-#include "drv_extern.h"
-
-#include "ace/OS_NS_stdlib.h"
 
 #include <iostream>
 #include <iomanip>
@@ -56,7 +59,10 @@ BE_post_init(char*[], long)
   ACE_CString included;
   DRV_add_include_path(included, include_dds.c_str(), 0, true);
 
-  if (idl_global->idl_version_ >= IDL_VERSION_4) {
+  if (idl_global->idl_version_ < IDL_VERSION_4) {
+    idl_global->ignore_files_ = true;
+    idl_global->err()->direct_error("IDL Version must at least be 4", "", 0);
+  } else {
     DRV_cpp_putarg("-D__OPENDDS_IDL_HAS_ANNOTATIONS");
     be_global->builtin_annotations_.register_all();
   }
