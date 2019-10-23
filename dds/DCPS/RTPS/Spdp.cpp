@@ -30,6 +30,7 @@
 
 #include "ace/Reactor.h"
 #include "ace/OS_NS_sys_socket.h" // For setsockopt()
+#include "ace/OS_NS_strings.h"
 
 #include <cstring>
 #include <stdexcept>
@@ -109,18 +110,20 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
                        const DDS::DomainParticipantQos& qos,
                        RtpsDiscovery* disco)
 {
-  bool disable_writers = false;
+  bool enable_writers = true;
 
   const DDS::PropertySeq& properties = qos.property.value;
   for (unsigned int idx = 0; idx != properties.length(); ++idx) {
     const char* name = properties[idx].name.in();
-    if (std::strcmp("OpenDDS.Rtps.Discovery.DisableWriters", name) == 0) {
-      disable_writers = true;
+    if (std::strcmp(RTPS_DISCOVERY_ENDPOINT_ANNOUNCEMENTS, name) == 0) {
+      if (ACE_OS::strcasecmp(properties[idx].value.in(), "0") == 0 ||
+          ACE_OS::strcasecmp(properties[idx].value.in(), "false") == 0) {
+        enable_writers = false;
+      }
     }
   }
 
   available_builtin_endpoints_ =
-    DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER |
     DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR |
     DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR |
     DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR |
@@ -128,8 +131,9 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
     BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER
     ;
 
-  if (!disable_writers) {
+  if (enable_writers) {
     available_builtin_endpoints_ |=
+      DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER |
       DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER |
       DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER;
   }
@@ -139,7 +143,6 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
     available_builtin_endpoints_ |=
       DDS::Security::SEDP_BUILTIN_PUBLICATIONS_SECURE_READER |
       DDS::Security::SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER |
-      DDS::Security::BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER |
       DDS::Security::BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER |
       DDS::Security::BUILTIN_PARTICIPANT_STATELESS_MESSAGE_WRITER |
       DDS::Security::BUILTIN_PARTICIPANT_STATELESS_MESSAGE_READER |
@@ -148,8 +151,9 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
       DDS::Security::SPDP_BUILTIN_PARTICIPANT_SECURE_WRITER |
       DDS::Security::SPDP_BUILTIN_PARTICIPANT_SECURE_READER
       ;
-    if (!disable_writers) {
+    if (enable_writers) {
       available_builtin_endpoints_ |=
+        DDS::Security::BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER |
         DDS::Security::SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER |
         DDS::Security::SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER;
     }

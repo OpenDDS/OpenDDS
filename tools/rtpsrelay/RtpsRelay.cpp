@@ -189,7 +189,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   factory->get_default_participant_qos(participant_qos);
 
   DDS::PropertySeq& properties = participant_qos.property.value;
-  append(properties, "OpenDDS.Rtps.Discovery.DisableWriters", "true");
+  append(properties, OpenDDS::RTPS::RTPS_DISCOVERY_ENDPOINT_ANNOUNCEMENTS, "false");
 
 #ifdef OPENDDS_SECURITY
   if (secure) {
