@@ -167,6 +167,11 @@ module Bench {
 #pragma DCPS_DATA_TYPE "Bench::NodeController::Config"
     struct Config {
       NodeId node_id;
+      /*
+       * Number of seconds to wait for workers to finish before reporting them
+       * as failed. 0 means never timeout.
+       */
+      unsigned long timeout;
       WorkerConfigs workers;
     };
     const string config_topic_name = "Node_Controller_Config";

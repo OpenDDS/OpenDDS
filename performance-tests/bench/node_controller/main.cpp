@@ -1,9 +1,6 @@
 /*
- * The Node Controller takes directives from Test Controllers and spawns
- * Workers, and reports the results back.
- *
- * TODO:
- * - Handle errors and interrupts more gracefully
+ * The Node Controller takes directives from a Test Controller, spawns Workers,
+ * and report the results back.
  */
 #include <map>
 #include <string>
@@ -14,6 +11,7 @@
 #include <cstdint>
 #include <mutex>
 #include <thread>
+#include <atomic>
 
 #include <ace/Process_Manager.h>
 #include <ace/OS_NS_stdlib.h>
@@ -26,8 +24,7 @@
 #include <dds/DCPS/WaitSet.h>
 
 #include <util.h>
-
-#include "BenchTypeSupportImpl.h"
+#include <BenchTypeSupportImpl.h>
 
 using namespace Bench::NodeController;
 using Bench::get_option_argument_int;
@@ -114,7 +111,7 @@ public:
       << " " << config_filename_
       << " --report " << report_filename_
       << " --log " << log_filename_ << std::flush;
-    std::string command = ss.str();
+    const std::string command = ss.str();
     std::cerr << command << std::endl << std::flush;
     proc_opts.command_line(command.c_str());
     return proc_opts;
@@ -123,16 +120,29 @@ public:
   void set_pid(pid_t pid)
   {
     pid_ = pid;
+    running_ = true;
+  }
+
+  pid_t get_pid()
+  {
+    return pid_;
   }
 
   void set_exit_status(int exit_status)
   {
     exit_status_ = exit_status;
+    running_ = false;
+  }
+
+  bool running()
+  {
+    return running_;
   }
 
 private:
   NodeId node_id_;
   WorkerId worker_id_;
+  bool running_ = false;
   pid_t pid_ = ACE_INVALID_PID;
   int exit_status_ = 0;
   std::string file_base_name_;
@@ -150,11 +160,17 @@ public:
   : process_manager_(process_manager)
   {
     process_manager.register_handler(this);
+    ACE_Reactor::instance()->register_handler(SIGINT, this);
   }
 
   ~WorkerManager()
   {
     process_manager_.register_handler(nullptr);
+  }
+
+  void timeout(unsigned value)
+  {
+    timeout_ = value;
   }
 
   bool add_worker(const NodeId& node_id, const WorkerConfig& config)
@@ -176,8 +192,22 @@ public:
     finished_workers_.push_back(worker);
   }
 
+  // Must hold lock_
+  void kill_all_the_workers()
+  {
+    for (auto worker_i : all_workers_) {
+      auto& worker = worker_i.second;
+      if (worker->running()) {
+        if (process_manager_.terminate(worker->get_pid())) {
+          process_manager_.wait(worker->get_pid(), ACE_Time_Value(0, ACE_ONE_SECOND_IN_USECS / 10));
+        }
+      }
+    }
+  }
+
   void run_workers(ReportDataWriter_var report_writer_impl)
   {
+    ACE_Reactor::instance()->schedule_timer(this, nullptr, ACE_Time_Value(timeout_));
     // Spawn Workers
     {
       std::lock_guard<std::mutex> guard(lock_);
@@ -198,20 +228,37 @@ public:
     // Wait For Them to Finish, Writing Reports As They Do
     bool running = true;
     while (running) {
+      // Check to see if any workers are done and write their reports
       std::list<WorkerPtr> finished_workers;
-
       {
         std::lock_guard<std::mutex> guard(lock_);
         finished_workers = finished_workers_;
         finished_workers_.clear();
         running = remaining_workers_;
       }
-
       for (auto& i : finished_workers) {
         i->write_report(report_writer_impl);
       }
 
-      ACE_OS::sleep(1);
+      // Check to see if we have to stop prematurely
+      bool kill_workers = false;
+      if (scenario_timedout_.load()) {
+        std::cerr << "Scenario Timedout, Killing Workers..." << std::endl;
+        kill_workers = true;
+      }
+      if (sigint_.load()) {
+        std::cerr << "Interrupted, Killing Workers..." << std::endl;
+        kill_workers = true;
+      }
+      if (kill_workers) {
+        std::lock_guard<std::mutex> guard(lock_);
+        kill_all_the_workers(); // Bwahahaha
+        running = false;
+      }
+
+      if (running) {
+        ACE_OS::sleep(1);
+      }
     }
   }
 
@@ -235,13 +282,32 @@ public:
     return 0;
   }
 
+  /// Used to the Handle Scenario Timeout
+  virtual int handle_timeout(const ACE_Time_Value&, const void* = nullptr)
+  {
+    scenario_timedout_.store(true);
+    return -1;
+  }
+
+  /// Used to the Interrupt
+  virtual int handle_signal(int signum, siginfo_t* = nullptr, ucontext_t* = nullptr)
+  {
+    if (signum == SIGINT) {
+      sigint_.store(true);
+    }
+    return 0;
+  }
+
 private:
+  unsigned timeout_ = 0;
   std::mutex lock_;
   std::map<WorkerId, WorkerPtr> all_workers_;
   size_t remaining_workers_ = 0;
   std::map<pid_t, WorkerId> pid_to_worker_id_;
   std::list<WorkerPtr> finished_workers_;
   ACE_Process_Manager& process_manager_;
+  std::atomic_bool scenario_timedout_{false};
+  std::atomic_bool sigint_{false};
 };
 
 enum class RunMode {
@@ -473,7 +539,7 @@ int run_cycle(
     DDS::PublicationMatchedStatus match{};
     while (match.current_count == 0) {
       if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
-        std::cerr << "wait for Test Controller failed" << std::endl;
+        std::cerr << "Wait for test controller failed" << std::endl;
         return 1;
       }
       if (status_writer_impl->get_publication_matched_status(match) != DDS::RETCODE_OK) {
@@ -509,7 +575,7 @@ int run_cycle(
     ws->detach_condition(read_condition);
     config_reader_impl->delete_readcondition(read_condition);
     if (rc != DDS::RETCODE_OK) {
-      std::cerr << "Wait failed" << std::endl;
+      std::cerr << "Wait for node config failed" << std::endl;
       return 1;
     }
 
@@ -522,12 +588,13 @@ int run_cycle(
       DDS::ANY_VIEW_STATE,
       DDS::ANY_INSTANCE_STATE);
     if (rc != DDS::RETCODE_OK) {
-      std::cerr << "Take failed" << std::endl;
+      std::cerr << "Take node config failed" << std::endl;
       return 1;
     }
 
     for (size_t node = 0; node < configs.length(); node++) {
       if (configs[node].node_id == this_node_id) {
+        worker_manager.timeout(configs[node].timeout);
         size_t config_count = configs[node].workers.length();
         for (size_t config = 0; config < config_count; config++) {
           WorkerId& id = configs[node].workers[config].worker_id;

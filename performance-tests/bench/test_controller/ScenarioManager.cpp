@@ -57,17 +57,19 @@ namespace {
   void read_protoworker_configs(
     const std::string& test_context,
     const WorkerPrototypes& protoworkers,
-    std::map<std::string, std::string>& worker_configs)
+    std::map<std::string, std::string>& worker_configs,
+    bool debug_alloc)
   {
     for (unsigned protoworker_i = 0; protoworker_i < protoworkers.length(); protoworker_i++) {
       const std::string filename = protoworkers[protoworker_i].config.in();
       if (!worker_configs.count(filename)) {
-        worker_configs[filename] = read_file(join_path(test_context, "config", "worker", filename));
+        worker_configs[filename] = debug_alloc ?
+          filename : read_file(join_path(test_context, "config", "worker", filename));
       }
     }
   }
 
-  void add_single_protoworker_to_node(
+  void add_single_worker_to_node(
     const WorkerPrototype& protoworker,
     const std::map<std::string, std::string>& worker_configs,
     Config& node)
@@ -156,32 +158,19 @@ AllocatedScenario ScenarioManager::allocate_scenario(
   auto ani = available_nodes.begin();
   for (unsigned i = 0; i < node_count; i++) {
     allocated_scenario.configs[i].node_id = ani->first;
+    allocated_scenario.configs[i].timeout = scenario_prototype.timeout;
     allocated_scenario.configs[i].workers.length(0);
     ani++;
   }
 
   // Read in Worker Config Files
-  std::map<std::string, std::string> worker_configs; // This is filename (no dirs) to the contents
-  if (debug_alloc) {
-    // Just Fill in the Config Field with the Filename
-    for (unsigned protonode_i = 0; protonode_i < scenario_prototype.nodes.length(); protonode_i++) {
-      const WorkerPrototypes& protoworkers = scenario_prototype.nodes[protonode_i].workers;
-      for (unsigned protoworker_i = 0; protoworker_i < protoworkers.length(); protoworker_i++) {
-        const std::string filename = protoworkers[protoworker_i].config.in();
-        worker_configs[filename] = filename;
-      }
-    }
-    for (unsigned protoworker_i = 0; protoworker_i < scenario_prototype.any_node.length(); protoworker_i++) {
-      const std::string filename = scenario_prototype.any_node[protoworker_i].config.in();
-      worker_configs[filename] = filename;
-    }
-  } else {
-    // Do the Real Thing
-    for (unsigned protonode_i = 0; protonode_i < scenario_prototype.nodes.length(); protonode_i++) {
-      read_protoworker_configs(test_context_, scenario_prototype.nodes[protonode_i].workers, worker_configs);
-    }
-    read_protoworker_configs(test_context_, scenario_prototype.any_node, worker_configs);
+  std::map<std::string, std::string> worker_configs;
+  for (unsigned protonode_i = 0; protonode_i < scenario_prototype.nodes.length(); protonode_i++) {
+    read_protoworker_configs(
+      test_context_, scenario_prototype.nodes[protonode_i].workers, worker_configs, debug_alloc);
   }
+  read_protoworker_configs(
+    test_context_, scenario_prototype.any_node, worker_configs, debug_alloc);
 
   // Allocate Exclusive Node Configs First
   unsigned node_i = 0; // iter for allocated_scenario.configs
@@ -215,7 +204,7 @@ AllocatedScenario ScenarioManager::allocate_scenario(
     const WorkerPrototype& protoworker = scenario_prototype.any_node[protoworker_i];
     allocated_scenario.expected_reports += protoworker.count;
     for (unsigned count_i = 0; count_i < protoworker.count; count_i++) {
-      add_single_protoworker_to_node(protoworker, worker_configs, allocated_scenario.configs[node_i++]);
+      add_single_worker_to_node(protoworker, worker_configs, allocated_scenario.configs[node_i++]);
       if (node_i >= node_count) {
         node_i = nonexclusive_start;
       }
