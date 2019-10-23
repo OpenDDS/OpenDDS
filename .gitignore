@@ -1,5 +1,6 @@
 .depend.*
 GNUmakefile*
+makefile_name.local
 *.vcxproj*
 *.tlog
 *.log
