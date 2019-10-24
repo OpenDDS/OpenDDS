@@ -5,9 +5,9 @@
 #include <ace/ACE.h>
 #include <ace/Log_Msg.h>
 
-#include "topic_annotations_testTypeSupportImpl.h"
+#include "key_annotationTypeSupportImpl.h"
 
-using namespace TopicAnnotationsTest;
+using namespace key_annotation;
 
 template <typename T>
 OpenDDS::DCPS::DDSTraits<T>& get_traits()

@@ -1,4 +1,4 @@
-module TopicAnnotationsTest {
+module key_annotation {
 
   /*
    * Simplest Case of a Sample Struct with no Key

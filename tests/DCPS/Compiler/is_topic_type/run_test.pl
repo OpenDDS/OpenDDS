@@ -6,7 +6,7 @@ use strict;
 
 eval('use JSON::PP;');
 if ($@) {
-  print STDERR "is_topic_type_test: JSON::PP not installed, skipping test and returning 0.\n";
+  print STDERR "is_topic_type: JSON::PP not installed, skipping test and returning 0.\n";
   exit(0);
 }
 
@@ -44,7 +44,7 @@ sub subtest {
   my $status = 0;
   my $mode = shift;
 
-  my $itl_file = "$mode/is_topic_type_test.itl";
+  my $itl_file = "$mode/is_topic_type.itl";
   open my $f, '<', $itl_file or die "Can't open itl file $itl_file: $!";
   local $/;
   my $itl_text = <$f>;
