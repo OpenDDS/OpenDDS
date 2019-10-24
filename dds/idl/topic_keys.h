@@ -8,7 +8,10 @@
 #include <vector>
 
 class AST_Decl;
+class AST_Type;
 class AST_Structure;
+class AST_Field;
+class AST_Union;
 
 /**
  * Find Keys in Topic Types

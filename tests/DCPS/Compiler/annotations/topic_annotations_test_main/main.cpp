@@ -1,9 +1,11 @@
+#include <dds/DCPS/Serializer.h>
+#include <dds/DCPS/TypeSupportImpl.h>
+#include <dds/DCPS/FilterEvaluator.h>
+
+#include <ace/ACE.h>
+#include <ace/Log_Msg.h>
+
 #include "topic_annotations_testTypeSupportImpl.h"
-#include "ace/ACE.h"
-#include "ace/Log_Msg.h"
-#include "dds/DCPS/Serializer.h"
-#include "dds/DCPS/TypeSupportImpl.h"
-#include "dds/DCPS/FilterEvaluator.h"
 
 using namespace TopicAnnotationsTest;
 
@@ -86,6 +88,7 @@ int ACE_TMAIN(int, ACE_TCHAR**)
   failed |= assert_key_count<MultidimensionalArrayStruct>(2 * 3 + 2 * 3 * 4);
   failed |= assert_key_count<ImpliedKeys::StructA>(5);
   failed |= assert_key_count<ImpliedKeys::StructB>(6);
+  failed |= assert_key_count<ImpliedKeys::StructC>(2);
 
   // Check KeyOnly for Unions
   failed |= assert_key_only_size(UnkeyedUnion(), 0);

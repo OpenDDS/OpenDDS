@@ -5,26 +5,22 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "be_global.h"
-#include "be_util.h"
-#include "be_extern.h"
-#include "ast_generator.h"
-#include "global_extern.h"
-#include "idl_defines.h"
-#include "utl_err.h"
-#include "utl_string.h"
+#include <ast_generator.h>
+#include <global_extern.h>
+#include <idl_defines.h>
+#include <utl_err.h>
+#include <utl_string.h>
+#include <ast_decl.h>
+#include <ast_structure.h>
+#include <ast_field.h>
+#include <ast_union.h>
+#include <ast_annotation_decl.h>
+#include <ast_annotation_member.h>
 
-#include "ast_decl.h"
-#include "ast_structure.h"
-#include "ast_field.h"
-#include "ast_union.h"
-#include "ast_annotation_decl.h"
-#include "ast_annotation_member.h"
-
-#include "ace/OS_NS_strings.h"
-#include "ace/OS_NS_sys_stat.h"
-#include "ace/ARGV.h"
-#include "ace/OS_NS_stdlib.h"
+#include <ace/OS_NS_strings.h>
+#include <ace/OS_NS_sys_stat.h>
+#include <ace/ARGV.h>
+#include <ace/OS_NS_stdlib.h>
 
 #include <algorithm>
 #include <iostream>
@@ -33,6 +29,10 @@
 #include <string>
 #include <vector>
 #include <set>
+
+#include "be_global.h"
+#include "be_util.h"
+#include "be_extern.h"
 
 using namespace std;
 
@@ -651,10 +651,10 @@ BE_GlobalData::is_default_nested(UTL_Scope* scope)
 }
 
 bool
-BE_GlobalData::is_key(AST_Field* node)
+BE_GlobalData::check_key(AST_Field* node, bool& value)
 {
   KeyAnnotation* key = dynamic_cast<KeyAnnotation*>(builtin_annotations_["::@key"]);
-  return key->node_value(dynamic_cast<AST_Decl*>(node));
+  return key->node_value_exists(dynamic_cast<AST_Decl*>(node), value);
 }
 
 bool

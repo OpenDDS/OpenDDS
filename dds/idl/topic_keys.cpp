@@ -1,15 +1,15 @@
-#include "idl_defines.h"
+#include "topic_keys.h"
+
+#include <idl_defines.h>
+#include <ast_structure.h>
+#include <ast_field.h>
+#include <utl_identifier.h>
+#include <ast_union.h>
+#include <ast_array.h>
 
 #include <string>
 
 #include "be_extern.h"
-#include "ast_structure.h"
-#include "ast_field.h"
-#include "utl_identifier.h"
-#include "ast_union.h"
-#include "ast_array.h"
-
-#include "topic_keys.h"
 
 TopicKeys::RootType
 TopicKeys::root_type(AST_Type* type)
@@ -197,7 +197,7 @@ TopicKeys::Iterator::operator++()
       }
       const ACE_CDR::ULong field_count = struct_root->nfields();
       // If a nested struct marked as a key has no keys, all the fields are
-      // implied to be keys.
+      // implied to be keys (expect those marked with @key(FALSE)).
       if (pos_ == 0) {
         if (level_ > 0) {
           implied_keys_ = true;
@@ -205,7 +205,9 @@ TopicKeys::Iterator::operator++()
             AST_Field** field_ptrptr;
             struct_root->field(field_ptrptr, pos_);
             AST_Field* field = *field_ptrptr;
-            if (be_global->is_key(field)) {
+            bool key_annotation_value;
+            const bool has_key_annotation = be_global->check_key(field, key_annotation_value);
+            if (has_key_annotation && key_annotation_value) {
               implied_keys_ = false;
             }
           }
@@ -219,7 +221,10 @@ TopicKeys::Iterator::operator++()
         AST_Field** field_ptrptr;
         struct_root->field(field_ptrptr, pos_);
         AST_Field* field = *field_ptrptr;
-        if (be_global->is_key(field) || implied_keys_) {
+        bool key_annotation_value;
+        const bool has_key_annotation = be_global->check_key(field, key_annotation_value);
+        const bool implied_key = implied_keys_ && !(has_key_annotation && !key_annotation_value);
+        if (key_annotation_value || implied_key) {
           child_ = new Iterator(field, this);
           Iterator& child = *child_;
           if (child == end_value()) {

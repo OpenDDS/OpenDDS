@@ -12,6 +12,7 @@ module TopicAnnotationsTest {
   /*
    * Simple Case of a Sample Struct with One Simple Key
    * 1 Key
+   *  - key
    */
   @topic
   struct SimpleKeyStruct {
@@ -22,6 +23,8 @@ module TopicAnnotationsTest {
   /*
    * Case of a Nested Struct Key
    * 2 Keys
+   *  - non_nested_key
+   *  - nested_key.key
    */
   @topic
   struct NestedKeyStruct {
@@ -32,6 +35,8 @@ module TopicAnnotationsTest {
   /*
    * Using a Typedef of a Struct as a Key
    * 2 Keys
+   *  - a_key_value
+   *  - my_struct_typedef_key.key
    */
   typedef SimpleKeyStruct MyStructTypedef;
   @topic
@@ -43,6 +48,8 @@ module TopicAnnotationsTest {
   /*
    * Case of an Array of Primitives
    * 2 Keys
+   *  - values[0]
+   *  - values[1]
    */
   typedef long LongArray[2];
   @topic
@@ -53,6 +60,8 @@ module TopicAnnotationsTest {
   /*
    * Case of an Array of Structures
    * 2 Keys
+   *  - values[0].key
+   *  - values[0].key
    */
   typedef SimpleKeyStruct SimpleKeyStructArray[2];
   @topic
@@ -77,6 +86,7 @@ module TopicAnnotationsTest {
   /*
    * Case of a Keyed Union
    * 1 Key
+   *  - _d()
    */
   @topic
   union KeyedUnion switch (@key long) {
@@ -91,6 +101,8 @@ module TopicAnnotationsTest {
   /*
    * Case of a Keyed Union Nested inside a Struct
    * 2 Keys
+   *  - value._d()
+   *  - another_key
    */
   @topic
   struct KeyedUnionStruct {
@@ -101,6 +113,14 @@ module TopicAnnotationsTest {
   /*
    * Struct with Multidimensional Array Keys
    * 2*3 + 2*3*4 (30) Keys
+   *  - array1[0][0]
+   *  - array1[0][1]
+   *   ...
+   *  - array1[1][2]
+   *  - array2[0][0][0]
+   *  - array2[0][0][1]
+   *   ...
+   *  - array2[1][2][3]
    */
   typedef short A_2D_Array_t[2][3];
   typedef short A_3D_Array_t[2][3][4];
@@ -132,6 +152,11 @@ module TopicAnnotationsTest {
     /*
      * Basic Usage
      * 5 keys
+     *  - nested_no_keys.a
+     *  - nested_no_keys.b
+     *  - nested_no_keys.c
+     *  - nested_one_key.a
+     *  - non_nested
      */
     @topic
     struct StructA {
@@ -143,12 +168,39 @@ module TopicAnnotationsTest {
     /*
      * Make Sure This Works Recursively
      * 6 keys
+     *  - as_key.nested_no_keys.a
+     *  - as_key.nested_no_keys.b
+     *  - as_key.nested_no_keys.c
+     *  - as_key.nested_one_key.a
+     *  - as_key.non_nested
+     *  - yet_another_key
      */
     @topic
     struct StructB {
       @key StructA as_key;
       StructA not_as_key;
       @key long yet_another_key;
+    };
+
+    struct StructWithKeyFalse {
+      short a;
+      @key(FALSE) long b;
+      float c;
+    };
+
+    /*
+     * @key(FALSE) Amid Implied Keys
+     * If there are fields that are marked with @key(FALSE) and none marked
+     * with @key or @key(TRUE), then keys can still be implied, but it excludes
+     * the fields that are marked with @key(FALSE).
+     * 2 keys
+     *  - as_key.a
+     *  - as_key.c
+     */
+    @topic
+    struct StructC {
+      @key StructWithKeyFalse as_key;
+      StructWithKeyFalse not_as_key;
     };
 
   };
