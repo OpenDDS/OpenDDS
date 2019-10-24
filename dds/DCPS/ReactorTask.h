@@ -11,6 +11,7 @@
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/TimeTypes.h"
+#include "dds/DCPS/ReactorInterceptor.h"
 #include "ace/Task.h"
 #include "ace/Barrier.h"
 #include "ace/Synch_Traits.h"
@@ -54,6 +55,8 @@ public:
 
   bool is_shut_down() const { return state_ == STATE_NOT_RUNNING; }
 
+  RcHandle<ReactorInterceptor> interceptor() const { return interceptor_; }
+
   OPENDDS_POOL_ALLOCATION_FWD
 
 private:
@@ -67,6 +70,18 @@ private:
 
   enum State { STATE_NOT_RUNNING, STATE_OPENING, STATE_RUNNING };
 
+  class Interceptor : public DCPS::ReactorInterceptor {
+  public:
+    Interceptor(DCPS::ReactorTask* task) : ReactorInterceptor(task->get_reactor(), task->get_reactor_owner()), task_(task) {}
+    bool reactor_is_shut_down() const
+    {
+      return task_->is_shut_down();
+    }
+
+  private:
+    DCPS::ReactorTask* task_;
+  };
+
   ACE_Barrier   barrier_;
   LockType      lock_;
   State         state_;
@@ -76,6 +91,9 @@ private:
   ACE_Proactor* proactor_;
   bool          use_async_send_;
   TimerQueueType* timer_queue_;
+
+  RcHandle<Interceptor> interceptor_;
+
 };
 
 } // namespace DCPS

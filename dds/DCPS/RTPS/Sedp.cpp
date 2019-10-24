@@ -332,7 +332,19 @@ Sedp::init(const RepoId& guid,
   }
 
   {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, rtps_inst->lock_, -1);
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, rtps_inst->rtps_relay_address_lock_, -1);
+    rtps_inst->rtps_relay_address_ = disco.sedp_rtps_relay_address();
+  }
+
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, rtps_inst->rtps_relay_address_lock_, -1);
+    rtps_inst->rtps_relay_beacon_period_ = disco.sedp_rtps_relay_beacon_period();
+  }
+
+  rtps_inst->rtps_relay_only_ = disco.rtps_relay_only();
+
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, rtps_inst->stun_server_address_lock_, -1);
     rtps_inst->stun_server_address_ = disco.sedp_stun_server_address();
   }
   rtps_inst->use_ice_ = disco.use_ice();
@@ -397,21 +409,6 @@ Sedp::init(const RepoId& guid,
 #endif
 
   return DDS::RETCODE_OK;
-}
-
-void
-Sedp::rtps_relay_address(const ACE_INET_Addr& address) {
-  DCPS::RtpsUdpInst_rch rtps_inst =
-    DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
-  ACE_GUARD(ACE_Thread_Mutex, g, rtps_inst->lock_);
-  rtps_inst->rtps_relay_address_ = address;
-}
-
-void
-Sedp::rtps_relay_only(bool flag) {
-  DCPS::RtpsUdpInst_rch rtps_inst =
-    DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
-  rtps_inst->rtps_relay_only_ = flag;
 }
 
 #ifdef OPENDDS_SECURITY
@@ -1161,7 +1158,7 @@ Sedp::Task::svc_secure_i(DCPS::MessageId id,
                          const Security::SPDPdiscoveredParticipantData* ppdata)
 {
   DCPS::unique_ptr<const Security::SPDPdiscoveredParticipantData> pdata(ppdata);
-  spdp_->handle_participant_data(id, *pdata, DCPS::SequenceNumber::ZERO());
+  spdp_->handle_participant_data(id, *pdata, DCPS::SequenceNumber::ZERO(), ACE_INET_Addr());
 }
 #endif
 
@@ -2676,7 +2673,7 @@ Sedp::Writer::transport_assoc_done(int flags, const RepoId& remote) {
                OPENDDS_STRING(conv).c_str()));
     return;
   }
-  sedp_.spdp_.interceptor().enqueue(new AssociationComplete(&sedp_, repo_id_, remote));
+  sedp_.spdp_.job_queue()->enqueue(make_rch<AssociationComplete>(&sedp_, repo_id_, remote));
 }
 
 void

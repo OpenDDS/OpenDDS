@@ -72,6 +72,11 @@ public:
     resend_period_ = period;
   }
 
+  DCPS::TimeDuration lease_duration() const { return lease_duration_; }
+  void lease_duration(const DCPS::TimeDuration& period) {
+    lease_duration_ = period;
+  }
+
   u_short pb() const { return pb_; }
   void pb(u_short port_base) {
     pb_ = port_base;
@@ -146,9 +151,24 @@ public:
     spdp_rtps_relay_address_ = address;
   }
 
+  const DCPS::TimeDuration& spdp_rtps_relay_beacon_period() const { return spdp_rtps_relay_beacon_period_; }
+  void spdp_rtps_relay_beacon_period(const DCPS::TimeDuration& period) {
+    spdp_rtps_relay_beacon_period_ = period;
+  }
+
+  const DCPS::TimeDuration& spdp_rtps_relay_send_period() const { return spdp_rtps_relay_send_period_; }
+  void spdp_rtps_relay_send_period(const DCPS::TimeDuration& period) {
+    spdp_rtps_relay_send_period_ = period;
+  }
+
   const ACE_INET_Addr& sedp_rtps_relay_address() const { return sedp_rtps_relay_address_; }
   void sedp_rtps_relay_address(const ACE_INET_Addr& address) {
     sedp_rtps_relay_address_ = address;
+  }
+
+  const DCPS::TimeDuration& sedp_rtps_relay_beacon_period() const { return sedp_rtps_relay_beacon_period_; }
+  void sedp_rtps_relay_beacon_period(const DCPS::TimeDuration& period) {
+    sedp_rtps_relay_beacon_period_ = period;
   }
 
   bool rtps_relay_only() const { return rtps_relay_only_; }
@@ -163,9 +183,6 @@ public:
   void use_ice(bool ui) {
     use_ice_ = ui;
   }
-
-  const DCPS::TimeDuration& max_spdp_timer_period() const { return max_spdp_timer_period_; }
-  void max_spdp_timer_period(const DCPS::TimeDuration& x) { max_spdp_timer_period_ = x; }
 
   const DCPS::TimeDuration& max_auth_time() const { return max_auth_time_; }
   void max_auth_time(const DCPS::TimeDuration& x) { max_auth_time_ = x; }
@@ -188,12 +205,10 @@ public:
                         const DCPS::RepoId& local_participant) const;
   u_short get_sedp_port(DDS::DomainId_t domain,
                         const DCPS::RepoId& local_participant) const;
-  void schedule_send(DDS::DomainId_t domain,
-                     const DCPS::RepoId& local_participant,
-                     const DCPS::TimeDuration& delay) const;
 
 private:
   DCPS::TimeDuration resend_period_;
+  DCPS::TimeDuration lease_duration_;
   u_short pb_, dg_, pg_, d0_, d1_, dx_;
   unsigned char ttl_;
   bool sedp_multicast_;
@@ -202,11 +217,13 @@ private:
   OPENDDS_STRING guid_interface_;
   AddrVec spdp_send_addrs_;
   ACE_INET_Addr spdp_rtps_relay_address_;
+  DCPS::TimeDuration spdp_rtps_relay_beacon_period_;
+  DCPS::TimeDuration spdp_rtps_relay_send_period_;
   ACE_INET_Addr sedp_rtps_relay_address_;
+  DCPS::TimeDuration sedp_rtps_relay_beacon_period_;
   bool rtps_relay_only_;
   ACE_INET_Addr sedp_stun_server_address_;
   bool use_ice_;
-  DCPS::TimeDuration max_spdp_timer_period_;
   DCPS::TimeDuration max_auth_time_;
   DCPS::TimeDuration auth_resend_period_;
   u_short max_spdp_sequence_msg_reset_check_;

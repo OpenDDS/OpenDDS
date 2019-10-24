@@ -1586,10 +1586,10 @@ namespace OpenDDS {
 
 #ifdef OPENDDS_SECURITY
         bool has_last_stateless_msg_;
-        MonotonicTimePoint last_stateless_msg_time_;
+        MonotonicTimePoint stateless_msg_deadline_;
         DDS::Security::ParticipantStatelessMessage last_stateless_msg_;
 
-        MonotonicTimePoint auth_started_time_;
+        MonotonicTimePoint auth_deadline_;
         AuthState auth_state_;
 
         DDS::Security::IdentityToken identity_token_;

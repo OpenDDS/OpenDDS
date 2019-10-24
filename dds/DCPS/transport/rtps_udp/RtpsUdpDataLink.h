@@ -23,6 +23,7 @@
 #include "dds/DCPS/transport/framework/DataLink.h"
 #include "dds/DCPS/ReactorTask.h"
 #include "dds/DCPS/ReactorTask_rch.h"
+#include "dds/DCPS/PeriodicTask.h"
 #include "dds/DCPS/transport/framework/TransportSendBuffer.h"
 
 #include "dds/DCPS/DataSampleElement.h"
@@ -489,11 +490,11 @@ private:
   }
 
   void send_nack_replies();
-  void send_heartbeats();
+  void send_heartbeats(const DCPS::MonotonicTimePoint& now);
   void send_directed_heartbeats(OPENDDS_VECTOR(RTPS::HeartBeatSubmessage)& hbs);
-  void check_heartbeats();
+  void check_heartbeats(const DCPS::MonotonicTimePoint& now);
   void send_heartbeat_replies();
-  void send_relay_beacon();
+  void send_relay_beacon(const DCPS::MonotonicTimePoint& now);
 
   CORBA::Long best_effort_heartbeat_count_;
 
@@ -525,54 +526,8 @@ private:
 
   } nack_reply_, heartbeat_reply_;
 
-  struct HeartBeat : ReactorInterceptor {
-
-    explicit HeartBeat(ACE_Reactor* reactor, ACE_thread_t owner, RtpsUdpDataLink* outer, PMF function)
-      : ReactorInterceptor(reactor, owner)
-      , outer_(outer)
-      , function_(function)
-      , enabled_(false) {}
-
-    void schedule_enable(bool reenable)
-    {
-      execute_or_enqueue(new ScheduleEnableCommand(this, reenable));
-    }
-
-    int handle_timeout(const ACE_Time_Value&, const void*)
-    {
-      (outer_->*function_)();
-      return 0;
-    }
-
-    bool reactor_is_shut_down() const
-    {
-      return outer_->reactor_is_shut_down();
-    }
-
-    void enable(bool reenable);
-    void disable();
-
-    RtpsUdpDataLink* outer_;
-    PMF function_;
-    bool enabled_;
-
-    struct ScheduleEnableCommand : public Command {
-      ScheduleEnableCommand(HeartBeat* hb, bool reenable)
-        : heartbeat_(hb), reenable_(reenable)
-      { }
-
-      virtual void execute()
-      {
-        heartbeat_->enable(reenable_);
-      }
-
-      HeartBeat* heartbeat_;
-      bool reenable_;
-    };
-
-  };
-
-  RcHandle<HeartBeat> heartbeat_, heartbeatchecker_, relay_beacon_;
+  typedef PmfPeriodicTask<RtpsUdpDataLink> Periodic;
+  Periodic heartbeat_, heartbeatchecker_, relay_beacon_;
 
   /// Data structure representing an "interesting" remote entity for static discovery.
   struct InterestingRemote {

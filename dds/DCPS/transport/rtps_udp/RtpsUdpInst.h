@@ -76,6 +76,8 @@ public:
   ///{
   void rtps_relay_address(const ACE_INET_Addr& address);
   ACE_INET_Addr rtps_relay_address() const;
+  void rtps_relay_beacon_period(const TimeDuration& period);
+  TimeDuration rtps_relay_beacon_period() const;
   void rtps_relay_only(bool flag) { rtps_relay_only_ = flag; }
   bool rtps_relay_only() const { return rtps_relay_only_; }
   void stun_server_address(const ACE_INET_Addr& address);
@@ -98,6 +100,8 @@ private:
   ACE_INET_Addr local_address_;
   OPENDDS_STRING local_address_config_str_;
   ACE_INET_Addr rtps_relay_address_;
+  mutable ACE_SYNCH_MUTEX rtps_relay_address_lock_;
+  TimeDuration rtps_relay_beacon_period_;
   bool rtps_relay_only_;
   bool use_ice_;
   ACE_INET_Addr stun_server_address_;
@@ -108,14 +112,26 @@ private:
 
 inline void RtpsUdpInst::rtps_relay_address(const ACE_INET_Addr& address)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  ACE_GUARD(ACE_Thread_Mutex, g, rtps_relay_address_lock_);
   rtps_relay_address_ = address;
 }
 
 inline ACE_INET_Addr RtpsUdpInst::rtps_relay_address() const
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ACE_INET_Addr());
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, rtps_relay_address_lock_, ACE_INET_Addr());
   return rtps_relay_address_;
+}
+
+inline void RtpsUdpInst::rtps_relay_beacon_period(const TimeDuration& period)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, rtps_relay_address_lock_);
+  rtps_relay_beacon_period_ = period;
+}
+
+inline TimeDuration RtpsUdpInst::rtps_relay_beacon_period() const
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, rtps_relay_address_lock_, TimeDuration());
+  return rtps_relay_beacon_period_;
 }
 
 inline void RtpsUdpInst::stun_server_address(const ACE_INET_Addr& address)

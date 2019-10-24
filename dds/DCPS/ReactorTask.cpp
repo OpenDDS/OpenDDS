@@ -130,6 +130,7 @@ OpenDDS::DCPS::ReactorTask::svc()
   reactor_owner_ = ACE_Thread_Manager::instance()->thr_self();
   wait_for_startup();
 
+  interceptor_ = make_rch<Interceptor>(this);
 
   {
     // Obtain the lock.  This should only happen once the open() has hit

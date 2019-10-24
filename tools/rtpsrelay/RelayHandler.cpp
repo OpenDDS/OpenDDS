@@ -447,10 +447,9 @@ SpdpHandler::SpdpHandler(ACE_Reactor* reactor,
                          const OpenDDS::DCPS::RepoId& application_participant_guid,
                          const CRYPTO_TYPE& crypto,
                          const ACE_INET_Addr& application_participant_addr)
-  : VerticalHandler(reactor, relay_addresses, association_table, lifespan, rtps_discovery, application_domain, application_participant_guid , crypto)
-  , application_participant_addr_(application_participant_addr)
-  , application_participant_addr_str_(addr_to_string(application_participant_addr))
-  , spdp_message_(nullptr)
+: VerticalHandler(reactor, relay_addresses, association_table, lifespan, rtps_discovery, application_domain, application_participant_guid , crypto)
+, application_participant_addr_(application_participant_addr)
+, application_participant_addr_str_(addr_to_string(application_participant_addr))
 {}
 
 std::string SpdpHandler::extract_relay_address(const RelayAddresses& relay_addresses) const
@@ -460,7 +459,7 @@ std::string SpdpHandler::extract_relay_address(const RelayAddresses& relay_addre
 
 bool SpdpHandler::do_normal_processing(const ACE_INET_Addr& remote,
                                        const OpenDDS::DCPS::RepoId& src_guid,
-                                       const GuidSet& /*to*/,
+                                       const GuidSet& to,
                                        const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg)
 {
   if (src_guid == application_participant_guid_) {
@@ -470,24 +469,43 @@ bool SpdpHandler::do_normal_processing(const ACE_INET_Addr& remote,
     }
 
     // SPDP message is from the application participant.
-    // Cache the SPDP announcement from the application participant.
-    spdp_message_ = msg;
+    if (!to.empty()) {
+      // Forward to destinations.
+      for (const auto& guid : to) {
+        const auto pos = guid_addr_map_.find(guid);
+        if (pos != guid_addr_map_.end()) {
+          for (const auto& addr : pos->second) {
+            enqueue_message(addr, msg);
+          }
+        }
+      }
+      max_fan_out(to.size());
+    } else {
+      // Forward to all peers except the application participant.
+      for (const auto& p : guid_addr_map_) {
+        if (p.first != application_participant_guid_) {
+          for (const auto& addr : p.second) {
+            enqueue_message(addr, msg);
+          }
+        }
+      }
+      max_fan_out(guid_addr_map_.size());
+    }
 
     return false;
   }
 
   // SPDP message is from a client.
+  if (to.empty() || to.count(application_participant_guid_) != 0) {
+    // Forward to the application participant.
+    enqueue_message(application_participant_addr_str_, msg);
+    max_fan_out(1);
+  }
+
   // Cache it.
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, spdp_messages_mutex_, false);
-  spdp_messages_[src_guid] = msg;
-
-  // Forward to the application participant.
-  enqueue_message(application_participant_addr_str_, msg);
-  max_fan_out(1);
-
-  // Send the client the SPDP from the application participant.
-  if (spdp_message_) {
-    enqueue_message(addr_to_string(remote), spdp_message_);
+  if (to.empty()) {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, spdp_messages_mutex_, false);
+    spdp_messages_[src_guid] = msg;
   }
 
   return true;
