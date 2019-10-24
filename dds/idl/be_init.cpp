@@ -5,21 +5,20 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "../Version.h"
-
-#include <ace/OS_NS_stdlib.h>
-
 #include <tao/Version.h>
 
 #include <global_extern.h>
 #include <drv_extern.h>
 #include <utl_err.h>
 
-#include "be_extern.h"
-#include "be_util.h"
+#include <ace/OS_NS_stdlib.h>
 
 #include <iostream>
 #include <iomanip>
+
+#include "be_extern.h"
+#include "be_util.h"
+#include "../Version.h"
 
 void
 BE_version()
