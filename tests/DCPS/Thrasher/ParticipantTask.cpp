@@ -116,11 +116,11 @@ ParticipantTask::svc()
         ACE_Configuration_Heap ach;
         ACE_Configuration_Section_Key sect_key;
         ach.open();
-        ach.open_section(ach.root_section(), "not_root", 1, sect_key);
-        ach.set_string_value(sect_key, "use_multicast", "0");
-        ach.set_string_value(sect_key, "nak_depth", "512");
-        ach.set_string_value(sect_key, "heartbeat_period", "200");
-        ach.set_string_value(sect_key, "heartbeat_response_delay", "100");
+        ach.open_section(ach.root_section(), ACE_TEXT("not_root"), 1, sect_key);
+        ach.set_string_value(sect_key, ACE_TEXT("use_multicast"), "0");
+        ach.set_string_value(sect_key, ACE_TEXT("nak_depth"), "512");
+        ach.set_string_value(sect_key, ACE_TEXT("heartbeat_period"), "200");
+        ach.set_string_value(sect_key, ACE_TEXT("heartbeat_response_delay"), "100");
         inst->load(ach, sect_key);
         config->instances_.push_back(inst);
         TheTransportRegistry->bind_config(config_name, participant);
