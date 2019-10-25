@@ -365,33 +365,45 @@ Sedp::init(const RepoId& guid,
   const bool besteffort = false, nondurable = false;
 #endif
 
-  publications_writer_.enable_transport_using_config(reliable, durable, transport_cfg_);
+  if (spdp_.available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER) {
+    publications_writer_.enable_transport_using_config(reliable, durable, transport_cfg_);
+  }
   publications_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
 
 #ifdef OPENDDS_SECURITY
   publications_secure_writer_.set_crypto_handles(spdp_.crypto_handle());
   publications_secure_reader_->set_crypto_handles(spdp_.crypto_handle());
-  publications_secure_writer_.enable_transport_using_config(reliable, durable, transport_cfg_);
+  if (spdp_.available_builtin_endpoints() & DDS::Security::SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER) {
+    publications_secure_writer_.enable_transport_using_config(reliable, durable, transport_cfg_);
+  }
   publications_secure_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
 #endif
 
-  subscriptions_writer_.enable_transport_using_config(reliable, durable, transport_cfg_);
+  if (spdp_.available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER) {
+    subscriptions_writer_.enable_transport_using_config(reliable, durable, transport_cfg_);
+  }
   subscriptions_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
 
 #ifdef OPENDDS_SECURITY
   subscriptions_secure_writer_.set_crypto_handles(spdp_.crypto_handle());
   subscriptions_secure_reader_->set_crypto_handles(spdp_.crypto_handle());
-  subscriptions_secure_writer_.enable_transport_using_config(reliable, durable, transport_cfg_);
+  if (spdp_.available_builtin_endpoints() & DDS::Security::SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER) {
+    subscriptions_secure_writer_.enable_transport_using_config(reliable, durable, transport_cfg_);
+  }
   subscriptions_secure_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
 #endif
 
-  participant_message_writer_.enable_transport_using_config(reliable, durable, transport_cfg_);
+  if (spdp_.available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER) {
+    participant_message_writer_.enable_transport_using_config(reliable, durable, transport_cfg_);
+  }
   participant_message_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
 
 #ifdef OPENDDS_SECURITY
   participant_message_secure_writer_.set_crypto_handles(spdp_.crypto_handle());
   participant_message_secure_reader_->set_crypto_handles(spdp_.crypto_handle());
-  participant_message_secure_writer_.enable_transport_using_config(reliable, durable, transport_cfg_);
+  if (spdp_.available_builtin_endpoints() & DDS::Security::BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER) {
+    participant_message_secure_writer_.enable_transport_using_config(reliable, durable, transport_cfg_);
+  }
   participant_message_secure_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
 
   participant_stateless_message_writer_.enable_transport_using_config(besteffort, nondurable, transport_cfg_);
@@ -956,7 +968,8 @@ void Sedp::associate_secure_readers_to_writers(const Security::SPDPdiscoveredPar
       peer.remote_data_, dcps_participant_secure_writer_.get_repo_id(), peer.remote_id_);
     dcps_participant_secure_writer_.assoc(peer);
   }
-  if (avail & SEDP_BUILTIN_PUBLICATIONS_SECURE_READER) {
+  if (spdp_.available_builtin_endpoints() & SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER &&
+      avail & SEDP_BUILTIN_PUBLICATIONS_SECURE_READER) {
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER;
     remote_reader_crypto_handles_[peer.remote_id_] = generate_remote_matched_reader_crypto_handle(
@@ -965,7 +978,8 @@ void Sedp::associate_secure_readers_to_writers(const Security::SPDPdiscoveredPar
       peer.remote_data_, publications_secure_writer_.get_repo_id(), peer.remote_id_);
     publications_secure_writer_.assoc(peer);
   }
-  if (avail & SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER) {
+  if (spdp_.available_builtin_endpoints() & SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER &&
+      avail & SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER) {
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER;
     remote_reader_crypto_handles_[peer.remote_id_] = generate_remote_matched_reader_crypto_handle(
@@ -1078,12 +1092,14 @@ Sedp::send_builtin_crypto_tokens(const Security::SPDPdiscoveredParticipantData& 
                                dcps_participant_secure_writer_.get_repo_id());
   }
 
-  if (avail & SEDP_BUILTIN_PUBLICATIONS_SECURE_READER) {
+  if (spdp_.available_builtin_endpoints() & SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER &&
+      avail & SEDP_BUILTIN_PUBLICATIONS_SECURE_READER) {
     send_builtin_crypto_tokens(part, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER,
                                publications_secure_writer_.get_repo_id());
   }
 
-  if (avail & SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER) {
+  if (spdp_.available_builtin_endpoints() & SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER &&
+      avail & SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER) {
     send_builtin_crypto_tokens(part, ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER,
                                subscriptions_secure_writer_.get_repo_id());
   }
@@ -1104,17 +1120,20 @@ Sedp::Task::svc_i(const ParticipantData_t* ppdata)
     pdata->participantProxy.availableBuiltinEndpoints;
 
   // See RTPS v2.1 section 8.5.5.1
-  if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR) {
+  if (spdp_->available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER &&
+      avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR) {
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER;
     sedp_->publications_writer_.assoc(peer);
   }
-  if (avail & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR) {
+  if (spdp_->available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER &&
+      avail & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR) {
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER;
     sedp_->subscriptions_writer_.assoc(peer);
   }
-  if (avail & BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER) {
+  if (spdp_->available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER &&
+      avail & BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER) {
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER;
     sedp_->participant_message_writer_.assoc(peer);
@@ -1191,18 +1210,24 @@ Sedp::disassociate(const ParticipantData_t& pdata)
     ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
     ACE_GUARD_RETURN(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock, false);
 
-    disassociate_helper(avail, DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR, part,
-      ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER, publications_writer_);
+    if (spdp_.available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER) {
+      disassociate_helper(avail, DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR, part,
+                          ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER, publications_writer_);
+    }
     disassociate_helper(avail, DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER, part,
       ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER, *publications_reader_);
 
-    disassociate_helper(avail, DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR, part,
-      ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER, subscriptions_writer_);
+    if (spdp_.available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER) {
+      disassociate_helper(avail, DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR, part,
+                          ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER, subscriptions_writer_);
+    }
     disassociate_helper(avail, DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER, part,
       ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER, *subscriptions_reader_);
 
-    disassociate_helper(avail, BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER, part,
-      ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER, participant_message_writer_);
+    if (spdp_.available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER) {
+      disassociate_helper(avail, BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER, part,
+                          ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER, participant_message_writer_);
+    }
     disassociate_helper(avail, BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER, part,
       ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER, *participant_message_reader_);
 
@@ -1211,18 +1236,24 @@ Sedp::disassociate(const ParticipantData_t& pdata)
 #ifdef OPENDDS_SECURITY
     using namespace DDS::Security;
 
-    disassociate_helper(avail, SEDP_BUILTIN_PUBLICATIONS_SECURE_READER, part,
-      ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER, publications_secure_writer_);
+    if (spdp_.available_builtin_endpoints() & SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER) {
+      disassociate_helper(avail, SEDP_BUILTIN_PUBLICATIONS_SECURE_READER, part,
+                          ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER, publications_secure_writer_);
+    }
     disassociate_helper(avail, SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER, part,
       ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER, *publications_secure_reader_);
 
-    disassociate_helper(avail, SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER, part,
-      ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER, subscriptions_secure_writer_);
+    if (spdp_.available_builtin_endpoints() & SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER) {
+      disassociate_helper(avail, SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER, part,
+                          ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER, subscriptions_secure_writer_);
+    }
     disassociate_helper(avail, SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER, part,
       ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER, *subscriptions_secure_reader_);
 
-    disassociate_helper(avail, BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER, part,
-      ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER, participant_message_secure_writer_);
+    if (spdp_.available_builtin_endpoints() & DDS::Security::BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER) {
+      disassociate_helper(avail, BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER, part,
+                          ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER, participant_message_secure_writer_);
+    }
     disassociate_helper(avail, BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER, part,
       ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER, *participant_message_secure_reader_);
 
@@ -2571,6 +2602,10 @@ void Sedp::signal_liveliness(DDS::LivelinessQosPolicyKind kind)
 void
 Sedp::signal_liveliness_unsecure(DDS::LivelinessQosPolicyKind kind)
 {
+  if (!(spdp_.available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER)) {
+    return;
+  }
+
   ParticipantMessageData data;
   data.participantGuid = participant_id_;
 
@@ -2595,6 +2630,10 @@ Sedp::signal_liveliness_unsecure(DDS::LivelinessQosPolicyKind kind)
 void
 Sedp::signal_liveliness_secure(DDS::LivelinessQosPolicyKind kind)
 {
+  if (!(spdp_.available_builtin_endpoints() & DDS::Security::BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER)) {
+    return;
+  }
+
   ParticipantMessageData data;
   data.participantGuid = participant_id_;
 
@@ -3347,6 +3386,14 @@ Sedp::populate_discovered_reader_msg(
 void
 Sedp::write_durable_publication_data(const RepoId& reader, bool secure)
 {
+  if (!(spdp_.available_builtin_endpoints() & (DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER
+#ifdef OPENDDS_SECURITY
+                                               | DDS::Security::SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER
+#endif
+                                               ))) {
+    return;
+  }
+
   if (secure) {
 #ifdef OPENDDS_SECURITY
     LocalPublicationIter pub, end = local_publications_.end();
@@ -3375,6 +3422,14 @@ Sedp::write_durable_publication_data(const RepoId& reader, bool secure)
 void
 Sedp::write_durable_subscription_data(const RepoId& reader, bool secure)
 {
+  if (!(spdp_.available_builtin_endpoints() & (DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER
+#ifdef OPENDDS_SECURITY
+                                               | DDS::Security::SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER
+#endif
+                                               ))) {
+    return;
+  }
+
   if (secure) {
 #ifdef OPENDDS_SECURITY
     LocalSubscriptionIter sub, end = local_subscriptions_.end();
@@ -3403,6 +3458,10 @@ Sedp::write_durable_subscription_data(const RepoId& reader, bool secure)
 void
 Sedp::write_durable_participant_message_data(const RepoId& reader)
 {
+  if (!(spdp_.available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER)) {
+    return;
+  }
+
   LocalParticipantMessageIter part, end = local_participant_messages_.end();
   for (part = local_participant_messages_.begin(); part != end; ++part) {
     write_participant_message_data(part->first, part->second, reader);
@@ -3497,6 +3556,10 @@ Sedp::write_publication_data_unsecure(
     LocalPublication& lp,
     const RepoId& reader)
 {
+  if (!(spdp_.available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER)) {
+    return DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
+
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
   if (spdp_.associated() && (reader != GUID_UNKNOWN ||
                              !associated_participants_.empty())) {
@@ -3541,6 +3604,10 @@ Sedp::write_publication_data_secure(
     LocalPublication& lp,
     const RepoId& reader)
 {
+  if (!(spdp_.available_builtin_endpoints() & DDS::Security::SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER)) {
+    return DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
+
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
   if (spdp_.associated() && (reader != GUID_UNKNOWN ||
                              !associated_participants_.empty())) {
@@ -3632,6 +3699,10 @@ Sedp::write_subscription_data_unsecure(
     LocalSubscription& ls,
     const RepoId& reader)
 {
+  if (!(spdp_.available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER)) {
+    return DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
+
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
   if (spdp_.associated() && (reader != GUID_UNKNOWN ||
                              !associated_participants_.empty())) {
@@ -3675,6 +3746,10 @@ Sedp::write_subscription_data_secure(
     LocalSubscription& ls,
     const RepoId& reader)
 {
+  if (!(spdp_.available_builtin_endpoints() & DDS::Security::SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER)) {
+    return DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
+
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
   if (spdp_.associated() && (reader != GUID_UNKNOWN ||
                              !associated_participants_.empty())) {
@@ -3723,6 +3798,10 @@ Sedp::write_participant_message_data(
     LocalParticipantMessage& pm,
     const RepoId& reader)
 {
+  if (!(spdp_.available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER)) {
+    return DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
+
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
   if (spdp_.associated() && (reader != GUID_UNKNOWN ||
                              !associated_participants_.empty())) {
