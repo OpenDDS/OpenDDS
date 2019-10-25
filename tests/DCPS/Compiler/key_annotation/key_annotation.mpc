@@ -18,7 +18,7 @@ project(*): dcps_test {
   exeout = .
 
   libs += key_annotation_idl
-  libpaths += ../key_annotation_idl
+  libpaths += .
   after += key_annotation_idl
 
   Source_Files {
