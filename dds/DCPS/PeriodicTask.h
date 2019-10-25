@@ -65,7 +65,7 @@ private:
   };
 
   struct ScheduleDisableCommand : public ReactorInterceptor::Command {
-    ScheduleDisableCommand(PeriodicTask* hb)
+    explicit ScheduleDisableCommand(PeriodicTask* hb)
       : periodic_task_(hb)
     { }
 
