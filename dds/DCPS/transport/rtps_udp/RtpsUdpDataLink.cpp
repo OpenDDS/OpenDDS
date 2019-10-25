@@ -95,9 +95,9 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
                 config.nak_response_delay_)
   , heartbeat_reply_(this, &RtpsUdpDataLink::send_heartbeat_replies,
                      config.heartbeat_response_delay_)
-  , heartbeat_(reactor_task->interceptor(), this, &RtpsUdpDataLink::send_heartbeats)
-  , heartbeatchecker_(reactor_task->interceptor(), this, &RtpsUdpDataLink::check_heartbeats)
-  , relay_beacon_(reactor_task->interceptor(), this, &RtpsUdpDataLink::send_relay_beacon)
+  , heartbeat_(reactor_task->interceptor(), *this, &RtpsUdpDataLink::send_heartbeats)
+  , heartbeatchecker_(reactor_task->interceptor(), *this, &RtpsUdpDataLink::check_heartbeats)
+  , relay_beacon_(reactor_task->interceptor(), *this, &RtpsUdpDataLink::send_relay_beacon)
   , held_data_delivery_handler_(this)
   , max_bundle_size_(config.max_bundle_size_)
   , quick_reply_delay_(config.heartbeat_response_delay_ * QUICK_REPLY_DELAY_RATIO)

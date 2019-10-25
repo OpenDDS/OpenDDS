@@ -1507,20 +1507,20 @@ Spdp::SpdpTransport::open()
 
   job_queue_ = DCPS::make_rch<DCPS::JobQueue>(reactor);
 
-  local_sender_ = DCPS::make_rch<SpdpPeriodic>(reactor_task_.interceptor(), this, &SpdpTransport::send_local);
+  local_sender_ = DCPS::make_rch<SpdpPeriodic>(reactor_task_.interceptor(), ref(*this), &SpdpTransport::send_local);
   local_sender_->enable(false, outer_->disco_->resend_period());
 
 #ifdef OPENDDS_SECURITY
-  auth_deadline_processor_ = DCPS::make_rch<SpdpSporadic>(reactor_task_.interceptor(), this, &SpdpTransport::process_auth_deadlines);
-  auth_resend_processor_ = DCPS::make_rch<SpdpSporadic>(reactor_task_.interceptor(), this, &SpdpTransport::process_auth_resends);
+  auth_deadline_processor_ = DCPS::make_rch<SpdpSporadic>(reactor_task_.interceptor(), ref(*this), &SpdpTransport::process_auth_deadlines);
+  auth_resend_processor_ = DCPS::make_rch<SpdpSporadic>(reactor_task_.interceptor(), ref(*this), &SpdpTransport::process_auth_resends);
 #endif
 
-  relay_sender_ = DCPS::make_rch<SpdpPeriodic>(reactor_task_.interceptor(), this, &SpdpTransport::send_relay);
+  relay_sender_ = DCPS::make_rch<SpdpPeriodic>(reactor_task_.interceptor(), ref(*this), &SpdpTransport::send_relay);
   if (outer_->disco_->spdp_rtps_relay_address() != ACE_INET_Addr()) {
     relay_sender_->enable(false, outer_->disco_->spdp_rtps_relay_send_period());
   }
 
-  relay_beacon_ = DCPS::make_rch<SpdpPeriodic>(reactor_task_.interceptor(), this, &SpdpTransport::send_relay_beacon);
+  relay_beacon_ = DCPS::make_rch<SpdpPeriodic>(reactor_task_.interceptor(), ref(*this), &SpdpTransport::send_relay_beacon);
   if (outer_->disco_->spdp_rtps_relay_address() != ACE_INET_Addr()) {
     relay_beacon_->enable(false, outer_->disco_->spdp_rtps_relay_beacon_period());
   }

@@ -332,19 +332,19 @@ Sedp::init(const RepoId& guid,
   }
 
   {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, rtps_inst->rtps_relay_address_lock_, -1);
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, rtps_inst->rtps_relay_config_lock_, -1);
     rtps_inst->rtps_relay_address_ = disco.sedp_rtps_relay_address();
   }
 
   {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, rtps_inst->rtps_relay_address_lock_, -1);
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, rtps_inst->rtps_relay_config_lock_, -1);
     rtps_inst->rtps_relay_beacon_period_ = disco.sedp_rtps_relay_beacon_period();
   }
 
   rtps_inst->rtps_relay_only_ = disco.rtps_relay_only();
 
   {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, rtps_inst->stun_server_address_lock_, -1);
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, rtps_inst->stun_server_config_lock_, -1);
     rtps_inst->stun_server_address_ = disco.sedp_stun_server_address();
   }
   rtps_inst->use_ice_ = disco.use_ice();

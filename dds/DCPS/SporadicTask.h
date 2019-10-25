@@ -108,24 +108,27 @@ private:
   }
 };
 
-template <typename Outer>
+template <typename Delegate>
 class PmfSporadicTask : public SporadicTask {
 public:
-  typedef void (Outer::*PMF)(const MonotonicTimePoint&);
+  typedef void (Delegate::*PMF)(const MonotonicTimePoint&);
 
-  PmfSporadicTask(RcHandle<ReactorInterceptor> interceptor, Outer* outer, PMF function)
+  PmfSporadicTask(RcHandle<ReactorInterceptor> interceptor, Delegate& delegate, PMF function)
     : SporadicTask(interceptor)
-    , outer_(outer)
+    , delegate_(delegate)
     , function_(function)
   {}
 
 private:
-  Outer* outer_;
+  WeakRcHandle<Delegate> delegate_;
   PMF function_;
 
   void execute(const MonotonicTimePoint& now)
   {
-    (outer_->*function_)(now);
+    RcHandle<Delegate> handle = delegate_.lock();
+    if (handle) {
+      ((*handle).*function_)(now);
+    }
   }
 };
 
