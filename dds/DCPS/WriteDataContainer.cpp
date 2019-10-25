@@ -1426,6 +1426,12 @@ WriteDataContainer::wait_ack_of_seq(const MonotonicTimePoint& abs_deadline, cons
   DDS::ReturnCode_t ret = DDS::RETCODE_OK;
   ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->wfa_lock_, DDS::RETCODE_ERROR);
 
+  SequenceNumber last_acked = acked_sequences_.last_ack();
+  SequenceNumber acked = acked_sequences_.cumulative_ack();
+  if (sequence == last_acked && sequence == acked && sending_data_.size() != 0) {
+    acked_sequences_.insert(sending_data_.head()->get_header().sequence_.previous());
+  }
+
   while (MonotonicTimePoint::now() < deadline) {
 
     if (!sequence_acknowledged(sequence)) {

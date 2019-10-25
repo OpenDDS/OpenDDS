@@ -36,9 +36,21 @@ if ($arg eq 'low') {
   $pub_opts .= "-t 64 -s 16";
   $sub_opts .= "-t 64 -n 1024";
 
+} elsif ($arg eq 'double') {
+  $pub_opts .= "-t 2 -s 1";
+  $sub_opts .= "-t 2 -n 2";
+
 } elsif ($arg eq 'single') {
   $pub_opts .= "-t 1 -s 1";
   $sub_opts .= "-t 1 -n 1";
+
+} elsif ($arg eq 'superlow') {
+  $pub_opts .= "-t 4 -s 256";
+  $sub_opts .= "-t 4 -n 1024";
+
+} elsif ($arg eq 'megalow') {
+  $pub_opts .= "-t 2 -s 512";
+  $sub_opts .= "-t 2 -n 1024";
 
 } else { # default (i.e. lazy)
   $pub_opts .= "-t 1 -s 1024";
@@ -61,7 +73,9 @@ $pub_opts .= " -DCPSConfigFile $ini_file";
 $sub_opts .= " -DCPSConfigFile $ini_file";
 
 my $test = new PerlDDS::TestFramework();
-$test->setup_discovery();
+if ("thrasher.ini" eq $ini_file) {
+  $test->setup_discovery();
+}
 $test->enable_console_logging();
 
 $test->process('sub', 'subscriber', $sub_opts);

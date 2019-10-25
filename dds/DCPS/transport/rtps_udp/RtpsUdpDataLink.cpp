@@ -561,6 +561,7 @@ RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
 
       RtpsReader_rch reader = rr->second;
       g.release();
+
       reader->remove_writer(remote_id);
 
       if (reader->writer_count() == 0) {
@@ -1869,8 +1870,8 @@ RtpsUdpDataLink::send_bundled_submessages(MetaSubmessageVec& meta_submessages)
   RepoId prev_dst; // used to determine when we need to write a new info_dst
   for (size_t i = 0; i < meta_submessage_bundles.size(); ++i) {
     prev_dst = GUID_UNKNOWN;
-    ACE_Message_Block mb_acknack(meta_submessage_bundle_sizes[i]); //FUTURE: allocators?
-    Serializer ser(&mb_acknack, false, Serializer::ALIGN_CDR);
+    ACE_Message_Block mb_bundle(meta_submessage_bundle_sizes[i]); //FUTURE: allocators?
+    Serializer ser(&mb_bundle, false, Serializer::ALIGN_CDR);
     for (MetaSubmessageIterVec::const_iterator it = meta_submessage_bundles[i].begin(); it != meta_submessage_bundles[i].end(); ++it) {
       MetaSubmessage& res = **it;
       RepoId dst = res.dst_guid_;
@@ -1882,7 +1883,7 @@ RtpsUdpDataLink::send_bundled_submessages(MetaSubmessageVec& meta_submessages)
       ser << res.sm_;
       prev_dst = dst;
     }
-    send_strategy()->send_rtps_control(mb_acknack, meta_submessage_bundle_addrs[i]);
+    send_strategy()->send_rtps_control(mb_bundle, meta_submessage_bundle_addrs[i]);
   }
 }
 
@@ -2907,10 +2908,10 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
   typedef ReaderInfoMap::iterator ri_iter;
   const ri_iter end = remote_readers_.end();
   for (ri_iter ri = remote_readers_.begin(); ri != end; ++ri) {
+    bool marked_to = false;
     if (has_data) {
       meta_submessage.to_guids_.insert(ri->first);
-    } else if (!ri->second.handshake_done_) {
-      pre_assoc_hb_guids.insert(ri->first);
+      marked_to = true;
     }
     if (!ri->second.durable_data_.empty()) {
       const MonotonicTimePoint expiration =
@@ -2931,11 +2932,16 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
         }
       } else {
         has_durable_data = true;
+        is_final = false;
         if (ri->second.durable_data_.rbegin()->first > durable_max) {
           durable_max = ri->second.durable_data_.rbegin()->first;
         }
         meta_submessage.to_guids_.insert(ri->first);
+        marked_to = true;
       }
+    }
+    if (!marked_to && !ri->second.handshake_done_) {
+      pre_assoc_hb_guids.insert(ri->first);
     }
   }
 
