@@ -75,7 +75,7 @@ public:
     DDS::DomainParticipantFactoryQos & qos);
 
   /// Make a copy of the participants map for reading.
-  const DPMap participants() const;
+  DPMap participants() const;
 
   void cleanup();
 
