@@ -82,7 +82,7 @@ private:
     }
 
   private:
-    DCPS::ReactorTask* task_;
+    DCPS::ReactorTask* const task_;
   };
 
   ACE_Barrier   barrier_;
