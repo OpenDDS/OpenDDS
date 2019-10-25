@@ -110,7 +110,7 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
     ACE_INET_Addr addr(rtps_relay_address_s.c_str());
     rtps_relay_address(addr);
   }
-  GET_CONFIG_TIME_VALUE(cf, sect, ACE_TEXT("DataRtpsRelayBeaconPeriod"),
+  GET_CONFIG_TIME_VALUE(cf, sect, ACE_TEXT("RtpsRelayBeaconPeriod"),
                         rtps_relay_beacon_period_);
 
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("RtpsRelayOnly"), rtps_relay_only_, bool);
