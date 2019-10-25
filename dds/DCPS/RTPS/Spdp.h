@@ -141,6 +141,8 @@ public:
 
   void schedule_send(const DCPS::TimeDuration& delay);
 
+  BuiltinEndpointSet_t available_builtin_endpoints() const { return available_builtin_endpoints_; }
+
 protected:
   Sedp& endpoint_manager() { return sedp_; }
 
@@ -229,6 +231,7 @@ private:
   void remove_expired_participants();
   void get_discovered_participant_ids(DCPS::RepoIdSet& results) const;
 
+  BuiltinEndpointSet_t available_builtin_endpoints_;
   Sedp sedp_;
   // wait for acknowledgments from SpdpTransport and Sedp::Task
   // when BIT is being removed (fini_bit)
