@@ -59,8 +59,8 @@ BE_post_init(char*[], long)
   DRV_add_include_path(included, include_dds.c_str(), 0, true);
 
   if (idl_global->idl_version_ < IDL_VERSION_4) {
-    idl_global->ignore_files_ = true;
-    idl_global->err()->direct_error("IDL Version must at least be 4", "", 0);
+    idl_global->ignore_files_ = true; // Exit without parsing files
+    be_global->error("opendds_idl requires IDL version to be 4 or greater");
   } else {
     DRV_cpp_putarg("-D__OPENDDS_IDL_HAS_ANNOTATIONS");
     be_global->builtin_annotations_.register_all();

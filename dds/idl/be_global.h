@@ -187,6 +187,16 @@ public:
   bool has_key(AST_Union* node);
 
   /**
+   * Give a warning that looks like one from tao_idl
+   */
+  void warning(const char* msg, const char* filename = 0, unsigned lineno = 0);
+
+  /**
+   * Give an error that looks like one from tao_idl
+   */
+  void error(const char* msg, const char* filename = 0, unsigned lineno = 0);
+
+  /**
    * Wrapper around built-in annotations, see annotations.h
    */
   BuiltinAnnotations builtin_annotations_;
