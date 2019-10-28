@@ -331,22 +331,12 @@ Sedp::init(const RepoId& guid,
     rtps_inst->local_address_.set(sedp_addr.c_str());
   }
 
-  {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, rtps_inst->rtps_relay_config_lock_, -1);
-    rtps_inst->rtps_relay_address_ = disco.sedp_rtps_relay_address();
-  }
-
-  {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, rtps_inst->rtps_relay_config_lock_, -1);
-    rtps_inst->rtps_relay_beacon_period_ = disco.sedp_rtps_relay_beacon_period();
-  }
-
+  rtps_relay_address(disco.sedp_rtps_relay_address());
+  rtps_inst->rtps_relay_beacon_period_ = disco.sedp_rtps_relay_beacon_period();
+  rtps_inst->use_rtps_relay_ = disco.use_rtps_relay();
   rtps_inst->rtps_relay_only_ = disco.rtps_relay_only();
 
-  {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, rtps_inst->stun_server_config_lock_, -1);
-    rtps_inst->stun_server_address_ = disco.sedp_stun_server_address();
-  }
+  stun_server_address(disco.sedp_stun_server_address());
   rtps_inst->use_ice_ = disco.use_ice();
 
   // Create a config
@@ -4789,6 +4779,22 @@ OPENDDS_STRING Sedp::Msg::msgTypeToString() const {
 void
 Sedp::AssociationComplete::execute() {
   sedp_->association_complete(local_, remote_);
+}
+
+void
+Sedp::rtps_relay_address(const ACE_INET_Addr& address)
+{
+  DCPS::RtpsUdpInst_rch rtps_inst = DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
+  ACE_GUARD(ACE_Thread_Mutex, g, rtps_inst->rtps_relay_config_lock_);
+  rtps_inst->rtps_relay_address_ = address;
+}
+
+void
+Sedp::stun_server_address(const ACE_INET_Addr& address)
+{
+  DCPS::RtpsUdpInst_rch rtps_inst = DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
+  ACE_GUARD(ACE_Thread_Mutex, g, rtps_inst->stun_server_config_lock_);
+  rtps_inst->stun_server_address_ = address;
 }
 
 }

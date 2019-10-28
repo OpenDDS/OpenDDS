@@ -57,6 +57,7 @@ RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
   , spdp_rtps_relay_beacon_period_(30, 0)
   , spdp_rtps_relay_send_period_(100, 0)
   , sedp_rtps_relay_beacon_period_(30, 0)
+  , use_rtps_relay_(false)
   , rtps_relay_only_(false)
   , use_ice_(false)
   , max_auth_time_(300, 0)
@@ -296,6 +297,17 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
                               value.c_str(), rtps_name.c_str()), -1);
           }
           discovery->rtps_relay_only(bool(smInt));
+        } else if (name == "UseRtpsRelay") {
+          const OPENDDS_STRING& value = it->second;
+          int smInt;
+          if (!DCPS::convertToInteger(value, smInt)) {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config ")
+                              ACE_TEXT("Invalid entry (%C) for UseRtpsRelay in ")
+                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+                              value.c_str(), rtps_name.c_str()), -1);
+          }
+          discovery->use_rtps_relay(bool(smInt));
 #ifdef OPENDDS_SECURITY
         } else if (name == "SedpStunServerAddress") {
           discovery->sedp_stun_server_address(ACE_INET_Addr(it->second.c_str()));
@@ -616,6 +628,38 @@ RtpsDiscovery::get_sedp_port(DDS::DomainId_t domain,
   }
 
   return 0;
+}
+
+void
+RtpsDiscovery::sedp_rtps_relay_address(const ACE_INET_Addr& address)
+{
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, rtps_relay_config_lock_);
+    sedp_rtps_relay_address_ = address;
+  }
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  for (typename DomainParticipantMap::const_iterator dom_pos = participants_.begin(), dom_limit = participants_.end();
+       dom_pos != dom_limit; ++dom_pos) {
+    for (typename ParticipantMap::const_iterator part_pos = dom_pos->second.begin(), part_limit = dom_pos->second.end(); part_pos != part_limit; ++part_pos) {
+      part_pos->second->sedp_rtps_relay_address(address);
+    }
+  }
+}
+
+void
+RtpsDiscovery::sedp_stun_server_address(const ACE_INET_Addr& address)
+{
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, stun_config_lock_);
+    sedp_stun_server_address_ = address;
+  }
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  for (typename DomainParticipantMap::const_iterator dom_pos = participants_.begin(), dom_limit = participants_.end();
+       dom_pos != dom_limit; ++dom_pos) {
+    for (typename ParticipantMap::const_iterator part_pos = dom_pos->second.begin(), part_limit = dom_pos->second.end(); part_pos != part_limit; ++part_pos) {
+      part_pos->second->sedp_stun_server_address(address);
+    }
+  }
 }
 
 } // namespace DCPS

@@ -156,6 +156,10 @@ public:
 
   ICE::Endpoint* get_ice_endpoint();
 
+  void rtps_relay_address(const ACE_INET_Addr& address);
+
+  void stun_server_address(const ACE_INET_Addr& address);
+
 private:
 
   class AssociationComplete : public DCPS::JobQueue::Job {

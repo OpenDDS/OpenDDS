@@ -227,7 +227,7 @@ ssize_t
 RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
                                    const ACE_INET_Addr& addr)
 {
-  const ACE_INET_Addr a = link_->config().rtps_relay_only() ? link_->config().rtps_relay_address() : addr;
+  const ACE_INET_Addr a = link_->config().rtps_relay_only_ ? link_->config().rtps_relay_address() : addr;
 #ifdef ACE_LACKS_SENDMSG
   char buffer[UDP_MAX_MESSAGE_SIZE];
   char *iter = buffer;
