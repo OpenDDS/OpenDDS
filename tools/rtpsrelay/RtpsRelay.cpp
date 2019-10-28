@@ -413,7 +413,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     publisher->get_default_datawriter_qos(writer_qos);
 
     writer_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
-    writer_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;;
+    writer_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
     DDS::DataWriter_var writer = publisher->create_datawriter(topic, writer_qos, nullptr,
                                                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);
