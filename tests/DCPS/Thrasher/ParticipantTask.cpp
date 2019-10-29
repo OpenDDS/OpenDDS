@@ -87,8 +87,11 @@ ParticipantTask::svc()
     //DDS::StatusCondition_var cond;
     //DDS::WaitSet_var ws = new DDS::WaitSet;
 
+    int this_thread_index = 0;
     { // Scope for guard to serialize creating Entities.
       GuardType guard(lock_);
+
+      this_thread_index = thread_index_++;
 
       // Create Participant
       participant =
@@ -102,9 +105,8 @@ ParticipantTask::svc()
       OpenDDS::RTPS::RtpsDiscovery_rch rd = OpenDDS::DCPS::dynamic_rchandle_cast<OpenDDS::RTPS::RtpsDiscovery>(disc);
       if (!rd.is_nil()) {
         char config_name[64], inst_name[64];
-        ACE_OS::snprintf(config_name, 64, "cfg_%d", thread_index_);
-        ACE_OS::snprintf(inst_name, 64, "rtps_%d", thread_index_);
-        ++thread_index_;
+        ACE_OS::snprintf(config_name, 64, "cfg_%d", this_thread_index);
+        ACE_OS::snprintf(inst_name, 64, "rtps_%d", this_thread_index);
 
         ACE_DEBUG((LM_INFO,
           "(%P|%t)    -> PARTICIPANT creating transport config %C\n",
@@ -208,6 +210,8 @@ ParticipantTask::svc()
     {
       Foo foo;
       foo.key = 3;
+      foo.x = (float) this_thread_index;
+      foo.y = (float) i;
       DDS::InstanceHandle_t handle = writer_i->register_instance(foo);
 
       if (writer_i->write(foo, handle) != DDS::RETCODE_OK) {

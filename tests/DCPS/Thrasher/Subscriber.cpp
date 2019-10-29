@@ -52,6 +52,45 @@ namespace
       }
     }
   }
+
+  int
+  wait_match(const DDS::DataReader_var& reader,
+             unsigned int num_readers, bool exact)
+  {
+    DDS::StatusCondition_var condition = reader->get_statuscondition();
+    condition->set_enabled_statuses(DDS::SUBSCRIPTION_MATCHED_STATUS);
+    DDS::WaitSet_var ws = new DDS::WaitSet;
+    ws->attach_condition(condition);
+    DDS::ConditionSeq conditions;
+    DDS::SubscriptionMatchedStatus ms = { 0, 0, 0, 0, 0 };
+    DDS::Duration_t timeout = { 3, 0 };
+    DDS::ReturnCode_t stat;
+    do {
+      stat = reader->get_subscription_matched_status(ms);
+      if (stat != DDS::RETCODE_OK) {
+        ACE_ERROR_RETURN((
+                    LM_ERROR,
+                    ACE_TEXT("(%P|%t) ERROR: %N:%l: wait_match() -")
+                    ACE_TEXT(" get_subscription_matched_status failed!\n")),
+                   -1);
+      } else if (exact && (ms.current_count == (CORBA::Long)num_readers)) {
+        break;  // matched
+      } else if (!exact && (ms.current_count >= (CORBA::Long)num_readers)) {
+        break;  // matched
+      }
+      // wait for a change
+      stat = ws->wait(conditions, timeout);
+      if ((stat != DDS::RETCODE_OK) && (stat != DDS::RETCODE_TIMEOUT)) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: %N:%l: wait_match() -")
+                          ACE_TEXT(" wait failed!\n")),
+                         -1);
+      }
+    } while (true);
+    ws->detach_condition(condition);
+    return 0;
+  }
+
 } // namespace
 
 int
@@ -113,8 +152,8 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
         ProgressIndicator("(%P|%t)    SUBSCRIBER %d%% (%d samples received)\n",
                           expected_samples);
 
-      DDS::DataReaderListener_var listener =
-        new DataReaderListenerImpl(received_samples, progress);
+      DataReaderListenerImpl* listener_p = new DataReaderListenerImpl(received_samples, progress);
+      DDS::DataReaderListener_var listener = listener_p;
 
       DDS::DataReaderQos reader_qos;
       subscriber->get_default_datareader_qos(reader_qos);
@@ -135,34 +174,22 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
                           ACE_TEXT("%N:%l: main()")
                           ACE_TEXT(" create_datareader failed!\n")), 7);
 
-      // Block until Publisher completes
-      DDS::StatusCondition_var cond = reader->get_statuscondition();
-      cond->set_enabled_statuses(DDS::SUBSCRIPTION_MATCHED_STATUS);
+      wait_match(reader, 1, false); // might never get up to n_publishers if they are exiting
+      listener_p->wait_received(OpenDDS::DCPS::TimeDuration(15, 0), expected_samples);
+      wait_match(reader, 0, true);
 
-      DDS::WaitSet_var ws = new DDS::WaitSet;
-      ws->attach_condition(cond);
-
-      DDS::Duration_t timeout =
-        { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
-
-      DDS::ConditionSeq conditions;
-      DDS::SubscriptionMatchedStatus matches = {0, 0, 0, 0, 0};
-      do
-      {
-        if (ws->wait(conditions, timeout) != DDS::RETCODE_OK)
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("%N:%l: main()")
-                            ACE_TEXT(" wait failed!\n")), 8);
-
-        if (reader->get_subscription_matched_status(matches) != ::DDS::RETCODE_OK)
-        {
-          ACE_ERROR ((LM_ERROR,
-            "ERROR: failed to get subscription matched status\n"));
-          return 1;
+      for (size_t x = 0; x < n_publishers; ++x) {
+        OPENDDS_MAP(size_t, OPENDDS_SET(size_t))::const_iterator xit = listener_p->x_and_y_map.find(x);
+        if (xit == listener_p->x_and_y_map.end()) {
+          ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) <- ERROR: MISSING ALL SAMPLES FROM PUBLISHER %d\n"), x));
+          break;
         }
-      }
-      while (matches.current_count > 0 || matches.total_count < n_publishers);
-      ws->detach_condition(cond);
+        for (size_t y = 0; y < expected_samples / n_publishers; ++y) {
+          if (xit->second.count(y) == 0) {
+            ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) <- ERROR: PUBLISHER %d MISSING SAMPLE %d\n"), x, y));
+          }
+        }
+    }
 
     } // End scope for contained entities
 

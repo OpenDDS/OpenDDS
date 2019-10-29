@@ -36,6 +36,10 @@ if ($arg eq 'low') {
   $pub_opts .= "-t 64 -s 16";
   $sub_opts .= "-t 64 -n 1024";
 
+} elsif ($arg eq 'triangle') {
+  $pub_opts .= "-t 3 -s 3";
+  $sub_opts .= "-t 3 -n 9";
+
 } elsif ($arg eq 'double') {
   $pub_opts .= "-t 2 -s 1";
   $sub_opts .= "-t 2 -n 2";
