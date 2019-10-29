@@ -1113,6 +1113,10 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
 
   RtpsUdpDataLink_rch link = link_.lock();
 
+  if (!link) {
+    return false;
+  }
+
   GuardType guard(link->strategy_lock_);
   if (link->receive_strategy() == 0) {
     return false;
@@ -1309,6 +1313,10 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
 
   RtpsUdpDataLink_rch link = link_.lock();
 
+  if (!link) {
+    return false;
+  }
+
   GuardType guard(link->strategy_lock_);
   if (link->receive_strategy() == 0) {
     return false;
@@ -1497,6 +1505,10 @@ RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(MetaSubmessageVec& meta_submessa
   using namespace OpenDDS::RTPS;
 
   RtpsUdpDataLink_rch link = link_.lock();
+
+  if (!link) {
+    return;
+  }
 
   GuardType guard(link->strategy_lock_);
   if (link->receive_strategy() == 0) {
