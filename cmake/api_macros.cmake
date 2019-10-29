@@ -18,11 +18,13 @@ macro(OPENDDS_GET_SOURCES_AND_OPTIONS
   idl_prefix
   libs
   tao_options
-  opendds_options)
+  opendds_options
+  link_keyword_option)
 
   set(_options_n
     PUBLIC PRIVATE INTERFACE
-    TAO_IDL_OPTIONS OPENDDS_IDL_OPTIONS)
+    TAO_IDL_OPTIONS OPENDDS_IDL_OPTIONS
+    TARGET_LINK_KEYWORD)
 
   cmake_parse_arguments(_arg "" "" "${_options_n}" ${ARGN})
 
@@ -46,6 +48,12 @@ macro(OPENDDS_GET_SOURCES_AND_OPTIONS
 
   set(${tao_options} ${_arg_TAO_IDL_OPTIONS})
   set(${opendds_options} ${_arg_OPENDDS_IDL_OPTIONS})
+
+  string(TOUPPER "${_arg_TARGET_LINK_KEYWORD}" keyword)  
+  if("${keyword}" MATCHES "\\_LINK$")
+    string(REPLACE "_LINK" "" ${link_keyword_option} ${keyword}) 
+  endif()
+  
 
   foreach(arg ${_arg_UNPARSED_ARGUMENTS})
     get_filename_component(arg ${arg} ABSOLUTE)
@@ -97,6 +105,7 @@ macro(OPENDDS_TARGET_SOURCES target)
     _libs
     _tao_options
     _opendds_options
+    _link_signature_option
     ${ARGN})
 
   if(NOT _opendds_options MATCHES "--(no-)?default-nested")
@@ -153,11 +162,15 @@ macro(OPENDDS_TARGET_SOURCES target)
         ${OPENDDS_DCPS_COMPILE_DEFS})
   endif()
 
+  if(_link_signature_option)
+    message("OPENDDS_TARGET_SOURCES Linking against libraries with scope: '${_link_signature_option}'")
+  endif() 
+
   if (OPENDDS_DCPS_LINK_DEPS)
-    target_link_libraries(${target} ${OPENDDS_DCPS_LINK_DEPS})
+    target_link_libraries(${target} ${_link_signature_option} ${OPENDDS_DCPS_LINK_DEPS})
   endif()
 
-  target_link_libraries(${target} PUBLIC Threads::Threads)
+  target_link_libraries(${target} ${_link_signature_option} Threads::Threads)
 
   foreach(scope PUBLIC PRIVATE INTERFACE)
     if(_idl_sources_${scope})
