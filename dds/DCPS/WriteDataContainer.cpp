@@ -120,6 +120,10 @@ WriteDataContainer::WriteDataContainer(
 
 WriteDataContainer::~WriteDataContainer()
 {
+  ACE_GUARD(ACE_Recursive_Thread_Mutex,
+            guard,
+            this->lock_);
+
   if (this->unsent_data_.size() > 0) {
     ACE_DEBUG((LM_WARNING,
                ACE_TEXT("(%P|%t) WARNING: WriteDataContainer::~WriteDataContainer() - ")
@@ -461,6 +465,10 @@ WriteDataContainer::num_all_samples()
 ACE_UINT64
 WriteDataContainer::get_unsent_data(SendStateDataSampleList& list)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                   guard,
+                   this->lock_, 0);
+
   DBG_ENTRY_LVL("WriteDataContainer","get_unsent_data",6);
   //
   // The samples in unsent_data are added to the local datawriter
@@ -521,6 +529,10 @@ WriteDataContainer::get_resend_data()
 bool
 WriteDataContainer::pending_data()
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                   guard,
+                   this->lock_, false);
+
   return this->sending_data_.size() != 0
          || this->orphaned_to_transport_.size() != 0
          || this->unsent_data_.size() != 0;
@@ -850,6 +862,9 @@ WriteDataContainer::remove_oldest_sample(
 {
   DataSampleElement* stale = 0;
 
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                   guard,
+                   this->lock_, DDS::RETCODE_ERROR);
   //
   // Remove the oldest sample from the instance list.
   //
@@ -1424,13 +1439,16 @@ WriteDataContainer::wait_ack_of_seq(const MonotonicTimePoint& abs_deadline, cons
 {
   const MonotonicTimePoint deadline(abs_deadline);
   DDS::ReturnCode_t ret = DDS::RETCODE_OK;
-  ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->wfa_lock_, DDS::RETCODE_ERROR);
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->lock_, DDS::RETCODE_ERROR);
+  ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, wfa_guard, this->wfa_lock_, DDS::RETCODE_ERROR);
 
   SequenceNumber last_acked = acked_sequences_.last_ack();
   SequenceNumber acked = acked_sequences_.cumulative_ack();
   if (sequence == last_acked && sequence == acked && sending_data_.size() != 0) {
     acked_sequences_.insert(sending_data_.head()->get_header().sequence_.previous());
   }
+
+  guard.release();
 
   while (MonotonicTimePoint::now() < deadline) {
 
