@@ -203,7 +203,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       if (listener_servant1->num_reads() > expected
         || listener_servant2->num_reads() > expected)
       {
-        cerr << "ERROR: received more than expected messages" << endl;
+        cerr << "ERROR: received more (" << listener_servant1->num_reads() << " + " << listener_servant2->num_reads() << ") than expected messages: (" << expected << " + " << expected << ")" << endl;
         exit (1);
       }
 
