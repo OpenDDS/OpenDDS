@@ -1123,7 +1123,7 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
   }
 
   const WriterInfoMap::iterator wi = remote_writers_.find(src);
-  if (wi != remote_writers_.end() && link) {
+  if (wi != remote_writers_.end()) {
     WriterInfo& info = wi->second;
     SequenceNumber seq;
     seq.setValue(data.writerSN.high, data.writerSN.low);
@@ -1169,7 +1169,7 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
     }
     info.recvd_.insert(seq);
     link->deliver_held_data(id_, info, durable_);
-  } else if (link) {
+  } else {
     if (Transport_debug_level > 5) {
       GuidConverter writer(src);
       GuidConverter reader(id_);
@@ -1208,14 +1208,19 @@ RtpsUdpDataLink::RtpsReader::process_gap_i(const RTPS::GapSubmessage& gap,
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
   RtpsUdpDataLink_rch link = link_.lock();
+
+  if (!link) {
+    return false;
+  }
+
   const WriterInfoMap::iterator wi = remote_writers_.find(src);
-  if (wi != remote_writers_.end() && link) {
+  if (wi != remote_writers_.end()) {
     SequenceRange sr;
     sr.first.setValue(gap.gapStart.high, gap.gapStart.low);
     SequenceNumber base;
     base.setValue(gap.gapList.bitmapBase.high, gap.gapList.bitmapBase.low);
     SequenceNumber first_received = SequenceNumber::MAX_VALUE;
-    if (!wi->second.recvd_.empty()) {
+    if (durable_ && !wi->second.recvd_.empty()) {
       OPENDDS_VECTOR(SequenceRange) missing = wi->second.recvd_.missing_sequence_ranges();
       if (!missing.empty()) {
         first_received = missing.front().second;
@@ -1333,43 +1338,55 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
   if (heartbeat.count.value <= info.heartbeat_recvd_count_) {
     return false;
   }
+  info.heartbeat_recvd_count_ = heartbeat.count.value;
 
-  bool immediate_reply = false;
+  // Heartbeat Sequence Range
   SequenceNumber hb_first;
   hb_first.setValue(heartbeat.firstSN.high, heartbeat.firstSN.low);
   SequenceNumber hb_last;
   hb_last.setValue(heartbeat.lastSN.high, heartbeat.lastSN.low);
-  if (info.first_ever_hb_ || (info.hb_range_.second.getValue() == 0 && hb_last.getValue() != 0)) {
+
+  // Internal Sequence Range
+  SequenceNumber& wi_first = info.hb_range_.first;
+  SequenceNumber& wi_last = info.hb_range_.second;
+
+  // Static Constant
+  static const SequenceNumber one, zero = SequenceNumber::ZERO();
+
+  bool immediate_reply = false;
+  if (wi_last.getValue() == 0 && hb_last.getValue() != 0) {
     immediate_reply = true;
   }
-  info.heartbeat_recvd_count_ = heartbeat.count.value;
-  info.first_ever_hb_ = false;
 
-  SequenceNumber& first = info.hb_range_.first;
-  first.setValue(heartbeat.firstSN.high, heartbeat.firstSN.low);
-  SequenceNumber& last = info.hb_range_.second;
-  last.setValue(heartbeat.lastSN.high, heartbeat.lastSN.low);
-  static const SequenceNumber starting, zero = SequenceNumber::ZERO();
-
-  // Only 'apply' heartbeat ranges to received set if the heartbeat is valid
-  // But for the sake of speedy discovery / association we'll still respond to invalid non-final heartbeats
-  if (last.getValue() >= starting.getValue()) {
-
-    DisjointSequence& recvd = info.recvd_;
-    if (!durable_ && info.first_valid_hb_) {
-      // For the non-durable reader, the first received HB or DATA establishes
-      // a baseline of the lowest sequence number we'd ever need to NACK.
-      if (recvd.empty() || recvd.low() >= last) {
-        recvd.insert(SequenceRange(zero, last));
+  // The first-ever HB can determine the start of our nackable range (wi_first)
+  if (info.first_ever_hb_) {
+    immediate_reply = true;
+    info.first_ever_hb_ = false;
+    if (!durable_) {
+      if (hb_last > zero) {
+        info.recvd_.insert(SequenceRange(zero, hb_last));
       } else {
-        recvd.insert(SequenceRange(zero, recvd.low()));
+        info.recvd_.insert(zero);
       }
-    } else if (!recvd.empty()) {
-      // All sequence numbers below 'first' should not be NACKed.
-      // The value of 'first' may not decrease with subsequent HBs.
-      recvd.insert(SequenceRange(zero,
-                                 (first > starting) ? first.previous() : zero));
+      wi_first = hb_last; // non-durable reliable connections ignore previous data
+    } else {
+      info.recvd_.insert(zero);
     }
+  }
+
+  // Only fully-valid heartbeats (see spec) will be "fully" applied to writer info
+  if (hb_first < hb_last || (hb_first == one && wi_last == zero)) {
+    if (info.first_valid_hb_) {
+      info.first_valid_hb_ = false;
+      immediate_reply = true;
+    }
+    if (!durable_) {
+      if (wi_first < hb_first) {
+        info.recvd_.insert(SequenceRange(wi_first, hb_first.previous()));
+        wi_first = hb_first;
+      }
+    }
+    wi_last = wi_last < hb_last ? hb_last : wi_last;
 
     link->deliver_held_data(id_, info, durable_);
 
