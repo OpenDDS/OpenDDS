@@ -146,6 +146,10 @@ public:
 
   u_short get_sedp_port() const { return sedp_.local_address().get_port_number(); }
 
+  void sedp_rtps_relay_address(const ACE_INET_Addr& address) { sedp_.rtps_relay_address(address); }
+
+  void sedp_stun_server_address(const ACE_INET_Addr& address) { sedp_.stun_server_address(address); }
+
   BuiltinEndpointSet_t available_builtin_endpoints() const { return available_builtin_endpoints_; }
 
 protected:

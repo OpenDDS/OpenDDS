@@ -148,8 +148,15 @@ public:
     guid_interface_ = gi;
   }
 
-  const ACE_INET_Addr& spdp_rtps_relay_address() const { return spdp_rtps_relay_address_; }
-  void spdp_rtps_relay_address(const ACE_INET_Addr& address) {
+  const ACE_INET_Addr& spdp_rtps_relay_address() const
+  {
+    static const ACE_INET_Addr dummy;
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, rtps_relay_config_lock_, dummy);
+    return spdp_rtps_relay_address_;
+  }
+  void spdp_rtps_relay_address(const ACE_INET_Addr& address)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, rtps_relay_config_lock_);
     spdp_rtps_relay_address_ = address;
   }
 
@@ -163,23 +170,32 @@ public:
     spdp_rtps_relay_send_period_ = period;
   }
 
-  const ACE_INET_Addr& sedp_rtps_relay_address() const { return sedp_rtps_relay_address_; }
-  void sedp_rtps_relay_address(const ACE_INET_Addr& address) {
-    sedp_rtps_relay_address_ = address;
+  const ACE_INET_Addr& sedp_rtps_relay_address() const
+  {
+    static const ACE_INET_Addr dummy;
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, rtps_relay_config_lock_, dummy);
+    return sedp_rtps_relay_address_;
   }
+  void sedp_rtps_relay_address(const ACE_INET_Addr& address);
 
   const DCPS::TimeDuration& sedp_rtps_relay_beacon_period() const { return sedp_rtps_relay_beacon_period_; }
   void sedp_rtps_relay_beacon_period(const DCPS::TimeDuration& period) {
     sedp_rtps_relay_beacon_period_ = period;
   }
 
+  bool use_rtps_relay() const { return use_rtps_relay_; }
+  void use_rtps_relay(bool f) { use_rtps_relay_ = f; }
+
   bool rtps_relay_only() const { return rtps_relay_only_; }
   void rtps_relay_only(bool f) { rtps_relay_only_ = f; }
 
-  const ACE_INET_Addr& sedp_stun_server_address() const { return sedp_stun_server_address_; }
-  void sedp_stun_server_address(const ACE_INET_Addr& address) {
-    sedp_stun_server_address_ = address;
+  const ACE_INET_Addr& sedp_stun_server_address() const
+  {
+    static const ACE_INET_Addr dummy;
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, stun_config_lock_, dummy);
+    return sedp_stun_server_address_;
   }
+  void sedp_stun_server_address(const ACE_INET_Addr& address);
 
   bool use_ice() const { return use_ice_; }
   void use_ice(bool ui) {
@@ -223,9 +239,12 @@ private:
   DCPS::TimeDuration spdp_rtps_relay_send_period_;
   ACE_INET_Addr sedp_rtps_relay_address_;
   DCPS::TimeDuration sedp_rtps_relay_beacon_period_;
+  bool use_rtps_relay_;
   bool rtps_relay_only_;
+  mutable ACE_SYNCH_MUTEX rtps_relay_config_lock_;
   ACE_INET_Addr sedp_stun_server_address_;
   bool use_ice_;
+  mutable ACE_SYNCH_MUTEX stun_config_lock_;
   DCPS::TimeDuration max_auth_time_;
   DCPS::TimeDuration auth_resend_period_;
   u_short max_spdp_sequence_msg_reset_check_;

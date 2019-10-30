@@ -280,8 +280,9 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
                      false);
   }
 
-  if (config.rtps_relay_address() != ACE_INET_Addr()) {
-    relay_beacon_.enable(false, config.rtps_relay_beacon_period());
+  if (config.rtps_relay_address() != ACE_INET_Addr() ||
+      config.use_rtps_relay_) {
+    relay_beacon_.enable(false, config.rtps_relay_beacon_period_);
   }
 
   return true;
@@ -3038,14 +3039,15 @@ RtpsUdpDataLink::check_heartbeats(const DCPS::MonotonicTimePoint& now)
 void
 RtpsUdpDataLink::send_relay_beacon(const DCPS::MonotonicTimePoint& /*now*/)
 {
-  if (config().rtps_relay_address() == ACE_INET_Addr()) {
+  const ACE_INET_Addr rra = config().rtps_relay_address();
+  if (rra == ACE_INET_Addr()) {
     return;
   }
 
   // Create a message with a few bytes of data for the beacon
   ACE_Message_Block mb(reinterpret_cast<const char*>(OpenDDS::RTPS::BEACON_MESSAGE), OpenDDS::RTPS::BEACON_MESSAGE_LENGTH);
   mb.wr_ptr(OpenDDS::RTPS::BEACON_MESSAGE_LENGTH);
-  send_strategy()->send_rtps_control(mb, config().rtps_relay_address());
+  send_strategy()->send_rtps_control(mb, rra);
 }
 
 void
@@ -3467,7 +3469,7 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
     if (normal_addr != NO_ADDR) {
       addresses.insert(normal_addr);
     }
-    ACE_INET_Addr relay_addr = config().rtps_relay_address();
+    const ACE_INET_Addr relay_addr = config().rtps_relay_address();
     if (relay_addr != NO_ADDR) {
       addresses.insert(relay_addr);
     }

@@ -1543,7 +1543,8 @@ Spdp::SpdpTransport::open()
   }
 
   relay_beacon_ = DCPS::make_rch<SpdpPeriodic>(reactor_task_.interceptor(), ref(*this), &SpdpTransport::send_relay_beacon);
-  if (outer_->disco_->spdp_rtps_relay_address() != ACE_INET_Addr()) {
+  if (outer_->disco_->spdp_rtps_relay_address() != ACE_INET_Addr() ||
+      outer_->disco_->use_rtps_relay()) {
     relay_beacon_->enable(false, outer_->disco_->spdp_rtps_relay_beacon_period());
   }
 }
