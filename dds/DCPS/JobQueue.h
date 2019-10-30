@@ -57,6 +57,11 @@ private:
         job->execute();
       }
     }
+
+    if (!job_queue_.empty()) {
+      reactor()->notify(this);
+    }
+
     return 0;
   }
 };
