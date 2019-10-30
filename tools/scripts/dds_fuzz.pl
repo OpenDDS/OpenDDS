@@ -8,30 +8,46 @@ use File::Find qw/find/;
 my $opendds_checks_failed = 0;
 my $dds_root_len = length($ENV{'DDS_ROOT'});
 
+sub failed_lines {
+  my $lines_ref = shift;
+  return "   - On the following lines: " . join(', ', @{$lines_ref}) . "\n";
+}
+
 sub process_file {
   my $full_filename = $_;
   my $filename = substr($full_filename, $dds_root_len);
-  my $cpp_source = $filename =~ /\.(cpp|h|inl)$/;
-  my $in_dds_dcps = $filename =~ /^\/dds\/DCPS/;
-  if (!($cpp_source && $in_dds_dcps)) {
-    return;
-  }
+  my $line_number = 1;
 
-  my $gettimeofday = 0;
+  my $in_dds_dcps = $filename =~ /^\/dds\/DCPS/;
+  my $cpp_file = $filename =~ /\.(cpp|h|inl)$/;
+  my $cmake_file = $filename =~ /(CMakeLists\.txt|\.cmake)$/;
+
+  my @gettimeofday_failed = ();
+  my @cmake_trailing_whitespace_failed = ();
 
   open(my $fd, $full_filename);
   while (my $line = <$fd>) {
-    if ($line =~ /gettimeofday|ACE_Time_Value\(\)\.now\(\)/) {
-      $gettimeofday = 1;
+    if ($cpp_file && $in_dds_dcps && $line =~ /gettimeofday|ACE_Time_Value\(\)\.now\(\)/) {
+      push(@gettimeofday_failed, $line_number);
     }
+    if ($cmake_file && $line =~ /\s\n$/) {
+      push(@cmake_trailing_whitespace_failed, $line_number);
+    }
+    $line_number += 1;
   }
   close($fd);
 
   my $failed_checks = "";
-  if ($gettimeofday) {
+  if (scalar @gettimeofday_failed) {
     $failed_checks .=
       " - ACE_OS::gettimeofday() and \"ACE_Time_Value().now()\" are forbidden in the core libraries.\n" .
-      "   See the \"Time\" section in docs/guidelines.md.\n";
+      "   See the \"Time\" section in docs/guidelines.md.\n" .
+      failed_lines(\@gettimeofday_failed);
+  }
+  if (scalar @cmake_trailing_whitespace_failed) {
+    $failed_checks .=
+      " - CMake file has trailing whitespace, which is forbidden in all text files by docs/guidelines.md\n" .
+      failed_lines(\@cmake_trailing_whitespace_failed);
   }
 
   if (length($failed_checks)) {
