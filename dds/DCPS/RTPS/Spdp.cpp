@@ -1537,7 +1537,8 @@ Spdp::SpdpTransport::open()
 #endif
 
   relay_sender_ = DCPS::make_rch<SpdpPeriodic>(reactor_task_.interceptor(), ref(*this), &SpdpTransport::send_relay);
-  if (outer_->disco_->spdp_rtps_relay_address() != ACE_INET_Addr()) {
+  if (outer_->disco_->spdp_rtps_relay_address() != ACE_INET_Addr() ||
+      outer_->disco_->use_rtps_relay()) {
     relay_sender_->enable(false, outer_->disco_->spdp_rtps_relay_send_period());
   }
 
