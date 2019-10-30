@@ -138,10 +138,18 @@ set(_opendds_libs
 
 list(APPEND _all_libs ${_opendds_libs} ${_ace_libs} ${_tao_libs})
 
+set(ACE_DEPS
+  Threads::Threads
+)
+
 macro(_OPENDDS_SYSTEM_LIBRARY name)
   list(APPEND ACE_DEPS ${name})
   string(TOUPPER "${name}" _cap_name)
-  find_library(${_cap_name}_LIBRARY ${name})
+  if((${ARGC} GREATER 1) AND ("${ARGV1}" STREQUAL "NO_CHECK"))
+    set(${_cap_name}_LIBRARY ${name})
+  else()
+    find_library(${_cap_name}_LIBRARY ${name})
+  endif()
   list(APPEND _opendds_required_deps ${_cap_name}_LIBRARY)
 endmacro()
 
@@ -153,8 +161,7 @@ if(UNIX)
 elseif(MSVC)
   # For some reason CMake can't find this in some cases, but we know it should
   # be there, so just link to it without a check.
-  set(IPHLPAPI_LIBRARY iphlpapi)
-  list(APPEND _opendds_required_deps IPHLPAPI_LIBRARY)
+  _OPENDDS_SYSTEM_LIBRARY(iphlpapi NO_CHECK)
 endif()
 
 set(OPENDDS_IDL_DEPS
