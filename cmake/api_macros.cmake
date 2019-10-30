@@ -18,13 +18,11 @@ macro(OPENDDS_GET_SOURCES_AND_OPTIONS
   idl_prefix
   libs
   tao_options
-  opendds_options
-  link_keyword_option)
+  opendds_options)
 
   set(_options_n
     PUBLIC PRIVATE INTERFACE
-    TAO_IDL_OPTIONS OPENDDS_IDL_OPTIONS
-    DEPENDENCY_LINK_KEYWORD)
+    TAO_IDL_OPTIONS OPENDDS_IDL_OPTIONS)
 
   cmake_parse_arguments(_arg "" "" "${_options_n}" ${ARGN})
 
@@ -48,11 +46,6 @@ macro(OPENDDS_GET_SOURCES_AND_OPTIONS
 
   set(${tao_options} ${_arg_TAO_IDL_OPTIONS})
   set(${opendds_options} ${_arg_OPENDDS_IDL_OPTIONS})
-
-  string(TOUPPER "${_arg_DEPENDENCY_LINK_KEYWORD}" keyword)
-  if("${keyword}" MATCHES "\\_LINK$")
-    string(REPLACE "_LINK" "" ${link_keyword_option} ${keyword})
-  endif()
 
   foreach(arg ${_arg_UNPARSED_ARGUMENTS})
     get_filename_component(arg ${arg} ABSOLUTE)
@@ -104,7 +97,6 @@ macro(OPENDDS_TARGET_SOURCES target)
     _libs
     _tao_options
     _opendds_options
-    _link_signature_option
     ${ARGN})
 
   if(NOT _opendds_options MATCHES "--(no-)?default-nested")
@@ -161,17 +153,24 @@ macro(OPENDDS_TARGET_SOURCES target)
         ${OPENDDS_DCPS_COMPILE_DEFS})
   endif()
 
-  if(OPENDDS_CMAKE_VERBOSE)
-    if(_link_signature_option)
-      message(STATUS "OPENDDS_TARGET_SOURCES Linking against dependencies with scope: '${_link_signature_option}'")
+  set(linking_keyword invalid)
+  foreach (scope PUBLIC PRIVATE INTERFACE "")
+    if (OPENDDS_DEPENDENCY_LINK_KEYWORD STREQUAL "${scope}")
+      set(linking_keyword "${scope}")
+      break()
     endif()
+  endforeach()
+
+  if ("${linking_keyword}" STREQUAL "invalid")
+    message(WARNING "The OPENDDS_DEPENDENCY_LINK_KEYWORD that was provided is not empty and is not a valid keyword for scope. PUBLIC will be used by default.")
+    set(linking_keyword PUBLIC)
   endif()
 
   if (OPENDDS_DCPS_LINK_DEPS)
-    target_link_libraries(${target} ${_link_signature_option} ${OPENDDS_DCPS_LINK_DEPS})
+    target_link_libraries(${target} ${linking_keyword} ${OPENDDS_DCPS_LINK_DEPS})
   endif()
 
-  target_link_libraries(${target} ${_link_signature_option} Threads::Threads)
+  target_link_libraries(${target} ${linking_keyword} Threads::Threads)
 
   foreach(scope PUBLIC PRIVATE INTERFACE)
     if(_idl_sources_${scope})

@@ -42,10 +42,10 @@ add_executable(subscriber
 )
 
 foreach(t ${all_targets})
-  target_link_libraries(${t} OpenDDS::OpenDDS)
+  target_link_libraries(${t} PUBLIC OpenDDS::OpenDDS)
 
   if (NOT "${t}" STREQUAL "messenger")
-    target_link_libraries(${t} messenger)
+    target_link_libraries(${t} PUBLIC messenger)
   endif()
 endforeach()
 

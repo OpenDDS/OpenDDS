@@ -44,7 +44,7 @@ OPENDDS_TARGET_SOURCES(subscriber
 )
 
 foreach(t ${all_targets})
-  target_link_libraries(${t} OpenDDS::OpenDDS)
+  target_link_libraries(${t} PUBLIC OpenDDS::OpenDDS)
 endforeach()
 
 # Copy configs/scripts into build-output directory

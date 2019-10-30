@@ -85,3 +85,5 @@ if (NOT DEFINED TAO_ROOT)
 else()
   _OPENDDS_RETURN_ERR("TAO_ROOT has already been set")
 endif()
+
+set(OPENDDS_DEPENDENCY_LINK_KEYWORD "PUBLIC" CACHE "The scope to use when linking a target against dependencies in the OPENDDS_TARGET_SOURCES macro. Set to empty when plain signature is desirable." STRING)
