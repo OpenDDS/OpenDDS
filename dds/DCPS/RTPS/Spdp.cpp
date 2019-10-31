@@ -2478,6 +2478,8 @@ void Spdp::purge_auth_deadlines(DiscoveredParticipantIter iter)
       break;
     }
   }
+#else
+  ACE_UNUSED_ARG(iter);
 #endif
 }
 
@@ -2495,6 +2497,8 @@ void Spdp::purge_auth_resends(DiscoveredParticipantIter iter)
       break;
     }
   }
+#else
+  ACE_UNUSED_ARG(iter);
 #endif
 }
 

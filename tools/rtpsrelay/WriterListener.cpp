@@ -29,7 +29,7 @@ void WriterListener::on_data_available(DDS::DataReader_ptr reader)
     return;
   }
 
-  for (size_t idx = 0; idx != infos.length(); ++idx) {
+  for (CORBA::ULong idx = 0; idx != infos.length(); ++idx) {
     switch (infos[idx].instance_state) {
     case DDS::ALIVE_INSTANCE_STATE:
       {
