@@ -116,6 +116,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       dr_qos.resource_limits.max_samples_per_instance = MAX_SAMPLES_PER_INSTANCES;
       dr_qos.resource_limits.max_samples = MAX_SAMPLES;
       dr_qos.resource_limits.max_instances = MAX_INSTANCES;
+      dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 #ifndef OPENDDS_NO_OWNERSHIP_PROFILE
       dr_qos.history.kind = ::DDS::KEEP_ALL_HISTORY_QOS;
       dr_qos.history.depth = MAX_SAMPLES_PER_INSTANCES;
