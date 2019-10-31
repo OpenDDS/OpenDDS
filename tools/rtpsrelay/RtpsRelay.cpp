@@ -461,8 +461,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
                                  &data_vertical_handler, &data_horizontal_handler);
   statistics_h.open();
 
-  rtps_discovery->schedule_send(application_domain, application_participant_id, OpenDDS::DCPS::TimeDuration(1));
-
   reactor->run_reactor_event_loop();
 
   return EXIT_SUCCESS;

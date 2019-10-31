@@ -172,7 +172,6 @@ public:
 private:
   const ACE_INET_Addr application_participant_addr_;
   const std::string application_participant_addr_str_;
-  OpenDDS::DCPS::Message_Block_Shared_Ptr spdp_message_;
   typedef std::map<OpenDDS::DCPS::RepoId, OpenDDS::DCPS::Message_Block_Shared_Ptr, OpenDDS::DCPS::GUID_tKeyLessThan> SpdpMessages;
   SpdpMessages spdp_messages_;
   ACE_Thread_Mutex spdp_messages_mutex_;

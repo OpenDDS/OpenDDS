@@ -44,6 +44,7 @@ using DCPS::TimeDuration;
 RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
   : DCPS::PeerDiscovery<Spdp>(key)
   , resend_period_(30 /*seconds*/) // see RTPS v2.1 9.6.1.4.2
+  , lease_duration_(300)
   , pb_(7400) // see RTPS v2.1 9.6.1.3 for PB, DG, PG, D0, D1 defaults
   , dg_(250)
   , pg_(2)
@@ -53,9 +54,12 @@ RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
   , ttl_(1)
   , sedp_multicast_(true)
   , default_multicast_group_("239.255.0.1") /*RTPS v2.1 9.6.1.4.1*/
+  , spdp_rtps_relay_beacon_period_(30, 0)
+  , spdp_rtps_relay_send_period_(100, 0)
+  , sedp_rtps_relay_beacon_period_(30, 0)
+  , use_rtps_relay_(false)
   , rtps_relay_only_(false)
   , use_ice_(false)
-  , max_spdp_timer_period_(0, 10000)
   , max_auth_time_(300, 0)
   , auth_resend_period_(1, 0)
   , max_spdp_sequence_msg_reset_check_(3)
@@ -124,6 +128,17 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
               value.c_str(), rtps_name.c_str()), -1);
           }
           discovery->resend_period(TimeDuration(resend));
+        } else if (name == "LeaseDuration") {
+          const OPENDDS_STRING& value = it->second;
+          int duration;
+          if (!DCPS::convertToInteger(value, duration)) {
+            ACE_ERROR_RETURN((LM_ERROR,
+              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+              ACE_TEXT("Invalid entry (%C) for LeaseDuration in ")
+              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+              value.c_str(), rtps_name.c_str()), -1);
+          }
+          discovery->lease_duration(TimeDuration(duration));
         } else if (name == "PB") {
           const OPENDDS_STRING& value = it->second;
           u_short pb;
@@ -236,8 +251,41 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           discovery->spdp_send_addrs().swap(spdp_send_addrs);
         } else if (name == "SpdpRtpsRelayAddress") {
           discovery->spdp_rtps_relay_address(ACE_INET_Addr(it->second.c_str()));
+        } else if (name == "SpdpRtpsRelayBeaconPeriod") {
+          const OPENDDS_STRING& value = it->second;
+          int period;
+          if (!DCPS::convertToInteger(value, period)) {
+            ACE_ERROR_RETURN((LM_ERROR,
+              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+              ACE_TEXT("Invalid entry (%C) for SpdpRtpsRelayBeaconPeriod in ")
+              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+              value.c_str(), rtps_name.c_str()), -1);
+          }
+          discovery->spdp_rtps_relay_beacon_period(TimeDuration(period));
+        } else if (name == "SpdpRtpsRelaySendPeriod") {
+          const OPENDDS_STRING& value = it->second;
+          int period;
+          if (!DCPS::convertToInteger(value, period)) {
+            ACE_ERROR_RETURN((LM_ERROR,
+              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+              ACE_TEXT("Invalid entry (%C) for SpdpRtpsRelaySendPeriod in ")
+              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+              value.c_str(), rtps_name.c_str()), -1);
+          }
+          discovery->spdp_rtps_relay_send_period(TimeDuration(period));
         } else if (name == "SedpRtpsRelayAddress") {
           discovery->sedp_rtps_relay_address(ACE_INET_Addr(it->second.c_str()));
+        } else if (name == "SedpRtpsRelayBeaconPeriod") {
+          const OPENDDS_STRING& value = it->second;
+          int period;
+          if (!DCPS::convertToInteger(value, period)) {
+            ACE_ERROR_RETURN((LM_ERROR,
+              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+              ACE_TEXT("Invalid entry (%C) for SedpRtpsRelayBeaconPeriod in ")
+              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+              value.c_str(), rtps_name.c_str()), -1);
+          }
+          discovery->sedp_rtps_relay_beacon_period(TimeDuration(period));
         } else if (name == "RtpsRelayOnly") {
           const OPENDDS_STRING& value = it->second;
           int smInt;
@@ -249,6 +297,17 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
                               value.c_str(), rtps_name.c_str()), -1);
           }
           discovery->rtps_relay_only(bool(smInt));
+        } else if (name == "UseRtpsRelay") {
+          const OPENDDS_STRING& value = it->second;
+          int smInt;
+          if (!DCPS::convertToInteger(value, smInt)) {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config ")
+                              ACE_TEXT("Invalid entry (%C) for UseRtpsRelay in ")
+                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+                              value.c_str(), rtps_name.c_str()), -1);
+          }
+          discovery->use_rtps_relay(bool(smInt));
 #ifdef OPENDDS_SECURITY
         } else if (name == "SedpStunServerAddress") {
           discovery->sedp_stun_server_address(ACE_INET_Addr(it->second.c_str()));
@@ -406,19 +465,6 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
                               string_value.c_str(), rtps_name.c_str()), -1);
           }
 #endif /* OPENDDS_SECURITY */
-        } else if (name == "MaxSpdpTimerPeriod") {
-          // In milliseconds.
-          const OPENDDS_STRING& string_value = it->second;
-          int int_value;
-          if (DCPS::convertToInteger(string_value, int_value)) {
-            discovery->max_spdp_timer_period(TimeDuration::from_msec(int_value));
-          } else {
-            ACE_ERROR_RETURN((LM_ERROR,
-              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-              ACE_TEXT("Invalid entry (%C) for MaxSpdpTimerPeriod in ")
-              ACE_TEXT("[rtps_discovery/%C] section.\n"),
-              string_value.c_str(), rtps_name.c_str()), -1);
-          }
         } else if (name == "MaxSpdpSequenceMsgResetChecks") {
           const OPENDDS_STRING& string_value = it->second;
           u_short value;
@@ -585,13 +631,34 @@ RtpsDiscovery::get_sedp_port(DDS::DomainId_t domain,
 }
 
 void
-RtpsDiscovery::schedule_send(DDS::DomainId_t domain,
-                             const DCPS::RepoId& local_participant,
-                             const DCPS::TimeDuration& delay) const
+RtpsDiscovery::sedp_rtps_relay_address(const ACE_INET_Addr& address)
 {
-  ParticipantHandle p = get_part(domain, local_participant);
-  if (p) {
-    p->schedule_send(delay);
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, rtps_relay_config_lock_);
+    sedp_rtps_relay_address_ = address;
+  }
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  for (typename DomainParticipantMap::const_iterator dom_pos = participants_.begin(), dom_limit = participants_.end();
+       dom_pos != dom_limit; ++dom_pos) {
+    for (typename ParticipantMap::const_iterator part_pos = dom_pos->second.begin(), part_limit = dom_pos->second.end(); part_pos != part_limit; ++part_pos) {
+      part_pos->second->sedp_rtps_relay_address(address);
+    }
+  }
+}
+
+void
+RtpsDiscovery::sedp_stun_server_address(const ACE_INET_Addr& address)
+{
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, stun_config_lock_);
+    sedp_stun_server_address_ = address;
+  }
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  for (typename DomainParticipantMap::const_iterator dom_pos = participants_.begin(), dom_limit = participants_.end();
+       dom_pos != dom_limit; ++dom_pos) {
+    for (typename ParticipantMap::const_iterator part_pos = dom_pos->second.begin(), part_limit = dom_pos->second.end(); part_pos != part_limit; ++part_pos) {
+      part_pos->second->sedp_stun_server_address(address);
+    }
   }
 }
 
