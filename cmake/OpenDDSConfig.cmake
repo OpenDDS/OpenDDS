@@ -98,6 +98,16 @@ find_program(ACE_GPERF
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
+if(OPENDDS_XERCES3)
+  set(XercesC_ROOT "${OPENDDS_XERCES3}")
+  find_package(XercesC REQUIRED)
+endif()
+
+if(OPENDDS_SECURITY)
+  set(OpenSSL_ROOT "${OPENDDS_OPENSSL}")
+  find_package(OpenSSL REQUIRED)
+endif()
+
 set(_ace_libs
   ACE_XML_Utils
   ACE
@@ -162,6 +172,13 @@ elseif(MSVC)
   # For some reason CMake can't find this in some cases, but we know it should
   # be there, so just link to it without a check.
   _OPENDDS_SYSTEM_LIBRARY(iphlpapi NO_CHECK)
+endif()
+
+if(OPENDDS_XERCES3)
+  set(ACE_XML_UTILS_DEPS
+    ACE::ACE
+    XercesC::XercesC
+  )
 endif()
 
 set(OPENDDS_IDL_DEPS
@@ -229,10 +246,14 @@ set(OPENDDS_RTPS_UDP_DEPS
   OpenDDS::Rtps
 )
 
-set(OPENDDS_SECURITY_DEPS
-  OpenDDS::Rtps
-  ACE::XML_Utils
-)
+if(OPENDDS_SECURITY)
+  set(OPENDDS_SECURITY_DEPS
+    OpenDDS::Rtps
+    ACE::XML_Utils
+    OpenSSL::SSL
+    OpenSSL::Crypto
+  )
+endif()
 
 set(OPENDDS_SHMEM_DEPS
   OpenDDS::Dcps

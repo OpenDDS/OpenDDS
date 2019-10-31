@@ -153,10 +153,6 @@ macro(OPENDDS_TARGET_SOURCES target)
         ${OPENDDS_DCPS_COMPILE_DEFS})
   endif()
 
-  if (OPENDDS_DCPS_LINK_DEPS)
-    target_link_libraries(${target} ${OPENDDS_DCPS_LINK_DEPS})
-  endif()
-
   foreach(scope PUBLIC PRIVATE INTERFACE)
     if(_idl_sources_${scope})
       opendds_target_idl_sources(${target}
