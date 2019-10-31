@@ -147,12 +147,16 @@ void RelayHandler::enqueue_message(const std::string& addr, const OpenDDS::DCPS:
 VerticalHandler::VerticalHandler(ACE_Reactor* reactor,
                                  const RelayAddresses& relay_addresses,
                                  const AssociationTable& association_table,
+                                 GuidRelayAddressesDataWriter_ptr responsible_relay_writer,
+                                 GuidRelayAddressesDataReader_ptr responsible_relay_reader,
                                  const OpenDDS::DCPS::TimeDuration& lifespan,
                                  const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
                                  DDS::DomainId_t application_domain,
                                  const OpenDDS::DCPS::RepoId& application_participant_guid,
                                  const CRYPTO_TYPE& crypto)
   : RelayHandler(reactor, association_table)
+  , responsible_relay_writer_(responsible_relay_writer)
+  , responsible_relay_reader_(responsible_relay_reader)
   , relay_addresses_(relay_addresses)
   , horizontal_handler_(nullptr)
   , lifespan_(lifespan)
@@ -198,6 +202,14 @@ void VerticalHandler::process_message(const ACE_INET_Addr& remote,
     expiration_guid_map_.erase(r.first);
     // Assign the new expiration time.
     res.first->second = expiration;
+    // Assert ownership.
+    const auto relay_addresses = read_relay_addresses(src_guid);
+    if (relay_addresses != relay_addresses_) {
+      write_relay_addresses(src_guid, relay_addresses_);
+    }
+  } else {
+    // Assert ownership.
+    write_relay_addresses(src_guid, relay_addresses_);
   }
   // Assign the new expiration time.
   expiration_guid_map_.insert(std::make_pair(expiration, ga));
@@ -208,6 +220,7 @@ void VerticalHandler::process_message(const ACE_INET_Addr& remote,
     guid_addr_map_.erase(pos->second.guid);
     guid_expiration_map_.erase(pos->second);
     expiration_guid_map_.erase(pos++);
+    unregister_relay_addresses(pos->second.guid);
   }
 
   // Readers send empty messages so we know where they are.
@@ -216,10 +229,8 @@ void VerticalHandler::process_message(const ACE_INET_Addr& remote,
   }
 
   if (do_normal_processing(remote, src_guid, to, msg)) {
-    RelayAddressesMap relay_addresses_map;
-    association_table_.populate_relay_addresses_map(relay_addresses_map, src_guid, to);
-
-    send(relay_addresses_map, msg);
+    association_table_.lookup_destinations(to, src_guid);
+    send(to, msg);
   }
 }
 
@@ -345,9 +356,12 @@ bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser
   return true;
 }
 
-void VerticalHandler::send(const RelayAddressesMap& relay_addresses_map,
+void VerticalHandler::send(const GuidSet& to,
                            const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg)
 {
+  RelayAddressesMap relay_addresses_map;
+  populate_relay_addresses_map(relay_addresses_map, to);
+
   size_t fan_out = 0;
   for (const auto& p : relay_addresses_map) {
     const auto& addrs = p.first;
@@ -369,6 +383,67 @@ void VerticalHandler::send(const RelayAddressesMap& relay_addresses_map,
     }
   }
   max_fan_out(fan_out);
+}
+
+void VerticalHandler::populate_relay_addresses_map(RelayAddressesMap& relay_addresses_map,
+                                                   const GuidSet& to)
+{
+  for (const auto& guid : to) {
+    const auto relay_addresses = read_relay_addresses(guid);
+    if (relay_addresses == RelayAddresses()) {
+      continue;
+    }
+    relay_addresses_map[relay_addresses].insert(guid);
+  }
+}
+
+RelayAddresses VerticalHandler::read_relay_addresses(const OpenDDS::DCPS::RepoId& guid) const
+{
+  RelayAddresses relay_addresses;
+
+  GuidRelayAddresses key;
+  key.guid(repoid_to_guid(guid));
+  DDS::InstanceHandle_t handle = responsible_relay_reader_->lookup_instance(key);
+  if (handle == DDS::HANDLE_NIL) {
+    return relay_addresses;
+  }
+  GuidRelayAddressesSeq received_data;
+  DDS::SampleInfoSeq info_seq;
+  const auto ret = responsible_relay_reader_->read_instance(received_data, info_seq, 1, handle,
+                                                            DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+  if (ret != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: VerticalHandler::read_relay_addresses failed to read\n"));
+    return relay_addresses;
+  }
+
+  return received_data[0].relay_addresses();
+}
+
+void VerticalHandler::write_relay_addresses(const OpenDDS::DCPS::RepoId& guid,
+                                            const RelayAddresses& relay_addresses)
+{
+  GuidRelayAddresses gra = {
+    repoid_to_guid(guid),
+    relay_addresses
+  };
+
+  const auto ret = responsible_relay_writer_->write(gra, DDS::HANDLE_NIL);
+  if (ret != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: VerticalHandler::write_relay_addresses failed to write\n"));
+  }
+}
+
+void VerticalHandler::unregister_relay_addresses(const OpenDDS::DCPS::RepoId& guid)
+{
+  GuidRelayAddresses gra = {
+    repoid_to_guid(guid),
+    RelayAddresses()
+  };
+
+  const auto ret = responsible_relay_writer_->unregister_instance(gra, DDS::HANDLE_NIL);
+  if (ret != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: VerticalHandler::unregister_relay_addresses failed to unregister_instance\n"));
+  }
 }
 
 HorizontalHandler::HorizontalHandler(ACE_Reactor* reactor,
@@ -441,13 +516,15 @@ void HorizontalHandler::process_message(const ACE_INET_Addr&,
 SpdpHandler::SpdpHandler(ACE_Reactor* reactor,
                          const RelayAddresses& relay_addresses,
                          const AssociationTable& association_table,
+                         GuidRelayAddressesDataWriter_ptr responsible_relay_writer,
+                         GuidRelayAddressesDataReader_ptr responsible_relay_reader,
                          const OpenDDS::DCPS::TimeDuration& lifespan,
                          const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
                          DDS::DomainId_t application_domain,
                          const OpenDDS::DCPS::RepoId& application_participant_guid,
                          const CRYPTO_TYPE& crypto,
                          const ACE_INET_Addr& application_participant_addr)
-: VerticalHandler(reactor, relay_addresses, association_table, lifespan, rtps_discovery, application_domain, application_participant_guid , crypto)
+: VerticalHandler(reactor, relay_addresses, association_table, responsible_relay_writer, responsible_relay_reader, lifespan, rtps_discovery, application_domain, application_participant_guid , crypto)
 , application_participant_addr_(application_participant_addr)
 , application_participant_addr_str_(addr_to_string(application_participant_addr))
 {}
@@ -516,40 +593,41 @@ void SpdpHandler::purge(const GuidAddr& ga)
   ACE_GUARD(ACE_Thread_Mutex, g, spdp_messages_mutex_);
   const auto pos = spdp_messages_.find(ga.guid);
   if (pos != spdp_messages_.end()) {
-    pos->second->release();
     spdp_messages_.erase(pos);
   }
 }
 
-void SpdpHandler::replay(const OpenDDS::DCPS::RepoId& x,
-                         const RelayAddressesMap& relay_addresses_map)
+void SpdpHandler::replay(const OpenDDS::DCPS::RepoId& from,
+                         const GuidSet& to)
 {
-  if (relay_addresses_map.empty()) {
+  if (to.empty()) {
     return;
   }
 
-  const auto src_guid = to_participant_guid(x);
+  const auto from_guid = to_participant_guid(from);
 
   ACE_GUARD(ACE_Thread_Mutex, g, spdp_messages_mutex_);
 
-  const auto pos = spdp_messages_.find(src_guid);
+  const auto pos = spdp_messages_.find(from_guid);
   if (pos == spdp_messages_.end()) {
     return;
   }
 
-  send(relay_addresses_map, pos->second);
+  send(to, pos->second);
 }
 
 SedpHandler::SedpHandler(ACE_Reactor* reactor,
                          const RelayAddresses& relay_addresses,
                          const AssociationTable& association_table,
+                         GuidRelayAddressesDataWriter_ptr responsible_relay_writer,
+                         GuidRelayAddressesDataReader_ptr responsible_relay_reader,
                          const OpenDDS::DCPS::TimeDuration& lifespan,
                          const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
                          DDS::DomainId_t application_domain,
                          const OpenDDS::DCPS::RepoId& application_participant_guid,
                          const CRYPTO_TYPE& crypto,
                          const ACE_INET_Addr& application_participant_addr)
-  : VerticalHandler(reactor, relay_addresses, association_table, lifespan, rtps_discovery, application_domain, application_participant_guid, crypto)
+: VerticalHandler(reactor, relay_addresses, association_table, responsible_relay_writer, responsible_relay_reader, lifespan, rtps_discovery, application_domain, application_participant_guid, crypto)
   , application_participant_addr_(application_participant_addr)
   , application_participant_addr_str_(addr_to_string(application_participant_addr))
 {}
@@ -609,13 +687,15 @@ bool SedpHandler::do_normal_processing(const ACE_INET_Addr& remote,
 DataHandler::DataHandler(ACE_Reactor* reactor,
                          const RelayAddresses& relay_addresses,
                          const AssociationTable& association_table,
+                         GuidRelayAddressesDataWriter_ptr responsible_relay_writer,
+                         GuidRelayAddressesDataReader_ptr responsible_relay_reader,
                          const OpenDDS::DCPS::TimeDuration& lifespan,
                          const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
                          DDS::DomainId_t application_domain,
                          const OpenDDS::DCPS::RepoId& application_participant_guid,
                          const CRYPTO_TYPE& crypto
                          )
-  : VerticalHandler(reactor, relay_addresses, association_table, lifespan, rtps_discovery, application_domain, application_participant_guid, crypto)
+: VerticalHandler(reactor, relay_addresses, association_table, responsible_relay_writer, responsible_relay_reader, lifespan, rtps_discovery, application_domain, application_participant_guid, crypto)
 {}
 
 std::string DataHandler::extract_relay_address(const RelayAddresses& relay_addresses) const
