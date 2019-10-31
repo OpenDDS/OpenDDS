@@ -35,10 +35,10 @@
 #include "Args.h"
 
 #ifdef OPENDDS_SECURITY
-const char auth_ca_file[] = "file:../../security/certs/identity/identity_ca_cert.pem";
-const char perm_ca_file[] = "file:../../security/certs/permissions/permissions_ca_cert.pem";
-const char id_cert_file[] = "file:../../security/certs/identity/test_participant_02_cert.pem";
-const char id_key_file[] = "file:../../security/certs/identity/test_participant_02_private_key.pem";
+const char auth_ca_file_from_tests[] = "security/certs/identity/identity_ca_cert.pem";
+const char perm_ca_file_from_tests[] = "security/certs/permissions/permissions_ca_cert.pem";
+const char id_cert_file_from_tests[] = "security/certs/identity/test_participant_02_cert.pem";
+const char id_key_file_from_tests[] = "security/certs/identity/test_participant_02_private_key.pem";
 const char governance_file[] = "file:./governance_signed.p7s";
 const char permissions_file[] = "file:./permissions_2_signed.p7s";
 
@@ -81,12 +81,26 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     DDS::PropertySeq& props = part_qos.property.value;
     append(props, "OpenDDS.RtpsRelay.Groups", "Messenger", true);
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
+    // Determine the path to the keys
+    OPENDDS_STRING path_to_tests;
+    const char* dds_root = ACE_OS::getenv("DDS_ROOT");
+    if (dds_root && dds_root[0]) {
+      // Use DDS_ROOT in case we are one of the CMake tests
+      path_to_tests = OPENDDS_STRING("file:") + dds_root + "/tests/";
+    } else {
+      // Else if DDS_ROOT isn't defined try to do it relative to the traditional location
+      path_to_tests = "file:../../";
+    }
+    const OPENDDS_STRING auth_ca_file = path_to_tests + auth_ca_file_from_tests;
+    const OPENDDS_STRING perm_ca_file = path_to_tests + perm_ca_file_from_tests;
+    const OPENDDS_STRING id_cert_file = path_to_tests + id_cert_file_from_tests;
+    const OPENDDS_STRING id_key_file = path_to_tests + id_key_file_from_tests;
     if (TheServiceParticipant->get_security()) {
-      append(props, DDSSEC_PROP_IDENTITY_CA, auth_ca_file);
-      append(props, DDSSEC_PROP_IDENTITY_CERT, id_cert_file);
-      append(props, DDSSEC_PROP_IDENTITY_PRIVKEY, id_key_file);
-      append(props, DDSSEC_PROP_PERM_CA, perm_ca_file);
+      append(props, DDSSEC_PROP_IDENTITY_CA, auth_ca_file.c_str());
+      append(props, DDSSEC_PROP_IDENTITY_CERT, id_cert_file.c_str());
+      append(props, DDSSEC_PROP_IDENTITY_PRIVKEY, id_key_file.c_str());
+      append(props, DDSSEC_PROP_PERM_CA, perm_ca_file.c_str());
       append(props, DDSSEC_PROP_PERM_GOV_DOC, governance_file);
       append(props, DDSSEC_PROP_PERM_DOC, permissions_file);
     }
