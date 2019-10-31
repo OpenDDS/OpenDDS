@@ -23,7 +23,8 @@ sub process_file {
   my $cmake_file = $filename =~ /(CMakeLists\.txt|\.cmake)$/;
 
   my @gettimeofday_failed = ();
-  my @cmake_trailing_whitespace_failed = ();
+  my @trailing_whitespace_failed = ();
+  my @tabs_failed = ();
 
   open(my $fd, $full_filename);
   while (my $line = <$fd>) {
@@ -31,7 +32,10 @@ sub process_file {
       push(@gettimeofday_failed, $line_number);
     }
     if ($cmake_file && $line =~ /\s\n$/) {
-      push(@cmake_trailing_whitespace_failed, $line_number);
+      push(@trailing_whitespace_failed, $line_number);
+    }
+    if ($cmake_file && $line =~ /\t/) {
+      push(@tabs_failed, $line_number);
     }
     $line_number += 1;
   }
@@ -44,10 +48,15 @@ sub process_file {
       "   See the \"Time\" section in docs/guidelines.md.\n" .
       failed_lines(\@gettimeofday_failed);
   }
-  if (scalar @cmake_trailing_whitespace_failed) {
+  if (scalar @trailing_whitespace_failed) {
     $failed_checks .=
-      " - CMake file has trailing whitespace, which is forbidden in all text files by docs/guidelines.md\n" .
-      failed_lines(\@cmake_trailing_whitespace_failed);
+      " - Text file has trailing whitespace, which is forbidden in all text files by docs/guidelines.md\n" .
+      failed_lines(\@trailing_whitespace_failed);
+  }
+  if (scalar @tabs_failed) {
+    $failed_checks .=
+      " - Text file has tabs, which is forbidden in most text files by docs/guidelines.md\n" .
+      failed_lines(\@tabs_failed);
   }
 
   if (length($failed_checks)) {
