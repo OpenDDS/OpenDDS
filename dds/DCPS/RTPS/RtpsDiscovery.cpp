@@ -638,9 +638,9 @@ RtpsDiscovery::sedp_rtps_relay_address(const ACE_INET_Addr& address)
     sedp_rtps_relay_address_ = address;
   }
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  for (typename DomainParticipantMap::const_iterator dom_pos = participants_.begin(), dom_limit = participants_.end();
+  for (DomainParticipantMap::const_iterator dom_pos = participants_.begin(), dom_limit = participants_.end();
        dom_pos != dom_limit; ++dom_pos) {
-    for (typename ParticipantMap::const_iterator part_pos = dom_pos->second.begin(), part_limit = dom_pos->second.end(); part_pos != part_limit; ++part_pos) {
+    for (ParticipantMap::const_iterator part_pos = dom_pos->second.begin(), part_limit = dom_pos->second.end(); part_pos != part_limit; ++part_pos) {
       part_pos->second->sedp_rtps_relay_address(address);
     }
   }
@@ -654,9 +654,9 @@ RtpsDiscovery::sedp_stun_server_address(const ACE_INET_Addr& address)
     sedp_stun_server_address_ = address;
   }
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  for (typename DomainParticipantMap::const_iterator dom_pos = participants_.begin(), dom_limit = participants_.end();
+  for (DomainParticipantMap::const_iterator dom_pos = participants_.begin(), dom_limit = participants_.end();
        dom_pos != dom_limit; ++dom_pos) {
-    for (typename ParticipantMap::const_iterator part_pos = dom_pos->second.begin(), part_limit = dom_pos->second.end(); part_pos != part_limit; ++part_pos) {
+    for (ParticipantMap::const_iterator part_pos = dom_pos->second.begin(), part_limit = dom_pos->second.end(); part_pos != part_limit; ++part_pos) {
       part_pos->second->sedp_stun_server_address(address);
     }
   }
