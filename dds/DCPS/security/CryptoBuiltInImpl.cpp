@@ -1042,10 +1042,27 @@ namespace {
     return 0;
   }
 
+  // Update 'size' and 'padding' in the same way that gen_find_size does, but for aligning to 'alignment'
+  void align(size_t alignment, size_t& size, size_t& padding)
+  {
+    const size_t offset = (size + padding) % alignment;
+    if (offset) {
+      padding += alignment - offset;
+    }
+  }
+
+  unsigned int roundUp(unsigned int length, unsigned int alignment)
+  {
+    const unsigned int offset = length % alignment;
+    return length + (offset ? alignment - offset : 0);
+  }
+
+  const int SEQLEN_SZ = 4, SM_ALIGN = 4;
+
   // Precondition: the bytes of 'original' starting at 'offset' to the end of 'original' are a valid Submessage
   // If that Submessage has octetsToNextHeader == 0, returns true and makes 'modified' a copy of 'original'
   // with the Submessage's octetsToNextHeader set to the actual byte count from the end of its SubmessageHeader
-  // to the end of 'original'. Otherwise returns false.
+  // to the end of 'original', rounded up to the alignment requirements (4 bytes). Otherwise returns false.
   bool setOctetsToNextHeader(DDS::OctetSeq& modified, const DDS::OctetSeq& original, unsigned int offset = 0)
   {
     if (offset + RTPS::SMHDR_SZ >= original.length()) {
@@ -1068,30 +1085,13 @@ namespace {
     ser_in >> submessageLength;
     if (submessageLength == 0) {
       modified = original;
-      const size_t len = origLength - RTPS::SMHDR_SZ;
+      const size_t len = roundUp(static_cast<unsigned int>(origLength - RTPS::SMHDR_SZ), SM_ALIGN);
       modified[offset + 2 + !flag_e] = len & 0xff;
       modified[offset + 2 + flag_e] = (len >> 8) & 0xff;
       return true;
     }
     return false;
   }
-
-  // Update 'size' and 'padding' in the same way that gen_find_size does, but for aligning to 'alignment'
-  void align(size_t alignment, size_t& size, size_t& padding)
-  {
-    const size_t offset = (size + padding) % alignment;
-    if (offset) {
-      padding += alignment - offset;
-    }
-  }
-
-  unsigned int roundUp(unsigned int length, unsigned int alignment)
-  {
-    const unsigned int offset = length % alignment;
-    return length + (offset ? alignment - offset : 0);
-  }
-
-  const int SEQLEN_SZ = 4, SM_ALIGN = 4;
 }
 
 bool CryptoBuiltInImpl::encode_submessage(
