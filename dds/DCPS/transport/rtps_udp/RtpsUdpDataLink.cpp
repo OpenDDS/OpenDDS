@@ -1382,7 +1382,6 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
     }
     if (!durable_) {
       if (wi_first < hb_first) {
-        info.recvd_.insert(SequenceRange(wi_first, hb_first.previous()));
         wi_first = hb_first;
       }
     }
