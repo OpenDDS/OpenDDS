@@ -447,11 +447,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     // Since we've just seen a new participant, let's send out our
     // own announcement, so they don't have to wait.
     if (from != ACE_INET_Addr()) {
-      if (from != disco_->spdp_rtps_relay_address()) {
-        this->tport_->write_i(guid, SpdpTransport::SEND_TO_LOCAL);
-      } else {
-        this->tport_->write_i(guid, SpdpTransport::SEND_TO_RELAY);
-      }
+      this->tport_->write_i(guid, from == disco_->spdp_rtps_relay_address() ? SpdpTransport::SEND_TO_RELAY : SpdpTransport::SEND_TO_LOCAL);
     }
 
 #ifdef OPENDDS_SECURITY
