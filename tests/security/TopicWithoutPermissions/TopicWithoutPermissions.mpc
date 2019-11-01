@@ -1,0 +1,6 @@
+project (Security*): dcpsexe, dcps_test {
+  requires += no_opendds_safety_profile
+  avoids += no_opendds_security
+  exename = *
+}
+
