@@ -13,12 +13,12 @@ const char* QUOTER_QUOTE_TOPIC = "Stock Quotes";
 
 const std::string file = "file:";
 
-std::string identity_ca_file = file + "../certs/identity/identity_ca_cert.pem";
-std::string permissions_ca_file = file + "../certs/permissions/permissions_ca_cert.pem";
-std::string identity_certificate_file = file + "../certs/identity/test_participant_01_cert.pem";
-std::string identity_key_file = file + "../certs/identity/identity_ca_private_key.pem";
-std::string governance_file = file + "../attributes/governance/governance_PU_PA_ED_EL_EOR_signed.p7s";
-std::string permissions_file = file + "../attributes/permissions/permissions_test_participant_01_read_signed.p7s";
+const std::string identity_ca_file = file + "../certs/identity/identity_ca_cert.pem";
+const std::string permissions_ca_file = file + "../certs/permissions/permissions_ca_cert.pem";
+const std::string identity_certificate_file = file + "../certs/identity/test_participant_01_cert.pem";
+const std::string identity_key_file = file + "../certs/identity/identity_ca_private_key.pem";
+const std::string governance_file = file + "../attributes/governance/governance_PU_PA_ED_EL_EOR_signed.p7s";
+const std::string permissions_file = file + "../attributes/permissions/permissions_test_participant_01_read_signed.p7s";
 
 ///
 // append
@@ -87,7 +87,7 @@ int main(int argc, char* argv[]) {
 			ACE_OS::exit(1);
 		} 
 
-		// Create a topic for the Quote type, which should not be allowed    
+		// Create a topic for the Stock Quotes, which should not be allowed    
 		DDS::Topic_var quote_topic = participant->create_topic(QUOTER_QUOTE_TOPIC,
 															   QUOTER_QUOTE_TYPE,
 															   TOPIC_QOS_DEFAULT,
