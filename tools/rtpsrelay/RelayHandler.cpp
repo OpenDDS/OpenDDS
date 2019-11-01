@@ -516,7 +516,6 @@ void SpdpHandler::purge(const GuidAddr& ga)
   ACE_GUARD(ACE_Thread_Mutex, g, spdp_messages_mutex_);
   const auto pos = spdp_messages_.find(ga.guid);
   if (pos != spdp_messages_.end()) {
-    pos->second->release();
     spdp_messages_.erase(pos);
   }
 }
