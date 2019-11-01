@@ -107,7 +107,7 @@ ParticipantTask::svc()
         char config_name[64], inst_name[64], nak_depth[8];
         ACE_OS::snprintf(config_name, 64, "cfg_%d", this_thread_index);
         ACE_OS::snprintf(inst_name, 64, "rtps_%d", this_thread_index);
-        ACE_OS::snprintf(nak_depth, 8, "%d", samples_per_thread_);
+        ACE_OS::snprintf(nak_depth, 8, "%lu", samples_per_thread_);
 
         ACE_DEBUG((LM_INFO,
           "(%P|%t)    -> PARTICIPANT creating transport config %C\n",
