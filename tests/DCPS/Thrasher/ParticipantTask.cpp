@@ -104,10 +104,11 @@ ParticipantTask::svc()
       OpenDDS::DCPS::Discovery_rch disc = TheServiceParticipant->get_discovery(42);
       OpenDDS::RTPS::RtpsDiscovery_rch rd = OpenDDS::DCPS::dynamic_rchandle_cast<OpenDDS::RTPS::RtpsDiscovery>(disc);
       if (!rd.is_nil()) {
-        char config_name[64], inst_name[64], nak_depth[8];
+        char config_name[64], inst_name[64];
+        ACE_TCHAR nak_depth[8];
         ACE_OS::snprintf(config_name, 64, "cfg_%d", this_thread_index);
         ACE_OS::snprintf(inst_name, 64, "rtps_%d", this_thread_index);
-        ACE_OS::snprintf(nak_depth, 8, "%lu", samples_per_thread_);
+        ACE_OS::snprintf(nak_depth, 8, ACE_TEXT("%lu"), samples_per_thread_);
 
         ACE_DEBUG((LM_INFO,
           "(%P|%t)    -> PARTICIPANT creating transport config %C\n",
