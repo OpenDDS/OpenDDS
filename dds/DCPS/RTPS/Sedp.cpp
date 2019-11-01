@@ -331,13 +331,13 @@ Sedp::init(const RepoId& guid,
     rtps_inst->local_address_.set(sedp_addr.c_str());
   }
 
-  rtps_relay_address(disco.sedp_rtps_relay_address());
-  rtps_inst->rtps_relay_beacon_period_ = disco.sedp_rtps_relay_beacon_period();
-  rtps_inst->use_rtps_relay_ = disco.use_rtps_relay();
-  rtps_inst->rtps_relay_only_ = disco.rtps_relay_only();
+  rtps_relay_address(disco.config()->sedp_rtps_relay_address());
+  rtps_inst->rtps_relay_beacon_period_ = disco.config()->sedp_rtps_relay_beacon_period();
+  rtps_inst->use_rtps_relay_ = disco.config()->use_rtps_relay();
+  rtps_inst->rtps_relay_only_ = disco.config()->rtps_relay_only();
 
-  stun_server_address(disco.sedp_stun_server_address());
-  rtps_inst->use_ice_ = disco.use_ice();
+  stun_server_address(disco.config()->sedp_stun_server_address());
+  rtps_inst->use_ice_ = disco.config()->use_ice();
 
   // Create a config
   OPENDDS_STRING config_name = DCPS::TransportRegistry::DEFAULT_INST_PREFIX +

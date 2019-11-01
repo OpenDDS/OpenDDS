@@ -182,6 +182,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
 
   : DCPS::LocalParticipant<Sedp>(qos)
   , disco_(disco)
+  , config_(disco_->config())
   , domain_(domain)
   , guid_(guid)
   , tport_(new SpdpTransport(this, false))
@@ -220,6 +221,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
 
   : DCPS::LocalParticipant<Sedp>(qos)
   , disco_(disco)
+  , config_(disco_->config())
   , domain_(domain)
   , guid_(guid)
   , tport_(new SpdpTransport(this, true))
@@ -449,7 +451,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     // Since we've just seen a new participant, let's send out our
     // own announcement, so they don't have to wait.
     if (from != ACE_INET_Addr()) {
-      if (from != disco_->spdp_rtps_relay_address()) {
+      if (from != config_->spdp_rtps_relay_address()) {
         this->tport_->write_i(guid, true, false);
       } else {
         this->tport_->write_i(guid, false, true);
@@ -557,7 +559,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
         iter->second.last_seen_ = now;
       }
     // Else a reset has occured and check if we should remove the participant
-    } else if (iter->second.seq_reset_count_ >= disco_->max_spdp_sequence_msg_reset_check()) {
+    } else if (iter->second.seq_reset_count_ >= config_->max_spdp_sequence_msg_reset_check()) {
       purge_auth_deadlines(iter);
       remove_discovered_participant(iter);
     }
@@ -790,11 +792,11 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
         return;
       }
       dp.has_last_stateless_msg_ = true;
-      dp.stateless_msg_deadline_ = MonotonicTimePoint::now() + disco_->auth_resend_period();
+      dp.stateless_msg_deadline_ = MonotonicTimePoint::now() + config_->auth_resend_period();
       dp.last_stateless_msg_ = reply;
       dp.auth_state_ = DCPS::AS_HANDSHAKE_REPLY_SENT;
       auth_resends_.insert(std::make_pair(dp.stateless_msg_deadline_, src_participant));
-      tport_->auth_resend_processor_->schedule(disco_->auth_resend_period());
+      tport_->auth_resend_processor_->schedule(config_->auth_resend_period());
       return;
     } else if (vr == DDS::Security::VALIDATION_OK_FINAL_MESSAGE) {
       // Theoretically, this shouldn't happen unless handshakes can involve fewer than 3 messages
@@ -847,11 +849,11 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
         return;
       }
       dp.has_last_stateless_msg_ = true;
-      dp.stateless_msg_deadline_ = MonotonicTimePoint::now() + disco_->auth_resend_period();
+      dp.stateless_msg_deadline_ = MonotonicTimePoint::now() + config_->auth_resend_period();
       dp.last_stateless_msg_ = reply;
       purge_auth_resends(participants_.find(src_participant));
       auth_resends_.insert(std::make_pair(dp.stateless_msg_deadline_, src_participant));
-      tport_->auth_resend_processor_->schedule(disco_->auth_resend_period());
+      tport_->auth_resend_processor_->schedule(config_->auth_resend_period());
       // cache the outbound message, but don't change state, since roles shouldn't have changed?
     } else if (vr == DDS::Security::VALIDATION_OK_FINAL_MESSAGE) {
       if (sedp_.write_stateless_message(reply, reader) != DDS::RETCODE_OK) {
@@ -922,7 +924,7 @@ Spdp::process_auth_resends(const DCPS::MonotonicTimePoint& now)
          pit->second.auth_state_ == DCPS::AS_HANDSHAKE_REPLY_SENT)) {
       RepoId reader = pit->first;
       reader.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
-      pit->second.stateless_msg_deadline_ = now + disco_->auth_resend_period();
+      pit->second.stateless_msg_deadline_ = now + config_->auth_resend_period();
       if (sedp_.write_stateless_message(pit->second.last_stateless_msg_, reader) != DDS::RETCODE_OK) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Spdp::process_auth_resends() - ")
                    ACE_TEXT("Unable to write stateless message retry.\n")));
@@ -1088,10 +1090,10 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
   DDS::Security::SecurityException se = {"", 0, 0};
 
   if (dp.auth_state_ == DCPS::AS_UNKNOWN) {
-    dp.auth_deadline_ = DCPS::MonotonicTimePoint::now() + disco_->max_auth_time();
+    dp.auth_deadline_ = DCPS::MonotonicTimePoint::now() + config_->max_auth_time();
     dp.auth_state_ = DCPS::AS_VALIDATING_REMOTE;
     auth_deadlines_.insert(std::make_pair(dp.auth_deadline_, guid));
-    tport_->auth_deadline_processor_->schedule(disco_->max_auth_time());
+    tport_->auth_deadline_processor_->schedule(config_->max_auth_time());
   }
 
   if (dp.auth_state_ == DCPS::AS_VALIDATING_REMOTE) {
@@ -1230,11 +1232,11 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
       return;
     }
     dp.has_last_stateless_msg_ = true;
-    dp.stateless_msg_deadline_ = MonotonicTimePoint::now() + disco_->auth_resend_period();
+    dp.stateless_msg_deadline_ = MonotonicTimePoint::now() + config_->auth_resend_period();
     dp.last_stateless_msg_ = msg;
     dp.auth_state_ = DCPS::AS_HANDSHAKE_REQUEST_SENT;
     auth_resends_.insert(std::make_pair(dp.stateless_msg_deadline_, guid));
-    tport_->auth_resend_processor_->schedule(disco_->auth_resend_period());
+    tport_->auth_resend_processor_->schedule(config_->auth_resend_period());
   }
 
   return;
@@ -1394,7 +1396,7 @@ Spdp::build_local_pdata(
       {PFLAGS_NO_ASSOCIATED_WRITERS} // opendds_participant_flags
     },
     { // Duration_t (leaseDuration)
-      static_cast<CORBA::Long>(disco_->lease_duration().value().sec()),
+      static_cast<CORBA::Long>(config_->lease_duration().value().sec()),
       0 // we are not supporting fractional seconds in the lease duration
     }
   };
@@ -1415,7 +1417,7 @@ bool Spdp::announce_domain_participant_qos()
 
 Spdp::SpdpTransport::SpdpTransport(Spdp* outer, bool securityGuids)
   : outer_(outer)
-  , lease_duration_(outer_->disco_->lease_duration())
+  , lease_duration_(outer_->config_->lease_duration())
   , buff_(64 * 1024)
   , wbuff_(64 * 1024)
   , reactor_task_(false)
@@ -1438,9 +1440,9 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer, bool securityGuids)
   data_.writerSN.low = 0;
 
   // Ports are set by the formulas in RTPS v2.1 Table 9.8
-  const u_short port_common = outer_->disco_->pb() +
-                              (outer_->disco_->dg() * outer_->domain_),
-    mc_port = port_common + outer_->disco_->d0();
+  const u_short port_common = outer_->config_->pb() +
+                              (outer_->config_->dg() * outer_->domain_),
+    mc_port = port_common + outer_->config_->d0();
 
   // with security enabled the meaning of the bytes in guidPrefix changes
   u_short participantId = securityGuids ? 0
@@ -1467,7 +1469,7 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer, bool securityGuids)
   }
 #endif
 
-  OPENDDS_STRING mc_addr = outer_->disco_->default_multicast_group();
+  OPENDDS_STRING mc_addr = outer_->config_->default_multicast_group();
   if (0 != default_multicast_.set(mc_port, mc_addr.c_str())) {
     ACE_DEBUG((
           LM_ERROR,
@@ -1477,7 +1479,7 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer, bool securityGuids)
     throw std::runtime_error("failed to set default_multicast address");
   }
 
-  const OPENDDS_STRING& net_if = outer_->disco_->multicast_interface();
+  const OPENDDS_STRING& net_if = outer_->config_->multicast_interface();
 
   if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((LM_INFO,
@@ -1505,9 +1507,10 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer, bool securityGuids)
 
   send_addrs_.insert(default_multicast_);
 
-  typedef RtpsDiscovery::AddrVec::iterator iter;
-  for (iter it = outer_->disco_->spdp_send_addrs().begin(),
-       end = outer_->disco_->spdp_send_addrs().end(); it != end; ++it) {
+  typedef RtpsDiscovery::AddrVec::const_iterator iter;
+  const RtpsDiscovery::AddrVec addrs = outer_->config_->spdp_send_addrs();
+  for (iter it = addrs.begin(),
+       end = addrs.end(); it != end; ++it) {
     send_addrs_.insert(ACE_INET_Addr(it->c_str()));
   }
 }
@@ -1531,7 +1534,7 @@ Spdp::SpdpTransport::open()
   job_queue_ = DCPS::make_rch<DCPS::JobQueue>(reactor);
 
   local_sender_ = DCPS::make_rch<SpdpPeriodic>(reactor_task_.interceptor(), ref(*this), &SpdpTransport::send_local);
-  local_sender_->enable(false, outer_->disco_->resend_period());
+  local_sender_->enable(false, outer_->config_->resend_period());
 
 #ifdef OPENDDS_SECURITY
   auth_deadline_processor_ = DCPS::make_rch<SpdpSporadic>(reactor_task_.interceptor(), ref(*this), &SpdpTransport::process_auth_deadlines);
@@ -1539,15 +1542,15 @@ Spdp::SpdpTransport::open()
 #endif
 
   relay_sender_ = DCPS::make_rch<SpdpPeriodic>(reactor_task_.interceptor(), ref(*this), &SpdpTransport::send_relay);
-  if (outer_->disco_->spdp_rtps_relay_address() != ACE_INET_Addr() ||
-      outer_->disco_->use_rtps_relay()) {
-    relay_sender_->enable(false, outer_->disco_->spdp_rtps_relay_send_period());
+  if (outer_->config_->spdp_rtps_relay_address() != ACE_INET_Addr() ||
+      outer_->config_->use_rtps_relay()) {
+    relay_sender_->enable(false, outer_->config_->spdp_rtps_relay_send_period());
   }
 
   relay_beacon_ = DCPS::make_rch<SpdpPeriodic>(reactor_task_.interceptor(), ref(*this), &SpdpTransport::send_relay_beacon);
-  if (outer_->disco_->spdp_rtps_relay_address() != ACE_INET_Addr() ||
-      outer_->disco_->use_rtps_relay()) {
-    relay_beacon_->enable(false, outer_->disco_->spdp_rtps_relay_beacon_period());
+  if (outer_->config_->spdp_rtps_relay_address() != ACE_INET_Addr() ||
+      outer_->config_->use_rtps_relay()) {
+    relay_beacon_->enable(false, outer_->config_->spdp_rtps_relay_beacon_period());
   }
 }
 
@@ -1604,7 +1607,7 @@ Spdp::SpdpTransport::dispose_unregister()
     return;
   }
 
-  if (!outer_->disco_->rtps_relay_only()) {
+  if (!outer_->config_->rtps_relay_only()) {
     typedef OPENDDS_SET(ACE_INET_Addr)::const_iterator iter_t;
     for (iter_t iter = send_addrs_.begin(); iter != send_addrs_.end(); ++iter) {
       const ssize_t res =
@@ -1618,12 +1621,12 @@ Spdp::SpdpTransport::dispose_unregister()
       }
     }
   }
-  if (outer_->disco_->spdp_rtps_relay_address() != ACE_INET_Addr()) {
+  if (outer_->config_->spdp_rtps_relay_address() != ACE_INET_Addr()) {
     const ssize_t res =
-      unicast_socket_.send(wbuff_.rd_ptr(), wbuff_.length(), outer_->disco_->spdp_rtps_relay_address());
+      unicast_socket_.send(wbuff_.rd_ptr(), wbuff_.length(), outer_->config_->spdp_rtps_relay_address());
     if (res < 0) {
       ACE_TCHAR addr_buff[256] = {};
-      outer_->disco_->spdp_rtps_relay_address().addr_to_string(addr_buff, 256, 0);
+      outer_->config_->spdp_rtps_relay_address().addr_to_string(addr_buff, 256, 0);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::dispose_unregister() - ")
                  ACE_TEXT("destination %s failed %p\n"), addr_buff, ACE_TEXT("send")));
@@ -1768,7 +1771,7 @@ Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, bool include_local, bool 
 void
 Spdp::SpdpTransport::send(bool include_local, bool include_relay)
 {
-  if (include_local && !outer_->disco_->rtps_relay_only()) {
+  if (include_local && !outer_->config_->rtps_relay_only()) {
     typedef OPENDDS_SET(ACE_INET_Addr)::const_iterator iter_t;
     for (iter_t iter = send_addrs_.begin(); iter != send_addrs_.end(); ++iter) {
       const ssize_t res =
@@ -1783,13 +1786,13 @@ Spdp::SpdpTransport::send(bool include_local, bool include_relay)
     }
   }
 
-  if ((include_relay || outer_->disco_->rtps_relay_only()) &&
-      outer_->disco_->spdp_rtps_relay_address() != ACE_INET_Addr()) {
+  if ((include_relay || outer_->config_->rtps_relay_only()) &&
+      outer_->config_->spdp_rtps_relay_address() != ACE_INET_Addr()) {
     const ssize_t res =
-      unicast_socket_.send(wbuff_.rd_ptr(), wbuff_.length(), outer_->disco_->spdp_rtps_relay_address());
+      unicast_socket_.send(wbuff_.rd_ptr(), wbuff_.length(), outer_->config_->spdp_rtps_relay_address());
     if (res < 0) {
       ACE_TCHAR addr_buff[256] = {};
-      outer_->disco_->spdp_rtps_relay_address().addr_to_string(addr_buff, 256, 0);
+      outer_->config_->spdp_rtps_relay_address().addr_to_string(addr_buff, 256, 0);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::send() - ")
                  ACE_TEXT("destination %s failed %p\n"), addr_buff, ACE_TEXT("send")));
@@ -1955,10 +1958,10 @@ bool
 Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
                                          u_short participant_id)
 {
-  uni_port_ = port_common + outer_->disco_->d1() + (outer_->disco_->pg() * participant_id);
+  uni_port_ = port_common + outer_->config_->d1() + (outer_->config_->pg() * participant_id);
 
   ACE_INET_Addr local_addr;
-  OPENDDS_STRING spdpaddr = outer_->disco_->spdp_local_address().c_str();
+  OPENDDS_STRING spdpaddr = outer_->config_->spdp_local_address().c_str();
 
   if (spdpaddr.empty()) {
     spdpaddr = "0.0.0.0";
@@ -1992,12 +1995,12 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
           uni_port_));
   }
 
-  if (!DCPS::set_socket_multicast_ttl(unicast_socket_, outer_->disco_->ttl())) {
+  if (!DCPS::set_socket_multicast_ttl(unicast_socket_, outer_->config_->ttl())) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_socket() - ")
                ACE_TEXT("failed to set TTL value to %d ")
                ACE_TEXT("for port:%hu %p\n"),
-               outer_->disco_->ttl(), uni_port_, ACE_TEXT("DCPS::set_socket_multicast_ttl:")));
+               outer_->config_->ttl(), uni_port_, ACE_TEXT("DCPS::set_socket_multicast_ttl:")));
     throw std::runtime_error("failed to set TTL");
   }
   return true;
@@ -2417,7 +2420,7 @@ Spdp::remote_crypto_handle(const DCPS::RepoId& remote_participant) const
 
 void Spdp::SpdpTransport::send_relay_beacon(const MonotonicTimePoint& /*now*/)
 {
-  if (outer_->disco_->spdp_rtps_relay_address() == ACE_INET_Addr()) {
+  if (outer_->config_->spdp_rtps_relay_address() == ACE_INET_Addr()) {
     return;
   }
 
@@ -2437,7 +2440,7 @@ void Spdp::SpdpTransport::send_relay_beacon(const MonotonicTimePoint& /*now*/)
 
 void Spdp::SpdpTransport::send_relay(const DCPS::MonotonicTimePoint& /*now*/)
 {
-  if (outer_->disco_->spdp_rtps_relay_address() == ACE_INET_Addr()) {
+  if (outer_->config_->spdp_rtps_relay_address() == ACE_INET_Addr()) {
     return;
   }
 
