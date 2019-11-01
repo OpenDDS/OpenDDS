@@ -230,6 +230,8 @@ bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser
                                     bool& is_beacon,
                                     bool check_submessages)
 {
+  ACE_UNUSED_ARG(msg);
+
   if (!message_parser.parseHeader()) {
     ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::parse_message failed to deserialize RTPS header\n"));
     return false;

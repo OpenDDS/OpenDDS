@@ -189,6 +189,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , eh_shutdown_(false)
   , shutdown_cond_(lock_)
   , shutdown_flag_(false)
+  , available_builtin_endpoints_(0)
   , sedp_(guid_, *this, lock_)
 #ifdef OPENDDS_SECURITY
   , security_config_()
@@ -226,6 +227,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , eh_shutdown_(false)
   , shutdown_cond_(lock_)
   , shutdown_flag_(false)
+  , available_builtin_endpoints_(0)
   , sedp_(guid_, *this, lock_)
   , security_config_(Security::SecurityRegistry::instance()->default_config())
   , security_enabled_(security_config_->get_authentication() && security_config_->get_access_control() && security_config_->get_crypto_key_factory() && security_config_->get_crypto_key_exchange())
@@ -2476,6 +2478,8 @@ void Spdp::purge_auth_deadlines(DiscoveredParticipantIter iter)
       break;
     }
   }
+#else
+  ACE_UNUSED_ARG(iter);
 #endif
 }
 
@@ -2493,6 +2497,8 @@ void Spdp::purge_auth_resends(DiscoveredParticipantIter iter)
       break;
     }
   }
+#else
+  ACE_UNUSED_ARG(iter);
 #endif
 }
 
