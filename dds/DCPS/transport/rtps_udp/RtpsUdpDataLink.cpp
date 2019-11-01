@@ -1540,7 +1540,6 @@ RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(MetaSubmessageVec& meta_submessa
     bool is_final = finalFlag || !nack;
 
     if (wi->second.ack_pending_ || nack || finalFlag) {
-      const bool prev_ack_pending = wi->second.ack_pending_;
       wi->second.ack_pending_ = false;
 
       SequenceNumber ack;
@@ -1551,47 +1550,13 @@ RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(MetaSubmessageVec& meta_submessa
 
       const SequenceNumber& hb_low = wi->second.hb_range_.first;
       const SequenceNumber& hb_high = wi->second.hb_range_.second;
-      const SequenceNumber::Value hb_low_val = hb_low.getValue(),
-        hb_high_val = hb_high.getValue();
 
-      if (recvd.empty()) {
-        // Nack the entire heartbeat range. Only reached when durable.
-        if (hb_low_val <= hb_high_val) {
-          ack = hb_low;
-          bitmap.length(bitmap_num_longs(ack, hb_high));
-          const CORBA::ULong idx = (hb_high_val > hb_low_val + 255)
-            ? 255
-            : CORBA::ULong(hb_high_val - hb_low_val);
-          DisjointSequence::fill_bitmap_range(0, idx,
-                                              bitmap.get_buffer(),
-                                              bitmap.length(), num_bits);
-        }
-      } else if (((prev_ack_pending && !nack) || should_nack_durable(wi->second)) && recvd.low() > hb_low) {
-        // Nack the range between the heartbeat low and the recvd low.
-        ack = hb_low;
-        const SequenceNumber& rec_low = recvd.low();
-        const SequenceNumber::Value rec_low_val = rec_low.getValue();
-        bitmap.length(bitmap_num_longs(ack, rec_low));
-        const CORBA::ULong idx = (rec_low_val > hb_low_val + 255)
-          ? 255
-          : CORBA::ULong(rec_low_val - hb_low_val);
-        DisjointSequence::fill_bitmap_range(0, idx,
-                                            bitmap.get_buffer(),
-                                            bitmap.length(), num_bits);
+      ack = std::max(++SequenceNumber(recvd.cumulative_ack()), hb_low);
 
-      } else {
-        ack = ++SequenceNumber(recvd.cumulative_ack());
-        if (recvd.low().getValue() > 1) {
-          // since the "ack" really is cumulative, we need to make
-          // sure that a lower discontinuity is not possible later
-          recvd.insert(SequenceRange(SequenceNumber::ZERO(), recvd.low()));
-        }
-
-        if (recvd.disjoint()) {
-          bitmap.length(bitmap_num_longs(ack, recvd.last_ack().previous()));
-          recvd.to_bitmap(bitmap.get_buffer(), bitmap.length(),
-                          num_bits, true);
-        }
+      if (recvd.disjoint()) {
+        bitmap.length(bitmap_num_longs(ack, recvd.last_ack().previous()));
+        recvd.to_bitmap(bitmap.get_buffer(), bitmap.length(),
+                        num_bits, true);
       }
 
       const SequenceNumber::Value ack_val = ack.getValue();
