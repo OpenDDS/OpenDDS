@@ -249,7 +249,7 @@ jobs:
         ConfigOpts: --compiler=clang++-8 --security
         PackageDeps: libxerces-c-dev libssl-dev cmake clang-8
         Repo: llvm-toolchain-$(lsb_release -cs)-8
-      CLANG8:
+      CLANG9:
         ConfigOpts: --compiler=clang++-9 --security
         PackageDeps: libxerces-c-dev libssl-dev cmake clang-9
       GCC6:
