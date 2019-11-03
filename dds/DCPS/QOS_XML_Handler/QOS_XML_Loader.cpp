@@ -33,7 +33,7 @@ namespace DCPS {
             if (DCPS_debug_level > 5)
               {
                 ACE_ERROR((LM_ERROR,
-                             "get_xml_file_name <%C> - "
+                             "get_xml_file_name <%s> - "
                              "Error: malformed qos_profile. Expected format: "
                              "<xml_file_base_name>#<profile_name>\n",
                              qos_profile));
@@ -68,7 +68,7 @@ namespace DCPS {
             if (DCPS_debug_level > 5)
               {
                 ACE_ERROR((LM_ERROR,
-                             "get_profile_name <%C> - "
+                             "get_profile_name <%s> - "
                              "Error: malformed qos_profile. Expected format: "
                              "<xml_file_base_name>#<profile_name>\n",
                              qos_profile));
@@ -107,7 +107,7 @@ namespace DCPS {
           {
             ACE_ERROR((LM_ERROR,
               ACE_TEXT("QOS_XML_Loader::init - ")
-              ACE_TEXT("Unable to extract a file name from <%C>, returning.\n"),
+              ACE_TEXT("Unable to extract a file name from <%s>, returning.\n"),
               qos_profile));
           }
         return ::DDS::RETCODE_BAD_PARAMETER;
@@ -151,7 +151,7 @@ namespace DCPS {
           {
             ACE_ERROR((LM_ERROR,
               ACE_TEXT("QOS_XML_Loader::get_datawriter_qos - ")
-              ACE_TEXT("Error parsing profile string <%C>, returning.\n"),
+              ACE_TEXT("Error parsing profile string <%s>, returning.\n"),
               qos_profile));
           }
         return ::DDS::RETCODE_BAD_PARAMETER;
@@ -206,7 +206,7 @@ namespace DCPS {
           {
             ACE_ERROR((LM_ERROR,
               ACE_TEXT("QOS_XML_Loader::get_datareader_qos - ")
-              ACE_TEXT("Error parsing profile string <%C>, returning.\n"),
+              ACE_TEXT("Error parsing profile string <%s>, returning.\n"),
               qos_profile));
           }
         return ::DDS::RETCODE_BAD_PARAMETER;
@@ -261,7 +261,7 @@ namespace DCPS {
           {
             ACE_ERROR((LM_ERROR,
               ACE_TEXT("QOS_XML_Loader::get_publisher_qos - ")
-              ACE_TEXT("Error parsing profile string <%C>, returning.\n"),
+              ACE_TEXT("Error parsing profile string <%s>, returning.\n"),
               qos_profile));
           }
         return ::DDS::RETCODE_BAD_PARAMETER;
@@ -314,7 +314,7 @@ namespace DCPS {
           {
             ACE_ERROR((LM_ERROR,
               ACE_TEXT("QOS_XML_Loader::get_subscriber_qos - ")
-              ACE_TEXT("Error parsing profile string <%C>, returning.\n"),
+              ACE_TEXT("Error parsing profile string <%s>, returning.\n"),
               qos_profile));
           }
         return ::DDS::RETCODE_BAD_PARAMETER;
@@ -369,7 +369,7 @@ namespace DCPS {
           {
             ACE_ERROR((LM_ERROR,
               ACE_TEXT("QOS_XML_Loader::get_topic_qos - ")
-              ACE_TEXT("Error parsing profile string <%C>, returning.\n"),
+              ACE_TEXT("Error parsing profile string <%s>, returning.\n"),
               qos_profile));
           }
         return ::DDS::RETCODE_BAD_PARAMETER;
@@ -425,7 +425,7 @@ namespace DCPS {
           {
             ACE_ERROR((LM_ERROR,
               ACE_TEXT("QOS_XML_Loader::get_participant_qos - ")
-              ACE_TEXT("Error parsing profile string <%C>, returning.\n"),
+              ACE_TEXT("Error parsing profile string <%s>, returning.\n"),
               qos_profile));
           }
         return ::DDS::RETCODE_BAD_PARAMETER;

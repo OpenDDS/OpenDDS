@@ -79,7 +79,7 @@ namespace DCPS {
       {
         ACE_ERROR((LM_ERROR,
           ACE_TEXT("QOS_XML_File_Handler::init - ")
-          ACE_TEXT("Caught CORBA exception whilst parsing XML <%C> into IDL: %C\n"),
+          ACE_TEXT("Caught CORBA exception whilst parsing XML <%s> into IDL: %C\n"),
           file,
           ex._info().c_str()));
         retcode = DDS::RETCODE_ERROR;
@@ -88,7 +88,7 @@ namespace DCPS {
       {
         ACE_ERROR((LM_ERROR,
           ACE_TEXT("QOS_XML_File_Handler::init - ")
-          ACE_TEXT("Unexpected exception whilst parsing XML <%C> into IDL.\n"),
+          ACE_TEXT("Unexpected exception whilst parsing XML <%s> into IDL.\n"),
           file));
         retcode = DDS::RETCODE_ERROR;
       }
@@ -108,7 +108,7 @@ namespace DCPS {
               {
                 ACE_DEBUG((LM_TRACE,
                   ACE_TEXT("QOS_XML_File_Handler::get_profile - ")
-                  ACE_TEXT("Found profile <%C>\n"),
+                  ACE_TEXT("Found profile <%s>\n"),
                   (*it)->name().c_str()));
               }
             return it->get();
@@ -124,7 +124,7 @@ namespace DCPS {
       {
         ACE_ERROR((LM_TRACE,
           ACE_TEXT("QOS_XML_File_Handler::get_profile - ")
-          ACE_TEXT("Did not find profile <%C>\n"),
+          ACE_TEXT("Did not find profile <%s>\n"),
           profile_name));
       }
     return 0;

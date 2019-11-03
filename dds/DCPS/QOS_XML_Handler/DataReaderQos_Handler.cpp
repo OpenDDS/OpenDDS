@@ -30,7 +30,7 @@ DataReaderQos_Handler::get_datareader_qos(DDS::DataReaderQos& dr_qos,
             {
               ACE_DEBUG((LM_TRACE,
                 ACE_TEXT("DataReaderQos_Handler::get_datareader_qos - ")
-                ACE_TEXT("No DataReader QOS available in profile <%C>\n"),
+                ACE_TEXT("No DataReader QOS available in profile <%s>\n"),
                 profile->name().c_str()));
             }
           return true;
@@ -42,7 +42,7 @@ DataReaderQos_Handler::get_datareader_qos(DDS::DataReaderQos& dr_qos,
 
   ACE_ERROR((LM_DEBUG,
     ACE_TEXT("DataReaderQos_Handler::get_datareader_qos - ")
-    ACE_TEXT("Unable to find DataReaderQos <%C>\n"),
+    ACE_TEXT("Unable to find DataReaderQos <%s>\n"),
     name));
   return false;
 }

@@ -109,7 +109,7 @@ QOS_PubSub_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, const 
                 {
                   ACE_DEBUG((LM_TRACE,
                     ACE_TEXT("QOS_PubSub_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos - ")
-                    ACE_TEXT("New name <%C> inserted in partition at position <%u>\n"),
+                    ACE_TEXT("New name <%s> inserted in partition at position <%u>\n"),
                     dds_qos.partition.name[pos].in(), pos));
                 }
             }
