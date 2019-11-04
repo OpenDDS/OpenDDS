@@ -138,7 +138,7 @@ public:
 
   OPENDDS_STRING sedp_local_address() const
   {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, OPENDDS_STRING());
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, "");
     return sedp_local_address_;
   }
   void sedp_local_address(const OPENDDS_STRING& mi)
@@ -149,7 +149,7 @@ public:
 
   OPENDDS_STRING spdp_local_address() const
   {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, OPENDDS_STRING());
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, "");
     return spdp_local_address_;
   }
   void spdp_local_address(const OPENDDS_STRING& mi)
@@ -171,7 +171,7 @@ public:
 
   OPENDDS_STRING multicast_interface() const
   {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, OPENDDS_STRING());
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, "");
     return multicast_interface_;
   }
   void multicast_interface(const OPENDDS_STRING& mi)
@@ -182,7 +182,7 @@ public:
 
   OPENDDS_STRING default_multicast_group() const
   {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, OPENDDS_STRING());
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, "");
     return default_multicast_group_;
   }
   void default_multicast_group(const OPENDDS_STRING& group)
@@ -204,7 +204,7 @@ public:
 
   OPENDDS_STRING guid_interface() const
   {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, OPENDDS_STRING());
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, "");
     return guid_interface_;
   }
   void guid_interface(const OPENDDS_STRING& gi)

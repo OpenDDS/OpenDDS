@@ -510,7 +510,7 @@ OpenDDS::DCPS::RepoId
 RtpsDiscovery::generate_participant_guid() {
   OpenDDS::DCPS::RepoId id = GUID_UNKNOWN;
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, id);
-  OPENDDS_STRING guid_interface = config_->guid_interface();
+  const OPENDDS_STRING guid_interface = config_->guid_interface();
   if (!guid_interface.empty()) {
     if (guid_gen_.interfaceName(guid_interface.c_str()) != 0) {
       if (DCPS::DCPS_debug_level) {
@@ -531,7 +531,7 @@ RtpsDiscovery::add_domain_participant(DDS::DomainId_t domain,
 {
   DCPS::AddDomainStatus ads = {OpenDDS::DCPS::RepoId(), false /*federated*/};
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ads);
-  OPENDDS_STRING guid_interface = config_->guid_interface();
+  const OPENDDS_STRING guid_interface = config_->guid_interface();
   if (!guid_interface.empty()) {
     if (guid_gen_.interfaceName(guid_interface.c_str()) != 0) {
       if (DCPS::DCPS_debug_level) {
