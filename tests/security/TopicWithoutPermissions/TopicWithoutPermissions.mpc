@@ -1,4 +1,19 @@
-project (Security*): dcpsexe, dcps_test {
+project(DDS*idl): dcps_test_idl_only_lib {
+  idlflags      += -Wb,stub_export_include=TopicWithoutPermissions_export.h \
+                   -Wb,stub_export_macro=TopicWithoutPermissions_Export -SS
+  dcps_ts_flags += -Wb,export_macro=TopicWithoutPermissions_Export
+  dynamicflags  += TOPICWITHOUTPERMISSIONS_BUILD_DLL
+  avoids        += no_opendds_security
+
+  TypeSupport_Files {
+    StockQuoter.idl
+  }
+}
+
+project (Security*): dcpsexe, dcps_test, dcps_rtps_udp {
+  after    += DDS*idl
+  libs     += DDS*idl
+
   requires += no_opendds_safety_profile
   avoids += no_opendds_security
   exename = *
