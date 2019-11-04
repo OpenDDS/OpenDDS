@@ -486,22 +486,21 @@ DomainParticipantImpl::create_topic_i(
                                                 mask,
                                                 type_support);
 
-	if (!new_topic) {
-		ACE_ERROR((LM_WARNING,
-			ACE_TEXT("(%P|%t) WARNING: ")
-			ACE_TEXT("DomainParticipantImpl::create_topic, ")
-			ACE_TEXT("create_new_topic failed.\n")));
-		return DDS::Topic::_nil();
-	}
+    if (!new_topic) {
+        ACE_ERROR((LM_WARNING,
+            ACE_TEXT("(%P|%t) WARNING: ")
+            ACE_TEXT("DomainParticipantImpl::create_topic, ")
+            ACE_TEXT("create_new_topic failed.\n")));
+        return DDS::Topic::_nil();
+    }
 
     if ((this->enabled_ == true) && qos_.entity_factory.autoenable_created_entities) {
       if (new_topic->enable() != DDS::RETCODE_OK) {
-        ACE_ERROR((LM_WARNING,
+                   ACE_ERROR((LM_WARNING,
                    ACE_TEXT("(%P|%t) WARNING: ")
                    ACE_TEXT("DomainParticipantImpl::create_topic, ")
                    ACE_TEXT("enable failed.\n")));
         return DDS::Topic::_nil();
-
       }
     }
     return new_topic._retn();
