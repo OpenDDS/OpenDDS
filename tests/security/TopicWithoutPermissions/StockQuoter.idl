@@ -5,9 +5,9 @@ module StockQuoter
 
 
 struct Quote {
-		string ticker;
-		string exchange;
-		string full_name;
-		double value;
-	     };
+        string ticker;
+        string exchange;
+        string full_name;
+        double value;
+        };
 };

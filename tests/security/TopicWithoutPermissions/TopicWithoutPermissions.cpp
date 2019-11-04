@@ -79,7 +79,7 @@ int main(int argc, char* argv[]) {
             ACE_OS::exit(1);
         }
 
-        // Create and register the ExchangeEvent type support object 
+        // Create and register the ExchangeEvent type support object
         StockQuoter::QuoteTypeSupport_var quote_ts = new StockQuoter::QuoteTypeSupportImpl;
         if (DDS::RETCODE_OK != quote_ts->register_type(participant,
                                                        QUOTER_QUOTE_TYPE)) {
