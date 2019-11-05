@@ -21,8 +21,8 @@ QosCommon::get_durability_kind(const ::dds::durabilityKind kind,
       dds_kind = ::DDS::PERSISTENT_DURABILITY_QOS;
       break;
     default:
-      ACE_ERROR((LM_DEBUG,
-        ACE_TEXT("QosCommon::get_durability_kind - ")
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: QosCommon::get_durability_kind - ")
         ACE_TEXT("Unknown durability kind found <%d>; returning VOLATILE_DURABILITY_QOS\n"),
         kind.integral()));
       dds_kind = ::DDS::VOLATILE_DURABILITY_QOS;
@@ -43,8 +43,8 @@ QosCommon::get_history_kind(const ::dds::historyKind kind,
       dds_kind = ::DDS::KEEP_LAST_HISTORY_QOS;
       break;
     default:
-      ACE_ERROR((LM_DEBUG,
-        ACE_TEXT("QosCommon::get_history_kind - ")
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: QosCommon::get_history_kind - ")
         ACE_TEXT("Unknown history kind found <%d>; returning KEEP_ALL_HISTORY_QOS\n"),
         kind.integral()));
       dds_kind = ::DDS::KEEP_ALL_HISTORY_QOS;
@@ -105,8 +105,8 @@ QosCommon::get_liveliness_kind(const ::dds::livelinessKind kind,
       dds_kind = ::DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS;
       break;
     default:
-      ACE_ERROR((LM_DEBUG,
-        ACE_TEXT("QosCommon::get_liveliness_kind - ")
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: QosCommon::get_liveliness_kind - ")
         ACE_TEXT("Unknown liveliness kind found <%d>; returning AUTOMATIC_LIVELINESS_QOS\n"),
         kind.integral()));
       dds_kind = ::DDS::AUTOMATIC_LIVELINESS_QOS;
@@ -127,8 +127,8 @@ QosCommon::get_realiability_kind(const ::dds::reliabilityKind kind,
       dds_kind = ::DDS::RELIABLE_RELIABILITY_QOS;
       break;
     default:
-      ACE_ERROR((LM_DEBUG,
-        ACE_TEXT("QosCommon::get_liveliness_kind - ")
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: QosCommon::get_liveliness_kind - ")
         ACE_TEXT("Unknown reliability kind found <%d>; returning BEST_EFFORT_RELIABILITY_QOS\n"),
         kind.integral()));
       dds_kind = ::DDS::BEST_EFFORT_RELIABILITY_QOS;
@@ -149,8 +149,8 @@ QosCommon::get_destination_order_kind(const ::dds::destinationOrderKind kind,
       dds_kind = ::DDS::BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS;
       break;
     default:
-      ACE_ERROR((LM_DEBUG,
-        ACE_TEXT("QosCommon::get_destination_order_kind - ")
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: QosCommon::get_destination_order_kind - ")
         ACE_TEXT("Unknown destination order kind found <%d>; returning BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS\n"),
         kind.integral()));
       dds_kind = ::DDS::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS;
@@ -171,8 +171,8 @@ QosCommon::get_ownership_kind(const ::dds::ownershipKind kind,
       dds_kind = ::DDS::EXCLUSIVE_OWNERSHIP_QOS;
       break;
     default:
-      ACE_ERROR((LM_DEBUG,
-        ACE_TEXT("QosCommon::get_ownership_kind - ")
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: QosCommon::get_ownership_kind - ")
         ACE_TEXT("Unknown ownership kind found <%d>; returning SHARED_OWNERSHIP_QOS\n"),
         kind.integral()));
       dds_kind = ::DDS::SHARED_OWNERSHIP_QOS;

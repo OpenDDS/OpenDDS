@@ -40,8 +40,8 @@ DataReaderQos_Handler::get_datareader_qos(DDS::DataReaderQos& dr_qos,
       return DataReaderQos_Handler::get_datareader_qos(dr_qos, dr_it->get());
     }
 
-  ACE_ERROR((LM_DEBUG,
-    ACE_TEXT("DataReaderQos_Handler::get_datareader_qos - ")
+  ACE_ERROR((LM_ERROR,
+    ACE_TEXT("(%P|%t) ERROR: DataReaderQos_Handler::get_datareader_qos - ")
     ACE_TEXT("Unable to find DataReaderQos <%s>\n"),
     name));
   return false;

@@ -40,8 +40,8 @@ DataWriterQos_Handler::get_datawriter_qos(DDS::DataWriterQos& dw_qos,
       return DataWriterQos_Handler::get_datawriter_qos(dw_qos, dw_it->get());
     }
 
-  ACE_ERROR((LM_DEBUG,
-    ACE_TEXT("DataWriterQos_Handler::get_datawriter_qos - ")
+  ACE_ERROR((LM_ERROR,
+    ACE_TEXT("(%P|%t) ERROR: DataWriterQos_Handler::get_datawriter_qos - ")
     ACE_TEXT("Unable to find DataWriterQos <%s>\n"),
     name));
   return false;

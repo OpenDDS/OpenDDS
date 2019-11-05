@@ -40,8 +40,8 @@ ParticipantQos_Handler::get_participant_qos(DDS::DomainParticipantQos& dp_qos,
       return ParticipantQos_Handler::get_participant_qos(dp_qos, dr_it->get());
     }
 
-  ACE_ERROR((LM_DEBUG,
-    ACE_TEXT("ParticipantQos_Handler::get_participant_qos - ")
+  ACE_ERROR((LM_ERROR,
+    ACE_TEXT("(%P|%t) ERROR: ParticipantQos_Handler::get_participant_qos - ")
     ACE_TEXT("Unable to find ParticipantQos <%s>\n"),
     name));
   return false;

@@ -40,8 +40,8 @@ SubscriberQos_Handler::get_subscriber_qos(DDS::SubscriberQos& sub_qos,
       return SubscriberQos_Handler::get_subscriber_qos(sub_qos, sub_it->get());
     }
 
-  ACE_ERROR((LM_DEBUG,
-    ACE_TEXT("SubscriberQos_Handler::get_subscriber_qos - ")
+  ACE_ERROR((LM_ERROR,
+    ACE_TEXT("(%P|%t) ERROR: SubscriberQos_Handler::get_subscriber_qos - ")
     ACE_TEXT("Unable to find SubscriberQos <%s>\n"),
     name));
   return false;

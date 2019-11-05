@@ -50,8 +50,8 @@ QOS_PubSub_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, const 
                 dds_qos.presentation.access_scope = ::DDS::GROUP_PRESENTATION_QOS;
                 break;
               default:
-                ACE_ERROR((LM_DEBUG,
-                  ACE_TEXT("QOS_PubSub_T::read_qos - ")
+                ACE_ERROR((LM_ERROR,
+                  ACE_TEXT("(%P|%t) ERROR: QOS_PubSub_T::read_qos - ")
                   ACE_TEXT("Unknown presentation access scope found <%d>; setting it to INSTANCE_PRESENTATION_QOS\n"),
                   xml_qos->presentation().access_scope().integral()));
                 dds_qos.presentation.access_scope = ::DDS::INSTANCE_PRESENTATION_QOS;

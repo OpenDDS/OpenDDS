@@ -116,14 +116,14 @@ namespace DCPS {
       }
     if (ACE_OS::strlen(profile_name) == 0)
       {
-        ACE_ERROR((LM_DEBUG,
-          ACE_TEXT("QOS_XML_File_Handler::get_profile - ")
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: QOS_XML_File_Handler::get_profile - ")
           ACE_TEXT("No profile specified\n")));
       }
     else
       {
-        ACE_ERROR((LM_TRACE,
-          ACE_TEXT("QOS_XML_File_Handler::get_profile - ")
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: QOS_XML_File_Handler::get_profile - ")
           ACE_TEXT("Did not find profile <%s>\n"),
           profile_name));
       }

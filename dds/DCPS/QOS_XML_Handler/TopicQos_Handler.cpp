@@ -39,8 +39,8 @@ TopicQos_Handler::get_topic_qos(DDS::TopicQos& tp_qos,
       return TopicQos_Handler::get_topic_qos(tp_qos, tp_it->get());
     }
 
-  ACE_ERROR((LM_DEBUG,
-    ACE_TEXT("TopicQos_Handler::get_topic_qos - ")
+  ACE_ERROR((LM_ERROR,
+    ACE_TEXT("(%P|%t) ERROR: TopicQos_Handler::get_topic_qos - ")
     ACE_TEXT("Unable to find TopicQos <%s>\n"),
     name));
   return false;

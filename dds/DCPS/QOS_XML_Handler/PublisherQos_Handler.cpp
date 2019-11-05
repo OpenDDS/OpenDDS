@@ -39,8 +39,8 @@ PublisherQos_Handler::get_publisher_qos(DDS::PublisherQos& pub_qos,
       return PublisherQos_Handler::get_publisher_qos(pub_qos, pub_it->get());
     }
 
-  ACE_ERROR((LM_DEBUG,
-    ACE_TEXT("PublisherQos_Handler::get_publisher_qos - ")
+  ACE_ERROR((LM_ERROR,
+    ACE_TEXT("(%P|%t) ERROR: PublisherQos_Handler::get_publisher_qos - ")
     ACE_TEXT("Unable to find PublisherQos <%s>\n"),
     name));
   return false;
