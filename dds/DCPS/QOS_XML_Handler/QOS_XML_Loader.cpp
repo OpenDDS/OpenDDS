@@ -33,19 +33,18 @@ namespace DCPS {
             if (DCPS_debug_level > 5)
               {
                 ACE_ERROR((LM_ERROR,
-                             "get_xml_file_name <%s> - "
-                             "Error: malformed qos_profile. Expected format: "
-                             "<xml_file_base_name>#<profile_name>\n",
-                             qos_profile));
+                           "get_xml_file_name <%s> - "
+                           "Error: malformed qos_profile. Expected format: "
+                           "<xml_file_base_name>#<profile_name>\n",
+                           qos_profile));
               }
             return 0;
           }
 
-        ACE_TCHAR * ret = (ACE_TCHAR*) ACE_OS::malloc(ACE_OS::strlen(file_name) + 5);
-        ret = ACE_OS::strcpy(ret, file_name);
-        ret = ACE_OS::strcat(ret, ACE_TEXT(".xml"));
+        ACE_TString ret(file_name);
+        ret += ACE_TEXT(".xml");
         ACE_OS::free(buf);
-        return ret;
+        return ret.rep();
       }
 
     return 0;
