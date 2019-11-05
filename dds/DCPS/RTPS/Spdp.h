@@ -47,6 +47,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace RTPS {
 
+class RtpsDiscoveryConfig;
 class RtpsDiscovery;
 
 /// Each instance of class Spdp represents the implementation of the RTPS
@@ -171,6 +172,7 @@ private:
             RtpsDiscovery* disco);
 
   RtpsDiscovery* disco_;
+  DCPS::RcHandle<RtpsDiscoveryConfig> config_;
 
   // Participant:
   const DDS::DomainId_t domain_;

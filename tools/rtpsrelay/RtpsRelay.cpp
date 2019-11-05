@@ -45,7 +45,7 @@ namespace {
     props.length(len + 1);
     try {
       props[len] = prop;
-    } catch (const CORBA::BAD_PARAM& ex) {
+    } catch (const CORBA::BAD_PARAM& /*ex*/) {
       ACE_ERROR((LM_ERROR, "Exception caught when appending parameter\n"));
     }
   }

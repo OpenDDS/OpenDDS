@@ -230,6 +230,8 @@ bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser
                                     bool& is_beacon,
                                     bool check_submessages)
 {
+  ACE_UNUSED_ARG(msg);
+
   if (!message_parser.parseHeader()) {
     ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::parse_message failed to deserialize RTPS header\n"));
     return false;
@@ -516,7 +518,6 @@ void SpdpHandler::purge(const GuidAddr& ga)
   ACE_GUARD(ACE_Thread_Mutex, g, spdp_messages_mutex_);
   const auto pos = spdp_messages_.find(ga.guid);
   if (pos != spdp_messages_.end()) {
-    pos->second->release();
     spdp_messages_.erase(pos);
   }
 }
