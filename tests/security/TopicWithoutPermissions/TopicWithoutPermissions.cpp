@@ -79,7 +79,7 @@ int main(int argc, char* argv[]) {
     ACE_OS::exit(1);
   }
 
-  // Create and register the ExchangeEvent type support object`
+  // Create and register the Quote Type support object
   StockQuoter::QuoteTypeSupport_var quote_ts = new StockQuoter::QuoteTypeSupportImpl;
   if (DDS::RETCODE_OK != quote_ts->register_type(participant,
                                                  QUOTER_QUOTE_TYPE)) {
@@ -91,7 +91,7 @@ int main(int argc, char* argv[]) {
   DDS::Topic_var quote_topic = participant->create_topic(QUOTER_QUOTE_TOPIC,
                                                          QUOTER_QUOTE_TYPE,
                                                          TOPIC_QOS_DEFAULT,
-                                                         0,
+                                                         NULL,
                                                          OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
   if (0 == quote_topic) {
