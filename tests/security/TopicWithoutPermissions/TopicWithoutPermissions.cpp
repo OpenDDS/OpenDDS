@@ -72,7 +72,7 @@ int main(int argc, char* argv[]) {
   // Create the DomainParticipant
   DDS::DomainParticipant_var participant = dpf->create_participant(QUOTER_DOMAIN_ID,
                                                                    participant_qos,
-                                                                   nullptr,
+                                                                   NULL,
                                                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
   if (0 == participant) {
