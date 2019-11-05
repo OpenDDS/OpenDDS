@@ -17,6 +17,9 @@
 #include "ConfigUtils.h"
 #include "RecorderImpl.h"
 #include "ReplayerImpl.h"
+#ifdef ACE_LINUX
+#include "LinuxNetworkConfigPublisher.h"
+#endif
 #include "StaticDiscovery.h"
 #if defined(OPENDDS_SECURITY)
 #include "security/framework/SecurityRegistry.h"
@@ -261,6 +264,10 @@ Service_Participant::shutdown()
 
       domainRepoMap_.clear();
 
+      if (network_config_publisher_) {
+        network_config_publisher_->close();
+      }
+
       reactor_task_.stop();
 
       discoveryMap_.clear();
@@ -435,6 +442,13 @@ Service_Participant::get_domain_participant_factory(int &argc,
       }
 
       this->monitor_.reset(this->monitor_factory_->create_sp_monitor(this));
+
+#ifdef ACE_LINUX
+      network_config_publisher_ = make_rch<LinuxNetworkConfigPublisher>(reactor_task_.interceptor());
+#endif
+      if (network_config_publisher_ && !network_config_publisher_->open()) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Service_Participant::get_domain_participant_factory could not open network config publisher\n ")));
+      }
     }
   }
 

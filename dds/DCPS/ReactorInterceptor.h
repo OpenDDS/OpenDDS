@@ -124,6 +124,8 @@ protected:
   OPENDDS_QUEUE(CommandPtr) command_queue_;
 };
 
+typedef RcHandle<ReactorInterceptor> ReactorInterceptor_rch;
+
 } // namespace DCPS
 } // namespace OpenDDS
 

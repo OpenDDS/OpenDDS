@@ -379,9 +379,9 @@ MulticastTransport::shutdown_i()
 }
 
 bool
-MulticastTransport::connection_info_i(TransportLocator& info) const
+MulticastTransport::connection_info_i(TransportLocator& info, ConnectionInfoFlags flags) const
 {
-  this->config().populate_locator(info);
+  this->config().populate_locator(info, flags);
   return true;
 }
 

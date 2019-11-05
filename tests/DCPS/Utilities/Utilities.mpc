@@ -1,0 +1,27 @@
+project(ClockPublisher): dcpsexe, dcps_test, dcps_transports_for_test, dcps_rtps, opendds_cxx11 {
+
+  Idl_Files {
+  }
+
+  TypeSupport_Files {
+    Utilities.idl
+  }
+
+  Source_Files {
+    ClockPublisher.cpp
+  }
+}
+
+project(ClockSubscriber): dcpsexe, dcps_test, dcps_transports_for_test, dcps_rtps, opendds_cxx11 {
+
+  Idl_Files {
+  }
+
+  TypeSupport_Files {
+    Utilities.idl
+  }
+
+  Source_Files {
+    ClockSubscriber.cpp
+  }
+}

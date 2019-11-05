@@ -168,6 +168,88 @@ bool paramsChanged(OpenDDS::DCPS::ContentFilterProperty_t& dest,
   return false;
 }
 
+OpenDDS::DCPS::LocatorSeq transport_locator_to_locator_seq(const OpenDDS::DCPS::TransportLocator& info)
+{
+  OpenDDS::DCPS::LocatorSeq locators;
+  OpenDDS::RTPS::blob_to_locators(info.data, locators);
+  return locators;
+}
+
+bool operator==(const OpenDDS::DCPS::Locator_t& x,
+                const OpenDDS::DCPS::Locator_t& y)
+{
+  return x.kind == y.kind && x.port == y.port && std::memcmp(x.address, y.address, sizeof(x.address)) == 0;
+}
+
+bool operator==(const OpenDDS::DCPS::TransportLocator& x,
+                const OpenDDS::DCPS::TransportLocator& y)
+{
+  return x.transport_type == y.transport_type && x.data == y.data;
+}
+
+bool operator==(const OpenDDS::DCPS::LocatorSeq& x,
+                const OpenDDS::DCPS::LocatorSeq& y)
+{
+  if (x.length() != y.length()) {
+    return false;
+  }
+
+  for (unsigned int idx = 0; idx != x.length(); ++idx) {
+    if (!(x[idx] == y[idx])) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+bool operator==(const OpenDDS::DCPS::TransportLocatorSeq& x,
+                const OpenDDS::DCPS::TransportLocatorSeq& y)
+{
+  if (x.length() != y.length()) {
+    return false;
+  }
+
+  for (unsigned int idx = 0; idx != x.length(); ++idx) {
+    if (!(x[idx] == y[idx])) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+bool locatorsChanged(const OpenDDS::RTPS::ParticipantProxy_t& x,
+                     const OpenDDS::RTPS::ParticipantProxy_t& y)
+{
+  return !(x.metatrafficUnicastLocatorList == y.metatrafficUnicastLocatorList &&
+           x.metatrafficMulticastLocatorList == y.metatrafficMulticastLocatorList &&
+           x.defaultMulticastLocatorList == y.defaultMulticastLocatorList &&
+           x.defaultUnicastLocatorList == y.defaultUnicastLocatorList);
+}
+
+bool locatorsChanged(OpenDDS::DCPS::WriterProxy_t& x,
+                     const OpenDDS::DCPS::WriterProxy_t& y)
+{
+  if (!(x.allLocators == y.allLocators)) {
+    x.allLocators = y.allLocators;
+    return true;
+  }
+
+  return false;
+}
+
+bool locatorsChanged(OpenDDS::DCPS::ReaderProxy_t& x,
+                     const OpenDDS::DCPS::ReaderProxy_t& y)
+{
+  if (!(x.allLocators == y.allLocators)) {
+    x.allLocators = y.allLocators;
+    return true;
+  }
+
+  return false;
+}
+
 }
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -664,42 +746,20 @@ Sedp::~Sedp()
   TheTransportRegistry->remove_inst(transport_inst_);
 }
 
-void
-Sedp::unicast_locators(DCPS::LocatorSeq& locators) const
+DCPS::LocatorSeq
+Sedp::unicast_locators() const
 {
-  DCPS::RtpsUdpInst_rch rtps_inst =
-    DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
-  using namespace OpenDDS::RTPS;
+  OpenDDS::DCPS::TransportLocator trans_info;
+  transport_inst_->populate_locator(trans_info, DCPS::CONNINFO_UNICAST);
+  return transport_locator_to_locator_seq(trans_info);
+}
 
-  CORBA::ULong idx = 0;
-
-  //if local_address_string is empty, or only the port has been set
-  //need to get interface addresses to populate into the locator
-  if (rtps_inst->local_address_config_str_.empty() ||
-      rtps_inst->local_address_config_str_.rfind(':') == 0) {
-    typedef OPENDDS_VECTOR(ACE_INET_Addr) AddrVector;
-    AddrVector addrs;
-    if (TheServiceParticipant->default_address ().empty ()) {
-      DCPS::get_interface_addrs(addrs);
-    } else {
-      addrs.push_back(ACE_INET_Addr(static_cast<u_short>(0), TheServiceParticipant->default_address().c_str()));
-    }
-    for (AddrVector::iterator adr_it = addrs.begin(); adr_it != addrs.end(); ++adr_it) {
-      idx = locators.length();
-      locators.length(idx + 1);
-      locators[idx].kind = address_to_kind(*adr_it);
-      locators[idx].port = rtps_inst->local_address_.get_port_number();
-      RTPS::address_to_bytes(locators[idx].address,
-        *adr_it);
-    }
-  } else {
-    idx = locators.length();
-    locators.length(idx + 1);
-    locators[idx].kind = address_to_kind(rtps_inst->local_address_);
-    locators[idx].port = rtps_inst->local_address_.get_port_number();
-    RTPS::address_to_bytes(locators[idx].address,
-      rtps_inst->local_address_);
-  }
+DCPS::LocatorSeq
+Sedp::multicast_locators() const
+{
+  OpenDDS::DCPS::TransportLocator trans_info;
+  transport_inst_->populate_locator(trans_info, DCPS::CONNINFO_MULTICAST);
+  return transport_locator_to_locator_seq(trans_info);
 }
 
 const ACE_INET_Addr&
@@ -745,14 +805,9 @@ Sedp::assign_bit_key(DiscoveredSubscription& sub)
 }
 
 void
-create_association_data_proto(DCPS::AssociationData& proto,
-                              const ParticipantData_t& pdata) {
-  proto.publication_transport_priority_ = 0;
-  proto.remote_reliable_ = true;
-  proto.remote_durable_ = true;
-  std::memcpy(proto.remote_id_.guidPrefix, pdata.participantProxy.guidPrefix,
-              sizeof(GuidPrefix_t));
-
+populate_locators(OpenDDS::DCPS::TransportLocatorSeq& remote_data,
+                  const ParticipantData_t& pdata)
+{
   const DCPS::LocatorSeq& mll =
     pdata.participantProxy.metatrafficMulticastLocatorList;
   const DCPS::LocatorSeq& ull =
@@ -772,11 +827,22 @@ create_association_data_proto(DCPS::AssociationData& proto,
   }
   ser_loc << ACE_OutputCDR::from_boolean(false); // requires_inline_qos
 
-  proto.remote_data_.length(1);
-  proto.remote_data_[0].transport_type = "rtps_udp";
-  message_block_to_sequence (mb_locator, proto.remote_data_[0].data);
+  remote_data.length(1);
+  remote_data[0].transport_type = "rtps_udp";
+  message_block_to_sequence (mb_locator, remote_data[0].data);
 }
 
+void
+create_association_data_proto(DCPS::AssociationData& proto,
+                              const ParticipantData_t& pdata) {
+  proto.publication_transport_priority_ = 0;
+  proto.remote_reliable_ = true;
+  proto.remote_durable_ = true;
+  std::memcpy(proto.remote_id_.guidPrefix, pdata.participantProxy.guidPrefix,
+              sizeof(GuidPrefix_t));
+
+  populate_locators(proto.remote_data_, pdata);
+}
 
 #ifdef OPENDDS_SECURITY
 void
@@ -1278,6 +1344,108 @@ Sedp::disassociate(const ParticipantData_t& pdata)
   } else {
     return false;
   }
+}
+
+void
+Sedp::update_locators(const ParticipantData_t& pdata)
+{
+  OpenDDS::DCPS::TransportLocatorSeq remote_data;
+  populate_locators(remote_data, pdata);
+
+  DCPS::RepoId remote_id;
+  std::memcpy(remote_id.guidPrefix, pdata.participantProxy.guidPrefix, sizeof(GuidPrefix_t));
+
+  if (DCPS::DCPS_debug_level > 3) {
+    remote_id.entityId = ENTITYID_PARTICIPANT;
+    const DCPS::GuidConverter conv(remote_id);
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::update_locators updating locators for %C\n"), OPENDDS_STRING(conv).c_str()));
+  }
+
+  const BuiltinEndpointSet_t& avail =
+    pdata.participantProxy.availableBuiltinEndpoints;
+
+  if (avail & DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER) {
+    remote_id.entityId = ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+  if (avail & DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR) {
+    remote_id.entityId = ENTITYID_SPDP_BUILTIN_PARTICIPANT_READER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+  if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER) {
+    remote_id.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+  if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR) {
+    remote_id.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+  if (avail & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER) {
+    remote_id.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+  if (avail & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR) {
+    remote_id.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+  if (avail & BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER) {
+    remote_id.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+  if (avail & BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER) {
+    remote_id.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+#ifdef OPENDDS_SECURITY
+  if (avail & DDS::Security::SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER) {
+    remote_id.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+  if (avail & DDS::Security::SEDP_BUILTIN_PUBLICATIONS_SECURE_READER) {
+    remote_id.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+  if (avail & DDS::Security::SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER) {
+    remote_id.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+  if (avail & DDS::Security::SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER) {
+    remote_id.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+  if (avail & DDS::Security::BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER) {
+    remote_id.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+  if (avail & DDS::Security::BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER) {
+    remote_id.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+  if (avail & DDS::Security::BUILTIN_PARTICIPANT_STATELESS_MESSAGE_WRITER) {
+    remote_id.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+  if (avail & DDS::Security::BUILTIN_PARTICIPANT_STATELESS_MESSAGE_READER) {
+    remote_id.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+  if (avail & DDS::Security::BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_WRITER) {
+    remote_id.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+  if (avail & DDS::Security::BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_READER) {
+    remote_id.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+  if (avail & DDS::Security::SPDP_BUILTIN_PARTICIPANT_SECURE_WRITER) {
+    remote_id.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+  if (avail & DDS::Security::SPDP_BUILTIN_PARTICIPANT_SECURE_READER) {
+    remote_id.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+#endif
 }
 
 template<typename Map>
@@ -1785,27 +1953,44 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
         }
       }
 
-    } else if (qosChanged(iter->second.writer_data_.ddsPublicationData,
-                          wdata.ddsPublicationData)) { // update existing
+    } else {
+      if (qosChanged(iter->second.writer_data_.ddsPublicationData,
+                     wdata.ddsPublicationData)) { // update existing
 
 #ifndef DDS_HAS_MINIMUM_BIT
-      DCPS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
-      if (bit) { // bit may be null if the DomainParticipant is shutting down
-        bit->store_synthetic_data(iter->second.writer_data_.ddsPublicationData,
-                                  DDS::NOT_NEW_VIEW_STATE);
-      }
+        DCPS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
+        if (bit) { // bit may be null if the DomainParticipant is shutting down
+          bit->store_synthetic_data(iter->second.writer_data_.ddsPublicationData,
+                                    DDS::NOT_NEW_VIEW_STATE);
+        }
 #endif /* DDS_HAS_MINIMUM_BIT */
 
-      // Match/unmatch local subscription(s)
-      topic_name = get_topic_name(iter->second);
-      OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
+        // Match/unmatch local subscription(s)
+        topic_name = get_topic_name(iter->second);
+        OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
           topics_.find(topic_name);
-      if (top_it != topics_.end()) {
-        if (DCPS::DCPS_debug_level > 3) {
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::data_received(dwd) - ")
-                               ACE_TEXT("calling match_endpoints update\n")));
+        if (top_it != topics_.end()) {
+          if (DCPS::DCPS_debug_level > 3) {
+            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::data_received(dwd) - ")
+                       ACE_TEXT("calling match_endpoints update\n")));
+          }
+          match_endpoints(guid, top_it->second);
         }
-        match_endpoints(guid, top_it->second);
+      }
+
+      if (locatorsChanged(iter->second.writer_data_.writerProxy, wdata.writerProxy)) {
+        topic_name = get_topic_name(iter->second);
+        OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::const_iterator top_it = topics_.find(topic_name);
+        using DCPS::RepoIdSet;
+        const RepoIdSet& assoc =
+          (top_it == topics_.end()) ? RepoIdSet() : top_it->second.endpoints();
+        for (RepoIdSet::const_iterator i = assoc.begin(); i != assoc.end(); ++i) {
+          if ((i->entityId.entityKind & 4) == 0) continue; // publication
+          LocalSubscriptionIter lsi = local_subscriptions_.find(*i);
+          if (lsi != local_subscriptions_.end()) {
+            lsi->second.subscription_->update_locators(guid, wdata.writerProxy.allLocators);
+          }
+        }
       }
     }
 
@@ -2135,6 +2320,22 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
           if (lpi != local_publications_.end()) {
             lpi->second.publication_->update_subscription_params(guid,
               rdata.contentFilterProperty.expressionParameters);
+          }
+        }
+      }
+
+      if (locatorsChanged(iter->second.reader_data_.readerProxy, rdata.readerProxy)) {
+        topic_name = get_topic_name(iter->second);
+        OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::const_iterator top_it =
+          topics_.find(topic_name);
+        using DCPS::RepoIdSet;
+        const RepoIdSet& assoc =
+          (top_it == topics_.end()) ? RepoIdSet() : top_it->second.endpoints();
+        for (RepoIdSet::const_iterator i = assoc.begin(); i != assoc.end(); ++i) {
+          if (i->entityId.entityKind & 4) continue; // subscription
+          LocalPublicationIter lpi = local_publications_.find(*i);
+          if (lpi != local_publications_.end()) {
+            lpi->second.publication_->update_locators(guid, rdata.readerProxy.allLocators);
           }
         }
       }
@@ -4795,6 +4996,12 @@ Sedp::stun_server_address(const ACE_INET_Addr& address)
   DCPS::RtpsUdpInst_rch rtps_inst = DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
   ACE_GUARD(ACE_Thread_Mutex, g, rtps_inst->stun_server_config_lock_);
   rtps_inst->stun_server_address_ = address;
+}
+
+bool locators_changed(const OpenDDS::RTPS::ParticipantProxy_t& x,
+                      const OpenDDS::RTPS::ParticipantProxy_t& y)
+{
+  return locatorsChanged(x, y);
 }
 
 }

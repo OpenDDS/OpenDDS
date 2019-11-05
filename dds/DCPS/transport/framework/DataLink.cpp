@@ -1148,6 +1148,26 @@ DataLink::ImmediateStart::execute() {
 }
 
 
+void
+DataLink::network_change()
+{
+  for (IdToSendListenerMap::const_iterator itr = send_listeners_.begin();
+       itr != send_listeners_.end(); ++itr) {
+    TransportSendListener_rch tsl = itr->second.lock();
+    if (tsl) {
+      tsl->network_change();
+    }
+  }
+
+  for (IdToRecvListenerMap::const_iterator itr = recv_listeners_.begin();
+       itr != recv_listeners_.end(); ++itr) {
+    TransportReceiveListener_rch tsl = itr->second.lock();
+    if (tsl) {
+      tsl->network_change();
+    }
+  }
+}
+
 #ifndef OPENDDS_SAFETY_PROFILE
 std::ostream&
 operator<<(std::ostream& str, const DataLink& value)

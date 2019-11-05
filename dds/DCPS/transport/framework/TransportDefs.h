@@ -235,6 +235,11 @@ enum RemoveResult {
 
 typedef ACE_CDR::Long Priority;
 
+typedef size_t ConnectionInfoFlags;
+static const ConnectionInfoFlags CONNINFO_UNICAST = (1 << 0);
+static const ConnectionInfoFlags CONNINFO_MULTICAST = (1 << 0);
+static const ConnectionInfoFlags CONNINFO_ALL = static_cast<ConnectionInfoFlags>(-1);
+
 } // namespace DCPS
 } // namespace OpenDDS
 

@@ -478,6 +478,21 @@ namespace OpenDDS {
                                           const DDS::DataWriterQos& qos,
                                           const DDS::PublisherQos& publisherQos) = 0;
 
+      void update_publication_locators(const RepoId& publicationId,
+                                       const TransportLocatorSeq& transInfo)
+      {
+        ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+        LocalPublicationIter iter = local_publications_.find(publicationId);
+        if (iter != local_publications_.end()) {
+          if (DCPS::DCPS_debug_level > 3) {
+            const DCPS::GuidConverter conv(publicationId);
+            ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) EndpointManager::update_publication_locators updating locators for %C\n"), OPENDDS_STRING(conv).c_str()));
+          }
+          iter->second.trans_info_ = transInfo;
+          write_publication_data(publicationId, iter->second);
+        }
+      }
+
       DCPS::RepoId add_subscription(const DCPS::RepoId& topicId,
                                     DCPS::DataReaderCallbacks* subscription,
                                     const DDS::DataReaderQos& qos,
@@ -609,6 +624,21 @@ namespace OpenDDS {
 
       virtual bool update_subscription_params(const DCPS::RepoId& subId,
                                               const DDS::StringSeq& params) = 0;
+
+      void update_subscription_locators(const RepoId& subscriptionId,
+                                        const TransportLocatorSeq& transInfo)
+      {
+        ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+        LocalSubscriptionIter iter = local_subscriptions_.find(subscriptionId);
+        if (iter != local_subscriptions_.end()) {
+          if (DCPS::DCPS_debug_level > 3) {
+            const DCPS::GuidConverter conv(subscriptionId);
+            ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) EndpointManager::update_subscription_locators updating locators for %C\n"), OPENDDS_STRING(conv).c_str()));
+          }
+          iter->second.trans_info_ = transInfo;
+          write_subscription_data(subscriptionId, iter->second);
+        }
+      }
 
       virtual void association_complete(const DCPS::RepoId& localId,
                                         const DCPS::RepoId& remoteId) = 0;
@@ -1482,6 +1512,12 @@ namespace OpenDDS {
         return endpoint_manager().update_publication_qos(publicationId, qos, publisherQos);
       }
 
+      void update_publication_locators(const RepoId& publicationId,
+                                       const TransportLocatorSeq& transInfo)
+      {
+        endpoint_manager().update_publication_locators(publicationId, transInfo);
+      }
+
       RepoId
       add_subscription(const RepoId& topicId,
                        DCPS::DataReaderCallbacks* subscription,
@@ -1522,6 +1558,13 @@ namespace OpenDDS {
                                  const DDS::StringSeq& params)
       {
         return endpoint_manager().update_subscription_params(subId, params);
+      }
+
+      void
+      update_subscription_locators(const RepoId& subId,
+                                   const TransportLocatorSeq& transInfo)
+      {
+        endpoint_manager().update_subscription_locators(subId, transInfo);
       }
 
       void
@@ -1884,6 +1927,14 @@ namespace OpenDDS {
                                                                   publisherQos);
       }
 
+      virtual void update_publication_locators(DDS::DomainId_t domainId,
+                                               const OpenDDS::DCPS::RepoId& partId,
+                                               const OpenDDS::DCPS::RepoId& dwId,
+                                               const DCPS::TransportLocatorSeq& transInfo)
+      {
+        get_part(domainId, partId)->update_publication_locators(dwId, transInfo);
+      }
+
       virtual OpenDDS::DCPS::RepoId add_subscription(DDS::DomainId_t domainId,
                                                      const OpenDDS::DCPS::RepoId& participantId,
                                                      const OpenDDS::DCPS::RepoId& topicId,
@@ -1931,6 +1982,14 @@ namespace OpenDDS {
                                               const DDS::StringSeq& params)
       {
         return get_part(domainId, partId)->update_subscription_params(subId, params);
+      }
+
+      virtual void update_subscription_locators(DDS::DomainId_t domainId,
+                                                const RepoId& partId,
+                                                const RepoId& subId,
+                                                const TransportLocatorSeq& transInfo)
+      {
+        get_part(domainId, partId)->update_subscription_locators(subId, transInfo);
       }
 
       virtual void association_complete(DDS::DomainId_t domainId,

@@ -120,6 +120,7 @@ void
 TransportClient::enable_transport_using_config(bool reliable, bool durable,
                                                const TransportConfig_rch& tc)
 {
+  config_ = tc;
   swap_bytes_ = tc->swap_bytes_;
   cdr_encapsulation_ = false;
   reliable_ = reliable;
@@ -136,6 +137,8 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
   }
   passive_connect_duration_ = TimeDuration::from_msec(duration);
 
+  populate_connection_info();
+
   const size_t n = tc->instances_.size();
 
   for (size_t i = 0; i < n; ++i) {
@@ -146,9 +149,6 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
 
       if (impl) {
         impls_.push_back(impl);
-        const CORBA::ULong len = conn_info_.length();
-        conn_info_.length(len + 1);
-        impl->connection_info(conn_info_[len]);
 
 #if defined(OPENDDS_SECURITY)
         impl->local_crypto_handle(get_crypto_handle());
@@ -167,6 +167,22 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
   }
 }
 
+void
+TransportClient::populate_connection_info()
+{
+  conn_info_.length(0);
+
+  const size_t n = config_->instances_.size();
+  for (size_t i = 0; i < n; ++i) {
+    TransportInst_rch inst = config_->instances_[i];
+    TransportImpl_rch impl = inst->impl();
+    if (impl) {
+      const CORBA::ULong len = conn_info_.length();
+      conn_info_.length(len + 1);
+      impl->connection_info(conn_info_[len], CONNINFO_ALL);
+    }
+  }
+}
 
 bool
 TransportClient::associate(const AssociationData& data, bool active)
@@ -710,6 +726,21 @@ TransportClient::unregister_for_writer(const RepoId& participant,
     RcHandle<TransportImpl> impl = (*pos).lock();
     if (impl) {
       impl->unregister_for_writer(participant, readerid, writerid);
+    }
+  }
+}
+
+void
+TransportClient::update_locators(const RepoId& remote,
+                                 const TransportLocatorSeq& locators)
+{
+  ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
+  for (ImplsType::iterator pos = impls_.begin(), limit = impls_.end();
+       pos != limit;
+       ++pos) {
+    RcHandle<TransportImpl> impl = (*pos).lock();
+    if (impl) {
+      impl->update_locators(remote, locators);
     }
   }
 }

@@ -17,6 +17,7 @@
 
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/ReactorInterceptor.h"
+#include "dds/DCPS/NetworkConfigPublisher.h"
 
 #include "Ice.h"
 
@@ -64,7 +65,7 @@ private:
   FoundationsType foundations_;
 };
 
-class AgentImpl : public Agent, public DCPS::ReactorInterceptor {
+class AgentImpl : public Agent, public DCPS::ReactorInterceptor, public virtual DCPS::NetworkConfigListener {
 public:
   ActiveFoundationSet active_foundations;
 
@@ -118,6 +119,11 @@ public:
   ACE_Recursive_Thread_Mutex mutex;
 
 private:
+    void add_address(const DCPS::NetworkInterface& interface,
+                     const ACE_INET_Addr& address);
+    void remove_address(const DCPS::NetworkInterface& interface,
+                        const ACE_INET_Addr& address);
+
   Configuration configuration_;
   size_t remote_peer_reflexive_counter_;
   typedef std::map<Endpoint*, EndpointManager*> EndpointManagerMapType;

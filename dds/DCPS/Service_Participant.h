@@ -19,6 +19,7 @@
 #include "dds/DCPS/DomainParticipantFactoryImpl.h"
 #include "dds/DCPS/unique_ptr.h"
 #include "dds/DCPS/ReactorTask.h"
+#include "dds/DCPS/NetworkConfigPublisher.h"
 
 #include "ace/Task.h"
 #include "ace/Configuration.h"
@@ -393,6 +394,8 @@ public:
    */
   void default_configuration_file(const ACE_TCHAR* path);
 
+  NetworkConfigPublisher_rch network_config_publisher() const { return network_config_publisher_; }
+
 private:
 
   /// Initialize default qos.
@@ -621,6 +624,8 @@ private:
    * passed, use this as the configuration file.
    */
   ACE_TString default_configuration_file_;
+
+  NetworkConfigPublisher_rch network_config_publisher_;
 };
 
 #define TheServiceParticipant OpenDDS::DCPS::Service_Participant::instance()

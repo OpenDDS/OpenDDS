@@ -87,7 +87,8 @@ public:
   void acknowledge();
 
   void shutdown();
-  void unicast_locators(DCPS::LocatorSeq& locators) const;
+  DCPS::LocatorSeq unicast_locators() const;
+  DCPS::LocatorSeq multicast_locators() const;
 
   // @brief return the ip address we have bound to.
   // Valid after init() call
@@ -112,6 +113,8 @@ public:
 #endif
 
   bool disassociate(const ParticipantData_t& pdata);
+
+  void update_locators(const ParticipantData_t& pdata);
 
 #ifdef OPENDDS_SECURITY
   DDS::ReturnCode_t write_stateless_message(DDS::Security::ParticipantStatelessMessage& msg,
@@ -817,6 +820,9 @@ private:
   ACE_Condition_Thread_Mutex cond_;
   unsigned int acks_;
 };
+
+bool locators_changed(const OpenDDS::RTPS::ParticipantProxy_t& x,
+                      const OpenDDS::RTPS::ParticipantProxy_t& y);
 
 }
 }

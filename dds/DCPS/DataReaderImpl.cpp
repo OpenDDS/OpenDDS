@@ -3245,6 +3245,18 @@ DataReaderImpl::unregister_for_writer(const RepoId& participant,
   TransportClient::unregister_for_writer(participant, readerid, writerid);
 }
 
+void
+DataReaderImpl::update_locators(const RepoId& writerId,
+                                const TransportLocatorSeq& locators)
+{
+  ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, writers_lock_);
+  WriterMapType::const_iterator iter = writers_.find(writerId);
+
+  if (iter != writers_.end()) {
+    TransportClient::update_locators(writerId, locators);
+  }
+}
+
 ICE::Endpoint*
 DataReaderImpl::get_ice_endpoint()
 {
@@ -3398,6 +3410,17 @@ void EndHistoricSamplesMissedSweeper::CancelCommand::execute()
     info_->historic_samples_timer_ = WriterInfo::NO_TIMER;
     sweeper_->info_set_.erase(info_);
   }
+}
+
+void DataReaderImpl::network_change()
+{
+  this->populate_connection_info();
+  const TransportLocatorSeq& trans_conf_info = this->connection_info();
+  Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
+  disco->update_subscription_locators(this->domain_id_,
+                                      this->dp_id_,
+                                      this->subscription_id_,
+                                      trans_conf_info);
 }
 
 } // namespace DCPS

@@ -34,6 +34,8 @@ public:
 
   virtual void remove_associations(const WriterIdSeq& pubids, bool notify) = 0;
 
+  virtual void network_change() {}
+
 protected:
 
   TransportReceiveListener();

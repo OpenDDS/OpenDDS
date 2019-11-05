@@ -473,14 +473,14 @@ TcpTransport::shutdown_i()
 }
 
 bool
-TcpTransport::connection_info_i(TransportLocator& local_info) const
+TcpTransport::connection_info_i(TransportLocator& local_info, ConnectionInfoFlags flags) const
 {
   DBG_ENTRY_LVL("TcpTransport", "connection_info_i", 6);
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport public address str %C\n",
             this->config().get_public_address().c_str()), 2);
 
-  this->config().populate_locator(local_info);
+  this->config().populate_locator(local_info, flags);
 
   return true;
 }

@@ -76,7 +76,7 @@ private:
 
   virtual void shutdown_i();
 
-  virtual bool connection_info_i(TransportLocator& local_info) const;
+  virtual bool connection_info_i(TransportLocator& local_info, ConnectionInfoFlags flags) const;
 
   /// Called by the DataLink to release itself.
   virtual void release_datalink(DataLink* link);

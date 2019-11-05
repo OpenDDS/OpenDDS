@@ -87,7 +87,13 @@ int AgentImpl::handle_timeout(const ACE_Time_Value& a_now, const void* /*act*/)
 
 AgentImpl::AgentImpl() :
   ReactorInterceptor(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner()),
-  remote_peer_reflexive_counter_(0) {}
+  remote_peer_reflexive_counter_(0)
+{
+  DCPS::NetworkConfigPublisher_rch ncp = TheServiceParticipant->network_config_publisher();
+  if (ncp) {
+    ncp->add_listener(rchandle_from(this));
+  }
+}
 
 void AgentImpl::add_endpoint(Endpoint* a_endpoint)
 {
@@ -213,6 +219,21 @@ void AgentImpl::check_invariants() const
   }
 
   OPENDDS_ASSERT(expected == active_foundations);
+}
+
+void AgentImpl::add_address(const DCPS::NetworkInterface&,
+                            const ACE_INET_Addr&)
+{
+  for (EndpointManagerMapType::const_iterator pos = endpoint_managers_.begin(),
+         limit = endpoint_managers_.end(); pos != limit; ++pos) {
+    pos->second->network_change();
+  }
+}
+
+void AgentImpl::remove_address(const DCPS::NetworkInterface& interface,
+                               const ACE_INET_Addr& address)
+{
+  add_address(interface, address);
 }
 
 #endif /* OPENDDS_SECURITY */
