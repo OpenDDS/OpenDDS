@@ -7,7 +7,7 @@
 
 #include <dds/DdsDcpsCore.idl>
 
-module SecurityAttributes{
+module SecurityAttributes {
 
 #pragma DCPS_DATA_TYPE "SecurityAttributes::Message"
 #pragma DCPS_DATA_KEY "SecurityAttributes::Message subject_id"
