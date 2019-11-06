@@ -103,7 +103,7 @@ QOS_PubSub_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, const 
                it != xml_qos->partition().name().end_element();
                ++it, ++pos)
             {
-              dds_qos.partition.name[pos] = ACE_NS_WString(it->get()->c_str()).char_rep();
+              dds_qos.partition.name[pos] = ACE_TEXT_ALWAYS_CHAR(it->get()->c_str());
 
               if (OpenDDS::DCPS::DCPS_debug_level > 9)
                 {
