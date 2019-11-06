@@ -29,7 +29,12 @@ namespace OpenDDS {
       };
       typedef OPENDDS_MAP_CMP(DCPS::RepoId, RemoteTopic, DCPS::GUID_tKeyLessThan) RemoteTopicMap;
 
-      TopicDetails() : topic_callbacks_(0) {}
+      TopicDetails()
+        : topic_id_()
+        , has_dcps_key_(false)
+        , topic_callbacks_(0)
+        , inconsistent_topic_count_(0)
+      {}
 
       void init(const OPENDDS_STRING& name,
                 const DCPS::RepoId& topic_id) {
