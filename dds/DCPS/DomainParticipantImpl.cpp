@@ -469,11 +469,11 @@ DomainParticipantImpl::create_topic_i(
       type_support = Registered_Data_Types->lookup(this, type_name);
       if (CORBA::is_nil(type_support)) {
         if (DCPS_debug_level >= 1) {
-            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-                       ACE_TEXT("DomainParticipantImpl::create_topic, ")
-                       ACE_TEXT("can't create a topic=%C type_name=%C ")
-                       ACE_TEXT("is not registered.\n"),
-                       topic_name, type_name));
+           ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("DomainParticipantImpl::create_topic, ")
+                      ACE_TEXT("can't create a topic=%C type_name=%C ")
+                      ACE_TEXT("is not registered.\n"),
+                      topic_name, type_name));
         }
         return DDS::Topic::_nil();
       }
@@ -485,14 +485,22 @@ DomainParticipantImpl::create_topic_i(
                                                 a_listener,
                                                 mask,
                                                 type_support);
+
+    if (!new_topic) {
+       ACE_ERROR((LM_WARNING,
+                  ACE_TEXT("(%P|%t) WARNING: ")
+                  ACE_TEXT("DomainParticipantImpl::create_topic, ")
+                  ACE_TEXT("create_new_topic failed.\n")));
+        return DDS::Topic::_nil();
+    }
+
     if ((this->enabled_ == true) && qos_.entity_factory.autoenable_created_entities) {
       if (new_topic->enable() != DDS::RETCODE_OK) {
-        ACE_ERROR((LM_WARNING,
-                   ACE_TEXT("(%P|%t) WARNING: ")
-                   ACE_TEXT("DomainParticipantImpl::create_topic, ")
-                   ACE_TEXT("enable failed.\n")));
+         ACE_ERROR((LM_WARNING,
+                    ACE_TEXT("(%P|%t) WARNING: ")
+                    ACE_TEXT("DomainParticipantImpl::create_topic, ")
+                    ACE_TEXT("enable failed.\n")));
         return DDS::Topic::_nil();
-
       }
     }
     return new_topic._retn();
