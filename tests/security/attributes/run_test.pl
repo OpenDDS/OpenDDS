@@ -261,7 +261,7 @@ if (!($scenario eq "")) {
     @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
     @topic_names = ("PD_OL_OA_OM_ED");
-    $pub_extra_space = "10000";
+    $pub_extra_space = "100000";
   } else {
     print "\nUnrecognized scenario '$scenario'. Skipping.\n";
     exit -1;
