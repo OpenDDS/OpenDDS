@@ -45,7 +45,7 @@ namespace {
     props.length(len + 1);
     try {
       props[len] = prop;
-    } catch (const CORBA::BAD_PARAM& ex) {
+    } catch (const CORBA::BAD_PARAM& /*ex*/) {
       ACE_ERROR((LM_ERROR, "Exception caught when appending parameter\n"));
     }
   }
@@ -460,8 +460,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
                                  &sedp_vertical_handler, &sedp_horizontal_handler,
                                  &data_vertical_handler, &data_horizontal_handler);
   statistics_h.open();
-
-  rtps_discovery->schedule_send(application_domain, application_participant_id, OpenDDS::DCPS::TimeDuration(1));
 
   reactor->run_reactor_event_loop();
 
