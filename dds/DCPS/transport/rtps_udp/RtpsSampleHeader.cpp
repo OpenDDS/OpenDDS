@@ -687,6 +687,11 @@ RtpsSampleHeader::split(const ACE_Message_Block& orig, size_t size,
     if (flags & FLAG_K_IN_DATA) {
       new_flags |= FLAG_K_IN_FRAG;
     }
+    new_flags &= ~(FLAG_N_IN_DATA | FLAG_N_IN_FRAG);
+    if (flags & FLAG_N_IN_DATA) {
+      new_flags |= FLAG_N_IN_FRAG;
+    }
+
   }
   head.reset(DataSampleHeader::alloc_msgblock(orig, sz, false));
 
