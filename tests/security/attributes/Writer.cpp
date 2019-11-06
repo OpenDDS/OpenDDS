@@ -103,9 +103,7 @@ Writer::svc()
     message.text         = "Worst. Movie. Ever.";
     message.count        = 0;
     message.extra_space.length(args_.extra_space);
-    for (int i = 0; i < args_.extra_space; i++) {
-      message.extra_space[i] = 'a';
-    }
+    memset(&message.extra_space[0], 'a', args_.extra_space);
 
     for (int i = 0; i < args_.num_messages_; i++) {
       DDS::ReturnCode_t error;
