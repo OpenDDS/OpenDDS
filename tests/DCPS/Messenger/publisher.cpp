@@ -107,7 +107,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: main()")
                           ACE_TEXT(" ERROR: create_participant failed!\n")),
-                         -1);
+                         1);
       }
 
       // Register TypeSupport (Messenger::Message)
@@ -118,7 +118,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: main()")
                           ACE_TEXT(" ERROR: register_type failed!\n")),
-                         -1);
+                         1);
       }
 
       // Create Topic
@@ -134,7 +134,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: main()")
                           ACE_TEXT(" ERROR: create_topic failed!\n")),
-                         -1);
+                         1);
       }
 
       // Create Publisher
@@ -147,7 +147,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: main()")
                           ACE_TEXT(" ERROR: create_publisher failed!\n")),
-                         -1);
+                         1);
       }
 
       DDS::DataWriterQos qos;
@@ -169,7 +169,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: main()")
                           ACE_TEXT(" ERROR: create_datawriter failed!\n")),
-                         -1);
+                         1);
       }
 
       // Start writing threads
@@ -212,7 +212,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
-    ACE_OS::exit(-1);
+    ACE_OS::exit(1);
   }
 
   return 0;

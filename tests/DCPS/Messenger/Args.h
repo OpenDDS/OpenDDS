@@ -59,7 +59,7 @@ parse_args(int argc, ACE_TCHAR *argv[])
     default:
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("usage: %s [-t transport]\n"), argv[0]),
-                       -1);
+                       1);
     }
   }
 
@@ -76,12 +76,12 @@ parse_args(int argc, ACE_TCHAR *argv[])
     if (config.in() == 0) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("no default config\n"), argv[0]),
-                       -1);
+                       1);
     }
     else if (config->instances_.size() < 1) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("no instances on default config\n"), argv[0]),
-                       -1);
+                       1);
     }
     else if (config->instances_.size() > 1) {
       ACE_ERROR((LM_ERROR,

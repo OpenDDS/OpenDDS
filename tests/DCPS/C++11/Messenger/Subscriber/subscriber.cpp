@@ -59,7 +59,7 @@ struct DataReaderListenerImpl
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("%N:%l: on_data_available()")
                    ACE_TEXT(" ERROR: _narrow failed!\n")));
-        ACE_OS::exit(-1);
+        ACE_OS::exit(1);
       }
 
       Messenger::Message message;
@@ -106,7 +106,7 @@ struct DataReaderListenerImpl
 
     } catch (const CORBA::Exception& e) {
       e._tao_print_exception("Exception caught in on_data_available():");
-      ACE_OS::exit(-1);
+      ACE_OS::exit(1);
     }
   }
 
@@ -174,7 +174,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     if (!participant) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: create_participant() failed!\n")), -1);
+                        ACE_TEXT(" ERROR: create_participant() failed!\n")), 1);
     }
 
     Messenger::MessageTypeSupport_var ts = new Messenger::MessageTypeSupportImpl;
@@ -182,7 +182,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     if (ts->register_type(participant, "") != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: register_type() failed!\n")), -1);
+                        ACE_TEXT(" ERROR: register_type() failed!\n")), 1);
     }
 
     CORBA::String_var type_name = ts->get_type_name();
@@ -196,7 +196,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     if (!topic) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: create_topic() failed!\n")), -1);
+                        ACE_TEXT(" ERROR: create_topic() failed!\n")), 1);
     }
 
     DDS::Subscriber_var sub =
@@ -207,7 +207,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     if (!sub) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: create_subscriber() failed!\n")), -1);
+                        ACE_TEXT(" ERROR: create_subscriber() failed!\n")), 1);
     }
 
     DataReaderListenerImpl* const listener_servant = new DataReaderListenerImpl;
@@ -226,7 +226,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     if (!reader) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: create_datareader() failed!\n")), -1);
+                        ACE_TEXT(" ERROR: create_datareader() failed!\n")), 1);
     }
 
     DDS::StatusCondition_var condition = reader->get_statuscondition();
@@ -245,7 +245,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       if (reader->get_subscription_matched_status(matches) != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l main()")
-                          ACE_TEXT(" ERROR: get_subscription_matched_status() failed!\n")), -1);
+                          ACE_TEXT(" ERROR: get_subscription_matched_status() failed!\n")), 1);
       }
       if (matches.current_count == 0 && matches.total_count > 0) {
         break;
@@ -253,11 +253,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l main()")
-                          ACE_TEXT(" ERROR: wait() failed!\n")), -1);
+                          ACE_TEXT(" ERROR: wait() failed!\n")), 1);
       }
     }
 
-    status = listener_servant->is_valid() ? 0 : -1;
+    status = listener_servant->is_valid() ? 0 : 1;
 
     ws->detach_condition(condition);
 
@@ -267,7 +267,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
-    status = -1;
+    status = 1;
   }
 
   return status;

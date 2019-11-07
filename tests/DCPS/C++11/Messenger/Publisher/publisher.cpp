@@ -33,7 +33,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: main()")
                         ACE_TEXT(" ERROR: create_participant failed!\n")),
-                        -1);
+                        1);
     }
 
     Messenger::MessageTypeSupport_var mts = new Messenger::MessageTypeSupportImpl;
@@ -42,7 +42,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: main()")
                         ACE_TEXT(" ERROR: register_type failed!\n")),
-                        -1);
+                        1);
     }
 
     CORBA::String_var type_name = mts->get_type_name();
@@ -57,7 +57,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: main()")
                         ACE_TEXT(" ERROR: create_topic failed!\n")),
-                        -1);
+                        1);
     }
 
     DDS::Publisher_var pub =
@@ -69,7 +69,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: main()")
                         ACE_TEXT(" ERROR: create_publisher failed!\n")),
-                        -1);
+                        1);
     }
 
     DDS::DataWriterQos qos;
@@ -86,7 +86,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: main()")
                         ACE_TEXT(" ERROR: create_datawriter failed!\n")),
-                        -1);
+                        1);
     }
 
     DDS::StatusCondition_var condition = dw->get_statuscondition();
@@ -106,14 +106,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("%N:%l: svc()")
                    ACE_TEXT(" ERROR: wait failed!\n")));
-        ACE_OS::exit(-1);
+        ACE_OS::exit(1);
       }
 
       if (dw->get_publication_matched_status(matches) != ::DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("%N:%l: svc()")
                    ACE_TEXT(" ERROR: get_publication_matched_status failed!\n")));
-        ACE_OS::exit(-1);
+        ACE_OS::exit(1);
       }
 
     } while (matches.current_count < 1);
@@ -127,7 +127,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("%N:%l: svc()")
                  ACE_TEXT(" ERROR: _narrow failed!\n")));
-      ACE_OS::exit(-1);
+      ACE_OS::exit(1);
     }
 
     Messenger::Message message;
@@ -164,7 +164,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
-    ACE_OS::exit(-1);
+    ACE_OS::exit(1);
   }
 
   return 0;
