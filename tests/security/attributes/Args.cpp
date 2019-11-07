@@ -29,6 +29,7 @@ Args::Args()
  , num_messages_(DEFAULT_NUM_MESSAGES)
  , expected_result_(0)
  , timeout_(0)
+ , extra_space(0)
 {
 }
 
