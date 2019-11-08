@@ -66,10 +66,10 @@ protected:
   {
     return UDP_MAX_MESSAGE_SIZE;
   }
+
   virtual void add_delayed_notification(TransportQueueElement* element);
   virtual RemoveResult do_remove_sample(const RepoId& pub_id,
-    const TransportQueueElement::MatchCriteria& criteria,
-    void* context);
+    const TransportQueueElement::MatchCriteria& criteria);
 
 private:
   bool marshal_transport_header(ACE_Message_Block* mb);
@@ -78,11 +78,11 @@ private:
   ssize_t send_single_i(const iovec iov[], int n,
                         const ACE_INET_Addr& addr);
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   ACE_Message_Block* pre_send_packet(const ACE_Message_Block* plain);
 
   struct Chunk {
-    char* start_;
+    const char* start_;
     unsigned int length_;
     DDS::OctetSeq encoded_;
   };
@@ -92,14 +92,21 @@ private:
                                 DDS::Security::CryptoTransform* crypto,
                                 const DDS::OctetSeq& plain,
                                 DDS::Security::DatawriterCryptoHandle sender_dwch,
-                                char* submessage_start, CORBA::Octet msgId);
+                                const char* submessage_start, CORBA::Octet msgId);
 
   bool encode_reader_submessage(const RepoId& receiver,
                                 OPENDDS_VECTOR(Chunk)& replacements,
                                 DDS::Security::CryptoTransform* crypto,
                                 const DDS::OctetSeq& plain,
                                 DDS::Security::DatareaderCryptoHandle sender_drch,
-                                char* submessage_start, CORBA::Octet msgId);
+                                const char* submessage_start, CORBA::Octet msgId);
+
+  ACE_Message_Block* encode_submessages(const ACE_Message_Block* plain,
+                                        DDS::Security::CryptoTransform* crypto,
+                                        bool& stateless_or_volatile);
+
+  ACE_Message_Block* encode_rtps_message(const ACE_Message_Block* plain,
+                                         DDS::Security::CryptoTransform* crypto);
 
   ACE_Message_Block* replace_chunks(const ACE_Message_Block* plain,
                                     const OPENDDS_VECTOR(Chunk)& replacements);

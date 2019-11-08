@@ -8,6 +8,10 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "SecurityConfig.h"
 
+#include "Properties.h"
+
+#include <cstring>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -54,6 +58,22 @@ void SecurityConfig::get_properties(DDS::PropertyQosPolicy& out_properties) cons
     out_prop.name = iProp->first.c_str();
     out_prop.value = iProp->second.c_str();
   }
+}
+
+bool SecurityConfig::qos_implies_security(const DDS::DomainParticipantQos& qos) const {
+  const DDS::PropertySeq& properties = qos.property.value;
+  for (unsigned int idx = 0; idx != properties.length(); ++idx) {
+    const char* name = properties[idx].name.in();
+    if (std::strcmp(DDS::Security::Properties::AuthIdentityCA, name) == 0 ||
+        std::strcmp(DDS::Security::Properties::AuthIdentityCertificate, name) == 0 ||
+        std::strcmp(DDS::Security::Properties::AuthPrivateKey, name) == 0 ||
+        std::strcmp(DDS::Security::Properties::AccessPermissionsCA, name) == 0 ||
+        std::strcmp(DDS::Security::Properties::AccessGovernance, name) == 0 ||
+        std::strcmp(DDS::Security::Properties::AccessPermissions, name) == 0) {
+      return true;
+    }
+  }
+  return false;
 }
 
 }

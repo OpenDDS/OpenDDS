@@ -45,15 +45,20 @@ OpenDDS_Dcps_Export
 bool
 compatibleQOS(const DDS::DataWriterQos * writerQos,
               const DDS::DataReaderQos * readerQos,
-              OpenDDS::DCPS::IncompatibleQosStatus* writerStatus,
-              OpenDDS::DCPS::IncompatibleQosStatus* readerStatus);
+              OpenDDS::DCPS::IncompatibleQosStatus* writerStatus = 0,
+              OpenDDS::DCPS::IncompatibleQosStatus* readerStatus = 0);
 
 OpenDDS_Dcps_Export
 bool
 compatibleQOS(const DDS::PublisherQos * pubQos,
               const DDS::SubscriberQos * subQos,
-              OpenDDS::DCPS::IncompatibleQosStatus* writerStatus,
-              OpenDDS::DCPS::IncompatibleQosStatus* readerStatus);
+              OpenDDS::DCPS::IncompatibleQosStatus* writerStatus = 0,
+              OpenDDS::DCPS::IncompatibleQosStatus* readerStatus = 0);
+
+OpenDDS_Dcps_Export
+bool
+matching_partitions(const DDS::PartitionQosPolicy& pub,
+                    const DDS::PartitionQosPolicy& sub);
 
 // Should check the association of the entity QoS ?
 // The changeable QoS that is supported currently and affect the association

@@ -156,7 +156,7 @@ private:
   //allows PendingAssoc to temporarily release lock_ to allow
   //TransportImpl to access Reactor if needed
   bool initiate_connect_i(TransportImpl::AcceptConnectResult& result,
-                          TransportImpl* impl,
+                          TransportImpl_rch impl,
                           const TransportImpl::RemoteTransport& remote,
                           const TransportImpl::ConnectionAttribs& attribs_,
                           Guard& guard);
@@ -168,7 +168,7 @@ private:
   friend class ::DDS_TEST;
 
   typedef OPENDDS_MAP_CMP(RepoId, DataLink_rch, GUID_tKeyLessThan) DataLinkIndex;
-  typedef OPENDDS_VECTOR(TransportImpl*) ImplsType;
+  typedef OPENDDS_VECTOR(WeakRcHandle<TransportImpl>) ImplsType;
 
   struct PendingAssoc : RcEventHandler {
     bool active_, removed_;
@@ -200,14 +200,12 @@ private:
 
     void schedule_timer(TransportClient* transport_client, const PendingAssoc_rch& pend)
     {
-      ScheduleCommand c(this, transport_client, pend);
-      execute_or_enqueue(c);
+      execute_or_enqueue(new ScheduleCommand(this, transport_client, pend));
     }
 
-    void cancel_timer(TransportClient* transport_client, const PendingAssoc_rch& pend)
+    ReactorInterceptor::CommandPtr cancel_timer(TransportClient* transport_client, const PendingAssoc_rch& pend)
     {
-      CancelCommand c(this, transport_client, pend);
-      execute_or_enqueue(c);
+      return execute_or_enqueue(new CancelCommand(this, transport_client, pend));
     }
 
     virtual bool reactor_is_shut_down() const
@@ -244,7 +242,7 @@ private:
         if (timer_->reactor()) {
           timer_->reactor()->schedule_timer(assoc_.in(),
                                             transport_client_,
-                                            transport_client_->passive_connect_duration_);
+                                            transport_client_->passive_connect_duration_.value());
         }
       }
     };
@@ -294,7 +292,7 @@ private:
 
   bool swap_bytes_, cdr_encapsulation_, reliable_, durable_;
 
-  ACE_Time_Value passive_connect_duration_;
+  TimeDuration passive_connect_duration_;
 
   TransportLocatorSeq conn_info_;
 

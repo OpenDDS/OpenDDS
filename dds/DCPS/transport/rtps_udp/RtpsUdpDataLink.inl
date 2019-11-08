@@ -61,6 +61,7 @@ RtpsUdpDataLink::local_crypto_handle(DDS::Security::ParticipantCryptoHandle h)
 ACE_INLINE DDS::Security::ParticipantCryptoHandle
 RtpsUdpDataLink::peer_crypto_handle(const RepoId& peer) const
 {
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, ch_lock_, DDS::HANDLE_NIL);
   const PeerHandlesCIter it = peer_crypto_handles_.find(peer);
   return (it == peer_crypto_handles_.end()) ? DDS::HANDLE_NIL : it->second;
 }
@@ -68,6 +69,7 @@ RtpsUdpDataLink::peer_crypto_handle(const RepoId& peer) const
 ACE_INLINE DDS::Security::DatawriterCryptoHandle
 RtpsUdpDataLink::writer_crypto_handle(const RepoId& writer) const
 {
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, ch_lock_, DDS::HANDLE_NIL);
   const PeerHandlesCIter it = peer_crypto_handles_.find(writer);
   return (it == peer_crypto_handles_.end()) ? DDS::HANDLE_NIL : it->second;
 }
@@ -75,8 +77,20 @@ RtpsUdpDataLink::writer_crypto_handle(const RepoId& writer) const
 ACE_INLINE DDS::Security::DatareaderCryptoHandle
 RtpsUdpDataLink::reader_crypto_handle(const RepoId& reader) const
 {
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, ch_lock_, DDS::HANDLE_NIL);
   const PeerHandlesCIter it = peer_crypto_handles_.find(reader);
   return (it == peer_crypto_handles_.end()) ? DDS::HANDLE_NIL : it->second;
+}
+
+ACE_INLINE DDS::Security::EndpointSecurityAttributesMask
+RtpsUdpDataLink::security_attributes(const RepoId& endpoint) const
+{
+  static const DDS::Security::EndpointSecurityAttributesMask inval = 0;
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, ch_lock_, inval);
+  typedef OPENDDS_MAP_CMP(RepoId, DDS::Security::EndpointSecurityAttributesMask,
+                          GUID_tKeyLessThan)::const_iterator iter_t;
+  const iter_t it = endpoint_security_attributes_.find(endpoint);
+  return (it == endpoint_security_attributes_.end()) ? inval : it->second;
 }
 #endif
 

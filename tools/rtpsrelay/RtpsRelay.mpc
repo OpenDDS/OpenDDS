@@ -1,6 +1,6 @@
-project: dcps_rtps, opendds_cxx11 {
+project: dcps_rtps_udp, opendds_cxx11, rtps_relay_lib, optional_security {
 
-  TypeSupport_Files {
-    Relay.idl
-  }
+  exeout = $(DDS_ROOT)/bin
+  requires += built_in_topics
+  requires += no_opendds_safety_profile
 }

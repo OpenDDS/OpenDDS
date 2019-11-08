@@ -16,6 +16,7 @@
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/ReactorInterceptor.h"
 #include "dds/DCPS/RepoIdTypes.h"
+#include "dds/DCPS/TimeTypes.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -117,9 +118,9 @@ public:
   /// tell this instance when a DataWriter transitions to NOT_ALIVE
   void writer_became_dead(const PublicationId& writer_id,
                           int num_alive_writers,
-                          const ACE_Time_Value& when);
+                          const MonotonicTimePoint& when);
 
-  DataReaderImpl* data_reader() const;
+  WeakRcHandle<OpenDDS::DCPS::DataReaderImpl> data_reader() const;
 
   virtual int handle_timeout(const ACE_Time_Value& current_time,
                              const void* arg);
@@ -213,7 +214,7 @@ private:
    * instance.  It is also queried to determine if the DataReader is
    * empty -- that it contains no more sample data.
    */
-  DataReaderImpl* reader_;
+  WeakRcHandle<DataReaderImpl> reader_;
   DDS::InstanceHandle_t handle_;
 
   RepoIdSet writers_;
@@ -240,12 +241,12 @@ private:
   };
 
   struct ScheduleCommand : CommandBase {
-    ScheduleCommand(InstanceState* instance_state, const ACE_Time_Value& delay)
+    ScheduleCommand(InstanceState* instance_state, const TimeDuration& delay)
       : CommandBase(instance_state)
       , delay_(delay)
     {}
 
-    const ACE_Time_Value delay_;
+    const TimeDuration delay_;
     void execute();
   };
 

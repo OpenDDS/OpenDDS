@@ -159,8 +159,6 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
     return AcceptConnectResult(link);
   }
 
-  GuardType connections_guard(connections_lock_);
-
   add_pending_connection(client, link);
   VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::connect_datalink pending.\n"), 0);
   return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
@@ -178,19 +176,6 @@ TcpTransport::async_connect_failed(const PriorityKey& key)
 
   if (link.in()) {
     link->invoke_on_start_callbacks(false);
-  }
-}
-
-void
-TcpTransport::async_connect_succeeded(const PriorityKey& key)
-{
-  GuardType guard(links_lock_);
-  TcpDataLink_rch link;
-  links_.find(key, link);
-  guard.release();
-
-  if (link.in()) {
-    link->invoke_on_start_callbacks(true);
   }
 }
 
@@ -212,6 +197,7 @@ TcpTransport::find_datalink_i(const PriorityKey& key, TcpDataLink_rch& link,
 
     VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) TcpTransport::find_datalink_i ")
               ACE_TEXT("link[%@] found, add to pending connections.\n"), link.in()), 0);
+
     add_pending_connection(client, link);
     link.reset(); // don't return link to TransportClient
     return true;
@@ -252,7 +238,6 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
             std::string(local_conv).c_str(),
             std::string(remote_conv).c_str()), 5);
 
-  GuardType guard(connections_lock_);
   const PriorityKey key =
     blob_to_key(remote.blob_, attribs.priority_, false /* !active */);
 
@@ -285,11 +270,14 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
   }
 
   TcpConnection_rch connection;
-  const ConnectionMap::iterator iter = connections_.find(key);
+  {
+    GuardType guard(connections_lock_);
+    const ConnectionMap::iterator iter = connections_.find(key);
 
-  if (iter != connections_.end()) {
-    connection = iter->second;
-    connections_.erase(iter);
+    if (iter != connections_.end()) {
+      connection = iter->second;
+      connections_.erase(iter);
+    }
   }
 
   if (connection.is_nil()) {
@@ -307,8 +295,6 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
     // no link ready, passive_connection will complete later
     return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
   }
-
-  guard.release(); // connect_tcp_datalink() isn't called with connections_lock_
 
   if (connect_tcp_datalink(*link, connection) == -1) {
     GuardType guard(links_lock_);
@@ -330,7 +316,7 @@ TcpTransport::stop_accepting_or_connecting(const TransportClient_wrch& client,
             "stop connecting to remote: %C\n",
             std::string(remote_converted).c_str()), 5);
 
-  GuardType guard(connections_lock_);
+  GuardType guard(pending_connections_lock_);
   typedef PendConnMap::iterator iter_t;
   const std::pair<iter_t, iter_t> range =
     pending_connections_.equal_range(client);
@@ -426,11 +412,11 @@ TcpTransport::shutdown_i()
   DBG_ENTRY_LVL("TcpTransport","shutdown_i",6);
 
   {
-    GuardType guard(this->links_lock_);
+    GuardType guard(links_lock_);
 
     AddrLinkMap::ENTRY* entry;
 
-    for (AddrLinkMap::ITERATOR itr(this->links_);
+    for (AddrLinkMap::ITERATOR itr(links_);
          itr.next(entry);
          itr.advance()) {
       entry->int_id_->pre_stop_i();
@@ -438,44 +424,52 @@ TcpTransport::shutdown_i()
   }
 
   // Don't accept any more connections.
-  this->acceptor_->close();
-  this->acceptor_->transport_shutdown();
+  acceptor_->close();
+  acceptor_->transport_shutdown();
 
-  this->con_checker_->close(1);
+  con_checker_->close(1);
 
   {
-    GuardType guard(this->connections_lock_);
+    {
+      GuardType guard(connections_lock_);
 
-    this->connections_.clear();
-    this->pending_connections_.clear();
+      for (ConnectionMap::iterator it = connections_.begin(); it != connections_.end(); ++it) {
+        it->second->shutdown();
+      }
+      connections_.clear();
+    }
+    {
+      GuardType guard(pending_connections_lock_);
+      pending_connections_.clear();
+    }
   }
 
   // Disconnect all of our DataLinks, and clear our links_ collection.
   {
-    GuardType guard(this->links_lock_);
+    GuardType guard(links_lock_);
 
     AddrLinkMap::ENTRY* entry;
 
-    for (AddrLinkMap::ITERATOR itr(this->links_);
+    for (AddrLinkMap::ITERATOR itr(links_);
          itr.next(entry);
          itr.advance()) {
       entry->int_id_->transport_shutdown();
     }
 
-    this->links_.unbind_all();
+    links_.unbind_all();
 
-    for (AddrLinkMap::ITERATOR itr(this->pending_release_links_);
+    for (AddrLinkMap::ITERATOR itr(pending_release_links_);
          itr.next(entry);
          itr.advance()) {
       entry->int_id_->transport_shutdown();
     }
 
-    this->pending_release_links_.unbind_all();
+    pending_release_links_.unbind_all();
   }
 
   // Tell our acceptor about this event so that it can drop its reference
   // it holds to this TcpTransport object (via smart-pointer).
-  this->acceptor_->transport_shutdown();
+  acceptor_->transport_shutdown();
 }
 
 bool
@@ -534,14 +528,14 @@ TcpTransport::release_datalink(DataLink* link)
 
   if (this->links_.unbind(key, released_link) != 0) {
     //No op
-  } else if (link->datalink_release_delay() > ACE_Time_Value::zero) {
+  } else if (link->datalink_release_delay() > TimeDuration::zero_value) {
     link->set_scheduling_release(true);
 
     VDBG_LVL((LM_DEBUG,
               "(%P|%t) TcpTransport::release_datalink datalink_release_delay "
               "is %: sec %d usec\n",
-              link->datalink_release_delay().sec(),
-              link->datalink_release_delay().usec()), 4);
+              link->datalink_release_delay().value().sec(),
+              link->datalink_release_delay().value().usec()), 4);
 
     // Atomic value update, safe to perform here.
     released_link->set_release_pending(true);
@@ -576,14 +570,12 @@ TcpTransport::release_datalink(DataLink* link)
   }
 
   // Actions are executed outside of the lock scope.
-  ACE_Time_Value cancel_now = ACE_OS::gettimeofday();
   switch (linkAction) {
   case StopLink:
-    link->schedule_stop(cancel_now);
+    link->schedule_stop(MonotonicTimePoint::now());
     break;
 
   case ScheduleLinkRelease:
-
     link->schedule_delayed_release();
     break;
 
@@ -718,6 +710,10 @@ TcpTransport::fresh_link(TcpConnection_rch connection)
   TcpDataLink_rch link;
   GuardType guard(this->links_lock_);
 
+  if (is_shut_down()) {
+    return 0;
+  }
+
   PriorityKey key(connection->transport_priority(),
                   connection->get_remote_address(),
                   connection->get_remote_address() == this->config().local_address(),
@@ -775,8 +771,7 @@ TcpTransport::unbind_link(DataLink* link)
 
   GuardType guard(this->links_lock_);
 
-  if (this->pending_release_links_.unbind(key) != 0 &&
-      link->datalink_release_delay() > ACE_Time_Value::zero) {
+  if (pending_release_links_.unbind(key) && !link->datalink_release_delay().is_zero()) {
     ACE_ERROR((LM_ERROR,
                "(%P|%t) TcpTransport::unbind_link INTERNAL ERROR - "
                "Failed to find link %@ tcp_link %@ PriorityKey "
@@ -790,6 +785,27 @@ TcpTransport::unbind_link(DataLink* link)
                (int)tcp_link->is_active()));
   }
 }
+
+void
+TcpTransport::add_reconnect_task(RcHandle<TcpReconnectTask> task) {
+  GuardType connections_guard(rc_tasks_lock_);
+  rc_tasks_.insert(task);
+}
+
+void
+TcpTransport::remove_reconnect_task(RcHandle<TcpReconnectTask> task) {
+  GuardType connections_guard(rc_tasks_lock_);
+  RC_TASK_SET::iterator it = rc_tasks_.begin();
+  while (it != rc_tasks_.end()) {
+    if (it->get() == task.get()) {
+      rc_tasks_.erase(it);
+      it = rc_tasks_.begin();
+    } else {
+      ++it;
+    }
+  }
+}
+
 
 }
 }

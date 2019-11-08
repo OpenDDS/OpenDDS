@@ -48,6 +48,7 @@ private:
   ShmemData* current_data_;
   size_t partial_recv_remaining_;
   const char* partial_recv_ptr_;
+  ACE_Thread_Mutex mutex_;
 };
 
 } // namespace DCPS

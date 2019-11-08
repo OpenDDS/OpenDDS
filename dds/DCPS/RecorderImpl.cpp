@@ -86,6 +86,8 @@ RecorderImpl::RecorderImpl()
 RecorderImpl::~RecorderImpl()
 {
   DBG_ENTRY_LVL("RecorderImpl","~RecorderImpl",6);
+  ReactorInterceptor::CommandPtr command;
+
   {
     ACE_READ_GUARD(ACE_RW_Thread_Mutex,
                    read_guard,
@@ -93,11 +95,13 @@ RecorderImpl::~RecorderImpl()
     // Cancel any uncancelled sweeper timers to decrement reference count.
     WriterMapType::iterator writer;
     for (writer = writers_.begin(); writer != writers_.end(); ++writer) {
-      remove_association_sweeper_->cancel_timer(writer->second);
+      command = remove_association_sweeper_->cancel_timer(writer->second);
     }
   }
 
-  remove_association_sweeper_->wait();
+  if (command) {
+    command->wait();
+  }
 }
 
 
@@ -121,6 +125,8 @@ RecorderImpl::cleanup()
 
   this->remove_all_associations();
 
+  ReactorInterceptor::CommandPtr command;
+
   {
     ACE_READ_GUARD_RETURN(ACE_RW_Thread_Mutex,
                    read_guard,
@@ -129,11 +135,13 @@ RecorderImpl::cleanup()
     // Cancel any uncancelled sweeper timers
     WriterMapType::iterator writer;
     for (writer = writers_.begin(); writer != writers_.end(); ++writer) {
-      remove_association_sweeper_->cancel_timer(writer->second);
+      command = remove_association_sweeper_->cancel_timer(writer->second);
     }
   }
 
-  remove_association_sweeper_->wait();
+  if (command) {
+    command->wait();
+  }
   return DDS::RETCODE_OK;
 }
 
@@ -388,14 +396,13 @@ RecorderImpl::add_association(const RepoId&            yourId,
     //   WriterMapType::iterator where = this->writers_.find(writer.writerId);
     //
     //   if (where != this->writers_.end()) {
-    //     const ACE_Time_Value now = ACE_OS::gettimeofday();
+    //     const MonotonicTimePoint now = MonotonicTimePoint::now();
     //
     //     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
     //
     //     if (where->second->should_ack(now)) {
     //       const SequenceNumber sequence = where->second->ack_sequence();
-    //       const DDS::Time_t timenow = time_value_to_time(now);
-    //       if (this->send_sample_ack(writer.writerId, sequence, timenow)) {
+    //       if (this->send_sample_ack(writer.writerId, sequence, now.to_dds_time())) {
     //         where->second->clear_acks(sequence);
     //       }
     //     }
@@ -405,9 +412,9 @@ RecorderImpl::add_association(const RepoId&            yourId,
     //
     // LIVELINESS policy timers are managed here.
     //
-    // if (liveliness_lease_duration_ != ACE_Time_Value::zero) {
+    // if (liveliness_lease_duration_ != TimeDuration::zero) {
     //   // this call will start the timer if it is not already set
-    //   const ACE_Time_Value now = ACE_OS::gettimeofday();
+    //   const MonotonicTimePoint now = MonotonicTimePoint::now();
     //
     //   if (DCPS_debug_level >= 5) {
     //     GuidConverter converter(subscription_id_);
@@ -811,11 +818,11 @@ RecorderImpl::signal_liveliness(const RepoId& remote_participant)
     }
   }
 
-  ACE_Time_Value when = ACE_OS::gettimeofday();
+  const MonotonicTimePoint now = MonotonicTimePoint::now();
   for (WriterSet::iterator pos = writers.begin(), limit = writers.end();
        pos != limit;
        ++pos) {
-    pos->second->received_activity(when);
+    pos->second->received_activity(now);
   }
 }
 

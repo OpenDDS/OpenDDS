@@ -662,10 +662,9 @@ OpenDDS::DCPS::DataDurabilityCache::insert(
 
   // Schedule cleanup timer.
   //FUTURE: The cleanup delay needs to be persisted (if QoS is persistent)
-  ACE_Time_Value const cleanup_delay(
-    duration_to_time_value(qos.service_cleanup_delay));
+  const TimeDuration cleanup_delay(qos.service_cleanup_delay);
 
-  if (cleanup_delay > ACE_Time_Value::zero) {
+  if (!cleanup_delay.is_zero()) {
     if (OpenDDS::DCPS::DCPS_debug_level >= 4) {
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("OpenDDS (%P|%t) Scheduling durable data ")
@@ -687,7 +686,7 @@ OpenDDS::DCPS::DataDurabilityCache::insert(
     long const tid =
       this->reactor_->schedule_timer(cleanup,
                                      0, // ACT
-                                     cleanup_delay);
+                                     cleanup_delay.value());
     if (tid == -1) {
       ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, false);
 

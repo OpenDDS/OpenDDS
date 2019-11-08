@@ -253,7 +253,7 @@ public:
   //@}
 
   /// Accessor for pending data timeout.
-  ACE_Time_Value pending_timeout() const;
+  TimeDuration pending_timeout() const;
 
   /// Accessors for priority extremums for the current scheduler.
   //@{
@@ -385,6 +385,13 @@ public:
    */
   void configure_pool();
 #endif
+
+  /**
+   * Set a configuration file to use if -DCPSConfigFile wasn't passed to
+   * TheParticipantFactoryWithArgs. Must be used before
+   * TheParticipantFactory*() functions are called.
+   */
+  void default_configuration_file(const ACE_TCHAR* path);
 
 private:
 
@@ -556,7 +563,7 @@ private:
   ACE_TString schedulerString_;
 
   /// Scheduler time slice from configuration file.
-  ACE_Time_Value schedulerQuantum_;
+  TimeDuration schedulerQuantum_;
 
 #if defined OPENDDS_SAFETY_PROFILE && defined ACE_HAS_ALLOC_HOOKS
   /// Pool size from configuration file.
@@ -593,7 +600,7 @@ private:
 
   /// Number of seconds to wait on pending samples to be sent
   /// or dropped.
-  ACE_Time_Value pending_timeout_;
+  TimeDuration pending_timeout_;
 
   /// Enable TAO's Bidirectional GIOP?
   bool bidir_giop_;
@@ -608,13 +615,19 @@ private:
   ACE_Recursive_Thread_Mutex maps_lock_;
 
   static int zero_argc;
+
+  /**
+   * If set before TheParticipantFactoryWithArgs and -DCPSConfigFile is not
+   * passed, use this as the configuration file.
+   */
+  ACE_TString default_configuration_file_;
 };
 
-#   define TheServiceParticipant OpenDDS::DCPS::Service_Participant::instance()
+#define TheServiceParticipant OpenDDS::DCPS::Service_Participant::instance()
 
-#   define TheParticipantFactory TheServiceParticipant->get_domain_participant_factory()
+#define TheParticipantFactory TheServiceParticipant->get_domain_participant_factory()
 
-#   define TheParticipantFactoryWithArgs(argc, argv) TheServiceParticipant->get_domain_participant_factory(argc, argv)
+#define TheParticipantFactoryWithArgs(argc, argv) TheServiceParticipant->get_domain_participant_factory(argc, argv)
 
 } // namespace DCPS
 } // namespace OpenDDS

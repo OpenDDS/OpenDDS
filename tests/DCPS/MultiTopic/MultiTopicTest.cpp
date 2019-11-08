@@ -66,6 +66,7 @@ struct Writer {
     TopicQos topic_qos;
     other_participant->get_default_topic_qos(topic_qos);
     topic_qos.latency_budget.duration.sec = 1;
+    topic_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
     Topic_var topic2 = other_participant->create_topic(topic_name, type_name,
       topic_qos, 0, DEFAULT_STATUS_MASK);
 

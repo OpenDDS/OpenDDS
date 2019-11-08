@@ -82,6 +82,8 @@ class OpenDDS_Dcps_Export SecurityConfig : public DCPS::RcObject {
 
   void get_properties(DDS::PropertyQosPolicy& properties) const;
 
+  bool qos_implies_security(const DDS::DomainParticipantQos& qos) const;
+
   SecurityConfig(const OPENDDS_STRING& name,
 #ifdef OPENDDS_SECURITY
                  Authentication_var authentication_plugin,

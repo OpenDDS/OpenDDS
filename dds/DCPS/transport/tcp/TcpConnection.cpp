@@ -15,6 +15,10 @@
 #include "TcpReconnectTask.h"
 #include "dds/DCPS/transport/framework/DirectPriorityMapper.h"
 #include "dds/DCPS/transport/framework/PriorityKey.h"
+#include "dds/DCPS/Time_Helper.h"
+
+using ::OpenDDS::DCPS::MonotonicTimePoint;
+using ::OpenDDS::DCPS::TimeDuration;
 
 #include "ace/os_include/netinet/os_tcp.h"
 #include "ace/OS_NS_arpa_inet.h"
@@ -39,7 +43,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 // The reconnect delay is the period from the last time the reconnect attempt
 // completes to when the reconnect request is dequeued.
-const ACE_Time_Value reconnect_delay(2);
+const TimeDuration reconnect_delay(2);
 
 OpenDDS::DCPS::TcpConnection::TcpConnection()
   : connected_(false)
@@ -47,17 +51,15 @@ OpenDDS::DCPS::TcpConnection::TcpConnection()
   , tcp_config_(0)
   , passive_reconnect_timer_id_(-1)
   , reconnect_state_(INIT_STATE)
-  , last_reconnect_attempted_(ACE_Time_Value::zero)
   , transport_priority_(0)  // TRANSPORT_PRIORITY.value default value - 0.
   , shutdown_(false)
   , passive_setup_(false)
   , passive_setup_buffer_(sizeof(ACE_UINT32))
   , transport_during_setup_(0)
   , id_(0)
-  , reconnect_thread_(0)
+  , reconnect_task_(make_rch<TcpReconnectTask>())
 {
   DBG_ENTRY_LVL("TcpConnection","TcpConnection",6);
-
   this->reference_counting_policy().value(ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
 }
 
@@ -71,29 +73,51 @@ OpenDDS::DCPS::TcpConnection::TcpConnection(const ACE_INET_Addr& remote_address,
   , tcp_config_(&config)
   , passive_reconnect_timer_id_(-1)
   , reconnect_state_(INIT_STATE)
-  , last_reconnect_attempted_(ACE_Time_Value::zero)
   , transport_priority_(priority)
   , shutdown_(false)
   , passive_setup_(false)
   , transport_during_setup_(0)
   , id_(0)
-  , reconnect_thread_(0)
+  , reconnect_task_(make_rch<TcpReconnectTask>())
 {
   DBG_ENTRY_LVL("TcpConnection","TcpConnection",6);
   this->reference_counting_policy().value(ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
-
 }
+
 OpenDDS::DCPS::TcpConnection::~TcpConnection()
 {
   DBG_ENTRY_LVL("TcpConnection","~TcpConnection",6);
-  if (reconnect_thread_ &&
-    // This is for Windows, where join doesn't check if the thread is the same
-    // and the thread will hang itself if it tries to join itself.
-    !ACE_OS::thr_equal(ACE_OS::thr_self(), reconnect_thread_)
-  ) {
-    ACE_Thread_Manager::instance()->join(reconnect_thread_);
+  shutdown();
+  if (!reconnect_task_->is_task_thread()) {
+    if (impl_) {
+      impl_->remove_reconnect_task(reconnect_task_);
+    }
+    reconnect_task_->wait();
   }
 }
+
+void
+OpenDDS::DCPS::TcpConnection::set_datalink(const OpenDDS::DCPS::TcpDataLink_rch& link)
+{
+  DBG_ENTRY_LVL("TcpConnection","set_datalink",6);
+
+  GuardType guard(reconnect_lock_);
+
+  link_ = link;
+  if (link_) {
+    impl_ = TcpTransport_rch(static_cast<TcpTransport*>(&link_->impl()), inc_count());
+    if (impl_) {
+      ReactorTask_rch rt = impl_->reactor_task();
+      interceptor_ = make_rch<Interceptor>(rt.get(), rt->get_reactor(), rt->get_reactor_owner());
+    } else {
+      interceptor_.reset();
+    }
+  } else {
+    interceptor_.reset();
+    impl_.reset();
+  }
+}
+
 
 OpenDDS::DCPS::TcpSendStrategy_rch
 OpenDDS::DCPS::TcpConnection::send_strategy()
@@ -112,10 +136,11 @@ OpenDDS::DCPS::TcpConnection::disconnect()
 {
   DBG_ENTRY_LVL("TcpConnection","disconnect",6);
   this->connected_ = false;
-  TcpReceiveStrategy_rch receive_strategy = this->receive_strategy();
-  if (receive_strategy) {
-    receive_strategy->get_reactor()->remove_handler(this,
-                                                    ACE_Event_Handler::READ_MASK | ACE_Event_Handler::DONT_CALL);
+
+  if (interceptor_) {
+    TcpConnection_rch con(this, inc_count());
+    ReactorInterceptor::CommandPtr cmd = interceptor_->execute_or_enqueue(new RemoveHandler(con, READ_MASK | DONT_CALL));
+    cmd->wait();
   }
 
   if (this->link_) {
@@ -123,7 +148,6 @@ OpenDDS::DCPS::TcpConnection::disconnect()
   }
 
   this->peer().close();
-
 }
 
 int
@@ -147,15 +171,10 @@ OpenDDS::DCPS::TcpConnection::open(void* arg)
     int connect_tcp_datalink_ = transport.connect_tcp_datalink(*link_, rchandle_from(this));
 
     if (active_open_ == -1 || connect_tcp_datalink_ == -1) {
-      // if (active_open() == -1 ||
-      //       transport->connect_tcp_datalink(link_, self) == -1) {
-
       transport.async_connect_failed(key);
-
       return -1;
     }
 
-    transport.async_connect_succeeded(key);
     return 0;
   }
 
@@ -347,7 +366,7 @@ OpenDDS::DCPS::TcpConnection::close(u_long)
 const std::string&
 OpenDDS::DCPS::TcpConnection::config_name() const
 {
-  return this->link_->impl().config().name();
+  return impl_->config().name();
 }
 
 int
@@ -630,24 +649,21 @@ OpenDDS::DCPS::TcpConnection::passive_reconnect_i()
     if (this->tcp_config_->passive_reconnect_duration_ == 0)
       return -1;
 
-    ACE_Time_Value timeout(this->tcp_config_->passive_reconnect_duration_/1000,
-                           this->tcp_config_->passive_reconnect_duration_%1000 * 1000);
     this->reconnect_state_ = PASSIVE_WAITING_STATE;
     this->link_->notify(DataLink::DISCONNECTED);
 
-    // It is possible that the passive reconnect is called after the new connection
-    // is accepted and the receive_strategy of this old connection is reset to nil.
-    TcpReceiveStrategy_rch receive_strategy = this->receive_strategy();
-    if (this->receive_strategy()) {
-
-      // Give a copy to reactor.
-      this->passive_reconnect_timer_id_ = receive_strategy->get_reactor()->schedule_timer(this, 0, timeout);
-
-      if (this->passive_reconnect_timer_id_ == -1) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ERROR: TcpConnection::passive_reconnect_i")
-                          ACE_TEXT(", %p.\n"), ACE_TEXT("schedule_timer")),
-                         -1);
+    if (interceptor_ && passive_reconnect_timer_id_ == -1) {
+      TcpConnection_rch con(this, inc_count());
+      TimeDuration delay = TimeDuration::from_msec(tcp_config_->passive_reconnect_duration_);
+      ReactorInterceptor::CommandPtr cmd = interceptor_->execute_or_enqueue(new ScheduleTimer(con, 0, delay));
+      guard.release();
+      const long result = ReactorInterceptor::ResultCommand<long>::wait_result(cmd);
+      guard.acquire();
+      passive_reconnect_timer_id_ = result;
+      if (passive_reconnect_timer_id_ == -1) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: TcpConnection::passive_reconnect_i")
+                   ACE_TEXT(", %p.\n"), ACE_TEXT("schedule_timer")));
       }
     }
   }
@@ -689,7 +705,7 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
   // We need reset the state to INIT_STATE if we are previously reconnected.
   // This would allow re-establishing connection after the re-established
   // connection lost again.
-  if (ACE_OS::gettimeofday() - this->last_reconnect_attempted_ > reconnect_delay
+  if (MonotonicTimePoint::now() - last_reconnect_attempted_ > reconnect_delay
       && this->reconnect_state_ == RECONNECTED_STATE) {
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
           "We are in RECONNECTED_STATE and now flip reconnect state to INIT_STATE.\n"));
@@ -726,9 +742,7 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
         break;
 
       if (ret == -1) {
-        ACE_Time_Value delay_tv(((int)retry_delay_msec)/1000,
-                                ((int)retry_delay_msec)%1000*1000);
-        ACE_OS::sleep(delay_tv);
+        ACE_OS::sleep(TimeDuration::from_msec(static_cast<ACE_UINT64>(retry_delay_msec)).value());
         retry_delay_msec *= this->tcp_config_->conn_retry_backoff_multiplier_;
 
       } else {
@@ -760,19 +774,26 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
                  this->config_name().c_str(),
                  this->remote_address_.get_host_addr(),
                  this->remote_address_.get_port_number()));
-      TcpReceiveStrategy_rch receive_strategy = this->receive_strategy();
-      if (receive_strategy->get_reactor()->register_handler(this, ACE_Event_Handler::READ_MASK) == -1) {
+
+      int result = -1;
+      if (interceptor_) {
+        TcpConnection_rch con(this, inc_count());
+        ReactorInterceptor::CommandPtr cmd = interceptor_->execute_or_enqueue(new RegisterHandler(con, READ_MASK));
+        result = ReactorInterceptor::ResultCommand<int>::wait_result(cmd);
+      }
+
+      if (result == -1) {
         ACE_ERROR_RETURN((LM_ERROR,
                           "(%P|%t) ERROR: OpenDDS::DCPS::TcpConnection::active_reconnect_i() can't register "
                           "with reactor %X %p\n", this, ACE_TEXT("register_handler")),
-                         -1);
+                          -1);
       }
       this->reconnect_state_ = RECONNECTED_STATE;
       this->link_->notify(DataLink::RECONNECTED);
       send_strategy->resume_send();
     }
 
-    this->last_reconnect_attempted_ = ACE_OS::gettimeofday();
+    last_reconnect_attempted_.set_to_now();
   }
 
   return this->reconnect_state_ == LOST_STATE ? -1 : 0;
@@ -785,7 +806,6 @@ OpenDDS::DCPS::TcpConnection::handle_timeout(const ACE_Time_Value &,
                                              const void *)
 {
   DBG_ENTRY_LVL("TcpConnection","handle_timeout",6);
-
   GuardType guard(this->reconnect_lock_);
 
   switch (this->reconnect_state_) {
@@ -842,8 +862,13 @@ void
 OpenDDS::DCPS::TcpConnection::transfer(TcpConnection* connection)
 {
   DBG_ENTRY_LVL("TcpConnection","transfer",6);
+  GuardType guard(reconnect_lock_);
 
-  GuardType guard(this->reconnect_lock_);
+  reconnect_task_->wait_complete(reconnect_lock_);
+
+  if (shutdown_) {
+    return;
+  }
 
   bool notify_reconnect = false;
 
@@ -867,14 +892,22 @@ OpenDDS::DCPS::TcpConnection::transfer(TcpConnection* connection)
 
   case PASSIVE_WAITING_STATE: {
     // Cancel the timer since we got new connection.
-    TcpReceiveStrategy_rch receive_strategy = this->receive_strategy();
-    if (receive_strategy->get_reactor()->cancel_timer(this) == -1) {
+    int result = -1;
+
+    if (interceptor_) {
+      TcpConnection_rch con(this, inc_count());
+      ReactorInterceptor::CommandPtr cmd = interceptor_->execute_or_enqueue(new CancelTimer(con ));
+      guard.release();
+      result = ReactorInterceptor::ResultCommand<int>::wait_result(cmd);
+      guard.acquire();
+    }
+    if (result == -1) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: TcpConnection::transfer, ")
                  ACE_TEXT(" %p. \n"), ACE_TEXT("cancel_timer")));
-
-    } else
+    } else {
       passive_reconnect_timer_id_ = -1;
+    }
 
     notify_reconnect = true;
   }
@@ -895,16 +928,17 @@ OpenDDS::DCPS::TcpConnection::transfer(TcpConnection* connection)
                ACE_TEXT(" should NOT be called by the connector side \n")));
   }
 
-  if (reconnect_thread_) {
-      ACE_Thread_Manager::instance()->join(reconnect_thread_);
-      reconnect_thread_ = 0;
-  }
   // connection->receive_strategy_ = this->receive_strategy_;
   // connection->send_strategy_ = this->send_strategy_;
+
+  ACE_GUARD(ACE_Thread_Mutex, con_guard, connection->reconnect_lock_);
+
   connection->remote_address_ = this->remote_address_;
   connection->local_address_ = this->local_address_;
   connection->tcp_config_ = this->tcp_config_;
   connection->link_ = this->link_;
+  connection->impl_ = this->impl_;
+  connection->interceptor_ = this->interceptor_;
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "transfer(%C:%d->%C:%d) passive reconnected. new con %@   "
@@ -989,11 +1023,15 @@ OpenDDS::DCPS::TcpConnection::tear_link()
 void
 OpenDDS::DCPS::TcpConnection::shutdown()
 {
-  DBG_ENTRY_LVL("TcpConnection","shutdown",6);
-  GuardType guard(this->reconnect_lock_);
-  this->shutdown_ = true;
-  ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH>::shutdown();
+  DBG_ENTRY_LVL("TcpConnection", "shutdown", 6);
 
+  GuardType guard(reconnect_lock_);
+  shutdown_ = true;
+
+  reconnect_task_->shutdown();
+  reconnect_task_->wait_complete(reconnect_lock_);
+
+  ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH>::shutdown();
 }
 
 ACE_Event_Handler::Reference_Count
@@ -1014,46 +1052,13 @@ void
 OpenDDS::DCPS::TcpConnection::spawn_reconnect_thread()
 {
   DBG_ENTRY_LVL("TcpConnection","spawn_reconnect_thread",6);
-  GuardType guard(this->reconnect_lock_);
-  if (!shutdown_) {
-    // Make sure the associated transport_config outlives the connection object.
-    TransportInst& transport_config = this->link_->impl().config();
-    transport_config._add_ref();
-    // add the reference count to be picked up from the new thread
-    this->_add_ref();
-    if (ACE_Thread_Manager::instance()->spawn(&reconnect_thread_fun,
-                                              this,
-                                              THR_NEW_LWP|THR_JOINABLE|THR_INHERIT_SCHED,
-                                              &reconnect_thread_) == -1){
-      // we need to decrement the reference count when thread creation fails.
-      this->_remove_ref();
-      transport_config._remove_ref();
-    }
+
+  GuardType guard(reconnect_lock_);
+  if (!shutdown_ && impl_) {
+    impl_->add_reconnect_task(reconnect_task_);
+    TcpConnection_rch con(this, inc_count());
+    reconnect_task_->reconnect(con);
   }
-}
-
-ACE_THR_FUNC_RETURN
-OpenDDS::DCPS::TcpConnection::reconnect_thread_fun(void* arg)
-{
-  DBG_ENTRY_LVL("TcpConnection","reconnect_thread_fun",6);
-
-  // Ignore all signals to avoid
-  //     ERROR: <something descriptive> Interrupted system call
-  // The main thread will handle signals.
-  sigset_t set;
-  ACE_OS::sigfillset(&set);
-  ACE_OS::thr_sigsetmask(SIG_SETMASK, &set, NULL);
-
-  // Make sure the associated transport_config outlives the connection object.
-  RcHandle<TransportInst> transport_config;
-  TcpConnection_rch connection(static_cast<TcpConnection*>(arg), keep_count());
-  transport_config = RcHandle<TransportInst>(&connection->link_->impl().config(), keep_count());
-
-  if (connection->reconnect() == -1) {
-    connection->tear_link();
-  }
-
-  return 0;
 }
 
 OPENDDS_STRING
@@ -1079,6 +1084,43 @@ OpenDDS::DCPS::TcpConnection::reconnect_state_string() const
     return OPENDDS_STRING("(Unknown Reconnect State: ")
       + to_dds_string(reconnect_state_) + ")";
   }
+}
+
+void
+OpenDDS::DCPS::TcpConnection::set_passive_reconnect_timer_id(long id) {
+
+  passive_reconnect_timer_id_ = id;
+
+  if (passive_reconnect_timer_id_ == -1) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: TcpConnection::passive_reconnect_i")
+               ACE_TEXT(", %p.\n"), ACE_TEXT("schedule_timer")));
+  }
+}
+
+bool
+OpenDDS::DCPS::TcpConnection::Interceptor::reactor_is_shut_down() const {
+  return task_->is_shut_down();
+}
+
+void
+OpenDDS::DCPS::TcpConnection::RegisterHandler::execute() {
+  result(reactor()->register_handler(con_.get(), mask_));
+}
+
+void
+OpenDDS::DCPS::TcpConnection::RemoveHandler::execute() {
+  result(reactor()->remove_handler(con_.get(), mask_));
+}
+
+void
+OpenDDS::DCPS::TcpConnection::ScheduleTimer::execute() {
+  result(reactor()->schedule_timer(con_.get(), arg_, delay_.value(), interval_.value()));
+}
+
+void
+OpenDDS::DCPS::TcpConnection::CancelTimer::execute() {
+  result(reactor()->cancel_timer(con_.get()));
 }
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

@@ -23,6 +23,19 @@ public class TAOObject implements org.omg.CORBA.Object {
     _jni_fini();
   }
 
+  @Override
+  public boolean equals(java.lang.Object o) {
+    if (o instanceof TAOObject) {
+      return _jni_ptr == ((TAOObject)o)._jni_ptr;
+    }
+    return false;
+  }
+
+  @Override
+  public int hashCode() {
+    return Long.valueOf(_jni_ptr).hashCode();
+  }
+
   //org.omg.CORBA.Object methods
   public native boolean _is_a(String repositoryIdentifier);
   public native boolean _is_equivalent(org.omg.CORBA.Object other);

@@ -27,6 +27,7 @@
 #include "dds/DCPS/DataSampleHeader.h"
 #include "dds/DCPS/PoolAllocationBase.h"
 #include "dds/DCPS/DiscoveryBase.h"
+#include "dds/DCPS/JobQueue.h"
 
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/framework/TransportSendListener.h"
@@ -75,8 +76,6 @@ public:
   DDS::ReturnCode_t init(const DCPS::RepoId& guid,
                          const RtpsDiscovery& disco,
                          DDS::DomainId_t domainId);
-
-  void rtps_relay_address(const ACE_INET_Addr& address);
 
 #ifdef OPENDDS_SECURITY
   DDS::ReturnCode_t init_security(DDS::Security::IdentityHandle id_handle,
@@ -157,7 +156,21 @@ public:
 
   ICE::Endpoint* get_ice_endpoint();
 
+  void rtps_relay_address(const ACE_INET_Addr& address);
+
+  void stun_server_address(const ACE_INET_Addr& address);
+
 private:
+
+  class AssociationComplete : public DCPS::JobQueue::Job {
+  public:
+    AssociationComplete(Sedp* sedp, const DCPS::RepoId& local, const DCPS::RepoId& remote) : sedp_(sedp), local_(local), remote_(remote) {}
+    void execute();
+  private:
+    Sedp* sedp_;
+    DCPS::RepoId local_, remote_;
+  };
+
   Spdp& spdp_;
 
 #ifdef OPENDDS_SECURITY

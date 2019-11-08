@@ -84,7 +84,7 @@ bin/auto_run_tests.pl
 **For Windows:**
 
 ```
-bin\auto_run_test.pl
+bin\auto_run_tests.pl
 ```
 
   If you built static libraries, add `-Config STATIC` to this command.

@@ -16,7 +16,6 @@
 #endif
 
 namespace {
-  const ACE_CDR::Octet PROTOCOL_RTPS[] = {'R', 'T', 'P', 'S'};
   const OpenDDS::DCPS::SequenceNumber dummy;
 }
 
@@ -42,7 +41,7 @@ RtpsTransportHeader::init(ACE_Message_Block& mb)
 
     // RTPS spec v2.1 section 8.3.6.3
     valid_ = std::equal(header_.prefix, header_.prefix + sizeof(header_.prefix),
-                        PROTOCOL_RTPS);
+                        RTPS::PROTOCOL_RTPS);
     valid_ &= (header_.version.major == OpenDDS::RTPS::PROTOCOLVERSION.major);
   }
 }

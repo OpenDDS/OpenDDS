@@ -7,27 +7,27 @@
 
 using namespace TopicAnnotationsTest;
 
-template <typename T> OpenDDS::DCPS::DDSTraits<T>&
-get_traits()
+template <typename T>
+OpenDDS::DCPS::DDSTraits<T>& get_traits()
 {
   static OpenDDS::DCPS::DDSTraits<T> traits;
   return traits;
 }
 
-template <typename T> const char*
-get_type_name()
+template <typename T>
+const char* get_type_name()
 {
   return get_traits<T>().type_name();
 }
 
-template <typename T> size_t
-get_key_count()
+template <typename T>
+size_t get_key_count()
 {
   return get_traits<T>().key_count();
 }
 
-template <typename T> bool
-assert_key_count(size_t expected)
+template <typename T>
+bool assert_key_count(size_t expected)
 {
   size_t count = get_key_count<T>();
   if (count != expected) {
@@ -41,8 +41,8 @@ assert_key_count(size_t expected)
   return false;
 }
 
-template <typename T> size_t
-find_size(const T& data, size_t& padding)
+template <typename T>
+size_t find_size(const T& data, size_t& padding)
 {
   size_t size = 0;
   padding = 0;
@@ -50,8 +50,8 @@ find_size(const T& data, size_t& padding)
   return size;
 }
 
-template <typename Type> bool
-assert_key_only_size(const Type& data, size_t expected)
+template <typename Type>
+bool assert_key_only_size(const Type& data, size_t expected)
 {
   typedef OpenDDS::DCPS::KeyOnly<const Type> KeyOnlyType;
   KeyOnlyType key_only_data(data);
@@ -69,8 +69,7 @@ assert_key_only_size(const Type& data, size_t expected)
   return false;
 }
 
-int
-ACE_TMAIN(int, ACE_TCHAR**)
+int ACE_TMAIN(int, ACE_TCHAR**)
 {
   bool failed = false;
 
@@ -78,6 +77,7 @@ ACE_TMAIN(int, ACE_TCHAR**)
   failed |= assert_key_count<UnkeyedStruct>(0);
   failed |= assert_key_count<SimpleKeyStruct>(1);
   failed |= assert_key_count<NestedKeyStruct>(2);
+  failed |= assert_key_count<TypedefStructKeyStruct>(2);
   failed |= assert_key_count<LongArrayStruct>(2);
   failed |= assert_key_count<SimpleKeyArray>(2);
   failed |= assert_key_count<UnkeyedUnion>(0);

@@ -40,7 +40,7 @@ public:
   size_t capacity() const;
   void bind(TransportSendStrategy* strategy);
 
-  virtual void retain_all(RepoId pub_id) = 0;
+  virtual void retain_all(const RepoId& pub_id) = 0;
   virtual void insert(SequenceNumber sequence,
                       TransportSendStrategy::QueueType* queue,
                       ACE_Message_Block* chain) = 0;
@@ -78,8 +78,6 @@ public:
   void release_all();
   typedef OPENDDS_MAP(SequenceNumber, BufferType) BufferMap;
   void release_acked(SequenceNumber seq);
-  void release(BufferMap::iterator buffer_iter);
-
   size_t n_chunks() const;
 
   SingleSendBuffer(size_t capacity, size_t max_samples_per_packet);
@@ -100,7 +98,7 @@ public:
   bool empty() const;
   bool contains(const SequenceNumber& seq) const;
 
-  void retain_all(RepoId pub_id);
+  void retain_all(const RepoId& pub_id);
   void insert(SequenceNumber sequence,
               TransportSendStrategy::QueueType* queue,
               ACE_Message_Block* chain);
@@ -110,7 +108,9 @@ public:
                        ACE_Message_Block* chain);
 
 private:
-  void check_capacity();
+  void check_capacity_i();
+  void release_i(BufferMap::iterator buffer_iter);
+
   RemoveResult retain_buffer(const RepoId& pub_id, BufferType& buffer);
   void insert_buffer(BufferType& buffer,
                      TransportSendStrategy::QueueType* queue,
@@ -130,6 +130,8 @@ private:
 
   typedef OPENDDS_MAP(SequenceNumber, RepoId) DestinationMap;
   DestinationMap destinations_;
+
+  ACE_Thread_Mutex mutex_;
 };
 
 } // namespace DCPS

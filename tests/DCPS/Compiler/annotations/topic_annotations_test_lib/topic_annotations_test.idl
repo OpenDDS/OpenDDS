@@ -30,6 +30,17 @@ module TopicAnnotationsTest {
   };
 
   /*
+   * Using a Typedef of a Struct as a Key
+   * 2 Keys
+   */
+  typedef SimpleKeyStruct MyStructTypedef;
+  @topic
+  struct TypedefStructKeyStruct {
+    @key long a_key_value;
+    @key MyStructTypedef my_struct_typedef_key;
+  };
+
+  /*
    * Case of an Array of Primitives
    * 2 Keys
    */

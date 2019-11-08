@@ -40,13 +40,6 @@ using namespace OpenDDS::DCPS;
 using namespace OpenDDS::RTPS;
 
 const bool host_is_bigendian = !ACE_CDR_BYTE_ORDER;
-const char* smkinds[] = {"RESERVED_0", "PAD", "RESERVED_2", "RESERVED_3",
-  "RESERVED_4", "RESERVED_5", "ACKNACK", "HEARTBEAT", "GAP", "INFO_TS",
-  "RESERVED_10", "RESERVED_11", "INFO_SRC", "INFO_REPLY_IP4", "INFO_DST",
-  "INFO_REPLY", "RESERVED_16", "RESERVED_17", "NACK_FRAG", "HEARTBEAT_FRAG",
-  "RESERVED_20", "DATA", "DATA_FRAG"};
-const size_t n_smkinds = sizeof(smkinds) / sizeof(smkinds[0]);
-
 
 struct SimpleTC: TransportClient {
   explicit SimpleTC(const RepoId& local) : local_id_(local), mutex_(), cond_(mutex_) {}
@@ -498,13 +491,17 @@ struct TestParticipant: ACE_Event_Handler {
         if (!recv_nackfrag(ser, peer)) return false;
         break;
       default:
-        if (static_cast<unsigned char>(subm) < n_smkinds) {
+#ifdef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+        ACE_DEBUG((LM_INFO, "Received submessage type: %u\n", unsigned(subm)));
+#else
+        if (static_cast<size_t>(subm) < gen_OpenDDS_RTPS_SubmessageKind_names_size) {
           ACE_DEBUG((LM_INFO, "Received submessage type: %C\n",
-                     smkinds[static_cast<unsigned char>(subm)]));
+                     gen_OpenDDS_RTPS_SubmessageKind_names[static_cast<size_t>(subm)]));
         } else {
-          ACE_ERROR((LM_ERROR, "ERROR: Received unknown submessage type: %d\n",
-                     int(subm)));
+          ACE_ERROR((LM_ERROR, "ERROR: Received unknown submessage type: %u\n",
+                     unsigned(subm)));
         }
+#endif
         SubmessageHeader smh;
         if (!(ser >> smh)) {
           ACE_ERROR((LM_ERROR, "ERROR: in handle_input() failed to deserialize "
@@ -706,7 +703,7 @@ void transport_setup()
   }
   rtps_inst->use_multicast_ = false;
   rtps_inst->datalink_release_delay_ = 0;
-  rtps_inst->heartbeat_period_ = ACE_Time_Value(0, 500*1000 /*microseconds*/);
+  rtps_inst->heartbeat_period_ = TimeDuration::from_msec(500);
   TransportConfig_rch cfg = TheTransportRegistry->create_config("cfg");
   cfg->instances_.push_back(inst);
   TheTransportRegistry->global_config(cfg);

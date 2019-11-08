@@ -13,22 +13,20 @@
 using namespace Messenger;
 using namespace std;
 
-static int const num_messages = 10;
-static ACE_Time_Value write_interval(0, 500000);
-extern ACE_Time_Value SLEEP_DURATION;
+static const int num_messages = 10;
+static const TimeDuration write_interval(0, 500000);
 
 // Wait for up to 10 seconds for subscription matched status.
-static DDS::Duration_t const MATCHED_WAIT_MAX_DURATION =
-{
+static const DDS::Duration_t MATCHED_WAIT_MAX_DURATION = {
   10, // seconds
   0   // nanoseconds
 };
 
 Writer::Writer(::DDS::DataWriter_ptr writer,
                CORBA::Long key,
-               ACE_Time_Value sleep_duration)
+               TimeDuration sleep_duration)
 : writer_(::DDS::DataWriter::_duplicate(writer)),
-  condition_(this->lock_),
+  condition_(lock_, OpenDDS::DCPS::ConditionAttributesMonotonic()),
   associated_(false),
   dwl_servant_(0),
   instance_handle_(::DDS::HANDLE_NIL),
@@ -55,8 +53,7 @@ Writer::start()
 void
 Writer::end()
 {
-  ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("(%P|%t) Writer::end \n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::end \n")));
   wait();
 }
 
@@ -64,16 +61,11 @@ Writer::end()
 int
 Writer::svc()
 {
-  ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("(%P|%t) Writer::svc begins.\n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::svc begins.\n")));
 
-  try
-  {
-    ACE_Time_Value now(ACE_OS::gettimeofday());
-    ACE_Time_Value connect_deadline(now + OpenDDS::DCPS::duration_to_time_value(MATCHED_WAIT_MAX_DURATION));
-
-    if (dwl_servant_->wait_matched(2, &connect_deadline) != 0)
-    {
+  try {
+    const MonotonicTimePoint connect_deadline(MonotonicTimePoint::now() + TimeDuration(MATCHED_WAIT_MAX_DURATION));
+    if (dwl_servant_->wait_matched(2, &connect_deadline.value()) != 0) {
       cerr << "ERROR: wait for subscription matching failed." << endl;
       exit(1);
     }
@@ -102,17 +94,17 @@ Writer::svc()
 
     ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) Writer::svc sleep for %d seconds.\n"),
-              this->sleep_duration_.sec()));
+              sleep_duration_.value().sec()));
 
-    ACE_OS::sleep(this->sleep_duration_);
+    ACE_OS::sleep(sleep_duration_.value());
 
     for (int i = 0; i < num_messages; ++i)
     {
       ++message.count;
 
       ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("(%P|%t) Writer::svc write sample %d to instance %d.\n"),
-              message.count, this->instance_handle_));
+        ACE_TEXT("(%P|%t) Writer::svc write sample %d to instance %d.\n"),
+        message.count, this->instance_handle_));
 
       ::DDS::ReturnCode_t const ret = message_dw->write(message, this->instance_handle_);
 
@@ -129,7 +121,7 @@ Writer::svc()
       // periods to expire.  Missed deadline should not occur since
       // the time between writes should be less than the offered
       // deadline period.
-      ACE_OS::sleep(write_interval);
+      ACE_OS::sleep(write_interval.value());
     }
   }
   catch (CORBA::Exception& e)
@@ -155,11 +147,9 @@ bool Writer::wait_for_start()
 {
   GuardType guard(this->lock_);
 
-  if (! associated_)
-  {
-    ACE_Time_Value abs = ACE_OS::gettimeofday() + ACE_Time_Value(10);
-    if (this->condition_.wait(&abs) == -1)
-    {
+  if (!associated_) {
+    const MonotonicTimePoint abs(MonotonicTimePoint::now() + TimeDuration(10));
+    if (condition_.wait(&abs.value()) == -1) {
       return false;
     }
   }

@@ -24,3 +24,16 @@ tests/security/attributes/run_test.pl --scenario SC5
 tests/security/attributes/run_test.pl --scenario TEST_8_8_5_FAILURE
 tests/security/attributes/run_test.pl --scenario TEST_8_8_5_SUCCESS
 tests/security/attributes/run_test.pl --scenario multiple_grants
+tests/security/attributes/run_test.pl --scenario FullMsgSign
+tests/security/attributes/run_test.pl --scenario FullMsgEncrypt
+tests/security/attributes/run_test.pl --scenario FullMsgSign_SubMsgSign
+tests/security/attributes/run_test.pl --scenario FullMsgSign_SubMsgEncrypt
+tests/security/attributes/run_test.pl --scenario FullMsgEncrypt_SubMsgSign
+tests/security/attributes/run_test.pl --scenario FullMsgEncrypt_SubMsgEncrypt
+tests/security/attributes/run_test.pl --scenario FullMsgSign_PayloadEncrypt
+tests/security/attributes/run_test.pl --scenario FullMsgEncrypt_PayloadEncrypt
+tests/security/attributes/run_test.pl --scenario FullMsgSign_SubMsgSign_PayloadEncrypt
+tests/security/attributes/run_test.pl --scenario FullMsgSign_SubMsgEncrypt_PayloadEncrypt
+tests/security/attributes/run_test.pl --scenario FullMsgEncrypt_SubMsgSign_PayloadEncrypt
+tests/security/attributes/run_test.pl --scenario FullMsgEncrypt_SubMsgEncrypt_PayloadEncrypt
+tests/security/TopicWithoutPermissions/run_test.pl

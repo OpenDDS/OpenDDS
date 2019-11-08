@@ -36,4 +36,15 @@ module NestedTypesTest {
   struct KeyInNestedArray {
     ArrayOfDotSeparatedKey dots_;
   };
+
+  struct StructWithValue {
+    short value;
+  };
+  typedef StructWithValue MyStructTypedef;
+
+#pragma DCPS_DATA_TYPE "NestedTypesTest::TypedefStructKeyStruct"
+#pragma DCPS_DATA_KEY  "NestedTypesTest::TypedefStructKeyStruct my_struct_typedef_key.value"
+  struct TypedefStructKeyStruct {
+    MyStructTypedef my_struct_typedef_key;
+  };
 };

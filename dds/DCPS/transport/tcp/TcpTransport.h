@@ -57,6 +57,9 @@ public:
   virtual void unbind_link(DataLink* link);
   TcpInst& config() const;
 
+  void add_reconnect_task(RcHandle<TcpReconnectTask> task);
+  void remove_reconnect_task(RcHandle<TcpReconnectTask> task);
+
 private:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
                                                const ConnectionAttribs& attribs,
@@ -81,7 +84,6 @@ private:
   virtual std::string transport_type() const { return "tcp"; }
 
   void async_connect_failed(const PriorityKey& key);
-  void async_connect_succeeded(const PriorityKey& key);
 
   /// The TcpConnection is our friend.  It tells us when it
   /// has been created (by our acceptor_), and is seeking the
@@ -163,6 +165,10 @@ private:
   /// TODO: reuse the reconnect_task in the TcpConnection
   ///       for new connection checking.
   unique_ptr<TcpConnectionReplaceTask> con_checker_;
+
+  typedef OPENDDS_SET( RcHandle<TcpReconnectTask> ) RC_TASK_SET;
+  RC_TASK_SET rc_tasks_;
+  LockType rc_tasks_lock_;
 };
 
 } // namespace DCPS

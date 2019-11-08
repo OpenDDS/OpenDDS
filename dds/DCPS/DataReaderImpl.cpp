@@ -62,12 +62,15 @@ DataReaderImpl::DataReaderImpl()
   topic_desc_(0),
   listener_mask_(DEFAULT_STATUS_MASK),
   domain_id_(0),
-  end_historic_sweeper_(make_rch<EndHistoricSamplesMissedSweeper>(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
-  remove_association_sweeper_(make_rch<RemoveAssociationSweeper<DataReaderImpl> >(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
+  end_historic_sweeper_(make_rch<EndHistoricSamplesMissedSweeper>(
+    TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
+  remove_association_sweeper_(make_rch<RemoveAssociationSweeper<DataReaderImpl> >(
+    TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
   n_chunks_(TheServiceParticipant->n_chunks()),
   reverse_pub_handle_lock_(publication_handle_lock_),
   reactor_(0),
-  liveliness_timer_(make_rch<LivelinessTimer>(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
+  liveliness_timer_(make_rch<LivelinessTimer>(
+    TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
   last_deadline_missed_total_count_(0),
   watchdog_(),
   is_bit_(false),
@@ -349,7 +352,7 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
 
     // LIVELINESS policy timers are managed here.
-    if (liveliness_lease_duration_ != ACE_Time_Value::zero) {
+    if (!liveliness_lease_duration_.is_zero()) {
       if (DCPS_debug_level >= 5) {
         GuidConverter converter(subscription_id_);
         ACE_DEBUG((LM_DEBUG,
@@ -656,8 +659,7 @@ void
 DataReaderImpl::remove_all_associations()
 {
   DBG_ENTRY_LVL("DataReaderImpl","remove_all_associations",6);
-  // stop pending associations
-  this->stop_associating();
+  stop_associating();
 
   OpenDDS::DCPS::WriterIdSeq writers;
   int size;
@@ -682,16 +684,13 @@ DataReaderImpl::remove_all_associations()
   }
 
   try {
-    CORBA::Boolean dont_notify_lost = 0;
-
     if (0 < size) {
-      remove_associations(writers, dont_notify_lost);
+      remove_associations(writers, false);
     }
-
   } catch (const CORBA::Exception&) {
-      ACE_DEBUG((LM_WARNING,
-                 ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::remove_all_associations() - ")
-                 ACE_TEXT("caught exception from remove_associations.\n")));
+    ACE_DEBUG((LM_WARNING,
+               ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::remove_all_associations() - ")
+               ACE_TEXT("caught exception from remove_associations.\n")));
   }
 }
 
@@ -758,7 +757,7 @@ DataReaderImpl::signal_liveliness(const RepoId& remote_participant)
     }
   }
 
-  ACE_Time_Value when = ACE_OS::gettimeofday();
+  const MonotonicTimePoint when = MonotonicTimePoint::now();
   for (WriterSet::iterator pos = writers.begin(), limit = writers.end();
        pos != limit;
        ++pos) {
@@ -919,7 +918,7 @@ void DataReaderImpl::qos_change(const DDS::DataReaderQos & qos)
       watchdog_.reset();
     } else {
       watchdog_->reset_interval(
-        duration_to_time_value(qos.deadline.period));
+        TimeDuration(qos.deadline.period));
     }
   }
 }
@@ -1207,8 +1206,7 @@ DataReaderImpl::enable()
       DDS::DURATION_INFINITE_SEC) &&
       (qos_.liveliness.lease_duration.nanosec !=
           DDS::DURATION_INFINITE_NSEC)) {
-    liveliness_lease_duration_ =
-        duration_to_time_value(qos_.liveliness.lease_duration);
+    liveliness_lease_duration_ = TimeDuration(qos_.liveliness.lease_duration);
   }
 
   // Setup the requested deadline watchdog if the configured deadline
@@ -1330,8 +1328,7 @@ DataReaderImpl::writer_activity(const DataSampleHeader& header)
   }
 
   if (!writer.is_nil()) {
-    ACE_Time_Value when = ACE_OS::gettimeofday();
-    writer->received_activity(when);
+    writer->received_activity(MonotonicTimePoint::now());
 
     if ((header.message_id_ == SAMPLE_DATA) ||
         (header.message_id_ == INSTANCE_REGISTRATION) ||
@@ -1846,21 +1843,20 @@ CORBA::Long DataReaderImpl::total_samples() const
 void
 DataReaderImpl::LivelinessTimer::check_liveliness()
 {
-  CheckLivelinessCommand c(this);
-  execute_or_enqueue(c);
+  execute_or_enqueue(new CheckLivelinessCommand(this));
 }
 
 int
 DataReaderImpl::LivelinessTimer::handle_timeout(const ACE_Time_Value& tv,
                                                 const void * /*arg*/)
 {
-  check_liveliness_i(false, tv);
+  check_liveliness_i(false, MonotonicTimePoint(tv));
   return 0;
 }
 
 void
 DataReaderImpl::LivelinessTimer::check_liveliness_i(bool cancel,
-                                                    const ACE_Time_Value& now)
+                                                    const MonotonicTimePoint& now)
 {
   // Working copy of the active timer Id.
 
@@ -1897,7 +1893,7 @@ DataReaderImpl::LivelinessTimer::check_liveliness_i(bool cancel,
   }
 
   // Used after the lock scope ends.
-  ACE_Time_Value smallest(ACE_Time_Value::max_time);
+  MonotonicTimePoint smallest(MonotonicTimePoint::max_value);
   int alive_writers = 0;
 
   // This is a bit convoluted.  The reasoning goes as follows:
@@ -1913,8 +1909,6 @@ DataReaderImpl::LivelinessTimer::check_liveliness_i(bool cancel,
     liveliness_timer_id_ = -1;
   }
 
-  ACE_Time_Value next_absolute;
-
   // Iterate over each writer to this reader
   {
     ACE_READ_GUARD(ACE_RW_Thread_Mutex,
@@ -1926,14 +1920,10 @@ DataReaderImpl::LivelinessTimer::check_liveliness_i(bool cancel,
         ++iter) {
       // deal with possibly not being alive or
       // tell when it will not be alive next (if no activity)
-      next_absolute = iter->second->check_activity(now);
-
-      if (next_absolute != ACE_Time_Value::max_time) {
+      const MonotonicTimePoint next_absolute(iter->second->check_activity(now));
+      if (!next_absolute.is_max()) {
         alive_writers++;
-
-        if (next_absolute < smallest) {
-          smallest = next_absolute;
-        }
+        smallest = std::min(smallest, next_absolute);
       }
     }
   }
@@ -1956,16 +1946,14 @@ DataReaderImpl::LivelinessTimer::check_liveliness_i(bool cancel,
 
   // Call into the reactor after releasing the sample lock.
   if (alive_writers) {
-    ACE_Time_Value relative;
-
     // compare the time now with the earliest(smallest) deadline we found
+    TimeDuration relative;
     if (now < smallest) {
       relative = smallest - now;
     } else {
-      relative = ACE_Time_Value(0,1); // ASAP
+      relative = TimeDuration(0, 1); // ASAP
     }
-
-    liveliness_timer_id_ = this->reactor()->schedule_timer(this, 0, relative);
+    liveliness_timer_id_ = this->reactor()->schedule_timer(this, 0, relative.value());
 
     if (liveliness_timer_id_ == -1) {
       ACE_ERROR((LM_ERROR,
@@ -2014,10 +2002,10 @@ OpenDDS::DCPS::WriterStats::WriterStats(
 {
 }
 
-void OpenDDS::DCPS::WriterStats::add_stat(const ACE_Time_Value& delay)
+void OpenDDS::DCPS::WriterStats::add_stat(const TimeDuration& delay)
 {
-  double datum = static_cast<double>(delay.sec());
-  datum += delay.usec() / 1000000.0;
+  double datum = static_cast<double>(delay.value().sec());
+  datum += delay.value().usec() / 1000000.0;
   this->stats_.add(datum);
 }
 
@@ -2085,7 +2073,7 @@ DataReaderImpl::writer_removed(WriterInfo& info)
   }
 
   liveliness_changed_status_.last_publication_handle = info.handle_;
-  instances_liveliness_update(info, ACE_OS::gettimeofday());
+  instances_liveliness_update(info, MonotonicTimePoint::now());
 
   if (liveliness_changed) {
     set_status_changed_flag(DDS::LIVELINESS_CHANGED_STATUS, true);
@@ -2095,7 +2083,7 @@ DataReaderImpl::writer_removed(WriterInfo& info)
 
 void
 DataReaderImpl::writer_became_alive(WriterInfo& info,
-    const ACE_Time_Value& /* when */)
+    const MonotonicTimePoint& /* when */)
 {
   if (DCPS_debug_level >= 5) {
     GuidConverter reader_converter(subscription_id_);
@@ -2168,8 +2156,8 @@ DataReaderImpl::writer_became_alive(WriterInfo& info,
 }
 
 void
-DataReaderImpl::writer_became_dead(WriterInfo & info,
-    const ACE_Time_Value& when)
+DataReaderImpl::writer_became_dead(WriterInfo& info,
+    const MonotonicTimePoint& when)
 {
   if (DCPS_debug_level >= 5) {
     GuidConverter reader_converter(subscription_id_);
@@ -2244,7 +2232,7 @@ DataReaderImpl::writer_became_dead(WriterInfo & info,
 
 void
 DataReaderImpl::instances_liveliness_update(WriterInfo& info,
-    const ACE_Time_Value& when)
+    const MonotonicTimePoint& when)
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
   for (SubscriptionInstanceMapType::iterator iter = instances_.begin(),
@@ -2291,17 +2279,11 @@ void DataReaderImpl::process_latency(const ReceivedDataSample& sample)
     // are enabled we need to calculate our latency
     if ((this->statistics_enabled()) ||
         (this->qos_.latency_budget.duration > zero)) {
-      // This starts as the current time.
-      ACE_Time_Value latency = ACE_OS::gettimeofday();
-
-      // The time interval starts at the send end.
-      DDS::Duration_t then = {
-          sample.header_.source_timestamp_sec_,
-          sample.header_.source_timestamp_nanosec_
+      const DDS::Time_t timestamp = {
+        sample.header_.source_timestamp_sec_,
+        sample.header_.source_timestamp_nanosec_
       };
-
-      // latency delay in ACE_Time_Value format.
-      latency -= duration_to_time_value(then);
+      const TimeDuration latency = SystemTimePoint::now() - SystemTimePoint(timestamp);
 
       if (this->statistics_enabled()) {
         location->second.add_stat(latency);
@@ -2311,13 +2293,13 @@ void DataReaderImpl::process_latency(const ReceivedDataSample& sample)
         ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("(%P|%t) DataReaderImpl::process_latency() - ")
             ACE_TEXT("measured latency of %dS, %dmS for current sample.\n"),
-            latency.sec(),
-            latency.msec()));
+            latency.value().sec(),
+            latency.value().msec()));
       }
 
       if (this->qos_.latency_budget.duration > zero) {
         // Check latency against the budget.
-        if (time_value_to_duration(latency) > this->qos_.latency_budget.duration) {
+        if (latency > TimeDuration(this->qos_.latency_budget.duration)) {
           this->notify_latency(sample.header_.publication_id_);
         }
       }
@@ -2581,7 +2563,7 @@ DataReaderImpl::lookup_instance_handles(const WriterIdSeq& ids,
 bool
 DataReaderImpl::filter_sample(const DataSampleHeader& header)
 {
-  ACE_Time_Value now(ACE_OS::gettimeofday());
+  const SystemTimePoint now = SystemTimePoint::now();
 
   // Expire historic data if QoS indicates VOLATILE.
   if (!always_get_history_ && header.historic_sample_
@@ -2592,7 +2574,7 @@ DataReaderImpl::filter_sample(const DataSampleHeader& header)
           ACE_TEXT("Discarded historic data.\n")));
     }
 
-    return true;  // Data filtered.
+    return true; // Data filtered.
   }
 
   // The LIFESPAN_DURATION_FLAG is set when sample data is sent
@@ -2600,27 +2582,25 @@ DataReaderImpl::filter_sample(const DataSampleHeader& header)
   if (header.lifespan_duration_) {
     // Finite lifespan.  Check if data has expired.
 
-    DDS::Time_t const tmp = {
-        header.source_timestamp_sec_ + header.lifespan_duration_sec_,
-        header.source_timestamp_nanosec_ + header.lifespan_duration_nanosec_
+    const DDS::Time_t expiration_dds_time = {
+      header.source_timestamp_sec_ + header.lifespan_duration_sec_,
+      header.source_timestamp_nanosec_ + header.lifespan_duration_nanosec_
     };
+    const SystemTimePoint expiration_time(expiration_dds_time);
 
     // We assume that the publisher host's clock and subcriber host's
     // clock are synchronized (allowed by the spec).
-    ACE_Time_Value const expiration_time(
-        OpenDDS::DCPS::time_to_time_value(tmp));
-
     if (now >= expiration_time) {
       if (DCPS_debug_level >= 8) {
-        ACE_Time_Value const diff(now - expiration_time);
+        const TimeDuration diff(now - expiration_time);
         ACE_DEBUG((LM_DEBUG,
-            ACE_TEXT("OpenDDS (%P|%t) Received data ")
-            ACE_TEXT("expired by %d seconds, %d microseconds.\n"),
-            diff.sec(),
-            diff.usec()));
+          ACE_TEXT("(%P|%t) Received data ")
+          ACE_TEXT("expired by %d seconds, %d microseconds.\n"),
+          diff.value().sec(),
+          diff.value().usec()));
       }
 
-      return true;  // Data filtered.
+      return true; // Data filtered.
     }
   }
 
@@ -2628,7 +2608,6 @@ DataReaderImpl::filter_sample(const DataSampleHeader& header)
 }
 
 bool
-
 DataReaderImpl::ownership_filter_instance(const SubscriptionInstance_rch& instance,
   const PublicationId& pubid)
 {
@@ -2705,20 +2684,19 @@ DataReaderImpl::ownership_filter_instance(const SubscriptionInstance_rch& instan
 }
 
 bool
-DataReaderImpl::time_based_filter_instance(const SubscriptionInstance_rch& instance, ACE_Time_Value& filter_time_expired)
+DataReaderImpl::time_based_filter_instance(
+  const SubscriptionInstance_rch& instance,
+  TimeDuration& filter_time_expired)
 {
-  ACE_Time_Value now(ACE_OS::gettimeofday());
+  const MonotonicTimePoint now = MonotonicTimePoint::now();
+  const TimeDuration minimum_separation(qos_.time_based_filter.minimum_separation);
 
   // TIME_BASED_FILTER processing; expire data samples
   // if minimum separation is not met for instance.
-  const DDS::Duration_t zero = { DDS::DURATION_ZERO_SEC, DDS::DURATION_ZERO_NSEC };
-
-  if (qos_.time_based_filter.minimum_separation > zero) {
+  if (!minimum_separation.is_zero()) {
     filter_time_expired = now - instance->last_accepted_;
-    DDS::Duration_t separation = time_value_to_duration(filter_time_expired);
-
-    if (separation < qos_.time_based_filter.minimum_separation) {
-      return true;  // Data filtered.
+    if (filter_time_expired < minimum_separation) {
+      return true; // Data filtered.
     }
   }
 
@@ -3319,7 +3297,7 @@ void DataReaderImpl::accept_sample_processing(const SubscriptionInstance_rch& in
 
   if (instance && watchdog_.in()) {
     instance->last_sample_tv_ = instance->cur_sample_tv_;
-    instance->cur_sample_tv_ = ACE_OS::gettimeofday();
+    instance->cur_sample_tv_.set_to_now();
 
     // Watchdog can't be called with sample_lock_ due to reactor deadlock
     ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
@@ -3356,15 +3334,13 @@ EndHistoricSamplesMissedSweeper::~EndHistoricSamplesMissedSweeper()
 void EndHistoricSamplesMissedSweeper::schedule_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
 {
   info->waiting_for_end_historic_samples_ = true;
-  ScheduleCommand c(this, info);
-  execute_or_enqueue(c);
+  execute_or_enqueue(new ScheduleCommand(this, info));
 }
 
 void EndHistoricSamplesMissedSweeper::cancel_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
 {
   info->waiting_for_end_historic_samples_ = false;
-  CancelCommand c(this, info);
-  execute_or_enqueue(c);
+  execute_or_enqueue(new CancelCommand(this, info));
 }
 
 int EndHistoricSamplesMissedSweeper::handle_timeout(

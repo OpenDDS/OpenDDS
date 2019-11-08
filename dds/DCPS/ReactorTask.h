@@ -10,11 +10,15 @@
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/RcObject.h"
+#include "dds/DCPS/TimeTypes.h"
+#include "dds/DCPS/ReactorInterceptor.h"
 #include "ace/Task.h"
 #include "ace/Barrier.h"
 #include "ace/Synch_Traits.h"
 #include "ace/Condition_T.h"
 #include "ace/Condition_Thread_Mutex.h"
+#include "ace/Timer_Heap_T.h"
+#include "ace/Event_Handler_Handle_Timeout_Upcall.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Proactor;
@@ -51,6 +55,8 @@ public:
 
   bool is_shut_down() const { return state_ == STATE_NOT_RUNNING; }
 
+  RcHandle<ReactorInterceptor> interceptor() const { return interceptor_; }
+
   OPENDDS_POOL_ALLOCATION_FWD
 
 private:
@@ -58,8 +64,26 @@ private:
   typedef ACE_SYNCH_MUTEX         LockType;
   typedef ACE_Guard<LockType>     GuardType;
   typedef ACE_Condition<LockType> ConditionType;
+  typedef ACE_Timer_Heap_T<
+    ACE_Event_Handler*, ACE_Event_Handler_Handle_Timeout_Upcall,
+    ACE_SYNCH_RECURSIVE_MUTEX, MonotonicClock> TimerQueueType;
 
   enum State { STATE_NOT_RUNNING, STATE_OPENING, STATE_RUNNING };
+
+  class Interceptor : public DCPS::ReactorInterceptor {
+  public:
+    explicit Interceptor(DCPS::ReactorTask* task)
+     : ReactorInterceptor(task->get_reactor(), task->get_reactor_owner())
+     , task_(task)
+     {}
+    bool reactor_is_shut_down() const
+    {
+      return task_->is_shut_down();
+    }
+
+  private:
+    DCPS::ReactorTask* const task_;
+  };
 
   ACE_Barrier   barrier_;
   LockType      lock_;
@@ -69,6 +93,10 @@ private:
   ACE_thread_t  reactor_owner_;
   ACE_Proactor* proactor_;
   bool          use_async_send_;
+  TimerQueueType* timer_queue_;
+
+  RcHandle<Interceptor> interceptor_;
+
 };
 
 } // namespace DCPS

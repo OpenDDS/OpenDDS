@@ -23,6 +23,24 @@ $debugOpts .= "-DCPSDebugLevel $debug " if $debug;
 unlink $debugFile;
 
 my $test = new PerlDDS::TestFramework();
+$test->{add_transport_config} = 0;
+
+if ($test->flag('rtps_udp')) {
+    $pub_opts .= " -t rtps_udp";
+}
+elsif ($test->flag('tcp')) {
+    $pub_opts .= " -t tcp";
+}
+elsif ($test->flag('shmem')) {
+    $pub_opts .= " -t shmem";
+}
+elsif ($test->flag('multicast')) {
+    $pub_opts .= " -t multicast";
+}
+elsif ($test->flag('udp')) {
+    $pub_opts .= " -t udp";
+}
+
 $test->process("dpshutdown", "dpshutdown", "$debugOpts $pub_opts");
 $test->start_process("dpshutdown");
 $client = $test->finish(30);

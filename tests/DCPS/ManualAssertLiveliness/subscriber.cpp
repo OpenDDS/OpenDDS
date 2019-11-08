@@ -133,6 +133,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       dr_qos.liveliness.lease_duration.sec = LEASE_DURATION_SEC ;
       dr_qos.liveliness.lease_duration.nanosec = 0 ;
+      dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
       // Create the Datareaders
       DDS::DataReader_var dr = sub->create_datareader(topic.in (),
@@ -170,11 +171,12 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       if (listener_servant.num_liveliness_change_callbacks () != num_liveliness_change_callbacks)
       {
-         cerr
-         << "ERROR: did not receive liveliness change callbacks as expected.("
-         << listener_servant.num_liveliness_change_callbacks () << "/"
-         << num_liveliness_change_callbacks << ")" << endl;
-         return 1;
+        cerr
+         << "ERROR: Expected " << num_liveliness_change_callbacks
+         << " liveliness change callbacks, but got "
+         << listener_servant.num_liveliness_change_callbacks()
+         << endl;
+        return 1;
       }
     }
   catch (CORBA::Exception& e)

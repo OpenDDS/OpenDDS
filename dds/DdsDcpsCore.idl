@@ -16,7 +16,7 @@
 #define HANDLE_TYPE_NATIVE long
 #define BUILTIN_TOPIC_KEY_TYPE_NATIVE long
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if defined __OPENDDS_IDL && !defined DDS_HAS_MINIMUM_BIT
 #  define BUILT_IN_TOPIC_TYPE @topic
 #  define BUILT_IN_TOPIC_KEY @key
 #else

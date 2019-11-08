@@ -38,7 +38,7 @@ InstanceState::InstanceState(DataReaderImpl* reader,
     empty_(true),
     release_pending_(false),
     release_timer_id_(-1),
-    reader_(reader),
+    reader_(*reader),
     handle_(handle),
     owner_(GUID_UNKNOWN),
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
@@ -51,8 +51,11 @@ InstanceState::~InstanceState()
 {
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   if (registered_) {
-    DataReaderImpl::OwnershipManagerPtr om = reader_->ownership_manager();
-    if (om) om->remove_instance(this);
+    RcHandle<DataReaderImpl> reader = reader_.lock();
+    if (reader) {
+      DataReaderImpl::OwnershipManagerPtr om = reader->ownership_manager();
+      if (om) om->remove_instance(this);
+    }
   }
 #endif
 }
@@ -68,8 +71,13 @@ void InstanceState::sample_info(DDS::SampleInfo& si, const ReceivedDataElement* 
     static_cast<CORBA::Long>(no_writers_generation_count_);
   si.source_timestamp = de->source_timestamp_;
   si.instance_handle = handle_;
-  RcHandle<DomainParticipantImpl> participant = reader_->participant_servant_.lock();
-  si.publication_handle = participant ? participant->id_to_handle(de->pub_) : 0;
+  RcHandle<DataReaderImpl> reader = reader_.lock();
+  if (reader) {
+    RcHandle<DomainParticipantImpl> participant = reader->participant_servant_.lock();
+    si.publication_handle = participant ? participant->id_to_handle(de->pub_) : DDS::HANDLE_NIL;
+  } else {
+    si.publication_handle = DDS::HANDLE_NIL;
+  }
   si.valid_data = de->valid_data_;
   /*
    * These are actually calculated later...
@@ -118,14 +126,17 @@ bool InstanceState::dispose_was_received(const PublicationId& writer_id)
   // resume if the writer sends message again.
   if (instance_state_ & DDS::ALIVE_INSTANCE_STATE) {
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-    DataReaderImpl::OwnershipManagerPtr owner_manager = reader_->ownership_manager();
-    if (! exclusive_
-      || (owner_manager && owner_manager->is_owner (handle_, writer_id))) {
+    RcHandle<DataReaderImpl> reader = reader_.lock();
+    if (reader) {
+      DataReaderImpl::OwnershipManagerPtr owner_manager = reader->ownership_manager();
+      if (! exclusive_
+        || (owner_manager && owner_manager->is_owner (handle_, writer_id))) {
 #endif
-      instance_state_ = DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE;
-      schedule_release();
-      return true;
+        instance_state_ = DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE;
+        schedule_release();
+        return true;
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+      }
     }
 #endif
   }
@@ -148,9 +159,12 @@ bool InstanceState::unregister_was_received(const PublicationId& writer_id)
   if (exclusive_) {
     // If unregistered by owner then the ownership should be transferred to another
     // writer.
-    DataReaderImpl::OwnershipManagerPtr owner_manager = reader_->ownership_manager();
-    if (owner_manager)
-      owner_manager->remove_writer (handle_, writer_id);
+    RcHandle<DataReaderImpl> reader = reader_.lock();
+    if (reader) {
+      DataReaderImpl::OwnershipManagerPtr owner_manager = reader->ownership_manager();
+      if (owner_manager)
+        owner_manager->remove_writer (handle_, writer_id);
+    }
   }
 #endif
 
@@ -163,7 +177,7 @@ bool InstanceState::unregister_was_received(const PublicationId& writer_id)
   return false;
 }
 
-void InstanceState::writer_became_dead(const PublicationId& writer_id, int, const ACE_Time_Value&)
+void InstanceState::writer_became_dead(const PublicationId& writer_id, int, const MonotonicTimePoint&)
 {
   if (DCPS_debug_level > 1) {
     GuidConverter conv(writer_id);
@@ -189,7 +203,13 @@ void InstanceState::schedule_pending()
 void InstanceState::schedule_release()
 {
   DDS::DataReaderQos qos;
-  reader_->get_qos(qos);
+  RcHandle<DataReaderImpl> reader = reader_.lock();
+  if (reader) {
+    reader->get_qos(qos);
+  } else {
+    cancel_release();
+    return;
+  }
 
   DDS::Duration_t delay;
 
@@ -214,8 +234,7 @@ void InstanceState::schedule_release()
       delay.nanosec != DDS::DURATION_INFINITE_NSEC) {
     cancel_release();
 
-    ScheduleCommand cmd(this, duration_to_time_value(delay));
-    execute_or_enqueue(cmd);
+    execute_or_enqueue(new ScheduleCommand(this, TimeDuration(delay)));
 
   } else {
     // N.B. instance transitions are always followed by a non-valid
@@ -229,8 +248,7 @@ void InstanceState::schedule_release()
 void InstanceState::cancel_release()
 {
   release_pending_ = false;
-  CancelCommand cmd(this);
-  execute_or_enqueue(cmd);
+  execute_or_enqueue(new CancelCommand(this));
 }
 
 bool InstanceState::release_if_empty()
@@ -247,7 +265,10 @@ bool InstanceState::release_if_empty()
 
 void InstanceState::release()
 {
-  reader_->release_instance(handle_);
+  RcHandle<DataReaderImpl> reader = reader_.lock();
+  if (reader) {
+    reader->release_instance(handle_);
+  }
 }
 
 void InstanceState::set_owner(const PublicationId& owner)
@@ -282,7 +303,10 @@ void InstanceState::reset_ownership(DDS::InstanceHandle_t instance)
   owner_ = GUID_UNKNOWN;
   registered_ = false;
 
-  reader_->reset_ownership(instance);
+  RcHandle<DataReaderImpl> reader = reader_.lock();
+  if (reader) {
+    reader->reset_ownership(instance);
+  }
 }
 
 bool InstanceState::most_recent_generation(ReceivedDataElement* item) const
@@ -306,7 +330,8 @@ void InstanceState::CancelCommand::execute()
 
 void InstanceState::ScheduleCommand::execute()
 {
-  instance_state_->release_timer_id_ = instance_state_->reactor()->schedule_timer(instance_state_, 0, delay_);
+  instance_state_->release_timer_id_ =
+    instance_state_->reactor()->schedule_timer(instance_state_, 0, delay_.value());
 
   if (instance_state_->release_timer_id_ == -1) {
     ACE_ERROR((LM_ERROR,
