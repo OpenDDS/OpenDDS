@@ -88,6 +88,9 @@ public:
   WriterStats(
     int amount = 0,
     DataCollector<double>::OnFull type = DataCollector<double>::KeepOldest);
+#ifdef ACE_HAS_CPP11
+  WriterStats(const WriterStats&) = default;
+#endif
 
   /// Add a datum to the latency statistics.
   void add_stat(const TimeDuration& delay);

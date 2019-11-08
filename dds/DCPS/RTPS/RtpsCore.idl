@@ -83,20 +83,23 @@ module OpenDDS {
     // Section 9.3: "Mapping of the RTPS Types"
 
     /* Type used to hold a timestamp. */
-    struct Time_t { // IETF RFC 1305: time = seconds + fraction / 2^32
-      long seconds;
+    struct Time_t {
+      unsigned long seconds;
       unsigned long fraction;
     };
 
     // see TIME_* constants in BaseMessageTypes.h
     typedef Time_t Timestamp_t;
 
-    /* Duration_t isn't defined in the PSM. It is used to hold time-differences.
-       Should have at least nano-second resolution.  Table 9.13's row for
-       PID_PARTICIPANT_LEASE_DURATION indicates this a 2-item struct or array,
-       just like Time_t (which does have the needed resolution).  So we'll use
-       Time_t for the Duration_t datatype. */
-    typedef Time_t Duration_t;
+    /* Duration_t wasn't defined in the PSM prior to RTPS 2.4. The updated struct
+       is now the same as what we'd assumed, with the added caveat that fractional
+       seconds are now fully utilized and as such we need to make note of protocol
+       version and vendor id when interpreting this field.
+    */
+    struct Duration_t {
+      long seconds;
+      unsigned long fraction;
+    };
 
     const long LOCATOR_KIND_INVALID = -1;
     const long LOCATOR_KIND_RESERVED = 0;
@@ -265,9 +268,7 @@ module OpenDDS {
     const ParameterId_t PID_PARTICIPANT_LEASE_DURATION = 0x0002;
     const ParameterId_t PID_CONTENT_FILTER_PROPERTY = 0x0035;
     const ParameterId_t PID_PARTICIPANT_GUID = 0x0050;
-    const ParameterId_t PID_PARTICIPANT_ENTITYID = 0x0051;
     const ParameterId_t PID_GROUP_GUID = 0x0052;
-    const ParameterId_t PID_GROUP_ENTITYID = 0x0053;
     const ParameterId_t PID_BUILTIN_ENDPOINT_SET = 0x0058;
     const ParameterId_t PID_PROPERTY_LIST = 0x0059;
     const ParameterId_t PID_TYPE_MAX_SIZE_SERIALIZED = 0x0060;
@@ -410,10 +411,6 @@ module OpenDDS {
 
       case PID_OPENDDS_PARTICIPANT_FLAGS:
         OpenDDSParticipantFlags_t participant_flags;
-
-      case PID_PARTICIPANT_ENTITYID:
-      case PID_GROUP_ENTITYID:
-        DCPS::EntityId_t entity_id;
 
       case PID_BUILTIN_ENDPOINT_SET:
         BuiltinEndpointSet_t builtin_endpoints;
