@@ -330,7 +330,7 @@ points in time and durations of time. It can differentiate between the system
 clock and the monotonic clock, but it does so poorly. OpenDDS provides three
 classes that wrap `ACE_Time_Value` to fill these roles: `TimeDuration`,
 `MonotonicTimePoint`, and `SystemTimePoint`. All three can be included using
-`dds/DCPS/TimeTypes.h`. Using `ACE_Time_Value` is discouraged unless directly
+`dds/DCPS/time_types.h`. Using `ACE_Time_Value` is discouraged unless directly
 dealing with ACE code which requires it and using `ACE_OS::gettimeofday()` or
 `ACE_Time_Value().now()` in C++ code in `dds/DCPS` treated as an error by the
 `dds_fuzz.pl` linter script.

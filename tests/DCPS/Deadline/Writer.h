@@ -4,7 +4,7 @@
 #define WRITER_H
 
 #include <dds/DdsDcpsPublicationC.h>
-#include "dds/DCPS/TimeTypes.h"
+#include "dds/DCPS/time_types.h"
 #include "MessengerTypeSupportC.h"
 #include "DataWriterListenerImpl.h"
 

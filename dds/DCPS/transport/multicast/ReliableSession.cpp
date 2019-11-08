@@ -16,7 +16,7 @@
 
 #include "dds/DCPS/Serializer.h"
 #include "dds/DCPS/GuidConverter.h"
-#include "dds/DCPS/TimeTypes.h"
+#include "dds/DCPS/time_types.h"
 
 #include <cstdlib>
 

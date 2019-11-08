@@ -1,7 +1,7 @@
 #include "DataWriterListenerImpl.h"
 #include "dds/DdsDcpsPublicationC.h"
 #include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/TimeTypes.h"
+#include "dds/DCPS/time_types.h"
 
 #include <iostream>
 

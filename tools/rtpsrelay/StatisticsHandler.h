@@ -3,7 +3,7 @@
 
 #include "RelayHandler.h"
 
-#include <dds/DCPS/TimeTypes.h>
+#include <dds/DCPS/time_types.h>
 
 #include <ace/Event_Handler.h>
 

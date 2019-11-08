@@ -42,7 +42,7 @@
 #include "RcEventHandler.h"
 #include "TopicImpl.h"
 #include "DomainParticipantImpl.h"
-#include "TimeTypes.h"
+#include "time_types.h"
 
 #include "ace/String_Base.h"
 #include "ace/Reverse_Lock_T.h"

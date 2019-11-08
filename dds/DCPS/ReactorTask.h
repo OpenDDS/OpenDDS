@@ -10,7 +10,7 @@
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/RcObject.h"
-#include "dds/DCPS/TimeTypes.h"
+#include "dds/DCPS/time_types.h"
 #include "dds/DCPS/ReactorInterceptor.h"
 #include "ace/Task.h"
 #include "ace/Barrier.h"

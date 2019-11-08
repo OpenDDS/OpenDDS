@@ -2,7 +2,7 @@
 #include "MessengerTypeSupportC.h"
 #include "MessengerTypeSupportImpl.h"
 #include <dds/DCPS/Service_Participant.h>
-#include <dds/DCPS/TimeTypes.h>
+#include <dds/DCPS/time_types.h>
 
 using namespace Messenger;
 

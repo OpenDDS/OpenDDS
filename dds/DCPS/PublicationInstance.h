@@ -15,7 +15,7 @@
 #include "ace/Synch_Traits.h"
 #include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/unique_ptr.h"
-#include "dds/DCPS/TimeTypes.h"
+#include "dds/DCPS/time_types.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

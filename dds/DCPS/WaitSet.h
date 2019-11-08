@@ -17,7 +17,7 @@
 #include "dds/DCPS/LocalObject.h"
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/PoolAllocator.h"
-#include "dds/DCPS/TimeTypes.h"
+#include "dds/DCPS/time_types.h"
 
 #include "ace/Thread_Mutex.h"
 #include "ace/Atomic_Op.h"

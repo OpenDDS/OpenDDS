@@ -7,7 +7,7 @@
 #include "ace/Synch.h"
 #include <dds/DCPS/MessageTracker.h>
 #include <dds/DCPS/Service_Participant.h>
-#include <dds/DCPS/TimeTypes.h>
+#include <dds/DCPS/time_types.h>
 #include "ace/ACE.h"
 #include "ace/Guard_T.h"
 #include "ace/OS_NS_time.h"

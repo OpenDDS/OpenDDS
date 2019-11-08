@@ -16,7 +16,7 @@
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/Qos_Helper.h>
 #include "dds/DCPS/WaitSet.h"
-#include "dds/DCPS/TimeTypes.h"
+#include "dds/DCPS/time_types.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 
 #include "dds/DCPS/StaticIncludes.h"
