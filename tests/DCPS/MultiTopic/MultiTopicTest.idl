@@ -1,45 +1,51 @@
 // example adapted from the DCPS Specification v1.2, Annex A, Section 3
 
-#pragma DCPS_DATA_TYPE "LocationInfo"
-#pragma DCPS_DATA_KEY "LocationInfo flight_id1"
-#pragma DCPS_DATA_KEY "LocationInfo flight_id2"
+@topic
 struct LocationInfo {
-  unsigned long flight_id1;
-  unsigned long flight_id2;
+  @key unsigned long flight_id1;
+  @key unsigned long flight_id2;
   long x;
   long y;
   long z;
 };
 
-#pragma DCPS_DATA_TYPE "PlanInfo"
-#pragma DCPS_DATA_KEY "PlanInfo flight_id1"
-#pragma DCPS_DATA_KEY "PlanInfo flight_id2"
-struct PlanInfo {
-  unsigned long flight_id1;
-  unsigned long flight_id2;
-  string flight_name;
-  string tailno;
+enum FlightType {
+  visual,
+  instrument,
+  mixed
 };
 
-#pragma DCPS_DATA_TYPE "MoreInfo"
-#pragma DCPS_DATA_KEY "MoreInfo flight_id1"
+typedef string<3> Airport;
+typedef sequence<Airport> Airports;
+
+@topic
+struct PlanInfo {
+  @key unsigned long flight_id1;
+  @key unsigned long flight_id2;
+  string flight_name;
+  string tailno;
+  FlightType type;
+  Airport departure;
+  Airport destination;
+  Airports alternative_destinations;
+};
+
+@topic
 struct MoreInfo {
-  unsigned long flight_id1;
+  @key unsigned long flight_id1;
   string more;
 };
 
-#pragma DCPS_DATA_TYPE "UnrelatedInfo"
 // testing cross-joins, this has no keys
+@topic
 struct UnrelatedInfo {
   string misc;
 };
 
-#pragma DCPS_DATA_TYPE "Resulting"
-#pragma DCPS_DATA_KEY "Resulting flight_id1"
-#pragma DCPS_DATA_KEY "Resulting flight_id2"
+@topic
 struct Resulting {
-  unsigned long flight_id1;
-  unsigned long flight_id2;
+  @key unsigned long flight_id1;
+  @key unsigned long flight_id2;
   string flight_name;
   long x;
   long y;
