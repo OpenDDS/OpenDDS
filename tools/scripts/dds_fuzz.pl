@@ -11,10 +11,6 @@ use Encode qw/decode encode FB_CROAK/;
 use Cwd qw/abs_path/;
 use Getopt::Long qw/GetOptions/;
 
-if (!defined $ENV{'ACE_ROOT'} || !defined $ENV{'DDS_ROOT'}) {
-  die("ACE_ROOT and DDS_ROOT must be defined!");
-}
-
 my $debug = 0;
 my $ace_fuzz = 1;
 my $simple_output = 0;
@@ -44,6 +40,13 @@ if (!GetOptions(
 if ($help) {
   print $help_message;
   exit 0;
+}
+
+my @missing_env = ();
+push(@missing_env, 'DDS_ROOT') if !defined $ENV{'DDS_ROOT'};
+push(@missing_env, 'ACE_ROOT') if (!defined $ENV{'ACE_ROOT'} && $ace_fuzz);
+if (scalar(@missing_env)) {
+  die(join(', ', @missing_env) . " must be defined!");
 }
 
 my %extra_checks = (); # TODO: Populate This
@@ -79,9 +82,10 @@ sub is_binary_file {
   return (-B $full_filename && !is_empty_file($full_filename)) || is_elf_file($full_filename);
 }
 
-# <name> => <regex to match to path> or <sub(path)>
+# <name> => <regex to match to path> or <sub(filename, full_filename)>
 my %path_conditions = (
-  not_this_file => qr/^tools\/scripts\/dds_fuzz.pl$/,
+  not_this_file => qr@^tools/scripts/dds_fuzz.pl$@,
+
   dir => sub {
     my $filename = shift;
     my $full_filename = shift;
@@ -283,7 +287,7 @@ my %checks = (
   },
 
   is_binary => {
-    extra => 1
+    extra => 1,
     message => [
       'File looks like a binary file'
     ],
