@@ -268,7 +268,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   DDS::Subscriber_var bit_subscriber = application_participant->get_builtin_subscriber();
 
-  GuidRelayAddressesTypeSupportImpl::_var_type guid_relay_addresses_ts =
+  GuidRelayAddressesTypeSupport_var guid_relay_addresses_ts =
     new GuidRelayAddressesTypeSupportImpl;
   if (guid_relay_addresses_ts->register_type(relay_participant, "") != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: failed to register GuidRelayAddresses type\n"));
@@ -286,7 +286,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  ReaderEntryTypeSupportImpl::_var_type reader_entry_ts =
+  ReaderEntryTypeSupport_var reader_entry_ts =
     new ReaderEntryTypeSupportImpl;
   if (reader_entry_ts->register_type(relay_participant, "") != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: failed to register ReaderEntry type\n"));
@@ -302,7 +302,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  WriterEntryTypeSupportImpl::_var_type writer_entry_ts =
+  WriterEntryTypeSupport_var writer_entry_ts =
     new WriterEntryTypeSupportImpl;
   if (writer_entry_ts->register_type(relay_participant, "") != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: failed to register WriterEntry type\n"));
@@ -363,8 +363,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   DDS::DataReader_var responsible_relay_reader_var =
-    relay_subscriber->create_datareader(responsible_relay_topic, reader_qos, nullptr,
-                                        DDS::DATA_AVAILABLE_STATUS);
+    relay_subscriber->create_datareader(responsible_relay_topic, reader_qos, nullptr, 0);
   if (!responsible_relay_reader_var) {
     ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: failed to create Reponsible Relay data reader\n"));
     return EXIT_FAILURE;
@@ -419,8 +418,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
+  DDS::DataReaderListener_var reader_listener =
+    new ReaderListener(association_table, spdp_vertical_handler);
   DDS::DataReader_var reader_reader_var = relay_subscriber->create_datareader(readers_topic, reader_qos,
-                                                                              new ReaderListener(association_table, spdp_vertical_handler),
+                                                                              reader_listener,
                                                                               DDS::DATA_AVAILABLE_STATUS);
 
   if (!reader_reader_var) {
@@ -429,8 +430,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   DDS::DataReader_var subscription_reader = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC);
-  DDS::DataReaderListener_var subscription_listener(new SubscriptionListener(application_participant_impl,
-                                                                             reader_writer));
+  DDS::DataReaderListener_var subscription_listener =
+    new SubscriptionListener(application_participant_impl, reader_writer);
   DDS::ReturnCode_t ret = subscription_reader->set_listener(subscription_listener, DDS::DATA_AVAILABLE_STATUS);
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: Failed to set listener on SubscriptionBuiltinTopicDataDataReader\n"));
@@ -452,8 +453,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
+  DDS::DataReaderListener_var writer_listener =
+    new WriterListener(association_table, spdp_vertical_handler);
   DDS::DataReader_var writer_reader = relay_subscriber->create_datareader(writers_topic, reader_qos,
-                                                                          new WriterListener(association_table, spdp_vertical_handler),
+                                                                          writer_listener,
                                                                           DDS::DATA_AVAILABLE_STATUS);
   if (!writer_reader) {
     ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: failed to create Writer data reader\n"));

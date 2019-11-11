@@ -359,8 +359,7 @@ bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser
 void VerticalHandler::send(const GuidSet& to,
                            const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg)
 {
-  RelayAddressesMap relay_addresses_map;
-  populate_relay_addresses_map(relay_addresses_map, to);
+  const auto relay_addresses_map = populate_relay_addresses_map(to);
 
   size_t fan_out = 0;
   for (const auto& p : relay_addresses_map) {
@@ -385,9 +384,10 @@ void VerticalHandler::send(const GuidSet& to,
   max_fan_out(fan_out);
 }
 
-void VerticalHandler::populate_relay_addresses_map(RelayAddressesMap& relay_addresses_map,
-                                                   const GuidSet& to)
+RelayAddressesMap VerticalHandler::populate_relay_addresses_map(const GuidSet& to)
 {
+  RelayAddressesMap relay_addresses_map;
+
   for (const auto& guid : to) {
     const auto relay_addresses = read_relay_addresses(guid);
     if (relay_addresses == RelayAddresses()) {
@@ -395,6 +395,8 @@ void VerticalHandler::populate_relay_addresses_map(RelayAddressesMap& relay_addr
     }
     relay_addresses_map[relay_addresses].insert(guid);
   }
+
+  return relay_addresses_map;
 }
 
 RelayAddresses VerticalHandler::read_relay_addresses(const OpenDDS::DCPS::RepoId& guid) const
@@ -410,7 +412,7 @@ RelayAddresses VerticalHandler::read_relay_addresses(const OpenDDS::DCPS::RepoId
   GuidRelayAddressesSeq received_data;
   DDS::SampleInfoSeq info_seq;
   const auto ret = responsible_relay_reader_->read_instance(received_data, info_seq, 1, handle,
-                                                            DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+                                                            DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: VerticalHandler::read_relay_addresses failed to read\n"));
     return relay_addresses;

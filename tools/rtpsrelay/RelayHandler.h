@@ -112,8 +112,7 @@ protected:
                        const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg) override;
   void send(const GuidSet& to,
             const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg);
-  void populate_relay_addresses_map(RelayAddressesMap& relay_addresses_map,
-                                    const GuidSet& to);
+  RelayAddressesMap populate_relay_addresses_map(const GuidSet& to);
 
   GuidRelayAddressesDataWriter_ptr responsible_relay_writer_;
   GuidRelayAddressesDataReader_ptr responsible_relay_reader_;
