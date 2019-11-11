@@ -1109,6 +1109,9 @@ Sedp::Task::svc_i(const ParticipantData_t* ppdata)
   const BuiltinEndpointSet_t& avail =
     pdata->participantProxy.availableBuiltinEndpoints;
 
+  const BuiltinEndpointQos_t& beq =
+    pdata->participantProxy.builtinEndpointQos;
+
   // See RTPS v2.1 section 8.5.5.1
   if (spdp_->available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER &&
       avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR) {
@@ -1125,6 +1128,9 @@ Sedp::Task::svc_i(const ParticipantData_t* ppdata)
   if (spdp_->available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER &&
       avail & BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER) {
     DCPS::AssociationData peer = proto;
+    if (beq & BEST_EFFORT_PARTICIPANT_MESSAGE_DATA_READER) {
+      peer.remote_reliable_ = false;
+    }
     peer.remote_id_.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER;
     sedp_->participant_message_writer_.assoc(peer);
   }
