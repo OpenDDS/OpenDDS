@@ -50,10 +50,8 @@ namespace {
       try {
         outer_->data_available(reader);
       } catch (std::exception& e) {
-        if (OpenDDS::DCPS::DCPS_debug_level) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) MultiTopicDataReaderBase::Listener::"
-                     "on_data_available(): %C", e.what()));
-        }
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: MultiTopicDataReaderBase::Listener::on_data_available: %C\n"),
+          e.what()));
       }
     }
 
@@ -68,12 +66,10 @@ namespace {
       outer_->_add_ref();
     }
 
-
     /// Decrement the reference count.
     virtual void _remove_ref (void){
       outer_->_remove_ref();
     }
-
 
     /// Get the refcount
     virtual CORBA::ULong _refcount_value (void) const{
@@ -101,9 +97,7 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
     dynamic_cast<DataReaderImpl*>(resulting_reader_.in());
 
   if (!resulting_impl) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: ")
-      ACE_TEXT("MultiTopicDataReaderBase::init, ")
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: MultiTopicDataReaderBase::init: ")
       ACE_TEXT("Failed to get DataReaderImpl.\n")));
     return;
   }
@@ -115,9 +109,7 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
   DDS::DomainParticipant_var participant = parent->get_participant();
   DomainParticipantImpl* dpi = dynamic_cast<DomainParticipantImpl*>(participant.in());
   if (!dpi) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: ")
-      ACE_TEXT("MultiTopicDataReaderBase::init, ")
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: MultiTopicDataReaderBase::init: ")
       ACE_TEXT("Failed to get DomainParticipantImpl.\n")));
     return;
   }
@@ -166,9 +158,8 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
         }
       }
     } catch (const std::runtime_error& e) {
-        ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) MultiTopicDataReaderBase::init: %C"), e.what()));
-        throw std::runtime_error("Failed to obtain metastruct for incoming.");
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: MultiTopicDataReaderBase::init: %C\n"), e.what()));
+      throw std::runtime_error("Failed to obtain metastruct for incoming.");
     }
   }
 
@@ -259,8 +250,7 @@ void MultiTopicDataReaderBase::data_available(DDS::DataReader_ptr reader)
       " could not be cast to DataReaderImpl.");
   }
   DataReaderImpl::GenericBundle gen;
-  ReturnCode_t rc = dri->read_generic(gen, NOT_READ_SAMPLE_STATE,
-                                      ANY_VIEW_STATE, ANY_INSTANCE_STATE,false);
+  ReturnCode_t rc = dri->read_generic(gen, NOT_READ_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE, false);
   if (rc == RETCODE_NO_DATA) {
     return;
   } else if (rc != RETCODE_OK) {
@@ -274,29 +264,23 @@ void MultiTopicDataReaderBase::data_available(DDS::DataReader_ptr reader)
       if (gen.info_[i].valid_data) {
         incoming_sample(gen.samples_[i], gen.info_[i], topic.c_str(), meta);
       } else if (gen.info_[i].instance_state != ALIVE_INSTANCE_STATE) {
-        DataReaderImpl* resulting_impl =
-          dynamic_cast<DataReaderImpl*>(resulting_reader_.in());
-
+        DataReaderImpl* resulting_impl = dynamic_cast<DataReaderImpl*>(resulting_reader_.in());
         if (resulting_impl) {
-          set<pair<InstanceHandle_t, InstanceHandle_t> >::const_iterator
-            iter = qp.instances_.begin();
-          while (iter != qp.instances_.end() &&
-            iter->first != gen.info_[i].instance_handle) ++iter;
-          for (; iter != qp.instances_.end() &&
-            iter->first == gen.info_[i].instance_handle; ++iter) {
-            resulting_impl->set_instance_state(iter->second,
-              gen.info_[i].instance_state);
+          set<pair<InstanceHandle_t, InstanceHandle_t> >::const_iterator iter = qp.instances_.begin();
+          while (iter != qp.instances_.end() && iter->first != gen.info_[i].instance_handle) {
+            ++iter;
+          }
+          for (; iter != qp.instances_.end() && iter->first == gen.info_[i].instance_handle; ++iter) {
+            resulting_impl->set_instance_state(iter->second, gen.info_[i].instance_state);
           }
         } else {
-          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) MultiTopicDataReaderBase::data_available:")
-            ACE_TEXT(" failed to obtain DataReaderImpl.")));
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: MultiTopicDataReaderBase::data_available:")
+            ACE_TEXT(" failed to obtain DataReaderImpl.\n")));
         }
       }
     }
   } catch (const std::runtime_error& e) {
-    if (OpenDDS::DCPS::DCPS_debug_level) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) MultiTopicDataReaderBase::data_available: %C"), e.what()));
-    }
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: MultiTopicDataReaderBase::data_available: %C\n"), e.what()));
   }
 }
 
