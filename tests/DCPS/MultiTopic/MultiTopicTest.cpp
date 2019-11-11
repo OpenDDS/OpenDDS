@@ -232,6 +232,7 @@ bool run_multitopic_test(const Publisher_var& pub, const Subscriber_var& sub)
       return false;
     }
     // Check return get_key_value
+    // Regression Test for https://github.com/objectcomputing/OpenDDS/issues/592
     Resulting resulting_value;
     ret = res_dr->get_key_value(resulting_value, DDS::HANDLE_NIL);
     if (ret != RETCODE_BAD_PARAMETER) return false;
