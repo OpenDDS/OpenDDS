@@ -67,7 +67,7 @@ public:
       ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Null SPDP Transport\n")));
       return false;
     }
-    addr = spdp_->tport_->default_multicast_;
+    addr = spdp_->tport_->multicast_address_;
     return true;
   }
 
