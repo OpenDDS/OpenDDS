@@ -52,7 +52,11 @@ class RtpsDiscovery;
 
 /// Each instance of class Spdp represents the implementation of the RTPS
 /// Simple Participant Discovery Protocol for a single local DomainParticipant.
-class OpenDDS_Rtps_Export Spdp : public DCPS::LocalParticipant<Sedp>, public ICE::AgentInfoListener {
+class OpenDDS_Rtps_Export Spdp : public DCPS::LocalParticipant<Sedp>
+#ifdef OPENDDS_SECURITY
+                               , public ICE::AgentInfoListener
+#endif
+{
 public:
 
   Spdp(DDS::DomainId_t domain,

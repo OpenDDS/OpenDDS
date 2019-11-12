@@ -1257,10 +1257,8 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
 
 void Spdp::update_agent_info(const DCPS::RepoId&, const ICE::AgentInfo&)
 {
-#ifdef OPENDDS_SECURITY
   if (is_security_enabled())
     write_secure_updates();
-#endif
 }
 #endif
 
