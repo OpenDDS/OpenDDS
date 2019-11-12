@@ -683,10 +683,14 @@ RtpsSampleHeader::split(const ACE_Message_Block& orig, size_t size,
   if (rd[data_offset] == DATA) {
     sz += 12; // DATA_FRAG is 12 bytes larger than DATA
     iqos_offset -= 12;
-    new_flags &= ~(FLAG_K_IN_DATA | FLAG_K_IN_FRAG);
+    new_flags = flags & (FLAG_E | FLAG_Q);
     if (flags & FLAG_K_IN_DATA) {
       new_flags |= FLAG_K_IN_FRAG;
     }
+    if (flags & FLAG_N_IN_DATA) {
+      new_flags |= FLAG_N_IN_FRAG;
+    }
+
   }
   head.reset(DataSampleHeader::alloc_msgblock(orig, sz, false));
 

@@ -485,8 +485,10 @@ module OpenDDS {
     const octet FLAG_M = 2; // InfoReplyIp4: Multicast present
     const octet FLAG_D = 4; // Data: sample Data present
     const octet FLAG_L = 4; // Heartbeat: Liveliness
-    const octet FLAG_K_IN_FRAG = 4; // DataFrag: Key present
-    const octet FLAG_K_IN_DATA = 8; // Data: Key present
+    const octet FLAG_K_IN_FRAG = 4;  // DataFrag: Key present
+    const octet FLAG_K_IN_DATA = 8;  // Data: Key present
+    const octet FLAG_N_IN_FRAG = 8;  // DataFrag:  indicates that the SerializedPayload has non-standard encoding
+    const octet FLAG_N_IN_DATA = 16; // Data: indicates that the SerializedPayload has non-standard encoding
 
     /* all Submessages are composed of a leading SubmessageHeader */
     struct SubmessageHeader {

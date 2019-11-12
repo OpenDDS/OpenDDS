@@ -31,7 +31,7 @@ void append(DDS::PropertySeq& props, const char* name, const std::string& value,
   try {
   props[len] = prop;
   }
-  catch (const CORBA::BAD_PARAM& ex) {
+  catch (const CORBA::BAD_PARAM&) {
   ACE_ERROR((LM_ERROR, "Exception caught when appending parameter\n"));
   }
 }
@@ -101,5 +101,5 @@ int main(int argc, char* argv[]) {
 
   cleanup(participant, dpf);
 
-  ACE_OS::exit(1);
+  return 1;
 }
