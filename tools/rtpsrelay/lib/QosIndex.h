@@ -65,74 +65,54 @@ class NoIndex;
 
 class RtpsRelayLib_Export Writer {
  public:
-  Writer(const WriterEntry& we, bool local)
+  explicit Writer(const WriterEntry& we)
     : participant_guid_(to_participant_guid(guid_to_repoid(we.guid())))
     {
-      reset(we, local);
+      reset(we);
     }
 
-  void reset(const WriterEntry& we, bool local)
+  void reset(const WriterEntry& we)
   {
     writer_entry_ = we;
-    local_ = local;
   }
 
   std::set<NoIndex*> indexes;
 
   const OpenDDS::DCPS::RepoId participant_guid() const { return participant_guid_; }
   const WriterEntry& writer_entry() const { return writer_entry_; }
-  bool local() const { return local_; }
-  bool remote() const { return !local_; }
 
 private:
   const OpenDDS::DCPS::RepoId participant_guid_;
   WriterEntry writer_entry_;
-  bool local_;
 };
 
 typedef std::shared_ptr<Writer> WriterPtr;
 typedef std::set<WriterPtr> WriterSet;
 
-inline void add_writer(WriterPtr writer,
-                       RelayAddressesMap& relay_addresses_map)
-{
-  relay_addresses_map[writer->writer_entry().relay_addresses()].insert(writer->participant_guid());
-}
-
 class RtpsRelayLib_Export Reader {
  public:
-  Reader(const ReaderEntry& re, bool local)
+  explicit Reader(const ReaderEntry& re)
     : participant_guid_(to_participant_guid(guid_to_repoid(re.guid())))
     {
-      reset(re, local);
+      reset(re);
     }
 
-  void reset(const ReaderEntry& re, bool local)
+  void reset(const ReaderEntry& re)
   {
     reader_entry_ = re;
-    local_ = local;
   }
   std::set<NoIndex*> indexes;
 
   const OpenDDS::DCPS::RepoId participant_guid() const { return participant_guid_; }
   const ReaderEntry& reader_entry() const { return reader_entry_; }
-  bool local() const { return local_; }
-  bool remote() const { return !local_; }
 
-private:
+ private:
   const OpenDDS::DCPS::RepoId participant_guid_;
   ReaderEntry reader_entry_;
-  bool local_;
 };
 
 typedef std::shared_ptr<Reader> ReaderPtr;
 typedef std::set<ReaderPtr> ReaderSet;
-
-inline void add_reader(ReaderPtr reader,
-                       RelayAddressesMap& relay_addresses_map)
-{
-  relay_addresses_map[reader->reader_entry().relay_addresses()].insert(reader->participant_guid());
-}
 
 class RtpsRelayLib_Export NoIndex {
 public:
@@ -147,20 +127,19 @@ public:
   }
 
   void insert(WriterPtr writer,
-              RelayAddressesMap& relay_addresses_map)
+              GuidSet& guids)
   {
     const auto p = writers_.insert(std::make_pair(writer, ReaderSet()));
     writer->indexes.insert(this);
-    match(p.first, relay_addresses_map);
+    match(p.first, guids);
   }
 
   void reinsert(WriterPtr writer,
                 const WriterEntry& writer_entry,
-                bool local,
-                RelayAddressesMap& relay_addresses_map)
+                GuidSet& guids)
   {
-    writer->reset(writer_entry, local);
-    match(writers_.find(writer), relay_addresses_map);
+    writer->reset(writer_entry);
+    match(writers_.find(writer), guids);
   }
 
   void erase(WriterPtr writer)
@@ -174,20 +153,19 @@ public:
   }
 
   void insert(ReaderPtr reader,
-              RelayAddressesMap& relay_addresses_map)
+              GuidSet& guids)
   {
     const auto p = readers_.insert(std::make_pair(reader, WriterSet()));
     reader->indexes.insert(this);
-    match(p.first, relay_addresses_map);
+    match(p.first, guids);
   }
 
   void reinsert(ReaderPtr reader,
                 const ReaderEntry& reader_entry,
-                bool local,
-                RelayAddressesMap& relay_addresses_map)
+                GuidSet& guids)
   {
-    reader->reset(reader_entry, local);
-    match(readers_.find(reader), relay_addresses_map);
+    reader->reset(reader_entry);
+    match(readers_.find(reader), guids);
   }
 
   void erase(ReaderPtr reader)
@@ -226,9 +204,9 @@ private:
   typedef std::map<ReaderPtr, WriterSet> Readers;
 
   void match(Writers::iterator pos,
-             RelayAddressesMap& relay_addresses_map);
+             GuidSet& guids);
   void match(Readers::iterator pos,
-             RelayAddressesMap& relay_addresses_map);
+             GuidSet& guids);
 
   Writers writers_;
   Readers readers_;
@@ -264,24 +242,23 @@ public:
   }
 
   void insert_literal(WriterPtr writer,
-                      RelayAddressesMap& relay_addresses_map)
+                      GuidSet& guids)
   {
     ++literal_count_;
-    index_.insert(writer, relay_addresses_map);
+    index_.insert(writer, guids);
   }
 
   void insert_pattern(WriterPtr writer,
-                      RelayAddressesMap& relay_addresses_map)
+                      GuidSet& guids)
   {
-    index_.insert(writer, relay_addresses_map);
+    index_.insert(writer, guids);
   }
 
   void reinsert(WriterPtr writer,
                 const WriterEntry& writer_entry,
-                bool local,
-                RelayAddressesMap& relay_addresses_map)
+                GuidSet& guids)
   {
-    index_.reinsert(writer, writer_entry, local, relay_addresses_map);
+    index_.reinsert(writer, writer_entry, guids);
   }
 
   void erase_literal(WriterPtr writer)
@@ -296,24 +273,23 @@ public:
   }
 
   void insert_literal(ReaderPtr reader,
-                      RelayAddressesMap& relay_addresses_map)
+                      GuidSet& guids)
   {
     ++literal_count_;
-    index_.insert(reader, relay_addresses_map);
+    index_.insert(reader, guids);
   }
 
   void insert_pattern(ReaderPtr reader,
-                      RelayAddressesMap& relay_addresses_map)
+                      GuidSet& guids)
   {
-    index_.insert(reader, relay_addresses_map);
+    index_.insert(reader, guids);
   }
 
   void reinsert(ReaderPtr reader,
                 const ReaderEntry& reader_entry,
-                bool local,
-                RelayAddressesMap& relay_addresses_map)
+                GuidSet& guids)
   {
-    index_.reinsert(reader, reader_entry, local, relay_addresses_map);
+    index_.reinsert(reader, reader_entry, guids);
   }
 
   void erase_literal(ReaderPtr reader)
@@ -364,15 +340,15 @@ public:
   }
 
   static void insert(PatternPtr pattern, LiteralPtr literal,
-                     RelayAddressesMap& relay_addresses_map)
+                     GuidSet& guids)
   {
     pattern->literals_.insert(literal);
     literal->insert(pattern);
     for (const auto writer : pattern->writers_) {
-      literal->insert_pattern(writer, relay_addresses_map);
+      literal->insert_pattern(writer, guids);
     }
     for (const auto reader : pattern->readers_) {
-      literal->insert_pattern(reader, relay_addresses_map);
+      literal->insert_pattern(reader, guids);
     }
   }
 
@@ -382,21 +358,20 @@ public:
   }
 
   void insert(WriterPtr writer,
-              RelayAddressesMap& relay_addresses_map)
+              GuidSet& guids)
   {
     writers_.insert(writer);
     for (const auto literal : literals_) {
-      literal->insert_pattern(writer, relay_addresses_map);
+      literal->insert_pattern(writer, guids);
     }
   }
 
   void reinsert(WriterPtr writer,
                 const WriterEntry& writer_entry,
-                bool local,
-                RelayAddressesMap& relay_addresses_map)
+                GuidSet& guids)
   {
     for (const auto literal : literals_) {
-      literal->reinsert(writer, writer_entry, local, relay_addresses_map);
+      literal->reinsert(writer, writer_entry, guids);
     }
   }
 
@@ -409,21 +384,20 @@ public:
   }
 
   void insert(ReaderPtr reader,
-              RelayAddressesMap& relay_addresses_map)
+              GuidSet& guids)
   {
     readers_.insert(reader);
     for (const auto literal : literals_) {
-      literal->insert_pattern(reader, relay_addresses_map);
+      literal->insert_pattern(reader, guids);
     }
   }
 
   void reinsert(ReaderPtr reader,
                 const ReaderEntry& reader_entry,
-                bool local,
-                RelayAddressesMap& relay_addresses_map)
+                GuidSet& guids)
   {
     for (const auto literal : literals_) {
-      literal->reinsert(reader, reader_entry, local, relay_addresses_map);
+      literal->reinsert(reader, reader_entry, guids);
     }
   }
 
@@ -733,7 +707,7 @@ public:
   }
 
   void insert(WriterPtr writer,
-              RelayAddressesMap& relay_addresses_map)
+              GuidSet& guids)
   {
     const auto qos = choose_qos(&writer->writer_entry()._publisher_qos.partition);
 
@@ -749,28 +723,27 @@ public:
           literal = LiteralPtr(new LiteralType());
           NodeType::insert(node_, name, literal);
           for (const auto pattern : NodeType::find_patterns(node_, name)) {
-            PatternType::insert(pattern, literal, relay_addresses_map);
+            PatternType::insert(pattern, literal, guids);
           }
         }
-        literal->insert_literal(writer, relay_addresses_map);
+        literal->insert_literal(writer, guids);
       } else {
         auto pattern = NodeType::find_pattern(node_, name);
         if (pattern == nullptr) {
           pattern = PatternPtr(new PatternType());
           NodeType::insert(node_, name, pattern);
           for (const auto literal : NodeType::find_literals(node_, name)) {
-            PatternType::insert(pattern, literal, relay_addresses_map);
+            PatternType::insert(pattern, literal, guids);
           }
         }
-        pattern->insert(writer, relay_addresses_map);
+        pattern->insert(writer, guids);
       }
     }
   }
 
   void reinsert(WriterPtr writer,
                 const WriterEntry& writer_entry,
-                bool local,
-                RelayAddressesMap& relay_addresses_map)
+                GuidSet& guids)
   {
     const auto old_qos = choose_qos(&writer->writer_entry()._publisher_qos.partition);
     const auto new_qos = choose_qos(&writer_entry._publisher_qos.partition);
@@ -813,15 +786,15 @@ public:
       } else {
         if (name.is_literal()) {
           const auto literal = NodeType::find_literal(node_, name);
-          literal->reinsert(writer, writer_entry, local, relay_addresses_map);
+          literal->reinsert(writer, writer_entry, guids);
         } else {
           const auto pattern = NodeType::find_pattern(node_, name);
-          pattern->reinsert(writer, writer_entry, local, relay_addresses_map);
+          pattern->reinsert(writer, writer_entry, guids);
         }
       }
     }
 
-    writer->reset(writer_entry, local);
+    writer->reset(writer_entry);
 
     for (Name name : new_names) {
       if (old_names.count(name) == 0) {
@@ -831,20 +804,20 @@ public:
             literal = LiteralPtr(new LiteralType());
             NodeType::insert(node_, name, literal);
             for (const auto pattern : NodeType::find_patterns(node_, name)) {
-              PatternType::insert(pattern, literal, relay_addresses_map);
+              PatternType::insert(pattern, literal, guids);
             }
           }
-          literal->insert_literal(writer, relay_addresses_map);
+          literal->insert_literal(writer, guids);
         } else {
           auto pattern = NodeType::find_pattern(node_, name);
           if (pattern == nullptr) {
             pattern = PatternPtr(new PatternType());
             NodeType::insert(node_, name, pattern);
             for (const auto literal : NodeType::find_literals(node_, name)) {
-              PatternType::insert(pattern, literal, relay_addresses_map);
+              PatternType::insert(pattern, literal, guids);
             }
           }
-          pattern->insert(writer, relay_addresses_map);
+          pattern->insert(writer, guids);
         }
       }
     }
@@ -878,7 +851,7 @@ public:
   }
 
   void insert(ReaderPtr reader,
-              RelayAddressesMap& relay_addresses_map)
+              GuidSet& guids)
   {
     const auto qos = choose_qos(&reader->reader_entry()._subscriber_qos.partition);
 
@@ -894,28 +867,27 @@ public:
           literal = LiteralPtr(new LiteralType());
           NodeType::insert(node_, name, literal);
           for (const auto pattern : NodeType::find_patterns(node_, name)) {
-            PatternType::insert(pattern, literal, relay_addresses_map);
+            PatternType::insert(pattern, literal, guids);
           }
         }
-        literal->insert_literal(reader, relay_addresses_map);
+        literal->insert_literal(reader, guids);
       } else {
         auto pattern = NodeType::find_pattern(node_, name);
         if (pattern == nullptr) {
           pattern = PatternPtr(new PatternType());
           NodeType::insert(node_, name, pattern);
           for (const auto literal : NodeType::find_literals(node_, name)) {
-            PatternType::insert(pattern, literal, relay_addresses_map);
+            PatternType::insert(pattern, literal, guids);
           }
         }
-        pattern->insert(reader, relay_addresses_map);
+        pattern->insert(reader, guids);
       }
     }
   }
 
   void reinsert(ReaderPtr reader,
                 const ReaderEntry& reader_entry,
-                bool local,
-                RelayAddressesMap& relay_addresses_map)
+                GuidSet& guids)
   {
     const auto old_qos = choose_qos(&reader->reader_entry()._subscriber_qos.partition);
     const auto new_qos = choose_qos(&reader_entry._subscriber_qos.partition);
@@ -959,15 +931,15 @@ public:
       } else {
         if (name.is_literal()) {
           const auto literal = NodeType::find_literal(node_, name);
-          literal->reinsert(reader, reader_entry, local, relay_addresses_map);
+          literal->reinsert(reader, reader_entry, guids);
         } else {
           const auto pattern = NodeType::find_pattern(node_, name);
-          pattern->reinsert(reader, reader_entry, local, relay_addresses_map);
+          pattern->reinsert(reader, reader_entry, guids);
         }
       }
     }
 
-    reader->reset(reader_entry, local);
+    reader->reset(reader_entry);
 
     for (const Name& name : new_names) {
       if (old_names.count(name) == 0) {
@@ -977,20 +949,20 @@ public:
             literal = LiteralPtr(new LiteralType());
             NodeType::insert(node_, name, literal);
             for (const auto pattern : NodeType::find_patterns(node_, name)) {
-              PatternType::insert(pattern, literal, relay_addresses_map);
+              PatternType::insert(pattern, literal, guids);
             }
           }
-          literal->insert_literal(reader, relay_addresses_map);
+          literal->insert_literal(reader, guids);
         } else {
           auto pattern = NodeType::find_pattern(node_, name);
           if (pattern == nullptr) {
             pattern = PatternPtr(new PatternType());
             NodeType::insert(node_, name, pattern);
             for (const auto literal : NodeType::find_literals(node_, name)) {
-              PatternType::insert(pattern, literal, relay_addresses_map);
+              PatternType::insert(pattern, literal, guids);
             }
           }
-          pattern->insert(reader, relay_addresses_map);
+          pattern->insert(reader, guids);
         }
       }
     }
@@ -1091,30 +1063,29 @@ public:
   typedef std::pair<std::string, std::string> KeyType;
 
   void insert(WriterPtr writer,
-              RelayAddressesMap& relay_addresses_map)
+              GuidSet& guids)
   {
     const auto key = std::make_pair(writer->writer_entry().topic_name(), writer->writer_entry().type_name());
     auto p = entities_.insert(std::make_pair(key, SubIndex()));
-    p.first->second.insert(writer, relay_addresses_map);
+    p.first->second.insert(writer, guids);
   }
 
   void reinsert(WriterPtr writer,
                 const WriterEntry& writer_entry,
-                bool local,
-                RelayAddressesMap& relay_addresses_map)
+                GuidSet& guids)
   {
     const auto old_key = std::make_pair(writer->writer_entry().topic_name(), writer->writer_entry().type_name());
     const auto new_key = std::make_pair(writer_entry.topic_name(), writer_entry.type_name());
     const auto pos = entities_.find(old_key);
     if (old_key == new_key) {
-      pos->second.reinsert(writer, writer_entry, local, relay_addresses_map);
+      pos->second.reinsert(writer, writer_entry, guids);
     } else {
       pos->second.erase(writer);
       if (pos->second.empty()) {
         entities_.erase(pos);
       }
-      writer->reset(writer_entry, local);
-      insert(writer, relay_addresses_map);
+      writer->reset(writer_entry);
+      insert(writer, guids);
     }
   }
 
@@ -1129,30 +1100,29 @@ public:
   }
 
   void insert(ReaderPtr reader,
-              RelayAddressesMap& relay_addresses_map)
+              GuidSet& guids)
   {
     const auto key = std::make_pair(reader->reader_entry().topic_name(), reader->reader_entry().type_name());
     const auto p = entities_.insert(std::make_pair(key, SubIndex()));
-    p.first->second.insert(reader, relay_addresses_map);
+    p.first->second.insert(reader, guids);
   }
 
   void reinsert(ReaderPtr reader,
                 const ReaderEntry& reader_entry,
-                bool local,
-                RelayAddressesMap& relay_addresses_map)
+                GuidSet& guids)
   {
     const auto old_key = std::make_pair(reader->reader_entry().topic_name(), reader->reader_entry().type_name());
     const auto new_key = std::make_pair(reader_entry.topic_name(), reader_entry.type_name());
     const auto pos = entities_.find(old_key);
     if (old_key == new_key) {
-      pos->second.reinsert(reader, reader_entry, local, relay_addresses_map);
+      pos->second.reinsert(reader, reader_entry, guids);
     } else {
       pos->second.erase(reader);
       if (pos->second.empty()) {
         entities_.erase(pos);
       }
-      reader->reset(reader_entry, local);
-      insert(reader, relay_addresses_map);
+      reader->reset(reader_entry);
+      insert(reader, guids);
     }
   }
 
