@@ -396,12 +396,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   sedp_vertical_handler.open(sedp_vertical_addr);
   data_vertical_handler.open(data_vertical_addr);
 
-  std::cout << "SPDP Horizontal listening on " << spdp_horizontal_handler.relay_address() << '\n'
-    << "SEDP Horizontal listening on " << sedp_horizontal_handler.relay_address() << '\n'
-    << "Data Horizontal listening on " << data_horizontal_handler.relay_address() << '\n'
-    << "SPDP Vertical listening on " << spdp_vertical_handler.relay_address() << '\n'
-    << "SEDP Vertical listening on " << sedp_vertical_handler.relay_address() << '\n'
-    << "Data Vertical listening on " << data_vertical_handler.relay_address() << std::endl;
+  std::cout << "SPDP Horizontal listening on " << addr_to_string(spdp_horizontal_handler.relay_address()) << '\n'
+            << "SEDP Horizontal listening on " << addr_to_string(sedp_horizontal_handler.relay_address()) << '\n'
+            << "Data Horizontal listening on " << addr_to_string(data_horizontal_handler.relay_address()) << '\n'
+            << "SPDP Vertical listening on " << addr_to_string(spdp_vertical_handler.relay_address()) << '\n'
+            << "SEDP Vertical listening on " << addr_to_string(sedp_vertical_handler.relay_address()) << '\n'
+            << "Data Vertical listening on " << addr_to_string(data_vertical_handler.relay_address()) << std::endl;
 
   DDS::DataWriter_var reader_writer_var = relay_publisher->create_datawriter(readers_topic, writer_qos, nullptr,
                                                                              OpenDDS::DCPS::DEFAULT_STATUS_MASK);

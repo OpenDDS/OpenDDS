@@ -38,10 +38,10 @@ RelayHandler::RelayHandler(ACE_Reactor* reactor,
 
 int RelayHandler::open(const ACE_INET_Addr& local)
 {
-  relay_address_ = addr_to_string(local);
+  relay_address_ = local;
 
   if (socket_.open(local) != 0) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::open failed to open socket on '%C'\n", relay_address_.c_str()));
+    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::open failed to open socket on '%C'\n", addr_to_string(relay_address_).c_str()));
     return -1;
   }
   if (socket_.enable(ACE_NONBLOCK) != 0) {
@@ -111,11 +111,10 @@ int RelayHandler::handle_output(ACE_HANDLE)
       buffers[idx].iov_len = block->length();
     }
 
-    ACE_INET_Addr addr(out.first.c_str());
-    const auto bytes = socket_.send(buffers, idx, addr, 0);
+    const auto bytes = socket_.send(buffers, idx, out.first, 0);
 
     if (bytes < 0) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::handle_output failed to send to %C: %m\n", out.first.c_str()));
+      ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::handle_output failed to send to %C: %m\n", addr_to_string(out.first).c_str()));
     } else {
       bytes_sent_ += bytes;
       ++messages_sent_;
@@ -131,7 +130,7 @@ int RelayHandler::handle_output(ACE_HANDLE)
   return 0;
 }
 
-void RelayHandler::enqueue_message(const std::string& addr, const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg)
+void RelayHandler::enqueue_message(const ACE_INET_Addr& addr, const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, outgoing_mutex_);
 
@@ -185,9 +184,8 @@ void VerticalHandler::process_message(const ACE_INET_Addr& remote,
     return;
   }
 
-  const auto addr_str = addr_to_string(remote);
-  guid_addr_map_[src_guid].insert(addr_str);
-  const GuidAddr ga(src_guid, addr_str);
+  guid_addr_map_[src_guid].insert(remote);
+  const GuidAddr ga(src_guid, remote);
 
   // Compute the new expiration time for this SPDP client.
   const auto expiration = now + lifespan_;
@@ -456,7 +454,7 @@ HorizontalHandler::HorizontalHandler(ACE_Reactor* reactor,
   , vertical_handler_(nullptr)
 {}
 
-void HorizontalHandler::enqueue_message(const std::string& addr,
+void HorizontalHandler::enqueue_message(const ACE_INET_Addr& addr,
                                         const GuidSet& guids,
                                         const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg)
 {
@@ -530,12 +528,11 @@ SpdpHandler::SpdpHandler(ACE_Reactor* reactor,
                          const ACE_INET_Addr& application_participant_addr)
 : VerticalHandler(reactor, relay_addresses, association_table, responsible_relay_writer, responsible_relay_reader, lifespan, rtps_discovery, application_domain, application_participant_guid , crypto)
 , application_participant_addr_(application_participant_addr)
-, application_participant_addr_str_(addr_to_string(application_participant_addr))
 {}
 
-std::string SpdpHandler::extract_relay_address(const RelayAddresses& relay_addresses) const
+ACE_INET_Addr SpdpHandler::extract_relay_address(const RelayAddresses& relay_addresses) const
 {
-  return relay_addresses.spdp_relay_address();
+  return ACE_INET_Addr(relay_addresses.spdp_relay_address().c_str());
 }
 
 bool SpdpHandler::do_normal_processing(const ACE_INET_Addr& remote,
@@ -579,7 +576,7 @@ bool SpdpHandler::do_normal_processing(const ACE_INET_Addr& remote,
   // SPDP message is from a client.
   if (to.empty() || to.count(application_participant_guid_) != 0) {
     // Forward to the application participant.
-    enqueue_message(application_participant_addr_str_, msg);
+    enqueue_message(application_participant_addr_, msg);
     max_fan_out(1);
   }
 
@@ -633,12 +630,11 @@ SedpHandler::SedpHandler(ACE_Reactor* reactor,
                          const ACE_INET_Addr& application_participant_addr)
 : VerticalHandler(reactor, relay_addresses, association_table, responsible_relay_writer, responsible_relay_reader, lifespan, rtps_discovery, application_domain, application_participant_guid, crypto)
   , application_participant_addr_(application_participant_addr)
-  , application_participant_addr_str_(addr_to_string(application_participant_addr))
 {}
 
-std::string SedpHandler::extract_relay_address(const RelayAddresses& relay_addresses) const
+ACE_INET_Addr SedpHandler::extract_relay_address(const RelayAddresses& relay_addresses) const
 {
-  return relay_addresses.sedp_relay_address();
+  return ACE_INET_Addr(relay_addresses.sedp_relay_address().c_str());
 }
 
 bool SedpHandler::do_normal_processing(const ACE_INET_Addr& remote,
@@ -682,7 +678,7 @@ bool SedpHandler::do_normal_processing(const ACE_INET_Addr& remote,
   // SEDP message is from a client.
   if (to.empty() || to.count(application_participant_guid_) != 0) {
     // Forward to the application participant.
-    enqueue_message(application_participant_addr_str_, msg);
+    enqueue_message(application_participant_addr_, msg);
     max_fan_out(1);
   }
   return true;
@@ -702,9 +698,9 @@ DataHandler::DataHandler(ACE_Reactor* reactor,
 : VerticalHandler(reactor, relay_addresses, association_table, responsible_relay_writer, responsible_relay_reader, lifespan, rtps_discovery, application_domain, application_participant_guid, crypto)
 {}
 
-std::string DataHandler::extract_relay_address(const RelayAddresses& relay_addresses) const
+ACE_INET_Addr DataHandler::extract_relay_address(const RelayAddresses& relay_addresses) const
 {
-  return relay_addresses.data_relay_address();
+  return ACE_INET_Addr(relay_addresses.data_relay_address().c_str());
 }
 
 }

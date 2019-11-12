@@ -27,8 +27,8 @@ namespace RtpsRelay {
 class RelayHandler : public ACE_Event_Handler {
 public:
   int open(const ACE_INET_Addr& local);
-  void enqueue_message(const std::string& addr, const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg);
-  const std::string& relay_address() const { return relay_address_; }
+  void enqueue_message(const ACE_INET_Addr& addr, const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg);
+  const ACE_INET_Addr& relay_address() const { return relay_address_; }
   size_t bytes_received() const { return bytes_received_; }
   size_t messages_received() const { return messages_received_; }
   size_t bytes_sent() const { return bytes_sent_; }
@@ -58,9 +58,9 @@ protected:
                                const OpenDDS::DCPS::MonotonicTimePoint& now,
                                const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg) = 0;
 private:
-  std::string relay_address_;
+  ACE_INET_Addr relay_address_;
   ACE_SOCK_Dgram socket_;
-  typedef std::queue<std::pair<std::string, OpenDDS::DCPS::Message_Block_Shared_Ptr>> OutgoingType;
+  typedef std::queue<std::pair<ACE_INET_Addr, OpenDDS::DCPS::Message_Block_Shared_Ptr>> OutgoingType;
   OutgoingType outgoing_;
   ACE_Thread_Mutex outgoing_mutex_;
   size_t bytes_received_;
@@ -75,7 +75,7 @@ class HorizontalHandler;
 // Sends to and receives from peers.
 class VerticalHandler : public RelayHandler {
 public:
-  typedef std::map<OpenDDS::DCPS::RepoId, std::set<std::string>, OpenDDS::DCPS::GUID_tKeyLessThan> GuidAddrMap;
+  typedef std::map<OpenDDS::DCPS::RepoId, std::set<ACE_INET_Addr>, OpenDDS::DCPS::GUID_tKeyLessThan> GuidAddrMap;
 
   VerticalHandler(ACE_Reactor* reactor,
                   const RelayAddresses& relay_addresses,
@@ -100,7 +100,7 @@ public:
   }
 
 protected:
-  virtual std::string extract_relay_address(const RelayAddresses& relay_addresses) const = 0;
+  virtual ACE_INET_Addr extract_relay_address(const RelayAddresses& relay_addresses) const = 0;
   virtual bool do_normal_processing(const ACE_INET_Addr& /*remote*/,
                                     const OpenDDS::DCPS::RepoId& /*src_guid*/,
                                     const GuidSet& /*to*/,
@@ -152,7 +152,7 @@ public:
   HorizontalHandler(ACE_Reactor* reactor,
                     const AssociationTable& association_table);
   void vertical_handler(VerticalHandler* vertical_handler) { vertical_handler_ = vertical_handler; }
-  void enqueue_message(const std::string& addr,
+  void enqueue_message(const ACE_INET_Addr& addr,
                        const GuidSet& to,
                        const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg);
 
@@ -182,12 +182,11 @@ public:
 
 private:
   const ACE_INET_Addr application_participant_addr_;
-  const std::string application_participant_addr_str_;
   typedef std::map<OpenDDS::DCPS::RepoId, OpenDDS::DCPS::Message_Block_Shared_Ptr, OpenDDS::DCPS::GUID_tKeyLessThan> SpdpMessages;
   SpdpMessages spdp_messages_;
   ACE_Thread_Mutex spdp_messages_mutex_;
 
-  std::string extract_relay_address(const RelayAddresses& relay_addresses) const override;
+  ACE_INET_Addr extract_relay_address(const RelayAddresses& relay_addresses) const override;
 
   bool do_normal_processing(const ACE_INET_Addr& remote,
                             const OpenDDS::DCPS::RepoId& src_guid,
@@ -213,9 +212,8 @@ public:
 
 private:
   const ACE_INET_Addr application_participant_addr_;
-  const std::string application_participant_addr_str_;
 
-  std::string extract_relay_address(const RelayAddresses& relay_addresses) const override;
+  ACE_INET_Addr extract_relay_address(const RelayAddresses& relay_addresses) const override;
 
   bool do_normal_processing(const ACE_INET_Addr& remote,
                             const OpenDDS::DCPS::RepoId& src_guid,
@@ -238,7 +236,7 @@ public:
               );
 
 private:
-  std::string extract_relay_address(const RelayAddresses& relay_addresses) const override;
+  ACE_INET_Addr extract_relay_address(const RelayAddresses& relay_addresses) const override;
 };
 
 }
