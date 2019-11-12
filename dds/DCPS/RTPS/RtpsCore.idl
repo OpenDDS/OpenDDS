@@ -488,7 +488,7 @@ module OpenDDS {
         DDS::DomainId_t domainId;
 
       case PID_DOMAIN_TAG:
-        string domainTag;
+        DCPS::String256 domainTag;
 
       case PID_BUILTIN_ENDPOINT_QOS:
         BuiltinEndpointQos_t builtinEndpointQos;
@@ -578,7 +578,7 @@ module OpenDDS {
 
     struct ParticipantProxy_t {
       DDS::DomainId_t domainId;
-      string domainTag;
+      DCPS::String256 domainTag;
       ProtocolVersion_t protocolVersion;
       DCPS::GuidPrefix_t guidPrefix;  // optional in SPDPdiscoveredParticipantData
       VendorId_t vendorId;
