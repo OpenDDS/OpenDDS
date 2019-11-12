@@ -3933,8 +3933,9 @@ Sedp::Task::svc()
 {
   for (Msg* msg = 0; getq(msg) != -1; /*no increment*/) {
     if (DCPS::DCPS_debug_level > 5) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::Task::svc "
-        "got message from queue type %C\n", msg->msgTypeToString().c_str()));
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::Task::svc ")
+        ACE_TEXT("got message from queue type %C\n"),
+        msg->msgTypeToString()));
     }
 
     DCPS::unique_ptr<Msg> delete_the_msg(msg);
@@ -4744,7 +4745,7 @@ WaitForAcks::reset()
   // cause wait_for_acks() to exit it's loop
 }
 
-OPENDDS_STRING Sedp::Msg::msgTypeToString(const MsgType type) {
+const char* Sedp::Msg::msgTypeToString(MsgType type) {
   switch (type) {
   case MSG_PARTICIPANT:
     return "MSG_PARTICIPANT";
@@ -4779,13 +4780,14 @@ OPENDDS_STRING Sedp::Msg::msgTypeToString(const MsgType type) {
 #endif
 
   default:
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Sedp::Msg::msgTypeToString() : ERROR: ")
-      ACE_TEXT("%u is not a valid queue type\n"), static_cast<unsigned>(type)));
-    return OpenDDS::DCPS::to_dds_string(static_cast<unsigned>(type));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::Msg::msgTypeToString: ")
+      ACE_TEXT("%d is either invalid or not recognized.\n"),
+      type));
+    return "Invalid message queue type";
   }
 }
 
-OPENDDS_STRING Sedp::Msg::msgTypeToString() const {
+const char* Sedp::Msg::msgTypeToString() const {
   return msgTypeToString(type_);
 }
 

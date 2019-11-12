@@ -1450,7 +1450,7 @@ bool CryptoBuiltInImpl::preprocess_secure_submsg(
         if (security_debug.chlookup) {
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {chlookup} CryptoBuiltInImpl::preprocess_secure_submsg: ")
             ACE_TEXT("    Key: %C\n"),
-            (ctk_to_dds_string(keyseq[i].transformation_kind) + ", " +
+            (OPENDDS_STRING(ctk_to_dds_string(keyseq[i].transformation_kind)) + ", " +
               ctki_to_dds_string(keyseq[i].sender_key_id)).c_str()));
         }
         if (matches(keyseq[i], ch)) {
