@@ -217,7 +217,7 @@ jobs:
 - job: Linux
   timeoutInMinutes: 90
   pool:
-    vmImage: ubuntu-latest
+    vmImage: ubuntu-18.04
   strategy:
     matrix:
       Debug:
