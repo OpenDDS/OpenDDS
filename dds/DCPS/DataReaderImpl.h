@@ -360,7 +360,7 @@ public:
   /// process a message that has been received - could be control or a data sample.
   virtual void data_received(const ReceivedDataSample& sample);
 
-  void network_change();
+  void transport_discovery_change();
 
   virtual bool check_transport_qos(const TransportInst& inst);
 

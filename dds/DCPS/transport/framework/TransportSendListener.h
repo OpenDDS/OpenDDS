@@ -71,7 +71,7 @@ public:
 
   virtual void retrieve_inline_qos_data(InlineQosData& qos_data) const;
 
-  virtual void network_change() {}
+  virtual void transport_discovery_change() {}
 
 protected:
 

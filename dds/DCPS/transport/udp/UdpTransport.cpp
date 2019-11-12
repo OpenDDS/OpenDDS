@@ -189,7 +189,7 @@ UdpTransport::shutdown_i()
 bool
 UdpTransport::connection_info_i(TransportLocator& info, ConnectionInfoFlags flags) const
 {
-  this->config().populate_locator(info, flags);
+  config().populate_locator(info, flags);
   return true;
 }
 

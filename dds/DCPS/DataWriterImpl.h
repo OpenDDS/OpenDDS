@@ -300,7 +300,7 @@ public:
    */
   void data_delivered(const DataSampleElement* sample);
 
-  void network_change();
+  void transport_discovery_change();
 
   /**
    * This is called by transport to notify that the control

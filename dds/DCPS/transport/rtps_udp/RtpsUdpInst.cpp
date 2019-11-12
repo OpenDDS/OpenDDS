@@ -179,7 +179,7 @@ RtpsUdpInst::populate_locator(OpenDDS::DCPS::TransportLocator& info, ConnectionI
   CORBA::ULong idx = 0;
 
   // multicast first so it's preferred by remote peers
-  if ((flags & CONNINFO_MULTICAST) && this->use_multicast_ && this->multicast_group_address_ != ACE_INET_Addr()) {
+  if ((flags & CONNINFO_MULTICAST) && use_multicast_ && multicast_group_address_ != ACE_INET_Addr()) {
     idx = locators.length();
     locators.length(idx + 1);
     locators[idx].kind = address_to_kind(this->multicast_group_address_);
@@ -191,8 +191,8 @@ RtpsUdpInst::populate_locator(OpenDDS::DCPS::TransportLocator& info, ConnectionI
   //if local_address_string is empty, or only the port has been set
   //need to get interface addresses to populate into the locator
   if (flags & CONNINFO_UNICAST) {
-    if (this->local_address_string().empty() ||
-        this->local_address_string().rfind(':') == 0) {
+    if (local_address_string().empty() ||
+        local_address_string().rfind(':') == 0) {
       typedef OPENDDS_VECTOR(ACE_INET_Addr) AddrVector;
       AddrVector addrs;
       if (TheServiceParticipant->default_address ().empty ()) {
@@ -204,16 +204,16 @@ RtpsUdpInst::populate_locator(OpenDDS::DCPS::TransportLocator& info, ConnectionI
         idx = locators.length();
         locators.length(idx + 1);
         locators[idx].kind = address_to_kind(*adr_it);
-        locators[idx].port = this->local_address().get_port_number();
+        locators[idx].port = local_address().get_port_number();
         RTPS::address_to_bytes(locators[idx].address, *adr_it);
       }
     } else {
       idx = locators.length();
       locators.length(idx + 1);
-      locators[idx].kind = address_to_kind(this->local_address());
-      locators[idx].port = this->local_address().get_port_number();
+      locators[idx].kind = address_to_kind(local_address());
+      locators[idx].port = local_address().get_port_number();
       RTPS::address_to_bytes(locators[idx].address,
-                             this->local_address());
+                             local_address());
     }
   }
 

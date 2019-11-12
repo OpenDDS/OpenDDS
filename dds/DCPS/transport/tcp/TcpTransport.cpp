@@ -480,7 +480,7 @@ TcpTransport::connection_info_i(TransportLocator& local_info, ConnectionInfoFlag
   VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport public address str %C\n",
             this->config().get_public_address().c_str()), 2);
 
-  this->config().populate_locator(local_info, flags);
+  config().populate_locator(local_info, flags);
 
   return true;
 }

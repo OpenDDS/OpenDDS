@@ -34,7 +34,7 @@ public:
 
   virtual void remove_associations(const WriterIdSeq& pubids, bool notify) = 0;
 
-  virtual void network_change() {}
+  virtual void transport_discovery_change() {}
 
 protected:
 

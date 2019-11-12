@@ -794,8 +794,7 @@ void
 DataWriterImpl::update_locators(const RepoId& readerId,
                                 const TransportLocatorSeq& locators)
 {
-  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
-  ACE_GUARD(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_);
+  ACE_GUARD(ACE_Thread_Mutex, reader_info_guard, reader_info_lock_);
   RepoIdToReaderInfoMap::const_iterator iter = reader_info_.find(readerId);
 
   if (iter != reader_info_.end()) {
@@ -2725,14 +2724,14 @@ LivenessTimer::handle_timeout(const ACE_Time_Value &tv,
   return 0;
 }
 
-void DataWriterImpl::network_change()
+void DataWriterImpl::transport_discovery_change()
 {
-  this->populate_connection_info();
-  const TransportLocatorSeq& trans_conf_info = this->connection_info();
+  populate_connection_info();
+  const TransportLocatorSeq& trans_conf_info = connection_info();
   Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
-  disco->update_publication_locators(this->domain_id_,
-                                     this->dp_id_,
-                                     this->publication_id_,
+  disco->update_publication_locators(domain_id_,
+                                     dp_id_,
+                                     publication_id_,
                                      trans_conf_info);
 }
 

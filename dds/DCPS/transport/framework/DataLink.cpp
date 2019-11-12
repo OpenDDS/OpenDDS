@@ -1155,15 +1155,15 @@ DataLink::network_change()
        itr != send_listeners_.end(); ++itr) {
     TransportSendListener_rch tsl = itr->second.lock();
     if (tsl) {
-      tsl->network_change();
+      tsl->transport_discovery_change();
     }
   }
 
   for (IdToRecvListenerMap::const_iterator itr = recv_listeners_.begin();
        itr != recv_listeners_.end(); ++itr) {
-    TransportReceiveListener_rch tsl = itr->second.lock();
-    if (tsl) {
-      tsl->network_change();
+    TransportReceiveListener_rch trl = itr->second.lock();
+    if (trl) {
+      trl->transport_discovery_change();
     }
   }
 }

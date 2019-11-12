@@ -3412,14 +3412,14 @@ void EndHistoricSamplesMissedSweeper::CancelCommand::execute()
   }
 }
 
-void DataReaderImpl::network_change()
+void DataReaderImpl::transport_discovery_change()
 {
-  this->populate_connection_info();
-  const TransportLocatorSeq& trans_conf_info = this->connection_info();
+  populate_connection_info();
+  const TransportLocatorSeq& trans_conf_info = connection_info();
   Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
-  disco->update_subscription_locators(this->domain_id_,
-                                      this->dp_id_,
-                                      this->subscription_id_,
+  disco->update_subscription_locators(domain_id_,
+                                      dp_id_,
+                                      subscription_id_,
                                       trans_conf_info);
 }
 

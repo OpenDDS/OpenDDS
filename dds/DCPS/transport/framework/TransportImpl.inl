@@ -51,7 +51,7 @@ ACE_INLINE bool
 OpenDDS::DCPS::TransportImpl::connection_info
   (TransportLocator& local_info, ConnectionInfoFlags flags) const
 {
-  return this->connection_info_i(local_info, flags);
+  return connection_info_i(local_info, flags);
 }
 
 
