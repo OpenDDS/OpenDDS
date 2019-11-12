@@ -1411,6 +1411,9 @@ bool Spdp::announce_domain_participant_qos()
   return true;
 }
 
+const Spdp::SpdpTransport::WriteFlags Spdp::SpdpTransport::SEND_TO_LOCAL;
+const Spdp::SpdpTransport::WriteFlags Spdp::SpdpTransport::SEND_TO_RELAY;
+
 Spdp::SpdpTransport::SpdpTransport(Spdp* outer, bool securityGuids)
   : outer_(outer)
   , lease_duration_(outer_->config_->lease_duration())
