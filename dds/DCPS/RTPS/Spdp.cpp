@@ -175,9 +175,11 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
 
 #ifdef OPENDDS_SECURITY
   ICE::Endpoint* endpoint = sedp_.get_ice_endpoint();
-  RepoId l = guid_;
-  l.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER;
-  ICE::Agent::instance()->add_local_agent_info_listener(endpoint, l, this);
+  if (endpoint) {
+    RepoId l = guid_;
+    l.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER;
+    ICE::Agent::instance()->add_local_agent_info_listener(endpoint, l, this);
+  }
 #endif
 }
 
@@ -345,9 +347,11 @@ Spdp::~Spdp()
 
 #ifdef OPENDDS_SECURITY
   ICE::Endpoint* endpoint = sedp_.get_ice_endpoint();
-  RepoId l = guid_;
-  l.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER;
-  ICE::Agent::instance()->remove_local_agent_info_listener(endpoint, l);
+  if (endpoint) {
+    RepoId l = guid_;
+    l.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER;
+    ICE::Agent::instance()->remove_local_agent_info_listener(endpoint, l);
+  }
 #endif
 
   // ensure sedp's task queue is drained before data members are being
