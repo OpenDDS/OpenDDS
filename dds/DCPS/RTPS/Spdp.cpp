@@ -438,11 +438,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     // Since we've just seen a new participant, let's send out our
     // own announcement, so they don't have to wait.
     if (from != ACE_INET_Addr()) {
-      if (from != config_->spdp_rtps_relay_address()) {
-        this->tport_->write_i(guid, true, false);
-      } else {
-        this->tport_->write_i(guid, false, true);
-      }
+      this->tport_->write_i(guid, from == config_->spdp_rtps_relay_address() ? SpdpTransport::SEND_TO_RELAY : SpdpTransport::SEND_TO_LOCAL);
     }
 
 #ifdef OPENDDS_SECURITY
@@ -1597,7 +1593,7 @@ Spdp::SpdpTransport::dispose_unregister()
     return;
   }
 
-  send(true, true);
+  send(SEND_TO_LOCAL | SEND_TO_RELAY);
 }
 
 void
@@ -1622,14 +1618,14 @@ Spdp::SpdpTransport::close()
 }
 
 void
-Spdp::SpdpTransport::write(bool include_local, bool include_relay)
+Spdp::SpdpTransport::write(WriteFlags flags)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, outer_->lock_);
-  write_i(include_local, include_relay);
+  write_i(flags);
 }
 
 void
-Spdp::SpdpTransport::write_i(bool include_local, bool include_relay)
+Spdp::SpdpTransport::write_i(WriteFlags flags)
 {
   const ParticipantData_t pdata = outer_->build_local_pdata(
 #ifdef OPENDDS_SECURITY
@@ -1675,11 +1671,11 @@ Spdp::SpdpTransport::write_i(bool include_local, bool include_relay)
     return;
   }
 
-  send(include_local, include_relay);
+  send(flags);
 }
 
 void
-Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, bool include_local, bool include_relay)
+Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, WriteFlags flags)
 {
   const ParticipantData_t pdata = outer_->build_local_pdata(
 #ifdef OPENDDS_SECURITY
@@ -1731,13 +1727,13 @@ Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, bool include_local, bool 
     return;
   }
 
-  send(include_local, include_relay);
+  send(flags);
 }
 
 void
-Spdp::SpdpTransport::send(bool include_local, bool include_relay)
+Spdp::SpdpTransport::send(WriteFlags flags)
 {
-  if (include_local && !outer_->config_->rtps_relay_only()) {
+  if ((flags & SEND_TO_LOCAL) && !outer_->config_->rtps_relay_only()) {
     typedef OPENDDS_SET(ACE_INET_Addr)::const_iterator iter_t;
     for (iter_t iter = send_addrs_.begin(); iter != send_addrs_.end(); ++iter) {
       send(*iter);
@@ -1745,7 +1741,7 @@ Spdp::SpdpTransport::send(bool include_local, bool include_relay)
   }
 
   const ACE_INET_Addr relay_address = outer_->config_->spdp_rtps_relay_address();
-  if ((include_relay || outer_->config_->rtps_relay_only()) &&
+  if (((flags & SEND_TO_RELAY) || outer_->config_->rtps_relay_only()) &&
       relay_address != ACE_INET_Addr()) {
     send(relay_address);
   }
@@ -1991,7 +1987,7 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
     joined_interfaces_.insert(nic.name());
     if (job_queue_) {
       // Don't write until open() because sedp will not be ready.
-      write_i(true, false);
+      write_i(SEND_TO_LOCAL);
     }
   } else {
     ACE_ERROR((LM_ERROR,
@@ -2453,7 +2449,7 @@ void Spdp::SpdpTransport::send_relay_beacon(const MonotonicTimePoint& /*now*/)
     return;
   }
 
-  send(false, true);
+  send(SEND_TO_RELAY);
 }
 
 void Spdp::SpdpTransport::send_relay(const DCPS::MonotonicTimePoint& /*now*/)
@@ -2462,12 +2458,12 @@ void Spdp::SpdpTransport::send_relay(const DCPS::MonotonicTimePoint& /*now*/)
     return;
   }
 
-  write(false, true);
+  write(SEND_TO_RELAY);
 }
 
 void Spdp::SpdpTransport::send_local(const DCPS::MonotonicTimePoint& /*now*/)
 {
-  write(true, false);
+  write(SEND_TO_LOCAL);
   outer_->remove_expired_participants();
 }
 

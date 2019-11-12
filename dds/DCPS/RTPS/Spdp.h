@@ -188,6 +188,10 @@ private:
 #endif /* DDS_HAS_MINIMUM_BIT */
 
   struct SpdpTransport : public virtual DCPS::RcEventHandler, public virtual DCPS::NetworkConfigListener {
+    typedef size_t WriteFlags;
+    static const WriteFlags SEND_TO_LOCAL = (1 << 0);
+    static const WriteFlags SEND_TO_RELAY = (1 << 1);
+
     SpdpTransport(Spdp* outer, bool securityGuids);
     ~SpdpTransport();
 
@@ -195,10 +199,10 @@ private:
     virtual int handle_exception(ACE_HANDLE fd = ACE_INVALID_HANDLE);
 
     void open();
-    void write(bool include_local, bool include_relay);
-    void write_i(bool include_local, bool include_relay);
-    void write_i(const DCPS::RepoId& guid, bool include_local, bool include_relay);
-    void send(bool include_local, bool include_relay);
+    void write(WriteFlags flags);
+    void write_i(WriteFlags flags);
+    void write_i(const DCPS::RepoId& guid, WriteFlags flags);
+    void send(WriteFlags flags);
     void send(const ACE_INET_Addr& addr);
     void close();
     void dispose_unregister();
