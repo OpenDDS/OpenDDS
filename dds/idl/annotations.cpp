@@ -20,6 +20,9 @@ BuiltinAnnotations::BuiltinAnnotations()
 
 BuiltinAnnotations::~BuiltinAnnotations()
 {
+  for (MapType::iterator i = map_.begin(); i != map_.end(); ++i) {
+    delete i->second;
+  }
 }
 
 BuiltinAnnotation*
