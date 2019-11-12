@@ -38,11 +38,21 @@ typedef TimePoint_T<SystemClock> SystemTimePoint;
  * the system clock to a certain degree.
  */
 ///@{
+#ifdef ACE_OCI_PATCHLEVEL
+#  if ACE_MAJOR_VERSION > 6 || (ACE_MAJOR_VERSION == 6 && \
+        (ACE_MINOR_VERSION > 2 || (ACE_MINOR_VERSION == 2 && \
+          (ACE_BETA_VERSION > 0 || (ACE_BETA_VERSION == 0 && ACE_OCI_PATCHLEVEL > 16)))))
+#    define OPENDDS_ACE_HAS_MONOTONIC_SUPPORT_MACROS
+#  endif
+#elif ACE_VERSION_CODE > ACE_MAKE_VERSION_CODE(6, 5, 6)
+#  define OPENDDS_ACE_HAS_MONOTONIC_SUPPORT_MACROS
+#endif
+
 #if defined(ACE_HAS_MONOTONIC_TIME_POLICY) && defined(ACE_HAS_MONOTONIC_CONDITIONS)
 #  define OPENDDS_USES_MONOTONIC_TIME
 // TODO: Remove this check once latest release of OCI ACE/TAO has the monotonic
 // support macros.
-#elif defined(ACE_OCI_PATCHLEVEL) && \
+#elif !defined(OPENDDS_ACE_HAS_SUPPORT_MACROS) && \
       (defined(ACE_WIN32) || \
        (defined(ACE_HAS_CLOCK_GETTIME) && \
         !defined(ACE_LACKS_MONOTONIC_TIME) && \
