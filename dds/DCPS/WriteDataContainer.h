@@ -249,13 +249,7 @@ public:
    * TRANSIENT_LOCAL_DURABILITY_QOS is used. The data on the list
    * returned is not put on any SendStateDataSampleList.
    */
-  SendStateDataSampleList get_resend_data() ;
-
-  /**
-   * Returns if pending data exists.  This includes
-   * sending, and unsent data.
-   */
-  bool pending_data();
+  SendStateDataSampleList get_resend_data();
 
   /**
    * Acknowledge the delivery of data.  The sample that resides in
@@ -358,6 +352,12 @@ private:
   WriteDataContainer(WriteDataContainer const &);
   WriteDataContainer & operator= (WriteDataContainer const &);
   // --------------------------
+
+  /**
+   * Returns if pending data exists.  This includes
+   * sending, and unsent data.
+   */
+  bool pending_data_i();
 
   void copy_and_prepend(SendStateDataSampleList& list,
                         const SendStateDataSampleList& appended,

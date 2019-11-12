@@ -25,7 +25,7 @@ namespace
 {
   std::size_t expected_samples = 1024;
   std::size_t received_samples = 0;
-  int n_publishers = 1;
+  size_t n_publishers = 1;
 
   void
   parse_args(int& argc, ACE_TCHAR** argv)
@@ -43,7 +43,7 @@ namespace
       }
       else if ((arg = shifter.get_the_parameter(ACE_TEXT("-t"))))
       {
-        n_publishers = ACE_OS::atoi(arg);
+        n_publishers = static_cast<size_t>(ACE_OS::atoi(arg));
         shifter.consume_arg();
       }
       else

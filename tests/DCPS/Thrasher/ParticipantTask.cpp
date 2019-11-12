@@ -84,8 +84,6 @@ ParticipantTask::svc()
     DDS::Publisher_var publisher;
     DDS::DataWriter_var writer;
     FooDataWriter_var writer_i;
-    //DDS::StatusCondition_var cond;
-    //DDS::WaitSet_var ws = new DDS::WaitSet;
 
     int this_thread_index = 0;
     { // Scope for guard to serialize creating Entities.
