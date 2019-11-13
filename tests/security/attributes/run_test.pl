@@ -34,7 +34,23 @@ my $pub_timeout = "10";
 my $sub_timeout = "10";
 my $pub_extra_space = "0";
 
-GetOptions ( 'scenario=s' => \$scenario, 'pub_cfg=s' => \$pub_cfg_file, 'sub_cfg=s' => \$sub_cfg_file, 'pub_cert=s' => \$pub_cert_file, 'sub_cert=s' => \$sub_cert_file, 'pub_key=s' => \$pub_key_file, 'sub_key=s' => \$sub_key_file, 'gov=s' => \@gov_files, 'pub_perm=s' => \@pub_perm_files, 'sub_perm=s' => \@sub_perm_files, 'topic=s' => \@topic_names, 'pub_expect=i' => \$pub_expect, 'sub_expect=i' => \$sub_expect, 'pub_timeout=i' => \$pub_timeout, 'sub_timeout=i' => \$sub_timeout , 'pub_extra_space=i' => \$pub_extra_space);
+GetOptions(
+  'scenario=s' => \$scenario,
+  'pub_cfg=s' => \$pub_cfg_file,
+  'sub_cfg=s' => \$sub_cfg_file,
+  'pub_cert=s' => \$pub_cert_file,
+  'sub_cert=s' => \$sub_cert_file,
+  'pub_key=s' => \$pub_key_file,
+  'sub_key=s' => \$sub_key_file,
+  'gov=s' => \@gov_files,
+  'pub_perm=s' => \@pub_perm_files,
+  'sub_perm=s' => \@sub_perm_files,
+  'topic=s' => \@topic_names,
+  'pub_expect=i' => \$pub_expect,
+  'sub_expect=i' => \$sub_expect,
+  'pub_timeout=i' => \$pub_timeout,
+  'sub_timeout=i' => \$sub_timeout,
+  'pub_extra_space=i' => \$pub_extra_space);
 
 # Handle scenarios first, since they are a special case
 if (!($scenario eq "")) {

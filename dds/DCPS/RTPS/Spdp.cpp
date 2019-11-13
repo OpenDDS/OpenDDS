@@ -1377,12 +1377,15 @@ Spdp::build_local_pdata(
     },
 #endif
     { // ParticipantProxy_t
+      domain_,
+      "",
       PROTOCOLVERSION,
       {gp[0], gp[1], gp[2], gp[3], gp[4], gp[5],
        gp[6], gp[7], gp[8], gp[9], gp[10], gp[11]},
       VENDORID_OPENDDS,
       false /*expectsIQoS*/,
       available_builtin_endpoints_,
+      0,
       sedp_unicast_,
       sedp_multicast_,
       nonEmptyList /*defaultMulticastLocatorList*/,

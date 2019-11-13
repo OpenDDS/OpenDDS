@@ -36,4 +36,6 @@ tests/security/attributes/run_test.pl --scenario FullMsgSign_SubMsgSign_PayloadE
 tests/security/attributes/run_test.pl --scenario FullMsgSign_SubMsgEncrypt_PayloadEncrypt
 tests/security/attributes/run_test.pl --scenario FullMsgEncrypt_SubMsgSign_PayloadEncrypt
 tests/security/attributes/run_test.pl --scenario FullMsgEncrypt_SubMsgEncrypt_PayloadEncrypt
-#tests/security/TopicWithoutPermissions/run_test.pl
+#tests/security/attributes/run_test.pl -scenario FullMsgSign_PayloadEncrypt_Frag
+tests/security/TopicWithoutPermissions/run_test.pl
+
