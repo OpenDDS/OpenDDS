@@ -148,7 +148,7 @@ private:
 // Sends to and receives from other relays.
 class HorizontalHandler : public RelayHandler {
 public:
-  HorizontalHandler(ACE_Reactor* reactor);
+  explicit HorizontalHandler(ACE_Reactor* reactor);
   void vertical_handler(VerticalHandler* vertical_handler) { vertical_handler_ = vertical_handler; }
   void enqueue_message(const ACE_INET_Addr& addr,
                        const GuidSet& to,
