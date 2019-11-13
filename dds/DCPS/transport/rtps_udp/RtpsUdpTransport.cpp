@@ -482,7 +482,7 @@ RtpsUdpTransport::IceEndpoint::send(const ACE_INET_Addr& destination, const STUN
   ACE_SOCK_Dgram& socket = transport.link_ ? transport.link_->unicast_socket() : transport.unicast_socket_;
 
   ACE_Message_Block block(20 + message.length());
-  DCPS::Serializer serializer(&block, true);
+  DCPS::Serializer serializer(&block, DCPS::Serializer::SWAP_BE);
   const_cast<STUN::Message&>(message).block = &block;
   serializer << message;
 

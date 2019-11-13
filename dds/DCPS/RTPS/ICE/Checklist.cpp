@@ -588,7 +588,7 @@ void Checklist::error_response(const ACE_INET_Addr& /*local_address*/,
       a_message.get_error_code(),
       a_message.get_error_reason().c_str()));
 
-    if (a_message.get_error_code() == 420 && a_message.has_unknown_attributes()) {
+    if (a_message.get_error_code() == STUN::UNKNOWN_ATTRIBUTE && a_message.has_unknown_attributes()) {
       std::vector<STUN::AttributeType> unknown_attributes = a_message.get_unknown_attributes();
 
       for (std::vector<STUN::AttributeType>::const_iterator pos = unknown_attributes.begin(),
@@ -597,7 +597,7 @@ void Checklist::error_response(const ACE_INET_Addr& /*local_address*/,
       }
     }
 
-    if (a_message.get_error_code() == 400 && a_message.get_error_code() == 420) {
+    if (a_message.get_error_code() == STUN::BAD_REQUEST && a_message.get_error_code() == STUN::UNKNOWN_ATTRIBUTE) {
       // Waiting and/or resending won't fix these errors.
       failed(cc);
       connectivity_checks_.erase(pos);

@@ -11,6 +11,7 @@
 #include "ace/ACE.h"
 #include "ace/SOCK_Dgram.h"
 
+#include <cstdlib>
 #include <iostream>
 
 void generate_transaction_id(OpenDDS::STUN::Message& message)
@@ -25,9 +26,9 @@ bool send(int& status,
           const ACE_INET_Addr& remote,
           OpenDDS::STUN::Message& request)
 {
-  OpenDDS::DCPS::Message_Block_Shared_Ptr block(new ACE_Message_Block(20 + request.length()));
+  OpenDDS::DCPS::Message_Block_Shared_Ptr block(new ACE_Message_Block(OpenDDS::STUN::HEADER_SIZE + request.length()));
   request.block = block.get();
-  OpenDDS::DCPS::Serializer serializer(block.get(), true);
+  OpenDDS::DCPS::Serializer serializer(block.get(), OpenDDS::DCPS::Serializer::SWAP_BE);
   if (!(serializer << request)) {
     std::cerr << "ERROR: Failed to serialize request" << std::endl;
     status = EXIT_FAILURE;
@@ -51,7 +52,7 @@ bool recv(int& status,
   iovec iov;
   ACE_INET_Addr addr;
   const ssize_t bytes_received = socket.recv(&iov, addr);
-  if (bytes_received <= 0) {
+  if (bytes_received < 0) {
     std::cerr << "ERROR: Failed to recv: " << strerror(errno) << std::endl;
     status = EXIT_FAILURE;
     return false;
@@ -64,7 +65,7 @@ bool recv(int& status,
   buffer->length(bytes_received);
 
   response.block = buffer.get();
-  OpenDDS::DCPS::Serializer deserializer(buffer.get(), true);
+  OpenDDS::DCPS::Serializer deserializer(buffer.get(), OpenDDS::DCPS::Serializer::SWAP_BE);
   if (!(deserializer >> response)) {
     std::cerr << "ERROR: Failed to deserialize response" << std::endl;
     status = EXIT_FAILURE;
@@ -120,7 +121,7 @@ bool test_success(int& status,
     retval = false;
   }
 
-  char buffer[256];
+  ACE_TCHAR buffer[256];
   a.addr_to_string(buffer, 256);
   std::cout << "Mapped address = " << buffer << std::endl;
 
@@ -178,7 +179,7 @@ bool test_unknown_method(int& status,
     retval = false;
   }
 
-  if (response.get_error_code() != 400) {
+  if (response.get_error_code() != OpenDDS::STUN::BAD_REQUEST) {
     std::cerr << "ERROR: Response has incorrect error code" << std::endl;
     status = EXIT_FAILURE;
     retval = false;

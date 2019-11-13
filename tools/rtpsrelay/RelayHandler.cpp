@@ -33,7 +33,7 @@ namespace {
     response.class_ = OpenDDS::STUN::ERROR_RESPONSE;
     response.method = a_message.method;
     memcpy(response.transaction_id.data, a_message.transaction_id.data, sizeof(a_message.transaction_id.data));
-    response.append_attribute(OpenDDS::STUN::make_error_code(400, a_reason));
+    response.append_attribute(OpenDDS::STUN::make_error_code(OpenDDS::STUN::BAD_REQUEST, a_reason));
     response.append_attribute(OpenDDS::STUN::make_fingerprint());
     return response;
   }
@@ -45,7 +45,7 @@ namespace {
     response.class_ = OpenDDS::STUN::ERROR_RESPONSE;
     response.method = a_message.method;
     memcpy(response.transaction_id.data, a_message.transaction_id.data, sizeof(a_message.transaction_id.data));
-    response.append_attribute(OpenDDS::STUN::make_error_code(420, "Unknown Attributes"));
+    response.append_attribute(OpenDDS::STUN::make_error_code(OpenDDS::STUN::UNKNOWN_ATTRIBUTE, "Unknown Attributes"));
     response.append_attribute(OpenDDS::STUN::make_unknown_attributes(a_unknown_attributes));
     response.append_attribute(OpenDDS::STUN::make_fingerprint());
     return response;
@@ -736,7 +736,7 @@ void StunHandler::process_message(const ACE_INET_Addr& remote_address,
                                   const OpenDDS::DCPS::MonotonicTimePoint&,
                                   const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg)
 {
-  OpenDDS::DCPS::Serializer serializer(msg.get(), true);
+  OpenDDS::DCPS::Serializer serializer(msg.get(), DCPS::Serializer::SWAP_BE);
   OpenDDS::STUN::Message message;
   message.block = msg.get();
   if (!(serializer >> message)) {
@@ -788,7 +788,7 @@ void StunHandler::process_message(const ACE_INET_Addr& remote_address,
 void StunHandler::send(const ACE_INET_Addr& addr, OpenDDS::STUN::Message message)
 {
   OpenDDS::DCPS::Message_Block_Shared_Ptr block(new ACE_Message_Block(20 + message.length()));
-  OpenDDS::DCPS::Serializer serializer(block.get(), true);
+  OpenDDS::DCPS::Serializer serializer(block.get(), DCPS::Serializer::SWAP_BE);
   message.block = block.get();
   serializer << message;
   enqueue_message(addr, block);

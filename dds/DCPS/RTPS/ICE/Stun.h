@@ -44,6 +44,11 @@ enum Family {
 };
 
 const ACE_UINT32 MAGIC_COOKIE = 0x2112A442;
+const size_t HEADER_SIZE = 20;
+
+const ACE_UINT16 BAD_REQUEST = 400;
+const ACE_UINT16 UNAUTHORIZED = 401;
+const ACE_UINT16 UNKNOWN_ATTRIBUTE = 420;
 
 enum AttributeType {
   MAPPED_ADDRESS     = 0x0001,
