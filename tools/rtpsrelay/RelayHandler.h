@@ -239,7 +239,7 @@ private:
 
 class StunHandler : public RelayHandler {
 public:
-  StunHandler(ACE_Reactor* reactor);
+  explicit StunHandler(ACE_Reactor* reactor);
 
 private:
   void process_message(const ACE_INET_Addr& remote,
