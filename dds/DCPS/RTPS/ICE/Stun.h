@@ -89,21 +89,46 @@ struct OpenDDS_Rtps_Export Attribute {
   ACE_UINT16 length() const;
 };
 
+OpenDDS_Rtps_Export
 Attribute make_mapped_address(const ACE_INET_Addr& addr);
+
+OpenDDS_Rtps_Export
 Attribute make_username(const std::string& username);
+
+OpenDDS_Rtps_Export
 Attribute make_message_integrity();
+
+OpenDDS_Rtps_Export
 Attribute make_error_code(ACE_UINT16 code, const std::string& reason);
+
+OpenDDS_Rtps_Export
 Attribute make_unknown_attributes(const std::vector<AttributeType>& unknown_attributes);
+
+OpenDDS_Rtps_Export
 Attribute make_xor_mapped_address(const ACE_INET_Addr& addr);
+
+OpenDDS_Rtps_Export
 Attribute make_unknown_attribute(ACE_UINT16 type, ACE_UINT16 length);
+
+OpenDDS_Rtps_Export
 Attribute make_priority(ACE_UINT32 priority);
+
+OpenDDS_Rtps_Export
 Attribute make_use_candidate();;
 
+OpenDDS_Rtps_Export
 Attribute make_fingerprint();
+
+OpenDDS_Rtps_Export
 Attribute make_ice_controlling(ACE_UINT64 ice_tie_breaker);
+
+OpenDDS_Rtps_Export
 Attribute make_ice_controlled(ACE_UINT64 ice_tie_breaker);
 
+OpenDDS_Rtps_Export
 bool operator>>(DCPS::Serializer& serializer, Attribute& attribute);
+
+OpenDDS_Rtps_Export
 bool operator<<(DCPS::Serializer& serializer, const Attribute& attribute);
 
 struct OpenDDS_Rtps_Export TransactionId {
