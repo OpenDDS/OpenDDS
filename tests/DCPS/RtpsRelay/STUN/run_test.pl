@@ -22,7 +22,7 @@ $test->{dcps_transport_debug_level} = 1;
 # will manually set -DCPSConfigFile
 $test->{add_transport_config} = 0;
 
-$test->process("server", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-DCPSConfigFile relay.ini -ApplicationDomain 42 -VerticalAddress 4444 -HorizontalAddress 127.0.0.1:11444");
+$test->process("server", "$DDS_ROOT/bin/RtpsRelay", "-DCPSConfigFile relay.ini -ApplicationDomain 42 -VerticalAddress 4444 -HorizontalAddress 127.0.0.1:11444");
 $test->process("client", "StunClient", "");
 
 $test->start_process("server");
