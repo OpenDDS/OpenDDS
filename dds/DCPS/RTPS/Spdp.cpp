@@ -159,7 +159,6 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
   guid = guid_; // may have changed in SpdpTransport constructor
   sedp_.ignore(guid);
   sedp_.init(guid_, *disco, domain_);
-}
 
 #ifdef OPENDDS_SECURITY
   ICE::Endpoint* endpoint = sedp_.get_ice_endpoint();
