@@ -285,5 +285,5 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     std::cerr << "ERROR: test_no_fingerprint failed" << std::endl;
   }
 
-  return EXIT_SUCCESS;
+  return status;
 }
