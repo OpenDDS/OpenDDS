@@ -358,11 +358,11 @@ private:
         if (key_marshaled_size_) {
           effective_size = key_marshaled_size_;
         } else {
-          if (cdr && !Serializer::use_rti_serialization()) {
+          if (cdr) {
             effective_size = cdr_header_size; // CDR encapsulation
           }
           TraitsType::gen_find_size(ko_instance_data, effective_size, padding);
-          if (cdr && Serializer::use_rti_serialization()) {
+          if (cdr) {
             effective_size += (cdr_header_size);
           }
         }
@@ -390,7 +390,7 @@ private:
         }
         // If this is RTI serialization, start counting byte offset AFTER
         // the header
-        if (cdr && Serializer::use_rti_serialization()) {
+        if (cdr) {
           // Start counting byte-offset AFTER header
           serializer.reset_alignment();
         }
@@ -400,11 +400,11 @@ private:
         if (marshaled_size_) {
           effective_size = marshaled_size_;
         } else {
-          if (cdr && !Serializer::use_rti_serialization()) {
+          if (cdr) {
             effective_size = cdr_header_size; // CDR encapsulation
           }
           TraitsType::gen_find_size(instance_data, effective_size, padding);
-          if (cdr && Serializer::use_rti_serialization()) {
+          if (cdr) {
             effective_size += (cdr_header_size);
           }
         }
@@ -439,7 +439,7 @@ private:
         }
         // If this is RTI serialization, start counting byte offset AFTER
         // the header
-        if (cdr && Serializer::use_rti_serialization()) {
+        if (cdr) {
           // Start counting byte-offset AFTER header
           serializer.reset_alignment();
         }

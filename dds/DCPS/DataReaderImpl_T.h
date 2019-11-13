@@ -914,10 +914,8 @@ namespace OpenDDS {
         return;
       }
 
-      if (Serializer::use_rti_serialization()) {
-        // Start counting byte-offset AFTER header
-        ser.reset_alignment();
-      }
+    // Start counting byte-offset AFTER header
+    ser.reset_alignment();
     }
 
     if (sample.header_.key_fields_only_) {
@@ -993,10 +991,8 @@ protected:
         return;
       }
 
-      if (Serializer::use_rti_serialization()) {
-        // Start counting byte-offset AFTER header
-        ser.reset_alignment();
-      }
+    // Start counting byte-offset AFTER header
+    ser.reset_alignment();
     }
 
     if (marshaling_type == OpenDDS::DCPS::KEY_ONLY_MARSHALING) {
