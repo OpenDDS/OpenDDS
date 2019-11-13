@@ -288,7 +288,7 @@ public:
    * to remove oldest samples (forcing the transport to drop samples if necessary)
    * to make space.  If there are several threads waiting then
    * the first one in the waiting list can enqueue, others continue
-   * waiting.
+   * waiting. Note: the lock should be held before calling this method
    */
   DDS::ReturnCode_t obtain_buffer(
     DataSampleElement*& element,
@@ -357,7 +357,7 @@ private:
    * Returns if pending data exists.  This includes
    * sending, and unsent data.
    */
-  bool pending_data_i();
+  bool pending_data();
 
   void copy_and_prepend(SendStateDataSampleList& list,
                         const SendStateDataSampleList& appended,

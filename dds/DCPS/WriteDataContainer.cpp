@@ -465,10 +465,6 @@ WriteDataContainer::num_all_samples()
 ACE_UINT64
 WriteDataContainer::get_unsent_data(SendStateDataSampleList& list)
 {
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                   guard,
-                   this->lock_, 0);
-
   DBG_ENTRY_LVL("WriteDataContainer","get_unsent_data",6);
   //
   // The samples in unsent_data are added to the local datawriter
@@ -527,7 +523,7 @@ WriteDataContainer::get_resend_data()
 }
 
 bool
-WriteDataContainer::pending_data_i()
+WriteDataContainer::pending_data()
 {
   return this->sending_data_.size() != 0
          || this->orphaned_to_transport_.size() != 0
@@ -614,7 +610,7 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
         release_buffer(stale);
       }
 
-      if (!pending_data_i())
+      if (!pending_data())
         empty_condition_.broadcast();
     }
 
@@ -689,7 +685,7 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
   }
 
   // Signal if there is no pending data.
-  if (!pending_data_i())
+  if (!pending_data())
     empty_condition_.broadcast();
 }
 
@@ -789,7 +785,7 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
       if (containing_list == &this->orphaned_to_transport_) {
         orphaned_to_transport_.dequeue(sample);
         release_buffer(stale);
-        if (!pending_data_i())
+        if (!pending_data())
           empty_condition_.broadcast();
 
       } else if (!containing_list) {
@@ -804,7 +800,7 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
 
   this->wakeup_blocking_writers (stale);
 
-  if (!pending_data_i())
+  if (!pending_data())
     empty_condition_.broadcast();
 }
 
@@ -857,11 +853,6 @@ WriteDataContainer::remove_oldest_sample(
   bool& released)
 {
   DataSampleElement* stale = 0;
-
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                   guard,
-                   this->lock_,
-                   DDS::RETCODE_ERROR);
 
   //
   // Remove the oldest sample from the instance list.
@@ -979,8 +970,9 @@ WriteDataContainer::remove_oldest_sample(
                      DDS::RETCODE_ERROR);
   }
 
-  if (!pending_data_i())
+  if (!pending_data()) {
     empty_condition_.broadcast();
+  }
 
   if (result == false) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -1383,7 +1375,7 @@ WriteDataContainer::wait_pending()
   }
 
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
-  const bool report = DCPS_debug_level > 0 && pending_data_i();
+  const bool report = DCPS_debug_level > 0 && pending_data();
   if (report) {
     if (pending_timeout.is_zero()) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::wait_pending no timeout\n")));
@@ -1394,8 +1386,8 @@ WriteDataContainer::wait_pending()
     }
   }
 
-  while (pending_data_i()) {
-    if (empty_condition_.wait(timeout_ptr) == -1 && pending_data_i()) {
+  while (pending_data()) {
+    if (empty_condition_.wait(timeout_ptr) == -1 && pending_data()) {
       if (DCPS_debug_level) {
         ACE_DEBUG((LM_INFO,
                    ACE_TEXT("(%P|%t) WriteDataContainer::wait_pending %p\n"),
