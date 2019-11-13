@@ -73,6 +73,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   DDS::DomainId_t application_domain = 1;
   ACE_INET_Addr nic_horizontal, nic_vertical;
   OpenDDS::DCPS::TimeDuration lifespan(60);   // 1 minute
+  unsigned short stun_port = 3478;
 
 #ifdef OPENDDS_SECURITY
   std::string identity_ca_file;
@@ -103,6 +104,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-Lifespan"))) {
       lifespan = OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg));
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-StunPort"))) {
+      stun_port = ACE_OS::atoi(arg);
       args.consume_arg();
 #ifdef OPENDDS_SECURITY
     } else if ((arg = args.get_the_parameter("-IdentityCA"))) {
@@ -236,6 +240,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   const ACE_INET_Addr sedp_vertical_addr(port_vertical++, addr_vertical);
   const ACE_INET_Addr data_vertical_addr(port_vertical++, addr_vertical);
 
+  ACE_INET_Addr stun_addr = nic_vertical;
+  stun_addr.set_port_number(stun_port);
+
   ACE_Reactor reactor_(new ACE_Select_Reactor, true);
   const auto reactor = &reactor_;
 
@@ -247,9 +254,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   AssociationTable association_table;
 
-  HorizontalHandler spdp_horizontal_handler(reactor, association_table);
-  HorizontalHandler sedp_horizontal_handler(reactor, association_table);
-  HorizontalHandler data_horizontal_handler(reactor, association_table);
+  HorizontalHandler spdp_horizontal_handler(reactor);
+  HorizontalHandler sedp_horizontal_handler(reactor);
+  HorizontalHandler data_horizontal_handler(reactor);
 
   const auto application_participant_id = application_participant_impl->get_id();
 
@@ -379,6 +386,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   SpdpHandler spdp_vertical_handler(reactor, relay_addresses, association_table, responsible_relay_writer, responsible_relay_reader, lifespan, rtps_discovery, application_domain, application_participant_id, crypto, spdp);
   SedpHandler sedp_vertical_handler(reactor, relay_addresses, association_table, responsible_relay_writer, responsible_relay_reader, lifespan, rtps_discovery, application_domain, application_participant_id, crypto, sedp);
   DataHandler data_vertical_handler(reactor, relay_addresses, association_table, responsible_relay_writer, responsible_relay_reader, lifespan, rtps_discovery, application_domain, application_participant_id, crypto);
+  StunHandler stun_handler(reactor);
 
   spdp_horizontal_handler.vertical_handler(&spdp_vertical_handler);
   sedp_horizontal_handler.vertical_handler(&sedp_vertical_handler);
@@ -396,12 +404,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   sedp_vertical_handler.open(sedp_vertical_addr);
   data_vertical_handler.open(data_vertical_addr);
 
+  stun_handler.open(stun_addr);
+
   std::cout << "SPDP Horizontal listening on " << addr_to_string(spdp_horizontal_handler.relay_address()) << '\n'
             << "SEDP Horizontal listening on " << addr_to_string(sedp_horizontal_handler.relay_address()) << '\n'
             << "Data Horizontal listening on " << addr_to_string(data_horizontal_handler.relay_address()) << '\n'
             << "SPDP Vertical listening on " << addr_to_string(spdp_vertical_handler.relay_address()) << '\n'
             << "SEDP Vertical listening on " << addr_to_string(sedp_vertical_handler.relay_address()) << '\n'
-            << "Data Vertical listening on " << addr_to_string(data_vertical_handler.relay_address()) << std::endl;
+            << "Data Vertical listening on " << addr_to_string(data_vertical_handler.relay_address()) << '\n'
+            << "STUN listening on " << addr_to_string(stun_handler.relay_address()) << std::endl;
 
   DDS::DataWriter_var reader_writer_var = relay_publisher->create_datawriter(readers_topic, writer_qos, nullptr,
                                                                              OpenDDS::DCPS::DEFAULT_STATUS_MASK);

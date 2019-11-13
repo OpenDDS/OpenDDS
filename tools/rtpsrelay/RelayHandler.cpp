@@ -25,10 +25,35 @@
 
 namespace RtpsRelay {
 
-RelayHandler::RelayHandler(ACE_Reactor* reactor,
-                           const AssociationTable& association_table)
+namespace {
+  OpenDDS::STUN::Message make_bad_request_error_response(const OpenDDS::STUN::Message& a_message,
+                                                         const std::string& a_reason)
+  {
+    OpenDDS::STUN::Message response;
+    response.class_ = OpenDDS::STUN::ERROR_RESPONSE;
+    response.method = a_message.method;
+    memcpy(response.transaction_id.data, a_message.transaction_id.data, sizeof(a_message.transaction_id.data));
+    response.append_attribute(OpenDDS::STUN::make_error_code(400, a_reason));
+    response.append_attribute(OpenDDS::STUN::make_fingerprint());
+    return response;
+  }
+
+  OpenDDS::STUN::Message make_unknown_attributes_error_response(const OpenDDS::STUN::Message& a_message,
+                                                                const std::vector<OpenDDS::STUN::AttributeType>& a_unknown_attributes)
+  {
+    OpenDDS::STUN::Message response;
+    response.class_ = OpenDDS::STUN::ERROR_RESPONSE;
+    response.method = a_message.method;
+    memcpy(response.transaction_id.data, a_message.transaction_id.data, sizeof(a_message.transaction_id.data));
+    response.append_attribute(OpenDDS::STUN::make_error_code(420, "Unknown Attributes"));
+    response.append_attribute(OpenDDS::STUN::make_unknown_attributes(a_unknown_attributes));
+    response.append_attribute(OpenDDS::STUN::make_fingerprint());
+    return response;
+  }
+}
+
+RelayHandler::RelayHandler(ACE_Reactor* reactor)
   : ACE_Event_Handler(reactor)
-  , association_table_(association_table)
   , bytes_received_(0)
   , messages_received_(0)
   , bytes_sent_(0)
@@ -153,7 +178,8 @@ VerticalHandler::VerticalHandler(ACE_Reactor* reactor,
                                  DDS::DomainId_t application_domain,
                                  const OpenDDS::DCPS::RepoId& application_participant_guid,
                                  const CRYPTO_TYPE& crypto)
-  : RelayHandler(reactor, association_table)
+  : RelayHandler(reactor)
+  , association_table_(association_table)
   , responsible_relay_writer_(responsible_relay_writer)
   , responsible_relay_reader_(responsible_relay_reader)
   , relay_addresses_(relay_addresses)
@@ -448,9 +474,8 @@ void VerticalHandler::unregister_relay_addresses(const OpenDDS::DCPS::RepoId& gu
   }
 }
 
-HorizontalHandler::HorizontalHandler(ACE_Reactor* reactor,
-                                     const AssociationTable& association_table)
-  : RelayHandler(reactor, association_table)
+HorizontalHandler::HorizontalHandler(ACE_Reactor* reactor)
+  : RelayHandler(reactor)
   , vertical_handler_(nullptr)
 {}
 
@@ -701,6 +726,72 @@ DataHandler::DataHandler(ACE_Reactor* reactor,
 ACE_INET_Addr DataHandler::extract_relay_address(const RelayAddresses& relay_addresses) const
 {
   return ACE_INET_Addr(relay_addresses.data_relay_address().c_str());
+}
+
+StunHandler::StunHandler(ACE_Reactor* reactor)
+  : RelayHandler(reactor)
+{}
+
+void StunHandler::process_message(const ACE_INET_Addr& remote_address,
+                                  const OpenDDS::DCPS::MonotonicTimePoint&,
+                                  const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg)
+{
+  OpenDDS::DCPS::Serializer serializer(msg.get(), true);
+  OpenDDS::STUN::Message message;
+  message.block = msg.get();
+  if (!(serializer >> message)) {
+    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) VerticalHandler::process_message: WARNING Could not deserialize STUN mssage\n")));
+    return;
+  }
+
+  if (message.class_ != OpenDDS::STUN::REQUEST) {
+    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) VerticalHandler::process_message: WARNING Unknown STUN message class\n")));
+    return;
+  }
+
+  std::vector<OpenDDS::STUN::AttributeType> unknown_attributes = message.unknown_comprehension_required_attributes();
+
+  if (!unknown_attributes.empty()) {
+    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) VerticalHandler::process_message: WARNING Unknown comprehension requird attributes\n")));
+    send(remote_address, make_unknown_attributes_error_response(message, unknown_attributes));
+    return;
+  }
+
+  if (!message.has_fingerprint()) {
+    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) VerticalHandler::process_message: WARNING No FINGERPRINT attribute\n")));
+    send(remote_address, make_bad_request_error_response(message, "Bad Request: FINGERPRINT must be pesent"));
+    return;
+  }
+
+  switch (message.method) {
+  case OpenDDS::STUN::BINDING:
+    {
+      OpenDDS::STUN::Message response;
+      response.class_ = OpenDDS::STUN::SUCCESS_RESPONSE;
+      response.method = OpenDDS::STUN::BINDING;
+      memcpy(response.transaction_id.data, message.transaction_id.data, sizeof(message.transaction_id.data));
+      response.append_attribute(OpenDDS::STUN::make_mapped_address(remote_address));
+      response.append_attribute(OpenDDS::STUN::make_xor_mapped_address(remote_address));
+      response.append_attribute(OpenDDS::STUN::make_fingerprint());
+      send(remote_address, response);
+    }
+    break;
+
+  default:
+    // Unknown method.  Stop processing.
+    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) VerticalHandler::process_message: WARNING Unknown STUN method\n")));
+    send(remote_address, make_bad_request_error_response(message, "Bad Request: Unknown method"));
+    break;
+  }
+}
+
+void StunHandler::send(const ACE_INET_Addr& addr, OpenDDS::STUN::Message message)
+{
+  OpenDDS::DCPS::Message_Block_Shared_Ptr block(new ACE_Message_Block(20 + message.length()));
+  OpenDDS::DCPS::Serializer serializer(block.get(), true);
+  message.block = block.get();
+  serializer << message;
+  enqueue_message(addr, block);
 }
 
 }

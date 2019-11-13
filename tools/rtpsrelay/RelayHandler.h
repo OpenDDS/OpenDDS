@@ -46,14 +46,13 @@ public:
   void max_fan_out(size_t fan_out) { max_fan_out_ = std::max(max_fan_out_, fan_out); }
 
 protected:
-    RelayHandler(ACE_Reactor* reactor,
-               const AssociationTable& association_table);
+  RelayHandler(ACE_Reactor* reactor);
 
   int handle_input(ACE_HANDLE handle) override;
   int handle_output(ACE_HANDLE handle) override;
   ACE_HANDLE get_handle() const override { return socket_.get_handle(); }
 
-  const AssociationTable& association_table_;
+  //const AssociationTable& association_table_;
   virtual void process_message(const ACE_INET_Addr& remote,
                                const OpenDDS::DCPS::MonotonicTimePoint& now,
                                const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg) = 0;
@@ -114,6 +113,7 @@ protected:
             const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg);
   RelayAddressesMap populate_relay_addresses_map(const GuidSet& to);
 
+  const AssociationTable& association_table_;
   GuidRelayAddressesDataWriter_ptr responsible_relay_writer_;
   GuidRelayAddressesDataReader_ptr responsible_relay_reader_;
   const RelayAddresses& relay_addresses_;
@@ -149,8 +149,7 @@ private:
 // Sends to and receives from other relays.
 class HorizontalHandler : public RelayHandler {
 public:
-  HorizontalHandler(ACE_Reactor* reactor,
-                    const AssociationTable& association_table);
+  HorizontalHandler(ACE_Reactor* reactor);
   void vertical_handler(VerticalHandler* vertical_handler) { vertical_handler_ = vertical_handler; }
   void enqueue_message(const ACE_INET_Addr& addr,
                        const GuidSet& to,
@@ -237,6 +236,18 @@ public:
 
 private:
   ACE_INET_Addr extract_relay_address(const RelayAddresses& relay_addresses) const override;
+};
+
+class StunHandler : public RelayHandler {
+public:
+  StunHandler(ACE_Reactor* reactor);
+
+private:
+  void process_message(const ACE_INET_Addr& remote,
+                       const OpenDDS::DCPS::MonotonicTimePoint& now,
+                       const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg) override;
+  void send(const ACE_INET_Addr& addr, OpenDDS::STUN::Message message);
+
 };
 
 }
