@@ -65,7 +65,7 @@ enum AttributeType {
   LAST_ATTRIBUTE     = 0xFFFF
 };
 
-struct Attribute {
+struct OpenDDS_Rtps_Export Attribute {
   Attribute() : type(LAST_ATTRIBUTE), unknown_length(0) {}
 
   AttributeType type;
@@ -106,14 +106,14 @@ Attribute make_ice_controlled(ACE_UINT64 ice_tie_breaker);
 bool operator>>(DCPS::Serializer& serializer, Attribute& attribute);
 bool operator<<(DCPS::Serializer& serializer, const Attribute& attribute);
 
-struct TransactionId {
+struct OpenDDS_Rtps_Export TransactionId {
   ACE_UINT8 data[12];
   bool operator<(const TransactionId& other) const;
   bool operator==(const TransactionId& other) const;
   bool operator!=(const TransactionId& other) const;
 };
 
-struct Message {
+struct OpenDDS_Rtps_Export Message {
   typedef std::vector<Attribute> AttributesType;
   typedef AttributesType::const_iterator const_iterator;
 
