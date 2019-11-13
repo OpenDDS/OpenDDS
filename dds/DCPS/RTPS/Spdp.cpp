@@ -172,8 +172,16 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
     sedp_multicast_.length(1);
     sedp_multicast_[0] = mc_locator;
   }
-}
 
+#ifdef OPENDDS_SECURITY
+  ICE::Endpoint* endpoint = sedp_.get_ice_endpoint();
+  if (endpoint) {
+    RepoId l = guid_;
+    l.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER;
+    ICE::Agent::instance()->add_local_agent_info_listener(endpoint, l, this);
+  }
+#endif
+}
 
 Spdp::Spdp(DDS::DomainId_t domain,
            RepoId& guid,
@@ -336,6 +344,15 @@ Spdp::~Spdp()
       }
     }
   }
+
+#ifdef OPENDDS_SECURITY
+  ICE::Endpoint* endpoint = sedp_.get_ice_endpoint();
+  if (endpoint) {
+    RepoId l = guid_;
+    l.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER;
+    ICE::Agent::instance()->remove_local_agent_info_listener(endpoint, l);
+  }
+#endif
 
   // ensure sedp's task queue is drained before data members are being
   // deleted
@@ -1237,6 +1254,12 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
 
   return;
 }
+
+void Spdp::update_agent_info(const DCPS::RepoId&, const ICE::AgentInfo&)
+{
+  if (is_security_enabled())
+    write_secure_updates();
+}
 #endif
 
 void
@@ -1687,6 +1710,7 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
   }
 
 #ifdef OPENDDS_SECURITY
+  if (!outer_->is_security_enabled()) {
     ICE::Endpoint* endpoint = outer_->sedp_.get_ice_endpoint();
     if (endpoint) {
       const ICE::AgentInfo& agent_info = ICE::Agent::instance()->get_local_agent_info(endpoint);
@@ -1698,6 +1722,7 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
         return;
       }
     }
+  }
 #endif
 
   wbuff_.reset();
@@ -1737,15 +1762,17 @@ Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, WriteFlags flags)
   }
 
 #ifdef OPENDDS_SECURITY
-  ICE::Endpoint* endpoint = outer_->sedp_.get_ice_endpoint();
-  if (endpoint) {
-    const ICE::AgentInfo& agent_info = ICE::Agent::instance()->get_local_agent_info(endpoint);
-    if (ParameterListConverter::to_param_list(agent_info, plist) < 0) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("Spdp::SpdpTransport::write() - ")
-                 ACE_TEXT("failed to convert from ICE::AgentInfo ")
-                 ACE_TEXT("to ParameterList\n")));
-      return;
+  if (!outer_->is_security_enabled()) {
+    ICE::Endpoint* endpoint = outer_->sedp_.get_ice_endpoint();
+    if (endpoint) {
+      const ICE::AgentInfo& agent_info = ICE::Agent::instance()->get_local_agent_info(endpoint);
+      if (ParameterListConverter::to_param_list(agent_info, plist) < 0) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                   ACE_TEXT("Spdp::SpdpTransport::write() - ")
+                   ACE_TEXT("failed to convert from ICE::AgentInfo ")
+                   ACE_TEXT("to ParameterList\n")));
+        return;
+      }
     }
   }
 #endif

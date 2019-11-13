@@ -2915,25 +2915,30 @@ Sedp::Writer::write_dcps_participant_secure(const Security::SPDPdiscoveredPartic
 {
   using DCPS::Serializer;
 
-  DDS::ReturnCode_t result = DDS::RETCODE_OK;
-
   ParameterList plist;
 
-  bool err = ParameterListConverter::to_param_list(msg, plist);
-
-  if (err) {
+  if (!ParameterListConverter::to_param_list(msg, plist)) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: Sedp::write_dcps_participant_secure - ")
                ACE_TEXT("Failed to convert SPDPdiscoveredParticipantData ")
                ACE_TEXT("to ParameterList\n")));
 
-    result = DDS::RETCODE_ERROR;
-
-  } else {
-    result = write_parameter_list(plist, reader, sequence);
+    return DDS::RETCODE_ERROR;
   }
 
-  return result;
+  ICE::Endpoint* endpoint = get_ice_endpoint();
+  if (endpoint) {
+    const ICE::AgentInfo& agent_info = ICE::Agent::instance()->get_local_agent_info(endpoint);
+    if (ParameterListConverter::to_param_list(agent_info, plist) < 0) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("Sedp::write_dcps_participant_secure() - ")
+                 ACE_TEXT("failed to convert from ICE::AgentInfo ")
+                 ACE_TEXT("to ParameterList\n")));
+      return DDS::RETCODE_ERROR;
+    }
+  }
+
+  return write_parameter_list(plist, reader, sequence);
 }
 #endif
 
