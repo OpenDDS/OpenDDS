@@ -189,7 +189,7 @@ bool test_unknown_method(int& status,
     status = EXIT_FAILURE;
     retval = false;
   }
-  
+
   if (!response.has_fingerprint()) {
     std::cerr << "ERROR: no fingerprint" << std::endl;
     status = EXIT_FAILURE;
