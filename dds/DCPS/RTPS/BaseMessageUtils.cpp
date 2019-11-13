@@ -104,6 +104,14 @@ void locators_to_blob(const DCPS::LocatorSeq& locators,
   message_block_to_sequence(mb_locator, blob);
 }
 
+OpenDDS_Rtps_Export
+DCPS::LocatorSeq transport_locator_to_locator_seq(const DCPS::TransportLocator& info)
+{
+  DCPS::LocatorSeq locators;
+  blob_to_locators(info.data, locators);
+  return locators;
+}
+
 MessageParser::MessageParser(const ACE_Message_Block& in)
   : in_(in.duplicate())
   , ser_(in_.get(), false, DCPS::Serializer::ALIGN_CDR)

@@ -415,8 +415,8 @@ void Certificate::load_cert_bytes(const std::string& path)
   if (!in) {
     ACE_ERROR((LM_ERROR,
                "(%P|%t) Certificate::load_cert_bytes:"
-               "WARNING: Failed to load file '%C'; errno: '%C'\n",
-               path.c_str(), strerror(errno)));
+               "WARNING: Failed to load file '%C'; '%m'\n",
+               path.c_str()));
     return;
   }
 

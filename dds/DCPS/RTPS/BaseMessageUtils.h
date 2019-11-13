@@ -78,6 +78,21 @@ inline void assign(GuidPrefix_t& dest, const GuidPrefix_t& src)
   std::memcpy(&dest[0], &src[0], sizeof(GuidPrefix_t));
 }
 
+inline DCPS::RepoId make_id(const GuidPrefix_t& prefix, const EntityId_t& entity)
+{
+  DCPS::RepoId id;
+  assign(id.guidPrefix, prefix);
+  id.entityId = entity;
+  return id;
+}
+
+inline DCPS::RepoId make_id(const DCPS::RepoId& participant_id, const EntityId_t& entity)
+{
+  DCPS::RepoId id = participant_id;
+  id.entityId = entity;
+  return id;
+}
+
 inline void assign(DCPS::OctetArray16& dest,
                    const DCPS::OctetArray16& src)
 {
@@ -145,6 +160,9 @@ DDS::ReturnCode_t blob_to_locators(const DCPS::TransportBLOB& blob,
 OpenDDS_Rtps_Export
 void locators_to_blob(const DCPS::LocatorSeq& locators,
                       DCPS::TransportBLOB& blob);
+
+OpenDDS_Rtps_Export
+DCPS::LocatorSeq transport_locator_to_locator_seq(const DCPS::TransportLocator& info);
 
 template <typename T>
 void message_block_to_sequence(const ACE_Message_Block& mb_locator, T& out)

@@ -655,9 +655,6 @@ private:
                     const DCPS::RepoId& writer, const DCPS::RepoId& reader);
 #endif
 
-  static DCPS::RepoId make_id(const DCPS::RepoId& participant_id,
-                              const EntityId_t& entity);
-
   static void set_inline_qos(DCPS::TransportLocatorSeq& locators);
 
   void write_durable_publication_data(const DCPS::RepoId& reader, bool secure);
@@ -821,8 +818,8 @@ private:
   unsigned int acks_;
 };
 
-bool locators_changed(const OpenDDS::RTPS::ParticipantProxy_t& x,
-                      const OpenDDS::RTPS::ParticipantProxy_t& y);
+bool locators_changed(const ParticipantProxy_t& x,
+                      const ParticipantProxy_t& y);
 
 }
 }

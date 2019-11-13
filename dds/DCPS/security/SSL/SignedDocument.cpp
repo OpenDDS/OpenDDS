@@ -292,8 +292,8 @@ PKCS7* SignedDocument::PKCS7_from_SMIME_file(const std::string& path)
   if (!in) {
     ACE_ERROR((LM_ERROR,
                "(%P|%t) SignedDocument::PKCS7_from_SMIME_file:"
-               "WARNING: Failed to load file '%C'; errno: '%C'\n",
-               path.c_str(), strerror(errno)));
+               "WARNING: Failed to load file '%C'; '%m'\n",
+               path.c_str()));
     return NULL;
   }
 

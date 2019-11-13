@@ -1789,9 +1789,10 @@ Spdp::SpdpTransport::send(const ACE_INET_Addr& addr)
     if (err != ENETUNREACH || !network_is_unreachable_) {
       ACE_TCHAR addr_buff[256] = {};
       addr.addr_to_string(addr_buff, 256);
+      errno = err;
       ACE_ERROR((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: Spdp::SpdpTransport::send() - ")
-                 ACE_TEXT("destination %s failed send: %C\n"), addr_buff, strerror(err)));
+                 ACE_TEXT("destination %s failed send: %m\n"), addr_buff));
     }
     if (err == ENETUNREACH) {
       network_is_unreachable_ = true;
@@ -2011,8 +2012,8 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
     ACE_DEBUG((LM_INFO,
                ACE_TEXT("(%P|%t) Spdp::SpdpTransport::join_multicast_group ")
                ACE_TEXT("joining group %C %C:%hu\n"),
-               nic.name().c_str (),
-               multicast_address_str_.c_str (),
+               nic.name().c_str(),
+               multicast_address_str_.c_str(),
                mc_port_));
   }
 
@@ -2041,8 +2042,8 @@ Spdp::SpdpTransport::leave_multicast_group(const DCPS::NetworkInterface& nic)
     ACE_DEBUG((LM_INFO,
                ACE_TEXT("(%P|%t) Spdp::SpdpTransport::leave_multicast_group ")
                ACE_TEXT("leaving group %C %C:%hu\n"),
-               nic.name().c_str (),
-               multicast_address_str_.c_str (),
+               nic.name().c_str(),
+               multicast_address_str_.c_str(),
                mc_port_));
   }
 
@@ -2066,7 +2067,7 @@ Spdp::SpdpTransport::add_address(const DCPS::NetworkInterface& nic,
       , nic_(nic)
     {}
 
-    void execute() override
+    void execute()
     {
       tport_->join_multicast_group(nic_);
     }
@@ -2087,7 +2088,7 @@ void Spdp::SpdpTransport::remove_address(const DCPS::NetworkInterface& nic,
       , nic_(nic)
     {}
 
-    void execute() override
+    void execute()
     {
       tport_->leave_multicast_group(nic_);
     }

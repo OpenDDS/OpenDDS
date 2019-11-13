@@ -442,13 +442,6 @@ Service_Participant::get_domain_participant_factory(int &argc,
       }
 
       this->monitor_.reset(this->monitor_factory_->create_sp_monitor(this));
-
-#ifdef ACE_LINUX
-      network_config_publisher_ = make_rch<LinuxNetworkConfigPublisher>(reactor_task_.interceptor());
-#endif
-      if (network_config_publisher_ && !network_config_publisher_->open()) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Service_Participant::get_domain_participant_factory could not open network config publisher\n ")));
-      }
     }
   }
 
@@ -2034,6 +2027,23 @@ void Service_Participant::default_configuration_file(const ACE_TCHAR* path)
 {
   default_configuration_file_ = path;
 }
+
+NetworkConfigPublisher_rch Service_Participant::network_config_publisher()
+{
+  if (!network_config_publisher_) {
+#ifdef ACE_LINUX
+    network_config_publisher_ = make_rch<LinuxNetworkConfigPublisher>(reactor_task_.interceptor());
+#endif
+  }
+
+  if (network_config_publisher_ && !network_config_publisher_->open()) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Service_Participant::get_domain_participant_factory could not open network config publisher\n ")));
+    network_config_publisher_->close();
+  }
+
+  return network_config_publisher_;
+}
+
 
 } // namespace DCPS
 } // namespace OpenDDS

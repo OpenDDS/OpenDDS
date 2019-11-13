@@ -394,7 +394,7 @@ public:
    */
   void default_configuration_file(const ACE_TCHAR* path);
 
-  NetworkConfigPublisher_rch network_config_publisher() const { return network_config_publisher_; }
+  NetworkConfigPublisher_rch network_config_publisher();
 
 private:
 

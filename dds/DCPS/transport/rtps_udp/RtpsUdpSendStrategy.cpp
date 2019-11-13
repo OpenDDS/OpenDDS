@@ -250,9 +250,10 @@ RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
     if (err != ENETUNREACH || !network_is_unreachable_) {
       ACE_TCHAR addr_buff[256] = {};
       a.addr_to_string(addr_buff, 256);
+      errno = err;
       const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
       ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_single_i() - "
-                 "destination %s failed send: %C\n", addr_buff, strerror(err)));
+                 "destination %s failed send: %m\n", addr_buff));
     }
     if (err == ENETUNREACH) {
       network_is_unreachable_ = true;
