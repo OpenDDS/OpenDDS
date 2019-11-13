@@ -52,7 +52,6 @@ protected:
   int handle_output(ACE_HANDLE handle) override;
   ACE_HANDLE get_handle() const override { return socket_.get_handle(); }
 
-  //const AssociationTable& association_table_;
   virtual void process_message(const ACE_INET_Addr& remote,
                                const OpenDDS::DCPS::MonotonicTimePoint& now,
                                const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg) = 0;
