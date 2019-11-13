@@ -46,7 +46,7 @@ public:
   void max_fan_out(size_t fan_out) { max_fan_out_ = std::max(max_fan_out_, fan_out); }
 
 protected:
-  RelayHandler(ACE_Reactor* reactor);
+  explicit RelayHandler(ACE_Reactor* reactor);
 
   int handle_input(ACE_HANDLE handle) override;
   int handle_output(ACE_HANDLE handle) override;
