@@ -34,19 +34,14 @@
 #include "Args.h"
 
 #ifdef OPENDDS_SECURITY
+#include <dds/DCPS/security/framework/Properties.h>
+
 const char auth_ca_file[] = "file:../../security/certs/identity/identity_ca_cert.pem";
 const char perm_ca_file[] = "file:../../security/certs/permissions/permissions_ca_cert.pem";
 const char id_cert_file[] = "file:../../security/certs/identity/test_participant_01_cert.pem";
 const char id_key_file[] = "file:../../security/certs/identity/test_participant_01_private_key.pem";
 const char governance_file[] = "file:./governance_signed.p7s";
 const char permissions_file[] = "file:./permissions_1_signed.p7s";
-
-const char DDSSEC_PROP_IDENTITY_CA[] = "dds.sec.auth.identity_ca";
-const char DDSSEC_PROP_IDENTITY_CERT[] = "dds.sec.auth.identity_certificate";
-const char DDSSEC_PROP_IDENTITY_PRIVKEY[] = "dds.sec.auth.private_key";
-const char DDSSEC_PROP_PERM_CA[] = "dds.sec.access.permissions_ca";
-const char DDSSEC_PROP_PERM_GOV_DOC[] = "dds.sec.access.governance";
-const char DDSSEC_PROP_PERM_DOC[] = "dds.sec.access.permissions";
 #endif
 
 bool dw_reliable() {
@@ -88,12 +83,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
 #if defined(OPENDDS_SECURITY)
       if (TheServiceParticipant->get_security()) {
-        append(props, DDSSEC_PROP_IDENTITY_CA, auth_ca_file);
-        append(props, DDSSEC_PROP_IDENTITY_CERT, id_cert_file);
-        append(props, DDSSEC_PROP_IDENTITY_PRIVKEY, id_key_file);
-        append(props, DDSSEC_PROP_PERM_CA, perm_ca_file);
-        append(props, DDSSEC_PROP_PERM_GOV_DOC, governance_file);
-        append(props, DDSSEC_PROP_PERM_DOC, permissions_file);
+        append(props, DDS::Security::Properties::AuthIdentityCA, auth_ca_file);
+        append(props, DDS::Security::Properties::AuthIdentityCertificate, id_cert_file);
+        append(props, DDS::Security::Properties::AuthPrivateKey, id_key_file);
+        append(props, DDS::Security::Properties::AccessPermissionsCA, perm_ca_file);
+        append(props, DDS::Security::Properties::AccessGovernance, governance_file);
+        append(props, DDS::Security::Properties::AccessPermissions, permissions_file);
       }
 #endif
 

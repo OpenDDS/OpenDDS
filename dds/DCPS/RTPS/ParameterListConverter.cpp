@@ -479,6 +479,14 @@ OpenDDS_Rtps_Export
 int to_param_list(const ParticipantProxy_t& proxy,
                   ParameterList& param_list)
 {
+  Parameter beq_param;
+  beq_param.builtinEndpointQos(proxy.builtinEndpointQos);
+  add_param(param_list, beq_param);
+
+  Parameter pd_param;
+  pd_param.domainId(proxy.domainId);
+  add_param(param_list, pd_param);
+
   Parameter pv_param;
   pv_param.version(proxy.protocolVersion);
   add_param(param_list, pv_param);
@@ -578,6 +586,12 @@ int from_param_list(const ParameterList& param_list,
   for (CORBA::ULong i = 0; i < length; ++i) {
     const Parameter& param = param_list[i];
     switch (param._d()) {
+      case PID_BUILTIN_ENDPOINT_QOS:
+        proxy.builtinEndpointQos = param.builtinEndpointQos();
+        break;
+      case PID_DOMAIN_ID:
+        proxy.domainId = param.domainId();
+        break;
       case PID_PROTOCOL_VERSION:
         proxy.protocolVersion = param.version();
         break;

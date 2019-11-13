@@ -26,18 +26,15 @@
 
 #include <ace/Argv_Type_Converter.h>
 
+#ifdef OPENDDS_SECURITY
+#include <dds/DCPS/security/framework/Properties.h>
+#endif
+
 using namespace OpenDDS::RTPS;
 using namespace OpenDDS::DCPS;
 
 #ifdef OPENDDS_SECURITY
 // security setup helpers:
-
-const char DDSSEC_PROP_IDENTITY_CA[] = "dds.sec.auth.identity_ca";
-const char DDSSEC_PROP_IDENTITY_CERT[] = "dds.sec.auth.identity_certificate";
-const char DDSSEC_PROP_IDENTITY_PRIVKEY[] = "dds.sec.auth.private_key";
-const char DDSSEC_PROP_PERM_CA[] = "dds.sec.access.permissions_ca";
-const char DDSSEC_PROP_PERM_GOV_DOC[] = "dds.sec.access.governance";
-const char DDSSEC_PROP_PERM_DOC[] = "dds.sec.access.permissions";
 
 const char auth_ca_file[] = "file:security/TESTONLY_identity_ca_cert.pem";
 const char perm_ca_file[] = "file:security/TESTONLY_permissions_ca_cert.pem";
@@ -157,12 +154,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
     if (!governance.empty() && !permissions.empty()) {
       TheServiceParticipant->set_security(true);
       DDS::PropertySeq& props = dp_qos.property.value;
-      append(props, DDSSEC_PROP_IDENTITY_CA, auth_ca_file);
-      append(props, DDSSEC_PROP_IDENTITY_CERT, id_cert_file);
-      append(props, DDSSEC_PROP_IDENTITY_PRIVKEY, id_key_file);
-      append(props, DDSSEC_PROP_PERM_CA, perm_ca_file);
-      append(props, DDSSEC_PROP_PERM_GOV_DOC, ("file:" + governance).c_str());
-      append(props, DDSSEC_PROP_PERM_DOC, ("file:" + permissions).c_str());
+      append(props, DDS::Security::Properties::AuthIdentityCA, auth_ca_file);
+      append(props, DDS::Security::Properties::AuthIdentityCertificate, id_cert_file);
+      append(props, DDS::Security::Properties::AuthPrivateKey, id_key_file);
+      append(props, DDS::Security::Properties::AccessPermissionsCA, perm_ca_file);
+      append(props, DDS::Security::Properties::AccessGovernance, ("file:" + governance).c_str());
+      append(props, DDS::Security::Properties::AccessPermissions, ("file:" + permissions).c_str());
     }
 #endif
 
