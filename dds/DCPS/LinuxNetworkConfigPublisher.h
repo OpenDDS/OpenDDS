@@ -27,12 +27,12 @@ namespace DCPS {
 class OpenDDS_Dcps_Export LinuxNetworkConfigPublisher : public RcEventHandler, public NetworkConfigPublisher {
 public:
   LinuxNetworkConfigPublisher(ReactorInterceptor_rch interceptor);
-  bool open() override;
-  bool close() override;
+  bool open();
+  bool close();
 
 private:
-  ACE_HANDLE get_handle() const override;
-  int handle_input(ACE_HANDLE) override;
+  ACE_HANDLE get_handle() const;
+  int handle_input(ACE_HANDLE);
   void read_messages();
   void process_message(const struct nlmsghdr* header);
 

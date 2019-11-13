@@ -211,7 +211,7 @@ void LinuxNetworkConfigPublisher::process_message(const struct nlmsghdr* header)
     break;
   case RTM_NEWLINK:
     {
-      std::string name;
+      OPENDDS_STRING name;
       const struct ifinfomsg* msg = reinterpret_cast<struct ifinfomsg*>(NLMSG_DATA(header));
       int rta_length = IFLA_PAYLOAD(header);
       for (const struct rtattr* attr = reinterpret_cast<const struct rtattr*>(IFLA_RTA(msg));

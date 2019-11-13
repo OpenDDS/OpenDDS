@@ -175,6 +175,7 @@ OpenDDS::DCPS::LocatorSeq transport_locator_to_locator_seq(const OpenDDS::DCPS::
   return locators;
 }
 
+#ifndef OPENDDS_SAFETY_PROFILE
 bool operator==(const OpenDDS::DCPS::Locator_t& x,
                 const OpenDDS::DCPS::Locator_t& y)
 {
@@ -186,6 +187,7 @@ bool operator==(const OpenDDS::DCPS::TransportLocator& x,
 {
   return x.transport_type == y.transport_type && x.data == y.data;
 }
+#endif
 
 bool operator==(const OpenDDS::DCPS::LocatorSeq& x,
                 const OpenDDS::DCPS::LocatorSeq& y)
