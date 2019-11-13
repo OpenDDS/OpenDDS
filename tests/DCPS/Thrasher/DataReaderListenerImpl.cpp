@@ -42,7 +42,7 @@ DataReaderListenerImpl::on_data_available(
       ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
       ++received_samples_;
       ++progress_;
-      x_and_y_map[(size_t) foo.x].insert((size_t) foo.y);
+      task_sample_set_map[(size_t) foo.x].insert((size_t) foo.y);
       condition_.broadcast();
     }
   }

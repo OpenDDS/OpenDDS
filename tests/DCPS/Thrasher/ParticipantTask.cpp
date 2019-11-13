@@ -109,8 +109,8 @@ ParticipantTask::svc()
         ACE_OS::snprintf(nak_depth, 8, ACE_TEXT("%lu"), samples_per_thread_);
 
         ACE_DEBUG((LM_INFO,
-          "(%P|%t)    -> PARTICIPANT creating transport config %C\n",
-          config_name));
+          "(%P|%t)    -> PARTICIPANT %d creating transport config %C\n",
+          this_thread_index, config_name));
         OpenDDS::DCPS::TransportConfig_rch config =
           TheTransportRegistry->create_config(config_name);
         OpenDDS::DCPS::TransportInst_rch inst =
@@ -190,7 +190,11 @@ ParticipantTask::svc()
                         ACE_TEXT(" create_datawriter failed!\n")), 1);
     }
 
+    ACE_DEBUG((LM_INFO, "(%P|%t)    -> PARTICIPANT %d waiting for match\n", this_thread_index));
+
     wait_match(writer, 1);
+
+    ACE_DEBUG((LM_INFO, "(%P|%t)    -> PARTICIPANT %d match found!\n", this_thread_index));
 
     writer_i = FooDataWriter::_narrow(writer);
     if (CORBA::is_nil(writer_i)) {

@@ -52,7 +52,7 @@ public:
   bool
   wait_received(const OpenDDS::DCPS::TimeDuration& duration, size_t target);
 
-  OPENDDS_MAP(size_t, OPENDDS_SET(size_t)) x_and_y_map;
+  OPENDDS_MAP(size_t, OPENDDS_SET(size_t)) task_sample_set_map;
 
 private:
 

@@ -179,8 +179,8 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
       wait_match(reader, 0, true);
 
       for (size_t x = 0; x < n_publishers; ++x) {
-        OPENDDS_MAP(size_t, OPENDDS_SET(size_t))::const_iterator xit = listener_p->x_and_y_map.find(x);
-        if (xit == listener_p->x_and_y_map.end()) {
+        OPENDDS_MAP(size_t, OPENDDS_SET(size_t))::const_iterator xit = listener_p->task_sample_set_map.find(x);
+        if (xit == listener_p->task_sample_set_map.end()) {
           ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) <- ERROR: MISSING ALL SAMPLES FROM PUBLISHER %d\n"), x));
           break;
         }
