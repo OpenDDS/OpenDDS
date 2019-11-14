@@ -481,7 +481,7 @@ namespace {
     if (result < 0) {
       ACE_TCHAR addr_buff[256] = {};
       int err = errno;
-      addr.addr_to_string(addr_buff, 256, 0);
+      addr.addr_to_string(addr_buff, 256);
       errno = err;
       const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
       ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_single_i() - "

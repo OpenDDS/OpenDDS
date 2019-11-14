@@ -1788,7 +1788,7 @@ Spdp::SpdpTransport::send(const ACE_INET_Addr& addr)
     const int err = errno;
     if (err != ENETUNREACH || !network_is_unreachable_) {
       ACE_TCHAR addr_buff[256] = {};
-      addr.addr_to_string(addr_buff, 256, 0);
+      addr.addr_to_string(addr_buff, 256);
       errno = err;
       ACE_ERROR((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: Spdp::SpdpTransport::send() - ")
