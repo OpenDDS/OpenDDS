@@ -1411,8 +1411,10 @@ bool Spdp::announce_domain_participant_qos()
   return true;
 }
 
+#if !defined _MSC_VER || _MSC_VER > 1700
 const Spdp::SpdpTransport::WriteFlags Spdp::SpdpTransport::SEND_TO_LOCAL;
 const Spdp::SpdpTransport::WriteFlags Spdp::SpdpTransport::SEND_TO_RELAY;
+#endif
 
 Spdp::SpdpTransport::SpdpTransport(Spdp* outer, bool securityGuids)
   : outer_(outer)
