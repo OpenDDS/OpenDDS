@@ -1,4 +1,4 @@
-project(StunClient): dcpsexe, dcps_test, dcps_transports_for_test, dcps_rtps, opendds_cxx11 {
+project(StunClient): dcpsexe, dcps_test, dcps_rtps, opendds_cxx11 {
 
   exename   = StunClient
 
