@@ -115,7 +115,7 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
   TcpConnection* pConn = connection.in();
 
   ACE_TCHAR str[64];
-  key.address().addr_to_string(str,sizeof(str)/sizeof(str[0]));
+  key.address().addr_to_string(str,sizeof(str)/sizeof(str[0]), 0);
 
   // Can't make this call while holding onto TransportClient::lock_
   const int ret =

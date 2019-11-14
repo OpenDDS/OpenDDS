@@ -249,7 +249,7 @@ RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
     const int err = errno;
     if (err != ENETUNREACH || !network_is_unreachable_) {
       ACE_TCHAR addr_buff[256] = {};
-      a.addr_to_string(addr_buff, 256);
+      a.addr_to_string(addr_buff, 256, 0);
       errno = err;
       const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
       ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_single_i() - "

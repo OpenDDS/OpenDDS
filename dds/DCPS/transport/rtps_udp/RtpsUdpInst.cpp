@@ -171,7 +171,7 @@ RtpsUdpInst::dump_to_str() const
 }
 
 size_t
-RtpsUdpInst::populate_locator(OpenDDS::DCPS::TransportLocator& info, ConnectionInfoFlags flags) const
+RtpsUdpInst::populate_locator(TransportLocator& info, ConnectionInfoFlags flags) const
 {
   using namespace OpenDDS::RTPS;
 
@@ -224,7 +224,7 @@ RtpsUdpInst::populate_locator(OpenDDS::DCPS::TransportLocator& info, ConnectionI
 }
 
 const TransportBLOB*
-RtpsUdpInst::get_blob(const OpenDDS::DCPS::TransportLocatorSeq& trans_info) const
+RtpsUdpInst::get_blob(const TransportLocatorSeq& trans_info) const
 {
   for (CORBA::ULong idx = 0, limit = trans_info.length(); idx != limit; ++idx) {
     if (std::strcmp(trans_info[idx].transport_type, "rtps_udp") == 0) {
@@ -263,9 +263,9 @@ void
 RtpsUdpInst::update_locators(const RepoId& remote_id,
                              const TransportLocatorSeq& locators)
 {
-  TransportImpl_rch impl = this->impl();
-  if (impl) {
-    DCPS::RtpsUdpTransport_rch rtps_impl = DCPS::static_rchandle_cast<DCPS::RtpsUdpTransport>(impl);
+  TransportImpl_rch imp = impl();
+  if (imp) {
+    RtpsUdpTransport_rch rtps_impl = static_rchandle_cast<RtpsUdpTransport>(imp);
     rtps_impl->update_locators(remote_id, locators);
   }
 }

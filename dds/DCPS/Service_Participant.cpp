@@ -18,7 +18,7 @@
 #include "RecorderImpl.h"
 #include "ReplayerImpl.h"
 #ifdef ACE_LINUX
-#include "LinuxNetworkConfigPublisher.h"
+#include "LinuxNetworkConfigMonitor.h"
 #endif
 #include "StaticDiscovery.h"
 #if defined(OPENDDS_SECURITY)
@@ -264,8 +264,11 @@ Service_Participant::shutdown()
 
       domainRepoMap_.clear();
 
-      if (network_config_publisher_) {
-        network_config_publisher_->close();
+      {
+        ACE_GUARD(ACE_Thread_Mutex, guard, network_config_monitor_lock_);
+        if (network_config_monitor_) {
+          network_config_monitor_->close();
+        }
       }
 
       reactor_task_.stop();
@@ -2028,20 +2031,22 @@ void Service_Participant::default_configuration_file(const ACE_TCHAR* path)
   default_configuration_file_ = path;
 }
 
-NetworkConfigPublisher_rch Service_Participant::network_config_publisher()
+NetworkConfigMonitor_rch Service_Participant::network_config_monitor()
 {
-  if (!network_config_publisher_) {
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, network_config_monitor_lock_, NetworkConfigMonitor_rch());
+
+  if (!network_config_monitor_) {
 #ifdef ACE_LINUX
-    network_config_publisher_ = make_rch<LinuxNetworkConfigPublisher>(reactor_task_.interceptor());
+    network_config_monitor_ = make_rch<LinuxNetworkConfigMonitor>(reactor_task_.interceptor());
 #endif
+
+    if (network_config_monitor_ && !network_config_monitor_->open()) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Service_Participant::get_domain_participant_factory could not open network config monitor\n ")));
+      network_config_monitor_->close();
+    }
   }
 
-  if (network_config_publisher_ && !network_config_publisher_->open()) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Service_Participant::get_domain_participant_factory could not open network config publisher\n ")));
-    network_config_publisher_->close();
-  }
-
-  return network_config_publisher_;
+  return network_config_monitor_;
 }
 
 

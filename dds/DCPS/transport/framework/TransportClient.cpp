@@ -175,11 +175,13 @@ TransportClient::populate_connection_info()
   const size_t n = config_->instances_.size();
   for (size_t i = 0; i < n; ++i) {
     TransportInst_rch inst = config_->instances_[i];
-    TransportImpl_rch impl = inst->impl();
-    if (impl) {
-      const CORBA::ULong len = conn_info_.length();
-      conn_info_.length(len + 1);
-      impl->connection_info(conn_info_[len], CONNINFO_ALL);
+    if (check_transport_qos(*inst)) {
+      TransportImpl_rch impl = inst->impl();
+      if (impl) {
+        const CORBA::ULong len = conn_info_.length();
+        conn_info_.length(len + 1);
+        impl->connection_info(conn_info_[len], CONNINFO_ALL);
+      }
     }
   }
 }
@@ -673,7 +675,7 @@ TransportClient::register_for_reader(const RepoId& participant,
   for (ImplsType::iterator pos = impls_.begin(), limit = impls_.end();
        pos != limit;
        ++pos) {
-    RcHandle<TransportImpl> impl = (*pos).lock();
+    RcHandle<TransportImpl> impl = pos->lock();
     if (impl) {
       impl->register_for_reader(participant, writerid, readerid, locators, listener);
     }
@@ -689,7 +691,7 @@ TransportClient::unregister_for_reader(const RepoId& participant,
   for (ImplsType::iterator pos = impls_.begin(), limit = impls_.end();
        pos != limit;
        ++pos) {
-    RcHandle<TransportImpl> impl = (*pos).lock();
+    RcHandle<TransportImpl> impl = pos->lock();
     if (impl) {
       impl->unregister_for_reader(participant, writerid, readerid);
     }
@@ -707,7 +709,7 @@ TransportClient::register_for_writer(const RepoId& participant,
   for (ImplsType::iterator pos = impls_.begin(), limit = impls_.end();
        pos != limit;
        ++pos) {
-    RcHandle<TransportImpl> impl = (*pos).lock();
+    RcHandle<TransportImpl> impl = pos->lock();
     if (impl) {
       impl->register_for_writer(participant, readerid, writerid, locators, listener);
     }
@@ -723,7 +725,7 @@ TransportClient::unregister_for_writer(const RepoId& participant,
   for (ImplsType::iterator pos = impls_.begin(), limit = impls_.end();
        pos != limit;
        ++pos) {
-    RcHandle<TransportImpl> impl = (*pos).lock();
+    RcHandle<TransportImpl> impl = pos->lock();
     if (impl) {
       impl->unregister_for_writer(participant, readerid, writerid);
     }
@@ -738,7 +740,7 @@ TransportClient::update_locators(const RepoId& remote,
   for (ImplsType::iterator pos = impls_.begin(), limit = impls_.end();
        pos != limit;
        ++pos) {
-    RcHandle<TransportImpl> impl = (*pos).lock();
+    RcHandle<TransportImpl> impl = pos->lock();
     if (impl) {
       impl->update_locators(remote, locators);
     }
@@ -756,7 +758,7 @@ TransportClient::get_ice_endpoint()
   for (ImplsType::iterator pos = impls_.begin(), limit = impls_.end();
        pos != limit;
        ++pos) {
-    RcHandle<TransportImpl> impl = (*pos).lock();
+    RcHandle<TransportImpl> impl = pos->lock();
     if (impl) {
       ICE::Endpoint* endpoint = impl->get_ice_endpoint();
       if (endpoint) { return endpoint; }

@@ -330,7 +330,7 @@ protected:
   /// knows about due to make_reservation().
   GUIDSeq* peer_ids(const RepoId& local_id) const;
 
-  void network_change();
+  void network_change() const;
 
 private:
 

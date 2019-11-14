@@ -17,7 +17,7 @@
 
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/ReactorInterceptor.h"
-#include "dds/DCPS/NetworkConfigPublisher.h"
+#include "dds/DCPS/NetworkConfigMonitor.h"
 
 #include "Ice.h"
 
@@ -119,11 +119,12 @@ public:
   ACE_Recursive_Thread_Mutex mutex;
 
 private:
-    void add_address(const DCPS::NetworkInterface& interface,
-                     const ACE_INET_Addr& address);
-    void remove_address(const DCPS::NetworkInterface& interface,
-                        const ACE_INET_Addr& address);
+  void add_address(const DCPS::NetworkInterface& interface,
+                   const ACE_INET_Addr& address);
+  void remove_address(const DCPS::NetworkInterface& interface,
+                      const ACE_INET_Addr& address);
 
+  bool ncm_listener_added_;
   Configuration configuration_;
   size_t remote_peer_reflexive_counter_;
   typedef std::map<Endpoint*, EndpointManager*> EndpointManagerMapType;

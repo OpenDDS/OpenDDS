@@ -316,11 +316,7 @@ RtpsUdpTransport::update_locators(const RepoId& remote,
                                   const TransportLocatorSeq& locators)
 {
   const TransportBLOB* blob = config().get_blob(locators);
-  if (!blob) {
-    return;
-  }
-
-  if (is_shut_down_) {
+  if (!blob || is_shut_down_) {
     return;
   }
 
@@ -485,7 +481,7 @@ namespace {
     if (result < 0) {
       ACE_TCHAR addr_buff[256] = {};
       int err = errno;
-      addr.addr_to_string(addr_buff, 256);
+      addr.addr_to_string(addr_buff, 256, 0);
       errno = err;
       const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
       ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_single_i() - "

@@ -115,7 +115,7 @@ namespace {
   {
     if (security_debug.warn) {
       ACE_TCHAR addr_buff[256] = {};
-      remote.addr_to_string(addr_buff, 256);
+      remote.addr_to_string(addr_buff, 256, 0);
       ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpReceiveStrategy::receive_bytes - "
                  "from %s secure RTPS processing failed: %C\n", addr_buff, msg));
     }

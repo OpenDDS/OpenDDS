@@ -87,12 +87,9 @@ int AgentImpl::handle_timeout(const ACE_Time_Value& a_now, const void* /*act*/)
 
 AgentImpl::AgentImpl() :
   ReactorInterceptor(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner()),
+  ncm_listener_added_(false),
   remote_peer_reflexive_counter_(0)
 {
-  DCPS::NetworkConfigPublisher_rch ncp = TheServiceParticipant->network_config_publisher();
-  if (ncp) {
-    ncp->add_listener(rchandle_from(this));
-  }
 }
 
 void AgentImpl::add_endpoint(Endpoint* a_endpoint)
@@ -106,6 +103,14 @@ void AgentImpl::add_endpoint(Endpoint* a_endpoint)
   }
 
   check_invariants();
+
+  if (!endpoint_managers_.empty() && !ncm_listener_added_) {
+    DCPS::NetworkConfigMonitor_rch ncp = TheServiceParticipant->network_config_monitor();
+    if (ncp) {
+      ncp->add_listener(rchandle_from(this));
+    }
+    ncm_listener_added_ = true;
+  }
 }
 
 void AgentImpl::remove_endpoint(Endpoint* a_endpoint)
@@ -122,6 +127,14 @@ void AgentImpl::remove_endpoint(Endpoint* a_endpoint)
   }
 
   check_invariants();
+
+  if (endpoint_managers_.empty() && ncm_listener_added_) {
+    DCPS::NetworkConfigMonitor_rch ncp = TheServiceParticipant->network_config_monitor();
+    if (ncp) {
+      ncp->remove_listener(rchandle_from(this));
+    }
+    ncm_listener_added_ = false;
+  }
 }
 
 AgentInfo AgentImpl::get_local_agent_info(Endpoint* a_endpoint) const
@@ -233,6 +246,7 @@ void AgentImpl::add_address(const DCPS::NetworkInterface&,
 void AgentImpl::remove_address(const DCPS::NetworkInterface& interface,
                                const ACE_INET_Addr& address)
 {
+  // Signal change.  Same code as add_address.
   add_address(interface, address);
 }
 

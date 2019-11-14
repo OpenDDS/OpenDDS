@@ -12,7 +12,7 @@
 
 #ifdef ACE_LINUX
 
-#include "NetworkConfigPublisher.h"
+#include "NetworkConfigMonitor.h"
 #include "RcEventHandler.h"
 #include "ReactorInterceptor.h"
 #include "dcps_export.h"
@@ -24,9 +24,9 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class OpenDDS_Dcps_Export LinuxNetworkConfigPublisher : public RcEventHandler, public NetworkConfigPublisher {
+class OpenDDS_Dcps_Export LinuxNetworkConfigMonitor : public RcEventHandler, public NetworkConfigMonitor {
 public:
-  LinuxNetworkConfigPublisher(ReactorInterceptor_rch interceptor);
+  explicit LinuxNetworkConfigMonitor(ReactorInterceptor_rch interceptor);
   bool open();
   bool close();
 
@@ -34,7 +34,7 @@ private:
   ACE_HANDLE get_handle() const;
   int handle_input(ACE_HANDLE);
   void read_messages();
-  void process_message(const struct nlmsghdr* header);
+  void process_message(const nlmsghdr* header);
 
   ACE_SOCK_Netlink socket_;
 };

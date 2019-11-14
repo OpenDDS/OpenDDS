@@ -1149,7 +1149,7 @@ DataLink::ImmediateStart::execute() {
 
 
 void
-DataLink::network_change()
+DataLink::network_change() const
 {
   for (IdToSendListenerMap::const_iterator itr = send_listeners_.begin();
        itr != send_listeners_.end(); ++itr) {

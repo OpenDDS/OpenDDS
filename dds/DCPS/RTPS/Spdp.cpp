@@ -1502,7 +1502,7 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer, bool securityGuids)
 
   multicast_interface_ = outer_->disco_->multicast_interface();
 
-  DCPS::NetworkConfigPublisher_rch ncp = TheServiceParticipant->network_config_publisher();
+  DCPS::NetworkConfigMonitor_rch ncp = TheServiceParticipant->network_config_monitor();
   if (ncp) {
     const DCPS::NetworkInterfaces nics = ncp->add_listener(rchandle_from(this));
 
@@ -1586,7 +1586,7 @@ Spdp::SpdpTransport::~SpdpTransport()
     outer_->eh_shutdown_ = true;
   }
   outer_->shutdown_cond_.signal();
-  DCPS::NetworkConfigPublisher_rch ncp = TheServiceParticipant->network_config_publisher();
+  DCPS::NetworkConfigMonitor_rch ncp = TheServiceParticipant->network_config_monitor();
   if (ncp) {
     ncp->remove_listener(rchandle_from(this));
   }
@@ -1788,7 +1788,7 @@ Spdp::SpdpTransport::send(const ACE_INET_Addr& addr)
     const int err = errno;
     if (err != ENETUNREACH || !network_is_unreachable_) {
       ACE_TCHAR addr_buff[256] = {};
-      addr.addr_to_string(addr_buff, 256);
+      addr.addr_to_string(addr_buff, 256, 0);
       errno = err;
       ACE_ERROR((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: Spdp::SpdpTransport::send() - ")

@@ -19,7 +19,7 @@
 #include "dds/DCPS/DomainParticipantFactoryImpl.h"
 #include "dds/DCPS/unique_ptr.h"
 #include "dds/DCPS/ReactorTask.h"
-#include "dds/DCPS/NetworkConfigPublisher.h"
+#include "dds/DCPS/NetworkConfigMonitor.h"
 
 #include "ace/Task.h"
 #include "ace/Configuration.h"
@@ -394,7 +394,7 @@ public:
    */
   void default_configuration_file(const ACE_TCHAR* path);
 
-  NetworkConfigPublisher_rch network_config_publisher();
+  NetworkConfigMonitor_rch network_config_monitor();
 
 private:
 
@@ -625,7 +625,8 @@ private:
    */
   ACE_TString default_configuration_file_;
 
-  NetworkConfigPublisher_rch network_config_publisher_;
+  NetworkConfigMonitor_rch network_config_monitor_;
+  mutable ACE_Thread_Mutex network_config_monitor_lock_;
 };
 
 #define TheServiceParticipant OpenDDS::DCPS::Service_Participant::instance()

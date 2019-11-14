@@ -39,15 +39,21 @@ public:
 
   AddressSet addresses;
 
-  bool operator==(int index) const
-  {
-    return index_ == index;
-  }
-
 private:
   int index_;
   OPENDDS_STRING name_;
   bool can_multicast_;
+};
+
+struct NetworkInterfaceIndex {
+  NetworkInterfaceIndex(int index) : index_(index) {}
+
+  bool operator()(const NetworkInterface& nic) const
+  {
+    return index_ == nic.index();
+  }
+
+  const int index_;
 };
 
 class NetworkConfigListener : public virtual RcObject {
@@ -64,7 +70,7 @@ typedef RcHandle<NetworkConfigListener> NetworkConfigListener_rch;
 
 typedef OPENDDS_VECTOR(NetworkInterface) NetworkInterfaces;
 
-class OpenDDS_Dcps_Export NetworkConfigPublisher : public virtual RcObject {
+class OpenDDS_Dcps_Export NetworkConfigMonitor : public virtual RcObject {
 public:
   virtual bool open() = 0;
   virtual bool close() = 0;
@@ -79,14 +85,22 @@ protected:
   void add_address(int index, const ACE_INET_Addr& address);
   void remove_address(int index, const ACE_INET_Addr& address);
 
-  mutable ACE_Thread_Mutex mutex_;
+private:
+  void process_add_remove();
 
   typedef OPENDDS_SET(NetworkConfigListener_rch) Listeners;
+  Listeners add_;
+  Listeners remove_;
+  mutable ACE_Thread_Mutex add_remove_mutex_;
+
   Listeners listeners_;
+  mutable ACE_Thread_Mutex listeners_mutex_;
+
   NetworkInterfaces network_interfaces_;
+  mutable ACE_Thread_Mutex network_interfaces_mutex_;
 };
 
-typedef RcHandle<NetworkConfigPublisher> NetworkConfigPublisher_rch;
+typedef RcHandle<NetworkConfigMonitor> NetworkConfigMonitor_rch;
 
 } // DCPS
 } // OpenDDS

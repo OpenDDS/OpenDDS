@@ -20,7 +20,7 @@
 #include "dds/DCPS/PeriodicTask.h"
 #include "dds/DCPS/SporadicTask.h"
 #include "dds/DCPS/JobQueue.h"
-#include "dds/DCPS/NetworkConfigPublisher.h"
+#include "dds/DCPS/NetworkConfigMonitor.h"
 
 #include "RtpsCoreC.h"
 #include "Sedp.h"

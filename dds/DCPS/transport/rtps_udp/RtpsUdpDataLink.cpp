@@ -214,7 +214,7 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
 
   RtpsUdpInst& config = this->config();
 
-  NetworkConfigPublisher_rch ncp = TheServiceParticipant->network_config_publisher();
+  NetworkConfigMonitor_rch ncp = TheServiceParticipant->network_config_monitor();
 
   DCPS::NetworkInterfaces nics;
   if (ncp) {
@@ -306,7 +306,7 @@ RtpsUdpDataLink::add_address(const DCPS::NetworkInterface& nic,
       , nic_(nic)
     {}
 
-    void execute() override
+    void execute()
     {
       tport_->join_multicast_group(nic_);
     }
@@ -328,7 +328,7 @@ RtpsUdpDataLink::remove_address(const DCPS::NetworkInterface& nic,
       , nic_(nic)
     {}
 
-    void execute() override
+    void execute()
     {
       tport_->leave_multicast_group(nic_);
     }
@@ -409,10 +409,9 @@ RtpsUdpDataLink::add_locator(const RepoId& remote_id,
   locators_[remote_id] = RemoteInfo(address, requires_inline_qos);
 
   if (DCPS::DCPS_debug_level > 3) {
-    const DCPS::GuidConverter conv(remote_id);
     ACE_TCHAR addr_buff[256] = {};
     address.addr_to_string(addr_buff, 256);
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) RtpsUdpDataLink::add_locator %C is now at %C\n"), OPENDDS_STRING(conv).c_str(), addr_buff));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) RtpsUdpDataLink::add_locator %C is now at %s\n"), LogGuid(remote_id).c_str(), addr_buff));
   }
 }
 
@@ -707,7 +706,7 @@ RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
 void
 RtpsUdpDataLink::stop_i()
 {
-  NetworkConfigPublisher_rch ncp = TheServiceParticipant->network_config_publisher();
+  NetworkConfigMonitor_rch ncp = TheServiceParticipant->network_config_monitor();
   if (ncp) {
     ncp->remove_listener(rchandle_from(this));
   }
