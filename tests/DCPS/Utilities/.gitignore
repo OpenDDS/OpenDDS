@@ -1,4 +1,12 @@
 /ClockPublisher
 /ClockSubscriber
-/UtilitiesC*
-/UtilitiesTypeSupport*
+/UtilitiesTypeSupport.idl
+/UtilitiesTypeSupportC.cpp
+/UtilitiesTypeSupportC.h
+/UtilitiesTypeSupportC.inl
+/UtilitiesTypeSupportImpl.cpp
+/UtilitiesTypeSupportImpl.h
+/UtilitiesTypeSupportS.h
+/UtilitiesC.h
+/UtilitiesC.cpp
+/UtilitiesC.inl
