@@ -123,7 +123,7 @@ bool test_success(int& status,
 
   ACE_TCHAR buffer[256];
   a.addr_to_string(buffer, 256);
-  std::cout << "Mapped address = " << buffer << std::endl;
+  std::cout << "Mapped address = " << ACE_TEXT_ALWAYS_CHAR(buffer) << std::endl;
 
   if (!response.has_fingerprint()) {
     std::cerr << "ERROR: no fingerprint" << std::endl;

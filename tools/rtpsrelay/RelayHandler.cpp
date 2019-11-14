@@ -736,7 +736,7 @@ void StunHandler::process_message(const ACE_INET_Addr& remote_address,
                                   const OpenDDS::DCPS::MonotonicTimePoint&,
                                   const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg)
 {
-  OpenDDS::DCPS::Serializer serializer(msg.get(), DCPS::Serializer::SWAP_BE);
+  OpenDDS::DCPS::Serializer serializer(msg.get(), OpenDDS::DCPS::Serializer::SWAP_BE);
   OpenDDS::STUN::Message message;
   message.block = msg.get();
   if (!(serializer >> message)) {
@@ -787,8 +787,10 @@ void StunHandler::process_message(const ACE_INET_Addr& remote_address,
 
 void StunHandler::send(const ACE_INET_Addr& addr, OpenDDS::STUN::Message message)
 {
-  OpenDDS::DCPS::Message_Block_Shared_Ptr block(new ACE_Message_Block(20 + message.length()));
-  OpenDDS::DCPS::Serializer serializer(block.get(), DCPS::Serializer::SWAP_BE);
+  using namespace OpenDDS::DCPS;
+  using namespace OpenDDS::STUN;
+  Message_Block_Shared_Ptr block(new ACE_Message_Block(HEADER_SIZE + message.length()));
+  Serializer serializer(block.get(), Serializer::SWAP_BE);
   message.block = block.get();
   serializer << message;
   enqueue_message(addr, block);
