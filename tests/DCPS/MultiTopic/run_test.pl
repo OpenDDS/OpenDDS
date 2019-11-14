@@ -10,16 +10,22 @@ use PerlDDS::Run_Test;
 use strict;
 
 my $is_rtps_disc = 0;
-if ($ARGV[0] eq 'rtps_disc') {
-  $is_rtps_disc = 1;
+my $dir;
+foreach my $arg (@ARGV) {
+  if ($arg eq 'rtps_disc') {
+    $is_rtps_disc = 1;
+  }
+  if ($arg eq 'cpp11' || $arg eq 'classic') {
+    $dir = $arg;
+  }
 }
 
 my $DCPSREPO;
-my $args;
+my $args = '';
 if ($is_rtps_disc) {
-  $args = '-DCPSConfigFile rtps_disc.ini';
+  $args .= " -DCPSConfigFile rtps_disc.ini";
 } else {
-  my $dcpsrepo_ior = 'repo.ior';
+  my $dcpsrepo_ior = "repo.ior";
   unlink $dcpsrepo_ior;
   $DCPSREPO = PerlDDS::create_process("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                       "-o $dcpsrepo_ior");
@@ -31,7 +37,7 @@ if ($is_rtps_disc) {
   }
 }
 
-my $TEST = PerlDDS::create_process('MultiTopicTest', $args);
+my $TEST = PerlDDS::create_process("$dir/MultiTopicTest", $args);
 
 my $result = $TEST->SpawnWaitKill(60);
 if ($result != 0) {

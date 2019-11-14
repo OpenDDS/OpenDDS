@@ -2,8 +2,8 @@
 
 @topic
 struct LocationInfo {
-  @key unsigned long flight_id1;
-  @key unsigned long flight_id2;
+  @key unsigned long flight_id;
+  @key unsigned long departure_date;
   long x;
   long y;
   long z;
@@ -15,13 +15,13 @@ enum FlightType {
   mixed
 };
 
-typedef string<3> Airport;
+typedef string<3> Airport; // 3 Letter IATA Code
 typedef sequence<Airport> Airports;
 
 @topic
 struct PlanInfo {
-  @key unsigned long flight_id1;
-  @key unsigned long flight_id2;
+  @key unsigned long flight_id;
+  @key unsigned long departure_date;
   string flight_name;
   string tailno;
   FlightType type;
@@ -30,10 +30,14 @@ struct PlanInfo {
   Airports alternative_destinations;
 };
 
+const unsigned long even_more_length = 5;
+typedef long EvenMore[even_more_length];
+
 @topic
 struct MoreInfo {
-  @key unsigned long flight_id1;
+  @key unsigned long departure_date;
   string more;
+  EvenMore even_more;
 };
 
 // testing cross-joins, this has no keys
@@ -44,12 +48,16 @@ struct UnrelatedInfo {
 
 @topic
 struct Resulting {
-  @key unsigned long flight_id1;
-  @key unsigned long flight_id2;
+  @key unsigned long flight_id;
+  @key unsigned long departure_date;
   string flight_name;
+  FlightType type;
+  Airport destination;
+  Airports alternative_destinations;
   long x;
   long y;
   long height;
   string more;
+  EvenMore even_more;
   string misc;
 };
