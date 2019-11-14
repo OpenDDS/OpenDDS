@@ -386,7 +386,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   SpdpHandler spdp_vertical_handler(reactor, relay_addresses, association_table, responsible_relay_writer, responsible_relay_reader, lifespan, rtps_discovery, application_domain, application_participant_id, crypto, spdp);
   SedpHandler sedp_vertical_handler(reactor, relay_addresses, association_table, responsible_relay_writer, responsible_relay_reader, lifespan, rtps_discovery, application_domain, application_participant_id, crypto, sedp);
   DataHandler data_vertical_handler(reactor, relay_addresses, association_table, responsible_relay_writer, responsible_relay_reader, lifespan, rtps_discovery, application_domain, application_participant_id, crypto);
+
+#ifdef OPENDDS_SECURITY
   StunHandler stun_handler(reactor);
+#endif
 
   spdp_horizontal_handler.vertical_handler(&spdp_vertical_handler);
   sedp_horizontal_handler.vertical_handler(&sedp_vertical_handler);
@@ -404,7 +407,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   sedp_vertical_handler.open(sedp_vertical_addr);
   data_vertical_handler.open(data_vertical_addr);
 
+#ifdef OPENDDS_SECURITY
   stun_handler.open(stun_addr);
+#endif
 
   std::cout << "SPDP Horizontal listening on " << addr_to_string(spdp_horizontal_handler.relay_address()) << '\n'
             << "SEDP Horizontal listening on " << addr_to_string(sedp_horizontal_handler.relay_address()) << '\n'
@@ -412,7 +417,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
             << "SPDP Vertical listening on " << addr_to_string(spdp_vertical_handler.relay_address()) << '\n'
             << "SEDP Vertical listening on " << addr_to_string(sedp_vertical_handler.relay_address()) << '\n'
             << "Data Vertical listening on " << addr_to_string(data_vertical_handler.relay_address()) << '\n'
+#ifdef OPENDDS_SECURITY
             << "STUN listening on " << addr_to_string(stun_handler.relay_address()) << std::endl;
+#else
+    ;
+#endif
 
   DDS::DataWriter_var reader_writer_var = relay_publisher->create_datawriter(readers_topic, writer_qos, nullptr,
                                                                              OpenDDS::DCPS::DEFAULT_STATUS_MASK);

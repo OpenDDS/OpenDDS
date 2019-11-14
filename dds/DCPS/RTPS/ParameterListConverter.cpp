@@ -1564,7 +1564,6 @@ int from_param_list(const ParameterList& param_list,
 
   return result;
 }
-#endif
 
 int to_param_list(const ICE::AgentInfo& agent_info,
                   ParameterList& param_list)
@@ -1636,6 +1635,7 @@ int from_param_list(const ParameterList& param_list,
   }
   return 0;
 }
+#endif
 
 } // ParameterListConverter
 } // RTPS

@@ -4,6 +4,7 @@
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
+#ifdef OPENDDS_SECURITY
 
 #include "Ice.h"
 
@@ -14,8 +15,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace ICE {
-
-#ifdef OPENDDS_SECURITY
 
 bool candidates_sorted(const Candidate& x, const Candidate& y)
 {
@@ -85,9 +84,10 @@ Agent* Agent::instance()
   return ACE_Singleton<AgentImpl, ACE_SYNCH_MUTEX>::instance();
 }
 
-#endif /* OPENDDS_SECURITY */
 
 } // namespace ICE
 } // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
+
+#endif /* OPENDDS_SECURITY */

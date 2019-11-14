@@ -327,11 +327,13 @@ Spdp::~Spdp()
     {
       DiscoveredParticipantIter part = participants_.find(*participant_id);
       if (part != participants_.end()) {
+#ifdef OPENDDS_SECURITY
         ICE::Endpoint* endpoint = sedp_.get_ice_endpoint();
         if (endpoint) {
           stop_ice(endpoint, part->first, part->second.pdata_.participantProxy.availableBuiltinEndpoints);
         }
         purge_auth_deadlines(part);
+#endif
         remove_discovered_participant(part);
       }
     }
@@ -516,11 +518,13 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 #endif
 
     if (id == DCPS::DISPOSE_INSTANCE || id == DCPS::DISPOSE_UNREGISTER_INSTANCE) {
+#ifdef OPENDDS_SECURITY
       ICE::Endpoint* endpoint = sedp_.get_ice_endpoint();
       if (endpoint) {
         stop_ice(endpoint, iter->first, iter->second.pdata_.participantProxy.availableBuiltinEndpoints);
       }
       purge_auth_deadlines(iter);
+#endif
       remove_discovered_participant(iter);
       return;
     }
@@ -556,7 +560,9 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       }
     // Else a reset has occured and check if we should remove the participant
     } else if (iter->second.seq_reset_count_ >= config_->max_spdp_sequence_msg_reset_check()) {
+#ifdef OPENDDS_SECURITY
       purge_auth_deadlines(iter);
+#endif
       remove_discovered_participant(iter);
     }
   }
@@ -604,6 +610,7 @@ Spdp::data_received(const DataSubmessage& data,
     (data.inlineQos.length() && disposed(data.inlineQos)) ? DCPS::DISPOSE_INSTANCE : DCPS::SAMPLE_DATA,
     pdata, seq, from);
 
+#ifdef OPENDDS_SECURITY
   ICE::Endpoint* endpoint = sedp_.get_ice_endpoint();
   if (!endpoint) {
     return;
@@ -623,6 +630,7 @@ Spdp::data_received(const DataSubmessage& data,
   } else {
     stop_ice(endpoint, guid, pdata.participantProxy.availableBuiltinEndpoints);
   }
+#endif
 }
 
 void
@@ -1264,12 +1272,14 @@ Spdp::remove_expired_participants()
             ACE_TEXT("participant %C exceeded lease duration, removing\n"),
             OPENDDS_STRING(conv).c_str()));
         }
+#ifdef OPENDDS_SECURITY
         ICE::Endpoint* endpoint = sedp_.get_ice_endpoint();
         if (endpoint) {
           stop_ice(endpoint, part->first, part->second.pdata_.participantProxy.availableBuiltinEndpoints);
 
         }
         purge_auth_deadlines(part);
+#endif
         remove_discovered_participant(part);
       }
     }
@@ -2196,8 +2206,8 @@ Spdp::add_sedp_unicast(const ACE_INET_Addr& addr)
   sedp_unicast_[idx] = locator;
 }
 
-void Spdp::start_ice(ICE::Endpoint* endpoint, RepoId r, const BuiltinEndpointSet_t& avail, const ICE::AgentInfo& agent_info) {
 #ifdef OPENDDS_SECURITY
+void Spdp::start_ice(ICE::Endpoint* endpoint, RepoId r, const BuiltinEndpointSet_t& avail, const ICE::AgentInfo& agent_info) {
   RepoId l = guid_;
 
   // See RTPS v2.1 section 8.5.5.1
@@ -2294,16 +2304,9 @@ void Spdp::start_ice(ICE::Endpoint* endpoint, RepoId r, const BuiltinEndpointSet
     r.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER;
     ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
   }
-#else
-  ACE_UNUSED_ARG(endpoint);
-  ACE_UNUSED_ARG(r);
-  ACE_UNUSED_ARG(avail);
-  ACE_UNUSED_ARG(agent_info);
-#endif
 }
 
 void Spdp::stop_ice(ICE::Endpoint* endpoint, DCPS::RepoId r, const BuiltinEndpointSet_t& avail) {
-#ifdef OPENDDS_SECURITY
   RepoId l = guid_;
 
   // See RTPS v2.1 section 8.5.5.1
@@ -2400,14 +2403,8 @@ void Spdp::stop_ice(ICE::Endpoint* endpoint, DCPS::RepoId r, const BuiltinEndpoi
     r.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER;
     ICE::Agent::instance()->stop_ice(endpoint, l, r);
   }
-#else
-  ACE_UNUSED_ARG(endpoint);
-  ACE_UNUSED_ARG(r);
-  ACE_UNUSED_ARG(avail);
-#endif
 }
 
-#ifdef OPENDDS_SECURITY
 DDS::Security::ParticipantCryptoHandle
 Spdp::remote_crypto_handle(const DCPS::RepoId& remote_participant) const
 {
@@ -2464,11 +2461,9 @@ void Spdp::SpdpTransport::process_auth_resends(const DCPS::MonotonicTimePoint& n
 {
   outer_->process_auth_resends(now);
 }
-#endif
 
 void Spdp::purge_auth_deadlines(DiscoveredParticipantIter iter)
 {
-#ifdef OPENDDS_SECURITY
   if (iter == participants_.end()) {
     return;
   }
@@ -2482,14 +2477,10 @@ void Spdp::purge_auth_deadlines(DiscoveredParticipantIter iter)
       break;
     }
   }
-#else
-  ACE_UNUSED_ARG(iter);
-#endif
 }
 
 void Spdp::purge_auth_resends(DiscoveredParticipantIter iter)
 {
-#ifdef OPENDDS_SECURITY
   if (iter == participants_.end()) {
     return;
   }
@@ -2501,10 +2492,8 @@ void Spdp::purge_auth_resends(DiscoveredParticipantIter iter)
       break;
     }
   }
-#else
-  ACE_UNUSED_ARG(iter);
-#endif
 }
+#endif
 
 }
 }

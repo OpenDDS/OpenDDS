@@ -6,6 +6,7 @@
  * See: http://www.opendds.org/license.html
  */
 
+#ifdef OPENDDS_SECURITY
 #ifndef OPENDDS_RTPS_STUN_H
 #define OPENDDS_RTPS_STUN_H
 
@@ -240,3 +241,4 @@ private:
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* OPENDDS_RTPS_STUN_H */
+#endif /* OPENDDS_SECURITY */

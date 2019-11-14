@@ -14,6 +14,8 @@
 #include <cstdlib>
 #include <iostream>
 
+#ifdef OPENDDS_SECURITY
+
 void generate_transaction_id(OpenDDS::STUN::Message& message)
 {
   for (size_t idx = 0; idx != 12; ++idx) {
@@ -264,6 +266,7 @@ bool test_no_fingerprint(int& status,
 
   return retval;
 }
+#endif
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
@@ -271,6 +274,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   ACE_UNUSED_ARG(argv);
 
   int status = EXIT_SUCCESS;
+#ifdef OPENDDS_SECURITY
   ACE_INET_Addr local;
   ACE_SOCK_Dgram socket(local);
 
@@ -285,6 +289,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   if (!test_no_fingerprint(status, socket, remote)) {
     std::cerr << "ERROR: test_no_fingerprint failed" << std::endl;
   }
-
+#endif
   return status;
 }

@@ -5,6 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
+#ifdef OPENDDS_SECURITY
+
 #include "Stun.h"
 
 #include "dds/DCPS/security/framework/SecurityRegistry.h"
@@ -14,8 +16,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace STUN {
-
-#ifdef OPENDDS_SECURITY
 
 ACE_UINT16 Attribute::length() const
 {
@@ -849,9 +849,8 @@ bool operator<<(DCPS::Serializer& serializer, const Message& message)
   return true;
 }
 
-#endif /* OPENDDS_SECURITY */
-
 } // namespace STUN
 } // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
+#endif /* OPENDDS_SECURITY */

@@ -237,6 +237,8 @@ private:
   ACE_INET_Addr extract_relay_address(const RelayAddresses& relay_addresses) const override;
 };
 
+#ifdef OPENDDS_SECURITY
+
 class StunHandler : public RelayHandler {
 public:
   explicit StunHandler(ACE_Reactor* reactor);
@@ -248,6 +250,7 @@ private:
   void send(const ACE_INET_Addr& addr, OpenDDS::STUN::Message message);
 
 };
+#endif /* OPENDDS_SECURITY */
 
 }
 

@@ -5,6 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
+#ifdef OPENDDS_SECURITY
+
 #include "Checklist.h"
 
 #include "EndpointManager.h"
@@ -16,8 +18,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace ICE {
-
-#ifdef OPENDDS_SECURITY
 
 using OpenDDS::DCPS::MonotonicTimePoint;
 using OpenDDS::DCPS::TimeDuration;
@@ -794,9 +794,9 @@ void Checklist::indication()
   last_indication_.set_to_now();
 }
 
-#endif /* OPENDDS_SECURITY */
 
 } // namespace ICE
 } // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
+#endif /* OPENDDS_SECURITY */

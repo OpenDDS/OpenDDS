@@ -25,6 +25,7 @@
 
 namespace RtpsRelay {
 
+#ifdef OPENDDS_SECURITY
 namespace {
   OpenDDS::STUN::Message make_bad_request_error_response(const OpenDDS::STUN::Message& a_message,
                                                          const std::string& a_reason)
@@ -51,6 +52,7 @@ namespace {
     return response;
   }
 }
+#endif
 
 RelayHandler::RelayHandler(ACE_Reactor* reactor)
   : ACE_Event_Handler(reactor)
@@ -728,6 +730,8 @@ ACE_INET_Addr DataHandler::extract_relay_address(const RelayAddresses& relay_add
   return ACE_INET_Addr(relay_addresses.data_relay_address().c_str());
 }
 
+#ifdef OPENDDS_SECURITY
+
 StunHandler::StunHandler(ACE_Reactor* reactor)
   : RelayHandler(reactor)
 {}
@@ -795,5 +799,6 @@ void StunHandler::send(const ACE_INET_Addr& addr, OpenDDS::STUN::Message message
   serializer << message;
   enqueue_message(addr, block);
 }
+#endif /* OPENDDS_SECURITY */
 
 }
