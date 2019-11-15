@@ -361,8 +361,8 @@ RtpsUdpDataLink::join_multicast_group(const DCPS::NetworkInterface& nic,
     ACE_DEBUG((LM_INFO,
                ACE_TEXT("(%P|%t) RtpsUdpDataLink::join_multicast_group ")
                ACE_TEXT("joining group %C %C:%hu\n"),
-               nic.name().c_str (),
-               config().multicast_group_address_str_.c_str (),
+               nic.name().c_str(),
+               config().multicast_group_address_str_.c_str(),
                config().multicast_group_address_.get_port_number()));
   }
 
@@ -386,8 +386,8 @@ RtpsUdpDataLink::leave_multicast_group(const DCPS::NetworkInterface& nic)
     ACE_DEBUG((LM_INFO,
                ACE_TEXT("(%P|%t) RtpsUdpDataLink::leave_multicast_group ")
                ACE_TEXT("leaving group %C %C:%hu\n"),
-               nic.name().c_str (),
-               config().multicast_group_address_str_.c_str (),
+               nic.name().c_str(),
+               config().multicast_group_address_str_.c_str(),
                config().multicast_group_address_.get_port_number()));
   }
 

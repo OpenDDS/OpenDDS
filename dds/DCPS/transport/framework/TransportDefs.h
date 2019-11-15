@@ -59,7 +59,7 @@ ACE_END_VERSIONED_NAMESPACE_DECL
     }                                                                            \
     else                                                                         \
     {                                                                            \
-      VALUE = static_cast<TYPE>(ACE_OS::atoi (stringvalue.c_str ()));            \
+      VALUE = static_cast<TYPE>(ACE_OS::atoi (stringvalue.c_str()));             \
     }                                                                            \
   }
 
@@ -148,7 +148,7 @@ ACE_END_VERSIONED_NAMESPACE_DECL
     }                                                                            \
     else                                                                         \
     {                                                                            \
-      VALUE = ACE_OS::strtod (stringvalue.c_str (), 0);                          \
+      VALUE = ACE_OS::strtod (stringvalue.c_str(), 0);                           \
     }                                                                            \
   }
 

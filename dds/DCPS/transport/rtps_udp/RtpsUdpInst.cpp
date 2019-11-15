@@ -198,7 +198,7 @@ RtpsUdpInst::populate_locator(TransportLocator& info, ConnectionInfoFlags flags)
       if (TheServiceParticipant->default_address ().empty ()) {
         get_interface_addrs(addrs);
       } else {
-        addrs.push_back (ACE_INET_Addr (static_cast<u_short> (0), TheServiceParticipant->default_address ().c_str ()));
+        addrs.push_back (ACE_INET_Addr (static_cast<u_short> (0), TheServiceParticipant->default_address().c_str()));
       }
       for (AddrVector::iterator adr_it = addrs.begin(); adr_it != addrs.end(); ++adr_it) {
         idx = locators.length();
@@ -246,7 +246,7 @@ RtpsUdpInst::host_addresses() const {
     if (TheServiceParticipant->default_address ().empty ()) {
       get_interface_addrs(addresses);
     } else {
-      addresses.push_back (ACE_INET_Addr (static_cast<u_short> (0), TheServiceParticipant->default_address ().c_str ()));
+      addresses.push_back (ACE_INET_Addr (static_cast<u_short> (0), TheServiceParticipant->default_address().c_str()));
     }
   } else {
     addresses.push_back(this->local_address());

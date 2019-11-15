@@ -337,7 +337,7 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
   // Override with DCPSDefaultAddress.
   if (config.local_address() == ACE_INET_Addr () &&
       !TheServiceParticipant->default_address ().empty ()) {
-    config.local_address(0, TheServiceParticipant->default_address ().c_str ());
+    config.local_address(0, TheServiceParticipant->default_address().c_str());
   }
 
   // Open the socket here so that any addresses/ports left
