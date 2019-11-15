@@ -608,10 +608,18 @@ Spdp::data_received(const DataSubmessage& data,
   if (shutdown_flag_.value()) { return; }
 
   ParticipantData_t pdata;
+
+  pdata.participantProxy.domainId = domain_;
+
   if (ParameterListConverter::from_param_list(plist, pdata) < 0) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::data_received - ")
       ACE_TEXT("failed to convert from ParameterList to ")
       ACE_TEXT("SPDPdiscoveredParticipantData\n")));
+    return;
+  }
+
+  // Remote domain ID, if populated, has to match
+  if (pdata.participantProxy.domainId != domain_) {
     return;
   }
 
