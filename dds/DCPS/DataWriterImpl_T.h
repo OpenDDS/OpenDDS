@@ -358,9 +358,6 @@ private:
         if (key_marshaled_size_) {
           effective_size = key_marshaled_size_;
         } else {
-          if (cdr) {
-            effective_size = cdr_header_size; // CDR encapsulation
-          }
           TraitsType::gen_find_size(ko_instance_data, effective_size, padding);
           if (cdr) {
             effective_size += (cdr_header_size);
@@ -400,9 +397,6 @@ private:
         if (marshaled_size_) {
           effective_size = marshaled_size_;
         } else {
-          if (cdr) {
-            effective_size = cdr_header_size; // CDR encapsulation
-          }
           TraitsType::gen_find_size(instance_data, effective_size, padding);
           if (cdr) {
             effective_size += (cdr_header_size);
