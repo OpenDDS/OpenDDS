@@ -41,9 +41,11 @@ RtpsUdpInst::RtpsUdpInst(const OPENDDS_STRING& name)
   , heartbeat_response_delay_(0, 500*1000 /*microseconds*/) // default from RTPS
   , handshake_timeout_(30) // default syn_timeout in OpenDDS_Multicast
   , durable_data_timeout_(60)
-  , opendds_discovery_guid_(GUID_UNKNOWN)
+  , rtps_relay_beacon_period_(30)
+  , use_rtps_relay_(false)
   , rtps_relay_only_(false)
   , use_ice_(false)
+  , opendds_discovery_guid_(GUID_UNKNOWN)
 {
 }
 
@@ -109,8 +111,11 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
     ACE_INET_Addr addr(rtps_relay_address_s.c_str());
     rtps_relay_address(addr);
   }
+  GET_CONFIG_TIME_VALUE(cf, sect, ACE_TEXT("RtpsRelayBeaconPeriod"),
+                        rtps_relay_beacon_period_);
 
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("RtpsRelayOnly"), rtps_relay_only_, bool);
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("UseRtpsRelay"), use_rtps_relay_, bool);
 
   ACE_TString stun_server_address_s;
   GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("DataStunServerAddress"),
@@ -226,6 +231,8 @@ RtpsUdpInst::get_blob(const OpenDDS::DCPS::TransportLocatorSeq& trans_info) cons
   return 0;
 }
 
+#ifdef OPENDDS_SECURITY
+
 ICE::AddressListType
 RtpsUdpInst::host_addresses() const {
   ICE::AddressListType addresses;
@@ -249,6 +256,8 @@ RtpsUdpInst::host_addresses() const {
 
   return addresses;
 }
+
+#endif
 
 } // namespace DCPS
 } // namespace OpenDDS

@@ -727,7 +727,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     }
   }
 
-  return false;
+  return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_participant: Not authorized for domain");
 }
 
 ::CORBA::Boolean AccessControlBuiltInImpl::check_remote_datawriter(

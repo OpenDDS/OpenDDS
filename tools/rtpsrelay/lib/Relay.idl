@@ -27,12 +27,6 @@ module RtpsRelay {
     @key EntityId_t entityId;
   };
 
-  struct RelayAddresses {
-    string spdp_relay_address;
-    string sedp_relay_address;
-    string data_relay_address;
-  };
-
   @topic
   struct WriterEntry {
     @key GUID_t guid;
@@ -41,8 +35,6 @@ module RtpsRelay {
     string type_name;
     DDS::DataWriterQos data_writer_qos;
     DDS::PublisherQos publisher_qos;
-
-    RelayAddresses relay_addresses;
   };
 
   @topic
@@ -53,11 +45,21 @@ module RtpsRelay {
     string type_name;
     DDS::DataReaderQos data_reader_qos;
     DDS::SubscriberQos subscriber_qos;
+  };
 
+  struct RelayAddresses {
+    string spdp_relay_address;
+    string sedp_relay_address;
+    string data_relay_address;
+  };
+
+  @topic
+  struct GuidRelayAddresses {
+    @key GUID_t guid;
     RelayAddresses relay_addresses;
   };
 
-typedef sequence<GUID_t> GuidSequence;
+  typedef sequence<GUID_t> GuidSequence;
 
   struct RelayHeader {
     GuidSequence to;

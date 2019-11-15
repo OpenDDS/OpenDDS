@@ -53,8 +53,8 @@ WriterInfoListener::writer_removed(WriterInfo&)
 {
 }
 
-WriterInfo::WriterInfo(WriterInfoListener*         reader,
-                       const PublicationId&        writer_id,
+WriterInfo::WriterInfo(WriterInfoListener* reader,
+                       const PublicationId& writer_id,
                        const ::DDS::DataWriterQos& writer_qos)
   : last_liveliness_activity_time_(MonotonicTimePoint::now()),
   historic_samples_timer_(NO_TIMER),
@@ -84,26 +84,21 @@ WriterInfo::WriterInfo(WriterInfoListener*         reader,
   }
 }
 
-OPENDDS_STRING
-WriterInfo::get_state_str() const
+const char* WriterInfo::get_state_str() const
 {
-  OPENDDS_STRING ret;
-  switch (this->state_) {
-  case WriterInfo::NOT_SET:
-    ret += "NOT_SET";
-    break;
-  case WriterInfo::ALIVE:
-    ret += "ALIVE";
-    break;
-  case WriterInfo::DEAD:
-    ret += "DEAD";
-    break;
+  switch (state_) {
+  case NOT_SET:
+    return "NOT_SET";
+  case ALIVE:
+    return "ALIVE";
+  case DEAD:
+    return "DEAD";
   default:
-    ret += "UNSPECIFIED(";
-    ret += to_dds_string(int(this->state_));
-    ret += ")";
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: WriterInfo::get_state_str: ")
+      ACE_TEXT("%d is either invalid or not recognized.\n"),
+      state_));
+    return "Invalid state";
   }
-  return ret.c_str();
 }
 
 void

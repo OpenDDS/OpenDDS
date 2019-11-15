@@ -1616,7 +1616,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         if (status != ::DDS::RETCODE_PRECONDITION_NOT_MET) {
           ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) t10 ERROR: ")
             ACE_TEXT("expected PRECONDITION_NOT_MET from delete_datareader, ")
-            ACE_TEXT("but it returned: %C\n"), retcode_to_string(status).c_str()));
+            ACE_TEXT("but it returned: %C\n"), retcode_to_string(status)));
           test_failed = 1;
         }
 
@@ -1636,7 +1636,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         if (status != ::DDS::RETCODE_OK) {
           ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) t10 ERROR: ")
             ACE_TEXT("delete_datareader returned: %C\n"),
-            retcode_to_string(status).c_str()));
+            retcode_to_string(status)));
           test_failed = 1;
         }
       }

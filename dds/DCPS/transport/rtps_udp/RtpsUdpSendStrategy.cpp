@@ -227,7 +227,7 @@ ssize_t
 RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
                                    const ACE_INET_Addr& addr)
 {
-  const ACE_INET_Addr a = link_->config().rtps_relay_only() ? link_->config().rtps_relay_address() : addr;
+  const ACE_INET_Addr a = link_->config().rtps_relay_only_ ? link_->config().rtps_relay_address() : addr;
 #ifdef ACE_LACKS_SENDMSG
   char buffer[UDP_MAX_MESSAGE_SIZE];
   char *iter = buffer;
@@ -304,11 +304,20 @@ RtpsUdpSendStrategy::encode_payload(const RepoId& pub_id,
   const DDS::OctetSeq plain = toSeq(payload.get());
   DDS::OctetSeq encoded, iQos;
   DDS::Security::SecurityException ex = {"", 0, 0};
+
   if (crypto->encode_serialized_payload(encoded, iQos, plain, writer_crypto_handle, ex)) {
     if (encoded != plain) {
       payload.reset(new ACE_Message_Block(encoded.length()));
       const char* raw = reinterpret_cast<const char*>(encoded.get_buffer());
       payload->copy(raw, encoded.length());
+
+      // Set FLAG_N flag
+      for (CORBA::ULong i = 0; i < submessages.length(); ++i) {
+          if (submessages[i]._d() == RTPS::DATA) {
+              RTPS::DataSubmessage& data = submessages[i].data_sm();
+              data.smHeader.flags |= RTPS::FLAG_N_IN_DATA;
+          }
+      }
     }
 
     const CORBA::ULong iQosLen = iQos.length();

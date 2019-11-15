@@ -17,6 +17,9 @@
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/RcEventHandler.h"
 #include "dds/DCPS/ReactorTask.h"
+#include "dds/DCPS/PeriodicTask.h"
+#include "dds/DCPS/SporadicTask.h"
+#include "dds/DCPS/JobQueue.h"
 
 #include "RtpsCoreC.h"
 #include "Sedp.h"
@@ -29,7 +32,6 @@
 
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/PoolAllocationBase.h"
-#include "dds/DCPS/ReactorInterceptor.h"
 
 #include "dds/DCPS/security/framework/SecurityConfig_rch.h"
 #ifdef OPENDDS_SECURITY
@@ -45,11 +47,16 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace RTPS {
 
+class RtpsDiscoveryConfig;
 class RtpsDiscovery;
 
 /// Each instance of class Spdp represents the implementation of the RTPS
 /// Simple Participant Discovery Protocol for a single local DomainParticipant.
-class OpenDDS_Rtps_Export Spdp : public DCPS::LocalParticipant<Sedp> {
+class OpenDDS_Rtps_Export Spdp : public DCPS::LocalParticipant<Sedp>
+#ifdef OPENDDS_SECURITY
+                               , public ICE::AgentInfoListener
+#endif
+{
 public:
 
   Spdp(DDS::DomainId_t domain,
@@ -99,12 +106,17 @@ public:
   void handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg);
 #endif
 
-  void handle_participant_data(DCPS::MessageId id, const ParticipantData_t& pdata, const DCPS::SequenceNumber& seq);
+  void handle_participant_data(DCPS::MessageId id,
+                               const ParticipantData_t& pdata,
+                               const DCPS::SequenceNumber& seq,
+                               const ACE_INET_Addr& from);
 
   static bool validateSequenceNumber(const DCPS::SequenceNumber& seq, DiscoveredParticipantIter& iter);
 
 #ifdef OPENDDS_SECURITY
-  void check_auth_states(const DCPS::MonotonicTimePoint& tv);
+  void process_auth_deadlines(const DCPS::MonotonicTimePoint& tv);
+  void process_auth_resends(const DCPS::MonotonicTimePoint& tv);
+
   /**
    * Write Secured Updated DP QOS
    *
@@ -133,13 +145,15 @@ public:
   void remove_sedp_unicast(const ACE_INET_Addr& addr);
   void add_sedp_unicast(const ACE_INET_Addr& addr);
 
-  DCPS::ReactorInterceptor& interceptor() { return interceptor_; }
+  DCPS::RcHandle<DCPS::JobQueue> job_queue() const { return tport_->job_queue_; }
 
   u_short get_spdp_port() const { return tport_ ? tport_->uni_port_ : 0; }
 
   u_short get_sedp_port() const { return sedp_.local_address().get_port_number(); }
 
-  void schedule_send(const DCPS::TimeDuration& delay);
+  void sedp_rtps_relay_address(const ACE_INET_Addr& address) { sedp_.rtps_relay_address(address); }
+
+  void sedp_stun_server_address(const ACE_INET_Addr& address) { sedp_.stun_server_address(address); }
 
   BuiltinEndpointSet_t available_builtin_endpoints() const { return available_builtin_endpoints_; }
 
@@ -162,28 +176,21 @@ private:
             RtpsDiscovery* disco);
 
   RtpsDiscovery* disco_;
-  DCPS::ReactorTask reactor_task_;
-
-  class Interceptor : public DCPS::ReactorInterceptor {
-  public:
-    Interceptor(DCPS::ReactorTask* task, ACE_Reactor* reactor, ACE_thread_t owner) : ReactorInterceptor(reactor, owner), task_(task) {}
-    bool reactor_is_shut_down() const;
-  private:
-    DCPS::ReactorTask* task_;
-  } interceptor_;
+  DCPS::RcHandle<RtpsDiscoveryConfig> config_;
 
   // Participant:
   const DDS::DomainId_t domain_;
   DCPS::RepoId guid_;
   DCPS::LocatorSeq sedp_unicast_, sedp_multicast_;
 
-  void data_received(const DataSubmessage& data, const ParameterList& plist);
+  void data_received(const DataSubmessage& data, const ParameterList& plist, const ACE_INET_Addr& from);
 
   void match_unauthenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp);
 
 #ifdef OPENDDS_SECURITY
   bool match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp);
   void attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp);
+  void update_agent_info(const DCPS::RepoId& local_guid, const ICE::AgentInfo& agent_info);
 #endif
 
 #ifndef DDS_HAS_MINIMUM_BIT
@@ -191,16 +198,21 @@ private:
 #endif /* DDS_HAS_MINIMUM_BIT */
 
   struct SpdpTransport : public DCPS::RcEventHandler {
+    typedef size_t WriteFlags;
+    static const WriteFlags SEND_TO_LOCAL = (1 << 0);
+    static const WriteFlags SEND_TO_RELAY = (1 << 1);
+
     SpdpTransport(Spdp* outer, bool securityGuids);
     ~SpdpTransport();
 
-    virtual int handle_timeout(const ACE_Time_Value&, const void*);
     virtual int handle_input(ACE_HANDLE h);
     virtual int handle_exception(ACE_HANDLE fd = ACE_INVALID_HANDLE);
 
     void open();
-    void write();
-    void write_i();
+    void write(WriteFlags flags);
+    void write_i(WriteFlags flags);
+    void write_i(const DCPS::RepoId& guid, WriteFlags flags);
+    void send(WriteFlags flags);
     void close();
     void dispose_unregister();
     bool open_unicast_socket(u_short port_common, u_short participant_id);
@@ -219,8 +231,22 @@ private:
     ACE_SOCK_Dgram_Mcast multicast_socket_;
     OPENDDS_SET(ACE_INET_Addr) send_addrs_;
     ACE_Message_Block buff_, wbuff_;
-    DCPS::TimeDuration disco_resend_period_;
-    DCPS::MonotonicTimePoint last_disco_resend_;
+    DCPS::ReactorTask reactor_task_;
+    DCPS::RcHandle<DCPS::JobQueue> job_queue_;
+    typedef DCPS::PmfPeriodicTask<SpdpTransport> SpdpPeriodic;
+    typedef DCPS::PmfSporadicTask<SpdpTransport> SpdpSporadic;
+    void send_local(const DCPS::MonotonicTimePoint& now);
+    DCPS::RcHandle<SpdpPeriodic> local_sender_;
+#ifdef OPENDDS_SECURITY
+    void process_auth_deadlines(const DCPS::MonotonicTimePoint& now);
+    DCPS::RcHandle<SpdpSporadic> auth_deadline_processor_;
+    void process_auth_resends(const DCPS::MonotonicTimePoint& now);
+    DCPS::RcHandle<SpdpSporadic> auth_resend_processor_;
+#endif
+    void send_relay(const DCPS::MonotonicTimePoint& now);
+    DCPS::RcHandle<SpdpPeriodic> relay_sender_;
+    void send_relay_beacon(const DCPS::MonotonicTimePoint& now);
+    DCPS::RcHandle<SpdpPeriodic> relay_beacon_;
   } *tport_;
 
   ACE_Event_Handler_var eh_; // manages our refcount on tport_
@@ -251,10 +277,17 @@ private:
   DDS::Security::PermissionsCredentialToken permissions_credential_token_;
 
   DDS::Security::ParticipantSecurityAttributes participant_sec_attr_;
-#endif
+
+  typedef std::multimap<DCPS::MonotonicTimePoint, DCPS::RepoId> TimeQueue;
+  TimeQueue auth_deadlines_;
+  TimeQueue auth_resends_;
 
   void start_ice(ICE::Endpoint* endpoint, DCPS::RepoId remote, const BuiltinEndpointSet_t& avail, const ICE::AgentInfo& agent_info);
   void stop_ice(ICE::Endpoint* endpoint, DCPS::RepoId remote, const BuiltinEndpointSet_t& avail);
+
+  void purge_auth_deadlines(DiscoveredParticipantIter iter);
+  void purge_auth_resends(DiscoveredParticipantIter iter);
+#endif
 
   friend class ::DDS_TEST;
 };

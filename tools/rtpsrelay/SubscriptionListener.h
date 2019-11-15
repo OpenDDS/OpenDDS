@@ -11,8 +11,7 @@ namespace RtpsRelay {
 class SubscriptionListener : public ListenerBase {
 public:
   SubscriptionListener(OpenDDS::DCPS::DomainParticipantImpl* participant,
-                       ReaderEntryDataWriter_ptr writer,
-                       const RelayAddresses& relay_addresses);
+                       ReaderEntryDataWriter_ptr writer);
 private:
   void on_data_available(DDS::DataReader_ptr /*reader*/) override;
   void write_sample(const DDS::SubscriptionBuiltinTopicData& data,
@@ -21,7 +20,6 @@ private:
 
   OpenDDS::DCPS::DomainParticipantImpl* participant_;
   ReaderEntryDataWriter_ptr writer_;
-  const RelayAddresses& relay_addresses_;
 };
 
 }

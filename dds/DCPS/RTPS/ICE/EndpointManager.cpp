@@ -348,7 +348,7 @@ bool EndpointManager::error_response(const STUN::Message& a_message)
   if (a_message.has_error_code()) {
     ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) EndpointManager::error_response: WARNING STUN error response code=%d reason=%s\n"), a_message.get_error_code(), a_message.get_error_reason().c_str()));
 
-    if (a_message.get_error_code() == 420 && a_message.has_unknown_attributes()) {
+    if (a_message.get_error_code() == STUN::UNKNOWN_ATTRIBUTE && a_message.has_unknown_attributes()) {
       std::vector<STUN::AttributeType> unknown_attributes = a_message.get_unknown_attributes();
 
       for (std::vector<STUN::AttributeType>::const_iterator pos = unknown_attributes.begin(),
@@ -393,7 +393,7 @@ STUN::Message EndpointManager::make_unknown_attributes_error_response(const STUN
   response.class_ = STUN::ERROR_RESPONSE;
   response.method = a_message.method;
   memcpy(response.transaction_id.data, a_message.transaction_id.data, sizeof(a_message.transaction_id.data));
-  response.append_attribute(STUN::make_error_code(420, "Unknown Attributes"));
+  response.append_attribute(STUN::make_error_code(STUN::UNKNOWN_ATTRIBUTE, "Unknown Attributes"));
   response.append_attribute(STUN::make_unknown_attributes(a_unknown_attributes));
   response.append_attribute(STUN::make_message_integrity());
   response.password = agent_info_.password;
@@ -408,7 +408,7 @@ STUN::Message EndpointManager::make_bad_request_error_response(const STUN::Messa
   response.class_ = STUN::ERROR_RESPONSE;
   response.method = a_message.method;
   memcpy(response.transaction_id.data, a_message.transaction_id.data, sizeof(a_message.transaction_id.data));
-  response.append_attribute(STUN::make_error_code(400, a_reason));
+  response.append_attribute(STUN::make_error_code(STUN::BAD_REQUEST, a_reason));
   response.append_attribute(STUN::make_message_integrity());
   response.password = agent_info_.password;
   response.append_attribute(STUN::make_fingerprint());
@@ -421,7 +421,7 @@ STUN::Message EndpointManager::make_unauthorized_error_response(const STUN::Mess
   response.class_ = STUN::ERROR_RESPONSE;
   response.method = a_message.method;
   memcpy(response.transaction_id.data, a_message.transaction_id.data, sizeof(a_message.transaction_id.data));
-  response.append_attribute(STUN::make_error_code(401, "Unauthorized"));
+  response.append_attribute(STUN::make_error_code(STUN::UNAUTHORIZED, "Unauthorized"));
   response.append_attribute(STUN::make_message_integrity());
   response.password = agent_info_.password;
   response.append_attribute(STUN::make_fingerprint());
