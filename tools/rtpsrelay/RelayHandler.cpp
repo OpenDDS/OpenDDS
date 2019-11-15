@@ -6,7 +6,7 @@
 #include <dds/DCPS/RTPS/BaseMessageTypes.h>
 #include <dds/DCPS/RTPS/MessageTypes.h>
 #include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
-#include <dds/DCPS/time_types.h>
+#include <dds/DCPS/TimeTypes.h>
 #include <dds/DdsDcpsCoreTypeSupportImpl.h>
 #include <dds/DdsDcpsGuidTypeSupportImpl.h>
 

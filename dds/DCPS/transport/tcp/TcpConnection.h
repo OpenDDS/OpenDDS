@@ -24,7 +24,7 @@
 #include "dds/DCPS/ReactorInterceptor.h"
 #include "dds/DCPS/ReactorTask.h"
 #include "dds/DCPS/transport/framework/TransportDefs.h"
-#include "dds/DCPS/time_types.h"
+#include "dds/DCPS/TimeTypes.h"
 
 #include "ace/SOCK_Stream.h"
 #include "ace/Svc_Handler.h"

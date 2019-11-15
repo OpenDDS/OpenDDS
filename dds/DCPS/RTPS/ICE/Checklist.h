@@ -12,7 +12,7 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include "dds/DCPS/time_types.h"
+#include "dds/DCPS/TimeTypes.h"
 
 #include "Task.h"
 #include "AgentImpl.h"

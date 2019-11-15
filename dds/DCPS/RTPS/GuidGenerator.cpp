@@ -8,7 +8,7 @@
 #include "dds/DCPS/RTPS/GuidGenerator.h"
 
 #include "dds/DCPS/GuidUtils.h"
-#include "dds/DCPS/time_types.h"
+#include "dds/DCPS/TimeTypes.h"
 
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
 

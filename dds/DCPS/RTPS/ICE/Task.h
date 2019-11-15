@@ -13,7 +13,7 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 #include "dds/Versioned_Namespace.h"
-#include "dds/DCPS/time_types.h"
+#include "dds/DCPS/TimeTypes.h"
 #include <ace/Time_Value.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL

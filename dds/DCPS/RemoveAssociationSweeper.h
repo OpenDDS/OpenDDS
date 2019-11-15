@@ -13,7 +13,7 @@
 #include "ReactorInterceptor.h"
 #include "Service_Participant.h"
 #include "GuidConverter.h"
-#include "time_types.h"
+#include "TimeTypes.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

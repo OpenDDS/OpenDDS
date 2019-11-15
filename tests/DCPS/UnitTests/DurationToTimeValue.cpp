@@ -9,7 +9,7 @@
 #include "ace/Time_Value.h"
 
 #include "dds/DCPS/Qos_Helper.h"
-#include "dds/DCPS/time_types.h"
+#include "dds/DCPS/TimeTypes.h"
 
 #include "../common/TestSupport.h"
 

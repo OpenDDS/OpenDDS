@@ -26,7 +26,7 @@
 #include "RcEventHandler.h"
 #include "unique_ptr.h"
 #include "Message_Block_Ptr.h"
-#include "time_types.h"
+#include "TimeTypes.h"
 
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
 #include "FilterEvaluator.h"

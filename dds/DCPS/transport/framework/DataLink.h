@@ -25,7 +25,7 @@
 #include "TransportReceiveListener.h"
 #include "dds/DCPS/transport/framework/QueueTaskBase_T.h"
 #include "dds/DCPS/ReactorInterceptor.h"
-#include "dds/DCPS/time_types.h"
+#include "dds/DCPS/TimeTypes.h"
 
 #include "ace/Event_Handler.h"
 #include "ace/Synch_Traits.h"

@@ -10,7 +10,7 @@
 
 #include "dds/DCPS/Ice.h"
 #include "dds/DCPS/RTPS/ICE/Stun.h"
-#include "dds/DCPS/time_types.h"
+#include "dds/DCPS/TimeTypes.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

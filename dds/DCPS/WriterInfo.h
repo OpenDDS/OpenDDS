@@ -17,7 +17,7 @@
 #include "CoherentChangeControl.h"
 #include "DisjointSequence.h"
 #include "transport/framework/ReceivedDataSample.h"
-#include "time_types.h"
+#include "TimeTypes.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

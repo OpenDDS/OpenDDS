@@ -42,7 +42,7 @@ public:
    *
    * \warning It will accept a ACE_Time_Value that represents a specific point
    * in time, but it is wrong to do so. Use one of the TimePoint_T classes
-   * defined in time_types.h that match the clock type.
+   * defined in TimeTypes.h that match the clock type.
    */
   explicit TimeDuration(const ACE_Time_Value& ace_time_value);
 

@@ -9,7 +9,7 @@
 #define OPENDDS_DCPS_THREADSYNCHRESOURCE_H
 
 #include "dds/DCPS/dcps_export.h"
-#include "dds/DCPS/time_types.h"
+#include "dds/DCPS/TimeTypes.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

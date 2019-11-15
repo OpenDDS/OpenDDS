@@ -16,7 +16,7 @@
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/ReactorInterceptor.h"
 #include "dds/DCPS/RepoIdTypes.h"
-#include "dds/DCPS/time_types.h"
+#include "dds/DCPS/TimeTypes.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
