@@ -172,8 +172,16 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
     sedp_multicast_.length(1);
     sedp_multicast_[0] = mc_locator;
   }
-}
 
+#ifdef OPENDDS_SECURITY
+  ICE::Endpoint* endpoint = sedp_.get_ice_endpoint();
+  if (endpoint) {
+    RepoId l = guid_;
+    l.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER;
+    ICE::Agent::instance()->add_local_agent_info_listener(endpoint, l, this);
+  }
+#endif
+}
 
 Spdp::Spdp(DDS::DomainId_t domain,
            RepoId& guid,
@@ -327,15 +335,26 @@ Spdp::~Spdp()
     {
       DiscoveredParticipantIter part = participants_.find(*participant_id);
       if (part != participants_.end()) {
+#ifdef OPENDDS_SECURITY
         ICE::Endpoint* endpoint = sedp_.get_ice_endpoint();
         if (endpoint) {
           stop_ice(endpoint, part->first, part->second.pdata_.participantProxy.availableBuiltinEndpoints);
         }
         purge_auth_deadlines(part);
+#endif
         remove_discovered_participant(part);
       }
     }
   }
+
+#ifdef OPENDDS_SECURITY
+  ICE::Endpoint* endpoint = sedp_.get_ice_endpoint();
+  if (endpoint) {
+    RepoId l = guid_;
+    l.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER;
+    ICE::Agent::instance()->remove_local_agent_info_listener(endpoint, l);
+  }
+#endif
 
   // ensure sedp's task queue is drained before data members are being
   // deleted
@@ -516,11 +535,13 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 #endif
 
     if (id == DCPS::DISPOSE_INSTANCE || id == DCPS::DISPOSE_UNREGISTER_INSTANCE) {
+#ifdef OPENDDS_SECURITY
       ICE::Endpoint* endpoint = sedp_.get_ice_endpoint();
       if (endpoint) {
         stop_ice(endpoint, iter->first, iter->second.pdata_.participantProxy.availableBuiltinEndpoints);
       }
       purge_auth_deadlines(iter);
+#endif
       remove_discovered_participant(iter);
       return;
     }
@@ -556,7 +577,9 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       }
     // Else a reset has occured and check if we should remove the participant
     } else if (iter->second.seq_reset_count_ >= config_->max_spdp_sequence_msg_reset_check()) {
+#ifdef OPENDDS_SECURITY
       purge_auth_deadlines(iter);
+#endif
       remove_discovered_participant(iter);
     }
   }
@@ -585,10 +608,18 @@ Spdp::data_received(const DataSubmessage& data,
   if (shutdown_flag_.value()) { return; }
 
   ParticipantData_t pdata;
+
+  pdata.participantProxy.domainId = domain_;
+
   if (ParameterListConverter::from_param_list(plist, pdata) < 0) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::data_received - ")
       ACE_TEXT("failed to convert from ParameterList to ")
       ACE_TEXT("SPDPdiscoveredParticipantData\n")));
+    return;
+  }
+
+  // Remote domain ID, if populated, has to match
+  if (pdata.participantProxy.domainId != domain_) {
     return;
   }
 
@@ -604,6 +635,7 @@ Spdp::data_received(const DataSubmessage& data,
     (data.inlineQos.length() && disposed(data.inlineQos)) ? DCPS::DISPOSE_INSTANCE : DCPS::SAMPLE_DATA,
     pdata, seq, from);
 
+#ifdef OPENDDS_SECURITY
   ICE::Endpoint* endpoint = sedp_.get_ice_endpoint();
   if (!endpoint) {
     return;
@@ -623,6 +655,7 @@ Spdp::data_received(const DataSubmessage& data,
   } else {
     stop_ice(endpoint, guid, pdata.participantProxy.availableBuiltinEndpoints);
   }
+#endif
 }
 
 void
@@ -1237,6 +1270,12 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
 
   return;
 }
+
+void Spdp::update_agent_info(const DCPS::RepoId&, const ICE::AgentInfo&)
+{
+  if (is_security_enabled())
+    write_secure_updates();
+}
 #endif
 
 void
@@ -1264,12 +1303,14 @@ Spdp::remove_expired_participants()
             ACE_TEXT("participant %C exceeded lease duration, removing\n"),
             OPENDDS_STRING(conv).c_str()));
         }
+#ifdef OPENDDS_SECURITY
         ICE::Endpoint* endpoint = sedp_.get_ice_endpoint();
         if (endpoint) {
           stop_ice(endpoint, part->first, part->second.pdata_.participantProxy.availableBuiltinEndpoints);
 
         }
         purge_auth_deadlines(part);
+#endif
         remove_discovered_participant(part);
       }
     }
@@ -1377,12 +1418,15 @@ Spdp::build_local_pdata(
     },
 #endif
     { // ParticipantProxy_t
+      domain_,
+      "",
       PROTOCOLVERSION,
       {gp[0], gp[1], gp[2], gp[3], gp[4], gp[5],
        gp[6], gp[7], gp[8], gp[9], gp[10], gp[11]},
       VENDORID_OPENDDS,
       false /*expectsIQoS*/,
       available_builtin_endpoints_,
+      0,
       sedp_unicast_,
       sedp_multicast_,
       nonEmptyList /*defaultMulticastLocatorList*/,
@@ -1410,6 +1454,11 @@ bool Spdp::announce_domain_participant_qos()
 
   return true;
 }
+
+#if !defined _MSC_VER || _MSC_VER > 1700
+const Spdp::SpdpTransport::WriteFlags Spdp::SpdpTransport::SEND_TO_LOCAL;
+const Spdp::SpdpTransport::WriteFlags Spdp::SpdpTransport::SEND_TO_RELAY;
+#endif
 
 Spdp::SpdpTransport::SpdpTransport(Spdp* outer, bool securityGuids)
   : outer_(outer)
@@ -1681,6 +1730,7 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
   }
 
 #ifdef OPENDDS_SECURITY
+  if (!outer_->is_security_enabled()) {
     ICE::Endpoint* endpoint = outer_->sedp_.get_ice_endpoint();
     if (endpoint) {
       const ICE::AgentInfo& agent_info = ICE::Agent::instance()->get_local_agent_info(endpoint);
@@ -1692,6 +1742,7 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
         return;
       }
     }
+  }
 #endif
 
   wbuff_.reset();
@@ -1731,15 +1782,17 @@ Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, WriteFlags flags)
   }
 
 #ifdef OPENDDS_SECURITY
-  ICE::Endpoint* endpoint = outer_->sedp_.get_ice_endpoint();
-  if (endpoint) {
-    const ICE::AgentInfo& agent_info = ICE::Agent::instance()->get_local_agent_info(endpoint);
-    if (ParameterListConverter::to_param_list(agent_info, plist) < 0) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("Spdp::SpdpTransport::write() - ")
-                 ACE_TEXT("failed to convert from ICE::AgentInfo ")
-                 ACE_TEXT("to ParameterList\n")));
-      return;
+  if (!outer_->is_security_enabled()) {
+    ICE::Endpoint* endpoint = outer_->sedp_.get_ice_endpoint();
+    if (endpoint) {
+      const ICE::AgentInfo& agent_info = ICE::Agent::instance()->get_local_agent_info(endpoint);
+      if (ParameterListConverter::to_param_list(agent_info, plist) < 0) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                   ACE_TEXT("Spdp::SpdpTransport::write() - ")
+                   ACE_TEXT("failed to convert from ICE::AgentInfo ")
+                   ACE_TEXT("to ParameterList\n")));
+        return;
+      }
     }
   }
 #endif
@@ -2191,8 +2244,8 @@ Spdp::add_sedp_unicast(const ACE_INET_Addr& addr)
   sedp_unicast_[idx] = locator;
 }
 
-void Spdp::start_ice(ICE::Endpoint* endpoint, RepoId r, const BuiltinEndpointSet_t& avail, const ICE::AgentInfo& agent_info) {
 #ifdef OPENDDS_SECURITY
+void Spdp::start_ice(ICE::Endpoint* endpoint, RepoId r, const BuiltinEndpointSet_t& avail, const ICE::AgentInfo& agent_info) {
   RepoId l = guid_;
 
   // See RTPS v2.1 section 8.5.5.1
@@ -2289,16 +2342,9 @@ void Spdp::start_ice(ICE::Endpoint* endpoint, RepoId r, const BuiltinEndpointSet
     r.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER;
     ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
   }
-#else
-  ACE_UNUSED_ARG(endpoint);
-  ACE_UNUSED_ARG(r);
-  ACE_UNUSED_ARG(avail);
-  ACE_UNUSED_ARG(agent_info);
-#endif
 }
 
 void Spdp::stop_ice(ICE::Endpoint* endpoint, DCPS::RepoId r, const BuiltinEndpointSet_t& avail) {
-#ifdef OPENDDS_SECURITY
   RepoId l = guid_;
 
   // See RTPS v2.1 section 8.5.5.1
@@ -2395,14 +2441,8 @@ void Spdp::stop_ice(ICE::Endpoint* endpoint, DCPS::RepoId r, const BuiltinEndpoi
     r.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER;
     ICE::Agent::instance()->stop_ice(endpoint, l, r);
   }
-#else
-  ACE_UNUSED_ARG(endpoint);
-  ACE_UNUSED_ARG(r);
-  ACE_UNUSED_ARG(avail);
-#endif
 }
 
-#ifdef OPENDDS_SECURITY
 DDS::Security::ParticipantCryptoHandle
 Spdp::remote_crypto_handle(const DCPS::RepoId& remote_participant) const
 {
@@ -2459,11 +2499,9 @@ void Spdp::SpdpTransport::process_auth_resends(const DCPS::MonotonicTimePoint& n
 {
   outer_->process_auth_resends(now);
 }
-#endif
 
 void Spdp::purge_auth_deadlines(DiscoveredParticipantIter iter)
 {
-#ifdef OPENDDS_SECURITY
   if (iter == participants_.end()) {
     return;
   }
@@ -2477,14 +2515,10 @@ void Spdp::purge_auth_deadlines(DiscoveredParticipantIter iter)
       break;
     }
   }
-#else
-  ACE_UNUSED_ARG(iter);
-#endif
 }
 
 void Spdp::purge_auth_resends(DiscoveredParticipantIter iter)
 {
-#ifdef OPENDDS_SECURITY
   if (iter == participants_.end()) {
     return;
   }
@@ -2496,10 +2530,8 @@ void Spdp::purge_auth_resends(DiscoveredParticipantIter iter)
       break;
     }
   }
-#else
-  ACE_UNUSED_ARG(iter);
-#endif
 }
+#endif
 
 }
 }

@@ -939,9 +939,14 @@ void Sedp::associate_secure_readers_to_writers(const Security::SPDPdiscoveredPar
   part.entityId = ENTITYID_PARTICIPANT;
 
   const BuiltinEndpointSet_t& avail = pdata.participantProxy.availableBuiltinEndpoints;
+  const BuiltinEndpointQos_t& beq = pdata.participantProxy.builtinEndpointQos;
+
 
   if (avail & BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER) {
     DCPS::AssociationData peer = proto;
+    if (beq & BEST_EFFORT_PARTICIPANT_MESSAGE_DATA_READER) {
+      peer.remote_reliable_ = false;
+    }
     peer.remote_id_.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER;
     remote_reader_crypto_handles_[peer.remote_id_] = generate_remote_matched_reader_crypto_handle(
       part, participant_message_secure_writer_.get_endpoint_crypto_handle(), false);
@@ -1109,6 +1114,9 @@ Sedp::Task::svc_i(const ParticipantData_t* ppdata)
   const BuiltinEndpointSet_t& avail =
     pdata->participantProxy.availableBuiltinEndpoints;
 
+  const BuiltinEndpointQos_t& beq =
+    pdata->participantProxy.builtinEndpointQos;
+
   // See RTPS v2.1 section 8.5.5.1
   if (spdp_->available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER &&
       avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR) {
@@ -1125,6 +1133,9 @@ Sedp::Task::svc_i(const ParticipantData_t* ppdata)
   if (spdp_->available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER &&
       avail & BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER) {
     DCPS::AssociationData peer = proto;
+    if (beq & BEST_EFFORT_PARTICIPANT_MESSAGE_DATA_READER) {
+      peer.remote_reliable_ = false;
+    }
     peer.remote_id_.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER;
     sedp_->participant_message_writer_.assoc(peer);
   }
@@ -2904,25 +2915,30 @@ Sedp::Writer::write_dcps_participant_secure(const Security::SPDPdiscoveredPartic
 {
   using DCPS::Serializer;
 
-  DDS::ReturnCode_t result = DDS::RETCODE_OK;
-
   ParameterList plist;
 
-  bool err = ParameterListConverter::to_param_list(msg, plist);
-
-  if (err) {
+  if (!ParameterListConverter::to_param_list(msg, plist)) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: Sedp::write_dcps_participant_secure - ")
                ACE_TEXT("Failed to convert SPDPdiscoveredParticipantData ")
                ACE_TEXT("to ParameterList\n")));
 
-    result = DDS::RETCODE_ERROR;
-
-  } else {
-    result = write_parameter_list(plist, reader, sequence);
+    return DDS::RETCODE_ERROR;
   }
 
-  return result;
+  ICE::Endpoint* endpoint = get_ice_endpoint();
+  if (endpoint) {
+    const ICE::AgentInfo& agent_info = ICE::Agent::instance()->get_local_agent_info(endpoint);
+    if (ParameterListConverter::to_param_list(agent_info, plist) < 0) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("Sedp::write_dcps_participant_secure() - ")
+                 ACE_TEXT("failed to convert from ICE::AgentInfo ")
+                 ACE_TEXT("to ParameterList\n")));
+      return DDS::RETCODE_ERROR;
+    }
+  }
+
+  return write_parameter_list(plist, reader, sequence);
 }
 #endif
 
@@ -3920,8 +3936,9 @@ Sedp::Task::svc()
 {
   for (Msg* msg = 0; getq(msg) != -1; /*no increment*/) {
     if (DCPS::DCPS_debug_level > 5) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::Task::svc "
-        "got message from queue type %C\n", msg->msgTypeToString().c_str()));
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::Task::svc ")
+        ACE_TEXT("got message from queue type %C\n"),
+        msg->msgTypeToString()));
     }
 
     DCPS::unique_ptr<Msg> delete_the_msg(msg);
@@ -4731,7 +4748,7 @@ WaitForAcks::reset()
   // cause wait_for_acks() to exit it's loop
 }
 
-OPENDDS_STRING Sedp::Msg::msgTypeToString(const MsgType type) {
+const char* Sedp::Msg::msgTypeToString(MsgType type) {
   switch (type) {
   case MSG_PARTICIPANT:
     return "MSG_PARTICIPANT";
@@ -4766,13 +4783,14 @@ OPENDDS_STRING Sedp::Msg::msgTypeToString(const MsgType type) {
 #endif
 
   default:
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Sedp::Msg::msgTypeToString() : ERROR: ")
-      ACE_TEXT("%u is not a valid queue type\n"), static_cast<unsigned>(type)));
-    return OpenDDS::DCPS::to_dds_string(static_cast<unsigned>(type));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::Msg::msgTypeToString: ")
+      ACE_TEXT("%d is either invalid or not recognized.\n"),
+      type));
+    return "Invalid message queue type";
   }
 }
 
-OPENDDS_STRING Sedp::Msg::msgTypeToString() const {
+const char* Sedp::Msg::msgTypeToString() const {
   return msgTypeToString(type_);
 }
 

@@ -231,6 +231,8 @@ RtpsUdpInst::get_blob(const OpenDDS::DCPS::TransportLocatorSeq& trans_info) cons
   return 0;
 }
 
+#ifdef OPENDDS_SECURITY
+
 ICE::AddressListType
 RtpsUdpInst::host_addresses() const {
   ICE::AddressListType addresses;
@@ -254,6 +256,8 @@ RtpsUdpInst::host_addresses() const {
 
   return addresses;
 }
+
+#endif
 
 } // namespace DCPS
 } // namespace OpenDDS

@@ -13,6 +13,8 @@
 
 #include <dds/DCPS/Service_Participant.h>
 
+#include <dds/DCPS/security/framework/Properties.h>
+
 using namespace OpenDDS::Security;
 using DDS::Property_t;
 using DDS::PropertySeq;
@@ -194,59 +196,59 @@ public:
   : auth_plugin_(new MockAuthentication())
   , test_class_()
   {
-    perm_ca_.name = "dds.sec.access.permissions_ca";
+    perm_ca_.name = DDS::Security::Properties::AccessPermissionsCA;
     perm_ca_.value = "file:certs/permissions/permissions_ca_cert.pem";
     perm_ca_.propagate = false;
 
-    gov_0_p7s_.name = "dds.sec.access.governance";
+    gov_0_p7s_.name = DDS::Security::Properties::AccessGovernance;
     gov_0_p7s_.value = "file:governance/governance_SC0_SecurityDisabled_signed.p7s";
     gov_0_p7s_.propagate = false;
 
-    gov_1_p7s_.name = "dds.sec.access.governance";
+    gov_1_p7s_.name = DDS::Security::Properties::AccessGovernance;
     gov_1_p7s_.value = "file:governance/governance_SC1_ProtectedDomain1_signed.p7s";
     gov_1_p7s_.propagate = false;
 
-    gov_2_p7s_.name = "dds.sec.access.governance";
+    gov_2_p7s_.name = DDS::Security::Properties::AccessGovernance;
     gov_2_p7s_.value = "file:governance/governance_SC2_ProtectedDomain2_signed.p7s";
     gov_2_p7s_.propagate = false;
 
-    gov_3_p7s_.name = "dds.sec.access.governance";
+    gov_3_p7s_.name = DDS::Security::Properties::AccessGovernance;
     gov_3_p7s_.value = "file:governance/governance_SC3_ProtectedDomain3_signed.p7s";
     gov_3_p7s_.propagate = false;
 
-    gov_4_p7s_.name = "dds.sec.access.governance";
+    gov_4_p7s_.name = DDS::Security::Properties::AccessGovernance;
     gov_4_p7s_.value = "file:governance/governance_SC4_ProtectedDomain4_signed.p7s";
     gov_4_p7s_.propagate = false;
 
-    gov_5_p7s_.name = "dds.sec.access.governance";
+    gov_5_p7s_.name = DDS::Security::Properties::AccessGovernance;
     gov_5_p7s_.value = "file:governance/governance_SC5_ProtectedDomain5_signed.p7s";
     gov_5_p7s_.propagate = false;
 
-    gov_6_p7s_.name = "dds.sec.access.governance";
+    gov_6_p7s_.name = DDS::Security::Properties::AccessGovernance;
     gov_6_p7s_.value = "file:governance/governance_SC6_ProtectedDomain6_signed.p7s";
     gov_6_p7s_.propagate = false;
 
-    perm_allowall_p7s_.name = "dds.sec.access.permissions";
+    perm_allowall_p7s_.name = DDS::Security::Properties::AccessPermissions;
     perm_allowall_p7s_.value = "file:permissions/permissions_test_participant_01_JoinDomain_signed.p7s";
     perm_allowall_p7s_.propagate = false;
 
-    perm_topic_p7s_.name = "dds.sec.access.permissions";
+    perm_topic_p7s_.name = DDS::Security::Properties::AccessPermissions;
     perm_topic_p7s_.value = "file:permissions/permissions_test_participant_01_TopicLevel_signed.p7s";
     perm_topic_p7s_.propagate = false;
 
-    perm_topic2_p7s_.name = "dds.sec.access.permissions";
+    perm_topic2_p7s_.name = DDS::Security::Properties::AccessPermissions;
     perm_topic2_p7s_.value = "file:permissions/permissions_test_participant_01_TopicLevel_2_signed.p7s";
     perm_topic2_p7s_.propagate = false;
 
-    perm_date_p7s_.name = "dds.sec.access.permissions";
+    perm_date_p7s_.name = DDS::Security::Properties::AccessPermissions;
     perm_date_p7s_.value = "file:permissions/permissions_test_participant_01_NotBefore_signed.p7s";
     perm_date_p7s_.propagate = false;
 
-    perm_dateoffset_p7s_.name = "dds.sec.access.permissions";
+    perm_dateoffset_p7s_.name = DDS::Security::Properties::AccessPermissions;
     perm_dateoffset_p7s_.value = "file:permissions/permissions_test_participant_01_NotBeforeOffset_signed.p7s";
     perm_dateoffset_p7s_.propagate = false;
 
-    perm_parts_p7s_.name = "dds.sec.access.permissions";
+    perm_parts_p7s_.name = DDS::Security::Properties::AccessPermissions;
     perm_parts_p7s_.value = "file:permissions/permissions_test_participant_01_TopicLevel_Partitions_Default_signed.p7s";
     perm_parts_p7s_.propagate = false;
 

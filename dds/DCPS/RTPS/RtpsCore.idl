@@ -9,6 +9,7 @@
 #define RTPS_RTPSCORE_IDL
 
 #include "dds/DdsDcpsInfoUtils.idl"
+#include "dds/DdsDcpsInfrastructure.idl"
 
 #ifdef OPENDDS_SECURITY
 #include "dds/DdsSecurityParams.idl"
@@ -205,6 +206,10 @@ module OpenDDS {
     const BuiltinEndpointSet_t BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER =
       1 << 11;
 
+    typedef unsigned long BuiltinEndpointQos_t;
+    const BuiltinEndpointQos_t BEST_EFFORT_PARTICIPANT_MESSAGE_DATA_READER =
+      1 << 0;
+
     union Parameter;
 
     /* contains a list of Parameters, terminated with a sentinel */
@@ -286,6 +291,11 @@ module OpenDDS {
     // ParameterId Bitmask values (Table 9.11)
     const ParameterId_t PIDMASK_VENDOR_SPECIFIC = 0x8000;
     const ParameterId_t PIDMASK_INCOMPATIBLE = 0x4000;
+
+    const ParameterId_t PID_DOMAIN_ID = 0x000f;
+    const ParameterId_t PID_DOMAIN_TAG = 0x4014;
+
+    const ParameterId_t PID_BUILTIN_ENDPOINT_QOS = 0x0077;
 
     typedef unsigned long OpenDDSParticipantFlagsBits_t;
     const OpenDDSParticipantFlagsBits_t PFLAGS_EMPTY = 0x0;
@@ -474,6 +484,15 @@ module OpenDDS {
       case PID_OPENDDS_ICE_CANDIDATE:
         IceCandidate_t ice_candidate;
 
+      case PID_DOMAIN_ID:
+        DDS::DomainId_t domainId;
+
+      case PID_DOMAIN_TAG:
+        DCPS::String256 domainTag;
+
+      case PID_BUILTIN_ENDPOINT_QOS:
+        BuiltinEndpointQos_t builtinEndpointQos;
+
       default:
         DDS::OctetSeq unknown_data;
     };
@@ -558,11 +577,14 @@ module OpenDDS {
     };
 
     struct ParticipantProxy_t {
+      DDS::DomainId_t domainId;
+      DCPS::String256 domainTag;
       ProtocolVersion_t protocolVersion;
       DCPS::GuidPrefix_t guidPrefix;  // optional in SPDPdiscoveredParticipantData
       VendorId_t vendorId;
       boolean expectsInlineQos;
       BuiltinEndpointSet_t availableBuiltinEndpoints;
+      BuiltinEndpointQos_t builtinEndpointQos;
       DCPS::LocatorSeq metatrafficUnicastLocatorList;
       DCPS::LocatorSeq metatrafficMulticastLocatorList;
       DCPS::LocatorSeq defaultMulticastLocatorList;
