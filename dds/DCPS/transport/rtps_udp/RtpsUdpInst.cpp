@@ -85,7 +85,7 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
       group_address_s += ACE_TEXT(":7401");
     }
     multicast_group_address_.set(group_address_s.c_str());
-    multicast_group_address_str_ = group_address_s.c_str();
+    multicast_group_address_str_ = ACE_TEXT_ALWAYS_CHAR(group_address_s.c_str());
   }
 
   GET_CONFIG_STRING_VALUE(cf, sect, ACE_TEXT("multicast_interface"),

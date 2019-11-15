@@ -105,4 +105,6 @@ typedef RcHandle<NetworkConfigMonitor> NetworkConfigMonitor_rch;
 } // DCPS
 } // OpenDDS
 
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
+
 #endif // OPENDDS_DCPS_NETWORKCONFIGPUBLISHER_H

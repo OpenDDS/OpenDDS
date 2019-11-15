@@ -148,6 +148,6 @@ void NetworkConfigMonitor::process_add_remove()
   listeners_.erase(remove_.begin(), remove_.end());
   listeners_.insert(add_.begin(), add_.end());
 }
-  
+
 } // DCPS
 } // OpenDDS
