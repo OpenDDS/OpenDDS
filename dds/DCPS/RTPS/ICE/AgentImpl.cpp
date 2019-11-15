@@ -234,8 +234,7 @@ void AgentImpl::check_invariants() const
   OPENDDS_ASSERT(expected == active_foundations);
 }
 
-void AgentImpl::add_address(const DCPS::NetworkInterface&,
-                            const ACE_INET_Addr&)
+void AgentImpl::network_change() const
 {
   for (EndpointManagerMapType::const_iterator pos = endpoint_managers_.begin(),
          limit = endpoint_managers_.end(); pos != limit; ++pos) {
@@ -243,11 +242,16 @@ void AgentImpl::add_address(const DCPS::NetworkInterface&,
   }
 }
 
-void AgentImpl::remove_address(const DCPS::NetworkInterface& interface,
-                               const ACE_INET_Addr& address)
+void AgentImpl::add_address(const DCPS::NetworkInterface&,
+                            const ACE_INET_Addr&)
 {
-  // Signal change.  Same code as add_address.
-  add_address(interface, address);
+  network_change();
+}
+
+void AgentImpl::remove_address(const DCPS::NetworkInterface&,
+                               const ACE_INET_Addr&)
+{
+  network_change();
 }
 
 #endif /* OPENDDS_SECURITY */

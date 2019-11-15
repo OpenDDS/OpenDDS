@@ -2041,7 +2041,7 @@ NetworkConfigMonitor_rch Service_Participant::network_config_monitor()
 #endif
 
     if (network_config_monitor_ && !network_config_monitor_->open()) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Service_Participant::get_domain_participant_factory could not open network config monitor\n ")));
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Service_Participant::get_domain_participant_factory could not open network config monitor\n ")));
       network_config_monitor_->close();
     }
   }

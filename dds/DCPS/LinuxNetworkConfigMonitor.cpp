@@ -164,21 +164,16 @@ void LinuxNetworkConfigMonitor::process_message(const nlmsghdr* header)
       for (const rtattr* attr = reinterpret_cast<const rtattr*>(IFA_RTA(msg));
            RTA_OK(attr, rta_length);
            attr = RTA_NEXT(attr, rta_length)) {
-        switch (attr->rta_type) {
-        case IFA_ADDRESS:
-          {
-            if (RTA_PAYLOAD(attr) != address_length) {
-              ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: LinuxNetworkConfigMonitor::process_message: incorrect address byte count\n")));
-              return;
-            }
-            ACE_INET_Addr addr;
-            addr.set_address(reinterpret_cast<const char*>(RTA_DATA(attr)), address_length, 0);
-            add_address(msg->ifa_index, addr);
+        if (attr->rta_type == IFA_ADDRESS) {
+          if (RTA_PAYLOAD(attr) != address_length) {
+            ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: LinuxNetworkConfigMonitor::process_message: incorrect address byte count\n")));
+            return;
           }
-          break;
+          ACE_INET_Addr addr;
+          addr.set_address(reinterpret_cast<const char*>(RTA_DATA(attr)), address_length, 0);
+          add_address(msg->ifa_index, addr);
         }
       }
-
     }
     break;
   case RTM_DELADDR:
@@ -197,18 +192,14 @@ void LinuxNetworkConfigMonitor::process_message(const nlmsghdr* header)
       for (const rtattr* attr = reinterpret_cast<const rtattr*>(IFA_RTA(msg));
            RTA_OK(attr, rta_length);
            attr = RTA_NEXT(attr, rta_length)) {
-        switch (attr->rta_type) {
-        case IFA_ADDRESS:
-          {
-            if (RTA_PAYLOAD(attr) != address_length) {
-              ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: LinuxNetworkConfigMonitor::process_message: incorrect address byte count\n")));
-              return;
-            }
-            ACE_INET_Addr addr;
-            addr.set_address(reinterpret_cast<const char*>(RTA_DATA(attr)), address_length, 0);
-            remove_address(msg->ifa_index, addr);
+        if (attr->rta_type == IFA_ADDRESS) {
+          if (RTA_PAYLOAD(attr) != address_length) {
+            ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: LinuxNetworkConfigMonitor::process_message: incorrect address byte count\n")));
+            return;
           }
-          break;
+          ACE_INET_Addr addr;
+          addr.set_address(reinterpret_cast<const char*>(RTA_DATA(attr)), address_length, 0);
+          remove_address(msg->ifa_index, addr);
         }
       }
 
@@ -222,10 +213,8 @@ void LinuxNetworkConfigMonitor::process_message(const nlmsghdr* header)
       for (const rtattr* attr = reinterpret_cast<const rtattr*>(IFLA_RTA(msg));
            RTA_OK(attr, rta_length);
            attr = RTA_NEXT(attr, rta_length)) {
-        switch (attr->rta_type) {
-        case IFLA_IFNAME:
+        if (attr->rta_type == IFLA_IFNAME) {
           name = reinterpret_cast<const char*>(RTA_DATA(attr));
-          break;
         }
       }
 

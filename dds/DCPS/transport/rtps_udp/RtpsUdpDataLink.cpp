@@ -323,7 +323,7 @@ RtpsUdpDataLink::remove_address(const DCPS::NetworkInterface& nic,
 {
   struct LeaveMulticastGroup : public DCPS::JobQueue::Job {
     LeaveMulticastGroup(DCPS::RcHandle<RtpsUdpDataLink> tport,
-                       const DCPS::NetworkInterface& nic)
+                        const DCPS::NetworkInterface& nic)
       : tport_(tport)
       , nic_(nic)
     {}
@@ -392,7 +392,7 @@ RtpsUdpDataLink::leave_multicast_group(const DCPS::NetworkInterface& nic)
   }
 
   if (0 == multicast_socket_.leave(config().multicast_group_address_, ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()))) {
-        joined_interfaces_.erase(nic.name());
+    joined_interfaces_.erase(nic.name());
   } else {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::leave_multicast_group(): ")

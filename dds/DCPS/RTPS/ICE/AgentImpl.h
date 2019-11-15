@@ -119,6 +119,7 @@ public:
   ACE_Recursive_Thread_Mutex mutex;
 
 private:
+  void network_change() const;
   void add_address(const DCPS::NetworkInterface& interface,
                    const ACE_INET_Addr& address);
   void remove_address(const DCPS::NetworkInterface& interface,

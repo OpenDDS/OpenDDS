@@ -247,11 +247,7 @@ RtpsUdpTransport::register_for_reader(const RepoId& participant,
                                       OpenDDS::DCPS::DiscoveryListener* listener)
 {
   const TransportBLOB* blob = config().get_blob(locators);
-  if (!blob) {
-    return;
-  }
-
-  if (is_shut_down_) {
+  if (!blob || is_shut_down_) {
     return;
   }
 
@@ -283,11 +279,7 @@ RtpsUdpTransport::register_for_writer(const RepoId& participant,
                                       DiscoveryListener* listener)
 {
   const TransportBLOB* blob = config().get_blob(locators);
-  if (!blob) {
-    return;
-  }
-
-  if (is_shut_down_) {
+  if (!blob || is_shut_down_) {
     return;
   }
 
