@@ -1409,6 +1409,7 @@ Sedp::sub_bit()
     sub->lookup_datareader(DCPS::BUILT_IN_SUBSCRIPTION_TOPIC);
   return dynamic_cast<DCPS::SubscriptionBuiltinTopicDataDataReaderImpl*>(d.in());
 }
+
 #endif /* DDS_HAS_MINIMUM_BIT */
 
 bool

@@ -1,0 +1,35 @@
+
+project(07_builtin_topics__monitor) : dcpsexe_with_tcp {
+
+  exename   = monitor
+  libpaths += ../lib
+
+
+  TypeSupport_Files {
+  }
+
+  IDL_Files {
+  }
+
+  Header_Files {
+    ParticipantLocationBuiltinTopicDataDataReaderListenerImpl.h
+  }
+
+  Inline_Files {
+  }
+
+  Source_Files {
+    monitor.cpp
+    ParticipantLocationBuiltinTopicDataDataReaderListenerImpl.cpp
+  }
+
+  Documentation_Files {
+    ../../Instructions/index.html
+    ../../Instructions/BuiltinTopics.html
+  }
+}
+
+
+
+
+

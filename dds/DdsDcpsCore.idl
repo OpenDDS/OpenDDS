@@ -300,6 +300,23 @@ module DDS {
 
     // ----------------------------------------------------------------------
 
+	//--cj
+	typedef unsigned long ParticipantLocation;
+
+	const ParticipantLocation LOCATION_LOCAL = 0x0001 << 0;
+	const ParticipantLocation LOCATION_ICE = 0x0001 << 1;
+	const ParticipantLocation LOCATION_RELAY = 0x0001 << 2;
+
+	BUILT_IN_TOPIC_TYPE
+		struct ParticipantLocationBuiltinTopicData {
+		BUILT_IN_TOPIC_KEY BuiltinTopicKey_t key;
+		string guid; 
+		string remote_addr;
+		ParticipantLocation location;
+		unsigned long timestamp;
+	};
+	//--cj end
+
     BUILT_IN_TOPIC_TYPE
     struct ParticipantBuiltinTopicData {
       BUILT_IN_TOPIC_KEY BuiltinTopicKey_t key;

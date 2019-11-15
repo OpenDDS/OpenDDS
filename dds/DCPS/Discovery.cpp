@@ -68,6 +68,45 @@ Discovery::create_bit_topics(DomainParticipantImpl* participant)
                      DDS::RETCODE_ERROR);
   }
 
+  //--cj
+  // Participant location topic
+  type_support =
+	  Registered_Data_Types->lookup(participant, BUILT_IN_PARTICIPANT_LOCATION_TOPIC_TYPE);
+
+  if (CORBA::is_nil(type_support)) {
+	  DDS::ParticipantLocationBuiltinTopicDataTypeSupport_var ts =
+		  new DDS::ParticipantLocationBuiltinTopicDataTypeSupportImpl;
+
+	  DDS::ReturnCode_t ret = ts->register_type(participant,
+		  BUILT_IN_PARTICIPANT_LOCATION_TOPIC_TYPE);
+
+	  if (ret != DDS::RETCODE_OK) {
+		  ACE_ERROR_RETURN((LM_ERROR,
+			  ACE_TEXT("(%P|%t) ")
+			  ACE_TEXT("Discovery::create_bit_topics, ")
+			  ACE_TEXT("register BUILT_IN_PARTICIPANT_LOCATION_TOPIC_TYPE returned %d.\n"),
+			  ret),
+			  ret);
+	  }
+  }
+
+  DDS::Topic_var bit_part_loc_topic =
+	  participant->create_topic(BUILT_IN_PARTICIPANT_LOCATION_TOPIC,
+		  BUILT_IN_PARTICIPANT_LOCATION_TOPIC_TYPE,
+		  TOPIC_QOS_DEFAULT,
+		  DDS::TopicListener::_nil(),
+		  DEFAULT_STATUS_MASK);
+
+  if (CORBA::is_nil(bit_part_loc_topic)) {
+	  ACE_ERROR_RETURN((LM_ERROR,
+		  ACE_TEXT("(%P|%t) ")
+		  ACE_TEXT("Discovery::create_bit_topics, ")
+		  ACE_TEXT("Nil %C Topic\n"),
+		  BUILT_IN_PARTICIPANT_LOCATION_TOPIC),
+		  DDS::RETCODE_ERROR);
+  }
+  //--cj end
+
   // Topic topic
   type_support =
     Registered_Data_Types->lookup(participant, BUILT_IN_TOPIC_TOPIC_TYPE);
@@ -178,10 +217,16 @@ Discovery::create_bit_topics(DomainParticipantImpl* participant)
                      DDS::RETCODE_ERROR);
   }
 
+  
   bit_part_topic->enable();
   bit_topic_topic->enable();
   bit_sub_topic->enable();
   bit_pub_topic->enable();
+
+  //--cj
+  bit_part_loc_topic->enable();
+  //--cj end
+
 #else
   ACE_UNUSED_ARG(participant);
 #endif /* DDS_HAS_MINIMUM_BIT */

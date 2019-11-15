@@ -166,7 +166,22 @@ protected:
 #endif
                                       );
 
+//--cj start
+  ParticipantLocationData_t build_local_plocdata(
+#ifdef OPENDDS_SECURITY
+	  Security::DiscoveredParticipantDataKind kind
+#endif
+  );
+
+  void update_location(const ACE_INET_Addr& from, const DCPS::RepoId& guid);
+
+  void update_bit_loc_data(DDS::ParticipantLocationBuiltinTopicData &bitl);
+
+//--cj end
+
   bool announce_domain_participant_qos();
+
+
 
 private:
 
@@ -195,6 +210,7 @@ private:
 
 #ifndef DDS_HAS_MINIMUM_BIT
   DCPS::ParticipantBuiltinTopicDataDataReaderImpl* part_bit();
+  DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl* part_loc_bit();
 #endif /* DDS_HAS_MINIMUM_BIT */
 
   struct SpdpTransport : public DCPS::RcEventHandler {
@@ -256,6 +272,15 @@ private:
 
   void remove_expired_participants();
   void get_discovered_participant_ids(DCPS::RepoIdSet& results) const;
+
+  //--cj start
+  // todo: store in a map for lookup and modification later.
+  ACE_INET_Addr location_addr;
+  DCPS::RepoId  location_guid;
+  unsigned long location_mask;
+  unsigned long location_timestamp;
+  //bool has_ice;
+  //--cj end
 
   BuiltinEndpointSet_t available_builtin_endpoints_;
   Sedp sedp_;

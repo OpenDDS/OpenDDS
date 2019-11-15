@@ -25,6 +25,11 @@ const char* const BUILT_IN_SUBSCRIPTION_TOPIC_TYPE = "SUBSCRIPTION_BUILT_IN_TOPI
 const char* const BUILT_IN_PUBLICATION_TOPIC = "DCPSPublication";
 const char* const BUILT_IN_PUBLICATION_TOPIC_TYPE = "PUBLICATION_BUILT_IN_TOPIC_TYPE";
 
+//--cj
+const char* const BUILT_IN_PARTICIPANT_LOCATION_TOPIC = "DCPSParticipantLocation";
+const char* const BUILT_IN_PARTICIPANT_LOCATION_TOPIC_TYPE = "PARTICIPANT_LOCATION_BUILT_IN_TOPIC_TYPE";
+//--cj end
+
 } // namespace DCPS
 } // namespace OpenDDS
 

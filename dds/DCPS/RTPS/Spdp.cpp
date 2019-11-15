@@ -200,6 +200,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , shutdown_flag_(false)
   , available_builtin_endpoints_(0)
   , sedp_(guid_, *this, lock_)
+  , location_mask(0)
 #ifdef OPENDDS_SECURITY
   , security_config_()
   , security_enabled_(false)
@@ -381,6 +382,27 @@ Spdp::write_secure_updates()
   for (DiscoveredParticipantIter pi = participants_.begin(); pi != participants_.end(); ++pi) {
     if (pi->second.auth_state_ == DCPS::AS_AUTHENTICATED) {
       sedp_.write_dcps_participant_secure(pdata, pi->first);
+
+//--cj
+// Must unlock when calling into part_bit() as it may call back into us
+	ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
+
+	// update location info for ICE
+		DDS::ParticipantLocationBuiltinTopicData discoveredLocationBit;
+	//discoveredLocationBit.key = partBitData(pdata).key;
+	//update_location(from, pi->first);
+  
+  printf("ICE ENABLED\n");
+  
+  location_mask |= 2;
+	update_bit_loc_data(discoveredLocationBit);
+	DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl* locbit = part_loc_bit();
+	if (locbit) {
+		ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
+		locbit->store_synthetic_data(discoveredLocationBit, DDS::NEW_VIEW_STATE);
+	}
+//--cj end
+
     }
   }
 }
@@ -401,7 +423,56 @@ namespace {
     return pdata.ddsParticipantData;
 #endif
   }
+
+  //--cj start
+  DDS::ParticipantLocationBuiltinTopicData& partLocBitData(ParticipantLocationData_t& pldata)
+  {
+	  return pldata.ddsParticipantLocationData;
+  }
+  //--cj end
 }
+
+//--cj
+void
+Spdp::update_location(const ACE_INET_Addr& from, const DCPS::RepoId& guid) {
+	location_addr = from;
+
+	//spdp from participant
+	//std::cout << "from  " << from.get_ip_address() << " : " << from.get_port_number() << std::endl;
+
+	// clear location mask
+	location_mask = 0;
+
+	if (from == config_->spdp_rtps_relay_address()) {
+		location_mask |= 0x4; // relay
+	}
+
+	//if (has_ice)
+	//{
+	//	location_mask |= 0x2; // ice
+	//}
+	
+	// if not ice or relay, then participant must be local
+	if (location_mask == 0)
+	{
+		location_mask |= 0x1;
+	}
+
+	location_guid = guid;
+	location_timestamp = MonotonicTimePoint::now().value().get_msec();
+}
+
+void Spdp::update_bit_loc_data(DDS::ParticipantLocationBuiltinTopicData &bitl) {
+	char buf[100];
+
+	location_addr.addr_to_string(buf, 100);
+	bitl.guid = CORBA::string_dup(DCPS::GuidConverter(location_guid).uniqueId().c_str());
+	bitl.remote_addr = CORBA::string_dup(buf);
+	bitl.location = location_mask;
+	bitl.timestamp = MonotonicTimePoint::now().value().get_msec();
+}
+
+//--cj end
 
 void
 Spdp::handle_participant_data(DCPS::MessageId id,
@@ -469,6 +540,10 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     // own announcement, so they don't have to wait.
     if (from != ACE_INET_Addr()) {
       this->tport_->write_i(guid, from == config_->spdp_rtps_relay_address() ? SpdpTransport::SEND_TO_RELAY : SpdpTransport::SEND_TO_LOCAL);
+
+	  //--cj
+	  update_location(from, guid);
+	  //--cj end
     }
 
 #ifdef OPENDDS_SECURITY
@@ -551,6 +626,13 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       DDS::ParticipantBuiltinTopicData& pdataBit = partBitData(pdata);
       DDS::ParticipantBuiltinTopicData& discoveredBit = partBitData(iter->second.pdata_);
       pdataBit.key = discoveredBit.key;
+
+	  //--cj start
+	  DDS::ParticipantLocationBuiltinTopicData discoveredLocationBit;
+	  discoveredLocationBit.key = pdataBit.key;
+	  update_location(from, guid);
+	  update_bit_loc_data(discoveredLocationBit);	  
+	  
 #ifndef OPENDDS_SAFETY_PROFILE
       using DCPS::operator!=;
 #endif
@@ -562,6 +644,15 @@ Spdp::handle_participant_data(DCPS::MessageId id,
           ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
           bit->store_synthetic_data(pdataBit, DDS::NOT_NEW_VIEW_STATE);
         }
+
+		//--cj start
+		DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl* locbit = part_loc_bit();
+		if (locbit) {
+			ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
+			locbit->store_synthetic_data(discoveredLocationBit, DDS::NOT_NEW_VIEW_STATE);
+		}
+		//--cj end
+
 #endif /* DDS_HAS_MINIMUM_BIT */
         // Perform search again, so iterator becomes valid
         iter = participants_.find(guid);
@@ -637,8 +728,14 @@ Spdp::data_received(const DataSubmessage& data,
 
   if (have_agent_info) {
     start_ice(endpoint, guid, pdata.participantProxy.availableBuiltinEndpoints, agent_info);
+
+	std::cout << "************* ICE ****************" << std::endl;
+
   } else {
     stop_ice(endpoint, guid, pdata.participantProxy.availableBuiltinEndpoints);
+
+	std::cout << "************* NO ICE ****************" << std::endl;
+
   }
 }
 
@@ -649,6 +746,9 @@ Spdp::match_unauthenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp)
   ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
 
   DDS::InstanceHandle_t bit_instance_handle = DDS::HANDLE_NIL;
+//--cj start
+  DDS::InstanceHandle_t locbit_instance_handle = DDS::HANDLE_NIL;
+//--cj end
 #ifndef DDS_HAS_MINIMUM_BIT
   DCPS::ParticipantBuiltinTopicDataDataReaderImpl* bit = part_bit();
   if (bit) {
@@ -656,6 +756,25 @@ Spdp::match_unauthenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp)
     bit_instance_handle =
       bit->store_synthetic_data(partBitData(dp.pdata_), DDS::NEW_VIEW_STATE);
   }
+
+  //--cj start
+
+  DDS::ParticipantLocationBuiltinTopicData discoveredLocationBit;
+#ifdef OPENDDS_SECURITY
+  discoveredLocationBit.key = partBitData(dp.pdata_).key;
+#else
+  discoveredLocationBit.key = dp.pdata_.ddsParticipantData.key;
+#endif
+  update_bit_loc_data(discoveredLocationBit);
+
+  DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl* locbit = part_loc_bit();
+  if (locbit) {
+	  ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
+	  locbit_instance_handle =
+		  locbit->store_synthetic_data(discoveredLocationBit, DDS::NEW_VIEW_STATE);
+  }
+
+  //--cj end
 #endif /* DDS_HAS_MINIMUM_BIT */
 
   // notify Sedp of association
@@ -1079,6 +1198,21 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp)
       bit->store_synthetic_data(dp.pdata_.ddsParticipantDataSecure.base.base,
                                 DDS::NEW_VIEW_STATE);
   }
+  //--cj
+  DDS::ParticipantLocationBuiltinTopicData discoveredLocationBit;
+#ifdef OPENDDS_SECURITY
+  discoveredLocationBit.key = partBitData(dp.pdata_).key;
+#else
+  discoveredLocationBit.key = dp.pdata_.ddsParticipantData.key;
+#endif
+  update_bit_loc_data(discoveredLocationBit);
+
+  DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl* locbit = part_loc_bit();
+  if (locbit) {
+	  ACE_GUARD_REACTION(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock, return false);
+	  locbit->store_synthetic_data(discoveredLocationBit, DDS::NEW_VIEW_STATE);
+  }
+  //--cj end
 #endif /* DDS_HAS_MINIMUM_BIT */
 
   // notify Sedp of association
@@ -1258,7 +1392,36 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
 void Spdp::update_agent_info(const DCPS::RepoId&, const ICE::AgentInfo&)
 {
   if (is_security_enabled())
-    write_secure_updates();
+  {
+    write_secure_updates(); 
+    //--cj
+    //has_ice = true;
+
+// Must unlock when calling into part_bit() as it may call back into us
+	ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
+
+	// update location info for ICE
+		DDS::ParticipantLocationBuiltinTopicData discoveredLocationBit;
+	//discoveredLocationBit.key = partBitData(pdata).key;
+	//update_location(from, pi->first);
+  
+  std::cout << "** ICE IS ENABLED**" << std::endl;
+  
+  location_mask |= 2;
+	update_bit_loc_data(discoveredLocationBit);
+	DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl* locbit = part_loc_bit();
+	if (locbit) {
+		ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
+		locbit->store_synthetic_data(discoveredLocationBit, DDS::NEW_VIEW_STATE);
+	}
+  std::cout << "** ICE Location updated **" << std::endl;
+  
+//--cj end
+
+  }
+  else {
+    //has_ice = false;
+  }
 }
 #endif
 
@@ -1330,6 +1493,19 @@ Spdp::part_bit()
     bit_subscriber_->lookup_datareader(DCPS::BUILT_IN_PARTICIPANT_TOPIC);
   return dynamic_cast<DCPS::ParticipantBuiltinTopicDataDataReaderImpl*>(d.in());
 }
+
+//--cj start
+DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl*
+Spdp::part_loc_bit()
+{
+	if (!bit_subscriber_.in())
+		return 0;
+
+	DDS::DataReader_var d =
+		bit_subscriber_->lookup_datareader(DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC);
+	return dynamic_cast<DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl*>(d.in());
+}
+//--cj end
 #endif /* DDS_HAS_MINIMUM_BIT */
 
 WaitForAcks&
@@ -1425,6 +1601,7 @@ Spdp::build_local_pdata(
 
   return pdata;
 }
+
 
 bool Spdp::announce_domain_participant_qos()
 {
@@ -1739,6 +1916,7 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
   send(flags);
 }
 
+
 void
 Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, WriteFlags flags)
 {
@@ -1800,6 +1978,7 @@ Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, WriteFlags flags)
 void
 Spdp::SpdpTransport::send(WriteFlags flags)
 {
+	//--cj send local | relay check here
   if ((flags & SEND_TO_LOCAL) && !outer_->config_->rtps_relay_only()) {
     typedef OPENDDS_SET(ACE_INET_Addr)::const_iterator iter_t;
     for (iter_t iter = send_addrs_.begin(); iter != send_addrs_.end(); ++iter) {

@@ -123,7 +123,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
 
       DDS::ConditionSeq conditions;
-      DDS::Duration_t timeout = { 60, 0 };
+      DDS::Duration_t timeout = { 300, 0 };
       if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("ERROR: %N:%l: main() -")
@@ -132,6 +132,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     ws->detach_condition(condition);
+
+	
 
     // Clean-up!
     participant->delete_contained_entities();

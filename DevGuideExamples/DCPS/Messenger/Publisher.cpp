@@ -146,7 +146,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     message.text       = "Worst. Movie. Ever.";
     message.count      = 0;
 
-    for (int i = 0; i < 10; ++i) {
+    for (int i = 0; i < 300; ++i) {
       DDS::ReturnCode_t error = message_writer->write(message, DDS::HANDLE_NIL);
       ++message.count;
       ++message.subject_id;
@@ -156,6 +156,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                    ACE_TEXT("ERROR: %N:%l: main() -")
                    ACE_TEXT(" write returned %d!\n"), error));
       }
+
+      // delay 
+      ACE_OS::sleep(1);
     }
 
     // Wait for samples to be acknowledged
