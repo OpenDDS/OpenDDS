@@ -459,12 +459,11 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
       arg_shifter.consume_arg();
       got_info = true;
 
-    }
-    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSRTISerialization"))) != 0) {
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSRTISerialization"))) != 0) {
       if (ACE_OS::atoi(currentArg) == 0) {
         ACE_ERROR((LM_WARNING,
           ACE_TEXT("(%P|%t) WARNING: Service_Participant::parse_args ")
-          ACE_TEXT("Argument ignored: DCPSRTISerialization is required to be enabled")));
+          ACE_TEXT("Argument ignored: DCPSRTISerialization is required to be enabled\n")));
       }
       arg_shifter.consume_arg();
       got_use_rti_serialization = true;
@@ -1485,7 +1484,7 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
         if (!should_use) {
           ACE_ERROR((LM_WARNING,
             ACE_TEXT("(%P|%t) WARNING: Service_Participant::load_common_configuration ")
-            ACE_TEXT("Argument ignored: DCPSRTISerialization is required to be enabled")));
+            ACE_TEXT("Argument ignored: DCPSRTISerialization is required to be enabled\n")));
         }
     }
 
