@@ -2093,7 +2093,7 @@ DataReaderImpl::writer_became_alive(WriterInfo& info,
         ACE_TEXT("reader %C from writer %C previous state %C.\n"),
         OPENDDS_STRING(reader_converter).c_str(),
         OPENDDS_STRING(writer_converter).c_str(),
-        info.get_state_str().c_str()));
+        info.get_state_str()));
   }
 
   // caller should already have the samples_lock_ !!!
@@ -2165,10 +2165,9 @@ DataReaderImpl::writer_became_dead(WriterInfo& info,
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderImpl::writer_became_dead: ")
         ACE_TEXT("reader %C from writer %C previous state %C.\n"),
-
         OPENDDS_STRING(reader_converter).c_str(),
         OPENDDS_STRING(writer_converter).c_str(),
-        info.get_state_str().c_str()));
+        info.get_state_str()));
   }
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE

@@ -284,7 +284,7 @@ OpenDDS::DCPS::TcpConnection::handle_setup_input(ACE_HANDLE /*h*/)
             "%@ %C:%d->%C:%d, priority==%d, reconnect_state = %C\n", this,
             remote_address_.get_host_addr(), remote_address_.get_port_number(),
             local_address_.get_host_addr(), local_address_.get_port_number(),
-            transport_priority_, reconnect_state_string().c_str()));
+            transport_priority_, reconnect_state_string()));
 
       // remove from reactor, normal recv strategy setup will add us back
       if (reactor()->remove_handler(this, READ_MASK | DONT_CALL) == -1) {
@@ -692,15 +692,15 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "active_reconnect_i(%C:%d->%C:%d) reconnect_state = %C\n",
-        this->remote_address_.get_host_addr(), this->remote_address_.get_port_number(),
-        this->local_address_.get_host_addr(), this->local_address_.get_port_number(),
-        this->reconnect_state_string().c_str()));
+        remote_address_.get_host_addr(), remote_address_.get_port_number(),
+        local_address_.get_host_addr(), local_address_.get_port_number(),
+        reconnect_state_string()));
   if (DCPS_debug_level >= 1) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) DBG:   TcpConnection::"
           "active_reconnect_i(%C:%d->%C:%d) reconnect_state = %C\n",
-          this->remote_address_.get_host_addr(), this->remote_address_.get_port_number(),
-          this->local_address_.get_host_addr(), this->local_address_.get_port_number(),
-          this->reconnect_state_string().c_str()));
+          remote_address_.get_host_addr(), remote_address_.get_port_number(),
+          local_address_.get_host_addr(), local_address_.get_port_number(),
+          reconnect_state_string()));
   }
   // We need reset the state to INIT_STATE if we are previously reconnected.
   // This would allow re-establishing connection after the re-established
@@ -1061,8 +1061,7 @@ OpenDDS::DCPS::TcpConnection::spawn_reconnect_thread()
   }
 }
 
-OPENDDS_STRING
-OpenDDS::DCPS::TcpConnection::reconnect_state_string() const
+const char* OpenDDS::DCPS::TcpConnection::reconnect_state_string() const
 {
   switch (reconnect_state_) {
   case INIT_STATE:
@@ -1076,13 +1075,10 @@ OpenDDS::DCPS::TcpConnection::reconnect_state_string() const
   case PASSIVE_TIMEOUT_CALLED_STATE:
     return "PASSIVE_TIMEOUT_CALLED_STATE";
   default:
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("TcpConnection::reconnect_state_string(): ")
-      ACE_TEXT("%d is either completely invalid or at least not defined in this function.\n"),
-      reconnect_state_
-    ));
-    return OPENDDS_STRING("(Unknown Reconnect State: ")
-      + to_dds_string(reconnect_state_) + ")";
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: TcpConnection::reconnect_state_string: ")
+      ACE_TEXT("%d is either invalid or not recognized.\n"),
+      reconnect_state_));
+    return "Invalid reconnect state";
   }
 }
 
