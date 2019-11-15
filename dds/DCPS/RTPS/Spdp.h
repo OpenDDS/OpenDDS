@@ -288,13 +288,13 @@ private:
   typedef std::multimap<DCPS::MonotonicTimePoint, DCPS::RepoId> TimeQueue;
   TimeQueue auth_deadlines_;
   TimeQueue auth_resends_;
-#endif
 
   void start_ice(ICE::Endpoint* endpoint, DCPS::RepoId remote, const BuiltinEndpointSet_t& avail, const ICE::AgentInfo& agent_info);
   void stop_ice(ICE::Endpoint* endpoint, DCPS::RepoId remote, const BuiltinEndpointSet_t& avail);
 
   void purge_auth_deadlines(DiscoveredParticipantIter iter);
   void purge_auth_resends(DiscoveredParticipantIter iter);
+#endif
 
   friend class ::DDS_TEST;
 };

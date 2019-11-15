@@ -79,7 +79,7 @@ public:
     if (take_result != DDS::RETCODE_OK) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l on_data_available() ERROR: ")
                  ACE_TEXT("take failed: %C\n"),
-                 retcode_to_string(take_result).c_str()));
+                 retcode_to_string(take_result)));
       error = true;
       done = true;
       return;
@@ -150,7 +150,7 @@ public:
     if (rc != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l setup_test() ERROR: ")
                         ACE_TEXT("get_default_subscriber_qos failed: %C\n"),
-                        retcode_to_string(rc).c_str()), false);
+                        retcode_to_string(rc)), false);
     }
 
     // TODO Currently only TOPIC access_scope is supported.
@@ -172,7 +172,7 @@ public:
     if (rc != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l setup_test() ERROR: ")
                         ACE_TEXT("get_default_publisher_qos failed: %C\n"),
-                        retcode_to_string(rc).c_str()), false);
+                        retcode_to_string(rc)), false);
     }
 
     // TODO Currently only TOPIC access_scope is supported.
@@ -242,14 +242,14 @@ public:
         if (rc != DDS::RETCODE_OK) {
           ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l setup_test() ERROR: ")
                             ACE_TEXT("wait failed: %C\n"),
-                            retcode_to_string(rc).c_str()), false);
+                            retcode_to_string(rc)), false);
         }
 
         rc = writer_->get_publication_matched_status(matches);
         if (rc != ::DDS::RETCODE_OK) {
           ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l setup_test() ERROR: ")
                             ACE_TEXT("Failed to get publication match status: %C\n"),
-                            retcode_to_string(rc).c_str()), false);
+                            retcode_to_string(rc)), false);
         }
       } while (matches.total_count < (coherent ? 2 : 1));
       ws->detach_condition(cond);
@@ -267,7 +267,7 @@ public:
       if (rc != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l ~Test() ERROR: ")
           ACE_TEXT("delete reader1 failed: %C\n"),
-          retcode_to_string(rc).c_str()));
+          retcode_to_string(rc)));
       }
     }
 
@@ -276,7 +276,7 @@ public:
       if (rc != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l ~Test() ERROR: ")
           ACE_TEXT("delete reader2 failed: %C\n"),
-          retcode_to_string(rc).c_str()));
+          retcode_to_string(rc)));
       }
     }
 
@@ -285,7 +285,7 @@ public:
       if (rc != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l ~Test() ERROR: ")
           ACE_TEXT("delete writer failed: %C\n"),
-          retcode_to_string(rc).c_str()));
+          retcode_to_string(rc)));
       }
     }
 
@@ -294,7 +294,7 @@ public:
       if (rc != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l ~Test() ERROR: ")
           ACE_TEXT("delete subscriber failed: %C\n"),
-          retcode_to_string(rc).c_str()));
+          retcode_to_string(rc)));
       }
     }
 
@@ -303,7 +303,7 @@ public:
       if (rc != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l ~Test() ERROR: ")
           ACE_TEXT("delete publisher failed: %C\n"),
-          retcode_to_string(rc).c_str()));
+          retcode_to_string(rc)));
       }
     }
   }
@@ -349,7 +349,7 @@ coherent_test(DDS::DomainParticipant_var& participant, DDS::Topic_var& topic)
     if (rc != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l coherent_test() ERROR: ")
           ACE_TEXT("Unable to write sample %u: %C\n"),
-          retcode_to_string(rc).c_str(), i), false);
+          retcode_to_string(rc), i), false);
     }
   }
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("Waiting...\n")));
@@ -369,7 +369,7 @@ coherent_test(DDS::DomainParticipant_var& participant, DDS::Topic_var& topic)
     } else if (rc != DDS::RETCODE_NO_DATA) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l coherent_test() ERROR: ")
         ACE_TEXT("Expected RETCODE_NO_DATA, but error is: %C\n"),
-        retcode_to_string(rc).c_str()), false);
+        retcode_to_string(rc)), false);
     }
   }
 
@@ -388,7 +388,7 @@ coherent_test(DDS::DomainParticipant_var& participant, DDS::Topic_var& topic)
     if (rc != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l coherent_test() ERROR: ")
                         ACE_TEXT("wait failed: %C\n"),
-                        retcode_to_string(rc).c_str()), false);
+                        retcode_to_string(rc)), false);
     }
   }
 
@@ -402,7 +402,7 @@ coherent_test(DDS::DomainParticipant_var& participant, DDS::Topic_var& topic)
     if (rc != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l coherent_test() ERROR: ")
         ACE_TEXT("take error: %C\n"),
-        retcode_to_string(rc).c_str()), false);
+        retcode_to_string(rc)), false);
     }
     if (foo.length() != SAMPLES_PER_TEST) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l coherent_test() ERROR: ")
@@ -467,7 +467,7 @@ ordered_test(DDS::DomainParticipant_var& participant, DDS::Topic_var& topic)
     if (rc != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l ordered_test() ERROR: ")
           ACE_TEXT("Unable to write sample %u: %C\n"),
-          retcode_to_string(rc).c_str(), i * 2), false);
+          i * 2, retcode_to_string(rc)), false);
     }
 
     // Write second instance
@@ -476,7 +476,7 @@ ordered_test(DDS::DomainParticipant_var& participant, DDS::Topic_var& topic)
     if (rc != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l ordered_test() ERROR: ")
           ACE_TEXT("Unable to write sample %u: %C\n"),
-          retcode_to_string(rc).c_str(), i * 2 + 1), false);
+          i * 2 + 1, retcode_to_string(rc)), false);
     }
   }
 
@@ -493,7 +493,7 @@ ordered_test(DDS::DomainParticipant_var& participant, DDS::Topic_var& topic)
     if (rc != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l ordered_test() ERROR: ")
                         ACE_TEXT("wait failed: %C\n"),
-                        retcode_to_string(rc).c_str()), false);
+                        retcode_to_string(rc)), false);
     }
   }
 
@@ -511,7 +511,7 @@ ordered_test(DDS::DomainParticipant_var& participant, DDS::Topic_var& topic)
     if (rc != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l ordered_test() ERROR: ")
                         ACE_TEXT("Unable to take samples: %C\n"),
-                        retcode_to_string(rc).c_str()), false);
+                        retcode_to_string(rc)), false);
     }
 
     DDS::Time_t last_timestamp = {0, 0};
@@ -556,7 +556,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     if (rc != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l main() ERROR: ")
                         ACE_TEXT("register_type failed: %C\n"),
-                        retcode_to_string(rc).c_str()), 1);
+                        retcode_to_string(rc)), 1);
     }
 
     // Create Topic (FooTopic)

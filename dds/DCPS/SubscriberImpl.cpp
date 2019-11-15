@@ -272,7 +272,7 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
         GuidConverter converter(dr_servant->get_subscription_id());
         ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) SubscriberImpl::delete_datareader(%C): ")
           ACE_TEXT("will return \"%C\" because datareader %s\n"),
-          OPENDDS_STRING(converter).c_str(), retcode_to_string(rc).c_str(),
+          OPENDDS_STRING(converter).c_str(), retcode_to_string(rc),
           reason));
       }
       return rc;

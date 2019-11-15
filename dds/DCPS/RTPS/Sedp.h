@@ -257,8 +257,8 @@ private:
       : type_(mt), id_(id), pgmdata_(data) {}
 #endif
 
-    static OPENDDS_STRING msgTypeToString(MsgType type);
-    OPENDDS_STRING msgTypeToString() const;
+    static const char* msgTypeToString(MsgType type);
+    const char* msgTypeToString() const;
   };
 
 

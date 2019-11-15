@@ -340,7 +340,7 @@ void InstanceState::ScheduleCommand::execute()
   }
 }
 
-OPENDDS_STRING InstanceState::instance_state_string(DDS::InstanceStateKind value)
+const char* InstanceState::instance_state_string(DDS::InstanceStateKind value)
 {
   switch (value) {
   case DDS::ALIVE_INSTANCE_STATE:
@@ -354,13 +354,11 @@ OPENDDS_STRING InstanceState::instance_state_string(DDS::InstanceStateKind value
   case DDS::ANY_INSTANCE_STATE:
     return "ANY_INSTANCE_STATE";
   default:
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: OpenDDS::DCPS::InstanceState::instance_state_string(): ")
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: InstanceState::instance_state_string: ")
       ACE_TEXT("%d is either invalid or not recognized.\n"),
-      value
-    ));
+      value));
 
-    return "(Unknown Instance State: " + to_dds_string(value) + ")";
+    return "Invalid instance state";
   }
 }
 

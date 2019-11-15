@@ -235,6 +235,8 @@ RtpsUdpInst::get_blob(const TransportLocatorSeq& trans_info) const
   return 0;
 }
 
+#ifdef OPENDDS_SECURITY
+
 ICE::AddressListType
 RtpsUdpInst::host_addresses() const {
   ICE::AddressListType addresses;
@@ -258,6 +260,8 @@ RtpsUdpInst::host_addresses() const {
 
   return addresses;
 }
+
+#endif
 
 void
 RtpsUdpInst::update_locators(const RepoId& remote_id,

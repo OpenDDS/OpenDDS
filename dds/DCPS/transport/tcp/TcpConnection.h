@@ -263,7 +263,7 @@ private:
   RcHandle<TcpReconnectTask> reconnect_task_;
 
   /// Get name of the current reconnect state as a string.
-  OPENDDS_STRING reconnect_state_string() const;
+  const char* reconnect_state_string() const;
 };
 
 } // namespace DCPS

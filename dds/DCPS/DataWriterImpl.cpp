@@ -270,7 +270,7 @@ DataWriterImpl::transport_assoc_done(int flags, const RepoId& remote_id)
     const GuidConverter conv(remote_id);
     ACE_DEBUG((LM_INFO,
                ACE_TEXT("(%P|%t) DataWriterImpl::transport_assoc_done: ")
-               ACE_TEXT(" writer %C succeeded in associating with reader %C\n"),
+               ACE_TEXT("writer %C succeeded in associating with reader %C\n"),
                OPENDDS_STRING(writer_conv).c_str(),
                OPENDDS_STRING(conv).c_str()));
   }
@@ -902,7 +902,7 @@ DataWriterImpl::set_qos(const DDS::DataWriterQos & qos)
         if (!status) {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) DataWriterImpl::set_qos, ")
-                            ACE_TEXT("qos not updated. \n")),
+                            ACE_TEXT("qos not updated.\n")),
                            DDS::RETCODE_ERROR);
         }
       }
@@ -986,7 +986,7 @@ DataWriterImpl::create_ack_token(DDS::Duration_t max_wait) const
   if (DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataWriterImpl::create_ack_token() - ")
-               ACE_TEXT("for sequence %q \n"),
+               ACE_TEXT("for sequence %q\n"),
                this->sequence_number_.getValue()));
   }
   return AckToken(max_wait, this->sequence_number_);
@@ -1208,7 +1208,7 @@ DataWriterImpl::get_matched_subscriptions(
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("DataWriterImpl::get_matched_subscriptions: ")
-                      ACE_TEXT(" Entity is not enabled. \n")),
+                      ACE_TEXT(" Entity is not enabled.\n")),
                      DDS::RETCODE_NOT_ENABLED);
   }
 
@@ -1242,7 +1242,7 @@ DataWriterImpl::get_matched_subscription_data(
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::")
                       ACE_TEXT("get_matched_subscription_data: ")
-                      ACE_TEXT("Entity is not enabled. \n")),
+                      ACE_TEXT("Entity is not enabled.\n")),
                      DDS::RETCODE_NOT_ENABLED);
   }
   RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
@@ -1455,7 +1455,7 @@ DataWriterImpl::enable()
   if (!publisher || this->publication_id_ == GUID_UNKNOWN) {
     ACE_DEBUG((LM_WARNING,
                ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::enable, ")
-               ACE_TEXT("add_publication returned invalid id. \n")));
+               ACE_TEXT("add_publication returned invalid id.\n")));
     data_container_->shutdown_ = true;
     return DDS::RETCODE_ERROR;
   }
@@ -1521,18 +1521,16 @@ DataWriterImpl::register_instance_i(DDS::InstanceHandle_t& handle,
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("DataWriterImpl::register_instance_i: ")
-                      ACE_TEXT(" Entity is not enabled. \n")),
+                      ACE_TEXT("Entity is not enabled.\n")),
                      DDS::RETCODE_NOT_ENABLED);
   }
 
-  DDS::ReturnCode_t ret =
-    this->data_container_->register_instance(handle, data);
-
+  DDS::ReturnCode_t ret = data_container_->register_instance(handle, data);
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::register_instance_i: ")
                       ACE_TEXT("register instance with container failed, returned <%C>.\n"),
-                      retcode_to_string(ret).c_str()),
+                      retcode_to_string(ret)),
                      ret);
   }
 
@@ -1542,13 +1540,12 @@ DataWriterImpl::register_instance_i(DDS::InstanceHandle_t& handle,
 
   DataSampleElement* element = 0;
   ret = this->data_container_->obtain_buffer_for_control(element);
-
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("DataWriterImpl::register_instance_i: ")
-                      ACE_TEXT("obtain_buffer_for_control returned %d.\n"),
-                      ret),
+                      ACE_TEXT("obtain_buffer_for_control failed, returned <%C>.\n"),
+                      retcode_to_string(ret)),
                      ret);
   }
 
@@ -1563,12 +1560,12 @@ DataWriterImpl::register_instance_i(DDS::InstanceHandle_t& handle,
   element->set_sample(move(sample));
 
   ret = this->data_container_->enqueue_control(element);
-
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("DataWriterImpl::register_instance_i: ")
-                      ACE_TEXT("enqueue_control failed.\n")),
+                      ACE_TEXT("enqueue_control failed, returned <%C>\n"),
+                      retcode_to_string(ret)),
                      ret);
   }
 
@@ -1593,7 +1590,7 @@ DataWriterImpl::register_instance_from_durable_data(
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::register_instance_from_durable_data: ")
                       ACE_TEXT("register instance with container failed, returned <%C>.\n"),
-                      retcode_to_string(ret).c_str()),
+                      retcode_to_string(ret)),
                      ret);
   }
 
@@ -1611,7 +1608,7 @@ DataWriterImpl::unregister_instance_i(DDS::InstanceHandle_t handle,
   if (enabled_ == false) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::unregister_instance_i: ")
-                      ACE_TEXT(" Entity is not enabled.\n")),
+                      ACE_TEXT("Entity is not enabled.\n")),
                      DDS::RETCODE_NOT_ENABLED);
   }
 
@@ -1630,7 +1627,7 @@ DataWriterImpl::unregister_instance_i(DDS::InstanceHandle_t handle,
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("DataWriterImpl::unregister_instance_i: ")
-                      ACE_TEXT(" unregister with container failed. \n")),
+                      ACE_TEXT("unregister with container failed.\n")),
                      ret);
   }
 
@@ -1681,7 +1678,7 @@ DataWriterImpl::dispose_and_unregister(DDS::InstanceHandle_t handle,
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("DataWriterImpl::dispose_and_unregister: ")
-                      ACE_TEXT("dispose on container failed. \n")),
+                      ACE_TEXT("dispose on container failed.\n")),
                      ret);
   }
 
@@ -1691,7 +1688,7 @@ DataWriterImpl::dispose_and_unregister(DDS::InstanceHandle_t handle,
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("DataWriterImpl::dispose_and_unregister: ")
-                      ACE_TEXT("unregister with container failed. \n")),
+                      ACE_TEXT("unregister with container failed.\n")),
                      ret);
   }
 
@@ -1766,7 +1763,7 @@ DataWriterImpl::write(Message_Block_Ptr data,
   if (enabled_ == false) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::write: ")
-                      ACE_TEXT(" Entity is not enabled. \n")),
+                      ACE_TEXT("Entity is not enabled.\n")),
                      DDS::RETCODE_NOT_ENABLED);
   }
 
@@ -1903,7 +1900,7 @@ DataWriterImpl::dispose(DDS::InstanceHandle_t handle,
   if (enabled_ == false) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::dispose: ")
-                      ACE_TEXT(" Entity is not enabled. \n")),
+                      ACE_TEXT("Entity is not enabled.\n")),
                      DDS::RETCODE_NOT_ENABLED);
   }
 
@@ -2175,7 +2172,7 @@ DataWriterImpl::data_delivered(const DataSampleElement* sample)
     GuidConverter writer_converter(publication_id_);
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::data_delivered: ")
-               ACE_TEXT(" The publication id %C from delivered element ")
+               ACE_TEXT("The publication id %C from delivered element ")
                ACE_TEXT("does not match the datawriter's id %C\n"),
                OPENDDS_STRING(sample_converter).c_str(),
                OPENDDS_STRING(writer_converter).c_str()));
@@ -2449,7 +2446,7 @@ DataWriterImpl::send_liveliness(const MonotonicTimePoint& now)
     if (this->send_control(header, move(liveliness_msg)) == SEND_CONTROL_ERROR) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::send_liveliness: ")
-                        ACE_TEXT(" send_control failed. \n")),
+                        ACE_TEXT("send_control failed.\n")),
                        false);
     }
   }
