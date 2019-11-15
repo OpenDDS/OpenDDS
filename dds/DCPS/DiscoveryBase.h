@@ -1575,6 +1575,14 @@ namespace OpenDDS {
         , crypto_handle_(DDS::HANDLE_NIL)
 #endif
         {
+          RepoId guid;
+          std::memcpy(guid.guidPrefix, p.participantProxy.guidPrefix, sizeof(p.participantProxy.guidPrefix));
+          guid.entityId = DCPS::ENTITYID_PARTICIPANT;
+          location_data_.guid = OPENDDS_STRING(GuidConverter(guid)).c_str();
+          location_data_.location = 0;
+          location_data_.change_mask = 0;
+          location_data_.timestamp = 0;
+
 #ifdef OPENDDS_SECURITY
           security_info_.participant_security_attributes = 0;
           security_info_.plugin_participant_security_attributes = 0;
@@ -1582,6 +1590,8 @@ namespace OpenDDS {
         }
 
         DiscoveredParticipantData pdata_;
+        DDS::ParticipantLocationBuiltinTopicData location_data_;
+
         MonotonicTimePoint last_seen_;
         DDS::InstanceHandle_t bit_ih_;
         DCPS::SequenceNumber last_seq_;

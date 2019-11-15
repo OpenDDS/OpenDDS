@@ -166,16 +166,9 @@ protected:
 #endif
                                       );
 
-//--cj start
-  ParticipantLocationData_t build_local_plocdata(
-#ifdef OPENDDS_SECURITY
-	  Security::DiscoveredParticipantDataKind kind
-#endif
-  );
+  void update_location(DDS::ParticipantLocationBuiltinTopicData& dp, DDS::ParticipantLocation mask, const ACE_INET_Addr& from);
 
-  void update_location(const ACE_INET_Addr& from, const DCPS::RepoId& guid);
-
-  void update_bit_loc_data(DDS::ParticipantLocationBuiltinTopicData &bitl);
+  //void update_bit_loc_data(DDS::ParticipantLocationBuiltinTopicData &bitl);
 
 //--cj end
 
@@ -275,10 +268,10 @@ private:
 
   //--cj start
   // todo: store in a map for lookup and modification later.
-  ACE_INET_Addr location_addr;
-  DCPS::RepoId  location_guid;
-  unsigned long location_mask;
-  unsigned long location_timestamp;
+  // ACE_INET_Addr location_addr;
+  // DCPS::RepoId  location_guid;
+  // unsigned long location_mask;
+  // unsigned long location_timestamp;
   //bool has_ice;
   //--cj end
 

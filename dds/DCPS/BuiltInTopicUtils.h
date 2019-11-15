@@ -206,16 +206,16 @@ keyFromSample<DDS::PublicationBuiltinTopicData>(
   return sample->key;
 }
 
-//--cj
-template<>
-inline
-DDS::BuiltinTopicKey_t
-keyFromSample<DDS::ParticipantLocationBuiltinTopicData>(
-	DDS::ParticipantLocationBuiltinTopicData* sample)
-{
-	return sample->key;
-}
-//--cj end
+// //--cj
+// template<>
+// inline
+// DDS::BuiltinTopicKey_t
+// keyFromSample<DDS::ParticipantLocationBuiltinTopicData>(
+// 	DDS::ParticipantLocationBuiltinTopicData* sample)
+// {
+// 	return sample->guid;
+// }
+// //--cj end
 
 #endif
 

@@ -64,9 +64,6 @@ typedef Security::SPDPdiscoveredParticipantData ParticipantData_t;
 #else
 typedef SPDPdiscoveredParticipantData ParticipantData_t;
 #endif
-//--cj start
-typedef SPDPdiscoveredParticipantLocationData ParticipantLocationData_t;
-//--cj end
 
 class Sedp : public DCPS::EndpointManager<ParticipantData_t> {
 public:

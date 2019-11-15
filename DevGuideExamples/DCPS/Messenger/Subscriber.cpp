@@ -10,6 +10,7 @@
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DdsDcpsSubscriptionC.h>
 
+#include <dds/DCPS/BuiltInTopicUtils.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/WaitSet.h>
@@ -18,7 +19,7 @@
 
 #include "DataReaderListenerImpl.h"
 #include "MessengerTypeSupportImpl.h"
-
+#include "ParticipantLocationBuiltinTopicDataDataReaderListenerImpl.h"
 
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
@@ -102,6 +103,32 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         ACE_TEXT(" _narrow failed!\n")),
                        -1);
     }
+
+
+
+
+    // Get the Built-In Subscriber for Built-In Topics
+    DDS::Subscriber_var bit_subscriber = participant->get_builtin_subscriber();
+
+    DDS::DataReader_var pub_loc_dr = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC);
+    if (0 == pub_loc_dr)
+      {
+        std::cerr << "Could not get " << OpenDDS::DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC
+                  << " DataReader." << std::endl;
+        ACE_OS::exit(1);
+      }
+
+    DDS::DataReaderListener_var pub_loc_listener =
+      new ParticipantLocationBuiltinTopicDataDataReaderListenerImpl();
+
+    CORBA::Long retcode =
+      pub_loc_dr->set_listener(pub_loc_listener,
+                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    if (retcode != DDS::RETCODE_OK)
+      {
+        std::cerr << "set_listener for " << OpenDDS::DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC << " failed." << std::endl;
+        ACE_OS::exit(1);
+      }
 
     // Block until Publisher completes
     DDS::StatusCondition_var condition = reader->get_statuscondition();

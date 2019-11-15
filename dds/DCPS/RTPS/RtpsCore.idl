@@ -601,14 +601,6 @@ module OpenDDS {
       Duration_t leaseDuration;
     };
 
-	//--cj start
-	struct SPDPdiscoveredParticipantLocationData {
-		DDS::ParticipantLocationBuiltinTopicData ddsParticipantLocationData;
-		ParticipantProxy_t participantProxy;
-		Duration_t timeStamp;
-	};
-	//--cj end
-
     /* Type used to hold data exchanged between Participants.
        This is used for the BuiltinParticipantMessage{Writer,Reader}
        to implement the Writer Liveliness Protocol (8.4.13). */
