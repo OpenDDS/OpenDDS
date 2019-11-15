@@ -105,7 +105,9 @@ private:
   ACE_INET_Addr stun_server_address_;
   mutable ACE_SYNCH_MUTEX stun_server_config_lock_;
 
+#ifdef OPENDDS_SECURITY
   ICE::AddressListType host_addresses() const;
+#endif
 };
 
 inline void RtpsUdpInst::rtps_relay_address(const ACE_INET_Addr& address)
