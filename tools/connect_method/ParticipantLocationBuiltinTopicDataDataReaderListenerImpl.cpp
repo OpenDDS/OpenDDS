@@ -72,9 +72,9 @@ void ParticipantLocationBuiltinTopicDataDataReaderListenerImpl::on_data_availabl
 				std::cout << "== Participant Location ==" << std::endl;
 				std::cout 
 					<< "  guid: " << participant.guid << std::endl
-					<< "  addr: " << participant.remote_addr << std::endl
+					<< "  addr: " << participant.local_addr << std::endl
 					<< "   loc: " << loc << std::endl
-					<< "  time: " << participant.timestamp << std::endl;
+					<< "  time: " << participant.local_timestamp << std::endl;
 			}
 		}
 		status = builtin_dr->read_next_sample(participant, si);

@@ -27,62 +27,45 @@ ParticipantLocationBuiltinTopicDataDataReaderListenerImpl::~ParticipantLocationB
 
 void ParticipantLocationBuiltinTopicDataDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 {
-	// 1.  Narrow the DataReader to an ParticipantLocationBuiltinTopicDataDataReader
-	// 2.  Read the samples from the data reader
-	// 3.  Print out the contents of the samples
-	DDS::ParticipantLocationBuiltinTopicDataDataReader_var builtin_dr =
-		DDS::ParticipantLocationBuiltinTopicDataDataReader::_narrow(reader);
-	if (0 == builtin_dr)
-	{
-		std::cerr << "ParticipantLocationBuiltinTopicDataDataReaderListenerImpl::"
-			<< "on_data_available: _narrow failed." << std::endl;
-		ACE_OS::exit(1);
-	}
+  // 1.  Narrow the DataReader to an ParticipantLocationBuiltinTopicDataDataReader
+  // 2.  Read the samples from the data reader
+  // 3.  Print out the contents of the samples
+  DDS::ParticipantLocationBuiltinTopicDataDataReader_var builtin_dr =
+    DDS::ParticipantLocationBuiltinTopicDataDataReader::_narrow(reader);
+  if (0 == builtin_dr)
+    {
+      std::cerr << "ParticipantLocationBuiltinTopicDataDataReaderListenerImpl::"
+                << "on_data_available: _narrow failed." << std::endl;
+      ACE_OS::exit(1);
+    }
 
-	DDS::ParticipantLocationBuiltinTopicData participant;
-	DDS::SampleInfo si;
-	DDS::ReturnCode_t status = builtin_dr->read_next_sample(participant, si);
+  DDS::ParticipantLocationBuiltinTopicData participant;
+  DDS::SampleInfo si;
 
-	while (status == DDS::RETCODE_OK)
-	{
-		if (si.valid_data) {
-			if (si.valid_data) {
-				std::string loc = "";
-				bool flag = false;
-				if (participant.location & 1) {
-					loc += "local ";
-					flag = true;
-				}
-				if (participant.location & 2) {
-					if (flag)
-						loc += "& ";
-					loc += "ice ";
-					flag = true;
-				}
-				if (participant.location & 4) {
-					if (flag)
-						loc += "& ";
-					loc += "relay";
-				}
-
-//				    << "  part: " << participant.key.value[0] << ","
-//					<< participant.key.value[1] << ","
-//					<< participant.key.value[2] << std::endl
-
-				std::cout << "== Participant Location ==" << std::endl;
-				std::cout 
-					<< "  guid: " << participant.guid << std::endl
-					<< "   loc: " << participant.location << std::endl
-       					<< "  mask: " << participant.change_mask << std::endl
-        				<< "local: " << participant.local_addr << std::endl
-                                        << "  ice: " << participant.ice_addr << std::endl
-                                        << "relay: " << participant.relay_addr << std::endl
-
-					<< "  time: " << participant.timestamp << std::endl;
-			}
-		}
-		status = builtin_dr->read_next_sample(participant, si);
-	}
+  for (DDS::ReturnCode_t status = builtin_dr->read_next_sample(participant, si);
+       status == DDS::RETCODE_OK;
+       status = builtin_dr->read_next_sample(participant, si)) {
+    std::cout << "== Participant Location ==" << std::endl;
+    std::cout
+    << " valid: " << si.valid_data << std::endl
+    << "  guid: " << participant.guid << std::endl
+    << "   loc: "
+    << ((participant.location & DDS::LOCATION_LOCAL) ? "LOCAL " : "")
+    << ((participant.location & DDS::LOCATION_ICE) ? "ICE " : "")
+    << ((participant.location & DDS::LOCATION_RELAY) ? "RELAY " : "")
+    << std::endl
+    << "  mask: "
+    << ((participant.change_mask & DDS::LOCATION_LOCAL) ? "LOCAL " : "")
+    << ((participant.change_mask & DDS::LOCATION_ICE) ? "ICE " : "")
+    << ((participant.change_mask & DDS::LOCATION_RELAY) ? "RELAY " : "")
+    << std::endl
+    << " local: " << participant.local_addr << std::endl
+    << "      : " << participant.local_timestamp << std::endl
+    << "   ice: " << participant.ice_addr << std::endl
+    << "      : " << participant.ice_timestamp << std::endl
+    << " relay: " << participant.relay_addr << std::endl
+    << "      : " << participant.relay_timestamp << std::endl;
+  }
 }
 
 void ParticipantLocationBuiltinTopicDataDataReaderListenerImpl::on_requested_deadline_missed(

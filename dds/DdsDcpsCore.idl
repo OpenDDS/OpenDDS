@@ -313,9 +313,11 @@ module DDS {
                 ParticipantLocation location;
                 ParticipantLocation change_mask;
 		string local_addr;
+                unsigned long local_timestamp;
                 string ice_addr;
+                unsigned long ice_timestamp;
                 string relay_addr;
-		unsigned long timestamp;
+		unsigned long relay_timestamp;
 	};
 	//--cj end
 

@@ -404,50 +404,80 @@ namespace {
   }
 }
 
-//--cj
 void
-Spdp::update_location(DDS::ParticipantLocationBuiltinTopicData& pl,
+Spdp::update_location(const DCPS::RepoId& guid,
                       DDS::ParticipantLocation mask,
-                      const ACE_INET_Addr& from) {
-  ACE_ERROR((LM_ERROR, "Spdp::update_location %C\n", pl.guid.in()));
-  ACE_TCHAR buffer[256];
-  from.addr_to_string(buffer, 256);
-
-  const DDS::ParticipantLocation old_mask = pl.location;
-
-  if (from != ACE_INET_Addr()) {
-    pl.location |= mask;
-  } else {
-    pl.location &= ~(mask);
+                      const ACE_INET_Addr& from)
+{
+  // We have the global lock.
+  DiscoveredParticipantIter iter = participants_.find(guid);
+  if (iter == participants_.end()) {
+    return;
   }
 
-  pl.change_mask = mask;
+  DDS::ParticipantLocationBuiltinTopicData& ld = iter->second.location_data_;
+
+  ACE_TCHAR buffer[256];
+  from.addr_to_string(buffer, 256);
+  const char* addr = ACE_TEXT_ALWAYS_CHAR(buffer);
+
+  const DDS::ParticipantLocation old_mask = ld.location;
+
+  if (from != ACE_INET_Addr()) {
+    ld.location |= mask;
+  } else {
+    ld.location &= ~(mask);
+  }
+
+  ld.change_mask = mask;
+
+  const unsigned long now = MonotonicTimePoint::now().value().sec();
 
   bool address_change = false;
   switch (mask) {
   case DDS::LOCATION_LOCAL:
-    address_change = (buffer != pl.local_addr);
-    pl.local_addr = buffer;
+    address_change = std::strcmp(addr, ld.local_addr.in()) != 0;
+    ld.local_addr = addr;
+    ld.local_timestamp = now;
     break;
   case DDS::LOCATION_ICE:
-    address_change = (buffer != pl.local_addr);
-    pl.ice_addr = buffer;
+    address_change = std::strcmp(addr, ld.ice_addr.in()) != 0;
+    ld.ice_addr = addr;
+    ld.ice_timestamp = now;
     break;
   case DDS::LOCATION_RELAY:
-    address_change = (buffer != pl.local_addr);
-    pl.relay_addr = buffer;
+    address_change = std::strcmp(addr, ld.relay_addr.in()) != 0;
+    ld.relay_addr = addr;
+    ld.relay_timestamp = now;
     break;
   }
 
-  pl.timestamp = MonotonicTimePoint::now().value().get_msec();
+  const unsigned long expr = now - rtps_time_to_time_duration(iter->second.pdata_.leaseDuration).value().sec();
+  if ((ld.location & DDS::LOCATION_LOCAL) && ld.local_timestamp < expr) {
+    ld.location &= ~(DDS::LOCATION_LOCAL);
+    ld.change_mask |= DDS::LOCATION_LOCAL;
+    ld.local_timestamp = now;
+  }
+  if ((ld.location & DDS::LOCATION_RELAY) && ld.relay_timestamp < expr) {
+    ld.location &= ~(DDS::LOCATION_RELAY);
+    ld.change_mask |= DDS::LOCATION_RELAY;
+    ld.relay_timestamp = now;
+  }
 
-  if (old_mask != pl.location || address_change) {
+  if (old_mask != ld.location || address_change) {
     DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl* locbit = part_loc_bit();
     if (locbit) {
-      ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
-      ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
-      locbit->store_synthetic_data(pl, DDS::NEW_VIEW_STATE);
-      ACE_ERROR((LM_ERROR, "Spdp::update_location after store %C\n", pl.guid.in()));
+      DDS::InstanceHandle_t handle = DDS::HANDLE_NIL;
+      {
+        const DDS::ParticipantLocationBuiltinTopicData ld_copy(ld);
+        ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
+        ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
+        handle = locbit->store_synthetic_data(ld_copy, DDS::NEW_VIEW_STATE);
+      }
+      DiscoveredParticipantIter iter = participants_.find(guid);
+      if (iter != participants_.end()) {
+        iter->second.location_ih_ = handle;
+      }
     }
   }
 }
@@ -458,7 +488,6 @@ Spdp::handle_participant_data(DCPS::MessageId id,
                               const DCPS::SequenceNumber& seq,
                               const ACE_INET_Addr& from)
 {
-  ACE_ERROR((LM_ERROR, "Spdp::handle_participant_data\n"));
   const MonotonicTimePoint now = MonotonicTimePoint::now();
 
   // Make a (non-const) copy so we can tweak values below
@@ -470,7 +499,6 @@ Spdp::handle_participant_data(DCPS::MessageId id,
   if (sedp_.ignoring(guid)) {
     // Ignore, this is our domain participant or one that the user has
     // asked us to ignore.
-    ACE_ERROR((LM_ERROR, "Spdp::handle_participant_data ignoring\n"));
     return;
   }
 
@@ -478,11 +506,8 @@ Spdp::handle_participant_data(DCPS::MessageId id,
   DiscoveredParticipantIter iter = participants_.find(guid);
 
   if (iter == participants_.end()) {
-    ACE_ERROR((LM_ERROR, "Spdp::handle_participant_data new participant\n"));
-
     // Trying to delete something that doesn't exist is a NOOP
     if (id == DCPS::DISPOSE_INSTANCE || id == DCPS::DISPOSE_UNREGISTER_INSTANCE) {
-      ACE_ERROR((LM_ERROR, "Spdp::handle_participant_data dispose DNE\n"));
       return;
     }
 
@@ -572,7 +597,6 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 #endif
 
   } else { // Existing Participant
-    ACE_ERROR((LM_ERROR, "Spdp::handle_participant_data existing participant\n"));
 #ifdef OPENDDS_SECURITY
     // Non-secure updates for authenticated participants are used for liveliness but
     // are otherwise ignored. Non-secure dispose messages are ignored completely.
@@ -581,7 +605,6 @@ Spdp::handle_participant_data(DCPS::MessageId id,
         id != DCPS::DISPOSE_INSTANCE &&
         id != DCPS::DISPOSE_UNREGISTER_INSTANCE) {
       iter->second.last_seen_ = now;
-      ACE_ERROR((LM_ERROR, "Spdp::handle_participant_data ignore because not secure\n"));
       return;
     }
 #endif
@@ -593,7 +616,6 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       }
       purge_auth_deadlines(iter);
       remove_discovered_participant(iter);
-      ACE_ERROR((LM_ERROR, "Spdp::handle_participant_data dispose existing\n"));
       return;
     }
 
@@ -634,10 +656,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     }
   }
 
-  iter = participants_.find(guid);
-  if (iter != participants_.end()) {
-    update_location(iter->second.location_data_, from == config_->spdp_rtps_relay_address() ? DDS::LOCATION_RELAY : DDS::LOCATION_LOCAL, from);
-  }
+  update_location(guid, from == config_->spdp_rtps_relay_address() ? DDS::LOCATION_RELAY : DDS::LOCATION_LOCAL, from);
 }
 
 bool
@@ -660,7 +679,6 @@ Spdp::data_received(const DataSubmessage& data,
                     const ParameterList& plist,
                     const ACE_INET_Addr& from)
 {
-  ACE_ERROR((LM_ERROR, "Spdp::data_received\n"));
   if (shutdown_flag_.value()) { return; }
 
   ParticipantData_t pdata;
@@ -1664,6 +1682,11 @@ Spdp::SpdpTransport::open()
       outer_->config_->use_rtps_relay()) {
     relay_beacon_->enable(false, outer_->config_->spdp_rtps_relay_beacon_period());
   }
+
+  ICE::Endpoint* endpoint = get_ice_endpoint();
+  if (endpoint) {
+    ICE::Agent::instance()->add_endpoint(endpoint);
+  }
 }
 
 Spdp::SpdpTransport::~SpdpTransport()
@@ -1752,6 +1775,12 @@ Spdp::SpdpTransport::close()
   if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) SpdpTransport::close\n")));
   }
+
+  ICE::Endpoint* endpoint = get_ice_endpoint();
+  if (endpoint) {
+    ICE::Agent::instance()->remove_endpoint(endpoint);
+  }
+
 #ifdef OPENDDS_SECURITY
   auth_deadline_processor_->cancel_and_wait();
   auth_resend_processor_->cancel_and_wait();
@@ -1921,12 +1950,19 @@ Spdp::SpdpTransport::send(WriteFlags flags)
 int
 Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
 {
-  ACE_ERROR((LM_ERROR, "Spdp::SpdpTransport::handle_input\n"));
   const ACE_SOCK_Dgram& socket = (h == unicast_socket_.get_handle())
                                  ? unicast_socket_ : multicast_socket_;
+  ACE_INET_Addr local;
   ACE_INET_Addr remote;
   buff_.reset();
-  const ssize_t bytes = socket.recv(buff_.wr_ptr(), buff_.space(), remote);
+  iovec iov[1];
+  iov[0].iov_base = buff_.wr_ptr();
+  iov[0].iov_len = buff_.space();
+  const ssize_t bytes = socket.recv(iov, 1, remote, 0
+#ifdef ACE_RECVPKTINFO
+                                    , &local
+#endif
+                                    );
 
   if (bytes > 0) {
     buff_.wr_ptr(bytes);
@@ -1945,6 +1981,23 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
   // Handle some RTI protocol multicast to the same address
   if ((buff_.size() >= 4) && (!ACE_OS::memcmp(buff_.rd_ptr(), "RTPX", 4))) {
     return 0; // Ignore
+  }
+
+  ICE::Endpoint* endpoint = get_ice_endpoint();
+  if (endpoint && (buff_.size() >= 4) && ACE_OS::memcmp(buff_.rd_ptr(), "RTPS", 4)) {
+# ifndef ACE_RECVPKTINFO
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() potential STUN message received but this version of the ACE library doesn't support the local_address extension in ACE_SOCK_Dgram::recv\n")));
+    ACE_NOTSUP_RETURN(0);
+# else
+    // Assume STUN
+    DCPS::Serializer serializer(&buff_, DCPS::Serializer::SWAP_BE);
+    STUN::Message message;
+    message.block = &buff_;
+    if (serializer >> message) {
+      ICE::Agent::instance()->receive(endpoint, local, remote, message);
+    }
+    return 0;
+# endif
   }
 
   DCPS::Serializer ser(&buff_, false, DCPS::Serializer::ALIGN_CDR);
@@ -2067,6 +2120,67 @@ Spdp::SpdpTransport::insert_send_addr(const ACE_INET_Addr& addr)
   send_addrs_.insert(addr);
 }
 
+ICE::Endpoint*
+Spdp::SpdpTransport::get_ice_endpoint()
+{
+#ifdef OPENDDS_SECURITY
+  return (outer_->config_->use_ice()) ? this : 0;
+#else
+  return 0;
+#endif
+}
+
+ICE::AddressListType
+Spdp::SpdpTransport::host_addresses() const
+{
+  ICE::AddressListType addresses;
+
+  //if local_address_string is empty, or only the port has been set
+  //need to get interface addresses to populate into the locator
+  const OPENDDS_STRING spdpaddr = outer_->config_->spdp_local_address();
+  if (spdpaddr.empty() ||
+      spdpaddr.rfind(':') == 0) {
+    if (TheServiceParticipant->default_address().empty()) {
+      DCPS::get_interface_addrs(addresses);
+    } else {
+      addresses.push_back(ACE_INET_Addr(static_cast<u_short>(0), TheServiceParticipant->default_address().c_str()));
+    }
+  } else {
+    addresses.push_back(ACE_INET_Addr(static_cast<u_short>(0), spdpaddr.c_str()));
+  }
+
+  for (ICE::AddressListType::iterator pos = addresses.begin(), limit = addresses.end(); pos != limit; ++pos) {
+    pos->set_port_number(uni_port_);
+  }
+
+  return addresses;
+}
+
+void
+Spdp::SpdpTransport::send(const ACE_INET_Addr& address, const STUN::Message& message)
+{
+  // TODO: Post a job.
+  wbuff_.reset();
+  DCPS::Serializer serializer(&wbuff_, DCPS::Serializer::SWAP_BE);
+  const_cast<STUN::Message&>(message).block = &wbuff_;
+  serializer << message;
+
+  const ssize_t res = unicast_socket_.send(wbuff_.rd_ptr(), wbuff_.length(), address);
+  if (res < 0) {
+    const int e = errno;
+    ACE_TCHAR addr_buff[256] = {};
+    address.addr_to_string(addr_buff, 256);
+    errno = e;
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::send() - destination %s failed %m\n"), addr_buff));
+  }
+}
+
+ACE_INET_Addr
+Spdp::SpdpTransport::stun_server_address() const
+{
+  return outer_->config_->sedp_stun_server_address();
+}
+
 void
 Spdp::signal_liveliness(DDS::LivelinessQosPolicyKind kind)
 {
@@ -2095,7 +2209,8 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
     throw std::runtime_error("failed to set unicast local address");
   }
 
-  if (!DCPS::open_appropriate_socket_type(unicast_socket_, local_addr)) {
+  int protocol_family = PF_UNSPEC;
+  if (!DCPS::open_appropriate_socket_type(unicast_socket_, local_addr, &protocol_family)) {
     if (DCPS::DCPS_debug_level > 3) {
       ACE_DEBUG((
             LM_WARNING,
@@ -2122,6 +2237,16 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
                outer_->config_->ttl(), uni_port_, ACE_TEXT("DCPS::set_socket_multicast_ttl:")));
     throw std::runtime_error("failed to set TTL");
   }
+
+#ifdef ACE_RECVPKTINFO
+  if (protocol_family == PF_INET) {
+    int sockopt = 1;
+    if (unicast_socket_.set_option(IPPROTO_IP, ACE_RECVPKTINFO, &sockopt, sizeof sockopt) == -1) {
+      ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_socket: set_option: %m\n")), false);
+    }
+  }
+#endif
+
   return true;
 }
 

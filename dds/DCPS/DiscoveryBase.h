@@ -1540,7 +1540,8 @@ namespace OpenDDS {
       struct DiscoveredParticipant {
 
         DiscoveredParticipant()
-        : bit_ih_(DDS::HANDLE_NIL)
+        : location_ih_(DDS::HANDLE_NIL)
+        , bit_ih_(DDS::HANDLE_NIL)
         , seq_reset_count_(0)
 #ifdef OPENDDS_SECURITY
         , has_last_stateless_msg_(false)
@@ -1562,6 +1563,7 @@ namespace OpenDDS {
           const MonotonicTimePoint& t,
           const DCPS::SequenceNumber& seq)
         : pdata_(p)
+        , location_ih_(DDS::HANDLE_NIL)
         , last_seen_(t)
         , bit_ih_(DDS::HANDLE_NIL)
         , last_seq_(seq)
@@ -1578,10 +1580,12 @@ namespace OpenDDS {
           RepoId guid;
           std::memcpy(guid.guidPrefix, p.participantProxy.guidPrefix, sizeof(p.participantProxy.guidPrefix));
           guid.entityId = DCPS::ENTITYID_PARTICIPANT;
-          location_data_.guid = OPENDDS_STRING(GuidConverter(guid)).c_str();
+          location_data_.guid = LogGuid(guid).c_str();
           location_data_.location = 0;
           location_data_.change_mask = 0;
-          location_data_.timestamp = 0;
+          location_data_.local_timestamp = 0;
+          location_data_.ice_timestamp = 0;
+          location_data_.relay_timestamp = 0;
 
 #ifdef OPENDDS_SECURITY
           security_info_.participant_security_attributes = 0;
@@ -1591,6 +1595,7 @@ namespace OpenDDS {
 
         DiscoveredParticipantData pdata_;
         DDS::ParticipantLocationBuiltinTopicData location_data_;
+        DDS::InstanceHandle_t location_ih_;
 
         MonotonicTimePoint last_seen_;
         DDS::InstanceHandle_t bit_ih_;
@@ -1647,14 +1652,12 @@ namespace OpenDDS {
             bit->set_instance_state(iter->second.bit_ih_,
                                     DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
           }
-		  //--cj
-		  ParticipantLocationBuiltinTopicDataDataReaderImpl* loc_bit = part_loc_bit();
-		  // bit may be null if the DomainParticipant is shutting down
-		  if (loc_bit && iter->second.bit_ih_ != DDS::HANDLE_NIL) {
-			  loc_bit->set_instance_state(iter->second.bit_ih_,
-				  DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
-		  }
-		  //--cj end
+          ParticipantLocationBuiltinTopicDataDataReaderImpl* loc_bit = part_loc_bit();
+          // bit may be null if the DomainParticipant is shutting down
+          if (loc_bit && iter->second.location_ih_ != DDS::HANDLE_NIL) {
+            loc_bit->set_instance_state(iter->second.location_ih_,
+                                        DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
+          }
 #endif /* DDS_HAS_MINIMUM_BIT */
           if (DCPS::DCPS_debug_level > 3) {
             DCPS::GuidConverter conv(iter->first);

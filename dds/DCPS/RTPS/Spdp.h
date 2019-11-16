@@ -166,15 +166,9 @@ protected:
 #endif
                                       );
 
-  void update_location(DDS::ParticipantLocationBuiltinTopicData& dp, DDS::ParticipantLocation mask, const ACE_INET_Addr& from);
-
-  //void update_bit_loc_data(DDS::ParticipantLocationBuiltinTopicData &bitl);
-
-//--cj end
+  void update_location(const DCPS::RepoId& guid, DDS::ParticipantLocation mask, const ACE_INET_Addr& from);
 
   bool announce_domain_participant_qos();
-
-
 
 private:
 
@@ -206,7 +200,7 @@ private:
   DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl* part_loc_bit();
 #endif /* DDS_HAS_MINIMUM_BIT */
 
-  struct SpdpTransport : public DCPS::RcEventHandler {
+  struct SpdpTransport : public DCPS::RcEventHandler, public ICE::Endpoint {
     typedef size_t WriteFlags;
     static const WriteFlags SEND_TO_LOCAL = (1 << 0);
     static const WriteFlags SEND_TO_RELAY = (1 << 1);
@@ -228,6 +222,10 @@ private:
     void acknowledge();
     void remove_send_addr(const ACE_INET_Addr& addr);
     void insert_send_addr(const ACE_INET_Addr& addr);
+    ICE::Endpoint* get_ice_endpoint();
+    ICE::AddressListType host_addresses() const;
+    void send(const ACE_INET_Addr& address, const STUN::Message& message);
+    ACE_INET_Addr stun_server_address() const;
 
     Spdp* outer_;
     Header hdr_;
