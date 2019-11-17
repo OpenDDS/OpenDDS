@@ -87,7 +87,14 @@ Stats<DataType>::Stats(
 
 template<typename DataType>
 inline
-Stats<DataType>::Stats(const Stats<DataType>& v) : DataCollector<DataType>(v), n_(v.n_), minimum_(v.minimum_), maximum_(v.maximum_), an_(v.an_), bn_(v.bn_), cn_(v.cn_), variance_(v.variance_)
+Stats<DataType>::Stats(const Stats<DataType>& v) : DataCollector<DataType>(v),
+  n_(v.n_),
+  minimum_(v.minimum_),
+  maximum_(v.maximum_),
+  an_(v.an_),
+  bn_(v.bn_),
+  cn_(v.cn_),
+  variance_(v.variance_)
 {
 }
 

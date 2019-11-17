@@ -83,6 +83,7 @@ module OpenDDS {
     // Section 9.3: "Mapping of the RTPS Types"
 
     /* Type used to hold a timestamp. */
+    // IETF RFC 1305 (NTP format): time = seconds + fraction / 2^32
     struct Time_t {
       unsigned long seconds;
       unsigned long fraction;

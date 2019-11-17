@@ -1258,8 +1258,14 @@ Spdp::remove_expired_participants()
   {
     DiscoveredParticipantIter part = participants_.find(*participant_id);
     if (part != participants_.end()) {
-      const MonotonicTimePoint expr(MonotonicTimePoint::now() -
-        rtps_duration_to_time_duration(part->second.pdata_.leaseDuration, part->second.pdata_.participantProxy.protocolVersion, part->second.pdata_.participantProxy.vendorId));
+      const MonotonicTimePoint expr(
+        MonotonicTimePoint::now() -
+        rtps_duration_to_time_duration(
+          part->second.pdata_.leaseDuration,
+          part->second.pdata_.participantProxy.protocolVersion,
+          part->second.pdata_.participantProxy.vendorId
+        )
+      );
       if (part->second.last_seen_ < expr) {
         if (DCPS::DCPS_debug_level > 1) {
           DCPS::GuidConverter conv(part->first);
