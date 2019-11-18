@@ -29,11 +29,6 @@ bool operator!=(const TAO::String_Manager& a, const TAO::String_Manager& b)
   return std::strcmp(a.in(), b.in());
 }
 
-bool operator!=(const Airports::element_type& a, const Airports::element_type& b)
-{
-  return std::strcmp(a.in(), b.in());
-}
-
 bool sequences_are_not_equal(const Airports& a, const Airports& b)
 {
   const unsigned len = a.length();
@@ -129,6 +124,8 @@ private:
   Resulting value_;
 };
 
+#  define ENUM_WRAPPER(TYPE, MEMBER) (MEMBER)
+
 #elif defined(CPP11_MAPPING)
 template <typename T>
 bool sequences_are_not_equal(const T& a, const T& b)
@@ -141,6 +138,9 @@ using PlanInfoWrapper = PlanInfo;
 using MoreInfoWrapper = MoreInfo;
 using UnrelatedInfoWrapper = UnrelatedInfo;
 using ResultingWrapper = Resulting;
+
+#  define ENUM_WRAPPER(TYPE, MEMBER) TYPE::MEMBER
+
 #endif
 
 template <typename T>
@@ -166,13 +166,13 @@ void set_sequence_length(T& seq, size_t length)
 std::ostream& operator<<(std::ostream& os, FlightType value)
 {
   switch (value) {
-  case FlightType::visual:
+  case ENUM_WRAPPER(FlightType, visual):
     os << "visual";
     return os;
-  case FlightType::instrument:
+  case ENUM_WRAPPER(FlightType, instrument):
     os << "instrument";
     return os;
-  case FlightType::mixed:
+  case ENUM_WRAPPER(FlightType, mixed):
     os << "mixed";
     return os;
   }
@@ -456,7 +456,7 @@ bool run_multitopic_test(const Publisher_var& pub, const Subscriber_var& sub)
     plan99.flight_id() = 99;
     plan99.departure_date() = 103;
     plan99.flight_name() = "Flight 100-99";
-    plan99.type() = FlightType::instrument;
+    plan99.type() = ENUM_WRAPPER(FlightType, instrument);
     plan99.tailno() = "N12345";
     plan99.departure() = "STL";
     plan99.destination() = "ALN";
@@ -477,7 +477,7 @@ bool run_multitopic_test(const Publisher_var& pub, const Subscriber_var& sub)
     PlanInfoWrapper plan96(plan99);
     plan96.flight_id() = 96;
     plan96.flight_name() = "Flight 100-96";
-    plan96.type() = FlightType::mixed;
+    plan96.type() = ENUM_WRAPPER(FlightType, mixed);
     plan96.departure() = "BER";
     plan96.destination() = "LHR";
     set_sequence_length(plan96.alternative_destinations(), 3);
@@ -535,7 +535,7 @@ bool run_multitopic_test(const Publisher_var& pub, const Subscriber_var& sub)
     ResultingWrapper rw(data[0]);
     std::cout << "Received: "
       << rw.flight_id() << " on " << rw.departure_date() << " \"" << rw.flight_name() << "\" "
-      << (rw.type() == FlightType::instrument ? "instrument" : "INVALID TYPE") << ' '
+      << (rw.type() == ENUM_WRAPPER(FlightType, instrument) ? "instrument" : "INVALID TYPE") << ' '
       << rw.destination() << ", alternatively {";
     print_sequence(std::cout, rw.alternative_destinations());
     std::cout
