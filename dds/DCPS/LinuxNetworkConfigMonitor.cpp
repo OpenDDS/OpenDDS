@@ -234,4 +234,6 @@ void LinuxNetworkConfigMonitor::process_message(const nlmsghdr* header)
 } // DCPS
 } // OpenDDS
 
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
+
 #endif // ACE_LINUX
