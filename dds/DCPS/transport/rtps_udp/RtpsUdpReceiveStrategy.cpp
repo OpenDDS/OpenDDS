@@ -1077,7 +1077,7 @@ RtpsUdpReceiveStrategy::MessageReceiver::fill_header(
   if (have_timestamp_) {
     header.source_timestamp_sec_ = timestamp_.seconds;
     header.source_timestamp_nanosec_ =
-      static_cast<ACE_UINT32>(timestamp_.fraction / NANOS_TO_RTPS_FRACS + .5);
+      DCPS::uint32_fractional_seconds_to_nanoseconds(timestamp_.fraction);
   }
   assign(header.publication_id_.guidPrefix, source_guid_prefix_);
 }
