@@ -120,8 +120,8 @@ namespace {
   std::string string_type(Classification cls)
   {
     return be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11 ?
-      (cls & CL_WIDE ? "std::wstring" : "std::string") :
-      cls & CL_WIDE ? "TAO::WString_Manager" : "TAO::String_Manager";
+      ((cls & CL_WIDE) ? "std::wstring" : "std::string") :
+      (cls & CL_WIDE) ? "TAO::WString_Manager" : "TAO::String_Manager";
   }
 
   std::string

@@ -99,7 +99,7 @@ private:
 
 class ResultingWrapper {
 public:
-  ResultingWrapper(const Resulting& value)
+  explicit ResultingWrapper(const Resulting& value)
   : value_(value)
   {
   }
