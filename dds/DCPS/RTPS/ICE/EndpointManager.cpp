@@ -751,6 +751,11 @@ void EndpointManager::ChangePasswordTask::execute(const MonotonicTimePoint& a_no
   enqueue(a_now + endpoint_manager->agent_impl->get_configuration().change_password_period());
 }
 
+void EndpointManager::network_change()
+{
+  set_host_addresses(endpoint->host_addresses());
+}
+
 #endif /* OPENDDS_SECURITY */
 
 } // namespace ICE

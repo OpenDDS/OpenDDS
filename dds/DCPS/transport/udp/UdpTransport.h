@@ -48,7 +48,7 @@ protected:
 
   virtual void shutdown_i();
 
-  virtual bool connection_info_i(TransportLocator& info) const;
+  virtual bool connection_info_i(TransportLocator& info, ConnectionInfoFlags flags) const;
   ACE_INET_Addr get_connection_addr(const TransportBLOB& data) const;
 
   virtual void release_datalink(DataLink* link);

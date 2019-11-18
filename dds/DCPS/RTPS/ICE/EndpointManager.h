@@ -138,6 +138,8 @@ struct EndpointManager {
 
   void schedule_for_destruction();
 
+  void network_change();
+
 private:
   bool scheduled_for_destruction_;
   AddressListType host_addresses_;          // Cached list of host addresses.

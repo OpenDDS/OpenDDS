@@ -2045,7 +2045,6 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       TEST_ASSERT(!to_param_list(writer_data, param_list));
       DiscoveredWriterData writer_data_out;
       TEST_ASSERT(!from_param_list(param_list, writer_data_out));
-      TEST_ASSERT(!writer_data_out.writerProxy.unicastLocatorList.length());
       TEST_ASSERT(writer_data_out.writerProxy.allLocators.length() == 1);
       TEST_ASSERT(!strcmp(writer_data_out.writerProxy.allLocators[0].transport_type, "rtps_udp"));
     }
@@ -3363,8 +3362,6 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       TEST_ASSERT(!reader_data_out.ddsSubscriptionData.partition.name.length());
       TEST_ASSERT(!reader_data_out.ddsSubscriptionData.topic_data.value.length());
       TEST_ASSERT(!reader_data_out.ddsSubscriptionData.group_data.value.length());
-      TEST_ASSERT(!reader_data_out.readerProxy.unicastLocatorList.length());
-      TEST_ASSERT(!reader_data_out.readerProxy.multicastLocatorList.length());
       TEST_ASSERT(!strlen(reader_data_out.contentFilterProperty.contentFilteredTopicName));
       TEST_ASSERT(!strlen(reader_data_out.contentFilterProperty.relatedTopicName));
       TEST_ASSERT(!strlen(reader_data_out.contentFilterProperty.filterClassName));

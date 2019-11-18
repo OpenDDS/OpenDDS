@@ -1032,8 +1032,6 @@ int from_param_list(const ParameterList& param_list,
       TheServiceParticipant->initial_TopicDataQosPolicy();
   writer_data.ddsPublicationData.group_data =
       TheServiceParticipant->initial_GroupDataQosPolicy();
-  writer_data.writerProxy.unicastLocatorList.length(0);
-  writer_data.writerProxy.multicastLocatorList.length(0);
 
   CORBA::ULong length = param_list.length();
   for (CORBA::ULong i = 0; i < length; ++i) {
@@ -1355,8 +1353,6 @@ int from_param_list(const ParameterList& param_list,
       TheServiceParticipant->initial_TopicDataQosPolicy();
   reader_data.ddsSubscriptionData.group_data =
       TheServiceParticipant->initial_GroupDataQosPolicy();
-  reader_data.readerProxy.unicastLocatorList.length(0);
-  reader_data.readerProxy.multicastLocatorList.length(0);
   reader_data.readerProxy.expectsInlineQos = false;
   reader_data.contentFilterProperty.contentFilteredTopicName = "";
   reader_data.contentFilterProperty.relatedTopicName = "";

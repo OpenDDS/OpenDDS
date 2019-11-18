@@ -25,6 +25,7 @@
 #include "dds/DCPS/ReactorTask_rch.h"
 #include "dds/DCPS/PeriodicTask.h"
 #include "dds/DCPS/transport/framework/TransportSendBuffer.h"
+#include "dds/DCPS/NetworkConfigMonitor.h"
 
 #include "dds/DCPS/DataSampleElement.h"
 #include "dds/DCPS/DisjointSequence.h"
@@ -33,6 +34,7 @@
 #include "dds/DCPS/DiscoveryListener.h"
 #include "dds/DCPS/ReactorInterceptor.h"
 #include "dds/DCPS/RcEventHandler.h"
+#include "dds/DCPS/JobQueue.h"
 
 #ifdef OPENDDS_SECURITY
 #include "dds/DdsSecurityCoreC.h"
@@ -58,7 +60,7 @@ class ReceivedDataSample;
 typedef RcHandle<RtpsUdpInst> RtpsUdpInst_rch;
 typedef RcHandle<RtpsUdpTransport> RtpsUdpTransport_rch;
 
-class OpenDDS_Rtps_Udp_Export RtpsUdpDataLink : public DataLink {
+  class OpenDDS_Rtps_Udp_Export RtpsUdpDataLink : public DataLink, public virtual NetworkConfigListener {
 public:
 
   RtpsUdpDataLink(RtpsUdpTransport& transport,
@@ -160,6 +162,14 @@ public:
 #endif
 
 private:
+  void join_multicast_group(const DCPS::NetworkInterface& nic,
+                            bool all_interfaces = false);
+  void leave_multicast_group(const DCPS::NetworkInterface& nic);
+  void add_address(const DCPS::NetworkInterface& interface,
+                   const ACE_INET_Addr& address);
+  void remove_address(const DCPS::NetworkInterface& interface,
+                      const ACE_INET_Addr& address);
+
   // Internal non-locking versions of the above
   AddrSet get_addresses_i(const RepoId& local, const RepoId& remote) const;
   AddrSet get_addresses_i(const RepoId& local) const;
@@ -186,6 +196,7 @@ private:
   typedef OPENDDS_MAP_CMP(RepoId, OPENDDS_VECTOR(RepoId),GUID_tKeyLessThan) DestToEntityMap;
 
   ReactorTask_rch reactor_task_;
+  RcHandle<DCPS::JobQueue> job_queue_;
 
   RtpsUdpSendStrategy* send_strategy();
   RtpsUdpReceiveStrategy* receive_strategy();
@@ -205,6 +216,7 @@ private:
 
   ACE_SOCK_Dgram unicast_socket_;
   ACE_SOCK_Dgram_Mcast multicast_socket_;
+  OPENDDS_SET(OPENDDS_STRING) joined_interfaces_;
 
   RcHandle<SingleSendBuffer> get_writer_send_buffer(const RepoId& pub_id);
 

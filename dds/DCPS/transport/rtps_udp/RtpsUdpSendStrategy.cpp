@@ -44,7 +44,8 @@ RtpsUdpSendStrategy::RtpsUdpSendStrategy(RtpsUdpDataLink* link,
     override_single_dest_(0),
     rtps_header_db_(RTPS::RTPSHDR_SZ, ACE_Message_Block::MB_DATA,
                     rtps_header_data_, 0, 0, ACE_Message_Block::DONT_DELETE, 0),
-    rtps_header_mb_(&rtps_header_db_, ACE_Message_Block::DONT_DELETE)
+    rtps_header_mb_(&rtps_header_db_, ACE_Message_Block::DONT_DELETE),
+    network_is_unreachable_(false)
 {
   std::memcpy(rtps_header_.prefix, RTPS::PROTOCOL_RTPS, sizeof RTPS::PROTOCOL_RTPS);
   rtps_header_.version = OpenDDS::RTPS::PROTOCOLVERSION;
@@ -245,13 +246,22 @@ RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
   const ssize_t result = link_->unicast_socket().send(iov, n, a);
 #endif
   if (result < 0) {
-    ACE_TCHAR addr_buff[256] = {};
-    int err = errno;
-    a.addr_to_string(addr_buff, 256, 0);
+    const int err = errno;
+    if (err != ENETUNREACH || !network_is_unreachable_) {
+      ACE_TCHAR addr_buff[256] = {};
+      a.addr_to_string(addr_buff, 256);
+      errno = err;
+      const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
+      ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_single_i() - "
+                 "destination %s failed send: %m\n", addr_buff));
+    }
+    if (err == ENETUNREACH) {
+      network_is_unreachable_ = true;
+    }
+    // Reset errno since the rest of framework expects it.
     errno = err;
-    const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
-    ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_single_i() - "
-      "destination %s failed %p\n", addr_buff, ACE_TEXT("send")));
+  } else {
+    network_is_unreachable_ = false;
   }
   return result;
 }

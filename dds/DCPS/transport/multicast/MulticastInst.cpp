@@ -189,7 +189,7 @@ MulticastInst::dump_to_str() const
 }
 
 size_t
-MulticastInst::populate_locator(OpenDDS::DCPS::TransportLocator& info) const
+MulticastInst::populate_locator(OpenDDS::DCPS::TransportLocator& info, ConnectionInfoFlags) const
 {
   if (this->group_address_ != ACE_INET_Addr()) {
     NetworkAddress network_address(this->group_address_);
