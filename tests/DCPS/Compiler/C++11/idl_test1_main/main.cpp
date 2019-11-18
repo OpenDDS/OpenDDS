@@ -42,6 +42,12 @@ bool idl2cxx11_test()
   u = std::move(u2);
   swap(u3, u);
 
+  {
+    // Regression Test for Invalid Free
+    Xyz::AUnion invalid_free;
+    invalid_free._d(Xyz::ColorX::yellowx);
+  }
+
   return true;
 }
 

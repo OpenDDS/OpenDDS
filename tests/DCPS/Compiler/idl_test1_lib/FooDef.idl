@@ -26,8 +26,6 @@ module Xyz {
 // Generated code won't compile with !ACE_HAS_WCHAR =>
 //   const wstring c14 = L"Hello, wide world.";
 
-//  typedef long TheKeyType;
-
   typedef short ArrayOfShorts[5];
 
   typedef short ArrayOfShorts2[3];
@@ -124,7 +122,6 @@ module Xyz {
   @topic
   struct Foo {
     @key long key;  //4
-//    TheKeyType key; // no different than without typedef
     //ArrayOfShorts shorts;
     octet octer; //+1 > 5
     @key ColorX xcolor; //+4 > 9

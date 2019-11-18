@@ -1597,7 +1597,11 @@ struct Cxx11Generator : GeneratorBase
     const std::string lang_field_type = generator_->map_type(type);
     const Classification cls = classify(actual_field_type);
     if (!(cls & (CL_PRIMITIVE | CL_ENUM))) {
-      return "    new(&_" + name + ") " + lang_field_type + ";\n";
+      std::stringstream ss;
+      ss
+        << "    new(&_" << name << ") " << lang_field_type << ";\n"
+        << "    _set = true;\n";
+      return ss.str();
     }
     return "";
   }
@@ -1699,10 +1703,10 @@ struct Cxx11Generator : GeneratorBase
       "{\n"
       "  if (_set && d != _disc) {\n"
       "    _reset();\n"
-      "  }\n";
+      "  }\n"
+      "  _set = false;\n";
     generateSwitchForUnion("d", union_activate, branches, discriminator, "", "", "", false, false);
     be_global->impl_ <<
-      "  _set = true;\n"
       "  _disc = d;\n"
       "}\n\n"
       "void " << nm << "::_reset()\n"
