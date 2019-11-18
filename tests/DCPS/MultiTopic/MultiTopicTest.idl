@@ -40,10 +40,21 @@ struct MoreInfo {
   EvenMore even_more;
 };
 
+union MiscUnion switch (short) {
+case 0:
+  long long_value;
+case 1:
+case 2:
+  string string_value;
+case 3:
+  char char_value;
+};
+
 // testing cross-joins, this has no keys
 @topic
 struct UnrelatedInfo {
   string misc;
+  MiscUnion misc_union;
 };
 
 @topic
@@ -60,4 +71,5 @@ struct Resulting {
   string more;
   EvenMore even_more;
   string misc;
+  MiscUnion misc_union;
 };

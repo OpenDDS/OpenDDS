@@ -34,35 +34,7 @@ bool operator!=(const Airports::element_type& a, const Airports::element_type& b
   return std::strcmp(a.in(), b.in());
 }
 
-template <typename T>
-size_t get_sequence_length(T& seq)
-{
-  return seq.length();
-}
-
-template <typename T>
-void set_sequence_length(T& seq, size_t length)
-{
-  seq.length(length);
-}
-
-template <typename T>
-bool sequences_are_not_equal(const T& a, const T& b)
-{
-  const unsigned len = a.length();
-  if (len != b.length()) {
-    return true;
-  }
-  for (unsigned i = 0; i < len; i++) {
-    if (a[i] != b[i]) {
-      return true;
-    }
-  }
-  return false;
-}
-
-template <>
-bool sequences_are_not_equal<Airports>(const Airports& a, const Airports& b)
+bool sequences_are_not_equal(const Airports& a, const Airports& b)
 {
   const unsigned len = a.length();
   if (len != b.length()) {
@@ -122,6 +94,7 @@ private:
 class UnrelatedInfoWrapper {
 public:
   TAO::String_Manager& misc() { return value_.misc; }
+  MiscUnion& misc_union() { return value_.misc_union; }
 
   operator UnrelatedInfo() const { return value_; }
 
@@ -148,6 +121,7 @@ public:
   TAO::String_Manager& more() { return value_.more; }
   EvenMore& even_more() { return value_.even_more; }
   TAO::String_Manager& misc() { return value_.misc; }
+  MiscUnion& misc_union() { return value_.misc_union; }
 
   operator Resulting() const { return value_; }
 
@@ -157,21 +131,36 @@ private:
 
 #elif defined(CPP11_MAPPING)
 template <typename T>
-size_t get_sequence_length(T& seq)
-{
-  return seq.size();
-}
-
-template <typename T>
-void set_sequence_length(std::vector<T>& seq, size_t length)
-{
-  seq.resize(length);
-}
-
-template <typename T>
 bool sequences_are_not_equal(const T& a, const T& b)
 {
   return a != b;
+}
+
+using LocationInfoWrapper = LocationInfo;
+using PlanInfoWrapper = PlanInfo;
+using MoreInfoWrapper = MoreInfo;
+using UnrelatedInfoWrapper = UnrelatedInfo;
+using ResultingWrapper = Resulting;
+#endif
+
+template <typename T>
+size_t get_sequence_length(T& seq)
+{
+#ifdef CLASSIC_MAPPING
+  return seq.length();
+#elif defined(CPP11_MAPPING)
+  return seq.size();
+#endif
+}
+
+template <typename T>
+void set_sequence_length(T& seq, size_t length)
+{
+#ifdef CLASSIC_MAPPING
+  seq.length(length);
+#elif defined(CPP11_MAPPING)
+  seq.resize(length);
+#endif
 }
 
 std::ostream& operator<<(std::ostream& os, FlightType value)
@@ -190,12 +179,48 @@ std::ostream& operator<<(std::ostream& os, FlightType value)
   throw std::runtime_error("Invalid value passed to operation<<(std::ostream, FlightType)");
 }
 
-using LocationInfoWrapper = LocationInfo;
-using PlanInfoWrapper = PlanInfo;
-using MoreInfoWrapper = MoreInfo;
-using UnrelatedInfoWrapper = UnrelatedInfo;
-using ResultingWrapper = Resulting;
+bool operator!=(const MiscUnion& a, const MiscUnion& b)
+{
+  if (a._d() != b._d()) {
+    return true;
+  }
+  switch (a._d()) {
+  case 0:
+    return a.long_value() != b.long_value();
+  case 1:
+  case 2:
+#if defined(CLASSIC_MAPPING)
+    return std::strcmp(a.string_value(), b.string_value());
+#elif defined(CPP11_MAPPING)
+    return a.string_value() != b.string_value();
 #endif
+  case 3:
+    return a.char_value() != b.char_value();
+  default:
+    throw std::runtime_error("Invalid discriminator in MiscUnion");
+  }
+}
+
+std::ostream& operator<<(std::ostream& os, const MiscUnion& value)
+{
+  os << value._d() << '/';
+  switch (value._d()) {
+  case 0:
+    return os << value.long_value();
+    break;
+  case 1:
+  case 2:
+    return os << '"' << value.string_value() << '"';
+    break;
+  case 3:
+    return os << value.char_value();
+    break;
+  default:
+    os << "Invalid(" << value._d() << ")";
+    break;
+  }
+  return os;
+}
 
 template <typename T>
 bool arrays_are_not_equal(const T* a, const T* b, size_t length)
@@ -378,7 +403,8 @@ bool run_multitopic_test(const Publisher_var& pub, const Subscriber_var& sub)
   for (int i = 0; i < N_ITERATIONS; ++i) {
 
     MultiTopic_var mt = sub_dp->create_multitopic("MyMultiTopic", type_name,
-      "SELECT flight_name, type, destination, alternative_destinations, x, y, z AS height, more, even_more, misc "
+      "SELECT flight_name, type, destination, alternative_destinations, "
+        "x, y, z AS height, more, even_more, misc, misc_union "
       "FROM Location NATURAL JOIN FlightPlan NATURAL JOIN More NATURAL JOIN Unrelated "
       "WHERE height < 1000 AND x < 23 AND type = 'instrument'", StringSeq());
     if (!mt) {
@@ -480,6 +506,8 @@ bool run_multitopic_test(const Publisher_var& pub, const Subscriber_var& sub)
     UnrelatedInfoDataWriter_var uidw = UnrelatedInfoDataWriter::_narrow(unrelated.dw_);
     UnrelatedInfoWrapper ui;
     ui.misc() = "Misc";
+    ui.misc_union().string_value("This is some more stuff");
+    ui.misc_union()._d(2);
     check_rc(uidw->write(ui, HANDLE_NIL), "write ui");
 
     // Read resulting samples
@@ -514,7 +542,7 @@ bool run_multitopic_test(const Publisher_var& pub, const Subscriber_var& sub)
       << "} " << rw.x() << " " << rw.y() << " " << rw.height()
       << " \"" << rw.more() << "\" { ";
     print_array(std::cout, &rw.even_more()[0], even_more_length);
-    std::cout << "} \"" << rw.misc() << "\"" << std::endl;
+    std::cout << "} \"" << rw.misc() << "\" " << rw.misc_union() << std::endl;
 
     // Check the Result
     bool invalid_result = false;
@@ -531,6 +559,7 @@ bool run_multitopic_test(const Publisher_var& pub, const Subscriber_var& sub)
     invalid_result |= expect("more", rw.more(), mi.more());
     invalid_result |= expect_array("even_more", &rw.even_more()[0], &mi.even_more()[0], even_more_length);
     invalid_result |= expect("misc", rw.misc(), ui.misc());
+    invalid_result |= expect("misc_union", rw.misc_union(), ui.misc_union());
     if (invalid_result) {
       return false;
     }
