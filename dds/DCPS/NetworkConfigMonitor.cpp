@@ -151,3 +151,5 @@ void NetworkConfigMonitor::process_add_remove()
 
 } // DCPS
 } // OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
