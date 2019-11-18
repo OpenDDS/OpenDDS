@@ -510,7 +510,7 @@ EOF
   my $arch = '';
   while (my $line = <$cl_out_fd>) {
     chomp ($line);
-    print "CL says: $line\n" if $opts{'verbose'};
+    print "CL says: $line\n" if $opts{'verbose'} && $line !~ /^\s*$/;
     # Convert _MSC_VER to the form \d+\.\d
     if ($line =~ /^CL is (\d+)\d (\w+)$/) {
       $ver = int($1) / 10;
