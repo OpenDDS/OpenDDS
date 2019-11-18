@@ -157,6 +157,8 @@ public:
 
   BuiltinEndpointSet_t available_builtin_endpoints() const { return available_builtin_endpoints_; }
 
+  ICE::Endpoint* get_ice_endpoint();
+
 protected:
   Sedp& endpoint_manager() { return sedp_; }
 
@@ -167,6 +169,7 @@ protected:
                                       );
 
   void update_location(const DCPS::RepoId& guid, DDS::ParticipantLocation mask, const ACE_INET_Addr& from);
+  void update_location_i(const DCPS::RepoId& guid, DDS::ParticipantLocation mask, const ACE_INET_Addr& from);
 
   bool announce_domain_participant_qos();
 
@@ -226,6 +229,8 @@ private:
     ICE::AddressListType host_addresses() const;
     void send(const ACE_INET_Addr& address, const STUN::Message& message);
     ACE_INET_Addr stun_server_address() const;
+    void ice_connect(const ICE::GuidSetType& guids, const ACE_INET_Addr& addr);
+    void ice_disconnect(const ICE::GuidSetType& guids);
 
     Spdp* outer_;
     Header hdr_;

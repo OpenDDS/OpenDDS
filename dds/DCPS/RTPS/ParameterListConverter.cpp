@@ -1580,56 +1580,58 @@ int from_param_list(const ParameterList& param_list,
 }
 #endif
 
-int to_param_list(const ICE::AgentInfo& agent_info,
+int to_param_list(const ICE::AgentInfoMap& ai_map,
                   ParameterList& param_list)
 {
-  IceGeneral_t ice_general;
-  ice_general.agent_type = agent_info.type;
-  ice_general.username = agent_info.username.c_str();
-  ice_general.password = agent_info.password.c_str();
+  for (ICE::AgentInfoMap::const_iterator map_pos = ai_map.begin(), limit = ai_map.end(); map_pos != limit; ++map_pos) {
+    const ICE::AgentInfo& agent_info = map_pos->second;
+    IceGeneral_t ice_general;
+    ice_general.key = map_pos->first.c_str();
+    ice_general.agent_type = agent_info.type;
+    ice_general.username = agent_info.username.c_str();
+    ice_general.password = agent_info.password.c_str();
 
-  Parameter param_general;
-  param_general.ice_general(ice_general);
-  add_param(param_list, param_general);
+    Parameter param_general;
+    param_general.ice_general(ice_general);
+    add_param(param_list, param_general);
 
-  for (ICE::AgentInfo::CandidatesType::const_iterator pos = agent_info.candidates.begin(),
-         limit = agent_info.candidates.end(); pos != limit; ++pos) {
-    IceCandidate_t ice_candidate;
-    ice_candidate.locator.kind = LOCATOR_KIND_UDPv4;
-    const sockaddr_in* in = static_cast<const sockaddr_in*>(pos->address.get_addr());
-    std::memset(&ice_candidate.locator.address[0], 0, 12);
-    std::memcpy(&ice_candidate.locator.address[12], &in->sin_addr, 4);
-    ice_candidate.locator.port = pos->address.get_port_number();
-    ice_candidate.foundation = pos->foundation.c_str();
-    ice_candidate.priority = pos->priority;
-    ice_candidate.type = pos->type;
+    for (ICE::AgentInfo::CandidatesType::const_iterator pos = agent_info.candidates.begin(),
+           limit = agent_info.candidates.end(); pos != limit; ++pos) {
+      IceCandidate_t ice_candidate;
+      ice_candidate.key = map_pos->first.c_str();
+      ice_candidate.locator.kind = LOCATOR_KIND_UDPv4;
+      const sockaddr_in* in = static_cast<const sockaddr_in*>(pos->address.get_addr());
+      std::memset(&ice_candidate.locator.address[0], 0, 12);
+      std::memcpy(&ice_candidate.locator.address[12], &in->sin_addr, 4);
+      ice_candidate.locator.port = pos->address.get_port_number();
+      ice_candidate.foundation = pos->foundation.c_str();
+      ice_candidate.priority = pos->priority;
+      ice_candidate.type = pos->type;
 
-    Parameter param;
-    param.ice_candidate(ice_candidate);
-    add_param(param_list, param);
+      Parameter param;
+      param.ice_candidate(ice_candidate);
+      add_param(param_list, param);
+    }
   }
 
   return 0;
 }
 
 int from_param_list(const ParameterList& param_list,
-                    ICE::AgentInfo& agent_info,
-                    bool& have_agent_info)
+                    ICE::AgentInfoMap& ai_map)
 {
-  have_agent_info = false;
   for (CORBA::ULong idx = 0, count = param_list.length(); idx != count; ++idx) {
     const Parameter& parameter = param_list[idx];
     switch (parameter._d()) {
     case PID_OPENDDS_ICE_GENERAL: {
-      have_agent_info = true;
       const IceGeneral_t& ice_general = parameter.ice_general();
+      ICE::AgentInfo& agent_info = ai_map[OPENDDS_STRING(ice_general.key.in())];
       agent_info.type = static_cast<ICE::AgentType>(ice_general.agent_type);
       agent_info.username = ice_general.username;
       agent_info.password = ice_general.password;
       break;
     }
     case PID_OPENDDS_ICE_CANDIDATE: {
-      have_agent_info = true;
       const IceCandidate_t& ice_candidate = parameter.ice_candidate();
       ICE::Candidate candidate;
       candidate.address.set_type(AF_INET);
@@ -1640,7 +1642,7 @@ int from_param_list(const ParameterList& param_list,
       candidate.foundation = ice_candidate.foundation;
       candidate.priority = ice_candidate.priority;
       candidate.type = static_cast<ICE::CandidateType>(ice_candidate.type);
-      agent_info.candidates.push_back(candidate);
+      ai_map[OPENDDS_STRING(ice_candidate.key.in())].candidates.push_back(candidate);
       break;
     }
     default:

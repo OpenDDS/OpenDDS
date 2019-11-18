@@ -94,26 +94,6 @@ inline bool operator==(const ConnectivityCheck& a_cc, const CandidatePair& a_cp)
   return a_cc.candidate_pair() == a_cp;
 }
 
-struct GuidPair {
-  DCPS::RepoId local;
-  DCPS::RepoId remote;
-
-  GuidPair(const DCPS::RepoId& a_local, const DCPS::RepoId& a_remote) : local(a_local), remote(a_remote) {}
-
-  bool operator<(const GuidPair& a_other) const
-  {
-    if (DCPS::GUID_tKeyLessThan()(this->local, a_other.local)) return true;
-
-    if (DCPS::GUID_tKeyLessThan()(a_other.local, this->local)) return false;
-
-    if (DCPS::GUID_tKeyLessThan()(this->remote, a_other.remote)) return true;
-
-    if (DCPS::GUID_tKeyLessThan()(a_other.remote, this->remote)) return false;
-
-    return false;
-  }
-};
-
 #if !OPENDDS_SAFETY_PROFILE
 inline std::ostream& operator<<(std::ostream& stream, const GuidPair& guidp)
 {
@@ -121,8 +101,6 @@ inline std::ostream& operator<<(std::ostream& stream, const GuidPair& guidp)
   return stream;
 }
 #endif
-
-typedef std::set<GuidPair> GuidSetType;
 
 struct Checklist : public Task {
   Checklist(EndpointManager* a_endpoint,

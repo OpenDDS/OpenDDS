@@ -172,13 +172,12 @@ int from_param_list(const ParameterList& param_list,
 // Extensions for ICE
 
 OpenDDS_Rtps_Export
-int to_param_list(const ICE::AgentInfo& agent_info,
+int to_param_list(const ICE::AgentInfoMap& ai_map,
                   ParameterList& param_list);
 
 OpenDDS_Rtps_Export
 int from_param_list(const ParameterList& param_list,
-                    ICE::AgentInfo& agent_info,
-                    bool& have_agent_info);
+                    ICE::AgentInfoMap& ai_map);
 
 }
 }

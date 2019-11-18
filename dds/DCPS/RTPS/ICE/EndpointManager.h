@@ -137,6 +137,16 @@ struct EndpointManager {
 
   void schedule_for_destruction();
 
+  void ice_connect(const GuidSetType& guids, const ACE_INET_Addr& addr)
+  {
+    endpoint->ice_connect(guids, addr);
+  }
+
+  void ice_disconnect(const GuidSetType& guids)
+  {
+    endpoint->ice_disconnect(guids);
+  }
+
 private:
   bool scheduled_for_destruction_;
   AddressListType host_addresses_;          // Cached list of host addresses.

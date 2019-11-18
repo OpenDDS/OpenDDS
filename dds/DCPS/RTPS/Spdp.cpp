@@ -336,9 +336,13 @@ Spdp::~Spdp()
     {
       DiscoveredParticipantIter part = participants_.find(*participant_id);
       if (part != participants_.end()) {
-        ICE::Endpoint* endpoint = sedp_.get_ice_endpoint();
-        if (endpoint) {
-          stop_ice(endpoint, part->first, part->second.pdata_.participantProxy.availableBuiltinEndpoints);
+        ICE::Endpoint* sedp_endpoint = sedp_.get_ice_endpoint();
+        if (sedp_endpoint) {
+          stop_ice(sedp_endpoint, part->first, part->second.pdata_.participantProxy.availableBuiltinEndpoints);
+        }
+        ICE::Endpoint* spdp_endpoint = get_ice_endpoint();
+        if (spdp_endpoint) {
+          ICE::Agent::instance()->stop_ice(spdp_endpoint, guid_, part->first);
         }
         purge_auth_deadlines(part);
         remove_discovered_participant(part);
@@ -409,6 +413,15 @@ Spdp::update_location(const DCPS::RepoId& guid,
                       DDS::ParticipantLocation mask,
                       const ACE_INET_Addr& from)
 {
+   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+   update_location_i(guid, mask, from);
+}
+
+void
+Spdp::update_location_i(const DCPS::RepoId& guid,
+                        DDS::ParticipantLocation mask,
+                        const ACE_INET_Addr& from)
+{
   // We have the global lock.
   DiscoveredParticipantIter iter = participants_.find(guid);
   if (iter == participants_.end()) {
@@ -417,14 +430,15 @@ Spdp::update_location(const DCPS::RepoId& guid,
 
   DDS::ParticipantLocationBuiltinTopicData& ld = iter->second.location_data_;
 
-  ACE_TCHAR buffer[256];
-  from.addr_to_string(buffer, 256);
-  const char* addr = ACE_TEXT_ALWAYS_CHAR(buffer);
+  const char* addr = "";
 
   const DDS::ParticipantLocation old_mask = ld.location;
 
   if (from != ACE_INET_Addr()) {
     ld.location |= mask;
+    ACE_TCHAR buffer[256];
+    from.addr_to_string(buffer, 256);
+    addr = ACE_TEXT_ALWAYS_CHAR(buffer);
   } else {
     ld.location &= ~(mask);
   }
@@ -482,6 +496,12 @@ Spdp::update_location(const DCPS::RepoId& guid,
   }
 }
 
+ICE::Endpoint*
+Spdp::get_ice_endpoint()
+{
+  return tport_->get_ice_endpoint();
+}
+
 void
 Spdp::handle_participant_data(DCPS::MessageId id,
                               const ParticipantData_t& cpdata,
@@ -501,6 +521,8 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     // asked us to ignore.
     return;
   }
+
+  const bool from_relay = from == config_->spdp_rtps_relay_address();
 
   // Find the participant - iterator valid only as long as we hold the lock
   DiscoveredParticipantIter iter = participants_.find(guid);
@@ -546,7 +568,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     // Since we've just seen a new participant, let's send out our
     // own announcement, so they don't have to wait.
     if (from != ACE_INET_Addr()) {
-      this->tport_->write_i(guid, from == config_->spdp_rtps_relay_address() ? SpdpTransport::SEND_TO_RELAY : SpdpTransport::SEND_TO_LOCAL);
+      this->tport_->write_i(guid, from_relay ? SpdpTransport::SEND_TO_RELAY : SpdpTransport::SEND_TO_LOCAL);
     }
 
 #ifdef OPENDDS_SECURITY
@@ -610,9 +632,13 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 #endif
 
     if (id == DCPS::DISPOSE_INSTANCE || id == DCPS::DISPOSE_UNREGISTER_INSTANCE) {
-      ICE::Endpoint* endpoint = sedp_.get_ice_endpoint();
-      if (endpoint) {
-        stop_ice(endpoint, iter->first, iter->second.pdata_.participantProxy.availableBuiltinEndpoints);
+      ICE::Endpoint* sedp_endpoint = sedp_.get_ice_endpoint();
+      if (sedp_endpoint) {
+        stop_ice(sedp_endpoint, iter->first, iter->second.pdata_.participantProxy.availableBuiltinEndpoints);
+      }
+      ICE::Endpoint* spdp_endpoint = get_ice_endpoint();
+      if (spdp_endpoint) {
+        ICE::Agent::instance()->stop_ice(spdp_endpoint, guid_, iter->first);
       }
       purge_auth_deadlines(iter);
       remove_discovered_participant(iter);
@@ -656,7 +682,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     }
   }
 
-  update_location(guid, from == config_->spdp_rtps_relay_address() ? DDS::LOCATION_RELAY : DDS::LOCATION_LOCAL, from);
+  update_location_i(guid, from_relay ? DDS::LOCATION_RELAY : DDS::LOCATION_LOCAL, from);
 }
 
 bool
@@ -697,34 +723,35 @@ Spdp::data_received(const DataSubmessage& data,
 
   DCPS::SequenceNumber seq;
   seq.setValue(data.writerSN.high, data.writerSN.low);
-  handle_participant_data(
-    (data.inlineQos.length() && disposed(data.inlineQos)) ? DCPS::DISPOSE_INSTANCE : DCPS::SAMPLE_DATA,
-    pdata, seq, from);
+  handle_participant_data((data.inlineQos.length() && disposed(data.inlineQos)) ? DCPS::DISPOSE_INSTANCE : DCPS::SAMPLE_DATA,
+                          pdata, seq, from);
 
-  ICE::Endpoint* endpoint = sedp_.get_ice_endpoint();
-  if (!endpoint) {
-    return;
-  }
-
-  ICE::AgentInfo agent_info;
-  bool have_agent_info;
-  if (ParameterListConverter::from_param_list(plist, agent_info, have_agent_info) < 0) {
+  ICE::AgentInfoMap ai_map;
+  if (ParameterListConverter::from_param_list(plist, ai_map) < 0) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::data_received - ")
-      ACE_TEXT("failed to convert from ParameterList to ")
-      ACE_TEXT("ICE::AgentInfo\n")));
+               ACE_TEXT("failed to convert from ParameterList to ")
+               ACE_TEXT("ICE::AgentInfo\n")));
     return;
   }
 
-  if (have_agent_info) {
-    start_ice(endpoint, guid, pdata.participantProxy.availableBuiltinEndpoints, agent_info);
-
-	std::cout << "************* ICE ****************" << std::endl;
-
-  } else {
-    stop_ice(endpoint, guid, pdata.participantProxy.availableBuiltinEndpoints);
-
-	std::cout << "************* NO ICE ****************" << std::endl;
-
+  ICE::Endpoint* sedp_endpoint = sedp_.get_ice_endpoint();
+  if (sedp_endpoint) {
+    ICE::AgentInfoMap::const_iterator sedp_pos = ai_map.find("SEDP");
+    if (sedp_pos != ai_map.end()) {
+      start_ice(sedp_endpoint, guid, pdata.participantProxy.availableBuiltinEndpoints, sedp_pos->second);
+    } else {
+      stop_ice(sedp_endpoint, guid, pdata.participantProxy.availableBuiltinEndpoints);
+    }
+  }
+  ICE::Endpoint* spdp_endpoint = get_ice_endpoint();
+  if (spdp_endpoint) {
+    ICE::AgentInfoMap::const_iterator spdp_pos = ai_map.find("SPDP");
+    if (spdp_pos != ai_map.end()) {
+      ICE::Agent::instance()->start_ice(spdp_endpoint, guid_, guid, spdp_pos->second);
+    } else {
+      ICE::Agent::instance()->stop_ice(spdp_endpoint, guid_, guid);
+      update_location(guid, DDS::LOCATION_ICE, ACE_INET_Addr());
+    }
   }
 }
 
@@ -992,9 +1019,13 @@ Spdp::process_auth_deadlines(const DCPS::MonotonicTimePoint& now)
                  ACE_TEXT("Removing discovered participant due to authentication timeout: %C\n"),
                  OPENDDS_STRING(DCPS::GuidConverter(pos->second)).c_str()));
       if (participant_sec_attr_.allow_unauthenticated_participants == false) {
-        ICE::Endpoint* endpoint = sedp_.get_ice_endpoint();
-        if (endpoint) {
-          stop_ice(endpoint, pit->first, pit->second.pdata_.participantProxy.availableBuiltinEndpoints);
+        ICE::Endpoint* sedp_endpoint = sedp_.get_ice_endpoint();
+        if (sedp_endpoint) {
+          stop_ice(sedp_endpoint, pit->first, pit->second.pdata_.participantProxy.availableBuiltinEndpoints);
+        }
+        ICE::Endpoint* spdp_endpoint = get_ice_endpoint();
+        if (spdp_endpoint) {
+          ICE::Agent::instance()->stop_ice(spdp_endpoint, guid_, pit->first);
         }
         remove_discovered_participant(pit);
       } else {
@@ -1378,10 +1409,13 @@ Spdp::remove_expired_participants()
             ACE_TEXT("participant %C exceeded lease duration, removing\n"),
             OPENDDS_STRING(conv).c_str()));
         }
-        ICE::Endpoint* endpoint = sedp_.get_ice_endpoint();
-        if (endpoint) {
-          stop_ice(endpoint, part->first, part->second.pdata_.participantProxy.availableBuiltinEndpoints);
-
+        ICE::Endpoint* sedp_endpoint = sedp_.get_ice_endpoint();
+        if (sedp_endpoint) {
+          stop_ice(sedp_endpoint, part->first, part->second.pdata_.participantProxy.availableBuiltinEndpoints);
+        }
+        ICE::Endpoint* spdp_endpoint = get_ice_endpoint();
+        if (spdp_endpoint) {
+          ICE::Agent::instance()->stop_ice(spdp_endpoint, guid_, part->first);
         }
         purge_auth_deadlines(part);
         remove_discovered_participant(part);
@@ -1827,16 +1861,21 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
 
 #ifdef OPENDDS_SECURITY
   if (!outer_->is_security_enabled()) {
-    ICE::Endpoint* endpoint = outer_->sedp_.get_ice_endpoint();
-    if (endpoint) {
-      const ICE::AgentInfo& agent_info = ICE::Agent::instance()->get_local_agent_info(endpoint);
-      if (ParameterListConverter::to_param_list(agent_info, plist) < 0) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-                   ACE_TEXT("Spdp::SpdpTransport::write() - ")
-                   ACE_TEXT("failed to convert from ICE::AgentInfo ")
-                   ACE_TEXT("to ParameterList\n")));
-        return;
-      }
+    ICE::AgentInfoMap ai_map;
+    ICE::Endpoint* sedp_endpoint = outer_->sedp_.get_ice_endpoint();
+    if (sedp_endpoint) {
+      ai_map["SEDP"] = ICE::Agent::instance()->get_local_agent_info(sedp_endpoint);
+    }
+    ICE::Endpoint* spdp_endpoint = get_ice_endpoint();
+    if (spdp_endpoint) {
+      ai_map["SPDP"] = ICE::Agent::instance()->get_local_agent_info(spdp_endpoint);
+    }
+    if (ParameterListConverter::to_param_list(ai_map, plist) < 0) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("Spdp::SpdpTransport::write() - ")
+                 ACE_TEXT("failed to convert from ICE::AgentInfo ")
+                 ACE_TEXT("to ParameterList\n")));
+      return;
     }
   }
 #endif
@@ -1880,16 +1919,21 @@ Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, WriteFlags flags)
 
 #ifdef OPENDDS_SECURITY
   if (!outer_->is_security_enabled()) {
-    ICE::Endpoint* endpoint = outer_->sedp_.get_ice_endpoint();
-    if (endpoint) {
-      const ICE::AgentInfo& agent_info = ICE::Agent::instance()->get_local_agent_info(endpoint);
-      if (ParameterListConverter::to_param_list(agent_info, plist) < 0) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-                   ACE_TEXT("Spdp::SpdpTransport::write() - ")
-                   ACE_TEXT("failed to convert from ICE::AgentInfo ")
-                   ACE_TEXT("to ParameterList\n")));
-        return;
-      }
+    ICE::AgentInfoMap ai_map;
+    ICE::Endpoint* sedp_endpoint = outer_->sedp_.get_ice_endpoint();
+    if (sedp_endpoint) {
+      ai_map["SEDP"] = ICE::Agent::instance()->get_local_agent_info(sedp_endpoint);
+    }
+    ICE::Endpoint* spdp_endpoint = get_ice_endpoint();
+    if (spdp_endpoint) {
+      ai_map["SPDP"] = ICE::Agent::instance()->get_local_agent_info(spdp_endpoint);
+    }
+    if (ParameterListConverter::to_param_list(ai_map, plist) < 0) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("Spdp::SpdpTransport::write() - ")
+                 ACE_TEXT("failed to convert from ICE::AgentInfo ")
+                 ACE_TEXT("to ParameterList\n")));
+      return;
     }
   }
 #endif
@@ -2159,7 +2203,7 @@ Spdp::SpdpTransport::host_addresses() const
 void
 Spdp::SpdpTransport::send(const ACE_INET_Addr& address, const STUN::Message& message)
 {
-  // TODO: Post a job.
+  ACE_GUARD(ACE_Thread_Mutex, g, outer_->lock_);
   wbuff_.reset();
   DCPS::Serializer serializer(&wbuff_, DCPS::Serializer::SWAP_BE);
   const_cast<STUN::Message&>(message).block = &wbuff_;
@@ -2179,6 +2223,22 @@ ACE_INET_Addr
 Spdp::SpdpTransport::stun_server_address() const
 {
   return outer_->config_->sedp_stun_server_address();
+}
+
+void
+Spdp::SpdpTransport::ice_connect(const ICE::GuidSetType& guids, const ACE_INET_Addr& addr)
+{
+  for (ICE::GuidSetType::const_iterator pos = guids.begin(), limit = guids.end(); pos != limit; ++pos) {
+    outer_->update_location(pos->remote, DDS::LOCATION_ICE, addr);
+  }
+}
+
+void
+Spdp::SpdpTransport::ice_disconnect(const ICE::GuidSetType& guids)
+{
+  for (ICE::GuidSetType::const_iterator pos = guids.begin(), limit = guids.end(); pos != limit; ++pos) {
+    outer_->update_location(pos->remote, DDS::LOCATION_ICE, ACE_INET_Addr());
+  }
 }
 
 void
