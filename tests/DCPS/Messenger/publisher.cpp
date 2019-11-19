@@ -29,6 +29,8 @@
 #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
+#include <cstdlib>
+
 #include "MessengerTypeSupportImpl.h"
 #include "Writer.h"
 #include "Args.h"
@@ -64,6 +66,7 @@ void append(DDS::PropertySeq& props, const char* name, const char* value, bool p
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
+  int status = EXIT_SUCCESS;
   DDS::DomainParticipantFactory_var dpf;
   DDS::DomainParticipant_var participant;
 
@@ -75,9 +78,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       dpf = TheParticipantFactoryWithArgs(argc, argv);
 
       std::cout << "Starting publisher with " << argc << " args" << std::endl;
-      int error;
-      if ((error = parse_args(argc, argv)) != 0) {
-        return error;
+      if ((status = parse_args(argc, argv)) != EXIT_SUCCESS) {
+        return status;
       }
 
       DDS::DomainParticipantQos part_qos;
@@ -107,7 +109,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: main()")
                           ACE_TEXT(" ERROR: create_participant failed!\n")),
-                         1);
+                         EXIT_FAILURE);
       }
 
       // Register TypeSupport (Messenger::Message)
@@ -118,7 +120,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: main()")
                           ACE_TEXT(" ERROR: register_type failed!\n")),
-                         1);
+                         EXIT_FAILURE);
       }
 
       // Create Topic
@@ -134,7 +136,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: main()")
                           ACE_TEXT(" ERROR: create_topic failed!\n")),
-                         1);
+                         EXIT_FAILURE);
       }
 
       // Create Publisher
@@ -147,7 +149,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: main()")
                           ACE_TEXT(" ERROR: create_publisher failed!\n")),
-                         1);
+                         EXIT_FAILURE);
       }
 
       DDS::DataWriterQos qos;
@@ -169,7 +171,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: main()")
                           ACE_TEXT(" ERROR: create_datawriter failed!\n")),
-                         1);
+                         EXIT_FAILURE);
       }
 
       // Start writing threads
@@ -202,6 +204,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       std::cerr << "deleting DW" << std::endl;
       delete writer;
     }
+
     // Clean-up!
     std::cerr << "deleting contained entities" << std::endl;
     participant->delete_contained_entities();
@@ -212,8 +215,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
-    ACE_OS::exit(1);
+    status = EXIT_FAILURE;
   }
 
-  return 0;
+  return status;
 }
