@@ -149,7 +149,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
-    status = EXIT_FAILURE
+    status = EXIT_FAILURE;
   }
 
   return status;
