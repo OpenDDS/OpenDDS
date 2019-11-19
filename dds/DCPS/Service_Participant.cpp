@@ -17,6 +17,9 @@
 #include "ConfigUtils.h"
 #include "RecorderImpl.h"
 #include "ReplayerImpl.h"
+#ifdef ACE_LINUX
+#include "LinuxNetworkConfigMonitor.h"
+#endif
 #include "StaticDiscovery.h"
 #if defined(OPENDDS_SECURITY)
 #include "security/framework/SecurityRegistry.h"
@@ -261,6 +264,13 @@ Service_Participant::shutdown()
 
       domainRepoMap_.clear();
 
+      {
+        ACE_GUARD(ACE_Thread_Mutex, guard, network_config_monitor_lock_);
+        if (network_config_monitor_) {
+          network_config_monitor_->close();
+        }
+      }
+
       reactor_task_.stop();
 
       discoveryMap_.clear();
@@ -460,10 +470,13 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
       got_info = true;
 
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSRTISerialization"))) != 0) {
-      Serializer::set_use_rti_serialization(ACE_OS::atoi(currentArg));
+      if (ACE_OS::atoi(currentArg) == 0) {
+        ACE_ERROR((LM_WARNING,
+          ACE_TEXT("(%P|%t) WARNING: Service_Participant::parse_args ")
+          ACE_TEXT("Argument ignored: DCPSRTISerialization is required to be enabled\n")));
+      }
       arg_shifter.consume_arg();
       got_use_rti_serialization = true;
-
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSChunks"))) != 0) {
       n_chunks_ = ACE_OS::atoi(currentArg);
       arg_shifter.consume_arg();
@@ -1478,7 +1491,11 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
     } else {
       bool should_use = false;
       GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSRTISerialization"), should_use, bool)
-      Serializer::set_use_rti_serialization(should_use);
+        if (!should_use) {
+          ACE_ERROR((LM_WARNING,
+            ACE_TEXT("(%P|%t) WARNING: Service_Participant::load_common_configuration ")
+            ACE_TEXT("Argument ignored: DCPSRTISerialization is required to be enabled\n")));
+        }
     }
 
     if (got_chunks) {
@@ -2020,6 +2037,25 @@ void Service_Participant::default_configuration_file(const ACE_TCHAR* path)
 {
   default_configuration_file_ = path;
 }
+
+NetworkConfigMonitor_rch Service_Participant::network_config_monitor()
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, network_config_monitor_lock_, NetworkConfigMonitor_rch());
+
+  if (!network_config_monitor_) {
+#ifdef ACE_LINUX
+    network_config_monitor_ = make_rch<LinuxNetworkConfigMonitor>(reactor_task_.interceptor());
+#endif
+
+    if (network_config_monitor_ && !network_config_monitor_->open()) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Service_Participant::get_domain_participant_factory could not open network config monitor\n ")));
+      network_config_monitor_->close();
+    }
+  }
+
+  return network_config_monitor_;
+}
+
 
 } // namespace DCPS
 } // namespace OpenDDS

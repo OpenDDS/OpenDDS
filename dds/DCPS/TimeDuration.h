@@ -37,6 +37,8 @@ public:
    */
   TimeDuration();
 
+  TimeDuration(const TimeDuration& other);
+
   /**
    * Copy the ACE_Time_Value directly.
    *

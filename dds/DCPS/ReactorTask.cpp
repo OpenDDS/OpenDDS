@@ -128,8 +128,10 @@ OpenDDS::DCPS::ReactorTask::svc()
                "(%P|%t) ERROR: Failed to change the reactor's owner().\n"));
   }
   reactor_owner_ = ACE_Thread_Manager::instance()->thr_self();
-  wait_for_startup();
 
+  interceptor_ = make_rch<Interceptor>(this);
+
+  wait_for_startup();
 
   {
     // Obtain the lock.  This should only happen once the open() has hit

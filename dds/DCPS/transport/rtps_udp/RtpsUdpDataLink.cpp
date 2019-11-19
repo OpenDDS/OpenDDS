@@ -89,18 +89,16 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
              false,     // is_loopback
              false)     // is_active
   , reactor_task_(reactor_task)
+  , job_queue_(DCPS::make_rch<DCPS::JobQueue>(reactor_task->get_reactor()))
   , multi_buff_(this, config.nak_depth_)
   , best_effort_heartbeat_count_(0)
   , nack_reply_(this, &RtpsUdpDataLink::send_nack_replies,
                 config.nak_response_delay_)
   , heartbeat_reply_(this, &RtpsUdpDataLink::send_heartbeat_replies,
                      config.heartbeat_response_delay_)
-  , heartbeat_(make_rch<HeartBeat>(
-      reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::send_heartbeats))
-  , heartbeatchecker_(make_rch<HeartBeat>(
-      reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::check_heartbeats))
-  , relay_beacon_(make_rch<HeartBeat>(
-      reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::send_relay_beacon))
+  , heartbeat_(reactor_task->interceptor(), *this, &RtpsUdpDataLink::send_heartbeats)
+  , heartbeatchecker_(reactor_task->interceptor(), *this, &RtpsUdpDataLink::check_heartbeats)
+  , relay_beacon_(reactor_task->interceptor(), *this, &RtpsUdpDataLink::send_relay_beacon)
   , held_data_delivery_handler_(this)
   , max_bundle_size_(config.max_bundle_size_)
   , quick_reply_delay_(config.heartbeat_response_delay_ * QUICK_REPLY_DELAY_RATIO)
@@ -216,20 +214,26 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
 
   RtpsUdpInst& config = this->config();
 
+  NetworkConfigMonitor_rch ncp = TheServiceParticipant->network_config_monitor();
+
+  DCPS::NetworkInterfaces nics;
+  if (ncp) {
+    nics = ncp->add_listener(rchandle_from(this));
+  }
+
   if (config.use_multicast_) {
-    const OPENDDS_STRING& net_if = config.multicast_interface_;
 #ifdef ACE_HAS_MAC_OSX
     multicast_socket_.opts(ACE_SOCK_Dgram_Mcast::OPT_BINDADDR_NO |
                            ACE_SOCK_Dgram_Mcast::DEFOPT_NULLIFACE);
 #endif
-    if (multicast_socket_.join(config.multicast_group_address_, 1,
-                               net_if.empty() ? 0 :
-                               ACE_TEXT_CHAR_TO_TCHAR(net_if.c_str())) != 0) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("RtpsUdpDataLink::open: ")
-                        ACE_TEXT("ACE_SOCK_Dgram_Mcast::join failed: %m\n")),
-                       false);
+    if (ncp) {
+      for (DCPS::NetworkInterfaces::const_iterator pos = nics.begin(), limit = nics.end(); pos != limit; ++pos) {
+        join_multicast_group(*pos);
+      }
+    } else {
+      NetworkInterface nic(0, config.multicast_interface_, true);
+      nic.addresses.insert(ACE_INET_Addr());
+      join_multicast_group(nic, true);
     }
   }
 
@@ -283,9 +287,118 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
                      false);
   }
 
+  if (config.rtps_relay_address() != ACE_INET_Addr() ||
+      config.use_rtps_relay_) {
+    relay_beacon_.enable(false, config.rtps_relay_beacon_period_);
+  }
+
   return true;
 }
 
+void
+RtpsUdpDataLink::add_address(const DCPS::NetworkInterface& nic,
+                             const ACE_INET_Addr&)
+{
+  struct JoinMulticastGroup : public JobQueue::Job {
+    JoinMulticastGroup(DCPS::RcHandle<RtpsUdpDataLink> tport,
+                       const DCPS::NetworkInterface& nic)
+      : tport_(tport)
+      , nic_(nic)
+    {}
+
+    void execute()
+    {
+      tport_->join_multicast_group(nic_);
+    }
+
+    DCPS::RcHandle<RtpsUdpDataLink> tport_;
+    DCPS::NetworkInterface nic_;
+  };
+  job_queue_->enqueue(DCPS::make_rch<JoinMulticastGroup>(rchandle_from(this), nic));
+}
+
+void
+RtpsUdpDataLink::remove_address(const DCPS::NetworkInterface& nic,
+                                const ACE_INET_Addr&)
+{
+  struct LeaveMulticastGroup : public DCPS::JobQueue::Job {
+    LeaveMulticastGroup(DCPS::RcHandle<RtpsUdpDataLink> tport,
+                        const DCPS::NetworkInterface& nic)
+      : tport_(tport)
+      , nic_(nic)
+    {}
+
+    void execute()
+    {
+      tport_->leave_multicast_group(nic_);
+    }
+
+    DCPS::RcHandle<RtpsUdpDataLink> tport_;
+    DCPS::NetworkInterface nic_;
+  };
+  job_queue_->enqueue(DCPS::make_rch<LeaveMulticastGroup>(rchandle_from(this), nic));
+}
+
+void
+RtpsUdpDataLink::join_multicast_group(const DCPS::NetworkInterface& nic,
+                                      bool all_interfaces)
+{
+  network_change();
+
+  if (!config().use_multicast_) {
+    return;
+  }
+
+  if (joined_interfaces_.count(nic.name()) != 0 || nic.addresses.empty() || !nic.can_multicast()) {
+    return;
+  }
+
+  if (!config().multicast_interface_.empty() && nic.name() != config().multicast_interface_) {
+    return;
+  }
+
+  if (DCPS::DCPS_debug_level > 3) {
+    ACE_DEBUG((LM_INFO,
+               ACE_TEXT("(%P|%t) RtpsUdpDataLink::join_multicast_group ")
+               ACE_TEXT("joining group %C %C:%hu\n"),
+               nic.name().c_str(),
+               config().multicast_group_address_str_.c_str(),
+               config().multicast_group_address_.get_port_number()));
+  }
+
+  if (0 == multicast_socket_.join(config().multicast_group_address_, 1, all_interfaces ? 0 : ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()))) {
+    joined_interfaces_.insert(nic.name());
+  } else {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::join_multicast_group(): ")
+               ACE_TEXT("ACE_SOCK_Dgram_Mcast::join failed: %m\n")));
+  }
+}
+
+void
+RtpsUdpDataLink::leave_multicast_group(const DCPS::NetworkInterface& nic)
+{
+  if (joined_interfaces_.count(nic.name()) == 0 || !nic.addresses.empty()) {
+    return;
+  }
+
+  if (DCPS::DCPS_debug_level > 3) {
+    ACE_DEBUG((LM_INFO,
+               ACE_TEXT("(%P|%t) RtpsUdpDataLink::leave_multicast_group ")
+               ACE_TEXT("leaving group %C %C:%hu\n"),
+               nic.name().c_str(),
+               config().multicast_group_address_str_.c_str(),
+               config().multicast_group_address_.get_port_number()));
+  }
+
+  if (0 == multicast_socket_.leave(config().multicast_group_address_, ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()))) {
+    joined_interfaces_.erase(nic.name());
+  } else {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::leave_multicast_group(): ")
+               ACE_TEXT("ACE_SOCK_Dgram_Mcast::leave failed: %m\n")));
+  }
+}
 
 void
 RtpsUdpDataLink::add_locator(const RepoId& remote_id,
@@ -294,6 +407,12 @@ RtpsUdpDataLink::add_locator(const RepoId& remote_id,
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   locators_[remote_id] = RemoteInfo(address, requires_inline_qos);
+
+  if (DCPS::DCPS_debug_level > 3) {
+    ACE_TCHAR addr_buff[256] = {};
+    address.addr_to_string(addr_buff, 256);
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) RtpsUdpDataLink::add_locator %C is now at %s\n"), LogGuid(remote_id).c_str(), addr_buff));
+  }
 }
 
 void
@@ -302,10 +421,6 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
                             bool local_durable, bool remote_durable)
 {
   const GuidConverter conv(local_id);
-
-  if (conv.isReader() && config().rtps_relay_address() != ACE_INET_Addr()) {
-    relay_beacon_->schedule_enable(false);
-  }
 
   if (!local_reliable) {
     return;
@@ -350,7 +465,7 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
   }
 
   if (enable_heartbeat) {
-    heartbeat_->schedule_enable(true);
+    heartbeat_.enable(true, config().heartbeat_period_);
   }
 }
 
@@ -388,7 +503,7 @@ RtpsUdpDataLink::register_for_reader(const RepoId& writerid,
   }
   g.release();
   if (enableheartbeat) {
-    heartbeat_->schedule_enable(false);
+    heartbeat_.enable(false, config().heartbeat_period_);
   }
 }
 
@@ -423,7 +538,7 @@ RtpsUdpDataLink::register_for_writer(const RepoId& readerid,
       InterestingRemote(readerid, address, listener)));
   g.release();
   if (enableheartbeatchecker) {
-    heartbeatchecker_->schedule_enable(false);
+    heartbeatchecker_.enable(false, config().heartbeat_period_);
   }
 }
 
@@ -591,11 +706,16 @@ RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
 void
 RtpsUdpDataLink::stop_i()
 {
+  NetworkConfigMonitor_rch ncp = TheServiceParticipant->network_config_monitor();
+  if (ncp) {
+    ncp->remove_listener(rchandle_from(this));
+  }
+
   nack_reply_.cancel();
   heartbeat_reply_.cancel();
-  heartbeat_->disable();
-  heartbeatchecker_->disable();
-  relay_beacon_->disable();
+  heartbeat_.disable_and_wait();
+  heartbeatchecker_.disable_and_wait();
+  relay_beacon_.disable_and_wait();
   unicast_socket_.close();
   multicast_socket_.close();
 }
@@ -989,7 +1109,7 @@ RtpsUdpDataLink::RtpsWriter::end_historic_samples_i(const DataSampleHeader& head
     // which already holds a RCH to the datalink... this is just to avoid adding another parameter to pass it
     RtpsUdpDataLink_rch link = link_.lock();
     if (link) {
-      link->heartbeat_->schedule_enable(true);
+      link->heartbeat_.enable(true, link->config().heartbeat_period_);
     }
   }
 }
@@ -1111,6 +1231,10 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
 
   RtpsUdpDataLink_rch link = link_.lock();
+
+  if (!link) {
+    return false;
+  }
 
   GuardType guard(link->strategy_lock_);
   if (link->receive_strategy() == 0) {
@@ -1308,6 +1432,10 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
 
   RtpsUdpDataLink_rch link = link_.lock();
 
+  if (!link) {
+    return false;
+  }
+
   GuardType guard(link->strategy_lock_);
   if (link->receive_strategy() == 0) {
     return false;
@@ -1496,6 +1624,10 @@ RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(MetaSubmessageVec& meta_submessa
   using namespace OpenDDS::RTPS;
 
   RtpsUdpDataLink_rch link = link_.lock();
+
+  if (!link) {
+    return;
+  }
 
   GuardType guard(link->strategy_lock_);
   if (link->receive_strategy() == 0) {
@@ -2786,7 +2918,7 @@ RtpsUdpDataLink::durability_resend(TransportQueueElement* element)
 }
 
 void
-RtpsUdpDataLink::send_heartbeats()
+RtpsUdpDataLink::send_heartbeats(const DCPS::MonotonicTimePoint& /*now*/)
 {
   OPENDDS_VECTOR(CallbackType) readerDoesNotExistCallbacks;
   OPENDDS_VECTOR(TransportQueueElement*) pendingCallbacks;
@@ -2821,7 +2953,7 @@ RtpsUdpDataLink::send_heartbeats()
     }
 
     if (writers_.empty() && interesting_readers_.empty()) {
-      heartbeat_->disable();
+      heartbeat_.disable_and_wait();
     }
 
     writers = writers_;
@@ -2998,12 +3130,12 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
 }
 
 void
-RtpsUdpDataLink::check_heartbeats()
+RtpsUdpDataLink::check_heartbeats(const DCPS::MonotonicTimePoint& now)
 {
   OPENDDS_VECTOR(CallbackType) writerDoesNotExistCallbacks;
 
   // Have any interesting writers timed out?
-  const MonotonicTimePoint tv(MonotonicTimePoint::now() - 10 * config().heartbeat_period_);
+  const MonotonicTimePoint tv(now - 10 * config().heartbeat_period_);
   {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
@@ -3027,21 +3159,17 @@ RtpsUdpDataLink::check_heartbeats()
 }
 
 void
-RtpsUdpDataLink::send_relay_beacon()
+RtpsUdpDataLink::send_relay_beacon(const DCPS::MonotonicTimePoint& /*now*/)
 {
-  const bool no_relay = config().rtps_relay_address() == ACE_INET_Addr();
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-    if (no_relay && readers_.empty()) {
-      relay_beacon_->disable();
-      return;
-    }
+  const ACE_INET_Addr rra = config().rtps_relay_address();
+  if (rra == ACE_INET_Addr()) {
+    return;
   }
 
   // Create a message with a few bytes of data for the beacon
   ACE_Message_Block mb(reinterpret_cast<const char*>(OpenDDS::RTPS::BEACON_MESSAGE), OpenDDS::RTPS::BEACON_MESSAGE_LENGTH);
   mb.wr_ptr(OpenDDS::RTPS::BEACON_MESSAGE_LENGTH);
-  send_strategy()->send_rtps_control(mb, config().rtps_relay_address());
+  send_strategy()->send_rtps_control(mb, rra);
 }
 
 void
@@ -3313,35 +3441,6 @@ RtpsUdpDataLink::TimedDelay::cancel()
 }
 
 void
-RtpsUdpDataLink::HeartBeat::enable(bool reenable)
-{
-  if (!enabled_) {
-    const TimeDuration& per = outer_->config().heartbeat_period_;
-    const long timer =
-      outer_->get_reactor()->schedule_timer(this, 0, ACE_Time_Value::zero, per.value());
-
-    if (timer == -1) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpDataLink::HeartBeat::enable"
-        " failed to schedule timer %p\n", ACE_TEXT("")));
-    } else {
-      enabled_ = true;
-    }
-  } else if (reenable) {
-    disable();
-    enable(false);
-  }
-}
-
-void
-RtpsUdpDataLink::HeartBeat::disable()
-{
-  if (enabled_) {
-    outer_->get_reactor()->cancel_timer(this);
-    enabled_ = false;
-  }
-}
-
-void
 RtpsUdpDataLink::send_final_acks(const RepoId& readerid)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
@@ -3492,7 +3591,7 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
     if (normal_addr != NO_ADDR) {
       addresses.insert(normal_addr);
     }
-    ACE_INET_Addr relay_addr = config().rtps_relay_address();
+    const ACE_INET_Addr relay_addr = config().rtps_relay_address();
     if (relay_addr != NO_ADDR) {
       addresses.insert(relay_addr);
     }

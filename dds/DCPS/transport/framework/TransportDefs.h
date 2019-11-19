@@ -59,7 +59,7 @@ ACE_END_VERSIONED_NAMESPACE_DECL
     }                                                                            \
     else                                                                         \
     {                                                                            \
-      VALUE = static_cast<TYPE>(ACE_OS::atoi (stringvalue.c_str ()));            \
+      VALUE = static_cast<TYPE>(ACE_OS::atoi (stringvalue.c_str()));             \
     }                                                                            \
   }
 
@@ -148,7 +148,7 @@ ACE_END_VERSIONED_NAMESPACE_DECL
     }                                                                            \
     else                                                                         \
     {                                                                            \
-      VALUE = ACE_OS::strtod (stringvalue.c_str (), 0);                          \
+      VALUE = ACE_OS::strtod (stringvalue.c_str(), 0);                           \
     }                                                                            \
   }
 
@@ -234,6 +234,11 @@ enum RemoveResult {
 };
 
 typedef ACE_CDR::Long Priority;
+
+typedef size_t ConnectionInfoFlags;
+static const ConnectionInfoFlags CONNINFO_UNICAST = (1 << 0);
+static const ConnectionInfoFlags CONNINFO_MULTICAST = (1 << 1);
+static const ConnectionInfoFlags CONNINFO_ALL = static_cast<ConnectionInfoFlags>(-1);
 
 } // namespace DCPS
 } // namespace OpenDDS

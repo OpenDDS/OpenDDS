@@ -67,7 +67,7 @@ public:
       ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Null SPDP Transport\n")));
       return false;
     }
-    addr = spdp_->tport_->default_multicast_;
+    addr = spdp_->tport_->multicast_address_;
     return true;
   }
 
@@ -325,12 +325,15 @@ bool run_test()
       qos.user_data
     },
     {
+      domain,
+      "",
       PROTOCOLVERSION,
       {gp[0], gp[1], gp[2], gp[3], gp[4], gp[5],
        gp[6], gp[7], gp[8], gp[9], gp[10], gp[11]},
       VENDORID_OPENDDS,
       false /*expectsIQoS*/,
       availableBuiltinEndpoints,
+      0,
       LocatorSeq() /* sedp_multicast */,
       LocatorSeq() /* sedp_unicast */,
       nonEmptyList /*defaultMulticastLocatorList*/,

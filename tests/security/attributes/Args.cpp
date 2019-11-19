@@ -29,6 +29,7 @@ Args::Args()
  , num_messages_(DEFAULT_NUM_MESSAGES)
  , expected_result_(0)
  , timeout_(0)
+ , extra_space(0)
 {
 }
 
@@ -61,6 +62,9 @@ int Args::parse_args(int argc, ACE_TCHAR *argv[], Args& args)
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-Domain"))) != 0) {
       args.domain_ = ACE_OS::atoi(currentArg);
       arg_shifter.consume_arg();
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-ExtraSpace"))) != 0) {
+       args.extra_space = ACE_OS::atoi(currentArg);
+       arg_shifter.consume_arg();
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-Topic"))) != 0) {
       args.topic_name_ = currentArg;
       arg_shifter.consume_arg();

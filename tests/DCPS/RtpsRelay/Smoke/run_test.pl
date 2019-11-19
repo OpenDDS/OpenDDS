@@ -36,12 +36,21 @@ $test->process("relay2", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-DCPSConfigFile relay2
 $test->process("publisher", "publisher", "-ORBDebugLevel 1 -DCPSConfigFile pub_rtps.ini" . $pub_sub_security_opts);
 $test->process("subscriber", "subscriber", "-ORBDebugLevel 1 -DCPSConfigFile sub_rtps.ini" . $pub_sub_security_opts);
 
-$test->start_process("relay1");
-$test->start_process("relay2");
-sleep 3;
-
-$test->start_process("subscriber");
-$test->start_process("publisher");
+if ($test->flag('join')) {
+    $test->start_process("relay2");
+    sleep 3;
+    $test->start_process("subscriber");
+    sleep 3;
+    $test->start_process("relay1");
+    sleep 3;
+    $test->start_process("publisher");
+} else {
+    $test->start_process("relay1");
+    $test->start_process("relay2");
+    sleep 3;
+    $test->start_process("subscriber");
+    $test->start_process("publisher");
+}
 
 $test->stop_process(180, "subscriber");
 $test->stop_process(5, "publisher");

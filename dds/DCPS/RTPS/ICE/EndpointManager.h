@@ -5,6 +5,7 @@
  * See: http://www.opendds.org/license.html
  */
 
+#ifdef OPENDDS_SECURITY
 #ifndef OPENDDS_RTPS_ICE_ENDPOINT_MANAGER_H
 #define OPENDDS_RTPS_ICE_ENDPOINT_MANAGER_H
 
@@ -137,6 +138,8 @@ struct EndpointManager {
 
   void schedule_for_destruction();
 
+  void network_change();
+
 private:
   bool scheduled_for_destruction_;
   AddressListType host_addresses_;          // Cached list of host addresses.
@@ -231,3 +234,4 @@ private:
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* OPENDDS_RTPS_ICE_ENDPOINT_MANAGER_H */
+#endif /* OPENDDS_SECURITY */

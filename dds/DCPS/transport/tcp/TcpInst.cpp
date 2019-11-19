@@ -86,7 +86,7 @@ OpenDDS::DCPS::TcpInst::dump_to_str() const
 }
 
 size_t
-OpenDDS::DCPS::TcpInst::populate_locator(OpenDDS::DCPS::TransportLocator& local_info) const
+OpenDDS::DCPS::TcpInst::populate_locator(OpenDDS::DCPS::TransportLocator& local_info, ConnectionInfoFlags) const
 {
   if (this->local_address() != ACE_INET_Addr() || !pub_address_str_.empty()) {
     // Get the public address string from the inst (usually the local address)

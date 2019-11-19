@@ -192,6 +192,11 @@ public:
     const DDS::DataWriterQos& qos,
     const DDS::PublisherQos& publisherQos) = 0;
 
+  virtual void update_publication_locators(
+    DDS::DomainId_t domainId,
+    const RepoId& partId,
+    const RepoId& dwId,
+    const TransportLocatorSeq& transInfo);
 
   // Subscription operations:
 
@@ -237,6 +242,11 @@ public:
     const RepoId& subscriptionId,
     const DDS::StringSeq& params) = 0;
 
+  virtual void update_subscription_locators(
+    DDS::DomainId_t domainId,
+    const RepoId& partId,
+    const RepoId& drId,
+    const TransportLocatorSeq& transInfo);
 
   // Managing reader/writer associations:
 

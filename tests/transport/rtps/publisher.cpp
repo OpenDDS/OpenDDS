@@ -283,7 +283,7 @@ int DDS_TEST::test(ACE_TString host, u_short port)
   log_time(now);
   const double conv = 4294.967296; // NTP fractional (2^-32) sec per microsec
   const InfoTimestampSubmessage it = { {INFO_TS, 1, 8},
-    {static_cast<ACE_CDR::Long>(now.sec()),
+    {static_cast<ACE_CDR::ULong>(now.sec()),
      static_cast<ACE_CDR::ULong>(now.usec() * conv)} };
 
   DataSubmessage ds = { {DATA, 7, 20 + 24 + 12 + sizeof(text)}, 0, 16,

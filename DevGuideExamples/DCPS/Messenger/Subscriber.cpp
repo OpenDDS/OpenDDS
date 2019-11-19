@@ -14,7 +14,11 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/WaitSet.h>
 
-#include "dds/DCPS/StaticIncludes.h"
+#include <dds/DCPS/StaticIncludes.h>
+#ifdef ACE_AS_STATIC_LIBS
+#  include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#endif
 
 #include "DataReaderListenerImpl.h"
 #include "MessengerTypeSupportImpl.h"
@@ -38,7 +42,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     if (!participant) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")
-                        ACE_TEXT(" create_participant failed!\n")), -1);
+                        ACE_TEXT(" create_participant failed!\n")),
+                       1);
     }
 
     // Register Type (Messenger::Message)
@@ -48,7 +53,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     if (ts->register_type(participant, "") != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")
-                        ACE_TEXT(" register_type failed!\n")), -1);
+                        ACE_TEXT(" register_type failed!\n")),
+                       1);
     }
 
     // Create Topic (Movie Discussion List)
@@ -63,7 +69,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     if (!topic) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")
-                        ACE_TEXT(" create_topic failed!\n")), -1);
+                        ACE_TEXT(" create_topic failed!\n")),
+                       1);
     }
 
     // Create Subscriber
@@ -75,22 +82,28 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     if (!subscriber) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")
-                        ACE_TEXT(" create_subscriber failed!\n")), -1);
+                        ACE_TEXT(" create_subscriber failed!\n")),
+                       1);
     }
 
     // Create DataReader
     DDS::DataReaderListener_var listener(new DataReaderListenerImpl);
 
+    DDS::DataReaderQos reader_qos;
+    subscriber->get_default_datareader_qos(reader_qos);
+    reader_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+
     DDS::DataReader_var reader =
       subscriber->create_datareader(topic,
-                             DATAREADER_QOS_DEFAULT,
-                             listener,
-                             OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                                    reader_qos,
+                                    listener,
+                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     if (!reader) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")
-                        ACE_TEXT(" create_datareader failed!\n")), -1);
+                        ACE_TEXT(" create_datareader failed!\n")),
+                       1);
     }
 
     Messenger::MessageDataReader_var reader_i =
@@ -100,7 +113,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")
                         ACE_TEXT(" _narrow failed!\n")),
-                       -1);
+                       1);
     }
 
     // Block until Publisher completes
@@ -115,7 +128,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       if (reader->get_subscription_matched_status(matches) != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("ERROR: %N:%l: main() -")
-                          ACE_TEXT(" get_subscription_matched_status failed!\n")), -1);
+                          ACE_TEXT(" get_subscription_matched_status failed!\n")),
+                         1);
       }
 
       if (matches.current_count == 0 && matches.total_count > 0) {
@@ -127,7 +141,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("ERROR: %N:%l: main() -")
-                          ACE_TEXT(" wait failed!\n")), -1);
+                          ACE_TEXT(" wait failed!\n")),
+                         1);
       }
     }
 
@@ -141,7 +156,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
-    return -1;
+    return 1;
   }
 
   return 0;

@@ -333,7 +333,7 @@ namespace {
                             header.source_timestamp_nanosec_};
     const InfoTimestampSubmessage ts = {
       {INFO_TS, flags, INFO_TS_SZ},
-      {st.sec, static_cast<ACE_UINT32>(st.nanosec * NANOS_TO_RTPS_FRACS + .5)}
+      {static_cast<ACE_UINT32>(st.sec), DCPS::nanoseconds_to_uint32_fractional_seconds(st.nanosec)}
     };
     const CORBA::ULong i = subm.length();
     subm.length(i + 1);
@@ -683,10 +683,14 @@ RtpsSampleHeader::split(const ACE_Message_Block& orig, size_t size,
   if (rd[data_offset] == DATA) {
     sz += 12; // DATA_FRAG is 12 bytes larger than DATA
     iqos_offset -= 12;
-    new_flags &= ~(FLAG_K_IN_DATA | FLAG_K_IN_FRAG);
+    new_flags = flags & (FLAG_E | FLAG_Q);
     if (flags & FLAG_K_IN_DATA) {
       new_flags |= FLAG_K_IN_FRAG;
     }
+    if (flags & FLAG_N_IN_DATA) {
+      new_flags |= FLAG_N_IN_FRAG;
+    }
+
   }
   head.reset(DataSampleHeader::alloc_msgblock(orig, sz, false));
 

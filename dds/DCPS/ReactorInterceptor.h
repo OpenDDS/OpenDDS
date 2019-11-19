@@ -95,12 +95,6 @@ public:
     return command;
   }
 
-  CommandPtr enqueue(Command* c)
-  {
-    OPENDDS_ASSERT(c);
-    return enqueue_i(c, false);
-  }
-
   virtual bool reactor_is_shut_down() const = 0;
 
 protected:
@@ -129,6 +123,8 @@ protected:
   ACE_Thread_Mutex mutex_;
   OPENDDS_QUEUE(CommandPtr) command_queue_;
 };
+
+typedef RcHandle<ReactorInterceptor> ReactorInterceptor_rch;
 
 } // namespace DCPS
 } // namespace OpenDDS

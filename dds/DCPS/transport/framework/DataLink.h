@@ -330,6 +330,8 @@ protected:
   /// knows about due to make_reservation().
   GUIDSeq* peer_ids(const RepoId& local_id) const;
 
+  void network_change() const;
+
 private:
 
   /// Helper function to output the enum as a string to help debugging.

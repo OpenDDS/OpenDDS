@@ -5,6 +5,7 @@
  * See: http://www.opendds.org/license.html
  */
 
+#ifdef OPENDDS_SECURITY
 #ifndef OPENDDS_RTPS_ICE_AGENT_IMPL_H
 #define OPENDDS_RTPS_ICE_AGENT_IMPL_H
 
@@ -17,6 +18,7 @@
 
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/ReactorInterceptor.h"
+#include "dds/DCPS/NetworkConfigMonitor.h"
 
 #include "Ice.h"
 
@@ -64,7 +66,7 @@ private:
   FoundationsType foundations_;
 };
 
-class AgentImpl : public Agent, public DCPS::ReactorInterceptor {
+class AgentImpl : public Agent, public DCPS::ReactorInterceptor, public virtual DCPS::NetworkConfigListener {
 public:
   ActiveFoundationSet active_foundations;
 
@@ -118,6 +120,13 @@ public:
   ACE_Recursive_Thread_Mutex mutex;
 
 private:
+  void network_change() const;
+  void add_address(const DCPS::NetworkInterface& interface,
+                   const ACE_INET_Addr& address);
+  void remove_address(const DCPS::NetworkInterface& interface,
+                      const ACE_INET_Addr& address);
+
+  bool ncm_listener_added_;
   Configuration configuration_;
   size_t remote_peer_reflexive_counter_;
   typedef std::map<Endpoint*, EndpointManager*> EndpointManagerMapType;
@@ -139,3 +148,4 @@ private:
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* OPENDDS_RTPS_ICE_AGENT_IMPL_H */
+#endif /* OPENDDS_SECURITY */

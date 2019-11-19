@@ -27,7 +27,7 @@
 #include "dds/DCPS/DataSampleHeader.h"
 #include "dds/DCPS/PoolAllocationBase.h"
 #include "dds/DCPS/DiscoveryBase.h"
-#include "dds/DCPS/ReactorInterceptor.h"
+#include "dds/DCPS/JobQueue.h"
 
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/framework/TransportSendListener.h"
@@ -77,9 +77,6 @@ public:
                          const RtpsDiscovery& disco,
                          DDS::DomainId_t domainId);
 
-  void rtps_relay_address(const ACE_INET_Addr& address);
-  void rtps_relay_only(bool flag);
-
 #ifdef OPENDDS_SECURITY
   DDS::ReturnCode_t init_security(DDS::Security::IdentityHandle id_handle,
                                   DDS::Security::PermissionsHandle perm_handle,
@@ -90,7 +87,8 @@ public:
   void acknowledge();
 
   void shutdown();
-  void unicast_locators(DCPS::LocatorSeq& locators) const;
+  DCPS::LocatorSeq unicast_locators() const;
+  DCPS::LocatorSeq multicast_locators() const;
 
   // @brief return the ip address we have bound to.
   // Valid after init() call
@@ -115,6 +113,8 @@ public:
 #endif
 
   bool disassociate(const ParticipantData_t& pdata);
+
+  void update_locators(const ParticipantData_t& pdata);
 
 #ifdef OPENDDS_SECURITY
   DDS::ReturnCode_t write_stateless_message(DDS::Security::ParticipantStatelessMessage& msg,
@@ -159,9 +159,13 @@ public:
 
   ICE::Endpoint* get_ice_endpoint();
 
+  void rtps_relay_address(const ACE_INET_Addr& address);
+
+  void stun_server_address(const ACE_INET_Addr& address);
+
 private:
 
-  class AssociationComplete : public DCPS::ReactorInterceptor::Command {
+  class AssociationComplete : public DCPS::JobQueue::Job {
   public:
     AssociationComplete(Sedp* sedp, const DCPS::RepoId& local, const DCPS::RepoId& remote) : sedp_(sedp), local_(local), remote_(remote) {}
     void execute();
@@ -253,8 +257,8 @@ private:
       : type_(mt), id_(id), pgmdata_(data) {}
 #endif
 
-    static OPENDDS_STRING msgTypeToString(MsgType type);
-    OPENDDS_STRING msgTypeToString() const;
+    static const char* msgTypeToString(MsgType type);
+    const char* msgTypeToString() const;
   };
 
 
@@ -651,9 +655,6 @@ private:
                     const DCPS::RepoId& writer, const DCPS::RepoId& reader);
 #endif
 
-  static DCPS::RepoId make_id(const DCPS::RepoId& participant_id,
-                              const EntityId_t& entity);
-
   static void set_inline_qos(DCPS::TransportLocatorSeq& locators);
 
   void write_durable_publication_data(const DCPS::RepoId& reader, bool secure);
@@ -816,6 +817,9 @@ private:
   ACE_Condition_Thread_Mutex cond_;
   unsigned int acks_;
 };
+
+bool locators_changed(const ParticipantProxy_t& x,
+                      const ParticipantProxy_t& y);
 
 }
 }

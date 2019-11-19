@@ -290,10 +290,10 @@ PKCS7* SignedDocument::PKCS7_from_SMIME_file(const std::string& path)
             back_inserter);
 
   if (!in) {
-    ACE_ERROR((LM_ERROR,
+    ACE_ERROR((LM_WARNING,
                "(%P|%t) SignedDocument::PKCS7_from_SMIME_file:"
-               "WARNING: Failed to load file '%C'; errno: '%C'\n",
-               path.c_str(), strerror(errno)));
+               "WARNING: Failed to load file '%C'; '%m'\n",
+               path.c_str()));
     return NULL;
   }
 
@@ -306,7 +306,7 @@ PKCS7* SignedDocument::PKCS7_from_SMIME_file(const std::string& path)
 PKCS7* SignedDocument::PKCS7_from_data(const DDS::OctetSeq& s_mime_data)
 {
   if (doc_) {
-    ACE_ERROR((LM_ERROR,
+    ACE_ERROR((LM_WARNING,
                "(%P|%t) SignedDocument::PKCS7_from_data: "
                "WARNING: document has already been constructed\n"));
     return NULL;
@@ -329,7 +329,7 @@ PKCS7* SignedDocument::PKCS7_from_data(const DDS::OctetSeq& s_mime_data)
     }
 
     if (0 != cache_verifiable(cache_this)) {
-      ACE_ERROR((LM_ERROR,
+      ACE_ERROR((LM_WARNING,
                  "(%P|%t) SignedDocument::PKCS7_from_data: "
                  "WARNING: failed to cache verifiable part of S/MIME data\n"));
     }

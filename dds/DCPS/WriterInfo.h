@@ -78,8 +78,8 @@ public:
   enum WriterState { NOT_SET, ALIVE, DEAD };
   enum HistoricSamplesState { NO_TIMER = -1 };
 
-  WriterInfo(WriterInfoListener*         reader,
-             const PublicationId&        writer_id,
+  WriterInfo(WriterInfoListener* reader,
+             const PublicationId& writer_id,
              const DDS::DataWriterQos& writer_qos);
 
   /// check to see if this writer is alive (called by handle_timeout).
@@ -90,14 +90,14 @@ public:
   MonotonicTimePoint check_activity(const MonotonicTimePoint& now);
 
   /// called when a sample or other activity is received from this writer.
-  void received_activity(const MonotonicTimePoint & when);
+  void received_activity(const MonotonicTimePoint& when);
 
   /// returns 1 if the DataWriter is lively; 2 if dead; otherwise returns 0.
   WriterState get_state() {
     return state_;
   };
 
-  OPENDDS_STRING get_state_str() const;
+  const char* get_state_str() const;
 
   /// update liveliness when remove_association is called.
   void removed();

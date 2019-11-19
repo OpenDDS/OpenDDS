@@ -80,8 +80,7 @@ MulticastTransport::make_datalink(const RepoId& local_id,
   // Join multicast group:
   if (!link->join(this->config().group_address_)) {
     ACE_TCHAR str[64];
-    this->config().group_address_.addr_to_string(str,
-                                        sizeof(str)/sizeof(str[0]));
+    this->config().group_address_.addr_to_string(str, sizeof(str)/sizeof(str[0]), 0);
     ACE_ERROR((LM_ERROR,
                     ACE_TEXT("(%P|%t) ERROR: ")
                     ACE_TEXT("MulticastTransport::make_datalink: ")
@@ -379,9 +378,9 @@ MulticastTransport::shutdown_i()
 }
 
 bool
-MulticastTransport::connection_info_i(TransportLocator& info) const
+MulticastTransport::connection_info_i(TransportLocator& info, ConnectionInfoFlags flags) const
 {
-  this->config().populate_locator(info);
+  config().populate_locator(info, flags);
   return true;
 }
 

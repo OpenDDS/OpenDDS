@@ -35,6 +35,7 @@ public:
   bool use_multicast_;
   unsigned char ttl_;
   ACE_INET_Addr multicast_group_address_;
+  OPENDDS_STRING multicast_group_address_str_;
   OPENDDS_STRING multicast_interface_;
 
   size_t nak_depth_;
@@ -51,7 +52,7 @@ public:
   bool is_reliable() const { return true; }
   bool requires_cdr() const { return true; }
 
-  virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info) const;
+  virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info, ConnectionInfoFlags flags) const;
   const TransportBLOB* get_blob(const OpenDDS::DCPS::TransportLocatorSeq& trans_info) const;
 
   OPENDDS_STRING local_address_string() const { return local_address_config_str_; }
@@ -76,11 +77,17 @@ public:
   ///{
   void rtps_relay_address(const ACE_INET_Addr& address);
   ACE_INET_Addr rtps_relay_address() const;
-  void rtps_relay_only(bool flag) { rtps_relay_only_ = flag; }
-  bool rtps_relay_only() const { return rtps_relay_only_; }
   void stun_server_address(const ACE_INET_Addr& address);
   ACE_INET_Addr stun_server_address() const;
   ///}
+
+  TimeDuration rtps_relay_beacon_period_;
+  bool use_rtps_relay_;
+  bool rtps_relay_only_;
+  bool use_ice_;
+
+  void update_locators(const RepoId& remote_id,
+                       const TransportLocatorSeq& locators);
 
 private:
   friend class RtpsUdpType;
@@ -98,35 +105,36 @@ private:
   ACE_INET_Addr local_address_;
   OPENDDS_STRING local_address_config_str_;
   ACE_INET_Addr rtps_relay_address_;
-  bool rtps_relay_only_;
-  bool use_ice_;
+  mutable ACE_SYNCH_MUTEX rtps_relay_config_lock_;
   ACE_INET_Addr stun_server_address_;
-  mutable ACE_SYNCH_MUTEX stun_server_address_lock_;
+  mutable ACE_SYNCH_MUTEX stun_server_config_lock_;
 
+#ifdef OPENDDS_SECURITY
   ICE::AddressListType host_addresses() const;
+#endif
 };
 
 inline void RtpsUdpInst::rtps_relay_address(const ACE_INET_Addr& address)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  ACE_GUARD(ACE_Thread_Mutex, g, rtps_relay_config_lock_);
   rtps_relay_address_ = address;
 }
 
 inline ACE_INET_Addr RtpsUdpInst::rtps_relay_address() const
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ACE_INET_Addr());
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, rtps_relay_config_lock_, ACE_INET_Addr());
   return rtps_relay_address_;
 }
 
 inline void RtpsUdpInst::stun_server_address(const ACE_INET_Addr& address)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, stun_server_address_lock_);
+  ACE_GUARD(ACE_Thread_Mutex, g, stun_server_config_lock_);
   stun_server_address_ = address;
 }
 
 inline ACE_INET_Addr RtpsUdpInst::stun_server_address() const
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, stun_server_address_lock_, ACE_INET_Addr());
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, stun_server_config_lock_, ACE_INET_Addr());
   return stun_server_address_;
 }
 

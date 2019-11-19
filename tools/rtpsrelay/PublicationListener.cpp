@@ -5,11 +5,9 @@
 namespace RtpsRelay {
 
 PublicationListener::PublicationListener(OpenDDS::DCPS::DomainParticipantImpl* participant,
-                                         WriterEntryDataWriter_ptr writer,
-                                         const RelayAddresses& relay_addresses)
+                                         WriterEntryDataWriter_ptr writer)
   : participant_(participant)
   , writer_(writer)
-  , relay_addresses_(relay_addresses)
 {}
 
 void PublicationListener::on_data_available(DDS::DataReader_ptr reader)
@@ -83,8 +81,6 @@ void PublicationListener::write_sample(const DDS::PublicationBuiltinTopicData& d
     data.type_name.in(),
     data_writer_qos,
     publisher_qos,
-
-    relay_addresses_
   };
 
   DDS::ReturnCode_t ret = writer_->write(entry, DDS::HANDLE_NIL);
