@@ -1597,10 +1597,8 @@ struct Cxx11Generator : GeneratorBase
     const std::string lang_field_type = generator_->map_type(type);
     const Classification cls = classify(actual_field_type);
     if (!(cls & (CL_PRIMITIVE | CL_ENUM))) {
-      std::stringstream ss;
-      ss
-        << "    new(&_" << name << ") " << lang_field_type << ";\n"
-        << "    _set = true;\n";
+      return "    new(&_" + name + ") " + lang_field_type + ";\n"
+        "    _set = true;\n";
       return ss.str();
     }
     return "";

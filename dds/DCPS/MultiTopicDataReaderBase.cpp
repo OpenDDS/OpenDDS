@@ -264,15 +264,17 @@ void MultiTopicDataReaderBase::data_available(DDS::DataReader_ptr reader)
       if (gen.info_[i].valid_data) {
         incoming_sample(gen.samples_[i], gen.info_[i], topic.c_str(), meta);
       } else if (gen.info_[i].instance_state != ALIVE_INSTANCE_STATE) {
-        DataReaderImpl* resulting_impl = dynamic_cast<DataReaderImpl*>(resulting_reader_.in());
+        DataReaderImpl* resulting_impl =
+          dynamic_cast<DataReaderImpl*>(resulting_reader_.in());
         if (resulting_impl) {
-          set<pair<InstanceHandle_t, InstanceHandle_t> >::const_iterator iter = qp.instances_.begin();
-          while (iter != qp.instances_.end() && iter->first != gen.info_[i].instance_handle) {
-            ++iter;
-          }
-          for (; iter != qp.instances_.end() && iter->first == gen.info_[i].instance_handle; ++iter) {
-            resulting_impl->set_instance_state(iter->second, gen.info_[i].instance_state);
-          }
+          set<pair<InstanceHandle_t, InstanceHandle_t> >::const_iterator
+            iter = qp.instances_.begin();
+          while (iter != qp.instances_.end() &&
+            iter->first != gen.info_[i].instance_handle) ++iter;
+          for (; iter != qp.instances_.end() &&
+            iter->first == gen.info_[i].instance_handle; ++iter) {
+            resulting_impl->set_instance_state(iter->second,
+              gen.info_[i].instance_state);
         } else {
           ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: MultiTopicDataReaderBase::data_available:")
             ACE_TEXT(" failed to obtain DataReaderImpl.\n")));
