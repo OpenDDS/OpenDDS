@@ -105,7 +105,7 @@ example, we can use `armeabi-v7a` <sup>[2](#footnote-2)</sup>.
 those sections before configuring and building OpenDDS.
 
 ```Shell
-./configure --no-tests --doc-group --target=android --macros=ANDROID_ABI=armeabi-v7a
+./configure --doc-group --target=android --macros=ANDROID_ABI=armeabi-v7a
 PATH=$PATH:$TOOLCHAIN/bin make # Pass -j/--jobs with an appropriate value or this'll take a while...
 ```
 
