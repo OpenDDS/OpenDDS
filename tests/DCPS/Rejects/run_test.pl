@@ -17,7 +17,7 @@ my $test = new PerlDDS::TestFramework();
 $test->{'dcps_debug_level'} = $test->{'dcps_transport_debug_level'} = 0;
 $test->ignore_error('DataWriterImpl::register_instance_i: register instance ' .
                     'with container failed');
-$test->ignore_error('Messenger::MessageDataWriterImpl::register_instance_w_timestamp, register failed');
+$test->ignore_error('Messenger::MessageDataWriterImpl::register_instance_w_timestamp: register failed');
 $test->setup_discovery();
 $test->process("sub", "subscriber");
 $test->process("pub", "publisher");
