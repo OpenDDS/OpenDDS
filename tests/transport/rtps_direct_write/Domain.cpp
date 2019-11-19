@@ -45,11 +45,11 @@ Domain::Domain(int argc, ACE_TCHAR* argv[])
   } catch (const CORBA::BAD_PARAM& e) {
     e._tao_print_exception("ERROR: CORBA::BAD_PARAM");
     cleanup();
-    throw e;
+    throw;
   } catch (const OpenDDS::DCPS::Transport::NotConfigured& e) {
     ACE_ERROR((LM_ERROR, "ERROR: OpenDDS::DCPS::Transport::NotConfigured.\n"));
     cleanup();
-    throw e;
+    throw;
   } catch(...) {
     cleanup();
     throw;
