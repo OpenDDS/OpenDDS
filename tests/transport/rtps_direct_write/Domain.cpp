@@ -3,7 +3,7 @@
 #include <ace/Get_Opt.h>
 
 Domain::Domain(int argc, ACE_TCHAR* argv[])
-  : dpf(TheParticipantFactoryWithArgs(argc, argv)), host(""), port(0), rtpsInst(nullptr) {
+  : dpf(TheParticipantFactoryWithArgs(argc, argv)), host(ACE_TEXT("")), port(0), rtpsInst(0) {
   try {
     ACE_Get_Opt opts(argc, argv, ACE_TEXT("h:p:"));
     int option = 0;
@@ -18,7 +18,8 @@ Domain::Domain(int argc, ACE_TCHAR* argv[])
       }
     }
 #ifdef OPENDDS_SAFETY_PROFILE
-    if (host == "localhost") {
+    if (host == ACE_TEXT("localhost"))
+    {
       host = "127.0.0.1";
     }
 #endif
