@@ -256,6 +256,30 @@ private:
     bool network_is_unreachable_;
   } *tport_;
 
+  struct ChangeMulticastGroup : public DCPS::JobQueue::Job {
+    enum CmgAction {CMG_JOIN, CMG_LEAVE};
+
+    ChangeMulticastGroup(DCPS::RcHandle<SpdpTransport> tport,
+                         const DCPS::NetworkInterface& nic, CmgAction action)
+      : tport_(tport)
+      , nic_(nic)
+      , action_(action)
+    {}
+
+    void execute()
+    {
+      if (action_ == CMG_JOIN) {
+        tport_->join_multicast_group(nic_);
+      } else {
+        tport_->leave_multicast_group(nic_);
+      }
+    }
+
+    DCPS::RcHandle<SpdpTransport> tport_;
+    DCPS::NetworkInterface nic_;
+    CmgAction action_;
+  };
+
   ACE_Event_Handler_var eh_; // manages our refcount on tport_
   bool eh_shutdown_;
   ACE_Condition_Thread_Mutex shutdown_cond_;

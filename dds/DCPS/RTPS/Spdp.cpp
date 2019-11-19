@@ -2086,43 +2086,15 @@ void
 Spdp::SpdpTransport::add_address(const DCPS::NetworkInterface& nic,
                                  const ACE_INET_Addr&)
 {
-  struct JoinMulticastGroup : public DCPS::JobQueue::Job {
-    JoinMulticastGroup(DCPS::RcHandle<SpdpTransport> tport,
-                       const DCPS::NetworkInterface& nic)
-      : tport_(tport)
-      , nic_(nic)
-    {}
-
-    void execute()
-    {
-      tport_->join_multicast_group(nic_);
-    }
-
-    DCPS::RcHandle<SpdpTransport> tport_;
-    DCPS::NetworkInterface nic_;
-  };
-  job_queue_->enqueue(DCPS::make_rch<JoinMulticastGroup>(rchandle_from(this), nic));
+  job_queue_->enqueue(DCPS::make_rch<ChangeMulticastGroup>(rchandle_from(this), nic,
+                                                           ChangeMulticastGroup::CMG_JOIN));
 }
 
 void Spdp::SpdpTransport::remove_address(const DCPS::NetworkInterface& nic,
                                          const ACE_INET_Addr&)
 {
-  struct LeaveMulticastGroup : public DCPS::JobQueue::Job {
-    LeaveMulticastGroup(DCPS::RcHandle<SpdpTransport> tport,
-                       const DCPS::NetworkInterface& nic)
-      : tport_(tport)
-      , nic_(nic)
-    {}
-
-    void execute()
-    {
-      tport_->leave_multicast_group(nic_);
-    }
-
-    DCPS::RcHandle<SpdpTransport> tport_;
-    DCPS::NetworkInterface nic_;
-  };
-  job_queue_->enqueue(DCPS::make_rch<LeaveMulticastGroup>(rchandle_from(this), nic));
+  job_queue_->enqueue(DCPS::make_rch<ChangeMulticastGroup>(rchandle_from(this), nic,
+                                                           ChangeMulticastGroup::CMG_LEAVE));
 }
 
 bool
