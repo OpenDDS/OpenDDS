@@ -216,10 +216,10 @@ module OpenDDS {
     /* custom de/serializer implemented in opendds_idl: see 9.4.2.11 */
     typedef sequence<Parameter> ParameterList;
 
+    // Identifies the original writer of a forwarded message
     struct OriginalWriterInfo_t {
       DCPS::GUID_t originalWriterGUID;
       SequenceNumber_t originalWriterSN;
-      ParameterList originalWriterQos;
     };
 
     typedef unsigned short ParameterId_t;
@@ -284,8 +284,7 @@ module OpenDDS {
     //   (the following constants are in the same order as Table 9.14)
     const ParameterId_t PID_CONTENT_FILTER_INFO = 0x0055;
     const ParameterId_t PID_COHERENT_SET = 0x0056;
-    // PID_DIRECTED_WRITE is not supported
-    //    const ParameterId_t PID_DIRECTED_WRITE = 0x0057;
+    const ParameterId_t PID_DIRECTED_WRITE = 0x0057;
     const ParameterId_t PID_ORIGINAL_WRITER_INFO = 0x0061;
 
     // ParameterId Bitmask values (Table 9.11)
@@ -416,6 +415,7 @@ module OpenDDS {
       case PID_ENDPOINT_GUID:
       case PID_GROUP_GUID:
       case PID_OPENDDS_ASSOCIATED_WRITER:
+      case PID_DIRECTED_WRITE:
         DCPS::GUID_t guid;
 
       case PID_OPENDDS_PARTICIPANT_FLAGS:

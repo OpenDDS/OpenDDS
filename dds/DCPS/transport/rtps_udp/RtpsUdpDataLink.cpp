@@ -1124,6 +1124,25 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
     WriterInfo& info = wi->second;
     SequenceNumber seq;
     seq.setValue(data.writerSN.high, data.writerSN.low);
+
+    // determines if this is a direct write to this reader
+    bool directWrite = false;
+    bool directWriteNoMatch = true;
+    for (CORBA::ULong i = 0; i < data.inlineQos.length() && directWriteNoMatch; ++i) {
+      if (data.inlineQos[i]._d() == RTPS::PID_DIRECTED_WRITE) {
+        directWrite = true;
+        if (data.inlineQos[i].guid() == id_) {
+          directWriteNoMatch = false;
+        }
+      }
+    }
+    if (directWrite && directWriteNoMatch) {
+      link->receive_strategy()->withhold_data_from(id_);
+      info.recvd_.insert(seq);
+      link->deliver_held_data(id_, info, durable_);
+      return false;
+    }
+
     info.frags_.erase(seq);
     if (info.recvd_.contains(seq)) {
       if (Transport_debug_level > 5) {
