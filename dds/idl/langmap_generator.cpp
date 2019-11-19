@@ -1599,7 +1599,6 @@ struct Cxx11Generator : GeneratorBase
     if (!(cls & (CL_PRIMITIVE | CL_ENUM))) {
       return "    new(&_" + name + ") " + lang_field_type + ";\n"
         "    _set = true;\n";
-      return ss.str();
     }
     return "";
   }
