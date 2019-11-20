@@ -137,7 +137,7 @@ module OpenDDS {
 
     // Constants for the ReliabilityKind_t::value field
     const short BEST_EFFORT = 1;
-    const short RELIABLE = 3;
+    const short RELIABLE = 2;
 
     struct KeyHash_t {
       DCPS::OctetArray16 value;
@@ -257,17 +257,10 @@ module OpenDDS {
     const ParameterId_t PID_VENDORID = 0x0016;
     const ParameterId_t PID_UNICAST_LOCATOR = 0x002f;
     const ParameterId_t PID_MULTICAST_LOCATOR = 0x0030;
-    const ParameterId_t PID_MULTICAST_IPADDRESS = 0x0011;
     const ParameterId_t PID_DEFAULT_UNICAST_LOCATOR = 0x0031;
     const ParameterId_t PID_DEFAULT_MULTICAST_LOCATOR = 0x0048;
     const ParameterId_t PID_METATRAFFIC_UNICAST_LOCATOR = 0x0032;
     const ParameterId_t PID_METATRAFFIC_MULTICAST_LOCATOR = 0x0033;
-    const ParameterId_t PID_DEFAULT_UNICAST_IPADDRESS = 0x000c;
-    const ParameterId_t PID_DEFAULT_UNICAST_PORT = 0x000e;
-    const ParameterId_t PID_METATRAFFIC_UNICAST_IPADDRESS = 0x0045;
-    const ParameterId_t PID_METATRAFFIC_UNICAST_PORT = 0x000d;
-    const ParameterId_t PID_METATRAFFIC_MULTICAST_IPADDRESS = 0x000b;
-    const ParameterId_t PID_METATRAFFIC_MULTICAST_PORT = 0x0046;
     const ParameterId_t PID_EXPECTS_INLINE_QOS = 0x0043;
     const ParameterId_t PID_PARTICIPANT_MANUAL_LIVELINESS_COUNT = 0x0034;
     const ParameterId_t PID_PARTICIPANT_BUILTIN_ENDPOINTS = 0x0044;
@@ -381,23 +374,6 @@ module OpenDDS {
       case PID_METATRAFFIC_UNICAST_LOCATOR:
       case PID_METATRAFFIC_MULTICAST_LOCATOR:
         DCPS::Locator_t locator;
-
-      case PID_MULTICAST_IPADDRESS:
-      case PID_DEFAULT_UNICAST_IPADDRESS:
-      case PID_METATRAFFIC_UNICAST_IPADDRESS:
-      case PID_METATRAFFIC_MULTICAST_IPADDRESS:
-        unsigned long ipv4_address;
-        //NOTE: the spec uses "IPv4Address_t" which is not defined anywhere.
-        //      We have chosen unsigned long to match the type of
-        //      the address field in the LocatorUDPv4_t struct.
-
-      case PID_DEFAULT_UNICAST_PORT:
-      case PID_METATRAFFIC_UNICAST_PORT:
-      case PID_METATRAFFIC_MULTICAST_PORT:
-        unsigned long udpv4_port;
-        //NOTE: the spec uses "Port_t" which is not defined anywhere.
-        //      We have chosen unsigned long to match the type of
-        //      the port field in the LocatorUDPv4_t struct.
 
       case PID_EXPECTS_INLINE_QOS:
         boolean expects_inline_qos;
