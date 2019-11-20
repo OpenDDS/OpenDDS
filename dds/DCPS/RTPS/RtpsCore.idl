@@ -254,6 +254,7 @@ module OpenDDS {
     const ParameterId_t PID_METATRAFFIC_MULTICAST_LOCATOR = 0x0033;
     const ParameterId_t PID_EXPECTS_INLINE_QOS = 0x0043;
     const ParameterId_t PID_PARTICIPANT_MANUAL_LIVELINESS_COUNT = 0x0034;
+    const ParameterId_t PID_PARTICIPANT_BUILTIN_ENDPOINTS = 0x0044;
     const ParameterId_t PID_PARTICIPANT_LEASE_DURATION = 0x0002;
     const ParameterId_t PID_CONTENT_FILTER_PROPERTY = 0x0035;
     const ParameterId_t PID_PARTICIPANT_GUID = 0x0050;
@@ -367,6 +368,9 @@ module OpenDDS {
 
       case PID_PARTICIPANT_MANUAL_LIVELINESS_COUNT:
         Count_t count;
+
+      case PID_PARTICIPANT_BUILTIN_ENDPOINTS:
+        unsigned long participant_builtin_endpoints;
 
       case PID_PARTICIPANT_LEASE_DURATION:
         Duration_t duration;

@@ -456,6 +456,15 @@ int to_param_list(const ParticipantProxy_t& proxy,
     add_param(param_list, eiq_param);
   }
 
+  Parameter abe_param;
+  abe_param.participant_builtin_endpoints(
+    proxy.availableBuiltinEndpoints);
+  add_param(param_list, abe_param);
+
+  // Interoperability note:
+  // For interoperability with other DDS implemenations, we'll encode the
+  // availableBuiltinEndpoints as PID_BUILTIN_ENDPOINT_SET in addition to
+  // PID_PARTICIPANT_BUILTIN_ENDPOINTS (above).
   Parameter be_param;
   be_param.builtin_endpoints(
     proxy.availableBuiltinEndpoints);
@@ -528,7 +537,15 @@ int from_param_list(const ParameterList& param_list,
         proxy.expectsInlineQos =
             param.expects_inline_qos();
         break;
+      case PID_PARTICIPANT_BUILTIN_ENDPOINTS:
+        proxy.availableBuiltinEndpoints =
+            param.participant_builtin_endpoints();
+        break;
       case PID_BUILTIN_ENDPOINT_SET:
+        // Interoperability note:
+        // OpenSplice uses this in place of PID_PARTICIPANT_BUILTIN_ENDPOINTS
+        // Table 9.13 indicates that PID_PARTICIPANT_BUILTIN_ENDPOINTS should be
+        // used to represent ParticipantProxy::availableBuiltinEndpoints
         proxy.availableBuiltinEndpoints =
             param.builtin_endpoints();
         break;
