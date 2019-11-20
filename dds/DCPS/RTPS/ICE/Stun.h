@@ -125,6 +125,8 @@ struct Message {
   : class_(REQUEST), method(BINDING), block(0), length_(0), length_for_message_integrity_(0) {}
 
   void generate_transaction_id();
+  
+  void clear_transaction_id();
 
   void append_attribute(const Attribute& attribute)
   {
