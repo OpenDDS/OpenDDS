@@ -507,6 +507,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       participant_data.participantProxy.metatrafficUnicastLocatorList.length(1);
       int status = to_param_list(participant_data, param_list);
       TEST_ASSERT(status == 0);
+      TEST_ASSERT(is_present(param_list, PID_PARTICIPANT_BUILTIN_ENDPOINTS));
       TEST_ASSERT(is_present(param_list, PID_METATRAFFIC_UNICAST_LOCATOR));
       TEST_ASSERT(is_missing(param_list, PID_METATRAFFIC_MULTICAST_LOCATOR));
       TEST_ASSERT(is_missing(param_list, PID_DEFAULT_UNICAST_LOCATOR));
@@ -521,6 +522,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       participant_data.participantProxy.metatrafficMulticastLocatorList.length(1);
       int status = to_param_list(participant_data, param_list);
       TEST_ASSERT(status == 0);
+      TEST_ASSERT(is_present(param_list, PID_PARTICIPANT_BUILTIN_ENDPOINTS));
       TEST_ASSERT(is_present(param_list, PID_METATRAFFIC_UNICAST_LOCATOR));
       TEST_ASSERT(is_present(param_list, PID_METATRAFFIC_MULTICAST_LOCATOR));
       TEST_ASSERT(is_missing(param_list, PID_DEFAULT_UNICAST_LOCATOR));
@@ -536,6 +538,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       participant_data.participantProxy.defaultUnicastLocatorList.length(1);
       int status = to_param_list(participant_data, param_list);
       TEST_ASSERT(status == 0);
+      TEST_ASSERT(is_present(param_list, PID_PARTICIPANT_BUILTIN_ENDPOINTS));
       TEST_ASSERT(is_present(param_list, PID_METATRAFFIC_UNICAST_LOCATOR));
       TEST_ASSERT(is_present(param_list, PID_METATRAFFIC_MULTICAST_LOCATOR));
       TEST_ASSERT(is_present(param_list, PID_DEFAULT_UNICAST_LOCATOR));
@@ -552,6 +555,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       participant_data.participantProxy.defaultMulticastLocatorList.length(1);
       int status = to_param_list(participant_data, param_list);
       TEST_ASSERT(status == 0);
+      TEST_ASSERT(is_present(param_list, PID_PARTICIPANT_BUILTIN_ENDPOINTS));
       TEST_ASSERT(is_present(param_list, PID_METATRAFFIC_UNICAST_LOCATOR));
       TEST_ASSERT(is_present(param_list, PID_METATRAFFIC_MULTICAST_LOCATOR));
       TEST_ASSERT(is_present(param_list, PID_DEFAULT_UNICAST_LOCATOR));
@@ -734,6 +738,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       ParameterList param_list;
       int status = to_param_list(participant_data, param_list);
       TEST_ASSERT(status == 0);
+      TEST_ASSERT(is_present(param_list, PID_PARTICIPANT_BUILTIN_ENDPOINTS));
+      Parameter param = get(param_list, PID_PARTICIPANT_BUILTIN_ENDPOINTS);
+      TEST_ASSERT(param.participant_builtin_endpoints() == 72393L);
       TEST_ASSERT(is_present(param_list, PID_BUILTIN_ENDPOINT_SET));
       Parameter param2 = get(param_list, PID_BUILTIN_ENDPOINT_SET);
       TEST_ASSERT(param2.builtin_endpoints() == 72393L);
@@ -1128,7 +1135,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       TEST_ASSERT(status != 0);
     }
 
-    {
+    { // Foreign DDS's have been observed using PID_BUILTIN_ENDPOINT_SET when
+      // they should be using PID_PARTICIPANT_BUILTIN_ENDPOINTS.
       Parameter vs_param;
       vs_param.builtin_endpoints(0x12345678);
       ParameterList vs_param_list;
