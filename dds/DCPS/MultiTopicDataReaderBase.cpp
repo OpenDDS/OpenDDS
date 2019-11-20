@@ -275,6 +275,7 @@ void MultiTopicDataReaderBase::data_available(DDS::DataReader_ptr reader)
             iter->first == gen.info_[i].instance_handle; ++iter) {
             resulting_impl->set_instance_state(iter->second,
               gen.info_[i].instance_state);
+          }
         } else {
           ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: MultiTopicDataReaderBase::data_available:")
             ACE_TEXT(" failed to obtain DataReaderImpl.\n")));
