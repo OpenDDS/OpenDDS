@@ -24,7 +24,10 @@ class NetworkInterface {
 public:
   typedef OPENDDS_SET(ACE_INET_Addr) AddressSet;
 
-  NetworkInterface() {}
+  NetworkInterface()
+    : index_(-1)
+    , can_multicast_(false)
+  {}
 
   NetworkInterface(int index,
                    const OPENDDS_STRING& name,
