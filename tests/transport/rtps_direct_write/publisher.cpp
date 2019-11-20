@@ -45,18 +45,26 @@ public:
   {
     enable_transport(true, false); // (reliable, durable)
 
-    subscription.remote_id_ = domain.getSubRdrId(0);
+    AssociationData subscription;
     subscription.remote_reliable_ = false;
     subscription.remote_data_.length(1);
     subscription.remote_data_[0].transport_type = "rtps_udp";
     setLocators(subscription.remote_data_[0].data, locators);
 
+    subscription.remote_id_ = domain.getSubRdrId(0);
     if (!associate(subscription, true)) {
-      throw std::string("publisher TransportClient::associate() failed");
+      throw std::string("publisher failed to associate reader 1");
+    }
+    subscription.remote_id_ = domain.getSubRdrId(1);
+    if (!associate(subscription, true)) {
+      throw std::string("publisher failed to associate reader 2");
     }
   }
 
-  virtual ~SimpleDataWriter() { disassociate(subscription.remote_id_); }
+  virtual ~SimpleDataWriter() {
+    disassociate(domain.getSubRdrId(0));
+    disassociate(domain.getSubRdrId(1));
+  }
 
   void callbacksExpected(ssize_t n) { callbacks_expected_ = n; }
   ssize_t callbacksExpected() const { return callbacks_expected_; }
@@ -106,7 +114,6 @@ private:
   }
 
   const Domain& domain;
-  AssociationData subscription;
   ssize_t callbacks_expected_;
 };
 
@@ -254,6 +261,8 @@ void DDS_TEST::serializeData(DataSampleElement& ds, const TestMsg& msg) const
 
 int DDS_TEST::run()
 {
+  SimpleDataWriter sdw(domain, locators);
+
   if(!writeToSocket(TestMsg(10, "TestMsg"))) {
     ACE_DEBUG((LM_INFO, "ERROR: failed to write to socket\n"));
   }
@@ -262,8 +271,6 @@ int DDS_TEST::run()
   }
 
   // send sample data through the OpenDDS transport
-  SimpleDataWriter sdw(domain, locators);
-
   DataSampleElement elements[] = {
     DataSampleElement(domain.getPubWtrId(), &sdw, OpenDDS::DCPS::PublicationInstance_rch()),
     DataSampleElement(domain.getPubWtrId(), &sdw, OpenDDS::DCPS::PublicationInstance_rch()),

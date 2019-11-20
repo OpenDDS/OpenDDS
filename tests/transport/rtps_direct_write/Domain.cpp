@@ -43,12 +43,12 @@ Domain::Domain(int argc, ACE_TCHAR* argv[])
     pubWtrId    = createID(0x89abcdef, 0x012345, OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY);
     subRdrId[0] = createID(0x76543210, 0x111111, OpenDDS::DCPS::ENTITYKIND_USER_READER_WITH_KEY);
     subRdrId[1] = createID(0x76543210, 0x222222, OpenDDS::DCPS::ENTITYKIND_USER_READER_WITH_KEY);
-  } catch (const CORBA::BAD_PARAM& e) {
-    e._tao_print_exception("ERROR: CORBA::BAD_PARAM");
+  } catch (const OpenDDS::DCPS::Transport::Exception& e) {
+    ACE_ERROR((LM_ERROR, "EXCEPTION: %C\n", typeid(e).name()));
     cleanup();
     throw;
-  } catch (const OpenDDS::DCPS::Transport::NotConfigured& e) {
-    ACE_ERROR((LM_ERROR, "ERROR: OpenDDS::DCPS::Transport::NotConfigured.\n"));
+  } catch (const CORBA::Exception& e) {
+    ACE_ERROR((LM_ERROR, "EXCEPTION: %C\n", e._info().c_str()));
     cleanup();
     throw;
   } catch(...) {

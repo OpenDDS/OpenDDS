@@ -38,6 +38,7 @@ public:
     std::fclose(file);
     std::cerr << "***Ready written to subready.txt\n";
 
+    AssociationData publication;
     publication.remote_id_ = domain.getPubWtrId();
     publication.remote_reliable_ = true;
     publication.remote_data_.length(1);
@@ -53,7 +54,7 @@ public:
     std::cerr << "***SimpleDataReader associated with publisher\n";
   }
 
-  virtual ~SimpleDataReader() { disassociate(publication.remote_id_); }
+  virtual ~SimpleDataReader() { disassociate(domain.getPubWtrId()); }
   bool done() { return done_; }
 
   // Implementing TransportReceiveListener
@@ -97,7 +98,6 @@ private:
   const int index;
   bool done_;
   SequenceNumber seq_;
-  AssociationData publication;
 };
 
 void SimpleDataReader::data_received(const ReceivedDataSample& sample)
