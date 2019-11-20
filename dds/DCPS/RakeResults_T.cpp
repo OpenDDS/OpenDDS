@@ -44,7 +44,7 @@ RakeResults<SampleSeq>::RakeResults(DataReaderImpl* reader,
   if (cond_) {
     const QueryConditionImpl* qci = dynamic_cast<QueryConditionImpl*>(cond_);
     if (!qci) {
-      ACE_ERROR((LM_DEBUG, ACE_TEXT("(%P|%t) ERROR: RakeResults(): ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RakeResults(): ")
         ACE_TEXT("failed to obtain QueryConditionImpl\n")));
       return;
     }

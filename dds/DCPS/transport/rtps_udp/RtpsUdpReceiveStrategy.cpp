@@ -570,8 +570,8 @@ RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage)
   if (Transport_debug_level > 5) {
     ACE_HEX_DUMP((LM_DEBUG, mb.rd_ptr(), mb.length(),
                   category == DATAWRITER_SUBMESSAGE ?
-                  "RtpsUdpReceiveStrategy: decoded writer submessage" :
-                  "RtpsUdpReceiveStrategy: decoded reader submessage"));
+                  ACE_TEXT("RtpsUdpReceiveStrategy: decoded writer submessage") :
+                  ACE_TEXT("RtpsUdpReceiveStrategy: decoded reader submessage")));
   }
 
   RtpsSampleHeader rsh(mb);

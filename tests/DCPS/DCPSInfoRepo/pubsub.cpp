@@ -412,10 +412,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       if (disc.is_nil())
         {
-          ACE_ERROR_RETURN ((LM_DEBUG,
-                             "Nil OpenDDS::DCPS::Discovery reference <%s>\n",
-                             ior),
-                            1);
+          ACE_ERROR_RETURN((LM_DEBUG,
+                            "(%P|%t) ERROR: Nil OpenDDS::DCPS::Discovery reference <%s>\n",
+                            ior),
+                           1);
         }
 
 /*
@@ -448,7 +448,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   catch (const std::exception& ex)
     {
       ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("(%P|%t) std::exception caught in main.cpp: %C\n"),
+                  ACE_TEXT("(%P|%t) ERROR: std::exception caught in main.cpp: %C\n"),
                   ex.what()));
       return 1;
     }
