@@ -60,9 +60,7 @@ int parse_args(int argc, ACE_TCHAR *argv[])
     }
     else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-x"))) != 0)
     {
-      float temp = ACE_OS::atof(currentArg);
-      TEST_DURATION_SEC.sec(std::floor(temp));
-      TEST_DURATION_SEC.usec((temp - static_cast<float>(TEST_DURATION_SEC.sec())) * 1e6);
+      TEST_DURATION_SEC.set(ACE_OS::atof(currentArg));
       arg_shifter.consume_arg();
     }
     else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-z")) == 0)

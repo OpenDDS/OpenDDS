@@ -20,8 +20,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-TopicImpl::TopicImpl(const RepoId                   topic_id,
-                     const char*                    topic_name,
+TopicImpl::TopicImpl(const char*                    topic_name,
                      const char*                    type_name,
                      OpenDDS::DCPS::TypeSupport_ptr type_support,
                      const DDS::TopicQos &          qos,
@@ -35,7 +34,7 @@ TopicImpl::TopicImpl(const RepoId                   topic_id,
     qos_(qos),
     listener_mask_(mask),
     listener_(DDS::TopicListener::_duplicate(a_listener)),
-    id_(topic_id),
+    id_(GUID_UNKNOWN),
     monitor_(0)
 {
   inconsistent_topic_status_.total_count = 0;
@@ -146,12 +145,15 @@ TopicImpl::enable()
                                              topic_name_.c_str(),
                                              type_name_.c_str(),
                                              qos_,
-                                             type_support_->has_dcps_key());
+                                             type_support_ ? type_support_->has_dcps_key() : false,
+                                             this);
     if (status != CREATED && status != FOUND) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: TopicImpl::enable, ")
-                 ACE_TEXT("assert_topic failed with return value %d.\n"),
-                 status));
+      if (DCPS_debug_level >= 1) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: TopicImpl::enable, ")
+                   ACE_TEXT("assert_topic failed with return value %d.\n"),
+                   status));
+      }
       return DDS::RETCODE_ERROR;
     }
   }
@@ -187,10 +189,11 @@ TopicImpl::transport_config(const TransportConfig_rch&)
 }
 
 void
-TopicImpl::inconsistent_topic()
+TopicImpl::inconsistent_topic(int count)
 {
-  ++inconsistent_topic_status_.total_count;
-  ++inconsistent_topic_status_.total_count_change;
+  inconsistent_topic_status_.total_count_change += count - inconsistent_topic_status_.total_count;
+  inconsistent_topic_status_.total_count = count;
+
   set_status_changed_flag(DDS::INCONSISTENT_TOPIC_STATUS, true);
 
   DDS::TopicListener_var listener = listener_;

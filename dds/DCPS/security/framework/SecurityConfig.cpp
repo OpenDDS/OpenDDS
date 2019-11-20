@@ -8,6 +8,10 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "SecurityConfig.h"
 
+#include "Properties.h"
+
+#include <cstring>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -20,6 +24,7 @@ SecurityConfig::SecurityConfig(const OPENDDS_STRING& name,
                                CryptoKeyExchange_var key_exchange_plugin,
                                CryptoKeyFactory_var key_factory_plugin,
                                CryptoTransform_var transform_plugin,
+                               Utility* utility_plugin,
 #endif
                                const ConfigPropertyList& properties)
   : name_(name)
@@ -29,6 +34,7 @@ SecurityConfig::SecurityConfig(const OPENDDS_STRING& name,
   , key_exchange_plugin_(key_exchange_plugin)
   , key_factory_plugin_(key_factory_plugin)
   , transform_plugin_(transform_plugin)
+  , utility_plugin_(utility_plugin)
 #endif
   , properties_(properties)
 {}
@@ -52,6 +58,22 @@ void SecurityConfig::get_properties(DDS::PropertyQosPolicy& out_properties) cons
     out_prop.name = iProp->first.c_str();
     out_prop.value = iProp->second.c_str();
   }
+}
+
+bool SecurityConfig::qos_implies_security(const DDS::DomainParticipantQos& qos) const {
+  const DDS::PropertySeq& properties = qos.property.value;
+  for (unsigned int idx = 0; idx != properties.length(); ++idx) {
+    const char* name = properties[idx].name.in();
+    if (std::strcmp(DDS::Security::Properties::AuthIdentityCA, name) == 0 ||
+        std::strcmp(DDS::Security::Properties::AuthIdentityCertificate, name) == 0 ||
+        std::strcmp(DDS::Security::Properties::AuthPrivateKey, name) == 0 ||
+        std::strcmp(DDS::Security::Properties::AccessPermissionsCA, name) == 0 ||
+        std::strcmp(DDS::Security::Properties::AccessGovernance, name) == 0 ||
+        std::strcmp(DDS::Security::Properties::AccessPermissions, name) == 0) {
+      return true;
+    }
+  }
+  return false;
 }
 
 }

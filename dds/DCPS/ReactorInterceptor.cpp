@@ -8,6 +8,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
 #include "ace/Log_Msg.h"
+#include "ace/Reverse_Lock_T.h"
 #include "ace/Synch.h"
 
 #include "ReactorInterceptor.h"
@@ -20,11 +21,7 @@ namespace DCPS {
 ReactorInterceptor::ReactorInterceptor(ACE_Reactor* reactor,
                                        ACE_thread_t owner)
   : owner_(owner)
-  , condition_(mutex_)
 {
-  if (reactor == 0) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ReactorInterceptor initialized with null reactor\n"));
-  }
   this->reactor(reactor);
 }
 
@@ -38,45 +35,23 @@ bool ReactorInterceptor::should_execute_immediately()
     reactor_is_shut_down();
 }
 
-void ReactorInterceptor::wait()
-{
-  ACE_GUARD(ACE_Thread_Mutex, guard, this->mutex_);
-
-  if (should_execute_immediately()) {
-    handle_exception_i(guard);
-    if (!reactor_is_shut_down()) {
-      reactor()->purge_pending_notifications(this);
-    }
-  } else {
-    while (!command_queue_.empty()) {
-      condition_.wait();
-    }
-  }
-}
-
-
 int ReactorInterceptor::handle_exception(ACE_HANDLE /*fd*/)
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, this->mutex_, 0);
-
-  return handle_exception_i(guard);
-}
-
-void ReactorInterceptor::process_command_queue()
-{
-  while (!command_queue_.empty()) {
-    CommandPtr command = move(command_queue_.front());
-    command_queue_.pop();
-    if (command)
-      command->execute();
-  }
-}
-
-int ReactorInterceptor::handle_exception_i(ACE_Guard<ACE_Thread_Mutex>&)
-{
-  process_command_queue();
-  condition_.signal();
+  process_command_queue_i();
   return 0;
+}
+
+void ReactorInterceptor::process_command_queue_i()
+{
+  ACE_GUARD(ACE_Thread_Mutex, guard, mutex_);
+  ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(mutex_);
+  while (!command_queue_.empty()) {
+    CommandPtr command = command_queue_.front();
+    command_queue_.pop();
+    ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rev_guard, rev_lock);
+    command->execute();
+    command->executed();
+  }
 }
 
 }

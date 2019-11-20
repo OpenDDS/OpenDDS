@@ -73,8 +73,7 @@ DataWriterImpl::DataWriterImpl()
     coherent_samples_(0),
     liveliness_lost_(false),
     reactor_(0),
-    liveliness_check_interval_(ACE_Time_Value::max_time),
-    last_liveliness_activity_time_(ACE_Time_Value::zero),
+    liveliness_check_interval_(TimeDuration::max_value),
     last_deadline_missed_total_count_(0),
     watchdog_(),
     is_bit_(false),
@@ -394,7 +393,7 @@ DataWriterImpl::association_complete(const RepoId& remote_id)
       GuidConverter reader_converter(remote_id);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataWriterImpl::association_complete - ")
-                 ACE_TEXT("bit %d local %C did not find pending reader: %C")
+                 ACE_TEXT("bit %d local %C did not find pending reader: %C ")
                  ACE_TEXT("defer association_complete_i until add_association resumes\n"),
                  is_bit_,
                  OPENDDS_STRING(writer_converter).c_str(),
@@ -572,10 +571,11 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
       Serializer ser(data.get());
       ser << remote_id;
 
-      const DDS::Time_t timestamp = time_value_to_time(ACE_OS::gettimeofday());
       DataSampleHeader header;
       Message_Block_Ptr end_historic_samples(
-        create_control_message(END_HISTORIC_SAMPLES, header, move(data), timestamp));
+        create_control_message(
+          END_HISTORIC_SAMPLES, header, move(data),
+          SystemTimePoint::now().to_dds_time()));
 
       this->controlTracker.message_sent();
       guard.release();
@@ -854,12 +854,6 @@ DataWriterImpl::update_subscription_params(const RepoId& readerId,
 #endif
 }
 
-void
-DataWriterImpl::inconsistent_topic()
-{
-  topic_servant_->inconsistent_topic();
-}
-
 DDS::ReturnCode_t
 DataWriterImpl::set_qos(const DDS::DataWriterQos & qos)
 {
@@ -922,7 +916,7 @@ DataWriterImpl::set_qos(const DDS::DataWriterQos & qos)
 
         } else {
           this->watchdog_->reset_interval(
-            duration_to_time_value(qos.deadline.period));
+            TimeDuration(qos.deadline.period));
         }
       }
 
@@ -1011,10 +1005,12 @@ DataWriterImpl::send_request_ack()
 
   Message_Block_Ptr blk;
   // Add header with the registration sample data.
-  Message_Block_Ptr sample(create_control_message(REQUEST_ACK,
-                                             element->get_header(),
-                                             move(blk),
-                                             time_value_to_time( ACE_OS::gettimeofday() )));
+  Message_Block_Ptr sample(
+    create_control_message(
+      REQUEST_ACK,
+      element->get_header(),
+      move(blk),
+      SystemTimePoint::now().to_dds_time()));
   element->set_sample(move(sample));
 
   ret = this->data_container_->enqueue_control(element);
@@ -1144,12 +1140,13 @@ DataWriterImpl::assert_liveliness()
   case DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS:
     {
       RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
-      if (participant)
+      if (participant) {
         return participant->assert_liveliness();
-      return DDS::RETCODE_OK;
+      }
     }
+    break;
   case DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS:
-    if (this->send_liveliness(ACE_OS::gettimeofday()) == false) {
+    if (send_liveliness(MonotonicTimePoint::now()) == false) {
       return DDS::RETCODE_ERROR;
     }
     break;
@@ -1171,18 +1168,18 @@ DataWriterImpl::assert_liveliness_by_participant()
   return DDS::RETCODE_OK;
 }
 
-ACE_Time_Value
+TimeDuration
 DataWriterImpl::liveliness_check_interval(DDS::LivelinessQosPolicyKind kind)
 {
   if (this->qos_.liveliness.kind == kind) {
     return liveliness_check_interval_;
   } else {
-    return ACE_Time_Value::max_time;
+    return TimeDuration::max_value;
   }
 }
 
 bool
-DataWriterImpl::participant_liveliness_activity_after(const ACE_Time_Value& tv)
+DataWriterImpl::participant_liveliness_activity_after(const MonotonicTimePoint& tv)
 {
   if (this->qos_.liveliness.kind == DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS) {
     return last_liveliness_activity_time_ > tv;
@@ -1272,6 +1269,10 @@ DataWriterImpl::enable()
 
   RcHandle<PublisherImpl> publisher = this->publisher_servant_.lock();
   if (!publisher || !publisher->is_enabled()) {
+    return DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
+
+  if (!topic_servant_->is_enabled()) {
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
@@ -1371,17 +1372,15 @@ DataWriterImpl::enable()
 
   if (qos_.liveliness.lease_duration.sec != DDS::DURATION_INFINITE_SEC &&
       qos_.liveliness.lease_duration.nanosec != DDS::DURATION_INFINITE_NSEC) {
-    liveliness_check_interval_ = duration_to_time_value(qos_.liveliness.lease_duration);
-    liveliness_check_interval_ *= TheServiceParticipant->liveliness_factor()/100.0;
     // Must be at least 1 micro second.
-    if (liveliness_check_interval_ == ACE_Time_Value::zero) {
-      liveliness_check_interval_ = ACE_Time_Value (0, 1);
-    }
+    liveliness_check_interval_ = std::max(
+      TimeDuration(qos_.liveliness.lease_duration) * (TheServiceParticipant->liveliness_factor() / 100.0),
+      TimeDuration(0, 1));
 
     if (reactor_->schedule_timer(liveness_timer_.in(),
                                  0,
-                                 liveliness_check_interval_,
-                                 liveliness_check_interval_) == -1) {
+                                 liveliness_check_interval_.value(),
+                                 liveliness_check_interval_.value()) == -1) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::enable: %p.\n"),
                  ACE_TEXT("schedule_timer")));
@@ -1520,7 +1519,8 @@ DataWriterImpl::register_instance_i(DDS::InstanceHandle_t& handle,
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::register_instance_i: ")
-                      ACE_TEXT("register instance with container failed.\n")),
+                      ACE_TEXT("register instance with container failed, returned <%C>.\n"),
+                      retcode_to_string(ret).c_str()),
                      ret);
   }
 
@@ -1541,10 +1541,12 @@ DataWriterImpl::register_instance_i(DDS::InstanceHandle_t& handle,
   }
 
   // Add header with the registration sample data.
-  Message_Block_Ptr sample(create_control_message(INSTANCE_REGISTRATION,
-                                             element->get_header(),
-                                             move(data),
-                                             source_timestamp));
+  Message_Block_Ptr sample(
+    create_control_message(
+     INSTANCE_REGISTRATION,
+     element->get_header(),
+     move(data),
+     source_timestamp));
 
   element->set_sample(move(sample));
 
@@ -1562,9 +1564,10 @@ DataWriterImpl::register_instance_i(DDS::InstanceHandle_t& handle,
 }
 
 DDS::ReturnCode_t
-DataWriterImpl::register_instance_from_durable_data(DDS::InstanceHandle_t& handle,
-                                    Message_Block_Ptr data,
-                                    const DDS::Time_t & source_timestamp)
+DataWriterImpl::register_instance_from_durable_data(
+  DDS::InstanceHandle_t& handle,
+  Message_Block_Ptr data,
+  const DDS::Time_t& source_timestamp)
 {
   DBG_ENTRY_LVL("DataWriterImpl","register_instance_from_durable_data",6);
 
@@ -1573,12 +1576,13 @@ DataWriterImpl::register_instance_from_durable_data(DDS::InstanceHandle_t& handl
                    get_lock(),
                    DDS::RETCODE_ERROR);
 
-  DDS::ReturnCode_t ret = register_instance_i(handle, move(data), source_timestamp);
+  const DDS::ReturnCode_t ret = register_instance_i(handle, move(data), source_timestamp);
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::register_instance_from_durable_data: ")
-                      ACE_TEXT("register instance with container failed.\n")),
-                      ret);
+                      ACE_TEXT("register instance with container failed, returned <%C>.\n"),
+                      retcode_to_string(ret).c_str()),
+                     ret);
   }
 
   send_all_to_flush_control(guard);
@@ -1793,7 +1797,7 @@ DataWriterImpl::write(Message_Block_Ptr data,
                       ACE_TEXT("enqueue failed.\n")),
                      ret);
   }
-  this->last_liveliness_activity_time_ = ACE_OS::gettimeofday();
+  last_liveliness_activity_time_.set_to_now();
 
   track_sequence_number(filter_out);
 
@@ -2273,12 +2277,13 @@ DataWriterImpl::end_coherent_changes(const GroupCoherentSamples& group_samples)
 
   size_t max_marshaled_size = end_msg.max_marshaled_size();
 
-  Message_Block_Ptr data( new ACE_Message_Block(max_marshaled_size,
-                                  ACE_Message_Block::MB_DATA,
-                                  0, //cont
-                                  0, //data
-                                  0, //alloc_strategy
-                                  get_db_lock()));
+  Message_Block_Ptr data(
+    new ACE_Message_Block(max_marshaled_size,
+      ACE_Message_Block::MB_DATA,
+      0, // cont
+      0, // data
+      0, // alloc_strategy
+      get_db_lock()));
 
   Serializer serializer(
     data.get(),
@@ -2286,13 +2291,11 @@ DataWriterImpl::end_coherent_changes(const GroupCoherentSamples& group_samples)
 
   serializer << end_msg;
 
-  DDS::Time_t source_timestamp =
-    time_value_to_time(ACE_OS::gettimeofday());
-
   DataSampleHeader header;
   Message_Block_Ptr control(
-    create_control_message(END_COHERENT_CHANGES, header, move(data), source_timestamp));
-
+    create_control_message(
+      END_COHERENT_CHANGES, header, move(data),
+      SystemTimePoint::now().to_dds_time()));
 
   this->coherent_ = false;
   this->coherent_samples_ = 0;
@@ -2346,25 +2349,26 @@ DataWriterImpl::listener_for(DDS::StatusKind kind)
 }
 
 int
-DataWriterImpl::handle_timeout(const ACE_Time_Value &tv,
-                               const void * /* arg */)
+DataWriterImpl::handle_timeout(const ACE_Time_Value& tv,
+                               const void* /* arg */)
 {
+  const MonotonicTimePoint now(tv);
   bool liveliness_lost = false;
 
-  ACE_Time_Value elapsed = tv - last_liveliness_activity_time_;
+  TimeDuration elapsed = now - last_liveliness_activity_time_;
 
   // Do we need to send a liveliness message?
   if (elapsed >= liveliness_check_interval_) {
     switch (this->qos_.liveliness.kind) {
     case DDS::AUTOMATIC_LIVELINESS_QOS:
-      if (this->send_liveliness(tv) == false) {
+      if (send_liveliness(now) == false) {
         liveliness_lost = true;
       }
       break;
 
     case DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS:
       if (liveliness_asserted_) {
-        if (this->send_liveliness(tv) == false) {
+        if (send_liveliness(now) == false) {
           liveliness_lost = true;
         }
       }
@@ -2382,8 +2386,9 @@ DataWriterImpl::handle_timeout(const ACE_Time_Value &tv,
         ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::handle_timeout: %p.\n"),
         ACE_TEXT("cancel_timer")));
     }
-    if (reactor_->schedule_timer(liveness_timer_.in(), 0, liveliness_check_interval_ - elapsed,
-      liveliness_check_interval_) == -1)
+    if (reactor_->schedule_timer(liveness_timer_.in(), 0,
+      (liveliness_check_interval_ - elapsed).value(),
+      liveliness_check_interval_.value()) == -1)
     {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::handle_timeout: %p.\n"),
@@ -2393,10 +2398,10 @@ DataWriterImpl::handle_timeout(const ACE_Time_Value &tv,
   }
 
   liveliness_asserted_ = false;
-  elapsed = tv - last_liveliness_activity_time_;
+  elapsed = now - last_liveliness_activity_time_;
 
   // Have we lost liveliness?
-  if (elapsed >= duration_to_time_value(qos_.liveliness.lease_duration)) {
+  if (elapsed >= TimeDuration(qos_.liveliness.lease_duration)) {
     liveliness_lost = true;
   }
 
@@ -2418,30 +2423,26 @@ DataWriterImpl::handle_timeout(const ACE_Time_Value &tv,
 }
 
 bool
-DataWriterImpl::send_liveliness(const ACE_Time_Value& now)
+DataWriterImpl::send_liveliness(const MonotonicTimePoint& now)
 {
   if (this->qos_.liveliness.kind == DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS ||
       !TheServiceParticipant->get_discovery(domain_id_)->supports_liveliness()) {
-    DDS::Time_t t = time_value_to_time(now);
     DataSampleHeader header;
     Message_Block_Ptr empty;
     Message_Block_Ptr liveliness_msg(
-      this->create_control_message(DATAWRITER_LIVELINESS, header, move(empty), t));
+      create_control_message(
+        DATAWRITER_LIVELINESS, header, move(empty),
+        SystemTimePoint::now().to_dds_time()));
 
     if (this->send_control(header, move(liveliness_msg)) == SEND_CONTROL_ERROR) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::send_liveliness: ")
                         ACE_TEXT(" send_control failed. \n")),
                        false);
-
-    } else {
-      last_liveliness_activity_time_ = now;
-      return true;
     }
-  } else {
-    last_liveliness_activity_time_ = now;
-    return true;
   }
+  last_liveliness_activity_time_ = now;
+  return true;
 }
 
 void
@@ -2705,8 +2706,7 @@ LivenessTimer::handle_timeout(const ACE_Time_Value &tv,
   DataWriterImpl_rch writer = this->writer_.lock();
   if (writer) {
     writer->handle_timeout(tv, arg);
-  }
-  else {
+  } else {
     this->reactor()->cancel_timer(this);
   }
   return 0;

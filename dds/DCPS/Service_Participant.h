@@ -18,7 +18,7 @@
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/DomainParticipantFactoryImpl.h"
 #include "dds/DCPS/unique_ptr.h"
-
+#include "dds/DCPS/ReactorTask.h"
 
 #include "ace/Task.h"
 #include "ace/Configuration.h"
@@ -73,9 +73,9 @@ public:
 
   /// Get the common timer interface.
   /// Intended for use by OpenDDS internals only.
-  ACE_Reactor_Timer_Interface* timer() const;
+  ACE_Reactor_Timer_Interface* timer();
 
-  ACE_Reactor* reactor() const;
+  ACE_Reactor* reactor();
 
   ACE_thread_t reactor_owner() const;
 
@@ -253,7 +253,7 @@ public:
   //@}
 
   /// Accessor for pending data timeout.
-  ACE_Time_Value pending_timeout() const;
+  TimeDuration pending_timeout() const;
 
   /// Accessors for priority extremums for the current scheduler.
   //@{
@@ -447,18 +447,7 @@ private:
   ACE_ARGV ORB_argv_;
 #endif
 
-  unique_ptr<ACE_Reactor> reactor_; //TODO: integrate with threadpool
-  ACE_thread_t reactor_owner_;
-
-  struct ReactorTask : ACE_Task_Base {
-    ReactorTask()
-      : barrier_(2)
-    { }
-    int svc();
-    void wait_for_startup() { barrier_.wait(); }
-  private:
-    ACE_Barrier barrier_;
-  } reactor_task_;
+  ReactorTask reactor_task_;
 
   RcHandle<DomainParticipantFactoryImpl> dp_factory_servant_;
 
@@ -574,7 +563,7 @@ private:
   ACE_TString schedulerString_;
 
   /// Scheduler time slice from configuration file.
-  ACE_Time_Value schedulerQuantum_;
+  TimeDuration schedulerQuantum_;
 
 #if defined OPENDDS_SAFETY_PROFILE && defined ACE_HAS_ALLOC_HOOKS
   /// Pool size from configuration file.
@@ -611,7 +600,7 @@ private:
 
   /// Number of seconds to wait on pending samples to be sent
   /// or dropped.
-  ACE_Time_Value pending_timeout_;
+  TimeDuration pending_timeout_;
 
   /// Enable TAO's Bidirectional GIOP?
   bool bidir_giop_;

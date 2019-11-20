@@ -201,6 +201,18 @@ BE_GlobalData::spawn_options()
   return /*this->orb_args_ +*/ idl_global->idl_flags();
 }
 
+void invalid_option(char * option)
+{
+  ACE_ERROR((LM_ERROR,
+    ACE_TEXT("IDL: I don't understand the '%C' option\n"), option));
+#ifdef TAO_IDL_HAS_PARSE_ARGS_EXIT
+  idl_global->parse_args_exit(1);
+#else
+  idl_global->set_compile_flags(
+    idl_global->compile_flags() | IDL_CF_ONLY_USAGE);
+#endif
+}
+
 void
 BE_GlobalData::parse_args(long &i, char **av)
 {
@@ -219,23 +231,12 @@ BE_GlobalData::parse_args(long &i, char **av)
       this->do_server_side(0);
 
     } else {
-      ACE_ERROR((
-                  LM_ERROR,
-                  ACE_TEXT("IDL: I don't understand the '%s' option\n"),
-                  av[i]));
-      ACE_OS::exit(99);
+      invalid_option(av[i]);
     }
 
     break;
   default:
-    ACE_ERROR((
-                LM_ERROR,
-                ACE_TEXT("IDL: I don't understand the '%s' option\n"),
-                av[i]));
-
-    idl_global->set_compile_flags(idl_global->compile_flags()
-                                  | IDL_CF_ONLY_USAGE);
-    break;
+    invalid_option(av[i]);
   }
 }
 

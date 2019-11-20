@@ -526,7 +526,7 @@ DCPS::TopicStatus
 InfoRepoDiscovery::assert_topic(DCPS::RepoId_out topicId, DDS::DomainId_t domainId,
                                 const RepoId& participantId, const char* topicName,
                                 const char* dataTypeName, const DDS::TopicQos& qos,
-                                bool hasDcpsKey)
+                                bool hasDcpsKey, TopicCallbacks* /*topic_callbacks*/)
 {
   try {
     return get_dcps_info()->assert_topic(topicId, domainId, participantId, topicName,
@@ -538,8 +538,11 @@ InfoRepoDiscovery::assert_topic(DCPS::RepoId_out topicId, DDS::DomainId_t domain
 }
 
 DCPS::TopicStatus
-InfoRepoDiscovery::find_topic(DDS::DomainId_t domainId, const char* topicName,
-                              CORBA::String_out dataTypeName, DDS::TopicQos_out qos,
+InfoRepoDiscovery::find_topic(DDS::DomainId_t domainId,
+                              const DCPS::RepoId& /*participantId*/,
+                              const char* topicName,
+                              CORBA::String_out dataTypeName,
+                              DDS::TopicQos_out qos,
                               DCPS::RepoId_out topicId)
 {
   try {

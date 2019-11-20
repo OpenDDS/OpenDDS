@@ -105,7 +105,7 @@ TEST(RapidJsonTest, SerializeTest)
   sample.bt.l = -2147483632;
   sample.bt.ull = 9223372036854775810ull;
   sample.bt.ll = -9223372036854775806ll;
-  sample.bt.f = 0.00141;
+  sample.bt.f = 0.00141f;
   sample.bt.d = -0.00000141;
   ACE_CDR_LONG_DOUBLE_ASSIGNMENT(sample.bt.ld, 1e34);
   sample.bt.b = false;

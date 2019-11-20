@@ -7,6 +7,7 @@
 #include "ace/Synch.h"
 #include <dds/DCPS/MessageTracker.h>
 #include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/TimeTypes.h>
 #include "ace/ACE.h"
 #include "ace/Guard_T.h"
 #include "ace/OS_NS_time.h"
@@ -20,7 +21,7 @@ MessageTracker::MessageTracker(const OPENDDS_STRING& msg_src)
 , dropped_count_(0)
 , delivered_count_(0)
 , sent_count_(0)
-, done_condition_(lock_)
+, done_condition_(lock_, ConditionAttributesMonotonic())
 {
 }
 
@@ -63,20 +64,19 @@ MessageTracker::message_dropped()
 void
 MessageTracker::wait_messages_pending(OPENDDS_STRING& caller_message)
 {
-  ACE_Time_Value pending_timeout =
-    TheServiceParticipant->pending_timeout();
+  const TimeDuration pending_timeout(TheServiceParticipant->pending_timeout());
+  MonotonicTimePoint timeout_at;
+  const ACE_Time_Value_T<MonotonicClock>* timeout_ptr = 0;
 
-  ACE_Time_Value* pTimeout = 0;
-
-  if (pending_timeout != ACE_Time_Value::zero) {
-    pTimeout = &pending_timeout;
-    pending_timeout += ACE_OS::gettimeofday();
+  if (!pending_timeout.is_zero()) {
+    timeout_at = MonotonicTimePoint::now() + pending_timeout;
+    timeout_ptr = &timeout_at.value();
   }
 
   ACE_GUARD(ACE_Thread_Mutex, guard, this->lock_);
   const bool report = DCPS_debug_level > 0 && pending_messages();
   if (report) {
-    if (pTimeout != 0) {
+    if (timeout_ptr) {
       ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("%T (%P|%t) MessageTracker::wait_messages_pending ")
                 ACE_TEXT("from source=%C will wait until %#T.\n"),
@@ -91,7 +91,7 @@ MessageTracker::wait_messages_pending(OPENDDS_STRING& caller_message)
     if (!pending_messages())
       break;
 
-    if (done_condition_.wait(pTimeout) == -1 && pending_messages()) {
+    if (done_condition_.wait(timeout_ptr) == -1 && pending_messages()) {
       if (DCPS_debug_level) {
         ACE_DEBUG((LM_INFO,
                    ACE_TEXT("(%P|%t) %T MessageTracker::")

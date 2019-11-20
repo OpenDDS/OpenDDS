@@ -28,8 +28,6 @@
 #include <ace/Time_Value.h>
 #include <ace/OS_NS_unistd.h>
 
-#include <cassert>
-
 using namespace std;
 
 char synch_fname[] = "dr_unmatch_done";

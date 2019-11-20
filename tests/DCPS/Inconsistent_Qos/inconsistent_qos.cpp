@@ -19,7 +19,6 @@
 #include "ace/Get_Opt.h"
 
 #include <memory>
-#include <assert.h>
 
 const char * xml_file_ = 0;
 

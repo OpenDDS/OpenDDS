@@ -37,21 +37,22 @@ OpenDDS_Dcps_Export extern const char* const BUILT_IN_PUBLICATION_TOPIC_TYPE;
  * Returns true if the topic name and type pair matches one of the built-in
  * topic name and type pairs.
  */
-inline bool topicIsBIT(const char* name, const char* type)
+inline bool
+topicIsBIT(const char* name, const char* type)
 {
-    return (
-      !ACE_OS::strcmp(name, OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC) &&
-      !ACE_OS::strcmp(type, OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC_TYPE)
-    ) || (
-      !ACE_OS::strcmp(name, OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC) &&
-      !ACE_OS::strcmp(type, OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC_TYPE)
-    ) || (
-      !ACE_OS::strcmp(name, OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC) &&
-      !ACE_OS::strcmp(type, OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC_TYPE)
-    ) || (
-      !ACE_OS::strcmp(name, OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC) &&
-      !ACE_OS::strcmp(type, OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC_TYPE)
-    );
+  return (
+    !ACE_OS::strcmp(name, BUILT_IN_PARTICIPANT_TOPIC) &&
+    !ACE_OS::strcmp(type, BUILT_IN_PARTICIPANT_TOPIC_TYPE)
+  ) || (
+    !ACE_OS::strcmp(name, BUILT_IN_TOPIC_TOPIC) &&
+    !ACE_OS::strcmp(type, BUILT_IN_TOPIC_TOPIC_TYPE)
+  ) || (
+    !ACE_OS::strcmp(name, BUILT_IN_SUBSCRIPTION_TOPIC) &&
+    !ACE_OS::strcmp(type, BUILT_IN_SUBSCRIPTION_TOPIC_TYPE)
+  ) || (
+    !ACE_OS::strcmp(name, BUILT_IN_PUBLICATION_TOPIC) &&
+    !ACE_OS::strcmp(type, BUILT_IN_PUBLICATION_TOPIC_TYPE)
+  );
 }
 
 class DomainParticipantImpl;
@@ -88,10 +89,8 @@ DDS::ReturnCode_t instance_handle_to_bit_data(
   typedef typename BIT_Reader_var::_obj_type BIT_Reader;
   BIT_Reader_var bit_reader = BIT_Reader::_narrow(reader.in());
 
-  const ACE_Time_Value due = ACE_OS::gettimeofday() +
-    ACE_Time_Value(TheServiceParticipant->bit_lookup_duration_msec() / 1000,
-                   (TheServiceParticipant->bit_lookup_duration_msec() % 1000)
-                   * 1000);
+  const MonotonicTimePoint due(MonotonicTimePoint::now() +
+    TimeDuration::from_msec(TheServiceParticipant->bit_lookup_duration_msec()));
 
     // Look for the data from builtin topic datareader until we get results or
     // timeout.
@@ -124,22 +123,14 @@ DDS::ReturnCode_t instance_handle_to_bit_data(
                        ret);
     }
 
-    const ACE_Time_Value now = ACE_OS::gettimeofday();
-
+    const MonotonicTimePoint now = MonotonicTimePoint::now();
     if (now < due) {
       if (DCPS_debug_level >= 10) {
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) instance_handle_to_repo_id, ")
                    ACE_TEXT("BIT reader read_instance failed - trying again.\n")));
       }
-
-      ACE_Time_Value tv = due - now;
-
-      if (tv > ACE_Time_Value(0, 100000)) {
-        tv = ACE_Time_Value(0, 100000);
-      }
-
-      ACE_OS::sleep(tv);
+      ACE_OS::sleep(std::min(due - now, TimeDuration(0, 100000)).value());
 
     } else {
       ACE_ERROR_RETURN((LM_ERROR,

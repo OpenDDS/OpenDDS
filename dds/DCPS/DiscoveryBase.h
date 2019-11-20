@@ -6,6 +6,7 @@
 #ifndef OPENDDS_DDS_DCPS_DISCOVERYBASE_H
 #define OPENDDS_DDS_DCPS_DISCOVERYBASE_H
 
+#include "dds/DCPS/TopicDetails.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/DataReaderImpl_T.h"
 #include "dds/DCPS/DCPS_Utils.h"
@@ -24,7 +25,6 @@
 #include "dds/DCPS/Ice.h"
 #endif
 
-#include "ace/Select_Reactor.h"
 #include "ace/Condition_Thread_Mutex.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -189,14 +189,7 @@ namespace OpenDDS {
 
     public:
       typedef DiscoveredParticipantData_ DiscoveredParticipantData;
-
-      struct TopicDetails {
-        OPENDDS_STRING data_type_;
-        DDS::TopicQos qos_;
-        DCPS::RepoId repo_id_;
-        bool has_dcps_key_;
-        RepoIdSet endpoints_;
-      };
+      typedef OpenDDS::DCPS::TopicDetails TopicDetails;
 
       EndpointManager(const RepoId& participant_id, ACE_Thread_Mutex& lock)
         : lock_(lock)
@@ -226,6 +219,12 @@ namespace OpenDDS {
         return RepoId();
       }
 
+      void purge_dead_topic(const OPENDDS_STRING& topic_name) {
+        typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it = topics_.find(topic_name);
+        topic_names_.erase(top_it->second.topic_id());
+        topics_.erase(top_it);
+      }
+
       void ignore(const DCPS::RepoId& to_ignore)
       {
         // Locked prior to call from Spdp.
@@ -235,15 +234,15 @@ namespace OpenDDS {
             discovered_publications_.find(to_ignore);
           if (iter != discovered_publications_.end()) {
             // clean up tracking info
-            topics_[get_topic_name(iter->second)].endpoints_.erase(iter->first);
-            remove_from_bit(iter->second);
             OPENDDS_STRING topic_name = get_topic_name(iter->second);
+            TopicDetails& td = topics_[topic_name];
+            td.remove_pub_sub(iter->first);
+            remove_from_bit(iter->second);
             discovered_publications_.erase(iter);
             // break associations
-            typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
-              topics_.find(topic_name);
-            if (top_it != topics_.end()) {
-              match_endpoints(to_ignore, top_it->second, true /*remove*/);
+            match_endpoints(to_ignore, td, true /*remove*/);
+            if (td.is_dead()) {
+              purge_dead_topic(topic_name);
             }
             return;
           }
@@ -253,15 +252,15 @@ namespace OpenDDS {
             discovered_subscriptions_.find(to_ignore);
           if (iter != discovered_subscriptions_.end()) {
             // clean up tracking info
-            topics_[get_topic_name(iter->second)].endpoints_.erase(iter->first);
-            remove_from_bit(iter->second);
             OPENDDS_STRING topic_name = get_topic_name(iter->second);
+            TopicDetails& td = topics_[topic_name];
+            td.remove_pub_sub(iter->first);
+            remove_from_bit(iter->second);
             discovered_subscriptions_.erase(iter);
             // break associations
-            typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
-              topics_.find(topic_name);
-            if (top_it != topics_.end()) {
-              match_endpoints(to_ignore, top_it->second, true /*remove*/);
+            match_endpoints(to_ignore, td, true /*remove*/);
+            if (td.is_dead()) {
+              purge_dead_topic(topic_name);
             }
             return;
           }
@@ -272,15 +271,15 @@ namespace OpenDDS {
           if (iter != topic_names_.end()) {
             ignored_topics_.insert(iter->second);
             // Remove all publications and subscriptions on this topic
-            typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
-              topics_.find(iter->second);
-            if (top_it != topics_.end()) {
-              TopicDetails& td = top_it->second;
-              RepoIdSet::iterator ep;
-              for (ep = td.endpoints_.begin(); ep!= td.endpoints_.end(); ++ep) {
-                match_endpoints(*ep, td, true /*remove*/);
-                if (shutting_down()) { return; }
-              }
+            TopicDetails& td = topics_[iter->second];
+            RepoIdSet ids = td.endpoints();
+            for (RepoIdSet::iterator ep = ids.begin(); ep!= ids.end(); ++ep) {
+              match_endpoints(*ep, td, true /*remove*/);
+              td.remove_pub_sub(*ep);
+              if (shutting_down()) { return; }
+            }
+            if (td.is_dead()) {
+              purge_dead_topic(iter->second);
             }
           }
         }
@@ -295,49 +294,67 @@ namespace OpenDDS {
 
       DCPS::TopicStatus assert_topic(DCPS::RepoId_out topicId, const char* topicName,
                                      const char* dataTypeName, const DDS::TopicQos& qos,
-                                     bool hasDcpsKey)
+                                     bool hasDcpsKey, TopicCallbacks* topic_callbacks)
       {
         ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::INTERNAL_ERROR);
         typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator iter =
           topics_.find(topicName);
-        if (iter != topics_.end()) { // types must match, RtpsDiscovery checked for us
-          iter->second.qos_ = qos;
-          iter->second.has_dcps_key_ = hasDcpsKey;
-          topicId = iter->second.repo_id_;
-          topic_names_[iter->second.repo_id_] = topicName;
+        if (iter != topics_.end()) {
+          if (iter->second.local_is_set() && iter->second.local_data_type_name() != dataTypeName) {
+            return DCPS::CONFLICTING_TYPENAME;
+          }
+          topicId = iter->second.topic_id();
+          iter->second.set_local(dataTypeName, qos, hasDcpsKey, topic_callbacks);
           return DCPS::FOUND;
         }
 
         TopicDetails& td = topics_[topicName];
-        td.data_type_ = dataTypeName;
-        td.qos_ = qos;
-        td.has_dcps_key_ = hasDcpsKey;
-        td.repo_id_ = make_topic_guid();
-        topicId = td.repo_id_;
-        topic_names_[td.repo_id_] = topicName;
+        topicId = make_topic_guid();
+        td.init(topicName, topicId);
+        topic_names_[topicId] = topicName;
+        td.set_local(dataTypeName, qos, hasDcpsKey, topic_callbacks);
 
         return DCPS::CREATED;
       }
 
-      DCPS::TopicStatus remove_topic(const RepoId& topicId, OPENDDS_STRING& name)
+      DCPS::TopicStatus find_topic(const char* topicName,
+                                   CORBA::String_out dataTypeName,
+                                   DDS::TopicQos_out qos,
+                                   OpenDDS::DCPS::RepoId_out topicId)
       {
         ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::INTERNAL_ERROR);
-        name = topic_names_[topicId];
-        typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
-          topics_.find(name);
-        if (top_it != topics_.end()) {
-          TopicDetails& td = top_it->second;
-          if (td.endpoints_.empty()) {
-            topics_.erase(name);
-          }
+        typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::const_iterator iter =
+          topics_.find(topicName);
+        if (iter == topics_.end()) {
+          return DCPS::NOT_FOUND;
         }
 
-        topic_names_.erase(topicId);
+        const TopicDetails& td = iter->second;
+
+        dataTypeName = td.local_data_type_name().c_str();
+        qos = new DDS::TopicQos(td.local_qos());
+        topicId = td.topic_id();
+        return DCPS::FOUND;
+      }
+
+      DCPS::TopicStatus remove_topic(const RepoId& topicId)
+      {
+        ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::INTERNAL_ERROR);
+        TopicNameMap::iterator name_iter = topic_names_.find(topicId);
+        if (name_iter == topic_names_.end()) {
+          return DCPS::NOT_FOUND;
+        }
+        const OPENDDS_STRING& name = name_iter->second;
+        TopicDetails& td = topics_[name];
+        td.unset_local();
+        if (td.is_dead()) {
+          purge_dead_topic(name);
+        }
+
         return DCPS::REMOVED;
       }
 
-      virtual bool update_topic_qos(const DCPS::RepoId& topicId, const DDS::TopicQos& qos,
-                                    OPENDDS_STRING& name) = 0;
+      virtual bool update_topic_qos(const DCPS::RepoId& topicId, const DDS::TopicQos& qos) = 0;
 
       DCPS::RepoId add_publication(const DCPS::RepoId& topicId,
                                    DCPS::DataWriterCallbacks* publication,
@@ -415,7 +432,7 @@ namespace OpenDDS {
 #endif
 
         TopicDetails& td = topics_[topic_name];
-        td.endpoints_.insert(rid);
+        td.add_pub_sub(rid);
 
         if (DDS::RETCODE_OK != add_publication_i(rid, pb)) {
           return RepoId();
@@ -446,7 +463,8 @@ namespace OpenDDS {
               topics_.find(topic_name);
             if (top_it != topics_.end()) {
               match_endpoints(publicationId, top_it->second, true /*remove*/);
-              top_it->second.endpoints_.erase(publicationId);
+              top_it->second.remove_pub_sub(publicationId);
+              // Local, no need to check for dead topic.
             }
           } else {
             ACE_ERROR((LM_ERROR,
@@ -543,7 +561,7 @@ namespace OpenDDS {
 #endif
 
         TopicDetails& td = topics_[topic_name];
-        td.endpoints_.insert(rid);
+        td.add_pub_sub(rid);
 
         if (DDS::RETCODE_OK != add_subscription_i(rid, sb)) {
           return RepoId();
@@ -574,7 +592,8 @@ namespace OpenDDS {
               topics_.find(topic_name);
             if (top_it != topics_.end()) {
               match_endpoints(subscriptionId, top_it->second, true /*remove*/);
-              top_it->second.endpoints_.erase(subscriptionId);
+              top_it->second.remove_pub_sub(subscriptionId);
+              // Local, no need to check for dead topic.
             }
           } else {
             ACE_ERROR((LM_ERROR,
@@ -601,16 +620,29 @@ namespace OpenDDS {
         LocalEndpoint() : topic_id_(DCPS::GUID_UNKNOWN), sequence_(DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN())
 #ifdef OPENDDS_SECURITY
           , have_ice_agent_info(false)
-#endif
+        {
+          security_attribs_.base.is_read_protected = false;
+          security_attribs_.base.is_write_protected = false;
+          security_attribs_.base.is_discovery_protected = false;
+          security_attribs_.base.is_liveliness_protected = false;
+          security_attribs_.is_submessage_protected = false;
+          security_attribs_.is_payload_protected = false;
+          security_attribs_.is_key_protected = false;
+          security_attribs_.plugin_endpoint_attributes = 0;
+        }
+#else
         {}
+#endif
+
         DCPS::RepoId topic_id_;
         DCPS::TransportLocatorSeq trans_info_;
         RepoIdSet matched_endpoints_;
         DCPS::SequenceNumber sequence_;
-        RepoIdSet remote_opendds_associations_;
+        RepoIdSet remote_expectant_opendds_associations_;
 #ifdef OPENDDS_SECURITY
         bool have_ice_agent_info;
         ICE::AgentInfo ice_agent_info;
+        DDS::Security::EndpointSecurityAttributes security_attribs_;
 #endif
       };
 
@@ -618,11 +650,6 @@ namespace OpenDDS {
         DCPS::DataWriterCallbacks* publication_;
         DDS::DataWriterQos qos_;
         DDS::PublisherQos publisher_qos_;
-
-#ifdef OPENDDS_SECURITY
-        DDS::Security::EndpointSecurityAttributes security_attribs_;
-#endif
-
       };
 
       struct LocalSubscription : LocalEndpoint {
@@ -630,11 +657,6 @@ namespace OpenDDS {
         DDS::DataReaderQos qos_;
         DDS::SubscriberQos subscriber_qos_;
         OpenDDS::DCPS::ContentFilterProperty_t filterProperties;
-
-#ifdef OPENDDS_SECURITY
-        DDS::Security::EndpointSecurityAttributes security_attribs_;
-#endif
-
       };
 
       typedef OPENDDS_MAP_CMP(DDS::BuiltinTopicKey_t, DCPS::RepoId,
@@ -726,7 +748,7 @@ namespace OpenDDS {
       {
         const bool reader = repoId.entityId.entityKind & 4;
         // Copy the endpoint set - lock can be released in match()
-        RepoIdSet endpoints_copy = td.endpoints_;
+        RepoIdSet endpoints_copy = td.endpoints();
 
         for (RepoIdSet::const_iterator iter = endpoints_copy.begin();
              iter != endpoints_copy.end(); ++iter) {
@@ -753,12 +775,14 @@ namespace OpenDDS {
             DCPS::WriterIdSeq writer_seq(1);
             writer_seq.length(1);
             writer_seq[0] = removing;
-            lsi->second.remote_opendds_associations_.erase(removing);
+            const size_t count = lsi->second.remote_expectant_opendds_associations_.erase(removing);
             lsi->second.subscription_->remove_associations(writer_seq,
                                                            false /*notify_lost*/);
             remove_assoc_i(remove_from, lsi->second, removing);
             // Update writer
-            write_subscription_data(remove_from, lsi->second);
+            if (count) {
+              write_subscription_data(remove_from, lsi->second);
+            }
           }
 
         } else {
@@ -768,7 +792,7 @@ namespace OpenDDS {
             DCPS::ReaderIdSeq reader_seq(1);
             reader_seq.length(1);
             reader_seq[0] = removing;
-            lpi->second.remote_opendds_associations_.erase(removing);
+            lpi->second.remote_expectant_opendds_associations_.erase(removing);
             lpi->second.publication_->remove_associations(reader_seq,
                                                           false /*notify_lost*/);
             remove_assoc_i(remove_from, lpi->second, removing);
@@ -972,20 +996,6 @@ namespace OpenDDS {
 
         if (DCPS::compatibleQOS(&writerStatus, &readerStatus, *wTls, *rTls,
                                 dwQos, drQos, pubQos, subQos)) {
-          if (!writer_local) {
-            RepoId writer_participant = writer;
-            writer_participant.entityId = ENTITYID_PARTICIPANT;
-            if (defer_writer(writer, writer_participant)) {
-              return;
-            }
-          }
-          if (!reader_local) {
-            RepoId reader_participant = reader;
-            reader_participant.entityId = ENTITYID_PARTICIPANT;
-            if (defer_reader(reader, reader_participant)) {
-              return;
-            }
-          }
 
           bool call_writer = false, call_reader = false;
           if (writer_local) {
@@ -1135,7 +1145,7 @@ namespace OpenDDS {
           }
 
           // change this if 'writer_active' (above) changes
-          if (call_writer && !call_reader && !is_opendds(reader)) {
+          if (call_writer && !call_reader && !is_expectant_opendds(reader)) {
             if (DCPS::DCPS_debug_level > 3) {
               ACE_DEBUG((LM_DEBUG,
                          ACE_TEXT("(%P|%t) EndpointManager::match - ")
@@ -1147,11 +1157,11 @@ namespace OpenDDS {
         } else if (already_matched) { // break an existing associtaion
           if (writer_local) {
             lpi->second.matched_endpoints_.erase(reader);
-            lpi->second.remote_opendds_associations_.erase(reader);
+            lpi->second.remote_expectant_opendds_associations_.erase(reader);
           }
           if (reader_local) {
             lsi->second.matched_endpoints_.erase(writer);
-            lsi->second.remote_opendds_associations_.erase(writer);
+            lsi->second.remote_expectant_opendds_associations_.erase(writer);
           }
           if (writer_local && !reader_local) {
             remove_assoc_i(writer, lpi->second, reader);
@@ -1192,11 +1202,7 @@ namespace OpenDDS {
         }
       }
 
-      virtual bool is_opendds(const GUID_t& endpoint) const
-      {
-        return !std::memcmp(endpoint.guidPrefix, DCPS::VENDORID_OCI,
-                            sizeof(DCPS::VENDORID_OCI));
-      }
+      virtual bool is_expectant_opendds(const GUID_t& endpoint) const = 0;
 
       virtual bool shutting_down() const = 0;
 
@@ -1212,12 +1218,6 @@ namespace OpenDDS {
       add_security_info(const DCPS::TransportLocatorSeq& locators,
                         const RepoId& /*writer*/, const RepoId& /*reader*/)
       { return locators; }
-
-      virtual bool defer_writer(const RepoId& writer,
-                                const RepoId& writer_participant) = 0;
-
-      virtual bool defer_reader(const RepoId& writer,
-                                const RepoId& writer_participant) = 0;
 
       void remove_from_bit(const DiscoveredPublication& pub)
       {
@@ -1250,7 +1250,7 @@ namespace OpenDDS {
         typename TDMap::const_iterator td = topics_.find(tn->second);
         if (td == topics_.end()) return false;
 
-        return td->second.has_dcps_key_;
+        return td->second.has_dcps_key();
       }
 
       void
@@ -1409,7 +1409,7 @@ namespace OpenDDS {
       DCPS::TopicStatus
       assert_topic(DCPS::RepoId_out topicId, const char* topicName,
                    const char* dataTypeName, const DDS::TopicQos& qos,
-                   bool hasDcpsKey)
+                   bool hasDcpsKey, TopicCallbacks* topic_callbacks)
       {
         if (std::strlen(topicName) > 256 || std::strlen(dataTypeName) > 256) {
           if (DCPS::DCPS_debug_level) {
@@ -1419,13 +1419,22 @@ namespace OpenDDS {
           return DCPS::PRECONDITION_NOT_MET;
         }
 
-        return endpoint_manager().assert_topic(topicId, topicName, dataTypeName, qos, hasDcpsKey);
+        return endpoint_manager().assert_topic(topicId, topicName, dataTypeName, qos, hasDcpsKey, topic_callbacks);
       }
 
       DCPS::TopicStatus
-      remove_topic(const RepoId& topicId, OPENDDS_STRING& name)
+      find_topic(const char* topicName,
+                 CORBA::String_out dataTypeName,
+                 DDS::TopicQos_out qos,
+                 OpenDDS::DCPS::RepoId_out topicId)
       {
-        return endpoint_manager().remove_topic(topicId, name);
+        return endpoint_manager().find_topic(topicName, dataTypeName, qos, topicId);
+      }
+
+      DCPS::TopicStatus
+      remove_topic(const RepoId& topicId)
+      {
+        return endpoint_manager().remove_topic(topicId);
       }
 
       void
@@ -1436,10 +1445,9 @@ namespace OpenDDS {
       }
 
       bool
-      update_topic_qos(const RepoId& topicId, const DDS::TopicQos& qos,
-                       OPENDDS_STRING& name)
+      update_topic_qos(const RepoId& topicId, const DDS::TopicQos& qos)
       {
-        return endpoint_manager().update_topic_qos(topicId, qos, name);
+        return endpoint_manager().update_topic_qos(topicId, qos);
       }
 
       RepoId
@@ -1528,19 +1536,16 @@ namespace OpenDDS {
 
       struct DiscoveredParticipant {
 
-        DiscoveredParticipant() :
+        DiscoveredParticipant()
+        : bit_ih_(DDS::HANDLE_NIL)
+        , seq_reset_count_(0)
 #ifdef OPENDDS_SECURITY
-          bit_ih_(0),
-          has_last_stateless_msg_(false),
-          last_stateless_msg_time_(0, 0),
-          auth_started_time_(0, 0),
-          auth_state_(AS_UNKNOWN),
-          identity_handle_(DDS::HANDLE_NIL),
-          handshake_handle_(DDS::HANDLE_NIL),
-          permissions_handle_(DDS::HANDLE_NIL),
-          crypto_handle_(DDS::HANDLE_NIL)
-#else
-          bit_ih_(0)
+        , has_last_stateless_msg_(false)
+        , auth_state_(AS_UNKNOWN)
+        , identity_handle_(DDS::HANDLE_NIL)
+        , handshake_handle_(DDS::HANDLE_NIL)
+        , permissions_handle_(DDS::HANDLE_NIL)
+        , crypto_handle_(DDS::HANDLE_NIL)
 #endif
         {
 #ifdef OPENDDS_SECURITY
@@ -1549,23 +1554,22 @@ namespace OpenDDS {
 #endif
         }
 
-        DiscoveredParticipant(const DiscoveredParticipantData& p, const ACE_Time_Value& t) :
+        DiscoveredParticipant(
+          const DiscoveredParticipantData& p,
+          const MonotonicTimePoint& t,
+          const DCPS::SequenceNumber& seq)
+        : pdata_(p)
+        , last_seen_(t)
+        , bit_ih_(DDS::HANDLE_NIL)
+        , last_seq_(seq)
+        , seq_reset_count_(0)
 #ifdef OPENDDS_SECURITY
-          pdata_(p),
-          last_seen_(t),
-          bit_ih_(DDS::HANDLE_NIL),
-          has_last_stateless_msg_(false),
-          last_stateless_msg_time_(0, 0),
-          auth_started_time_(0, 0),
-          auth_state_(AS_UNKNOWN),
-          identity_handle_(DDS::HANDLE_NIL),
-          handshake_handle_(DDS::HANDLE_NIL),
-          permissions_handle_(DDS::HANDLE_NIL),
-          crypto_handle_(DDS::HANDLE_NIL)
-#else
-          pdata_(p),
-          last_seen_(t),
-          bit_ih_(DDS::HANDLE_NIL)
+        , has_last_stateless_msg_(false)
+        , auth_state_(AS_UNKNOWN)
+        , identity_handle_(DDS::HANDLE_NIL)
+        , handshake_handle_(DDS::HANDLE_NIL)
+        , permissions_handle_(DDS::HANDLE_NIL)
+        , crypto_handle_(DDS::HANDLE_NIL)
 #endif
         {
 #ifdef OPENDDS_SECURITY
@@ -1575,15 +1579,17 @@ namespace OpenDDS {
         }
 
         DiscoveredParticipantData pdata_;
-        ACE_Time_Value last_seen_;
+        MonotonicTimePoint last_seen_;
         DDS::InstanceHandle_t bit_ih_;
+        DCPS::SequenceNumber last_seq_;
+        ACE_UINT16 seq_reset_count_;
 
 #ifdef OPENDDS_SECURITY
         bool has_last_stateless_msg_;
-        ACE_Time_Value last_stateless_msg_time_;
+        MonotonicTimePoint stateless_msg_deadline_;
         DDS::Security::ParticipantStatelessMessage last_stateless_msg_;
 
-        ACE_Time_Value auth_started_time_;
+        MonotonicTimePoint auth_deadline_;
         AuthState auth_state_;
 
         DDS::Security::IdentityToken identity_token_;
@@ -1668,27 +1674,35 @@ namespace OpenDDS {
 
       explicit PeerDiscovery(const RepoKey& key) : Discovery(key) { }
 
-      ~PeerDiscovery() {
-        reactor_runner_.end();
-      }
-
       virtual DDS::Subscriber_ptr init_bit(DomainParticipantImpl* participant) {
         using namespace DCPS;
+
+        DDS::Subscriber_var bit_subscriber;
+#ifndef DDS_HAS_MINIMUM_BIT
+        if (!TheServiceParticipant->get_BIT()) {
+          get_part(participant->get_domain_id(), participant->get_id())->init_bit(bit_subscriber);
+          return 0;
+        }
+
         if (create_bit_topics(participant) != DDS::RETCODE_OK) {
           return 0;
         }
 
-        DDS::Subscriber_var bit_subscriber =
+        bit_subscriber =
           participant->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
                                          DDS::SubscriberListener::_nil(),
                                          DEFAULT_STATUS_MASK);
         SubscriberImpl* sub = dynamic_cast<SubscriberImpl*>(bit_subscriber.in());
+        if (sub == 0) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) PeerDiscovery::init_bit")
+                     ACE_TEXT(" - Could not cast Subscriber to SubscriberImpl\n")));
+          return 0;
+        }
 
         DDS::DataReaderQos dr_qos;
         sub->get_default_datareader_qos(dr_qos);
         dr_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
 
-#ifndef DDS_HAS_MINIMUM_BIT
         DDS::TopicDescription_var bit_part_topic =
           participant->lookup_topicdescription(BUILT_IN_PARTICIPANT_TOPIC);
         create_bit_dr(bit_part_topic, BUILT_IN_PARTICIPANT_TOPIC_TYPE,
@@ -1788,59 +1802,25 @@ namespace OpenDDS {
                                              const char* topicName,
                                              const char* dataTypeName,
                                              const DDS::TopicQos& qos,
-                                             bool hasDcpsKey)
+                                             bool hasDcpsKey,
+                                             TopicCallbacks* topic_callbacks)
       {
         ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::INTERNAL_ERROR);
-        typename OPENDDS_MAP(DDS::DomainId_t,
-                             OPENDDS_MAP(OPENDDS_STRING, TopicDetails) )::iterator topic_it =
-          topics_.find(domainId);
-        if (topic_it != topics_.end()) {
-          const typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator it =
-            topic_it->second.find(topicName);
-          if (it != topic_it->second.end()
-              && it->second.data_type_ != dataTypeName) {
-            topicId = GUID_UNKNOWN;
-            return DCPS::CONFLICTING_TYPENAME;
-          }
-        }
-
         // Verified its safe to hold lock during call to assert_topic
-        const DCPS::TopicStatus stat =
-          participants_[domainId][participantId]->assert_topic(topicId, topicName,
-                                                               dataTypeName, qos,
-                                                               hasDcpsKey);
-        if (stat == DCPS::CREATED || stat == DCPS::FOUND) { // qos change (FOUND)
-          TopicDetails& td = topics_[domainId][topicName];
-          td.data_type_ = dataTypeName;
-          td.qos_ = qos;
-          td.repo_id_ = topicId;
-          ++topic_use_[domainId][topicName];
-        }
-        return stat;
+        return participants_[domainId][participantId]->assert_topic(topicId, topicName,
+                                                                    dataTypeName, qos,
+                                                                    hasDcpsKey, topic_callbacks);
       }
 
-      virtual DCPS::TopicStatus find_topic(DDS::DomainId_t domainId, const char* topicName,
-                                           CORBA::String_out dataTypeName, DDS::TopicQos_out qos,
+      virtual DCPS::TopicStatus find_topic(DDS::DomainId_t domainId,
+                                           const OpenDDS::DCPS::RepoId& participantId,
+                                           const char* topicName,
+                                           CORBA::String_out dataTypeName,
+                                           DDS::TopicQos_out qos,
                                            OpenDDS::DCPS::RepoId_out topicId)
       {
         ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::INTERNAL_ERROR);
-        typename OPENDDS_MAP(DDS::DomainId_t,
-                             OPENDDS_MAP(OPENDDS_STRING, TopicDetails) )::iterator topic_it =
-          topics_.find(domainId);
-        if (topic_it == topics_.end()) {
-          return DCPS::NOT_FOUND;
-        }
-        typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator iter =
-          topic_it->second.find(topicName);
-        if (iter == topic_it->second.end()) {
-          return DCPS::NOT_FOUND;
-        }
-        TopicDetails& td = iter->second;
-        dataTypeName = td.data_type_.c_str();
-        qos = new DDS::TopicQos(td.qos_);
-        topicId = td.repo_id_;
-        ++topic_use_[domainId][topicName];
-        return DCPS::FOUND;
+        return participants_[domainId][participantId]->find_topic(topicName, dataTypeName, qos, topicId);
       }
 
       virtual DCPS::TopicStatus remove_topic(DDS::DomainId_t domainId,
@@ -1848,31 +1828,8 @@ namespace OpenDDS {
                                              const OpenDDS::DCPS::RepoId& topicId)
       {
         ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::INTERNAL_ERROR);
-        typename OPENDDS_MAP(DDS::DomainId_t,
-                             OPENDDS_MAP(OPENDDS_STRING, TopicDetails) )::iterator topic_it =
-          topics_.find(domainId);
-        if (topic_it == topics_.end()) {
-          return DCPS::NOT_FOUND;
-        }
-
-        OPENDDS_STRING name;
         // Safe to hold lock while calling remove topic
-        const DCPS::TopicStatus stat =
-          participants_[domainId][participantId]->remove_topic(topicId, name);
-
-        if (stat == DCPS::REMOVED) {
-          if (0 == --topic_use_[domainId][name]) {
-            topic_use_[domainId].erase(name);
-            if (topic_it->second.empty()) {
-              topic_use_.erase(domainId);
-            }
-            topic_it->second.erase(name);
-            if (topic_it->second.empty()) {
-              topics_.erase(topic_it);
-            }
-          }
-        }
-        return stat;
+        return participants_[domainId][participantId]->remove_topic(topicId);
       }
 
       virtual bool ignore_topic(DDS::DomainId_t domainId, const OpenDDS::DCPS::RepoId& myParticipantId,
@@ -1886,14 +1843,8 @@ namespace OpenDDS {
                                     const OpenDDS::DCPS::RepoId& participantId, const DDS::TopicQos& qos)
       {
         ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
-        OPENDDS_STRING name;
         // Safe to hold lock while calling update_topic_qos
-        if (participants_[domainId][participantId]->update_topic_qos(topicId,
-                                                                     qos, name)) {
-          topics_[domainId][name].qos_ = qos;
-          return true;
-        }
-        return false;
+        return participants_[domainId][participantId]->update_topic_qos(topicId, qos);
       }
 
       virtual OpenDDS::DCPS::RepoId add_publication(DDS::DomainId_t domainId,
@@ -1990,17 +1941,6 @@ namespace OpenDDS {
         get_part(domainId, participantId)->association_complete(localId, remoteId);
       }
 
-      ACE_Reactor*
-      reactor()
-      {
-        ACE_GUARD_RETURN(ACE_Thread_Mutex, g, reactor_runner_.mtx_, 0);
-        if (!reactor_runner_.reactor_) {
-          reactor_runner_.reactor_.reset(new ACE_Reactor(new ACE_Select_Reactor, true));
-          reactor_runner_.activate();
-        }
-        return reactor_runner_.reactor_.get();
-      }
-
     protected:
 
       typedef DCPS::RcHandle<Participant> ParticipantHandle;
@@ -2030,16 +1970,31 @@ namespace OpenDDS {
         using namespace DCPS;
         TopicDescriptionImpl* bit_topic_i =
           dynamic_cast<TopicDescriptionImpl*>(topic);
+        if (bit_topic_i == 0) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) PeerDiscovery::create_bit_dr")
+                     ACE_TEXT(" - Could not cast TopicDescription to TopicDescriptionImpl\n")));
+          return;
+        }
 
         DDS::DomainParticipant_var participant = sub->get_participant();
         DomainParticipantImpl* participant_i =
           dynamic_cast<DomainParticipantImpl*>(participant.in());
+        if (participant_i == 0) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) PeerDiscovery::create_bit_dr")
+                     ACE_TEXT(" - Could not cast DomainParticipant to DomainParticipantImpl\n")));
+          return;
+        }
 
         TypeSupport_var type_support =
           Registered_Data_Types->lookup(participant, type);
 
         DDS::DataReader_var dr = type_support->create_datareader();
         OpenDDS::DCPS::DataReaderImpl* dri = dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(dr.in());
+        if (dri == 0) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) PeerDiscovery::create_bit_dr")
+                     ACE_TEXT(" - Could not cast DataReader to DataReaderImpl\n")));
+          return;
+        }
 
         dri->init(bit_topic_i, qos, 0 /*listener*/, 0 /*mask*/, participant_i, sub);
         dri->disable_transport();
@@ -2048,33 +2003,7 @@ namespace OpenDDS {
 
       mutable ACE_Thread_Mutex lock_;
 
-      // Before participants_ so destroyed after.
-      struct ReactorRunner : ACE_Task_Base {
-      ReactorRunner()  {}
-
-        int svc()
-        {
-          reactor_->owner(ACE_Thread_Manager::instance()->thr_self());
-          reactor_->run_reactor_event_loop();
-          return 0;
-        }
-
-        void end()
-        {
-          ACE_GUARD(ACE_Thread_Mutex, g, mtx_);
-          if (reactor_) {
-            reactor_->end_reactor_event_loop();
-            wait();
-          }
-        }
-
-        unique_ptr<ACE_Reactor> reactor_;
-        ACE_Thread_Mutex mtx_;
-      } reactor_runner_;
-
       DomainParticipantMap participants_;
-      OPENDDS_MAP(DDS::DomainId_t, OPENDDS_MAP(OPENDDS_STRING, TopicDetails) ) topics_;
-      OPENDDS_MAP(DDS::DomainId_t, OPENDDS_MAP(OPENDDS_STRING, unsigned int) ) topic_use_;
     };
 
   } // namespace DCPS

@@ -11,6 +11,8 @@ use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 use strict;
 
+PerlDDS::add_lib_path('../ConsolidatedMessengerIdl');
+
 my $subscriber_completed = "subscriber_finished.txt";
 my $subscriber_ready = "subscriber_ready.txt";
 my $publisher_ready = "publisher_ready.txt";

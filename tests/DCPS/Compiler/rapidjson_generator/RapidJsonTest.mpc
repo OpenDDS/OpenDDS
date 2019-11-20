@@ -1,4 +1,4 @@
-project: dcpsexe, dcps_rapidjson, googletest {
+project: dcpsexe, dcps_test, dcps_rapidjson, googletest {
 
   exename = *
 

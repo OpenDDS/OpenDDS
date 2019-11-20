@@ -31,14 +31,18 @@ bool
     }
 
   OPENDDS_STRING supported;
-  for (OPENDDS_VECTOR(OpenDDS::DCPS::TransportImpl*)::const_iterator it = tc->impls_.begin(),
+  for (OpenDDS::DCPS::TransportClient::ImplsType::const_iterator it = tc->impls_.begin(),
           end = tc->impls_.end();
           it != end;)
     {
-      supported += (*it)->config().name();
-      if (++it != end)
+      OpenDDS::DCPS::TransportImpl_rch impl = it->lock();
+      if (impl)
         {
-          supported += ", ";
+          supported += impl->config().name();
+          if (++it != end)
+            {
+              supported += ", ";
+            }
         }
     }
 
@@ -47,11 +51,12 @@ bool
              name.c_str(),
              supported.c_str()));
 
-  for (OPENDDS_VECTOR(OpenDDS::DCPS::TransportImpl*)::const_iterator it = tc->impls_.begin();
+  for (OpenDDS::DCPS::TransportClient::ImplsType::const_iterator it = tc->impls_.begin();
           it != tc->impls_.end(); ++it)
     {
 
-      if ((*it)->config().name() == name)
+      OpenDDS::DCPS::TransportImpl_rch impl = it->lock();
+      if (impl && impl->config().name() == name)
         {
 //          ACE_ERROR_RETURN((LM_DEBUG,
 //                            ACE_TEXT("(%P|%t) Yes. Transport '%C' is supported.\n"),

@@ -118,6 +118,8 @@ void
 increment_incompatibility_count(OpenDDS::DCPS::IncompatibleQosStatus* status,
                                 DDS::QosPolicyId_t incompatible_policy)
 {
+  if (!status) return;
+
   ++status->total_count;
   ++status->count_since_last_send;
   status->last_policy_id = incompatible_policy;

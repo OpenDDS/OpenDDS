@@ -164,6 +164,11 @@ public:
     return 0;
   }
 
+  bool is_shutdown_initiated() const {
+    GuardType guard(lock_);
+    return shutdown_initiated_;
+  }
+
   /// The subclass should implement this function to handle the
   /// dequeued request.
   virtual void execute(T& req) = 0;
@@ -177,7 +182,7 @@ private:
   typedef ACE_Unbounded_Queue<T>  Queue;
 
   /// Lock to protect the "state" (all of the data members) of this object.
-  LockType lock_;
+  mutable LockType lock_;
 
   /// The request queue.
   Queue queue_;

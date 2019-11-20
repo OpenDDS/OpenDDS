@@ -26,35 +26,31 @@ namespace {
   {
     DDS::StatusCondition_var condition = writer->get_statuscondition();
     condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
-
     DDS::WaitSet_var ws = new DDS::WaitSet;
     ws->attach_condition(condition);
-
-    DDS::Duration_t timeout =
-      { 120, DDS::DURATION_INFINITE_NSEC };
-
     DDS::ConditionSeq conditions;
-    DDS::PublicationMatchedStatus matches = {0, 0, 0, 0, 0};
-
-    while (true) {
-      if (writer->get_publication_matched_status(matches) != ::DDS::RETCODE_OK) {
+    DDS::PublicationMatchedStatus ms = { 0, 0, 0, 0, 0 };
+    DDS::Duration_t timeout = { 1, 0 };
+    DDS::ReturnCode_t stat;
+    do {
+      stat = writer->get_publication_matched_status(ms);
+      if (stat != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("%N:%l: wait_for_match()")
-                   ACE_TEXT(" ERROR: get_publication_matched_status failed!\n")));
-        ACE_OS::exit(-1);
-      }
-
-      if (matches.current_count != (int)count) {
-        if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
-          ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("%N:%l: wait_for_match()")
-                     ACE_TEXT(" ERROR: wait failed!\n")));
-          ACE_OS::exit(-1);
-        }
+                   ACE_TEXT("(%P|%t) ERROR: %N:%l: wait_match() -")
+                   ACE_TEXT(" get_publication_matched_status failed!\n")));
+      } else if (ms.current_count >= (CORBA::Long)count) {
+        break;  // matched
       } else {
-        break;
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) Waiting for %d matched readers, currently have %d.\n"), ms.current_count, count));
       }
-    }
+      // wait for a change
+      stat = ws->wait(conditions, timeout);
+      if ((stat != DDS::RETCODE_OK) && (stat != DDS::RETCODE_TIMEOUT)) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: %N:%l: wait_match() -")
+                   ACE_TEXT(" wait failed!\n")));
+      }
+    } while (true);
     ws->detach_condition(condition);
   }
 }
@@ -130,6 +126,8 @@ Writer::write()
         ACE_OS::sleep(delay);
       }
     }
+
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) Messages written, waiting for readers to disconnect\n")));
 
     // Let readers disconnect first, once they either get the data or
     // give up and time-out.  This allows the writer to be alive while

@@ -41,7 +41,7 @@ ShmemReceiveStrategy::read()
 
   ShmemAllocator* alloc = link_->peer_allocator();
   void* mem = 0;
-  if (-1 == alloc->find(bound_name_.c_str(), mem)) {
+  if (alloc == 0 || -1 == alloc->find(bound_name_.c_str(), mem)) {
     VDBG_LVL((LM_INFO, "(%P|%t) ShmemReceiveStrategy::read link %@ "
               "peer allocator not found, receive_bytes will close link\n",
               link_), 1);
@@ -86,7 +86,7 @@ ShmemReceiveStrategy::receive_bytes(iovec iov[],
   // check that the writer's shared memory is still available
   ShmemAllocator* alloc = link_->peer_allocator();
   void* mem;
-  if (-1 == alloc->find(bound_name_.c_str(), mem)
+  if (alloc == 0 || -1 == alloc->find(bound_name_.c_str(), mem)
       || current_data_->status_ != SHMEM_DATA_IN_USE) {
     VDBG_LVL((LM_INFO, "(%P|%t) ShmemReceiveStrategy::receive_bytes closing\n"),
              1);

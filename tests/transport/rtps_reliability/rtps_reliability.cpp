@@ -40,16 +40,25 @@ using namespace OpenDDS::DCPS;
 using namespace OpenDDS::RTPS;
 
 const bool host_is_bigendian = !ACE_CDR_BYTE_ORDER;
-const char* smkinds[] = {"RESERVED_0", "PAD", "RESERVED_2", "RESERVED_3",
-  "RESERVED_4", "RESERVED_5", "ACKNACK", "HEARTBEAT", "GAP", "INFO_TS",
-  "RESERVED_10", "RESERVED_11", "INFO_SRC", "INFO_REPLY_IP4", "INFO_DST",
-  "INFO_REPLY", "RESERVED_16", "RESERVED_17", "NACK_FRAG", "HEARTBEAT_FRAG",
-  "RESERVED_20", "DATA", "DATA_FRAG"};
-const size_t n_smkinds = sizeof(smkinds) / sizeof(smkinds[0]);
-
 
 struct SimpleTC: TransportClient {
-  explicit SimpleTC(const RepoId& local) : local_id_(local) {}
+  explicit SimpleTC(const RepoId& local) : local_id_(local), mutex_(), cond_(mutex_) {}
+
+  void transport_assoc_done(int flags, const RepoId& remote) {
+    if (!(flags & ASSOC_OK)) {
+      return;
+    }
+    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+    associated_.insert(remote);
+    cond_.broadcast();
+  }
+
+  void wait_for_assoc(const RepoId& remote) {
+    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+    while (associated_.find(remote) == associated_.end()) {
+      cond_.wait(mutex_);
+    }
+  }
 
   using TransportClient::enable_transport;
   using TransportClient::associate;
@@ -63,6 +72,9 @@ struct SimpleTC: TransportClient {
   CORBA::Long get_priority_value(const AssociationData&) const { return 0; }
 
   RepoId local_id_;
+  RepoIdSet associated_;
+  ACE_Thread_Mutex mutex_;
+  ACE_Condition<ACE_Thread_Mutex> cond_;
 };
 
 
@@ -479,13 +491,17 @@ struct TestParticipant: ACE_Event_Handler {
         if (!recv_nackfrag(ser, peer)) return false;
         break;
       default:
-        if (static_cast<unsigned char>(subm) < n_smkinds) {
+#ifdef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+        ACE_DEBUG((LM_INFO, "Received submessage type: %u\n", unsigned(subm)));
+#else
+        if (static_cast<size_t>(subm) < gen_OpenDDS_RTPS_SubmessageKind_names_size) {
           ACE_DEBUG((LM_INFO, "Received submessage type: %C\n",
-                     smkinds[static_cast<unsigned char>(subm)]));
+                     gen_OpenDDS_RTPS_SubmessageKind_names[static_cast<size_t>(subm)]));
         } else {
-          ACE_ERROR((LM_ERROR, "ERROR: Received unknown submessage type: %d\n",
-                     int(subm)));
+          ACE_ERROR((LM_ERROR, "ERROR: Received unknown submessage type: %u\n",
+                     unsigned(subm)));
         }
+#endif
         SubmessageHeader smh;
         if (!(ser >> smh)) {
           ACE_ERROR((LM_ERROR, "ERROR: in handle_input() failed to deserialize "
@@ -617,7 +633,12 @@ struct TestParticipant: ACE_Event_Handler {
     ACE_DEBUG((LM_INFO, "recv_hb() first = %d last = %d\n",
                hb.firstSN.low, hb.lastSN.low));
     const bool flag_f = hb.smHeader.flags & 2;
-    if (!flag_f && hb.firstSN.low == 1 && hb.lastSN.low == 1) {
+    if (!flag_f && hb.lastSN.low == 0) {
+      const SequenceNumber_t zero = {0, 0};
+      if (!send_an(hb.writerId, zero, peer, false)) {
+        return false;
+      }
+    } else if (!flag_f && hb.firstSN.low == 1 && hb.lastSN.low == 1) {
       const SequenceNumber_t one = {0, 1};
       if (!send_an(hb.writerId, one, peer, false)) {
         return false;
@@ -682,7 +703,7 @@ void transport_setup()
   }
   rtps_inst->use_multicast_ = false;
   rtps_inst->datalink_release_delay_ = 0;
-  rtps_inst->heartbeat_period_ = ACE_Time_Value(0, 500*1000 /*microseconds*/);
+  rtps_inst->heartbeat_period_ = TimeDuration::from_msec(500);
   TransportConfig_rch cfg = TheTransportRegistry->create_config("cfg");
   cfg->instances_.push_back(inst);
   TheTransportRegistry->global_config(cfg);
@@ -810,6 +831,7 @@ bool run_test()
                "SimpleDataReader(reader2) could not associate with writer1\n"));
     return false;
   }
+  sdr2.wait_for_assoc(writer1);
 
   const TransportLocatorSeq& part2_loc = sdr2.connection_info();
   if (part2_loc.length() < 1) {
@@ -939,13 +961,14 @@ bool run_test()
   AssociationData part1_reader = part1_writer;
   part1_reader.remote_id_ = reader1;
   part1_reader.remote_durable_ = false;
-  ReactorTask rt;
+  ::ReactorTask rt;
   if (!sdw2.associate(part1_reader, true /*active*/)) {
     ACE_DEBUG((LM_DEBUG,
                "SimpleDataWriter(writer2) could not associate with reader1\n"));
     sdr2.disassociate(writer1);
     return false;
   }
+  sdw2.wait_for_assoc(reader1);
   rt.wait();
 
   SequenceNumber seq_dw2;

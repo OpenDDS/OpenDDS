@@ -40,7 +40,6 @@ feature (built_in_topics): dcps_ts_defaults, idl2jni {
                     -Wb,stub_export_include=dcps_java_export.h \
                     -Wb,stub_export_macro=dcps_java_Export
     $(DDS_ROOT)/dds/DdsDcpsCoreTypeSupport.idl << DdsDcpsTypeSupportExtJC.h
-    //$(DDS_ROOT)/dds/DdsDcpsInfrastructureTypeSupport.idl << DdsDcpsTypeSupportExtJC.h
   }
 
   Define_Custom(TypeSupportJavaOnly) {
@@ -51,6 +50,9 @@ feature (built_in_topics): dcps_ts_defaults, idl2jni {
     dependent = $(OPENDDS_IDL_DEP) $(DDS_ROOT)/dds/idl/IDLTemplate.txt
     keyword dcps_ts_java_flags = commandflags
   }
+
+  // Topic types must be declared using topic anotations
+  dcps_ts_java_flags += --default-nested
 
   TypeSupportJavaOnly_Files {
     dcps_ts_java_flags += -Wb,java=BitsJC.cpp

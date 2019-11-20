@@ -10,14 +10,12 @@ class CryptoTransformTest : public Test
 {
 public:
   CryptoTransformTest()
-  : test_class_()
-  , test_buffer_()
-  , readers_()
-  , writers_()
-  , participants_()
+    : test_class_()
+    , test_buffer_()
+    , readers_()
+    , writers_()
+    , participants_()
   {
-    // Initialize a simple buffer
-    //CORBA::Octet* buffer_alloc
   }
 
   ~CryptoTransformTest()
@@ -75,7 +73,7 @@ public:
     return participants_;
   }
 
-private:
+protected:
 
   template<class T>
   void init_seq(T& seq, CORBA::ULong length)
@@ -91,6 +89,12 @@ private:
   DDS::Security::DatareaderCryptoHandleSeq readers_;
   DDS::Security::DatawriterCryptoHandleSeq writers_;
   DDS::Security::ParticipantCryptoHandleSeq participants_;
+
+  struct SharedSecret : DDS::Security::SharedSecretHandle {
+    DDS::OctetSeq* challenge1() { return 0; }
+    DDS::OctetSeq* challenge2() { return 0; }
+    DDS::OctetSeq* sharedSecret() { return 0; }
+  } shared_secret_;
 };
 
 
@@ -303,60 +307,62 @@ TEST_F(CryptoTransformTest, encode_rtps_message_NegativeIndex)
   EXPECT_EQ(0U, output.length());
 }
 
-TEST_F(CryptoTransformTest, encode_rtps_message_NilReaderAtN)
-{
-  ::DDS::OctetSeq output;
-  ::DDS::Security::SecurityException ex;
-  ::DDS::Security::ParticipantCryptoHandle handle = 1;
-
-  // Provide a valid list of participant handles
-  const ::CORBA::Long NUM_PARTS = 10;
-  init_participants(NUM_PARTS);
-
-  // Test each position to see if a NIL reader is handled properly
-  DDS::Security::ParticipantCryptoHandleSeq& participants = get_participants();
-  for (::CORBA::Long n = 0; n < NUM_PARTS; ++n) {
-    // Temporarily replace the value at N with a NIL handle
-    DDS::Security::ParticipantCryptoHandle temp = participants[n];
-    participants[n] = DDS::HANDLE_NIL;
-    ::CORBA::Long index = n;
-
-    EXPECT_FALSE(get_inst().encode_rtps_message(
-      output, get_buffer(), handle, participants, index, ex));
-    EXPECT_EQ(0U, output.length());
-    EXPECT_EQ(n, index);
-
-    // Restore the handle before next iteration
-    participants[n] = temp;
-  }
-}
-
-TEST_F(CryptoTransformTest, encode_rtps_message_MultiPass)
-{
-  ::DDS::OctetSeq output;
-  ::DDS::Security::SecurityException ex;
-  ::DDS::Security::ParticipantCryptoHandle handle = 1;
-
-  // Provide a valid list of participant handles
-  const ::CORBA::Long NUM_PARTS = 10;
-  init_participants(NUM_PARTS);
-
-  // Test each position to see if a NIL reader is handled properly
-  for (::CORBA::Long n = 0; n < NUM_PARTS; ++n) {
-    ::CORBA::Long index = n;
-    if (index < NUM_PARTS) {
-      EXPECT_TRUE(get_inst().encode_rtps_message(
-        output, get_buffer(), handle, get_participants(), index, ex));
-      EXPECT_EQ(get_buffer(), output);
-      EXPECT_EQ((n + 1), index);
-    } else {
-      // Out of bounds test
-      EXPECT_FALSE(get_inst().encode_rtps_message(
-        output, get_buffer(), handle, get_participants(), index, ex));
-      EXPECT_EQ(n, index);
-    }
-  }
-}
+// Multiple receiver handles is not currently supported in RTPS Message encoding
+//
+//TEST_F(CryptoTransformTest, encode_rtps_message_NilReaderAtN)
+//{
+//  ::DDS::OctetSeq output;
+//  ::DDS::Security::SecurityException ex;
+//  ::DDS::Security::ParticipantCryptoHandle handle = 1;
+//
+//  // Provide a valid list of participant handles
+//  const ::CORBA::Long NUM_PARTS = 10;
+//  init_participants(NUM_PARTS);
+//
+//  // Test each position to see if a NIL reader is handled properly
+//  DDS::Security::ParticipantCryptoHandleSeq& participants = get_participants();
+//  for (::CORBA::Long n = 0; n < NUM_PARTS; ++n) {
+//    // Temporarily replace the value at N with a NIL handle
+//    DDS::Security::ParticipantCryptoHandle temp = participants[n];
+//    participants[n] = DDS::HANDLE_NIL;
+//    ::CORBA::Long index = n;
+//
+//    EXPECT_FALSE(get_inst().encode_rtps_message(
+//      output, get_buffer(), handle, participants, index, ex));
+//    EXPECT_EQ(0U, output.length());
+//    EXPECT_EQ(n, index);
+//
+//    // Restore the handle before next iteration
+//    participants[n] = temp;
+//  }
+//}
+//
+//TEST_F(CryptoTransformTest, encode_rtps_message_MultiPass)
+//{
+//  ::DDS::OctetSeq output;
+//  ::DDS::Security::SecurityException ex;
+//  ::DDS::Security::ParticipantCryptoHandle handle = 1;
+//
+//  // Provide a valid list of participant handles
+//  const ::CORBA::Long NUM_PARTS = 10;
+//  init_participants(NUM_PARTS);
+//
+//  // Test each position to see if a NIL reader is handled properly
+//  for (::CORBA::Long n = 0; n < NUM_PARTS; ++n) {
+//    ::CORBA::Long index = n;
+//    if (index < NUM_PARTS) {
+//      EXPECT_TRUE(get_inst().encode_rtps_message(
+//        output, get_buffer(), handle, get_participants(), index, ex));
+//      EXPECT_EQ(get_buffer(), output);
+//      EXPECT_EQ((n + 1), index);
+//    } else {
+//      // Out of bounds test
+//      EXPECT_FALSE(get_inst().encode_rtps_message(
+//        output, get_buffer(), handle, get_participants(), index, ex));
+//      EXPECT_EQ(n, index);
+//    }
+//  }
+//}
 
 TEST_F(CryptoTransformTest, decode_rtps_message_NilHandles)
 {
@@ -369,20 +375,6 @@ TEST_F(CryptoTransformTest, decode_rtps_message_NilHandles)
     output, get_buffer(), 1, DDS::HANDLE_NIL, ex));
   EXPECT_FALSE(get_inst().decode_rtps_message(
     output, get_buffer(), DDS::HANDLE_NIL, DDS::HANDLE_NIL, ex));
-}
-
-TEST_F(CryptoTransformTest, decode_rtps_message_GoodHandles)
-{
-  DDS::OctetSeq output;
-  DDS::Security::SecurityException ex;
-  DDS::Security::ParticipantCryptoHandle send_handle = 1;
-  DDS::Security::ParticipantCryptoHandle recv_handle = 2;
-
-  init_buffer(128, 5);
-
-  EXPECT_TRUE(get_inst().decode_rtps_message(
-    output, get_buffer(), recv_handle, send_handle, ex));
-  EXPECT_EQ(get_buffer(), output);
 }
 
 TEST_F(CryptoTransformTest, preprocess_secure_submsg_NilHandles)
@@ -502,13 +494,26 @@ TEST_F(CryptoTransformTest, decode_serialized_payload_NilHandles)
 
 TEST_F(CryptoTransformTest, decode_serialized_payload_Success)
 {
-  ::DDS::OctetSeq output;
-  ::DDS::OctetSeq inline_qos;
-  ::DDS::Security::SecurityException ex;
+  using namespace DDS::Security;
+  CryptoKeyFactory& kef = dynamic_cast<CryptoKeyFactory&>(get_inst());
+  CryptoKeyExchange& kex = dynamic_cast<CryptoKeyExchange&>(get_inst());
+
+  DDS::PropertySeq no_properties;
+  EndpointSecurityAttributes esa = {{false, false, false, false}, true, false, false, 0, no_properties};
+  SecurityException ex;
+  const DatareaderCryptoHandle drch = kef.register_local_datareader(0, no_properties, esa, ex);
+  const ParticipantCryptoHandle rpch = kef.register_matched_remote_participant(0, 1, 2, &shared_secret_, ex);
+  const DatawriterCryptoHandle dwch = kef.register_matched_remote_datawriter(drch, rpch, &shared_secret_, ex);
+
+  const DatawriterCryptoHandle peer_dwch = kef.register_local_datawriter(0, no_properties, esa, ex);
+  DatawriterCryptoTokenSeq dwct;
+  kex.create_local_datawriter_crypto_tokens(dwct, peer_dwch, 99, ex);
+  kex.set_remote_datawriter_crypto_tokens(drch, dwch, dwct, ex);
 
   init_buffer(294, 17);
-
-  EXPECT_TRUE(get_inst().decode_serialized_payload(output, get_buffer(), inline_qos, 1, 2, ex));
+  DDS::OctetSeq output;
+  DDS::OctetSeq inline_qos;
+  EXPECT_TRUE(get_inst().decode_serialized_payload(output, get_buffer(), inline_qos, drch, dwch, ex));
   EXPECT_EQ(get_buffer(), output);
 }
 

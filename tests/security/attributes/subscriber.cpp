@@ -31,12 +31,7 @@
 #include "SecurityAttributesMessageTypeSupportImpl.h"
 #include "Args.h"
 
-const char DDSSEC_PROP_IDENTITY_CA[] = "dds.sec.auth.identity_ca";
-const char DDSSEC_PROP_IDENTITY_CERT[] = "dds.sec.auth.identity_certificate";
-const char DDSSEC_PROP_IDENTITY_PRIVKEY[] = "dds.sec.auth.private_key";
-const char DDSSEC_PROP_PERM_CA[] = "dds.sec.access.permissions_ca";
-const char DDSSEC_PROP_PERM_GOV_DOC[] = "dds.sec.access.governance";
-const char DDSSEC_PROP_PERM_DOC[] = "dds.sec.access.permissions";
+#include <dds/DCPS/security/framework/Properties.h>
 
 #define CLEAN_ERROR_RETURN(stuff, val) \
 do { \
@@ -90,12 +85,12 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args) {
 
     if (TheServiceParticipant->get_security()) {
       DDS::PropertySeq& props = part_qos.property.value;
-      append(props, DDSSEC_PROP_IDENTITY_CA, my_args.auth_ca_file_.data());
-      append(props, DDSSEC_PROP_IDENTITY_CERT, my_args.id_cert_file_.data());
-      append(props, DDSSEC_PROP_IDENTITY_PRIVKEY, my_args.id_key_file_.data());
-      append(props, DDSSEC_PROP_PERM_CA, my_args.perm_ca_file_.data());
-      append(props, DDSSEC_PROP_PERM_GOV_DOC, my_args.governance_file_.data());
-      append(props, DDSSEC_PROP_PERM_DOC, my_args.permissions_file_.data());
+      append(props, DDS::Security::Properties::AuthIdentityCA, my_args.auth_ca_file_.data());
+      append(props, DDS::Security::Properties::AuthIdentityCertificate, my_args.id_cert_file_.data());
+      append(props, DDS::Security::Properties::AuthPrivateKey, my_args.id_key_file_.data());
+      append(props, DDS::Security::Properties::AccessPermissionsCA, my_args.perm_ca_file_.data());
+      append(props, DDS::Security::Properties::AccessGovernance, my_args.governance_file_.data());
+      append(props, DDS::Security::Properties::AccessPermissions, my_args.permissions_file_.data());
     }
 
     // Create DomainParticipant

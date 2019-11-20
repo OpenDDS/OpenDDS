@@ -78,7 +78,7 @@ public:
   /// Our DataLink has been requested by some particular
   /// TransportClient to remove the supplied sample
   /// (basically, an "unsend" attempt) from this strategy object.
-  RemoveResult remove_sample(const DataSampleElement* sample, void* context);
+  RemoveResult remove_sample(const DataSampleElement* sample);
 
   void remove_all_msgs(RepoId pub_id);
 
@@ -139,6 +139,12 @@ public:
 
   void deliver_ack_request(TransportQueueElement* element);
 
+  /// Put the maximum UDP payload size here so that it can be shared by all
+  /// UDP-based transports.  This is the worst-case (conservative) value for
+  /// UDP/IPv4.  If there are no IP options, or if IPv6 is used, it could
+  /// actually be a little larger.
+  static const size_t UDP_MAX_MESSAGE_SIZE = 65466;
+
 protected:
 
   TransportSendStrategy(std::size_t id,
@@ -173,12 +179,6 @@ protected:
   /// fragment larger messages.  This fragmentation and
   /// reassembly will be transparent to the user.
   virtual size_t max_message_size() const;
-
-  /// Put the maximum UDP payload size here so that it can be shared by all
-  /// UDP-based transports.  This is the worst-case (conservative) value for
-  /// UDP/IPv4.  If there are no IP options, or if IPv6 is used, it could
-  /// actually be a little larger.
-  static const size_t UDP_MAX_MESSAGE_SIZE = 65466;
 
   /// Set graceful disconnecting flag.
   void set_graceful_disconnecting(bool flag);
@@ -238,13 +238,14 @@ private:
   /// Form an IOV and call the send_bytes() template method.
   ssize_t do_send_packet(const ACE_Message_Block* packet, int& bp);
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   /// Derived classes can override to transform the data right before it's
   /// sent.  If the returned value is non-NULL it will be sent instead of
-  /// sending the parameter.
-  virtual ACE_Message_Block* pre_send_packet(const ACE_Message_Block*)
+  /// sending the parameter.  If the returned value is NULL the original
+  /// message will be dropped.
+  virtual ACE_Message_Block* pre_send_packet(const ACE_Message_Block* m)
   {
-    return 0;
+    return m->duplicate();
   }
 #endif
 
@@ -297,8 +298,7 @@ public:
 protected:
   /// Implement framework chain visitations to remove a sample.
   virtual RemoveResult do_remove_sample(const RepoId& pub_id,
-    const TransportQueueElement::MatchCriteria& criteria,
-    void* context);
+    const TransportQueueElement::MatchCriteria& criteria);
 
 private:
 

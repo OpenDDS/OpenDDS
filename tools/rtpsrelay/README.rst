@@ -41,58 +41,59 @@ have the following objectives:
 
 * Scalability - the RTPS relay should be able to scale horizontally.
 * Efficiency - The relay should not forward messages to participants
-  that are not interested in those messages.  The final answer to this
-  problem is to make the relay partcipate in discovery and learn the
-  associations between readers and writers.  In the interim, we will
-  allow each participant to declare a list of groups in which it will
-  participate.  Any RTPS message sent by a group member will be
-  forwarded to all of the members in the group.
+  that are not interested in those messages.
 
 Architecture
 ============
 
 The following diagram shows the major components of an RtpsRelay::
 
-    +-------------------------+   +-------------------------+
-    | RtpsRelay               |   | RtpsRelay               |
-    |                         |   |                         |
-    |  +-------------------+  |   |  +-------------------+  |
-    |  | Relay Participant |<-+---+->| Relay Participant |  |
-    |  +-------------------+  |   |  +-------------------+  |
-    |                         |   |                         |
-    |   +-----------------+   |   |   +-----------------+   |
-    |   | Horizontal Port |<--+---+-->| Horizontal Port |   |
-    |   +-----------------+   |   |   +-----------------+   |
-    |                         |   |                         |
-    |    +---------------+    |   |    +---------------+    |
-    |    | Vertical Port |    |   |    | Vertical Port |    |
-    |    +---------------+    |   |    +---------------+    |
-    |            ^            |   |            ^            |
-    |            |            |   |            |            |
-    +------------+------------+   +------------+------------+
-                 |                             |
-          +------+------+               +------+------+
-          | Participant |               | Participant |
-          +-------------+               +-------------+
+    +-----------------------------------------------------+   +-----------------------------------------------------+
+    | RtpsRelay                                           |   | RtpsRelay                                           |
+    |                                                     |   |                                                     |
+    |                              +-------------------+  |   |                              +-------------------+  |
+    |                              | Relay Participant |<-+---+----------------------------->| Relay Participant |  |
+    |                              +-------------------+  |   |                              +-------------------+  |
+    |                                                     |   |                                                     |
+    |                               +-----------------+   |   |                               +-----------------+   |
+    |                               | Horizontal Port |<--+---+------------------------------>| Horizontal Port |   |
+    |                               +-----------------+   |   |                               +-----------------+   |
+    |                                                     |   |                                                     |
+    | +-------------------------+    +---------------+    |   | +-------------------------+    +---------------+    |
+    | | Application Participant |<-->| Vertical Port |    |   | | Application Participant |<-->| Vertical Port |    |
+    | +-------------------------+    +---------------+    |   | +-------------------------+    +---------------+    |
+    |                                        ^            |   |                                        ^            |
+    |                                        |            |   |                                        |            |
+    +----------------------------------------+------------+   +----------------------------------------+------------+
+                                             |                                                         |
+                                      +------+------+                                           +------+------+
+                                      | Participant |                                           | Participant |
+                                      +-------------+                                           +-------------+
 
 * Relay Participant - A DDS Participant that the relays use to
-  exchange information about participant groups and addresses.
+  exchange information about readers and writers.
 * Horizontal Port - A UDP port that the relays use to send and receive
   RTPS messages with other relays.
 * Vertical Port - A UDP port that the relays use to send and receive
   RTPS messages with participants.
+* Application Participant - A DDS Participant in the application's
+  domain.  This allows the relay to participate in (secure) discovery.
+  An Application Participant only communicates with the participants that
+  use the corresponding relay.
 
-A participant should be associated with a single relay.  When a
-participant sends a message to a relay, a couple of things happen.
-First, if the participant is behind a NAT, then the NAT bindings are
-updated to allow traffic from the relay back to the participant.
-Second, the relay records the public address of the participant and
-its group information (if an SPDP message).  It shares the group and
-address information with the other relays via a DDS topic.  Third, the
-relay makes a forwarding decision that might involve sending the
-message to other participants that are using the relay in question or
-forwarding the message to other relays because they have participants
-that should receive the message.
+A participant should use a single relay.  When a participant sends a
+message to a relay, a couple of things happen.  First, if the
+participant is behind a NAT, then the NAT bindings are updated to
+allow traffic from the relay back to the participant.  Second, the
+relay records the public address of the participant.  Third, it
+forwards messages to the Application Participant so that that relay
+can discover the readers and writers in the participant.  Once a relay
+discovers this information, it shares it with the other relays via DDS
+topics in the Relay Participant.  Fourth, the relay makes a forwarding
+decision that might involve sending the message to other participants
+that are using the relay in question or forwarding the message to
+other relays because they have participants that should receive the
+message.
 
 If a relay receives a message from another relay, it forwards the
 message to any participants that it serves that should be recipients
@@ -124,14 +125,13 @@ Arguments
   use for the vertical SPDP port.  The SEDP port will listen at port +
   1 and the data port will listen at port + 2.  The default port
   is 444.
-* :code:`-Domain` - The DDS domain to use for the Relay Participant.
+* :code:`-RelayDomain` - The DDS domain to use for the Relay Participant.
   The default is 0.
-* :code:`-RenewAfter` - Time in seconds after which the relay will
-  renew group and routing information for an active participant.  The
-  default is 60 seconds.
+* :code:`-ApplicationDomain` - The DDS domain to use for Application Participant.
+  The default is 1.
 * :code:`-Lifespan` - Time in seconds after which the relay will purge
-  group and routing information for an inactive participant.  The
-  default is 300 seconds.
+  IP:port information for an inactive participant.  The default is 60
+  seconds.
 
 Participant Configuration
 =========================
@@ -141,10 +141,6 @@ To use a relay, a participant must use the following configuration options:
 * :code:`SpdpRtpsRelayAddress` - Vertical SPDP IP:port of an RtpsRelay.
 * :code:`SedpRtpsRelayAddress` - Vertical SEDP IP:port of an RtpsRelay.
 * :code:`DataRtpsRelayAddress` - Vertical data IP:port of an RtpsRelay.
-
-A participant must declare its groups via a comma separated list of
-strings stored in a DDS Security property with the key
-"OpenDDS.RtpsRelay.Groups".
 
 A participant may change the period for sending empty RTPS messages
 for readers by adjusting the :code:`heartbeat_period` configuration
@@ -181,4 +177,3 @@ Limitations and Future Work
 * Secure SPDP messages.  The routing decisions made by the relays are
   driven by the groups declared in SPDP messages.  These messages are
   unencrypted and unauthenticated.
-* Make the relay participate in discovery to optimize network traffic.

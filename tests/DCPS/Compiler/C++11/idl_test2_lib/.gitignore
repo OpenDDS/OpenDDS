@@ -1,5 +1,3 @@
-/BazDef_TS.cpp
-/BazDef_TS.hpp
 /BazDefC.h
 /BazDefTypeSupport.idl
 /BazDefTypeSupportC.cpp
@@ -8,8 +6,6 @@
 /BazDefTypeSupportImpl.cpp
 /BazDefTypeSupportImpl.h
 /BazDefTypeSupportS.h
-/FooDef_TS.cpp
-/FooDef_TS.hpp
 /FooDefC.h
 /FooDefTypeSupport.idl
 /FooDefTypeSupportC.cpp

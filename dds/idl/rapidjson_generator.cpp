@@ -55,6 +55,8 @@ namespace {
         return "Int64";
       case AST_PredefinedType::PT_ulonglong:
         return "Uint64";
+      case AST_PredefinedType::PT_float:
+        return "Float";
       default:
         return "Double";
       }
@@ -90,7 +92,8 @@ namespace {
           array = "gen_" + underscores + "_names";
         strm <<
           "  {\n"
-          "    std::string str(" << src << " >= " << array << "_size ? \"<<invalid>>\" : " << array << "[static_cast<int>(" << src << ")]);\n" <<
+          "    const size_t index = static_cast<size_t>(" << src << ");\n"
+          "    std::string str(index >= " << array << "_size ? \"<<invalid>>\" : " << array << "[index]);\n" <<
           "    " << tgt_str << op_pre << "str.c_str(), " << alloc << op_post << ";\n"
           "  }\n";
         return;
@@ -264,17 +267,22 @@ namespace {
           dds_generator::scoped_helper(type->name(), "_"),
           temp_type = scoped(type->name()),
           temp_name = "temp_" + underscores;
+        const bool octet_type = (pt == AST_PredefinedType::PT_octet);
         strm <<
           ip << "if (val.IsString()) {\n" <<
           ip << "  std::string ss(val.GetString());\n" <<
           ip << "  std::istringstream iss(ss);\n" <<
-          ip << "  " << (pt == AST_PredefinedType::PT_octet ? "uint16_t" : temp_type.c_str()) << " " << temp_name << ";\n" <<
+          ip << "  " << (octet_type ? "uint16_t" : temp_type.c_str()) << " " << temp_name << ";\n" <<
           ip << "  if (ss.find(\"0x\") != std::string::npos) {\n" <<
           ip << "    iss >> std::hex >> " << temp_name << ";\n" <<
           ip << "  } else {\n" <<
           ip << "    iss >> " << temp_name << ";\n" <<
           ip << "  }\n" <<
-          ip << "  " << propName << assign_prefix << temp_name << assign_suffix << ";\n" <<
+          ip << "  " << propName << assign_prefix;
+        if (octet_type) {
+          strm << "static_cast<" << temp_type.c_str() << ">(";
+        }
+        strm << temp_name << (octet_type ? ")" : "") << assign_suffix << ";\n" <<
           ip << "}\n" <<
           ip << "if (val.IsNumber()) {\n" <<
           ip << "  " << propName << assign_prefix << "val.Get" << rapidJsonType << "()" << assign_suffix << ";\n" <<
@@ -392,35 +400,8 @@ namespace {
                  field->field_type(), fieldName.c_str());
     }
   };
-}
 
-bool rapidjson_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
-                              const std::vector<AST_Field*>& fields,
-                              AST_Type::SIZE_TYPE, const char*)
-{
-  gen_includes();
-  {
-    NamespaceGuard ng;
-    const std::string clazz = scoped(name);
-    {
-      Function ctv("copyToRapidJson", "void");
-      ctv.addArg("src", "const " + clazz + '&');
-      ctv.addArg("dst", "rapidjson::Value&");
-      ctv.addArg("alloc", "rapidjson::Value::AllocatorType&");
-      ctv.endArgs();
-      std::for_each(fields.begin(), fields.end(), gen_field_copyto("dst", "alloc", "src"));
-    }
-    {
-      Function vtc("copyFromRapidJson", "void");
-      vtc.addArg("src", "const rapidjson::Value&");
-      vtc.addArg("out", clazz + '&');
-      vtc.endArgs();
-      std::for_each(fields.begin(), fields.end(),
-                    gen_field_copyfrom("out", "src"));
-    }
-  }
-
-  if (idl_global->is_dcps_type(name)) {
+  void gen_type_support(UTL_ScopedName* name) {
     be_global->add_include("dds/DCPS/RapidJsonTypeConverter.h",
                            BE_GlobalData::STREAM_CPP);
     ScopedNamespaceGuard cppGuard(name, be_global->impl_);
@@ -455,6 +436,37 @@ bool rapidjson_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
       "  };\n"
       "};\n\n" <<
       ts_rj << "::Initializer init_tsrapidjson_" << lname << ";\n";
+  }
+} // namespace
+
+bool rapidjson_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
+                              const std::vector<AST_Field*>& fields,
+                              AST_Type::SIZE_TYPE, const char*)
+{
+  gen_includes();
+  {
+    NamespaceGuard ng;
+    const std::string clazz = scoped(name);
+    {
+      Function ctv("copyToRapidJson", "void");
+      ctv.addArg("src", "const " + clazz + '&');
+      ctv.addArg("dst", "rapidjson::Value&");
+      ctv.addArg("alloc", "rapidjson::Value::AllocatorType&");
+      ctv.endArgs();
+      std::for_each(fields.begin(), fields.end(), gen_field_copyto("dst", "alloc", "src"));
+    }
+    {
+      Function vtc("copyFromRapidJson", "void");
+      vtc.addArg("src", "const rapidjson::Value&");
+      vtc.addArg("out", clazz + '&');
+      vtc.endArgs();
+      std::for_each(fields.begin(), fields.end(),
+                    gen_field_copyfrom("out", "src"));
+    }
+  }
+
+  if (idl_global->is_dcps_type(name) || be_global->is_topic_type(node)) {
+    gen_type_support(name);
   }
   return true;
 }
@@ -587,7 +599,7 @@ namespace {
   }
 }
 
-bool rapidjson_generator::gen_union(AST_Union*, UTL_ScopedName* name,
+bool rapidjson_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
                              const std::vector<AST_UnionBranch*>& branches,
                              AST_Type* discriminator, const char* /*repoid*/)
 {
@@ -610,6 +622,9 @@ bool rapidjson_generator::gen_union(AST_Union*, UTL_ScopedName* name,
     vtc.endArgs();
     gen_copyfrom("out", "src", discriminator, "_d", false, true);
     generateSwitchForUnion("out._d()", branchGenFrom, branches, discriminator, "", "", clazz.c_str(), false, false);
+  }
+  if (be_global->is_topic_type(node)) {
+    gen_type_support(name);
   }
   return true;
 }

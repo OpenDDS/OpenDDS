@@ -112,7 +112,7 @@ static ACE_TString config_fname(ACE_TEXT(""));
 
 static const ACE_TCHAR DEFAULT_REPO_IOR[] = ACE_TEXT("file://repo.ior");
 
-static const ACE_CString DEFAULT_PERSISTENT_DATA_DIR = "OpenDDS-durable-data-dir";
+static const char DEFAULT_PERSISTENT_DATA_DIR[] = "OpenDDS-durable-data-dir";
 
 static const ACE_TCHAR COMMON_SECTION_NAME[] = ACE_TEXT("common");
 static const ACE_TCHAR DOMAIN_SECTION_NAME[] = ACE_TEXT("domain");
@@ -162,7 +162,7 @@ Service_Participant::Service_Participant()
 #ifndef OPENDDS_SAFETY_PROFILE
     ORB_argv_(false /*substitute_env_args*/),
 #endif
-    reactor_owner_(ACE_OS::NULL_thread),
+    reactor_task_(false),
     defaultDiscovery_(DDS_DEFAULT_DISCOVERY_METHOD),
     n_chunks_(DEFAULT_NUM_CHUNKS),
     association_chunk_multiplier_(DEFAULT_CHUNK_MULTIPLIER),
@@ -185,7 +185,6 @@ Service_Participant::Service_Participant()
     federation_initial_backoff_seconds_(DEFAULT_FEDERATION_INITIAL_BACKOFF_SECONDS),
     federation_backoff_multiplier_(DEFAULT_FEDERATION_BACKOFF_MULTIPLIER),
     federation_liveliness_(DEFAULT_FEDERATION_LIVELINESS),
-    schedulerQuantum_(ACE_Time_Value::zero),
 #if defined OPENDDS_SAFETY_PROFILE && defined ACE_HAS_ALLOC_HOOKS
     pool_size_(1024*1024*16),
     pool_granularity_(8),
@@ -197,7 +196,6 @@ Service_Participant::Service_Participant()
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
     persistent_data_dir_(DEFAULT_PERSISTENT_DATA_DIR),
 #endif
-    pending_timeout_(ACE_Time_Value::zero),
     bidir_giop_(true),
     monitor_enabled_(false),
     shut_down_(false),
@@ -225,33 +223,22 @@ Service_Participant::instance()
   return ACE_Singleton<Service_Participant, ACE_SYNCH_MUTEX>::instance();
 }
 
-int
-Service_Participant::ReactorTask::svc()
-{
-  Service_Participant* sp = instance();
-  sp->reactor_->owner(ACE_Thread_Manager::instance()->thr_self());
-  sp->reactor_owner_ = ACE_Thread_Manager::instance()->thr_self();
-  this->wait_for_startup();
-  sp->reactor_->run_reactor_event_loop();
-  return 0;
-}
-
 ACE_Reactor_Timer_Interface*
-Service_Participant::timer() const
+Service_Participant::timer()
 {
-  return reactor_.get();
+  return reactor_task_.get_reactor();
 }
 
 ACE_Reactor*
-Service_Participant::reactor() const
+Service_Participant::reactor()
 {
-  return reactor_.get();
+  return reactor_task_.get_reactor();
 }
 
 ACE_thread_t
 Service_Participant::reactor_owner() const
 {
-  return reactor_owner_;
+  return reactor_task_.get_reactor_owner();
 }
 
 void
@@ -274,11 +261,7 @@ Service_Participant::shutdown()
 
       domainRepoMap_.clear();
 
-      if (reactor_) {
-        reactor_->end_reactor_event_loop();
-        reactor_task_.wait();
-        reactor_.reset();
-      }
+      reactor_task_.stop();
 
       discoveryMap_.clear();
 
@@ -422,19 +405,7 @@ Service_Participant::get_domain_participant_factory(int &argc,
 
       dp_factory_servant_ = make_rch<DomainParticipantFactoryImpl>();
 
-      if (!reactor_)
-        reactor_.reset(new ACE_Reactor(new ACE_Select_Reactor, true));
-
-      reactor_task_.thr_mgr(ACE_Thread_Manager::instance());
-
-      if (reactor_task_.activate(THR_NEW_LWP | THR_JOINABLE) == -1) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("ERROR: Service_Participant::get_domain_participant_factory, ")
-                   ACE_TEXT("Failed to activate the reactor task.\n")));
-        return DDS::DomainParticipantFactory::_nil();
-      }
-
-      reactor_task_.wait_for_startup();
+      reactor_task_.open(0);
 
       if (this->monitor_enabled_) {
 #if !defined(ACE_AS_STATIC_LIBS)
@@ -554,7 +525,7 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
 #endif
 
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSPendingTimeout"))) != 0) {
-      this->pending_timeout_ = ACE_OS::atoi(currentArg);
+      pending_timeout_ = TimeDuration(ACE_OS::atoi(currentArg));
       arg_shifter.consume_arg();
       got_pending_timeout = true;
 
@@ -830,7 +801,7 @@ Service_Participant::initializeScheduling()
       ace_scheduler,
       ACE_Sched_Params::priority_min(ace_scheduler),
       ACE_SCOPE_THREAD,
-      this->schedulerQuantum_);
+      schedulerQuantum_.value());
 
     if (ACE_OS::sched_params(params) != 0) {
       if (ACE_OS::last_error() == EPERM) {
@@ -1073,15 +1044,14 @@ Service_Participant::repository_lost(Discovery::RepoKey key)
   }
 
   // Calculate the bounding end time for attempts.
-  ACE_Time_Value recoveryFailedTime
-  = ACE_OS::gettimeofday()
-    + ACE_Time_Value(this->federation_recovery_duration(), 0);
+  const TimeDuration td(federation_recovery_duration());
+  const MonotonicTimePoint recoveryFailedTime(MonotonicTimePoint::now() + td);
 
   // Backoff delay.
   int backoff = this->federation_initial_backoff_seconds();
 
   // Keep trying until the total recovery time specified is exceeded.
-  while (recoveryFailedTime > ACE_OS::gettimeofday()) {
+  while (recoveryFailedTime > MonotonicTimePoint::now()) {
 
     // Wrap to the beginning at the end of the list.
     if (current == this->discoveryMap_.end()) {
@@ -1146,7 +1116,7 @@ Service_Participant::repository_lost(Discovery::RepoKey key)
 
   // If we reach here, we have exceeded the total recovery time
   // specified.
-  ACE_ASSERT(recoveryFailedTime == ACE_Time_Value::zero);
+  OPENDDS_ASSERT(recoveryFailedTime.is_zero());
 }
 
 void
@@ -1624,7 +1594,7 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
     } else {
       int timeout = 0;
       GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSPendingTimeout"), timeout, int)
-      this->pending_timeout_ = timeout;
+      pending_timeout_ = TimeDuration(timeout);
     }
 
     if (got_publisher_content_filter) {
@@ -1708,8 +1678,9 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
 
     GET_CONFIG_VALUE(cf, sect, ACE_TEXT("scheduler_slice"), usec, suseconds_t)
 
-    if (usec > 0)
-      this->schedulerQuantum_.usec(usec);
+    if (usec > 0) {
+      schedulerQuantum_ = TimeDuration(0, usec);
+    }
   }
 
   return 0;
@@ -2029,25 +2000,23 @@ Service_Participant::delete_replayer(Replayer_ptr replayer)
   return ret;
 }
 
-DDS::Topic_ptr
-Service_Participant::create_typeless_topic(
+DDS::Topic_ptr Service_Participant::create_typeless_topic(
   DDS::DomainParticipant_ptr participant,
-  const char * topic_name,
-  const char * type_name,
+  const char* topic_name,
+  const char* type_name,
   bool type_has_keys,
-  const DDS::TopicQos & qos,
+  const DDS::TopicQos& qos,
   DDS::TopicListener_ptr a_listener,
   DDS::StatusMask mask)
 {
   DomainParticipantImpl* participant_servant = dynamic_cast<DomainParticipantImpl*>(participant);
-  if (! participant_servant) {
+  if (!participant_servant) {
     return 0;
   }
   return participant_servant->create_typeless_topic(topic_name, type_name, type_has_keys, qos, a_listener, mask);
 }
 
-void
-Service_Participant::default_configuration_file(const ACE_TCHAR* path)
+void Service_Participant::default_configuration_file(const ACE_TCHAR* path)
 {
   default_configuration_file_ = path;
 }

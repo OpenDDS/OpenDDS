@@ -7,6 +7,8 @@
 
 #include "ts_generator.h"
 #include "be_extern.h"
+#include "be_util.h"
+#include "topic_keys.h"
 
 #include "utl_identifier.h"
 
@@ -21,12 +23,7 @@
 namespace {
   std::string read_template(const char* prefix)
   {
-    const char* dds_root = ACE_OS::getenv("DDS_ROOT");
-    if (!dds_root) {
-      ACE_ERROR((LM_ERROR, "The environment variable DDS_ROOT must be set.\n"));
-      BE_abort();
-    }
-    std::string path = dds_root;
+    std::string path = be_util::dds_root();
     path.append("/dds/idl/");
     path.append(prefix);
     path.append("Template.txt");
@@ -55,7 +52,6 @@ namespace {
       be_global->add_include(includes[i], whichStream);
     }
   }
-
 }
 
 ts_generator::ts_generator()
@@ -63,13 +59,40 @@ ts_generator::ts_generator()
 {
 }
 
-bool ts_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
-  const std::vector<AST_Field*>&, AST_Type::SIZE_TYPE, const char*)
+bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
 {
-  IDL_GlobalData::DCPS_Data_Type_Info* info = idl_global->is_dcps_type(name);
+  AST_Structure* struct_node = 0;
+  AST_Union* union_node = 0;
+  if (!node || !name) {
+    return false;
+  }
+  if (node->node_type() == AST_Decl::NT_struct) {
+    struct_node = dynamic_cast<AST_Structure*>(node);
+  } else if (node->node_type() == AST_Decl::NT_union) {
+    union_node = dynamic_cast<AST_Union*>(node);
+  } else {
+    return false;
+  }
 
-  if (!info) {
-    // no #pragma DCPS_DATA_TYPE, so nothing to generate
+  if (!struct_node && !union_node) {
+    idl_global->err()->misc_error(
+      "Could not cast AST Nodes to valid types", node);
+    return false;
+  }
+
+  size_t key_count = 0;
+  if (struct_node) {
+    IDL_GlobalData::DCPS_Data_Type_Info* info = idl_global->is_dcps_type(name);
+    if (be_global->is_topic_type(struct_node)) {
+      key_count = TopicKeys(struct_node).count();
+    } else if (info) {
+      key_count = info->key_list_.size();
+    } else {
+      return true;
+    }
+  } else if (be_global->is_topic_type(union_node)) {
+    key_count = be_global->has_key(union_node) ? 1 : 0;
+  } else {
     return true;
   }
 
@@ -125,8 +148,6 @@ bool ts_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
   }
   be_global->header_ << be_global->versioning_end() << "\n";
 
-  const bool has_keys = info->key_list_.is_empty();
-
   be_global->header_ <<
     "OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL\n"
     "namespace OpenDDS { namespace DCPS {\n"
@@ -141,7 +162,8 @@ bool ts_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
     "  typedef " << cxxName << "_OpenDDS_KeyLessThan LessThanType;\n"
     "\n"
     "  static const char* type_name () { return \"" << cxxName << "\"; }\n"
-    "  static bool gen_has_key () { return " << (has_keys ? "false" : "true") << "; }\n"
+    "  static bool gen_has_key () { return " << (key_count ? "true" : "false") << "; }\n"
+    "  static size_t key_count () { return " << key_count << "; }\n"
     "\n"
     "  static size_t gen_max_marshaled_size(const MessageType& x, bool align) { return ::OpenDDS::DCPS::gen_max_marshaled_size(x, align); }\n"
     "  static void gen_find_size(const MessageType& arr, size_t& size, size_t& padding) { ::OpenDDS::DCPS::gen_find_size(arr, size, padding); }\n"
@@ -236,29 +258,37 @@ bool ts_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
   be_global->impl_ << be_global->versioning_end() << "\n";
 
   if (be_global->face_ts()) {
-    face_ts_generator::generate(name);
+    if (node->node_type() == AST_Decl::NT_struct) {
+      face_ts_generator::generate(name);
+    } else {
+      idl_global->err()->misc_error(
+        "Generating FACE type support for Union topic types is not supported", node);
+      return false;
+    }
   }
 
   return true;
 }
 
-bool ts_generator::gen_union(AST_Union*, UTL_ScopedName* name,
+bool ts_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
+  const std::vector<AST_Field*>&, AST_Type::SIZE_TYPE, const char*)
+{
+  return generate_ts(node, name);
+}
+
+bool ts_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
   const std::vector<AST_UnionBranch*>&, AST_Type*, const char*)
 {
-  if (idl_global->is_dcps_type(name)) {
-    std::cerr << "ERROR: union " << scoped(name) << " can not be used as a "
-      "DCPS_DATA_TYPE (only structs can be Topic types)" << std::endl;
-    return false;
-  }
-  return true;
+  return generate_ts(node, name);
 }
 
 namespace java_ts_generator {
 
   /// called directly by dds_visitor::visit_structure() if -Wb,java
-  void generate(UTL_ScopedName* name) {
-    if (idl_global->is_dcps_type(name) == 0) {
-      // no #pragma DCPS_DATA_TYPE, so nothing to generate
+  void generate(AST_Structure* node) {
+    UTL_ScopedName* name = node->name();
+
+    if (!(idl_global->is_dcps_type(name) || be_global->is_topic_type(node))) {
       return;
     }
 

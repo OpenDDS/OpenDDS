@@ -415,8 +415,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       dr_qos.user_data.value[0] = fromhex(reader_id, 0);
       dr_qos.user_data.value[1] = fromhex(reader_id, 1);
       dr_qos.user_data.value[2] = fromhex(reader_id, 2);
-      dr_qos.reliability.kind = reliable ? DDS::RELIABLE_RELIABILITY_QOS : DDS::BEST_EFFORT_RELIABILITY_QOS;
     }
+    dr_qos.reliability.kind = reliable ? DDS::RELIABLE_RELIABILITY_QOS : DDS::BEST_EFFORT_RELIABILITY_QOS;
+
     DDS::DataReader_var reader =
       subscriber->create_datareader(topic,
                                     dr_qos,

@@ -1,17 +1,14 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
 module Messenger {
 
-#pragma DCPS_DATA_TYPE "Messenger::Message"
-#pragma DCPS_DATA_KEY "Messenger::Message subject_id"
-
+  @topic
   struct Message {
     string text;
+    @key
     long   subject_id;
     long   count;
   };

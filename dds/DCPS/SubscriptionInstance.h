@@ -43,9 +43,9 @@ public:
                        const DDS::DataReaderQos& qos,
                        ACE_Recursive_Thread_Mutex& lock,
                        DDS::InstanceHandle_t handle)
-    : instance_state_(reader, lock, handle),
+    : instance_state_(make_rch<InstanceState>(reader, ref(lock), handle)),
       last_sequence_(),
-      rcvd_samples_(&instance_state_),
+      rcvd_samples_(instance_state_),
       instance_handle_(handle),
       deadline_timer_id_(-1)
   {
@@ -67,7 +67,7 @@ public:
   }
 
   /// Instance state for this instance
-  InstanceState instance_state_ ;
+  InstanceState_rch instance_state_;
 
   /// Sequence number of the move recent data sample received
   SequenceNumber last_sequence_ ;
@@ -81,13 +81,13 @@ public:
   /// The instance handle for the registered object
   DDS::InstanceHandle_t instance_handle_;
 
-  ACE_Time_Value   last_sample_tv_;
+  MonotonicTimePoint last_sample_tv_;
 
-  ACE_Time_Value   cur_sample_tv_;
+  MonotonicTimePoint cur_sample_tv_;
 
-  long             deadline_timer_id_;
+  long deadline_timer_id_;
 
-  ACE_Time_Value   last_accepted_;
+  MonotonicTimePoint last_accepted_;
 };
 
 typedef RcHandle<SubscriptionInstance> SubscriptionInstance_rch;

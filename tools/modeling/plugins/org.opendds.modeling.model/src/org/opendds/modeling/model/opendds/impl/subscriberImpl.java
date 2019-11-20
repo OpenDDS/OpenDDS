@@ -42,8 +42,6 @@ import org.opendds.modeling.model.qos.PresentationQosPolicy;
  * <!-- begin-user-doc -->
  * An implementation of the model object '<em><b>subscriber</b></em>'.
  * <!-- end-user-doc -->
- * <p>
- * </p>
  *
  * @generated
  */
@@ -72,8 +70,8 @@ public class subscriberImpl extends SubscriberImpl implements subscriber {
 	 */
 	@Override
 	public EList<org.opendds.modeling.model.qos.QosPolicy> getPolicies() {
-		return com.ociweb.emf.util.ReferencesFinder.findInstancesOf(
-				org.opendds.modeling.model.qos.QosPolicy.class, this);
+		return com.ociweb.emf.util.ReferencesFinder.findInstancesOf(org.opendds.modeling.model.qos.QosPolicy.class,
+				this);
 	}
 
 } //subscriberImpl

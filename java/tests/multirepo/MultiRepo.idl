@@ -7,9 +7,8 @@
 
 module MultiRepo {
 
-#pragma DCPS_DATA_TYPE "MultiRepo::Message"
-
-   struct Message {
-       string text;
-   };
+  @topic
+  struct Message {
+    string text;
+  };
 };

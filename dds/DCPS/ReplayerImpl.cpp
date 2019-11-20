@@ -102,8 +102,7 @@ ReplayerImpl::cleanup()
 {
 
   //     // Unregister all registered instances prior to deletion.
-  //     // DDS::Time_t source_timestamp = time_value_to_time(ACE_OS::gettimeofday());
-  //     // this->unregister_instances(source_timestamp);
+  //     // this->unregister_instances(SystemTimePoint::now().to_dds_time());
   //
   //     // CORBA::String_var topic_name = this->get_Atopic_name();
   {
@@ -823,12 +822,6 @@ ReplayerImpl::update_subscription_params(const RepoId&         readerId,
 {
   ACE_UNUSED_ARG(readerId);
   ACE_UNUSED_ARG(params);
-}
-
-void
-ReplayerImpl::inconsistent_topic()
-{
-  topic_servant_->inconsistent_topic();
 }
 
 bool

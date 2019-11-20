@@ -40,8 +40,7 @@ public final class OpenDDSEditPlugin extends EMFPlugin {
 	 * @generated NOT
 	 */
 	public OpenDDSEditPlugin() {
-		super(new ResourceLocator[] { Plugin.INSTANCE
-				.getPluginResourceLocator() });
+		super(new ResourceLocator[] { Plugin.INSTANCE.getPluginResourceLocator() });
 	}
 
 	/**

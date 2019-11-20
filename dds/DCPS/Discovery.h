@@ -15,6 +15,7 @@
 
 #include "dds/DCPS/DataReaderCallbacks.h"
 #include "dds/DCPS/DataWriterCallbacks.h"
+#include "dds/DCPS/TopicCallbacks.h"
 #include "dds/DdsDcpsSubscriptionC.h"
 
 #include "dds/DCPS/PoolAllocator.h"
@@ -128,10 +129,12 @@ public:
     const char* topicName,
     const char* dataTypeName,
     const DDS::TopicQos& qos,
-    bool hasDcpsKey) = 0;
+    bool hasDcpsKey,
+    TopicCallbacks* topic_callbacks) = 0;
 
   virtual TopicStatus find_topic(
     DDS::DomainId_t domainId,
+    const RepoId& participantId,
     const char* topicName,
     CORBA::String_out dataTypeName,
     DDS::TopicQos_out qos,

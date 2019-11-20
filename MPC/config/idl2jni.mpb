@@ -47,4 +47,8 @@ project: taolib_with_idl, portableserver, java, dds_macros {
     }
   }
 
+  verbatim(gnuace, bottom) {
+    $(filter %.class, $(GENERATED_DIRTY)): $(filter %.java, $(GENERATED_DIRTY))
+  }
+
 }

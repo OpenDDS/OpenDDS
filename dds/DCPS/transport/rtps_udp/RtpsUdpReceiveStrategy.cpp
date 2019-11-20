@@ -16,21 +16,26 @@
 
 #include "ace/Reactor.h"
 
+#include <algorithm>
+#include <cstring>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
 
-  RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link, const GuidPrefix_t& local_prefix)
+RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link, const GuidPrefix_t& local_prefix)
   : link_(link)
   , last_received_()
   , recvd_sample_(0)
   , receiver_(local_prefix)
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   , secure_sample_(0)
+  , encoded_rtps_(false)
+  , encoded_submsg_(false)
 #endif
 {
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   secure_prefix_.smHeader.submessageId = SUBMESSAGE_NONE;
 #endif
 }
@@ -94,8 +99,8 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
       ICE::Agent::instance()->receive(endpoint, local_address, remote_address, message);
     }
     head->release();
-  }
 # endif
+  }
 #else
   ACE_UNUSED_ARG(endpoint);
   ACE_UNUSED_ARG(stop);
@@ -103,6 +108,22 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
 
   return ret;
 }
+
+#ifdef OPENDDS_SECURITY
+namespace {
+  ssize_t recv_err(const char* msg, const ACE_INET_Addr& remote, bool& stop)
+  {
+    if (security_debug.warn) {
+      ACE_TCHAR addr_buff[256] = {};
+      remote.addr_to_string(addr_buff, 256, 0);
+      ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpReceiveStrategy::receive_bytes - "
+                 "from %s secure RTPS processing failed: %C\n", addr_buff, msg));
+    }
+    stop = true;
+    return 0;
+  }
+}
+#endif
 
 ssize_t
 RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
@@ -132,7 +153,133 @@ RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
 #endif
   remote_address_ = remote_address;
 
+#ifdef OPENDDS_SECURITY
+  if (stop) {
+    return ret;
+  }
+
+  using namespace DDS::Security;
+  const ParticipantCryptoHandle receiver = link_->local_crypto_handle();
+  if (ret > 0 && receiver != DDS::HANDLE_NIL) {
+    encoded_rtps_ = false;
+
+    const CryptoTransform_var crypto = link_->security_config()->get_crypto_transform();
+    if (!crypto) {
+      return recv_err("no crypto plugin", remote_address, stop);
+    }
+
+    if (ret < RTPS::RTPSHDR_SZ + RTPS::SMHDR_SZ) {
+      return recv_err("message too short", remote_address, stop);
+    }
+
+    const unsigned int encLen = static_cast<unsigned int>(ret);
+    DDS::OctetSeq encoded(encLen);
+    encoded.length(encLen);
+    unsigned char* const encBuf = encoded.get_buffer();
+    size_t copied = 0;
+    for (int i = 0; i < n && copied < encLen; ++i) {
+      const size_t chunk = std::min(static_cast<size_t>(iov[i].iov_len),
+                                    static_cast<size_t>(encLen - copied));
+      std::memcpy(encBuf + copied, iov[i].iov_base, chunk);
+      copied += chunk;
+    }
+
+    if (copied != encLen) {
+      return recv_err("received bytes didn't fit in iovec array", remote_address, stop);
+    }
+
+    if (encoded[RTPS::RTPSHDR_SZ] != RTPS::SRTPS_PREFIX) {
+      return ret;
+    }
+
+    GUID_t peer;
+    static const int GuidPrefixOffset = 8; // "RTPS", Version(2), Vendor(2)
+    std::memcpy(peer.guidPrefix, encBuf + GuidPrefixOffset, sizeof peer.guidPrefix);
+    peer.entityId = RTPS::ENTITYID_PARTICIPANT;
+    const ParticipantCryptoHandle sender = link_->peer_crypto_handle(peer);
+    if (sender == DDS::HANDLE_NIL) {
+      if (security_debug.warn) {
+        ACE_DEBUG((LM_WARNING, "decode_rtps_message no remote participant crypto handle, dropping\n"));
+      }
+      stop = true;
+      return ret;
+    }
+
+    DDS::OctetSeq plain;
+    SecurityException ex = {"", 0, 0};
+    if (!crypto->decode_rtps_message(plain, encoded, receiver, sender, ex)) {
+      if (security_debug.warn) {
+        ACE_DEBUG((LM_WARNING, "decode_rtps_message SecurityException [%d.%d]: %C\n",
+                   ex.code, ex.minor_code, ex.message.in()));
+      }
+      if (ex.code == OPENDDS_EXCEPTION_CODE_NO_KEY && ex.minor_code == OPENDDS_EXCEPTION_MINOR_CODE_NO_KEY) {
+        if (security_debug.warn) {
+          ACE_DEBUG((LM_WARNING, "decode_rtps_message remote participant has crypto handle but no key, dropping\n"));
+        }
+        stop = true;
+        return ret;
+      }
+      return recv_err("decode_rtps_message failed", remote_address, stop);
+    }
+
+    copied = 0;
+    const size_t plainLen = plain.length();
+    const unsigned char* const plainBuf = plain.get_buffer();
+    for (int i = 0; i < n && copied < plainLen; ++i) {
+      const size_t chunk = std::min(static_cast<size_t>(iov[i].iov_len),
+                                    plainLen - copied);
+      std::memcpy(iov[i].iov_base, plainBuf + copied, chunk);
+      copied += chunk;
+    }
+
+    if (copied != plainLen) {
+      return recv_err("plaintext doesn't fit in iovec array", remote_address, stop);
+    }
+
+    encoded_rtps_ = true;
+    return plainLen;
+  }
+#endif
+
   return ret;
+}
+
+bool RtpsUdpReceiveStrategy::check_encoded(const EntityId_t& sender)
+{
+#ifdef OPENDDS_SECURITY
+  using namespace DDS::Security;
+  GUID_t sendGuid;
+  std::memcpy(sendGuid.guidPrefix, receiver_.source_guid_prefix_, sizeof sendGuid.guidPrefix);
+  sendGuid.entityId = sender;
+
+  if (link_->local_crypto_handle() != DDS::HANDLE_NIL
+      && !encoded_rtps_ && !RtpsUdpDataLink::separate_message(sender)) {
+    if (security_debug.warn) {
+      const GuidConverter conv(sendGuid);
+      ACE_DEBUG((LM_WARNING, "(%P|%t) RtpsUdpReceiveStrategy::check_encoded "
+                 "Full message from %C requires protection, dropping\n",
+                 OPENDDS_STRING(conv).c_str()));
+    }
+    return false;
+  }
+
+  const EndpointSecurityAttributesMask esa = link_->security_attributes(sendGuid);
+  static const EndpointSecurityAttributesMask MASK_PROTECT_SUBMSG =
+    ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_VALID | ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_SUBMESSAGE_PROTECTED;
+
+  if ((esa & MASK_PROTECT_SUBMSG) == MASK_PROTECT_SUBMSG && !encoded_submsg_) {
+    if (security_debug.warn) {
+      const GuidConverter conv(sendGuid);
+      ACE_DEBUG((LM_WARNING, "(%P|%t) RtpsUdpReceiveStrategy::check_encoded "
+                 "Submessage from %C requires protection, dropping\n",
+                 OPENDDS_STRING(conv).c_str()));
+    }
+    return false;
+  }
+#else
+  ACE_UNUSED_ARG(sender);
+#endif
+  return true;
 }
 
 void
@@ -149,22 +296,19 @@ RtpsUdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
 
   const RtpsSampleHeader& rsh = received_sample_header();
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   const SubmessageKind kind = rsh.submessage_._d();
 
-  if ((secure_prefix_.smHeader.submessageId == SRTPS_PREFIX
-       && kind != SRTPS_POSTFIX) ||
-      (secure_prefix_.smHeader.submessageId == SEC_PREFIX
-       && kind != SEC_POSTFIX)) {
+  if (secure_prefix_.smHeader.submessageId == SEC_PREFIX && kind != SEC_POSTFIX) {
     // secure envelope in progress, defer processing
     secure_submessages_.push_back(rsh.submessage_);
     if (kind == DATA) {
-      // SRTPS: once full-message protection is supported, this technique will
-      // need to be extended to support > 1 data payload (auth. only)
       secure_sample_ = sample;
     }
     return;
   }
+
+  encoded_submsg_ = false;
 #endif
 
   deliver_sample_i(sample, rsh.submessage_);
@@ -190,6 +334,9 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
   case DATA: {
     receiver_.fill_header(sample.header_);
     const DataSubmessage& data = submessage.data_sm();
+    if (!check_encoded(data.writerId)) {
+      break;
+    }
     recvd_sample_ = &sample;
     readers_selected_.clear();
     readers_withheld_.clear();
@@ -211,7 +358,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
             ACE_TEXT("calling DataLink::data_received for seq: %q to reader %C\n"),
             this, sample.header_.sequence_.getValue(), OPENDDS_STRING(reader_conv).c_str()));
         }
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
         if (decode_payload(sample, data)) {
           link_->data_received(sample, reader);
         }
@@ -252,7 +399,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
             this, sample.header_.sequence_.getValue()));
         }
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
         if (decode_payload(sample, data)) {
           link_->data_received(sample);
         }
@@ -267,7 +414,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
             this, sample.header_.sequence_.getValue()));
         }
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
         if (decode_payload(sample, data)) {
           link_->data_received_include(sample, readers_selected_);
         }
@@ -280,10 +427,16 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
     break;
   }
   case GAP:
+    if (!check_encoded(submessage.gap_sm().writerId)) {
+      break;
+    }
     link_->received(submessage.gap_sm(), receiver_.source_guid_prefix_);
     break;
 
   case HEARTBEAT:
+    if (!check_encoded(submessage.heartbeat_sm().writerId)) {
+      break;
+    }
     link_->received(submessage.heartbeat_sm(),
                     receiver_.source_guid_prefix_);
     if (submessage.heartbeat_sm().smHeader.flags & FLAG_L) {
@@ -296,16 +449,25 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
     break;
 
   case ACKNACK:
+    if (!check_encoded(submessage.acknack_sm().readerId)) {
+      break;
+    }
     link_->received(submessage.acknack_sm(),
                     receiver_.source_guid_prefix_);
     break;
 
   case HEARTBEAT_FRAG:
+    if (!check_encoded(submessage.hb_frag_sm().writerId)) {
+      break;
+    }
     link_->received(submessage.hb_frag_sm(),
                     receiver_.source_guid_prefix_);
     break;
 
   case NACK_FRAG:
+    if (!check_encoded(submessage.nack_frag_sm().readerId)) {
+      break;
+    }
     link_->received(submessage.nack_frag_sm(),
                     receiver_.source_guid_prefix_);
     break;
@@ -314,16 +476,9 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
      has successfully reassembled the fragments and we now have a DATA submsg
    */
 
-#if defined(OPENDDS_SECURITY)
-  case SRTPS_PREFIX:
+#ifdef OPENDDS_SECURITY
   case SEC_PREFIX:
     secure_prefix_ = submessage.security_sm();
-    break;
-
-  case SRTPS_POSTFIX:
-    secure_prefix_.smHeader.submessageId = SUBMESSAGE_NONE;
-    secure_sample_ = ReceivedDataSample(0);
-    ACE_ERROR((LM_ERROR, "ERROR: RtpsUdpReceiveStrategy SRTPS unsupported.\n"));
     break;
 
   case SEC_POSTFIX:
@@ -336,37 +491,27 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
   }
 }
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
 void
 RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage)
 {
   using namespace DDS::Security;
-  const ParticipantCryptoHandle local_pch = link_->local_crypto_handle();
+
+  const CryptoTransform_var crypto = link_->security_config()->get_crypto_transform();
+  if (!crypto) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RtpsUdpReceiveStrategy SEC_POSTFIX no CryptoTransform\n"));
+    return;
+  }
 
   RepoId peer;
   RTPS::assign(peer.guidPrefix, receiver_.source_guid_prefix_);
   peer.entityId = ENTITYID_PARTICIPANT;
   const ParticipantCryptoHandle peer_pch = link_->peer_crypto_handle(peer);
 
-  CryptoTransform_var crypto = link_->security_config()->get_crypto_transform();
-
   DDS::OctetSeq encoded_submsg, plain_submsg;
   sec_submsg_to_octets(encoded_submsg, submessage);
   secure_prefix_.smHeader.submessageId = SUBMESSAGE_NONE;
   secure_sample_ = ReceivedDataSample(0);
-
-  if (local_pch == DDS::HANDLE_NIL || !crypto) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RtpsUdpReceiveStrategy SEC_POSTFIX "
-               "precondition unmet %d %@\n", local_pch, crypto.in()));
-    return;
-  }
-
-  if (peer_pch == DDS::HANDLE_NIL) {
-    VDBG_LVL((LM_DEBUG, "(%P|%t) RtpsUdpReceiveStrategy SEC_POSTFIX "
-              "no crypto handle for %C\n",
-              OPENDDS_STRING(GuidConverter(peer)).c_str()), 2);
-    return;
-  }
 
   DatawriterCryptoHandle dwch = DDS::HANDLE_NIL;
   DatareaderCryptoHandle drch = DDS::HANDLE_NIL;
@@ -374,7 +519,7 @@ RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage)
   SecurityException ex = {"", 0, 0};
 
   bool ok = crypto->preprocess_secure_submsg(dwch, drch, category, encoded_submsg,
-                                             local_pch, peer_pch, ex);
+                                             link_->local_crypto_handle(), peer_pch, ex);
 
   if (ok) {
     VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpReceiveStrategy::deliver_from_secure ")
@@ -433,6 +578,7 @@ RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage)
   if (check_header(rsh)) {
     ReceivedDataSample plain_sample(mb.duplicate());
     if (rsh.into_received_data_sample(plain_sample)) {
+      encoded_submsg_ = true;
       deliver_sample_i(plain_sample, rsh.submessage_);
     }
   }
@@ -483,10 +629,9 @@ RtpsUdpReceiveStrategy::sec_submsg_to_octets(DDS::OctetSeq& encoded,
 bool RtpsUdpReceiveStrategy::decode_payload(ReceivedDataSample& sample,
                                             const RTPS::DataSubmessage& submsg)
 {
-  const DDS::Security::DatawriterCryptoHandle writer_crypto_handle =
-    link_->writer_crypto_handle(sample.header_.publication_id_);
-  DDS::Security::CryptoTransform_var crypto =
-    link_->security_config()->get_crypto_transform();
+  using namespace DDS::Security;
+  const DatawriterCryptoHandle writer_crypto_handle = link_->writer_crypto_handle(sample.header_.publication_id_);
+  const CryptoTransform_var crypto = link_->security_config()->get_crypto_transform();
 
   if (writer_crypto_handle == DDS::HANDLE_NIL || !crypto) {
     return true;
@@ -510,7 +655,7 @@ bool RtpsUdpReceiveStrategy::decode_payload(ReceivedDataSample& sample,
                  Serializer::ALIGN_CDR);
   ser << submsg.inlineQos;
 
-  DDS::Security::SecurityException ex = {"", 0, 0};
+  SecurityException ex = {"", 0, 0};
   // DDS-Security: since origin authentication for payload is not yet supported
   // the reader's crypto handle is NIL here (could be multiple readers in this
   // participant)
@@ -519,8 +664,19 @@ bool RtpsUdpReceiveStrategy::decode_payload(ReceivedDataSample& sample,
                                                     writer_crypto_handle, ex);
   if (ok) {
     const unsigned int n = plain.length();
-    if (encoded.length() == n &&
-        0 == std::memcmp(plain.get_buffer(), encoded.get_buffer(), n)) {
+    if (encoded.length() == n && 0 == std::memcmp(plain.get_buffer(), encoded.get_buffer(), n)) {
+      const EndpointSecurityAttributesMask esa = link_->security_attributes(sample.header_.publication_id_);
+      static const EndpointSecurityAttributesMask MASK_PROTECT_PAYLOAD =
+        ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_VALID | ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_PAYLOAD_PROTECTED;
+      if ((esa & MASK_PROTECT_PAYLOAD) == MASK_PROTECT_PAYLOAD) {
+        if (security_debug.warn) {
+          const GuidConverter writer(sample.header_.publication_id_);
+          ACE_DEBUG((LM_WARNING, "(%P|%t) {warn} RtpsUdpReceiveStrategy: "
+                     "payload protection required for writer %C, dropping\n",
+                     OPENDDS_STRING(writer).c_str()));
+        }
+        return false;
+      }
       return true;
     }
 
@@ -617,7 +773,7 @@ RtpsUdpReceiveStrategy::check_header(const RtpsTransportHeader& header)
 {
   receiver_.reset(remote_address_, header.header_);
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   secure_prefix_.smHeader.submessageId = SUBMESSAGE_NONE;
 #endif
 
@@ -628,7 +784,7 @@ bool
 RtpsUdpReceiveStrategy::check_header(const RtpsSampleHeader& header)
 {
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   if (secure_prefix_.smHeader.submessageId) {
     return header.valid();
   }
@@ -742,6 +898,7 @@ RtpsUdpReceiveStrategy::has_fragments(const SequenceRange& range,
         p.first = sn;
         frag_info->push_back(p);
         RTPS::FragmentNumberSet& missing_frags = frag_info->back().second;
+        missing_frags.numBits = 0; // make sure this is a valid number before passing to get_gaps
         missing_frags.bitmap.length(8); // start at max length
         missing_frags.bitmapBase.value =
           reassembly_.get_gaps(sn, pub_id, missing_frags.bitmap.get_buffer(),

@@ -14,7 +14,9 @@
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/PoolAllocator.h"
+#include "dds/DCPS/ReactorInterceptor.h"
 #include "dds/DCPS/RepoIdTypes.h"
+#include "dds/DCPS/TimeTypes.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -28,6 +30,9 @@ namespace DCPS {
 class DataReaderImpl;
 class ReceivedDataElement;
 
+class InstanceState;
+typedef RcHandle<InstanceState> InstanceState_rch;
+
 /**
  * @class InstanceState
  *
@@ -39,7 +44,7 @@ class ReceivedDataElement;
  * Accessors are provided to query the current value of each of
  * these states.
  */
-class OpenDDS_Dcps_Export InstanceState : public ACE_Event_Handler {
+class OpenDDS_Dcps_Export InstanceState : public ReactorInterceptor {
 public:
   InstanceState(DataReaderImpl* reader,
                 ACE_Recursive_Thread_Mutex& lock,
@@ -56,6 +61,8 @@ public:
 
   /// Access view state.
   DDS::ViewStateKind view_state() const;
+
+  bool match(DDS::ViewStateMask view, DDS::InstanceStateMask inst) const;
 
   /// Access disposed generation count
   size_t disposed_generation_count() const;
@@ -111,9 +118,9 @@ public:
   /// tell this instance when a DataWriter transitions to NOT_ALIVE
   void writer_became_dead(const PublicationId& writer_id,
                           int num_alive_writers,
-                          const ACE_Time_Value& when);
+                          const MonotonicTimePoint& when);
 
-  DataReaderImpl* data_reader() const;
+  WeakRcHandle<OpenDDS::DCPS::DataReaderImpl> data_reader() const;
 
   virtual int handle_timeout(const ACE_Time_Value& current_time,
                              const void* arg);
@@ -137,10 +144,15 @@ public:
     return instance_state_string(instance_state_);
   }
 
-  /// Return string of the name of the instance state kind or mask passed
+  /// Return string of the name of the instance state kind passed
   static OPENDDS_STRING instance_state_string(DDS::InstanceStateKind value);
 
+  /// Return string representation of the instance state mask passed
+  static OPENDDS_STRING instance_state_mask_string(DDS::InstanceStateMask mask);
+
 private:
+  bool reactor_is_shut_down() const;
+
   ACE_Recursive_Thread_Mutex& lock_;
 
   /**
@@ -202,7 +214,7 @@ private:
    * instance.  It is also queried to determine if the DataReader is
    * empty -- that it contains no more sample data.
    */
-  DataReaderImpl* reader_;
+  WeakRcHandle<DataReaderImpl> reader_;
   DDS::InstanceHandle_t handle_;
 
   RepoIdSet writers_;
@@ -211,6 +223,33 @@ private:
   /// registered with participant so it can be called back as
   /// the owner is updated.
   bool registered_;
+
+  struct CommandBase : Command {
+    explicit CommandBase(InstanceState* instance_state)
+      : instance_state_(instance_state)
+    {}
+
+    InstanceState* instance_state_;
+  };
+
+  struct CancelCommand : CommandBase {
+    explicit CancelCommand(InstanceState* instance_state)
+      : CommandBase(instance_state)
+    {}
+
+    void execute();
+  };
+
+  struct ScheduleCommand : CommandBase {
+    ScheduleCommand(InstanceState* instance_state, const TimeDuration& delay)
+      : CommandBase(instance_state)
+      , delay_(delay)
+    {}
+
+    const TimeDuration delay_;
+    void execute();
+  };
+
 };
 
 } // namespace DCPS

@@ -34,6 +34,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace Security {
 
+using DCPS::TimeDuration;
+
 typedef Governance::GovernanceAccessRules::iterator gov_iter;
 typedef Permissions::PermissionGrantRules::iterator perm_grant_iter;
 typedef Permissions::TopicRules::iterator perm_topic_rules_iter;
@@ -56,7 +58,7 @@ AccessControlBuiltInImpl::AccessControlBuiltInImpl()
   , handle_mutex_()
   , gen_handle_mutex_()
   , next_handle_(1)
-  , listener_ptr_(NULL)
+  , listener_ptr_(0)
 {  }
 
 AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
@@ -125,7 +127,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   OpenDDS::Security::SSL::SubjectName sn_id;
 
-  if (id_sn == NULL || sn_id.parse(id_sn) != 0 || !permissions->contains_subject_name(sn_id)) {
+  if (!id_sn || sn_id.parse(id_sn) != 0 || !permissions->contains_subject_name(sn_id)) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: No permissions subject name matches identity subject name");
     return DDS::HANDLE_NIL;
   }
@@ -302,8 +304,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ::DDS::Security::SecurityException & ex)
 {
   if (DDS::HANDLE_NIL == permissions_handle) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_participant: Invalid permissions handle");
-    return false;
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_participant: Invalid permissions handle");
   }
 
 /*
@@ -329,17 +330,15 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ACPermsMap::iterator piter = local_ac_perms_.find(permissions_handle);
 
   if (piter == local_ac_perms_.end()) {
-    CommonUtilities::set_security_error(ex, -1, 0,
+    return CommonUtilities::set_security_error(ex, -1, 0,
       "AccessControlBuiltInImpl::check_create_participant: "
       "No matching permissions handle present");
-    return false;
   }
 
   if (domain_id != piter->second.domain_id) {
-    CommonUtilities::set_security_error(ex, -1, 0,
+    return CommonUtilities::set_security_error(ex, -1, 0,
       "AccessControlBuiltInImpl::check_create_participant: "
       "Domain does not match validated permissions handle");
-    return false;
   }
 
   ::DDS::Security::DomainId_t domain_to_find = domain_id;
@@ -364,10 +363,9 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     }
   }
 
-  CommonUtilities::set_security_error(ex, -1, 0,
+  return CommonUtilities::set_security_error(ex, -1, 0,
     "AccessControlBuiltInImpl::check_create_participant: "
     "No governance exists for this domain");
-  return false;
 }
 
 ::CORBA::Boolean AccessControlBuiltInImpl::check_create_datawriter(
@@ -380,12 +378,10 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ::DDS::Security::SecurityException & ex)
 {
   if (DDS::HANDLE_NIL == permissions_handle) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datawriter: Invalid permissions handle");
-    return false;
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datawriter: Invalid permissions handle");
   }
   if (0 == topic_name) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datawriter: Invalid Topic Name");
-    return false;
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datawriter: Invalid Topic Name");
   }
 
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_mutex_, false);
@@ -393,8 +389,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ACPermsMap::iterator ac_iter = local_ac_perms_.find(permissions_handle);
 
   if (ac_iter == local_ac_perms_.end()) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datawriter: No matching permissions handle present");
-    return false;
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datawriter: No matching permissions handle present");
   }
 
   gov_iter begin = ac_iter->second.gov->access_rules().begin();
@@ -417,26 +412,19 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
   // Check the Permissions file
-  time_t delta_time;
-
+  TimeDuration delta_time;
   if (!validate_date_time(ac_iter, delta_time, ex)) {
     return false;
   }
 
-  Permissions::PublishSubscribe_t publish = Permissions::PUBLISH;
-  CORBA::Boolean successful = search_local_permissions(topic_name, domain_id, partition, publish, ac_iter, ex);
-
-  if (!successful) {
+  if (!search_local_permissions(topic_name, domain_id, partition, Permissions::PUBLISH, ac_iter, ex)) {
     return false;
   }
 
   if (!local_rp_timer_.is_scheduled()) {
     // Start timer
-    ACE_Time_Value timer_length(delta_time);
-
-    if (!local_rp_timer_.start_timer(timer_length, permissions_handle)) {
-      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datawriter: Permissions timer could not be created.");
-      return false;
+    if (!local_rp_timer_.start_timer(delta_time, permissions_handle)) {
+      return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datawriter: Permissions timer could not be created.");
     }
   }
 
@@ -453,13 +441,11 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ::DDS::Security::SecurityException & ex)
 {
   if (DDS::HANDLE_NIL == permissions_handle) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Invalid permissions handle");
-    return false;
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Invalid permissions handle");
   }
 
   if (0 == topic_name) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Invalid Topic Name");
-    return false;
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Invalid Topic Name");
   }
 
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_mutex_, false);
@@ -467,8 +453,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ACPermsMap::iterator ac_iter = local_ac_perms_.find(permissions_handle);
 
   if (ac_iter == local_ac_perms_.end()) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: No matching permissions handle present");
-    return false;
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: No matching permissions handle present");
   }
 
   gov_iter begin = ac_iter->second.gov->access_rules().begin();
@@ -493,25 +478,18 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
   // Check the Permissions file
-  time_t delta_time;
-
+  TimeDuration delta_time;
   if (!validate_date_time(ac_iter, delta_time, ex)) {
     return false;
   }
 
-  Permissions::PublishSubscribe_t subscribe = Permissions::SUBSCRIBE;
-  CORBA::Boolean successful = search_local_permissions(topic_name, domain_id, partition, subscribe, ac_iter, ex);
-
-  if (!successful) {
+  if (!search_local_permissions(topic_name, domain_id, partition, Permissions::SUBSCRIBE, ac_iter, ex)) {
     return false;
   }
 
   if (!local_rp_timer_.is_scheduled()) {
-    ACE_Time_Value timer_length(delta_time);
-
-    if (!local_rp_timer_.start_timer(timer_length, permissions_handle)) {
-      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Permissions timer could not be created.");
-      return false;
+    if (!local_rp_timer_.start_timer(delta_time, permissions_handle)) {
+      return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Permissions timer could not be created.");
     }
   }
 
@@ -526,12 +504,10 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ::DDS::Security::SecurityException & ex)
 {
   if (DDS::HANDLE_NIL == permissions_handle) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_topic: Invalid permissions handle");
-    return false;
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_topic: Invalid permissions handle");
   }
   if (0 == topic_name) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_topic: Invalid Topic Name");
-    return false;
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_topic: Invalid Topic Name");
   }
 
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_mutex_, false);
@@ -539,15 +515,13 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ACPermsMap::iterator ac_iter = local_ac_perms_.find(permissions_handle);
 
   if (ac_iter == local_ac_perms_.end()) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_topic: No matching permissions handle present");
-    return false;
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_topic: No matching permissions handle present");
   }
 
   // Check the Governance file for allowable topic attributes
 
   if (domain_id != ac_iter->second.domain_id) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_topic: Requested domain ID does not match permissions handle");
-    return false;
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_topic: Requested domain ID does not match permissions handle");
   }
 
   ::DDS::Security::DomainId_t domain_to_find = ac_iter->second.domain_id;
@@ -573,8 +547,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
   // Check the Permissions file for grants
-  time_t delta_time;
-
+  TimeDuration delta_time;
   if (!validate_date_time(ac_iter, delta_time, ex)) {
     return false;
   }
@@ -615,8 +588,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
         return true;
       }
       else {
-        CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_topic: No matching rule for topic, default permission is DENY.");
-        return false;
+        return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_topic: No matching rule for topic, default permission is DENY.");
       }
     }
   }
@@ -633,16 +605,13 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ::DDS::Security::SecurityException & ex)
 {
   if (DDS::HANDLE_NIL == permissions_handle) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_local_datawriter_register_instance: Invalid permissions handle");
-    return false;
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_local_datawriter_register_instance: Invalid permissions handle");
   }
   if (0 == writer) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_local_datawriter_register_instance: Invalid Writer");
-    return false;
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_local_datawriter_register_instance: Invalid Writer");
   }
   if (0 == key) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_local_datawriter_register_instance: Invalid Topic Key");
-    return false;
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_local_datawriter_register_instance: Invalid Topic Key");
   }
 
   return true;
@@ -655,16 +624,13 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ::DDS::Security::SecurityException & ex)
 {
   if (DDS::HANDLE_NIL == permissions_handle) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_local_datawriter_dispose_instance: Invalid permissions handle");
-    return false;
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_local_datawriter_dispose_instance: Invalid permissions handle");
   }
   if (0 == writer) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_local_datawriter_dispose_instance: Invalid Writer");
-    return false;
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_local_datawriter_dispose_instance: Invalid Writer");
   }
   if (0 == key) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_local_datawriter_dispose_instance: Invalid Topic Key");
-    return false;
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_local_datawriter_dispose_instance: Invalid Topic Key");
   }
 
   return true;
@@ -677,8 +643,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ::DDS::Security::SecurityException & ex)
 {
   if (DDS::HANDLE_NIL == permissions_handle) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_participant: Invalid permissions handle");
-    return false;
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_participant: Invalid permissions handle");
   }
 
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_mutex_, false);
@@ -686,8 +651,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ACPermsMap::iterator ac_iter = local_ac_perms_.find(permissions_handle);
 
   if (ac_iter == local_ac_perms_.end()) {
-    CommonUtilities::set_security_error(ex,-1, 0, "AccessControlBuiltInImpl::check_remote_participant: No matching permissions handle present");
-    return false;
+    return CommonUtilities::set_security_error(ex,-1, 0, "AccessControlBuiltInImpl::check_remote_participant: No matching permissions handle present");
   }
 
   gov_iter begin = ac_iter->second.gov->access_rules().begin();
@@ -715,8 +679,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     parse_class_id(remote_class_id, remote_plugin_class_name, remote_major_ver, remote_minor_ver);
   }
   else {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_participant: Invalid remote class ID");
-    return false;
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_participant: Invalid remote class ID");
   }
 
   for (ACPermsMap::iterator local_iter = local_ac_perms_.begin(); local_iter != local_ac_perms_.end(); ++local_iter) {
@@ -728,8 +691,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
           parse_class_id(local_class_id, local_plugin_class_name, local_major_ver, local_minor_ver);
         }
         else {
-          CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_participant: Invalid local class ID");
-          return false;
+          return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_participant: Invalid local class ID");
         }
 
         break;
@@ -739,13 +701,11 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   if (strcmp(local_plugin_class_name.c_str(), remote_plugin_class_name.c_str()) == 0) {
     if (local_major_ver != remote_major_ver) {
-      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_participant: Class ID major versions do not match");
-      return false;
+      return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_participant: Class ID major versions do not match");
     }
   }
   else {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_participant: Class ID plugin class name do not match");
-    return false;
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_participant: Class ID plugin class name do not match");
   }
 
   // Check permissions topic grants
@@ -767,7 +727,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     }
   }
 
-  return false;
+  return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_participant: Not authorized for domain");
 }
 
 ::CORBA::Boolean AccessControlBuiltInImpl::check_remote_datawriter(
@@ -777,13 +737,11 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ::DDS::Security::SecurityException & ex)
 {
   if (DDS::HANDLE_NIL == permissions_handle) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter: Invalid permissions handle");
-    return false;
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter: Invalid permissions handle");
   }
 
   if (publication_data.base.base.topic_name[0] == 0) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter: Invalid topic name");
-    return false;
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter: Invalid topic name");
   }
 
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_mutex_, false);
@@ -791,8 +749,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ACPermsMap::iterator ac_iter = local_ac_perms_.find(permissions_handle);
 
   if (ac_iter == local_ac_perms_.end()) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter: No matching permissions handle present");
-    return false;
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter: No matching permissions handle present");
   }
 
   gov_iter begin = ac_iter->second.gov->access_rules().begin();
@@ -814,26 +771,18 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     }
   }
 
-  time_t delta_time;
-
+  TimeDuration delta_time;
   if (!validate_date_time(ac_iter, delta_time, ex)) {
     return false;
   }
 
-  Permissions::PublishSubscribe_t publish = Permissions::PUBLISH;
-
-  CORBA::Boolean successful = search_remote_permissions(publication_data.base.base.topic_name, domain_id, ac_iter, publish, ex);
-
-  if (!successful) {
+  if (!search_remote_permissions(publication_data.base.base.topic_name, domain_id, ac_iter, Permissions::PUBLISH, ex)) {
     return false;
   }
 
   if (!remote_rp_timer_.is_scheduled()) {
-    ACE_Time_Value timer_length(delta_time);
-
-    if (!remote_rp_timer_.start_timer(timer_length, permissions_handle)) {
-      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Permissions timer could not be created.");
-      return false;
+    if (!remote_rp_timer_.start_timer(delta_time, permissions_handle)) {
+      return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Permissions timer could not be created.");
     }
   }
 
@@ -848,8 +797,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ::DDS::Security::SecurityException & ex)
 {
   if (DDS::HANDLE_NIL == permissions_handle) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datareader: Invalid permissions handle");
-    return false;
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datareader: Invalid permissions handle");
   }
 
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_mutex_, false);
@@ -857,8 +805,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ACPermsMap::iterator ac_iter = local_ac_perms_.find(permissions_handle);
 
   if (ac_iter == local_ac_perms_.end()) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: No matching permissions handle present");
-    return false;
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: No matching permissions handle present");
   }
 
   // Default this to false for now
@@ -884,26 +831,18 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     }
   }
 
-  time_t delta_time;
-
+  TimeDuration delta_time;
   if (!validate_date_time(ac_iter, delta_time, ex)) {
     return false;
   }
 
-  Permissions::PublishSubscribe_t subscribe = Permissions::SUBSCRIBE;
-
-  CORBA::Boolean successful = search_remote_permissions(subscription_data.base.base.topic_name, domain_id, ac_iter, subscribe, ex);
-
-  if (!successful) {
+  if (!search_remote_permissions(subscription_data.base.base.topic_name, domain_id, ac_iter, Permissions::SUBSCRIBE, ex)) {
     return false;
   }
 
   if (!remote_rp_timer_.is_scheduled()) {
-    ACE_Time_Value timer_length(delta_time);
-
-    if (!remote_rp_timer_.start_timer(timer_length, permissions_handle)) {
-      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Permissions timer could not be created.");
-      return false;
+    if (!remote_rp_timer_.start_timer(delta_time, permissions_handle)) {
+      return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Permissions timer could not be created.");
     }
   }
 
@@ -918,13 +857,11 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 {
   // NOTE: permissions_handle is for the remote DomainParticipant.
   if (DDS::HANDLE_NIL == permissions_handle) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_topic: Invalid permissions handle");
-    return false;
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_topic: Invalid permissions handle");
   }
 
   if (topic_data.name[0] == 0) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_topic: Invalid topic data");
-    return false;
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_topic: Invalid topic data");
   }
 
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_mutex_, false);
@@ -932,8 +869,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ACPermsMap::iterator ac_iter = local_ac_perms_.find(permissions_handle);
 
   if (ac_iter == local_ac_perms_.end()) {
-    CommonUtilities::set_security_error(ex,-1, 0, "AccessControlBuiltInImpl::check_remote_topic: No matching permissions handle present");
-    return false;
+    return CommonUtilities::set_security_error(ex,-1, 0, "AccessControlBuiltInImpl::check_remote_topic: No matching permissions handle present");
   }
 
   // Compare the PluginClassName and MajorVersion of the local permissions_token
@@ -951,8 +887,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     parse_class_id(remote_class_id, remote_plugin_class_name, remote_major_ver, remote_minor_ver);
   }
   else {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_topic: Invalid remote class ID");
-    return false;
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_topic: Invalid remote class ID");
   }
 
   for (ACPermsMap::iterator local_iter = local_ac_perms_.begin(); local_iter != local_ac_perms_.end(); ++local_iter) {
@@ -964,8 +899,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
           parse_class_id(local_class_id, local_plugin_class_name, local_major_ver, local_minor_ver);
         }
         else {
-          CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_topic: Invalid local class ID");
-          return false;
+          return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_topic: Invalid local class ID");
         }
 
         break;
@@ -975,13 +909,11 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   if (strcmp(local_plugin_class_name.c_str(), remote_plugin_class_name.c_str()) == 0) {
     if (local_major_ver != remote_major_ver) {
-      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_topic: Class ID major versions do not match");
-      return false;
+      return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_topic: Class ID major versions do not match");
     }
   }
   else {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_topic: Class ID plugin class name do not match");
-    return false;
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_topic: Class ID plugin class name do not match");
   }
 
   // Check the Governance file for allowable topic attributes
@@ -1007,8 +939,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
   // Check the Permissions file for grants
-  time_t delta_time;
-
+  TimeDuration delta_time;
   if (!validate_date_time(ac_iter, delta_time, ex)) {
     return false;
   }
@@ -1054,8 +985,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
         return true;
       }
       else {
-        CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_topic: No matching rule for topic, default permission is DENY.");
-        return false;
+        return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_topic: No matching rule for topic, default permission is DENY.");
       }
     }
   }
@@ -1073,12 +1003,10 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ::DDS::Security::SecurityException & ex)
 {
   if (DDS::HANDLE_NIL == writer_permissions_handle) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_local_datawriter_match: Invalid writer permissions handle");
-    return false;
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_local_datawriter_match: Invalid writer permissions handle");
   }
   if (DDS::HANDLE_NIL == reader_permissions_handle) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_local_datawriter_match: Invalid reader permissions handle");
-    return false;
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_local_datawriter_match: Invalid reader permissions handle");
   }
 
   return true;
@@ -1092,12 +1020,10 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ::DDS::Security::SecurityException & ex)
 {
   if (DDS::HANDLE_NIL == writer_permissions_handle) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_local_datareader_match: Invalid writer permissions handle");
-    return false;
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_local_datareader_match: Invalid writer permissions handle");
   }
   if (DDS::HANDLE_NIL == reader_permissions_handle) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_local_datareader_match: Invalid reader permissions handle");
-    return false;
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_local_datareader_match: Invalid reader permissions handle");
   }
 
   return true;
@@ -1114,16 +1040,13 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   if (DDS::HANDLE_NIL == permissions_handle ||
       DDS::HANDLE_NIL == publication_handle ||
       DDS::HANDLE_NIL == instance_handle) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter_register_instance: Invalid handle");
-    return false;
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter_register_instance: Invalid handle");
   }
   if (0 == reader) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter_register_instance: Invalid Reader pointer");
-    return false;
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter_register_instance: Invalid Reader pointer");
   }
   if (0 == key) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter_register_instance: Invalid Topic Key");
-    return false;
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter_register_instance: Invalid Topic Key");
   }
 
   return true;
@@ -1138,16 +1061,13 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 {
   if (DDS::HANDLE_NIL == permissions_handle ||
       DDS::HANDLE_NIL == publication_handle) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter_dispose_instance: Invalid handle");
-    return false;
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter_dispose_instance: Invalid handle");
   }
   if (0 == reader) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter_dispose_instance: Invalid Reader pointer");
-    return false;
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter_dispose_instance: Invalid Reader pointer");
   }
   if (0 == key) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter_dispose_instance: Invalid Topic Key");
-    return false;
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter_dispose_instance: Invalid Topic Key");
   }
   return true;
 }
@@ -1495,9 +1415,10 @@ time_t AccessControlBuiltInImpl::convert_permissions_time(const std::string& tim
   return mktime(&permission_tm);
 }
 
-::CORBA::Boolean AccessControlBuiltInImpl::validate_date_time(const ACPermsMap::iterator ac_iter,
-  time_t & delta_time,
-  ::DDS::Security::SecurityException & ex)
+bool AccessControlBuiltInImpl::validate_date_time(
+  const ACPermsMap::iterator ac_iter,
+  TimeDuration& delta_time,
+  DDS::Security::SecurityException& ex)
 {
   time_t after_time = 0, cur_utc_time = 0;
   time_t current_date_time = time(0);
@@ -1536,7 +1457,7 @@ time_t AccessControlBuiltInImpl::convert_permissions_time(const std::string& tim
 
   }
 
-  delta_time = after_time - cur_utc_time;
+  delta_time = TimeDuration(after_time - cur_utc_time);
   return true;
 }
 
@@ -1717,7 +1638,6 @@ CORBA::Boolean AccessControlBuiltInImpl::search_local_permissions(
           perm_topic_ps_rules_iter tpsr_iter;
 
           for (tpsr_iter = ptr_iter->topic_ps_rules.begin(); tpsr_iter != ptr_iter->topic_ps_rules.end(); ++tpsr_iter) {
-//            if (tpsr_iter->ps_type == Permissions::PUBLISH) {
             if (tpsr_iter->ps_type == pub_or_sub) {
               std::vector<std::string>::iterator tl_iter; // topic list
 
@@ -1733,7 +1653,6 @@ CORBA::Boolean AccessControlBuiltInImpl::search_local_permissions(
                         perm_partition_ps_iter pps_iter;
 
                         for (pps_iter = pp_iter->partition_ps.begin(); pps_iter != pp_iter->partition_ps.end(); ++pps_iter) {
-//                          if (pps_iter->ps_type == Permissions::PUBLISH) {
                           if (pps_iter->ps_type == pub_or_sub) {
                             std::vector<std::string>::iterator pl_iter; // partition list
                             num_param_partitions = static_cast<unsigned int>(pps_iter->partition_list.size());
@@ -1957,26 +1876,25 @@ AccessControlBuiltInImpl::RevokePermissionsTimer::~RevokePermissionsTimer()
 {
   ACE_Reactor_Timer_Interface* reactor = TheServiceParticipant->timer();
 
-  if (scheduled_ && reactor != NULL) {
+  if (scheduled_ && reactor) {
     reactor->cancel_timer(this);
     scheduled_ = false;
   }
 }
 
-bool AccessControlBuiltInImpl::RevokePermissionsTimer::start_timer(const ACE_Time_Value length, ::DDS::Security::PermissionsHandle pm_handle)
+bool
+AccessControlBuiltInImpl::RevokePermissionsTimer::start_timer(
+  const TimeDuration& length, ::DDS::Security::PermissionsHandle pm_handle)
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex,
-      guard,
-      this->lock_,
-      false);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, lock_, false);
 
   ::DDS::Security::PermissionsHandle *eh_params_ptr =
       new ::DDS::Security::PermissionsHandle(pm_handle);
 
   ACE_Reactor_Timer_Interface* reactor = TheServiceParticipant->timer();
 
-  if (reactor != NULL) {
-    timer_id_ = reactor->schedule_timer(this, eh_params_ptr, length);
+  if (reactor) {
+    timer_id_ = reactor->schedule_timer(this, eh_params_ptr, length.value());
 
     if (timer_id_ != -1) {
       scheduled_ = true;
@@ -1990,35 +1908,32 @@ bool AccessControlBuiltInImpl::RevokePermissionsTimer::start_timer(const ACE_Tim
   return false;
 }
 
-int AccessControlBuiltInImpl::RevokePermissionsTimer::handle_timeout(const ACE_Time_Value & tv, const void * arg)
+int
+AccessControlBuiltInImpl::RevokePermissionsTimer::handle_timeout(
+  const ACE_Time_Value& /*tv*/, const void* arg)
 {
-  ACE_UNUSED_ARG(tv);
-  ACE_GUARD_RETURN(ACE_Thread_Mutex,
-      guard,
-      this->lock_,
-      -1);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, lock_, -1);
 
-  ::DDS::Security::PermissionsHandle *pm_handle = (::DDS::Security::PermissionsHandle *)arg;
+  const DDS::Security::PermissionsHandle* pm_handle =
+    static_cast<const DDS::Security::PermissionsHandle*>(arg);
 
   scheduled_ = false;
 
   ACPermsMap::iterator iter = impl_.local_ac_perms_.find(*pm_handle);
 
   if (iter == impl_.local_ac_perms_.end()) {
-    ACE_DEBUG((LM_ERROR, ACE_TEXT(
-        "(%P|%t) AccessControlBuiltInImpl::Revoke_Permissions_Timer::handle_timeout: pm_handle %d not found!\n"), *pm_handle));
+    ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) AccessControlBuiltInImpl::Revoke_Permissions_Timer::handle_timeout: ")
+      ACE_TEXT("pm_handle %d not found!\n"), *pm_handle));
     return -1;
   }
 
   impl_.local_ac_perms_.erase(iter);
 
   // If a listener exists, call on_revoke_permissions
-  if (impl_.listener_ptr_ != NULL) {
-    if (!impl_.listener_ptr_->on_revoke_permissions(&impl_, *pm_handle)) {
-      ACE_DEBUG((LM_ERROR, ACE_TEXT(
-          "(%P|%t) AccessControlBuiltInImpl::Revoke_Permissions_Timer::handle_timeout: on_revoke_permissions failed for pm_handle %d!\n"), *pm_handle));
-      return -1;
-    }
+  if (impl_.listener_ptr_ && !impl_.listener_ptr_->on_revoke_permissions(&impl_, *pm_handle)) {
+    ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) AccessControlBuiltInImpl::Revoke_Permissions_Timer::handle_timeout: ")
+      ACE_TEXT("on_revoke_permissions failed for pm_handle %d!\n"), *pm_handle));
+    return -1;
   }
 
   if (OpenDDS::DCPS::DCPS_debug_level > 0) {

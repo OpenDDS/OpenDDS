@@ -272,6 +272,11 @@ namespace {
     return std::strlen(cfprop.filterExpression);
   }
 
+  bool not_default(const OpenDDSParticipantFlags_t& flags)
+  {
+    return flags.bits != PFLAGS_EMPTY;
+  }
+
   void normalize(DDS::Duration_t& dur)
   {
     // Interoperability note:
@@ -474,6 +479,14 @@ OpenDDS_Rtps_Export
 int to_param_list(const ParticipantProxy_t& proxy,
                   ParameterList& param_list)
 {
+  Parameter beq_param;
+  beq_param.builtinEndpointQos(proxy.builtinEndpointQos);
+  add_param(param_list, beq_param);
+
+  Parameter pd_param;
+  pd_param.domainId(proxy.domainId);
+  add_param(param_list, pd_param);
+
   Parameter pv_param;
   pv_param.version(proxy.protocolVersion);
   add_param(param_list, pv_param);
@@ -548,6 +561,12 @@ int to_param_list(const ParticipantProxy_t& proxy,
     add_param(param_list, param_p);
   }
 
+  if (not_default(proxy.opendds_participant_flags)) {
+    Parameter param_opf;
+    param_opf.participant_flags(proxy.opendds_participant_flags);
+    add_param(param_list, param_opf);
+  }
+
   return 0;
 }
 
@@ -567,6 +586,12 @@ int from_param_list(const ParameterList& param_list,
   for (CORBA::ULong i = 0; i < length; ++i) {
     const Parameter& param = param_list[i];
     switch (param._d()) {
+      case PID_BUILTIN_ENDPOINT_QOS:
+        proxy.builtinEndpointQos = param.builtinEndpointQos();
+        break;
+      case PID_DOMAIN_ID:
+        proxy.domainId = param.domainId();
+        break;
       case PID_PROTOCOL_VERSION:
         proxy.protocolVersion = param.version();
         break;
@@ -653,6 +678,9 @@ int from_param_list(const ParameterList& param_list,
         break;
       case PID_PROPERTY_LIST:
         proxy.property = param.property();
+        break;
+      case PID_OPENDDS_PARTICIPANT_FLAGS:
+        proxy.opendds_participant_flags = param.participant_flags();
         break;
       case PID_SENTINEL:
       case PID_PAD:
@@ -1589,7 +1617,7 @@ int from_param_list(const ParameterList& param_list,
                     bool& have_agent_info)
 {
   have_agent_info = false;
-  for (size_t idx = 0, count = param_list.length(); idx != count; ++idx) {
+  for (CORBA::ULong idx = 0, count = param_list.length(); idx != count; ++idx) {
     const Parameter& parameter = param_list[idx];
     switch (parameter._d()) {
     case PID_OPENDDS_ICE_GENERAL: {
@@ -1605,10 +1633,10 @@ int from_param_list(const ParameterList& param_list,
       const IceCandidate_t& ice_candidate = parameter.ice_candidate();
       ICE::Candidate candidate;
       candidate.address.set_type(AF_INET);
-      if (candidate.address.set_address(reinterpret_cast<const char*>(parameter.locator().address) + 12, 4, 0 /*network order*/) != 0) {
+      if (candidate.address.set_address(reinterpret_cast<const char*>(ice_candidate.locator.address) + 12, 4, 0 /*network order*/) != 0) {
         return -1;
       }
-      candidate.address.set_port_number(parameter.locator().port);
+      candidate.address.set_port_number(ice_candidate.locator.port);
       candidate.foundation = ice_candidate.foundation;
       candidate.priority = ice_candidate.priority;
       candidate.type = static_cast<ICE::CandidateType>(ice_candidate.type);

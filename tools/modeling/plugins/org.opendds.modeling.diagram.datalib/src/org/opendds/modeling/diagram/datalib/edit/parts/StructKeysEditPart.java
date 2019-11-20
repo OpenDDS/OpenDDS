@@ -65,8 +65,7 @@ public class StructKeysEditPart extends ListCompartmentEditPart {
 	 * @generated NOT
 	 */
 	public IFigure createFigure() {
-		ResizableCompartmentFigure rcf = (ResizableCompartmentFigure) super
-				.createFigure();
+		ResizableCompartmentFigure rcf = (ResizableCompartmentFigure) super.createFigure();
 		FlowLayout layout = new FlowLayout();
 		layout.setMajorSpacing(getMapMode().DPtoLP(5));
 		layout.setMinorSpacing(getMapMode().DPtoLP(5));
@@ -85,18 +84,13 @@ public class StructKeysEditPart extends ListCompartmentEditPart {
 	 */
 	protected void createDefaultEditPolicies() {
 		super.createDefaultEditPolicies();
-		installEditPolicy(EditPolicyRoles.SEMANTIC_ROLE,
-				new StructKeysItemSemanticEditPolicy());
-		installEditPolicy(EditPolicyRoles.CREATION_ROLE,
-				new CreationEditPolicy());
-		installEditPolicy(EditPolicyRoles.DRAG_DROP_ROLE,
-				new DragDropEditPolicy());
-		installEditPolicy(EditPolicyRoles.CANONICAL_ROLE,
-				new StructKeysCanonicalEditPolicy());
+		installEditPolicy(EditPolicyRoles.SEMANTIC_ROLE, new StructKeysItemSemanticEditPolicy());
+		installEditPolicy(EditPolicyRoles.CREATION_ROLE, new CreationEditPolicy());
+		installEditPolicy(EditPolicyRoles.DRAG_DROP_ROLE, new DragDropEditPolicy());
+		installEditPolicy(EditPolicyRoles.CANONICAL_ROLE, new StructKeysCanonicalEditPolicy());
 
 		// Added for Drag and Drop support
-		installEditPolicy(EditPolicy.LAYOUT_ROLE, new CompartmentEditPolicy(
-				TypesPackage.Literals.STRUCT__FIELDS));
+		installEditPolicy(EditPolicy.LAYOUT_ROLE, new CompartmentEditPolicy(TypesPackage.Literals.STRUCT__FIELDS));
 	}
 
 	/**
@@ -112,11 +106,9 @@ public class StructKeysEditPart extends ListCompartmentEditPart {
 	 */
 	public EditPart getTargetEditPart(Request request) {
 		if (request instanceof CreateViewAndElementRequest) {
-			CreateElementRequestAdapter adapter = ((CreateViewAndElementRequest) request)
-					.getViewAndElementDescriptor()
+			CreateElementRequestAdapter adapter = ((CreateViewAndElementRequest) request).getViewAndElementDescriptor()
 					.getCreateElementRequestAdapter();
-			IElementType type = (IElementType) adapter
-					.getAdapter(IElementType.class);
+			IElementType type = (IElementType) adapter.getAdapter(IElementType.class);
 			if (type == OpenDDSDataLibElementTypes.Key_3004) {
 				return this;
 			}

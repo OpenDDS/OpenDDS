@@ -87,19 +87,18 @@ sub divides_evenly
 
 sub delay_msec_calc
 {
-  my $total_writers = shift;
   my $samples = shift;
   my $base_delay_msec = shift;
 
-  return int(($total_writers * $samples) / 100 + 1) * $base_delay_msec;
+  return int($samples / 100 + 1) * $base_delay_msec;
 }
 
 my $pub_processes = 1;
 my $sub_processes = 1;
 my $delay_msec;
-my $serialized_samples;
+my $serialized_samples_per_writer;
 my $base_delay_msec = 500;
-my $samples = 10;
+my $samples = 5;
 my $custom = 0;
 my $total_writers;
 my $pub_part = 2;
@@ -116,7 +115,7 @@ if ($#ARGV < 1) {
     $config_opts .= '-sub_participants ' . $sub_part . ' ';
     $config_opts .= '-readers 2 ';
     $delay_msec = $base_delay_msec;
-    $serialized_samples = 2 * 2 * 10; # pub_part * writers * samples
+    $serialized_samples_per_writer = 2 * 10; # pub_part * samples
 }
 elsif ($ARGV[1] =~ /(\d+)[t|T][o|O](\d+)/) {
     $total_writers = $1;
@@ -151,9 +150,9 @@ elsif ($ARGV[1] =~ /(\d+)[t|T][o|O](\d+)/) {
     $config_opts .= '-writers ' . $writers . ' ';
     $config_opts .= '-samples ' . $samples . ' ';
     $config_opts .= '-readers ' . $readers . ' ';
-    # produce at most 100 samples per 500ms
-    $delay_msec = delay_msec_calc($total_writers, $samples, $base_delay_msec);
-    $serialized_samples = $pub_part * $writers * $samples;
+
+    $delay_msec = delay_msec_calc($samples, $base_delay_msec);
+    $serialized_samples_per_writer = $pub_part * $samples;
 }
 elsif ($ARGV[1] =~ /-\S+_process/ ||
        $ARGV[1] =~ /-\S+_participant/ ||
@@ -192,11 +191,11 @@ elsif ($ARGV[1] =~ /-\S+_process/ ||
     if ($config_opts =~ /-delay_msec (\d+)/) {
         $delay_msec = $1;
     } else {
-	$delay_msec = delay_msec_calc($total_writers, $samples, $base_delay_msec);
+        $delay_msec = delay_msec_calc($samples, $base_delay_msec);
     }
 
     # only used if -total_duration_msec is not in $ARGV[1]
-    $serialized_samples = $pub_part * $writers * $samples;
+    $serialized_samples_per_writer = $pub_part * $samples;
 
 }
 else {
@@ -213,7 +212,7 @@ if ($config_opts =~ /-total_duration_msec (\d+)/) {
     $total_duration_msec = $1;
 }
 else {
-    $total_duration_msec = $serialized_samples * $delay_msec * 2;
+    $total_duration_msec = $serialized_samples_per_writer * $delay_msec * 2;
     $config_opts .= '-total_duration_msec ' . $total_duration_msec . ' ';
 }
 
@@ -238,7 +237,7 @@ if (!$custom) {
     }
 
     if ($#ARGV == 3 && $ARGV[3] eq "orb_csdtp") {
-	$config_opts .= '-ORBSvcConf svc_csdtp.conf ';
+      $config_opts .= '-ORBSvcConf svc_csdtp.conf ';
     }
 }
 elsif ($config_opts !~ /-sample_size/) {
@@ -264,14 +263,15 @@ print "sub_opts=$sub_opts\n";
 
 $test->setup_discovery();
 
-for ($index = 0; $index < $sub_processes; ++$index) {
-    $test->process("subscriber #$index", "subscriber", $sub_opts .
-                   ($PerlDDS::SafetyProfile ? "-p $index" : ''));
-}
 for ($index = 0; $index < $pub_processes; ++$index) {
     $test->process("publisher #$index", "publisher", $pub_opts .
                    ($PerlDDS::SafetyProfile ? '-p '.
                     ($sub_processes + $index) : ''));
+}
+
+for ($index = 0; $index < $sub_processes; ++$index) {
+    $test->process("subscriber #$index", "subscriber", $sub_opts .
+                   ($PerlDDS::SafetyProfile ? "-p $index" : ''));
 }
 
 for ($index = 0; $index < $pub_processes; ++$index) {
@@ -284,8 +284,9 @@ for ($index = 0; $index < $sub_processes; ++$index) {
 
 # first subscriber process needs to be killed a little after the
 # total expected duration
-my $wait_to_kill = $total_duration_msec * 2;
+my $wait_to_kill = $total_duration_msec / 1000 + 10;
 print "wait_to_kill=$wait_to_kill\n";
 # ignore this issue that is already being tracked in redmine
 $test->ignore_error("(Redmine Issue# 1446)");
+$test->{wait_after_first_proc} = 10;
 exit $test->finish($wait_to_kill);

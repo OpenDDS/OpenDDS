@@ -7,6 +7,7 @@
 #include "dds/DCPS/Util.h"
 #include "dds/DCPS/TypeSupportImpl.h"
 #include "dcps_export.h"
+#include "dds/DCPS/SafetyProfileStreams.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -51,7 +52,7 @@ namespace OpenDDS {
         marshaled_size_ = 0; // should use gen_find_size when marshaling
       }
       if (MarshalTraitsType::gen_is_bounded_key_size()) {
-        OpenDDS::DCPS::KeyOnly<const MessageType > ko(data);
+        OpenDDS::DCPS::KeyOnly<const MessageType> ko(data);
         key_marshaled_size_ = 8 + TraitsType::gen_max_marshaled_size(ko, true);
         // worst case: CDR Encapsulation (4 bytes) + Padding for alignment (4 bytes)
       } else {
@@ -63,13 +64,11 @@ namespace OpenDDS {
     {
     }
 
-  virtual DDS::InstanceHandle_t register_instance (
-      const MessageType & instance)
-    {
-      DDS::Time_t const timestamp =
-        ::OpenDDS::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
-      return register_instance_w_timestamp (instance, timestamp);
-    }
+  virtual DDS::InstanceHandle_t
+  register_instance(const MessageType& instance)
+  {
+    return register_instance_w_timestamp(instance, SystemTimePoint::now().to_dds_time());
+  }
 
   virtual DDS::InstanceHandle_t register_instance_w_timestamp (
       const MessageType & instance,
@@ -87,25 +86,19 @@ namespace OpenDDS {
                       ACE_TEXT("(%P|%t) ")
                       ACE_TEXT("%CDataWriterImpl::")
                       ACE_TEXT("register_instance_w_timestamp, ")
-                      ACE_TEXT("register failed error=%d.\n"),
+                      ACE_TEXT("register failed: %C.\n"),
                       TraitsType::type_name(),
-                      ret));
+                      retcode_to_string(ret).c_str()));
         }
 
       return registered_handle;
     }
 
-  virtual DDS::ReturnCode_t unregister_instance (
-      const MessageType & instance,
-      DDS::InstanceHandle_t handle)
-    {
-      DDS::Time_t const timestamp =
-        ::OpenDDS::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
-
-      return unregister_instance_w_timestamp (instance,
-                                              handle,
-                                              timestamp);
-    }
+  virtual DDS::ReturnCode_t
+  unregister_instance(const MessageType& instance, DDS::InstanceHandle_t handle)
+  {
+    return unregister_instance_w_timestamp(instance, handle, SystemTimePoint::now().to_dds_time());
+  }
 
   virtual DDS::ReturnCode_t unregister_instance_w_timestamp (
       const MessageType & instance_data,
@@ -136,17 +129,11 @@ namespace OpenDDS {
   //WARNING: If the handle is non-nil and the instance is not registered
   //         then this operation may cause an access violation.
   //         This lack of safety helps performance.
-  virtual DDS::ReturnCode_t write (
-      const MessageType & instance_data,
-      DDS::InstanceHandle_t handle)
-    {
-      DDS::Time_t const source_timestamp =
-        ::OpenDDS::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
-      return write_w_timestamp (instance_data,
-                                handle,
-                                source_timestamp);
-    }
-
+  virtual DDS::ReturnCode_t
+  write(const MessageType& instance_data, DDS::InstanceHandle_t handle)
+  {
+    return write_w_timestamp(instance_data, handle, SystemTimePoint::now().to_dds_time());
+  }
 
   //WARNING: If the handle is non-nil and the instance is not registered
   //         then this operation may cause an access violation.
@@ -169,9 +156,9 @@ namespace OpenDDS {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) ")
                             ACE_TEXT("%CDataWriterImpl::write_w_timestamp, ")
-                            ACE_TEXT("register failed err=%d.\n"),
+                            ACE_TEXT("register failed: %C.\n"),
                             TraitsType::type_name(),
-                            ret),
+                            retcode_to_string(ret).c_str()),
                            ret);
         }
 
@@ -206,16 +193,11 @@ namespace OpenDDS {
                                                   filter_out._retn());
     }
 
-  virtual DDS::ReturnCode_t dispose (
-      const MessageType & instance_data,
-      DDS::InstanceHandle_t instance_handle)
-    {
-      DDS::Time_t const source_timestamp =
-        ::OpenDDS::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
-      return dispose_w_timestamp (instance_data,
-                                  instance_handle,
-                                  source_timestamp);
-    }
+  virtual DDS::ReturnCode_t
+  dispose(const MessageType& instance_data, DDS::InstanceHandle_t instance_handle)
+  {
+    return dispose_w_timestamp(instance_data, instance_handle, SystemTimePoint::now().to_dds_time());
+  }
 
   virtual DDS::ReturnCode_t dispose_w_timestamp (
       const MessageType & instance_data,
@@ -388,12 +370,15 @@ private:
           effective_size += padding;
         }
 
-        ACE_NEW_RETURN(tmp_mb, ACE_Message_Block(effective_size,
-                                             ACE_Message_Block::MB_DATA,
-                                             0, //cont
-                                             0, //data
-                                             0, //alloc_strategy
-                                             get_db_lock()), 0);
+        ACE_NEW_RETURN(tmp_mb,
+          ACE_Message_Block(
+            effective_size,
+            ACE_Message_Block::MB_DATA,
+            0, // cont
+            0, // data
+            0, // alloc_strategy
+            get_db_lock()),
+          0);
         mb.reset(tmp_mb);
         OpenDDS::DCPS::Serializer serializer(mb.get(), swap, cdr
                                              ? OpenDDS::DCPS::Serializer::ALIGN_CDR
@@ -427,24 +412,22 @@ private:
           effective_size += padding;
         }
 
-
         ACE_NEW_MALLOC_RETURN(tmp_mb,
-                              static_cast<ACE_Message_Block*>(
-                                                              mb_allocator_->malloc(
-                                                                                    sizeof(ACE_Message_Block))),
-                              ACE_Message_Block(
-                                                effective_size,
-                                                ACE_Message_Block::MB_DATA,
-                                                0, //cont
-                                                0, //data
-                                                data_allocator_.get(), //allocator_strategy
-                                                get_db_lock(), //data block locking_strategy
-                                                ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
-                                                ACE_Time_Value::zero,
-                                                ACE_Time_Value::max_time,
-                                                db_allocator_.get(),
-                                                mb_allocator_.get()),
-                              0);
+          static_cast<ACE_Message_Block*>(
+            mb_allocator_->malloc(sizeof(ACE_Message_Block))),
+          ACE_Message_Block(
+            effective_size,
+            ACE_Message_Block::MB_DATA,
+            0, // cont
+            0, // data
+            data_allocator_.get(), // allocator_strategy
+            get_db_lock(), // data block locking_strategy
+            ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
+            ACE_Time_Value::zero,
+            ACE_Time_Value::max_time,
+            db_allocator_.get(),
+            mb_allocator_.get()),
+          0);
         mb.reset(tmp_mb);
         OpenDDS::DCPS::Serializer serializer(mb.get(), swap, cdr
                                              ? OpenDDS::DCPS::Serializer::ALIGN_CDR
@@ -461,10 +444,11 @@ private:
           serializer.reset_alignment();
         }
 
-        if (! (serializer << instance_data)) {
+        if (!(serializer << instance_data)) {
           ACE_ERROR_RETURN((LM_ERROR,
-            ACE_TEXT("(%P|%t) OpenDDS::DCPS::DataWriterImpl::dds_marshal(), ")
-            ACE_TEXT("instance_data serialization error.\n")),
+            ACE_TEXT("(%P|%t) ERROR: %CDataWriterImpl::dds_marshal(): ")
+            ACE_TEXT("instance_data serialization error.\n"),
+            TraitsType::type_name()),
             0);
         }
       }
@@ -537,7 +521,7 @@ private:
                                      ACE_TEXT("(%P|%t) ")
                                      ACE_TEXT("%CDataWriterImpl::")
                                      ACE_TEXT("get_or_create_instance_handle, ")
-                                     ACE_TEXT("insert %C failed. \n"),
+                                     ACE_TEXT("insert %C failed.\n"),
                                      TraitsType::type_name(), TraitsType::type_name()),
                                     DDS::RETCODE_ERROR);
                 }
@@ -550,12 +534,12 @@ private:
       return DDS::RETCODE_OK;
     }
 
-    InstanceMap  instance_map_;
-    size_t       marshaled_size_;
-    size_t       key_marshaled_size_;
+    InstanceMap instance_map_;
+    size_t marshaled_size_;
+    size_t key_marshaled_size_;
     unique_ptr<DataAllocator> data_allocator_;
     unique_ptr<MessageBlockAllocator> mb_allocator_;
-    unique_ptr<DataBlockAllocator>    db_allocator_;
+    unique_ptr<DataBlockAllocator> db_allocator_;
 
     // A class, normally provided by an unit test, that needs access to
     // private methods/members.

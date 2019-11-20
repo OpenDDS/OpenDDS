@@ -1,4 +1,4 @@
-project: dcpsexe, dcps_transports_for_test, dcps_ts_subdir {
+project: dcpsexe, dcps_test, dcps_transports_for_test, dcps_ts_subdir {
   exename = ReadConditionTest
   idlflags += -SS -o GeneratedCode
 

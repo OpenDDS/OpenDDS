@@ -30,6 +30,7 @@
 #ifdef OPENDDS_SECURITY
 #include "dds/DCPS/security/framework/SecurityRegistry.h"
 #include "dds/DCPS/security/framework/SecurityConfig.h"
+#include "dds/DCPS/security/framework/Properties.h"
 #endif
 
 #include "RecorderImpl.h"
@@ -89,11 +90,12 @@ namespace DCPS {
 //      cannot be false.
 
 // Implementation skeleton constructor
-DomainParticipantImpl::DomainParticipantImpl(DomainParticipantFactoryImpl *     factory,
-                                             const DDS::DomainId_t&             domain_id,
-                                             const DDS::DomainParticipantQos &  qos,
-                                             DDS::DomainParticipantListener_ptr a_listener,
-                                             const DDS::StatusMask &            mask)
+DomainParticipantImpl::DomainParticipantImpl(
+  DomainParticipantFactoryImpl* factory,
+  const DDS::DomainId_t& domain_id,
+  const DDS::DomainParticipantQos& qos,
+  DDS::DomainParticipantListener_ptr a_listener,
+  const DDS::StatusMask& mask)
   : factory_(factory),
     default_topic_qos_(TheServiceParticipant->initial_TopicQos()),
     default_publisher_qos_(TheServiceParticipant->initial_PublisherQos()),
@@ -111,8 +113,8 @@ DomainParticipantImpl::DomainParticipantImpl(DomainParticipantFactoryImpl *     
     shutdown_complete_(false),
     monitor_(0),
     pub_id_gen_(dp_id_),
-    automatic_liveliness_timer_ (*this),
-    participant_liveliness_timer_ (*this)
+    automatic_liveliness_timer_(*this),
+    participant_liveliness_timer_(*this)
 {
   (void) this->set_listener(a_listener, mask);
   monitor_ = TheServiceParticipant->monitor_factory_->create_dp_monitor(this);
@@ -461,57 +463,47 @@ DomainParticipantImpl::create_topic_i(
   } else {
 
     OpenDDS::DCPS::TypeSupport_var type_support;
-    bool has_keys = (topic_mask & TOPIC_TYPE_HAS_KEYS);
 
     if (0 == topic_mask) {
        // creating a topic with compile time type
       type_support = Registered_Data_Types->lookup(this, type_name);
       if (CORBA::is_nil(type_support)) {
         if (DCPS_debug_level >= 1) {
-            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-                       ACE_TEXT("DomainParticipantImpl::create_topic, ")
-                       ACE_TEXT("can't create a topic=%C type_name=%C ")
-                       ACE_TEXT("is not registered.\n"),
-                       topic_name, type_name));
+           ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("DomainParticipantImpl::create_topic, ")
+                      ACE_TEXT("can't create a topic=%C type_name=%C ")
+                      ACE_TEXT("is not registered.\n"),
+                      topic_name, type_name));
         }
         return DDS::Topic::_nil();
       }
-      has_keys = type_support->has_dcps_key();
     }
 
-    RepoId topic_id = GUID_UNKNOWN;
-    TopicStatus status = TOPIC_DISABLED;
+    DDS::Topic_var new_topic = create_new_topic(topic_name,
+                                                type_name,
+                                                topic_qos,
+                                                a_listener,
+                                                mask,
+                                                type_support);
 
-    if (is_enabled()) {
-      Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
-      status = disco->assert_topic(topic_id,
-                                   domain_id_,
-                                   dp_id_,
-                                   topic_name,
-                                   type_name,
-                                   topic_qos,
-                                   has_keys);
+    if (!new_topic) {
+       ACE_ERROR((LM_WARNING,
+                  ACE_TEXT("(%P|%t) WARNING: ")
+                  ACE_TEXT("DomainParticipantImpl::create_topic, ")
+                  ACE_TEXT("create_new_topic failed.\n")));
+        return DDS::Topic::_nil();
     }
 
-    if (status == CREATED || status == FOUND || status == TOPIC_DISABLED) {
-      DDS::Topic_ptr new_topic = create_new_topic(topic_id,
-                                                  topic_name,
-                                                  type_name,
-                                                  topic_qos,
-                                                  a_listener,
-                                                  mask,
-                                                  type_support);
-      if (this->monitor_) {
-        this->monitor_->report();
+    if ((this->enabled_ == true) && qos_.entity_factory.autoenable_created_entities) {
+      if (new_topic->enable() != DDS::RETCODE_OK) {
+         ACE_ERROR((LM_WARNING,
+                    ACE_TEXT("(%P|%t) WARNING: ")
+                    ACE_TEXT("DomainParticipantImpl::create_topic, ")
+                    ACE_TEXT("enable failed.\n")));
+        return DDS::Topic::_nil();
       }
-      return new_topic;
-
-    } else {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::create_topic, ")
-                 ACE_TEXT("assert_topic failed with return value %d.\n"), status));
-      return DDS::Topic::_nil();
     }
+    return new_topic._retn();
   }
 }
 
@@ -636,15 +628,13 @@ DomainParticipantImpl::delete_topic_i(
 //      because it will steal the framework's reference.
 DDS::Topic_ptr
 DomainParticipantImpl::find_topic(
-  const char * topic_name,
-  const DDS::Duration_t & timeout)
+  const char* topic_name,
+  const DDS::Duration_t& timeout)
 {
-  ACE_Time_Value timeout_tv
-  = ACE_OS::gettimeofday() + ACE_Time_Value(timeout.sec, timeout.nanosec/1000);
+  const MonotonicTimePoint timeout_at(MonotonicTimePoint::now() + TimeDuration(timeout));
 
   bool first_time = true;
-
-  while (first_time || ACE_OS::gettimeofday() < timeout_tv) {
+  while (first_time || MonotonicTimePoint::now() < timeout_at) {
     if (first_time) {
       first_time = false;
     }
@@ -668,12 +658,13 @@ DomainParticipantImpl::find_topic(
 
     Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
     TopicStatus status = disco->find_topic(domain_id_,
+                                           get_id(),
                                            topic_name,
                                            type_name.out(),
                                            qos.out(),
                                            topic_id);
 
-
+    const MonotonicTimePoint now = MonotonicTimePoint::now();
     if (status == FOUND) {
       OpenDDS::DCPS::TypeSupport_var type_support =
         Registered_Data_Types->lookup(this, type_name.in());
@@ -688,8 +679,7 @@ DomainParticipantImpl::find_topic(
         return DDS::Topic::_nil();
       }
 
-      DDS::Topic_ptr new_topic = create_new_topic(topic_id,
-                                                  topic_name,
+      DDS::Topic_ptr new_topic = create_new_topic(topic_name,
                                                   type_name,
                                                   qos,
                                                   DDS::TopicListener::_nil(),
@@ -702,18 +692,14 @@ DomainParticipantImpl::find_topic(
                  ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::find_topic - ")
                  ACE_TEXT("topic not found, discovery returned INTERNAL_ERROR!\n")));
       return DDS::Topic::_nil();
-    } else {
-      ACE_Time_Value now = ACE_OS::gettimeofday();
+    } else if (now < timeout_at) {
+      const TimeDuration remaining = timeout_at - now;
 
-      if (now < timeout_tv) {
-        ACE_Time_Value remaining = timeout_tv - now;
+      if (remaining.value().sec() >= 1) {
+        ACE_OS::sleep(1);
 
-        if (remaining.sec() >= 1) {
-          ACE_OS::sleep(1);
-
-        } else {
-          ACE_OS::sleep(remaining);
-        }
+      } else {
+        ACE_OS::sleep(remaining.value());
       }
     }
   }
@@ -1368,7 +1354,7 @@ DomainParticipantImpl::assert_liveliness()
     it->svt_->assert_liveliness_by_participant();
   }
 
-  last_liveliness_activity_ = ACE_OS::gettimeofday();
+  last_liveliness_activity_.set_to_now();
 
   return DDS::RETCODE_OK;
 }
@@ -1437,12 +1423,9 @@ DomainParticipantImpl::get_default_topic_qos(
 }
 
 DDS::ReturnCode_t
-DomainParticipantImpl::get_current_time(
-  DDS::Time_t & current_time)
+DomainParticipantImpl::get_current_time(DDS::Time_t& current_time)
 {
-  current_time
-  = OpenDDS::DCPS::time_value_to_time(
-      ACE_OS::gettimeofday());
+  current_time = SystemTimePoint::now().to_dds_time();
   return DDS::RETCODE_OK;
 }
 
@@ -1646,17 +1629,15 @@ DomainParticipantImpl::enable()
 
   if (disco.is_nil()) {
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("DomainParticipantImpl::enable, ")
-               ACE_TEXT("no repository found for domain id: %d.\n"), domain_id_));
+               ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable, ")
+               ACE_TEXT("no discovery found for domain id: %d.\n"), domain_id_));
     return DDS::RETCODE_ERROR;
   }
 
 #ifdef OPENDDS_SECURITY
   if (TheServiceParticipant->get_security() && !security_config_) {
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("DomainParticipantImpl::enable, ")
+               ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable, ")
                ACE_TEXT("DCPSSecurity flag is set, but unable to load security plugin configuration.\n")));
     return DDS::RETCODE_ERROR;
   }
@@ -1665,7 +1646,7 @@ DomainParticipantImpl::enable()
   AddDomainStatus value = {GUID_UNKNOWN, false};
 
 #ifdef OPENDDS_SECURITY
-  if (TheServiceParticipant->get_security()) {
+  if (TheServiceParticipant->get_security() && security_config_->qos_implies_security(qos_)) {
     Security::Authentication_var auth = security_config_->get_authentication();
 
     DDS::Security::SecurityException se;
@@ -1675,8 +1656,7 @@ DomainParticipantImpl::enable()
     /* TODO - Handle VALIDATION_PENDING_RETRY */
     if (val_res != DDS::Security::VALIDATION_OK) {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("DomainParticipantImpl::enable, ")
+        ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable, ")
         ACE_TEXT("Unable to validate local identity. SecurityException[%d.%d]: %C\n"),
           se.code, se.minor_code, se.message.in()));
       return DDS::Security::RETCODE_NOT_ALLOWED_BY_SECURITY;
@@ -1688,8 +1668,7 @@ DomainParticipantImpl::enable()
 
     if (perm_handle_ == DDS::HANDLE_NIL) {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("DomainParticipantImpl::enable, ")
+        ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable, ")
         ACE_TEXT("Unable to validate local permissions. SecurityException[%d.%d]: %C\n"),
           se.code, se.minor_code, se.message.in()));
       return DDS::Security::RETCODE_NOT_ALLOWED_BY_SECURITY;
@@ -1698,8 +1677,7 @@ DomainParticipantImpl::enable()
     bool check_create = access->check_create_participant(perm_handle_, domain_id_, qos_, se);
     if (!check_create) {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("DomainParticipantImpl::enable, ")
+        ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable, ")
         ACE_TEXT("Unable to create participant. SecurityException[%d.%d]: %C\n"),
           se.code, se.minor_code, se.message.in()));
       return DDS::Security::RETCODE_NOT_ALLOWED_BY_SECURITY;
@@ -1710,32 +1688,40 @@ DomainParticipantImpl::enable()
 
     if (!check_part_sec_attr) {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("DomainParticipantImpl::enable, ")
+        ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable,")
         ACE_TEXT("Unable to get participant security attributes. SecurityException[%d.%d]: %C\n"),
           se.code, se.minor_code, se.message.in()));
       return DDS::RETCODE_ERROR;
     }
 
-    Security::CryptoKeyFactory_var crypto = security_config_->get_crypto_key_factory();
+    if (part_sec_attr.is_rtps_protected) { // DDS-Security v1.1 8.4.2.4 Table 27 is_rtps_protected
+      if (part_sec_attr.allow_unauthenticated_participants) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable, ")
+                   ACE_TEXT("allow_unauthenticated_participants is not possible with is_rtps_protected\n")));
+        return DDS::Security::RETCODE_NOT_ALLOWED_BY_SECURITY;
+      }
 
-    part_crypto_handle_ = crypto->register_local_participant(id_handle_, perm_handle_,
-      Util::filter_properties(qos_.property.value, "dds.sec.crypto."), part_sec_attr, se);
-    if (part_crypto_handle_ == DDS::HANDLE_NIL) {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("DomainParticipantImpl::enable, ")
-        ACE_TEXT("Unable to register local participant. SecurityException[%d.%d]: %C\n"),
-          se.code, se.minor_code, se.message.in()));
-      return DDS::RETCODE_ERROR;
+      const Security::CryptoKeyFactory_var crypto = security_config_->get_crypto_key_factory();
+      part_crypto_handle_ = crypto->register_local_participant(id_handle_, perm_handle_,
+        Util::filter_properties(qos_.property.value, "dds.sec.crypto."), part_sec_attr, se);
+      if (part_crypto_handle_ == DDS::HANDLE_NIL) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable, ")
+                   ACE_TEXT("Unable to register local participant. SecurityException[%d.%d]: %C\n"),
+                   se.code, se.minor_code, se.message.in()));
+        return DDS::RETCODE_ERROR;
+      }
+
+    } else {
+      part_crypto_handle_ = DDS::HANDLE_NIL;
     }
 
     value = disco->add_domain_participant_secure(domain_id_, qos_, dp_id_, id_handle_, perm_handle_, part_crypto_handle_);
 
     if (value.id == GUID_UNKNOWN) {
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("DomainParticipantImpl::enable, ")
+                 ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable, ")
                  ACE_TEXT("add_domain_participant_secure returned invalid id.\n")));
       return DDS::RETCODE_ERROR;
     }
@@ -1747,8 +1733,7 @@ DomainParticipantImpl::enable()
 
     if (value.id == GUID_UNKNOWN) {
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("DomainParticipantImpl::enable, ")
+                 ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::enable, ")
                  ACE_TEXT("add_domain_participant returned invalid id.\n")));
       return DDS::RETCODE_ERROR;
     }
@@ -1866,7 +1851,6 @@ DomainParticipantImpl::get_repoid(const DDS::InstanceHandle_t& handle)
 
 DDS::Topic_ptr
 DomainParticipantImpl::create_new_topic(
-  const RepoId topic_id,
   const char * topic_name,
   const char * type_name,
   const DDS::TopicQos & qos,
@@ -1880,7 +1864,7 @@ DomainParticipantImpl::create_new_topic(
                    DDS::Topic::_nil());
 
 #ifdef OPENDDS_SECURITY
-  if (TheServiceParticipant->get_security() && !topicIsBIT(topic_name, type_name)) {
+  if (perm_handle_ && !topicIsBIT(topic_name, type_name)) {
     Security::AccessControl_var access = security_config_->get_access_control();
 
     DDS::Security::SecurityException se;
@@ -1910,8 +1894,7 @@ DomainParticipantImpl::create_new_topic(
   TopicImpl* topic_servant = 0;
 
   ACE_NEW_RETURN(topic_servant,
-                 TopicImpl(topic_id,
-                           topic_name,
+                 TopicImpl(topic_name,
                            type_name,
                            type_support,
                            qos,
@@ -2220,10 +2203,10 @@ DomainParticipantImpl::remove_adjust_liveliness_timers()
 DomainParticipantImpl::LivelinessTimer::LivelinessTimer(DomainParticipantImpl& impl,
                                                         DDS::LivelinessQosPolicyKind kind)
   : impl_(impl)
-  , kind_ (kind)
-  , interval_ (ACE_Time_Value::max_time)
-  , recalculate_interval_ (false)
-  , scheduled_ (false)
+  , kind_(kind)
+  , interval_(TimeDuration::max_value)
+  , recalculate_interval_(false)
+  , scheduled_(false)
 { }
 
 DomainParticipantImpl::LivelinessTimer::~LivelinessTimer()
@@ -2236,27 +2219,22 @@ DomainParticipantImpl::LivelinessTimer::~LivelinessTimer()
 void
 DomainParticipantImpl::LivelinessTimer::add_adjust(OpenDDS::DCPS::DataWriterImpl* writer)
 {
-  ACE_GUARD(ACE_Thread_Mutex,
-            guard,
-            this->lock_);
+  ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 
-  const ACE_Time_Value now = ACE_OS::gettimeofday();
+  const MonotonicTimePoint now = MonotonicTimePoint::now();
 
   // Calculate the time remaining to liveliness check.
-  const ACE_Time_Value remaining = interval_ - (now - last_liveliness_check_);
+  const TimeDuration remaining = interval_ - (now - last_liveliness_check_);
 
   // Adopt a smaller interval.
-  const ACE_Time_Value i = writer->liveliness_check_interval(kind_);
-  if (i < interval_) {
-    interval_ = i;
-  }
+  interval_ = std::min(interval_, writer->liveliness_check_interval(kind_));
 
   // Reschedule or schedule a timer if necessary.
   if (scheduled_ && interval_ < remaining) {
     TheServiceParticipant->timer()->cancel_timer(this);
-    TheServiceParticipant->timer()->schedule_timer(this, 0, interval_);
+    TheServiceParticipant->timer()->schedule_timer(this, 0, interval_.value());
   } else if (!scheduled_) {
-    TheServiceParticipant->timer()->schedule_timer(this, 0, interval_);
+    TheServiceParticipant->timer()->schedule_timer(this, 0, interval_.value());
     scheduled_ = true;
     last_liveliness_check_ = now;
   }
@@ -2265,20 +2243,19 @@ DomainParticipantImpl::LivelinessTimer::add_adjust(OpenDDS::DCPS::DataWriterImpl
 void
 DomainParticipantImpl::LivelinessTimer::remove_adjust()
 {
-  ACE_GUARD(ACE_Thread_Mutex,
-            guard,
-            this->lock_);
+  ACE_GUARD(ACE_Thread_Mutex, guard, this->lock_);
 
   recalculate_interval_ = true;
 }
 
 int
-DomainParticipantImpl::LivelinessTimer::handle_timeout(const ACE_Time_Value & tv, const void* /* arg */)
+DomainParticipantImpl::LivelinessTimer::handle_timeout(
+  const ACE_Time_Value& tv,
+  const void* /* arg */)
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex,
-                   guard,
-                   this->lock_,
-                   0);
+  const MonotonicTimePoint now(tv);
+
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, this->lock_, 0);
 
   scheduled_ = false;
 
@@ -2287,10 +2264,10 @@ DomainParticipantImpl::LivelinessTimer::handle_timeout(const ACE_Time_Value & tv
     recalculate_interval_ = false;
   }
 
-  if (interval_ != ACE_Time_Value::max_time) {
-    dispatch(tv);
-    last_liveliness_check_ = tv;
-    TheServiceParticipant->timer()->schedule_timer(this, 0, interval_);
+  if (!interval_.is_max()) {
+    dispatch(now);
+    last_liveliness_check_ = now;
+    TheServiceParticipant->timer()->schedule_timer(this, 0, interval_.value());
     scheduled_ = true;
   }
 
@@ -2302,7 +2279,7 @@ DomainParticipantImpl::AutomaticLivelinessTimer::AutomaticLivelinessTimer(Domain
 { }
 
 void
-DomainParticipantImpl::AutomaticLivelinessTimer::dispatch(const ACE_Time_Value& /* tv */)
+DomainParticipantImpl::AutomaticLivelinessTimer::dispatch(const MonotonicTimePoint& /* tv */)
 {
   impl_.signal_liveliness (kind_);
 }
@@ -2312,17 +2289,17 @@ DomainParticipantImpl::ParticipantLivelinessTimer::ParticipantLivelinessTimer(Do
 { }
 
 void
-DomainParticipantImpl::ParticipantLivelinessTimer::dispatch(const ACE_Time_Value& tv)
+DomainParticipantImpl::ParticipantLivelinessTimer::dispatch(const MonotonicTimePoint& tv)
 {
   if (impl_.participant_liveliness_activity_after (tv - interval())) {
     impl_.signal_liveliness (kind_);
   }
 }
 
-ACE_Time_Value
+TimeDuration
 DomainParticipantImpl::liveliness_check_interval(DDS::LivelinessQosPolicyKind kind)
 {
-  ACE_Time_Value tv = ACE_Time_Value::max_time;
+  TimeDuration tv(TimeDuration::max_value);
 
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     tao_mon,
@@ -2338,16 +2315,13 @@ DomainParticipantImpl::liveliness_check_interval(DDS::LivelinessQosPolicyKind ki
 }
 
 bool
-DomainParticipantImpl::participant_liveliness_activity_after(const ACE_Time_Value& tv)
+DomainParticipantImpl::participant_liveliness_activity_after(const MonotonicTimePoint& tv)
 {
   if (last_liveliness_activity_ > tv) {
     return true;
   }
 
-  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
-                    tao_mon,
-                    this->publishers_protector_,
-                    tv);
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, tao_mon, this->publishers_protector_, !tv.is_zero());
 
   for (PublisherSet::iterator it(publishers_.begin());
        it != publishers_.end(); ++it) {

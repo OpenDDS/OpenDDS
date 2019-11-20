@@ -42,19 +42,18 @@ namespace DCPS {
 DataLink::DataLink(TransportImpl& impl, Priority priority, bool is_loopback,
                    bool is_active)
   : stopped_(false),
-    scheduled_to_stop_at_(ACE_Time_Value::zero),
     impl_(impl),
     transport_priority_(priority),
     scheduling_release_(false),
     is_loopback_(is_loopback),
     is_active_(is_active),
     started_(false),
-    send_response_listener_("DataLink")
+    send_response_listener_("DataLink"),
+    interceptor_(impl_.reactor(), impl_.reactor_owner())
 {
   DBG_ENTRY_LVL("DataLink", "DataLink", 6);
 
-  datalink_release_delay_.sec(impl.config().datalink_release_delay_ / 1000);
-  datalink_release_delay_.usec(impl.config().datalink_release_delay_ % 1000 * 1000);
+  datalink_release_delay_ = TimeDuration::from_msec(impl.config().datalink_release_delay_);
 
   id_ = DataLink::get_next_datalink_id();
 
@@ -102,30 +101,85 @@ DataLink::impl() const
   return impl_;
 }
 
-
 bool
 DataLink::add_on_start_callback(const TransportClient_wrch& client, const RepoId& remote)
 {
+  const DataLink_rch link(this, inc_count());
+
   GuardType guard(strategy_lock_);
+
+  TransportClient_rch client_lock = client.lock();
+  if (client_lock) {
+    PendingOnStartsMap::iterator it = pending_on_starts_.find(remote);
+    if (it != pending_on_starts_.end()) {
+      RepoIdSet::iterator it2 = it->second.find(client_lock->get_repo_id());
+      if (it2 != it->second.end()) {
+        it->second.erase(it2);
+        if (it->second.empty()) {
+          pending_on_starts_.erase(it);
+        }
+        guard.release();
+        interceptor_.execute_or_enqueue(new ImmediateStart(link, client, remote));
+      } else {
+        on_start_callbacks_[remote][client_lock->get_repo_id()] = client;
+      }
+    } else {
+      on_start_callbacks_[remote][client_lock->get_repo_id()] = client;
+    }
+  }
 
   if (started_ && !send_strategy_.is_nil()) {
     return false; // link already started
   }
-  on_start_callbacks_.push_back(std::make_pair(client, remote));
   return true;
+}
+
+void
+DataLink::remove_startup_callbacks(const RepoId& local, const RepoId& remote)
+{
+  GuardType guard(strategy_lock_);
+
+  OnStartCallbackMap::iterator oit = on_start_callbacks_.find(remote);
+  if (oit != on_start_callbacks_.end()) {
+    RepoToClientMap::iterator oit2 = oit->second.find(local);
+    if (oit2 != oit->second.end()) {
+      oit->second.erase(oit2);
+      if (oit->second.empty()) {
+        on_start_callbacks_.erase(oit);
+      }
+    }
+  }
+  PendingOnStartsMap::iterator pit = pending_on_starts_.find(remote);
+  if (pit != pending_on_starts_.end()) {
+    RepoIdSet::iterator pit2 = pit->second.find(local);
+    if (pit2 != pit->second.end()) {
+      pit->second.erase(pit2);
+      if (pit->second.empty()) {
+        pending_on_starts_.erase(pit);
+      }
+    }
+  }
 }
 
 void
 DataLink::remove_on_start_callback(const TransportClient_wrch& client, const RepoId& remote)
 {
   GuardType guard(strategy_lock_);
-  on_start_callbacks_.erase(
-    std::remove(on_start_callbacks_.begin(),
-                on_start_callbacks_.end(),
-                std::make_pair(client, remote)),
-    on_start_callbacks_.end());
-}
 
+  TransportClient_rch client_lock = client.lock();
+  if (client_lock) {
+    OnStartCallbackMap::iterator it = on_start_callbacks_.find(remote);
+    if (it != on_start_callbacks_.end()) {
+      RepoToClientMap::iterator it2 = it->second.find(client_lock->get_repo_id());
+      if (it2 != it->second.end()) {
+        it->second.erase(it2);
+        if (it->second.empty()) {
+          on_start_callbacks_.erase(it);
+        }
+      }
+    }
+  }
+}
 
 void
 DataLink::invoke_on_start_callbacks(bool success)
@@ -139,13 +193,60 @@ DataLink::invoke_on_start_callbacks(bool success)
       break;
     }
 
-    OnStartCallback last_callback = on_start_callbacks_.back();
-    on_start_callbacks_.pop_back();
+    RepoId remote;
+    TransportClient_wrch client;
+
+    OnStartCallbackMap::iterator it = on_start_callbacks_.begin();
+    if (it != on_start_callbacks_.end()) {
+      remote = it->first;
+      RepoToClientMap::iterator it2 = it->second.begin();
+      if (it2 != it->second.end()) {
+        client = it2->second;
+        it->second.erase(it2);
+        if (it->second.empty()) {
+          on_start_callbacks_.erase(it);
+        }
+      }
+    }
 
     guard.release();
-    TransportClient_rch client = last_callback.first.lock();
-    if (client)
-      client->use_datalink(last_callback.second, link);
+    TransportClient_rch client_lock = client.lock();
+    if (client_lock) {
+      client_lock->use_datalink(remote, link);
+    }
+  }
+}
+
+void
+DataLink::invoke_on_start_callbacks(const RepoId& local, const RepoId& remote, bool success)
+{
+  const DataLink_rch link(success ? this : 0, inc_count());
+
+  TransportClient_wrch client;
+
+  {
+    GuardType guard(strategy_lock_);
+
+    OnStartCallbackMap::iterator it = on_start_callbacks_.find(remote);
+    if (it != on_start_callbacks_.end()) {
+      RepoToClientMap::iterator it2 = it->second.find(local);
+      if (it2 != it->second.end()) {
+        client = it2->second;
+        it->second.erase(it2);
+        if (it->second.empty()) {
+          on_start_callbacks_.erase(it);
+        }
+      } else {
+        pending_on_starts_[remote].insert(local);
+      }
+    } else {
+      pending_on_starts_[remote].insert(local);
+    }
+  }
+
+  TransportClient_rch client_lock = client.lock();
+  if (client_lock) {
+    client_lock->use_datalink(remote, link);
   }
 }
 
@@ -153,7 +254,8 @@ DataLink::invoke_on_start_callbacks(bool success)
 int
 DataLink::handle_exception(ACE_HANDLE /* fd */)
 {
-  if(this->scheduled_to_stop_at_ == ACE_Time_Value::zero) {
+  const MonotonicTimePoint now = MonotonicTimePoint::now();
+  if (scheduled_to_stop_at_.is_zero()) {
     if (DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataLink::handle_exception() - not scheduling or stopping\n")));
@@ -166,7 +268,7 @@ DataLink::handle_exception(ACE_HANDLE /* fd */)
       }
     }
     return 0;
-  } else if (this->scheduled_to_stop_at_ <= ACE_OS::gettimeofday()) {
+  } else if (scheduled_to_stop_at_ <= now) {
     if (this->scheduling_release_) {
       if (DCPS_debug_level > 0) {
         ACE_DEBUG((LM_DEBUG,
@@ -187,8 +289,8 @@ DataLink::handle_exception(ACE_HANDLE /* fd */)
                  ACE_TEXT("(%P|%t) DataLink::handle_exception() - (delay) scheduling timer for future release\n")));
     }
     ACE_Reactor_Timer_Interface* reactor = impl_.timer();
-    ACE_Time_Value future_release_time = this->scheduled_to_stop_at_ - ACE_OS::gettimeofday();
-    reactor->schedule_timer(this, 0, future_release_time);
+    const TimeDuration future_release_time = scheduled_to_stop_at_ - now;
+    reactor->schedule_timer(this, 0, future_release_time.value());
   }
   return 0;
 }
@@ -197,9 +299,9 @@ DataLink::handle_exception(ACE_HANDLE /* fd */)
 //this thread avoids possibly deadlocking trying to access reactor
 //to stop strategies or schedule timers
 void
-DataLink::schedule_stop(const ACE_Time_Value& schedule_to_stop_at)
+DataLink::schedule_stop(const MonotonicTimePoint& schedule_to_stop_at)
 {
-  if (!this->stopped_ && this->scheduled_to_stop_at_ == ACE_Time_Value::zero) {
+  if (!stopped_ && scheduled_to_stop_at_.is_zero()) {
     this->scheduled_to_stop_at_ = schedule_to_stop_at;
     notify_reactor();
     // reactor will invoke our DataLink::handle_exception()
@@ -214,7 +316,7 @@ DataLink::schedule_stop(const ACE_Time_Value& schedule_to_stop_at)
 void
 DataLink::notify_reactor()
 {
-  TransportReactorTask_rch reactor(impl_.reactor_task());
+  ReactorTask_rch reactor(impl_.reactor_task());
   reactor->get_reactor()->notify(this);
 }
 
@@ -248,7 +350,7 @@ DataLink::stop()
 
   this->stop_i();
   this->stopped_ = true;
-  this->scheduled_to_stop_at_ = ACE_Time_Value::zero;
+  scheduled_to_stop_at_ = MonotonicTimePoint::zero_value;
 }
 
 void
@@ -292,7 +394,7 @@ DataLink::make_reservation(const RepoId& remote_subscription_id,
       rls = make_rch<ReceiveListenerSet>();
     rls->insert(local_publication_id, TransportReceiveListener_rch());
 
-    send_listeners_.insert(std::make_pair(local_publication_id,send_listener));
+    send_listeners_.insert(std::make_pair(local_publication_id, send_listener));
   }
   return 0;
 }
@@ -385,6 +487,8 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
                OPENDDS_STRING(remote).c_str()));
   }
 
+  remove_startup_callbacks(local_id, remote_id);
+
   //let the specific class release its reservations
   //done this way to prevent deadlock of holding pub_sub_maps_lock_
   //then obtaining a specific class lock in release_reservations_i
@@ -443,7 +547,7 @@ DataLink::schedule_delayed_release()
     this->send_strategy_->clear();
   }
 
-  ACE_Time_Value future_release_time = ACE_OS::gettimeofday() + this->datalink_release_delay_;
+  const MonotonicTimePoint future_release_time(MonotonicTimePoint::now() + datalink_release_delay_);
   this->schedule_stop(future_release_time);
 }
 
@@ -462,7 +566,7 @@ DataLink::cancel_release()
       ACE_DEBUG((LM_DEBUG, "(%P|%t) DataLink::cancel_release - link[%@] currently scheduling release, notify reactor of cancel\n", this));
     }
     this->set_scheduling_release(false);
-    this->scheduled_to_stop_at_ = ACE_Time_Value::zero;
+    scheduled_to_stop_at_ = MonotonicTimePoint::zero_value;
     notify_reactor();
   }
   return true;
@@ -679,7 +783,7 @@ DataLink::transport_shutdown()
 
   //this->cancel_release();
   this->set_scheduling_release(false);
-  this->scheduled_to_stop_at_ = ACE_Time_Value::zero;
+  scheduled_to_stop_at_ = MonotonicTimePoint::zero_value;
 
   ACE_Reactor_Timer_Interface* reactor = impl_.timer();
   reactor->cancel_timer(this);
@@ -924,7 +1028,7 @@ void DataLink::clear_associations()
 int
 DataLink::handle_timeout(const ACE_Time_Value& /*tv*/, const void* /*arg*/)
 {
-  if (this->scheduled_to_stop_at_ != ACE_Time_Value::zero) {
+  if (!scheduled_to_stop_at_.is_zero()) {
     VDBG_LVL((LM_DEBUG, "(%P|%t) DataLink::handle_timeout called\n"), 4);
     impl_.unbind_link(this);
 
@@ -1029,6 +1133,20 @@ DataLink::handle_send_request_ack(TransportQueueElement* element)
   element->data_delivered();
   return true;
 }
+
+bool
+DataLink::Interceptor::reactor_is_shut_down() const {
+  return false;
+}
+
+void
+DataLink::ImmediateStart::execute() {
+  TransportClient_rch client_lock = client_.lock();
+  if (client_lock) {
+    client_lock->use_datalink(remote_, link_);
+  }
+}
+
 
 #ifndef OPENDDS_SAFETY_PROFILE
 std::ostream&

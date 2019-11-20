@@ -29,8 +29,7 @@ import org.opendds.modeling.diagram.dcpslib.providers.OpenDDSDcpsLibElementTypes
 /**
  * @generated
  */
-public class DomainParticipantQoSPoliciesCustomEditPart extends
-		ListCompartmentEditPart {
+public class DomainParticipantQoSPoliciesCustomEditPart extends ListCompartmentEditPart {
 
 	/**
 	 * @generated
@@ -62,8 +61,7 @@ public class DomainParticipantQoSPoliciesCustomEditPart extends
 	 * @generated
 	 */
 	public IFigure createFigure() {
-		ResizableCompartmentFigure result = (ResizableCompartmentFigure) super
-				.createFigure();
+		ResizableCompartmentFigure result = (ResizableCompartmentFigure) super.createFigure();
 		result.setTitleVisibility(false);
 		return result;
 	}
@@ -73,17 +71,13 @@ public class DomainParticipantQoSPoliciesCustomEditPart extends
 	 */
 	protected void createDefaultEditPolicies() {
 		super.createDefaultEditPolicies();
-		installEditPolicy(EditPolicy.PRIMARY_DRAG_ROLE,
-				new ResizableCompartmentEditPolicy());
+		installEditPolicy(EditPolicy.PRIMARY_DRAG_ROLE, new ResizableCompartmentEditPolicy());
 		installEditPolicy(EditPolicyRoles.SEMANTIC_ROLE,
 				new DomainParticipantQoSPoliciesCustomItemSemanticEditPolicy());
 		installEditPolicy(EditPolicyRoles.CREATION_ROLE,
-				new CreationEditPolicyWithCustomReparent(
-						OpenDDSDcpsLibVisualIDRegistry.TYPED_INSTANCE));
-		installEditPolicy(EditPolicyRoles.DRAG_DROP_ROLE,
-				new DragDropEditPolicy());
-		installEditPolicy(EditPolicyRoles.CANONICAL_ROLE,
-				new DomainParticipantQoSPoliciesCustomCanonicalEditPolicy());
+				new CreationEditPolicyWithCustomReparent(OpenDDSDcpsLibVisualIDRegistry.TYPED_INSTANCE));
+		installEditPolicy(EditPolicyRoles.DRAG_DROP_ROLE, new DragDropEditPolicy());
+		installEditPolicy(EditPolicyRoles.CANONICAL_ROLE, new DomainParticipantQoSPoliciesCustomCanonicalEditPolicy());
 	}
 
 	/**
@@ -99,11 +93,9 @@ public class DomainParticipantQoSPoliciesCustomEditPart extends
 	 */
 	public EditPart getTargetEditPart(Request request) {
 		if (request instanceof CreateViewAndElementRequest) {
-			CreateElementRequestAdapter adapter = ((CreateViewAndElementRequest) request)
-					.getViewAndElementDescriptor()
+			CreateElementRequestAdapter adapter = ((CreateViewAndElementRequest) request).getViewAndElementDescriptor()
 					.getCreateElementRequestAdapter();
-			IElementType type = (IElementType) adapter
-					.getAdapter(IElementType.class);
+			IElementType type = (IElementType) adapter.getAdapter(IElementType.class);
 			if (type == OpenDDSDcpsLibElementTypes.EfQosPolicy_3012) {
 				return this;
 			}
@@ -124,8 +116,8 @@ public class DomainParticipantQoSPoliciesCustomEditPart extends
 	 */
 	@Override
 	protected java.util.List getModelChildren() {
-		return CompartmentChildrenFinder.filterPoliciesNotOwnedByDcpsLib(
-				((View) getModel()).getElement(), super.getModelChildren());
+		return CompartmentChildrenFinder.filterPoliciesNotOwnedByDcpsLib(((View) getModel()).getElement(),
+				super.getModelChildren());
 	}
 
 }

@@ -1,20 +1,6 @@
-
-project(ZeroCopyDRL_idl): dcps_test_lib {
-  idlflags      += -Wb,stub_export_include=Messenger_export.h \
-                   -Wb,stub_export_macro=Messenger_Export -SS
-  dcps_ts_flags += -Wb,export_macro=Messenger_Export
-  dynamicflags  += MESSENGER_BUILD_DLL
-
-  TypeSupport_Files {
-    Messenger.idl
-  }
-}
-
-project(ZeroCopyDRL_Publisher): dcpsexe, dcps_transports_for_test, dds_model {
+project(ZeroCopyDRL_Publisher): dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test, dds_model {
 
   exename   = publisher
-  after    += ZeroCopyDRL_idl
-  libs     += ZeroCopyDRL_idl
 
   Idl_Files {
   }
@@ -25,11 +11,9 @@ project(ZeroCopyDRL_Publisher): dcpsexe, dcps_transports_for_test, dds_model {
   }
 }
 
-project(ZeroCopyDRL_Subscriber): dcpsexe, dcps_transports_for_test, dds_model {
+project(ZeroCopyDRL_Subscriber): dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test, dds_model {
 
   exename   = subscriber
-  after    += ZeroCopyDRL_idl
-  libs     += ZeroCopyDRL_idl
 
   Idl_Files {
   }
@@ -40,11 +24,9 @@ project(ZeroCopyDRL_Subscriber): dcpsexe, dcps_transports_for_test, dds_model {
   }
 }
 
-project(ZeroCopyDRL_StackSubscriber) : dcpsexe, dcps_transports_for_test, dds_model {
+project(ZeroCopyDRL_StackSubscriber) : dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test, dds_model {
 
   exename   = stack_subscriber
-  after    += ZeroCopyDRL_idl
-  libs     += ZeroCopyDRL_idl
 
   Idl_Files {
   }

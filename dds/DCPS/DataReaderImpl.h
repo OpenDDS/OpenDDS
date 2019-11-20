@@ -42,6 +42,7 @@
 #include "RcEventHandler.h"
 #include "TopicImpl.h"
 #include "DomainParticipantImpl.h"
+#include "TimeTypes.h"
 
 #include "ace/String_Base.h"
 #include "ace/Reverse_Lock_T.h"
@@ -89,7 +90,7 @@ public:
     DataCollector<double>::OnFull type = DataCollector<double>::KeepOldest);
 
   /// Add a datum to the latency statistics.
-  void add_stat(const ACE_Time_Value& delay);
+  void add_stat(const TimeDuration& delay);
 
   /// Extract the current latency statistics for this writer.
   LatencyStatistics get_stats() const;
@@ -223,8 +224,6 @@ public:
 
   virtual void update_incompatible_qos(const IncompatibleQosStatus& status);
 
-  virtual void inconsistent_topic();
-
   virtual void signal_liveliness(const RepoId& remote_participant);
 
   /**
@@ -240,13 +239,13 @@ public:
   /// The writer state is inout parameter, it has to be set ALIVE before
   /// handle_timeout is called since some subroutine use the state.
   void writer_became_alive(WriterInfo& info,
-                           const ACE_Time_Value& when);
+                           const MonotonicTimePoint& when);
 
   /// tell instances when a DataWriter transitions to DEAD
   /// The writer state is inout parameter, the state is set to DEAD
   /// when it returns.
   void writer_became_dead(WriterInfo& info,
-                          const ACE_Time_Value& when);
+                          const MonotonicTimePoint& when);
 
   /// tell instance when a DataWriter is removed.
   /// The liveliness status need update.
@@ -616,7 +615,7 @@ protected:
   bool ownership_filter_instance(const SubscriptionInstance_rch& instance,
                                  const PublicationId& pubid);
   bool time_based_filter_instance(const SubscriptionInstance_rch& instance,
-                                  ACE_Time_Value& filter_time_expired);
+                                  TimeDuration& filter_time_expired);
 
   void accept_sample_processing(const SubscriptionInstance_rch& instance, const DataSampleHeader& header, bool is_new_instance);
 
@@ -625,21 +624,21 @@ protected:
   /// Data has arrived into the cache, unblock waiting ReadConditions
   void notify_read_conditions();
 
-  unique_ptr<ReceivedDataAllocator>  rd_allocator_;
-  DDS::DataReaderQos           qos_;
+  unique_ptr<ReceivedDataAllocator> rd_allocator_;
+  DDS::DataReaderQos qos_;
 
   // Status conditions accessible by subclasses.
   DDS::SampleRejectedStatus sample_rejected_status_;
   DDS::SampleLostStatus sample_lost_status_;
 
   /// lock protecting sample container as well as statuses.
-  ACE_Recursive_Thread_Mutex   sample_lock_;
+  ACE_Recursive_Thread_Mutex sample_lock_;
 
   typedef ACE_Reverse_Lock<ACE_Recursive_Thread_Mutex> Reverse_Lock_t;
   Reverse_Lock_t reverse_sample_lock_;
 
   WeakRcHandle<DomainParticipantImpl> participant_servant_;
-  TopicDescriptionPtr<TopicImpl>      topic_servant_;
+  TopicDescriptionPtr<TopicImpl> topic_servant_;
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   bool is_exclusive_ownership_;
@@ -674,7 +673,7 @@ private:
                                DDS::InstanceHandleSeq& hdls);
 
   void instances_liveliness_update(WriterInfo& info,
-                                   const ACE_Time_Value& when);
+                                   const MonotonicTimePoint& when);
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   bool verify_coherent_changes_completion(WriterInfo* writer);
@@ -769,8 +768,7 @@ private:
 
     void cancel_timer()
     {
-      CancelCommand c(this);
-      execute_or_enqueue(c);
+      execute_or_enqueue(new CancelCommand(this));
     }
 
     virtual bool reactor_is_shut_down() const
@@ -785,7 +783,7 @@ private:
 
     /// liveliness timer id; -1 if no timer is set
     long liveliness_timer_id_;
-    void check_liveliness_i(bool cancel, const ACE_Time_Value& current_time);
+    void check_liveliness_i(bool cancel, const MonotonicTimePoint& now);
 
     int handle_timeout(const ACE_Time_Value& current_time, const void* arg);
 
@@ -806,7 +804,7 @@ private:
       { }
       virtual void execute()
       {
-        timer_->check_liveliness_i(true, ACE_OS::gettimeofday());
+        timer_->check_liveliness_i(true, MonotonicTimePoint::now());
       }
     };
 

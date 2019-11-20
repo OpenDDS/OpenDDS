@@ -10,7 +10,11 @@
 
 #include /**/ "ace/pre.h"
 
-#include "dds/DCPS/transport/framework/QueueTaskBase_T.h"
+#include "dds/DCPS/RcObject.h"
+#include "dds/DCPS/transport/tcp/TcpConnection_rch.h"
+#include "ace/Condition_Thread_Mutex.h"
+#include "ace/Reverse_Lock_T.h"
+#include "ace/Task.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
@@ -21,35 +25,48 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class TcpConnection;
-
-enum ReconnectOpType {
-  DO_RECONNECT
-};
-
 /**
  * @class TcpReconnectTask
  *
- * @brief Active Object managing a queue of reconnecting request.
+ * @brief Object managing a reconnection request.
  *
- *  This task handles request to reconnect to the remotes to avoid the
- *  the caller threads (thread to send or reactor thread) block on reconnecting.
- *  This reconnect task has lifetime as TcpConnection object. One reconnect
- *  task just dedicates to a single connection.
+ *  This task handles a request to reconnect a tcp connection object to avoid the
+ *  the caller threads (thread to send or reactor thread) blocking on reconnect.
+ *  This reconnect task has the same lifetime as the paired TcpConnection object.
  */
-class TcpReconnectTask : public QueueTaskBase <ReconnectOpType> {
+class TcpReconnectTask : public ACE_Task_Base, public RcObject {
 public:
-  TcpReconnectTask(TcpConnection* con);
+  TcpReconnectTask();
 
   virtual ~TcpReconnectTask();
 
-  /// Handle reconnect requests.
-  virtual void execute(ReconnectOpType& op);
+  void reconnect(TcpConnection_rch con);
+  bool active();
+  void wait_complete();
+  void shutdown();
+
+  template <typename T>
+  void wait_complete(T& lockable) {
+    ACE_Reverse_Lock<T> rev_lock(lockable);
+    while (active()) {
+      ACE_GUARD(ACE_Reverse_Lock<T>, rev_guard, rev_lock);
+      wait_complete();
+    }
+  }
+
+  bool is_task_thread() { return ACE_Thread::self() == id_; }
 
 private:
 
+  /// Handle reconnect requests.
+  int svc();
+
   /// The connection that needs be re-established.
-  TcpConnection* connection_;
+  TcpConnection_rch connection_;
+  ACE_Thread_Mutex mutex_;
+  ACE_Condition_Thread_Mutex cv_;
+  bool shutdown_;
+  ACE_thread_t id_;
 };
 
 } // namespace DCPS

@@ -42,7 +42,7 @@ if ($test->flag('keymarshalling')) {
                      );
   foreach my $file (@error_files) {
     my $idl = PerlDDS::create_process ("$ENV{DDS_ROOT}/dds/idl/opendds_idl",
-                                       $file,
+                                       "--default-nested $file",
                                        $LONE_PROCESS);
     open(SAVEOUT, ">&STDOUT");
     open(SAVEERR, ">&STDERR");

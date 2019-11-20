@@ -1,4 +1,4 @@
-project: dcps_test_lib, opendds_cxx11 {
+project: dcps_test_idl_only_lib, opendds_cxx11 {
   dcps_ts_flags += -Wb,export_include=Messenger_export.h \
                    -Wb,export_macro=Messenger_Export
   idlflags      += -Wb,export_macro=Messenger_Export
@@ -6,9 +6,5 @@ project: dcps_test_lib, opendds_cxx11 {
 
   TypeSupport_Files {
     Messenger.idl
-  }
-
-  IDL_Files {
-    MessengerTypeSupport.idl
   }
 }

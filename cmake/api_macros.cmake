@@ -99,6 +99,14 @@ macro(OPENDDS_TARGET_SOURCES target)
     _opendds_options
     ${ARGN})
 
+  if(NOT _opendds_options MATCHES "--(no-)?default-nested")
+    if (OPENDDS_DEFAULT_NESTED)
+      list(APPEND _opendds_options "--default-nested")
+    else()
+      list(APPEND _opendds_options "--no-default-nested")
+    endif()
+  endif()
+
   if(_libs)
     message(WARNING "Ignoring libs '${_libs}' passed into OPENDDS_TARGET_SOURCES.")
   endif()
@@ -148,6 +156,8 @@ macro(OPENDDS_TARGET_SOURCES target)
   if (OPENDDS_DCPS_LINK_DEPS)
     target_link_libraries(${target} ${OPENDDS_DCPS_LINK_DEPS})
   endif()
+
+  target_link_libraries(${target} Threads::Threads)
 
   foreach(scope PUBLIC PRIVATE INTERFACE)
     if(_idl_sources_${scope})

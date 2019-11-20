@@ -21,6 +21,8 @@ namespace ICE {
 
 #ifdef OPENDDS_SECURITY
 
+using DCPS::MonotonicTimePoint;
+
 EndpointManager::EndpointManager(AgentImpl* a_agent_impl, Endpoint* a_endpoint) :
   agent_impl(a_agent_impl),
   endpoint(a_endpoint),
@@ -34,7 +36,7 @@ EndpointManager::EndpointManager(AgentImpl* a_agent_impl, Endpoint* a_endpoint) 
   // Set the type.
   agent_info_.type = FULL;
 
-  TheSecurityRegistry->default_config()->get_utility()->generate_random_bytes(&ice_tie_breaker_, sizeof(ice_tie_breaker_));
+  TheSecurityRegistry->fix_empty_default()->get_utility()->generate_random_bytes(&ice_tie_breaker_, sizeof(ice_tie_breaker_));
 
   change_username();
   set_host_addresses(endpoint->host_addresses());
@@ -160,7 +162,7 @@ void EndpointManager::change_username()
 {
   // Generate the username.
   unsigned char username[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-  TheSecurityRegistry->default_config()->get_utility()->generate_random_bytes(username, sizeof(username));
+  TheSecurityRegistry->fix_empty_default()->get_utility()->generate_random_bytes(username, sizeof(username));
   agent_info_.username = OpenDDS::DCPS::to_hex_dds_string(username, 16, 0, 0);
   change_password(false);
 }
@@ -168,7 +170,7 @@ void EndpointManager::change_username()
 void EndpointManager::change_password(bool password_only)
 {
   unsigned char password[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-  TheSecurityRegistry->default_config()->get_utility()->generate_random_bytes(password, sizeof(password));
+  TheSecurityRegistry->fix_empty_default()->get_utility()->generate_random_bytes(password, sizeof(password));
   agent_info_.password = OpenDDS::DCPS::to_hex_dds_string(password, 16, 0, 0);
   regenerate_agent_info(password_only);
 }
@@ -258,7 +260,7 @@ void EndpointManager::regenerate_agent_info(bool password_only)
   }
 }
 
-void EndpointManager::server_reflexive_task(const ACE_Time_Value& a_now)
+void EndpointManager::server_reflexive_task(const MonotonicTimePoint& a_now)
 {
   // Request and maintain a server-reflexive address.
   next_stun_server_address_ = endpoint->stun_server_address();
@@ -538,8 +540,11 @@ void EndpointManager::request(const ACE_INET_Addr& a_local_address,
     }
 
     else {
-      std::pair<DeferredTriggeredChecksType::iterator, bool> x = deferred_triggered_checks_.insert(std::make_pair(remote_username, DeferredTriggeredCheckListType()));
-      x.first->second.push_back(DeferredTriggeredCheck(a_local_address, a_remote_address, priority, use_candidate, ACE_Time_Value().now() + agent_impl->get_configuration().deferred_triggered_check_ttl()));
+      std::pair<DeferredTriggeredChecksType::iterator, bool> x =
+        deferred_triggered_checks_.insert(std::make_pair(remote_username, DeferredTriggeredCheckListType()));
+      x.first->second.push_back(DeferredTriggeredCheck(
+        a_local_address, a_remote_address, priority, use_candidate,
+        MonotonicTimePoint::now() + agent_impl->get_configuration().deferred_triggered_check_ttl()));
     }
   }
   break;
@@ -719,10 +724,10 @@ EndpointManager::ServerReflexiveTask::ServerReflexiveTask(EndpointManager* a_end
   : Task(a_endpoint_manager->agent_impl),
     endpoint_manager(a_endpoint_manager)
 {
-  enqueue(ACE_Time_Value().now());
+  enqueue(MonotonicTimePoint::now());
 }
 
-void EndpointManager::ServerReflexiveTask::execute(const ACE_Time_Value& a_now)
+void EndpointManager::ServerReflexiveTask::execute(const MonotonicTimePoint& a_now)
 {
   if (endpoint_manager->scheduled_for_destruction_) {
     delete endpoint_manager;
@@ -737,10 +742,10 @@ EndpointManager::ChangePasswordTask::ChangePasswordTask(EndpointManager* a_endpo
   : Task(a_endpoint_manager->agent_impl),
     endpoint_manager(a_endpoint_manager)
 {
-  enqueue(ACE_Time_Value().now() + endpoint_manager->agent_impl->get_configuration().change_password_period());
+  enqueue(MonotonicTimePoint::now() + endpoint_manager->agent_impl->get_configuration().change_password_period());
 }
 
-void EndpointManager::ChangePasswordTask::execute(const ACE_Time_Value& a_now)
+void EndpointManager::ChangePasswordTask::execute(const MonotonicTimePoint& a_now)
 {
   endpoint_manager->change_password(true);
   enqueue(a_now + endpoint_manager->agent_impl->get_configuration().change_password_period());

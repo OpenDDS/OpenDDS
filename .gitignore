@@ -43,3 +43,4 @@ lib*.dylib
 .idea/
 .vs/
 /tags
+/host_tools.mwc*
