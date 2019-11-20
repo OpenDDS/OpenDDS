@@ -46,7 +46,7 @@ private:
 };
 
 struct NetworkInterfaceIndex {
-  NetworkInterfaceIndex(int index) : index_(index) {}
+  explicit NetworkInterfaceIndex(int index) : index_(index) {}
 
   bool operator()(const NetworkInterface& nic) const
   {
@@ -66,7 +66,7 @@ public:
                               const ACE_INET_Addr& /*address*/) {}
 };
 
-typedef RcHandle<NetworkConfigListener> NetworkConfigListener_rch;
+typedef WeakRcHandle<NetworkConfigListener> NetworkConfigListener_wrch;
 
 typedef OPENDDS_VECTOR(NetworkInterface) NetworkInterfaces;
 
@@ -75,8 +75,8 @@ public:
   virtual bool open() = 0;
   virtual bool close() = 0;
 
-  NetworkInterfaces add_listener(NetworkConfigListener_rch listener);
-  void remove_listener(NetworkConfigListener_rch listener);
+  NetworkInterfaces add_listener(NetworkConfigListener_wrch listener);
+  void remove_listener(NetworkConfigListener_wrch listener);
   NetworkInterfaces get() const;
 
 protected:
@@ -88,11 +88,7 @@ protected:
 private:
   void process_add_remove();
 
-  typedef OPENDDS_SET(NetworkConfigListener_rch) Listeners;
-  Listeners add_;
-  Listeners remove_;
-  mutable ACE_Thread_Mutex add_remove_mutex_;
-
+  typedef OPENDDS_SET(NetworkConfigListener_wrch) Listeners;
   Listeners listeners_;
   mutable ACE_Thread_Mutex listeners_mutex_;
 

@@ -1528,9 +1528,9 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer, bool securityGuids)
 
   multicast_interface_ = outer_->disco_->multicast_interface();
 
-  DCPS::NetworkConfigMonitor_rch ncp = TheServiceParticipant->network_config_monitor();
-  if (ncp) {
-    const DCPS::NetworkInterfaces nics = ncp->add_listener(rchandle_from(this));
+  DCPS::NetworkConfigMonitor_rch ncm = TheServiceParticipant->network_config_monitor();
+  if (ncm) {
+    const DCPS::NetworkInterfaces nics = ncm->add_listener(*this);
 
     for (DCPS::NetworkInterfaces::const_iterator pos = nics.begin(), limit = nics.end(); pos != limit; ++pos) {
       join_multicast_group(*pos);
@@ -1612,9 +1612,9 @@ Spdp::SpdpTransport::~SpdpTransport()
     outer_->eh_shutdown_ = true;
   }
   outer_->shutdown_cond_.signal();
-  DCPS::NetworkConfigMonitor_rch ncp = TheServiceParticipant->network_config_monitor();
-  if (ncp) {
-    ncp->remove_listener(rchandle_from(this));
+  DCPS::NetworkConfigMonitor_rch ncm = TheServiceParticipant->network_config_monitor();
+  if (ncm) {
+    ncm->remove_listener(*this);
   }
 
   unicast_socket_.close();

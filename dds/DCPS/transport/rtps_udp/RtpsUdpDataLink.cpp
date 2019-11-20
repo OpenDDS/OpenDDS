@@ -214,11 +214,11 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
 
   RtpsUdpInst& config = this->config();
 
-  NetworkConfigMonitor_rch ncp = TheServiceParticipant->network_config_monitor();
+  NetworkConfigMonitor_rch ncm = TheServiceParticipant->network_config_monitor();
 
   DCPS::NetworkInterfaces nics;
-  if (ncp) {
-    nics = ncp->add_listener(rchandle_from(this));
+  if (ncm) {
+    nics = ncm->add_listener(*this);
   }
 
   if (config.use_multicast_) {
@@ -226,7 +226,7 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
     multicast_socket_.opts(ACE_SOCK_Dgram_Mcast::OPT_BINDADDR_NO |
                            ACE_SOCK_Dgram_Mcast::DEFOPT_NULLIFACE);
 #endif
-    if (ncp) {
+    if (ncm) {
       for (DCPS::NetworkInterfaces::const_iterator pos = nics.begin(), limit = nics.end(); pos != limit; ++pos) {
         join_multicast_group(*pos);
       }
@@ -678,9 +678,9 @@ RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
 void
 RtpsUdpDataLink::stop_i()
 {
-  NetworkConfigMonitor_rch ncp = TheServiceParticipant->network_config_monitor();
-  if (ncp) {
-    ncp->remove_listener(rchandle_from(this));
+  NetworkConfigMonitor_rch ncm = TheServiceParticipant->network_config_monitor();
+  if (ncm) {
+    ncm->remove_listener(*this);
   }
 
   nack_reply_.cancel();

@@ -105,9 +105,9 @@ void AgentImpl::add_endpoint(Endpoint* a_endpoint)
   check_invariants();
 
   if (!endpoint_managers_.empty() && !ncm_listener_added_) {
-    DCPS::NetworkConfigMonitor_rch ncp = TheServiceParticipant->network_config_monitor();
-    if (ncp) {
-      ncp->add_listener(rchandle_from(this));
+    DCPS::NetworkConfigMonitor_rch ncm = TheServiceParticipant->network_config_monitor();
+    if (ncm) {
+      ncm->add_listener(*this);
     }
     ncm_listener_added_ = true;
   }
@@ -129,9 +129,9 @@ void AgentImpl::remove_endpoint(Endpoint* a_endpoint)
   check_invariants();
 
   if (endpoint_managers_.empty() && ncm_listener_added_) {
-    DCPS::NetworkConfigMonitor_rch ncp = TheServiceParticipant->network_config_monitor();
-    if (ncp) {
-      ncp->remove_listener(rchandle_from(this));
+    DCPS::NetworkConfigMonitor_rch ncm = TheServiceParticipant->network_config_monitor();
+    if (ncm) {
+      ncm->remove_listener(*this);
     }
     ncm_listener_added_ = false;
   }
