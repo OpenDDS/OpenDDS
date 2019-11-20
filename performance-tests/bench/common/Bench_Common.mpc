@@ -1,4 +1,5 @@
 project: dcpslib, ../bench_idl_lib, ../bench_builder_idl_lib, dcps_rapidjson {
+  avoids += no_cxx11
 
   after    += Bench_Builder
   libs     += Bench_Builder
@@ -15,4 +16,3 @@ project: dcpslib, ../bench_idl_lib, ../bench_builder_idl_lib, dcps_rapidjson {
   }
 
 }
-

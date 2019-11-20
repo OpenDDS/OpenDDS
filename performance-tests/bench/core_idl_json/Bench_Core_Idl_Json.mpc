@@ -20,4 +20,3 @@ project: dcpslib, dcps_rapidjson {
     ../../../dds/DdsDcpsGuid.idl
   }
 }
-

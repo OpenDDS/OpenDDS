@@ -23,4 +23,3 @@ project: dcpslib, dcps_rapidjson, ../bench_builder_idl_lib {
     ../builder_idl/Builder.idl
   }
 }
-

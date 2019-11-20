@@ -1,4 +1,5 @@
 project: ../bench_builder_idl_lib {
+  avoids += no_cxx11
   after    += Bench_Builder
   libs     += Bench_Builder
   expand(BENCH_BUILDER_ROOT) {
@@ -13,4 +14,3 @@ project: ../bench_builder_idl_lib {
 
   exename   = *
 }
-
