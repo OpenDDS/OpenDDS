@@ -1,4 +1,5 @@
 project: dcps_rtps_udp {
+  avoids += no_cxx11
   after    += Bench_Idl
   libs     += Bench_Idl
   expand(BENCH_ROOT) {
@@ -7,4 +8,3 @@ project: dcps_rtps_udp {
   }
   includes += $(BENCH_ROOT)/idl
 }
-

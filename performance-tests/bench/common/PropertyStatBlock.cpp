@@ -83,15 +83,17 @@ SimpleStatBlock consolidate(const SimpleStatBlock& sb1, const SimpleStatBlock& s
   }
   result.median_sample_overflow_ = result.sample_count_ - result.median_sample_count_;
 
-  if (result.median_buffer_.size()) {
+  if (result.median_sample_count_) {
     // Calculate consolidated median from consolidated median buffer
     {
       std::vector<double> median_buffer = result.median_buffer_;
-      std::sort(&median_buffer[0], &median_buffer[median_buffer.size() - 1]);
-      if (result.median_sample_count_ % 2) {
-        result.median_ = (median_buffer[result.median_sample_count_ / 2] + median_buffer[(result.median_sample_count_ / 2) + 1]) / 2.0;
+      std::sort(&median_buffer[0], &median_buffer[0] + result.median_sample_count_);
+      if (result.median_sample_count_ % 2 == 0) {
+        // even, but not zero
+        result.median_ = (median_buffer[(result.median_sample_count_ / 2) - 1] + median_buffer[result.median_sample_count_ / 2]) / 2.0;
       } else {
-        result.median_ = median_buffer[(result.median_sample_count_ / 2) + 1];
+        // odd
+        result.median_ = median_buffer[result.median_sample_count_ / 2];
       }
     }
 
@@ -101,11 +103,11 @@ SimpleStatBlock consolidate(const SimpleStatBlock& sb1, const SimpleStatBlock& s
       for (size_t i = 0; i < mad_buffer.size(); ++i) {
         mad_buffer[i] = fabs(mad_buffer[i] - result.median_);
       }
-      std::sort(&mad_buffer[0], &mad_buffer[mad_buffer.size() - 1]);
-      if (result.median_sample_count_ % 2) {
-        result.median_absolute_deviation_ = (mad_buffer[result.median_sample_count_ / 2] + mad_buffer[(result.median_sample_count_ / 2) + 1]) / 2.0;
+      std::sort(&mad_buffer[0], &mad_buffer[0] + result.median_sample_count_);
+      if (result.median_sample_count_ % 2 == 0) {
+        result.median_absolute_deviation_ = (mad_buffer[(result.median_sample_count_ / 2) - 1] + mad_buffer[result.median_sample_count_ / 2]) / 2.0;
       } else {
-        result.median_absolute_deviation_ = mad_buffer[(result.median_sample_count_ / 2) + 1];
+        result.median_absolute_deviation_ = mad_buffer[result.median_sample_count_ / 2];
       }
     }
   }
@@ -192,7 +194,7 @@ void PropertyStatBlock::finalize()
   if (count) {
     // calculate median
     std::sort(&median_buffer_[0], &median_buffer_[count - 1]);
-    if (count % 2) {
+    if (count % 2 == 0) {
       median_result = (median_buffer_[count / 2] + median_buffer_[(count / 2) + 1]) / 2.0;
     } else {
       median_result = median_buffer_[(count / 2) + 1];
@@ -203,7 +205,7 @@ void PropertyStatBlock::finalize()
       mad_buffer[i] = fabs(median_buffer_[i] - median_result);
     }
     std::sort(&median_buffer_[0], &median_buffer_[count - 1]);
-    if (count % 2) {
+    if (count % 2 == 0) {
       mad_result = (mad_buffer[count / 2] + mad_buffer[(count / 2) + 1]) / 2.0;
     } else {
       mad_result = mad_buffer[(count / 2) + 1];
