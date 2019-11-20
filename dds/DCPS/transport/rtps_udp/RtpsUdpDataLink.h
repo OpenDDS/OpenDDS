@@ -60,7 +60,7 @@ class ReceivedDataSample;
 typedef RcHandle<RtpsUdpInst> RtpsUdpInst_rch;
 typedef RcHandle<RtpsUdpTransport> RtpsUdpTransport_rch;
 
-  class OpenDDS_Rtps_Udp_Export RtpsUdpDataLink : public DataLink, public virtual NetworkConfigListener {
+class OpenDDS_Rtps_Udp_Export RtpsUdpDataLink : public DataLink, public virtual NetworkConfigListener {
 public:
 
   RtpsUdpDataLink(RtpsUdpTransport& transport,
@@ -645,6 +645,30 @@ private:
 #endif
 
   void accumulate_addresses(const RepoId& local, const RepoId& remote, AddrSet& addresses) const;
+
+  struct ChangeMulticastGroup : public JobQueue::Job {
+    enum CmgAction {CMG_JOIN, CMG_LEAVE};
+
+    ChangeMulticastGroup(RcHandle<RtpsUdpDataLink> link,
+                         const NetworkInterface& nic, CmgAction action)
+      : link_(link)
+      , nic_(nic)
+      , action_(action)
+    {}
+
+    void execute()
+    {
+      if (action_ == CMG_JOIN) {
+        link_->join_multicast_group(nic_);
+      } else {
+        link_->leave_multicast_group(nic_);
+      }
+    }
+
+    RcHandle<RtpsUdpDataLink> link_;
+    NetworkInterface nic_;
+    CmgAction action_;
+  };
 };
 
 } // namespace DCPS
