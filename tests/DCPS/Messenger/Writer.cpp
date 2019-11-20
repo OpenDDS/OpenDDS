@@ -12,6 +12,8 @@
 #include <dds/DdsDcpsPublicationC.h>
 #include <dds/DCPS/WaitSet.h>
 
+#include <cstdlib>
+
 #include "Args.h"
 #include "MessengerTypeSupportC.h"
 #include "Writer.h"
@@ -35,7 +37,7 @@ Writer::start()
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("%N:%l: start()")
                ACE_TEXT(" activate failed!\n")));
-    ACE_OS::exit(-1);
+    ACE_OS::exit(EXIT_FAILURE);
   }
 }
 
@@ -69,14 +71,14 @@ Writer::svc()
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("%N:%l: svc()")
                    ACE_TEXT(" ERROR: wait failed!\n")));
-        ACE_OS::exit(-1);
+        ACE_OS::exit(EXIT_FAILURE);
       }
 
       if (writer_->get_publication_matched_status(matches) != ::DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("%N:%l: svc()")
                    ACE_TEXT(" ERROR: get_publication_matched_status failed!\n")));
-        ACE_OS::exit(-1);
+        ACE_OS::exit(EXIT_FAILURE);
       }
 
     } while (matches.current_count < 1);
@@ -88,10 +90,10 @@ Writer::svc()
       = Messenger::MessageDataWriter::_narrow(writer_.in());
 
     if (CORBA::is_nil(message_dw.in())) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("%N:%l: svc()")
-                   ACE_TEXT(" ERROR: _narrow failed!\n")));
-        ACE_OS::exit(-1);
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("%N:%l: svc()")
+                 ACE_TEXT(" ERROR: _narrow failed!\n")));
+      ACE_OS::exit(EXIT_FAILURE);
     }
 
     Messenger::Message message;
