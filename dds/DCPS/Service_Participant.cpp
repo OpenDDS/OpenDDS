@@ -1489,13 +1489,13 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
     if (got_use_rti_serialization) {
       ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSRTISerialization")));
     } else {
-      bool should_use = false;
+      bool should_use = true;
       GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSRTISerialization"), should_use, bool)
-        if (!should_use) {
-          ACE_ERROR((LM_WARNING,
-            ACE_TEXT("(%P|%t) WARNING: Service_Participant::load_common_configuration ")
-            ACE_TEXT("Argument ignored: DCPSRTISerialization is required to be enabled\n")));
-        }
+      if (!should_use) {
+        ACE_ERROR((LM_WARNING,
+          ACE_TEXT("(%P|%t) WARNING: Service_Participant::load_common_configuration ")
+          ACE_TEXT("Argument ignored: DCPSRTISerialization is required to be enabled\n")));
+      }
     }
 
     if (got_chunks) {
