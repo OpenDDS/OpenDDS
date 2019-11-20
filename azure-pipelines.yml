@@ -245,7 +245,7 @@ jobs:
         PackageDeps: libxerces-c-dev libssl-dev cmake clang-6.0
         Repo: llvm-toolchain-$(lsb_release -cs)-6.0
       CLANG7:
-        ConfigOpts: --compiler=clang++-7 --security --features=uses_wchar=1 
+        ConfigOpts: --compiler=clang++-7 --security --features=uses_wchar=1
         PackageDeps: libxerces-c-dev libssl-dev cmake clang-7
         Repo: llvm-toolchain-$(lsb_release -cs)-7
       CLANG8:
