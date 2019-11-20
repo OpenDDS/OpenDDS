@@ -726,6 +726,9 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
 
 Sedp::~Sedp()
 {
+  DCPS::RtpsUdpInst_rch rtps_inst =
+    DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
+  rtps_inst->opendds_discovery_default_listener_.reset();
   TheTransportRegistry->remove_config(transport_cfg_);
   TheTransportRegistry->remove_inst(transport_inst_);
 }
