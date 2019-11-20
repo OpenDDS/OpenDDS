@@ -112,7 +112,7 @@ public:
       << " --report " << report_filename_
       << " --log " << log_filename_ << std::flush;
     const std::string command = ss.str();
-    std::cerr << command << std::endl << std::flush;
+    std::cerr << command + "\n" << std::flush;
     proc_opts.command_line(command.c_str());
     return proc_opts;
   }
