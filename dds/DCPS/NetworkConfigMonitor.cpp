@@ -144,7 +144,7 @@ void NetworkConfigMonitor::remove_address(int index, const ACE_INET_Addr& addres
     ACE_GUARD(ACE_Thread_Mutex, g, network_interfaces_mutex_);
     NetworkInterfaces::iterator nic_pos = std::find_if(network_interfaces_.begin(), network_interfaces_.end(), NetworkInterfaceIndex(index));
     if (nic_pos != network_interfaces_.end()) {
-      NetworkInterface::AddressSet::const_iterator addr_pos = nic_pos->addresses.find(address);
+      NetworkInterface::AddressSet::iterator addr_pos = nic_pos->addresses.find(address);
       if (addr_pos != nic_pos->addresses.end()) {
         nic_pos->addresses.erase(addr_pos);
         nic = *nic_pos;
