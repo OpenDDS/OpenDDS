@@ -155,7 +155,7 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
       remote_address.get_host_addr(), remote_address.get_port_number()));
 
     TransportLocator info;
-    this->impl().connection_info_i(info);
+    impl().connection_info_i(info, CONNINFO_ALL);
     ACE_Message_Block* data_block;
     ACE_NEW_RETURN(data_block,
                    ACE_Message_Block(info.data.length()+sizeof(Priority),

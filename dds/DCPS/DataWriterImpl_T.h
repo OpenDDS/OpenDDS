@@ -410,7 +410,7 @@ private:
   DDS::ReturnCode_t get_or_create_instance_handle(
     DDS::InstanceHandle_t& handle,
     const MessageType& instance_data,
-    const DDS::Time_t & source_timestamp)
+    const DDS::Time_t& source_timestamp)
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, get_lock(), DDS::RETCODE_ERROR);
 

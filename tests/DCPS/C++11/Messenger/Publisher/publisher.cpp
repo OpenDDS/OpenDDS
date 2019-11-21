@@ -14,9 +14,11 @@
 #include "ace/Log_Msg.h"
 
 #include <iostream>
+#include <cstdlib>
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
+  int status = EXIT_SUCCESS;
   DDS::DomainParticipantFactory_var dpf;
   DDS::DomainParticipant_var participant;
 
@@ -33,7 +35,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: main()")
                         ACE_TEXT(" ERROR: create_participant failed!\n")),
-                        -1);
+                       EXIT_FAILURE);
     }
 
     Messenger::MessageTypeSupport_var mts = new Messenger::MessageTypeSupportImpl;
@@ -42,7 +44,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: main()")
                         ACE_TEXT(" ERROR: register_type failed!\n")),
-                        -1);
+                       EXIT_FAILURE);
     }
 
     CORBA::String_var type_name = mts->get_type_name();
@@ -57,7 +59,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: main()")
                         ACE_TEXT(" ERROR: create_topic failed!\n")),
-                        -1);
+                       EXIT_FAILURE);
     }
 
     DDS::Publisher_var pub =
@@ -69,7 +71,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: main()")
                         ACE_TEXT(" ERROR: create_publisher failed!\n")),
-                        -1);
+                       EXIT_FAILURE);
     }
 
     DDS::DataWriterQos qos;
@@ -86,7 +88,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: main()")
                         ACE_TEXT(" ERROR: create_datawriter failed!\n")),
-                        -1);
+                       EXIT_FAILURE);
     }
 
     DDS::StatusCondition_var condition = dw->get_statuscondition();
@@ -103,17 +105,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
     do {
       if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("%N:%l: svc()")
-                   ACE_TEXT(" ERROR: wait failed!\n")));
-        ACE_OS::exit(-1);
+        ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l: main() ERROR: ")
+                          ACE_TEXT("wait failed!\n")),
+                         EXIT_FAILURE);
       }
 
       if (dw->get_publication_matched_status(matches) != ::DDS::RETCODE_OK) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("%N:%l: svc()")
-                   ACE_TEXT(" ERROR: get_publication_matched_status failed!\n")));
-        ACE_OS::exit(-1);
+        ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l: main() ERROR: ")
+                          ACE_TEXT("get_publication_matched_status failed!\n")),
+                         EXIT_FAILURE);
       }
 
     } while (matches.current_count < 1);
@@ -124,10 +124,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       Messenger::MessageDataWriter::_narrow(dw);
 
     if (!message_dw) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("%N:%l: svc()")
-                 ACE_TEXT(" ERROR: _narrow failed!\n")));
-      ACE_OS::exit(-1);
+      ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l: main() ERROR: ")
+                        ACE_TEXT("_narrow failed!\n")),
+                       EXIT_FAILURE);
     }
 
     Messenger::Message message;
@@ -148,7 +147,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
       if (error != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("%N:%l: svc()")
+                   ACE_TEXT("%N:%l: main()")
                    ACE_TEXT(" ERROR: write returned %d!\n"), error));
       }
 
@@ -164,8 +163,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
-    ACE_OS::exit(-1);
+    status = EXIT_FAILURE;
   }
 
-  return 0;
+  return status;
 }

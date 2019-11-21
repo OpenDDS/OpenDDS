@@ -791,6 +791,18 @@ DataWriterImpl::unregister_for_reader(const RepoId& participant,
 }
 
 void
+DataWriterImpl::update_locators(const RepoId& readerId,
+                                const TransportLocatorSeq& locators)
+{
+  ACE_GUARD(ACE_Thread_Mutex, reader_info_guard, reader_info_lock_);
+  RepoIdToReaderInfoMap::const_iterator iter = reader_info_.find(readerId);
+
+  if (iter != reader_info_.end()) {
+    TransportClient::update_locators(readerId, locators);
+  }
+}
+
+void
 DataWriterImpl::update_incompatible_qos(const IncompatibleQosStatus& status)
 {
   DDS::DataWriterListener_var listener =
@@ -2709,6 +2721,16 @@ LivenessTimer::handle_timeout(const ACE_Time_Value &tv,
   return 0;
 }
 
+void DataWriterImpl::transport_discovery_change()
+{
+  populate_connection_info();
+  const TransportLocatorSeq& trans_conf_info = connection_info();
+  Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
+  disco->update_publication_locators(domain_id_,
+                                     dp_id_,
+                                     publication_id_,
+                                     trans_conf_info);
+}
 
 } // namespace DCPS
 } // namespace OpenDDS

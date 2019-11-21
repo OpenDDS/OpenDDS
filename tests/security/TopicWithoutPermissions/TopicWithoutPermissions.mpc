@@ -1,6 +1,6 @@
-project(DDS*idl): dcps_test_idl_only_lib {
-  idlflags      += -Wb,stub_export_include=TopicWithoutPermissions_export.h \
-                   -Wb,stub_export_macro=TopicWithoutPermissions_Export -SS
+project(Security*idl): dcps_test_idl_only_lib {
+  idlflags      += -Wb,export_include=TopicWithoutPermissions_export.h \
+                   -Wb,export_macro=TopicWithoutPermissions_Export -SS
   dcps_ts_flags += -Wb,export_macro=TopicWithoutPermissions_Export
   dynamicflags  += TOPICWITHOUTPERMISSIONS_BUILD_DLL
   avoids        += no_opendds_security
@@ -10,12 +10,20 @@ project(DDS*idl): dcps_test_idl_only_lib {
   }
 }
 
-project (Security*): dcpsexe, dcps_test, dcps_rtps_udp {
-  after    += DDS*idl
-  libs     += DDS*idl
+project(Security*): dcpsexe, dcps_test, dcps_rtps_udp {
+  after += Security*idl
+  libs += Security*idl
 
-  requires += no_opendds_safety_profile
   avoids += no_opendds_security
   exename = *
-}
 
+  Source_Files {
+    TopicWithoutPermissions.cpp
+  }
+
+  IDL_Files {
+  }
+
+  TypeSupport_Files {
+  }
+}

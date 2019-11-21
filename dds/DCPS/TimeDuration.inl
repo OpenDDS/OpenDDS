@@ -23,6 +23,12 @@ TimeDuration::TimeDuration()
 }
 
 ACE_INLINE
+TimeDuration::TimeDuration(const TimeDuration& other)
+: value_(other.value_)
+{
+}
+
+ACE_INLINE
 TimeDuration::TimeDuration(const ACE_Time_Value& ace_time_value)
 : value_(ace_time_value)
 {
@@ -30,7 +36,7 @@ TimeDuration::TimeDuration(const ACE_Time_Value& ace_time_value)
 
 ACE_INLINE
 TimeDuration::TimeDuration(time_t sec, suseconds_t usec)
-: value_(ACE_Time_Value(sec, usec))
+: value_(sec, usec)
 {
 }
 

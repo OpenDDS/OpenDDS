@@ -233,9 +233,9 @@ RtpsUdpTransport::get_connection_addr(const TransportBLOB& remote,
 }
 
 bool
-RtpsUdpTransport::connection_info_i(TransportLocator& info) const
+RtpsUdpTransport::connection_info_i(TransportLocator& info, ConnectionInfoFlags flags) const
 {
-  config().populate_locator(info);
+  config().populate_locator(info, flags);
   return true;
 }
 
@@ -247,11 +247,7 @@ RtpsUdpTransport::register_for_reader(const RepoId& participant,
                                       OpenDDS::DCPS::DiscoveryListener* listener)
 {
   const TransportBLOB* blob = config().get_blob(locators);
-  if (!blob) {
-    return;
-  }
-
-  if (is_shut_down_) {
+  if (!blob || is_shut_down_) {
     return;
   }
 
@@ -283,11 +279,7 @@ RtpsUdpTransport::register_for_writer(const RepoId& participant,
                                       DiscoveryListener* listener)
 {
   const TransportBLOB* blob = config().get_blob(locators);
-  if (!blob) {
-    return;
-  }
-
-  if (is_shut_down_) {
+  if (!blob || is_shut_down_) {
     return;
   }
 
@@ -311,13 +303,33 @@ RtpsUdpTransport::unregister_for_writer(const RepoId& /*participant*/,
   }
 }
 
+void
+RtpsUdpTransport::update_locators(const RepoId& remote,
+                                  const TransportLocatorSeq& locators)
+{
+  const TransportBLOB* blob = config().get_blob(locators);
+  if (!blob || is_shut_down_) {
+    return;
+  }
+
+  GuardThreadType guard_links(links_lock_);
+
+  if (link_) {
+    bool requires_inline_qos;
+    unsigned int blob_bytes_read;
+    ACE_INET_Addr addr = get_connection_addr(*blob, &requires_inline_qos,
+                                             &blob_bytes_read);
+    link_->add_locator(remote, addr, requires_inline_qos);
+  }
+}
+
 bool
 RtpsUdpTransport::configure_i(RtpsUdpInst& config)
 {
   // Override with DCPSDefaultAddress.
   if (config.local_address() == ACE_INET_Addr () &&
       !TheServiceParticipant->default_address ().empty ()) {
-    config.local_address(0, TheServiceParticipant->default_address ().c_str ());
+    config.local_address(0, TheServiceParticipant->default_address().c_str());
   }
 
   // Open the socket here so that any addresses/ports left
@@ -461,7 +473,7 @@ namespace {
     if (result < 0) {
       ACE_TCHAR addr_buff[256] = {};
       int err = errno;
-      addr.addr_to_string(addr_buff, 256, 0);
+      addr.addr_to_string(addr_buff, 256);
       errno = err;
       const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
       ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_single_i() - "

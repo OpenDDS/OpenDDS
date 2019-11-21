@@ -88,7 +88,7 @@ int Governance::load(const SSL::SignedDocument& doc)
   }
 
   // Find the domain rules
-  xercesc::DOMNodeList * domainRules = xmlDoc->getElementsByTagName(XStr("domain_rule"));
+  xercesc::DOMNodeList * domainRules = xmlDoc->getElementsByTagName(XStr(ACE_TEXT("domain_rule")));
 
   for (XMLSize_t r = 0; r < domainRules->getLength(); ++r) {
     Governance::DomainRule rule_holder_;
@@ -100,23 +100,23 @@ int Governance::load(const SSL::SignedDocument& doc)
     for (XMLSize_t rn = 0; rn < ruleNodes->getLength(); rn++) {
       const XStr dn_tag = ruleNodes->item(rn)->getNodeName();
 
-      if ("domains" == dn_tag) {
+      if (ACE_TEXT("domains") == dn_tag) {
         xercesc::DOMNodeList * domainIdNodes = ruleNodes->item(rn)->getChildNodes();
 
         for (XMLSize_t did = 0; did < domainIdNodes->getLength(); did++) {
-          if ("id" == XStr(domainIdNodes->item(did)->getNodeName())) {
+          if (ACE_TEXT("id") == XStr(domainIdNodes->item(did)->getNodeName())) {
             const XMLCh* t = domainIdNodes->item(did)->getTextContent();
             unsigned int i;
             if (xercesc::XMLString::textToBin(t, i)) {
               rule_holder_.domain_list.insert(i);
             }
-          } else if ("id_range" == XStr(domainIdNodes->item(did)->getNodeName())) {
+          } else if (ACE_TEXT("id_range") == XStr(domainIdNodes->item(did)->getNodeName())) {
             int min_value = 0;
             int max_value = 0;
             xercesc::DOMNodeList * domRangeIdNodes = domainIdNodes->item(did)->getChildNodes();
 
             for (XMLSize_t drid = 0; drid < domRangeIdNodes->getLength(); drid++) {
-              if (strcmp("min", xercesc::XMLString::transcode(domRangeIdNodes->item(drid)->getNodeName())) == 0) {
+              if (ACE_OS::strcmp("min", xercesc::XMLString::transcode(domRangeIdNodes->item(drid)->getNodeName())) == 0) {
                 min_value = atoi(xercesc::XMLString::transcode(domRangeIdNodes->item(drid)->getTextContent()));
               } else if (strcmp("max", xercesc::XMLString::transcode(domRangeIdNodes->item(drid)->getNodeName())) == 0) {
                 max_value = atoi(xercesc::XMLString::transcode(domRangeIdNodes->item(drid)->getTextContent()));
@@ -140,21 +140,21 @@ int Governance::load(const SSL::SignedDocument& doc)
 
     // Process allow_unauthenticated_participants
     xercesc::DOMNodeList * allow_unauthenticated_participants_ =
-              xmlDoc->getElementsByTagName(XStr("allow_unauthenticated_participants"));
+              xmlDoc->getElementsByTagName(XStr(ACE_TEXT("allow_unauthenticated_participants")));
     char * attr_aup = xercesc::XMLString::transcode(allow_unauthenticated_participants_->item(0)->getTextContent());
     rule_holder_.domain_attrs.allow_unauthenticated_participants = (ACE_OS::strcasecmp(attr_aup,"false") == 0 ? false : true);
     xercesc::XMLString::release(&attr_aup);
 
     // Process enable_join_access_control
     xercesc::DOMNodeList * enable_join_access_control_ =
-             xmlDoc->getElementsByTagName(XStr("enable_join_access_control"));
+             xmlDoc->getElementsByTagName(XStr(ACE_TEXT("enable_join_access_control")));
     char * attr_ejac = xercesc::XMLString::transcode(enable_join_access_control_->item(0)->getTextContent());
     rule_holder_.domain_attrs.is_access_protected = ACE_OS::strcasecmp(attr_ejac, "false") == 0 ? false : true;
     xercesc::XMLString::release(&attr_ejac);
 
     // Process discovery_protection_kind
     xercesc::DOMNodeList * discovery_protection_kind_ =
-             xmlDoc->getElementsByTagName(XStr("discovery_protection_kind"));
+             xmlDoc->getElementsByTagName(XStr(ACE_TEXT("discovery_protection_kind")));
     char * attr_dpk = xercesc::XMLString::transcode(discovery_protection_kind_->item(0)->getTextContent());
     if (ACE_OS::strcasecmp(attr_dpk, "NONE") == 0) {
       rule_holder_.domain_attrs.is_discovery_protected = false;
@@ -175,7 +175,7 @@ int Governance::load(const SSL::SignedDocument& doc)
 
     // Process liveliness_protection_kind
     xercesc::DOMNodeList * liveliness_protection_kind_ =
-             xmlDoc->getElementsByTagName(XStr("liveliness_protection_kind"));
+             xmlDoc->getElementsByTagName(XStr(ACE_TEXT("liveliness_protection_kind")));
     char * attr_lpk = xercesc::XMLString::transcode(liveliness_protection_kind_->item(0)->getTextContent());
     if (ACE_OS::strcasecmp(attr_lpk, "NONE") == 0) {
       rule_holder_.domain_attrs.is_liveliness_protected = false;
@@ -196,7 +196,7 @@ int Governance::load(const SSL::SignedDocument& doc)
 
     // Process rtps_protection_kind
     xercesc::DOMNodeList * rtps_protection_kind_ =
-             xmlDoc->getElementsByTagName(XStr("rtps_protection_kind"));
+             xmlDoc->getElementsByTagName(XStr(ACE_TEXT("rtps_protection_kind")));
     char * attr_rpk = xercesc::XMLString::transcode(rtps_protection_kind_->item(0)->getTextContent());
 
     if (ACE_OS::strcasecmp(attr_rpk, "NONE") == 0) {
@@ -220,7 +220,7 @@ int Governance::load(const SSL::SignedDocument& doc)
 
     // Process topic rules
 
-    xercesc::DOMNodeList * topic_rules = xmlDoc->getElementsByTagName(XStr("topic_rule"));
+    xercesc::DOMNodeList * topic_rules = xmlDoc->getElementsByTagName(XStr(ACE_TEXT("topic_rule")));
 
     for (XMLSize_t tr = 0; tr < topic_rules->getLength(); tr++) {
       xercesc::DOMNodeList * topic_rule_nodes = topic_rules->item(tr)->getChildNodes();
@@ -230,19 +230,19 @@ int Governance::load(const SSL::SignedDocument& doc)
         XStr tr_tag = topic_rule_nodes->item(trn)->getNodeName();
         char * tr_val = xercesc::XMLString::transcode(topic_rule_nodes->item(trn)->getTextContent());
 
-        if (tr_tag == "topic_expression") {
+        if (tr_tag == ACE_TEXT("topic_expression")) {
           t_rules.topic_expression = tr_val;
-        } else if (tr_tag == "enable_discovery_protection") {
+        } else if (tr_tag == ACE_TEXT("enable_discovery_protection")) {
           t_rules.topic_attrs.is_discovery_protected = ACE_OS::strcasecmp(tr_val, "false") == 0 ? false : true;
-        } else if (tr_tag == "enable_liveliness_protection") {
+        } else if (tr_tag == ACE_TEXT("enable_liveliness_protection")) {
           t_rules.topic_attrs.is_liveliness_protected = ACE_OS::strcasecmp(tr_val, "false") == 0 ? false : true;
-        } else if (tr_tag == "enable_read_access_control") {
+        } else if (tr_tag == ACE_TEXT("enable_read_access_control")) {
           t_rules.topic_attrs.is_read_protected = ACE_OS::strcasecmp(tr_val, "false") == 0 ? false : true;
-        } else if (tr_tag == "enable_write_access_control") {
+        } else if (tr_tag == ACE_TEXT("enable_write_access_control")) {
           t_rules.topic_attrs.is_write_protected = ACE_OS::strcasecmp(tr_val, "false") == 0 ? false : true;
-        } else if (tr_tag == "metadata_protection_kind") {
+        } else if (tr_tag == ACE_TEXT("metadata_protection_kind")) {
           t_rules.metadata_protection_kind.assign(tr_val);
-        } else if (tr_tag == "data_protection_kind") {
+        } else if (tr_tag == ACE_TEXT("data_protection_kind")) {
           t_rules.data_protection_kind.assign(tr_val);
         }
         xercesc::XMLString::release(&tr_val);

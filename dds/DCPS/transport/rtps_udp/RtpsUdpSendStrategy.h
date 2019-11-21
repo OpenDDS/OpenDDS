@@ -120,6 +120,7 @@ private:
   char rtps_header_data_[RTPS::RTPSHDR_SZ];
   ACE_Data_Block rtps_header_db_;
   ACE_Message_Block rtps_header_mb_;
+  bool network_is_unreachable_;
 };
 
 } // namespace DCPS

@@ -132,8 +132,6 @@ https://www.activestate.com/activeperl).
 
 * [Google Test](docs/dependencies.md#google-test), for various tests.
   * Starting with OpenDDS 3.14, Google Test is required for OpenDDS tests.
-    Tests are built by default, so that means Google Test is required unless
-    `--no-tests` is passed to `configure`.
 * [CMake](docs/dependencies.md#cmake), for building Google Test and the OpenDDS
   CMake module.
 * [Java](docs/dependencies.md#java), for Java bindings.
@@ -200,11 +198,10 @@ This release of OpenDDS has been tested using the following compilers:
 
 ## Building and Installing
 
-For building and installation instructions
-see the [`INSTALL.md`](INSTALL.md) file in this directory.
+For building and installation instructions see the [`INSTALL.md`](INSTALL.md)
+file in this directory.
 
 ## Quick Start with Docker
 
 See [`docs/docker.md`](docs/docker.md) for how to use the pre-built docker
 image.
-

@@ -13,7 +13,7 @@ install:
   - cd ..
   - set MPC_ROOT=%CD%\ext\MPC
   - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" amd64
-  - call configure --no-tests --ace=ext\ACE_TAO\ACE
+  - call configure --ace=ext\ACE_TAO\ACE
   - perl ext\ACE_TAO\ACE\bin\mwc.pl -type vs2017 tests\DCPS\Messenger
 
 platform:

@@ -210,7 +210,7 @@ InfoRepoMulticastResponder::handle_input(ACE_HANDLE)
 
   if (OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_TCHAR addr[64];
-    remote_addr.addr_to_string(addr, sizeof(addr));
+    remote_addr.addr_to_string(addr, sizeof(addr), 0);
     ACE_DEBUG((LM_DEBUG,
                "(%P|%t) Received multicast from %s.\n"
                "Service Name received : %C\n"
@@ -291,7 +291,7 @@ InfoRepoMulticastResponder::handle_input(ACE_HANDLE)
 
   if (OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_TCHAR addr[64];
-    peer_addr.addr_to_string(addr, sizeof(addr));
+    peer_addr.addr_to_string(addr, sizeof(addr), 0);
     ACE_DEBUG((LM_DEBUG,
                "(%P|%t) Replying to peer %s.\n",
                addr));

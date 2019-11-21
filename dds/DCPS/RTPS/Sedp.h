@@ -87,7 +87,8 @@ public:
   void acknowledge();
 
   void shutdown();
-  void unicast_locators(DCPS::LocatorSeq& locators) const;
+  DCPS::LocatorSeq unicast_locators() const;
+  DCPS::LocatorSeq multicast_locators() const;
 
   // @brief return the ip address we have bound to.
   // Valid after init() call
@@ -112,6 +113,8 @@ public:
 #endif
 
   bool disassociate(const ParticipantData_t& pdata);
+
+  void update_locators(const ParticipantData_t& pdata);
 
 #ifdef OPENDDS_SECURITY
   DDS::ReturnCode_t write_stateless_message(DDS::Security::ParticipantStatelessMessage& msg,
@@ -652,9 +655,6 @@ private:
                     const DCPS::RepoId& writer, const DCPS::RepoId& reader);
 #endif
 
-  static DCPS::RepoId make_id(const DCPS::RepoId& participant_id,
-                              const EntityId_t& entity);
-
   static void set_inline_qos(DCPS::TransportLocatorSeq& locators);
 
   void write_durable_publication_data(const DCPS::RepoId& reader, bool secure);
@@ -817,6 +817,9 @@ private:
   ACE_Condition_Thread_Mutex cond_;
   unsigned int acks_;
 };
+
+bool locators_changed(const ParticipantProxy_t& x,
+                      const ParticipantProxy_t& y);
 
 }
 }

@@ -162,6 +162,7 @@ performance-tests/DCPS/TCPListenerTest/run_test.pl -p 4 -s 1: !DCPS_MIN !OPENDDS
 #performance-tests/DCPS/MulticastListenerTest/run_test.pl -p 2 -s 3: !DCPS_MIN !NO_MCAST
 
 DevGuideExamples/DCPS/Messenger/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
+DevGuideExamples/DCPS/Messenger/run_test.pl --rtps: !DCPS_MIN !OPENDDS_SAFETY_PROFILE RTPS
 DevGuideExamples/DCPS/Messenger_ZeroCopy/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 
 tests/DCPS/Messenger/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE

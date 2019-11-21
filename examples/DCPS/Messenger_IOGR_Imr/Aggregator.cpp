@@ -187,8 +187,8 @@ Aggregator::run ()
     }
   catch (const CORBA::Exception&)
     {
-      ACE_ERROR_RETURN ((LM_DEBUG,
-                         "Error in run \n"),
+      ACE_ERROR_RETURN ((LM_ERROR,
+                         "(%P|%t) ERROR: Error in run \n"),
                         -1);
     }
 
@@ -207,7 +207,7 @@ Aggregator::write_to_file (void)
       FILE *output_file= ACE_OS::fopen (ior_output_file, ACE_TEXT("w"));
       if (output_file == 0)
         ACE_ERROR_RETURN ((LM_ERROR,
-                           "Cannot open output file for writing IOR: %s",
+                           "(%P|%t) ERROR: Cannot open output file for writing IOR: %s",
                            ior_output_file),
                           1);
       ACE_OS::fprintf (output_file, "%s", iorref.in ());

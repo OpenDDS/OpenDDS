@@ -333,7 +333,7 @@ namespace {
                             header.source_timestamp_nanosec_};
     const InfoTimestampSubmessage ts = {
       {INFO_TS, flags, INFO_TS_SZ},
-      {st.sec, static_cast<ACE_UINT32>(st.nanosec * NANOS_TO_RTPS_FRACS + .5)}
+      {static_cast<ACE_UINT32>(st.sec), DCPS::nanoseconds_to_uint32_fractional_seconds(st.nanosec)}
     };
     const CORBA::ULong i = subm.length();
     subm.length(i + 1);

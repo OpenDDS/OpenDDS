@@ -42,7 +42,7 @@ TransportConfig::populate_locators(TransportLocatorSeq& trans_info) const
        ++pos) {
     const CORBA::ULong idx = trans_info.length();
     trans_info.length(idx + 1);
-    if ((*pos)->populate_locator(trans_info[idx]) == 0) {
+    if ((*pos)->populate_locator(trans_info[idx], CONNINFO_ALL) == 0) {
       trans_info.length(idx);
     }
   }

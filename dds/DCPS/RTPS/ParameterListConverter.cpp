@@ -123,57 +123,6 @@ namespace {
     reader_data.readerProxy.associatedWriters.length(len + 1);
     reader_data.readerProxy.associatedWriters[len] = param.guid();
   }
-
-  void set_ipaddress(DCPS::LocatorSeq& locators,
-                     LocatorState& last_state,
-                     const unsigned long addr) {
-    const CORBA::ULong length = locators.length();
-    // Update last locator if the last state is port only
-    if (last_state == locator_port_only && length > 0) {
-      // Update last locator
-      DCPS::Locator_t& partial = locators[length - 1];
-      assign(partial.address, addr);
-      // there is no longer a partially complete locator, set state
-      last_state = locator_complete;
-    // Else there is no partially complete locator available
-    } else {
-      // initialize and append new locator
-      DCPS::Locator_t locator;
-      locator.kind = LOCATOR_KIND_UDPv4;
-      locator.port = 0;
-      assign(locator.address, addr);
-      locators.length(length + 1);
-      locators[length] = locator;
-      // there is now a paritally complete locator, set state
-      last_state = locator_address_only;
-    }
-  }
-
-  void set_port(DCPS::LocatorSeq& locators,
-                LocatorState& last_state,
-                const unsigned long port) {
-    const CORBA::ULong length = locators.length();
-    // Update last locator if the last state is address only
-    if (last_state == locator_address_only && length > 0) {
-      // Update last locator
-      DCPS::Locator_t& partial = locators[length - 1];
-      partial.port = port;
-      // there is no longer a partially complete locator, set state
-      last_state = locator_complete;
-    // Else there is no partially complete locator available
-    } else {
-      // initialize and append new locator
-      DCPS::Locator_t locator;
-      locator.kind = LOCATOR_KIND_UDPv4;
-      locator.port = port;
-      assign(locator.address, 0);
-      locators.length(length + 1);
-      locators[length] = locator;
-      // there is now a paritally complete locator, set state
-      last_state = locator_port_only;
-    }
-  }
-
   bool not_default(const DDS::UserDataQosPolicy& qos) {
     DDS::UserDataQosPolicy def_qos =
         TheServiceParticipant->initial_UserDataQosPolicy();
@@ -573,11 +522,6 @@ int to_param_list(const ParticipantProxy_t& proxy,
 int from_param_list(const ParameterList& param_list,
                     ParticipantProxy_t& proxy)
 {
-  // Track the state of our locators
-  LocatorState du_last_state = locator_undefined;
-  LocatorState mu_last_state = locator_undefined;
-  LocatorState mm_last_state = locator_undefined;
-
   // Start by setting defaults
   proxy.availableBuiltinEndpoints = 0;
   proxy.expectsInlineQos = false;
@@ -642,39 +586,6 @@ int from_param_list(const ParameterList& param_list,
       case PID_PARTICIPANT_MANUAL_LIVELINESS_COUNT:
         proxy.manualLivelinessCount.value =
             param.count().value;
-        break;
-      case PID_DEFAULT_UNICAST_IPADDRESS:
-        set_ipaddress(
-          proxy.defaultUnicastLocatorList,
-          du_last_state,
-          param.ipv4_address());
-        break;
-      case PID_METATRAFFIC_UNICAST_IPADDRESS:
-        set_ipaddress(
-          proxy.metatrafficUnicastLocatorList,
-          mu_last_state,
-          param.ipv4_address());
-        break;
-      case PID_METATRAFFIC_MULTICAST_IPADDRESS:
-        set_ipaddress(
-          proxy.metatrafficMulticastLocatorList,
-          mm_last_state,
-          param.ipv4_address());
-        break;
-      case PID_DEFAULT_UNICAST_PORT:
-        set_port(proxy.defaultUnicastLocatorList,
-                 du_last_state,
-                 param.udpv4_port());
-        break;
-      case PID_METATRAFFIC_UNICAST_PORT:
-        set_port(proxy.metatrafficUnicastLocatorList,
-                 mu_last_state,
-                 param.udpv4_port());
-        break;
-      case PID_METATRAFFIC_MULTICAST_PORT:
-        set_port(proxy.metatrafficMulticastLocatorList,
-                 mm_last_state,
-                 param.udpv4_port());
         break;
       case PID_PROPERTY_LIST:
         proxy.property = param.property();
@@ -885,8 +796,13 @@ int to_param_list(const DCPS::DiscoveredWriterData& writer_data,
     // Spec creators for RTPS have reliability indexed at 1
     DDS::ReliabilityQosPolicy reliability_copy =
         writer_data.ddsPublicationData.reliability;
-    reliability_copy.kind =
-        (DDS::ReliabilityQosPolicyKind)((int)reliability_copy.kind + 1);
+
+    if (reliability_copy.kind == DDS::BEST_EFFORT_RELIABILITY_QOS) {
+      reliability_copy.kind = (DDS::ReliabilityQosPolicyKind)(RTPS::BEST_EFFORT);
+    } else { // default to RELIABLE for writers
+      reliability_copy.kind = (DDS::ReliabilityQosPolicyKind)(RTPS::RELIABLE);
+    }
+
     param.reliability(reliability_copy);
     add_param(param_list, param);
   }
@@ -991,7 +907,6 @@ int to_param_list(const DCPS::DiscoveredWriterData& writer_data,
 int from_param_list(const ParameterList& param_list,
                     DCPS::DiscoveredWriterData& writer_data)
 {
-  LocatorState last_state = locator_undefined;  // Track state of locator
   // Collect the rtps_udp locators before appending them to allLocators
   DCPS::LocatorSeq rtps_udp_locators;
 
@@ -1032,8 +947,6 @@ int from_param_list(const ParameterList& param_list,
       TheServiceParticipant->initial_TopicDataQosPolicy();
   writer_data.ddsPublicationData.group_data =
       TheServiceParticipant->initial_GroupDataQosPolicy();
-  writer_data.writerProxy.unicastLocatorList.length(0);
-  writer_data.writerProxy.multicastLocatorList.length(0);
 
   CORBA::ULong length = param_list.length();
   for (CORBA::ULong i = 0; i < length; ++i) {
@@ -1073,9 +986,14 @@ int from_param_list(const ParameterList& param_list,
         writer_data.ddsPublicationData.reliability = param.reliability();
         // Interoperability note:
         // Spec creators for RTPS have reliability indexed at 1
-        writer_data.ddsPublicationData.reliability.kind =
-          (DDS::ReliabilityQosPolicyKind)
-              ((int)writer_data.ddsPublicationData.reliability.kind - 1);
+        {
+          const CORBA::Short rtpsKind = (const CORBA::Short)(param.reliability().kind);
+          if (rtpsKind == RTPS::BEST_EFFORT) {
+            writer_data.ddsPublicationData.reliability.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
+          } else { // default to RELIABLE for writers
+            writer_data.ddsPublicationData.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+          }
+        }
         normalize(writer_data.ddsPublicationData.reliability.max_blocking_time);
         break;
       case PID_LIFESPAN:
@@ -1115,11 +1033,6 @@ int from_param_list(const ParameterList& param_list,
         break;
       case PID_MULTICAST_LOCATOR:
         append_locator(rtps_udp_locators, param.locator());
-        break;
-      case PID_MULTICAST_IPADDRESS:
-        set_ipaddress(rtps_udp_locators,
-                      last_state,
-                      param.ipv4_address());
         break;
       case PID_OPENDDS_LOCATOR:
         // Append the rtps_udp_locators, if any, first, to preserve order
@@ -1203,8 +1116,13 @@ int to_param_list(const DCPS::DiscoveredReaderData& reader_data,
     // Spec creators for RTPS have reliability indexed at 1
     DDS::ReliabilityQosPolicy reliability_copy =
         reader_data.ddsSubscriptionData.reliability;
-    reliability_copy.kind =
-        (DDS::ReliabilityQosPolicyKind)((int)reliability_copy.kind + 1);
+
+    if (reliability_copy.kind == DDS::RELIABLE_RELIABILITY_QOS) {
+      reliability_copy.kind = (DDS::ReliabilityQosPolicyKind)(RTPS::RELIABLE);
+    } else { // default to BEST_EFFORT for readers
+      reliability_copy.kind = (DDS::ReliabilityQosPolicyKind)(RTPS::BEST_EFFORT);
+    }
+
     param.reliability(reliability_copy);
     add_param(param_list, param);
   }
@@ -1322,7 +1240,6 @@ int to_param_list(const DCPS::DiscoveredReaderData& reader_data,
 int from_param_list(const ParameterList& param_list,
                     DCPS::DiscoveredReaderData& reader_data)
 {
-  LocatorState last_state = locator_undefined;  // Track state of locator
   // Collect the rtps_udp locators before appending them to allLocators
 
   DCPS::LocatorSeq rtps_udp_locators;
@@ -1355,8 +1272,6 @@ int from_param_list(const ParameterList& param_list,
       TheServiceParticipant->initial_TopicDataQosPolicy();
   reader_data.ddsSubscriptionData.group_data =
       TheServiceParticipant->initial_GroupDataQosPolicy();
-  reader_data.readerProxy.unicastLocatorList.length(0);
-  reader_data.readerProxy.multicastLocatorList.length(0);
   reader_data.readerProxy.expectsInlineQos = false;
   reader_data.contentFilterProperty.contentFilteredTopicName = "";
   reader_data.contentFilterProperty.relatedTopicName = "";
@@ -1396,9 +1311,15 @@ int from_param_list(const ParameterList& param_list,
         reader_data.ddsSubscriptionData.reliability = param.reliability();
         // Interoperability note:
         // Spec creators for RTPS have reliability indexed at 1
-        reader_data.ddsSubscriptionData.reliability.kind =
-          (DDS::ReliabilityQosPolicyKind)
-              ((int)reader_data.ddsSubscriptionData.reliability.kind - 1);
+        {
+          const CORBA::Short rtpsKind = (const CORBA::Short)(param.reliability().kind);
+          const CORBA::Short OLD_RELIABLE_VALUE = 3;
+          if (rtpsKind == RTPS::RELIABLE || rtpsKind == OLD_RELIABLE_VALUE) {
+            reader_data.ddsSubscriptionData.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+          } else { // default to BEST_EFFORT for readers
+            reader_data.ddsSubscriptionData.reliability.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
+          }
+        }
         break;
       case PID_USER_DATA:
         reader_data.ddsSubscriptionData.user_data = param.user_data();
@@ -1437,11 +1358,6 @@ int from_param_list(const ParameterList& param_list,
         break;
       case PID_CONTENT_FILTER_PROPERTY:
         reader_data.contentFilterProperty = param.content_filter_property();
-        break;
-      case PID_MULTICAST_IPADDRESS:
-        set_ipaddress(rtps_udp_locators,
-                      last_state,
-                      param.ipv4_address());
         break;
       case PID_OPENDDS_LOCATOR:
         // Append the rtps_udp_locators, if any, first, to preserve order
