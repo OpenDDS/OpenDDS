@@ -9,6 +9,7 @@ project: dcpslib, dcps_rapidjson, ../bench_builder_idl_lib {
                    -I$(DDS_ROOT)/dds
 
   after += Bench_Core_Idl_Json
+  libs += Bench_Core_Idl_Json
 
   dynamicflags  += BENCH_BUILDER_BUILD_DLL
   includes += $(DDS_ROOT)/dds
