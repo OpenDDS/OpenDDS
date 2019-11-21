@@ -38,10 +38,8 @@ namespace OpenDDS {
     typedef DataReaderImpl_T<DDS::ParticipantBuiltinTopicData> ParticipantBuiltinTopicDataDataReaderImpl;
     typedef DataReaderImpl_T<DDS::PublicationBuiltinTopicData> PublicationBuiltinTopicDataDataReaderImpl;
     typedef DataReaderImpl_T<DDS::SubscriptionBuiltinTopicData> SubscriptionBuiltinTopicDataDataReaderImpl;
-    //--cj
-	typedef DataReaderImpl_T<DDS::ParticipantLocationBuiltinTopicData> ParticipantLocationBuiltinTopicDataDataReaderImpl;
-	//--cj end
-	typedef DataReaderImpl_T<DDS::TopicBuiltinTopicData> TopicBuiltinTopicDataDataReaderImpl;
+	  typedef DataReaderImpl_T<DDS::ParticipantLocationBuiltinTopicData> ParticipantLocationBuiltinTopicDataDataReaderImpl;
+	  typedef DataReaderImpl_T<DDS::TopicBuiltinTopicData> TopicBuiltinTopicDataDataReaderImpl;
 
 #ifdef OPENDDS_SECURITY
     typedef OPENDDS_MAP_CMP(DCPS::RepoId, DDS::Security::DatareaderCryptoHandle, DCPS::GUID_tKeyLessThan)
@@ -1679,7 +1677,6 @@ namespace OpenDDS {
         return dynamic_cast<ParticipantBuiltinTopicDataDataReaderImpl*>(d.in());
       }
 
-	  //--cj
 	  DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl* part_loc_bit()
 	  {
 		  if (!bit_subscriber_.in())
@@ -1689,7 +1686,6 @@ namespace OpenDDS {
 			  bit_subscriber_->lookup_datareader(DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC);
 		  return dynamic_cast<ParticipantLocationBuiltinTopicDataDataReaderImpl*>(d.in());
 	  }
-	  //--cj end
 #endif /* DDS_HAS_MINIMUM_BIT */
 
       mutable ACE_Thread_Mutex lock_;
@@ -1759,12 +1755,10 @@ namespace OpenDDS {
         create_bit_dr(bit_sub_topic, BUILT_IN_SUBSCRIPTION_TOPIC_TYPE,
                       sub, dr_qos);
 
-		//--cj
 		DDS::TopicDescription_var bit_part_loc_topic =
 			participant->lookup_topicdescription(BUILT_IN_PARTICIPANT_LOCATION_TOPIC);
 		create_bit_dr(bit_part_loc_topic, BUILT_IN_PARTICIPANT_LOCATION_TOPIC_TYPE,
 			sub, dr_qos);
-		//--cj end
 
         const DDS::ReturnCode_t ret = bit_subscriber->enable();
         if (ret != DDS::RETCODE_OK) {

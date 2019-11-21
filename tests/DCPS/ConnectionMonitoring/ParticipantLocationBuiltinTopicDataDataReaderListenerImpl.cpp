@@ -1,10 +1,9 @@
-// -*- C++ -*-
-//
-// $Id: ParticipantLocationBuiltinTopicDataDataReaderListenerImpl.cpp,v 1.1 2006/03/31 16:53:17 don Exp $
-//
-// (c) Copyright 2008, Object Computing, Inc.
-// All Rights Reserved.
-//
+/*
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 #include "ParticipantLocationBuiltinTopicDataDataReaderListenerImpl.h"
 #include <dds/DdsDcpsCoreTypeSupportC.h>

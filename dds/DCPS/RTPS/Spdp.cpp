@@ -762,9 +762,6 @@ Spdp::match_unauthenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp)
   ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
 
   DDS::InstanceHandle_t bit_instance_handle = DDS::HANDLE_NIL;
-//--cj start
-  //DDS::InstanceHandle_t locbit_instance_handle = DDS::HANDLE_NIL;
-//--cj end
 #ifndef DDS_HAS_MINIMUM_BIT
   DCPS::ParticipantBuiltinTopicDataDataReaderImpl* bit = part_bit();
   if (bit) {
@@ -1456,7 +1453,6 @@ Spdp::part_bit()
   return dynamic_cast<DCPS::ParticipantBuiltinTopicDataDataReaderImpl*>(d.in());
 }
 
-//--cj start
 DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl*
 Spdp::part_loc_bit()
 {
@@ -1467,7 +1463,7 @@ Spdp::part_loc_bit()
 		bit_subscriber_->lookup_datareader(DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC);
 	return dynamic_cast<DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl*>(d.in());
 }
-//--cj end
+
 #endif /* DDS_HAS_MINIMUM_BIT */
 
 WaitForAcks&
@@ -1961,7 +1957,6 @@ Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, WriteFlags flags)
 void
 Spdp::SpdpTransport::send(WriteFlags flags)
 {
-	//--cj send local | relay check here
   if ((flags & SEND_TO_LOCAL) && !outer_->config_->rtps_relay_only()) {
     typedef OPENDDS_SET(ACE_INET_Addr)::const_iterator iter_t;
     for (iter_t iter = send_addrs_.begin(); iter != send_addrs_.end(); ++iter) {

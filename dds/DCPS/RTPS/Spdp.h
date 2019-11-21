@@ -269,15 +269,6 @@ private:
   void remove_expired_participants();
   void get_discovered_participant_ids(DCPS::RepoIdSet& results) const;
 
-  //--cj start
-  // todo: store in a map for lookup and modification later.
-  // ACE_INET_Addr location_addr;
-  // DCPS::RepoId  location_guid;
-  // unsigned long location_mask;
-  // unsigned long location_timestamp;
-  //bool has_ice;
-  //--cj end
-
   BuiltinEndpointSet_t available_builtin_endpoints_;
   Sedp sedp_;
   // wait for acknowledgments from SpdpTransport and Sedp::Task

@@ -33,10 +33,8 @@ OpenDDS_Dcps_Export extern const char* const BUILT_IN_SUBSCRIPTION_TOPIC_TYPE;
 OpenDDS_Dcps_Export extern const char* const BUILT_IN_PUBLICATION_TOPIC;
 OpenDDS_Dcps_Export extern const char* const BUILT_IN_PUBLICATION_TOPIC_TYPE;
 
-//--cj start
 OpenDDS_Dcps_Export extern const char* const BUILT_IN_PARTICIPANT_LOCATION_TOPIC;
 OpenDDS_Dcps_Export extern const char* const BUILT_IN_PARTICIPANT_LOCATION_TOPIC_TYPE;
-//--cj end
 
 /**
  * Returns true if the topic name and type pair matches one of the built-in
@@ -57,11 +55,9 @@ topicIsBIT(const char* name, const char* type)
   ) || (
     !ACE_OS::strcmp(name, BUILT_IN_PUBLICATION_TOPIC) &&
     !ACE_OS::strcmp(type, BUILT_IN_PUBLICATION_TOPIC_TYPE)
-  //--cj
   ) || (
 	!ACE_OS::strcmp(name, BUILT_IN_PARTICIPANT_LOCATION_TOPIC) &&
 	!ACE_OS::strcmp(type, BUILT_IN_PARTICIPANT_LOCATION_TOPIC_TYPE)
-  //--cj end
 	);
 }
 
@@ -205,17 +201,6 @@ keyFromSample<DDS::PublicationBuiltinTopicData>(
 {
   return sample->key;
 }
-
-// //--cj
-// template<>
-// inline
-// DDS::BuiltinTopicKey_t
-// keyFromSample<DDS::ParticipantLocationBuiltinTopicData>(
-// 	DDS::ParticipantLocationBuiltinTopicData* sample)
-// {
-// 	return sample->guid;
-// }
-// //--cj end
 
 #endif
 

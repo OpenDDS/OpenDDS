@@ -68,7 +68,6 @@ Discovery::create_bit_topics(DomainParticipantImpl* participant)
                      DDS::RETCODE_ERROR);
   }
 
-  //--cj
   // Participant location topic
   type_support =
 	  Registered_Data_Types->lookup(participant, BUILT_IN_PARTICIPANT_LOCATION_TOPIC_TYPE);
@@ -105,7 +104,6 @@ Discovery::create_bit_topics(DomainParticipantImpl* participant)
 		  BUILT_IN_PARTICIPANT_LOCATION_TOPIC),
 		  DDS::RETCODE_ERROR);
   }
-  //--cj end
 
   // Topic topic
   type_support =
@@ -223,9 +221,7 @@ Discovery::create_bit_topics(DomainParticipantImpl* participant)
   bit_sub_topic->enable();
   bit_pub_topic->enable();
 
-  //--cj
   bit_part_loc_topic->enable();
-  //--cj end
 
 #else
   ACE_UNUSED_ARG(participant);

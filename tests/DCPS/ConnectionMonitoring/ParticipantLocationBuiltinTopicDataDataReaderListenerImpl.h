@@ -1,9 +1,10 @@
-// -*- C++ -*-
-//
-//
-// (c) Copyright 2008, Object Computing, Inc.
-// All Rights Reserved.
-//
+/*
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #ifndef PARTICIPANT_LOCATION_BUILTIN_TOPIC_DATA_DATAREADER_LISTENER_IMPL
 #define PARTICIPANT_LOCATION_BUILTIN_TOPIC_DATA_DATAREADER_LISTENER_IMPL
 
@@ -58,4 +59,4 @@ private:
 
 };
 
-#endif /* KEYS_DATAREADER_LISTENER_IMPL  */
+#endif /* PARTICIPANT_LOCATION_BUILTIN_TOPIC_DATA_DATAREADER_LISTENER_IMPL  */

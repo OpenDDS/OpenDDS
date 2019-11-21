@@ -300,26 +300,24 @@ module DDS {
 
     // ----------------------------------------------------------------------
 
-	//--cj
-	typedef unsigned long ParticipantLocation;
+	  typedef unsigned long ParticipantLocation;
 
-	const ParticipantLocation LOCATION_LOCAL = 0x0001 << 0;
-	const ParticipantLocation LOCATION_ICE = 0x0001 << 1;
-	const ParticipantLocation LOCATION_RELAY = 0x0001 << 2;
+  	const ParticipantLocation LOCATION_LOCAL = 0x0001 << 0;
+	  const ParticipantLocation LOCATION_ICE = 0x0001 << 1;
+	  const ParticipantLocation LOCATION_RELAY = 0x0001 << 2;
 
-	BUILT_IN_TOPIC_TYPE
-		struct ParticipantLocationBuiltinTopicData {
-		BUILT_IN_TOPIC_KEY string guid;
-                ParticipantLocation location;
-                ParticipantLocation change_mask;
-		string local_addr;
-                unsigned long local_timestamp;
-                string ice_addr;
-                unsigned long ice_timestamp;
-                string relay_addr;
-		unsigned long relay_timestamp;
-	};
-	//--cj end
+  	BUILT_IN_TOPIC_TYPE
+	  struct ParticipantLocationBuiltinTopicData {
+		  BUILT_IN_TOPIC_KEY string guid;
+      ParticipantLocation location;
+      ParticipantLocation change_mask;
+		  string local_addr;
+      unsigned long local_timestamp;
+      string ice_addr;
+      unsigned long ice_timestamp;
+      string relay_addr;
+		  unsigned long relay_timestamp;
+	  };
 
     BUILT_IN_TOPIC_TYPE
     struct ParticipantBuiltinTopicData {
