@@ -216,6 +216,8 @@ public:
                        const ACE_INET_Addr& a_remote_address,
                        const STUN::Message& a_message) = 0;
 
+  virtual void shutdown() = 0;
+
   static Agent* instance();
 };
 

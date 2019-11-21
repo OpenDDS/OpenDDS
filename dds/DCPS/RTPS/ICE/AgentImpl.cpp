@@ -87,7 +87,9 @@ int AgentImpl::handle_timeout(const ACE_Time_Value& a_now, const void* /*act*/)
 
 AgentImpl::AgentImpl() :
   ReactorInterceptor(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner()),
-  remote_peer_reflexive_counter_(0) {}
+  remote_peer_reflexive_counter_(0) {
+    TheServiceParticipant->add_shutdown_listener(this);
+  }
 
 void AgentImpl::add_endpoint(Endpoint* a_endpoint)
 {
@@ -213,6 +215,15 @@ void AgentImpl::check_invariants() const
   }
 
   OPENDDS_ASSERT(expected == active_foundations);
+}
+
+void AgentImpl::shutdown()
+{
+  reactor()->cancel_timer(this, 0);
+}
+
+void AgentImpl::notify_shutdown() {
+  shutdown();
 }
 
 #endif /* OPENDDS_SECURITY */
