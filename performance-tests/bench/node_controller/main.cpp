@@ -165,6 +165,7 @@ public:
 
   ~WorkerManager()
   {
+    ACE_Reactor::instance()->remove_handler(SIGINT, nullptr);
     process_manager_.register_handler(nullptr);
   }
 
@@ -260,6 +261,7 @@ public:
         ACE_OS::sleep(1);
       }
     }
+    ACE_Reactor::instance()->cancel_timer(this);
   }
 
   /// Used to the Handle Exit of a Worker
