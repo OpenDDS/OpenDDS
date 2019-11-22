@@ -9,9 +9,9 @@
 
 #include "ace/config.h"
 
-#ifdef ACE_LINUX
-
 #include "LinuxNetworkConfigMonitor.h"
+
+#ifdef OPENDDS_LINUX_NETWORK_CONFIG_MONITOR
 
 #include <ace/Netlink_Addr.h>
 
@@ -236,4 +236,4 @@ void LinuxNetworkConfigMonitor::process_message(const nlmsghdr* header)
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // ACE_LINUX
+#endif // OPENDDS_LINUX_NETWORK_CONFIG_MONITOR

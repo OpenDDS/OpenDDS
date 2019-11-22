@@ -10,7 +10,9 @@
 
 #include "ace/config.h"
 
-#ifdef ACE_LINUX
+#if defined(ACE_LINUX) || defined(ACE_ANDROID)
+
+#define OPENDDS_LINUX_NETWORK_CONFIG_MONTIOR
 
 #include "NetworkConfigMonitor.h"
 #include "RcEventHandler.h"
@@ -44,6 +46,6 @@ private:
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // ACE_LINUX
+#endif // ACE_LINUX || ACE_ANDROID
 
 #endif // OPENDDS_DCPS_LINUXNETWORKCONFIGPUBLISHER_H
