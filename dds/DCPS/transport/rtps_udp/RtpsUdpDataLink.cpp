@@ -1996,43 +1996,46 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
   using namespace OpenDDS::RTPS;
 
   MetaSubmessageVec meta_submessages;
+  RtpsReaderMap readers;
 
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
-  for (InterestingAckNackSetType::const_iterator pos = interesting_ack_nacks_.begin(),
-         limit = interesting_ack_nacks_.end();
-       pos != limit;
-       ++pos) {
+    for (InterestingAckNackSetType::const_iterator pos = interesting_ack_nacks_.begin(),
+           limit = interesting_ack_nacks_.end();
+         pos != limit;
+         ++pos) {
 
-    SequenceNumber ack;
-    LongSeq8 bitmap;
-    bitmap.length(0);
+      SequenceNumber ack;
+      LongSeq8 bitmap;
+      bitmap.length(0);
 
-    AckNackSubmessage acknack = {
-      {ACKNACK,
-       CORBA::Octet(FLAG_E | FLAG_F),
-       0 /*length*/},
-      pos->readerid.entityId,
-      pos->writerid.entityId,
-      { // SequenceNumberSet: acking bitmapBase - 1
-        {ack.getHigh(), ack.getLow()},
-        0 /* num_bits */, bitmap
-      },
-      {0 /* acknack count */}
-    };
+      AckNackSubmessage acknack = {
+        {ACKNACK,
+         CORBA::Octet(FLAG_E | FLAG_F),
+         0 /*length*/},
+        pos->readerid.entityId,
+        pos->writerid.entityId,
+        { // SequenceNumberSet: acking bitmapBase - 1
+          {ack.getHigh(), ack.getLow()},
+          0 /* num_bits */, bitmap
+        },
+        {0 /* acknack count */}
+      };
 
-    MetaSubmessage meta_submessage(pos->readerid, pos->writerid);
-    meta_submessage.sm_.acknack_sm(acknack);
+      MetaSubmessage meta_submessage(pos->readerid, pos->writerid);
+      meta_submessage.sm_.acknack_sm(acknack);
 
-    meta_submessages.push_back(meta_submessage);
+      meta_submessages.push_back(meta_submessage);
+    }
+    interesting_ack_nacks_.clear();
+
+    readers = readers_;
   }
-  interesting_ack_nacks_.clear();
 
-  for (RtpsReaderMap::iterator rr = readers_.begin(); rr != readers_.end(); ++rr) {
+  for (RtpsReaderMap::iterator rr = readers.begin(); rr != readers.end(); ++rr) {
     rr->second->gather_ack_nacks(meta_submessages);
   }
-
-  g.release();
 
   send_bundled_submessages(meta_submessages);
 }
@@ -3415,14 +3418,20 @@ RtpsUdpDataLink::TimedDelay::cancel()
 void
 RtpsUdpDataLink::send_final_acks(const RepoId& readerid)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  RtpsReaderMap::iterator rr = readers_.find(readerid);
-  MetaSubmessageVec meta_submessages;
-  if (rr != readers_.end()) {
-    rr->second->gather_ack_nacks(meta_submessages, true);
+  RtpsReader_rch reader;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    RtpsReaderMap::iterator rr = readers_.find(readerid);
+    if (rr != readers_.end()) {
+      reader = rr->second;
+    }
   }
-  g.release();
-  send_bundled_submessages(meta_submessages);
+
+  if (reader) {
+    MetaSubmessageVec meta_submessages;
+    reader->gather_ack_nacks(meta_submessages, true);
+    send_bundled_submessages(meta_submessages);
+  }
 }
 
 
