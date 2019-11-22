@@ -10,7 +10,7 @@
 
 #include "ace/config.h"
 
-#if defined(ACE_LINUX) || defined(ACE_ANDROID)
+#if (defined(ACE_LINUX) || defined(ACE_ANDROID)) && !defined(OPENDDS_SAFETY_PROFILE)
 
 #define OPENDDS_LINUX_NETWORK_CONFIG_MONTIOR
 

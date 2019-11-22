@@ -2041,7 +2041,7 @@ NetworkConfigMonitor_rch Service_Participant::network_config_monitor()
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, network_config_monitor_lock_, NetworkConfigMonitor_rch());
 
   if (!network_config_monitor_) {
-#if defined OPENDDS_LINUX_NETWORK_CONFIG_MONITOR && !defined OPENDDS_SAFETY_PROFILE
+#ifdef OPENDDS_LINUX_NETWORK_CONFIG_MONITOR
     network_config_monitor_ = make_rch<LinuxNetworkConfigMonitor>(reactor_task_.interceptor());
 #endif
 
