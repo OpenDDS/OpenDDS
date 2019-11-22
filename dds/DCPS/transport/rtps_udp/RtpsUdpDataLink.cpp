@@ -89,6 +89,7 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
              false,     // is_loopback
              false)     // is_active
   , reactor_task_(reactor_task)
+  , job_queue_(DCPS::make_rch<DCPS::JobQueue>(reactor_task->get_reactor()))
   , multi_buff_(this, config.nak_depth_)
   , best_effort_heartbeat_count_(0)
   , nack_reply_(this, &RtpsUdpDataLink::send_nack_replies,
@@ -213,20 +214,26 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
 
   RtpsUdpInst& config = this->config();
 
+  NetworkConfigMonitor_rch ncm = TheServiceParticipant->network_config_monitor();
+
+  DCPS::NetworkInterfaces nics;
+  if (ncm) {
+    nics = ncm->add_listener(*this);
+  }
+
   if (config.use_multicast_) {
-    const OPENDDS_STRING& net_if = config.multicast_interface_;
 #ifdef ACE_HAS_MAC_OSX
     multicast_socket_.opts(ACE_SOCK_Dgram_Mcast::OPT_BINDADDR_NO |
                            ACE_SOCK_Dgram_Mcast::DEFOPT_NULLIFACE);
 #endif
-    if (multicast_socket_.join(config.multicast_group_address_, 1,
-                               net_if.empty() ? 0 :
-                               ACE_TEXT_CHAR_TO_TCHAR(net_if.c_str())) != 0) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("RtpsUdpDataLink::open: ")
-                        ACE_TEXT("ACE_SOCK_Dgram_Mcast::join failed: %m\n")),
-                       false);
+    if (ncm) {
+      for (DCPS::NetworkInterfaces::const_iterator pos = nics.begin(), limit = nics.end(); pos != limit; ++pos) {
+        join_multicast_group(*pos);
+      }
+    } else {
+      NetworkInterface nic(0, config.multicast_interface_, true);
+      nic.addresses.insert(ACE_INET_Addr());
+      join_multicast_group(nic, true);
     }
   }
 
@@ -288,6 +295,82 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
   return true;
 }
 
+void
+RtpsUdpDataLink::add_address(const DCPS::NetworkInterface& nic,
+                             const ACE_INET_Addr&)
+{
+  job_queue_->enqueue(make_rch<ChangeMulticastGroup>(rchandle_from(this), nic,
+                                                     ChangeMulticastGroup::CMG_JOIN));
+}
+
+void
+RtpsUdpDataLink::remove_address(const DCPS::NetworkInterface& nic,
+                                const ACE_INET_Addr&)
+{
+  job_queue_->enqueue(make_rch<ChangeMulticastGroup>(rchandle_from(this), nic,
+                                                     ChangeMulticastGroup::CMG_LEAVE));
+}
+
+void
+RtpsUdpDataLink::join_multicast_group(const DCPS::NetworkInterface& nic,
+                                      bool all_interfaces)
+{
+  network_change();
+
+  if (!config().use_multicast_) {
+    return;
+  }
+
+  if (joined_interfaces_.count(nic.name()) != 0 || nic.addresses.empty() || !nic.can_multicast()) {
+    return;
+  }
+
+  if (!config().multicast_interface_.empty() && nic.name() != config().multicast_interface_) {
+    return;
+  }
+
+  if (DCPS::DCPS_debug_level > 3) {
+    ACE_DEBUG((LM_INFO,
+               ACE_TEXT("(%P|%t) RtpsUdpDataLink::join_multicast_group ")
+               ACE_TEXT("joining group %C %C:%hu\n"),
+               nic.name().c_str(),
+               config().multicast_group_address_str_.c_str(),
+               config().multicast_group_address_.get_port_number()));
+  }
+
+  if (0 == multicast_socket_.join(config().multicast_group_address_, 1, all_interfaces ? 0 : ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()))) {
+    joined_interfaces_.insert(nic.name());
+  } else {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::join_multicast_group(): ")
+               ACE_TEXT("ACE_SOCK_Dgram_Mcast::join failed: %m\n")));
+  }
+}
+
+void
+RtpsUdpDataLink::leave_multicast_group(const DCPS::NetworkInterface& nic)
+{
+  if (joined_interfaces_.count(nic.name()) == 0 || !nic.addresses.empty()) {
+    return;
+  }
+
+  if (DCPS::DCPS_debug_level > 3) {
+    ACE_DEBUG((LM_INFO,
+               ACE_TEXT("(%P|%t) RtpsUdpDataLink::leave_multicast_group ")
+               ACE_TEXT("leaving group %C %C:%hu\n"),
+               nic.name().c_str(),
+               config().multicast_group_address_str_.c_str(),
+               config().multicast_group_address_.get_port_number()));
+  }
+
+  if (0 == multicast_socket_.leave(config().multicast_group_address_, ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()))) {
+    joined_interfaces_.erase(nic.name());
+  } else {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::leave_multicast_group(): ")
+               ACE_TEXT("ACE_SOCK_Dgram_Mcast::leave failed: %m\n")));
+  }
+}
 
 void
 RtpsUdpDataLink::add_locator(const RepoId& remote_id,
@@ -296,6 +379,12 @@ RtpsUdpDataLink::add_locator(const RepoId& remote_id,
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   locators_[remote_id] = RemoteInfo(address, requires_inline_qos);
+
+  if (DCPS::DCPS_debug_level > 3) {
+    ACE_TCHAR addr_buff[256] = {};
+    address.addr_to_string(addr_buff, 256);
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) RtpsUdpDataLink::add_locator %C is now at %s\n"), LogGuid(remote_id).c_str(), addr_buff));
+  }
 }
 
 void
@@ -589,6 +678,11 @@ RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
 void
 RtpsUdpDataLink::stop_i()
 {
+  NetworkConfigMonitor_rch ncm = TheServiceParticipant->network_config_monitor();
+  if (ncm) {
+    ncm->remove_listener(*this);
+  }
+
   nack_reply_.cancel();
   heartbeat_reply_.cancel();
   heartbeat_.disable_and_wait();

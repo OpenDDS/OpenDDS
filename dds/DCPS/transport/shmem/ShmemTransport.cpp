@@ -206,9 +206,9 @@ ShmemTransport::shutdown_i()
 }
 
 bool
-ShmemTransport::connection_info_i(TransportLocator& info) const
+ShmemTransport::connection_info_i(TransportLocator& info, ConnectionInfoFlags flags) const
 {
-  this->config().populate_locator(info);
+  config().populate_locator(info, flags);
   return true;
 }
 

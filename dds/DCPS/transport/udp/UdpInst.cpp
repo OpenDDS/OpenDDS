@@ -74,7 +74,7 @@ UdpInst::dump_to_str() const
 }
 
 size_t
-UdpInst::populate_locator(OpenDDS::DCPS::TransportLocator& info) const
+UdpInst::populate_locator(OpenDDS::DCPS::TransportLocator& info, ConnectionInfoFlags) const
 {
   if (this->local_address() != ACE_INET_Addr()) {
     NetworkAddress network_address;

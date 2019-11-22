@@ -17,7 +17,9 @@
 #include <ace/Get_Opt.h>
 #include <ace/Log_Msg.h>
 #include <ace/OS_NS_stdlib.h>
+
 #include <iostream>
+#include <cstdlib>
 
 const int num_messages = 40;
 extern bool reliable;
@@ -59,7 +61,7 @@ parse_args(int argc, ACE_TCHAR *argv[])
     default:
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("usage: %s [-t transport]\n"), argv[0]),
-                       -1);
+                       EXIT_FAILURE);
     }
   }
 
@@ -76,12 +78,12 @@ parse_args(int argc, ACE_TCHAR *argv[])
     if (config.in() == 0) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("no default config\n"), argv[0]),
-                       -1);
+                       EXIT_FAILURE);
     }
     else if (config->instances_.size() < 1) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("no instances on default config\n"), argv[0]),
-                       -1);
+                       EXIT_FAILURE);
     }
     else if (config->instances_.size() > 1) {
       ACE_ERROR((LM_ERROR,
@@ -91,7 +93,7 @@ parse_args(int argc, ACE_TCHAR *argv[])
     inst->thread_per_connection_ = true;
   }
 
-  return 0;
+  return EXIT_SUCCESS;
 }
 
 

@@ -5,6 +5,7 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+#include "dcps_export.h"
 #include "unique_ptr.h"
 #include "ace/Message_Block.h"
 
@@ -20,7 +21,7 @@ struct Message_Block_Deleter
   }
 };
 
-typedef unique_ptr<ACE_Message_Block,Message_Block_Deleter> Message_Block_Ptr;
+typedef unique_ptr<ACE_Message_Block, Message_Block_Deleter> Message_Block_Ptr;
 
 class OpenDDS_Dcps_Export Message_Block_Shared_Ptr {
 public:

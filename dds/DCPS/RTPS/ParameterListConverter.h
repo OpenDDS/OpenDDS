@@ -166,8 +166,6 @@ int to_param_list(const DiscoveredSubscription_SecurityWrapper& wrapper,
 OpenDDS_Rtps_Export
 int from_param_list(const ParameterList& param_list,
                     DiscoveredSubscription_SecurityWrapper& wrapper);
-#endif
-
 
 // Extensions for ICE
 
@@ -178,6 +176,7 @@ int to_param_list(const ICE::AgentInfoMap& ai_map,
 OpenDDS_Rtps_Export
 int from_param_list(const ParameterList& param_list,
                     ICE::AgentInfoMap& ai_map);
+#endif
 
 }
 }

@@ -1,0 +1,8 @@
+project(StunClient): dcpsexe, dcps_test, dcps_rtps, opendds_cxx11 {
+
+  exename   = StunClient
+
+  Source_Files {
+    StunClient.cpp
+  }
+}

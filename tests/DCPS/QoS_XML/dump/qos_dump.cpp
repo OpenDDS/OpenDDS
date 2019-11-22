@@ -15,8 +15,8 @@ int ACE_TMAIN (int, ACE_TCHAR *[])
           ::DDS::DataWriterQos dw_qos;
           retcode_qos = xml_loader.get_datawriter_qos (
                                 dw_qos,
-                                "qos#TestProfile",
-                                "TopicName");
+                                ACE_TEXT("qos#TestProfile"),
+                                ACE_TEXT("TopicName"));
           if (retcode_qos != DDS::RETCODE_OK)
             {
               ACE_ERROR ((LM_ERROR, "MAIN - "
@@ -40,8 +40,8 @@ int ACE_TMAIN (int, ACE_TCHAR *[])
           ::DDS::DataReaderQos dr_qos;
           retcode_qos = xml_loader.get_datareader_qos (
                                 dr_qos,
-                                "qos#TestProfile",
-                                "TopicName");
+                                ACE_TEXT("qos#TestProfile"),
+                                ACE_TEXT("TopicName"));
           if (retcode_qos != DDS::RETCODE_OK)
             {
               ACE_ERROR ((LM_ERROR, "MAIN - "
@@ -53,8 +53,8 @@ int ACE_TMAIN (int, ACE_TCHAR *[])
           ::DDS::TopicQos tp_qos;
           retcode_qos = xml_loader.get_topic_qos (
                                 tp_qos,
-                                "qos#TestProfile",
-                                "TopicName");
+                                ACE_TEXT("qos#TestProfile"),
+                                ACE_TEXT("TopicName"));
           if (retcode_qos != DDS::RETCODE_OK)
             {
               ACE_ERROR ((LM_ERROR, "MAIN - "
@@ -66,7 +66,7 @@ int ACE_TMAIN (int, ACE_TCHAR *[])
           ::DDS::PublisherQos pub_qos;
           retcode_qos = xml_loader.get_publisher_qos (
                                 pub_qos,
-                                "qos#TestProfile");
+                                ACE_TEXT("qos#TestProfile"));
           if (retcode_qos != DDS::RETCODE_OK)
             {
               ACE_ERROR ((LM_ERROR, "MAIN - "
@@ -78,7 +78,7 @@ int ACE_TMAIN (int, ACE_TCHAR *[])
           ::DDS::SubscriberQos sub_qos;
           retcode_qos = xml_loader.get_subscriber_qos (
                                 sub_qos,
-                                "qos#TestProfile");
+                                ACE_TEXT("qos#TestProfile"));
           if (retcode_qos != DDS::RETCODE_OK)
             {
               ACE_ERROR ((LM_ERROR, "MAIN - "
@@ -90,7 +90,7 @@ int ACE_TMAIN (int, ACE_TCHAR *[])
           ::DDS::DomainParticipantQos dp_qos;
           retcode_qos = xml_loader.get_participant_qos (
                                 dp_qos,
-                                "qos#TestProfile");
+                                ACE_TEXT("qos#TestProfile"));
           if (retcode_qos != DDS::RETCODE_OK)
             {
               ACE_ERROR ((LM_ERROR, "MAIN - "

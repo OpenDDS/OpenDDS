@@ -21,8 +21,6 @@
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/Qos_Helper.h"
 
-#include "dds/DCPS/RTPS/ICE/Ice.h"
-
 #ifdef OPENDDS_SECURITY
 #include "SecurityHelpers.h"
 #include "dds/DCPS/security/framework/SecurityRegistry.h"
@@ -159,19 +157,6 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
   guid = guid_; // may have changed in SpdpTransport constructor
   sedp_.ignore(guid);
   sedp_.init(guid_, *disco, domain_);
-
-  // Append metatraffic unicast locator
-  sedp_.unicast_locators(sedp_unicast_);
-
-  if (disco->sedp_multicast()) { // Append metatraffic multicast locator
-    const ACE_INET_Addr& mc_addr = sedp_.multicast_group();
-    DCPS::Locator_t mc_locator;
-    mc_locator.kind = address_to_kind(mc_addr);
-    mc_locator.port = mc_addr.get_port_number();
-    address_to_bytes(mc_locator.address, mc_addr);
-    sedp_multicast_.length(1);
-    sedp_multicast_[0] = mc_locator;
-  }
 
 #ifdef OPENDDS_SECURITY
   ICE::Endpoint* endpoint = sedp_.get_ice_endpoint();
@@ -336,6 +321,7 @@ Spdp::~Spdp()
     {
       DiscoveredParticipantIter part = participants_.find(*participant_id);
       if (part != participants_.end()) {
+#ifdef OPENDDS_SECURITY
         ICE::Endpoint* sedp_endpoint = sedp_.get_ice_endpoint();
         if (sedp_endpoint) {
           stop_ice(sedp_endpoint, part->first, part->second.pdata_.participantProxy.availableBuiltinEndpoints);
@@ -345,6 +331,7 @@ Spdp::~Spdp()
           ICE::Agent::instance()->stop_ice(spdp_endpoint, guid_, part->first);
         }
         purge_auth_deadlines(part);
+#endif
         remove_discovered_participant(part);
       }
     }
@@ -466,7 +453,10 @@ Spdp::update_location_i(const DCPS::RepoId& guid,
     break;
   }
 
-  const unsigned long expr = now - rtps_time_to_time_duration(iter->second.pdata_.leaseDuration).value().sec();
+  const unsigned long expr = now - rtps_duration_to_time_duration(
+                                    iter->second.pdata_.leaseDuration,
+                                    iter->second.pdata_.participantProxy.protocolVersion,
+                                    iter->second.pdata_.participantProxy.vendorId).value().sec();
   if ((ld.location & DDS::LOCATION_LOCAL) && ld.local_timestamp < expr) {
     ld.location &= ~(DDS::LOCATION_LOCAL);
     ld.change_mask |= DDS::LOCATION_LOCAL;
@@ -632,6 +622,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 #endif
 
     if (id == DCPS::DISPOSE_INSTANCE || id == DCPS::DISPOSE_UNREGISTER_INSTANCE) {
+#ifdef OPENDDS_SECURITY
       ICE::Endpoint* sedp_endpoint = sedp_.get_ice_endpoint();
       if (sedp_endpoint) {
         stop_ice(sedp_endpoint, iter->first, iter->second.pdata_.participantProxy.availableBuiltinEndpoints);
@@ -641,6 +632,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
         ICE::Agent::instance()->stop_ice(spdp_endpoint, guid_, iter->first);
       }
       purge_auth_deadlines(iter);
+#endif
       remove_discovered_participant(iter);
       return;
     }
@@ -672,12 +664,17 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       }
       // Participant may have been removed while lock released
       if (iter != participants_.end()) {
+        if (locators_changed(iter->second.pdata_.participantProxy, pdata.participantProxy)) {
+          sedp_.update_locators(pdata);
+        }
         iter->second.pdata_ = pdata;
         iter->second.last_seen_ = now;
       }
     // Else a reset has occured and check if we should remove the participant
     } else if (iter->second.seq_reset_count_ >= config_->max_spdp_sequence_msg_reset_check()) {
+#ifdef OPENDDS_SECURITY
       purge_auth_deadlines(iter);
+#endif
       remove_discovered_participant(iter);
     }
   }
@@ -708,10 +705,18 @@ Spdp::data_received(const DataSubmessage& data,
   if (shutdown_flag_.value()) { return; }
 
   ParticipantData_t pdata;
+
+  pdata.participantProxy.domainId = domain_;
+
   if (ParameterListConverter::from_param_list(plist, pdata) < 0) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::data_received - ")
       ACE_TEXT("failed to convert from ParameterList to ")
       ACE_TEXT("SPDPdiscoveredParticipantData\n")));
+    return;
+  }
+
+  // Remote domain ID, if populated, has to match
+  if (pdata.participantProxy.domainId != domain_) {
     return;
   }
 
@@ -726,6 +731,7 @@ Spdp::data_received(const DataSubmessage& data,
   handle_participant_data((data.inlineQos.length() && disposed(data.inlineQos)) ? DCPS::DISPOSE_INSTANCE : DCPS::SAMPLE_DATA,
                           pdata, seq, from);
 
+#ifdef OPENDDS_SECURITY
   ICE::AgentInfoMap ai_map;
   if (ParameterListConverter::from_param_list(plist, ai_map) < 0) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::data_received - ")
@@ -753,6 +759,7 @@ Spdp::data_received(const DataSubmessage& data,
       update_location(guid, DDS::LOCATION_ICE, ACE_INET_Addr());
     }
   }
+#endif
 }
 
 void
@@ -1396,8 +1403,14 @@ Spdp::remove_expired_participants()
   {
     DiscoveredParticipantIter part = participants_.find(*participant_id);
     if (part != participants_.end()) {
-      const MonotonicTimePoint expr(MonotonicTimePoint::now() -
-        rtps_time_to_time_duration(part->second.pdata_.leaseDuration));
+      const MonotonicTimePoint expr(
+        MonotonicTimePoint::now() -
+        rtps_duration_to_time_duration(
+          part->second.pdata_.leaseDuration,
+          part->second.pdata_.participantProxy.protocolVersion,
+          part->second.pdata_.participantProxy.vendorId
+        )
+      );
       if (part->second.last_seen_ < expr) {
         if (DCPS::DCPS_debug_level > 1) {
           DCPS::GuidConverter conv(part->first);
@@ -1406,6 +1419,7 @@ Spdp::remove_expired_participants()
             ACE_TEXT("participant %C exceeded lease duration, removing\n"),
             OPENDDS_STRING(conv).c_str()));
         }
+#ifdef OPENDDS_SECURITY
         ICE::Endpoint* sedp_endpoint = sedp_.get_ice_endpoint();
         if (sedp_endpoint) {
           stop_ice(sedp_endpoint, part->first, part->second.pdata_.participantProxy.availableBuiltinEndpoints);
@@ -1415,6 +1429,7 @@ Spdp::remove_expired_participants()
           ICE::Agent::instance()->stop_ice(spdp_endpoint, guid_, part->first);
         }
         purge_auth_deadlines(part);
+#endif
         remove_discovered_participant(part);
       }
     }
@@ -1456,12 +1471,13 @@ Spdp::part_bit()
 DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl*
 Spdp::part_loc_bit()
 {
-	if (!bit_subscriber_.in())
-		return 0;
+  if (!bit_subscriber_.in())
+    return 0;
 
-	DDS::DataReader_var d =
-		bit_subscriber_->lookup_datareader(DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC);
-	return dynamic_cast<DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl*>(d.in());
+  DDS::DataReader_var d =
+    bit_subscriber_->lookup_datareader(DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC);
+
+    return dynamic_cast<DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl*>(d.in());
 }
 
 #endif /* DDS_HAS_MINIMUM_BIT */
@@ -1543,8 +1559,8 @@ Spdp::build_local_pdata(
       false /*expectsIQoS*/,
       available_builtin_endpoints_,
       0,
-      sedp_unicast_,
-      sedp_multicast_,
+      sedp_.unicast_locators(),
+      sedp_.multicast_locators(),
       nonEmptyList /*defaultMulticastLocatorList*/,
       nonEmptyList /*defaultUnicastLocatorList*/,
       {0 /*manualLivelinessCount*/},   //FUTURE: implement manual liveliness
@@ -1572,8 +1588,10 @@ bool Spdp::announce_domain_participant_qos()
   return true;
 }
 
+#if !defined _MSC_VER || _MSC_VER > 1700
 const Spdp::SpdpTransport::WriteFlags Spdp::SpdpTransport::SEND_TO_LOCAL;
 const Spdp::SpdpTransport::WriteFlags Spdp::SpdpTransport::SEND_TO_RELAY;
+#endif
 
 Spdp::SpdpTransport::SpdpTransport(Spdp* outer, bool securityGuids)
   : outer_(outer)
@@ -1581,6 +1599,7 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer, bool securityGuids)
   , buff_(64 * 1024)
   , wbuff_(64 * 1024)
   , reactor_task_(false)
+  , network_is_unreachable_(false)
 {
   hdr_.prefix[0] = 'R';
   hdr_.prefix[1] = 'T';
@@ -1601,8 +1620,8 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer, bool securityGuids)
 
   // Ports are set by the formulas in RTPS v2.1 Table 9.8
   const u_short port_common = outer_->config_->pb() +
-                              (outer_->config_->dg() * outer_->domain_),
-    mc_port = port_common + outer_->config_->d0();
+    (outer_->config_->dg() * outer_->domain_);
+  mc_port_ = port_common + outer_->config_->d0();
 
   // with security enabled the meaning of the bytes in guidPrefix changes
   u_short participantId = securityGuids ? 0
@@ -1629,25 +1648,14 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer, bool securityGuids)
   }
 #endif
 
-  OPENDDS_STRING mc_addr = outer_->config_->default_multicast_group();
-  if (0 != default_multicast_.set(mc_port, mc_addr.c_str())) {
+  multicast_address_str_ = outer_->config_->default_multicast_group();
+  if (0 != multicast_address_.set(mc_port_, multicast_address_str_.c_str())) {
     ACE_DEBUG((
           LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::SpdpTransport() - ")
           ACE_TEXT("failed setting default_multicast address %C:%hu %p\n"),
-          mc_addr.c_str(), mc_port, ACE_TEXT("ACE_INET_Addr::set")));
+          multicast_address_str_.c_str(), mc_port_, ACE_TEXT("ACE_INET_Addr::set")));
     throw std::runtime_error("failed to set default_multicast address");
-  }
-
-  const OPENDDS_STRING& net_if = outer_->config_->multicast_interface();
-
-  if (DCPS::DCPS_debug_level > 3) {
-    ACE_DEBUG((LM_INFO,
-               ACE_TEXT("(%P|%t) Spdp::SpdpTransport::SpdpTransport ")
-               ACE_TEXT("joining group %C %C:%hu\n"),
-               net_if.c_str (),
-               mc_addr.c_str (),
-               mc_port));
   }
 
 #ifdef ACE_HAS_MAC_OSX
@@ -1655,17 +1663,22 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer, bool securityGuids)
                          ACE_SOCK_Dgram_Mcast::DEFOPT_NULLIFACE);
 #endif
 
-  if (0 != multicast_socket_.join(default_multicast_, 1,
-                                  net_if.empty() ? 0 :
-                                  ACE_TEXT_CHAR_TO_TCHAR(net_if.c_str()))) {
-    ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::SpdpTransport() - ")
-        ACE_TEXT("failed to join multicast group %C:%hu %p\n"),
-        mc_addr.c_str(), mc_port, ACE_TEXT("ACE_SOCK_Dgram_Mcast::join")));
-    throw std::runtime_error("failed to join multicast group");
+  multicast_interface_ = outer_->disco_->multicast_interface();
+
+  DCPS::NetworkConfigMonitor_rch ncm = TheServiceParticipant->network_config_monitor();
+  if (ncm) {
+    const DCPS::NetworkInterfaces nics = ncm->add_listener(*this);
+
+    for (DCPS::NetworkInterfaces::const_iterator pos = nics.begin(), limit = nics.end(); pos != limit; ++pos) {
+      join_multicast_group(*pos);
+    }
+  } else {
+    DCPS::NetworkInterface nic(0, multicast_interface_, true);
+    nic.addresses.insert(ACE_INET_Addr());
+    join_multicast_group(nic, true);
   }
 
-  send_addrs_.insert(default_multicast_);
+  send_addrs_.insert(multicast_address_);
 
   typedef RtpsDiscovery::AddrVec::const_iterator iter;
   const RtpsDiscovery::AddrVec addrs = outer_->config_->spdp_send_addrs();
@@ -1741,6 +1754,11 @@ Spdp::SpdpTransport::~SpdpTransport()
     outer_->eh_shutdown_ = true;
   }
   outer_->shutdown_cond_.signal();
+  DCPS::NetworkConfigMonitor_rch ncm = TheServiceParticipant->network_config_monitor();
+  if (ncm) {
+    ncm->remove_listener(*this);
+  }
+
   unicast_socket_.close();
   multicast_socket_.close();
 }
@@ -1772,31 +1790,7 @@ Spdp::SpdpTransport::dispose_unregister()
     return;
   }
 
-  if (!outer_->config_->rtps_relay_only()) {
-    typedef OPENDDS_SET(ACE_INET_Addr)::const_iterator iter_t;
-    for (iter_t iter = send_addrs_.begin(); iter != send_addrs_.end(); ++iter) {
-      const ssize_t res =
-        unicast_socket_.send(wbuff_.rd_ptr(), wbuff_.length(), *iter);
-      if (res < 0) {
-        ACE_TCHAR addr_buff[256] = {};
-        iter->addr_to_string(addr_buff, 256, 0);
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::dispose_unregister() - ")
-                   ACE_TEXT("destination %s failed %p\n"), addr_buff, ACE_TEXT("send")));
-      }
-    }
-  }
-  if (outer_->config_->spdp_rtps_relay_address() != ACE_INET_Addr()) {
-    const ssize_t res =
-      unicast_socket_.send(wbuff_.rd_ptr(), wbuff_.length(), outer_->config_->spdp_rtps_relay_address());
-    if (res < 0) {
-      ACE_TCHAR addr_buff[256] = {};
-      outer_->config_->spdp_rtps_relay_address().addr_to_string(addr_buff, 256, 0);
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::dispose_unregister() - ")
-                 ACE_TEXT("destination %s failed %p\n"), addr_buff, ACE_TEXT("send")));
-    }
-  }
+  send(SEND_TO_LOCAL | SEND_TO_RELAY);
 }
 
 void
@@ -1960,29 +1954,36 @@ Spdp::SpdpTransport::send(WriteFlags flags)
   if ((flags & SEND_TO_LOCAL) && !outer_->config_->rtps_relay_only()) {
     typedef OPENDDS_SET(ACE_INET_Addr)::const_iterator iter_t;
     for (iter_t iter = send_addrs_.begin(); iter != send_addrs_.end(); ++iter) {
-      const ssize_t res =
-        unicast_socket_.send(wbuff_.rd_ptr(), wbuff_.length(), *iter);
-      if (res < 0) {
-        ACE_TCHAR addr_buff[256] = {};
-        iter->addr_to_string(addr_buff, 256, 0);
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::send() - ")
-                   ACE_TEXT("destination %s failed %p\n"), addr_buff, ACE_TEXT("send")));
-      }
+      send(*iter);
     }
   }
 
+  const ACE_INET_Addr relay_address = outer_->config_->spdp_rtps_relay_address();
   if (((flags & SEND_TO_RELAY) || outer_->config_->rtps_relay_only()) &&
-      outer_->config_->spdp_rtps_relay_address() != ACE_INET_Addr()) {
-    const ssize_t res =
-      unicast_socket_.send(wbuff_.rd_ptr(), wbuff_.length(), outer_->config_->spdp_rtps_relay_address());
-    if (res < 0) {
+      relay_address != ACE_INET_Addr()) {
+    send(relay_address);
+  }
+}
+
+void
+Spdp::SpdpTransport::send(const ACE_INET_Addr& addr)
+{
+  const ssize_t res = unicast_socket_.send(wbuff_.rd_ptr(), wbuff_.length(), addr);
+  if (res < 0) {
+    const int err = errno;
+    if (err != ENETUNREACH || !network_is_unreachable_) {
       ACE_TCHAR addr_buff[256] = {};
-      outer_->config_->spdp_rtps_relay_address().addr_to_string(addr_buff, 256, 0);
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::send() - ")
-                 ACE_TEXT("destination %s failed %p\n"), addr_buff, ACE_TEXT("send")));
+      addr.addr_to_string(addr_buff, 256);
+      errno = err;
+      ACE_ERROR((LM_WARNING,
+                 ACE_TEXT("(%P|%t) WARNING: Spdp::SpdpTransport::send() - ")
+                 ACE_TEXT("destination %s failed send: %m\n"), addr_buff));
     }
+    if (err == ENETUNREACH) {
+      network_is_unreachable_ = true;
+    }
+  } else {
+    network_is_unreachable_ = false;
   }
 }
 
@@ -2147,18 +2148,6 @@ Spdp::SpdpTransport::acknowledge()
   reactor->notify(this);
 }
 
-void
-Spdp::SpdpTransport::remove_send_addr(const ACE_INET_Addr& addr)
-{
-  send_addrs_.erase(addr);
-}
-
-void
-Spdp::SpdpTransport::insert_send_addr(const ACE_INET_Addr& addr)
-{
-  send_addrs_.insert(addr);
-}
-
 ICE::Endpoint*
 Spdp::SpdpTransport::get_ice_endpoint()
 {
@@ -2236,7 +2225,7 @@ Spdp::SpdpTransport::ice_disconnect(const ICE::GuidSetType& guids)
   }
 }
 
-void
+void 
 Spdp::signal_liveliness(DDS::LivelinessQosPolicyKind kind)
 {
   sedp_.signal_liveliness(kind);
@@ -2303,6 +2292,81 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
 #endif
 
   return true;
+}
+
+void
+Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
+                                          bool all_interfaces)
+{
+  if (joined_interfaces_.count(nic.name()) != 0 || nic.addresses.empty() || !nic.can_multicast()) {
+    return;
+  }
+
+  if (!multicast_interface_.empty() && nic.name() != multicast_interface_) {
+    return;
+  }
+
+  if (DCPS::DCPS_debug_level > 3) {
+    ACE_DEBUG((LM_INFO,
+               ACE_TEXT("(%P|%t) Spdp::SpdpTransport::join_multicast_group ")
+               ACE_TEXT("joining group %C %C:%hu\n"),
+               nic.name().c_str(),
+               multicast_address_str_.c_str(),
+               mc_port_));
+  }
+
+  if (0 == multicast_socket_.join(multicast_address_, 1, all_interfaces ? 0 : ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()))) {
+    joined_interfaces_.insert(nic.name());
+    if (job_queue_) {
+      // Don't write until open() because sedp will not be ready.
+      write_i(SEND_TO_LOCAL);
+    }
+  } else {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::join_multicast_group() - ")
+               ACE_TEXT("failed to join multicast group %C:%hu %p\n"),
+               multicast_address_str_.c_str(), mc_port_, ACE_TEXT("ACE_SOCK_Dgram_Mcast::join")));
+  }
+}
+
+void
+Spdp::SpdpTransport::leave_multicast_group(const DCPS::NetworkInterface& nic)
+{
+  if (joined_interfaces_.count(nic.name()) == 0 || !nic.addresses.empty()) {
+    return;
+  }
+
+  if (DCPS::DCPS_debug_level > 3) {
+    ACE_DEBUG((LM_INFO,
+               ACE_TEXT("(%P|%t) Spdp::SpdpTransport::leave_multicast_group ")
+               ACE_TEXT("leaving group %C %C:%hu\n"),
+               nic.name().c_str(),
+               multicast_address_str_.c_str(),
+               mc_port_));
+  }
+
+  if (0 != multicast_socket_.leave(multicast_address_, ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()))) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::leave_multicast_group() - ")
+               ACE_TEXT("failed to leave multicast group %C:%hu %p\n"),
+               multicast_address_str_.c_str(), mc_port_, ACE_TEXT("ACE_SOCK_Dgram_Mcast::leave")));
+  }
+  joined_interfaces_.erase(nic.name());
+}
+
+void
+Spdp::SpdpTransport::add_address(const DCPS::NetworkInterface& nic,
+                                 const ACE_INET_Addr&)
+{
+  job_queue_->enqueue(DCPS::make_rch<ChangeMulticastGroup>(rchandle_from(this), nic,
+                                                           ChangeMulticastGroup::CMG_JOIN));
+}
+
+void Spdp::SpdpTransport::remove_address(const DCPS::NetworkInterface& nic,
+                                         const ACE_INET_Addr&)
+{
+  job_queue_->enqueue(DCPS::make_rch<ChangeMulticastGroup>(rchandle_from(this), nic,
+                                                           ChangeMulticastGroup::CMG_LEAVE));
 }
 
 bool
@@ -2435,18 +2499,6 @@ Spdp::lookup_participant_auth_state(const DCPS::RepoId& id) const
 }
 #endif
 
-void
-Spdp::remove_send_addr(const ACE_INET_Addr& addr)
-{
-  tport_->remove_send_addr(addr);
-}
-
-void
-Spdp::add_send_addr(const ACE_INET_Addr& addr)
-{
-  tport_->insert_send_addr(addr);
-}
-
 #ifndef OPENDDS_SAFETY_PROFILE
 bool
 operator==(const DCPS::Locator_t& x, const DCPS::Locator_t& y)
@@ -2461,41 +2513,8 @@ operator!=(const DCPS::Locator_t& x, const DCPS::Locator_t& y)
 }
 #endif
 
-void
-Spdp::remove_sedp_unicast(const ACE_INET_Addr& addr)
-{
-  DCPS::Locator_t locator;
-  locator.kind = address_to_kind(addr);
-  locator.port = addr.get_port_number();
-  RTPS::address_to_bytes(locator.address, addr);
-
-  DCPS::LocatorSeq new_sedp_unicast;
-  for (CORBA::ULong idx = 0; idx != sedp_unicast_.length(); ++idx) {
-    if (sedp_unicast_[idx] != locator) {
-      const CORBA::ULong out_idx = new_sedp_unicast.length();
-      new_sedp_unicast.length(out_idx + 1);
-      new_sedp_unicast[out_idx] = sedp_unicast_[idx];
-    }
-  }
-
-  sedp_unicast_ = new_sedp_unicast;
-}
-
-void
-Spdp::add_sedp_unicast(const ACE_INET_Addr& addr)
-{
-  DCPS::Locator_t locator;
-  locator.kind = address_to_kind(addr);
-  locator.port = addr.get_port_number();
-  RTPS::address_to_bytes(locator.address, addr);
-
-  const CORBA::ULong idx = sedp_unicast_.length();
-  sedp_unicast_.length(idx + 1);
-  sedp_unicast_[idx] = locator;
-}
-
-void Spdp::start_ice(ICE::Endpoint* endpoint, RepoId r, const BuiltinEndpointSet_t& avail, const ICE::AgentInfo& agent_info) {
 #ifdef OPENDDS_SECURITY
+void Spdp::start_ice(ICE::Endpoint* endpoint, RepoId r, const BuiltinEndpointSet_t& avail, const ICE::AgentInfo& agent_info) {
   RepoId l = guid_;
 
   // See RTPS v2.1 section 8.5.5.1
@@ -2592,16 +2611,9 @@ void Spdp::start_ice(ICE::Endpoint* endpoint, RepoId r, const BuiltinEndpointSet
     r.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER;
     ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
   }
-#else
-  ACE_UNUSED_ARG(endpoint);
-  ACE_UNUSED_ARG(r);
-  ACE_UNUSED_ARG(avail);
-  ACE_UNUSED_ARG(agent_info);
-#endif
 }
 
 void Spdp::stop_ice(ICE::Endpoint* endpoint, DCPS::RepoId r, const BuiltinEndpointSet_t& avail) {
-#ifdef OPENDDS_SECURITY
   RepoId l = guid_;
 
   // See RTPS v2.1 section 8.5.5.1
@@ -2698,14 +2710,8 @@ void Spdp::stop_ice(ICE::Endpoint* endpoint, DCPS::RepoId r, const BuiltinEndpoi
     r.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER;
     ICE::Agent::instance()->stop_ice(endpoint, l, r);
   }
-#else
-  ACE_UNUSED_ARG(endpoint);
-  ACE_UNUSED_ARG(r);
-  ACE_UNUSED_ARG(avail);
-#endif
 }
 
-#ifdef OPENDDS_SECURITY
 DDS::Security::ParticipantCryptoHandle
 Spdp::remote_crypto_handle(const DCPS::RepoId& remote_participant) const
 {
@@ -2762,11 +2768,9 @@ void Spdp::SpdpTransport::process_auth_resends(const DCPS::MonotonicTimePoint& n
 {
   outer_->process_auth_resends(now);
 }
-#endif
 
 void Spdp::purge_auth_deadlines(DiscoveredParticipantIter iter)
 {
-#ifdef OPENDDS_SECURITY
   if (iter == participants_.end()) {
     return;
   }
@@ -2780,14 +2784,10 @@ void Spdp::purge_auth_deadlines(DiscoveredParticipantIter iter)
       break;
     }
   }
-#else
-  ACE_UNUSED_ARG(iter);
-#endif
 }
 
 void Spdp::purge_auth_resends(DiscoveredParticipantIter iter)
 {
-#ifdef OPENDDS_SECURITY
   if (iter == participants_.end()) {
     return;
   }
@@ -2799,10 +2799,8 @@ void Spdp::purge_auth_resends(DiscoveredParticipantIter iter)
       break;
     }
   }
-#else
-  ACE_UNUSED_ARG(iter);
-#endif
 }
+#endif
 
 }
 }

@@ -69,8 +69,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       if (CORBA::is_nil(info.in()) )
         {
-          ACE_ERROR_RETURN ((LM_DEBUG,
-                             "Nil OpenDDS::DCPS::DCPSInfo reference <%s>\n",
+          ACE_ERROR_RETURN ((LM_ERROR,
+                             "(%P|%t) ERROR: Nil OpenDDS::DCPS::DCPSInfo reference <%s>\n",
                              ior),
                             1);
         }

@@ -30,7 +30,7 @@ public:
   {
     cf_.open();
     ACE_Ini_ImpExp import(cf_);
-    ASSERT_EQ(0, import.import_config("test1.ini"));
+    ASSERT_EQ(0, import.import_config(ACE_TEXT("test1.ini")));
     ASSERT_EQ(0, TheSecurityRegistry->load_security_configuration(cf_));
   }
 

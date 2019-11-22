@@ -49,9 +49,9 @@ OpenDDS::DCPS::TransportImpl::reactor_owner() const
 
 ACE_INLINE bool
 OpenDDS::DCPS::TransportImpl::connection_info
-  (TransportLocator& local_info) const
+  (TransportLocator& local_info, ConnectionInfoFlags flags) const
 {
-  return this->connection_info_i(local_info);
+  return connection_info_i(local_info, flags);
 }
 
 

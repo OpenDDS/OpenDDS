@@ -56,37 +56,37 @@ namespace DCPS {
      */
     DDS::ReturnCode_t
     get_datawriter_qos (DDS::DataWriterQos& dw_qos,
-                        const char *qos_profile,
-                        const char* topic_name);
+                        const ACE_TCHAR *qos_profile,
+                        const ACE_TCHAR* topic_name);
 
     DDS::ReturnCode_t
     get_datareader_qos (DDS::DataReaderQos& dr_qos,
-                        const char *qos_profile,
-                        const char* topic_name);
+                        const ACE_TCHAR *qos_profile,
+                        const ACE_TCHAR* topic_name);
 
     DDS::ReturnCode_t
     get_publisher_qos (DDS::PublisherQos& pub_qos,
-                        const char *qos_profile);
+                        const ACE_TCHAR *qos_profile);
 
     DDS::ReturnCode_t
     get_subscriber_qos (DDS::SubscriberQos& sub_qos,
-                        const char *qos_profile);
+                        const ACE_TCHAR *qos_profile);
 
     DDS::ReturnCode_t
     get_topic_qos (DDS::TopicQos& topic_qos,
-                   const char *qos_profile,
+                   const ACE_TCHAR *qos_profile,
                    const ACE_TCHAR *topic_name);
 
     DDS::ReturnCode_t
     get_participant_qos (DDS::DomainParticipantQos& part_qos,
-                         const char *qos_profile);
+                         const ACE_TCHAR *qos_profile);
     //@}
 
   private:
     QOS_XML_File_Handler xml_file_;
 
-    char* get_xml_file_name (const char * qos_profile);
-    char* get_profile_name (const char * qos_profile);
+    ACE_TString get_xml_file_name(const ACE_TCHAR* qos_profile);
+    ACE_TString get_profile_name(const ACE_TCHAR* qos_profile);
   };
 }
 }

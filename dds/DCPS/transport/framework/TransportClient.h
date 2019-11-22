@@ -71,6 +71,7 @@ public:
   bool swap_bytes() const { return swap_bytes_; }
   bool cdr_encapsulation() const { return cdr_encapsulation_; }
   const TransportLocatorSeq& connection_info() const { return conn_info_; }
+  void populate_connection_info();
 
   // Managing associations to remote peers:
 
@@ -100,6 +101,9 @@ public:
   void unregister_for_writer(const RepoId& participant,
                              const RepoId& readerid,
                              const RepoId& writerid);
+
+  void update_locators(const RepoId& remote,
+                       const TransportLocatorSeq& locators);
 
   ICE::Endpoint* get_ice_endpoint();
 
@@ -264,6 +268,7 @@ private:
 
   // Associated Impls and DataLinks:
 
+  TransportConfig_rch config_;
   ImplsType impls_;
   PendingMap pending_;
   DataLinkSet links_;

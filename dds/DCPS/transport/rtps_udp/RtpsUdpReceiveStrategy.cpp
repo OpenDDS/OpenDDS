@@ -92,7 +92,7 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
       bytes -= block_size;
     }
 
-    DCPS::Serializer serializer(head, true);
+    DCPS::Serializer serializer(head, DCPS::Serializer::SWAP_BE);
     STUN::Message message;
     message.block = head;
     if (serializer >> message) {
@@ -115,7 +115,7 @@ namespace {
   {
     if (security_debug.warn) {
       ACE_TCHAR addr_buff[256] = {};
-      remote.addr_to_string(addr_buff, 256, 0);
+      remote.addr_to_string(addr_buff, 256);
       ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpReceiveStrategy::receive_bytes - "
                  "from %s secure RTPS processing failed: %C\n", addr_buff, msg));
     }
@@ -570,8 +570,8 @@ RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage)
   if (Transport_debug_level > 5) {
     ACE_HEX_DUMP((LM_DEBUG, mb.rd_ptr(), mb.length(),
                   category == DATAWRITER_SUBMESSAGE ?
-                  "RtpsUdpReceiveStrategy: decoded writer submessage" :
-                  "RtpsUdpReceiveStrategy: decoded reader submessage"));
+                  ACE_TEXT("RtpsUdpReceiveStrategy: decoded writer submessage") :
+                  ACE_TEXT("RtpsUdpReceiveStrategy: decoded reader submessage")));
   }
 
   RtpsSampleHeader rsh(mb);
@@ -1077,7 +1077,7 @@ RtpsUdpReceiveStrategy::MessageReceiver::fill_header(
   if (have_timestamp_) {
     header.source_timestamp_sec_ = timestamp_.seconds;
     header.source_timestamp_nanosec_ =
-      static_cast<ACE_UINT32>(timestamp_.fraction / NANOS_TO_RTPS_FRACS + .5);
+      DCPS::uint32_fractional_seconds_to_nanoseconds(timestamp_.fraction);
   }
   assign(header.publication_id_.guidPrefix, source_guid_prefix_);
 }

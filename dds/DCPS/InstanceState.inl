@@ -161,4 +161,10 @@ OpenDDS::DCPS::InstanceState::no_writer () const
   return writers_.empty();
 }
 
+ACE_INLINE
+const char* OpenDDS::DCPS::InstanceState::instance_state_string() const
+{
+  return instance_state_string(instance_state_);
+}
+
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
