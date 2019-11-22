@@ -56,9 +56,9 @@ topicIsBIT(const char* name, const char* type)
     !ACE_OS::strcmp(name, BUILT_IN_PUBLICATION_TOPIC) &&
     !ACE_OS::strcmp(type, BUILT_IN_PUBLICATION_TOPIC_TYPE)
   ) || (
-	!ACE_OS::strcmp(name, BUILT_IN_PARTICIPANT_LOCATION_TOPIC) &&
-	!ACE_OS::strcmp(type, BUILT_IN_PARTICIPANT_LOCATION_TOPIC_TYPE)
-	);
+    !ACE_OS::strcmp(name, BUILT_IN_PARTICIPANT_LOCATION_TOPIC) &&
+    !ACE_OS::strcmp(type, BUILT_IN_PARTICIPANT_LOCATION_TOPIC_TYPE)
+  );
 }
 
 class DomainParticipantImpl;

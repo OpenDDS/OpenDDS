@@ -68,49 +68,49 @@ void ParticipantLocationBuiltinTopicDataDataReaderListenerImpl::on_data_availabl
 }
 
 void ParticipantLocationBuiltinTopicDataDataReaderListenerImpl::on_requested_deadline_missed(
-	DDS::DataReader_ptr,
-	const DDS::RequestedDeadlineMissedStatus &)
+  DDS::DataReader_ptr,
+  const DDS::RequestedDeadlineMissedStatus &)
 {
-	std::cerr << "ParticipantLocationBuiltinTopicDataDataReaderListenerImpl::"
-		<< "on_requested_deadline_missed" << std::endl;
+  std::cerr << "ParticipantLocationBuiltinTopicDataDataReaderListenerImpl::"
+    << "on_requested_deadline_missed" << std::endl;
 }
 
 void ParticipantLocationBuiltinTopicDataDataReaderListenerImpl::on_requested_incompatible_qos(
-	DDS::DataReader_ptr,
-	const DDS::RequestedIncompatibleQosStatus &)
+  DDS::DataReader_ptr,
+  const DDS::RequestedIncompatibleQosStatus &)
 {
-	std::cerr << "ParticipantLocationBuiltinTopicDataDataReaderListenerImpl::"
-		<< "on_requested_incompatible_qos" << std::endl;
+  std::cerr << "ParticipantLocationBuiltinTopicDataDataReaderListenerImpl::"
+    << "on_requested_incompatible_qos" << std::endl;
 }
 
 void ParticipantLocationBuiltinTopicDataDataReaderListenerImpl::on_liveliness_changed(
-	DDS::DataReader_ptr,
-	const DDS::LivelinessChangedStatus&)
+  DDS::DataReader_ptr,
+  const DDS::LivelinessChangedStatus&)
 {
-	std::cerr << "ParticipantLocationBuiltinTopicDataDataReaderListenerImpl::"
-		<< "on_liveliness_changed" << std::endl;
+  std::cerr << "ParticipantLocationBuiltinTopicDataDataReaderListenerImpl::"
+    << "on_liveliness_changed" << std::endl;
 }
 
 void ParticipantLocationBuiltinTopicDataDataReaderListenerImpl::on_subscription_matched(
-	DDS::DataReader_ptr,
-	const DDS::SubscriptionMatchedStatus &)
+  DDS::DataReader_ptr,
+  const DDS::SubscriptionMatchedStatus &)
 {
-	std::cerr << "ParticipantLocationBuiltinTopicDataDataReaderListenerImpl::"
-		<< "on_subscription_matched" << std::endl;
+  std::cerr << "ParticipantLocationBuiltinTopicDataDataReaderListenerImpl::"
+    << "on_subscription_matched" << std::endl;
 }
 
 void ParticipantLocationBuiltinTopicDataDataReaderListenerImpl::on_sample_rejected(
-	DDS::DataReader_ptr,
-	const DDS::SampleRejectedStatus&)
+  DDS::DataReader_ptr,
+  const DDS::SampleRejectedStatus&)
 {
-	std::cerr << "ParticipantLocationBuiltinTopicDataDataReaderListenerImpl::"
-		<< "on_sample_rejected" << std::endl;
+  std::cerr << "ParticipantLocationBuiltinTopicDataDataReaderListenerImpl::"
+    << "on_sample_rejected" << std::endl;
 }
 
 void ParticipantLocationBuiltinTopicDataDataReaderListenerImpl::on_sample_lost(
-	DDS::DataReader_ptr,
-	const DDS::SampleLostStatus&)
+  DDS::DataReader_ptr,
+  const DDS::SampleLostStatus&)
 {
-	std::cerr << "ParticipantLocationBuiltinTopicDataDataReaderListenerImpl::"
-		<< "on_sample_lost" << std::endl;
+  std::cerr << "ParticipantLocationBuiltinTopicDataDataReaderListenerImpl::"
+    << "on_sample_lost" << std::endl;
 }

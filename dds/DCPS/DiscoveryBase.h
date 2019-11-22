@@ -38,8 +38,8 @@ namespace OpenDDS {
     typedef DataReaderImpl_T<DDS::ParticipantBuiltinTopicData> ParticipantBuiltinTopicDataDataReaderImpl;
     typedef DataReaderImpl_T<DDS::PublicationBuiltinTopicData> PublicationBuiltinTopicDataDataReaderImpl;
     typedef DataReaderImpl_T<DDS::SubscriptionBuiltinTopicData> SubscriptionBuiltinTopicDataDataReaderImpl;
-	  typedef DataReaderImpl_T<DDS::ParticipantLocationBuiltinTopicData> ParticipantLocationBuiltinTopicDataDataReaderImpl;
-	  typedef DataReaderImpl_T<DDS::TopicBuiltinTopicData> TopicBuiltinTopicDataDataReaderImpl;
+    typedef DataReaderImpl_T<DDS::ParticipantLocationBuiltinTopicData> ParticipantLocationBuiltinTopicDataDataReaderImpl;
+    typedef DataReaderImpl_T<DDS::TopicBuiltinTopicData> TopicBuiltinTopicDataDataReaderImpl;
 
 #ifdef OPENDDS_SECURITY
     typedef OPENDDS_MAP_CMP(RepoId, DDS::Security::DatareaderCryptoHandle, GUID_tKeyLessThan)
@@ -1720,15 +1720,15 @@ namespace OpenDDS {
         return dynamic_cast<ParticipantBuiltinTopicDataDataReaderImpl*>(d.in());
       }
 
-	  DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl* part_loc_bit()
-	  {
-		  if (!bit_subscriber_.in())
-			  return 0;
+    DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl* part_loc_bit()
+    {
+      if (!bit_subscriber_.in())
+        return 0;
 
-		  DDS::DataReader_var d =
-			  bit_subscriber_->lookup_datareader(DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC);
-		  return dynamic_cast<ParticipantLocationBuiltinTopicDataDataReaderImpl*>(d.in());
-	  }
+      DDS::DataReader_var d =
+        bit_subscriber_->lookup_datareader(DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC);
+      return dynamic_cast<ParticipantLocationBuiltinTopicDataDataReaderImpl*>(d.in());
+    }
 #endif /* DDS_HAS_MINIMUM_BIT */
 
       mutable ACE_Thread_Mutex lock_;
@@ -1796,10 +1796,10 @@ namespace OpenDDS {
         create_bit_dr(bit_sub_topic, BUILT_IN_SUBSCRIPTION_TOPIC_TYPE,
                       sub, dr_qos);
 
-		DDS::TopicDescription_var bit_part_loc_topic =
-			participant->lookup_topicdescription(BUILT_IN_PARTICIPANT_LOCATION_TOPIC);
-		create_bit_dr(bit_part_loc_topic, BUILT_IN_PARTICIPANT_LOCATION_TOPIC_TYPE,
-			sub, dr_qos);
+    DDS::TopicDescription_var bit_part_loc_topic =
+      participant->lookup_topicdescription(BUILT_IN_PARTICIPANT_LOCATION_TOPIC);
+    create_bit_dr(bit_part_loc_topic, BUILT_IN_PARTICIPANT_LOCATION_TOPIC_TYPE,
+      sub, dr_qos);
 
         const DDS::ReturnCode_t ret = bit_subscriber->enable();
         if (ret != DDS::RETCODE_OK) {
