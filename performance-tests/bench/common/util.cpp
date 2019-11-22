@@ -81,7 +81,9 @@ std::string iso8601()
   using namespace std::chrono;
   std::stringstream ss;
   const std::time_t now = system_clock::to_time_t(system_clock::now());
-  ss << std::put_time(gmtime(&now), "%FT%TZ");
+  char buf[sizeof "2011-10-08T07:07:09Z"];
+  std::strftime(buf, sizeof buf, "%FT%TZ", std::gmtime(&now));
+  ss << buf;
   return ss.str();
 }
 
