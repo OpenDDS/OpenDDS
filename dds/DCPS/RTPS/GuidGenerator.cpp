@@ -127,7 +127,7 @@ GuidGenerator::interfaceName(const char* iface)
 
   alloc->free(addrs);
   return found ? 0 : -1;
-#elif defined ACE_LINUX || defined __ANDROID_API__
+#elif defined ACE_LINUX || defined ACE_ANDROID
   ifreq ifr;
   // Guarantee that iface will fit in ifr.ifr_name and still be null terminated
   // ifr.ifr_name is sized to IFNAMSIZ
