@@ -516,8 +516,8 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       bit_subscriber = participant->get_builtin_subscriber () ;
       TEST_CHECK (! CORBA::is_nil (bit_subscriber.in ()));
 
-      //test_bit_participant ();
-      //test_bit_topic ();
+      test_bit_participant ();
+      test_bit_topic ();
       test_bit_publication ();
       test_bit_subscription ();
     }
