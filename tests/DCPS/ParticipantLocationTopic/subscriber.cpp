@@ -57,7 +57,6 @@ int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   int status = 0;
-  unsigned long locations = 0;
 
   try {
     // Initialize DomainParticipantFactory
@@ -154,6 +153,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_OS::exit(1);
       }
 
+    unsigned long locations = 0;
+
     DDS::DataReaderListener_var pub_loc_listener =
       new ParticipantLocationBuiltinTopicDataDataReaderListenerImpl(locations);
 
@@ -198,8 +199,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     status = listener_servant->is_valid() ? 0 : -1;
 
     ws->detach_condition(condition);
-
-    ACE_OS::sleep(10);
 
     // check that all locations received
     unsigned long all = DDS::LOCATION_LOCAL | DDS::LOCATION_ICE | DDS::LOCATION_RELAY;

@@ -57,10 +57,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   int status = 0;
 
-  unsigned long locations = 0;
-
   try {
-
     std::cout << "Starting publisher" << std::endl;
     {
       // Initialize DomainParticipantFactory
@@ -158,6 +155,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                   << " DataReader." << std::endl;
         ACE_OS::exit(1);
       }
+
+    unsigned long locations = 0;
 
     DDS::DataReaderListener_var pub_loc_listener =
       new ParticipantLocationBuiltinTopicDataDataReaderListenerImpl(locations);
