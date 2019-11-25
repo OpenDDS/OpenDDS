@@ -1350,7 +1350,6 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
   SequenceNumber& wi_first = info.hb_range_.first;
   SequenceNumber& wi_last = info.hb_range_.second;
 
-  // Static Constant
   static const SequenceNumber one, zero = SequenceNumber::ZERO();
 
   bool immediate_reply = false;
