@@ -1726,10 +1726,12 @@ Spdp::SpdpTransport::open()
     relay_beacon_->enable(false, outer_->config_->spdp_rtps_relay_beacon_period());
   }
 
+#ifdef OPENDDS_SECURITY
   ICE::Endpoint* endpoint = get_ice_endpoint();
   if (endpoint) {
     ICE::Agent::instance()->add_endpoint(endpoint);
   }
+#endif
 }
 
 Spdp::SpdpTransport::~SpdpTransport()
@@ -1800,12 +1802,12 @@ Spdp::SpdpTransport::close()
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) SpdpTransport::close\n")));
   }
 
+#ifdef OPENDDS_SECURITY
   ICE::Endpoint* endpoint = get_ice_endpoint();
   if (endpoint) {
     ICE::Agent::instance()->remove_endpoint(endpoint);
   }
 
-#ifdef OPENDDS_SECURITY
   auth_deadline_processor_->cancel_and_wait();
   auth_resend_processor_->cancel_and_wait();
 #endif
@@ -2029,6 +2031,8 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() potential STUN message received but this version of the ACE library doesn't support the local_address extension in ACE_SOCK_Dgram::recv\n")));
     ACE_NOTSUP_RETURN(0);
 # else
+
+#ifdef OPENDDS_SECURITY
     // Assume STUN
     DCPS::Serializer serializer(&buff_, DCPS::Serializer::SWAP_BE);
     STUN::Message message;
@@ -2036,6 +2040,7 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
     if (serializer >> message) {
       ICE::Agent::instance()->receive(endpoint, local, remote, message);
     }
+#endif
     return 0;
 # endif
   }
@@ -2158,6 +2163,7 @@ Spdp::SpdpTransport::get_ice_endpoint()
 #endif
 }
 
+#ifdef OPENDDS_SECURITY
 ICE::AddressListType
 Spdp::SpdpTransport::host_addresses() const
 {
@@ -2224,6 +2230,7 @@ Spdp::SpdpTransport::ice_disconnect(const ICE::GuidSetType& guids)
     outer_->update_location(pos->remote, DDS::LOCATION_ICE, ACE_INET_Addr());
   }
 }
+#endif /* OPENDDS_SECURITY */
 
 void 
 Spdp::signal_liveliness(DDS::LivelinessQosPolicyKind kind)

@@ -199,7 +199,11 @@ private:
   DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl* part_loc_bit();
 #endif /* DDS_HAS_MINIMUM_BIT */
 
-  struct SpdpTransport : public virtual DCPS::RcEventHandler, public virtual DCPS::NetworkConfigListener, public ICE::Endpoint {
+  struct SpdpTransport : public virtual DCPS::RcEventHandler, public virtual DCPS::NetworkConfigListener
+#ifdef OPENDDS_SECURITY
+        , public ICE::Endpoint
+#endif
+{
     typedef size_t WriteFlags;
     static const WriteFlags SEND_TO_LOCAL = (1 << 0);
     static const WriteFlags SEND_TO_RELAY = (1 << 1);
@@ -230,11 +234,14 @@ private:
                         const ACE_INET_Addr& address);
 
     ICE::Endpoint* get_ice_endpoint();
+    
+#ifdef OPENDDS_SECURITY
     ICE::AddressListType host_addresses() const;
     void send(const ACE_INET_Addr& address, const STUN::Message& message);
     ACE_INET_Addr stun_server_address() const;
     void ice_connect(const ICE::GuidSetType& guids, const ACE_INET_Addr& addr);
     void ice_disconnect(const ICE::GuidSetType& guids);
+#endif
 
     Spdp* outer_;
     Header hdr_;
