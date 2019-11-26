@@ -650,7 +650,7 @@ bool BE_GlobalData::is_default_nested(UTL_Scope* scope)
 bool BE_GlobalData::check_key(AST_Field* node, bool& value)
 {
   KeyAnnotation* key = dynamic_cast<KeyAnnotation*>(builtin_annotations_["::@key"]);
-  return key->node_value_exists(dynamic_cast<AST_Decl*>(node), value);
+  return key->node_value_exists(node, value);
 }
 
 bool BE_GlobalData::has_key(AST_Union* node)

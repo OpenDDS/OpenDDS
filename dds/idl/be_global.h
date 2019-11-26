@@ -175,9 +175,7 @@ public:
 
   /**
    * If node has the key annotation, this sets value to the key annotation
-   * value and returns true.
-   * If node does not have the key annotation, this sets value false and
-   * returns false.
+   * value and returns true, else this sets value to false and returns false.
    */
   bool check_key(AST_Field* node, bool& value);
 

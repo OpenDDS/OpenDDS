@@ -197,9 +197,9 @@ TopicKeys::Iterator& TopicKeys::Iterator::operator++()
       if (pos_ == 0) {
         if (level_ > 0) {
           implied_keys_ = true;
-          for (; pos_ < field_count && implied_keys_; ++pos_) {
+          for (unsigned i = 0; i < field_count && implied_keys_; ++i) {
             AST_Field** field_ptrptr;
-            struct_root->field(field_ptrptr, pos_);
+            struct_root->field(field_ptrptr, i);
             AST_Field* field = *field_ptrptr;
             bool key_annotation_value;
             const bool has_key_annotation = be_global->check_key(field, key_annotation_value);
@@ -207,12 +207,11 @@ TopicKeys::Iterator& TopicKeys::Iterator::operator++()
               implied_keys_ = false;
             }
           }
-          pos_ = 0;
         } else {
           implied_keys_ = false;
         }
       }
-      // Iterate over the fields
+
       for (; pos_ < field_count; ++pos_) {
         AST_Field** field_ptrptr;
         struct_root->field(field_ptrptr, pos_);
@@ -226,8 +225,13 @@ TopicKeys::Iterator& TopicKeys::Iterator::operator++()
           if (child == end_value()) {
             delete child_;
             child_ = 0;
-            // Even with implied keys, keep this as a safety check
-            throw Error(field, "field is marked as key, but does not contain any keys.");
+            if (implied_key) {
+              throw Error(field,
+                "field is implicitly marked as key, but does not contain any keys.");
+            } else {
+              throw Error(field,
+                "field is explictly marked as key, but does not contain any keys.");
+            }
           } else {
             current_value_ = *child;
             return *this;
