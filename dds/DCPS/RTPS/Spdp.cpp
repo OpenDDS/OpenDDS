@@ -185,7 +185,6 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , shutdown_flag_(false)
   , available_builtin_endpoints_(0)
   , sedp_(guid_, *this, lock_)
-  //, location_mask(0)
 #ifdef OPENDDS_SECURITY
   , security_config_()
   , security_enabled_(false)
@@ -397,7 +396,7 @@ namespace {
 
 void
 Spdp::update_location(const DCPS::RepoId& guid,
-                      DDS::ParticipantLocation mask,
+                      OpenDDS::DCPS::ParticipantLocation mask,
                       const ACE_INET_Addr& from)
 {
    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
@@ -406,7 +405,7 @@ Spdp::update_location(const DCPS::RepoId& guid,
 
 void
 Spdp::update_location_i(const DCPS::RepoId& guid,
-                        DDS::ParticipantLocation mask,
+                        OpenDDS::DCPS::ParticipantLocation mask,
                         const ACE_INET_Addr& from)
 {
   // We have the global lock.
@@ -415,11 +414,11 @@ Spdp::update_location_i(const DCPS::RepoId& guid,
     return;
   }
 
-  DDS::ParticipantLocationBuiltinTopicData& ld = iter->second.location_data_;
+  OpenDDS::DCPS::ParticipantLocationBuiltinTopicData& ld = iter->second.location_data_;
 
   const char* addr = "";
 
-  const DDS::ParticipantLocation old_mask = ld.location;
+  const OpenDDS::DCPS::ParticipantLocation old_mask = ld.location;
 
   if (from != ACE_INET_Addr()) {
     ld.location |= mask;
@@ -436,17 +435,17 @@ Spdp::update_location_i(const DCPS::RepoId& guid,
 
   bool address_change = false;
   switch (mask) {
-  case DDS::LOCATION_LOCAL:
+  case OpenDDS::DCPS::LOCATION_LOCAL:
     address_change = std::strcmp(addr, ld.local_addr.in()) != 0;
     ld.local_addr = addr;
     ld.local_timestamp = now;
     break;
-  case DDS::LOCATION_ICE:
+  case OpenDDS::DCPS::LOCATION_ICE:
     address_change = std::strcmp(addr, ld.ice_addr.in()) != 0;
     ld.ice_addr = addr;
     ld.ice_timestamp = now;
     break;
-  case DDS::LOCATION_RELAY:
+  case OpenDDS::DCPS::LOCATION_RELAY:
     address_change = std::strcmp(addr, ld.relay_addr.in()) != 0;
     ld.relay_addr = addr;
     ld.relay_timestamp = now;
@@ -457,14 +456,14 @@ Spdp::update_location_i(const DCPS::RepoId& guid,
                                     iter->second.pdata_.leaseDuration,
                                     iter->second.pdata_.participantProxy.protocolVersion,
                                     iter->second.pdata_.participantProxy.vendorId).value().sec();
-  if ((ld.location & DDS::LOCATION_LOCAL) && ld.local_timestamp < expr) {
-    ld.location &= ~(DDS::LOCATION_LOCAL);
-    ld.change_mask |= DDS::LOCATION_LOCAL;
+  if ((ld.location & OpenDDS::DCPS::LOCATION_LOCAL) && ld.local_timestamp < expr) {
+    ld.location &= ~(OpenDDS::DCPS::LOCATION_LOCAL);
+    ld.change_mask |= OpenDDS::DCPS::LOCATION_LOCAL;
     ld.local_timestamp = now;
   }
-  if ((ld.location & DDS::LOCATION_RELAY) && ld.relay_timestamp < expr) {
-    ld.location &= ~(DDS::LOCATION_RELAY);
-    ld.change_mask |= DDS::LOCATION_RELAY;
+  if ((ld.location & OpenDDS::DCPS::LOCATION_RELAY) && ld.relay_timestamp < expr) {
+    ld.location &= ~(OpenDDS::DCPS::LOCATION_RELAY);
+    ld.change_mask |= OpenDDS::DCPS::LOCATION_RELAY;
     ld.relay_timestamp = now;
   }
 
@@ -473,7 +472,7 @@ Spdp::update_location_i(const DCPS::RepoId& guid,
     if (locbit) {
       DDS::InstanceHandle_t handle = DDS::HANDLE_NIL;
       {
-        const DDS::ParticipantLocationBuiltinTopicData ld_copy(ld);
+        const OpenDDS::DCPS::ParticipantLocationBuiltinTopicData ld_copy(ld);
         ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
         ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
         handle = locbit->store_synthetic_data(ld_copy, DDS::NEW_VIEW_STATE);
@@ -679,7 +678,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     }
   }
 
-  update_location_i(guid, from_relay ? DDS::LOCATION_RELAY : DDS::LOCATION_LOCAL, from);
+  update_location_i(guid, from_relay ? OpenDDS::DCPS::LOCATION_RELAY : OpenDDS::DCPS::LOCATION_LOCAL, from);
 }
 
 bool
@@ -756,7 +755,7 @@ Spdp::data_received(const DataSubmessage& data,
       ICE::Agent::instance()->start_ice(spdp_endpoint, guid_, guid, spdp_pos->second);
     } else {
       ICE::Agent::instance()->stop_ice(spdp_endpoint, guid_, guid);
-      update_location(guid, DDS::LOCATION_ICE, ACE_INET_Addr());
+      update_location(guid, OpenDDS::DCPS::LOCATION_ICE, ACE_INET_Addr());
     }
   }
 #endif
@@ -1455,32 +1454,6 @@ Spdp::fini_bit()
   // wait for the 2 acknowledgements
   wait_for_acks_.wait_for_acks(2);
 }
-
-#ifndef DDS_HAS_MINIMUM_BIT
-DCPS::ParticipantBuiltinTopicDataDataReaderImpl*
-Spdp::part_bit()
-{
-  if (!bit_subscriber_.in())
-    return 0;
-
-  DDS::DataReader_var d =
-    bit_subscriber_->lookup_datareader(DCPS::BUILT_IN_PARTICIPANT_TOPIC);
-  return dynamic_cast<DCPS::ParticipantBuiltinTopicDataDataReaderImpl*>(d.in());
-}
-
-DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl*
-Spdp::part_loc_bit()
-{
-  if (!bit_subscriber_.in())
-    return 0;
-
-  DDS::DataReader_var d =
-    bit_subscriber_->lookup_datareader(DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC);
-
-    return dynamic_cast<DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl*>(d.in());
-}
-
-#endif /* DDS_HAS_MINIMUM_BIT */
 
 WaitForAcks&
 Spdp::wait_for_acks()
@@ -2219,7 +2192,7 @@ void
 Spdp::SpdpTransport::ice_connect(const ICE::GuidSetType& guids, const ACE_INET_Addr& addr)
 {
   for (ICE::GuidSetType::const_iterator pos = guids.begin(), limit = guids.end(); pos != limit; ++pos) {
-    outer_->update_location(pos->remote, DDS::LOCATION_ICE, addr);
+    outer_->update_location(pos->remote, OpenDDS::DCPS::LOCATION_ICE, addr);
   }
 }
 
@@ -2227,7 +2200,7 @@ void
 Spdp::SpdpTransport::ice_disconnect(const ICE::GuidSetType& guids)
 {
   for (ICE::GuidSetType::const_iterator pos = guids.begin(), limit = guids.end(); pos != limit; ++pos) {
-    outer_->update_location(pos->remote, DDS::LOCATION_ICE, ACE_INET_Addr());
+    outer_->update_location(pos->remote, OpenDDS::DCPS::LOCATION_ICE, ACE_INET_Addr());
   }
 }
 #endif /* OPENDDS_SECURITY */

@@ -38,7 +38,7 @@ namespace OpenDDS {
     typedef DataReaderImpl_T<DDS::ParticipantBuiltinTopicData> ParticipantBuiltinTopicDataDataReaderImpl;
     typedef DataReaderImpl_T<DDS::PublicationBuiltinTopicData> PublicationBuiltinTopicDataDataReaderImpl;
     typedef DataReaderImpl_T<DDS::SubscriptionBuiltinTopicData> SubscriptionBuiltinTopicDataDataReaderImpl;
-    typedef DataReaderImpl_T<DDS::ParticipantLocationBuiltinTopicData> ParticipantLocationBuiltinTopicDataDataReaderImpl;
+    typedef DataReaderImpl_T<OpenDDS::DCPS::ParticipantLocationBuiltinTopicData> ParticipantLocationBuiltinTopicDataDataReaderImpl;
     typedef DataReaderImpl_T<DDS::TopicBuiltinTopicData> TopicBuiltinTopicDataDataReaderImpl;
 
 #ifdef OPENDDS_SECURITY
@@ -1635,7 +1635,7 @@ namespace OpenDDS {
         }
 
         DiscoveredParticipantData pdata_;
-        DDS::ParticipantLocationBuiltinTopicData location_data_;
+        OpenDDS::DCPS::ParticipantLocationBuiltinTopicData location_data_;
         DDS::InstanceHandle_t location_ih_;
 
         MonotonicTimePoint last_seen_;
@@ -1710,15 +1710,15 @@ namespace OpenDDS {
       }
 
 #ifndef DDS_HAS_MINIMUM_BIT
-      ParticipantBuiltinTopicDataDataReaderImpl* part_bit()
-      {
+    DCPS::ParticipantBuiltinTopicDataDataReaderImpl* part_bit()
+    {
         if (!bit_subscriber_.in())
           return 0;
 
         DDS::DataReader_var d =
           bit_subscriber_->lookup_datareader(BUILT_IN_PARTICIPANT_TOPIC);
         return dynamic_cast<ParticipantBuiltinTopicDataDataReaderImpl*>(d.in());
-      }
+    }
 
     DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl* part_loc_bit()
     {

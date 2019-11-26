@@ -73,8 +73,8 @@ Discovery::create_bit_topics(DomainParticipantImpl* participant)
     Registered_Data_Types->lookup(participant, BUILT_IN_PARTICIPANT_LOCATION_TOPIC_TYPE);
 
   if (CORBA::is_nil(type_support)) {
-    DDS::ParticipantLocationBuiltinTopicDataTypeSupport_var ts =
-      new DDS::ParticipantLocationBuiltinTopicDataTypeSupportImpl;
+    OpenDDS::DCPS::ParticipantLocationBuiltinTopicDataTypeSupport_var ts =
+      new OpenDDS::DCPS::ParticipantLocationBuiltinTopicDataTypeSupportImpl;
 
     DDS::ReturnCode_t ret = ts->register_type(participant,
       BUILT_IN_PARTICIPANT_LOCATION_TOPIC_TYPE);

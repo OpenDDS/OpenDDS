@@ -165,8 +165,8 @@ protected:
 #endif
                                       );
 
-  void update_location(const DCPS::RepoId& guid, DDS::ParticipantLocation mask, const ACE_INET_Addr& from);
-  void update_location_i(const DCPS::RepoId& guid, DDS::ParticipantLocation mask, const ACE_INET_Addr& from);
+  void update_location(const DCPS::RepoId& guid, OpenDDS::DCPS::ParticipantLocation mask, const ACE_INET_Addr& from);
+  void update_location_i(const DCPS::RepoId& guid, OpenDDS::DCPS::ParticipantLocation mask, const ACE_INET_Addr& from);
 
   bool announce_domain_participant_qos();
 
@@ -193,11 +193,6 @@ private:
   void attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp);
   void update_agent_info(const DCPS::RepoId& local_guid, const ICE::AgentInfo& agent_info);
 #endif
-
-#ifndef DDS_HAS_MINIMUM_BIT
-  DCPS::ParticipantBuiltinTopicDataDataReaderImpl* part_bit();
-  DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl* part_loc_bit();
-#endif /* DDS_HAS_MINIMUM_BIT */
 
   struct SpdpTransport : public virtual DCPS::RcEventHandler, public virtual DCPS::NetworkConfigListener
 #ifdef OPENDDS_SECURITY
