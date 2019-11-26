@@ -54,7 +54,7 @@ Publisher::Publisher(const PublisherConfig& config, PublisherReport& report, DDS
   }
 
   if (!transport_config_name_.empty()) {
-    Log::log() << "Binding config for publisher " << name_ << " (" << transport_config_name_ << ")"<< std::endl;
+    Log::log() << "Binding config for publisher " << name_ << " (" << transport_config_name_ << ")" << std::endl;
     TheTransportRegistry->bind_config(transport_config_name_.c_str(), publisher_);
   }
 
@@ -63,7 +63,11 @@ Publisher::Publisher(const PublisherConfig& config, PublisherReport& report, DDS
 
 Publisher::~Publisher() {
   datawriters_.reset();
-  if (publisher_) {
+  Log::log() << "Deleting publisher: " << name_ << std::endl;
+  if (!CORBA::is_nil(publisher_.in())) {
+    if (participant_->delete_publisher(publisher_) != DDS::RETCODE_OK) {
+      Log::log() << "Error deleting publisher: " << name_ << std::endl;
+    }
   }
 }
 

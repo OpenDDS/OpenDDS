@@ -54,7 +54,7 @@ Subscriber::Subscriber(const SubscriberConfig& config, SubscriberReport& report,
   }
 
   if (!transport_config_name_.empty()) {
-    Log::log() << "Binding config for subscriber " << name_ << " (" << transport_config_name_ << ")"<< std::endl;
+    Log::log() << "Binding config for subscriber " << name_ << " (" << transport_config_name_ << ")" << std::endl;
     TheTransportRegistry->bind_config(transport_config_name_.c_str(), subscriber_);
   }
 
@@ -63,7 +63,11 @@ Subscriber::Subscriber(const SubscriberConfig& config, SubscriberReport& report,
 
 Subscriber::~Subscriber() {
   datareaders_.reset();
-  if (subscriber_) {
+  Log::log() << "Deleting subscriber: " << name_ << std::endl;
+  if (!CORBA::is_nil(subscriber_.in())) {
+    if (participant_->delete_subscriber(subscriber_) != DDS::RETCODE_OK) {
+      Log::log() << "Error deleting subscriber: " << name_ << std::endl;
+    }
   }
 }
 

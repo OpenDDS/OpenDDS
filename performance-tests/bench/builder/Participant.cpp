@@ -53,7 +53,7 @@ Participant::Participant(const ParticipantConfig& config, ParticipantReport& rep
 
   // Bind Transport Config
   if (!transport_config_name_.empty()) {
-    Log::log() << "Binding config for participant " << name_ << " (" << transport_config_name_ << ")"<< std::endl;
+    Log::log() << "Binding config for participant " << name_ << " (" << transport_config_name_ << ")" << std::endl;
     TheTransportRegistry->bind_config(transport_config_name_.c_str(), participant_);
   }
 

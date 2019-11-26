@@ -249,6 +249,8 @@ std::vector<WorkerReport> ScenarioManager::execute(const AllocatedScenario& allo
 
   // Wait for reports
   std::vector<WorkerReport> parsed_reports;
+  size_t parse_failures = 0;
+  size_t worker_failures = 0;
   while (true) {
     DDS::ReturnCode_t rc;
 
@@ -280,9 +282,12 @@ std::vector<WorkerReport> ScenarioManager::execute(const AllocatedScenario& allo
     for (size_t r = 0; r < reports.length(); r++) {
       if (info[r].valid_data) {
         if (reports[r].failed) {
+          ++worker_failures;
           std::stringstream ss;
-          ss << "Worker " << reports[r].worker_id << " of node " << reports[r].node_id << " failed";
-          throw std::runtime_error(ss.str());
+          ss << "Worker " << reports[r].worker_id << " of node "
+            << reports[r].node_id << " failed with log:\n===\n"
+            << std::string(reports[r].log.in()) + "\n===\n";
+          std::cerr << ss.str() << std::flush;
         } else {
           WorkerReport report;
           std::stringstream ss;
@@ -290,19 +295,27 @@ std::vector<WorkerReport> ScenarioManager::execute(const AllocatedScenario& allo
           if (json_2_idl(ss, report)) {
             parsed_reports.push_back(report);
           } else {
+            ++parse_failures;
             std::stringstream ess;
             ess << "Error parsing report details from Worker " << reports[r].worker_id
               << " of node " << reports[r].node_id;
-            throw std::runtime_error(ess.str());
+            std::cerr << ess.str() + "\n" << std::flush;
           }
         }
-        std::cout << "Got " << parsed_reports.size() << " out of "
-          << allocated_scenario.expected_reports << " expected reports" << std::endl;
+        std::stringstream ss;
+        ss << "Got " << parsed_reports.size() << " out of "
+          << allocated_scenario.expected_reports << " expected reports";
+        if (worker_failures != 0 || parse_failures != 0) {
+          ss << " (with " << worker_failures << " worker failures and "
+            << parse_failures << " parse failures)";
+        }
+        ss << std::endl;
+        std::cerr << ss.str() << std::flush;
       }
     }
     {
       std::lock_guard<std::mutex> guard(reports_left_mutex);
-      reports_left = allocated_scenario.expected_reports - parsed_reports.size();
+      reports_left = allocated_scenario.expected_reports - parsed_reports.size() - worker_failures - parse_failures;
       if (reports_left == 0) {
         break;
       }

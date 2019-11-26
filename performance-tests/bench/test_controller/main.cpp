@@ -319,6 +319,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       std::cout << scenario_end;
 
       std::cout << "Wrote results to " << result_path << std::endl;
+
+      if (reports.size() != allocated_scenario.expected_reports) {
+        result_file << "ERROR: Only received " << reports.size() << "out of " << allocated_scenario.expected_reports << " valid reports!" << std::endl;
+        std::cerr << "ERROR: Only received " << reports.size() << " out of " << allocated_scenario.expected_reports << " valid reports!" << std::endl;
+      }
     }
   } catch (const std::runtime_error& e) {
     std::cerr << "Error: " << e.what() << std::endl;
