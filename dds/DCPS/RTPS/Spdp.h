@@ -234,7 +234,7 @@ private:
                         const ACE_INET_Addr& address);
 
     ICE::Endpoint* get_ice_endpoint();
-    
+
 #ifdef OPENDDS_SECURITY
     ICE::AddressListType host_addresses() const;
     void send(const ACE_INET_Addr& address, const STUN::Message& message);

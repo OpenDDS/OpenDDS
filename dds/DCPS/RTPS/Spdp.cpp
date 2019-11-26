@@ -1383,7 +1383,7 @@ void Spdp::update_agent_info(const DCPS::RepoId&, const ICE::AgentInfo&)
 {
   if (is_security_enabled())
   {
-    write_secure_updates(); 
+    write_secure_updates();
   }
 }
 #endif
@@ -2232,7 +2232,7 @@ Spdp::SpdpTransport::ice_disconnect(const ICE::GuidSetType& guids)
 }
 #endif /* OPENDDS_SECURITY */
 
-void 
+void
 Spdp::signal_liveliness(DDS::LivelinessQosPolicyKind kind)
 {
   sedp_.signal_liveliness(kind);

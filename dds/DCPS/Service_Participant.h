@@ -88,7 +88,7 @@ public:
   ACE_thread_t reactor_owner() const;
 
   void add_shutdown_listener(ShutdownListener* listener);
-  
+
   /**
    * Initialize the DDS client environment and get the
    * @c DomainParticipantFactory.

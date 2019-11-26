@@ -208,7 +208,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       std::cerr << "Error: One more locations missing. Location mask " << locations << " != " << all <<  "." << std::endl;
       status = -1;
     }
-    
+
     // Clean-up!
     participant->delete_contained_entities();
     dpf->delete_participant(participant.in());

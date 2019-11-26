@@ -158,7 +158,7 @@ struct Checklist : public Task {
 
 private:
   bool scheduled_for_destruction_;
-  EndpointManager* const endpoint_manager_; 
+  EndpointManager* const endpoint_manager_;
   GuidSetType guids_;
   AgentInfo local_agent_info_;
   AgentInfo remote_agent_info_;

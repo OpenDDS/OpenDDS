@@ -239,7 +239,7 @@ void AgentImpl::shutdown()
   reactor()->cancel_timer(this, 0);
 }
 
-void AgentImpl::notify_shutdown() 
+void AgentImpl::notify_shutdown()
 {
   shutdown();
 }

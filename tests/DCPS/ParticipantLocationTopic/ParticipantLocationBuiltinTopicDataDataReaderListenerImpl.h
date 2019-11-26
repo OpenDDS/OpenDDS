@@ -54,7 +54,7 @@ public:
         const DDS::SampleLostStatus& status);
 
 private:
-    
+
     unsigned long& location_mask;
 
 };

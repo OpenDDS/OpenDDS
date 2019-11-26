@@ -50,14 +50,14 @@ struct DeferredTriggeredCheck {
 };
 
 struct EndpointManager {
-  AgentImpl* const agent_impl;  
+  AgentImpl* const agent_impl;
   Endpoint* const endpoint;
 
   EndpointManager(AgentImpl* a_agent_impl, Endpoint* a_endpoint);
 
   const AgentInfo& agent_info() const
   {
-    return agent_info_; 
+    return agent_info_;
   }
 
   void add_agent_info_listener(const DCPS::RepoId& a_local_guid,

@@ -215,7 +215,7 @@ Discovery::create_bit_topics(DomainParticipantImpl* participant)
                      DDS::RETCODE_ERROR);
   }
 
-  
+
   bit_part_topic->enable();
   bit_topic_topic->enable();
   bit_sub_topic->enable();
