@@ -80,7 +80,7 @@ Topic::Topic(const TopicConfig& config, DDS::DomainParticipant_var& participant)
 
   // Bind Transport Config
   if (!transport_config_name_.empty()) {
-    Log::log() << "Binding config for topic " << name_ << " (" << transport_config_name_ << ")"<< std::endl;
+    Log::log() << "Binding config for topic " << name_ << " (" << transport_config_name_ << ")" << std::endl;
     TheTransportRegistry->bind_config(transport_config_name_.c_str(), topic_);
   }
 }

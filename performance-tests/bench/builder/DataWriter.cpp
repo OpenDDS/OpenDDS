@@ -105,13 +105,17 @@ DataWriter::DataWriter(const DataWriterConfig& config, DataWriterReport& report,
   }
 
   if (!transport_config_name_.empty()) {
-    Log::log() << "Binding config for datawriter " << name_ << " (" << transport_config_name_ << ")"<< std::endl;
+    Log::log() << "Binding config for datawriter " << name_ << " (" << transport_config_name_ << ")" << std::endl;
     TheTransportRegistry->bind_config(transport_config_name_.c_str(), datawriter_);
   }
 }
 
 DataWriter::~DataWriter() {
-  if (datawriter_) {
+  Log::log() << "Deleting datawriter: " << name_ << std::endl;
+  if (!CORBA::is_nil(datawriter_.in())) {
+    if (publisher_->delete_datawriter(datawriter_) != DDS::RETCODE_OK) {
+      Log::log() << "Error deleting datawriter: " << name_ << std::endl;
+    }
   }
 }
 

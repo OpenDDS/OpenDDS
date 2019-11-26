@@ -184,6 +184,7 @@ module Bench {
       boolean failed;
       // JSON Serialized Bench::WorkerReport
       string details;
+      string log;
     };
     const string report_topic_name = "Node_Controller_Report";
   };

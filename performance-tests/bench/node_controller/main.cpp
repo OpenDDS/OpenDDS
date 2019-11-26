@@ -89,13 +89,21 @@ public:
     Report report;
     report.node_id = node_id_;
     report.worker_id = worker_id_;
-    report.failed = pid_ == ACE_INVALID_PID || exit_status_ != 0;
+    report.failed = (pid_ == ACE_INVALID_PID || exit_status_ != 0);
     report.details = "";
+    report.log = "";
+
     if (!report.failed) {
-      std::ifstream file(report_filename_);
-      if (file.good()) {
-        std::string str((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+      std::ifstream report_file(report_filename_);
+      if (report_file.good()) {
+        std::string str((std::istreambuf_iterator<char>(report_file)), std::istreambuf_iterator<char>());
         report.details = str.c_str();
+      }
+    } else {
+      std::ifstream log_file(log_filename_);
+      if (log_file.good()) {
+        std::string str((std::istreambuf_iterator<char>(log_file)), std::istreambuf_iterator<char>());
+        report.log = str.c_str();
       }
     }
     if (report_writer_impl->write(report, DDS::HANDLE_NIL)) {
@@ -128,9 +136,16 @@ public:
     return pid_;
   }
 
-  void set_exit_status(int exit_status)
+  void set_exit_status(int return_code, ACE_exitcode exit_code)
   {
-    exit_status_ = exit_status;
+// TODO FIXME This is required to correctly detect segfaults on Linux
+// It's possible we need to do something similar on other platforms and we will
+// probably want to expand this to do the correct thing on windows / android / macos
+#ifdef ACE_LINUX
+    exit_status_ = exit_code ? exit_code : return_code;
+#else
+    exit_status_ = return_code;
+#endif
     running_ = false;
   }
 
@@ -274,7 +289,7 @@ public:
     const auto i = pid_to_worker_id_.find(pid);
     if (i != pid_to_worker_id_.end()) {
       auto& worker = all_workers_[i->second];
-      worker->set_exit_status(process->return_value());
+      worker->set_exit_status(process->return_value(), process->exit_code());
       remaining_workers_--;
       finished_workers_.push_back(worker);
     } else {

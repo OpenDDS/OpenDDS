@@ -95,12 +95,18 @@ DataReader::DataReader(const DataReaderConfig& config, DataReaderReport& report,
   }
 
   if (!transport_config_name_.empty()) {
-    Log::log() << "Binding config for datareader " << name_ << " (" << transport_config_name_ << ")"<< std::endl;
+    Log::log() << "Binding config for datareader " << name_ << " (" << transport_config_name_ << ")" << std::endl;
     TheTransportRegistry->bind_config(transport_config_name_.c_str(), datareader_);
   }
 }
 
 DataReader::~DataReader() {
+  Log::log() << "Deleting datareader: " << name_ << std::endl;
+  if (!CORBA::is_nil(datareader_.in())) {
+    if (subscriber_->delete_datareader(datareader_) != DDS::RETCODE_OK) {
+      Log::log() << "Error deleting datareader: " << name_ << std::endl;
+    }
+  }
 }
 
 void DataReader::enable() {
