@@ -40,7 +40,7 @@
 class SimpleDataWriter : public TransportSendListener, public TransportClient
 {
 public:
-  explicit SimpleDataWriter(const Domain& d, const LocatorSeq& locators)
+  SimpleDataWriter(const Domain& d, const LocatorSeq& locators)
     : domain(d), callbacks_expected_(0)
   {
     enable_transport(true, false); // (reliable, durable)
@@ -274,10 +274,13 @@ int DDS_TEST::run()
   DataSampleElement elements[] = {
     DataSampleElement(domain.getPubWtrId(), &sdw, OpenDDS::DCPS::PublicationInstance_rch()),
     DataSampleElement(domain.getPubWtrId(), &sdw, OpenDDS::DCPS::PublicationInstance_rch()),
+    DataSampleElement(domain.getPubWtrId(), &sdw, OpenDDS::DCPS::PublicationInstance_rch()),
   };
 
   serializeData(elements[0], TestMsg(10, "Through OpenDDS Transport"));
-  serializeData(elements[1], TestMsg(99, "key=99 means end"));
+  --msgSeqN;
+  serializeData(elements[1], TestMsg(10, "Test same msgSeqN"));
+  serializeData(elements[2], TestMsg(99, "key=99 means end"));
 
   SendStateDataSampleList list;
   listData(list, elements, sizeof(elements) / sizeof(elements[0]));

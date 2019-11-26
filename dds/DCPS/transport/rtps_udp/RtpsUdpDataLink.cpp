@@ -1219,18 +1219,18 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
     SequenceNumber seq;
     seq.setValue(data.writerSN.high, data.writerSN.low);
 
-    // determines if this is a direct write to this reader
-    bool directWrite = false;
-    bool directWriteNoMatch = true;
-    for (CORBA::ULong i = 0; i < data.inlineQos.length() && directWriteNoMatch; ++i) {
+    // determines if this is a directed write to this reader
+    bool directedWrite = false;
+    bool directedWriteMatch = false;
+    for (CORBA::ULong i = 0; i < data.inlineQos.length() && !directedWriteMatch; ++i) {
       if (data.inlineQos[i]._d() == RTPS::PID_DIRECTED_WRITE) {
-        directWrite = true;
+        directedWrite = true;
         if (data.inlineQos[i].guid() == id_) {
-          directWriteNoMatch = false;
+          directedWriteMatch = true;
         }
       }
     }
-    if (directWrite && directWriteNoMatch) {
+    if (directedWrite && !directedWriteMatch) {
       link->receive_strategy()->withhold_data_from(id_);
       info.recvd_.insert(seq);
       link->deliver_held_data(id_, info, durable_);

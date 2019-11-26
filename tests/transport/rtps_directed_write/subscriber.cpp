@@ -26,7 +26,7 @@
 class SimpleDataReader : public TransportReceiveListener, public TransportClient
 {
 public:
-  explicit SimpleDataReader(const Domain &d, const int readerIndex)
+  SimpleDataReader(const Domain &d, const int readerIndex)
     : domain(d), index(readerIndex), done_(false), seq_()
   {
     //enable_transport(false, false); //(reliable, durable)
@@ -156,7 +156,7 @@ public:
     domain.setHostAddress();
   }
 
-  int run(){
+  int run() {
     SimpleDataReader reader0(domain, 0);
     SimpleDataReader reader1(domain, 1);
     while (!(reader0.done() && reader1.done())) {

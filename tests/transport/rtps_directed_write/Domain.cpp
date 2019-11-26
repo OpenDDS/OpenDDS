@@ -18,8 +18,7 @@ Domain::Domain(int argc, ACE_TCHAR* argv[])
       }
     }
 #ifdef OPENDDS_SAFETY_PROFILE
-    if (host == ACE_TEXT("localhost"))
-    {
+    if (host == ACE_TEXT("localhost")) {
       host = "127.0.0.1";
     }
 #endif
@@ -51,7 +50,7 @@ Domain::Domain(int argc, ACE_TCHAR* argv[])
     ACE_ERROR((LM_ERROR, "EXCEPTION: %C\n", e._info().c_str()));
     cleanup();
     throw;
-  } catch(...) {
+  } catch (...) {
     cleanup();
     throw;
   }
@@ -87,8 +86,8 @@ OpenDDS::DCPS::RepoId Domain::createID(long participantId, long key, CORBA::Octe
 }
 
 void Domain::cleanup() {
-  if(dpf != nullptr) {
+  if (dpf) {
     TheServiceParticipant->shutdown();
-    dpf = nullptr;
+    dpf = 0;
   }
 }

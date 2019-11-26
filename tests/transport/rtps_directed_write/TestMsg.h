@@ -31,10 +31,8 @@ bool operator>>(Serializer& strm, TestMsg& stru)
   return (strm >> stru.key) && (strm >> stru.value.out());
 }
 
-size_t gen_max_marshaled_size(const TestMsg& stru, bool align)
+size_t gen_max_marshaled_size(const TestMsg&, bool)
 {
-  ACE_UNUSED_ARG(stru);
-  ACE_UNUSED_ARG(align);
   return 0;
 }
 
