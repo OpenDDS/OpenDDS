@@ -253,8 +253,7 @@ Service_Participant::shutdown()
     return;
   }
 
-  if (shutdown_listener_)
-  {
+  if (shutdown_listener_) {
     shutdown_listener_->notify_shutdown();
   }
 
@@ -1961,10 +1960,9 @@ Service_Participant::add_discovery(Discovery_rch discovery)
 }
 
 void
-Service_Participant::add_shutdown_listener(ShutdownListener *listener)
+Service_Participant::set_shutdown_listener(ShutdownListener* listener)
 {
-  if (listener)
-    shutdown_listener_ = listener;
+  shutdown_listener_ = listener;
 }
 
 const Service_Participant::RepoKeyDiscoveryMap&

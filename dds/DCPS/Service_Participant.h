@@ -48,7 +48,7 @@ class Monitor;
 
 const char DEFAULT_ORB_NAME[] = "OpenDDS_DCPS";
 
-class ACE_Proper_Export_Flag ShutdownListener {
+class ShutdownListener {
 public:
   virtual ~ShutdownListener() {}
   virtual void notify_shutdown() = 0;
@@ -87,7 +87,7 @@ public:
 
   ACE_thread_t reactor_owner() const;
 
-  void add_shutdown_listener(ShutdownListener* listener);
+  void set_shutdown_listener(ShutdownListener* listener);
 
   /**
    * Initialize the DDS client environment and get the

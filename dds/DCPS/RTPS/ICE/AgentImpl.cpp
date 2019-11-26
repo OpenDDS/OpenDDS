@@ -88,8 +88,9 @@ int AgentImpl::handle_timeout(const ACE_Time_Value& a_now, const void* /*act*/)
 AgentImpl::AgentImpl() :
   ReactorInterceptor(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner()),
   ncm_listener_added_(false),
-  remote_peer_reflexive_counter_(0) {
-    TheServiceParticipant->add_shutdown_listener(this);
+  remote_peer_reflexive_counter_(0)
+  {
+    TheServiceParticipant->set_shutdown_listener(this);
   }
 
 void AgentImpl::add_endpoint(Endpoint* a_endpoint)
