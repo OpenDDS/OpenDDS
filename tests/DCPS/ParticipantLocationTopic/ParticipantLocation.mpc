@@ -8,7 +8,7 @@ project(ParticipantLocationPublisher): dcpsexe, dcps_test, dcps_cm, dcps_transpo
   Source_Files {
     publisher.cpp
     Writer.cpp
-    ParticipantLocationBuiltinTopicDataDataReaderListenerImpl.cpp
+    ParticipantLocationListenerImpl.cpp
   }
 }
 
@@ -22,6 +22,6 @@ project(ParticipantLocationSubscriber): dcpsexe, dcps_test, dcps_cm, dcps_transp
   Source_Files {
     subscriber.cpp
     DataReaderListener.cpp
-    ParticipantLocationBuiltinTopicDataDataReaderListenerImpl.cpp
+    ParticipantLocationListenerImpl.cpp
   }
 }

@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef PARTICIPANT_LOCATION_BUILTIN_TOPIC_DATA_DATAREADER_LISTENER_IMPL
-#define PARTICIPANT_LOCATION_BUILTIN_TOPIC_DATA_DATAREADER_LISTENER_IMPL
+#ifndef PARTICIPANT_LOCATION_LISTENER_IMPL
+#define PARTICIPANT_LOCATION_LISTENER_IMPL
 
 #include <dds/DdsDcpsSubscriptionC.h>
 #include <dds/DCPS/LocalObject.h>
@@ -16,15 +16,15 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 
-class ParticipantLocationBuiltinTopicDataDataReaderListenerImpl
+class ParticipantLocationListenerImpl
     : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener>
 {
 public:
     //Constructor
-    ParticipantLocationBuiltinTopicDataDataReaderListenerImpl(unsigned long& locations);
+    ParticipantLocationListenerImpl(unsigned long& locations);
 
     //Destructor
-    virtual ~ParticipantLocationBuiltinTopicDataDataReaderListenerImpl();
+    virtual ~ParticipantLocationListenerImpl();
 
     virtual void on_requested_deadline_missed(
         DDS::DataReader_ptr reader,
@@ -59,4 +59,4 @@ private:
 
 };
 
-#endif /* PARTICIPANT_LOCATION_BUILTIN_TOPIC_DATA_DATAREADER_LISTENER_IMPL  */
+#endif /* PARTICIPANT_LOCATION_LISTENER_IMPL  */

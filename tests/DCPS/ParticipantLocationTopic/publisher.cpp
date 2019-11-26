@@ -33,7 +33,7 @@
 #include "Writer.h"
 
 #include <dds/DCPS/BuiltInTopicUtils.h>
-#include "ParticipantLocationBuiltinTopicDataDataReaderListenerImpl.h"
+#include "ParticipantLocationListenerImpl.h"
 
 #include <iostream>
 
@@ -159,7 +159,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     unsigned long locations = 0;
 
     DDS::DataReaderListener_var pub_loc_listener =
-      new ParticipantLocationBuiltinTopicDataDataReaderListenerImpl(locations);
+      new ParticipantLocationListenerImpl(locations);
 
     CORBA::Long retcode =
       pub_loc_dr->set_listener(pub_loc_listener,
@@ -194,7 +194,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       delete writer;
 
       // check that all locations received
-      unsigned long all = DDS::LOCATION_LOCAL | DDS::LOCATION_ICE | DDS::LOCATION_RELAY;
+      unsigned long all = OpenDDS::DCPS::LOCATION_LOCAL | OpenDDS::DCPS::LOCATION_ICE | OpenDDS::DCPS::LOCATION_RELAY;
 
       if (locations != all)
       {
