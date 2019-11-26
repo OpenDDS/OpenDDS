@@ -35,7 +35,7 @@ bool assert_key_count(size_t expected)
   if (count != expected) {
     const char* type_name = get_type_name<T>();
     ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: ")
-      ACE_TEXT("For DDSTraits<%C>::key_count(), expected %u keys but ")
+      ACE_TEXT("For DDSTraits<%C>::key_count(), expected %u key(s) but ")
       ACE_TEXT("got %u!\n"),
       type_name, expected, count));
     return true;
@@ -52,16 +52,16 @@ size_t find_size(const T& data, size_t& padding)
   return size;
 }
 
-template <typename Type>
-bool assert_key_only_size(const Type& data, size_t expected)
+template <typename T>
+bool assert_key_only_size(const T& data, size_t expected)
 {
-  typedef OpenDDS::DCPS::KeyOnly<const Type> KeyOnlyType;
+  typedef OpenDDS::DCPS::KeyOnly<const T> KeyOnlyType;
   KeyOnlyType key_only_data(data);
 
   size_t padding;
   size_t size = find_size<KeyOnlyType>(key_only_data, padding);
   if (size != expected) {
-    const char* type_name = get_type_name<Type>();
+    const char* type_name = get_type_name<T>();
     ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: ")
       ACE_TEXT("For gen_find_size(OpenDDS::DCPS::KeyOnly<%C>), expected %u ")
       ACE_TEXT("but got %u!\n"),
@@ -71,24 +71,152 @@ bool assert_key_only_size(const Type& data, size_t expected)
   return false;
 }
 
+template <typename T>
+class KeyCheck {
+public:
+  KeyCheck()
+  : failed_(false)
+  {
+  }
+
+  void add_key(const std::string& key_name)
+  {
+    if (!keys_.insert(key_name).second) {
+      const char* type_name = get_type_name<T>();
+      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: ")
+        ACE_TEXT("For %C, %C is being inserted twice.\n"),
+        type_name, key_name.c_str()));
+      failed_ = true;
+    }
+  }
+
+  bool failed()
+  {
+#ifndef OPENDDS_NO_MULTI_TOPIC
+    for (Keys::const_iterator i = keys_.cbegin(); i != keys_.cend(); ++i) {
+      if (!OpenDDS::DCPS::getMetaStruct<T>().isDcpsKey(i->c_str())) {
+        const char* type_name = get_type_name<T>();
+        ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: ")
+          ACE_TEXT("For getMetaStruct<%C>().isDcpsKey(), expected %C to be a key, but it wasn't"),
+          type_name, i->c_str()));
+        failed_ = true;
+      }
+    }
+#endif
+    failed_ |= assert_key_count<T>(keys_.size());
+    return failed_;
+  }
+
+private:
+  typedef std::set<std::string> Keys;
+  Keys keys_;
+  bool failed_;
+};
+
 int ACE_TMAIN(int, ACE_TCHAR**)
 {
   bool failed = false;
 
-  // Check Key Counts
-  failed |= assert_key_count<UnkeyedStruct>(0);
-  failed |= assert_key_count<SimpleKeyStruct>(1);
-  failed |= assert_key_count<NestedKeyStruct>(2);
-  failed |= assert_key_count<TypedefStructKeyStruct>(2);
-  failed |= assert_key_count<LongArrayStruct>(2);
-  failed |= assert_key_count<SimpleKeyArray>(2);
+  {
+    KeyCheck<UnkeyedStruct> c;
+    failed |= c.failed();
+  }
+  {
+    KeyCheck<SimpleKeyStruct> c;
+    c.add_key("key");
+    failed |= c.failed();
+  }
+  {
+    KeyCheck<NestedKeyStruct> c;
+    c.add_key("non_nested_key");
+    c.add_key("nested_key.key");
+    failed |= c.failed();
+  }
+  {
+    KeyCheck<TypedefStructKeyStruct> c;
+    c.add_key("a_key_value");
+    c.add_key("my_struct_typedef_key.key");
+    failed |= c.failed();
+  }
+  {
+    KeyCheck<LongArrayStruct> c;
+    c.add_key("values[0]");
+    c.add_key("values[1]");
+    failed |= c.failed();
+  }
+  {
+    KeyCheck<SimpleKeyArray> c;
+    c.add_key("values[0].key");
+    c.add_key("values[1].key");
+    failed |= c.failed();
+  }
   failed |= assert_key_count<UnkeyedUnion>(0);
   failed |= assert_key_count<KeyedUnion>(1);
-  failed |= assert_key_count<KeyedUnionStruct>(2);
-  failed |= assert_key_count<MultidimensionalArrayStruct>(2 * 3 + 2 * 3 * 4);
-  failed |= assert_key_count<ImpliedKeys::StructA>(5);
-  failed |= assert_key_count<ImpliedKeys::StructB>(6);
-  failed |= assert_key_count<ImpliedKeys::StructC>(2);
+  {
+    KeyCheck<KeyedUnionStruct> c;
+    c.add_key("value");
+    c.add_key("another_key");
+    failed |= c.failed();
+  }
+  {
+    KeyCheck<MultidimensionalArrayStruct> c;
+    c.add_key("array1[0][0]");
+    c.add_key("array1[0][1]");
+    c.add_key("array1[0][2]");
+    c.add_key("array1[1][0]");
+    c.add_key("array1[1][1]");
+    c.add_key("array1[1][2]");
+    c.add_key("array2[0][0][0]");
+    c.add_key("array2[0][0][1]");
+    c.add_key("array2[0][0][2]");
+    c.add_key("array2[0][0][3]");
+    c.add_key("array2[0][1][0]");
+    c.add_key("array2[0][1][1]");
+    c.add_key("array2[0][1][2]");
+    c.add_key("array2[0][1][3]");
+    c.add_key("array2[0][2][0]");
+    c.add_key("array2[0][2][1]");
+    c.add_key("array2[0][2][2]");
+    c.add_key("array2[0][2][3]");
+    c.add_key("array2[1][0][0]");
+    c.add_key("array2[1][0][1]");
+    c.add_key("array2[1][0][2]");
+    c.add_key("array2[1][0][3]");
+    c.add_key("array2[1][1][0]");
+    c.add_key("array2[1][1][1]");
+    c.add_key("array2[1][1][2]");
+    c.add_key("array2[1][1][3]");
+    c.add_key("array2[1][2][0]");
+    c.add_key("array2[1][2][1]");
+    c.add_key("array2[1][2][2]");
+    c.add_key("array2[1][2][3]");
+    failed |= c.failed();
+  }
+  {
+    KeyCheck<ImpliedKeys::StructA> c;
+    c.add_key("nested_no_keys.a");
+    c.add_key("nested_no_keys.b");
+    c.add_key("nested_no_keys.c");
+    c.add_key("nested_one_key.a");
+    c.add_key("non_nested");
+    failed |= c.failed();
+  }
+  {
+    KeyCheck<ImpliedKeys::StructB> c;
+    c.add_key("as_key.nested_no_keys.a");
+    c.add_key("as_key.nested_no_keys.b");
+    c.add_key("as_key.nested_no_keys.c");
+    c.add_key("as_key.nested_one_key.a");
+    c.add_key("as_key.non_nested");
+    c.add_key("yet_another_key");
+    failed |= c.failed();
+  }
+  {
+    KeyCheck<ImpliedKeys::StructC> c;
+    c.add_key("as_key.a");
+    c.add_key("as_key.c");
+    failed |= c.failed();
+  }
 
   // Check KeyOnly for Unions
   failed |= assert_key_only_size(UnkeyedUnion(), 0);
