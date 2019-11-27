@@ -11,7 +11,8 @@
 #include <string>
 
 // Implementation skeleton constructor
-ParticipantLocationListenerImpl::ParticipantLocationListenerImpl(unsigned long& locations) :
+ParticipantLocationListenerImpl::ParticipantLocationListenerImpl(const char* id, unsigned long& locations) :
+  id(id),
   location_mask(locations)
 {
 }
@@ -46,7 +47,7 @@ void ParticipantLocationListenerImpl::on_data_available(DDS::DataReader_ptr read
     OpenDDS::DCPS::RepoId guid;
     std::memcpy(&guid, &participant.guid, sizeof(guid));
 
-    std::cout << "== Participant Location ==" << std::endl;
+    std::cout << "== " << id << " Participant Location ==" << std::endl;
     std::cout
     << " valid: " << si.valid_data << std::endl
     << "  guid: " << guid << std::endl

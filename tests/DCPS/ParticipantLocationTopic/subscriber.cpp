@@ -38,18 +38,6 @@
 
 #include <iostream>
 
-#ifdef OPENDDS_SECURITY
-#include <dds/DCPS/security/framework/Properties.h>
-
-void append(DDS::PropertySeq& props, const char* name, const char* value, bool propagate = false)
-{
-  const DDS::Property_t prop = {name, value, propagate};
-  const unsigned int len = props.length();
-  props.length(len + 1);
-  props[len] = prop;
-}
-#endif
-
 bool reliable = false;
 bool wait_for_acks = false;
 
@@ -142,30 +130,28 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         ACE_TEXT(" ERROR: create_datareader() failed!\n")), -1);
     }
 
-// Get the Built-In Subscriber for Built-In Topics
+    // Get the Built-In Subscriber for Built-In Topics
     DDS::Subscriber_var bit_subscriber = participant->get_builtin_subscriber();
 
     DDS::DataReader_var pub_loc_dr = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC);
-    if (0 == pub_loc_dr)
-      {
-        std::cerr << "Could not get " << OpenDDS::DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC
-                  << " DataReader." << std::endl;
-        ACE_OS::exit(1);
-      }
+    if (0 == pub_loc_dr) {
+      std::cerr << "Could not get " << OpenDDS::DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC
+                << " DataReader." << std::endl;
+      ACE_OS::exit(1);
+    }
 
     unsigned long locations = 0;
 
     DDS::DataReaderListener_var pub_loc_listener =
-      new ParticipantLocationListenerImpl(locations);
+      new ParticipantLocationListenerImpl("Subscriber", locations);
 
     CORBA::Long retcode =
       pub_loc_dr->set_listener(pub_loc_listener,
                                OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-    if (retcode != DDS::RETCODE_OK)
-      {
-        std::cerr << "set_listener for " << OpenDDS::DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC << " failed." << std::endl;
-        ACE_OS::exit(1);
-      }
+    if (retcode != DDS::RETCODE_OK) {
+      std::cerr << "set_listener for " << OpenDDS::DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC << " failed." << std::endl;
+      ACE_OS::exit(1);
+    }
 
     // Block until Publisher completes
     DDS::StatusCondition_var condition = reader->get_statuscondition();
@@ -200,16 +186,18 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     ws->detach_condition(condition);
 
-    // check that all locations received
-    unsigned long all = OpenDDS::DCPS::LOCATION_LOCAL | OpenDDS::DCPS::LOCATION_ICE | OpenDDS::DCPS::LOCATION_RELAY;
+        // check that all locations received
+    unsigned long all = OpenDDS::DCPS::LOCATION_LOCAL |
+#ifdef OPENDDS_SECURITY
+                        OpenDDS::DCPS::LOCATION_ICE |
+#endif
+                        OpenDDS::DCPS::LOCATION_RELAY;
 
-    if (locations == all)
-    {
+    if (locations == all) {
       status = 0;
     }
-    else
-    {
-      std::cerr << "Error: One more locations missing. Location mask " << locations << " != " << all <<  "." << std::endl;
+    else {
+      std::cerr << "Error in subscriber: One more locations missing. Location mask " << locations << " != " << all <<  "." << std::endl;
       status = -1;
     }
 

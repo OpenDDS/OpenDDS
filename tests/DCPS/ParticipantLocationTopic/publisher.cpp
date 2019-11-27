@@ -146,26 +146,24 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
 
       // Get the Built-In Subscriber for Built-In Topics
-    DDS::Subscriber_var bit_subscriber = participant->get_builtin_subscriber();
+      DDS::Subscriber_var bit_subscriber = participant->get_builtin_subscriber();
 
-    DDS::DataReader_var pub_loc_dr = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC);
-    if (0 == pub_loc_dr)
-      {
+      DDS::DataReader_var pub_loc_dr = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC);
+      if (0 == pub_loc_dr) {
         std::cerr << "Could not get " << OpenDDS::DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC
                   << " DataReader." << std::endl;
         ACE_OS::exit(1);
       }
 
-    unsigned long locations = 0;
+      unsigned long locations = 0;
 
-    DDS::DataReaderListener_var pub_loc_listener =
-      new ParticipantLocationListenerImpl(locations);
+      DDS::DataReaderListener_var pub_loc_listener =
+        new ParticipantLocationListenerImpl("Publisher", locations);
 
-    CORBA::Long retcode =
-      pub_loc_dr->set_listener(pub_loc_listener,
-                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-    if (retcode != DDS::RETCODE_OK)
-      {
+      CORBA::Long retcode =
+        pub_loc_dr->set_listener(pub_loc_listener,
+                                OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      if (retcode != DDS::RETCODE_OK) {
         std::cerr << "set_listener for " << OpenDDS::DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC << " failed." << std::endl;
         ACE_OS::exit(1);
       }
@@ -194,18 +192,21 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       delete writer;
 
       // check that all locations received
-      unsigned long all = OpenDDS::DCPS::LOCATION_LOCAL | OpenDDS::DCPS::LOCATION_ICE | OpenDDS::DCPS::LOCATION_RELAY;
+      unsigned long all = OpenDDS::DCPS::LOCATION_LOCAL |
+#ifdef OPENDDS_SECURITY
+                        OpenDDS::DCPS::LOCATION_ICE |
+#endif
+                        OpenDDS::DCPS::LOCATION_RELAY;
 
-      if (locations == all)
-      {
+      if (locations == all) {
         status = 0;
       }
-      else
-      {
-        std::cerr << "Error: One more locations missing. Location mask " << locations << " != " << all <<  "." << std::endl;
+      else {
+        std::cerr << "Error in publisher: One more locations missing. Location mask " << locations << " != " << all <<  "." << std::endl;
         status = -1;
       }
     }
+
     // Clean-up!
     std::cerr << "deleting contained entities" << std::endl;
     participant->delete_contained_entities();

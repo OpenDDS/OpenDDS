@@ -21,7 +21,7 @@ class ParticipantLocationListenerImpl
 {
 public:
     //Constructor
-    ParticipantLocationListenerImpl(unsigned long& locations);
+    ParticipantLocationListenerImpl(const char* id, unsigned long& locations);
 
     //Destructor
     virtual ~ParticipantLocationListenerImpl();
@@ -56,6 +56,7 @@ public:
 private:
 
     unsigned long& location_mask;
+    const char* id;
 
 };
 
