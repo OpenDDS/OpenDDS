@@ -120,10 +120,6 @@ WriteDataContainer::WriteDataContainer(
 
 WriteDataContainer::~WriteDataContainer()
 {
-  ACE_GUARD(ACE_Recursive_Thread_Mutex,
-            guard,
-            lock_);
-
   if (this->unsent_data_.size() > 0) {
     ACE_DEBUG((LM_WARNING,
                ACE_TEXT("(%P|%t) WARNING: WriteDataContainer::~WriteDataContainer() - ")
