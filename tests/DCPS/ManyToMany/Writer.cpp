@@ -12,6 +12,8 @@
 #include <dds/DdsDcpsPublicationC.h>
 #include <dds/DCPS/WaitSet.h>
 
+#include "tests/Utils/StatusMatching.h"
+
 #include "tests/DCPS/LargeSample/MessengerTypeSupportC.h"
 #include "Writer.h"
 
@@ -19,40 +21,6 @@ Writer::Writer(const Options& options, Writers& writers)
   : options_(options)
   , writers_(writers)
 {
-}
-
-namespace {
-  void wait_for_match(DDS::DataWriter_ptr writer, const unsigned int count)
-  {
-    DDS::StatusCondition_var condition = writer->get_statuscondition();
-    condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
-    DDS::WaitSet_var ws = new DDS::WaitSet;
-    ws->attach_condition(condition);
-    DDS::ConditionSeq conditions;
-    DDS::PublicationMatchedStatus ms = { 0, 0, 0, 0, 0 };
-    DDS::Duration_t timeout = { 1, 0 };
-    DDS::ReturnCode_t stat;
-    do {
-      stat = writer->get_publication_matched_status(ms);
-      if (stat != DDS::RETCODE_OK) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: %N:%l: wait_match() -")
-                   ACE_TEXT(" get_publication_matched_status failed!\n")));
-      } else if (ms.current_count >= (CORBA::Long)count) {
-        break;  // matched
-      } else {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) Waiting for %d matched readers, currently have %d.\n"), ms.current_count, count));
-      }
-      // wait for a change
-      stat = ws->wait(conditions, timeout);
-      if ((stat != DDS::RETCODE_OK) && (stat != DDS::RETCODE_TIMEOUT)) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: %N:%l: wait_match() -")
-                   ACE_TEXT(" wait failed!\n")));
-      }
-    } while (true);
-    ws->detach_condition(condition);
-  }
 }
 
 bool
@@ -72,7 +40,7 @@ Writer::write()
     for (Writers::const_iterator writer = writers_.begin();
          writer != writers_.end();
          ++writer) {
-      wait_for_match(writer->writer, subscribers);
+      Utils::wait_match(writer->writer, subscribers, Utils::GTE);
 
       // we already have a ref count, no need to take another
       Messenger::MessageDataWriter_ptr message_dw =
@@ -135,7 +103,7 @@ Writer::write()
     for (Writers::const_iterator writer = writers_.begin();
          writer != writers_.end();
          ++writer) {
-      wait_for_match(writer->writer, 0);
+      Utils::wait_match(writer->writer, 0);
     }
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in svc():");

@@ -21,6 +21,8 @@
 # include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
 #endif
 
+#include "tests/Utils/StatusMatching.h"
+
 namespace
 {
   std::size_t expected_samples = 1024;
@@ -51,44 +53,6 @@ namespace
         shifter.ignore_arg();
       }
     }
-  }
-
-  int
-  wait_match(const DDS::DataReader_var& reader,
-             unsigned int num_readers, bool exact)
-  {
-    DDS::StatusCondition_var condition = reader->get_statuscondition();
-    condition->set_enabled_statuses(DDS::SUBSCRIPTION_MATCHED_STATUS);
-    DDS::WaitSet_var ws = new DDS::WaitSet;
-    ws->attach_condition(condition);
-    DDS::ConditionSeq conditions;
-    DDS::SubscriptionMatchedStatus ms = { 0, 0, 0, 0, 0 };
-    DDS::Duration_t timeout = { 3, 0 };
-    DDS::ReturnCode_t stat;
-    do {
-      stat = reader->get_subscription_matched_status(ms);
-      if (stat != DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((
-                    LM_ERROR,
-                    ACE_TEXT("(%P|%t) ERROR: %N:%l: wait_match() -")
-                    ACE_TEXT(" get_subscription_matched_status failed!\n")),
-                   -1);
-      } else if (exact && (ms.current_count == (CORBA::Long)num_readers)) {
-        break;  // matched
-      } else if (!exact && (ms.current_count >= (CORBA::Long)num_readers)) {
-        break;  // matched
-      }
-      // wait for a change
-      stat = ws->wait(conditions, timeout);
-      if ((stat != DDS::RETCODE_OK) && (stat != DDS::RETCODE_TIMEOUT)) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ERROR: %N:%l: wait_match() -")
-                          ACE_TEXT(" wait failed!\n")),
-                         -1);
-      }
-    } while (true);
-    ws->detach_condition(condition);
-    return 0;
   }
 
 } // namespace
@@ -174,9 +138,9 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
                           ACE_TEXT("%N:%l: main()")
                           ACE_TEXT(" create_datareader failed!\n")), 7);
 
-      wait_match(reader, 1, false); // might never get up to n_publishers if they are exiting
+      Utils::wait_match(reader, 1, Utils::GTE); // might never get up to n_publishers if they are exiting
       listener_p->wait_received(OpenDDS::DCPS::TimeDuration(15, 0), expected_samples);
-      wait_match(reader, 0, true);
+      Utils::wait_match(reader, 0);
 
       for (size_t x = 0; x < n_publishers; ++x) {
         OPENDDS_MAP(size_t, OPENDDS_SET(size_t))::const_iterator xit = listener_p->task_sample_set_map.find(x);

@@ -23,6 +23,8 @@
 #include "ProgressIndicator.h"
 #include "FooTypeTypeSupportImpl.h"
 
+#include "tests/Utils/StatusMatching.h"
+
 ParticipantTask::ParticipantTask(const std::size_t& samples_per_thread)
   : samples_per_thread_(samples_per_thread)
   , thread_index_(0)
@@ -31,46 +33,6 @@ ParticipantTask::ParticipantTask(const std::size_t& samples_per_thread)
 
 ParticipantTask::~ParticipantTask()
 {}
-
-namespace {
-
-int
-wait_match(const DDS::DataWriter_var& writer,
-           unsigned int num_readers)
-{
-  DDS::StatusCondition_var condition = writer->get_statuscondition();
-  condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
-  DDS::WaitSet_var ws = new DDS::WaitSet;
-  ws->attach_condition(condition);
-  DDS::ConditionSeq conditions;
-  DDS::PublicationMatchedStatus ms = { 0, 0, 0, 0, 0 };
-  DDS::Duration_t timeout = { 3, 0 };
-  DDS::ReturnCode_t stat;
-  do {
-    stat = writer->get_publication_matched_status(ms);
-    if (stat != DDS::RETCODE_OK) {
-      ACE_ERROR_RETURN((
-                  LM_ERROR,
-                  ACE_TEXT("(%P|%t) ERROR: %N:%l: wait_match() -")
-                  ACE_TEXT(" get_publication_matched_status failed!\n")),
-                 -1);
-    } else if (ms.current_count == (CORBA::Long)num_readers) {
-      break;  // matched
-    }
-    // wait for a change
-    stat = ws->wait(conditions, timeout);
-    if ((stat != DDS::RETCODE_OK) && (stat != DDS::RETCODE_TIMEOUT)) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: %N:%l: wait_match() -")
-                        ACE_TEXT(" wait failed!\n")),
-                       -1);
-    }
-  } while (true);
-  ws->detach_condition(condition);
-  return 0;
-}
-
-} // end anonymous namespace
 
 int
 ParticipantTask::svc()
@@ -192,7 +154,7 @@ ParticipantTask::svc()
 
     ACE_DEBUG((LM_INFO, "(%P|%t)    -> PARTICIPANT %d waiting for match\n", this_thread_index));
 
-    wait_match(writer, 1);
+    Utils::wait_match(writer, 1);
 
     ACE_DEBUG((LM_INFO, "(%P|%t)    -> PARTICIPANT %d match found!\n", this_thread_index));
 
