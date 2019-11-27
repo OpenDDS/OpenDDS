@@ -83,8 +83,8 @@ Discovery::create_bit_topics(DomainParticipantImpl* participant)
       ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("(%P|%t) ")
         ACE_TEXT("Discovery::create_bit_topics, ")
-        ACE_TEXT("register BUILT_IN_PARTICIPANT_LOCATION_TOPIC_TYPE returned %d.\n"),
-        ret),
+        ACE_TEXT("register BUILT_IN_PARTICIPANT_LOCATION_TOPIC_TYPE returned %C.\n"),
+        retcode_to_string(ret)),
         ret);
     }
   }
