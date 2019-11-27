@@ -55,7 +55,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   DDS::DomainParticipantFactory_var dpf;
   DDS::DomainParticipant_var participant;
 
-  int status = 0;
+  int status = -1;
 
   try {
     std::cout << "Starting publisher" << std::endl;
@@ -196,12 +196,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       // check that all locations received
       unsigned long all = OpenDDS::DCPS::LOCATION_LOCAL | OpenDDS::DCPS::LOCATION_ICE | OpenDDS::DCPS::LOCATION_RELAY;
 
-      if (locations != all)
+      if (locations == all)
+      {
+        status = 0;
+      }
+      else
       {
         std::cerr << "Error: One more locations missing. Location mask " << locations << " != " << all <<  "." << std::endl;
         status = -1;
       }
-
     }
     // Clean-up!
     std::cerr << "deleting contained entities" << std::endl;

@@ -41,10 +41,15 @@ void ParticipantLocationListenerImpl::on_data_available(DDS::DataReader_ptr read
   for (DDS::ReturnCode_t status = builtin_dr->read_next_sample(participant, si);
        status == DDS::RETCODE_OK;
        status = builtin_dr->read_next_sample(participant, si)) {
+
+    // copy octet[] to guid
+    OpenDDS::DCPS::RepoId guid;
+    std::memcpy(&guid, &participant.guid, sizeof(guid));
+
     std::cout << "== Participant Location ==" << std::endl;
     std::cout
     << " valid: " << si.valid_data << std::endl
-    << "  guid: " << participant.guid << std::endl
+    << "  guid: " << guid << std::endl
     << "   loc: "
     << ((participant.location & OpenDDS::DCPS::LOCATION_LOCAL) ? "LOCAL " : "")
     << ((participant.location & OpenDDS::DCPS::LOCATION_ICE) ? "ICE " : "")

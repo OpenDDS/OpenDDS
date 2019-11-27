@@ -1621,7 +1621,7 @@ namespace OpenDDS {
           RepoId guid;
           std::memcpy(guid.guidPrefix, p.participantProxy.guidPrefix, sizeof(p.participantProxy.guidPrefix));
           guid.entityId = DCPS::ENTITYID_PARTICIPANT;
-          location_data_.guid = LogGuid(guid).c_str();
+          std::memcpy(location_data_.guid, guid.guidPrefix, sizeof(RepoId));
           location_data_.location = 0;
           location_data_.change_mask = 0;
           location_data_.local_timestamp = 0;
@@ -1666,7 +1666,6 @@ namespace OpenDDS {
         DDS::Security::ParticipantCryptoHandle crypto_handle_;
         DDS::Security::ParticipantCryptoTokenSeq crypto_tokens_;
 #endif
-
       };
 
       typedef OPENDDS_MAP_CMP(RepoId, DiscoveredParticipant,
@@ -1712,12 +1711,12 @@ namespace OpenDDS {
 #ifndef DDS_HAS_MINIMUM_BIT
     DCPS::ParticipantBuiltinTopicDataDataReaderImpl* part_bit()
     {
-        if (!bit_subscriber_.in())
-          return 0;
+      if (!bit_subscriber_.in())
+        return 0;
 
-        DDS::DataReader_var d =
-          bit_subscriber_->lookup_datareader(BUILT_IN_PARTICIPANT_TOPIC);
-        return dynamic_cast<ParticipantBuiltinTopicDataDataReaderImpl*>(d.in());
+      DDS::DataReader_var d =
+        bit_subscriber_->lookup_datareader(BUILT_IN_PARTICIPANT_TOPIC);
+      return dynamic_cast<ParticipantBuiltinTopicDataDataReaderImpl*>(d.in());
     }
 
     DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl* part_loc_bit()

@@ -56,7 +56,7 @@ bool wait_for_acks = false;
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
-  int status = 0;
+  int status = -1;
 
   try {
     // Initialize DomainParticipantFactory
@@ -203,7 +203,11 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     // check that all locations received
     unsigned long all = OpenDDS::DCPS::LOCATION_LOCAL | OpenDDS::DCPS::LOCATION_ICE | OpenDDS::DCPS::LOCATION_RELAY;
 
-    if (locations != all)
+    if (locations == all)
+    {
+      status = 0;
+    }
+    else
     {
       std::cerr << "Error: One more locations missing. Location mask " << locations << " != " << all <<  "." << std::endl;
       status = -1;

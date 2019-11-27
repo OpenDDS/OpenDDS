@@ -438,13 +438,15 @@ module OpenDDS {
     // network location/connection details.
     typedef unsigned long ParticipantLocation;
 
+    typedef octet OctetGuidArray16[16];
+
     const ParticipantLocation LOCATION_LOCAL = 0x0001 << 0;
     const ParticipantLocation LOCATION_ICE = 0x0001 << 1;
     const ParticipantLocation LOCATION_RELAY = 0x0001 << 2;
 
     BUILT_IN_TOPIC_TYPE
     struct ParticipantLocationBuiltinTopicData {
-            BUILT_IN_TOPIC_KEY string guid;
+            BUILT_IN_TOPIC_KEY OctetGuidArray16 guid;
             ParticipantLocation location;
             ParticipantLocation change_mask;
             string local_addr;
