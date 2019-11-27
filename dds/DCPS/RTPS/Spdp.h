@@ -164,9 +164,10 @@ protected:
                                       Security::DiscoveredParticipantDataKind kind
 #endif
                                       );
-
+#ifndef DDS_HAS_MINIMUM_BIT
   void update_location(const DCPS::RepoId& guid, OpenDDS::DCPS::ParticipantLocation mask, const ACE_INET_Addr& from);
   void update_location_i(const DCPS::RepoId& guid, OpenDDS::DCPS::ParticipantLocation mask, const ACE_INET_Addr& from);
+#endif
 
   bool announce_domain_participant_qos();
 

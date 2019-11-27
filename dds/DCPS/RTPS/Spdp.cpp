@@ -394,6 +394,7 @@ namespace {
   }
 }
 
+#ifndef DDS_HAS_MINIMUM_BIT
 void
 Spdp::update_location(const DCPS::RepoId& guid,
                       OpenDDS::DCPS::ParticipantLocation mask,
@@ -484,6 +485,7 @@ Spdp::update_location_i(const DCPS::RepoId& guid,
     }
   }
 }
+#endif
 
 ICE::Endpoint*
 Spdp::get_ice_endpoint()
@@ -677,8 +679,9 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       remove_discovered_participant(iter);
     }
   }
-
+#ifndef DDS_HAS_MINIMUM_BIT
   update_location_i(guid, from_relay ? OpenDDS::DCPS::LOCATION_RELAY : OpenDDS::DCPS::LOCATION_LOCAL, from);
+#endif
 }
 
 bool
