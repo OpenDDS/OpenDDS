@@ -758,7 +758,9 @@ Spdp::data_received(const DataSubmessage& data,
       ICE::Agent::instance()->start_ice(spdp_endpoint, guid_, guid, spdp_pos->second);
     } else {
       ICE::Agent::instance()->stop_ice(spdp_endpoint, guid_, guid);
+    #ifndef DDS_HAS_MINIMUM_BIT
       update_location(guid, OpenDDS::DCPS::LOCATION_ICE, ACE_INET_Addr());
+    #endif
     }
   }
 #endif
@@ -2191,6 +2193,7 @@ Spdp::SpdpTransport::stun_server_address() const
   return outer_->config_->sedp_stun_server_address();
 }
 
+#ifndef DDS_HAS_MINIMUM_BIT
 void
 Spdp::SpdpTransport::ice_connect(const ICE::GuidSetType& guids, const ACE_INET_Addr& addr)
 {
@@ -2206,6 +2209,7 @@ Spdp::SpdpTransport::ice_disconnect(const ICE::GuidSetType& guids)
     outer_->update_location(pos->remote, OpenDDS::DCPS::LOCATION_ICE, ACE_INET_Addr());
   }
 }
+#endif /* DDS_HAS_MINIMUM_BIT */
 #endif /* OPENDDS_SECURITY */
 
 void

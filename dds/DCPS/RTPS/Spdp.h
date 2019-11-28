@@ -235,8 +235,10 @@ private:
     ICE::AddressListType host_addresses() const;
     void send(const ACE_INET_Addr& address, const STUN::Message& message);
     ACE_INET_Addr stun_server_address() const;
+  #ifndef DDS_HAS_MINIMUM_BIT
     void ice_connect(const ICE::GuidSetType& guids, const ACE_INET_Addr& addr);
     void ice_disconnect(const ICE::GuidSetType& guids);
+  #endif
 #endif
 
     Spdp* outer_;
