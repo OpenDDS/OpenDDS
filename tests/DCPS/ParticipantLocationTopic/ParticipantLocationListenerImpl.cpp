@@ -6,14 +6,14 @@
  */
 
 #include "ParticipantLocationListenerImpl.h"
-#include <dds/DdsDcpsCoreTypeSupportC.h>
+#include <dds/DdsDcpsCoreTypeSupportImpl.h>
 #include <ace/streams.h>
 #include <string>
 
 // Implementation skeleton constructor
 ParticipantLocationListenerImpl::ParticipantLocationListenerImpl(const char* id, unsigned long& locations) :
-  id(id),
-  location_mask(locations)
+  location_mask(locations),
+  id(id)
 {
 }
 

@@ -55,7 +55,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   DDS::DomainParticipantFactory_var dpf;
   DDS::DomainParticipant_var participant;
 
-  int status = -1;
+  int status = EXIT_FAILURE;
 
   try {
     std::cout << "Starting publisher" << std::endl;
@@ -77,7 +77,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: main()")
                           ACE_TEXT(" ERROR: create_participant failed!\n")),
-                         -1);
+                         EXIT_FAILURE);
       }
 
       // Register TypeSupport (Messenger::Message)
@@ -88,7 +88,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: main()")
                           ACE_TEXT(" ERROR: register_type failed!\n")),
-                         -1);
+                         EXIT_FAILURE);
       }
 
       // Create Topic
@@ -104,7 +104,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: main()")
                           ACE_TEXT(" ERROR: create_topic failed!\n")),
-                         -1);
+                         EXIT_FAILURE);
       }
 
       // Create Publisher
@@ -122,7 +122,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: main()")
                           ACE_TEXT(" ERROR: create_publisher failed!\n")),
-                         -1);
+                         EXIT_FAILURE);
       }
 
       DDS::DataWriterQos qos;
@@ -142,7 +142,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: main()")
                           ACE_TEXT(" ERROR: create_datawriter failed!\n")),
-                         -1);
+                         EXIT_FAILURE);
       }
 
       // Get the Built-In Subscriber for Built-In Topics
@@ -152,7 +152,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       if (0 == pub_loc_dr) {
         std::cerr << "Could not get " << OpenDDS::DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC
                   << " DataReader." << std::endl;
-        ACE_OS::exit(1);
+        ACE_OS::exit(EXIT_FAILURE);
       }
 
       unsigned long locations = 0;
@@ -165,7 +165,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                 OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (retcode != DDS::RETCODE_OK) {
         std::cerr << "set_listener for " << OpenDDS::DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC << " failed." << std::endl;
-        ACE_OS::exit(1);
+        ACE_OS::exit(EXIT_FAILURE);
       }
 
       // Start writing threads
@@ -199,11 +199,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         OpenDDS::DCPS::LOCATION_RELAY;
 
       if (locations == all) {
-        status = 0;
+        status = EXIT_SUCCESS;
       }
       else {
         std::cerr << "Error in publisher: One more locations missing. Location mask " << locations << " != " << all <<  "." << std::endl;
-        status = -1;
+        status = EXIT_FAILURE;
       }
     }
 
@@ -217,7 +217,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
-    status = -1;
+    status = EXIT_FAILURE;
   }
 
   return status;

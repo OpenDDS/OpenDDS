@@ -44,7 +44,7 @@ bool wait_for_acks = false;
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
-  int status = -1;
+  int status = EXIT_FAILURE;
 
   try {
     // Initialize DomainParticipantFactory
@@ -64,7 +64,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     if (CORBA::is_nil(participant.in())) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: create_participant() failed!\n")), -1);
+                        ACE_TEXT(" ERROR: create_participant() failed!\n")), EXIT_FAILURE);
     }
 
     // Register Type (Messenger::Message)
@@ -74,7 +74,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     if (ts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: register_type() failed!\n")), -1);
+                        ACE_TEXT(" ERROR: register_type() failed!\n")), EXIT_FAILURE);
     }
 
     // Create Topic (Movie Discussion List)
@@ -89,7 +89,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     if (CORBA::is_nil(topic.in())) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: create_topic() failed!\n")), -1);
+                        ACE_TEXT(" ERROR: create_topic() failed!\n")), EXIT_FAILURE);
     }
 
     // Create Subscriber
@@ -106,7 +106,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     if (CORBA::is_nil(sub.in())) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: create_subscriber() failed!\n")), -1);
+                        ACE_TEXT(" ERROR: create_subscriber() failed!\n")), EXIT_FAILURE);
     }
 
     // Create DataReader
@@ -127,7 +127,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     if (CORBA::is_nil(reader.in())) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: create_datareader() failed!\n")), -1);
+                        ACE_TEXT(" ERROR: create_datareader() failed!\n")), EXIT_FAILURE);
     }
 
     // Get the Built-In Subscriber for Built-In Topics
@@ -137,7 +137,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     if (0 == pub_loc_dr) {
       std::cerr << "Could not get " << OpenDDS::DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC
                 << " DataReader." << std::endl;
-      ACE_OS::exit(1);
+      ACE_OS::exit(EXIT_FAILURE);
     }
 
     unsigned long locations = 0;
@@ -150,7 +150,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (retcode != DDS::RETCODE_OK) {
       std::cerr << "set_listener for " << OpenDDS::DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC << " failed." << std::endl;
-      ACE_OS::exit(1);
+      ACE_OS::exit(EXIT_FAILURE);
     }
 
     // Block until Publisher completes
@@ -170,7 +170,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       if (reader->get_subscription_matched_status(matches) != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l main()")
-                          ACE_TEXT(" ERROR: get_subscription_matched_status() failed!\n")), -1);
+                          ACE_TEXT(" ERROR: get_subscription_matched_status() failed!\n")), -EXIT_FAILURE);
       }
       if (matches.current_count == 0 && matches.total_count > 0) {
         break;
@@ -178,11 +178,11 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l main()")
-                          ACE_TEXT(" ERROR: wait() failed!\n")), -1);
+                          ACE_TEXT(" ERROR: wait() failed!\n")), EXIT_FAILURE);
       }
     }
 
-    status = listener_servant->is_valid() ? 0 : -1;
+    status = listener_servant->is_valid() ? EXIT_SUCCESS : EXIT_FAILURE;
 
     ws->detach_condition(condition);
 
@@ -193,12 +193,12 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 #endif
                         OpenDDS::DCPS::LOCATION_RELAY;
 
-    if (locations == all) {
-      status = 0;
+    if (!status && locations == all) {
+      status = EXIT_SUCCESS;
     }
     else {
       std::cerr << "Error in subscriber: One more locations missing. Location mask " << locations << " != " << all <<  "." << std::endl;
-      status = -1;
+      status = EXIT_FAILURE;
     }
 
     // Clean-up!
@@ -208,7 +208,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
-    status = -1;
+    status = EXIT_FAILURE;
   }
 
   return status;
