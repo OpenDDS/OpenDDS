@@ -185,11 +185,11 @@ RtpsUdpTransport::use_datalink(const RepoId& local_id,
 {
   bool requires_inline_qos;
   unsigned int blob_bytes_read;
-  ACE_INET_Addr raddr = get_connection_addr(remote_data, &requires_inline_qos,
+  ACE_INET_Addr addr = get_connection_addr(remote_data, &requires_inline_qos,
                                            &blob_bytes_read);
 
   if (link_) {
-    link_->add_locator(remote_id, raddr, requires_inline_qos);
+    link_->add_locator(remote_id, addr, requires_inline_qos);
 
 #if defined(OPENDDS_SECURITY)
     if (remote_data.length() > blob_bytes_read) {
