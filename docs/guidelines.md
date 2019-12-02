@@ -30,7 +30,8 @@ of the guidelines.
   * [Naming](#naming)
   * [Comments](#comments)
   * [Documenting Code for Doxygen](#documenting-code-for-doxygen)
-  * [Preprocessor Macros](#preprocessor-macros)
+  * [Preprocessor](#preprocessor)
+    * [Includes](#includes)
   * [Time](#time)
 
 ## Repository
@@ -206,7 +207,9 @@ The punctuation placement rules can be summarized as:
   desirable.
 - Use the constructor initializer list and make sure its order matches the
   declaration order.
-- Prefer pre-increment/decrement (`++x`) to post-increment/decrement (`x++`)
+- Prefer pre-increment/decrement (`++x`) to post-increment/decrement (`x++`).
+  For objects this avoids creating a unused copy of the original object. It's
+  also recommended to do this for primitives just to enforce the habit.
 - All currently supported compilers use the template inclusion mechanism. Thus
   function/method template definitions may not be placed in normal `*.cpp`
   files, instead they can go in `_T.cpp` (which are `#included` and not
@@ -229,6 +232,10 @@ declare two pointers! It's best just to break these into separate statements:
 int* c;
 int* b;
 ```
+
+In code targeting C++03, it is customary to use `0` as the null pointer. In code
+targeting C++11 and later, `nullptr` should be used instead. `NULL` should
+never be used.
 
 ### Naming
 
@@ -290,29 +297,54 @@ The extra `*` on the multiline comment and `/` on the single line comment are
 important. They inform Doxygen that comment is the documentation for the
 following declaration.
 
-For groups of very similar things you can avoid repeating yourself with `///{`
-and `///}`:
-
-```C++
-/**
- * Get a string
- */
-///{
-char* get_c_string();
-std::string get_cpp_string();
-///}
-```
-
 If referring to something that happens to be a namespace or other global
 object (like DDS, OpenDDS, or RTPS), you should precede it with a `%`.
 If not it will turn into a link to that object.
 
 For more information, see [the Doxygen manual](http://www.doxygen.nl/manual/).
 
-### Preprocessor Macros
+### Preprocessor
 
-* Use `#ifdef MACRO` to test if `MACRO` is defined.
-* Use `#ifndef MACRO` to test if `MACRO` is not defined.
+- Prefer `#ifdef ...` and `#ifndef ...` to `#if defined ...` and
+  `#if !defined ...` when testing if a single macro is defined.
+- As stated before, preprocessor macros visible to user code must begin with
+  `OPENDDS_`.
+- Ignoring the header guard if there is one, preprocessor statements should be
+  indented using two spaces starting at the pound symbol, like so:
+
+```C++
+#if defined(X) && defined(Y)
+#  if X > Y
+#    define Z 1
+#  else
+#    define Z 0
+#  endif
+#else
+#  define Z -1
+#endif
+```
+
+#### Includes
+
+Includes should be ordered based on their hierarchy from local to system as a
+safeguard against headers being dependant on a particular order. For most cases
+in OpenDDS, it can be generalized as the following:
+
+1. The corresponding header to the source file (`Foo.h` if we were in
+   `Foo.cpp`).
+2. Headers from the local project.
+3. Headers from external OpenDDS based-libraries.
+4. Headers from OpenDDS.
+5. Headers from external TAO based-libraries.
+6. Headers from TAO.
+7. Headers from external ACE based-libraries.
+8. Headers from ACE.
+9. Headers from external non-ACE-based libraries.
+10. Headers from system and C and C++ standard libraries.
+
+Headers should only use local includes (`#include "foo/Foo.h"`) if the header
+is relative to the file. Otherwise system includes (`#include <foo/Foo.h>`)
+should be preferred to hint that the header is in the include path.
 
 ### Time
 
