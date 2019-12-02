@@ -306,9 +306,9 @@ const Duration_t max_wait = {10, 0};
 void check_rc(ReturnCode_t ret, const char* message, const char* extra_message = 0)
 {
   if (ret != RETCODE_OK) {
-    std::string msg = OPENDDS_STRING("Failed to") + message;
+    std::string msg = std::string("Failed to") + message;
     if (extra_message) {
-      msg += ' ' + extra_message;
+      msg += std::string(" ") + extra_message;
     }
     msg += ": " + retcode_to_string(ret);
     throw std::runtime_error(msg);
