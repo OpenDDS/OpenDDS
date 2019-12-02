@@ -1972,9 +1972,14 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
 {
   const ACE_SOCK_Dgram& socket = (h == unicast_socket_.get_handle())
                                  ? unicast_socket_ : multicast_socket_;
-  ACE_INET_Addr local;
   ACE_INET_Addr remote;
   buff_.reset();
+
+#ifdef ACE_LACKS_SENDMSG
+  const ssize_t bytes = socket.recv(buff_.wr_ptr(), buff_.space(), remote);
+#else
+  ACE_INET_Addr local;
+
   iovec iov[1];
   iov[0].iov_base = buff_.wr_ptr();
   iov[0].iov_len = buff_.space();
@@ -1983,6 +1988,7 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
                                     , &local
 #endif
                                     );
+#endif
 
   if (bytes > 0) {
     buff_.wr_ptr(bytes);
