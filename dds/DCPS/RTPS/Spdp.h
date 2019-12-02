@@ -21,6 +21,7 @@
 #include "dds/DCPS/SporadicTask.h"
 #include "dds/DCPS/JobQueue.h"
 #include "dds/DCPS/NetworkConfigMonitor.h"
+#include "dds/DCPS/RTPS/ICE/Ice.h"
 
 #include "RtpsCoreC.h"
 #include "Sedp.h"
@@ -153,6 +154,8 @@ public:
 
   BuiltinEndpointSet_t available_builtin_endpoints() const { return available_builtin_endpoints_; }
 
+  ICE::Endpoint* get_ice_endpoint();
+
 protected:
   Sedp& endpoint_manager() { return sedp_; }
 
@@ -161,6 +164,10 @@ protected:
                                       Security::DiscoveredParticipantDataKind kind
 #endif
                                       );
+#ifndef DDS_HAS_MINIMUM_BIT
+  void update_location(const DCPS::RepoId& guid, OpenDDS::DCPS::ParticipantLocation mask, const ACE_INET_Addr& from);
+  void update_location_i(const DCPS::RepoId& guid, OpenDDS::DCPS::ParticipantLocation mask, const ACE_INET_Addr& from);
+#endif
 
   bool announce_domain_participant_qos();
 
@@ -188,11 +195,11 @@ private:
   void update_agent_info(const DCPS::RepoId& local_guid, const ICE::AgentInfo& agent_info);
 #endif
 
-#ifndef DDS_HAS_MINIMUM_BIT
-  DCPS::ParticipantBuiltinTopicDataDataReaderImpl* part_bit();
-#endif /* DDS_HAS_MINIMUM_BIT */
-
-  struct SpdpTransport : public virtual DCPS::RcEventHandler, public virtual DCPS::NetworkConfigListener {
+  struct SpdpTransport : public virtual DCPS::RcEventHandler, public virtual DCPS::NetworkConfigListener
+#ifdef OPENDDS_SECURITY
+        , public ICE::Endpoint
+#endif
+{
     typedef size_t WriteFlags;
     static const WriteFlags SEND_TO_LOCAL = (1 << 0);
     static const WriteFlags SEND_TO_RELAY = (1 << 1);
@@ -221,6 +228,18 @@ private:
                      const ACE_INET_Addr& address);
     void remove_address(const DCPS::NetworkInterface& interface,
                         const ACE_INET_Addr& address);
+
+    ICE::Endpoint* get_ice_endpoint();
+
+#ifdef OPENDDS_SECURITY
+    ICE::AddressListType host_addresses() const;
+    void send(const ACE_INET_Addr& address, const STUN::Message& message);
+    ACE_INET_Addr stun_server_address() const;
+  #ifndef DDS_HAS_MINIMUM_BIT
+    void ice_connect(const ICE::GuidSetType& guids, const ACE_INET_Addr& addr);
+    void ice_disconnect(const ICE::GuidSetType& guids);
+  #endif
+#endif
 
     Spdp* outer_;
     Header hdr_;

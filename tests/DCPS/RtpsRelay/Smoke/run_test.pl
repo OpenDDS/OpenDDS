@@ -31,10 +31,17 @@ if ($test->flag('secure')) {
     $pub_sub_security_opts = " -DCPSSecurity 1";
 }
 
+my $pub_ini = " pub_rtps.ini";
+my $sub_ini = " sub_rtps.ini";
+
+if ($test->flag('single')) {
+    $sub_ini = $pub_ini;
+}
+
 $test->process("relay1", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-DCPSConfigFile relay1.ini -ApplicationDomain 42 -VerticalAddress 4444 -HorizontalAddress 127.0.0.1:11444" . $relay_security_opts);
 $test->process("relay2", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-DCPSConfigFile relay2.ini -ApplicationDomain 42 -VerticalAddress 5444 -HorizontalAddress 127.0.0.1:11544" . $relay_security_opts);
-$test->process("publisher", "publisher", "-ORBDebugLevel 1 -DCPSConfigFile pub_rtps.ini" . $pub_sub_security_opts);
-$test->process("subscriber", "subscriber", "-ORBDebugLevel 1 -DCPSConfigFile sub_rtps.ini" . $pub_sub_security_opts);
+$test->process("publisher", "publisher", "-ORBDebugLevel 1 -DCPSConfigFile". $pub_ini . $pub_sub_security_opts);
+$test->process("subscriber", "subscriber", "-ORBDebugLevel 1 -DCPSConfigFile" . $sub_ini . $pub_sub_security_opts);
 
 if ($test->flag('join')) {
     $test->start_process("relay2");

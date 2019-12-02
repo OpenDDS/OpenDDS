@@ -10,7 +10,7 @@
 
 #include <sstream>
 
-const long  TEST_DOMAIN   = 911;
+const long  TEST_DOMAIN   = 42;
 const char* TEST_TOPIC    = "foo";
 const char* TEST_TOPIC_TYPE     = "foo";
 const ACE_TCHAR* reader_address_str = ACE_TEXT("localhost:0");

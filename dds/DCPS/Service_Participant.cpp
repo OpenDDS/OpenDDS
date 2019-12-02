@@ -200,6 +200,7 @@ Service_Participant::Service_Participant()
     bidir_giop_(true),
     monitor_enabled_(false),
     shut_down_(false),
+    shutdown_listener_(0),
     default_configuration_file_(ACE_TEXT(""))
 {
   initialize();
@@ -248,6 +249,10 @@ Service_Participant::shutdown()
   // When we are already shutdown just let the shutdown be a noop
   if (shut_down_) {
     return;
+  }
+
+  if (shutdown_listener_) {
+    shutdown_listener_->notify_shutdown();
   }
 
   shut_down_ = true;
@@ -1950,6 +1955,12 @@ Service_Participant::add_discovery(Discovery_rch discovery)
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->maps_lock_);
     this->discoveryMap_[discovery->key()] = discovery;
   }
+}
+
+void
+Service_Participant::set_shutdown_listener(ShutdownListener* listener)
+{
+  shutdown_listener_ = listener;
 }
 
 const Service_Participant::RepoKeyDiscoveryMap&
