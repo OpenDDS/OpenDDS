@@ -21,11 +21,11 @@ foreach my $arg (@ARGV) {
 }
 
 my $DCPSREPO;
-my $args = '';
+my $args;
 if ($is_rtps_disc) {
-  $args .= " -DCPSConfigFile rtps_disc.ini";
+  $args = ' -DCPSConfigFile rtps_disc.ini';
 } else {
-  my $dcpsrepo_ior = "repo.ior";
+  my $dcpsrepo_ior = 'repo.ior';
   unlink $dcpsrepo_ior;
   $DCPSREPO = PerlDDS::create_process("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                       "-o $dcpsrepo_ior");

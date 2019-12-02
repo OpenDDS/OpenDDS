@@ -1,5 +1,7 @@
 // example adapted from the DCPS Specification v1.2, Annex A, Section 3
 
+#include <tao/StringSeq.pidl>
+
 @topic
 struct LocationInfo {
   @key unsigned long flight_id;

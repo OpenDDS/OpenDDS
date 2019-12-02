@@ -13,8 +13,9 @@
 
 #include <MultiTopicTestTypeSupportImpl.h>
 
-#include <sstream>
 #include <stdexcept>
+#include <string>
+#include <ostream>
 
 using namespace DDS;
 using namespace OpenDDS::DCPS;
@@ -29,13 +30,15 @@ bool operator!=(const TAO::String_Manager& a, const TAO::String_Manager& b)
   return std::strcmp(a.in(), b.in());
 }
 
+typedef unsigned SeqLen;
+
 bool sequences_are_not_equal(const Airports& a, const Airports& b)
 {
-  const unsigned len = a.length();
+  const SeqLen len = a.length();
   if (len != b.length()) {
     return true;
   }
-  for (unsigned i = 0; i < len; i++) {
+  for (SeqLen i = 0; i < len; ++i) {
     if (strcmp(a[i], b[i])) {
       return true;
     }
@@ -127,6 +130,9 @@ private:
 #  define ENUM_WRAPPER(TYPE, MEMBER) (MEMBER)
 
 #elif defined(CPP11_MAPPING)
+
+typedef size_t SeqLen;
+
 template <typename T>
 bool sequences_are_not_equal(const T& a, const T& b)
 {
@@ -144,7 +150,7 @@ using ResultingWrapper = Resulting;
 #endif
 
 template <typename T>
-size_t get_sequence_length(T& seq)
+SeqLen get_sequence_length(const T& seq)
 {
 #ifdef CLASSIC_MAPPING
   return seq.length();
@@ -154,7 +160,7 @@ size_t get_sequence_length(T& seq)
 }
 
 template <typename T>
-void set_sequence_length(T& seq, size_t length)
+void set_sequence_length(T& seq, SeqLen length)
 {
 #ifdef CLASSIC_MAPPING
   seq.length(length);
@@ -225,7 +231,7 @@ std::ostream& operator<<(std::ostream& os, const MiscUnion& value)
 template <typename T>
 bool arrays_are_not_equal(const T* a, const T* b, size_t length)
 {
-  for (size_t i = 0; i < length; i++) {
+  for (size_t i = 0; i < length; ++i) {
     if (a[i] != b[i]) {
       return true;
     }
@@ -236,7 +242,7 @@ bool arrays_are_not_equal(const T* a, const T* b, size_t length)
 template <typename T>
 void print_array(std::ostream& os, const T* array, size_t length)
 {
-  for (size_t i = 0; i < length; i++) {
+  for (size_t i = 0; i < length; ++i) {
     if (i) {
       os << ", ";
     }
@@ -246,7 +252,7 @@ void print_array(std::ostream& os, const T* array, size_t length)
 
 template <typename T>
 void print_sequence(std::ostream& os, const T& seq) {
-  for (size_t i = 0; i < get_sequence_length(seq); i++) {
+  for (SeqLen i = 0; i < get_sequence_length(seq); ++i) {
     if (i) {
       os << ", ";
     }
@@ -300,13 +306,12 @@ const Duration_t max_wait = {10, 0};
 void check_rc(ReturnCode_t ret, const char* message, const char* extra_message = 0)
 {
   if (ret != RETCODE_OK) {
-    std::ostringstream oss;
-    oss << "Failed to " << message;
+    std::string msg = OPENDDS_STRING("Failed to") + message;
     if (extra_message) {
-      oss << ' ' << extra_message;
+      msg += ' ' + extra_message;
     }
-    oss << ": " << retcode_to_string(ret);
-    throw std::runtime_error(oss.str());
+    msg += ": " + retcode_to_string(ret);
+    throw std::runtime_error(msg);
   }
 }
 
@@ -489,14 +494,14 @@ bool run_multitopic_test(const Publisher_var& pub, const Subscriber_var& sub)
 
     mi.departure_date() = 299;
     mi.more() = "Shouldn't see this";
-    for (unsigned i = 0; i < even_more_length; i++) {
+    for (unsigned i = 0; i < even_more_length; ++i) {
       mi.even_more()[i] = i;
     }
     check_rc(midw->write(mi, HANDLE_NIL), "write first mi");
 
     mi.departure_date() = 103;
     mi.more() = "Extra info for all flights departing on 103";
-    for (unsigned i = 0; i < even_more_length; i++) {
+    for (unsigned i = 0; i < even_more_length; ++i) {
       mi.even_more()[i] = i + 1;
     }
     check_rc(midw->write(mi, HANDLE_NIL), "write second mi");
@@ -570,11 +575,9 @@ bool run_multitopic_test(const Publisher_var& pub, const Subscriber_var& sub)
       Resulting resulting_value;
       ReturnCode_t rc = res_dr->get_key_value(resulting_value, HANDLE_NIL);
       if (rc != RETCODE_BAD_PARAMETER) {
-        std::ostringstream oss;
-        oss
-          << "Expected get_key_value for HANDLE_NIL to return bad param, but it returned "
-          << retcode_to_string(rc);
-        throw std::runtime_error(oss.str());
+        throw std::runtime_error(
+          std::string("Expected get_key_value for HANDLE_NIL to return bad param, but it returned ") +
+          retcode_to_string(rc));
       }
     }
 
@@ -584,11 +587,9 @@ bool run_multitopic_test(const Publisher_var& pub, const Subscriber_var& sub)
     {
       ReturnCode_t ret = res_dr->read_w_condition(data, info, LENGTH_UNLIMITED, rc);
       if (ret != RETCODE_NO_DATA) {
-        std::ostringstream oss;
-        oss
-          << "Expected read_w_condition to return no data, but it returned "
-          << retcode_to_string(ret);
-        throw std::runtime_error(oss.str());
+        throw std::runtime_error(
+          std::string("Expected read_w_condition to return no data, but it returned ") +
+          retcode_to_string(ret));
       }
     }
     dr->delete_readcondition(rc);
@@ -621,7 +622,8 @@ bool run_multitopic_test(const Publisher_var& pub, const Subscriber_var& sub)
   ResultingDataReader_var res_dr = ResultingDataReader::_narrow(dr);
   ResultingSeq data;
   SampleInfoSeq info;
-  check_rc(res_dr->read_w_condition(data, info, LENGTH_UNLIMITED, rc), "");
+  check_rc(res_dr->read_w_condition(data, info, LENGTH_UNLIMITED, rc),
+    "final read_w_condition on Resulting reader");
   dr->delete_readcondition(rc);
 
   return !(info[0].valid_data || info[0].instance_state != NOT_ALIVE_DISPOSED_INSTANCE_STATE);

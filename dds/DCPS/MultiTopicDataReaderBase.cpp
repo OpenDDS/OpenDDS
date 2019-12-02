@@ -250,7 +250,8 @@ void MultiTopicDataReaderBase::data_available(DDS::DataReader_ptr reader)
       " could not be cast to DataReaderImpl.");
   }
   DataReaderImpl::GenericBundle gen;
-  ReturnCode_t rc = dri->read_generic(gen, NOT_READ_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE, false);
+  const ReturnCode_t rc = dri->read_generic(gen,
+    NOT_READ_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE, false);
   if (rc == RETCODE_NO_DATA) {
     return;
   } else if (rc != RETCODE_OK) {

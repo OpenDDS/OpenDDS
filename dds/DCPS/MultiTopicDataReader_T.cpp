@@ -105,11 +105,9 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::join(
       ReturnCode_t ret = other_dri->read_instance_generic(other_data.ptr_,
         info, ih, READ_SAMPLE_STATE, ANY_VIEW_STATE, ALIVE_INSTANCE_STATE);
       if (ret != RETCODE_OK && ret != RETCODE_NO_DATA) {
-        std::ostringstream ss;
-        ss
-          << "In join(), incoming DataReader for " << OPENDDS_STRING(other_topic)
-          << " read_instance_generic: " << retcode_to_string(ret);
-        throw std::runtime_error(ss.str());
+        throw std::runtime_error(
+         OPENDDS_STRING("In join(), incoming DataReader for ") + OPENDDS_STRING(other_topic) +
+         " read_instance_generic: " + retcode_to_string(ret));
       } else if (ret == DDS::RETCODE_OK) {
         resulting.push_back(prototype);
         resulting.back().combine(SampleWithInfo(other_topic.in(), info));
