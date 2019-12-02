@@ -310,7 +310,7 @@ void check_rc(ReturnCode_t ret, const char* message, const char* extra_message =
     if (extra_message) {
       msg += std::string(" ") + extra_message;
     }
-    msg += ": " + retcode_to_string(ret);
+    msg += std::string(": ") + retcode_to_string(ret);
     throw std::runtime_error(msg);
   }
 }
