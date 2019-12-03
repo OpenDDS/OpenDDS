@@ -1,5 +1,8 @@
 #include "topic_keys.h"
 
+#include "be_extern.h"
+#include "dds_generator.h"
+
 #include <idl_defines.h>
 #include <ast_structure.h>
 #include <ast_field.h>
@@ -8,8 +11,6 @@
 #include <ast_array.h>
 
 #include <string>
-
-#include "be_extern.h"
 
 TopicKeys::RootType TopicKeys::root_type(AST_Type* type)
 {
@@ -191,18 +192,17 @@ TopicKeys::Iterator& TopicKeys::Iterator::operator++()
       if (!struct_root) {
         throw Error(root_, "Invalid Key Iterator");
       }
-      const ACE_CDR::ULong field_count = struct_root->nfields();
+      const Fields fields(struct_root);
+      const Fields::Iterator fields_end = fields.end();
+
       // If a nested struct marked as a key has no keys, all the fields are
       // implied to be keys (expect those marked with @key(FALSE)).
       if (pos_ == 0) {
         if (level_ > 0) {
           implied_keys_ = true;
-          for (unsigned i = 0; i < field_count && implied_keys_; ++i) {
-            AST_Field** field_ptrptr;
-            struct_root->field(field_ptrptr, i);
-            AST_Field* field = *field_ptrptr;
+          for (Fields::Iterator i = fields.begin(); i != fields_end && implied_keys_; ++i) {
             bool key_annotation_value;
-            const bool has_key_annotation = be_global->check_key(field, key_annotation_value);
+            const bool has_key_annotation = be_global->check_key(*i, key_annotation_value);
             if (has_key_annotation && key_annotation_value) {
               implied_keys_ = false;
             }
@@ -212,28 +212,21 @@ TopicKeys::Iterator& TopicKeys::Iterator::operator++()
         }
       }
 
-      for (; pos_ < field_count; ++pos_) {
-        AST_Field** field_ptrptr;
-        struct_root->field(field_ptrptr, pos_);
-        AST_Field* field = *field_ptrptr;
+      for (Fields::Iterator i = fields[pos_]; i != fields_end; ++i) {
         bool key_annotation_value;
-        const bool has_key_annotation = be_global->check_key(field, key_annotation_value);
+        const bool has_key_annotation = be_global->check_key(*i, key_annotation_value);
         const bool implied_key = implied_keys_ && !(has_key_annotation && !key_annotation_value);
         if (key_annotation_value || implied_key) {
-          child_ = new Iterator(field, this);
+          child_ = new Iterator(*i, this);
           Iterator& child = *child_;
           if (child == end_value()) {
             delete child_;
             child_ = 0;
-            if (implied_key) {
-              throw Error(field,
-                "field is implicitly marked as key, but does not contain any keys.");
-            } else {
-              throw Error(field,
-                "field is explictly marked as key, but does not contain any keys.");
-            }
+            throw Error(*i, std::string("field is ") + (implied_key ? "implicitly" : "explicitly") +
+              " marked as key, but does not contain any keys.");
           } else {
             current_value_ = *child;
+            pos_ = i.pos();
             return *this;
           }
         }
@@ -284,7 +277,7 @@ TopicKeys::Iterator& TopicKeys::Iterator::operator++()
         return *this;
       } else {
         throw Error(union_node, "union type is marked as key, "
-          "but it's discriminator isn't");
+          "but its discriminator isn't");
       }
     }
 
@@ -352,9 +345,7 @@ void TopicKeys::Iterator::path_i(std::stringstream& ss)
     if (!struct_root) {
       throw Error(root_, error_msg);
     }
-    AST_Field** field_ptrptr;
-    struct_root->field(field_ptrptr, child_ ? pos_ : pos_ - 1);
-    AST_Field* field = *field_ptrptr;
+    AST_Field* field = *Fields(struct_root)[child_ ? pos_ : pos_ - 1];
     ss << (level_ ? "." : "") << field->local_name()->get_string();
   } else if (root_type_ == UnionType) {
     // Nothing

@@ -250,21 +250,20 @@ dds_visitor::visit_structure(AST_Structure* node)
     }
   }
 
-  size_t nfields = node->nfields();
-  vector<AST_Field*> fields;
-  fields.reserve(nfields);
-  for (CORBA::ULong i = 0; i < nfields; ++i) {
-    AST_Field** f;
-    node->field(f, i);
-    if (!field_check_anon(*f)) {
+  vector<AST_Field*> field_vec;
+  field_vec.reserve(node->nfields());
+  const Fields fields(node);
+  const Fields::Iterator fields_end = fields.end();
+  for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
+    if (!field_check_anon(*i)) {
       error_ = true;
       return -1;
     }
-    fields.push_back(*f);
+    field_vec.push_back(*i);
   }
 
   if (!java_ts_only_) {
-    error_ |= !gen_target_.gen_struct(node, node->name(), fields,
+    error_ |= !gen_target_.gen_struct(node, node->name(), field_vec,
                                       node->size_type(), node->repoID());
   }
 
@@ -397,29 +396,23 @@ dds_visitor::visit_union(AST_Union* node)
   const char* name = node->local_name()->get_string();
 
   BE_Comment_Guard g("UNION", name);
-
   ACE_UNUSED_ARG(g);
 
   vector<AST_UnionBranch*> branches;
-
-  size_t nfields = node->nfields();
-
-  branches.reserve(nfields);
-
-  for (CORBA::ULong i = 0; i < nfields; ++i) {
-    AST_Field** f;
-    node->field(f, i);
-    if (!field_check_anon(*f)) {
+  branches.reserve(node->nfields());
+  const Fields fields(node);
+  const Fields::Iterator fields_end = fields.end();
+  for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
+    if (!field_check_anon(*i)) {
       error_ = true;
       return -1;
     }
 
-    AST_UnionBranch* ub = AST_UnionBranch::narrow_from_decl(*f);
-
+    AST_UnionBranch* ub = dynamic_cast<AST_UnionBranch*>(*i);
     if (!ub) {
-      std::cerr << "ERROR - expected union to contain UnionBranches\n";
+      idl_global->err()->misc_error("expected union to only contain UnionBranches", ub);
       error_ = true;
-      return 0;
+      return -1;
     }
 
     branches.push_back(ub);

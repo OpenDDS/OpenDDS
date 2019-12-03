@@ -5,6 +5,10 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include "be_extern.h"
+#include "be_util.h"
+#include "../Version.h"
+
 #include <tao/Version.h>
 
 #include <global_extern.h>
@@ -15,10 +19,6 @@
 
 #include <iostream>
 #include <iomanip>
-
-#include "be_extern.h"
-#include "be_util.h"
-#include "../Version.h"
 
 void
 BE_version()
