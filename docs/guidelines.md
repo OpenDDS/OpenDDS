@@ -305,8 +305,8 @@ For more information, see [the Doxygen manual](http://www.doxygen.nl/manual/).
 
 ### Preprocessor
 
-- Prefer `#ifdef ...` and `#ifndef ...` to `#if defined ...` and
-  `#if !defined ...` when testing if a single macro is defined.
+- Prefer `#ifdef` and `#ifndef` to `#if defined` and `#if !defined` when
+  testing if a single macro is defined.
 - As stated before, preprocessor macros visible to user code must begin with
   `OPENDDS_`.
 - Ignoring the header guard if there is one, preprocessor statements should be
@@ -326,25 +326,26 @@ For more information, see [the Doxygen manual](http://www.doxygen.nl/manual/).
 
 #### Includes
 
-Includes should be ordered based on their hierarchy from local to system as a
-safeguard against headers being dependant on a particular order. For most cases
-in OpenDDS, it can be generalized as the following:
+As a safeguard against headers being dependant on a particular order, includes
+should be ordered based on a hierarchy going from local headers to system
+headers. This order can be generalized as the following:
 
 1. The corresponding header to the source file (`Foo.h` if we were in
    `Foo.cpp`).
 2. Headers from the local project.
-3. Headers from external OpenDDS based-libraries.
-4. Headers from OpenDDS.
-5. Headers from external TAO based-libraries.
+3. Headers from external OpenDDS-based libraries.
+4. User API OpenDDS Headers.
+4. Internal API OpenDDS Headers.
+5. Headers from external TAO-based libraries.
 6. Headers from TAO.
-7. Headers from external ACE based-libraries.
+7. Headers from external ACE-based libraries.
 8. Headers from ACE.
 9. Headers from external non-ACE-based libraries.
-10. Headers from system and C and C++ standard libraries.
+10. Headers from system and C++ standard libraries.
 
 Headers should only use local includes (`#include "foo/Foo.h"`) if the header
 is relative to the file. Otherwise system includes (`#include <foo/Foo.h>`)
-should be preferred to hint that the header is in the include path.
+should be used to make it clear that the header is on the system include path.
 
 ### Time
 
