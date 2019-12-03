@@ -1946,8 +1946,7 @@ DomainParticipantImpl::is_clean() const
   }
 
   if (!TheTransientKludge->is_enabled()) {
-    // There are builtin-in topics and builtin topic subscribers
-    // left.
+    // There are built-in topics and built-in topic subscribers left.
 
     sub_is_clean = !sub_is_clean ? subscribers_.size() == 1 : true;
     topics_is_clean = !topics_is_clean ? non_bit_topic_count == 0 : true;
