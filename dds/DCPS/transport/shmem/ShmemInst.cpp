@@ -63,7 +63,7 @@ ShmemInst::dump_to_str() const
 }
 
 size_t
-ShmemInst::populate_locator(OpenDDS::DCPS::TransportLocator& info) const
+ShmemInst::populate_locator(OpenDDS::DCPS::TransportLocator& info, ConnectionInfoFlags) const
 {
   info.transport_type = "shmem";
 

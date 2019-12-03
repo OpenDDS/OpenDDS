@@ -32,6 +32,8 @@ public:
         typename DataCollector<DataType>::OnFull type =
           DataCollector<DataType>::KeepOldest);
 
+  Stats(const Stats&);
+
   /// Default bitwise copy is sufficient.
 
   /// Assignment operator
@@ -81,6 +83,19 @@ Stats<DataType>::Stats(
   typename DataCollector<DataType>::OnFull type) : DataCollector<DataType>(amount, type)
 {
   this->reset();
+}
+
+template<typename DataType>
+inline
+Stats<DataType>::Stats(const Stats<DataType>& v) : DataCollector<DataType>(v),
+  n_(v.n_),
+  minimum_(v.minimum_),
+  maximum_(v.maximum_),
+  an_(v.an_),
+  bn_(v.bn_),
+  cn_(v.cn_),
+  variance_(v.variance_)
+{
 }
 
 template<typename DataType>

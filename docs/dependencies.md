@@ -102,16 +102,13 @@ OpenDDS has a [CMake `FindPackage` module included](../cmake). See
 without the need to use MPC in your application.
 
 CMake is required to build Google Test for OpenDDS tests if a prebuilt Google
-Test is not found or provided. You can forgo having to have CMake by passing
-`--no-tests` to the OpenDDS configure script or building and/or installing
-Google Test separately.
+Test is not found or provided.
 
 See [`../tests/gtest_setup.txt`](../tests/gtest_setup.txt) for details.
 
 ### Google Test
 
-Google Test is required for OpenDDS tests. You can forgo this dependency by
-passing `--no-tests` to the OpenDDS configure script.
+Google Test is required for OpenDDS tests.
 
 Google Test is a git submodule that will be downloaded automatically if the
 repository was recursively cloned or submodules were initialized separately.

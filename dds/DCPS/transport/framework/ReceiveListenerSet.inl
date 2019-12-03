@@ -67,8 +67,8 @@ ReceiveListenerSet::remove(RepoId subscriber_id)
   GuardType guard(this->lock_);
 
   if (unbind(map_, subscriber_id) != 0) {
-    ACE_ERROR_RETURN((LM_DEBUG,
-                      "(%P|%t) subscriber_id (%C) not found in map_.\n",
+    ACE_ERROR_RETURN((LM_ERROR,
+                      "(%P|%t) ERROR: subscriber_id (%C) not found in map_.\n",
                       LogGuid(subscriber_id).c_str()),
                      -1);
   }

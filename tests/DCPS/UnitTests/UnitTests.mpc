@@ -62,6 +62,14 @@ project(*RtpsFragmentation): dcpsexe, dcps_test, dcps_rtps_udp {
   }
 }
 
+project(*RtpsDuration): dcps_rtpsexe, dcps_test {
+  exename = *
+
+  Source_Files {
+    RtpsDuration.cpp
+  }
+}
+
 project(*GuidGenerator): dcps_rtpsexe, dcps_test {
   exename   = *
 

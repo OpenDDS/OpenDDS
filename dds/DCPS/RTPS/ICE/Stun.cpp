@@ -5,6 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
+#ifdef OPENDDS_SECURITY
+
 #include "Stun.h"
 
 #include "dds/DCPS/security/framework/SecurityRegistry.h"
@@ -14,8 +16,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace STUN {
-
-#ifdef OPENDDS_SECURITY
 
 ACE_UINT16 Attribute::length() const
 {
@@ -604,13 +604,13 @@ void Message::compute_message_integrity(const std::string& password, unsigned ch
 {
   ACE_Message_Block* block = this->block->duplicate();
   block->rd_ptr(block->base());
-  DCPS::Serializer serializer(block, true);
+  DCPS::Serializer serializer(block, DCPS::Serializer::SWAP_BE);
 
   // Write the length and resize for hashing.
   block->wr_ptr(block->base() + 2);
   ACE_UINT16 message_length = length_for_message_integrity();
   serializer << message_length;
-  block->wr_ptr(block->base() + 20 + length_for_message_integrity() - 24);
+  block->wr_ptr(block->base() + HEADER_SIZE + length_for_message_integrity() - 24);
 
   // Compute the SHA1.
   TheSecurityRegistry->fix_empty_default()->get_utility()->hmac(message_integrity, block->rd_ptr(), block->length(), password);
@@ -693,10 +693,10 @@ ACE_UINT32 Message::compute_fingerprint() const
 {
   ACE_Message_Block* block = this->block->duplicate();
   block->rd_ptr(block->base());
-  DCPS::Serializer serializer(block, true);
+  DCPS::Serializer serializer(block, DCPS::Serializer::SWAP_BE);
 
   // Resize for hashing.
-  block->wr_ptr(block->base() + 20 + length() - 8);
+  block->wr_ptr(block->base() + HEADER_SIZE + length() - 8);
 
   // Compute the CRC-32
   ACE_UINT32 crc = ACE::crc32(block->rd_ptr(), block->length());
@@ -849,9 +849,8 @@ bool operator<<(DCPS::Serializer& serializer, const Message& message)
   return true;
 }
 
-#endif /* OPENDDS_SECURITY */
-
 } // namespace STUN
 } // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
+#endif /* OPENDDS_SECURITY */

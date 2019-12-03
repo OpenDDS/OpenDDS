@@ -193,6 +193,18 @@ Discovery::Config::~Config()
 {
 }
 
+void Discovery::update_publication_locators(DDS::DomainId_t,
+                                            const RepoId&,
+                                            const RepoId&,
+                                            const TransportLocatorSeq&)
+{}
+
+void Discovery::update_subscription_locators(DDS::DomainId_t,
+                                             const RepoId&,
+                                             const RepoId&,
+                                             const TransportLocatorSeq&)
+{}
+
 } // namespace DCPS
 } // namespace OpenDDS
 

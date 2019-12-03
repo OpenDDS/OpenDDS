@@ -95,6 +95,18 @@ bool operator>=(const DDS::Time_t& t1, const DDS::Time_t& t2);
 ACE_INLINE OpenDDS_Dcps_Export
 DDS::Time_t operator-(const DDS::Time_t& t1, const DDS::Time_t& t2);
 
+ACE_INLINE OpenDDS_Dcps_Export
+ACE_UINT32 uint32_fractional_seconds_to_nanoseconds(ACE_UINT32 fraction);
+
+ACE_INLINE OpenDDS_Dcps_Export
+ACE_UINT32 nanoseconds_to_uint32_fractional_seconds(ACE_UINT32 fraction);
+
+ACE_INLINE OpenDDS_Dcps_Export
+ACE_UINT32 uint32_fractional_seconds_to_microseconds(ACE_UINT32 fraction);
+
+ACE_INLINE OpenDDS_Dcps_Export
+ACE_UINT32 microseconds_to_uint32_fractional_seconds(ACE_UINT32 fraction);
+
 } // namespace DCPS
 } // namespace OpenDDS
 

@@ -20,6 +20,7 @@
 #include "dds/DCPS/PeriodicTask.h"
 #include "dds/DCPS/SporadicTask.h"
 #include "dds/DCPS/JobQueue.h"
+#include "dds/DCPS/NetworkConfigMonitor.h"
 
 #include "RtpsCoreC.h"
 #include "Sedp.h"
@@ -140,11 +141,6 @@ public:
   DCPS::AuthState lookup_participant_auth_state(const DCPS::RepoId& id) const;
 #endif
 
-  void remove_send_addr(const ACE_INET_Addr& addr);
-  void add_send_addr(const ACE_INET_Addr& addr);
-  void remove_sedp_unicast(const ACE_INET_Addr& addr);
-  void add_sedp_unicast(const ACE_INET_Addr& addr);
-
   DCPS::RcHandle<DCPS::JobQueue> job_queue() const { return tport_->job_queue_; }
 
   u_short get_spdp_port() const { return tport_ ? tport_->uni_port_ : 0; }
@@ -181,7 +177,6 @@ private:
   // Participant:
   const DDS::DomainId_t domain_;
   DCPS::RepoId guid_;
-  DCPS::LocatorSeq sedp_unicast_, sedp_multicast_;
 
   void data_received(const DataSubmessage& data, const ParameterList& plist, const ACE_INET_Addr& from);
 
@@ -197,7 +192,7 @@ private:
   DCPS::ParticipantBuiltinTopicDataDataReaderImpl* part_bit();
 #endif /* DDS_HAS_MINIMUM_BIT */
 
-  struct SpdpTransport : public DCPS::RcEventHandler {
+  struct SpdpTransport : public virtual DCPS::RcEventHandler, public virtual DCPS::NetworkConfigListener {
     typedef size_t WriteFlags;
     static const WriteFlags SEND_TO_LOCAL = (1 << 0);
     static const WriteFlags SEND_TO_RELAY = (1 << 1);
@@ -213,12 +208,19 @@ private:
     void write_i(WriteFlags flags);
     void write_i(const DCPS::RepoId& guid, WriteFlags flags);
     void send(WriteFlags flags);
+    void send(const ACE_INET_Addr& addr);
     void close();
     void dispose_unregister();
     bool open_unicast_socket(u_short port_common, u_short participant_id);
     void acknowledge();
-    void remove_send_addr(const ACE_INET_Addr& addr);
-    void insert_send_addr(const ACE_INET_Addr& addr);
+
+    void join_multicast_group(const DCPS::NetworkInterface& nic,
+                              bool all_interfaces = false);
+    void leave_multicast_group(const DCPS::NetworkInterface& nic);
+    void add_address(const DCPS::NetworkInterface& interface,
+                     const ACE_INET_Addr& address);
+    void remove_address(const DCPS::NetworkInterface& interface,
+                        const ACE_INET_Addr& address);
 
     Spdp* outer_;
     Header hdr_;
@@ -226,9 +228,13 @@ private:
     DCPS::SequenceNumber seq_;
     DCPS::TimeDuration lease_duration_;
     u_short uni_port_;
+    u_short mc_port_;
     ACE_SOCK_Dgram unicast_socket_;
-    ACE_INET_Addr default_multicast_;
+    OPENDDS_STRING multicast_interface_;
+    ACE_INET_Addr multicast_address_;
+    OPENDDS_STRING multicast_address_str_;
     ACE_SOCK_Dgram_Mcast multicast_socket_;
+    OPENDDS_SET(OPENDDS_STRING) joined_interfaces_;
     OPENDDS_SET(ACE_INET_Addr) send_addrs_;
     ACE_Message_Block buff_, wbuff_;
     DCPS::ReactorTask reactor_task_;
@@ -247,7 +253,32 @@ private:
     DCPS::RcHandle<SpdpPeriodic> relay_sender_;
     void send_relay_beacon(const DCPS::MonotonicTimePoint& now);
     DCPS::RcHandle<SpdpPeriodic> relay_beacon_;
+    bool network_is_unreachable_;
   } *tport_;
+
+  struct ChangeMulticastGroup : public DCPS::JobQueue::Job {
+    enum CmgAction {CMG_JOIN, CMG_LEAVE};
+
+    ChangeMulticastGroup(DCPS::RcHandle<SpdpTransport> tport,
+                         const DCPS::NetworkInterface& nic, CmgAction action)
+      : tport_(tport)
+      , nic_(nic)
+      , action_(action)
+    {}
+
+    void execute()
+    {
+      if (action_ == CMG_JOIN) {
+        tport_->join_multicast_group(nic_);
+      } else {
+        tport_->leave_multicast_group(nic_);
+      }
+    }
+
+    DCPS::RcHandle<SpdpTransport> tport_;
+    DCPS::NetworkInterface nic_;
+    CmgAction action_;
+  };
 
   ACE_Event_Handler_var eh_; // manages our refcount on tport_
   bool eh_shutdown_;
@@ -281,13 +312,13 @@ private:
   typedef std::multimap<DCPS::MonotonicTimePoint, DCPS::RepoId> TimeQueue;
   TimeQueue auth_deadlines_;
   TimeQueue auth_resends_;
-#endif
 
   void start_ice(ICE::Endpoint* endpoint, DCPS::RepoId remote, const BuiltinEndpointSet_t& avail, const ICE::AgentInfo& agent_info);
   void stop_ice(ICE::Endpoint* endpoint, DCPS::RepoId remote, const BuiltinEndpointSet_t& avail);
 
   void purge_auth_deadlines(DiscoveredParticipantIter iter);
   void purge_auth_resends(DiscoveredParticipantIter iter);
+#endif
 
   friend class ::DDS_TEST;
 };

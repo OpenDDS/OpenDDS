@@ -25,10 +25,37 @@
 
 namespace RtpsRelay {
 
-RelayHandler::RelayHandler(ACE_Reactor* reactor,
-                           const AssociationTable& association_table)
+#ifdef OPENDDS_SECURITY
+namespace {
+  OpenDDS::STUN::Message make_bad_request_error_response(const OpenDDS::STUN::Message& a_message,
+                                                         const std::string& a_reason)
+  {
+    OpenDDS::STUN::Message response;
+    response.class_ = OpenDDS::STUN::ERROR_RESPONSE;
+    response.method = a_message.method;
+    memcpy(response.transaction_id.data, a_message.transaction_id.data, sizeof(a_message.transaction_id.data));
+    response.append_attribute(OpenDDS::STUN::make_error_code(OpenDDS::STUN::BAD_REQUEST, a_reason));
+    response.append_attribute(OpenDDS::STUN::make_fingerprint());
+    return response;
+  }
+
+  OpenDDS::STUN::Message make_unknown_attributes_error_response(const OpenDDS::STUN::Message& a_message,
+                                                                const std::vector<OpenDDS::STUN::AttributeType>& a_unknown_attributes)
+  {
+    OpenDDS::STUN::Message response;
+    response.class_ = OpenDDS::STUN::ERROR_RESPONSE;
+    response.method = a_message.method;
+    memcpy(response.transaction_id.data, a_message.transaction_id.data, sizeof(a_message.transaction_id.data));
+    response.append_attribute(OpenDDS::STUN::make_error_code(OpenDDS::STUN::UNKNOWN_ATTRIBUTE, "Unknown Attributes"));
+    response.append_attribute(OpenDDS::STUN::make_unknown_attributes(a_unknown_attributes));
+    response.append_attribute(OpenDDS::STUN::make_fingerprint());
+    return response;
+  }
+}
+#endif
+
+RelayHandler::RelayHandler(ACE_Reactor* reactor)
   : ACE_Event_Handler(reactor)
-  , association_table_(association_table)
   , bytes_received_(0)
   , messages_received_(0)
   , bytes_sent_(0)
@@ -38,10 +65,10 @@ RelayHandler::RelayHandler(ACE_Reactor* reactor,
 
 int RelayHandler::open(const ACE_INET_Addr& local)
 {
-  relay_address_ = addr_to_string(local);
+  relay_address_ = local;
 
   if (socket_.open(local) != 0) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::open failed to open socket on '%C'\n", relay_address_.c_str()));
+    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::open failed to open socket on '%C'\n", addr_to_string(relay_address_).c_str()));
     return -1;
   }
   if (socket_.enable(ACE_NONBLOCK) != 0) {
@@ -111,11 +138,10 @@ int RelayHandler::handle_output(ACE_HANDLE)
       buffers[idx].iov_len = block->length();
     }
 
-    ACE_INET_Addr addr(out.first.c_str());
-    const auto bytes = socket_.send(buffers, idx, addr, 0);
+    const auto bytes = socket_.send(buffers, idx, out.first, 0);
 
     if (bytes < 0) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::handle_output failed to send to %C: %m\n", out.first.c_str()));
+      ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::handle_output failed to send to %C: %m\n", addr_to_string(out.first).c_str()));
     } else {
       bytes_sent_ += bytes;
       ++messages_sent_;
@@ -131,7 +157,7 @@ int RelayHandler::handle_output(ACE_HANDLE)
   return 0;
 }
 
-void RelayHandler::enqueue_message(const std::string& addr, const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg)
+void RelayHandler::enqueue_message(const ACE_INET_Addr& addr, const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, outgoing_mutex_);
 
@@ -154,7 +180,8 @@ VerticalHandler::VerticalHandler(ACE_Reactor* reactor,
                                  DDS::DomainId_t application_domain,
                                  const OpenDDS::DCPS::RepoId& application_participant_guid,
                                  const CRYPTO_TYPE& crypto)
-  : RelayHandler(reactor, association_table)
+  : RelayHandler(reactor)
+  , association_table_(association_table)
   , responsible_relay_writer_(responsible_relay_writer)
   , responsible_relay_reader_(responsible_relay_reader)
   , relay_addresses_(relay_addresses)
@@ -185,9 +212,8 @@ void VerticalHandler::process_message(const ACE_INET_Addr& remote,
     return;
   }
 
-  const auto addr_str = addr_to_string(remote);
-  guid_addr_map_[src_guid].insert(addr_str);
-  const GuidAddr ga(src_guid, addr_str);
+  guid_addr_map_[src_guid].insert(remote);
+  const GuidAddr ga(src_guid, remote);
 
   // Compute the new expiration time for this SPDP client.
   const auto expiration = now + lifespan_;
@@ -450,13 +476,12 @@ void VerticalHandler::unregister_relay_addresses(const OpenDDS::DCPS::RepoId& gu
   }
 }
 
-HorizontalHandler::HorizontalHandler(ACE_Reactor* reactor,
-                                     const AssociationTable& association_table)
-  : RelayHandler(reactor, association_table)
+HorizontalHandler::HorizontalHandler(ACE_Reactor* reactor)
+  : RelayHandler(reactor)
   , vertical_handler_(nullptr)
 {}
 
-void HorizontalHandler::enqueue_message(const std::string& addr,
+void HorizontalHandler::enqueue_message(const ACE_INET_Addr& addr,
                                         const GuidSet& guids,
                                         const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg)
 {
@@ -530,12 +555,11 @@ SpdpHandler::SpdpHandler(ACE_Reactor* reactor,
                          const ACE_INET_Addr& application_participant_addr)
 : VerticalHandler(reactor, relay_addresses, association_table, responsible_relay_writer, responsible_relay_reader, lifespan, rtps_discovery, application_domain, application_participant_guid , crypto)
 , application_participant_addr_(application_participant_addr)
-, application_participant_addr_str_(addr_to_string(application_participant_addr))
 {}
 
-std::string SpdpHandler::extract_relay_address(const RelayAddresses& relay_addresses) const
+ACE_INET_Addr SpdpHandler::extract_relay_address(const RelayAddresses& relay_addresses) const
 {
-  return relay_addresses.spdp_relay_address();
+  return ACE_INET_Addr(relay_addresses.spdp_relay_address().c_str());
 }
 
 bool SpdpHandler::do_normal_processing(const ACE_INET_Addr& remote,
@@ -579,7 +603,7 @@ bool SpdpHandler::do_normal_processing(const ACE_INET_Addr& remote,
   // SPDP message is from a client.
   if (to.empty() || to.count(application_participant_guid_) != 0) {
     // Forward to the application participant.
-    enqueue_message(application_participant_addr_str_, msg);
+    enqueue_message(application_participant_addr_, msg);
     max_fan_out(1);
   }
 
@@ -633,12 +657,11 @@ SedpHandler::SedpHandler(ACE_Reactor* reactor,
                          const ACE_INET_Addr& application_participant_addr)
 : VerticalHandler(reactor, relay_addresses, association_table, responsible_relay_writer, responsible_relay_reader, lifespan, rtps_discovery, application_domain, application_participant_guid, crypto)
   , application_participant_addr_(application_participant_addr)
-  , application_participant_addr_str_(addr_to_string(application_participant_addr))
 {}
 
-std::string SedpHandler::extract_relay_address(const RelayAddresses& relay_addresses) const
+ACE_INET_Addr SedpHandler::extract_relay_address(const RelayAddresses& relay_addresses) const
 {
-  return relay_addresses.sedp_relay_address();
+  return ACE_INET_Addr(relay_addresses.sedp_relay_address().c_str());
 }
 
 bool SedpHandler::do_normal_processing(const ACE_INET_Addr& remote,
@@ -682,7 +705,7 @@ bool SedpHandler::do_normal_processing(const ACE_INET_Addr& remote,
   // SEDP message is from a client.
   if (to.empty() || to.count(application_participant_guid_) != 0) {
     // Forward to the application participant.
-    enqueue_message(application_participant_addr_str_, msg);
+    enqueue_message(application_participant_addr_, msg);
     max_fan_out(1);
   }
   return true;
@@ -702,9 +725,80 @@ DataHandler::DataHandler(ACE_Reactor* reactor,
 : VerticalHandler(reactor, relay_addresses, association_table, responsible_relay_writer, responsible_relay_reader, lifespan, rtps_discovery, application_domain, application_participant_guid, crypto)
 {}
 
-std::string DataHandler::extract_relay_address(const RelayAddresses& relay_addresses) const
+ACE_INET_Addr DataHandler::extract_relay_address(const RelayAddresses& relay_addresses) const
 {
-  return relay_addresses.data_relay_address();
+  return ACE_INET_Addr(relay_addresses.data_relay_address().c_str());
 }
+
+#ifdef OPENDDS_SECURITY
+
+StunHandler::StunHandler(ACE_Reactor* reactor)
+  : RelayHandler(reactor)
+{}
+
+void StunHandler::process_message(const ACE_INET_Addr& remote_address,
+                                  const OpenDDS::DCPS::MonotonicTimePoint&,
+                                  const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg)
+{
+  OpenDDS::DCPS::Serializer serializer(msg.get(), OpenDDS::DCPS::Serializer::SWAP_BE);
+  OpenDDS::STUN::Message message;
+  message.block = msg.get();
+  if (!(serializer >> message)) {
+    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) VerticalHandler::process_message: WARNING Could not deserialize STUN mssage\n")));
+    return;
+  }
+
+  if (message.class_ != OpenDDS::STUN::REQUEST) {
+    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) VerticalHandler::process_message: WARNING Unknown STUN message class\n")));
+    return;
+  }
+
+  std::vector<OpenDDS::STUN::AttributeType> unknown_attributes = message.unknown_comprehension_required_attributes();
+
+  if (!unknown_attributes.empty()) {
+    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) VerticalHandler::process_message: WARNING Unknown comprehension requird attributes\n")));
+    send(remote_address, make_unknown_attributes_error_response(message, unknown_attributes));
+    return;
+  }
+
+  if (!message.has_fingerprint()) {
+    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) VerticalHandler::process_message: WARNING No FINGERPRINT attribute\n")));
+    send(remote_address, make_bad_request_error_response(message, "Bad Request: FINGERPRINT must be pesent"));
+    return;
+  }
+
+  switch (message.method) {
+  case OpenDDS::STUN::BINDING:
+    {
+      OpenDDS::STUN::Message response;
+      response.class_ = OpenDDS::STUN::SUCCESS_RESPONSE;
+      response.method = OpenDDS::STUN::BINDING;
+      memcpy(response.transaction_id.data, message.transaction_id.data, sizeof(message.transaction_id.data));
+      response.append_attribute(OpenDDS::STUN::make_mapped_address(remote_address));
+      response.append_attribute(OpenDDS::STUN::make_xor_mapped_address(remote_address));
+      response.append_attribute(OpenDDS::STUN::make_fingerprint());
+      send(remote_address, response);
+    }
+    break;
+
+  default:
+    // Unknown method.  Stop processing.
+    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) VerticalHandler::process_message: WARNING Unknown STUN method\n")));
+    send(remote_address, make_bad_request_error_response(message, "Bad Request: Unknown method"));
+    break;
+  }
+}
+
+void StunHandler::send(const ACE_INET_Addr& addr, OpenDDS::STUN::Message message)
+{
+  using namespace OpenDDS::DCPS;
+  using namespace OpenDDS::STUN;
+  Message_Block_Shared_Ptr block(new ACE_Message_Block(HEADER_SIZE + message.length()));
+  Serializer serializer(block.get(), Serializer::SWAP_BE);
+  message.block = block.get();
+  serializer << message;
+  enqueue_message(addr, block);
+}
+#endif /* OPENDDS_SECURITY */
 
 }

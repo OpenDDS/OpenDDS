@@ -35,6 +35,7 @@ public:
   bool use_multicast_;
   unsigned char ttl_;
   ACE_INET_Addr multicast_group_address_;
+  OPENDDS_STRING multicast_group_address_str_;
   OPENDDS_STRING multicast_interface_;
 
   size_t nak_depth_;
@@ -51,7 +52,7 @@ public:
   bool is_reliable() const { return true; }
   bool requires_cdr() const { return true; }
 
-  virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info) const;
+  virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info, ConnectionInfoFlags flags) const;
   const TransportBLOB* get_blob(const OpenDDS::DCPS::TransportLocatorSeq& trans_info) const;
 
   OPENDDS_STRING local_address_string() const { return local_address_config_str_; }
@@ -85,6 +86,9 @@ public:
   bool rtps_relay_only_;
   bool use_ice_;
 
+  void update_locators(const RepoId& remote_id,
+                       const TransportLocatorSeq& locators);
+
 private:
   friend class RtpsUdpType;
   template <typename T, typename U>
@@ -105,7 +109,9 @@ private:
   ACE_INET_Addr stun_server_address_;
   mutable ACE_SYNCH_MUTEX stun_server_config_lock_;
 
+#ifdef OPENDDS_SECURITY
   ICE::AddressListType host_addresses() const;
+#endif
 };
 
 inline void RtpsUdpInst::rtps_relay_address(const ACE_INET_Addr& address)

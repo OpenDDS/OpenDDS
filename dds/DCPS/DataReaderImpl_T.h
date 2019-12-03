@@ -914,10 +914,8 @@ namespace OpenDDS {
         return;
       }
 
-      if (Serializer::use_rti_serialization()) {
-        // Start counting byte-offset AFTER header
-        ser.reset_alignment();
-      }
+    // Start counting byte-offset AFTER header
+    ser.reset_alignment();
     }
 
     if (sample.header_.key_fields_only_) {
@@ -993,10 +991,8 @@ protected:
         return;
       }
 
-      if (Serializer::use_rti_serialization()) {
-        // Start counting byte-offset AFTER header
-        ser.reset_alignment();
-      }
+    // Start counting byte-offset AFTER header
+    ser.reset_alignment();
     }
 
     if (marshaling_type == OpenDDS::DCPS::KEY_ONLY_MARSHALING) {
@@ -1281,10 +1277,9 @@ DDS::ReturnCode_t read_instance_i(MessageSequenceType& received_data,
     }
     if ((state_obj->instance_state() & instance_states) == 0) {
       if (!msg.empty()) msg += " and ";
-      msg += "instance state is "
-        + state_obj->instance_state_string()
-        + " while the validity mask is "
-        + InstanceState::instance_state_mask_string(instance_states);
+      msg += "instance state is ";
+      msg += state_obj->instance_state_string();
+      msg += " while the validity mask is " + InstanceState::instance_state_mask_string(instance_states);
     }
     const GuidConverter conv(get_subscription_id());
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataReaderImpl_T::read_instance_i: ")

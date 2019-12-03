@@ -176,6 +176,7 @@ performance-tests/DCPS/TCPListenerTest/run_test.pl -p 4 -s 1: !DCPS_MIN !OPENDDS
 #performance-tests/DCPS/MulticastListenerTest/run_test.pl -p 2 -s 3: !DCPS_MIN !NO_MCAST
 
 DevGuideExamples/DCPS/Messenger/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
+DevGuideExamples/DCPS/Messenger/run_test.pl --rtps: !DCPS_MIN !OPENDDS_SAFETY_PROFILE RTPS
 DevGuideExamples/DCPS/Messenger_ZeroCopy/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 
 tests/DCPS/Messenger/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
@@ -396,3 +397,4 @@ tests/DCPS/RtpsRelay/Unit/run_test.pl: !DCPS_MIN CXX11 !NO_BUILT_IN_TOPICS !OPEN
 tests/DCPS/RtpsRelay/Smoke/run_test.pl: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE !IPV6
 tests/DCPS/RtpsRelay/Smoke/run_test.pl secure: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE !IPV6
 tests/DCPS/RtpsRelay/Smoke/run_test.pl join: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE !IPV6
+tests/DCPS/RtpsRelay/STUN/run_test.pl: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE !IPV6

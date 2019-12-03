@@ -5,6 +5,7 @@
  * See: http://www.opendds.org/license.html
  */
 
+#ifdef OPENDDS_SECURITY
 #ifndef OPENDDS_RTPS_ICE_CHECKLIST_H
 #define OPENDDS_RTPS_ICE_CHECKLIST_H
 
@@ -256,3 +257,4 @@ private:
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* OPENDDS_RTPS_ICE_CHECKLIST_H */
+#endif /* OPENDDS_SECURITY */
