@@ -77,6 +77,10 @@ public:
   // the runtime costs of making a copy
   const char* type_name() const;
 
+  // OpenDDS extension which doesn't duplicate the string to prevent
+  // the runtime costs of making a copy
+  const char* topic_name() const;
+
   virtual void transport_config(const TransportConfig_rch& cfg);
 
   void inconsistent_topic(int count);

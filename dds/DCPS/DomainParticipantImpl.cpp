@@ -1938,10 +1938,7 @@ DomainParticipantImpl::is_clean() const
 
   // check that the only remaining topics are built-in topics
   for (TopicMap::const_iterator it = topics_.begin(); it != topics_.end(); ++it) {
-    CORBA::String_var name = it->second.pair_.svt_->get_name();
-    CORBA::String_var type_name = it->second.pair_.svt_->get_type_name();
-
-    if (!topicIsBIT(name.in(), type_name.in())) {
+    if (!topicIsBIT(it->second.pair_.svt_->topic_name(), it->second.pair_.svt_->type_name())) {
       topics_is_clean = false;
     }
   }
