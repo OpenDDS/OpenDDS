@@ -232,9 +232,8 @@ int* c;
 int* b;
 ```
 
-In code targeting C++03, it is customary to use `0` as the null pointer. In code
-targeting C++11 and later, `nullptr` should be used instead. `NULL` should
-never be used.
+In code targeting C++03, `0` should be used as the null pointer. For C++11 and
+later, `nullptr` should be used instead. `NULL` should never be used.
 
 ### Naming
 
@@ -304,6 +303,8 @@ For more information, see [the Doxygen manual](http://www.doxygen.nl/manual/).
 
 ### Preprocessor
 
+- If possible, use other languarge features things like inlining and constants
+  instead of the preprocessor.
 - Prefer `#ifdef` and `#ifndef` to `#if defined` and `#if !defined` when
   testing if a single macro is defined.
 - Leave parentheses off preprocessor operators. For example, use `#if defined X
@@ -329,7 +330,8 @@ For more information, see [the Doxygen manual](http://www.doxygen.nl/manual/).
 
 As a safeguard against headers being dependant on a particular order, includes
 should be ordered based on a hierarchy going from local headers to system
-headers. This order can be generalized as the following:
+headers, with spaces between groups of includes. This order can be generalized
+as the following:
 
 1. The corresponding header to the source file (`Foo.h` if we were in
    `Foo.cpp`).
