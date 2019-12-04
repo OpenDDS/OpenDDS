@@ -36,9 +36,9 @@ $test->process("publisher", "publisher", "-ORBDebugLevel 1 -DCPSConfigFile". $in
 $test->process("subscriber", "subscriber", "-ORBDebugLevel 1 -DCPSConfigFile" . $ini);
 
 $test->start_process("relay");
-
+sleep 1;
 $test->start_process("publisher");
-sleep 3;
+sleep 1;
 $test->start_process("subscriber");
 
 $test->stop_process(180, "subscriber");

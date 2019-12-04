@@ -188,6 +188,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
       dw->wait_for_acknowledgments(timeout);
 
+      // delay
+      ACE_OS::sleep(2);
+
       std::cerr << "deleting DW" << std::endl;
       delete writer;
 
@@ -202,17 +205,17 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         status = EXIT_SUCCESS;
       }
       else {
-        std::cerr << "Error in publisher: One more locations missing. Location mask " << locations << " != " << all <<  "." << std::endl;
+        std::cerr << "Error in publisher: One or more locations missing. Location mask " << locations << " != " << all <<  "." << std::endl;
         status = EXIT_FAILURE;
       }
     }
 
     // Clean-up!
-    std::cerr << "deleting contained entities" << std::endl;
+    std::cerr << "publisher deleting contained entities" << std::endl;
     participant->delete_contained_entities();
-    std::cerr << "deleting participant" << std::endl;
+    std::cerr << "publisher deleting participant" << std::endl;
     dpf->delete_participant(participant.in());
-    std::cerr << "shutdown" << std::endl;
+    std::cerr << "publisher shutdown" << std::endl;
     TheServiceParticipant->shutdown();
 
   } catch (const CORBA::Exception& e) {
