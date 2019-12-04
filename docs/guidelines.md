@@ -303,7 +303,7 @@ For more information, see [the Doxygen manual](http://www.doxygen.nl/manual/).
 
 ### Preprocessor
 
-- If possible, use other languarge features things like inlining and constants
+- If possible, use other language features things like inlining and constants
   instead of the preprocessor.
 - Prefer `#ifdef` and `#ifndef` to `#if defined` and `#if !defined` when
   testing if a single macro is defined.
