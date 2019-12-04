@@ -207,9 +207,8 @@ The punctuation placement rules can be summarized as:
   desirable.
 - Use the constructor initializer list and make sure its order matches the
   declaration order.
-- Prefer pre-increment/decrement (`++x`) to post-increment/decrement (`x++`).
-  For objects this avoids creating a unused copy of the original object. It's
-  also recommended to do this for primitives just to enforce the habit.
+- Prefer pre-increment/decrement (`++x`) to post-increment/decrement (`x++`)
+  for both objects and non-objects.
 - All currently supported compilers use the template inclusion mechanism. Thus
   function/method template definitions may not be placed in normal `*.cpp`
   files, instead they can go in `_T.cpp` (which are `#included` and not
@@ -307,13 +306,15 @@ For more information, see [the Doxygen manual](http://www.doxygen.nl/manual/).
 
 - Prefer `#ifdef` and `#ifndef` to `#if defined` and `#if !defined` when
   testing if a single macro is defined.
+- Leave parentheses off preprocessor operators. For example, use `#if defined X
+  && defined Y` instead of `#if defined(X) && defined(Y)`.
 - As stated before, preprocessor macros visible to user code must begin with
   `OPENDDS_`.
 - Ignoring the header guard if there is one, preprocessor statements should be
   indented using two spaces starting at the pound symbol, like so:
 
 ```C++
-#if defined(X) && defined(Y)
+#if defined X && defined Y
 #  if X > Y
 #    define Z 1
 #  else
