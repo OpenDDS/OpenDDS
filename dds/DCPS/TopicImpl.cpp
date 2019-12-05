@@ -182,6 +182,13 @@ TopicImpl::type_name() const
   return this->type_name_.c_str();
 }
 
+const char*
+TopicImpl::topic_name() const
+{
+  return this->topic_name_.c_str();
+}
+
+
 void
 TopicImpl::transport_config(const TransportConfig_rch&)
 {

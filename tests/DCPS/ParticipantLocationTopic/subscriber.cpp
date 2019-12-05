@@ -186,7 +186,10 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     ws->detach_condition(condition);
 
-        // check that all locations received
+    // delay to ensure location BIT received
+    ACE_OS::sleep(2);
+
+    // check that all locations received
     unsigned long all = OpenDDS::DCPS::LOCATION_LOCAL |
 #ifdef OPENDDS_SECURITY
                         OpenDDS::DCPS::LOCATION_ICE |
@@ -197,13 +200,16 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       status = EXIT_SUCCESS;
     }
     else {
-      std::cerr << "Error in subscriber: One more locations missing. Location mask " << locations << " != " << all <<  "." << std::endl;
+      std::cerr << "Error in subscriber: One or more locations missing. Location mask " << locations << " != " << all <<  "." << std::endl;
       status = EXIT_FAILURE;
     }
 
     // Clean-up!
+    std::cerr << "subscriber deleting contained entities" << std::endl;
     participant->delete_contained_entities();
+    std::cerr << "subscriber deleting participant" << std::endl;
     dpf->delete_participant(participant.in());
+    std::cerr << "subscriber shutdown" << std::endl;
     TheServiceParticipant->shutdown();
 
   } catch (const CORBA::Exception& e) {
