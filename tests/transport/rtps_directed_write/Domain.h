@@ -23,11 +23,13 @@ public:
 
   const OpenDDS::DCPS::TimeDuration& getHeartbeatPeriod() const;
   void setHeartbeatPeriod(const ACE_UINT64& ms);
+  bool readersReliable() const { return reliableReaders; }
 
 private:
   DDS::DomainParticipantFactory_var dpf;
   ACE_TString host;
   u_short port;
+  bool reliableReaders;
   OpenDDS::DCPS::TransportInst_rch transportInst;
   OpenDDS::DCPS::RtpsUdpInst* rtpsInst;
 

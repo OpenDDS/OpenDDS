@@ -344,6 +344,9 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
     // in-order delivery, link_->received() will add it to readers_withheld_ otherwise
     // it will be added to readers_selected_
     link_->received(data, receiver_.source_guid_prefix_);
+    if (readers_selected_.empty() && readers_withheld_.empty()) {
+      listDirectedWriteReaders(data);
+    }
     recvd_sample_ = 0;
 
     if (data.readerId != ENTITYID_UNKNOWN) {
@@ -365,9 +368,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
 #else
         link_->data_received(sample, reader);
 #endif
-
       }
-
     } else {
       if (Transport_debug_level > 5) {
         OPENDDS_STRING included_ids;
@@ -382,7 +383,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
         first = true;
         RepoIdSet::iterator iter2 = this->readers_withheld_.begin();
         while(iter2 != readers_withheld_.end()) {
-            excluded_ids += (first ? "" : "\n") + OPENDDS_STRING(GuidConverter(*iter2));
+          excluded_ids += (first ? "" : "\n") + OPENDDS_STRING(GuidConverter(*iter2));
           first = false;
           ++iter2;
         }
@@ -406,7 +407,6 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
 #else
         link_->data_received(sample);
 #endif
-
       } else {
         if (Transport_debug_level > 5) {
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpReceiveStrategy[%@]::deliver_sample - ")
@@ -421,7 +421,6 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
 #else
         link_->data_received_include(sample, readers_selected_);
 #endif
-
       }
     }
     break;
@@ -813,6 +812,42 @@ void
 RtpsUdpReceiveStrategy::do_not_withhold_data_from(const RepoId& sub_id)
 {
   readers_selected_.insert(sub_id);
+}
+
+// add readerID to readers_withheld_ and return true if a DirectedWrite message is not to this reader.
+bool RtpsUdpReceiveStrategy::withholdDirectedWrite(const RTPS::DataSubmessage& ds, const RepoId& readerID)
+{
+  bool directedWrite = false;
+  bool match = false;
+  for (CORBA::ULong i = 0; i < ds.inlineQos.length() && !match; ++i) {
+    if (ds.inlineQos[i]._d() == RTPS::PID_DIRECTED_WRITE) {
+      directedWrite = true;
+      std::cout << "a directedWrite to " << GuidConverter(ds.inlineQos[i].guid()); //??
+      if (ds.inlineQos[i].guid() == readerID) {
+        match = true;
+      }
+    }
+  }
+  if (directedWrite) { std::cout << (match?" Match":" NoMatch") << std::endl; } //??
+  if (directedWrite && !match) {
+    std::cout << "withhold data from " << GuidConverter(readerID) << '\n'; //??
+    readers_withheld_.insert(readerID);
+    return true;
+  }
+  return false;
+}
+
+// Fill readers_selected_ with all the intended readers, if this is a DirectedWrite message.
+bool RtpsUdpReceiveStrategy::listDirectedWriteReaders(const RTPS::DataSubmessage& ds)
+{
+  readers_selected_.clear();
+  for (CORBA::ULong i = 0; i < ds.inlineQos.length(); ++i) {
+    if (ds.inlineQos[i]._d() == RTPS::PID_DIRECTED_WRITE) {
+      readers_selected_.insert(ds.inlineQos[i].guid());
+      std::cout << "directedWrite to " << GuidConverter(ds.inlineQos[i].guid()) << std::endl; //??
+    }
+  }
+  return !readers_selected_.empty();
 }
 
 bool

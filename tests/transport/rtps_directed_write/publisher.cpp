@@ -179,11 +179,11 @@ bool DDS_TEST::writeToSocket(const TestMsg& msg, const CORBA::Octet flags) const
   log_time(now);
   const double conv = 4294.967296; // NTP fractional (2^-32) sec per microsec
   const InfoTimestampSubmessage it = { {INFO_TS, 1, 8},
-    {static_cast<ACE_CDR::Long>(now.sec()),
+    {static_cast<ACE_CDR::ULong>(now.sec()),
      static_cast<ACE_CDR::ULong>(now.usec() * conv)} };
-
-  DataSubmessage ds = { {DATA, flags, 20 + (flags==DEQ?24:0) + 12 + ACE_OS::strlen(msg.value)+1},
-    0, 16, ENTITYID_UNKNOWN, domain.getPubWtrId().entityId, {0, ++msgSeqN}, ParameterList() };
+  ::CORBA::UShort sz = 20 + (flags == DEQ ? 24 : 0) + 12 + ACE_OS::strlen(msg.value) + 1;
+  DataSubmessage ds = { {DATA, flags, sz}, 0, 16, ENTITYID_UNKNOWN,
+    domain.getPubWtrId().entityId, {0, ++msgSeqN}, ParameterList() };
   if(flags == DEQ) {
     ds.inlineQos.length(1);
     ds.inlineQos[0].guid(domain.getSubRdrId(1));
@@ -279,7 +279,7 @@ int DDS_TEST::run()
 
   serializeData(elements[0], TestMsg(10, "Through OpenDDS Transport"));
   --msgSeqN;
-  serializeData(elements[1], TestMsg(10, "Test same msgSeqN"));
+  serializeData(elements[1], TestMsg(10, "Test duplicate seq#"));
   serializeData(elements[2], TestMsg(99, "key=99 means end"));
 
   SendStateDataSampleList list;

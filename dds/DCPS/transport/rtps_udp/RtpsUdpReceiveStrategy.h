@@ -75,7 +75,13 @@ public:
                                       ICE::Endpoint* endpoint,
                                       bool& stop);
 
+  // Add readerID to readers_withheld_ if a DirectedWrite message is not to this reader.
+  bool withholdDirectedWrite(const RTPS::DataSubmessage& ds, const RepoId& readerID);
+
 private:
+  // Fill readers_selected_ with all the intended readers, if this is a DirectedWrite message.
+  bool listDirectedWriteReaders(const RTPS::DataSubmessage& ds);
+
   virtual ssize_t receive_bytes(iovec iov[],
                                 int n,
                                 ACE_INET_Addr& remote_address,

@@ -26,17 +26,16 @@
 class SimpleDataReader : public TransportReceiveListener, public TransportClient
 {
 public:
-  SimpleDataReader(const Domain &d, const int readerIndex)
+  SimpleDataReader(const Domain& d, const int readerIndex)
     : domain(d), index(readerIndex), done_(false), seq_()
   {
-    //enable_transport(false, false); //(reliable, durable)
-    enable_transport(true, false); //(reliable, durable)
+    enable_transport(domain.readersReliable(), false); //(reliable, durable)
 
     // Write a file so that test script knows we're ready
     FILE *file = std::fopen("subready.txt", "w");
     std::fprintf(file, "Ready\n");
     std::fclose(file);
-    std::cerr << "***Ready written to subready.txt\n";
+    std::cerr << "**Ready written to subready.txt. ";
 
     AssociationData publication;
     publication.remote_id_ = domain.getPubWtrId();
@@ -47,11 +46,11 @@ public:
     for (CORBA::ULong i = 0; i < 5; ++i) {
       publication.remote_data_[0].data[i] = 0;
     }
-    std::cerr << "Associating with publisher..." << std::endl;
+    std::cerr << "Reader " << GuidConverter(get_repo_id()) << " associating with publisher...";
     if (!associate(publication, false)) {
       throw std::string("subscriber TransportClient::associate() failed");
     }
-    std::cerr << "***SimpleDataReader associated with publisher\n";
+    std::cerr << "associated.\n";
   }
 
   virtual ~SimpleDataReader() { disassociate(domain.getPubWtrId()); }

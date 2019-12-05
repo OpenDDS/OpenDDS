@@ -2,10 +2,12 @@
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
 #include <ace/Get_Opt.h>
 
-Domain::Domain(int argc, ACE_TCHAR* argv[])
-  : dpf(TheParticipantFactoryWithArgs(argc, argv)), host(ACE_TEXT("")), port(0), rtpsInst(0) {
+Domain::Domain(int argc, ACE_TCHAR* argv[]) :
+  dpf(TheParticipantFactoryWithArgs(argc, argv)),
+  host(ACE_TEXT("")), port(0), reliableReaders(true), rtpsInst(0)
+{
   try {
-    ACE_Get_Opt opts(argc, argv, ACE_TEXT("h:p:"));
+    ACE_Get_Opt opts(argc, argv, ACE_TEXT("h:p:r:"));
     int option = 0;
     while ((option = opts()) != EOF) {
       switch (option) {
@@ -14,6 +16,9 @@ Domain::Domain(int argc, ACE_TCHAR* argv[])
         break;
       case 'p':
         port = static_cast<u_short>(ACE_OS::atoi(opts.opt_arg()));
+        break;
+      case 'r':
+        reliableReaders = (ACE_OS::atoi(opts.opt_arg()) == 1);
         break;
       }
     }
