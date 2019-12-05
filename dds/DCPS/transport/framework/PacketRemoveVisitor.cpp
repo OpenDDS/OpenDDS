@@ -54,8 +54,7 @@ PacketRemoveVisitor::visit_element_ref(TransportQueueElement*& element)
         "The element is [%0x]\n",
         element));
 
-  TransportRetainedElement* tre = dynamic_cast<TransportRetainedElement*>(element);
-  if (tre) {
+  if (element->is_retained_replaced()) {
     status_ = REMOVE_FOUND;
     return 0;
   }
