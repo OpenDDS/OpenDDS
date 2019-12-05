@@ -19,9 +19,6 @@
           { "name": "DCPSDebugLevel",
             "value": "0"
           },
-          { "name": "DCPSRTISerialization",
-            "value": "0"
-          },
           { "name": "DCPSPendingTimeout",
             "value": "3"
           }

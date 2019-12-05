@@ -259,11 +259,15 @@ public:
       // Check to see if we have to stop prematurely
       bool kill_workers = false;
       if (scenario_timedout_.load()) {
-        std::cerr << "Scenario Timedout, Killing Workers..." << std::endl;
+        std::stringstream ss;
+        ss << "Scenario Timedout, Killing Workers..." << std::endl;
+        std::cerr << ss.str() << std::flush;
         kill_workers = true;
       }
       if (sigint_.load()) {
-        std::cerr << "Interrupted, Killing Workers..." << std::endl;
+        std::stringstream ss;
+        ss << "Interrupted, Killing Workers..." << std::endl;
+        std::cerr << ss.str() << std::flush;
         kill_workers = true;
       }
       if (kill_workers) {
