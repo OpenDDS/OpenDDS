@@ -74,8 +74,7 @@ bool compare_and_update_counts(CORBA::Long incoming, CORBA::Long& existing) {
   static const CORBA::Long ONE_QUARTER_MAX_POSITIVE = 0x20000000;
   static const CORBA::Long THREE_QUARTER_MAX_POSITIVE = 0x60000000;
   if (incoming <= existing &&
-      !(incoming < ONE_QUARTER_MAX_POSITIVE && existing > THREE_QUARTER_MAX_POSITIVE))
-  {
+      !(incoming < ONE_QUARTER_MAX_POSITIVE && existing > THREE_QUARTER_MAX_POSITIVE)) {
     return false;
   }
   existing = incoming;
