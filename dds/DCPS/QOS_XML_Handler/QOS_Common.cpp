@@ -55,38 +55,35 @@ QosCommon::get_history_kind(const ::dds::historyKind kind,
 void
 QosCommon::get_duration(::DDS::Duration_t& duration, const ACE_TCHAR * sec, const ACE_TCHAR * nsec)
 {
-  if (ACE_OS::strcmp(sec, ACE_TEXT("DURATION_INFINITY")) == 0 ||
-      ACE_OS::strcmp(sec, ACE_TEXT("DURATION_INFINITE_SEC")) == 0)
-    {
+  if (sec != 0) {
+    if (ACE_OS::strcmp(sec, ACE_TEXT("DURATION_INFINITY")) == 0 ||
+        ACE_OS::strcmp(sec, ACE_TEXT("DURATION_INFINITE_SEC")) == 0) {
       duration.sec = 0x7fffffff;
-    }
-  else
-    {
+    } else {
       duration.sec = ACE_OS::atoi(sec);
     }
+  }
 
-  if (ACE_OS::strcmp(nsec, ACE_TEXT("DURATION_INFINITY")) == 0 ||
-      ACE_OS::strcmp(nsec, ACE_TEXT("DURATION_INFINITE_NSEC")) == 0)
-    {
+  if (nsec != 0) {
+    if (ACE_OS::strcmp(nsec, ACE_TEXT("DURATION_INFINITY")) == 0 ||
+             ACE_OS::strcmp(nsec, ACE_TEXT("DURATION_INFINITE_NSEC")) == 0) {
       duration.nanosec =  0x7fffffff;
-    }
-  else
-    {
+    } else {
       duration.nanosec = ACE_OS::atoi(nsec);
     }
+  }
 }
 
 ::CORBA::Long
 QosCommon::get_qos_long(const ACE_TCHAR* value)
 {
-  if (ACE_OS::strcmp(value, ACE_TEXT("LENGTH_UNLIMITED")) == 0)
-    {
-      return -1;
-    }
-  else
-    {
-      return ACE_OS::atoi(value);
-    }
+  if (value == 0) {
+    return 0;
+  } else if (ACE_OS::strcmp(value, ACE_TEXT("LENGTH_UNLIMITED")) == 0) {
+    return -1;
+  } else {
+    return ACE_OS::atoi(value);
+  }
 }
 
 void
