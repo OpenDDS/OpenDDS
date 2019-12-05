@@ -24,11 +24,7 @@ $test->{dcps_transport_debug_level} = 1;
 # will manually set -DCPSConfigFile
 $test->{add_transport_config} = 0;
 
-my $sconfig = 0; # local
-
 my $ini = " rtps.ini";
-
-my $relay_security_opts;
 
 $test->process("relay", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-DCPSConfigFile relay.ini -ApplicationDomain 42 -VerticalAddress 4444 -HorizontalAddress 127.0.0.1:11444 ");
 
@@ -44,8 +40,6 @@ $test->start_process("subscriber");
 $test->stop_process(180, "subscriber");
 $test->stop_process(5, "publisher");
 
-if ($sconfig != 0) {
-    $test->kill_process(5, "relay");
-}
+$test->kill_process(5, "relay");
 
 exit $test->finish();
