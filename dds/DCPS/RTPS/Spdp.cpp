@@ -418,12 +418,12 @@ Spdp::update_location_i(const DCPS::RepoId& guid,
   OpenDDS::DCPS::ParticipantLocationBuiltinTopicData& ld = iter->second.location_data_;
 
   const char* addr = "";
+  ACE_TCHAR buffer[256];
 
   const OpenDDS::DCPS::ParticipantLocation old_mask = ld.location;
 
   if (from != ACE_INET_Addr()) {
     ld.location |= mask;
-    ACE_TCHAR buffer[256];
     from.addr_to_string(buffer, 256);
     addr = ACE_TEXT_ALWAYS_CHAR(buffer);
   } else {
