@@ -236,15 +236,14 @@ std::vector<WorkerReport> ScenarioManager::execute(const AllocatedScenario& allo
   std::mutex reports_left_mutex;
   std::condition_variable timeout_cv;
   const std::chrono::seconds timeout(allocated_scenario.timeout);
-  std::thread timeout_thread;
+  std::shared_ptr<std::thread> timeout_thread;
   if (timeout.count() > 0) {
-    std::thread temp([&reports_left, &reports_left_mutex, &timeout_cv, &timeout, &guard_condition]  {
+    timeout_thread.reset(new std::thread([&reports_left, &reports_left_mutex, &timeout_cv, &timeout, &guard_condition]  {
       std::unique_lock<std::mutex> lock(reports_left_mutex);
       if (!timeout_cv.wait_for(lock, timeout, [&reports_left] {return reports_left == 0;})) {
         guard_condition->set_trigger_value(true);
       }
-    });
-    timeout_thread.swap(temp);
+    }));
   }
 
   // Wait for reports
@@ -260,7 +259,9 @@ std::vector<WorkerReport> ScenarioManager::execute(const AllocatedScenario& allo
     for (unsigned i = 0; i < active.length(); i++) {
       if (active[i] == guard_condition) {
         timeout_cv.notify_all();
-        timeout_thread.join();
+        if (timeout_thread) {
+          timeout_thread->join();
+        }
         std::stringstream ss;
         ss << "Timedout waiting for the scenario to complete";
         throw std::runtime_error(ss.str());
@@ -324,7 +325,9 @@ std::vector<WorkerReport> ScenarioManager::execute(const AllocatedScenario& allo
 
   if (timeout.count() > 0) {
     timeout_cv.notify_all();
-    timeout_thread.join();
+    if (timeout_thread) {
+      timeout_thread->join();
+    }
   }
 
   wait_set->detach_condition(read_condition);
