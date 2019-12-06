@@ -426,7 +426,7 @@ private:
       handle = it->second;
       OpenDDS::DCPS::PublicationInstance_rch instance = get_handle_instance(handle);
 
-      if (instance->unregistered_ == false) {
+      if (instance && instance->unregistered_ == false) {
         needs_registration = false;
       }
       // else: The instance is unregistered and now register again.
