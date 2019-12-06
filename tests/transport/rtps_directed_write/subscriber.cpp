@@ -46,7 +46,7 @@ public:
     for (CORBA::ULong i = 0; i < 5; ++i) {
       publication.remote_data_[0].data[i] = 0;
     }
-    std::cerr << "Reader " << GuidConverter(get_repo_id()) << " associating with publisher...";
+    std::cerr << "Reader " << OPENDDS_STRING(GuidConverter(get_repo_id())) << " associating with publisher...";
     if (!associate(publication, false)) {
       throw std::string("subscriber TransportClient::associate() failed");
     }
@@ -114,7 +114,6 @@ void SimpleDataReader::data_received(const ReceivedDataSample& sample)
   }
 
   if (data.key == 99) {
-    std::cout << OPENDDS_STRING(GuidConverter(get_repo_id())).c_str() << " received terminating sample\n";
     ACE_DEBUG((LM_INFO, "%C received terminating sample\n", OPENDDS_STRING(GuidConverter(get_repo_id())).c_str()));
     done_ = true;
     return;
