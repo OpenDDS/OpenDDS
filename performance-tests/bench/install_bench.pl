@@ -54,8 +54,8 @@ find( sub { /^.*\.so\..*\z/s && push @libs, $File::Find::name }, "$from" );
 foreach (@libs) {
     my $fn = (split '/', $_)[-1];
     my $sln = (split '\.',$fn)[0];
-    rm("$dest/lib/${sln}.so");
-    rm("$dest/lib/$fn");
+    unlink "$dest/lib/${sln}.so";
+    unlink "$dest/lib/$fn";
     cp("$_", "$dest/lib");
     chmod 0755, "$dest/lib/$fn";
     symlink("$dest/lib/$fn", "$dest/lib/${sln}.so") || die "Cannot symlink ${sln}.so : $!";
