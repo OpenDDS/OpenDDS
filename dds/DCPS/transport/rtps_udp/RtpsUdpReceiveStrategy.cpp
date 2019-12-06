@@ -822,15 +822,12 @@ bool RtpsUdpReceiveStrategy::withholdDirectedWrite(const RTPS::DataSubmessage& d
   for (CORBA::ULong i = 0; i < ds.inlineQos.length() && !match; ++i) {
     if (ds.inlineQos[i]._d() == RTPS::PID_DIRECTED_WRITE) {
       directedWrite = true;
-      std::cout << "a directedWrite to " << GuidConverter(ds.inlineQos[i].guid()); //??
       if (ds.inlineQos[i].guid() == readerID) {
         match = true;
       }
     }
   }
-  if (directedWrite) { std::cout << (match?" Match":" NoMatch") << std::endl; } //??
   if (directedWrite && !match) {
-    std::cout << "withhold data from " << GuidConverter(readerID) << '\n'; //??
     readers_withheld_.insert(readerID);
     return true;
   }
@@ -844,7 +841,6 @@ bool RtpsUdpReceiveStrategy::listDirectedWriteReaders(const RTPS::DataSubmessage
   for (CORBA::ULong i = 0; i < ds.inlineQos.length(); ++i) {
     if (ds.inlineQos[i]._d() == RTPS::PID_DIRECTED_WRITE) {
       readers_selected_.insert(ds.inlineQos[i].guid());
-      std::cout << "directedWrite to " << GuidConverter(ds.inlineQos[i].guid()) << std::endl; //??
     }
   }
   return !readers_selected_.empty();
