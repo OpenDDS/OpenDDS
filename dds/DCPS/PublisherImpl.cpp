@@ -258,6 +258,9 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
 
     publication_map_.erase(it);
 
+    // not just unregister but remove any pending writes/sends.
+    dw_servant->unregister_all();
+
     // Release pi_lock_ before making call to transport layer to avoid
     // some deadlock situations that threads acquire locks(PublisherImpl
     // pi_lock_, TransportClient reservation_lock and TransportImpl
@@ -267,6 +270,7 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
     // Wait for pending samples to drain prior to removing associations
     // and unregistering the publication.
     dw_servant->wait_pending();
+
     // Call remove association before unregistering the datawriter
     // with the transport, otherwise some callbacks resulted from
     // remove_association may lost.
@@ -277,9 +281,6 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
   if (this->monitor_) {
     this->monitor_->report();
   }
-
-  // not just unregister but remove any pending writes/sends.
-  dw_servant->unregister_all();
 
   RcHandle<DomainParticipantImpl> participant = this->participant_.lock();
 

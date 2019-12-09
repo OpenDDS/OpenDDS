@@ -54,6 +54,11 @@ PacketRemoveVisitor::visit_element_ref(TransportQueueElement*& element)
         "The element is [%0x]\n",
         element));
 
+  if (element->is_retained_replaced()) {
+    status_ = REMOVE_FOUND;
+    return 0;
+  }
+
   // These is the head of the chain of "source" blocks from the element
   // currently being visited.
   ACE_Message_Block* element_blocks =
