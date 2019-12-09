@@ -14,7 +14,6 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include "dds/DCPS/LocalObject.h"
 #include "dds/DCPS/ConditionImpl.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -26,9 +25,12 @@ typedef GuardCondition* GuardCondition_ptr;
 typedef TAO_Objref_Var_T<GuardCondition> GuardCondition_var;
 
 class OpenDDS_Dcps_Export GuardCondition
-  : public virtual OpenDDS::DCPS::LocalObject<DDS::GuardConditionInterf>
+  : public virtual DDS::GuardConditionInterf
   , public virtual OpenDDS::DCPS::ConditionImpl {
 public:
+  typedef GuardCondition* _ptr_type;
+  typedef GuardCondition_var _var_type;
+
   GuardCondition()
     : trigger_value_(false)
   {}
@@ -40,6 +42,7 @@ public:
   ReturnCode_t set_trigger_value(CORBA::Boolean value);
 
   static GuardCondition_ptr _duplicate(GuardCondition_ptr obj);
+  static GuardCondition_ptr _narrow(CORBA::Object_ptr obj);
 
 private:
   CORBA::Boolean trigger_value_;
