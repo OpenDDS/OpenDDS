@@ -8,9 +8,10 @@
 #ifndef OPENDDS_IDL_BE_GLOBAL_H
 #define OPENDDS_IDL_BE_GLOBAL_H
 
-#include "ace/SString.h"
-#include "idl_defines.h"
-#include "utl_scoped_name.h"
+#include <idl_defines.h>
+#include <utl_scoped_name.h>
+
+#include <ace/SString.h>
 
 #include <string>
 #include <sstream>
@@ -173,9 +174,10 @@ public:
   bool root_default_nested() const;
 
   /**
-   * Check if a struct field has been declared a key.
+   * If node has the key annotation, this sets value to the key annotation
+   * value and returns true, else this sets value to false and returns false.
    */
-  bool is_key(AST_Field* node);
+  bool check_key(AST_Field* node, bool& value);
 
   /**
    * Check if the discriminator in a union has been declared a key.
@@ -183,9 +185,14 @@ public:
   bool has_key(AST_Union* node);
 
   /**
-   * Give a warning that looks like tao_idl's, but out of context of tao_idl.
+   * Give a warning that looks like one from tao_idl
    */
-  void warning(const char* filename, unsigned lineno, const char* msg);
+  void warning(const char* msg, const char* filename = 0, unsigned lineno = 0);
+
+  /**
+   * Give an error that looks like one from tao_idl
+   */
+  void error(const char* msg, const char* filename = 0, unsigned lineno = 0);
 
   /**
    * Wrapper around built-in annotations, see annotations.h

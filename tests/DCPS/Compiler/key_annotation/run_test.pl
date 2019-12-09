@@ -9,7 +9,7 @@ use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 use strict;
 
-my $name = 'topic_annotations_test';
+my $name = 'key_annotation';
 
 PerlDDS::add_lib_path("../${name}_lib");
 

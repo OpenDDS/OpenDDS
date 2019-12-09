@@ -1,0 +1,27 @@
+project(*idl): dcps_test_idl_only_lib, msvc_bigobj {
+  idlflags += -Wb,export_macro=key_annotation_idl_Export -Wb,export_include=key_annotation_idl_export.h
+  dcps_ts_flags += -Wb,export_macro=key_annotation_idl_Export -Wb,export_include=key_annotation_idl_export.h
+  dynamicflags += KEY_ANNOTATION_IDL_BUILD_DLL
+
+  TypeSupport_Files {
+    key_annotation.idl
+  }
+
+  IDL_Files {
+    key_annotation.idl
+    key_annotationTypeSupport.idl
+  }
+}
+
+project(*): dcps_test {
+  exename = key_annotation
+  exeout = .
+
+  libs += key_annotation_idl
+  libpaths += .
+  after += key_annotation_idl
+
+  Source_Files {
+    main.cpp
+  }
+}
