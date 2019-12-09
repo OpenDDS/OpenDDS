@@ -93,7 +93,7 @@ public:
   bool failed()
   {
 #ifndef OPENDDS_NO_MULTI_TOPIC
-    for (Keys::const_iterator i = keys_.cbegin(); i != keys_.cend(); ++i) {
+    for (Keys::const_iterator i = keys_.begin(); i != keys_.end(); ++i) {
       if (!OpenDDS::DCPS::getMetaStruct<T>().isDcpsKey(i->c_str())) {
         const char* type_name = get_type_name<T>();
         ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: ")
