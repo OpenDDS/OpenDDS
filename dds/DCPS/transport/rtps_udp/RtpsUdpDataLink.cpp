@@ -70,6 +70,17 @@ bool bitmapNonEmpty(const OpenDDS::RTPS::SequenceNumberSet& snSet)
   return false;
 }
 
+bool compare_and_update_counts(CORBA::Long incoming, CORBA::Long& existing) {
+  static const CORBA::Long ONE_QUARTER_MAX_POSITIVE = 0x20000000;
+  static const CORBA::Long THREE_QUARTER_MAX_POSITIVE = 0x60000000;
+  if (incoming <= existing &&
+      !(incoming < ONE_QUARTER_MAX_POSITIVE && existing > THREE_QUARTER_MAX_POSITIVE)) {
+    return false;
+  }
+  existing = incoming;
+  return true;
+}
+
 }
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -1421,7 +1432,7 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
 
   WriterInfo& info = wi->second;
 
-  if (heartbeat.count.value <= info.heartbeat_recvd_count_) {
+  if (!compare_and_update_counts(heartbeat.count.value, info.heartbeat_recvd_count_)) {
     return false;
   }
 
@@ -2164,11 +2175,9 @@ RtpsUdpDataLink::RtpsReader::process_hb_frag_i(const RTPS::HeartBeatFragSubmessa
     return false;
   }
 
-  if (hb_frag.count.value <= wi->second.hb_frag_recvd_count_) {
+  if (!compare_and_update_counts(hb_frag.count.value, wi->second.hb_frag_recvd_count_)) {
     return false;
   }
-
-  wi->second.hb_frag_recvd_count_ = hb_frag.count.value;
 
   SequenceNumber seq;
   seq.setValue(hb_frag.writerSN.high, hb_frag.writerSN.low);
@@ -2339,13 +2348,11 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
     return;
   }
 
-  if (acknack.count.value <= ri->second.acknack_recvd_count_) {
+  if (!compare_and_update_counts(acknack.count.value, ri->second.acknack_recvd_count_)) {
     VDBG((LM_WARNING, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
       "WARNING Count indicates duplicate, dropping\n"));
     return;
   }
-
-  ri->second.acknack_recvd_count_ = acknack.count.value;
 
   if (!ri->second.handshake_done_) {
     ri->second.handshake_done_ = true;
@@ -2541,13 +2548,11 @@ void RtpsUdpDataLink::RtpsWriter::process_nackfrag(const RTPS::NackFragSubmessag
     return;
   }
 
-  if (nackfrag.count.value <= ri->second.nackfrag_recvd_count_) {
+  if (!compare_and_update_counts(nackfrag.count.value, ri->second.nackfrag_recvd_count_)) {
     VDBG((LM_WARNING, "(%P|%t) RtpsUdpDataLink::received(NACK_FRAG) "
       "WARNING Count indicates duplicate, dropping\n"));
     return;
   }
-
-  ri->second.nackfrag_recvd_count_ = nackfrag.count.value;
 
   SequenceNumber seq;
   seq.setValue(nackfrag.writerSN.high, nackfrag.writerSN.low);
