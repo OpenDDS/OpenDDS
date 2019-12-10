@@ -413,6 +413,7 @@ void Checklist::succeeded(const ConnectivityCheck& cc)
     }
 
     nominated_is_live_ = true;
+    endpoint_manager_->ice_connect(guids_, nominated_->remote.address);
     last_indication_.set_to_now();
 
     while (!connectivity_checks_.empty()) {
@@ -731,7 +732,13 @@ void Checklist::execute(const MonotonicTimePoint& a_now)
     interval = std::min(interval, endpoint_manager_->agent_impl->get_configuration().indication_period());
 
     // Check that we are receiving indications.
+    const bool before = nominated_is_live_;
     nominated_is_live_ = (a_now - last_indication_) < endpoint_manager_->agent_impl->get_configuration().nominated_ttl();
+    if (before && !nominated_is_live_) {
+      endpoint_manager_->ice_disconnect(guids_);
+    } else if (!before && nominated_is_live_) {
+      endpoint_manager_->ice_connect(guids_, nominated_->remote.address);
+    }
   }
 
   if (flag) {

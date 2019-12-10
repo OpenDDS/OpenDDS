@@ -4,11 +4,11 @@ project: dcps_test_idl_only_lib, msvc_bigobj {
   idlflags += -I..
 
   TypeSupport_Files {
-    ../is_topic_type_test.idl
+    ../is_topic_type.idl
   }
 
   IDL_Files {
-    ../is_topic_type_test.idl
-    is_topic_type_testTypeSupport.idl
+    ../is_topic_type.idl
+    is_topic_typeTypeSupport.idl
   }
 }

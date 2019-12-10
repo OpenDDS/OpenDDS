@@ -1934,14 +1934,18 @@ bool
 DomainParticipantImpl::is_clean() const
 {
   bool sub_is_clean = subscribers_.empty();
-  bool topics_is_clean = topics_.size() == 0;
+  bool topics_is_clean = true;
+
+  // check that the only remaining topics are built-in topics
+  for (TopicMap::const_iterator it = topics_.begin(); it != topics_.end(); ++it) {
+    if (!topicIsBIT(it->second.pair_.svt_->topic_name(), it->second.pair_.svt_->type_name())) {
+      topics_is_clean = false;
+    }
+  }
 
   if (!TheTransientKludge->is_enabled()) {
-    // There are four topics and builtin topic subscribers
-    // left.
-
+    // There are built-in topics and built-in topic subscribers left.
     sub_is_clean = !sub_is_clean ? subscribers_.size() == 1 : true;
-    topics_is_clean = !topics_is_clean ? topics_.size() == 4 : true;
   }
   return (publishers_.empty()
           && sub_is_clean

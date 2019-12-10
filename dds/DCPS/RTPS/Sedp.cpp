@@ -1554,6 +1554,7 @@ Sedp::sub_bit()
     sub->lookup_datareader(DCPS::BUILT_IN_SUBSCRIPTION_TOPIC);
   return dynamic_cast<DCPS::SubscriptionBuiltinTopicDataDataReaderImpl*>(d.in());
 }
+
 #endif /* DDS_HAS_MINIMUM_BIT */
 
 bool
@@ -3103,16 +3104,21 @@ Sedp::Writer::write_dcps_participant_secure(const Security::SPDPdiscoveredPartic
     return DDS::RETCODE_ERROR;
   }
 
-  ICE::Endpoint* endpoint = get_ice_endpoint();
-  if (endpoint) {
-    const ICE::AgentInfo& agent_info = ICE::Agent::instance()->get_local_agent_info(endpoint);
-    if (ParameterListConverter::to_param_list(agent_info, plist) < 0) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("Sedp::write_dcps_participant_secure() - ")
-                 ACE_TEXT("failed to convert from ICE::AgentInfo ")
-                 ACE_TEXT("to ParameterList\n")));
-      return DDS::RETCODE_ERROR;
-    }
+  ICE::AgentInfoMap ai_map;
+  ICE::Endpoint* sedp_endpoint = get_ice_endpoint();
+  if (sedp_endpoint) {
+    ai_map["SEDP"] = ICE::Agent::instance()->get_local_agent_info(sedp_endpoint);
+  }
+  ICE::Endpoint* spdp_endpoint = sedp_.spdp_.get_ice_endpoint();
+  if (spdp_endpoint) {
+    ai_map["SPDP"] = ICE::Agent::instance()->get_local_agent_info(spdp_endpoint);
+  }
+  if (ParameterListConverter::to_param_list(ai_map, plist) < 0) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("Sedp::write_dcps_participant_secure() - ")
+               ACE_TEXT("failed to convert from ICE::AgentInfo ")
+               ACE_TEXT("to ParameterList\n")));
+    return DDS::RETCODE_ERROR;
   }
 
   return write_parameter_list(plist, reader, sequence);
@@ -3312,12 +3318,19 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
         return;
       }
 #ifdef OPENDDS_SECURITY
-      if (ParameterListConverter::from_param_list(data, wdata->ice_agent_info_, wdata->have_ice_agent_info_) < 0) {
+      wdata->have_ice_agent_info_ = false;
+      ICE::AgentInfoMap ai_map;
+      if (ParameterListConverter::from_param_list(data, ai_map) < 0) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to convert from ParameterList ")
                    ACE_TEXT("to ICE Agent info\n")));
         return;
+      }
+      ICE::AgentInfoMap::const_iterator pos = ai_map.find("DATA");
+      if (pos != ai_map.end()) {
+        wdata->have_ice_agent_info_ = true;
+        wdata->ice_agent_info_ = pos->second;
       }
 #endif
       sedp_.task_.enqueue(id, move(wdata));
@@ -3340,12 +3353,20 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
                    ACE_TEXT("to DiscoveredPublication_SecurityWrapper\n")));
         return;
       }
-      if (ParameterListConverter::from_param_list(data, wdata_secure->ice_agent_info, wdata_secure->have_ice_agent_info) < 0) {
+
+      wdata_secure->have_ice_agent_info = false;
+      ICE::AgentInfoMap ai_map;
+      if (ParameterListConverter::from_param_list(data, ai_map) < 0) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to convert from ParameterList ")
                    ACE_TEXT("to ICE Agent info\n")));
         return;
+      }
+      ICE::AgentInfoMap::const_iterator pos = ai_map.find("DATA");
+      if (pos != ai_map.end()) {
+        wdata_secure->have_ice_agent_info = true;
+        wdata_secure->ice_agent_info = pos->second;
       }
       sedp_.task_.enqueue(id, move(wdata_secure));
 #endif
@@ -3367,12 +3388,19 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
         return;
       }
 #ifdef OPENDDS_SECURITY
-      if (ParameterListConverter::from_param_list(data, rdata->ice_agent_info_, rdata->have_ice_agent_info_) < 0) {
+      rdata->have_ice_agent_info_ = false;
+      ICE::AgentInfoMap ai_map;
+      if (ParameterListConverter::from_param_list(data, ai_map) < 0) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to convert from ParameterList ")
                    ACE_TEXT("to ICE Agent info\n")));
         return;
+      }
+      ICE::AgentInfoMap::const_iterator pos = ai_map.find("DATA");
+      if (pos != ai_map.end()) {
+        rdata->have_ice_agent_info_ = true;
+        rdata->ice_agent_info_ = pos->second;
       }
 #endif
       if (rdata->reader_data_.readerProxy.expectsInlineQos) {
@@ -3398,13 +3426,22 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
                    ACE_TEXT("to DiscoveredSubscription_SecurityWrapper\n")));
         return;
       }
-      if (ParameterListConverter::from_param_list(data, rdata->ice_agent_info, rdata->have_ice_agent_info) < 0) {
+
+      rdata->have_ice_agent_info = false;
+      ICE::AgentInfoMap ai_map;
+      if (ParameterListConverter::from_param_list(data, ai_map) < 0) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to convert from ParameterList ")
                    ACE_TEXT("to ICE Agent info\n")));
         return;
       }
+      ICE::AgentInfoMap::const_iterator pos = ai_map.find("DATA");
+      if (pos != ai_map.end()) {
+        rdata->have_ice_agent_info = true;
+        rdata->ice_agent_info = pos->second;
+      }
+
       if ((rdata->data).readerProxy.expectsInlineQos) {
         set_inline_qos((rdata->data).readerProxy.allLocators);
       }
@@ -3760,7 +3797,9 @@ Sedp::write_publication_data_unsecure(
     }
 #ifdef OPENDDS_SECURITY
     if (lp.have_ice_agent_info) {
-      if (ParameterListConverter::to_param_list(lp.ice_agent_info, plist)) {
+      ICE::AgentInfoMap ai_map;
+      ai_map["DATA"] = lp.ice_agent_info;
+      if (ParameterListConverter::to_param_list(ai_map, plist)) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data - ")
                    ACE_TEXT("Failed to convert ICE Agent info ")
@@ -3811,7 +3850,9 @@ Sedp::write_publication_data_secure(
       result = DDS::RETCODE_ERROR;
     }
     if (lp.have_ice_agent_info) {
-      if (ParameterListConverter::to_param_list(lp.ice_agent_info, plist)) {
+      ICE::AgentInfoMap ai_map;
+      ai_map["DATA"] = lp.ice_agent_info;
+      if (ParameterListConverter::to_param_list(ai_map, plist)) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data - ")
                    ACE_TEXT("Failed to convert ICE Agent info ")
@@ -3903,7 +3944,9 @@ Sedp::write_subscription_data_unsecure(
     }
 #ifdef OPENDDS_SECURITY
     if (ls.have_ice_agent_info) {
-      if (ParameterListConverter::to_param_list(ls.ice_agent_info, plist)) {
+      ICE::AgentInfoMap ai_map;
+      ai_map["DATA"] = ls.ice_agent_info;
+      if (ParameterListConverter::to_param_list(ai_map, plist)) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data - ")
                    ACE_TEXT("Failed to convert ICE Agent info ")
@@ -3953,7 +3996,9 @@ Sedp::write_subscription_data_secure(
       result = DDS::RETCODE_ERROR;
     }
     if (ls.have_ice_agent_info) {
-      if (ParameterListConverter::to_param_list(ls.ice_agent_info, plist)) {
+      ICE::AgentInfoMap ai_map;
+      ai_map["DATA"] = ls.ice_agent_info;
+      if (ParameterListConverter::to_param_list(ai_map, plist)) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data - ")
                    ACE_TEXT("Failed to convert ICE Agent info ")

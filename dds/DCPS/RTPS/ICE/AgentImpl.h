@@ -18,6 +18,7 @@
 
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/ReactorInterceptor.h"
+#include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/NetworkConfigMonitor.h"
 
 #include "Ice.h"
@@ -66,7 +67,7 @@ private:
   FoundationsType foundations_;
 };
 
-class AgentImpl : public Agent, public DCPS::ReactorInterceptor, public virtual DCPS::NetworkConfigListener {
+class AgentImpl : public Agent, public DCPS::ReactorInterceptor, public DCPS::ShutdownListener, public virtual DCPS::NetworkConfigListener {
 public:
   ActiveFoundationSet active_foundations;
 
@@ -76,6 +77,10 @@ public:
   {
     return configuration_;
   }
+
+  void shutdown();
+
+  void notify_shutdown();
 
   void add_endpoint(Endpoint* a_endpoint);
 

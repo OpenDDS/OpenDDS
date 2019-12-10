@@ -89,8 +89,9 @@ AgentImpl::AgentImpl() :
   ReactorInterceptor(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner()),
   ncm_listener_added_(false),
   remote_peer_reflexive_counter_(0)
-{
-}
+  {
+    TheServiceParticipant->set_shutdown_listener(this);
+  }
 
 void AgentImpl::add_endpoint(Endpoint* a_endpoint)
 {
@@ -234,6 +235,15 @@ void AgentImpl::check_invariants() const
   OPENDDS_ASSERT(expected == active_foundations);
 }
 
+void AgentImpl::shutdown()
+{
+  reactor()->cancel_timer(this, 0);
+}
+
+void AgentImpl::notify_shutdown()
+{
+  shutdown();
+}
 void AgentImpl::network_change() const
 {
   for (EndpointManagerMapType::const_iterator pos = endpoint_managers_.begin(),

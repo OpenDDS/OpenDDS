@@ -33,6 +33,8 @@ EndpointManager::EndpointManager(AgentImpl* a_agent_impl, Endpoint* a_endpoint) 
   change_password_task_(this)
 {
 
+  binding_request_.clear_transaction_id();
+
   // Set the type.
   agent_info_.type = FULL;
 

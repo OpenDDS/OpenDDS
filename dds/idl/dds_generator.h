@@ -690,4 +690,113 @@ std::string insert_cxx11_accessor_parens(
     ? full_var_name : full_var_name + "()";
 }
 
+/**
+ * Wrapper for Iterating Over Structure Fields
+ */
+class Fields {
+public:
+  class Iterator {
+  public:
+    typedef AST_Field* value_type;
+    typedef AST_Field** pointer;
+    typedef AST_Field*& reference;
+    typedef std::input_iterator_tag iterator_category;
+
+    explicit Iterator(AST_Structure* node = 0, unsigned pos = 0)
+    : node_(node)
+    , pos_(pos)
+    {
+      check();
+    }
+
+    bool valid() const {
+      return node_ && pos_ < node_->nfields();
+    }
+
+    void check()
+    {
+      if (!valid()) {
+        node_ = 0;
+        pos_ = 0;
+      }
+    }
+
+    unsigned pos() const
+    {
+      return pos_;
+    }
+
+    Iterator& operator++() // Prefix
+    {
+      if (node_) {
+        ++pos_;
+        check();
+      }
+      return *this;
+    }
+
+    Iterator operator++(int) // Postfix
+    {
+      Iterator prev(*this);
+      ++(*this);
+      return prev;
+    }
+
+    AST_Field* operator*() const
+    {
+      if (node_) {
+        AST_Field** field_ptrptr;
+        node_->field(field_ptrptr, pos_);
+        if (field_ptrptr) {
+          return *field_ptrptr;
+        }
+      }
+      return 0;
+    }
+
+    bool operator==(const Iterator& other) const
+    {
+      return node_ == other.node_ && pos_ == other.pos_;
+    }
+
+    bool operator!=(const Iterator& other) const
+    {
+      return !(*this == other);
+    }
+
+  private:
+    AST_Structure* node_;
+    unsigned pos_;
+  };
+
+  explicit Fields(AST_Structure* node = 0)
+  : node_(node)
+  {
+  }
+
+  AST_Structure* node() const
+  {
+    return node_;
+  }
+
+  Iterator begin() const
+  {
+    return Iterator(node_);
+  }
+
+  Iterator end() const
+  {
+    static Iterator end_value;
+    return end_value;
+  }
+
+  Iterator operator[](unsigned position) const
+  {
+    return Iterator(node_, position);
+  }
+
+private:
+  AST_Structure* node_;
+};
+
 #endif

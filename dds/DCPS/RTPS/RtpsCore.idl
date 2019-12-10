@@ -166,6 +166,7 @@ module OpenDDS {
     const IceAgentType_t ICE_LITE = 0x1;
 
     struct IceGeneral_t {
+      string key;
       IceAgentType_t agent_type;
       string username;
       string password;
@@ -178,6 +179,7 @@ module OpenDDS {
     const IceCandidateType_t ICE_RELAYED = 0x3;
 
     struct IceCandidate_t {
+      string key;
       DCPS::Locator_t locator;
       string foundation;
       unsigned long priority;

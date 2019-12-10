@@ -29,6 +29,7 @@
 
 #include "Recorder.h"
 #include "Replayer.h"
+
 #include <memory>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -46,6 +47,12 @@ class DataDurabilityCache;
 class Monitor;
 
 const char DEFAULT_ORB_NAME[] = "OpenDDS_DCPS";
+
+class ShutdownListener {
+public:
+  virtual ~ShutdownListener() {}
+  virtual void notify_shutdown() = 0;
+};
 
 /**
  * @class Service_Participant
@@ -79,6 +86,8 @@ public:
   ACE_Reactor* reactor();
 
   ACE_thread_t reactor_owner() const;
+
+  void set_shutdown_listener(ShutdownListener* listener);
 
   /**
    * Initialize the DDS client environment and get the
@@ -613,6 +622,8 @@ private:
 
   /// Used to track state of service participant
   bool shut_down_;
+
+  ShutdownListener* shutdown_listener_;
 
   /// Guard access to the internal maps.
   ACE_Recursive_Thread_Mutex maps_lock_;

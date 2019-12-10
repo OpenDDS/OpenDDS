@@ -57,14 +57,16 @@ tests/DCPS/DpShutdown/run_test.pl shmem: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_
 tests/DCPS/DpShutdown/run_test.pl udp: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/DpShutdown/run_test.pl multicast: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE !NO_MCAST
 tests/DCPS/Serializer/run_test.pl: !DCPS_MIN
+
 tests/DCPS/Compiler/idl_test1_main/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/Compiler/idl_test3_main/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/Compiler/C++11/idl_test1_main/run_test.pl: !DCPS_MIN CXX11
 tests/DCPS/Compiler/C++11/idl_test3_main/run_test.pl: !DCPS_MIN CXX11
-tests/DCPS/Compiler/annotations/topic_annotations_test_main/run_test.pl: !DCPS_MIN
-tests/DCPS/Compiler/annotations/is_topic_type_test/run_test.pl: !DCPS_MIN
-tests/DCPS/C++11/Messenger/run_test.pl: !DCPS_MIN CXX11
+tests/DCPS/Compiler/key_annotation/run_test.pl: !DCPS_MIN
+tests/DCPS/Compiler/is_topic_type/run_test.pl: !DCPS_MIN
 tests/DCPS/Compiler/rapidjson_generator/run_test.pl: RAPIDJSON
+
+tests/DCPS/C++11/Messenger/run_test.pl: !DCPS_MIN CXX11
 
 tests/DCPS/DcpsIntegration/run_test-integration.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/DcpsIntegration/run_test-topic.pl: !DCPS_MIN !DDS_NO_PERSISTENCE_PROFILE !DDS_NO_OWNERSHIP_PROFILE
@@ -397,4 +399,7 @@ tests/DCPS/RtpsRelay/Unit/run_test.pl: !DCPS_MIN CXX11 !NO_BUILT_IN_TOPICS !OPEN
 tests/DCPS/RtpsRelay/Smoke/run_test.pl: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE !IPV6
 tests/DCPS/RtpsRelay/Smoke/run_test.pl secure: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE !IPV6
 tests/DCPS/RtpsRelay/Smoke/run_test.pl join: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE !IPV6
+tests/DCPS/RtpsRelay/Smoke/run_test.pl single: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE !IPV6
 tests/DCPS/RtpsRelay/STUN/run_test.pl: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE !IPV6
+
+tests/DCPS/ParticipantLocationTopic/run_test.pl: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE !IPV6

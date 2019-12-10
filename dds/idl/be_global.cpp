@@ -5,26 +5,22 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "be_global.h"
-#include "be_util.h"
-#include "be_extern.h"
-#include "ast_generator.h"
-#include "global_extern.h"
-#include "idl_defines.h"
-#include "utl_err.h"
-#include "utl_string.h"
+#include <ast_generator.h>
+#include <global_extern.h>
+#include <idl_defines.h>
+#include <utl_err.h>
+#include <utl_string.h>
+#include <ast_decl.h>
+#include <ast_structure.h>
+#include <ast_field.h>
+#include <ast_union.h>
+#include <ast_annotation_decl.h>
+#include <ast_annotation_member.h>
 
-#include "ast_decl.h"
-#include "ast_structure.h"
-#include "ast_field.h"
-#include "ast_union.h"
-#include "ast_annotation_decl.h"
-#include "ast_annotation_member.h"
-
-#include "ace/OS_NS_strings.h"
-#include "ace/OS_NS_sys_stat.h"
-#include "ace/ARGV.h"
-#include "ace/OS_NS_stdlib.h"
+#include <ace/OS_NS_strings.h>
+#include <ace/OS_NS_sys_stat.h>
+#include <ace/ARGV.h>
+#include <ace/OS_NS_stdlib.h>
 
 #include <algorithm>
 #include <iostream>
@@ -33,6 +29,10 @@
 #include <string>
 #include <vector>
 #include <set>
+
+#include "be_global.h"
+#include "be_util.h"
+#include "be_extern.h"
 
 using namespace std;
 
@@ -615,14 +615,12 @@ BE_GlobalData::get_include_block(BE_GlobalData::stream_enum_t which)
   return ret.str();
 }
 
-bool
-BE_GlobalData::is_topic_type(AST_Decl* node)
+bool BE_GlobalData::is_topic_type(AST_Decl* node)
 {
   return builtin_annotations_["::@topic"]->find_on(node) || !is_nested(node);
 }
 
-bool
-BE_GlobalData::is_nested(AST_Decl* node)
+bool BE_GlobalData::is_nested(AST_Decl* node)
 {
   NestedAnnotation* nested = dynamic_cast<NestedAnnotation*>(
     builtin_annotations_["::@nested"]);
@@ -633,8 +631,7 @@ BE_GlobalData::is_nested(AST_Decl* node)
   return is_default_nested(node->defined_in());
 }
 
-bool
-BE_GlobalData::is_default_nested(UTL_Scope* scope)
+bool BE_GlobalData::is_default_nested(UTL_Scope* scope)
 {
   AST_Decl* module = dynamic_cast<AST_Decl*>(scope);
   DefaultNestedAnnotation* default_nested = dynamic_cast<DefaultNestedAnnotation*>(
@@ -650,32 +647,46 @@ BE_GlobalData::is_default_nested(UTL_Scope* scope)
   return root_default_nested_; // True if --default-nested was passed
 }
 
-bool
-BE_GlobalData::is_key(AST_Field* node)
+bool BE_GlobalData::check_key(AST_Field* node, bool& value)
 {
   KeyAnnotation* key = dynamic_cast<KeyAnnotation*>(builtin_annotations_["::@key"]);
-  return key->node_value(dynamic_cast<AST_Decl*>(node));
+  return key->node_value_exists(node, value);
 }
 
-bool
-BE_GlobalData::has_key(AST_Union* node)
+bool BE_GlobalData::has_key(AST_Union* node)
 {
   KeyAnnotation* key = dynamic_cast<KeyAnnotation*>(builtin_annotations_["::@key"]);
   return key->union_value(node);
 }
 
-void
-BE_GlobalData::warning(const char* filename, unsigned lineno, const char* msg)
+void BE_GlobalData::warning(const char* msg, const char* filename, unsigned lineno)
 {
   if (idl_global->print_warnings()) {
-    ACE_ERROR((LM_WARNING,
-      ACE_TEXT("Warning - %C: \"%C\", line %u: %C\n"),
-      idl_global->prog_name(), filename, lineno, msg));
+    if (filename) {
+      ACE_ERROR((LM_WARNING, ACE_TEXT("Warning - %C: \"%C\", line %u: %C\n"),
+        idl_global->prog_name(), filename, lineno, msg));
+    } else {
+      ACE_ERROR((LM_WARNING, ACE_TEXT("Warning - %C: %C\n"),
+        idl_global->prog_name(), msg));
+    }
   }
+  idl_global->err()->last_warning = UTL_Error::EIDL_MISC;
 }
 
-bool
-BE_GlobalData::warn_about_dcps_data_type()
+void BE_GlobalData::error(const char* msg, const char* filename, unsigned lineno)
+{
+  if (filename) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("Error - %C: \"%C\", line %u: %C\n"),
+      idl_global->prog_name(), filename, lineno, msg));
+  } else {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("Error - %C: %C\n"),
+      idl_global->prog_name(), msg));
+  }
+  idl_global->set_err_count(idl_global->err_count() + 1);
+  idl_global->err()->last_error = UTL_Error::EIDL_MISC;
+}
+
+bool BE_GlobalData::warn_about_dcps_data_type()
 {
   if (!warn_about_dcps_data_type_) {
     return false;

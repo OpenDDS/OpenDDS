@@ -497,6 +497,11 @@ void Message::generate_transaction_id()
   TheSecurityRegistry->fix_empty_default()->get_utility()->generate_random_bytes(transaction_id.data, sizeof(transaction_id.data));
 }
 
+void Message::clear_transaction_id()
+{
+  ACE_OS::memset(transaction_id.data, 0, sizeof(transaction_id.data));
+}
+
 std::vector<AttributeType> Message::unknown_comprehension_required_attributes() const
 {
   std::vector<AttributeType> retval;

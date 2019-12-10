@@ -38,6 +38,7 @@ namespace OpenDDS {
     typedef DataReaderImpl_T<DDS::ParticipantBuiltinTopicData> ParticipantBuiltinTopicDataDataReaderImpl;
     typedef DataReaderImpl_T<DDS::PublicationBuiltinTopicData> PublicationBuiltinTopicDataDataReaderImpl;
     typedef DataReaderImpl_T<DDS::SubscriptionBuiltinTopicData> SubscriptionBuiltinTopicDataDataReaderImpl;
+    typedef DataReaderImpl_T<OpenDDS::DCPS::ParticipantLocationBuiltinTopicData> ParticipantLocationBuiltinTopicDataDataReaderImpl;
     typedef DataReaderImpl_T<DDS::TopicBuiltinTopicData> TopicBuiltinTopicDataDataReaderImpl;
 
 #ifdef OPENDDS_SECURITY
@@ -1580,7 +1581,8 @@ namespace OpenDDS {
       struct DiscoveredParticipant {
 
         DiscoveredParticipant()
-        : bit_ih_(DDS::HANDLE_NIL)
+        : location_ih_(DDS::HANDLE_NIL)
+        , bit_ih_(DDS::HANDLE_NIL)
         , seq_reset_count_(0)
 #ifdef OPENDDS_SECURITY
         , has_last_stateless_msg_(false)
@@ -1602,6 +1604,7 @@ namespace OpenDDS {
           const MonotonicTimePoint& t,
           const SequenceNumber& seq)
         : pdata_(p)
+        , location_ih_(DDS::HANDLE_NIL)
         , last_seen_(t)
         , bit_ih_(DDS::HANDLE_NIL)
         , last_seq_(seq)
@@ -1615,6 +1618,16 @@ namespace OpenDDS {
         , crypto_handle_(DDS::HANDLE_NIL)
 #endif
         {
+          RepoId guid;
+          std::memcpy(guid.guidPrefix, p.participantProxy.guidPrefix, sizeof(p.participantProxy.guidPrefix));
+          guid.entityId = DCPS::ENTITYID_PARTICIPANT;
+          std::memcpy(location_data_.guid, guid.guidPrefix, sizeof(RepoId));
+          location_data_.location = 0;
+          location_data_.change_mask = 0;
+          location_data_.local_timestamp = 0;
+          location_data_.ice_timestamp = 0;
+          location_data_.relay_timestamp = 0;
+
 #ifdef OPENDDS_SECURITY
           security_info_.participant_security_attributes = 0;
           security_info_.plugin_participant_security_attributes = 0;
@@ -1622,6 +1635,9 @@ namespace OpenDDS {
         }
 
         DiscoveredParticipantData pdata_;
+        OpenDDS::DCPS::ParticipantLocationBuiltinTopicData location_data_;
+        DDS::InstanceHandle_t location_ih_;
+
         MonotonicTimePoint last_seen_;
         DDS::InstanceHandle_t bit_ih_;
         SequenceNumber last_seq_;
@@ -1650,7 +1666,6 @@ namespace OpenDDS {
         DDS::Security::ParticipantCryptoHandle crypto_handle_;
         DDS::Security::ParticipantCryptoTokenSeq crypto_tokens_;
 #endif
-
       };
 
       typedef OPENDDS_MAP_CMP(RepoId, DiscoveredParticipant,
@@ -1677,6 +1692,12 @@ namespace OpenDDS {
             bit->set_instance_state(iter->second.bit_ih_,
                                     DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
           }
+          ParticipantLocationBuiltinTopicDataDataReaderImpl* loc_bit = part_loc_bit();
+          // bit may be null if the DomainParticipant is shutting down
+          if (loc_bit && iter->second.location_ih_ != DDS::HANDLE_NIL) {
+            loc_bit->set_instance_state(iter->second.location_ih_,
+                                        DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
+          }
 #endif /* DDS_HAS_MINIMUM_BIT */
           if (DCPS_debug_level > 3) {
             GuidConverter conv(iter->first);
@@ -1688,15 +1709,25 @@ namespace OpenDDS {
       }
 
 #ifndef DDS_HAS_MINIMUM_BIT
-      ParticipantBuiltinTopicDataDataReaderImpl* part_bit()
-      {
-        if (!bit_subscriber_.in())
-          return 0;
+    DCPS::ParticipantBuiltinTopicDataDataReaderImpl* part_bit()
+    {
+      if (!bit_subscriber_.in())
+        return 0;
 
-        DDS::DataReader_var d =
-          bit_subscriber_->lookup_datareader(BUILT_IN_PARTICIPANT_TOPIC);
-        return dynamic_cast<ParticipantBuiltinTopicDataDataReaderImpl*>(d.in());
-      }
+      DDS::DataReader_var d =
+        bit_subscriber_->lookup_datareader(BUILT_IN_PARTICIPANT_TOPIC);
+      return dynamic_cast<ParticipantBuiltinTopicDataDataReaderImpl*>(d.in());
+    }
+
+    DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl* part_loc_bit()
+    {
+      if (!bit_subscriber_.in())
+        return 0;
+
+      DDS::DataReader_var d =
+        bit_subscriber_->lookup_datareader(DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC);
+      return dynamic_cast<ParticipantLocationBuiltinTopicDataDataReaderImpl*>(d.in());
+    }
 #endif /* DDS_HAS_MINIMUM_BIT */
 
       mutable ACE_Thread_Mutex lock_;
@@ -1763,6 +1794,11 @@ namespace OpenDDS {
           participant->lookup_topicdescription(BUILT_IN_SUBSCRIPTION_TOPIC);
         create_bit_dr(bit_sub_topic, BUILT_IN_SUBSCRIPTION_TOPIC_TYPE,
                       sub, dr_qos);
+
+    DDS::TopicDescription_var bit_part_loc_topic =
+      participant->lookup_topicdescription(BUILT_IN_PARTICIPANT_LOCATION_TOPIC);
+    create_bit_dr(bit_part_loc_topic, BUILT_IN_PARTICIPANT_LOCATION_TOPIC_TYPE,
+      sub, dr_qos);
 
         const DDS::ReturnCode_t ret = bit_subscriber->enable();
         if (ret != DDS::RETCODE_OK) {

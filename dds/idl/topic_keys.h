@@ -8,7 +8,10 @@
 #include <vector>
 
 class AST_Decl;
+class AST_Type;
 class AST_Structure;
+class AST_Field;
+class AST_Union;
 
 /**
  * Find Keys in Topic Types
@@ -89,7 +92,7 @@ public:
     Iterator(TopicKeys &parent);
 
     /**
-     * Create completely separate copy of another iterator
+     * Create a completely separate copy of another iterator
      */
     Iterator(const Iterator& other);
 
@@ -151,6 +154,9 @@ public:
     /// Element Count in the Array
     size_t element_count_;
 
+    /// Used in struct field key iteration
+    bool implied_keys_;
+
     /**
      * Internal Recursive Impl. of path()
      */
@@ -195,4 +201,5 @@ private:
   /// Have iterators recurse into structures
   bool recursive_;
 };
+
 #endif
