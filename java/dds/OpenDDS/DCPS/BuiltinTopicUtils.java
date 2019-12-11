@@ -1,4 +1,4 @@
-/*
+OpenDDSParticipantLocation/*
  *
  *
  * Distributed under the OpenDDS License.
@@ -19,6 +19,9 @@ public class BuiltinTopicUtils {
 
     public static final String BUILT_IN_PUBLICATION_TOPIC = "DCPSPublication";
     public static final String BUILT_IN_PUBLICATION_TOPIC_TYPE = "PUBLICATION_BUILT_IN_TOPIC_TYPE";
+
+    public static final String BUILT_IN_PARTICIPANT_LOCATION_TOPIC = "OpenDDSParticipantLocation";
+    public static final String BUILT_IN_PARTICIPANT_LOCATION_TOPIC_TYPE = "PARTICIPANT_LOCATION_BUILT_IN_TOPIC_TYPE";
 
     //
 
