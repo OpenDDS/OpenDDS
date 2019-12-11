@@ -45,7 +45,7 @@ public class ParticipantLocationTest {
       return;
     }
 
-    DataReader dr = builtinSubscriber.lookup_datareader("OpenDDSParticipantLocation");
+    DataReader dr = builtinSubscriber.lookup_datareader(BuiltinTopicUtils.BUILT_IN_PARTICIPANT_LOCATION_TOPIC);
     if (dr  == null) {
       System.err.println("ERROR: could not lookup datareader");
       return;
@@ -56,21 +56,6 @@ public class ParticipantLocationTest {
 
     int ret = dr.set_listener(locationListener, OpenDDS.DCPS.DEFAULT_STATUS_MASK.value);
     assert (ret == DDS.RETCODE_OK.value);
-
-    //----
-    DataReader pdr = builtinSubscriber.lookup_datareader("DCPSParticipant");
-    if (pdr  == null) {
-      System.err.println("ERROR: could not lookup datareader");
-      return;
-    }
-
-    ParticipantLocationListener plocationListener = new ParticipantLocationListener();
-    assert (plocationListener != null);
-
-    ret = pdr.set_listener(plocationListener, OpenDDS.DCPS.DEFAULT_STATUS_MASK.value);
-    assert (ret == DDS.RETCODE_OK.value);
-
-//----
 
     ParticipantLocationBuiltinTopicDataDataReader reader =
         ParticipantLocationBuiltinTopicDataDataReaderHelper.narrow(dr);
