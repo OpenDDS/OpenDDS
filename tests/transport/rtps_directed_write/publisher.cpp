@@ -1,5 +1,5 @@
 #include "TestMsg.h"
-#include "Domain.h"
+#include "AppConfig.h"
 
 #include "dds/DCPS/transport/framework/TransportSendListener.h"
 #include "dds/DCPS/transport/framework/TransportClient.h"
@@ -40,8 +40,8 @@
 class SimpleDataWriter : public TransportSendListener, public TransportClient
 {
 public:
-  SimpleDataWriter(const Domain& d, const LocatorSeq& locators)
-    : domain(d), callbacks_expected_(0)
+  SimpleDataWriter(const AppConfig& ac, const LocatorSeq& locators)
+    : config(ac), callbacks_expected_(0)
   {
     enable_transport(true, false); // (reliable, durable)
 
@@ -51,19 +51,19 @@ public:
     subscription.remote_data_[0].transport_type = "rtps_udp";
     setLocators(subscription.remote_data_[0].data, locators);
 
-    subscription.remote_id_ = domain.getSubRdrId(0);
+    subscription.remote_id_ = config.getSubRdrId(0);
     if (!associate(subscription, true)) {
       throw std::string("publisher failed to associate reader 1");
     }
-    subscription.remote_id_ = domain.getSubRdrId(1);
+    subscription.remote_id_ = config.getSubRdrId(1);
     if (!associate(subscription, true)) {
       throw std::string("publisher failed to associate reader 2");
     }
   }
 
   virtual ~SimpleDataWriter() {
-    disassociate(domain.getSubRdrId(0));
-    disassociate(domain.getSubRdrId(1));
+    disassociate(config.getSubRdrId(0));
+    disassociate(config.getSubRdrId(1));
   }
 
   void callbacksExpected(ssize_t n) { callbacks_expected_ = n; }
@@ -71,22 +71,22 @@ public:
 
   // Implementing TransportSendListener
   void data_delivered(const DataSampleElement*) {
-    ACE_DEBUG((LM_INFO, "(%P|%t) SimpleDataWriter::data_delivered()\n"));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) SimpleDataWriter::data_delivered()\n")));
     --callbacks_expected_;
   }
 
   void data_dropped(const DataSampleElement*, bool by_transport) {
-    ACE_DEBUG((LM_INFO, "(%P|%t) SimpleDataWriter::data_dropped(element, %d)\n",
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) SimpleDataWriter::data_dropped(element, %d)\n"),
       int(by_transport)));
     --callbacks_expected_;
   }
 
   void control_delivered(const Message_Block_Ptr&) { //sample
-    ACE_DEBUG((LM_INFO, "(%P|%t) SimpleDataWriter::control_delivered()\n"));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) SimpleDataWriter::control_delivered()\n")));
   }
 
   void control_dropped(const Message_Block_Ptr&, bool) { //(sample, dropped_by_transport)
-    ACE_DEBUG((LM_INFO, "(%P|%t) SimpleDataWriter::control_dropped()\n"));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) SimpleDataWriter::control_dropped()\n")));
   }
 
   void notify_publication_disconnected(const ReaderIdSeq&) {}
@@ -98,7 +98,7 @@ public:
 
   // Implementing TransportClient
   bool check_transport_qos(const TransportInst&) { return true; }
-  const RepoId& get_repo_id() const { return domain.getPubWtrId(); }
+  const RepoId& get_repo_id() const { return config.getPubWtrId(); }
   DDS::DomainId_t domain_id() const { return 0; }
   CORBA::Long get_priority_value(const AssociationData&) const { return 0; }
 
@@ -113,16 +113,16 @@ private:
     OpenDDS::RTPS::message_block_to_sequence(mb, data);
   }
 
-  const Domain& domain;
+  const AppConfig& config;
   ssize_t callbacks_expected_;
 };
 
 class DDS_TEST {
 public:
-  DDS_TEST(int argc, ACE_TCHAR* argv[]) : domain(argc, argv), msgSeqN(0) {
-    domain.setHeartbeatPeriod(100);
+  DDS_TEST(int argc, ACE_TCHAR* argv[]) : config(argc, argv), msgSeqN(0) {
+    config.setHeartbeatPeriod(100);
 
-    ACE_INET_Addr remoteAddr = domain.getHostAddress();
+    ACE_INET_Addr remoteAddr = config.getHostAddress();
     locators.length(1);
     locators[0].kind = OpenDDS::RTPS::address_to_kind(remoteAddr);
     locators[0].port = remoteAddr.get_port_number();
@@ -145,7 +145,7 @@ private:
     const std::time_t seconds = t.sec();
     std::string ts(ACE_TEXT_ALWAYS_CHAR(ACE_OS::ctime_r(&seconds, buffer, 32)));
     ts.erase(ts.size() - 1); // remove \n from ctime()
-    ACE_DEBUG((LM_INFO, "Sending with timestamp %C %q usec\n", ts.c_str(), ACE_INT64(t.usec())));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("Sending with timestamp %C %q usec\n"), ts.c_str(), ACE_INT64(t.usec())));
   }
 
   bool writeToSocket(const TestMsg& msg, const CORBA::Octet flags = DE) const;
@@ -160,7 +160,7 @@ private:
     }
   }
 
-  Domain domain;
+  AppConfig config;
   LocatorSeq locators;
   mutable CORBA::ULong msgSeqN;
 };
@@ -169,7 +169,7 @@ using namespace OpenDDS::RTPS;
 
 bool DDS_TEST::writeToSocket(const TestMsg& msg, const CORBA::Octet flags) const
 {
-  const OpenDDS::RTPS::GuidPrefix_t& local_prefix = domain.getPubWtrId().guidPrefix;
+  const OpenDDS::RTPS::GuidPrefix_t& local_prefix = config.getPubWtrId().guidPrefix;
   const Header hdr = { {'R', 'T', 'P', 'S'}, PROTOCOLVERSION, VENDORID_OPENDDS,
     {local_prefix[0], local_prefix[1], local_prefix[2], local_prefix[3],
      local_prefix[4], local_prefix[5], local_prefix[6], local_prefix[7],
@@ -183,10 +183,10 @@ bool DDS_TEST::writeToSocket(const TestMsg& msg, const CORBA::Octet flags) const
      static_cast<ACE_CDR::ULong>(now.usec() * conv)} };
   ::CORBA::UShort sz = 20 + (flags == DEQ ? 24 : 0) + 12 + ACE_OS::strlen(msg.value) + 1;
   DataSubmessage ds = { {DATA, flags, sz}, 0, 16, ENTITYID_UNKNOWN,
-    domain.getPubWtrId().entityId, {0, ++msgSeqN}, ParameterList() };
+    config.getPubWtrId().entityId, {0, ++msgSeqN}, ParameterList() };
   if(flags == DEQ) {
     ds.inlineQos.length(1);
-    ds.inlineQos[0].guid(domain.getSubRdrId(1));
+    ds.inlineQos[0].guid(config.getSubRdrId(1));
     ds.inlineQos[0]._d(OpenDDS::RTPS::PID_DIRECTED_WRITE);
   }
 
@@ -201,25 +201,21 @@ bool DDS_TEST::writeToSocket(const TestMsg& msg, const CORBA::Octet flags) const
   Serializer ser(&mb, hostIsBigEndian, Serializer::ALIGN_CDR);
   bool ok = (ser << hdr) && (ser << it) && (ser << ds) && (ser << encap) && (ser << msg);
   if (!ok) {
-    ACE_DEBUG((LM_INFO, "ERROR: failed to serialize RTPS message\n"));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("ERROR: failed to serialize RTPS message\n")));
     return false;
   }
 
   ACE_INET_Addr local_addr;
   ACE_SOCK_Dgram sock;
   if (!open_appropriate_socket_type(sock, local_addr)) {
-    ACE_ERROR_RETURN((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: ")
-      ACE_TEXT("publisher: open_appropriate_socket_type:")
-      ACE_TEXT("%m\n")),
-      false);
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: open_appropriate_socket_type:%m\n")), false);
   }
 
   ACE_INET_Addr dest;
   locator_to_address(dest, locators[0], local_addr.get_type() != AF_INET);
   ssize_t res = sock.send(mb.rd_ptr(), mb.length(), dest);
   if (res < 0) {
-    ACE_DEBUG((LM_INFO, "ERROR: in sock.send()\n"));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("ERROR: in sock.send()\n")));
     return false;
   } else {
     std::ostringstream oss;
@@ -234,7 +230,7 @@ void DDS_TEST::serializeData(DataSampleElement& ds, const TestMsg& msg) const
 {
   DataSampleHeader& dsh = ds.header_;
   dsh.message_id_ = SAMPLE_DATA;
-  dsh.publication_id_ = domain.getPubWtrId();
+  dsh.publication_id_ = config.getPubWtrId();
   dsh.sequence_ = ++msgSeqN;
   const ACE_Time_Value tv = ACE_OS::gettimeofday();
   log_time(tv);
@@ -261,20 +257,20 @@ void DDS_TEST::serializeData(DataSampleElement& ds, const TestMsg& msg) const
 
 int DDS_TEST::run()
 {
-  SimpleDataWriter sdw(domain, locators);
+  SimpleDataWriter sdw(config, locators);
 
   if(!writeToSocket(TestMsg(10, "TestMsg"))) {
-    ACE_DEBUG((LM_INFO, "ERROR: failed to write to socket\n"));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("ERROR: failed to write to socket\n")));
   }
   if(!writeToSocket(TestMsg(10, "Directed Write"), DEQ)) {
-    ACE_DEBUG((LM_INFO, "ERROR: failed to write to socket\n"));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("ERROR: failed to write to socket\n")));
   }
 
   // send sample data through the OpenDDS transport
   DataSampleElement elements[] = {
-    DataSampleElement(domain.getPubWtrId(), &sdw, OpenDDS::DCPS::PublicationInstance_rch()),
-    DataSampleElement(domain.getPubWtrId(), &sdw, OpenDDS::DCPS::PublicationInstance_rch()),
-    DataSampleElement(domain.getPubWtrId(), &sdw, OpenDDS::DCPS::PublicationInstance_rch()),
+    DataSampleElement(config.getPubWtrId(), &sdw, OpenDDS::DCPS::PublicationInstance_rch()),
+    DataSampleElement(config.getPubWtrId(), &sdw, OpenDDS::DCPS::PublicationInstance_rch()),
+    DataSampleElement(config.getPubWtrId(), &sdw, OpenDDS::DCPS::PublicationInstance_rch()),
   };
 
   serializeData(elements[0], TestMsg(10, "Through OpenDDS Transport"));
@@ -292,7 +288,7 @@ int DDS_TEST::run()
   }
 
   // Allow enough time for a HEARTBEAT message to be generated
-  ACE_OS::sleep((domain.getHeartbeatPeriod() * 2.0).value());
+  ACE_OS::sleep((config.getHeartbeatPeriod() * 2.0).value());
 
   return 0;
 }

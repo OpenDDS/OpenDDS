@@ -1,5 +1,5 @@
 #include "TestMsg.h"
-#include "Domain.h"
+#include "AppConfig.h"
 
 #include "dds/DCPS/transport/framework/TransportReceiveListener.h"
 #include "dds/DCPS/transport/framework/TransportClient.h"
@@ -26,10 +26,10 @@
 class SimpleDataReader : public TransportReceiveListener, public TransportClient
 {
 public:
-  SimpleDataReader(const Domain& d, const int readerIndex)
-    : domain(d), index(readerIndex), done_(false), seq_()
+  SimpleDataReader(const AppConfig& ac, const int readerIndex)
+    : config(ac), index(readerIndex), done_(false), seq_()
   {
-    enable_transport(domain.readersReliable(), false); //(reliable, durable)
+    enable_transport(config.readersReliable(), false); //(reliable, durable)
 
     // Write a file so that test script knows we're ready
     FILE *file = std::fopen("subready.txt", "w");
@@ -38,7 +38,7 @@ public:
     std::cerr << "**Ready written to subready.txt. ";
 
     AssociationData publication;
-    publication.remote_id_ = domain.getPubWtrId();
+    publication.remote_id_ = config.getPubWtrId();
     publication.remote_reliable_ = true;
     publication.remote_data_.length(1);
     publication.remote_data_[0].transport_type = "rtps_udp";
@@ -53,7 +53,7 @@ public:
     std::cerr << "associated.\n";
   }
 
-  virtual ~SimpleDataReader() { disassociate(domain.getPubWtrId()); }
+  virtual ~SimpleDataReader() { disassociate(config.getPubWtrId()); }
   bool done() { return done_; }
 
   // Implementing TransportReceiveListener
@@ -67,7 +67,7 @@ public:
 
   // Implementing TransportClient
   bool check_transport_qos(const TransportInst&) { return true; }
-  const RepoId& get_repo_id() const { return domain.getSubRdrId(index); }
+  const RepoId& get_repo_id() const { return config.getSubRdrId(index); }
   DDS::DomainId_t domain_id() const { return 0; }
   CORBA::Long get_priority_value(const AssociationData&) const { return 0; }
 
@@ -80,7 +80,7 @@ private:
     bool ok = deserializeEncapsulationHeader(s);
     ok &= (s >> data);
     if (!ok) {
-      ACE_ERROR((LM_ERROR, "ERROR: failed to deserialize data\n"));
+      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: failed to deserialize data\n")));
     }
     return ok;
   }
@@ -88,12 +88,12 @@ private:
     bool ok = deserializeEncapsulationHeader(s);
     ok &= (s >> OpenDDS::DCPS::KeyOnly<TestMsg>(data));
     if (!ok) {
-      ACE_ERROR((LM_ERROR, "ERROR: failed to deserialize key data\n"));
+      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: failed to deserialize key data\n")));
     }
     return ok;
   }
 
-  const Domain& domain;
+  const AppConfig& config;
   const int index;
   bool done_;
   SequenceNumber seq_;
@@ -114,7 +114,8 @@ void SimpleDataReader::data_received(const ReceivedDataSample& sample)
   }
 
   if (data.key == 99) {
-    ACE_DEBUG((LM_INFO, "%C received terminating sample\n", OPENDDS_STRING(GuidConverter(get_repo_id())).c_str()));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("%C received terminating sample\n"),
+      OPENDDS_STRING(GuidConverter(get_repo_id())).c_str()));
     done_ = true;
     return;
   }
@@ -136,27 +137,25 @@ void SimpleDataReader::data_received(const ReceivedDataSample& sample)
     "publication = " << OPENDDS_STRING(pub) << "\n\t"
     "data.key = "    << data.key << "\n\t"
     "data.value = "  << data.value << "\n";
-  ACE_DEBUG((LM_INFO, "%C", oss.str().c_str()));
+  ACE_DEBUG((LM_INFO, ACE_TEXT("%C"), oss.str().c_str()));
 
   if (!sample.header_.byte_order_ ||
-      pub.checksum() != GuidConverter(domain.getPubWtrId()).checksum()) {
-    ACE_ERROR((LM_ERROR, "ERROR: DataSampleHeader malformed\n"));
+      pub.checksum() != GuidConverter(config.getPubWtrId()).checksum()) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: DataSampleHeader malformed\n")));
   }
 
   if (sample.header_.sequence_ == 2 && index != 1) {
-    ACE_ERROR((LM_ERROR, "ERROR: received unmatched Directed Write message\n"));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: received unmatched Directed Write message\n")));
   }
 }
 
 class DDS_TEST {
 public:
-  DDS_TEST(int argc, ACE_TCHAR* argv[]) : domain(argc, argv) {
-    domain.setHostAddress();
-  }
+  DDS_TEST(int argc, ACE_TCHAR* argv[]) : config(argc, argv, true) {}
 
   int run() {
-    SimpleDataReader reader0(domain, 0);
-    SimpleDataReader reader1(domain, 1);
+    SimpleDataReader reader0(config, 0);
+    SimpleDataReader reader1(config, 1);
     while (!(reader0.done() && reader1.done())) {
       ACE_OS::sleep(1);
     }
@@ -164,7 +163,7 @@ public:
   }
 
 private:
-  Domain domain;
+  AppConfig config;
 };
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])

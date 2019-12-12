@@ -374,7 +374,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
         OPENDDS_STRING included_ids;
         bool first = true;
         RepoIdSet::iterator iter = readers_selected_.begin();
-        while(iter != readers_selected_.end()) {
+        while (iter != readers_selected_.end()) {
           included_ids += (first ? "" : "\n") + OPENDDS_STRING(GuidConverter(*iter));
           first = false;
           ++iter;
@@ -382,7 +382,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
         OPENDDS_STRING excluded_ids;
         first = true;
         RepoIdSet::iterator iter2 = this->readers_withheld_.begin();
-        while(iter2 != readers_withheld_.end()) {
+        while (iter2 != readers_withheld_.end()) {
           excluded_ids += (first ? "" : "\n") + OPENDDS_STRING(GuidConverter(*iter2));
           first = false;
           ++iter2;

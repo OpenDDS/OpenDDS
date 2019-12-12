@@ -3,7 +3,7 @@ project(*pub) : dcpsexe, dcps_test, dcps_rtps_udp {
   exename = publisher
 
   Source_Files {
-    Domain.cpp
+    AppConfig.cpp
     publisher.cpp
   }
 }
@@ -13,7 +13,7 @@ project(*sub) : dcpsexe, dcps_test, dcps_rtps_udp {
   exename = subscriber
 
   Source_Files {
-    Domain.cpp
+    AppConfig.cpp
     subscriber.cpp
   }
 }
