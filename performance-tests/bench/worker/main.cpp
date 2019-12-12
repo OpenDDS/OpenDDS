@@ -3,6 +3,13 @@
 #include <ace/Proactor.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 
+#ifdef ACE_AS_STATIC_LIBS
+#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#include <dds/DCPS/transport/udp/Udp.h>
+#include <dds/DCPS/transport/tcp/Tcp.h>
+#include <dds/DCPS/transport/multicast/Multicast.h>
+#endif
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 #include "BenchC.h"
