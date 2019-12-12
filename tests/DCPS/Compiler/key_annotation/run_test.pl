@@ -11,8 +11,6 @@ use strict;
 
 my $name = 'key_annotation';
 
-PerlDDS::add_lib_path("../${name}_lib");
-
 my $status = 0;
 my $TESTDVR = PerlDDS::create_process ($name);
 
