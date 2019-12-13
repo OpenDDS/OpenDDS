@@ -15,16 +15,26 @@ import java.util.ArrayList;
 
 public class ParticipantLocationListener extends DDS._DataReaderListenerLocalBase {
 
-    public ParticipantLocationListener() {
-      System.out.println("creating participant listener");
+    private String id;
+    private int[] location_mask;
+
+    private String guidFormatter(byte[] guid) {
+      StringBuilder g = new StringBuilder();
+      for (int ctr = 0; ctr < guid.length; ++ctr) {
+        g.append(String.format("%02x", guid[ctr]));
+        if ((ctr + 1) %4 == 0 && ctr + 1 < guid.length) {
+          g.append(".");
+        }
+      }
+      return g.toString();
+    }
+
+    public ParticipantLocationListener(String id, int[] location_mask) {
+      this.id = id;
+      this.location_mask = location_mask;
     }
 
     public synchronized void on_data_available(DDS.DataReader reader) {
-      System.out.println("on_data_available");
-/*
-      // 1.  Narrow the DataReader to an ParticipantLocationBuiltinTopicDataDataReader
-      // 2.  Read the samples from the data reader
-      // 3.  Print out the contents of the samples
       ParticipantLocationBuiltinTopicDataDataReader bitDataReader =
         ParticipantLocationBuiltinTopicDataDataReaderHelper.narrow(reader);
 
@@ -34,26 +44,59 @@ public class ParticipantLocationListener extends DDS._DataReaderListenerLocalBas
         System.exit(1);
       }
 
-      ParticipantLocationBuiltinTopicDataHolder loc =
-        new ParticipantLocationBuiltinTopicDataHolder(new ParticipantLocationBuiltinTopicData());
-      SampleInfoHolder sih = new SampleInfoHolder(new SampleInfo(0, 0, 0,
+      ParticipantLocationBuiltinTopicDataHolder participant =
+        new ParticipantLocationBuiltinTopicDataHolder(
+          new ParticipantLocationBuiltinTopicData(new byte[16], 0, 0, "", 0, "", 0, "", 0));
+      SampleInfoHolder si = new SampleInfoHolder(new SampleInfo(0, 0, 0,
         new DDS.Time_t(), 0, 0, 0, 0, 0, 0, 0, false, 0));
-      int status = bitDataReader.take_next_sample(loc, sih);
 
-      if (status == RETCODE_OK.value) {
+      for (int status = bitDataReader.read_next_sample(participant, si);
+        status == DDS.RETCODE_OK.value;
+        status = bitDataReader.read_next_sample(participant, si)) {
 
-        System.out.println("local = "
-                                + loc.value.local_addr);
-        System.out.println("relay = "
-                                + loc.value.relay_addr);
-        System.out.println("ice =  "
-                                + loc.value.ice_addr);
+        System.out.println("== " + id + " Participant Location ==");
+        System.out.println(" valid: " + si.value.valid_data);
+        System.out.println("  guid: " + guidFormatter(participant.value.guid));
+
+        String locations = "";
+        if ((participant.value.location & OpenDDS.DCPS.LOCATION_LOCAL.value) != 0) {
+          locations = "LOCAL ";
+        }
+        if ((participant.value.location & OpenDDS.DCPS.LOCATION_ICE.value) != 0) {
+          locations += "ICE ";
+        }
+        if ((participant.value.location & OpenDDS.DCPS.LOCATION_RELAY.value) != 0) {
+          locations += "RELAY ";
+        }
+
+        System.out.println("   loc: " + locations);
+
+        String masks = "";
+        if ((participant.value.change_mask & OpenDDS.DCPS.LOCATION_LOCAL.value) != 0) {
+          masks = "LOCAL ";
+        }
+        if ((participant.value.change_mask & OpenDDS.DCPS.LOCATION_ICE.value) != 0) {
+          masks += "ICE ";
+        }
+        if ((participant.value.change_mask & OpenDDS.DCPS.LOCATION_RELAY.value) != 0) {
+          masks += "RELAY ";
+        }
+
+        System.out.println("  mask: " + masks);
+
+        System.out.println(" local: " + participant.value.local_addr);
+        System.out.println("      : " + participant.value.local_timestamp);
+        System.out.println("   ice: " + participant.value.ice_addr);
+        System.out.println("      : " + participant.value.ice_timestamp);
+        System.out.println(" relay: " + participant.value.relay_addr);
+        System.out.println("      : " + participant.value.relay_timestamp);
+
+        // update locations seen
+        location_mask[0] |= participant.value.location;
       }
-      else {
-        System.err.println("Error: " + status);
-      }
-    */
+
     }
+
 
     public void on_requested_deadline_missed(DDS.DataReader reader, DDS.RequestedDeadlineMissedStatus status) {
         System.err.println("ParticipantLocationListener.on_requested_deadline_missed");
