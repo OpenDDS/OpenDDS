@@ -1,4 +1,4 @@
-OpenDDSParticipantLocation/*
+/*
  *
  *
  * Distributed under the OpenDDS License.
