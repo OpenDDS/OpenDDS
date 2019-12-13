@@ -7,11 +7,7 @@
 
 import DDS.*;
 import OpenDDS.DCPS.*;
-import OpenDDS.DCPS.transport.*;
-import org.omg.CORBA.StringSeqHolder;
 import Messenger.*;
-import java.util.ArrayList;
-
 
 public class ParticipantLocationListener extends DDS._DataReaderListenerLocalBase {
 

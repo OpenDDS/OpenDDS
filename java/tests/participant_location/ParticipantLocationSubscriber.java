@@ -7,9 +7,7 @@
 
 import DDS.*;
 import OpenDDS.DCPS.*;
-
 import org.omg.CORBA.StringSeqHolder;
-
 import Messenger.*;
 
 public class ParticipantLocationSubscriber {
