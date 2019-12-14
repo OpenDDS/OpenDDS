@@ -1219,12 +1219,6 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
     SequenceNumber seq;
     seq.setValue(data.writerSN.high, data.writerSN.low);
 
-    if (link->receive_strategy()->withholdDirectedWrite(data, id_)) {
-      info.recvd_.insert(seq);
-      link->deliver_held_data(id_, info, durable_);
-      return false;
-    }
-
     info.frags_.erase(seq);
     if (info.recvd_.contains(seq)) {
       if (Transport_debug_level > 5) {

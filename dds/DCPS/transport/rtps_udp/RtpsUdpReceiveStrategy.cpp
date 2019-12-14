@@ -337,6 +337,10 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
     if (!check_encoded(data.writerId)) {
       break;
     }
+
+    RepoIdSet directedWriteReaders;
+    getDirectedWriteReaders(directedWriteReaders, data);
+
     recvd_sample_ = &sample;
     readers_selected_.clear();
     readers_withheld_.clear();
@@ -344,9 +348,6 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
     // in-order delivery, link_->received() will add it to readers_withheld_ otherwise
     // it will be added to readers_selected_
     link_->received(data, receiver_.source_guid_prefix_);
-    if (readers_selected_.empty() && readers_withheld_.empty()) {
-      listDirectedWriteReaders(data);
-    }
     recvd_sample_ = 0;
 
     if (data.readerId != ENTITYID_UNKNOWN) {
@@ -363,10 +364,14 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
         }
 #ifdef OPENDDS_SECURITY
         if (decode_payload(sample, data)) {
-          link_->data_received(sample, reader);
+          if (directedWriteReaders.empty() || directedWriteReaders.find(reader) != directedWriteReaders.end()) {
+           link_->data_received(sample, reader);
+          }
         }
 #else
-        link_->data_received(sample, reader);
+        if (directedWriteReaders.empty() || directedWriteReaders.find(reader) != directedWriteReaders.end()) {
+          link_->data_received(sample, reader);
+        }
 #endif
       }
     } else {
@@ -402,10 +407,18 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
 
 #ifdef OPENDDS_SECURITY
         if (decode_payload(sample, data)) {
-          link_->data_received(sample);
+          if (directedWriteReaders.empty()) {
+            link_->data_received(sample);
+          } else {
+            link_->data_received_include(sample, directedWriteReaders);
+          }
         }
 #else
-        link_->data_received(sample);
+        if (directedWriteReaders.empty()) {
+          link_->data_received(sample);
+        } else {
+          link_->data_received_include(sample, directedWriteReaders);
+        }
 #endif
       } else {
         if (Transport_debug_level > 5) {
@@ -416,10 +429,26 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
 
 #ifdef OPENDDS_SECURITY
         if (decode_payload(sample, data)) {
-          link_->data_received_include(sample, readers_selected_);
+          if (directedWriteReaders.empty()) {
+            link_->data_received_include(sample, readers_selected_);
+          } else {
+            for (RepoIdSet::iterator i = directedWriteReaders.begin(); i != directedWriteReaders.end(); ++i) {
+              if (readers_selected_.find(*i) != readers_selected_.end()) {
+                link_->data_received(sample, *i);
+              }
+            }
+          }
         }
 #else
-        link_->data_received_include(sample, readers_selected_);
+        if (directedWriteReaders.empty()) {
+          link_->data_received_include(sample, readers_selected_);
+        } else {
+          for (RepoIdSet::iterator i = directedWriteReaders.begin(); i != directedWriteReaders.end(); ++i) {
+            if (readers_selected_.find(*i) != readers_selected_.end()) {
+              link_->data_received(sample, *i);
+            }
+          }
+        }
 #endif
       }
     }
@@ -814,36 +843,15 @@ RtpsUdpReceiveStrategy::do_not_withhold_data_from(const RepoId& sub_id)
   readers_selected_.insert(sub_id);
 }
 
-// add readerID to readers_withheld_ and return true if a DirectedWrite message is not to this reader.
-bool RtpsUdpReceiveStrategy::withholdDirectedWrite(const RTPS::DataSubmessage& ds, const RepoId& readerID)
+bool RtpsUdpReceiveStrategy::getDirectedWriteReaders(RepoIdSet& directedWriteReaders, const RTPS::DataSubmessage& ds)
 {
-  bool directedWrite = false;
-  bool match = false;
-  for (CORBA::ULong i = 0; i < ds.inlineQos.length() && !match; ++i) {
-    if (ds.inlineQos[i]._d() == RTPS::PID_DIRECTED_WRITE) {
-      directedWrite = true;
-      if (ds.inlineQos[i].guid() == readerID) {
-        match = true;
-      }
-    }
-  }
-  if (directedWrite && !match) {
-    readers_withheld_.insert(readerID);
-    return true;
-  }
-  return false;
-}
-
-// Fill readers_selected_ with all the intended readers, if this is a DirectedWrite message.
-bool RtpsUdpReceiveStrategy::listDirectedWriteReaders(const RTPS::DataSubmessage& ds)
-{
-  readers_selected_.clear();
+  directedWriteReaders.clear();
   for (CORBA::ULong i = 0; i < ds.inlineQos.length(); ++i) {
     if (ds.inlineQos[i]._d() == RTPS::PID_DIRECTED_WRITE) {
-      readers_selected_.insert(ds.inlineQos[i].guid());
+      directedWriteReaders.insert(ds.inlineQos[i].guid());
     }
   }
-  return !readers_selected_.empty();
+  return !directedWriteReaders.empty();
 }
 
 bool
