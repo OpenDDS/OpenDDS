@@ -76,7 +76,7 @@ public:
                                       bool& stop);
 
 private:
-  bool getDirectedWriteReaders(RepoIdSet& directedWriteReaders, const RTPS::DataSubmessage& ds);
+  bool getDirectedWriteReaders(RepoIdSet& directedWriteReaders, const RTPS::DataSubmessage& ds) const;
 
   virtual ssize_t receive_bytes(iovec iov[],
                                 int n,

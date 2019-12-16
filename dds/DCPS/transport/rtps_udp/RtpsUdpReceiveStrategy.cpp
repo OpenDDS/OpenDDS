@@ -843,7 +843,7 @@ RtpsUdpReceiveStrategy::do_not_withhold_data_from(const RepoId& sub_id)
   readers_selected_.insert(sub_id);
 }
 
-bool RtpsUdpReceiveStrategy::getDirectedWriteReaders(RepoIdSet& directedWriteReaders, const RTPS::DataSubmessage& ds)
+bool RtpsUdpReceiveStrategy::getDirectedWriteReaders(RepoIdSet& directedWriteReaders, const RTPS::DataSubmessage& ds) const
 {
   directedWriteReaders.clear();
   for (CORBA::ULong i = 0; i < ds.inlineQos.length(); ++i) {
