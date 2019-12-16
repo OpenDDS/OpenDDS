@@ -6,7 +6,7 @@ using namespace OpenDDS::DCPS;
 struct TestMsg {
   ACE_CDR::ULong key;
   TAO::String_Manager value;
-  TestMsg() : key(0), value(ACE_TEXT("")) {}
+  TestMsg() : key(0), value("") {}
   TestMsg(ACE_CDR::ULong msgKey, TAO::String_Manager msgValue)
     : key(msgKey), value(msgValue) {}
 };
