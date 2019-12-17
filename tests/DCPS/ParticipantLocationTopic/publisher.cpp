@@ -34,32 +34,6 @@
 
 #include <iostream>
 
-bool check_for_ice = true;
-
-int parse_args (int argc, ACE_TCHAR *argv[])
-{
-  ACE_Get_Opt get_opts (argc, argv, ACE_TEXT ("n"));
-  int c;
-
-  while ((c = get_opts ()) != -1)
-    switch (c)
-      {
-      case 'n':
-        check_for_ice = false;
-        break;
-      case '?':
-      default:
-        ACE_ERROR_RETURN ((LM_ERROR,
-                           "usage:  %s "
-                           "-n do not check for ICE connections"
-                           "\n",
-                           argv [0]),
-                          -1);
-      }
-  // Indicates successful parsing of the command line
-  return 0;
-}
-
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   DDS::DomainParticipantFactory_var dpf;
@@ -72,9 +46,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     {
       // Initialize DomainParticipantFactory
       dpf = TheParticipantFactoryWithArgs(argc, argv);
-
-      if( parse_args(argc, argv) != 0)
-      return 1;
 
       DDS::DomainParticipantQos part_qos;
       dpf->get_default_participant_qos(part_qos);
@@ -207,23 +178,17 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       delete writer;
 
       // check that all locations received
-      unsigned long all = OpenDDS::DCPS::LOCATION_LOCAL | OpenDDS::DCPS::LOCATION_RELAY;
-      std::cerr << "Publisher checking for connection locations LOCAL, RELAY";
+      unsigned long local_relay = OpenDDS::DCPS::LOCATION_LOCAL | OpenDDS::DCPS::LOCATION_RELAY;
+      unsigned long local_relay_ice = local_relay | OpenDDS::DCPS::LOCATION_ICE;
 
-      if (check_for_ice) {
-        #ifdef OPENDDS_SECURITY
-        all |= OpenDDS::DCPS::LOCATION_ICE;
-        std::cerr << ", ICE";
-        #endif
-      }
-      std::cerr << std::endl;
-
-      if (locations == all) {
+      // check for local and relay first || check for local, relay and ice
+      if (locations == local_relay || locations == local_relay_ice) {
         status = EXIT_SUCCESS;
       }
       else {
         std::cerr << "Error in publisher: One or more locations missing. Location mask "
-                  << locations << " != " << all <<  "." << std::endl;
+                  << locations << " != " << local_relay << " (local & relay) and  "
+                  << locations << " != " << local_relay_ice <<  " (local, relay & ice)." << std::endl;
         status = EXIT_FAILURE;
       }
     }
