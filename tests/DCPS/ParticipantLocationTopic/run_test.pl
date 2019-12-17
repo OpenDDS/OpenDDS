@@ -27,11 +27,9 @@ $test->{add_transport_config} = 0;
 my $pub_sub_ini = "rtps.ini";
 
 foreach my $i (@ARGV) {
-
-if ($i eq 'noice')
-    {
-      $pub_sub_ini = 'rtps_no_ice.ini';
-    }
+  if ($i eq 'noice' || $i eq '-noice') {
+    $pub_sub_ini = 'rtps_no_ice.ini';
+  }
 }
 
 

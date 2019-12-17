@@ -182,8 +182,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       unsigned long local_relay_ice = local_relay | OpenDDS::DCPS::LOCATION_ICE;
 
       // check for local and relay first || check for local, relay and ice
-      if (locations == local_relay || locations == local_relay_ice) {
+      if (locations == local_relay) {
         status = EXIT_SUCCESS;
+        std::cerr << "Publisher success. Found locations LOCAL and RELAY." << std::endl;
+      }
+      else if (locations == local_relay_ice) {
+        status = EXIT_SUCCESS;
+        std::cerr << "Publisher success. Found locations LOCAL, RELAY and ICE." << std::endl;
       }
       else {
         std::cerr << "Error in publisher: One or more locations missing. Location mask "

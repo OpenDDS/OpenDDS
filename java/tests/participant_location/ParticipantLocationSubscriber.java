@@ -105,8 +105,13 @@ public class ParticipantLocationSubscriber {
     boolean success = false;
     int localAndRelay = OpenDDS.DCPS.LOCATION_LOCAL.value | OpenDDS.DCPS.LOCATION_RELAY.value;
     int localRelayIce = localAndRelay | OpenDDS.DCPS.LOCATION_ICE.value;
-    if (location_mask[0] == localAndRelay || location_mask[0] == localRelayIce) {
+    if (location_mask[0] == localAndRelay) {
       success = true;
+      System.out.println("Publisher success. Found locations LOCAL and RELAY");
+    }
+    else if (location_mask[0] == localRelayIce) {
+      success = true;
+      System.out.println("Publisher success. Found locations LOCAL, RELAY and ICE");
     }
 
     // cleanup
