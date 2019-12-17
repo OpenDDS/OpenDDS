@@ -117,6 +117,13 @@ namespace {
     }
   }
 
+  std::string string_type(Classification cls)
+  {
+    return be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11 ?
+      ((cls & CL_WIDE) ? "std::wstring" : "std::string") :
+      (cls & CL_WIDE) ? "TAO::WString_Manager" : "TAO::String_Manager";
+  }
+
   std::string
   to_cxx_type(AST_Type* type, int& size)
   {
@@ -127,8 +134,7 @@ namespace {
     }
     if (cls & CL_STRING) {
       size = 4; // encoding of str length is 4 bytes
-      return ((cls & CL_WIDE) ? "TAO::W" : "TAO::")
-        + std::string("String_Manager");
+      return string_type(cls);
     }
     if (cls & CL_PRIMITIVE) {
       type = resolveActualType(type);
@@ -191,8 +197,8 @@ namespace {
     const std::string cxx_type = to_cxx_type(type, size);
     if (cls & CL_SCALAR) {
       type = resolveActualType(type);
-      const std::string val =
-        (cls & CL_STRING) ? "val.out()" : getWrapper("val", type, WD_INPUT);
+      const std::string val = (cls & CL_STRING) ? (use_cxx11 ? "val" : "val.out()")
+        : getWrapper("val", type, WD_INPUT);
       be_global->impl_ <<
         "    if (std::strcmp(field, \"" << fieldName << "\") == 0) {\n"
         "      " << cxx_type << " val;\n"
@@ -306,7 +312,7 @@ namespace {
     if (!cls) return; // skip CL_UNKNOWN types
     const char* fieldName = field->local_name()->get_string();
     const std::string fieldType = (cls & CL_STRING) ?
-      ((cls & CL_WIDE) ? "TAO::WString_Manager" : "TAO::String_Manager")
+      string_type(cls)
       : scoped(field->field_type()->name());
     if ((cls & (CL_SCALAR | CL_STRUCTURE | CL_SEQUENCE | CL_UNION))
         || (use_cxx11 && (cls & CL_ARRAY))) {
