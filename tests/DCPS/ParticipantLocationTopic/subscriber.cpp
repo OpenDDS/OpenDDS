@@ -5,6 +5,7 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include <ace/Get_Opt.h>
 
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
@@ -39,7 +40,32 @@
 #include <iostream>
 
 bool reliable = false;
-bool wait_for_acks = false;
+
+bool check_for_ice = true;
+
+int parse_args (int argc, ACE_TCHAR *argv[])
+{
+  ACE_Get_Opt get_opts (argc, argv, ACE_TEXT ("n"));
+  int c;
+
+  while ((c = get_opts ()) != -1)
+    switch (c)
+      {
+      case 'n':
+        check_for_ice = false;
+        break;
+      case '?':
+      default:
+        ACE_ERROR_RETURN ((LM_ERROR,
+                           "usage:  %s "
+                           "-n do not check for ICE connections"
+                           "\n",
+                           argv [0]),
+                          -1);
+      }
+  // Indicates successful parsing of the command line
+  return 0;
+}
 
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
@@ -50,6 +76,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     // Initialize DomainParticipantFactory
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
+
+    if( parse_args(argc, argv) != 0)
+      return 1;
 
     DDS::DomainParticipantQos part_qos;
     dpf->get_default_participant_qos(part_qos);
@@ -190,11 +219,16 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     ACE_OS::sleep(2);
 
     // check that all locations received
-    unsigned long all = OpenDDS::DCPS::LOCATION_LOCAL |
-#ifdef OPENDDS_SECURITY
-                        OpenDDS::DCPS::LOCATION_ICE |
-#endif
-                        OpenDDS::DCPS::LOCATION_RELAY;
+    unsigned long all = OpenDDS::DCPS::LOCATION_LOCAL | OpenDDS::DCPS::LOCATION_RELAY;
+    std::cerr << "Subscriber checking for connection locations LOCAL, RELAY";
+
+    if (check_for_ice) {
+      #ifdef OPENDDS_SECURITY
+      all |= OpenDDS::DCPS::LOCATION_ICE;
+      std::cerr << ", ICE";
+      #endif
+    }
+    std::cerr << std::endl;
 
     if (!status && locations == all) {
       status = EXIT_SUCCESS;
