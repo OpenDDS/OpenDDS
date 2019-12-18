@@ -17,9 +17,17 @@ public class ParticipantLocationSubscriber {
   private static DomainParticipantFactory dpf;
   private static DomainParticipant participant;
 
+  private static boolean noIce = false;
+
   public static void main(String[] args) throws Exception {
     System.out.println("Start Subscriber");
     dpf = TheParticipantFactory.WithArgs(new StringSeqHolder(args));
+
+    for (String s: args) {
+      if (s.equals("-n")) {
+        noIce = true;
+      }
+    }
 
     participant = dpf.create_participant(DOMAIN_ID, PARTICIPANT_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
 
@@ -105,11 +113,11 @@ public class ParticipantLocationSubscriber {
     boolean success = false;
     int localAndRelay = OpenDDS.DCPS.LOCATION_LOCAL.value | OpenDDS.DCPS.LOCATION_RELAY.value;
     int localRelayIce = localAndRelay | OpenDDS.DCPS.LOCATION_ICE.value;
-    if (location_mask[0] == localAndRelay) {
+    if (noIce && location_mask[0] == localAndRelay) {
       success = true;
       System.out.println("Publisher success. Found locations LOCAL and RELAY");
     }
-    else if (location_mask[0] == localRelayIce) {
+    else if (!noIce && location_mask[0] == localRelayIce) {
       success = true;
       System.out.println("Publisher success. Found locations LOCAL, RELAY and ICE");
     }

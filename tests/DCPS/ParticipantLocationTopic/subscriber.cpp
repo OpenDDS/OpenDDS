@@ -40,9 +40,33 @@
 #include <iostream>
 
 bool reliable = false;
+bool no_ice = false;
 
-int
-ACE_TMAIN(int argc, ACE_TCHAR *argv[])
+int parse_args (int argc, ACE_TCHAR *argv[])
+{
+  ACE_Get_Opt get_opts (argc, argv, ACE_TEXT ("n"));
+  int c;
+
+  while ((c = get_opts ()) != -1)
+    switch (c)
+      {
+      case 'n':
+        no_ice = true;
+        break;
+      case '?':
+      default:
+        ACE_ERROR_RETURN ((LM_ERROR,
+                           "usage:  %s "
+                           "-n do not check for ICE connections"
+                           "\n",
+                           argv [0]),
+                          -1);
+      }
+  // Indicates successful parsing of the command line
+  return 0;
+}
+
+int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   int status = EXIT_FAILURE;
 
@@ -50,6 +74,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     // Initialize DomainParticipantFactory
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
+
+    if( parse_args(argc, argv) != 0)
+      return 1;
 
     DDS::DomainParticipantQos part_qos;
     dpf->get_default_participant_qos(part_qos);
@@ -194,11 +221,11 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     unsigned long local_relay_ice = local_relay | OpenDDS::DCPS::LOCATION_ICE;
 
     // check for local and relay first || check for local, relay and ice
-    if (locations == local_relay) {
+    if (no_ice && locations == local_relay) {
       status = EXIT_SUCCESS;
       std::cerr << "Subscriber success. Found locations LOCAL and RELAY." << std::endl;
     }
-    else if (locations == local_relay_ice) {
+    else if (!no_ice && locations == local_relay_ice) {
       status = EXIT_SUCCESS;
       std::cerr << "Subscriber success. Found locations LOCAL, RELAY and ICE." << std::endl;
     }
