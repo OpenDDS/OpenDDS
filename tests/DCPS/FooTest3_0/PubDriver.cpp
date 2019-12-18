@@ -487,6 +487,7 @@ PubDriver::register_test ()
   TEST_CHECK(key_holder.sample_sequence == foo1.sample_sequence);
   TEST_CHECK(key_holder.writer_id == foo1.writer_id);
 
+  // Regression Test for https://github.com/objectcomputing/OpenDDS/issues/592
   ret = foo_datawriter_->get_key_value(key_holder, ::DDS::HANDLE_NIL);
   TEST_CHECK(ret == ::DDS::RETCODE_BAD_PARAMETER);
 

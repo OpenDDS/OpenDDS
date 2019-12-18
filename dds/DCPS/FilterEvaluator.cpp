@@ -85,10 +85,7 @@ public:
 
   virtual bool has_non_key_fields(const MetaStruct& meta) const
   {
-    for (
-      OPENDDS_VECTOR(EvalNode*)::const_iterator i = children_.begin();
-      i != children_.end(); ++i
-    ) {
+    for (OPENDDS_VECTOR(EvalNode*)::const_iterator i = children_.begin(); i != children_.end(); ++i) {
       EvalNode* child = *i;
       if (child->has_non_key_fields(meta)) {
         return true;
@@ -145,10 +142,7 @@ FilterEvaluator::~FilterEvaluator()
 
 bool FilterEvaluator::has_non_key_fields(const MetaStruct& meta) const
 {
-  for (
-    OPENDDS_VECTOR(OPENDDS_STRING)::const_iterator i = order_bys_.begin();
-    i != order_bys_.end(); ++i
-  ) {
+  for (OPENDDS_VECTOR(OPENDDS_STRING)::const_iterator i = order_bys_.begin(); i != order_bys_.end(); ++i) {
     if (!meta.isDcpsKey(i->c_str())) {
       return true;
     }
