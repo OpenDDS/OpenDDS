@@ -100,8 +100,6 @@ struct OpenDDS_Dcps_Export GUID_tKeyLessThan {
   }
 };
 
-bool operator<(const GUID_t& lhs, const GUID_t& rhs);
-
 typedef OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan) RepoIdSet;
 
 

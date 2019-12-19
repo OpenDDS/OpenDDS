@@ -6,15 +6,15 @@
  */
 #include "GuidUtils.h"
 #include "Util.h"
+#include "GuidBuilder.h"
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "DCPS/SafetyProfileStreams.h"
 
-#include <cstdlib>
-#include <cstdio>
 #include "ace/ACE.h"
 #include "ace/OS_NS_string.h"
 
-#include "GuidBuilder.h"
+#include <cstdlib>
+#include <cstdio>
 
 namespace {
 
@@ -52,15 +52,11 @@ to_string(const GUID_t& guid)
     '.' + to_string(guid.entityId);
 }
 
-bool operator<(const GUID_t& lhs, const GUID_t& rhs)
-{
-  return memcmp(&lhs, &rhs, sizeof(GUID_t)) < 0;
-}
-
 void intersect(const RepoIdSet& a, const RepoIdSet& b, RepoIdSet& result)
 {
   result.clear();
-  intersect_sorted_ranges(a.cbegin(), a.end(), b.cbegin(), b.end(), std::inserter(result, result.end()));
+  intersect_sorted_ranges(a.cbegin(), a.end(), b.cbegin(), b.end(),
+                          std::inserter(result, result.end()), GUID_tKeyLessThan());
 }
 
 #ifndef OPENDDS_SAFETY_PROFILE
