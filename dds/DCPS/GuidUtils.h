@@ -100,7 +100,10 @@ struct OpenDDS_Dcps_Export GUID_tKeyLessThan {
   }
 };
 
+bool operator<(const GUID_t& lhs, const GUID_t& rhs);
+
 typedef OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan) RepoIdSet;
+
 
 inline size_t
 gen_max_marshaled_size(const GUID_t&)
@@ -180,6 +183,9 @@ OpenDDS_Dcps_Export inline GUID_t make_guid(
   std::memcpy(&result.entityId, &entity, sizeof(EntityId_t));
   return result;
 }
+
+OpenDDS_Dcps_Export
+void intersect(const RepoIdSet& a, const RepoIdSet& b, RepoIdSet& result);
 
 } // namespace DCPS
 } // namespace OpenDDS
