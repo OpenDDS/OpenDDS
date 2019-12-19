@@ -5,7 +5,7 @@
  * See: http://www.opendds.org/license.html
  */
 #include "GuidUtils.h"
-#include "dds/DCPS/Util.h"
+#include "Util.h"
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "DCPS/SafetyProfileStreams.h"
 
