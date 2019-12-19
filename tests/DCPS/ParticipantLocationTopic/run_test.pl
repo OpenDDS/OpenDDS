@@ -37,8 +37,8 @@ foreach my $i (@ARGV) {
 
 $test->process("relay", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-DCPSConfigFile relay.ini -ApplicationDomain 42 -VerticalAddress 4444 -HorizontalAddress 127.0.0.1:11444 ");
 
-$test->process("publisher", "publisher", "$opt -ORBDebugLevel 1 -DCPSConfigFile". $pub_sub_ini);
-$test->process("subscriber", "subscriber", "$opt -ORBDebugLevel 1 -DCPSConfigFile" . $pub_sub_ini);
+$test->process("publisher", "publisher", "$opt -ORBDebugLevel 1 -DCPSConfigFile ". $pub_sub_ini);
+$test->process("subscriber", "subscriber", "$opt -ORBDebugLevel 1 -DCPSConfigFile " . $pub_sub_ini);
 
 $test->start_process("relay");
 sleep 1;
