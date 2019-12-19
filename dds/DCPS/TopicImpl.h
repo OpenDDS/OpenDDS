@@ -103,7 +103,7 @@ private:
   DDS::InconsistentTopicStatus inconsistent_topic_status_;
 
   /// Pointer to the monitor object for this entity
-  Monitor* monitor_;
+  unique_ptr<Monitor> monitor_;
 };
 
 

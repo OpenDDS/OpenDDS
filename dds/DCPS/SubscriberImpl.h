@@ -205,7 +205,7 @@ private:
   ACE_Recursive_Thread_Mutex   si_lock_;
 
   /// Monitor object for this entity
-  Monitor* monitor_;
+  unique_ptr<Monitor> monitor_;
 
   int access_depth_;
 };

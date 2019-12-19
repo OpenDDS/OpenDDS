@@ -34,13 +34,12 @@ TopicImpl::TopicImpl(const char*                    topic_name,
     qos_(qos),
     listener_mask_(mask),
     listener_(DDS::TopicListener::_duplicate(a_listener)),
-    id_(GUID_UNKNOWN),
-    monitor_(0)
+    id_(GUID_UNKNOWN)
 {
   inconsistent_topic_status_.total_count = 0;
   inconsistent_topic_status_.total_count_change = 0;
-  monitor_ =
-    TheServiceParticipant->monitor_factory_->create_topic_monitor(this);
+  
+  monitor_.reset(TheServiceParticipant->monitor_factory_->create_topic_monitor(this));
 }
 
 TopicImpl::~TopicImpl()

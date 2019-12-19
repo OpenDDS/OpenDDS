@@ -283,7 +283,7 @@ public:
   DataLinkCleanupTask dl_clean_task_;
 
   /// Monitor object for this entity
-  Monitor* monitor_;
+  unique_ptr<Monitor> monitor_;
 
 protected:
   /// Id of the last link established.

@@ -46,10 +46,9 @@ PublisherImpl::PublisherImpl(DDS::InstanceHandle_t      handle,
   suspend_depth_count_(0),
   sequence_number_(),
   reverse_pi_lock_(pi_lock_),
-  monitor_(0),
   publisher_id_(id)
 {
-  monitor_ = TheServiceParticipant->monitor_factory_->create_publisher_monitor(this);
+  monitor_.reset(TheServiceParticipant->monitor_factory_->create_publisher_monitor(this));
 }
 
 PublisherImpl::~PublisherImpl()
