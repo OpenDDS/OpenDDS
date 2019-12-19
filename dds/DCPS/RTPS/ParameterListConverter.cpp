@@ -987,7 +987,7 @@ int from_param_list(const ParameterList& param_list,
         // Interoperability note:
         // Spec creators for RTPS have reliability indexed at 1
         {
-          const CORBA::Short rtpsKind = (const CORBA::Short)(param.reliability().kind);
+          const CORBA::Short rtpsKind = static_cast<CORBA::Short>(param.reliability().kind);
           if (rtpsKind == RTPS::BEST_EFFORT) {
             writer_data.ddsPublicationData.reliability.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
           } else { // default to RELIABLE for writers
