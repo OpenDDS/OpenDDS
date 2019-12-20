@@ -16,7 +16,7 @@ public:
   using Listener = ListenerType;
   using Listener_var = typename ListenerType::_var_type;
 
-  using listener_factory = std::function<Listener_var()>;
+  using listener_factory = std::function<Listener_var(const Builder::PropertySeq&)>;
   using listener_factory_map = std::map<std::string, listener_factory>;
 
   static bool register_listener_factory(const std::string& name, const listener_factory& factory) {
@@ -37,7 +37,18 @@ public:
 
     auto it = s_factory_map.find(name);
     if (it != s_factory_map.end()) {
-      result = (it->second)();
+      result = (it->second)(Builder::PropertySeq());
+    }
+    return result;
+  }
+
+  static Listener_var create_listener(const std::string& name, const Builder::PropertySeq& properties) {
+    std::unique_lock<std::mutex> lock(s_mutex);
+    Listener_var result = Listener::_nil();
+
+    auto it = s_factory_map.find(name);
+    if (it != s_factory_map.end()) {
+      result = (it->second)(properties);
     }
     return result;
   }

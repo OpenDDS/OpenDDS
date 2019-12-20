@@ -24,11 +24,15 @@ public:
   DataReaderReport& get_report() { return report_; }
   const DataReaderReport& get_report() const { return report_; }
 
+  DDS::DataReaderQos& get_qos() { return qos_; }
+  const DDS::DataReaderQos& get_qos() const { return qos_; }
+
 protected:
   std::string name_;
   std::string topic_name_;
   std::string listener_type_name_;
   const uint32_t listener_status_mask_;
+  Builder::PropertySeq listener_properties_;
   const std::string transport_config_name_;
   DataReaderReport& report_;
   DDS::Subscriber_var subscriber_;
@@ -38,6 +42,7 @@ protected:
   PropertyIndex create_time_;
   PropertyIndex enable_time_;
   PropertyIndex last_discovery_time_;
+  DDS::DataReaderQos qos_;
 };
 
 using ReaderMap = std::map<std::string, std::shared_ptr<DataReader>>;

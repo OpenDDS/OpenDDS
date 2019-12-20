@@ -352,6 +352,9 @@ void handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std:
 
   size_t total_undermatched_readers = 0;
   size_t total_undermatched_writers = 0;
+  size_t total_out_of_order_data_count = 0;
+  size_t total_duplicate_data_count = 0;
+  size_t total_missing_data_count = 0;
   Builder::TimeStamp max_discovery_time_delta = ZERO;
 
   Bench::SimpleStatBlock consolidated_latency_stats;
@@ -386,6 +389,19 @@ void handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std:
           Bench::ConstPropertyStatBlock dr_round_trip_latency(dr_report.properties, "round_trip_latency");
           Bench::ConstPropertyStatBlock dr_round_trip_jitter(dr_report.properties, "round_trip_jitter");
 
+          Builder::ConstPropertyIndex out_of_order_data_count_prop = get_property(dr_report.properties, "out_of_order_data_count", Builder::PVK_ULL);
+          if (out_of_order_data_count_prop) {
+            total_out_of_order_data_count += out_of_order_data_count_prop->value.ull_prop();
+          }
+          Builder::ConstPropertyIndex duplicate_data_count_prop = get_property(dr_report.properties, "duplicate_data_count", Builder::PVK_ULL);
+          if (duplicate_data_count_prop) {
+            total_duplicate_data_count += duplicate_data_count_prop->value.ull_prop();
+          }
+          Builder::ConstPropertyIndex missing_data_count_prop = get_property(dr_report.properties, "missing_data_count", Builder::PVK_ULL);
+          if (missing_data_count_prop) {
+            total_missing_data_count += missing_data_count_prop->value.ull_prop();
+          }
+
           consolidated_latency_stats = consolidate(consolidated_latency_stats, dr_latency.to_simple_stat_block());
           consolidated_jitter_stats = consolidate(consolidated_jitter_stats, dr_jitter.to_simple_stat_block());
           consolidated_round_trip_latency_stats = consolidate(consolidated_round_trip_latency_stats, dr_round_trip_latency.to_simple_stat_block());
@@ -408,6 +424,17 @@ void handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std:
   result_out << "  Total Undermatched Readers: " << total_undermatched_readers <<
     ", Total Undermatched Writers: " << total_undermatched_writers << std::endl;
   result_out << "  Max Discovery Time Delta: " << max_discovery_time_delta << " seconds" << std::endl;
+
+  result_out << std::endl;
+
+  result_out << "Data Count Stats:" << std::endl;
+  result_out << "  Total Out-Of-Order Data Samples: " << total_out_of_order_data_count << std::endl;
+  result_out << "  Total Duplicate Data Samples: " << total_duplicate_data_count << std::endl;
+  result_out << "  Total Missing Data Samples: " << total_missing_data_count << std::endl;
+
+  result_out << std::endl;
+
+  result_out << "Data Timing Stats:" << std::endl;
 
   result_out << std::endl;
 

@@ -10,6 +10,7 @@ DataReader::DataReader(const DataReaderConfig& config, DataReaderReport& report,
   : name_(config.name.in()), topic_name_(config.topic_name.in())
   , listener_type_name_(config.listener_type_name.in())
   , listener_status_mask_(config.listener_status_mask)
+  , listener_properties_(config.listener_properties)
   , transport_config_name_(config.transport_config_name.in())
   , report_(report)
   , subscriber_(subscriber)
@@ -29,44 +30,43 @@ DataReader::DataReader(const DataReaderConfig& config, DataReaderReport& report,
   topic_ = topic_ptr->get_dds_topic();
 
   // Customize QoS Object
-  DDS::DataReaderQos qos;
-  subscriber_->get_default_datareader_qos(qos);
+  subscriber_->get_default_datareader_qos(qos_);
 
   //DurabilityQosPolicyMask durability;
-  APPLY_QOS_MASK(qos, config.qos, config.qos_mask, durability, kind);
+  APPLY_QOS_MASK(qos_, config.qos, config.qos_mask, durability, kind);
   //DeadlineQosPolicyMask deadline;
-  APPLY_QOS_MASK(qos, config.qos, config.qos_mask, deadline, period);
+  APPLY_QOS_MASK(qos_, config.qos, config.qos_mask, deadline, period);
   //LatencyBudgetQosPolicyMask latency_budget;
-  APPLY_QOS_MASK(qos, config.qos, config.qos_mask, latency_budget, duration);
+  APPLY_QOS_MASK(qos_, config.qos, config.qos_mask, latency_budget, duration);
   //LivelinessQosPolicyMask liveliness;
-  APPLY_QOS_MASK(qos, config.qos, config.qos_mask, liveliness, kind);
-  APPLY_QOS_MASK(qos, config.qos, config.qos_mask, liveliness, lease_duration);
+  APPLY_QOS_MASK(qos_, config.qos, config.qos_mask, liveliness, kind);
+  APPLY_QOS_MASK(qos_, config.qos, config.qos_mask, liveliness, lease_duration);
   //ReliabilityQosPolicyMask reliability;
-  APPLY_QOS_MASK(qos, config.qos, config.qos_mask, reliability, kind);
-  APPLY_QOS_MASK(qos, config.qos, config.qos_mask, reliability, max_blocking_time);
+  APPLY_QOS_MASK(qos_, config.qos, config.qos_mask, reliability, kind);
+  APPLY_QOS_MASK(qos_, config.qos, config.qos_mask, reliability, max_blocking_time);
   //DestinationOrderQosPolicyMask destination_order;
-  APPLY_QOS_MASK(qos, config.qos, config.qos_mask, destination_order, kind);
+  APPLY_QOS_MASK(qos_, config.qos, config.qos_mask, destination_order, kind);
   //HistoryQosPolicyMask history;
-  APPLY_QOS_MASK(qos, config.qos, config.qos_mask, history, kind);
-  APPLY_QOS_MASK(qos, config.qos, config.qos_mask, history, depth);
+  APPLY_QOS_MASK(qos_, config.qos, config.qos_mask, history, kind);
+  APPLY_QOS_MASK(qos_, config.qos, config.qos_mask, history, depth);
   //ResourceLimitsQosPolicyMask resource_limits;
-  APPLY_QOS_MASK(qos, config.qos, config.qos_mask, resource_limits, max_samples);
-  APPLY_QOS_MASK(qos, config.qos, config.qos_mask, resource_limits, max_instances);
-  APPLY_QOS_MASK(qos, config.qos, config.qos_mask, resource_limits, max_samples_per_instance);
+  APPLY_QOS_MASK(qos_, config.qos, config.qos_mask, resource_limits, max_samples);
+  APPLY_QOS_MASK(qos_, config.qos, config.qos_mask, resource_limits, max_instances);
+  APPLY_QOS_MASK(qos_, config.qos, config.qos_mask, resource_limits, max_samples_per_instance);
   //UserDataQosPolicyMask user_data;
-  APPLY_QOS_MASK(qos, config.qos, config.qos_mask, user_data, value);
+  APPLY_QOS_MASK(qos_, config.qos, config.qos_mask, user_data, value);
   //OwnershipQosPolicyMask ownership;
-  APPLY_QOS_MASK(qos, config.qos, config.qos_mask, ownership, kind);
+  APPLY_QOS_MASK(qos_, config.qos, config.qos_mask, ownership, kind);
   //TimeBasedFilterQosPolicyMask time_based_filter;
-  APPLY_QOS_MASK(qos, config.qos, config.qos_mask, time_based_filter, minimum_separation);
+  APPLY_QOS_MASK(qos_, config.qos, config.qos_mask, time_based_filter, minimum_separation);
   //ReaderDataLifecycleQosPolicyMask reader_data_lifecycle;
-  APPLY_QOS_MASK(qos, config.qos, config.qos_mask, reader_data_lifecycle, autopurge_nowriter_samples_delay);
-  APPLY_QOS_MASK(qos, config.qos, config.qos_mask, reader_data_lifecycle, autopurge_disposed_samples_delay);
+  APPLY_QOS_MASK(qos_, config.qos, config.qos_mask, reader_data_lifecycle, autopurge_nowriter_samples_delay);
+  APPLY_QOS_MASK(qos_, config.qos, config.qos_mask, reader_data_lifecycle, autopurge_disposed_samples_delay);
 
   // Create Listener From Factory
   listener_ = DDS::DataReaderListener::_nil();
   if (!listener_type_name_.empty()) {
-    listener_ = create_listener(listener_type_name_);
+    listener_ = create_listener(listener_type_name_, listener_properties_);
     if (!listener_) {
       std::stringstream ss;
       ss << "datareader listener creation failed for datareader '" << name_
@@ -84,7 +84,7 @@ DataReader::DataReader(const DataReaderConfig& config, DataReaderReport& report,
   last_discovery_time_->value.time_prop(Builder::ZERO);
 
   create_time_->value.time_prop(get_time());
-  datareader_ = subscriber_->create_datareader(topic_, qos, listener_, listener_status_mask_);
+  datareader_ = subscriber_->create_datareader(topic_, qos_, listener_, listener_status_mask_);
   if (CORBA::is_nil(datareader_.in())) {
     throw std::runtime_error("datareader creation failed");
   }

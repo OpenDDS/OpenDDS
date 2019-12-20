@@ -1,25 +1,25 @@
 {
   "name": "Example",
-  "desc": "This is the scenario that used to be hardcoded",
+  "desc": "This is the showtime scenario with durable readers / writers and 10 nodes",
   "nodes": [
     {
       "workers": [
         {
-          "config": "daemon.json",
+          "config": "showtime_daemon_durable.json",
           "count": 1
         },
         {
-          "config": "worker.json",
+          "config": "showtime_worker_durable.json",
           "count": 1
         }
       ],
-      "count": 20,
+      "count": 10,
       "exclusive": false
     }
   ],
   "any_node": [
     {
-      "config": "master.json",
+      "config": "showtime_master_durable.json",
       "count": 1
     }
   ],

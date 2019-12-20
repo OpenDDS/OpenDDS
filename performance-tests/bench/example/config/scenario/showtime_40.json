@@ -5,21 +5,21 @@
     {
       "workers": [
         {
-          "config": "daemon.json",
+          "config": "showtime_daemon.json",
           "count": 1
         },
         {
-          "config": "worker.json",
+          "config": "showtime_worker.json",
           "count": 1
         }
       ],
-      "count": 10,
+      "count": 40,
       "exclusive": false
     }
   ],
   "any_node": [
     {
-      "config": "master.json",
+      "config": "showtime_master.json",
       "count": 1
     }
   ],

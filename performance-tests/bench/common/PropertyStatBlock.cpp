@@ -10,7 +10,7 @@ namespace Bench {
 SimpleStatBlock::SimpleStatBlock()
  : sample_count_(0)
  , min_(std::numeric_limits<double>::max())
- , max_(std::numeric_limits<double>::min())
+ , max_(std::numeric_limits<double>::lowest())
  , mean_(0.0)
  , var_x_sample_count_(0.0)
  , median_buffer_()
@@ -124,7 +124,7 @@ PropertyStatBlock::PropertyStatBlock(Builder::PropertySeq& seq, const std::strin
   min_->value.double_prop(std::numeric_limits<double>::max());
 
   max_ = get_or_create_property(seq, prefix + "_max", Builder::PVK_DOUBLE);
-  max_->value.double_prop(std::numeric_limits<double>::min());
+  max_->value.double_prop(std::numeric_limits<double>::lowest());
 
   mean_ = get_or_create_property(seq, prefix + "_mean", Builder::PVK_DOUBLE);
   mean_->value.double_prop(0.0);

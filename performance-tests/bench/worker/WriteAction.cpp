@@ -24,7 +24,7 @@ const ACE_Time_Value ZERO(0, 0);
 
 namespace Bench {
 
-WriteAction::WriteAction(ACE_Proactor& proactor) : proactor_(proactor), started_(false), stopped_(false), write_period_(1, 0) {
+WriteAction::WriteAction(ACE_Proactor& proactor) : proactor_(proactor), started_(false), stopped_(false), write_period_(1, 0), max_count_(0) {
 }
 
 bool WriteAction::init(const ActionConfig& config, ActionReport& report, Builder::ReaderMap& readers, Builder::WriterMap& writers) {
@@ -60,6 +60,15 @@ bool WriteAction::init(const ActionConfig& config, ActionReport& report, Builder
     data_buffer_bytes = data_buffer_bytes_prop->value.ull_prop();
   }
   data_.buffer.length(data_buffer_bytes);
+
+  size_t max_count = 0;
+  auto max_count_prop = get_property(config.params, "max_count", Builder::PVK_ULL);
+  if (max_count_prop) {
+    max_count = max_count_prop->value.ull_prop();
+  }
+  max_count_ = max_count;
+
+  data_.msg_count = 0;
 
   size_t total_hops = 0;
   auto total_hops_prop = get_property(config.params, "total_hops", Builder::PVK_ULL);
@@ -109,7 +118,7 @@ void WriteAction::start() {
   if (!started_) {
     instance_ = data_dw_->register_instance(data_);
     started_ = true;
-    proactor_.schedule_timer(*handler_, nullptr, ZERO);
+    proactor_.schedule_timer(*handler_, nullptr, ZERO, write_period_);
   }
 }
 
@@ -125,16 +134,14 @@ void WriteAction::stop() {
 void WriteAction::do_write() {
   std::unique_lock<std::mutex> lock(mutex_);
   if (started_ && !stopped_) {
-    data_.created_time = data_.sent_time = Builder::get_time();
-    DDS::ReturnCode_t result = data_dw_->write(data_, 0);
-    if (result != DDS::RETCODE_OK) {
-      std::cout << "Error during WriteAction::do_write()'s call to datawriter::write()" << std::endl;
+    if (max_count_ == 0 || data_.msg_count < max_count_) {
+      ++(data_.msg_count);
+      data_.created_time = data_.sent_time = Builder::get_time();
+      DDS::ReturnCode_t result = data_dw_->write(data_, 0);
+      if (result != DDS::RETCODE_OK) {
+        std::cout << "Error during WriteAction::do_write()'s call to datawriter::write()" << std::endl;
+      }
     }
-    Builder::TimeStamp write_end_ts = Builder::get_time();
-    ACE_Time_Value write_begin(data_.sent_time.sec, data_.sent_time.nsec / 1e3);
-    ACE_Time_Value write_end(write_end_ts.sec, write_end_ts.nsec / 1e3);
-    ACE_Time_Value delta = write_period_ - (write_end - write_begin);
-    proactor_.schedule_timer(*handler_, nullptr, delta < ZERO ? ZERO : delta);
   }
 }
 
