@@ -38,7 +38,6 @@ TopicImpl::TopicImpl(const char*                    topic_name,
 {
   inconsistent_topic_status_.total_count = 0;
   inconsistent_topic_status_.total_count_change = 0;
-  
   monitor_.reset(TheServiceParticipant->monitor_factory_->create_topic_monitor(this));
 }
 
