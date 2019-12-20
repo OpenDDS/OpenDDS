@@ -5,6 +5,7 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include <ace/Get_Opt.h>
 
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
@@ -39,10 +40,33 @@
 #include <iostream>
 
 bool reliable = false;
-bool wait_for_acks = false;
+bool no_ice = false;
 
-int
-ACE_TMAIN(int argc, ACE_TCHAR *argv[])
+int parse_args (int argc, ACE_TCHAR *argv[])
+{
+  ACE_Get_Opt get_opts (argc, argv, ACE_TEXT ("n"));
+  int c;
+
+  while ((c = get_opts ()) != -1)
+    switch (c)
+      {
+      case 'n':
+        no_ice = true;
+        break;
+      case '?':
+      default:
+        ACE_ERROR_RETURN ((LM_ERROR,
+                           "usage:  %s "
+                           "-n do not check for ICE connections"
+                           "\n",
+                           argv [0]),
+                          -1);
+      }
+  // Indicates successful parsing of the command line
+  return 0;
+}
+
+int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   int status = EXIT_FAILURE;
 
@@ -50,6 +74,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     // Initialize DomainParticipantFactory
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
+
+    if( parse_args(argc, argv) != 0)
+      return 1;
 
     DDS::DomainParticipantQos part_qos;
     dpf->get_default_participant_qos(part_qos);
@@ -190,17 +217,22 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     ACE_OS::sleep(2);
 
     // check that all locations received
-    unsigned long all = OpenDDS::DCPS::LOCATION_LOCAL |
-#ifdef OPENDDS_SECURITY
-                        OpenDDS::DCPS::LOCATION_ICE |
-#endif
-                        OpenDDS::DCPS::LOCATION_RELAY;
+    unsigned long local_relay = OpenDDS::DCPS::LOCATION_LOCAL | OpenDDS::DCPS::LOCATION_RELAY;
+    unsigned long local_relay_ice = local_relay | OpenDDS::DCPS::LOCATION_ICE;
 
-    if (!status && locations == all) {
+    // check for local and relay first || check for local, relay and ice
+    if (no_ice && locations == local_relay) {
       status = EXIT_SUCCESS;
+      std::cerr << "Subscriber success. Found locations LOCAL and RELAY." << std::endl;
+    }
+    else if (!no_ice && locations == local_relay_ice) {
+      status = EXIT_SUCCESS;
+      std::cerr << "Subscriber success. Found locations LOCAL, RELAY and ICE." << std::endl;
     }
     else {
-      std::cerr << "Error in subscriber: One or more locations missing. Location mask " << locations << " != " << all <<  "." << std::endl;
+      std::cerr << "Error in subscriber: One or more locations missing. Location mask "
+                << locations << " != " << local_relay << " (local & relay) and  "
+                << locations << " != " << local_relay_ice <<  " (local, relay & ice)." << std::endl;
       status = EXIT_FAILURE;
     }
 

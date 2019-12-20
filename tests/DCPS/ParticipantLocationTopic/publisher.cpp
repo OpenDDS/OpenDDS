@@ -6,9 +6,6 @@
  */
 
 #include <ace/Get_Opt.h>
-#include <ace/Log_Msg.h>
-#include <ace/OS_NS_stdlib.h>
-#include <ace/OS_NS_unistd.h>
 
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
@@ -37,18 +34,31 @@
 
 #include <iostream>
 
-#ifdef OPENDDS_SECURITY
-#include <dds/DCPS/security/framework/Properties.h>
+bool no_ice = false;
 
-void append(DDS::PropertySeq& props, const char* name, const char* value, bool propagate = false)
+int parse_args (int argc, ACE_TCHAR *argv[])
 {
-  const DDS::Property_t prop = {name, value, propagate};
-  const unsigned int len = props.length();
-  props.length(len + 1);
-  props[len] = prop;
-}
+  ACE_Get_Opt get_opts (argc, argv, ACE_TEXT ("n"));
+  int c;
 
-#endif
+  while ((c = get_opts ()) != -1)
+    switch (c)
+      {
+      case 'n':
+        no_ice = true;
+        break;
+      case '?':
+      default:
+        ACE_ERROR_RETURN ((LM_ERROR,
+                           "usage:  %s "
+                           "-n do not check for ICE connections"
+                           "\n",
+                           argv [0]),
+                          -1);
+      }
+  // Indicates successful parsing of the command line
+  return 0;
+}
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
@@ -62,6 +72,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     {
       // Initialize DomainParticipantFactory
       dpf = TheParticipantFactoryWithArgs(argc, argv);
+
+      if( parse_args(argc, argv) != 0)
+        return 1;
 
       DDS::DomainParticipantQos part_qos;
       dpf->get_default_participant_qos(part_qos);
@@ -184,8 +197,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       std::cout << "Writer wait for ACKS" << std::endl;
 
-      DDS::Duration_t timeout =
-        { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
+      DDS::Duration_t timeout = { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
       dw->wait_for_acknowledgments(timeout);
 
       // delay
@@ -195,17 +207,22 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       delete writer;
 
       // check that all locations received
-      unsigned long all = OpenDDS::DCPS::LOCATION_LOCAL |
-#ifdef OPENDDS_SECURITY
-                        OpenDDS::DCPS::LOCATION_ICE |
-#endif
-                        OpenDDS::DCPS::LOCATION_RELAY;
+      unsigned long local_relay = OpenDDS::DCPS::LOCATION_LOCAL | OpenDDS::DCPS::LOCATION_RELAY;
+      unsigned long local_relay_ice = local_relay | OpenDDS::DCPS::LOCATION_ICE;
 
-      if (locations == all) {
+      // check for local and relay first || check for local, relay and ice
+      if (no_ice && locations == local_relay) {
         status = EXIT_SUCCESS;
+        std::cerr << "Publisher success. Found locations LOCAL and RELAY." << std::endl;
+      }
+      else if (!no_ice && locations == local_relay_ice) {
+        status = EXIT_SUCCESS;
+        std::cerr << "Publisher success. Found locations LOCAL, RELAY and ICE." << std::endl;
       }
       else {
-        std::cerr << "Error in publisher: One or more locations missing. Location mask " << locations << " != " << all <<  "." << std::endl;
+        std::cerr << "Error in publisher: One or more locations missing. Location mask "
+                  << locations << " != " << local_relay << " (local & relay) and  "
+                  << locations << " != " << local_relay_ice <<  " (local, relay & ice)." << std::endl;
         status = EXIT_FAILURE;
       }
     }
