@@ -1,2 +1,2 @@
 #!/bin/bash
-docker build --build-arg BASIS=$BASIS .
+docker build --build-arg BASIS=$BASIS -t $IMAGE_NAME .
