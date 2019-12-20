@@ -5,6 +5,8 @@
 #include "BenchTypeSupportImpl.h"
 #include "PropertyStatBlock.h"
 
+#include "dds/DCPS/DisjointSequence.h"
+
 #include <unordered_map>
 
 namespace Bench {
@@ -13,7 +15,7 @@ class WorkerDataReaderListener : public Builder::DataReaderListener {
 public:
 
   WorkerDataReaderListener();
-  WorkerDataReaderListener(size_t expected);
+  WorkerDataReaderListener(const Builder::PropertySeq& properties);
   virtual ~WorkerDataReaderListener();
 
   void add_handler(DataHandler& handler);
@@ -36,8 +38,13 @@ public:
 
 protected:
   std::mutex mutex_;
-  size_t expected_count_{0};
-  size_t matched_count_{0};
+  bool durable_{false};
+  bool history_keep_all_{false};
+  size_t history_depth_{false};
+  size_t expected_match_count_{0};
+  size_t match_count_{0};
+  size_t expected_sample_count_{0};
+  size_t sample_count_{0};
   Builder::DataReader* datareader_{0};
   DataDataReader_var data_dr_;
   std::vector<DataHandler*> handlers_;
@@ -45,17 +52,32 @@ protected:
   Builder::PropertyIndex last_discovery_time_;
   Builder::PropertyIndex lost_sample_count_;
   Builder::PropertyIndex rejected_sample_count_;
+  Builder::PropertyIndex out_of_order_data_count_;
+  Builder::PropertyIndex duplicate_data_count_;
+  Builder::PropertyIndex missing_data_count_;
+
+  struct WriterState {
+    size_t sample_count_{0};
+    size_t first_data_count_{0};
+    size_t prev_data_count_{0};
+    size_t current_data_count_{0};
+    size_t out_of_order_data_count_{0};
+    size_t duplicate_data_count_{0};
+    OpenDDS::DCPS::DisjointSequence data_received_;
+    double previous_latency_{0.0};
+    double previous_round_trip_latency_{0.0};
+  };
+
+  typedef std::unordered_map<DDS::InstanceHandle_t, WriterState> WriterStateMap;
+
+  WriterStateMap writer_state_map_;
 
   // Normal Latency / Jitter
   std::shared_ptr<PropertyStatBlock> latency_stat_block_;
-  std::unordered_map<DDS::InstanceHandle_t, double> previous_latency_map_;
-
   std::shared_ptr<PropertyStatBlock> jitter_stat_block_;
 
   // Round-Trip Latency / Jitter
   std::shared_ptr<PropertyStatBlock> round_trip_latency_stat_block_;
-  std::unordered_map<DDS::InstanceHandle_t, double> previous_round_trip_latency_map_;
-
   std::shared_ptr<PropertyStatBlock> round_trip_jitter_stat_block_;
 };
 

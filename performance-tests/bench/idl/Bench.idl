@@ -19,6 +19,7 @@ module Bench {
 #pragma DCPS_DATA_KEY  "Bench::Data id.low"
   struct Data {
     UniqueId id;
+    unsigned long msg_count;
     unsigned long total_hops;
     unsigned long hop_count;
     Builder::TimeStamp created_time;

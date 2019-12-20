@@ -11,8 +11,21 @@ WorkerDataReaderListener::WorkerDataReaderListener()
 {
 }
 
-WorkerDataReaderListener::WorkerDataReaderListener(size_t expected) : expected_count_(expected)
+WorkerDataReaderListener::WorkerDataReaderListener(const Builder::PropertySeq& properties)
 {
+  size_t expected_match_count = 0;
+  auto expected_match_count_prop = get_property(properties, "expected_match_count", Builder::PVK_ULL);
+  if (expected_match_count_prop) {
+    expected_match_count = expected_match_count_prop->value.ull_prop();
+  }
+  expected_match_count_ = expected_match_count;
+
+  size_t expected_sample_count = 0;
+  auto expected_sample_count_prop = get_property(properties, "expected_sample_count", Builder::PVK_ULL);
+  if (expected_sample_count_prop) {
+    expected_sample_count = expected_sample_count_prop->value.ull_prop();
+  }
+  expected_sample_count_ = expected_sample_count;
 }
 
 WorkerDataReaderListener::~WorkerDataReaderListener()
@@ -94,15 +107,42 @@ WorkerDataReaderListener::on_data_available(DDS::DataReader_ptr reader)
 
       std::unique_lock<std::mutex> lock(mutex_);
 
-      // Update Latency & Calculate / Update Jitter
-      auto pl_it = previous_latency_map_.find(si.publication_handle);
-      if (pl_it == previous_latency_map_.end()) {
-        pl_it = previous_latency_map_.insert(
-          std::unordered_map<DDS::InstanceHandle_t, double>::value_type(si.publication_handle, 0.0)).first;
-      } else {
-        jitter = std::fabs(pl_it->second - latency);
+      bool new_writer = false;
+      auto ws_it = writer_state_map_.find(si.publication_handle);
+      if (ws_it == writer_state_map_.end()) {
+        new_writer = true;
+        ws_it = writer_state_map_.insert(WriterStateMap::value_type(si.publication_handle, WriterState())).first;
       }
-      pl_it->second = latency;
+      WriterState& ws = ws_it->second;
+
+      if (ws.sample_count_ == 0) {
+        ws.first_data_count_ = data.msg_count;
+        ws.prev_data_count_ = data.msg_count;
+        ws.current_data_count_ = data.msg_count;
+        if (durable_ && (history_keep_all_ || history_depth_ > data.msg_count)) {
+          ws.data_received_.insert(0);
+        }
+      } else {
+        ws.prev_data_count_ = ws.current_data_count_;
+        ws.current_data_count_ = data.msg_count;
+        if (ws.current_data_count_ <= ws.prev_data_count_) {
+          if (ws.current_data_count_ < ws.prev_data_count_) {
+            ++(ws.out_of_order_data_count_);
+          } else {
+            ++(ws.duplicate_data_count_);
+          }
+        }
+      }
+
+      ws.data_received_.insert(data.msg_count);
+      ++(ws.sample_count_);
+
+
+      // Update Latency & Calculate / Update Jitter
+      if (!new_writer) {
+        jitter = std::fabs(ws.previous_latency_ - latency);
+      }
+      ws.previous_latency_ = latency;
       if (datareader_) {
         latency_stat_block_->update(latency);
 
@@ -113,15 +153,10 @@ WorkerDataReaderListener::on_data_available(DDS::DataReader_ptr reader)
 
       // Update Round-Trip Latency & Calculate / Update Round-Trip Jitter
       if (data.total_hops != 0 && data.hop_count == data.total_hops) {
-        auto prtl_it = previous_round_trip_latency_map_.find(si.publication_handle);
-        if (prtl_it == previous_round_trip_latency_map_.end()) {
-          prtl_it =
-            previous_round_trip_latency_map_.insert(
-              std::unordered_map<DDS::InstanceHandle_t, double>::value_type(si.publication_handle, 0.0)).first;
-        } else {
-          round_trip_jitter = std::fabs(prtl_it->second - round_trip_latency);
+        if (!new_writer) {
+          round_trip_jitter = std::fabs(ws.previous_round_trip_latency_ - round_trip_latency);
         }
-        prtl_it->second = round_trip_latency;
+        ws.previous_round_trip_latency_ = round_trip_latency;
         if (datareader_) {
           round_trip_latency_stat_block_->update(round_trip_latency);
 
@@ -145,21 +180,21 @@ WorkerDataReaderListener::on_subscription_matched(
 {
   //std::cout << "WorkerDataReaderListener::on_subscription_matched" << std::endl;
   std::unique_lock<std::mutex> lock(mutex_);
-  if (expected_count_ != 0) {
-    if (static_cast<size_t>(status.current_count) == expected_count_) {
+  if (expected_match_count_ != 0) {
+    if (static_cast<size_t>(status.current_count) == expected_match_count_) {
       //std::cout << "WorkerDataReaderListener reached expected count!" << std::endl;
       if (datareader_) {
         last_discovery_time_->value.time_prop(Builder::get_time());
       }
     }
   } else {
-    if (static_cast<size_t>(status.current_count) > matched_count_) {
+    if (static_cast<size_t>(status.current_count) > match_count_) {
       if (datareader_) {
         last_discovery_time_->value.time_prop(Builder::get_time());
       }
     }
   }
-  matched_count_ = status.current_count;
+  match_count_ = status.current_count;
 }
 
 void
@@ -173,15 +208,33 @@ WorkerDataReaderListener::set_datareader(Builder::DataReader& datareader)
 {
   datareader_ = &datareader;
 
+  auto durability_kind = datareader_->get_qos().durability.kind;
+  if (durability_kind == DDS::TRANSIENT_LOCAL_DURABILITY_QOS ||
+      durability_kind == DDS::TRANSIENT_DURABILITY_QOS ||
+      durability_kind == DDS::PERSISTENT_DURABILITY_QOS) {
+    durable_ = true;
+  }
+  history_keep_all_ = datareader_->get_qos().history.kind == DDS::KEEP_ALL_HISTORY_QOS;
+  history_depth_ = datareader_->get_qos().history.depth;
+
   last_discovery_time_ =
     get_or_create_property(datareader_->get_report().properties, "last_discovery_time", Builder::PVK_TIME);
+
   lost_sample_count_ =
     get_or_create_property(datareader_->get_report().properties, "lost_sample_count", Builder::PVK_ULL);
   rejected_sample_count_ =
     get_or_create_property(datareader_->get_report().properties, "rejected_sample_count", Builder::PVK_ULL);
 
+  out_of_order_data_count_ =
+    get_or_create_property(datareader_->get_report().properties, "out_of_order_data_count", Builder::PVK_ULL);
+  duplicate_data_count_ =
+    get_or_create_property(datareader_->get_report().properties, "duplicate_data_count", Builder::PVK_ULL);
+  missing_data_count_ =
+    get_or_create_property(datareader_->get_report().properties, "missing_data_count", Builder::PVK_ULL);
+
   const Builder::PropertySeq& global_properties = get_global_properties();
-  Builder::ConstPropertyIndex buffer_size_prop = get_property(global_properties, "default_stat_median_buffer_size", Builder::PVK_ULL);
+  Builder::ConstPropertyIndex buffer_size_prop =
+    get_property(global_properties, "default_stat_median_buffer_size", Builder::PVK_ULL);
   size_t buffer_size = buffer_size_prop ? buffer_size_prop->value.ull_prop() : DEFAULT_STAT_BLOCK_BUFFER_SIZE;
 
   latency_stat_block_ =
@@ -198,6 +251,24 @@ void
 WorkerDataReaderListener::unset_datareader(Builder::DataReader& datareader)
 {
   if (datareader_ == &datareader) {
+
+    size_t out_of_order_data_count = 0;
+    size_t duplicate_data_count = 0;
+    size_t missing_data_count = 0;
+    for (auto it = writer_state_map_.begin(); it != writer_state_map_.end(); ++it) {
+      out_of_order_data_count += it->second.out_of_order_data_count_;
+      duplicate_data_count += it->second.duplicate_data_count_;
+      if (it->second.data_received_.disjoint()) {
+        auto msr = it->second.data_received_.missing_sequence_ranges();
+        for (auto it2 = msr.begin(); it2 != msr.end(); ++it2) {
+          missing_data_count += (it2->second.getValue() - (it2->first.getValue() - 1));
+        }
+      }
+    }
+
+    out_of_order_data_count_->value.ull_prop(out_of_order_data_count);
+    duplicate_data_count_->value.ull_prop(duplicate_data_count);
+    missing_data_count_->value.ull_prop(missing_data_count);
 
     latency_stat_block_->finalize();
     jitter_stat_block_->finalize();
