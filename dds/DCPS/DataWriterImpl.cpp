@@ -79,8 +79,6 @@ DataWriterImpl::DataWriterImpl()
     is_bit_(false),
     min_suspended_transaction_id_(0),
     max_suspended_transaction_id_(0),
-    monitor_(0),
-    periodic_monitor_(0),
     liveliness_asserted_(false),
     liveness_timer_(make_rch<LivenessTimer>(ref(*this)))
 {
@@ -102,10 +100,8 @@ DataWriterImpl::DataWriterImpl()
   publication_match_status_.current_count_change = 0;
   publication_match_status_.last_subscription_handle = DDS::HANDLE_NIL;
 
-  monitor_ =
-    TheServiceParticipant->monitor_factory_->create_data_writer_monitor(this);
-  periodic_monitor_ =
-    TheServiceParticipant->monitor_factory_->create_data_writer_periodic_monitor(this);
+  monitor_.reset(TheServiceParticipant->monitor_factory_->create_data_writer_monitor(this));
+  monitor_.reset(TheServiceParticipant->monitor_factory_->create_data_writer_periodic_monitor(this));
 }
 
 // This method is called when there are no longer any reference to the
