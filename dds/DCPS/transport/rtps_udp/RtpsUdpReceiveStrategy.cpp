@@ -6,6 +6,7 @@
  */
 
 #include "RtpsUdpReceiveStrategy.h"
+#include "Util.h"
 #include "RtpsUdpDataLink.h"
 #include "RtpsUdpInst.h"
 #include "RtpsUdpTransport.h"
