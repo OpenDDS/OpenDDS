@@ -170,6 +170,26 @@ OutputIterator intersect_sorted_ranges(InputIteratorA a, InputIteratorA aEnd,
   return intersect;
 }
 
+// Keeps the intersection of the two sorted collections in the first one,
+// and returns whether an intersection exists between the two colloctions.
+template <typename SortedA, typename SortedB, typename LessThan>
+bool intersect(SortedA& sA, const SortedB& sB, LessThan lessThan)
+{
+  typename SortedA::iterator a = sA.begin();
+  typename SortedA::const_iterator b = sB.cbegin();
+  while (a != sA.end()) {
+    if (b != sB.end()) {
+      if (lessThan(*a, *b)) { a = sA.erase(a); }
+      else {
+        if (!lessThan(*b, *a)) { ++a; }
+        ++b;
+      }
+    }
+    else { a = sA.erase(a, sA.end()); }
+  }
+  return !sA.empty();
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
 
