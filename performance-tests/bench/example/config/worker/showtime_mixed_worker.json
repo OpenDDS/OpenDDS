@@ -3,6 +3,12 @@
   "start_time": { "sec": -2, "nsec": 0 },
   "stop_time": { "sec": -90, "nsec": 0 },
 
+  "properties": [
+    { "name": "default_stat_median_buffer_size",
+      "value": { "_d": "PVK_ULL", "ull_prop": 2000 }
+    }
+  ],
+
   "process": {
     "config_sections": [
       { "name": "common",
@@ -68,87 +74,19 @@
       }
     ],
     "discoveries": [
-      { "name": "bench_test_rtps_01",
-        "type": "rtps",
-        "domain": 7
-      },
       { "name": "bench_test_rtps_02",
         "type": "rtps",
         "domain": 17
       }
     ],
     "instances": [
-      { "name": "rtps_instance_01",
-        "type": "rtps_udp",
-        "domain": 7
-      },
       { "name": "rtps_instance_02",
         "type": "rtps_udp",
         "domain": 17
       }
     ],
     "participants": [
-      { "name": "participant_A1",
-        "domain": 7,
-        "transport_config_name": "rtps_instance_01",
-
-        "qos": { "entity_factory": { "autoenable_created_entities": false } },
-        "qos_mask": { "entity_factory": { "has_autoenable_created_entities": false } },
-
-        "topics": [
-          { "name": "topic_T1",
-            "type_name": "Bench::Data"
-          }
-        ],
-        "subscribers": [
-          { "name": "subscriber_A1",
-
-            "qos": { "partition": { "name": [ "bench_showtime" ] } },
-            "qos_mask": { "partition": { "has_name": true } },
-
-            "datareaders": [
-              { "name": "datareader_A1_T1",
-                "topic_name": "topic_T1",
-                "listener_type_name": "bench_drl",
-                "listener_status_mask": 4294967295,
-
-                "qos": { "reliability": { "kind": "RELIABLE_RELIABILITY_QOS" },
-                         "durability": { "kind": "TRANSIENT_LOCAL_DURABILITY_QOS" },
-                         "history": { "kind": "KEEP_ALL_HISTORY_QOS" }
-                       },
-                "qos_mask": { "reliability": { "has_kind": true },
-                              "durability": { "has_kind": true },
-                              "history": { "has_kind": true }
-                            }
-              }
-            ]
-          }
-        ],
-        "publishers": [
-          { "name": "publisher_A1",
-
-            "qos": { "partition": { "name": [ "bench_showtime" ] } },
-            "qos_mask": { "partition": { "has_name": true } },
-
-            "datawriters": [
-              { "name": "datawriter_A1_T1",
-                "topic_name": "topic_T1",
-                "listener_type_name": "bench_dwl",
-                "listener_status_mask": 4294967295,
-                "qos": { "reliability": { "kind": "RELIABLE_RELIABILITY_QOS" },
-                         "durability": { "kind": "TRANSIENT_LOCAL_DURABILITY_QOS" },
-                         "history": { "kind": "KEEP_ALL_HISTORY_QOS" }
-                       },
-                "qos_mask": { "reliability": { "has_kind": true },
-                              "durability": { "has_kind": true },
-                              "history": { "has_kind": true }
-                            }
-              }
-            ]
-          }
-        ]
-      },
-      { "name": "participant_A2",
+      { "name": "participant_C1",
         "domain": 17,
         "transport_config_name": "rtps_instance_02",
 
@@ -156,7 +94,7 @@
         "qos_mask": { "entity_factory": { "has_autoenable_created_entities": false } },
 
         "topics": [
-          { "name": "topic_T2",
+          { "name": "topic_T3",
             "type_name": "Bench::Data"
           },
           { "name": "topic_T4",
@@ -164,27 +102,21 @@
           }
         ],
         "subscribers": [
-          { "name": "subscriber_A2",
+          { "name": "subscriber_C1",
 
             "qos": { "partition": { "name": [ "bench_showtime" ] } },
             "qos_mask": { "partition": { "has_name": true } },
 
             "datareaders": [
-              { "name": "datareader_A2_T2",
-                "topic_name": "topic_T2",
+              { "name": "datareader_C1_T3",
+                "topic_name": "topic_T3",
                 "listener_type_name": "bench_drl",
                 "listener_status_mask": 4294967295,
 
-                "qos": { "reliability": { "kind": "RELIABLE_RELIABILITY_QOS" },
-                         "durability": { "kind": "TRANSIENT_LOCAL_DURABILITY_QOS" },
-                         "history": { "kind": "KEEP_ALL_HISTORY_QOS" }
-                       },
-                "qos_mask": { "reliability": { "has_kind": true },
-                              "durability": { "has_kind": true },
-                              "history": { "has_kind": true }
-                            }
+                "qos": { "reliability": { "kind": "RELIABLE_RELIABILITY_QOS" } },
+                "qos_mask": { "reliability": { "has_kind": true } }
               },
-              { "name": "datareader_A2_T4",
+              { "name": "datareader_C1_T4",
                 "topic_name": "topic_T4",
                 "listener_type_name": "bench_drl",
                 "listener_status_mask": 4294967295,
@@ -202,14 +134,14 @@
           }
         ],
         "publishers": [
-          { "name": "publisher_A2",
+          { "name": "publisher_C1",
 
             "qos": { "partition": { "name": [ "bench_showtime" ] } },
             "qos_mask": { "partition": { "has_name": true } },
 
             "datawriters": [
-              { "name": "datawriter_A2_T2",
-                "topic_name": "topic_T2",
+              { "name": "datawriter_C1_T3",
+                "topic_name": "topic_T3",
                 "listener_type_name": "bench_dwl",
                 "listener_status_mask": 4294967295,
                 "qos": { "reliability": { "kind": "RELIABLE_RELIABILITY_QOS" },
@@ -221,7 +153,7 @@
                               "history": { "has_kind": true }
                             }
               },
-              { "name": "datawriter_A2_T4",
+              { "name": "datawriter_C1_T4",
                 "topic_name": "topic_T4",
                 "listener_type_name": "bench_dwl",
                 "listener_status_mask": 4294967295,
@@ -242,22 +174,9 @@
   },
   "actions": [
     {
-      "name": "write_action_A1_T1",
+      "name": "write_action_C1_T3",
       "type": "write",
-      "writers": [ "datawriter_A1_T1" ],
-      "params": [
-        { "name": "data_buffer_bytes",
-          "value": { "_d": "PVK_ULL", "ull_prop": 123 }
-        },
-        { "name": "write_period",
-          "value": { "_d": "PVK_DOUBLE", "double_prop": 3.21 }
-        }
-      ]
-    },
-    {
-      "name": "write_action_A2_T2",
-      "type": "write",
-      "writers": [ "datawriter_A2_T2" ],
+      "writers": [ "datawriter_C1_T3" ],
       "params": [
         { "name": "data_buffer_bytes",
           "value": { "_d": "PVK_ULL", "ull_prop": 321 }
@@ -268,9 +187,9 @@
       ]
     },
     {
-      "name": "write_action_A2_T4",
+      "name": "write_action_C1_T4",
       "type": "write",
-      "writers": [ "datawriter_A2_T4" ],
+      "writers": [ "datawriter_C1_T4" ],
       "params": [
         { "name": "data_buffer_bytes",
           "value": { "_d": "PVK_ULL", "ull_prop": 222 }

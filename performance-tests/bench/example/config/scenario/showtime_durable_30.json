@@ -1,15 +1,15 @@
 {
-  "name": "Example",
-  "desc": "This is the showtime scenario with durable readers / writers and 10 nodes",
+  "name": "Showtime Durable 30",
+  "desc": "This is the showtime scenario with durable writers/readers and 30 'nodes'",
   "nodes": [
     {
       "workers": [
         {
-          "config": "showtime_daemon_durable.json",
+          "config": "showtime_durable_daemon.json",
           "count": 1
         },
         {
-          "config": "showtime_worker_durable.json",
+          "config": "showtime_durable_worker.json",
           "count": 1
         }
       ],
@@ -19,7 +19,7 @@
   ],
   "any_node": [
     {
-      "config": "showtime_master_durable.json",
+      "config": "showtime_durable_master.json",
       "count": 1
     }
   ],
