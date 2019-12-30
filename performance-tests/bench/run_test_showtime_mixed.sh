@@ -27,5 +27,7 @@ cd node_controller
 ./node_controller one-shot --name Leg_06 &
 ./node_controller one-shot --name Leg_07 &
 ./node_controller one-shot --name Leg_08 &
+./node_controller one-shot --name Leg_09 &
+./node_controller one-shot --name Leg_10 &
 cd ../test_controller
-./test_controller ../example showtime_30 --wait-for-nodes 4
+./test_controller ../example showtime_mixed_30 --wait-for-nodes 4

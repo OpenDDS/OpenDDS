@@ -3,6 +3,12 @@
   "start_time": { "sec": -2, "nsec": 0 },
   "stop_time": { "sec": -90, "nsec": 0 },
 
+  "properties": [
+    { "name": "default_stat_median_buffer_size",
+      "value": { "_d": "PVK_ULL", "ull_prop": 2000 }
+    }
+  ],
+
   "process": {
     "config_sections": [
       { "name": "common",

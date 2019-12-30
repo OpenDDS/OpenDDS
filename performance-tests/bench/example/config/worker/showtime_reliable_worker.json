@@ -1,7 +1,13 @@
 {
   "enable_time": { "sec": -2, "nsec": 0 },
   "start_time": { "sec": -2, "nsec": 0 },
-  "stop_time": { "sec": -20, "nsec": 0 },
+  "stop_time": { "sec": -90, "nsec": 0 },
+
+  "properties": [
+    { "name": "default_stat_median_buffer_size",
+      "value": { "_d": "PVK_ULL", "ull_prop": 2000 }
+    }
+  ],
 
   "process": {
     "config_sections": [
@@ -154,7 +160,7 @@
           "value": { "_d": "PVK_ULL", "ull_prop": 321 }
         },
         { "name": "write_period",
-          "value": { "_d": "PVK_DOUBLE", "double_prop": 12.3 }
+          "value": { "_d": "PVK_DOUBLE", "double_prop": 1.23 }
         }
       ]
     },
@@ -167,7 +173,7 @@
           "value": { "_d": "PVK_ULL", "ull_prop": 222 }
         },
         { "name": "write_period",
-          "value": { "_d": "PVK_DOUBLE", "double_prop": 22.2 }
+          "value": { "_d": "PVK_DOUBLE", "double_prop": 2.22 }
         }
       ]
     }
