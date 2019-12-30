@@ -125,16 +125,18 @@ WorkerDataReaderListener::on_data_available(DDS::DataReader_ptr reader)
       } else {
         ws.prev_data_count_ = ws.current_data_count_;
         ws.current_data_count_ = data.msg_count;
-        if (ws.current_data_count_ <= ws.prev_data_count_) {
-          if (ws.current_data_count_ < ws.prev_data_count_) {
-            ++(ws.out_of_order_data_count_);
-          } else {
-            ++(ws.duplicate_data_count_);
-          }
+        if (ws.current_data_count_ < ws.prev_data_count_) {
+          // once we have one out-of-order, how do we count subsequent ones?
+          // one option is to consider everything out of order until it's 'fixed'
+          // another (this way) is to only capture relative out-of-order issues
+          // which will have a greater penalty for repeated violations
+          ++(ws.out_of_order_data_count_);
         }
       }
 
-      ws.data_received_.insert(data.msg_count);
+      if (!ws.data_received_.insert(data.msg_count)) {
+        ++(ws.duplicate_data_count_);
+      }
       ++(ws.sample_count_);
 
 
