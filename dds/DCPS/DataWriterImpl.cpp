@@ -101,7 +101,7 @@ DataWriterImpl::DataWriterImpl()
   publication_match_status_.last_subscription_handle = DDS::HANDLE_NIL;
 
   monitor_.reset(TheServiceParticipant->monitor_factory_->create_data_writer_monitor(this));
-  monitor_.reset(TheServiceParticipant->monitor_factory_->create_data_writer_periodic_monitor(this));
+  periodic_monitor_.reset(TheServiceParticipant->monitor_factory_->create_data_writer_periodic_monitor(this));
 }
 
 // This method is called when there are no longer any reference to the
