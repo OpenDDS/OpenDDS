@@ -652,5 +652,11 @@ int run_cycle(
   // Run Workers and Wait for Them to Finish
   worker_manager.run_workers(report_writer_impl);
 
+  DDS::Duration_t timeout = { 10, 0 };
+  if (report_writer_impl->wait_for_acknowledgments(timeout) != DDS::RETCODE_OK) {
+    std::cerr << "Waiting for report acknowledgment failed failed" << std::endl;
+    return 1;
+  }
+
   return 0;
 }
