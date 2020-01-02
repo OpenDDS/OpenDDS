@@ -55,7 +55,7 @@ to_string(const GUID_t& guid)
 void intersect(const RepoIdSet& a, const RepoIdSet& b, RepoIdSet& result)
 {
   result.clear();
-  intersect_sorted_ranges(a.cbegin(), a.end(), b.cbegin(), b.end(),
+  intersect_sorted_ranges(a.begin(), a.end(), b.begin(), b.end(),
                           std::inserter(result, result.end()), GUID_tKeyLessThan());
 }
 

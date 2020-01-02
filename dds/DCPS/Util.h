@@ -148,7 +148,7 @@ OutputIterator intersect_sorted_ranges(InputIteratorA a, InputIteratorA aEnd,
                                        OutputIterator intersect)
 {
   while (a != aEnd && b != bEnd) {
-    if      (*a < *b) { ++a; }
+    if (*a < *b) { ++a; }
     else if (*b < *a) { ++b; }
     else { *intersect++ = *a++; ++b; }
   }
@@ -163,7 +163,7 @@ OutputIterator intersect_sorted_ranges(InputIteratorA a, InputIteratorA aEnd,
                                        OutputIterator intersect, LessThan lessThan)
 {
   while (a != aEnd && b != bEnd) {
-    if      (lessThan(*a, *b)) { ++a; }
+    if (lessThan(*a, *b)) { ++a; }
     else if (lessThan(*b, *a)) { ++b; }
     else { *intersect++ = *a++; ++b; }
   }
@@ -176,7 +176,7 @@ template <typename SortedA, typename SortedB, typename LessThan>
 bool intersect(SortedA& sA, const SortedB& sB, LessThan lessThan)
 {
   typename SortedA::iterator a = sA.begin();
-  typename SortedA::const_iterator b = sB.cbegin();
+  typename SortedA::const_iterator b = sB.begin();
   while (a != sA.end()) {
     if (b != sB.end()) {
       if (lessThan(*a, *b)) { a = sA.erase(a); }
