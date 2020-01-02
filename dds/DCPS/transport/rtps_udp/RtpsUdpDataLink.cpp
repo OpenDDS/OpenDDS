@@ -1229,6 +1229,7 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
     WriterInfo& info = wi->second;
     SequenceNumber seq;
     seq.setValue(data.writerSN.high, data.writerSN.low);
+
     info.frags_.erase(seq);
     if (info.recvd_.contains(seq)) {
       if (Transport_debug_level > 5) {

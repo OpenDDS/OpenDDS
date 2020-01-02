@@ -140,6 +140,55 @@ void push_back(Seq& seq, const typename Seq::value_type& val)
   seq[len] = val;
 }
 
+// Constructs a sorted intersect of the given two sorted ranges [a,aEnd) and [b,bEnd).
+// (for pre-c++17 code for the similar effect of std::set_intersection in c++17)
+template <typename InputIteratorA, typename InputIteratorB, typename OutputIterator>
+OutputIterator intersect_sorted_ranges(InputIteratorA a, InputIteratorA aEnd,
+                                       InputIteratorB b, InputIteratorB bEnd,
+                                       OutputIterator intersect)
+{
+  while (a != aEnd && b != bEnd) {
+    if (*a < *b) { ++a; }
+    else if (*b < *a) { ++b; }
+    else { *intersect++ = *a++; ++b; }
+  }
+  return intersect;
+}
+
+// Constructs a sorted intersect of the given two sorted ranges [a,aEnd) and [b,bEnd).
+// (for pre-c++17 code for the similar effect of std::set_intersection in c++17)
+template <typename InputIteratorA, typename InputIteratorB, typename OutputIterator, typename LessThan>
+OutputIterator intersect_sorted_ranges(InputIteratorA a, InputIteratorA aEnd,
+                                       InputIteratorB b, InputIteratorB bEnd,
+                                       OutputIterator intersect, LessThan lessThan)
+{
+  while (a != aEnd && b != bEnd) {
+    if (lessThan(*a, *b)) { ++a; }
+    else if (lessThan(*b, *a)) { ++b; }
+    else { *intersect++ = *a++; ++b; }
+  }
+  return intersect;
+}
+
+// Keeps the intersection of the two sorted collections in the first one,
+// and returns whether an intersection exists between the two colloctions.
+template <typename SortedA, typename SortedB, typename LessThan>
+bool intersect(SortedA& sA, const SortedB& sB, LessThan lessThan)
+{
+  typename SortedA::iterator a = sA.begin();
+  typename SortedA::const_iterator b = sB.begin();
+  while (a != sA.end()) {
+    if (b != sB.end()) {
+      if (lessThan(*a, *b)) { a = sA.erase(a); }
+      else {
+        if (!lessThan(*b, *a)) { ++a; }
+        ++b;
+      }
+    }
+    else { a = sA.erase(a, sA.end()); }
+  }
+  return !sA.empty();
+}
 
 } // namespace DCPS
 } // namespace OpenDDS
