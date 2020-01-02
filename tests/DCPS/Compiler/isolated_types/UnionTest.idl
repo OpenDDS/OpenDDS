@@ -1,0 +1,4 @@
+union UnionTest switch(long) {
+  case 0: long foo_0;
+  case 1: long foo_1;
+};
