@@ -97,9 +97,9 @@ unlink $monready_file;
 
 open(MONOUT,"mon.out");
 my @monout=<MONOUT>;close MONOUT;
-my $mon_count = grep /Report/,@monout;
+my $mon_count = grep /Report:/,@monout;
 print STDOUT "mon_count=$mon_count\n";
-if ($mon_count < 145) {
+if ($mon_count < 135) {
     print STDERR "ERROR: Insufficient number of monitor messages seen\n";
     $status = 1;
 }
