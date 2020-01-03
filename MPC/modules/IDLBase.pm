@@ -127,8 +127,8 @@ sub do_cached_parse {
       elsif ($arg =~ /^\-I(.+)/) {
         push(@include, $1);
       }
-      elsif ($arg eq '--default-nested') {
-        $self->{'default_nested'} = 1;
+      elsif ($arg eq '--no-default-nested') {
+        $self->{'default_nested'} = 0;
       }
     }
   }
@@ -372,8 +372,11 @@ sub parse {
       if ($nkey eq 'default_nested' || $nkey eq 'nested') {
         $cnested = $val;
       }
-      elsif ($nkey eq 'topic') {
-        $cnested = !$val;
+    }
+    elsif ($str =~ s/^@([a-z_]+)//) {
+      my $nkey = $1;
+      if ($nkey eq 'topic') {
+        $cnested = 0;
       }
     }
     elsif ($str =~ s/^([a-z_][\w]*)//i) {

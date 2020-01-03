@@ -1,3 +1,6 @@
+#ifndef OPENDDS_IDL_ANNOTATIONS_HEADER
+#define OPENDDS_IDL_ANNOTATIONS_HEADER
+
 #include <string>
 #include <map>
 
@@ -121,3 +124,5 @@ public:
   virtual std::string definition() const;
   virtual std::string name() const;
 };
+
+#endif

@@ -1,5 +1,4 @@
 project: dcps_test_idl_only_lib, msvc_bigobj {
-  dcps_ts_flags -= --default-nested
   dcps_ts_flags += -Gitl --no-default-nested
   idlflags += -I..
 
