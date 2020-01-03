@@ -8,15 +8,13 @@
 #ifndef dds_visitor_H
 #define dds_visitor_H
 
-#include "ast_visitor.h"
 #include "be_extern.h"
 #include "dds_generator.h"
 
-#include "tao/Basic_Types.h"
-#include "tao/Version.h"
+#include <ast_visitor.h>
 
-#include <set>
-#include <string>
+#include <tao/Basic_Types.h>
+#include <tao/Version.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
