@@ -285,7 +285,7 @@ dds_visitor::visit_structure(AST_Structure* node)
                 "  The following keys were declared using @key, but not DCPS_DATA_KEY:";
               header = true;
             }
-            message += string("\n    ") + *i;
+            message += "\n    " + *i;
           }
         }
 
@@ -298,7 +298,7 @@ dds_visitor::visit_structure(AST_Structure* node)
                 "  The following keys were declared using DCPS_DATA_KEY, but not @key:";
               header = true;
             }
-            message += string("\n    ") + *i;
+            message += "\n    " + *i;
           }
         }
 
