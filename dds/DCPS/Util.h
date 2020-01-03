@@ -179,13 +179,16 @@ bool intersect(SortedA& sA, const SortedB& sB, LessThan lessThan)
   typename SortedA::const_iterator b = sB.begin();
   while (a != sA.end()) {
     if (b != sB.end()) {
-      if (lessThan(*a, *b)) { a = sA.erase(a); }
-      else {
+      if (lessThan(*a, *b)) {
+        sA.erase(a++);
+      } else {
         if (!lessThan(*b, *a)) { ++a; }
         ++b;
       }
+    } else {
+      sA.erase(a, sA.end());
+      break;
     }
-    else { a = sA.erase(a, sA.end()); }
   }
   return !sA.empty();
 }
