@@ -99,7 +99,7 @@ open(MONOUT,"mon.out");
 my @monout=<MONOUT>;close MONOUT;
 my $mon_count = grep /Report:/,@monout;
 print STDOUT "mon_count=$mon_count\n";
-if ($mon_count < 59) {
+if ($mon_count < 50) {
     print STDERR "ERROR: Insufficient number of monitor messages seen\n";
     $status = 1;
 }

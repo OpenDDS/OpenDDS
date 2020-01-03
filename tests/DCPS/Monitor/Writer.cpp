@@ -129,6 +129,9 @@ Writer::svc()
     e._tao_print_exception("Exception caught in svc():");
   }
 
+  // Patch to prevent premature shutdown
+  Sleep(1000);
+
   finished_instances_ ++;
 
   return 0;
