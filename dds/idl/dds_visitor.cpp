@@ -244,8 +244,8 @@ dds_visitor::visit_structure(AST_Structure* node)
     if (be_global->warn_about_dcps_data_type()) {
       idl_global->err()->misc_warning("\n"
         "  DCPS_DATA_TYPE and DCPS_DATA_KEY pragma statements are deprecated; please use\n"
-        "  topic annotations instead.\n"
-        "  See docs/migrating_to_topic_annotations.md in the OpenDDS source code for\n"
+        "  topic type annotations instead.\n"
+        "  See docs/migrating_to_topic_type_annotations.md in the OpenDDS source code for\n"
         "  more information.", node);
     }
   }
