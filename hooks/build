@@ -1,0 +1,6 @@
+#!/bin/bash
+if [[ -z "${BASIS}" ]]; then
+    docker build -t $IMAGE_NAME .
+else
+    docker build --build-arg BASIS=$BASIS -t $IMAGE_NAME .
+fi

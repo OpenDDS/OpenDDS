@@ -1,4 +1,5 @@
-FROM ubuntu:bionic
+ARG BASIS=ubuntu:bionic
+FROM $BASIS
 
 RUN apt-get update && apt-get install -y \
     cmake \
