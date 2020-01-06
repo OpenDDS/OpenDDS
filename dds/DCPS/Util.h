@@ -172,20 +172,27 @@ OutputIterator intersect_sorted_ranges(InputIteratorA a, InputIteratorA aEnd,
 
 // Keeps the intersection of the two sorted collections in the first one,
 // and returns whether an intersection exists between the two colloctions.
-template <typename SortedA, typename SortedB, typename LessThan>
-bool intersect(SortedA& sA, const SortedB& sB, LessThan lessThan)
+// Note:
+// The generic scope of the first template parameter is narrowed down to std::set<T> because
+// the pre-c++11 erase() may not work here with some collections (e.g. a sorted std::vector).
+// The since-c++11 erase() works properly with both an std::set and a sorted std::vector.
+template <typename SetA, typename SortedB, typename LessThan>
+bool set_intersect(SetA& sA, const SortedB& sB, LessThan lessThan)
 {
-  typename SortedA::iterator a = sA.begin();
-  typename SortedA::const_iterator b = sB.begin();
+  typename SetA::iterator a = sA.begin();
+  typename SortedB::const_iterator b = sB.begin();
   while (a != sA.end()) {
     if (b != sB.end()) {
-      if (lessThan(*a, *b)) { a = sA.erase(a); }
-      else {
+      if (lessThan(*a, *b)) {
+        sA.erase(a++);
+      } else {
         if (!lessThan(*b, *a)) { ++a; }
         ++b;
       }
+    } else {
+      sA.erase(a, sA.end());
+      break;
     }
-    else { a = sA.erase(a, sA.end()); }
   }
   return !sA.empty();
 }
