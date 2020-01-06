@@ -8,8 +8,13 @@
 #ifndef OPENDDS_IDL_BE_GLOBAL_H
 #define OPENDDS_IDL_BE_GLOBAL_H
 
-#include <idl_defines.h>
+#include "annotations.h"
+
 #include <utl_scoped_name.h>
+#include <idl_defines.h>
+#ifndef TAO_IDL_HAS_ANNOTATIONS
+#  error "Annotation support in tao_idl is required, please use a newer version of TAO"
+#endif
 
 #include <ace/SString.h>
 
@@ -20,11 +25,6 @@
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
-
-#ifndef TAO_IDL_HAS_ANNOTATIONS
-#  error "Annotation support in tao_idl is required, please use a newer version of TAO"
-#endif
-#include "annotations.h"
 
 class AST_Generator;
 class AST_Decl;
@@ -168,8 +168,8 @@ public:
 
   /**
    * Nested property of the root module. Assuming there are no annotations, all
-   * potential topic types inherit this value. True when --default-nested is
-   * passed, otherwise false.
+   * potential topic types inherit this value. True by default unless
+   * --no-default-nested was passed.
    */
   bool root_default_nested() const;
 

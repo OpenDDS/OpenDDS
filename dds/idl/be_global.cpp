@@ -5,6 +5,11 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include "be_global.h"
+
+#include "be_util.h"
+#include "be_extern.h"
+
 #include <ast_generator.h>
 #include <global_extern.h>
 #include <idl_defines.h>
@@ -30,10 +35,6 @@
 #include <vector>
 #include <set>
 
-#include "be_global.h"
-#include "be_util.h"
-#include "be_extern.h"
-
 using namespace std;
 
 BE_GlobalData* be_global = 0;
@@ -50,7 +51,7 @@ BE_GlobalData::BE_GlobalData()
   , face_ts_(false)
   , seq_("Seq")
   , language_mapping_(LANGMAP_NONE)
-  , root_default_nested_(false)
+  , root_default_nested_(true)
   , warn_about_dcps_data_type_(true)
 {
 }
@@ -644,7 +645,7 @@ bool BE_GlobalData::is_default_nested(UTL_Scope* scope)
     return is_default_nested(module->defined_in());
   }
 
-  return root_default_nested_; // True if --default-nested was passed
+  return root_default_nested_;
 }
 
 bool BE_GlobalData::check_key(AST_Field* node, bool& value)
