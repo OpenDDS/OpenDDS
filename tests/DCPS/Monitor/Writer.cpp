@@ -130,7 +130,7 @@ Writer::svc()
   }
 
   // Patch to prevent premature shutdown
-  Sleep(1000);
+  ACE_OS::sleep(1);
 
   finished_instances_ ++;
 
