@@ -436,7 +436,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
                 ACE_TEXT("calling DataLink::data_received_include for seq: %q to intersection of readers\n"),
                 this, sample.header_.sequence_.getValue()));
             }
-            intersect(directedWriteReaders, readers_selected_, GUID_tKeyLessThan());
+            set_intersect(directedWriteReaders, readers_selected_, GUID_tKeyLessThan());
             link_->data_received_include(sample, directedWriteReaders);
           }
 #ifdef OPENDDS_SECURITY

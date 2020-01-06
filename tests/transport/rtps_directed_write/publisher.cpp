@@ -251,7 +251,8 @@ void DDS_TEST::serializeData(DataSampleElement& ds, const TestMsg& msg) const
 
   Serializer ser(ds.sample_->cont(), hostIsBigEndian, Serializer::ALIGN_CDR);
   if (!((ser << encap) && (ser << msg))) {
-    throw std::string("ERROR: failed to serialize element " + std::to_string(msgSeqN));
+    ACE_DEBUG((LM_INFO, "ERROR: failed to serialize element with seq#: %q\n", msgSeqN));
+    throw std::string("ERROR: failed to serialize element");
   }
 }
 
