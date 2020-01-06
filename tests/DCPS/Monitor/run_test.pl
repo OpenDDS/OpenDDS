@@ -34,7 +34,7 @@ unlink $monready_file;
 unlink qw/pub.log sub.log mon.out mon.log DCPSInfoRepo.log/;
 
 my $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                  "-DCPSDebugLevel 6 -ORBDebugLevel 10 -ORBLogFile DCPSInfoRepo.log -o $dcpsrepo_ior ");
+                                  "-NOBITS -DCPSDebugLevel 6 -ORBDebugLevel 10 -ORBLogFile DCPSInfoRepo.log -o $dcpsrepo_ior ");
 
 my $Monitor    = PerlDDS::create_process ("monitor",    " $mon_opts");
 my $Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts");
