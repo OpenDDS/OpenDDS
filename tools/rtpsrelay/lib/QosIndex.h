@@ -18,7 +18,8 @@ inline OpenDDS::DCPS::RepoId guid_to_repoid(const GUID_t& a_guid)
 inline GUID_t repoid_to_guid(const OpenDDS::DCPS::RepoId& a_guid)
 {
   GUID_t retval;
-  std::memcpy(&retval, &a_guid, sizeof(OpenDDS::DCPS::RepoId));
+  // static_cast since we are copying from a struct to a class.
+  std::memcpy(static_cast<void*>(&retval), &a_guid, sizeof(OpenDDS::DCPS::RepoId));
   return retval;
 }
 
