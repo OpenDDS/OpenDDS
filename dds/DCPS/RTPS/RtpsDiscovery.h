@@ -481,6 +481,7 @@ public:
   u_short get_sedp_port(DDS::DomainId_t domain,
                         const DCPS::RepoId& local_participant) const;
 
+  void spdp_rtps_relay_address(const ACE_INET_Addr& address);
   void sedp_rtps_relay_address(const ACE_INET_Addr& address);
   void sedp_stun_server_address(const ACE_INET_Addr& address);
 
