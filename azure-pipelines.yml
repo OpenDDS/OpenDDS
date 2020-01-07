@@ -224,6 +224,7 @@ jobs:
         ConfigOpts: --no-inline --java=/usr/lib/jvm/zulu-12-azure-amd64
       Release:
         ConfigOpts: --no-debug --optimize --java=/usr/lib/jvm/zulu-12-azure-amd64
+        InstallPrefix: 'install'
       Safety:
         ConfigOpts: --safety-profile
       SafetyBaseNoBuiltinTopics:
@@ -288,6 +289,35 @@ jobs:
       and(succeeded(),
           not(contains(variables['ConfigOpts'], '--safety-profile')),
           not(contains(variables['ConfigOpts'], '--no-ownership-profile')))
+  - script: |
+      export DESTDIR=$(realpath $(InstallPrefix)_temp)
+      export INSTALL_PREFIX=$(realpath $(InstallPrefix))
+      make install
+      cp -r $DESTDIR$INSTALL_PREFIX .
+    displayName: Install OpenDDS
+    condition: and(succeeded(), ne(variables['InstallPrefix'], ''))
+  - script: |
+      source $(InstallPrefix)/share/ace/ace-devel.sh
+      source $(InstallPrefix)/share/tao/tao-devel.sh
+      source $(InstallPrefix)/share/tao/dds-devel.sh
+      cd tests/DCPS/Messenger
+      git clean -dfx .
+      $ACE_ROOT/bin/mwc.pl -type gnuace .
+      make
+    displayName: Build tests/DCPS/Messenger using Installed OpenDDS and MPC
+    condition: and(succeeded(), ne(variables['InstallPrefix'], ''))
+  - script: |
+      source $(InstallPrefix)/share/ace/ace-devel.sh
+      source $(InstallPrefix)/share/tao/tao-devel.sh
+      source $(InstallPrefix)/share/tao/dds-devel.sh
+      cd tests/cmake_integration/Messenger/Messenger_1
+      rm -fr build
+      mkdir build
+      cd build
+      cmake ..
+      cmake --build .
+    displayName: Build tests/DCPS/Messenger using Installed OpenDDS and CMake
+    condition: and(succeeded(), ne(variables['InstallPrefix'], ''))
 
 - job: macOS
   timeoutInMinutes: 90
