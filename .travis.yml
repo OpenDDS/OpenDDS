@@ -82,7 +82,7 @@ before_script:
 script:
   - travis_wait 47 make -s -j 3
   - FILES=$(git clean -nxd); if [ "$FILES" != "" ]; then
-        echo ERROR: These files should be gitignored:;
+        echo ERROR These files should be gitignored;
         echo $FILES;
         exit 1;
     fi
