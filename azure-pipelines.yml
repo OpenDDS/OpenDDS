@@ -294,12 +294,17 @@ jobs:
       export INSTALL_PREFIX=$(realpath $(InstallPrefix))
       make install
       cp -r $DESTDIR$INSTALL_PREFIX .
+      cat << EOF > install_setenv.sh
+      source $INSTALL_PREFIXshare/ace/ace-devel.sh
+      source $INSTALL_PREFIXshare/tao/tao-devel.sh
+      source $INSTALL_PREFIXshare/tao/dds-devel.sh
+      source PATH="$INSTALL_PREFIX/bin:$PATH"
+      source LD_LIBRARY_PATH="$INSTALL_PREFIX/lib:$LD_LIBRARY_PATH"
+      EOF
     displayName: Install OpenDDS
     condition: and(succeeded(), ne(variables['InstallPrefix'], ''))
   - script: |
-      source $(InstallPrefix)/share/ace/ace-devel.sh
-      source $(InstallPrefix)/share/tao/tao-devel.sh
-      source $(InstallPrefix)/share/tao/dds-devel.sh
+      source install_setenv.sh
       cd tests/DCPS/Messenger
       git clean -dfx .
       $ACE_ROOT/bin/mwc.pl -type gnuace .
@@ -307,9 +312,7 @@ jobs:
     displayName: Build tests/DCPS/Messenger using Installed OpenDDS and MPC
     condition: and(succeeded(), ne(variables['InstallPrefix'], ''))
   - script: |
-      source $(InstallPrefix)/share/ace/ace-devel.sh
-      source $(InstallPrefix)/share/tao/tao-devel.sh
-      source $(InstallPrefix)/share/tao/dds-devel.sh
+      source install_setenv.sh
       cd tests/cmake_integration/Messenger/Messenger_1
       rm -fr build
       mkdir build
