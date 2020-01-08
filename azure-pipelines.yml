@@ -293,13 +293,13 @@ jobs:
       export DESTDIR=$(realpath $(InstallPrefix)_temp)
       export INSTALL_PREFIX=$(realpath $(InstallPrefix))
       make install
-      cp -r $DESTDIR$INSTALL_PREFIX .
+      cp -r $DESTDIR/$INSTALL_PREFIX .
       cat << EOF > install_setenv.sh
-      source $INSTALL_PREFIXshare/ace/ace-devel.sh
-      source $INSTALL_PREFIXshare/tao/tao-devel.sh
-      source $INSTALL_PREFIXshare/tao/dds-devel.sh
-      source PATH="$INSTALL_PREFIX/bin:$PATH"
-      source LD_LIBRARY_PATH="$INSTALL_PREFIX/lib:$LD_LIBRARY_PATH"
+      source $INSTALL_PREFIX/share/ace/ace-devel.sh
+      source $INSTALL_PREFIX/share/tao/tao-devel.sh
+      source $INSTALL_PREFIX/share/tao/dds-devel.sh
+      export PATH="$INSTALL_PREFIX/bin:$PATH"
+      export LD_LIBRARY_PATH="$INSTALL_PREFIX/lib:$LD_LIBRARY_PATH"
       EOF
     displayName: Install OpenDDS
     condition: and(succeeded(), ne(variables['InstallPrefix'], ''))
