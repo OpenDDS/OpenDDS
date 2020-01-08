@@ -1621,7 +1621,7 @@ namespace OpenDDS {
           RepoId guid;
           std::memcpy(guid.guidPrefix, p.participantProxy.guidPrefix, sizeof(p.participantProxy.guidPrefix));
           guid.entityId = DCPS::ENTITYID_PARTICIPANT;
-          std::memcpy(location_data_.guid, guid.guidPrefix, sizeof(RepoId));
+          std::memcpy(location_data_.guid, &guid, sizeof(guid));
           location_data_.location = 0;
           location_data_.change_mask = 0;
           location_data_.local_timestamp = 0;

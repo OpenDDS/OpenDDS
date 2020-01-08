@@ -781,7 +781,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     qos_index_test<TopicIndex<NoIndex> >(status);
     qos_index_test<TopicIndex<PartitionIndex<NoIndex> > >(status);
     qos_index_test<PartitionIndex<TopicIndex<NoIndex> > >(status);
-  } catch (const CORBA::BAD_PARAM& ex) {
+  } catch (const CORBA::BAD_PARAM&) {
     std::cout << "Exception" << std::endl;
     status = EXIT_FAILURE;
   }

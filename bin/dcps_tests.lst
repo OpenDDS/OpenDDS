@@ -337,6 +337,7 @@ tests/DCPS/SubscriberCycle/run_test.pl: !DCPS_MIN !DDS_NO_CONTENT_FILTERED_TOPIC
 tests/transport/rtps/run_test.pl: !DCPS_MIN RTPS
 tests/transport/rtps_reliability/run_test.pl: !DCPS_MIN RTPS
 tests/transport/spdp/run_test.pl: !DCPS_MIN RTPS
+tests/transport/rtps_directed_write/run_test.pl: !DCPS_MIN RTPS
 
 tests/DCPS/ManyTopicTest/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/ManyTopicTest/run_test.pl rtps: !DCPS_MIN RTPS
@@ -404,4 +405,4 @@ tests/DCPS/RtpsRelay/Smoke/run_test.pl join: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_T
 tests/DCPS/RtpsRelay/Smoke/run_test.pl single: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE !IPV6
 tests/DCPS/RtpsRelay/STUN/run_test.pl: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE !IPV6
 
-tests/DCPS/ParticipantLocationTopic/run_test.pl: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE !IPV6
+tests/DCPS/ParticipantLocationTopic/run_test.pl noice: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE !IPV6

@@ -11,33 +11,34 @@ if ($@) {
 }
 
 # The expected results of is_topic_type()
-# dn and wo_dn refers to running opendds_idl with and without --default-nested
+# dn and no_dn refers to running opendds_idl with --default-nested and
+# --no-default-nested respectively
 my %expected = (
-  "NonAnnotatedStruct"                             => {not_found => 1, dn => 0, wo_dn => 1},
-  "TopicStruct"                                    => {not_found => 1, dn => 1, wo_dn => 1},
-  "NestedStruct"                                   => {not_found => 1, dn => 0, wo_dn => 0},
-  "NestedTrueStruct"                               => {not_found => 1, dn => 0, wo_dn => 0},
-  "NestedFalseStruct"                              => {not_found => 1, dn => 1, wo_dn => 1},
-  "NonAnnotatedModule/NonAnnotatedStruct"          => {not_found => 1, dn => 0, wo_dn => 1},
-  "NonAnnotatedModule/TopicStruct"                 => {not_found => 1, dn => 1, wo_dn => 1},
-  "NonAnnotatedModule/NestedStruct"                => {not_found => 1, dn => 0, wo_dn => 0},
-  "NonAnnotatedModule/NestedTrueStruct"            => {not_found => 1, dn => 0, wo_dn => 0},
-  "NonAnnotatedModule/NestedFalseStruct"           => {not_found => 1, dn => 1, wo_dn => 1},
-  "DefaultNestedModule/NonAnnotatedStruct"         => {not_found => 1, dn => 0, wo_dn => 0},
-  "DefaultNestedModule/TopicStruct"                => {not_found => 1, dn => 1, wo_dn => 1},
-  "DefaultNestedModule/NestedStruct"               => {not_found => 1, dn => 0, wo_dn => 0},
-  "DefaultNestedModule/NestedTrueStruct"           => {not_found => 1, dn => 0, wo_dn => 0},
-  "DefaultNestedModule/NestedFalseStruct"          => {not_found => 1, dn => 1, wo_dn => 1},
-  "DefaultNestedTrueModule/NonAnnotatedStruct"     => {not_found => 1, dn => 0, wo_dn => 0},
-  "DefaultNestedTrueModule/TopicStruct"            => {not_found => 1, dn => 1, wo_dn => 1},
-  "DefaultNestedTrueModule/NestedStruct"           => {not_found => 1, dn => 0, wo_dn => 0},
-  "DefaultNestedTrueModule/NestedTrueStruct"       => {not_found => 1, dn => 0, wo_dn => 0},
-  "DefaultNestedTrueModule/NestedFalseStruct"      => {not_found => 1, dn => 1, wo_dn => 1},
-  "DefaultNestedFalseModule/NonAnnotatedStruct"    => {not_found => 1, dn => 1, wo_dn => 1},
-  "DefaultNestedFalseModule/TopicStruct"           => {not_found => 1, dn => 1, wo_dn => 1},
-  "DefaultNestedFalseModule/NestedStruct"          => {not_found => 1, dn => 0, wo_dn => 0},
-  "DefaultNestedFalseModule/NestedTrueStruct"      => {not_found => 1, dn => 0, wo_dn => 0},
-  "DefaultNestedFalseModule/NestedFalseStruct"     => {not_found => 1, dn => 1, wo_dn => 1},
+  "NonAnnotatedStruct"                             => {not_found => 1, dn => 0, no_dn => 1},
+  "TopicStruct"                                    => {not_found => 1, dn => 1, no_dn => 1},
+  "NestedStruct"                                   => {not_found => 1, dn => 0, no_dn => 0},
+  "NestedTrueStruct"                               => {not_found => 1, dn => 0, no_dn => 0},
+  "NestedFalseStruct"                              => {not_found => 1, dn => 1, no_dn => 1},
+  "NonAnnotatedModule/NonAnnotatedStruct"          => {not_found => 1, dn => 0, no_dn => 1},
+  "NonAnnotatedModule/TopicStruct"                 => {not_found => 1, dn => 1, no_dn => 1},
+  "NonAnnotatedModule/NestedStruct"                => {not_found => 1, dn => 0, no_dn => 0},
+  "NonAnnotatedModule/NestedTrueStruct"            => {not_found => 1, dn => 0, no_dn => 0},
+  "NonAnnotatedModule/NestedFalseStruct"           => {not_found => 1, dn => 1, no_dn => 1},
+  "DefaultNestedModule/NonAnnotatedStruct"         => {not_found => 1, dn => 0, no_dn => 0},
+  "DefaultNestedModule/TopicStruct"                => {not_found => 1, dn => 1, no_dn => 1},
+  "DefaultNestedModule/NestedStruct"               => {not_found => 1, dn => 0, no_dn => 0},
+  "DefaultNestedModule/NestedTrueStruct"           => {not_found => 1, dn => 0, no_dn => 0},
+  "DefaultNestedModule/NestedFalseStruct"          => {not_found => 1, dn => 1, no_dn => 1},
+  "DefaultNestedTrueModule/NonAnnotatedStruct"     => {not_found => 1, dn => 0, no_dn => 0},
+  "DefaultNestedTrueModule/TopicStruct"            => {not_found => 1, dn => 1, no_dn => 1},
+  "DefaultNestedTrueModule/NestedStruct"           => {not_found => 1, dn => 0, no_dn => 0},
+  "DefaultNestedTrueModule/NestedTrueStruct"       => {not_found => 1, dn => 0, no_dn => 0},
+  "DefaultNestedTrueModule/NestedFalseStruct"      => {not_found => 1, dn => 1, no_dn => 1},
+  "DefaultNestedFalseModule/NonAnnotatedStruct"    => {not_found => 1, dn => 1, no_dn => 1},
+  "DefaultNestedFalseModule/TopicStruct"           => {not_found => 1, dn => 1, no_dn => 1},
+  "DefaultNestedFalseModule/NestedStruct"          => {not_found => 1, dn => 0, no_dn => 0},
+  "DefaultNestedFalseModule/NestedTrueStruct"      => {not_found => 1, dn => 0, no_dn => 0},
+  "DefaultNestedFalseModule/NestedFalseStruct"     => {not_found => 1, dn => 1, no_dn => 1},
 );
 
 sub subtest {
@@ -84,6 +85,6 @@ sub subtest {
 
 my $status = 0;
 $status |= subtest('dn');
-$status |= subtest('wo_dn');
+$status |= subtest('no_dn');
 
 exit $status;

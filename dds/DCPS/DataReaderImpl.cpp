@@ -2765,7 +2765,6 @@ void DataReaderImpl::notify_liveliness_change()
       output_str += current->second->get_state_str();
     }
 
-    output_str + "\n";
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderImpl::notify_liveliness_change: ")
         ACE_TEXT("listener at 0x%x, mask 0x%x.\n")

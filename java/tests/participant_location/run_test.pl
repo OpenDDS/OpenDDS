@@ -15,23 +15,30 @@ my $status = 0;
 my $debug = '0';
 my $vmargs;
 
+my $pub_sub_ini = "rtps.ini";
+my $opt = "";
+
 foreach my $i (@ARGV) {
     if ($i eq '-debug') {
         $debug = '10';
     }
-    if ($i eq '-noXcheck')
+    elsif ($i eq '-noXcheck')
     {
       # disable -Xcheck:jni warnings
       $vmargs = "-ea";
     }
+    elsif ($i eq '-noice' || $i eq 'noice')
+    {
+      $pub_sub_ini = 'rtps_no_ice.ini';
+      $opt = "-n";
+    }
 }
 
-my $opts = "";
 my $debug_opt = ($debug eq '0') ? ''
     : "-ORBDebugLevel $debug -DCPSDebugLevel $debug";
 
-my $pub_test_opts = "$opts $debug_opt -ORBLogFile pubtest.log -DCPSConfigFile rtps.ini";
-my $sub_test_opts = "$opts $debug_opt -ORBLogFile subtest.log -DCPSConfigFile rtps.ini";
+my $pub_test_opts = "$opt $debug_opt -ORBLogFile pubtest.log -DCPSConfigFile $pub_sub_ini";
+my $sub_test_opts = "$opt $debug_opt -ORBLogFile subtest.log -DCPSConfigFile $pub_sub_ini";
 
 PerlACE::add_lib_path ("$DDS_ROOT/java/tests/messenger/messenger_idl");
 

@@ -494,15 +494,15 @@ bool run_multitopic_test(const Publisher_var& pub, const Subscriber_var& sub)
 
     mi.departure_date() = 299;
     mi.more() = "Shouldn't see this";
-    for (unsigned i = 0; i < even_more_length; ++i) {
-      mi.even_more()[i] = i;
+    for (unsigned j = 0; j < even_more_length; ++j) {
+      mi.even_more()[j] = j;
     }
     check_rc(midw->write(mi, HANDLE_NIL), "write first mi");
 
     mi.departure_date() = 103;
     mi.more() = "Extra info for all flights departing on 103";
-    for (unsigned i = 0; i < even_more_length; ++i) {
-      mi.even_more()[i] = i + 1;
+    for (unsigned j = 0; j < even_more_length; ++j) {
+      mi.even_more()[j] = j + 1;
     }
     check_rc(midw->write(mi, HANDLE_NIL), "write second mi");
 

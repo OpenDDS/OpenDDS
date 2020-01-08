@@ -87,10 +87,11 @@ public class ParticipantLocationListener extends DDS._DataReaderListenerLocalBas
         System.out.println(" relay: " + participant.value.relay_addr);
         System.out.println("      : " + participant.value.relay_timestamp);
 
-        // update locations seen
-        location_mask[0] |= participant.value.location;
+        // update locations if SampleInfo is valid
+        if (si.value.valid_data) {
+          location_mask[0] |= participant.value.location;
+        }
       }
-
     }
 
 
