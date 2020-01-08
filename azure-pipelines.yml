@@ -150,12 +150,12 @@ jobs:
   - script: |
       cd DevGuideExamples\DCPS\Messenger
       perl appveyor_run_test.pl
-    condition: and(succeeded(), eq($[variables['BuildConfiguration']], 'Debug'))
+    condition: $[and(succeeded(), eq(variables['BuildConfiguration'], 'Debug'))]
     displayName: Run Examples DCPS Messenger
   - script: |
       cd tests\DCPS\Messenger
       perl run_test.pl rtps
-    condition: and(succeeded(), eq($[variables['BuildConfiguration']], 'Debug'))
+    condition: $[and(succeeded(), eq(variables['BuildConfiguration'], 'Debug'))]
     displayName: Run DCPS Messenger Test
 
 - job: VisualStudio2015
