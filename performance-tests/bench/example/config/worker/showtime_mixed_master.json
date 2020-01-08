@@ -141,6 +141,7 @@
                 "topic_name": "topic_T1",
                 "listener_type_name": "bench_dwl",
                 "listener_status_mask": 4294967295,
+
                 "qos": { "reliability": { "kind": "RELIABLE_RELIABILITY_QOS" },
                          "durability": { "kind": "TRANSIENT_LOCAL_DURABILITY_QOS" },
                          "history": { "kind": "KEEP_ALL_HISTORY_QOS" }
@@ -181,28 +182,16 @@
                 "listener_type_name": "bench_drl",
                 "listener_status_mask": 4294967295,
 
-                "qos": { "reliability": { "kind": "RELIABLE_RELIABILITY_QOS" },
-                         "durability": { "kind": "TRANSIENT_LOCAL_DURABILITY_QOS" },
-                         "history": { "kind": "KEEP_ALL_HISTORY_QOS" }
-                       },
-                "qos_mask": { "reliability": { "has_kind": true },
-                              "durability": { "has_kind": true },
-                              "history": { "has_kind": true }
-                            }
+                "qos": { "reliability": { "kind": "RELIABLE_RELIABILITY_QOS" } },
+                "qos_mask": { "reliability": { "has_kind": true } }
               },
               { "name": "datareader_A2_T4",
                 "topic_name": "topic_T4",
                 "listener_type_name": "bench_drl",
                 "listener_status_mask": 4294967295,
 
-                "qos": { "reliability": { "kind": "RELIABLE_RELIABILITY_QOS" },
-                         "durability": { "kind": "TRANSIENT_LOCAL_DURABILITY_QOS" },
-                         "history": { "kind": "KEEP_ALL_HISTORY_QOS" }
-                       },
-                "qos_mask": { "reliability": { "has_kind": true },
-                              "durability": { "has_kind": true },
-                              "history": { "has_kind": true }
-                            }
+                "qos": { "reliability": { "kind": "RELIABLE_RELIABILITY_QOS" } },
+                "qos_mask": { "reliability": { "has_kind": true } }
               }
             ]
           }
@@ -218,27 +207,17 @@
                 "topic_name": "topic_T2",
                 "listener_type_name": "bench_dwl",
                 "listener_status_mask": 4294967295,
-                "qos": { "reliability": { "kind": "RELIABLE_RELIABILITY_QOS" },
-                         "durability": { "kind": "TRANSIENT_LOCAL_DURABILITY_QOS" },
-                         "history": { "kind": "KEEP_ALL_HISTORY_QOS" }
-                       },
-                "qos_mask": { "reliability": { "has_kind": true },
-                              "durability": { "has_kind": true },
-                              "history": { "has_kind": true }
-                            }
+
+                "qos": { "reliability": { "kind": "RELIABLE_RELIABILITY_QOS" } },
+                "qos_mask": { "reliability": { "has_kind": true } }
               },
               { "name": "datawriter_A2_T4",
                 "topic_name": "topic_T4",
                 "listener_type_name": "bench_dwl",
                 "listener_status_mask": 4294967295,
-                "qos": { "reliability": { "kind": "RELIABLE_RELIABILITY_QOS" },
-                         "durability": { "kind": "TRANSIENT_LOCAL_DURABILITY_QOS" },
-                         "history": { "kind": "KEEP_ALL_HISTORY_QOS" }
-                       },
-                "qos_mask": { "reliability": { "has_kind": true },
-                              "durability": { "has_kind": true },
-                              "history": { "has_kind": true }
-                            }
+
+                "qos": { "reliability": { "kind": "RELIABLE_RELIABILITY_QOS" } },
+                "qos_mask": { "reliability": { "has_kind": true } }
               }
             ]
           }
@@ -257,6 +236,9 @@
         },
         { "name": "write_period",
           "value": { "_d": "PVK_DOUBLE", "double_prop": 3.21 }
+        },
+        { "name": "max_count",
+          "value": { "_d": "PVK_ULL", "double_prop": 10 }
         }
       ]
     },
@@ -270,6 +252,9 @@
         },
         { "name": "write_period",
           "value": { "_d": "PVK_DOUBLE", "double_prop": 1.23 }
+        },
+        { "name": "max_count",
+          "value": { "_d": "PVK_ULL", "double_prop": 10 }
         }
       ]
     },
