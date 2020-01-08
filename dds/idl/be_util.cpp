@@ -148,7 +148,7 @@ be_util::generator_init()
   return gen;
 }
 
-const std::string&
+const char*
 be_util::dds_root()
 {
   static const char* value = ACE_OS::getenv("DDS_ROOT");
