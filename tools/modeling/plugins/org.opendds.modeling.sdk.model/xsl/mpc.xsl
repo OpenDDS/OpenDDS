@@ -46,6 +46,12 @@
   <xsl:text>
   includes += $(DDS_ROOT)/tools/modeling/codegen
 
+  <!--
+    Suppress DCPS_DATA_TYPE warnings for now. The proper thing to do would be
+    to modify idl.xsl to use topic type annotations.
+  -->
+  dcps_ts_flags += --no-dcps-data-type-warnings
+
   idlflags      += -Wb,export_macro=</xsl:text>
   <xsl:value-of select="$normalized-modelname"/>
   <xsl:text>_Export -Wb,export_include=</xsl:text>

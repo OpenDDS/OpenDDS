@@ -49,7 +49,7 @@ void ParticipantLocationListenerImpl::on_data_available(DDS::DataReader_ptr read
 
     std::cout << "== " << id << " Participant Location ==" << std::endl;
     std::cout
-    << " valid: " << si.valid_data << std::endl
+    << " valid: " << (si.valid_data == 1 ? "true" : "false") << std::endl
     << "  guid: " << guid << std::endl
     << "   loc: "
     << ((participant.location & OpenDDS::DCPS::LOCATION_LOCAL) ? "LOCAL " : "")
@@ -68,8 +68,11 @@ void ParticipantLocationListenerImpl::on_data_available(DDS::DataReader_ptr read
     << " relay: " << participant.relay_addr << std::endl
     << "      : " << participant.relay_timestamp << std::endl;
 
-    // update locations seen
-    location_mask |= participant.change_mask;
+    // update locations if SampleInfo is valid.
+    if (si.valid_data == 1)
+    {
+      location_mask |= participant.change_mask;
+    }
   }
 }
 

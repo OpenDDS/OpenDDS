@@ -439,6 +439,9 @@ namespace {
       first_struct_ = false;
     }
 
+    be_global->add_include("dds/DCPS/FilterEvaluator.h",
+      BE_GlobalData::STREAM_CPP);
+
     std::string decl = "const MetaStruct& getMetaStruct<" + clazz + ">()",
       exp = be_global->export_macro().c_str();
     be_global->header_ << "template<>\n" << exp << (exp.length() ? "\n" : "")
@@ -593,8 +596,6 @@ metaclass_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
   ContentSubscriptionGuard csg;
   NamespaceGuard ng;
   be_global->add_include("dds/DCPS/PoolAllocator.h",
-    BE_GlobalData::STREAM_CPP);
-  be_global->add_include("dds/DCPS/FilterEvaluator.h",
     BE_GlobalData::STREAM_CPP);
 
   if (!generate_metaclass(node, name, fields, first_struct_, clazz)) {

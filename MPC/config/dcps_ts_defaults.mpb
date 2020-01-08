@@ -32,9 +32,6 @@ project : dds_macros, taobaseidldefaults {
   // any OpenDDS annotations, all other unknown annotations will be caught by
   // opendds_idl.
   idlflags += --idl-version 4 --unknown-annotations ignore
-  
-  // Topic types must be declared using topic anotations
-  dcps_ts_flags += --default-nested
 }
 
 feature(!no_opendds_safety_profile): taobaseidldefaults {

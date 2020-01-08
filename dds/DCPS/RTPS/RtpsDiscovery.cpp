@@ -638,6 +638,12 @@ RtpsDiscovery::get_sedp_port(DDS::DomainId_t domain,
 }
 
 void
+RtpsDiscovery::spdp_rtps_relay_address(const ACE_INET_Addr& address)
+{
+  config_->spdp_rtps_relay_address(address);
+}
+
+void
 RtpsDiscovery::sedp_rtps_relay_address(const ACE_INET_Addr& address)
 {
   config_->sedp_rtps_relay_address(address);

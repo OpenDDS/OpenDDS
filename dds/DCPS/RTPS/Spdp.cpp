@@ -417,7 +417,7 @@ Spdp::update_location_i(const DCPS::RepoId& guid,
 
   OpenDDS::DCPS::ParticipantLocationBuiltinTopicData& ld = iter->second.location_data_;
 
-  const char* addr = "";
+  OPENDDS_STRING addr = "";
   ACE_TCHAR buffer[256];
 
   const OpenDDS::DCPS::ParticipantLocation old_mask = ld.location;
@@ -437,18 +437,18 @@ Spdp::update_location_i(const DCPS::RepoId& guid,
   bool address_change = false;
   switch (mask) {
   case OpenDDS::DCPS::LOCATION_LOCAL:
-    address_change = std::strcmp(addr, ld.local_addr.in()) != 0;
-    ld.local_addr = addr;
+    address_change = addr.compare(ld.local_addr.in()) != 0;
+    ld.local_addr = addr.c_str();
     ld.local_timestamp = now;
     break;
   case OpenDDS::DCPS::LOCATION_ICE:
-    address_change = std::strcmp(addr, ld.ice_addr.in()) != 0;
-    ld.ice_addr = addr;
+    address_change = addr.compare(ld.ice_addr.in()) != 0;
+    ld.ice_addr = addr.c_str();
     ld.ice_timestamp = now;
     break;
   case OpenDDS::DCPS::LOCATION_RELAY:
-    address_change = std::strcmp(addr, ld.relay_addr.in()) != 0;
-    ld.relay_addr = addr;
+    address_change = addr.compare(ld.relay_addr.in()) != 0;
+    ld.relay_addr = addr.c_str();
     ld.relay_timestamp = now;
     break;
   }

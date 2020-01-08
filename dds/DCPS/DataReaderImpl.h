@@ -868,10 +868,10 @@ private:
   ReadConditionSet read_conditions_;
 
   /// Monitor object for this entity
-  Monitor* monitor_;
+  unique_ptr<Monitor> monitor_;
 
   /// Periodic Monitor object for this entity
-  Monitor* periodic_monitor_;
+  unique_ptr<Monitor>  periodic_monitor_;
 
   bool transport_disabled_;
 };

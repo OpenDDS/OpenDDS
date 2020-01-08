@@ -1,11 +1,11 @@
-# Migrating to Topic Annotations
+# Migrating to Topic Type Annotations
 
 In OpenDDS 3.14, we have deprecated the `#pragma DCPS_DATA_TYPE` and `#pragma
 DCPS_DATA_KEY` preprocessor statements in favor of IDL 4 annotations. This
-document will just give advice on how to migrate existing IDL to use topic
+document will just give advice on how to migrate existing IDL to use topic type
 annotations. It is recommended to also read the "Defining the Data Types"
-section in the OpenDDS Developer's Guide, where topic annotations are covered
-in more detail.
+section in the OpenDDS Developer's Guide, where topic type annotations are
+covered in more detail.
 
 **Table of Contents:**
 

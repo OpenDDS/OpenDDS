@@ -111,13 +111,12 @@ DomainParticipantImpl::DomainParticipantImpl(
     federated_(false),
     shutdown_condition_(shutdown_mutex_),
     shutdown_complete_(false),
-    monitor_(0),
     pub_id_gen_(dp_id_),
     automatic_liveliness_timer_(*this),
     participant_liveliness_timer_(*this)
 {
   (void) this->set_listener(a_listener, mask);
-  monitor_ = TheServiceParticipant->monitor_factory_->create_dp_monitor(this);
+  monitor_.reset(TheServiceParticipant->monitor_factory_->create_dp_monitor(this));
 }
 
 DomainParticipantImpl::~DomainParticipantImpl()

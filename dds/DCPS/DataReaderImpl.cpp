@@ -78,8 +78,6 @@ DataReaderImpl::DataReaderImpl()
   statistics_enabled_(false),
   raw_latency_buffer_size_(0),
   raw_latency_buffer_type_(DataCollector<double>::KeepOldest),
-  monitor_(0),
-  periodic_monitor_(0),
   transport_disabled_(false)
 {
   reactor_ = TheServiceParticipant->timer();
@@ -120,8 +118,8 @@ DataReaderImpl::DataReaderImpl()
   this->budget_exceeded_status_.total_count_change = 0;
   this->budget_exceeded_status_.last_instance_handle = DDS::HANDLE_NIL;
 
-  monitor_ = TheServiceParticipant->monitor_factory_->create_data_reader_monitor(this);
-  periodic_monitor_ = TheServiceParticipant->monitor_factory_->create_data_reader_periodic_monitor(this);
+  monitor_.reset(TheServiceParticipant->monitor_factory_->create_data_reader_monitor(this));
+  periodic_monitor_.reset(TheServiceParticipant->monitor_factory_->create_data_reader_periodic_monitor(this));
 }
 
 // This method is called when there are no longer any reference to the
@@ -2767,7 +2765,6 @@ void DataReaderImpl::notify_liveliness_change()
       output_str += current->second->get_state_str();
     }
 
-    output_str + "\n";
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderImpl::notify_liveliness_change: ")
         ACE_TEXT("listener at 0x%x, mask 0x%x.\n")
