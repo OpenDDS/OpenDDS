@@ -127,7 +127,10 @@ void WriteAction::stop() {
   if (started_ && !stopped_) {
     stopped_ = true;
     proactor_.cancel_timer(*handler_);
+    const DDS::Duration_t timeout = { 0, 0 };
+    data_dw_->wait_for_acknowledgments(timeout);
     data_dw_->unregister_instance(data_, instance_);
+    data_dw_->wait_for_acknowledgments(timeout);
   }
 }
 
@@ -139,6 +142,7 @@ void WriteAction::do_write() {
       data_.created_time = data_.sent_time = Builder::get_time();
       DDS::ReturnCode_t result = data_dw_->write(data_, 0);
       if (result != DDS::RETCODE_OK) {
+        --(data_.msg_count);
         std::cout << "Error during WriteAction::do_write()'s call to datawriter::write()" << std::endl;
       }
     }

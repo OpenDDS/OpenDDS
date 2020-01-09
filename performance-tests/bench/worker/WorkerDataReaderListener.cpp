@@ -138,7 +138,7 @@ WorkerDataReaderListener::on_data_available(DDS::DataReader_ptr reader)
         ++(ws.duplicate_data_count_);
       }
       ++(ws.sample_count_);
-
+      ++sample_count_;
 
       // Update Latency & Calculate / Update Jitter
       if (!new_writer) {
@@ -233,6 +233,8 @@ WorkerDataReaderListener::set_datareader(Builder::DataReader& datareader)
     get_or_create_property(datareader_->get_report().properties, "duplicate_data_count", Builder::PVK_ULL);
   missing_data_count_ =
     get_or_create_property(datareader_->get_report().properties, "missing_data_count", Builder::PVK_ULL);
+  missing_data_details_ =
+    get_or_create_property(datareader_->get_report().properties, "missing_data_details", Builder::PVK_STRING);
 
   const Builder::PropertySeq& global_properties = get_global_properties();
   Builder::ConstPropertyIndex buffer_size_prop =
@@ -257,20 +259,44 @@ WorkerDataReaderListener::unset_datareader(Builder::DataReader& datareader)
     size_t out_of_order_data_count = 0;
     size_t duplicate_data_count = 0;
     size_t missing_data_count = 0;
+    std::stringstream missing_data_details;
+    bool new_writer = true;
+
     for (auto it = writer_state_map_.begin(); it != writer_state_map_.end(); ++it) {
+      new_writer = true;
       out_of_order_data_count += it->second.out_of_order_data_count_;
       duplicate_data_count += it->second.duplicate_data_count_;
       if (it->second.data_received_.disjoint()) {
         auto msr = it->second.data_received_.missing_sequence_ranges();
         for (auto it2 = msr.begin(); it2 != msr.end(); ++it2) {
           missing_data_count += (it2->second.getValue() - (it2->first.getValue() - 1));
+          if (new_writer) {
+            if (it != writer_state_map_.begin()) {
+              missing_data_details << " " << std::flush;
+            }
+            missing_data_details << "[PH: " << it->first << " (" << it->second.data_received_.low().getValue() << "-" << it->second.data_received_.high().getValue() << ")] " << std::flush;
+            new_writer = false;
+          } else {
+            missing_data_details << ", " << std::flush;
+          }
+          if (it2->first.getValue() == it2->second.getValue()) {
+            missing_data_details << it2->first.getValue() << std::flush;
+          } else {
+            missing_data_details << it2->first.getValue() << "-" << it2->second.getValue() << std::flush;
+          }
         }
       }
+    }
+
+    if (expected_sample_count_ && sample_count_ < expected_sample_count_) {
+      missing_data_count += expected_sample_count_ - sample_count_;
+      missing_data_details << " Expected Sample Deficit: " << expected_sample_count_ - sample_count_ << std::flush;
     }
 
     out_of_order_data_count_->value.ull_prop(out_of_order_data_count);
     duplicate_data_count_->value.ull_prop(duplicate_data_count);
     missing_data_count_->value.ull_prop(missing_data_count);
+    missing_data_details_->value.string_prop(missing_data_details.str().c_str());
 
     latency_stat_block_->finalize();
     jitter_stat_block_->finalize();
