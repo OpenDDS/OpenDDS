@@ -1129,16 +1129,45 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
     seq.setValue(data.writerSN.high, data.writerSN.low);
     info.frags_.erase(seq);
     if (info.recvd_.empty()) {
-      if (Transport_debug_level > 5) {
-        GuidConverter writer(src);
-        GuidConverter reader(id_);
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::process_data_i(DataSubmessage) -")
-                             ACE_TEXT(" data seq: %q from %C being DROPPED from %C because writer NOT INITIALIZED\n"),
-                             seq.getValue(),
-                             OPENDDS_STRING(writer).c_str(),
-                             OPENDDS_STRING(reader).c_str()));
+      // This is the first data / heartbeat we've seen
+      // Initialize the reader so we can potentially deliver data
+      if (durable_) {
+        info.hb_range_.first = 1;
+        info.hb_range_.second = seq;
+        info.recvd_.insert(SequenceNumber::ZERO());
+        info.recvd_.insert(seq);
+      } else {
+        info.hb_range_.first = seq;
+        info.hb_range_.second = seq;
+        info.recvd_.insert(SequenceRange(SequenceNumber::ZERO(), seq));
       }
-      link->receive_strategy()->withhold_data_from(id_);
+      if (durable_ && info.recvd_.disjoint()) {
+        if (Transport_debug_level > 5) {
+          GuidConverter writer(src);
+          GuidConverter reader(id_);
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::process_data_i(DataSubmessage) -")
+                               ACE_TEXT(" data seq: %q from %C being WITHHELD from %C because it's EXPECTING more data")
+                               ACE_TEXT(" (first message, initializing reader)\n"),
+                               seq.getValue(),
+                               OPENDDS_STRING(writer).c_str(),
+                               OPENDDS_STRING(reader).c_str()));
+        }
+        const ReceivedDataSample* sample =
+          link->receive_strategy()->withhold_data_from(id_);
+        info.held_.insert(std::make_pair(seq, *sample));
+      } else {
+        if (Transport_debug_level > 5) {
+          GuidConverter writer(src);
+          GuidConverter reader(id_);
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::process_data_i(DataSubmessage) -")
+                               ACE_TEXT(" data seq: %q from %C to %C OK to deliver")
+                               ACE_TEXT(" (first message, initializing reader)\n"),
+                               seq.getValue(),
+                               OPENDDS_STRING(writer).c_str(),
+                               OPENDDS_STRING(reader).c_str()));
+        }
+        link->receive_strategy()->do_not_withhold_data_from(id_);
+      }
     } else if (seq < info.recvd_.low()) {
       if (Transport_debug_level > 5) {
         GuidConverter writer(src);
@@ -1249,17 +1278,9 @@ RtpsUdpDataLink::RtpsReader::process_gap_i(const RTPS::GapSubmessage& gap,
     start.setValue(gap.gapStart.high, gap.gapStart.low);
     base.setValue(gap.gapList.bitmapBase.high, gap.gapList.bitmapBase.low);
 
-    SequenceNumber first_received = SequenceNumber::MAX_VALUE;
-    if (durable_ && !wi->second.recvd_.empty()) {
-      OPENDDS_VECTOR(SequenceRange) missing = wi->second.recvd_.missing_sequence_ranges();
-      if (!missing.empty()) {
-        first_received = missing.front().second;
-      }
-    }
-
     SequenceRange sr;
     sr.first = std::max(wi->second.recvd_.low(), start);
-    sr.second = std::min(first_received, base.previous());
+    sr.second = base.previous();
 
     // Insert the GAP range (but not before recvd_.low())
     if (sr.first <= sr.second) {
@@ -1420,15 +1441,18 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
   if (info.first_ever_hb_) {
     immediate_reply = true;
     info.first_ever_hb_ = false;
-    if (!durable_) {
-      if (hb_last > zero) {
-        info.recvd_.insert(SequenceRange(zero, hb_last));
+    // Don't re-initialize recvd_ values if a data sample has already done it
+    if (info.recvd_.empty()) {
+      if (!durable_) {
+        if (hb_last > zero) {
+          info.recvd_.insert(SequenceRange(zero, hb_last));
+        } else {
+          info.recvd_.insert(zero);
+        }
+        wi_first = hb_last; // non-durable reliable connections ignore previous data
       } else {
         info.recvd_.insert(zero);
       }
-      wi_first = hb_last; // non-durable reliable connections ignore previous data
-    } else {
-      info.recvd_.insert(zero);
     }
   }
 
@@ -1440,7 +1464,9 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
     }
     if (!durable_) {
       if (wi_first < hb_first) {
+        info.recvd_.insert(SequenceRange(wi_first, hb_first.previous()));
         wi_first = hb_first;
+        link->deliver_held_data(id_, info, durable_);
       }
     }
     wi_last = wi_last < hb_last ? hb_last : wi_last;
