@@ -290,6 +290,7 @@ jobs:
           not(contains(variables['ConfigOpts'], '--safety-profile')),
           not(contains(variables['ConfigOpts'], '--no-ownership-profile')))
   - script: |
+      # Make sure install using DESTDIR is also working
       export DESTDIR=$(realpath $(InstallPrefix)_temp)
       export INSTALL_PREFIX=$(realpath $(InstallPrefix))
       make install
@@ -300,6 +301,7 @@ jobs:
       source $INSTALL_PREFIX/share/tao/dds-devel.sh
       export PATH="$INSTALL_PREFIX/bin:$PATH"
       export LD_LIBRARY_PATH="$INSTALL_PREFIX/lib:$LD_LIBRARY_PATH"
+      export MPC_ROOT=$(realpath ACE_TAO/ACE/MPC)
       EOF
     displayName: Install OpenDDS
     condition: and(succeeded(), ne(variables['InstallPrefix'], ''))
@@ -309,7 +311,7 @@ jobs:
       git clean -dfx .
       $ACE_ROOT/bin/mwc.pl -type gnuace .
       make
-    displayName: Build tests/DCPS/Messenger using Installed OpenDDS and MPC
+    displayName: Build Messenger Using Installed OpenDDS and MPC
     condition: and(succeeded(), ne(variables['InstallPrefix'], ''))
   - script: |
       source install_setenv.sh
@@ -319,7 +321,7 @@ jobs:
       cd build
       cmake ..
       cmake --build .
-    displayName: Build tests/DCPS/Messenger using Installed OpenDDS and CMake
+    displayName: Build Messenger Using Installed OpenDDS and CMake
     condition: and(succeeded(), ne(variables['InstallPrefix'], ''))
 
 - job: macOS
