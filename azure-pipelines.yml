@@ -298,7 +298,7 @@ jobs:
       cat << EOF > install_setenv.sh
       source $INSTALL_PREFIX/share/ace/ace-devel.sh
       source $INSTALL_PREFIX/share/tao/tao-devel.sh
-      source $INSTALL_PREFIX/share/tao/dds-devel.sh
+      source $INSTALL_PREFIX/share/dds/dds-devel.sh
       export PATH="$INSTALL_PREFIX/bin:$PATH"
       export LD_LIBRARY_PATH="$INSTALL_PREFIX/lib:$LD_LIBRARY_PATH"
       export MPC_ROOT=$(realpath ACE_TAO/ACE/MPC)
