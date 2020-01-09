@@ -78,11 +78,6 @@ project(OpenDDS_Dcps): core, coverage_optional, \
     ../rules.dds.GNU
   }
 
-  InstallData_Files {
-    gendir = bin
-    ../bin/PerlDDS
-  }
-
   verbatim(gnuace, postinstall) {
 "	echo export DDS_ROOT=$(INSTALL_PREFIX)/share/dds> $(DESTDIR)$(INSTALL_PREFIX)/share/dds/dds-devel.sh"
 "	@$(MKDIR) $(DESTDIR)$(INSTALL_PREFIX)/share/dds/dds"
