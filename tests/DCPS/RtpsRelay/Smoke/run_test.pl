@@ -27,7 +27,7 @@ $test->{add_transport_config} = 0;
 my $relay_security_opts = "";
 my $pub_sub_security_opts = "";
 if ($test->flag('secure')) {
-    $relay_security_opts = " -IdentityCA ../../../security/certs/identity/identity_ca_cert.pem -PermissionsCA ../../../security/certs/permissions/permissions_ca_cert.pem -IdentityCertificate ../../../security/certs/identity/test_participant_01_cert.pem -IdentityKey ../../../security/certs/identity/test_participant_01_private_key.pem -Goverance governance_signed.p7s -Permissions permissions_relay_signed.p7s -DCPSSecurity 1";
+    $relay_security_opts = " -IdentityCA ../../../security/certs/identity/identity_ca_cert.pem -PermissionsCA ../../../security/certs/permissions/permissions_ca_cert.pem -IdentityCertificate ../../../security/certs/identity/test_participant_01_cert.pem -IdentityKey ../../../security/certs/identity/test_participant_01_private_key.pem -Governance governance_signed.p7s -Permissions permissions_relay_signed.p7s -DCPSSecurity 1";
     $pub_sub_security_opts = " -DCPSSecurity 1";
 }
 
