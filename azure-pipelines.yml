@@ -247,17 +247,11 @@ jobs:
       WChar:
         ConfigOpts: --features=uses_wchar=1 --no-inline
       CLANG5:
-        ConfigOpts: --compiler=clang++-5.0 --security --std=c++11
+        ConfigOpts: --compiler=clang++-5.0 --security --std=c++11 --features=uses_wchar=1 --no-inline
         PackageDeps: libxerces-c-dev libssl-dev cmake clang-5.0
       CLANG6:
         ConfigOpts: --compiler=clang++-6.0 --security
         PackageDeps: libxerces-c-dev libssl-dev cmake clang-6.0
-      CLANG7:
-        ConfigOpts: --compiler=clang++-7 --security --features=uses_wchar=1
-        PackageDeps: libxerces-c-dev libssl-dev cmake clang-7
-      CLANG8:
-        ConfigOpts: --compiler=clang++-8 --security --no-inline
-        PackageDeps: libxerces-c-dev libssl-dev cmake clang-8
       CLANG9:
         ConfigOpts: --compiler=clang++-9 --security
         PackageDeps: libxerces-c-dev libssl-dev cmake clang-9
@@ -268,12 +262,6 @@ jobs:
       GCC6:
         ConfigOpts: --compiler=g++-6 --xerces --features=uses_wchar=1 --no-debug
         PackageDeps: libxerces-c-dev g++-6
-      GCC7:
-        ConfigOpts: --compiler=g++-7 --no-inline
-        PackageDeps: g++-7
-      GCC8:
-        ConfigOpts: --compiler=g++-8 --no-inline
-        PackageDeps: g++-8
       GCC9:
         ConfigOpts: --compiler=g++-9 --no-inline
         PackageDeps: g++-9
