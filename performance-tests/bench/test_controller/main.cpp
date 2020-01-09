@@ -352,6 +352,8 @@ void handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std:
 
   size_t total_undermatched_readers = 0;
   size_t total_undermatched_writers = 0;
+  size_t total_lost_sample_count = 0;
+  size_t total_rejected_sample_count = 0;
   size_t total_out_of_order_data_count = 0;
   size_t total_duplicate_data_count = 0;
   size_t total_missing_data_count = 0;
@@ -389,6 +391,14 @@ void handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std:
           Bench::ConstPropertyStatBlock dr_round_trip_latency(dr_report.properties, "round_trip_latency");
           Bench::ConstPropertyStatBlock dr_round_trip_jitter(dr_report.properties, "round_trip_jitter");
 
+          Builder::ConstPropertyIndex lost_sample_count_prop = get_property(dr_report.properties, "lost_sample_count", Builder::PVK_ULL);
+          if (lost_sample_count_prop) {
+            total_lost_sample_count += lost_sample_count_prop->value.ull_prop();
+          }
+          Builder::ConstPropertyIndex rejected_sample_count_prop = get_property(dr_report.properties, "rejected_sample_count", Builder::PVK_ULL);
+          if (rejected_sample_count_prop) {
+            total_rejected_sample_count += rejected_sample_count_prop->value.ull_prop();
+          }
           Builder::ConstPropertyIndex out_of_order_data_count_prop = get_property(dr_report.properties, "out_of_order_data_count", Builder::PVK_ULL);
           if (out_of_order_data_count_prop) {
             total_out_of_order_data_count += out_of_order_data_count_prop->value.ull_prop();
@@ -399,6 +409,12 @@ void handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std:
           }
           Builder::ConstPropertyIndex missing_data_count_prop = get_property(dr_report.properties, "missing_data_count", Builder::PVK_ULL);
           if (missing_data_count_prop) {
+            if (missing_data_count_prop->value.ull_prop()) {
+              Builder::ConstPropertyIndex missing_data_details_prop = get_property(dr_report.properties, "missing_data_details", Builder::PVK_STRING);
+              if (missing_data_details_prop) {
+                result_out << "Missing Data (" << missing_data_count_prop->value.ull_prop() << ") Details: " << missing_data_details_prop->value.string_prop() << std::endl;
+              }
+            }
             total_missing_data_count += missing_data_count_prop->value.ull_prop();
           }
 
@@ -410,6 +426,8 @@ void handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std:
       }
     }
   }
+
+  result_out << std::endl;
 
   result_out << "Test Timing Stats:" << std::endl;
   result_out << "  Max Construction Time: " << max_construction_time << " seconds" << std::endl;
@@ -424,6 +442,12 @@ void handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std:
   result_out << "  Total Undermatched Readers: " << total_undermatched_readers <<
     ", Total Undermatched Writers: " << total_undermatched_writers << std::endl;
   result_out << "  Max Discovery Time Delta: " << max_discovery_time_delta << " seconds" << std::endl;
+
+  result_out << std::endl;
+
+  result_out << "DDS Sample Count Stats:" << std::endl;
+  result_out << "  Total Lost Samples: " << total_lost_sample_count << std::endl;
+  result_out << "  Total Rejected Samples: " << total_rejected_sample_count << std::endl;
 
   result_out << std::endl;
 

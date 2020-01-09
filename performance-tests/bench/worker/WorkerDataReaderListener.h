@@ -55,6 +55,7 @@ protected:
   Builder::PropertyIndex out_of_order_data_count_;
   Builder::PropertyIndex duplicate_data_count_;
   Builder::PropertyIndex missing_data_count_;
+  Builder::PropertyIndex missing_data_details_;
 
   struct WriterState {
     size_t sample_count_{0};
