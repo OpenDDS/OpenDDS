@@ -296,6 +296,7 @@ jobs:
       make install
       cp -r $DESTDIR/$INSTALL_PREFIX .
       cat << EOF > install_setenv.sh
+      export opendds_prefix=$INSTALL_PREFIX
       source $INSTALL_PREFIX/share/ace/ace-devel.sh
       source $INSTALL_PREFIX/share/tao/tao-devel.sh
       source $INSTALL_PREFIX/share/dds/dds-devel.sh
@@ -319,7 +320,7 @@ jobs:
       rm -fr build
       mkdir build
       cd build
-      cmake ..
+      cmake -DCMAKE_PREFIX_PATH=$opendds_prefix ..
       cmake --build .
     displayName: Build Messenger Using Installed OpenDDS and CMake
     condition: and(succeeded(), ne(variables['InstallPrefix'], ''))
