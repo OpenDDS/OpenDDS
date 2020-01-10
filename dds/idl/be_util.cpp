@@ -149,11 +149,11 @@ be_util::generator_init()
   return gen;
 }
 
-const std::string&
+const char*
 be_util::dds_root()
 {
-  static std::string value = ACE_OS::getenv("DDS_ROOT");
-  if (value.empty()) {
+  static const char* value = ACE_OS::getenv("DDS_ROOT");
+  if (!value || !value[0]) {
     ACE_ERROR((LM_ERROR, "Error - The environment variable DDS_ROOT must be set.\n"));
     BE_abort();
   }
