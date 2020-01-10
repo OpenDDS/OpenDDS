@@ -228,10 +228,13 @@ jobs:
   timeoutInMinutes: 90
   pool:
     vmImage: ubuntu-18.04
+  variables:
+    TEST_MESSENGER: false
   strategy:
     matrix:
       Debug:
         ConfigOpts: --no-inline --java=/usr/lib/jvm/zulu-12-azure-amd64
+	TEST_MESSENGER: true
       Release:
         ConfigOpts: --no-debug --optimize --java=/usr/lib/jvm/zulu-12-azure-amd64
       Safety:
@@ -289,6 +292,18 @@ jobs:
       and(succeeded(),
           not(contains(variables['ConfigOpts'], '--safety-profile')),
           not(contains(variables['ConfigOpts'], '--no-ownership-profile')))
+  - script: |
+      source setenv.sh
+      cd DevGuideExamples/DCPS/Messenger
+      perl integration_run_test.pl
+    condition: eq(variables['TEST_MESSENGER'], 'true')
+    displayName: Run Examples DCPS Messenger
+  - script: |
+      source setenv.sh
+      cd tests/DCPS/Messenger
+      perl run_test.pl rtps
+    condition: eq(variables['TEST_MESSENGER'], 'true')
+    displayName: Run DCPS Messenger Test
 
 - job: macOS
   timeoutInMinutes: 90
