@@ -127,10 +127,12 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
     stun_server_address(addr);
   }
 
+#ifdef OPENDDS_SECURITY
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("UseIce"), use_ice_, bool);
   if (use_ice_ && !TheServiceParticipant->get_security()) {
     ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Security must be enabled (-DCPSSecurity 1) when using ICE (UseIce)\n")), -1);
   }
+#endif
 
   return 0;
 }
