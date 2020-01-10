@@ -313,10 +313,10 @@ jobs:
       $DDS_ROOT/tests/cmake_integration/run_ci_tests.pl
     displayName: Compile and run CMake tests
   - script: |
-      cd DevGuideExamples\DCPS\Messenger
+      cd DevGuideExamples/DCPS/Messenger
       perl integration_run_test.pl
     displayName: Run Examples DCPS Messenger
   - script: |
-      cd tests\DCPS\Messenger
+      cd tests/DCPS/Messenger
       perl run_test.pl rtps
     displayName: Run DCPS Messenger Test
