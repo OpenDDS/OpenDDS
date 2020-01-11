@@ -299,14 +299,10 @@ jobs:
           not(contains(variables['ConfigOpts'], '--no-ownership-profile')))
   - script: |
       set -e
-      set -x
       # Make sure install using DESTDIR is also working
       export DESTDIR=$(realpath install_temp)
       export INSTALL_PREFIX=$(realpath install_prefix)
       make install
-      ls -al
-      ls -al install_temp || true
-      ls -al $DESTDIR/$INSTALL_PREFIX || true
       cp -r $DESTDIR/$INSTALL_PREFIX .
       cat << EOF > install_setenv.sh
       export opendds_prefix=$INSTALL_PREFIX
