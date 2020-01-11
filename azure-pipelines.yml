@@ -224,7 +224,7 @@ jobs:
         ConfigOpts: --no-inline --java=/usr/lib/jvm/zulu-12-azure-amd64
       Release:
         ConfigOpts: --no-debug --optimize --java=/usr/lib/jvm/zulu-12-azure-amd64
-        Install: true
+        DoMakeInstall: true
       Safety:
         ConfigOpts: --safety-profile
       SafetyBaseNoBuiltinTopics:
@@ -314,7 +314,7 @@ jobs:
       export MPC_ROOT=$(realpath ACE_TAO/ACE/MPC)
       EOF
     displayName: Install OpenDDS
-    condition: and(succeeded(), ne(variables['Install'], ''))
+    condition: and(succeeded(), ne(variables['DoMakeInstall'], ''))
   - script: |
       set -e
       source install_setenv.sh
@@ -323,7 +323,7 @@ jobs:
       $ACE_ROOT/bin/mwc.pl -type gnuace .
       make
     displayName: Build Messenger Using Installed OpenDDS and MPC
-    condition: and(succeeded(), ne(variables['Install'], ''))
+    condition: and(succeeded(), ne(variables['DoMakeInstall'], ''))
   - script: |
       set -e
       source install_setenv.sh
@@ -334,7 +334,7 @@ jobs:
       cmake -DCMAKE_PREFIX_PATH=$opendds_prefix ..
       cmake --build .
     displayName: Build Messenger Using Installed OpenDDS and CMake
-    condition: and(succeeded(), ne(variables['Install'], ''))
+    condition: and(succeeded(), ne(variables['DoMakeInstall'], ''))
 
 - job: macOS
   timeoutInMinutes: 90
