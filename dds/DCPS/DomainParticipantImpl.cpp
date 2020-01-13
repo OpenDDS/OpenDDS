@@ -199,7 +199,7 @@ DomainParticipantImpl::delete_publisher(
                    this->publishers_protector_,
                    DDS::RETCODE_ERROR);
 
-  Publisher_Pair pair(the_servant, p, false);
+  Publisher_Pair pair(the_servant, p, true);
 
   if (OpenDDS::DCPS::remove(publishers_, pair) == -1) {
     ACE_ERROR((LM_ERROR,
