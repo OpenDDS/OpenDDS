@@ -118,7 +118,8 @@ my %path_conditions = (
   in_old_bench => qr@^performance-tests/Bench@,
   in_java_jms => qr@^java/jms@,
 
-  cpp_file => qr/\.(cpp|h|inl)$/,
+  cpp_file => qr/\.(cpp|h|hpp|inl)$/,
+  cpp_header_file => qr/\.(h|hpp|inl)$/,
   idl_file => qr/\.idl$/,
   cmake_file => qr/(CMakeLists\.txt|\.cmake)$/,
   md_file => qr/\.md$/,
@@ -302,6 +303,24 @@ my %checks = (
       '!excel_file',
       '!photoshop_file',
     ],
+  },
+
+  nonprefixed_public_macros => {
+    message => [
+      'Public macros must be prefixed with OPENDDS or ACE'
+    ],
+    path_matches_all_of => ['cpp_header_file', 'in_dds_dcps'],
+    line_matches => sub {
+      my $line = shift;
+      if ($line =~ /#\s*define\s*(\w+)/) {
+        my $what = $1;
+        if (!($what =~ /^(OPENDDS|ACE)/)) {
+          # print "$what\n";
+          return 1;
+        }
+      }
+      return 0;
+    },
   },
 );
 
