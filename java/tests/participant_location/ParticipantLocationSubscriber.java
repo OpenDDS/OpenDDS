@@ -51,9 +51,7 @@ public class ParticipantLocationSubscriber {
       return;
     }
 
-    int[] location_mask = { 0 };
-
-    ParticipantLocationListener locationListener = new ParticipantLocationListener("Subscriber", location_mask);
+    ParticipantLocationListener locationListener = new ParticipantLocationListener("Subscriber");
     assert (locationListener != null);
 
     int ret = dr.set_listener(locationListener, OpenDDS.DCPS.DEFAULT_STATUS_MASK.value);
@@ -109,18 +107,8 @@ public class ParticipantLocationSubscriber {
 
     System.out.println("Stop Subscriber");
 
-    // check for local, relay (and ice for security builds)
-    boolean success = false;
-    int localAndRelay = OpenDDS.DCPS.LOCATION_LOCAL.value | OpenDDS.DCPS.LOCATION_RELAY.value;
-    int localRelayIce = localAndRelay | OpenDDS.DCPS.LOCATION_ICE.value;
-    if (noIce && location_mask[0] == localAndRelay) {
-      success = true;
-      System.out.println("Publisher success. Found locations LOCAL and RELAY");
-    }
-    else if (!noIce && location_mask[0] == localRelayIce) {
-      success = true;
-      System.out.println("Publisher success. Found locations LOCAL, RELAY and ICE");
-    }
+    Thread.sleep(5000);
+    boolean success = locationListener.check(noIce);
 
     // cleanup
     participant.delete_contained_entities();
@@ -128,7 +116,6 @@ public class ParticipantLocationSubscriber {
     TheServiceParticipant.shutdown();
 
     if (!success) {
-      System.err.println("Error in subscriber: One or more locations missing. Location mask = " + location_mask[0]);
       System.exit(1);
     }
 
