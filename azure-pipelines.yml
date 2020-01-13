@@ -237,6 +237,7 @@ jobs:
         TEST_MESSENGER: true
       Release:
         ConfigOpts: --no-debug --optimize --java=/usr/lib/jvm/zulu-12-azure-amd64
+        InstallPrefix: 'install'
       Safety:
         ConfigOpts: --safety-profile
       SafetyBaseNoBuiltinTopics:

@@ -125,7 +125,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       identity_key_file = file + arg;
       secure = true;
       args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-Goverance"))) {
+    } else if ((arg = args.get_the_parameter("-Governance"))) {
       governance_file = file + arg;
       secure = true;
       args.consume_arg();

@@ -15,7 +15,7 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Service_Participant.h>
-#include "model/Sync.h"
+#include "tests/Utils/StatusMatching.h"
 
 #include "dds/DCPS/StaticIncludes.h"
 #ifdef ACE_AS_STATIC_LIBS
@@ -199,7 +199,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                          -1);
       }
       // Block until Subscriber is available
-      OpenDDS::Model::WriterSync::wait_match(dw, 1);
+      Utils::wait_match(dw, 1, Utils::GTE);
 
       // Start writing threads
       std::cout << "Creating Writer" << std::endl;

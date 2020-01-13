@@ -327,6 +327,9 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
                               value.c_str(), rtps_name.c_str()), -1);
           }
           config->use_ice(bool(smInt));
+          if (smInt && !TheServiceParticipant->get_security()) {
+            ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Security must be enabled (-DCPSSecurity 1) when using ICE (UseIce)\n")), -1);
+          }
         } else if (name == "IceTa") {
           // In milliseconds.
           const OPENDDS_STRING& string_value = it->second;

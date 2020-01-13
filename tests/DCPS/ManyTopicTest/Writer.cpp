@@ -10,6 +10,7 @@
 #include "tests/DCPS/ManyTopicTypes/Foo1DefTypeSupportC.h"
 #include "tests/DCPS/ManyTopicTypes/Foo2DefTypeSupportC.h"
 #include "tests/DCPS/ManyTopicTypes/Foo3DefTypeSupportC.h"
+#include "tests/Utils/StatusMatching.h"
 
 #include "ace/OS_NS_unistd.h"
 
@@ -38,6 +39,12 @@ Writer::start()
                ACE_TEXT("activate")));
     throw TestException();
   }
+}
+
+int
+Writer::wait_match(const DDS::DataWriter_var& dw, unsigned int count)
+{
+  return Utils::wait_match(dw, count, Utils::GTE);
 }
 
 void

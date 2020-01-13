@@ -18,18 +18,13 @@ RUN cmake CMakeLists.txt && make && cp ./*.a /usr/lib
 WORKDIR /usr/src/gmock
 RUN cmake CMakeLists.txt && make && cp ./*.a /usr/lib
 
-RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
-    apt-get install -y --no-install-recommends nodejs
-
 ADD . /opt/OpenDDS
 
 RUN cd /opt/OpenDDS && \
     ./configure --prefix=/usr/local --security --doc-group --std=c++11 && \
     make && \
     make install && \
-    cp -a /opt/OpenDDS/ACE_wrappers/MPC /usr/local/share/ace/MPC && \
-    cd /opt/OpenDDS/tools/repeater && \
-    npm install
+    cp -a /opt/OpenDDS/ACE_wrappers/MPC /usr/local/share/ace/MPC
 
 ENV ACE_ROOT=/usr/local/share/ace \
     TAO_ROOT=/usr/local/share/tao \
