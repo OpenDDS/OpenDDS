@@ -23,6 +23,7 @@ namespace OpenDDS {
     struct TopicDetails {
 
       struct RemoteTopic {
+        RemoteTopic() : data_type_name_(), inconsistent_(false), endpoints_() {}
         OPENDDS_STRING data_type_name_;
         bool inconsistent_;
         RepoIdSet endpoints_;

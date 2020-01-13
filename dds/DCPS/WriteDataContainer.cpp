@@ -369,7 +369,7 @@ WriteDataContainer::dispose(DDS::InstanceHandle_t instance_handle,
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    guard,
-                   this->lock_,
+                   lock_,
                    DDS::RETCODE_ERROR);
 
   PublicationInstance_rch instance;
@@ -423,7 +423,7 @@ WriteDataContainer::num_samples(DDS::InstanceHandle_t handle,
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    guard,
-                   this->lock_,
+                   lock_,
                    DDS::RETCODE_ERROR);
   PublicationInstance_rch instance;
 
@@ -445,7 +445,7 @@ WriteDataContainer::num_all_samples()
 
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    guard,
-                   this->lock_,
+                   lock_,
                    0);
 
   for (PublicationInstanceMapType::iterator iter = instances_.begin();
@@ -538,7 +538,7 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
 
   ACE_GUARD(ACE_Recursive_Thread_Mutex,
             guard,
-            this->lock_);
+            lock_);
 
   // Delivered samples _must_ be on sending_data_ list
 
@@ -612,7 +612,7 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
 
     return;
   }
-  ACE_GUARD(ACE_SYNCH_MUTEX, wfa_guard, this->wfa_lock_);
+  ACE_GUARD(ACE_SYNCH_MUTEX, wfa_guard, wfa_lock_);
   SequenceNumber acked_seq = stale->get_header().sequence_;
   SequenceNumber prev_max = acked_sequences_.cumulative_ack();
 
@@ -714,7 +714,7 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
 
   ACE_GUARD (ACE_Recursive_Thread_Mutex,
     guard,
-    this->lock_);
+    lock_);
 
   // The dropped sample should be in the sending_data_ list.
   // Otherwise an exception will be raised.
@@ -966,15 +966,8 @@ WriteDataContainer::remove_oldest_sample(
                      DDS::RETCODE_ERROR);
   }
 
-  // Signal if there is no pending data.
-  {
-    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                     guard,
-                     this->lock_,
-                     DDS::RETCODE_ERROR);
-
-    if (!pending_data())
-      empty_condition_.broadcast();
+  if (!pending_data()) {
+    empty_condition_.broadcast();
   }
 
   if (result == false) {
@@ -1198,7 +1191,7 @@ WriteDataContainer::unregister_all()
     //the delete_datawriter call which does not acquire the lock in advance.
     ACE_GUARD(ACE_Recursive_Thread_Mutex,
               guard,
-              this->lock_);
+              lock_);
     // Tell transport remove all control messages currently
     // transport is processing.
     (void) this->writer_->remove_all_msgs();
@@ -1377,7 +1370,7 @@ WriteDataContainer::wait_pending()
     timeout_ptr = &timeout_at.value();
   }
 
-  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
   const bool report = DCPS_debug_level > 0 && pending_data();
   if (report) {
     if (pending_timeout.is_zero()) {
@@ -1410,7 +1403,7 @@ WriteDataContainer::get_instance_handles(InstanceHandleVec& instance_handles)
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex,
             guard,
-            this->lock_);
+            lock_);
   PublicationInstanceMapType::iterator it = instances_.begin();
 
   while (it != instances_.end()) {
@@ -1424,7 +1417,16 @@ WriteDataContainer::wait_ack_of_seq(const MonotonicTimePoint& abs_deadline, cons
 {
   const MonotonicTimePoint deadline(abs_deadline);
   DDS::ReturnCode_t ret = DDS::RETCODE_OK;
-  ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->wfa_lock_, DDS::RETCODE_ERROR);
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
+  ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, wfa_guard, wfa_lock_, DDS::RETCODE_ERROR);
+
+  SequenceNumber last_acked = acked_sequences_.last_ack();
+  SequenceNumber acked = acked_sequences_.cumulative_ack();
+  if (sequence == last_acked && sequence == acked && sending_data_.size() != 0) {
+    acked_sequences_.insert(sending_data_.head()->get_header().sequence_.previous());
+  }
+
+  guard.release();
 
   while (MonotonicTimePoint::now() < deadline) {
 

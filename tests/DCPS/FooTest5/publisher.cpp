@@ -28,7 +28,7 @@
 #include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include <dds/DCPS/transport/framework/TransportExceptions.h>
-#include "model/Sync.h"
+#include "tests/Utils/StatusMatching.h"
 
 #include "ace/Arg_Shifter.h"
 #include "ace/OS_NS_unistd.h"
@@ -465,7 +465,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       for (int i = 0; i < num_datawriters; i ++)
         {
-          OpenDDS::Model::WriterSync::wait_match(dw[i], associations_per_writer);
+          Utils::wait_match(dw[i], associations_per_writer, Utils::GTE);
           writers[i]->start ();
         }
 

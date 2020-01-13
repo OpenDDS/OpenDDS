@@ -212,6 +212,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       // Since there is a whole separate test for testing set_qos, just set these right away
       dr_qos.deadline.period.sec     = DEADLINE_PERIOD.sec;
       dr_qos.deadline.period.nanosec = DEADLINE_PERIOD.nanosec;
+      dr_qos.reliability.kind        = DDS::RELIABLE_RELIABILITY_QOS;
 
       // First data reader will have a listener to test listener
       // callback on deadline expiration.

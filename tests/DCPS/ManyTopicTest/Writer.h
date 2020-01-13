@@ -5,7 +5,6 @@
 
 #include "dds/DdsDcpsPublicationC.h"
 #include "ace/Task.h"
-#include "model/Sync.h"
 #include "dds/DCPS/TypeSupportImpl.h"
 
 class Writer : public ACE_Task_Base
@@ -21,6 +20,7 @@ public:
   void end();
 
   bool is_finished() const;
+  int wait_match(const DDS::DataWriter_var& dw, unsigned int count);
 
 protected:
 
@@ -75,7 +75,7 @@ int TypedWriter<TSI>::svc()
       CORBA::String_var(topic->get_name()).in()));
 
     const DDS::DataWriter_var dw = DDS::DataWriter::_duplicate(writer_);
-    OpenDDS::Model::WriterSync::wait_match(dw);
+    wait_match(dw, 1);
 
     DSample foo;
     init_instance_(foo, 0);
