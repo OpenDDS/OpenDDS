@@ -344,11 +344,14 @@ jobs:
   timeoutInMinutes: 90
   pool:
     vmImage: macOS-latest
+  variables:
+    TEST_MESSENGER: false
   strategy:
     maxParallel: 2
     matrix:
       Debug:
         ConfigOpts: --no-inline
+        TEST_MESSENGER: true
       Release:
         ConfigOpts: --no-debug --optimize
   steps:
@@ -366,9 +369,11 @@ jobs:
       source setenv.sh
       cd DevGuideExamples/DCPS/Messenger
       perl integration_run_test.pl
+    condition: eq(variables['TEST_MESSENGER'], 'true')
     displayName: Run Examples DCPS Messenger
   - script: |
       source setenv.sh
       cd tests/DCPS/Messenger
       perl run_test.pl rtps
+    condition: eq(variables['TEST_MESSENGER'], 'true')
     displayName: Run DCPS Messenger Test
