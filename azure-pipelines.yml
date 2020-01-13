@@ -304,6 +304,41 @@ jobs:
       perl run_test.pl rtps
     condition: eq(variables['TEST_MESSENGER'], 'true')
     displayName: Run DCPS Messenger Test
+  - script: |
+      # Make sure install using DESTDIR is also working
+      export DESTDIR=$(realpath $(InstallPrefix)_temp)
+      export INSTALL_PREFIX=$(realpath $(InstallPrefix))
+      make install
+      cp -r $DESTDIR/$INSTALL_PREFIX .
+      cat << EOF > install_setenv.sh
+      export opendds_prefix=$INSTALL_PREFIX
+      source $INSTALL_PREFIX/share/ace/ace-devel.sh
+      source $INSTALL_PREFIX/share/tao/tao-devel.sh
+      source $INSTALL_PREFIX/share/dds/dds-devel.sh
+      export PATH="$INSTALL_PREFIX/bin:$PATH"
+      export LD_LIBRARY_PATH="$INSTALL_PREFIX/lib:$LD_LIBRARY_PATH"
+      export MPC_ROOT=$(realpath ACE_TAO/ACE/MPC)
+      EOF
+    displayName: Install OpenDDS
+    condition: and(succeeded(), ne(variables['InstallPrefix'], ''))
+  - script: |
+      source install_setenv.sh
+      cd tests/DCPS/Messenger
+      git clean -dfx .
+      $ACE_ROOT/bin/mwc.pl -type gnuace .
+      make
+    displayName: Build Messenger Using Installed OpenDDS and MPC
+    condition: and(succeeded(), ne(variables['InstallPrefix'], ''))
+  - script: |
+      source install_setenv.sh
+      cd tests/cmake_integration/Messenger/Messenger_1
+      rm -fr build
+      mkdir build
+      cd build
+      cmake -DCMAKE_PREFIX_PATH=$opendds_prefix ..
+      cmake --build .
+    displayName: Build Messenger Using Installed OpenDDS and CMake
+    condition: and(succeeded(), ne(variables['InstallPrefix'], ''))
 
 - job: macOS
   timeoutInMinutes: 90
