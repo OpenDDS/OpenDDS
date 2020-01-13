@@ -22,12 +22,12 @@ RUN cmake CMakeLists.txt && make && cp ./*.a /usr/lib
 ADD . /opt/OpenDDS
 
 ARG ACE_CONFIG_OPTION="--doc-group"
-ARG ACE_SOURCE_DIR="/opt/OpenDDS/ACE_wrappers/MPC"
+ARG MPC_ROOT="/opt/OpenDDS/ACE_wrappers/MPC"
 RUN cd /opt/OpenDDS && \
     ./configure --prefix=/usr/local --security --std=c++11 ${ACE_CONFIG_OPTION} && \
     make && \
     make install && \
-    cp -a ${ACE_SOURCE_DIR} /usr/local/share/ace/MPC
+    cp -a ${MPC_ROOT} /usr/local/share/ace/MPC
 
 ENV ACE_ROOT=/usr/local/share/ace \
     TAO_ROOT=/usr/local/share/tao \
