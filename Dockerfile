@@ -11,7 +11,8 @@ RUN apt-get update && apt-get install -y \
     libxerces-c-dev \
     libssl-dev \
     perl-base \
-    perl-modules
+    perl-modules \
+    git
 
 WORKDIR /usr/src/gtest
 RUN cmake CMakeLists.txt && make && cp ./*.a /usr/lib
@@ -20,11 +21,13 @@ RUN cmake CMakeLists.txt && make && cp ./*.a /usr/lib
 
 ADD . /opt/OpenDDS
 
+ARG ACE_CONFIG_OPTION="--doc-group"
+ARG ACE_SOURCE_DIR="/opt/OpenDDS/ACE_wrappers/MPC"
 RUN cd /opt/OpenDDS && \
-    ./configure --prefix=/usr/local --security --doc-group --std=c++11 && \
+    ./configure --prefix=/usr/local --security --std=c++11 ${ACE_CONFIG_OPTION} && \
     make && \
     make install && \
-    cp -a /opt/OpenDDS/ACE_wrappers/MPC /usr/local/share/ace/MPC
+    cp -a ${ACE_SOURCE_DIR} /usr/local/share/ace/MPC
 
 ENV ACE_ROOT=/usr/local/share/ace \
     TAO_ROOT=/usr/local/share/tao \
