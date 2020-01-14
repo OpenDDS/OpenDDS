@@ -22,7 +22,7 @@ project: aceexe, crosscompile, dds_macros, install {
   }
 
   verbatim(gnuace, postinstall) {
-"	@$(MKDIR) $(INSTALL_PREFIX)/share/dds/bin"
-"	ln -sf $(INSTALL_PREFIX)/bin/idl2jni $(INSTALL_PREFIX)/share/dds/bin"
+"	@$(MKDIR) $(DESTDIR)$(INSTALL_PREFIX)/share/dds/bin"
+"	ln -sf $(INSTALL_PREFIX)/bin/idl2jni $(DESTDIR)$(INSTALL_PREFIX)/share/dds/bin"
   }
 }

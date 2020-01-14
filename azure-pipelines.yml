@@ -224,7 +224,7 @@ jobs:
         ConfigOpts: --no-inline --java=/usr/lib/jvm/zulu-12-azure-amd64
       Release:
         ConfigOpts: --no-debug --optimize --java=/usr/lib/jvm/zulu-12-azure-amd64
-        InstallPrefix: 'install'
+        DoMakeInstall: true
       Safety:
         ConfigOpts: --safety-profile
       SafetyBaseNoBuiltinTopics:
@@ -233,7 +233,10 @@ jobs:
         ConfigOpts: --security --features=versioned_namespace=1
         PackageDeps: libxerces-c-dev libssl-dev cmake
       SecurityWithoutFeatures:
-        ConfigOpts: --no-inline --no-debug --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile --security
+        ConfigOpts: >
+          --security --no-inline --no-debug
+          --no-built-in-topics --no-content-subscription --no-ownership-profile
+          --no-object-model-profile --no-persistence-profile
         PackageDeps: libxerces-c-dev libssl-dev cmake
       WChar:
         ConfigOpts: --features=uses_wchar=1 --no-inline
@@ -270,54 +273,62 @@ jobs:
         PackageDeps: g++-9
   steps:
   - script: |
+      set -e
       wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|sudo apt-key add -
       sudo apt-add-repository "deb http://apt.llvm.org/$(lsb_release -cs)/ $(Repo) main"
     displayName: Add repository ($(Repo))
     condition: and(succeeded(), ne(variables['Repo'], ''))
   - script: |
+      set -e
       sudo apt-get --yes update
-      sudo apt-get --yes install libxerces-c-dev libssl-dev $(PackageDeps)
+      sudo apt-get --yes install $(PackageDeps)
     displayName: Install system packages
     condition: and(succeeded(), ne(variables['PackageDeps'], ''))
   - script: |
+      set -e
       ./configure -v --mpcopts="-workers 4" --ace-github-latest --tests $(ConfigOpts)
       tools/scripts/show_build_config.pl
     displayName: Run configure script
   - script: make -sj6
     displayName: Compile
   - script: |
-      source $(Build.SourcesDirectory)/setenv.sh && $DDS_ROOT/tests/cmake_integration/run_ci_tests.pl
+      set -e
+      source $(Build.SourcesDirectory)/setenv.sh
+      $DDS_ROOT/tests/cmake_integration/run_ci_tests.pl
     displayName: Compile and run CMake tests
     condition: >
       and(succeeded(),
           not(contains(variables['ConfigOpts'], '--safety-profile')),
           not(contains(variables['ConfigOpts'], '--no-ownership-profile')))
   - script: |
+      set -e
       # Make sure install using DESTDIR is also working
-      export DESTDIR=$(realpath $(InstallPrefix)_temp)
-      export INSTALL_PREFIX=$(realpath $(InstallPrefix))
+      export DESTDIR=$(realpath install_temp)
+      export INSTALL_PREFIX=$(realpath install_prefix)
       make install
       cp -r $DESTDIR/$INSTALL_PREFIX .
       cat << EOF > install_setenv.sh
       export opendds_prefix=$INSTALL_PREFIX
-      source $INSTALL_PREFIX/share/ace/ace-devel.sh
-      source $INSTALL_PREFIX/share/tao/tao-devel.sh
-      source $INSTALL_PREFIX/share/dds/dds-devel.sh
-      export PATH="$INSTALL_PREFIX/bin:$PATH"
-      export LD_LIBRARY_PATH="$INSTALL_PREFIX/lib:$LD_LIBRARY_PATH"
+      source \$opendds_prefix/share/ace/ace-devel.sh
+      source \$opendds_prefix/share/tao/tao-devel.sh
+      source \$opendds_prefix/share/dds/dds-devel.sh
+      export PATH="\$opendds_prefix/bin:\$PATH"
+      export LD_LIBRARY_PATH="\$opendds_prefix/lib:\$LD_LIBRARY_PATH"
       export MPC_ROOT=$(realpath ACE_TAO/ACE/MPC)
       EOF
     displayName: Install OpenDDS
-    condition: and(succeeded(), ne(variables['InstallPrefix'], ''))
+    condition: and(succeeded(), ne(variables['DoMakeInstall'], ''))
   - script: |
+      set -e
       source install_setenv.sh
       cd tests/DCPS/Messenger
       git clean -dfx .
       $ACE_ROOT/bin/mwc.pl -type gnuace .
       make
     displayName: Build Messenger Using Installed OpenDDS and MPC
-    condition: and(succeeded(), ne(variables['InstallPrefix'], ''))
+    condition: and(succeeded(), ne(variables['DoMakeInstall'], ''))
   - script: |
+      set -e
       source install_setenv.sh
       cd tests/cmake_integration/Messenger/Messenger_1
       rm -fr build
@@ -326,7 +337,7 @@ jobs:
       cmake -DCMAKE_PREFIX_PATH=$opendds_prefix ..
       cmake --build .
     displayName: Build Messenger Using Installed OpenDDS and CMake
-    condition: and(succeeded(), ne(variables['InstallPrefix'], ''))
+    condition: and(succeeded(), ne(variables['DoMakeInstall'], ''))
 
 - job: macOS
   timeoutInMinutes: 90
