@@ -29,6 +29,19 @@ my $stack_based = 0;
 my $is_rtps_disc = 0;
 my $DCPSREPO;
 
+my $filename = "subscriber";
+my $filename_exe = "subscriber.exe";
+if (!(-e $filename) && !(-e $filename_exe)) {
+    print STDERR "ERROR: subscriber does not exist\n";
+    exit 1;
+}
+$filename = 'publisher';
+$filename_exe = "publisher.exe";
+if (!(-e $filename) && !(-e $filename_exe)) {
+    print STDERR "ERROR: publisher does not exist\n";
+    exit 1;
+}
+
 my $thread_per_connection = "";
 if ($test->flag('thread_per')) {
     $thread_per_connection = " -p ";
