@@ -137,6 +137,10 @@ WorkerDataReaderListener::on_data_available(DDS::DataReader_ptr reader)
       if (!ws.data_received_.insert(data.msg_count)) {
         ++(ws.duplicate_data_count_);
       }
+      if (!ws.previously_disjoint_ && ws.data_received_.disjoint()) {
+        //std::cout << "This shouldn't happen... " << std::endl;
+      }
+      ws.previously_disjoint_ = ws.data_received_.disjoint();
       ++(ws.sample_count_);
       ++sample_count_;
 
@@ -218,6 +222,7 @@ WorkerDataReaderListener::set_datareader(Builder::DataReader& datareader)
   }
   history_keep_all_ = datareader_->get_qos().history.kind == DDS::KEEP_ALL_HISTORY_QOS;
   history_depth_ = datareader_->get_qos().history.depth;
+  reliable_ = datareader_->get_qos().reliability.kind == DDS::RELIABLE_RELIABILITY_QOS;
 
   last_discovery_time_ =
     get_or_create_property(datareader_->get_report().properties, "last_discovery_time", Builder::PVK_TIME);
@@ -267,14 +272,14 @@ WorkerDataReaderListener::unset_datareader(Builder::DataReader& datareader)
       out_of_order_data_count += it->second.out_of_order_data_count_;
       duplicate_data_count += it->second.duplicate_data_count_;
       if (it->second.data_received_.disjoint()) {
+        if (missing_data_details.str().empty()) {
+          missing_data_details << "Topic Name: " << datareader_->get_topic_name() << ", Reliable: " << (reliable_ ? "true" : "false") << ", Durable: " << (durable_ ? "true" : "false") << std::flush;
+        }
         auto msr = it->second.data_received_.missing_sequence_ranges();
         for (auto it2 = msr.begin(); it2 != msr.end(); ++it2) {
           missing_data_count += (it2->second.getValue() - (it2->first.getValue() - 1));
           if (new_writer) {
-            if (it != writer_state_map_.begin()) {
-              missing_data_details << " " << std::flush;
-            }
-            missing_data_details << "[PH: " << it->first << " (" << it->second.data_received_.low().getValue() << "-" << it->second.data_received_.high().getValue() << ")] " << std::flush;
+            missing_data_details << " [PH: " << it->first << " (" << it->second.data_received_.low().getValue() << "-" << it->second.data_received_.high().getValue() << ")] " << std::flush;
             new_writer = false;
           } else {
             missing_data_details << ", " << std::flush;

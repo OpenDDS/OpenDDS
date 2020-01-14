@@ -39,6 +39,7 @@ public:
 protected:
   std::mutex mutex_;
   bool durable_{false};
+  bool reliable_{false};
   bool history_keep_all_{false};
   size_t history_depth_{false};
   size_t expected_match_count_{0};
@@ -65,6 +66,7 @@ protected:
     size_t out_of_order_data_count_{0};
     size_t duplicate_data_count_{0};
     OpenDDS::DCPS::DisjointSequence data_received_;
+    bool previously_disjoint_{false};
     double previous_latency_{0.0};
     double previous_round_trip_latency_{0.0};
   };
