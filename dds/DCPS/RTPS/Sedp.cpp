@@ -2891,7 +2891,10 @@ Sedp::Writer::transport_assoc_done(int flags, const RepoId& remote) {
                DCPS::LogGuid(remote).c_str()));
     return;
   }
-  sedp_.spdp_.job_queue()->enqueue(make_rch<AssociationComplete>(&sedp_, repo_id_, remote));
+  DCPS::RcHandle<DCPS::JobQueue> job_queue = sedp_.spdp_.job_queue();
+  if (job_queue) {
+    job_queue->enqueue(make_rch<AssociationComplete>(&sedp_, repo_id_, remote));
+  }
 }
 
 void
