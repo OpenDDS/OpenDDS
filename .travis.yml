@@ -91,6 +91,9 @@ script:
     fi
   - if [ "$NO_TESTS" == "1" ]; then
       echo Building Messenger;
+      cd tests/DSPS/Messenger;
+      mwc.pl -type gnuace;
+      cd ../../..;
       make DDS_Messenger_Subscriber DDS_Messenger_Publisher;
     fi
   - if [ "$SAFETY_PROFILE" == "1" ]; then
