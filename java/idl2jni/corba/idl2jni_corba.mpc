@@ -13,6 +13,6 @@ project: java, dds_macros, install {
   }
 
   verbatim(gnuace, postinstall) {
-"	cp $(DDS_ROOT)/lib/i2jrt_corba.jar $(INSTALL_PREFIX)/lib"
+"	cp $(DDS_ROOT)/lib/i2jrt_corba.jar $(DESTDIR)$(INSTALL_PREFIX)/lib"
   }
 }
