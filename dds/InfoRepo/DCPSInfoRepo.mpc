@@ -156,9 +156,4 @@ project(*Main): dcpsexe, iortable, bidir_giop, DCPSInfoRepo_bits, imr_client, sv
 
   TypeSupport_Files {
   }
-
-  verbatim(gnuace, postinstall) {
-"	@$(MKDIR) $(DESTDIR)$(INSTALL_PREFIX)/share/dds/bin"
-"	ln -sf $(INSTALL_PREFIX)/bin/DCPSInfoRepo $(DESTDIR)$(INSTALL_PREFIX)/share/dds/bin"
-  }
 }
