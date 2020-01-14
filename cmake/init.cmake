@@ -48,18 +48,18 @@ if (NOT DEFINED ACE_ROOT)
   if(OPENDDS_USE_PREFIX_PATH)
     set(ACE_ROOT "${_OPENDDS_RELATIVE_PREFIX_ROOT}/share/ace")
     set(ACE_INCLUDE_DIR "${_OPENDDS_RELATIVE_PREFIX_ROOT}/include")
-    set(ACE_BIN_DIR "${_OPENDDS_RELATIVE_PREFIX_ROOT}/bin")
     set(ACE_LIB_DIR "${_OPENDDS_RELATIVE_PREFIX_ROOT}/lib")
 
   elseif(OPENDDS_ACE)
     set(ACE_ROOT ${OPENDDS_ACE})
     set(ACE_INCLUDE_DIR "${ACE_ROOT}")
-    set(ACE_BIN_DIR "${ACE_ROOT}/bin")
     set(ACE_LIB_DIR "${ACE_ROOT}/lib")
 
   else()
     _OPENDDS_RETURN_ERR("Failed to locate ACE_ROOT")
   endif()
+
+  set(ACE_BIN_DIR "${ACE_ROOT}/bin")
 
 else()
   _OPENDDS_RETURN_ERR("ACE_ROOT has already been set")
