@@ -306,6 +306,21 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     }
     thread_pool.clear();
 
+    if (config.destruction_time == ZERO) {
+      std::cerr << "No destruction time specified. Press any key to destroy process entities." << std::endl;
+      std::getline(std::cin, line);
+    } else {
+      if (config.destruction_time < ZERO) {
+        auto dur = -get_duration(config.destruction_time);
+        std::unique_lock<std::mutex> lock(cv_mutex);
+        while (cv.wait_for(lock, dur) != std::cv_status::timeout) {}
+      } else {
+        auto timeout_time = std::chrono::system_clock::time_point(get_duration(config.destruction_time));
+        std::unique_lock<std::mutex> lock(cv_mutex);
+        while (cv.wait_until(lock, timeout_time) != std::cv_status::timeout) {}
+      }
+    }
+
     process.detach_listeners();
 
     process_report = process.get_report();
@@ -315,21 +330,21 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     process_destruction_begin_time = Builder::get_time();
   } catch (const std::exception& e) {
     std::cerr << "Exception caught trying to build process object: " << e.what() << std::endl;
-    TheServiceParticipant->shutdown();
     proactor.proactor_end_event_loop();
     for (size_t i = 0; i < THREAD_POOL_SIZE; ++i) {
       thread_pool[i]->join();
     }
     thread_pool.clear();
+    TheServiceParticipant->shutdown();
     return 1;
   } catch (...) {
     std::cerr << "Unknown exception caught trying to build process object" << std::endl;
-    TheServiceParticipant->shutdown();
     proactor.proactor_end_event_loop();
     for (size_t i = 0; i < THREAD_POOL_SIZE; ++i) {
       thread_pool[i]->join();
     }
     thread_pool.clear();
+    TheServiceParticipant->shutdown();
     return 1;
   }
   process_destruction_end_time = Builder::get_time();

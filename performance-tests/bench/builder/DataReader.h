@@ -27,6 +27,8 @@ public:
   DDS::DataReaderQos& get_qos() { return qos_; }
   const DDS::DataReaderQos& get_qos() const { return qos_; }
 
+  const std::string& get_topic_name() const { return topic_name_; }
+
 protected:
   std::string name_;
   std::string topic_name_;
