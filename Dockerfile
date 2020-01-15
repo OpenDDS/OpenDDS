@@ -27,7 +27,7 @@ RUN cd /opt/OpenDDS && \
     ./configure --prefix=/usr/local --security --std=c++11 ${ACE_CONFIG_OPTION} && \
     make && \
     make install && \
-    cp -a ${MPC_ROOT} /usr/local/share/ace/MPC
+    cp -a ${MPC_ROOT} /usr/local/share/MPC
 
 ENV ACE_ROOT=/usr/local/share/ace \
     TAO_ROOT=/usr/local/share/tao \
