@@ -113,6 +113,8 @@ public:
   /// Given a 'local' id, return the set of address for all remote peers.
   AddrSet get_addresses(const RepoId& local) const;
 
+  const RepoIdSet* updateWriterSeqReaders(const RepoId& writer, const SequenceNumber& seq);
+
   void associated(const RepoId& local, const RepoId& remote,
                   bool local_reliable, bool remote_reliable,
                   bool local_durable, bool remote_durable);
@@ -413,6 +415,8 @@ private:
 
   typedef OPENDDS_MULTIMAP_CMP(RepoId, RtpsReader_rch, GUID_tKeyLessThan) RtpsReaderMultiMap;
   RtpsReaderMultiMap readers_of_writer_; // keys are remote data writer GUIDs
+
+  WriterSeqReadersMap writerSeqReaders_;
 
   void deliver_held_data(const RepoId& readerId, WriterInfo& info, bool durable);
 

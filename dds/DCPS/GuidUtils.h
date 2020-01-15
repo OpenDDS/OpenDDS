@@ -11,7 +11,7 @@
 #include "dds/DdsDcpsGuidC.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DCPS/PoolAllocator.h"
-
+#include "dds/DCPS/SequenceNumber.h"
 #include "dcps_export.h"
 
 #include "tao/Basic_Types.h"
@@ -102,6 +102,13 @@ struct OpenDDS_Dcps_Export GUID_tKeyLessThan {
 
 typedef OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan) RepoIdSet;
 
+struct SeqReaders {
+  OpenDDS::DCPS::SequenceNumber seq;
+  OpenDDS::DCPS::RepoIdSet readers;
+  SeqReaders(const RepoId& id) : seq(0) { readers.insert(id); }
+};
+
+typedef OPENDDS_MAP_CMP(RepoId, SeqReaders, GUID_tKeyLessThan) WriterSeqReadersMap;
 
 inline size_t
 gen_max_marshaled_size(const GUID_t&)

@@ -398,6 +398,19 @@ RtpsUdpDataLink::add_locator(const RepoId& remote_id,
   }
 }
 
+const RepoIdSet* RtpsUdpDataLink::updateWriterSeqReaders(const RepoId& writer, const SequenceNumber& seq)
+{
+  WriterSeqReadersMap::iterator i = writerSeqReaders_.find(writer);
+  if (i != writerSeqReaders_.end()) {
+    if (i->second.seq < seq) {
+      i->second.seq = seq;
+    } else {
+      return &(i->second.readers);
+    }
+  } // else the writer is not associated with best effort readers
+  return 0;
+}
+
 void
 RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
                             bool local_reliable, bool remote_reliable,
@@ -406,6 +419,15 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
   const GuidConverter conv(local_id);
 
   if (!local_reliable) {
+    if (conv.isReader()) {
+      WriterSeqReadersMap::iterator i = writerSeqReaders_.find(remote_id);
+      if (i == writerSeqReaders_.end()) {
+        writerSeqReaders_.insert(WriterSeqReadersMap::value_type(remote_id, SeqReaders(local_id)));
+      } else if (i->second.readers.find(local_id) == i->second.readers.end()) {
+        i->second.readers.insert(local_id);
+      }
+    }
+
     return;
   }
 
@@ -668,6 +690,17 @@ RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
           if (rr != readers_.end()) {
             readers_.erase(rr);
           }
+        }
+      }
+    }
+
+    WriterSeqReadersMap::iterator w = writerSeqReaders_.find(remote_id);
+    if (w != writerSeqReaders_.end()) {
+      RepoIdSet::iterator r = w->second.readers.find(local_id);
+      if (r != w->second.readers.end()) {
+        w->second.readers.erase(r);
+        if (w->second.readers.empty()) {
+          writerSeqReaders_.erase(w);
         }
       }
     }
