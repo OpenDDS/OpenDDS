@@ -401,10 +401,22 @@ void handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std:
           }
           Builder::ConstPropertyIndex out_of_order_data_count_prop = get_property(dr_report.properties, "out_of_order_data_count", Builder::PVK_ULL);
           if (out_of_order_data_count_prop) {
+            if (out_of_order_data_count_prop->value.ull_prop()) {
+              Builder::ConstPropertyIndex out_of_order_data_details_prop = get_property(dr_report.properties, "out_of_order_data_details", Builder::PVK_STRING);
+              if (out_of_order_data_details_prop) {
+                result_out << "Out Of Order Data (" << out_of_order_data_count_prop->value.ull_prop() << ") Details: " << out_of_order_data_details_prop->value.string_prop() << std::endl;
+              }
+            }
             total_out_of_order_data_count += out_of_order_data_count_prop->value.ull_prop();
           }
           Builder::ConstPropertyIndex duplicate_data_count_prop = get_property(dr_report.properties, "duplicate_data_count", Builder::PVK_ULL);
           if (duplicate_data_count_prop) {
+            if (duplicate_data_count_prop->value.ull_prop()) {
+              Builder::ConstPropertyIndex duplicate_data_details_prop = get_property(dr_report.properties, "duplicate_data_details", Builder::PVK_STRING);
+              if (duplicate_data_details_prop) {
+                result_out << "Duplicate Data (" << duplicate_data_count_prop->value.ull_prop() << ") Details: " << duplicate_data_details_prop->value.string_prop() << std::endl;
+              }
+            }
             total_duplicate_data_count += duplicate_data_count_prop->value.ull_prop();
           }
           Builder::ConstPropertyIndex missing_data_count_prop = get_property(dr_report.properties, "missing_data_count", Builder::PVK_ULL);
