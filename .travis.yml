@@ -91,10 +91,8 @@ script:
     fi
   - if [ "$NO_TESTS" == "1" ]; then
       echo Building Messenger;
-      cd tests/DCPS/Messenger;
-      $ACE_ROOT/bin/mwc.pl -type gnuace .;
-      make DDS_Messenger_Subscriber DDS_Messenger_Publisher;
-      cd ../../..;
+      $ACE_ROOT/bin/mwc.pl -type gnuace tests/DCPS/Messenger;
+      make -C tests/DCPS/Messenger;
     fi
   - if [ "$SAFETY_PROFILE" == "1" ]; then
         cd build/target/tests/DCPS/Messenger && ./run_test.pl rtps_disc;
