@@ -54,7 +54,9 @@ protected:
   Builder::PropertyIndex lost_sample_count_;
   Builder::PropertyIndex rejected_sample_count_;
   Builder::PropertyIndex out_of_order_data_count_;
+  Builder::PropertyIndex out_of_order_data_details_;
   Builder::PropertyIndex duplicate_data_count_;
+  Builder::PropertyIndex duplicate_data_details_;
   Builder::PropertyIndex missing_data_count_;
   Builder::PropertyIndex missing_data_details_;
 
@@ -63,10 +65,12 @@ protected:
     size_t first_data_count_{0};
     size_t prev_data_count_{0};
     size_t current_data_count_{0};
-    size_t out_of_order_data_count_{0};
-    size_t duplicate_data_count_{0};
     OpenDDS::DCPS::DisjointSequence data_received_;
     bool previously_disjoint_{false};
+    size_t out_of_order_data_count_{0};
+    OpenDDS::DCPS::DisjointSequence out_of_order_data_received_;
+    size_t duplicate_data_count_{0};
+    OpenDDS::DCPS::DisjointSequence duplicate_data_received_;
     double previous_latency_{0.0};
     double previous_round_trip_latency_{0.0};
   };

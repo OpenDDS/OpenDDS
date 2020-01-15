@@ -131,11 +131,13 @@ WorkerDataReaderListener::on_data_available(DDS::DataReader_ptr reader)
           // another (this way) is to only capture relative out-of-order issues
           // which will have a greater penalty for repeated violations
           ++(ws.out_of_order_data_count_);
+          ws.out_of_order_data_received_.insert(ws.current_data_count_);
         }
       }
 
       if (!ws.data_received_.insert(data.msg_count)) {
         ++(ws.duplicate_data_count_);
+        ws.duplicate_data_received_.insert(ws.current_data_count_);
       }
       if (!ws.previously_disjoint_ && ws.data_received_.disjoint()) {
         //std::cout << "This shouldn't happen... " << std::endl;
@@ -234,8 +236,12 @@ WorkerDataReaderListener::set_datareader(Builder::DataReader& datareader)
 
   out_of_order_data_count_ =
     get_or_create_property(datareader_->get_report().properties, "out_of_order_data_count", Builder::PVK_ULL);
+  out_of_order_data_details_ =
+    get_or_create_property(datareader_->get_report().properties, "out_of_order_data_details", Builder::PVK_STRING);
   duplicate_data_count_ =
     get_or_create_property(datareader_->get_report().properties, "duplicate_data_count", Builder::PVK_ULL);
+  duplicate_data_details_ =
+    get_or_create_property(datareader_->get_report().properties, "duplicate_data_details", Builder::PVK_STRING);
   missing_data_count_ =
     get_or_create_property(datareader_->get_report().properties, "missing_data_count", Builder::PVK_ULL);
   missing_data_details_ =
@@ -265,6 +271,8 @@ WorkerDataReaderListener::unset_datareader(Builder::DataReader& datareader)
     size_t duplicate_data_count = 0;
     size_t missing_data_count = 0;
     std::stringstream missing_data_details;
+    std::stringstream out_of_order_data_details;
+    std::stringstream duplicate_data_details;
     bool new_writer = true;
 
     for (auto it = writer_state_map_.begin(); it != writer_state_map_.end(); ++it) {
@@ -291,6 +299,44 @@ WorkerDataReaderListener::unset_datareader(Builder::DataReader& datareader)
           }
         }
       }
+      if (!it->second.out_of_order_data_received_.empty()) {
+        if (out_of_order_data_details.str().empty()) {
+          out_of_order_data_details << "Topic Name: " << datareader_->get_topic_name() << ", Reliable: " << (reliable_ ? "true" : "false") << ", Durable: " << (durable_ ? "true" : "false") << std::flush;
+        }
+        auto psr = it->second.out_of_order_data_received_.present_sequence_ranges();
+        for (auto it2 = psr.begin(); it2 != psr.end(); ++it2) {
+          if (new_writer) {
+            out_of_order_data_details << " [PH: " << it->first << " (" << it->second.out_of_order_data_received_.low().getValue() << "-" << it->second.out_of_order_data_received_.high().getValue() << ")] " << std::flush;
+            new_writer = false;
+          } else {
+            out_of_order_data_details << ", " << std::flush;
+          }
+          if (it2->first.getValue() == it2->second.getValue()) {
+            out_of_order_data_details << it2->first.getValue() << std::flush;
+          } else {
+            out_of_order_data_details << it2->first.getValue() << "-" << it2->second.getValue() << std::flush;
+          }
+        }
+      }
+      if (!it->second.duplicate_data_received_.empty()) {
+        if (duplicate_data_details.str().empty()) {
+          duplicate_data_details << "Topic Name: " << datareader_->get_topic_name() << ", Reliable: " << (reliable_ ? "true" : "false") << ", Durable: " << (durable_ ? "true" : "false") << std::flush;
+        }
+        auto psr = it->second.duplicate_data_received_.present_sequence_ranges();
+        for (auto it2 = psr.begin(); it2 != psr.end(); ++it2) {
+          if (new_writer) {
+            duplicate_data_details << " [PH: " << it->first << " (" << it->second.duplicate_data_received_.low().getValue() << "-" << it->second.duplicate_data_received_.high().getValue() << ")] " << std::flush;
+            new_writer = false;
+          } else {
+            duplicate_data_details << ", " << std::flush;
+          }
+          if (it2->first.getValue() == it2->second.getValue()) {
+            duplicate_data_details << it2->first.getValue() << std::flush;
+          } else {
+            duplicate_data_details << it2->first.getValue() << "-" << it2->second.getValue() << std::flush;
+          }
+        }
+      }
     }
 
     if (expected_sample_count_ && sample_count_ < expected_sample_count_) {
@@ -299,7 +345,9 @@ WorkerDataReaderListener::unset_datareader(Builder::DataReader& datareader)
     }
 
     out_of_order_data_count_->value.ull_prop(out_of_order_data_count);
+    out_of_order_data_details_->value.string_prop(out_of_order_data_details.str().c_str());
     duplicate_data_count_->value.ull_prop(duplicate_data_count);
+    duplicate_data_details_->value.string_prop(duplicate_data_details.str().c_str());
     missing_data_count_->value.ull_prop(missing_data_count);
     missing_data_details_->value.string_prop(missing_data_details.str().c_str());
 

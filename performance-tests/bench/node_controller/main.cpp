@@ -654,7 +654,7 @@ int run_cycle(
 
   DDS::Duration_t timeout = { 10, 0 };
   if (report_writer_impl->wait_for_acknowledgments(timeout) != DDS::RETCODE_OK) {
-    std::cerr << "Waiting for report acknowledgment failed failed" << std::endl;
+    std::cerr << "Waiting for report acknowledgment failed" << std::endl;
     return 1;
   }
 
