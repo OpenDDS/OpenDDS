@@ -1,6 +1,11 @@
 #!/bin/bash
-if [[ -z "${BASIS}" ]]; then
-    docker build --build-arg ACE_CONFIG_OPTION=$ACE_CONFIG_OPTION -t $IMAGE_NAME .
-else
-    docker build --build-arg BASIS=$BASIS --build-arg ACE_CONFIG_OPTION=$ACE_CONFIG_OPTION -t $IMAGE_NAME .
+BASIS_ARG=""
+ACE_ARG=""
+if [[ ! -z "${BASIS}" ]]; then
+    BASIS_ARG="--build-arg BASIS=$BASIS"
 fi
+if [[ ! -z "${ACE_CONFIG_OPTION}" ]]; then
+    ACE_ARG="--build-arg ACE_CONFIG_OPTION=$ACE_CONFIG_OPTION"
+fi
+
+docker build $BASIS_ARG $ACE_ARG -t $IMAGE_NAME .
