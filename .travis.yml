@@ -92,7 +92,7 @@ script:
   - if [ "$NO_TESTS" == "1" ]; then
       echo Building Messenger;
       cd tests/DCPS/Messenger;
-      mwc.pl -type gnuace;
+      ./mwc.pl -type gnuace;
       cd ../../..;
       make DDS_Messenger_Subscriber DDS_Messenger_Publisher;
     fi
