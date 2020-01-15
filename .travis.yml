@@ -91,9 +91,8 @@ script:
     fi
   - if [ "$NO_TESTS" == "1" ]; then
       echo Building Messenger;
-      source setenv.sh;
       cd tests/DCPS/Messenger;
-      mwc.pl -type gnuace .;
+      $ACE_ROOT/bin/mwc.pl -type gnuace .;
       make DDS_Messenger_Subscriber DDS_Messenger_Publisher;
       cd ../../..;
     fi
