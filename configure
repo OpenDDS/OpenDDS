@@ -901,9 +901,13 @@ if ($is_windows && $opts{'target'} eq 'android') {
   # Rename the VERSION files in ACE, TAO, and OPENDDS. On Windows the cross
   # compiler will pick them up instead of the version standard header the
   # standard library is trying to include.
-  rename("$ace_src\\VERSION", "$ace_src\\VERSION.txt");
-  rename("$tao_src\\VERSION", "$tao_src\\VERSION.txt");
-  rename("VERSION", "VERSION.txt");
+  if (exists($opts{'dry-run'})) {
+    print("Would rename VERSION files to get around version header Windows issue.\n");
+  } else {
+    rename("$ace_src\\VERSION", "$ace_src\\VERSION.txt");
+    rename("$tao_src\\VERSION", "$tao_src\\VERSION.txt");
+    rename("VERSION", "VERSION.txt");
+  }
 }
 
 sub clone_host_and_target {
@@ -1807,6 +1811,22 @@ sub generate_workspace {
     }
     elsif (exists $opts{$feat} && !$opts{$feat}) {
       disable_feature(\@features, $feat);
+    }
+  }
+
+  if ($is_target && $opts{'target'} eq 'android') {
+    # We can't detect C++11 compatibility in cross compilers at the moment,
+    # but all the NDKs we officially support are C++11+ by default, so enable
+    # C++11 features unless an explicit 'no_cxx11' feature already is set.
+    my $set = 1;
+    for my $feature (@{$opts{'features'}}) {
+      if ($feature =~ /no_cxx11/) {
+        $set = 0;
+      }
+    }
+    disable_feature(\@features, 'no_cxx11') if ($set);
+    if ($opts{'verbose'}) {
+      print "Setting no_cxx11=0 for Android: $set\n";
     }
   }
 
