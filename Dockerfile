@@ -22,11 +22,11 @@ RUN cmake CMakeLists.txt && make && cp ./*.a /usr/lib
 ADD . /opt/OpenDDS
 
 ARG ACE_CONFIG_OPTION="--doc-group"
-ARG MPC_ROOT="/opt/OpenDDS/ACE_wrappers/MPC"
 RUN cd /opt/OpenDDS && \
     ./configure --prefix=/usr/local --security --std=c++11 ${ACE_CONFIG_OPTION} && \
     make && \
     make install && \
+    . /opt/OpenDDS/setenv.sh && \
     cp -a ${MPC_ROOT} /usr/local/share/MPC
 
 ENV ACE_ROOT=/usr/local/share/ace \
@@ -35,6 +35,6 @@ ENV ACE_ROOT=/usr/local/share/ace \
     PATH=".:/usr/local/share/ace/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
 WORKDIR /opt/OpenDDS/tests/DCPS/Messenger
-RUN mwc.pl -type gnuace && make
+RUN . /opt/OpenDDS/setenv.sh && mwc.pl -type gnuace && make
 
 WORKDIR /opt/workspace

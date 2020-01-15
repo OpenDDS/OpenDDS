@@ -1,6 +1,6 @@
 #!/bin/bash
 if [[ -z "${BASIS}" ]]; then
-    docker build --build-arg ACE_CONFIG_OPTION=$ACE_CONFIG_OPTION --build-arg MPC_ROOT=$MPC_ROOT -t $IMAGE_NAME .
+    docker build --build-arg ACE_CONFIG_OPTION=$ACE_CONFIG_OPTION -t $IMAGE_NAME .
 else
-    docker build --build-arg BASIS=$BASIS --build-arg ACE_CONFIG_OPTION=$ACE_CONFIG_OPTION --build-arg MPC_ROOT=$MPC_ROOT -t $IMAGE_NAME .
+    docker build --build-arg BASIS=$BASIS --build-arg ACE_CONFIG_OPTION=$ACE_CONFIG_OPTION -t $IMAGE_NAME .
 fi
