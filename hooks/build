@@ -1,10 +1,10 @@
 #!/bin/bash
 BASIS_ARG=""
 ACE_ARG=""
-if [[ ! -z "${BASIS}" ]]; then
+if [[ -n "${BASIS}" ]]; then
     BASIS_ARG="--build-arg BASIS=$BASIS"
 fi
-if [[ ! -z "${ACE_CONFIG_OPTION}" ]]; then
+if [[ -n "${ACE_CONFIG_OPTION}" ]]; then
     ACE_ARG="--build-arg ACE_CONFIG_OPTION=$ACE_CONFIG_OPTION"
 fi
 
