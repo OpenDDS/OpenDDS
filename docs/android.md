@@ -38,17 +38,13 @@ are mostly for shorthand.
 | `$STUDIO`    | Android Studio                                   |
 | `$JDK`       | The Java SDK                                     |
 
+These will be replaced with Windows environment notation (`%VARNAME%`) in
+Windows specific instructions, but they have the same meaning.
+
 ## Requirements
 
-To follow along this guide and build OpenDDS you will need:
+To follow along with this guide and build OpenDDS you will need:
 
- - A Unix system supported by both OpenDDS and the Android NDK.
-   - This guide was developed on a Linux system, but should work on macOS as
-     well.
-   - On Windows, a virtual Unix system <sup>[1](#footnote-1)</sup> can be used
-     to build the OpenDDS and IDL libraries. Then they can be transfered to
-     Windows where they can be used in Android Studio as they would be used on
-     Linux.
  - OpenDDS 3.14 or higher.
  - [Android Native Development Kit (NDK)](https://developer.android.com/ndk/)
    r18 or higher. You can download it separately from android.com or using the
@@ -57,12 +53,40 @@ To follow along this guide and build OpenDDS you will need:
  - Some knowledge about OpenDDS and Android development will be assumed, but
    more OpenDDS knowledge will be assumed than Android knowledge.
 
-In addition to those, building OpenDDS with optional dependencies also
-have requirements not listed here but will in their own sections.
+In addition to those, building OpenDDS with optional dependencies also have
+requirements not listed here but will in their own sections.
 
 The [\"Using OpenDDS in a Android App\"
 section](#using-opendds-in-a-android-app) assumes the use of Android Studio,
-but the will also work when just using the Android SDK.
+but the will also work when just using the Android SDK if tweaked.
+
+## Building on Windows
+
+If using you're using Windows Subsystem for Linux (WSL), Docker, or anything
+like that, then when you done with the guide you can copy the resulting
+libraries from the virtual environment to Windows and where they can be used in
+Android Studio as they would be used on Linux. Also you can skip the rest of
+this section and any **Windows Users:** notices.
+
+If you want to build OpenDDS for Android on Windows without any kind of
+vitalization you will have to follow the **Windows Users:** notices.
+
+In addition to OpenDDS and the Android NDK you will also need the following
+software:
+
+- MinGW
+  - Building OpenDDS for Android requires various utilities that would
+    normally come on a Unix system. To replace them install
+    [MinGW](http://www.mingw.org/) and the `mingw-developer-toolkit-bin` meta
+    package using the MinGW package manager.
+
+- OpenDDS Host tools build using Visual Studio
+  - In a separate copy of OpenDDS, build OpenDDS as described in
+    [`INSTALL.md`](../INSTALL.md) using Visual Studio, except use the
+    `--host-tools-only` configure script option. If you want to use Java in the
+    Android build, please pass also pass the `--java` configure script option
+    here as described in the [Java](#java) section. You will also need to pass
+    it to the configure script build for Android when that comes.
 
 ## Building OpenDDS for Android
 
@@ -82,6 +106,15 @@ later:
 $NDK/build/tools/make_standalone_toolchain.py --arch arm --api 24 --install-dir $TOOLCHAIN
 ```
 
+**Windows Users:** Android NDK includes Python in prebuilt\windows-x86_64\bin
+for 64-bit Windows NDKs. For the example above, assuming %NDK% is the location
+of the NDK and %TOOLCHAIN% is the desired location of the toolchain, run this
+command instead:
+
+```bat
+ %NDK%\prebuilt\windows-x86_64\bin\python.exe %NDK%\build\tools\make_standalone_toolchain.py --arch arm --api 24 --install-dir %TOOLCHAIN%
+```
+
 Once a toolchain is obtained, OpenDDS can be configured to cross compile for
 Android by passing `--target=android` and `--macros=ANDROID_ABI=<ARCH>` to the
 OpenDDS configure script. The `--arch` argument for
@@ -93,13 +126,13 @@ the configure script must match according to this table:
 | `--arch` | `ANDROID_ABI`           | `$ABI_PREFIX`           | Description                         |
 | -------- | ----------------------- | ----------------------- | ----------------------------------- |
 | `arm`    | `armeabi-v7a`           | `arm-linux-androideabi` | 32-bit ARM                          |
-| `arm`    | `armeabi-v7a-with-neon` | `arm-linux-androideabi` | 32-bit ARM with [NEON](#footnote-2) |
+| `arm`    | `armeabi-v7a-with-neon` | `arm-linux-androideabi` | 32-bit ARM with [NEON](#footnote-1) |
 | `arm64`  | `arm64-v8a`             | `aarch64-linux-android` | 64-bit ARM                          |
 | `x86`    | `x86`                   | `i686-linux-android`    | 32-bit x86                          |
 | `x86_64` | `x86_64`                | `x86_64-linux-android`  | 64-bit x86                          |
 
 For example, to build OpenDDS with the toolchain generated in the previous
-example, we can use `armeabi-v7a` <sup>[2](#footnote-2)</sup>.
+example, we can use `armeabi-v7a` <sup>[2](#footnote-1)</sup>.
 
 **NOTE**: If you want to use [Java](#java) or [DDS Security](#openssl), read
 those sections before configuring and building OpenDDS.
@@ -108,6 +141,37 @@ those sections before configuring and building OpenDDS.
 ./configure --doc-group --target=android --macros=ANDROID_ABI=armeabi-v7a
 PATH=$PATH:$TOOLCHAIN/bin make # Pass -j/--jobs with an appropriate value or this'll take a while...
 ```
+
+**Windows Users:** The command is similar with these exceptions:
+
+- `--host-tools` with the location of the OpenDDS host tools that were built
+  using Visual Studio must be passed to `configure`.
+
+- In addition to the Android toolchain, you will also need MinGW utilities in
+  your `%PATH` and the command prompt environment for Visual Studio. The
+  default installation location of the MinGW utilities is
+  `C:\MinGW\msys\1.0\bin`. The Visual Studio command prompt is the same as when
+  configuring the host tools. Well actually it can't be the exact same still
+  running environment or else the `ACE_ROOT` and `TAO_ROOT` environment
+  variables will mess up the build for Android, so start a new one if you
+  haven't already.
+
+In the end the commands will look like this:
+
+```Batch
+configure --doc-group --target=android --macros=ANDROID_ABI=armeabi-v7a --host-tools=%HOST_DDS%
+call "C:\Program Files (x86)\Microsoft Visual Studio\Version\Offering\Common7\Tools\VsDevCmd.bat"
+set PATH=%TOOLCHAIN%/bin;%PATH%
+set PATH=C:\MinGW\msys\1.0\bin;%PATH%
+make
+REM Pass -j/--jobs with an appropriate value or this'll take a while...
+```
+
+You can get rid of the second line if you're already in a Visual Studio
+"Developer Command Prompt" or adjust it if your Visual Studio is different
+version or configuration. See
+[here](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-options/how-to-set-environment-variables-for-the-visual-studio-command-line)
+for more information.
 
 ### Host Tools
 
@@ -233,48 +297,59 @@ the [ABI/architecture table](#abi-table)).
 The exact list of libraries to include depend on what features you're using but
 the basic list of library file for OpenDDS are as follows:
 
- - If not already included because of a separate C++ NDK project, you must
-   include the Clang C++ Standard Library. This is located at
-   `$TOOLCHAIN/sysroot/usr/lib/$ABI_PREFIX/libc++_shared.so` where
-   `$ABI_PREFIX` is an identifier for the architecture and can be found in the
-   [ABI/architecture table](#abi-table).
+  - Required Libraries to use OpenDDS
 
- - `$DDS_ROOT/lib/libOpenDDS_Dcps.so`
- - `$ACE_ROOT/lib/libACE.so`
- - `$ACE_ROOT/lib/libTAO.so`
- - `$ACE_ROOT/lib/libTAO_AnyTypeCode.so`
- - `$ACE_ROOT/lib/libTAO_BiDirGIOP.so`
- - `$ACE_ROOT/lib/libTAO_CodecFactory.so`
- - `$ACE_ROOT/lib/libTAO_PI.so`
+   - If not already included because of a separate C++ NDK project, you must
+     include the Clang C++ Standard Library. This is located at
+     `$TOOLCHAIN/sysroot/usr/lib/$ABI_PREFIX/libc++_shared.so` where
+     `$ABI_PREFIX` is an identifier for the architecture and can be found in the
+     [ABI/architecture table](#abi-table).
+
+   - `$ACE_ROOT/lib/libACE.so`
+   - `$ACE_ROOT/lib/libTAO.so`
+   - `$ACE_ROOT/lib/libTAO_AnyTypeCode.so`
+   - `$ACE_ROOT/lib/libTAO_BiDirGIOP.so`
+   - `$ACE_ROOT/lib/libTAO_CodecFactory.so`
+   - `$ACE_ROOT/lib/libTAO_PI.so`
+
+   - `$DDS_ROOT/lib/libOpenDDS_Dcps.so`
 
  - The following are the transport libraries, one for each transport type. You
    will need at least one of these, depending on the transport(s) you want to
    use:
    - `$DDS_ROOT/lib/libOpenDDS_Rtps_Udp.so`
-     - You will also need `$DDS_ROOT/lib/libOpenDDS_Rtps.so`
+     - Depends on `$DDS_ROOT/lib/libOpenDDS_Rtps.so`.
    - `$DDS_ROOT/lib/libOpenDDS_Multicast.so`
    - `$DDS_ROOT/lib/libOpenDDS_Shmem.so`
    - `$DDS_ROOT/lib/libOpenDDS_Tcp.so`
    - `$DDS_ROOT/lib/libOpenDDS_Udp.so`
 
- - The [type support library for your IDL](#cross-compiling-idl-libraries)
+ - The [type support libraries for your IDL](#cross-compiling-idl-libraries)
 
- - Required to use InfoRepo Peer Discovery:
-   - `$DDS_ROOT/lib/libOpenDDS_InfoRepoDiscovery.so`
-   - `$ACE_ROOT/lib/libTAO_PortableServer.so`
+ - The following are the peer discovery libraries. Static discovery is built
+   into `libOpenDDS_Dcps.so`, but most likely you will want one of these:
+
+   - Required to use RTPS Peer Discovery:
+     - `$DDS_ROOT/lib/libOpenDDS_Rtps.so`
+
+   - Required to use the Information Repository Peer Discovery:
+     - `$DDS_ROOT/lib/libOpenDDS_InfoRepoDiscovery.so`
+       - Depends on `$ACE_ROOT/lib/libTAO_PortableServer.so`
 
  - Required to use OpenDDS Security:
    - `$ACE_ROOT/lib/libACE_XML_Utils.so`
    - `$DDS_ROOT/lib/libOpenDDS_QOS_XML_XSC_Handler.so`
    - `libxerces-c-3.*.so`
    - `libiconv.so` if it is necessary to include it.
+   - `$DDS_ROOT/lib/libOpenDDS_Security.so`
 
  - In addition to the jars listed below, the following native libraries are
    required for using the Java API:
    - `$DDS_ROOT/lib/libtao_java.so`
    - `$DDS_ROOT/lib/libidl2jni_runtime.so`
    - `$DDS_ROOT/lib/libOpenDDS_DCPS_Java.so`
-   - The [native part of the Java library for your IDL](#java-idl-libraries)
+   - The [native part of the Java library for your IDL libraries](
+      #java-idl-libraries)
 
 This list might not be complete, especially if you're using a major feature not
 listed here.
@@ -465,12 +540,6 @@ separate from the main app, but this hasn't been fully explored yet.
 
 <a id="footnote-1"/>
 
-1. This can be Docker, Windows Subsystem for Linux (WSL), or a traditional VM.
-   The Android NDK for Windows might work if the build was set up correctly but
-   this hasn't been tested.
-
-<a id="footnote-2"/>
-
-2. The choice to support NEON or not is beyond the scope of this guide. See
+1. The choice to support NEON or not is beyond the scope of this guide. See
    ["NEON Support"](https://developer.android.com/ndk/guides/cpu-arm-neon) for
    more information.
