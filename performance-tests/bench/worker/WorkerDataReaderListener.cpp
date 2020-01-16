@@ -275,30 +275,10 @@ WorkerDataReaderListener::unset_datareader(Builder::DataReader& datareader)
     std::stringstream duplicate_data_details;
     bool new_writer = true;
 
+    // out of order count / details
     for (auto it = writer_state_map_.begin(); it != writer_state_map_.end(); ++it) {
       new_writer = true;
-      out_of_order_data_count += it->second.out_of_order_data_count_;
-      duplicate_data_count += it->second.duplicate_data_count_;
-      if (it->second.data_received_.disjoint()) {
-        if (missing_data_details.str().empty()) {
-          missing_data_details << "Topic Name: " << datareader_->get_topic_name() << ", Reliable: " << (reliable_ ? "true" : "false") << ", Durable: " << (durable_ ? "true" : "false") << std::flush;
-        }
-        auto msr = it->second.data_received_.missing_sequence_ranges();
-        for (auto it2 = msr.begin(); it2 != msr.end(); ++it2) {
-          missing_data_count += (it2->second.getValue() - (it2->first.getValue() - 1));
-          if (new_writer) {
-            missing_data_details << " [PH: " << it->first << " (" << it->second.data_received_.low().getValue() << "-" << it->second.data_received_.high().getValue() << ")] " << std::flush;
-            new_writer = false;
-          } else {
-            missing_data_details << ", " << std::flush;
-          }
-          if (it2->first.getValue() == it2->second.getValue()) {
-            missing_data_details << it2->first.getValue() << std::flush;
-          } else {
-            missing_data_details << it2->first.getValue() << "-" << it2->second.getValue() << std::flush;
-          }
-        }
-      }
+      out_of_order_data_count += it->second.out_of_order_data_count_; // update count
       if (!it->second.out_of_order_data_received_.empty()) {
         if (out_of_order_data_details.str().empty()) {
           out_of_order_data_details << "Topic Name: " << datareader_->get_topic_name() << ", Reliable: " << (reliable_ ? "true" : "false") << ", Durable: " << (durable_ ? "true" : "false") << std::flush;
@@ -306,7 +286,7 @@ WorkerDataReaderListener::unset_datareader(Builder::DataReader& datareader)
         auto psr = it->second.out_of_order_data_received_.present_sequence_ranges();
         for (auto it2 = psr.begin(); it2 != psr.end(); ++it2) {
           if (new_writer) {
-            out_of_order_data_details << " [PH: " << it->first << " (" << it->second.out_of_order_data_received_.low().getValue() << "-" << it->second.out_of_order_data_received_.high().getValue() << ")] " << std::flush;
+            out_of_order_data_details << " [PH: " << it->first << " (" << it->second.data_received_.low().getValue() << "-" << it->second.data_received_.high().getValue() << ")] " << std::flush;
             new_writer = false;
           } else {
             out_of_order_data_details << ", " << std::flush;
@@ -318,6 +298,12 @@ WorkerDataReaderListener::unset_datareader(Builder::DataReader& datareader)
           }
         }
       }
+    }
+
+    // duplicate data count / details
+    for (auto it = writer_state_map_.begin(); it != writer_state_map_.end(); ++it) {
+      new_writer = true;
+      duplicate_data_count += it->second.duplicate_data_count_; // update count
       if (!it->second.duplicate_data_received_.empty()) {
         if (duplicate_data_details.str().empty()) {
           duplicate_data_details << "Topic Name: " << datareader_->get_topic_name() << ", Reliable: " << (reliable_ ? "true" : "false") << ", Durable: " << (durable_ ? "true" : "false") << std::flush;
@@ -325,7 +311,7 @@ WorkerDataReaderListener::unset_datareader(Builder::DataReader& datareader)
         auto psr = it->second.duplicate_data_received_.present_sequence_ranges();
         for (auto it2 = psr.begin(); it2 != psr.end(); ++it2) {
           if (new_writer) {
-            duplicate_data_details << " [PH: " << it->first << " (" << it->second.duplicate_data_received_.low().getValue() << "-" << it->second.duplicate_data_received_.high().getValue() << ")] " << std::flush;
+            duplicate_data_details << " [PH: " << it->first << " (" << it->second.data_received_.low().getValue() << "-" << it->second.data_received_.high().getValue() << ")] " << std::flush;
             new_writer = false;
           } else {
             duplicate_data_details << ", " << std::flush;
@@ -339,6 +325,31 @@ WorkerDataReaderListener::unset_datareader(Builder::DataReader& datareader)
       }
     }
 
+    // missing data count / details
+    for (auto it = writer_state_map_.begin(); it != writer_state_map_.end(); ++it) {
+      new_writer = true;
+      if (it->second.data_received_.disjoint()) {
+        if (missing_data_details.str().empty()) {
+          missing_data_details << "Topic Name: " << datareader_->get_topic_name() << ", Reliable: " << (reliable_ ? "true" : "false") << ", Durable: " << (durable_ ? "true" : "false") << std::flush;
+        }
+        auto msr = it->second.data_received_.missing_sequence_ranges();
+        for (auto it2 = msr.begin(); it2 != msr.end(); ++it2) {
+          missing_data_count += (it2->second.getValue() - (it2->first.getValue() - 1)); // update count
+          if (new_writer) {
+            missing_data_details << " [PH: " << it->first << " (" << it->second.data_received_.low().getValue() << "-" << it->second.data_received_.high().getValue() << ")] " << std::flush;
+            new_writer = false;
+          } else {
+            missing_data_details << ", " << std::flush;
+          }
+          if (it2->first.getValue() == it2->second.getValue()) {
+            missing_data_details << it2->first.getValue() << std::flush;
+          } else {
+            missing_data_details << it2->first.getValue() << "-" << it2->second.getValue() << std::flush;
+          }
+        }
+      }
+    }
+    // if we didn't meet the expected sample count, add difference to missing sample count
     if (expected_sample_count_ && sample_count_ < expected_sample_count_) {
       missing_data_count += expected_sample_count_ - sample_count_;
       missing_data_details << " Expected Sample Deficit: " << expected_sample_count_ - sample_count_ << std::flush;
