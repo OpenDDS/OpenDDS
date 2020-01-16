@@ -7,12 +7,13 @@
 
 import DDS.*;
 import OpenDDS.DCPS.*;
-import Messenger.*;
+import java.util.Map;
+import java.util.HashMap;
 
 public class ParticipantLocationListener extends DDS._DataReaderListenerLocalBase {
 
     private String id;
-    private int[] location_mask;
+    private Map<String, Integer> map = new HashMap<>();
 
     private String guidFormatter(byte[] guid) {
       StringBuilder g = new StringBuilder();
@@ -25,9 +26,8 @@ public class ParticipantLocationListener extends DDS._DataReaderListenerLocalBas
       return g.toString();
     }
 
-    public ParticipantLocationListener(String id, int[] location_mask) {
+    public ParticipantLocationListener(String id) {
       this.id = id;
-      this.location_mask = location_mask;
     }
 
     public synchronized void on_data_available(DDS.DataReader reader) {
@@ -52,7 +52,8 @@ public class ParticipantLocationListener extends DDS._DataReaderListenerLocalBas
 
         System.out.println("== " + id + " Participant Location ==");
         System.out.println(" valid: " + si.value.valid_data);
-        System.out.println("  guid: " + guidFormatter(participant.value.guid));
+        String guid = guidFormatter(participant.value.guid);
+        System.out.println("  guid: " + guid);
 
         String locations = "";
         if ((participant.value.location & OpenDDS.DCPS.LOCATION_LOCAL.value) != 0) {
@@ -89,7 +90,12 @@ public class ParticipantLocationListener extends DDS._DataReaderListenerLocalBas
 
         // update locations if SampleInfo is valid
         if (si.value.valid_data) {
-          location_mask[0] |= participant.value.location;
+            Integer mask = 0;
+            if (map.containsKey(guid)) {
+                mask = map.get(guid);
+            }
+            mask |= participant.value.location;
+            map.put(guid, mask);
         }
       }
     }
@@ -119,4 +125,29 @@ public class ParticipantLocationListener extends DDS._DataReaderListenerLocalBas
         System.err.println("ParticipantLocationListener.on_sample_lost");
     }
 
+    public boolean check(boolean noIce) {
+        int expected =
+            OpenDDS.DCPS.LOCATION_LOCAL.value |
+            (!noIce ? OpenDDS.DCPS.LOCATION_ICE.value : 0) |
+            OpenDDS.DCPS.LOCATION_RELAY.value;
+        System.out.println(id + " expecting "
+                           + ((expected & OpenDDS.DCPS.LOCATION_LOCAL.value) != 0 ? " LOCAL" : "")
+                           + ((expected & OpenDDS.DCPS.LOCATION_ICE.value) != 0 ? " ICE" : "")
+                           + ((expected & OpenDDS.DCPS.LOCATION_RELAY.value) != 0 ? " RELAY" : "")
+                           );
+
+        boolean found = false;
+        for (Map.Entry entry : map.entrySet()) {
+            String key = (String)entry.getKey();
+            Integer mask = (Integer)entry.getValue();
+            System.out.println(id + " " + key
+                               + ((mask & OpenDDS.DCPS.LOCATION_LOCAL.value) != 0 ? " LOCAL" : "")
+                               + ((mask & OpenDDS.DCPS.LOCATION_ICE.value) != 0 ? " ICE" : "")
+                               + ((mask & OpenDDS.DCPS.LOCATION_RELAY.value) != 0 ? " RELAY" : "")
+                               );
+            found = found || mask == expected;
+        }
+
+        return found;
+    }
 }
