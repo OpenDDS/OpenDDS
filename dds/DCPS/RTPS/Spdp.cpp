@@ -710,7 +710,7 @@ Spdp::data_received(const DataSubmessage& data,
 
   pdata.participantProxy.domainId = domain_;
 
-  if (ParameterListConverter::from_param_list(plist, pdata) < 0) {
+  if (!ParameterListConverter::from_param_list(plist, pdata)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::data_received - ")
       ACE_TEXT("failed to convert from ParameterList to ")
       ACE_TEXT("SPDPdiscoveredParticipantData\n")));
@@ -735,7 +735,7 @@ Spdp::data_received(const DataSubmessage& data,
 
 #ifdef OPENDDS_SECURITY
   ICE::AgentInfoMap ai_map;
-  if (ParameterListConverter::from_param_list(plist, ai_map) < 0) {
+  if (!ParameterListConverter::from_param_list(plist, ai_map)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::data_received - ")
                ACE_TEXT("failed to convert from ParameterList to ")
                ACE_TEXT("ICE::AgentInfo\n")));
@@ -888,7 +888,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
 
     ParameterList plist;
     set_participant_guid(guid_, plist);
-    if (ParameterListConverter::to_param_list(pbtds.base, plist) < 0) {
+    if (!ParameterListConverter::to_param_list(pbtds.base, plist)) {
       ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Spdp::handle_handshake_message() - ")
         ACE_TEXT("Failed to convert from ParticipantBuiltinTopicData to ParameterList\n")));
       return;
@@ -1325,7 +1325,7 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
 
     ParameterList plist;
     set_participant_guid(guid_, plist);
-    if (ParameterListConverter::to_param_list(pbtds.base, plist) < 0) {
+    if (!ParameterListConverter::to_param_list(pbtds.base, plist)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::attempt_authentication() - ")
         ACE_TEXT("Failed to convert from ParticipantBuiltinTopicData to ParameterList\n")));
       return;
@@ -1821,7 +1821,7 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
   ++seq_;
 
   ParameterList plist;
-  if (ParameterListConverter::to_param_list(pdata, plist) < 0) {
+  if (!ParameterListConverter::to_param_list(pdata, plist)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
       ACE_TEXT("Spdp::SpdpTransport::write() - ")
       ACE_TEXT("failed to convert from SPDPdiscoveredParticipantData ")
@@ -1840,7 +1840,7 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
     if (spdp_endpoint) {
       ai_map["SPDP"] = ICE::Agent::instance()->get_local_agent_info(spdp_endpoint);
     }
-    if (ParameterListConverter::to_param_list(ai_map, plist) < 0) {
+    if (!ParameterListConverter::to_param_list(ai_map, plist)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
                  ACE_TEXT("Spdp::SpdpTransport::write() - ")
                  ACE_TEXT("failed to convert from ICE::AgentInfo ")
@@ -1879,7 +1879,7 @@ Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, WriteFlags flags)
   ++seq_;
 
   ParameterList plist;
-  if (ParameterListConverter::to_param_list(pdata, plist) < 0) {
+  if (!ParameterListConverter::to_param_list(pdata, plist)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
       ACE_TEXT("Spdp::SpdpTransport::write() - ")
       ACE_TEXT("failed to convert from SPDPdiscoveredParticipantData ")
@@ -1898,7 +1898,7 @@ Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, WriteFlags flags)
     if (spdp_endpoint) {
       ai_map["SPDP"] = ICE::Agent::instance()->get_local_agent_info(spdp_endpoint);
     }
-    if (ParameterListConverter::to_param_list(ai_map, plist) < 0) {
+    if (!ParameterListConverter::to_param_list(ai_map, plist)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
                  ACE_TEXT("Spdp::SpdpTransport::write() - ")
                  ACE_TEXT("failed to convert from ICE::AgentInfo ")
