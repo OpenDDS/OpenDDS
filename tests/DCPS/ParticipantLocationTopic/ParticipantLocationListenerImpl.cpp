@@ -71,7 +71,7 @@ void ParticipantLocationListenerImpl::on_data_available(DDS::DataReader_ptr read
     if (si.valid_data == 1)
     {
       std::pair<LocationMapType::iterator, bool> p = location_map.insert(std::make_pair(guid, 0));
-      p.first->second |= participant.change_mask;
+      p.first->second |= participant.location;
     }
   }
 }
