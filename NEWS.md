@@ -12,7 +12,7 @@ Released %TIMESTAMP%
     information on both of these features.
   - See `docs/migrating_to_topic_type_annotations.md` for a guide on how to
     migrate existing IDL to use topic type annotations.
-- Monitor and the ishapes demo now use Qt5
+- Monitor GUI and the ishapes demo now use Qt5
 - Expanded Android Documentation in `docs/android.md`
 - Updated dissector to work with Wireshark 3.0
 
