@@ -34,6 +34,6 @@ project: taolib, idl2jni, install {
   }
 
   verbatim(gnuace, postinstall) {
-"	cp $(DDS_ROOT)/lib/tao_java.jar $(INSTALL_PREFIX)/lib"
+"	cp $(DDS_ROOT)/lib/tao_java.jar $(DESTDIR)$(INSTALL_PREFIX)/lib"
   }
 }
