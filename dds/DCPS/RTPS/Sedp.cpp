@@ -3098,7 +3098,7 @@ Sedp::Writer::write_dcps_participant_secure(const Security::SPDPdiscoveredPartic
 
   ParameterList plist;
 
-  if (!ParameterListConverter::to_param_list(msg, plist)) {
+  if (ParameterListConverter::to_param_list(msg, plist)) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: Sedp::write_dcps_participant_secure - ")
                ACE_TEXT("Failed to convert SPDPdiscoveredParticipantData ")
@@ -3116,7 +3116,7 @@ Sedp::Writer::write_dcps_participant_secure(const Security::SPDPdiscoveredPartic
   if (spdp_endpoint) {
     ai_map["SPDP"] = ICE::Agent::instance()->get_local_agent_info(spdp_endpoint);
   }
-  if (ParameterListConverter::to_param_list(ai_map, plist) < 0) {
+  if (ParameterListConverter::to_param_list(ai_map, plist)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
                ACE_TEXT("Sedp::write_dcps_participant_secure() - ")
                ACE_TEXT("failed to convert from ICE::AgentInfo ")
