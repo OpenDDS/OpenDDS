@@ -32,9 +32,10 @@ RUN cd /opt/OpenDDS && \
 ENV ACE_ROOT=/usr/local/share/ace \
     TAO_ROOT=/usr/local/share/tao \
     DDS_ROOT=/usr/local/share/dds \
+    MPC_ROOT=/usr/local/share/MPC \
     PATH=".:/usr/local/share/ace/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
 WORKDIR /opt/OpenDDS/tests/DCPS/Messenger
-RUN . /opt/OpenDDS/setenv.sh && mwc.pl -type gnuace && make
+RUN mwc.pl -type gnuace && make
 
 WORKDIR /opt/workspace
