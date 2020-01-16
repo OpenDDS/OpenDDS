@@ -388,6 +388,6 @@ jobs:
   - script: |
       source setenv.sh
       cd tests/DCPS/Messenger
-      perl run_test.pl rtps
+      perl run_test.pl all
     condition: eq(variables['TEST_MESSENGER'], 'true')
     displayName: Run DCPS Messenger Test
