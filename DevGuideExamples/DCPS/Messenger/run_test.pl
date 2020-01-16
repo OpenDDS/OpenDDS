@@ -44,6 +44,19 @@ my $sub_opts = "$common_opts -DCPSTransportDebugLevel 6 " .
 my $DCPSREPO;
 my $dcpsrepo_ior = "repo.ior";
 
+my $filename = "subscriber";
+my $filename_exe = "subscriber.exe";
+if (!(-e $filename) && !(-e $filename_exe)) {
+    print STDERR "ERROR: subscriber does not exist\n";
+    exit 1;
+}
+$filename = 'publisher';
+$filename_exe = "publisher.exe";
+if (!(-e $filename) && !(-e $filename_exe)) {
+    print STDERR "ERROR: publisher does not exist\n";
+    exit 1;
+}
+
 my $Subscriber = PerlDDS::create_process("subscriber", " $sub_opts");
 my $Publisher = PerlDDS::create_process("publisher", " $pub_opts");
 
