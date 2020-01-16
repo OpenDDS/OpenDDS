@@ -352,12 +352,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
     link_->received(data, receiver_.source_guid_prefix_);
     recvd_sample_ = 0;
 
-    const RepoIdSet* readers = link_->updateWriterSeqReaders(sample.header_.publication_id_, sample.header_.sequence_);
-    if (readers) {
-      for (RepoIdSet::const_iterator i = readers->begin(); i != readers->end(); ++i) {
-        readers_withheld_.insert(*i);
-      }
-    }
+    link_->withholdBestEffortReadersOnBadSeq(sample.header_.publication_id_, sample.header_.sequence_, readers_withheld_);
 
     if (data.readerId != ENTITYID_UNKNOWN) {
       RepoId reader;

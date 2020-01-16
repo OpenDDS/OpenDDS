@@ -35,6 +35,7 @@
 #include "dds/DCPS/ReactorInterceptor.h"
 #include "dds/DCPS/RcEventHandler.h"
 #include "dds/DCPS/JobQueue.h"
+#include "dds/DCPS/SequenceNumber.h"
 
 #ifdef OPENDDS_SECURITY
 #include "dds/DdsSecurityCoreC.h"
@@ -59,6 +60,14 @@ class RtpsUdpTransport;
 class ReceivedDataSample;
 typedef RcHandle<RtpsUdpInst> RtpsUdpInst_rch;
 typedef RcHandle<RtpsUdpTransport> RtpsUdpTransport_rch;
+
+struct SeqReaders {
+  OpenDDS::DCPS::SequenceNumber seq;
+  OpenDDS::DCPS::RepoIdSet readers;
+  SeqReaders(const RepoId& id) : seq(0) { readers.insert(id); }
+};
+
+typedef OPENDDS_MAP_CMP(RepoId, SeqReaders, GUID_tKeyLessThan) WriterSeqReadersMap;
 
 class OpenDDS_Rtps_Udp_Export RtpsUdpDataLink : public DataLink, public virtual NetworkConfigListener {
 public:
@@ -113,7 +122,7 @@ public:
   /// Given a 'local' id, return the set of address for all remote peers.
   AddrSet get_addresses(const RepoId& local) const;
 
-  const RepoIdSet* updateWriterSeqReaders(const RepoId& writer, const SequenceNumber& seq);
+  void withholdBestEffortReadersOnBadSeq(const RepoId& writer, const SequenceNumber& seq, RepoIdSet& readersWithheld);
 
   void associated(const RepoId& local, const RepoId& remote,
                   bool local_reliable, bool remote_reliable,
@@ -416,7 +425,7 @@ private:
   typedef OPENDDS_MULTIMAP_CMP(RepoId, RtpsReader_rch, GUID_tKeyLessThan) RtpsReaderMultiMap;
   RtpsReaderMultiMap readers_of_writer_; // keys are remote data writer GUIDs
 
-  WriterSeqReadersMap writerSeqReaders_;
+  WriterSeqReadersMap writerBestEffortReaders_;
 
   void deliver_held_data(const RepoId& readerId, WriterInfo& info, bool durable);
 

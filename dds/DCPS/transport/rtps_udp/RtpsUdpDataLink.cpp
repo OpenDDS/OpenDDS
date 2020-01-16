@@ -398,17 +398,18 @@ RtpsUdpDataLink::add_locator(const RepoId& remote_id,
   }
 }
 
-const RepoIdSet* RtpsUdpDataLink::updateWriterSeqReaders(const RepoId& writer, const SequenceNumber& seq)
+void RtpsUdpDataLink::withholdBestEffortReadersOnBadSeq(const RepoId& writer, const SequenceNumber& seq, RepoIdSet& readersWithheld)
 {
-  WriterSeqReadersMap::iterator i = writerSeqReaders_.find(writer);
-  if (i != writerSeqReaders_.end()) {
-    if (i->second.seq < seq) {
-      i->second.seq = seq;
+  WriterSeqReadersMap::iterator w = writerBestEffortReaders_.find(writer);
+  if (w != writerBestEffortReaders_.end()) {
+    if (w->second.seq < seq) {
+      w->second.seq = seq;
     } else {
-      return &(i->second.readers);
+      for (RepoIdSet::const_iterator r = w->second.readers.begin(); r != w->second.readers.end(); ++r) {
+        readersWithheld.insert(*r);
+      }
     }
   } // else the writer is not associated with best effort readers
-  return 0;
 }
 
 void
@@ -416,13 +417,15 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
                             bool local_reliable, bool remote_reliable,
                             bool local_durable, bool remote_durable)
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+
   const GuidConverter conv(local_id);
 
   if (!local_reliable) {
     if (conv.isReader()) {
-      WriterSeqReadersMap::iterator i = writerSeqReaders_.find(remote_id);
-      if (i == writerSeqReaders_.end()) {
-        writerSeqReaders_.insert(WriterSeqReadersMap::value_type(remote_id, SeqReaders(local_id)));
+      WriterSeqReadersMap::iterator i = writerBestEffortReaders_.find(remote_id);
+      if (i == writerBestEffortReaders_.end()) {
+        writerBestEffortReaders_.insert(WriterSeqReadersMap::value_type(remote_id, SeqReaders(local_id)));
       } else if (i->second.readers.find(local_id) == i->second.readers.end()) {
         i->second.readers.insert(local_id);
       }
@@ -433,7 +436,6 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
 
   bool enable_heartbeat = false;
 
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   if (conv.isWriter()) {
     if (remote_reliable) {
       // Insert count if not already there.
@@ -692,15 +694,15 @@ RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
           }
         }
       }
-    }
-
-    WriterSeqReadersMap::iterator w = writerSeqReaders_.find(remote_id);
-    if (w != writerSeqReaders_.end()) {
-      RepoIdSet::iterator r = w->second.readers.find(local_id);
-      if (r != w->second.readers.end()) {
-        w->second.readers.erase(r);
-        if (w->second.readers.empty()) {
-          writerSeqReaders_.erase(w);
+    } else {
+      WriterSeqReadersMap::iterator w = writerBestEffortReaders_.find(remote_id);
+      if (w != writerBestEffortReaders_.end()) {
+        RepoIdSet::iterator r = w->second.readers.find(local_id);
+        if (r != w->second.readers.end()) {
+          w->second.readers.erase(r);
+          if (w->second.readers.empty()) {
+            writerBestEffortReaders_.erase(w);
+          }
         }
       }
     }
