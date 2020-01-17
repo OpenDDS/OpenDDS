@@ -898,19 +898,6 @@ if (!$ace_src || !$tao_src) {
 print "Using ace_src: $ace_src\n" if $opts{'verbose'};
 print "Using tao_src: $tao_src\n" if $opts{'verbose'};
 
-if ($is_windows && $opts{'target'} eq 'android') {
-  # Rename the VERSION files in ACE, TAO, and OPENDDS. On Windows the cross
-  # compiler will pick them up instead of the version standard header the
-  # standard library is trying to include.
-  if (exists($opts{'dry-run'})) {
-    print("Would rename VERSION files to get around version header Windows issue.\n");
-  } else {
-    rename("$ace_src\\VERSION", "$ace_src\\VERSION.txt");
-    rename("$tao_src\\VERSION", "$tao_src\\VERSION.txt");
-    rename("VERSION", "VERSION.txt");
-  }
-}
-
 sub clone_host_and_target {
   my $source_dir = shift;
   locate_mpc($ace_src);
