@@ -6,14 +6,17 @@
  */
 
 #include "be_global.h"
-#include "be_util.h"
-#include "ast_generator.h"
-#include "global_extern.h"
-#include "idl_defines.h"
-#include "utl_err.h"
-#include "utl_string.h"
 
-#include "ace/OS_NS_strings.h"
+#include "be_util.h"
+#include "be_extern.h"
+
+#include <ast_generator.h>
+#include <global_extern.h>
+#include <idl_defines.h>
+#include <utl_err.h>
+#include <utl_string.h>
+
+#include <ace/OS_NS_strings.h>
 
 #include <iostream>
 #include <fstream>
