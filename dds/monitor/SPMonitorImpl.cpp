@@ -46,8 +46,15 @@ SPMonitorImpl::report()
     report.host = this->hostname_.c_str();
     report.pid  = this->pid_;
     DDS::DomainParticipantFactory_var pf = TheParticipantFactory;
-    const DomainParticipantFactoryImpl::DPMap& participants =
-      dynamic_cast<DomainParticipantFactoryImpl*>(pf.in())->participants();
+
+    OpenDDS::DCPS::DomainParticipantFactoryImpl* pi = dynamic_cast<DomainParticipantFactoryImpl*>(pf.in());
+    if (!pi) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) SPMonitorImpl::report():")
+        ACE_TEXT(" failed to obtain DomainParticipantFactoryImpl.\n")));
+      return;
+    }
+
+    const DomainParticipantFactoryImpl::DPMap& participants = pi->participants();
     CORBA::ULong length = 0;
     for (DomainParticipantFactoryImpl::DPMap::const_iterator mapIter = participants.begin();
          mapIter != participants.end();

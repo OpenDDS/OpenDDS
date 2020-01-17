@@ -35,12 +35,12 @@ public:
     const bool empty = job_queue_.empty();
     job_queue_.push(job);
     if (empty) {
+      guard.release();
       reactor()->notify(this);
     }
   }
 
 private:
-  RcHandle<ReactorInterceptor> interceptor_;
   ACE_Thread_Mutex mutex_;
   OPENDDS_QUEUE(JobPtr) job_queue_;
 
@@ -59,6 +59,7 @@ private:
     }
 
     if (!job_queue_.empty()) {
+      guard.release();
       reactor()->notify(this);
     }
 
