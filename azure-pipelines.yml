@@ -330,6 +330,7 @@ jobs:
       export PATH="\$opendds_prefix/bin:\$PATH"
       export LD_LIBRARY_PATH="\$opendds_prefix/lib:\$LD_LIBRARY_PATH"
       export MPC_ROOT=$(realpath ACE_TAO/ACE/MPC)
+      export PER5LIB=$(realpath bin):$(realpath ACE_TAO/ACE/bin)
       EOF
     displayName: Install OpenDDS
     condition: and(succeeded(), ne(variables['DoMakeInstall'], ''))
@@ -340,6 +341,7 @@ jobs:
       git clean -dfx .
       $ACE_ROOT/bin/mwc.pl -type gnuace .
       make
+      perl run_test.pl rtps
     displayName: Build Messenger Using Installed OpenDDS and MPC
     condition: and(succeeded(), ne(variables['DoMakeInstall'], ''))
   - script: |
@@ -351,6 +353,7 @@ jobs:
       cd build
       cmake -DCMAKE_PREFIX_PATH=$opendds_prefix ..
       cmake --build .
+      perl run_test.pl rtps
     displayName: Build Messenger Using Installed OpenDDS and CMake
     condition: and(succeeded(), ne(variables['DoMakeInstall'], ''))
 

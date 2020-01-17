@@ -311,7 +311,6 @@ sub new {
   $self->{temp_files} = [];
   $self->{errors_to_ignore} = [];
   $self->{info_repo} = {};
-  $self->{info_repo}->{executable} = "$ENV{DDS_ROOT}/bin/DCPSInfoRepo";
   $self->{info_repo}->{state} = "none";
   $self->{info_repo}->{file} = "repo.ior";
   $self->{processes}->{process} = {};
@@ -619,7 +618,17 @@ sub setup_discovery {
   my $params = shift;
   my $executable = shift;
   $params = "" if !defined($params);
-  $executable = "$ENV{DDS_ROOT}/bin/DCPSInfoRepo" if !defined($executable);
+  if (!defined($executable)) {
+    $executable = "$ENV{DDS_ROOT}/bin/DCPSInfoRepo";
+    if (!(-e $executable)) {
+      if (!defined($ENV{OPENDDS_INSTALL_PREFIX})) {
+        print STDERR "ERROR: OPENDDS_INSTALL_PREFIX is not defined\n";
+        exit 1;
+      }
+      $executable = "$ENV{OPENDDS_INSTALL_PREFIX}/bin/DCPSInfoRepo";
+    }
+  }
+ 
   if ($self->{discovery} ne "info_repo" || $PerlDDS::SafetyProfile) {
     $self->_info("TestFramework::setup_discovery not creating DCPSInfoRepo "
       . "since discovery=" . $self->{discovery} . "\n");
