@@ -1466,8 +1466,8 @@ bool to_param_list(const DiscoveredPublication_SecurityWrapper& wrapper,
 bool from_param_list(const ParameterList& param_list,
                     DiscoveredPublication_SecurityWrapper& wrapper)
 {
-  bool result = from_param_list(param_list, wrapper.data) ||
-               from_param_list(param_list, wrapper.security_info) ||
+  bool result = from_param_list(param_list, wrapper.data) &&
+               from_param_list(param_list, wrapper.security_info) &&
                from_param_list(param_list, wrapper.data_tags);
 
   return result;
@@ -1488,8 +1488,8 @@ bool to_param_list(const DiscoveredSubscription_SecurityWrapper& wrapper,
 bool from_param_list(const ParameterList& param_list,
                     DiscoveredSubscription_SecurityWrapper& wrapper)
 {
-  bool result = from_param_list(param_list, wrapper.data) ||
-               from_param_list(param_list, wrapper.security_info) ||
+  bool result = from_param_list(param_list, wrapper.data) &&
+               from_param_list(param_list, wrapper.security_info) &&
                from_param_list(param_list, wrapper.data_tags);
 
   return result;
