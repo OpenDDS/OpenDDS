@@ -544,7 +544,7 @@ sub process {
   }
 
   my $extension = ".exe";
-  my $executable_ext = $executable + $extension;
+  my $executable_ext = $executable.$extension;
   if (!(-e $executable) && !(-e $executable_ext)) {
     print STDERR "ERROR: executable \"$executable\" does not exist \n";
     $self->{status} = -1;
