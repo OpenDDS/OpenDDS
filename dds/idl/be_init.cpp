@@ -9,11 +9,8 @@
 #include "be_util.h"
 #include "../Version.h"
 
-#include <tao/Version.h>
-
 #include <global_extern.h>
 #include <drv_extern.h>
-#include <utl_err.h>
 
 #include <ace/OS_NS_stdlib.h>
 
@@ -60,7 +57,7 @@ BE_post_init(char*[], long)
 
   if (idl_global->idl_version_ < IDL_VERSION_4) {
     idl_global->ignore_files_ = true; // Exit without parsing files
-    be_global->error("opendds_idl requires IDL version to be 4 or greater");
+    be_global->error("OpenDDS requires IDL version to be 4 or greater");
   } else {
     DRV_cpp_putarg("-D__OPENDDS_IDL_HAS_ANNOTATIONS");
     be_global->builtin_annotations_.register_all();
