@@ -1,2 +1,6 @@
-/publisher
-/subscriber
+publisher
+subscriber
+*.log
+subready.txt
+test.txt
+GNUmakefile*
