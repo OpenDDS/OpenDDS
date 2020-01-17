@@ -544,14 +544,6 @@ sub process {
     return;
   }
 
-  my $extension = ".exe";
-  my $executable_ext = $executable + $extension;
-  if (!(-e $executable) && !(-e $executable_ext)) {
-    print STDERR "ERROR: executable \"$executable\" does not exist \n";
-    $self->{status} = -1;
-    return;
-  }
-
   if (defined $ENV{DCPSDebugLevel}) {
     $self->{dcps_debug_level} = $ENV{DCPSDebugLevel};
   }
