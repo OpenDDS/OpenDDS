@@ -389,7 +389,17 @@ DataLink::default_listener() const
 ACE_INLINE
 void
 DataLink::send_final_acks (const RepoId& /*readerid*/)
-{ }
+{
+}
+
+ACE_INLINE
+bool
+DataLink::is_local_reliable(const RepoId& id) const
+{
+  GuardType guard(this->pub_sub_maps_lock_);
+  AssocByLocal::const_iterator it = assoc_by_local_.find(id);
+  return it != assoc_by_local_.end() && it->second.reliable_;
+}
 
 }
 }
