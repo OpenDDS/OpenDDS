@@ -1832,6 +1832,10 @@ sub generate_workspace {
     if ($opts{'verbose'}) {
       print "Setting no_cxx11=0 for Android: $set\n";
     }
+
+    # Disable including $JAVA_HOME/include on Android. Android NDK includes a
+    # jni.h
+    disable_feature(\@features, 'jni_include')
   }
 
   my $mpctype = (!$is_windows || ($cross_compile && $is_target))
