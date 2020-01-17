@@ -18,10 +18,7 @@ enum CmpOp {
 };
 
 template <typename Entity>
-int wait_match(const Entity& entity, unsigned int count, CmpOp cmp = EQ)
-{
-  return 0;
-}
+int wait_match(const Entity& entity, unsigned int count, CmpOp cmp = EQ);
 
 template <>
 int wait_match<DDS::DataWriter_var>(const DDS::DataWriter_var& writer, unsigned int num_readers, CmpOp cmp)
