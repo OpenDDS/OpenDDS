@@ -110,6 +110,7 @@ my %platforminfo =
        "See docs/android.md for details.",
      ],
      'needs_i2jrt_corba' => 1,
+     'java_platform' => 'android',
    },
   );
 
@@ -1049,7 +1050,7 @@ sub write_platform_macros {
         if ($has_host_compiler) {
           print $PMG 'TAO_IDL_PREPROCESSOR = ', $opts{'compiler'}, "\n";
         }
-        print $PMG 'TAO_IDLFLAGS += -g $(HOST_ACE)/bin/ace_gperf$(HOST_EXE_EXT)', "\n";
+        print $PMG 'TAO_IDLFLAGS += -g $(HOST_ACE)/bin/ace_gperf', "\n";
         print $PMG 'build_tao_idl_be = 0', "\n";
         unless ($build_host_tools) {
           my $host_ace;
@@ -1144,7 +1145,10 @@ if (exists $opts{'java'}) {
   if ($opts{'static'} && !$host_tools_only) {
     die "ERROR: --static can't be used with --java\nStopped";
   }
-  setEnv('JAVA_PLATFORM', perlOS_to_java_platform());
+  setHostEnv('JAVA_PLATFORM', perlOS_to_java_platform());
+  if ($cross_compile && exists $platforminfo{$opts{'target'}}->{'java_platform'}) {
+    setEnv('JAVA_PLATFORM', $platforminfo{$opts{'target'}}->{'java_platform'});
+  }
 }
 
 my $try_to_use_qt_system_pkg =

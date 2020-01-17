@@ -6,7 +6,6 @@ project: taolib, java, javah, optional_jni_check, dds_macros, i2jrt_optional, in
 
   libout       = $(DDS_ROOT)/lib
   dynamicflags = IDL2JNI_RUNTIME_BUILD_DLL
-  includes    += $(JAVA_HOME)/include $(JAVA_HOME)/include/$(JAVA_PLATFORM)
 
   specific {
     jarname    = i2jrt
