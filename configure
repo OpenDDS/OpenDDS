@@ -155,8 +155,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'std=s', 'C++ standard version (for compilers that use -std)',
     'target=s', 'Cross-compile target (none): see --target-help',
     'target-compiler=s', 'Compiler for target (if req\'d): see --target-help',
-    'host-tools=s', 'DDS_ROOT of host tools for cross compile (build' .
-      $argIndent . 'them)',
+    'host-tools=s', 'DDS_ROOT of host tools for cross compile (build)',
     'host-ace=s', 'Define host ACE_ROOT (uses relative path from' .
       $argIndent . 'target DDS_ROOT to target ACE_ROOT)',
     'host-tools-only!', 'Just build the host tools (no)',
@@ -539,7 +538,6 @@ if ($has_host_compiler) {
     print "Auto-detecting compiler\n" if $opts{'verbose'};
     for my $stdcomp (@{$platforminfo{$opts{'host'}}->{'compilers'}}) {
       my $path = which($stdcomp);
-      print "$stdcomp: $path\n";
       if ($path) {
         print "Found $stdcomp at: $path\n" if $opts{'verbose'};
         $opts{'compiler'} = $stdcomp;

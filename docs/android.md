@@ -38,8 +38,8 @@ are mostly for shorthand.
 | `$STUDIO`    | Android Studio                                   |
 | `$JDK`       | The Java SDK                                     |
 
-These will be replaced with Windows environment notation (`%VARNAME%`) in
-Windows specific instructions, but they have the same meaning.
+These same variables will be used with Windows environment notation
+(`%VARNAME%`) in Windows specific instructions, but they have the same meaning.
 
 ## Requirements
 
@@ -69,7 +69,7 @@ Android Studio as they would be used on Linux. Also you can skip the rest of
 this section and any **Windows Users:** notices.
 
 If you want to build OpenDDS for Android on Windows without any kind of
-vitalization you will have to follow the **Windows Users:** notices.
+virtualization you will have to follow the **Windows Users:** notices.
 
 In addition to OpenDDS and the Android NDK you will also need the following
 software:
@@ -87,6 +87,11 @@ software:
     Android build, please pass also pass the `--java` configure script option
     here as described in the [Java](#java) section. You will also need to pass
     it to the configure script build for Android when that comes.
+
+Finally all paths being passed to GNU make must not contain spaces because of a
+ACE's gnuace make scripts don't those paths handle correctly on Windows. This
+means the NDK, toolchain, MinGW, JDK, OpenDDS source, OpenDDS host tools, etc.
+must not contain any spaces in their paths.
 
 ## Building OpenDDS for Android
 
@@ -106,10 +111,10 @@ later:
 $NDK/build/tools/make_standalone_toolchain.py --arch arm --api 24 --install-dir $TOOLCHAIN
 ```
 
-**Windows Users:** Android NDK includes Python in prebuilt\windows-x86_64\bin
-for 64-bit Windows NDKs. For the example above, assuming %NDK% is the location
-of the NDK and %TOOLCHAIN% is the desired location of the toolchain, run this
-command instead:
+**Windows Users:** Android NDK includes Python in `prebuilt\windows-x86_64\bin`
+for 64-bit Windows NDKs. For the example above, assuming `%NDK%` is the
+location of the NDK and `%TOOLCHAIN%` is the desired location of the toolchain,
+run this command instead:
 
 ```bat
  %NDK%\prebuilt\windows-x86_64\bin\python.exe %NDK%\build\tools\make_standalone_toolchain.py --arch arm --api 24 --install-dir %TOOLCHAIN%
@@ -142,36 +147,25 @@ those sections before configuring and building OpenDDS.
 PATH=$PATH:$TOOLCHAIN/bin make # Pass -j/--jobs with an appropriate value or this'll take a while...
 ```
 
-**Windows Users:** The command is similar with these exceptions:
+**Windows Users:** The commands for this are similar with these exceptions:
 
 - `--host-tools` with the location of the OpenDDS host tools that were built
   using Visual Studio must be passed to `configure`.
 
 - In addition to the Android toolchain, you will also need MinGW utilities in
-  your `%PATH` and the command prompt environment for Visual Studio. The
-  default installation location of the MinGW utilities is
-  `C:\MinGW\msys\1.0\bin`. The Visual Studio command prompt is the same as when
-  configuring the host tools. Well actually it can't be the exact same still
-  running environment or else the `ACE_ROOT` and `TAO_ROOT` environment
-  variables will mess up the build for Android, so start a new one if you
-  haven't already.
+  your `%PATH%`. The default installation location of the MinGW utilities is
+  `C:\MinGW\msys\1.0\bin`.
 
-In the end the commands will look like this:
+- Make sure these commands in a new Visual Studio command prompt that is
+  different from where you configured the host tools.
 
 ```Batch
 configure --doc-group --target=android --macros=ANDROID_ABI=armeabi-v7a --host-tools=%HOST_DDS%
-call "C:\Program Files (x86)\Microsoft Visual Studio\Version\Offering\Common7\Tools\VsDevCmd.bat"
-set PATH=%TOOLCHAIN%/bin;%PATH%
+set PATH=%TOOLCHAIN%\bin;%PATH%
 set PATH=C:\MinGW\msys\1.0\bin;%PATH%
 make
 REM Pass -j/--jobs with an appropriate value or this'll take a while...
 ```
-
-You can get rid of the second line if you're already in a Visual Studio
-"Developer Command Prompt" or adjust it if your Visual Studio is different
-version or configuration. See
-[here](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-options/how-to-set-environment-variables-for-the-visual-studio-command-line)
-for more information.
 
 ### Host Tools
 
@@ -212,7 +206,7 @@ for Android, pass `--host-tools $HOST_DDS` to the configure script.
 
 To use OpenDDS in the traditional Android development language, Java, you will
 need to build the Java bindings when building OpenDDS. See
-[../java/README]([../java/README) for details. For Android you can use the JDK
+[../java/README](../java/README) for details. For Android you can use the JDK
 provided with Android Studio, so `JDK=$STUDIO/jre`. Pass `--java=$JDK` to the
 OpenDDS configure script.
 
@@ -297,7 +291,7 @@ the [ABI/architecture table](#abi-table)).
 The exact list of libraries to include depend on what features you're using but
 the basic list of library file for OpenDDS are as follows:
 
-  - Required Libraries to use OpenDDS
+  - Core OpenDDS library and its dependencies:
 
    - If not already included because of a separate C++ NDK project, you must
      include the Clang C++ Standard Library. This is located at
@@ -332,7 +326,7 @@ the basic list of library file for OpenDDS are as follows:
    - Required to use RTPS Peer Discovery:
      - `$DDS_ROOT/lib/libOpenDDS_Rtps.so`
 
-   - Required to use the Information Repository Peer Discovery:
+   - Required to use the DCPSInfoRepo Peer Discovery:
      - `$DDS_ROOT/lib/libOpenDDS_InfoRepoDiscovery.so`
        - Depends on `$ACE_ROOT/lib/libTAO_PortableServer.so`
 
