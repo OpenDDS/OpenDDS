@@ -22,7 +22,7 @@ SimpleDataReader::SimpleDataReader(const AppConfig& ac, const int readerIndex)
   : config(ac), index(readerIndex), done_(false)
 {
   enable_transport(false, false); //(reliable, durable)
-  //enable_transport((index == 2), false); //(reliable, durable) //??one sets for all
+  //enable_transport((index == 2), false); //(reliable, durable)
 
   // Write a file so that test script knows we're ready
   FILE *file = std::fopen("subready.txt", "w");
@@ -99,7 +99,6 @@ void SimpleDataReader::data_received(const ReceivedDataSample& sample)
       i->second = seqN;
     } else {
       ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: seq#%q <= seq#%q(last)\n\n"), seqN, i->second));
-      //std::cout << "ERROR: seq#" << seqN << " <= seq#" << i->second << "(last)\n"; //replace this with the above line
     }
   } else {
     ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: received message from unassociated writer.\n")));
