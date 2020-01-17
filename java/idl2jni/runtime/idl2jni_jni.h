@@ -16,7 +16,7 @@
 
 #include <ace/config-all.h>
 
-#ifdef ACE_ANDROID
+#ifndef ACE_ANDROID
 #  include <jni_md.h>
 #  undef JNIEXPORT
 #  define JNIEXPORT ACE_Proper_Export_Flag
