@@ -35,7 +35,7 @@ RtpsUdpInst::RtpsUdpInst(const OPENDDS_STRING& name)
   , ttl_(1)
   , multicast_group_address_(7401, "239.255.0.2")
   , multicast_group_address_str_("239.255.0.2:7401")
-  , nak_depth_(32) // default nak_depth in OpenDDS_Multicast
+  , nak_depth_(0)
   , max_bundle_size_(TransportSendStrategy::UDP_MAX_MESSAGE_SIZE - RTPS::RTPSHDR_SZ) // default maximum bundled message size is max udp message size (see TransportStrategy) minus RTPS header
   , nak_response_delay_(0, 200*1000 /*microseconds*/) // default from RTPS
   , heartbeat_period_(1) // no default in RTPS spec
