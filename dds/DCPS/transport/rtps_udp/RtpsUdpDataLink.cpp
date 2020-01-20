@@ -148,10 +148,12 @@ RtpsUdpDataLink::add_delayed_notification(TransportQueueElement* element)
   return false;
 }
 
-void RtpsUdpDataLink::do_remove_sample(const RepoId& pub_id,
-  const TransportQueueElement::MatchCriteria& criteria)
+RemoveResult
+RtpsUdpDataLink::remove_sample(const DataSampleElement* sample)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  RepoId pub_id = sample->get_pub_id();
+
+  ACE_Guard<ACE_Thread_Mutex> g(lock_);
   RtpsWriter_rch writer;
   RtpsWriterMap::iterator iter = writers_.find(pub_id);
   if (iter != writers_.end()) {
@@ -161,15 +163,81 @@ void RtpsUdpDataLink::do_remove_sample(const RepoId& pub_id,
   g.release();
 
   if (writer) {
-    writer->do_remove_sample(criteria);
+    return writer->remove_sample(sample);
+  }
+  return REMOVE_NOT_FOUND;
+}
+
+void RtpsUdpDataLink::remove_all_msgs(const RepoId& pub_id)
+{
+  ACE_Guard<ACE_Thread_Mutex> g(lock_);
+  RtpsWriter_rch writer;
+  RtpsWriterMap::iterator iter = writers_.find(pub_id);
+  if (iter != writers_.end()) {
+    writer = iter->second;
+  }
+
+  g.release();
+
+  if (writer) {
+    writer->remove_all_msgs();
   }
 }
 
+RemoveResult
+RtpsUdpDataLink::RtpsWriter::remove_sample(const DataSampleElement* sample)
+{
+  bool found = false;
+  SequenceNumber to_release;
+  TransportQueueElement* tqe = 0;
+
+  const char* const payload = sample->get_sample()->cont()->rd_ptr();
+  const TransportQueueElement::MatchOnDataPayload modp(payload);
+
+  ACE_Guard<ACE_Thread_Mutex> g(mutex_);
+
+  RtpsUdpDataLink_rch link = link_.lock();
+  if (!link) {
+    return REMOVE_NOT_FOUND;
+  }
+
+  RemoveResult result = link->send_strategy()->remove_sample(sample);
+
+  ACE_Guard<ACE_Thread_Mutex> g2(elems_not_acked_mutex_);
+
+  if (!elems_not_acked_.empty()) {
+    SnToTqeMap::iterator it = elems_not_acked_.begin();
+    while (!found && it != elems_not_acked_.end()) {
+      if (modp.matches(*it->second)) {
+        found = true;
+        to_release = it->first;
+        tqe = it->second;
+        elems_not_acked_.erase(it);
+      } else {
+        ++it;
+      }
+    }
+  }
+
+  g2.release();
+
+  if (found) {
+    send_buff_->release_acked(to_release);
+  }
+
+  g.release();
+
+  if (found) {
+    tqe->data_dropped(true);
+    result = REMOVE_FOUND;
+  }
+  return result;
+}
+
 void
-RtpsUdpDataLink::RtpsWriter::do_remove_sample(const TransportQueueElement::MatchCriteria& criteria)
+RtpsUdpDataLink::RtpsWriter::remove_all_msgs()
 {
   SnToTqeMap sn_tqe_map;
-  SnToTqeMap to_deliver;
 
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
@@ -178,39 +246,24 @@ RtpsUdpDataLink::RtpsWriter::do_remove_sample(const TransportQueueElement::Match
     return;
   }
 
+  send_buff_->retain_all(id_);
+
+  link->send_strategy()->remove_all_msgs(id_);
+
   ACE_GUARD(ACE_Thread_Mutex, g2, elems_not_acked_mutex_);
 
-  if (!elems_not_acked_.empty()) {
-    to_deliver.insert(to_deliver_.begin(), to_deliver_.end());
-    to_deliver_.clear();
-    OPENDDS_SET(SequenceNumber) sns_to_release;
-    SnToTqeMap::iterator it = elems_not_acked_.begin();
-    while (it != elems_not_acked_.end()) {
-      if (criteria.matches(*it->second)) {
-        sn_tqe_map.insert(RtpsWriter::SnToTqeMap::value_type(it->first, it->second));
-        sns_to_release.insert(it->first);
-        SnToTqeMap::iterator last = it;
-        ++it;
-        elems_not_acked_.erase(last);
-      } else {
-        ++it;
-      }
-    }
-    OPENDDS_SET(SequenceNumber)::iterator sns_it = sns_to_release.begin();
-    while (sns_it != sns_to_release.end()) {
-      send_buff_->release_acked(*sns_it);
-      ++sns_it;
-    }
-  }
+  sn_tqe_map.swap(elems_not_acked_);
 
   g2.release();
+
+  SnToTqeMap::iterator release_iter = sn_tqe_map.begin();
+  while (release_iter != sn_tqe_map.end()) {
+    send_buff_->release_acked(release_iter->first);
+    ++release_iter;
+  }
+
   g.release();
 
-  SnToTqeMap::iterator deliver_iter = to_deliver.begin();
-  while (deliver_iter != to_deliver.end()) {
-    deliver_iter->second->data_delivered();
-    ++deliver_iter;
-  }
   SnToTqeMap::iterator drop_iter = sn_tqe_map.begin();
   while (drop_iter != sn_tqe_map.end()) {
     drop_iter->second->data_dropped(true);
@@ -543,21 +596,11 @@ RtpsUdpDataLink::unregister_for_writer(const RepoId& readerid,
 }
 
 void
-RtpsUdpDataLink::RtpsWriter::pre_stop_helper(OPENDDS_VECTOR(TransportQueueElement*)& to_deliver,
-                                             OPENDDS_VECTOR(TransportQueueElement*)& to_drop)
+RtpsUdpDataLink::RtpsWriter::pre_stop_helper(OPENDDS_VECTOR(TransportQueueElement*)& to_drop)
 {
   typedef OPENDDS_MULTIMAP(SequenceNumber, TransportQueueElement*)::iterator iter_t;
 
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-  if (!to_deliver_.empty()) {
-    iter_t iter = to_deliver_.begin();
-    while (iter != to_deliver_.end()) {
-      to_deliver.push_back(iter->second);
-      to_deliver_.erase(iter);
-      iter = to_deliver_.begin();
-    }
-  }
-
   ACE_GUARD(ACE_Thread_Mutex, g2, elems_not_acked_mutex_);
 
   if (!elems_not_acked_.empty()) {
@@ -582,7 +625,6 @@ RtpsUdpDataLink::pre_stop_i()
 {
   DBG_ENTRY_LVL("RtpsUdpDataLink","pre_stop_i",6);
   DataLink::pre_stop_i();
-  OPENDDS_VECTOR(TransportQueueElement*) to_deliver;
   OPENDDS_VECTOR(TransportQueueElement*) to_drop;
   {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
@@ -590,7 +632,7 @@ RtpsUdpDataLink::pre_stop_i()
     RtpsWriterMap::iterator iter = writers_.begin();
     while (iter != writers_.end()) {
       RtpsWriter_rch writer = iter->second;
-      writer->pre_stop_helper(to_deliver, to_drop);
+      writer->pre_stop_helper(to_drop);
       RtpsWriterMap::iterator last = iter;
       ++iter;
       heartbeat_counts_.erase(last->first);
@@ -598,11 +640,6 @@ RtpsUdpDataLink::pre_stop_i()
     }
   }
   typedef OPENDDS_VECTOR(TransportQueueElement*)::iterator tqe_iter;
-  tqe_iter deliver_it = to_deliver.begin();
-  while (deliver_it != to_deliver.end()) {
-    (*deliver_it)->data_delivered();
-    ++deliver_it;
-  }
   tqe_iter drop_it = to_drop.begin();
   while (drop_it != to_drop.end()) {
     (*drop_it)->data_dropped(true);
@@ -614,7 +651,6 @@ void
 RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
                                         const RepoId& local_id)
 {
-  OPENDDS_VECTOR(TransportQueueElement*) to_deliver;
   OPENDDS_VECTOR(TransportQueueElement*) to_drop;
   using std::pair;
   const GuidConverter conv(local_id);
@@ -628,7 +664,7 @@ RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
       writer->remove_reader(remote_id);
 
       if (writer->reader_count() == 0) {
-        writer->pre_stop_helper(to_deliver, to_drop);
+        writer->pre_stop_helper(to_drop);
         const CORBA::ULong hbc = writer->get_heartbeat_count();
 
         ACE_GUARD(ACE_Thread_Mutex, h, lock_);
@@ -675,11 +711,6 @@ RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
   }
 
   typedef OPENDDS_VECTOR(TransportQueueElement*)::iterator tqe_iter;
-  tqe_iter deliver_it = to_deliver.begin();
-  while (deliver_it != to_deliver.end()) {
-    (*deliver_it)->data_delivered();
-    ++deliver_it;
-  }
   tqe_iter drop_it = to_drop.begin();
   while (drop_it != to_drop.end()) {
     (*drop_it)->data_dropped(true);
@@ -718,15 +749,6 @@ RtpsUdpDataLink::get_writer_send_buffer(const RepoId& pub_id)
 }
 
 // Implementing MultiSendBuffer nested class
-
-void
-RtpsUdpDataLink::MultiSendBuffer::retain_all(const RepoId& pub_id)
-{
-  RcHandle<SingleSendBuffer> send_buff = outer_->get_writer_send_buffer(pub_id);
-  if (!send_buff.is_nil()) {
-    send_buff->retain_all(pub_id);
-  }
-}
 
 void
 RtpsUdpDataLink::MultiSendBuffer::insert(SequenceNumber /*transport_seq*/,
@@ -3420,13 +3442,6 @@ RtpsUdpDataLink::RtpsWriter::RtpsWriter(RcHandle<RtpsUdpDataLink> link, const Re
 RtpsUdpDataLink::RtpsWriter::~RtpsWriter()
 {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-
-  if (!to_deliver_.empty()) {
-    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: RtpsWriter::~RtpsWriter - ")
-      ACE_TEXT("deleting with %d elements left to deliver\n"),
-      to_deliver_.size()));
-  }
-
   ACE_GUARD(ACE_Thread_Mutex, g2, elems_not_acked_mutex_);
 
   if (!elems_not_acked_.empty()) {

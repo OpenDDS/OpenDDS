@@ -80,7 +80,7 @@ public:
   /// (basically, an "unsend" attempt) from this strategy object.
   RemoveResult remove_sample(const DataSampleElement* sample);
 
-  void remove_all_msgs(RepoId pub_id);
+  void remove_all_msgs(const RepoId& pub_id);
 
   /// Called by our ThreadSynch object when we should be able to
   /// start sending any partial packet bytes and/or compose a new
