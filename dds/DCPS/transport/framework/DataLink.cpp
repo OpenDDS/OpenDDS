@@ -1182,16 +1182,13 @@ operator<<(std::ostream& str, const DataLink& value)
       << " local entities currently using this link comprising following associations:"
       << std::endl;
 
-  for (DataLink::AssocByLocal::const_iterator
-       localId = value.assoc_by_local_.begin();
-       localId != value.assoc_by_local_.end();
-       ++localId) {
-    for (RepoIdSet::const_iterator
-         remoteId = localId->second.associated_.begin();
-         remoteId != localId->second.associated_.end();
-         ++remoteId) {
-      str << GuidConverter(localId->first) << " --> "
-          << GuidConverter(*remoteId) << "   " << std::endl;
+  typedef DataLink::AssocByLocal::const_iterator assoc_iter_t;
+  const DataLink::AssocByLocal& abl = value.assoc_by_local_;
+  for (assoc_iter_t ait = abl.begin(); ait != abl.end(); ++ait) {
+    const RepoIdSet& set = ait->second.associated_;
+    for (RepoIdSet::const_iterator rit = set.begin(); rit != set.end(); ++rit) {
+      str << GuidConverter(ait->first) << " --> "
+          << GuidConverter(*rit) << "   " << std::endl;
     }
   }
   return str;
