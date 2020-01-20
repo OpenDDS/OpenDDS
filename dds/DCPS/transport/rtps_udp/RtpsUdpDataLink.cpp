@@ -412,7 +412,7 @@ RtpsUdpDataLink::make_reservation(const RepoId& rpi,
     }
   }
   guard.release();
-  return DataLink::make_reservation(rpi, lsi, trl, reliable); 
+  return DataLink::make_reservation(rpi, lsi, trl, reliable);
 }
 
 void
