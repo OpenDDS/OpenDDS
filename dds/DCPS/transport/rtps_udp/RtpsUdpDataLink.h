@@ -70,8 +70,8 @@ public:
 
   bool add_delayed_notification(TransportQueueElement* element);
 
-  RemoveResult remove_sample(const DataSampleElement* sample) override;
-  void remove_all_msgs(const RepoId& pub_id) override;
+  RemoveResult remove_sample(const DataSampleElement* sample);
+  void remove_all_msgs(const RepoId& pub_id);
 
   RtpsUdpInst& config() const;
 
