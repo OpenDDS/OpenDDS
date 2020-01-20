@@ -3098,7 +3098,7 @@ Sedp::Writer::write_dcps_participant_secure(const Security::SPDPdiscoveredPartic
 
   ParameterList plist;
 
-  if (ParameterListConverter::to_param_list(msg, plist)) {
+  if (!ParameterListConverter::to_param_list(msg, plist)) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: Sedp::write_dcps_participant_secure - ")
                ACE_TEXT("Failed to convert SPDPdiscoveredParticipantData ")
