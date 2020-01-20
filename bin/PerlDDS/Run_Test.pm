@@ -628,7 +628,7 @@ sub setup_discovery {
       $executable = "$ENV{OPENDDS_INSTALL_PREFIX}/bin/DCPSInfoRepo";
     }
   }
- 
+
   if ($self->{discovery} ne "info_repo" || $PerlDDS::SafetyProfile) {
     $self->_info("TestFramework::setup_discovery not creating DCPSInfoRepo "
       . "since discovery=" . $self->{discovery} . "\n");
