@@ -664,9 +664,9 @@ bool from_param_list(const ParameterList& param_list,
                     SPDPdiscoveredParticipantData& participant_data)
 {
   bool result = from_param_list(param_list, participant_data.ddsParticipantData);
-  if (!result) {
+  if (result) {
     result = from_param_list(param_list, participant_data.participantProxy);
-    if (!result) {
+    if (result) {
       result = from_param_list(param_list, participant_data.leaseDuration);
     }
   }
@@ -721,9 +721,9 @@ bool from_param_list(const ParameterList& param_list,
     }
   }
 
-  if (!result) {
+  if (result) {
     result = from_param_list(param_list, participant_data.participantProxy);
-    if (!result) {
+    if (result) {
       result = from_param_list(param_list, participant_data.leaseDuration);
     }
   }
