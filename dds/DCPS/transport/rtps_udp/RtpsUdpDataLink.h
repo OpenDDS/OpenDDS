@@ -227,7 +227,6 @@ private:
       , outer_(outer)
     {}
 
-    void retain_all(const RepoId&) {}
     void insert(SequenceNumber sequence,
                 TransportSendStrategy::QueueType* queue,
                 ACE_Message_Block* chain);

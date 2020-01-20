@@ -206,15 +206,13 @@ RtpsUdpDataLink::RtpsWriter::remove_sample(const DataSampleElement* sample)
   ACE_Guard<ACE_Thread_Mutex> g2(elems_not_acked_mutex_);
 
   if (!elems_not_acked_.empty()) {
-    SnToTqeMap::iterator it = elems_not_acked_.begin();
-    while (!found && it != elems_not_acked_.end()) {
+    typedef SnToTqeMap::iterator iter_t;
+    for (iter_t it = elems_not_acked_.begin(); !found && it != elems_not_acked_.end(); ++it) {
       if (modp.matches(*it->second)) {
         found = true;
         to_release = it->first;
         tqe = it->second;
         elems_not_acked_.erase(it);
-      } else {
-        ++it;
       }
     }
   }
@@ -237,8 +235,6 @@ RtpsUdpDataLink::RtpsWriter::remove_sample(const DataSampleElement* sample)
 void
 RtpsUdpDataLink::RtpsWriter::remove_all_msgs()
 {
-  SnToTqeMap sn_tqe_map;
-
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
   RtpsUdpDataLink_rch link = link_.lock();
@@ -252,22 +248,20 @@ RtpsUdpDataLink::RtpsWriter::remove_all_msgs()
 
   ACE_GUARD(ACE_Thread_Mutex, g2, elems_not_acked_mutex_);
 
+  SnToTqeMap sn_tqe_map;
   sn_tqe_map.swap(elems_not_acked_);
 
   g2.release();
 
-  SnToTqeMap::iterator release_iter = sn_tqe_map.begin();
-  while (release_iter != sn_tqe_map.end()) {
-    send_buff_->release_acked(release_iter->first);
-    ++release_iter;
+  typedef SnToTqeMap::iterator iter_t;
+  for (iter_t it = sn_tqe_map.begin(); it != sn_tqe_map.end(); ++it) {
+    send_buff_->release_acked(it->first);
   }
 
   g.release();
 
-  SnToTqeMap::iterator drop_iter = sn_tqe_map.begin();
-  while (drop_iter != sn_tqe_map.end()) {
-    drop_iter->second->data_dropped(true);
-    ++drop_iter;
+  for (iter_t it = sn_tqe_map.begin(); it != sn_tqe_map.end(); ++it) {
+    it->second->data_dropped(true);
   }
 }
 
