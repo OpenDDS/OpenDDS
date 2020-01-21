@@ -137,12 +137,6 @@ OpenDDS::DCPS::TcpConnection::disconnect()
   DBG_ENTRY_LVL("TcpConnection","disconnect",6);
   this->connected_ = false;
 
-  if (interceptor_) {
-    TcpConnection_rch con(this, inc_count());
-    ReactorInterceptor::CommandPtr cmd = interceptor_->execute_or_enqueue(new RemoveHandler(con, READ_MASK | DONT_CALL));
-    cmd->wait();
-  }
-
   if (this->link_) {
     this->link_->drop_pending_request_acks();
   }
@@ -715,11 +709,6 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
   if (this->reconnect_state_ == INIT_STATE) {
     // Suspend send once.
     TcpSendStrategy_rch send_strategy = this->send_strategy();
-    if (send_strategy)
-      send_strategy->suspend_send();
-    this->reconnect_lock_.release();
-    this->disconnect();
-    this->reconnect_lock_.acquire();
 
     if (this->shutdown_)
       return -1;
@@ -769,6 +758,8 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
       if (send_strategy)
         send_strategy->terminate_send();
 
+      last_reconnect_attempted_.set_to_now();
+
     } else {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) re-established connection on transport: %C to %C:%d.\n",
                  this->config_name().c_str(),
@@ -791,9 +782,10 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
       this->reconnect_state_ = RECONNECTED_STATE;
       this->link_->notify(DataLink::RECONNECTED);
       send_strategy->resume_send();
+      // the connection has already been established, last_reconnect_attempted_ is cleared so it won't be used to calculate the
+      // reconnect_delay time for the next disconnetion.
+      this->last_reconnect_attempted_ = this->last_reconnect_attempted_.zero_value;
     }
-
-    last_reconnect_attempted_.set_to_now();
   }
 
   return this->reconnect_state_ == LOST_STATE ? -1 : 0;
@@ -996,8 +988,6 @@ OpenDDS::DCPS::TcpConnection::relink_from_send(bool do_suspend)
   TcpSendStrategy_rch send_strategy = this->send_strategy();
   if (do_suspend && send_strategy)
     send_strategy->suspend_send();
-
-  this->spawn_reconnect_thread();
 }
 
 /// This is called by TcpReceiveStrategy when a disconnect

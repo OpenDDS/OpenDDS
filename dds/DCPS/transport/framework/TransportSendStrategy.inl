@@ -85,7 +85,12 @@ OpenDDS::DCPS::TransportSendStrategy::resume_send()
     this->delayed_delivered_notification_queue_.clear();
 
   } else if (this->mode_ == MODE_SUSPEND) {
+    this->header_.length_ = 0;
+    this->pkt_chain_ = 0;
+    QueueType elems;
+    elems.swap(this->elems_);
     this->mode_ = this->mode_before_suspend_;
+    this->header_complete_ = false;
     this->mode_before_suspend_ = MODE_NOT_SET;
     if (this->queue_.size() > 0) {
       this->mode_ = MODE_QUEUE;
