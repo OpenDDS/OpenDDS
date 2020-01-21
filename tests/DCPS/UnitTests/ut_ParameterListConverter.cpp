@@ -1134,7 +1134,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       vs_param_list.length(1);
       vs_param_list[0] = vs_param;
       bool status = from_param_list(vs_param_list, part_data_out);
-      TEST_ASSERT(status == true);
+      TEST_ASSERT(status == false);
     }
 
     { // Foreign DDS's have been observed using PID_BUILTIN_ENDPOINT_SET when
@@ -2734,7 +2734,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                           sizeof(OpenDDS::DCPS::GuidPrefix_t)));
 
       DiscoveredReaderData reader_data_out;
-      TEST_ASSERT(from_param_list(param_list, reader_data_out));
+      from_param_list(param_list, reader_data_out);
       TEST_ASSERT(reader_data_out.readerProxy.associatedWriters.length() == 2);
       TEST_ASSERT(!memcmp(reader_data_out.readerProxy.associatedWriters[0].guidPrefix,
                           writer0.guidPrefix,
