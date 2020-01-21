@@ -33,7 +33,7 @@ jobs:
       echo ##vso[task.setvariable variable=VcVarsArch]%VCVARS_ARCH%
     displayName: Set VcVarsArch
   - script: |
-      git clone -q --depth 1 git://github.com/mitza-oci/vcpkg.git %VCPKG_ROOT% -b issue9654
+      git clone -q --depth 1 git://github.com/Microsoft/vcpkg.git %VCPKG_ROOT%
       call %VCPKG_ROOT%\bootstrap-vcpkg.bat
       set VCPKG_ARCH=$(VcVarsArch)-windows
       %VCPKG_ROOT%\vcpkg install --triplet %VCPKG_ARCH% openssl xerces-c
@@ -102,7 +102,7 @@ jobs:
       echo ##vso[task.setvariable variable=VcVarsArch]%VCVARS_ARCH%
     displayName: Set VcVarsArch
   - script: |
-      git clone -q --depth 1 git://github.com/mitza-oci/vcpkg.git %VCPKG_ROOT% -b issue9654
+      git clone -q --depth 1 git://github.com/Microsoft/vcpkg.git %VCPKG_ROOT%
       call %VCPKG_ROOT%\bootstrap-vcpkg.bat
       set VCPKG_ARCH=$(VcVarsArch)-windows
       %VCPKG_ROOT%\vcpkg install --triplet %VCPKG_ARCH% openssl xerces-c
@@ -175,7 +175,7 @@ jobs:
       echo ##vso[task.setvariable variable=VcVarsArch]%VCVARS_ARCH%
     displayName: Set VcVarsArch
   - script: |
-      git clone -q --depth 1 git://github.com/mitza-oci/vcpkg.git %VCPKG_ROOT% -b issue9654
+      git clone -q --depth 1 git://github.com/Microsoft/vcpkg.git %VCPKG_ROOT%
       call %VCPKG_ROOT%\bootstrap-vcpkg.bat
       set VCPKG_ARCH=$(VcVarsArch)-windows
       %VCPKG_ROOT%\vcpkg install --triplet %VCPKG_ARCH% openssl xerces-c
