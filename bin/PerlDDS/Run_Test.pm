@@ -620,12 +620,11 @@ sub setup_discovery {
   $params = "" if !defined($params);
   if (!defined($executable)) {
     $executable = "$ENV{DDS_ROOT}/bin/DCPSInfoRepo";
-    my $extension = ".exe";
-    my $executable_ext = $executable.$extension;
-    if (!(-e $executable) && !(-e $executable_ext)) {
+    if (!(-e $executable) && !(-e "${executable}.exe")) {
       if (!defined($ENV{OPENDDS_INSTALL_PREFIX})) {
-        print STDERR "ERROR: OPENDDS_INSTALL_PREFIX is not defined\n";
-        exit 1;
+        print STDERR "ERROR: OPENDDS_INSTALL_PREFIX is not defined. Couldn't find $DDS_ROOT/bin/DCPSInfoRepo\n";
+        $self->{status} = -1;
+        return;
       }
       $executable = "$ENV{OPENDDS_INSTALL_PREFIX}/bin/DCPSInfoRepo";
     }
