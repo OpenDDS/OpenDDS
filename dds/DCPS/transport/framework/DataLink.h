@@ -334,8 +334,6 @@ protected:
 
   void network_change() const;
 
-  bool is_local_reliable(const RepoId& id) const;
-
 private:
 
   /// Helper function to output the enum as a string to help debugging.
