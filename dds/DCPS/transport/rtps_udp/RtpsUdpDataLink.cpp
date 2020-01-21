@@ -207,12 +207,13 @@ RtpsUdpDataLink::RtpsWriter::remove_sample(const DataSampleElement* sample)
 
   if (!elems_not_acked_.empty()) {
     typedef SnToTqeMap::iterator iter_t;
-    for (iter_t it = elems_not_acked_.begin(); !found && it != elems_not_acked_.end(); ++it) {
+    for (iter_t it = elems_not_acked_.begin(); it != elems_not_acked_.end(); ++it) {
       if (modp.matches(*it->second)) {
         found = true;
         to_release = it->first;
         tqe = it->second;
         elems_not_acked_.erase(it);
+        break;
       }
     }
   }
