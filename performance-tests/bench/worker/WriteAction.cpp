@@ -24,7 +24,7 @@ const ACE_Time_Value ZERO(0, 0);
 
 namespace Bench {
 
-WriteAction::WriteAction(ACE_Proactor& proactor) : proactor_(proactor), started_(false), stopped_(false), write_period_(1, 0), max_count_(0) {
+WriteAction::WriteAction(ACE_Proactor& proactor) : proactor_(proactor), started_(false), stopped_(false), write_period_(1, 0), max_count_(0), new_key_count_(0), new_key_probability_(0) {
 }
 
 bool WriteAction::init(const ActionConfig& config, ActionReport& report, Builder::ReaderMap& readers, Builder::WriterMap& writers) {
@@ -67,6 +67,20 @@ bool WriteAction::init(const ActionConfig& config, ActionReport& report, Builder
     max_count = max_count_prop->value.ull_prop();
   }
   max_count_ = max_count;
+
+  size_t new_key_count = 0;
+  auto new_key_count_prop = get_property(config.params, "new_key_count", Builder::PVK_ULL);
+  if (new_key_count_prop) {
+    new_key_count = new_key_count_prop->value.ull_prop();
+  }
+  new_key_count_ = new_key_count;
+
+  uint64_t new_key_probability = 0;
+  auto new_key_probability_prop = get_property(config.params, "new_key_probability", Builder::PVK_DOUBLE);
+  if (new_key_probability_prop) {
+    new_key_probability = new_key_probability_prop->value.double_prop();
+  }
+  new_key_probability_ = static_cast<uint64_t>(static_cast<double>(std::numeric_limits<uint64_t>::max()) * new_key_probability);
 
   data_.msg_count = 0;
 
@@ -139,6 +153,11 @@ void WriteAction::do_write() {
   if (started_ && !stopped_) {
     if (max_count_ == 0 || data_.msg_count < max_count_) {
       ++(data_.msg_count);
+      if ((new_key_count_ != 0 && (data_.msg_count % new_key_count_) == 0)
+          || (new_key_probability_ != 0 && mt_() <= new_key_probability_)) {
+        data_.id.high = mt_();
+        data_.id.low = mt_();
+      }
       data_.created_time = data_.sent_time = Builder::get_time();
       DDS::ReturnCode_t result = data_dw_->write(data_, 0);
       if (result != DDS::RETCODE_OK) {

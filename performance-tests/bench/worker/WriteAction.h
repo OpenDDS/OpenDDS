@@ -28,6 +28,8 @@ protected:
   ACE_Time_Value write_period_;
   size_t current_count_;
   size_t max_count_;
+  size_t new_key_count_;
+  uint64_t new_key_probability_;
   DDS::InstanceHandle_t instance_;
   std::shared_ptr<ACE_Handler> handler_;
   std::mt19937_64 mt_;
