@@ -356,7 +356,7 @@ bool to_param_list(const DDS::Security::ParticipantBuiltinTopicData& pbtd,
 bool from_param_list(const ParameterList& param_list,
                     DDS::Security::ParticipantBuiltinTopicData& pbtd)
 {
-  if (from_param_list(param_list, pbtd.base) != 0)
+  if (!from_param_list(param_list, pbtd.base))
     return false;
 
   pbtd.security_info.participant_security_attributes = 0;
@@ -403,7 +403,7 @@ bool to_param_list(const DDS::Security::ParticipantBuiltinTopicDataSecure& pbtds
 bool from_param_list(const ParameterList& param_list,
                     DDS::Security::ParticipantBuiltinTopicDataSecure& pbtds)
 {
-  if (from_param_list(param_list, pbtds.base) != 0)
+  if (!from_param_list(param_list, pbtds.base))
     return false;
 
   CORBA::ULong length = param_list.length();
