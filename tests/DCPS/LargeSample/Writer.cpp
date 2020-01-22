@@ -74,15 +74,16 @@ Writer::write(bool reliable, int num_messages)
     pid << std::setw(5) << my_pid_;
 
     Messenger::Message message1;
-    message1.writer_id  = 1;
-    message1.from       = "Comic Book Guy 1";
+    message1.writer_id = 1;
+    message1.from = "Comic Book Guy 1";
     message1.process_id = pid.str().c_str();
-    message1.text       = "Worst. Movie. Ever.";
-    message1.sample_id  = 0;
+    message1.participant_id = 0;
+    message1.text = "Worst. Movie. Ever.";
+    message1.sample_id = 0;
 
     Messenger::Message message2 = message1;
-    message2.writer_id  = 2;
-    message2.from       = "Comic Book Guy 2";
+    message2.writer_id = 2;
+    message2.from = "Comic Book Guy 2";
 
     DDS::InstanceHandle_t handle1 = message_dw1->register_instance(message1);
     DDS::InstanceHandle_t handle2 = message_dw2->register_instance(message2);

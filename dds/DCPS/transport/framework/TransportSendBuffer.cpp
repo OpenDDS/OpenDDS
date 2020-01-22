@@ -34,6 +34,11 @@ TransportSendBuffer::~TransportSendBuffer()
 }
 
 void
+TransportSendBuffer::retain_all(const RepoId&)
+{
+}
+
+void
 TransportSendBuffer::resend_one(const BufferType& buffer)
 {
   int bp = 0;
