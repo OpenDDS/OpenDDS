@@ -400,6 +400,7 @@ RtpsUdpDataLink::add_locator(const RepoId& remote_id,
 
 void RtpsUdpDataLink::withholdBestEffortReadersOnBadSeq(const RepoId& writer, const SequenceNumber& seq, RepoIdSet& readersWithheld)
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   WriterSeqReadersMap::iterator w = writerBestEffortReaders_.find(writer);
   if (w != writerBestEffortReaders_.end()) {
     if (w->second.seq < seq) {

@@ -2,16 +2,26 @@
 #include "dds/DCPS/RepoIdBuilder.h"
 #include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
-#include "dds/DCPS/transport/framework/TransportExceptions.h"
 #include <ace/Basic_Types.h>
 #include <ace/Get_Opt.h>
 #ifdef ACE_AS_STATIC_LIBS
 #include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
 #endif
 
-AppConfig::AppConfig(int argc, ACE_TCHAR* argv[], bool setLocalAddress) :
-  dpf(TheParticipantFactoryWithArgs(argc, argv)),
-  host(ACE_TEXT("")), port(0), rtpsInst(0)
+const OpenDDS::DCPS::RepoId AppConfig::writerId[3] = {
+  createID(0x11111111, 0x111111, OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY),
+  createID(0x11111111, 0x222222, OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY),
+  createID(0x11111111, 0x333333, OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY)
+};
+
+const OpenDDS::DCPS::RepoId AppConfig::readerId[3] = {
+  createID(0x22222222, 0x111111, OpenDDS::DCPS::ENTITYKIND_USER_READER_WITH_KEY),
+  createID(0x22222222, 0x222222, OpenDDS::DCPS::ENTITYKIND_USER_READER_WITH_KEY),
+  createID(0x22222222, 0x333333, OpenDDS::DCPS::ENTITYKIND_USER_READER_WITH_KEY)
+};
+
+AppConfig::AppConfig(int argc, ACE_TCHAR* argv[]) :
+  dpf(TheParticipantFactoryWithArgs(argc, argv)), host(ACE_TEXT("")), port(0)
 {
   try {
     ACE_Get_Opt opts(argc, argv, ACE_TEXT("h:p:"));
@@ -33,38 +43,8 @@ AppConfig::AppConfig(int argc, ACE_TCHAR* argv[], bool setLocalAddress) :
 #endif
     if (host.empty() || port == 0) {
       ACE_DEBUG((LM_INFO, ACE_TEXT("ERROR: -h <host> and -p <port> are missing\n")));
-      throw;
+      throw std::string("-h <host> and -p <port> missing");
     }
-
-    transportInst = TheTransportRegistry->create_inst("my_rtps", "rtps_udp");
-    rtpsInst = dynamic_cast<OpenDDS::DCPS::RtpsUdpInst*>(transportInst.in());
-    if (!rtpsInst) {
-      ACE_DEBUG((LM_INFO, ACE_TEXT("ERROR: Failed to cast to RtpsUdpInst*\n")));
-      throw;
-    }
-    rtpsInst->datalink_release_delay_ = 0;
-    if (setLocalAddress) {
-      rtpsInst->local_address(port, ACE_TEXT_ALWAYS_CHAR(host.c_str()));
-    }
-
-    OpenDDS::DCPS::TransportConfig_rch cfg = TheTransportRegistry->create_config("cfg");
-    cfg->instances_.push_back(transportInst);
-    TheTransportRegistry->global_config(cfg);
-
-    pubWtrId[0] = createID(0x11111111, 0x111111, OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY);
-    pubWtrId[1] = createID(0x11111111, 0x222222, OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY);
-    pubWtrId[2] = createID(0x11111111, 0x333333, OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY);
-    subRdrId[0] = createID(0x22222222, 0x111111, OpenDDS::DCPS::ENTITYKIND_USER_READER_WITH_KEY);
-    subRdrId[1] = createID(0x22222222, 0x222222, OpenDDS::DCPS::ENTITYKIND_USER_READER_WITH_KEY);
-    subRdrId[2] = createID(0x22222222, 0x333333, OpenDDS::DCPS::ENTITYKIND_USER_READER_WITH_KEY);
-  } catch (const OpenDDS::DCPS::Transport::Exception& e) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("EXCEPTION: %C\n"), typeid(e).name()));
-    cleanup();
-    throw;
-  } catch (const CORBA::Exception& e) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("EXCEPTION: %C\n"), e._info().c_str()));
-    cleanup();
-    throw;
   } catch (...) {
     cleanup();
     throw;
@@ -78,13 +58,6 @@ AppConfig::~AppConfig() {
 ACE_INET_Addr AppConfig::getHostAddress() const {
   return ACE_INET_Addr(port, host.c_str(),
     (host == ACE_TEXT("localhost")) ? AF_UNSPEC : AF_INET);
-}
-
-const OpenDDS::DCPS::TimeDuration& AppConfig::getHeartbeatPeriod() const {
-  return rtpsInst->heartbeat_period_;
-}
-void AppConfig::setHeartbeatPeriod(const ACE_UINT64& ms) {
-  rtpsInst->heartbeat_period_ = OpenDDS::DCPS::TimeDuration::from_msec(ms);
 }
 
 OpenDDS::DCPS::RepoId AppConfig::createID(long participantId, long key, CORBA::Octet kind) {

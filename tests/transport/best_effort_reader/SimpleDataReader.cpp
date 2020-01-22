@@ -2,7 +2,6 @@
 
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
-
 #include "dds/DCPS/AssociationData.h"
 #include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/Qos_Helper.h"
@@ -39,11 +38,11 @@ SimpleDataReader::SimpleDataReader(const AppConfig& ac, const int readerIndex)
   }
 
   for (int i = index; i < 3; ++i) {
-    ad.remote_id_ = config.getPubWtrId(i);
+    ad.remote_id_ = AppConfig::writerId[i];
     if (!associate(ad, false)) {
       throw std::string("reader associate() failed");
     }
-    id_seqN_[config.getPubWtrId(i)] = 0;
+    id_seqN_[AppConfig::writerId[i]] = 0;
     config.to_cerr(ad.remote_id_, get_repo_id(), "associated");
   }
   std::cout << "Reader" << (index+1) << " associated with " << id_seqN_.size() << " writer(s)\n" << std::endl;
@@ -51,8 +50,8 @@ SimpleDataReader::SimpleDataReader(const AppConfig& ac, const int readerIndex)
 
 SimpleDataReader::~SimpleDataReader() {
   for (int i = index; i < 3; ++i) {
-    disassociate(config.getPubWtrId(i));
-    config.to_cerr(config.getPubWtrId(i), get_repo_id(), "disassociated");
+    disassociate(AppConfig::writerId[i]);
+    config.to_cerr(AppConfig::writerId[i], get_repo_id(), "disassociated");
   }
 }
 
@@ -106,13 +105,7 @@ void SimpleDataReader::data_received(const ReceivedDataSample& sample)
 }
 
 // ========== ========== ========== ========== ========== ========== ==========
-// Implementing TransportClient
-const RepoId& SimpleDataReader::get_repo_id() const {
-  return config.getSubRdrId(index);
-}
-
-// ========== ========== ========== ========== ========== ========== ==========
-//private:
+// private:
 bool SimpleDataReader::deserializeEncapsulationHeader(Serializer& s) {
   ACE_CDR::ULong encap;
   return (s >> encap); // read and ignore 32-bit CDR Encapsulation header
