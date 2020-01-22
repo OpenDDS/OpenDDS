@@ -613,13 +613,17 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 #ifdef OPENDDS_SECURITY
     // Non-secure updates for authenticated participants are used for liveliness but
     // are otherwise ignored. Non-secure dispose messages are ignored completely.
-    if (iter->second.auth_state_ == DCPS::AS_AUTHENTICATED &&
-        pdata.dataKind != Security::DPDK_SECURE &&
-        id != DCPS::DISPOSE_INSTANCE &&
-        id != DCPS::DISPOSE_UNREGISTER_INSTANCE) {
+    if (!(iter->second.auth_state_ == DCPS::AS_AUTHENTICATED && pdata.hasIdentityStatusToken)) {
       iter->second.last_seen_ = now;
       return;
     }
+    //if (iter->second.auth_state_ == DCPS::AS_AUTHENTICATED &&
+    //    pdata.dataKind != Security::DPDK_SECURE &&
+    //    id != DCPS::DISPOSE_INSTANCE &&
+    //    id != DCPS::DISPOSE_UNREGISTER_INSTANCE) {
+    //  iter->second.last_seen_ = now;
+    //  return;
+    //}
 #endif
 
     if (id == DCPS::DISPOSE_INSTANCE || id == DCPS::DISPOSE_UNREGISTER_INSTANCE) {

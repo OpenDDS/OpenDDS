@@ -282,6 +282,20 @@ namespace {
 
     return OpenDDS::Security::DPDK_ORIGINAL;
   }
+
+  bool has_identity_status_token(const ParameterList& param_list)
+  {
+    CORBA::ULong length = param_list.length();
+    for (CORBA::ULong i = 0; i < length; ++i) {
+      const Parameter& param = param_list[i];
+      switch (param._d()) {
+      case DDS::Security::PID_IDENTITY_STATUS_TOKEN:
+        return true;
+      }
+    }
+
+    return false;
+  }
 #endif
 
 };
@@ -703,6 +717,7 @@ int from_param_list(const ParameterList& param_list,
   int result = 0;
 
   participant_data.dataKind = find_data_kind(param_list);
+  participant_data.hasIdentityStatusToken = has_identity_status_token(param_list);
   switch (participant_data.dataKind) {
 
     case OpenDDS::Security::DPDK_SECURE: {
