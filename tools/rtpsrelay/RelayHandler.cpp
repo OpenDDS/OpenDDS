@@ -105,7 +105,7 @@ int RelayHandler::handle_input(ACE_HANDLE)
   const auto bytes = socket_.recv(&iov, remote);
 
   if (bytes <= 0) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::handle_input failed to recv\n"));
+    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::handle_input failed to recv: %m\n"));
     return 0;
   }
 
