@@ -398,6 +398,23 @@ RtpsUdpDataLink::add_locator(const RepoId& remote_id,
   }
 }
 
+int
+RtpsUdpDataLink::make_reservation(const RepoId& rpi,
+                                  const RepoId& lsi,
+                                  const TransportReceiveListener_wrch& trl,
+                                  bool reliable)
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(lock_);
+  if (reliable) {
+    RtpsReaderMap::iterator rr = readers_.find(lsi);
+    if (rr == readers_.end()) {
+      pending_reliable_readers_.insert(lsi);
+    }
+  }
+  guard.release();
+  return DataLink::make_reservation(rpi, lsi, trl, reliable);
+}
+
 void
 RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
                             bool local_reliable, bool remote_reliable,
@@ -437,6 +454,7 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
   } else if (conv.isReader()) {
     RtpsReaderMap::iterator rr = readers_.find(local_id);
     if (rr == readers_.end()) {
+      pending_reliable_readers_.erase(local_id);
       RtpsUdpDataLink_rch link(this, OpenDDS::DCPS::inc_count());
       RtpsReader_rch reader = make_rch<RtpsReader>(link, local_id, local_durable);
       rr = readers_.insert(RtpsReaderMap::value_type(local_id, reader)).first;
@@ -1204,7 +1222,51 @@ void
 RtpsUdpDataLink::received(const RTPS::DataSubmessage& data,
                           const GuidPrefix_t& src_prefix)
 {
-  datareader_dispatch(data, src_prefix, &RtpsReader::process_data_i);
+  RepoId local;
+  std::memcpy(local.guidPrefix, local_prefix_, sizeof(GuidPrefix_t));
+  local.entityId = data.readerId;
+
+  RepoId src;
+  std::memcpy(src.guidPrefix, src_prefix, sizeof(GuidPrefix_t));
+  src.entityId = data.writerId;
+
+  OPENDDS_VECTOR(RtpsReader_rch) to_call;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    if (local.entityId == ENTITYID_UNKNOWN) {
+      typedef std::pair<RtpsReaderMultiMap::iterator, RtpsReaderMultiMap::iterator> RRMM_IterRange;
+      for (RRMM_IterRange iters = readers_of_writer_.equal_range(src); iters.first != iters.second; ++iters.first) {
+        to_call.push_back(iters.first->second);
+      }
+      if (!pending_reliable_readers_.empty()) {
+        GuardType guard(strategy_lock_);
+        RtpsUdpReceiveStrategy* trs = receive_strategy();
+        if (trs) {
+          for (RepoIdSet::const_iterator it = pending_reliable_readers_.begin();
+               it != pending_reliable_readers_.end(); ++it)
+          {
+            trs->withhold_data_from(*it);
+          }
+        }
+      }
+    } else {
+      const RtpsReaderMap::iterator rr = readers_.find(local);
+      if (rr != readers_.end()) {
+        to_call.push_back(rr->second);
+      } else if (pending_reliable_readers_.count(local)) {
+        GuardType guard(strategy_lock_);
+        RtpsUdpReceiveStrategy* trs = receive_strategy();
+        if (trs) {
+          trs->withhold_data_from(local);
+        }
+      }
+    }
+  }
+  MetaSubmessageVec meta_submessages;
+  for (OPENDDS_VECTOR(RtpsReader_rch)::const_iterator it = to_call.begin(); it < to_call.end(); ++it) {
+    (*it)->process_data_i(data, src, meta_submessages);
+  }
+  send_bundled_submessages(meta_submessages);
 }
 
 bool
@@ -1340,7 +1402,7 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
                            OPENDDS_STRING(writer).c_str(),
                            OPENDDS_STRING(reader).c_str()));
     }
-    link->receive_strategy()->do_not_withhold_data_from(id_);
+    link->receive_strategy()->withhold_data_from(id_);
   }
   return false;
 }

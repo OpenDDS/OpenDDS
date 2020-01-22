@@ -562,10 +562,10 @@ TransportClient::add_link(const DataLink_rch& link, const RepoId& peer)
   TransportReceiveListener_rch trl = get_receive_listener();
 
   if (trl) {
-    link->make_reservation(peer, repo_id_, trl);
+    link->make_reservation(peer, repo_id_, trl, reliable_);
 
   } else {
-    link->make_reservation(peer, repo_id_, get_send_listener());
+    link->make_reservation(peer, repo_id_, get_send_listener(), reliable_);
   }
 }
 

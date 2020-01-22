@@ -113,6 +113,11 @@ public:
   /// Given a 'local' id, return the set of address for all remote peers.
   AddrSet get_addresses(const RepoId& local) const;
 
+  int make_reservation(const RepoId& remote_publication_id,
+                       const RepoId& local_subscription_id,
+                       const TransportReceiveListener_wrch& receive_listener,
+                       bool reliable);
+
   void associated(const RepoId& local, const RepoId& remote,
                   bool local_reliable, bool remote_reliable,
                   bool local_durable, bool remote_durable);
@@ -407,6 +412,8 @@ private:
                                OPENDDS_VECTOR(AddrSet)& meta_submessage_bundle_addrs,
                                OPENDDS_VECTOR(size_t)& meta_submessage_bundle_sizes);
   void send_bundled_submessages(MetaSubmessageVec& meta_submessages);
+
+  RepoIdSet pending_reliable_readers_;
 
   typedef OPENDDS_MAP_CMP(RepoId, RtpsReader_rch, GUID_tKeyLessThan) RtpsReaderMap;
   RtpsReaderMap readers_;

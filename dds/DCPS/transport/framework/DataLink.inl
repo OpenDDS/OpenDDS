@@ -389,7 +389,8 @@ DataLink::default_listener() const
 ACE_INLINE
 void
 DataLink::send_final_acks (const RepoId& /*readerid*/)
-{ }
+{
+}
 
 }
 }

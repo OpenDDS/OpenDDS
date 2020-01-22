@@ -111,7 +111,8 @@ public:
   ///              -1 means failure.
   virtual int make_reservation(const RepoId& remote_subscription_id,
                                const RepoId& local_publication_id,
-                               const TransportSendListener_wrch& send_listener);
+                               const TransportSendListener_wrch& send_listener,
+                               bool reliable);
 
   /// Only called by our TransportImpl object.
   ///
@@ -119,7 +120,8 @@ public:
   ///              -1 means failure.
   virtual int make_reservation(const RepoId& remote_publication_id,
                                const RepoId& local_subscription_id,
-                               const TransportReceiveListener_wrch& receive_listener);
+                               const TransportReceiveListener_wrch& receive_listener,
+                               bool reliable);
 
   // ciju: Called by LinkSet with locks held
   /// This will release reservations that were made by one of the
@@ -396,7 +398,12 @@ private:
   typedef OPENDDS_MAP_CMP(RepoId, ReceiveListenerSet_rch, GUID_tKeyLessThan) AssocByRemote;
   AssocByRemote assoc_by_remote_;
 
-  typedef OPENDDS_MAP_CMP(RepoId, RepoIdSet, GUID_tKeyLessThan) AssocByLocal;
+  struct LocalAssociationInfo {
+    bool reliable_;
+    RepoIdSet associated_;
+  };
+
+  typedef OPENDDS_MAP_CMP(RepoId, LocalAssociationInfo, GUID_tKeyLessThan) AssocByLocal;
   AssocByLocal assoc_by_local_;
 
   /// A reference to the TransportImpl that created this DataLink.

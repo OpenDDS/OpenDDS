@@ -62,11 +62,13 @@ public:
 
   int make_reservation(const RepoId& remote_subscription_id,
                        const RepoId& local_publication_id,
-                       const TransportSendListener_wrch& send_listener);
+                       const TransportSendListener_wrch& send_listener,
+                       bool reliable);
 
   int make_reservation(const RepoId& remote_publication_id,
                        const RepoId& local_subscription_id,
-                       const TransportReceiveListener_wrch& receive_listener);
+                       const TransportReceiveListener_wrch& receive_listener,
+                       bool reliable);
 
 protected:
 
