@@ -158,7 +158,7 @@ public:
   virtual RemoveResult remove_sample(const DataSampleElement* sample);
 
   // ciju: Called by LinkSet with locks held
-  void remove_all_msgs(RepoId pub_id);
+  virtual void remove_all_msgs(const RepoId& pub_id);
 
   /// This is called by our TransportReceiveStrategy object when it
   /// has received a complete data sample.  This method will cause

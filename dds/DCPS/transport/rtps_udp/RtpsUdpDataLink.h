@@ -70,8 +70,8 @@ public:
 
   bool add_delayed_notification(TransportQueueElement* element);
 
-  void do_remove_sample(const RepoId& pub_id,
-                        const TransportQueueElement::MatchCriteria& criteria);
+  RemoveResult remove_sample(const DataSampleElement* sample);
+  void remove_all_msgs(const RepoId& pub_id);
 
   RtpsUdpInst& config() const;
 
@@ -232,7 +232,6 @@ private:
       , outer_(outer)
     {}
 
-    void retain_all(const RepoId& pub_id);
     void insert(SequenceNumber sequence,
                 TransportSendStrategy::QueueType* queue,
                 ACE_Message_Block* chain);
@@ -312,7 +311,10 @@ private:
     ~RtpsWriter();
     SequenceNumber heartbeat_high(const ReaderInfo&) const;
     void add_elem_awaiting_ack(TransportQueueElement* element);
-    void do_remove_sample(const TransportQueueElement::MatchCriteria& criteria);
+
+    void send_delayed_notifications(const TransportQueueElement::MatchCriteria& criteria);
+    RemoveResult remove_sample(const DataSampleElement* sample);
+    void remove_all_msgs();
 
     bool add_reader(const RepoId& id, const ReaderInfo& info);
     bool has_reader(const RepoId& id) const;
@@ -321,8 +323,7 @@ private:
     CORBA::Long get_heartbeat_count() const { return heartbeat_count_; }
 
     bool is_reader_handshake_done(const RepoId& id) const;
-    void pre_stop_helper(OPENDDS_VECTOR(TransportQueueElement*)& to_deliver,
-                         OPENDDS_VECTOR(TransportQueueElement*)& to_drop);
+    void pre_stop_helper(OPENDDS_VECTOR(TransportQueueElement*)& to_drop);
     TransportQueueElement* customize_queue_element_helper(TransportQueueElement* element,
                                                           bool requires_inline_qos,
                                                           MetaSubmessageVec& meta_submessages,

@@ -1261,7 +1261,7 @@ TransportSendStrategy::send_stop(RepoId /*repoId*/)
 }
 
 void
-TransportSendStrategy::remove_all_msgs(RepoId pub_id)
+TransportSendStrategy::remove_all_msgs(const RepoId& pub_id)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","remove_all_msgs",6);
 
