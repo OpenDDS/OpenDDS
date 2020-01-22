@@ -648,7 +648,6 @@ EOF
   }
 }
 
-
 sub looksRelative {
   my $val = shift;
   return substr($val, 0, 1) ne $slash && ($slash eq '/' || $val !~ /^[a-z]:/i);
@@ -944,7 +943,8 @@ sub dump_and_unlink { # removes temp files created by dry-run
 
 sub write_config_h {
   my %buildEnv = %{shift()};
-  my $pi = $platforminfo{$opts{$buildEnv{'build'}}};
+  my $platform = $opts{$buildEnv{'build'}};
+  my $pi = $platforminfo{$platform};
   $opts{'optimize'} = 0 if !exists $opts{'optimize'};
 
   my $CFGH = backup_and_open("$buildEnv{'ACE_ROOT'}/ace/config.h");
@@ -953,7 +953,7 @@ sub write_config_h {
       print $CFGH "$line\n";
     }
   }
-  my $cfg = $opts{$buildEnv{'build'}};
+  my $cfg = $platform;
   if ($pi->{'aceconfig'}) {
     $cfg = $pi->{'aceconfig'};
     $cfg =~ s/\$UNAMER/my $u = `uname -r`; chomp $u; $u/e;
@@ -1130,9 +1130,16 @@ if (exists $opts{'java'}) {
   if ($opts{'static'} && !$host_tools_only) {
     die "ERROR: --static can't be used with --java\nStopped";
   }
-  setHostEnv('JAVA_PLATFORM', perlOS_to_java_platform());
-  if ($cross_compile && exists $platforminfo{$opts{'target'}}->{'java_platform'}) {
-    setEnv('JAVA_PLATFORM', $platforminfo{$opts{'target'}}->{'java_platform'});
+  my $host_java_platform = perlOS_to_java_platform();
+  if ($cross_compile) {
+    if (exists $platforminfo{$opts{'target'}}->{'java_platform'}) {
+      setEnv('JAVA_PLATFORM', $platforminfo{$opts{'target'}}->{'java_platform'});
+      setHostEnv('JAVA_PLATFORM', $host_java_platform);
+    } else {
+      die "Cross-compile with Java for $opts{'target'} in not supported.\nStopped";
+    }
+  } else {
+    setEnv('JAVA_PLATFORM', $host_java_platform);
   }
 }
 
@@ -1882,6 +1889,10 @@ EOT
       if (!$found) {
         push(@features, "java_pre_jpms=0");
       }
+    }
+
+    if ($opts{'java'} && $cross_compile) {
+      push(@features, "jni_check=0");
     }
 
     if ($buildtao && @features) {
