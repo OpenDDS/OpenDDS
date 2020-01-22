@@ -120,9 +120,7 @@ bool DDS_TEST::writeToSocket(const TestMsg& msg, const CORBA::Octet flags) const
   if (res < 0) {
     ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: in sock.send()%m\n")), false);
   } else {
-    std::ostringstream oss;
-    oss << "Sent " << res << " bytes.\n";
-    ACE_DEBUG((LM_INFO, oss.str().c_str()));
+    ACE_DEBUG((LM_INFO, "Sent %d bytes.\n", res));
   }
 
   return true;
