@@ -111,7 +111,8 @@ public:
   void handle_participant_data(DCPS::MessageId id,
                                const ParticipantData_t& pdata,
                                const DCPS::SequenceNumber& seq,
-                               const ACE_INET_Addr& from);
+                               const ACE_INET_Addr& from,
+                               bool fromSecureChannel);
 
   static bool validateSequenceNumber(const DCPS::SequenceNumber& seq, DiscoveredParticipantIter& iter);
 

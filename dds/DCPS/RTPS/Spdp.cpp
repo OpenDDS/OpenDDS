@@ -497,7 +497,8 @@ void
 Spdp::handle_participant_data(DCPS::MessageId id,
                               const ParticipantData_t& cpdata,
                               const DCPS::SequenceNumber& seq,
-                              const ACE_INET_Addr& from)
+                              const ACE_INET_Addr& from,
+                              bool fromSecureChannel)
 {
   const MonotonicTimePoint now = MonotonicTimePoint::now();
 
@@ -613,7 +614,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 #ifdef OPENDDS_SECURITY
     // Non-secure updates for authenticated participants are used for liveliness but
     // are otherwise ignored. Non-secure dispose messages are ignored completely.
-    if (!(iter->second.auth_state_ == DCPS::AS_AUTHENTICATED && pdata.hasIdentityStatusToken)) {
+    if (!(iter->second.auth_state_ == DCPS::AS_AUTHENTICATED && fromSecureChannel)) {
       iter->second.last_seen_ = now;
       return;
     }
@@ -735,7 +736,7 @@ Spdp::data_received(const DataSubmessage& data,
   DCPS::SequenceNumber seq;
   seq.setValue(data.writerSN.high, data.writerSN.low);
   handle_participant_data((data.inlineQos.length() && disposed(data.inlineQos)) ? DCPS::DISPOSE_INSTANCE : DCPS::SAMPLE_DATA,
-                          pdata, seq, from);
+                          pdata, seq, from, false);
 
 #ifdef OPENDDS_SECURITY
   ICE::AgentInfoMap ai_map;
