@@ -332,7 +332,6 @@ the basic list of library file for OpenDDS are as follows:
 
  - Required to use OpenDDS Security:
    - `$ACE_ROOT/lib/libACE_XML_Utils.so`
-   - `$DDS_ROOT/lib/libOpenDDS_QOS_XML_XSC_Handler.so`
    - `libxerces-c-3.*.so`
    - `libiconv.so` if it is necessary to include it.
    - `$DDS_ROOT/lib/libOpenDDS_Security.so`
