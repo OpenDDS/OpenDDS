@@ -1423,7 +1423,7 @@ RtpsUdpDataLink::RtpsReader::process_gap_i(const RTPS::GapSubmessage& gap,
         bitmap.length((gap.gapList.numBits + 31) / 32); // won't be any larger than original
         memset(&bitmap[0], 0, sizeof (CORBA::ULong) * ((gap.gapList.numBits + 31) / 32));
 
-        temp.to_bitmap(bitmap.get_buffer(), bitmap.length(), num_bits, true);
+        (void) temp.to_bitmap(bitmap.get_buffer(), bitmap.length(), num_bits, true);
         if (num_bits) {
           wi->second.recvd_.insert(temp.cumulative_ack(), num_bits, &bitmap[0]);
         }
@@ -1738,8 +1738,8 @@ RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(MetaSubmessageVec& meta_submessa
 
       if (recvd.disjoint()) {
         bitmap.length(bitmap_num_longs(ack, recvd.last_ack().previous()));
-        recvd.to_bitmap(bitmap.get_buffer(), bitmap.length(),
-                        num_bits, true);
+        (void) recvd.to_bitmap(bitmap.get_buffer(), bitmap.length(),
+                               num_bits, true);
       }
 
       const SequenceNumber::Value ack_val = ack.getValue();
@@ -2318,7 +2318,7 @@ RtpsUdpDataLink::RtpsWriter::gather_gaps_i(const RepoId& reader,
 
   if (gaps.disjoint()) {
     bitmap.length(bitmap_num_longs(base, gaps.high()));
-    gaps.to_bitmap(bitmap.get_buffer(), bitmap.length(), num_bits);
+    (void) gaps.to_bitmap(bitmap.get_buffer(), bitmap.length(), num_bits);
   } else {
     bitmap.length(1);
     bitmap[0] = 0;
