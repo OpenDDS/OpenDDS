@@ -625,8 +625,7 @@ sub setup_discovery {
         print STDERR "ERROR: Couldn't find \$DDS_ROOT/bin/DCPSInfoRepo. It " .
           "needs to be built or \$OPENDDS_INSTALL_PREFIX needs to be defined " .
           "if OpenDDS is installed.\n";
-        $self->{status} = -1;
-        return;
+        exit 1;
       }
       $executable = "$ENV{OPENDDS_INSTALL_PREFIX}/bin/DCPSInfoRepo";
     }
