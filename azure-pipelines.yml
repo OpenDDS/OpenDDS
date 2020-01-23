@@ -323,13 +323,14 @@ jobs:
       make install
       cp -r $DESTDIR/$INSTALL_PREFIX .
       cat << EOF > install_setenv.sh
-      export opendds_prefix=$INSTALL_PREFIX
-      source \$opendds_prefix/share/ace/ace-devel.sh
-      source \$opendds_prefix/share/tao/tao-devel.sh
-      source \$opendds_prefix/share/dds/dds-devel.sh
-      export PATH="\$opendds_prefix/bin:\$PATH"
-      export LD_LIBRARY_PATH="\$opendds_prefix/lib:\$LD_LIBRARY_PATH"
+      export OPENDDS_INSTALL_PREFIX=$INSTALL_PREFIX
+      source \$OPENDDS_INSTALL_PREFIX/share/ace/ace-devel.sh
+      source \$OPENDDS_INSTALL_PREFIX/share/tao/tao-devel.sh
+      source \$OPENDDS_INSTALL_PREFIX/share/dds/dds-devel.sh
+      export PATH="\$OPENDDS_INSTALL_PREFIX/bin:\$PATH"
+      export LD_LIBRARY_PATH="\$OPENDDS_INSTALL_PREFIX/lib:\$LD_LIBRARY_PATH"
       export MPC_ROOT=$(realpath ACE_TAO/ACE/MPC)
+      export PERL5LIB=$(realpath bin):$(realpath ACE_TAO/ACE/bin)
       EOF
     displayName: Install OpenDDS
     condition: and(succeeded(), ne(variables['DoMakeInstall'], ''))
@@ -340,6 +341,7 @@ jobs:
       git clean -dfx .
       $ACE_ROOT/bin/mwc.pl -type gnuace .
       make
+      perl run_test.pl rtps
     displayName: Build Messenger Using Installed OpenDDS and MPC
     condition: and(succeeded(), ne(variables['DoMakeInstall'], ''))
   - script: |
@@ -349,8 +351,9 @@ jobs:
       rm -fr build
       mkdir build
       cd build
-      cmake -DCMAKE_PREFIX_PATH=$opendds_prefix ..
+      cmake -DCMAKE_PREFIX_PATH=$OPENDDS_INSTALL_PREFIX ..
       cmake --build .
+      perl run_test.pl rtps
     displayName: Build Messenger Using Installed OpenDDS and CMake
     condition: and(succeeded(), ne(variables['DoMakeInstall'], ''))
 
