@@ -11,9 +11,7 @@ public:
   ~AppConfig();
 
   ACE_INET_Addr getHostAddress() const;
-  ACE_TString getHost() const { return host; }
-  u_short getPort() const { return port; }
-
+  bool configureTransport();
   void to_cerr(const OpenDDS::DCPS::RepoId& remote, const OpenDDS::DCPS::RepoId& local, const std::string& txt) const;
 
 private:

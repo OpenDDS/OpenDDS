@@ -122,7 +122,7 @@ public:
   /// Given a 'local' id, return the set of address for all remote peers.
   AddrSet get_addresses(const RepoId& local) const;
 
-  void withholdBestEffortReadersOnBadSeq(const RepoId& writer, const SequenceNumber& seq, RepoIdSet& readersWithheld);
+  void filterBestEffortReaders(const ReceivedDataSample& ds, RepoIdSet& selected, RepoIdSet& withheld);
 
   void associated(const RepoId& local, const RepoId& remote,
                   bool local_reliable, bool remote_reliable,

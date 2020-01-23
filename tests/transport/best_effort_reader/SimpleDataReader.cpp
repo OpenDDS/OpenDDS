@@ -20,8 +20,7 @@
 SimpleDataReader::SimpleDataReader(const AppConfig& ac, const int readerIndex)
   : config(ac), index(readerIndex), done_(false)
 {
-  enable_transport(false, false); //(reliable, durable)
-  //enable_transport((index == 2), false); //(reliable, durable)
+  enable_transport((index == 2), false); //(reliable, durable)
 
   // Write a file so that test script knows we're ready
   FILE *file = std::fopen("subready.txt", "w");
@@ -45,7 +44,7 @@ SimpleDataReader::SimpleDataReader(const AppConfig& ac, const int readerIndex)
     id_seqN_[AppConfig::writerId[i]] = 0;
     config.to_cerr(ad.remote_id_, get_repo_id(), "associated");
   }
-  std::cout << "Reader" << (index+1) << " associated with " << id_seqN_.size() << " writer(s)\n" << std::endl;
+  std::cerr << "Reader" << (index+1) << " associated with " << id_seqN_.size() << " writer(s)\n" << std::endl;
 }
 
 SimpleDataReader::~SimpleDataReader() {
@@ -110,6 +109,7 @@ bool SimpleDataReader::deserializeEncapsulationHeader(Serializer& s) {
   ACE_CDR::ULong encap;
   return (s >> encap); // read and ignore 32-bit CDR Encapsulation header
 }
+
 bool SimpleDataReader::deserializeData(TestMsg& data, Serializer& s) {
   bool ok = deserializeEncapsulationHeader(s);
   ok &= (s >> data);
@@ -118,6 +118,7 @@ bool SimpleDataReader::deserializeData(TestMsg& data, Serializer& s) {
   }
   return ok;
 }
+
 bool SimpleDataReader::deserializeKey(TestMsg& data, Serializer& s) {
   bool ok = deserializeEncapsulationHeader(s);
   ok &= (s >> OpenDDS::DCPS::KeyOnly<TestMsg>(data));

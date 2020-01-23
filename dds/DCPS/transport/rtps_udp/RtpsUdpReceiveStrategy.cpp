@@ -352,7 +352,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
     link_->received(data, receiver_.source_guid_prefix_);
     recvd_sample_ = 0;
 
-    link_->withholdBestEffortReadersOnBadSeq(sample.header_.publication_id_, sample.header_.sequence_, readers_withheld_);
+    link_->filterBestEffortReaders(sample, readers_selected_, readers_withheld_);
 
     if (data.readerId != ENTITYID_UNKNOWN) {
       RepoId reader;

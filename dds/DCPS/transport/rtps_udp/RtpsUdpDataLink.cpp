@@ -398,17 +398,18 @@ RtpsUdpDataLink::add_locator(const RepoId& remote_id,
   }
 }
 
-void RtpsUdpDataLink::withholdBestEffortReadersOnBadSeq(const RepoId& writer, const SequenceNumber& seq, RepoIdSet& readersWithheld)
+void RtpsUdpDataLink::filterBestEffortReaders(const ReceivedDataSample& ds, RepoIdSet& selected, RepoIdSet& withheld)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  const RepoId& writer = ds.header_.publication_id_;
+  const SequenceNumber& seq = ds.header_.sequence_;
   WriterSeqReadersMap::iterator w = writerBestEffortReaders_.find(writer);
   if (w != writerBestEffortReaders_.end()) {
     if (w->second.seq < seq) {
       w->second.seq = seq;
+      selected.insert(w->second.readers.begin(), w->second.readers.end());
     } else {
-      for (RepoIdSet::const_iterator r = w->second.readers.begin(); r != w->second.readers.end(); ++r) {
-        readersWithheld.insert(*r);
-      }
+      withheld.insert(w->second.readers.begin(), w->second.readers.end());
     }
   } // else the writer is not associated with best effort readers
 }

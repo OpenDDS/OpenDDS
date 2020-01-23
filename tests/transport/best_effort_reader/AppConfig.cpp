@@ -1,4 +1,8 @@
 #include "AppConfig.h"
+#include "dds/DCPS/transport/framework/TransportExceptions.h"
+#include "dds/DCPS/transport/framework/ReceivedDataSample.h"
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
+#include "dds/DCPS/transport/rtps_udp/RtpsUdpInst.h"
 #include "dds/DCPS/RepoIdBuilder.h"
 #include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
@@ -58,6 +62,29 @@ AppConfig::~AppConfig() {
 ACE_INET_Addr AppConfig::getHostAddress() const {
   return ACE_INET_Addr(port, host.c_str(),
     (host == ACE_TEXT("localhost")) ? AF_UNSPEC : AF_INET);
+}
+
+bool AppConfig::configureTransport(){
+  try {
+    OpenDDS::DCPS::TransportInst_rch transpt = TheTransportRegistry->create_inst("my_rtps", "rtps_udp");
+    OpenDDS::DCPS::RtpsUdpInst* rtpsUdp = dynamic_cast<OpenDDS::DCPS::RtpsUdpInst*>(transpt.in());
+    if (!rtpsUdp) {
+      ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Failed to cast to RtpsUdpInst*%m\n")), false);
+    }
+    rtpsUdp->datalink_release_delay_ = 0;
+    rtpsUdp->local_address(port, ACE_TEXT_ALWAYS_CHAR(host.c_str()));
+
+    OpenDDS::DCPS::TransportConfig_rch cfg = TheTransportRegistry->create_config("cfg");
+    cfg->instances_.push_back(transpt);
+    TheTransportRegistry->global_config(cfg);
+    return true;
+  } catch (const OpenDDS::DCPS::Transport::Exception& e) {
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: %C%m\n"), typeid(e).name()), false);
+  } catch (const CORBA::Exception& e) {
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: %C%m\n"), e._info().c_str()), false);
+  } catch (...) {
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: in configureTransport()%m\n")), false);
+  }
 }
 
 OpenDDS::DCPS::RepoId AppConfig::createID(long participantId, long key, CORBA::Octet kind) {
