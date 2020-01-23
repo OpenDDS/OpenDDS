@@ -614,7 +614,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 #ifdef OPENDDS_SECURITY
     // Non-secure updates for authenticated participants are used for liveliness but
     // are otherwise ignored. Non-secure dispose messages are ignored completely.
-    if (!iter->second.auth_state_ == DCPS::AS_AUTHENTICATED || (iter->second.auth_state_ == DCPS::AS_AUTHENTICATED && !fromSecureChannel)) {
+    if ((iter->second.auth_state_ == DCPS::AS_AUTHENTICATED) && !fromSecureChannel) {
       iter->second.last_seen_ = now;
       return;
     }
