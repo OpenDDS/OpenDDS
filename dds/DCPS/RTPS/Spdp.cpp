@@ -618,6 +618,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
         id != DCPS::DISPOSE_INSTANCE &&
         id != DCPS::DISPOSE_UNREGISTER_INSTANCE) {
       iter->second.last_seen_ = now;
+      update_location_i(guid, from_relay ? OpenDDS::DCPS::LOCATION_RELAY : OpenDDS::DCPS::LOCATION_LOCAL, from);
       return;
     }
 #endif
