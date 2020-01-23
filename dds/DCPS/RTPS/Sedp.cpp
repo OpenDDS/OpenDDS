@@ -2841,6 +2841,7 @@ ICE::Endpoint* Sedp::get_ice_endpoint() {
 
 Sedp::Endpoint::~Endpoint()
 {
+  remove_all_msgs();
 }
 
 //---------------------------------------------------------------
@@ -2874,7 +2875,6 @@ Sedp::Writer::Writer(const RepoId& pub_id, Sedp& sedp)
 
 Sedp::Writer::~Writer()
 {
-  remove_all_msgs();
 }
 
 bool
@@ -3244,7 +3244,6 @@ Sedp::Writer::set_header_fields(DCPS::DataSampleHeader& dsh,
 
 Sedp::Reader::~Reader()
 {
-  remove_all_msgs();
 }
 
 bool
