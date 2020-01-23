@@ -345,7 +345,7 @@ public:
   }
 
 private:
-  mutable ACE_SYNCH_MUTEX lock_;
+  mutable ACE_Thread_Mutex lock_;
   DCPS::TimeDuration resend_period_;
   DCPS::TimeDuration lease_duration_;
   u_short pb_, dg_, pg_, d0_, d1_, dx_;

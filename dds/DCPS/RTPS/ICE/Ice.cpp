@@ -81,7 +81,7 @@ Candidate make_peer_reflexive_candidate(const ACE_INET_Addr& address, ACE_UINT32
 
 Agent* Agent::instance()
 {
-  return ACE_Singleton<AgentImpl, ACE_SYNCH_MUTEX>::instance();
+  return ACE_Singleton<AgentImpl, ACE_Thread_Mutex>::instance();
 }
 
 
