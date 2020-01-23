@@ -74,6 +74,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   ACE_INET_Addr nic_horizontal, nic_vertical;
   OpenDDS::DCPS::TimeDuration lifespan(60);   // 1 minute
   unsigned short stun_port = 3478;
+  std::string user_data;
 
 #ifdef OPENDDS_SECURITY
   std::string identity_ca_file;
@@ -107,6 +108,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-StunPort"))) {
       stun_port = ACE_OS::atoi(arg);
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-UserData"))) {
+      user_data = arg;
       args.consume_arg();
 #ifdef OPENDDS_SECURITY
     } else if ((arg = args.get_the_parameter("-IdentityCA"))) {
@@ -191,6 +195,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   DDS::DomainParticipantQos participant_qos;
   factory->get_default_participant_qos(participant_qos);
+  participant_qos.user_data.value.length(user_data.length());
+  participant_qos.user_data.value.replace(user_data.length(),
+                                          user_data.length(),
+                                          const_cast<CORBA::Octet*>(reinterpret_cast<const CORBA::Octet*>(user_data.data())));
 
   DDS::PropertySeq& properties = participant_qos.property.value;
   append(properties, OpenDDS::RTPS::RTPS_DISCOVERY_ENDPOINT_ANNOUNCEMENTS, "false");
