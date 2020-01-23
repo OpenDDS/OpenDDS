@@ -2874,6 +2874,7 @@ Sedp::Writer::Writer(const RepoId& pub_id, Sedp& sedp)
 
 Sedp::Writer::~Writer()
 {
+  remove_all_msgs();
 }
 
 bool
@@ -3242,7 +3243,9 @@ Sedp::Writer::set_header_fields(DCPS::DataSampleHeader& dsh,
 //-------------------------------------------------------------------------
 
 Sedp::Reader::~Reader()
-{}
+{
+  remove_all_msgs();
+}
 
 bool
 Sedp::Reader::assoc(const DCPS::AssociationData& publication)
