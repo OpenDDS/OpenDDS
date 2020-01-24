@@ -156,33 +156,6 @@ private:
     ACE_Reactor_Mask mask_;
   };
 
-  class RemoveHandler : public ReactorInterceptor::ResultCommand<int> {
-  public:
-    RemoveHandler(TcpConnection_rch con, ACE_Reactor_Mask mask) : con_(con), mask_(mask) {}
-    void execute();
-  private:
-    TcpConnection_rch con_;
-    ACE_Reactor_Mask mask_;
-  };
-
-  class ScheduleTimer : public ReactorInterceptor::ResultCommand<long> {
-  public:
-    ScheduleTimer(TcpConnection_rch con, void* arg, const TimeDuration& delay, const TimeDuration& interval = TimeDuration::zero_value) : con_(con), arg_(arg), delay_(delay), interval_(interval) {}
-    void execute();
-  private:
-    TcpConnection_rch con_;
-    void* arg_;
-    TimeDuration delay_, interval_;
-  };
-
-  class CancelTimer : public ReactorInterceptor::ResultCommand<int> {
-  public:
-    CancelTimer(TcpConnection_rch con) : con_(con) {}
-    void execute();
-  private:
-    TcpConnection_rch con_;
-  };
-
   /// Attempt an active connection establishment to the remote address.
   /// The local address is sent to the remote (passive) side to
   /// identify ourselves to the remote side.
@@ -234,12 +207,6 @@ private:
   TcpTransport_rch impl_;
 
   RcHandle<Interceptor> interceptor_;
-
-  /// The id of the scheduled timer. The timer is scheduled to check if the connection
-  /// is re-established during the passive_reconnect_duration_. This id controls
-  /// that the timer is just scheduled once when there are multiple threads detect
-  /// the lost connection.
-  ACE_Atomic_Op<ACE_SYNCH_MUTEX, int> passive_reconnect_timer_id_;
 
   /// The state indicates each step of the reconnecting.
   ReconnectState reconnect_state_;
