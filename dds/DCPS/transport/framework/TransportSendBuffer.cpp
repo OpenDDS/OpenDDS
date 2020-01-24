@@ -377,7 +377,11 @@ SingleSendBuffer::resend_fragments_i(const SequenceNumber& seq,
   if (fragments_.empty() || requested_frags.empty()) {
     return;
   }
-  const BufferMap& buffers = fragments_[seq];
+  const FragmentMap::const_iterator fm_it = fragments_.find(seq);
+  if (fm_it == fragments_.end()) {
+    return;
+  }
+  const BufferMap& buffers = fm_it->second;
   const OPENDDS_VECTOR(SequenceRange) psr =
     requested_frags.present_sequence_ranges();
   SequenceNumber sent = SequenceNumber::ZERO();
@@ -386,13 +390,13 @@ SingleSendBuffer::resend_fragments_i(const SequenceNumber& seq,
     if (it == buffers.end()) {
       return;
     }
-    BufferMap::const_iterator it2 = buffers.lower_bound(psr[i].second);
-    while (true) {
+    const BufferMap::const_iterator last = buffers.lower_bound(psr[i].second);
+    while (it != buffers.end()) {
       if (sent < it->first) {
         resend_one(it->second);
         sent = it->first;
       }
-      if (it == it2) {
+      if (it == last) {
         break;
       }
       ++it;
