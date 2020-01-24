@@ -86,7 +86,7 @@ GuidGenerator::GuidGenerator()
 ACE_UINT16
 GuidGenerator::getCount()
 {
-  ACE_Guard<ACE_SYNCH_MUTEX> guard(counter_lock_);
+  ACE_Guard<ACE_Thread_Mutex> guard(counter_lock_);
   return counter_++;
 }
 
