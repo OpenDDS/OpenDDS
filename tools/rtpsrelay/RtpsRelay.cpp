@@ -196,9 +196,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   DDS::DomainParticipantQos participant_qos;
   factory->get_default_participant_qos(participant_qos);
   participant_qos.user_data.value.length(user_data.length());
-  participant_qos.user_data.value.replace(user_data.length(),
-                                          user_data.length(),
-                                          const_cast<CORBA::Octet*>(reinterpret_cast<const CORBA::Octet*>(user_data.data())));
+  std::memcpy(participant_qos.user_data.value.get_buffer(), user_data.data(), user_data.length());
 
   DDS::PropertySeq& properties = participant_qos.property.value;
   append(properties, OpenDDS::RTPS::RTPS_DISCOVERY_ENDPOINT_ANNOUNCEMENTS, "false");
