@@ -348,7 +348,7 @@ bool run_test()
     }
   };
 
-  if (OpenDDS::RTPS::ParameterListConverter::to_param_list(pdata, plist) < 0) {
+  if (!OpenDDS::RTPS::ParameterListConverter::to_param_list(pdata, plist)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
       ACE_TEXT("spdp_transport - run_test - ")
       ACE_TEXT("failed to convert from SPDPdiscoveredParticipantData ")

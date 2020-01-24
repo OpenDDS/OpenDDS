@@ -311,7 +311,6 @@ sub new {
   $self->{temp_files} = [];
   $self->{errors_to_ignore} = [];
   $self->{info_repo} = {};
-  $self->{info_repo}->{executable} = "$ENV{DDS_ROOT}/bin/DCPSInfoRepo";
   $self->{info_repo}->{state} = "none";
   $self->{info_repo}->{file} = "repo.ior";
   $self->{processes}->{process} = {};
@@ -544,6 +543,14 @@ sub process {
     return;
   }
 
+  my $extension = ".exe";
+  my $executable_ext = $executable.$extension;
+  if (!(-e $executable) && !(-e $executable_ext)) {
+    print STDERR "ERROR: executable \"$executable\" does not exist \n";
+    $self->{status} = -1;
+    return;
+  }
+
   if (defined $ENV{DCPSDebugLevel}) {
     $self->{dcps_debug_level} = $ENV{DCPSDebugLevel};
   }
@@ -611,11 +618,24 @@ sub setup_discovery {
   my $params = shift;
   my $executable = shift;
   $params = "" if !defined($params);
-  $executable = "$ENV{DDS_ROOT}/bin/DCPSInfoRepo" if !defined($executable);
+
   if ($self->{discovery} ne "info_repo" || $PerlDDS::SafetyProfile) {
     $self->_info("TestFramework::setup_discovery not creating DCPSInfoRepo "
       . "since discovery=" . $self->{discovery} . "\n");
     return;
+  }
+
+  if (!defined($executable)) {
+    $executable = "$ENV{DDS_ROOT}/bin/DCPSInfoRepo";
+    if (!(-e $executable) && !(-e "${executable}.exe")) {
+      if (!defined($ENV{OPENDDS_INSTALL_PREFIX})) {
+        print STDERR "ERROR: Couldn't find \$DDS_ROOT/bin/DCPSInfoRepo. It " .
+          "needs to be built or \$OPENDDS_INSTALL_PREFIX needs to be defined " .
+          "if OpenDDS is installed.\n";
+        exit 1;
+      }
+      $executable = "$ENV{OPENDDS_INSTALL_PREFIX}/bin/DCPSInfoRepo";
+    }
   }
 
   if ($self->{info_repo}->{state} ne "none" &&
