@@ -447,6 +447,7 @@ module OpenDDS {
     BUILT_IN_TOPIC_TYPE
     struct ParticipantLocationBuiltinTopicData {
             BUILT_IN_TOPIC_KEY OctetGuidArray16 guid;
+            DDS::BuiltinTopicKey_t participant_key;
             ParticipantLocation location;
             ParticipantLocation change_mask;
             string local_addr;

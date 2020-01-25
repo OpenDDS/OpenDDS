@@ -1635,6 +1635,16 @@ namespace OpenDDS {
         }
 
         DiscoveredParticipantData pdata_;
+        struct LocationUpdate {
+          OpenDDS::DCPS::ParticipantLocation mask_;
+          ACE_INET_Addr from_;
+          LocationUpdate() {}
+          LocationUpdate(OpenDDS::DCPS::ParticipantLocation mask,
+                         const ACE_INET_Addr& from)
+            : mask_(mask), from_(from) {}
+        };
+        typedef OPENDDS_VECTOR(LocationUpdate) LocationUpdateList;
+        LocationUpdateList location_updates_;
         OpenDDS::DCPS::ParticipantLocationBuiltinTopicData location_data_;
         DDS::InstanceHandle_t location_ih_;
 
