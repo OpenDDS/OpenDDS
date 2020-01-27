@@ -397,7 +397,7 @@ namespace {
 #ifndef DDS_HAS_MINIMUM_BIT
 void
 Spdp::enqueue_location_update_i(DiscoveredParticipantIter iter,
-                                OpenDDS::DCPS::ParticipantLocation mask,
+                                DCPS::ParticipantLocation mask,
                                 const ACE_INET_Addr& from)
 {
   // We have the global lock.
@@ -416,19 +416,17 @@ Spdp::process_location_updates_i(DiscoveredParticipantIter iter)
 
   const RepoId guid = iter->first;
 
-  DiscoveredParticipant::LocationUpdateList location_updates = iter->second.location_updates_;
-  iter->second.location_updates_.clear();
+  DiscoveredParticipant::LocationUpdateList location_updates;
+  std::swap(iter->second.location_updates_, location_updates);
 
   for (DiscoveredParticipant::LocationUpdateList::const_iterator pos = location_updates.begin(),
          limit = location_updates.end(); pos != limit; ++pos) {
-    OpenDDS::DCPS::ParticipantLocationBuiltinTopicData& location_data = iter->second.location_data_;
-    std::memcpy(location_data.participant_key.value,
-                guid.guidPrefix, sizeof(DDS::BuiltinTopicKey_t));
+    DCPS::ParticipantLocationBuiltinTopicData& location_data = iter->second.location_data_;
 
     OPENDDS_STRING addr = "";
     ACE_TCHAR buffer[256];
 
-    const OpenDDS::DCPS::ParticipantLocation old_mask = location_data.location;
+    const DCPS::ParticipantLocation old_mask = location_data.location;
 
     if (pos->from_ != ACE_INET_Addr()) {
       location_data.location |= pos->mask_;
@@ -444,17 +442,17 @@ Spdp::process_location_updates_i(DiscoveredParticipantIter iter)
 
     bool address_change = false;
     switch (pos->mask_) {
-    case OpenDDS::DCPS::LOCATION_LOCAL:
+    case DCPS::LOCATION_LOCAL:
       address_change = addr.compare(location_data.local_addr.in()) != 0;
       location_data.local_addr = addr.c_str();
       location_data.local_timestamp = now;
       break;
-    case OpenDDS::DCPS::LOCATION_ICE:
+    case DCPS::LOCATION_ICE:
       address_change = addr.compare(location_data.ice_addr.in()) != 0;
       location_data.ice_addr = addr.c_str();
       location_data.ice_timestamp = now;
       break;
-    case OpenDDS::DCPS::LOCATION_RELAY:
+    case DCPS::LOCATION_RELAY:
       address_change = addr.compare(location_data.relay_addr.in()) != 0;
       location_data.relay_addr = addr.c_str();
       location_data.relay_timestamp = now;
@@ -465,14 +463,14 @@ Spdp::process_location_updates_i(DiscoveredParticipantIter iter)
                                                                     iter->second.pdata_.leaseDuration,
                                                                     iter->second.pdata_.participantProxy.protocolVersion,
                                                                     iter->second.pdata_.participantProxy.vendorId).value().sec();
-    if ((location_data.location & OpenDDS::DCPS::LOCATION_LOCAL) && location_data.local_timestamp < expr) {
-      location_data.location &= ~(OpenDDS::DCPS::LOCATION_LOCAL);
-      location_data.change_mask |= OpenDDS::DCPS::LOCATION_LOCAL;
+    if ((location_data.location & DCPS::LOCATION_LOCAL) && location_data.local_timestamp < expr) {
+      location_data.location &= ~(DCPS::LOCATION_LOCAL);
+      location_data.change_mask |= DCPS::LOCATION_LOCAL;
       location_data.local_timestamp = now;
     }
-    if ((location_data.location & OpenDDS::DCPS::LOCATION_RELAY) && location_data.relay_timestamp < expr) {
-      location_data.location &= ~(OpenDDS::DCPS::LOCATION_RELAY);
-      location_data.change_mask |= OpenDDS::DCPS::LOCATION_RELAY;
+    if ((location_data.location & DCPS::LOCATION_RELAY) && location_data.relay_timestamp < expr) {
+      location_data.location &= ~(DCPS::LOCATION_RELAY);
+      location_data.change_mask |= DCPS::LOCATION_RELAY;
       location_data.relay_timestamp = now;
     }
 
@@ -481,7 +479,7 @@ Spdp::process_location_updates_i(DiscoveredParticipantIter iter)
       if (locbit) {
         DDS::InstanceHandle_t handle = DDS::HANDLE_NIL;
         {
-          const OpenDDS::DCPS::ParticipantLocationBuiltinTopicData ld_copy(location_data);
+          const DCPS::ParticipantLocationBuiltinTopicData ld_copy(location_data);
           ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
           ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
           handle = locbit->store_synthetic_data(ld_copy, DDS::NEW_VIEW_STATE);
@@ -526,7 +524,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
   }
 
   const bool from_relay = from == config_->spdp_rtps_relay_address();
-  const OpenDDS::DCPS::ParticipantLocation location_mask = from_relay ? OpenDDS::DCPS::LOCATION_RELAY : OpenDDS::DCPS::LOCATION_LOCAL;
+  const DCPS::ParticipantLocation location_mask = from_relay ? DCPS::LOCATION_RELAY : DCPS::LOCATION_LOCAL;
 
   // Find the participant - iterator valid only as long as we hold the lock
   DiscoveredParticipantIter iter = participants_.find(guid);
@@ -791,7 +789,7 @@ Spdp::data_received(const DataSubmessage& data,
       ACE_GUARD(ACE_Thread_Mutex, g, lock_);
       DiscoveredParticipantIter iter = participants_.find(guid);
       if (iter != participants_.end()) {
-        enqueue_location_update_i(iter, OpenDDS::DCPS::LOCATION_ICE, ACE_INET_Addr());
+        enqueue_location_update_i(iter, DCPS::LOCATION_ICE, ACE_INET_Addr());
         process_location_updates_i(iter);
       }
     #endif
@@ -2251,7 +2249,7 @@ Spdp::SpdpTransport::ice_connect(const ICE::GuidSetType& guids, const ACE_INET_A
   for (ICE::GuidSetType::const_iterator pos = guids.begin(), limit = guids.end(); pos != limit; ++pos) {
     DiscoveredParticipantIter iter = outer_->participants_.find(pos->remote);
     if (iter != outer_->participants_.end()) {
-      outer_->enqueue_location_update_i(iter, OpenDDS::DCPS::LOCATION_ICE, addr);
+      outer_->enqueue_location_update_i(iter, DCPS::LOCATION_ICE, addr);
       outer_->process_location_updates_i(iter);
     }
   }
@@ -2264,7 +2262,7 @@ Spdp::SpdpTransport::ice_disconnect(const ICE::GuidSetType& guids)
   for (ICE::GuidSetType::const_iterator pos = guids.begin(), limit = guids.end(); pos != limit; ++pos) {
     DiscoveredParticipantIter iter = outer_->participants_.find(pos->remote);
     if (iter != outer_->participants_.end()) {
-      outer_->enqueue_location_update_i(iter, OpenDDS::DCPS::LOCATION_ICE, ACE_INET_Addr());
+      outer_->enqueue_location_update_i(iter, DCPS::LOCATION_ICE, ACE_INET_Addr());
       outer_->process_location_updates_i(iter);
     }
   }

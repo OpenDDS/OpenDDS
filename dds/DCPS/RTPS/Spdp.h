@@ -166,7 +166,7 @@ protected:
 #endif
                                       );
 #ifndef DDS_HAS_MINIMUM_BIT
-  void enqueue_location_update_i(DiscoveredParticipantIter iter, OpenDDS::DCPS::ParticipantLocation mask, const ACE_INET_Addr& from);
+  void enqueue_location_update_i(DiscoveredParticipantIter iter, DCPS::ParticipantLocation mask, const ACE_INET_Addr& from);
   void process_location_updates_i(DiscoveredParticipantIter iter);
 #endif
 
