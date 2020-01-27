@@ -44,7 +44,8 @@ function(opendds_target_generated_dependencies target idl_file scope)
 
   add_dependencies(${target} ${bridge_target})
 
-  target_sources(${target} ${scope} ${cpp_files} ${all_idl_files} ${hdr_files})
+  target_sources(${target} ${scope} ${all_idl_files} ${hdr_files})
+  target_sources(${target} PRIVATE ${cpp_files})
 
   foreach(file ${hdr_files})
     get_target_property(target_includes ${target} INCLUDE_DIRECTORIES)
