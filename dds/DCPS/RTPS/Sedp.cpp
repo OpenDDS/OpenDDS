@@ -2860,6 +2860,7 @@ ICE::Endpoint* Sedp::get_ice_endpoint() {
 
 Sedp::Endpoint::~Endpoint()
 {
+  remove_all_msgs();
 }
 
 //---------------------------------------------------------------
@@ -3266,7 +3267,8 @@ Sedp::Writer::set_header_fields(DCPS::DataSampleHeader& dsh,
 //-------------------------------------------------------------------------
 
 Sedp::Reader::~Reader()
-{}
+{
+}
 
 bool
 Sedp::Reader::assoc(const DCPS::AssociationData& publication)
