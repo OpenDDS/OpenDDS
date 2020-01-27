@@ -123,6 +123,8 @@ public:
   DDS::ReturnCode_t write_volatile_message(DDS::Security::ParticipantVolatileMessageSecure& msg,
                                            const DCPS::RepoId& reader);
 
+  void write_durable_dcps_participant_secure(const DCPS::RepoId& reader);
+
   DDS::ReturnCode_t write_dcps_participant_secure(const Security::SPDPdiscoveredParticipantData& msg,
                                                   const DCPS::RepoId& part);
 #endif

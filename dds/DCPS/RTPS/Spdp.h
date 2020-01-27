@@ -140,6 +140,10 @@ public:
   DDS::Security::PermissionsHandle lookup_participant_permissions(const DCPS::RepoId& id) const;
 
   DCPS::AuthState lookup_participant_auth_state(const DCPS::RepoId& id) const;
+
+  void process_participant_ice(const ParameterList& plist,
+                               const ParticipantData_t& pdata,
+                               const DCPS::RepoId& guid);
 #endif
 
   DCPS::RcHandle<DCPS::JobQueue> job_queue() const { return tport_->job_queue_; }
@@ -156,14 +160,14 @@ public:
 
   ICE::Endpoint* get_ice_endpoint();
 
-protected:
-  Sedp& endpoint_manager() { return sedp_; }
-
   ParticipantData_t build_local_pdata(
 #ifdef OPENDDS_SECURITY
                                       Security::DiscoveredParticipantDataKind kind
 #endif
                                       );
+protected:
+  Sedp& endpoint_manager() { return sedp_; }
+
 #ifndef DDS_HAS_MINIMUM_BIT
   void update_location(const DCPS::RepoId& guid, OpenDDS::DCPS::ParticipantLocation mask, const ACE_INET_Addr& from);
   void update_location_i(const DCPS::RepoId& guid, OpenDDS::DCPS::ParticipantLocation mask, const ACE_INET_Addr& from);
