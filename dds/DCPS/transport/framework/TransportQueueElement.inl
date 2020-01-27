@@ -27,8 +27,8 @@ bool
 TransportQueueElement::data_dropped(bool dropped_by_transport)
 {
   DBG_ENTRY_LVL("TransportQueueElement", "data_dropped", 6);
-  this->dropped_ = true;
-  return this->decision_made(dropped_by_transport);
+  dropped_ = true;
+  return decision_made(dropped_by_transport);
 }
 
 ACE_INLINE
@@ -39,7 +39,7 @@ TransportQueueElement::data_delivered()
   // Decision made depend on dropped_ flag. If any link drops
   // the sample even other links deliver successfully, the
   // data dropped by transport will called back to writer.
-  return this->decision_made(this->dropped_);
+  return decision_made(dropped_);
 }
 
 ACE_INLINE
@@ -48,7 +48,7 @@ TransportQueueElement::decision_made(bool dropped_by_transport)
 {
   DBG_ENTRY_LVL("TransportQueueElement", "decision_made", 6);
 
-  const unsigned long new_count = --this->sub_loan_count_;
+  const unsigned long new_count = --sub_loan_count_;
   if (new_count == 0) {
     // All interested subscriptions have been satisfied.
 
@@ -58,8 +58,8 @@ TransportQueueElement::decision_made(bool dropped_by_transport)
     // as this element will be released anyway and not be
     // accessible. Note it can not be set after release_element
     // call.
-    // this->released_ = true;
-    this->release_element(dropped_by_transport);
+    // released_ = true;
+    release_element(dropped_by_transport);
     return true;
   }
 
@@ -76,21 +76,21 @@ ACE_INLINE
 bool
 TransportQueueElement::was_dropped() const
 {
-  return this->dropped_;
+  return dropped_;
 }
 
 ACE_INLINE
 bool
 TransportQueueElement::released() const
 {
-  return this->released_;
+  return released_;
 }
 
 ACE_INLINE
 void
 TransportQueueElement::released(bool flag)
 {
-  this->released_ = flag;
+  released_ = flag;
 }
 
 ACE_INLINE
@@ -98,8 +98,8 @@ bool
 TransportQueueElement::MatchOnPubId::matches(
   const TransportQueueElement& candidate) const
 {
-  return this->pub_id_ == candidate.publication_id()
-    && this->pub_id_ != GUID_UNKNOWN;
+  return pub_id_ == candidate.publication_id()
+    && pub_id_ != GUID_UNKNOWN;
 }
 
 ACE_INLINE
@@ -107,10 +107,11 @@ bool
 TransportQueueElement::MatchOnDataPayload::matches(
   const TransportQueueElement& candidate) const
 {
-  if (!candidate.msg_payload()) {
+  const ACE_Message_Block* payload = candidate.msg_payload();
+  if (!payload) {
     return false;
   }
-  return this->data_ == candidate.msg_payload()->rd_ptr();
+  return data_ == payload->rd_ptr();
 }
 
 }
