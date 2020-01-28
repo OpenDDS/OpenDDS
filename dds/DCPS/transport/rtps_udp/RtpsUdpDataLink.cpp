@@ -909,6 +909,7 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
                 subm, *tsce, requires_inline_qos);
     } else if (tsce->header().message_id_ == END_HISTORIC_SAMPLES) {
       end_historic_samples_i(tsce->header(), msg->cont());
+      g.release();
       element->data_delivered();
       return 0;
     } else if (tsce->header().message_id_ == DATAWRITER_LIVELINESS) {
@@ -1013,6 +1014,8 @@ RtpsUdpDataLink::customize_queue_element_non_reliable_i(
       deliver_after_send = true;
       return 0;
     } else {
+      ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(writers_lock_);
+      ACE_Guard<ACE_Reverse_Lock<ACE_Thread_Mutex> > g(rev_lock);
       element->data_dropped(true /*dropped_by_transport*/);
       return 0;
     }
