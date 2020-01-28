@@ -2840,7 +2840,7 @@ void Spdp::process_participant_ice(const ParameterList& plist,
     } else {
       ICE::Agent::instance()->stop_ice(spdp_endpoint, guid_, guid);
 #ifndef DDS_HAS_MINIMUM_BIT
-      update_location(guid, OpenDDS::DCPS::LOCATION_ICE, ACE_INET_Addr());
+      update_location(guid, DCPS::LOCATION_ICE, ACE_INET_Addr());
 #endif
     }
   }
