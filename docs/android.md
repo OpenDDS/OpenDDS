@@ -4,6 +4,7 @@
 
 * [Variables](#variables)
 * [Requirements](#requirements)
+* [Building on Windows](#building-on-windows)
 * [Building OpenDDS for Android](#building-opendds-for-android)
   * [Host Tools](#host-tools)
   * [OpenDDS's Optional Dependencies](#openddss-optional-dependencies)
@@ -38,12 +39,9 @@ are mostly for shorthand.
 | `$STUDIO`    | Android Studio                                   |
 | `$JDK`       | The Java SDK                                     |
 
-These same variables will be used with Windows environment notation
-(`%VARNAME%`) in Windows specific instructions, but they have the same meaning.
-
 ## Requirements
 
-To follow along with this guide and build OpenDDS you will need:
+To build the core OpenDDS native libraries for Android you will need:
 
  - OpenDDS 3.14 or higher.
  - [Android Native Development Kit (NDK)](https://developer.android.com/ndk/)
@@ -52,9 +50,11 @@ To follow along with this guide and build OpenDDS you will need:
    SDK Manager, this is located in `$SDK/ndk-bundle`.
  - Some knowledge about OpenDDS and Android development will be assumed, but
    more OpenDDS knowledge will be assumed than Android knowledge.
+ - Windows users should see ["Building on Windows"](#building-on-windows) for
+   additional requirements they might need.
 
 In addition to those, building OpenDDS with optional dependencies also have
-requirements not listed here but will in their own sections.
+additional requirements listed in their own sections.
 
 The [\"Using OpenDDS in a Android App\"
 section](#using-opendds-in-a-android-app) assumes the use of Android Studio,
@@ -74,19 +74,22 @@ virtualization you will have to follow the **Windows Users:** notices.
 In addition to OpenDDS and the Android NDK you will also need the following
 software:
 
-- MinGW
-  - Building OpenDDS for Android requires various utilities that would
-    normally come on a Unix system. To replace them install
-    [MinGW](http://www.mingw.org/) and the `mingw-developer-toolkit-bin` meta
-    package using the MinGW package manager.
+- [MSYS2](https://www.msys2.org)
+  - Building OpenDDS and its dependencies for Android requires various
+    utilities that would normally come on a Unix system. This guide will use
+    MSYS2, which supplies many of those utilities. Install MSYS2 from the
+    offical website at https://www.msys2.org and set it up.
+  - In a MSYS2 shell run the following command to install programs that will be
+    needed: `pacman -S cmake make perl git diffutils patch`
 
 - OpenDDS Host tools build using Visual Studio
   - In a separate copy of OpenDDS, build OpenDDS as described in
     [`INSTALL.md`](../INSTALL.md) using Visual Studio, except use the
-    `--host-tools-only` configure script option. If you want to use Java in the
-    Android build, please pass also pass the `--java` configure script option
-    here as described in the [Java](#java) section. You will also need to pass
-    it to the configure script build for Android when that comes.
+    `--host-tools-only` configure script option.
+  - If you want to use Java in the Android build, please pass also pass the
+    `--java` configure script option here as described in the [Java](#java)
+    section. You will also need to pass it to the configure script build for
+    Android when that comes.
 
 Finally all paths being passed to GNU make must not contain spaces because of a
 ACE's gnuace make scripts don't those paths handle correctly on Windows. This
