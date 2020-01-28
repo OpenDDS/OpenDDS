@@ -396,91 +396,100 @@ namespace {
 
 #ifndef DDS_HAS_MINIMUM_BIT
 void
-Spdp::update_location(const DCPS::RepoId& guid,
-                      OpenDDS::DCPS::ParticipantLocation mask,
-                      const ACE_INET_Addr& from)
+Spdp::enqueue_location_update_i(DiscoveredParticipantIter iter,
+                                DCPS::ParticipantLocation mask,
+                                const ACE_INET_Addr& from)
 {
-   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-   update_location_i(guid, mask, from);
+  // We have the global lock.
+  iter->second.location_updates_.push_back(DiscoveredParticipant::LocationUpdate(mask, from));
 }
 
 void
-Spdp::update_location_i(const DCPS::RepoId& guid,
-                        OpenDDS::DCPS::ParticipantLocation mask,
-                        const ACE_INET_Addr& from)
+Spdp::process_location_updates_i(DiscoveredParticipantIter iter)
 {
   // We have the global lock.
-  DiscoveredParticipantIter iter = participants_.find(guid);
-  if (iter == participants_.end()) {
+
+  if (iter->second.bit_ih_ == DDS::HANDLE_NIL) {
+    // Not in the built-in topics.
     return;
   }
 
-  OpenDDS::DCPS::ParticipantLocationBuiltinTopicData& ld = iter->second.location_data_;
+  const RepoId guid = iter->first;
 
-  OPENDDS_STRING addr = "";
-  ACE_TCHAR buffer[256];
+  DiscoveredParticipant::LocationUpdateList location_updates;
+  std::swap(iter->second.location_updates_, location_updates);
 
-  const OpenDDS::DCPS::ParticipantLocation old_mask = ld.location;
+  for (DiscoveredParticipant::LocationUpdateList::const_iterator pos = location_updates.begin(),
+         limit = location_updates.end(); pos != limit; ++pos) {
+    DCPS::ParticipantLocationBuiltinTopicData& location_data = iter->second.location_data_;
 
-  if (from != ACE_INET_Addr()) {
-    ld.location |= mask;
-    from.addr_to_string(buffer, 256);
-    addr = ACE_TEXT_ALWAYS_CHAR(buffer);
-  } else {
-    ld.location &= ~(mask);
-  }
+    OPENDDS_STRING addr = "";
+    ACE_TCHAR buffer[256];
 
-  ld.change_mask = mask;
+    const DCPS::ParticipantLocation old_mask = location_data.location;
 
-  const unsigned long now = MonotonicTimePoint::now().value().sec();
+    if (pos->from_ != ACE_INET_Addr()) {
+      location_data.location |= pos->mask_;
+      pos->from_.addr_to_string(buffer, 256);
+      addr = ACE_TEXT_ALWAYS_CHAR(buffer);
+    } else {
+      location_data.location &= ~(pos->mask_);
+    }
 
-  bool address_change = false;
-  switch (mask) {
-  case OpenDDS::DCPS::LOCATION_LOCAL:
-    address_change = addr.compare(ld.local_addr.in()) != 0;
-    ld.local_addr = addr.c_str();
-    ld.local_timestamp = now;
-    break;
-  case OpenDDS::DCPS::LOCATION_ICE:
-    address_change = addr.compare(ld.ice_addr.in()) != 0;
-    ld.ice_addr = addr.c_str();
-    ld.ice_timestamp = now;
-    break;
-  case OpenDDS::DCPS::LOCATION_RELAY:
-    address_change = addr.compare(ld.relay_addr.in()) != 0;
-    ld.relay_addr = addr.c_str();
-    ld.relay_timestamp = now;
-    break;
-  }
+    location_data.change_mask = pos->mask_;
 
-  const unsigned long expr = now - rtps_duration_to_time_duration(
-                                    iter->second.pdata_.leaseDuration,
-                                    iter->second.pdata_.participantProxy.protocolVersion,
-                                    iter->second.pdata_.participantProxy.vendorId).value().sec();
-  if ((ld.location & OpenDDS::DCPS::LOCATION_LOCAL) && ld.local_timestamp < expr) {
-    ld.location &= ~(OpenDDS::DCPS::LOCATION_LOCAL);
-    ld.change_mask |= OpenDDS::DCPS::LOCATION_LOCAL;
-    ld.local_timestamp = now;
-  }
-  if ((ld.location & OpenDDS::DCPS::LOCATION_RELAY) && ld.relay_timestamp < expr) {
-    ld.location &= ~(OpenDDS::DCPS::LOCATION_RELAY);
-    ld.change_mask |= OpenDDS::DCPS::LOCATION_RELAY;
-    ld.relay_timestamp = now;
-  }
+    const unsigned long now = MonotonicTimePoint::now().value().sec();
 
-  if (old_mask != ld.location || address_change) {
-    DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl* locbit = part_loc_bit();
-    if (locbit) {
-      DDS::InstanceHandle_t handle = DDS::HANDLE_NIL;
-      {
-        const OpenDDS::DCPS::ParticipantLocationBuiltinTopicData ld_copy(ld);
-        ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
-        ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
-        handle = locbit->store_synthetic_data(ld_copy, DDS::NEW_VIEW_STATE);
-      }
-      DiscoveredParticipantIter iter = participants_.find(guid);
-      if (iter != participants_.end()) {
-        iter->second.location_ih_ = handle;
+    bool address_change = false;
+    switch (pos->mask_) {
+    case DCPS::LOCATION_LOCAL:
+      address_change = addr.compare(location_data.local_addr.in()) != 0;
+      location_data.local_addr = addr.c_str();
+      location_data.local_timestamp = now;
+      break;
+    case DCPS::LOCATION_ICE:
+      address_change = addr.compare(location_data.ice_addr.in()) != 0;
+      location_data.ice_addr = addr.c_str();
+      location_data.ice_timestamp = now;
+      break;
+    case DCPS::LOCATION_RELAY:
+      address_change = addr.compare(location_data.relay_addr.in()) != 0;
+      location_data.relay_addr = addr.c_str();
+      location_data.relay_timestamp = now;
+      break;
+    }
+
+    const unsigned long expr = now - rtps_duration_to_time_duration(
+                                                                    iter->second.pdata_.leaseDuration,
+                                                                    iter->second.pdata_.participantProxy.protocolVersion,
+                                                                    iter->second.pdata_.participantProxy.vendorId).value().sec();
+    if ((location_data.location & DCPS::LOCATION_LOCAL) && location_data.local_timestamp < expr) {
+      location_data.location &= ~(DCPS::LOCATION_LOCAL);
+      location_data.change_mask |= DCPS::LOCATION_LOCAL;
+      location_data.local_timestamp = now;
+    }
+    if ((location_data.location & DCPS::LOCATION_RELAY) && location_data.relay_timestamp < expr) {
+      location_data.location &= ~(DCPS::LOCATION_RELAY);
+      location_data.change_mask |= DCPS::LOCATION_RELAY;
+      location_data.relay_timestamp = now;
+    }
+
+    if (old_mask != location_data.location || address_change) {
+      DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl* locbit = part_loc_bit();
+      if (locbit) {
+        DDS::InstanceHandle_t handle = DDS::HANDLE_NIL;
+        {
+          const DCPS::ParticipantLocationBuiltinTopicData ld_copy(location_data);
+          ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
+          ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
+          handle = locbit->store_synthetic_data(ld_copy, DDS::NEW_VIEW_STATE);
+        }
+        iter = participants_.find(guid);
+        if (iter != participants_.end()) {
+          iter->second.location_ih_ = handle;
+        } else {
+          return;
+        }
       }
     }
   }
@@ -497,7 +506,8 @@ void
 Spdp::handle_participant_data(DCPS::MessageId id,
                               const ParticipantData_t& cpdata,
                               const DCPS::SequenceNumber& seq,
-                              const ACE_INET_Addr& from)
+                              const ACE_INET_Addr& from,
+                              bool from_sedp)
 {
   const MonotonicTimePoint now = MonotonicTimePoint::now();
 
@@ -514,6 +524,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
   }
 
   const bool from_relay = from == config_->spdp_rtps_relay_address();
+  const DCPS::ParticipantLocation location_mask = from_relay ? DCPS::LOCATION_RELAY : DCPS::LOCATION_LOCAL;
 
   // Find the participant - iterator valid only as long as we hold the lock
   DiscoveredParticipantIter iter = participants_.find(guid);
@@ -538,8 +549,15 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     }
 
     // add a new participant
-    participants_[guid] = DiscoveredParticipant(pdata, now, seq);
-    DiscoveredParticipant& dp = participants_[guid];
+    std::pair<DiscoveredParticipantIter, bool> p = participants_.insert(std::make_pair(guid, DiscoveredParticipant(pdata, now, seq)));
+    iter = p.first;
+    DiscoveredParticipant& dp = iter->second;
+
+#ifndef DDS_HAS_MINIMUM_BIT
+    if (!from_sedp) {
+      enqueue_location_update_i(iter, location_mask, from);
+    }
+#endif
 
 #ifdef OPENDDS_SECURITY
     if (is_security_enabled()) {
@@ -610,6 +628,11 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 #endif
 
   } else { // Existing Participant
+#ifndef DDS_HAS_MINIMUM_BIT
+    if (!from_sedp) {
+      enqueue_location_update_i(iter, location_mask, from);
+    }
+#endif
 #ifdef OPENDDS_SECURITY
     // Non-secure updates for authenticated participants are used for liveliness but
     // are otherwise ignored. Non-secure dispose messages are ignored completely.
@@ -618,6 +641,9 @@ Spdp::handle_participant_data(DCPS::MessageId id,
         id != DCPS::DISPOSE_INSTANCE &&
         id != DCPS::DISPOSE_UNREGISTER_INSTANCE) {
       iter->second.last_seen_ = now;
+#ifndef DDS_HAS_MINIMUM_BIT
+      process_location_updates_i(iter);
+#endif
       return;
     }
 #endif
@@ -670,6 +696,10 @@ Spdp::handle_participant_data(DCPS::MessageId id,
         }
         iter->second.pdata_ = pdata;
         iter->second.last_seen_ = now;
+
+#ifndef DDS_HAS_MINIMUM_BIT
+        process_location_updates_i(iter);
+#endif
       }
     // Else a reset has occured and check if we should remove the participant
     } else if (iter->second.seq_reset_count_ >= config_->max_spdp_sequence_msg_reset_check()) {
@@ -679,9 +709,6 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       remove_discovered_participant(iter);
     }
   }
-#ifndef DDS_HAS_MINIMUM_BIT
-  update_location_i(guid, from_relay ? OpenDDS::DCPS::LOCATION_RELAY : OpenDDS::DCPS::LOCATION_LOCAL, from);
-#endif
 }
 
 bool
@@ -731,7 +758,7 @@ Spdp::data_received(const DataSubmessage& data,
   DCPS::SequenceNumber seq;
   seq.setValue(data.writerSN.high, data.writerSN.low);
   handle_participant_data((data.inlineQos.length() && disposed(data.inlineQos)) ? DCPS::DISPOSE_INSTANCE : DCPS::SAMPLE_DATA,
-                          pdata, seq, from);
+                          pdata, seq, from, false);
 
 #ifdef OPENDDS_SECURITY
   ICE::AgentInfoMap ai_map;
@@ -759,7 +786,12 @@ Spdp::data_received(const DataSubmessage& data,
     } else {
       ICE::Agent::instance()->stop_ice(spdp_endpoint, guid_, guid);
     #ifndef DDS_HAS_MINIMUM_BIT
-      update_location(guid, OpenDDS::DCPS::LOCATION_ICE, ACE_INET_Addr());
+      ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+      DiscoveredParticipantIter iter = participants_.find(guid);
+      if (iter != participants_.end()) {
+        enqueue_location_update_i(iter, DCPS::LOCATION_ICE, ACE_INET_Addr());
+        process_location_updates_i(iter);
+      }
     #endif
     }
   }
@@ -790,6 +822,9 @@ Spdp::match_unauthenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp)
   DiscoveredParticipantIter iter = participants_.find(guid);
   if (iter != participants_.end()) {
     iter->second.bit_ih_ = bit_instance_handle;
+#ifndef DDS_HAS_MINIMUM_BIT
+    process_location_updates_i(iter);
+#endif
   }
 }
 
@@ -1221,6 +1256,9 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp)
   DiscoveredParticipantIter iter = participants_.find(guid);
   if (iter != participants_.end()) {
     iter->second.bit_ih_ = bit_instance_handle;
+#ifndef DDS_HAS_MINIMUM_BIT
+    process_location_updates_i(iter);
+#endif
   }
   return true;
 }
@@ -2207,16 +2245,26 @@ Spdp::SpdpTransport::stun_server_address() const
 void
 Spdp::SpdpTransport::ice_connect(const ICE::GuidSetType& guids, const ACE_INET_Addr& addr)
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, outer_->lock_);
   for (ICE::GuidSetType::const_iterator pos = guids.begin(), limit = guids.end(); pos != limit; ++pos) {
-    outer_->update_location(pos->remote, OpenDDS::DCPS::LOCATION_ICE, addr);
+    DiscoveredParticipantIter iter = outer_->participants_.find(pos->remote);
+    if (iter != outer_->participants_.end()) {
+      outer_->enqueue_location_update_i(iter, DCPS::LOCATION_ICE, addr);
+      outer_->process_location_updates_i(iter);
+    }
   }
 }
 
 void
 Spdp::SpdpTransport::ice_disconnect(const ICE::GuidSetType& guids)
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, outer_->lock_);
   for (ICE::GuidSetType::const_iterator pos = guids.begin(), limit = guids.end(); pos != limit; ++pos) {
-    outer_->update_location(pos->remote, OpenDDS::DCPS::LOCATION_ICE, ACE_INET_Addr());
+    DiscoveredParticipantIter iter = outer_->participants_.find(pos->remote);
+    if (iter != outer_->participants_.end()) {
+      outer_->enqueue_location_update_i(iter, DCPS::LOCATION_ICE, ACE_INET_Addr());
+      outer_->process_location_updates_i(iter);
+    }
   }
 }
 #endif /* DDS_HAS_MINIMUM_BIT */
