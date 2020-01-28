@@ -21,7 +21,6 @@
 
 #include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/PoolAllocator.h"
-#include "dds/DCPS/ReactorInterceptor.h"
 #include "dds/DCPS/ReactorTask.h"
 #include "dds/DCPS/transport/framework/TransportDefs.h"
 #include "dds/DCPS/TimeTypes.h"
@@ -88,6 +87,7 @@ public:
 
   virtual int close(u_long);
   virtual int handle_close(ACE_HANDLE, ACE_Reactor_Mask);
+  virtual int handle_exception(ACE_HANDLE /*fd*/);
 
   void set_sock_options(const TcpInst* tcp_config);
 
@@ -139,23 +139,6 @@ public:
 
 private:
 
-  class Interceptor : public ReactorInterceptor {
-  public:
-    Interceptor(ReactorTask* task, ACE_Reactor* reactor, ACE_thread_t owner) : ReactorInterceptor(reactor, owner), task_(task) {}
-    bool reactor_is_shut_down() const;
-  private:
-    ReactorTask* task_;
-  };
-
-  class RegisterHandler : public ReactorInterceptor::ResultCommand<int> {
-  public:
-    RegisterHandler(TcpConnection_rch con, ACE_Reactor_Mask mask) : con_(con), mask_(mask) {}
-    void execute();
-  private:
-    TcpConnection_rch con_;
-    ACE_Reactor_Mask mask_;
-  };
-
   /// Attempt an active connection establishment to the remote address.
   /// The local address is sent to the remote (passive) side to
   /// identify ourselves to the remote side.
@@ -205,8 +188,6 @@ private:
 
   /// Impl object which is needed for connection objects and reconnect task
   TcpTransport_rch impl_;
-
-  RcHandle<Interceptor> interceptor_;
 
   /// The state indicates each step of the reconnecting.
   ReconnectState reconnect_state_;

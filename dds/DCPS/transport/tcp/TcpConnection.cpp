@@ -104,14 +104,7 @@ OpenDDS::DCPS::TcpConnection::set_datalink(const OpenDDS::DCPS::TcpDataLink_rch&
   link_ = link;
   if (link_) {
     impl_ = TcpTransport_rch(static_cast<TcpTransport*>(&link_->impl()), inc_count());
-    if (impl_) {
-      ReactorTask_rch rt = impl_->reactor_task();
-      interceptor_ = make_rch<Interceptor>(rt.get(), rt->get_reactor(), rt->get_reactor_owner());
-    } else {
-      interceptor_.reset();
-    }
   } else {
-    interceptor_.reset();
     impl_.reset();
   }
 }
@@ -739,30 +732,9 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
       last_reconnect_attempted_.set_to_now();
 
     } else {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) re-established connection on transport: %C to %C:%d.\n",
-                 this->config_name().c_str(),
-                 this->remote_address_.get_host_addr(),
-                 this->remote_address_.get_port_number()));
-
-      int result = -1;
-      if (interceptor_) {
-        TcpConnection_rch con(this, inc_count());
-        ReactorInterceptor::CommandPtr cmd = interceptor_->execute_or_enqueue(new RegisterHandler(con, READ_MASK));
-        result = ReactorInterceptor::ResultCommand<int>::wait_result(cmd);
-      }
-
-      if (result == -1) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          "(%P|%t) ERROR: OpenDDS::DCPS::TcpConnection::active_reconnect_i() can't register "
-                          "with reactor %X %p\n", this, ACE_TEXT("register_handler")),
-                          -1);
-      }
-      this->reconnect_state_ = RECONNECTED_STATE;
-      this->link_->notify(DataLink::RECONNECTED);
-      send_strategy->resume_send();
-      // the connection has already been established, last_reconnect_attempted_ is cleared so it won't be used to calculate the
-      // reconnect_delay time for the next disconnetion.
-      this->last_reconnect_attempted_ = this->last_reconnect_attempted_.zero_value;
+      // this connection has been established, delegate all the rest of processing to the reactor thread
+      this->reactor()->notify(this);
+      return 0;
     }
   }
 
@@ -887,7 +859,6 @@ OpenDDS::DCPS::TcpConnection::transfer(TcpConnection* connection)
   connection->tcp_config_ = this->tcp_config_;
   connection->link_ = this->link_;
   connection->impl_ = this->impl_;
-  connection->interceptor_ = this->interceptor_;
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "transfer(%C:%d->%C:%d) passive reconnected. new con %@   "
@@ -1029,14 +1000,35 @@ const char* OpenDDS::DCPS::TcpConnection::reconnect_state_string() const
   }
 }
 
-bool
-OpenDDS::DCPS::TcpConnection::Interceptor::reactor_is_shut_down() const {
-  return task_->is_shut_down();
-}
 
-void
-OpenDDS::DCPS::TcpConnection::RegisterHandler::execute() {
-  result(reactor()->register_handler(con_.get(), mask_));
+int OpenDDS::DCPS::TcpConnection::handle_exception(ACE_HANDLE) {
+  // this function is the continuation of the reactor->notify() inside active_reconnect_i()
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) re-established connection on transport: %C to %C:%d.\n",
+            this->config_name().c_str(),
+            this->remote_address_.get_host_addr(),
+            this->remote_address_.get_port_number()));
+
+  GuardType guard(reconnect_lock_);
+
+  if (shutdown_) {
+    return 0;
+  }
+
+  int result = reactor()->register_handler(this, READ_MASK);
+  if (result == -1) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        "(%P|%t) ERROR: OpenDDS::DCPS::TcpConnection::handle_exception() can't register "
+                        "with reactor %X %p\n", this, ACE_TEXT("register_handler")),
+                        -1);
+  }
+
+  this->reconnect_state_ = RECONNECTED_STATE;
+  this->link_->notify(DataLink::RECONNECTED);
+  this->send_strategy()->resume_send();
+  // the connection has already been established, last_reconnect_attempted_ is cleared so it won't be used to calculate the
+  // reconnect_delay time for the next disconnetion.
+  this->last_reconnect_attempted_ = this->last_reconnect_attempted_.zero_value;
+  return 0;
 }
 
 
