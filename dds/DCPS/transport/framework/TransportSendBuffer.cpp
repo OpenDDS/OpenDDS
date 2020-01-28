@@ -384,18 +384,18 @@ SingleSendBuffer::resend_fragments_i(const SequenceNumber& seq,
   const BufferMap& buffers = fm_it->second;
   const OPENDDS_VECTOR(SequenceRange)& psr = requested_frags.present_sequence_ranges();
 
-  SequenceNumber frag_min;
-  size_t i = 0;
   BufferMap::const_iterator it = buffers.lower_bound(psr.front().first);
   BufferMap::const_iterator end = buffers.lower_bound(psr.back().second);
   if (end != buffers.end()) {
     ++end;
   }
 
+  SequenceNumber frag_min;
+  size_t i = 0;
+
   // Iterate over both containers simultaneously
   while (i < psr.size() && it != end) {
     if (psr[i].second < frag_min) {
-      // While the range is too low, increment range
       ++i;
     } else {
       // Once the range max is over our fragment minimum, we either
