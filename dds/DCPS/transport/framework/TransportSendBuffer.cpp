@@ -42,7 +42,7 @@ void
 TransportSendBuffer::resend_one(const BufferType& buffer)
 {
   int bp = 0;
-  this->strategy_->do_send_packet(buffer.second, bp);
+  strategy_->do_send_packet(buffer.second, bp);
 }
 
 
@@ -54,10 +54,10 @@ SingleSendBuffer::SingleSendBuffer(size_t capacity,
                                    size_t max_samples_per_packet)
   : TransportSendBuffer(capacity),
     n_chunks_(capacity * max_samples_per_packet),
-    retained_mb_allocator_(this->n_chunks_ * 2),
-    retained_db_allocator_(this->n_chunks_ * 2),
-    replaced_mb_allocator_(this->n_chunks_ * 2),
-    replaced_db_allocator_(this->n_chunks_ * 2)
+    retained_mb_allocator_(n_chunks_ * 2),
+    retained_db_allocator_(n_chunks_ * 2),
+    replaced_mb_allocator_(n_chunks_ * 2),
+    replaced_db_allocator_(n_chunks_ * 2)
 {
 }
 
@@ -70,8 +70,8 @@ void
 SingleSendBuffer::release_all()
 {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-  for (BufferMap::iterator it(this->buffers_.begin());
-       it != this->buffers_.end();) {
+  for (BufferMap::iterator it = buffers_.begin();
+       it != buffers_.end();) {
     release_i(it++);
   }
 }
@@ -79,22 +79,9 @@ SingleSendBuffer::release_all()
 void
 SingleSendBuffer::release_acked(SequenceNumber seq) {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-  BufferMap::iterator buffer_iter = buffers_.begin();
-  BufferType& buffer(buffer_iter->second);
-
-  if (Transport_debug_level > 5) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) SingleSendBuffer::release_acked() - ")
-      ACE_TEXT("releasing buffer at: (0x%@,0x%@)\n"),
-      buffer.first, buffer.second
-    ));
-  }
-  while (buffer_iter != buffers_.end()) {
-    if (buffer_iter->first == seq) {
-      release_i(buffer_iter);
-      return;
-    }
-    ++buffer_iter;
+  BufferMap::iterator buffer_iter = buffers_.find(seq);
+  if (buffer_iter != buffers_.end()) {
+    release_i(buffer_iter);
   }
 }
 
@@ -151,8 +138,8 @@ SingleSendBuffer::retain_all(const RepoId& pub_id)
     ));
   }
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-  for (BufferMap::iterator it(this->buffers_.begin());
-       it != this->buffers_.end();) {
+  for (BufferMap::iterator it(buffers_.begin());
+       it != buffers_.end();) {
     if (it->second.first && it->second.second) {
       if (retain_buffer(pub_id, it->second) == REMOVE_ERROR) {
         GuidConverter converter(pub_id);
@@ -196,8 +183,8 @@ SingleSendBuffer::retain_buffer(const RepoId& pub_id, BufferType& buffer)
   PacketRemoveVisitor visitor(match,
                               buffer.second,
                               buffer.second,
-                              this->replaced_mb_allocator_,
-                              this->replaced_db_allocator_);
+                              replaced_mb_allocator_,
+                              replaced_db_allocator_);
 
   buffer.first->accept_replace_visitor(visitor);
   return visitor.status();
@@ -211,7 +198,7 @@ SingleSendBuffer::insert(SequenceNumber sequence,
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
   check_capacity_i();
 
-  BufferType& buffer = this->buffers_[sequence];
+  BufferType& buffer = buffers_[sequence];
   insert_buffer(buffer, queue, chain);
 
   if (Transport_debug_level > 5) {
@@ -244,15 +231,15 @@ SingleSendBuffer::insert_buffer(BufferType& buffer,
   ACE_NEW(elems, TransportSendStrategy::QueueType());
 
   CopyChainVisitor visitor(*elems,
-                           &this->retained_mb_allocator_,
-                           &this->retained_db_allocator_);
+                           &retained_mb_allocator_,
+                           &retained_db_allocator_);
   queue->accept_visitor(visitor);
 
   // Copy sample's message/data block descriptors:
   ACE_Message_Block*& data = buffer.second;
   data = TransportQueueElement::clone_mb(chain,
-                                         &this->retained_mb_allocator_,
-                                         &this->retained_db_allocator_);
+                                         &retained_mb_allocator_,
+                                         &retained_db_allocator_);
 }
 
 void
@@ -286,13 +273,13 @@ SingleSendBuffer::insert_fragment(SequenceNumber sequence,
 void
 SingleSendBuffer::check_capacity_i()
 {
-  if (this->capacity_ == SingleSendBuffer::UNLIMITED) {
+  if (capacity_ == SingleSendBuffer::UNLIMITED) {
     return;
   }
   // Age off oldest sample if we are at capacity:
-  if (this->buffers_.size() == this->capacity_) {
-    BufferMap::iterator it(this->buffers_.begin());
-    if (it == this->buffers_.end()) return;
+  if (buffers_.size() == capacity_) {
+    BufferMap::iterator it(buffers_.begin());
+    if (it == buffers_.end()) return;
 
     if (Transport_debug_level > 5) {
       ACE_DEBUG((LM_DEBUG,
