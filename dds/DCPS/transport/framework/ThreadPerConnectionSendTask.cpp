@@ -140,37 +140,35 @@ int ThreadPerConnectionSendTask::svc()
   ACE_OS::thr_sigsetmask(SIG_SETMASK, &set, NULL);
 
   SendRequest* req;
-  std::vector<SendRequest*> reqs;
+  OPENDDS_VECTOR(SendRequest*) reqs;
 
   ACE_Reverse_Lock<LockType> rev_lock(lock_);
   GuardType guard(lock_);
 
   // Start the "GetWork-And-PerformWork" loop for the current worker thread.
   while (!shutdown_initiated_) {
-    {
 
-      if (queue_.size() == 0) {
-        work_available_.wait();
+    if (queue_.size() == 0) {
+      work_available_.wait();
+    }
+
+    if (shutdown_initiated_) {
+      break;
+    }
+
+    while (queue_.size() != 0 && (reqs.empty() || reqs.back()->op_ != SEND_STOP)) {
+      req = queue_.get();
+
+      if (req == 0) {
+        //I'm not sure why this thread got more signals than actual signals
+        //when using thread_per_connection and the user application thread
+        //send requests without interval. We just need ignore the dequeue
+        //failure.
+        //ACE_ERROR ((LM_ERROR, "(%P|%t) ERROR: ThreadPerConnectionSendTask::svc  %p\n",
+        //  ACE_TEXT("dequeue_head")));
+        continue;
       }
-
-      if (shutdown_initiated_) {
-        break;
-      }
-
-      while (queue_.size() != 0 && (reqs.empty() || reqs.back()->op_ != SEND_STOP)) {
-        req = queue_.get();
-
-        if (req == 0) {
-          //I'm not sure why this thread got more signals than actual signals
-          //when using thread_per_connection and the user application thread
-          //send requests without interval. We just need ignore the dequeue
-          //failure.
-          //ACE_ERROR ((LM_ERROR, "(%P|%t) ERROR: ThreadPerConnectionSendTask::svc  %p\n",
-          //  ACE_TEXT("dequeue_head")));
-          continue;
-        }
-        reqs.push_back(req);
-      }
+      reqs.push_back(req);
     }
 
     ACE_Guard<ACE_Reverse_Lock<LockType> > rev_guard(rev_lock);
