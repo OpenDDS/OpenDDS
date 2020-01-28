@@ -916,6 +916,7 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
       deliver_after_send = true;
       return 0;
     } else {
+      g.release();
       element->data_dropped(true /*dropped_by_transport*/);
       return 0;
     }
@@ -2642,12 +2643,14 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   if (!is_final) {
     link->nack_reply_.schedule(); // timer will invoke send_nack_replies()
   }
+
+  g.release();
+
   typedef OPENDDS_MAP(SequenceNumber, TransportQueueElement*)::iterator iter_t;
   for (iter_t it = pendingCallbacks.begin();
        it != pendingCallbacks.end(); ++it) {
     it->second->data_delivered();
   }
-  g.release();
 
   TqeSet::iterator deliver_iter = to_deliver.begin();
   while (deliver_iter != to_deliver.end()) {
