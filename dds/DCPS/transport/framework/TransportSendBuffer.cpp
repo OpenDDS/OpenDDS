@@ -382,23 +382,29 @@ SingleSendBuffer::resend_fragments_i(const SequenceNumber& seq,
     return;
   }
   const BufferMap& buffers = fm_it->second;
-  const OPENDDS_VECTOR(SequenceRange) psr =
-    requested_frags.present_sequence_ranges();
-  SequenceNumber sent = SequenceNumber::ZERO();
-  for (size_t i = 0; i < psr.size(); ++i) {
-    BufferMap::const_iterator it = buffers.lower_bound(psr[i].first);
-    if (it == buffers.end()) {
-      return;
-    }
-    const BufferMap::const_iterator last = buffers.lower_bound(psr[i].second);
-    while (it != buffers.end()) {
-      if (sent < it->first) {
-        resend_one(it->second);
-        sent = it->first;
+  const OPENDDS_VECTOR(SequenceRange)& psr = requested_frags.present_sequence_ranges();
+
+  SequenceNumber frag_min;
+  size_t i = 0;
+  BufferMap::const_iterator it = buffers.lower_bound(psr.front().first);
+  BufferMap::const_iterator end = buffers.lower_bound(psr.back().second);
+  if (end != buffers.end()) {
+    ++end;
+  }
+
+  // Iterate over both containers simultaneously
+  while (i < psr.size() && it != end) {
+    if (psr[i].second < frag_min) {
+      // While the range is too low, increment range
+      ++i;
+    } else {
+      // Once the range max is over our fragment minimum, we either
+      // expect overlap (resend fragment) or the range is too high (skip fragment)
+      // Either way, we will increment the fragment now to avoid duplicate resends
+      if (it->first >= psr[i].first) {
+        resend_one(it->second); // overlap - resend fragment buffer
       }
-      if (it == last) {
-        break;
-      }
+      frag_min = it->first + 1; // increment fragment buffer
       ++it;
     }
   }
