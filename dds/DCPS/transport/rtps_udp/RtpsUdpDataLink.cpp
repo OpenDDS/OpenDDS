@@ -987,7 +987,8 @@ RtpsUdpDataLink::customize_queue_element_non_reliable_i(
   TransportQueueElement* element,
   bool requires_inline_qos,
   MetaSubmessageVec& meta_submessages,
-  bool& deliver_after_send)
+  bool& deliver_after_send,
+  ACE_Guard<ACE_Thread_Mutex>& guard)
 {
   RTPS::SubmessageSeq subm;
 
@@ -1014,8 +1015,7 @@ RtpsUdpDataLink::customize_queue_element_non_reliable_i(
       deliver_after_send = true;
       return 0;
     } else {
-      ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(writers_lock_);
-      ACE_Guard<ACE_Reverse_Lock<ACE_Thread_Mutex> > g(rev_lock);
+      guard.release();
       element->data_dropped(true /*dropped_by_transport*/);
       return 0;
     }
@@ -1067,7 +1067,7 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
   const RepoId pub_id = element->publication_id();
   GUIDSeq_var peers = peer_ids(pub_id);
 
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, writers_lock_, 0);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, writers_lock_, 0);
 
   bool require_iq = requires_inline_qos(peers);
 
@@ -1078,11 +1078,11 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
   bool deliver_after_send = false;
   if (rw != writers_.end()) {
     writer = rw->second;
-    g.release();
+    guard.release();
     result = writer->customize_queue_element_helper(element, require_iq, meta_submessages, deliver_after_send);
   } else {
-    result = customize_queue_element_non_reliable_i(element, require_iq, meta_submessages, deliver_after_send);
-    g.release();
+    result = customize_queue_element_non_reliable_i(element, require_iq, meta_submessages, deliver_after_send, guard);
+    guard.release();
   }
 
   send_bundled_submessages(meta_submessages);

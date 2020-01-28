@@ -588,7 +588,8 @@ private:
   TransportQueueElement* customize_queue_element_non_reliable_i(TransportQueueElement* element,
                                                                 bool requires_inline_qos,
                                                                 MetaSubmessageVec& meta_submessages,
-                                                                bool& deliver_after_send);
+                                                                bool& deliver_after_send,
+                                                                ACE_Guard<ACE_Thread_Mutex>& guard);
 
   void send_heartbeats_manual_i(const TransportSendControlElement* tsce,
                                 MetaSubmessageVec& meta_submessages);
