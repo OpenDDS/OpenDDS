@@ -276,7 +276,7 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
 {
   unicast_socket_ = unicast_socket;
 
-  RtpsUdpInst& config = this->config();
+  RtpsUdpInst& cfg = config();
 
   NetworkConfigMonitor_rch ncm = TheServiceParticipant->network_config_monitor();
 
@@ -285,7 +285,7 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
     nics = ncm->add_listener(*this);
   }
 
-  if (config.use_multicast_) {
+  if (cfg.use_multicast_) {
 #ifdef ACE_HAS_MAC_OSX
     multicast_socket_.opts(ACE_SOCK_Dgram_Mcast::OPT_BINDADDR_NO |
                            ACE_SOCK_Dgram_Mcast::DEFOPT_NULLIFACE);
@@ -295,24 +295,24 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
         join_multicast_group(*pos);
       }
     } else {
-      NetworkInterface nic(0, config.multicast_interface_, true);
+      NetworkInterface nic(0, cfg.multicast_interface_, true);
       nic.addresses.insert(ACE_INET_Addr());
       join_multicast_group(nic, true);
     }
   }
 
-  if (!OpenDDS::DCPS::set_socket_multicast_ttl(unicast_socket_, config.ttl_)) {
+  if (!OpenDDS::DCPS::set_socket_multicast_ttl(unicast_socket_, cfg.ttl_)) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("RtpsUdpDataLink::open: ")
                       ACE_TEXT("failed to set TTL: %d\n"),
-                      config.ttl_),
+                      cfg.ttl_),
                      false);
   }
 
-  if (config.send_buffer_size_ > 0) {
-    int snd_size = config.send_buffer_size_;
-    if (this->unicast_socket_.set_option(SOL_SOCKET,
+  if (cfg.send_buffer_size_ > 0) {
+    int snd_size = cfg.send_buffer_size_;
+    if (unicast_socket_.set_option(SOL_SOCKET,
                                 SO_SNDBUF,
                                 (void *) &snd_size,
                                 sizeof(snd_size)) < 0
@@ -325,9 +325,9 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
     }
   }
 
-  if (config.rcv_buffer_size_ > 0) {
-    int rcv_size = config.rcv_buffer_size_;
-    if (this->unicast_socket_.set_option(SOL_SOCKET,
+  if (cfg.rcv_buffer_size_ > 0) {
+    int rcv_size = cfg.rcv_buffer_size_;
+    if (unicast_socket_.set_option(SOL_SOCKET,
                                 SO_RCVBUF,
                                 (void *) &rcv_size,
                                 sizeof(int)) < 0
@@ -351,9 +351,9 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
                      false);
   }
 
-  if (config.rtps_relay_address() != ACE_INET_Addr() ||
-      config.use_rtps_relay_) {
-    relay_beacon_.enable(false, config.rtps_relay_beacon_period_);
+  if (cfg.rtps_relay_address() != ACE_INET_Addr() ||
+      cfg.use_rtps_relay_) {
+    relay_beacon_.enable(false, cfg.rtps_relay_beacon_period_);
   }
 
   return true;
@@ -1040,8 +1040,8 @@ RtpsUdpDataLink::customize_queue_element_non_reliable_i(
   const RepoId pub_id = element->publication_id();
 
   {
-    GuardType guard(this->strategy_lock_);
-    if (this->send_strategy_) {
+    GuardType guard(strategy_lock_);
+    if (send_strategy_) {
       send_strategy()->encode_payload(pub_id, data, subm);
     }
   }
@@ -1065,7 +1065,7 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
 
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, writers_lock_, 0);
 
-  bool requires_inline_qos = this->requires_inline_qos(peers);
+  bool require_iq = requires_inline_qos(peers);
 
   const RtpsWriterMap::iterator rw = writers_.find(pub_id);
   MetaSubmessageVec meta_submessages;
@@ -1075,10 +1075,10 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
   if (rw != writers_.end()) {
     writer = rw->second;
     g.release();
-    result = writer->customize_queue_element_helper(element, requires_inline_qos, meta_submessages, deliver_after_send);
+    result = writer->customize_queue_element_helper(element, require_iq, meta_submessages, deliver_after_send);
   } else {
+    result = customize_queue_element_non_reliable_i(element, require_iq, meta_submessages, deliver_after_send);
     g.release();
-    result = customize_queue_element_non_reliable_i(element, requires_inline_qos, meta_submessages, deliver_after_send);
   }
 
   send_bundled_submessages(meta_submessages);
@@ -3318,10 +3318,7 @@ RtpsUdpDataLink::send_heartbeats_manual_i(const TransportSendControlElement* tsc
   firstSN = 1;
   lastSN = tsce->sequence();
 
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, misc_lock_);
-    counter = ++best_effort_heartbeat_count_;
-  }
+  counter = ++best_effort_heartbeat_count_;
 
   const HeartBeatSubmessage hb = {
     {HEARTBEAT,
@@ -3746,7 +3743,7 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
 
 ICE::Endpoint*
 RtpsUdpDataLink::get_ice_endpoint() const {
-  return this->impl().get_ice_endpoint();
+  return impl().get_ice_endpoint();
 }
 
 } // namespace DCPS

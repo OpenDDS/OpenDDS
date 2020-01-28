@@ -424,10 +424,13 @@ private:
 
   void deliver_held_data(const RepoId& readerId, WriterInfo& info, bool durable);
 
-  /// lock_ protects data structures accessed by both the transport's thread
-  /// (TransportReactorTask) and an external thread which is responsible
-  /// for adding/removing associations from the DataLink.
-  mutable ACE_Thread_Mutex misc_lock_;
+  /// What was once a single lock for the whole datalink is now split between three (four including ch_lock_):
+  /// - readers_lock_ protects readers_, readers_of_writer_, pending_reliable_readers_, and interesting_writers_
+  ///   along with anything else that fits the 'reader side activity' of the datalink
+  /// - writers_lock_ protects writers_, heartbeat_counts_, best_effort_heartbeat_count_, and interesting_readers_
+  ///   along with anything else that fits the 'writers side activity' of the datalink
+  /// - locators_lock_ protects locators_ (and therefore calls to get_addresses_i())
+  ///   for both remote writers and remote readers
   mutable ACE_Thread_Mutex readers_lock_;
   mutable ACE_Thread_Mutex writers_lock_;
   mutable ACE_Thread_Mutex locators_lock_;
