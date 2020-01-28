@@ -111,7 +111,8 @@ public:
   void handle_participant_data(DCPS::MessageId id,
                                const ParticipantData_t& pdata,
                                const DCPS::SequenceNumber& seq,
-                               const ACE_INET_Addr& from);
+                               const ACE_INET_Addr& from,
+                               bool from_sedp);
 
   static bool validateSequenceNumber(const DCPS::SequenceNumber& seq, DiscoveredParticipantIter& iter);
 
@@ -169,8 +170,8 @@ protected:
   Sedp& endpoint_manager() { return sedp_; }
 
 #ifndef DDS_HAS_MINIMUM_BIT
-  void update_location(const DCPS::RepoId& guid, OpenDDS::DCPS::ParticipantLocation mask, const ACE_INET_Addr& from);
-  void update_location_i(const DCPS::RepoId& guid, OpenDDS::DCPS::ParticipantLocation mask, const ACE_INET_Addr& from);
+  void enqueue_location_update_i(DiscoveredParticipantIter iter, DCPS::ParticipantLocation mask, const ACE_INET_Addr& from);
+  void process_location_updates_i(DiscoveredParticipantIter iter);
 #endif
 
   bool announce_domain_participant_qos();

@@ -543,9 +543,8 @@ sub process {
     return;
   }
 
-  my $extension = ".exe";
-  my $executable_ext = $executable.$extension;
-  if (!(-e $executable) && !(-e $executable_ext)) {
+  my $subdir = $PerlACE::Process::ExeSubDir;
+  if (!(-e $executable) && !(-e "$executable.exe") && !(-e $subdir.$executable) && !(-e "$subdir.$executable.exe")) {
     print STDERR "ERROR: executable \"$executable\" does not exist \n";
     $self->{status} = -1;
     return;
@@ -618,6 +617,13 @@ sub setup_discovery {
   my $params = shift;
   my $executable = shift;
   $params = "" if !defined($params);
+
+  if ($self->{discovery} ne "info_repo" || $PerlDDS::SafetyProfile) {
+    $self->_info("TestFramework::setup_discovery not creating DCPSInfoRepo "
+      . "since discovery=" . $self->{discovery} . "\n");
+    return;
+  }
+
   if (!defined($executable)) {
     $executable = "$ENV{DDS_ROOT}/bin/DCPSInfoRepo";
     if (!(-e $executable) && !(-e "${executable}.exe")) {
@@ -629,12 +635,6 @@ sub setup_discovery {
       }
       $executable = "$ENV{OPENDDS_INSTALL_PREFIX}/bin/DCPSInfoRepo";
     }
-  }
-
-  if ($self->{discovery} ne "info_repo" || $PerlDDS::SafetyProfile) {
-    $self->_info("TestFramework::setup_discovery not creating DCPSInfoRepo "
-      . "since discovery=" . $self->{discovery} . "\n");
-    return;
   }
 
   if ($self->{info_repo}->{state} ne "none" &&
