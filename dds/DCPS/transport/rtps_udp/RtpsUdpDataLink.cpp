@@ -505,18 +505,22 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
       invoke_on_start_callbacks(local_id, remote_id, true);
     }
   } else if (conv.isReader()) {
-    ACE_GUARD(ACE_Thread_Mutex, g, readers_lock_);
-    RtpsReaderMap::iterator rr = readers_.find(local_id);
-    if (rr == readers_.end()) {
-      pending_reliable_readers_.erase(local_id);
-      RtpsUdpDataLink_rch link(this, OpenDDS::DCPS::inc_count());
-      RtpsReader_rch reader = make_rch<RtpsReader>(link, local_id, local_durable);
-      rr = readers_.insert(RtpsReaderMap::value_type(local_id, reader)).first;
+    if (remote_reliable) {
+      ACE_GUARD(ACE_Thread_Mutex, g, readers_lock_);
+      RtpsReaderMap::iterator rr = readers_.find(local_id);
+      if (rr == readers_.end()) {
+        pending_reliable_readers_.erase(local_id);
+        RtpsUdpDataLink_rch link(this, OpenDDS::DCPS::inc_count());
+        RtpsReader_rch reader = make_rch<RtpsReader>(link, local_id, local_durable);
+        rr = readers_.insert(RtpsReaderMap::value_type(local_id, reader)).first;
+      }
+      RtpsReader_rch reader = rr->second;
+      readers_of_writer_.insert(RtpsReaderMultiMap::value_type(remote_id, rr->second));
+      g.release();
+      reader->add_writer(remote_id, WriterInfo());
+    } else {
+      invoke_on_start_callbacks(local_id, remote_id, true);
     }
-    RtpsReader_rch reader = rr->second;
-    readers_of_writer_.insert(RtpsReaderMultiMap::value_type(remote_id, rr->second));
-    g.release();
-    reader->add_writer(remote_id, WriterInfo());
   }
 
   if (enable_heartbeat) {
@@ -1626,6 +1630,7 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
   static const SequenceNumber one, zero = SequenceNumber::ZERO();
 
   bool immediate_reply = false;
+  bool first_ever_hb = false;
   if (wi_last.getValue() == 0 && hb_last.getValue() != 0) {
     immediate_reply = true;
   }
@@ -1634,6 +1639,7 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
   if (info.first_ever_hb_) {
     immediate_reply = true;
     info.first_ever_hb_ = false;
+    first_ever_hb = true;
     // Don't re-initialize recvd_ values if a data sample has already done it
     if (info.recvd_.empty()) {
       if (!durable_) {
@@ -1681,6 +1687,13 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
     } else {
       return true; // timer will invoke send_heartbeat_replies()
     }
+  }
+
+  guard.release();
+  g.release();
+
+  if (first_ever_hb) {
+    link->invoke_on_start_callbacks(id_, src, true);
   }
 
   //FUTURE: support assertion of liveliness for MANUAL_BY_TOPIC
