@@ -18,7 +18,6 @@ private:
     Reader(const std::string& name, DDS::Subscriber_var& s, const Domain& d, bool reliable);
     int wait();
   private:
-    DataReaderListenerImpl* listenerImpl_;
     DDS::DataReaderListener_var listener_;
     DDS::DataReader_var reader_;
   };
@@ -56,13 +55,13 @@ int Subscriber::run() {
 }
 
 Subscriber::Reader::Reader(const std::string& name, DDS::Subscriber_var& s, const Domain& d, bool reliable)
+  : listener_(new DataReaderListenerImpl(name))
 {
   try {
     std::cout << name << ": " << (reliable ? "reliable" : "best-effort") << std::endl;
     DDS::DataReaderQos qos;
     s->get_default_datareader_qos(qos);
     qos.reliability.kind = reliable ? DDS::RELIABLE_RELIABILITY_QOS : DDS::BEST_EFFORT_RELIABILITY_QOS;
-    listener_ = (listenerImpl_ = new DataReaderListenerImpl(name));
     reader_ = s->create_datareader(d.topic.in(), qos, listener_.in(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (CORBA::is_nil(reader_.in())) {
       throw ACE_TEXT("create_datareader failed.");
@@ -93,7 +92,8 @@ int Subscriber::Reader::wait()
         throw ACE_TEXT("ERROR: get_subscription_matched_status failed!\n");
       }
     }
-    if (!listenerImpl_->valid()) { ret = 1; }
+    DataReaderListenerImpl* listener = dynamic_cast<DataReaderListenerImpl*>(listener_.in());
+    if(!listener || !listener->valid()) { ret = 1; }
   } catch (...) { ret = 1; }
   waitSet->detach_condition(statusCondition);
   return ret;

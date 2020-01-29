@@ -96,9 +96,7 @@ void DataReaderListenerImpl::on_sample_lost(
 
 bool DataReaderListenerImpl::valid() const
 {
-  //std::cout << reader_ << " received: " << received_ << "/" << Domain::N_MSG << std::endl;
   std::cout << reader_ << " received: " << received_ << "/" << Domain::N_MSG
     << ((received_ > 0) ? "\n" : " <--- ERROR\n");
-  //return validSeq_;
   return validSeq_ && (received_ > 0);
 }
