@@ -2725,6 +2725,8 @@ Sedp::association_complete(const RepoId& localId,
     write_durable_subscription_data(remoteId, true);
   } else if (remoteId.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER) {
     write_durable_participant_message_data(remoteId);
+  } else if (remoteId.entityId == ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER) {
+    write_durable_dcps_participant_secure(remoteId);
   } else if (remoteId.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER) {
 
     if (associated_volatile_readers_.insert(remoteId).second) {
@@ -3541,6 +3543,8 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
                    ACE_TEXT("to Security::SPDPdiscoveredParticipantData\n")));
         return;
       }
+      const DCPS::RepoId guid = make_guid(sample.header_.publication_id_.guidPrefix, DCPS::ENTITYID_PARTICIPANT);
+      sedp_.spdp_.process_participant_ice(data, *pdata, guid);
       sedp_.task_.enqueue(id, move(pdata));
 #endif
 
@@ -3735,6 +3739,19 @@ Sedp::write_volatile_message(DDS::Security::ParticipantVolatileMessageSecure& ms
   static DCPS::SequenceNumber sequence = 0;
   msg.message_identity.sequence_number = static_cast<unsigned long>((++sequence).getValue());
   return participant_volatile_message_secure_writer_->write_volatile_message_secure(msg, reader, sequence);
+}
+
+void
+Sedp::write_durable_dcps_participant_secure(const DCPS::RepoId& reader)
+{
+  if (!(spdp_.available_builtin_endpoints() & DDS::Security::SPDP_BUILTIN_PARTICIPANT_SECURE_WRITER)) {
+    return;
+  }
+
+  const Security::SPDPdiscoveredParticipantData& pdata = spdp_.build_local_pdata(Security::DPDK_SECURE);
+
+  write_dcps_participant_secure(pdata, reader);
+  dcps_participant_secure_writer_->end_historic_samples(reader);
 }
 
 DDS::ReturnCode_t
