@@ -3751,7 +3751,7 @@ Sedp::write_durable_dcps_participant_secure(const DCPS::RepoId& reader)
   const Security::SPDPdiscoveredParticipantData& pdata = spdp_.build_local_pdata(Security::DPDK_SECURE);
 
   write_dcps_participant_secure(pdata, reader);
-  dcps_participant_secure_writer_.end_historic_samples(reader);
+  dcps_participant_secure_writer_->end_historic_samples(reader);
 }
 
 DDS::ReturnCode_t

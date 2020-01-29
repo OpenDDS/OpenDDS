@@ -2840,7 +2840,12 @@ void Spdp::process_participant_ice(const ParameterList& plist,
     } else {
       ICE::Agent::instance()->stop_ice(spdp_endpoint, guid_, guid);
 #ifndef DDS_HAS_MINIMUM_BIT
-      update_location(guid, DCPS::LOCATION_ICE, ACE_INET_Addr());
+      ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+      DiscoveredParticipantIter iter = participants_.find(guid);
+      if (iter != participants_.end()) {
+        enqueue_location_update_i(iter, DCPS::LOCATION_ICE, ACE_INET_Addr());
+        process_location_updates_i(iter);
+      }
 #endif
     }
   }
