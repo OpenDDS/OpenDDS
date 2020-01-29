@@ -1,0 +1,7 @@
+@topic
+struct TestMsg
+{
+  @key long key;
+  long seq;
+  string msg;
+};
