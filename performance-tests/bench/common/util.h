@@ -28,7 +28,7 @@ std::string join_path(const std::string& arg, Args... args) {
 
 std::string Bench_Common_Export create_temp_dir(const std::string& prefix);
 std::vector<std::string> Bench_Common_Export get_dir_contents(const std::string& path);
-bool Bench_Common_Export file_exits(const std::string& path);
+bool Bench_Common_Export file_exists(const std::string& path);
 
 /**
  * Get Current UTC Time in ISO8601

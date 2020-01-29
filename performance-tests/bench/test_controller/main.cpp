@@ -204,7 +204,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   // Check to see if the Result Already Exists
   try {
-    if (file_exits(result_path)) {
+    if (file_exists(result_path)) {
       if (overwrite_result) {
         std::cerr << "Warning: overwriting " << result_path << std::endl;
       } else {

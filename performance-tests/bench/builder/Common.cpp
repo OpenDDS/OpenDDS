@@ -7,7 +7,8 @@ namespace Builder {
 
 const TimeStamp ZERO = {0, 0};
 
-TimeStamp get_time() {
+TimeStamp get_time()
+{
   auto now = std::chrono::high_resolution_clock::now();
   auto seconds = std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch());
   auto nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>((now - seconds).time_since_epoch());
@@ -15,7 +16,14 @@ TimeStamp get_time() {
   return result;
 }
 
-double to_seconds_double(const TimeStamp& ts) {
+TimeStamp from_seconds(int32_t sec)
+{
+  TimeStamp result = { sec, 0 };
+  return result;
+}
+
+double to_seconds_double(const TimeStamp& ts)
+{
   return static_cast<double>(ts.sec) + (static_cast<double>(ts.nsec) * 1e-9);
 }
 
@@ -26,7 +34,22 @@ get_duration(const TimeStamp& ts)
     (static_cast<int64_t>(ts.nsec) / 1000)));
 }
 
-TimeStamp operator-(const TimeStamp& lhs, const TimeStamp& rhs) {
+TimeStamp operator+(const TimeStamp& lhs, const TimeStamp& rhs)
+{
+  TimeStamp result;
+  result.sec = lhs.sec + rhs.sec;
+  uint64_t nsec = static_cast<uint64_t>(lhs.nsec) + static_cast<uint64_t>(rhs.nsec);
+  if (nsec >= static_cast<uint64_t>(1e9)) {
+    result.sec += nsec / static_cast<uint64_t>(1e9);
+    result.nsec = nsec % static_cast<uint64_t>(1e9);
+  } else {
+    result.nsec = nsec;
+  }
+  return result;
+}
+
+TimeStamp operator-(const TimeStamp& lhs, const TimeStamp& rhs)
+{
   TimeStamp result;
   result.sec = lhs.sec - rhs.sec;
   if (lhs.nsec >= rhs.nsec) {
@@ -38,15 +61,18 @@ TimeStamp operator-(const TimeStamp& lhs, const TimeStamp& rhs) {
   return result;
 }
 
-bool operator<(const TimeStamp& lhs, const TimeStamp& rhs) {
+bool operator<(const TimeStamp& lhs, const TimeStamp& rhs)
+{
   return lhs.sec < rhs.sec || (lhs.sec == rhs.sec && lhs.nsec < rhs.nsec);
 }
 
-bool operator<=(const TimeStamp& lhs, const TimeStamp& rhs) {
+bool operator<=(const TimeStamp& lhs, const TimeStamp& rhs)
+{
   return lhs.sec < rhs.sec || (lhs.sec == rhs.sec && lhs.nsec <= rhs.nsec);
 }
 
-bool operator==(const TimeStamp& lhs, const TimeStamp& rhs) {
+bool operator==(const TimeStamp& lhs, const TimeStamp& rhs)
+{
   return lhs.sec == rhs.sec && lhs.sec == rhs.sec;
 }
 
@@ -70,11 +96,13 @@ PropertyIndex::PropertyIndex(PropertySeq& seq, uint32_t index)
 {
 }
 
-const Property* PropertyIndex::operator->() const {
+const Property* PropertyIndex::operator->() const
+{
   return &((*seq_)[index_]);
 }
 
-Property* PropertyIndex::operator->() {
+Property* PropertyIndex::operator->()
+{
   return &((*seq_)[index_]);
 }
 
@@ -90,7 +118,8 @@ ConstPropertyIndex::ConstPropertyIndex(const PropertySeq& seq, uint32_t index)
 {
 }
 
-const Property* ConstPropertyIndex::operator->() const {
+const Property* ConstPropertyIndex::operator->() const
+{
   return &((*seq_)[index_]);
 }
 

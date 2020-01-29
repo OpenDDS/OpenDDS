@@ -108,6 +108,11 @@ namespace {
 
     return new_worker_total;
   }
+
+  void customize_configs(std::map<std::string, std::string>& worker_configs) {
+    Builder::TimeStamp now = Builder::get_time();
+    Builder::TimeStamp create_time = now + Builder::from_seconds(3);
+  }
 }
 
 AllocatedScenario ScenarioManager::allocate_scenario(
@@ -171,6 +176,8 @@ AllocatedScenario ScenarioManager::allocate_scenario(
   }
   read_protoworker_configs(
     test_context_, scenario_prototype.any_node, worker_configs, debug_alloc);
+
+  customize_configs(worker_configs);
 
   // Allocate Exclusive Node Configs First
   unsigned node_i = 0; // iter for allocated_scenario.configs
