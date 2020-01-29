@@ -366,10 +366,20 @@ OpenDDS::DCPS::TcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
                this->remote_address_.get_port_number()));
   }
 
-  TcpReceiveStrategy_rch receive_strategy = this->receive_strategy();
+  TcpDataLink_rch link;
+
+  {
+    GuardType guard(reconnect_lock_);
+    link = link_;
+  }
+
+  if (!link) return 0;
+
+  TcpReceiveStrategy_rch receive_strategy = link->receive_strategy();
+  TcpSendStrategy_rch send_strategy = link->send_strategy();
+
   bool graceful = receive_strategy && receive_strategy->gracefully_disconnected();
 
-  TcpSendStrategy_rch send_strategy = this->send_strategy();
   if (send_strategy) {
     if (graceful) {
       send_strategy->terminate_send();
@@ -381,7 +391,7 @@ OpenDDS::DCPS::TcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
   this->disconnect();
 
   if (graceful) {
-    this->link_->notify(DataLink::DISCONNECTED);
+    link->notify(DataLink::DISCONNECTED);
   } else if (this->is_connector_) {
     this->spawn_reconnect_thread();
   } else {
