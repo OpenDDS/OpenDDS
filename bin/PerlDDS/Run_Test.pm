@@ -544,7 +544,7 @@ sub process {
   }
 
   my $subdir = $PerlACE::Process::ExeSubDir;
-  if (!(-e $executable) && !(-e "$executable.exe") && !(-e $subdir.$executable) && !(-e "$subdir.$executable.exe")) {
+  if (!(-e $executable) && !(-e "$executable.exe") && !(-e $subdir.$executable) && !(-e "$subdir$executable.exe")) {
     print STDERR "ERROR: executable \"$executable\" does not exist \n";
     $self->{status} = -1;
     return;
