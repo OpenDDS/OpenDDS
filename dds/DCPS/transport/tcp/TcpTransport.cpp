@@ -118,8 +118,11 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
   key.address().addr_to_string(str,sizeof(str)/sizeof(str[0]), 0);
 
   // Can't make this call while holding onto TransportClient::lock_
+  ACE_Time_Value conn_timeout;
+  conn_timeout.msec(this->config().active_conn_timeout_period_);
+
   const int ret =
-    connector_.connect(pConn, key.address(), ACE_Synch_Options::asynch);
+    connector_.connect(pConn, key.address(), ACE_Synch_Options(ACE_Synch_Options::USE_REACTOR|ACE_Synch_Options::USE_TIMEOUT, conn_timeout));
 
   if (ret == -1 && errno != EWOULDBLOCK) {
 

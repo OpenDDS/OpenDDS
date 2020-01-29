@@ -841,6 +841,25 @@ OpenDDS::DCPS::TcpConnection::handle_timeout(const ACE_Time_Value &,
                this->remote_address_.get_port_number()));
     break;
 
+  case INIT_STATE: {
+    // couldn't initialize connection successfully.
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpConnection::handle_timeout, failed connection initialization due to timeout.: %C to %C:%d.\n",
+               this->config_name().c_str(),
+               this->remote_address_.get_host_addr(),
+               this->remote_address_.get_port_number()));
+
+    // build key and remove from service
+    TcpTransport& transport = static_cast<TcpTransport&>(link_->impl());
+
+    const bool is_loop(local_address_ == remote_address_);
+    const PriorityKey key(transport_priority_, remote_address_,
+                          is_loop, true /* active */);
+
+    transport.async_connect_failed(key);
+    }
+
+    break;
+
   default :
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: TcpConnection::handle_timeout, ")
