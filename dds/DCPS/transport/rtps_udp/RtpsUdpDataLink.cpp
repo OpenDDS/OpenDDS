@@ -132,7 +132,7 @@ RtpsUdpDataLink::config() const
 bool
 RtpsUdpDataLink::add_delayed_notification(TransportQueueElement* element)
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, writers_lock_, false);
   RtpsWriter_rch writer;
   RtpsWriterMap::iterator iter = writers_.find(element->publication_id());
   if (iter != writers_.end()) {
@@ -153,7 +153,7 @@ RtpsUdpDataLink::remove_sample(const DataSampleElement* sample)
 {
   RepoId pub_id = sample->get_pub_id();
 
-  ACE_Guard<ACE_Thread_Mutex> g(lock_);
+  ACE_Guard<ACE_Thread_Mutex> g(writers_lock_);
   RtpsWriter_rch writer;
   RtpsWriterMap::iterator iter = writers_.find(pub_id);
   if (iter != writers_.end()) {
@@ -170,7 +170,7 @@ RtpsUdpDataLink::remove_sample(const DataSampleElement* sample)
 
 void RtpsUdpDataLink::remove_all_msgs(const RepoId& pub_id)
 {
-  ACE_Guard<ACE_Thread_Mutex> g(lock_);
+  ACE_Guard<ACE_Thread_Mutex> g(writers_lock_);
   RtpsWriter_rch writer;
   RtpsWriterMap::iterator iter = writers_.find(pub_id);
   if (iter != writers_.end()) {
@@ -191,6 +191,7 @@ RtpsUdpDataLink::RtpsWriter::remove_sample(const DataSampleElement* sample)
   SequenceNumber to_release;
   TransportQueueElement* tqe = 0;
 
+  const SequenceNumber& seq = sample->get_header().sequence_;
   const char* const payload = sample->get_sample()->cont()->rd_ptr();
   const TransportQueueElement::MatchOnDataPayload modp(payload);
 
@@ -207,12 +208,12 @@ RtpsUdpDataLink::RtpsWriter::remove_sample(const DataSampleElement* sample)
 
   if (!elems_not_acked_.empty()) {
     typedef SnToTqeMap::iterator iter_t;
-    for (iter_t it = elems_not_acked_.begin(); it != elems_not_acked_.end(); ++it) {
-      if (modp.matches(*it->second)) {
+    for (std::pair<iter_t, iter_t> er = elems_not_acked_.equal_range(seq); er.first != er.second; ++er.first) {
+      if (modp.matches(*er.first->second)) {
         found = true;
-        to_release = it->first;
-        tqe = it->second;
-        elems_not_acked_.erase(it);
+        to_release = seq;
+        tqe = er.first->second;
+        elems_not_acked_.erase(er.first);
         break;
       }
     }
@@ -254,9 +255,13 @@ RtpsUdpDataLink::RtpsWriter::remove_all_msgs()
 
   g2.release();
 
+  SequenceNumber prev = SequenceNumber::ZERO();
   typedef SnToTqeMap::iterator iter_t;
   for (iter_t it = sn_tqe_map.begin(); it != sn_tqe_map.end(); ++it) {
-    send_buff_->release_acked(it->first);
+    if (it->first != prev) {
+      send_buff_->release_acked(it->first);
+      prev = it->first;
+    }
   }
 
   g.release();
@@ -271,7 +276,7 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
 {
   unicast_socket_ = unicast_socket;
 
-  RtpsUdpInst& config = this->config();
+  RtpsUdpInst& cfg = config();
 
   NetworkConfigMonitor_rch ncm = TheServiceParticipant->network_config_monitor();
 
@@ -280,7 +285,7 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
     nics = ncm->add_listener(*this);
   }
 
-  if (config.use_multicast_) {
+  if (cfg.use_multicast_) {
 #ifdef ACE_HAS_MAC_OSX
     multicast_socket_.opts(ACE_SOCK_Dgram_Mcast::OPT_BINDADDR_NO |
                            ACE_SOCK_Dgram_Mcast::DEFOPT_NULLIFACE);
@@ -290,24 +295,24 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
         join_multicast_group(*pos);
       }
     } else {
-      NetworkInterface nic(0, config.multicast_interface_, true);
+      NetworkInterface nic(0, cfg.multicast_interface_, true);
       nic.addresses.insert(ACE_INET_Addr());
       join_multicast_group(nic, true);
     }
   }
 
-  if (!OpenDDS::DCPS::set_socket_multicast_ttl(unicast_socket_, config.ttl_)) {
+  if (!OpenDDS::DCPS::set_socket_multicast_ttl(unicast_socket_, cfg.ttl_)) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("RtpsUdpDataLink::open: ")
                       ACE_TEXT("failed to set TTL: %d\n"),
-                      config.ttl_),
+                      cfg.ttl_),
                      false);
   }
 
-  if (config.send_buffer_size_ > 0) {
-    int snd_size = config.send_buffer_size_;
-    if (this->unicast_socket_.set_option(SOL_SOCKET,
+  if (cfg.send_buffer_size_ > 0) {
+    int snd_size = cfg.send_buffer_size_;
+    if (unicast_socket_.set_option(SOL_SOCKET,
                                 SO_SNDBUF,
                                 (void *) &snd_size,
                                 sizeof(snd_size)) < 0
@@ -320,9 +325,9 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
     }
   }
 
-  if (config.rcv_buffer_size_ > 0) {
-    int rcv_size = config.rcv_buffer_size_;
-    if (this->unicast_socket_.set_option(SOL_SOCKET,
+  if (cfg.rcv_buffer_size_ > 0) {
+    int rcv_size = cfg.rcv_buffer_size_;
+    if (unicast_socket_.set_option(SOL_SOCKET,
                                 SO_RCVBUF,
                                 (void *) &rcv_size,
                                 sizeof(int)) < 0
@@ -346,9 +351,9 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
                      false);
   }
 
-  if (config.rtps_relay_address() != ACE_INET_Addr() ||
-      config.use_rtps_relay_) {
-    relay_beacon_.enable(false, config.rtps_relay_beacon_period_);
+  if (cfg.rtps_relay_address() != ACE_INET_Addr() ||
+      cfg.use_rtps_relay_) {
+    relay_beacon_.enable(false, cfg.rtps_relay_beacon_period_);
   }
 
   return true;
@@ -436,7 +441,7 @@ RtpsUdpDataLink::add_locator(const RepoId& remote_id,
                              const ACE_INET_Addr& address,
                              bool requires_inline_qos)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  ACE_GUARD(ACE_Thread_Mutex, g, locators_lock_);
   locators_[remote_id] = RemoteInfo(address, requires_inline_qos);
 
   if (DCPS::DCPS_debug_level > 3) {
@@ -452,7 +457,7 @@ RtpsUdpDataLink::make_reservation(const RepoId& rpi,
                                   const TransportReceiveListener_wrch& trl,
                                   bool reliable)
 {
-  ACE_Guard<ACE_Thread_Mutex> guard(lock_);
+  ACE_Guard<ACE_Thread_Mutex> guard(readers_lock_);
   if (reliable) {
     RtpsReaderMap::iterator rr = readers_.find(lsi);
     if (rr == readers_.end()) {
@@ -476,9 +481,9 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
 
   bool enable_heartbeat = false;
 
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   if (conv.isWriter()) {
     if (remote_reliable) {
+      ACE_GUARD(ACE_Thread_Mutex, g, writers_lock_);
       // Insert count if not already there.
       RtpsWriterMap::iterator rw = writers_.find(local_id);
       if (rw == writers_.end()) {
@@ -500,6 +505,7 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
       invoke_on_start_callbacks(local_id, remote_id, true);
     }
   } else if (conv.isReader()) {
+    ACE_GUARD(ACE_Thread_Mutex, g, readers_lock_);
     RtpsReaderMap::iterator rr = readers_.find(local_id);
     if (rr == readers_.end()) {
       pending_reliable_readers_.erase(local_id);
@@ -541,7 +547,7 @@ RtpsUdpDataLink::register_for_reader(const RepoId& writerid,
                                      const ACE_INET_Addr& address,
                                      OpenDDS::DCPS::DiscoveryListener* listener)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  ACE_GUARD(ACE_Thread_Mutex, g, writers_lock_);
   bool enableheartbeat = interesting_readers_.empty();
   interesting_readers_.insert(
     InterestingRemoteMapType::value_type(
@@ -560,7 +566,7 @@ void
 RtpsUdpDataLink::unregister_for_reader(const RepoId& writerid,
                                        const RepoId& readerid)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  ACE_GUARD(ACE_Thread_Mutex, g, writers_lock_);
   for (InterestingRemoteMapType::iterator pos = interesting_readers_.lower_bound(readerid),
          limit = interesting_readers_.upper_bound(readerid);
        pos != limit;
@@ -579,7 +585,7 @@ RtpsUdpDataLink::register_for_writer(const RepoId& readerid,
                                      const ACE_INET_Addr& address,
                                      OpenDDS::DCPS::DiscoveryListener* listener)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  ACE_GUARD(ACE_Thread_Mutex, g, readers_lock_);
   bool enableheartbeatchecker = interesting_writers_.empty();
   interesting_writers_.insert(
     InterestingRemoteMapType::value_type(
@@ -595,7 +601,7 @@ void
 RtpsUdpDataLink::unregister_for_writer(const RepoId& readerid,
                                        const RepoId& writerid)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  ACE_GUARD(ACE_Thread_Mutex, g, readers_lock_);
   for (InterestingRemoteMapType::iterator pos = interesting_writers_.lower_bound(writerid),
          limit = interesting_writers_.upper_bound(writerid);
        pos != limit;
@@ -611,7 +617,7 @@ RtpsUdpDataLink::unregister_for_writer(const RepoId& readerid,
 void
 RtpsUdpDataLink::RtpsWriter::pre_stop_helper(OPENDDS_VECTOR(TransportQueueElement*)& to_drop)
 {
-  typedef OPENDDS_MULTIMAP(SequenceNumber, TransportQueueElement*)::iterator iter_t;
+  typedef SnToTqeMap::iterator iter_t;
 
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
   ACE_GUARD(ACE_Thread_Mutex, g2, elems_not_acked_mutex_);
@@ -640,7 +646,7 @@ RtpsUdpDataLink::pre_stop_i()
   DataLink::pre_stop_i();
   OPENDDS_VECTOR(TransportQueueElement*) to_drop;
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    ACE_GUARD(ACE_Thread_Mutex, g, writers_lock_);
 
     RtpsWriterMap::iterator iter = writers_.begin();
     while (iter != writers_.end()) {
@@ -668,7 +674,7 @@ RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
   using std::pair;
   const GuidConverter conv(local_id);
   if (conv.isWriter()) {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    ACE_GUARD(ACE_Thread_Mutex, g, writers_lock_);
     RtpsWriterMap::iterator rw = writers_.find(local_id);
 
     if (rw != writers_.end()) {
@@ -680,7 +686,7 @@ RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
         writer->pre_stop_helper(to_drop);
         const CORBA::ULong hbc = writer->get_heartbeat_count();
 
-        ACE_GUARD(ACE_Thread_Mutex, h, lock_);
+        ACE_GUARD(ACE_Thread_Mutex, h, writers_lock_);
         rw = writers_.find(local_id);
         if (rw != writers_.end()) {
           heartbeat_counts_[rw->first] = hbc;
@@ -692,7 +698,7 @@ RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
     }
 
   } else if (conv.isReader()) {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    ACE_GUARD(ACE_Thread_Mutex, g, readers_lock_);
     RtpsReaderMap::iterator rr = readers_.find(local_id);
 
     if (rr != readers_.end()) {
@@ -713,7 +719,7 @@ RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
 
       if (reader->writer_count() == 0) {
         {
-          ACE_GUARD(ACE_Thread_Mutex, h, lock_);
+          ACE_GUARD(ACE_Thread_Mutex, h, readers_lock_);
           rr = readers_.find(local_id);
           if (rr != readers_.end()) {
             readers_.erase(rr);
@@ -752,7 +758,7 @@ RcHandle<SingleSendBuffer>
 RtpsUdpDataLink::get_writer_send_buffer(const RepoId& pub_id)
 {
   RcHandle<SingleSendBuffer> result;
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, result);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, writers_lock_, result);
 
   const RtpsWriterMap::iterator wi = writers_.find(pub_id);
   if (wi != writers_.end()) {
@@ -903,6 +909,7 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
                 subm, *tsce, requires_inline_qos);
     } else if (tsce->header().message_id_ == END_HISTORIC_SAMPLES) {
       end_historic_samples_i(tsce->header(), msg->cont());
+      g.release();
       element->data_delivered();
       return 0;
     } else if (tsce->header().message_id_ == DATAWRITER_LIVELINESS) {
@@ -910,6 +917,7 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
       deliver_after_send = true;
       return 0;
     } else {
+      g.release();
       element->data_dropped(true /*dropped_by_transport*/);
       return 0;
     }
@@ -979,7 +987,8 @@ RtpsUdpDataLink::customize_queue_element_non_reliable_i(
   TransportQueueElement* element,
   bool requires_inline_qos,
   MetaSubmessageVec& meta_submessages,
-  bool& deliver_after_send)
+  bool& deliver_after_send,
+  ACE_Guard<ACE_Thread_Mutex>& guard)
 {
   RTPS::SubmessageSeq subm;
 
@@ -1006,6 +1015,7 @@ RtpsUdpDataLink::customize_queue_element_non_reliable_i(
       deliver_after_send = true;
       return 0;
     } else {
+      guard.release();
       element->data_dropped(true /*dropped_by_transport*/);
       return 0;
     }
@@ -1034,8 +1044,8 @@ RtpsUdpDataLink::customize_queue_element_non_reliable_i(
   const RepoId pub_id = element->publication_id();
 
   {
-    GuardType guard(this->strategy_lock_);
-    if (this->send_strategy_) {
+    GuardType guard(strategy_lock_);
+    if (send_strategy_) {
       send_strategy()->encode_payload(pub_id, data, subm);
     }
   }
@@ -1057,9 +1067,9 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
   const RepoId pub_id = element->publication_id();
   GUIDSeq_var peers = peer_ids(pub_id);
 
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, 0);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, writers_lock_, 0);
 
-  bool requires_inline_qos = this->requires_inline_qos(peers);
+  bool require_iq = requires_inline_qos(peers);
 
   const RtpsWriterMap::iterator rw = writers_.find(pub_id);
   MetaSubmessageVec meta_submessages;
@@ -1068,11 +1078,11 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
   bool deliver_after_send = false;
   if (rw != writers_.end()) {
     writer = rw->second;
-    g.release();
-    result = writer->customize_queue_element_helper(element, requires_inline_qos, meta_submessages, deliver_after_send);
+    guard.release();
+    result = writer->customize_queue_element_helper(element, require_iq, meta_submessages, deliver_after_send);
   } else {
-    result = customize_queue_element_non_reliable_i(element, requires_inline_qos, meta_submessages, deliver_after_send);
-    g.release();
+    result = customize_queue_element_non_reliable_i(element, require_iq, meta_submessages, deliver_after_send, guard);
+    guard.release();
   }
 
   send_bundled_submessages(meta_submessages);
@@ -1249,7 +1259,7 @@ RtpsUdpDataLink::received(const RTPS::DataSubmessage& data,
 
   OPENDDS_VECTOR(RtpsReader_rch) to_call;
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    ACE_GUARD(ACE_Thread_Mutex, g, readers_lock_);
     if (local.entityId == ENTITYID_UNKNOWN) {
       typedef std::pair<RtpsReaderMultiMap::iterator, RtpsReaderMultiMap::iterator> RRMM_IterRange;
       for (RRMM_IterRange iters = readers_of_writer_.equal_range(src); iters.first != iters.second; ++iters.first) {
@@ -1530,7 +1540,7 @@ RtpsUdpDataLink::received(const RTPS::HeartBeatSubmessage& heartbeat,
   OPENDDS_VECTOR(InterestingRemote) callbacks;
 
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    ACE_GUARD(ACE_Thread_Mutex, g, readers_lock_);
 
     // We received a heartbeat from a writer.
     // We should ACKNACK if the writer is interesting and there is no association.
@@ -1908,7 +1918,7 @@ namespace {
 void
 RtpsUdpDataLink::build_meta_submessage_map(MetaSubmessageVec& meta_submessages, AddrDestMetaSubmessageMap& adr_map)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  ACE_GUARD(ACE_Thread_Mutex, g, locators_lock_);
   AddrSet addrs;
   // Sort meta_submessages by address set and destination
   for (MetaSubmessageVec::iterator it = meta_submessages.begin(); it != meta_submessages.end(); ++it) {
@@ -2151,7 +2161,7 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
   RtpsReaderMap readers;
 
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    ACE_GUARD(ACE_Thread_Mutex, g, readers_lock_);
 
     for (InterestingAckNackSetType::const_iterator pos = interesting_ack_nacks_.begin(),
            limit = interesting_ack_nacks_.end();
@@ -2356,7 +2366,7 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
   OPENDDS_VECTOR(DiscoveryListener*) callbacks;
 
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    ACE_GUARD(ACE_Thread_Mutex, g, writers_lock_);
     for (InterestingRemoteMapType::iterator pos = interesting_readers_.lower_bound(remote),
            limit = interesting_readers_.upper_bound(remote);
          pos != limit;
@@ -2630,22 +2640,24 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
     ri->second.requested_changes_.push_back(acknack.readerSNState);
   }
 
-  SnToTqeMap to_deliver;
+  TqeSet to_deliver;
   acked_by_all_helper_i(to_deliver);
 
   if (!is_final) {
     link->nack_reply_.schedule(); // timer will invoke send_nack_replies()
   }
+
+  g.release();
+
   typedef OPENDDS_MAP(SequenceNumber, TransportQueueElement*)::iterator iter_t;
   for (iter_t it = pendingCallbacks.begin();
        it != pendingCallbacks.end(); ++it) {
     it->second->data_delivered();
   }
-  g.release();
 
-  SnToTqeMap::iterator deliver_iter = to_deliver.begin();
+  TqeSet::iterator deliver_iter = to_deliver.begin();
   while (deliver_iter != to_deliver.end()) {
-    deliver_iter->second->data_delivered();
+    (*deliver_iter)->data_delivered();
     ++deliver_iter;
   }
 
@@ -2802,7 +2814,7 @@ RtpsUdpDataLink::send_nack_replies()
 {
   RtpsWriterMap writers;
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    ACE_GUARD(ACE_Thread_Mutex, g, writers_lock_);
     writers = writers_;
   }
 
@@ -2958,20 +2970,21 @@ RtpsUdpDataLink::RtpsWriter::send_directed_nack_replies_i(const RepoId& readerId
 void
 RtpsUdpDataLink::RtpsWriter::process_acked_by_all()
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  TqeSet to_deliver;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+    acked_by_all_helper_i(to_deliver);
+  }
 
-  SnToTqeMap to_deliver;
-  acked_by_all_helper_i(to_deliver);
-
-  SnToTqeMap::iterator deliver_iter = to_deliver.begin();
+  TqeSet::iterator deliver_iter = to_deliver.begin();
   while (deliver_iter != to_deliver.end()) {
-    deliver_iter->second->data_delivered();
+    (*deliver_iter)->data_delivered();
     ++deliver_iter;
   }
 }
 
 void
-RtpsUdpDataLink::RtpsWriter::acked_by_all_helper_i(SnToTqeMap& to_deliver)
+RtpsUdpDataLink::RtpsWriter::acked_by_all_helper_i(TqeSet& to_deliver)
 {
   using namespace OpenDDS::RTPS;
   typedef OPENDDS_MULTIMAP(SequenceNumber, TransportQueueElement*)::iterator iter_t;
@@ -2983,30 +2996,30 @@ RtpsUdpDataLink::RtpsWriter::acked_by_all_helper_i(SnToTqeMap& to_deliver)
     return;
   }
 
+  //start with the max sequence number writer knows about and decrease
+  //by what the min over all readers is
+  SequenceNumber all_readers_ack = SequenceNumber::MAX_VALUE;
+
+  typedef ReaderInfoMap::iterator ri_iter;
+  const ri_iter end = remote_readers_.end();
+  for (ri_iter ri = remote_readers_.begin(); ri != end; ++ri) {
+    if (ri->second.cur_cumulative_ack_ < all_readers_ack) {
+      all_readers_ack = ri->second.cur_cumulative_ack_;
+    }
+  }
+  if (all_readers_ack == SequenceNumber::MAX_VALUE) {
+    return;
+  }
+
   ACE_GUARD(ACE_Thread_Mutex, g2, elems_not_acked_mutex_);
 
   if (!elems_not_acked_.empty()) {
-
-    //start with the max sequence number writer knows about and decrease
-    //by what the min over all readers is
-    SequenceNumber all_readers_ack = SequenceNumber::MAX_VALUE;
-
-    typedef ReaderInfoMap::iterator ri_iter;
-    const ri_iter end = remote_readers_.end();
-    for (ri_iter ri = remote_readers_.begin(); ri != end; ++ri) {
-      if (ri->second.cur_cumulative_ack_ < all_readers_ack) {
-        all_readers_ack = ri->second.cur_cumulative_ack_;
-      }
-    }
-    if (all_readers_ack == SequenceNumber::MAX_VALUE) {
-      return;
-    }
 
     OPENDDS_SET(SequenceNumber) sns_to_release;
     iter_t it = elems_not_acked_.begin();
     while (it != elems_not_acked_.end()) {
       if (it->first < all_readers_ack) {
-        to_deliver.insert(RtpsWriter::SnToTqeMap::value_type(it->first, it->second));
+        to_deliver.insert(it->second);
         sns_to_release.insert(it->first);
         iter_t last = it;
         ++it;
@@ -3051,7 +3064,7 @@ RtpsUdpDataLink::send_heartbeats(const DCPS::MonotonicTimePoint& /*now*/)
   WtaMap writers_to_advertise;
 
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    ACE_GUARD(ACE_Thread_Mutex, g, writers_lock_);
 
     RtpsUdpInst& cfg = config();
 
@@ -3263,7 +3276,7 @@ RtpsUdpDataLink::check_heartbeats(const DCPS::MonotonicTimePoint& now)
   // Have any interesting writers timed out?
   const MonotonicTimePoint tv(now - 10 * config().heartbeat_period_);
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    ACE_GUARD(ACE_Thread_Mutex, g, readers_lock_);
 
     for (InterestingRemoteMapType::iterator pos = interesting_writers_.begin(), limit = interesting_writers_.end();
          pos != limit;
@@ -3310,6 +3323,7 @@ RtpsUdpDataLink::send_heartbeats_manual_i(const TransportSendControlElement* tsc
 
   firstSN = 1;
   lastSN = tsce->sequence();
+
   counter = ++best_effort_heartbeat_count_;
 
   const HeartBeatSubmessage hb = {
@@ -3564,7 +3578,7 @@ RtpsUdpDataLink::send_final_acks(const RepoId& readerid)
 {
   RtpsReader_rch reader;
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    ACE_GUARD(ACE_Thread_Mutex, g, readers_lock_);
     RtpsReaderMap::iterator rr = readers_.find(readerid);
     if (rr != readers_.end()) {
       reader = rr->second;
@@ -3642,13 +3656,13 @@ RtpsUdpDataLink::receive_strategy()
 
 RtpsUdpDataLink::AddrSet
 RtpsUdpDataLink::get_addresses(const RepoId& local, const RepoId& remote) const {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, AddrSet());
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, locators_lock_, AddrSet());
   return get_addresses_i(local, remote);
 }
 
 RtpsUdpDataLink::AddrSet
 RtpsUdpDataLink::get_addresses(const RepoId& local) const {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, AddrSet());
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, locators_lock_, AddrSet());
   return get_addresses_i(local);
 }
 
@@ -3735,7 +3749,7 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
 
 ICE::Endpoint*
 RtpsUdpDataLink::get_ice_endpoint() const {
-  return this->impl().get_ice_endpoint();
+  return impl().get_ice_endpoint();
 }
 
 } // namespace DCPS

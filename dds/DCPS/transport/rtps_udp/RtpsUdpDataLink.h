@@ -281,9 +281,9 @@ private:
     ReaderInfoMap remote_readers_;
     RcHandle<SingleSendBuffer> send_buff_;
     SequenceNumber expected_;
+    typedef OPENDDS_SET(TransportQueueElement*) TqeSet;
     typedef OPENDDS_MULTIMAP(SequenceNumber, TransportQueueElement*) SnToTqeMap;
     SnToTqeMap elems_not_acked_;
-    SnToTqeMap to_deliver_;
     WeakRcHandle<RtpsUdpDataLink> link_;
     RepoId id_;
     bool durable_;
@@ -301,7 +301,7 @@ private:
     void gather_gaps_i(const RepoId& reader,
                        const DisjointSequence& gaps,
                        MetaSubmessageVec& meta_submessages);
-    void acked_by_all_helper_i(SnToTqeMap& to_deliver);
+    void acked_by_all_helper_i(TqeSet& to_deliver);
     void send_directed_nack_replies_i(const RepoId& readerId, ReaderInfo& reader, MetaSubmessageVec& meta_submessages);
     void process_requested_changes_i(DisjointSequence& requests, const ReaderInfo& reader);
     void send_nackfrag_replies_i(DisjointSequence& gaps, AddrSet& gap_recipients);
@@ -424,10 +424,16 @@ private:
 
   void deliver_held_data(const RepoId& readerId, WriterInfo& info, bool durable);
 
-  /// lock_ protects data structures accessed by both the transport's thread
-  /// (TransportReactorTask) and an external thread which is responsible
-  /// for adding/removing associations from the DataLink.
-  mutable ACE_Thread_Mutex lock_;
+  /// What was once a single lock for the whole datalink is now split between three (four including ch_lock_):
+  /// - readers_lock_ protects readers_, readers_of_writer_, pending_reliable_readers_, and interesting_writers_
+  ///   along with anything else that fits the 'reader side activity' of the datalink
+  /// - writers_lock_ protects writers_, heartbeat_counts_, best_effort_heartbeat_count_, and interesting_readers_
+  ///   along with anything else that fits the 'writers side activity' of the datalink
+  /// - locators_lock_ protects locators_ (and therefore calls to get_addresses_i())
+  ///   for both remote writers and remote readers
+  mutable ACE_Thread_Mutex readers_lock_;
+  mutable ACE_Thread_Mutex writers_lock_;
+  mutable ACE_Thread_Mutex locators_lock_;
 
   /// Extend the FragmentNumberSet to cover the fragments that are
   /// missing from our last known fragment to the extent
@@ -454,7 +460,7 @@ private:
 
     OPENDDS_VECTOR(RtpsWriter_rch) to_call;
     {
-      ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+      ACE_GUARD(ACE_Thread_Mutex, g, writers_lock_);
       const RtpsWriterMap::iterator rw = writers_.find(local);
       if (rw == writers_.end()) {
         return;
@@ -484,7 +490,7 @@ private:
     bool schedule_timer = false;
     OPENDDS_VECTOR(RtpsReader_rch) to_call;
     {
-      ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+      ACE_GUARD(ACE_Thread_Mutex, g, readers_lock_);
       if (local.entityId == ENTITYID_UNKNOWN) {
         typedef std::pair<RtpsReaderMultiMap::iterator, RtpsReaderMultiMap::iterator> RRMM_IterRange;
         for (RRMM_IterRange iters = readers_of_writer_.equal_range(src); iters.first != iters.second; ++iters.first) {
@@ -582,7 +588,8 @@ private:
   TransportQueueElement* customize_queue_element_non_reliable_i(TransportQueueElement* element,
                                                                 bool requires_inline_qos,
                                                                 MetaSubmessageVec& meta_submessages,
-                                                                bool& deliver_after_send);
+                                                                bool& deliver_after_send,
+                                                                ACE_Guard<ACE_Thread_Mutex>& guard);
 
   void send_heartbeats_manual_i(const TransportSendControlElement* tsce,
                                 MetaSubmessageVec& meta_submessages);
