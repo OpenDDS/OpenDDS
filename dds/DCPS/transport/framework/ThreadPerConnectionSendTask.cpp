@@ -50,23 +50,25 @@ int ThreadPerConnectionSendTask::add_request(SendStrategyOpType op,
 
   int result = -1;
   { // guard scope
-    GuardType guard(this->lock_);
+    GuardType guard(lock_);
 
-    if (this->shutdown_initiated_) {
+    if (shutdown_initiated_) {
       return -1;
     }
 
-    result = this->queue_.put(req.get());
+    result = queue_.put(req.get());
 
-    if (result == 0) {
-      this->work_available_.signal();
-      req.release();
-
-    } else {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ThreadPerConnectionSendTask::add %p\n"),
-                 ACE_TEXT("put")));
+    if (result == 0 && op == SEND_STOP) {
+      work_available_.signal();
     }
+  }
+
+  if (result == 0) {
+    req.release();
+  } else {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ThreadPerConnectionSendTask::add %p\n"),
+               ACE_TEXT("put")));
   }
 
   return result;
@@ -76,18 +78,18 @@ int ThreadPerConnectionSendTask::open(void*)
 {
   DBG_ENTRY("ThreadPerConnectionSendTask", "open");
 
-  GuardType guard(this->lock_);
+  GuardType guard(lock_);
 
   // We can assume that we are in the proper state to handle this open()
   // call as long as we haven't been open()'ed before.
-  if (this->opened_) {
+  if (opened_) {
     ACE_ERROR_RETURN((LM_ERROR,
                       "(%P|%t) ThreadPerConnectionSendTask failed to open.  "
                       "Task has previously been open()'ed.\n"),
                      -1);
   }
 
-  DirectPriorityMapper mapper(this->link_->transport_priority());
+  DirectPriorityMapper mapper(link_->transport_priority());
   int priority = mapper.thread_priority();
 
   long flags  = THR_NEW_LWP | THR_JOINABLE ;//|THR_SCOPE_PROCESS | THR_SCOPE_THREAD;
@@ -109,7 +111,7 @@ int ThreadPerConnectionSendTask::open(void*)
   }
 
   // Activate this task object with one worker thread.
-  if (this->activate(flags, 1, 0, priority) != 0) {
+  if (activate(flags, 1, 0, priority) != 0) {
     // Assumes that when activate returns non-zero return code that
     // no threads were activated.
     ACE_ERROR_RETURN((LM_ERROR,
@@ -119,7 +121,7 @@ int ThreadPerConnectionSendTask::open(void*)
   }
 
   // Now we have past the point where we can say we've been open()'ed before.
-  this->opened_ = true;
+  opened_ = true;
 
   return 0;
 }
@@ -128,7 +130,7 @@ int ThreadPerConnectionSendTask::svc()
 {
   DBG_ENTRY_LVL("ThreadPerConnectionSendTask", "svc", 6);
 
-  this->thr_id_ = ACE_OS::thr_self();
+  thr_id_ = ACE_OS::thr_self();
 
   // Ignore all signals to avoid
   //     ERROR: <something descriptive> Interrupted system call
@@ -137,20 +139,24 @@ int ThreadPerConnectionSendTask::svc()
   ACE_OS::sigfillset(&set);
   ACE_OS::thr_sigsetmask(SIG_SETMASK, &set, NULL);
 
+  SendRequest* req;
+  OPENDDS_VECTOR(SendRequest*) reqs;
+
+  ACE_Reverse_Lock<LockType> rev_lock(lock_);
+  GuardType guard(lock_);
+
   // Start the "GetWork-And-PerformWork" loop for the current worker thread.
-  while (!this->shutdown_initiated_) {
-    SendRequest* req;
-    {
-      GuardType guard(this->lock_);
+  while (!shutdown_initiated_) {
 
-      if (this->queue_.size() == 0) {
-        this->work_available_.wait();
-      }
+    if (queue_.size() == 0) {
+      work_available_.wait();
+    }
 
-      if (this->shutdown_initiated_) {
-        break;
-      }
+    if (shutdown_initiated_) {
+      break;
+    }
 
+    while (queue_.size() != 0 && (reqs.empty() || reqs.back()->op_ != SEND_STOP)) {
       req = queue_.get();
 
       if (req == 0) {
@@ -162,13 +168,20 @@ int ThreadPerConnectionSendTask::svc()
         //  ACE_TEXT("dequeue_head")));
         continue;
       }
+      reqs.push_back(req);
     }
 
-    this->execute(*req);
-    delete req;
+    ACE_Guard<ACE_Reverse_Lock<LockType> > rev_guard(rev_lock);
+
+    if (!reqs.empty() && reqs.back()->op_ == SEND_STOP) {
+      for (size_t i = 0; i < reqs.size(); ++i) {
+        execute(*reqs[i]);
+        delete reqs[i];
+      }
+      reqs.clear();
+    }
   }
 
-  // This will never get executed.
   return 0;
 }
 
@@ -181,19 +194,19 @@ int ThreadPerConnectionSendTask::close(u_long flag)
   }
 
   {
-    GuardType guard(this->lock_);
+    GuardType guard(lock_);
 
-    if (this->shutdown_initiated_) {
+    if (shutdown_initiated_) {
       return 0;
     }
 
     // Set the shutdown flag to true.
-    this->shutdown_initiated_ = true;
-    this->work_available_.signal();
+    shutdown_initiated_ = true;
+    work_available_.broadcast();
   }
 
-  if (this->opened_ && !ACE_OS::thr_equal(this->thr_id_, ACE_OS::thr_self())) {
-    this->wait();
+  if (opened_ && !ACE_OS::thr_equal(thr_id_, ACE_OS::thr_self())) {
+    wait();
   }
 
   return 0;
@@ -204,12 +217,12 @@ ThreadPerConnectionSendTask::remove_sample(const DataSampleElement* element)
 {
   DBG_ENTRY("ThreadPerConnectionSendTask", "remove_sample");
 
-  GuardType guard(this->lock_);
-
   ACE_Message_Block* payload = element->get_sample()->cont();
   ThreadPerConRemoveVisitor visitor(payload);
 
-  this->queue_.accept_visitor(visitor);
+  GuardType guard(lock_);
+
+  queue_.accept_visitor(visitor);
 
   return visitor.status();
 }
@@ -222,17 +235,17 @@ void ThreadPerConnectionSendTask::execute(SendRequest& req)
 
   switch (req.op_) {
   case SEND_START:
-    this->link_->send_start_i();
+    link_->send_start_i();
     break;
   case SEND:
-    this->link_->send_i(req.element_);
+    link_->send_i(req.element_);
     break;
   case SEND_STOP:
     //DataLink::send_stop_i expects the RepoId of the message sender, however, in ThreadPerConnectionSendTask
     //the control element will be a null element with only the op_ set.  Thus pass in GUID_UNKNOWN which will
     //allow send_stop to call send_delayed_notifications without a match.  In the case of ThreadPerConnectionSendTask
     //this is allowable because only one thread will be managing the sending thus no deadlock down in send_delayed_notifications()
-    this->link_->send_stop_i(GUID_UNKNOWN);
+    link_->send_stop_i(GUID_UNKNOWN);
     break;
   default:
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ThreadPerConnectionSendTask::execute unknown command %d\n",
