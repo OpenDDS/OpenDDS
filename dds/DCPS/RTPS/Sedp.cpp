@@ -3723,6 +3723,8 @@ Sedp::write_dcps_participant_secure(const Security::SPDPdiscoveredParticipantDat
 DDS::ReturnCode_t
 Sedp::write_dcps_participant_dispose(const RepoId& part)
 {
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::write_dcps_participant_dispose ")
+    ACE_TEXT("calling dcps_participant_secure_writer_.write_unregister_dispose\n")));
   return dcps_participant_secure_writer_.write_unregister_dispose(part, PID_PARTICIPANT_GUID);
 }
 #endif
