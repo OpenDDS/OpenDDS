@@ -532,7 +532,7 @@ OpenDDS::DCPS::TcpConnection::active_establishment(bool initiate_connect)
 /// previous lost and new association is added. The connector side needs to try to
 /// actively reconnect to remote.
 int
-OpenDDS::DCPS::TcpConnection::reconnect(bool on_new_association)
+OpenDDS::DCPS::TcpConnection::reconnect()
 {
   DBG_ENTRY_LVL("TcpConnection","reconnect",6);
   if (DCPS_debug_level >= 1) {
@@ -542,17 +542,9 @@ OpenDDS::DCPS::TcpConnection::reconnect(bool on_new_association)
                this->remote_address_.get_port_number()));
   }
 
-  if (on_new_association) {
-    if (DCPS_debug_level >= 1) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpConnection::reconnect on new association\n"));
-    }
-    return this->active_reconnect_on_new_association();
-  }
-
-  // If on_new_association is false, it's called by the reconnect task.
   // We need make sure if the link release is pending. If does, do
   // not try to reconnect.
-  else if (!this->link_->is_release_pending()) {
+  if (!this->link_->is_release_pending()) {
     if (DCPS_debug_level >= 1) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpConnection::reconnect release not currently pending\n"));
     }
@@ -586,27 +578,6 @@ OpenDDS::DCPS::TcpConnection::active_open()
   return active_establishment(false /* !initiate_connect */);
 }
 
-int
-OpenDDS::DCPS::TcpConnection::active_reconnect_on_new_association()
-{
-  DBG_ENTRY_LVL("TcpConnection","active_reconnect_on_new_association",6);
-  GuardType guard(this->reconnect_lock_);
-  if (this->shutdown_)
-    return -1;
-
-  if (this->connected_ == true)
-    return 0;
-
-  else if (this->active_establishment() == 0) {
-    this->reconnect_state_ = INIT_STATE;
-    TcpSendStrategy_rch send_strategy = this->send_strategy();
-    if (send_strategy)
-      send_strategy->resume_send();
-    return 0;
-  }
-
-  return -1;
-}
 
 // This method is called on acceptor side when the lost connection is detected.
 // A timer is scheduled to check if a new connection is created within the

@@ -91,7 +91,7 @@ public:
 
   void set_sock_options(const TcpInst* tcp_config);
 
-  int reconnect(bool on_new_association = false);
+  int reconnect();
 
   /// Return true if the object represents the connector side, otherwise
   /// it's the acceptor side. The acceptor/connector role is not changed
@@ -148,8 +148,6 @@ private:
 
   int active_reconnect_i();
   int passive_reconnect_i();
-  int active_reconnect_on_new_association();
-  void set_passive_reconnect_timer_id(long id);
 
   /// During the connection setup phase, the passive side sets passive_setup_,
   /// redirecting handle_input() events here (there is no recv strategy yet).
