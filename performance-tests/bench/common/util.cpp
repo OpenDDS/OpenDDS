@@ -105,7 +105,7 @@ std::vector<std::string> get_dir_contents(const std::string& path)
   return rv;
 }
 
-bool file_exits(const std::string& path)
+bool file_exists(const std::string& path)
 {
   ACE_stat stat_result;
   if (ACE_OS::stat(path.c_str(), &stat_result) == -1) {

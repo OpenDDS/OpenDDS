@@ -18,9 +18,13 @@ Bench_Builder_Export extern const TimeStamp ZERO;
 
 Bench_Builder_Export TimeStamp get_time();
 
+Bench_Builder_Export TimeStamp from_seconds(int32_t sec);
+
 Bench_Builder_Export double to_seconds_double(const TimeStamp& ts);
 
 Bench_Builder_Export std::chrono::milliseconds get_duration(const TimeStamp& ts);
+
+Bench_Builder_Export TimeStamp operator+(const TimeStamp& lhs, const TimeStamp& rhs);
 
 Bench_Builder_Export TimeStamp operator-(const TimeStamp& lhs, const TimeStamp& rhs);
 
