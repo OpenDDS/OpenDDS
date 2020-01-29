@@ -144,7 +144,8 @@ private:
   /// identify ourselves to the remote side.
   /// Note this method is not thread protected. The caller need acquire
   /// the reconnect_lock_ before calling this function.
-  int active_establishment(bool initiate_connect = true);
+  int active_establishment();
+  int on_active_connection_established();
 
   int active_reconnect_i();
   int passive_reconnect_i();

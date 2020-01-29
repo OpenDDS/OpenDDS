@@ -442,38 +442,26 @@ OpenDDS::DCPS::TcpConnection::set_sock_options(const TcpInst* tcp_config)
 }
 
 int
-OpenDDS::DCPS::TcpConnection::active_establishment(bool initiate_connect)
+OpenDDS::DCPS::TcpConnection::active_establishment()
 {
   DBG_ENTRY_LVL("TcpConnection","active_establishment",6);
-
-  // Safety check - This should not happen since is_connector_ defaults to
-  // true and the role in a connection connector is not changed when reconnecting.
-  if (this->is_connector_ == false) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      "(%P|%t) ERROR: Failed to connect because it's previously an acceptor.\n"),
-                     -1);
-  }
-
-  if (this->shutdown_)
-    return -1;
 
   // Now use a connector object to establish the connection.
   ACE_SOCK_Connector connector;
 
-  if (initiate_connect && connector.connect(this->peer(), remote_address_) != 0) {
+  if (connector.connect(this->peer(), remote_address_) != 0) {
 
     ACE_DEBUG((LM_DEBUG,
                       ACE_TEXT("(%P|%t) DBG: Failed to connect. this->shutdown_=%d %p\n%C"),
                       int(this->shutdown_), ACE_TEXT("connect"), this->tcp_config_->dump_to_str().c_str()));
                       return -1;
 
-  } else {
-    this->connected_ = true;
-    const std::string remote_host = this->remote_address_.get_host_addr();
-    VDBG((LM_DEBUG, "(%P|%t) DBG:   active_establishment(%C:%d->%C:%d)\n",
-          this->local_address_.get_host_addr(), this->local_address_.get_port_number(),
-          remote_host.c_str(), this->remote_address_.get_port_number()));
   }
+  return 0;
+}
+
+int
+OpenDDS::DCPS::TcpConnection::on_active_connection_established() {
 
   // Set the DiffServ codepoint according to the priority value.
   DirectPriorityMapper mapper(this->transport_priority_);
@@ -575,7 +563,13 @@ OpenDDS::DCPS::TcpConnection::active_open()
     return 0;
   }
 
-  return active_establishment(false /* !initiate_connect */);
+  this->connected_ = true;
+  const std::string remote_host = this->remote_address_.get_host_addr();
+  VDBG((LM_DEBUG, "(%P|%t) DBG:   active_open(%C:%d->%C:%d)\n",
+        this->local_address_.get_host_addr(), this->local_address_.get_port_number(),
+        remote_host.c_str(), this->remote_address_.get_port_number()));
+
+  return on_active_connection_established();
 }
 
 
@@ -649,9 +643,6 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
   }
 
   if (this->reconnect_state_ == INIT_STATE) {
-    // Suspend send once.
-    TcpSendStrategy_rch send_strategy = this->send_strategy();
-
     if (this->shutdown_)
       return -1;
 
@@ -666,11 +657,8 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
     double retry_delay_msec = this->tcp_config_->conn_retry_initial_delay_;
     int ret = -1;
 
-    for (int i = 0; i < this->tcp_config_->conn_retry_attempts_; ++i) {
-      ret = this->active_establishment();
-
-      if (this->shutdown_)
-        break;
+    for (int i = 0; i < this->tcp_config_->conn_retry_attempts_ && !this->shutdown_; ++i) {
+      ret = this->active_establishment() ;
 
       if (ret == -1) {
         ACE_OS::sleep(TimeDuration::from_msec(static_cast<ACE_UINT64>(retry_delay_msec)).value());
@@ -697,6 +685,7 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
 
       this->reconnect_state_ = LOST_STATE;
       this->link_->notify(DataLink::LOST);
+      TcpSendStrategy_rch send_strategy = this->send_strategy();
       if (send_strategy)
         send_strategy->terminate_send();
 
@@ -983,6 +972,10 @@ int OpenDDS::DCPS::TcpConnection::handle_exception(ACE_HANDLE) {
 
   if (shutdown_) {
     return 0;
+  }
+
+  if (on_active_connection_established() == -1) {
+    return -1;
   }
 
   int result = reactor()->register_handler(this, READ_MASK);
