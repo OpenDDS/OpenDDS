@@ -195,7 +195,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   DDS::DomainParticipantQos participant_qos;
   factory->get_default_participant_qos(participant_qos);
-  participant_qos.user_data.value.length(user_data.length());
+  participant_qos.user_data.value.length(static_cast<CORBA::ULong>(user_data.length()));
   std::memcpy(participant_qos.user_data.value.get_buffer(), user_data.data(), user_data.length());
 
   DDS::PropertySeq& properties = participant_qos.property.value;
