@@ -16,7 +16,6 @@
 #include "TcpConnection_rch.h"
 #include "TcpSendStrategy_rch.h"
 #include "TcpReceiveStrategy_rch.h"
-#include "TcpReconnectTask.h"
 #include "TcpTransport_rch.h"
 
 #include "dds/DCPS/RcObject.h"
@@ -45,6 +44,7 @@ public:
     INIT_STATE,
     LOST_STATE,
     RECONNECTED_STATE,
+    ACTIVE_RECONNECTING_STATE,
     PASSIVE_WAITING_STATE,
     PASSIVE_TIMEOUT_CALLED_STATE
   };
@@ -65,6 +65,9 @@ public:
   /// The local address is sent to the remote (passive) side to
   /// identify ourselves to the remote side.
   int active_open();
+  int active_reconnect_open();
+
+  int passive_open(void*);
 
   /// This will be called by the DataLink (that "owns" us) when
   /// the TcpTransport has been told to shutdown(), or when
@@ -87,19 +90,13 @@ public:
 
   virtual int close(u_long);
   virtual int handle_close(ACE_HANDLE, ACE_Reactor_Mask);
-  virtual int handle_exception(ACE_HANDLE /*fd*/);
 
   void set_sock_options(const TcpInst* tcp_config);
-
-  int reconnect();
 
   /// Return true if the object represents the connector side, otherwise
   /// it's the acceptor side. The acceptor/connector role is not changed
   /// when re-establishing the connection.
   bool is_connector() const;
-
-  /// Return true if connection is connected.
-  bool is_connected() const;
 
   void transfer(TcpConnection* connection);
 
@@ -139,16 +136,11 @@ public:
 
 private:
 
-  /// Attempt an active connection establishment to the remote address.
-  /// The local address is sent to the remote (passive) side to
-  /// identify ourselves to the remote side.
-  /// Note this method is not thread protected. The caller need acquire
-  /// the reconnect_lock_ before calling this function.
-  int active_establishment();
+  /// Handle the logic after an active connection has been established
   int on_active_connection_established();
 
-  int active_reconnect_i();
-  int passive_reconnect_i();
+  void active_reconnect_i(const TcpDataLink_rch& link);
+  void passive_reconnect_i();
 
   /// During the connection setup phase, the passive side sets passive_setup_,
   /// redirecting handle_input() events here (there is no recv strategy yet).
@@ -156,19 +148,11 @@ private:
 
   const std::string& config_name() const;
 
-  void spawn_reconnect_thread();
-
   typedef ACE_SYNCH_MUTEX     LockType;
   typedef ACE_Guard<LockType> GuardType;
 
-  /// Lock to avoid the reconnect() called multiple times when
-  /// both send() and recv() fail.
+  /// Lock to synchronize state between reactor and non-reactor threads.
   LockType reconnect_lock_;
-
-  /// Flag indicates if connected or disconnected. It's set to true
-  /// when actively connecting or passively accepting succeeds and set
-  /// to false whenever the peer stream is closed.
-  ACE_Atomic_Op<ACE_SYNCH_MUTEX, bool> connected_;
 
   /// Flag indicate this connection object is the connector or acceptor.
   bool is_connector_;
@@ -191,9 +175,6 @@ private:
   /// The state indicates each step of the reconnecting.
   ReconnectState reconnect_state_;
 
-  /// Last time the connection is re-established.
-  MonotonicTimePoint last_reconnect_attempted_;
-
   /// TRANSPORT_PRIORITY.value policy value.
   Priority transport_priority_;
 
@@ -206,8 +187,7 @@ private:
 
   /// Small unique identifying value.
   std::size_t id_;
-
-  RcHandle<TcpReconnectTask> reconnect_task_;
+  int conn_retry_counter_;
 
   /// Get name of the current reconnect state as a string.
   const char* reconnect_state_string() const;
