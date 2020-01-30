@@ -87,9 +87,6 @@ OpenDDS::DCPS::TcpConnection::~TcpConnection()
   DBG_ENTRY_LVL("TcpConnection","~TcpConnection",6);
   shutdown();
   if (!reconnect_task_->is_task_thread()) {
-    if (impl_) {
-      impl_->remove_reconnect_task(reconnect_task_);
-    }
     reconnect_task_->wait();
   }
 }
@@ -943,7 +940,6 @@ OpenDDS::DCPS::TcpConnection::spawn_reconnect_thread()
 
   GuardType guard(reconnect_lock_);
   if (!shutdown_ && impl_) {
-    impl_->add_reconnect_task(reconnect_task_);
     TcpConnection_rch con(this, inc_count());
     reconnect_task_->reconnect(con);
   }

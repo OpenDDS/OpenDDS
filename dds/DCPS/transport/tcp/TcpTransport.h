@@ -57,9 +57,6 @@ public:
   virtual void unbind_link(DataLink* link);
   TcpInst& config() const;
 
-  void add_reconnect_task(RcHandle<TcpReconnectTask> task);
-  void remove_reconnect_task(RcHandle<TcpReconnectTask> task);
-
 private:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
                                                const ConnectionAttribs& attribs,
@@ -159,10 +156,6 @@ private:
   /// This protects the connections_ and the pending_connections_
   /// data members.
   LockType connections_lock_;
-
-  typedef OPENDDS_SET( RcHandle<TcpReconnectTask> ) RC_TASK_SET;
-  RC_TASK_SET rc_tasks_;
-  LockType rc_tasks_lock_;
 };
 
 } // namespace DCPS

@@ -773,27 +773,6 @@ TcpTransport::unbind_link(DataLink* link)
   }
 }
 
-void
-TcpTransport::add_reconnect_task(RcHandle<TcpReconnectTask> task) {
-  GuardType connections_guard(rc_tasks_lock_);
-  rc_tasks_.insert(task);
-}
-
-void
-TcpTransport::remove_reconnect_task(RcHandle<TcpReconnectTask> task) {
-  GuardType connections_guard(rc_tasks_lock_);
-  RC_TASK_SET::iterator it = rc_tasks_.begin();
-  while (it != rc_tasks_.end()) {
-    if (it->get() == task.get()) {
-      rc_tasks_.erase(it);
-      it = rc_tasks_.begin();
-    } else {
-      ++it;
-    }
-  }
-}
-
-
 }
 }
 
