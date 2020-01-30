@@ -138,6 +138,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
   Bench::WorkerConfig config;
 
+  config.create_time = ZERO;
   config.enable_time = ZERO;
   config.start_time = ZERO;
   config.stop_time = ZERO;
@@ -216,6 +217,18 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     std::string line;
     std::condition_variable cv;
     std::mutex cv_mutex;
+
+    if (!(config.create_time == ZERO)) {
+      if (config.create_time < ZERO) {
+        auto dur = -get_duration(config.create_time);
+        std::unique_lock<std::mutex> lock(cv_mutex);
+        while (cv.wait_for(lock, dur) != std::cv_status::timeout) {}
+      } else {
+        auto timeout_time = std::chrono::system_clock::time_point(get_duration(config.create_time));
+        std::unique_lock<std::mutex> lock(cv_mutex);
+        while (cv.wait_until(lock, timeout_time) != std::cv_status::timeout) {}
+      }
+    }
 
     Log::log() << "Beginning process construction / entity creation." << std::endl;
 

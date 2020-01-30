@@ -21,6 +21,7 @@
 #include <util.h>
 #include <json_conversion.h>
 
+#include "ScenarioOverrides.h"
 #include "ScenarioManager.h"
 
 using namespace Bench;
@@ -86,6 +87,16 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   std::string result_id;
   bool overwrite_result = false;
 
+  ScenarioOverrides overrides;
+  {
+    char host[256];
+    ACE_OS::hostname(host, sizeof(host));
+    pid_t pid = ACE_OS::getpid();
+    std::stringstream ss;
+    ss << "_" << host << "_" << pid << std::flush;
+    overrides.bench_partition_suffix = ss.str();
+  }
+
   const char* usage = "usage: test_controller [-h|--help] | TEST_CONTEXT SCENARIO_ID [OPTIONS...]";
   try {
     for (int i = 1; i < argc; i++) {
@@ -144,6 +155,18 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         result_id = get_option_argument(i, argc, argv);
       } else if (!ACE_OS::strcmp(argument, "--overwrite-result")) {
         overwrite_result = true;
+      } else if (!ACE_OS::strcmp(argument, "--override-bench-partition-suffix")) {
+        overrides.bench_partition_suffix = get_option_argument(i, argc, argv);
+      } else if (!ACE_OS::strcmp(argument, "--override-create-time")) {
+        overrides.create_time_delta = get_option_argument_uint(i, argc, argv);
+      } else if (!ACE_OS::strcmp(argument, "--override-enable-time")) {
+        overrides.enable_time_delta = get_option_argument_uint(i, argc, argv);
+      } else if (!ACE_OS::strcmp(argument, "--override-start-time")) {
+        overrides.start_time_delta = get_option_argument_uint(i, argc, argv);
+      } else if (!ACE_OS::strcmp(argument, "--override-stop-time")) {
+        overrides.stop_time_delta = get_option_argument_uint(i, argc, argv);
+      } else if (!ACE_OS::strcmp(argument, "--override-destruction-time")) {
+        overrides.destruction_time_delta = get_option_argument_uint(i, argc, argv);
       } else if (test_context_path.empty() && argument[0] != '-') {
         test_context_path = argument;
       } else if (scenario_id.empty() && argument[0] != '-') {
@@ -241,7 +264,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   try {
     DdsEntities dds_entities(dpf, domain);
-    ScenarioManager scenario_manager(bench_root, test_context_path, dds_entities);
+    ScenarioManager scenario_manager(bench_root, test_context_path, overrides, dds_entities);
 
     // Part 1: Get What Needs to be Broadcast
     AllocatedScenario allocated_scenario;

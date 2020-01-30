@@ -5,6 +5,7 @@
 #include <map>
 #include <vector>
 
+#include "ScenarioOverrides.h"
 #include "DdsEntities.h"
 
 /**
@@ -16,6 +17,7 @@ public:
   ScenarioManager(
     const std::string& bench_root,
     const std::string& test_context,
+    const ScenarioOverrides& overrides,
     DdsEntities& dds_entities);
 
   ~ScenarioManager();
@@ -41,8 +43,11 @@ public:
   std::vector<Bench::WorkerReport> execute(const Bench::TestController::AllocatedScenario& allocated_scenario);
 
 private:
+  void customize_configs(std::map<std::string, std::string>& worker_configs);
+
   const std::string bench_root_;
   const std::string test_context_;
+  ScenarioOverrides overrides_;
   DdsEntities& dds_entities_;
 };
 

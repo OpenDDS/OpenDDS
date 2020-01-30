@@ -52,6 +52,7 @@ module Bench {
 // ---
 
   struct WorkerConfig {
+    Builder::TimeStamp create_time;
     Builder::TimeStamp enable_time;
     Builder::TimeStamp start_time;
     Builder::TimeStamp stop_time;
