@@ -547,7 +547,7 @@ sub process {
   my $basename = File::Basename::basename ($executable);
   my $dirname = File::Basename::dirname ($executable). '/';
   my $test_executable = $dirname.$subdir.$basename;
-  if (!(-e $test_executable) && !(-e "$test_executable.exe")) {
+  if (!(-e $test_executable) && !(-e "$test_executable.exe") && !(-e $executable) && !(-e "$executable.exe")) {
     print STDERR "ERROR: executable \"$executable\" does not exist; subdir: $subdir; basename: $basename ; dirname: $dirname\n";
     $self->{status} = -1;
     return;
