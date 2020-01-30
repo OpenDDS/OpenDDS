@@ -139,7 +139,7 @@ RtpsUdpTransport::connect_datalink(const RemoteTransport& remote,
 TransportImpl::AcceptConnectResult
 RtpsUdpTransport::accept_datalink(const RemoteTransport& remote,
                                   const ConnectionAttribs& attribs,
-                                  const TransportClient_rch&)
+                                  const TransportClient_rch& client)
 {
   GuardThreadType guard_links(links_lock_);
 
@@ -158,7 +158,22 @@ RtpsUdpTransport::accept_datalink(const RemoteTransport& remote,
   use_datalink(attribs.local_id_, remote.repo_id_, remote.blob_,
                attribs.local_reliable_, remote.reliable_,
                attribs.local_durable_, remote.durable_);
-  return AcceptConnectResult(link);
+
+  if (0 == std::memcmp(attribs.local_id_.guidPrefix, remote.repo_id_.guidPrefix,
+                       sizeof(GuidPrefix_t))) {
+    return AcceptConnectResult(link); // "loopback" connection return link right away
+  }
+
+  if (link->check_handshake_complete(attribs.local_id_, remote.repo_id_)){
+    return AcceptConnectResult(link);
+  }
+
+  link->add_on_start_callback(client, remote.repo_id_);
+
+  GuardType guard(connections_lock_);
+  add_pending_connection(client, link);
+  VDBG_LVL((LM_DEBUG, "(%P|%t) RtpsUdpTransport::accept_datalink pending.\n"), 2);
+  return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
 }
 
 
