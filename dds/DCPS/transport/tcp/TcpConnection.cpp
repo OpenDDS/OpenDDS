@@ -87,9 +87,6 @@ OpenDDS::DCPS::TcpConnection::~TcpConnection()
   DBG_ENTRY_LVL("TcpConnection","~TcpConnection",6);
   shutdown();
   if (!reconnect_task_->is_task_thread()) {
-    if (impl_) {
-      impl_->remove_reconnect_task(reconnect_task_);
-    }
     reconnect_task_->wait();
   }
 }
@@ -366,10 +363,20 @@ OpenDDS::DCPS::TcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
                this->remote_address_.get_port_number()));
   }
 
-  TcpReceiveStrategy_rch receive_strategy = this->receive_strategy();
+  TcpDataLink_rch link;
+
+  {
+    GuardType guard(reconnect_lock_);
+    link = link_;
+  }
+
+  if (!link) return 0;
+
+  TcpReceiveStrategy_rch receive_strategy = link->receive_strategy();
+  TcpSendStrategy_rch send_strategy = link->send_strategy();
+
   bool graceful = receive_strategy && receive_strategy->gracefully_disconnected();
 
-  TcpSendStrategy_rch send_strategy = this->send_strategy();
   if (send_strategy) {
     if (graceful) {
       send_strategy->terminate_send();
@@ -381,7 +388,7 @@ OpenDDS::DCPS::TcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
   this->disconnect();
 
   if (graceful) {
-    this->link_->notify(DataLink::DISCONNECTED);
+    link->notify(DataLink::DISCONNECTED);
   } else if (this->is_connector_) {
     this->spawn_reconnect_thread();
   } else {
@@ -442,38 +449,26 @@ OpenDDS::DCPS::TcpConnection::set_sock_options(const TcpInst* tcp_config)
 }
 
 int
-OpenDDS::DCPS::TcpConnection::active_establishment(bool initiate_connect)
+OpenDDS::DCPS::TcpConnection::active_establishment()
 {
   DBG_ENTRY_LVL("TcpConnection","active_establishment",6);
-
-  // Safety check - This should not happen since is_connector_ defaults to
-  // true and the role in a connection connector is not changed when reconnecting.
-  if (this->is_connector_ == false) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      "(%P|%t) ERROR: Failed to connect because it's previously an acceptor.\n"),
-                     -1);
-  }
-
-  if (this->shutdown_)
-    return -1;
 
   // Now use a connector object to establish the connection.
   ACE_SOCK_Connector connector;
 
-  if (initiate_connect && connector.connect(this->peer(), remote_address_) != 0) {
+  if (connector.connect(this->peer(), remote_address_) != 0) {
 
     ACE_DEBUG((LM_DEBUG,
                       ACE_TEXT("(%P|%t) DBG: Failed to connect. this->shutdown_=%d %p\n%C"),
                       int(this->shutdown_), ACE_TEXT("connect"), this->tcp_config_->dump_to_str().c_str()));
                       return -1;
 
-  } else {
-    this->connected_ = true;
-    const std::string remote_host = this->remote_address_.get_host_addr();
-    VDBG((LM_DEBUG, "(%P|%t) DBG:   active_establishment(%C:%d->%C:%d)\n",
-          this->local_address_.get_host_addr(), this->local_address_.get_port_number(),
-          remote_host.c_str(), this->remote_address_.get_port_number()));
   }
+  return 0;
+}
+
+int
+OpenDDS::DCPS::TcpConnection::on_active_connection_established() {
 
   // Set the DiffServ codepoint according to the priority value.
   DirectPriorityMapper mapper(this->transport_priority_);
@@ -532,7 +527,7 @@ OpenDDS::DCPS::TcpConnection::active_establishment(bool initiate_connect)
 /// previous lost and new association is added. The connector side needs to try to
 /// actively reconnect to remote.
 int
-OpenDDS::DCPS::TcpConnection::reconnect(bool on_new_association)
+OpenDDS::DCPS::TcpConnection::reconnect()
 {
   DBG_ENTRY_LVL("TcpConnection","reconnect",6);
   if (DCPS_debug_level >= 1) {
@@ -542,17 +537,9 @@ OpenDDS::DCPS::TcpConnection::reconnect(bool on_new_association)
                this->remote_address_.get_port_number()));
   }
 
-  if (on_new_association) {
-    if (DCPS_debug_level >= 1) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpConnection::reconnect on new association\n"));
-    }
-    return this->active_reconnect_on_new_association();
-  }
-
-  // If on_new_association is false, it's called by the reconnect task.
   // We need make sure if the link release is pending. If does, do
   // not try to reconnect.
-  else if (!this->link_->is_release_pending()) {
+  if (!this->link_->is_release_pending()) {
     if (DCPS_debug_level >= 1) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpConnection::reconnect release not currently pending\n"));
     }
@@ -583,30 +570,15 @@ OpenDDS::DCPS::TcpConnection::active_open()
     return 0;
   }
 
-  return active_establishment(false /* !initiate_connect */);
+  this->connected_ = true;
+  const std::string remote_host = this->remote_address_.get_host_addr();
+  VDBG((LM_DEBUG, "(%P|%t) DBG:   active_open(%C:%d->%C:%d)\n",
+        this->local_address_.get_host_addr(), this->local_address_.get_port_number(),
+        remote_host.c_str(), this->remote_address_.get_port_number()));
+
+  return on_active_connection_established();
 }
 
-int
-OpenDDS::DCPS::TcpConnection::active_reconnect_on_new_association()
-{
-  DBG_ENTRY_LVL("TcpConnection","active_reconnect_on_new_association",6);
-  GuardType guard(this->reconnect_lock_);
-  if (this->shutdown_)
-    return -1;
-
-  if (this->connected_ == true)
-    return 0;
-
-  else if (this->active_establishment() == 0) {
-    this->reconnect_state_ = INIT_STATE;
-    TcpSendStrategy_rch send_strategy = this->send_strategy();
-    if (send_strategy)
-      send_strategy->resume_send();
-    return 0;
-  }
-
-  return -1;
-}
 
 // This method is called on acceptor side when the lost connection is detected.
 // A timer is scheduled to check if a new connection is created within the
@@ -678,9 +650,6 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
   }
 
   if (this->reconnect_state_ == INIT_STATE) {
-    // Suspend send once.
-    TcpSendStrategy_rch send_strategy = this->send_strategy();
-
     if (this->shutdown_)
       return -1;
 
@@ -695,11 +664,8 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
     double retry_delay_msec = this->tcp_config_->conn_retry_initial_delay_;
     int ret = -1;
 
-    for (int i = 0; i < this->tcp_config_->conn_retry_attempts_; ++i) {
-      ret = this->active_establishment();
-
-      if (this->shutdown_)
-        break;
+    for (int i = 0; i < this->tcp_config_->conn_retry_attempts_ && !this->shutdown_; ++i) {
+      ret = this->active_establishment() ;
 
       if (ret == -1) {
         ACE_OS::sleep(TimeDuration::from_msec(static_cast<ACE_UINT64>(retry_delay_msec)).value());
@@ -726,6 +692,7 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
 
       this->reconnect_state_ = LOST_STATE;
       this->link_->notify(DataLink::LOST);
+      TcpSendStrategy_rch send_strategy = this->send_strategy();
       if (send_strategy)
         send_strategy->terminate_send();
 
@@ -781,6 +748,25 @@ OpenDDS::DCPS::TcpConnection::handle_timeout(const ACE_Time_Value &,
                this->config_name().c_str(),
                this->remote_address_.get_host_addr(),
                this->remote_address_.get_port_number()));
+    break;
+
+  case INIT_STATE: {
+    // couldn't initialize connection successfully.
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpConnection::handle_timeout, failed connection initialization due to timeout.: %C to %C:%d.\n",
+               this->config_name().c_str(),
+               this->remote_address_.get_host_addr(),
+               this->remote_address_.get_port_number()));
+
+    // build key and remove from service
+    TcpTransport& transport = static_cast<TcpTransport&>(link_->impl());
+
+    const bool is_loop(local_address_ == remote_address_);
+    const PriorityKey key(transport_priority_, remote_address_,
+                          is_loop, true /* active */);
+
+    transport.async_connect_failed(key);
+    }
+
     break;
 
   default :
@@ -973,7 +959,6 @@ OpenDDS::DCPS::TcpConnection::spawn_reconnect_thread()
 
   GuardType guard(reconnect_lock_);
   if (!shutdown_ && impl_) {
-    impl_->add_reconnect_task(reconnect_task_);
     TcpConnection_rch con(this, inc_count());
     reconnect_task_->reconnect(con);
   }
@@ -1012,6 +997,10 @@ int OpenDDS::DCPS::TcpConnection::handle_exception(ACE_HANDLE) {
 
   if (shutdown_) {
     return 0;
+  }
+
+  if (on_active_connection_established() == -1) {
+    return -1;
   }
 
   int result = reactor()->register_handler(this, READ_MASK);
