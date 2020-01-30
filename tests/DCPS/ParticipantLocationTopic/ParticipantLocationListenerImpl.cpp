@@ -132,9 +132,9 @@ bool ParticipantLocationListenerImpl::check(bool no_ice)
     OpenDDS::DCPS::LOCATION_RELAY;
 
   std::cout << id << " expecting "
-            << ((expected & OpenDDS::DCPS::LOCATION_LOCAL) ? " LOCAL" : "")
+            << " LOCAL"
             << ((expected & OpenDDS::DCPS::LOCATION_ICE) ? " ICE" : "")
-            << ((expected & OpenDDS::DCPS::LOCATION_RELAY) ? " RELAY" : "")
+            << " RELAY"
             << std::endl;
 
   bool found = false;
