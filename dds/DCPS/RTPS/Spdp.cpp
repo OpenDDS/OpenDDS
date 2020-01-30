@@ -1791,12 +1791,23 @@ Spdp::SpdpTransport::close()
     ICE::Agent::instance()->remove_endpoint(endpoint);
   }
 
-  auth_deadline_processor_->cancel_and_wait();
-  auth_resend_processor_->cancel_and_wait();
+  if (auth_deadline_processor_) {
+    auth_deadline_processor_->cancel_and_wait();
+  }
+  if (auth_resend_processor_) {
+    auth_resend_processor_->cancel_and_wait();
+  }
 #endif
-  relay_sender_->disable_and_wait();
-  relay_beacon_->disable_and_wait();
-  local_sender_->disable_and_wait();
+  if (relay_sender_) {
+    relay_sender_->disable_and_wait();
+  }
+  if (relay_beacon_) {
+    relay_beacon_->disable_and_wait();
+  }
+  if (local_sender_) {
+    local_sender_->disable_and_wait();
+  }
+
   ACE_Reactor* reactor = reactor_task_.get_reactor();
   const ACE_Reactor_Mask mask =
     ACE_Event_Handler::READ_MASK | ACE_Event_Handler::DONT_CALL;
