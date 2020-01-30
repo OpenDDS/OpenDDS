@@ -2750,7 +2750,7 @@ void Spdp::SpdpTransport::send_relay_beacon(const MonotonicTimePoint& /*now*/)
     return;
   }
 
-  static const PadSubmessage pad = { PAD, FLAG_E, 0 };
+  static const PadSubmessage pad = { { PAD, FLAG_E, 0 } };
 
   wbuff_.reset();
   DCPS::Serializer ser(&wbuff_, false, DCPS::Serializer::ALIGN_CDR);
