@@ -20,9 +20,11 @@ using namespace Bench::NodeController;
 ScenarioManager::ScenarioManager(
   const std::string& bench_root,
   const std::string& test_context,
+  const ScenarioOverrides& overrides,
   DdsEntities& dds_entities)
 : bench_root_(bench_root)
 , test_context_(test_context)
+, overrides_(overrides)
 , dds_entities_(dds_entities)
 {
 }
@@ -109,9 +111,65 @@ namespace {
     return new_worker_total;
   }
 
-  void customize_configs(std::map<std::string, std::string>& worker_configs) {
-    Builder::TimeStamp now = Builder::get_time();
-    Builder::TimeStamp create_time = now + Builder::from_seconds(3);
+}
+
+void ScenarioManager::customize_configs(std::map<std::string, std::string>& worker_configs) {
+  Builder::TimeStamp now = Builder::get_time();
+
+  for (auto it = worker_configs.begin(); it != worker_configs.end(); ++it) {
+
+    // Convert to C++ IDL-generated structures
+    std::stringstream iss(it->second);
+    Bench::WorkerConfig wc;
+    if (!Bench::json_2_idl(iss, wc)) {
+      throw std::runtime_error("Can't parse json configs for customization");
+    }
+
+    // Apply Individual Overrides
+    if (!overrides_.bench_partition_suffix.empty()) {
+      for (size_t i = 0; i < wc.process.participants.length(); ++i) {
+        for (size_t j = 0; j < wc.process.participants[i].subscribers.length(); ++j) {
+          for (size_t k = 0; k < wc.process.participants[i].subscribers[j].qos.partition.name.length(); ++k) {
+            std::string temp(wc.process.participants[i].subscribers[j].qos.partition.name[k].in());
+            if (temp.substr(0, 6) == "bench_") {
+              wc.process.participants[i].subscribers[j].qos.partition.name[k] = (temp + overrides_.bench_partition_suffix).c_str();
+              wc.process.participants[i].subscribers[j].qos_mask.partition.has_name = true;
+            }
+          }
+        }
+        for (size_t j = 0; j < wc.process.participants[i].publishers.length(); ++j) {
+          for (size_t k = 0; k < wc.process.participants[i].publishers[j].qos.partition.name.length(); ++k) {
+            std::string temp(wc.process.participants[i].publishers[j].qos.partition.name[k].in());
+            if (temp.substr(0, 6) == "bench_") {
+              wc.process.participants[i].publishers[j].qos.partition.name[k] = (temp + overrides_.bench_partition_suffix).c_str();
+              wc.process.participants[i].publishers[j].qos_mask.partition.has_name = true;
+            }
+          }
+        }
+      }
+    }
+    if (overrides_.create_time_delta) {
+      wc.create_time = now + Builder::from_seconds(overrides_.create_time_delta);
+    }
+    if (overrides_.enable_time_delta) {
+      wc.enable_time = now + Builder::from_seconds(overrides_.enable_time_delta);
+    }
+    if (overrides_.start_time_delta) {
+      wc.start_time = now + Builder::from_seconds(overrides_.start_time_delta);
+    }
+    if (overrides_.stop_time_delta) {
+      wc.stop_time = now + Builder::from_seconds(overrides_.stop_time_delta);
+    }
+    if (overrides_.destruction_time_delta) {
+      wc.destruction_time = now + Builder::from_seconds(overrides_.destruction_time_delta);
+    }
+
+    // Convert back to JSON
+    std::stringstream oss;
+    if (!Bench::idl_2_json(wc, oss, false)) {
+      throw std::runtime_error("Can't reserialize customized json configs");
+    }
+    it->second = oss.str();
   }
 }
 

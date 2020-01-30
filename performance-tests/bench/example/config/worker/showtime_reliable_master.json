@@ -110,7 +110,7 @@
         "subscribers": [
           { "name": "subscriber_A1",
 
-            "qos": { "partition": { "name": [ "bench_jfti" ] } },
+            "qos": { "partition": { "name": [ "bench_showtime_reliable" ] } },
             "qos_mask": { "partition": { "has_name": true } },
 
             "datareaders": [
@@ -128,7 +128,7 @@
         "publishers": [
           { "name": "publisher_A1",
 
-            "qos": { "partition": { "name": [ "bench_jfti" ] } },
+            "qos": { "partition": { "name": [ "bench_showtime_reliable" ] } },
             "qos_mask": { "partition": { "has_name": true } },
 
             "datawriters": [
@@ -159,7 +159,7 @@
         "subscribers": [
           { "name": "subscriber_A2",
 
-            "qos": { "partition": { "name": [ "bench_jfti" ] } },
+            "qos": { "partition": { "name": [ "bench_showtime_reliable" ] } },
             "qos_mask": { "partition": { "has_name": true } },
 
             "datareaders": [
@@ -185,7 +185,7 @@
         "publishers": [
           { "name": "publisher_A2",
 
-            "qos": { "partition": { "name": [ "bench_jfti" ] } },
+            "qos": { "partition": { "name": [ "bench_showtime_reliable" ] } },
             "qos_mask": { "partition": { "has_name": true } },
 
             "datawriters": [

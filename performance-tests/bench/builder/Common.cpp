@@ -31,7 +31,7 @@ std::chrono::milliseconds
 get_duration(const TimeStamp& ts)
 {
   return std::chrono::milliseconds(static_cast<int64_t>((static_cast<int64_t>(ts.sec) * 1000) +
-    (static_cast<int64_t>(ts.nsec) / 1000)));
+    (static_cast<int64_t>(ts.nsec) / 1e6)));
 }
 
 TimeStamp operator+(const TimeStamp& lhs, const TimeStamp& rhs)
