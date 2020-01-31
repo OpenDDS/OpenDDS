@@ -43,7 +43,8 @@ are mostly for shorthand.
 
 To build the core OpenDDS native libraries for Android you will need:
 
- - OpenDDS 3.14 or higher.
+ - A development system supported by both OpenDDS and the Android NDK.
+   - Windows and Linux were tested, but macOS should work as well.
  - [Android Native Development Kit (NDK)](https://developer.android.com/ndk/)
    r18 or higher. You can download it separately from android.com or using the
    SDK Manager that comes with Android Studio. If you download the NDK using the
@@ -63,13 +64,13 @@ but the will also work when just using the Android SDK if tweaked.
 ## Building on Windows
 
 If using you're using Windows Subsystem for Linux (WSL), Docker, or anything
-like that, then when you done with the guide you can copy the resulting
+like that, then when you're done with the guide you can copy the resulting
 libraries from the virtual environment to Windows and where they can be used in
 Android Studio as they would be used on Linux. Also you can skip the rest of
 this section and any **Windows Users:** notices.
 
-If you want to build OpenDDS for Android on Windows without any kind of
-virtualization you will have to follow the **Windows Users:** notices.
+If you want to build OpenDDS for Android on Windows without WSL or Docker,
+follow the **Windows Users:** notices.
 
 In addition to OpenDDS and the Android NDK you will also need the following
 software:
@@ -79,14 +80,16 @@ software:
     utilities that would normally come on a Unix system. This guide will use
     MSYS2, which supplies many of those utilities. Install MSYS2 from the
     offical website at https://www.msys2.org and set it up.
+  - Follow all install/update steps from the msys2.org website.
   - In a MSYS2 shell run the following command to install programs that will be
     needed: `pacman -S cmake make perl git diffutils patch`
 
 - OpenDDS Host tools build using Visual Studio
   - In a separate copy of OpenDDS, build OpenDDS as described in
     [`INSTALL.md`](../INSTALL.md) using Visual Studio, except use the
-    `--host-tools-only` configure script option.
-  - If you want to use Java in the Android build, please pass also pass the
+    `--host-tools-only` configure script option.  This OpenDDS (and the ACE+TAO
+    it uses) must be the same version as the one used to build for Android.
+  - If you want to use Java in the Android build, also pass the
     `--java` configure script option here as described in the [Java](#java)
     section. You will also need to pass it to the configure script build for
     Android when that comes.
@@ -140,7 +143,7 @@ the configure script must match according to this table:
 | `x86_64` | `x86_64`                | `x86_64-linux-android`  | 64-bit x86                          |
 
 For example, to build OpenDDS with the toolchain generated in the previous
-example, we can use `armeabi-v7a` <sup>[2](#footnote-1)</sup>.
+example, we can use `armeabi-v7a` <sup>[1](#footnote-1)</sup>.
 
 **NOTE**: If you want to use [Java](#java) or [DDS Security](#openssl), read
 those sections before configuring and building OpenDDS.
@@ -155,7 +158,7 @@ PATH=$PATH:$TOOLCHAIN/bin make # Pass -j/--jobs with an appropriate value or thi
 - `--host-tools` with the location of the OpenDDS host tools that were built
   using Visual Studio must be passed to `configure`.
 
-- In addition to the Android toolchain, you will also need MinGW utilities in
+- In addition to the Android toolchain, you will also need MSYS2 utilities in
   your `%PATH%`. The default installation location of the MinGW utilities is
   `C:\MinGW\msys\1.0\bin`.
 
@@ -164,8 +167,7 @@ PATH=$PATH:$TOOLCHAIN/bin make # Pass -j/--jobs with an appropriate value or thi
 
 ```Batch
 configure --doc-group --target=android --macros=ANDROID_ABI=armeabi-v7a --host-tools=%HOST_DDS%
-set PATH=%TOOLCHAIN%\bin;%PATH%
-set PATH=C:\MinGW\msys\1.0\bin;%PATH%
+set PATH=%PATH%;%TOOLCHAIN%\bin;C:\msys64\usr\bin
 make
 REM Pass -j/--jobs with an appropriate value or this'll take a while...
 ```
@@ -226,18 +228,64 @@ not found. This can be accomplished by either disabling the generation of the
 shared libraries by passing `no-shared` to OpenSSL's `Configure` script or just
 deleting the `so` files after building OpenSSL.
 
+Cross-compiling OpenSSL on Windows:
+1. Start the MSYS2 MSYS development shell using the start menu shortcut or `C:\msys64\msys2_shell.cmd -msys`
+2. `cd /c/your/location/of/OpenSSL-source`
+3. `export ANDROID_NDK_HOME=/c/your/location/of/ndk-standalone-toolchain`
+4. `PATH+=:$ANDROID_NDK_HOME/bin`
+5. `./Configure android-arm no-shared` (or replace -arm with a different platform, see OpenSSL's NOTES.ANDROID file)
+6. `make`
+
 #### Xerces
 
-Xerces is also required for OpenDDS Security. It does not support Android
+Xerces C++ is also required for OpenDDS Security. It does not support Android
 specifically, but it comes with a CMake build script that can be paired with
-the Android NDK's CMake cross compile file.
+the Android NDK's CMake toolchain.
 
 Xerces requires a supported "transcoder" library. For API levels greater than
-or equal to 28 one of these is included with Android, GNU libiconv. Before 28
+or equal to 28 one of these, GNU libiconv, is included with Android. Before 28
 any of the transcoders supported by Xerces would work theoretically but GNU
 libiconv was the one tested.
 
-<!-- TODO API <28 -->
+Download [GNU libiconv](https://ftp.gnu.org/pub/gnu/libiconv) version 1.16
+source code and extract the archive.
+
+Cross-compiling GNU libiconv on Windows:
+1. Start the MSYS2 MSYS development shell using the start menu shortcut or `C:\msys64\msys2_shell.cmd -msys`
+2. `cd /c/your/location/of/libiconv-source`
+3. `export ANDROID_NDK_HOME=/c/your/location/of/ndk-standalone-toolchain`
+4. `PATH+=:$ANDROID_NDK_HOME/bin`
+5. `target=arm-linux-androideabi` (or select a different NDK target)
+6. `./configure --prefix=/c/your/location/of/installed-libiconv --host=$target CC=$target-clang CXX=$target-clang++ LD=$target-ld CFLAGS="-fPIE -fPIC" LDFLAGS=-pie`
+7. `make && make install`
+
+Note that the directory given by `--prefix=` will be created by `make install`
+and will have `include` and `lib` subdirectories that will be used by the Xerces
+build.
+
+Cross-compiling Xerces on Windows, using GNU libiconv:
+
+A modified version of Xerces C++ hosted on
+[OCI Labs on GitHub](https://github.com/oci-labs/xerces-c/tree/android)
+has support for an external GNU libiconv.  Download this version using git or
+the GitHub web interface [ZIP archive](https://github.com/oci-labs/xerces-c/archive/android.zip).  Note that this is the `android` branch of the repository.
+
+Start the Microsoft Visual Studio command prompt for C++ development (for example "x64 Native Tools Command Prompt for VS 2019").
+
+`cmake` and `ninja` should be on the PATH.  They can be installed as on option component in the Visual Studio installer (see "C++ CMake tools for Windows"), or downloaded separately.
+
+Set environment variables based on the NDK location and Android configuration selected:
+1. `set target=arm-linux-androideabi`
+2. `set abi=armeabi-v7a`
+3. `set api=16`
+4. `set NDK=C:\your\location\of\NDK`
+5. `set GNU_ICONV_ROOT=C:\your\location\of\installed-libiconv`
+
+Configure and build with CMake
+1. `cd C:\your\location\of\Xerces-for-android`
+2. `mkdir build & cd build`
+3. `cmake -GNinja -DCMAKE_INSTALL_PREFIX=C:\your\location\of\installed-xerces -DCMAKE_TOOLCHAIN_FILE=%NDK%\build\cmake\android.toolchain.cmake -DANDROID_ABI=%abi% -DANDROID_PLATFORM=android-%api% "-DANDROID_CPP_FEATURES=rtti exceptions" ..`
+4. `cmake --build . --target install`
 
 ## Cross-Compiling IDL Libraries
 
