@@ -110,6 +110,7 @@ my %platforminfo =
        "See docs/android.md for details.",
      ],
      'needs_i2jrt_corba' => 1,
+     'java_platform' => 'android',
    },
   );
 
@@ -154,8 +155,9 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'std=s', 'C++ standard version (for compilers that use -std)',
     'target=s', 'Cross-compile target (none): see --target-help',
     'target-compiler=s', 'Compiler for target (if req\'d): see --target-help',
-    'host-tools=s', 'DDS_ROOT of host tools for cross compile' .
-      $argIndent . '(build them)',
+    'host-tools=s', 'DDS_ROOT of host tools for cross compile (build)',
+    'host-ace=s', 'Define host ACE_ROOT (uses relative path from' .
+      $argIndent . 'target DDS_ROOT to target ACE_ROOT)',
     'host-tools-only!', 'Just build the host tools (no)',
     'prefix=s', 'Installation prefix (none)',
    ],
@@ -348,11 +350,11 @@ my $is_windows = $opts{'host'} eq 'win32';
 my ($slash, $exeext) = $is_windows ? ('\\', '.exe') : ('/', '');
 
 my %specific =
-  ($slash eq '/' ?
-   ('ext' => 'sh', 'export' => 'export', 'pathsep' => ':', 'refpre' => '${',
-    'refpost' => '}', 'comment' => '#') :
+  ($is_windows ?
    ('ext' => 'cmd', 'export' => 'set', 'pathsep' => ';', 'refpre' => '%',
-    'refpost' => '%', 'comment' => '::')
+    'refpost' => '%', 'comment' => '::') :
+   ('ext' => 'sh', 'export' => 'export', 'pathsep' => ':', 'refpre' => '${',
+    'refpost' => '}', 'comment' => '#')
   );
 
 sub which {
@@ -497,7 +499,7 @@ if (defined $opts{'safety-profile'} && $opts{'safety-profile'} eq '') {
   $opts{'safety-profile'} = 'extended';
 }
 
-my $build_host_tools;
+my $build_host_tools = 0;
 if ($opts{'host'} ne $opts{'target'} || $opts{'safety-profile'}) {
   $build_host_tools = !$opts{'host-tools'};
   print "Cross-compile build " .
@@ -505,6 +507,7 @@ if ($opts{'host'} ne $opts{'target'} || $opts{'safety-profile'}) {
     if $opts{'verbose'};
   $cross_compile = 1;
 }
+my $has_host_compiler = $build_host_tools || !$cross_compile;
 
 if ($platforminfo{$opts{'target'}}->{'compiler_root_env'}) {
   # This target puts its cross-compiler in the PATH before the host compiler,
@@ -523,43 +526,44 @@ if (!exists $platforminfo{$opts{'target'}}->{'needs_i2jrt_corba'}) {
 
 ## compiler
 
-if ($opts{'compiler'}) {
-  my $standard = 0;
-  for my $stdcomp (@{$platforminfo{$opts{'host'}}->{'compilers'}}) {
-    $standard = 1 if $opts{'compiler'} eq $stdcomp;
+if ($has_host_compiler) {
+  if ($opts{'compiler'}) {
+    my $standard = 0;
+    for my $stdcomp (@{$platforminfo{$opts{'host'}}->{'compilers'}}) {
+      $standard = 1 if $opts{'compiler'} eq $stdcomp;
+    }
+    $opts{'nonstdcompiler'} = 1 unless $standard;
   }
-  $opts{'nonstdcompiler'} = 1 unless $standard;
-}
-else {
-  print "Auto-detecting compiler\n" if $opts{'verbose'};
-  for my $stdcomp (@{$platforminfo{$opts{'host'}}->{'compilers'}}) {
-    my $path = which($stdcomp);
-    if ($path) {
-      print "Found $stdcomp at: $path\n" if $opts{'verbose'};
-      $opts{'compiler'} = $stdcomp;
-      last;
+  else {
+    print "Auto-detecting compiler\n" if $opts{'verbose'};
+    for my $stdcomp (@{$platforminfo{$opts{'host'}}->{'compilers'}}) {
+      my $path = which($stdcomp);
+      if ($path) {
+        print "Found $stdcomp at: $path\n" if $opts{'verbose'};
+        $opts{'compiler'} = $stdcomp;
+        last;
+      }
+    }
+    if (!defined $opts{'compiler'}) {
+      die "ERROR: Can't find a compiler, set PATH or run this script with the ".
+        "--compiler option.\n" . ($is_windows ? "  For Microsoft Visual C++, ".
+                                  "run this script from the Visual Studio ".
+                                  "Command Prompt.\n" : '') . "Stopped";
     }
   }
-  if (!defined $opts{'compiler'}) {
-    die "ERROR: Can't find a compiler, set PATH or run this script with the ".
-      "--compiler option.\n" . ($is_windows ? "  For Microsoft Visual C++, ".
-                                "run this script from the Visual Studio ".
-                                "Command Prompt.\n" : '') . "Stopped";
-  }
-}
-print "compiler is: $opts{'compiler'}\n" if $opts{'verbose'};
+  print "compiler is: $opts{'compiler'}\n" if $opts{'verbose'};
 
-if ($opts{'compiler'} =~ /cl(\.exe)?$/i) {
-  my $savepath = $ENV{'PATH'};
-  my $clpath = which($opts{'compiler'});
-  if ($clpath) {
-    $clpath =~ s/vc\\bin(\\(x86_)?amd64)?/common7\\ide/i;
-    $ENV{'PATH'} .= ";$clpath";
-  }
+  if ($opts{'compiler'} =~ /cl(\.exe)?$/i) {
+    my $savepath = $ENV{'PATH'};
+    my $clpath = which($opts{'compiler'});
+    if ($clpath) {
+      $clpath =~ s/vc\\bin(\\(x86_)?amd64)?/common7\\ide/i;
+      $ENV{'PATH'} .= ";$clpath";
+    }
 
-  # Have CL Tell Us Its Target Architecture and Version
-  my ($tmp_fd, $tmp_filename) = File::Temp::tempfile();
-  my $cl_check = << "EOF";
+    # Have CL Tell Us Its Target Architecture and Version
+    my ($tmp_fd, $tmp_filename) = File::Temp::tempfile();
+    my $cl_check = << "EOF";
 #ifdef _M_X64
 #  define ARCH x64
 #elif defined(_M_IX86)
@@ -573,73 +577,74 @@ if ($opts{'compiler'} =~ /cl(\.exe)?$/i) {
 #endif
 CL is _MSC_VER ARCH
 EOF
-  print $tmp_fd $cl_check;
-  close($tmp_fd);
-  my $cl_command = "\"$opts{'compiler'}\" /EP $tmp_filename 2>&1";
-  print "Running $cl_command\n" if $opts{'verbose'};
-  open(my $cl_out_fd, "-|", $cl_command)
-    or die "ERROR: Could not detect Visual C++ version, try running this ".
-      "script from the Visual Studio Command Prompt.\nStopped";
-  my $ver = 0;
-  my $arch = '';
-  while (my $line = <$cl_out_fd>) {
-    chomp ($line);
-    print "CL says: $line\n" if $opts{'verbose'} && $line !~ /^\s*$/;
-    # Convert _MSC_VER to the form \d+\.\d
-    if ($line =~ /^CL is (\d+)\d (\w+)$/) {
-      $ver = int($1) / 10;
-      $arch = $2;
-      last;
+    print $tmp_fd $cl_check;
+    close($tmp_fd);
+    my $cl_command = "\"$opts{'compiler'}\" /EP $tmp_filename 2>&1";
+    print "Running $cl_command\n" if $opts{'verbose'};
+    open(my $cl_out_fd, "-|", $cl_command)
+      or die "ERROR: Could not detect Visual C++ version, try running this ".
+        "script from the Visual Studio Command Prompt.\nStopped";
+    my $ver = 0;
+    my $arch = '';
+    while (my $line = <$cl_out_fd>) {
+      chomp ($line);
+      print "CL says: $line\n" if $opts{'verbose'} && $line !~ /^\s*$/;
+      # Convert _MSC_VER to the form \d+\.\d
+      if ($line =~ /^CL is (\d+)\d (\w+)$/) {
+        $ver = int($1) / 10;
+        $arch = $2;
+        last;
+      }
     }
-  }
-  close($cl_out_fd);
-  unlink($tmp_filename)
-    or warn "Unable to delete temporary file $tmp_filename: $!";
-  print "CL Version is $ver, architecture is $arch\n" if $opts{'verbose'};
-  if (!$ver && !$arch) {
-    die "cl version probe failed, invalid output from cl\nStopped";
-  }
-  if ($arch eq 'Unknown') {
-    die "cl version probe failed, no known architecture macro was defined\nStopped";
-  }
-  if (!exists $platforminfo{'win32'}->{'cl_archs'}->{$arch}) {
-    die "cl version probe failed, invalid architecture \"$arch\"\nStopped";
-  }
-  if (!$platforminfo{'win32'}->{'cl_archs'}->{$arch}) {
-    die "ERROR: Windows for $arch isn't supported\nStopped";
-  }
-  if (!exists $platforminfo{'win32'}->{'cl_versions'}->{$ver}) {
-    die "ERROR: Unknown or unsupported Visual C++ compiler version: $ver\n"
-      . "Stopped";
-  }
-
-  $opts{'compiler_version'} = $platforminfo{'win32'}->{'cl_versions'}->{$ver};
-  $opts{'compiler_target_architecture'} = $arch;
-
-  if ($ver >= 19) {
-    push(@{$opts{'features'}}, 'no_cxx11=0');
-    print "Visual C++ has C++11 support\n" if $opts{'verbose'};
-  }
-  $ENV{'PATH'} = $savepath;
-  print "Detected Visual C++ version: $opts{'compiler_version'}\n"
-    if $opts{'verbose'};
-}
-elsif ($opts{'compiler'} =~ /g\+\+/) {
-  if ($opts{'std'}) {
-    push(@{$opts{'macros'}}, 'CCFLAGS += -std=' . $opts{'std'});
-    print "Added platform_macros for -std=$opts{std}\n" if $opts{'verbose'};
-  }
-  else {
-    my $ver = `$opts{'compiler'} --version`;
-    if ($ver =~ /\(.*\) (\d+)\.\d+/ && $1 >= 6) {
-      $opts{'std'} = 'gnu++14';
-      print "Detected GCC >=6, default -std=gnu++14\n" if $opts{'verbose'};
+    close($cl_out_fd);
+    unlink($tmp_filename)
+      or warn "Unable to delete temporary file $tmp_filename: $!";
+    print "CL Version is $ver, architecture is $arch\n" if $opts{'verbose'};
+    if (!$ver && !$arch) {
+      die "cl version probe failed, invalid output from cl\nStopped";
     }
-  }
+    if ($arch eq 'Unknown') {
+      die "cl version probe failed, no known architecture macro was defined\nStopped";
+    }
+    if (!exists $platforminfo{'win32'}->{'cl_archs'}->{$arch}) {
+      die "cl version probe failed, invalid architecture \"$arch\"\nStopped";
+    }
+    if (!$platforminfo{'win32'}->{'cl_archs'}->{$arch}) {
+      die "ERROR: Windows for $arch isn't supported\nStopped";
+    }
+    if (!exists $platforminfo{'win32'}->{'cl_versions'}->{$ver}) {
+      die "ERROR: Unknown or unsupported Visual C++ compiler version: $ver\n"
+        . "Stopped";
+    }
 
-  if ($opts{'std'} && $opts{'std'} =~ /(0x|11|1y|14|1z|17)$/) {
-    push(@{$opts{'features'}}, 'no_cxx11=0');
-    print "Compiler has C++11 support\n" if $opts{'verbose'};
+    $opts{'compiler_version'} = $platforminfo{'win32'}->{'cl_versions'}->{$ver};
+    $opts{'compiler_target_architecture'} = $arch;
+
+    if ($ver >= 19) {
+      push(@{$opts{'features'}}, 'no_cxx11=0');
+      print "Visual C++ has C++11 support\n" if $opts{'verbose'};
+    }
+    $ENV{'PATH'} = $savepath;
+    print "Detected Visual C++ version: $opts{'compiler_version'}\n"
+      if $opts{'verbose'};
+  }
+  elsif ($opts{'compiler'} =~ /g\+\+/) {
+    if ($opts{'std'}) {
+      push(@{$opts{'macros'}}, 'CCFLAGS += -std=' . $opts{'std'});
+      print "Added platform_macros for -std=$opts{std}\n" if $opts{'verbose'};
+    }
+    else {
+      my $ver = `$opts{'compiler'} --version`;
+      if ($ver =~ /\(.*\) (\d+)\.\d+/ && $1 >= 6) {
+        $opts{'std'} = 'gnu++14';
+        print "Detected GCC >=6, default -std=gnu++14\n" if $opts{'verbose'};
+      }
+    }
+
+    if ($opts{'std'} && $opts{'std'} =~ /(0x|11|1y|14|1z|17)$/) {
+      push(@{$opts{'features'}}, 'no_cxx11=0');
+      print "Compiler has C++11 support\n" if $opts{'verbose'};
+    }
   }
 }
 
@@ -938,7 +943,8 @@ sub dump_and_unlink { # removes temp files created by dry-run
 
 sub write_config_h {
   my %buildEnv = %{shift()};
-  my $pi = $platforminfo{$opts{$buildEnv{'build'}}};
+  my $platform = $opts{$buildEnv{'build'}};
+  my $pi = $platforminfo{$platform};
   $opts{'optimize'} = 0 if !exists $opts{'optimize'};
 
   my $CFGH = backup_and_open("$buildEnv{'ACE_ROOT'}/ace/config.h");
@@ -947,7 +953,7 @@ sub write_config_h {
       print $CFGH "$line\n";
     }
   }
-  my $cfg = $opts{$buildEnv{'build'}};
+  my $cfg = $platform;
   if ($pi->{'aceconfig'}) {
     $cfg = $pi->{'aceconfig'};
     $cfg =~ s/\$UNAMER/my $u = `uname -r`; chomp $u; $u/e;
@@ -1022,12 +1028,23 @@ sub write_platform_macros {
       }
       if ($cross_compile) {
         print $PMG 'TAO_IDL = $(HOST_ACE)/bin/tao_idl', "\n";
+        if ($is_windows) {
+          print $PMG "HOST_EXE_EXT = .exe\n";
+        }
         print $PMG 'TAO_IDL_DEP = $(TAO_IDL)$(HOST_EXE_EXT)', "\n";
-        print $PMG 'TAO_IDL_PREPROCESSOR = ', $opts{'compiler'}, "\n";
+        if ($has_host_compiler) {
+          print $PMG 'TAO_IDL_PREPROCESSOR = ', $opts{'compiler'}, "\n";
+        }
         print $PMG 'TAO_IDLFLAGS += -g $(HOST_ACE)/bin/ace_gperf', "\n";
         print $PMG 'build_tao_idl_be = 0', "\n";
         unless ($build_host_tools) {
-          print $PMG 'HOST_ACE = $(HOST_DDS)', nested($ace_src, '.'), "\n";
+          my $host_ace;
+          if (exists $opts{'host-ace'}) {
+            $host_ace = $opts{'host-ace'};
+          } else {
+            $host_ace = '$(HOST_DDS)' . nested($ace_src, '.');
+          }
+          print $PMG "HOST_ACE = $host_ace\n";
         }
         if ($opts{'target-compiler'}) {
           my $tcomp = $opts{'target-compiler'};
@@ -1113,7 +1130,17 @@ if (exists $opts{'java'}) {
   if ($opts{'static'} && !$host_tools_only) {
     die "ERROR: --static can't be used with --java\nStopped";
   }
-  setEnv('JAVA_PLATFORM', perlOS_to_java_platform());
+  my $host_java_platform = perlOS_to_java_platform();
+  if ($cross_compile) {
+    if (exists $platforminfo{$opts{'target'}}->{'java_platform'}) {
+      setEnv('JAVA_PLATFORM', $platforminfo{$opts{'target'}}->{'java_platform'});
+      setHostEnv('JAVA_PLATFORM', $host_java_platform);
+    } else {
+      die "Cross-compile with Java for $opts{'target'} in not supported.\nStopped";
+    }
+  } else {
+    setEnv('JAVA_PLATFORM', $host_java_platform);
+  }
 }
 
 my $try_to_use_qt_system_pkg =
@@ -1783,6 +1810,26 @@ sub generate_workspace {
     }
   }
 
+  if ($is_target && $opts{'target'} eq 'android') {
+    # We can't detect C++11 compatibility in cross compilers at the moment,
+    # but all the NDKs we officially support are C++11+ by default, so enable
+    # C++11 features unless an explicit 'no_cxx11' feature already is set.
+    my $set = 1;
+    for my $feature (@{$opts{'features'}}) {
+      if ($feature =~ /no_cxx11/) {
+        $set = 0;
+      }
+    }
+    disable_feature(\@features, 'no_cxx11') if ($set);
+    if ($opts{'verbose'}) {
+      print "Setting no_cxx11=0 for Android: $set\n";
+    }
+
+    # Disable including $JAVA_HOME/include on Android. Android NDK includes a
+    # jni.h
+    disable_feature(\@features, 'jni_include')
+  }
+
   my $mpctype = (!$is_windows || ($cross_compile && $is_target))
                 ? 'gnuace' : $opts{'compiler_version'};
 
@@ -1842,6 +1889,10 @@ EOT
       if (!$found) {
         push(@features, "java_pre_jpms=0");
       }
+    }
+
+    if ($opts{'java'} && $cross_compile) {
+      push(@features, "jni_check=0");
     }
 
     if ($buildtao && @features) {

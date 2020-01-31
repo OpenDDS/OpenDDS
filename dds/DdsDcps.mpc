@@ -72,7 +72,7 @@ project(OpenDDS_Dcps): core, coverage_optional, \
     ../MPC
     ../AUTHORS
     ../README.md
-    ../VERSION
+    ../VERSION.txt
     ../LICENSE
     ../NEWS.md
     ../rules.dds.GNU
