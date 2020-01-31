@@ -168,6 +168,8 @@ PATH=$PATH:$TOOLCHAIN/bin make # Pass -j/--jobs with an appropriate value or thi
 ```Batch
 configure --doc-group --target=android --macros=ANDROID_ABI=armeabi-v7a --host-tools=%HOST_DDS%
 set PATH=%PATH%;%TOOLCHAIN%\bin;C:\msys64\usr\bin
+ren %ACE_ROOT%\VERSION VERSION.txt
+ren %TAO_ROOT%\VERSION VERSION.txt
 make
 REM Pass -j/--jobs with an appropriate value or this'll take a while...
 ```
@@ -371,13 +373,13 @@ the basic list of library file for OpenDDS are as follows:
 
  - The [type support libraries for your IDL](#cross-compiling-idl-libraries)
 
- - The following are the peer discovery libraries. Static discovery is built
+ - The following are the Discovery libraries. Static discovery is built
    into `libOpenDDS_Dcps.so`, but most likely you will want one of these:
 
-   - Required to use RTPS Peer Discovery:
+   - Required to use RTPS Discovery:
      - `$DDS_ROOT/lib/libOpenDDS_Rtps.so`
 
-   - Required to use the DCPSInfoRepo Peer Discovery:
+   - Required to use the DCPSInfoRepo Discovery:
      - `$DDS_ROOT/lib/libOpenDDS_InfoRepoDiscovery.so`
        - Depends on `$ACE_ROOT/lib/libTAO_PortableServer.so`
 
