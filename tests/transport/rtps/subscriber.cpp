@@ -103,14 +103,14 @@ public:
       ACE_DEBUG((LM_INFO, "%C", oss.str().c_str()));
 
       if (sample.header_.message_id_ != SAMPLE_DATA
-          || sample.header_.sequence_ != seq_++ || !sample.header_.byte_order_
+          || !sample.header_.byte_order_
           || sample.header_.message_length_ != 533
           || pub.checksum() != GuidConverter(pub_id_).checksum()) {
         ACE_ERROR((LM_ERROR, "ERROR: DataSampleHeader malformed\n"));
       }
 
-      if (seq_ == 2) {
-        ++seq_; // publisher.cpp deliberately skips #2 to test GAP generation
+      if (seq_ == 6) {
+        ++seq_; // publisher.cpp deliberately skips #6 to test GAP generation
       }
 
       if (data.key != 0x09230923 || std::strlen(data.value.in()) != 520) {
