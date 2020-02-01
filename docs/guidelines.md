@@ -45,6 +45,8 @@ open for pull requests.
 Pull requests will be tested automatically and full CI builds of the master
 branch can be found at
 [http://scoreboard.ociweb.com/oci-dds.html](http://scoreboard.ociweb.com/oci-dds.html).
+You can disable PR CI by including `[skip ci]` somewhere in your commit
+message.
 
 All tests listed in `DDS_ROOT/bin/dcps_tests.lst` are part of the automated
 test suite.
