@@ -6,14 +6,17 @@
  */
 
 #include "be_global.h"
-#include "be_util.h"
-#include "ast_generator.h"
-#include "global_extern.h"
-#include "idl_defines.h"
-#include "utl_err.h"
-#include "utl_string.h"
 
-#include "ace/OS_NS_strings.h"
+#include "be_util.h"
+#include "be_extern.h"
+
+#include <ast_generator.h>
+#include <global_extern.h>
+#include <idl_defines.h>
+#include <utl_err.h>
+#include <utl_string.h>
+
+#include <ace/OS_NS_strings.h>
 
 #include <iostream>
 #include <fstream>
@@ -128,21 +131,17 @@ void
 BE_GlobalData::open_streams(const char *filename)
 {
   this->filename(filename);
-  size_t len = strlen(filename);
 
+  size_t len = strlen(filename);
   if ((len < 5 || 0 != ACE_OS::strcasecmp(filename + len - 4, ".idl"))
       && (len < 6 || 0 != ACE_OS::strcasecmp(filename + len - 5, ".pidl"))) {
-    UTL_Error u;
-    UTL_String str("Input filename must end in \".idl\" or \".pidl\".");
-    u.back_end(0, &str);
-    exit(-1);
-    return;
+    ACE_ERROR((LM_ERROR, "Error - Input filename must end in \".idl\" or \".pidl\".\n"));
+    BE_abort();
   }
 
   string filebase(filename);
   filebase.erase(filebase.rfind('.'));
-  size_t idx = filebase.rfind(ACE_DIRECTORY_SEPARATOR_CHAR);
-
+  size_t idx = filebase.find_last_of("/\\"); // allow either slash
   if (idx != string::npos) {
     filebase = filebase.substr(idx + 1);
   }
@@ -340,4 +339,31 @@ BE_GlobalData::get_include_block(BE_GlobalData::stream_enum_t which)
   }
 
   return ret;
+}
+
+void BE_GlobalData::warning(const char* msg, const char* filename, unsigned lineno)
+{
+  if (idl_global->print_warnings()) {
+    if (filename) {
+      ACE_ERROR((LM_WARNING, ACE_TEXT("Warning - %C: \"%C\", line %u: %C\n"),
+        idl_global->prog_name(), filename, lineno, msg));
+    } else {
+      ACE_ERROR((LM_WARNING, ACE_TEXT("Warning - %C: %C\n"),
+        idl_global->prog_name(), msg));
+    }
+  }
+  idl_global->err()->last_warning = UTL_Error::EIDL_MISC;
+}
+
+void BE_GlobalData::error(const char* msg, const char* filename, unsigned lineno)
+{
+  if (filename) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("Error - %C: \"%C\", line %u: %C\n"),
+      idl_global->prog_name(), filename, lineno, msg));
+  } else {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("Error - %C: %C\n"),
+      idl_global->prog_name(), msg));
+  }
+  idl_global->set_err_count(idl_global->err_count() + 1);
+  idl_global->err()->last_error = UTL_Error::EIDL_MISC;
 }

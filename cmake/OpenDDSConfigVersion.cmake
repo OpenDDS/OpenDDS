@@ -13,7 +13,7 @@ macro(opendds_extract_version  in_version_file  out_version  out_major  out_mino
   endif()
 endmacro()
 
-opendds_extract_version("${DDS_ROOT}/VERSION"
+opendds_extract_version("${DDS_ROOT}/VERSION.txt"
   _OPENDDS_VERSION
   _OPENDDS_VERSION_MAJOR
   _OPENDDS_VERSION_MINOR

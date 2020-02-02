@@ -138,8 +138,8 @@ private:
   void unregister_relay_addresses(const OpenDDS::DCPS::RepoId& guid);
 
   OpenDDS::RTPS::RtpsDiscovery_rch rtps_discovery_;
-  const DDS::DomainId_t application_domain_;
 #ifdef OPENDDS_SECURITY
+  const DDS::DomainId_t application_domain_;
   const DDS::Security::CryptoTransform_var crypto_;
   const DDS::Security::ParticipantCryptoHandle application_participant_crypto_handle_;
 #endif

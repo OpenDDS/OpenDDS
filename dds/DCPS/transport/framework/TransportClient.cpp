@@ -303,11 +303,10 @@ TransportClient::associate(const AssociationData& data, bool active)
             if (res.link_.is_nil()) {
                 // In this case, it may be waiting for the TCP connection to be established.  Just wait without trying other transports.
                 pending_assoc_timer_->schedule_timer(this, iter->second);
+            } else {
+              use_datalink_i(data.remote_id_, res.link_, guard);
+              return true;
             }
-            else {
-                use_datalink_i(data.remote_id_, res.link_, guard);
-            }
-            return true;
           }
         }
       }
@@ -429,7 +428,6 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
                               "between %C and remote %C unsuccessful\n",
                               OPENDDS_STRING(tmp_local).c_str(),
                               OPENDDS_STRING(tmp_remote).c_str()), 0);
-          break;
         }
 
         if (res.success_) {

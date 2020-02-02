@@ -4,8 +4,7 @@ feature(!java_pre_jpms) : java {
 
 project: taolib_with_idl, portableserver, java, dds_macros {
 
-  includes   += $(DDS_ROOT)/java/idl2jni/runtime $(JAVA_HOME)/include \
-                $(JAVA_HOME)/include/$(JAVA_PLATFORM)
+  includes   += $(DDS_ROOT)/java/idl2jni/runtime
   libpaths   += $(DDS_ROOT)/lib
   libs       += idl2jni_runtime
   after      += idl2jni_runtime idl2jni_codegen
