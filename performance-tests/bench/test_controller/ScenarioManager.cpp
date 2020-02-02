@@ -150,6 +150,9 @@ void ScenarioManager::customize_configs(std::map<std::string, std::string>& work
     }
     if (overrides_.create_time_delta) {
       wc.create_time = now + Builder::from_seconds(overrides_.create_time_delta);
+    } else {
+      // TODO FIXME This won't be right for all test scenarios, but not sure how else to avoid uninitialized values for now
+      wc.create_time = Builder::ZERO;
     }
     if (overrides_.enable_time_delta) {
       wc.enable_time = now + Builder::from_seconds(overrides_.enable_time_delta);
