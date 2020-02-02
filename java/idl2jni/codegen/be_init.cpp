@@ -6,7 +6,7 @@
  */
 
 #include "be_extern.h"
-#include "../../../../dds/Version.h"
+#include "../../../dds/Version.h"
 
 #include <global_extern.h>
 #include <drv_extern.h>
