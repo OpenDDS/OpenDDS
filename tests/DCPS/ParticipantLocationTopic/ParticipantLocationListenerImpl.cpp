@@ -11,8 +11,8 @@
 #include <string>
 
 // Implementation skeleton constructor
-ParticipantLocationListenerImpl::ParticipantLocationListenerImpl(const char* id) :
-  id(id)
+ParticipantLocationListenerImpl::ParticipantLocationListenerImpl(const std::string& id) :
+  id_(id)
 {
 }
 
@@ -46,7 +46,7 @@ void ParticipantLocationListenerImpl::on_data_available(DDS::DataReader_ptr read
     OpenDDS::DCPS::RepoId guid;
     std::memcpy(&guid, &participant.guid, sizeof(guid));
 
-    std::cout << "== " << id << " Participant Location ==" << std::endl;
+    std::cout << "== " << id_ << " Participant Location ==" << std::endl;
     std::cout
     << " valid: " << (si.valid_data == 1 ? "true" : "false") << std::endl
     << "  guid: " << guid << std::endl
@@ -131,7 +131,7 @@ bool ParticipantLocationListenerImpl::check(bool no_ice)
     (!no_ice ? OpenDDS::DCPS::LOCATION_ICE : 0) |
     OpenDDS::DCPS::LOCATION_RELAY;
 
-  std::cout << id << " expecting "
+  std::cout << id_ << " expecting "
             << " LOCAL"
             << ((expected & OpenDDS::DCPS::LOCATION_ICE) ? " ICE" : "")
             << " RELAY"
@@ -140,7 +140,7 @@ bool ParticipantLocationListenerImpl::check(bool no_ice)
   bool found = false;
   for (LocationMapType::const_iterator pos = location_map.begin(), limit = location_map.end();
        pos != limit; ++ pos) {
-    std::cout << id << " " << pos->first
+    std::cout << id_ << " " << pos->first
               << ((pos->second & OpenDDS::DCPS::LOCATION_LOCAL) ? " LOCAL" : "")
               << ((pos->second & OpenDDS::DCPS::LOCATION_ICE) ? " ICE" : "")
               << ((pos->second & OpenDDS::DCPS::LOCATION_RELAY) ? " RELAY" : "")
