@@ -2,6 +2,7 @@
 #include <dds/DCPS/Service_Participant.h>
 #include "TestMsgTypeSupportImpl.h"
 #include <dds/DCPS/Marked_Default_Qos.h>
+#include <iostream>
 
 const char* Domain::TESTMSG_TYPE  = "TestReliableBestEffortReaders Type";
 const char* Domain::TESTMSG_TOPIC = "TestReliableBestEffortReaders Topic";
