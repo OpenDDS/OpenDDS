@@ -7,27 +7,20 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 use strict;
 use File::Temp qw/ :POSIX /;
 
-my $target = $ENV{'JAVA_PLATFORM'} or $^O;
-
 my $lib_orig = shift;
 
 my $nm;
 my $pattern;
 my @decorators;
 
-if ($target eq 'MSWin32') {
+if ($^O eq 'MSWin32') {
   $nm = 'dumpbin /exports';
   @decorators = (['', '.dll'], ['', 'd.dll'], ['lib', '.dll']);
-}
-else {
+} else {
   if ($^O eq 'solaris') {
     $nm = 'gnm -g -P';
-  }
-  else {
+  } else {
     $nm = 'nm -g -P';
-    if (defined($ENV{'CROSS_COMPILE'})) {
-      $nm = $ENV{'CROSS_COMPILE'} . $nm;
-    }
   }
   $pattern = '^_?(Java_\\S+) T ';
   @decorators = (['lib', '.so'], ['lib', '.sl'], ['lib', '.a'], ['lib', '.so'],
@@ -47,7 +40,7 @@ while (!-r $lib && $idx < scalar @decorators) {
 
 die "Can't find $lib_orig\n" unless -r $lib;
 
-if ($target eq 'MSWin32') {
+if ($^O eq 'MSWin32') {
   my $headers = `dumpbin /headers $lib`;
   (my $machine) = ($headers =~ /machine \((\w+)\)/);
   my $prefix = ($machine eq 'x64' ? '' : '_');
