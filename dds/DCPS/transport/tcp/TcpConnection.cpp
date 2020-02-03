@@ -332,9 +332,10 @@ OpenDDS::DCPS::TcpConnection::close(u_long)
     // This would be called when using ACE_Connector to initiate an async connect and
     // the network stack detects the destination is unreachable before timeout.
     if (DCPS_debug_level >= 1) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpConnection(%x)::close() on transport: %C to %C:%d because of reconnect failure.\n",
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpConnection()::close() on transport: %C to %C:%d because of reconnect failure.\n",
             this->config_name().c_str(),
-            this->remote_address_.get_host_addr()));
+            this->remote_address_.get_host_addr(),
+            this->remote_address_.get_port_number()));
     }
 
     if (this->conn_retry_counter_ >= this->tcp_config_->conn_retry_attempts_) {
@@ -571,7 +572,7 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
 
     if (DCPS_debug_level >= 1) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) DBG:   TcpConnection::"
-            "reconnect(%C:%d->%C:%d) reconnect_state = %C, conn_retry_counter_=%d, retry_delay_msec=%f\n",
+            "active_reconnect_i(%C:%d->%C:%d) reconnect_state = %C, conn_retry_counter_=%d, retry_delay_msec=%f\n",
             remote_address_.get_host_addr(), remote_address_.get_port_number(),
             local_address_.get_host_addr(), local_address_.get_port_number(),
             reconnect_state_string(), this->conn_retry_counter_, retry_delay_msec));
@@ -584,7 +585,7 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
     TcpConnection* pconn = this;
     int ret = transport.connector_.connect(pconn, this->remote_address_,  ACE_Synch_Options::asynch);
     if (ret == -1 && errno != EWOULDBLOCK) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) TcpConnection::reconnect error %m.\n"));
+      ACE_ERROR((LM_ERROR, "(%P|%t) TcpConnection::active_reconnect_i error %m.\n"));
     }
 
     this->reactor()->schedule_timer(this, 0, timeout);
@@ -685,10 +686,13 @@ OpenDDS::DCPS::TcpConnection::handle_timeout(const ACE_Time_Value &,
     // cancel the async connect operation and retry it.
     TcpTransport& transport = static_cast<TcpTransport&>(link_->impl());
     transport.connector_.cancel(this);
-    // the pass through is intentional
+    this->active_reconnect_i();
+    break;
   }
   case ACTIVE_WAITING_STATE:
     this->active_reconnect_i();
+    break;
+  case LOST_STATE:
     break;
   default :
     ACE_ERROR((LM_ERROR,
