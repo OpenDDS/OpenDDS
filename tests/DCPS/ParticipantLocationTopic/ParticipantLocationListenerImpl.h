@@ -24,7 +24,7 @@ class ParticipantLocationListenerImpl
 {
 public:
   //Constructor
-  ParticipantLocationListenerImpl(const std::string& id);
+  explicit ParticipantLocationListenerImpl(const std::string& id);
 
   //Destructor
   virtual ~ParticipantLocationListenerImpl();
