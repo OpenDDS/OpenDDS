@@ -46,7 +46,8 @@ RtpsCustomizedElement::fragment(size_t size)
 const ACE_Message_Block*
 RtpsCustomizedElement::msg_payload() const
 {
-  return msg() ? msg()->cont() : 0;
+  const ACE_Message_Block* message = msg();
+  return message ? message->cont() : 0;
 }
 
 }

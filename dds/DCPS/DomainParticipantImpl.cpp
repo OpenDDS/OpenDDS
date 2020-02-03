@@ -151,7 +151,7 @@ DomainParticipantImpl::create_publisher(
   DDS::Publisher_ptr pub_obj(pub);
 
   // this object will also act as the guard for leaking Publisher Impl
-  Publisher_Pair pair(pub, pub_obj, NO_DUP);
+  Publisher_Pair pair(pub, pub_obj, false);
 
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    tao_mon,
@@ -199,7 +199,7 @@ DomainParticipantImpl::delete_publisher(
                    this->publishers_protector_,
                    DDS::RETCODE_ERROR);
 
-  Publisher_Pair pair(the_servant, p, DUP);
+  Publisher_Pair pair(the_servant, p, true);
 
   if (OpenDDS::DCPS::remove(publishers_, pair) == -1) {
     ACE_ERROR((LM_ERROR,
@@ -240,7 +240,7 @@ DomainParticipantImpl::create_subscriber(
 
   DDS::Subscriber_ptr sub_obj(sub);
 
-  Subscriber_Pair pair(sub, sub_obj, NO_DUP);
+  Subscriber_Pair pair(sub, sub_obj, false);
 
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    tao_mon,
@@ -299,7 +299,7 @@ DomainParticipantImpl::delete_subscriber(
                    this->subscribers_protector_,
                    DDS::RETCODE_ERROR);
 
-  Subscriber_Pair pair(the_servant, s, DUP);
+  Subscriber_Pair pair(the_servant, s, true);
 
   if (OpenDDS::DCPS::remove(subscribers_, pair) == -1) {
     ACE_ERROR((LM_ERROR,
@@ -1910,7 +1910,7 @@ DomainParticipantImpl::create_new_topic(
   DDS::Topic_ptr obj(topic_servant);
 
   // this object will also act as a guard against leaking the new TopicImpl
-  RefCounted_Topic refCounted_topic(Topic_Pair(topic_servant, obj, NO_DUP));
+  RefCounted_Topic refCounted_topic(Topic_Pair(topic_servant, obj, false));
 
   if (OpenDDS::DCPS::bind(topics_, topic_name, refCounted_topic) == -1) {
     ACE_ERROR((LM_ERROR,

@@ -11,8 +11,7 @@
 #include <string>
 
 // Implementation skeleton constructor
-ParticipantLocationListenerImpl::ParticipantLocationListenerImpl(const char* id, unsigned long& locations) :
-  location_mask(locations),
+ParticipantLocationListenerImpl::ParticipantLocationListenerImpl(const char* id) :
   id(id)
 {
 }
@@ -71,7 +70,8 @@ void ParticipantLocationListenerImpl::on_data_available(DDS::DataReader_ptr read
     // update locations if SampleInfo is valid.
     if (si.valid_data == 1)
     {
-      location_mask |= participant.change_mask;
+      std::pair<LocationMapType::iterator, bool> p = location_map.insert(std::make_pair(guid, 0));
+      p.first->second |= participant.location;
     }
   }
 }
@@ -122,4 +122,30 @@ void ParticipantLocationListenerImpl::on_sample_lost(
 {
   std::cerr << "ParticipantLocationListenerImpl::"
     << "on_sample_lost" << std::endl;
+}
+
+bool ParticipantLocationListenerImpl::check(bool no_ice)
+{
+  const unsigned long expected =
+    OpenDDS::DCPS::LOCATION_LOCAL |
+    (!no_ice ? OpenDDS::DCPS::LOCATION_ICE : 0) |
+    OpenDDS::DCPS::LOCATION_RELAY;
+
+  std::cout << id << " expecting "
+            << " LOCAL"
+            << ((expected & OpenDDS::DCPS::LOCATION_ICE) ? " ICE" : "")
+            << " RELAY"
+            << std::endl;
+
+  bool found = false;
+  for (LocationMapType::const_iterator pos = location_map.begin(), limit = location_map.end();
+       pos != limit; ++ pos) {
+    std::cout << id << " " << pos->first
+              << ((pos->second & OpenDDS::DCPS::LOCATION_LOCAL) ? " LOCAL" : "")
+              << ((pos->second & OpenDDS::DCPS::LOCATION_ICE) ? " ICE" : "")
+              << ((pos->second & OpenDDS::DCPS::LOCATION_RELAY) ? " RELAY" : "")
+              << std::endl;
+    found = found || pos->second == expected;
+  }
+  return found;
 }

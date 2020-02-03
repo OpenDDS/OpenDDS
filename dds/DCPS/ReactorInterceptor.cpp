@@ -51,6 +51,7 @@ void ReactorInterceptor::process_command_queue_i()
     ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rev_guard, rev_lock);
     command->execute();
     command->executed();
+    command.reset();
   }
 }
 

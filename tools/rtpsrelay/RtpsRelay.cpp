@@ -74,6 +74,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   ACE_INET_Addr nic_horizontal, nic_vertical;
   OpenDDS::DCPS::TimeDuration lifespan(60);   // 1 minute
   unsigned short stun_port = 3478;
+  std::string user_data;
 
 #ifdef OPENDDS_SECURITY
   std::string identity_ca_file;
@@ -108,6 +109,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     } else if ((arg = args.get_the_parameter("-StunPort"))) {
       stun_port = ACE_OS::atoi(arg);
       args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-UserData"))) {
+      user_data = arg;
+      args.consume_arg();
 #ifdef OPENDDS_SECURITY
     } else if ((arg = args.get_the_parameter("-IdentityCA"))) {
       identity_ca_file = file + arg;
@@ -125,7 +129,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       identity_key_file = file + arg;
       secure = true;
       args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-Goverance"))) {
+    } else if ((arg = args.get_the_parameter("-Governance"))) {
       governance_file = file + arg;
       secure = true;
       args.consume_arg();
@@ -191,6 +195,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   DDS::DomainParticipantQos participant_qos;
   factory->get_default_participant_qos(participant_qos);
+  participant_qos.user_data.value.length(static_cast<CORBA::ULong>(user_data.length()));
+  std::memcpy(participant_qos.user_data.value.get_buffer(), user_data.data(), user_data.length());
 
   DDS::PropertySeq& properties = participant_qos.property.value;
   append(properties, OpenDDS::RTPS::RTPS_DISCOVERY_ENDPOINT_ANNOUNCEMENTS, "false");

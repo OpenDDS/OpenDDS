@@ -35,7 +35,7 @@ RtpsUdpInst::RtpsUdpInst(const OPENDDS_STRING& name)
   , ttl_(1)
   , multicast_group_address_(7401, "239.255.0.2")
   , multicast_group_address_str_("239.255.0.2:7401")
-  , nak_depth_(32) // default nak_depth in OpenDDS_Multicast
+  , nak_depth_(0)
   , max_bundle_size_(TransportSendStrategy::UDP_MAX_MESSAGE_SIZE - RTPS::RTPSHDR_SZ) // default maximum bundled message size is max udp message size (see TransportStrategy) minus RTPS header
   , nak_response_delay_(0, 200*1000 /*microseconds*/) // default from RTPS
   , heartbeat_period_(1) // no default in RTPS spec
@@ -127,7 +127,12 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
     stun_server_address(addr);
   }
 
+#ifdef OPENDDS_SECURITY
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("UseIce"), use_ice_, bool);
+  if (use_ice_ && !TheServiceParticipant->get_security()) {
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Security must be enabled (-DCPSSecurity 1) when using ICE (UseIce)\n")), -1);
+  }
+#endif
 
   return 0;
 }

@@ -109,9 +109,9 @@ project: idl2jni, javah, dcpslib, optional_jni_check, dcps_java_optional, dcps_t
   }
 
   verbatim(gnuace, postinstall) {
-"	cp $(DDS_ROOT)/lib/OpenDDS_DCPS.jar $(INSTALL_PREFIX)/lib"
+"	cp $(DDS_ROOT)/lib/OpenDDS_DCPS.jar $(DESTDIR)$(INSTALL_PREFIX)/lib"
 "	perl -pi -e 's!\\$$[(]DDS_ROOT[)]/lib!$(INSTALL_PREFIX)/lib!g' $(DESTDIR)$(INSTALL_PREFIX)/share/dds/MPC/config/idl2jni.mpb"
 "	perl -pi -e 's!\\$$[(]DDS_ROOT[)]/lib!$(INSTALL_PREFIX)/lib!g' $(DESTDIR)$(INSTALL_PREFIX)/share/dds/MPC/config/dcps_java.mpb"
-"	rm $(INSTALL_PREFIX)/dds/*.idl && rmdir $(INSTALL_PREFIX)/dds"
+"	rm $(DESTDIR)$(INSTALL_PREFIX)/dds/*.idl && rmdir $(DESTDIR)$(INSTALL_PREFIX)/dds"
   }
 }

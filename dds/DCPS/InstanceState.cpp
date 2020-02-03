@@ -232,7 +232,6 @@ void InstanceState::schedule_release()
 
   if (delay.sec != DDS::DURATION_INFINITE_SEC &&
       delay.nanosec != DDS::DURATION_INFINITE_NSEC) {
-    cancel_release();
 
     execute_or_enqueue(new ScheduleCommand(this, TimeDuration(delay)));
 
@@ -330,6 +329,10 @@ void InstanceState::CancelCommand::execute()
 
 void InstanceState::ScheduleCommand::execute()
 {
+  if (instance_state_->release_timer_id_ != -1) {
+    instance_state_->reactor()->cancel_timer(instance_state_);
+  }
+
   instance_state_->release_timer_id_ =
     instance_state_->reactor()->schedule_timer(instance_state_, 0, delay_.value());
 
