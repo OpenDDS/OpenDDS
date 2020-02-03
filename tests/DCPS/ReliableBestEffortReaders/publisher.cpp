@@ -3,6 +3,7 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/WaitSet.h>
 #include <iostream>
+#include <assert.h>
 
 class Publisher
 {

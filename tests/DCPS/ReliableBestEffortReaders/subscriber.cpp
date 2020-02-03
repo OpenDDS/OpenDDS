@@ -37,10 +37,12 @@ Subscriber::Subscriber(int argc, ACE_TCHAR* argv[]) : domain_(argc, argv, "Subsc
   reliable_[1] = false;
   ACE_Get_Opt opts(argc, argv, ACE_TEXT("r:"));
   for (int option = opts(); option != EOF; option = opts()) {
-    if(option == 'r') {
-      std::string r = opts.opt_arg();
-      if(r.length() > 0) { reliable_[0] = (r[0] == '1'); }
-      if(r.length() > 1) { reliable_[1] = (r[1] == '1'); }
+    if (option == 'r') {
+      ACE_TCHAR* r = opts.opt_arg();
+      if (r) {
+        reliable_[0] = (r[0] == '1');
+        reliable_[1] = (r[1] == '1');
+      }
       break;
     }
   }
