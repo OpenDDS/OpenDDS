@@ -197,7 +197,7 @@ public:
   /**
    * Wrapper around built-in annotations, see annotations.h
    */
-  BuiltinAnnotations builtin_annotations_;
+  Annotations builtin_annotations_;
 
   /**
    * If true, warn about #pragma DCPS_DATA_TYPE

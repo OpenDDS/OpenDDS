@@ -1,6 +1,23 @@
+/**
+ * /file annotations.h
+ *
+ * Wrappers for accessing data from IDL annotations and registers the
+ * annotation by evaluating its definition. Each annotation (@key, @topic,
+ * etc.) should have class.
+ *
+ * To add a new annotation, implement a subclass of Annotation, implementing at
+ * least definition() and name(), then add a register_one call for the class to
+ * Annotations::register_all() in annotations.cpp.
+ */
+
 #ifndef OPENDDS_IDL_ANNOTATIONS_HEADER
 #define OPENDDS_IDL_ANNOTATIONS_HEADER
 
+#include <ast_expression.h>
+
+#include <ace/Basic_Types.h>
+
+#include <vector>
 #include <string>
 #include <map>
 
@@ -8,18 +25,18 @@ class AST_Decl;
 class AST_Union;
 class AST_Annotation_Decl;
 class AST_Annotation_Appl;
-class BuiltinAnnotation;
+class Annotation;
 
-class BuiltinAnnotations {
+class Annotations {
 public:
-  BuiltinAnnotations();
-  ~BuiltinAnnotations();
+  Annotations();
+  ~Annotations();
 
   void register_all();
-  BuiltinAnnotation* operator[](const std::string& annotation);
+  Annotation* operator[](const std::string& annotation);
 
-  template<typename T> inline void
-  register_one()
+  template<typename T>
+  void register_one()
   {
     T* annotation = new T;
     map_[annotation->fullname()] = annotation;
@@ -27,17 +44,17 @@ public:
   }
 
 private:
-  typedef std::map<std::string, BuiltinAnnotation*> MapType;
+  typedef std::map<std::string, Annotation*> MapType;
   MapType map_;
 };
 
 /**
- * Wrapper for Annotations
+ * Wrapper Base Class for Annotations
  */
-class BuiltinAnnotation {
+class Annotation {
 public:
-  BuiltinAnnotation();
-  virtual ~BuiltinAnnotation();
+  Annotation();
+  virtual ~Annotation();
 
   virtual std::string definition() const = 0;
   virtual std::string name() const = 0;
@@ -51,25 +68,38 @@ private:
   AST_Annotation_Decl* declaration_;
 };
 
-/**
- * Annotation with a Single Boolean Member Named "value"
- */
-class BuiltinAnnotationWithBoolValue : public BuiltinAnnotation {
-public:
-  BuiltinAnnotationWithBoolValue();
-  virtual ~BuiltinAnnotationWithBoolValue();
+AST_Expression::AST_ExprValue* get_annotation_member_ev(
+  AST_Annotation_Appl* appl, const char* member_name);
 
+bool get_bool_annotation_member_value(
+  AST_Annotation_Appl* appl, const char* member_name);
+
+ACE_UINT32 get_u32_annotation_member_value(
+  AST_Annotation_Appl* appl, const char* member_name);
+
+/**
+ * Annotation with a Single Member Named "value"
+ */
+template <typename T>
+class AnnotationWithValue : public Annotation {
+public:
   /**
    * Default value if the node DOESN'T have the annotation. This is different
    * than the default value in the annotation definition.
    */
-  virtual bool default_value() const;
+  T default_value() const
+  {
+    return T();
+  }
 
   /**
    * Returns the value according to the annotation if it exists, else returns
    * default_value().
    */
-  virtual bool node_value(AST_Decl* node) const;
+  T node_value(AST_Decl* node) const
+  {
+    return value_from_appl(find_on(node));
+  }
 
   /**
    * If node has the annotation, this sets value to the annotation value and
@@ -77,52 +107,124 @@ public:
    * If node does not have the annotation, this sets value to default_value()
    * and returns false.
    */
-  virtual bool node_value_exists(AST_Decl* node, bool& value) const;
+  bool node_value_exists(AST_Decl* node, T& value) const
+  {
+    AST_Annotation_Appl* appl = find_on(node);
+    value = value_from_appl(appl);
+    return appl;
+  }
 
 protected:
-  bool value_from_appl(AST_Annotation_Appl* appl) const;
+  /**
+   * Get value from an annotation application. Returns default_value if appl is
+   * null. Must be specialized.
+   */
+  T value_from_appl(AST_Annotation_Appl* appl) const;
 };
 
-/// Wrapper for @key
-class KeyAnnotation : public BuiltinAnnotationWithBoolValue {
-public:
-  KeyAnnotation();
-  virtual ~KeyAnnotation();
+template<>
+bool AnnotationWithValue<bool>::value_from_appl(AST_Annotation_Appl* appl) const;
 
-  virtual std::string definition() const;
-  virtual std::string name() const;
+template<>
+unsigned AnnotationWithValue<ACE_UINT32>::value_from_appl(
+  AST_Annotation_Appl* appl) const;
 
-  virtual bool union_value(AST_Union* node) const;
+template <typename T>
+class AnnotationWithEnumValue : public AnnotationWithValue<T> {
+protected:
+  T value_from_appl(AST_Annotation_Appl* appl) const
+  {
+    return appl ? static_cast<T>(
+      get_u32_annotation_member_value(appl, "value")) : this->default_value();
+  }
 };
 
-/// Wrapper for @topic
-class TopicAnnotation : public BuiltinAnnotation {
+class KeyAnnotation : public AnnotationWithValue<bool> {
 public:
-  TopicAnnotation();
-  virtual ~TopicAnnotation();
+  std::string definition() const;
+  std::string name() const;
 
-  virtual std::string definition() const;
-  virtual std::string name() const;
+  bool union_value(AST_Union* node) const;
 };
 
-/// Wrapper for @nested
-class NestedAnnotation : public BuiltinAnnotationWithBoolValue {
+class TopicAnnotation : public Annotation {
 public:
-  NestedAnnotation();
-  virtual ~NestedAnnotation();
-
-  virtual std::string definition() const;
-  virtual std::string name() const;
+  std::string definition() const;
+  std::string name() const;
 };
 
-/// Wrapper for @default_nested
-class DefaultNestedAnnotation : public BuiltinAnnotationWithBoolValue {
+class NestedAnnotation : public AnnotationWithValue<bool> {
 public:
-  DefaultNestedAnnotation();
-  virtual ~DefaultNestedAnnotation();
+  std::string definition() const;
+  std::string name() const;
+};
 
-  virtual std::string definition() const;
-  virtual std::string name() const;
+class DefaultNestedAnnotation : public AnnotationWithValue<bool> {
+public:
+  std::string definition() const;
+  std::string name() const;
+};
+
+class IdAnnotation : public AnnotationWithValue<ACE_UINT32> {
+public:
+  std::string definition() const;
+  std::string name() const;
+};
+
+enum AutoidKind {
+  autoidkind_sequential,
+  autoidkind_hash
+};
+
+class AutoidAnnotation : public AnnotationWithEnumValue<AutoidKind> {
+public:
+  std::string definition() const;
+  std::string name() const;
+
+  AutoidKind default_value() const;
+};
+
+class HashidAnnotation : public AnnotationWithValue<std::string> {
+public:
+  std::string definition() const;
+  std::string name() const;
+
+  std::string default_value() const;
+};
+
+enum ExtensibilityKind {
+  extensibilitykind_final,
+  extensibilitykind_appendable,
+  extensibilitykind_mutable
+};
+
+class ExtensibilityAnnotation : public AnnotationWithEnumValue<ExtensibilityKind> {
+public:
+  std::string definition() const;
+  std::string name() const;
+
+  ExtensibilityKind default_value() const;
+};
+
+// @annotation final = @extensibility(FINAL);
+class FinalAnnotation : public Annotation {
+public:
+  std::string definition() const;
+  std::string name() const;
+};
+
+// @annotation appendable = @extensibility(APPENDABLE);
+class AppendableAnnotation : public Annotation {
+public:
+  std::string definition() const;
+  std::string name() const;
+};
+
+// @annotation mutable = @extensibility(MUTABLE);
+class MutableAnnotation : public Annotation {
+public:
+  std::string definition() const;
+  std::string name() const;
 };
 
 #endif

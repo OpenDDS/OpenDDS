@@ -1,65 +1,69 @@
 #include "annotations.h"
 
+#include "be_extern.h"
+
 #include <ast_annotation_decl.h>
 #include <ast_annotation_appl.h>
 #include <ast_annotation_member.h>
 #include <ast_union.h>
+#include <utl_string.h>
 
-void
-BuiltinAnnotations::register_all()
+void Annotations::register_all()
 {
   register_one<KeyAnnotation>();
   register_one<TopicAnnotation>();
   register_one<NestedAnnotation>();
   register_one<DefaultNestedAnnotation>();
+  register_one<IdAnnotation>();
+  register_one<AutoidAnnotation>();
+  register_one<HashidAnnotation>();
+  register_one<ExtensibilityAnnotation>();
+  register_one<FinalAnnotation>();
+  register_one<AppendableAnnotation>();
+  register_one<MutableAnnotation>();
 }
 
-BuiltinAnnotations::BuiltinAnnotations()
+Annotations::Annotations()
 {
 }
 
-BuiltinAnnotations::~BuiltinAnnotations()
+Annotations::~Annotations()
 {
   for (MapType::iterator i = map_.begin(); i != map_.end(); ++i) {
     delete i->second;
   }
 }
 
-BuiltinAnnotation*
-BuiltinAnnotations::operator[](const std::string& annotation)
+Annotation* Annotations::operator[](const std::string& annotation)
 {
   return map_[annotation];
 }
 
-BuiltinAnnotation::BuiltinAnnotation()
+Annotation::Annotation()
 : declaration_(0)
 {
 }
 
-BuiltinAnnotation::~BuiltinAnnotation()
+Annotation::~Annotation()
 {
 }
 
-std::string
-BuiltinAnnotation::fullname() const
+std::string Annotation::fullname() const
 {
   return std::string("::@") + name();
 }
 
-AST_Annotation_Decl*
-BuiltinAnnotation::declaration() const
+AST_Annotation_Decl* Annotation::declaration() const
 {
   return declaration_;
 }
 
-AST_Annotation_Appl*
-BuiltinAnnotation::find_on(AST_Decl* node) const
+AST_Annotation_Appl* Annotation::find_on(AST_Decl* node) const
 {
   return node->annotations().find(declaration_);
 }
 
-void
-BuiltinAnnotation::cache()
+void Annotation::cache()
 {
   idl_global->eval(definition().c_str());
   UTL_Scope* root = idl_global->scopes().bottom();
@@ -67,60 +71,80 @@ BuiltinAnnotation::cache()
     root->lookup_by_name(fullname().c_str()));
 }
 
-BuiltinAnnotationWithBoolValue::BuiltinAnnotationWithBoolValue()
+AST_Expression::AST_ExprValue* get_annotation_member_ev(
+  AST_Annotation_Appl* appl, const char* member_name)
 {
-}
-
-BuiltinAnnotationWithBoolValue::~BuiltinAnnotationWithBoolValue()
-{
-}
-
-bool
-BuiltinAnnotationWithBoolValue::default_value() const
-{
-  return false;
-}
-
-bool
-BuiltinAnnotationWithBoolValue::value_from_appl(AST_Annotation_Appl* appl) const
-{
-  if (!appl) {
-    return default_value();
-  }
   AST_Annotation_Member* member =
-    dynamic_cast<AST_Annotation_Member*>((*appl)["value"]);
-  if (!member || !member->value() || !member->value()->ev()) {
-    throw std::string("Error accessing value member");
+    dynamic_cast<AST_Annotation_Member*>((*appl)[member_name]);
+  AST_Expression::AST_ExprValue* ev = 0;
+  if (member) {
+    AST_Expression* e = member->value();
+    if (e) {
+      ev = e->ev();
+    }
   }
-  return member->value()->ev()->u.bval;
+  if (!ev) {
+    idl_global->err()->misc_error(
+      (std::string("Found null pointer while getting value of member \"") +
+        member_name + "\" of annotation \"" +
+        appl->local_name()->get_string() + "\"").c_str(),
+      appl);
+    BE_abort();
+  }
+  return ev;
 }
 
-bool
-BuiltinAnnotationWithBoolValue::node_value(AST_Decl* node) const
+bool get_bool_annotation_member_value(
+  AST_Annotation_Appl* appl, const char* member_name)
 {
-  return value_from_appl(find_on(node));
+  return get_annotation_member_ev(appl, member_name)->u.bval;
 }
 
-bool
-BuiltinAnnotationWithBoolValue::node_value_exists(AST_Decl* node, bool& value) const
+ACE_UINT32 get_u32_annotation_member_value(
+  AST_Annotation_Appl* appl, const char* member_name)
 {
-  AST_Annotation_Appl* appl = find_on(node);
-  value = value_from_appl(appl);
-  return appl;
+  return get_annotation_member_ev(appl, member_name)->u.ulval;
+}
+
+std::string get_str_annotation_member_value(
+  AST_Annotation_Appl* appl, const char* member_name)
+{
+  UTL_String* idlstr = get_annotation_member_ev(appl, member_name)->u.strval;
+  if (!idlstr) {
+    idl_global->err()->misc_error(
+      (std::string("Found null pointer while getting string value of member \"") +
+        member_name + "\" of annotation \"" +
+        appl->local_name()->get_string() + "\"").c_str(),
+      appl);
+    BE_abort();
+  }
+  return idlstr->get_string();
+}
+
+template<>
+bool AnnotationWithValue<bool>::value_from_appl(
+  AST_Annotation_Appl* appl) const
+{
+  return appl ? get_bool_annotation_member_value(appl, "value") : default_value();
+}
+
+template<>
+ACE_UINT32 AnnotationWithValue<ACE_UINT32>::value_from_appl(
+  AST_Annotation_Appl* appl) const
+{
+  return appl ? get_u32_annotation_member_value(appl, "value") : default_value();
+}
+
+template<>
+std::string AnnotationWithValue<std::string>::value_from_appl(
+  AST_Annotation_Appl* appl) const
+{
+  return appl ? get_str_annotation_member_value(appl, "value") : default_value();
 }
 
 // @key ======================================================================
 
-KeyAnnotation::KeyAnnotation()
-{
-}
-
-KeyAnnotation::~KeyAnnotation()
-{
-}
-
-std::string
-KeyAnnotation::definition() const
+std::string KeyAnnotation::definition() const
 {
   return
     "@annotation key {\n"
@@ -128,30 +152,19 @@ KeyAnnotation::definition() const
     "};\n";
 }
 
-std::string
-KeyAnnotation::name() const
+std::string KeyAnnotation::name() const
 {
   return "key";
 }
 
-bool
-KeyAnnotation::union_value(AST_Union* node) const
+bool KeyAnnotation::union_value(AST_Union* node) const
 {
   return value_from_appl(node->disc_annotations().find(declaration()));
 }
 
 // @topic ====================================================================
 
-TopicAnnotation::TopicAnnotation()
-{
-}
-
-TopicAnnotation::~TopicAnnotation()
-{
-}
-
-std::string
-TopicAnnotation::definition() const
+std::string TopicAnnotation::definition() const
 {
   return
     "@annotation topic {\n"
@@ -160,24 +173,14 @@ TopicAnnotation::definition() const
     "};\n";
 }
 
-std::string
-TopicAnnotation::name() const
+std::string TopicAnnotation::name() const
 {
   return "topic";
 }
 
 // @nested ===================================================================
 
-NestedAnnotation::NestedAnnotation()
-{
-}
-
-NestedAnnotation::~NestedAnnotation()
-{
-}
-
-std::string
-NestedAnnotation::definition() const
+std::string NestedAnnotation::definition() const
 {
   return
     "@annotation nested {\n"
@@ -185,24 +188,14 @@ NestedAnnotation::definition() const
     "};\n";
 }
 
-std::string
-NestedAnnotation::name() const
+std::string NestedAnnotation::name() const
 {
   return "nested";
 }
 
 // @default_nested ===========================================================
 
-DefaultNestedAnnotation::DefaultNestedAnnotation()
-{
-}
-
-DefaultNestedAnnotation::~DefaultNestedAnnotation()
-{
-}
-
-std::string
-DefaultNestedAnnotation::definition() const
+std::string DefaultNestedAnnotation::definition() const
 {
   return
     "@annotation default_nested {\n"
@@ -210,8 +203,122 @@ DefaultNestedAnnotation::definition() const
     "};\n";
 }
 
-std::string
-DefaultNestedAnnotation::name() const
+std::string DefaultNestedAnnotation::name() const
 {
   return "default_nested";
+}
+
+// @id =======================================================================
+
+std::string IdAnnotation::definition() const
+{
+  return
+    "@annotation id {\n"
+    "  unsigned long value;\n"
+    "};\n";
+}
+
+std::string IdAnnotation::name() const
+{
+  return "id";
+}
+
+// @autoid ===================================================================
+
+std::string AutoidAnnotation::definition() const
+{
+  return
+    "@annotation autoid {\n"
+    "    enum AutoidKind {\n"
+    "      SEQUENTIAL,\n"
+    "      HASH\n"
+    "    };\n"
+    "    AutoidKind value default HASH;\n"
+    "};\n";
+}
+
+std::string AutoidAnnotation::name() const
+{
+  return "autoid";
+}
+
+AutoidKind AutoidAnnotation::default_value() const
+{
+  return autoidkind_sequential;
+}
+
+// @hashid ===================================================================
+
+std::string HashidAnnotation::definition() const
+{
+  return
+    "@annotation hashid {\n"
+    "  string value default \"\";"
+    "};\n";
+}
+
+std::string HashidAnnotation::name() const
+{
+  return "hashid";
+}
+
+// @extensibility ============================================================
+
+std::string ExtensibilityAnnotation::definition() const
+{
+  return
+    "@annotation extensibility {\n"
+    "  enum ExtensibilityKind {\n"
+    "    FINAL,\n"
+    "    APPENDABLE,\n"
+    "    MUTABLE\n"
+    "  };\n"
+    "  ExtensibilityKind value;\n"
+    "};\n";
+}
+
+std::string ExtensibilityAnnotation::name() const
+{
+  return "extensibility";
+}
+
+ExtensibilityKind ExtensibilityAnnotation::default_value() const
+{
+  return extensibilitykind_appendable;
+}
+
+// @final ====================================================================
+
+std::string FinalAnnotation::definition() const
+{
+  return "@annotation final {};\n";
+}
+
+std::string FinalAnnotation::name() const
+{
+  return "final";
+}
+
+// @appendable ===============================================================
+
+std::string AppendableAnnotation::definition() const
+{
+  return "@annotation appendable {};\n";
+}
+
+std::string AppendableAnnotation::name() const
+{
+  return "appendable";
+}
+
+// @mutable ==================================================================
+
+std::string MutableAnnotation::definition() const
+{
+  return "@annotation mutable {};\n";
+}
+
+std::string MutableAnnotation::name() const
+{
+  return "mutable";
 }
