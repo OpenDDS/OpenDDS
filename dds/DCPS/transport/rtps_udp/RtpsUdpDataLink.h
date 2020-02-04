@@ -438,8 +438,8 @@ private:
   void deliver_held_data(const RepoId& readerId, WriterInfo& info, bool durable);
 
   /// What was once a single lock for the whole datalink is now split between three (four including ch_lock_):
-  /// - readers_lock_ protects readers_, readers_of_writer_, pending_reliable_readers_, and interesting_writers_
-  ///   along with anything else that fits the 'reader side activity' of the datalink
+  /// - readers_lock_ protects readers_, readers_of_writer_, pending_reliable_readers_, interesting_writers_, and
+  ///   writerBestEffortReaders_ along with anything else that fits the 'reader side activity' of the datalink
   /// - writers_lock_ protects writers_, heartbeat_counts_, best_effort_heartbeat_count_, and interesting_readers_
   ///   along with anything else that fits the 'writers side activity' of the datalink
   /// - locators_lock_ protects locators_ (and therefore calls to get_addresses_i())

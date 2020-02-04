@@ -453,7 +453,7 @@ RtpsUdpDataLink::add_locator(const RepoId& remote_id,
 
 void RtpsUdpDataLink::filterBestEffortReaders(const ReceivedDataSample& ds, RepoIdSet& selected, RepoIdSet& withheld)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  ACE_GUARD(ACE_Thread_Mutex, g, readers_lock_);
   const RepoId& writer = ds.header_.publication_id_;
   const SequenceNumber& seq = ds.header_.sequence_;
   WriterSeqReadersMap::iterator w = writerBestEffortReaders_.find(writer);
@@ -489,12 +489,11 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
                             bool local_reliable, bool remote_reliable,
                             bool local_durable, bool remote_durable)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-
   const GuidConverter conv(local_id);
 
   if (!local_reliable) {
     if (conv.isReader()) {
+      ACE_GUARD(ACE_Thread_Mutex, g, readers_lock_);
       WriterSeqReadersMap::iterator i = writerBestEffortReaders_.find(remote_id);
       if (i == writerBestEffortReaders_.end()) {
         writerBestEffortReaders_.insert(WriterSeqReadersMap::value_type(remote_id, SeqReaders(local_id)));
@@ -502,7 +501,6 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
         i->second.readers.insert(local_id);
       }
     }
-
     return;
   }
 
