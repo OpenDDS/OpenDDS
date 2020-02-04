@@ -451,7 +451,6 @@ OpenDDS::DCPS::TcpDataLink::do_association_actions()
 {
   typedef std::vector<std::pair<RepoId, RepoId> > PairVec;
   PairVec to_send;
-  PairVec to_call;
 
   {
     GuardType guard(strategy_lock_);
