@@ -45,6 +45,7 @@ public:
     LOST_STATE,
     RECONNECTED_STATE,
     ACTIVE_RECONNECTING_STATE,
+    ACTIVE_WAITING_STATE,
     PASSIVE_WAITING_STATE,
     PASSIVE_TIMEOUT_CALLED_STATE
   };
@@ -139,8 +140,11 @@ private:
   /// Handle the logic after an active connection has been established
   int on_active_connection_established();
 
-  void active_reconnect_i(const TcpDataLink_rch& link);
+  void active_reconnect_i();
   void passive_reconnect_i();
+
+  void notify_connection_lost();
+  void handle_stop_reconnecting();
 
   /// During the connection setup phase, the passive side sets passive_setup_,
   /// redirecting handle_input() events here (there is no recv strategy yet).
