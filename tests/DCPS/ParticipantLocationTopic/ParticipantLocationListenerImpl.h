@@ -24,7 +24,7 @@ class ParticipantLocationListenerImpl
 {
 public:
   //Constructor
-  ParticipantLocationListenerImpl(const char* id);
+  explicit ParticipantLocationListenerImpl(const std::string& id);
 
   //Destructor
   virtual ~ParticipantLocationListenerImpl();
@@ -62,7 +62,7 @@ public:
   LocationMapType location_map;
 
 private:
-  const char* id;
+  const std::string id_;
 
 };
 

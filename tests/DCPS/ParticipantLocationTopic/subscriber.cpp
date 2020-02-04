@@ -163,6 +163,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     ParticipantLocationListenerImpl* listener = new ParticipantLocationListenerImpl("Subscriber");
+    DDS::DataReaderListener_var listener_var(listener);
 
     CORBA::Long retcode =
       pub_loc_dr->set_listener(listener,
