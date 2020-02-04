@@ -63,6 +63,9 @@ public:
                                      const RepoId& /*writerid*/,
                                      const RepoId& /*readerid*/) { }
 
+  virtual void update_locators(const RepoId& /*remote*/,
+                               const TransportLocatorSeq& /*locators*/) { }
+
   virtual ICE::Endpoint* get_ice_endpoint() = 0;
 };
 

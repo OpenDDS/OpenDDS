@@ -413,10 +413,10 @@ void Certificate::load_cert_bytes(const std::string& path)
   std::ifstream in(path.c_str(), std::ios::binary);
 
   if (!in) {
-    ACE_ERROR((LM_ERROR,
+    ACE_ERROR((LM_WARNING,
                "(%P|%t) Certificate::load_cert_bytes:"
-               "WARNING: Failed to load file '%C'; errno: '%C'\n",
-               path.c_str(), strerror(errno)));
+               "WARNING: Failed to load file '%C'; '%m'\n",
+               path.c_str()));
     return;
   }
 

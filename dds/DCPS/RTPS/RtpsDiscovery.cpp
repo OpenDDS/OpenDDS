@@ -57,7 +57,7 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   , auth_resend_period_(1, 0)
   , max_spdp_sequence_msg_reset_check_(3)
   , spdp_rtps_relay_beacon_period_(30, 0)
-  , spdp_rtps_relay_send_period_(100, 0)
+  , spdp_rtps_relay_send_period_(30, 0)
   , sedp_rtps_relay_beacon_period_(30, 0)
   , use_rtps_relay_(false)
   , rtps_relay_only_(false)
@@ -327,6 +327,9 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
                               value.c_str(), rtps_name.c_str()), -1);
           }
           config->use_ice(bool(smInt));
+          if (smInt && !TheServiceParticipant->get_security()) {
+            ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Security must be enabled (-DCPSSecurity 1) when using ICE (UseIce)\n")), -1);
+          }
         } else if (name == "IceTa") {
           // In milliseconds.
           const OPENDDS_STRING& string_value = it->second;
@@ -635,6 +638,12 @@ RtpsDiscovery::get_sedp_port(DDS::DomainId_t domain,
   }
 
   return 0;
+}
+
+void
+RtpsDiscovery::spdp_rtps_relay_address(const ACE_INET_Addr& address)
+{
+  config_->spdp_rtps_relay_address(address);
 }
 
 void

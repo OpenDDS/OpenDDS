@@ -1,0 +1,11 @@
+#!/bin/bash
+BASIS_ARG=""
+ACE_ARG=""
+if [[ -n "${BASIS}" ]]; then
+    BASIS_ARG="--build-arg BASIS=$BASIS"
+fi
+if [[ -n "${ACE_CONFIG_OPTION}" ]]; then
+    ACE_ARG="--build-arg ACE_CONFIG_OPTION=$ACE_CONFIG_OPTION"
+fi
+
+docker build $BASIS_ARG $ACE_ARG -t $IMAGE_NAME .

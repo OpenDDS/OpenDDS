@@ -1,9 +1,9 @@
 #include "annotations.h"
 
-#include "ast_annotation_decl.h"
-#include "ast_annotation_appl.h"
-#include "ast_annotation_member.h"
-#include "ast_union.h"
+#include <ast_annotation_decl.h>
+#include <ast_annotation_appl.h>
+#include <ast_annotation_member.h>
+#include <ast_union.h>
 
 void
 BuiltinAnnotations::register_all()
@@ -20,6 +20,9 @@ BuiltinAnnotations::BuiltinAnnotations()
 
 BuiltinAnnotations::~BuiltinAnnotations()
 {
+  for (MapType::iterator i = map_.begin(); i != map_.end(); ++i) {
+    delete i->second;
+  }
 }
 
 BuiltinAnnotation*
@@ -72,7 +75,6 @@ BuiltinAnnotationWithBoolValue::~BuiltinAnnotationWithBoolValue()
 {
 }
 
-
 bool
 BuiltinAnnotationWithBoolValue::default_value() const
 {
@@ -97,6 +99,14 @@ bool
 BuiltinAnnotationWithBoolValue::node_value(AST_Decl* node) const
 {
   return value_from_appl(find_on(node));
+}
+
+bool
+BuiltinAnnotationWithBoolValue::node_value_exists(AST_Decl* node, bool& value) const
+{
+  AST_Annotation_Appl* appl = find_on(node);
+  value = value_from_appl(appl);
+  return appl;
 }
 
 // @key ======================================================================

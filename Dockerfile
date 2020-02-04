@@ -1,4 +1,5 @@
-FROM ubuntu:xenial
+ARG BASIS=ubuntu:bionic
+FROM $BASIS
 
 RUN apt-get update && apt-get install -y \
     cmake \
@@ -10,29 +11,28 @@ RUN apt-get update && apt-get install -y \
     libxerces-c-dev \
     libssl-dev \
     perl-base \
-    perl-modules
+    perl-modules \
+    git
 
 WORKDIR /usr/src/gtest
 RUN cmake CMakeLists.txt && make && cp ./*.a /usr/lib
 WORKDIR /usr/src/gmock
 RUN cmake CMakeLists.txt && make && cp ./*.a /usr/lib
 
-RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
-    apt-get install -y --no-install-recommends nodejs
-
 ADD . /opt/OpenDDS
 
+ARG ACE_CONFIG_OPTION="--doc-group"
 RUN cd /opt/OpenDDS && \
-    ./configure --prefix=/usr/local --security --doc-group --no-tests --std=c++11 && \
+    ./configure --prefix=/usr/local --security --std=c++11 ${ACE_CONFIG_OPTION} && \
     make && \
     make install && \
-    cp -a /opt/OpenDDS/ACE_wrappers/MPC /usr/local/share/ace/MPC && \
-    cd /opt/OpenDDS/tools/repeater && \
-    npm install
+    . /opt/OpenDDS/setenv.sh && \
+    cp -a ${MPC_ROOT} /usr/local/share/MPC
 
 ENV ACE_ROOT=/usr/local/share/ace \
     TAO_ROOT=/usr/local/share/tao \
     DDS_ROOT=/usr/local/share/dds \
+    MPC_ROOT=/usr/local/share/MPC \
     PATH=".:/usr/local/share/ace/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
 WORKDIR /opt/OpenDDS/tests/DCPS/Messenger

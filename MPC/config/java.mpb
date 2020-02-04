@@ -28,3 +28,13 @@ project {
   postbuild += <%if(jarname)%><%quote%>$(JAVA_HOME)/bin/jar<%quote%> -cf <%libout%>/<%jarname%>.jar -C classes .<%endif%>
   postclean += <%rmdir%> classes<%if(jarname)%> <%cmdsep%> <%rm%> <%libout%><%slash%><%jarname%>.jar<%endif%>
 }
+
+feature(jni_include) {
+  expand(JNI_ROOT) {
+    $JNI_ROOT
+    $(JAVA_HOME)
+  }
+  includes += \
+    $(JNI_ROOT)/include \
+    $(JNI_ROOT)/include/$(JAVA_PLATFORM)
+}

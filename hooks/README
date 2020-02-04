@@ -1,0 +1,2 @@
+The hooks directory represents build phase hooks for Dockerhub builds.
+https://docs.docker.com/docker-hub/builds/advanced/

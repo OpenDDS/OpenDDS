@@ -55,7 +55,7 @@ public:
 
   bool is_shut_down() const { return state_ == STATE_NOT_RUNNING; }
 
-  RcHandle<ReactorInterceptor> interceptor() const { return interceptor_; }
+  ReactorInterceptor_rch interceptor() const { return interceptor_; }
 
   OPENDDS_POOL_ALLOCATION_FWD
 
@@ -95,8 +95,7 @@ private:
   bool          use_async_send_;
   TimerQueueType* timer_queue_;
 
-  RcHandle<Interceptor> interceptor_;
-
+  ReactorInterceptor_rch interceptor_;
 };
 
 } // namespace DCPS

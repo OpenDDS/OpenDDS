@@ -3,7 +3,6 @@
 # OpenDDS
 
 [![Build Status](https://travis-ci.org/objectcomputing/OpenDDS.svg?branch=master)](https://travis-ci.org/objectcomputing/OpenDDS)
-[![Build status](https://ci.appveyor.com/api/projects/status/github/objectcomputing/OpenDDS?svg=true)](https://ci.appveyor.com/project/mitza-oci/opendds/branch/master)
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/opendds/badge.svg)](https://scan.coverity.com/projects/opendds)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/4647c7248ac14e7bb60c142c626ba574)](https://www.codacy.com/app/OpenDDS/OpenDDS?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=objectcomputing/OpenDDS&amp;utm_campaign=Badge_Grade)
 [![Azure DevOps](https://dev.azure.com/opendds/OpenDDS/_apis/build/status/objectcomputing.OpenDDS)](https://dev.azure.com/opendds/OpenDDS/_build/latest?definitionId=1)
@@ -110,7 +109,7 @@ There are two distributions of ACE/TAO that can be used with OpenDDS:
   * Can be manually downloaded from:
     * http://download.objectcomputing.com/TAO-2.2a_patches/
 * DOC Group ACE 6.5.5 / TAO 2.5.5
-  * When using the configure script, DOG Group ACE/TAO can be downloaded using
+  * When using the configure script, DOC Group ACE/TAO can be downloaded using
     one of these arguments:
     * `--doc-group` for the latest release
     * `--ace-github-latest` to use the master branch of ACE/TAO as is. This
@@ -132,8 +131,6 @@ https://www.activestate.com/activeperl).
 
 * [Google Test](docs/dependencies.md#google-test), for various tests.
   * Starting with OpenDDS 3.14, Google Test is required for OpenDDS tests.
-    Tests are built by default, so that means Google Test is required unless
-    `--no-tests` is passed to `configure`.
 * [CMake](docs/dependencies.md#cmake), for building Google Test and the OpenDDS
   CMake module.
 * [Java](docs/dependencies.md#java), for Java bindings.
@@ -200,11 +197,10 @@ This release of OpenDDS has been tested using the following compilers:
 
 ## Building and Installing
 
-For building and installation instructions
-see the [`INSTALL.md`](INSTALL.md) file in this directory.
+For building and installation instructions see the [`INSTALL.md`](INSTALL.md)
+file in this directory.
 
 ## Quick Start with Docker
 
 See [`docs/docker.md`](docs/docker.md) for how to use the pre-built docker
 image.
-

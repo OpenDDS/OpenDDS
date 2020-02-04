@@ -87,7 +87,11 @@ int AgentImpl::handle_timeout(const ACE_Time_Value& a_now, const void* /*act*/)
 
 AgentImpl::AgentImpl() :
   ReactorInterceptor(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner()),
-  remote_peer_reflexive_counter_(0) {}
+  ncm_listener_added_(false),
+  remote_peer_reflexive_counter_(0)
+  {
+    TheServiceParticipant->set_shutdown_listener(this);
+  }
 
 void AgentImpl::add_endpoint(Endpoint* a_endpoint)
 {
@@ -100,6 +104,14 @@ void AgentImpl::add_endpoint(Endpoint* a_endpoint)
   }
 
   check_invariants();
+
+  if (!endpoint_managers_.empty() && !ncm_listener_added_) {
+    DCPS::NetworkConfigMonitor_rch ncm = TheServiceParticipant->network_config_monitor();
+    if (ncm) {
+      ncm->add_listener(*this);
+    }
+    ncm_listener_added_ = true;
+  }
 }
 
 void AgentImpl::remove_endpoint(Endpoint* a_endpoint)
@@ -116,6 +128,14 @@ void AgentImpl::remove_endpoint(Endpoint* a_endpoint)
   }
 
   check_invariants();
+
+  if (endpoint_managers_.empty() && ncm_listener_added_) {
+    DCPS::NetworkConfigMonitor_rch ncm = TheServiceParticipant->network_config_monitor();
+    if (ncm) {
+      ncm->remove_listener(*this);
+    }
+    ncm_listener_added_ = false;
+  }
 }
 
 AgentInfo AgentImpl::get_local_agent_info(Endpoint* a_endpoint) const
@@ -213,6 +233,35 @@ void AgentImpl::check_invariants() const
   }
 
   OPENDDS_ASSERT(expected == active_foundations);
+}
+
+void AgentImpl::shutdown()
+{
+  reactor()->cancel_timer(this, 0);
+}
+
+void AgentImpl::notify_shutdown()
+{
+  shutdown();
+}
+void AgentImpl::network_change() const
+{
+  for (EndpointManagerMapType::const_iterator pos = endpoint_managers_.begin(),
+         limit = endpoint_managers_.end(); pos != limit; ++pos) {
+    pos->second->network_change();
+  }
+}
+
+void AgentImpl::add_address(const DCPS::NetworkInterface&,
+                            const ACE_INET_Addr&)
+{
+  network_change();
+}
+
+void AgentImpl::remove_address(const DCPS::NetworkInterface&,
+                               const ACE_INET_Addr&)
+{
+  network_change();
 }
 
 #endif /* OPENDDS_SECURITY */

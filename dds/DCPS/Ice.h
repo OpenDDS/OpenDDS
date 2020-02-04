@@ -100,6 +100,8 @@ struct AgentInfo {
   }
 };
 
+typedef OPENDDS_MAP(OPENDDS_STRING, ICE::AgentInfo) AgentInfoMap;
+
 } // namespace ICE
 } // namespace OpenDDS
 

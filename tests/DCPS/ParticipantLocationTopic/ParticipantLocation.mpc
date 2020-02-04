@@ -1,0 +1,27 @@
+project(ParticipantLocationPublisher): dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test, dcps_rtps, opendds_cxx11 {
+
+  exename   = publisher
+  requires += built_in_topics
+
+  Idl_Files {
+  }
+
+  Source_Files {
+    publisher.cpp
+    ParticipantLocationListenerImpl.cpp
+  }
+}
+
+project(ParticipantLocationSubscriber): dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test, dcps_rtps, opendds_cxx11 {
+
+  exename   = subscriber
+  requires += built_in_topics
+
+  Idl_Files {
+  }
+
+  Source_Files {
+    subscriber.cpp
+    ParticipantLocationListenerImpl.cpp
+  }
+}

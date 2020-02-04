@@ -17,29 +17,10 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
   namespace RTPS {
 
-    const Time_t TIME_ZERO     = { 0, 0 };
-    const Time_t TIME_INVALID  = { -1, 0xffffffff };
-    const Time_t TIME_INFINITE = { 0x7fffffff, 0xffffffff };
+    const Time_t TIME_INVALID  = { 0xffffffffu, 0xffffffffu };
 
-    // conversion factor from nanoseconds to NTP fractional (2^-32) seconds
-    const double NANOS_TO_RTPS_FRACS = 4.294967296;
-
-#ifndef OPENDDS_SAFETY_PROFILE
-    inline bool operator==(const Time_t& x, const Time_t& y)
-    {
-      return x.seconds == y.seconds && x.fraction == y.fraction;
-    }
-#endif
-
-    inline DCPS::TimeDuration rtps_time_to_time_duration(const Time_t& rtps_time)
-    {
-      if (rtps_time == TIME_INFINITE || rtps_time == TIME_INVALID) {
-        return DCPS::TimeDuration::max_value;
-      }
-      return DCPS::TimeDuration(
-        rtps_time.seconds,
-        static_cast<ACE_UINT32>(rtps_time.fraction / NANOS_TO_RTPS_FRACS + .5) / 1000);
-    }
+    const Duration_t DURATION_ZERO     = { 0, 0u };
+    const Duration_t DURATION_INFINITE = { 0x7fffffff, 0xffffffffu };
 
     const VendorId_t VENDORID_UNKNOWN = { { 0 } };
     const VendorId_t VENDORID_OPENDDS =

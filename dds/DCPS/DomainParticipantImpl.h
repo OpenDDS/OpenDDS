@@ -488,7 +488,7 @@ private:
   /// (i.e. subscribers and publishers).
   InstanceHandleGenerator participant_handles_;
 
-  Monitor* monitor_;
+  unique_ptr<Monitor> monitor_;
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   OwnershipManager owner_man_;

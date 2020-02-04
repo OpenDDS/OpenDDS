@@ -5,6 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
+#ifdef OPENDDS_SECURITY
+
 #include "Checklist.h"
 
 #include "EndpointManager.h"
@@ -16,8 +18,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace ICE {
-
-#ifdef OPENDDS_SECURITY
 
 using OpenDDS::DCPS::MonotonicTimePoint;
 using OpenDDS::DCPS::TimeDuration;
@@ -413,6 +413,7 @@ void Checklist::succeeded(const ConnectivityCheck& cc)
     }
 
     nominated_is_live_ = true;
+    endpoint_manager_->ice_connect(guids_, nominated_->remote.address);
     last_indication_.set_to_now();
 
     while (!connectivity_checks_.empty()) {
@@ -588,7 +589,7 @@ void Checklist::error_response(const ACE_INET_Addr& /*local_address*/,
       a_message.get_error_code(),
       a_message.get_error_reason().c_str()));
 
-    if (a_message.get_error_code() == 420 && a_message.has_unknown_attributes()) {
+    if (a_message.get_error_code() == STUN::UNKNOWN_ATTRIBUTE && a_message.has_unknown_attributes()) {
       std::vector<STUN::AttributeType> unknown_attributes = a_message.get_unknown_attributes();
 
       for (std::vector<STUN::AttributeType>::const_iterator pos = unknown_attributes.begin(),
@@ -597,7 +598,7 @@ void Checklist::error_response(const ACE_INET_Addr& /*local_address*/,
       }
     }
 
-    if (a_message.get_error_code() == 400 && a_message.get_error_code() == 420) {
+    if (a_message.get_error_code() == STUN::BAD_REQUEST && a_message.get_error_code() == STUN::UNKNOWN_ATTRIBUTE) {
       // Waiting and/or resending won't fix these errors.
       failed(cc);
       connectivity_checks_.erase(pos);
@@ -731,7 +732,13 @@ void Checklist::execute(const MonotonicTimePoint& a_now)
     interval = std::min(interval, endpoint_manager_->agent_impl->get_configuration().indication_period());
 
     // Check that we are receiving indications.
+    const bool before = nominated_is_live_;
     nominated_is_live_ = (a_now - last_indication_) < endpoint_manager_->agent_impl->get_configuration().nominated_ttl();
+    if (before && !nominated_is_live_) {
+      endpoint_manager_->ice_disconnect(guids_);
+    } else if (!before && nominated_is_live_) {
+      endpoint_manager_->ice_connect(guids_, nominated_->remote.address);
+    }
   }
 
   if (flag) {
@@ -794,9 +801,9 @@ void Checklist::indication()
   last_indication_.set_to_now();
 }
 
-#endif /* OPENDDS_SECURITY */
 
 } // namespace ICE
 } // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
+#endif /* OPENDDS_SECURITY */

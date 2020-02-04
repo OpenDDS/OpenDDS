@@ -4,16 +4,17 @@
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
-
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
-#include "DCPS/SafetyProfileStreams.h"
+#include "GuidUtils.h"
+#include "Util.h"
+#include "GuidBuilder.h"
+#include "SafetyProfileStreams.h"
 
-#include <cstdlib>
-#include <cstdio>
 #include "ace/ACE.h"
 #include "ace/OS_NS_string.h"
 
-#include "GuidBuilder.h"
+#include <cstdlib>
+#include <cstdio>
 
 namespace {
 
@@ -49,6 +50,13 @@ to_string(const GUID_t& guid)
 {
   return to_hex_dds_string(&guid.guidPrefix[0], sizeof(GuidPrefix_t), '.', 4) +
     '.' + to_string(guid.entityId);
+}
+
+void intersect(const RepoIdSet& a, const RepoIdSet& b, RepoIdSet& result)
+{
+  result.clear();
+  intersect_sorted_ranges(a.begin(), a.end(), b.begin(), b.end(),
+                          std::inserter(result, result.end()), GUID_tKeyLessThan());
 }
 
 #ifndef OPENDDS_SAFETY_PROFILE

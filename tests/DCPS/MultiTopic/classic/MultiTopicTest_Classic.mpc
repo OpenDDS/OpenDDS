@@ -1,0 +1,16 @@
+project: dcpsexe, dcps_test, content_subscription {
+  requires += multi_topic
+  idlflags += -I..
+  TypeSupport_Files {
+    ../MultiTopicTest.idl
+  }
+  IDL_Files {
+    ../MultiTopicTest.idl
+    MultiTopicTestTypeSupport.idl
+  }
+  includes += .
+  macros += CLASSIC_MAPPING
+  Source_Files {
+    ../MultiTopicTest.cpp
+  }
+}

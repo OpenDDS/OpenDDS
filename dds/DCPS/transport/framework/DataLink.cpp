@@ -363,7 +363,8 @@ DataLink::resume_send()
 int
 DataLink::make_reservation(const RepoId& remote_subscription_id,
                            const RepoId& local_publication_id,
-                           const TransportSendListener_wrch& send_listener)
+                           const TransportSendListener_wrch& send_listener,
+                           bool reliable)
 {
   DBG_ENTRY_LVL("DataLink", "make_reservation", 6);
 
@@ -387,7 +388,9 @@ DataLink::make_reservation(const RepoId& remote_subscription_id,
   {
     GuardType guard(pub_sub_maps_lock_);
 
-    assoc_by_local_[local_publication_id].insert(remote_subscription_id);
+    LocalAssociationInfo& info = assoc_by_local_[local_publication_id];
+    info.reliable_ = reliable;
+    info.associated_.insert(remote_subscription_id);
     ReceiveListenerSet_rch& rls = assoc_by_remote_[remote_subscription_id];
 
     if (rls.is_nil())
@@ -402,7 +405,8 @@ DataLink::make_reservation(const RepoId& remote_subscription_id,
 int
 DataLink::make_reservation(const RepoId& remote_publication_id,
                            const RepoId& local_subscription_id,
-                           const TransportReceiveListener_wrch& receive_listener)
+                           const TransportReceiveListener_wrch& receive_listener,
+                           bool reliable)
 {
   DBG_ENTRY_LVL("DataLink", "make_reservation", 6);
 
@@ -425,7 +429,9 @@ DataLink::make_reservation(const RepoId& remote_publication_id,
   {
     GuardType guard(pub_sub_maps_lock_);
 
-    assoc_by_local_[local_subscription_id].insert(remote_publication_id);
+    LocalAssociationInfo& info = assoc_by_local_[local_subscription_id];
+    info.reliable_ = reliable;
+    info.associated_.insert(remote_publication_id);
     ReceiveListenerSet_rch& rls = assoc_by_remote_[remote_publication_id];
 
     if (rls.is_nil())
@@ -459,7 +465,7 @@ DataLink::peer_ids(const RepoId& local_id) const
     return 0;
 
   GUIDSeq_var result = new GUIDSeq;
-  set_to_seq(iter->second, static_cast<GUIDSeq&>(result));
+  set_to_seq(iter->second.associated_, static_cast<GUIDSeq&>(result));
   return result._retn();
 }
 
@@ -510,7 +516,7 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
     } else {
       rls->remove(local_id);
     }
-    RepoIdSet& ris = assoc_by_local_[local_id];
+    RepoIdSet& ris = assoc_by_local_[local_id].associated_;
     if (ris.size() == 1) {
       DataLinkSet_rch& links = released_locals[local_id];
       if (links.is_nil())
@@ -834,7 +840,7 @@ DataLink::notify(ConnectionNotice notice)
         }
         break;
       }
-      const RepoIdSet& rids = local_it->second;
+      const RepoIdSet& rids = local_it->second.associated_;
 
       ReaderIdSeq subids;
       set_to_seq(rids, subids);
@@ -900,7 +906,7 @@ DataLink::notify(ConnectionNotice notice)
         }
         break;
       }
-      const RepoIdSet& rids = local_it->second;
+      const RepoIdSet& rids = local_it->second.associated_;
 
       WriterIdSeq pubids;
       set_to_seq(rids, pubids);
@@ -973,11 +979,11 @@ DataLink::target_intersection(const RepoId& pub_id, const GUIDSeq& in,
   AssocByLocal::const_iterator iter = assoc_by_local_.find(pub_id);
 
   if (iter != assoc_by_local_.end()) {
-    n_subs = iter->second.size();
+    n_subs = iter->second.associated_.size();
     const CORBA::ULong len = in.length();
 
     for (CORBA::ULong i(0); i < len; ++i) {
-      if (iter->second.count(in[i])) {
+      if (iter->second.associated_.count(in[i])) {
         if (res.ptr() == 0) {
           res = new GUIDSeq;
         }
@@ -1011,14 +1017,14 @@ void DataLink::clear_associations()
     TransportSendListener_rch tsl = send_listener_for(iter->first);
     if (tsl) {
       ReaderIdSeq sub_ids;
-      set_to_seq(iter->second, sub_ids);
+      set_to_seq(iter->second.associated_, sub_ids);
       tsl->remove_associations(sub_ids, false);
       continue;
     }
     TransportReceiveListener_rch trl = recv_listener_for(iter->first);
     if (trl) {
       WriterIdSeq pub_ids;
-      set_to_seq(iter->second, pub_ids);
+      set_to_seq(iter->second.associated_, pub_ids);
       trl->remove_associations(pub_ids, false);
     }
   }
@@ -1148,6 +1154,26 @@ DataLink::ImmediateStart::execute() {
 }
 
 
+void
+DataLink::network_change() const
+{
+  for (IdToSendListenerMap::const_iterator itr = send_listeners_.begin();
+       itr != send_listeners_.end(); ++itr) {
+    TransportSendListener_rch tsl = itr->second.lock();
+    if (tsl) {
+      tsl->transport_discovery_change();
+    }
+  }
+
+  for (IdToRecvListenerMap::const_iterator itr = recv_listeners_.begin();
+       itr != recv_listeners_.end(); ++itr) {
+    TransportReceiveListener_rch trl = itr->second.lock();
+    if (trl) {
+      trl->transport_discovery_change();
+    }
+  }
+}
+
 #ifndef OPENDDS_SAFETY_PROFILE
 std::ostream&
 operator<<(std::ostream& str, const DataLink& value)
@@ -1156,16 +1182,13 @@ operator<<(std::ostream& str, const DataLink& value)
       << " local entities currently using this link comprising following associations:"
       << std::endl;
 
-  for (DataLink::AssocByLocal::const_iterator
-       localId = value.assoc_by_local_.begin();
-       localId != value.assoc_by_local_.end();
-       ++localId) {
-    for (RepoIdSet::const_iterator
-         remoteId = localId->second.begin();
-         remoteId != localId->second.end();
-         ++remoteId) {
-      str << GuidConverter(localId->first) << " --> "
-          << GuidConverter(*remoteId) << "   " << std::endl;
+  typedef DataLink::AssocByLocal::const_iterator assoc_iter_t;
+  const DataLink::AssocByLocal& abl = value.assoc_by_local_;
+  for (assoc_iter_t ait = abl.begin(); ait != abl.end(); ++ait) {
+    const RepoIdSet& set = ait->second.associated_;
+    for (RepoIdSet::const_iterator rit = set.begin(); rit != set.end(); ++rit) {
+      str << GuidConverter(ait->first) << " --> "
+          << GuidConverter(*rit) << "   " << std::endl;
     }
   }
   return str;

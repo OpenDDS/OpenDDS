@@ -120,6 +120,7 @@ void
 TransportClient::enable_transport_using_config(bool reliable, bool durable,
                                                const TransportConfig_rch& tc)
 {
+  config_ = tc;
   swap_bytes_ = tc->swap_bytes_;
   cdr_encapsulation_ = false;
   reliable_ = reliable;
@@ -136,6 +137,8 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
   }
   passive_connect_duration_ = TimeDuration::from_msec(duration);
 
+  populate_connection_info();
+
   const size_t n = tc->instances_.size();
 
   for (size_t i = 0; i < n; ++i) {
@@ -146,9 +149,6 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
 
       if (impl) {
         impls_.push_back(impl);
-        const CORBA::ULong len = conn_info_.length();
-        conn_info_.length(len + 1);
-        impl->connection_info(conn_info_[len]);
 
 #if defined(OPENDDS_SECURITY)
         impl->local_crypto_handle(get_crypto_handle());
@@ -167,6 +167,24 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
   }
 }
 
+void
+TransportClient::populate_connection_info()
+{
+  conn_info_.length(0);
+
+  const size_t n = config_->instances_.size();
+  for (size_t i = 0; i < n; ++i) {
+    TransportInst_rch inst = config_->instances_[i];
+    if (check_transport_qos(*inst)) {
+      TransportImpl_rch impl = inst->impl();
+      if (impl) {
+        const CORBA::ULong len = conn_info_.length();
+        conn_info_.length(len + 1);
+        impl->connection_info(conn_info_[len], CONNINFO_ALL);
+      }
+    }
+  }
+}
 
 bool
 TransportClient::associate(const AssociationData& data, bool active)
@@ -285,11 +303,10 @@ TransportClient::associate(const AssociationData& data, bool active)
             if (res.link_.is_nil()) {
                 // In this case, it may be waiting for the TCP connection to be established.  Just wait without trying other transports.
                 pending_assoc_timer_->schedule_timer(this, iter->second);
+            } else {
+              use_datalink_i(data.remote_id_, res.link_, guard);
+              return true;
             }
-            else {
-                use_datalink_i(data.remote_id_, res.link_, guard);
-            }
-            return true;
           }
         }
       }
@@ -411,7 +428,6 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
                               "between %C and remote %C unsuccessful\n",
                               OPENDDS_STRING(tmp_local).c_str(),
                               OPENDDS_STRING(tmp_remote).c_str()), 0);
-          break;
         }
 
         if (res.success_) {
@@ -544,10 +560,10 @@ TransportClient::add_link(const DataLink_rch& link, const RepoId& peer)
   TransportReceiveListener_rch trl = get_receive_listener();
 
   if (trl) {
-    link->make_reservation(peer, repo_id_, trl);
+    link->make_reservation(peer, repo_id_, trl, reliable_);
 
   } else {
-    link->make_reservation(peer, repo_id_, get_send_listener());
+    link->make_reservation(peer, repo_id_, get_send_listener(), reliable_);
   }
 }
 
@@ -657,7 +673,7 @@ TransportClient::register_for_reader(const RepoId& participant,
   for (ImplsType::iterator pos = impls_.begin(), limit = impls_.end();
        pos != limit;
        ++pos) {
-    RcHandle<TransportImpl> impl = (*pos).lock();
+    RcHandle<TransportImpl> impl = pos->lock();
     if (impl) {
       impl->register_for_reader(participant, writerid, readerid, locators, listener);
     }
@@ -673,7 +689,7 @@ TransportClient::unregister_for_reader(const RepoId& participant,
   for (ImplsType::iterator pos = impls_.begin(), limit = impls_.end();
        pos != limit;
        ++pos) {
-    RcHandle<TransportImpl> impl = (*pos).lock();
+    RcHandle<TransportImpl> impl = pos->lock();
     if (impl) {
       impl->unregister_for_reader(participant, writerid, readerid);
     }
@@ -691,7 +707,7 @@ TransportClient::register_for_writer(const RepoId& participant,
   for (ImplsType::iterator pos = impls_.begin(), limit = impls_.end();
        pos != limit;
        ++pos) {
-    RcHandle<TransportImpl> impl = (*pos).lock();
+    RcHandle<TransportImpl> impl = pos->lock();
     if (impl) {
       impl->register_for_writer(participant, readerid, writerid, locators, listener);
     }
@@ -707,9 +723,24 @@ TransportClient::unregister_for_writer(const RepoId& participant,
   for (ImplsType::iterator pos = impls_.begin(), limit = impls_.end();
        pos != limit;
        ++pos) {
-    RcHandle<TransportImpl> impl = (*pos).lock();
+    RcHandle<TransportImpl> impl = pos->lock();
     if (impl) {
       impl->unregister_for_writer(participant, readerid, writerid);
+    }
+  }
+}
+
+void
+TransportClient::update_locators(const RepoId& remote,
+                                 const TransportLocatorSeq& locators)
+{
+  ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
+  for (ImplsType::iterator pos = impls_.begin(), limit = impls_.end();
+       pos != limit;
+       ++pos) {
+    RcHandle<TransportImpl> impl = pos->lock();
+    if (impl) {
+      impl->update_locators(remote, locators);
     }
   }
 }
@@ -725,7 +756,7 @@ TransportClient::get_ice_endpoint()
   for (ImplsType::iterator pos = impls_.begin(), limit = impls_.end();
        pos != limit;
        ++pos) {
-    RcHandle<TransportImpl> impl = (*pos).lock();
+    RcHandle<TransportImpl> impl = pos->lock();
     if (impl) {
       ICE::Endpoint* endpoint = impl->get_ice_endpoint();
       if (endpoint) { return endpoint; }

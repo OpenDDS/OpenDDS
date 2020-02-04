@@ -230,6 +230,30 @@ bool non_negative_duration(const DDS::Duration_t& t)
     || valid_duration(t);
 }
 
+ACE_INLINE OpenDDS_Dcps_Export
+ACE_UINT32 uint32_fractional_seconds_to_nanoseconds(ACE_UINT32 fraction)
+{
+  return static_cast<ACE_UINT32>((static_cast<ACE_UINT64>(fraction) * 1000000000) >> 32);
+}
+
+ACE_INLINE OpenDDS_Dcps_Export
+ACE_UINT32 nanoseconds_to_uint32_fractional_seconds(ACE_UINT32 nsec)
+{
+  return static_cast<ACE_UINT32>((static_cast<ACE_UINT64>(nsec) << 32) / 1000000000);
+}
+
+ACE_INLINE OpenDDS_Dcps_Export
+ACE_UINT32 uint32_fractional_seconds_to_microseconds(ACE_UINT32 fraction)
+{
+  return static_cast<ACE_UINT32>((static_cast<ACE_UINT64>(fraction) * 1000000) >> 32);
+}
+
+ACE_INLINE OpenDDS_Dcps_Export
+ACE_UINT32 microseconds_to_uint32_fractional_seconds(ACE_UINT32 usec)
+{
+  return static_cast<ACE_UINT32>((static_cast<ACE_UINT64>(usec) << 32) / 1000000);
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
 

@@ -252,8 +252,8 @@ private:
   size_t marshaled_size_;
 };
 
-const char* to_string(const MessageId value);
-const char* to_string(const SubMessageId value);
+const char* to_string(MessageId value);
+const char* to_string(SubMessageId value);
 OPENDDS_STRING to_string(const DataSampleHeader& value);
 
 /// Marshal/Insertion into a buffer.
@@ -263,11 +263,11 @@ bool operator<<(ACE_Message_Block&, const DataSampleHeader& value);
 #ifndef OPENDDS_SAFETY_PROFILE
 /// Message Id enumeration insertion onto an ostream.
 OpenDDS_Dcps_Export
-std::ostream& operator<<(std::ostream& str, const MessageId value);
+std::ostream& operator<<(std::ostream& os, MessageId value);
 
 /// Sub-Message Id enumeration insertion onto an ostream.
 OpenDDS_Dcps_Export
-std::ostream& operator<<(std::ostream& os, const SubMessageId rhs);
+std::ostream& operator<<(std::ostream& os, SubMessageId value);
 
 /// Message header insertion onto an ostream.
 OpenDDS_Dcps_Export

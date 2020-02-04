@@ -38,6 +38,8 @@ struct Args {
   int expected_result_;
   int timeout_;
 
+  int extra_space;
+
   Args();
 
   static int parse_args(int argc, ACE_TCHAR *argv[], Args& args);

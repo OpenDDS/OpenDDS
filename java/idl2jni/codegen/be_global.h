@@ -92,6 +92,16 @@ public:
 
   static bool writeFile(const char *fileName, const std::string &content);
 
+  /**
+   * Give a warning that looks like one from tao_idl
+   */
+  void warning(const char* msg, const char* filename = 0, unsigned lineno = 0);
+
+  /**
+   * Give an error that looks like one from tao_idl
+   */
+  void error(const char* msg, const char* filename = 0, unsigned lineno = 0);
+
 private:
   const char *filename_;
   // Name of the IDL file we are processing.

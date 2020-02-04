@@ -31,13 +31,12 @@ namespace DCPS {
 
 TransportImpl::TransportImpl(TransportInst& config)
   : config_(config)
-  , monitor_(0)
   , last_link_(0)
   , is_shut_down_(false)
 {
   DBG_ENTRY_LVL("TransportImpl", "TransportImpl", 6);
   if (TheServiceParticipant->monitor_factory_) {
-    monitor_ = TheServiceParticipant->monitor_factory_->create_transport_monitor(this);
+    monitor_.reset(TheServiceParticipant->monitor_factory_->create_transport_monitor(this));
   }
 }
 

@@ -7,7 +7,6 @@
 
 #include "Tcp_pch.h"
 #include "TcpTransport.h"
-#include "TcpConnectionReplaceTask.h"
 #include "TcpAcceptor.h"
 #include "TcpSendStrategy.h"
 #include "TcpReceiveStrategy.h"
@@ -35,7 +34,6 @@ namespace DCPS {
 TcpTransport::TcpTransport(TcpInst& inst)
   : TransportImpl(inst)
   , acceptor_(new TcpAcceptor(this))
-  , con_checker_(new TcpConnectionReplaceTask(this))
 {
   DBG_ENTRY_LVL("TcpTransport","TcpTransport",6);
 
@@ -49,7 +47,6 @@ TcpTransport::TcpTransport(TcpInst& inst)
 TcpTransport::~TcpTransport()
 {
   DBG_ENTRY_LVL("TcpTransport","~TcpTransport",6);
-  con_checker_->close(1);  // This could potentially fix a race condition
 }
 
 
@@ -115,11 +112,14 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
   TcpConnection* pConn = connection.in();
 
   ACE_TCHAR str[64];
-  key.address().addr_to_string(str,sizeof(str)/sizeof(str[0]));
+  key.address().addr_to_string(str,sizeof(str)/sizeof(str[0]), 0);
 
   // Can't make this call while holding onto TransportClient::lock_
+  ACE_Time_Value conn_timeout;
+  conn_timeout.msec(this->config().active_conn_timeout_period_);
+
   const int ret =
-    connector_.connect(pConn, key.address(), ACE_Synch_Options::asynch);
+    connector_.connect(pConn, key.address(), ACE_Synch_Options(ACE_Synch_Options::USE_REACTOR|ACE_Synch_Options::USE_TIMEOUT, conn_timeout));
 
   if (ret == -1 && errno != EWOULDBLOCK) {
 
@@ -337,14 +337,6 @@ TcpTransport::configure_i(TcpInst& config)
 
   connector_.open(reactor_task()->get_reactor());
 
-  // Open the reconnect task
-  if (this->con_checker_->open()) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: connection checker failed to open : %p\n"),
-                      ACE_TEXT("open")),
-                     false);
-  }
-
   // Override with DCPSDefaultAddress.
   if (config.local_address() == ACE_INET_Addr () &&
       !TheServiceParticipant->default_address ().empty ()) {
@@ -427,8 +419,6 @@ TcpTransport::shutdown_i()
   acceptor_->close();
   acceptor_->transport_shutdown();
 
-  con_checker_->close(1);
-
   {
     {
       GuardType guard(connections_lock_);
@@ -473,14 +463,14 @@ TcpTransport::shutdown_i()
 }
 
 bool
-TcpTransport::connection_info_i(TransportLocator& local_info) const
+TcpTransport::connection_info_i(TransportLocator& local_info, ConnectionInfoFlags flags) const
 {
   DBG_ENTRY_LVL("TcpTransport", "connection_info_i", 6);
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport public address str %C\n",
             this->config().get_public_address().c_str()), 2);
 
-  this->config().populate_locator(local_info);
+  config().populate_locator(local_info, flags);
 
   return true;
 }
@@ -633,7 +623,7 @@ TcpTransport::passive_connection(const ACE_INET_Addr& remote_address,
       links_.unbind(key);
 
     } else {
-      con_checker_->add(connection);
+      this->fresh_link(connection);
     }
 
     return;
@@ -658,7 +648,7 @@ TcpTransport::passive_connection(const ACE_INET_Addr& remote_address,
   connections_[key] = connection;
   VDBG_LVL((LM_DEBUG, "(%P|%t) # of after connections: %d\n", connections_.size()), 5);
 
-  con_checker_->add(connection);
+  this->fresh_link(connection);
 }
 
 /// Common code used by accept_datalink(), passive_connection(), and active completion.
@@ -785,27 +775,6 @@ TcpTransport::unbind_link(DataLink* link)
                (int)tcp_link->is_active()));
   }
 }
-
-void
-TcpTransport::add_reconnect_task(RcHandle<TcpReconnectTask> task) {
-  GuardType connections_guard(rc_tasks_lock_);
-  rc_tasks_.insert(task);
-}
-
-void
-TcpTransport::remove_reconnect_task(RcHandle<TcpReconnectTask> task) {
-  GuardType connections_guard(rc_tasks_lock_);
-  RC_TASK_SET::iterator it = rc_tasks_.begin();
-  while (it != rc_tasks_.end()) {
-    if (it->get() == task.get()) {
-      rc_tasks_.erase(it);
-      it = rc_tasks_.begin();
-    } else {
-      ++it;
-    }
-  }
-}
-
 
 }
 }

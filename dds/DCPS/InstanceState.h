@@ -139,13 +139,10 @@ public:
   DDS::InstanceHandle_t instance_handle() const { return handle_; }
 
   /// Return string of the name of the current instance state
-  OPENDDS_STRING instance_state_string() const
-  {
-    return instance_state_string(instance_state_);
-  }
+  const char* instance_state_string() const;
 
   /// Return string of the name of the instance state kind passed
-  static OPENDDS_STRING instance_state_string(DDS::InstanceStateKind value);
+  static const char* instance_state_string(DDS::InstanceStateKind value);
 
   /// Return string representation of the instance state mask passed
   static OPENDDS_STRING instance_state_mask_string(DDS::InstanceStateMask mask);

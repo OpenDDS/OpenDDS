@@ -5,15 +5,14 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "../Version.h"
-
-#include "tao/Version.h"
-#include "global_extern.h"
 #include "be_extern.h"
 #include "be_util.h"
-#include "drv_extern.h"
+#include "../Version.h"
 
-#include "ace/OS_NS_stdlib.h"
+#include <global_extern.h>
+#include <drv_extern.h>
+
+#include <ace/OS_NS_stdlib.h>
 
 #include <iostream>
 #include <iomanip>
@@ -56,7 +55,10 @@ BE_post_init(char*[], long)
   ACE_CString included;
   DRV_add_include_path(included, include_dds.c_str(), 0, true);
 
-  if (idl_global->idl_version_ >= IDL_VERSION_4) {
+  if (idl_global->idl_version_ < IDL_VERSION_4) {
+    idl_global->ignore_files_ = true; // Exit without parsing files
+    be_global->error("OpenDDS requires IDL version to be 4 or greater");
+  } else {
     DRV_cpp_putarg("-D__OPENDDS_IDL_HAS_ANNOTATIONS");
     be_global->builtin_annotations_.register_all();
   }

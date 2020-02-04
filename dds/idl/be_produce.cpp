@@ -324,10 +324,11 @@ BE_produce()
         if (stb_inc == "orbC.h" ||
             (stb_inc.size() >= 7
             && stb_inc.substr(stb_inc.size() - 7) == "/orbC.h") ) {
-          be_global->warning(idl_fn, lineno,
+          be_global->warning(
             "Potential inclusion of TAO orbC.h\n"
             "  Include TAO orb.idl with path of tao/orb.idl"
-            "  to prevent compilation errors");
+            "  to prevent compilation errors",
+            idl_fn, lineno);
         }
       }
 

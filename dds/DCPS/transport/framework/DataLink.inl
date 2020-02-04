@@ -208,7 +208,7 @@ DataLink::remove_sample(const DataSampleElement* sample)
 }
 
 ACE_INLINE void
-DataLink::remove_all_msgs(RepoId pub_id)
+DataLink::remove_all_msgs(const RepoId& pub_id)
 {
   DBG_ENTRY_LVL("DataLink","remove_all_msgs",6);
 
@@ -389,7 +389,8 @@ DataLink::default_listener() const
 ACE_INLINE
 void
 DataLink::send_final_acks (const RepoId& /*readerid*/)
-{ }
+{
+}
 
 }
 }

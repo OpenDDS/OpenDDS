@@ -35,11 +35,11 @@ void test_invalid(int& status, const std::string& s)
   }
 }
 
-#define ASSERT_MATCHED(x) do {                                          \
-  GuidSet expected_local_guids;                                       \
-  expected_local_guids.insert(x->participant_guid());                 \
-  if (relay_addresses_map[RelayAddresses()] != expected_local_guids) { \
-    std::cout << "ERROR: " <<  __func__ << " failed: local guids do not match" << std::endl; \
+#define ASSERT_MATCHED(x) do {                                  \
+  GuidSet expected_guids;                                       \
+  expected_guids.insert(x->participant_guid());                 \
+  if (guids != expected_guids) { \
+    std::cout << "ERROR: " <<  __func__ << " failed: guids do not match" << std::endl; \
     status = EXIT_FAILURE;                                              \
   } \
   ReaderSet actual_readers, expected_readers;                           \
@@ -59,8 +59,8 @@ void test_invalid(int& status, const std::string& s)
 } while(0);
 
 #define ASSERT_NOT_MATCHED do { \
-  if (!relay_addresses_map.empty()) {                    \
-    std::cout << "ERROR: " <<  __func__ << " failed: local guids should be empty" << std::endl; \
+  if (!guids.empty()) {                    \
+    std::cout << "ERROR: " <<  __func__ << " failed: guids should be empty" << std::endl; \
     status = EXIT_FAILURE;                                              \
   } \
   ReaderSet actual_readers, expected_readers;                   \
@@ -87,7 +87,7 @@ void writer_then_matched_reader(int& status)
   writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
   writer_entry.publisher_qos().partition.name.length(1);
   writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
-  WriterPtr writer(new Writer(writer_entry, true));
+  WriterPtr writer(new Writer(writer_entry));
 
   ReaderEntry reader_entry;
   reader_entry.topic_name("the topic");
@@ -96,12 +96,12 @@ void writer_then_matched_reader(int& status)
   reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
   reader_entry.subscriber_qos().partition.name.length(1);
   reader_entry.subscriber_qos().partition.name[0] = "?bjec[!s] *, [Ii]nc.";
-  ReaderPtr reader(new Reader(reader_entry, true));
+  ReaderPtr reader(new Reader(reader_entry));
 
   Index index;
-  RelayAddressesMap relay_addresses_map;
-  index.insert(writer, relay_addresses_map);
-  index.insert(reader, relay_addresses_map);
+  GuidSet guids;
+  index.insert(writer, guids);
+  index.insert(reader, guids);
 
   ASSERT_MATCHED(writer);
 }
@@ -116,7 +116,7 @@ void reader_then_matched_writer(int& status)
   writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
   writer_entry.publisher_qos().partition.name.length(1);
   writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
-  WriterPtr writer(new Writer(writer_entry, true));
+  WriterPtr writer(new Writer(writer_entry));
 
   ReaderEntry reader_entry;
   reader_entry.topic_name("the topic");
@@ -125,12 +125,12 @@ void reader_then_matched_writer(int& status)
   reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
   reader_entry.subscriber_qos().partition.name.length(1);
   reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
-  ReaderPtr reader(new Reader(reader_entry, true));
+  ReaderPtr reader(new Reader(reader_entry));
 
   Index index;
-  RelayAddressesMap relay_addresses_map;
-  index.insert(reader, relay_addresses_map);
-  index.insert(writer, relay_addresses_map);
+  GuidSet guids;
+  index.insert(reader, guids);
+  index.insert(writer, guids);
 
   ASSERT_MATCHED(reader);
 }
@@ -146,7 +146,7 @@ void matched_then_writer_changes_reliability(int& status)
   writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
   writer_entry.publisher_qos().partition.name.length(1);
   writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
-  WriterPtr writer(new Writer(writer_entry, true));
+  WriterPtr writer(new Writer(writer_entry));
 
   ReaderEntry reader_entry;
   reader_entry.topic_name("the topic");
@@ -156,19 +156,19 @@ void matched_then_writer_changes_reliability(int& status)
   reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
   reader_entry.subscriber_qos().partition.name.length(1);
   reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
-  ReaderPtr reader(new Reader(reader_entry, true));
+  ReaderPtr reader(new Reader(reader_entry));
 
   Index index;
-  RelayAddressesMap relay_addresses_map;
-  index.insert(writer, relay_addresses_map);
-  index.insert(reader, relay_addresses_map);
+  GuidSet guids;
+  index.insert(writer, guids);
+  index.insert(reader, guids);
 
   ASSERT_MATCHED(writer);
 
   writer_entry.data_writer_qos().reliability.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
 
-  relay_addresses_map.clear();
-  index.reinsert(writer, writer_entry, true, relay_addresses_map);
+  guids.clear();
+  index.reinsert(writer, writer_entry, guids);
   ASSERT_NOT_MATCHED;
 }
 
@@ -183,7 +183,7 @@ void matched_then_reader_changes_reliability(int& status)
   writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
   writer_entry.publisher_qos().partition.name.length(1);
   writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
-  WriterPtr writer(new Writer(writer_entry, true));
+  WriterPtr writer(new Writer(writer_entry));
 
   ReaderEntry reader_entry;
   reader_entry.topic_name("the topic");
@@ -193,19 +193,19 @@ void matched_then_reader_changes_reliability(int& status)
   reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
   reader_entry.subscriber_qos().partition.name.length(1);
   reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
-  ReaderPtr reader(new Reader(reader_entry, true));
+  ReaderPtr reader(new Reader(reader_entry));
 
   Index index;
-  RelayAddressesMap relay_addresses_map;
-  index.insert(writer, relay_addresses_map);
-  index.insert(reader, relay_addresses_map);
+  GuidSet guids;
+  index.insert(writer, guids);
+  index.insert(reader, guids);
 
   ASSERT_MATCHED(writer);
 
   reader_entry.data_reader_qos().reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
-  relay_addresses_map.clear();
-  index.reinsert(reader, reader_entry, true, relay_addresses_map);
+  guids.clear();
+  index.reinsert(reader, reader_entry, guids);
 
   ASSERT_NOT_MATCHED;
 }
@@ -220,7 +220,7 @@ void matched_then_writer_changes_partition(int& status)
   writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
   writer_entry.publisher_qos().partition.name.length(1);
   writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
-  WriterPtr writer(new Writer(writer_entry, true));
+  WriterPtr writer(new Writer(writer_entry));
 
   ReaderEntry reader_entry;
   reader_entry.topic_name("the topic");
@@ -229,19 +229,19 @@ void matched_then_writer_changes_partition(int& status)
   reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
   reader_entry.subscriber_qos().partition.name.length(1);
   reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
-  ReaderPtr reader(new Reader(reader_entry, true));
+  ReaderPtr reader(new Reader(reader_entry));
 
   Index index;
-  RelayAddressesMap relay_addresses_map;
-  index.insert(writer, relay_addresses_map);
-  index.insert(reader, relay_addresses_map);
+  GuidSet guids;
+  index.insert(writer, guids);
+  index.insert(reader, guids);
 
   ASSERT_MATCHED(writer);
 
   writer_entry.publisher_qos().partition.name[0] = "Object";
 
-  relay_addresses_map.clear();
-  index.reinsert(writer, writer_entry, true, relay_addresses_map);
+  guids.clear();
+  index.reinsert(writer, writer_entry, guids);
 
   ASSERT_NOT_MATCHED;
 }
@@ -256,7 +256,7 @@ void matched_then_reader_changes_partition(int& status)
   writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
   writer_entry.publisher_qos().partition.name.length(1);
   writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
-  WriterPtr writer(new Writer(writer_entry, true));
+  WriterPtr writer(new Writer(writer_entry));
 
   ReaderEntry reader_entry;
   reader_entry.topic_name("the topic");
@@ -265,19 +265,19 @@ void matched_then_reader_changes_partition(int& status)
   reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
   reader_entry.subscriber_qos().partition.name.length(1);
   reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
-  ReaderPtr reader(new Reader(reader_entry, true));
+  ReaderPtr reader(new Reader(reader_entry));
 
   Index index;
-  RelayAddressesMap relay_addresses_map;
-  index.insert(writer, relay_addresses_map);
-  index.insert(reader, relay_addresses_map);
+  GuidSet guids;
+  index.insert(writer, guids);
+  index.insert(reader, guids);
 
   ASSERT_MATCHED(writer);
 
   reader_entry.subscriber_qos().partition.name[0] = "Object";
 
-  relay_addresses_map.clear();
-  index.reinsert(reader, reader_entry, true, relay_addresses_map);
+  guids.clear();
+  index.reinsert(reader, reader_entry, guids);
 
   ASSERT_NOT_MATCHED;
 }
@@ -292,7 +292,7 @@ void matched_then_writer_changes_topic(int& status)
   writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
   writer_entry.publisher_qos().partition.name.length(1);
   writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
-  WriterPtr writer(new Writer(writer_entry, true));
+  WriterPtr writer(new Writer(writer_entry));
 
   ReaderEntry reader_entry;
   reader_entry.topic_name("the topic");
@@ -301,19 +301,19 @@ void matched_then_writer_changes_topic(int& status)
   reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
   reader_entry.subscriber_qos().partition.name.length(1);
   reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
-  ReaderPtr reader(new Reader(reader_entry, true));
+  ReaderPtr reader(new Reader(reader_entry));
 
   Index index;
-  RelayAddressesMap relay_addresses_map;
-  index.insert(writer, relay_addresses_map);
-  index.insert(reader, relay_addresses_map);
+  GuidSet guids;
+  index.insert(writer, guids);
+  index.insert(reader, guids);
 
   ASSERT_MATCHED(writer);
 
   writer_entry.topic_name("a new topic");
 
-  relay_addresses_map.clear();
-  index.reinsert(writer, writer_entry, true, relay_addresses_map);
+  guids.clear();
+  index.reinsert(writer, writer_entry, guids);
 
   ASSERT_NOT_MATCHED;
 }
@@ -328,7 +328,7 @@ void matched_then_reader_changes_topic(int& status)
   writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
   writer_entry.publisher_qos().partition.name.length(1);
   writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
-  WriterPtr writer(new Writer(writer_entry, true));
+  WriterPtr writer(new Writer(writer_entry));
 
   ReaderEntry reader_entry;
   reader_entry.topic_name("the topic");
@@ -337,19 +337,19 @@ void matched_then_reader_changes_topic(int& status)
   reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
   reader_entry.subscriber_qos().partition.name.length(1);
   reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
-  ReaderPtr reader(new Reader(reader_entry, true));
+  ReaderPtr reader(new Reader(reader_entry));
 
   Index index;
-  RelayAddressesMap relay_addresses_map;
-  index.insert(writer, relay_addresses_map);
-  index.insert(reader, relay_addresses_map);
+  GuidSet guids;
+  index.insert(writer, guids);
+  index.insert(reader, guids);
 
   ASSERT_MATCHED(writer);
 
   reader_entry.topic_name("a new topic");
 
-  relay_addresses_map.clear();
-  index.reinsert(reader, reader_entry, true, relay_addresses_map);
+  guids.clear();
+  index.reinsert(reader, reader_entry, guids);
 
   ASSERT_NOT_MATCHED;
 }
@@ -365,7 +365,7 @@ void unmatched_then_writer_changes_reliability(int& status)
   writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
   writer_entry.publisher_qos().partition.name.length(1);
   writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
-  WriterPtr writer(new Writer(writer_entry, true));
+  WriterPtr writer(new Writer(writer_entry));
 
   ReaderEntry reader_entry;
   reader_entry.topic_name("the topic");
@@ -375,18 +375,18 @@ void unmatched_then_writer_changes_reliability(int& status)
   reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
   reader_entry.subscriber_qos().partition.name.length(1);
   reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
-  ReaderPtr reader(new Reader(reader_entry, true));
+  ReaderPtr reader(new Reader(reader_entry));
 
   Index index;
-  RelayAddressesMap relay_addresses_map;
-  index.insert(writer, relay_addresses_map);
-  index.insert(reader, relay_addresses_map);
+  GuidSet guids;
+  index.insert(writer, guids);
+  index.insert(reader, guids);
 
   ASSERT_NOT_MATCHED;
 
   writer_entry.data_writer_qos().reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
-  index.reinsert(writer, writer_entry, true, relay_addresses_map);
+  index.reinsert(writer, writer_entry, guids);
 
   ASSERT_MATCHED(reader);
 }
@@ -402,7 +402,7 @@ void unmatched_then_reader_changes_reliability(int& status)
   writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
   writer_entry.publisher_qos().partition.name.length(1);
   writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
-  WriterPtr writer(new Writer(writer_entry, true));
+  WriterPtr writer(new Writer(writer_entry));
 
   ReaderEntry reader_entry;
   reader_entry.topic_name("the topic");
@@ -412,18 +412,18 @@ void unmatched_then_reader_changes_reliability(int& status)
   reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
   reader_entry.subscriber_qos().partition.name.length(1);
   reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
-  ReaderPtr reader(new Reader(reader_entry, true));
+  ReaderPtr reader(new Reader(reader_entry));
 
   Index index;
-  RelayAddressesMap relay_addresses_map;
-  index.insert(writer, relay_addresses_map);
-  index.insert(reader, relay_addresses_map);
+  GuidSet guids;
+  index.insert(writer, guids);
+  index.insert(reader, guids);
 
   ASSERT_NOT_MATCHED;
 
   reader_entry.data_reader_qos().reliability.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
 
-  index.reinsert(reader, reader_entry, true, relay_addresses_map);
+  index.reinsert(reader, reader_entry, guids);
 
   ASSERT_MATCHED(writer);
 }
@@ -438,7 +438,7 @@ void unmatched_then_writer_changes_partition(int& status)
   writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
   writer_entry.publisher_qos().partition.name.length(1);
   writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
-  WriterPtr writer(new Writer(writer_entry, true));
+  WriterPtr writer(new Writer(writer_entry));
 
   ReaderEntry reader_entry;
   reader_entry.topic_name("the topic");
@@ -447,18 +447,18 @@ void unmatched_then_writer_changes_partition(int& status)
   reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
   reader_entry.subscriber_qos().partition.name.length(1);
   reader_entry.subscriber_qos().partition.name[0] = "OCI";
-  ReaderPtr reader(new Reader(reader_entry, true));
+  ReaderPtr reader(new Reader(reader_entry));
 
   Index index;
-  RelayAddressesMap relay_addresses_map;
-  index.insert(writer, relay_addresses_map);
-  index.insert(reader, relay_addresses_map);
+  GuidSet guids;
+  index.insert(writer, guids);
+  index.insert(reader, guids);
 
   ASSERT_NOT_MATCHED;
 
   writer_entry.publisher_qos().partition.name[0] = "OCI";
 
-  index.reinsert(writer, writer_entry, true, relay_addresses_map);
+  index.reinsert(writer, writer_entry, guids);
 
   ASSERT_MATCHED(reader);
 }
@@ -473,7 +473,7 @@ void unmatched_then_reader_changes_partition(int& status)
   writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
   writer_entry.publisher_qos().partition.name.length(1);
   writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
-  WriterPtr writer(new Writer(writer_entry, true));
+  WriterPtr writer(new Writer(writer_entry));
 
   ReaderEntry reader_entry;
   reader_entry.topic_name("the topic");
@@ -482,18 +482,18 @@ void unmatched_then_reader_changes_partition(int& status)
   reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
   reader_entry.subscriber_qos().partition.name.length(1);
   reader_entry.subscriber_qos().partition.name[0] = "OCI";
-  ReaderPtr reader(new Reader(reader_entry, true));
+  ReaderPtr reader(new Reader(reader_entry));
 
   Index index;
-  RelayAddressesMap relay_addresses_map;
-  index.insert(writer, relay_addresses_map);
-  index.insert(reader, relay_addresses_map);
+  GuidSet guids;
+  index.insert(writer, guids);
+  index.insert(reader, guids);
 
   ASSERT_NOT_MATCHED;
 
   reader_entry.subscriber_qos().partition.name[0] = "Object Computing, Inc.";
 
-  index.reinsert(reader, reader_entry, true, relay_addresses_map);
+  index.reinsert(reader, reader_entry, guids);
 
   ASSERT_MATCHED(writer);
 }
@@ -508,7 +508,7 @@ void unmatched_then_writer_changes_topic(int& status)
   writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
   writer_entry.publisher_qos().partition.name.length(1);
   writer_entry.publisher_qos().partition.name[0] = "O*C*I*";
-  WriterPtr writer(new Writer(writer_entry, true));
+  WriterPtr writer(new Writer(writer_entry));
 
   ReaderEntry reader_entry;
   reader_entry.topic_name("the topic");
@@ -517,18 +517,18 @@ void unmatched_then_writer_changes_topic(int& status)
   reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
   reader_entry.subscriber_qos().partition.name.length(1);
   reader_entry.subscriber_qos().partition.name[0] = "Object Computing, Inc.";
-  ReaderPtr reader(new Reader(reader_entry, true));
+  ReaderPtr reader(new Reader(reader_entry));
 
   Index index;
-  RelayAddressesMap relay_addresses_map;
-  index.insert(writer, relay_addresses_map);
-  index.insert(reader, relay_addresses_map);
+  GuidSet guids;
+  index.insert(writer, guids);
+  index.insert(reader, guids);
 
   ASSERT_NOT_MATCHED;
 
   writer_entry.topic_name("the topic");
 
-  index.reinsert(writer, writer_entry, true, relay_addresses_map);
+  index.reinsert(writer, writer_entry, guids);
 
   ASSERT_MATCHED(reader);
 }
@@ -541,7 +541,7 @@ void unmatched_then_reader_changes_topic(int& status)
   writer_entry.type_name("the type");
   writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
   writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
-  WriterPtr writer(new Writer(writer_entry, true));
+  WriterPtr writer(new Writer(writer_entry));
 
   ReaderEntry reader_entry;
   reader_entry.topic_name("wrong topic");
@@ -550,18 +550,18 @@ void unmatched_then_reader_changes_topic(int& status)
   reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
   reader_entry.subscriber_qos().partition.name.length(1);
   reader_entry.subscriber_qos().partition.name[0] = "";
-  ReaderPtr reader(new Reader(reader_entry, true));
+  ReaderPtr reader(new Reader(reader_entry));
 
   Index index;
-  RelayAddressesMap relay_addresses_map;
-  index.insert(writer, relay_addresses_map);
-  index.insert(reader, relay_addresses_map);
+  GuidSet guids;
+  index.insert(writer, guids);
+  index.insert(reader, guids);
 
   ASSERT_NOT_MATCHED;
 
   reader_entry.topic_name("the topic");
 
-  index.reinsert(reader, reader_entry, true, relay_addresses_map);
+  index.reinsert(reader, reader_entry, guids);
 
   ASSERT_MATCHED(writer);
 }
@@ -576,7 +576,7 @@ void matched_then_writer_disappears(int& status)
   writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
   writer_entry.publisher_qos().partition.name.length(1);
   writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
-  WriterPtr writer(new Writer(writer_entry, true));
+  WriterPtr writer(new Writer(writer_entry));
 
   ReaderEntry reader_entry;
   reader_entry.topic_name("the topic");
@@ -585,18 +585,18 @@ void matched_then_writer_disappears(int& status)
   reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
   reader_entry.subscriber_qos().partition.name.length(1);
   reader_entry.subscriber_qos().partition.name[0] = "O*C*I*";
-  ReaderPtr reader(new Reader(reader_entry, true));
+  ReaderPtr reader(new Reader(reader_entry));
 
   Index index;
-  RelayAddressesMap relay_addresses_map;
-  index.insert(writer, relay_addresses_map);
-  index.insert(reader, relay_addresses_map);
+  GuidSet guids;
+  index.insert(writer, guids);
+  index.insert(reader, guids);
 
   ASSERT_MATCHED(writer);
 
   index.erase(writer);
 
-  relay_addresses_map.clear();
+  guids.clear();
 
   ASSERT_NOT_MATCHED;
 }
@@ -611,7 +611,7 @@ void matched_then_reader_disappears(int& status)
   writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
   writer_entry.publisher_qos().partition.name.length(1);
   writer_entry.publisher_qos().partition.name[0] = "O*C*I*";
-  WriterPtr writer(new Writer(writer_entry, true));
+  WriterPtr writer(new Writer(writer_entry));
 
   ReaderEntry reader_entry;
   reader_entry.topic_name("the topic");
@@ -620,17 +620,17 @@ void matched_then_reader_disappears(int& status)
   reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
   reader_entry.subscriber_qos().partition.name.length(1);
   reader_entry.subscriber_qos().partition.name[0] = "Object Computing, Inc.";
-  ReaderPtr reader(new Reader(reader_entry, true));
+  ReaderPtr reader(new Reader(reader_entry));
 
   Index index;
-  RelayAddressesMap relay_addresses_map;
-  index.insert(writer, relay_addresses_map);
-  index.insert(reader, relay_addresses_map);
+  GuidSet guids;
+  index.insert(writer, guids);
+  index.insert(reader, guids);
   ASSERT_MATCHED(writer);
 
   index.erase(reader);
 
-  relay_addresses_map.clear();
+  guids.clear();
 
   ASSERT_NOT_MATCHED;
 }
@@ -781,7 +781,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     qos_index_test<TopicIndex<NoIndex> >(status);
     qos_index_test<TopicIndex<PartitionIndex<NoIndex> > >(status);
     qos_index_test<PartitionIndex<TopicIndex<NoIndex> > >(status);
-  } catch (const CORBA::BAD_PARAM& ex) {
+  } catch (const CORBA::BAD_PARAM&) {
     std::cout << "Exception" << std::endl;
     status = EXIT_FAILURE;
   }

@@ -65,6 +65,9 @@ OpenDDS::DCPS::TcpInst::load(ACE_Configuration_Heap& cf,
   GET_CONFIG_VALUE(cf, trans_sect, ACE_TEXT("max_output_pause_period"),
                    this->max_output_pause_period_, int)
 
+  GET_CONFIG_VALUE(cf, trans_sect, ACE_TEXT("active_conn_timeout_period"),
+                   this->active_conn_timeout_period_, int)
+
   return 0;
 }
 
@@ -82,11 +85,12 @@ OpenDDS::DCPS::TcpInst::dump_to_str() const
   os << formatNameForDump("conn_retry_attempts")           << this->conn_retry_attempts_ << std::endl;
   os << formatNameForDump("passive_reconnect_duration")    << this->passive_reconnect_duration_ << std::endl;
   os << formatNameForDump("max_output_pause_period")       << this->max_output_pause_period_ << std::endl;
+  os << formatNameForDump("active_conn_timeout_period")    << this->active_conn_timeout_period_ << std::endl;
   return OPENDDS_STRING(os.str());
 }
 
 size_t
-OpenDDS::DCPS::TcpInst::populate_locator(OpenDDS::DCPS::TransportLocator& local_info) const
+OpenDDS::DCPS::TcpInst::populate_locator(OpenDDS::DCPS::TransportLocator& local_info, ConnectionInfoFlags) const
 {
   if (this->local_address() != ACE_INET_Addr() || !pub_address_str_.empty()) {
     // Get the public address string from the inst (usually the local address)

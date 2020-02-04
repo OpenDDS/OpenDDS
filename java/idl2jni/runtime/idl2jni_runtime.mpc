@@ -6,7 +6,6 @@ project: taolib, java, javah, optional_jni_check, dds_macros, i2jrt_optional, in
 
   libout       = $(DDS_ROOT)/lib
   dynamicflags = IDL2JNI_RUNTIME_BUILD_DLL
-  includes    += $(JAVA_HOME)/include $(JAVA_HOME)/include/$(JAVA_PLATFORM)
 
   specific {
     jarname    = i2jrt
@@ -24,9 +23,9 @@ project: taolib, java, javah, optional_jni_check, dds_macros, i2jrt_optional, in
   }
 
   verbatim(gnuace, postinstall) {
-"	cp $(DDS_ROOT)/lib/i2jrt.jar $(INSTALL_PREFIX)/lib"
-"	@$(MKDIR) $(INSTALL_PREFIX)/share/dds/java/build_scripts"
-"	cp ../../build_scripts/java?_wrapper.pl $(INSTALL_PREFIX)/share/dds/java/build_scripts"
-"	cp *.h $(INSTALL_PREFIX)/share/dds/java"
+"	cp $(DDS_ROOT)/lib/i2jrt.jar $(DESTDIR)$(INSTALL_PREFIX)/lib"
+"	@$(MKDIR) $(DESTDIR)$(INSTALL_PREFIX)/share/dds/java/build_scripts"
+"	cp ../../build_scripts/java?_wrapper.pl $(DESTDIR)$(INSTALL_PREFIX)/share/dds/java/build_scripts"
+"	cp *.h $(DESTDIR)$(INSTALL_PREFIX)/share/dds/java"
   }
 }

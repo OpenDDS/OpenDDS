@@ -6,12 +6,12 @@
 #ifndef OPENDDS_DCPS_TIME_TYPES_HEADER
 #define OPENDDS_DCPS_TIME_TYPES_HEADER
 
-#include "ace/Monotonic_Time_Policy.h"
-#include "ace/Time_Policy.h"
-#include "ace/Condition_Attributes.h"
+#include <ace/Monotonic_Time_Policy.h>
+#include <ace/Time_Policy.h>
+#include <ace/Condition_Attributes.h>
 
-#include "dds/DCPS/TimeDuration.h"
-#include "dds/DCPS/TimePoint_T.h"
+#include "TimeDuration.h"
+#include "TimePoint_T.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #  pragma once
@@ -38,15 +38,28 @@ typedef TimePoint_T<SystemClock> SystemTimePoint;
  * the system clock to a certain degree.
  */
 ///@{
-#if defined(__APPLE__) && defined(__MACH__)
+#if defined(ACE_HAS_MONOTONIC_TIME_POLICY) && defined(ACE_HAS_MONOTONIC_CONDITIONS)
+#  define OPENDDS_USES_MONOTONIC_TIME
 /*
- * As of writing, ACE_Monotonic_Time_Policy doesn't support Darwin systems like
- * macOS. Use SystemClock instead, because ACE_Monotonic_Time_Policy falls back
- * to returning ACE_Time_Value::zero for some reason.
+ * TODO: Remove this check once latest release of OCI ACE/TAO has the monotonic
+ * support macros.
  */
-typedef SystemClock MonotonicClock;
-#else
+#elif defined(ACE_OCI_PATCHLEVEL) && \
+  (defined(ACE_WIN32) || \
+    (defined(ACE_HAS_CLOCK_GETTIME) && \
+    !defined(ACE_LACKS_MONOTONIC_TIME) && \
+    !defined(ACE_LACKS_CONDATTR) && \
+    ((defined(_POSIX_MONOTONIC_CLOCK) && (_POSIX_MONOTONIC_CLOCK != -1)) || \
+      defined(ACE_HAS_CLOCK_GETTIME_MONOTONIC)) && \
+    ((defined(_POSIX_CLOCK_SELECTION) && (_POSIX_CLOCK_SELECTION != -1)) && \
+      !defined(ACE_LACKS_CONDATTR_SETCLOCK))))
+#  define OPENDDS_USES_MONOTONIC_TIME
+#endif
+
+#ifdef OPENDDS_USES_MONOTONIC_TIME
 typedef ACE_Monotonic_Time_Policy MonotonicClock;
+#else
+typedef SystemClock MonotonicClock;
 #endif
 typedef TimePoint_T<MonotonicClock> MonotonicTimePoint;
 ///@}

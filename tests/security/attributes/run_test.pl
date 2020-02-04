@@ -32,8 +32,25 @@ my $pub_expect = "0";
 my $sub_expect = "0";
 my $pub_timeout = "10";
 my $sub_timeout = "10";
+my $pub_extra_space = "0";
 
-GetOptions ( 'scenario=s' => \$scenario, 'pub_cfg=s' => \$pub_cfg_file, 'sub_cfg=s' => \$sub_cfg_file, 'pub_cert=s' => \$pub_cert_file, 'sub_cert=s' => \$sub_cert_file, 'pub_key=s' => \$pub_key_file, 'sub_key=s' => \$sub_key_file, 'gov=s' => \@gov_files, 'pub_perm=s' => \@pub_perm_files, 'sub_perm=s' => \@sub_perm_files, 'topic=s' => \@topic_names, 'pub_expect=i' => \$pub_expect, 'sub_expect=i' => \$sub_expect, 'pub_timeout=i' => \$pub_timeout, 'sub_timeout=i' => \$sub_timeout );
+GetOptions(
+  'scenario=s' => \$scenario,
+  'pub_cfg=s' => \$pub_cfg_file,
+  'sub_cfg=s' => \$sub_cfg_file,
+  'pub_cert=s' => \$pub_cert_file,
+  'sub_cert=s' => \$sub_cert_file,
+  'pub_key=s' => \$pub_key_file,
+  'sub_key=s' => \$sub_key_file,
+  'gov=s' => \@gov_files,
+  'pub_perm=s' => \@pub_perm_files,
+  'sub_perm=s' => \@sub_perm_files,
+  'topic=s' => \@topic_names,
+  'pub_expect=i' => \$pub_expect,
+  'sub_expect=i' => \$sub_expect,
+  'pub_timeout=i' => \$pub_timeout,
+  'sub_timeout=i' => \$sub_timeout,
+  'pub_extra_space=i' => \$pub_extra_space);
 
 # Handle scenarios first, since they are a special case
 if (!($scenario eq "")) {
@@ -255,6 +272,12 @@ if (!($scenario eq "")) {
     @pub_perm_files = ("permissions/permissions_test_participant_01_allowall_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_allowall_signed.p7s");
     @topic_names = ("PD_OL_RWA_EM_ED");
+  } elsif ($scenario eq "FullMsgSign_PayloadEncrypt_Frag") {
+    @gov_files = ("governance/governance_PU_PA_ED_NL_SR_signed.p7s");
+    @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
+    @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
+    @topic_names = ("PD_OL_OA_OM_ED");
+    $pub_extra_space = "100000";
   } else {
     print "\nUnrecognized scenario '$scenario'. Skipping.\n";
     exit -1;
@@ -394,6 +417,10 @@ foreach my $gov_file (@gov_files) {
 
         if (!($sub_timeout eq "0")) {
           $sub_opts .= " -Timeout $sub_timeout";
+        }
+
+        if (!($pub_extra_space eq "0")) {
+          $pub_opts .= " -ExtraSpace $pub_extra_space";
         }
 
         #print "$gov_file $pub_perm_file $sub_perm_file\n";

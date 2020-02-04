@@ -40,7 +40,7 @@ public:
   size_t capacity() const;
   void bind(TransportSendStrategy* strategy);
 
-  virtual void retain_all(const RepoId& pub_id) = 0;
+  virtual void retain_all(const RepoId& pub_id);
   virtual void insert(SequenceNumber sequence,
                       TransportSendStrategy::QueueType* queue,
                       ACE_Message_Block* chain) = 0;
