@@ -1364,18 +1364,8 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
                                OPENDDS_STRING(reader).c_str()));
         }
         link->receive_strategy()->do_not_withhold_data_from(id_);
+        info.first_delivered_data_ = false;
       }
-    } else if (seq < info.recvd_.low()) {
-      if (Transport_debug_level > 5) {
-        GuidConverter writer(src);
-        GuidConverter reader(id_);
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::process_data_i(DataSubmessage) -")
-                             ACE_TEXT(" data seq: %q from %C being DROPPED from %C because it's BELOW initialized range\n"),
-                             seq.getValue(),
-                             OPENDDS_STRING(writer).c_str(),
-                             OPENDDS_STRING(reader).c_str()));
-      }
-      link->receive_strategy()->withhold_data_from(id_);
     } else if (info.recvd_.contains(seq)) {
       if (Transport_debug_level > 5) {
         GuidConverter writer(src);
@@ -1393,7 +1383,8 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
       info.held_.insert(std::make_pair(seq, *sample));
       info.recvd_.insert(seq);
       link->deliver_held_data(id_, info, durable_);
-    } else if (info.recvd_.disjoint() || info.recvd_.cumulative_ack() != seq.previous()) {
+    } else if (info.recvd_.disjoint() ||
+               (!info.first_delivered_data_ && info.recvd_.cumulative_ack() != seq.previous())) {
       if (Transport_debug_level > 5) {
         GuidConverter writer(src);
         GuidConverter reader(id_);
@@ -1420,6 +1411,7 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
       }
       info.recvd_.insert(seq);
       link->receive_strategy()->do_not_withhold_data_from(id_);
+      info.first_delivered_data_ = false;
     }
   } else {
     if (Transport_debug_level > 5) {
@@ -1655,8 +1647,8 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
     }
   }
 
-  // Only fully-valid heartbeats (see spec) will be "fully" applied to writer info
-  if (hb_first < hb_last || (hb_first == one && wi_last == zero)) {
+  // Only valid heartbeats (see spec) will be "fully" applied to writer info
+  if (hb_first <= hb_last + 1 || (hb_first == one && wi_last == zero)) {
     if (info.first_valid_hb_) {
       info.first_valid_hb_ = false;
       immediate_reply = true;
@@ -3627,6 +3619,10 @@ void RtpsUdpDataLink::HeldDataDeliveryHandler::notify_delivery(const RepoId& rea
   const SequenceNumber ca = info.recvd_.cumulative_ack();
   typedef OPENDDS_MAP(SequenceNumber, ReceivedDataSample)::iterator iter;
   const iter end = info.held_.upper_bound(ca);
+
+  if (info.held_.begin() != end) {
+    info.first_delivered_data_ = false;
+  }
 
   for (iter it = info.held_.begin(); it != end; /*increment in loop body*/) {
     if (Transport_debug_level > 5) {
