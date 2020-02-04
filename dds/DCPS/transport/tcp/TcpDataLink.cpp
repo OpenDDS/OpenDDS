@@ -458,20 +458,12 @@ OpenDDS::DCPS::TcpDataLink::do_association_actions()
 
     for (OnStartCallbackMap::const_iterator it = on_start_callbacks_.begin(); it != on_start_callbacks_.end(); ++it) {
       for (RepoToClientMap::const_iterator it2 = it->second.begin(); it2 != it->second.end(); ++it2) {
-        GuidConverter conv(it2->first);
         to_send.push_back(std::make_pair(it2->first, it->first));
-        if (!conv.isWriter()) {
-          to_call.push_back(std::make_pair(it2->first, it->first));
-        }
       }
     }
   }
 
   send_strategy_->link_released(false);
-
-  for (PairVec::const_iterator it = to_call.begin(); it != to_call.end(); ++it) {
-    invoke_on_start_callbacks(it->first, it->second, true);
-  }
 
   for (PairVec::const_iterator it = to_send.begin(); it != to_send.end(); ++it) {
     send_association_msg(it->first, it->second);
