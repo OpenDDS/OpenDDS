@@ -11,6 +11,7 @@
 #ifdef ACE_AS_STATIC_LIBS
 #include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
 #endif
+#include <iostream>
 
 const OpenDDS::DCPS::RepoId AppConfig::writerId[3] = {
   createID(0x11111111, 0x111111, OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY),
