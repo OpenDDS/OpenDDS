@@ -33,7 +33,7 @@ namespace {
     OpenDDS::STUN::Message response;
     response.class_ = OpenDDS::STUN::ERROR_RESPONSE;
     response.method = a_message.method;
-    memcpy(response.transaction_id.data, a_message.transaction_id.data, sizeof(a_message.transaction_id.data));
+    std::memcpy(response.transaction_id.data, a_message.transaction_id.data, sizeof(a_message.transaction_id.data));
     response.append_attribute(OpenDDS::STUN::make_error_code(OpenDDS::STUN::BAD_REQUEST, a_reason));
     response.append_attribute(OpenDDS::STUN::make_fingerprint());
     return response;
@@ -45,7 +45,7 @@ namespace {
     OpenDDS::STUN::Message response;
     response.class_ = OpenDDS::STUN::ERROR_RESPONSE;
     response.method = a_message.method;
-    memcpy(response.transaction_id.data, a_message.transaction_id.data, sizeof(a_message.transaction_id.data));
+    std::memcpy(response.transaction_id.data, a_message.transaction_id.data, sizeof(a_message.transaction_id.data));
     response.append_attribute(OpenDDS::STUN::make_error_code(OpenDDS::STUN::UNKNOWN_ATTRIBUTE, "Unknown Attributes"));
     response.append_attribute(OpenDDS::STUN::make_unknown_attributes(a_unknown_attributes));
     response.append_attribute(OpenDDS::STUN::make_fingerprint());
@@ -784,7 +784,7 @@ void StunHandler::process_message(const ACE_INET_Addr& remote_address,
       OpenDDS::STUN::Message response;
       response.class_ = OpenDDS::STUN::SUCCESS_RESPONSE;
       response.method = OpenDDS::STUN::BINDING;
-      memcpy(response.transaction_id.data, message.transaction_id.data, sizeof(message.transaction_id.data));
+      std::memcpy(response.transaction_id.data, message.transaction_id.data, sizeof(message.transaction_id.data));
       response.append_attribute(OpenDDS::STUN::make_mapped_address(remote_address));
       response.append_attribute(OpenDDS::STUN::make_xor_mapped_address(remote_address));
       response.append_attribute(OpenDDS::STUN::make_fingerprint());

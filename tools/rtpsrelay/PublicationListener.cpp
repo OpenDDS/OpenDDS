@@ -47,9 +47,8 @@ void PublicationListener::on_data_available(DDS::DataReader_ptr reader)
 void PublicationListener::write_sample(const DDS::PublicationBuiltinTopicData& data,
                                        const DDS::SampleInfo& info)
 {
-  const OpenDDS::DCPS::RepoId id = participant_->get_repoid(info.instance_handle);
   GUID_t guid;
-  std::memcpy(&guid, &id, sizeof(GUID_t));
+  assign(guid, participant_->get_repoid(info.instance_handle));
 
   DDS::DataWriterQos data_writer_qos;
   data_writer_qos.durability = data.durability;
@@ -91,9 +90,8 @@ void PublicationListener::write_sample(const DDS::PublicationBuiltinTopicData& d
 
 void PublicationListener::unregister_instance(const DDS::SampleInfo& info)
 {
-  const OpenDDS::DCPS::RepoId id = participant_->get_repoid(info.instance_handle);
   GUID_t guid;
-  std::memcpy(&guid, &id, sizeof(GUID_t));
+  assign(guid, participant_->get_repoid(info.instance_handle));
 
   WriterEntry entry;
   entry.guid(guid);
