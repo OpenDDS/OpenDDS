@@ -433,6 +433,7 @@ private:
     virtual ~Reader();
 
     bool assoc(const DCPS::AssociationData& publication);
+    void transport_assoc_done(int flags, const DCPS::RepoId& remote);
 
     // Implementing TransportReceiveListener
 
