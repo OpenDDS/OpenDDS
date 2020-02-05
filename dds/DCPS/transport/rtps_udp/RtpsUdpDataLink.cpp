@@ -1325,20 +1325,13 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
     seq.setValue(data.writerSN.high, data.writerSN.low);
 
     info.frags_.erase(seq);
-    if (info.recvd_.empty()) {
-      // This is the first data / heartbeat we've seen
-      // Initialize the reader so we can potentially deliver data
-      if (durable_) {
-        info.hb_range_.first = 1;
-        info.hb_range_.second = seq;
-        info.recvd_.insert(SequenceNumber::ZERO());
-        info.recvd_.insert(seq);
-      } else {
-        info.hb_range_.first = seq;
-        info.hb_range_.second = seq;
-        info.recvd_.insert(SequenceRange(SequenceNumber::ZERO(), seq));
-      }
-      if (durable_ && info.recvd_.disjoint()) {
+    if (durable_ && info.recvd_.empty()) {
+      info.hb_range_.first = 1;
+      info.hb_range_.second = seq;
+      info.recvd_.insert(SequenceNumber::ZERO());
+      info.recvd_.insert(seq);
+
+      if (seq != 1) {
         if (Transport_debug_level > 5) {
           GuidConverter writer(src);
           GuidConverter reader(id_);
@@ -1352,6 +1345,7 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
         const ReceivedDataSample* sample =
           link->receive_strategy()->withhold_data_from(id_);
         info.held_.insert(std::make_pair(seq, *sample));
+
       } else {
         if (Transport_debug_level > 5) {
           GuidConverter writer(src);
@@ -1366,6 +1360,14 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
         link->receive_strategy()->do_not_withhold_data_from(id_);
         info.first_delivered_data_ = false;
       }
+
+    } else if (!durable_ && info.first_delivered_data_) {
+      info.hb_range_.first = seq;
+      info.hb_range_.second = seq;
+      info.recvd_.insert(SequenceRange(SequenceNumber::ZERO(), seq));
+      info.first_delivered_data_ = false;
+      link->receive_strategy()->do_not_withhold_data_from(id_);
+
     } else if (info.recvd_.contains(seq)) {
       if (Transport_debug_level > 5) {
         GuidConverter writer(src);
@@ -1377,14 +1379,15 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
                              OPENDDS_STRING(reader).c_str()));
       }
       link->receive_strategy()->withhold_data_from(id_);
+
     } else if (!info.held_.empty()) {
       const ReceivedDataSample* sample =
         link->receive_strategy()->withhold_data_from(id_);
       info.held_.insert(std::make_pair(seq, *sample));
       info.recvd_.insert(seq);
       link->deliver_held_data(id_, info, durable_);
-    } else if (info.recvd_.disjoint() ||
-               (!info.first_delivered_data_ && info.recvd_.cumulative_ack() != seq.previous())) {
+
+    } else if (info.recvd_.disjoint() || info.recvd_.cumulative_ack() != seq.previous()) {
       if (Transport_debug_level > 5) {
         GuidConverter writer(src);
         GuidConverter reader(id_);
@@ -1399,6 +1402,7 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
       info.held_.insert(std::make_pair(seq, *sample));
       info.recvd_.insert(seq);
       link->deliver_held_data(id_, info, durable_);
+
     } else {
       if (Transport_debug_level > 5) {
         GuidConverter writer(src);
@@ -1413,6 +1417,7 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
       link->receive_strategy()->do_not_withhold_data_from(id_);
       info.first_delivered_data_ = false;
     }
+
   } else {
     if (Transport_debug_level > 5) {
       GuidConverter writer(src);
