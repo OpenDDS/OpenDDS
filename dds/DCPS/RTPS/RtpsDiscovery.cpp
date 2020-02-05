@@ -485,6 +485,19 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
               ACE_TEXT("[rtps_discovery/%C] section.\n"),
               string_value.c_str(), rtps_name.c_str()), -1);
           }
+        } else if (name == "GuidParticipantCountUseRandomSeed") {
+          int value;
+          if (DCPS::convertToInteger(it->second, value)) {
+            if (!value) {
+              discovery->reset_guid_participant_counter();
+            }
+          } else {
+            ACE_ERROR_RETURN((LM_ERROR,
+              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+              ACE_TEXT("Invalid entry (%C) for GuidParticipantCountUseRandomSeed in ")
+              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+              it->second.c_str(), rtps_name.c_str()), -1);
+          }
         } else {
           ACE_ERROR_RETURN((LM_ERROR,
             ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
