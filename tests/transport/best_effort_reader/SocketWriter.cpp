@@ -21,7 +21,6 @@
 #include <ace/OS_NS_unistd.h>
 
 #include <iostream>
-#include <sstream>
 #include <cstring>
 #include <ctime>
 
@@ -120,9 +119,8 @@ bool SocketWriter::send(const ACE_Message_Block& mb) const
   for (std::set<ACE_INET_Addr>::const_iterator i = dest_addr_.begin(); i != dest_addr_.end(); ++i) {
     ssize_t res = socket_.send(mb.rd_ptr(), mb.length(), *i);
     if (res >= 0) {
-      std::ostringstream oss;
-      oss << "SocketWriter " << id_ << " sent " << i->get_host_addr() << " (" << res << " bytes)\n";
-      ACE_DEBUG((LM_INFO, oss.str().c_str()));
+      ACE_DEBUG((LM_INFO, "SocketWriter %C sent %C (%d bytes)\n",
+                 OPENDDS_STRING(GuidConverter(id_)).c_str(), i->get_host_addr()));
     } else {
       ACE_DEBUG((LM_INFO, ACE_TEXT("ERROR: in socket_.send()\n")));
       return false;
