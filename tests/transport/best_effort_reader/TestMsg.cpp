@@ -1,6 +1,6 @@
 #include "TestMsg.h"
-#include "dds/DCPS/Serializer.h"
-#include "dds/DCPS/TypeSupportImpl.h"
+#include <dds/DCPS/Serializer.h>
+#include <dds/DCPS/TypeSupportImpl.h>
 
 using namespace OpenDDS::DCPS;
 

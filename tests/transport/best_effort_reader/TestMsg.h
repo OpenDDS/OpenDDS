@@ -1,8 +1,8 @@
 #ifndef test_transport_TestMsg_H
 #define test_transport_TestMsg_H
 
-#include "dds/DCPS/Serializer.h"
-#include "dds/DCPS/TypeSupportImpl.h"
+#include <dds/DCPS/Serializer.h>
+#include <dds/DCPS/TypeSupportImpl.h>
 
 using namespace OpenDDS::DCPS;
 
