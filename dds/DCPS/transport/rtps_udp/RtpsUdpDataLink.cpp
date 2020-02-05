@@ -1690,6 +1690,7 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
   const bool is_final = heartbeat.smHeader.flags & RTPS::FLAG_F,
     liveliness = heartbeat.smHeader.flags & RTPS::FLAG_L;
 
+  bool result = false;
   if (!is_final || (!liveliness && (info.should_nack() ||
       should_nack_durable(info) ||
       link->receive_strategy()->has_fragments(info.hb_range_, wi->first)))) {
@@ -1697,9 +1698,8 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
 
     if (immediate_reply) {
       link->heartbeat_reply_.schedule(link->quick_reply_delay_);
-      return false;
     } else {
-      return true; // timer will invoke send_heartbeat_replies()
+      result = true; // timer will invoke send_heartbeat_replies()
     }
   }
 
@@ -1711,7 +1711,7 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
   }
 
   //FUTURE: support assertion of liveliness for MANUAL_BY_TOPIC
-  return false;
+  return result;
 }
 
 bool
@@ -1772,7 +1772,7 @@ RtpsUdpDataLink::RtpsReader::is_writer_handshake_done(const RepoId& id) const
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
   WriterInfoMap::const_iterator iter = remote_writers_.find(id);
-  return iter != remote_writers_.end() && iter->second.first_ever_hb_;
+  return iter != remote_writers_.end() && !iter->second.first_ever_hb_;
 }
 
 bool
