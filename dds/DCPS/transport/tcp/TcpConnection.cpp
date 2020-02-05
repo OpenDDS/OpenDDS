@@ -584,7 +584,7 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
 
     TcpConnection* pconn = this;
     int ret = transport.connector_.connect(pconn, this->remote_address_,  ACE_Synch_Options::asynch);
-    if (ret == -1 && errno != EWOULDBLOCK) {
+    if (ret == -1 && errno != EWOULDBLOCK && errno != EINPROGRESS) {
       ACE_ERROR((LM_ERROR, "(%P|%t) TcpConnection::active_reconnect_i error %m.\n"));
       this->reconnect_state_ = ACTIVE_WAITING_STATE;
       TcpSendStrategy_rch send_strategy = link_->send_strategy();
