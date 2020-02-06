@@ -653,8 +653,12 @@ bool RtpsUdpReceiveStrategy::decode_payload(ReceivedDataSample& sample,
   const DatawriterCryptoHandle writer_crypto_handle = link_->writer_crypto_handle(sample.header_.publication_id_);
   const CryptoTransform_var crypto = link_->security_config()->get_crypto_transform();
 
-  if (writer_crypto_handle == DDS::HANDLE_NIL || !crypto) {
-    return true;
+  const EndpointSecurityAttributesMask esa = link_->security_attributes(sample.header_.publication_id_);
+  bool payload_protected = esa & ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_PAYLOAD_PROTECTED;
+
+//  if (writer_crypto_handle == DDS::HANDLE_NIL || !crypto) {
+    if (writer_crypto_handle == DDS::HANDLE_NIL || !crypto || !payload_protected) {
+      return true;
   }
 
   DDS::OctetSeq encoded, plain, iQos;
@@ -685,7 +689,7 @@ bool RtpsUdpReceiveStrategy::decode_payload(ReceivedDataSample& sample,
   if (ok) {
     const unsigned int n = plain.length();
     if (encoded.length() == n && 0 == std::memcmp(plain.get_buffer(), encoded.get_buffer(), n)) {
-      const EndpointSecurityAttributesMask esa = link_->security_attributes(sample.header_.publication_id_);
+      //const EndpointSecurityAttributesMask esa = link_->security_attributes(sample.header_.publication_id_);
       static const EndpointSecurityAttributesMask MASK_PROTECT_PAYLOAD =
         ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_VALID | ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_PAYLOAD_PROTECTED;
       if ((esa & MASK_PROTECT_PAYLOAD) == MASK_PROTECT_PAYLOAD) {

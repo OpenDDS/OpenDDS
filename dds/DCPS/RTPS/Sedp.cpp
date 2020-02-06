@@ -3512,7 +3512,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
                    ACE_TEXT("to Security::SPDPdiscoveredParticipantData\n")));
         return;
       }
-      sedp_.task_.enqueue(id, move(pdata));
+      sedp_.task_.enqueue(id, move(pdata), true);
 #endif
 
     }
@@ -4065,15 +4065,17 @@ Sedp::acknowledge()
 }
 
 void
-Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<ParticipantData_t> pdata)
+Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<ParticipantData_t> pdata, bool bSecureParticipant)
 {
   if (spdp_->shutting_down()) { return; }
 
   Msg::MsgType type = Msg::MSG_PARTICIPANT;
 
 #ifdef OPENDDS_SECURITY
-  if (pdata->dataKind == Security::DPDK_SECURE) {
-    type = Msg::MSG_DCPS_PARTICIPANT_SECURE;
+  //if (pdata->dataKind == Security::DPDK_SECURE) {
+  if (bSecureParticipant) {
+      type = Msg::MSG_DCPS_PARTICIPANT_SECURE;
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::Task::enqueue ")
   }
 #endif
 

@@ -475,7 +475,7 @@ private:
     }
     ~Task();
 
-    void enqueue(DCPS::MessageId id, DCPS::unique_ptr<ParticipantData_t> pdata);
+    void enqueue(DCPS::MessageId id, DCPS::unique_ptr<ParticipantData_t> pdata, bool bSecureParticipant = false);
 
     void enqueue(DCPS::MessageId id, DCPS::unique_ptr<DiscoveredPublication> wdata);
     void enqueue(DCPS::MessageId id, DCPS::unique_ptr<DiscoveredSubscription> rdata);
