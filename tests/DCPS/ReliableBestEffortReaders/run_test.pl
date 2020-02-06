@@ -11,7 +11,6 @@ use strict;
 
 sub do_test {
   my $reliable = shift;
-  my $port = PerlACE::random_port();
   my $test = new PerlDDS::TestFramework();
 
   $test->process('publisher', 'publisher', " -DCPSConfigFile rtps_disc.ini");
