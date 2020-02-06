@@ -583,7 +583,16 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
     timeout.msec(static_cast<int>(retry_delay_msec));
 
     TcpConnection* pconn = this;
-    int ret = transport.connector_.connect(pconn, this->remote_address_,  ACE_Synch_Options::asynch);
+    int ret;
+    {
+      ACE_Reverse_Lock<LockType> rev_lock(this->reconnect_lock_);
+      ACE_Guard<ACE_Reverse_Lock<LockType> > guard(rev_lock);
+      // We need to temporarily release the lock here because the connect could occasionally be synchronous
+      // if the source and destination are on the same host. When the call become synchronous, active_reconnect_open()
+      // would be called and try to acquired the lock in the same thread.
+      ret = transport.connector_.connect(pconn, this->remote_address_,  ACE_Synch_Options::asynch);
+    }
+
     if (ret == -1 && errno != EWOULDBLOCK && errno != EINPROGRESS) {
       ACE_ERROR((LM_ERROR, "(%P|%t) TcpConnection::active_reconnect_i error %m.\n"));
       this->reconnect_state_ = ACTIVE_WAITING_STATE;
