@@ -101,8 +101,6 @@ $test->ignore_error("(Redmine Issue# 1446)");
 
 # Ignore normal disconnect/reconnect messages
 $test->ignore_error("TcpConnection::active_reconnect_i error Connection refused");
-$test->ignore_error("WriteDataContainer::remove_oldest_sample, dequeue_next_send_sample from internal list failed.");
-$test->ignore_error("DataWriterImpl::dispose_and_unregister: dispose on container failed");
 
 # start killing processes in 60 seconds
 my $fin = $test->finish(60);
