@@ -17,7 +17,7 @@ unsigned int total_count = 0;
 
 struct TestObj : RcObject
 {
-  TestObj() : do_enable_(false) {}
+  TestObj() : multi_(0), do_enable_(false) {}
 
   void execute(const MonotonicTimePoint&) {
     ACE_DEBUG((LM_DEBUG, "TestObj::execute() called at %T\n"));
