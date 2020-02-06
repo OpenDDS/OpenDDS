@@ -27,6 +27,8 @@ struct TestObj : RcObject
     }
   }
 
+  void set_do_enable(bool do_enable) { do_enable_ = do_enable; }
+
   PmfMultiTask<TestObj>* multi_;
   bool do_enable_;
 };
@@ -47,13 +49,13 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     ACE_OS::sleep(5);
     ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count));
     TEST_CHECK(total_count == 2);
-    obj.do_enable_ = true;
+    obj.set_do_enable(true);
     const MonotonicTimePoint deadline = MonotonicTimePoint::now() + TimeDuration::from_msec(2000);
     while (MonotonicTimePoint::now() < deadline) {
       multi.enable(TimeDuration::from_msec(100));
       ACE_OS::sleep(0);
     }
-    obj.do_enable_ = false;
+    obj.set_do_enable(false);
     ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count));
     TEST_CHECK(total_count <= 21);
     const unsigned int prev_total_count = total_count;
