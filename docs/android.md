@@ -80,9 +80,9 @@ software:
     utilities that would normally come on a Unix system. This guide will use
     MSYS2, which supplies many of those utilities. Install MSYS2 from the
     offical website at https://www.msys2.org and set it up.
-  - Follow all install/update steps from the msys2.org website.
-  - In a MSYS2 shell run the following command to install programs that will be
-    needed: `pacman -S cmake make perl git diffutils patch`
+  - Follow all the install/update steps from the msys2.org website.
+
+- [Strawberry Perl](http://strawberryperl.com/)
 
 - OpenDDS Host tools build using Visual Studio
   - In a separate copy of OpenDDS, build OpenDDS as described in
