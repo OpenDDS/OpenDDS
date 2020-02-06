@@ -3273,26 +3273,6 @@ Sedp::Reader::assoc(const DCPS::AssociationData& publication)
   return associate(publication, false);
 }
 
-void
-Sedp::Reader::transport_assoc_done(int flags, const RepoId& remote) {
-  if (!(flags & ASSOC_OK)) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) Sedp::Reader::transport_assoc_done: ")
-               ACE_TEXT("ERROR: transport layer failed to associate %C\n"),
-               DCPS::LogGuid(remote).c_str()));
-    return;
-  }
-
-  if (shutting_down_.value()) {
-    return;
-  }
-
-  DCPS::RcHandle<DCPS::JobQueue> job_queue = sedp_.spdp_.job_queue();
-  if (job_queue) {
-    job_queue->enqueue(make_rch<AssociationComplete>(&sedp_, repo_id_, remote));
-  }
-}
-
 // Implementing TransportReceiveListener
 
 static bool
