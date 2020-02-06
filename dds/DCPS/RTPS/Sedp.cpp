@@ -4076,6 +4076,8 @@ Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<ParticipantData_t> pdat
   if (bSecureParticipant) {
       type = Msg::MSG_DCPS_PARTICIPANT_SECURE;
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::Task::enqueue ")
+    //ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::Task::enqueue ")
+    //  ACE_TEXT("MSG_DCPS_PARTICIPANT_SECURE\n")));
   }
 #endif
 
