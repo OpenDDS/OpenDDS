@@ -53,8 +53,6 @@ public:
   /// doing so.
   void populate(DCPS::GUID_t& container);
 
-  void resetCounter() { counter_ = 0; }
-
 private:
   enum {NODE_ID_SIZE = 6};
 
