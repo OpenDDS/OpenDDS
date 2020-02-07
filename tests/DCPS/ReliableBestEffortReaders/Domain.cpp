@@ -1,11 +1,11 @@
 #include "Domain.h"
+#include <tests/DCPS/ConsolidatedMessengerIdl/MessengerTypeSupportImpl.h>
 #include <dds/DCPS/Service_Participant.h>
-#include "TestMsgTypeSupportImpl.h"
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <iostream>
 
-const char* Domain::TESTMSG_TYPE  = "TestReliableBestEffortReaders Type";
-const char* Domain::TESTMSG_TOPIC = "TestReliableBestEffortReaders Topic";
+const char* Domain::TEST_TOPIC = "TestReliableBestEffortReaders Topic";
+const char* Domain::TEST_TOPIC_TYPE  = "TestReliableBestEffortReaders Type";
 
 Domain::Domain(int argc, ACE_TCHAR* argv[], const std::string& app_mame) : appName(app_mame) {
   try {
@@ -20,12 +20,12 @@ Domain::Domain(int argc, ACE_TCHAR* argv[], const std::string& app_mame) : appNa
       throw ACE_TEXT("create_participant failed.");
     }
 
-    TestMsgTypeSupport_var ts = new TestMsgTypeSupportImpl();
-    if (ts->register_type(participant.in(), TESTMSG_TYPE) != DDS::RETCODE_OK) {
+    Messenger::MessageTypeSupport_var ts(new Messenger::MessageTypeSupportImpl);
+    if (ts->register_type(participant.in(), TEST_TOPIC_TYPE) != DDS::RETCODE_OK) {
       throw ACE_TEXT("register_type failed.");
     }
 
-    topic = participant->create_topic(TESTMSG_TOPIC, TESTMSG_TYPE,
+    topic = participant->create_topic(TEST_TOPIC, TEST_TOPIC_TYPE,
       TOPIC_QOS_DEFAULT, DDS::TopicListener::_nil(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (CORBA::is_nil(topic.in())) {
       throw ACE_TEXT("create_topic failed.");

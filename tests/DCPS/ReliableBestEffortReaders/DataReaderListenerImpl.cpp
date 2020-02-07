@@ -1,8 +1,8 @@
 // #include "Args.h"
 #include "Domain.h"
 #include "DataReaderListenerImpl.h"
-#include "TestMsgTypeSupportC.h"
-#include "TestMsgTypeSupportImpl.h"
+#include <tests/DCPS/ConsolidatedMessengerIdl/MessengerTypeSupportC.h>
+#include <tests/DCPS/ConsolidatedMessengerIdl/MessengerTypeSupportImpl.h>
 #include <ace/Log_Msg.h>
 #include <ace/OS_NS_stdlib.h>
 #include <dds/DdsDcpsSubscriptionC.h>
@@ -22,24 +22,23 @@ DataReaderListenerImpl::~DataReaderListenerImpl()
 void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr dr)
 {
   try {
-    TestMsgDataReader_var msg_dr = TestMsgDataReader::_narrow(dr);
+    Messenger::MessageDataReader_var msg_dr = Messenger::MessageDataReader::_narrow(dr);
     if (CORBA::is_nil(msg_dr.in())) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l: TestMsgDataReader::_narrow failed!\n")));
       ACE_OS::exit(EXIT_FAILURE);
     }
 
-    TestMsg msg;
+    Messenger::Message msg;
     DDS::SampleInfo si;
     DDS::ReturnCode_t status = msg_dr->take_next_sample(msg, si) ;
     if (status == DDS::RETCODE_OK) {
-      //std::cout << "sample_rank:" << si.sample_rank << "; instance_state:" << si.instance_state << std::endl;
       if (si.valid_data) {
         ++received_;
-        std::cout << reader_ << " received " << msg.key << ':' << msg.seq << ':' << msg.msg << std::endl;
-        if (lastSeq_ < msg.seq) {
-          lastSeq_ = msg.seq;
+        std::cout << reader_ << " received " << msg.subject_id << ':' << msg.count << ':' << msg.text << std::endl;
+        if (lastSeq_ < msg.count) {
+          lastSeq_ = msg.count;
         } else {
-          std::cout << "ERROR: sequence order " << lastSeq_ << ':' << msg.seq << std::endl;
+          std::cout << "ERROR: sequence order " << lastSeq_ << ':' << msg.count << std::endl;
           validSeq_ = false;
         }
       } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {

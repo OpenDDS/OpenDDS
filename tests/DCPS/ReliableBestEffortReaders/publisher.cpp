@@ -1,5 +1,5 @@
 #include "Domain.h"
-#include "TestMsgTypeSupportImpl.h"
+#include <tests/DCPS/ConsolidatedMessengerIdl/MessengerTypeSupportImpl.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/WaitSet.h>
 #include <iostream>
@@ -13,7 +13,7 @@ public:
 private:
   void waitForSubscriber();
   Domain domain;
-  TestMsgDataWriter_var writer;
+  Messenger::MessageDataWriter_var writer;
 };
 
 Publisher::Publisher(int argc, ACE_TCHAR* argv[]) : domain(argc, argv, "Publisher")
@@ -37,7 +37,7 @@ Publisher::Publisher(int argc, ACE_TCHAR* argv[]) : domain(argc, argv, "Publishe
   if (CORBA::is_nil(dw.in())) {
     throw ACE_TEXT("create_datawriter failed.");
   }
-  writer = TestMsgDataWriter::_narrow(dw);
+  writer = Messenger::MessageDataWriter::_narrow(dw);
   if (CORBA::is_nil(writer.in())) {
     throw ACE_TEXT("TestMsgDataWriter::_narrow failed.");
   }
@@ -47,10 +47,10 @@ int Publisher::run()
 {
   waitForSubscriber();
 
-  TestMsg msg = {1, 0, "test"};
+  Messenger::Message msg = {"", "", 1, "test", 0, 0, 0};
   DDS::InstanceHandle_t handle = writer->register_instance(msg);
   for (CORBA::Long i = 1; i <= Domain::N_MSG; ++i) {
-    msg.seq = i;
+    msg.count = i;
     DDS::ReturnCode_t r = writer->write(msg, handle);
     if (r != ::DDS::RETCODE_OK) {
       std::cerr << "Publisher write returned error code " << r << std::endl;

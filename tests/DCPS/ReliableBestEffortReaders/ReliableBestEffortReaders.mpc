@@ -1,21 +1,5 @@
-project(DDS*idl): dcps_test_idl_only_lib {
-  idlflags      += -Wb,stub_export_include=TestMsg_export.h \
-                   -Wb,stub_export_macro=TestMsg_Export -SS
-  dcps_ts_flags += -Wb,export_macro=TestMsg_Export
-  dynamicflags  += TESTMSG_BUILD_DLL
-
-  TypeSupport_Files {
-    TestMsg.idl
-  }
-
-  Source_Files {
-  }
-}
-
-project(*pub) : dcpsexe, dcps_test, dcps_rtps_udp {
+project(*pub) : dcpsexe, dcps_test, dcps_rtps_udp, dcps_cm {
   exename = publisher
-  after    += DDS*idl
-  libs     += DDS*idl
 
   Source_Files {
     Domain.cpp
@@ -23,10 +7,8 @@ project(*pub) : dcpsexe, dcps_test, dcps_rtps_udp {
   }
 }
 
-project(*sub) : dcpsexe, dcps_test, dcps_rtps_udp {
+project(*sub) : dcpsexe, dcps_test, dcps_rtps_udp, dcps_cm {
   exename = subscriber
-  after    += DDS*idl
-  libs     += DDS*idl
 
   Source_Files {
     Domain.cpp

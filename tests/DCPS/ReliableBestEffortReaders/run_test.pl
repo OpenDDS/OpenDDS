@@ -9,6 +9,8 @@ use lib "$ENV{DDS_ROOT}/bin";
 use PerlDDS::Run_Test;
 use strict;
 
+PerlDDS::add_lib_path('../ConsolidatedMessengerIdl');
+
 sub do_test {
   my $reliable = shift;
   my $test = new PerlDDS::TestFramework();

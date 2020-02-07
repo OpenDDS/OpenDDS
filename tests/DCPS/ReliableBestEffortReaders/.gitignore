@@ -1,15 +1,3 @@
 /publisher
 /subscriber
 /test.txt
-/TestMsgC.cpp
-/TestMsgC.h
-/TestMsgC.inl
-/TestMsgS.cpp
-/TestMsgS.h
-/TestMsgTypeSupport.idl
-/TestMsgTypeSupportC.cpp
-/TestMsgTypeSupportC.h
-/TestMsgTypeSupportC.inl
-/TestMsgTypeSupportImpl.cpp
-/TestMsgTypeSupportImpl.h
-/TestMsgTypeSupportS.h
