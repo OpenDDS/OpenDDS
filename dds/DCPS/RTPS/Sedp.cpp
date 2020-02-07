@@ -3723,8 +3723,6 @@ Sedp::write_dcps_participant_secure(const Security::SPDPdiscoveredParticipantDat
 DDS::ReturnCode_t
 Sedp::write_dcps_participant_dispose(const RepoId& part)
 {
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::write_dcps_participant_dispose ")
-    ACE_TEXT("calling dcps_participant_secure_writer_.write_unregister_dispose\n")));
   return dcps_participant_secure_writer_.write_unregister_dispose(part, PID_PARTICIPANT_GUID);
 }
 #endif
@@ -4072,7 +4070,6 @@ Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<ParticipantData_t> pdat
   Msg::MsgType type = Msg::MSG_PARTICIPANT;
 
 #ifdef OPENDDS_SECURITY
-  //if (pdata->dataKind == Security::DPDK_SECURE) {
   if (bSecureParticipant) {
       type = Msg::MSG_DCPS_PARTICIPANT_SECURE;
   }

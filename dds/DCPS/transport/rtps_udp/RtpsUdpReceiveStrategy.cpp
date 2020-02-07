@@ -656,8 +656,7 @@ bool RtpsUdpReceiveStrategy::decode_payload(ReceivedDataSample& sample,
   const EndpointSecurityAttributesMask esa = link_->security_attributes(sample.header_.publication_id_);
   bool payload_protected = esa & ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_PAYLOAD_PROTECTED;
 
-//  if (writer_crypto_handle == DDS::HANDLE_NIL || !crypto) {
-    if (writer_crypto_handle == DDS::HANDLE_NIL || !crypto || !payload_protected) {
+  if (writer_crypto_handle == DDS::HANDLE_NIL || !crypto || !payload_protected) {
       return true;
   }
 
@@ -689,7 +688,6 @@ bool RtpsUdpReceiveStrategy::decode_payload(ReceivedDataSample& sample,
   if (ok) {
     const unsigned int n = plain.length();
     if (encoded.length() == n && 0 == std::memcmp(plain.get_buffer(), encoded.get_buffer(), n)) {
-      //const EndpointSecurityAttributesMask esa = link_->security_attributes(sample.header_.publication_id_);
       static const EndpointSecurityAttributesMask MASK_PROTECT_PAYLOAD =
         ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_VALID | ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_PAYLOAD_PROTECTED;
       if ((esa & MASK_PROTECT_PAYLOAD) == MASK_PROTECT_PAYLOAD) {
