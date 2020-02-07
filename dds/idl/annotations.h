@@ -20,6 +20,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <set>
 
 class AST_Decl;
 class AST_Union;
@@ -147,10 +148,19 @@ public:
   bool union_value(AST_Union* node) const;
 };
 
-class TopicAnnotation : public Annotation {
+class TopicAnnotation : public AnnotationWithValue<bool> {
 public:
+  TopicAnnotation();
+
   std::string definition() const;
   std::string name() const;
+
+  bool node_value(AST_Decl* node) const;
+
+private:
+  std::set<std::string> platforms_;
+
+  bool value_from_appl(AST_Annotation_Appl* appl) const;
 };
 
 class NestedAnnotation : public AnnotationWithValue<bool> {

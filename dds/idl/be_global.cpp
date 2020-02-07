@@ -618,7 +618,9 @@ BE_GlobalData::get_include_block(BE_GlobalData::stream_enum_t which)
 
 bool BE_GlobalData::is_topic_type(AST_Decl* node)
 {
-  return builtin_annotations_["::@topic"]->find_on(node) || !is_nested(node);
+  TopicAnnotation* topic = dynamic_cast<TopicAnnotation*>(
+    builtin_annotations_["::@topic"]);
+  return topic->node_value(node) || !is_nested(node);
 }
 
 bool BE_GlobalData::is_nested(AST_Decl* node)

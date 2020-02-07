@@ -164,6 +164,13 @@ bool KeyAnnotation::union_value(AST_Union* node) const
 
 // @topic ====================================================================
 
+TopicAnnotation::TopicAnnotation()
+{
+  platforms_.insert("*");
+  platforms_.insert("DDS");
+  platforms_.insert("OpenDDS");
+}
+
 std::string TopicAnnotation::definition() const
 {
   return
@@ -176,6 +183,27 @@ std::string TopicAnnotation::definition() const
 std::string TopicAnnotation::name() const
 {
   return "topic";
+}
+
+bool TopicAnnotation::node_value(AST_Decl* node) const
+{
+  if (node) {
+    for (AST_Annotation_Appls::iterator i = node->annotations().begin();
+        i != node->annotations().end(); ++i) {
+      if (value_from_appl(i->get())) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+bool TopicAnnotation::value_from_appl(AST_Annotation_Appl* appl) const
+{
+  if (appl && appl->annotation_decl() == declaration()) {
+    return platforms_.count(get_str_annotation_member_value(appl, "platform"));
+  }
+  return false;
 }
 
 // @nested ===================================================================
