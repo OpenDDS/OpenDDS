@@ -4071,7 +4071,7 @@ Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<ParticipantData_t> pdat
 
 #ifdef OPENDDS_SECURITY
   if (bSecureParticipant) {
-      type = Msg::MSG_DCPS_PARTICIPANT_SECURE;
+    type = Msg::MSG_DCPS_PARTICIPANT_SECURE;
   }
 #endif
 
