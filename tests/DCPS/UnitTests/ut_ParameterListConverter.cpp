@@ -505,8 +505,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       SPDPdiscoveredParticipantData participant_data = Factory::default_participant_data();
       ParameterList param_list;
       participant_data.participantProxy.metatrafficUnicastLocatorList.length(1);
-      int status = to_param_list(participant_data, param_list);
-      TEST_ASSERT(status == 0);
+      bool status = to_param_list(participant_data, param_list);
+      TEST_ASSERT(status == true);
       TEST_ASSERT(is_present(param_list, PID_PARTICIPANT_BUILTIN_ENDPOINTS));
       TEST_ASSERT(is_present(param_list, PID_METATRAFFIC_UNICAST_LOCATOR));
       TEST_ASSERT(is_missing(param_list, PID_METATRAFFIC_MULTICAST_LOCATOR));
@@ -520,8 +520,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       ParameterList param_list;
       participant_data.participantProxy.metatrafficUnicastLocatorList.length(1);
       participant_data.participantProxy.metatrafficMulticastLocatorList.length(1);
-      int status = to_param_list(participant_data, param_list);
-      TEST_ASSERT(status == 0);
+      bool status = to_param_list(participant_data, param_list);
+      TEST_ASSERT(status == true);
       TEST_ASSERT(is_present(param_list, PID_PARTICIPANT_BUILTIN_ENDPOINTS));
       TEST_ASSERT(is_present(param_list, PID_METATRAFFIC_UNICAST_LOCATOR));
       TEST_ASSERT(is_present(param_list, PID_METATRAFFIC_MULTICAST_LOCATOR));
@@ -536,8 +536,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       participant_data.participantProxy.metatrafficUnicastLocatorList.length(1);
       participant_data.participantProxy.metatrafficMulticastLocatorList.length(1);
       participant_data.participantProxy.defaultUnicastLocatorList.length(1);
-      int status = to_param_list(participant_data, param_list);
-      TEST_ASSERT(status == 0);
+      bool status = to_param_list(participant_data, param_list);
+      TEST_ASSERT(status == true);
       TEST_ASSERT(is_present(param_list, PID_PARTICIPANT_BUILTIN_ENDPOINTS));
       TEST_ASSERT(is_present(param_list, PID_METATRAFFIC_UNICAST_LOCATOR));
       TEST_ASSERT(is_present(param_list, PID_METATRAFFIC_MULTICAST_LOCATOR));
@@ -553,8 +553,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       participant_data.participantProxy.metatrafficMulticastLocatorList.length(1);
       participant_data.participantProxy.defaultUnicastLocatorList.length(1);
       participant_data.participantProxy.defaultMulticastLocatorList.length(1);
-      int status = to_param_list(participant_data, param_list);
-      TEST_ASSERT(status == 0);
+      bool status = to_param_list(participant_data, param_list);
+      TEST_ASSERT(status == true);
       TEST_ASSERT(is_present(param_list, PID_PARTICIPANT_BUILTIN_ENDPOINTS));
       TEST_ASSERT(is_present(param_list, PID_METATRAFFIC_UNICAST_LOCATOR));
       TEST_ASSERT(is_present(param_list, PID_METATRAFFIC_MULTICAST_LOCATOR));
@@ -567,8 +567,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       SPDPdiscoveredParticipantData participant_data =
           Factory::spdp_participant("hello user", 10);
       ParameterList param_list;
-      int status = to_param_list(participant_data, param_list);
-      TEST_ASSERT(status == 0);
+      bool status = to_param_list(participant_data, param_list);
+      TEST_ASSERT(status == true);
       TEST_ASSERT(is_present(param_list, PID_USER_DATA));
       Parameter param = get(param_list, PID_USER_DATA);
       UserDataQosPolicy ud_qos = param.user_data();
@@ -589,11 +589,11 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       SPDPdiscoveredParticipantData participant_data =
           Factory::spdp_participant("hello user", 10);
       ParameterList param_list;
-      int status = to_param_list(participant_data, param_list);
-      TEST_ASSERT(status == 0);
+      bool status = to_param_list(participant_data, param_list);
+      TEST_ASSERT(status == true);
       SPDPdiscoveredParticipantData part_data_out;
       status = from_param_list(param_list, part_data_out);
-      TEST_ASSERT(status == 0);
+      TEST_ASSERT(status == true);
       TEST_ASSERT(participant_data.ddsParticipantData.user_data.value[0] ==
                   part_data_out.ddsParticipantData.user_data.value[0]);
       TEST_ASSERT(participant_data.ddsParticipantData.user_data.value[1] ==
@@ -620,8 +620,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       SPDPdiscoveredParticipantData participant_data =
           Factory::spdp_participant(NULL, 0, 3, 8);
       ParameterList param_list;
-      int status = to_param_list(participant_data, param_list);
-      TEST_ASSERT(status == 0);
+      bool status = to_param_list(participant_data, param_list);
+      TEST_ASSERT(status == true);
       TEST_ASSERT(is_present(param_list, PID_PROTOCOL_VERSION));
       Parameter param = get(param_list, PID_PROTOCOL_VERSION);
       OpenDDS::RTPS::ProtocolVersion_t pv = param.version();
@@ -633,11 +633,11 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       SPDPdiscoveredParticipantData participant_data =
           Factory::spdp_participant(NULL, 0, 9, 1);
       ParameterList param_list;
-      int status = to_param_list(participant_data, param_list);
-      TEST_ASSERT(status == 0);
+      bool status = to_param_list(participant_data, param_list);
+      TEST_ASSERT(status == true);
       SPDPdiscoveredParticipantData part_data_out;
       status = from_param_list(param_list, part_data_out);
-      TEST_ASSERT(status == 0);
+      TEST_ASSERT(status == true);
       TEST_ASSERT(participant_data.participantProxy.protocolVersion.major ==
                   part_data_out.participantProxy.protocolVersion.major);
       TEST_ASSERT(participant_data.participantProxy.protocolVersion.minor ==
@@ -649,8 +649,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       SPDPdiscoveredParticipantData participant_data =
           Factory::spdp_participant(NULL, 0, 0, 0, vendor_id);
       ParameterList param_list;
-      int status = to_param_list(participant_data, param_list);
-      TEST_ASSERT(status == 0);
+      bool status = to_param_list(participant_data, param_list);
+      TEST_ASSERT(status == true);
       TEST_ASSERT(is_present(param_list, PID_VENDORID));
       Parameter param = get(param_list, PID_VENDORID);
       OpenDDS::RTPS::VendorId_t vid = param.vendor();
@@ -663,10 +663,11 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       SPDPdiscoveredParticipantData participant_data =
           Factory::spdp_participant(NULL, 0, 0, 0, vendor_id);
       ParameterList param_list;
-      int status = to_param_list(participant_data, param_list);
-      TEST_ASSERT(status == 0);
+      bool status = to_param_list(participant_data, param_list);
+      TEST_ASSERT(status == true);
       SPDPdiscoveredParticipantData part_data_out;
       status = from_param_list(param_list, part_data_out);
+      TEST_ASSERT(status == true);
       TEST_ASSERT(!memcmp(participant_data.participantProxy.vendorId.vendorId,
                           part_data_out.participantProxy.vendorId.vendorId,
                           sizeof(OctetArray2)));
@@ -678,8 +679,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       SPDPdiscoveredParticipantData participant_data =
           Factory::spdp_participant(NULL, 0, 0, 0, NULL, &guid_in);
       ParameterList param_list;
-      int status = to_param_list(participant_data, param_list);
-      TEST_ASSERT(status == 0);
+      bool status = to_param_list(participant_data, param_list);
+      TEST_ASSERT(status == true);
       TEST_ASSERT(is_present(param_list, PID_PARTICIPANT_GUID));
       Parameter param = get(param_list, PID_PARTICIPANT_GUID);
       GUID_t guid_out = param.guid();
@@ -692,11 +693,11 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       SPDPdiscoveredParticipantData participant_data =
           Factory::spdp_participant(NULL, 0, 0, 0, NULL, &guid_in);
       ParameterList param_list;
-      int status = to_param_list(participant_data, param_list);
-      TEST_ASSERT(status == 0);
+      bool status = to_param_list(participant_data, param_list);
+      TEST_ASSERT(status == true);
       SPDPdiscoveredParticipantData part_data_out;
       status = from_param_list(param_list, part_data_out);
-      TEST_ASSERT(status == 0);
+      TEST_ASSERT(status == true);
       TEST_ASSERT(memcmp(participant_data.participantProxy.guidPrefix,
                          part_data_out.participantProxy.guidPrefix,
                          sizeof(GuidPrefix_t)) == 0);
@@ -706,8 +707,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       SPDPdiscoveredParticipantData participant_data =
           Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, true);
       ParameterList param_list;
-      int status = to_param_list(participant_data, param_list);
-      TEST_ASSERT(status == 0);
+      bool status = to_param_list(participant_data, param_list);
+      TEST_ASSERT(status == true);
       TEST_ASSERT(is_present(param_list, PID_EXPECTS_INLINE_QOS));
       Parameter param = get(param_list, PID_EXPECTS_INLINE_QOS);
       TEST_ASSERT(param.expects_inline_qos() == true);
@@ -717,18 +718,18 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       SPDPdiscoveredParticipantData participant_data =
           Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, true);
       ParameterList param_list;
-      int status = to_param_list(participant_data, param_list);
-      TEST_ASSERT(status == 0);
+      bool status = to_param_list(participant_data, param_list);
+      TEST_ASSERT(status == true);
       SPDPdiscoveredParticipantData part_data_out;
       status = from_param_list(param_list, part_data_out);
-      TEST_ASSERT(status == 0);
+      TEST_ASSERT(status == true);
       TEST_ASSERT(part_data_out.participantProxy.expectsInlineQos == true);
       // Change to false
       participant_data.participantProxy.expectsInlineQos = false;
       param_list.length(0);
       to_param_list(participant_data, param_list);
       status = from_param_list(param_list, part_data_out);
-      TEST_ASSERT(status == 0);
+      TEST_ASSERT(status == true);
       TEST_ASSERT(part_data_out.participantProxy.expectsInlineQos == false);
     }
 
@@ -736,8 +737,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       SPDPdiscoveredParticipantData participant_data =
           Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 72393L);
       ParameterList param_list;
-      int status = to_param_list(participant_data, param_list);
-      TEST_ASSERT(status == 0);
+      bool status = to_param_list(participant_data, param_list);
+      TEST_ASSERT(status == true);
       TEST_ASSERT(is_present(param_list, PID_PARTICIPANT_BUILTIN_ENDPOINTS));
       Parameter param = get(param_list, PID_PARTICIPANT_BUILTIN_ENDPOINTS);
       TEST_ASSERT(param.participant_builtin_endpoints() == 72393L);
@@ -750,11 +751,11 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       SPDPdiscoveredParticipantData participant_data =
           Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 72393L);
       ParameterList param_list;
-      int status = to_param_list(participant_data, param_list);
-      TEST_ASSERT(status == 0);
+      bool status = to_param_list(participant_data, param_list);
+      TEST_ASSERT(status == true);
       SPDPdiscoveredParticipantData part_data_out;
       status = from_param_list(param_list, part_data_out);
-      TEST_ASSERT(status == 0);
+      TEST_ASSERT(status == true);
       TEST_ASSERT(
           participant_data.participantProxy.availableBuiltinEndpoints ==
           part_data_out.participantProxy.availableBuiltinEndpoints);
@@ -773,8 +774,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
                                     locators, 2);
       ParameterList param_list;
-      int status = to_param_list(participant_data, param_list);
-      TEST_ASSERT(status == 0);
+      bool status = to_param_list(participant_data, param_list);
+      TEST_ASSERT(status == true);
       TEST_ASSERT(is_present(param_list, PID_METATRAFFIC_UNICAST_LOCATOR));
       Parameter param = get(param_list, PID_METATRAFFIC_UNICAST_LOCATOR, 0);
       locator_out = param.locator();
@@ -801,11 +802,11 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
                                     locators, 2);
       ParameterList param_list;
-      int status = to_param_list(participant_data, param_list);
-      TEST_ASSERT(status == 0);
+      bool status = to_param_list(participant_data, param_list);
+      TEST_ASSERT(status == true);
       SPDPdiscoveredParticipantData part_data_out;
       status = from_param_list(param_list, part_data_out);
-      TEST_ASSERT(status == 0);
+      TEST_ASSERT(status == true);
       {
         Locator_t& locator = part_data_out.participantProxy.metatrafficUnicastLocatorList[0];
         TEST_ASSERT(locators[0].kind == locator.kind);
@@ -832,11 +833,11 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
                                     NULL, 0, locators, 2);
       ParameterList param_list;
-      int status = to_param_list(participant_data, param_list);
-      TEST_ASSERT(status == 0);
+      bool status = to_param_list(participant_data, param_list);
+      TEST_ASSERT(status == true);
       SPDPdiscoveredParticipantData part_data_out;
       status = from_param_list(param_list, part_data_out);
-      TEST_ASSERT(status == 0);
+      TEST_ASSERT(status == true);
       {
         Locator_t& locator = part_data_out.participantProxy.metatrafficMulticastLocatorList[0];
         TEST_ASSERT(locators[0].kind == locator.kind);
@@ -863,11 +864,11 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
                                     NULL, 0, locators, 2);
       ParameterList param_list;
-      int status = to_param_list(participant_data, param_list);
-      TEST_ASSERT(status == 0);
+      bool status = to_param_list(participant_data, param_list);
+      TEST_ASSERT(status == true);
       SPDPdiscoveredParticipantData part_data_out;
       status = from_param_list(param_list, part_data_out);
-      TEST_ASSERT(status == 0);
+      TEST_ASSERT(status == true);
       {
         Locator_t& locator = part_data_out.participantProxy.metatrafficMulticastLocatorList[0];
         TEST_ASSERT(locators[0].kind == locator.kind);
@@ -895,8 +896,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
                                     NULL, 0, NULL, 0, locators, 2);
       ParameterList param_list;
-      int status = to_param_list(participant_data, param_list);
-      TEST_ASSERT(status == 0);
+      bool status = to_param_list(participant_data, param_list);
+      TEST_ASSERT(status == true);
       TEST_ASSERT(is_present(param_list, PID_DEFAULT_UNICAST_LOCATOR));
       Parameter param = get(param_list, PID_DEFAULT_UNICAST_LOCATOR, 0);
       locator_out = param.locator();
@@ -923,11 +924,11 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
                                     NULL, 0, NULL, 0, locators, 2);
       ParameterList param_list;
-      int status = to_param_list(participant_data, param_list);
-      TEST_ASSERT(status == 0);
+      bool status = to_param_list(participant_data, param_list);
+      TEST_ASSERT(status == true);
       SPDPdiscoveredParticipantData part_data_out;
       status = from_param_list(param_list, part_data_out);
-      TEST_ASSERT(status == 0);
+      TEST_ASSERT(status == true);
       {
         Locator_t& locator = part_data_out.participantProxy.defaultUnicastLocatorList[0];
         TEST_ASSERT(locators[0].kind == locator.kind);
@@ -956,8 +957,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                                     NULL, 0, NULL, 0, NULL, 0,
                                     locators, 2);
       ParameterList param_list;
-      int status = to_param_list(participant_data, param_list);
-      TEST_ASSERT(status == 0);
+      bool status = to_param_list(participant_data, param_list);
+      TEST_ASSERT(status == true);
       TEST_ASSERT(is_present(param_list, PID_DEFAULT_MULTICAST_LOCATOR));
       Parameter param = get(param_list, PID_DEFAULT_MULTICAST_LOCATOR, 0);
       locator_out = param.locator();
@@ -985,11 +986,11 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                                     NULL, 0, NULL, 0, NULL, 0,
                                     locators, 2);
       ParameterList param_list;
-      int status = to_param_list(participant_data, param_list);
-      TEST_ASSERT(status == 0);
+      bool status = to_param_list(participant_data, param_list);
+      TEST_ASSERT(status == true);
       SPDPdiscoveredParticipantData part_data_out;
       status = from_param_list(param_list, part_data_out);
-      TEST_ASSERT(status == 0);
+      TEST_ASSERT(status == true);
       {
         Locator_t& locator = part_data_out.participantProxy.defaultMulticastLocatorList[0];
         TEST_ASSERT(locators[0].kind == locator.kind);
@@ -1010,8 +1011,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                                     NULL, 0, NULL, 0, NULL, 0, NULL, 0,
                                     7);
       ParameterList param_list;
-      int status = to_param_list(participant_data, param_list);
-      TEST_ASSERT(status == 0);
+      bool status = to_param_list(participant_data, param_list);
+      TEST_ASSERT(status == true);
       TEST_ASSERT(is_present(param_list, PID_PARTICIPANT_MANUAL_LIVELINESS_COUNT));
       Parameter param = get(param_list, PID_PARTICIPANT_MANUAL_LIVELINESS_COUNT);
       TEST_ASSERT(param.count().value == 7);
@@ -1023,10 +1024,11 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                                     NULL, 0, NULL, 0, NULL, 0, NULL, 0,
                                     6);
       ParameterList param_list;
-      int status = to_param_list(participant_data, param_list);
-      TEST_ASSERT(status == 0);
+      bool status = to_param_list(participant_data, param_list);
+      TEST_ASSERT(status == true);
       SPDPdiscoveredParticipantData part_data_out;
       status = from_param_list(param_list, part_data_out);
+      TEST_ASSERT(status == true);
       TEST_ASSERT(
           part_data_out.participantProxy.manualLivelinessCount.value == 6);
     }
@@ -1037,8 +1039,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                                     NULL, 0, NULL, 0, NULL, 0, NULL, 0, 7,
                                     12, 300);
       ParameterList param_list;
-      int status = to_param_list(participant_data, param_list);
-      TEST_ASSERT(status == 0);
+      bool status = to_param_list(participant_data, param_list);
+      TEST_ASSERT(status == true);
       TEST_ASSERT(is_present(param_list, PID_PARTICIPANT_LEASE_DURATION));
       Parameter param = get(param_list, PID_PARTICIPANT_LEASE_DURATION);
       TEST_ASSERT(param.duration().seconds == 12);
@@ -1051,11 +1053,11 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                                     NULL, 0, NULL, 0, NULL, 0, NULL, 0, 7,
                                     12, 300);
       ParameterList param_list;
-      int status = to_param_list(participant_data, param_list);
-      TEST_ASSERT(status == 0);
+      bool status = to_param_list(participant_data, param_list);
+      TEST_ASSERT(status == true);
       SPDPdiscoveredParticipantData part_data_out;
       status = from_param_list(param_list, part_data_out);
-      TEST_ASSERT(status == 0);
+      TEST_ASSERT(status == true);
       TEST_ASSERT(part_data_out.leaseDuration.seconds ==
                   participant_data.leaseDuration.seconds);
       TEST_ASSERT(part_data_out.leaseDuration.fraction ==
@@ -1066,8 +1068,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       SPDPdiscoveredParticipantData part_data_out;
       part_data_out.ddsParticipantData.user_data.value.length(4);
       ParameterList empty_param_list;
-      int status = from_param_list(empty_param_list, part_data_out);
-      TEST_ASSERT(!status);
+      bool status = from_param_list(empty_param_list, part_data_out);
+      TEST_ASSERT(status == true);
       CORBA::ULong length = part_data_out.ddsParticipantData.user_data.value.length();
       TEST_ASSERT(length == 0);
     }
@@ -1080,8 +1082,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       SPDPdiscoveredParticipantData part_data_out;
       part_data_out.participantProxy.expectsInlineQos = true;
       ParameterList empty_param_list;
-      int status = from_param_list(empty_param_list, part_data_out);
-      TEST_ASSERT(!status);
+      bool status = from_param_list(empty_param_list, part_data_out);
+      TEST_ASSERT(status == true);
       TEST_ASSERT(part_data_out.participantProxy.expectsInlineQos == false);
     }
 
@@ -1096,8 +1098,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     { // Should set participant lease duration to default if not present in param list
       SPDPdiscoveredParticipantData part_data_out;
       ParameterList empty_param_list;
-      int status = from_param_list(empty_param_list, part_data_out);
-      TEST_ASSERT(!status);
+      bool status = from_param_list(empty_param_list, part_data_out);
+      TEST_ASSERT(status == true);
       TEST_ASSERT(part_data_out.leaseDuration.seconds == 100);
       TEST_ASSERT(part_data_out.leaseDuration.fraction == 0);
     }
@@ -1109,8 +1111,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       vs_param._d(0x8001);
       vs_param_list.length(1);
       vs_param_list[0] = vs_param;
-      int status = from_param_list(vs_param_list, part_data_out);
-      TEST_ASSERT(!status);
+      bool status = from_param_list(vs_param_list, part_data_out);
+      TEST_ASSERT(status == true);
     }
 
     { // Should not fail on participant optional parameters
@@ -1120,8 +1122,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       vs_param._d(0x3FFF);
       vs_param_list.length(1);
       vs_param_list[0] = vs_param;
-      int status = from_param_list(vs_param_list, part_data_out);
-      TEST_ASSERT(!status);
+      bool status = from_param_list(vs_param_list, part_data_out);
+      TEST_ASSERT(status == true);
     }
 
     { // Should fail on participant required parameters
@@ -1131,8 +1133,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       vs_param._d(0x4001);
       vs_param_list.length(1);
       vs_param_list[0] = vs_param;
-      int status = from_param_list(vs_param_list, part_data_out);
-      TEST_ASSERT(status != 0);
+      bool status = from_param_list(vs_param_list, part_data_out);
+      TEST_ASSERT(status == false);
     }
 
     { // Foreign DDS's have been observed using PID_BUILTIN_ENDPOINT_SET when
@@ -1143,8 +1145,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       vs_param_list.length(1);
       vs_param_list[0] = vs_param;
       SPDPdiscoveredParticipantData part_data_out;
-      const int status = from_param_list(vs_param_list, part_data_out);
-      TEST_ASSERT(!status);
+      const bool status = from_param_list(vs_param_list, part_data_out);
+      TEST_ASSERT(status == true);
       TEST_ASSERT(part_data_out.participantProxy.availableBuiltinEndpoints
                   == 0x12345678);
     }
@@ -1156,8 +1158,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       vs_param._d(PID_SENTINEL);
       vs_param_list.length(1);
       vs_param_list[0] = vs_param;
-      int status = from_param_list(vs_param_list, part_data_out);
-      TEST_ASSERT(!status);
+      bool status = from_param_list(vs_param_list, part_data_out);
+      TEST_ASSERT(status == true);
     }
 
     { // Should ignore participant PAD
@@ -1167,21 +1169,21 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       vs_param._d(PID_PAD);
       vs_param_list.length(1);
       vs_param_list[0] = vs_param;
-      int status = from_param_list(vs_param_list, part_data_out);
-      TEST_ASSERT(!status);
+      bool status = from_param_list(vs_param_list, part_data_out);
+      TEST_ASSERT(status == true);
     }
 
     { // Should encode writer data
       DiscoveredWriterData writer_data = Factory::default_writer_data();
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(writer_data, param_list));
+      TEST_ASSERT(to_param_list(writer_data, param_list));
     }
 
     { // Should encode writer topic name
       DiscoveredWriterData writer_data =
           Factory::writer_data("TOPIC NAME TEST");
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(writer_data, param_list));
+      TEST_ASSERT(to_param_list(writer_data, param_list));
       TEST_ASSERT(is_present(param_list, PID_TOPIC_NAME));
       Parameter param = get(param_list, PID_TOPIC_NAME);
       TEST_ASSERT(!strncmp(param.string_data(), "TOPIC NAME TEST", 15));
@@ -1191,9 +1193,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       DiscoveredWriterData writer_data =
           Factory::writer_data("TOPIC NAME TEST");
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(writer_data, param_list));
+      TEST_ASSERT(to_param_list(writer_data, param_list));
       DiscoveredWriterData writer_data_out;
-      TEST_ASSERT(!from_param_list(param_list, writer_data_out));
+      TEST_ASSERT(from_param_list(param_list, writer_data_out));
       TEST_ASSERT(!strcmp(writer_data.ddsPublicationData.topic_name,
                           writer_data_out.ddsPublicationData.topic_name));
     }
@@ -1202,7 +1204,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       DiscoveredWriterData writer_data_out;
       writer_data_out.ddsPublicationData.topic_name = "TEST TOPIC";
       ParameterList empty_param_list;
-      TEST_ASSERT(!from_param_list(empty_param_list, writer_data_out));
+      TEST_ASSERT(from_param_list(empty_param_list, writer_data_out));
       TEST_ASSERT(!strcmp(writer_data_out.ddsPublicationData.topic_name, ""));
     }
 
@@ -1210,7 +1212,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       DiscoveredWriterData writer_data = Factory::writer_data("", "Messages");
 
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(writer_data, param_list));
+      TEST_ASSERT(to_param_list(writer_data, param_list));
       TEST_ASSERT(is_present(param_list, PID_TYPE_NAME));
       Parameter param = get(param_list, PID_TYPE_NAME);
       TEST_ASSERT(!strncmp(param.string_data(), "Messages", 8));
@@ -1219,9 +1221,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     { // Should decode writer type name
       DiscoveredWriterData writer_data = Factory::writer_data("", "Messages");
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(writer_data, param_list));
+      TEST_ASSERT(to_param_list(writer_data, param_list));
       DiscoveredWriterData writer_data_out;
-      TEST_ASSERT(!from_param_list(param_list, writer_data_out));
+      TEST_ASSERT(from_param_list(param_list, writer_data_out));
       TEST_ASSERT(!strcmp(writer_data.ddsPublicationData.type_name,
                           writer_data_out.ddsPublicationData.type_name));
     }
@@ -1230,7 +1232,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       DiscoveredWriterData writer_data_out;
       writer_data_out.ddsPublicationData.type_name = "TEST TYPE";
       ParameterList empty_param_list;
-      TEST_ASSERT(!from_param_list(empty_param_list, writer_data_out));
+      TEST_ASSERT(from_param_list(empty_param_list, writer_data_out));
       TEST_ASSERT(!strcmp(writer_data_out.ddsPublicationData.type_name, ""));
     }
 
@@ -1240,7 +1242,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           TRANSIENT_LOCAL_DURABILITY_QOS);
 
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(writer_data, param_list));
+      TEST_ASSERT(to_param_list(writer_data, param_list));
       TEST_ASSERT(is_present(param_list, PID_DURABILITY));
       Parameter param = get(param_list, PID_DURABILITY);
       TEST_ASSERT(param.durability().kind == TRANSIENT_LOCAL_DURABILITY_QOS);
@@ -1251,9 +1253,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           NULL, NULL,
           TRANSIENT_LOCAL_DURABILITY_QOS);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(writer_data, param_list));
+      TEST_ASSERT(to_param_list(writer_data, param_list));
       DiscoveredWriterData writer_data_out;
-      TEST_ASSERT(!from_param_list(param_list, writer_data_out));
+      TEST_ASSERT(from_param_list(param_list, writer_data_out));
       TEST_ASSERT(writer_data.ddsPublicationData.durability.kind ==
                   writer_data_out.ddsPublicationData.durability.kind);
     }
@@ -1262,7 +1264,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       DiscoveredWriterData writer_data_out = Factory::writer_data(
           NULL, NULL, TRANSIENT_LOCAL_DURABILITY_QOS);
       ParameterList empty_param_list;
-      TEST_ASSERT(!from_param_list(empty_param_list, writer_data_out));
+      TEST_ASSERT(from_param_list(empty_param_list, writer_data_out));
       DurabilityQosPolicy defaultQos =
           TheServiceParticipant->initial_DurabilityQosPolicy();
       TEST_ASSERT(defaultQos.kind ==
@@ -1279,7 +1281,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           389, 102, 20);
 
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(writer_data, param_list));
+      TEST_ASSERT(to_param_list(writer_data, param_list));
       TEST_ASSERT(is_present(param_list, PID_DURABILITY_SERVICE));
       Parameter param = get(param_list, PID_DURABILITY_SERVICE);
       DurabilityServiceQosPolicy dsqp = param.durability_service();
@@ -1300,9 +1302,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           KEEP_LAST_HISTORY_QOS, 172,
           389, 102, 20);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(writer_data, param_list));
+      TEST_ASSERT(to_param_list(writer_data, param_list));
       DiscoveredWriterData writer_data_out;
-      TEST_ASSERT(!from_param_list(param_list, writer_data_out));
+      TEST_ASSERT(from_param_list(param_list, writer_data_out));
       DurabilityServiceQosPolicy& ds_in =
           writer_data.ddsPublicationData.durability_service;
       DurabilityServiceQosPolicy& ds_out =
@@ -1325,7 +1327,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           KEEP_LAST_HISTORY_QOS, 172,
           389, 102, 20);
       ParameterList empty_param_list;
-      TEST_ASSERT(!from_param_list(empty_param_list, writer_data_out));
+      TEST_ASSERT(from_param_list(empty_param_list, writer_data_out));
       DurabilityServiceQosPolicy defaultQos =
           TheServiceParticipant->initial_DurabilityServiceQosPolicy();
       DurabilityServiceQosPolicy& ds_out =
@@ -1349,7 +1351,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           127, 35000);
 
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(writer_data, param_list));
+      TEST_ASSERT(to_param_list(writer_data, param_list));
       TEST_ASSERT(is_present(param_list, PID_DEADLINE));
       Parameter param = get(param_list, PID_DEADLINE);
       TEST_ASSERT(param.deadline().period.sec == 127);
@@ -1362,9 +1364,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1,
           127, 35000);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(writer_data, param_list));
+      TEST_ASSERT(to_param_list(writer_data, param_list));
       DiscoveredWriterData writer_data_out;
-      TEST_ASSERT(!from_param_list(param_list, writer_data_out));
+      TEST_ASSERT(from_param_list(param_list, writer_data_out));
       TEST_ASSERT(writer_data.ddsPublicationData.deadline.period.sec ==
                   writer_data_out.ddsPublicationData.deadline.period.sec);
       TEST_ASSERT(writer_data.ddsPublicationData.deadline.period.nanosec ==
@@ -1377,7 +1379,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       writer_data_out.ddsPublicationData.deadline.period.nanosec = 7;
 
       ParameterList empty_param_list;
-      TEST_ASSERT(!from_param_list(empty_param_list, writer_data_out));
+      TEST_ASSERT(from_param_list(empty_param_list, writer_data_out));
       DeadlineQosPolicy defaultQos =
           TheServiceParticipant->initial_DeadlineQosPolicy();
       TEST_ASSERT(defaultQos.period.sec ==
@@ -1392,7 +1394,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0,
           5, 25000);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(writer_data, param_list));
+      TEST_ASSERT(to_param_list(writer_data, param_list));
       TEST_ASSERT(is_present(param_list, PID_LATENCY_BUDGET));
       Parameter param = get(param_list, PID_LATENCY_BUDGET);
       TEST_ASSERT(param.latency_budget().duration.sec == 5);
@@ -1405,9 +1407,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0,
           5, 25000);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(writer_data, param_list));
+      TEST_ASSERT(to_param_list(writer_data, param_list));
       DiscoveredWriterData writer_data_out;
-      TEST_ASSERT(!from_param_list(param_list, writer_data_out));
+      TEST_ASSERT(from_param_list(param_list, writer_data_out));
       TEST_ASSERT(writer_data.ddsPublicationData.latency_budget.duration.sec ==
                   writer_data_out.ddsPublicationData.latency_budget.duration.sec);
     }
@@ -1418,7 +1420,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       writer_data_out.ddsPublicationData.latency_budget.duration.nanosec = 7;
 
       ParameterList empty_param_list;
-      TEST_ASSERT(!from_param_list(empty_param_list, writer_data_out));
+      TEST_ASSERT(from_param_list(empty_param_list, writer_data_out));
       LatencyBudgetQosPolicy defaultQos =
           TheServiceParticipant->initial_LatencyBudgetQosPolicy();
       TEST_ASSERT(defaultQos.duration.sec ==
@@ -1432,7 +1434,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
           MANUAL_BY_PARTICIPANT_LIVELINESS_QOS, 17, 15000);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(writer_data, param_list));
+      TEST_ASSERT(to_param_list(writer_data, param_list));
       TEST_ASSERT(is_present(param_list, PID_LIVELINESS));
       Parameter param = get(param_list, PID_LIVELINESS);
       TEST_ASSERT(param.liveliness().kind == MANUAL_BY_PARTICIPANT_LIVELINESS_QOS);
@@ -1446,9 +1448,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
           MANUAL_BY_PARTICIPANT_LIVELINESS_QOS, 17, 15000);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(writer_data, param_list));
+      TEST_ASSERT(to_param_list(writer_data, param_list));
       DiscoveredWriterData writer_data_out;
-      TEST_ASSERT(!from_param_list(param_list, writer_data_out));
+      TEST_ASSERT(from_param_list(param_list, writer_data_out));
       TEST_ASSERT(writer_data.ddsPublicationData.liveliness.kind ==
                   writer_data_out.ddsPublicationData.liveliness.kind);
       TEST_ASSERT(writer_data.ddsPublicationData.liveliness.lease_duration.sec ==
@@ -1465,7 +1467,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       writer_data_out.ddsPublicationData.liveliness.lease_duration.nanosec = 7;
 
       ParameterList empty_param_list;
-      TEST_ASSERT(!from_param_list(empty_param_list, writer_data_out));
+      TEST_ASSERT(from_param_list(empty_param_list, writer_data_out));
       LivelinessQosPolicy defaultQos =
           TheServiceParticipant->initial_LivelinessQosPolicy();
       TEST_ASSERT(defaultQos.kind ==
@@ -1482,7 +1484,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           AUTOMATIC_LIVELINESS_QOS, 0, 0,
           RELIABLE_RELIABILITY_QOS, 8, 100);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(writer_data, param_list));
+      TEST_ASSERT(to_param_list(writer_data, param_list));
       TEST_ASSERT(is_present(param_list, PID_RELIABILITY));
       Parameter param = get(param_list, PID_RELIABILITY);
       const int reliable_interop = static_cast<int>(RELIABLE_RELIABILITY_QOS) + 1;
@@ -1498,9 +1500,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           AUTOMATIC_LIVELINESS_QOS, 0, 0,
           RELIABLE_RELIABILITY_QOS, 8, 100);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(writer_data, param_list));
+      TEST_ASSERT(to_param_list(writer_data, param_list));
       DiscoveredWriterData writer_data_out;
-      TEST_ASSERT(!from_param_list(param_list, writer_data_out));
+      TEST_ASSERT(from_param_list(param_list, writer_data_out));
       TEST_ASSERT(writer_data.ddsPublicationData.reliability.kind ==
                   writer_data_out.ddsPublicationData.reliability.kind);
       TEST_ASSERT(writer_data.ddsPublicationData.reliability.max_blocking_time.sec ==
@@ -1517,7 +1519,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       writer_data_out.ddsPublicationData.reliability.max_blocking_time.nanosec = 7;
 
       ParameterList empty_param_list;
-      TEST_ASSERT(!from_param_list(empty_param_list, writer_data_out));
+      TEST_ASSERT(from_param_list(empty_param_list, writer_data_out));
       ReliabilityQosPolicy defaultQos =
           TheServiceParticipant->initial_DataWriterQos().reliability;
       TEST_ASSERT(defaultQos.kind ==
@@ -1535,7 +1537,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           BEST_EFFORT_RELIABILITY_QOS, 0, 0,
           12, 90000);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(writer_data, param_list));
+      TEST_ASSERT(to_param_list(writer_data, param_list));
       TEST_ASSERT(is_present(param_list, PID_LIFESPAN));
       Parameter param = get(param_list, PID_LIFESPAN);
       TEST_ASSERT(param.lifespan().duration.sec == 12);
@@ -1549,9 +1551,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           BEST_EFFORT_RELIABILITY_QOS, 0, 0,
           12, 90000);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(writer_data, param_list));
+      TEST_ASSERT(to_param_list(writer_data, param_list));
       DiscoveredWriterData writer_data_out;
-      TEST_ASSERT(!from_param_list(param_list, writer_data_out));
+      TEST_ASSERT(from_param_list(param_list, writer_data_out));
       TEST_ASSERT(writer_data.ddsPublicationData.lifespan.duration.sec ==
                   writer_data_out.ddsPublicationData.lifespan.duration.sec);
       TEST_ASSERT(writer_data.ddsPublicationData.lifespan.duration.nanosec ==
@@ -1563,7 +1565,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       writer_data_out.ddsPublicationData.lifespan.duration.nanosec = 7;
 
       ParameterList empty_param_list;
-      TEST_ASSERT(!from_param_list(empty_param_list, writer_data_out));
+      TEST_ASSERT(from_param_list(empty_param_list, writer_data_out));
       LifespanQosPolicy defaultQos =
           TheServiceParticipant->initial_LifespanQosPolicy();
       TEST_ASSERT(defaultQos.duration.sec ==
@@ -1582,7 +1584,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0,
           ud, ud_len);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(writer_data, param_list));
+      TEST_ASSERT(to_param_list(writer_data, param_list));
       TEST_ASSERT(is_present(param_list, PID_USER_DATA));
       Parameter param = get(param_list, PID_USER_DATA);
       TEST_ASSERT(param.user_data().value.length() == ud_len);
@@ -1600,9 +1602,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0,
           ud, ud_len);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(writer_data, param_list));
+      TEST_ASSERT(to_param_list(writer_data, param_list));
       DiscoveredWriterData writer_data_out;
-      TEST_ASSERT(!from_param_list(param_list, writer_data_out));
+      TEST_ASSERT(from_param_list(param_list, writer_data_out));
       TEST_ASSERT(writer_data.ddsPublicationData.user_data.value ==
                   writer_data_out.ddsPublicationData.user_data.value);
     }
@@ -1617,7 +1619,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           ud, ud_len);
 
       ParameterList empty_param_list;
-      TEST_ASSERT(!from_param_list(empty_param_list, writer_data_out));
+      TEST_ASSERT(from_param_list(empty_param_list, writer_data_out));
       UserDataQosPolicy defaultQos =
           TheServiceParticipant->initial_UserDataQosPolicy();
       TEST_ASSERT(defaultQos.value ==
@@ -1632,7 +1634,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
           EXCLUSIVE_OWNERSHIP_QOS);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(writer_data, param_list));
+      TEST_ASSERT(to_param_list(writer_data, param_list));
       TEST_ASSERT(is_present(param_list, PID_OWNERSHIP));
       Parameter param = get(param_list, PID_OWNERSHIP);
       TEST_ASSERT(param.ownership().kind == EXCLUSIVE_OWNERSHIP_QOS);
@@ -1646,9 +1648,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
           EXCLUSIVE_OWNERSHIP_QOS);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(writer_data, param_list));
+      TEST_ASSERT(to_param_list(writer_data, param_list));
       DiscoveredWriterData writer_data_out;
-      TEST_ASSERT(!from_param_list(param_list, writer_data_out));
+      TEST_ASSERT(from_param_list(param_list, writer_data_out));
       TEST_ASSERT(writer_data.ddsPublicationData.ownership.kind ==
                   writer_data_out.ddsPublicationData.ownership.kind);
     }
@@ -1657,7 +1659,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       writer_data_out.ddsPublicationData.ownership.kind = EXCLUSIVE_OWNERSHIP_QOS;
 
       ParameterList empty_param_list;
-      TEST_ASSERT(!from_param_list(empty_param_list, writer_data_out));
+      TEST_ASSERT(from_param_list(empty_param_list, writer_data_out));
       OwnershipQosPolicy defaultQos =
           TheServiceParticipant->initial_OwnershipQosPolicy();
       TEST_ASSERT(defaultQos.kind ==
@@ -1673,7 +1675,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           SHARED_OWNERSHIP_QOS,
           29);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(writer_data, param_list));
+      TEST_ASSERT(to_param_list(writer_data, param_list));
   #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
       TEST_ASSERT(is_present(param_list, PID_OWNERSHIP_STRENGTH));
       Parameter param = get(param_list, PID_OWNERSHIP_STRENGTH);
@@ -1690,9 +1692,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           SHARED_OWNERSHIP_QOS,
           29);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(writer_data, param_list));
+      TEST_ASSERT(to_param_list(writer_data, param_list));
       DiscoveredWriterData writer_data_out;
-      TEST_ASSERT(!from_param_list(param_list, writer_data_out));
+      TEST_ASSERT(from_param_list(param_list, writer_data_out));
       TEST_ASSERT(writer_data.ddsPublicationData.ownership_strength.value ==
                   writer_data_out.ddsPublicationData.ownership_strength.value);
     }
@@ -1702,7 +1704,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       writer_data_out.ddsPublicationData.ownership_strength.value = 17;
 
       ParameterList empty_param_list;
-      TEST_ASSERT(!from_param_list(empty_param_list, writer_data_out));
+      TEST_ASSERT(from_param_list(empty_param_list, writer_data_out));
       OwnershipStrengthQosPolicy defaultQos =
           TheServiceParticipant->initial_OwnershipStrengthQosPolicy();
       TEST_ASSERT(defaultQos.value ==
@@ -1718,7 +1720,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           SHARED_OWNERSHIP_QOS, 0,
           BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(writer_data, param_list));
+      TEST_ASSERT(to_param_list(writer_data, param_list));
       TEST_ASSERT(is_present(param_list, PID_DESTINATION_ORDER));
       Parameter param = get(param_list, PID_DESTINATION_ORDER);
       TEST_ASSERT(param.destination_order().kind ==
@@ -1733,9 +1735,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           SHARED_OWNERSHIP_QOS, 0,
           BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(writer_data, param_list));
+      TEST_ASSERT(to_param_list(writer_data, param_list));
       DiscoveredWriterData writer_data_out;
-      TEST_ASSERT(!from_param_list(param_list, writer_data_out));
+      TEST_ASSERT(from_param_list(param_list, writer_data_out));
       TEST_ASSERT(writer_data.ddsPublicationData.destination_order.kind ==
                   writer_data_out.ddsPublicationData.destination_order.kind);
     }
@@ -1745,7 +1747,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS;
 
       ParameterList empty_param_list;
-      TEST_ASSERT(!from_param_list(empty_param_list, writer_data_out));
+      TEST_ASSERT(from_param_list(empty_param_list, writer_data_out));
       DestinationOrderQosPolicy defaultQos =
           TheServiceParticipant->initial_DestinationOrderQosPolicy();
       TEST_ASSERT(defaultQos.kind ==
@@ -1762,7 +1764,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
           GROUP_PRESENTATION_QOS, true, true);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(writer_data, param_list));
+      TEST_ASSERT(to_param_list(writer_data, param_list));
       TEST_ASSERT(is_present(param_list, PID_PRESENTATION));
       Parameter param = get(param_list, PID_PRESENTATION);
       TEST_ASSERT(param.presentation().access_scope ==
@@ -1780,9 +1782,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
           GROUP_PRESENTATION_QOS, true, true);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(writer_data, param_list));
+      TEST_ASSERT(to_param_list(writer_data, param_list));
       DiscoveredWriterData writer_data_out;
-      TEST_ASSERT(!from_param_list(param_list, writer_data_out));
+      TEST_ASSERT(from_param_list(param_list, writer_data_out));
       TEST_ASSERT(writer_data.ddsPublicationData.presentation.access_scope ==
                   writer_data_out.ddsPublicationData.presentation.access_scope);
       TEST_ASSERT(writer_data.ddsPublicationData.presentation.coherent_access ==
@@ -1798,7 +1800,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       writer_data_out.ddsPublicationData.presentation.ordered_access = true;
 
       ParameterList empty_param_list;
-      TEST_ASSERT(!from_param_list(empty_param_list, writer_data_out));
+      TEST_ASSERT(from_param_list(empty_param_list, writer_data_out));
       PresentationQosPolicy defaultQos =
           TheServiceParticipant->initial_PresentationQosPolicy();
       TEST_ASSERT(defaultQos.access_scope ==
@@ -1821,7 +1823,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           INSTANCE_PRESENTATION_QOS, false, false,
           part);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(writer_data, param_list));
+      TEST_ASSERT(to_param_list(writer_data, param_list));
       TEST_ASSERT(is_present(param_list, PID_PARTITION));
       Parameter param = get(param_list, PID_PARTITION);
       TEST_ASSERT(param.partition().name.length() == 1);
@@ -1839,9 +1841,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           INSTANCE_PRESENTATION_QOS, false, false,
           part);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(writer_data, param_list));
+      TEST_ASSERT(to_param_list(writer_data, param_list));
       DiscoveredWriterData writer_data_out;
-      TEST_ASSERT(!from_param_list(param_list, writer_data_out));
+      TEST_ASSERT(from_param_list(param_list, writer_data_out));
       TEST_ASSERT(writer_data_out.ddsPublicationData.partition.name.length() == 1);
       TEST_ASSERT(!strcmp(writer_data.ddsPublicationData.partition.name[0],
                           writer_data_out.ddsPublicationData.partition.name[0]));
@@ -1860,7 +1862,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           part);
 
       ParameterList empty_param_list;
-      TEST_ASSERT(!from_param_list(empty_param_list, writer_data_out));
+      TEST_ASSERT(from_param_list(empty_param_list, writer_data_out));
       TEST_ASSERT(!writer_data_out.ddsPublicationData.partition.name.length());
     }
 
@@ -1876,7 +1878,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           INSTANCE_PRESENTATION_QOS, false, false, NULL,
           topic_data, 7);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(writer_data, param_list));
+      TEST_ASSERT(to_param_list(writer_data, param_list));
       TEST_ASSERT(is_present(param_list, PID_TOPIC_DATA));
       Parameter param = get(param_list, PID_TOPIC_DATA);
       CORBA::ULong len = param.topic_data().value.length();
@@ -1897,9 +1899,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           INSTANCE_PRESENTATION_QOS, false, false, NULL,
           topic_data, 7);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(writer_data, param_list));
+      TEST_ASSERT(to_param_list(writer_data, param_list));
       DiscoveredWriterData writer_data_out;
-      TEST_ASSERT(!from_param_list(param_list, writer_data_out));
+      TEST_ASSERT(from_param_list(param_list, writer_data_out));
       TEST_ASSERT(writer_data.ddsPublicationData.topic_data.value ==
                   writer_data_out.ddsPublicationData.topic_data.value);
     }
@@ -1917,7 +1919,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           topic_data, 7);
 
       ParameterList empty_param_list;
-      TEST_ASSERT(!from_param_list(empty_param_list, writer_data_out));
+      TEST_ASSERT(from_param_list(empty_param_list, writer_data_out));
       TEST_ASSERT(!writer_data_out.ddsPublicationData.topic_data.value.length());
     }
     { // Should encode writer group data
@@ -1932,7 +1934,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0,
           group_data, 7);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(writer_data, param_list));
+      TEST_ASSERT(to_param_list(writer_data, param_list));
       TEST_ASSERT(is_present(param_list, PID_GROUP_DATA));
       Parameter param = get(param_list, PID_GROUP_DATA);
       CORBA::ULong len = param.group_data().value.length();
@@ -1953,9 +1955,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0,
           group_data, 7);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(writer_data, param_list));
+      TEST_ASSERT(to_param_list(writer_data, param_list));
       DiscoveredWriterData writer_data_out;
-      TEST_ASSERT(!from_param_list(param_list, writer_data_out));
+      TEST_ASSERT(from_param_list(param_list, writer_data_out));
       TEST_ASSERT(writer_data.ddsPublicationData.group_data.value ==
                   writer_data_out.ddsPublicationData.group_data.value);
     }
@@ -1973,7 +1975,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           group_data, 7);
 
       ParameterList empty_param_list;
-      TEST_ASSERT(!from_param_list(empty_param_list, writer_data_out));
+      TEST_ASSERT(from_param_list(empty_param_list, writer_data_out));
       TEST_ASSERT(!writer_data_out.ddsPublicationData.group_data.value.length());
     }
     { // Should encode writer guid
@@ -1986,15 +1988,15 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
           INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(writer_data, param_list));
+      TEST_ASSERT(to_param_list(writer_data, param_list));
       TEST_ASSERT(is_present(param_list, PID_ENDPOINT_GUID));
     }
     { // Should decode writer guid
       DiscoveredWriterData writer_data = Factory::default_writer_data();
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(writer_data, param_list));
+      TEST_ASSERT(to_param_list(writer_data, param_list));
       DiscoveredWriterData writer_data_out;
-      TEST_ASSERT(!from_param_list(param_list, writer_data_out));
+      TEST_ASSERT(from_param_list(param_list, writer_data_out));
       TEST_ASSERT(!memcmp(&writer_data.writerProxy.remoteWriterGuid,
                           &writer_data_out.writerProxy.remoteWriterGuid,
                           sizeof(GUID_t)));
@@ -2019,7 +2021,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           locators, 2
           );
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(writer_data, param_list));
+      TEST_ASSERT(to_param_list(writer_data, param_list));
       TEST_ASSERT(is_present(param_list, PID_UNICAST_LOCATOR));
       TEST_ASSERT(!is_present(param_list, PID_MULTICAST_LOCATOR));
       TEST_ASSERT(!is_present(param_list, PID_OPENDDS_LOCATOR));
@@ -2042,9 +2044,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0,
           locators, 2);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(writer_data, param_list));
+      TEST_ASSERT(to_param_list(writer_data, param_list));
       DiscoveredWriterData writer_data_out;
-      TEST_ASSERT(!from_param_list(param_list, writer_data_out));
+      TEST_ASSERT(from_param_list(param_list, writer_data_out));
       TEST_ASSERT(writer_data_out.writerProxy.allLocators.length() == 1);
       TEST_ASSERT(!strcmp(writer_data_out.writerProxy.allLocators[0].transport_type, "rtps_udp"));
     }
@@ -2067,7 +2069,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0,
           NULL, 0, locators, 2);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(writer_data, param_list));
+      TEST_ASSERT(to_param_list(writer_data, param_list));
       TEST_ASSERT(is_present(param_list, PID_MULTICAST_LOCATOR));
       TEST_ASSERT(!is_present(param_list, PID_UNICAST_LOCATOR));
       TEST_ASSERT(!is_present(param_list, PID_OPENDDS_LOCATOR));
@@ -2090,9 +2092,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0,
           NULL, 0, locators, 2);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(writer_data, param_list));
+      TEST_ASSERT(to_param_list(writer_data, param_list));
       DiscoveredWriterData writer_data_out;
-      TEST_ASSERT(!from_param_list(param_list, writer_data_out));
+      TEST_ASSERT(from_param_list(param_list, writer_data_out));
       TEST_ASSERT(writer_data_out.writerProxy.allLocators.length() == 1);
       TEST_ASSERT(!strcmp(writer_data_out.writerProxy.allLocators[0].transport_type, "rtps_udp"));
     }
@@ -2100,14 +2102,14 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     { // Should encode reader data
       DiscoveredReaderData reader_data = Factory::default_reader_data();
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(reader_data, param_list));
+      TEST_ASSERT(to_param_list(reader_data, param_list));
     }
 
     { // Should encode reader topic name
       DiscoveredReaderData reader_data =
           Factory::reader_data("TOPIC NAME TEST");
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(reader_data, param_list));
+      TEST_ASSERT(to_param_list(reader_data, param_list));
       TEST_ASSERT(is_present(param_list, PID_TOPIC_NAME));
       Parameter param = get(param_list, PID_TOPIC_NAME);
       TEST_ASSERT(!strncmp(param.string_data(), "TOPIC NAME TEST", 15));
@@ -2117,9 +2119,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       DiscoveredReaderData reader_data =
           Factory::reader_data("TOPIC NAME TEST");
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(reader_data, param_list));
+      TEST_ASSERT(to_param_list(reader_data, param_list));
       DiscoveredReaderData reader_data_out;
-      TEST_ASSERT(!from_param_list(param_list, reader_data_out));
+      TEST_ASSERT(from_param_list(param_list, reader_data_out));
       TEST_ASSERT(!strcmp(reader_data.ddsSubscriptionData.topic_name,
                           reader_data_out.ddsSubscriptionData.topic_name));
     }
@@ -2128,7 +2130,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       DiscoveredReaderData reader_data = Factory::reader_data("", "Messages");
 
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(reader_data, param_list));
+      TEST_ASSERT(to_param_list(reader_data, param_list));
       TEST_ASSERT(is_present(param_list, PID_TYPE_NAME));
       Parameter param = get(param_list, PID_TYPE_NAME);
       TEST_ASSERT(!strncmp(param.string_data(), "Messages", 8));
@@ -2137,9 +2139,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     { // Should decode reader type name
       DiscoveredReaderData reader_data = Factory::reader_data("", "Messages");
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(reader_data, param_list));
+      TEST_ASSERT(to_param_list(reader_data, param_list));
       DiscoveredReaderData reader_data_out;
-      TEST_ASSERT(!from_param_list(param_list, reader_data_out));
+      TEST_ASSERT(from_param_list(param_list, reader_data_out));
       TEST_ASSERT(!strcmp(reader_data.ddsSubscriptionData.type_name,
                           reader_data_out.ddsSubscriptionData.type_name));
     }
@@ -2150,7 +2152,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           TRANSIENT_LOCAL_DURABILITY_QOS);
 
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(reader_data, param_list));
+      TEST_ASSERT(to_param_list(reader_data, param_list));
       TEST_ASSERT(is_present(param_list, PID_DURABILITY));
       Parameter param = get(param_list, PID_DURABILITY);
       TEST_ASSERT(param.durability().kind == TRANSIENT_LOCAL_DURABILITY_QOS);
@@ -2161,9 +2163,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           NULL, NULL,
           TRANSIENT_LOCAL_DURABILITY_QOS);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(reader_data, param_list));
+      TEST_ASSERT(to_param_list(reader_data, param_list));
       DiscoveredReaderData reader_data_out;
-      TEST_ASSERT(!from_param_list(param_list, reader_data_out));
+      TEST_ASSERT(from_param_list(param_list, reader_data_out));
       TEST_ASSERT(reader_data.ddsSubscriptionData.durability.kind ==
                   reader_data_out.ddsSubscriptionData.durability.kind);
     }
@@ -2174,7 +2176,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           127, 35000);
 
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(reader_data, param_list));
+      TEST_ASSERT(to_param_list(reader_data, param_list));
       TEST_ASSERT(is_present(param_list, PID_DEADLINE));
       Parameter param = get(param_list, PID_DEADLINE);
       TEST_ASSERT(param.deadline().period.sec == 127);
@@ -2186,9 +2188,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           NULL, NULL, VOLATILE_DURABILITY_QOS,
           127, 35000);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(reader_data, param_list));
+      TEST_ASSERT(to_param_list(reader_data, param_list));
       DiscoveredReaderData reader_data_out;
-      TEST_ASSERT(!from_param_list(param_list, reader_data_out));
+      TEST_ASSERT(from_param_list(param_list, reader_data_out));
       TEST_ASSERT(reader_data.ddsSubscriptionData.deadline.period.sec ==
                   reader_data_out.ddsSubscriptionData.deadline.period.sec);
       TEST_ASSERT(reader_data.ddsSubscriptionData.deadline.period.nanosec ==
@@ -2200,7 +2202,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
           5, 25000);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(reader_data, param_list));
+      TEST_ASSERT(to_param_list(reader_data, param_list));
       TEST_ASSERT(is_present(param_list, PID_LATENCY_BUDGET));
       Parameter param = get(param_list, PID_LATENCY_BUDGET);
       TEST_ASSERT(param.deadline().period.sec == 5);
@@ -2212,9 +2214,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
           5, 25000);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(reader_data, param_list));
+      TEST_ASSERT(to_param_list(reader_data, param_list));
       DiscoveredReaderData reader_data_out;
-      TEST_ASSERT(!from_param_list(param_list, reader_data_out));
+      TEST_ASSERT(from_param_list(param_list, reader_data_out));
       TEST_ASSERT(reader_data.ddsSubscriptionData.latency_budget.duration.sec ==
                   reader_data_out.ddsSubscriptionData.latency_budget.duration.sec);
     }
@@ -2224,7 +2226,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
           MANUAL_BY_PARTICIPANT_LIVELINESS_QOS, 17, 15000);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(reader_data, param_list));
+      TEST_ASSERT(to_param_list(reader_data, param_list));
       TEST_ASSERT(is_present(param_list, PID_LIVELINESS));
       Parameter param = get(param_list, PID_LIVELINESS);
       TEST_ASSERT(param.liveliness().kind == MANUAL_BY_PARTICIPANT_LIVELINESS_QOS);
@@ -2237,9 +2239,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
           MANUAL_BY_PARTICIPANT_LIVELINESS_QOS, 17, 15000);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(reader_data, param_list));
+      TEST_ASSERT(to_param_list(reader_data, param_list));
       DiscoveredReaderData reader_data_out;
-      TEST_ASSERT(!from_param_list(param_list, reader_data_out));
+      TEST_ASSERT(from_param_list(param_list, reader_data_out));
       TEST_ASSERT(reader_data.ddsSubscriptionData.liveliness.kind ==
                   reader_data_out.ddsSubscriptionData.liveliness.kind);
       TEST_ASSERT(reader_data.ddsSubscriptionData.liveliness.lease_duration.sec ==
@@ -2254,7 +2256,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           AUTOMATIC_LIVELINESS_QOS, 0, 0,
           RELIABLE_RELIABILITY_QOS, 8, 100);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(reader_data, param_list));
+      TEST_ASSERT(to_param_list(reader_data, param_list));
       TEST_ASSERT(is_present(param_list, PID_RELIABILITY));
       Parameter param = get(param_list, PID_RELIABILITY);
       const int reliable_interop = static_cast<int>(RELIABLE_RELIABILITY_QOS) + 1;
@@ -2269,9 +2271,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           AUTOMATIC_LIVELINESS_QOS, 0, 0,
           RELIABLE_RELIABILITY_QOS, 8, 100);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(reader_data, param_list));
+      TEST_ASSERT(to_param_list(reader_data, param_list));
       DiscoveredReaderData reader_data_out;
-      TEST_ASSERT(!from_param_list(param_list, reader_data_out));
+      TEST_ASSERT(from_param_list(param_list, reader_data_out));
       TEST_ASSERT(reader_data.ddsSubscriptionData.reliability.kind ==
                   reader_data_out.ddsSubscriptionData.reliability.kind);
       TEST_ASSERT(reader_data.ddsSubscriptionData.reliability.max_blocking_time.sec ==
@@ -2289,7 +2291,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           BEST_EFFORT_RELIABILITY_QOS, 0, 0,
           ud, ud_len);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(reader_data, param_list));
+      TEST_ASSERT(to_param_list(reader_data, param_list));
       TEST_ASSERT(is_present(param_list, PID_USER_DATA));
       Parameter param = get(param_list, PID_USER_DATA);
       TEST_ASSERT(param.user_data().value.length() == ud_len);
@@ -2306,9 +2308,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           BEST_EFFORT_RELIABILITY_QOS, 0, 0,
           ud, ud_len);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(reader_data, param_list));
+      TEST_ASSERT(to_param_list(reader_data, param_list));
       DiscoveredReaderData reader_data_out;
-      TEST_ASSERT(!from_param_list(param_list, reader_data_out));
+      TEST_ASSERT(from_param_list(param_list, reader_data_out));
       TEST_ASSERT(reader_data.ddsSubscriptionData.user_data.value ==
                   reader_data_out.ddsSubscriptionData.user_data.value);
     }
@@ -2320,7 +2322,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           BEST_EFFORT_RELIABILITY_QOS, 0, 0, NULL, 0,
           EXCLUSIVE_OWNERSHIP_QOS);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(reader_data, param_list));
+      TEST_ASSERT(to_param_list(reader_data, param_list));
       TEST_ASSERT(is_present(param_list, PID_OWNERSHIP));
       Parameter param = get(param_list, PID_OWNERSHIP);
       TEST_ASSERT(param.ownership().kind == EXCLUSIVE_OWNERSHIP_QOS);
@@ -2333,9 +2335,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           BEST_EFFORT_RELIABILITY_QOS, 0, 0, NULL, 0,
           EXCLUSIVE_OWNERSHIP_QOS);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(reader_data, param_list));
+      TEST_ASSERT(to_param_list(reader_data, param_list));
       DiscoveredReaderData reader_data_out;
-      TEST_ASSERT(!from_param_list(param_list, reader_data_out));
+      TEST_ASSERT(from_param_list(param_list, reader_data_out));
       TEST_ASSERT(reader_data.ddsSubscriptionData.ownership.kind ==
                   reader_data_out.ddsSubscriptionData.ownership.kind);
     }
@@ -2348,7 +2350,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           SHARED_OWNERSHIP_QOS,
           BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(reader_data, param_list));
+      TEST_ASSERT(to_param_list(reader_data, param_list));
       TEST_ASSERT(is_present(param_list, PID_DESTINATION_ORDER));
       Parameter param = get(param_list, PID_DESTINATION_ORDER);
       TEST_ASSERT(param.destination_order().kind ==
@@ -2362,9 +2364,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           SHARED_OWNERSHIP_QOS,
           BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(reader_data, param_list));
+      TEST_ASSERT(to_param_list(reader_data, param_list));
       DiscoveredReaderData reader_data_out;
-      TEST_ASSERT(!from_param_list(param_list, reader_data_out));
+      TEST_ASSERT(from_param_list(param_list, reader_data_out));
       TEST_ASSERT(reader_data.ddsSubscriptionData.destination_order.kind ==
                   reader_data_out.ddsSubscriptionData.destination_order.kind);
     }
@@ -2378,7 +2380,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
           GROUP_PRESENTATION_QOS, true, true);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(reader_data, param_list));
+      TEST_ASSERT(to_param_list(reader_data, param_list));
       TEST_ASSERT(is_present(param_list, PID_PRESENTATION));
       Parameter param = get(param_list, PID_PRESENTATION);
       TEST_ASSERT(param.presentation().access_scope ==
@@ -2395,9 +2397,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
           GROUP_PRESENTATION_QOS, true, true);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(reader_data, param_list));
+      TEST_ASSERT(to_param_list(reader_data, param_list));
       DiscoveredReaderData reader_data_out;
-      TEST_ASSERT(!from_param_list(param_list, reader_data_out));
+      TEST_ASSERT(from_param_list(param_list, reader_data_out));
       TEST_ASSERT(reader_data.ddsSubscriptionData.presentation.access_scope ==
                   reader_data_out.ddsSubscriptionData.presentation.access_scope);
       TEST_ASSERT(reader_data.ddsSubscriptionData.presentation.coherent_access ==
@@ -2417,7 +2419,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           INSTANCE_PRESENTATION_QOS, false, false,
           part);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(reader_data, param_list));
+      TEST_ASSERT(to_param_list(reader_data, param_list));
       TEST_ASSERT(is_present(param_list, PID_PARTITION));
       Parameter param = get(param_list, PID_PARTITION);
       TEST_ASSERT(param.partition().name.length() == 1);
@@ -2434,9 +2436,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           INSTANCE_PRESENTATION_QOS, false, false,
           part);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(reader_data, param_list));
+      TEST_ASSERT(to_param_list(reader_data, param_list));
       DiscoveredReaderData reader_data_out;
-      TEST_ASSERT(!from_param_list(param_list, reader_data_out));
+      TEST_ASSERT(from_param_list(param_list, reader_data_out));
       TEST_ASSERT(reader_data_out.ddsSubscriptionData.partition.name.length() == 1);
       TEST_ASSERT(!strcmp(reader_data.ddsSubscriptionData.partition.name[0],
                           reader_data_out.ddsSubscriptionData.partition.name[0]));
@@ -2453,7 +2455,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           INSTANCE_PRESENTATION_QOS, false, false, NULL,
           topic_data, 7);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(reader_data, param_list));
+      TEST_ASSERT(to_param_list(reader_data, param_list));
       TEST_ASSERT(is_present(param_list, PID_TOPIC_DATA));
       Parameter param = get(param_list, PID_TOPIC_DATA);
       CORBA::ULong len = param.topic_data().value.length();
@@ -2473,9 +2475,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           INSTANCE_PRESENTATION_QOS, false, false, NULL,
           topic_data, 7);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(reader_data, param_list));
+      TEST_ASSERT(to_param_list(reader_data, param_list));
       DiscoveredReaderData reader_data_out;
-      TEST_ASSERT(!from_param_list(param_list, reader_data_out));
+      TEST_ASSERT(from_param_list(param_list, reader_data_out));
       TEST_ASSERT(reader_data.ddsSubscriptionData.topic_data.value ==
                   reader_data_out.ddsSubscriptionData.topic_data.value);
     }
@@ -2491,7 +2493,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0,
           group_data, 7);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(reader_data, param_list));
+      TEST_ASSERT(to_param_list(reader_data, param_list));
       TEST_ASSERT(is_present(param_list, PID_GROUP_DATA));
       Parameter param = get(param_list, PID_GROUP_DATA);
       CORBA::ULong len = param.group_data().value.length();
@@ -2511,9 +2513,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0,
           group_data, 7);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(reader_data, param_list));
+      TEST_ASSERT(to_param_list(reader_data, param_list));
       DiscoveredReaderData reader_data_out;
-      TEST_ASSERT(!from_param_list(param_list, reader_data_out));
+      TEST_ASSERT(from_param_list(param_list, reader_data_out));
       TEST_ASSERT(reader_data.ddsSubscriptionData.group_data.value ==
                   reader_data_out.ddsSubscriptionData.group_data.value);
     }
@@ -2527,15 +2529,15 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
           INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(reader_data, param_list));
+      TEST_ASSERT(to_param_list(reader_data, param_list));
       TEST_ASSERT(is_present(param_list, PID_ENDPOINT_GUID));
     }
     { // Should decode reader guid
       DiscoveredReaderData reader_data;
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(reader_data, param_list));
+      TEST_ASSERT(to_param_list(reader_data, param_list));
       DiscoveredReaderData reader_data_out;
-      TEST_ASSERT(!from_param_list(param_list, reader_data_out));
+      TEST_ASSERT(from_param_list(param_list, reader_data_out));
       TEST_ASSERT(!memcmp(&reader_data.readerProxy.remoteReaderGuid,
                           &reader_data_out.readerProxy.remoteReaderGuid,
                           sizeof(GUID_t)));
@@ -2559,7 +2561,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           locators, 2
           );
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(reader_data, param_list));
+      TEST_ASSERT(to_param_list(reader_data, param_list));
       TEST_ASSERT(is_present(param_list, PID_UNICAST_LOCATOR));
       TEST_ASSERT(!is_present(param_list, PID_MULTICAST_LOCATOR));
       TEST_ASSERT(!is_present(param_list, PID_OPENDDS_LOCATOR));
@@ -2581,9 +2583,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0,
           locators, 2);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(reader_data, param_list));
+      TEST_ASSERT(to_param_list(reader_data, param_list));
       DiscoveredReaderData reader_data_out;
-      TEST_ASSERT(!from_param_list(param_list, reader_data_out));
+      TEST_ASSERT(from_param_list(param_list, reader_data_out));
       TEST_ASSERT(reader_data_out.readerProxy.allLocators.length() == 1);
     }
 
@@ -2604,7 +2606,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0,
           NULL, 0, locators, 2);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(reader_data, param_list));
+      TEST_ASSERT(to_param_list(reader_data, param_list));
       TEST_ASSERT(is_present(param_list, PID_MULTICAST_LOCATOR));
       Parameter param0 = get(param_list, PID_MULTICAST_LOCATOR, 0);
       Locator_t loc0 = param0.locator();
@@ -2630,9 +2632,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0,
           NULL, 0, locators, 2);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(reader_data, param_list));
+      TEST_ASSERT(to_param_list(reader_data, param_list));
       DiscoveredReaderData reader_data_out;
-      TEST_ASSERT(!from_param_list(param_list, reader_data_out));
+      TEST_ASSERT(from_param_list(param_list, reader_data_out));
       TEST_ASSERT(reader_data_out.readerProxy.allLocators.length() == 1);
       TEST_ASSERT(!strcmp(reader_data_out.readerProxy.allLocators[0].transport_type, "rtps_udp"));
     }
@@ -2652,7 +2654,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           NULL, 0, NULL, 0,
           cf_topic_name, rel_topic_name, NULL, filter_expr, params, 2);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(reader_data, param_list));
+      TEST_ASSERT(to_param_list(reader_data, param_list));
       TEST_ASSERT(is_present(param_list, PID_CONTENT_FILTER_PROPERTY));
       // Default check
       Parameter param = get(param_list, PID_CONTENT_FILTER_PROPERTY);
@@ -2676,9 +2678,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           NULL, 0, NULL, 0,
           cf_topic_name, rel_topic_name, filter_name, filter_expr, params, 2);
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(reader_data, param_list));
+      TEST_ASSERT(to_param_list(reader_data, param_list));
       DiscoveredReaderData reader_data_out;
-      TEST_ASSERT(!from_param_list(param_list, reader_data_out));
+      TEST_ASSERT(from_param_list(param_list, reader_data_out));
       TEST_ASSERT(
           !strcmp(reader_data.contentFilterProperty.contentFilteredTopicName,
               reader_data_out.contentFilterProperty.contentFilteredTopicName));
@@ -2721,7 +2723,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       reader_data.readerProxy.associatedWriters[1] = writer1;
 
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(reader_data, param_list));
+      TEST_ASSERT(to_param_list(reader_data, param_list));
       Parameter guid0 = get(param_list, PID_OPENDDS_ASSOCIATED_WRITER, 0);
       Parameter guid1 = get(param_list, PID_OPENDDS_ASSOCIATED_WRITER, 1);
       TEST_ASSERT(!memcmp(guid0.guid().guidPrefix,
@@ -2777,7 +2779,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
           uc_locators, 2, mc_locators, 2,
           cf_topic_name, rel_topic_name, filter_name, filter_expr, params, 2);
       ParameterList empty_param_list;
-      TEST_ASSERT(!from_param_list(empty_param_list, reader_data_out));
+      TEST_ASSERT(from_param_list(empty_param_list, reader_data_out));
       TEST_ASSERT(!strcmp(reader_data_out.ddsSubscriptionData.topic_name, ""));
       TEST_ASSERT(!strcmp(reader_data_out.ddsSubscriptionData.type_name, ""));
       TEST_ASSERT(reader_data_out.ddsSubscriptionData.durability.kind ==
@@ -2831,8 +2833,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       SPDPdiscoveredParticipantData participant_data =
           Factory::default_participant_data();
       ParameterList param_list;
-      int status = to_param_list(participant_data, param_list);
-      TEST_ASSERT(status == 0);
+      bool status = to_param_list(participant_data, param_list);
+      TEST_ASSERT(status == true);
       TEST_ASSERT(!is_present(param_list, PID_USER_DATA));
       TEST_ASSERT(!is_present(param_list, PID_EXPECTS_INLINE_QOS));
       TEST_ASSERT(!is_present(param_list, PID_PARTICIPANT_LEASE_DURATION));
@@ -2841,7 +2843,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       DiscoveredWriterData writer_data = Factory::default_writer_data();
 
       ParameterList param_list;
-      TEST_ASSERT(!to_param_list(writer_data, param_list));
+      TEST_ASSERT(to_param_list(writer_data, param_list));
       TEST_ASSERT(!is_present(param_list, PID_DURABILITY));
       TEST_ASSERT(!is_present(param_list, PID_DURABILITY_SERVICE));
       TEST_ASSERT(!is_present(param_list, PID_DEADLINE));
@@ -2865,7 +2867,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       DiscoveredReaderData reader_data = Factory::default_reader_data();
       ParameterList param_list;
       TEST_ASSERT(param_list.length() == 0);
-      TEST_ASSERT(!to_param_list(reader_data, param_list));
+      TEST_ASSERT(to_param_list(reader_data, param_list));
       TEST_ASSERT(!is_present(param_list, PID_DURABILITY));
       TEST_ASSERT(!is_present(param_list, PID_DEADLINE));
       TEST_ASSERT(!is_present(param_list, PID_LATENCY_BUDGET));

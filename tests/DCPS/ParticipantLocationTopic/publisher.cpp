@@ -27,7 +27,6 @@
 #endif
 
 #include "MessengerTypeSupportImpl.h"
-#include "Writer.h"
 
 #include <dds/DCPS/BuiltInTopicUtils.h>
 #include "ParticipantLocationListenerImpl.h"
@@ -62,169 +61,126 @@ int parse_args (int argc, ACE_TCHAR *argv[])
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
-  DDS::DomainParticipantFactory_var dpf;
-  DDS::DomainParticipant_var participant;
-
-  int status = EXIT_FAILURE;
+  int status = EXIT_SUCCESS;
 
   try {
     std::cout << "Starting publisher" << std::endl;
-    {
-      // Initialize DomainParticipantFactory
-      dpf = TheParticipantFactoryWithArgs(argc, argv);
 
-      if( parse_args(argc, argv) != 0)
-        return 1;
+    // Initialize DomainParticipantFactory
+    DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
 
-      DDS::DomainParticipantQos part_qos;
-      dpf->get_default_participant_qos(part_qos);
+    if( parse_args(argc, argv) != 0)
+      return 1;
+
+    DDS::DomainParticipantQos part_qos;
+    dpf->get_default_participant_qos(part_qos);
 
 
-      // Create DomainParticipant
-      participant = dpf->create_participant(42,
-                                part_qos,
-                                DDS::DomainParticipantListener::_nil(),
+    // Create DomainParticipant
+    DDS::DomainParticipant_var participant = dpf->create_participant(42,
+                                                                     part_qos,
+                                                                     DDS::DomainParticipantListener::_nil(),
+                                                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+    if (CORBA::is_nil(participant.in())) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("%N:%l: main()")
+                        ACE_TEXT(" ERROR: create_participant failed!\n")),
+                       EXIT_FAILURE);
+    }
+
+    // Register TypeSupport (Messenger::Message)
+    Messenger::MessageTypeSupport_var mts =
+      new Messenger::MessageTypeSupportImpl();
+
+    if (mts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("%N:%l: main()")
+                        ACE_TEXT(" ERROR: register_type failed!\n")),
+                       EXIT_FAILURE);
+    }
+
+    // Create Topic
+    CORBA::String_var type_name = mts->get_type_name();
+    DDS::Topic_var topic =
+      participant->create_topic("Movie Discussion List",
+                                type_name.in(),
+                                TOPIC_QOS_DEFAULT,
+                                DDS::TopicListener::_nil(),
                                 OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-      if (CORBA::is_nil(participant.in())) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l: main()")
-                          ACE_TEXT(" ERROR: create_participant failed!\n")),
-                         EXIT_FAILURE);
-      }
+    if (CORBA::is_nil(topic.in())) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("%N:%l: main()")
+                        ACE_TEXT(" ERROR: create_topic failed!\n")),
+                       EXIT_FAILURE);
+    }
 
-      // Register TypeSupport (Messenger::Message)
-      Messenger::MessageTypeSupport_var mts =
-        new Messenger::MessageTypeSupportImpl();
+    // Create Publisher
+    DDS::PublisherQos publisher_qos;
+    participant->get_default_publisher_qos(publisher_qos);
+    publisher_qos.partition.name.length(1);
+    publisher_qos.partition.name[0] = "OCI";
 
-      if (mts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l: main()")
-                          ACE_TEXT(" ERROR: register_type failed!\n")),
-                         EXIT_FAILURE);
-      }
+    DDS::Publisher_var pub =
+      participant->create_publisher(publisher_qos,
+                                    DDS::PublisherListener::_nil(),
+                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-      // Create Topic
-      CORBA::String_var type_name = mts->get_type_name();
-      DDS::Topic_var topic =
-        participant->create_topic("Movie Discussion List",
-                                  type_name.in(),
-                                  TOPIC_QOS_DEFAULT,
-                                  DDS::TopicListener::_nil(),
-                                  OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    if (CORBA::is_nil(pub.in())) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("%N:%l: main()")
+                        ACE_TEXT(" ERROR: create_publisher failed!\n")),
+                       EXIT_FAILURE);
+    }
 
-      if (CORBA::is_nil(topic.in())) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l: main()")
-                          ACE_TEXT(" ERROR: create_topic failed!\n")),
-                         EXIT_FAILURE);
-      }
+    DDS::DataWriterQos qos;
+    pub->get_default_datawriter_qos(qos);
+    std::cout << "Reliable DataWriter" << std::endl;
+    qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
+    qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
-      // Create Publisher
-      DDS::PublisherQos publisher_qos;
-      participant->get_default_publisher_qos(publisher_qos);
-      publisher_qos.partition.name.length(1);
-      publisher_qos.partition.name[0] = "OCI";
+    // Create DataWriter
+    DDS::DataWriter_var dw =
+      pub->create_datawriter(topic.in(),
+                             qos,
+                             DDS::DataWriterListener::_nil(),
+                             OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-      DDS::Publisher_var pub =
-        participant->create_publisher(publisher_qos,
-                                      DDS::PublisherListener::_nil(),
-                                      OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    if (CORBA::is_nil(dw.in())) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("%N:%l: main()")
+                        ACE_TEXT(" ERROR: create_datawriter failed!\n")),
+                       EXIT_FAILURE);
+    }
 
-      if (CORBA::is_nil(pub.in())) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l: main()")
-                          ACE_TEXT(" ERROR: create_publisher failed!\n")),
-                         EXIT_FAILURE);
-      }
+    // Get the Built-In Subscriber for Built-In Topics
+    DDS::Subscriber_var bit_subscriber = participant->get_builtin_subscriber();
 
-      DDS::DataWriterQos qos;
-      pub->get_default_datawriter_qos(qos);
-      std::cout << "Reliable DataWriter" << std::endl;
-      qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
-      qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+    DDS::DataReader_var pub_loc_dr = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC);
+    if (0 == pub_loc_dr) {
+      std::cerr << "Could not get " << OpenDDS::DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC
+                << " DataReader." << std::endl;
+      ACE_OS::exit(EXIT_FAILURE);
+    }
 
-      // Create DataWriter
-      DDS::DataWriter_var dw =
-        pub->create_datawriter(topic.in(),
-                               qos,
-                               DDS::DataWriterListener::_nil(),
+    ParticipantLocationListenerImpl* listener = new ParticipantLocationListenerImpl("Publisher");
+    DDS::DataReaderListener_var listener_var(listener);
+
+    CORBA::Long retcode =
+      pub_loc_dr->set_listener(listener,
                                OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    if (retcode != DDS::RETCODE_OK) {
+      std::cerr << "set_listener for " << OpenDDS::DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC << " failed." << std::endl;
+      ACE_OS::exit(EXIT_FAILURE);
+    }
 
-      if (CORBA::is_nil(dw.in())) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l: main()")
-                          ACE_TEXT(" ERROR: create_datawriter failed!\n")),
-                         EXIT_FAILURE);
-      }
+    // All participants are sending SPDP at a one second interval so 5 seconds should be adequate.
+    ACE_OS::sleep(5);
 
-      // Get the Built-In Subscriber for Built-In Topics
-      DDS::Subscriber_var bit_subscriber = participant->get_builtin_subscriber();
-
-      DDS::DataReader_var pub_loc_dr = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC);
-      if (0 == pub_loc_dr) {
-        std::cerr << "Could not get " << OpenDDS::DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC
-                  << " DataReader." << std::endl;
-        ACE_OS::exit(EXIT_FAILURE);
-      }
-
-      unsigned long locations = 0;
-
-      DDS::DataReaderListener_var pub_loc_listener =
-        new ParticipantLocationListenerImpl("Publisher", locations);
-
-      CORBA::Long retcode =
-        pub_loc_dr->set_listener(pub_loc_listener,
-                                OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-      if (retcode != DDS::RETCODE_OK) {
-        std::cerr << "set_listener for " << OpenDDS::DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC << " failed." << std::endl;
-        ACE_OS::exit(EXIT_FAILURE);
-      }
-
-      // Start writing threads
-      std::cout << "Creating Writer" << std::endl;
-      Writer* writer = new Writer(dw.in());
-      std::cout << "Starting Writer" << std::endl;
-      writer->start();
-
-      while (!writer->is_finished()) {
-        ACE_Time_Value small_time(0, 250000);
-        ACE_OS::sleep(small_time);
-      }
-
-      std::cout << "Writer finished " << std::endl;
-      writer->end();
-
-      std::cout << "Writer wait for ACKS" << std::endl;
-
-      DDS::Duration_t timeout = { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
-      dw->wait_for_acknowledgments(timeout);
-
-      // delay
-      ACE_OS::sleep(2);
-
-      std::cerr << "deleting DW" << std::endl;
-      delete writer;
-
-      // check that all locations received
-      unsigned long local_relay = OpenDDS::DCPS::LOCATION_LOCAL | OpenDDS::DCPS::LOCATION_RELAY;
-      unsigned long local_relay_ice = local_relay | OpenDDS::DCPS::LOCATION_ICE;
-
-      // check for local and relay first || check for local, relay and ice
-      if (no_ice && locations == local_relay) {
-        status = EXIT_SUCCESS;
-        std::cerr << "Publisher success. Found locations LOCAL and RELAY." << std::endl;
-      }
-      else if (!no_ice && locations == local_relay_ice) {
-        status = EXIT_SUCCESS;
-        std::cerr << "Publisher success. Found locations LOCAL, RELAY and ICE." << std::endl;
-      }
-      else {
-        std::cerr << "Error in publisher: One or more locations missing. Location mask "
-                  << locations << " != " << local_relay << " (local & relay) and  "
-                  << locations << " != " << local_relay_ice <<  " (local, relay & ice)." << std::endl;
-        status = EXIT_FAILURE;
-      }
+    // check that all locations received
+    if (!listener->check(no_ice)) {
+      status = EXIT_FAILURE;
     }
 
     // Clean-up!

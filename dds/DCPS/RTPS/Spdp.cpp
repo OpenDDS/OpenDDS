@@ -178,7 +178,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , config_(disco_->config())
   , domain_(domain)
   , guid_(guid)
-  , tport_(new SpdpTransport(this, false))
+  , tport_(new SpdpTransport(this))
   , eh_(tport_)
   , eh_shutdown_(false)
   , shutdown_cond_(lock_)
@@ -217,7 +217,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , config_(disco_->config())
   , domain_(domain)
   , guid_(guid)
-  , tport_(new SpdpTransport(this, true))
+  , tport_(new SpdpTransport(this))
   , eh_(tport_)
   , eh_shutdown_(false)
   , shutdown_cond_(lock_)
@@ -369,11 +369,7 @@ Spdp::write_secure_updates()
   const Security::SPDPdiscoveredParticipantData& pdata =
     build_local_pdata(Security::DPDK_SECURE);
 
-  for (DiscoveredParticipantIter pi = participants_.begin(); pi != participants_.end(); ++pi) {
-    if (pi->second.auth_state_ == DCPS::AS_AUTHENTICATED) {
-      sedp_.write_dcps_participant_secure(pdata, pi->first);
-    }
-  }
+  sedp_.write_dcps_participant_secure(pdata, GUID_UNKNOWN);
 }
 
 void
@@ -396,91 +392,100 @@ namespace {
 
 #ifndef DDS_HAS_MINIMUM_BIT
 void
-Spdp::update_location(const DCPS::RepoId& guid,
-                      OpenDDS::DCPS::ParticipantLocation mask,
-                      const ACE_INET_Addr& from)
+Spdp::enqueue_location_update_i(DiscoveredParticipantIter iter,
+                                DCPS::ParticipantLocation mask,
+                                const ACE_INET_Addr& from)
 {
-   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-   update_location_i(guid, mask, from);
+  // We have the global lock.
+  iter->second.location_updates_.push_back(DiscoveredParticipant::LocationUpdate(mask, from));
 }
 
 void
-Spdp::update_location_i(const DCPS::RepoId& guid,
-                        OpenDDS::DCPS::ParticipantLocation mask,
-                        const ACE_INET_Addr& from)
+Spdp::process_location_updates_i(DiscoveredParticipantIter iter)
 {
   // We have the global lock.
-  DiscoveredParticipantIter iter = participants_.find(guid);
-  if (iter == participants_.end()) {
+
+  if (iter->second.bit_ih_ == DDS::HANDLE_NIL) {
+    // Not in the built-in topics.
     return;
   }
 
-  OpenDDS::DCPS::ParticipantLocationBuiltinTopicData& ld = iter->second.location_data_;
+  const RepoId guid = iter->first;
 
-  OPENDDS_STRING addr = "";
-  ACE_TCHAR buffer[256];
+  DiscoveredParticipant::LocationUpdateList location_updates;
+  std::swap(iter->second.location_updates_, location_updates);
 
-  const OpenDDS::DCPS::ParticipantLocation old_mask = ld.location;
+  for (DiscoveredParticipant::LocationUpdateList::const_iterator pos = location_updates.begin(),
+         limit = location_updates.end(); pos != limit; ++pos) {
+    DCPS::ParticipantLocationBuiltinTopicData& location_data = iter->second.location_data_;
 
-  if (from != ACE_INET_Addr()) {
-    ld.location |= mask;
-    from.addr_to_string(buffer, 256);
-    addr = ACE_TEXT_ALWAYS_CHAR(buffer);
-  } else {
-    ld.location &= ~(mask);
-  }
+    OPENDDS_STRING addr = "";
+    ACE_TCHAR buffer[256];
 
-  ld.change_mask = mask;
+    const DCPS::ParticipantLocation old_mask = location_data.location;
 
-  const unsigned long now = MonotonicTimePoint::now().value().sec();
+    if (pos->from_ != ACE_INET_Addr()) {
+      location_data.location |= pos->mask_;
+      pos->from_.addr_to_string(buffer, 256);
+      addr = ACE_TEXT_ALWAYS_CHAR(buffer);
+    } else {
+      location_data.location &= ~(pos->mask_);
+    }
 
-  bool address_change = false;
-  switch (mask) {
-  case OpenDDS::DCPS::LOCATION_LOCAL:
-    address_change = addr.compare(ld.local_addr.in()) != 0;
-    ld.local_addr = addr.c_str();
-    ld.local_timestamp = now;
-    break;
-  case OpenDDS::DCPS::LOCATION_ICE:
-    address_change = addr.compare(ld.ice_addr.in()) != 0;
-    ld.ice_addr = addr.c_str();
-    ld.ice_timestamp = now;
-    break;
-  case OpenDDS::DCPS::LOCATION_RELAY:
-    address_change = addr.compare(ld.relay_addr.in()) != 0;
-    ld.relay_addr = addr.c_str();
-    ld.relay_timestamp = now;
-    break;
-  }
+    location_data.change_mask = pos->mask_;
 
-  const unsigned long expr = now - rtps_duration_to_time_duration(
-                                    iter->second.pdata_.leaseDuration,
-                                    iter->second.pdata_.participantProxy.protocolVersion,
-                                    iter->second.pdata_.participantProxy.vendorId).value().sec();
-  if ((ld.location & OpenDDS::DCPS::LOCATION_LOCAL) && ld.local_timestamp < expr) {
-    ld.location &= ~(OpenDDS::DCPS::LOCATION_LOCAL);
-    ld.change_mask |= OpenDDS::DCPS::LOCATION_LOCAL;
-    ld.local_timestamp = now;
-  }
-  if ((ld.location & OpenDDS::DCPS::LOCATION_RELAY) && ld.relay_timestamp < expr) {
-    ld.location &= ~(OpenDDS::DCPS::LOCATION_RELAY);
-    ld.change_mask |= OpenDDS::DCPS::LOCATION_RELAY;
-    ld.relay_timestamp = now;
-  }
+    const unsigned long now = MonotonicTimePoint::now().value().sec();
 
-  if (old_mask != ld.location || address_change) {
-    DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl* locbit = part_loc_bit();
-    if (locbit) {
-      DDS::InstanceHandle_t handle = DDS::HANDLE_NIL;
-      {
-        const OpenDDS::DCPS::ParticipantLocationBuiltinTopicData ld_copy(ld);
-        ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
-        ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
-        handle = locbit->store_synthetic_data(ld_copy, DDS::NEW_VIEW_STATE);
-      }
-      DiscoveredParticipantIter iter = participants_.find(guid);
-      if (iter != participants_.end()) {
-        iter->second.location_ih_ = handle;
+    bool address_change = false;
+    switch (pos->mask_) {
+    case DCPS::LOCATION_LOCAL:
+      address_change = addr.compare(location_data.local_addr.in()) != 0;
+      location_data.local_addr = addr.c_str();
+      location_data.local_timestamp = now;
+      break;
+    case DCPS::LOCATION_ICE:
+      address_change = addr.compare(location_data.ice_addr.in()) != 0;
+      location_data.ice_addr = addr.c_str();
+      location_data.ice_timestamp = now;
+      break;
+    case DCPS::LOCATION_RELAY:
+      address_change = addr.compare(location_data.relay_addr.in()) != 0;
+      location_data.relay_addr = addr.c_str();
+      location_data.relay_timestamp = now;
+      break;
+    }
+
+    const unsigned long expr = now - rtps_duration_to_time_duration(
+                                                                    iter->second.pdata_.leaseDuration,
+                                                                    iter->second.pdata_.participantProxy.protocolVersion,
+                                                                    iter->second.pdata_.participantProxy.vendorId).value().sec();
+    if ((location_data.location & DCPS::LOCATION_LOCAL) && location_data.local_timestamp < expr) {
+      location_data.location &= ~(DCPS::LOCATION_LOCAL);
+      location_data.change_mask |= DCPS::LOCATION_LOCAL;
+      location_data.local_timestamp = now;
+    }
+    if ((location_data.location & DCPS::LOCATION_RELAY) && location_data.relay_timestamp < expr) {
+      location_data.location &= ~(DCPS::LOCATION_RELAY);
+      location_data.change_mask |= DCPS::LOCATION_RELAY;
+      location_data.relay_timestamp = now;
+    }
+
+    if (old_mask != location_data.location || address_change) {
+      DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl* locbit = part_loc_bit();
+      if (locbit) {
+        DDS::InstanceHandle_t handle = DDS::HANDLE_NIL;
+        {
+          const DCPS::ParticipantLocationBuiltinTopicData ld_copy(location_data);
+          ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
+          ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
+          handle = locbit->store_synthetic_data(ld_copy, DDS::NEW_VIEW_STATE);
+        }
+        iter = participants_.find(guid);
+        if (iter != participants_.end()) {
+          iter->second.location_ih_ = handle;
+        } else {
+          return;
+        }
       }
     }
   }
@@ -515,6 +520,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
   }
 
   const bool from_relay = from == config_->spdp_rtps_relay_address();
+  const DCPS::ParticipantLocation location_mask = from_relay ? DCPS::LOCATION_RELAY : DCPS::LOCATION_LOCAL;
 
   // Find the participant - iterator valid only as long as we hold the lock
   DiscoveredParticipantIter iter = participants_.find(guid);
@@ -539,8 +545,15 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     }
 
     // add a new participant
-    participants_[guid] = DiscoveredParticipant(pdata, now, seq);
-    DiscoveredParticipant& dp = participants_[guid];
+    std::pair<DiscoveredParticipantIter, bool> p = participants_.insert(std::make_pair(guid, DiscoveredParticipant(pdata, now, seq)));
+    iter = p.first;
+    DiscoveredParticipant& dp = iter->second;
+
+#ifndef DDS_HAS_MINIMUM_BIT
+    if (!fromSecureChannel) {
+      enqueue_location_update_i(iter, location_mask, from);
+    }
+#endif
 
 #ifdef OPENDDS_SECURITY
     if (is_security_enabled()) {
@@ -611,13 +624,21 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 #endif
 
   } else { // Existing Participant
+#ifndef DDS_HAS_MINIMUM_BIT
+    if (!fromSecureChannel) {
+      enqueue_location_update_i(iter, location_mask, from);
+    }
+#endif
 #ifdef OPENDDS_SECURITY
     // Non-secure updates for authenticated participants are used for liveliness but
     // are otherwise ignored. Non-secure dispose messages are ignored completely.
     if (is_security_enabled()) {
       if ((iter->second.auth_state_ == DCPS::AS_AUTHENTICATED) && !fromSecureChannel) {
         iter->second.last_seen_ = now;
-        return;
+#ifndef DDS_HAS_MINIMUM_BIT
+      process_location_updates_i(iter);
+#endif
+      return;
       }
     }
 #endif
@@ -670,6 +691,10 @@ Spdp::handle_participant_data(DCPS::MessageId id,
         }
         iter->second.pdata_ = pdata;
         iter->second.last_seen_ = now;
+
+#ifndef DDS_HAS_MINIMUM_BIT
+        process_location_updates_i(iter);
+#endif
       }
     // Else a reset has occured and check if we should remove the participant
     } else if (iter->second.seq_reset_count_ >= config_->max_spdp_sequence_msg_reset_check()) {
@@ -679,9 +704,6 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       remove_discovered_participant(iter);
     }
   }
-#ifndef DDS_HAS_MINIMUM_BIT
-  update_location_i(guid, from_relay ? OpenDDS::DCPS::LOCATION_RELAY : OpenDDS::DCPS::LOCATION_LOCAL, from);
-#endif
 }
 
 bool
@@ -710,7 +732,7 @@ Spdp::data_received(const DataSubmessage& data,
 
   pdata.participantProxy.domainId = domain_;
 
-  if (ParameterListConverter::from_param_list(plist, pdata) < 0) {
+  if (!ParameterListConverter::from_param_list(plist, pdata)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::data_received - ")
       ACE_TEXT("failed to convert from ParameterList to ")
       ACE_TEXT("SPDPdiscoveredParticipantData\n")));
@@ -734,34 +756,8 @@ Spdp::data_received(const DataSubmessage& data,
                           pdata, seq, from, false);
 
 #ifdef OPENDDS_SECURITY
-  ICE::AgentInfoMap ai_map;
-  if (ParameterListConverter::from_param_list(plist, ai_map) < 0) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::data_received - ")
-               ACE_TEXT("failed to convert from ParameterList to ")
-               ACE_TEXT("ICE::AgentInfo\n")));
-    return;
-  }
-
-  ICE::Endpoint* sedp_endpoint = sedp_.get_ice_endpoint();
-  if (sedp_endpoint) {
-    ICE::AgentInfoMap::const_iterator sedp_pos = ai_map.find("SEDP");
-    if (sedp_pos != ai_map.end()) {
-      start_ice(sedp_endpoint, guid, pdata.participantProxy.availableBuiltinEndpoints, sedp_pos->second);
-    } else {
-      stop_ice(sedp_endpoint, guid, pdata.participantProxy.availableBuiltinEndpoints);
-    }
-  }
-  ICE::Endpoint* spdp_endpoint = get_ice_endpoint();
-  if (spdp_endpoint) {
-    ICE::AgentInfoMap::const_iterator spdp_pos = ai_map.find("SPDP");
-    if (spdp_pos != ai_map.end()) {
-      ICE::Agent::instance()->start_ice(spdp_endpoint, guid_, guid, spdp_pos->second);
-    } else {
-      ICE::Agent::instance()->stop_ice(spdp_endpoint, guid_, guid);
-    #ifndef DDS_HAS_MINIMUM_BIT
-      update_location(guid, OpenDDS::DCPS::LOCATION_ICE, ACE_INET_Addr());
-    #endif
-    }
+  if (!is_security_enabled()) {
+    process_participant_ice(plist, pdata, guid);
   }
 #endif
 }
@@ -790,6 +786,9 @@ Spdp::match_unauthenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp)
   DiscoveredParticipantIter iter = participants_.find(guid);
   if (iter != participants_.end()) {
     iter->second.bit_ih_ = bit_instance_handle;
+#ifndef DDS_HAS_MINIMUM_BIT
+    process_location_updates_i(iter);
+#endif
   }
 }
 
@@ -888,7 +887,8 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
 
     ParameterList plist;
     set_participant_guid(guid_, plist);
-    if (ParameterListConverter::to_param_list(pbtds.base, plist) < 0) {
+
+    if (!ParameterListConverter::to_param_list(pbtds.base, plist)) {
       ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Spdp::handle_handshake_message() - ")
         ACE_TEXT("Failed to convert from ParticipantBuiltinTopicData to ParameterList\n")));
       return;
@@ -1220,6 +1220,9 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp)
   DiscoveredParticipantIter iter = participants_.find(guid);
   if (iter != participants_.end()) {
     iter->second.bit_ih_ = bit_instance_handle;
+#ifndef DDS_HAS_MINIMUM_BIT
+    process_location_updates_i(iter);
+#endif
   }
   return true;
 }
@@ -1325,7 +1328,8 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
 
     ParameterList plist;
     set_participant_guid(guid_, plist);
-    if (ParameterListConverter::to_param_list(pbtds.base, plist) < 0) {
+
+    if (!ParameterListConverter::to_param_list(pbtds.base, plist)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::attempt_authentication() - ")
         ACE_TEXT("Failed to convert from ParticipantBuiltinTopicData to ParameterList\n")));
       return;
@@ -1571,7 +1575,7 @@ const Spdp::SpdpTransport::WriteFlags Spdp::SpdpTransport::SEND_TO_LOCAL;
 const Spdp::SpdpTransport::WriteFlags Spdp::SpdpTransport::SEND_TO_RELAY;
 #endif
 
-Spdp::SpdpTransport::SpdpTransport(Spdp* outer, bool securityGuids)
+Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
   : outer_(outer)
   , lease_duration_(outer_->config_->lease_duration())
   , buff_(64 * 1024)
@@ -1601,9 +1605,7 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer, bool securityGuids)
     (outer_->config_->dg() * outer_->domain_);
   mc_port_ = port_common + outer_->config_->d0();
 
-  // with security enabled the meaning of the bytes in guidPrefix changes
-  u_short participantId = securityGuids ? 0
-    : (hdr_.guidPrefix[10] << 8) | hdr_.guidPrefix[11];
+  u_short participantId = 0;
 
 #ifdef OPENDDS_SAFETY_PROFILE
   const u_short startingParticipantId = participantId;
@@ -1664,6 +1666,13 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer, bool securityGuids)
        end = addrs.end(); it != end; ++it) {
     send_addrs_.insert(ACE_INET_Addr(it->c_str()));
   }
+
+#ifdef OPENDDS_SECURITY
+  ICE::Endpoint* endpoint = get_ice_endpoint();
+  if (endpoint) {
+    ICE::Agent::instance()->add_endpoint(endpoint);
+  }
+#endif
 }
 
 void
@@ -1703,13 +1712,6 @@ Spdp::SpdpTransport::open()
       outer_->config_->use_rtps_relay()) {
     relay_beacon_->enable(false, outer_->config_->spdp_rtps_relay_beacon_period());
   }
-
-#ifdef OPENDDS_SECURITY
-  ICE::Endpoint* endpoint = get_ice_endpoint();
-  if (endpoint) {
-    ICE::Agent::instance()->add_endpoint(endpoint);
-  }
-#endif
 }
 
 Spdp::SpdpTransport::~SpdpTransport()
@@ -1786,12 +1788,23 @@ Spdp::SpdpTransport::close()
     ICE::Agent::instance()->remove_endpoint(endpoint);
   }
 
-  auth_deadline_processor_->cancel_and_wait();
-  auth_resend_processor_->cancel_and_wait();
+  if (auth_deadline_processor_) {
+    auth_deadline_processor_->cancel_and_wait();
+  }
+  if (auth_resend_processor_) {
+    auth_resend_processor_->cancel_and_wait();
+  }
 #endif
-  relay_sender_->disable_and_wait();
-  relay_beacon_->disable_and_wait();
-  local_sender_->disable_and_wait();
+  if (relay_sender_) {
+    relay_sender_->disable_and_wait();
+  }
+  if (relay_beacon_) {
+    relay_beacon_->disable_and_wait();
+  }
+  if (local_sender_) {
+    local_sender_->disable_and_wait();
+  }
+
   ACE_Reactor* reactor = reactor_task_.get_reactor();
   const ACE_Reactor_Mask mask =
     ACE_Event_Handler::READ_MASK | ACE_Event_Handler::DONT_CALL;
@@ -1821,7 +1834,7 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
   ++seq_;
 
   ParameterList plist;
-  if (ParameterListConverter::to_param_list(pdata, plist) < 0) {
+  if (!ParameterListConverter::to_param_list(pdata, plist)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
       ACE_TEXT("Spdp::SpdpTransport::write() - ")
       ACE_TEXT("failed to convert from SPDPdiscoveredParticipantData ")
@@ -1840,7 +1853,8 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
     if (spdp_endpoint) {
       ai_map["SPDP"] = ICE::Agent::instance()->get_local_agent_info(spdp_endpoint);
     }
-    if (ParameterListConverter::to_param_list(ai_map, plist) < 0) {
+
+    if (!ParameterListConverter::to_param_list(ai_map, plist)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
                  ACE_TEXT("Spdp::SpdpTransport::write() - ")
                  ACE_TEXT("failed to convert from ICE::AgentInfo ")
@@ -1879,7 +1893,7 @@ Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, WriteFlags flags)
   ++seq_;
 
   ParameterList plist;
-  if (ParameterListConverter::to_param_list(pdata, plist) < 0) {
+  if (!ParameterListConverter::to_param_list(pdata, plist)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
       ACE_TEXT("Spdp::SpdpTransport::write() - ")
       ACE_TEXT("failed to convert from SPDPdiscoveredParticipantData ")
@@ -1898,7 +1912,8 @@ Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, WriteFlags flags)
     if (spdp_endpoint) {
       ai_map["SPDP"] = ICE::Agent::instance()->get_local_agent_info(spdp_endpoint);
     }
-    if (ParameterListConverter::to_param_list(ai_map, plist) < 0) {
+
+  if (!ParameterListConverter::to_param_list(ai_map, plist)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
                  ACE_TEXT("Spdp::SpdpTransport::write() - ")
                  ACE_TEXT("failed to convert from ICE::AgentInfo ")
@@ -2203,16 +2218,26 @@ Spdp::SpdpTransport::stun_server_address() const
 void
 Spdp::SpdpTransport::ice_connect(const ICE::GuidSetType& guids, const ACE_INET_Addr& addr)
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, outer_->lock_);
   for (ICE::GuidSetType::const_iterator pos = guids.begin(), limit = guids.end(); pos != limit; ++pos) {
-    outer_->update_location(pos->remote, OpenDDS::DCPS::LOCATION_ICE, addr);
+    DiscoveredParticipantIter iter = outer_->participants_.find(pos->remote);
+    if (iter != outer_->participants_.end()) {
+      outer_->enqueue_location_update_i(iter, DCPS::LOCATION_ICE, addr);
+      outer_->process_location_updates_i(iter);
+    }
   }
 }
 
 void
 Spdp::SpdpTransport::ice_disconnect(const ICE::GuidSetType& guids)
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, outer_->lock_);
   for (ICE::GuidSetType::const_iterator pos = guids.begin(), limit = guids.end(); pos != limit; ++pos) {
-    outer_->update_location(pos->remote, OpenDDS::DCPS::LOCATION_ICE, ACE_INET_Addr());
+    DiscoveredParticipantIter iter = outer_->participants_.find(pos->remote);
+    if (iter != outer_->participants_.end()) {
+      outer_->enqueue_location_update_i(iter, DCPS::LOCATION_ICE, ACE_INET_Addr());
+      outer_->process_location_updates_i(iter);
+    }
   }
 }
 #endif /* DDS_HAS_MINIMUM_BIT */
@@ -2722,7 +2747,7 @@ void Spdp::SpdpTransport::send_relay_beacon(const MonotonicTimePoint& /*now*/)
     return;
   }
 
-  static const PadSubmessage pad = { PAD, FLAG_E, 0 };
+  static const PadSubmessage pad = { { PAD, FLAG_E, 0 } };
 
   wbuff_.reset();
   DCPS::Serializer ser(&wbuff_, false, DCPS::Serializer::ALIGN_CDR);
@@ -2790,6 +2815,46 @@ void Spdp::purge_auth_resends(DiscoveredParticipantIter iter)
     if (range.first->second == iter->first) {
       auth_resends_.erase(range.first);
       break;
+    }
+  }
+}
+
+void Spdp::process_participant_ice(const ParameterList& plist,
+                                   const ParticipantData_t& pdata,
+                                   const DCPS::RepoId& guid)
+{
+  ICE::AgentInfoMap ai_map;
+  if (!ParameterListConverter::from_param_list(plist, ai_map)) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::data_received - ")
+               ACE_TEXT("failed to convert from ParameterList to ")
+               ACE_TEXT("ICE::AgentInfo\n")));
+    return;
+  }
+
+  ICE::Endpoint* sedp_endpoint = sedp_.get_ice_endpoint();
+  if (sedp_endpoint) {
+    ICE::AgentInfoMap::const_iterator sedp_pos = ai_map.find("SEDP");
+    if (sedp_pos != ai_map.end()) {
+      start_ice(sedp_endpoint, guid, pdata.participantProxy.availableBuiltinEndpoints, sedp_pos->second);
+    } else {
+      stop_ice(sedp_endpoint, guid, pdata.participantProxy.availableBuiltinEndpoints);
+    }
+  }
+  ICE::Endpoint* spdp_endpoint = get_ice_endpoint();
+  if (spdp_endpoint) {
+    ICE::AgentInfoMap::const_iterator spdp_pos = ai_map.find("SPDP");
+    if (spdp_pos != ai_map.end()) {
+      ICE::Agent::instance()->start_ice(spdp_endpoint, guid_, guid, spdp_pos->second);
+    } else {
+      ICE::Agent::instance()->stop_ice(spdp_endpoint, guid_, guid);
+#ifndef DDS_HAS_MINIMUM_BIT
+      ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+      DiscoveredParticipantIter iter = participants_.find(guid);
+      if (iter != participants_.end()) {
+        enqueue_location_update_i(iter, DCPS::LOCATION_ICE, ACE_INET_Addr());
+        process_location_updates_i(iter);
+      }
+#endif
     }
   }
 }

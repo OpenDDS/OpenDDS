@@ -47,9 +47,8 @@ void SubscriptionListener::on_data_available(DDS::DataReader_ptr reader)
 void SubscriptionListener::write_sample(const DDS::SubscriptionBuiltinTopicData& data,
                                         const DDS::SampleInfo& info)
 {
-  const OpenDDS::DCPS::RepoId id = participant_->get_repoid(info.instance_handle);
   GUID_t guid;
-  std::memcpy(&guid, &id, sizeof(GUID_t));
+  assign(guid, participant_->get_repoid(info.instance_handle));
 
   DDS::DataReaderQos data_reader_qos;
   data_reader_qos.durability = data.durability;
@@ -88,9 +87,8 @@ void SubscriptionListener::write_sample(const DDS::SubscriptionBuiltinTopicData&
 
 void SubscriptionListener::unregister_instance(const DDS::SampleInfo& info)
 {
-  const OpenDDS::DCPS::RepoId id = participant_->get_repoid(info.instance_handle);
   GUID_t guid;
-  std::memcpy(&guid, &id, sizeof(GUID_t));
+  assign(guid, participant_->get_repoid(info.instance_handle));
 
   ReaderEntry entry;
   entry.guid(guid);

@@ -147,6 +147,16 @@ jobs:
   - script: |
       perl "%DDS_ROOT%\tests\cmake_integration\run_ci_tests.pl" --build-config=$(BuildConfiguration) --generator="Visual Studio 15 2017" --arch $(BuildPlatform)
     displayName: Compile and run CMake tests
+  - script: |
+      cd DevGuideExamples\DCPS\Messenger
+      perl integration_run_test.pl
+    condition: eq(variables['BuildConfiguration'], 'Debug')
+    displayName: Run Examples DCPS Messenger
+  - script: |
+      cd tests\DCPS\Messenger
+      perl run_test.pl rtps
+    condition: eq(variables['BuildConfiguration'], 'Debug')
+    displayName: Run DCPS Messenger Test
 
 - job: VisualStudio2015
   timeoutInMinutes: 90
@@ -218,13 +228,16 @@ jobs:
   timeoutInMinutes: 90
   pool:
     vmImage: ubuntu-18.04
+  variables:
+    TEST_MESSENGER: false
   strategy:
     matrix:
       Debug:
         ConfigOpts: --no-inline --java=/usr/lib/jvm/zulu-12-azure-amd64
+        TEST_MESSENGER: true
       Release:
         ConfigOpts: --no-debug --optimize --java=/usr/lib/jvm/zulu-12-azure-amd64
-        InstallPrefix: 'install'
+        DoMakeInstall: true
       Safety:
         ConfigOpts: --safety-profile
       SafetyBaseNoBuiltinTopics:
@@ -233,22 +246,19 @@ jobs:
         ConfigOpts: --security --features=versioned_namespace=1
         PackageDeps: libxerces-c-dev libssl-dev cmake
       SecurityWithoutFeatures:
-        ConfigOpts: --no-inline --no-debug --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile --security
+        ConfigOpts: >
+          --security --no-inline --no-debug
+          --no-built-in-topics --no-content-subscription --no-ownership-profile
+          --no-object-model-profile --no-persistence-profile
         PackageDeps: libxerces-c-dev libssl-dev cmake
       WChar:
         ConfigOpts: --features=uses_wchar=1 --no-inline
       CLANG5:
-        ConfigOpts: --compiler=clang++-5.0 --security --std=c++11
+        ConfigOpts: --compiler=clang++-5.0 --security --std=c++11 --features=uses_wchar=1 --no-inline
         PackageDeps: libxerces-c-dev libssl-dev cmake clang-5.0
       CLANG6:
         ConfigOpts: --compiler=clang++-6.0 --security
         PackageDeps: libxerces-c-dev libssl-dev cmake clang-6.0
-      CLANG7:
-        ConfigOpts: --compiler=clang++-7 --security --features=uses_wchar=1
-        PackageDeps: libxerces-c-dev libssl-dev cmake clang-7
-      CLANG8:
-        ConfigOpts: --compiler=clang++-8 --security --no-inline
-        PackageDeps: libxerces-c-dev libssl-dev cmake clang-8
       CLANG9:
         ConfigOpts: --compiler=clang++-9 --security
         PackageDeps: libxerces-c-dev libssl-dev cmake clang-9
@@ -259,84 +269,106 @@ jobs:
       GCC6:
         ConfigOpts: --compiler=g++-6 --xerces --features=uses_wchar=1 --no-debug
         PackageDeps: libxerces-c-dev g++-6
-      GCC7:
-        ConfigOpts: --compiler=g++-7 --no-inline
-        PackageDeps: g++-7
-      GCC8:
-        ConfigOpts: --compiler=g++-8 --no-inline
-        PackageDeps: g++-8
       GCC9:
         ConfigOpts: --compiler=g++-9 --no-inline
         PackageDeps: g++-9
   steps:
   - script: |
+      set -e
       wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|sudo apt-key add -
       sudo apt-add-repository "deb http://apt.llvm.org/$(lsb_release -cs)/ $(Repo) main"
     displayName: Add repository ($(Repo))
     condition: and(succeeded(), ne(variables['Repo'], ''))
   - script: |
+      set -e
       sudo apt-get --yes update
-      sudo apt-get --yes install libxerces-c-dev libssl-dev $(PackageDeps)
+      sudo apt-get --yes install $(PackageDeps)
     displayName: Install system packages
     condition: and(succeeded(), ne(variables['PackageDeps'], ''))
   - script: |
+      set -e
       ./configure -v --mpcopts="-workers 4" --ace-github-latest --tests $(ConfigOpts)
       tools/scripts/show_build_config.pl
     displayName: Run configure script
   - script: make -sj6
     displayName: Compile
   - script: |
-      source $(Build.SourcesDirectory)/setenv.sh && $DDS_ROOT/tests/cmake_integration/run_ci_tests.pl
+      set -e
+      source $(Build.SourcesDirectory)/setenv.sh
+      $DDS_ROOT/tests/cmake_integration/run_ci_tests.pl
     displayName: Compile and run CMake tests
     condition: >
       and(succeeded(),
           not(contains(variables['ConfigOpts'], '--safety-profile')),
           not(contains(variables['ConfigOpts'], '--no-ownership-profile')))
   - script: |
+      set -e
+      source setenv.sh
+      cd DevGuideExamples/DCPS/Messenger
+      perl integration_run_test.pl
+    condition: eq(variables['TEST_MESSENGER'], 'true')
+    displayName: Run Examples DCPS Messenger
+  - script: |
+      set -e
+      source setenv.sh
+      cd tests/DCPS/Messenger
+      perl run_test.pl rtps
+    condition: eq(variables['TEST_MESSENGER'], 'true')
+    displayName: Run DCPS Messenger Test
+  - script: |
+      set -e
       # Make sure install using DESTDIR is also working
-      export DESTDIR=$(realpath $(InstallPrefix)_temp)
-      export INSTALL_PREFIX=$(realpath $(InstallPrefix))
+      export DESTDIR=$(realpath install_temp)
+      export INSTALL_PREFIX=$(realpath install_prefix)
       make install
       cp -r $DESTDIR/$INSTALL_PREFIX .
       cat << EOF > install_setenv.sh
-      export opendds_prefix=$INSTALL_PREFIX
-      source $INSTALL_PREFIX/share/ace/ace-devel.sh
-      source $INSTALL_PREFIX/share/tao/tao-devel.sh
-      source $INSTALL_PREFIX/share/dds/dds-devel.sh
-      export PATH="$INSTALL_PREFIX/bin:$PATH"
-      export LD_LIBRARY_PATH="$INSTALL_PREFIX/lib:$LD_LIBRARY_PATH"
+      export OPENDDS_INSTALL_PREFIX=$INSTALL_PREFIX
+      source \$OPENDDS_INSTALL_PREFIX/share/ace/ace-devel.sh
+      source \$OPENDDS_INSTALL_PREFIX/share/tao/tao-devel.sh
+      source \$OPENDDS_INSTALL_PREFIX/share/dds/dds-devel.sh
+      export PATH="\$OPENDDS_INSTALL_PREFIX/bin:\$PATH"
+      export LD_LIBRARY_PATH="\$OPENDDS_INSTALL_PREFIX/lib:\$LD_LIBRARY_PATH"
       export MPC_ROOT=$(realpath ACE_TAO/ACE/MPC)
+      export PERL5LIB=$(realpath bin):$(realpath ACE_TAO/ACE/bin)
       EOF
     displayName: Install OpenDDS
-    condition: and(succeeded(), ne(variables['InstallPrefix'], ''))
+    condition: and(succeeded(), ne(variables['DoMakeInstall'], ''))
   - script: |
+      set -e
       source install_setenv.sh
       cd tests/DCPS/Messenger
       git clean -dfx .
       $ACE_ROOT/bin/mwc.pl -type gnuace .
       make
+      perl run_test.pl rtps
     displayName: Build Messenger Using Installed OpenDDS and MPC
-    condition: and(succeeded(), ne(variables['InstallPrefix'], ''))
+    condition: and(succeeded(), ne(variables['DoMakeInstall'], ''))
   - script: |
+      set -e
       source install_setenv.sh
       cd tests/cmake_integration/Messenger/Messenger_1
       rm -fr build
       mkdir build
       cd build
-      cmake -DCMAKE_PREFIX_PATH=$opendds_prefix ..
+      cmake -DCMAKE_PREFIX_PATH=$OPENDDS_INSTALL_PREFIX ..
       cmake --build .
+      perl run_test.pl rtps
     displayName: Build Messenger Using Installed OpenDDS and CMake
-    condition: and(succeeded(), ne(variables['InstallPrefix'], ''))
+    condition: and(succeeded(), ne(variables['DoMakeInstall'], ''))
 
 - job: macOS
   timeoutInMinutes: 90
   pool:
     vmImage: macOS-latest
+  variables:
+    TEST_MESSENGER: false
   strategy:
     maxParallel: 2
     matrix:
       Debug:
         ConfigOpts: --no-inline
+        TEST_MESSENGER: true
       Release:
         ConfigOpts: --no-debug --optimize
   steps:
@@ -350,3 +382,15 @@ jobs:
       source $(Build.SourcesDirectory)/setenv.sh &&
       $DDS_ROOT/tests/cmake_integration/run_ci_tests.pl
     displayName: Compile and run CMake tests
+  - script: |
+      source setenv.sh
+      cd DevGuideExamples/DCPS/Messenger
+      perl integration_run_test.pl
+    condition: eq(variables['TEST_MESSENGER'], 'true')
+    displayName: Run Examples DCPS Messenger
+  - script: |
+      source setenv.sh
+      cd tests/DCPS/Messenger
+      perl run_test.pl all
+    condition: eq(variables['TEST_MESSENGER'], 'true')
+    displayName: Run DCPS Messenger Test

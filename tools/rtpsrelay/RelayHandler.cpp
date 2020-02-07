@@ -33,7 +33,7 @@ namespace {
     OpenDDS::STUN::Message response;
     response.class_ = OpenDDS::STUN::ERROR_RESPONSE;
     response.method = a_message.method;
-    memcpy(response.transaction_id.data, a_message.transaction_id.data, sizeof(a_message.transaction_id.data));
+    std::memcpy(response.transaction_id.data, a_message.transaction_id.data, sizeof(a_message.transaction_id.data));
     response.append_attribute(OpenDDS::STUN::make_error_code(OpenDDS::STUN::BAD_REQUEST, a_reason));
     response.append_attribute(OpenDDS::STUN::make_fingerprint());
     return response;
@@ -45,7 +45,7 @@ namespace {
     OpenDDS::STUN::Message response;
     response.class_ = OpenDDS::STUN::ERROR_RESPONSE;
     response.method = a_message.method;
-    memcpy(response.transaction_id.data, a_message.transaction_id.data, sizeof(a_message.transaction_id.data));
+    std::memcpy(response.transaction_id.data, a_message.transaction_id.data, sizeof(a_message.transaction_id.data));
     response.append_attribute(OpenDDS::STUN::make_error_code(OpenDDS::STUN::UNKNOWN_ATTRIBUTE, "Unknown Attributes"));
     response.append_attribute(OpenDDS::STUN::make_unknown_attributes(a_unknown_attributes));
     response.append_attribute(OpenDDS::STUN::make_fingerprint());
@@ -105,7 +105,7 @@ int RelayHandler::handle_input(ACE_HANDLE)
   const auto bytes = socket_.recv(&iov, remote);
 
   if (bytes <= 0) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::handle_input failed to recv\n"));
+    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::handle_input failed to recv: %m\n"));
     return 0;
   }
 
@@ -135,7 +135,17 @@ int RelayHandler::handle_output(ACE_HANDLE)
     int idx = 0;
     for (ACE_Message_Block* block = out.second.get(); block && idx < BUFFERS_SIZE; block = block->cont(), ++idx) {
       buffers[idx].iov_base = block->rd_ptr();
+#ifdef _MSC_VER
+#pragma warning(push)
+      // iov_len is 32-bit on 64-bit VC++, but we don't want a cast here
+      // since on other platforms iov_len is 64-bit
+#pragma warning(disable : 4267)
+#endif
+      // TODO: u_long = size_t
       buffers[idx].iov_len = block->length();
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
     }
 
     const auto bytes = socket_.send(buffers, idx, out.first, 0);
@@ -189,13 +199,14 @@ VerticalHandler::VerticalHandler(ACE_Reactor* reactor,
   , lifespan_(lifespan)
   , application_participant_guid_(application_participant_guid)
   , rtps_discovery_(rtps_discovery)
-  , application_domain_(application_domain)
 #ifdef OPENDDS_SECURITY
+  , application_domain_(application_domain)
   , crypto_(crypto)
   , application_participant_crypto_handle_(rtps_discovery_->get_crypto_handle(application_domain_, application_participant_guid_))
 #endif
 {
   ACE_UNUSED_ARG(crypto);
+  ACE_UNUSED_ARG(application_domain);
 }
 
 void VerticalHandler::process_message(const ACE_INET_Addr& remote,
@@ -320,7 +331,7 @@ bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser
             return false;
           }
 
-          encoded_buffer.length(msg->length());
+          encoded_buffer.length(static_cast<CORBA::ULong>(msg->length()));
           std::memcpy(encoded_buffer.get_buffer(), msg->rd_ptr(), msg->length());
 
           if (!crypto_->decode_rtps_message(plain_buffer, encoded_buffer, application_participant_crypto_handle_, remote_crypto_handle, ex)) {
@@ -773,7 +784,7 @@ void StunHandler::process_message(const ACE_INET_Addr& remote_address,
       OpenDDS::STUN::Message response;
       response.class_ = OpenDDS::STUN::SUCCESS_RESPONSE;
       response.method = OpenDDS::STUN::BINDING;
-      memcpy(response.transaction_id.data, message.transaction_id.data, sizeof(message.transaction_id.data));
+      std::memcpy(response.transaction_id.data, message.transaction_id.data, sizeof(message.transaction_id.data));
       response.append_attribute(OpenDDS::STUN::make_mapped_address(remote_address));
       response.append_attribute(OpenDDS::STUN::make_xor_mapped_address(remote_address));
       response.append_attribute(OpenDDS::STUN::make_fingerprint());

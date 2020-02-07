@@ -18,8 +18,6 @@
 
 #include <string>
 
-class TAO_OutStream;
-class AST_Decl;
 class AST_Generator;
 
 namespace be_util {

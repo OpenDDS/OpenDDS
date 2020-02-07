@@ -31,7 +31,6 @@
 #include <dds/DCPS/transport/framework/TransportConfig.h>
 #include <dds/DCPS/transport/framework/TransportInst.h>
 
-#include "DataReaderListener.h"
 #include "MessengerTypeSupportImpl.h"
 
 #include <dds/DCPS/BuiltInTopicUtils.h>
@@ -68,7 +67,7 @@ int parse_args (int argc, ACE_TCHAR *argv[])
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
-  int status = EXIT_FAILURE;
+  int status = EXIT_SUCCESS;
 
   try {
     // Initialize DomainParticipantFactory
@@ -136,10 +135,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         ACE_TEXT(" ERROR: create_subscriber() failed!\n")), EXIT_FAILURE);
     }
 
-    // Create DataReader
-    DataReaderListenerImpl* const listener_servant = new DataReaderListenerImpl;
-    DDS::DataReaderListener_var listener(listener_servant);
-
     DDS::DataReaderQos dr_qos;
     sub->get_default_datareader_qos(dr_qos);
     std::cout << "Reliable DataReader" << std::endl;
@@ -148,7 +143,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     DDS::DataReader_var reader =
       sub->create_datareader(topic.in(),
                              dr_qos,
-                             listener.in(),
+                             0,
                              OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     if (CORBA::is_nil(reader.in())) {
@@ -167,72 +162,22 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_OS::exit(EXIT_FAILURE);
     }
 
-    unsigned long locations = 0;
-
-    DDS::DataReaderListener_var pub_loc_listener =
-      new ParticipantLocationListenerImpl("Subscriber", locations);
+    ParticipantLocationListenerImpl* listener = new ParticipantLocationListenerImpl("Subscriber");
+    DDS::DataReaderListener_var listener_var(listener);
 
     CORBA::Long retcode =
-      pub_loc_dr->set_listener(pub_loc_listener,
+      pub_loc_dr->set_listener(listener,
                                OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (retcode != DDS::RETCODE_OK) {
       std::cerr << "set_listener for " << OpenDDS::DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC << " failed." << std::endl;
       ACE_OS::exit(EXIT_FAILURE);
     }
 
-    // Block until Publisher completes
-    DDS::StatusCondition_var condition = reader->get_statuscondition();
-    condition->set_enabled_statuses(DDS::SUBSCRIPTION_MATCHED_STATUS);
-
-    DDS::WaitSet_var ws = new DDS::WaitSet;
-    ws->attach_condition(condition);
-
-    DDS::Duration_t timeout =
-      { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
-
-    DDS::ConditionSeq conditions;
-    DDS::SubscriptionMatchedStatus matches = { 0, 0, 0, 0, 0 };
-
-    while (true) {
-      if (reader->get_subscription_matched_status(matches) != DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l main()")
-                          ACE_TEXT(" ERROR: get_subscription_matched_status() failed!\n")), -EXIT_FAILURE);
-      }
-      if (matches.current_count == 0 && matches.total_count > 0) {
-        break;
-      }
-      if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l main()")
-                          ACE_TEXT(" ERROR: wait() failed!\n")), EXIT_FAILURE);
-      }
-    }
-
-    status = listener_servant->is_valid() ? EXIT_SUCCESS : EXIT_FAILURE;
-
-    ws->detach_condition(condition);
-
-    // delay to ensure location BIT received
-    ACE_OS::sleep(2);
+    // All participants are sending SPDP at a one second interval so 5 seconds should be adequate.
+    ACE_OS::sleep(5);
 
     // check that all locations received
-    unsigned long local_relay = OpenDDS::DCPS::LOCATION_LOCAL | OpenDDS::DCPS::LOCATION_RELAY;
-    unsigned long local_relay_ice = local_relay | OpenDDS::DCPS::LOCATION_ICE;
-
-    // check for local and relay first || check for local, relay and ice
-    if (no_ice && locations == local_relay) {
-      status = EXIT_SUCCESS;
-      std::cerr << "Subscriber success. Found locations LOCAL and RELAY." << std::endl;
-    }
-    else if (!no_ice && locations == local_relay_ice) {
-      status = EXIT_SUCCESS;
-      std::cerr << "Subscriber success. Found locations LOCAL, RELAY and ICE." << std::endl;
-    }
-    else {
-      std::cerr << "Error in subscriber: One or more locations missing. Location mask "
-                << locations << " != " << local_relay << " (local & relay) and  "
-                << locations << " != " << local_relay_ice <<  " (local, relay & ice)." << std::endl;
+    if (!listener->check(no_ice)) {
       status = EXIT_FAILURE;
     }
 

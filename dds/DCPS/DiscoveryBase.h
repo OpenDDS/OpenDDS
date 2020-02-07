@@ -38,7 +38,7 @@ namespace OpenDDS {
     typedef DataReaderImpl_T<DDS::ParticipantBuiltinTopicData> ParticipantBuiltinTopicDataDataReaderImpl;
     typedef DataReaderImpl_T<DDS::PublicationBuiltinTopicData> PublicationBuiltinTopicDataDataReaderImpl;
     typedef DataReaderImpl_T<DDS::SubscriptionBuiltinTopicData> SubscriptionBuiltinTopicDataDataReaderImpl;
-    typedef DataReaderImpl_T<OpenDDS::DCPS::ParticipantLocationBuiltinTopicData> ParticipantLocationBuiltinTopicDataDataReaderImpl;
+    typedef DataReaderImpl_T<ParticipantLocationBuiltinTopicData> ParticipantLocationBuiltinTopicDataDataReaderImpl;
     typedef DataReaderImpl_T<DDS::TopicBuiltinTopicData> TopicBuiltinTopicDataDataReaderImpl;
 
 #ifdef OPENDDS_SECURITY
@@ -1635,7 +1635,17 @@ namespace OpenDDS {
         }
 
         DiscoveredParticipantData pdata_;
-        OpenDDS::DCPS::ParticipantLocationBuiltinTopicData location_data_;
+        struct LocationUpdate {
+          ParticipantLocation mask_;
+          ACE_INET_Addr from_;
+          LocationUpdate() {}
+          LocationUpdate(ParticipantLocation mask,
+                         const ACE_INET_Addr& from)
+            : mask_(mask), from_(from) {}
+        };
+        typedef OPENDDS_VECTOR(LocationUpdate) LocationUpdateList;
+        LocationUpdateList location_updates_;
+        ParticipantLocationBuiltinTopicData location_data_;
         DDS::InstanceHandle_t location_ih_;
 
         MonotonicTimePoint last_seen_;

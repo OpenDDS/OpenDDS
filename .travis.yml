@@ -89,6 +89,11 @@ script:
   - if [ "$SAFETY_PROFILE" != "1" ]; then
       $DDS_ROOT/tests/cmake_integration/run_ci_tests.pl;
     fi
+  - if [ "$NO_TESTS" == "1" ]; then
+      echo Building Messenger;
+      $ACE_ROOT/bin/mwc.pl -type gnuace tests/DCPS/Messenger;
+      make -C tests/DCPS/Messenger;
+    fi
   - if [ "$SAFETY_PROFILE" == "1" ]; then
         cd build/target/tests/DCPS/Messenger && ./run_test.pl rtps_disc;
         cd $DDS_ROOT/build/target/tests/FACE/Messenger;
