@@ -101,21 +101,41 @@ int RelayHandler::open(const ACE_INET_Addr& local)
 int RelayHandler::handle_input(ACE_HANDLE)
 {
   ACE_INET_Addr remote;
-  iovec iov;
-  const auto bytes = socket_.recv(&iov, remote);
+  int inlen = 65536; // Default to maximum datagram size.
+  const int iov_size = 1;
+  iovec iov[iov_size];
+  OpenDDS::DCPS::Message_Block_Shared_Ptr buffer;
 
-  if (bytes <= 0) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::handle_input failed to recv: %m\n"));
+#ifdef FIONREAD
+  if (ACE_OS::ioctl (get_handle(),
+                     FIONREAD,
+                     &inlen) == -1) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::handle_input failed to get available byte count: %m\n"));
+    return 0;
+  }
+#endif
+
+  if (inlen >= 0) {
+    // Allocate at least one byte so that recv cannot return early.
+    buffer = OpenDDS::DCPS::Message_Block_Shared_Ptr(new ACE_Message_Block(std::max(inlen, 1)));
+    iov[0].iov_base = buffer->wr_ptr();
+    iov[0].iov_len = buffer->size();
+  } else {
+    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::handle_input available byte count is negative\n"));
     return 0;
   }
 
-  bytes_received_ += bytes;
-  ++messages_received_;
+  const auto bytes = socket_.recv(iov, iov_size, remote);
 
-  const auto data_block =
-    new (ACE_Allocator::instance()->malloc(sizeof(ACE_Data_Block))) ACE_Data_Block(bytes, ACE_Message_Block::MB_DATA,
-                                                                                   static_cast<const char*>(iov.iov_base), 0, 0, 0, 0);
-  OpenDDS::DCPS::Message_Block_Shared_Ptr buffer(new ACE_Message_Block(data_block));
+  if (bytes < 0) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::handle_input failed to recv: %m\n"));
+    return 0;
+  } else if (bytes == 0) {
+    // Okay.  Empty datagram.
+    ACE_ERROR((LM_WARNING, "(%P|%t) %N:%l ERROR: RelayHandler::handle_input received an empty datagram\n"));
+    return 0;
+  }
+
   buffer->length(bytes);
 
   process_message(remote, OpenDDS::DCPS::MonotonicTimePoint::now(), buffer);
