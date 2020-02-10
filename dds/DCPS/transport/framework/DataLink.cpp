@@ -550,7 +550,7 @@ DataLink::schedule_delayed_release()
   // can not be delivered when new association is added and still use
   // this connection/datalink.
   if (!this->send_strategy_.is_nil()) {
-    this->send_strategy_->clear();
+    this->send_strategy_->clear(TransportSendStrategy::MODE_DIRECT);
   }
 
   const MonotonicTimePoint future_release_time(MonotonicTimePoint::now() + datalink_release_delay_);
@@ -875,7 +875,6 @@ DataLink::notify(ConnectionNotice notice)
                    connection_notice_as_str(notice)));
       }
     }
-
   }
 
   // Notify the datareaders registered with TransportImpl
@@ -1194,6 +1193,14 @@ operator<<(std::ostream& str, const DataLink& value)
   return str;
 }
 #endif
+
+void
+DataLink::terminate_send_if_suspended()
+{
+  if (send_strategy_)
+    send_strategy_->terminate_send_if_suspended();
+}
+
 }
 }
 

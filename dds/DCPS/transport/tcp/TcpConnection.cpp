@@ -609,9 +609,6 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
         ACE_ERROR((LM_ERROR, "(%P|%t) TcpConnection::active_reconnect_i error %m.\n"));
       }
       this->reconnect_state_ = ACTIVE_WAITING_STATE;
-      TcpSendStrategy_rch send_strategy = link_->send_strategy();
-      if (send_strategy)
-        send_strategy->terminate_send();
     }
 
     this->reactor()->schedule_timer(this, 0, timeout);

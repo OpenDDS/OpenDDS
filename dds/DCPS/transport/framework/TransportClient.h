@@ -133,6 +133,8 @@ public:
   virtual void add_link(const DataLink_rch& link, const RepoId& peer);
   virtual const RepoId& get_repo_id() const = 0;
 
+  void terminate_send_if_suspended();
+
 private:
 
   // Implemented by derived classes (DataReaderImpl/DataWriterImpl)
@@ -140,6 +142,8 @@ private:
   virtual DDS::DomainId_t domain_id() const = 0;
   virtual Priority get_priority_value(const AssociationData& data) const = 0;
   virtual void transport_assoc_done(int /*flags*/, const RepoId& /*remote*/) {}
+
+
 
 #if defined(OPENDDS_SECURITY)
   virtual DDS::Security::ParticipantCryptoHandle get_crypto_handle() const
@@ -272,10 +276,6 @@ private:
   ImplsType impls_;
   PendingMap pending_;
   DataLinkSet links_;
-
-  /// These are the links being used during the call to send(). This is made a member of the
-  /// class to minimize allocation/deallocations of the data link set.
-  DataLinkSet send_links_;
 
   DataLinkIndex data_link_index_;
 
