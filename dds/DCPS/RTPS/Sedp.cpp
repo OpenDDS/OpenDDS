@@ -3113,8 +3113,7 @@ Sedp::Writer::write_volatile_message_secure(const DDS::Security::ParticipantVola
 
 DDS::ReturnCode_t
 Sedp::Writer::write_dcps_participant_secure(const Security::SPDPdiscoveredParticipantData& msg,
-                                            const RepoId& reader,
-                                            DCPS::SequenceNumber& sequence)
+                                            const RepoId& reader)
 {
   using DCPS::Serializer;
 
@@ -3146,7 +3145,7 @@ Sedp::Writer::write_dcps_participant_secure(const Security::SPDPdiscoveredPartic
     return DDS::RETCODE_ERROR;
   }
 
-  return write_parameter_list(plist, reader, sequence);
+  return write_parameter_list(plist, reader, seq_++);
 }
 #endif
 
@@ -3540,7 +3539,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       }
       const DCPS::RepoId guid = make_guid(sample.header_.publication_id_.guidPrefix, DCPS::ENTITYID_PARTICIPANT);
       sedp_.spdp_.process_participant_ice(data, *pdata, guid);
-      sedp_.task_.enqueue(id, move(pdata));
+      sedp_.task_.enqueue(id, move(pdata), true);
 #endif
 
     }
@@ -3753,12 +3752,10 @@ DDS::ReturnCode_t
 Sedp::write_dcps_participant_secure(const Security::SPDPdiscoveredParticipantData& msg,
                                     const RepoId& part)
 {
-  static DCPS::SequenceNumber sequence = 0;
-
   DCPS::RepoId remote_reader(part);
   remote_reader.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER;
 
-  return dcps_participant_secure_writer_->write_dcps_participant_secure(msg, remote_reader, ++sequence);
+  return dcps_participant_secure_writer_->write_dcps_participant_secure(msg, remote_reader);
 }
 
 DDS::ReturnCode_t
@@ -4104,14 +4101,14 @@ Sedp::acknowledge()
 }
 
 void
-Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<ParticipantData_t> pdata)
+Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<ParticipantData_t> pdata, bool bSecureParticipant)
 {
   if (spdp_->shutting_down()) { return; }
 
   Msg::MsgType type = Msg::MSG_PARTICIPANT;
 
 #ifdef OPENDDS_SECURITY
-  if (pdata->dataKind == Security::DPDK_SECURE) {
+  if (bSecureParticipant) {
     type = Msg::MSG_DCPS_PARTICIPANT_SECURE;
   }
 #endif

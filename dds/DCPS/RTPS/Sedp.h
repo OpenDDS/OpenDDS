@@ -371,8 +371,7 @@ private:
                                                     DCPS::SequenceNumber& sequence);
 
     DDS::ReturnCode_t write_dcps_participant_secure(const Security::SPDPdiscoveredParticipantData& msg,
-                                                    const DCPS::RepoId& reader,
-                                                    DCPS::SequenceNumber& sequence);
+                                                    const DCPS::RepoId& reader);
 #endif
 
     DDS::ReturnCode_t write_unregister_dispose(const DCPS::RepoId& rid, CORBA::UShort pid = PID_ENDPOINT_GUID);
@@ -481,7 +480,7 @@ private:
     }
     ~Task();
 
-    void enqueue(DCPS::MessageId id, DCPS::unique_ptr<ParticipantData_t> pdata);
+    void enqueue(DCPS::MessageId id, DCPS::unique_ptr<ParticipantData_t> pdata, bool bSecureParticipant = false);
 
     void enqueue(DCPS::MessageId id, DCPS::unique_ptr<DiscoveredPublication> wdata);
     void enqueue(DCPS::MessageId id, DCPS::unique_ptr<DiscoveredSubscription> rdata);

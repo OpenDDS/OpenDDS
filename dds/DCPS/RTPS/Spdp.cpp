@@ -583,7 +583,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 
       if (has_security_data == false) {
         if (participant_sec_attr_.allow_unauthenticated_participants == false) {
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Spdp::data_received - ")
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Spdp::handle_participant_data - ")
             ACE_TEXT("Incompatible security attributes in discovered participant: %C\n"),
             std::string(DCPS::GuidConverter(guid)).c_str()));
           participants_.erase(guid);
@@ -600,7 +600,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
         attempt_authentication(guid, dp);
         if (dp.auth_state_ == DCPS::AS_UNAUTHENTICATED) {
           if (participant_sec_attr_.allow_unauthenticated_participants == false) {
-            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Spdp::data_received - ")
+            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Spdp::handle_participant_data - ")
               ACE_TEXT("Incompatible security attributes in discovered participant: %C\n"),
               std::string(DCPS::GuidConverter(guid)).c_str()));
             participants_.erase(guid);
@@ -632,15 +632,14 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 #ifdef OPENDDS_SECURITY
     // Non-secure updates for authenticated participants are used for liveliness but
     // are otherwise ignored. Non-secure dispose messages are ignored completely.
-    if (iter->second.auth_state_ == DCPS::AS_AUTHENTICATED &&
-        pdata.dataKind != Security::DPDK_SECURE &&
-        id != DCPS::DISPOSE_INSTANCE &&
-        id != DCPS::DISPOSE_UNREGISTER_INSTANCE) {
-      iter->second.last_seen_ = now;
+    if (is_security_enabled()) {
+      if (iter->second.auth_state_ == DCPS::AS_AUTHENTICATED && !from_sedp) {
+        iter->second.last_seen_ = now;
 #ifndef DDS_HAS_MINIMUM_BIT
-      process_location_updates_i(iter);
+        process_location_updates_i(iter);
 #endif
-      return;
+        return;
+      }
     }
 #endif
 

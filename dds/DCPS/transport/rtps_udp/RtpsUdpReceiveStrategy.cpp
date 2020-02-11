@@ -361,7 +361,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
           (directedWriteReaders.empty() || directedWriteReaders.find(reader) != directedWriteReaders.end())) {
         if (Transport_debug_level > 5) {
           GuidConverter reader_conv(reader);
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpReceiveStrategy[%@]::deliver_sample - ")
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpReceiveStrategy[%@]::deliver_sample_i - ")
             ACE_TEXT("calling DataLink::data_received for seq: %q to reader %C\n"),
             this, sample.header_.sequence_.getValue(), OPENDDS_STRING(reader_conv).c_str()));
         }
@@ -391,7 +391,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
           first = false;
           ++iter2;
         }
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t)  - RtpsUdpReceiveStrategy[%@]::deliver_sample:\n")
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t)  - RtpsUdpReceiveStrategy[%@]::deliver_sample_i:\n")
           ACE_TEXT("  readers_selected ids:\n%C\n")
           ACE_TEXT("  readers_withheld ids:\n%C\n"),
           this, included_ids.c_str(), excluded_ids.c_str()));
@@ -403,14 +403,14 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
 #endif
           if (directedWriteReaders.empty()) {
             if (Transport_debug_level > 5) {
-              ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpReceiveStrategy[%@]::deliver_sample - ")
+              ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpReceiveStrategy[%@]::deliver_sample_i - ")
                 ACE_TEXT("calling DataLink::data_received for seq: %q TO ALL, no exclusion or inclusion\n"),
                 this, sample.header_.sequence_.getValue()));
             }
             link_->data_received(sample);
           } else {
             if (Transport_debug_level > 5) {
-              ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpReceiveStrategy[%@]::deliver_sample - ")
+              ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpReceiveStrategy[%@]::deliver_sample_i - ")
                 ACE_TEXT("calling DataLink::data_received_include for seq: %q to directedWriteReaders\n"),
                 this, sample.header_.sequence_.getValue()));
             }
@@ -425,14 +425,14 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
 #endif
           if (directedWriteReaders.empty()) {
             if (Transport_debug_level > 5) {
-              ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpReceiveStrategy[%@]::deliver_sample - ")
+              ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpReceiveStrategy[%@]::deliver_sample_i - ")
                 ACE_TEXT("calling DataLink::data_received_include for seq: %q to readers_selected_\n"),
                 this, sample.header_.sequence_.getValue()));
             }
             link_->data_received_include(sample, readers_selected_);
           } else {
             if (Transport_debug_level > 5) {
-              ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpReceiveStrategy[%@]::deliver_sample - ")
+              ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpReceiveStrategy[%@]::deliver_sample_i - ")
                 ACE_TEXT("calling DataLink::data_received_include for seq: %q to intersection of readers\n"),
                 this, sample.header_.sequence_.getValue()));
             }
@@ -653,7 +653,10 @@ bool RtpsUdpReceiveStrategy::decode_payload(ReceivedDataSample& sample,
   const DatawriterCryptoHandle writer_crypto_handle = link_->writer_crypto_handle(sample.header_.publication_id_);
   const CryptoTransform_var crypto = link_->security_config()->get_crypto_transform();
 
-  if (writer_crypto_handle == DDS::HANDLE_NIL || !crypto) {
+  const EndpointSecurityAttributesMask esa = link_->security_attributes(sample.header_.publication_id_);
+  bool payload_protected = esa & ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_PAYLOAD_PROTECTED;
+
+  if (writer_crypto_handle == DDS::HANDLE_NIL || !crypto || !payload_protected) {
     return true;
   }
 
@@ -685,7 +688,6 @@ bool RtpsUdpReceiveStrategy::decode_payload(ReceivedDataSample& sample,
   if (ok) {
     const unsigned int n = plain.length();
     if (encoded.length() == n && 0 == std::memcmp(plain.get_buffer(), encoded.get_buffer(), n)) {
-      const EndpointSecurityAttributesMask esa = link_->security_attributes(sample.header_.publication_id_);
       static const EndpointSecurityAttributesMask MASK_PROTECT_PAYLOAD =
         ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_VALID | ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_PAYLOAD_PROTECTED;
       if ((esa & MASK_PROTECT_PAYLOAD) == MASK_PROTECT_PAYLOAD) {
