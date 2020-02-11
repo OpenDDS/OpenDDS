@@ -1,4 +1,5 @@
-#pragma once
+#ifndef tests_transport_best_effort_reader_AppConfig_h
+#define tests_transport_best_effort_reader_AppConfig_h
 
 #include "dds/DCPS/Service_Participant.h"
 
@@ -22,3 +23,5 @@ private:
   ACE_TString host;
   u_short port;
 };
+
+#endif

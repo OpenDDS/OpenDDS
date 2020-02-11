@@ -456,8 +456,8 @@ void RtpsUdpDataLink::filterBestEffortReaders(const ReceivedDataSample& ds, Repo
   ACE_GUARD(ACE_Thread_Mutex, g, readers_lock_);
   const RepoId& writer = ds.header_.publication_id_;
   const SequenceNumber& seq = ds.header_.sequence_;
-  WriterSeqReadersMap::iterator w = writerBestEffortReaders_.find(writer);
-  if (w != writerBestEffortReaders_.end()) {
+  WriterToSeqReadersMap::iterator w = writer_to_seq_best_effort_readers_.find(writer);
+  if (w != writer_to_seq_best_effort_readers_.end()) {
     if (w->second.seq < seq) {
       w->second.seq = seq;
       selected.insert(w->second.readers.begin(), w->second.readers.end());
@@ -494,9 +494,9 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
   if (!local_reliable) {
     if (conv.isReader()) {
       ACE_GUARD(ACE_Thread_Mutex, g, readers_lock_);
-      WriterSeqReadersMap::iterator i = writerBestEffortReaders_.find(remote_id);
-      if (i == writerBestEffortReaders_.end()) {
-        writerBestEffortReaders_.insert(WriterSeqReadersMap::value_type(remote_id, SeqReaders(local_id)));
+      WriterToSeqReadersMap::iterator i = writer_to_seq_best_effort_readers_.find(remote_id);
+      if (i == writer_to_seq_best_effort_readers_.end()) {
+        writer_to_seq_best_effort_readers_.insert(WriterToSeqReadersMap::value_type(remote_id, SeqReaders(local_id)));
       } else if (i->second.readers.find(local_id) == i->second.readers.end()) {
         i->second.readers.insert(local_id);
       }
@@ -756,13 +756,13 @@ RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
         }
       }
     } else {
-      WriterSeqReadersMap::iterator w = writerBestEffortReaders_.find(remote_id);
-      if (w != writerBestEffortReaders_.end()) {
+      WriterToSeqReadersMap::iterator w = writer_to_seq_best_effort_readers_.find(remote_id);
+      if (w != writer_to_seq_best_effort_readers_.end()) {
         RepoIdSet::iterator r = w->second.readers.find(local_id);
         if (r != w->second.readers.end()) {
           w->second.readers.erase(r);
           if (w->second.readers.empty()) {
-            writerBestEffortReaders_.erase(w);
+            writer_to_seq_best_effort_readers_.erase(w);
           }
         }
       }

@@ -26,7 +26,6 @@ public:
     sw2.write(TestMsg(99, "2-3 end"), 3);
     sw3.write(TestMsg(99, "3-3 end"), 3);
 
-    ACE_OS::sleep(2);
     return 0;
   }
 
