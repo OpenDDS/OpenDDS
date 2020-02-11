@@ -2421,9 +2421,7 @@ RtpsUdpDataLink::RtpsWriter::gather_gaps_i(const RepoId& reader,
     bitmap.length(bitmap_num_longs(base, gaps.high()));
     (void) gaps.to_bitmap(bitmap.get_buffer(), bitmap.length(), num_bits);
   } else {
-    bitmap.length(0);
     bitmap[0] = 0;
-    num_bits = 0;
   }
 
   MetaSubmessage meta_submessage(id_, reader);
