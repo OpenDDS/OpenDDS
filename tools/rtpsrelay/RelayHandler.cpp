@@ -98,45 +98,45 @@ int RelayHandler::open(const ACE_INET_Addr& local)
   return 0;
 }
 
-int RelayHandler::handle_input(ACE_HANDLE)
+int RelayHandler::handle_input(ACE_HANDLE handle)
 {
   ACE_INET_Addr remote;
   int inlen = 65536; // Default to maximum datagram size.
-  const int iov_size = 1;
-  iovec iov[iov_size];
-  OpenDDS::DCPS::Message_Block_Shared_Ptr buffer;
 
 #ifdef FIONREAD
-  if (ACE_OS::ioctl (get_handle(),
+  if (ACE_OS::ioctl (handle,
                      FIONREAD,
                      &inlen) == -1) {
     ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::handle_input failed to get available byte count: %m\n"));
     return 0;
   }
+#else
+  ACE_UNUSED_ARG(handle);
 #endif
 
-  if (inlen >= 0) {
-    // Allocate at least one byte so that recv cannot return early.
-    buffer = OpenDDS::DCPS::Message_Block_Shared_Ptr(new ACE_Message_Block(std::max(inlen, 1)));
-    iov[0].iov_base = buffer->wr_ptr();
-    iov[0].iov_len = buffer->size();
-  } else {
+  if (inlen < 0) {
     ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::handle_input available byte count is negative\n"));
     return 0;
   }
 
-  const auto bytes = socket_.recv(iov, iov_size, remote);
+  // Allocate at least one byte so that recv cannot return early.
+  OpenDDS::DCPS::Message_Block_Shared_Ptr buffer(new ACE_Message_Block(std::max(inlen, 1)));
+
+  const auto bytes = socket_.recv(buffer->wr_ptr(), buffer->size(), remote);
 
   if (bytes < 0) {
     ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::handle_input failed to recv: %m\n"));
     return 0;
   } else if (bytes == 0) {
     // Okay.  Empty datagram.
-    ACE_ERROR((LM_WARNING, "(%P|%t) %N:%l ERROR: RelayHandler::handle_input received an empty datagram\n"));
+    ACE_ERROR((LM_WARNING, "(%P|%t) %N:%l WARNING: RelayHandler::handle_input received an empty datagram\n"));
     return 0;
   }
 
   buffer->length(bytes);
+
+  bytes_received_ += bytes;
+  ++messages_received_;
 
   process_message(remote, OpenDDS::DCPS::MonotonicTimePoint::now(), buffer);
   return 0;
