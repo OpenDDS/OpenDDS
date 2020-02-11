@@ -468,8 +468,6 @@ public:
   u_short max_spdp_sequence_msg_reset_check() const { return config_->max_spdp_sequence_msg_reset_check(); }
   void max_spdp_sequence_msg_reset_check(u_short reset_value) { config_->max_spdp_sequence_msg_reset_check(reset_value); }
 
-  void reset_guid_participant_counter() { guid_gen_.resetCounter(); }
-
   RtpsDiscoveryConfig_rch config() const { return config_; }
 
 #ifdef OPENDDS_SECURITY
