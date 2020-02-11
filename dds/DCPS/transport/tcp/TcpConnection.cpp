@@ -599,7 +599,7 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
         // This could happen on Windows, it may due to the close() on non-blocking socket needs more time to complete.
         // In this case, we just wait another second to initiate the connect again without incrementing the conn_retry_counter_.
         timeout.sec(1);
-        this->conn_retry_counter_ --;
+        --conn_retry_counter_;
         if (DCPS_debug_level >= 1) {
           ACE_DEBUG((LM_DEBUG, "(%P|%t) DBG:   TcpConnection::"
                                "active_reconnect_i() socket operation is already in progress, wait another second to initiate the connect\n"));
