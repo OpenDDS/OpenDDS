@@ -1830,7 +1830,6 @@ RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(MetaSubmessageVec& meta_submessa
       SequenceNumber ack;
       CORBA::ULong num_bits = 0;
       LongSeq8 bitmap;
-      bitmap.length(0);
       bitmap[0] = 0;
 
       const SequenceNumber& hb_low = wi->second.hb_range_.first;
