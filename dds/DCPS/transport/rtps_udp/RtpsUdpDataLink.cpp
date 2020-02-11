@@ -1333,7 +1333,7 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
   }
 
   const WriterInfoMap::iterator wi = remote_writers_.find(src);
-  if (wi != remote_writers_.end()) {
+  if (wi != remote_writers_.end() && !wi->second.first_ever_hb_) {
     WriterInfo& info = wi->second;
     SequenceNumber seq;
     seq.setValue(data.writerSN.high, data.writerSN.low);
