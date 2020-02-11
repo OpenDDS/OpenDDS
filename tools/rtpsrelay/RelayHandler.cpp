@@ -129,7 +129,7 @@ int RelayHandler::handle_input(ACE_HANDLE handle)
     return 0;
   } else if (bytes == 0) {
     // Okay.  Empty datagram.
-    ACE_ERROR((LM_WARNING, "(%P|%t) %N:%l WARNING: RelayHandler::handle_input received an empty datagram\n"));
+    ACE_DEBUG((LM_WARNING, "(%P|%t) %N:%l WARNING: RelayHandler::handle_input received an empty datagram\n"));
     return 0;
   }
 
@@ -435,7 +435,7 @@ void VerticalHandler::send(const GuidSet& to,
             enqueue_message(addr, msg);
           }
         } else {
-          ACE_ERROR((LM_WARNING, "(%P|%t) %N:%l WARNING: VerticalHandler::send failed to get address\n"));
+          ACE_DEBUG((LM_WARNING, "(%P|%t) %N:%l WARNING: VerticalHandler::send failed to get address\n"));
         }
       }
     }
@@ -567,7 +567,7 @@ void HorizontalHandler::process_message(const ACE_INET_Addr&,
         vertical_handler_->enqueue_message(addr, msg);
       }
     } else {
-      ACE_ERROR((LM_WARNING, "(%P|%t) %N:%l WARNING: HorizontalHandler::process_message failed to get address\n"));
+      ACE_DEBUG((LM_WARNING, "(%P|%t) %N:%l WARNING: HorizontalHandler::process_message failed to get address\n"));
     }
   }
   max_fan_out(relay_header.to().size());
@@ -775,25 +775,25 @@ void StunHandler::process_message(const ACE_INET_Addr& remote_address,
   OpenDDS::STUN::Message message;
   message.block = msg.get();
   if (!(serializer >> message)) {
-    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) VerticalHandler::process_message: WARNING Could not deserialize STUN mssage\n")));
+    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) VerticalHandler::process_message: WARNING Could not deserialize STUN mssage\n")));
     return;
   }
 
   if (message.class_ != OpenDDS::STUN::REQUEST) {
-    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) VerticalHandler::process_message: WARNING Unknown STUN message class\n")));
+    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) VerticalHandler::process_message: WARNING Unknown STUN message class\n")));
     return;
   }
 
   std::vector<OpenDDS::STUN::AttributeType> unknown_attributes = message.unknown_comprehension_required_attributes();
 
   if (!unknown_attributes.empty()) {
-    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) VerticalHandler::process_message: WARNING Unknown comprehension requird attributes\n")));
+    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) VerticalHandler::process_message: WARNING Unknown comprehension requird attributes\n")));
     send(remote_address, make_unknown_attributes_error_response(message, unknown_attributes));
     return;
   }
 
   if (!message.has_fingerprint()) {
-    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) VerticalHandler::process_message: WARNING No FINGERPRINT attribute\n")));
+    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) VerticalHandler::process_message: WARNING No FINGERPRINT attribute\n")));
     send(remote_address, make_bad_request_error_response(message, "Bad Request: FINGERPRINT must be pesent"));
     return;
   }
@@ -814,7 +814,7 @@ void StunHandler::process_message(const ACE_INET_Addr& remote_address,
 
   default:
     // Unknown method.  Stop processing.
-    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) VerticalHandler::process_message: WARNING Unknown STUN method\n")));
+    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) VerticalHandler::process_message: WARNING Unknown STUN method\n")));
     send(remote_address, make_bad_request_error_response(message, "Bad Request: Unknown method"));
     break;
   }
