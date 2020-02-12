@@ -380,6 +380,7 @@ private:
     bool remove_writer(const RepoId& id);
     size_t writer_count() const;
 
+    bool is_writer_handshake_done(const RepoId& id) const;
     bool should_nack_durable(const WriterInfo& info);
 
     bool process_heartbeat_i(const RTPS::HeartBeatSubmessage& heartbeat, const RepoId& src, MetaSubmessageVec& meta_submessages);

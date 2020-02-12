@@ -3273,7 +3273,6 @@ Sedp::Reader::assoc(const DCPS::AssociationData& publication)
   return associate(publication, false);
 }
 
-
 // Implementing TransportReceiveListener
 
 static bool
