@@ -2455,6 +2455,7 @@ DataWriterImpl::prepare_to_delete()
 {
   this->set_deleted(true);
   this->stop_associating();
+  this->terminate_send_if_suspended();
 }
 
 PublicationInstance_rch

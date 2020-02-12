@@ -137,4 +137,11 @@ OpenDDS::DCPS::TcpSendStrategy::add_delayed_notification(TransportQueueElement* 
   }
 }
 
+void
+OpenDDS::DCPS::TcpSendStrategy::terminate_send_if_suspended()
+{
+  DBG_ENTRY_LVL("TcpSendStrategy","terminate_send_if_suspended",6);
+  this->clear(MODE_TERMINATED, MODE_SUSPEND);
+}
+
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

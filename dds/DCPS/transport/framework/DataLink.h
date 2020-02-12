@@ -199,6 +199,7 @@ public:
   // Used by to inform the send strategy to clear all unsent samples upon
   // backpressure timed out.
   void terminate_send();
+  void terminate_send_if_suspended();
 
   /// This is called on publisher side to see if this link communicates
   /// with the provided sub.
