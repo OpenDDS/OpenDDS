@@ -82,17 +82,8 @@ jobs:
     vmImage: vs2017-win2016
   strategy:
     matrix:
-      Debug64:
-        BuildPlatform: x64
-        BuildConfiguration: Debug
       Release64:
         BuildPlatform: x64
-        BuildConfiguration: Release
-      Debug32:
-        BuildPlatform: Win32
-        BuildConfiguration: Debug
-      Release32:
-        BuildPlatform: Win32
         BuildConfiguration: Release
   variables:
     VCPKG_ROOT: $(Build.SourcesDirectory)\vcpkg
