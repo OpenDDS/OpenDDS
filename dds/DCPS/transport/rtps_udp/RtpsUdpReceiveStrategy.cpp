@@ -654,7 +654,7 @@ bool RtpsUdpReceiveStrategy::decode_payload(ReceivedDataSample& sample,
   const CryptoTransform_var crypto = link_->security_config()->get_crypto_transform();
 
   const EndpointSecurityAttributesMask esa = link_->security_attributes(sample.header_.publication_id_);
-  bool payload_protected = esa & ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_PAYLOAD_PROTECTED;
+  const bool payload_protected = esa & ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_PAYLOAD_PROTECTED;
 
   if (writer_crypto_handle == DDS::HANDLE_NIL || !crypto || !payload_protected) {
     return true;

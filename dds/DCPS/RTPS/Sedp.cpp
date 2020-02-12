@@ -3145,7 +3145,11 @@ Sedp::Writer::write_dcps_participant_secure(const Security::SPDPdiscoveredPartic
     return DDS::RETCODE_ERROR;
   }
 
-  return write_parameter_list(plist, reader, seq_++);
+  DDS::ReturnCode_t return_code = write_parameter_list(plist, reader, seq_);
+  if (return_code == DDS::RETCODE_OK) {
+    seq_++;
+  }
+  return return_code;
 }
 #endif
 
