@@ -28,7 +28,6 @@ protected:
   class Registration {
   public:
     Registration(ForwardAction& fa, WorkerDataReaderListener* wdrl) : fa_(fa), wdrl_(wdrl) { wdrl_->add_handler(fa_); }
-    ~Registration() { wdrl_->remove_handler(fa_); }
   protected:
     ForwardAction& fa_;
     WorkerDataReaderListener* wdrl_;
