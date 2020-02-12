@@ -111,7 +111,7 @@ bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
 
 OpenDDS_Rtps_Export
 bool from_param_list(const ParameterList& param_list,
-                    DCPS::DiscoveredWriterData& writer_data);
+                     DCPS::DiscoveredWriterData& writer_data);
 
 // OpenDDS::DCPS::DiscoveredReaderData
 
