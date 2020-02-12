@@ -75,6 +75,14 @@ jobs:
   - script: |
       perl "%DDS_ROOT%\tests\cmake_integration\run_ci_tests.pl" --build-config=$(BuildConfiguration) --generator="Visual Studio 16 2019" --arch $(BuildPlatform)
     displayName: Compile and run CMake tests
+  - script: |
+      cd DevGuideExamples\DCPS\Messenger
+      perl integration_run_test.pl
+    displayName: Run Examples DCPS Messenger
+  - script: |
+      cd tests\DCPS\Messenger
+      perl run_test.pl rtps
+    displayName: Run DCPS Messenger Test
 
 - job: VisualStudio2017
   timeoutInMinutes: 90
@@ -141,12 +149,10 @@ jobs:
   - script: |
       cd DevGuideExamples\DCPS\Messenger
       perl integration_run_test.pl
-    condition: eq(variables['BuildConfiguration'], 'Debug')
     displayName: Run Examples DCPS Messenger
   - script: |
       cd tests\DCPS\Messenger
       perl run_test.pl rtps
-    condition: eq(variables['BuildConfiguration'], 'Debug')
     displayName: Run DCPS Messenger Test
 
 - job: VisualStudio2015
@@ -214,6 +220,14 @@ jobs:
       platform: $(BuildPlatform)
       configuration: $(BuildConfiguration)
       maximumCpuCount: true
+  - script: |
+      cd DevGuideExamples\DCPS\Messenger
+      perl integration_run_test.pl
+    displayName: Run Examples DCPS Messenger
+  - script: |
+      cd tests\DCPS\Messenger
+      perl run_test.pl rtps
+    displayName: Run DCPS Messenger Test
 
 - job: Linux
   timeoutInMinutes: 90
