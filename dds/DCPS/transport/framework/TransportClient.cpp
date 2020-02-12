@@ -1022,6 +1022,11 @@ TransportClient::remove_all_msgs()
   return links_.remove_all_msgs(repo_id_);
 }
 
+void
+TransportClient::terminate_send_if_suspended() {
+  links_.terminate_send_if_suspended();
+}
+
 }
 }
 

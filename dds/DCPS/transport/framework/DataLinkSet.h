@@ -85,6 +85,8 @@ public:
   MapType& map() { return map_; }
   //@}
 
+  void terminate_send_if_suspended();
+
 private:
 
   /// Hash map for DataLinks.

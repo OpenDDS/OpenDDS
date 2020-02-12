@@ -534,13 +534,27 @@ RtpsUdpDataLink::check_handshake_complete(const RepoId& local_id,
 {
   const GuidConverter conv(local_id);
   if (conv.isWriter()) {
-    RtpsWriterMap::iterator rw = writers_.find(local_id);
-    if (rw == writers_.end()) {
-      return true; // not reliable, no handshaking
+    RtpsWriter_rch writer;
+    {
+      ACE_Guard<ACE_Thread_Mutex> guard(writers_lock_);
+      RtpsWriterMap::iterator rw = writers_.find(local_id);
+      if (rw == writers_.end()) {
+        return true; // not reliable, no handshaking
+      }
+      writer = rw->second;
     }
-    return rw->second->is_reader_handshake_done(remote_id);
+    return writer->is_reader_handshake_done(remote_id);
   } else if (conv.isReader()) {
-    return true; // no handshaking for local reader
+    RtpsReader_rch reader;
+    {
+      ACE_Guard<ACE_Thread_Mutex> guard(readers_lock_);
+      RtpsReaderMap::iterator rr = readers_.find(local_id);
+      if (rr == readers_.end()) {
+        return true; // not reliable, no handshaking
+      }
+      reader = rr->second;
+    }
+    return reader->is_writer_handshake_done(remote_id);
   }
   return false;
 }
@@ -1319,7 +1333,7 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
   }
 
   const WriterInfoMap::iterator wi = remote_writers_.find(src);
-  if (wi != remote_writers_.end()) {
+  if (wi != remote_writers_.end() && !wi->second.first_ever_hb_) {
     WriterInfo& info = wi->second;
     SequenceNumber seq;
     seq.setValue(data.writerSN.high, data.writerSN.low);
@@ -1673,6 +1687,7 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
   const bool is_final = heartbeat.smHeader.flags & RTPS::FLAG_F,
     liveliness = heartbeat.smHeader.flags & RTPS::FLAG_L;
 
+  bool result = false;
   if (!is_final || (!liveliness && (info.should_nack() ||
       should_nack_durable(info) ||
       link->receive_strategy()->has_fragments(info.hb_range_, wi->first)))) {
@@ -1680,9 +1695,8 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
 
     if (immediate_reply) {
       link->heartbeat_reply_.schedule(link->quick_reply_delay_);
-      return false;
     } else {
-      return true; // timer will invoke send_heartbeat_replies()
+      result = true; // timer will invoke send_heartbeat_replies()
     }
   }
 
@@ -1694,7 +1708,7 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
   }
 
   //FUTURE: support assertion of liveliness for MANUAL_BY_TOPIC
-  return false;
+  return result;
 }
 
 bool
@@ -1750,6 +1764,13 @@ RtpsUdpDataLink::RtpsWriter::is_reader_handshake_done(const RepoId& id) const
   return iter != remote_readers_.end() && iter->second.handshake_done_;
 }
 
+bool
+RtpsUdpDataLink::RtpsReader::is_writer_handshake_done(const RepoId& id) const
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
+  WriterInfoMap::const_iterator iter = remote_writers_.find(id);
+  return iter != remote_writers_.end() && !iter->second.first_ever_hb_;
+}
 
 bool
 RtpsUdpDataLink::RtpsReader::add_writer(const RepoId& id, const WriterInfo& info)

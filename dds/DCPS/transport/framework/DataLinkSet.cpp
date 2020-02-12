@@ -90,3 +90,12 @@ OpenDDS::DCPS::DataLinkSet::empty()
 
   return map_.empty();
 }
+
+void OpenDDS::DCPS::DataLinkSet::terminate_send_if_suspended()
+{
+  GuardType guard(this->lock_);
+  for (MapType::iterator itr = map_.begin();
+      itr != map_.end(); ++itr) {
+        itr->second->terminate_send_if_suspended();
+  }
+}

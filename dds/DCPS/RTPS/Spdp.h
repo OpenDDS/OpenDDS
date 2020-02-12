@@ -209,7 +209,7 @@ private:
     static const WriteFlags SEND_TO_LOCAL = (1 << 0);
     static const WriteFlags SEND_TO_RELAY = (1 << 1);
 
-    SpdpTransport(Spdp* outer, bool securityGuids);
+    explicit SpdpTransport(Spdp* outer);
     ~SpdpTransport();
 
     virtual int handle_input(ACE_HANDLE h);

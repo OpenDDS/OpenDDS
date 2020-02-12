@@ -369,7 +369,7 @@ OpenDDS::DCPS::TcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
   DBG_ENTRY_LVL("TcpConnection","handle_close",6);
 
   if (DCPS_debug_level >= 1) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpConnection()::handle_close() called on transport: %C to %C:%d , reconnect_state = %C.\n",
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpConnection::handle_close() called on transport: %C to %C:%d , reconnect_state = %C.\n",
                this->config_name().c_str(),
                this->remote_address_.get_host_addr(),
                this->remote_address_.get_port_number(), reconnect_state_string()));
@@ -583,9 +583,32 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
     timeout.msec(static_cast<int>(retry_delay_msec));
 
     TcpConnection* pconn = this;
-    int ret = transport.connector_.connect(pconn, this->remote_address_,  ACE_Synch_Options::asynch);
-    if (ret == -1 && errno != EWOULDBLOCK) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) TcpConnection::active_reconnect_i error %m.\n"));
+    int ret;
+    {
+      ACE_Reverse_Lock<LockType> rev_lock(this->reconnect_lock_);
+      ACE_Guard<ACE_Reverse_Lock<LockType> > guard(rev_lock);
+      // We need to temporarily release the lock here because the connect could occasionally be synchronous
+      // if the source and destination are on the same host. When the call become synchronous, active_reconnect_open()
+      // would be called and try to acquired the lock in the same thread.
+      ret = transport.connector_.connect(pconn, this->remote_address_,  ACE_Synch_Options::asynch);
+    }
+
+    if (ret == -1 && errno != EWOULDBLOCK)
+    {
+      if (errno == EALREADY) {
+        // This could happen on Windows, it may due to the close() on non-blocking socket needs more time to complete.
+        // In this case, we just wait another second to initiate the connect again without incrementing the conn_retry_counter_.
+        timeout.sec(1);
+        --conn_retry_counter_;
+        if (DCPS_debug_level >= 1) {
+          ACE_DEBUG((LM_DEBUG, "(%P|%t) DBG:   TcpConnection::"
+                               "active_reconnect_i() socket operation is already in progress, wait another second to initiate the connect\n"));
+        }
+      }
+      else {
+        ACE_ERROR((LM_ERROR, "(%P|%t) TcpConnection::active_reconnect_i error %m.\n"));
+      }
+      this->reconnect_state_ = ACTIVE_WAITING_STATE;
     }
 
     this->reactor()->schedule_timer(this, 0, timeout);
