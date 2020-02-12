@@ -30,4 +30,4 @@ cd node_controller
 ./node_controller one-shot --name Leg_09 &
 ./node_controller one-shot --name Leg_10 &
 cd ../test_controller
-./test_controller ../example showtime_reliable_30 --wait-for-nodes 4
+./test_controller ../example showtime_reliable_30 --wait-for-nodes 4 --override-create-time 15
