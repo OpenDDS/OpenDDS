@@ -20,6 +20,7 @@ public:
   void addDestination(const ACE_INET_Addr& dest);
   bool write(const TestMsg& msg, CORBA::ULong seqN) const;
   bool write(const TestMsg& msg, CORBA::ULong seqN, const OpenDDS::DCPS::RepoId& directedWrite) const;
+  bool writeHeartbeat(CORBA::Long heartbeatCount, CORBA::ULong seqN) const;
 
 private:
   static const bool hostIsBigEndian = !ACE_CDR_BYTE_ORDER;
@@ -31,12 +32,17 @@ private:
 
   OpenDDS::RTPS::InfoTimestampSubmessage timeSubMsg() const;
   OpenDDS::RTPS::DataSubmessage dataSubMsg(const TestMsg& msg, CORBA::ULong seqN) const;
+  OpenDDS::RTPS::HeartBeatSubmessage heartBeatSubMsg(CORBA::Long heartbeatCount, CORBA::ULong seqN) const;
 
   size_t msgSize(const OpenDDS::RTPS::InfoTimestampSubmessage& t,
                  const OpenDDS::RTPS::DataSubmessage& d, const TestMsg& m) const;
 
+  size_t hbSize(const OpenDDS::RTPS::HeartBeatSubmessage& hb) const;
+
   bool serialize(ACE_Message_Block& mb, const OpenDDS::RTPS::InfoTimestampSubmessage& t,
                  const OpenDDS::RTPS::DataSubmessage& d, const TestMsg& m) const;
+
+  bool serialize(ACE_Message_Block& mb, const OpenDDS::RTPS::HeartBeatSubmessage& hb) const;
 
   bool send(const ACE_Message_Block& mb) const;
 
