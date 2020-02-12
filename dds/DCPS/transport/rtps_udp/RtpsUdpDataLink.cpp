@@ -1332,11 +1332,17 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
     return false;
   }
 
+  bool on_start = false;
   const WriterInfoMap::iterator wi = remote_writers_.find(src);
-  if (wi != remote_writers_.end() && !wi->second.first_ever_hb_) {
+  if (wi != remote_writers_.end()) {
     WriterInfo& info = wi->second;
     SequenceNumber seq;
     seq.setValue(data.writerSN.high, data.writerSN.low);
+
+    if (info.first_activity_) {
+      on_start = true;
+      info.first_activity_ = false;
+    }
 
     info.frags_.erase(seq);
     if (durable_ && info.recvd_.empty()) {
@@ -1446,6 +1452,12 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
     }
     link->receive_strategy()->withhold_data_from(id_);
   }
+
+  guard.release();
+  if (on_start) {
+    link->invoke_on_start_callbacks(id_, src, true);
+  }
+
   return false;
 }
 
@@ -1647,9 +1659,9 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
   }
 
   // The first-ever HB can determine the start of our nackable range (wi_first)
-  if (info.first_ever_hb_) {
+  if (info.first_activity_) {
     immediate_reply = true;
-    info.first_ever_hb_ = false;
+    info.first_activity_ = false;
     first_ever_hb = true;
     // Don't re-initialize recvd_ values if a data sample has already done it
     if (info.recvd_.empty()) {
@@ -1769,7 +1781,7 @@ RtpsUdpDataLink::RtpsReader::is_writer_handshake_done(const RepoId& id) const
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
   WriterInfoMap::const_iterator iter = remote_writers_.find(id);
-  return iter != remote_writers_.end() && !iter->second.first_ever_hb_;
+  return iter != remote_writers_.end() && !iter->second.first_activity_;
 }
 
 bool
