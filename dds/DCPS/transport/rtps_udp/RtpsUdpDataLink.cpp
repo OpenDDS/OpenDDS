@@ -1830,7 +1830,6 @@ RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(MetaSubmessageVec& meta_submessa
       SequenceNumber ack;
       CORBA::ULong num_bits = 0;
       LongSeq8 bitmap;
-      bitmap[0] = 0;
 
       const SequenceNumber& hb_low = wi->second.hb_range_.first;
       const SequenceNumber& hb_high = wi->second.hb_range_.second;
@@ -1839,8 +1838,10 @@ RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(MetaSubmessageVec& meta_submessa
 
       if (recvd.disjoint()) {
         bitmap.length(bitmap_num_longs(ack, recvd.last_ack().previous()));
-        (void) recvd.to_bitmap(bitmap.get_buffer(), bitmap.length(),
-                               num_bits, true);
+        if (bitmap.length() > 0) {
+          (void)recvd.to_bitmap(bitmap.get_buffer(), bitmap.length(),
+            num_bits, true);
+        }
       }
 
       const SequenceNumber::Value ack_val = ack.getValue();
@@ -2419,9 +2420,9 @@ RtpsUdpDataLink::RtpsWriter::gather_gaps_i(const RepoId& reader,
 
   if (gaps.disjoint()) {
     bitmap.length(bitmap_num_longs(base, gaps.high()));
-    (void) gaps.to_bitmap(bitmap.get_buffer(), bitmap.length(), num_bits);
-  } else {
-    bitmap[0] = 0;
+    if (bitmap.length() > 0) {
+      (void)gaps.to_bitmap(bitmap.get_buffer(), bitmap.length(), num_bits);
+    }
   }
 
   MetaSubmessage meta_submessage(id_, reader);
