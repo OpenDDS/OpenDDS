@@ -12,7 +12,7 @@
 
 #if (defined(ACE_LINUX) || defined(ACE_ANDROID)) && !defined(OPENDDS_SAFETY_PROFILE)
 
-#define OPENDDS_LINUX_NETWORK_CONFIG_MONTIOR
+#define OPENDDS_LINUX_NETWORK_CONFIG_MONITOR
 
 #include "NetworkConfigMonitor.h"
 #include "RcEventHandler.h"
