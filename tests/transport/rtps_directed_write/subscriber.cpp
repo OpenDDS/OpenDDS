@@ -26,31 +26,20 @@
 class SimpleDataReader : public TransportReceiveListener, public TransportClient
 {
 public:
-  SimpleDataReader(const AppConfig& ac, const int readerIndex)
+  SimpleDataReader(const AppConfig& ac, const int readerIndex, AssociationData& publication)
     : config(ac), index(readerIndex), done_(false), seq_()
   {
     enable_transport(config.readersReliable(), false); //(reliable, durable)
 
-    // Write a file so that test script knows we're ready
-    FILE *file = std::fopen("subready.txt", "w");
-    std::fprintf(file, "Ready\n");
-    std::fclose(file);
-    std::cerr << "**Ready written to subready.txt. ";
-
-    AssociationData publication;
-    publication.remote_id_ = config.getPubWtrId();
-    publication.remote_reliable_ = true;
-    publication.remote_data_.length(1);
-    publication.remote_data_[0].transport_type = "rtps_udp";
-    publication.remote_data_[0].data.length(5);
-    for (CORBA::ULong i = 0; i < 5; ++i) {
-      publication.remote_data_[0].data[i] = 0;
+    if (index == 1) {
+      writeSubReady();
     }
-    std::cerr << "Reader " << OPENDDS_STRING(GuidConverter(get_repo_id())) << " associating with publisher...";
+
+    publication.remote_id_ = config.getPubWtrId();
     if (!associate(publication, false)) {
       throw std::string("subscriber TransportClient::associate() failed");
     }
-    std::cerr << "associated.\n";
+    std::cerr << "Reader " << OPENDDS_STRING(GuidConverter(get_repo_id())) << " called associate()\n";
   }
 
   virtual ~SimpleDataReader() { disassociate(config.getPubWtrId()); }
@@ -91,6 +80,12 @@ private:
       ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: failed to deserialize key data\n")));
     }
     return ok;
+  }
+
+  void writeSubReady() {
+    FILE* file = std::fopen("subready.txt", "w");
+    std::fprintf(file, "Ready\n");
+    std::fclose(file);
   }
 
   const AppConfig& config;
@@ -151,11 +146,19 @@ void SimpleDataReader::data_received(const ReceivedDataSample& sample)
 
 class DDS_TEST {
 public:
-  DDS_TEST(int argc, ACE_TCHAR* argv[]) : config(argc, argv, true) {}
+  DDS_TEST(int argc, ACE_TCHAR* argv[]) : config(argc, argv, true) {
+    publication.remote_reliable_ = true;
+    publication.remote_data_.length(1);
+    publication.remote_data_[0].transport_type = "rtps_udp";
+    publication.remote_data_[0].data.length(5);
+    for (CORBA::ULong i = 0; i < 5; ++i) {
+      publication.remote_data_[0].data[i] = 0;
+    }
+  }
 
   int run() {
-    SimpleDataReader reader0(config, 0);
-    SimpleDataReader reader1(config, 1);
+    SimpleDataReader reader0(config, 0, publication);
+    SimpleDataReader reader1(config, 1, publication);
     while (!(reader0.done() && reader1.done())) {
       ACE_OS::sleep(1);
     }
@@ -164,6 +167,7 @@ public:
 
 private:
   AppConfig config;
+  AssociationData publication;
 };
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
