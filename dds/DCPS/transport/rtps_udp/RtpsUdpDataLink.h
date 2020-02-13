@@ -356,13 +356,14 @@ private:
     OPENDDS_MAP(SequenceNumber, ReceivedDataSample) held_;
     SequenceRange hb_range_;
     OPENDDS_MAP(SequenceNumber, RTPS::FragmentNumber_t) frags_;
-    bool ack_pending_, first_ever_hb_, first_valid_hb_;
+    bool ack_pending_, first_activity_, first_valid_hb_, first_delivered_data_;
     CORBA::Long heartbeat_recvd_count_, hb_frag_recvd_count_,
       acknack_count_, nackfrag_count_;
 
     WriterInfo()
-      : ack_pending_(false), first_ever_hb_(true), first_valid_hb_(true), heartbeat_recvd_count_(0),
-        hb_frag_recvd_count_(0), acknack_count_(0), nackfrag_count_(0) { hb_range_.second = SequenceNumber::ZERO(); }
+      : ack_pending_(false), first_activity_(true), first_valid_hb_(true), first_delivered_data_(true)
+      , heartbeat_recvd_count_(0), hb_frag_recvd_count_(0), acknack_count_(0), nackfrag_count_(0)
+    { hb_range_.second = SequenceNumber::ZERO(); }
 
     bool should_nack() const;
   };
