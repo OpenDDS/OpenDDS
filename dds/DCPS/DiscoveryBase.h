@@ -1624,9 +1624,9 @@ namespace OpenDDS {
           std::memcpy(location_data_.guid, &guid, sizeof(guid));
           location_data_.location = 0;
           location_data_.change_mask = 0;
-          location_data_.local_timestamp = 0;
-          location_data_.ice_timestamp = 0;
-          location_data_.relay_timestamp = 0;
+          location_data_.local_timestamp = {0, 0};
+          location_data_.ice_timestamp = {0, 0};
+          location_data_.relay_timestamp = {0, 0};
 
 #ifdef OPENDDS_SECURITY
           security_info_.participant_security_attributes = 0;

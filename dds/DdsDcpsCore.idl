@@ -450,11 +450,11 @@ module OpenDDS {
             ParticipantLocation location;
             ParticipantLocation change_mask;
             string local_addr;
-            unsigned long local_timestamp;
+            DDS::Time_t local_timestamp;
             string ice_addr;
-            unsigned long ice_timestamp;
+            DDS::Time_t ice_timestamp;
             string relay_addr;
-            unsigned long relay_timestamp;
+            DDS::Time_t relay_timestamp;
     };
 
   };// End of module DCPS

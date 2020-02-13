@@ -434,40 +434,40 @@ Spdp::process_location_updates_i(DiscoveredParticipantIter iter)
 
     location_data.change_mask = pos->mask_;
 
-    const unsigned long now = MonotonicTimePoint::now().value().sec();
+    const DCPS::SystemTimePoint now = DCPS::SystemTimePoint::now();
 
     bool address_change = false;
     switch (pos->mask_) {
     case DCPS::LOCATION_LOCAL:
       address_change = addr.compare(location_data.local_addr.in()) != 0;
       location_data.local_addr = addr.c_str();
-      location_data.local_timestamp = now;
+      location_data.local_timestamp = now.to_dds_time();
       break;
     case DCPS::LOCATION_ICE:
       address_change = addr.compare(location_data.ice_addr.in()) != 0;
       location_data.ice_addr = addr.c_str();
-      location_data.ice_timestamp = now;
+      location_data.ice_timestamp = now.to_dds_time();
       break;
     case DCPS::LOCATION_RELAY:
       address_change = addr.compare(location_data.relay_addr.in()) != 0;
       location_data.relay_addr = addr.c_str();
-      location_data.relay_timestamp = now;
+      location_data.relay_timestamp = now.to_dds_time();
       break;
     }
 
-    const unsigned long expr = now - rtps_duration_to_time_duration(
-                                                                    iter->second.pdata_.leaseDuration,
-                                                                    iter->second.pdata_.participantProxy.protocolVersion,
-                                                                    iter->second.pdata_.participantProxy.vendorId).value().sec();
-    if ((location_data.location & DCPS::LOCATION_LOCAL) && location_data.local_timestamp < expr) {
+    const DDS::Time_t expr = (now - rtps_duration_to_time_duration(
+                                                                   iter->second.pdata_.leaseDuration,
+                                                                   iter->second.pdata_.participantProxy.protocolVersion,
+                                                                   iter->second.pdata_.participantProxy.vendorId)).to_dds_time();
+    if ((location_data.location & DCPS::LOCATION_LOCAL) && DCPS::operator<(location_data.local_timestamp, expr)) {
       location_data.location &= ~(DCPS::LOCATION_LOCAL);
       location_data.change_mask |= DCPS::LOCATION_LOCAL;
-      location_data.local_timestamp = now;
+      location_data.local_timestamp = now.to_dds_time();
     }
-    if ((location_data.location & DCPS::LOCATION_RELAY) && location_data.relay_timestamp < expr) {
+    if ((location_data.location & DCPS::LOCATION_RELAY) && DCPS::operator<(location_data.relay_timestamp, expr)) {
       location_data.location &= ~(DCPS::LOCATION_RELAY);
       location_data.change_mask |= DCPS::LOCATION_RELAY;
-      location_data.relay_timestamp = now;
+      location_data.relay_timestamp = now.to_dds_time();
     }
 
     if (old_mask != location_data.location || address_change) {
