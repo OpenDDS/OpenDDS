@@ -3245,12 +3245,14 @@ void
 DataReaderImpl::update_locators(const RepoId& writerId,
                                 const TransportLocatorSeq& locators)
 {
-  ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, writers_lock_);
-  WriterMapType::const_iterator iter = writers_.find(writerId);
-
-  if (iter != writers_.end()) {
-    TransportClient::update_locators(writerId, locators);
+  {
+    ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, writers_lock_);
+    WriterMapType::const_iterator iter = writers_.find(writerId);
+    if (iter == writers_.end()) {
+      return;
+    }
   }
+  TransportClient::update_locators(writerId, locators);
 }
 
 ICE::Endpoint*

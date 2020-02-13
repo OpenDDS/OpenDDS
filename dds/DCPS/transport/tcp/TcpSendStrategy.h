@@ -40,6 +40,7 @@ public:
 
   /// Enable or disable output processing by the reactor according to mode.
   virtual void schedule_output();
+  virtual void terminate_send_if_suspended();
 
 protected:
 

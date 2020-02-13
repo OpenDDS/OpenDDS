@@ -25,7 +25,7 @@ use warnings;
 ## Version of OCI's TAO to download
 my $oci_tao_version = '2.2a';
 ## Version of DOC Group ACE/TAO to download, uses the ACE version number
-my $doc_tao_version = '6.5.7';
+my $doc_tao_version = '6.5.8';
 
 my $backup_timestamp = strftime "%Y-%m-%d-%H-%M-%S", localtime time;
 
@@ -100,18 +100,31 @@ my %platforminfo =
                             ],
                 },
    'android' => {
-     'libpath' => 'LD_LIBRARY_PATH',
-     'aceplatform' => 'android',
-     'aceconfig' => 'android',
-     'no_host' => 1,
-     'usage' => [
-       "Use --macros=ANDROID_ABI=<ARCH> to specify the target archtecture.",
-       "Defaults to armeabi-v7a which is 32-bit ARMv7.",
-       "See docs/android.md for details.",
-     ],
-     'needs_i2jrt_corba' => 1,
-     'java_platform' => 'android',
-   },
+                  'libpath' => 'LD_LIBRARY_PATH',
+                  'aceplatform' => 'android',
+                  'aceconfig' => 'android',
+                  'no_host' => 1,
+                  'usage' => [
+                      "Use --macros=ANDROID_ABI=<ARCH> to specify the",
+                      "target architecture.",
+                      "Defaults to armeabi-v7a which is 32-bit ARMv7.",
+                      "See docs/android.md for details.",
+                    ],
+                  'needs_i2jrt_corba' => 1,
+                  'java_platform' => 'android',
+                },
+    'ios' => {
+                'compilers' => ['clang++'],
+                'libpath' => 'DYLD_LIBRARY_PATH',
+                'no_host' => 1,
+                'aceconfig' => 'macosx-iOS',
+                'aceplatform' => 'macosx_iOS',
+                'usage' => [
+                    "Use --macros=IPHONE_TARGET=SIMULATOR or",
+                    "--macros=IPHONE_TARGET=HARDWARE",
+                    "to specify the target architecture."
+                  ],
+              }
   );
 
 sub targetUsage {
