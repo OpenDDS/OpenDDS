@@ -194,6 +194,7 @@ RtpsUdpDataLink::RtpsWriter::remove_sample(const DataSampleElement* sample)
   const SequenceNumber& seq = sample->get_header().sequence_;
   const char* const payload = sample->get_sample()->cont()->rd_ptr();
   const TransportQueueElement::MatchOnDataPayload modp(payload);
+  SingleSendBuffer::BufferVec removed;
 
   ACE_Guard<ACE_Thread_Mutex> g(mutex_);
 
@@ -222,13 +223,18 @@ RtpsUdpDataLink::RtpsWriter::remove_sample(const DataSampleElement* sample)
   g2.release();
 
   if (found) {
-    send_buff_->release_acked(to_release);
+    send_buff_->remove_acked(to_release, removed);
   }
 
   g.release();
 
   if (found) {
     tqe->data_dropped(true);
+    for (size_t i = 0; i < removed.size(); ++i) {
+      delete removed[i].first;
+      removed[i].second->release();
+    }
+    removed.clear();
     result = REMOVE_FOUND;
   }
   return result;
