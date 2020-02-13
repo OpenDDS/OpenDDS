@@ -2867,7 +2867,7 @@ Sedp::Endpoint::~Endpoint()
 
 //---------------------------------------------------------------
 Sedp::Writer::Writer(const RepoId& pub_id, Sedp& sedp, ACE_INT64 seq_init)
-  : Endpoint(pub_id, sedp)
+  : Endpoint(pub_id, sedp), seq_(seq_init)
 {
   header_.prefix[0] = 'R';
   header_.prefix[1] = 'T';
@@ -2887,7 +2887,6 @@ Sedp::Writer::Writer(const RepoId& pub_id, Sedp& sedp, ACE_INT64 seq_init)
   header_.guidPrefix[9] = pub_id.guidPrefix[9];
   header_.guidPrefix[10] = pub_id.guidPrefix[10];
   header_.guidPrefix[11] = pub_id.guidPrefix[11];
-  seq_ = seq_init;
 }
 
 Sedp::Writer::~Writer()
@@ -3146,7 +3145,7 @@ Sedp::Writer::write_dcps_participant_secure(const Security::SPDPdiscoveredPartic
     return DDS::RETCODE_ERROR;
   }
 
-return write_parameter_list(plist, reader, sequence);
+  return write_parameter_list(plist, reader, sequence);
 }
 #endif
 
@@ -3756,11 +3755,9 @@ Sedp::write_dcps_participant_secure(const Security::SPDPdiscoveredParticipantDat
   DCPS::RepoId remote_reader(part);
   if (part != GUID_UNKNOWN) {
     remote_reader.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER;
-    return dcps_participant_secure_writer_->write_dcps_participant_secure(msg, remote_reader, seq_++);
   }
 
-  DCPS::SequenceNumber sequence = DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN();
-  return dcps_participant_secure_writer_->write_dcps_participant_secure(msg, remote_reader, sequence);
+  return dcps_participant_secure_writer_->write_dcps_participant_secure(msg, remote_reader, participant_secure_sequence_);
 }
 
 DDS::ReturnCode_t

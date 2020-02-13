@@ -178,9 +178,7 @@ private:
   };
 
   Spdp& spdp_;
-  DCPS::SequenceNumber seq_;
-  DCPS::SequenceNumber durable_seq_;
-
+  DCPS::SequenceNumber participant_secure_sequence_;
 
 #ifdef OPENDDS_SECURITY
   DDS::Security::ParticipantSecurityAttributes participant_sec_attr_;
