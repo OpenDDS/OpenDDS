@@ -52,7 +52,7 @@ protected:
 
   virtual void shutdown_i();
 
-  virtual bool connection_info_i(TransportLocator& info) const;
+  virtual bool connection_info_i(TransportLocator& info, ConnectionInfoFlags flags) const;
 
   virtual void release_datalink(DataLink* link);
 
@@ -82,15 +82,17 @@ private:
 
   unique_ptr<ShmemAllocator> alloc_;
 
-  struct ReadTask : ACE_Task_Base {
+  class ReadTask : public ACE_Task_Base {
+  public:
     ReadTask(ShmemTransport* outer, ACE_sema_t semaphore);
     int svc();
     void stop();
+    void signal_semaphore();
 
+  private:
     ShmemTransport* outer_;
     ACE_sema_t semaphore_;
     bool stopped_;
-
   };
   unique_ptr<ReadTask> read_task_;
 };

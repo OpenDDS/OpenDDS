@@ -5,6 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
+#ifdef OPENDDS_SECURITY
+
 #include "Checklist.h"
 
 #include "EndpointManager.h"
@@ -17,7 +19,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace ICE {
 
-#ifdef OPENDDS_SECURITY
+using OpenDDS::DCPS::MonotonicTimePoint;
+using OpenDDS::DCPS::TimeDuration;
 
 const ACE_UINT32 PEER_REFLEXIVE_PRIORITY = (110 << 24) + (65535 << 8) + ((256 - 1) << 0);  // No local preference, component 1.
 
@@ -53,7 +56,7 @@ ACE_UINT64 CandidatePair::compute_priority()
 
 ConnectivityCheck::ConnectivityCheck(const CandidatePair& a_candidate_pair,
                                      const AgentInfo& a_local_agent_info, const AgentInfo& a_remote_agent_info,
-                                     ACE_UINT64 a_ice_tie_breaker, const ACE_Time_Value& a_expiration_date)
+                                     ACE_UINT64 a_ice_tie_breaker, const MonotonicTimePoint& a_expiration_date)
   : candiate_pair_(a_candidate_pair), cancelled_(false), expiration_date_(a_expiration_date)
 {
   request_.class_ = STUN::REQUEST;
@@ -117,16 +120,20 @@ void Checklist::reset()
   nominating_ = valid_list_.end();
   nominated_ = valid_list_.end();
   nominated_is_live_ = false;
-  check_interval_ = ACE_Time_Value();
-  max_check_interval_ = ACE_Time_Value();
+  check_interval_ = TimeDuration::zero_value;
+  max_check_interval_ = TimeDuration::zero_value;
   connectivity_checks_.clear();
 }
 
 void Checklist::generate_candidate_pairs()
 {
   // Add the candidate pairs.
-  for (AgentInfo::CandidatesType::const_iterator local_pos = local_agent_info_.candidates.begin(), local_limit = local_agent_info_.candidates.end(); local_pos != local_limit; ++local_pos) {
-    for (AgentInfo::CandidatesType::const_iterator remote_pos = remote_agent_info_.candidates.begin(), remote_limit = remote_agent_info_.candidates.end(); remote_pos != remote_limit; ++remote_pos) {
+  AgentInfo::CandidatesType::const_iterator local_pos = local_agent_info_.candidates.begin();
+  AgentInfo::CandidatesType::const_iterator local_limit = local_agent_info_.candidates.end();
+  for (; local_pos != local_limit; ++local_pos) {
+    AgentInfo::CandidatesType::const_iterator remote_pos = remote_agent_info_.candidates.begin();
+    AgentInfo::CandidatesType::const_iterator remote_limit = remote_agent_info_.candidates.end();
+    for (; remote_pos != remote_limit; ++remote_pos) {
       frozen_.push_back(CandidatePair(*local_pos, *remote_pos, local_is_controlling_));
     }
   }
@@ -152,9 +159,9 @@ void Checklist::generate_candidate_pairs()
 
   if (frozen_.size() != 0) {
     check_interval_ = endpoint_manager_->agent_impl->get_configuration().T_a();
-    double s = frozen_.size();
+    double s = static_cast<double>(frozen_.size());
     max_check_interval_ = endpoint_manager_->agent_impl->get_configuration().checklist_period() * (1.0 / s);
-    enqueue(ACE_Time_Value().now());
+    enqueue(MonotonicTimePoint::now());
   }
 }
 
@@ -358,7 +365,7 @@ void Checklist::generate_triggered_check(const ACE_INET_Addr& local_address, con
   // This can move something from failed to in progress.
   // In that case, we need to schedule.
   check_interval_ = endpoint_manager_->agent_impl->get_configuration().T_a();
-  enqueue(ACE_Time_Value().now());
+  enqueue(MonotonicTimePoint::now());
 }
 
 void Checklist::succeeded(const ConnectivityCheck& cc)
@@ -406,7 +413,8 @@ void Checklist::succeeded(const ConnectivityCheck& cc)
     }
 
     nominated_is_live_ = true;
-    last_indication_ = ACE_Time_Value().now();
+    endpoint_manager_->ice_connect(guids_, nominated_->remote.address);
+    last_indication_.set_to_now();
 
     while (!connectivity_checks_.empty()) {
       ConnectivityCheck cc = connectivity_checks_.front();
@@ -576,9 +584,12 @@ void Checklist::error_response(const ACE_INET_Addr& /*local_address*/,
   }
 
   if (a_message.has_error_code()) {
-    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) Checklist::error_response: WARNING STUN error response code=%d reason=%s\n"), a_message.get_error_code(), a_message.get_error_reason().c_str()));
+    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) Checklist::error_response: WARNING ")
+      ACE_TEXT("STUN error response code=%d reason=%s\n"),
+      a_message.get_error_code(),
+      a_message.get_error_reason().c_str()));
 
-    if (a_message.get_error_code() == 420 && a_message.has_unknown_attributes()) {
+    if (a_message.get_error_code() == STUN::UNKNOWN_ATTRIBUTE && a_message.has_unknown_attributes()) {
       std::vector<STUN::AttributeType> unknown_attributes = a_message.get_unknown_attributes();
 
       for (std::vector<STUN::AttributeType>::const_iterator pos = unknown_attributes.begin(),
@@ -587,7 +598,7 @@ void Checklist::error_response(const ACE_INET_Addr& /*local_address*/,
       }
     }
 
-    if (a_message.get_error_code() == 400 && a_message.get_error_code() == 420) {
+    if (a_message.get_error_code() == STUN::BAD_REQUEST && a_message.get_error_code() == STUN::UNKNOWN_ATTRIBUTE) {
       // Waiting and/or resending won't fix these errors.
       failed(cc);
       connectivity_checks_.erase(pos);
@@ -600,7 +611,7 @@ void Checklist::error_response(const ACE_INET_Addr& /*local_address*/,
   }
 }
 
-void Checklist::do_next_check(const ACE_Time_Value& a_now)
+void Checklist::do_next_check(const MonotonicTimePoint& a_now)
 {
   // Triggered checks.
   if (!triggered_check_queue_.empty()) {
@@ -675,7 +686,7 @@ void Checklist::do_next_check(const ACE_Time_Value& a_now)
   check_interval_ = endpoint_manager_->agent_impl->get_configuration().checklist_period();
 }
 
-void Checklist::execute(const ACE_Time_Value& a_now)
+void Checklist::execute(const MonotonicTimePoint& a_now)
 {
   if (scheduled_for_destruction_) {
     delete this;
@@ -695,7 +706,7 @@ void Checklist::execute(const ACE_Time_Value& a_now)
   }
 
   bool flag = false;
-  ACE_Time_Value interval = std::max(check_interval_, endpoint_manager_->agent_impl->get_configuration().indication_period());
+  TimeDuration interval = std::max(check_interval_, endpoint_manager_->agent_impl->get_configuration().indication_period());
 
   if (!triggered_check_queue_.empty() ||
       !frozen_.empty() ||
@@ -721,11 +732,17 @@ void Checklist::execute(const ACE_Time_Value& a_now)
     interval = std::min(interval, endpoint_manager_->agent_impl->get_configuration().indication_period());
 
     // Check that we are receiving indications.
+    const bool before = nominated_is_live_;
     nominated_is_live_ = (a_now - last_indication_) < endpoint_manager_->agent_impl->get_configuration().nominated_ttl();
+    if (before && !nominated_is_live_) {
+      endpoint_manager_->ice_disconnect(guids_);
+    } else if (!before && nominated_is_live_) {
+      endpoint_manager_->ice_connect(guids_, nominated_->remote.address);
+    }
   }
 
   if (flag) {
-    enqueue(ACE_Time_Value().now() + interval);
+    enqueue(MonotonicTimePoint::now() + interval);
   }
 
   // The checklist has failed.  Don't schedule.
@@ -750,7 +767,7 @@ void Checklist::remove_guid(const GuidPair& a_guid_pair)
 
     // Flush ourselves out of the task queue.
     // Schedule for now but it may be later.
-    enqueue(ACE_Time_Value().now());
+    enqueue(MonotonicTimePoint::now());
   }
 }
 
@@ -781,12 +798,12 @@ ACE_INET_Addr Checklist::selected_address() const
 
 void Checklist::indication()
 {
-  last_indication_ = ACE_Time_Value().now();
+  last_indication_.set_to_now();
 }
 
-#endif /* OPENDDS_SECURITY */
 
 } // namespace ICE
 } // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
+#endif /* OPENDDS_SECURITY */

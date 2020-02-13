@@ -1,7 +1,6 @@
-project(DDS*idl): dcps_test_lib {
+project(DDS*idl): dcps_test_idl_only_lib {
   idlflags      += -Wb,export_macro=InstancesLib_Export -Wb,export_include=instanceslib_export.h -SS
   dcps_ts_flags += -Wb,export_macro=InstancesLib_Export
-  libout         = .
   dynamicflags  += INSTANCESLIB_BUILD_DLL
 
   TypeSupport_Files {
@@ -10,7 +9,7 @@ project(DDS*idl): dcps_test_lib {
   }
 }
 
-project(*Publisher): dcpsexe, dcps_transports_for_test {
+project(*Publisher): dcpsexe, dcps_test, dcps_transports_for_test {
   exename = publisher
   exeout = .
 
@@ -29,7 +28,7 @@ project(*Publisher): dcpsexe, dcps_transports_for_test {
   }
 }
 
-project(*Subscriber): dcpsexe, dcps_transports_for_test, dds_model {
+project(*Subscriber): dcpsexe, dcps_test, dcps_transports_for_test, dds_model {
   exename = subscriber
   exeout = .
 

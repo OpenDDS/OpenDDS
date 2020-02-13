@@ -131,12 +131,11 @@ bool java_class_gen(const JavaName &jn, JavaFileType jft, const char *body,
 
   ostringstream oss;
 
-  if (jn.pkg_.size() > 0)
-    oss <<
-    "package " << pkgdecl << ";\n";
+  if (jn.pkg_.size() > 0) {
+    oss << "package " << pkgdecl << ";\n";
+  }
 
-  oss <<
-  "public " << classkeyw << ' ' << jn.clazz_;
+  oss << "public " << classkeyw << ' ' << jn.clazz_;
 
   if (*extends) {
     oss << " extends " << extends;
@@ -146,10 +145,7 @@ bool java_class_gen(const JavaName &jn, JavaFileType jft, const char *body,
     oss << " implements " << implements;
   }
 
-  oss << " {\n" <<
-  body <<
-  nativeLoader <<
-  "}\n";
+  oss << " {\n" << body << nativeLoader << "}\n";
 
   return BE_GlobalData::writeFile(file.c_str(), oss.str());
 }
@@ -233,7 +229,7 @@ std::string param_type(AST_Type *t, AST_Argument::Direction dir)
       builtin = true;
       capitalize = true;
     default:
-      ;
+      break;
     }
 
     break;
@@ -252,7 +248,7 @@ std::string param_type(AST_Type *t, AST_Argument::Direction dir)
     break;
   }
   default:
-    ;
+    break;
   }
 
   if (capitalize) type[0] = toupper(type[0]);
@@ -292,17 +288,19 @@ std::string idl_mapping_java::type(AST_Type *decl)
       return "float";
     case AST_PredefinedType::PT_double:
       return "double";
-    default:                                ;//fall through
+    default:
+      break;
     }
+    break;
   }
   case AST_Decl::NT_string:
     return "String";
-  case AST_Decl::NT_enum:
-  case AST_Decl::NT_interface:
-  case AST_Decl::NT_interface_fwd:
-  case AST_Decl::NT_native:
-  case AST_Decl::NT_union:
-  case AST_Decl::NT_struct:
+  case AST_Decl::NT_enum: // fallthrough
+  case AST_Decl::NT_interface: // fallthrough
+  case AST_Decl::NT_interface_fwd: // fallthrough
+  case AST_Decl::NT_native: // fallthrough
+  case AST_Decl::NT_union: // fallthrough
+  case AST_Decl::NT_struct: // fallthrough
   case AST_Decl::NT_struct_fwd:
     return scoped(decl->name());
   case AST_Decl::NT_typedef: {
@@ -317,7 +315,8 @@ std::string idl_mapping_java::type(AST_Type *decl)
     AST_Array *arr = AST_Array::narrow_from_decl(decl);
     return type(arr->base_type()) + "[]";
   }
-  default: ;//fall through
+  default:
+    break;
   }
 
   cerr << "ERROR - unknown Java type " << decl->node_type()

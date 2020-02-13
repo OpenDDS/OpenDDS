@@ -8,6 +8,10 @@
 
 #include "dds/DCPS/SafetyProfileStreams.h"
 
+#ifdef OPENDDS_SECURITY
+#  include "dds/DdsSecurityCoreC.h"
+#endif
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -102,21 +106,20 @@ to_dds_string(unsigned long to_convert, bool as_hex)
   return OPENDDS_STRING(buf);
 }
 
-OPENDDS_STRING
-to_hex_dds_string(const unsigned char* data, const size_t size, const char delim, const size_t delim_every)
+OPENDDS_STRING to_hex_dds_string(
+  const unsigned char* data, const size_t size, const char delim, const size_t delim_every)
 {
   return to_hex_dds_string(reinterpret_cast<const char*>(data), size, delim, delim_every);
 }
 
-static inline
-char nibble_to_hex_char(char nibble)
+static inline char nibble_to_hex_char(char nibble)
 {
   nibble &= 0x0F;
   return ((nibble < 0xA) ? '0' : ('a' - 0xA)) + nibble;
 }
 
-OPENDDS_STRING
-to_hex_dds_string(const char* data, size_t size, const char delim, const size_t delim_every)
+OPENDDS_STRING to_hex_dds_string(
+  const char* data, size_t size, const char delim, const size_t delim_every)
 {
   const bool valid_delim = delim && delim_every;
   size_t l = size * 2;
@@ -137,6 +140,47 @@ to_hex_dds_string(const char* data, size_t size, const char delim, const size_t 
     rv.push_back(nibble_to_hex_char(data[i]));
   }
   return rv;
+}
+
+const char* retcode_to_string(DDS::ReturnCode_t value)
+{
+  switch (value) {
+  case DDS::RETCODE_OK:
+    return "OK";
+  case DDS::RETCODE_ERROR:
+    return "Error";
+  case DDS::RETCODE_UNSUPPORTED:
+    return "Unsupported";
+  case DDS::RETCODE_BAD_PARAMETER:
+    return "Bad parameter";
+  case DDS::RETCODE_PRECONDITION_NOT_MET:
+    return "Precondition not met";
+  case DDS::RETCODE_OUT_OF_RESOURCES:
+    return "Out of resources";
+  case DDS::RETCODE_NOT_ENABLED:
+    return "Not enabled";
+  case DDS::RETCODE_IMMUTABLE_POLICY:
+    return "Immutable policy";
+  case DDS::RETCODE_INCONSISTENT_POLICY:
+    return "Inconsistent policy";
+  case DDS::RETCODE_ALREADY_DELETED:
+    return "Already deleted";
+  case DDS::RETCODE_TIMEOUT:
+    return "Timeout";
+  case DDS::RETCODE_NO_DATA:
+    return "No data";
+  case DDS::RETCODE_ILLEGAL_OPERATION:
+    return "Illegal operation";
+#ifdef OPENDDS_SECURITY
+  case DDS::Security::RETCODE_NOT_ALLOWED_BY_SECURITY:
+    return "Not allowed by security";
+#endif
+  default:
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: retcode_to_string: ")
+      ACE_TEXT("%d is either invalid or not recognized.\n"),
+      value));
+    return "Invalid return code";
+  }
 }
 
 } // namespace DCPS

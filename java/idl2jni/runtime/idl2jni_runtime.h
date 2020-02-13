@@ -275,8 +275,12 @@ public:
   explicit JNIThreadAttacher(JavaVM *jvm, jobject cl = 0)
   : jvm_(jvm)
   , jni_(0) {
-    void *jni;
-
+#ifdef ACE_ANDROID
+    typedef JNIEnv* JNIEnv_t;
+#else
+    typedef void* JNIEnv_t;
+#endif
+    JNIEnv_t jni;
     if (jvm_->AttachCurrentThread(&jni, 0) != 0) {
       throw std::exception();
     }

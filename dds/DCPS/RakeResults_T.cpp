@@ -44,7 +44,7 @@ RakeResults<SampleSeq>::RakeResults(DataReaderImpl* reader,
   if (cond_) {
     const QueryConditionImpl* qci = dynamic_cast<QueryConditionImpl*>(cond_);
     if (!qci) {
-      ACE_ERROR((LM_DEBUG, ACE_TEXT("(%P|%t) ERROR: RakeResults(): ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RakeResults(): ")
         ACE_TEXT("failed to obtain QueryConditionImpl\n")));
       return;
     }
@@ -149,7 +149,7 @@ bool RakeResults<SampleSeq>::copy_into(FwdIter iter, FwdIter end,
 
     // 2. Per-sample SampleInfo (not the three *_rank variables) and state
     SubscriptionInstance& inst = *iter->si_;
-    inst.instance_state_.sample_info(info_seq_[idx], rde);
+    inst.instance_state_->sample_info(info_seq_[idx], rde);
     rde->sample_state_ = DDS::READ_SAMPLE_STATE;
 
     // 3. Record some info about per-instance SampleInfo (*_rank) so that
@@ -176,7 +176,7 @@ bool RakeResults<SampleSeq>::copy_into(FwdIter iter, FwdIter end,
 
     if (!id.most_recent_generation_) {
       id.most_recent_generation_ =
-        inst.instance_state_.most_recent_generation(rde);
+        inst.instance_state_->most_recent_generation(rde);
     }
 
     id.sampleinfo_positions_.push_back(idx);
@@ -202,7 +202,7 @@ bool RakeResults<SampleSeq>::copy_into(FwdIter iter, FwdIter end,
       // If this instance has not been released
       if (released_instances.find(&inst) == released_instances.end()) {
         if (id.most_recent_generation_) {
-          inst.instance_state_.accessed();
+          inst.instance_state_->accessed();
         }
       }
     }

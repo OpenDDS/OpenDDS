@@ -16,7 +16,7 @@
 #include "TcpConnection.h"
 #include "TcpConnection_rch.h"
 
-#include "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
+#include "dds/DCPS/ReactorTask_rch.h"
 #include "dds/DCPS/transport/framework/PriorityKey.h"
 
 #include "ace/INET_Addr.h"
@@ -73,7 +73,7 @@ private:
 
   virtual void shutdown_i();
 
-  virtual bool connection_info_i(TransportLocator& local_info) const;
+  virtual bool connection_info_i(TransportLocator& local_info, ConnectionInfoFlags flags) const;
 
   /// Called by the DataLink to release itself.
   virtual void release_datalink(DataLink* link);
@@ -156,12 +156,6 @@ private:
   /// This protects the connections_ and the pending_connections_
   /// data members.
   LockType connections_lock_;
-
-  /// This task is used to resolve some deadlock situation
-  /// during reconnecting.
-  /// TODO: reuse the reconnect_task in the TcpConnection
-  ///       for new connection checking.
-  unique_ptr<TcpConnectionReplaceTask> con_checker_;
 };
 
 } // namespace DCPS

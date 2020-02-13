@@ -106,7 +106,7 @@ public:
   /// future versions of the spec which may have additional optional fields.
   bool skip(ACE_CDR::UShort n, int size = 1);
 
-  size_t available_r() const { return current_ ? current_->total_length() : 0; }
+  const char* pos_rd() const { return current_ ? current_->rd_ptr() : 0; }
 
   /**
    * The buffer @a x must be large enough to contain @a length
@@ -367,9 +367,6 @@ private:
 
 public:
   static const size_t WCHAR_SIZE = 2; // Serialize wchar as UTF-16BE
-
-  static bool use_rti_serialization();
-  static void set_use_rti_serialization(bool should_use);
 
 #if defined ACE_LITTLE_ENDIAN
   static const bool SWAP_BE = true;

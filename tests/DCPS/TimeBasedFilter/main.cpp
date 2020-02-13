@@ -236,7 +236,7 @@ bool verify_unreliable(const size_t expected_samples, SampleMap& rcvd_samples)
     size_t seen = foos.size();
 
     ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("%N:%l verify_reliable() - ")
+        ACE_TEXT("%N:%l verify_unreliable() - ")
         ACE_TEXT("Instance %d messages received:\n"), j));
     for (size_t recvd = 0; recvd < foos.size(); recvd++)
     {
@@ -582,7 +582,6 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     for (size_t i = 0; i < EXPECTED_ITERATIONS; ++i) {
       for (::CORBA::Long j = 0; j < NUM_INSTANCES; ++j) {
         Foo foo = { j, 0, 0, 0 }; // same instance required for repeated samples
-        const ACE_Time_Value start = ACE_OS::gettimeofday();
         for (size_t k = 0; k < SAMPLES_PER_CYCLE; ++k) {
           foo.x = (CORBA::Float)global_sent_msg_counter++;
 

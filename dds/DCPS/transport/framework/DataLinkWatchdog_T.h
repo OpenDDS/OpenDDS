@@ -17,6 +17,7 @@
 #include "ace/OS_NS_time.h"
 #include "ace/Reverse_Lock_T.h"
 #include "dds/DCPS/ReactorInterceptor.h"
+#include "dds/DCPS/Time_Helper.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -27,28 +28,26 @@ class DataLinkWatchdog : public ReactorInterceptor {
 public:
 
   bool schedule(const void* arg = 0) {
-    ScheduleCommand c(this, arg, false);
-    execute_or_enqueue(c);
+    execute_or_enqueue(new ScheduleCommand (this, arg, false));
     return true;
   }
 
   bool schedule_now(const void* arg = 0) {
-    ScheduleCommand c(this, arg, true);
-    execute_or_enqueue(c);
+    execute_or_enqueue(new ScheduleCommand(this, arg, true));
     return true;
   }
 
-  void cancel() {
-    CancelCommand c(this);
-    execute_or_enqueue(c);
+  ReactorInterceptor::CommandPtr cancel() {
+    return execute_or_enqueue(new CancelCommand(this));
   }
 
-  int handle_timeout(const ACE_Time_Value& now, const void* arg) {
-    ACE_Time_Value timeout = next_timeout();
+  int handle_timeout(const ACE_Time_Value& now_time_value, const void* arg) {
+    const MonotonicTimePoint now(now_time_value);
+    TimeDuration timeout_in = next_timeout();
 
-    if (timeout != ACE_Time_Value::zero) {
-      timeout += this->epoch_;
-      if (now > timeout) {
+    if (!timeout_in.is_zero()) {
+      const MonotonicTimePoint timeout_at(epoch_ + timeout_in);
+      if (now > timeout_at) {
         on_timeout(arg);
         {
           cancel_i();
@@ -82,10 +81,10 @@ protected:
   virtual ~DataLinkWatchdog() {
   }
 
-  virtual ACE_Time_Value next_interval() = 0;
+  virtual TimeDuration next_interval() = 0;
   virtual void on_interval(const void* arg) = 0;
 
-  virtual ACE_Time_Value next_timeout() { return ACE_Time_Value::zero; }
+  virtual TimeDuration next_timeout() { return TimeDuration::zero_value; }
   virtual void on_timeout(const void* /*arg*/) {}
 
 private:
@@ -128,24 +127,26 @@ private:
 
   long timer_id_;
 
-  ACE_Time_Value epoch_;
+  MonotonicTimePoint epoch_;
   bool cancelled_;
 
   bool schedule_i(const void* arg, bool nodelay) {
     if (this->cancelled_) return true;
 
-    ACE_Time_Value delay;
-    if (!nodelay) delay = next_interval();
+    TimeDuration delay;
+    if (!nodelay) {
+      delay = next_interval();
+    }
 
-    if (this->epoch_ == ACE_Time_Value::zero) {
-      this->epoch_ = ACE_OS::gettimeofday();
+    if (epoch_.is_zero()) {
+      epoch_.set_to_now();
     }
 
     long timer_id = -1;
     {
       timer_id = reactor()->schedule_timer(this,  // event_handler
                                            arg,
-                                           delay);
+                                           delay.value());
 
       if (timer_id == -1) {
         ACE_ERROR_RETURN ((LM_ERROR,
@@ -160,8 +161,7 @@ private:
     if (this->cancelled_) {
       reactor()->cancel_timer(timer_id);
       return true;
-    }
-    else {
+    } else {
       this->timer_id_ = timer_id;
     }
 

@@ -74,8 +74,8 @@ public:
   virtual DDS::ReturnCode_t get_qos(
     DDS::DomainParticipantFactoryQos & qos);
 
-  /// Expose the participants for reading.
-  const DPMap& participants() const;
+  /// Make a copy of the participants map for reading.
+  DPMap participants() const;
 
   void cleanup();
 
@@ -84,15 +84,13 @@ private:
   DDS::DomainParticipantFactoryQos qos_;
 
   /// The default qos value of DomainParticipant.
-  DDS::DomainParticipantQos   default_participant_qos_;
+  DDS::DomainParticipantQos default_participant_qos_;
 
   /// The collection of domain participants.
-  DPMap                       participants_;
+  DPMap participants_;
 
   /// Protect the participant collection.
-  /// Use recursive mutex to allow nested acquisition and
-  /// release of a mutex that occurs in the same thread.
-  ACE_Recursive_Thread_Mutex  participants_protector_;
+  mutable ACE_Thread_Mutex participants_protector_;
 };
 
 } // namespace DCPS

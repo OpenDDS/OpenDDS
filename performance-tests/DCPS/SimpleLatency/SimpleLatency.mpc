@@ -1,4 +1,4 @@
-project(*idl): dcps_test_lib {
+project(*idl): dcps_test_idl_only_lib {
   idlflags      += -Wb,stub_export_include=SimpleLatency_export.h \
                    -Wb,stub_export_macro=SimpleLatency_Export -SS
   dcps_ts_flags += -Wb,export_macro=SimpleLatency_Export
@@ -9,7 +9,7 @@ project(*idl): dcps_test_lib {
   }
 }
 
-project(DDS*Pub): dcpsexe {
+project(DDS*Pub): dcpsexe, dcps_test {
   after  += *idl
   libs   += *idl
   exename = dds_pub
@@ -25,7 +25,7 @@ project(DDS*Pub): dcpsexe {
 }
 
 
-project(DDS*Sub): dcpsexe {
+project(DDS*Sub): dcpsexe, dcps_test {
   after  += *idl
   libs   += *idl
   exename = dds_sub

@@ -10,6 +10,7 @@
 
 #include <dds/DdsDcpsSubscriptionC.h>
 #include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/SafetyProfileStreams.h>
 
 #include "DataReaderListener.h"
 #include "MessengerTypeSupportC.h"
@@ -17,10 +18,12 @@
 
 #include <iostream>
 
+using OpenDDS::DCPS::retcode_to_string;
+
 extern int acess_scope;
 
 DataReaderListenerImpl::DataReaderListenerImpl(const char* /*reader_id*/)
-  : num_reads_(0), verify_result_ (true)
+  : num_reads_(0), verify_result_(true)
 {
 }
 
@@ -77,8 +80,8 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
     } else {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("%N:%l: on_data_available()")
-                 ACE_TEXT(" ERROR: unexpected status: %d\n"),
-                 status));
+                 ACE_TEXT(" ERROR: take_next_sample unexpected status: %C\n"),
+                 retcode_to_string(status)));
       this->verify_result_ = false;
     }
 

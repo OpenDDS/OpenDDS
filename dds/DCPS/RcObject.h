@@ -19,7 +19,7 @@ namespace DCPS {
 
   class RcObject;
 
-  class WeakObject : public PoolAllocationBase
+  class OpenDDS_Dcps_Export WeakObject : public PoolAllocationBase
   {
   public:
     WeakObject(RcObject* ptr)
@@ -50,7 +50,7 @@ namespace DCPS {
     bool expired_;
   };
 
-  class RcObject : public PoolAllocationBase {
+  class OpenDDS_Dcps_Export RcObject : public PoolAllocationBase {
   public:
 
     virtual ~RcObject(){

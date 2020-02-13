@@ -21,6 +21,11 @@
 
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
 
+#ifdef OPENDDS_SECURITY
+#include "dds/DCPS/RTPS/SecurityHelpers.h"
+#include <vector>
+#endif
+
 #include <cstring>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -39,12 +44,10 @@ RtpsUdpSendStrategy::RtpsUdpSendStrategy(RtpsUdpDataLink* link,
     override_single_dest_(0),
     rtps_header_db_(RTPS::RTPSHDR_SZ, ACE_Message_Block::MB_DATA,
                     rtps_header_data_, 0, 0, ACE_Message_Block::DONT_DELETE, 0),
-    rtps_header_mb_(&rtps_header_db_, ACE_Message_Block::DONT_DELETE)
+    rtps_header_mb_(&rtps_header_db_, ACE_Message_Block::DONT_DELETE),
+    network_is_unreachable_(false)
 {
-  rtps_header_.prefix[0] = 'R';
-  rtps_header_.prefix[1] = 'T';
-  rtps_header_.prefix[2] = 'P';
-  rtps_header_.prefix[3] = 'S';
+  std::memcpy(rtps_header_.prefix, RTPS::PROTOCOL_RTPS, sizeof RTPS::PROTOCOL_RTPS);
   rtps_header_.version = OpenDDS::RTPS::PROTOCOLVERSION;
   rtps_header_.vendorId = OpenDDS::RTPS::VENDORID_OPENDDS;
   std::memcpy(rtps_header_.guidPrefix, local_prefix,
@@ -141,16 +144,31 @@ RtpsUdpSendStrategy::marshal_transport_header(ACE_Message_Block* mb)
     RTPS::RTPSHDR_SZ);
 }
 
+namespace {
+  struct AMB_Continuation {
+    AMB_Continuation(ACE_Message_Block& head, ACE_Message_Block& tail)
+      : head_(head) { head_.cont(&tail); }
+    ~AMB_Continuation() { head_.cont(0); }
+    ACE_Message_Block& head_;
+  };
+}
+
 void
 RtpsUdpSendStrategy::send_rtps_control(ACE_Message_Block& submessages,
                                        const ACE_INET_Addr& addr)
 {
-  rtps_header_mb_.cont(&submessages);
-#if defined(OPENDDS_SECURITY)
-  Message_Block_Ptr alternate(pre_send_packet(&rtps_header_mb_));
-  ACE_Message_Block& use_mb = alternate ? *alternate : rtps_header_mb_;
+  const AMB_Continuation cont(rtps_header_mb_, submessages);
+
+#ifdef OPENDDS_SECURITY
+  const Message_Block_Ptr alternate(pre_send_packet(&rtps_header_mb_));
+  if (!alternate) {
+    VDBG((LM_DEBUG, "(%P|%t) RtpsUdpSendStrategy::send_rtps_control () - "
+          "pre_send_packet returned NULL, dropping.\n"));
+    return;
+  }
+  ACE_Message_Block& use_mb = *alternate;
 #else
-  ACE_Message_Block& use_mb =  rtps_header_mb_;
+  ACE_Message_Block& use_mb = rtps_header_mb_;
 #endif
 
   iovec iov[MAX_SEND_BLOCKS];
@@ -161,20 +179,24 @@ RtpsUdpSendStrategy::send_rtps_control(ACE_Message_Block& submessages,
     ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_rtps_control() - "
       "failed to send RTPS control message\n"));
   }
-
-  rtps_header_mb_.cont(0);
 }
 
 void
 RtpsUdpSendStrategy::send_rtps_control(ACE_Message_Block& submessages,
                                        const OPENDDS_SET(ACE_INET_Addr)& addrs)
 {
-  rtps_header_mb_.cont(&submessages);
-#if defined(OPENDDS_SECURITY)
-  Message_Block_Ptr alternate(pre_send_packet(&rtps_header_mb_));
-  ACE_Message_Block& use_mb = alternate ? *alternate : rtps_header_mb_;
+  const AMB_Continuation cont(rtps_header_mb_, submessages);
+
+#ifdef OPENDDS_SECURITY
+  const Message_Block_Ptr alternate(pre_send_packet(&rtps_header_mb_));
+  if (!alternate) {
+    VDBG((LM_DEBUG, "(%P|%t) RtpsUdpSendStrategy::send_rtps_control () - "
+          "pre_send_packet returned NULL, dropping.\n"));
+    return;
+  }
+  ACE_Message_Block& use_mb = *alternate;
 #else
-  ACE_Message_Block& use_mb =  rtps_header_mb_;
+  ACE_Message_Block& use_mb = rtps_header_mb_;
 #endif
 
   iovec iov[MAX_SEND_BLOCKS];
@@ -185,8 +207,6 @@ RtpsUdpSendStrategy::send_rtps_control(ACE_Message_Block& submessages,
     ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_rtps_control() - "
       "failed to send RTPS control message\n"));
   }
-
-  rtps_header_mb_.cont(0);
 }
 
 ssize_t
@@ -208,6 +228,7 @@ ssize_t
 RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
                                    const ACE_INET_Addr& addr)
 {
+  const ACE_INET_Addr a = link_->config().rtps_relay_only_ ? link_->config().rtps_relay_address() : addr;
 #ifdef ACE_LACKS_SENDMSG
   char buffer[UDP_MAX_MESSAGE_SIZE];
   char *iter = buffer;
@@ -220,18 +241,27 @@ RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
     std::memcpy(iter, iov[i].iov_base, iov[i].iov_len);
     iter += iov[i].iov_len;
   }
-  const ssize_t result = link_->unicast_socket().send(buffer, iter - buffer, addr);
+  const ssize_t result = link_->unicast_socket().send(buffer, iter - buffer, a);
 #else
-  const ssize_t result = link_->unicast_socket().send(iov, n, addr);
+  const ssize_t result = link_->unicast_socket().send(iov, n, a);
 #endif
   if (result < 0) {
-    ACE_TCHAR addr_buff[256] = {};
-    int err = errno;
-    addr.addr_to_string(addr_buff, 256, 0);
+    const int err = errno;
+    if (err != ENETUNREACH || !network_is_unreachable_) {
+      ACE_TCHAR addr_buff[256] = {};
+      a.addr_to_string(addr_buff, 256);
+      errno = err;
+      const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
+      ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_single_i() - "
+                 "destination %s failed send: %m\n", addr_buff));
+    }
+    if (err == ENETUNREACH) {
+      network_is_unreachable_ = true;
+    }
+    // Reset errno since the rest of framework expects it.
     errno = err;
-    const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
-    ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_single_i() - "
-      "destination %s failed %p\n", addr_buff, ACE_TEXT("send")));
+  } else {
+    network_is_unreachable_ = false;
   }
   return result;
 }
@@ -244,18 +274,21 @@ RtpsUdpSendStrategy::add_delayed_notification(TransportQueueElement* element)
   }
 }
 
-RemoveResult
-RtpsUdpSendStrategy::do_remove_sample(const RepoId& pub_id,
-  const TransportQueueElement::MatchCriteria& criteria,
-  void* context)
-{
-  ACE_Guard<ACE_Thread_Mutex>* guard =
-    static_cast<ACE_Guard<ACE_Thread_Mutex>*>(context);
-  link_->do_remove_sample(pub_id, criteria, *guard);
-  return TransportSendStrategy::do_remove_sample(pub_id, criteria, 0);
+#ifdef OPENDDS_SECURITY
+namespace {
+  DDS::OctetSeq toSeq(const ACE_Message_Block* mb)
+  {
+    DDS::OctetSeq out;
+    out.length(static_cast<unsigned int>(mb->total_length()));
+    unsigned char* const buffer = out.get_buffer();
+    for (unsigned int i = 0; mb; mb = mb->cont()) {
+      std::memcpy(buffer + i, mb->rd_ptr(), mb->length());
+      i += static_cast<unsigned int>(mb->length());
+    }
+    return out;
+  }
 }
 
-#if defined(OPENDDS_SECURITY)
 void
 RtpsUdpSendStrategy::encode_payload(const RepoId& pub_id,
                                     Message_Block_Ptr& payload,
@@ -270,22 +303,23 @@ RtpsUdpSendStrategy::encode_payload(const RepoId& pub_id,
     return;
   }
 
-  DDS::OctetSeq encoded, plain, iQos;
-  plain.length(static_cast<unsigned int>(payload->total_length()));
-  unsigned char* const buffer = plain.get_buffer();
-  ACE_Message_Block* mb(payload.get());
-  for (unsigned int i = 0; mb; mb = mb->cont()) {
-    std::memcpy(buffer + i, mb->rd_ptr(), mb->length());
-    i += static_cast<unsigned int>(mb->length());
-  }
-
+  const DDS::OctetSeq plain = toSeq(payload.get());
+  DDS::OctetSeq encoded, iQos;
   DDS::Security::SecurityException ex = {"", 0, 0};
-  if (crypto->encode_serialized_payload(encoded, iQos, plain,
-                                        writer_crypto_handle, ex)) {
+
+  if (crypto->encode_serialized_payload(encoded, iQos, plain, writer_crypto_handle, ex)) {
     if (encoded != plain) {
       payload.reset(new ACE_Message_Block(encoded.length()));
       const char* raw = reinterpret_cast<const char*>(encoded.get_buffer());
       payload->copy(raw, encoded.length());
+
+      // Set FLAG_N flag
+      for (CORBA::ULong i = 0; i < submessages.length(); ++i) {
+          if (submessages[i]._d() == RTPS::DATA) {
+              RTPS::DataSubmessage& data = submessages[i].data_sm();
+              data.smHeader.flags |= RTPS::FLAG_N_IN_DATA;
+          }
+      }
     }
 
     const CORBA::ULong iQosLen = iQos.length();
@@ -322,23 +356,69 @@ RtpsUdpSendStrategy::encode_payload(const RepoId& pub_id,
   }
 }
 
+ACE_Message_Block*
+RtpsUdpSendStrategy::pre_send_packet(const ACE_Message_Block* plain)
+{
+  const DDS::Security::CryptoTransform_var crypto = link_->security_config()->get_crypto_transform();
+  if (!crypto) {
+    return plain->duplicate();
+  }
+
+  bool stateless_or_volatile = false;
+  Message_Block_Ptr submessages(encode_submessages(plain, crypto, stateless_or_volatile));
+
+  if (!submessages || stateless_or_volatile || link_->local_crypto_handle() == DDS::HANDLE_NIL) {
+    return submessages.release();
+  }
+
+  return encode_rtps_message(submessages.get(), crypto);
+}
+
+ACE_Message_Block*
+RtpsUdpSendStrategy::encode_rtps_message(const ACE_Message_Block* plain, DDS::Security::CryptoTransform* crypto)
+{
+  using namespace DDS::Security;
+  DDS::OctetSeq encoded_rtps_message;
+  const DDS::OctetSeq plain_rtps_message = toSeq(plain);
+  const ParticipantCryptoHandle send_handle = link_->local_crypto_handle();
+  const ParticipantCryptoHandleSeq recv_handles; // unused
+  int idx = 0; // unused
+  SecurityException ex = {"", 0, 0};
+  if (crypto->encode_rtps_message(encoded_rtps_message, plain_rtps_message,
+                                  send_handle, recv_handles, idx, ex)) {
+    Message_Block_Ptr out(new ACE_Message_Block(encoded_rtps_message.length()));
+    const char* raw = reinterpret_cast<const char*>(encoded_rtps_message.get_buffer());
+    out->copy(raw, encoded_rtps_message.length());
+    return out.release();
+  }
+  if (ex.code == 0 && ex.minor_code == 0) {
+    return plain->duplicate(); // send original pre-encoded msg
+  }
+  if (Transport_debug_level) {
+    ACE_ERROR((LM_ERROR, "RtpsUdpSendStrategy::encode_rtps_message - ERROR "
+               "plugin failed to encode RTPS message from handle %d [%d.%d]: %C\n",
+               send_handle, ex.code, ex.minor_code, ex.message.in()));
+  }
+  return 0; // do not send pre-encoded msg
+}
+
 namespace {
-  DDS::OctetSeq toSeq(Serializer& ser1, CORBA::Octet msgId, CORBA::Octet flags,
-                      CORBA::UShort octetsToNextHeader, CORBA::ULong dataWord2,
-                      EntityId_t readerId, EntityId_t writerId, size_t remain)
+  DDS::OctetSeq toSeq(Serializer& ser1, RTPS::SubmessageHeader smHdr, CORBA::ULong dataExtra,
+                      EntityId_t readerId, EntityId_t writerId, unsigned int remain)
   {
+    const int msgId = smHdr.submessageId;
+    const unsigned int octetsToNextHeader = smHdr.submessageLength;
     const bool shortMsg = (msgId == RTPS::PAD || msgId == RTPS::INFO_TS);
-    CORBA::ULong size = RTPS::SMHDR_SZ +
-      ((octetsToNextHeader == 0 && !shortMsg) ? static_cast<unsigned int>(remain) : octetsToNextHeader);
+    const CORBA::ULong size = RTPS::SMHDR_SZ + ((octetsToNextHeader == 0 && !shortMsg) ? remain : octetsToNextHeader);
     DDS::OctetSeq out(size);
     out.length(size);
     ACE_Message_Block mb(reinterpret_cast<const char*>(out.get_buffer()), size);
     Serializer ser2(&mb, ser1.swap_bytes(), Serializer::ALIGN_CDR);
-    ser2 << ACE_OutputCDR::from_octet(msgId);
-    ser2 << ACE_OutputCDR::from_octet(flags);
-    ser2 << octetsToNextHeader;
+    ser2 << ACE_OutputCDR::from_octet(smHdr.submessageId);
+    ser2 << ACE_OutputCDR::from_octet(smHdr.flags);
+    ser2 << smHdr.submessageLength;
     if (msgId == RTPS::DATA || msgId == RTPS::DATA_FRAG) {
-      ser2 << dataWord2;
+      ser2 << dataExtra;
     }
     ser2 << readerId;
     ser2 << writerId;
@@ -358,6 +438,13 @@ namespace {
                  ex.message.in()));
     }
   }
+
+  void check_stateless_volatile(EntityId_t writerId, bool& stateless_or_volatile)
+  {
+    stateless_or_volatile |=
+      writerId == RTPS::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER ||
+      writerId == RTPS::ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER;
+  }
 }
 
 bool
@@ -366,10 +453,14 @@ RtpsUdpSendStrategy::encode_writer_submessage(const RepoId& receiver,
                                               DDS::Security::CryptoTransform* crypto,
                                               const DDS::OctetSeq& plain,
                                               DDS::Security::DatawriterCryptoHandle sender_dwch,
-                                              char* submessage_start,
+                                              const char* submessage_start,
                                               CORBA::Octet msgId)
 {
   using namespace DDS::Security;
+
+  if (sender_dwch == DDS::HANDLE_NIL) {
+    return true;
+  }
 
   DatareaderCryptoHandleSeq readerHandles;
   if (std::memcmp(&GUID_UNKNOWN, &receiver, sizeof receiver)) {
@@ -384,8 +475,7 @@ RtpsUdpSendStrategy::encode_writer_submessage(const RepoId& receiver,
   SecurityException ex = {"", 0, 0};
   replacements.resize(replacements.size() + 1);
   Chunk& c = replacements.back();
-  if (crypto->encode_datawriter_submessage(c.encoded_, plain, sender_dwch,
-                                           readerHandles, idx, ex)) {
+  if (crypto->encode_datawriter_submessage(c.encoded_, plain, sender_dwch, readerHandles, idx, ex)) {
     if (c.encoded_ != plain) {
       c.start_ = submessage_start;
       c.length_ = plain.length();
@@ -406,10 +496,14 @@ RtpsUdpSendStrategy::encode_reader_submessage(const RepoId& receiver,
                                               DDS::Security::CryptoTransform* crypto,
                                               const DDS::OctetSeq& plain,
                                               DDS::Security::DatareaderCryptoHandle sender_drch,
-                                              char* submessage_start,
+                                              const char* submessage_start,
                                               CORBA::Octet msgId)
 {
   using namespace DDS::Security;
+
+  if (sender_drch == DDS::HANDLE_NIL) {
+    return true;
+  }
 
   DatawriterCryptoHandleSeq writerHandles;
   if (std::memcmp(&GUID_UNKNOWN, &receiver, sizeof receiver)) {
@@ -423,8 +517,7 @@ RtpsUdpSendStrategy::encode_reader_submessage(const RepoId& receiver,
   SecurityException ex = {"", 0, 0};
   replacements.resize(replacements.size() + 1);
   Chunk& c = replacements.back();
-  if (crypto->encode_datareader_submessage(c.encoded_, plain, sender_drch,
-                                           writerHandles, ex)) {
+  if (crypto->encode_datareader_submessage(c.encoded_, plain, sender_drch, writerHandles, ex)) {
     if (c.encoded_ != plain) {
       c.start_ = submessage_start;
       c.length_ = plain.length();
@@ -440,28 +533,19 @@ RtpsUdpSendStrategy::encode_reader_submessage(const RepoId& receiver,
 }
 
 ACE_Message_Block*
-RtpsUdpSendStrategy::pre_send_packet(const ACE_Message_Block* plain)
+RtpsUdpSendStrategy::encode_submessages(const ACE_Message_Block* plain,
+                                        DDS::Security::CryptoTransform* crypto,
+                                        bool& stateless_or_volatile)
 {
-  using namespace DDS::Security;
-
-  CryptoTransform_var crypto = link_->security_config()->get_crypto_transform();
-  const ParticipantCryptoHandle local_pch = link_->local_crypto_handle();
-  if (!crypto || local_pch == DDS::HANDLE_NIL) {
-    return 0;
-  }
-
   // 'plain' contains a full RTPS Message on its way to the socket(s).
   // Let the crypto plugin examine each submessage and replace it with an
-  // encoded version.  First, parse through the message using the 'in'
+  // encoded version.  First, parse through the message using the 'plain'
   // message block chain.  Instead of changing the messsage in place,
   // modifications are stored in the 'replacements' which will end up
   // changing the message when the 'out' message block is created in the
   // helper method replace_chunks().
-  Message_Block_Ptr in(plain->duplicate());
-  ACE_Message_Block* current = in.get();
-  Serializer ser(current);
-  RTPS::Header header;
-  bool ok = ser >> header;
+  RTPS::MessageParser parser(*plain);
+  bool ok = parser.parseHeader();
 
   RepoId sender = GUID_UNKNOWN;
   RTPS::assign(sender.guidPrefix, link_->local_prefix());
@@ -470,49 +554,32 @@ RtpsUdpSendStrategy::pre_send_packet(const ACE_Message_Block* plain)
 
   OPENDDS_VECTOR(Chunk) replacements;
 
-  while (ok && in->total_length()) {
-    while (current && !current->length()) {
-      current = current->cont();
-    }
+  while (ok && parser.remaining()) {
 
-    if (!current) {
+    const char* const submessage_start = parser.current();
+
+    if (!parser.parseSubmessageHeader()) {
       ok = false;
       break;
     }
 
-    char* submessage_start = current->rd_ptr();
+    const unsigned int remaining = static_cast<unsigned int>(parser.remaining());
+    const RTPS::SubmessageHeader smhdr = parser.submessageHeader();
 
-    CORBA::Octet msgId, flags;
-    if (!(ser >> ACE_InputCDR::to_octet(msgId)) ||
-        !(ser >> ACE_InputCDR::to_octet(flags))) {
-      ok = false;
-      break;
-    }
+    CORBA::ULong dataExtra = 0;
 
-    ser.swap_bytes(ACE_CDR_BYTE_ORDER != (flags & RTPS::FLAG_E));
-    CORBA::UShort octetsToNextHeader;
-    if (!(ser >> octetsToNextHeader)) {
-      ok = false;
-      break;
-    }
-
-    const size_t remaining = in->total_length();
-    int read = 0;
-    CORBA::ULong u2 = 0;
-
-    switch (msgId) {
+    switch (smhdr.submessageId) {
     case RTPS::INFO_DST: {
       GuidPrefix_t_forany guidPrefix(receiver.guidPrefix);
-      if (!(ser >> guidPrefix)) {
+      if (!(parser >> guidPrefix)) {
         ok = false;
         break;
       }
-      read += RTPS::INFO_DST_SZ;
       break;
     }
     case RTPS::DATA:
     case RTPS::DATA_FRAG:
-      if (!(ser >> u2)) { // extraFlags|octetsToInlineQos
+      if (!(parser >> dataExtra)) { // extraFlags|octetsToInlineQos
         ok = false;
         break;
       }
@@ -520,50 +587,38 @@ RtpsUdpSendStrategy::pre_send_packet(const ACE_Message_Block* plain)
     case RTPS::HEARTBEAT:
     case RTPS::GAP:
     case RTPS::HEARTBEAT_FRAG: {
-      if (!(ser >> receiver.entityId)) { // readerId
+      if (!(parser >> receiver.entityId)) { // readerId
         ok = false;
         break;
       }
-      if (!(ser >> sender.entityId)) { // writerId
-        ok = false;
-        break;
-      }
-      DatawriterCryptoHandle sender_dwch = link_->writer_crypto_handle(sender);
-      if (sender_dwch == DDS::HANDLE_NIL) {
+      if (!(parser >> sender.entityId)) { // writerId
         ok = false;
         break;
       }
 
-      DDS::OctetSeq plain(toSeq(ser, msgId, flags, octetsToNextHeader, u2,
-                                receiver.entityId, sender.entityId, remaining));
-      read = octetsToNextHeader;
-      if (!encode_writer_submessage(receiver, replacements, crypto, plain,
-                                    sender_dwch, submessage_start, msgId)) {
+      check_stateless_volatile(sender.entityId, stateless_or_volatile);
+      DDS::OctetSeq plainSm(toSeq(parser.serializer(), smhdr, dataExtra, receiver.entityId, sender.entityId, remaining));
+      if (!encode_writer_submessage(receiver, replacements, crypto, plainSm,
+                                    link_->writer_crypto_handle(sender), submessage_start, smhdr.submessageId)) {
         ok = false;
       }
       break;
     }
     case RTPS::ACKNACK:
     case RTPS::NACK_FRAG: {
-      if (!(ser >> sender.entityId)) { // readerId
+      if (!(parser >> sender.entityId)) { // readerId
         ok = false;
         break;
       }
-      if (!(ser >> receiver.entityId)) { // writerId
-        ok = false;
-        break;
-      }
-      DatareaderCryptoHandle sender_drch = link_->reader_crypto_handle(sender);
-      if (sender_drch == DDS::HANDLE_NIL) {
+      if (!(parser >> receiver.entityId)) { // writerId
         ok = false;
         break;
       }
 
-      DDS::OctetSeq plain(toSeq(ser, msgId, flags, octetsToNextHeader, 0,
-                                sender.entityId, receiver.entityId, remaining));
-      read = octetsToNextHeader;
-      if (!encode_reader_submessage(receiver, replacements, crypto, plain,
-                                    sender_drch, submessage_start, msgId)) {
+      check_stateless_volatile(receiver.entityId, stateless_or_volatile);
+      DDS::OctetSeq plainSm(toSeq(parser.serializer(), smhdr, 0, sender.entityId, receiver.entityId, remaining));
+      if (!encode_reader_submessage(receiver, replacements, crypto, plainSm,
+                                    link_->reader_crypto_handle(sender), submessage_start, smhdr.submessageId)) {
         ok = false;
       }
       break;
@@ -572,23 +627,22 @@ RtpsUdpSendStrategy::pre_send_packet(const ACE_Message_Block* plain)
       break;
     }
 
-    if (!ok || (octetsToNextHeader == 0 && msgId != RTPS::PAD
-                && msgId != RTPS::INFO_TS)) {
+    if (!ok || !parser.hasNextSubmessage()) {
       break;
     }
 
-    if (octetsToNextHeader > read) {
-      if (!ser.skip(octetsToNextHeader - read)) {
-        ok = false;
-      }
+    if (!parser.skipToNextSubmessage()) {
+      ok = false;
     }
   }
 
-  if (!ok || replacements.empty()) {
+  if (!ok) {
     return 0;
   }
 
-  //DDS-Security: SRTPS encoding (including if replacements is empty above)
+  if (replacements.empty()) {
+    return plain->duplicate();
+  }
 
   return replace_chunks(plain, replacements);
 }
@@ -620,8 +674,7 @@ RtpsUdpSendStrategy::replace_chunks(const ACE_Message_Block* plain,
     out->copy(cur->rd_ptr(), prefix);
     cur->rd_ptr(prefix);
 
-    out->copy(reinterpret_cast<const char*>(c.encoded_.get_buffer()),
-              c.encoded_.length());
+    out->copy(reinterpret_cast<const char*>(c.encoded_.get_buffer()), c.encoded_.length());
     for (size_t n = c.length_; n; cur = cur->cont()) {
       if (cur->length() > n) {
         cur->rd_ptr(n);

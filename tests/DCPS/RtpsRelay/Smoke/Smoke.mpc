@@ -1,0 +1,25 @@
+project(RtpsRelayPublisher): dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test, dcps_rtps, opendds_cxx11 {
+
+  exename   = publisher
+
+  Idl_Files {
+  }
+
+  Source_Files {
+    publisher.cpp
+    Writer.cpp
+  }
+}
+
+project(RtpsRelaySubscriber): dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test, dcps_rtps, opendds_cxx11 {
+
+  exename   = subscriber
+
+  Idl_Files {
+  }
+
+  Source_Files {
+    subscriber.cpp
+    DataReaderListener.cpp
+  }
+}

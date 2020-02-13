@@ -8,7 +8,15 @@
 #ifndef OPENDDS_IDL_BE_GLOBAL_H
 #define OPENDDS_IDL_BE_GLOBAL_H
 
-#include "ace/SString.h"
+#include "annotations.h"
+
+#include <utl_scoped_name.h>
+#include <idl_defines.h>
+#ifndef TAO_IDL_HAS_ANNOTATIONS
+#  error "Annotation support in tao_idl is required, please use a newer version of TAO"
+#endif
+
+#include <ace/SString.h>
 
 #include <string>
 #include <sstream>
@@ -19,6 +27,12 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 class AST_Generator;
+class AST_Decl;
+class UTL_Scope;
+class AST_Structure;
+class AST_Field;
+class AST_Union;
+class AST_Annotation_Decl;
 
 // Defines a class containing all back end global data.
 
@@ -43,8 +57,6 @@ public:
 
   const char* filename() const;
   void filename(const char* fname);
-
-  //bool do_included_files() const;
 
   ACE_CString spawn_options();
   // Command line passed to ACE_Process::spawn. Different
@@ -146,17 +158,72 @@ public:
 
   static bool writeFile(const char* fileName, const std::string &content);
 
+  /**
+   * Based on annotations and global_default_nested_, determine if a type is a
+   * topic type and needs type support.
+   *
+   * Does not check for specific types of types (struct vs array).
+   */
+  bool is_topic_type(AST_Decl* node);
+
+  /**
+   * Nested property of the root module. Assuming there are no annotations, all
+   * potential topic types inherit this value. True by default unless
+   * --no-default-nested was passed.
+   */
+  bool root_default_nested() const;
+
+  /**
+   * If node has the key annotation, this sets value to the key annotation
+   * value and returns true, else this sets value to false and returns false.
+   */
+  bool check_key(AST_Field* node, bool& value);
+
+  /**
+   * Check if the discriminator in a union has been declared a key.
+   */
+  bool has_key(AST_Union* node);
+
+  /**
+   * Give a warning that looks like one from tao_idl
+   */
+  void warning(const char* msg, const char* filename = 0, unsigned lineno = 0);
+
+  /**
+   * Give an error that looks like one from tao_idl
+   */
+  void error(const char* msg, const char* filename = 0, unsigned lineno = 0);
+
+  /**
+   * Wrapper around built-in annotations, see annotations.h
+   */
+  BuiltinAnnotations builtin_annotations_;
+
+  /**
+   * If true, warn about #pragma DCPS_DATA_TYPE
+   */
+  bool warn_about_dcps_data_type();
+
 private:
+  /// Name of the IDL file we are processing.
   const char* filename_;
-  // Name of the IDL file we are processing.
 
   bool java_, suppress_idl_, suppress_typecode_,
-    no_default_gen_, generate_itl_, generate_v8_, generate_rapidjson_, face_ts_;
+    no_default_gen_, generate_itl_, generate_v8_,
+    generate_rapidjson_, face_ts_;
 
-  ACE_CString export_macro_, export_include_, versioning_name_, versioning_begin_, versioning_end_, pch_include_, java_arg_, seq_;
+  ACE_CString export_macro_, export_include_,
+    versioning_name_, versioning_begin_, versioning_end_,
+    pch_include_, java_arg_, seq_;
   std::set<std::string> cpp_includes_;
 
   LanguageMapping language_mapping_;
+
+  bool root_default_nested_;
+  bool warn_about_dcps_data_type_;
+
+  bool is_nested(AST_Decl* node);
+  bool is_default_nested(UTL_Scope* scope);
 };
 
 class BE_Comment_Guard {

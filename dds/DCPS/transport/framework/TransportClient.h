@@ -71,6 +71,7 @@ public:
   bool swap_bytes() const { return swap_bytes_; }
   bool cdr_encapsulation() const { return cdr_encapsulation_; }
   const TransportLocatorSeq& connection_info() const { return conn_info_; }
+  void populate_connection_info();
 
   // Managing associations to remote peers:
 
@@ -101,6 +102,9 @@ public:
                              const RepoId& readerid,
                              const RepoId& writerid);
 
+  void update_locators(const RepoId& remote,
+                       const TransportLocatorSeq& locators);
+
   ICE::Endpoint* get_ice_endpoint();
 
   // Data transfer:
@@ -127,15 +131,19 @@ public:
   bool remove_all_msgs();
 
   virtual void add_link(const DataLink_rch& link, const RepoId& peer);
+  virtual const RepoId& get_repo_id() const = 0;
+
+  void terminate_send_if_suspended();
 
 private:
 
   // Implemented by derived classes (DataReaderImpl/DataWriterImpl)
   virtual bool check_transport_qos(const TransportInst& inst) = 0;
-  virtual const RepoId& get_repo_id() const = 0;
   virtual DDS::DomainId_t domain_id() const = 0;
   virtual Priority get_priority_value(const AssociationData& data) const = 0;
   virtual void transport_assoc_done(int /*flags*/, const RepoId& /*remote*/) {}
+
+
 
 #if defined(OPENDDS_SECURITY)
   virtual DDS::Security::ParticipantCryptoHandle get_crypto_handle() const
@@ -156,7 +164,7 @@ private:
   //allows PendingAssoc to temporarily release lock_ to allow
   //TransportImpl to access Reactor if needed
   bool initiate_connect_i(TransportImpl::AcceptConnectResult& result,
-                          TransportImpl* impl,
+                          TransportImpl_rch impl,
                           const TransportImpl::RemoteTransport& remote,
                           const TransportImpl::ConnectionAttribs& attribs_,
                           Guard& guard);
@@ -168,7 +176,7 @@ private:
   friend class ::DDS_TEST;
 
   typedef OPENDDS_MAP_CMP(RepoId, DataLink_rch, GUID_tKeyLessThan) DataLinkIndex;
-  typedef OPENDDS_VECTOR(TransportImpl*) ImplsType;
+  typedef OPENDDS_VECTOR(WeakRcHandle<TransportImpl>) ImplsType;
 
   struct PendingAssoc : RcEventHandler {
     bool active_, removed_;
@@ -200,14 +208,12 @@ private:
 
     void schedule_timer(TransportClient* transport_client, const PendingAssoc_rch& pend)
     {
-      ScheduleCommand c(this, transport_client, pend);
-      execute_or_enqueue(c);
+      execute_or_enqueue(new ScheduleCommand(this, transport_client, pend));
     }
 
-    void cancel_timer(TransportClient* transport_client, const PendingAssoc_rch& pend)
+    ReactorInterceptor::CommandPtr cancel_timer(TransportClient* transport_client, const PendingAssoc_rch& pend)
     {
-      CancelCommand c(this, transport_client, pend);
-      execute_or_enqueue(c);
+      return execute_or_enqueue(new CancelCommand(this, transport_client, pend));
     }
 
     virtual bool reactor_is_shut_down() const
@@ -244,7 +250,7 @@ private:
         if (timer_->reactor()) {
           timer_->reactor()->schedule_timer(assoc_.in(),
                                             transport_client_,
-                                            transport_client_->passive_connect_duration_);
+                                            transport_client_->passive_connect_duration_.value());
         }
       }
     };
@@ -266,13 +272,10 @@ private:
 
   // Associated Impls and DataLinks:
 
+  TransportConfig_rch config_;
   ImplsType impls_;
   PendingMap pending_;
   DataLinkSet links_;
-
-  /// These are the links being used during the call to send(). This is made a member of the
-  /// class to minimize allocation/deallocations of the data link set.
-  DataLinkSet send_links_;
 
   DataLinkIndex data_link_index_;
 
@@ -294,7 +297,7 @@ private:
 
   bool swap_bytes_, cdr_encapsulation_, reliable_, durable_;
 
-  ACE_Time_Value passive_connect_duration_;
+  TimeDuration passive_connect_duration_;
 
   TransportLocatorSeq conn_info_;
 

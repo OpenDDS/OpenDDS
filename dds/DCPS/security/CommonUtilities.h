@@ -41,19 +41,19 @@ struct URI {
 
 int increment_handle(int& next);
 
-void set_security_error(DDS::Security::SecurityException& ex,
+bool set_security_error(DDS::Security::SecurityException& ex,
                         int code,
                         int minor_code,
                         const char* message);
 
-void set_security_error(DDS::Security::SecurityException& ex,
+bool set_security_error(DDS::Security::SecurityException& ex,
                         int code,
                         int minor_code,
                         const char* message,
                         const unsigned char (&a1)[4],
                         const unsigned char (&a2)[4]);
 
-OPENDDS_STRING ctk_to_dds_string(const CryptoTransformKind& keyKind);
+const char* ctk_to_dds_string(const CryptoTransformKind& keyKind);
 OPENDDS_STRING ctki_to_dds_string(const CryptoTransformKeyId& keyId);
 OPENDDS_STRING to_dds_string(const KeyOctetSeq& keyData);
 OPENDDS_STRING to_dds_string(const KeyMaterial_AES_GCM_GMAC& km);

@@ -102,6 +102,7 @@ struct OpenDDS_Dcps_Export GUID_tKeyLessThan {
 
 typedef OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan) RepoIdSet;
 
+
 inline size_t
 gen_max_marshaled_size(const GUID_t&)
 {
@@ -112,8 +113,7 @@ gen_max_marshaled_size(const GUID_t&)
 inline bool
 operator==(const GUID_t& lhs, const GUID_t& rhs)
 {
-  GUID_tKeyLessThan lessThan;
-  return !lessThan(lhs, rhs) && !lessThan(rhs, lhs);
+  return memcmp(&lhs, &rhs, sizeof(GUID_t)) == 0;
 }
 
 inline bool
@@ -136,8 +136,7 @@ struct GuidPrefixEqual {
 inline bool
 operator==(const EntityId_t& lhs, const EntityId_t& rhs)
 {
-  return !GUID_tKeyLessThan::entity_less(lhs, rhs)
-    && !GUID_tKeyLessThan::entity_less(rhs, lhs);
+  return memcmp(&lhs, &rhs, sizeof(EntityId_t)) == 0;
 }
 
 inline bool
@@ -173,6 +172,19 @@ operator<<(std::ostream& os, const GUID_t& rhs);
 OpenDDS_Dcps_Export std::istream&
 operator>>(std::istream& is, GUID_t& rhs);
 #endif
+
+OpenDDS_Dcps_Export inline GUID_t make_guid(
+  const GuidPrefix_t& prefix, const EntityId_t& entity)
+{
+  GUID_t result;
+  std::memcpy(result.guidPrefix, prefix, sizeof(GuidPrefix_t));
+  std::memcpy(&result.entityId, &entity, sizeof(EntityId_t));
+  return result;
+}
+
+OpenDDS_Dcps_Export
+void intersect(const RepoIdSet& a, const RepoIdSet& b, RepoIdSet& result);
+
 } // namespace DCPS
 } // namespace OpenDDS
 

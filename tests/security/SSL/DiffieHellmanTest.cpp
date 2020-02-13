@@ -34,13 +34,6 @@ public:
   DiffieHellman dh4;
 };
 
-TEST_F(DiffieHellmanTest, PubKey_Generation)
-{
-  DDS::OctetSeq pubserial;
-  dh1.pub_key(pubserial);
-  ASSERT_EQ(256u, pubserial.length());
-}
-
 TEST_F(DiffieHellmanTest, DH_SharedSecret_GenerationAndComparison)
 {
   DDS::OctetSeq dh1_pubkey;

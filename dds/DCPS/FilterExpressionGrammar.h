@@ -12,7 +12,6 @@
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
-#include <cassert>
 #include <typeinfo>
 
 #include "yard/yard_base_grammar.hpp"

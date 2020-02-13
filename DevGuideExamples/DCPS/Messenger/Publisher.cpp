@@ -14,7 +14,11 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/WaitSet.h>
 
-#include "dds/DCPS/StaticIncludes.h"
+#include <dds/DCPS/StaticIncludes.h>
+#ifdef ACE_AS_STATIC_LIBS
+#  include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#endif
 
 #include "MessengerTypeSupportImpl.h"
 
@@ -38,7 +42,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")
                         ACE_TEXT(" create_participant failed!\n")),
-                       -1);
+                       1);
     }
 
     // Register TypeSupport (Messenger::Message)
@@ -49,7 +53,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")
                         ACE_TEXT(" register_type failed!\n")),
-                       -1);
+                       1);
     }
 
     // Create Topic (Movie Discussion List)
@@ -65,7 +69,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")
                         ACE_TEXT(" create_topic failed!\n")),
-                       -1);
+                       1);
     }
 
     // Create Publisher
@@ -78,7 +82,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")
                         ACE_TEXT(" create_publisher failed!\n")),
-                       -1);
+                       1);
     }
 
     // Create DataWriter
@@ -92,7 +96,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")
                         ACE_TEXT(" create_datawriter failed!\n")),
-                       -1);
+                       1);
     }
 
     Messenger::MessageDataWriter_var message_writer =
@@ -102,7 +106,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")
                         ACE_TEXT(" _narrow failed!\n")),
-                       -1);
+                       1);
     }
 
     // Block until Subscriber is available
@@ -118,7 +122,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("ERROR: %N:%l: main() -")
                           ACE_TEXT(" get_publication_matched_status failed!\n")),
-                         -1);
+                         1);
       }
 
       if (matches.current_count >= 1) {
@@ -131,7 +135,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("ERROR: %N:%l: main() -")
                           ACE_TEXT(" wait failed!\n")),
-                         -1);
+                         1);
       }
     }
 
@@ -164,7 +168,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")
                         ACE_TEXT(" wait_for_acknowledgments failed!\n")),
-                       -1);
+                       1);
     }
 
     // Clean-up!
@@ -175,7 +179,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
-    return -1;
+    return 1;
   }
 
   return 0;

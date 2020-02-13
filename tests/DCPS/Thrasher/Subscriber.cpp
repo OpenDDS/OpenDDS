@@ -21,11 +21,13 @@
 # include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
 #endif
 
+#include "tests/Utils/StatusMatching.h"
+
 namespace
 {
   std::size_t expected_samples = 1024;
   std::size_t received_samples = 0;
-  int n_publishers = 1;
+  size_t n_publishers = 1;
 
   void
   parse_args(int& argc, ACE_TCHAR** argv)
@@ -43,7 +45,7 @@ namespace
       }
       else if ((arg = shifter.get_the_parameter(ACE_TEXT("-t"))))
       {
-        n_publishers = ACE_OS::atoi(arg);
+        n_publishers = static_cast<size_t>(ACE_OS::atoi(arg));
         shifter.consume_arg();
       }
       else
@@ -52,6 +54,7 @@ namespace
       }
     }
   }
+
 } // namespace
 
 int
@@ -113,8 +116,8 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
         ProgressIndicator("(%P|%t)    SUBSCRIBER %d%% (%d samples received)\n",
                           expected_samples);
 
-      DDS::DataReaderListener_var listener =
-        new DataReaderListenerImpl(received_samples, progress);
+      DataReaderListenerImpl* listener_p = new DataReaderListenerImpl(received_samples, progress);
+      DDS::DataReaderListener_var listener = listener_p;
 
       DDS::DataReaderQos reader_qos;
       subscriber->get_default_datareader_qos(reader_qos);
@@ -135,34 +138,22 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
                           ACE_TEXT("%N:%l: main()")
                           ACE_TEXT(" create_datareader failed!\n")), 7);
 
-      // Block until Publisher completes
-      DDS::StatusCondition_var cond = reader->get_statuscondition();
-      cond->set_enabled_statuses(DDS::SUBSCRIPTION_MATCHED_STATUS);
+      Utils::wait_match(reader, 1, Utils::GTE); // might never get up to n_publishers if they are exiting
+      listener_p->wait_received(OpenDDS::DCPS::TimeDuration(15, 0), expected_samples);
+      Utils::wait_match(reader, 0);
 
-      DDS::WaitSet_var ws = new DDS::WaitSet;
-      ws->attach_condition(cond);
-
-      DDS::Duration_t timeout =
-        { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
-
-      DDS::ConditionSeq conditions;
-      DDS::SubscriptionMatchedStatus matches = {0, 0, 0, 0, 0};
-      do
-      {
-        if (ws->wait(conditions, timeout) != DDS::RETCODE_OK)
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("%N:%l: main()")
-                            ACE_TEXT(" wait failed!\n")), 8);
-
-        if (reader->get_subscription_matched_status(matches) != ::DDS::RETCODE_OK)
-        {
-          ACE_ERROR ((LM_ERROR,
-            "ERROR: failed to get subscription matched status\n"));
-          return 1;
+      for (size_t x = 0; x < n_publishers; ++x) {
+        OPENDDS_MAP(size_t, OPENDDS_SET(size_t))::const_iterator xit = listener_p->task_sample_set_map.find(x);
+        if (xit == listener_p->task_sample_set_map.end()) {
+          ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) <- ERROR: MISSING ALL SAMPLES FROM PUBLISHER %d\n"), x));
+          break;
         }
-      }
-      while (matches.current_count > 0 || matches.total_count < n_publishers);
-      ws->detach_condition(cond);
+        for (size_t y = 0; y < expected_samples / n_publishers; ++y) {
+          if (xit->second.count(y) == 0) {
+            ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) <- ERROR: PUBLISHER %d MISSING SAMPLE %d\n"), x, y));
+          }
+        }
+    }
 
     } // End scope for contained entities
 

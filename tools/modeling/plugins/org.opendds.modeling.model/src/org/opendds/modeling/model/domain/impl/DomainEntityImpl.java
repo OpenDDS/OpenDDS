@@ -31,10 +31,10 @@ import org.opendds.modeling.model.domain.QosProperty;
  * <!-- end-user-doc -->
  * <p>
  * The following features are implemented:
+ * </p>
  * <ul>
  *   <li>{@link org.opendds.modeling.model.domain.impl.DomainEntityImpl#getTransportConfig <em>Transport Config</em>}</li>
  * </ul>
- * </p>
  *
  * @generated
  */
@@ -82,6 +82,7 @@ public class DomainEntityImpl extends EntityImpl implements DomainEntity {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getTransportConfig() {
 		return transportConfig;
 	}
@@ -91,12 +92,12 @@ public class DomainEntityImpl extends EntityImpl implements DomainEntity {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setTransportConfig(String newTransportConfig) {
 		String oldTransportConfig = transportConfig;
 		transportConfig = newTransportConfig;
 		if (eNotificationRequired())
-			eNotify(new ENotificationImpl(this, Notification.SET,
-					DomainPackage.DOMAIN_ENTITY__TRANSPORT_CONFIG,
+			eNotify(new ENotificationImpl(this, Notification.SET, DomainPackage.DOMAIN_ENTITY__TRANSPORT_CONFIG,
 					oldTransportConfig, transportConfig));
 	}
 
@@ -169,7 +170,7 @@ public class DomainEntityImpl extends EntityImpl implements DomainEntity {
 		if (eIsProxy())
 			return super.toString();
 
-		StringBuffer result = new StringBuffer(super.toString());
+		StringBuilder result = new StringBuilder(super.toString());
 		result.append(" (transportConfig: ");
 		result.append(transportConfig);
 		result.append(')');
@@ -181,8 +182,8 @@ public class DomainEntityImpl extends EntityImpl implements DomainEntity {
 	 */
 	@Override
 	public EList<org.opendds.modeling.model.qos.QosPolicy> getPolicies() {
-		return com.ociweb.emf.util.ReferencesFinder.findInstancesOf(
-				org.opendds.modeling.model.qos.QosPolicy.class, this);
+		return com.ociweb.emf.util.ReferencesFinder.findInstancesOf(org.opendds.modeling.model.qos.QosPolicy.class,
+				this);
 	}
 
 } //DomainEntityImpl

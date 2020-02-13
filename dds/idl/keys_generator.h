@@ -19,9 +19,8 @@ public:
   bool gen_typedef(AST_Typedef*, UTL_ScopedName*, AST_Type*, const char*)
   { return true; }
 
-  bool gen_union(AST_Union*, UTL_ScopedName*, const std::vector<AST_UnionBranch*>&,
-                 AST_Type*, const char*)
-  { return true; }
+  bool gen_union(AST_Union* node, UTL_ScopedName* name, const std::vector<AST_UnionBranch*>&,
+                 AST_Type*, const char*);
 };
 
 #endif

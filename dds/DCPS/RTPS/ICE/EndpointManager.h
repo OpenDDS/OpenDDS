@@ -5,6 +5,7 @@
  * See: http://www.opendds.org/license.html
  */
 
+#ifdef OPENDDS_SECURITY
 #ifndef OPENDDS_RTPS_ICE_ENDPOINT_MANAGER_H
 #define OPENDDS_RTPS_ICE_ENDPOINT_MANAGER_H
 
@@ -33,13 +34,13 @@ struct DeferredTriggeredCheck {
   ACE_INET_Addr remote_address;
   ACE_UINT32 priority;
   bool use_candidate;
-  ACE_Time_Value expiration_date;
+  DCPS::MonotonicTimePoint expiration_date;
 
   DeferredTriggeredCheck(const ACE_INET_Addr& a_local_address,
                          const ACE_INET_Addr& a_remote_address,
                          ACE_UINT32 a_priority,
                          bool a_use_candidate,
-                         const ACE_Time_Value& a_expiration_date)
+                         const DCPS::MonotonicTimePoint& a_expiration_date)
   : local_address(a_local_address)
   , remote_address(a_remote_address)
   , priority(a_priority)
@@ -137,6 +138,18 @@ struct EndpointManager {
 
   void schedule_for_destruction();
 
+  void ice_connect(const GuidSetType& guids, const ACE_INET_Addr& addr)
+  {
+    endpoint->ice_connect(guids, addr);
+  }
+
+  void ice_disconnect(const GuidSetType& guids)
+  {
+    endpoint->ice_disconnect(guids);
+  }
+
+  void network_change();
+
 private:
   bool scheduled_for_destruction_;
   AddressListType host_addresses_;          // Cached list of host addresses.
@@ -181,7 +194,7 @@ private:
 
   void regenerate_agent_info(bool password_only);
 
-  void server_reflexive_task(const ACE_Time_Value& a_now);
+  void server_reflexive_task(const DCPS::MonotonicTimePoint & a_now);
 
   bool success_response(const STUN::Message& a_message);
 
@@ -215,13 +228,13 @@ private:
   struct ServerReflexiveTask : public Task {
     EndpointManager* endpoint_manager;
     ServerReflexiveTask(EndpointManager* a_endpoint_manager);
-    void execute(const ACE_Time_Value& a_now);
+    void execute(const DCPS::MonotonicTimePoint& a_now);
   } server_reflexive_task_;
 
   struct ChangePasswordTask : public Task {
     EndpointManager* endpoint_manager;
     ChangePasswordTask(EndpointManager* a_endpoint_manager);
-    void execute(const ACE_Time_Value& a_now);
+    void execute(const DCPS::MonotonicTimePoint& a_now);
   } change_password_task_;
 };
 
@@ -231,3 +244,4 @@ private:
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* OPENDDS_RTPS_ICE_ENDPOINT_MANAGER_H */
+#endif /* OPENDDS_SECURITY */

@@ -34,8 +34,7 @@ public class DeadlineQosPolicyCreateCommand extends EditElementCommand {
 	 */
 	@Override
 	protected EObject getElementToEdit() {
-		EObject container = ((CreateElementRequest) getRequest())
-				.getContainer();
+		EObject container = ((CreateElementRequest) getRequest()).getContainer();
 		if (container instanceof View) {
 			container = ((View) container).getElement();
 		}
@@ -55,19 +54,16 @@ public class DeadlineQosPolicyCreateCommand extends EditElementCommand {
 	 * @generated NOT
 	 */
 	@Override
-	protected CommandResult doExecuteWithResult(IProgressMonitor monitor,
-			IAdaptable info) throws ExecutionException {
+	protected CommandResult doExecuteWithResult(IProgressMonitor monitor, IAdaptable info) throws ExecutionException {
 
 		final String policyAssociationName = "deadline";
 
 		org.opendds.modeling.model.opendds.deadlineQosPolicy newElement = OpenDDSFactory.eINSTANCE
 				.createdeadlineQosPolicy();
 
-		QosPolicyCreationHelper.addPolicy(newElement, policyAssociationName,
-				getElementToEdit());
+		QosPolicyCreationHelper.addPolicy(newElement, policyAssociationName, getElementToEdit());
 
-		ElementInitializers.getInstance().init_DeadlineQosPolicy_3022(
-				newElement);
+		ElementInitializers.getInstance().init_DeadlineQosPolicy_3022(newElement);
 
 		doConfigure(newElement, monitor, info);
 
@@ -79,19 +75,13 @@ public class DeadlineQosPolicyCreateCommand extends EditElementCommand {
 	/**
 	 * @generated
 	 */
-	protected void doConfigure(
-			org.opendds.modeling.model.opendds.deadlineQosPolicy newElement,
-			IProgressMonitor monitor, IAdaptable info)
-			throws ExecutionException {
-		IElementType elementType = ((CreateElementRequest) getRequest())
-				.getElementType();
-		ConfigureRequest configureRequest = new ConfigureRequest(
-				getEditingDomain(), newElement, elementType);
-		configureRequest.setClientContext(((CreateElementRequest) getRequest())
-				.getClientContext());
+	protected void doConfigure(org.opendds.modeling.model.opendds.deadlineQosPolicy newElement,
+			IProgressMonitor monitor, IAdaptable info) throws ExecutionException {
+		IElementType elementType = ((CreateElementRequest) getRequest()).getElementType();
+		ConfigureRequest configureRequest = new ConfigureRequest(getEditingDomain(), newElement, elementType);
+		configureRequest.setClientContext(((CreateElementRequest) getRequest()).getClientContext());
 		configureRequest.addParameters(getRequest().getParameters());
-		ICommand configureCommand = elementType
-				.getEditCommand(configureRequest);
+		ICommand configureCommand = elementType.getEditCommand(configureRequest);
 		if (configureCommand != null && configureCommand.canExecute()) {
 			configureCommand.execute(monitor, info);
 		}

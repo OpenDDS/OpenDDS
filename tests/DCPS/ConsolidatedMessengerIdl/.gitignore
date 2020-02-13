@@ -1,0 +1,11 @@
+MessengerC.cpp
+MessengerC.h
+MessengerC.inl
+MessengerS.h
+MessengerTypeSupport.idl
+MessengerTypeSupportC.cpp
+MessengerTypeSupportC.h
+MessengerTypeSupportC.inl
+MessengerTypeSupportImpl.cpp
+MessengerTypeSupportImpl.h
+MessengerTypeSupportS.h

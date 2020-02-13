@@ -1,4 +1,4 @@
-project(*idl): dcps_test_lib {
+project(*idl): dcps_test_idl_only_lib {
   idlflags      += -Wb,stub_export_include=WaitForAck_export.h \
                    -Wb,stub_export_macro=WaitForAck_Export -SS
   dcps_ts_flags += -Wb,export_macro=WaitForAck_Export
@@ -10,7 +10,7 @@ project(*idl): dcps_test_lib {
 }
 
 
-project(*Publisher) : dcpsexe, dcps_transports_for_test {
+project(*Publisher) : dcpsexe, dcps_test, dcps_transports_for_test {
   exename = publisher
   after  += *idl
   libs   += *idl
@@ -26,7 +26,7 @@ project(*Publisher) : dcpsexe, dcps_transports_for_test {
   }
 }
 
-project(*Subscriber) : dcpsexe, dcps_transports_for_test {
+project(*Subscriber) : dcpsexe, dcps_test, dcps_transports_for_test {
   exename = subscriber
   after  += *idl
   libs   += *idl

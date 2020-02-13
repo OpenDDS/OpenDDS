@@ -6,16 +6,26 @@
  */
 
 #include "be_global.h"
-#include "be_util.h"
-#include "ast_generator.h"
-#include "global_extern.h"
-#include "idl_defines.h"
-#include "utl_err.h"
-#include "utl_string.h"
 
-#include "ace/OS_NS_strings.h"
-#include "ace/OS_NS_sys_stat.h"
-#include "ace/ARGV.h"
+#include "be_util.h"
+#include "be_extern.h"
+
+#include <ast_generator.h>
+#include <global_extern.h>
+#include <idl_defines.h>
+#include <utl_err.h>
+#include <utl_string.h>
+#include <ast_decl.h>
+#include <ast_structure.h>
+#include <ast_field.h>
+#include <ast_union.h>
+#include <ast_annotation_decl.h>
+#include <ast_annotation_member.h>
+
+#include <ace/OS_NS_strings.h>
+#include <ace/OS_NS_sys_stat.h>
+#include <ace/ARGV.h>
+#include <ace/OS_NS_stdlib.h>
 
 #include <algorithm>
 #include <iostream>
@@ -41,6 +51,8 @@ BE_GlobalData::BE_GlobalData()
   , face_ts_(false)
   , seq_("Seq")
   , language_mapping_(LANGMAP_NONE)
+  , root_default_nested_(true)
+  , warn_about_dcps_data_type_(true)
 {
 }
 
@@ -225,35 +237,22 @@ bool BE_GlobalData::face_ts() const
   return this->face_ts_;
 }
 
-// bool
-// BE_GlobalData::do_included_files() const
-// {
-//   return false; //we never process included files
-// }
-
 void
 BE_GlobalData::open_streams(const char* filename)
 {
-  this->filename(filename);
   size_t len = strlen(filename);
-
   if ((len < 5 || 0 != ACE_OS::strcasecmp(filename + len - 4, ".idl"))
       && (len < 6 || 0 != ACE_OS::strcasecmp(filename + len - 5, ".pidl"))) {
-    UTL_Error u;
-    UTL_String str("Input filename must end in \".idl\" or \".pidl\".");
-    u.back_end(0, &str);
-    exit(-1);
-    return;
+    ACE_ERROR((LM_ERROR, "Error - Input filename must end in \".idl\" or \".pidl\".\n"));
+    BE_abort();
   }
 
   string filebase(filename);
   filebase.erase(filebase.rfind('.'));
   size_t idx = filebase.find_last_of("/\\"); // allow either slash
-
   if (idx != string::npos) {
     filebase = filebase.substr(idx + 1);
   }
-
   header_name_ = (filebase + "TypeSupportImpl.h").c_str();
   impl_name_ = (filebase + "TypeSupportImpl.cpp").c_str();
   idl_name_ = (filebase + "TypeSupport.idl").c_str();
@@ -318,6 +317,15 @@ BE_GlobalData::parse_args(long& i, char** av)
   // This flag is provided for CIAO compatibility
   static const char EXPORT_FLAG[] = "--export=";
   static const size_t EXPORT_FLAG_SIZE = sizeof(EXPORT_FLAG) - 1;
+
+  static const char DEFAULT_NESTED_FLAG[] = "--default-nested";
+  static const size_t DEFAULT_NESTED_FLAG_SIZE = sizeof(DEFAULT_NESTED_FLAG) - 1;
+
+  static const char NO_DEFAULT_NESTED_FLAG[] = "--no-default-nested";
+  static const size_t NO_DEFAULT_NESTED_FLAG_SIZE = sizeof(NO_DEFAULT_NESTED_FLAG) - 1;
+
+  static const char NO_DCPS_DATA_TYPE_WARNINGS_FLAG[] = "--no-dcps-data-type-warnings";
+  static const size_t NO_DCPS_DATA_TYPE_WARNINGS_FLAG_SIZE = sizeof(NO_DCPS_DATA_TYPE_WARNINGS_FLAG) - 1;
 
   switch (av[i][1]) {
   case 'o':
@@ -386,8 +394,14 @@ BE_GlobalData::parse_args(long& i, char** av)
     break;
 
   case '-':
-    if (0 == ACE_OS::strncasecmp(av[i], EXPORT_FLAG, EXPORT_FLAG_SIZE)) {
+    if (!ACE_OS::strncasecmp(av[i], EXPORT_FLAG, EXPORT_FLAG_SIZE)) {
       this->export_macro(av[i] + EXPORT_FLAG_SIZE);
+    } else if (!ACE_OS::strncasecmp(av[i], DEFAULT_NESTED_FLAG, DEFAULT_NESTED_FLAG_SIZE)) {
+      root_default_nested_ = true;
+    } else if (!ACE_OS::strncasecmp(av[i], NO_DEFAULT_NESTED_FLAG, NO_DEFAULT_NESTED_FLAG_SIZE)) {
+      root_default_nested_ = false;
+    } else if (!ACE_OS::strncasecmp(av[i], NO_DCPS_DATA_TYPE_WARNINGS_FLAG, NO_DCPS_DATA_TYPE_WARNINGS_FLAG_SIZE)) {
+      warn_about_dcps_data_type_ = false;
     } else {
       invalid_option(av[i]);
     }
@@ -590,7 +604,6 @@ BE_GlobalData::get_include_block(BE_GlobalData::stream_enum_t which)
     if (!export_include().empty())
       ret << "#include \"" << export_include() << "\"\n";
     break;
-
   case STREAM_CPP:
     std::for_each(cpp_includes().begin(), cpp_includes().end(), InsertIncludes(ret));
     std::for_each(referenced_idl_.begin(), referenced_idl_.end(),
@@ -601,4 +614,84 @@ BE_GlobalData::get_include_block(BE_GlobalData::stream_enum_t which)
   }
 
   return ret.str();
+}
+
+bool BE_GlobalData::is_topic_type(AST_Decl* node)
+{
+  return builtin_annotations_["::@topic"]->find_on(node) || !is_nested(node);
+}
+
+bool BE_GlobalData::is_nested(AST_Decl* node)
+{
+  NestedAnnotation* nested = dynamic_cast<NestedAnnotation*>(
+    builtin_annotations_["::@nested"]);
+  if (nested->find_on(node)) {
+    return nested->node_value(node);
+  }
+
+  return is_default_nested(node->defined_in());
+}
+
+bool BE_GlobalData::is_default_nested(UTL_Scope* scope)
+{
+  AST_Decl* module = dynamic_cast<AST_Decl*>(scope);
+  DefaultNestedAnnotation* default_nested = dynamic_cast<DefaultNestedAnnotation*>(
+    builtin_annotations_["::@default_nested"]);
+  if (module) {
+    if (default_nested->find_on(module)) {
+      return default_nested->node_value(module);
+    }
+
+    return is_default_nested(module->defined_in());
+  }
+
+  return root_default_nested_;
+}
+
+bool BE_GlobalData::check_key(AST_Field* node, bool& value)
+{
+  KeyAnnotation* key = dynamic_cast<KeyAnnotation*>(builtin_annotations_["::@key"]);
+  return key->node_value_exists(node, value);
+}
+
+bool BE_GlobalData::has_key(AST_Union* node)
+{
+  KeyAnnotation* key = dynamic_cast<KeyAnnotation*>(builtin_annotations_["::@key"]);
+  return key->union_value(node);
+}
+
+void BE_GlobalData::warning(const char* msg, const char* filename, unsigned lineno)
+{
+  if (idl_global->print_warnings()) {
+    if (filename) {
+      ACE_ERROR((LM_WARNING, ACE_TEXT("Warning - %C: \"%C\", line %u: %C\n"),
+        idl_global->prog_name(), filename, lineno, msg));
+    } else {
+      ACE_ERROR((LM_WARNING, ACE_TEXT("Warning - %C: %C\n"),
+        idl_global->prog_name(), msg));
+    }
+  }
+  idl_global->err()->last_warning = UTL_Error::EIDL_MISC;
+}
+
+void BE_GlobalData::error(const char* msg, const char* filename, unsigned lineno)
+{
+  if (filename) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("Error - %C: \"%C\", line %u: %C\n"),
+      idl_global->prog_name(), filename, lineno, msg));
+  } else {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("Error - %C: %C\n"),
+      idl_global->prog_name(), msg));
+  }
+  idl_global->set_err_count(idl_global->err_count() + 1);
+  idl_global->err()->last_error = UTL_Error::EIDL_MISC;
+}
+
+bool BE_GlobalData::warn_about_dcps_data_type()
+{
+  if (!warn_about_dcps_data_type_) {
+    return false;
+  }
+  warn_about_dcps_data_type_ = false;
+  return idl_global->print_warnings();
 }

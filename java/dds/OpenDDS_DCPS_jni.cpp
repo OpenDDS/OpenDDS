@@ -870,7 +870,7 @@ jlong JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_getSynInterval
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::MulticastInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: MulticastInst>(jni, jthis));
-  return inst->syn_interval_.msec();
+  return inst->syn_interval_.value().msec();
 }
 
 // MulticastInst::setSynInterval
@@ -878,7 +878,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_setSynInterval
 (JNIEnv * jni, jobject jthis, jlong val)
 {
   OpenDDS::DCPS::MulticastInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: MulticastInst>(jni, jthis));
-  inst->syn_interval_.msec(long(val));
+  inst->syn_interval_ = OpenDDS::DCPS::TimeDuration::from_msec(val);
 }
 
 // MulticastInst::getSynTimeout
@@ -886,7 +886,7 @@ jlong JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_getSynTimeout
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::MulticastInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: MulticastInst>(jni, jthis));
-  return inst->syn_timeout_.msec();
+  return inst->syn_timeout_.value().msec();
 }
 
 // MulticastInst::setSynTimeout
@@ -894,7 +894,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_setSynTimeout
 (JNIEnv * jni, jobject jthis, jlong val)
 {
   OpenDDS::DCPS::MulticastInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: MulticastInst>(jni, jthis));
-  inst->syn_timeout_.msec(long(val));
+  inst->syn_timeout_ = OpenDDS::DCPS::TimeDuration::from_msec(val);
 }
 
 // MulticastInst::getNakDepth
@@ -918,7 +918,7 @@ jlong JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_getNakInterval
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::MulticastInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: MulticastInst>(jni, jthis));
-  return inst->nak_interval_.msec();
+  return inst->nak_interval_.value().msec();
 }
 
 // MulticastInst::setNakInterval
@@ -926,7 +926,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_setNakInterval
 (JNIEnv * jni, jobject jthis, jlong val)
 {
   OpenDDS::DCPS::MulticastInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: MulticastInst>(jni, jthis));
-  inst->nak_interval_.msec(long(val));
+  inst->nak_interval_ = OpenDDS::DCPS::TimeDuration::from_msec(val);
 }
 
 // MulticastInst::getNakDelayInterval
@@ -966,7 +966,7 @@ jlong JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_getNakTimeout
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::MulticastInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: MulticastInst>(jni, jthis));
-  return inst->nak_timeout_.msec();
+  return inst->nak_timeout_.value().msec();
 }
 
 // MulticastInst::setNakTimeout
@@ -974,7 +974,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_setNakTimeout
 (JNIEnv * jni, jobject jthis, jlong val)
 {
   OpenDDS::DCPS::MulticastInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: MulticastInst>(jni, jthis));
-  inst->nak_timeout_.msec(long(val));
+  inst->nak_timeout_ = OpenDDS::DCPS::TimeDuration::from_msec(val);
 }
 
 // MulticastInst::getTimeToLive
@@ -1085,7 +1085,7 @@ jlong JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_getNakResponseDelay
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::RtpsUdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: RtpsUdpInst>(jni, jthis));
-  return inst->nak_response_delay_.msec();
+  return inst->nak_response_delay_.value().msec();
 }
 
 // RtpsUdpInst::setNakResponseDelay
@@ -1093,7 +1093,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_setNakResponseDelay
 (JNIEnv * jni, jobject jthis, jlong val)
 {
   OpenDDS::DCPS::RtpsUdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: RtpsUdpInst>(jni, jthis));
-  inst->nak_response_delay_.msec(long(val));
+  inst->nak_response_delay_ = OpenDDS::DCPS::TimeDuration::from_msec(val);
 }
 
 // RtpsUdpInst::getHeartbeatPeriod
@@ -1101,7 +1101,7 @@ jlong JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_getHeartbeatPeriod
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::RtpsUdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: RtpsUdpInst>(jni, jthis));
-  return inst->heartbeat_period_.msec();
+  return inst->heartbeat_period_.value().msec();
 }
 
 // RtpsUdpInst::setHeartbeatPeriod
@@ -1109,7 +1109,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_setHeartbeatPeriod
 (JNIEnv * jni, jobject jthis, jlong val)
 {
   OpenDDS::DCPS::RtpsUdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: RtpsUdpInst>(jni, jthis));
-  inst->heartbeat_period_.msec(long(val));
+  inst->heartbeat_period_ = OpenDDS::DCPS::TimeDuration::from_msec(val);
 }
 
 // RtpsUdpInst::getHeartbeatResponseDelay
@@ -1117,7 +1117,7 @@ jlong JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_getHeartbeatResponseDelay
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::RtpsUdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: RtpsUdpInst>(jni, jthis));
-  return inst->heartbeat_response_delay_.msec();
+  return inst->heartbeat_response_delay_.value().msec();
 }
 
 // RtpsUdpInst::setHeartbeatResponseDelay
@@ -1125,7 +1125,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_setHeartbeatResponseDelay
 (JNIEnv * jni, jobject jthis, jlong val)
 {
   OpenDDS::DCPS::RtpsUdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: RtpsUdpInst>(jni, jthis));
-  inst->heartbeat_response_delay_.msec(long(val));
+  inst->heartbeat_response_delay_ = OpenDDS::DCPS::TimeDuration::from_msec(val);
 }
 
 // RtpsUdpInst::getHandshakeTimeout
@@ -1133,7 +1133,7 @@ jlong JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_getHandshakeTimeout
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::RtpsUdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: RtpsUdpInst>(jni, jthis));
-  return inst->handshake_timeout_.msec();
+  return inst->handshake_timeout_.value().msec();
 }
 
 // RtpsUdpInst::setHandshakeTimeout
@@ -1141,7 +1141,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_setHandshakeTimeout
 (JNIEnv * jni, jobject jthis, jlong val)
 {
   OpenDDS::DCPS::RtpsUdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: RtpsUdpInst>(jni, jthis));
-  inst->handshake_timeout_.msec(long(val));
+  inst->handshake_timeout_ = OpenDDS::DCPS::TimeDuration::from_msec(val);
 }
 
 // WaitSet and GuardCondition

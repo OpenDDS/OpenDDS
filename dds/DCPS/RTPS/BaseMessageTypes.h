@@ -10,18 +10,17 @@
 
 #include "RtpsCoreC.h"
 #include "dds/DCPS/GuidUtils.h"
+#include "dds/DCPS/TimeDuration.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
   namespace RTPS {
 
-    const Time_t TIME_ZERO     = { 0, 0 };
-    const Time_t TIME_INVALID  = { -1, 0xffffffff };
-    const Time_t TIME_INFINITE = { 0x7fffffff, 0xffffffff };
+    const Time_t TIME_INVALID  = { 0xffffffffu, 0xffffffffu };
 
-    // conversion factor from nanoseconds to NTP fractional (2^-32) seconds
-    const double NANOS_TO_RTPS_FRACS = 4.294967296;
+    const Duration_t DURATION_ZERO     = { 0, 0u };
+    const Duration_t DURATION_INFINITE = { 0x7fffffff, 0xffffffffu };
 
     const VendorId_t VENDORID_UNKNOWN = { { 0 } };
     const VendorId_t VENDORID_OPENDDS =
@@ -52,6 +51,8 @@ namespace OpenDDS {
 
     const LocatorUDPv4_t LOCATORUDPv4_INVALID = { 0, 0 };
 
+    const ACE_CDR::Octet PROTOCOL_RTPS[] = {'R', 'T', 'P', 'S'};
+
     const ProtocolVersion_t PROTOCOLVERSION_1_0 = { 1, 0 };
     const ProtocolVersion_t PROTOCOLVERSION_1_1 = { 1, 1 };
     const ProtocolVersion_t PROTOCOLVERSION_2_0 = { 2, 0 };
@@ -64,6 +65,11 @@ namespace OpenDDS {
     const char BLOB_PROP_PART_CRYPTO_HANDLE[] = "ParticipantCryptoHandle";
     const char BLOB_PROP_DW_CRYPTO_HANDLE[] = "DatawriterCryptoHandle";
     const char BLOB_PROP_DR_CRYPTO_HANDLE[] = "DatareaderCryptoHandle";
+    const char BLOB_PROP_ENDPOINT_SEC_ATTR[] = "EndpointSecurityAttributes";
+
+    const ::CORBA::Octet BEACON_MSG_ID = PAD;
+    const ::CORBA::Octet BEACON_MESSAGE[] = { BEACON_MSG_ID, 0, 0, 0 };
+    const size_t BEACON_MESSAGE_LENGTH = sizeof(BEACON_MESSAGE);
   }
 }
 

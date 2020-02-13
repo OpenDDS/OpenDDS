@@ -20,8 +20,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 WriterInfoListener::WriterInfoListener()
-  : subscription_id_(GUID_UNKNOWN),
-  liveliness_lease_duration_(ACE_Time_Value::zero)
+  : subscription_id_(GUID_UNKNOWN)
 {
 }
 
@@ -34,7 +33,7 @@ WriterInfoListener::~WriterInfoListener()
 /// handle_timeout is called since some subroutine use the state.
 void
 WriterInfoListener::writer_became_alive(WriterInfo&,
-                                        const ACE_Time_Value& )
+                                        const MonotonicTimePoint&)
 {
 }
 
@@ -43,26 +42,23 @@ WriterInfoListener::writer_became_alive(WriterInfo&,
 /// when it returns.
 void
 WriterInfoListener::writer_became_dead(WriterInfo&,
-                                       const ACE_Time_Value& )
+                                       const MonotonicTimePoint&)
 {
 }
 
 /// tell instance when a DataWriter is removed.
 /// The liveliness status need update.
 void
-WriterInfoListener::writer_removed(WriterInfo& )
+WriterInfoListener::writer_removed(WriterInfo&)
 {
 }
 
-
-
-WriterInfo::WriterInfo(WriterInfoListener*         reader,
-                       const PublicationId&        writer_id,
+WriterInfo::WriterInfo(WriterInfoListener* reader,
+                       const PublicationId& writer_id,
                        const ::DDS::DataWriterQos& writer_qos)
-  : last_liveliness_activity_time_(ACE_OS::gettimeofday()),
+  : last_liveliness_activity_time_(MonotonicTimePoint::now()),
   historic_samples_timer_(NO_TIMER),
   remove_association_timer_(NO_TIMER),
-  removal_deadline_(ACE_Time_Value::zero),
   last_historic_seq_(SequenceNumber::SEQUENCENUMBER_UNKNOWN()),
   waiting_for_end_historic_samples_(false),
   scheduled_for_removal_(false),
@@ -88,26 +84,21 @@ WriterInfo::WriterInfo(WriterInfoListener*         reader,
   }
 }
 
-OPENDDS_STRING
-WriterInfo::get_state_str() const
+const char* WriterInfo::get_state_str() const
 {
-  OPENDDS_STRING ret;
-  switch (this->state_) {
-  case WriterInfo::NOT_SET:
-    ret += "NOT_SET";
-    break;
-  case WriterInfo::ALIVE:
-    ret += "ALIVE";
-    break;
-  case WriterInfo::DEAD:
-    ret += "DEAD";
-    break;
+  switch (state_) {
+  case NOT_SET:
+    return "NOT_SET";
+  case ALIVE:
+    return "ALIVE";
+  case DEAD:
+    return "DEAD";
   default:
-    ret += "UNSPECIFIED(";
-    ret += to_dds_string(int(this->state_));
-    ret += ")";
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: WriterInfo::get_state_str: ")
+      ACE_TEXT("%d is either invalid or not recognized.\n"),
+      state_));
+    return "Invalid state";
   }
-  return ret.c_str();
 }
 
 void
@@ -137,21 +128,19 @@ WriterInfo::is_owner_evaluated (::DDS::InstanceHandle_t instance)
     return iter->second;
 }
 
-ACE_Time_Value
-WriterInfo::check_activity(const ACE_Time_Value& now)
+MonotonicTimePoint
+WriterInfo::check_activity(const MonotonicTimePoint& now)
 {
-  ACE_Time_Value expires_at = ACE_Time_Value::max_time;
+  MonotonicTimePoint expires_at(MonotonicTimePoint::max_value);
 
   // We only need check the liveliness with the non-zero liveliness_lease_duration_.
-  // if (state_ != DEAD && reader_->liveliness_lease_duration_ != ACE_Time_Value::zero)
-  if (state_ == ALIVE && reader_->liveliness_lease_duration_ != ACE_Time_Value::zero) {
-    expires_at = this->last_liveliness_activity_time_ +
-                 reader_->liveliness_lease_duration_;
+  if (state_ == ALIVE && !reader_->liveliness_lease_duration_.is_zero()) {
+    expires_at = last_liveliness_activity_time_ + reader_->liveliness_lease_duration_;
 
     if (expires_at <= now) {
       // let all instances know this write is not alive.
       reader_->writer_became_dead(*this, now);
-      expires_at = ACE_Time_Value::max_time;
+      expires_at = MonotonicTimePoint::max_value;
     }
   }
 
@@ -164,14 +153,15 @@ WriterInfo::removed()
   reader_->writer_removed(*this);
 }
 
-ACE_Time_Value WriterInfo::activity_wait_period() const
+TimeDuration
+WriterInfo::activity_wait_period() const
 {
-  ACE_Time_Value activity_wait_period(TheServiceParticipant->pending_timeout());
-  if (reader_->liveliness_lease_duration_ != ACE_Time_Value::zero) {
+  TimeDuration activity_wait_period(TheServiceParticipant->pending_timeout());
+  if (!reader_->liveliness_lease_duration_.is_zero()) {
     activity_wait_period = reader_->liveliness_lease_duration_;
   }
-  if (activity_wait_period == ACE_Time_Value::zero) {
-      activity_wait_period = duration_to_time_value(writer_qos_.reliability.max_blocking_time);
+  if (activity_wait_period.is_zero()) {
+    activity_wait_period = TimeDuration(writer_qos_.reliability.max_blocking_time);
   }
 
   return activity_wait_period;
@@ -193,12 +183,12 @@ WriterInfo::active() const
   //     3) Writer's max blocking time (could be infinite, in which case
   //        RemoveAssociationSweeper will remove after its max wait)
   //     4) Zero - don't wait, simply remove association
-  ACE_Time_Value activity_wait_period = this->activity_wait_period();
+  const TimeDuration period = activity_wait_period();
 
-  if (activity_wait_period == ACE_Time_Value::zero) {
+  if (period.is_zero()) {
     return false;
   }
-  return (ACE_OS::gettimeofday() - last_liveliness_activity_time_) <= activity_wait_period;
+  return (MonotonicTimePoint::now() - last_liveliness_activity_time_) <= period;
 }
 
 

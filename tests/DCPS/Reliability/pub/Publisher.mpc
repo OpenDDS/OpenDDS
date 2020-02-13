@@ -1,4 +1,4 @@
-project(Reliability*) : dcpsexe, dcps_transports_for_test, dds_model {
+project(Reliability*) : dcpsexe, dcps_test, dcps_transports_for_test, dds_model {
   exename   = publisher
   after    += Reliability
 

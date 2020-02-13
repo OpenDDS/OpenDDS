@@ -27,7 +27,6 @@
 #include <ace/Time_Value.h>
 #include <ace/OS_NS_unistd.h>
 
-#include <cassert>
 using namespace std;
 
 const char PARTITION_A[] = "ZiggieStardust";
@@ -110,6 +109,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       DDS::DataReaderQos dr_qos;
       sub1->get_default_datareader_qos (dr_qos);
+      dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
       // Create first DataReader with listener.
       DDS::DataReaderListener_var listener1 (new DataReaderListenerImpl);
@@ -203,7 +203,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       if (listener_servant1->num_reads() > expected
         || listener_servant2->num_reads() > expected)
       {
-        cerr << "ERROR: received more than expected messages" << endl;
+        cerr << "ERROR: received more (" << listener_servant1->num_reads() << " + " << listener_servant2->num_reads() << ") than expected messages: (" << expected << " + " << expected << ")" << endl;
         exit (1);
       }
 

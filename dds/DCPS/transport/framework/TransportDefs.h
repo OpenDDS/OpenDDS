@@ -59,7 +59,7 @@ ACE_END_VERSIONED_NAMESPACE_DECL
     }                                                                            \
     else                                                                         \
     {                                                                            \
-      VALUE = static_cast<TYPE>(ACE_OS::atoi (stringvalue.c_str ()));            \
+      VALUE = static_cast<TYPE>(ACE_OS::atoi (stringvalue.c_str()));             \
     }                                                                            \
   }
 
@@ -148,18 +148,18 @@ ACE_END_VERSIONED_NAMESPACE_DECL
     }                                                                            \
     else                                                                         \
     {                                                                            \
-      VALUE = ACE_OS::strtod (stringvalue.c_str (), 0);                          \
+      VALUE = ACE_OS::strtod (stringvalue.c_str(), 0);                           \
     }                                                                            \
   }
 
 /// Macro to get the individual configuration value
-///  from ACE_Configuration_Heap as ACE_Time_Value
+///  from ACE_Configuration_Heap as TimeDuration
 ///  using milliseconds.
 #define GET_CONFIG_TIME_VALUE(CF, SECT, KEY, VALUE)                              \
   {                                                                              \
     long tv = -1;                                                                \
     GET_CONFIG_VALUE(CF, SECT, KEY, tv, long);                                   \
-    if (tv != -1) VALUE.msec(tv);                                                \
+    if (tv != -1) VALUE = TimeDuration::from_msec(tv); \
   }
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -234,6 +234,11 @@ enum RemoveResult {
 };
 
 typedef ACE_CDR::Long Priority;
+
+typedef size_t ConnectionInfoFlags;
+static const ConnectionInfoFlags CONNINFO_UNICAST = (1 << 0);
+static const ConnectionInfoFlags CONNINFO_MULTICAST = (1 << 1);
+static const ConnectionInfoFlags CONNINFO_ALL = static_cast<ConnectionInfoFlags>(-1);
 
 } // namespace DCPS
 } // namespace OpenDDS

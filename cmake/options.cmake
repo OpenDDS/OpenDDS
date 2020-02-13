@@ -71,6 +71,11 @@ if (OPENDDS_SECURITY)
   _OPENDDS_APPEND_DEF(OPENDDS_SECURITY)
 endif()
 
+if (OPENDDS_SUPPRESS_ANYS)
+  list(APPEND OPENDDS_DDS_BASE_IDL_FLAGS -Sa -St)
+  list(APPEND OPENDDS_TAO_BASE_IDL_FLAGS -Sa -St)
+endif()
+
 # ACE defines.
 
 if (OPENDDS_NO_DEBUG AND UNIX)
@@ -93,12 +98,6 @@ if (OPENDDS_STATIC)
   _OPENDDS_APPEND_DEF(ACE_AS_STATIC_LIBS ACE_HAS_CUSTOM_EXPORT_MACROS=0 TAO_AS_STATIC_LIBS)
 endif()
 
-# Link libraries.
-
-if (OPENDDS_XERCES3)
-  list(APPEND OPENDDS_DCPS_LINK_DEPS ACE::XML_Utils)
-endif()
-
 # Force C++ standard.
 
 if (OPENDDS_STD AND UNIX)
@@ -110,6 +109,8 @@ if (OPENDDS_STD AND UNIX)
     set(CMAKE_CXX_STANDARD 14)
   elseif("${OPENDDS_STD}" MATCHES "(1z|17)$")
     set(CMAKE_CXX_STANDARD 17)
+  elseif("${OPENDDS_STD}" MATCHES "(2a|20)$")
+    set(CMAKE_CXX_STANDARD 20)
   else()
     message(WARNING "Ignoring unknown OPENDDS_STD value '${OPENDDS_STD}'")
   endif()

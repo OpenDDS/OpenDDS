@@ -21,6 +21,8 @@ namespace ICE {
 
 #ifdef OPENDDS_SECURITY
 
+using DCPS::MonotonicTimePoint;
+
 EndpointManager::EndpointManager(AgentImpl* a_agent_impl, Endpoint* a_endpoint) :
   agent_impl(a_agent_impl),
   endpoint(a_endpoint),
@@ -31,10 +33,12 @@ EndpointManager::EndpointManager(AgentImpl* a_agent_impl, Endpoint* a_endpoint) 
   change_password_task_(this)
 {
 
+  binding_request_.clear_transaction_id();
+
   // Set the type.
   agent_info_.type = FULL;
 
-  TheSecurityRegistry->default_config()->get_utility()->generate_random_bytes(&ice_tie_breaker_, sizeof(ice_tie_breaker_));
+  TheSecurityRegistry->fix_empty_default()->get_utility()->generate_random_bytes(&ice_tie_breaker_, sizeof(ice_tie_breaker_));
 
   change_username();
   set_host_addresses(endpoint->host_addresses());
@@ -160,7 +164,7 @@ void EndpointManager::change_username()
 {
   // Generate the username.
   unsigned char username[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-  TheSecurityRegistry->default_config()->get_utility()->generate_random_bytes(username, sizeof(username));
+  TheSecurityRegistry->fix_empty_default()->get_utility()->generate_random_bytes(username, sizeof(username));
   agent_info_.username = OpenDDS::DCPS::to_hex_dds_string(username, 16, 0, 0);
   change_password(false);
 }
@@ -168,7 +172,7 @@ void EndpointManager::change_username()
 void EndpointManager::change_password(bool password_only)
 {
   unsigned char password[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-  TheSecurityRegistry->default_config()->get_utility()->generate_random_bytes(password, sizeof(password));
+  TheSecurityRegistry->fix_empty_default()->get_utility()->generate_random_bytes(password, sizeof(password));
   agent_info_.password = OpenDDS::DCPS::to_hex_dds_string(password, 16, 0, 0);
   regenerate_agent_info(password_only);
 }
@@ -258,7 +262,7 @@ void EndpointManager::regenerate_agent_info(bool password_only)
   }
 }
 
-void EndpointManager::server_reflexive_task(const ACE_Time_Value& a_now)
+void EndpointManager::server_reflexive_task(const MonotonicTimePoint& a_now)
 {
   // Request and maintain a server-reflexive address.
   next_stun_server_address_ = endpoint->stun_server_address();
@@ -346,7 +350,7 @@ bool EndpointManager::error_response(const STUN::Message& a_message)
   if (a_message.has_error_code()) {
     ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) EndpointManager::error_response: WARNING STUN error response code=%d reason=%s\n"), a_message.get_error_code(), a_message.get_error_reason().c_str()));
 
-    if (a_message.get_error_code() == 420 && a_message.has_unknown_attributes()) {
+    if (a_message.get_error_code() == STUN::UNKNOWN_ATTRIBUTE && a_message.has_unknown_attributes()) {
       std::vector<STUN::AttributeType> unknown_attributes = a_message.get_unknown_attributes();
 
       for (std::vector<STUN::AttributeType>::const_iterator pos = unknown_attributes.begin(),
@@ -391,7 +395,7 @@ STUN::Message EndpointManager::make_unknown_attributes_error_response(const STUN
   response.class_ = STUN::ERROR_RESPONSE;
   response.method = a_message.method;
   memcpy(response.transaction_id.data, a_message.transaction_id.data, sizeof(a_message.transaction_id.data));
-  response.append_attribute(STUN::make_error_code(420, "Unknown Attributes"));
+  response.append_attribute(STUN::make_error_code(STUN::UNKNOWN_ATTRIBUTE, "Unknown Attributes"));
   response.append_attribute(STUN::make_unknown_attributes(a_unknown_attributes));
   response.append_attribute(STUN::make_message_integrity());
   response.password = agent_info_.password;
@@ -406,7 +410,7 @@ STUN::Message EndpointManager::make_bad_request_error_response(const STUN::Messa
   response.class_ = STUN::ERROR_RESPONSE;
   response.method = a_message.method;
   memcpy(response.transaction_id.data, a_message.transaction_id.data, sizeof(a_message.transaction_id.data));
-  response.append_attribute(STUN::make_error_code(400, a_reason));
+  response.append_attribute(STUN::make_error_code(STUN::BAD_REQUEST, a_reason));
   response.append_attribute(STUN::make_message_integrity());
   response.password = agent_info_.password;
   response.append_attribute(STUN::make_fingerprint());
@@ -419,7 +423,7 @@ STUN::Message EndpointManager::make_unauthorized_error_response(const STUN::Mess
   response.class_ = STUN::ERROR_RESPONSE;
   response.method = a_message.method;
   memcpy(response.transaction_id.data, a_message.transaction_id.data, sizeof(a_message.transaction_id.data));
-  response.append_attribute(STUN::make_error_code(401, "Unauthorized"));
+  response.append_attribute(STUN::make_error_code(STUN::UNAUTHORIZED, "Unauthorized"));
   response.append_attribute(STUN::make_message_integrity());
   response.password = agent_info_.password;
   response.append_attribute(STUN::make_fingerprint());
@@ -538,8 +542,11 @@ void EndpointManager::request(const ACE_INET_Addr& a_local_address,
     }
 
     else {
-      std::pair<DeferredTriggeredChecksType::iterator, bool> x = deferred_triggered_checks_.insert(std::make_pair(remote_username, DeferredTriggeredCheckListType()));
-      x.first->second.push_back(DeferredTriggeredCheck(a_local_address, a_remote_address, priority, use_candidate, ACE_Time_Value().now() + agent_impl->get_configuration().deferred_triggered_check_ttl()));
+      std::pair<DeferredTriggeredChecksType::iterator, bool> x =
+        deferred_triggered_checks_.insert(std::make_pair(remote_username, DeferredTriggeredCheckListType()));
+      x.first->second.push_back(DeferredTriggeredCheck(
+        a_local_address, a_remote_address, priority, use_candidate,
+        MonotonicTimePoint::now() + agent_impl->get_configuration().deferred_triggered_check_ttl()));
     }
   }
   break;
@@ -719,10 +726,10 @@ EndpointManager::ServerReflexiveTask::ServerReflexiveTask(EndpointManager* a_end
   : Task(a_endpoint_manager->agent_impl),
     endpoint_manager(a_endpoint_manager)
 {
-  enqueue(ACE_Time_Value().now());
+  enqueue(MonotonicTimePoint::now());
 }
 
-void EndpointManager::ServerReflexiveTask::execute(const ACE_Time_Value& a_now)
+void EndpointManager::ServerReflexiveTask::execute(const MonotonicTimePoint& a_now)
 {
   if (endpoint_manager->scheduled_for_destruction_) {
     delete endpoint_manager;
@@ -737,13 +744,18 @@ EndpointManager::ChangePasswordTask::ChangePasswordTask(EndpointManager* a_endpo
   : Task(a_endpoint_manager->agent_impl),
     endpoint_manager(a_endpoint_manager)
 {
-  enqueue(ACE_Time_Value().now() + endpoint_manager->agent_impl->get_configuration().change_password_period());
+  enqueue(MonotonicTimePoint::now() + endpoint_manager->agent_impl->get_configuration().change_password_period());
 }
 
-void EndpointManager::ChangePasswordTask::execute(const ACE_Time_Value& a_now)
+void EndpointManager::ChangePasswordTask::execute(const MonotonicTimePoint& a_now)
 {
   endpoint_manager->change_password(true);
   enqueue(a_now + endpoint_manager->agent_impl->get_configuration().change_password_period());
+}
+
+void EndpointManager::network_change()
+{
+  set_host_addresses(endpoint->host_addresses());
 }
 
 #endif /* OPENDDS_SECURITY */

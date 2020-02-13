@@ -24,6 +24,8 @@
 #include "TransportSendListener.h"
 #include "TransportReceiveListener.h"
 #include "dds/DCPS/transport/framework/QueueTaskBase_T.h"
+#include "dds/DCPS/ReactorInterceptor.h"
+#include "dds/DCPS/TimeTypes.h"
 
 #include "ace/Event_Handler.h"
 #include "ace/Synch_Traits.h"
@@ -89,13 +91,13 @@ public:
   DataLink(TransportImpl& impl, Priority priority, bool is_loopback, bool is_active);
   virtual ~DataLink();
 
-  //Reactor invokes this after being notified in schedule_stop or cancel_release
+  /// Reactor invokes this after being notified in schedule_stop or cancel_release
   int handle_exception(ACE_HANDLE /* fd */);
 
-  //Allows DataLink::stop to be done on the reactor thread so that
-  //this thread avoids possibly deadlocking trying to access reactor
-  //to stop strategies or schedule timers
-  void schedule_stop(const ACE_Time_Value& schedule_to_stop_at);
+  /// Allows DataLink::stop to be done on the reactor thread so that
+  /// this thread avoids possibly deadlocking trying to access reactor
+  /// to stop strategies or schedule timers
+  void schedule_stop(const MonotonicTimePoint& schedule_to_stop_at);
   /// The stop method is used to stop the DataLink prior to shutdown.
   void stop();
 
@@ -107,17 +109,19 @@ public:
   ///
   /// Return Codes: 0 means successful reservation made.
   ///              -1 means failure.
-  int make_reservation(const RepoId& remote_subscription_id,
-                       const RepoId& local_publication_id,
-                       const TransportSendListener_wrch& send_listener);
+  virtual int make_reservation(const RepoId& remote_subscription_id,
+                               const RepoId& local_publication_id,
+                               const TransportSendListener_wrch& send_listener,
+                               bool reliable);
 
   /// Only called by our TransportImpl object.
   ///
   /// Return Codes: 0 means successful reservation made.
   ///              -1 means failure.
-  int make_reservation(const RepoId& remote_publication_id,
-                       const RepoId& local_subscription_id,
-                       const TransportReceiveListener_wrch& receive_listener);
+  virtual int make_reservation(const RepoId& remote_publication_id,
+                               const RepoId& local_subscription_id,
+                               const TransportReceiveListener_wrch& receive_listener,
+                               bool reliable);
 
   // ciju: Called by LinkSet with locks held
   /// This will release reservations that were made by one of the
@@ -130,7 +134,7 @@ public:
 
   void schedule_delayed_release();
 
-  const ACE_Time_Value& datalink_release_delay() const;
+  const TimeDuration& datalink_release_delay() const;
 
   /// Either send or receive listener for this local_id should be
   /// removed from internal DataLink structures so it no longer
@@ -151,11 +155,10 @@ public:
   /// This method is essentially an "undo_send()" method.  It's goal
   /// is to remove all traces of the sample from this DataLink (if
   /// the sample is even known to the DataLink).
-  virtual RemoveResult remove_sample(const DataSampleElement* sample,
-                                     void* context);
+  virtual RemoveResult remove_sample(const DataSampleElement* sample);
 
   // ciju: Called by LinkSet with locks held
-  void remove_all_msgs(RepoId pub_id);
+  virtual void remove_all_msgs(const RepoId& pub_id);
 
   /// This is called by our TransportReceiveStrategy object when it
   /// has received a complete data sample.  This method will cause
@@ -196,6 +199,7 @@ public:
   // Used by to inform the send strategy to clear all unsent samples upon
   // backpressure timed out.
   void terminate_send();
+  void terminate_send_if_suspended();
 
   /// This is called on publisher side to see if this link communicates
   /// with the provided sub.
@@ -252,9 +256,29 @@ public:
 
   typedef WeakRcHandle<TransportClient> TransportClient_wrch;
   typedef std::pair<TransportClient_wrch, RepoId> OnStartCallback;
+
+  void add_pending_on_start(const RepoId& local, const RepoId& remote);
   bool add_on_start_callback(const TransportClient_wrch& client, const RepoId& remote);
   void remove_on_start_callback(const TransportClient_wrch& client, const RepoId& remote);
   void invoke_on_start_callbacks(bool success);
+  void invoke_on_start_callbacks(const RepoId& local, const RepoId& remote, bool success);
+  void remove_startup_callbacks(const RepoId& local, const RepoId& remote);
+
+  class Interceptor : public ReactorInterceptor {
+  public:
+    Interceptor(ACE_Reactor* reactor, ACE_thread_t owner) : ReactorInterceptor(reactor, owner) {}
+    bool reactor_is_shut_down() const;
+  };
+
+  class ImmediateStart : public ReactorInterceptor::Command {
+  public:
+    ImmediateStart(RcHandle<DataLink> link, WeakRcHandle<TransportClient> client, const RepoId& remote) : link_(link), client_(client), remote_(remote) {}
+    void execute();
+  private:
+    RcHandle<DataLink> link_;
+    WeakRcHandle<TransportClient> client_;
+    RepoId remote_;
+  };
 
   void set_scheduling_release(bool scheduling_release);
 
@@ -277,7 +301,8 @@ protected:
   /// if one of the strategy objects was started successfully, then
   /// it will be stopped before the start() method returns -1.
   int start(const TransportSendStrategy_rch& send_strategy,
-            const TransportStrategy_rch& receive_strategy);
+            const TransportStrategy_rch& receive_strategy,
+            bool invoke_all = true);
 
   /// This announces the "stop" event to our subclass.  The "stop"
   /// event will occur when this DataLink is handling a
@@ -308,11 +333,7 @@ protected:
   /// knows about due to make_reservation().
   GUIDSeq* peer_ids(const RepoId& local_id) const;
 
-  /**
-   * For a given reader writer pair, call the first_acknowledged_by_reader
-   * callback on the TransportSendListener if there is one.
-   */
-  void first_acknowledged_by_reader(const RepoId& localWriter, const RepoId& remoteReader, const SequenceNumber& sn_base);
+  void network_change() const;
 
 private:
 
@@ -358,7 +379,7 @@ private:
   /// A boolean indicating if the DataLink has been stopped. This
   /// value is protected by the strategy_lock_.
   bool stopped_;
-  ACE_Time_Value scheduled_to_stop_at_;
+  MonotonicTimePoint scheduled_to_stop_at_;
 
   /// Map publication Id value to TransportSendListener.
   typedef OPENDDS_MAP_CMP(RepoId, TransportSendListener_wrch, GUID_tKeyLessThan) IdToSendListenerMap;
@@ -378,10 +399,15 @@ private:
   typedef OPENDDS_MAP_CMP(RepoId, ReceiveListenerSet_rch, GUID_tKeyLessThan) AssocByRemote;
   AssocByRemote assoc_by_remote_;
 
-  typedef OPENDDS_MAP_CMP(RepoId, RepoIdSet, GUID_tKeyLessThan) AssocByLocal;
+  struct LocalAssociationInfo {
+    bool reliable_;
+    RepoIdSet associated_;
+  };
+
+  typedef OPENDDS_MAP_CMP(RepoId, LocalAssociationInfo, GUID_tKeyLessThan) AssocByLocal;
   AssocByLocal assoc_by_local_;
 
-  /// A (smart) pointer to the TransportImpl that created this DataLink.
+  /// A reference to the TransportImpl that created this DataLink.
   TransportImpl& impl_;
 
   /// The id for this DataLink
@@ -408,11 +434,15 @@ protected:
   TransportSendStrategy_rch send_strategy_;
 
   LockType strategy_lock_;
-  OPENDDS_VECTOR(OnStartCallback) on_start_callbacks_;
+  typedef OPENDDS_MAP_CMP(RepoId, TransportClient_wrch, GUID_tKeyLessThan) RepoToClientMap;
+  typedef OPENDDS_MAP_CMP(RepoId, RepoToClientMap, GUID_tKeyLessThan) OnStartCallbackMap;
+  OnStartCallbackMap on_start_callbacks_;
+  typedef OPENDDS_MAP_CMP(RepoId, RepoIdSet, GUID_tKeyLessThan) PendingOnStartsMap;
+  PendingOnStartsMap pending_on_starts_;
 
   /// Configurable delay in milliseconds that the datalink
   /// should be released after all associations are removed.
-  ACE_Time_Value datalink_release_delay_;
+  TimeDuration datalink_release_delay_;
 
   /// Allocators for data and message blocks used by transport
   /// control samples when send_control is called.
@@ -427,6 +457,8 @@ protected:
 
   /// Listener for TransportSendControlElements created in send_control
   SendResponseListener send_response_listener_;
+
+  Interceptor interceptor_;
 };
 
 } // namespace DCPS

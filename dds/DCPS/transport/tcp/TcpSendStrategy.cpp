@@ -14,7 +14,7 @@
 #include "TcpDataLink.h"
 #include "dds/DCPS/transport/framework/ThreadSynch.h"
 #include "dds/DCPS/transport/framework/ScheduleOutputHandler.h"
-#include "dds/DCPS/transport/framework/TransportReactorTask.h"
+#include "dds/DCPS/ReactorTask.h"
 #include "dds/DCPS/transport/framework/ReactorSynchStrategy.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -23,7 +23,7 @@ OpenDDS::DCPS::TcpSendStrategy::TcpSendStrategy(
   std::size_t id,
   TcpDataLink& link,
   TcpSynchResource* synch_resource,
-  const TransportReactorTask_rch& task,
+  const ReactorTask_rch& task,
   Priority priority)
   : TransportSendStrategy(id, link.impl(),
                           synch_resource, priority,
@@ -135,6 +135,13 @@ OpenDDS::DCPS::TcpSendStrategy::add_delayed_notification(TransportQueueElement* 
     // only add the notification when we are not sending REQUEST_ACK message
     TransportSendStrategy::add_delayed_notification(element);
   }
+}
+
+void
+OpenDDS::DCPS::TcpSendStrategy::terminate_send_if_suspended()
+{
+  DBG_ENTRY_LVL("TcpSendStrategy","terminate_send_if_suspended",6);
+  this->clear(MODE_TERMINATED, MODE_SUSPEND);
 }
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

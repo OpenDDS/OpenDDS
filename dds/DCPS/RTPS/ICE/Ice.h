@@ -5,11 +5,13 @@
  * See: http://www.opendds.org/license.html
  */
 
+#ifdef OPENDDS_SECURITY
 #ifndef OPENDDS_RTPS_ICE_H
 #define OPENDDS_RTPS_ICE_H
 
 #include "dds/DCPS/Ice.h"
 #include "dds/DCPS/RTPS/ICE/Stun.h"
+#include "dds/DCPS/TimeTypes.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -30,12 +32,36 @@ Candidate make_server_reflexive_candidate(const ACE_INET_Addr& address, const AC
 Candidate make_peer_reflexive_candidate(const ACE_INET_Addr& address, const ACE_INET_Addr& base, const ACE_INET_Addr& server_address, ACE_UINT32 priority);
 Candidate make_peer_reflexive_candidate(const ACE_INET_Addr& address, ACE_UINT32 priority, size_t q);
 
+struct OpenDDS_Rtps_Export GuidPair {
+  DCPS::RepoId local;
+  DCPS::RepoId remote;
+
+  GuidPair(const DCPS::RepoId& a_local, const DCPS::RepoId& a_remote) : local(a_local), remote(a_remote) {}
+
+  bool operator<(const GuidPair& a_other) const
+  {
+    if (DCPS::GUID_tKeyLessThan()(this->local, a_other.local)) return true;
+
+    if (DCPS::GUID_tKeyLessThan()(a_other.local, this->local)) return false;
+
+    if (DCPS::GUID_tKeyLessThan()(this->remote, a_other.remote)) return true;
+
+    if (DCPS::GUID_tKeyLessThan()(a_other.remote, this->remote)) return false;
+
+    return false;
+  }
+};
+
+typedef std::set<GuidPair> GuidSetType;
+
 class OpenDDS_Rtps_Export Endpoint {
 public:
   virtual ~Endpoint() {}
   virtual AddressListType host_addresses() const = 0;
   virtual void send(const ACE_INET_Addr& address, const STUN::Message& message) = 0;
   virtual ACE_INET_Addr stun_server_address() const = 0;
+  virtual void ice_connect(const GuidSetType&, const ACE_INET_Addr&) {}
+  virtual void ice_disconnect(const GuidSetType&) {}
 };
 
 class OpenDDS_Rtps_Export AgentInfoListener {
@@ -59,56 +85,56 @@ public:
     change_password_period_(5 * 60)
   {}
 
-  void T_a(const ACE_Time_Value& x)
+  void T_a(const DCPS::TimeDuration& x)
   {
     T_a_ = x;
   }
-  ACE_Time_Value T_a() const
+  DCPS::TimeDuration T_a() const
   {
     return T_a_;
   }
 
-  void connectivity_check_ttl(const ACE_Time_Value& x)
+  void connectivity_check_ttl(const DCPS::TimeDuration& x)
   {
     connectivity_check_ttl_ = x;
   }
-  ACE_Time_Value connectivity_check_ttl() const
+  DCPS::TimeDuration connectivity_check_ttl() const
   {
     return connectivity_check_ttl_;
   }
 
-  void checklist_period(const ACE_Time_Value& x)
+  void checklist_period(const DCPS::TimeDuration& x)
   {
     checklist_period_ = x;
   }
-  ACE_Time_Value checklist_period() const
+  DCPS::TimeDuration checklist_period() const
   {
     return checklist_period_;
   }
 
-  void indication_period(const ACE_Time_Value& x)
+  void indication_period(const DCPS::TimeDuration& x)
   {
     indication_period_ = x;
   }
-  ACE_Time_Value indication_period() const
+  DCPS::TimeDuration indication_period() const
   {
     return indication_period_;
   }
 
-  void nominated_ttl(const ACE_Time_Value& x)
+  void nominated_ttl(const DCPS::TimeDuration& x)
   {
     nominated_ttl_ = x;
   }
-  ACE_Time_Value nominated_ttl() const
+  DCPS::TimeDuration nominated_ttl() const
   {
     return nominated_ttl_;
   }
 
-  void server_reflexive_address_period(const ACE_Time_Value& x)
+  void server_reflexive_address_period(const DCPS::TimeDuration& x)
   {
     server_reflexive_address_period_ = x;
   }
-  ACE_Time_Value server_reflexive_address_period() const
+  DCPS::TimeDuration server_reflexive_address_period() const
   {
     return server_reflexive_address_period_;
   }
@@ -122,20 +148,20 @@ public:
     return server_reflexive_indication_count_;
   }
 
-  void deferred_triggered_check_ttl(const ACE_Time_Value& x)
+  void deferred_triggered_check_ttl(const DCPS::TimeDuration& x)
   {
     deferred_triggered_check_ttl_ = x;
   }
-  ACE_Time_Value deferred_triggered_check_ttl() const
+  DCPS::TimeDuration deferred_triggered_check_ttl() const
   {
     return deferred_triggered_check_ttl_;
   }
 
-  void change_password_period(const ACE_Time_Value& x)
+  void change_password_period(const DCPS::TimeDuration& x)
   {
     change_password_period_ = x;
   }
-  ACE_Time_Value change_password_period() const
+  DCPS::TimeDuration change_password_period() const
   {
     return change_password_period_;
   }
@@ -143,23 +169,23 @@ public:
 private:
   // Mininum time between consecutive sends.
   // RFC 8445 Section 14.2
-  ACE_Time_Value T_a_;
+  DCPS::TimeDuration T_a_;
   // Repeat a check for this long before failing it.
-  ACE_Time_Value connectivity_check_ttl_;
+  DCPS::TimeDuration connectivity_check_ttl_;
   // Run all of the ordinary checks in a checklist in this amount of time.
-  ACE_Time_Value checklist_period_;
+  DCPS::TimeDuration checklist_period_;
   // Send an indication at this interval once an address is selected.
-  ACE_Time_Value indication_period_;
+  DCPS::TimeDuration indication_period_;
   // The nominated pair will still be valid if an indication has been received within this amount of time.
-  ACE_Time_Value nominated_ttl_;
+  DCPS::TimeDuration nominated_ttl_;
   // Perform server-reflexive candidate gathering this often.
-  ACE_Time_Value server_reflexive_address_period_;
+  DCPS::TimeDuration server_reflexive_address_period_;
   // Send this many binding indications to the STUN server before sending a binding request.
   size_t server_reflexive_indication_count_;
   // Lifetime of a deferred triggered check.
-  ACE_Time_Value deferred_triggered_check_ttl_;
+  DCPS::TimeDuration deferred_triggered_check_ttl_;
   // Change the password this often.
-  ACE_Time_Value change_password_period_;
+  DCPS::TimeDuration change_password_period_;
 };
 
 class OpenDDS_Rtps_Export Agent {
@@ -191,6 +217,8 @@ public:
                        const ACE_INET_Addr& a_remote_address,
                        const STUN::Message& a_message) = 0;
 
+  virtual void shutdown() = 0;
+
   static Agent* instance();
 };
 
@@ -200,3 +228,4 @@ public:
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* OPENDDS_RTPS_ICE_H */
+#endif /* OPENDDS_SECURITY */

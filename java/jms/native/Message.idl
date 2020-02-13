@@ -5,9 +5,6 @@
  * See: http://www.opendds.org/license.html
  */
 
-#pragma DCPS_DATA_TYPE "OpenDDS::JMS::MessagePayload"
-#pragma DCPS_DATA_KEY "OpenDDS::JMS::MessagePayload theHeader.JMSMessageID"
-
 #include "tao/OctetSeq.pidl"
 
 module OpenDDS {
@@ -17,7 +14,7 @@ module JMS {
     struct MessageHeader {
         string JMSDestination;
         long JMSDeliveryMode;
-        string JMSMessageID;
+        @key string JMSMessageID;
         long long JMSTimestamp;
         string JMSCorrelationID;
         string JMSReplyTo;
@@ -130,8 +127,9 @@ module JMS {
             CORBA::OctetSeq theOctetSeqBody;
     };
 
+    @topic
     struct MessagePayload {
-        MessageHeader theHeader;
+        @key MessageHeader theHeader;
         MessageProperties theProperties;
         MessageBody theBody;
     };

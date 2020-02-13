@@ -33,11 +33,11 @@ SynWatchdog::reactor_is_shut_down() const
   return session_->link()->transport().is_shut_down();
 }
 
-ACE_Time_Value
+TimeDuration
 SynWatchdog::next_interval()
 {
   MulticastInst& config = this->session_->link()->config();
-  ACE_Time_Value interval(config.syn_interval_);
+  TimeDuration interval(config.syn_interval_);
 
   // Apply exponential backoff based on number of retries:
   if (this->retries_ > 0) {
@@ -56,7 +56,7 @@ SynWatchdog::on_interval(const void* /*arg*/)
   this->session_->send_syn();
 }
 
-ACE_Time_Value
+TimeDuration
 SynWatchdog::next_timeout()
 {
   return this->session_->link()->config().syn_timeout_;
@@ -95,8 +95,8 @@ MulticastSession::MulticastSession(ACE_Reactor* reactor,
 
 MulticastSession::~MulticastSession()
 {
-  syn_watchdog_->cancel();
-  syn_watchdog_->wait();
+  ReactorInterceptor::CommandPtr command = syn_watchdog_->cancel();
+  command->wait();
 }
 
 bool

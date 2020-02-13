@@ -48,8 +48,7 @@ import org.opendds.modeling.diagram.policylib.navigator.OpenDDSPolicyLibNavigato
 /**
  * @generated
  */
-public class OpenDDSPolicyLibDiagramEditor extends DiagramDocumentEditor
-		implements IGotoMarker {
+public class OpenDDSPolicyLibDiagramEditor extends DiagramDocumentEditor implements IGotoMarker {
 
 	/**
 	 * @generated
@@ -117,10 +116,8 @@ public class OpenDDSPolicyLibDiagramEditor extends DiagramDocumentEditor
 	 * @generated
 	 */
 	protected IDocumentProvider getDocumentProvider(IEditorInput input) {
-		if (input instanceof IFileEditorInput
-				|| input instanceof URIEditorInput) {
-			return OpenDDSPolicyLibDiagramEditorPlugin.getInstance()
-					.getDocumentProvider();
+		if (input instanceof IFileEditorInput || input instanceof URIEditorInput) {
+			return OpenDDSPolicyLibDiagramEditorPlugin.getInstance().getDocumentProvider();
 		}
 		return super.getDocumentProvider(input);
 	}
@@ -129,8 +126,7 @@ public class OpenDDSPolicyLibDiagramEditor extends DiagramDocumentEditor
 	 * @generated
 	 */
 	public TransactionalEditingDomain getEditingDomain() {
-		IDocument document = getEditorInput() != null ? getDocumentProvider()
-				.getDocument(getEditorInput()) : null;
+		IDocument document = getEditorInput() != null ? getDocumentProvider().getDocument(getEditorInput()) : null;
 		if (document instanceof IDiagramDocument) {
 			return ((IDiagramDocument) document).getEditingDomain();
 		}
@@ -141,10 +137,8 @@ public class OpenDDSPolicyLibDiagramEditor extends DiagramDocumentEditor
 	 * @generated
 	 */
 	protected void setDocumentProvider(IEditorInput input) {
-		if (input instanceof IFileEditorInput
-				|| input instanceof URIEditorInput) {
-			setDocumentProvider(OpenDDSPolicyLibDiagramEditorPlugin
-					.getInstance().getDocumentProvider());
+		if (input instanceof IFileEditorInput || input instanceof URIEditorInput) {
+			setDocumentProvider(OpenDDSPolicyLibDiagramEditorPlugin.getInstance().getDocumentProvider());
 		} else {
 			super.setDocumentProvider(input);
 		}
@@ -178,8 +172,7 @@ public class OpenDDSPolicyLibDiagramEditor extends DiagramDocumentEditor
 		Shell shell = getSite().getShell();
 		IEditorInput input = getEditorInput();
 		SaveAsDialog dialog = new SaveAsDialog(shell);
-		IFile original = input instanceof IFileEditorInput ? ((IFileEditorInput) input)
-				.getFile() : null;
+		IFile original = input instanceof IFileEditorInput ? ((IFileEditorInput) input).getFile() : null;
 		if (original != null) {
 			dialog.setOriginalFile(original);
 		}
@@ -190,9 +183,7 @@ public class OpenDDSPolicyLibDiagramEditor extends DiagramDocumentEditor
 			return;
 		}
 		if (provider.isDeleted(input) && original != null) {
-			String message = NLS.bind(
-					Messages.OpenDDSPolicyLibDiagramEditor_SavingDeletedFile,
-					original.getName());
+			String message = NLS.bind(Messages.OpenDDSPolicyLibDiagramEditor_SavingDeletedFile, original.getName());
 			dialog.setErrorMessage(null);
 			dialog.setMessage(message, IMessageProvider.WARNING);
 		}
@@ -213,37 +204,27 @@ public class OpenDDSPolicyLibDiagramEditor extends DiagramDocumentEditor
 		IFile file = workspaceRoot.getFile(filePath);
 		final IEditorInput newInput = new FileEditorInput(file);
 		// Check if the editor is already open
-		IEditorMatchingStrategy matchingStrategy = getEditorDescriptor()
-				.getEditorMatchingStrategy();
-		IEditorReference[] editorRefs = PlatformUI.getWorkbench()
-				.getActiveWorkbenchWindow().getActivePage()
+		IEditorMatchingStrategy matchingStrategy = getEditorDescriptor().getEditorMatchingStrategy();
+		IEditorReference[] editorRefs = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage()
 				.getEditorReferences();
 		for (int i = 0; i < editorRefs.length; i++) {
 			if (matchingStrategy.matches(editorRefs[i], newInput)) {
-				MessageDialog
-						.openWarning(
-								shell,
-								Messages.OpenDDSPolicyLibDiagramEditor_SaveAsErrorTitle,
-								Messages.OpenDDSPolicyLibDiagramEditor_SaveAsErrorMessage);
+				MessageDialog.openWarning(shell, Messages.OpenDDSPolicyLibDiagramEditor_SaveAsErrorTitle,
+						Messages.OpenDDSPolicyLibDiagramEditor_SaveAsErrorMessage);
 				return;
 			}
 		}
 		boolean success = false;
 		try {
 			provider.aboutToChange(newInput);
-			getDocumentProvider(newInput).saveDocument(progressMonitor,
-					newInput,
+			getDocumentProvider(newInput).saveDocument(progressMonitor, newInput,
 					getDocumentProvider().getDocument(getEditorInput()), true);
 			success = true;
 		} catch (CoreException x) {
 			IStatus status = x.getStatus();
 			if (status == null || status.getSeverity() != IStatus.CANCEL) {
-				ErrorDialog
-						.openError(
-								shell,
-								Messages.OpenDDSPolicyLibDiagramEditor_SaveErrorTitle,
-								Messages.OpenDDSPolicyLibDiagramEditor_SaveErrorMessage,
-								x.getStatus());
+				ErrorDialog.openError(shell, Messages.OpenDDSPolicyLibDiagramEditor_SaveErrorTitle,
+						Messages.OpenDDSPolicyLibDiagramEditor_SaveErrorMessage, x.getStatus());
 			}
 		} finally {
 			provider.changed(newInput);
@@ -277,8 +258,7 @@ public class OpenDDSPolicyLibDiagramEditor extends DiagramDocumentEditor
 		}
 		IFile file = WorkspaceSynchronizer.getFile(diagram.eResource());
 		if (file != null) {
-			OpenDDSPolicyLibNavigatorItem item = new OpenDDSPolicyLibNavigatorItem(
-					diagram, file, false);
+			OpenDDSPolicyLibNavigatorItem item = new OpenDDSPolicyLibNavigatorItem(diagram, file, false);
 			return new StructuredSelection(item);
 		}
 		return StructuredSelection.EMPTY;
@@ -289,16 +269,15 @@ public class OpenDDSPolicyLibDiagramEditor extends DiagramDocumentEditor
 	 */
 	protected void configureGraphicalViewer() {
 		super.configureGraphicalViewer();
-		DiagramEditorContextMenuProvider provider = new DiagramEditorContextMenuProvider(
-				this, getDiagramGraphicalViewer());
+		DiagramEditorContextMenuProvider provider = new DiagramEditorContextMenuProvider(this,
+				getDiagramGraphicalViewer());
 		getDiagramGraphicalViewer().setContextMenu(provider);
-		getSite().registerContextMenu(ActionIds.DIAGRAM_EDITOR_CONTEXT_MENU,
-				provider, getDiagramGraphicalViewer());
+		getSite().registerContextMenu(ActionIds.DIAGRAM_EDITOR_CONTEXT_MENU, provider, getDiagramGraphicalViewer());
 
 		// Custom code begin
 		org.eclipse.ui.IWorkbenchPage page = getSite().getPage();
-		org.eclipse.ui.IPartListener2 listener = new com.ociweb.gmf.part.SaveOnDeactivationListener(
-				this, ID, OpenDDSPolicyLibDiagramEditorPlugin.getInstance());
+		org.eclipse.ui.IPartListener2 listener = new com.ociweb.gmf.part.SaveOnDeactivationListener(this, ID,
+				OpenDDSPolicyLibDiagramEditorPlugin.getInstance());
 		page.addPartListener(listener);
 		// Custom code end
 	}

@@ -31,7 +31,7 @@ public:
 TEST_F(SerializePropertyTest, PropertySeq_OnePropagateFalse_TwoPropagateTrue)
 {
   inseq.length(3);
-  for (size_t i = 0; i < inseq.length(); ++i) {
+  for (CORBA::ULong i = 0; i < inseq.length(); ++i) {
 
     std::stringstream name, value;
     name << "name " << i;

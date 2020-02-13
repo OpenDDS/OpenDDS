@@ -1,7 +1,7 @@
 [submodule "tools/rapidjson"]
 	path = tools/rapidjson
-	url = git://github.com/miloyip/rapidjson.git
+	url = https://github.com/miloyip/rapidjson.git
 	branch = version1.1.0
 [submodule "tests/googletest"]
 	path = tests/googletest
-	url = git://github.com/google/googletest
+	url = https://github.com/google/googletest

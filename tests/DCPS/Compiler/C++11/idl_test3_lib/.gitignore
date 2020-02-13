@@ -1,5 +1,3 @@
-/FooDef2_TS.cpp
-/FooDef2_TS.hpp
 /FooDef2C.h
 /FooDef2TypeSupport.idl
 /FooDef2TypeSupportC.cpp
@@ -8,8 +6,6 @@
 /FooDef2TypeSupportImpl.cpp
 /FooDef2TypeSupportImpl.h
 /FooDef2TypeSupportS.h
-/FooDef3_TS.cpp
-/FooDef3_TS.hpp
 /FooDef3C.h
 /FooDef3TypeSupport.idl
 /FooDef3TypeSupportC.cpp
@@ -18,8 +14,6 @@
 /FooDef3TypeSupportImpl.cpp
 /FooDef3TypeSupportImpl.h
 /FooDef3TypeSupportS.h
-/FooDef_TS.cpp
-/FooDef_TS.hpp
 /FooDefC.h
 /FooDefTypeSupport.idl
 /FooDefTypeSupportC.cpp
@@ -28,8 +22,6 @@
 /FooDefTypeSupportImpl.cpp
 /FooDefTypeSupportImpl.h
 /FooDefTypeSupportS.h
-/SharedTypes_TS.cpp
-/SharedTypes_TS.hpp
 /SharedTypesC.h
 /SharedTypesTypeSupport.idl
 /SharedTypesTypeSupportC.cpp

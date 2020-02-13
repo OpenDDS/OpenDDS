@@ -25,20 +25,24 @@ bool
 {
   if (tc == 0)
     {
-      ACE_ERROR_RETURN((LM_INFO,
-                        ACE_TEXT("(%P|%t) Null transport client.\n")),
-                       0);
+      ACE_DEBUG((LM_INFO,
+                 ACE_TEXT("(%P|%t) Null transport client.\n")));
+      return false;
     }
 
   OPENDDS_STRING supported;
-  for (OPENDDS_VECTOR(OpenDDS::DCPS::TransportImpl*)::const_iterator it = tc->impls_.begin(),
+  for (OpenDDS::DCPS::TransportClient::ImplsType::const_iterator it = tc->impls_.begin(),
           end = tc->impls_.end();
           it != end;)
     {
-      supported += (*it)->config().name();
-      if (++it != end)
+      OpenDDS::DCPS::TransportImpl_rch impl = it->lock();
+      if (impl)
         {
-          supported += ", ";
+          supported += impl->config().name();
+          if (++it != end)
+            {
+              supported += ", ";
+            }
         }
     }
 
@@ -47,24 +51,23 @@ bool
              name.c_str(),
              supported.c_str()));
 
-  for (OPENDDS_VECTOR(OpenDDS::DCPS::TransportImpl*)::const_iterator it = tc->impls_.begin();
+  for (OpenDDS::DCPS::TransportClient::ImplsType::const_iterator it = tc->impls_.begin();
           it != tc->impls_.end(); ++it)
     {
 
-      if ((*it)->config().name() == name)
+      OpenDDS::DCPS::TransportImpl_rch impl = it->lock();
+      if (impl && impl->config().name() == name)
         {
-//          ACE_ERROR_RETURN((LM_DEBUG,
-//                            ACE_TEXT("(%P|%t) Yes. Transport '%C' is supported.\n"),
-//                            name.c_str()),
-//                           true);
+//          ACE_DEBUG((LM_DEBUG,
+//                     ACE_TEXT("(%P|%t) Yes. Transport '%C' is supported.\n"),
+//                     name.c_str()));
           return true;
         }
     }
 
-//  ACE_ERROR_RETURN((LM_DEBUG,
-//                    ACE_TEXT("(%P|%t) No. Transport '%C' is not supported.\n"),
-//                    name.c_str()),
-//                   false);
+//  ACE_DEBUG((LM_DEBUG,
+//             ACE_TEXT("(%P|%t) No. Transport '%C' is not supported.\n"),
+//             name.c_str()));
   return false;
 }
 
@@ -73,23 +76,23 @@ bool
 {
   if (ctc == 0)
     {
-      ACE_ERROR_RETURN((LM_INFO,
-                        ACE_TEXT("(%P|%t) Null transport client.\n")),
+      ACE_ERROR_RETURN((LM_WARNING,
+                        ACE_TEXT("(%P|%t) WARNING: Null transport client.\n")),
                        false);
     }
 
   OpenDDS::DCPS::TransportClient* tc = const_cast<OpenDDS::DCPS::TransportClient*> (ctc);
   if (tc == 0)
     {
-      ACE_ERROR_RETURN((LM_INFO,
-                        ACE_TEXT("(%P|%t) Null transport client.\n")),
+      ACE_ERROR_RETURN((LM_WARNING,
+                        ACE_TEXT("(%P|%t) WARNING: Null transport client.\n")),
                        false);
     }
 
   if (tc->links_.map().size() == 0)
     {
       ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) No negotiated protocols?!.\n")),
+                        ACE_TEXT("(%P|%t) ERROR: No negotiated protocols?!.\n")),
                        false);
     }
 
@@ -119,18 +122,16 @@ bool
 
       if (datalink->impl().config().name() == name)
         {
-//          ACE_ERROR_RETURN((LM_DEBUG,
-//                            ACE_TEXT("(%P|%t) Yes. Transport '%C' was negotiated.\n"),
-//                            name.c_str()),
-//                           true);
+//          ACE_DEBUG((LM_DEBUG,
+//                     ACE_TEXT("(%P|%t) Yes. Transport '%C' was negotiated.\n"),
+//                     name.c_str()));
           return true;
         }
     }
 
-//  ACE_ERROR_RETURN((LM_DEBUG,
-//                    ACE_TEXT("(%P|%t) No. Transport '%C' was not negotiated.\n"),
-//                    name.c_str()),
-//                   false);
+//  ACE_DEBUG((LM_DEBUG,
+//             ACE_TEXT("(%P|%t) No. Transport '%C' was not negotiated.\n"),
+//             name.c_str()));
   return false;
 }
 

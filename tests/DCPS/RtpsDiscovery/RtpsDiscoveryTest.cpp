@@ -18,7 +18,7 @@
 #include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
 #endif
 
-#include "model/Sync.h"
+#include "tests/Utils/StatusMatching.h"
 #include "ace/Arg_Shifter.h"
 #include "ace/OS_NS_unistd.h"
 
@@ -94,7 +94,6 @@ using OpenDDS::DCPS::DEFAULT_STATUS_MASK;
 using OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC;
 using OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC;
 using OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC;
-using OpenDDS::Model::WriterSync;
 
 void cleanup(const DomainParticipantFactory_var& dpf,
              const DomainParticipant_var& dp)
@@ -264,28 +263,6 @@ DataWriter_var create_data_writer(const DomainParticipant_var& dp2)
   return dw;
 }
 
-void wait_match(const DataReader_var& dr, int n)
-{
-  StatusCondition_var condition = dr->get_statuscondition();
-  condition->set_enabled_statuses(SUBSCRIPTION_MATCHED_STATUS);
-  WaitSet_var ws = new DDS::WaitSet;
-  ws->attach_condition(condition);
-  ConditionSeq conditions;
-  SubscriptionMatchedStatus ms = {0, 0, 0, 0, 0};
-  const Duration_t timeout = {1, 0};
-  ReturnCode_t result;
-  while (dr->get_subscription_matched_status(ms) == RETCODE_OK
-         && ms.current_count != n) {
-    result = ws->wait(conditions, timeout);
-    if (result != RETCODE_OK && result != RETCODE_TIMEOUT) {
-      ACE_ERROR((LM_ERROR,
-        "ERROR: %P wait_match could not wait for condition: %d\n", result));
-      break;
-    }
-  }
-  ws->detach_condition(condition);
-}
-
 void recreate_data_writer_and_topic(DataWriter_var& dw, const DataReader_var& dr)
 {
   DataWriterQos dw_qos;
@@ -306,7 +283,7 @@ void recreate_data_writer_and_topic(DataWriter_var& dw, const DataReader_var& dr
   topic = 0;
 
   // Wait until the data reader is not associated with the writer.
-  wait_match (dr, 0);
+  Utils::wait_match(dr, 0);
 
   topic = dp->create_topic(topic_name, type_name, topic_qos, 0, 0);
   if (!topic) {
@@ -788,7 +765,7 @@ bool run_test(DomainParticipant_var& dp_sub,
   }
 
   // Wait for the reader to associate with the writer.
-  WriterSync::wait_match(dw);
+  Utils::wait_match(dw, 1, Utils::GTE);
 
   // Remove the writer and its topic, then re-create them.  The writer's
   // participant should still have discovery info about the reader so that
@@ -796,11 +773,11 @@ bool run_test(DomainParticipant_var& dp_sub,
   recreate_data_writer_and_topic(dw, dr);
 
   // Wait for the reader to associate with the writer.
-  WriterSync::wait_match(dw);
+  Utils::wait_match(dw, 1, Utils::GTE);
 
   // The new writer is associated with the reader, but the reader may still
   // also be associated with the old writer.
-  wait_match(dr, 1);
+  Utils::wait_match(dr, 1);
 
   // Get the new instance handle as pub_ih
   if (!read_publication_bit(bit_sub, dp_sub, pub_repo_id, pub_ih, TestConfig::DATA_WRITER_USER_DATA(), TestConfig::TOPIC_DATA(), 1, 2)) {

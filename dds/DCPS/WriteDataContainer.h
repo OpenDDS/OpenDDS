@@ -17,6 +17,7 @@
 #include "PoolAllocator.h"
 #include "PoolAllocationBase.h"
 #include "Message_Block_Ptr.h"
+#include "TimeTypes.h"
 
 #include "ace/Synch_Traits.h"
 #include "ace/Condition_T.h"
@@ -248,13 +249,7 @@ public:
    * TRANSIENT_LOCAL_DURABILITY_QOS is used. The data on the list
    * returned is not put on any SendStateDataSampleList.
    */
-  SendStateDataSampleList get_resend_data() ;
-
-  /**
-   * Returns if pending data exists.  This includes
-   * sending, and unsent data.
-   */
-  bool pending_data();
+  SendStateDataSampleList get_resend_data();
 
   /**
    * Acknowledge the delivery of data.  The sample that resides in
@@ -293,7 +288,7 @@ public:
    * to remove oldest samples (forcing the transport to drop samples if necessary)
    * to make space.  If there are several threads waiting then
    * the first one in the waiting list can enqueue, others continue
-   * waiting.
+   * waiting. Note: the lock should be held before calling this method
    */
   DDS::ReturnCode_t obtain_buffer(
     DataSampleElement*& element,
@@ -341,7 +336,7 @@ public:
   typedef OPENDDS_VECTOR(DDS::InstanceHandle_t) InstanceHandleVec;
   void get_instance_handles(InstanceHandleVec& instance_handles);
 
-  DDS::ReturnCode_t wait_ack_of_seq(const ACE_Time_Value& abs_deadline, const SequenceNumber& sequence);
+  DDS::ReturnCode_t wait_ack_of_seq(const MonotonicTimePoint& abs_deadline, const SequenceNumber& sequence);
 
   bool sequence_acknowledged(const SequenceNumber sequence);
 
@@ -357,6 +352,12 @@ private:
   WriteDataContainer(WriteDataContainer const &);
   WriteDataContainer & operator= (WriteDataContainer const &);
   // --------------------------
+
+  /**
+   * Returns if pending data exists.  This includes
+   * sending, and unsent data.
+   */
+  bool pending_data();
 
   void copy_and_prepend(SendStateDataSampleList& list,
                         const SendStateDataSampleList& appended,
@@ -495,7 +496,7 @@ private:
 
   /// The number of chunks that sample_list_element_allocator_
   /// needs initialize.
-  size_t                                    n_chunks_;
+  size_t n_chunks_;
 
   /// The cached allocator to allocate DataSampleElement
   /// objects.

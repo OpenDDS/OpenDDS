@@ -27,6 +27,7 @@
 #include "dds/DCPS/DataSampleHeader.h"
 #include "dds/DCPS/PoolAllocationBase.h"
 #include "dds/DCPS/DiscoveryBase.h"
+#include "dds/DCPS/JobQueue.h"
 
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/framework/TransportSendListener.h"
@@ -39,6 +40,7 @@
 #include "dds/DCPS/RTPS/RtpsSecurityC.h"
 #endif
 
+#include "ace/Atomic_Op.h"
 #include "ace/Task_Ex_T.h"
 #include "ace/Thread_Mutex.h"
 #include "ace/Condition_Thread_Mutex.h"
@@ -76,8 +78,6 @@ public:
                          const RtpsDiscovery& disco,
                          DDS::DomainId_t domainId);
 
-  void rtps_relay_address(const ACE_INET_Addr& address);
-
 #ifdef OPENDDS_SECURITY
   DDS::ReturnCode_t init_security(DDS::Security::IdentityHandle id_handle,
                                   DDS::Security::PermissionsHandle perm_handle,
@@ -88,7 +88,8 @@ public:
   void acknowledge();
 
   void shutdown();
-  void unicast_locators(DCPS::LocatorSeq& locators) const;
+  DCPS::LocatorSeq unicast_locators() const;
+  DCPS::LocatorSeq multicast_locators() const;
 
   // @brief return the ip address we have bound to.
   // Valid after init() call
@@ -114,12 +115,16 @@ public:
 
   bool disassociate(const ParticipantData_t& pdata);
 
+  void update_locators(const ParticipantData_t& pdata);
+
 #ifdef OPENDDS_SECURITY
   DDS::ReturnCode_t write_stateless_message(DDS::Security::ParticipantStatelessMessage& msg,
                                             const DCPS::RepoId& reader);
 
   DDS::ReturnCode_t write_volatile_message(DDS::Security::ParticipantVolatileMessageSecure& msg,
                                            const DCPS::RepoId& reader);
+
+  void write_durable_dcps_participant_secure(const DCPS::RepoId& reader);
 
   DDS::ReturnCode_t write_dcps_participant_secure(const Security::SPDPdiscoveredParticipantData& msg,
                                                   const DCPS::RepoId& part);
@@ -128,8 +133,7 @@ public:
   DDS::ReturnCode_t write_dcps_participant_dispose(const DCPS::RepoId& part);
 
   // Topic
-  bool update_topic_qos(const DCPS::RepoId& topicId, const DDS::TopicQos& qos,
-                        OPENDDS_STRING& name);
+  bool update_topic_qos(const DCPS::RepoId& topicId, const DDS::TopicQos& qos);
 
   // Publication
   bool update_publication_qos(const DCPS::RepoId& publicationId,
@@ -158,7 +162,21 @@ public:
 
   ICE::Endpoint* get_ice_endpoint();
 
+  void rtps_relay_address(const ACE_INET_Addr& address);
+
+  void stun_server_address(const ACE_INET_Addr& address);
+
 private:
+
+  class AssociationComplete : public DCPS::JobQueue::Job {
+  public:
+    AssociationComplete(Sedp* sedp, const DCPS::RepoId& local, const DCPS::RepoId& remote) : sedp_(sedp), local_(local), remote_(remote) {}
+    void execute();
+  private:
+    Sedp* sedp_;
+    DCPS::RepoId local_, remote_;
+  };
+
   Spdp& spdp_;
 
 #ifdef OPENDDS_SECURITY
@@ -242,8 +260,8 @@ private:
       : type_(mt), id_(id), pgmdata_(data) {}
 #endif
 
-    static OPENDDS_STRING msgTypeToString(MsgType type);
-    OPENDDS_STRING msgTypeToString() const;
+    static const char* msgTypeToString(MsgType type);
+    const char* msgTypeToString() const;
   };
 
 
@@ -252,6 +270,7 @@ private:
     Endpoint(const DCPS::RepoId& repo_id, Sedp& sedp)
       : repo_id_(repo_id)
       , sedp_(sedp)
+      , shutting_down_(false)
 #ifdef OPENDDS_SECURITY
       , participant_crypto_handle_(DDS::HANDLE_NIL)
       , endpoint_crypto_handle_(DDS::HANDLE_NIL)
@@ -292,9 +311,12 @@ private:
     }
 #endif
 
+    void shutting_down() { shutting_down_ = true; }
+
   protected:
     DCPS::RepoId repo_id_;
     Sedp& sedp_;
+    ACE_Atomic_Op<ACE_Thread_Mutex, bool> shutting_down_;
 #ifdef OPENDDS_SECURITY
     DDS::Security::ParticipantCryptoHandle participant_crypto_handle_;
     DDS::Security::NativeCryptoHandle endpoint_crypto_handle_;
@@ -307,6 +329,7 @@ private:
     virtual ~Writer();
 
     bool assoc(const DCPS::AssociationData& subscription);
+    void transport_assoc_done(int flags, const DCPS::RepoId& remote);
 
     // Implementing TransportSendListener
     void data_delivered(const DCPS::DataSampleElement*);
@@ -374,70 +397,28 @@ private:
 
   };
 
-  Writer publications_writer_;
+  typedef DCPS::RcHandle<Writer> Writer_rch;
+
+  Writer_rch publications_writer_;
 
 #ifdef OPENDDS_SECURITY
-  Writer publications_secure_writer_;
+  Writer_rch publications_secure_writer_;
 #endif
 
-  Writer subscriptions_writer_;
+  Writer_rch subscriptions_writer_;
 
 #ifdef OPENDDS_SECURITY
-  Writer subscriptions_secure_writer_;
+  Writer_rch subscriptions_secure_writer_;
 #endif
 
-  Writer participant_message_writer_;
+  Writer_rch participant_message_writer_;
 
 #ifdef OPENDDS_SECURITY
-  Writer participant_message_secure_writer_;
-  Writer participant_stateless_message_writer_;
-  Writer dcps_participant_secure_writer_;
+  Writer_rch participant_message_secure_writer_;
+  Writer_rch participant_stateless_message_writer_;
+  Writer_rch dcps_participant_secure_writer_;
 
-  /**
-   * Special Case for the Participant Volatile Message Secure Writer, which
-   * performs key exchange. This sends the keys after the first ACKNACK from a
-   * Reader to prevent a loss of keys in the transition between authentication
-   * and key exchange. See docs/design/security.md section titled "Slow
-   * Follower Key Exchange Issue" for details.
-   */
-  class RepeatOnceWriter : public Writer {
-  public:
-    RepeatOnceWriter(const DCPS::RepoId& pub_id, Sedp& sedp);
-
-    /**
-     * If a remote participant's volatile reader acks us for the fist time,
-     * resend all keys (User and Builtin) for a second time.
-     *
-     * Removes the participant's keys afterwards.
-     */
-    void first_acknowledged_by_reader(
-      const DCPS::RepoId& rdr, const DCPS::SequenceNumber& sn_base);
-
-    /// Erase any keys pending repeat to this participant
-    void erase(const DCPS::RepoId& part);
-
-    struct RemoteWriter {
-      DCPS::RepoId local_reader, remote_writer;
-      DDS::Security::DatareaderCryptoTokenSeq reader_tokens;
-    };
-    typedef OPENDDS_VECTOR(RemoteWriter) RemoteWriterVector;
-    typedef OPENDDS_MAP_CMP(
-      DCPS::RepoId, RemoteWriterVector, DCPS::GUID_tKeyLessThan) RemoteWriterVectors;
-    RemoteWriterVectors remote_writers_;
-
-    struct RemoteReader {
-      DCPS::RepoId local_writer, remote_reader;
-      DDS::Security::DatawriterCryptoTokenSeq writer_tokens;
-    };
-    typedef OPENDDS_VECTOR(RemoteReader) RemoteReaderVector;
-    typedef OPENDDS_MAP_CMP(
-      DCPS::RepoId, RemoteReaderVector, DCPS::GUID_tKeyLessThan) RemoteReaderVectors;
-    RemoteReaderVectors remote_readers_;
-
-    /// Lock for remote_readers_ and remote_writers_
-    ACE_Thread_Mutex lock_;
-
-  } participant_volatile_message_secure_writer_;
+  Writer_rch participant_volatile_message_secure_writer_;
 #endif
 
   class Reader
@@ -447,7 +428,6 @@ private:
   public:
     Reader(const DCPS::RepoId& sub_id, Sedp& sedp)
       : Endpoint(sub_id, sedp)
-      , shutting_down_(false)
     {}
 
     virtual ~Reader();
@@ -462,8 +442,6 @@ private:
     void notify_subscription_reconnected(const DCPS::WriterIdSeq&) {}
     void notify_subscription_lost(const DCPS::WriterIdSeq&) {}
     void remove_associations(const DCPS::WriterIdSeq&, bool) {}
-
-    ACE_Atomic_Op<ACE_SYNCH_MUTEX, bool> shutting_down_;
   };
 
   typedef DCPS::RcHandle<Reader> Reader_rch;
@@ -665,9 +643,7 @@ private:
 
   // Topic:
 
-  DCPS::RepoIdSet defer_match_endpoints_, associated_participants_;
-
-  void inconsistent_topic(const DCPS::RepoIdSet& endpoints) const;
+  DCPS::RepoIdSet associated_participants_;
 
   virtual bool shutting_down() const;
 
@@ -685,24 +661,10 @@ private:
                     const DCPS::RepoId& writer, const DCPS::RepoId& reader);
 #endif
 
-  virtual bool defer_writer(const DCPS::RepoId& writer,
-                            const DCPS::RepoId& writer_participant);
-
-  virtual bool defer_reader(const DCPS::RepoId& reader,
-                            const DCPS::RepoId& reader_participant);
-
-  static DCPS::RepoId make_id(const DCPS::RepoId& participant_id,
-                              const EntityId_t& entity);
-
   static void set_inline_qos(DCPS::TransportLocatorSeq& locators);
 
-  void write_durable_publication_data(const DCPS::RepoId& reader);
-  void write_durable_subscription_data(const DCPS::RepoId& reader);
-
-#ifdef OPENDDS_SECURITY
-  void write_durable_publication_data_secure(const DCPS::RepoId& reader);
-  void write_durable_subscription_data_secure(const DCPS::RepoId& reader);
-#endif
+  void write_durable_publication_data(const DCPS::RepoId& reader, bool secure);
+  void write_durable_subscription_data(const DCPS::RepoId& reader, bool secure);
 
   void write_durable_participant_message_data(const DCPS::RepoId& reader);
 
@@ -745,7 +707,7 @@ private:
                                                    LocalParticipantMessage& part,
                                                    const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
 
-  bool is_opendds(const GUID_t& endpoint) const;
+  virtual bool is_expectant_opendds(const GUID_t& endpoint) const;
 
 #ifdef OPENDDS_SECURITY
   DCPS::SequenceNumber secure_automatic_liveliness_seq_;
@@ -791,6 +753,27 @@ protected:
   void handle_datawriter_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg);
 
   DDS::DomainId_t get_domain_id() const;
+
+  DCPS::RepoIdSet associated_volatile_readers_;
+
+  struct RemoteWriter {
+    DCPS::RepoId local_reader, remote_writer;
+    DDS::Security::DatareaderCryptoTokenSeq reader_tokens;
+  };
+  typedef OPENDDS_VECTOR(RemoteWriter) RemoteWriterVector;
+  typedef OPENDDS_MAP_CMP(
+    DCPS::RepoId, RemoteWriterVector, DCPS::GUID_tKeyLessThan) RemoteWriterVectors;
+  RemoteWriterVectors datareader_crypto_tokens_;
+
+  struct RemoteReader {
+    DCPS::RepoId local_writer, remote_reader;
+    DDS::Security::DatawriterCryptoTokenSeq writer_tokens;
+  };
+  typedef OPENDDS_VECTOR(RemoteReader) RemoteReaderVector;
+  typedef OPENDDS_MAP_CMP(
+    DCPS::RepoId, RemoteReaderVector, DCPS::GUID_tKeyLessThan) RemoteReaderVectors;
+  RemoteReaderVectors datawriter_crypto_tokens_;
+
 #endif
 
 #ifdef OPENDDS_SECURITY
@@ -840,6 +823,9 @@ private:
   ACE_Condition_Thread_Mutex cond_;
   unsigned int acks_;
 };
+
+bool locators_changed(const ParticipantProxy_t& x,
+                      const ParticipantProxy_t& y);
 
 }
 }

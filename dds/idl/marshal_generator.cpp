@@ -7,6 +7,7 @@
 
 #include "marshal_generator.h"
 #include "utl_identifier.h"
+#include "topic_keys.h"
 
 #include <string>
 #include <sstream>
@@ -846,7 +847,7 @@ namespace {
   // specified and returns the AST_Type associated with that key.
   // Because the key name can contain indexed arrays and nested
   // structures, things can get interesting.
-  AST_Type* find_type(const std::vector<AST_Field*>& fields, const string& key)
+  AST_Type* find_type(AST_Structure* struct_node, const string& key)
   {
     string key_base = key;   // the field we are looking for here
     string key_rem;          // the sub-field we will look for recursively
@@ -866,14 +867,13 @@ namespace {
         key_rem = key.substr(pos+1);
       }
     }
-    for (size_t i = 0; i < fields.size(); ++i) {
-      string field_name = fields[i]->local_name()->get_string();
-      if (field_name == key_base) {
-        AST_Type* field_type = fields[i]->field_type();
-        AST_Typedef* typedef_node = dynamic_cast<AST_Typedef*>(field_type);
-        if (typedef_node) {
-          field_type = typedef_node->primitive_base_type();
-        }
+
+    const Fields fields(struct_node);
+    const Fields::Iterator fields_end = fields.end();
+    for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
+      AST_Field* field = *i;
+      if (key_base == field->local_name()->get_string()) {
+        AST_Type* field_type = resolveActualType(field->field_type());
         if (!is_array && key_rem.empty()) {
           // The requested key field matches this one.  We do not allow
           // arrays (must be indexed specifically) or structs (must
@@ -916,17 +916,9 @@ namespace {
         if (sub_struct == 0) {
           throw string("Expected structure field for ") + key_base;
         }
-        size_t nfields = sub_struct->nfields();
-        std::vector<AST_Field*> sub_fields;
-        sub_fields.reserve(nfields);
 
-        for (unsigned long i = 0; i < nfields; ++i) {
-          AST_Field** f;
-          sub_struct->field(f, i);
-          sub_fields.push_back(*f);
-        }
         // find type of nested struct field
-        return find_type(sub_fields, key_rem);
+        return find_type(sub_struct, key_rem);
       }
     }
     throw string("Field not found.");
@@ -946,11 +938,10 @@ namespace {
     if ((fld_cls & CL_STRING) && !(fld_cls & CL_BOUNDED)) {
       bounded = false;
     } else if (fld_cls & CL_STRUCTURE) {
-      AST_Structure* struct_node = dynamic_cast<AST_Structure*>(type);
-      for (unsigned long i = 0; i < struct_node->nfields(); ++i) {
-        AST_Field** f;
-        struct_node->field(f, i);
-        if (!is_bounded_type((*f)->field_type())) {
+      const Fields fields(dynamic_cast<AST_Structure*>(type));
+      const Fields::Iterator fields_end = fields.end();
+      for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
+        if (!is_bounded_type((*i)->field_type())) {
           bounded = false;
           break;
         }
@@ -966,11 +957,10 @@ namespace {
       AST_Array* array_node = dynamic_cast<AST_Array*>(type);
       if (!is_bounded_type(array_node->base_type())) bounded = false;
     } else if (fld_cls & CL_UNION) {
-      AST_Union* union_node = dynamic_cast<AST_Union*>(type);
-      for (unsigned long i = 0; i < union_node->nfields(); ++i) {
-        AST_Field** f;
-        union_node->field(f, i);
-        if (!is_bounded_type((*f)->field_type())) {
+      const Fields fields(dynamic_cast<AST_Union*>(type));
+      const Fields::Iterator fields_end = fields.end();
+      for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
+        if (!is_bounded_type((*i)->field_type())) {
           bounded = false;
           break;
         }
@@ -1066,12 +1056,10 @@ namespace {
       break;
     }
     case AST_Decl::NT_struct: {
-      AST_Structure* struct_node = dynamic_cast<AST_Structure*>(type);
-      for (unsigned long i = 0; i < struct_node->nfields(); ++i) {
-        AST_Field** f;
-        struct_node->field(f, i);
-        AST_Type* field_type = (*f)->field_type();
-        max_marshaled_size(field_type, size, padding);
+      const Fields fields(dynamic_cast<AST_Structure*>(type));
+      const Fields::Iterator fields_end = fields.end();
+      for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
+        max_marshaled_size((*i)->field_type(), size, padding);
       }
       break;
     }
@@ -1100,11 +1088,10 @@ namespace {
       max_marshaled_size(union_node->disc_type(), size, padding);
       size_t largest_field_size = 0, largest_field_pad = 0;
       const size_t starting_size = size, starting_pad = padding;
-      for (unsigned long i = 0; i < union_node->nfields(); ++i) {
-        AST_Field** f;
-        union_node->field(f, i);
-        AST_Type* field_type = (*f)->field_type();
-        max_marshaled_size(field_type, size, padding);
+      const Fields fields(union_node);
+      const Fields::Iterator fields_end = fields.end();
+      for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
+        max_marshaled_size((*i)->field_type(), size, padding);
         size_t field_size = size - starting_size,
           field_pad = padding - starting_pad;
         if (field_size > largest_field_size) {
@@ -1572,9 +1559,78 @@ namespace {
     std::map<string, string> cst_;
     string iQosOffset_, preamble_;
   };
+
+  typedef void (*KeyIterationFn)(
+    const string& key_name, AST_Type* ast_type,
+    size_t* size, size_t* padding,
+    string* expr, string* intro);
+
+  bool
+  iterate_over_keys(
+    AST_Structure* node,
+    const std::string& struct_name,
+    IDL_GlobalData::DCPS_Data_Type_Info* info,
+    TopicKeys& keys,
+    KeyIterationFn fn,
+    size_t* size, size_t* padding,
+    string* expr, string* intro)
+  {
+    if (!info) {
+      TopicKeys::Iterator finished = keys.end();
+      for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
+        string key_name = i.path();
+        AST_Type* straight_ast_type = i.get_ast_type();
+        AST_Type* ast_type;
+        if (i.root_type() == TopicKeys::UnionType) {
+          AST_Union* union_type = dynamic_cast<AST_Union*>(straight_ast_type);
+          if (!union_type) {
+            std::cerr << "ERROR: Invalid key iterator for: " << struct_name;
+            return false;
+          }
+          ast_type = dynamic_cast<AST_Type*>(union_type->disc_type());
+          key_name.append("._d()");
+        } else {
+          ast_type = straight_ast_type;
+        }
+        fn(key_name, ast_type, size, padding, expr, intro);
+      }
+    } else {
+      IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
+      for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
+        const string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
+        AST_Type* field_type = 0;
+        try {
+          field_type = find_type(node, key_name);
+        } catch (const string& error) {
+          std::cerr << "ERROR: Invalid key specification for " << struct_name
+                    << " (" << key_name << "). " << error << std::endl;
+          return false;
+        }
+        fn(key_name, field_type, size, padding, expr, intro);
+      }
+    }
+    return true;
+  }
+
+  void
+  gen_max_marshaled_size_iteration(
+    const string&, AST_Type* ast_type,
+    size_t* size, size_t* padding, string*, string*)
+  {
+    max_marshaled_size(ast_type, *size, *padding);
+  }
+
+  void
+  gen_find_size_iteration(
+    const string& key_name, AST_Type* ast_type,
+    size_t*, size_t*, string* expr, string* intro)
+  {
+    *expr += findSizeCommon(key_name, ast_type, "stru.t", *intro);
+  }
+
 }
 
-bool marshal_generator::gen_struct(AST_Structure* /* node */,
+bool marshal_generator::gen_struct(AST_Structure* node,
                                    UTL_ScopedName* name,
                                    const std::vector<AST_Field*>& fields,
                                    AST_Type::SIZE_TYPE /* size */,
@@ -1659,8 +1715,15 @@ bool marshal_generator::gen_struct(AST_Structure* /* node */,
   }
 
   IDL_GlobalData::DCPS_Data_Type_Info* info = idl_global->is_dcps_type(name);
-  // Only generate these methods if this is a DCPS type
-  if (info != 0) {
+  const bool is_topic_type = be_global->is_topic_type(node);
+  TopicKeys keys;
+  if (is_topic_type) {
+    keys = TopicKeys(node);
+    info = 0; // Annotations Override DCPS_DATA_TYPE
+  }
+
+  // Only generate these methods if this is a topic type
+  if (info || is_topic_type) {
     bool is_bounded_struct = true;
     for (size_t i = 0; i < fields.size(); ++i) {
       if (!is_bounded_type(fields[i]->field_type())) {
@@ -1693,20 +1756,30 @@ bool marshal_generator::gen_struct(AST_Structure* /* node */,
 
     // Generate key-related marshaling code
     bool bounded_key = true;
-    IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
-    for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
-      string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
-      AST_Type* field_type = 0;
-      try {
-        field_type = find_type(fields, key_name);
-      } catch (const string& error) {
-        std::cerr << "ERROR: Invalid key specification for " << cxx
-                  << " (" << key_name << "). " << error << std::endl;
-        return false;
+    if (info) {
+      IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
+      for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
+        string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
+        AST_Type* field_type = 0;
+        try {
+          field_type = find_type(node, key_name);
+        } catch (const string& error) {
+          std::cerr << "ERROR: Invalid key specification for " << cxx
+                    << " (" << key_name << "). " << error << std::endl;
+          return false;
+        }
+        if (!is_bounded_type(field_type)) {
+          bounded_key = false;
+          break;
+        }
       }
-      if (!is_bounded_type(field_type)) {
-        bounded_key = false;
-        break;
+    } else {
+      TopicKeys::Iterator finished = keys.end();
+      for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
+        if (!is_bounded_type(i.get_ast_type())) {
+          bounded_key = false;
+          break;
+        }
       }
     }
 
@@ -1717,20 +1790,13 @@ bool marshal_generator::gen_struct(AST_Structure* /* node */,
       max_marsh.endArgs();
 
       if (bounded_key) {  // Only generate a size if the key is bounded
-        IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
         size_t size = 0, padding = 0;
-        for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
-          string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
-          AST_Type* field_type = 0;
-          try {
-            field_type = find_type(fields, key_name);
-          } catch (const string& error) {
-            std::cerr << "ERROR: Invalid key specification for " << cxx
-                      << " (" << key_name << "). " << error << std::endl;
-            return false;
-          }
-          max_marshaled_size(field_type, size, padding);
+
+        if (!iterate_over_keys(node, cxx, info, keys,
+          gen_max_marshaled_size_iteration, &size, &padding, 0, 0)) {
+          return false;
         }
+
         if (padding) {
           be_global->impl_
             << "  return align ? " << size + padding << " : " << size << ";\n";
@@ -1751,19 +1817,12 @@ bool marshal_generator::gen_struct(AST_Structure* /* node */,
       find_size.addArg("padding", "size_t&");
       find_size.endArgs();
       string expr, intro;
-      IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
-      for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
-        string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
-        AST_Type* field_type = 0;
-        try {
-          field_type = find_type(fields, key_name);
-        } catch (const string& error) {
-          std::cerr << "ERROR: Invalid key specification for " << cxx
-                    << " (" << key_name << "). " << error << std::endl;
-          return false;
-        }
-        expr += findSizeCommon(key_name, field_type, "stru.t", intro);
+
+      if (!iterate_over_keys(node, cxx, info, keys,
+        gen_find_size_iteration, 0, 0, &expr, &intro)) {
+        return false;
       }
+
       be_global->impl_ << intro << expr;
     }
 
@@ -1775,23 +1834,61 @@ bool marshal_generator::gen_struct(AST_Structure* /* node */,
 
       bool first = true;
       string expr, intro;
-      IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
-      for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
-        string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
-        AST_Type* field_type = 0;
-        try {
-          field_type = find_type(fields, key_name);
-        } catch (const string& error) {
-          std::cerr << "ERROR: Invalid key specification for " << cxx
-                    << " (" << key_name << "). " << error << std::endl;
-          return false;
+
+      if (info) {
+        IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
+        for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
+          string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
+          AST_Type* field_type = 0;
+          try {
+            field_type = find_type(node, key_name);
+          } catch (const string& error) {
+            std::cerr << "ERROR: Invalid key specification for " << cxx
+                      << " (" << key_name << "). " << error << std::endl;
+            return false;
+          }
+          if (first) {
+            first = false;
+          } else {
+            expr += "\n    && ";
+          }
+          expr += streamCommon(key_name, field_type, "<< stru.t", intro);
         }
-        if (first) first = false;
-        else       expr += "\n    && ";
-        expr += streamCommon(key_name, field_type, "<< stru.t", intro);
+      } else {
+        TopicKeys::Iterator finished = keys.end();
+        for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
+          std::string key_name = i.path();
+          if (first) {
+            first = false;
+          } else {
+            expr += "\n    && ";
+          }
+          AST_Type* straight_ast_type = i.get_ast_type();
+          AST_Type* ast_type;
+          if (i.root_type() == TopicKeys::UnionType) {
+            key_name.append("._d()");
+            AST_Union* union_type = dynamic_cast<AST_Union*>(straight_ast_type);
+            if (!union_type) {
+              std::cerr << "ERROR: Invalid key iterator for: " << cxx;
+              return false;
+            }
+            ast_type = dynamic_cast<AST_Type*>(union_type->disc_type());
+          } else {
+            ast_type = straight_ast_type;
+          }
+          if (!ast_type) {
+            std::cerr << "ERROR: Invalid key iterator for: " << cxx;
+            return false;
+          }
+          expr += streamCommon(key_name, ast_type, "<< stru.t", intro);
+        }
       }
-      if (first) be_global->impl_ << intro << "  return true;\n";
-      else be_global->impl_ << intro << "  return " << expr << ";\n";
+
+      if (first) {
+        be_global->impl_ << intro << "  return true;\n";
+      } else {
+        be_global->impl_ << intro << "  return " << expr << ";\n";
+      }
     }
 
     {
@@ -1802,23 +1899,68 @@ bool marshal_generator::gen_struct(AST_Structure* /* node */,
 
       bool first = true;
       string expr, intro;
-      IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
-      for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
-        string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
-        AST_Type* field_type = 0;
-        try {
-          field_type = find_type(fields, key_name);
-        } catch (const string& error) {
-          std::cerr << "ERROR: Invalid key specification for " << cxx
-                    << " (" << key_name << "). " << error << std::endl;
-          return false;
+
+      if (info) {
+        IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
+        for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
+          string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
+          AST_Type* field_type = 0;
+          try {
+            field_type = find_type(node, key_name);
+          } catch (const string& error) {
+            std::cerr << "ERROR: Invalid key specification for " << cxx
+                      << " (" << key_name << "). " << error << std::endl;
+            return false;
+          }
+          if (first) {
+            first = false;
+          } else {
+            expr += "\n    && ";
+          }
+          expr += streamCommon(key_name, field_type, ">> stru.t", intro);
         }
-        if (first) first = false;
-        else       expr += "\n    && ";
-        expr += streamCommon(key_name, field_type, ">> stru.t", intro);
+      } else {
+        TopicKeys::Iterator finished = keys.end();
+        for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
+          std::string key_name = i.path();
+          AST_Type* ast_type = i.get_ast_type();
+          if (i.root_type() == TopicKeys::UnionType) {
+            AST_Union* union_type = dynamic_cast<AST_Union*>(ast_type);
+            if (!union_type) {
+              std::cerr << "ERROR: Invalid key iterator for: " << cxx;
+              return false;
+            }
+            AST_Type* disc_type = dynamic_cast<AST_Type*>(union_type->disc_type());
+            if (!disc_type) {
+              std::cerr << "ERROR: Invalid key iterator for: " << cxx;
+              return false;
+            }
+            be_global->impl_ <<
+              "  {\n"
+              "    " << scoped(disc_type->name()) << " tmp;\n" <<
+              "    if (strm >> " << getWrapper("tmp", disc_type, WD_INPUT) << ") {\n"
+              "      stru.t." << key_name << "._d(tmp);\n"
+              "    } else {\n"
+              "      return false;\n"
+              "    }\n"
+              "  }\n"
+              ;
+          } else {
+            if (first) {
+              first = false;
+            } else {
+              expr += "\n    && ";
+            }
+            expr += streamCommon(key_name, ast_type, ">> stru.t", intro);
+          }
+        }
       }
-      if (first) be_global->impl_ << intro << "  return true;\n";
-      else be_global->impl_ << intro << "  return " << expr << ";\n";
+
+      if (first) {
+        be_global->impl_ << intro << "  return true;\n";
+      } else {
+        be_global->impl_ << intro << "  return " << expr << ";\n";
+      }
     }
 
     be_global->header_ <<
@@ -1984,7 +2126,7 @@ namespace {
   }
 }
 
-bool marshal_generator::gen_union(AST_Union*, UTL_ScopedName* name,
+bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
    const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator,
    const char*)
 {
@@ -2051,5 +2193,127 @@ bool marshal_generator::gen_union(AST_Union*, UTL_ScopedName* name,
         "  return true;\n";
     }
   }
+
+  const bool has_key = be_global->has_key(node);
+  const bool is_topic_type = be_global->is_topic_type(node);
+
+  if (!is_topic_type) {
+    if (has_key) {
+      idl_global->err()->misc_warning(
+        "Union has @key on its discriminator, "
+        "but it's not a topic type, ignoring it...", node);
+    }
+    return true;
+  }
+
+  const string key_only_wrap_out = getWrapper("uni.t._d()", discriminator, WD_OUTPUT);
+
+  const bool is_bounded = is_bounded_type(node);
+  {
+    Function max_marsh("gen_max_marshaled_size", "size_t");
+    max_marsh.addArg("uni", "const " + cxx + "&");
+    max_marsh.addArg("align", "bool");
+    max_marsh.endArgs();
+    if (is_bounded) {
+      size_t size = 0, padding = 0;
+      max_marshaled_size(node, size, padding);
+      if (padding) {
+        be_global->impl_
+          << "  return align ? " << size + padding << " : " << size << ";\n";
+      } else {
+        be_global->impl_
+          << "  return " << size << ";\n";
+      }
+    } else { // unbounded
+      be_global->impl_
+        << "  return 0;\n";
+    }
+  }
+
+  {
+    Function max_marsh("gen_max_marshaled_size", "size_t");
+    max_marsh.addArg("uni", "KeyOnly<const " + cxx + ">");
+    max_marsh.addArg("align", "bool");
+    max_marsh.endArgs();
+
+    if (has_key) {
+      size_t size = 0, padding = 0;
+      max_marshaled_size(node->disc_type(), size, padding);
+      if (padding) {
+        be_global->impl_
+          << "  return align ? " << size + padding << " : " << size << ";\n";
+      } else {
+        be_global->impl_
+          << "  return " << size << ";\n";
+      }
+    } else {
+      be_global->impl_
+        << "  return 0;\n";
+    }
+  }
+
+  {
+    Function find_size("gen_find_size", "void");
+    find_size.addArg("uni", "KeyOnly<const " + cxx + ">");
+    find_size.addArg("size", "size_t&");
+    find_size.addArg("padding", "size_t&");
+    find_size.endArgs();
+
+    if (has_key) {
+      const string align = getAlignment(discriminator);
+      if (!align.empty()) {
+        be_global->impl_ <<
+          "  if ((size + padding) % " << align << ") {\n"
+          "    padding += " << align << " - ((size + padding) % " << align
+          << ");\n"
+          "  }\n";
+      }
+      if (disc_cls & CL_ENUM) {
+        be_global->impl_ <<
+          "  size += max_marshaled_size_ulong();\n";
+      } else {
+        be_global->impl_ <<
+          "  size += gen_max_marshaled_size(" << key_only_wrap_out << ");\n";
+      }
+    }
+  }
+
+  {
+    Function insertion("operator<<", "bool");
+    insertion.addArg("strm", "Serializer&");
+    insertion.addArg("uni", "KeyOnly<const " + cxx + ">");
+    insertion.endArgs();
+
+    if (has_key) {
+      be_global->impl_ << streamAndCheck("<< " + key_only_wrap_out);
+    }
+
+    be_global->impl_ << "  return true;\n";
+  }
+
+  {
+    Function extraction("operator>>", "bool");
+    extraction.addArg("strm", "Serializer&");
+    extraction.addArg("uni", "KeyOnly<" + cxx + ">");
+    extraction.endArgs();
+
+    if (has_key) {
+      be_global->impl_
+        << "  " << scoped(discriminator->name()) << " disc;\n"
+        << streamAndCheck(">> " + getWrapper("disc", discriminator, WD_INPUT))
+        << "  uni.t._d(disc);\n";
+    }
+
+    be_global->impl_ << "  return true;\n";
+  }
+
+  be_global->header_ <<
+    "template <>\n"
+    "struct MarshalTraits<" << cxx << "> {\n"
+    "  static bool gen_is_bounded_size() { return " << (is_bounded ? "true" : "false") << "; }\n"
+    // Key is the discriminator, so it's always bounded
+    "  static bool gen_is_bounded_key_size() { return true; }\n"
+    "};\n";
+
   return true;
 }

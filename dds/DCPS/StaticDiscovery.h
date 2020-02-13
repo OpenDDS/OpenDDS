@@ -150,8 +150,7 @@ public:
                                        const DDS::DataReaderQos& qos);
 
   virtual bool update_topic_qos(const RepoId& /*topicId*/,
-                                const DDS::TopicQos& /*qos*/,
-                                OPENDDS_STRING& /*name*/);
+                                const DDS::TopicQos& /*qos*/);
 
   virtual bool update_publication_qos(const RepoId& /*publicationId*/,
                                       const DDS::DataWriterQos& /*qos*/,
@@ -181,6 +180,8 @@ public:
   virtual DDS::ReturnCode_t remove_subscription_i(const RepoId& /*subscriptionId*/,
                                                   LocalSubscription& /*sub*/);
 
+  virtual bool is_expectant_opendds(const GUID_t& endpoint) const;
+
   virtual bool shutting_down() const;
 
   virtual void populate_transport_locator_sequence(TransportLocatorSeq*& /*tls*/,
@@ -190,12 +191,6 @@ public:
   virtual void populate_transport_locator_sequence(TransportLocatorSeq*& /*tls*/,
                                                    DiscoveredPublicationIter& /*iter*/,
                                                    const RepoId& /*reader*/);
-
-  virtual bool defer_writer(const RepoId& /*writer*/,
-                            const RepoId& /*writer_participant*/);
-
-  virtual bool defer_reader(const RepoId& /*writer*/,
-                            const RepoId& /*writer_participant*/);
 
   virtual void reader_exists(const RepoId& readerid, const RepoId& writerid);
   virtual void reader_does_not_exist(const RepoId& readerid, const RepoId& writerid);

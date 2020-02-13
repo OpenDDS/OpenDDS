@@ -1,4 +1,4 @@
-project(DDS*idl): dcps_test_lib {
+project(DDS*idl): dcps_test_idl_only_lib {
   idlflags      += -Wb,stub_export_include=LivelinessKeepAliveTest_export.h \
                    -Wb,stub_export_macro=LivelinessKeepAliveTest_Export -SS
   dcps_ts_flags += -Wb,export_macro=LivelinessKeepAliveTest_Export
@@ -11,7 +11,7 @@ project(DDS*idl): dcps_test_lib {
 
 }
 
-project(LivelinessKeepAliveTestPublisher): dcpsexe, dcps_transports_for_test {
+project(LivelinessKeepAliveTestPublisher): dcpsexe, dcps_test, dcps_transports_for_test {
   exename   = publisher
   libs     += DDS*idl
   after    += DDS*idl
@@ -26,7 +26,7 @@ project(LivelinessKeepAliveTestPublisher): dcpsexe, dcps_transports_for_test {
 }
 
 
-project(LivelinessKeepAliveTestSubscriber): dcpsexe, dcps_transports_for_test {
+project(LivelinessKeepAliveTestSubscriber): dcpsexe, dcps_test, dcps_transports_for_test {
   exename   = subscriber
   libs     += DDS*idl
   after    += DDS*idl

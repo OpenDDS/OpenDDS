@@ -1,4 +1,4 @@
-project: dcpsexe, dcps_transports_for_test{
+project: dcpsexe, dcps_test, dcps_transports_for_test{
   avoids   += no_cxx11
   requires += no_opendds_safety_profile
   exename   = subscriber

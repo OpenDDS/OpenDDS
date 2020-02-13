@@ -71,8 +71,8 @@ ShmemTransport::connect_datalink(const RemoteTransport& remote,
               ACE_TEXT("link found.\n")), 2);
     return AcceptConnectResult(link);
   }
-    VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) ShmemTransport::connect_datalink ")
-              ACE_TEXT("new link.\n")), 2);
+  VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) ShmemTransport::connect_datalink ")
+            ACE_TEXT("new link.\n")), 2);
   return AcceptConnectResult(add_datalink(key.second));
 }
 
@@ -101,6 +101,8 @@ ShmemTransport::stop_accepting_or_connecting(const TransportClient_wrch&, const 
 bool
 ShmemTransport::configure_i(ShmemInst& config)
 {
+  create_reactor_task();
+
 #ifdef OPENDDS_SHMEM_UNSUPPORTED
   ACE_UNUSED_ARG(config);
   ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
@@ -173,7 +175,10 @@ ShmemTransport::shutdown_i()
 {
   // Shutdown reserved datalinks and release configuration:
   GuardType guard(links_lock_);
-  if (read_task_) read_task_->stop();
+  if (read_task_) {
+    read_task_->stop();
+    read_task_->wait();
+  }
 
   for (ShmemDataLinkMap::iterator it(links_.begin());
        it != links_.end(); ++it) {
@@ -201,9 +206,9 @@ ShmemTransport::shutdown_i()
 }
 
 bool
-ShmemTransport::connection_info_i(TransportLocator& info) const
+ShmemTransport::connection_info_i(TransportLocator& info, ConnectionInfoFlags flags) const
 {
-  this->config().populate_locator(info);
+  config().populate_locator(info, flags);
   return true;
 }
 
@@ -245,22 +250,34 @@ ShmemTransport::ReadTask::ReadTask(ShmemTransport* outer, ACE_sema_t semaphore)
 int
 ShmemTransport::ReadTask::svc()
 {
-  while (true) {
+  while (!stopped_) {
     ACE_OS::sema_wait(&semaphore_);
     if (stopped_) {
       return 0;
     }
     outer_->read_from_links();
   }
-  return 1;
+  return 0;
 }
 
 void
 ShmemTransport::ReadTask::stop()
 {
+  if (stopped_) {
+    return;
+  }
   stopped_ = true;
   ACE_OS::sema_post(&semaphore_);
   wait();
+}
+
+void
+ShmemTransport::ReadTask::signal_semaphore()
+{
+  if (stopped_) {
+    return;
+  }
+  ACE_OS::sema_post(&semaphore_);
 }
 
 void
@@ -276,7 +293,7 @@ ShmemTransport::read_from_links()
   }
 
   typedef std::vector<ShmemDataLink_rch>::iterator dl_iter_t;
-  for (dl_iter_t dl_it = dl_copies.begin(); dl_it != dl_copies.end(); ++dl_it) {
+  for (dl_iter_t dl_it = dl_copies.begin(); !is_shut_down() && dl_it != dl_copies.end(); ++dl_it) {
     dl_it->in()->read();
   }
 }
@@ -284,7 +301,10 @@ ShmemTransport::read_from_links()
 void
 ShmemTransport::signal_semaphore()
 {
-  ACE_OS::sema_post(&read_task_->semaphore_);
+  if (is_shut_down()) {
+    return;
+  }
+  read_task_->signal_semaphore();
 }
 
 std::string

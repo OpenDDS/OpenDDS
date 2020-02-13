@@ -103,8 +103,6 @@ module OpenDDS
     struct ReaderProxy_t {
       GUID_t remoteReaderGuid;  // optional in DiscoveredReaderData
       boolean expectsInlineQos;
-      LocatorSeq unicastLocatorList;
-      LocatorSeq multicastLocatorList;
       TransportLocatorSeq allLocators;
       GUIDSeq associatedWriters;
     };
@@ -118,8 +116,6 @@ module OpenDDS
 
     struct WriterProxy_t {
       GUID_t remoteWriterGuid;  // optional in DiscoveredWriterData
-      LocatorSeq unicastLocatorList;
-      LocatorSeq multicastLocatorList;
       TransportLocatorSeq allLocators;
     };
 

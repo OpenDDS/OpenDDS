@@ -31,7 +31,7 @@ ACE_Time_Value duration_to_time_value(const DDS::Duration_t& t);
 
 ACE_INLINE OpenDDS_Dcps_Export
 ACE_Time_Value duration_to_absolute_time_value(const DDS::Duration_t& t,
-                                               const ACE_Time_Value& now = ACE_OS::gettimeofday());
+                                               const ACE_Time_Value& now);
 
 ACE_INLINE OpenDDS_Dcps_Export
 DDS::Duration_t time_value_to_duration(const ACE_Time_Value& tv);
@@ -94,6 +94,18 @@ bool operator>=(const DDS::Time_t& t1, const DDS::Time_t& t2);
 
 ACE_INLINE OpenDDS_Dcps_Export
 DDS::Time_t operator-(const DDS::Time_t& t1, const DDS::Time_t& t2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+ACE_UINT32 uint32_fractional_seconds_to_nanoseconds(ACE_UINT32 fraction);
+
+ACE_INLINE OpenDDS_Dcps_Export
+ACE_UINT32 nanoseconds_to_uint32_fractional_seconds(ACE_UINT32 fraction);
+
+ACE_INLINE OpenDDS_Dcps_Export
+ACE_UINT32 uint32_fractional_seconds_to_microseconds(ACE_UINT32 fraction);
+
+ACE_INLINE OpenDDS_Dcps_Export
+ACE_UINT32 microseconds_to_uint32_fractional_seconds(ACE_UINT32 fraction);
 
 } // namespace DCPS
 } // namespace OpenDDS

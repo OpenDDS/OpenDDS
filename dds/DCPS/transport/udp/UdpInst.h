@@ -34,7 +34,7 @@ public:
 
   bool is_reliable() const { return false; }
 
-  virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info) const;
+  virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info, ConnectionInfoFlags flags) const;
 
   OPENDDS_STRING local_address_string() const { return local_address_config_str_; }
   ACE_INET_Addr local_address() const { return local_address_; }

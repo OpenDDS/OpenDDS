@@ -155,7 +155,6 @@ DDS::Time_t time_value_to_time(const ACE_Time_Value& tv)
   return t;
 }
 
-
 ACE_INLINE
 ACE_Time_Value duration_to_time_value(const DDS::Duration_t& t)
 {
@@ -169,7 +168,6 @@ ACE_Time_Value duration_to_time_value(const DDS::Duration_t& t)
     return ACE_Time_Value(ACE_Utils::truncate_cast<time_t>(sec), usec);
   }
 }
-
 
 ACE_INLINE
 ACE_Time_Value duration_to_absolute_time_value(const DDS::Duration_t& t,
@@ -186,7 +184,6 @@ ACE_Time_Value duration_to_absolute_time_value(const DDS::Duration_t& t,
     return ACE_Time_Value(ACE_Utils::truncate_cast<time_t>(sec), usec);
   }
 }
-
 
 ACE_INLINE
 DDS::Duration_t time_value_to_duration(const ACE_Time_Value& tv)
@@ -231,6 +228,30 @@ bool non_negative_duration(const DDS::Duration_t& t)
     (t.sec == DDS::DURATION_ZERO_SEC  // Allow zero duration.
      && t.nanosec == DDS::DURATION_ZERO_NSEC)
     || valid_duration(t);
+}
+
+ACE_INLINE OpenDDS_Dcps_Export
+ACE_UINT32 uint32_fractional_seconds_to_nanoseconds(ACE_UINT32 fraction)
+{
+  return static_cast<ACE_UINT32>((static_cast<ACE_UINT64>(fraction) * 1000000000) >> 32);
+}
+
+ACE_INLINE OpenDDS_Dcps_Export
+ACE_UINT32 nanoseconds_to_uint32_fractional_seconds(ACE_UINT32 nsec)
+{
+  return static_cast<ACE_UINT32>((static_cast<ACE_UINT64>(nsec) << 32) / 1000000000);
+}
+
+ACE_INLINE OpenDDS_Dcps_Export
+ACE_UINT32 uint32_fractional_seconds_to_microseconds(ACE_UINT32 fraction)
+{
+  return static_cast<ACE_UINT32>((static_cast<ACE_UINT64>(fraction) * 1000000) >> 32);
+}
+
+ACE_INLINE OpenDDS_Dcps_Export
+ACE_UINT32 microseconds_to_uint32_fractional_seconds(ACE_UINT32 usec)
+{
+  return static_cast<ACE_UINT32>((static_cast<ACE_UINT64>(usec) << 32) / 1000000);
 }
 
 } // namespace DCPS

@@ -1,7 +1,7 @@
 //
 //
 
-project(*publisher): dcpsexe, dcps_transports_for_test {
+project(*publisher): dcpsexe, dcps_test, dcps_transports_for_test {
   exename   = publisher
   
   after    += DcpsFooType
@@ -17,7 +17,7 @@ project(*publisher): dcpsexe, dcps_transports_for_test {
   }
 }
 
-project(*subscriber): dcpsexe, dcps_transports_for_test {
+project(*subscriber): dcpsexe, dcps_test, dcps_transports_for_test {
   exename   = subscriber
   
   after    += DcpsFooType

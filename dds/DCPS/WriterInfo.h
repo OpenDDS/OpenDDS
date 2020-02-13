@@ -17,6 +17,7 @@
 #include "CoherentChangeControl.h"
 #include "DisjointSequence.h"
 #include "transport/framework/ReceivedDataSample.h"
+#include "TimeTypes.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -39,19 +40,19 @@ public:
   ///      instead of ACE_Time_Value::zero to be consistent with default
   ///      duration qos ? Or should we simply use the ACE_Time_Value::zero
   ///      to indicate the INFINITY duration ?
-  ACE_Time_Value liveliness_lease_duration_;
+  TimeDuration liveliness_lease_duration_;
 
   /// tell instances when a DataWriter transitions to being alive
   /// The writer state is inout parameter, it has to be set ALIVE before
   /// handle_timeout is called since some subroutine use the state.
-  virtual void writer_became_alive(WriterInfo&           info,
-                                   const ACE_Time_Value& when);
+  virtual void writer_became_alive(WriterInfo& info,
+                                   const MonotonicTimePoint& when);
 
   /// tell instances when a DataWriter transitions to DEAD
   /// The writer state is inout parameter, the state is set to DEAD
   /// when it returns.
-  virtual void writer_became_dead(WriterInfo&           info,
-                                  const ACE_Time_Value& when);
+  virtual void writer_became_dead(WriterInfo& info,
+                                  const MonotonicTimePoint& when);
 
   /// tell instance when a DataWriter is removed.
   /// The liveliness status need update.
@@ -77,31 +78,31 @@ public:
   enum WriterState { NOT_SET, ALIVE, DEAD };
   enum HistoricSamplesState { NO_TIMER = -1 };
 
-  WriterInfo(WriterInfoListener*         reader,
-             const PublicationId&        writer_id,
+  WriterInfo(WriterInfoListener* reader,
+             const PublicationId& writer_id,
              const DDS::DataWriterQos& writer_qos);
 
   /// check to see if this writer is alive (called by handle_timeout).
-  /// @param now next time this DataWriter will become not active (not alive)
+  /// @param now next monotonic time this DataWriter will become not active (not alive)
   ///      if no sample or liveliness message is received.
-  /// @returns absolute time when the Writer will become not active (if no activity)
-  ///          of ACE_Time_Value::zero if the writer is already or became not alive
-  ACE_Time_Value check_activity(const ACE_Time_Value& now);
+  /// @returns montonic time when the Writer will become not active (if no activity)
+  ///          of MonotonicTimePoint::max_value if the writer is already or became not alive
+  MonotonicTimePoint check_activity(const MonotonicTimePoint& now);
 
   /// called when a sample or other activity is received from this writer.
-  int received_activity(const ACE_Time_Value& when);
+  void received_activity(const MonotonicTimePoint& when);
 
   /// returns 1 if the DataWriter is lively; 2 if dead; otherwise returns 0.
   WriterState get_state() {
     return state_;
   };
 
-  OPENDDS_STRING get_state_str() const;
+  const char* get_state_str() const;
 
   /// update liveliness when remove_association is called.
   void removed();
 
-  ACE_Time_Value activity_wait_period() const;
+  TimeDuration activity_wait_period() const;
 
   /// Checks to see if writer has registered activity in either
   /// liveliness_lease_duration or DCPSPendingTimeout duration
@@ -121,12 +122,12 @@ public:
   //private:
 
   /// Timestamp of last write/dispose/assert_liveliness from this DataWriter
-  ACE_Time_Value last_liveliness_activity_time_;
+  MonotonicTimePoint last_liveliness_activity_time_;
 
   // Non-negative if this a durable writer which has a timer scheduled
   long historic_samples_timer_;
   long remove_association_timer_;
-  ACE_Time_Value removal_deadline_;
+  MonotonicTimePoint removal_deadline_;
 
   /// Temporary holding place for samples received before
   /// the END_HISTORIC_SAMPLES control message.
@@ -174,18 +175,14 @@ public:
 };
 
 inline
-int
-OpenDDS::DCPS::WriterInfo::received_activity(const ACE_Time_Value& when)
+void
+WriterInfo::received_activity(const MonotonicTimePoint& when)
 {
   last_liveliness_activity_time_ = when;
 
   if (state_ != ALIVE) { // NOT_SET || DEAD
     reader_->writer_became_alive(*this, when);
-    return 0;
   }
-
-  //TBD - is the "was alive" return value used?
-  return 1;
 }
 
 } // namespace DCPS

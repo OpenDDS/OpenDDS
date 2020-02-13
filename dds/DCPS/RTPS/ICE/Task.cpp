@@ -16,7 +16,7 @@ namespace ICE {
 
 #ifdef OPENDDS_SECURITY
 
-void Task::enqueue(const ACE_Time_Value& a_release_time)
+void Task::enqueue(const DCPS::MonotonicTimePoint& a_release_time)
 {
   release_time_ = a_release_time;
   agent_impl_->enqueue(this);

@@ -1,4 +1,4 @@
-project(BenchIdl): dcps {
+project(BenchIdl): dcps_test {
   // This project ensures the common components get built first.
   requires += no_opendds_safety_profile
   TypeSupport_Files {
@@ -8,7 +8,7 @@ project(BenchIdl): dcps {
   custom_only = 1
 }
 
-project(BenchProcess) : dcpsexe, dcps_transports_for_test, svc_utils {
+project(BenchProcess) : dcps_test, dcpsexe, dcps_transports_for_test, svc_utils {
   requires += no_opendds_safety_profile
   exename = testprocess
   exeout  = ../bin

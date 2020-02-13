@@ -244,8 +244,7 @@ void StaticEndpointManager::assign_subscription_key(RepoId& rid,
 
 bool
 StaticEndpointManager::update_topic_qos(const RepoId& /*topicId*/,
-                                        const DDS::TopicQos& /*qos*/,
-                                        OPENDDS_STRING& /*name*/)
+                                        const DDS::TopicQos& /*qos*/)
 {
   ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: StaticEndpointManager::update_topic_qos - ")
              ACE_TEXT("Not allowed\n")));
@@ -440,6 +439,14 @@ StaticEndpointManager::remove_subscription_i(const RepoId& readerid,
 }
 
 bool
+StaticEndpointManager::is_expectant_opendds(const GUID_t& /*endpoint*/) const
+{
+  // We can't propagate associated writers via SEDP announcments if we're
+  // using static discovery, so nobody ought to be "expecting" them
+  return false;
+}
+
+bool
 StaticEndpointManager::shutting_down() const
 {
   ACE_DEBUG((LM_NOTICE, ACE_TEXT("(%P|%t) StaticEndpointManager::shutting_down TODO\n")));
@@ -463,24 +470,6 @@ StaticEndpointManager::populate_transport_locator_sequence(TransportLocatorSeq*&
 {
   ACE_DEBUG((LM_NOTICE, ACE_TEXT("(%P|%t) StaticEndpointManager::populate_transport_locator_sequence TODO\n")));
   // TODO
-}
-
-bool
-StaticEndpointManager::defer_writer(const RepoId& /*writer*/,
-                                    const RepoId& /*writer_participant*/)
-{
-  ACE_DEBUG((LM_NOTICE, ACE_TEXT("(%P|%t) StaticEndpointManager::defer_writer TODO\n")));
-  // TODO
-  return false;
-}
-
-bool
-StaticEndpointManager::defer_reader(const RepoId& /*writer*/,
-                                    const RepoId& /*writer_participant*/)
-{
-  // TODO
-  ACE_DEBUG((LM_NOTICE, ACE_TEXT("(%P|%t) StaticEndpointManager::defer_reader TODO\n")));
-  return false;
 }
 
 void
@@ -1522,8 +1511,8 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
     ValueMap values;
     pullValues(cf, it->second, values);
     int domain = 0;
-    unsigned char participant[6];
-    unsigned char entity[3];
+    unsigned char participant[6] = { 0 };
+    unsigned char entity[3] = { 0 };
     enum Type {
       Reader,
       Writer
@@ -1562,7 +1551,7 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
 #ifdef __SUNPRO_CC
         int count = 0; std::count_if(value.begin(), value.end(), isxdigit, count);
 #else
-        int count = std::count_if(value.begin(), value.end(), isxdigit);
+        const OPENDDS_STRING::difference_type count = std::count_if(value.begin(), value.end(), isxdigit);
 #endif
         if (value.size() != HEX_DIGITS_IN_PARTICIPANT || static_cast<size_t>(count) != HEX_DIGITS_IN_PARTICIPANT) {
           ACE_ERROR_RETURN((LM_ERROR,
@@ -1580,7 +1569,7 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
 #ifdef __SUNPRO_CC
         int count = 0; std::count_if(value.begin(), value.end(), isxdigit, count);
 #else
-        int count = std::count_if(value.begin(), value.end(), isxdigit);
+        const OPENDDS_STRING::difference_type count = std::count_if(value.begin(), value.end(), isxdigit);
 #endif
         if (value.size() != HEX_DIGITS_IN_ENTITY || static_cast<size_t>(count) != HEX_DIGITS_IN_ENTITY) {
           ACE_ERROR_RETURN((LM_ERROR,

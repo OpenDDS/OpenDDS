@@ -429,7 +429,7 @@ sub verify_update_version_file {
   my $settings = shift();
   my $version = $settings->{version};
   my $correct = 0;
-  my $status = open(VERSION, 'VERSION');
+  my $status = open(VERSION, 'VERSION.txt');
   my $metaversion = quotemeta($version);
   while (<VERSION>) {
     if ($_ =~ /This is OpenDDS version $metaversion, released/) {
@@ -443,17 +443,17 @@ sub verify_update_version_file {
 }
 
 sub message_update_version_file {
-  return "VERSION file needs updating with current version"
+  return "VERSION.txt file needs updating with current version"
 }
 
 sub remedy_update_version_file {
   my $settings = shift();
   my $version = $settings->{version};
-  print "  >> Updating VERSION file for $version\n";
+  print "  >> Updating VERSION.txt file for $version\n";
   my $timestamp = $settings->{timestamp};
   my $outline = "This is OpenDDS version $version, released $timestamp";
   my $corrected = 0;
-  open(VERSION, "+< VERSION")                 or die "Opening: $!";
+  open(VERSION, "+< VERSION.txt") or die "Opening: $!";
   my $out = "";
 
   while (<VERSION>) {
@@ -1210,7 +1210,7 @@ sub verify_tgz_source {
     # Check if it is in the right format
     my $basename = basename($settings->{clone_dir});
     open(TGZ, "gzip -c -d $file | tar -tvf - |") or die "Opening $!";
-    my $target = join("/", $basename, 'VERSION');
+    my $target = join("/", $basename, 'VERSION.txt');
     while (<TGZ>) {
       if (/$target/) {
         $good = 1;
@@ -1911,7 +1911,7 @@ my %global_settings = (
     modified     => {
         "NEWS.md" => 1,
         "PROBLEM-REPORT-FORM" => 1,
-        "VERSION" => 1,
+        "VERSION.txt" => 1,
         "dds/Version.h" => 1,
         "docs/history/ChangeLog-$version" => 1,
         "tools/scripts/gitrelease.pl" => 1,
@@ -1921,7 +1921,7 @@ my %global_settings = (
     skip_doxygen => any_arg_is("--skip-doxygen") || $is_micro,
     skip_website => any_arg_is("--skip-website") || $is_micro,
     workspace    => $workspace,
-    download_url => remove_end_slash(string_arg_value("--download-url")),
+    download_url => remove_end_slash(string_arg_value("--download-url")) || $default_download_url,
     ace_root     => "$workspace/$ace_root"
 );
 
@@ -1933,7 +1933,7 @@ if (%parsed_version) {
 
 my @release_steps  = (
   {
-    name    => 'Update VERSION',
+    name    => 'Update VERSION.txt',
     verify  => sub{verify_update_version_file(@_)},
     message => sub{message_update_version_file(@_)},
     remedy  => sub{remedy_update_version_file(@_)},

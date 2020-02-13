@@ -45,8 +45,6 @@ public:
   virtual void update_incompatible_qos (
       const OpenDDS::DCPS::IncompatibleQosStatus & status);
 
-  virtual void inconsistent_topic() {}
-
   virtual void signal_liveliness(const OpenDDS::DCPS::RepoId& /*remote_participant*/) { }
 
   DiscReceivedCalls& received()

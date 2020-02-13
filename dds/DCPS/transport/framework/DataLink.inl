@@ -58,7 +58,7 @@ bool  DataLink::is_active() const
   return this->is_active_;
 }
 
-ACE_INLINE const ACE_Time_Value&
+ACE_INLINE const TimeDuration&
 DataLink::datalink_release_delay() const
 {
   return this->datalink_release_delay_;
@@ -180,7 +180,7 @@ void  DataLink::set_scheduling_release(bool scheduling_release)
 }
 
 ACE_INLINE RemoveResult
-DataLink::remove_sample(const DataSampleElement* sample, void* context)
+DataLink::remove_sample(const DataSampleElement* sample)
 {
   DBG_ENTRY_LVL("DataLink", "remove_sample", 6);
 
@@ -201,14 +201,14 @@ DataLink::remove_sample(const DataSampleElement* sample, void* context)
   }
 
   if (!strategy.is_nil()) {
-    return strategy->remove_sample(sample, context);
+    return strategy->remove_sample(sample);
   }
 
   return REMOVE_NOT_FOUND;
 }
 
 ACE_INLINE void
-DataLink::remove_all_msgs(RepoId pub_id)
+DataLink::remove_all_msgs(const RepoId& pub_id)
 {
   DBG_ENTRY_LVL("DataLink","remove_all_msgs",6);
 
@@ -236,7 +236,7 @@ DataLink::id() const
 
 ACE_INLINE int
 DataLink::start(const TransportSendStrategy_rch& send_strategy,
-                const TransportStrategy_rch& receive_strategy)
+                const TransportStrategy_rch& receive_strategy, bool invoke_all)
 {
   DBG_ENTRY_LVL("DataLink","start",6);
 
@@ -269,7 +269,9 @@ DataLink::start(const TransportSendStrategy_rch& send_strategy,
     this->send_strategy_    = send_strategy;
     this->receive_strategy_ = receive_strategy;
   }
-  invoke_on_start_callbacks(true);
+  if (invoke_all) {
+    invoke_on_start_callbacks(true);
+  }
   {
     //catch any associations added during initial invoke_on_start_callbacks
     //only after first use_datalink has resolved does datalink's state truly
@@ -279,7 +281,9 @@ DataLink::start(const TransportSendStrategy_rch& send_strategy,
   }
   //Now state transitioned to started so no new on_start_callbacks will be added
   //so resolve any added during transition to started.
-  invoke_on_start_callbacks(true);
+  if (invoke_all) {
+    invoke_on_start_callbacks(true);
+  }
   return 0;
 }
 
@@ -385,20 +389,7 @@ DataLink::default_listener() const
 ACE_INLINE
 void
 DataLink::send_final_acks (const RepoId& /*readerid*/)
-{ }
-
-ACE_INLINE
-void
-DataLink::first_acknowledged_by_reader(const RepoId& localWriter, const RepoId& remoteReader, const SequenceNumber& sn_base)
 {
-  TransportSendListener_rch tsl;
-  {
-    GuardType guard(pub_sub_maps_lock_);
-    tsl = send_listener_for(localWriter);
-  }
-  if (tsl) {
-    tsl->first_acknowledged_by_reader(remoteReader, sn_base);
-  }
 }
 
 }

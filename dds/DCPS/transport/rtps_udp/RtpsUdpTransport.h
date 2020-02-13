@@ -35,6 +35,9 @@ public:
   RtpsUdpInst& config() const;
   virtual ICE::Endpoint* get_ice_endpoint();
 
+  virtual void update_locators(const RepoId& /*remote*/,
+                               const TransportLocatorSeq& /*locators*/);
+
 private:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
                                                const ConnectionAttribs& attribs,
@@ -71,7 +74,7 @@ private:
                                      const RepoId& /*readerid*/,
                                      const RepoId& /*writerid*/);
 
-  virtual bool connection_info_i(TransportLocator& info) const;
+  virtual bool connection_info_i(TransportLocator& info, ConnectionInfoFlags flags) const;
   ACE_INET_Addr get_connection_addr(const TransportBLOB& data,
                                     bool* requires_inline_qos = 0,
                                     unsigned int* blob_bytes_read = 0) const;
@@ -99,12 +102,11 @@ private:
 #endif
 
   //protects access to link_ for duration of make_datalink
-  typedef ACE_Thread_Mutex         ThreadLockType;
-  typedef ACE_Guard<ThreadLockType>     GuardThreadType;
+  typedef ACE_Thread_Mutex          ThreadLockType;
+  typedef ACE_Guard<ThreadLockType> GuardThreadType;
   ThreadLockType links_lock_;
 
-  /// This protects the connections_ and the pending_connections_
-  /// data members.
+  /// This protects the connections_ data member
   typedef ACE_SYNCH_MUTEX     LockType;
   typedef ACE_Guard<LockType> GuardType;
   LockType connections_lock_;

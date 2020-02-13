@@ -45,6 +45,8 @@ public:
 
   virtual bool owned_by_transport();
 
+  virtual bool is_retained_replaced() const;
+
 protected:
   virtual void release_element(bool dropped_by_transport);
 

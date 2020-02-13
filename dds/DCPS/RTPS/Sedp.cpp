@@ -50,8 +50,8 @@
 #include <cstring>
 
 namespace {
-bool qosChanged(DDS::PublicationBuiltinTopicData& dest,
-                const DDS::PublicationBuiltinTopicData& src)
+bool checkAndAssignQos(DDS::PublicationBuiltinTopicData& dest,
+                       const DDS::PublicationBuiltinTopicData& src)
 {
 #ifndef OPENDDS_SAFETY_PROFILE
   using OpenDDS::DCPS::operator!=;
@@ -103,8 +103,8 @@ bool qosChanged(DDS::PublicationBuiltinTopicData& dest,
   return changed;
 }
 
-bool qosChanged(DDS::SubscriptionBuiltinTopicData& dest,
-                const DDS::SubscriptionBuiltinTopicData& src)
+bool checkAndAssignQos(DDS::SubscriptionBuiltinTopicData& dest,
+                       const DDS::SubscriptionBuiltinTopicData& src)
 {
 #ifndef OPENDDS_SAFETY_PROFILE
   using OpenDDS::DCPS::operator!=;
@@ -151,8 +151,8 @@ bool qosChanged(DDS::SubscriptionBuiltinTopicData& dest,
   return changed;
 }
 
-bool paramsChanged(OpenDDS::DCPS::ContentFilterProperty_t& dest,
-                   const OpenDDS::DCPS::ContentFilterProperty_t& src)
+bool checkAndAssignParams(OpenDDS::DCPS::ContentFilterProperty_t& dest,
+                          const OpenDDS::DCPS::ContentFilterProperty_t& src)
 {
   if (dest.expressionParameters.length() != src.expressionParameters.length()) {
     dest.expressionParameters = src.expressionParameters;
@@ -168,6 +168,80 @@ bool paramsChanged(OpenDDS::DCPS::ContentFilterProperty_t& dest,
   return false;
 }
 
+#ifndef OPENDDS_SAFETY_PROFILE
+bool operator==(const OpenDDS::DCPS::Locator_t& x,
+                const OpenDDS::DCPS::Locator_t& y)
+{
+  return x.kind == y.kind && x.port == y.port && std::memcmp(x.address, y.address, sizeof(x.address)) == 0;
+}
+
+bool operator==(const OpenDDS::DCPS::TransportLocator& x,
+                const OpenDDS::DCPS::TransportLocator& y)
+{
+  return x.transport_type == y.transport_type && x.data == y.data;
+}
+#endif
+
+template<typename T>
+bool sequence_equal(const T& x,
+                    const T& y)
+{
+  if (x.length() != y.length()) {
+    return false;
+  }
+
+  for (unsigned int idx = 0; idx != x.length(); ++idx) {
+    if (!(x[idx] == y[idx])) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+bool operator==(const OpenDDS::DCPS::LocatorSeq& x,
+                const OpenDDS::DCPS::LocatorSeq& y)
+{
+  return sequence_equal(x, y);
+}
+
+bool operator==(const OpenDDS::DCPS::TransportLocatorSeq& x,
+                const OpenDDS::DCPS::TransportLocatorSeq& y)
+{
+  return sequence_equal(x, y);
+}
+
+bool locatorsChanged(const OpenDDS::RTPS::ParticipantProxy_t& x,
+                     const OpenDDS::RTPS::ParticipantProxy_t& y)
+{
+  return !(x.metatrafficUnicastLocatorList == y.metatrafficUnicastLocatorList &&
+           x.metatrafficMulticastLocatorList == y.metatrafficMulticastLocatorList &&
+           x.defaultMulticastLocatorList == y.defaultMulticastLocatorList &&
+           x.defaultUnicastLocatorList == y.defaultUnicastLocatorList);
+}
+
+bool checkAndAssignLocators(OpenDDS::DCPS::WriterProxy_t& x,
+                            const OpenDDS::DCPS::WriterProxy_t& y)
+{
+  if (!(x.allLocators == y.allLocators)) {
+    x.allLocators = y.allLocators;
+    return true;
+  }
+
+  return false;
+}
+
+bool checkAndAssignLocators(OpenDDS::DCPS::ReaderProxy_t& x,
+                            const OpenDDS::DCPS::ReaderProxy_t& y)
+{
+  if (!(x.allLocators == y.allLocators)) {
+    x.allLocators = y.allLocators;
+    return true;
+  }
+
+  return false;
+}
+
 }
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -176,40 +250,43 @@ namespace OpenDDS {
 namespace RTPS {
 using DCPS::RepoId;
 using DCPS::make_rch;
+using DCPS::TimeDuration;
+using DCPS::MonotonicTimePoint;
+using DCPS::SystemTimePoint;
 
 const bool Sedp::host_is_bigendian_(!ACE_CDR_BYTE_ORDER);
 
 Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock) :
   DCPS::EndpointManager<ParticipantData_t>(participant_id, lock),
   spdp_(owner),
-  publications_writer_(
-    make_id(participant_id, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER), *this),
+  publications_writer_(make_rch<Writer>(
+    make_id(participant_id, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER), ref(*this))),
 
 #ifdef OPENDDS_SECURITY
-  publications_secure_writer_(
-    make_id(participant_id, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER), *this),
+  publications_secure_writer_(make_rch<Writer>(
+    make_id(participant_id, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER), ref(*this))),
 #endif
 
-  subscriptions_writer_(
-    make_id(participant_id, ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER), *this),
+  subscriptions_writer_(make_rch<Writer>(
+    make_id(participant_id, ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER), ref(*this))),
 
 #ifdef OPENDDS_SECURITY
-  subscriptions_secure_writer_(
-    make_id(participant_id, ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER), *this),
+  subscriptions_secure_writer_(make_rch<Writer>(
+    make_id(participant_id, ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER), ref(*this))),
 #endif
 
-  participant_message_writer_(
-    make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER), *this),
+  participant_message_writer_(make_rch<Writer>(
+    make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER), ref(*this))),
 
 #ifdef OPENDDS_SECURITY
-  participant_message_secure_writer_(
-    make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER), *this),
-  participant_stateless_message_writer_(
-    make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER), *this),
-  dcps_participant_secure_writer_(
-    make_id(participant_id, ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER), *this),
-  participant_volatile_message_secure_writer_(
-    make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER), *this),
+  participant_message_secure_writer_(make_rch<Writer>(
+    make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER), ref(*this))),
+  participant_stateless_message_writer_(make_rch<Writer>(
+    make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER), ref(*this))),
+  dcps_participant_secure_writer_(make_rch<Writer>(
+    make_id(participant_id, ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER), ref(*this))),
+  participant_volatile_message_secure_writer_(make_rch<Writer>(
+    make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER), ref(*this))),
 #endif
 
   publications_reader_(make_rch<Reader>(
@@ -269,14 +346,6 @@ Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock) :
   sub_bit_key_.value[0] = sub_bit_key_.value[1] = sub_bit_key_.value[2] = 0;
 }
 
-RepoId
-Sedp::make_id(const RepoId& participant_id, const EntityId_t& entity)
-{
-  RepoId id = participant_id;
-  id.entityId = entity;
-  return id;
-}
-
 DDS::ReturnCode_t
 Sedp::init(const RepoId& guid,
            const RtpsDiscovery& disco,
@@ -328,11 +397,13 @@ Sedp::init(const RepoId& guid,
     rtps_inst->local_address_.set(sedp_addr.c_str());
   }
 
-  {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, rtps_inst->lock_, -1);
-    rtps_inst->stun_server_address_ = disco.sedp_stun_server_address();
-  }
-  rtps_inst->use_ice_ = disco.use_ice();
+  rtps_relay_address(disco.config()->sedp_rtps_relay_address());
+  rtps_inst->rtps_relay_beacon_period_ = disco.config()->sedp_rtps_relay_beacon_period();
+  rtps_inst->use_rtps_relay_ = disco.config()->use_rtps_relay();
+  rtps_inst->rtps_relay_only_ = disco.config()->rtps_relay_only();
+
+  stun_server_address(disco.config()->sedp_stun_server_address());
+  rtps_inst->use_ice_ = disco.config()->use_ice();
 
   // Create a config
   OPENDDS_STRING config_name = DCPS::TransportRegistry::DEFAULT_INST_PREFIX +
@@ -350,58 +421,62 @@ Sedp::init(const RepoId& guid,
   const bool besteffort = false, nondurable = false;
 #endif
 
-  publications_writer_.enable_transport_using_config(reliable, durable, transport_cfg_);
+  if (spdp_.available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER) {
+    publications_writer_->enable_transport_using_config(reliable, durable, transport_cfg_);
+  }
   publications_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
 
 #ifdef OPENDDS_SECURITY
-  publications_secure_writer_.set_crypto_handles(spdp_.crypto_handle());
+  publications_secure_writer_->set_crypto_handles(spdp_.crypto_handle());
   publications_secure_reader_->set_crypto_handles(spdp_.crypto_handle());
-  publications_secure_writer_.enable_transport_using_config(reliable, durable, transport_cfg_);
+  if (spdp_.available_builtin_endpoints() & DDS::Security::SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER) {
+    publications_secure_writer_->enable_transport_using_config(reliable, durable, transport_cfg_);
+  }
   publications_secure_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
 #endif
 
-  subscriptions_writer_.enable_transport_using_config(reliable, durable, transport_cfg_);
+  if (spdp_.available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER) {
+    subscriptions_writer_->enable_transport_using_config(reliable, durable, transport_cfg_);
+  }
   subscriptions_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
 
 #ifdef OPENDDS_SECURITY
-  subscriptions_secure_writer_.set_crypto_handles(spdp_.crypto_handle());
+  subscriptions_secure_writer_->set_crypto_handles(spdp_.crypto_handle());
   subscriptions_secure_reader_->set_crypto_handles(spdp_.crypto_handle());
-  subscriptions_secure_writer_.enable_transport_using_config(reliable, durable, transport_cfg_);
+  if (spdp_.available_builtin_endpoints() & DDS::Security::SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER) {
+    subscriptions_secure_writer_->enable_transport_using_config(reliable, durable, transport_cfg_);
+  }
   subscriptions_secure_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
 #endif
 
-  participant_message_writer_.enable_transport_using_config(reliable, durable, transport_cfg_);
+  if (spdp_.available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER) {
+    participant_message_writer_->enable_transport_using_config(reliable, durable, transport_cfg_);
+  }
   participant_message_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
 
 #ifdef OPENDDS_SECURITY
-  participant_message_secure_writer_.set_crypto_handles(spdp_.crypto_handle());
+  participant_message_secure_writer_->set_crypto_handles(spdp_.crypto_handle());
   participant_message_secure_reader_->set_crypto_handles(spdp_.crypto_handle());
-  participant_message_secure_writer_.enable_transport_using_config(reliable, durable, transport_cfg_);
+  if (spdp_.available_builtin_endpoints() & DDS::Security::BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER) {
+    participant_message_secure_writer_->enable_transport_using_config(reliable, durable, transport_cfg_);
+  }
   participant_message_secure_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
 
-  participant_stateless_message_writer_.enable_transport_using_config(besteffort, nondurable, transport_cfg_);
+  participant_stateless_message_writer_->enable_transport_using_config(besteffort, nondurable, transport_cfg_);
   participant_stateless_message_reader_->enable_transport_using_config(besteffort, nondurable, transport_cfg_);
 
-  participant_volatile_message_secure_writer_.set_crypto_handles(spdp_.crypto_handle());
+  participant_volatile_message_secure_writer_->set_crypto_handles(spdp_.crypto_handle());
   participant_volatile_message_secure_reader_->set_crypto_handles(spdp_.crypto_handle());
-  participant_volatile_message_secure_writer_.enable_transport_using_config(reliable, nondurable, transport_cfg_);
+  participant_volatile_message_secure_writer_->enable_transport_using_config(reliable, nondurable, transport_cfg_);
   participant_volatile_message_secure_reader_->enable_transport_using_config(reliable, nondurable, transport_cfg_);
 
-  dcps_participant_secure_writer_.set_crypto_handles(spdp_.crypto_handle());
+  dcps_participant_secure_writer_->set_crypto_handles(spdp_.crypto_handle());
   dcps_participant_secure_reader_->set_crypto_handles(spdp_.crypto_handle());
-  dcps_participant_secure_writer_.enable_transport_using_config(reliable, durable, transport_cfg_);
+  dcps_participant_secure_writer_->enable_transport_using_config(reliable, durable, transport_cfg_);
   dcps_participant_secure_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
 #endif
 
   return DDS::RETCODE_OK;
-}
-
-void
-Sedp::rtps_relay_address(const ACE_INET_Addr& address) {
-  DCPS::RtpsUdpInst_rch rtps_inst =
-    DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
-  ACE_GUARD(ACE_Thread_Mutex, g, rtps_inst->lock_);
-  rtps_inst->rtps_relay_address_ = address;
 }
 
 #ifdef OPENDDS_SECURITY
@@ -469,8 +544,10 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
       }
 
       h = key_factory->register_local_datawriter(crypto_handle, writer_props, dw_sec_attr, ex);
-      participant_volatile_message_secure_writer_.set_crypto_handles(crypto_handle, h);
-      local_writer_crypto_handles_[participant_volatile_message_secure_writer_.get_repo_id()] = h;
+      participant_volatile_message_secure_writer_->set_crypto_handles(crypto_handle, h);
+      const RepoId pvms_writer = participant_volatile_message_secure_writer_->get_repo_id();
+      local_writer_crypto_handles_[pvms_writer] = h;
+      local_writer_security_attribs_[pvms_writer] = dw_sec_attr;
 
       EndpointSecurityAttributes dr_sec_attr(default_sec_attr);
       ok = acl->get_datareader_sec_attributes(perm_handle, "DCPSParticipantVolatileMessageSecure",
@@ -484,7 +561,9 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
 
       h = key_factory->register_local_datareader(crypto_handle, reader_props, dr_sec_attr, ex);
       participant_volatile_message_secure_reader_->set_crypto_handles(crypto_handle, h);
-      local_reader_crypto_handles_[participant_volatile_message_secure_reader_->get_repo_id()] = h;
+      const RepoId pvms_reader = participant_volatile_message_secure_reader_->get_repo_id();
+      local_reader_crypto_handles_[pvms_reader] = h;
+      local_reader_security_attribs_[pvms_reader] = dr_sec_attr;
     }
 
     // DCPS-Participant-Message-Secure
@@ -502,8 +581,10 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
       }
 
       h = key_factory->register_local_datawriter(crypto_handle, writer_props, dw_sec_attr, ex);
-      participant_message_secure_writer_.set_crypto_handles(crypto_handle, h);
-      local_writer_crypto_handles_[participant_message_secure_writer_.get_repo_id()] = h;
+      participant_message_secure_writer_->set_crypto_handles(crypto_handle, h);
+      const RepoId pms_writer = participant_message_secure_writer_->get_repo_id();
+      local_writer_crypto_handles_[pms_writer] = h;
+      local_writer_security_attribs_[pms_writer] = dw_sec_attr;
 
       EndpointSecurityAttributes dr_sec_attr(default_sec_attr);
       ok = acl->get_datareader_sec_attributes(perm_handle, "DCPSParticipantMessageSecure",
@@ -517,7 +598,9 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
 
       h = key_factory->register_local_datareader(crypto_handle, reader_props, dr_sec_attr, ex);
       participant_message_secure_reader_->set_crypto_handles(crypto_handle, h);
-      local_reader_crypto_handles_[participant_message_secure_reader_->get_repo_id()] = h;
+      const RepoId pms_reader = participant_message_secure_reader_->get_repo_id();
+      local_reader_crypto_handles_[pms_reader] = h;
+      local_reader_security_attribs_[pms_reader] = dr_sec_attr;
     }
 
     // DCPS-Publications-Secure
@@ -535,8 +618,10 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
       }
 
       h = key_factory->register_local_datawriter(crypto_handle, writer_props, dw_sec_attr, ex);
-      publications_secure_writer_.set_crypto_handles(crypto_handle, h);
-      local_writer_crypto_handles_[publications_secure_writer_.get_repo_id()] = h;
+      publications_secure_writer_->set_crypto_handles(crypto_handle, h);
+      const RepoId ps_writer = publications_secure_writer_->get_repo_id();
+      local_writer_crypto_handles_[ps_writer] = h;
+      local_writer_security_attribs_[ps_writer] = dw_sec_attr;
 
       EndpointSecurityAttributes dr_sec_attr(default_sec_attr);
       ok = acl->get_datareader_sec_attributes(perm_handle, "DCPSPublicationsSecure",
@@ -550,7 +635,9 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
 
       h = key_factory->register_local_datareader(crypto_handle, reader_props, dr_sec_attr, ex);
       publications_secure_reader_->set_crypto_handles(crypto_handle, h);
-      local_reader_crypto_handles_[publications_secure_reader_->get_repo_id()] = h;
+      const RepoId ps_reader = publications_secure_reader_->get_repo_id();
+      local_reader_crypto_handles_[ps_reader] = h;
+      local_reader_security_attribs_[ps_reader] = dr_sec_attr;
     }
 
     // DCPS-Subscriptions-Secure
@@ -568,8 +655,10 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
       }
 
       h = key_factory->register_local_datawriter(crypto_handle, writer_props, dw_sec_attr, ex);
-      subscriptions_secure_writer_.set_crypto_handles(crypto_handle, h);
-      local_writer_crypto_handles_[subscriptions_secure_writer_.get_repo_id()] = h;
+      subscriptions_secure_writer_->set_crypto_handles(crypto_handle, h);
+      const RepoId ss_writer = subscriptions_secure_writer_->get_repo_id();
+      local_writer_crypto_handles_[ss_writer] = h;
+      local_writer_security_attribs_[ss_writer] = dw_sec_attr;
 
       EndpointSecurityAttributes dr_sec_attr(default_sec_attr);
       ok = acl->get_datareader_sec_attributes(perm_handle, "DCPSSubscriptionsSecure",
@@ -583,7 +672,9 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
 
       h = key_factory->register_local_datareader(crypto_handle, reader_props, dr_sec_attr, ex);
       subscriptions_secure_reader_->set_crypto_handles(crypto_handle, h);
-      local_reader_crypto_handles_[subscriptions_secure_reader_->get_repo_id()] = h;
+      const RepoId ss_reader = subscriptions_secure_reader_->get_repo_id();
+      local_reader_crypto_handles_[ss_reader] = h;
+      local_reader_security_attribs_[ss_reader] = dr_sec_attr;
     }
 
     // DCPS-Participants-Secure
@@ -601,8 +692,10 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
       }
 
       h = key_factory->register_local_datawriter(crypto_handle, writer_props, dw_sec_attr, ex);
-      dcps_participant_secure_writer_.set_crypto_handles(crypto_handle, h);
-      local_writer_crypto_handles_[dcps_participant_secure_writer_.get_repo_id()] = h;
+      dcps_participant_secure_writer_->set_crypto_handles(crypto_handle, h);
+      const RepoId dps_writer = dcps_participant_secure_writer_->get_repo_id();
+      local_writer_crypto_handles_[dps_writer] = h;
+      local_writer_security_attribs_[dps_writer] = dw_sec_attr;
 
       EndpointSecurityAttributes dr_sec_attr(default_sec_attr);
       ok = acl->get_datareader_sec_attributes(perm_handle, "DCPSParticipantSecure",
@@ -616,7 +709,9 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
 
       h = key_factory->register_local_datareader(crypto_handle, reader_props, dr_sec_attr, ex);
       dcps_participant_secure_reader_->set_crypto_handles(crypto_handle, h);
-      local_reader_crypto_handles_[dcps_participant_secure_reader_->get_repo_id()] = h;
+      const RepoId dps_reader = dcps_participant_secure_reader_->get_repo_id();
+      local_reader_crypto_handles_[dps_reader] = h;
+      local_reader_security_attribs_[dps_reader] = dr_sec_attr;
     }
 
   } else {
@@ -631,56 +726,27 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
 
 Sedp::~Sedp()
 {
+  DCPS::RtpsUdpInst_rch rtps_inst =
+    DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
+  rtps_inst->opendds_discovery_default_listener_.reset();
   TheTransportRegistry->remove_config(transport_cfg_);
   TheTransportRegistry->remove_inst(transport_inst_);
 }
 
-void
-Sedp::unicast_locators(DCPS::LocatorSeq& locators) const
+DCPS::LocatorSeq
+Sedp::unicast_locators() const
 {
-  DCPS::RtpsUdpInst_rch rtps_inst =
-    DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
-  using namespace OpenDDS::RTPS;
+  DCPS::TransportLocator trans_info;
+  transport_inst_->populate_locator(trans_info, DCPS::CONNINFO_UNICAST);
+  return transport_locator_to_locator_seq(trans_info);
+}
 
-  CORBA::ULong idx = 0;
-
-  // multicast first so it's preferred by remote peers
-  if (rtps_inst->use_multicast_ && rtps_inst->multicast_group_address_ != ACE_INET_Addr()) {
-    idx = locators.length();
-    locators.length(idx + 1);
-    locators[idx].kind = address_to_kind(rtps_inst->multicast_group_address_);
-    locators[idx].port = rtps_inst->multicast_group_address_.get_port_number();
-    RTPS::address_to_bytes(locators[idx].address,
-      rtps_inst->multicast_group_address_);
-  }
-
-  //if local_address_string is empty, or only the port has been set
-  //need to get interface addresses to populate into the locator
-  if (rtps_inst->local_address_config_str_.empty() ||
-      rtps_inst->local_address_config_str_.rfind(':') == 0) {
-    typedef OPENDDS_VECTOR(ACE_INET_Addr) AddrVector;
-    AddrVector addrs;
-    if (TheServiceParticipant->default_address ().empty ()) {
-      DCPS::get_interface_addrs(addrs);
-    } else {
-      addrs.push_back(ACE_INET_Addr(static_cast<u_short>(0), TheServiceParticipant->default_address().c_str()));
-    }
-    for (AddrVector::iterator adr_it = addrs.begin(); adr_it != addrs.end(); ++adr_it) {
-      idx = locators.length();
-      locators.length(idx + 1);
-      locators[idx].kind = address_to_kind(*adr_it);
-      locators[idx].port = rtps_inst->local_address_.get_port_number();
-      RTPS::address_to_bytes(locators[idx].address,
-        *adr_it);
-    }
-  } else {
-    idx = locators.length();
-    locators.length(idx + 1);
-    locators[idx].kind = address_to_kind(rtps_inst->local_address_);
-    locators[idx].port = rtps_inst->local_address_.get_port_number();
-    RTPS::address_to_bytes(locators[idx].address,
-      rtps_inst->local_address_);
-  }
+DCPS::LocatorSeq
+Sedp::multicast_locators() const
+{
+  DCPS::TransportLocator trans_info;
+  transport_inst_->populate_locator(trans_info, DCPS::CONNINFO_MULTICAST);
+  return transport_locator_to_locator_seq(trans_info);
 }
 
 const ACE_INET_Addr&
@@ -726,14 +792,9 @@ Sedp::assign_bit_key(DiscoveredSubscription& sub)
 }
 
 void
-create_association_data_proto(DCPS::AssociationData& proto,
-                              const ParticipantData_t& pdata) {
-  proto.publication_transport_priority_ = 0;
-  proto.remote_reliable_ = true;
-  proto.remote_durable_ = true;
-  std::memcpy(proto.remote_id_.guidPrefix, pdata.participantProxy.guidPrefix,
-              sizeof(GuidPrefix_t));
-
+populate_locators(DCPS::TransportLocatorSeq& remote_data,
+                  const ParticipantData_t& pdata)
+{
   const DCPS::LocatorSeq& mll =
     pdata.participantProxy.metatrafficMulticastLocatorList;
   const DCPS::LocatorSeq& ull =
@@ -753,11 +814,20 @@ create_association_data_proto(DCPS::AssociationData& proto,
   }
   ser_loc << ACE_OutputCDR::from_boolean(false); // requires_inline_qos
 
-  proto.remote_data_.length(1);
-  proto.remote_data_[0].transport_type = "rtps_udp";
-  message_block_to_sequence (mb_locator, proto.remote_data_[0].data);
+  remote_data.length(1);
+  remote_data[0].transport_type = "rtps_udp";
+  message_block_to_sequence (mb_locator, remote_data[0].data);
 }
 
+void
+create_association_data_proto(DCPS::AssociationData& proto,
+                              const ParticipantData_t& pdata) {
+  proto.publication_transport_priority_ = 0;
+  proto.remote_reliable_ = true;
+  proto.remote_durable_ = true;
+  assign(proto.remote_id_.guidPrefix, pdata.participantProxy.guidPrefix);
+  populate_locators(proto.remote_data_, pdata);
+}
 
 #ifdef OPENDDS_SECURITY
 void
@@ -786,7 +856,7 @@ Sedp::associate_preauth(const Security::SPDPdiscoveredParticipantData& pdata)
   if (avail & DDS::Security::BUILTIN_PARTICIPANT_STATELESS_MESSAGE_READER) {
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
-    participant_stateless_message_writer_.assoc(peer);
+    participant_stateless_message_writer_->assoc(peer);
   }
 }
 #endif
@@ -852,10 +922,10 @@ void Sedp::associate_volatile(const Security::SPDPdiscoveredParticipantData& pda
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER;
     remote_reader_crypto_handles_[peer.remote_id_] = generate_remote_matched_reader_crypto_handle(
-      part, participant_volatile_message_secure_writer_.get_endpoint_crypto_handle(), false);
+      part, participant_volatile_message_secure_writer_->get_endpoint_crypto_handle(), false);
     peer.remote_data_ = add_security_info(
-      peer.remote_data_, participant_volatile_message_secure_writer_.get_repo_id(), peer.remote_id_);
-    participant_volatile_message_secure_writer_.assoc(peer);
+      peer.remote_data_, participant_volatile_message_secure_writer_->get_repo_id(), peer.remote_id_);
+    participant_volatile_message_secure_writer_->assoc(peer);
   }
 }
 
@@ -920,42 +990,49 @@ void Sedp::associate_secure_readers_to_writers(const Security::SPDPdiscoveredPar
   part.entityId = ENTITYID_PARTICIPANT;
 
   const BuiltinEndpointSet_t& avail = pdata.participantProxy.availableBuiltinEndpoints;
+  const BuiltinEndpointQos_t& beq = pdata.participantProxy.builtinEndpointQos;
+
 
   if (avail & BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER) {
     DCPS::AssociationData peer = proto;
+    if (beq & BEST_EFFORT_PARTICIPANT_MESSAGE_DATA_READER) {
+      peer.remote_reliable_ = false;
+    }
     peer.remote_id_.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER;
     remote_reader_crypto_handles_[peer.remote_id_] = generate_remote_matched_reader_crypto_handle(
-      part, participant_message_secure_writer_.get_endpoint_crypto_handle(), false);
+      part, participant_message_secure_writer_->get_endpoint_crypto_handle(), false);
     peer.remote_data_ = add_security_info(
-      peer.remote_data_, participant_message_secure_writer_.get_repo_id(), peer.remote_id_);
-    participant_message_secure_writer_.assoc(peer);
+      peer.remote_data_, participant_message_secure_writer_->get_repo_id(), peer.remote_id_);
+    participant_message_secure_writer_->assoc(peer);
   }
   if (avail & SPDP_BUILTIN_PARTICIPANT_SECURE_READER) {
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER;
     remote_reader_crypto_handles_[peer.remote_id_] = generate_remote_matched_reader_crypto_handle(
-      part, dcps_participant_secure_writer_.get_endpoint_crypto_handle(), false);
+      part, dcps_participant_secure_writer_->get_endpoint_crypto_handle(), false);
     peer.remote_data_ = add_security_info(
-      peer.remote_data_, dcps_participant_secure_writer_.get_repo_id(), peer.remote_id_);
-    dcps_participant_secure_writer_.assoc(peer);
+      peer.remote_data_, dcps_participant_secure_writer_->get_repo_id(), peer.remote_id_);
+    dcps_participant_secure_writer_->assoc(peer);
   }
-  if (avail & SEDP_BUILTIN_PUBLICATIONS_SECURE_READER) {
+  if (spdp_.available_builtin_endpoints() & SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER &&
+      avail & SEDP_BUILTIN_PUBLICATIONS_SECURE_READER) {
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER;
     remote_reader_crypto_handles_[peer.remote_id_] = generate_remote_matched_reader_crypto_handle(
-      part, publications_secure_writer_.get_endpoint_crypto_handle(), false);
+      part, publications_secure_writer_->get_endpoint_crypto_handle(), false);
     peer.remote_data_ = add_security_info(
-      peer.remote_data_, publications_secure_writer_.get_repo_id(), peer.remote_id_);
-    publications_secure_writer_.assoc(peer);
+      peer.remote_data_, publications_secure_writer_->get_repo_id(), peer.remote_id_);
+    publications_secure_writer_->assoc(peer);
   }
-  if (avail & SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER) {
+  if (spdp_.available_builtin_endpoints() & SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER &&
+      avail & SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER) {
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER;
     remote_reader_crypto_handles_[peer.remote_id_] = generate_remote_matched_reader_crypto_handle(
-      part, subscriptions_secure_writer_.get_endpoint_crypto_handle(), false);
+      part, subscriptions_secure_writer_->get_endpoint_crypto_handle(), false);
     peer.remote_data_ = add_security_info(
-      peer.remote_data_, subscriptions_secure_writer_.get_repo_id(), peer.remote_id_);
-    subscriptions_secure_writer_.assoc(peer);
+      peer.remote_data_, subscriptions_secure_writer_->get_repo_id(), peer.remote_id_);
+    subscriptions_secure_writer_->assoc(peer);
   }
 }
 
@@ -964,20 +1041,21 @@ Sedp::create_and_send_datareader_crypto_tokens(
   const DDS::Security::DatareaderCryptoHandle& drch, const DCPS::RepoId& local_reader,
   const DDS::Security::DatawriterCryptoHandle& dwch, const DCPS::RepoId& remote_writer)
 {
-  DCPS::RepoId remote_participant;
-  std::memcpy(remote_participant.guidPrefix, remote_writer.guidPrefix, sizeof(GuidPrefix_t));
-  remote_participant.entityId = ENTITYID_PARTICIPANT;
+  DCPS::RepoId remote_volatile_reader;
+  assign(remote_volatile_reader.guidPrefix, remote_writer.guidPrefix);
+  remote_volatile_reader.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER;
 
-  RepeatOnceWriter::RemoteWriter info;
+  RemoteWriter info;
   info.local_reader = local_reader;
   info.remote_writer = remote_writer;
   DDS::Security::DatareaderCryptoTokenSeq& drcts = info.reader_tokens;
   create_datareader_crypto_tokens(drch, dwch, drcts);
 
-  send_datareader_crypto_tokens(local_reader, remote_writer, drcts);
-  ACE_Guard<ACE_Thread_Mutex> g(participant_volatile_message_secure_writer_.lock_);
-  participant_volatile_message_secure_writer_.
-    remote_writers_[remote_participant].push_back(info);
+  if (associated_volatile_readers_.count(remote_volatile_reader) != 0) {
+    send_datareader_crypto_tokens(local_reader, remote_writer, drcts);
+  } else {
+    datareader_crypto_tokens_[remote_volatile_reader].push_back(info);
+  }
 }
 
 void
@@ -985,20 +1063,21 @@ Sedp::create_and_send_datawriter_crypto_tokens(
   const DDS::Security::DatawriterCryptoHandle& dwch, const DCPS::RepoId& local_writer,
   const DDS::Security::DatareaderCryptoHandle& drch, const DCPS::RepoId& remote_reader)
 {
-  DCPS::RepoId remote_participant;
-  std::memcpy(remote_participant.guidPrefix, remote_reader.guidPrefix, sizeof(GuidPrefix_t));
-  remote_participant.entityId = ENTITYID_PARTICIPANT;
+  DCPS::RepoId remote_volatile_reader;
+  assign(remote_volatile_reader.guidPrefix, remote_reader.guidPrefix);
+  remote_volatile_reader.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER;
 
-  RepeatOnceWriter::RemoteReader info;
+  RemoteReader info;
   info.local_writer = local_writer;
   info.remote_reader = remote_reader;
   DDS::Security::DatawriterCryptoTokenSeq& dwcts = info.writer_tokens;
   create_datawriter_crypto_tokens(dwch, drch, dwcts);
 
-  send_datawriter_crypto_tokens(local_writer, remote_reader, dwcts);
-  ACE_Guard<ACE_Thread_Mutex> g(participant_volatile_message_secure_writer_.lock_);
-  participant_volatile_message_secure_writer_.
-    remote_readers_[remote_participant].push_back(info);
+  if (associated_volatile_readers_.count(remote_volatile_reader) != 0) {
+    send_datawriter_crypto_tokens(local_writer, remote_reader, dwcts);
+  } else {
+    datawriter_crypto_tokens_[remote_volatile_reader].push_back(info);
+  }
 }
 
 void
@@ -1023,9 +1102,7 @@ Sedp::send_builtin_crypto_tokens(const Security::SPDPdiscoveredParticipantData& 
 {
   using namespace DDS::Security;
 
-  DCPS::RepoId part;
-  std::memcpy(part.guidPrefix, pdata.participantProxy.guidPrefix, sizeof(GuidPrefix_t));
-  part.entityId = ENTITYID_PARTICIPANT;
+  const DCPS::RepoId part = make_id(pdata.participantProxy.guidPrefix, ENTITYID_PARTICIPANT);
 
   const BuiltinEndpointSet_t& avail = pdata.participantProxy.availableBuiltinEndpoints;
 
@@ -1051,22 +1128,24 @@ Sedp::send_builtin_crypto_tokens(const Security::SPDPdiscoveredParticipantData& 
 
   if (avail & BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER) {
     send_builtin_crypto_tokens(part, ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER,
-                               participant_message_secure_writer_.get_repo_id());
+                               participant_message_secure_writer_->get_repo_id());
   }
 
   if (avail & SPDP_BUILTIN_PARTICIPANT_SECURE_READER) {
     send_builtin_crypto_tokens(part, ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER,
-                               dcps_participant_secure_writer_.get_repo_id());
+                               dcps_participant_secure_writer_->get_repo_id());
   }
 
-  if (avail & SEDP_BUILTIN_PUBLICATIONS_SECURE_READER) {
+  if (spdp_.available_builtin_endpoints() & SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER &&
+      avail & SEDP_BUILTIN_PUBLICATIONS_SECURE_READER) {
     send_builtin_crypto_tokens(part, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER,
-                               publications_secure_writer_.get_repo_id());
+                               publications_secure_writer_->get_repo_id());
   }
 
-  if (avail & SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER) {
+  if (spdp_.available_builtin_endpoints() & SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER &&
+      avail & SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER) {
     send_builtin_crypto_tokens(part, ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER,
-                               subscriptions_secure_writer_.get_repo_id());
+                               subscriptions_secure_writer_->get_repo_id());
   }
 }
 #endif
@@ -1084,28 +1163,31 @@ Sedp::Task::svc_i(const ParticipantData_t* ppdata)
   const BuiltinEndpointSet_t& avail =
     pdata->participantProxy.availableBuiltinEndpoints;
 
+  const BuiltinEndpointQos_t& beq =
+    pdata->participantProxy.builtinEndpointQos;
+
   // See RTPS v2.1 section 8.5.5.1
-  if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR) {
+  if (spdp_->available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER &&
+      avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR) {
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER;
-    sedp_->publications_writer_.assoc(peer);
+    sedp_->publications_writer_->assoc(peer);
   }
-  if (avail & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR) {
+  if (spdp_->available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER &&
+      avail & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR) {
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER;
-    sedp_->subscriptions_writer_.assoc(peer);
+    sedp_->subscriptions_writer_->assoc(peer);
   }
-  if (avail & BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER) {
+  if (spdp_->available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER &&
+      avail & BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER) {
     DCPS::AssociationData peer = proto;
+    if (beq & BEST_EFFORT_PARTICIPANT_MESSAGE_DATA_READER) {
+      peer.remote_reliable_ = false;
+    }
     peer.remote_id_.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER;
-    sedp_->participant_message_writer_.assoc(peer);
+    sedp_->participant_message_writer_->assoc(peer);
   }
-
-#ifdef OPENDDS_SECURITY
-  if (sedp_->is_security_enabled()) {
-    sedp_->associate_secure_readers_to_writers(*pdata);
-  }
-#endif
 
   //FUTURE: if/when topic propagation is supported, add it here
 
@@ -1133,67 +1215,10 @@ Sedp::Task::svc_i(const ParticipantData_t* ppdata)
 
 #ifdef OPENDDS_SECURITY
   if (sedp_->is_security_enabled()) {
-    spdp_->send_participant_crypto_tokens(proto.remote_id_);
     sedp_->send_builtin_crypto_tokens(*pdata);
   }
 #endif
 
-  // Write durable data
-  if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR) {
-    proto.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER;
-    sedp_->write_durable_publication_data(proto.remote_id_);
-  }
-  if (avail & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR) {
-    proto.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER;
-    sedp_->write_durable_subscription_data(proto.remote_id_);
-  }
-  if (avail & BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER) {
-    proto.remote_id_.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER;
-    sedp_->write_durable_participant_message_data(proto.remote_id_);
-  }
-
-  for (DCPS::RepoIdSet::iterator it = sedp_->defer_match_endpoints_.begin();
-       it != sedp_->defer_match_endpoints_.end(); /*incremented in body*/) {
-    if (0 == std::memcmp(it->guidPrefix, proto.remote_id_.guidPrefix,
-                         sizeof(GuidPrefix_t))) {
-      OPENDDS_STRING topic;
-      if (it->entityId.entityKind & 4) {
-        DiscoveredSubscriptionIter dsi =
-          sedp_->discovered_subscriptions_.find(*it);
-        if (dsi != sedp_->discovered_subscriptions_.end()) {
-          topic = dsi->second.reader_data_.ddsSubscriptionData.topic_name;
-        }
-      } else {
-        DiscoveredPublicationIter dpi =
-          sedp_->discovered_publications_.find(*it);
-        if (dpi != sedp_->discovered_publications_.end()) {
-          topic = dpi->second.writer_data_.ddsPublicationData.topic_name;
-        }
-      }
-      if (DCPS::DCPS_debug_level > 3) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::AssociateTask::svc - ")
-          ACE_TEXT("processing deferred endpoints for topic %C\n"),
-          topic.c_str()));
-      }
-      if (!topic.empty()) {
-        OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator ti =
-          sedp_->topics_.find(topic);
-        if (ti != sedp_->topics_.end()) {
-          if (DCPS::DCPS_debug_level > 3) {
-            DCPS::GuidConverter conv(*it);
-            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::AssociateTask::svc - ")
-              ACE_TEXT("calling match_endpoints %C\n"),
-              OPENDDS_STRING(conv).c_str()));
-          }
-          sedp_->match_endpoints(*it, ti->second);
-          if (spdp_->shutting_down()) { return; }
-        }
-      }
-      sedp_->defer_match_endpoints_.erase(it++);
-    } else {
-      ++it;
-    }
-  }
 }
 
 #ifdef OPENDDS_SECURITY
@@ -1202,7 +1227,7 @@ Sedp::Task::svc_secure_i(DCPS::MessageId id,
                          const Security::SPDPdiscoveredParticipantData* ppdata)
 {
   DCPS::unique_ptr<const Security::SPDPdiscoveredParticipantData> pdata(ppdata);
-  spdp_->handle_participant_data(id, *pdata);
+  spdp_->handle_participant_data(id, *pdata, DCPS::SequenceNumber::ZERO(), ACE_INET_Addr(), true);
 }
 #endif
 
@@ -1222,10 +1247,8 @@ namespace {
 bool
 Sedp::disassociate(const ParticipantData_t& pdata)
 {
-  RepoId part;
-  std::memcpy(part.guidPrefix, pdata.participantProxy.guidPrefix,
-              sizeof(GuidPrefix_t));
-  part.entityId = ENTITYID_PARTICIPANT;
+  const RepoId part = make_id(pdata.participantProxy.guidPrefix, ENTITYID_PARTICIPANT);
+
   associated_participants_.erase(part);
   const BuiltinEndpointSet_t avail =
     pdata.participantProxy.availableBuiltinEndpoints;
@@ -1234,18 +1257,24 @@ Sedp::disassociate(const ParticipantData_t& pdata)
     ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
     ACE_GUARD_RETURN(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock, false);
 
-    disassociate_helper(avail, DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR, part,
-      ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER, publications_writer_);
+    if (spdp_.available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER) {
+      disassociate_helper(avail, DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR, part,
+                          ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER, *publications_writer_);
+    }
     disassociate_helper(avail, DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER, part,
       ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER, *publications_reader_);
 
-    disassociate_helper(avail, DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR, part,
-      ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER, subscriptions_writer_);
+    if (spdp_.available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER) {
+      disassociate_helper(avail, DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR, part,
+                          ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER, *subscriptions_writer_);
+    }
     disassociate_helper(avail, DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER, part,
       ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER, *subscriptions_reader_);
 
-    disassociate_helper(avail, BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER, part,
-      ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER, participant_message_writer_);
+    if (spdp_.available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER) {
+      disassociate_helper(avail, BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER, part,
+                          ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER, *participant_message_writer_);
+    }
     disassociate_helper(avail, BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER, part,
       ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER, *participant_message_reader_);
 
@@ -1254,33 +1283,39 @@ Sedp::disassociate(const ParticipantData_t& pdata)
 #ifdef OPENDDS_SECURITY
     using namespace DDS::Security;
 
-    disassociate_helper(avail, SEDP_BUILTIN_PUBLICATIONS_SECURE_READER, part,
-      ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER, publications_secure_writer_);
+    if (spdp_.available_builtin_endpoints() & SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER) {
+      disassociate_helper(avail, SEDP_BUILTIN_PUBLICATIONS_SECURE_READER, part,
+                          ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER, *publications_secure_writer_);
+    }
     disassociate_helper(avail, SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER, part,
       ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER, *publications_secure_reader_);
 
-    disassociate_helper(avail, SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER, part,
-      ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER, subscriptions_secure_writer_);
+    if (spdp_.available_builtin_endpoints() & SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER) {
+      disassociate_helper(avail, SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER, part,
+                          ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER, *subscriptions_secure_writer_);
+    }
     disassociate_helper(avail, SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER, part,
       ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER, *subscriptions_secure_reader_);
 
-    disassociate_helper(avail, BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER, part,
-      ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER, participant_message_secure_writer_);
+    if (spdp_.available_builtin_endpoints() & DDS::Security::BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER) {
+      disassociate_helper(avail, BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER, part,
+                          ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER, *participant_message_secure_writer_);
+    }
     disassociate_helper(avail, BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER, part,
       ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER, *participant_message_secure_reader_);
 
     disassociate_helper(avail, BUILTIN_PARTICIPANT_STATELESS_MESSAGE_READER, part,
-      ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER, participant_stateless_message_writer_);
+      ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER, *participant_stateless_message_writer_);
     disassociate_helper(avail, BUILTIN_PARTICIPANT_STATELESS_MESSAGE_WRITER, part,
       ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER, *participant_stateless_message_reader_);
 
     disassociate_helper(avail, BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_READER, part,
-      ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER, participant_volatile_message_secure_writer_);
+      ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER, *participant_volatile_message_secure_writer_);
     disassociate_helper(avail, BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_WRITER, part,
       ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER, *participant_volatile_message_secure_reader_);
 
     disassociate_helper(avail, SPDP_BUILTIN_PARTICIPANT_SECURE_READER, part,
-      ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER, dcps_participant_secure_writer_);
+      ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER, *dcps_participant_secure_writer_);
     disassociate_helper(avail, SPDP_BUILTIN_PARTICIPANT_SECURE_WRITER, part,
       ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER, *dcps_participant_secure_reader_);
 #endif
@@ -1288,7 +1323,9 @@ Sedp::disassociate(const ParticipantData_t& pdata)
   }
 
 #ifdef OPENDDS_SECURITY
-  participant_volatile_message_secure_writer_.erase(part);
+  RepoId remote_volatile(part);
+  remote_volatile.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER;
+  associated_volatile_readers_.erase(remote_volatile);
 #endif
 
   if (spdp_.has_discovered_participant(part)) {
@@ -1298,6 +1335,105 @@ Sedp::disassociate(const ParticipantData_t& pdata)
   } else {
     return false;
   }
+}
+
+void
+Sedp::update_locators(const ParticipantData_t& pdata)
+{
+  DCPS::TransportLocatorSeq remote_data;
+  populate_locators(remote_data, pdata);
+
+  DCPS::RepoId remote_id = make_id(pdata.participantProxy.guidPrefix, ENTITYID_PARTICIPANT);
+
+  if (DCPS::DCPS_debug_level > 3) {
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::update_locators updating locators for %C\n"), DCPS::LogGuid(remote_id).c_str()));
+  }
+
+  const BuiltinEndpointSet_t& avail =
+    pdata.participantProxy.availableBuiltinEndpoints;
+
+  if (avail & DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER) {
+    remote_id.entityId = ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+  if (avail & DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR) {
+    remote_id.entityId = ENTITYID_SPDP_BUILTIN_PARTICIPANT_READER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+  if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER) {
+    remote_id.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+  if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR) {
+    remote_id.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+  if (avail & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER) {
+    remote_id.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+  if (avail & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR) {
+    remote_id.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+  if (avail & BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER) {
+    remote_id.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+  if (avail & BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER) {
+    remote_id.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+#ifdef OPENDDS_SECURITY
+  if (avail & DDS::Security::SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER) {
+    remote_id.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+  if (avail & DDS::Security::SEDP_BUILTIN_PUBLICATIONS_SECURE_READER) {
+    remote_id.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+  if (avail & DDS::Security::SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER) {
+    remote_id.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+  if (avail & DDS::Security::SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER) {
+    remote_id.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+  if (avail & DDS::Security::BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER) {
+    remote_id.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+  if (avail & DDS::Security::BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER) {
+    remote_id.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+  if (avail & DDS::Security::BUILTIN_PARTICIPANT_STATELESS_MESSAGE_WRITER) {
+    remote_id.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+  if (avail & DDS::Security::BUILTIN_PARTICIPANT_STATELESS_MESSAGE_READER) {
+    remote_id.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+  if (avail & DDS::Security::BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_WRITER) {
+    remote_id.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+  if (avail & DDS::Security::BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_READER) {
+    remote_id.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+  if (avail & DDS::Security::SPDP_BUILTIN_PARTICIPANT_SECURE_WRITER) {
+    remote_id.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+  if (avail & DDS::Security::SPDP_BUILTIN_PARTICIPANT_SECURE_READER) {
+    remote_id.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER;
+    transport_inst_->update_locators(remote_id, remote_data);
+  }
+#endif
 }
 
 template<typename Map>
@@ -1313,7 +1449,7 @@ Sedp::remove_entities_belonging_to(Map& m, RepoId participant)
     OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
       topics_.find(topic_name);
     if (top_it != topics_.end()) {
-      top_it->second.endpoints_.erase(i->first);
+      top_it->second.remove_pub_sub(i->first);
       if (DCPS::DCPS_debug_level > 3) {
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) Sedp::remove_entities_belonging_to - ")
@@ -1321,6 +1457,9 @@ Sedp::remove_entities_belonging_to(Map& m, RepoId participant)
       }
       match_endpoints(i->first, top_it->second, true /*remove*/);
       if (spdp_.shutting_down()) { return; }
+      if (top_it->second.is_dead()) {
+        purge_dead_topic(topic_name);
+      }
     }
     remove_from_bit(i->second);
     m.erase(i++);
@@ -1415,11 +1554,11 @@ Sedp::sub_bit()
     sub->lookup_datareader(DCPS::BUILT_IN_SUBSCRIPTION_TOPIC);
   return dynamic_cast<DCPS::SubscriptionBuiltinTopicDataDataReaderImpl*>(d.in());
 }
+
 #endif /* DDS_HAS_MINIMUM_BIT */
 
 bool
-Sedp::update_topic_qos(const RepoId& topicId, const DDS::TopicQos& qos,
-                       OPENDDS_STRING& name)
+Sedp::update_topic_qos(const RepoId& topicId, const DDS::TopicQos& qos)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
   OPENDDS_MAP_CMP(RepoId, OPENDDS_STRING, DCPS::GUID_tKeyLessThan)::iterator iter =
@@ -1427,16 +1566,16 @@ Sedp::update_topic_qos(const RepoId& topicId, const DDS::TopicQos& qos,
   if (iter == topic_names_.end()) {
     return false;
   }
-  name = iter->second;
+  const OPENDDS_STRING& name = iter->second;
   TopicDetails& topic = topics_[name];
   using namespace DCPS;
   // If the TOPIC_DATA QoS changed our local endpoints must be resent
   // with new QoS
-  if (qos.topic_data != topic.qos_.topic_data) {
-    topic.qos_ = qos;
+  if (qos.topic_data != topic.local_qos().topic_data) {
+    topic.update(qos);
     // For each endpoint associated on this topic
-    for (RepoIdSet::iterator topic_endpoints = topic.endpoints_.begin();
-         topic_endpoints != topic.endpoints_.end(); ++topic_endpoints) {
+    for (RepoIdSet::const_iterator topic_endpoints = topic.endpoints().begin();
+         topic_endpoints != topic.endpoints().end(); ++topic_endpoints) {
 
       const RepoId& rid = *topic_endpoints;
       GuidConverter conv(rid);
@@ -1459,34 +1598,6 @@ Sedp::update_topic_qos(const RepoId& topicId, const DDS::TopicQos& qos,
   return true;
 }
 
-void
-Sedp::inconsistent_topic(const DCPS::RepoIdSet& eps) const
-{
-  using DCPS::RepoIdSet;
-  for (RepoIdSet::const_iterator iter(eps.begin()); iter != eps.end(); ++iter) {
-    if (0 == std::memcmp(participant_id_.guidPrefix, iter->guidPrefix,
-                         sizeof(GuidPrefix_t))) {
-      const bool reader = iter->entityId.entityKind & 4;
-      if (reader) {
-        const LocalSubscriptionCIter lsi = local_subscriptions_.find(*iter);
-        if (lsi != local_subscriptions_.end()) {
-          lsi->second.subscription_->inconsistent_topic();
-          // Only make one callback per inconsistent topic, even if we have
-          // more than one reader/writer on the topic -- it's the Topic object
-          // that will actually see the InconsistentTopicStatus change.
-          return;
-        }
-      } else {
-        const LocalPublicationCIter lpi = local_publications_.find(*iter);
-        if (lpi != local_publications_.end()) {
-          lpi->second.publication_->inconsistent_topic();
-          return; // see comment above
-        }
-      }
-    }
-  }
-}
-
 DDS::ReturnCode_t
 Sedp::remove_publication_i(const RepoId& publicationId, LocalPublication& pub)
 {
@@ -1495,10 +1606,16 @@ Sedp::remove_publication_i(const RepoId& publicationId, LocalPublication& pub)
   if (endpoint) {
     ICE::Agent::instance()->remove_local_agent_info_listener(endpoint, publicationId);
   }
+
+  if (is_security_enabled() && pub.security_attribs_.base.is_discovery_protected) {
+    return publications_secure_writer_->write_unregister_dispose(publicationId);
+  } else {
+    return publications_writer_->write_unregister_dispose(publicationId);
+  }
 #else
   ACE_UNUSED_ARG(pub);
+  return publications_writer_->write_unregister_dispose(publicationId);
 #endif
-  return publications_writer_.write_unregister_dispose(publicationId);
 }
 
 bool
@@ -1537,10 +1654,16 @@ Sedp::remove_subscription_i(const RepoId& subscriptionId,
   if (endpoint) {
     ICE::Agent::instance()->remove_local_agent_info_listener(endpoint, subscriptionId);
   }
+
+  if (is_security_enabled() && sub.security_attribs_.base.is_discovery_protected) {
+    return subscriptions_secure_writer_->write_unregister_dispose(subscriptionId);
+  } else {
+    return subscriptions_writer_->write_unregister_dispose(subscriptionId);
+  }
 #else
   ACE_UNUSED_ARG(sub);
+  return subscriptions_writer_->write_unregister_dispose(subscriptionId);
 #endif
-  return subscriptions_writer_.write_unregister_dispose(subscriptionId);
 }
 
 bool
@@ -1602,9 +1725,28 @@ void
 Sedp::shutdown()
 {
   task_.shutdown();
-  publications_reader_->shutting_down_ = true;
-  subscriptions_reader_->shutting_down_ = true;
-  participant_message_reader_->shutting_down_ = true;
+  publications_reader_->shutting_down();
+  subscriptions_reader_->shutting_down();
+  participant_message_reader_->shutting_down();
+#ifdef OPENDDS_SECURITY
+  publications_secure_reader_->shutting_down();
+  subscriptions_secure_reader_->shutting_down();
+  participant_message_secure_reader_->shutting_down();
+  participant_stateless_message_reader_->shutting_down();
+  participant_volatile_message_secure_reader_->shutting_down();
+  dcps_participant_secure_reader_->shutting_down();
+#endif
+  publications_writer_->shutting_down();
+  subscriptions_writer_->shutting_down();
+  participant_message_writer_->shutting_down();
+#ifdef OPENDDS_SECURITY
+  publications_secure_writer_->shutting_down();
+  subscriptions_secure_writer_->shutting_down();
+  participant_message_secure_writer_->shutting_down();
+  participant_stateless_message_writer_->shutting_down();
+  participant_volatile_message_secure_writer_->shutting_down();
+  dcps_participant_secure_writer_->shutting_down();
+#endif
 }
 
 void
@@ -1644,6 +1786,9 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
                                           )
 {
   OPENDDS_STRING topic_name;
+
+  RepoId participant_id = guid;
+  participant_id.entityId = ENTITYID_PARTICIPANT;
 
   // Find the publication - iterator valid only as long as we hold the lock
   DiscoveredPublicationIter iter = discovered_publications_.find(guid);
@@ -1687,9 +1832,6 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
 
           DDS::Security::SecurityException ex = {"", 0, 0};
 
-          RepoId part = guid;
-          part.entityId = ENTITYID_PARTICIPANT;
-
           DDS::TopicBuiltinTopicData data;
           data.key = wdata.ddsPublicationData.key;
           data.name = wdata.ddsPublicationData.topic_name;
@@ -1705,10 +1847,10 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
           data.ownership = wdata.ddsPublicationData.ownership;
           data.topic_data = wdata.ddsPublicationData.topic_data;
 
-          DCPS::AuthState auth_state = spdp_.lookup_participant_auth_state(part);
+          DCPS::AuthState auth_state = spdp_.lookup_participant_auth_state(participant_id);
           if (auth_state == DCPS::AS_AUTHENTICATED) {
 
-            DDS::Security::PermissionsHandle remote_permissions = spdp_.lookup_participant_permissions(part);
+            DDS::Security::PermissionsHandle remote_permissions = spdp_.lookup_participant_permissions(participant_id);
 
             if (participant_sec_attr_.is_access_protected &&
                 !get_access_control()->check_remote_topic(remote_permissions, spdp_.get_domain_id(), data, ex))
@@ -1766,34 +1908,19 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
 
         DiscoveredPublication& pub = discovered_publications_[guid] = prepub;
 
-        OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
-          topics_.find(topic_name);
+        // Create a topic if necessary.
+        OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it = topics_.find(topic_name);
         if (top_it == topics_.end()) {
-          top_it =
-            topics_.insert(std::make_pair(topic_name, TopicDetails())).first;
-          top_it->second.data_type_ = wdata.ddsPublicationData.type_name;
-          top_it->second.qos_.topic_data = wdata.ddsPublicationData.topic_data;
-          top_it->second.repo_id_ = make_topic_guid();
-
-        } else if (top_it->second.data_type_ !=
-                   wdata.ddsPublicationData.type_name.in()) {
-          inconsistent_topic(top_it->second.endpoints_);
-          if (DCPS::DCPS_debug_level) {
-            ACE_DEBUG((LM_WARNING,
-              ACE_TEXT("(%P|%t) Sedp::data_received(dwd) - WARNING ")
-              ACE_TEXT("topic %C discovered data type %C doesn't ")
-              ACE_TEXT("match known data type %C, ignoring ")
-              ACE_TEXT("discovered publication.\n"),
-              topic_name.c_str(),
-              wdata.ddsPublicationData.type_name.in(),
-              top_it->second.data_type_.c_str()));
-          }
-          return;
+          top_it = topics_.insert(std::make_pair(topic_name, TopicDetails())).first;
+          DCPS::RepoId topic_id = make_topic_guid();
+          top_it->second.init(topic_name, topic_id);
+          topic_names_[topic_id] = topic_name;
         }
 
         TopicDetails& td = top_it->second;
-        topic_names_[td.repo_id_] = topic_name;
-        td.endpoints_.insert(guid);
+
+        // Upsert the remote topic.
+        td.add_pub_sub(guid, wdata.ddsPublicationData.type_name.in());
 
         std::memcpy(pub.writer_data_.ddsPublicationData.participant_key.value,
                     guid.guidPrefix, sizeof(DDS::BuiltinTopicKey_t));
@@ -1834,26 +1961,44 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
         }
       }
 
-    } else if (qosChanged(iter->second.writer_data_.ddsPublicationData,
-                          wdata.ddsPublicationData)) { // update existing
+    } else {
+      if (checkAndAssignQos(iter->second.writer_data_.ddsPublicationData,
+                            wdata.ddsPublicationData)) { // update existing
+
 #ifndef DDS_HAS_MINIMUM_BIT
-      DCPS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
-      if (bit) { // bit may be null if the DomainParticipant is shutting down
-        bit->store_synthetic_data(iter->second.writer_data_.ddsPublicationData,
-                                  DDS::NOT_NEW_VIEW_STATE);
-      }
+        DCPS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
+        if (bit) { // bit may be null if the DomainParticipant is shutting down
+          bit->store_synthetic_data(iter->second.writer_data_.ddsPublicationData,
+                                    DDS::NOT_NEW_VIEW_STATE);
+        }
 #endif /* DDS_HAS_MINIMUM_BIT */
 
-      // Match/unmatch local subscription(s)
-      topic_name = get_topic_name(iter->second);
-      OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
+        // Match/unmatch local subscription(s)
+        topic_name = get_topic_name(iter->second);
+        OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
           topics_.find(topic_name);
-      if (top_it != topics_.end()) {
-        if (DCPS::DCPS_debug_level > 3) {
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::data_received(dwd) - ")
-                               ACE_TEXT("calling match_endpoints update\n")));
+        if (top_it != topics_.end()) {
+          if (DCPS::DCPS_debug_level > 3) {
+            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::data_received(dwd) - ")
+                       ACE_TEXT("calling match_endpoints update\n")));
+          }
+          match_endpoints(guid, top_it->second);
         }
-        match_endpoints(guid, top_it->second);
+      }
+
+      if (checkAndAssignLocators(iter->second.writer_data_.writerProxy, wdata.writerProxy)) {
+        topic_name = get_topic_name(iter->second);
+        OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::const_iterator top_it = topics_.find(topic_name);
+        using DCPS::RepoIdSet;
+        const RepoIdSet& assoc =
+          (top_it == topics_.end()) ? RepoIdSet() : top_it->second.endpoints();
+        for (RepoIdSet::const_iterator i = assoc.begin(); i != assoc.end(); ++i) {
+          if (DCPS::GuidConverter(*i).isWriter()) continue; // publication
+          LocalSubscriptionIter lsi = local_subscriptions_.find(*i);
+          if (lsi != local_subscriptions_.end()) {
+            lsi->second.subscription_->update_locators(guid, wdata.writerProxy.allLocators);
+          }
+        }
       }
     }
 
@@ -1866,9 +2011,12 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
       OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
           topics_.find(topic_name);
       if (top_it != topics_.end()) {
-        top_it->second.endpoints_.erase(guid);
+        top_it->second.remove_pub_sub(guid);
         match_endpoints(guid, top_it->second, true /*remove*/);
         if (spdp_.shutting_down()) { return; }
+        if (top_it->second.is_dead()) {
+          purge_dead_topic(topic_name);
+        }
       }
       remove_from_bit(iter->second);
       if (DCPS::DCPS_debug_level > 3) {
@@ -1960,6 +2108,9 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
 {
   OPENDDS_STRING topic_name;
 
+  RepoId participant_id = guid;
+  participant_id.entityId = ENTITYID_PARTICIPANT;
+
   // Find the subscripion - iterator valid only as long as we hold the lock
   DiscoveredSubscriptionIter iter = discovered_subscriptions_.find(guid);
 
@@ -2002,9 +2153,6 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
 
           DDS::Security::SecurityException ex = {"", 0, 0};
 
-          RepoId part = guid;
-          part.entityId = ENTITYID_PARTICIPANT;
-
           DDS::TopicBuiltinTopicData data;
           data.key = rdata.ddsSubscriptionData.key;
           data.name = rdata.ddsSubscriptionData.topic_name;
@@ -2018,10 +2166,10 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
           data.ownership = rdata.ddsSubscriptionData.ownership;
           data.topic_data = rdata.ddsSubscriptionData.topic_data;
 
-          DCPS::AuthState auth_state = spdp_.lookup_participant_auth_state(part);
+          DCPS::AuthState auth_state = spdp_.lookup_participant_auth_state(participant_id);
           if (auth_state == DCPS::AS_AUTHENTICATED) {
 
-            DDS::Security::PermissionsHandle remote_permissions = spdp_.lookup_participant_permissions(part);
+            DDS::Security::PermissionsHandle remote_permissions = spdp_.lookup_participant_permissions(participant_id);
 
             if (participant_sec_attr_.is_access_protected &&
                 !get_access_control()->check_remote_topic(remote_permissions, spdp_.get_domain_id(), data, ex))
@@ -2087,34 +2235,19 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
 
         DiscoveredSubscription& sub = discovered_subscriptions_[guid] = presub;
 
-        OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
-          topics_.find(topic_name);
+        // Create a topic if necessary.
+        OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it = topics_.find(topic_name);
         if (top_it == topics_.end()) {
-          top_it =
-            topics_.insert(std::make_pair(topic_name, TopicDetails())).first;
-          top_it->second.data_type_ = rdata.ddsSubscriptionData.type_name;
-          top_it->second.qos_.topic_data = rdata.ddsSubscriptionData.topic_data;
-          top_it->second.repo_id_ = make_topic_guid();
-
-        } else if (top_it->second.data_type_ !=
-                   rdata.ddsSubscriptionData.type_name.in()) {
-          inconsistent_topic(top_it->second.endpoints_);
-          if (DCPS::DCPS_debug_level) {
-            ACE_DEBUG((LM_WARNING,
-                       ACE_TEXT("(%P|%t) Sedp::data_received(drd) - WARNING ")
-                       ACE_TEXT("topic %C discovered data type %C doesn't ")
-                       ACE_TEXT("match known data type %C, ignoring ")
-                       ACE_TEXT("discovered subscription.\n"),
-                       topic_name.c_str(),
-                       rdata.ddsSubscriptionData.type_name.in(),
-                       top_it->second.data_type_.c_str()));
-          }
-          return;
+          top_it = topics_.insert(std::make_pair(topic_name, TopicDetails())).first;
+          DCPS::RepoId topic_id = make_topic_guid();
+          top_it->second.init(topic_name, topic_id);
+          topic_names_[topic_id] = topic_name;
         }
 
         TopicDetails& td = top_it->second;
-        topic_names_[td.repo_id_] = topic_name;
-        td.endpoints_.insert(guid);
+
+        // Upsert the remote topic.
+        td.add_pub_sub(guid, rdata.ddsSubscriptionData.type_name.in());
 
         std::memcpy(sub.reader_data_.ddsSubscriptionData.participant_key.value,
                     guid.guidPrefix, sizeof(DDS::BuiltinTopicKey_t));
@@ -2156,8 +2289,8 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
       }
 
     } else { // update existing
-      if (qosChanged(iter->second.reader_data_.ddsSubscriptionData,
-                     rdata.ddsSubscriptionData)) {
+      if (checkAndAssignQos(iter->second.reader_data_.ddsSubscriptionData,
+                            rdata.ddsSubscriptionData)) {
 #ifndef DDS_HAS_MINIMUM_BIT
         DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
         if (bit) { // bit may be null if the DomainParticipant is shutting down
@@ -2180,17 +2313,17 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
         }
       }
 
-      if (paramsChanged(iter->second.reader_data_.contentFilterProperty,
-                        rdata.contentFilterProperty)) {
+      if (checkAndAssignParams(iter->second.reader_data_.contentFilterProperty,
+                               rdata.contentFilterProperty)) {
         // Let any associated local publications know about the change
         topic_name = get_topic_name(iter->second);
         OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
             topics_.find(topic_name);
         using DCPS::RepoIdSet;
         const RepoIdSet& assoc =
-          (top_it == topics_.end()) ? RepoIdSet() : top_it->second.endpoints_;
+          (top_it == topics_.end()) ? RepoIdSet() : top_it->second.endpoints();
         for (RepoIdSet::const_iterator i = assoc.begin(); i != assoc.end(); ++i) {
-          if (i->entityId.entityKind & 4) continue; // subscription
+          if (DCPS::GuidConverter(*i).isReader()) continue; // subscription
           const LocalPublicationIter lpi = local_publications_.find(*i);
           if (lpi != local_publications_.end()) {
             lpi->second.publication_->update_subscription_params(guid,
@@ -2198,20 +2331,39 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
           }
         }
       }
-    }
-    // For each associated opendds writer to this reader
-    CORBA::ULong len = rdata.readerProxy.associatedWriters.length();
-    for (CORBA::ULong writerIndex = 0; writerIndex < len; ++writerIndex)
-    {
-      GUID_t writerGuid = rdata.readerProxy.associatedWriters[writerIndex];
 
-      // If the associated writer is in this participant
-      LocalPublicationIter lp = local_publications_.find(writerGuid);
-      if (lp != local_publications_.end()) {
-        // If the local writer is not fully associated with the reader
-        if (lp->second.remote_opendds_associations_.insert(guid).second) {
-          // This is a new association
-          lp->second.publication_->association_complete(guid);
+      if (checkAndAssignLocators(iter->second.reader_data_.readerProxy, rdata.readerProxy)) {
+        topic_name = get_topic_name(iter->second);
+        OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::const_iterator top_it =
+          topics_.find(topic_name);
+        using DCPS::RepoIdSet;
+        const RepoIdSet& assoc =
+          (top_it == topics_.end()) ? RepoIdSet() : top_it->second.endpoints();
+        for (RepoIdSet::const_iterator i = assoc.begin(); i != assoc.end(); ++i) {
+          if (i->entityId.entityKind & 4) continue; // subscription
+          LocalPublicationIter lpi = local_publications_.find(*i);
+          if (lpi != local_publications_.end()) {
+            lpi->second.publication_->update_locators(guid, rdata.readerProxy.allLocators);
+          }
+        }
+      }
+    }
+
+    if (is_expectant_opendds(guid)) {
+      // For each associated opendds writer to this reader
+      CORBA::ULong len = rdata.readerProxy.associatedWriters.length();
+      for (CORBA::ULong writerIndex = 0; writerIndex < len; ++writerIndex)
+      {
+        GUID_t writerGuid = rdata.readerProxy.associatedWriters[writerIndex];
+
+        // If the associated writer is in this participant
+        LocalPublicationIter lp = local_publications_.find(writerGuid);
+        if (lp != local_publications_.end()) {
+          // If the local writer is not fully associated with the reader
+          if (lp->second.remote_expectant_opendds_associations_.insert(guid).second) {
+            // This is a new association
+            lp->second.publication_->association_complete(guid);
+          }
         }
       }
     }
@@ -2225,12 +2377,15 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
       OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
           topics_.find(topic_name);
       if (top_it != topics_.end()) {
-        top_it->second.endpoints_.erase(guid);
+        top_it->second.remove_pub_sub(guid);
         if (DCPS::DCPS_debug_level > 3) {
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::data_received(drd) - ")
                                ACE_TEXT("calling match_endpoints disp/unreg\n")));
         }
         match_endpoints(guid, top_it->second, true /*remove*/);
+        if (top_it->second.is_dead()) {
+          purge_dead_topic(topic_name);
+        }
         if (spdp_.shutting_down()) { return; }
       }
       remove_from_bit(iter->second);
@@ -2536,30 +2691,74 @@ Sedp::received_volatile_message_secure(DCPS::MessageId /* message_id */,
 #endif
 
 bool
-Sedp::is_opendds(const GUID_t& endpoint) const
+Sedp::is_expectant_opendds(const GUID_t& endpoint) const
 {
   GUID_t participant = endpoint;
   participant.entityId = DCPS::ENTITYID_PARTICIPANT;
-  return spdp_.is_opendds(participant);
+  return spdp_.is_expectant_opendds(participant);
 }
 
 void
 Sedp::association_complete(const RepoId& localId,
                            const RepoId& remoteId)
 {
-  // If the remote endpoint is an opendds endpoint
-  if (is_opendds(remoteId)) {
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  // If the remote endpoint is an opendds endpoint that expects associated datawriter announcements
+  if (is_expectant_opendds(remoteId)) {
     LocalSubscriptionIter sub = local_subscriptions_.find(localId);
     // If the local endpoint is a reader
     if (sub != local_subscriptions_.end()) {
       std::pair<DCPS::RepoIdSet::iterator, bool> result =
-          sub->second.remote_opendds_associations_.insert(remoteId);
+          sub->second.remote_expectant_opendds_associations_.insert(remoteId);
       // If this is a new association for the local reader
       if (result.second) {
         // Tell other participants
         write_subscription_data(localId, sub->second);
       }
     }
+  }
+
+#ifdef OPENDDS_SECURITY
+  if (remoteId.entityId == ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER) {
+    write_durable_publication_data(remoteId, true);
+  } else if (remoteId.entityId == ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER) {
+    write_durable_subscription_data(remoteId, true);
+  } else if (remoteId.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER) {
+    write_durable_participant_message_data(remoteId);
+  } else if (remoteId.entityId == ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER) {
+    write_durable_dcps_participant_secure(remoteId);
+  } else if (remoteId.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER) {
+
+    if (associated_volatile_readers_.insert(remoteId).second) {
+
+      spdp_.send_participant_crypto_tokens(remoteId);
+
+      RemoteReaderVectors::iterator reader_map_iter = datawriter_crypto_tokens_.find(remoteId);
+      if (reader_map_iter != datawriter_crypto_tokens_.end()) {
+        typedef RemoteReaderVector::iterator iter_t;
+        for (iter_t i = reader_map_iter->second.begin(); i != reader_map_iter->second.end(); ++i) {
+          send_datawriter_crypto_tokens(i->local_writer, i->remote_reader, i->writer_tokens);
+        }
+        datawriter_crypto_tokens_.erase(reader_map_iter);
+      }
+
+      RemoteWriterVectors::iterator writer_map_iter = datareader_crypto_tokens_.find(remoteId);
+      if (writer_map_iter != datareader_crypto_tokens_.end()) {
+        typedef RemoteWriterVector::iterator iter_t;
+        for (iter_t i = writer_map_iter->second.begin(); i != writer_map_iter->second.end(); ++i) {
+          send_datareader_crypto_tokens(i->local_reader, i->remote_writer, i->reader_tokens);
+        }
+        datareader_crypto_tokens_.erase(writer_map_iter);
+      }
+    }
+  }
+#endif
+  if (remoteId.entityId == ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER) {
+    write_durable_publication_data(remoteId, false);
+  } else if (remoteId.entityId == ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER) {
+    write_durable_subscription_data(remoteId, false);
+  } else if (remoteId.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER) {
+    write_durable_participant_message_data(remoteId);
   }
 }
 
@@ -2604,18 +2803,22 @@ void Sedp::signal_liveliness(DDS::LivelinessQosPolicyKind kind)
 void
 Sedp::signal_liveliness_unsecure(DDS::LivelinessQosPolicyKind kind)
 {
+  if (!(spdp_.available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER)) {
+    return;
+  }
+
   ParticipantMessageData data;
   data.participantGuid = participant_id_;
 
   switch (kind) {
   case DDS::AUTOMATIC_LIVELINESS_QOS:
     data.participantGuid.entityId = DCPS::EntityIdConverter(PARTICIPANT_MESSAGE_DATA_KIND_AUTOMATIC_LIVELINESS_UPDATE);
-    participant_message_writer_.write_participant_message(data, GUID_UNKNOWN, automatic_liveliness_seq_);
+    participant_message_writer_->write_participant_message(data, GUID_UNKNOWN, automatic_liveliness_seq_);
     break;
 
   case DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS:
     data.participantGuid.entityId = DCPS::EntityIdConverter(PARTICIPANT_MESSAGE_DATA_KIND_MANUAL_LIVELINESS_UPDATE);
-    participant_message_writer_.write_participant_message(data, GUID_UNKNOWN, manual_liveliness_seq_);
+    participant_message_writer_->write_participant_message(data, GUID_UNKNOWN, manual_liveliness_seq_);
     break;
 
   case DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS:
@@ -2628,18 +2831,22 @@ Sedp::signal_liveliness_unsecure(DDS::LivelinessQosPolicyKind kind)
 void
 Sedp::signal_liveliness_secure(DDS::LivelinessQosPolicyKind kind)
 {
+  if (!(spdp_.available_builtin_endpoints() & DDS::Security::BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER)) {
+    return;
+  }
+
   ParticipantMessageData data;
   data.participantGuid = participant_id_;
 
   switch (kind) {
   case DDS::AUTOMATIC_LIVELINESS_QOS:
     data.participantGuid.entityId = DCPS::EntityIdConverter(PARTICIPANT_MESSAGE_DATA_KIND_AUTOMATIC_LIVELINESS_UPDATE);
-    participant_message_secure_writer_.write_participant_message(data, GUID_UNKNOWN, secure_automatic_liveliness_seq_);
+    participant_message_secure_writer_->write_participant_message(data, GUID_UNKNOWN, secure_automatic_liveliness_seq_);
     break;
 
   case DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS:
     data.participantGuid.entityId = DCPS::EntityIdConverter(PARTICIPANT_MESSAGE_DATA_KIND_MANUAL_LIVELINESS_UPDATE);
-    participant_message_secure_writer_.write_participant_message(data, GUID_UNKNOWN, secure_manual_liveliness_seq_);
+    participant_message_secure_writer_->write_participant_message(data, GUID_UNKNOWN, secure_manual_liveliness_seq_);
     break;
 
   case DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS:
@@ -2655,6 +2862,7 @@ ICE::Endpoint* Sedp::get_ice_endpoint() {
 
 Sedp::Endpoint::~Endpoint()
 {
+  remove_all_msgs();
 }
 
 //---------------------------------------------------------------
@@ -2679,11 +2887,6 @@ Sedp::Writer::Writer(const RepoId& pub_id, Sedp& sedp)
   header_.guidPrefix[9] = pub_id.guidPrefix[9];
   header_.guidPrefix[10] = pub_id.guidPrefix[10];
   header_.guidPrefix[11] = pub_id.guidPrefix[11];
-
-  // The reference count is explicited incremented to avoid been explcitly deleted
-  // via the RcHandle<TransportClient> because the object is always been created
-  // on the stack.
-  RcObject::_add_ref();
 }
 
 Sedp::Writer::~Writer()
@@ -2694,6 +2897,26 @@ bool
 Sedp::Writer::assoc(const DCPS::AssociationData& subscription)
 {
   return associate(subscription, true);
+}
+
+void
+Sedp::Writer::transport_assoc_done(int flags, const RepoId& remote) {
+  if (!(flags & ASSOC_OK)) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) Sedp::Writer::transport_assoc_done: ")
+               ACE_TEXT("ERROR: transport layer failed to associate %C\n"),
+               DCPS::LogGuid(remote).c_str()));
+    return;
+  }
+
+  if (shutting_down_.value()) {
+    return;
+  }
+
+  DCPS::RcHandle<DCPS::JobQueue> job_queue = sedp_.spdp_.job_queue();
+  if (job_queue) {
+    job_queue->enqueue(make_rch<AssociationComplete>(&sedp_, repo_id_, remote));
+  }
 }
 
 void
@@ -2895,25 +3118,35 @@ Sedp::Writer::write_dcps_participant_secure(const Security::SPDPdiscoveredPartic
 {
   using DCPS::Serializer;
 
-  DDS::ReturnCode_t result = DDS::RETCODE_OK;
-
   ParameterList plist;
 
-  bool err = ParameterListConverter::to_param_list(msg, plist);
-
-  if (err) {
+  if (!ParameterListConverter::to_param_list(msg, plist)) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: Sedp::write_dcps_participant_secure - ")
                ACE_TEXT("Failed to convert SPDPdiscoveredParticipantData ")
                ACE_TEXT("to ParameterList\n")));
 
-    result = DDS::RETCODE_ERROR;
-
-  } else {
-    result = write_parameter_list(plist, reader, sequence);
+    return DDS::RETCODE_ERROR;
   }
 
-  return result;
+  ICE::AgentInfoMap ai_map;
+  ICE::Endpoint* sedp_endpoint = get_ice_endpoint();
+  if (sedp_endpoint) {
+    ai_map["SEDP"] = ICE::Agent::instance()->get_local_agent_info(sedp_endpoint);
+  }
+  ICE::Endpoint* spdp_endpoint = sedp_.spdp_.get_ice_endpoint();
+  if (spdp_endpoint) {
+    ai_map["SPDP"] = ICE::Agent::instance()->get_local_agent_info(spdp_endpoint);
+  }
+  if (!ParameterListConverter::to_param_list(ai_map, plist)) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("Sedp::write_dcps_participant_secure() - ")
+               ACE_TEXT("failed to convert from ICE::AgentInfo ")
+               ACE_TEXT("to ParameterList\n")));
+    return DDS::RETCODE_ERROR;
+  }
+
+  return write_parameter_list(plist, reader, sequence);
 }
 #endif
 
@@ -3023,77 +3256,22 @@ Sedp::Writer::set_header_fields(DCPS::DataSampleHeader& dsh,
 
   dsh.sequence_ = sequence;
 
-  const ACE_Time_Value now = ACE_OS::gettimeofday();
-  dsh.source_timestamp_sec_ = static_cast<ACE_INT32>(now.sec());
-  dsh.source_timestamp_nanosec_ = now.usec() * 1000;
+  const SystemTimePoint now = SystemTimePoint::now();
+  dsh.source_timestamp_sec_ = static_cast<ACE_INT32>(now.value().sec());
+  dsh.source_timestamp_nanosec_ = now.value().usec() * 1000;
 }
-
-#ifdef OPENDDS_SECURITY
-Sedp::RepeatOnceWriter::RepeatOnceWriter(const RepoId& pub_id, Sedp& sedp)
-  : Writer(pub_id, sedp)
-{
-}
-
-void
-Sedp::RepeatOnceWriter::first_acknowledged_by_reader(
-  const DCPS::RepoId& rdr, const DCPS::SequenceNumber& sn_base)
-{
-  if (!std::memcmp(repo_id_.guidPrefix, rdr.guidPrefix, sizeof(DCPS::GuidPrefix_t))) {
-    return;
-  }
-
-  RepoId remote_participant;
-  RTPS::assign(remote_participant.guidPrefix, rdr.guidPrefix);
-  remote_participant.entityId = ENTITYID_PARTICIPANT;
-
-  if (DCPS::security_debug.bookkeeping) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} RepeatOnceWriter::first_acknowledged_by_reader: ")
-      ACE_TEXT("%C acked %u, resending any keys we have\n"),
-      OPENDDS_STRING(DCPS::GuidConverter(rdr)).c_str(),
-      sn_base.getValue()));
-  }
-
-  ACE_Guard<ACE_Thread_Mutex> g(lock_);
-
-  RemoteReaderVectors::iterator reader_map_iter = remote_readers_.find(remote_participant);
-  if (reader_map_iter != remote_readers_.end()) {
-    typedef RemoteReaderVector::iterator iter_t;
-    for (iter_t i = reader_map_iter->second.begin(); i != reader_map_iter->second.end(); ++i) {
-      sedp_.send_datawriter_crypto_tokens(i->local_writer, i->remote_reader, i->writer_tokens);
-    }
-    remote_readers_.erase(reader_map_iter);
-  }
-
-  RemoteWriterVectors::iterator writer_map_iter = remote_writers_.find(remote_participant);
-  if (writer_map_iter != remote_writers_.end()) {
-    typedef RemoteWriterVector::iterator iter_t;
-    for (iter_t i = writer_map_iter->second.begin(); i != writer_map_iter->second.end(); ++i) {
-      sedp_.send_datareader_crypto_tokens(i->local_reader, i->remote_writer, i->reader_tokens);
-    }
-    remote_writers_.erase(writer_map_iter);
-  }
-}
-
-void
-Sedp::RepeatOnceWriter::erase(const DCPS::RepoId& part)
-{
-  ACE_Guard<ACE_Thread_Mutex> g(lock_);
-  remote_readers_.erase(part);
-  remote_writers_.erase(part);
-}
-#endif
 
 //-------------------------------------------------------------------------
 
 Sedp::Reader::~Reader()
-{}
+{
+}
 
 bool
 Sedp::Reader::assoc(const DCPS::AssociationData& publication)
 {
   return associate(publication, false);
 }
-
 
 // Implementing TransportReceiveListener
 
@@ -3103,6 +3281,7 @@ decode_parameter_list(const DCPS::ReceivedDataSample& sample,
                       const ACE_CDR::Octet& encap,
                       ParameterList& data)
 {
+
   if (sample.header_.key_fields_only_ && encap < 2) {
     GUID_t guid;
     if (!(ser >> guid)) return false;
@@ -3118,7 +3297,9 @@ decode_parameter_list(const DCPS::ReceivedDataSample& sample,
 void
 Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
 {
-  if (shutting_down_.value()) return;
+  if (shutting_down_.value()) {
+    return;
+  }
 
   switch (sample.header_.message_id_) {
   case DCPS::SAMPLE_DATA:
@@ -3154,7 +3335,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       }
 
       DCPS::unique_ptr<DiscoveredPublication> wdata(new DiscoveredPublication);
-      if (ParameterListConverter::from_param_list(data, wdata->writer_data_) < 0) {
+      if (!ParameterListConverter::from_param_list(data, wdata->writer_data_)) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to convert from ParameterList ")
@@ -3162,12 +3343,19 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
         return;
       }
 #ifdef OPENDDS_SECURITY
-      if (ParameterListConverter::from_param_list(data, wdata->ice_agent_info_, wdata->have_ice_agent_info_) < 0) {
+      wdata->have_ice_agent_info_ = false;
+      ICE::AgentInfoMap ai_map;
+      if (!ParameterListConverter::from_param_list(data, ai_map)) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to convert from ParameterList ")
                    ACE_TEXT("to ICE Agent info\n")));
         return;
+      }
+      ICE::AgentInfoMap::const_iterator pos = ai_map.find("DATA");
+      if (pos != ai_map.end()) {
+        wdata->have_ice_agent_info_ = true;
+        wdata->ice_agent_info_ = pos->second;
       }
 #endif
       sedp_.task_.enqueue(id, move(wdata));
@@ -3183,19 +3371,27 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
 
       DCPS::unique_ptr<DiscoveredPublication_SecurityWrapper> wdata_secure(new DiscoveredPublication_SecurityWrapper);
 
-      if (ParameterListConverter::from_param_list(data, *wdata_secure) < 0) {
+      if (!ParameterListConverter::from_param_list(data, *wdata_secure)) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to convert from ParameterList ")
                    ACE_TEXT("to DiscoveredPublication_SecurityWrapper\n")));
         return;
       }
-      if (ParameterListConverter::from_param_list(data, wdata_secure->ice_agent_info, wdata_secure->have_ice_agent_info) < 0) {
+
+      wdata_secure->have_ice_agent_info = false;
+      ICE::AgentInfoMap ai_map;
+      if (!ParameterListConverter::from_param_list(data, ai_map)) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to convert from ParameterList ")
                    ACE_TEXT("to ICE Agent info\n")));
         return;
+      }
+      ICE::AgentInfoMap::const_iterator pos = ai_map.find("DATA");
+      if (pos != ai_map.end()) {
+        wdata_secure->have_ice_agent_info = true;
+        wdata_secure->ice_agent_info = pos->second;
       }
       sedp_.task_.enqueue(id, move(wdata_secure));
 #endif
@@ -3209,7 +3405,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       }
 
       DCPS::unique_ptr<DiscoveredSubscription> rdata(new DiscoveredSubscription);
-      if (ParameterListConverter::from_param_list(data, rdata->reader_data_) < 0) {
+      if (!ParameterListConverter::from_param_list(data, rdata->reader_data_)) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to convert from ParameterList ")
@@ -3217,12 +3413,19 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
         return;
       }
 #ifdef OPENDDS_SECURITY
-      if (ParameterListConverter::from_param_list(data, rdata->ice_agent_info_, rdata->have_ice_agent_info_) < 0) {
+      rdata->have_ice_agent_info_ = false;
+      ICE::AgentInfoMap ai_map;
+      if (!ParameterListConverter::from_param_list(data, ai_map)) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to convert from ParameterList ")
                    ACE_TEXT("to ICE Agent info\n")));
         return;
+      }
+      ICE::AgentInfoMap::const_iterator pos = ai_map.find("DATA");
+      if (pos != ai_map.end()) {
+        rdata->have_ice_agent_info_ = true;
+        rdata->ice_agent_info_ = pos->second;
       }
 #endif
       if (rdata->reader_data_.readerProxy.expectsInlineQos) {
@@ -3241,20 +3444,29 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
 
       DCPS::unique_ptr<DiscoveredSubscription_SecurityWrapper> rdata(new DiscoveredSubscription_SecurityWrapper);
 
-      if (ParameterListConverter::from_param_list(data, *rdata) < 0) {
+      if (!ParameterListConverter::from_param_list(data, *rdata)) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to convert from ParameterList ")
                    ACE_TEXT("to DiscoveredSubscription_SecurityWrapper\n")));
         return;
       }
-      if (ParameterListConverter::from_param_list(data, rdata->ice_agent_info, rdata->have_ice_agent_info) < 0) {
+
+      rdata->have_ice_agent_info = false;
+      ICE::AgentInfoMap ai_map;
+      if (!ParameterListConverter::from_param_list(data, ai_map)) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to convert from ParameterList ")
                    ACE_TEXT("to ICE Agent info\n")));
         return;
       }
+      ICE::AgentInfoMap::const_iterator pos = ai_map.find("DATA");
+      if (pos != ai_map.end()) {
+        rdata->have_ice_agent_info = true;
+        rdata->ice_agent_info = pos->second;
+      }
+
       if ((rdata->data).readerProxy.expectsInlineQos) {
         set_inline_qos((rdata->data).readerProxy.allLocators);
       }
@@ -3318,13 +3530,15 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
 
       DCPS::unique_ptr<Security::SPDPdiscoveredParticipantData> pdata(new Security::SPDPdiscoveredParticipantData);
 
-      if (ParameterListConverter::from_param_list(data, *pdata) < 0) {
+      if (!ParameterListConverter::from_param_list(data, *pdata)) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to convert from ParameterList ")
                    ACE_TEXT("to Security::SPDPdiscoveredParticipantData\n")));
         return;
       }
+      const DCPS::RepoId guid = make_guid(sample.header_.publication_id_.guidPrefix, DCPS::ENTITYID_PARTICIPANT);
+      sedp_.spdp_.process_participant_ice(data, *pdata, guid);
       sedp_.task_.enqueue(id, move(pdata));
 #endif
 
@@ -3348,7 +3562,7 @@ Sedp::populate_discovered_writer_msg(
   OPENDDS_STRING topic_name = topic_names_[pub.topic_id_];
   dwd.ddsPublicationData.topic_name = topic_name.c_str();
   TopicDetails& topic_details = topics_[topic_name];
-  dwd.ddsPublicationData.type_name = topic_details.data_type_.c_str();
+  dwd.ddsPublicationData.type_name = topic_details.local_data_type_name().c_str();
   dwd.ddsPublicationData.durability = pub.qos_.durability;
   dwd.ddsPublicationData.durability_service = pub.qos_.durability_service;
   dwd.ddsPublicationData.deadline = pub.qos_.deadline;
@@ -3362,7 +3576,7 @@ Sedp::populate_discovered_writer_msg(
   dwd.ddsPublicationData.destination_order = pub.qos_.destination_order;
   dwd.ddsPublicationData.presentation = pub.publisher_qos_.presentation;
   dwd.ddsPublicationData.partition = pub.publisher_qos_.partition;
-  dwd.ddsPublicationData.topic_data = topic_details.qos_.topic_data;
+  dwd.ddsPublicationData.topic_data = topic_details.local_qos().topic_data;
   dwd.ddsPublicationData.group_data = pub.publisher_qos_.group_data;
   dwd.writerProxy.remoteWriterGuid = publication_id;
   // Ignore dwd.writerProxy.unicastLocatorList;
@@ -3381,7 +3595,7 @@ Sedp::populate_discovered_reader_msg(
   OPENDDS_STRING topic_name = topic_names_[sub.topic_id_];
   drd.ddsSubscriptionData.topic_name = topic_name.c_str();
   TopicDetails& topic_details = topics_[topic_name];
-  drd.ddsSubscriptionData.type_name = topic_details.data_type_.c_str();
+  drd.ddsSubscriptionData.type_name = topic_details.local_data_type_name().c_str();
   drd.ddsSubscriptionData.durability = sub.qos_.durability;
   drd.ddsSubscriptionData.deadline = sub.qos_.deadline;
   drd.ddsSubscriptionData.latency_budget = sub.qos_.latency_budget;
@@ -3393,7 +3607,7 @@ Sedp::populate_discovered_reader_msg(
   drd.ddsSubscriptionData.time_based_filter = sub.qos_.time_based_filter;
   drd.ddsSubscriptionData.presentation = sub.subscriber_qos_.presentation;
   drd.ddsSubscriptionData.partition = sub.subscriber_qos_.partition;
-  drd.ddsSubscriptionData.topic_data = topic_details.qos_.topic_data;
+  drd.ddsSubscriptionData.topic_data = topic_details.local_qos().topic_data;
   drd.ddsSubscriptionData.group_data = sub.subscriber_qos_.group_data;
   drd.readerProxy.remoteReaderGuid = subscription_id;
   drd.readerProxy.expectsInlineQos = false;  // We never expect inline qos
@@ -3407,8 +3621,8 @@ Sedp::populate_discovered_reader_msg(
   drd.contentFilterProperty.filterExpression = sub.filterProperties.filterExpression;
   drd.contentFilterProperty.expressionParameters = sub.filterProperties.expressionParameters;
   for (DCPS::RepoIdSet::const_iterator writer =
-        sub.remote_opendds_associations_.begin();
-       writer != sub.remote_opendds_associations_.end();
+        sub.remote_expectant_opendds_associations_.begin();
+       writer != sub.remote_expectant_opendds_associations_.end();
        ++writer) {
     CORBA::ULong len = drd.readerProxy.associatedWriters.length();
     drd.readerProxy.associatedWriters.length(len + 1);
@@ -3417,67 +3631,89 @@ Sedp::populate_discovered_reader_msg(
 }
 
 void
-Sedp::write_durable_publication_data(const RepoId& reader)
+Sedp::write_durable_publication_data(const RepoId& reader, bool secure)
 {
-  LocalPublicationIter pub, end = local_publications_.end();
-  for (pub = local_publications_.begin(); pub != end; ++pub) {
-    write_publication_data(pub->first, pub->second, reader);
-  }
-  publications_writer_.end_historic_samples(reader);
-
+  if (!(spdp_.available_builtin_endpoints() & (DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER
 #ifdef OPENDDS_SECURITY
-  publications_secure_writer_.end_historic_samples(reader);
+                                               | DDS::Security::SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER
 #endif
+                                               ))) {
+    return;
+  }
 
+  if (secure) {
+#ifdef OPENDDS_SECURITY
+    LocalPublicationIter pub, end = local_publications_.end();
+    for (pub = local_publications_.begin(); pub != end; ++pub) {
+      if (pub->second.security_attribs_.base.is_discovery_protected) {
+        write_publication_data_secure(pub->first, pub->second, reader);
+      }
+    }
+    publications_secure_writer_->end_historic_samples(reader);
+#endif
+  } else {
+    LocalPublicationIter pub, end = local_publications_.end();
+    for (pub = local_publications_.begin(); pub != end; ++pub) {
+#ifdef OPENDDS_SECURITY
+      if (!pub->second.security_attribs_.base.is_discovery_protected) {
+        write_publication_data(pub->first, pub->second, reader);
+      }
+#else
+      write_publication_data(pub->first, pub->second, reader);
+#endif
+    }
+    publications_writer_->end_historic_samples(reader);
+  }
 }
 
-#ifdef OPENDDS_SECURITY
 void
-Sedp::write_durable_publication_data_secure(const RepoId& reader)
+Sedp::write_durable_subscription_data(const RepoId& reader, bool secure)
 {
-  LocalPublicationIter pub, end = local_publications_.end();
-  for (pub = local_publications_.begin(); pub != end; ++pub) {
-    write_publication_data(pub->first, pub->second, reader);
-  }
-  publications_secure_writer_.end_historic_samples(reader);
-}
-#endif
-
-void
-Sedp::write_durable_subscription_data(const RepoId& reader)
-{
-  LocalSubscriptionIter sub, end = local_subscriptions_.end();
-  for (sub = local_subscriptions_.begin(); sub != end; ++sub) {
-    write_subscription_data(sub->first, sub->second, reader);
-  }
-  subscriptions_writer_.end_historic_samples(reader);
-
+  if (!(spdp_.available_builtin_endpoints() & (DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER
 #ifdef OPENDDS_SECURITY
-  subscriptions_secure_writer_.end_historic_samples(reader);
+                                               | DDS::Security::SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER
 #endif
-
-}
-
-#ifdef OPENDDS_SECURITY
-void
-Sedp::write_durable_subscription_data_secure(const RepoId& reader)
-{
-  LocalSubscriptionIter sub, end = local_subscriptions_.end();
-  for (sub = local_subscriptions_.begin(); sub != end; ++sub) {
-    write_subscription_data(sub->first, sub->second, reader);
+                                               ))) {
+    return;
   }
-  subscriptions_secure_writer_.end_historic_samples(reader);
-}
+
+  if (secure) {
+#ifdef OPENDDS_SECURITY
+    LocalSubscriptionIter sub, end = local_subscriptions_.end();
+    for (sub = local_subscriptions_.begin(); sub != end; ++sub) {
+      if (is_security_enabled() && sub->second.security_attribs_.base.is_discovery_protected) {
+        write_subscription_data_secure(sub->first, sub->second, reader);
+      }
+    }
+    subscriptions_secure_writer_->end_historic_samples(reader);
 #endif
+  } else {
+    LocalSubscriptionIter sub, end = local_subscriptions_.end();
+    for (sub = local_subscriptions_.begin(); sub != end; ++sub) {
+#ifdef OPENDDS_SECURITY
+      if (!(is_security_enabled() && sub->second.security_attribs_.base.is_discovery_protected)) {
+        write_subscription_data(sub->first, sub->second, reader);
+      }
+#else
+      write_subscription_data(sub->first, sub->second, reader);
+#endif
+    }
+    subscriptions_writer_->end_historic_samples(reader);
+  }
+}
 
 void
 Sedp::write_durable_participant_message_data(const RepoId& reader)
 {
+  if (!(spdp_.available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER)) {
+    return;
+  }
+
   LocalParticipantMessageIter part, end = local_participant_messages_.end();
   for (part = local_participant_messages_.begin(); part != end; ++part) {
     write_participant_message_data(part->first, part->second, reader);
   }
-  participant_message_writer_.end_historic_samples(reader);
+  participant_message_writer_->end_historic_samples(reader);
 }
 
 #ifdef OPENDDS_SECURITY
@@ -3487,7 +3723,7 @@ Sedp::write_stateless_message(DDS::Security::ParticipantStatelessMessage& msg,
 {
   static DCPS::SequenceNumber sequence = 0;
   msg.message_identity.sequence_number = static_cast<unsigned long>((++sequence).getValue());
-  return participant_stateless_message_writer_.write_stateless_message(msg, reader, sequence);
+  return participant_stateless_message_writer_->write_stateless_message(msg, reader, sequence);
 }
 
 DDS::ReturnCode_t
@@ -3496,7 +3732,20 @@ Sedp::write_volatile_message(DDS::Security::ParticipantVolatileMessageSecure& ms
 {
   static DCPS::SequenceNumber sequence = 0;
   msg.message_identity.sequence_number = static_cast<unsigned long>((++sequence).getValue());
-  return participant_volatile_message_secure_writer_.write_volatile_message_secure(msg, reader, sequence);
+  return participant_volatile_message_secure_writer_->write_volatile_message_secure(msg, reader, sequence);
+}
+
+void
+Sedp::write_durable_dcps_participant_secure(const DCPS::RepoId& reader)
+{
+  if (!(spdp_.available_builtin_endpoints() & DDS::Security::SPDP_BUILTIN_PARTICIPANT_SECURE_WRITER)) {
+    return;
+  }
+
+  const Security::SPDPdiscoveredParticipantData& pdata = spdp_.build_local_pdata(Security::DPDK_SECURE);
+
+  write_dcps_participant_secure(pdata, reader);
+  dcps_participant_secure_writer_->end_historic_samples(reader);
 }
 
 DDS::ReturnCode_t
@@ -3508,13 +3757,13 @@ Sedp::write_dcps_participant_secure(const Security::SPDPdiscoveredParticipantDat
   DCPS::RepoId remote_reader(part);
   remote_reader.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER;
 
-  return dcps_participant_secure_writer_.write_dcps_participant_secure(msg, remote_reader, ++sequence);
+  return dcps_participant_secure_writer_->write_dcps_participant_secure(msg, remote_reader, ++sequence);
 }
 
 DDS::ReturnCode_t
 Sedp::write_dcps_participant_dispose(const RepoId& part)
 {
-  return dcps_participant_secure_writer_.write_unregister_dispose(part, PID_PARTICIPANT_GUID);
+  return dcps_participant_secure_writer_->write_unregister_dispose(part, PID_PARTICIPANT_GUID);
 }
 #endif
 
@@ -3567,6 +3816,10 @@ Sedp::write_publication_data_unsecure(
     LocalPublication& lp,
     const RepoId& reader)
 {
+  if (!(spdp_.available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER)) {
+    return DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
+
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
   if (spdp_.associated() && (reader != GUID_UNKNOWN ||
                              !associated_participants_.empty())) {
@@ -3575,7 +3828,7 @@ Sedp::write_publication_data_unsecure(
     populate_discovered_writer_msg(dwd, rid, lp);
 
     // Convert to parameter list
-    if (ParameterListConverter::to_param_list(dwd, plist, map_ipv4_to_ipv6())) {
+    if (!ParameterListConverter::to_param_list(dwd, plist, map_ipv4_to_ipv6())) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data - ")
                  ACE_TEXT("Failed to convert DiscoveredWriterData ")
@@ -3584,7 +3837,9 @@ Sedp::write_publication_data_unsecure(
     }
 #ifdef OPENDDS_SECURITY
     if (lp.have_ice_agent_info) {
-      if (ParameterListConverter::to_param_list(lp.ice_agent_info, plist)) {
+      ICE::AgentInfoMap ai_map;
+      ai_map["DATA"] = lp.ice_agent_info;
+      if (!ParameterListConverter::to_param_list(ai_map, plist)) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data - ")
                    ACE_TEXT("Failed to convert ICE Agent info ")
@@ -3595,7 +3850,7 @@ Sedp::write_publication_data_unsecure(
 #endif
 
     if (DDS::RETCODE_OK == result) {
-      result = publications_writer_.write_parameter_list(plist, reader, lp.sequence_);
+      result = publications_writer_->write_parameter_list(plist, reader, lp.sequence_);
     }
   } else if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_publication_data - ")
@@ -3611,6 +3866,10 @@ Sedp::write_publication_data_secure(
     LocalPublication& lp,
     const RepoId& reader)
 {
+  if (!(spdp_.available_builtin_endpoints() & DDS::Security::SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER)) {
+    return DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
+
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
   if (spdp_.associated() && (reader != GUID_UNKNOWN ||
                              !associated_participants_.empty())) {
@@ -3623,7 +3882,7 @@ Sedp::write_publication_data_secure(
     dwd.security_info.plugin_endpoint_security_attributes = lp.security_attribs_.plugin_endpoint_attributes;
 
     // Convert to parameter list
-    if (ParameterListConverter::to_param_list(dwd, plist, map_ipv4_to_ipv6())) {
+    if (!ParameterListConverter::to_param_list(dwd, plist, map_ipv4_to_ipv6())) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data - ")
                  ACE_TEXT("Failed to convert DiscoveredWriterData ")
@@ -3631,7 +3890,9 @@ Sedp::write_publication_data_secure(
       result = DDS::RETCODE_ERROR;
     }
     if (lp.have_ice_agent_info) {
-      if (ParameterListConverter::to_param_list(lp.ice_agent_info, plist)) {
+      ICE::AgentInfoMap ai_map;
+      ai_map["DATA"] = lp.ice_agent_info;
+      if (!ParameterListConverter::to_param_list(ai_map, plist)) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data - ")
                    ACE_TEXT("Failed to convert ICE Agent info ")
@@ -3643,7 +3904,7 @@ Sedp::write_publication_data_secure(
       RepoId effective_reader = reader;
       if (reader != GUID_UNKNOWN)
         effective_reader.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER;
-      result = publications_secure_writer_.write_parameter_list(plist, effective_reader, lp.sequence_);
+      result = publications_secure_writer_->write_parameter_list(plist, effective_reader, lp.sequence_);
     }
   } else if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_publication_data - ")
@@ -3702,6 +3963,10 @@ Sedp::write_subscription_data_unsecure(
     LocalSubscription& ls,
     const RepoId& reader)
 {
+  if (!(spdp_.available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER)) {
+    return DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
+
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
   if (spdp_.associated() && (reader != GUID_UNKNOWN ||
                              !associated_participants_.empty())) {
@@ -3710,7 +3975,7 @@ Sedp::write_subscription_data_unsecure(
     populate_discovered_reader_msg(drd, rid, ls);
 
     // Convert to parameter list
-    if (ParameterListConverter::to_param_list(drd, plist, map_ipv4_to_ipv6())) {
+    if (!ParameterListConverter::to_param_list(drd, plist, map_ipv4_to_ipv6())) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data - ")
                  ACE_TEXT("Failed to convert DiscoveredReaderData ")
@@ -3719,7 +3984,9 @@ Sedp::write_subscription_data_unsecure(
     }
 #ifdef OPENDDS_SECURITY
     if (ls.have_ice_agent_info) {
-      if (ParameterListConverter::to_param_list(ls.ice_agent_info, plist)) {
+      ICE::AgentInfoMap ai_map;
+      ai_map["DATA"] = ls.ice_agent_info;
+      if (!ParameterListConverter::to_param_list(ai_map, plist)) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data - ")
                    ACE_TEXT("Failed to convert ICE Agent info ")
@@ -3729,7 +3996,7 @@ Sedp::write_subscription_data_unsecure(
     }
 #endif
     if (DDS::RETCODE_OK == result) {
-      result = subscriptions_writer_.write_parameter_list(plist, reader, ls.sequence_);
+      result = subscriptions_writer_->write_parameter_list(plist, reader, ls.sequence_);
     }
   } else if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_subscription_data - ")
@@ -3745,6 +4012,10 @@ Sedp::write_subscription_data_secure(
     LocalSubscription& ls,
     const RepoId& reader)
 {
+  if (!(spdp_.available_builtin_endpoints() & DDS::Security::SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER)) {
+    return DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
+
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
   if (spdp_.associated() && (reader != GUID_UNKNOWN ||
                              !associated_participants_.empty())) {
@@ -3757,7 +4028,7 @@ Sedp::write_subscription_data_secure(
     drd.security_info.plugin_endpoint_security_attributes = ls.security_attribs_.plugin_endpoint_attributes;
 
     // Convert to parameter list
-    if (ParameterListConverter::to_param_list(drd, plist, map_ipv4_to_ipv6())) {
+    if (!ParameterListConverter::to_param_list(drd, plist, map_ipv4_to_ipv6())) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data - ")
                  ACE_TEXT("Failed to convert DiscoveredReaderData ")
@@ -3765,7 +4036,9 @@ Sedp::write_subscription_data_secure(
       result = DDS::RETCODE_ERROR;
     }
     if (ls.have_ice_agent_info) {
-      if (ParameterListConverter::to_param_list(ls.ice_agent_info, plist)) {
+      ICE::AgentInfoMap ai_map;
+      ai_map["DATA"] = ls.ice_agent_info;
+      if (!ParameterListConverter::to_param_list(ai_map, plist)) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data - ")
                    ACE_TEXT("Failed to convert ICE Agent info ")
@@ -3777,7 +4050,7 @@ Sedp::write_subscription_data_secure(
       RepoId effective_reader = reader;
       if (reader != GUID_UNKNOWN)
         effective_reader.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER;
-      result = subscriptions_secure_writer_.write_parameter_list(plist, effective_reader, ls.sequence_);
+      result = subscriptions_secure_writer_->write_parameter_list(plist, effective_reader, ls.sequence_);
     }
   } else if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_subscription_data - ")
@@ -3793,12 +4066,16 @@ Sedp::write_participant_message_data(
     LocalParticipantMessage& pm,
     const RepoId& reader)
 {
+  if (!(spdp_.available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER)) {
+    return DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
+
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
   if (spdp_.associated() && (reader != GUID_UNKNOWN ||
                              !associated_participants_.empty())) {
     ParticipantMessageData pmd;
     pmd.participantGuid = rid;
-    result = participant_message_writer_.write_participant_message(pmd, reader, pm.sequence_);
+    result = participant_message_writer_->write_participant_message(pmd, reader, pm.sequence_);
   } else if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_participant_message_data - ")
                ACE_TEXT("not currently associated, dropping msg.\n")));
@@ -3921,9 +4198,11 @@ Sedp::Task::svc()
 {
   for (Msg* msg = 0; getq(msg) != -1; /*no increment*/) {
     if (DCPS::DCPS_debug_level > 5) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::Task::svc "
-        "got message from queue type %C\n", msg->msgTypeToString().c_str()));
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::Task::svc ")
+        ACE_TEXT("got message from queue type %C\n"),
+        msg->msgTypeToString()));
     }
+
     DCPS::unique_ptr<Msg> delete_the_msg(msg);
     switch (msg->type_) {
       case Msg::MSG_PARTICIPANT:
@@ -4028,7 +4307,6 @@ Sedp::populate_transport_locator_sequence(DCPS::TransportLocatorSeq*& rTls,
                                participantExpectsInlineQos);
   if (!rTls->length()) {     // if no locators provided, add the default
     if (!participant_found) {
-      defer_match_endpoints_.insert(reader);
       return;
     } else if (locs.length()) {
       size_t size = 0, padding = 0;
@@ -4073,7 +4351,6 @@ Sedp::populate_transport_locator_sequence(DCPS::TransportLocatorSeq*& wTls,
                                participantExpectsInlineQos);
   if (!wTls->length()) {     // if no locators provided, add the default
     if (!participant_found) {
-      defer_match_endpoints_.insert(writer);
       return;
     } else if (locs.length()) {
       size_t size = 0, padding = 0;
@@ -4107,6 +4384,7 @@ Sedp::add_security_info(const DCPS::TransportLocatorSeq& locators,
                         const RepoId& writer, const RepoId& reader)
 {
   using DCPS::Serializer;
+  using namespace DDS::Security;
 
   if (std::memcmp(writer.guidPrefix, reader.guidPrefix,
                   sizeof(DCPS::GuidPrefix_t)) == 0) {
@@ -4114,29 +4392,38 @@ Sedp::add_security_info(const DCPS::TransportLocatorSeq& locators,
     return locators;
   }
 
-  DDS::Security::ParticipantCryptoHandle part_handle = DDS::HANDLE_NIL;
-  DDS::Security::DatawriterCryptoHandle dw_handle = DDS::HANDLE_NIL;
-  DDS::Security::DatareaderCryptoHandle dr_handle = DDS::HANDLE_NIL;
+  DCPS::RepoId remote_part;
+  const DCPS::RepoId local_part = spdp_.guid();
+  if (std::memcmp(writer.guidPrefix, local_part.guidPrefix, sizeof writer.guidPrefix) == 0) {
+    remote_part = reader;
+  } else if (std::memcmp(reader.guidPrefix, local_part.guidPrefix, sizeof reader.guidPrefix) == 0) {
+    remote_part = writer;
+  } else {
+    return locators;
+  }
+
+  remote_part.entityId = ENTITYID_PARTICIPANT;
+  ParticipantCryptoHandle part_handle = spdp_.lookup_participant_crypto_info(remote_part).first;
+
+  if (part_handle == DDS::HANDLE_NIL) {
+    // security not enabled for this discovered participant
+    return locators;
+  }
+
+  DatawriterCryptoHandle dw_handle = DDS::HANDLE_NIL;
+  DatareaderCryptoHandle dr_handle = DDS::HANDLE_NIL;
+  EndpointSecurityAttributesMask mask = 0;
 
   if (local_reader_crypto_handles_.find(reader) != local_reader_crypto_handles_.end() &&
       remote_writer_crypto_handles_.find(writer) != remote_writer_crypto_handles_.end()) {
     dr_handle = local_reader_crypto_handles_[reader];
     dw_handle = remote_writer_crypto_handles_[writer];
-    DCPS::RepoId part = writer;
-    part.entityId = ENTITYID_PARTICIPANT;
-    part_handle = spdp_.lookup_participant_crypto_info(part).first;
+    mask = security_attributes_to_bitmask(local_reader_security_attribs_[reader]);
   } else if (local_writer_crypto_handles_.find(writer) != local_writer_crypto_handles_.end() &&
              remote_reader_crypto_handles_.find(reader) != remote_reader_crypto_handles_.end()) {
     dw_handle = local_writer_crypto_handles_[writer];
     dr_handle = remote_reader_crypto_handles_[reader];
-    DCPS::RepoId part = reader;
-    part.entityId = ENTITYID_PARTICIPANT;
-    part_handle = spdp_.lookup_participant_crypto_info(part).first;
-  }
-
-  if (part_handle == DDS::HANDLE_NIL) {
-    // security not enabled for this discovered participant
-    return locators;
+    mask = security_attributes_to_bitmask(local_writer_security_attribs_[writer]);
   }
 
   DCPS::TransportLocatorSeq_var newLoc;
@@ -4155,6 +4442,11 @@ Sedp::add_security_info(const DCPS::TransportLocatorSeq& locators,
         DDS::OctetSeq handleOctetsDr = handle_to_octets(dr_handle);
         const DDS::BinaryProperty_t dr_p = {BLOB_PROP_DR_CRYPTO_HANDLE,
                                             handleOctetsDr, true /*serialize*/};
+        DDS::OctetSeq endpointSecAttr(static_cast<unsigned int>(DCPS::max_marshaled_size_ulong()));
+        endpointSecAttr.length(endpointSecAttr.maximum());
+        std::memcpy(endpointSecAttr.get_buffer(), &mask, endpointSecAttr.length());
+        const DDS::BinaryProperty_t esa_p = {BLOB_PROP_ENDPOINT_SEC_ATTR,
+                                             endpointSecAttr, true /*serialize*/};
         size_t size = 0, padding = 0;
         DCPS::gen_find_size(prop, size, padding);
         if (dw_handle != DDS::HANDLE_NIL) {
@@ -4163,6 +4455,7 @@ Sedp::add_security_info(const DCPS::TransportLocatorSeq& locators,
         if (dr_handle != DDS::HANDLE_NIL) {
           DCPS::gen_find_size(dr_p, size, padding);
         }
+        DCPS::gen_find_size(esa_p, size, padding);
         ACE_Message_Block mb(size + padding);
         Serializer ser(&mb, ACE_CDR_BYTE_ORDER, Serializer::ALIGN_CDR);
         ser << prop;
@@ -4172,6 +4465,7 @@ Sedp::add_security_info(const DCPS::TransportLocatorSeq& locators,
         if (dr_handle != DDS::HANDLE_NIL) {
           ser << dr_p;
         }
+        ser << esa_p;
         added.length(static_cast<unsigned int>(mb.size()));
         std::memcpy(added.get_buffer(), mb.rd_ptr(), mb.size());
       }
@@ -4186,36 +4480,6 @@ Sedp::add_security_info(const DCPS::TransportLocatorSeq& locators,
   return newLoc ? newLoc : locators;
 }
 #endif
-
-bool
-Sedp::defer_writer(const RepoId& writer,
-                   const RepoId& writer_participant)
-{
-  if (!associated_participants_.count(writer_participant)) {
-    if (DCPS::DCPS_debug_level > 3) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::match - ")
-                 ACE_TEXT("remote writer deferred\n")));
-    }
-    defer_match_endpoints_.insert(writer);
-    return true;
-  }
-  return false;
-}
-
-bool
-Sedp::defer_reader(const RepoId& reader,
-                   const RepoId& reader_participant)
-{
-  if (!associated_participants_.count(reader_participant)) {
-    if (DCPS::DCPS_debug_level > 3) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::match - ")
-                 ACE_TEXT("remote reader deferred\n")));
-    }
-    defer_match_endpoints_.insert(reader);
-    return true;
-  }
-  return false;
-}
 
 #ifdef OPENDDS_SECURITY
 DDS::Security::DatawriterCryptoHandle
@@ -4432,7 +4696,7 @@ Sedp::handle_datareader_crypto_tokens(const DDS::Security::ParticipantVolatileMe
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Sedp::handle_datareader_crypto_tokens() - ")
       ACE_TEXT("received tokens for unknown remote reader: (%C). Caching.\n"),
-      OPENDDS_STRING(DCPS::GuidConverter(msg.source_endpoint_guid)).c_str()));
+               DCPS::LogGuid(msg.source_endpoint_guid).c_str()));
     pending_remote_reader_crypto_tokens_[msg.source_endpoint_guid] = drcts;
     return;
   }
@@ -4524,6 +4788,7 @@ Sedp::remove_assoc_i(const DCPS::RepoId& local_guid, const LocalSubscription& ls
 void
 Sedp::PublicationAgentInfoListener::update_agent_info(const DCPS::RepoId& a_local_guid,
                                                       const ICE::AgentInfo& a_agent_info) {
+  ACE_GUARD(ACE_Thread_Mutex, g, sedp.lock_);
   LocalPublicationIter pos = sedp.local_publications_.find(a_local_guid);
   if (pos != sedp.local_publications_.end()) {
     pos->second.have_ice_agent_info = true;
@@ -4535,6 +4800,7 @@ Sedp::PublicationAgentInfoListener::update_agent_info(const DCPS::RepoId& a_loca
 void
 Sedp::SubscriptionAgentInfoListener::update_agent_info(const DCPS::RepoId& a_local_guid,
                                                        const ICE::AgentInfo& a_agent_info) {
+  ACE_GUARD(ACE_Thread_Mutex, g, sedp.lock_);
   LocalSubscriptionIter pos = sedp.local_subscriptions_.find(a_local_guid);
   if (pos != sedp.local_subscriptions_.end()) {
     pos->second.have_ice_agent_info = true;
@@ -4606,8 +4872,8 @@ Sedp::start_ice(const DCPS::RepoId& guid, const DiscoveredPublication& dpub) {
   }
 
   TopicDetails& td = topics_[get_topic_name(dpub)];
-  for (DCPS::RepoIdSet::const_iterator it = td.endpoints_.begin(),
-         end = td.endpoints_.end(); it != end; ++it) {
+  for (DCPS::RepoIdSet::const_iterator it = td.endpoints().begin(),
+         end = td.endpoints().end(); it != end; ++it) {
     const DCPS::GuidConverter conv(*it);
     if (conv.isReader()) {
       LocalSubscriptionIter lsi = local_subscriptions_.find(*it);
@@ -4634,8 +4900,8 @@ Sedp::start_ice(const DCPS::RepoId& guid, const DiscoveredSubscription& dsub) {
   }
 
   TopicDetails& td = topics_[get_topic_name(dsub)];
-  for (DCPS::RepoIdSet::const_iterator it = td.endpoints_.begin(),
-         end = td.endpoints_.end(); it != end; ++it) {
+  for (DCPS::RepoIdSet::const_iterator it = td.endpoints().begin(),
+         end = td.endpoints().end(); it != end; ++it) {
     const DCPS::GuidConverter conv(*it);
     if (conv.isWriter()) {
       LocalPublicationIter lpi = local_publications_.find(*it);
@@ -4662,8 +4928,8 @@ Sedp::stop_ice(const DCPS::RepoId& guid, const DiscoveredPublication& dpub) {
   }
 
   TopicDetails& td = topics_[get_topic_name(dpub)];
-  for (DCPS::RepoIdSet::const_iterator it = td.endpoints_.begin(),
-         end = td.endpoints_.end(); it != end; ++it) {
+  for (DCPS::RepoIdSet::const_iterator it = td.endpoints().begin(),
+         end = td.endpoints().end(); it != end; ++it) {
     const DCPS::GuidConverter conv(*it);
     if (conv.isReader()) {
       LocalSubscriptionIter lsi = local_subscriptions_.find(*it);
@@ -4690,8 +4956,8 @@ Sedp::stop_ice(const DCPS::RepoId& guid, const DiscoveredSubscription& dsub) {
   }
 
   TopicDetails& td = topics_[get_topic_name(dsub)];
-  for (DCPS::RepoIdSet::const_iterator it = td.endpoints_.begin(),
-         end = td.endpoints_.end(); it != end; ++it) {
+  for (DCPS::RepoIdSet::const_iterator it = td.endpoints().begin(),
+         end = td.endpoints().end(); it != end; ++it) {
     const DCPS::GuidConverter conv(*it);
     if (conv.isWriter()) {
       LocalPublicationIter lpi = local_publications_.find(*it);
@@ -4744,7 +5010,7 @@ WaitForAcks::reset()
   // cause wait_for_acks() to exit it's loop
 }
 
-OPENDDS_STRING Sedp::Msg::msgTypeToString(const MsgType type) {
+const char* Sedp::Msg::msgTypeToString(MsgType type) {
   switch (type) {
   case MSG_PARTICIPANT:
     return "MSG_PARTICIPANT";
@@ -4779,14 +5045,42 @@ OPENDDS_STRING Sedp::Msg::msgTypeToString(const MsgType type) {
 #endif
 
   default:
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Sedp::Msg::msgTypeToString() : ERROR: ")
-      ACE_TEXT("%u is not a valid queue type\n"), static_cast<unsigned>(type)));
-    return OpenDDS::DCPS::to_dds_string(static_cast<unsigned>(type));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::Msg::msgTypeToString: ")
+               ACE_TEXT("%d is either invalid or not recognized.\n"),
+               type));
+    return "Invalid message queue type";
   }
 }
 
-OPENDDS_STRING Sedp::Msg::msgTypeToString() const {
+const char* Sedp::Msg::msgTypeToString() const {
   return msgTypeToString(type_);
+}
+
+void
+Sedp::AssociationComplete::execute() {
+  sedp_->association_complete(local_, remote_);
+}
+
+void
+Sedp::rtps_relay_address(const ACE_INET_Addr& address)
+{
+  DCPS::RtpsUdpInst_rch rtps_inst = DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
+  ACE_GUARD(ACE_Thread_Mutex, g, rtps_inst->rtps_relay_config_lock_);
+  rtps_inst->rtps_relay_address_ = address;
+}
+
+void
+Sedp::stun_server_address(const ACE_INET_Addr& address)
+{
+  DCPS::RtpsUdpInst_rch rtps_inst = DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
+  ACE_GUARD(ACE_Thread_Mutex, g, rtps_inst->stun_server_config_lock_);
+  rtps_inst->stun_server_address_ = address;
+}
+
+bool locators_changed(const ParticipantProxy_t& x,
+                      const ParticipantProxy_t& y)
+{
+  return locatorsChanged(x, y);
 }
 
 }

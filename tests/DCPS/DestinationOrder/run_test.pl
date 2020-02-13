@@ -11,6 +11,7 @@ use PerlDDS::Run_Test;
 use strict;
 
 PerlDDS::add_lib_path('../FooType');
+PerlDDS::add_lib_path('../TestFramework');
 
 my $test = new PerlDDS::TestFramework();
 $test->setup_discovery();

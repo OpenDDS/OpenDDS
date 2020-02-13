@@ -1,20 +1,5 @@
-
-project(*idl): dcps_test_lib {
-  idlflags      += -Wb,stub_export_include=SetQosDeadline_export.h \
-                   -Wb,stub_export_macro=SetQosDeadline_Export -SS
-  dcps_ts_flags += -Wb,export_macro=SetQosDeadline_Export
-  dynamicflags  += SETQOSDEADLINE_BUILD_DLL
-
-  TypeSupport_Files {
-    Messenger.idl
-  }
-}
-
-
-project(*Publisher) : dcpsexe, dcps_transports_for_test {
+project(*Publisher) : dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test {
   exename = publisher
-  after  += *idl
-  libs   += *idl
 
   Idl_Files {
   }
@@ -25,10 +10,8 @@ project(*Publisher) : dcpsexe, dcps_transports_for_test {
   }
 }
 
-project(*Subscriber) : dcpsexe, dcps_transports_for_test {
+project(*Subscriber) : dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test {
   exename = subscriber
-  after  += *idl
-  libs   += *idl
 
   Idl_Files {
   }

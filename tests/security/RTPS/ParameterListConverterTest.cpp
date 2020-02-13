@@ -98,8 +98,8 @@ namespace {
   }
 
   Token token(string classid = "Test-Class-Id",
-              size_t proplen = 1,
-              size_t bproplen = 1,
+              CORBA::ULong proplen = 1,
+              CORBA::ULong bproplen = 1,
               bool propagate = true)
   {
     Token t;
@@ -107,7 +107,7 @@ namespace {
     t.class_id = classid.c_str();
 
     t.properties.length(proplen);
-    for (size_t i = 0; i < proplen; ++i) {
+    for (CORBA::ULong i = 0; i < proplen; ++i) {
         stringstream name, value;
         name << "Property " << i;
         value << "PropertyValue " << i;
@@ -118,14 +118,14 @@ namespace {
     }
 
     t.binary_properties.length(bproplen);
-    for (size_t i = 0; i < bproplen; ++i) {
+    for (CORBA::ULong i = 0; i < bproplen; ++i) {
         stringstream name, value;
         name << "BinaryProperty " << i;
         value << "BinaryPropertyValue " << i;
 
         t.binary_properties[i].name = name.str().c_str();
 
-        size_t vlen = value.str().length();
+        const CORBA::ULong vlen = static_cast<CORBA::ULong>(value.str().length());
         t.binary_properties[i].value.length(vlen);
         memcpy(t.binary_properties[i].value.get_buffer(),  value.str().c_str(),  vlen);
 
@@ -180,8 +180,8 @@ TEST(ToParamListTest, From_SPDPdiscoveredParticipantData_IdentityStatusToken)
   w1.leaseDuration = temp.leaseDuration;
 
   ParameterList p;
-  ASSERT_EQ(0, ParameterListConverter::to_param_list(w1, p));
-  ASSERT_EQ(0, ParameterListConverter::from_param_list(p, w2));
+  ASSERT_EQ(true, ParameterListConverter::to_param_list(w1, p));
+  ASSERT_EQ(true, ParameterListConverter::from_param_list(p, w2));
 
   ASSERT_EQ(0, strcmp("Property 0", w2.ddsParticipantDataSecure.identity_status_token.properties[0].name));
   ASSERT_EQ(0, strcmp("PropertyValue 0", w2.ddsParticipantDataSecure.identity_status_token.properties[0].value));

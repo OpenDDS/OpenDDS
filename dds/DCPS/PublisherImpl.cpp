@@ -45,12 +45,10 @@ PublisherImpl::PublisherImpl(DDS::InstanceHandle_t      handle,
   participant_(*participant),
   suspend_depth_count_(0),
   sequence_number_(),
-  aggregation_period_start_(ACE_Time_Value::zero),
   reverse_pi_lock_(pi_lock_),
-  monitor_(0),
   publisher_id_(id)
 {
-  monitor_ = TheServiceParticipant->monitor_factory_->create_publisher_monitor(this);
+  monitor_.reset(TheServiceParticipant->monitor_factory_->create_publisher_monitor(this));
 }
 
 PublisherImpl::~PublisherImpl()
@@ -209,8 +207,7 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
 #endif
 
   // Unregister all registered instances prior to deletion.
-  DDS::Time_t source_timestamp = time_value_to_time(ACE_OS::gettimeofday());
-  dw_servant->unregister_instances(source_timestamp);
+  dw_servant->unregister_instances(SystemTimePoint::now().to_dds_time());
 
   // Wait for any control messages to be transported during
   // unregistering of instances.
@@ -260,6 +257,9 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
 
     publication_map_.erase(it);
 
+    // not just unregister but remove any pending writes/sends.
+    dw_servant->unregister_all();
+
     // Release pi_lock_ before making call to transport layer to avoid
     // some deadlock situations that threads acquire locks(PublisherImpl
     // pi_lock_, TransportClient reservation_lock and TransportImpl
@@ -269,6 +269,7 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
     // Wait for pending samples to drain prior to removing associations
     // and unregistering the publication.
     dw_servant->wait_pending();
+
     // Call remove association before unregistering the datawriter
     // with the transport, otherwise some callbacks resulted from
     // remove_association may lost.
@@ -279,9 +280,6 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
   if (this->monitor_) {
     this->monitor_->report();
   }
-
-  // not just unregister but remove any pending writes/sends.
-  dw_servant->unregister_all();
 
   RcHandle<DomainParticipantImpl> participant = this->participant_.lock();
 
@@ -874,19 +872,19 @@ PublisherImpl::assert_liveliness_by_participant()
   return ret;
 }
 
-ACE_Time_Value
+TimeDuration
 PublisherImpl::liveliness_check_interval(DDS::LivelinessQosPolicyKind kind)
 {
-  ACE_Time_Value tv = ACE_Time_Value::max_time;
+  TimeDuration tv = TimeDuration::max_value;
   for (DataWriterMap::iterator it(datawriter_map_.begin());
       it != datawriter_map_.end(); ++it) {
-    tv = std::min (tv, it->second->liveliness_check_interval(kind));
+    tv = std::min(tv, it->second->liveliness_check_interval(kind));
   }
   return tv;
 }
 
 bool
-PublisherImpl::participant_liveliness_activity_after(const ACE_Time_Value& tv)
+PublisherImpl::participant_liveliness_activity_after(const MonotonicTimePoint& tv)
 {
   for (DataWriterMap::iterator it(datawriter_map_.begin());
       it != datawriter_map_.end(); ++it) {

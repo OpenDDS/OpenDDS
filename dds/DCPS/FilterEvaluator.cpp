@@ -85,10 +85,7 @@ public:
 
   virtual bool has_non_key_fields(const MetaStruct& meta) const
   {
-    for (
-      OPENDDS_VECTOR(EvalNode*)::const_iterator i = children_.begin();
-      i != children_.end(); ++i
-    ) {
+    for (OPENDDS_VECTOR(EvalNode*)::const_iterator i = children_.begin(); i != children_.end(); ++i) {
       EvalNode* child = *i;
       if (child->has_non_key_fields(meta)) {
         return true;
@@ -145,10 +142,7 @@ FilterEvaluator::~FilterEvaluator()
 
 bool FilterEvaluator::has_non_key_fields(const MetaStruct& meta) const
 {
-  for (
-    OPENDDS_VECTOR(OPENDDS_STRING)::const_iterator i = order_bys_.begin();
-    i != order_bys_.end(); ++i
-  ) {
+  for (OPENDDS_VECTOR(OPENDDS_STRING)::const_iterator i = order_bys_.begin(); i != order_bys_.end(); ++i) {
     if (!meta.isDcpsKey(i->c_str())) {
       return true;
     }
@@ -402,7 +396,7 @@ namespace {
         }
         break;
       }
-      assert(0);
+      OPENDDS_ASSERT(0);
       return Value(0);
     }
 
@@ -429,14 +423,14 @@ namespace {
       } else if (op->TypeMatches<OR>()) {
         op_ = LG_OR;
       } else {
-        assert(0);
+        OPENDDS_ASSERT(0);
       }
     }
 
     Value eval(FilterEvaluator::DataForEval& data)
     {
       Value left = children_[0]->eval(data);
-      assert(left.type_ == Value::VAL_BOOL);
+      OPENDDS_ASSERT(left.type_ == Value::VAL_BOOL);
       switch (op_) {
       case LG_NOT:
         return !left.b_;
@@ -493,7 +487,7 @@ FilterEvaluator::walkAst(const FilterEvaluator::AstNodeWrapper& node)
     if (a == 1) {
       return walkAst(child(node, 0));
     } else if (a == 2) {
-      assert(child(node, 0)->TypeMatches<NOT>());
+      OPENDDS_ASSERT(child(node, 0)->TypeMatches<NOT>());
       return new Logical(walkAst(child(node, 1)));
     } else if (a == 3) {
       EvalNode* left = walkAst(child(node, 0));
@@ -503,7 +497,7 @@ FilterEvaluator::walkAst(const FilterEvaluator::AstNodeWrapper& node)
     }
   }
 
-  assert(0);
+  OPENDDS_ASSERT(0);
   return 0;
 }
 
@@ -539,7 +533,7 @@ FilterEvaluator::walkOperand(const FilterEvaluator::AstNodeWrapper& node)
       return call;
     }
   }
-  assert(0);
+  OPENDDS_ASSERT(0);
   return 0;
 }
 

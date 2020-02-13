@@ -108,9 +108,12 @@ public:
   virtual bool requires_cdr() const { return false; }
 
   /// Populate a transport locator sequence.  Return the number of "locators."
-  virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info) const = 0;
+  virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info, ConnectionInfoFlags flags) const = 0;
 
   ICE::Endpoint* get_ice_endpoint();
+
+  virtual void update_locators(const RepoId& /*remote_id*/,
+                               const TransportLocatorSeq& /*locators*/) {}
 
 protected:
 
@@ -122,6 +125,7 @@ protected:
   void set_port_in_addr_string(OPENDDS_STRING& addr_str, u_short port_number);
 
   mutable ACE_SYNCH_MUTEX lock_;
+  bool shutting_down_;
 
 private:
 
@@ -134,7 +138,7 @@ private:
 
   friend class TransportClient;
  protected:
-  TransportImpl* impl();
+  TransportImpl_rch impl();
  private:
   virtual TransportImpl_rch new_impl() = 0;
 

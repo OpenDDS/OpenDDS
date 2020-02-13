@@ -19,9 +19,8 @@
 #include "ace/Get_Opt.h"
 
 #include <memory>
-#include <assert.h>
 
-const char * xml_file_ = 0;
+const ACE_TCHAR * xml_file_ = 0;
 
 int
 parse_args(int argc, ACE_TCHAR *argv[])
@@ -153,8 +152,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
 
       pub->get_default_datawriter_qos (dw_qos);
       xml_file_loader->get_datawriter_qos (dw_qos,
-                                           "InconsistentQos",
-                                            "");
+                                           ACE_TEXT("InconsistentQos"),
+                                           ACE_TEXT(""));
       delete xml_file_loader;
 
       DDS::DataWriter_var dw =

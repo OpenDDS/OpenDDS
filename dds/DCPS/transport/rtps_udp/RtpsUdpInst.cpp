@@ -34,14 +34,19 @@ RtpsUdpInst::RtpsUdpInst(const OPENDDS_STRING& name)
   , use_multicast_(true)
   , ttl_(1)
   , multicast_group_address_(7401, "239.255.0.2")
-  , nak_depth_(32) // default nak_depth in OpenDDS_Multicast
+  , multicast_group_address_str_("239.255.0.2:7401")
+  , nak_depth_(0)
+  , max_bundle_size_(TransportSendStrategy::UDP_MAX_MESSAGE_SIZE - RTPS::RTPSHDR_SZ) // default maximum bundled message size is max udp message size (see TransportStrategy) minus RTPS header
   , nak_response_delay_(0, 200*1000 /*microseconds*/) // default from RTPS
   , heartbeat_period_(1) // no default in RTPS spec
   , heartbeat_response_delay_(0, 500*1000 /*microseconds*/) // default from RTPS
   , handshake_timeout_(30) // default syn_timeout in OpenDDS_Multicast
   , durable_data_timeout_(60)
-  , opendds_discovery_guid_(GUID_UNKNOWN)
+  , rtps_relay_beacon_period_(30)
+  , use_rtps_relay_(false)
+  , rtps_relay_only_(false)
   , use_ice_(false)
+  , opendds_discovery_guid_(GUID_UNKNOWN)
 {
 }
 
@@ -80,12 +85,15 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
       group_address_s += ACE_TEXT(":7401");
     }
     multicast_group_address_.set(group_address_s.c_str());
+    multicast_group_address_str_ = ACE_TEXT_ALWAYS_CHAR(group_address_s.c_str());
   }
 
   GET_CONFIG_STRING_VALUE(cf, sect, ACE_TEXT("multicast_interface"),
                           multicast_interface_);
 
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("nak_depth"), nak_depth_, size_t);
+
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("max_bundle_size"), max_bundle_size_, size_t);
 
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("ttl"), ttl_, unsigned char);
 
@@ -105,6 +113,11 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
     ACE_INET_Addr addr(rtps_relay_address_s.c_str());
     rtps_relay_address(addr);
   }
+  GET_CONFIG_TIME_VALUE(cf, sect, ACE_TEXT("RtpsRelayBeaconPeriod"),
+                        rtps_relay_beacon_period_);
+
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("RtpsRelayOnly"), rtps_relay_only_, bool);
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("UseRtpsRelay"), use_rtps_relay_, bool);
 
   ACE_TString stun_server_address_s;
   GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("DataStunServerAddress"),
@@ -114,7 +127,12 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
     stun_server_address(addr);
   }
 
+#ifdef OPENDDS_SECURITY
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("UseIce"), use_ice_, bool);
+  if (use_ice_ && !TheServiceParticipant->get_security()) {
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Security must be enabled (-DCPSSecurity 1) when using ICE (UseIce)\n")), -1);
+  }
+#endif
 
   return 0;
 }
@@ -149,15 +167,16 @@ RtpsUdpInst::dump_to_str() const
       + ':' + to_dds_string(multicast_group_address_.get_port_number()) + '\n';
   ret += formatNameForDump("multicast_interface") + multicast_interface_ + '\n';
   ret += formatNameForDump("nak_depth") + to_dds_string(unsigned(nak_depth_)) + '\n';
-  ret += formatNameForDump("nak_response_delay") + to_dds_string(nak_response_delay_.msec()) + '\n';
-  ret += formatNameForDump("heartbeat_period") + to_dds_string(heartbeat_period_.msec()) + '\n';
-  ret += formatNameForDump("heartbeat_response_delay") + to_dds_string(heartbeat_response_delay_.msec()) + '\n';
-  ret += formatNameForDump("handshake_timeout") + to_dds_string(handshake_timeout_.msec()) + '\n';
+  ret += formatNameForDump("max_bundle_size") + to_dds_string(unsigned(max_bundle_size_)) + '\n';
+  ret += formatNameForDump("nak_response_delay") + to_dds_string(nak_response_delay_.value().msec()) + '\n';
+  ret += formatNameForDump("heartbeat_period") + to_dds_string(heartbeat_period_.value().msec()) + '\n';
+  ret += formatNameForDump("heartbeat_response_delay") + to_dds_string(heartbeat_response_delay_.value().msec()) + '\n';
+  ret += formatNameForDump("handshake_timeout") + to_dds_string(handshake_timeout_.value().msec()) + '\n';
   return ret;
 }
 
 size_t
-RtpsUdpInst::populate_locator(OpenDDS::DCPS::TransportLocator& info) const
+RtpsUdpInst::populate_locator(TransportLocator& info, ConnectionInfoFlags flags) const
 {
   using namespace OpenDDS::RTPS;
 
@@ -165,7 +184,7 @@ RtpsUdpInst::populate_locator(OpenDDS::DCPS::TransportLocator& info) const
   CORBA::ULong idx = 0;
 
   // multicast first so it's preferred by remote peers
-  if (this->use_multicast_ && this->multicast_group_address_ != ACE_INET_Addr()) {
+  if ((flags & CONNINFO_MULTICAST) && use_multicast_ && multicast_group_address_ != ACE_INET_Addr()) {
     idx = locators.length();
     locators.length(idx + 1);
     locators[idx].kind = address_to_kind(this->multicast_group_address_);
@@ -176,29 +195,31 @@ RtpsUdpInst::populate_locator(OpenDDS::DCPS::TransportLocator& info) const
 
   //if local_address_string is empty, or only the port has been set
   //need to get interface addresses to populate into the locator
-  if (this->local_address_string().empty() ||
-      this->local_address_string().rfind(':') == 0) {
-    typedef OPENDDS_VECTOR(ACE_INET_Addr) AddrVector;
-    AddrVector addrs;
-    if (TheServiceParticipant->default_address ().empty ()) {
-      get_interface_addrs(addrs);
+  if (flags & CONNINFO_UNICAST) {
+    if (local_address_string().empty() ||
+        local_address_string().rfind(':') == 0) {
+      typedef OPENDDS_VECTOR(ACE_INET_Addr) AddrVector;
+      AddrVector addrs;
+      if (TheServiceParticipant->default_address ().empty ()) {
+        get_interface_addrs(addrs);
+      } else {
+        addrs.push_back (ACE_INET_Addr (static_cast<u_short> (0), TheServiceParticipant->default_address().c_str()));
+      }
+      for (AddrVector::iterator adr_it = addrs.begin(); adr_it != addrs.end(); ++adr_it) {
+        idx = locators.length();
+        locators.length(idx + 1);
+        locators[idx].kind = address_to_kind(*adr_it);
+        locators[idx].port = local_address().get_port_number();
+        RTPS::address_to_bytes(locators[idx].address, *adr_it);
+      }
     } else {
-      addrs.push_back (ACE_INET_Addr (static_cast<u_short> (0), TheServiceParticipant->default_address ().c_str ()));
-    }
-    for (AddrVector::iterator adr_it = addrs.begin(); adr_it != addrs.end(); ++adr_it) {
       idx = locators.length();
       locators.length(idx + 1);
-      locators[idx].kind = address_to_kind(*adr_it);
-      locators[idx].port = this->local_address().get_port_number();
-      RTPS::address_to_bytes(locators[idx].address, *adr_it);
+      locators[idx].kind = address_to_kind(local_address());
+      locators[idx].port = local_address().get_port_number();
+      RTPS::address_to_bytes(locators[idx].address,
+                             local_address());
     }
-  } else {
-    idx = locators.length();
-    locators.length(idx + 1);
-    locators[idx].kind = address_to_kind(this->local_address());
-    locators[idx].port = this->local_address().get_port_number();
-    RTPS::address_to_bytes(locators[idx].address,
-                           this->local_address());
   }
 
   info.transport_type = "rtps_udp";
@@ -208,7 +229,7 @@ RtpsUdpInst::populate_locator(OpenDDS::DCPS::TransportLocator& info) const
 }
 
 const TransportBLOB*
-RtpsUdpInst::get_blob(const OpenDDS::DCPS::TransportLocatorSeq& trans_info) const
+RtpsUdpInst::get_blob(const TransportLocatorSeq& trans_info) const
 {
   for (CORBA::ULong idx = 0, limit = trans_info.length(); idx != limit; ++idx) {
     if (std::strcmp(trans_info[idx].transport_type, "rtps_udp") == 0) {
@@ -218,6 +239,8 @@ RtpsUdpInst::get_blob(const OpenDDS::DCPS::TransportLocatorSeq& trans_info) cons
 
   return 0;
 }
+
+#ifdef OPENDDS_SECURITY
 
 ICE::AddressListType
 RtpsUdpInst::host_addresses() const {
@@ -230,7 +253,7 @@ RtpsUdpInst::host_addresses() const {
     if (TheServiceParticipant->default_address ().empty ()) {
       get_interface_addrs(addresses);
     } else {
-      addresses.push_back (ACE_INET_Addr (static_cast<u_short> (0), TheServiceParticipant->default_address ().c_str ()));
+      addresses.push_back (ACE_INET_Addr (static_cast<u_short> (0), TheServiceParticipant->default_address().c_str()));
     }
   } else {
     addresses.push_back(this->local_address());
@@ -241,6 +264,19 @@ RtpsUdpInst::host_addresses() const {
   }
 
   return addresses;
+}
+
+#endif
+
+void
+RtpsUdpInst::update_locators(const RepoId& remote_id,
+                             const TransportLocatorSeq& locators)
+{
+  TransportImpl_rch imp = impl();
+  if (imp) {
+    RtpsUdpTransport_rch rtps_impl = static_rchandle_cast<RtpsUdpTransport>(imp);
+    rtps_impl->update_locators(remote_id, locators);
+  }
 }
 
 } // namespace DCPS

@@ -78,9 +78,9 @@ public:
   /// Our DataLink has been requested by some particular
   /// TransportClient to remove the supplied sample
   /// (basically, an "unsend" attempt) from this strategy object.
-  RemoveResult remove_sample(const DataSampleElement* sample, void* context);
+  RemoveResult remove_sample(const DataSampleElement* sample);
 
-  void remove_all_msgs(RepoId pub_id);
+  void remove_all_msgs(const RepoId& pub_id);
 
   /// Called by our ThreadSynch object when we should be able to
   /// start sending any partial packet bytes and/or compose a new
@@ -113,6 +113,7 @@ public:
   /// This is called whenver the connection is lost and reconnect fails.
   /// It removes all samples in the backpressure queue and packet queue.
   void terminate_send(bool graceful_disconnecting = false);
+  virtual void terminate_send_if_suspended();
 
   // Moved clear() declaration below as Enums can't be foward declared.
 
@@ -138,6 +139,12 @@ public:
   virtual ACE_HANDLE get_handle();
 
   void deliver_ack_request(TransportQueueElement* element);
+
+  /// Put the maximum UDP payload size here so that it can be shared by all
+  /// UDP-based transports.  This is the worst-case (conservative) value for
+  /// UDP/IPv4.  If there are no IP options, or if IPv6 is used, it could
+  /// actually be a little larger.
+  static const size_t UDP_MAX_MESSAGE_SIZE = 65466;
 
 protected:
 
@@ -173,12 +180,6 @@ protected:
   /// fragment larger messages.  This fragmentation and
   /// reassembly will be transparent to the user.
   virtual size_t max_message_size() const;
-
-  /// Put the maximum UDP payload size here so that it can be shared by all
-  /// UDP-based transports.  This is the worst-case (conservative) value for
-  /// UDP/IPv4.  If there are no IP options, or if IPv6 is used, it could
-  /// actually be a little larger.
-  static const size_t UDP_MAX_MESSAGE_SIZE = 65466;
 
   /// Set graceful disconnecting flag.
   void set_graceful_disconnecting(bool flag);
@@ -238,13 +239,14 @@ private:
   /// Form an IOV and call the send_bytes() template method.
   ssize_t do_send_packet(const ACE_Message_Block* packet, int& bp);
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   /// Derived classes can override to transform the data right before it's
   /// sent.  If the returned value is non-NULL it will be sent instead of
-  /// sending the parameter.
-  virtual ACE_Message_Block* pre_send_packet(const ACE_Message_Block*)
+  /// sending the parameter.  If the returned value is NULL the original
+  /// message will be dropped.
+  virtual ACE_Message_Block* pre_send_packet(const ACE_Message_Block* m)
   {
-    return 0;
+    return m->duplicate();
   }
 #endif
 
@@ -283,22 +285,18 @@ public:
     MODE_TERMINATED
   };
 
-  /// Clear queued messages and messages in current packet.
-  // The API now has a defaulted mode (the default is the same as
-  // as the earlier hard-coded value).
-  // Clear locks the local mutex. In certain situations its
-  // important to set the new mode in the clear itself.
-  // Since the default is the earlier hard-coded value, this
-  // shouldn't have any impact.
-  void clear(SendMode mode = MODE_DIRECT);
+  /// Clear queued messages and messages in current packet and set the
+  /// current mode to new_mod if the current mode equals old_mode or
+  /// old_mode is MODE_NOT_SET.
+
+  void clear(SendMode new_mode, SendMode old_mode = MODE_NOT_SET);
 
   /// Access the current sending mode.
   SendMode mode() const;
 protected:
   /// Implement framework chain visitations to remove a sample.
   virtual RemoveResult do_remove_sample(const RepoId& pub_id,
-    const TransportQueueElement::MatchCriteria& criteria,
-    void* context);
+    const TransportQueueElement::MatchCriteria& criteria);
 
 private:
 

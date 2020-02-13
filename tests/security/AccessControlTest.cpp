@@ -13,6 +13,8 @@
 
 #include <dds/DCPS/Service_Participant.h>
 
+#include <dds/DCPS/security/framework/Properties.h>
+
 using namespace OpenDDS::Security;
 using DDS::Property_t;
 using DDS::PropertySeq;
@@ -194,59 +196,59 @@ public:
   : auth_plugin_(new MockAuthentication())
   , test_class_()
   {
-    perm_ca_.name = "dds.sec.access.permissions_ca";
+    perm_ca_.name = DDS::Security::Properties::AccessPermissionsCA;
     perm_ca_.value = "file:certs/permissions/permissions_ca_cert.pem";
     perm_ca_.propagate = false;
 
-    gov_0_p7s_.name = "dds.sec.access.governance";
+    gov_0_p7s_.name = DDS::Security::Properties::AccessGovernance;
     gov_0_p7s_.value = "file:governance/governance_SC0_SecurityDisabled_signed.p7s";
     gov_0_p7s_.propagate = false;
 
-    gov_1_p7s_.name = "dds.sec.access.governance";
+    gov_1_p7s_.name = DDS::Security::Properties::AccessGovernance;
     gov_1_p7s_.value = "file:governance/governance_SC1_ProtectedDomain1_signed.p7s";
     gov_1_p7s_.propagate = false;
 
-    gov_2_p7s_.name = "dds.sec.access.governance";
+    gov_2_p7s_.name = DDS::Security::Properties::AccessGovernance;
     gov_2_p7s_.value = "file:governance/governance_SC2_ProtectedDomain2_signed.p7s";
     gov_2_p7s_.propagate = false;
 
-    gov_3_p7s_.name = "dds.sec.access.governance";
+    gov_3_p7s_.name = DDS::Security::Properties::AccessGovernance;
     gov_3_p7s_.value = "file:governance/governance_SC3_ProtectedDomain3_signed.p7s";
     gov_3_p7s_.propagate = false;
 
-    gov_4_p7s_.name = "dds.sec.access.governance";
+    gov_4_p7s_.name = DDS::Security::Properties::AccessGovernance;
     gov_4_p7s_.value = "file:governance/governance_SC4_ProtectedDomain4_signed.p7s";
     gov_4_p7s_.propagate = false;
 
-    gov_5_p7s_.name = "dds.sec.access.governance";
+    gov_5_p7s_.name = DDS::Security::Properties::AccessGovernance;
     gov_5_p7s_.value = "file:governance/governance_SC5_ProtectedDomain5_signed.p7s";
     gov_5_p7s_.propagate = false;
 
-    gov_6_p7s_.name = "dds.sec.access.governance";
+    gov_6_p7s_.name = DDS::Security::Properties::AccessGovernance;
     gov_6_p7s_.value = "file:governance/governance_SC6_ProtectedDomain6_signed.p7s";
     gov_6_p7s_.propagate = false;
 
-    perm_allowall_p7s_.name = "dds.sec.access.permissions";
+    perm_allowall_p7s_.name = DDS::Security::Properties::AccessPermissions;
     perm_allowall_p7s_.value = "file:permissions/permissions_test_participant_01_JoinDomain_signed.p7s";
     perm_allowall_p7s_.propagate = false;
 
-    perm_topic_p7s_.name = "dds.sec.access.permissions";
+    perm_topic_p7s_.name = DDS::Security::Properties::AccessPermissions;
     perm_topic_p7s_.value = "file:permissions/permissions_test_participant_01_TopicLevel_signed.p7s";
     perm_topic_p7s_.propagate = false;
 
-    perm_topic2_p7s_.name = "dds.sec.access.permissions";
+    perm_topic2_p7s_.name = DDS::Security::Properties::AccessPermissions;
     perm_topic2_p7s_.value = "file:permissions/permissions_test_participant_01_TopicLevel_2_signed.p7s";
     perm_topic2_p7s_.propagate = false;
 
-    perm_date_p7s_.name = "dds.sec.access.permissions";
+    perm_date_p7s_.name = DDS::Security::Properties::AccessPermissions;
     perm_date_p7s_.value = "file:permissions/permissions_test_participant_01_NotBefore_signed.p7s";
     perm_date_p7s_.propagate = false;
 
-    perm_dateoffset_p7s_.name = "dds.sec.access.permissions";
+    perm_dateoffset_p7s_.name = DDS::Security::Properties::AccessPermissions;
     perm_dateoffset_p7s_.value = "file:permissions/permissions_test_participant_01_NotBeforeOffset_signed.p7s";
     perm_dateoffset_p7s_.propagate = false;
 
-    perm_parts_p7s_.name = "dds.sec.access.permissions";
+    perm_parts_p7s_.name = DDS::Security::Properties::AccessPermissions;
     perm_parts_p7s_.value = "file:permissions/permissions_test_participant_01_TopicLevel_Partitions_Default_signed.p7s";
     perm_parts_p7s_.propagate = false;
 
@@ -277,11 +279,24 @@ public:
     DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(arg_count, const_cast<char**>(params));
   }
 
-  void add_property(Property_t p) {
-      PropertySeq& seq = domain_participant_qos.property.value;
-      size_t len = seq.length();
-      seq.length(len + 1);
-      seq[len] = p;
+  void add_property(const Property_t& p)
+  {
+    PropertySeq& seq = domain_participant_qos.property.value;
+    const CORBA::ULong len = seq.length();
+    seq.length(len + 1);
+    seq[len] = p;
+  }
+
+  void add_or_replace_property(const Property_t& p)
+  {
+    PropertySeq& seq = domain_participant_qos.property.value;
+    for (unsigned int i = 0; i < seq.length(); ++i) {
+      if (std::strcmp(seq[i].name, p.name) == 0) {
+        seq[i] = p;
+        return;
+      }
+    }
+    add_property(p);
   }
 
   std::string extract_file_name(const std::string& file_parm) {
@@ -394,12 +409,12 @@ TEST_F(AccessControlTest, validate_remote_permissions_Success)
   remote_apc_token.class_id = Expected_Permissions_Cred_Token_Class_Id;
   remote_apc_token.binary_properties.length(2);
   remote_apc_token.binary_properties[0].name = "c.id";
-  remote_apc_token.binary_properties[0].value.length(id.size());
+  remote_apc_token.binary_properties[0].value.length(static_cast<CORBA::ULong>(id.size()));
   memcpy(remote_apc_token.binary_properties[0].value.get_buffer(), id.c_str(), id.size());
   remote_apc_token.binary_properties[0].propagate = true;
 
   remote_apc_token.binary_properties[1].name = "c.perm";
-  remote_apc_token.binary_properties[1].value.length(pf.size());
+  remote_apc_token.binary_properties[1].value.length(static_cast<CORBA::ULong>(pf.size()));
   memcpy(remote_apc_token.binary_properties[1].value.get_buffer(), pf.c_str(), pf.size());
   remote_apc_token.binary_properties[1].propagate = true;
 
@@ -469,7 +484,7 @@ TEST_F(AccessControlTest, check_create_datawriter_Success)
   ::DDS::Security::SecurityException ex;
 
   set_up_service_participant();
-  add_property(AccessControlTest::gov_6_p7s_);
+  add_or_replace_property(AccessControlTest::gov_6_p7s_);
 
   ::DDS::Security::PermissionsHandle out_handle =
           get_inst().validate_local_permissions(auth_plugin_.get(), 1, 0, domain_participant_qos, ex);
@@ -497,7 +512,7 @@ TEST_F(AccessControlTest, check_create_datawriter_default_Success)
   ::DDS::Security::SecurityException ex;
 
   set_up_service_participant();
-  add_property(AccessControlTest::gov_6_p7s_);
+  add_or_replace_property(AccessControlTest::gov_6_p7s_);
 
   ::DDS::Security::PermissionsHandle out_handle =
       get_inst().validate_local_permissions(auth_plugin_.get(), 1, 0, domain_participant_qos, ex);
@@ -523,8 +538,8 @@ TEST_F(AccessControlTest, check_create_datawriter_date_Fail)
     ::DDS::Security::SecurityException ex;
 
     set_up_service_participant();
-    add_property(AccessControlTest::gov_6_p7s_);
-    add_property(AccessControlTest::perm_date_p7s_);
+    add_or_replace_property(AccessControlTest::gov_6_p7s_);
+    add_or_replace_property(AccessControlTest::perm_date_p7s_);
 
     ::DDS::Security::PermissionsHandle out_handle =
         get_inst().validate_local_permissions(auth_plugin_.get(), 1, 0, domain_participant_qos, ex);
@@ -581,7 +596,7 @@ TEST_F(AccessControlTest, check_create_datareader_Success)
   ::DDS::Security::SecurityException ex;
 
   set_up_service_participant();
-  add_property(AccessControlTest::gov_6_p7s_);
+  add_or_replace_property(AccessControlTest::gov_6_p7s_);
 
   ::DDS::Security::PermissionsHandle permissions_handle =
           get_inst().validate_local_permissions(auth_plugin_.get(), 1, 0, domain_participant_qos, ex);
@@ -611,7 +626,7 @@ TEST_F(AccessControlTest, check_create_datareader_Success)
 //    ::DDS::Security::SecurityException ex;
 //
 //    set_up_service_participant();
-//    add_property(AccessControlTest::gov_6_p7s_);
+//    add_or_replace_property(AccessControlTest::gov_6_p7s_);
 //
 //    ::DDS::Security::PermissionsHandle permissions_handle =
 //        get_inst().validate_local_permissions(auth_plugin_.get(), 1, 0, domain_participant_qos, ex);
@@ -658,7 +673,7 @@ TEST_F(AccessControlTest, check_create_datareader_default_Success)
   ::DDS::Security::SecurityException ex;
 
   set_up_service_participant();
-  add_property(AccessControlTest::gov_6_p7s_);
+  add_or_replace_property(AccessControlTest::gov_6_p7s_);
 
   ::DDS::Security::PermissionsHandle permissions_handle =
       get_inst().validate_local_permissions(auth_plugin_.get(), 1, 0, domain_participant_qos, ex);
@@ -810,12 +825,12 @@ TEST_F(AccessControlTest, check_remote_participant_Success_Governance)
   remote_apc_token.class_id = Expected_Permissions_Cred_Token_Class_Id;
   remote_apc_token.binary_properties.length(2);
   remote_apc_token.binary_properties[0].name = "c.id";
-  remote_apc_token.binary_properties[0].value.length(id.size());
+  remote_apc_token.binary_properties[0].value.length(static_cast<CORBA::ULong>(id.size()));
   memcpy(remote_apc_token.binary_properties[0].value.get_buffer(), id.c_str(), id.size());
   remote_apc_token.binary_properties[0].propagate = true;
 
   remote_apc_token.binary_properties[1].name = "c.perm";
-  remote_apc_token.binary_properties[1].value.length(pf.size());
+  remote_apc_token.binary_properties[1].value.length(static_cast<CORBA::ULong>(pf.size()));
   memcpy(remote_apc_token.binary_properties[1].value.get_buffer(),pf.c_str(), pf.size());
   remote_apc_token.binary_properties[1].propagate = true;
 
@@ -836,7 +851,7 @@ TEST_F(AccessControlTest, check_remote_participant_Success_Permissions)
   ::DDS::Security::AuthenticatedPeerCredentialToken remote_apc_token;
   ::DDS::Security::SecurityException ex;
 
-  add_property(AccessControlTest::gov_6_p7s_);
+  add_or_replace_property(AccessControlTest::gov_6_p7s_);
 
   participant_data.base.permissions_token.class_id = Expected_Permissions_Token_Class_Id;
 
@@ -851,12 +866,12 @@ TEST_F(AccessControlTest, check_remote_participant_Success_Permissions)
   remote_apc_token.class_id = Expected_Permissions_Cred_Token_Class_Id;
   remote_apc_token.binary_properties.length(2);
   remote_apc_token.binary_properties[0].name = "c.id";
-  remote_apc_token.binary_properties[0].value.length(id.size());
+  remote_apc_token.binary_properties[0].value.length(static_cast<CORBA::ULong>(id.size()));
   memcpy(remote_apc_token.binary_properties[0].value.get_buffer(), id.c_str(), id.size());
   remote_apc_token.binary_properties[0].propagate = true;
 
   remote_apc_token.binary_properties[1].name = "c.perm";
-  remote_apc_token.binary_properties[1].value.length(pf.size());
+  remote_apc_token.binary_properties[1].value.length(static_cast<CORBA::ULong>(pf.size()));
   memcpy(remote_apc_token.binary_properties[1].value.get_buffer(), pf.c_str(), pf.size());
   remote_apc_token.binary_properties[1].propagate = true;
 
@@ -899,11 +914,11 @@ TEST_F(AccessControlTest, check_remote_datawriter_Success)
   remote_apc_token.class_id = Expected_Permissions_Cred_Token_Class_Id;
   remote_apc_token.binary_properties.length(2);
   remote_apc_token.binary_properties[0].name = "c.id";
-  remote_apc_token.binary_properties[0].value.length(id.size());
+  remote_apc_token.binary_properties[0].value.length(static_cast<CORBA::ULong>(id.size()));
   memcpy(remote_apc_token.binary_properties[0].value.get_buffer(), id.c_str(), id.size());
   remote_apc_token.binary_properties[0].propagate = true;
   remote_apc_token.binary_properties[1].name = "c.perm";
-  remote_apc_token.binary_properties[1].value.length(pf.size());
+  remote_apc_token.binary_properties[1].value.length(static_cast<CORBA::ULong>(pf.size()));
   memcpy(remote_apc_token.binary_properties[1].value.get_buffer(), pf.c_str(), pf.size());
   remote_apc_token.binary_properties[1].propagate = true;
   get_inst().validate_local_permissions(auth_plugin_.get(), 1, 1, domain_participant_qos, ex);
@@ -950,11 +965,11 @@ TEST_F(AccessControlTest, check_remote_datareader_Success)
   remote_apc_token.class_id = Expected_Permissions_Cred_Token_Class_Id;
   remote_apc_token.binary_properties.length(2);
   remote_apc_token.binary_properties[0].name = "c.id";
-  remote_apc_token.binary_properties[0].value.length(id.size());
+  remote_apc_token.binary_properties[0].value.length(static_cast<CORBA::ULong>(id.size()));
   memcpy(remote_apc_token.binary_properties[0].value.get_buffer(), id.c_str(), id.size());
   remote_apc_token.binary_properties[0].propagate = true;
   remote_apc_token.binary_properties[1].name = "c.perm";
-  remote_apc_token.binary_properties[1].value.length(pf.size());
+  remote_apc_token.binary_properties[1].value.length(static_cast<CORBA::ULong>(pf.size()));
   memcpy(remote_apc_token.binary_properties[1].value.get_buffer(), pf.c_str(), pf.size());
   remote_apc_token.binary_properties[1].propagate = true;
   get_inst().validate_local_permissions(auth_plugin_.get(), 1, 1, domain_participant_qos, ex);
@@ -1005,12 +1020,12 @@ TEST_F(AccessControlTest, check_remote_topic_Success)
   remote_apc_token.class_id = Expected_Permissions_Cred_Token_Class_Id;
   remote_apc_token.binary_properties.length(2);
   remote_apc_token.binary_properties[0].name = "c.id";
-  remote_apc_token.binary_properties[0].value.length(id.size());
+  remote_apc_token.binary_properties[0].value.length(static_cast<CORBA::ULong>(id.size()));
   memcpy(remote_apc_token.binary_properties[0].value.get_buffer(), id.c_str(), id.size());
   remote_apc_token.binary_properties[0].propagate = true;
 
   remote_apc_token.binary_properties[1].name = "c.perm";
-  remote_apc_token.binary_properties[1].value.length(pf.size());
+  remote_apc_token.binary_properties[1].value.length(static_cast<CORBA::ULong>(pf.size()));
   memcpy(remote_apc_token.binary_properties[1].value.get_buffer(), pf.c_str(), pf.size());
   remote_apc_token.binary_properties[1].propagate = true;
 

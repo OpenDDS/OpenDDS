@@ -11,6 +11,8 @@ use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 use strict;
 
+PerlDDS::add_lib_path('../ConsolidatedMessengerIdl');
+
 my $debug ;# = 10;
 my $subDebug;
 my $pubDebug;

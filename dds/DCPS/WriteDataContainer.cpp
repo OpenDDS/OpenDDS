@@ -38,32 +38,31 @@ namespace DCPS {
  *       a common function.
  */
 bool
-resend_data_expired(DataSampleElement const & element,
-                    DDS::LifespanQosPolicy const & lifespan)
+resend_data_expired(const DataSampleElement& element,
+                    const DDS::LifespanQosPolicy& lifespan)
 {
   if (lifespan.duration.sec != DDS::DURATION_INFINITE_SEC
       || lifespan.duration.nanosec != DDS::DURATION_INFINITE_NSEC) {
     // Finite lifespan.  Check if data has expired.
 
-    DDS::Time_t const tmp = {
+    const DDS::Time_t tmp = {
       element.get_header().source_timestamp_sec_ + lifespan.duration.sec,
       element.get_header().source_timestamp_nanosec_ + lifespan.duration.nanosec
     };
-
-    ACE_Time_Value const now(ACE_OS::gettimeofday());
-    ACE_Time_Value const expiration_time(time_to_time_value(tmp));
+    const SystemTimePoint expiration_time(time_to_time_value(tmp));
+    const SystemTimePoint now = SystemTimePoint::now();
 
     if (now >= expiration_time) {
       if (DCPS_debug_level >= 8) {
-        ACE_Time_Value const diff(now - expiration_time);
+        const TimeDuration diff = now - expiration_time;
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("OpenDDS (%P|%t) Data to be sent ")
                    ACE_TEXT("expired by %d seconds, %d microseconds.\n"),
-                   diff.sec(),
-                   diff.usec()));
+                   diff.value().sec(),
+                   diff.value().usec()));
       }
 
-      return true;  // Data expired.
+      return true; // Data expired.
     }
   }
 
@@ -76,16 +75,16 @@ WriteDataContainer::WriteDataContainer(
   CORBA::Long history_depth,
   CORBA::Long max_durable_per_instance,
   DDS::Duration_t max_blocking_time,
-  size_t         n_chunks,
+  size_t n_chunks,
   DDS::DomainId_t domain_id,
-  char const * topic_name,
-  char const * type_name,
+  const char* topic_name,
+  const char* type_name,
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   DataDurabilityCache* durability_cache,
-  DDS::DurabilityServiceQosPolicy const & durability_service,
+  const DDS::DurabilityServiceQosPolicy& durability_service,
 #endif
-  CORBA::Long     max_instances,
-  CORBA::Long     max_total_samples)
+  CORBA::Long max_instances,
+  CORBA::Long max_total_samples)
   : transaction_id_(0),
     publication_id_(GUID_UNKNOWN),
     writer_(writer),
@@ -96,9 +95,9 @@ WriteDataContainer::WriteDataContainer(
     max_num_samples_(max_total_samples),
     max_blocking_time_(max_blocking_time),
     waiting_on_release_(false),
-    condition_(lock_),
-    empty_condition_(lock_),
-    wfa_condition_(this->wfa_lock_),
+    condition_(lock_, ConditionAttributesMonotonic()),
+    empty_condition_(lock_, ConditionAttributesMonotonic()),
+    wfa_condition_(wfa_lock_, ConditionAttributesMonotonic()),
     n_chunks_(n_chunks),
     sample_list_element_allocator_(2 * n_chunks_),
     shutdown_(false),
@@ -193,7 +192,7 @@ WriteDataContainer::enqueue(
 
   if (this->writer_->watchdog_.in()) {
     instance->last_sample_tv_ = instance->cur_sample_tv_;
-    instance->cur_sample_tv_ = ACE_OS::gettimeofday();
+    instance->cur_sample_tv_.set_to_now();
     this->writer_->watchdog_->execute(*this->writer_, instance, false);
   }
 
@@ -370,7 +369,7 @@ WriteDataContainer::dispose(DDS::InstanceHandle_t instance_handle,
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    guard,
-                   this->lock_,
+                   lock_,
                    DDS::RETCODE_ERROR);
 
   PublicationInstance_rch instance;
@@ -424,7 +423,7 @@ WriteDataContainer::num_samples(DDS::InstanceHandle_t handle,
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    guard,
-                   this->lock_,
+                   lock_,
                    DDS::RETCODE_ERROR);
   PublicationInstance_rch instance;
 
@@ -446,7 +445,7 @@ WriteDataContainer::num_all_samples()
 
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    guard,
-                   this->lock_,
+                   lock_,
                    0);
 
   for (PublicationInstanceMapType::iterator iter = instances_.begin();
@@ -539,7 +538,7 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
 
   ACE_GUARD(ACE_Recursive_Thread_Mutex,
             guard,
-            this->lock_);
+            lock_);
 
   // Delivered samples _must_ be on sending_data_ list
 
@@ -613,7 +612,7 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
 
     return;
   }
-  ACE_GUARD(ACE_SYNCH_MUTEX, wfa_guard, this->wfa_lock_);
+  ACE_GUARD(ACE_SYNCH_MUTEX, wfa_guard, wfa_lock_);
   SequenceNumber acked_seq = stale->get_header().sequence_;
   SequenceNumber prev_max = acked_sequences_.cumulative_ack();
 
@@ -715,7 +714,7 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
 
   ACE_GUARD (ACE_Recursive_Thread_Mutex,
     guard,
-    this->lock_);
+    lock_);
 
   // The dropped sample should be in the sending_data_ list.
   // Otherwise an exception will be raised.
@@ -967,15 +966,8 @@ WriteDataContainer::remove_oldest_sample(
                      DDS::RETCODE_ERROR);
   }
 
-  // Signal if there is no pending data.
-  {
-    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                     guard,
-                     this->lock_,
-                     DDS::RETCODE_ERROR);
-
-    if (!pending_data())
-      empty_condition_.broadcast();
+  if (!pending_data()) {
+    empty_condition_.broadcast();
   }
 
   if (result == false) {
@@ -1037,7 +1029,7 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
   DDS::ReturnCode_t ret = DDS::RETCODE_OK;
 
   bool need_to_set_abs_timeout = true;
-  ACE_Time_Value abs_timeout;
+  MonotonicTimePoint abs_timeout;
 
   //max_num_samples_ covers ResourceLimitsQosPolicy max_samples and
   //max_instances and max_instances * depth
@@ -1061,10 +1053,10 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
       }
       // Reliable writers can wait
       if (need_to_set_abs_timeout) {
-        abs_timeout = duration_to_absolute_time_value (max_blocking_time_);
+        abs_timeout = MonotonicTimePoint(MonotonicTimePoint::now() + TimeDuration(max_blocking_time_));
         need_to_set_abs_timeout = false;
       }
-      if (!shutdown_ && ACE_OS::gettimeofday() < abs_timeout) {
+      if (!shutdown_ && MonotonicTimePoint::now() < abs_timeout) {
         if (DCPS_debug_level >= 2) {
           ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::obtain_buffer")
                                 ACE_TEXT(" instance %d waiting for samples to be released by transport\n"),
@@ -1072,7 +1064,7 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
         }
 
         waiting_on_release_ = true;
-        int const wait_result = condition_.wait(&abs_timeout);
+        const int wait_result = condition_.wait(&abs_timeout.value());
 
         if (wait_result == 0) {
           remove_excess_durable();
@@ -1199,7 +1191,7 @@ WriteDataContainer::unregister_all()
     //the delete_datawriter call which does not acquire the lock in advance.
     ACE_GUARD(ACE_Recursive_Thread_Mutex,
               guard,
-              this->lock_);
+              lock_);
     // Tell transport remove all control messages currently
     // transport is processing.
     (void) this->writer_->remove_all_msgs();
@@ -1369,35 +1361,29 @@ void WriteDataContainer::reschedule_deadline()
 void
 WriteDataContainer::wait_pending()
 {
-  ACE_Time_Value pending_timeout =
-    TheServiceParticipant->pending_timeout();
+  const TimeDuration pending_timeout(TheServiceParticipant->pending_timeout());
+  MonotonicTimePoint timeout_at;
+  const ACE_Time_Value_T<MonotonicClock>* timeout_ptr = 0;
 
-  ACE_Time_Value* pTimeout = 0;
-
-  if (pending_timeout != ACE_Time_Value::zero) {
-    pTimeout = &pending_timeout;
-    pending_timeout += ACE_OS::gettimeofday();
+  if (!pending_timeout.is_zero()) {
+    timeout_at = MonotonicTimePoint::now() + pending_timeout;
+    timeout_ptr = &timeout_at.value();
   }
 
-  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
   const bool report = DCPS_debug_level > 0 && pending_data();
   if (report) {
-    if (pending_timeout == ACE_Time_Value::zero) {
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("%T (%P|%t) WriteDataContainer::wait_pending no timeout\n")));
+    if (pending_timeout.is_zero()) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::wait_pending no timeout\n")));
     } else {
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("%T (%P|%t) WriteDataContainer::wait_pending timeout ")
-                 ACE_TEXT("at %#T\n"),
-                 &pending_timeout));
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::wait_pending ")
+        ACE_TEXT("timeout at %#T\n"),
+        &pending_timeout.value()));
     }
   }
-  while (true) {
 
-    if (!pending_data())
-      break;
-
-    if (empty_condition_.wait(pTimeout) == -1 && pending_data()) {
+  while (pending_data()) {
+    if (empty_condition_.wait(timeout_ptr) == -1 && pending_data()) {
       if (DCPS_debug_level) {
         ACE_DEBUG((LM_INFO,
                    ACE_TEXT("(%P|%t) WriteDataContainer::wait_pending %p\n"),
@@ -1408,8 +1394,7 @@ WriteDataContainer::wait_pending()
     }
   }
   if (report) {
-    ACE_DEBUG((LM_DEBUG,
-               "%T (%P|%t) WriteDataContainer::wait_pending done\n"));
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::wait_pending done\n")));
   }
 }
 
@@ -1418,7 +1403,7 @@ WriteDataContainer::get_instance_handles(InstanceHandleVec& instance_handles)
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex,
             guard,
-            this->lock_);
+            lock_);
   PublicationInstanceMapType::iterator it = instances_.begin();
 
   while (it != instances_.end()) {
@@ -1428,18 +1413,27 @@ WriteDataContainer::get_instance_handles(InstanceHandleVec& instance_handles)
 }
 
 DDS::ReturnCode_t
-WriteDataContainer::wait_ack_of_seq(const ACE_Time_Value& abs_deadline, const SequenceNumber& sequence)
+WriteDataContainer::wait_ack_of_seq(const MonotonicTimePoint& abs_deadline, const SequenceNumber& sequence)
 {
-  ACE_Time_Value deadline(abs_deadline);
+  const MonotonicTimePoint deadline(abs_deadline);
   DDS::ReturnCode_t ret = DDS::RETCODE_OK;
-  ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->wfa_lock_, DDS::RETCODE_ERROR);
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
+  ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, wfa_guard, wfa_lock_, DDS::RETCODE_ERROR);
 
-  while (ACE_OS::gettimeofday() < deadline) {
+  SequenceNumber last_acked = acked_sequences_.last_ack();
+  SequenceNumber acked = acked_sequences_.cumulative_ack();
+  if (sequence == last_acked && sequence == acked && sending_data_.size() != 0) {
+    acked_sequences_.insert(sending_data_.head()->get_header().sequence_.previous());
+  }
+
+  guard.release();
+
+  while (MonotonicTimePoint::now() < deadline) {
 
     if (!sequence_acknowledged(sequence)) {
       // lock is released while waiting and acquired before returning
       // from wait.
-      int const wait_result = wfa_condition_.wait(&deadline);
+      int const wait_result = wfa_condition_.wait(&deadline.value());
 
       if (wait_result != 0) {
         if (errno == ETIME) {

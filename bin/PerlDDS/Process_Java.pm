@@ -26,8 +26,8 @@ sub new {
   my @classpaths = ('classes', "$DDS_ROOT/lib/i2jrt.jar",
                     "$DDS_ROOT/lib/OpenDDS_DCPS.jar");
 
-  if (-e "$DDS_ROOT/lib/i2jrt_compact.jar") {
-    push(@classpaths, "$DDS_ROOT/lib/i2jrt_compact.jar");
+  if (-e "$DDS_ROOT/lib/i2jrt_corba.jar") {
+    push(@classpaths, "$DDS_ROOT/lib/i2jrt_corba.jar");
   }
 
   if (defined $classpath) {

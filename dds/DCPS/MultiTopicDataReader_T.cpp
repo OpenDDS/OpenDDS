@@ -86,11 +86,8 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::join(
 {
   using namespace DDS;
   DataReaderImpl* other_dri = dynamic_cast<DataReaderImpl*>(other_dr);
-
   if (!other_dri) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: ")
-      ACE_TEXT("MultiTopicDataReader_T::join, ")
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: MultiTopicDataReader_T::join: ")
       ACE_TEXT("Failed to get DataReaderImpl.\n")));
     return;
   }
@@ -108,11 +105,9 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::join(
       ReturnCode_t ret = other_dri->read_instance_generic(other_data.ptr_,
         info, ih, READ_SAMPLE_STATE, ANY_VIEW_STATE, ALIVE_INSTANCE_STATE);
       if (ret != RETCODE_OK && ret != RETCODE_NO_DATA) {
-        std::ostringstream rc_ss;
-        rc_ss << ret;
-        throw std::runtime_error("In join(), incoming DataReader for " +
-          OPENDDS_STRING(other_topic) + " read_instance_generic, error #" +
-          rc_ss.str());
+        throw std::runtime_error(
+         OPENDDS_STRING("In join(), incoming DataReader for ") + OPENDDS_STRING(other_topic) +
+         " read_instance_generic: " + retcode_to_string(ret));
       } else if (ret == DDS::RETCODE_OK) {
         resulting.push_back(prototype);
         resulting.back().combine(SampleWithInfo(other_topic.in(), info));
@@ -129,11 +124,11 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::join(
       ret = other_dri->read_next_instance_generic(other_data.ptr_, info, ih,
         READ_SAMPLE_STATE, ANY_VIEW_STATE, ALIVE_INSTANCE_STATE);
       if (ret != RETCODE_OK && ret != RETCODE_NO_DATA) {
-        std::ostringstream rc_ss;
-        rc_ss << ret;
-        throw std::runtime_error("In join(), incoming DataReader for " +
-          OPENDDS_STRING(other_topic) + " read_next_instance_generic, error #" +
-          rc_ss.str());
+        std::ostringstream ss;
+        ss
+          << "In join(), incoming DataReader for " << OPENDDS_STRING(other_topic)
+          << " read_next_instance_generic: " << retcode_to_string(ret);
+        throw std::runtime_error(ss.str());
       } else if (ret == RETCODE_NO_DATA) {
         break;
       }
@@ -265,8 +260,7 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::process_joins(
 
       }
     } catch (const std::runtime_error& e) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) MultiTopicDataReader_T::process_joins: "
-        "%C", e.what()));
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: MultiTopicDataReader_T::process_joins: %C\n"), e.what()));
     }
   }
 }
@@ -296,9 +290,7 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::cross_join(
     partialResults.erase(seen);
     process_joins(partialResults, partialResults[withJoin], withJoin, qp);
   } catch (const std::runtime_error& e) {
-    if (OpenDDS::DCPS::DCPS_debug_level) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) MultiTopicDataReader_T::cross_join: %C", e.what()));
-    }
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: MultiTopicDataReader_T::cross_join: %C\n"), e.what()));
   }
 }
 

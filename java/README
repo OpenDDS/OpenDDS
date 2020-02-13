@@ -65,7 +65,7 @@ Foo.idl                       - hand-written description of the DDS sample type
 Foo.idl
 -------
 module Baz {
-#pragma DCPS_DATA_TYPE "Baz::Bar"
+  @topic
   struct Bar {
     long x;
   };
@@ -83,8 +83,7 @@ defined.
    generated from it.  java/tests/messenger/messenger_idl is set up this way.
 
 2. Create an IDL file describing the data structure you will be using with
-   OpenDDS.  See Messenger.idl for an example.  This file will contain at least
-   one line starting with "#pragma DCPS_DATA_TYPE".  For the sake of these
+   OpenDDS.  See Messenger.idl for an example.  For the sake of these
    instructions, we'll call the file Foo.idl.
 
 3. Create an export header, Foo_Export.h

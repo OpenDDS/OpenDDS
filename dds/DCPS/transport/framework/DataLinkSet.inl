@@ -158,7 +158,7 @@ OpenDDS::DCPS::DataLinkSet::remove_sample(const DataSampleElement* sample)
   const MapType::iterator end = this->map_.end();
   for (MapType::iterator itr = this->map_.begin(); itr != end; ++itr) {
 
-    if (itr->second->remove_sample(sample, 0) == REMOVE_RELEASED) {
+    if (itr->second->remove_sample(sample) == REMOVE_RELEASED) {
       return true;
     }
   }
@@ -167,7 +167,7 @@ OpenDDS::DCPS::DataLinkSet::remove_sample(const DataSampleElement* sample)
 }
 
 ACE_INLINE bool
-OpenDDS::DCPS::DataLinkSet::remove_all_msgs(RepoId pub_id)
+OpenDDS::DCPS::DataLinkSet::remove_all_msgs(const RepoId& pub_id)
 {
   DBG_ENTRY_LVL("DataLinkSet", "remove_all_msgs", 6);
   GuardType guard(this->lock_);

@@ -26,6 +26,7 @@
 #include "RcEventHandler.h"
 #include "unique_ptr.h"
 #include "Message_Block_Ptr.h"
+#include "TimeTypes.h"
 
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
 #include "FilterEvaluator.h"
@@ -55,9 +56,6 @@ class DataSampleElement;
 class SendStateDataSampleList;
 struct AssociationData;
 class LivenessTimer;
-
-
-
 
 /**
 * @class DataWriterImpl
@@ -93,24 +91,22 @@ public:
   typedef OPENDDS_MAP_CMP(RepoId, SequenceNumber, GUID_tKeyLessThan) RepoIdToSequenceMap;
 
   struct AckToken {
-    ACE_Time_Value tstamp_;
+    MonotonicTimePoint tstamp_;
     DDS::Duration_t max_wait_;
     SequenceNumber sequence_;
 
     AckToken(const DDS::Duration_t& max_wait,
              const SequenceNumber& sequence)
-      : tstamp_(ACE_OS::gettimeofday()),
-        max_wait_(max_wait),
-        sequence_(sequence) {}
+      : tstamp_(MonotonicTimePoint::now())
+      , max_wait_(max_wait)
+      , sequence_(sequence)
+    {
+    }
 
     ~AckToken() {}
 
-    ACE_Time_Value deadline() const {
-      return duration_to_absolute_time_value(this->max_wait_, this->tstamp_);
-    }
-
-    DDS::Time_t timestamp() const {
-      return time_value_to_time(this->tstamp_);
+    MonotonicTimePoint deadline() const {
+      return tstamp_ + TimeDuration(max_wait_);
     }
   };
 
@@ -149,9 +145,9 @@ public:
   virtual DDS::ReturnCode_t get_publication_matched_status(
     DDS::PublicationMatchedStatus & status);
 
-  ACE_Time_Value liveliness_check_interval(DDS::LivelinessQosPolicyKind kind);
+  TimeDuration liveliness_check_interval(DDS::LivelinessQosPolicyKind kind);
 
-  bool participant_liveliness_activity_after(const ACE_Time_Value& tv);
+  bool participant_liveliness_activity_after(const MonotonicTimePoint& tv);
 
   virtual DDS::ReturnCode_t assert_liveliness();
 
@@ -188,8 +184,6 @@ public:
 
   virtual void update_subscription_params(const RepoId& readerId,
                                           const DDS::StringSeq& params);
-
-  virtual void inconsistent_topic();
 
 
   /**
@@ -306,6 +300,8 @@ public:
    */
   void data_delivered(const DataSampleElement* sample);
 
+  void transport_discovery_change();
+
   /**
    * This is called by transport to notify that the control
    * message is delivered.
@@ -395,6 +391,9 @@ public:
   virtual void unregister_for_reader(const RepoId& participant,
                                      const RepoId& writerid,
                                      const RepoId& readerid);
+
+  virtual void update_locators(const RepoId& remote,
+                               const TransportLocatorSeq& locators);
 
   void notify_publication_disconnected(const ReaderIdSeq& subids);
   void notify_publication_reconnected(const ReaderIdSeq& subids);
@@ -543,7 +542,7 @@ private:
                          const DDS::Time_t& source_timestamp);
 
   /// Send the liveliness message.
-  bool send_liveliness(const ACE_Time_Value& now);
+  bool send_liveliness(const MonotonicTimePoint& now);
 
   /// Lookup the instance handles by the subscription repo ids
   void lookup_instance_handles(const ReaderIdSeq& ids,
@@ -645,9 +644,9 @@ private:
   /// timer.
   ACE_Reactor_Timer_Interface* reactor_;
   /// The time interval for sending liveliness message.
-  ACE_Time_Value             liveliness_check_interval_;
+  TimeDuration liveliness_check_interval_;
   /// Timestamp of last write/dispose/assert_liveliness.
-  ACE_Time_Value             last_liveliness_activity_time_;
+  MonotonicTimePoint last_liveliness_activity_time_;
   /// Total number of offered deadlines missed during last offered
   /// deadline status check.
   CORBA::Long last_deadline_missed_total_count_;
@@ -657,7 +656,7 @@ private:
 
   /// Flag indicates that this datawriter is a builtin topic
   /// datawriter.
-  bool                       is_bit_;
+  bool is_bit_;
 
   RepoIdSet pending_readers_, assoc_complete_readers_;
 
@@ -667,10 +666,10 @@ private:
   SendStateDataSampleList             available_data_list_;
 
   /// Monitor object for this entity
-  Monitor* monitor_;
+  unique_ptr<Monitor> monitor_;
 
   /// Periodic Monitor object for this entity
-  Monitor* periodic_monitor_;
+  unique_ptr<Monitor> periodic_monitor_;
 
 
   // Do we need to set the sequence repair header bit?

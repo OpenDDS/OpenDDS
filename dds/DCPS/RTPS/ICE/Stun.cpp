@@ -5,6 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
+#ifdef OPENDDS_SECURITY
+
 #include "Stun.h"
 
 #include "dds/DCPS/security/framework/SecurityRegistry.h"
@@ -15,8 +17,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace STUN {
 
-#ifdef OPENDDS_SECURITY
-
 ACE_UINT16 Attribute::length() const
 {
   switch (type) {
@@ -25,16 +25,16 @@ ACE_UINT16 Attribute::length() const
     return 8;
 
   case USERNAME:
-    return username.size();
+    return static_cast<ACE_UINT16>(username.size());
 
   case MESSAGE_INTEGRITY:
     return 20;
 
   case ERROR_CODE:
-    return 4 + error.reason.size();
+    return static_cast<ACE_UINT16>(4 + error.reason.size());
 
   case UNKNOWN_ATTRIBUTES:
-    return 2 * unknown_attributes.size();
+    return static_cast<ACE_UINT16>(2 * unknown_attributes.size());
 
   case XOR_MAPPED_ADDRESS:
     // TODO(jrw972):  Handle IPv6.
@@ -52,6 +52,8 @@ ACE_UINT16 Attribute::length() const
   case ICE_CONTROLLED:
   case ICE_CONTROLLING:
     return 8;
+  default:
+    break;
   }
 
   return unknown_length;
@@ -248,7 +250,7 @@ bool operator>>(DCPS::Serializer& serializer, Attribute& attribute)
 
     ACE_UINT16 code = class_ * 100 + num;
 
-    size_t reason_length = attribute_length - 4;
+    const ACE_CDR::ULong reason_length = attribute_length - 4;
 
     if (reason_length > 763) {
       return false;
@@ -402,7 +404,8 @@ bool operator<<(DCPS::Serializer& serializer, const Attribute& attribute)
   break;
 
   case USERNAME: {
-    serializer.write_octet_array(reinterpret_cast<const ACE_CDR::Octet*>(attribute.username.c_str()), attribute.username.size());
+    serializer.write_octet_array(reinterpret_cast<const ACE_CDR::Octet*>(attribute.username.c_str()),
+                                 static_cast<ACE_CDR::ULong>(attribute.username.size()));
   }
   break;
 
@@ -418,7 +421,8 @@ bool operator<<(DCPS::Serializer& serializer, const Attribute& attribute)
     serializer << static_cast<ACE_CDR::Char>(0);
     serializer << static_cast<ACE_CDR::Char>(class_);
     serializer << static_cast<ACE_CDR::Char>(num);
-    serializer.write_octet_array(reinterpret_cast<const ACE_CDR::Octet*>(attribute.error.reason.c_str()), attribute.error.reason.size());
+    serializer.write_octet_array(reinterpret_cast<const ACE_CDR::Octet*>(attribute.error.reason.c_str()),
+                                 static_cast<ACE_CDR::ULong>(attribute.error.reason.size()));
   }
   break;
 
@@ -490,7 +494,12 @@ bool TransactionId::operator!=(const TransactionId& other) const
 
 void Message::generate_transaction_id()
 {
-  TheSecurityRegistry->default_config()->get_utility()->generate_random_bytes(transaction_id.data, sizeof(transaction_id.data));
+  TheSecurityRegistry->fix_empty_default()->get_utility()->generate_random_bytes(transaction_id.data, sizeof(transaction_id.data));
+}
+
+void Message::clear_transaction_id()
+{
+  ACE_OS::memset(transaction_id.data, 0, sizeof(transaction_id.data));
 }
 
 std::vector<AttributeType> Message::unknown_comprehension_required_attributes() const
@@ -600,16 +609,16 @@ void Message::compute_message_integrity(const std::string& password, unsigned ch
 {
   ACE_Message_Block* block = this->block->duplicate();
   block->rd_ptr(block->base());
-  DCPS::Serializer serializer(block, true);
+  DCPS::Serializer serializer(block, DCPS::Serializer::SWAP_BE);
 
   // Write the length and resize for hashing.
   block->wr_ptr(block->base() + 2);
   ACE_UINT16 message_length = length_for_message_integrity();
   serializer << message_length;
-  block->wr_ptr(block->base() + 20 + length_for_message_integrity() - 24);
+  block->wr_ptr(block->base() + HEADER_SIZE + length_for_message_integrity() - 24);
 
   // Compute the SHA1.
-  TheSecurityRegistry->default_config()->get_utility()->hmac(message_integrity, block->rd_ptr(), block->length(), password);
+  TheSecurityRegistry->fix_empty_default()->get_utility()->hmac(message_integrity, block->rd_ptr(), block->length(), password);
 
   // Write the correct length.
   block->wr_ptr(block->base() + 2);
@@ -689,10 +698,10 @@ ACE_UINT32 Message::compute_fingerprint() const
 {
   ACE_Message_Block* block = this->block->duplicate();
   block->rd_ptr(block->base());
-  DCPS::Serializer serializer(block, true);
+  DCPS::Serializer serializer(block, DCPS::Serializer::SWAP_BE);
 
   // Resize for hashing.
-  block->wr_ptr(block->base() + 20 + length() - 8);
+  block->wr_ptr(block->base() + HEADER_SIZE + length() - 8);
 
   // Compute the CRC-32
   ACE_UINT32 crc = ACE::crc32(block->rd_ptr(), block->length());
@@ -777,10 +786,10 @@ bool operator>>(DCPS::Serializer& serializer, Message& message)
     return false;
   }
 
-  while (serializer.length() != 0) {
-    bool have_integrity = false;
-    bool have_fingerprint = false;
+  bool have_integrity = false;
+  bool have_fingerprint = false;
 
+  while (serializer.length() != 0) {
     Attribute attribute;
 
     if (!(serializer >> attribute)) {
@@ -845,9 +854,8 @@ bool operator<<(DCPS::Serializer& serializer, const Message& message)
   return true;
 }
 
-#endif /* OPENDDS_SECURITY */
-
 } // namespace STUN
 } // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
+#endif /* OPENDDS_SECURITY */

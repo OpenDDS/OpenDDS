@@ -109,8 +109,13 @@ my $tsreg  = 'TypeSupport\.idl';
 sub do_cached_parse {
   my($self, $file, $flags) = @_;
 
+  # By default opendds_idl considers all types not to be topic types (aka
+  # "nested") unless --no-default-nested was passed or annotations say
+  # otherwise.
+  $self->{'default_nested'} = 1;
+
   ## Set up the macros and include paths supplied in the command flags
-  my %macros;
+  my %macros = ('__OPENDDS_IDL' => 1);
   my %mparams;
   my @include;
   if (defined $flags) {
@@ -120,6 +125,9 @@ sub do_cached_parse {
       }
       elsif ($arg =~ /^\-I(.+)/) {
         push(@include, $1);
+      }
+      elsif ($arg =~ /^--(no-)?default-nested$/) {
+        $self->{'default_nested'} = !$1;
       }
     }
   }
@@ -150,7 +158,7 @@ sub get_output {
   my @filenames;
   my %seen;
 
-  ## Parse the IDL file and get back the types and names
+  ## Parse the IDL file and get back the types and names.
   my($data, $fwd) = $self->do_cached_parse($file, $flags);
 
   ## Get the file names based on the type and name of each entry
@@ -314,9 +322,16 @@ sub parse {
   ## Preprocess the file into one huge string
   my $ts_str;
   my $ts_pragma;
-  ($str, $ts_str, $ts_pragma) = $self->preprocess($file, $includes,
-                                                  $macros, $mparams)
-                                                            if (!defined $str);
+  my $included;
+  ($str, $ts_str, $ts_pragma) =
+     $self->preprocess($file, $includes, $macros, $mparams) if (!defined $str);
+
+  ## Track the nested value over the lifetime of this file.  The $cnested
+  ## variable is used to track the current value set by the user, which may
+  ## or may not get pushed onto the nested stack.  The top of the stack is
+  ## the actual setting for the current scope.
+  my @nested = ($self->{'default_nested'});
+  my $cnested = $nested[$#nested];
 
   ## Keep track of const's and typedef's with these variables
   my $single;
@@ -347,6 +362,16 @@ sub parse {
     }
     elsif ($str =~ s/^L'(.|\\.|\\[0-7]{1,3}|\\x[a-f\d]{1,2}|\\u[a-f\d]{1,4})'//i) {
       ## Wchar literal
+    }
+    elsif ($str =~ s/^@([a-z_]+)(?:\s*\((.*)\))?//) {
+      # Topic Type Annotations
+      my $name = $1;
+      if ($name eq 'default_nested' || $name eq 'nested') {
+        $cnested = (defined $2 && $2 eq 'FALSE') ? 0 : 1;
+      } elsif ($name eq 'topic') {
+        # @topic can have parameters, but we can ignore them here
+        $cnested = 0;
+      }
     }
     elsif ($str =~ s/^([a-z_][\w]*)//i) {
       my $name    = $1;
@@ -449,6 +474,8 @@ sub parse {
       ## forward declaration and we need to drop it.
       if ($forward) {
         if ($c eq '{') {
+          push(@nested, $cnested);
+
           ## If this was previously forward declared, we can remove it
           ## now that it has been fully declared as we no longer need to
           ## create a dependency on it.
@@ -458,6 +485,19 @@ sub parse {
             @forwards = grep(!/^$file$/, @forwards);
           }
           $forward = undef;
+
+          ## If it is not nested, it is a topic type.
+          if (!$nested[$#nested]) {
+            ## If this is a struct or union, we need to append to the type
+            ## support string and "pragma"
+            if ($#state >= 0 &&
+                ($state[$#state]->[0] eq 'struct' ||
+                 $state[$#state]->[0] eq 'union')) {
+              my($tst, $tsp) = $self->generate_ts_string(join('::', @$scope));
+              $ts_str .= $tst;
+              $ts_pragma .= $tsp;
+            }
+          }
         }
         elsif ($c eq ';') {
           ## This is a forward declaration.  Add it to the list of
@@ -472,6 +512,9 @@ sub parse {
 
       ## We've found a closing brace
       if ($c eq '}') {
+        pop(@nested);
+        $cnested = $nested[$#nested];
+
         ## See if the start of the scope is something that we support
         my $entry = pop(@state);
         if (defined $$entry[0] && $types{$$entry[0]}) {
@@ -510,6 +553,40 @@ sub parse {
 # ************************************************************
 # Preprocessor Subroutine Section
 # ************************************************************
+
+sub generate_ts_string {
+  my($self, $dtype) = @_;
+
+  my $ts_str = '';
+  my $ts_pragma = "$dtype;";
+
+  ## Get the data type and remove the scope portion
+  my @ns;
+  if ($dtype =~ s/(.*):://) {
+    @ns = split(/::/, $1);
+  }
+
+  ## For now, we will assume that all parts of the scope
+  ## name are modules.  If idl2jni is extended to support
+  ## types declared within interfaces, this code will need
+  ## to change.
+  foreach my $ns (@ns) {
+    $ts_str .= "module $ns { ";
+  }
+
+  $ts_str .= "native ${dtype}Seq; " .
+             "local interface ${dtype}TypeSupport {}; " .
+             "local interface ${dtype}DataWriter {}; " .
+             "local interface ${dtype}DataReader {}; ";
+
+  ## Close the namespaces (module or interface it works the
+  ## same).
+  foreach my $ns (@ns) {
+    $ts_str .= " };";
+  }
+
+  return $ts_str, $ts_pragma;
+}
 
 sub preprocess {
   my($self, $file, $includes, $macros, $mparams, $included) = @_;
@@ -684,32 +761,9 @@ sub preprocess {
             elsif ($pline =~ /^pragma\s+(.*)/) {
               my $arg = $1;
               if ($arg =~ /^DCPS_DATA_TYPE\s+"(.*)"$/) {
-                $ts_pragma .= "$1;";
-                ## Get the data type and remove the scope portion
-                my $dtype = $1;
-                my @ns;
-                if ($dtype =~ s/(.*):://) {
-                  @ns = split(/::/, $1);
-                }
-
-                ## For now, we will assume that all parts of the scope
-                ## name are modules.  If idl2jni is extended to support
-                ## types declared within interfaces, this code will need
-                ## to change.
-                foreach my $ns (@ns) {
-                  $ts_str .= "module $ns { ";
-                }
-
-                $ts_str .= "native ${dtype}Seq; " .
-                           "local interface ${dtype}TypeSupport {}; " .
-                           "local interface ${dtype}DataWriter {}; " .
-                           "local interface ${dtype}DataReader {}; ";
-
-                ## Close the namespaces (module or interface it works the
-                ## same).
-                foreach my $ns (@ns) {
-                  $ts_str .= " };";
-                }
+                my($tst, $tsp) = $self->generate_ts_string($1);
+                $ts_str .= $tst;
+                $ts_pragma .= $tsp;
               }
             }
           }
@@ -802,7 +856,7 @@ sub evaluate_if {
   else {
     ## For #if, we only support defined, macro and numeric values.
     ## All others are considered a syntax error.
-    if ($value =~ /^(!)?\s*defined\s*\(\s*([_a-z]\w*)\s*\)$/i) {
+    if ($value =~ /^(!)?\s*defined\s*\(?\s*([_a-z]\w*)\s*\)?$/i) {
       my $not   = $1;
       my $macro = $2;
       $status = (defined $macros->{$macro} ? 1 : 0);

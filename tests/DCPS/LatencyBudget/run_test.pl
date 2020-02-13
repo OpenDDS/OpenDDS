@@ -11,6 +11,8 @@ use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 use strict;
 
+PerlDDS::add_lib_path('../ConsolidatedMessengerIdl');
+
 my $data_file = "test_run.data";
 unlink $data_file;
 

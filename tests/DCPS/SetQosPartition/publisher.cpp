@@ -14,9 +14,11 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Qos_Helper.h>
-#include <tools/modeling/codegen/model/Sync.h>
 #include "dds/DCPS/StaticIncludes.h"
 #include "dds/DCPS/unique_ptr.h"
+
+#include "tests/Utils/StatusMatching.h"
+#include "tests/Utils/ExceptionStreams.h"
 
 #ifdef ACE_AS_STATIC_LIBS
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
@@ -24,7 +26,6 @@
 #endif
 
 #include <ace/streams.h>
-#include "tests/Utils/ExceptionStreams.h"
 #include "ace/Get_Opt.h"
 #include "ace/OS_NS_unistd.h"
 
@@ -111,7 +112,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
         OpenDDS::DCPS::unique_ptr<Writer> writer (new Writer (dw.in ()));
 
         cout << "Pub waiting for match on A partition." << std::endl;
-        if (OpenDDS::Model::WriterSync::wait_match(dw)) {
+        if (Utils::wait_match(dw, 1, Utils::GTE)) {
           cerr << "Error waiting for match on A partition" << std::endl;
           return 1;
         }
@@ -163,7 +164,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
         OpenDDS::DCPS::unique_ptr<Writer> writer (new Writer (dw.in ()));
 
         cout << "Pub waiting for match on B partition." << std::endl;
-        if (OpenDDS::Model::WriterSync::wait_match(dw)) {
+        if (wait_match(dw, 1, Utils::GTE)) {
           cerr << "Error waiting for match on B partition" << std::endl;
           return 1;
         }
@@ -196,6 +197,11 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
       {
         OpenDDS::DCPS::unique_ptr<Writer> writer (new Writer (dw.in ()));
 
+        cout << "Pub waiting for additional match on B partition." << std::endl;
+        if (wait_match(dw, 2, Utils::GTE)) {
+          cerr << "Error waiting for additional match on B partition" << std::endl;
+          return 1;
+        }
         attempts = 1;
         while (attempts != max_attempts)
         {

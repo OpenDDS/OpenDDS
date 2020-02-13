@@ -13,7 +13,7 @@
 #include <string>
 
 namespace java_ts_generator {
-  void generate(UTL_ScopedName* name);
+  void generate(AST_Structure* node);
 }
 
 namespace face_ts_generator {
@@ -31,10 +31,12 @@ public:
   bool gen_typedef(AST_Typedef*, UTL_ScopedName*, AST_Type*, const char*)
   { return true; }
 
-  bool gen_union(AST_Union*, UTL_ScopedName*, const std::vector<AST_UnionBranch*>&,
+  bool gen_union(AST_Union* node, UTL_ScopedName* name, const std::vector<AST_UnionBranch*>&,
                  AST_Type*, const char*);
 
 private:
+  bool generate_ts(AST_Decl* node, UTL_ScopedName* name);
+
   std::string idl_template_;
 };
 

@@ -68,11 +68,11 @@ MulticastInst::MulticastInst(const std::string& name)
 {
   default_group_address(this->group_address_);
 
-  this->syn_interval_.msec(DEFAULT_SYN_INTERVAL);
-  this->syn_timeout_.msec(DEFAULT_SYN_TIMEOUT);
+  syn_interval_ = TimeDuration::from_msec(DEFAULT_SYN_INTERVAL);
+  syn_timeout_ = TimeDuration::from_msec(DEFAULT_SYN_TIMEOUT);
 
-  this->nak_interval_.msec(DEFAULT_NAK_INTERVAL);
-  this->nak_timeout_.msec(DEFAULT_NAK_TIMEOUT);
+  nak_interval_ = TimeDuration::from_msec(DEFAULT_NAK_INTERVAL);
+  nak_timeout_ = TimeDuration::from_msec(DEFAULT_NAK_TIMEOUT);
 }
 
 int
@@ -162,13 +162,13 @@ MulticastInst::dump_to_str() const
   os << formatNameForDump("port_offset")         << this->port_offset_ << std::endl;
   os << formatNameForDump("reliable")            << (this->reliable_ ? "true" : "false") << std::endl;
   os << formatNameForDump("syn_backoff")         << this->syn_backoff_ << std::endl;
-  os << formatNameForDump("syn_interval")        << this->syn_interval_.msec() << std::endl;
-  os << formatNameForDump("syn_timeout")         << this->syn_timeout_.msec() << std::endl;
+  os << formatNameForDump("syn_interval")        << this->syn_interval_.value().msec() << std::endl;
+  os << formatNameForDump("syn_timeout")         << this->syn_timeout_.value().msec() << std::endl;
   os << formatNameForDump("nak_depth")           << this->nak_depth_ << std::endl;
-  os << formatNameForDump("nak_interval")        << this->nak_interval_.msec() << std::endl;
+  os << formatNameForDump("nak_interval")        << this->nak_interval_.value().msec() << std::endl;
   os << formatNameForDump("nak_delay_intervals") << this->nak_delay_intervals_ << std::endl;
   os << formatNameForDump("nak_max")             << this->nak_max_ << std::endl;
-  os << formatNameForDump("nak_timeout")         << this->nak_timeout_.msec() << std::endl;
+  os << formatNameForDump("nak_timeout")         << this->nak_timeout_.value().msec() << std::endl;
   os << formatNameForDump("ttl")                 << int(this->ttl_) << std::endl;
   os << formatNameForDump("rcv_buffer_size");
 
@@ -189,7 +189,7 @@ MulticastInst::dump_to_str() const
 }
 
 size_t
-MulticastInst::populate_locator(OpenDDS::DCPS::TransportLocator& info) const
+MulticastInst::populate_locator(OpenDDS::DCPS::TransportLocator& info, ConnectionInfoFlags) const
 {
   if (this->group_address_ != ACE_INET_Addr()) {
     NetworkAddress network_address(this->group_address_);

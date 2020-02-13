@@ -255,8 +255,10 @@ public:
   virtual DDS::ReturnCode_t get_default_topic_qos(
     DDS::TopicQos & qos);
 
-  virtual DDS::ReturnCode_t get_current_time(
-    DDS::Time_t & current_time);
+  /**
+   * Set Argument to Current System Time
+   */
+  virtual DDS::ReturnCode_t get_current_time(DDS::Time_t& current_time);
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
 
@@ -400,7 +402,6 @@ private:
     int                    topic_mask);
 
   DDS::Topic_ptr create_new_topic(
-    const RepoId                   topic_id,
     const char *                   topic_name,
     const char *                   type_name,
     const DDS::TopicQos &          qos,
@@ -487,7 +488,7 @@ private:
   /// (i.e. subscribers and publishers).
   InstanceHandleGenerator participant_handles_;
 
-  Monitor* monitor_;
+  unique_ptr<Monitor> monitor_;
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   OwnershipManager owner_man_;
@@ -524,18 +525,18 @@ private:
     void add_adjust(OpenDDS::DCPS::DataWriterImpl* writer);
     void remove_adjust();
     int handle_timeout(const ACE_Time_Value &tv, const void * /* arg */);
-    virtual void dispatch(const ACE_Time_Value& tv) = 0;
+    virtual void dispatch(const MonotonicTimePoint& tv) = 0;
 
   protected:
     DomainParticipantImpl& impl_;
     const DDS::LivelinessQosPolicyKind kind_;
 
-    ACE_Time_Value interval () const { return interval_; }
+    TimeDuration interval () const { return interval_; }
 
   private:
-    ACE_Time_Value interval_;
+    TimeDuration interval_;
     bool recalculate_interval_;
-    ACE_Time_Value last_liveliness_check_;
+    MonotonicTimePoint last_liveliness_check_;
     bool scheduled_;
     ACE_Thread_Mutex lock_;
   };
@@ -543,22 +544,22 @@ private:
   class AutomaticLivelinessTimer : public LivelinessTimer {
   public:
     AutomaticLivelinessTimer(DomainParticipantImpl& impl);
-    virtual void dispatch(const ACE_Time_Value& tv);
+    virtual void dispatch(const MonotonicTimePoint& tv);
   };
   AutomaticLivelinessTimer automatic_liveliness_timer_;
 
   class ParticipantLivelinessTimer : public LivelinessTimer {
   public:
     ParticipantLivelinessTimer(DomainParticipantImpl& impl);
-    virtual void dispatch(const ACE_Time_Value& tv);
+    virtual void dispatch(const MonotonicTimePoint& tv);
   };
   ParticipantLivelinessTimer participant_liveliness_timer_;
 
-  ACE_Time_Value liveliness_check_interval(DDS::LivelinessQosPolicyKind kind);
-  bool participant_liveliness_activity_after(const ACE_Time_Value& tv);
+  TimeDuration liveliness_check_interval(DDS::LivelinessQosPolicyKind kind);
+  bool participant_liveliness_activity_after(const MonotonicTimePoint& tv);
   void signal_liveliness(DDS::LivelinessQosPolicyKind kind);
 
-  ACE_Time_Value last_liveliness_activity_;
+  MonotonicTimePoint last_liveliness_activity_;
 
   virtual int handle_exception(ACE_HANDLE fd);
 };

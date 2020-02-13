@@ -756,7 +756,12 @@ TransportSendStrategy::terminate_send(bool graceful_disconnecting)
 }
 
 void
-TransportSendStrategy::clear(SendMode mode)
+TransportSendStrategy::terminate_send_if_suspended()
+{
+}
+
+void
+TransportSendStrategy::clear(SendMode new_mode, SendMode old_mode)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","clear",6);
 
@@ -765,6 +770,9 @@ TransportSendStrategy::clear(SendMode mode)
   QueueType queue;
   {
     GuardType guard(this->lock_);
+
+    if (old_mode != MODE_NOT_SET && this->mode_ != old_mode)
+      return;
 
     if (this->header_.length_ > 0) {
       // Clear the messages in the pkt_chain_ that is partially sent.
@@ -789,13 +797,13 @@ TransportSendStrategy::clear(SendMode mode)
     this->pkt_chain_ = 0;
     this->header_complete_ = false;
     this->start_counter_ = 0;
-    this->mode_ = mode;
+    this->mode_ = new_mode;
     this->mode_before_suspend_ = MODE_NOT_SET;
   }
 
   // We need remove the queued elements outside the lock,
-  // otherwise we have a deadlock situation when remove vistor
-  // calls the data_droped on each dropped elements.
+  // otherwise we have a deadlock situation when remove visitor
+  // calls the data_dropped on each dropped elements.
 
   // Clear all samples in queue.
   RemoveAllVisitor remove_all_visitor;
@@ -1261,7 +1269,7 @@ TransportSendStrategy::send_stop(RepoId /*repoId*/)
 }
 
 void
-TransportSendStrategy::remove_all_msgs(RepoId pub_id)
+TransportSendStrategy::remove_all_msgs(const RepoId& pub_id)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","remove_all_msgs",6);
 
@@ -1276,11 +1284,11 @@ TransportSendStrategy::remove_all_msgs(RepoId pub_id)
     this->send_buffer_->retain_all(pub_id);
   }
 
-  do_remove_sample(pub_id, match, 0);
+  do_remove_sample(pub_id, match);
 }
 
 RemoveResult
-TransportSendStrategy::remove_sample(const DataSampleElement* sample, void* context)
+TransportSendStrategy::remove_sample(const DataSampleElement* sample)
 {
   DBG_ENTRY_LVL("TransportSendStrategy", "remove_sample", 6);
 
@@ -1304,13 +1312,12 @@ TransportSendStrategy::remove_sample(const DataSampleElement* sample, void* cont
   }
 
   GuardType guard(this->lock_);
-  return do_remove_sample(pub_id, modp, context);
+  return do_remove_sample(pub_id, modp);
 }
 
 RemoveResult
 TransportSendStrategy::do_remove_sample(const RepoId&,
-  const TransportQueueElement::MatchCriteria& criteria,
-  void*)
+  const TransportQueueElement::MatchCriteria& criteria)
 {
   DBG_ENTRY_LVL("TransportSendStrategy", "do_remove_sample", 6);
 
@@ -1691,10 +1698,14 @@ TransportSendStrategy::do_send_packet(const ACE_Message_Block* packet, int& bp)
   }
   DBG_ENTRY_LVL("TransportSendStrategy", "do_send_packet", 6);
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   // pre_send_packet may provide different data that takes the place of the
   // original "packet" (used for security encryption/authentication)
   Message_Block_Ptr substitute(pre_send_packet(packet));
+  if (!substitute) {
+    VDBG((LM_DEBUG, "(%P|%t) DBG:   pre_send_packet returned NULL, dropping.\n"));
+    return packet->total_length();
+  }
 #endif
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
@@ -1702,8 +1713,8 @@ TransportSendStrategy::do_send_packet(const ACE_Message_Block* packet, int& bp)
 
   iovec iov[MAX_SEND_BLOCKS];
 
-#if defined(OPENDDS_SECURITY)
-  const int num_blocks = mb_to_iov(substitute ? *substitute : *packet, iov);
+#ifdef OPENDDS_SECURITY
+  const int num_blocks = mb_to_iov(*substitute, iov);
 #else
   const int num_blocks = mb_to_iov(*packet, iov);
 #endif
@@ -1721,8 +1732,8 @@ TransportSendStrategy::do_send_packet(const ACE_Message_Block* packet, int& bp)
             "The send_bytes() said that num_bytes_sent == [%d].\n",
             num_bytes_sent), 5);
 
-#if defined(OPENDDS_SECURITY)
-  if (substitute && num_bytes_sent > 0) {
+#ifdef OPENDDS_SECURITY
+  if (num_bytes_sent > 0 && packet->data_block() != substitute->data_block()) {
     // Although the "substitute" data took the place of "packet", the rest
     // of the framework needs to account for the bytes in "packet" being taken
     // care of, as if they were actually sent.

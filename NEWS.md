@@ -4,7 +4,15 @@
 Released %TIMESTAMP%
 
 ### Additions:
-- Monitor and the ishapes demo now use Qt5
+- Union topic types and IDL annotations for topic types (#1067):
+  - Like structures, unions can now be used to define a topic.
+  - `#pragma DCPS_DATA_TYPE` and `#pragma DCPS_DATA_KEY` are now deprecated in
+    favor of the `@topic` and `@key` IDL annotations.
+  - See section 2.1.1 of the OpenDDS 3.14 Developer's Guide for more
+    information on both of these features.
+  - See `docs/migrating_to_topic_type_annotations.md` for a guide on how to
+    migrate existing IDL to use topic type annotations.
+- Monitor GUI and the ishapes demo now use Qt5
 - Expanded Android Documentation in `docs/android.md`
 - Updated dissector to work with Wireshark 3.0
 

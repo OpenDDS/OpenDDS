@@ -29,7 +29,7 @@ namespace DCPS {
 
 UdpDataLink::UdpDataLink(UdpTransport& transport,
                          Priority   priority,
-                         TransportReactorTask* reactor_task,
+                         ReactorTask* reactor_task,
                          bool       active)
   : DataLink(transport,
              priority,
@@ -155,7 +155,7 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
       remote_address.get_host_addr(), remote_address.get_port_number()));
 
     TransportLocator info;
-    this->impl().connection_info_i(info);
+    impl().connection_info_i(info, CONNINFO_ALL);
     ACE_Message_Block* data_block;
     ACE_NEW_RETURN(data_block,
                    ACE_Message_Block(info.data.length()+sizeof(Priority),
@@ -236,8 +236,8 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
     char buff[size];
     // Default this timeout to 30.  We may want to make this settable
     // or use another settable timeout value here.
-    ACE_Time_Value tv(30);
-    const ssize_t recvd = socket().recv(buff, size, this->remote_address_, 0, &tv);
+    const TimeDuration tv(30);
+    const ssize_t recvd = socket().recv(buff, size, this->remote_address_, 0, &tv.value());
     if (recvd == 1) {
       // Expected value
       VDBG_LVL((LM_DEBUG,

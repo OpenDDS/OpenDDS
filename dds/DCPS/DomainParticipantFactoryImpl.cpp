@@ -78,9 +78,9 @@ DomainParticipantFactoryImpl::create_participant(
     }
   }
 
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+  ACE_GUARD_RETURN(ACE_Thread_Mutex,
                    tao_mon,
-                   this->participants_protector_,
+                   participants_protector_,
                    DDS::DomainParticipant::_nil());
 
   participants_[domainId].insert(dp);
@@ -134,46 +134,48 @@ DomainParticipantFactoryImpl::delete_participant(
 
   DPSet* entry = 0;
 
-  if (find(participants_, domain_id, entry) == -1) {
-    GuidConverter converter(dp_id);
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("DomainParticipantFactoryImpl::delete_participant: ")
-                      ACE_TEXT("%p domain_id=%d dp_id=%C.\n"),
-                      ACE_TEXT("find"),
-                      domain_id,
-                      OPENDDS_STRING(converter).c_str()), DDS::RETCODE_ERROR);
-
-  } else {
-    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex,
                      tao_mon,
-                     this->participants_protector_,
+                     participants_protector_,
                      DDS::RETCODE_ERROR);
 
-    DDS::ReturnCode_t result
-    = the_servant->delete_contained_entities();
-
-    if (result != DDS::RETCODE_OK) {
-      return result;
-    }
-
-    if (OpenDDS::DCPS::remove(*entry, servant_rch) == -1) {
+    if (find(participants_, domain_id, entry) == -1) {
+      GuidConverter converter(dp_id);
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("DomainParticipantFactoryImpl::delete_participant, ")
-                        ACE_TEXT(" %p.\n"),
-                        ACE_TEXT("remove")),
-                       DDS::RETCODE_ERROR);
-    }
+                        ACE_TEXT("DomainParticipantFactoryImpl::delete_participant: ")
+                        ACE_TEXT("%p domain_id=%d dp_id=%C.\n"),
+                        ACE_TEXT("find"),
+                        domain_id,
+                        OPENDDS_STRING(converter).c_str()), DDS::RETCODE_ERROR);
 
-    if (entry->empty()) {
-      if (unbind(participants_, domain_id) == -1) {
+    } else {
+      DDS::ReturnCode_t result
+      = the_servant->delete_contained_entities();
+
+      if (result != DDS::RETCODE_OK) {
+        return result;
+      }
+
+      if (OpenDDS::DCPS::remove(*entry, servant_rch) == -1) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: ")
                           ACE_TEXT("DomainParticipantFactoryImpl::delete_participant, ")
                           ACE_TEXT(" %p.\n"),
-                          ACE_TEXT("unbind")),
+                          ACE_TEXT("remove")),
                          DDS::RETCODE_ERROR);
+      }
+
+      if (entry->empty()) {
+        if (unbind(participants_, domain_id) == -1) {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            ACE_TEXT("(%P|%t) ERROR: ")
+                            ACE_TEXT("DomainParticipantFactoryImpl::delete_participant, ")
+                            ACE_TEXT(" %p.\n"),
+                            ACE_TEXT("unbind")),
+                           DDS::RETCODE_ERROR);
+        }
       }
     }
   }
@@ -195,9 +197,9 @@ DDS::DomainParticipant_ptr
 DomainParticipantFactoryImpl::lookup_participant(
   DDS::DomainId_t domainId)
 {
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+  ACE_GUARD_RETURN(ACE_Thread_Mutex,
                    tao_mon,
-                   this->participants_protector_,
+                   participants_protector_,
                    DDS::DomainParticipant::_nil());
 
   DPSet* entry;
@@ -272,14 +274,23 @@ DomainParticipantFactoryImpl::get_qos(
   return DDS::RETCODE_OK;
 }
 
-const DomainParticipantFactoryImpl::DPMap&
+DomainParticipantFactoryImpl::DPMap
 DomainParticipantFactoryImpl::participants() const
 {
-  return this->participants_;
+  ACE_GUARD_RETURN(ACE_Thread_Mutex,
+                   tao_mon,
+                   participants_protector_,
+                   DomainParticipantFactoryImpl::DPMap());
+
+  return participants_;
 }
 
 void DomainParticipantFactoryImpl::cleanup()
 {
+  ACE_GUARD(ACE_Thread_Mutex,
+            tao_mon,
+            participants_protector_);
+
   DPMap::iterator itr;
   for (itr = participants_.begin(); itr != participants_.end(); ++itr) {
     DPSet& dp_set = itr->second;

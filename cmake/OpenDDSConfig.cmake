@@ -95,6 +95,30 @@ find_program(ACE_GPERF
     ${_ace_bin_hints}
 )
 
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+
+if(OPENDDS_XERCES3)
+  find_package(XercesC PATHS "${OPENDDS_XERCES3}" NO_DEFAULT_PATH)
+  if (NOT XercesC_FOUND)
+    find_package(XercesC)
+  endif()
+  if (NOT XercesC_FOUND)
+    message(FATAL_ERROR "Could not find XercesC")
+  endif()
+endif()
+
+if(OPENDDS_SECURITY)
+  find_package(OpenSSL PATHS "${OPENDDS_OPENSSL}" NO_DEFAULT_PATH)
+  if (NOT OpenSSL_FOUND)
+    set(OPENSSL_ROOT_DIR "${OPENDDS_OPENSSL}")
+    find_package(OpenSSL)
+  endif()
+  if (NOT OpenSSL_FOUND)
+    message(FATAL_ERROR "Could not find OpenSSL")
+  endif()
+endif()
+
 set(_ace_libs
   ACE_XML_Utils
   ACE
@@ -134,6 +158,39 @@ set(_opendds_libs
 )
 
 list(APPEND _all_libs ${_opendds_libs} ${_ace_libs} ${_tao_libs})
+
+set(ACE_DEPS
+  Threads::Threads
+)
+
+macro(_OPENDDS_SYSTEM_LIBRARY name)
+  list(APPEND ACE_DEPS ${name})
+  string(TOUPPER "${name}" _cap_name)
+  if((${ARGC} GREATER 1) AND ("${ARGV1}" STREQUAL "NO_CHECK"))
+    set(${_cap_name}_LIBRARY ${name})
+  else()
+    find_library(${_cap_name}_LIBRARY ${name})
+  endif()
+  list(APPEND _opendds_required_deps ${_cap_name}_LIBRARY)
+endmacro()
+
+if(UNIX)
+  _OPENDDS_SYSTEM_LIBRARY(dl)
+  if(NOT APPLE)
+    _OPENDDS_SYSTEM_LIBRARY(rt)
+  endif()
+elseif(MSVC)
+  # For some reason CMake can't find this in some cases, but we know it should
+  # be there, so just link to it without a check.
+  _OPENDDS_SYSTEM_LIBRARY(iphlpapi NO_CHECK)
+endif()
+
+if(OPENDDS_XERCES3)
+  set(ACE_XML_UTILS_DEPS
+    ACE::ACE
+    XercesC::XercesC
+  )
+endif()
 
 set(OPENDDS_IDL_DEPS
   TAO::IDL_FE
@@ -200,10 +257,14 @@ set(OPENDDS_RTPS_UDP_DEPS
   OpenDDS::Rtps
 )
 
-set(OPENDDS_SECURITY_DEPS
-  OpenDDS::Rtps
-  ACE::XML_Utils
-)
+if(OPENDDS_SECURITY)
+  set(OPENDDS_SECURITY_DEPS
+    OpenDDS::Rtps
+    ACE::XML_Utils
+    OpenSSL::SSL
+    OpenSSL::Crypto
+  )
+endif()
 
 set(OPENDDS_SHMEM_DEPS
   OpenDDS::Dcps
@@ -235,18 +296,11 @@ endmacro()
 set(_suffix_RELEASE "")
 set(_suffix_DEBUG d)
 
-if(OPENDDS_STATIC)
-  if(MSVC)
-    list(APPEND ACE_DEPS iphlpapi)
+if(MSVC AND OPENDDS_STATIC)
+  opendds_vs_force_static()
 
-    opendds_vs_force_static()
-
-    set(_suffix_RELEASE s${_suffix_RELEASE})
-    set(_suffix_DEBUG s${_suffix_DEBUG})
-
-  else()
-    list(APPEND ACE_DEPS pthread rt dl)
-  endif()
+  set(_suffix_RELEASE s${_suffix_RELEASE})
+  set(_suffix_DEBUG s${_suffix_DEBUG})
 endif()
 
 foreach(_cfg  RELEASE  DEBUG)
@@ -288,14 +342,14 @@ foreach(_lib ${_all_libs})
   select_library_configurations(${_LIB_VAR})
 endforeach()
 
-set(_opendds_required_deps
-      OPENDDS_DCPS_LIBRARY
-      OPENDDS_IDL
-      ACE_LIBRARY
-      ACE_GPERF
-      TAO_LIBRARY
-      TAO_IDL
-      PERL
+list(APPEND _opendds_required_deps
+  OPENDDS_DCPS_LIBRARY
+  OPENDDS_IDL
+  ACE_LIBRARY
+  ACE_GPERF
+  TAO_LIBRARY
+  TAO_IDL
+  PERL
 )
 
 foreach(_dep ${_opendds_required_deps})
@@ -367,10 +421,10 @@ endmacro()
 
 if(OPENDDS_FOUND)
   set(OPENDDS_INCLUDE_DIRS
-      ${OPENDDS_INCLUDE_DIR}
-      ${ACE_INCLUDE_DIR}
-      ${TAO_INCLUDE_DIR}
-      ${TAO_INCLUDE_DIR}/orbsvcs
+    ${OPENDDS_INCLUDE_DIR}
+    ${ACE_INCLUDE_DIR}
+    ${TAO_INCLUDE_DIR}
+    ${TAO_INCLUDE_DIR}/orbsvcs
   )
 
   _OPENDDS_ADD_TARGET_BINARY(opendds_idl "${OPENDDS_IDL}")

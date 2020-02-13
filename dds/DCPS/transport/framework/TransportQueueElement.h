@@ -148,6 +148,8 @@ public:
 
   virtual bool is_request_ack() const { return false; }
 
+  virtual bool is_retained_replaced() const { return false; }
+
 protected:
 
   /// Ctor.  The initial_count is the number of DataLinks to which

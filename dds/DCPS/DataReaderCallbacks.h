@@ -51,8 +51,6 @@ public:
 
   virtual void update_incompatible_qos(const IncompatibleQosStatus& status) = 0;
 
-  virtual void inconsistent_topic() = 0;
-
   virtual void signal_liveliness(const RepoId& remote_participant) = 0;
 
   virtual void register_for_writer(const RepoId& /*participant*/,
@@ -64,6 +62,9 @@ public:
   virtual void unregister_for_writer(const RepoId& /*participant*/,
                                      const RepoId& /*readerid*/,
                                      const RepoId& /*writerid*/) { }
+
+  virtual void update_locators(const RepoId& /*remote*/,
+                               const TransportLocatorSeq& /*locators*/) { }
 
   virtual ICE::Endpoint* get_ice_endpoint() = 0;
 };

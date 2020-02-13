@@ -16,8 +16,8 @@
 #include "dds/DCPS/PoolAllocator.h"
 #include "TransportDefs.h"
 #include "TransportInst.h"
-#include "TransportReactorTask.h"
-#include "TransportReactorTask_rch.h"
+#include "dds/DCPS/ReactorTask.h"
+#include "dds/DCPS/ReactorTask_rch.h"
 #include "DataLinkCleanupTask.h"
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/DiscoveryListener.h"
@@ -80,7 +80,7 @@ public:
   /// TransportImpl subclass to do the dirty work since it really
   /// is the one that knows how to populate the supplied
   /// TransportLocator object.
-  virtual bool connection_info_i(TransportLocator& local_info) const = 0;
+  virtual bool connection_info_i(TransportLocator& local_info, ConnectionInfoFlags flags) const = 0;
 
   virtual void register_for_reader(const RepoId& /*participant*/,
                                    const RepoId& /*writerid*/,
@@ -101,6 +101,10 @@ public:
   virtual void unregister_for_writer(const RepoId& /*participant*/,
                                      const RepoId& /*readerid*/,
                                      const RepoId& /*writerid*/) { }
+
+  virtual void update_locators(const RepoId& /*remote*/,
+                               const TransportLocatorSeq& /*locators*/) { }
+
 
   /// Interface to the transport's reactor for scheduling timers.
   ACE_Reactor_Timer_Interface* timer() const;
@@ -199,7 +203,13 @@ protected:
   /// Accessor to obtain a "copy" of the reference to the reactor task.
   /// Caller is responsible for the "copy" of the reference that is
   /// returned.
-  TransportReactorTask_rch reactor_task();
+  ReactorTask_rch reactor_task();
+
+  typedef ACE_SYNCH_MUTEX     LockType;
+  typedef ACE_Guard<LockType> GuardType;
+
+  /// Lock to protect the pending_connections_ data member
+  mutable LockType pending_connections_lock_;
 
   typedef OPENDDS_MULTIMAP(TransportClient_wrch, DataLink_rch) PendConnMap;
   PendConnMap pending_connections_;
@@ -256,10 +266,7 @@ public:
   /// to a TransportInterfaceInfo object that will be "populated"
   /// with this TransportImpl's connection information (ie, how
   /// another process would connect to this TransportImpl).
-  bool connection_info(TransportLocator& local_info) const;
-
-  typedef ACE_SYNCH_MUTEX     LockType;
-  typedef ACE_Guard<LockType> GuardType;
+  bool connection_info(TransportLocator& local_info, ConnectionInfoFlags flags) const;
 
   /// Lock to protect the config_ and reactor_task_ data members.
   mutable LockType lock_;
@@ -270,13 +277,13 @@ public:
 
   /// The reactor (task) object - may not even be used if the concrete
   /// subclass (of TransportImpl) doesn't require a reactor.
-  TransportReactorTask_rch reactor_task_;
+  ReactorTask_rch reactor_task_;
 
   /// smart ptr to the associated DL cleanup task
   DataLinkCleanupTask dl_clean_task_;
 
   /// Monitor object for this entity
-  Monitor* monitor_;
+  unique_ptr<Monitor> monitor_;
 
 protected:
   /// Id of the last link established.

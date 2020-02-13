@@ -76,6 +76,8 @@ public:
                                       bool& stop);
 
 private:
+  bool getDirectedWriteReaders(RepoIdSet& directedWriteReaders, const RTPS::DataSubmessage& ds) const;
+
   virtual ssize_t receive_bytes(iovec iov[],
                                 int n,
                                 ACE_INET_Addr& remote_address,
@@ -97,7 +99,7 @@ private:
 
   virtual bool reassemble(ReceivedDataSample& data);
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   void sec_submsg_to_octets(DDS::OctetSeq& encoded,
                             const RTPS::Submessage& postfix);
 
@@ -106,6 +108,8 @@ private:
   bool decode_payload(ReceivedDataSample& sample,
                       const RTPS::DataSubmessage& submessage);
 #endif
+
+  bool check_encoded(const EntityId_t& sender);
 
   RtpsUdpDataLink* link_;
   SequenceNumber last_received_;
@@ -145,10 +149,11 @@ private:
   MessageReceiver receiver_;
   ACE_INET_Addr remote_address_;
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   RTPS::SecuritySubmessage secure_prefix_;
   OPENDDS_VECTOR(RTPS::Submessage) secure_submessages_;
   ReceivedDataSample secure_sample_;
+  bool encoded_rtps_, encoded_submsg_;
 #endif
 };
 

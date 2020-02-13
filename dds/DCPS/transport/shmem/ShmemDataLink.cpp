@@ -103,6 +103,8 @@ ShmemDataLink::control_received(ReceivedDataSample& /*sample*/)
 void
 ShmemDataLink::stop_i()
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+
   if (peer_alloc_) {
     peer_alloc_->release(0 /*don't close*/);
   }
@@ -114,6 +116,13 @@ ShmemTransport&
 ShmemDataLink::impl() const
 {
   return static_cast<ShmemTransport&>(DataLink::impl());
+}
+
+ShmemAllocator*
+ShmemDataLink::peer_allocator()
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, 0);
+  return peer_alloc_;
 }
 
 ShmemAllocator*

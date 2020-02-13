@@ -12,6 +12,7 @@
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "EntityImpl.h"
 #include "TopicDescriptionImpl.h"
+#include "TopicCallbacks.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -36,11 +37,11 @@ class Monitor;
 class OpenDDS_Dcps_Export TopicImpl
   : public virtual LocalObject<DDS::Topic>,
     public virtual EntityImpl,
+    public virtual TopicCallbacks,
     public virtual TopicDescriptionImpl {
 public:
 
-  TopicImpl(const RepoId                   topic_id,
-            const char*                    topic_name,
+  TopicImpl(const char*                    topic_name,
             const char*                    type_name,
             OpenDDS::DCPS::TypeSupport_ptr type_support,
             const DDS::TopicQos &          qos,
@@ -76,9 +77,13 @@ public:
   // the runtime costs of making a copy
   const char* type_name() const;
 
+  // OpenDDS extension which doesn't duplicate the string to prevent
+  // the runtime costs of making a copy
+  const char* topic_name() const;
+
   virtual void transport_config(const TransportConfig_rch& cfg);
 
-  void inconsistent_topic();
+  void inconsistent_topic(int count);
 
 private:
   /// The topic qos
@@ -98,7 +103,7 @@ private:
   DDS::InconsistentTopicStatus inconsistent_topic_status_;
 
   /// Pointer to the monitor object for this entity
-  Monitor* monitor_;
+  unique_ptr<Monitor> monitor_;
 };
 
 

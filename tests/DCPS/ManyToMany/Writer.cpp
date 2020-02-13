@@ -12,6 +12,8 @@
 #include <dds/DdsDcpsPublicationC.h>
 #include <dds/DCPS/WaitSet.h>
 
+#include "tests/Utils/StatusMatching.h"
+
 #include "tests/DCPS/LargeSample/MessengerTypeSupportC.h"
 #include "Writer.h"
 
@@ -19,44 +21,6 @@ Writer::Writer(const Options& options, Writers& writers)
   : options_(options)
   , writers_(writers)
 {
-}
-
-namespace {
-  void wait_for_match(DDS::DataWriter_ptr writer, const unsigned int count)
-  {
-    DDS::StatusCondition_var condition = writer->get_statuscondition();
-    condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
-
-    DDS::WaitSet_var ws = new DDS::WaitSet;
-    ws->attach_condition(condition);
-
-    DDS::Duration_t timeout =
-      { 120, DDS::DURATION_INFINITE_NSEC };
-
-    DDS::ConditionSeq conditions;
-    DDS::PublicationMatchedStatus matches = {0, 0, 0, 0, 0};
-
-    while (true) {
-      if (writer->get_publication_matched_status(matches) != ::DDS::RETCODE_OK) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("%N:%l: wait_for_match()")
-                   ACE_TEXT(" ERROR: get_publication_matched_status failed!\n")));
-        ACE_OS::exit(-1);
-      }
-
-      if (matches.current_count != (int)count) {
-        if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
-          ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("%N:%l: wait_for_match()")
-                     ACE_TEXT(" ERROR: wait failed!\n")));
-          ACE_OS::exit(-1);
-        }
-      } else {
-        break;
-      }
-    }
-    ws->detach_condition(condition);
-  }
 }
 
 bool
@@ -76,7 +40,7 @@ Writer::write()
     for (Writers::const_iterator writer = writers_.begin();
          writer != writers_.end();
          ++writer) {
-      wait_for_match(writer->writer, subscribers);
+      Utils::wait_match(writer->writer, subscribers, Utils::GTE);
 
       // we already have a ref count, no need to take another
       Messenger::MessageDataWriter_ptr message_dw =
@@ -131,13 +95,15 @@ Writer::write()
       }
     }
 
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) Messages written, waiting for readers to disconnect\n")));
+
     // Let readers disconnect first, once they either get the data or
     // give up and time-out.  This allows the writer to be alive while
     // processing requests for retransmission from the readers.
     for (Writers::const_iterator writer = writers_.begin();
          writer != writers_.end();
          ++writer) {
-      wait_for_match(writer->writer, 0);
+      Utils::wait_match(writer->writer, 0);
     }
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in svc():");

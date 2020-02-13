@@ -50,6 +50,10 @@ tests/DCPS/LivelinessTest/run_test.pl rtps_disc take: !DCPS_MIN !DDS_NO_OWNERSHI
 tests/DCPS/Inconsistent_Qos/run_test.pl: RTPS DDS4CCM_OPENDDS
 tests/DCPS/TopicReuse/run_test.pl: RTPS
 tests/DCPS/DpShutdown/run_test.pl: RTPS
+tests/DCPS/DpShutdown/run_test.pl tcp: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/DpShutdown/run_test.pl shmem: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE !NO_SHMEM
+tests/DCPS/DpShutdown/run_test.pl udp: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/DpShutdown/run_test.pl multicast: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE !NO_MCAST
 tests/DCPS/Serializer/run_test.pl: !DCPS_MIN
 tests/DCPS/Compiler/idl_test1_main/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/Compiler/idl_test3_main/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
@@ -158,6 +162,7 @@ performance-tests/DCPS/TCPListenerTest/run_test.pl -p 4 -s 1: !DCPS_MIN !OPENDDS
 #performance-tests/DCPS/MulticastListenerTest/run_test.pl -p 2 -s 3: !DCPS_MIN !NO_MCAST
 
 DevGuideExamples/DCPS/Messenger/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
+DevGuideExamples/DCPS/Messenger/run_test.pl --rtps: !DCPS_MIN !OPENDDS_SAFETY_PROFILE RTPS
 DevGuideExamples/DCPS/Messenger_ZeroCopy/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 
 tests/DCPS/Messenger/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE

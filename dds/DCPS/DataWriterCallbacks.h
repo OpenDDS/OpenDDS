@@ -53,8 +53,6 @@ public:
   virtual void update_subscription_params(const RepoId& readerId,
                                           const DDS::StringSeq& exprParams) = 0;
 
-  virtual void inconsistent_topic() = 0;
-
   virtual void register_for_reader(const RepoId& /*participant*/,
                                    const RepoId& /*writerid*/,
                                    const RepoId& /*readerid*/,
@@ -64,6 +62,9 @@ public:
   virtual void unregister_for_reader(const RepoId& /*participant*/,
                                      const RepoId& /*writerid*/,
                                      const RepoId& /*readerid*/) { }
+
+  virtual void update_locators(const RepoId& /*remote*/,
+                               const TransportLocatorSeq& /*locators*/) { }
 
   virtual ICE::Endpoint* get_ice_endpoint() = 0;
 };

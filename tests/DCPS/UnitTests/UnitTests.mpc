@@ -1,4 +1,4 @@
-project(*DisjointSequence): dcpsexe {
+project(*DisjointSequence): dcpsexe, dcps_test {
   exename   = *
 
   Source_Files {
@@ -6,7 +6,7 @@ project(*DisjointSequence): dcpsexe {
   }
 }
 
-project(*LivelinessCompatibility): dcpsexe {
+project(*LivelinessCompatibility): dcpsexe, dcps_test {
   exename   = *
 
   Source_Files {
@@ -14,7 +14,7 @@ project(*LivelinessCompatibility): dcpsexe {
   }
 }
 
-project(*SequenceNumber): dcpsexe {
+project(*SequenceNumber): dcpsexe, dcps_test {
   exename   = *
 
   Source_Files {
@@ -22,7 +22,7 @@ project(*SequenceNumber): dcpsexe {
   }
 }
 
-project(*DurationToTimeValue): dcpsexe {
+project(*DurationToTimeValue): dcpsexe, dcps_test {
   exename   = *
 
   Source_Files {
@@ -30,7 +30,7 @@ project(*DurationToTimeValue): dcpsexe {
   }
 }
 
-project(*TimeTSubtraction): dcpsexe {
+project(*TimeTSubtraction): dcpsexe, dcps_test {
   exename   = *
 
   Source_Files {
@@ -38,7 +38,7 @@ project(*TimeTSubtraction): dcpsexe {
   }
 }
 
-project(*Fragmentation): dcpsexe {
+project(*Fragmentation): dcpsexe, dcps_test {
   exename   = *
 
   Source_Files {
@@ -46,7 +46,7 @@ project(*Fragmentation): dcpsexe {
   }
 }
 
-project(*Reassembly): dcpsexe {
+project(*Reassembly): dcpsexe, dcps_test {
   exename   = *
 
   Source_Files {
@@ -54,7 +54,7 @@ project(*Reassembly): dcpsexe {
   }
 }
 
-project(*RtpsFragmentation): dcpsexe, dcps_rtps_udp {
+project(*RtpsFragmentation): dcpsexe, dcps_test, dcps_rtps_udp {
   exename   = *
 
   Source_Files {
@@ -62,7 +62,15 @@ project(*RtpsFragmentation): dcpsexe, dcps_rtps_udp {
   }
 }
 
-project(*GuidGenerator): dcps_rtpsexe {
+project(*RtpsDuration): dcps_rtpsexe, dcps_test {
+  exename = *
+
+  Source_Files {
+    RtpsDuration.cpp
+  }
+}
+
+project(*GuidGenerator): dcps_rtpsexe, dcps_test {
   exename   = *
 
   Source_Files {
@@ -70,7 +78,7 @@ project(*GuidGenerator): dcps_rtpsexe {
   }
 }
 
-project(*ParameterListConverter): dcps_rtpsexe {
+project(*ParameterListConverter): dcps_rtpsexe, dcps_test {
   exename   = *
 
   Source_Files {
@@ -78,7 +86,7 @@ project(*ParameterListConverter): dcps_rtpsexe {
   }
 }
 
-project(*RepoIdSequence) : dcps_rtpsexe {
+project(*RepoIdSequence) : dcps_rtpsexe, dcps_test {
   exename   = *
 
   Source_Files {
@@ -86,7 +94,7 @@ project(*RepoIdSequence) : dcps_rtpsexe {
   }
 }
 
-project(*BIT_DataReader): dcps_rtps_udp, dcps_default_discovery {
+project(*BIT_DataReader): dcps_rtps_udp, dcps_default_discovery, dcps_test {
   exename   = *
   requires += built_in_topics
 

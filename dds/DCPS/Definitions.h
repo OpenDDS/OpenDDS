@@ -61,9 +61,10 @@
 #endif
 
 #ifdef OPENDDS_SAFETY_PROFILE
-#define OPENDDS_ASSERT(C) ((void) 0)
+#  define OPENDDS_ASSERT(C) ((void) 0)
 #else
-#define OPENDDS_ASSERT(C) assert(C)
+#  include <cassert>
+#  define OPENDDS_ASSERT(C) assert(C)
 #endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -75,9 +76,6 @@ typedef Cached_Allocator_With_Overflow<ACE_Message_Block, ACE_Thread_Mutex> Mess
 typedef Cached_Allocator_With_Overflow<ACE_Data_Block, ACE_Thread_Mutex> DataBlockAllocator;
 struct DataSampleHeader;
 typedef Cached_Allocator_With_Overflow<DataSampleHeader, ACE_Null_Mutex> DataSampleHeaderAllocator;
-
-#define DUP true
-#define NO_DUP false
 
 /// This struct holds both object reference and the corresponding servant.
 template <typename T_impl, typename T, typename T_ptr, typename T_var>
