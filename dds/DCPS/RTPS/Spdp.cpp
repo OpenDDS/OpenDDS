@@ -632,14 +632,12 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 #ifdef OPENDDS_SECURITY
     // Non-secure updates for authenticated participants are used for liveliness but
     // are otherwise ignored. Non-secure dispose messages are ignored completely.
-    if (is_security_enabled()) {
-      if (iter->second.auth_state_ == DCPS::AS_AUTHENTICATED && !from_sedp) {
-        iter->second.last_seen_ = now;
+    if (is_security_enabled() && iter->second.auth_state_ == DCPS::AS_AUTHENTICATED && !from_sedp) {
+      iter->second.last_seen_ = now;
 #ifndef DDS_HAS_MINIMUM_BIT
-        process_location_updates_i(iter);
+      process_location_updates_i(iter);
 #endif
-        return;
-      }
+      return;
     }
 #endif
 

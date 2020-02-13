@@ -178,6 +178,9 @@ private:
   };
 
   Spdp& spdp_;
+  DCPS::SequenceNumber seq_;
+  DCPS::SequenceNumber durable_seq_;
+
 
 #ifdef OPENDDS_SECURITY
   DDS::Security::ParticipantSecurityAttributes participant_sec_attr_;
@@ -325,7 +328,7 @@ private:
 
   class Writer : public DCPS::TransportSendListener, public Endpoint {
   public:
-    Writer(const DCPS::RepoId& pub_id, Sedp& sedp);
+    Writer(const DCPS::RepoId& pub_id, Sedp& sedp, ACE_INT64 seq_init = 1);
     virtual ~Writer();
 
     bool assoc(const DCPS::AssociationData& subscription);
@@ -371,12 +374,18 @@ private:
                                                     DCPS::SequenceNumber& sequence);
 
     DDS::ReturnCode_t write_dcps_participant_secure(const Security::SPDPdiscoveredParticipantData& msg,
-                                                    const DCPS::RepoId& reader);
+                                                    const DCPS::RepoId& reader, DCPS::SequenceNumber& sequence);
 #endif
 
     DDS::ReturnCode_t write_unregister_dispose(const DCPS::RepoId& rid, CORBA::UShort pid = PID_ENDPOINT_GUID);
 
     void end_historic_samples(const DCPS::RepoId& reader);
+
+    const DCPS::SequenceNumber& get_seq() const
+    {
+      return seq_;
+    }
+
 
   private:
     Header header_;

@@ -687,20 +687,6 @@ bool RtpsUdpReceiveStrategy::decode_payload(ReceivedDataSample& sample,
                                                     writer_crypto_handle, ex);
   if (ok) {
     const unsigned int n = plain.length();
-    if (encoded.length() == n && 0 == std::memcmp(plain.get_buffer(), encoded.get_buffer(), n)) {
-      static const EndpointSecurityAttributesMask MASK_PROTECT_PAYLOAD =
-        ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_VALID | ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_PAYLOAD_PROTECTED;
-      if ((esa & MASK_PROTECT_PAYLOAD) == MASK_PROTECT_PAYLOAD) {
-        if (security_debug.warn) {
-          const GuidConverter writer(sample.header_.publication_id_);
-          ACE_DEBUG((LM_WARNING, "(%P|%t) {warn} RtpsUdpReceiveStrategy: "
-                     "payload protection required for writer %C, dropping\n",
-                     OPENDDS_STRING(writer).c_str()));
-        }
-        return false;
-      }
-      return true;
-    }
 
     // The sample.sample_ message block uses the transport's data block so it
     // can't be modified in-place, instead replace it with a new block.

@@ -284,7 +284,7 @@ Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock) :
   participant_stateless_message_writer_(make_rch<Writer>(
     make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER), ref(*this))),
   dcps_participant_secure_writer_(make_rch<Writer>(
-    make_id(participant_id, ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER), ref(*this))),
+    make_id(participant_id, ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER), ref(*this), 2)),
   participant_volatile_message_secure_writer_(make_rch<Writer>(
     make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER), ref(*this))),
 #endif
@@ -2866,7 +2866,7 @@ Sedp::Endpoint::~Endpoint()
 }
 
 //---------------------------------------------------------------
-Sedp::Writer::Writer(const RepoId& pub_id, Sedp& sedp)
+Sedp::Writer::Writer(const RepoId& pub_id, Sedp& sedp, ACE_INT64 seq_init)
   : Endpoint(pub_id, sedp)
 {
   header_.prefix[0] = 'R';
@@ -2887,6 +2887,7 @@ Sedp::Writer::Writer(const RepoId& pub_id, Sedp& sedp)
   header_.guidPrefix[9] = pub_id.guidPrefix[9];
   header_.guidPrefix[10] = pub_id.guidPrefix[10];
   header_.guidPrefix[11] = pub_id.guidPrefix[11];
+  seq_ = seq_init;
 }
 
 Sedp::Writer::~Writer()
@@ -3113,7 +3114,7 @@ Sedp::Writer::write_volatile_message_secure(const DDS::Security::ParticipantVola
 
 DDS::ReturnCode_t
 Sedp::Writer::write_dcps_participant_secure(const Security::SPDPdiscoveredParticipantData& msg,
-                                            const RepoId& reader)
+                                            const RepoId& reader, DCPS::SequenceNumber& sequence)
 {
   using DCPS::Serializer;
 
@@ -3145,7 +3146,7 @@ Sedp::Writer::write_dcps_participant_secure(const Security::SPDPdiscoveredPartic
     return DDS::RETCODE_ERROR;
   }
 
-return write_parameter_list(plist, reader, DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN());
+return write_parameter_list(plist, reader, sequence);
 }
 #endif
 
@@ -3721,8 +3722,8 @@ DDS::ReturnCode_t
 Sedp::write_stateless_message(DDS::Security::ParticipantStatelessMessage& msg,
                               const RepoId& reader)
 {
-  static DCPS::SequenceNumber sequence = 0;
-  msg.message_identity.sequence_number = static_cast<unsigned long>((++sequence).getValue());
+  msg.message_identity.sequence_number = static_cast<unsigned long>(participant_stateless_message_writer_->get_seq().getValue());
+  DCPS::SequenceNumber sequence = DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN();
   return participant_stateless_message_writer_->write_stateless_message(msg, reader, sequence);
 }
 
@@ -3730,8 +3731,8 @@ DDS::ReturnCode_t
 Sedp::write_volatile_message(DDS::Security::ParticipantVolatileMessageSecure& msg,
                              const RepoId& reader)
 {
-  static DCPS::SequenceNumber sequence = 0;
-  msg.message_identity.sequence_number = static_cast<unsigned long>((++sequence).getValue());
+  msg.message_identity.sequence_number = static_cast<unsigned long>(participant_volatile_message_secure_writer_->get_seq().getValue());
+  DCPS::SequenceNumber sequence = DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN();
   return participant_volatile_message_secure_writer_->write_volatile_message_secure(msg, reader, sequence);
 }
 
@@ -3753,9 +3754,13 @@ Sedp::write_dcps_participant_secure(const Security::SPDPdiscoveredParticipantDat
                                     const RepoId& part)
 {
   DCPS::RepoId remote_reader(part);
-  remote_reader.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER;
+  if (part != GUID_UNKNOWN) {
+    remote_reader.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER;
+    return dcps_participant_secure_writer_->write_dcps_participant_secure(msg, remote_reader, seq_++);
+  }
 
-  return dcps_participant_secure_writer_->write_dcps_participant_secure(msg, remote_reader);
+  DCPS::SequenceNumber sequence = DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN();
+  return dcps_participant_secure_writer_->write_dcps_participant_secure(msg, remote_reader, sequence);
 }
 
 DDS::ReturnCode_t
