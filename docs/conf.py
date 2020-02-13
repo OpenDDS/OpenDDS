@@ -33,6 +33,8 @@ if m:
 else:
     sys.exit('Could figure out version')
 
+master_doc = 'index'
+
 
 # -- General configuration ---------------------------------------------------
 
