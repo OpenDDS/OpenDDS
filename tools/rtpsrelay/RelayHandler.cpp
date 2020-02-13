@@ -161,7 +161,6 @@ int RelayHandler::handle_output(ACE_HANDLE)
       // since on other platforms iov_len is 64-bit
 #pragma warning(disable : 4267)
 #endif
-      // TODO: u_long = size_t
       buffers[idx].iov_len = block->length();
 #ifdef _MSC_VER
 #pragma warning(pop)
