@@ -49,7 +49,7 @@ CORBA::ULong
 bitmap_num_longs(const OpenDDS::DCPS::SequenceNumber& low,
                  const OpenDDS::DCPS::SequenceNumber& high)
 {
-  return high < low ? CORBA::ULong(1) : std::min(CORBA::ULong(8), CORBA::ULong((high.getValue() - low.getValue() + 32) / 32));
+  return high < low ? CORBA::ULong(0) : std::min(CORBA::ULong(8), CORBA::ULong((high.getValue() - low.getValue() + 31) / 32));
 }
 
 bool bitmapNonEmpty(const OpenDDS::RTPS::SequenceNumberSet& snSet)
@@ -1864,10 +1864,8 @@ RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(MetaSubmessageVec& meta_submessa
       wi->second.ack_pending_ = false;
 
       SequenceNumber ack;
-      CORBA::ULong num_bits = 1;
+      CORBA::ULong num_bits = 0;
       LongSeq8 bitmap;
-      bitmap.length(1);
-      bitmap[0] = 0;
 
       const SequenceNumber& hb_low = wi->second.hb_range_.first;
       const SequenceNumber& hb_high = wi->second.hb_range_.second;
@@ -1876,8 +1874,10 @@ RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(MetaSubmessageVec& meta_submessa
 
       if (recvd.disjoint()) {
         bitmap.length(bitmap_num_longs(ack, recvd.last_ack().previous()));
-        (void) recvd.to_bitmap(bitmap.get_buffer(), bitmap.length(),
-                               num_bits, true);
+        if (bitmap.length() > 0) {
+          (void)recvd.to_bitmap(bitmap.get_buffer(), bitmap.length(),
+            num_bits, true);
+        }
       }
 
       const SequenceNumber::Value ack_val = ack.getValue();
@@ -2456,11 +2456,9 @@ RtpsUdpDataLink::RtpsWriter::gather_gaps_i(const RepoId& reader,
 
   if (gaps.disjoint()) {
     bitmap.length(bitmap_num_longs(base, gaps.high()));
-    (void) gaps.to_bitmap(bitmap.get_buffer(), bitmap.length(), num_bits);
-  } else {
-    bitmap.length(1);
-    bitmap[0] = 0;
-    num_bits = 1;
+    if (bitmap.length() > 0) {
+      (void)gaps.to_bitmap(bitmap.get_buffer(), bitmap.length(), num_bits);
+    }
   }
 
   MetaSubmessage meta_submessage(id_, reader);
