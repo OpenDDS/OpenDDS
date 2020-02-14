@@ -17,24 +17,10 @@
 #include <iostream>
 #include <sstream>
 
-SimpleDataReader::SimpleDataReader(const AppConfig& ac, const int readerIndex)
+SimpleDataReader::SimpleDataReader(const AppConfig& ac, const int readerIndex, AssociationData& ad)
   : config(ac), index(readerIndex), done_(false)
 {
   enable_transport((index == 2), false); //(reliable, durable)
-
-  // Write a file so that test script knows we're ready
-  FILE *file = std::fopen("subready.txt", "w");
-  std::fprintf(file, "Ready\n");
-  std::fclose(file);
-
-  AssociationData ad;
-  ad.remote_reliable_ = true;
-  ad.remote_data_.length(1);
-  ad.remote_data_[0].transport_type = "rtps_udp";
-  ad.remote_data_[0].data.length(5);
-  for (CORBA::ULong i = 0; i < 5; ++i) {
-    ad.remote_data_[0].data[i] = 0;
-  }
 
   for (int i = index; i < 3; ++i) {
     ad.remote_id_ = AppConfig::writerId[i];

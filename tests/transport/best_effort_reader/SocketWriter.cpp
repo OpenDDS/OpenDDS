@@ -53,10 +53,10 @@ void SocketWriter::addDestination(const ACE_INET_Addr& dest) {
   dest_addr_.insert(dest);
 }
 
-bool SocketWriter::write(const TestMsg& msg, CORBA::ULong seqN) const
+bool SocketWriter::write(CORBA::ULong seqN, const TestMsg& msg) const
 {
   const OpenDDS::RTPS::InfoTimestampSubmessage it = timeSubMsg();
-  OpenDDS::RTPS::DataSubmessage ds = dataSubMsg(msg, seqN);
+  OpenDDS::RTPS::DataSubmessage ds = dataSubMsg(seqN, msg);
   ACE_Message_Block mb(msgSize(it, ds, msg));
   if (serialize(mb, it, ds, msg)) {
     return send(mb);
@@ -64,7 +64,7 @@ bool SocketWriter::write(const TestMsg& msg, CORBA::ULong seqN) const
   return false;
 }
 
-bool SocketWriter::write(const TestMsg& msg, CORBA::ULong seqN, const OpenDDS::DCPS::RepoId& directedWrite) const
+bool SocketWriter::write(CORBA::ULong seqN, const TestMsg& msg, const OpenDDS::DCPS::RepoId& directedWrite) const
 {
   const OpenDDS::RTPS::InfoTimestampSubmessage it = timeSubMsg();
   CORBA::UShort sz = 20 + 24 + 12 + ACE_OS::strlen(msg.value) + 1;
@@ -78,9 +78,10 @@ bool SocketWriter::write(const TestMsg& msg, CORBA::ULong seqN, const OpenDDS::D
   }
   return false;
 }
-bool SocketWriter::writeHeartbeat(CORBA::Long heartbeatCount, CORBA::ULong seqN) const
+
+bool SocketWriter::writeHeartbeat(CORBA::ULong seqN, CORBA::Long heartbeatCount) const
 {
-  const OpenDDS::RTPS::HeartBeatSubmessage hb = heartBeatSubMsg(heartbeatCount, seqN);
+  const OpenDDS::RTPS::HeartBeatSubmessage hb = heartBeatSubMsg(seqN, heartbeatCount);
   ACE_Message_Block mb(hbSize(hb));
   if (serialize(mb, hb)) {
     return send(mb);
@@ -96,14 +97,14 @@ OpenDDS::RTPS::InfoTimestampSubmessage SocketWriter::timeSubMsg() const
   return it;
 }
 
-OpenDDS::RTPS::DataSubmessage SocketWriter::dataSubMsg(const TestMsg& msg, CORBA::ULong seqN) const
+OpenDDS::RTPS::DataSubmessage SocketWriter::dataSubMsg(CORBA::ULong seqN, const TestMsg& msg) const
 {
   CORBA::UShort sz = 20 + 12 + ACE_OS::strlen(msg.value) + 1;
   DataSubmessage ds = {{DATA, DE, sz}, 0, 16, ENTITYID_UNKNOWN, id_.entityId, {0, seqN}, ParameterList()};
   return ds;
 }
 
-OpenDDS::RTPS::HeartBeatSubmessage SocketWriter::heartBeatSubMsg(CORBA::Long heartbeatCount, CORBA::ULong seqN) const
+OpenDDS::RTPS::HeartBeatSubmessage SocketWriter::heartBeatSubMsg(CORBA::ULong seqN, CORBA::Long heartbeatCount) const
 {
   const OpenDDS::RTPS::HeartBeatSubmessage hb = {
     {HEARTBEAT, 0, HEARTBEAT_SZ}, ENTITYID_UNKNOWN, // any matched reader

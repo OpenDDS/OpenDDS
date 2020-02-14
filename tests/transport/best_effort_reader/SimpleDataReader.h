@@ -14,7 +14,7 @@
 class SimpleDataReader : public TransportReceiveListener, public TransportClient
 {
 public:
-  SimpleDataReader(const AppConfig& ac, const int readerIndex);
+  SimpleDataReader(const AppConfig& ac, const int readerIndex, AssociationData& ad);
   virtual ~SimpleDataReader();
   bool done() { return done_; }
 

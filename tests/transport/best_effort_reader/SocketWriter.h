@@ -18,9 +18,9 @@ public:
   SocketWriter(const OpenDDS::DCPS::RepoId& id, const ACE_INET_Addr& destination);
 
   void addDestination(const ACE_INET_Addr& dest);
-  bool write(const TestMsg& msg, CORBA::ULong seqN) const;
-  bool write(const TestMsg& msg, CORBA::ULong seqN, const OpenDDS::DCPS::RepoId& directedWrite) const;
-  bool writeHeartbeat(CORBA::Long heartbeatCount, CORBA::ULong seqN) const;
+  bool write(CORBA::ULong seqN, const TestMsg& msg) const;
+  bool write(CORBA::ULong seqN, const TestMsg& msg, const OpenDDS::DCPS::RepoId& directedWrite) const;
+  bool writeHeartbeat(CORBA::ULong seqN, CORBA::Long heartbeatCount) const;
 
 private:
   static const bool hostIsBigEndian = !ACE_CDR_BYTE_ORDER;
@@ -31,8 +31,8 @@ private:
   static OpenDDS::RTPS::Header header(OpenDDS::DCPS::RepoId id);
 
   OpenDDS::RTPS::InfoTimestampSubmessage timeSubMsg() const;
-  OpenDDS::RTPS::DataSubmessage dataSubMsg(const TestMsg& msg, CORBA::ULong seqN) const;
-  OpenDDS::RTPS::HeartBeatSubmessage heartBeatSubMsg(CORBA::Long heartbeatCount, CORBA::ULong seqN) const;
+  OpenDDS::RTPS::DataSubmessage dataSubMsg(CORBA::ULong seqN, const TestMsg& msg) const;
+  OpenDDS::RTPS::HeartBeatSubmessage heartBeatSubMsg(CORBA::ULong seqN, CORBA::Long heartbeatCount) const;
 
   size_t msgSize(const OpenDDS::RTPS::InfoTimestampSubmessage& t,
                  const OpenDDS::RTPS::DataSubmessage& d, const TestMsg& m) const;

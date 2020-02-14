@@ -20,7 +20,7 @@ sub do_test {
 
   $test->process('subscriber', 'subscriber', "-h localhost -p $port -ORBLogFile $sublog");
   $test->start_process('subscriber');
-  if (PerlACE::waitforfile_timed($subready, 10) == -1) {
+  if (PerlACE::waitforfile_timed($subready, 30) == -1) {
     print STDERR "ERROR: waiting for subscriber file\n";
     $test->finish(1);
     return 1;

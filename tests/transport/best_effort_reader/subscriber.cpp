@@ -1,5 +1,6 @@
 #include "SimpleDataReader.h"
 
+#include "dds/DCPS/AssociationData.h"
 #include <ace/OS_main.h>
 #include <ace/String_Base.h>
 
@@ -17,12 +18,20 @@ public:
     if(!config.configureTransport()) {
       throw std::string("Failed to create Subscriber.");
     }
+    publication.remote_reliable_ = true;
+    publication.remote_data_.length(1);
+    publication.remote_data_[0].transport_type = "rtps_udp";
+    publication.remote_data_[0].data.length(5);
+    for (CORBA::ULong i = 0; i < 5; ++i) {
+      publication.remote_data_[0].data[i] = 0;
+    }
   }
 
   int run() {
-    SimpleDataReader reader1(config, 0);
-    SimpleDataReader reader2(config, 1);
-    SimpleDataReader reader3(config, 2);
+    SimpleDataReader reader1(config, 0, publication);
+    SimpleDataReader reader2(config, 1, publication);
+    SimpleDataReader reader3(config, 2, publication);
+    writeSubReady();
     while (!(reader1.done() && reader2.done() && reader3.done())) {
       ACE_OS::sleep(1);
     }
@@ -30,7 +39,15 @@ public:
   }
 
 private:
+  void writeSubReady() {
+    FILE* file = std::fopen("subready.txt", "w");
+    std::fprintf(file, "Ready\n");
+    std::fclose(file);
+    std::cerr << "*** Ready written to subready.txt ***\n";
+  }
+
   AppConfig config;
+  AssociationData publication;
 };
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])

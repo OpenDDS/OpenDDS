@@ -12,25 +12,25 @@ public:
     SocketWriter sw2(AppConfig::writerId[1], config.getHostAddress());
     SocketWriter sw3(AppConfig::writerId[2], config.getHostAddress());
 
-    sw1.writeHeartbeat(1, 1);
-    sw2.writeHeartbeat(1, 1);
-    sw3.writeHeartbeat(1, 1);
+    bool r = sw1.writeHeartbeat(1, 1);
+    r = r && sw2.writeHeartbeat(1, 1);
+    r = r && sw3.writeHeartbeat(1, 1);
 
-    sw1.write(TestMsg(10, "1-2"), 2);
-    sw2.write(TestMsg(10, "2-2"), 2);
-    sw3.write(TestMsg(10, "3-2"), 2);
+    r = r && sw1.write(2, TestMsg(10, "1-2"));
+    r = r && sw2.write(2, TestMsg(10, "2-2"));
+    r = r && sw3.write(2, TestMsg(10, "3-2"));
 
-    sw1.write(TestMsg(10, "1-2 Duplicate"), 2);
-    sw2.write(TestMsg(10, "2-2 Duplicate"), 2);
-    sw3.write(TestMsg(10, "3-2 Duplicate"), 2);
+    r = r && sw1.write(2, TestMsg(10, "1-2 Duplicate"));
+    r = r && sw2.write(2, TestMsg(10, "2-2 Duplicate"));
+    r = r && sw3.write(2, TestMsg(10, "3-2 Duplicate"));
 
-    sw3.write(TestMsg(10, "3-3"), 3);
+    r = r && sw3.write(3, TestMsg(10, "3-3"));
 
-    sw1.write(TestMsg(99, "1-4 end"), 4);
-    sw2.write(TestMsg(99, "2-4 end"), 4);
-    sw3.write(TestMsg(99, "3-4 end"), 4);
+    r = r && sw1.write(4, TestMsg(99, "1-4 end"));
+    r = r && sw2.write(4, TestMsg(99, "2-4 end"));
+    r = r && sw3.write(4, TestMsg(99, "3-4 end"));
 
-    return 0;
+    return (r ? 0 : 1);
   }
 
 private:
