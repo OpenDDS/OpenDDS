@@ -3,6 +3,7 @@
 #include "dds/DCPS/AssociationData.h"
 #include <ace/OS_main.h>
 #include <ace/String_Base.h>
+#include <iostream>
 
 /*
 The test contains 3 writers and 3 readers, associated as follows:
