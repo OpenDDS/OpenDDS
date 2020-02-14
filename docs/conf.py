@@ -35,6 +35,8 @@ else:
 
 master_doc = 'index'
 
+primary_domain = 'cpp'
+
 
 # -- General configuration ---------------------------------------------------
 
