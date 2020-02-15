@@ -29,7 +29,7 @@ with open('../VERSION.txt') as f:
     version_txt = f.read()
 m = re.search(r'version (.*),', version_txt)
 if m:
-    version = m[1]
+    release = version = m[1]
 else:
     sys.exit('Could figure out version')
 
@@ -53,12 +53,20 @@ templates_path = ['_templates']
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = [
+  '_build',
+  'Thumbs.db',
+  '.DS_Store',
+  'history/**',
+  'design/**',
+]
 
 source_suffix = {
     '.rst': 'restructuredtext',
     '.md': 'markdown',
 }
+
+numfig = True
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -75,7 +83,13 @@ html_static_path = ['.']
 
 html_theme_options = {
     'logo': 'logo.svg',
-    'github_user': 'objectcomputing',
-    'github_repo': 'OpenDDS',
-    'github_type': 'star',
+    'logo_name': True,
+    'extra_nav_links': {
+      'Main Website': 'https://opendds.org',
+      'GitHub Repo': 'https://github.com/objectcomputing/OpenDDS',
+    },
 }
+
+# -- LaTeX (PDF) output ------------------------------------------------------
+
+latex_logo = 'logo.svg'

@@ -1,5 +1,5 @@
-API Reference
-=============
+C++ API Reference
+=================
 
 Preprocessor Macros
 -------------------
