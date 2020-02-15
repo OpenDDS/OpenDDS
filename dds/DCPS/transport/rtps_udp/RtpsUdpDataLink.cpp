@@ -15,6 +15,7 @@
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
 #include "dds/DCPS/transport/framework/TransportSendControlElement.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
+#include "dds/DCPS/transport/framework/RemoveAllVisitor.h"
 
 #include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
@@ -229,12 +230,14 @@ RtpsUdpDataLink::RtpsWriter::remove_sample(const DataSampleElement* sample)
   g.release();
 
   if (found) {
-    tqe->data_dropped(true);
     for (size_t i = 0; i < removed.size(); ++i) {
+      RemoveAllVisitor visitor;
+      removed[i].first->accept_remove_visitor(visitor);
       delete removed[i].first;
       removed[i].second->release();
     }
     removed.clear();
+    tqe->data_dropped(true);
     result = REMOVE_FOUND;
   }
   return result;

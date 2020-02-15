@@ -149,8 +149,6 @@ SingleSendBuffer::remove_i(BufferMap::iterator buffer_iter, BufferVec& removed)
 
   if (buffer.first && buffer.second) {
     // not a fragment
-    RemoveAllVisitor visitor;
-    buffer.first->accept_remove_visitor(visitor);
     removed.push_back(buffer);
   } else {
     // data actually stored in fragments_
@@ -158,9 +156,7 @@ SingleSendBuffer::remove_i(BufferMap::iterator buffer_iter, BufferVec& removed)
     if (fm_it != fragments_.end()) {
       for (BufferMap::iterator bm_it = fm_it->second.begin();
            bm_it != fm_it->second.end(); ++bm_it) {
-        RemoveAllVisitor visitor;
-        bm_it->second.first->accept_remove_visitor(visitor);
-        removed.push_back(buffer);
+        removed.push_back(bm_it->second);
       }
       fragments_.erase(fm_it);
     }
@@ -265,6 +261,8 @@ SingleSendBuffer::insert(SequenceNumber sequence,
   }
   g.release();
   for (size_t i = 0; i < removed.size(); ++i) {
+    RemoveAllVisitor visitor;
+    removed[i].first->accept_remove_visitor(visitor);
     delete removed[i].first;
     removed[i].second->release();
   }
@@ -320,6 +318,8 @@ SingleSendBuffer::insert_fragment(SequenceNumber sequence,
   }
   g.release();
   for (size_t i = 0; i < removed.size(); ++i) {
+    RemoveAllVisitor visitor;
+    removed[i].first->accept_remove_visitor(visitor);
     delete removed[i].first;
     removed[i].second->release();
   }
