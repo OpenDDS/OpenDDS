@@ -92,4 +92,4 @@ html_theme_options = {
 
 # -- LaTeX (PDF) output ------------------------------------------------------
 
-latex_logo = 'logo.svg'
+latex_logo = 'logo_276_186.png'
