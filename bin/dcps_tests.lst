@@ -341,6 +341,7 @@ tests/transport/rtps/run_test.pl: !DCPS_MIN RTPS
 tests/transport/rtps_reliability/run_test.pl: !DCPS_MIN RTPS
 tests/transport/spdp/run_test.pl: !DCPS_MIN RTPS
 tests/transport/rtps_directed_write/run_test.pl: !DCPS_MIN RTPS
+tests/transport/best_effort_reader/run_test.pl: !DCPS_MIN RTPS
 
 tests/DCPS/ManyTopicTest/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/ManyTopicTest/run_test.pl rtps: !DCPS_MIN RTPS

@@ -352,6 +352,8 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
     link_->received(data, receiver_.source_guid_prefix_);
     recvd_sample_ = 0;
 
+    link_->filterBestEffortReaders(sample, readers_selected_, readers_withheld_);
+
     if (data.readerId != ENTITYID_UNKNOWN) {
       RepoId reader;
       std::memcpy(reader.guidPrefix, link_->local_prefix(),
