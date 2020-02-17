@@ -20,12 +20,14 @@ jobs:
       Release64:
         BuildPlatform: x64
         BuildConfiguration: Release
+        MessengerTests: true
       Debug32:
         BuildPlatform: Win32
         BuildConfiguration: Debug
       Release32:
         BuildPlatform: Win32
         BuildConfiguration: Release
+        MessengerTests: true
   variables:
     VCPKG_ROOT: $(Build.SourcesDirectory)\vcpkg
   steps:
@@ -73,6 +75,24 @@ jobs:
       platform: $(BuildPlatform)
       configuration: $(BuildConfiguration)
       maximumCpuCount: true
+  - script: |
+      mwc.pl -type vs2019 tests\DCPS\Messenger DevGuideExamples\DCPS\Messenger
+    condition: and(succeeded(), ne(variables['MessengerTests'], ''))
+    displayName: Generate Messenger sln files
+  - task: VSBuild@1
+    condition: and(succeeded(), ne(variables['MessengerTests'], ''))
+    displayName: Build Messenger Test
+    inputs:
+      solution: tests\DCPS\Messenger\Messenger.sln
+      platform: $(BuildPlatform)
+      configuration: $(BuildConfiguration)
+  - task: VSBuild@1
+    condition: and(succeeded(), ne(variables['MessengerTests'], ''))
+    displayName: Build Messenger Example
+    inputs:
+      solution: DevGuideExamples\DCPS\Messenger\Messenger.sln
+      platform: $(BuildPlatform)
+      configuration: $(BuildConfiguration)
   - script: |
       perl "%DDS_ROOT%\tests\cmake_integration\run_ci_tests.pl" --build-config=$(BuildConfiguration) --generator="Visual Studio 16 2019" --arch $(BuildPlatform)
     displayName: Compile and run CMake tests
