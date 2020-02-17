@@ -154,7 +154,6 @@ void LinuxNetworkConfigMonitor::process_message(const nlmsghdr* header)
         address_length = 4;
         break;
       default:
-        ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: LinuxNetworkConfigMonitor::process_message: unhandled address family: %d\n"), msg->ifa_family));
         return;
       }
       int rta_length = IFA_PAYLOAD(header);
@@ -182,7 +181,6 @@ void LinuxNetworkConfigMonitor::process_message(const nlmsghdr* header)
         address_length = 4;
         break;
       default:
-        ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: LinuxNetworkConfigMonitor::process_message: unhandled address family: %d\n"), msg->ifa_family));
         return;
       }
       int rta_length = IFA_PAYLOAD(header);
