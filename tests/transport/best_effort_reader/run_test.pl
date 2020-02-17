@@ -11,15 +11,14 @@ use strict;
 
 sub do_test {
   my $mcast = shift;
-  my $reliable = shift;
   my $port = PerlACE::random_port();
   my $subready = 'subready.txt';
   unlink $subready;
 
   my $test = new PerlDDS::TestFramework();
-  my $sublog = "sub_". ($reliable ? "Reliable" : "BestEffort") . ($mcast ? "_multicast" : "") . ".log";
+  my $sublog = "sub". ($mcast ? "_multicast" : "") . ".log";
 
-  $test->process('subscriber', 'subscriber', "-h localhost -p $port -r $reliable -ORBLogFile $sublog");
+  $test->process('subscriber', 'subscriber', "-h localhost -p $port -ORBLogFile $sublog");
   $test->start_process('subscriber');
   if (PerlACE::waitforfile_timed($subready, 30) == -1) {
     print STDERR "ERROR: waiting for subscriber file\n";
@@ -37,16 +36,10 @@ sub do_test {
   return $result;
 }
 
-print "\nTesting with best-effort readers...\n";
-my $result = do_test(0, 0);
+print "\nTesting best-effort readers...\n";
+my $result = do_test(0);
 
-print "\nTesting with best-effort readers, multicast...\n";
-$result += do_test(1, 0);
-
-print "\nTesting with reliable readers...\n";
-$result += do_test(0, 1);
-
-print "\nTesting with reliable readers, multicast...\n";
-$result += do_test(1, 1);
+print "\nTesting best-effort readers, multicast...\n";
+$result += do_test(1);
 
 exit $result;

@@ -178,6 +178,7 @@ private:
   };
 
   Spdp& spdp_;
+  DCPS::SequenceNumber participant_secure_sequence_;
 
 #ifdef OPENDDS_SECURITY
   DDS::Security::ParticipantSecurityAttributes participant_sec_attr_;
@@ -325,7 +326,7 @@ private:
 
   class Writer : public DCPS::TransportSendListener, public Endpoint {
   public:
-    Writer(const DCPS::RepoId& pub_id, Sedp& sedp);
+    Writer(const DCPS::RepoId& pub_id, Sedp& sedp, ACE_INT64 seq_init = 1);
     virtual ~Writer();
 
     bool assoc(const DCPS::AssociationData& subscription);
@@ -371,13 +372,18 @@ private:
                                                     DCPS::SequenceNumber& sequence);
 
     DDS::ReturnCode_t write_dcps_participant_secure(const Security::SPDPdiscoveredParticipantData& msg,
-                                                    const DCPS::RepoId& reader,
-                                                    DCPS::SequenceNumber& sequence);
+                                                    const DCPS::RepoId& reader, DCPS::SequenceNumber& sequence);
 #endif
 
     DDS::ReturnCode_t write_unregister_dispose(const DCPS::RepoId& rid, CORBA::UShort pid = PID_ENDPOINT_GUID);
 
     void end_historic_samples(const DCPS::RepoId& reader);
+
+    const DCPS::SequenceNumber& get_seq() const
+    {
+      return seq_;
+    }
+
 
   private:
     Header header_;
@@ -481,7 +487,7 @@ private:
     }
     ~Task();
 
-    void enqueue(DCPS::MessageId id, DCPS::unique_ptr<ParticipantData_t> pdata);
+    void enqueue(DCPS::MessageId id, DCPS::unique_ptr<ParticipantData_t> pdata, bool bSecureParticipant = false);
 
     void enqueue(DCPS::MessageId id, DCPS::unique_ptr<DiscoveredPublication> wdata);
     void enqueue(DCPS::MessageId id, DCPS::unique_ptr<DiscoveredSubscription> rdata);

@@ -35,6 +35,7 @@
 #include "dds/DCPS/ReactorInterceptor.h"
 #include "dds/DCPS/RcEventHandler.h"
 #include "dds/DCPS/JobQueue.h"
+#include "dds/DCPS/SequenceNumber.h"
 
 #ifdef OPENDDS_SECURITY
 #include "dds/DdsSecurityCoreC.h"
@@ -59,6 +60,14 @@ class RtpsUdpTransport;
 class ReceivedDataSample;
 typedef RcHandle<RtpsUdpInst> RtpsUdpInst_rch;
 typedef RcHandle<RtpsUdpTransport> RtpsUdpTransport_rch;
+
+struct SeqReaders {
+  SequenceNumber seq;
+  RepoIdSet readers;
+  SeqReaders(const RepoId& id) : seq(0) { readers.insert(id); }
+};
+
+typedef OPENDDS_MAP_CMP(RepoId, SeqReaders, GUID_tKeyLessThan) WriterToSeqReadersMap;
 
 class OpenDDS_Rtps_Udp_Export RtpsUdpDataLink : public DataLink, public virtual NetworkConfigListener {
 public:
@@ -112,6 +121,8 @@ public:
   AddrSet get_addresses(const RepoId& local, const RepoId& remote) const;
   /// Given a 'local' id, return the set of address for all remote peers.
   AddrSet get_addresses(const RepoId& local) const;
+
+  void filterBestEffortReaders(const ReceivedDataSample& ds, RepoIdSet& selected, RepoIdSet& withheld);
 
   int make_reservation(const RepoId& remote_publication_id,
                        const RepoId& local_subscription_id,
@@ -424,11 +435,13 @@ private:
   typedef OPENDDS_MULTIMAP_CMP(RepoId, RtpsReader_rch, GUID_tKeyLessThan) RtpsReaderMultiMap;
   RtpsReaderMultiMap readers_of_writer_; // keys are remote data writer GUIDs
 
+  WriterToSeqReadersMap writer_to_seq_best_effort_readers_;
+
   void deliver_held_data(const RepoId& readerId, WriterInfo& info, bool durable);
 
   /// What was once a single lock for the whole datalink is now split between three (four including ch_lock_):
-  /// - readers_lock_ protects readers_, readers_of_writer_, pending_reliable_readers_, and interesting_writers_
-  ///   along with anything else that fits the 'reader side activity' of the datalink
+  /// - readers_lock_ protects readers_, readers_of_writer_, pending_reliable_readers_, interesting_writers_, and
+  ///   writer_to_seq_best_effort_readers_ along with anything else that fits the 'reader side activity' of the datalink
   /// - writers_lock_ protects writers_, heartbeat_counts_, best_effort_heartbeat_count_, and interesting_readers_
   ///   along with anything else that fits the 'writers side activity' of the datalink
   /// - locators_lock_ protects locators_ (and therefore calls to get_addresses_i())

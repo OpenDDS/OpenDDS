@@ -866,6 +866,9 @@ bool run_test()
   if (!part1.send_data(writer1.entityId, seq, part2_addr)) {
     return false;
   }
+
+  reactor_wait();
+
   // this heartbeat isn't final, so reader needs to ack even if it has all data:
   if (!part1.send_hb(writer1.entityId, seq, seq, part2_addr)) {
     return false;
