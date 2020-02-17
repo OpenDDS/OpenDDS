@@ -91,10 +91,7 @@ bool LinuxNetworkConfigMonitor::close()
 {
   bool retval = true;
 
-  if (reactor()->remove_handler(this, READ_MASK) != 0) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: LinuxNetworkConfigMonitor::close: could not unregister for input: %m\n")));
-    retval = false;
-  }
+  reactor()->remove_handler(this, READ_MASK);
 
   if (socket_.close() != 0) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: LinuxNetworkConfigMonitor::close: could not close socket: %m\n")));
