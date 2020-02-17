@@ -7,6 +7,11 @@
 #include <ace/Get_Opt.h>
 #include <iostream>
 
+#ifdef ACE_AS_STATIC_LIBS
+# include "dds/DCPS/RTPS/RtpsDiscovery.h"
+# include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
+#endif
+
 class Subscriber {
 public:
   Subscriber(int argc, ACE_TCHAR* argv[]);
