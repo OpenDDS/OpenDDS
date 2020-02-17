@@ -6,7 +6,7 @@ project: dcpslib, ../bench_idl_lib, ../bench_builder_idl_lib, dcps_rapidjson {
 
   expand(BENCH_BUILDER_ROOT) {
     $BENCH_BUILDER_ROOT
-    $(DDS_ROOT)/performance-tests/bench
+    $(DDS_ROOT)/performance-tests/bench_2
   }
 
   dynamicflags  += BENCH_COMMON_BUILD_DLL

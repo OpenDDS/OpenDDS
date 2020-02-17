@@ -103,7 +103,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
       throw 1;
     }
   } catch(int value) {
-    std::cerr << "See DDS_ROOT/performance-tests/bench/README.md for usage" << std::endl;
+    std::cerr << "See DDS_ROOT/performance-tests/bench_2/README.md for usage" << std::endl;
     return value;
   }
 
