@@ -4,6 +4,7 @@
 #include <ace/OS_main.h>
 #include <ace/String_Base.h>
 #include <iostream>
+#include <fstream>
 
 /*
 The test contains 3 writers and 3 readers, associated as follows:
@@ -41,9 +42,8 @@ public:
 
 private:
   void writeSubReady() {
-    FILE* file = std::fopen("subready.txt", "w");
-    std::fprintf(file, "Ready\n");
-    std::fclose(file);
+    std::ofstream os("subready.txt", std::ios::binary);
+    os << "Ready\n";
     std::cerr << "*** Ready written to subready.txt ***\n";
   }
 
