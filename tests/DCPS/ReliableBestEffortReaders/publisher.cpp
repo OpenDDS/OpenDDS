@@ -30,7 +30,7 @@ Publisher::Publisher(int argc, ACE_TCHAR* argv[]) : domain(argc, argv, "Publishe
 
   DDS::DataWriterQos qos;
   pub->get_default_datawriter_qos(qos);
-  qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
+  qos.history.kind = DDS::KEEP_LAST_HISTORY_QOS;
   qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
   qos.liveliness.kind = DDS::AUTOMATIC_LIVELINESS_QOS;
   DDS::Duration_t livelinessLease = {2, 0}; //2 seconds
