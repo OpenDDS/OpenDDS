@@ -1,6 +1,10 @@
 #include "SimpleDataReader.h"
 
-#include "dds/DCPS/AssociationData.h"
+#include <dds/DCPS/AssociationData.h>
+#ifdef ACE_AS_STATIC_LIBS
+#  include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#endif
 #include <ace/OS_main.h>
 #include <ace/String_Base.h>
 #include <iostream>

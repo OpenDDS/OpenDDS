@@ -1,6 +1,10 @@
 #include "AppConfig.h"
 #include "SocketWriter.h"
 #include "TestMsg.h"
+#ifdef ACE_AS_STATIC_LIBS
+#  include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#endif
 
 class Publisher {
 public:
