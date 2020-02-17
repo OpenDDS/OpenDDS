@@ -1,16 +1,15 @@
 #include "Domain.h"
 #include "DataReaderListenerImpl.h"
-#include "dds/DCPS/StaticIncludes.h"
+#include <dds/DCPS/StaticIncludes.h>
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/WaitSet.h>
+#ifdef ACE_AS_STATIC_LIBS
+#  include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#endif
 #include <ace/Get_Opt.h>
 #include <iostream>
-
-#ifdef ACE_AS_STATIC_LIBS
-# include "dds/DCPS/RTPS/RtpsDiscovery.h"
-# include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
-#endif
 
 class Subscriber {
 public:
