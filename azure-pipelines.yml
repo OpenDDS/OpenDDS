@@ -83,14 +83,14 @@ jobs:
     condition: and(succeeded(), ne(variables['MessengerTests'], ''))
     displayName: Build Messenger Test
     inputs:
-      solution: tests\DCPS\Messenger\Messenger.sln
+      solution: "%DDS_ROOT%\tests\DCPS\Messenger\Messenger.sln"
       platform: $(BuildPlatform)
       configuration: $(BuildConfiguration)
   - task: VSBuild@1
     condition: and(succeeded(), ne(variables['MessengerTests'], ''))
     displayName: Build Messenger Example
     inputs:
-      solution: DevGuideExamples\DCPS\Messenger\Messenger.sln
+      solution: "%DDS_ROOT%\DevGuideExamples\DCPS\Messenger\Messenger.sln"
       platform: $(BuildPlatform)
       configuration: $(BuildConfiguration)
   - script: |
@@ -185,21 +185,11 @@ jobs:
       Release64:
         BuildPlatform: x64
         BuildConfiguration: Release
-  variables:
-    VCPKG_ROOT: $(Build.SourcesDirectory)\vcpkg
   steps:
   - script: |
       if %BuildPlatform%==x64 (set VCVARS_ARCH=x64) else set VCVARS_ARCH=x86
       echo ##vso[task.setvariable variable=VcVarsArch]%VCVARS_ARCH%
     displayName: Set VcVarsArch
-  - script: |
-      git clone -q --depth 1 git://github.com/Microsoft/vcpkg.git %VCPKG_ROOT%
-      call %VCPKG_ROOT%\bootstrap-vcpkg.bat
-      set VCPKG_ARCH=$(VcVarsArch)-windows
-      %VCPKG_ROOT%\vcpkg install --triplet %VCPKG_ARCH% openssl xerces-c
-      rmdir /s/q %VCPKG_ROOT%\packages %VCPKG_ROOT%\buildtrees
-      echo ##vso[task.setvariable variable=VcPkgInst]%VCPKG_ROOT%\installed\%VCPKG_ARCH%
-    displayName: Vcpkg
   - task: BatchScript@1
     displayName: VcVars
     inputs:
