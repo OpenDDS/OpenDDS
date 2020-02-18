@@ -85,13 +85,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
   try {
     for (int i = 1; i < argc; i++) {
-      const char* argument = ACE_TEXT_ALWAYS_CHAR(argv[i]);
+      const ACE_TCHAR* argument = argv[i];
       if (!ACE_OS::strcmp(argv[i], ACE_TEXT("--log"))) {
         log_file_path = get_option_argument(i, argc, argv);
       } else if (!ACE_OS::strcmp(argv[i], ACE_TEXT("--report"))) {
         report_file_path = get_option_argument(i, argc, argv);
       } else if (config_file_path.empty()) {
-        config_file_path = argument;
+        config_file_path = ACE_TEXT_ALWAYS_CHAR(argument);
       } else {
         std::cerr << "Invalid option: " << argument << std::endl;
         return 1;

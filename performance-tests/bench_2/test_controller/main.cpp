@@ -100,15 +100,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   const char* usage = "usage: test_controller [-h|--help] | TEST_CONTEXT SCENARIO_ID [OPTIONS...]";
   try {
     for (int i = 1; i < argc; i++) {
-      const char* argument = ACE_TEXT_ALWAYS_CHAR(argv[i]);
-      if (!ACE_OS::strcmp(argument, "--domain")) {
+      const ACE_TCHAR* argument = argv[i];
+      if (!ACE_OS::strcmp(argument, ACE_TEXT("--domain"))) {
         domain = get_option_argument_int(i, argc, argv);
-      } else if (!ACE_OS::strcmp(argument, "--wait-for-nodes")) {
+      } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--wait-for-nodes"))) {
         wait_for_nodes = get_option_argument_uint(i, argc, argv);
-      } else if (!ACE_OS::strcmp(argument, "--timeout")) {
+      } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--timeout"))) {
         timeout = get_option_argument_uint(i, argc, argv);
         timeout_passed = true;
-      } else if (!ACE_OS::strcmp(argument, "--help") || !ACE_OS::strcmp(argument, "-h")) {
+      } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--help")) || !ACE_OS::strcmp(argument, ACE_TEXT("-h"))) {
         std::cout << usage << std::endl
           << std::endl
 //            ################################################################################
@@ -143,34 +143,34 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
           << "                             it would overwrite another result." << std::endl;
 //            ################################################################################
         return 0;
-      } else if (!ACE_OS::strcmp(argument, "--prealloc-scenario-out")) {
+      } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--prealloc-scenario-out"))) {
         preallocated_scenario_output_path = get_option_argument(i, argc, argv);
-      } else if (!ACE_OS::strcmp(argument, "--prealloc-scenario-in")) {
+      } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--prealloc-scenario-in"))) {
         preallocated_scenario_input_path = get_option_argument(i, argc, argv);
-      } else if (!ACE_OS::strcmp(argument, "--pretty")) {
+      } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--pretty"))) {
         pretty = true;
-      } else if (!ACE_OS::strcmp(argument, "--debug-alloc")) {
+      } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--debug-alloc"))) {
         debug_alloc = true;
-      } else if (!ACE_OS::strcmp(argument, "--result-id")) {
+      } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--result-id"))) {
         result_id = get_option_argument(i, argc, argv);
-      } else if (!ACE_OS::strcmp(argument, "--overwrite-result")) {
+      } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--overwrite-result"))) {
         overwrite_result = true;
-      } else if (!ACE_OS::strcmp(argument, "--override-bench-partition-suffix")) {
+      } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--override-bench-partition-suffix"))) {
         overrides.bench_partition_suffix = get_option_argument(i, argc, argv);
-      } else if (!ACE_OS::strcmp(argument, "--override-create-time")) {
+      } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--override-create-time"))) {
         overrides.create_time_delta = get_option_argument_uint(i, argc, argv);
-      } else if (!ACE_OS::strcmp(argument, "--override-enable-time")) {
+      } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--override-enable-time"))) {
         overrides.enable_time_delta = get_option_argument_uint(i, argc, argv);
-      } else if (!ACE_OS::strcmp(argument, "--override-start-time")) {
+      } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--override-start-time"))) {
         overrides.start_time_delta = get_option_argument_uint(i, argc, argv);
-      } else if (!ACE_OS::strcmp(argument, "--override-stop-time")) {
+      } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--override-stop-time"))) {
         overrides.stop_time_delta = get_option_argument_uint(i, argc, argv);
-      } else if (!ACE_OS::strcmp(argument, "--override-destruction-time")) {
+      } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--override-destruction-time"))) {
         overrides.destruction_time_delta = get_option_argument_uint(i, argc, argv);
       } else if (test_context_path.empty() && argument[0] != '-') {
-        test_context_path = argument;
+        test_context_path = ACE_TEXT_ALWAYS_CHAR(argument);
       } else if (scenario_id.empty() && argument[0] != '-') {
-        scenario_id = argument;
+        scenario_id = ACE_TEXT_ALWAYS_CHAR(argument);
       } else {
         std::cerr << "Invalid option: " << argument << std::endl;
         throw 1;

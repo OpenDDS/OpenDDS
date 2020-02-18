@@ -126,7 +126,7 @@ public:
       << " --log " << log_filename_ << std::flush;
     const std::string command = ss.str();
     std::cerr << command + "\n" << std::flush;
-    proc_opts.command_line(command.c_str());
+    proc_opts.command_line("%s", command.c_str());
     return proc_opts;
   }
 
@@ -372,7 +372,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       throw 1;
     }
 
-    const char* run_mode_arg = ACE_TEXT_ALWAYS_CHAR(argv[1]);
+    const ACE_TCHAR* run_mode_arg = argv[1];
     if (!ACE_OS::strcmp(run_mode_arg, ACE_TEXT("one-shot"))) {
       run_mode = RunMode::one_shot;
     } else if (!ACE_OS::strcmp(run_mode_arg, ACE_TEXT("daemon"))) {
@@ -380,7 +380,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     } else if (!ACE_OS::strcmp(run_mode_arg, ACE_TEXT("daemon-exit-on-error"))) {
       run_mode = RunMode::daemon_exit_on_error;
     } else {
-      std::cerr << "Invalid run mode: " << run_mode_arg << std::endl;
+      std::cerr << "Invalid run mode: " << ACE_TEXT_ALWAYS_CHAR(run_mode_arg) << std::endl;
       throw 1;
     }
 

@@ -19,7 +19,7 @@ ConfigSectionManager::ConfigSectionManager(const ConfigSectionSeq& seq) {
     std::vector<ACE_Configuration_Section_Key> keys;
     keys.push_back(ach.root_section());
     while (token != NULL) {
-      ACE_TString ttoken(token);
+      ACE_TString ttoken(ACE_TEXT_CHAR_TO_TCHAR(token));
       ACE_Configuration_Section_Key sect_key;
       ach.open_section(keys.back(), ttoken.c_str(), 1, sect_key);
       keys.push_back(sect_key);
@@ -30,8 +30,8 @@ ConfigSectionManager::ConfigSectionManager(const ConfigSectionSeq& seq) {
         << "Adding '" << section.properties[j].name
         <<"' = '" << section.properties[j].value
         << "' to [" << section.name << "] configuration section" << std::endl;
-      ACE_TString tname(section.properties[j].name.in());
-      ACE_TString tvalue(section.properties[j].value.in());
+      ACE_TString tname(ACE_TEXT_CHAR_TO_TCHAR(section.properties[j].name.in()));
+      ACE_TString tvalue(ACE_TEXT_CHAR_TO_TCHAR(section.properties[j].value.in()));
       ach.set_string_value(keys.back(), tname.c_str(), tvalue.c_str());
     }
   }

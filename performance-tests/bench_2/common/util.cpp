@@ -55,15 +55,15 @@ std::string join_path(const std::string& arg) {
 std::string create_temp_dir(const std::string& prefix)
 {
   // Create Template for mktemp
-  char buffer[PATH_MAX];
+  ACE_TCHAR buffer[PATH_MAX];
   if (ACE::get_temp_dir(&buffer[0], PATH_MAX) == -1) {
     return "";
   }
   ACE_OS::strcpy(
     &buffer[0],
-    join_path(
+    ACE_TEXT_CHAR_TO_TCHAR(join_path(
       ACE_TEXT_ALWAYS_CHAR(&buffer[0]),
-      (prefix + "_XXXXXX")).c_str());
+      (prefix + "_XXXXXX")).c_str()));
 
   // Fill the template and create the directory
   if (!ACE_OS::mktemp(buffer)) {
@@ -73,7 +73,7 @@ std::string create_temp_dir(const std::string& prefix)
     return "";
   }
 
-  return buffer;
+  return ACE_TEXT_ALWAYS_CHAR(buffer);
 }
 
 std::string iso8601()
@@ -90,7 +90,7 @@ std::string iso8601()
 std::vector<std::string> get_dir_contents(const std::string& path)
 {
   std::vector<std::string> rv;
-  ACE_DIR* dir = ACE_OS::opendir(path.c_str());
+  ACE_DIR* dir = ACE_OS::opendir(ACE_TEXT_CHAR_TO_TCHAR(path.c_str()));
   if (dir) {
     ACE_DIRENT* entry;
     while ((entry = ACE_OS::readdir(dir))) {

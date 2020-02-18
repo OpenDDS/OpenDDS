@@ -25,32 +25,38 @@ DdsEntities::DdsEntities(
   if (status_ts_->register_type(participant_, "")) {
     throw std::runtime_error("register_type failed for Status");
   }
+  char* status_type_name = status_ts_->get_type_name();
   status_topic_ = participant_->create_topic(
-    status_topic_name, status_ts_->get_type_name(), TOPIC_QOS_DEFAULT, nullptr,
+    status_topic_name, status_type_name, TOPIC_QOS_DEFAULT, nullptr,
     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!status_topic_) {
     throw std::runtime_error("create_topic status failed");
   }
+  delete [] status_type_name;
   config_ts_ = new ConfigTypeSupportImpl;
   if (config_ts_->register_type(participant_, "")) {
     throw std::runtime_error("register_type failed for Config");
   }
+  char* config_type_name = config_ts_->get_type_name();
   config_topic_ = participant_->create_topic(
-    config_topic_name, config_ts_->get_type_name(), TOPIC_QOS_DEFAULT, nullptr,
+    config_topic_name, config_type_name, TOPIC_QOS_DEFAULT, nullptr,
     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!config_topic_) {
     throw std::runtime_error("create_topic config failed");
   }
+  delete [] config_type_name;
   report_ts_ = new ReportTypeSupportImpl;
   if (report_ts_->register_type(participant_, "")) {
     throw std::runtime_error("register_type failed for Report");
   }
+  char* report_type_name = report_ts_->get_type_name();
   report_topic_ = participant_->create_topic(
-    report_topic_name, report_ts_->get_type_name(), TOPIC_QOS_DEFAULT, nullptr,
+    report_topic_name, report_type_name, TOPIC_QOS_DEFAULT, nullptr,
     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!report_topic_) {
     throw std::runtime_error("create_topic report failed");
   }
+  delete [] report_type_name;
 
   // Create DataWriters
   publisher_ = participant_->create_publisher(
