@@ -17,27 +17,27 @@ if [ -e $pid_file ]; then
     log=$(head -n ${i} ${log_file} | tail -n 1)
     kill $pid 2>/dev/null
     total_workers=$(echo "$total_workers + 1" | bc )
-    undermatched_readers=$(cat ${log} | grep "undermatched readers" | cut -d ':' -f 2 | sed 's/^ //g' | cut -d ' ' -f 1)
-    undermatched_writers=$(cat ${log} | grep "undermatched writers" | cut -d ':' -f 2 | sed 's/^ //g' | cut -d ' ' -f 1)
+    undermatched_readers=$(grep "undermatched readers" ${log} | cut -d ':' -f 2 | sed 's/^ //g' | cut -d ' ' -f 1)
+    undermatched_writers=$(grep "undermatched writers" ${log} | cut -d ':' -f 2 | sed 's/^ //g' | cut -d ' ' -f 1)
     total_undermatched=$( echo "$total_undermatched + $undermatched_readers + $undermatched_writers" | bc )
-    max_discovery=$(cat ${log} | grep "max discovery time delta" | cut -d ':' -f 2 | sed 's/^ //g' | cut -d ' ' -f 1)
+    max_discovery=$(grep "max discovery time delta" ${log} | cut -d ':' -f 2 | sed 's/^ //g' | cut -d ' ' -f 1)
     #echo max_discovery = $max_discovery
     max_max_discovery=$( echo "if ( $max_max_discovery > $max_discovery ) { $max_max_discovery; } else { $max_discovery; }" | bc )
-    latency_sample_count_line=$(cat ${log} | grep "total (latency) sample count")
+    latency_sample_count_line=$(grep "total (latency) sample count" ${log})
     if ! [ -z "$latency_sample_count_line" ]; then
-      latency_sample_count=$(cat ${log} | grep "total (latency) sample count" | cut -d ':' -f 2 | sed 's/^ //g' | cut -d ' ' -f 1)
+      latency_sample_count=$(grep "total (latency) sample count" ${log} | cut -d ':' -f 2 | sed 's/^ //g' | cut -d ' ' -f 1)
       #echo latency_sample_count = $latency_sample_count
       total_latency_samples=$( echo "$total_latency_samples + $latency_sample_count" | bc )
-      mean_latency=$(cat ${log} | grep "mean latency" | cut -d ':' -f 2 | sed 's/^ //g' | cut -d ' ' -f 1)
+      mean_latency=$(grep "mean latency" ${log} | cut -d ':' -f 2 | sed 's/^ //g' | cut -d ' ' -f 1)
       #echo mean_latency = $mean_latency
       total_latency_sample_prods=$( echo "$total_latency_sample_prods + ( $latency_sample_count * $mean_latency )" | bc )
     fi
-    jitter_sample_count_line=$(cat ${log} | grep "total (jitter) sample count")
+    jitter_sample_count_line=$(grep "total (jitter) sample count" ${log})
     if ! [ -z "$jitter_sample_count_line" ]; then
-      jitter_sample_count=$(cat ${log} | grep "total (jitter) sample count" | cut -d ':' -f 2 | sed 's/^ //g' | cut -d ' ' -f 1)
+      jitter_sample_count=$(grep "total (jitter) sample count" ${log} | cut -d ':' -f 2 | sed 's/^ //g' | cut -d ' ' -f 1)
       #echo jitter_sample_count = $jitter_sample_count
       total_jitter_samples=$( echo "$total_jitter_samples + $jitter_sample_count" | bc )
-      mean_jitter=$(cat ${log} | grep "mean jitter" | cut -d ':' -f 2 | sed 's/^ //g' | cut -d ' ' -f 1)
+      mean_jitter=$(grep "mean jitter" ${log} | cut -d ':' -f 2 | sed 's/^ //g' | cut -d ' ' -f 1)
       #echo mean_jitter = $mean_jitter
       total_jitter_sample_prods=$( echo "$total_jitter_sample_prods + ( $jitter_sample_count * $mean_jitter )" | bc )
     fi
