@@ -76,7 +76,7 @@ jobs:
       configuration: $(BuildConfiguration)
       maximumCpuCount: true
   - script: |
-      perl mwc.pl -type vs2019 tests\DCPS\Messenger DevGuideExamples\DCPS\Messenger
+      perl "%ACE_ROOT%/bin/mwc.pl" -type vs2019 tests\DCPS\Messenger DevGuideExamples\DCPS\Messenger
     condition: and(succeeded(), ne(variables['MessengerTests'], ''))
     displayName: Generate Messenger sln files
   - task: VSBuild@1
