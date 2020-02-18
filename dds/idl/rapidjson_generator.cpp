@@ -404,7 +404,8 @@ namespace {
   void gen_type_support(UTL_ScopedName* name) {
     be_global->add_include("dds/DCPS/RapidJsonTypeConverter.h",
                            BE_GlobalData::STREAM_CPP);
-    ScopedNamespaceGuard cppGuard(name, be_global->impl_, "namespace", true);
+    be_global->impl_ << be_global->versioning_begin() << "\n";
+    ScopedNamespaceGuard cppGuard(name, be_global->impl_);
     const std::string lname = name->last_component()->get_string(),
       ts_rj = lname + "TypeSupportRapidJsonImpl";
     be_global->impl_ <<
@@ -436,6 +437,7 @@ namespace {
       "  };\n"
       "};\n\n" <<
       ts_rj << "::Initializer init_tsrapidjson_" << lname << ";\n";
+    be_global->impl_ << be_global->versioning_end() << "\n";
   }
 } // namespace
 

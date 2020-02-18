@@ -4,6 +4,8 @@ project: dcpslib, dcps_rapidjson {
                    -Wb,export_macro=Bench_Builder_Export \
                    -Wb,cpp_include=dds/DdsDcpsCoreTypeSupportImpl.h \
                    -Wb,cpp_include=dds/DdsDcpsGuidTypeSupportImpl.h \
+                   -Wb,versioning_begin=OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL \
+                   -Wb,versioning_end=OPENDDS_END_VERSIONED_NAMESPACE_DECL \
                    -I$(DDS_ROOT)/dds
 
   dynamicflags  += BENCH_BUILDER_BUILD_DLL
