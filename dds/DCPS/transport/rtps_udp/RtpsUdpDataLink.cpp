@@ -1389,7 +1389,8 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
       info.first_activity_ = false;
     }
 
-    const bool no_nack = !(info.hb_range_.second == SequenceNumber::ZERO()) && info.hb_range_.second < info.hb_range_.first;
+    const bool no_nack = !(info.hb_range_.second == SequenceNumber::ZERO())
+      && info.hb_range_.second < info.hb_range_.first;
 
     info.frags_.erase(seq);
     if (durable_ && info.recvd_.empty()) {
