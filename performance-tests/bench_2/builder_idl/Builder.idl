@@ -1,3 +1,4 @@
+#include <tao/DoubleSeq.pidl>
 #include "dds/DdsDcpsCore.idl"
 
 module Builder {
@@ -388,7 +389,7 @@ module Builder {
 
   // Process
 
-#pragma DCPS_DATA_TYPE "Builder::ProcessConfig"
+  @topic
   struct ProcessConfig {
     ConfigSectionSeq config_sections;
     DiscoveryConfigSeq discoveries;
