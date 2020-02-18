@@ -67,7 +67,7 @@ bool SocketWriter::write(CORBA::ULong seqN, const TestMsg& msg) const
 bool SocketWriter::write(CORBA::ULong seqN, const TestMsg& msg, const OpenDDS::DCPS::RepoId& directedWrite) const
 {
   const OpenDDS::RTPS::InfoTimestampSubmessage it = timeSubMsg();
-  CORBA::UShort sz = 20 + 24 + 12 + ACE_OS::strlen(msg.value) + 1;
+  CORBA::UShort sz = static_cast<CORBA::UShort>(20 + 24 + 12 + ACE_OS::strlen(msg.value) + 1);
   DataSubmessage ds = {{DATA, DEQ, sz}, 0, 16, ENTITYID_UNKNOWN, id_.entityId, {0, seqN}, ParameterList()};
   ds.inlineQos.length(1);
   ds.inlineQos[0].guid(directedWrite);
@@ -99,7 +99,7 @@ OpenDDS::RTPS::InfoTimestampSubmessage SocketWriter::timeSubMsg() const
 
 OpenDDS::RTPS::DataSubmessage SocketWriter::dataSubMsg(CORBA::ULong seqN, const TestMsg& msg) const
 {
-  CORBA::UShort sz = 20 + 12 + ACE_OS::strlen(msg.value) + 1;
+  CORBA::UShort sz = static_cast<CORBA::UShort>(20 + 12 + ACE_OS::strlen(msg.value) + 1);
   DataSubmessage ds = {{DATA, DE, sz}, 0, 16, ENTITYID_UNKNOWN, id_.entityId, {0, seqN}, ParameterList()};
   return ds;
 }
