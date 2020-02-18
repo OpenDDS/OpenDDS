@@ -24,8 +24,7 @@ unsigned Bench_Common_Export get_option_argument_uint(int& i, int argc, ACE_TCHA
 std::string Bench_Common_Export join_path(const std::string& arg);
 template <typename... Args>
 std::string join_path(const std::string& arg, Args... args) {
-  ACE_TString temp(ACE_TEXT_CHAR_TO_TCHAR(arg.c_str()));
-  return arg + (temp[temp.length() - 1] == ACE_DIRECTORY_SEPARATOR_CHAR ? "" : ACE_TEXT_ALWAYS_CHAR(ACE_DIRECTORY_SEPARATOR_STR)) + join_path(args...);
+  return arg + (arg.back() == ACE_DIRECTORY_SEPARATOR_CHAR_A ? "" : ACE_DIRECTORY_SEPARATOR_STR_A) + join_path(args...);
 }
 
 std::string Bench_Common_Export create_temp_dir(const std::string& prefix);

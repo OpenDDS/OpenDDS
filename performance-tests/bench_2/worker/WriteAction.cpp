@@ -24,7 +24,10 @@ const ACE_Time_Value ZERO(0, 0);
 
 namespace Bench {
 
-WriteAction::WriteAction(ACE_Proactor& proactor) : proactor_(proactor), started_(false), stopped_(false), write_period_(1, 0), max_count_(0), new_key_count_(0), new_key_probability_(0) {
+WriteAction::WriteAction(ACE_Proactor& proactor)
+ : proactor_(proactor), started_(false), stopped_(false)
+ , write_period_(1, 0), max_count_(0), new_key_count_(0), new_key_probability_(0)
+{
 }
 
 bool WriteAction::init(const ActionConfig& config, ActionReport& report, Builder::ReaderMap& readers, Builder::WriterMap& writers) {
