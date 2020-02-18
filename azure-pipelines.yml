@@ -97,12 +97,14 @@ jobs:
       perl "%DDS_ROOT%\tests\cmake_integration\run_ci_tests.pl" --build-config=$(BuildConfiguration) --generator="Visual Studio 16 2019" --arch $(BuildPlatform)
     displayName: Compile and run CMake tests
   - script: |
+      if %BuildConfiguration%==Release (set SUBDIR_FOR_MESSENGER=Release) else set SUBDIR_FOR_MESSENGER=.
       cd DevGuideExamples\DCPS\Messenger
-      perl integration_run_test.pl
+      perl integration_run_test.pl -ExeSubDir $(SUBDIR_FOR_MESSENGER) 
     displayName: Run Examples DCPS Messenger
   - script: |
+      if %BuildConfiguration%==Release (set SUBDIR_FOR_MESSENGER=Release) else set SUBDIR_FOR_MESSENGER=.
       cd tests\DCPS\Messenger
-      perl run_test.pl rtps
+      perl run_test.pl rtps -ExeSubDir $(SUBDIR_FOR_MESSENGER)
     displayName: Run DCPS Messenger Test
 
 - job: VisualStudio2017
