@@ -388,7 +388,7 @@ namespace {
   {
     be_global->add_include("dds/DCPS/V8TypeConverter.h",
                            BE_GlobalData::STREAM_CPP);
-    ScopedNamespaceGuard cppGuard(name, be_global->impl_);
+    ScopedNamespaceGuard cppGuard(name, be_global->impl_, "namespace", true);
     const std::string lname = name->last_component()->get_string(),
       tsv8 = lname + "TypeSupportV8Impl";
     be_global->impl_ <<

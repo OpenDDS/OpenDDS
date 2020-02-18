@@ -154,16 +154,22 @@ struct NamespaceGuard {
 
 struct ScopedNamespaceGuard  {
   ScopedNamespaceGuard(UTL_ScopedName* name, std::ostream& os,
-                       const char* keyword = "namespace")
+                       const char* keyword = "namespace", bool version_macro = false)
     : os_(os)
+    , semi_()
+    , n_(0)
+    , version_macro_(version_macro)
   {
+    if (version_macro_) {
+      os_ << "OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL\n";
+    }
     for (n_ = 0; name->tail();
          name = static_cast<UTL_ScopedName*>(name->tail())) {
       const char* str = name->head()->get_string();
       if (str && str[0]) {
         ++n_;
-        os << keyword << (name->head()->escaped() ? " _" : " ")
-           << str << " {\n";
+        os_ << keyword << (name->head()->escaped() ? " _" : " ")
+            << str << " {\n";
       }
     }
     if (std::strcmp(keyword, "module") == 0) semi_ = ";";
@@ -172,11 +178,15 @@ struct ScopedNamespaceGuard  {
   ~ScopedNamespaceGuard()
   {
     for (int i = 0; i < n_; ++i) os_ << '}' << semi_ << '\n';
+    if (version_macro_) {
+      os_ << "OPENDDS_END_VERSIONED_NAMESPACE_DECL\n";
+    }
   }
 
   std::ostream& os_;
   std::string semi_;
   int n_;
+  bool version_macro_;
 };
 
 struct Function {
