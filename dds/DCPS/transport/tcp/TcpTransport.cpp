@@ -776,6 +776,15 @@ TcpTransport::unbind_link(DataLink* link)
   }
 }
 
+
+int
+TcpTransport::Connector::fini() {
+  // Overriding fini() so that  ACE_Connector<TcpConnection, ACE_SOCK_Connector>::close() won't be
+  // invoked in the process shutting down reactor. Without overrinding fini(), close() would be called
+  // from destructor and from reactor in different threads which leads to synchronization issues.
+  return 0;
+}
+
 }
 }
 
