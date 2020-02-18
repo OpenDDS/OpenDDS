@@ -176,7 +176,7 @@ using WorkerPtr = std::shared_ptr<Worker>;
 class WorkerManager : public ACE_Event_Handler {
 public:
 
-  WorkerManager(ACE_Process_Manager& process_manager)
+  explicit WorkerManager(ACE_Process_Manager& process_manager)
   : process_manager_(process_manager)
   {
     process_manager.register_handler(this);
@@ -353,7 +353,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       std::cerr << "ERROR: BENCH_ROOT or DDS_ROOT must be defined" << std::endl;
       return 1;
     }
-    bench_root = join_path(dds_root, "performance-tests", "bench");
+    bench_root = join_path(dds_root, "performance-tests", "bench_2");
   }
 
   TheServiceParticipant->default_configuration_file(

@@ -100,7 +100,6 @@ WorkerDataReaderListener::on_data_available(DDS::DataReader_ptr reader)
       double latency = Builder::to_seconds_double(now - data.sent_time);
       double jitter = -1.0;
       double round_trip_latency = -1.0;
-      double round_trip_jitter = -1.0;
       if (data.total_hops != 0 && data.hop_count == data.total_hops) {
         round_trip_latency = Builder::to_seconds_double(now - data.created_time) / static_cast<double>(data.total_hops);
       }
@@ -161,6 +160,7 @@ WorkerDataReaderListener::on_data_available(DDS::DataReader_ptr reader)
 
       // Update Round-Trip Latency & Calculate / Update Round-Trip Jitter
       if (data.total_hops != 0 && data.hop_count == data.total_hops) {
+        double round_trip_jitter = -1.0;
         if (!new_writer) {
           round_trip_jitter = std::fabs(ws.previous_round_trip_latency_ - round_trip_latency);
         }
@@ -273,7 +273,7 @@ WorkerDataReaderListener::unset_datareader(Builder::DataReader& datareader)
     std::stringstream missing_data_details;
     std::stringstream out_of_order_data_details;
     std::stringstream duplicate_data_details;
-    bool new_writer = true;
+    bool new_writer;
 
     // out of order count / details
     for (auto it = writer_state_map_.begin(); it != writer_state_map_.end(); ++it) {

@@ -13,11 +13,9 @@ DdsEntities::DdsEntities(
   DDS::DomainParticipantFactory_var dpf,
   int domain)
   : dpf_(dpf)
+  , participant_(dpf->create_participant(domain, PARTICIPANT_QOS_DEFAULT,
+                                         nullptr, OpenDDS::DCPS::DEFAULT_STATUS_MASK))
 {
-  // Create Participant
-  participant_ = dpf->create_participant(
-    domain, PARTICIPANT_QOS_DEFAULT, nullptr,
-    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!participant_) {
     throw std::runtime_error("create_participant failed");
   }

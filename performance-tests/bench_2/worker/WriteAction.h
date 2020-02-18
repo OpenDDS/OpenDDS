@@ -26,7 +26,6 @@ protected:
   DataDataWriter_var data_dw_;
   Data data_;
   ACE_Time_Value write_period_;
-  size_t current_count_;
   size_t max_count_;
   size_t new_key_count_;
   uint64_t new_key_probability_;
