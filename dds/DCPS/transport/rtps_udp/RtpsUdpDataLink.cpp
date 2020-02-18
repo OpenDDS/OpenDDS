@@ -1389,6 +1389,8 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
       info.first_activity_ = false;
     }
 
+    const bool no_nack = !(info.hb_range_.second == SequenceNumber::ZERO()) && info.hb_range_.second < info.hb_range_.first;
+
     info.frags_.erase(seq);
     if (durable_ && info.recvd_.empty()) {
       info.hb_range_.first = 1;
@@ -1426,7 +1428,7 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
         info.first_delivered_data_ = false;
       }
 
-    } else if (!durable_ && info.first_delivered_data_) {
+    } else if (!durable_ && info.first_delivered_data_ && info.hb_range_.second < seq && no_nack) {
       info.hb_range_.first = seq;
       info.hb_range_.second = seq;
       info.recvd_.insert(SequenceRange(SequenceNumber::ZERO(), seq));
