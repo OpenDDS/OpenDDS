@@ -83,14 +83,14 @@ jobs:
     condition: and(succeeded(), ne(variables['MessengerTests'], ''))
     displayName: Build Messenger Test
     inputs:
-      solution: "%DDS_ROOT%\tests\DCPS\Messenger\Messenger.sln"
+      solution: "$(DDS_ROOT)\tests\DCPS\Messenger\Messenger.sln
       platform: $(BuildPlatform)
       configuration: $(BuildConfiguration)
   - task: VSBuild@1
     condition: and(succeeded(), ne(variables['MessengerTests'], ''))
     displayName: Build Messenger Example
     inputs:
-      solution: "%DDS_ROOT%\DevGuideExamples\DCPS\Messenger\Messenger.sln"
+      solution: "$(DDS_ROOT)\DevGuideExamples\DCPS\Messenger\Messenger.sln
       platform: $(BuildPlatform)
       configuration: $(BuildConfiguration)
   - script: |
