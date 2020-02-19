@@ -98,14 +98,15 @@ jobs:
     displayName: Compile and run CMake tests
   - script: |
       if %BuildConfiguration%==Release (set SUBDIR_FOR_MESSENGER=Release) else set SUBDIR_FOR_MESSENGER=.
-      cd DevGuideExamples\DCPS\Messenger
-      perl integration_run_test.pl -ExeSubDir $(SUBDIR_FOR_MESSENGER) 
-    displayName: Run Examples DCPS Messenger
-  - script: |
-      if %BuildConfiguration%==Release (set SUBDIR_FOR_MESSENGER=Release) else set SUBDIR_FOR_MESSENGER=.
       cd tests\DCPS\Messenger
       perl run_test.pl rtps -ExeSubDir $(SUBDIR_FOR_MESSENGER)
     displayName: Run DCPS Messenger Test
+  - script: |
+      if %BuildConfiguration%==Release (set SUBDIR_FOR_MESSENGER=Release) else set SUBDIR_FOR_MESSENGER=.
+      cd DevGuideExamples\DCPS\Messenger
+      perl integration_run_test.pl -ExeSubDir $(SUBDIR_FOR_MESSENGER)
+    condition: eq(variables['BuildConfiguration'], 'Debug')
+    displayName: Run Examples DCPS Messenger
 
 - job: VisualStudio2017
   timeoutInMinutes: 90
@@ -167,16 +168,31 @@ jobs:
       configuration: $(BuildConfiguration)
       maximumCpuCount: true
   - script: |
+      perl "%ACE_ROOT%/bin/mwc.pl" -type vs2017 tests\DCPS\Messenger DevGuideExamples\DCPS\Messenger
+    displayName: Generate Messenger sln files
+  - task: VSBuild@1
+    displayName: Build Messenger Test
+    inputs:
+      solution: $(DDS_ROOT)\tests\DCPS\Messenger\Messenger.sln
+      platform: $(BuildPlatform)
+      configuration: $(BuildConfiguration)
+  - task: VSBuild@1
+    displayName: Build Messenger Example
+    inputs:
+      solution: $(DDS_ROOT)\DevGuideExamples\DCPS\Messenger\Messenger.sln
+      platform: $(BuildPlatform)
+      configuration: $(BuildConfiguration)
+  - script: |
       perl "%DDS_ROOT%\tests\cmake_integration\run_ci_tests.pl" --build-config=$(BuildConfiguration) --generator="Visual Studio 15 2017" --arch $(BuildPlatform)
     displayName: Compile and run CMake tests
-  - script: |
-      cd DevGuideExamples\DCPS\Messenger
-      perl integration_run_test.pl
-    displayName: Run Examples DCPS Messenger
   - script: |
       cd tests\DCPS\Messenger
       perl run_test.pl rtps
     displayName: Run DCPS Messenger Test
+#  - script: |
+#      cd DevGuideExamples\DCPS\Messenger
+#      perl integration_run_test.pl
+#    displayName: Run Examples DCPS Messenger
 
 - job: VisualStudio2015
   timeoutInMinutes: 90
@@ -234,13 +250,28 @@ jobs:
       configuration: $(BuildConfiguration)
       maximumCpuCount: true
   - script: |
-      cd DevGuideExamples\DCPS\Messenger
-      perl integration_run_test.pl
-    displayName: Run Examples DCPS Messenger
+      perl "%ACE_ROOT%/bin/mwc.pl" -type vs2015 tests\DCPS\Messenger DevGuideExamples\DCPS\Messenger
+    displayName: Generate Messenger sln files
+  - task: VSBuild@1
+    displayName: Build Messenger Test
+    inputs:
+      solution: $(DDS_ROOT)\tests\DCPS\Messenger\Messenger.sln
+      platform: $(BuildPlatform)
+      configuration: $(BuildConfiguration)
+  - task: VSBuild@1
+    displayName: Build Messenger Example
+    inputs:
+      solution: $(DDS_ROOT)\DevGuideExamples\DCPS\Messenger\Messenger.sln
+      platform: $(BuildPlatform)
+      configuration: $(BuildConfiguration)
   - script: |
       cd tests\DCPS\Messenger
       perl run_test.pl rtps
     displayName: Run DCPS Messenger Test
+#  - script: |
+#      cd DevGuideExamples\DCPS\Messenger
+#      perl integration_run_test.pl
+#    displayName: Run Examples DCPS Messenger
 
 - job: Linux
   timeoutInMinutes: 90
