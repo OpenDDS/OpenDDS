@@ -105,7 +105,6 @@ jobs:
       if %BuildConfiguration%==Release (set SUBDIR_FOR_MESSENGER=Release) else set SUBDIR_FOR_MESSENGER=.
       cd DevGuideExamples\DCPS\Messenger
       perl integration_run_test.pl -ExeSubDir %SUBDIR_FOR_MESSENGER%
-    condition: eq(variables['BuildConfiguration'], 'Debug')
     displayName: Run Examples DCPS Messenger
 
 - job: VisualStudio2017
@@ -190,11 +189,11 @@ jobs:
       cd tests\DCPS\Messenger
       perl run_test.pl rtps -ExeSubDir %SUBDIR_FOR_MESSENGER%
     displayName: Run DCPS Messenger Test
-#  - script: |
-#      if %BuildConfiguration%==Release (set SUBDIR_FOR_MESSENGER=Release) else set SUBDIR_FOR_MESSENGER=.
-#      cd DevGuideExamples\DCPS\Messenger
-#      perl integration_run_test.pl -ExeSubDir %SUBDIR_FOR_MESSENGER%
-#    displayName: Run Examples DCPS Messenger
+  - script: |
+      if %BuildConfiguration%==Release (set SUBDIR_FOR_MESSENGER=Release) else set SUBDIR_FOR_MESSENGER=.
+      cd DevGuideExamples\DCPS\Messenger
+      perl integration_run_test.pl -ExeSubDir %SUBDIR_FOR_MESSENGER%
+    displayName: Run Examples DCPS Messenger
 
 - job: VisualStudio2015
   timeoutInMinutes: 90
