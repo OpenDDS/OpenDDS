@@ -171,6 +171,21 @@ void NetworkConfigMonitor::remove_address(int index, const ACE_INET_Addr& addres
   }
 }
 
+int NetworkConfigMonitor::get_index(const OPENDDS_STRING& name)
+{
+  int index = -1;
+  NetworkInterface nic;
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, network_interfaces_mutex_, -1);
+    NetworkInterfaces::iterator nic_pos = std::find_if(network_interfaces_.begin(), network_interfaces_.end(), NetworkInterfaceName(name));
+    if (nic_pos != network_interfaces_.end()) {
+      index = nic_pos->index();
+    }
+  }
+
+  return index;
+}
+
 } // DCPS
 } // OpenDDS
 

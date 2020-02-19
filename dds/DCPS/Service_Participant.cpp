@@ -2065,6 +2065,45 @@ NetworkConfigMonitor_rch Service_Participant::network_config_monitor()
   return network_config_monitor_;
 }
 
+#if defined(OPENDDS_NETWORK_CONFIG_UPDATER)
+
+void
+Service_Participant::add_interface(const OPENDDS_STRING &name)
+{
+  if (network_config_monitor_)
+  {
+    dynamic_cast<NetworkConfigUpdater*>(network_config_monitor_.get())->add_interface(name);
+  }
+}
+
+void
+Service_Participant::remove_interface(const OPENDDS_STRING &name)
+{
+  if (network_config_monitor_)
+  {
+    dynamic_cast<NetworkConfigUpdater*>(network_config_monitor_.get())->remove_interface(name);
+  }
+}
+
+void
+Service_Participant::add_address(const OPENDDS_STRING &name, const ACE_INET_Addr& address)
+{
+  if (network_config_monitor_)
+  {
+    dynamic_cast<NetworkConfigUpdater*>(network_config_monitor_.get())->add_address(name, address);
+  }
+}
+
+void
+Service_Participant::remove_address(const OPENDDS_STRING &name, const ACE_INET_Addr& address)
+{
+  if (network_config_monitor_)
+  {
+    dynamic_cast<NetworkConfigUpdater*>(network_config_monitor_.get())->remove_address(name, address);
+  }
+}
+
+#endif // OPENDDS_NETWORK_CONFIG_UPDATER
 
 } // namespace DCPS
 } // namespace OpenDDS
