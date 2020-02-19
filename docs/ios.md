@@ -177,8 +177,8 @@ Set `OPENSSL_ROOT` to the install location:
 export OPENSSL_ROOT=/usr/local/ios/openssl
 ```
 
-Copy the static libraries (libcrypto.a and libssl.a) to the \$OPENSSL_ROOT/lib 
-and the header files to $OPENSSL_ROOT/include`.
+Copy the static libraries (libcrypto.a and libssl.a) to the `$OPENSSL_ROOT/lib` 
+and the header files to `$OPENSSL_ROOT/include`.
 
 OpenDDS security builds need the location of OpenSSL installed headers and
 static libraries. This location can be passed to the OpenDDS configure script 
