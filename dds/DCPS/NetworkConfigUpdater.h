@@ -8,11 +8,10 @@
 #ifndef OPENDDS_DCPS_NETWORKCONFIGUPDATER_H
 #define OPENDDS_DCPS_NETWORKCONFIGUPDATER_H
 
-#include "ace/config.h"
-
 #ifdef ACE_HAS_IOS 
 #define OPENDDS_NETWORK_CONFIG_UPDATER
 
+#include "ace/os_include/os_ifaddrs.h"
 #include "NetworkConfigMonitor.h"
 #include "dcps_export.h"
 

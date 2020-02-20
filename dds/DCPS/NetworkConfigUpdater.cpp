@@ -7,15 +7,9 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
-#include "ace/config.h"
-#include "ace/os_include/os_ifaddrs.h"
-
 #include "NetworkConfigUpdater.h"
 
 #ifdef OPENDDS_NETWORK_CONFIG_UPDATER
-
-#include <ace/Netlink_Addr.h>
-#include <net/if.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -24,12 +18,13 @@ namespace DCPS {
 
 NetworkConfigUpdater::NetworkConfigUpdater()
 {
-
 }
 
 bool NetworkConfigUpdater::open()
 {
-  ACE_DEBUG((LM_DEBUG, "NetworkConfigUpdater::open enumerating interfaces"));
+  if (DCPS_debug_level > 0) {
+    ACE_DEBUG((LM_DEBUG, "NetworkConfigUpdater::open enumerating interfaces"));
+  }
 
   struct ifaddrs *ifap = 0;
   struct ifaddrs *p_if = 0;
