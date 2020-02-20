@@ -1,7 +1,7 @@
 #pragma once
 
 #include "BenchC.h"
-#include "Process.h"
+#include "BuilderProcess.h"
 
 namespace Bench {
 

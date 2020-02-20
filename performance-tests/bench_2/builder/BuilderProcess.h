@@ -8,10 +8,10 @@
 
 namespace Builder {
 
-class Bench_Builder_Export Process {
+class Bench_Builder_Export BuilderProcess {
 public:
-  explicit Process(const ProcessConfig& config);
-  ~Process();
+  explicit BuilderProcess(const ProcessConfig& config);
+  ~BuilderProcess();
 
   void enable_dds_entities();
 

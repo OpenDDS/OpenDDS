@@ -25,7 +25,7 @@
 #include "SubscriberListener.h"
 #include "PublisherListener.h"
 #include "ParticipantListener.h"
-#include "Process.h"
+#include "BuilderProcess.h"
 
 #include "Utils.h"
 
@@ -233,7 +233,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     Log::log() << "Beginning process construction / entity creation." << std::endl;
 
     process_construction_begin_time = Builder::get_time();
-    Builder::Process process(config.process);
+    Builder::BuilderProcess process(config.process);
     process_construction_end_time = Builder::get_time();
 
     Log::log() << std::endl << "Process construction / entity creation complete." << std::endl << std::endl;
