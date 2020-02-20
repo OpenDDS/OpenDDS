@@ -1,0 +1,28 @@
+{
+  "name": "Scalability",
+  "desc": "This scenario is inteded to test fan-in of multiple writers, writing aggregage feeds, to a single reader",
+  "nodes": [],
+  "any_node": [
+    {
+      "config": "scalability_receiver_plus.json",
+      "count": 1
+    },
+    {
+      "config": "scalability_aggregator_fault.json",
+      "count": 1
+    },
+    {
+      "config": "scalability_aggregator_spike.json",
+      "count": 1
+    },
+    {
+      "config": "scalability_aggregator_nodata.json",
+      "count": 1
+    },
+    {
+      "config": "scalability_aggregator.json",
+      "count": 97
+    }
+  ],
+  "timeout": 180
+}

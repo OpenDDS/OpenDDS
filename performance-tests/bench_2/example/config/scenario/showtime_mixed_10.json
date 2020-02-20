@@ -1,0 +1,27 @@
+{
+  "name": "Showtime Mixed 10",
+  "desc": "This is the showtime scenario with mixed writers/readers and 10 'nodes'",
+  "nodes": [
+    {
+      "workers": [
+        {
+          "config": "showtime_mixed_daemon.json",
+          "count": 1
+        },
+        {
+          "config": "showtime_mixed_worker.json",
+          "count": 1
+        }
+      ],
+      "count": 10,
+      "exclusive": false
+    }
+  ],
+  "any_node": [
+    {
+      "config": "showtime_mixed_master.json",
+      "count": 1
+    }
+  ],
+  "timeout": 180
+}

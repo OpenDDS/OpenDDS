@@ -156,14 +156,16 @@ struct ScopedNamespaceGuard  {
   ScopedNamespaceGuard(UTL_ScopedName* name, std::ostream& os,
                        const char* keyword = "namespace")
     : os_(os)
+    , semi_()
+    , n_(0)
   {
     for (n_ = 0; name->tail();
          name = static_cast<UTL_ScopedName*>(name->tail())) {
       const char* str = name->head()->get_string();
       if (str && str[0]) {
         ++n_;
-        os << keyword << (name->head()->escaped() ? " _" : " ")
-           << str << " {\n";
+        os_ << keyword << (name->head()->escaped() ? " _" : " ")
+            << str << " {\n";
       }
     }
     if (std::strcmp(keyword, "module") == 0) semi_ = ";";

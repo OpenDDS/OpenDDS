@@ -1,0 +1,165 @@
+{
+  "enable_time": { "sec": -2, "nsec": 0 },
+  "start_time": { "sec": -2, "nsec": 0 },
+  "stop_time": { "sec": -45, "nsec": 0 },
+  "destruction_time": { "sec": -2, "nsec": 0 },
+
+  "process": {
+    "config_sections": [
+      { "name": "common",
+        "properties": [
+          { "name": "DCPSSecurity",
+            "value": "0"
+          },
+          { "name": "DCPSDebugLevel",
+            "value": "0"
+          }
+        ]
+      }
+    ],
+    "discoveries": [
+      { "name": "bench_test_rtps",
+        "type": "rtps",
+        "domain": 7
+      }
+    ],
+    "instances": [
+      { "name": "rtps_instance_01",
+        "type": "rtps_udp",
+        "domain": 7
+      }
+    ],
+    "participants": [
+      { "name": "participant_01",
+        "domain": 7,
+        "transport_config_name": "rtps_instance_01",
+
+        "qos": { "entity_factory": { "autoenable_created_entities": false } },
+        "qos_mask": { "entity_factory": { "has_autoenable_created_entities": false } },
+
+        "topics": [
+          { "name": "topic_A",
+            "type_name": "Bench::Data"
+          },
+          { "name": "topic_B",
+            "type_name": "Bench::Data"
+          },
+          { "name": "topic_C",
+            "type_name": "Bench::Data"
+          },
+          { "name": "topic_D",
+            "type_name": "Bench::Data"
+          },
+          { "name": "topic_E",
+            "type_name": "Bench::Data"
+          },
+          { "name": "topic_F",
+            "type_name": "Bench::Data"
+          }
+        ],
+        "subscribers": [
+          { "name": "subscriber_01",
+            "datareaders": [
+              { "name": "datareader_E",
+                "topic_name": "topic_E",
+                "listener_type_name": "bench_drl",
+                "listener_status_mask": 4294967295,
+
+                "qos": { "reliability": { "kind": "RELIABLE_RELIABILITY_QOS" } },
+                "qos_mask": { "reliability": { "has_kind": true } }
+              },
+              { "name": "datareader_F",
+                "topic_name": "topic_F",
+                "listener_type_name": "bench_drl",
+                "listener_status_mask": 4294967295,
+
+                "qos": { "reliability": { "kind": "RELIABLE_RELIABILITY_QOS" } },
+                "qos_mask": { "reliability": { "has_kind": true } }
+              }
+            ]
+          }
+        ],
+        "publishers": [
+          { "name": "publisher_01",
+            "datawriters": [
+              { "name": "datawriter_A",
+                "topic_name": "topic_A",
+                "listener_type_name": "bench_dwl",
+                "listener_status_mask": 4294967295
+              },
+              { "name": "datawriter_B",
+                "topic_name": "topic_B",
+                "listener_type_name": "bench_dwl",
+                "listener_status_mask": 4294967295
+              },
+              { "name": "datawriter_C",
+                "topic_name": "topic_C",
+                "listener_type_name": "bench_dwl",
+                "listener_status_mask": 4294967295
+              },
+              { "name": "datawriter_D",
+                "topic_name": "topic_D",
+                "listener_type_name": "bench_dwl",
+                "listener_status_mask": 4294967295
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "actions": [
+    {
+      "name": "write_action_A",
+      "type": "write",
+      "writers": [ "datawriter_A" ],
+      "params": [
+        { "name": "data_buffer_bytes",
+          "value": { "_d": "PVK_ULL", "ull_prop": 512 }
+        },
+        { "name": "write_period",
+          "value": { "_d": "PVK_DOUBLE", "double_prop": 40.0 }
+        }
+      ]
+    },
+    {
+      "name": "write_action_B",
+      "type": "write",
+      "writers": [ "datawriter_B" ],
+      "params": [
+        { "name": "data_buffer_bytes",
+          "value": { "_d": "PVK_ULL", "ull_prop": 256 }
+        },
+        { "name": "write_period",
+          "value": { "_d": "PVK_DOUBLE", "double_prop": 20.0 }
+        }
+      ]
+    },
+    {
+      "name": "write_action_C",
+      "type": "write",
+      "writers": [ "datawriter_C" ],
+      "params": [
+        { "name": "data_buffer_bytes",
+          "value": { "_d": "PVK_ULL", "ull_prop": 128 }
+        },
+        { "name": "write_period",
+          "value": { "_d": "PVK_DOUBLE", "double_prop": 10.0 }
+        }
+      ]
+    },
+    {
+      "name": "write_action_D",
+      "type": "write",
+      "writers": [ "datawriter_D" ],
+      "params": [
+        { "name": "data_buffer_bytes",
+          "value": { "_d": "PVK_ULL", "ull_prop": 64 }
+        },
+        { "name": "write_period",
+          "value": { "_d": "PVK_DOUBLE", "double_prop": 5.0 }
+        }
+      ]
+    }
+  ]
+}

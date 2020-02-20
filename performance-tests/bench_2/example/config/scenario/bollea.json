@@ -1,0 +1,16 @@
+{
+  "name": "Bollea",
+  "desc": "This scenario is inteded to test fan-in of multiple writers, writing aggregage feeds, to a single reader",
+  "nodes": [],
+  "any_node": [
+    {
+      "config": "bollea_receiver.json",
+      "count": 1
+    },
+    {
+      "config": "bollea_aggregator.json",
+      "count": 4
+    }
+  ],
+  "timeout": 180
+}

@@ -1,0 +1,86 @@
+{
+  "enable_time": { "sec": -1, "nsec": 0 },
+  "start_time": { "sec": -3, "nsec": 0 },
+  "stop_time": { "sec": -30, "nsec": 0 },
+  "destruction_time": { "sec": -1, "nsec": 0 },
+
+  "process": {
+    "config_sections": [
+      { "name": "common",
+        "properties": [
+          { "name": "DCPSSecurity",
+            "value": "1"
+          }
+        ]
+      },
+      { "name": "transport/rtps_instance_02",
+        "properties": [
+          { "name": "use_multicast",
+            "value": "0"
+          },
+          { "name": "transport_type",
+            "value": "rtps_udp"
+          }
+        ]
+      }
+    ],
+    "discoveries": [
+      { "name": "bench_test_rtps",
+        "type": "rtps",
+        "domain": 0
+      }
+    ],
+    "instances": [
+      { "name": "rtps_instance_02",
+        "type": "rtps_udp",
+        "domain": 0
+      }
+    ],
+    "participants": [
+      { "name": "participant_02",
+        "domain": 0,
+        "listener_status_mask": 4294967295,
+        "transport_config_name": "rtps_instance_02",
+
+        "qos": {
+            "entity_factory": { "autoenable_created_entities": false },
+            "property": {
+              "value": [
+                { "name": "dds.sec.auth.identity_ca", "value": "file:../../../tests/security/certs/identity/identity_ca_cert.pem", "propagate": false },
+                { "name": "dds.sec.auth.identity_certificate", "value": "file:../../../tests/security/certs/identity/test_participant_02_cert.pem", "propagate": false },
+                { "name": "dds.sec.auth.private_key", "value": "file:../../../tests/security/certs/identity/test_participant_02_private_key.pem", "propagate": false },
+                { "name": "dds.sec.access.permissions_ca", "value": "file:../../../tests/security/certs/permissions/permissions_ca_cert.pem", "propagate": false },
+                { "name": "dds.sec.access.governance", "value": "file:../../../tests/security/attributes/governance/governance_PU_PA_ED_EL_NR_signed.p7s", "propagate": false },
+                { "name": "dds.sec.access.permissions", "value": "file:../../../tests/security/attributes/permissions/permissions_test_participant_02_readwrite_signed.p7s", "propagate": false }
+              ]
+            }
+          },
+        "qos_mask": {
+          "entity_factory": { "has_autoenable_created_entities": false },
+          "property": { "has_value": true }
+        },
+        "topics": [
+          { "name": "OD_OL_OA_EM_OD",
+            "type_name": "Bench::Data",
+            "listener_status_mask": 4294967295
+          }
+        ],
+        "subscribers": [
+          { "name": "subscriber_02",
+            "listener_status_mask": 4294967295,
+            "datareaders": [
+              { "name": "datareader_02",
+                "topic_name": "OD_OL_OA_EM_OD",
+                "listener_type_name": "bench_drl",
+                "listener_status_mask": 4294967295,
+
+                "qos": { "reliability": { "kind": "RELIABLE_RELIABILITY_QOS" } },
+                "qos_mask": { "reliability": { "has_kind": true } }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
