@@ -4105,6 +4105,7 @@ Sedp::acknowledge()
 void
 Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<ParticipantData_t> pdata, bool bSecureParticipant)
 {
+  ACE_UNUSED_ARG(bSecureParticipant);
   if (spdp_->shutting_down()) { return; }
 
   Msg::MsgType type = Msg::MSG_PARTICIPANT;
