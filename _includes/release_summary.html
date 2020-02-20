@@ -1,7 +1,7 @@
 
 <h2>Releases</h2>
 
-{% assign sorted_rel = site.github.releases | sort: "created_at" | reverse %}
+{% assign sorted_rel = site.github.releases | where: "prerelease", false | sort: "created_at" | reverse %}
 {% assign latest_rel = sorted_rel | first %}
 
 <h3><a href="{{latest_rel.html_url}}">{{latest_rel.name}}</a></h3>
@@ -22,18 +22,18 @@
 
 <i class="post-date">Released on {{ latest_rel.published_at | date_to_long_string }}</i>
 
-{% if site.github.releases.size > 1 %}
+{% if sorted_rel.size > 1 %}
   <h3>Previous Releases:</h3>
 
   <ul>
     {% for r in sorted_rel limit:5 offset:1 %}
       <li><a href="{{ r.html_url }}">{{ r.name }}</a></li>
     {% endfor %}
-    {% if site.github.releases.size > 6 %}
+    {% if sorted_rel.size > 6 %}
       <li><a href="{{ site.github.releases_url }}">See all releases on GitHub</a></li>
     {% endif %}
   </ul>
   <div class="more-release-notes">
-    <p>Release notes for all previous releases can be found in the <a href="{{ site.data.opendds.github_raw_base_uri }}/{{ latest_rel.tag_name }}/NEWS.md">NEWS</a> file.</p>
+    <p>Release notes for all previous releases can be found in the <a href="{{ site.data.opendds.github_raw_base_uri }}/{{ latest_rel.tag_name }}/NEWS.md">NEWS.md</a> file.</p>
   </div>
 {% endif %}
