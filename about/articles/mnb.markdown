@@ -1,14 +1,19 @@
 ---
 layout: page
-title: Middleware News Brief
+title: Middleware News Brief / SETT
 order: 82
 categories: [opendds]
 ---
-OCI publishes Middleware News Brief articles on a number of topics.  The following are related to OpenDDS:
+OCI publishes Middleware News Brief and SETT (Software Engineering Tech Trends) articles on a number of topics.  The following are related to OpenDDS:
 
+- [OMG DDS For Extremely Resource-Constrained Environments (DDS-XRCE)](https://objectcomputing.com/resources/publications/sett/october-2019-dds-for-extremely-resource-constrained-environments)
+- [Interoperable Internet-Enabled DDS Applications](https://objectcomputing.com/resources/publications/mnb/interoperable-internet-enabled-dds-applications)
+- [Bringing Multicast to the Cloud for Interoperable OpenDDS Applications](https://objectcomputing.com/resources/publications/sett/march-2019-multicast-to-cloud-for-dds-applications)
+- [Distributing Data Securely with OpenDDS](https://objectcomputing.com/resources/publications/sett/october-2018-distributing-data-securely-with-opendds)
 - [Using TAO and OpenDDS with .NET, Part I](http://www.objectcomputing.com/resources/publications/mnb/using-tao-and-opendds-with-net-part-1)
 - [Using TAO and OpenDDS with .NET, Part II](http://www.objectcomputing.com/resources/publications/mnb/using-tao-and-opendds-with-net-part-ii)
 - [Using TAO and OpenDDS with .NET, Part III - DCPSInfoRepo Collocation](http://www.objectcomputing.com/resources/publications/mnb/using-tao-and-opendds-with-net-part-iii-dcpsinforepo-collocation)
+- [Bridging XMPP and DDS Messaging Frameworks](https://objectcomputing.com/resources/publications/sett/april-2012-bridging-xmpp-and-dds-messaging-frameworks)
 - [Using QuickFAST and OpenDDS for a Low-Latency Market Data Feed](https://objectcomputing.com/resources/publications/mnb/using-quickfast-and-opendds-for-a-low-latency-market-data-feed)
 - [Using Reliable Multicast for Data Distribution with OpenDDS](https://objectcomputing.com/resources/publications/mnb/using-reliable-multicast-for-data-distribution-with-opendds)
 - [Interpreting OpenDDS Performance Testing Results](https://objectcomputing.com/resources/publications/mnb/interpreting-opendds-performance-testing-results)

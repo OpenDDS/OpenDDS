@@ -115,7 +115,8 @@ h1, h2, h3, h4, h5, h6 {
 /**
  * Links
  */
-.page-content a[href] {
+
+ %link-baseline {
     color: $brand-color;
     text-decoration: none;
 
@@ -127,6 +128,10 @@ h1, h2, h3, h4, h5, h6 {
         color: $text-color;
         text-decoration: underline;
     }
+ }
+
+.page-content a[href] {
+    @extend %link-baseline;
 }
 
 
@@ -181,8 +186,8 @@ pre {
  * Wrapper
  */
 .wrapper {
-    max-width: -webkit-calc(1200px - (#{$spacing-unit} * 2));
-    max-width:         calc(1200px - (#{$spacing-unit} * 2));
+    max-width: -webkit-calc(1000px - (#{$spacing-unit} * 2));
+    max-width:         calc(1000px - (#{$spacing-unit} * 2));
     margin-right: auto;
     margin-left: auto;
     padding-right: $spacing-unit;

@@ -22,6 +22,38 @@
 .sidebar:after {
     clear: both;
 }
+.above-nav-bg {
+    width: 100%;
+    margin-right: auto;
+    margin-left: auto;
+    background-color: #FFF;
+    @extend %clearfix;
+    padding: 1em 0;
+}
+
+.above-nav {
+    .opendds-logo {
+        width: 200px;
+    
+        img {
+            width: 50%;
+            float: left;
+        }
+    
+        h1 {
+            color: $text-color;
+            width: 50%;
+            float: right;
+            margin-top: 8px;
+        }
+    }
+}
+
+.above-nav-main-content {
+    width: 98%;
+    margin-left: auto;
+    margin-right: auto;
+}
 
 .site-nav {
     float: left;
@@ -219,9 +251,15 @@
 /**
  * Site footer
  */
+
 .site-footer {
-    border-top: 1px solid $grey-color-light;
+    border-top: 5px solid $grey-color;
+    border-bottom: 5px solid $grey-color;
     padding: $spacing-unit 0;
+}
+
+.site-footer a[href] {
+    @extend %link-baseline;
 }
 
 .footer-heading {
@@ -230,15 +268,24 @@
 }
 
 .contact-list,
-.social-media-list {
+.social-media-list,
+.footer-resources-list {
     list-style: none;
     margin-left: 0;
+}
+
+.footer-resources-list {
+    i {
+        font-size: 0.9em;
+    }
 }
 
 .footer-col-wrapper {
     font-size: 15px;
     color: $grey-color;
-    margin-left: -$spacing-unit / 2;
+    width: 98%;
+    margin-left: auto;
+    margin-right: auto;
     @extend %clearfix;
 }
 
@@ -249,8 +296,24 @@
 }
 
 .footer-col-1 {
-    width: -webkit-calc(35% - (#{$spacing-unit} / 2));
-    width:         calc(35% - (#{$spacing-unit} / 2));
+    width: -webkit-calc(30% - (#{$spacing-unit} / 2));
+    width:         calc(30% - (#{$spacing-unit} / 2));
+
+    a {
+        img {
+            width: 80%;
+            margin-bottom: 5%;
+        }
+    }
+
+    @include media-query($on-palm) {
+        a {
+            img {
+                width: 50%;
+                margin-bottom: 5%;
+            }
+        }
+    }
 }
 
 .footer-col-2 {
@@ -259,8 +322,13 @@
 }
 
 .footer-col-3 {
-    width: -webkit-calc(45% - (#{$spacing-unit} / 2));
-    width:         calc(45% - (#{$spacing-unit} / 2));
+    width: -webkit-calc(20% - (#{$spacing-unit} / 2));
+    width:         calc(20% - (#{$spacing-unit} / 2));
+}
+
+.footer-col-4 {
+    width: -webkit-calc(30% - (#{$spacing-unit} / 2));
+    width:         calc(30% - (#{$spacing-unit} / 2));
 }
 
 @include media-query($on-laptop) {
@@ -270,7 +338,8 @@
         width:         calc(50% - (#{$spacing-unit} / 2));
     }
 
-    .footer-col-3 {
+    .footer-col-3,
+    .footer-col-4 {
         width: -webkit-calc(100% - (#{$spacing-unit} / 2));
         width:         calc(100% - (#{$spacing-unit} / 2));
     }
@@ -284,6 +353,30 @@
     }
 }
 
+.footer-end-matter {
+    font-size: 15px;
+    color: $grey-color;
+    margin-left: -$spacing-unit / 2;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    text-align: center;
+    
+    .wrapper {
+        width: 50%;
+    }
+
+    @include media-query($on-palm) {
+        .wrapper {
+            width: 90%;
+        }
+    }
+}
+
+.footer-end-matter a[href] {
+    @extend %link-baseline;
+}
+
+
 
 
 /**
@@ -295,6 +388,12 @@
 
 .page-heading {
     font-size: 20px;
+}
+
+.post {
+    width: 95%;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .post-list {
@@ -360,5 +459,51 @@
         @include media-query($on-laptop) {
             font-size: 18px;
         }
+    }
+}
+
+.news-summary {
+    float: left;
+    width: 50%;
+
+    .news-item {
+        margin-bottom: 1em;
+    }
+}
+
+.release-summary {
+    float: right;
+    width: 45%;
+
+    .download-note {
+        font-size: 0.95em;
+    }
+
+    .more-release-notes {
+        margin-top: 1.5em;
+    }
+}
+
+.post-date {
+    display: block;
+    color: $grey-color;
+    font-size: 0.9em;
+    margin-top: 3px;
+}
+
+.more-news {
+    margin-top: 1em;
+}
+
+@include media-query($on-palm) {
+    .news-summary {
+        float: none;
+        width: 90%;
+        margin-bottom: 1.5em;
+    }
+    
+    .release-summary {
+        float: none;
+        width: 90%;
     }
 }
