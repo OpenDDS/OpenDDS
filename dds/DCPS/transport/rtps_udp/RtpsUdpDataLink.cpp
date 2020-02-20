@@ -1805,8 +1805,22 @@ RtpsUdpDataLink::RtpsWriter::has_reader(const RepoId& id) const
 bool
 RtpsUdpDataLink::RtpsWriter::remove_reader(const RepoId& id)
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
-  return remote_readers_.erase(id) > 0;
+  OPENDDS_MAP(SequenceNumber, TransportQueueElement*) dd;
+  bool result = false;
+  {
+    ACE_Guard<ACE_Thread_Mutex> g(mutex_);
+    ReaderInfoMap::iterator it = remote_readers_.find(id);
+    if (it != remote_readers_.end()) {
+      it->second.swap_durable_data(dd);
+      remote_readers_.erase(it);
+      result = true;
+    }
+  }
+  typedef OPENDDS_MAP(SequenceNumber, TransportQueueElement*)::iterator iter_t;
+  for (iter_t it = dd.begin(); it != dd.end(); ++it) {
+    it->second->data_dropped();
+  }
+  return result;
 }
 
 size_t
@@ -3570,6 +3584,12 @@ RtpsUdpDataLink::populate_security_handles(const RepoId& local_id,
 RtpsUdpDataLink::ReaderInfo::~ReaderInfo()
 {
   expire_durable_data();
+}
+
+void
+RtpsUdpDataLink::ReaderInfo::swap_durable_data(OPENDDS_MAP(SequenceNumber, TransportQueueElement*)& dd)
+{
+  durable_data_.swap(dd);
 }
 
 void

@@ -281,6 +281,7 @@ private:
       , durable_(durable)
     {}
     ~ReaderInfo();
+    void swap_durable_data(OPENDDS_MAP(SequenceNumber, TransportQueueElement*)& dd);
     void expire_durable_data();
     bool expecting_durable_data() const;
   };
