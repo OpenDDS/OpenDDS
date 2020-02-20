@@ -18,7 +18,7 @@ public:
   static DDS::TypeSupport_var get_type_support(const std::string& name);
   static std::vector<std::string> get_type_names();
 
-  class TypeSupportRegistration {
+  class Bench_Builder_Export TypeSupportRegistration {
   public:
     explicit TypeSupportRegistration(DDS::TypeSupport* ts);
   };

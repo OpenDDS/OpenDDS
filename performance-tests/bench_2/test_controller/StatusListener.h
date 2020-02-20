@@ -7,10 +7,7 @@
 
 #include <dds/DdsDcpsInfrastructureC.h>
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
 #include "BenchTypeSupportImpl.h"
-#pragma GCC diagnostic pop
 
 typedef std::map<Bench::NodeController::NodeId, Bench::NodeController::Status, OpenDDS::DCPS::GUID_tKeyLessThan> Nodes;
 std::ostream& operator<<(std::ostream& os, const Bench::NodeController::Status& node);

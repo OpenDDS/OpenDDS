@@ -8,10 +8,7 @@
 #include <ace/Default_Constants.h> // For ACE_DIRECTORY_SEPARATOR_*
 #include <ace/SString.h>
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
 #include "Bench_Common_Export.h"
-#pragma GCC diagnostic pop
 
 namespace Bench {
 

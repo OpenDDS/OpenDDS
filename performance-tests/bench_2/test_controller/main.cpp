@@ -12,11 +12,8 @@
 #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
 #include "BenchTypeSupportImpl.h"
 #include "PropertyStatBlock.h"
-#pragma GCC diagnostic pop
 
 #include <util.h>
 #include <json_conversion.h>

@@ -5,11 +5,8 @@
 #include <dds/DdsDcpsPublicationC.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
 #include "BenchTypeSupportImpl.h"
 #include "PropertyStatBlock.h"
-#pragma GCC diagnostic pop
 
 #include "StatusListener.h"
 

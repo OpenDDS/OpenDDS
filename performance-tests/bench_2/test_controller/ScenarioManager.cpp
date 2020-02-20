@@ -10,6 +10,8 @@
 #include <dds/DCPS/WaitSet.h>
 #include <dds/DCPS/GuardCondition.h>
 
+#include <ace/OS_NS_unistd.h>
+
 #include <util.h>
 #include <json_conversion.h>
 

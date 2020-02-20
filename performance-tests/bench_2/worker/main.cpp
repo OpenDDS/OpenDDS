@@ -10,12 +10,9 @@
 #include <dds/DCPS/transport/multicast/Multicast.h>
 #endif
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
 #include "BenchC.h"
 #include "BenchTypeSupportImpl.h"
 #include "BuilderTypeSupportImpl.h"
-#pragma GCC diagnostic pop
 
 #include "ListenerFactory.h"
 

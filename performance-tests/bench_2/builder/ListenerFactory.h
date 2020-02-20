@@ -11,7 +11,7 @@
 namespace Builder {
 
 template <typename ListenerType>
-class Bench_Builder_Export ListenerFactory {
+class ListenerFactory {
 public:
   using Listener = ListenerType;
   using Listener_var = typename ListenerType::_var_type;
