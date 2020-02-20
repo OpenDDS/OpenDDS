@@ -14,7 +14,7 @@
   {% if ext == '.zip' %}
     {% assign note = 'Windows' %}
   {% else %}
-    {% assign note = 'Linux/Solaris/MacOSX' %}
+    {% assign note = 'Linux/macOS' %}
   {% endif %}
 
   <p><a href="{{ a.browser_download_url }}">Download {{a.name}}</a> <span class="download-note">({{ note }})</span></p>
