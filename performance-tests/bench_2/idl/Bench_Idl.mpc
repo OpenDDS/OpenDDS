@@ -13,6 +13,11 @@ project: dcpslib, ../bench_builder_idl_lib, dcps_rapidjson {
 
   requires += no_opendds_safety_profile
 
+  after += Bench_Builder_Idl_Json
+  libs += Bench_Builder_Idl_Json
+  after += Bench_Core_Idl_Json
+  libs += Bench_Core_Idl_Json
+
   Idl_Files {
     Bench.idl
   }
