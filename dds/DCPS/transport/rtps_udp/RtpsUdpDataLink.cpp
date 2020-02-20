@@ -1393,48 +1393,60 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
       && info.hb_range_.second < info.hb_range_.first;
 
     info.frags_.erase(seq);
-    if (durable_ && info.recvd_.empty()) {
-      info.hb_range_.first = 1;
-      info.hb_range_.second = seq;
-      info.recvd_.insert(SequenceNumber::ZERO());
-      info.recvd_.insert(seq);
+    if (info.recvd_.empty()) {
+      if (durable_) {
+        info.hb_range_.first = 1;
+        info.hb_range_.second = seq;
+        info.recvd_.insert(SequenceNumber::ZERO());
+        info.recvd_.insert(seq);
 
-      if (seq != 1) {
-        if (Transport_debug_level > 5) {
-          GuidConverter writer(src);
-          GuidConverter reader(id_);
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::process_data_i(DataSubmessage) -")
-                               ACE_TEXT(" data seq: %q from %C being WITHHELD from %C because it's EXPECTING more data")
-                               ACE_TEXT(" (first message, initializing reader)\n"),
-                               seq.getValue(),
-                               OPENDDS_STRING(writer).c_str(),
-                               OPENDDS_STRING(reader).c_str()));
+        if (seq != 1) {
+          if (Transport_debug_level > 5) {
+            GuidConverter writer(src);
+            GuidConverter reader(id_);
+            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::process_data_i(DataSubmessage) -")
+                                 ACE_TEXT(" data seq: %q from %C being WITHHELD from %C because it's EXPECTING more data")
+                                 ACE_TEXT(" (first message, initializing reader)\n"),
+                                 seq.getValue(),
+                                 OPENDDS_STRING(writer).c_str(),
+                                 OPENDDS_STRING(reader).c_str()));
+          }
+          const ReceivedDataSample* sample =
+            link->receive_strategy()->withhold_data_from(id_);
+          info.held_.insert(std::make_pair(seq, *sample));
+
+        } else {
+          if (Transport_debug_level > 5) {
+            GuidConverter writer(src);
+            GuidConverter reader(id_);
+            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::process_data_i(DataSubmessage) -")
+                                 ACE_TEXT(" data seq: %q from %C to %C OK to deliver")
+                                 ACE_TEXT(" (first message, initializing reader)\n"),
+                                 seq.getValue(),
+                                 OPENDDS_STRING(writer).c_str(),
+                                 OPENDDS_STRING(reader).c_str()));
+          }
+          link->receive_strategy()->do_not_withhold_data_from(id_);
+          info.first_delivered_data_ = false;
         }
-        const ReceivedDataSample* sample =
-          link->receive_strategy()->withhold_data_from(id_);
-        info.held_.insert(std::make_pair(seq, *sample));
-
       } else {
-        if (Transport_debug_level > 5) {
-          GuidConverter writer(src);
-          GuidConverter reader(id_);
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::process_data_i(DataSubmessage) -")
-                               ACE_TEXT(" data seq: %q from %C to %C OK to deliver")
-                               ACE_TEXT(" (first message, initializing reader)\n"),
-                               seq.getValue(),
-                               OPENDDS_STRING(writer).c_str(),
-                               OPENDDS_STRING(reader).c_str()));
+        SequenceNumber low = std::min(seq, info.frags_.empty() ? seq : info.frags_.begin()->first.previous());
+        if (seq <= low) {
+          info.hb_range_.first = seq;
+          info.hb_range_.second = seq;
+          info.recvd_.insert(SequenceRange(SequenceNumber::ZERO(), seq));
+          info.first_delivered_data_ = false;
+          link->receive_strategy()->do_not_withhold_data_from(id_);
+        } else {
+          info.hb_range_.first = low;
+          info.hb_range_.second = seq;
+          const ReceivedDataSample* sample =
+            link->receive_strategy()->withhold_data_from(id_);
+          info.held_.insert(std::make_pair(seq, *sample));
+          info.recvd_.insert(seq);
+          link->deliver_held_data(id_, info, durable_);
         }
-        link->receive_strategy()->do_not_withhold_data_from(id_);
-        info.first_delivered_data_ = false;
       }
-
-    } else if (!durable_ && info.first_delivered_data_ && info.hb_range_.second < seq && no_nack) {
-      info.hb_range_.first = seq;
-      info.hb_range_.second = seq;
-      info.recvd_.insert(SequenceRange(SequenceNumber::ZERO(), seq));
-      info.first_delivered_data_ = false;
-      link->receive_strategy()->do_not_withhold_data_from(id_);
 
     } else if (info.recvd_.contains(seq)) {
       if (Transport_debug_level > 5) {
@@ -1454,6 +1466,13 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
       info.held_.insert(std::make_pair(seq, *sample));
       info.recvd_.insert(seq);
       link->deliver_held_data(id_, info, durable_);
+
+    } else if (!durable_ && info.first_delivered_data_ && info.hb_range_.second < seq && no_nack) {
+      info.hb_range_.first = seq;
+      info.hb_range_.second = seq;
+      info.recvd_.insert(SequenceRange(SequenceNumber::ZERO(), seq));
+      info.first_delivered_data_ = false;
+      link->receive_strategy()->do_not_withhold_data_from(id_);
 
     } else if (info.recvd_.disjoint() || info.recvd_.cumulative_ack() != seq.previous()) {
       if (Transport_debug_level > 5) {
