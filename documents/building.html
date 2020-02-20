@@ -85,7 +85,7 @@ order: 103
 
   <div class="bodytext" align="justify">
     <a name="DetailedInstructions"><span class="headertext">Detailed Instructions</span></a>
-{% assign latest_rel = site.github.releases | sort: "created_at" | last %}
+{% assign latest_rel = site.github.releases | where: "prerelease", false | sort: "created_at" | last %}
     <p>Please see the file <a href="http://raw.githubusercontent.com/objectcomputing/OpenDDS/{{latest_rel.tag_name}}/INSTALL"><code>INSTALL</code></a> for detailed instructions
       on building DDS on a number of platforms.</p>
   </div>
