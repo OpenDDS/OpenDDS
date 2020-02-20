@@ -9,7 +9,7 @@ order: 97
   <div class="bodytext" align="justify">
     <span class="headertext">Latest Release</span>
     <p>The latest release is available at the OpenDDS download site: <a href="http://download.objectcomputing.com/OpenDDS/">http://download.objectcomputing.com/OpenDDS/</a> and from GitHub: <ul>
-{% assign sorted_rel = site.github.releases | sort: "created_at" | reverse %}
+{% assign sorted_rel = site.github.releases | where: "prerelease", false | sort: "created_at" | reverse %}
 {% assign latest_rel = sorted_rel | first %}
 {% assign assets = latest_rel.assets | sort: "name" | reverse %}
 {% for a in assets %}{% capture tn %}Open{{latest_rel.tag_name}}{% endcapture %}
