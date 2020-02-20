@@ -6,8 +6,10 @@
  */
 
 #include "marshal_generator.h"
-#include "utl_identifier.h"
+
 #include "topic_keys.h"
+
+#include <utl_identifier.h>
 
 #include <string>
 #include <sstream>
@@ -1712,6 +1714,30 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       }
     }
     be_global->impl_ << intro << "  return " << expr << ";\n";
+  }
+
+  if (be_global->printer()) {
+    be_global->add_include("<dds/DCPS/Printer.h>");
+    PreprocessorIfGuard g("ndef OPENDDS_SAFETY_PROFILE");
+    Function shift("operator<<", "std::ostream&");
+    shift.addArg("strm", "Printable");
+    shift.addArg("stru", "const " + cxx + "&");
+    shift.endArgs();
+    string intro;
+    string expr = "  strm.push_indent();\n";
+    for (size_t i = 0; i < fields.size(); ++i) {
+      const string field_name = fields[i]->local_name()->get_string();
+      expr +=
+        "  strm.print_indent();\n"
+        "  if (strm.printer().print_field_names()) {\n"
+        "    strm.os() << \"" + field_name + ": \";\n"
+        "  }\n"
+        "  " + streamCommon(
+          field_name, fields[i]->field_type(), "<< stru", intro, cxx) +
+          " << std::endl;\n";
+    }
+    be_global->impl_ << intro << expr <<
+      "  return strm.os();\n";
   }
 
   IDL_GlobalData::DCPS_Data_Type_Info* info = idl_global->is_dcps_type(name);

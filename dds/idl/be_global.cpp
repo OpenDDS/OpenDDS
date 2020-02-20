@@ -49,6 +49,7 @@ BE_GlobalData::BE_GlobalData()
   , generate_v8_(false)
   , generate_rapidjson_(false)
   , face_ts_(false)
+  , printer_(false)
   , seq_("Seq")
   , language_mapping_(LANGMAP_NONE)
   , root_default_nested_(true)
@@ -237,6 +238,16 @@ bool BE_GlobalData::face_ts() const
   return this->face_ts_;
 }
 
+void BE_GlobalData::printer(bool b)
+{
+  this->printer_ = b;
+}
+
+bool BE_GlobalData::printer() const
+{
+  return this->printer_;
+}
+
 void
 BE_GlobalData::open_streams(const char* filename)
 {
@@ -303,12 +314,7 @@ void invalid_option(char * option)
 {
   ACE_ERROR((LM_ERROR,
     ACE_TEXT("IDL: I don't understand the '%C' option\n"), option));
-#ifdef TAO_IDL_HAS_PARSE_ARGS_EXIT
   idl_global->parse_args_exit(1);
-#else
-  idl_global->set_compile_flags(
-    idl_global->compile_flags() | IDL_CF_ONLY_USAGE);
-#endif
 }
 
 void
@@ -334,9 +340,7 @@ BE_GlobalData::parse_args(long& i, char** av)
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("IDL: unable to create directory %C")
         ACE_TEXT(" specified by -o option\n"), av[i + 1]));
-#ifdef TAO_IDL_HAS_PARSE_ARGS_EXIT
       idl_global->parse_args_exit(1);
-#endif
     } else {
       output_dir_ = av[++i];
     }
@@ -348,9 +352,11 @@ BE_GlobalData::parse_args(long& i, char** av)
     } else if (0 == ACE_OS::strcasecmp(av[i], "-GfaceTS")) {
       face_ts(true);
     } else if (0 == ACE_OS::strcasecmp(av[i], "-Gv8")) {
-      be_global->v8(true);
+      v8(true);
     } else if (0 == ACE_OS::strcasecmp(av[i], "-Grapidjson")) {
-      be_global->rapidjson(true);
+      rapidjson(true);
+    } else if (!ACE_OS::strcasecmp(av[i], "-Gprinter")) {
+      printer(true);
     } else {
       invalid_option(av[i]);
     }

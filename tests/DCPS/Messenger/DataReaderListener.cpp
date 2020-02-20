@@ -68,11 +68,9 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
           valid_ = false;
         }
 
-        std::cout << "Message: subject    = " << message.subject.in() << std::endl
-                  << "         subject_id = " << message.subject_id   << std::endl
-                  << "         from       = " << message.from.in()    << std::endl
-                  << "         count      = " << message.count        << std::endl
-                  << "         text       = " << message.text.in()    << std::endl;
+        std::cout
+          << "Message:" << std::endl
+          << OpenDDS::DCPS::Printer() << message;
 
         if (std::string("Comic Book Guy") != message.from.in() &&
             std::string("OpenDDS-Java") != message.from.in()) {

@@ -137,6 +137,9 @@ public:
   bool face_ts() const;
   void face_ts(bool b);
 
+  bool printer() const;
+  void printer(bool b);
+
   ACE_CString java_arg() const;
   void java_arg(const ACE_CString& str);
 
@@ -210,7 +213,7 @@ private:
 
   bool java_, suppress_idl_, suppress_typecode_,
     no_default_gen_, generate_itl_, generate_v8_,
-    generate_rapidjson_, face_ts_;
+    generate_rapidjson_, face_ts_, printer_;
 
   ACE_CString export_macro_, export_include_,
     versioning_name_, versioning_begin_, versioning_end_,

@@ -219,6 +219,42 @@ struct Function {
   }
 };
 
+class PreprocessorIfGuard {
+public:
+  PreprocessorIfGuard(
+    const std::string& what,
+    bool impl = true, bool header = true,
+    const std::string& indent = "")
+  : what_(what)
+  , impl_(impl)
+  , header_(header)
+  , indent_(indent)
+  {
+    output("#" + indent + "if" + what + "\n");
+  }
+
+  ~PreprocessorIfGuard()
+  {
+    output("#" + indent_ + "endif // if" + what_ + "\n");
+  }
+
+  void output(const std::string& str) const
+  {
+    if (impl_) {
+      be_global->impl_ << str;
+    }
+    if (header_) {
+      be_global->header_ << str;
+    }
+  }
+
+private:
+  const std::string what_;
+  const bool impl_;
+  const bool header_;
+  const std::string indent_;
+};
+
 inline std::string scoped(UTL_ScopedName* sn)
 {
   return dds_generator::scoped_helper(sn, "::");
