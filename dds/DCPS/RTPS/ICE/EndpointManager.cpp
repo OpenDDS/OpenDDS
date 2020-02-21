@@ -145,7 +145,7 @@ void EndpointManager::receive(const ACE_INET_Addr& a_local_address,
     return;
 
   case STUN::INDICATION:
-    indication(a_message);
+    indication(a_local_address, a_remote_address, a_message);
     return;
 
   case STUN::SUCCESS_RESPONSE:
@@ -274,7 +274,7 @@ void EndpointManager::server_reflexive_task(const MonotonicTimePoint& a_now)
     binding_request_.generate_transaction_id();
     binding_request_.append_attribute(STUN::make_fingerprint());
 
-    endpoint->send(next_stun_server_address_, binding_request_);
+    send(next_stun_server_address_, binding_request_);
 
     if (!requesting_ && send_count_ == agent_impl->get_configuration().server_reflexive_indication_count() - 1) {
       requesting_ = true;
@@ -439,15 +439,15 @@ void EndpointManager::request(const ACE_INET_Addr& a_local_address,
 
   if (!a_message.get_username(username)) {
     ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) EndpointManager::request: WARNING No USERNAME attribute\n")));
-    endpoint->send(a_remote_address,
-                   make_bad_request_error_response(a_message, "Bad Request: USERNAME must be present"));
+    send(a_remote_address,
+         make_bad_request_error_response(a_message, "Bad Request: USERNAME must be present"));
     return;
   }
 
   if (!a_message.has_message_integrity()) {
     ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) EndpointManager::request: WARNING No MESSAGE_INTEGRITY attribute\n")));
-    endpoint->send(a_remote_address,
-                   make_bad_request_error_response(a_message, "Bad Request: MESSAGE_INTEGRITY must be present"));
+    send(a_remote_address,
+         make_bad_request_error_response(a_message, "Bad Request: MESSAGE_INTEGRITY must be present"));
     return;
   }
 
@@ -455,15 +455,15 @@ void EndpointManager::request(const ACE_INET_Addr& a_local_address,
 
   if (idx == std::string::npos) {
     ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) EndpointManager::request: WARNING USERNAME does not contain a colon\n")));
-    endpoint->send(a_remote_address,
-                   make_bad_request_error_response(a_message, "Bad Request: USERNAME must be colon-separated"));
+    send(a_remote_address,
+         make_bad_request_error_response(a_message, "Bad Request: USERNAME must be colon-separated"));
     return;
   }
 
   if (username.substr(0, idx) != agent_info_.username) {
     // We expect this to happen.
-    endpoint->send(a_remote_address,
-                   make_unauthorized_error_response(a_message));
+    send(a_remote_address,
+         make_unauthorized_error_response(a_message));
     return;
   }
 
@@ -472,8 +472,8 @@ void EndpointManager::request(const ACE_INET_Addr& a_local_address,
   // Check the message_integrity.
   if (!a_message.verify_message_integrity(agent_info_.password)) {
     // We expect this to happen.
-    endpoint->send(a_remote_address,
-                   make_unauthorized_error_response(a_message));
+    send(a_remote_address,
+         make_unauthorized_error_response(a_message));
     return;
   }
 
@@ -481,22 +481,22 @@ void EndpointManager::request(const ACE_INET_Addr& a_local_address,
 
   if (!unknown_attributes.empty()) {
     ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) EndpointManager::request: WARNING Unknown comprehension required attributes\n")));
-    endpoint->send(a_remote_address,
-                   make_unknown_attributes_error_response(a_message, unknown_attributes));
+    send(a_remote_address,
+         make_unknown_attributes_error_response(a_message, unknown_attributes));
     return;
   }
 
   if (!a_message.has_fingerprint()) {
     ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) EndpointManager::request: WARNING No FINGERPRINT attribute\n")));
-    endpoint->send(a_remote_address,
-                   make_bad_request_error_response(a_message, "Bad Request: FINGERPRINT must be present"));
+    send(a_remote_address,
+         make_bad_request_error_response(a_message, "Bad Request: FINGERPRINT must be present"));
     return;
   }
 
   if (!a_message.has_ice_controlled() && !a_message.has_ice_controlling()) {
     ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) EndpointManager::request: WARNING No ICE_CONTROLLED/ICE_CONTROLLING attribute\n")));
-    endpoint->send(a_remote_address,
-                   make_bad_request_error_response(a_message, "Bad Request: Either ICE_CONTROLLED or ICE_CONTROLLING must be present"));
+    send(a_remote_address,
+         make_bad_request_error_response(a_message, "Bad Request: Either ICE_CONTROLLED or ICE_CONTROLLING must be present"));
     return;
   }
 
@@ -504,8 +504,8 @@ void EndpointManager::request(const ACE_INET_Addr& a_local_address,
 
   if (use_candidate && a_message.has_ice_controlled()) {
     ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) EndpointManager::request: WARNING USE_CANDIDATE without ICE_CONTROLLED\n")));
-    endpoint->send(a_remote_address,
-                   make_bad_request_error_response(a_message, "Bad Request: USE_CANDIDATE can only be present when ICE_CONTROLLED is present"));
+    send(a_remote_address,
+         make_bad_request_error_response(a_message, "Bad Request: USE_CANDIDATE can only be present when ICE_CONTROLLED is present"));
     return;
   }
 
@@ -513,8 +513,8 @@ void EndpointManager::request(const ACE_INET_Addr& a_local_address,
 
   if (!a_message.get_priority(priority)) {
     ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) EndpointManager::request: WARNING No PRIORITY attribute\n")));
-    endpoint->send(a_remote_address,
-                   make_bad_request_error_response(a_message, "Bad Request: PRIORITY must be present"));
+    send(a_remote_address,
+         make_bad_request_error_response(a_message, "Bad Request: PRIORITY must be present"));
     return;
   }
 
@@ -530,7 +530,7 @@ void EndpointManager::request(const ACE_INET_Addr& a_local_address,
     response.append_attribute(STUN::make_message_integrity());
     response.password = agent_info_.password;
     response.append_attribute(STUN::make_fingerprint());
-    endpoint->send(a_remote_address, response);
+    send(a_remote_address, response);
 
     // 7.3.1.3
     UsernameToChecklistType::const_iterator pos = username_to_checklist_.find(remote_username);
@@ -554,13 +554,15 @@ void EndpointManager::request(const ACE_INET_Addr& a_local_address,
   default:
     // Unknown method.  Stop processing.
     ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) EndpointManager::request: WARNING Unknown ICE method\n")));
-    endpoint->send(a_remote_address,
-                   make_bad_request_error_response(a_message, "Bad Request: Unknown method"));
+    send(a_remote_address,
+         make_bad_request_error_response(a_message, "Bad Request: Unknown method"));
     break;
   }
 }
 
-void EndpointManager::indication(const STUN::Message& a_message)
+void EndpointManager::indication(const ACE_INET_Addr& /*a_local_address*/,
+                                 const ACE_INET_Addr& /*a_remote_address*/,
+                                 const STUN::Message& a_message)
 {
   std::string username;
 
@@ -714,6 +716,14 @@ void EndpointManager::schedule_for_destruction()
   }
 }
 
+void EndpointManager::unfreeze()
+{
+  for (UsernameToChecklistType::const_iterator pos = username_to_checklist_.begin(),
+       limit = username_to_checklist_.end(); pos != limit; ++pos) {
+    pos->second->unfreeze();
+  }
+}
+
 void EndpointManager::unfreeze(const FoundationType& a_foundation)
 {
   for (UsernameToChecklistType::const_iterator pos = username_to_checklist_.begin(),
@@ -756,6 +766,11 @@ void EndpointManager::ChangePasswordTask::execute(const MonotonicTimePoint& a_no
 void EndpointManager::network_change()
 {
   set_host_addresses(endpoint->host_addresses());
+}
+
+void EndpointManager::send(const ACE_INET_Addr& address, const STUN::Message& message)
+{
+  endpoint->send(address, message);
 }
 
 #endif /* OPENDDS_SECURITY */

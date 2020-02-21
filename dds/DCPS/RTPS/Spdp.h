@@ -304,6 +304,16 @@ private:
     CmgAction action_;
   };
 
+  class SendStun : public DCPS::JobQueue::Job {
+  public:
+    SendStun(SpdpTransport* tport, const ACE_INET_Addr& address, const STUN::Message& message) : tport_(tport), address_(address), message_(message) {}
+    void execute();
+  private:
+    SpdpTransport* tport_;
+    ACE_INET_Addr address_;
+    STUN::Message message_;
+  };
+
   ACE_Event_Handler_var eh_; // manages our refcount on tport_
   bool eh_shutdown_;
   ACE_Condition_Thread_Mutex shutdown_cond_;

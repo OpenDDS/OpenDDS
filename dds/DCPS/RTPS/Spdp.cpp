@@ -2199,17 +2199,26 @@ Spdp::SpdpTransport::host_addresses() const
 void
 Spdp::SpdpTransport::send(const ACE_INET_Addr& address, const STUN::Message& message)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, outer_->lock_);
-  wbuff_.reset();
-  DCPS::Serializer serializer(&wbuff_, DCPS::Serializer::SWAP_BE);
-  const_cast<STUN::Message&>(message).block = &wbuff_;
-  serializer << message;
+  DCPS::RcHandle<DCPS::JobQueue> job_queue = outer_->job_queue();
+  if (job_queue) {
+    job_queue->enqueue(DCPS::make_rch<SendStun>(this, address, message));
+  }
+}
 
-  const ssize_t res = unicast_socket_.send(wbuff_.rd_ptr(), wbuff_.length(), address);
+void
+Spdp::SendStun::execute()
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, tport_->outer_->lock_);
+  tport_->wbuff_.reset();
+  DCPS::Serializer serializer(&tport_->wbuff_, DCPS::Serializer::SWAP_BE);
+  const_cast<STUN::Message&>(message_).block = &tport_->wbuff_;
+  serializer << message_;
+
+  const ssize_t res = tport_->unicast_socket_.send(tport_->wbuff_.rd_ptr(), tport_->wbuff_.length(), address_);
   if (res < 0) {
     const int e = errno;
     ACE_TCHAR addr_buff[256] = {};
-    address.addr_to_string(addr_buff, 256);
+    address_.addr_to_string(addr_buff, 256);
     errno = e;
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::send() - destination %s failed %m\n"), addr_buff));
   }

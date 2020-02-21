@@ -141,6 +141,7 @@ struct OpenDDS_Rtps_Export TransactionId {
   bool operator<(const TransactionId& other) const;
   bool operator==(const TransactionId& other) const;
   bool operator!=(const TransactionId& other) const;
+  std::string to_string() const;
 };
 
 struct OpenDDS_Rtps_Export Message {
