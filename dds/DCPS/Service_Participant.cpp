@@ -23,6 +23,7 @@
 #include "security/framework/SecurityRegistry.h"
 #endif
 
+#include "ace/config.h"
 #include "ace/Singleton.h"
 #include "ace/Arg_Shifter.h"
 #include "ace/Reactor.h"
@@ -2053,57 +2054,30 @@ NetworkConfigMonitor_rch Service_Participant::network_config_monitor()
 
   if (!network_config_monitor_) {
 #ifdef OPENDDS_LINUX_NETWORK_CONFIG_MONITOR
+    if (DCPS_debug_level > 0) {
+      ACE_DEBUG((LM_DEBUG,
+               "%T (%P|%t) Service_Participant::network_config_monitor(). Creating LinuxNetworkConfigMonitor\n"));
+    }
     network_config_monitor_ = make_rch<LinuxNetworkConfigMonitor>(reactor_task_.interceptor());
+#elif defined(ACE_HAS_GETIFADDRS)
+    if (DCPS_debug_level > 0) {
+      ACE_DEBUG((LM_DEBUG,
+               "%T (%P|%t) Service_Participant::network_config_monitor(). Creating NetworkConfigMonitor\n"));
+    }
+    network_config_monitor_ = make_rch<NetworkConfigMonitor>();
 #endif
 
     if (network_config_monitor_ && !network_config_monitor_->open()) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Service_Participant::get_domain_participant_factory could not open network config monitor\n ")));
       network_config_monitor_->close();
     }
+    else if (!network_config_monitor_) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Service_Participant::get_domain_participant_factory could not create network config monitor\n ")));
+    }
   }
 
   return network_config_monitor_;
 }
-
-#if defined(OPENDDS_NETWORK_CONFIG_UPDATER)
-
-void
-Service_Participant::add_interface(const OPENDDS_STRING &name)
-{
-  if (network_config_monitor_)
-  {
-    dynamic_cast<NetworkConfigUpdater*>(network_config_monitor_.get())->add_interface(name);
-  }
-}
-
-void
-Service_Participant::remove_interface(const OPENDDS_STRING &name)
-{
-  if (network_config_monitor_)
-  {
-    dynamic_cast<NetworkConfigUpdater*>(network_config_monitor_.get())->remove_interface(name);
-  }
-}
-
-void
-Service_Participant::add_address(const OPENDDS_STRING &name, const ACE_INET_Addr& address)
-{
-  if (network_config_monitor_)
-  {
-    dynamic_cast<NetworkConfigUpdater*>(network_config_monitor_.get())->add_address(name, address);
-  }
-}
-
-void
-Service_Participant::remove_address(const OPENDDS_STRING &name, const ACE_INET_Addr& address)
-{
-  if (network_config_monitor_)
-  {
-    dynamic_cast<NetworkConfigUpdater*>(network_config_monitor_.get())->remove_address(name, address);
-  }
-}
-
-#endif // OPENDDS_NETWORK_CONFIG_UPDATER
 
 } // namespace DCPS
 } // namespace OpenDDS

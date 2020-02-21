@@ -20,7 +20,6 @@
 #include "dds/DCPS/unique_ptr.h"
 #include "dds/DCPS/ReactorTask.h"
 #include "dds/DCPS/NetworkConfigMonitor.h"
-#include "dds/DCPS/NetworkConfigUpdater.h"
 
 #include "ace/Task.h"
 #include "ace/Configuration.h"
@@ -307,15 +306,6 @@ public:
   void set_security(bool b) {
     security_enabled_ = b;
   }
-#endif
-
-#if defined(OPENDDS_NETWORK_CONFIG_UPDATER)
-
-  void add_interface(const OPENDDS_STRING &name);
-  void remove_interface(const OPENDDS_STRING &name);
-  void add_address(const OPENDDS_STRING &name, const ACE_INET_Addr& address);
-  void remove_address(const OPENDDS_STRING &name, const ACE_INET_Addr& address);
-
 #endif
 
   bool get_BIT() {

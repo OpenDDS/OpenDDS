@@ -37,6 +37,7 @@ public:
     , can_multicast_(can_multicast)
   {}
   int index() const { return index_; }
+  void index(int index) { index_ = index; }
   const OPENDDS_STRING& name() const { return name_; }
   bool can_multicast() const { return can_multicast_; }
 
@@ -87,12 +88,17 @@ typedef OPENDDS_VECTOR(NetworkInterface) NetworkInterfaces;
 
 class OpenDDS_Dcps_Export NetworkConfigMonitor : public virtual RcObject {
 public:
-  virtual bool open() = 0;
-  virtual bool close() = 0;
+  virtual bool open();
+  virtual bool close();
 
   NetworkInterfaces add_listener(NetworkConfigListener_wrch listener);
   void remove_listener(NetworkConfigListener_wrch listener);
   NetworkInterfaces get() const;
+
+  void add_interface(const OPENDDS_STRING &name);
+  void remove_interface(const OPENDDS_STRING &name);
+  void add_address(const OPENDDS_STRING &name, const ACE_INET_Addr& address);
+  void remove_address(const OPENDDS_STRING &name, const ACE_INET_Addr& address);
 
 protected:
   void add_interface(const NetworkInterface& nic);
@@ -103,6 +109,8 @@ protected:
   int get_index(const OPENDDS_STRING& name);
 
 private:
+  void validate_interfaces_index();
+
   typedef OPENDDS_SET(NetworkConfigListener_wrch) Listeners;
   Listeners listeners_;
   mutable ACE_Thread_Mutex listeners_mutex_;
