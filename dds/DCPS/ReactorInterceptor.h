@@ -113,7 +113,7 @@ protected:
     const CommandPtr command(c, keep_count());
     {
       ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-      command_queue_.push(command);
+      command_queue_.push_back(command);
       if (state_ == NONE) {
         state_ = NOTIFIED;
         do_notify = true;
@@ -134,7 +134,7 @@ protected:
 
   ACE_thread_t owner_;
   ACE_Thread_Mutex mutex_;
-  OPENDDS_QUEUE(CommandPtr) command_queue_;
+  OPENDDS_DEQUE(CommandPtr) command_queue_;
   ReactorState state_;
 };
 
