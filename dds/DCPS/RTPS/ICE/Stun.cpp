@@ -492,25 +492,6 @@ bool TransactionId::operator!=(const TransactionId& other) const
   return (memcmp(this->data, other.data, sizeof(data)) != 0);
 }
 
-static char to_hex(int x)
-{
-  if (x < 10) {
-    return x + '0';
-  } else {
-    return x - 10 + 'A';
-  }
-}
-
-std::string TransactionId::to_string() const
-{
-  std::string r;
-  for (size_t idx = 0; idx != sizeof(data); ++idx) {
-    r += to_hex((data[idx] & 0xF0) >> 4);
-    r += to_hex(data[idx] & 0x0F);
-  }
-  return r;
-}
-
 void Message::generate_transaction_id()
 {
   TheSecurityRegistry->fix_empty_default()->get_utility()->generate_random_bytes(transaction_id.data, sizeof(transaction_id.data));
