@@ -1,7 +1,7 @@
 # OpenDDS Releases
 
-## Version 3.14 of OpenDDS
-Released %TIMESTAMP%
+## Version 3.14.0 of OpenDDS
+OpenDDS 3.14.0 is currently in development, so this list might change.
 
 ### Additions:
 - Union topic types and IDL annotations for topic types (#1067):
@@ -20,8 +20,8 @@ Released %TIMESTAMP%
 - Java API can now be used on Android
 
 ### Notes:
-- Removed outdated `-Gws` option of `opendds_idl`. This option produced sample
-  descriptions for the Wireshark dissector before OpenDDS v3.7.
+- Removed outdated `-Gws` option of `opendds_idl`. This option produced topic
+  type descriptions for the Wireshark dissector before OpenDDS v3.7.
 
 ## Version 3.13.1 of OpenDDS
 
