@@ -15,10 +15,6 @@
 
 #include "ace/INET_Addr.h"
 
-#ifdef ACE_HAS_GETIFADDRS
-#define OPENDDS_NETWORK_CONFIG_MONITOR
-#endif
-
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -64,18 +60,6 @@ struct NetworkInterfaceIndex {
   const int index_;
 };
 
-struct NetworkInterfaceName {
-  explicit NetworkInterfaceName(const OPENDDS_STRING& name) : name_(name) {}
-
-  bool operator()(const NetworkInterface& nic)
-  {
-    return name_ == nic.name();
-  }
-
-  const OPENDDS_STRING name_;
-};
-
-
 class NetworkConfigListener : public virtual RcObject {
 public:
   virtual void add_interface(const NetworkInterface& /*interface*/) {}
@@ -92,17 +76,12 @@ typedef OPENDDS_VECTOR(NetworkInterface) NetworkInterfaces;
 
 class OpenDDS_Dcps_Export NetworkConfigMonitor : public virtual RcObject {
 public:
-  virtual bool open();
-  virtual bool close();
+  virtual bool open() = 0;
+  virtual bool close() = 0;
 
   NetworkInterfaces add_listener(NetworkConfigListener_wrch listener);
   void remove_listener(NetworkConfigListener_wrch listener);
   NetworkInterfaces get() const;
-
-  void add_interface(const OPENDDS_STRING &name);
-  void remove_interface(const OPENDDS_STRING &name);
-  void add_address(const OPENDDS_STRING &name, const ACE_INET_Addr& address);
-  void remove_address(const OPENDDS_STRING &name, const ACE_INET_Addr& address);
 
 protected:
   void add_interface(const NetworkInterface& nic);
@@ -110,10 +89,8 @@ protected:
   void add_address(int index, const ACE_INET_Addr& address);
   void remove_address(int index, const ACE_INET_Addr& address);
 
-  int get_index(const OPENDDS_STRING& name);
-
 private:
-  void validate_interfaces_index();
+  void process_add_remove();
 
   typedef OPENDDS_SET(NetworkConfigListener_wrch) Listeners;
   Listeners listeners_;
