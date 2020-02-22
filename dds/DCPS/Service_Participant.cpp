@@ -17,6 +17,7 @@
 #include "ConfigUtils.h"
 #include "RecorderImpl.h"
 #include "ReplayerImpl.h"
+#include "NetworkConfigMonitor.h"
 #include "LinuxNetworkConfigMonitor.h"
 #include "StaticDiscovery.h"
 #if defined(OPENDDS_SECURITY)
@@ -2059,7 +2060,7 @@ NetworkConfigMonitor_rch Service_Participant::network_config_monitor()
                "%T (%P|%t) Service_Participant::network_config_monitor(). Creating LinuxNetworkConfigMonitor\n"));
     }
     network_config_monitor_ = make_rch<LinuxNetworkConfigMonitor>(reactor_task_.interceptor());
-#elif defined(ACE_HAS_GETIFADDRS)
+#elif defined(OPENDDS_NETWORK_CONFIG_MONITOR)
     if (DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG,
                "%T (%P|%t) Service_Participant::network_config_monitor(). Creating NetworkConfigMonitor\n"));
@@ -2071,9 +2072,11 @@ NetworkConfigMonitor_rch Service_Participant::network_config_monitor()
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Service_Participant::get_domain_participant_factory could not open network config monitor\n ")));
       network_config_monitor_->close();
     }
+#if defined(OPENDDS_NETWORK_CONFIG_MONITOR)
     else if (!network_config_monitor_) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Service_Participant::get_domain_participant_factory could not create network config monitor\n ")));
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Error: Service_Participant::get_domain_participant_factory could not create network config monitor\n ")));
     }
+#endif
   }
 
   return network_config_monitor_;

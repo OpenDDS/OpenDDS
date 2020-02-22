@@ -15,6 +15,10 @@
 
 #include "ace/INET_Addr.h"
 
+#ifdef ACE_HAS_GETIFADDRS
+#define OPENDDS_NETWORK_CONFIG_MONITOR
+#endif
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {

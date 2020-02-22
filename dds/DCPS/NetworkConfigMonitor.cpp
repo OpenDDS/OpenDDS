@@ -9,13 +9,11 @@
 
 #include "NetworkConfigMonitor.h"
 
-#ifdef ACE_HAS_GETIFADDRS
+#ifdef OPENDDS_NETWORK_CONFIG_MONITOR
 
 #include "ace/os_include/os_ifaddrs.h"
 
 #include <net/if.h>
-
-#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -24,10 +22,6 @@ namespace DCPS {
 
 bool NetworkConfigMonitor::open()
 {
-#ifndef ACE_HAS_GETIFADDRS
-  ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: NetworkConfigMonitor::open(). This OS does not support ::getifaddrs().\n")));
-  return false;
-#else
   if (DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) NetworkConfigMonitor::open() enumerating interfaces\n")));
   }
@@ -79,7 +73,6 @@ bool NetworkConfigMonitor::open()
   ::freeifaddrs (p_ifa);
 
   return true;
-#endif /* ACE_HAS_GETIFADDRS */
 }
 
 bool NetworkConfigMonitor::close()
@@ -116,11 +109,6 @@ NetworkInterfaces NetworkConfigMonitor::get() const
 
 void NetworkConfigMonitor::add_interface(const OPENDDS_STRING &name)
 {
-#ifndef ACE_HAS_GETIFADDRS
-  ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: NetworkConfigMonitor::add_interface(). This OS does not support ::getifaddrs().\n")));
-  return;
-#else
-
   NetworkInterface* p_nic = 0;
 
   ifaddrs* p_ifa = 0;
@@ -166,8 +154,6 @@ void NetworkConfigMonitor::add_interface(const OPENDDS_STRING &name)
   }
 
   validate_interfaces_index();
-
-#endif /* ACE_HAS_GETIFADDRS */
 }
 
 void NetworkConfigMonitor::remove_interface(const OPENDDS_STRING &name)
@@ -205,12 +191,10 @@ void NetworkConfigMonitor::remove_address(const OPENDDS_STRING &name, const ACE_
 
 void NetworkConfigMonitor::validate_interfaces_index()
 {
-// if the OS has inserted a new nic, which happens when
-// turning on/off wifi or cellular on iOS, then an
-// interface could have a different index from the index
-// stored in network_interfaces_
-#ifdef ACE_HAS_GETIFADDRS
-
+  // if the OS has added an interface, which happens when
+  // turning on/off wifi or cellular on iOS, then an
+  // interface could have a different index from the index
+  // stored in network_interfaces_
   ifaddrs* p_ifa = 0;
   ifaddrs* p_if = 0;
 
@@ -248,8 +232,6 @@ void NetworkConfigMonitor::validate_interfaces_index()
   }
 
   ::freeifaddrs (p_ifa);
-
-#endif /* ACE_HAS_GETIFADDRS */
 }
 
 
@@ -405,3 +387,5 @@ int NetworkConfigMonitor::get_index(const OPENDDS_STRING& name)
 } // OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
+
+#endif // OPENDDS_NETWORK_CONFIG_MONITOR
