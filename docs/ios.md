@@ -142,7 +142,7 @@ and will have `include` and `lib` subdirectories that will be used by the
 OpenSSL build. 
 
 OpenSSL builds for iOS simulators are not as well-supported, and require 
-minor modifications to the generated makefile. To build OpenSSL for iOS
+a minor modification to the generated makefile. To build OpenSSL for iOS
 simulators, set the following environment variables:
 
 ```Shell
@@ -153,14 +153,14 @@ export PATH="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.
 ```
 Run the configure script in openssl-1.1.1d/:
 ```Shell
-./Configure iossimulator-xcrun no-shared no-dso no-hw no-engine --prefix=/usr/local/ios/openssl
+./Configure darwin64-x86_64-cc no-shared no-dso no-hw no-engine --prefix=/usr/local/ios/openssl
 ```
 
 Modify the generated Makefile setting CNF_CFLAGS, and CNF_CXXFLAGS to:
 
-    CNF_CFLAGS=-miphoneos-version-min=12.0 -arch x86_64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk
-
-    CNF_CXXFLAGS=-miphoneos-version-min=12.0 -arch x86_64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk
+```Shell
+CNF_CFLAGS=-arch x86_64 -miphoneos-version-min=12.0 -isysroot $(CROSS_TOP)/SDKs/$(CROSS_SDK)
+```
 
 Build with make:
 
@@ -168,8 +168,11 @@ Build with make:
 make
 ```
 
-There will be linker errors after the static libraries have been built. These
-can be ignored.
+Install with make:
+
+```Shell
+make install
+```
 
 Set `OPENSSL_ROOT` to the install location:
 
@@ -177,8 +180,9 @@ Set `OPENSSL_ROOT` to the install location:
 export OPENSSL_ROOT=/usr/local/ios/openssl
 ```
 
-Copy the static libraries (libcrypto.a and libssl.a) to the `$OPENSSL_ROOT/lib` 
-and the header files to `$OPENSSL_ROOT/include`.
+Note that the directory given by `--prefix=` will be created by `make install`
+and will have `include` and `lib` subdirectories that will be used by the 
+OpenSSL build. 
 
 OpenDDS security builds need the location of OpenSSL installed headers and
 static libraries. This location can be passed to the OpenDDS configure script 
