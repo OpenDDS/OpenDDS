@@ -20,6 +20,10 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+NetworkConfigModifier::NetworkConfigModifier()
+{
+}
+
 bool NetworkConfigModifier::open()
 {
   if (DCPS_debug_level > 0) {
@@ -112,8 +116,7 @@ void NetworkConfigModifier::add_interface(const OPENDDS_STRING &name)
       continue;
 
     if (p_if->ifa_addr->sa_family == AF_INET) {
-      if (name == p_if->ifa_name)
-      {
+      if (name == p_if->ifa_name) {
         p_nic = new NetworkInterface (count, p_if->ifa_name, p_if->ifa_flags & IFF_MULTICAST);
         break;
       }
@@ -126,7 +129,6 @@ void NetworkConfigModifier::add_interface(const OPENDDS_STRING &name)
 
   if (p_nic) {
     NetworkConfigMonitor::add_interface(*p_nic);
-
     delete p_nic;
   }
 
@@ -185,8 +187,6 @@ void NetworkConfigModifier::validate_interfaces_index()
 
   int count = 0;
 
-
-
   // Pull the address out of each INET interface.
   for (p_if = p_ifa; p_if != 0; p_if = p_if->ifa_next)
   {
@@ -198,14 +198,11 @@ void NetworkConfigModifier::validate_interfaces_index()
       continue;
 
     if (p_if->ifa_addr->sa_family == AF_INET) {
-      const std::string name(p_if->ifa_name);
-      {
-        NetworkInterfaces::iterator nic_pos = std::find_if(get().begin(), get().end(), NetworkInterfaceName(name));
-        if (nic_pos != get().end()) {
-          nic_pos->index(count);
-        }
+      const OPENDDS_STRING name(p_if->ifa_name);
+      NetworkInterfaces::iterator nic_pos = std::find_if(get().begin(), get().end(), NetworkInterfaceName(name));
+      if (nic_pos != get().end()) {
+        nic_pos->index(count);
       }
-
       ++count;
     }
   }
