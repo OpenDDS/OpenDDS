@@ -13,12 +13,12 @@ Released %TIMESTAMP%
   - See `docs/migrating_to_topic_type_annotations.md` for a guide on how to
     migrate existing IDL to use topic type annotations.
 - Added a C++11 mode to opendds_idl's code generation (#954, #1030, #1379)
-- RtpsRelay, a server that assists with peer-based discovery on the internet (#1057, #1068, #1286, #1341)
-- Support for IETF ICE for NAT firewall traversal (#1069)
+- RtpsRelay, a server that assists with peer-based discovery on the internet, see the "Internet-Enabled RTPS" Chapter in the Developer's Guide (#1057, #1068, #1286, #1341)
+- Support for IETF ICE for NAT firewall traversal, see the "Internet-Enabled RTPS" Chapter in the Developer's Guide (#1069)
 - Dynamic network interface changes on supported platforms (#1365, #1551)
 - An OpenDDS-specific Built-In Topic to report network location/connection details (#1389)
 - Performance improvements to RTPS Discovery and the RTPS_UDP transport (#1045, #1177, #1138, #1202, #1251, #1260, #1262, #1265, #1324, #1402)
-- CMake package for building applications that use OpenDDS (#981)
+- CMake package for building applications that use OpenDDS, see `docs/cmake.md` (#981)
 - Query Condition and Content-Filtered Topic can filter dispose/unregister messages (#900)
 - Support for publishing using the [Node.js module](https://www.npmjs.com/package/opendds) with V8 (#1065)
 - opendds_idl can generate code to convert IDL structures to RapidJSON (#1097, #1254)
@@ -29,7 +29,7 @@ Released %TIMESTAMP%
 
 ### Platform Support and Dependencies:
 - Support for Java Development Kit up to version 12 (#1137)
-- Monitor GUI and the ishapes example now use Qt5 (#929, #932, #1083)
+- Monitor GUI and the ishapes example now use Qt5, see `docs/qt.md` (#929, #932, #1083)
 - Improved Android support, see `docs/android.md` (#1066, #1446)
 - iOS support (#1535, #1545, #1551)
 - Updated dissector to work with Wireshark 3 (#1080)
