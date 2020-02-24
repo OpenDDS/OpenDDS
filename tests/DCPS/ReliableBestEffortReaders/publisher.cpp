@@ -15,7 +15,7 @@ public:
   Publisher(int argc, ACE_TCHAR* argv[]);
   int run();
 private:
-  void waitForSubscriber();
+  DDS::ReturnCode_t waitForSubscriber();
   Domain domain;
   Messenger::MessageDataWriter_var writer;
 };
@@ -49,7 +49,7 @@ Publisher::Publisher(int argc, ACE_TCHAR* argv[]) : domain(argc, argv, "Publishe
 
 int Publisher::run()
 {
-  waitForSubscriber();
+  if (waitForSubscriber() != DDS::RETCODE_OK) return 1;
 
   Messenger::Message msg = {"", "", 1, "test", 0, 0, 0};
   DDS::InstanceHandle_t handle = writer->register_instance(msg);
@@ -63,27 +63,44 @@ int Publisher::run()
   return 0;
 }
 
-void Publisher::waitForSubscriber()
+DDS::ReturnCode_t Publisher::waitForSubscriber()
 {
   std::cout << "Publisher waiting for subscriber..." << std::endl;
   DDS::StatusCondition_var statusCondition = writer->get_statuscondition();
-  statusCondition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
+  DDS::ReturnCode_t ret = statusCondition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
+  if (ret != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l ERROR: set_enabled_statuses()\n")));
+    return ret;
+  }
   DDS::WaitSet_var waitSet = new DDS::WaitSet;
-  waitSet->attach_condition(statusCondition);
+  ret = waitSet->attach_condition(statusCondition);
+  if (ret != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l ERROR: attach_condition()\n")));
+    return ret;
+  }
   try {
     DDS::ConditionSeq conditions;
     DDS::Duration_t timeout = {DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC};
     DDS::PublicationMatchedStatus match = {0, 0, 0, 0, 0};
     while (match.current_count < Domain::N_READER) {
-      waitSet->wait(conditions, timeout);
+      ret = waitSet->wait(conditions, timeout);
+      if (ret != DDS::RETCODE_OK) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l ERROR: wait()\n")));
+        throw 1;
+      }
       assert(writer->get_status_changes() & DDS::PUBLICATION_MATCHED_STATUS);
-      writer->get_publication_matched_status(match);
+      ret = writer->get_publication_matched_status(match);
+      if (ret != DDS::RETCODE_OK) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l ERROR: get_publication_matched_status()\n")));
+        throw 1;
+      }
     }
     std::cout << "Publisher match.current_count " << match.current_count << std::endl;
   } catch (...) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l ERROR: Publisher::waitForSubscriber()\n")));
   }
-  waitSet->detach_condition(statusCondition);
+  DDS::ReturnCode_t ret2 = waitSet->detach_condition(statusCondition);
+  return (ret != DDS::RETCODE_OK) ? ret : ret2;
 }
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
