@@ -29,6 +29,7 @@ my $ace_tao_url = "http://download.ociweb.com/TAO-2.2a/$ace_tao_filename";
 my $ace_root = "ACE_wrappers";
 my $git_name_prefix = "DDS-";
 my $default_post_release_metadata = "dev";
+my $release_flag_filename = "release_occurred";
 
 $ENV{TZ} = "UTC";
 Time::Piece::_tzset;
@@ -289,6 +290,12 @@ sub yes_no {
       print "Please answer y or n. ";
     }
   }
+}
+
+sub touch_file {
+  my $path = shift();
+  my $t = time();
+  utime($t, $t, ($path,)) || die "Couldn't touch file $path: $!\nStopped";
 }
 
 ############################################################################
@@ -1964,6 +1971,12 @@ sub remedy_news_template_file_section {
 
 ############################################################################
 
+sub verify_release_flag_file {
+  return -f $_[0]->{release_flag_file_path};
+}
+
+############################################################################
+
 my $status = 0;
 
 # Process Optional Arguments
@@ -2106,8 +2119,16 @@ my %global_settings = (
     skip_website => $skip_website,
     workspace    => $workspace,
     download_url => $download_url,
-    ace_root     => "$workspace/$ace_root"
+    ace_root     => "$workspace/$ace_root",
+    release_flag_file_path => "$workspace/$release_flag_filename",
+    release_flag_file_exists => 0,
 );
+
+if (verify_release_flag_file(\%global_settings)) {
+  $global_settings{release_flag_file_exists} = 1;
+  print "Release flag file found, assuming release is done. Remove " .
+    "$global_settings{release_flag_file_path} if this is not the case\n";
+}
 
 my @release_steps  = (
   {
@@ -2318,6 +2339,13 @@ my @release_steps  = (
     skip    => $global_settings{skip_website},
   },
   {
+    name => 'Create Release Flag File',
+    verify => sub{verify_release_flag_file(@_)},
+    message => sub{ return "Release flag file needs to be created."},
+    remedy => sub{touch_file("$_[0]->{release_flag_file_name_path}"); return 0;},
+    is_release_flag_step => 1, # Everything after this is post-release
+  },
+  {
     name    => 'Update NEWS for Post-Release',
     verify  => sub{verify_news_template_file_section(@_)},
     message => sub{message_news_template_file_section(@_)},
@@ -2368,6 +2396,7 @@ my @release_steps  = (
 );
 
 # For all steps, check for missing required attributes, fill others
+my $found_release_flag_step = 0;
 foreach my $step_index (1..scalar(@release_steps)) {
   my $step = $release_steps[$step_index - 1];
   my @required = (
@@ -2388,6 +2417,12 @@ foreach my $step_index (1..scalar(@release_steps)) {
   $step->{verified} = 0;
   if (not exists $step->{can_force}) {
     $step->{can_force} = 0;
+  }
+  if (not exists $step->{is_release_step}) {
+    $step->{is_release_step} = !$found_release_flag_step;
+  }
+  if (exists $step->{is_release_flag_step} && $step->{is_release_flag_step}) {
+    $found_release_flag_step = 1;
   }
 }
 
@@ -2410,7 +2445,9 @@ sub run_step {
   my $step = $release_steps->[$step_count-1];
   my $title = $step->{name};
 
-  return if (!$settings->{list_all} && ($step->{skip} || $step->{verified}));
+  return if (
+    !$settings->{list_all} && ($step->{skip} || $step->{verified} ||
+    ($settings->{release_flag_file_exists} && $step->{is_release_step})));
   print "$step_count: $title\n";
   return if $settings->{list};
 
