@@ -199,8 +199,9 @@ void NetworkConfigModifier::validate_interfaces_index()
 
     if (p_if->ifa_addr->sa_family == AF_INET) {
       const OPENDDS_STRING name(p_if->ifa_name);
-      NetworkInterfaces::iterator nic_pos = std::find_if(get().begin(), get().end(), NetworkInterfaceName(name));
-      if (nic_pos != get().end()) {
+      NetworkInterfaces nics = get();
+      NetworkInterfaces::iterator nic_pos = std::find_if(nics.begin(), nics.end(), NetworkInterfaceName(name));
+      if (nic_pos != nics.end()) {
         nic_pos->index(count);
       }
       ++count;
@@ -219,7 +220,7 @@ int NetworkConfigModifier::get_index(const OPENDDS_STRING& name)
   if (nic_pos != nics.end()) {
     index = nic_pos->index();
   }
-  
+
   return index;
 }
 
