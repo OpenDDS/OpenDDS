@@ -90,8 +90,6 @@ protected:
   void remove_address(int index, const ACE_INET_Addr& address);
 
 private:
-  void process_add_remove();
-
   typedef OPENDDS_SET(NetworkConfigListener_wrch) Listeners;
   Listeners listeners_;
   mutable ACE_Thread_Mutex listeners_mutex_;
