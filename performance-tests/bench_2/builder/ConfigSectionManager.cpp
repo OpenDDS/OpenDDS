@@ -20,10 +20,12 @@ ConfigSectionManager::ConfigSectionManager(const ConfigSectionSeq& seq) {
     keys.push_back(ach.root_section());
     while (token != NULL) {
       ACE_TString ttoken(ACE_TEXT_CHAR_TO_TCHAR(token));
-      ACE_Configuration_Section_Key sect_key;
-      ach.open_section(keys.back(), ttoken.c_str(), 1, sect_key);
-      keys.push_back(sect_key);
-      token = std::strtok(NULL, "/");
+      if (ttoken.c_str()) {
+        ACE_Configuration_Section_Key sect_key;
+        ach.open_section(keys.back(), ttoken.c_str(), 1, sect_key);
+        keys.push_back(sect_key);
+        token = std::strtok(NULL, "/");
+      }
     }
     for (CORBA::ULong j = 0; j < section.properties.length(); ++j) {
       Log::log()
