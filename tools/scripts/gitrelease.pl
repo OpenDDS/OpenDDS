@@ -28,7 +28,7 @@ my $ace_tao_filename = "ACE+TAO-2.2a_with_latest_patches_NO_makefiles.tar.gz";
 my $ace_tao_url = "http://download.ociweb.com/TAO-2.2a/$ace_tao_filename";
 my $ace_root = "ACE_wrappers";
 my $git_name_prefix = "DDS-";
-my $default_post_release_version_id = "dev";
+my $default_post_release_metadata = "dev";
 
 $ENV{TZ} = "UTC";
 Time::Piece::_tzset;
@@ -69,10 +69,8 @@ sub insert_news_template($$) {
   my $settings = shift();
   my $post_release = shift();
 
-  print("pr: $post_release\n");
   my $version = ($post_release ?
     $settings->{parsed_next_version} : $settings->{parsed_version})->{string};
-  print("$settings->{parsed_next_version}->{metadata}\n");
   my $release_msg = $post_release ?
     get_news_post_release_msg($settings) : get_news_release_msg($settings);
 
@@ -144,8 +142,8 @@ sub usage {
     "  --next-version=VERSION What to set the verion to after release. Must be the\n" .
     "                         same format as the VERSION positional argument.\n" .
     "                         (default is to increment the minor version field).\n" .
-    "  --version-id=ID        What to append to the post-release version string like\n" .
-    "                         X.Y.Z-ID (default: ${default_post_release_version_id})\n" .
+    "  --metadata=ID          What to append to the post-release version string like\n" .
+    "                         X.Y.Z-ID (default: ${default_post_release_metadata})\n" .
     "  --skip-devguide        Skip getting and including the devguide\n" .
     "  --skip-doxygen         Skip getting ACE/TAO and generating and including the\n" .
     "                         doxygen docs\n" .
@@ -372,13 +370,21 @@ sub parse_version {
   my $version = shift;
   my %result = ();
   if ($version =~ /^(0|[1-9]\d*)\.(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)))?$/) {
-    $result{string} = "$version";
     $result{major} = $1;
     $result{minor} = $2;
     $result{micro} = $3 || "0";
     $result{metadata} = $4 || "";
+    my $metadata_maybe = $result{metadata} ? "-$result{metadata}" : "";
+
     $result{series_string} = "$result{major}.$result{minor}";
-    $result{release_string} = "$result{series_string}.$result{micro}";
+    $result{series_string_with_metadata} = "$result{series_string}$metadata_maybe";
+    $result{full_release_string} = "$result{series_string}.$result{micro}";
+    $result{complete_string} = "$result{full_release_string}$metadata_maybe";
+    if ($result{micro} eq "0") {
+      $result{string} = $result{series_string_with_metadata};
+    } else {
+      $result{string} = $result{complete_string};
+    }
   }
   return %result;
 }
@@ -421,7 +427,6 @@ sub version_greater_equal {
     my $lnum = $li =~ /^\d+$/ ? 1 : 0;
     my $ri = $rfields[$i];
     my $rnum = $ri =~ /^\d+$/ ? 1 : 0;
-    print("  $li($lnum) $ri($rnum)\n");
     return 1 if (!$lnum && $rnum);
     return 0 if ($lnum && !$rnum);
     if ($lnum) {
@@ -440,7 +445,7 @@ sub version_greater {
   my $left = shift();
   my $right = shift();
   return version_greater_equal($left, $right) &&
-    $left->{string} ne $right->{string};
+    $left->{complete_string} ne $right->{complete_string};
 }
 
 sub version_lesser {
@@ -992,8 +997,6 @@ sub verify_update_version_h_file {
   }
 
   my $parsed_version = $post_release ?
-    $settings->{parsed_next_version} : $settings->{parsed_version};
-  my $version = $post_release ?
     $settings->{parsed_next_version} : $settings->{parsed_version};
   my $metaversion = quotemeta($parsed_version->{string});
   my $release = $post_release ? "0" : "1";
@@ -1976,7 +1979,7 @@ my $github_user = $default_github_user;
 my $download_url = $default_download_url;
 my $micro = 0;
 my $next_version = "";
-my $version_id = $default_post_release_version_id;
+my $metadata = $default_post_release_metadata;
 my $skip_devguide = 0;
 my $skip_doxygen = 0;
 my $skip_website = 0;
@@ -1995,7 +1998,7 @@ GetOptions(
   'download-url=s' => \$download_url,
   'micro!' => \$micro,
   'next-version=s' => \$next_version,
-  'version-id=s' => \$version_id,
+  'metadata=s' => \$metadata,
   'skip-devguide!' => \$skip_devguide,
   'skip-doxygen!' => \$skip_doxygen ,
   'skip-website!' => \$skip_website ,
@@ -2003,7 +2006,7 @@ GetOptions(
 ) or die "See --help for options.\nStopped";
 
 if (!(scalar(@ARGV) == 0 || scalar(@ARGV) == 2)) {
-  die "Expecting at 0 or 2 positional arugments. See --help.\nStopped";
+  die "Expecting 0 or 2 positional arguments. See --help.\nStopped";
 }
 
 if ($print_list_all) {
@@ -2011,8 +2014,8 @@ if ($print_list_all) {
 }
 
 if ($micro) {
-  if ($print_list && !$branch) {
-    die "For micro releases, you must define the branch you want to use with --branch";
+  if (!$print_list && !$branch) {
+    die "For micro releases, you must define the branch you want to use with --branch.\nStopped";
   }
   $skip_devguide = 1;
   $skip_doxygen = 1;
@@ -2048,10 +2051,10 @@ if (%parsed_version) {
     $next_version = sprintf("%s.%d.%s",
       $parsed_version{major}, int($parsed_version{minor}) + 1, "0");
   }
-  $next_version .= "-${version_id}";
+  $next_version .= "-${metadata}";
   %parsed_next_version = parse_version($next_version);
   if (!%parsed_next_version) {
-    die "Invalid next version: $next_version";
+    die "Invalid next version: $next_version\nStopped";
   }
 }
 

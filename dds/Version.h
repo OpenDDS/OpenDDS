@@ -9,4 +9,4 @@
 #define DDS_MINOR_VERSION 14
 #define DDS_MICRO_VERSION 0
 #define OPENDDS_IS_RELEASE 0
-#define DDS_VERSION "3.14.0-dev"
+#define DDS_VERSION "3.14-dev"
