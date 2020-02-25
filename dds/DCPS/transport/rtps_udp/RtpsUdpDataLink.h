@@ -386,7 +386,7 @@ private:
 
   class RtpsReader : public RcObject {
   public:
-    RtpsReader(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable) : link_(link), id_(id), durable_(durable) {}
+    RtpsReader(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable) : link_(link), id_(id), durable_(durable), stopping_(false) {}
 
     bool add_writer(const RepoId& id, const WriterInfo& info);
     bool has_writer(const RepoId& id) const;
@@ -395,6 +395,8 @@ private:
 
     bool is_writer_handshake_done(const RepoId& id) const;
     bool should_nack_durable(const WriterInfo& info);
+
+    void pre_stop_helper();
 
     bool process_heartbeat_i(const RTPS::HeartBeatSubmessage& heartbeat, const RepoId& src, MetaSubmessageVec& meta_submessages);
     bool process_data_i(const RTPS::DataSubmessage& data, const RepoId& src, MetaSubmessageVec& meta_submessages);
@@ -413,6 +415,7 @@ private:
     RepoId id_;
     bool durable_;
     WriterInfoMap remote_writers_;
+    bool stopping_;
   };
   typedef RcHandle<RtpsReader> RtpsReader_rch;
 

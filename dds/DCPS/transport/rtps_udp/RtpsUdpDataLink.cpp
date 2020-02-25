@@ -716,6 +716,16 @@ RtpsUdpDataLink::pre_stop_i()
     (*drop_it)->data_dropped(true);
     ++drop_it;
   }
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, readers_lock_);
+
+    RtpsReaderMap::iterator iter = readers_.begin();
+    while (iter != readers_.end()) {
+      RtpsReader_rch reader = iter->second;
+      reader->pre_stop_helper();
+      ++iter;
+    }
+  }
 }
 
 void
@@ -1359,12 +1369,39 @@ RtpsUdpDataLink::received(const RTPS::DataSubmessage& data,
   send_bundled_submessages(meta_submessages);
 }
 
+void
+RtpsUdpDataLink::RtpsReader::pre_stop_helper()
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+
+  stopping_ = true;
+
+  RtpsUdpDataLink_rch link = link_.lock();
+
+  if (!link) {
+    return;
+  }
+
+  GuardType guard(link->strategy_lock_);
+  if (link->receive_strategy() == 0) {
+    return;
+  }
+
+  for (WriterInfoMap::iterator it = remote_writers_.begin(); it != remote_writers_.end(); ++it) {
+    it->second.held_.clear();
+  }
+}
+
 bool
 RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
                                             const RepoId& src,
                                             MetaSubmessageVec&)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
+
+  if (stopping_) {
+    return false;
+  }
 
   RtpsUdpDataLink_rch link = link_.lock();
 
@@ -1393,6 +1430,7 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
       && info.hb_range_.second < info.hb_range_.first;
 
     info.frags_.erase(seq);
+
     if (info.recvd_.empty()) {
       if (durable_) {
         info.hb_range_.first = 1;
