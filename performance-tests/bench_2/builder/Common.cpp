@@ -73,14 +73,15 @@ bool operator<=(const TimeStamp& lhs, const TimeStamp& rhs)
 
 bool operator==(const TimeStamp& lhs, const TimeStamp& rhs)
 {
-  return lhs.sec == rhs.sec && lhs.sec == rhs.sec;
+  return lhs.sec == rhs.sec && lhs.nsec == rhs.nsec;
 }
 
 std::ostream&
 operator<<(std::ostream& out, const TimeStamp& ts)
 {
+  std::streamsize ssize = out.precision();
   out << std::setprecision(3) << std::fixed <<
-    static_cast<double>(ts.sec) + (static_cast<double>(ts.nsec) / 1.0e9) << std::flush;
+    static_cast<double>(ts.sec) + (static_cast<double>(ts.nsec) / 1.0e9) << std::setprecision(ssize) << std::flush;
   return out;
 }
 

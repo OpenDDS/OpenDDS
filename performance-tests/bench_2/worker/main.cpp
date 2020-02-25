@@ -11,7 +11,14 @@
 #endif
 
 #include "BenchC.h"
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
+#endif
 #include "BenchTypeSupportImpl.h"
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 #include "BuilderTypeSupportImpl.h"
 
 #include "ListenerFactory.h"

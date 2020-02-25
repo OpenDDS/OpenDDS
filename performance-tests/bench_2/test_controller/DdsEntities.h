@@ -5,7 +5,15 @@
 #include <dds/DdsDcpsPublicationC.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
+#endif
 #include "BenchTypeSupportImpl.h"
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
+
 #include "PropertyStatBlock.h"
 
 #include "StatusListener.h"
