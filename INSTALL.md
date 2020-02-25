@@ -34,7 +34,7 @@ supported platforms.
   To start the script simply change to the directory containing this INSTALL
   file, and run:
 
-**For Unixes (Linux, macOS, Solaris, BSDs, etc):**
+**For Unixes (Linux, macOS, BSDs, etc):**
 
 ```
 ./configure
@@ -78,7 +78,7 @@ configure script.**
   **NOTE:** Make sure your environment is set by checking the variable `DDS_ROOT`.
         Run setenv if it is not set.
 
-**For Unixes (Linux, macOS, Solaris, BSDs, etc):**
+**For Unixes (Linux, macOS, BSDs, etc):**
 
 ```
 bin/auto_run_tests.pl
