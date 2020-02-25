@@ -304,6 +304,7 @@ private:
     CmgAction action_;
   };
 
+#ifdef OPENDDS_SECURITY
   class SendStun : public DCPS::JobQueue::Job {
   public:
     SendStun(SpdpTransport* tport, const ACE_INET_Addr& address, const STUN::Message& message) : tport_(tport), address_(address), message_(message) {}
@@ -313,6 +314,7 @@ private:
     ACE_INET_Addr address_;
     STUN::Message message_;
   };
+#endif
 
   ACE_Event_Handler_var eh_; // manages our refcount on tport_
   bool eh_shutdown_;
