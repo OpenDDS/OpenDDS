@@ -214,7 +214,7 @@ void NetworkConfigModifier::validate_interfaces_index()
 int NetworkConfigModifier::get_index(const OPENDDS_STRING& name)
 {
   int index = -1;
-  
+
   NetworkInterfaces nics = get();
   NetworkInterfaces::iterator nic_pos = std::find_if(nics.begin(), nics.end(), NetworkInterfaceName(name));
   if (nic_pos != nics.end()) {
