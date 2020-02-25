@@ -97,7 +97,7 @@ software:
 
 Finally all paths being passed to GNU make must not contain spaces because of a
 ACE's gnuace make scripts don't those paths handle correctly on Windows. This
-means the NDK, toolchain, MinGW, JDK, OpenDDS source, OpenDDS host tools, etc.
+means the NDK, toolchain, MSYS2, JDK, OpenDDS source, OpenDDS host tools, etc.
 must not contain any spaces in their paths.
 
 ## Building OpenDDS for Android
@@ -160,8 +160,7 @@ PATH=$PATH:$TOOLCHAIN/bin make # Pass -j/--jobs with an appropriate value or thi
   using Visual Studio must be passed to `configure`.
 
 - In addition to the Android toolchain, you will also need MSYS2 utilities in
-  your `%PATH%`. The default installation location of the MinGW utilities is
-  `C:\MinGW\msys\1.0\bin`.
+  your `%PATH%`.
 
 - Make sure these commands in a new Visual Studio command prompt that is
   different from where you configured the host tools.
