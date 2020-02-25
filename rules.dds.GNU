@@ -56,16 +56,24 @@ IDL2JNI_DEP = $(IDL2JNI)
 # with different minor or major or beta versions to fail.
 #
 ifeq (cmd,$(findstring cmd,$(SHELL)))
-DDS_MAJOR_VERSION := $(shell awk "/DDS_MAJOR_VERSION/ { print $$3}" ${DDS_ROOT}/dds/Version.h)
-DDS_MINOR_VERSION := $(shell awk "/DDS_MINOR_VERSION/ { print $$3}" ${DDS_ROOT}/dds/Version.h)
-DDS_MICRO_VERSION := $(shell awk "/DDS_MICRO_VERSION/ { print $$3}" ${DDS_ROOT}/dds/Version.h)
+  DDS_MAJOR_VERSION := $(shell awk "/DDS_MAJOR_VERSION/ { print $$3}" ${DDS_ROOT}/dds/Version.h)
+  DDS_MINOR_VERSION := $(shell awk "/DDS_MINOR_VERSION/ { print $$3}" ${DDS_ROOT}/dds/Version.h)
+  DDS_MICRO_VERSION := $(shell awk "/DDS_MICRO_VERSION/ { print $$3}" ${DDS_ROOT}/dds/Version.h)
+  OPENDDS_VERSION_METADATA := \
+    $(shell awk "/OPENDDS_VERSION_METADATA/ { print substr($$3, 2, length($$3) - 2) }" ${DDS_ROOT}/dds/Version.h)
 else
-DDS_MAJOR_VERSION := $(shell awk '/DDS_MAJOR_VERSION/ { print $$3}' ${DDS_ROOT}/dds/Version.h)
-DDS_MINOR_VERSION := $(shell awk '/DDS_MINOR_VERSION/ { print $$3}' ${DDS_ROOT}/dds/Version.h)
-DDS_MICRO_VERSION := $(shell awk '/DDS_MICRO_VERSION/ { print $$3}' ${DDS_ROOT}/dds/Version.h)
+  DDS_MAJOR_VERSION := $(shell awk '/DDS_MAJOR_VERSION/ { print $$3}' ${DDS_ROOT}/dds/Version.h)
+  DDS_MINOR_VERSION := $(shell awk '/DDS_MINOR_VERSION/ { print $$3}' ${DDS_ROOT}/dds/Version.h)
+  DDS_MICRO_VERSION := $(shell awk '/DDS_MICRO_VERSION/ { print $$3}' ${DDS_ROOT}/dds/Version.h)
+  OPENDDS_VERSION_METADATA := \
+    $(shell awk '/OPENDDS_VERSION_METADATA/ { print substr($$3, 2, length($$3) - 2)}' ${DDS_ROOT}/dds/Version.h)
 endif
 
-GNUACE_PROJECT_VERSION ?= $(DDS_MAJOR_VERSION).$(DDS_MINOR_VERSION).$(DDS_MICRO_VERSION)
+ifdef OPENDDS_VERSION_METADATA
+  GNUACE_PROJECT_VERSION ?= $(DDS_MAJOR_VERSION).$(DDS_MINOR_VERSION).$(DDS_MICRO_VERSION)-$(OPENDDS_VERSION_METADATA)
+else
+  GNUACE_PROJECT_VERSION ?= $(DDS_MAJOR_VERSION).$(DDS_MINOR_VERSION).$(DDS_MICRO_VERSION)
+endif
 
 -include $(DDS_ROOT)/user_macros.GNU
 
