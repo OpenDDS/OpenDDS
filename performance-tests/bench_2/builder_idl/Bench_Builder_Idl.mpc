@@ -9,6 +9,13 @@ project: dcpslib {
 
   requires += no_opendds_safety_profile
 
+  expand(BENCH_BUILDER_ROOT) {
+    $BENCH_BUILDER_ROOT
+    $(DDS_ROOT)/performance-tests/bench_2
+  }
+
+  libout = $(BENCH_BUILDER_ROOT)/lib
+
   Idl_Files {
     Builder.idl
   }

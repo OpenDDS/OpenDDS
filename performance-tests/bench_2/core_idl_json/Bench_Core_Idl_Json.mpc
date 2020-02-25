@@ -13,6 +13,13 @@ project: dcpslib, dcps_rapidjson {
 
   requires += no_opendds_safety_profile
 
+  expand(BENCH_BUILDER_ROOT) {
+    $BENCH_BUILDER_ROOT
+    $(DDS_ROOT)/performance-tests/bench_2
+  }
+
+  libout = $(BENCH_BUILDER_ROOT)/lib
+
   Modify_Custom(Idl) {
     automatic_in = 0
   }
