@@ -2150,8 +2150,9 @@ my %global_settings = (
 
 if (verify_release_flag_file(\%global_settings)) {
   $global_settings{release_flag_file_exists} = 1;
-  print "Release flag file found, assuming release is done. Remove " .
-    "$global_settings{release_flag_file_path} if this is not the case\n";
+  print
+    "Release flag file found, assuming release is done! Remove the\n" .
+    "\"$release_flag_filename\" file in the workspace if that is not the case.\n";
 }
 
 my @release_steps  = (
@@ -2353,7 +2354,7 @@ my @release_steps  = (
     name    => 'Upload to GitHub',
     verify  => sub{verify_github_upload(@_)},
     message => sub{message_github_upload(@_)},
-    remedy  => sub{remedy_github_upload(@_)}
+    remedy  => sub{remedy_github_upload(@_)},
   },
   {
     name    => 'Release Website',
@@ -2367,14 +2368,14 @@ my @release_steps  = (
     verify => sub{verify_release_flag_file(@_)},
     message => sub{ return "Release flag file needs to be created."},
     remedy => sub{touch_file("$_[0]->{release_flag_file_name_path}"); return 0;},
-    is_release_flag_step => 1, # Everything after this is post-release
+    post_release => 1,
   },
   {
     name    => 'Update NEWS for Post-Release',
     verify  => sub{verify_news_template_file_section(@_)},
     message => sub{message_news_template_file_section(@_)},
     remedy  => sub{remedy_news_template_file_section(@_)},
-    skip    => $global_settings{micro},
+    post_release => 1,
   },
   {
     name    => 'Update VERSION.txt for Post-Release',
@@ -2382,6 +2383,7 @@ my @release_steps  = (
     message => sub{message_update_version_file(@_)},
     remedy  => sub{remedy_update_version_file(@_, 1)},
     can_force => 1,
+    post_release => 1,
   },
   {
     name    => 'Update Version.h for Post-Release',
@@ -2389,6 +2391,7 @@ my @release_steps  = (
     message => sub{message_update_version_h_file(@_)},
     remedy  => sub{remedy_update_version_h_file(@_, 1)},
     can_force => 1,
+    post_release => 1,
   },
   {
     name    => 'Update PROBLEM-REPORT-FORM for Post-Release',
@@ -2396,20 +2399,22 @@ my @release_steps  = (
     message => sub{message_update_prf_file(@_, 1)},
     remedy  => sub{remedy_update_prf_file(@_, 1)},
     can_force => 1,
+    post_release => 1,
   },
   {
     name    => 'Commit Post-Release Changes',
     verify  => sub{verify_git_status_clean(@_, 1)},
     message => sub{message_commit_git_changes(@_)},
     remedy  => sub{remedy_git_status_clean(@_)},
-    skip    => $global_settings{micro},
+    post_release => 1,
   },
   {
     name    => 'Push Post-Release Changes',
     prereqs => ['Verify Remote'],
     verify  => sub{verify_git_changes_pushed(@_, 1)},
     message => sub{message_git_changes_pushed(@_)},
-    remedy  => sub{remedy_git_changes_pushed(@_, 0)}
+    remedy  => sub{remedy_git_changes_pushed(@_, 0)},
+    post_release => 1,
   },
   {
     name    => 'Email DDS-Release-Announce list',
@@ -2420,7 +2425,6 @@ my @release_steps  = (
 );
 
 # For all steps, check for missing required attributes, fill others
-my $found_release_flag_step = 0;
 foreach my $step_index (1..scalar(@release_steps)) {
   my $step = $release_steps[$step_index - 1];
   my @required = (
@@ -2442,11 +2446,8 @@ foreach my $step_index (1..scalar(@release_steps)) {
   if (not exists $step->{can_force}) {
     $step->{can_force} = 0;
   }
-  if (not exists $step->{is_release_step}) {
-    $step->{is_release_step} = !$found_release_flag_step;
-  }
-  if (exists $step->{is_release_flag_step} && $step->{is_release_flag_step}) {
-    $found_release_flag_step = 1;
+  if (not exists $step->{post_release}) {
+    $step->{post_release} = 0;
   }
 }
 
@@ -2471,7 +2472,8 @@ sub run_step {
 
   return if (
     !$settings->{list_all} && ($step->{skip} || $step->{verified} ||
-    ($settings->{release_flag_file_exists} && $step->{is_release_step})));
+    ($settings->{release_flag_file_exists} && !$step->{post_release}) ||
+    ($settings->{micro} && $step->{post_release})));
   print "$step_count: $title\n";
   return if $settings->{list};
 
