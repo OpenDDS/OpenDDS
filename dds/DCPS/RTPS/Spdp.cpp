@@ -1019,8 +1019,8 @@ Spdp::process_auth_deadlines(const DCPS::MonotonicTimePoint& now)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
-  for (TimeQueue::iterator pos = auth_deadlines_.begin(), limit = auth_deadlines_.end();
-       pos != limit && pos->first <= now;) {
+  for (TimeQueue::iterator pos = auth_deadlines_.begin(),
+        limit = auth_deadlines_.upper_bound(now); pos != limit;) {
 
     DiscoveredParticipantIter pit = participants_.find(pos->second);
     if (pit != participants_.end()) {
@@ -1037,14 +1037,20 @@ Spdp::process_auth_deadlines(const DCPS::MonotonicTimePoint& now)
           ICE::Agent::instance()->stop_ice(spdp_endpoint, guid_, pit->first);
         }
         remove_discovered_participant(pit);
+        auth_deadlines_.erase(pos++);
       } else {
         purge_auth_resends(pit);
         pit->second.auth_state_ = DCPS::AS_UNAUTHENTICATED;
-        match_unauthenticated(pos->second, pit);
+        const DCPS::MonotonicTimePoint time = pos->first;
+        const RepoId part_id = pos->second;
+        auth_deadlines_.erase(pos);
+        match_unauthenticated(part_id, pit);
+        pos = auth_deadlines_.lower_bound(time);
+        limit = auth_deadlines_.upper_bound(now);
       }
+    } else {
+      auth_deadlines_.erase(pos++);
     }
-
-    auth_deadlines_.erase(pos++);
   }
 
   if (!auth_deadlines_.empty()) {
