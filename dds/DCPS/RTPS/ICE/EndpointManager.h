@@ -130,6 +130,8 @@ struct EndpointManager {
     username_to_checklist_.erase(pos);
   }
 
+  void unfreeze();
+
   void unfreeze(const FoundationType& a_foundation);
 
   void compute_active_foundations(ActiveFoundationSet& a_active_foundations) const;
@@ -149,6 +151,8 @@ struct EndpointManager {
   }
 
   void network_change();
+
+  void send(const ACE_INET_Addr& address, const STUN::Message& message);
 
 private:
   bool scheduled_for_destruction_;
@@ -215,7 +219,9 @@ private:
                const ACE_INET_Addr& a_remote_address,
                const STUN::Message& a_message);
 
-  void indication(const STUN::Message& a_message);
+  void indication(const ACE_INET_Addr& a_local_address,
+                  const ACE_INET_Addr& a_remote_address,
+                  const STUN::Message& a_message);
 
   void success_response(const ACE_INET_Addr& a_local_address,
                         const ACE_INET_Addr& a_remote_address,
