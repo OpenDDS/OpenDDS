@@ -27,7 +27,7 @@ NetworkConfigModifier::NetworkConfigModifier()
 bool NetworkConfigModifier::open()
 {
   if (DCPS_debug_level > 0) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) NetworkConfigModifier::open() enumerating interfaces\n")));
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) NetworkConfigModifier::open() enumerating interfaces.\n")));
   }
 
   ifaddrs* p_ifa = 0;
@@ -43,8 +43,7 @@ bool NetworkConfigModifier::open()
   int count = 0;
 
   // Pull the address out of each INET interface.
-  for (p_if = p_ifa; p_if != 0; p_if = p_if->ifa_next)
-  {
+  for (p_if = p_ifa; p_if != 0; p_if = p_if->ifa_next) {
     if (p_if->ifa_addr == 0)
       continue;
 
@@ -53,15 +52,12 @@ bool NetworkConfigModifier::open()
       continue;
 
     if (p_if->ifa_addr->sa_family == AF_INET) {
-      struct sockaddr_in *addr =
-        reinterpret_cast<sockaddr_in *> (p_if->ifa_addr);
+      struct sockaddr_in* addr = reinterpret_cast<sockaddr_in*> (p_if->ifa_addr);
 
       // Sometimes the kernel returns 0.0.0.0 as the interface
       // address, skip those...
       if (addr->sin_addr.s_addr != INADDR_ANY) {
-        address.set((u_short) 0,
-                     addr->sin_addr.s_addr,
-                     0);
+        address.set((u_short) 0, addr->sin_addr.s_addr, 0);
 
         NetworkInterface iface(count, p_if->ifa_name, p_if->ifa_flags & IFF_MULTICAST);
         iface.addresses.insert(address);
@@ -84,7 +80,6 @@ bool NetworkConfigModifier::close()
   if (DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) NetworkConfigModifier::close()\n")));
   }
-
   return true;
 }
 
@@ -98,16 +93,17 @@ void NetworkConfigModifier::add_interface(const OPENDDS_STRING &name)
   ACE_INET_Addr address;
 
   if (::getifaddrs(&p_ifa) != 0) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: NetworkConfigModifier::add_interface %p"),
-        ACE_TEXT("getifaddrs error - ")));
-      return;
+    if (DCPS_debug_level > 0) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: NetworkConfigModifier::add_interface %p "),
+        ACE_TEXT("getifaddrs error.\n")));
+    }
+    return;
   }
 
   int count = 0;
 
   // Pull the address out of each INET interface.
-  for (p_if = p_ifa; p_if != 0; p_if = p_if->ifa_next)
-  {
+  for (p_if = p_ifa; p_if != 0; p_if = p_if->ifa_next) {
     if (p_if->ifa_addr == 0)
       continue;
 
@@ -117,7 +113,7 @@ void NetworkConfigModifier::add_interface(const OPENDDS_STRING &name)
 
     if (p_if->ifa_addr->sa_family == AF_INET) {
       if (name == p_if->ifa_name) {
-        p_nic = new NetworkInterface (count, p_if->ifa_name, p_if->ifa_flags & IFF_MULTICAST);
+        p_nic = new NetworkInterface(count, p_if->ifa_name, p_if->ifa_flags & IFF_MULTICAST);
         break;
       }
 
@@ -142,7 +138,9 @@ void NetworkConfigModifier::remove_interface(const OPENDDS_STRING &name)
     NetworkConfigMonitor::remove_interface(index);
   }
   else {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: NetworkConfigModifier::remove_interface. Interface '%s' not found"), name.c_str()));
+    if (DCPS_debug_level > 0) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: NetworkConfigModifier::remove_interface. Interface '%C' not found.\n"), name.c_str()));
+    }
   }
 }
 
@@ -153,7 +151,9 @@ void NetworkConfigModifier::add_address(const OPENDDS_STRING &name, const ACE_IN
     NetworkConfigMonitor::add_address(index, address);
   }
   else {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: NetworkConfigModifier::add_address. Interface '%s' not found"), name.c_str()));
+    if (DCPS_debug_level > 0) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: NetworkConfigModifier::add_address. Interface '%C' not found.\n"), name.c_str()));
+    }
   }
 }
 
@@ -162,9 +162,10 @@ void NetworkConfigModifier::remove_address(const OPENDDS_STRING &name, const ACE
   int index = get_index(name);
   if (index != -1) {
     NetworkConfigMonitor::remove_address(index, address);
-  }
-  else {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: NetworkConfigModifier::remove_address. Interface '%s' not found"), name.c_str()));
+  } else {
+    if (DCPS_debug_level > 0) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: NetworkConfigModifier::remove_address. Interface '%C' not found.\n"), name.c_str()));
+    }
   }
 }
 
@@ -179,17 +180,17 @@ void NetworkConfigModifier::validate_interfaces_index()
 
   ACE_INET_Addr address;
 
-  if (::getifaddrs(&p_ifa) != 0)
-  {
-      ACE_ERROR((LM_ERROR, "NetworkConfigModifier::add_interface getifaddrs error."));
-      return;
+  if (::getifaddrs(&p_ifa) != 0) {
+    if (DCPS_debug_level > 0) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR:NetworkConfigModifier::add_interface getifaddrs error.\n")));
+    }
+    return;
   }
 
   int count = 0;
 
   // Pull the address out of each INET interface.
-  for (p_if = p_ifa; p_if != 0; p_if = p_if->ifa_next)
-  {
+  for (p_if = p_ifa; p_if != 0; p_if = p_if->ifa_next) {
     if (p_if->ifa_addr == 0)
       continue;
 
