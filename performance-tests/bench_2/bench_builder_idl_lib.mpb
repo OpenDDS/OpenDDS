@@ -6,5 +6,6 @@ project: dcps_rtps_udp {
     $BENCH_BUILDER_ROOT
     $(DDS_ROOT)/performance-tests/bench_2
   }
+  libpaths += $(BENCH_BUILDER_ROOT)/lib
   includes += $(BENCH_BUILDER_ROOT)/builder_idl
 }

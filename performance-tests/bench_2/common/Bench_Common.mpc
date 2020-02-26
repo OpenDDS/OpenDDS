@@ -12,6 +12,8 @@ project: dcpslib, ../bench_idl_lib, ../bench_builder_idl_lib, dcps_rapidjson {
   dynamicflags  += BENCH_COMMON_BUILD_DLL
   includes += $(BENCH_BUILDER_ROOT)/builder
 
+  libout = $(BENCH_ROOT)/lib
+
   Idl_Files {
   }
 
