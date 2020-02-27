@@ -122,7 +122,7 @@ int RelayHandler::handle_input(ACE_HANDLE handle)
   // Allocate at least one byte so that recv cannot return early.
   OpenDDS::DCPS::Message_Block_Shared_Ptr buffer(new ACE_Message_Block(std::max(inlen, 1)));
 
-  const auto bytes = socket_.recv(buffer->wr_ptr(), buffer->size(), remote);
+  const auto bytes = socket_.recv(buffer->wr_ptr(), buffer->space(), remote);
 
   if (bytes < 0) {
     ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::handle_input failed to recv: %m\n"));

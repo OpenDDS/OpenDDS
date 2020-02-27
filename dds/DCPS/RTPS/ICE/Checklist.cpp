@@ -161,7 +161,6 @@ void Checklist::generate_candidate_pairs()
     check_interval_ = endpoint_manager_->agent_impl->get_configuration().T_a();
     double s = static_cast<double>(frozen_.size());
     max_check_interval_ = endpoint_manager_->agent_impl->get_configuration().checklist_period() * (1.0 / s);
-    enqueue(MonotonicTimePoint::now());
   }
 }
 
@@ -185,37 +184,47 @@ void Checklist::check_invariants() const
 
 void Checklist::unfreeze()
 {
+  bool flag = false;
+
   for (CandidatePairsType::iterator pos = frozen_.begin(), limit = frozen_.end(); pos != limit;) {
     const CandidatePair& cp = *pos;
 
-    if (!endpoint_manager_->agent_impl->active_foundations.contains(cp.foundation)) {
-      endpoint_manager_->agent_impl->active_foundations.add(cp.foundation);
+    if (!endpoint_manager_->agent_impl->contains(cp.foundation)) {
+      endpoint_manager_->agent_impl->add(cp.foundation);
       waiting_.push_back(cp);
       waiting_.sort(CandidatePair::priority_sorted);
       frozen_.erase(pos++);
-    }
-
-    else {
+      flag = true;
+    } else {
       ++pos;
     }
+  }
+
+  if (flag) {
+    enqueue(MonotonicTimePoint::now());
   }
 }
 
 void Checklist::unfreeze(const FoundationType& a_foundation)
 {
+  bool flag = false;
+
   for (CandidatePairsType::iterator pos = frozen_.begin(), limit = frozen_.end(); pos != limit;) {
     const CandidatePair& cp = *pos;
 
     if (cp.foundation == a_foundation) {
-      endpoint_manager_->agent_impl->active_foundations.add(cp.foundation);
+      endpoint_manager_->agent_impl->add(cp.foundation);
       waiting_.push_back(cp);
       waiting_.sort(CandidatePair::priority_sorted);
       frozen_.erase(pos++);
-    }
-
-    else {
+      flag = true;
+    } else {
       ++pos;
     }
+  }
+
+  if (flag) {
+    enqueue(MonotonicTimePoint::now());
   }
 }
 
@@ -229,11 +238,11 @@ void Checklist::add_valid_pair(const CandidatePair& valid_pair)
 void Checklist::fix_foundations()
 {
   for (CandidatePairsType::const_iterator pos = waiting_.begin(), limit = waiting_.end(); pos != limit; ++pos) {
-    endpoint_manager_->agent_impl->active_foundations.remove(pos->foundation);
+    endpoint_manager_->agent_impl->remove(pos->foundation);
   }
 
   for (CandidatePairsType::const_iterator pos = in_progress_.begin(), limit = in_progress_.end(); pos != limit; ++pos) {
-    endpoint_manager_->agent_impl->active_foundations.remove(pos->foundation);
+    endpoint_manager_->agent_impl->remove(pos->foundation);
   }
 }
 
@@ -274,7 +283,7 @@ void Checklist::add_triggered_check(const CandidatePair& a_candidate_pair)
 
   if (pos != frozen_.end()) {
     frozen_.erase(pos);
-    endpoint_manager_->agent_impl->active_foundations.add(a_candidate_pair.foundation);
+    endpoint_manager_->agent_impl->add(a_candidate_pair.foundation);
     waiting_.push_back(a_candidate_pair);
     waiting_.sort(CandidatePair::priority_sorted);
     triggered_check_queue_.push_back(a_candidate_pair);
@@ -292,7 +301,7 @@ void Checklist::add_triggered_check(const CandidatePair& a_candidate_pair)
 
   if (pos != in_progress_.end()) {
     // Duplicating to waiting.
-    endpoint_manager_->agent_impl->active_foundations.add(a_candidate_pair.foundation);
+    endpoint_manager_->agent_impl->add(a_candidate_pair.foundation);
     waiting_.push_back(a_candidate_pair);
     waiting_.sort(CandidatePair::priority_sorted);
     triggered_check_queue_.push_back(a_candidate_pair);
@@ -310,7 +319,7 @@ void Checklist::add_triggered_check(const CandidatePair& a_candidate_pair)
 
   if (pos != failed_.end()) {
     failed_.erase(pos);
-    endpoint_manager_->agent_impl->active_foundations.add(a_candidate_pair.foundation);
+    endpoint_manager_->agent_impl->add(a_candidate_pair.foundation);
     waiting_.push_back(a_candidate_pair);
     waiting_.sort(CandidatePair::priority_sorted);
     triggered_check_queue_.push_back(a_candidate_pair);
@@ -318,7 +327,7 @@ void Checklist::add_triggered_check(const CandidatePair& a_candidate_pair)
   }
 
   // Not in checklist.
-  endpoint_manager_->agent_impl->active_foundations.add(a_candidate_pair.foundation);
+  endpoint_manager_->agent_impl->add(a_candidate_pair.foundation);
   waiting_.push_back(a_candidate_pair);
   waiting_.sort(CandidatePair::priority_sorted);
   triggered_check_queue_.push_back(a_candidate_pair);
@@ -326,13 +335,14 @@ void Checklist::add_triggered_check(const CandidatePair& a_candidate_pair)
 
 void Checklist::remove_from_in_progress(const CandidatePair& a_candidate_pair)
 {
-  endpoint_manager_->agent_impl->active_foundations.remove(a_candidate_pair.foundation);
+  endpoint_manager_->agent_impl->remove(a_candidate_pair.foundation);
   // Candidates can be in progress multiple times.
   CandidatePairsType::iterator pos = std::find(in_progress_.begin(), in_progress_.end(), a_candidate_pair);
   in_progress_.erase(pos);
 }
 
-void Checklist::generate_triggered_check(const ACE_INET_Addr& local_address, const ACE_INET_Addr& remote_address,
+void Checklist::generate_triggered_check(const ACE_INET_Addr& local_address,
+                                         const ACE_INET_Addr& remote_address,
                                          ACE_UINT32 priority,
                                          bool use_candidate)
 {
@@ -405,7 +415,7 @@ void Checklist::succeeded(const ConnectivityCheck& cc)
       while (!waiting_.empty()) {
         CandidatePair cp = waiting_.front();
         waiting_.pop_front();
-        endpoint_manager_->agent_impl->active_foundations.remove(cp.foundation);
+        endpoint_manager_->agent_impl->remove(cp.foundation);
         failed_.push_back(cp);
       }
 
@@ -624,14 +634,12 @@ void Checklist::do_next_check(const MonotonicTimePoint& a_now)
     in_progress_.push_back(cp);
     in_progress_.sort(CandidatePair::priority_sorted);
 
-    endpoint_manager_->endpoint->send(cc.candidate_pair().remote.address, cc.request());
+    endpoint_manager_->send(cc.candidate_pair().remote.address, cc.request());
     connectivity_checks_.push_back(cc);
     endpoint_manager_->set_responsible_checklist(cc.request().transaction_id, this);
     check_interval_ = endpoint_manager_->agent_impl->get_configuration().T_a();
     return;
   }
-
-  unfreeze();
 
   // Ordinary check.
   if (!waiting_.empty()) {
@@ -643,7 +651,7 @@ void Checklist::do_next_check(const MonotonicTimePoint& a_now)
     in_progress_.push_back(cp);
     in_progress_.sort(CandidatePair::priority_sorted);
 
-    endpoint_manager_->endpoint->send(cc.candidate_pair().remote.address, cc.request());
+    endpoint_manager_->send(cc.candidate_pair().remote.address, cc.request());
     connectivity_checks_.push_back(cc);
     endpoint_manager_->set_responsible_checklist(cc.request().transaction_id, this);
     check_interval_ = endpoint_manager_->agent_impl->get_configuration().T_a();
@@ -659,9 +667,7 @@ void Checklist::do_next_check(const MonotonicTimePoint& a_now)
       if (!cc.cancelled()) {
         // Failing can allow nomination to proceed.
         failed(cc);
-      }
-
-      else {
+      } else {
         remove_from_in_progress(cc.candidate_pair());
       }
 
@@ -672,7 +678,7 @@ void Checklist::do_next_check(const MonotonicTimePoint& a_now)
     if (!cc.cancelled()) {
       // Reset the password in the event that it changed.
       cc.password(remote_agent_info_.password);
-      endpoint_manager_->endpoint->send(cc.candidate_pair().remote.address, cc.request());
+      endpoint_manager_->send(cc.candidate_pair().remote.address, cc.request());
     }
 
     connectivity_checks_.push_back(cc);
@@ -682,7 +688,7 @@ void Checklist::do_next_check(const MonotonicTimePoint& a_now)
     break;
   }
 
-  // Waiting for the remote.
+  // Waiting for the remote or frozen.
   check_interval_ = endpoint_manager_->agent_impl->get_configuration().checklist_period();
 }
 
@@ -727,7 +733,7 @@ void Checklist::execute(const MonotonicTimePoint& a_now)
     message.password = remote_agent_info_.password;
     message.append_attribute(STUN::make_message_integrity());
     message.append_attribute(STUN::make_fingerprint());
-    endpoint_manager_->endpoint->send(selected_address(), message);
+    endpoint_manager_->send(selected_address(), message);
     flag = true;
     interval = std::min(interval, endpoint_manager_->agent_impl->get_configuration().indication_period());
 

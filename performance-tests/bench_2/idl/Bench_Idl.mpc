@@ -1,0 +1,34 @@
+project: dcpslib, ../bench_builder_idl_lib, dcps_rapidjson {
+  idlflags      += -Wb,stub_export_include=Bench_Idl_Export.h \
+                   -Wb,stub_export_macro=Bench_Idl_Export \
+                   -I$(DDS_ROOT)/dds \
+                   -I$(BENCH_BUILDER_ROOT)/builder_idl
+  dcps_ts_flags += -Wb,export_macro=Bench_Idl_Export \
+                   -Wb,cpp_include=$(BENCH_BUILDER_ROOT)/core_idl_json/DdsDcpsCoreTypeSupportImpl.h \
+                   -Wb,cpp_include=$(BENCH_BUILDER_ROOT)/core_idl_json/DdsDcpsGuidTypeSupportImpl.h \
+                   -Wb,cpp_include=$(BENCH_BUILDER_ROOT)/builder_idl_json/BuilderTypeSupportImpl.h \
+                   -I$(BENCH_BUILDER_ROOT)/builder_idl
+  dynamicflags  += BENCH_IDL_BUILD_DLL
+  includes += $(DDS_ROOT)/dds
+
+  requires += no_opendds_safety_profile
+
+  expand(BENCH_ROOT) {
+    $BENCH_ROOT
+    $(DDS_ROOT)/performance-tests/bench_2
+  }
+  libout = $(BENCH_ROOT)/lib
+
+  after += Bench_Builder_Idl_Json
+  libs += Bench_Builder_Idl_Json
+  after += Bench_Core_Idl_Json
+  libs += Bench_Core_Idl_Json
+
+  Idl_Files {
+    Bench.idl
+  }
+
+  TypeSupport_Files {
+    Bench.idl
+  }
+}

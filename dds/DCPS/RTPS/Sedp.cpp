@@ -284,7 +284,7 @@ Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock) :
   participant_stateless_message_writer_(make_rch<Writer>(
     make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER), ref(*this))),
   dcps_participant_secure_writer_(make_rch<Writer>(
-    make_id(participant_id, ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER), ref(*this))),
+    make_id(participant_id, ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER), ref(*this), 2)),
   participant_volatile_message_secure_writer_(make_rch<Writer>(
     make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER), ref(*this))),
 #endif
@@ -2866,8 +2866,8 @@ Sedp::Endpoint::~Endpoint()
 }
 
 //---------------------------------------------------------------
-Sedp::Writer::Writer(const RepoId& pub_id, Sedp& sedp)
-  : Endpoint(pub_id, sedp)
+Sedp::Writer::Writer(const RepoId& pub_id, Sedp& sedp, ACE_INT64 seq_init)
+  : Endpoint(pub_id, sedp), seq_(seq_init)
 {
   header_.prefix[0] = 'R';
   header_.prefix[1] = 'T';
@@ -3113,8 +3113,7 @@ Sedp::Writer::write_volatile_message_secure(const DDS::Security::ParticipantVola
 
 DDS::ReturnCode_t
 Sedp::Writer::write_dcps_participant_secure(const Security::SPDPdiscoveredParticipantData& msg,
-                                            const RepoId& reader,
-                                            DCPS::SequenceNumber& sequence)
+                                            const RepoId& reader, DCPS::SequenceNumber& sequence)
 {
   using DCPS::Serializer;
 
@@ -3539,7 +3538,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       }
       const DCPS::RepoId guid = make_guid(sample.header_.publication_id_.guidPrefix, DCPS::ENTITYID_PARTICIPANT);
       sedp_.spdp_.process_participant_ice(data, *pdata, guid);
-      sedp_.task_.enqueue(id, move(pdata));
+      sedp_.task_.enqueue(id, move(pdata), true);
 #endif
 
     }
@@ -3721,8 +3720,8 @@ DDS::ReturnCode_t
 Sedp::write_stateless_message(DDS::Security::ParticipantStatelessMessage& msg,
                               const RepoId& reader)
 {
-  static DCPS::SequenceNumber sequence = 0;
-  msg.message_identity.sequence_number = static_cast<unsigned long>((++sequence).getValue());
+  msg.message_identity.sequence_number = static_cast<unsigned long>(participant_stateless_message_writer_->get_seq().getValue());
+  DCPS::SequenceNumber sequence = DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN();
   return participant_stateless_message_writer_->write_stateless_message(msg, reader, sequence);
 }
 
@@ -3730,8 +3729,8 @@ DDS::ReturnCode_t
 Sedp::write_volatile_message(DDS::Security::ParticipantVolatileMessageSecure& msg,
                              const RepoId& reader)
 {
-  static DCPS::SequenceNumber sequence = 0;
-  msg.message_identity.sequence_number = static_cast<unsigned long>((++sequence).getValue());
+  msg.message_identity.sequence_number = static_cast<unsigned long>(participant_volatile_message_secure_writer_->get_seq().getValue());
+  DCPS::SequenceNumber sequence = DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN();
   return participant_volatile_message_secure_writer_->write_volatile_message_secure(msg, reader, sequence);
 }
 
@@ -3752,12 +3751,12 @@ DDS::ReturnCode_t
 Sedp::write_dcps_participant_secure(const Security::SPDPdiscoveredParticipantData& msg,
                                     const RepoId& part)
 {
-  static DCPS::SequenceNumber sequence = 0;
-
   DCPS::RepoId remote_reader(part);
-  remote_reader.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER;
+  if (part != GUID_UNKNOWN) {
+    remote_reader.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER;
+  }
 
-  return dcps_participant_secure_writer_->write_dcps_participant_secure(msg, remote_reader, ++sequence);
+  return dcps_participant_secure_writer_->write_dcps_participant_secure(msg, remote_reader, participant_secure_sequence_);
 }
 
 DDS::ReturnCode_t
@@ -4103,14 +4102,15 @@ Sedp::acknowledge()
 }
 
 void
-Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<ParticipantData_t> pdata)
+Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<ParticipantData_t> pdata, bool bSecureParticipant)
 {
+  ACE_UNUSED_ARG(bSecureParticipant);
   if (spdp_->shutting_down()) { return; }
 
   Msg::MsgType type = Msg::MSG_PARTICIPANT;
 
 #ifdef OPENDDS_SECURITY
-  if (pdata->dataKind == Security::DPDK_SECURE) {
+  if (bSecureParticipant) {
     type = Msg::MSG_DCPS_PARTICIPANT_SECURE;
   }
 #endif

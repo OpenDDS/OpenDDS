@@ -91,10 +91,7 @@ bool LinuxNetworkConfigMonitor::close()
 {
   bool retval = true;
 
-  if (reactor()->remove_handler(this, READ_MASK) != 0) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: LinuxNetworkConfigMonitor::close: could not unregister for input: %m\n")));
-    retval = false;
-  }
+  reactor()->remove_handler(this, READ_MASK);
 
   if (socket_.close() != 0) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: LinuxNetworkConfigMonitor::close: could not close socket: %m\n")));
@@ -157,7 +154,6 @@ void LinuxNetworkConfigMonitor::process_message(const nlmsghdr* header)
         address_length = 4;
         break;
       default:
-        ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: LinuxNetworkConfigMonitor::process_message: unhandled address family: %d\n"), msg->ifa_family));
         return;
       }
       int rta_length = IFA_PAYLOAD(header);
@@ -185,7 +181,6 @@ void LinuxNetworkConfigMonitor::process_message(const nlmsghdr* header)
         address_length = 4;
         break;
       default:
-        ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: LinuxNetworkConfigMonitor::process_message: unhandled address family: %d\n"), msg->ifa_family));
         return;
       }
       int rta_length = IFA_PAYLOAD(header);

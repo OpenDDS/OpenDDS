@@ -1,0 +1,4 @@
+project: ../bench_builder_exe, ../bench_exe {
+  libs += OpenDDS_Tcp
+  after += OpenDDS_Tcp
+}

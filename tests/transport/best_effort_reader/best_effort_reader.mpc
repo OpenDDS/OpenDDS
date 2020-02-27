@@ -1,0 +1,23 @@
+project(*pub) : dcpsexe, dcps_test, dcps_rtps_udp {
+
+  exename = publisher
+
+  Source_Files {
+    AppConfig.cpp
+    TestMsg.cpp
+    SocketWriter.cpp
+    publisher.cpp
+  }
+}
+
+project(*sub) : dcpsexe, dcps_test, dcps_rtps_udp {
+
+  exename = subscriber
+
+  Source_Files {
+    AppConfig.cpp
+    TestMsg.cpp
+    SimpleDataReader.cpp
+    subscriber.cpp
+  }
+}

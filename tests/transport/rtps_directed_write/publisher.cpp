@@ -135,7 +135,8 @@ bool DDS_TEST::writeToSocket(const TestMsg& msg, const CORBA::Octet flags) const
   const InfoTimestampSubmessage it = { {INFO_TS, 1, 8},
     {static_cast<ACE_CDR::ULong>(now.sec()),
      static_cast<ACE_CDR::ULong>(now.usec() * conv)} };
-  ::CORBA::UShort sz = 20 + (flags == DEQ ? 24 : 0) + 12 + ACE_OS::strlen(msg.value) + 1;
+  CORBA::UShort sz = static_cast<CORBA::UShort>(
+    20 + (flags == DEQ ? 24 : 0) + 12 + ACE_OS::strlen(msg.value) + 1);
   DataSubmessage ds = { {DATA, flags, sz}, 0, 16, ENTITYID_UNKNOWN,
     config.getPubWtrId().entityId, {0, ++msgSeqN}, ParameterList() };
   if (flags == DEQ) {

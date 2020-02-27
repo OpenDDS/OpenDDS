@@ -1,0 +1,11 @@
+project: dcps_rtps_udp {
+  avoids += no_cxx11
+  after    += Bench_Idl
+  libs     += Bench_Idl
+  expand(BENCH_ROOT) {
+    $BENCH_ROOT
+    $(DDS_ROOT)/performance-tests/bench_2
+  }
+  libpaths += $(BENCH_ROOT)/lib
+  includes += $(BENCH_ROOT)/idl
+}

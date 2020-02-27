@@ -1,0 +1,31 @@
+project: dcpslib, dcps_rapidjson {
+  dcps_ts_flags += -Sdefault \
+                   -Wb,export_include=Bench_Core_Idl_Json_Export.h \
+                   -Wb,export_macro=Bench_Core_Idl_Json_Export \
+                   -Wb,cpp_include=dds/DdsDcpsCoreTypeSupportImpl.h \
+                   -Wb,cpp_include=dds/DdsDcpsGuidTypeSupportImpl.h \
+                   -Wb,versioning_begin=OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL \
+                   -Wb,versioning_end=OPENDDS_END_VERSIONED_NAMESPACE_DECL \
+                   -I$(DDS_ROOT)/dds
+
+  dynamicflags  += BENCH_CORE_IDL_JSON_BUILD_DLL
+  includes += $(DDS_ROOT)/dds
+
+  requires += no_opendds_safety_profile
+
+  expand(BENCH_BUILDER_ROOT) {
+    $BENCH_BUILDER_ROOT
+    $(DDS_ROOT)/performance-tests/bench_2
+  }
+
+  libout = $(BENCH_BUILDER_ROOT)/lib
+
+  Modify_Custom(Idl) {
+    automatic_in = 0
+  }
+
+  TypeSupport_Files {
+    ../../../dds/DdsDcpsCore.idl
+    ../../../dds/DdsDcpsGuid.idl
+  }
+}

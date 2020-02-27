@@ -1,0 +1,15 @@
+{
+  "name": "Selfish Echo",
+  "desc": "This is like a typical echo client / server combo, except the client doesn't listen for a response. Useful for profiling writer behavior",
+  "any_node": [
+    {
+      "config": "selfish_echo_client_config.json",
+      "count": 1
+    },
+    {
+      "config": "simple_echo_server_config.json",
+      "count": 1
+    }
+  ],
+  "timeout": 120
+}

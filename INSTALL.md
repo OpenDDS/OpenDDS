@@ -2,16 +2,18 @@
 
 **Table of Contents:**
 
-* [Java](#java)
-* [Supported Platforms](#supported-platforms)
-* [Compiling](#compiling)
-* [Test](#test)
-* [Installation](#installation)
-  * [Application Development with an Installed OpenDDS](#application-development-with-an-installed-opendds)
-* [Cross Compiling](#cross-compiling)
-  * [Raspberry Pi](#raspberry-pi)
-  * [Android](#android)
-* [Building Your Own Applications](#building-your-own-applications)
+- [Building and Installing OpenDDS](#building-and-installing-opendds)
+  - [Java](#java)
+  - [Supported Platforms](#supported-platforms)
+  - [Compiling](#compiling)
+  - [Test](#test)
+  - [Installation](#installation)
+    - [Application Development with an Installed OpenDDS](#application-development-with-an-installed-opendds)
+  - [Cross Compiling](#cross-compiling)
+    - [Raspberry Pi](#raspberry-pi)
+    - [Android](#android)
+    - [Apple iOS](#apple-ios)
+  - [Building Your Own Applications](#building-your-own-applications)
 
 ## Java
 
@@ -34,7 +36,7 @@ supported platforms.
   To start the script simply change to the directory containing this INSTALL
   file, and run:
 
-**For Unixes (Linux, macOS, Solaris, BSDs, etc):**
+**For Unixes (Linux, macOS, BSDs, etc):**
 
 ```
 ./configure
@@ -78,7 +80,7 @@ configure script.**
   **NOTE:** Make sure your environment is set by checking the variable `DDS_ROOT`.
         Run setenv if it is not set.
 
-**For Unixes (Linux, macOS, Solaris, BSDs, etc):**
+**For Unixes (Linux, macOS, BSDs, etc):**
 
 ```
 bin/auto_run_tests.pl
@@ -153,6 +155,11 @@ The instructions for building for the Raspberry Pi are on
 ### Android
 
 Android support is documented in [`docs/android.md`](docs/android.md).
+
+### Apple iOS
+
+Apple iOS support is documented in [`docs/ios.md`](docs/ios.md).
+
 
 ## Building Your Own Applications
 

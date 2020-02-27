@@ -1,26 +1,27 @@
 # OpenDDS and Android
 
-**How to build OpenDDS for Android and incorperate OpenDDS into Android apps.**
+**How to build OpenDDS for Android and incorporate OpenDDS into Android apps.**
 
-* [Variables](#variables)
-* [Requirements](#requirements)
-* [Building on Windows](#building-on-windows)
-* [Building OpenDDS for Android](#building-opendds-for-android)
-  * [Host Tools](#host-tools)
-  * [OpenDDS's Optional Dependencies](#openddss-optional-dependencies)
-    * [Java](#java)
-    * [OpenSSL](#openssl)
-    * [Xerces](#xerces)
-* [Cross-Compiling IDL Libraries](#cross-compiling-idl-libraries)
-  * [Java IDL Libraries](#java-idl-libraries)
-* [Using OpenDDS in a Android App](#using-opendds-in-a-android-app)
-  * [Adding the OpenDDS Native Libraries to the App](#adding-the-opendds-native-libraries-to-the-app)
-  * [Adding OpenDDS Java Libraries to the App](#adding-opendds-java-libraries-to-the-app)
-  * [Network Permissions and Availability](#network-permissions-and-availability)
-  * [OpenDDS Configuration Files](#opendds-configuration-files)
-  * [Multithreading](#multithreading)
-  * [Android Activity Lifecycle](#android-activity-lifecycle)
-* [Footnotes](#footnotes)
+- [OpenDDS and Android](#opendds-and-android)
+  - [Variables](#variables)
+  - [Requirements](#requirements)
+  - [Building on Windows](#building-on-windows)
+  - [Building OpenDDS for Android](#building-opendds-for-android)
+    - [Host Tools](#host-tools)
+    - [OpenDDS's Optional Dependencies](#openddss-optional-dependencies)
+      - [Java](#java)
+      - [OpenSSL](#openssl)
+      - [Xerces](#xerces)
+  - [Cross-Compiling IDL Libraries](#cross-compiling-idl-libraries)
+    - [Java IDL Libraries](#java-idl-libraries)
+  - [Using OpenDDS in a Android App](#using-opendds-in-a-android-app)
+    - [Adding the OpenDDS Native Libraries to the App](#adding-the-opendds-native-libraries-to-the-app)
+    - [Adding OpenDDS Java Libraries to the App](#adding-opendds-java-libraries-to-the-app)
+    - [Network Permissions and Availability](#network-permissions-and-availability)
+    - [OpenDDS Configuration Files](#opendds-configuration-files)
+    - [Multithreading](#multithreading)
+    - [Android Activity Lifecycle](#android-activity-lifecycle)
+  - [Footnotes](#footnotes)
 
 ## Variables
 
@@ -79,7 +80,7 @@ software:
   - Building OpenDDS and its dependencies for Android requires various
     utilities that would normally come on a Unix system. This guide will use
     MSYS2, which supplies many of those utilities. Install MSYS2 from the
-    offical website at https://www.msys2.org and set it up.
+    official website at https://www.msys2.org and set it up.
   - Follow all the install/update steps from the msys2.org website.
 
 - [Strawberry Perl](http://strawberryperl.com/)
@@ -96,7 +97,7 @@ software:
 
 Finally all paths being passed to GNU make must not contain spaces because of a
 ACE's gnuace make scripts don't those paths handle correctly on Windows. This
-means the NDK, toolchain, MinGW, JDK, OpenDDS source, OpenDDS host tools, etc.
+means the NDK, toolchain, MSYS2, JDK, OpenDDS source, OpenDDS host tools, etc.
 must not contain any spaces in their paths.
 
 ## Building OpenDDS for Android
@@ -159,8 +160,7 @@ PATH=$PATH:$TOOLCHAIN/bin make # Pass -j/--jobs with an appropriate value or thi
   using Visual Studio must be passed to `configure`.
 
 - In addition to the Android toolchain, you will also need MSYS2 utilities in
-  your `%PATH%`. The default installation location of the MinGW utilities is
-  `C:\MinGW\msys\1.0\bin`.
+  your `%PATH%`.
 
 - Make sure these commands in a new Visual Studio command prompt that is
   different from where you configured the host tools.

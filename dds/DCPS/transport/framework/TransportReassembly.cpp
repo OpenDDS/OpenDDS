@@ -139,6 +139,10 @@ TransportReassembly::insert(OPENDDS_LIST(FragRange)& flist,
         }
       }
       return true;
+    } else if (fr.transport_seq_.first == seqRange.first && fr.transport_seq_.second == seqRange.second) {
+      VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::insert() "
+        "duplicate fragment range, dropping\n"));
+      return false;
     }
   }
 

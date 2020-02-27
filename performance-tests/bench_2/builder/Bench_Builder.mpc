@@ -1,0 +1,5 @@
+project: dcpslib, dcps_inforepodiscovery, ../bench_builder_idl_lib {
+  avoids += no_cxx11
+  dynamicflags += BENCH_BUILDER_BUILD_DLL
+  libout = $(BENCH_BUILDER_ROOT)/lib
+}

@@ -8,15 +8,20 @@ general overview of OpenDDS.
 ======================================================================
 * Prerequisites
 
-  - JDK (Java Development Kit) for Java SE 5 through 8
+  - JDK (Java Development Kit) for Java SE 5 and up
 
     <http://java.sun.com/javase/downloads>
     Sun distributes the JDK for Windows, Linux, and Solaris.  OpenDDS supports
     these three platforms in both 32-bit and 64-bit variants.  There is also
     experimental support for the 32-bit and 64-bit variants of the JDK provided
-    by Apple on Mac OS X.  If you are using a 64-bit JDK, make sure all the
+    by Apple on macOS.  If you are using a 64-bit JDK, make sure all the
     native libraries are also built for 64-bit.  Similarly, a 32-bit JDK must
     be matched with 32-bit native libraries.
+
+    If using a recent JDK version (9 and higher) that includes the JPMS
+    (Java Platform Module System), disable the MPC feature java_pre_jpms.
+    The OpenDDS configure script will attempt to detect the Java version and
+    set the MPC feature automatically.
 
   - C++ Compiler
 

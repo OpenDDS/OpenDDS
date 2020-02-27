@@ -1,0 +1,20 @@
+project: dcpslib, ../bench_idl_lib, ../bench_builder_idl_lib, dcps_rapidjson {
+  avoids += no_cxx11
+
+  after    += Bench_Builder
+  libs     += Bench_Builder
+
+  expand(BENCH_BUILDER_ROOT) {
+    $BENCH_BUILDER_ROOT
+    $(DDS_ROOT)/performance-tests/bench_2
+  }
+
+  dynamicflags  += BENCH_COMMON_BUILD_DLL
+  includes += $(BENCH_BUILDER_ROOT)/builder
+
+  libout = $(BENCH_ROOT)/lib
+
+  Idl_Files {
+  }
+
+}
