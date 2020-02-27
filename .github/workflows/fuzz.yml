@@ -15,8 +15,13 @@ jobs:
     steps:
     - name: checkout OpenDDS
       uses: actions/checkout@v1
+    - name: Remove not fuzzable directories
+        run: rm -rf *
+        working-directory: ./tools/modeling/plugins
+    - name: Remove not fuzzable directories
+        run: rm -rf *
+        working-directory: ./tools/rapidjson
     - name: Run fuzz
       run: |
-        rm -rf tools/modeling/plugins tools/rapidjson tests/googletest
         perl ${env:DDS_ROOT}/tools/scripts/dds_fuzz.pl
       shell: pwsh
