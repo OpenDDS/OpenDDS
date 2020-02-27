@@ -26,6 +26,9 @@ class DdsSecurity_Export BuiltInPluginLoader : public ACE_Service_Object
 {
 public:
   virtual int init(int argc, ACE_TCHAR* argv[]);
+
+private:
+  bool initialized = false;
 };
 
 ACE_STATIC_SVC_DECLARE_EXPORT(DdsSecurity, BuiltInPluginLoader)
