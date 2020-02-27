@@ -221,12 +221,14 @@ int Permissions::load(const SSL::SignedDocument& doc)
       }
     }
 
-    if (!valid_subject) {
-      ACE_DEBUG((LM_WARNING,
-        ACE_TEXT("(%P|%t) AccessControlBuiltInImpl::load_permissions_file: Unable to parse subject name, ignoring grant.\n")));
-    } else if (contains_subject_name(rule_holder_.subject)) {
-      ACE_DEBUG((LM_WARNING,
-        ACE_TEXT("(%P|%t) AccessControlBuiltInImpl::load_permissions_file: Ignoring grant with duplicate subject name.\n")));
+    if (!valid_subject && DCPS::security_debug.access_warn) {
+      ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) {access_warn} ")
+        ACE_TEXT("AccessControlBuiltInImpl::load_permissions_file: ")
+        ACE_TEXT("Unable to parse subject name, ignoring grant.\n")));
+    } else if (contains_subject_name(rule_holder_.subject) && DCPS::security_debug.access_warn) {
+      ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) {access_warn} ")
+        ACE_TEXT("AccessControlBuiltInImpl::load_permissions_file: ")
+        ACE_TEXT("Ignoring grant with duplicate subject name.\n")));
     } else {
       perm_data_.perm_rules.push_back(rule_holder_);
     }

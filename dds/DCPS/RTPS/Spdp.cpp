@@ -582,9 +582,11 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 
       if (has_security_data == false) {
         if (participant_sec_attr_.allow_unauthenticated_participants == false) {
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Spdp::handle_participant_data - ")
-            ACE_TEXT("Incompatible security attributes in discovered participant: %C\n"),
-            std::string(DCPS::GuidConverter(guid)).c_str()));
+          if (DCPS::security_debug.auth_debug) {
+            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} Spdp::handle_participant_data - ")
+              ACE_TEXT("Incompatible security attributes in discovered participant: %C\n"),
+              std::string(DCPS::GuidConverter(guid)).c_str()));
+          }
           participants_.erase(guid);
         } else { // allow_unauthenticated_participants == true
           iter->second.auth_state_ = DCPS::AS_UNAUTHENTICATED;
@@ -599,9 +601,11 @@ Spdp::handle_participant_data(DCPS::MessageId id,
         attempt_authentication(guid, iter->second);
         if (iter->second.auth_state_ == DCPS::AS_UNAUTHENTICATED) {
           if (participant_sec_attr_.allow_unauthenticated_participants == false) {
-            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Spdp::handle_participant_data - ")
-              ACE_TEXT("Incompatible security attributes in discovered participant: %C\n"),
-              std::string(DCPS::GuidConverter(guid)).c_str()));
+            if (DCPS::security_debug.auth_debug) {
+              ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} Spdp::handle_participant_data - ")
+                ACE_TEXT("Incompatible security attributes in discovered participant: %C\n"),
+                std::string(DCPS::GuidConverter(guid)).c_str()));
+            }
             participants_.erase(guid);
           } else { // allow_unauthenticated_participants == true
             iter->second.auth_state_ = DCPS::AS_UNAUTHENTICATED;
@@ -851,10 +855,12 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
   // If discovery hasn't initialized / validated this participant yet, ignore handshake messages
   DiscoveredParticipantIter iter = participants_.find(src_participant);
   if (iter == participants_.end()) {
-    ACE_DEBUG((LM_WARNING,
-      ACE_TEXT("(%P|%t) Spdp::handle_handshake_message() - ")
-      ACE_TEXT("received handshake for undiscovered participant %C. Ignoring.\n"),
-               std::string(DCPS::GuidConverter(src_participant)).c_str()));
+    if (OpenDDS::DCPS::security_debug.auth_warn) {
+      ACE_DEBUG((LM_WARNING,
+        ACE_TEXT("(%P|%t) {auth_warn} Spdp::handle_handshake_message() - ")
+        ACE_TEXT("received handshake for undiscovered participant %C. Ignoring.\n"),
+                 std::string(DCPS::GuidConverter(src_participant)).c_str()));
+    }
     return;
   }
 
@@ -886,16 +892,20 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
     set_participant_guid(guid_, plist);
 
     if (!ParameterListConverter::to_param_list(pbtds.base, plist)) {
-      ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Spdp::handle_handshake_message() - ")
-        ACE_TEXT("Failed to convert from ParticipantBuiltinTopicData to ParameterList\n")));
+      if (OpenDDS::DCPS::security_debug.auth_warn) {
+        ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} Spdp::handle_handshake_message() - ")
+          ACE_TEXT("Failed to convert from ParticipantBuiltinTopicData to ParameterList\n")));
+      }
       return;
     }
 
     ACE_Message_Block temp_buff(64 * 1024);
     DCPS::Serializer ser(&temp_buff, DCPS::Serializer::SWAP_BE, DCPS::Serializer::ALIGN_INITIALIZE);
     if (!(ser << plist)) {
-      ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Spdp::handle_handshake_message() - ")
-        ACE_TEXT("Failed to serialize parameter list.\n")));
+      if (OpenDDS::DCPS::security_debug.auth_warn) {
+        ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} Spdp::handle_handshake_message() - ")
+          ACE_TEXT("Failed to serialize parameter list.\n")));
+      }
       return;
     }
 
@@ -915,14 +925,18 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
       auth->begin_handshake_reply(iter->second.handshake_handle_, reply.message_data[0], iter->second.identity_handle_,
                                   identity_handle_, local_participant, se);
     if (vr == DDS::Security::VALIDATION_FAILED) {
-      ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Spdp::handle_handshake_message() - ")
-        ACE_TEXT("Failed to reply to incoming handshake message. Security Exception[%d.%d]: %C\n"),
-          se.code, se.minor_code, se.message.in()));
+      if (OpenDDS::DCPS::security_debug.auth_warn) {
+        ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} Spdp::handle_handshake_message() - ")
+          ACE_TEXT("Failed to reply to incoming handshake message. Security Exception[%d.%d]: %C\n"),
+            se.code, se.minor_code, se.message.in()));
+      }
       return;
     } else if (vr == DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE) {
       if (sedp_.write_stateless_message(reply, reader) != DDS::RETCODE_OK) {
-        ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Spdp::handle_handshake_message() - ")
-          ACE_TEXT("Unable to write stateless message for handshake reply.\n")));
+        if (OpenDDS::DCPS::security_debug.auth_warn) {
+          ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} Spdp::handle_handshake_message() - ")
+            ACE_TEXT("Unable to write stateless message for handshake reply.\n")));
+        }
         return;
       }
       iter->second.has_last_stateless_msg_ = true;
@@ -935,8 +949,10 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
     } else if (vr == DDS::Security::VALIDATION_OK_FINAL_MESSAGE) {
       // Theoretically, this shouldn't happen unless handshakes can involve fewer than 3 messages
       if (sedp_.write_stateless_message(reply, reader) != DDS::RETCODE_OK) {
-        ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Spdp::handle_handshake_message() - ")
-          ACE_TEXT("Unable to write stateless message for final message.\n")));
+        if (OpenDDS::DCPS::security_debug.auth_warn) {
+          ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} Spdp::handle_handshake_message() - ")
+            ACE_TEXT("Unable to write stateless message for final message.\n")));
+        }
         return;
       }
       iter->second.has_last_stateless_msg_ = false;
@@ -967,23 +983,27 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
     reply.source_endpoint_guid = GUID_UNKNOWN;
     reply.message_data.length(1);
 
-    DDS::Security::ValidationResult_t vr = auth->process_handshake(reply.message_data[0], msg.message_data[0], iter->second.handshake_handle_, se);
+    DDS::Security::ValidationResult_t vr = auth->process_handshake(
+      reply.message_data[0], msg.message_data[0], dp.handshake_handle_, se);
     if (vr == DDS::Security::VALIDATION_FAILED) {
-      if (iter->second.auth_state_ == DCPS::AS_HANDSHAKE_REQUEST_SENT) {
-        ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Spdp::handle_handshake_message() - ")
-          ACE_TEXT("Failed to process incoming handshake message when expecting reply from %C. Security Exception[%d.%d]: %C\n"),
-          std::string(DCPS::GuidConverter(src_participant)).c_str(), se.code, se.minor_code, se.message.in()));
-      } else {
-        ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Spdp::handle_handshake_message() - ")
-          ACE_TEXT("Failed to process incoming handshake message when expecting final message from %C. Security Exception[%d.%d]: %C\n"),
-          std::string(DCPS::GuidConverter(src_participant)).c_str(), se.code, se.minor_code, se.message.in()));
+      if (OpenDDS::DCPS::security_debug.auth_warn) {
+        ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} WARNING: ")
+          ACE_TEXT("Spdp::handle_handshake_message() - ")
+          ACE_TEXT("Failed to process incoming handshake message when ")
+          ACE_TEXT("expecting %C from %C. Security Exception[%d.%d]: %C\n"),
+          iter->second.auth_state_ == DCPS::AS_HANDSHAKE_REQUEST_SENT ?
+            "reply" : "final message",
+          std::string(DCPS::GuidConverter(src_participant)).c_str(),
+          se.code, se.minor_code, se.message.in()));
       }
       return;
     } else if (vr == DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE) {
       // Theoretically, this shouldn't happen unless handshakes can involve more than 3 messages
       if (sedp_.write_stateless_message(reply, reader) != DDS::RETCODE_OK) {
-        ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Spdp::handle_handshake_message() - ")
-          ACE_TEXT("Unable to write stateless message for handshake reply.\n")));
+        if (OpenDDS::DCPS::security_debug.auth_warn) {
+          ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} WARNING: Spdp::handle_handshake_message() - ")
+            ACE_TEXT("Unable to write stateless message for handshake reply.\n")));
+        }
         return;
       }
       iter->second.has_last_stateless_msg_ = true;
@@ -995,8 +1015,10 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
       // cache the outbound message, but don't change state, since roles shouldn't have changed?
     } else if (vr == DDS::Security::VALIDATION_OK_FINAL_MESSAGE) {
       if (sedp_.write_stateless_message(reply, reader) != DDS::RETCODE_OK) {
-        ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Spdp::handle_handshake_message() - ")
-          ACE_TEXT("Unable to write stateless message for final message.\n")));
+        if (OpenDDS::DCPS::security_debug.auth_warn) {
+          ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} WARNING: Spdp::handle_handshake_message() - ")
+            ACE_TEXT("Unable to write stateless message for final message.\n")));
+        }
         return;
       }
       iter->second.has_last_stateless_msg_ = false;
@@ -1024,9 +1046,11 @@ Spdp::process_auth_deadlines(const DCPS::MonotonicTimePoint& now)
 
     DiscoveredParticipantIter pit = participants_.find(pos->second);
     if (pit != participants_.end()) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Spdp::process_auth_deadlines() - ")
-                 ACE_TEXT("Removing discovered participant due to authentication timeout: %C\n"),
-                 OPENDDS_STRING(DCPS::GuidConverter(pos->second)).c_str()));
+      if (OpenDDS::DCPS::security_debug.auth_debug) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} Spdp::process_auth_deadlines() - ")
+                   ACE_TEXT("Removing discovered participant due to authentication timeout: %C\n"),
+                   OPENDDS_STRING(DCPS::GuidConverter(pos->second)).c_str()));
+      }
       if (participant_sec_attr_.allow_unauthenticated_participants == false) {
         ICE::Endpoint* sedp_endpoint = sedp_.get_ice_endpoint();
         if (sedp_endpoint) {
@@ -1073,8 +1097,10 @@ Spdp::process_auth_resends(const DCPS::MonotonicTimePoint& now)
       RepoId reader = pit->first;
       reader.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
       pit->second.stateless_msg_deadline_ = now + config_->auth_resend_period();
-      if (sedp_.write_stateless_message(pit->second.last_stateless_msg_, reader) != DDS::RETCODE_OK) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Spdp::process_auth_resends() - ")
+      const bool error = sedp_.write_stateless_message(
+        pit->second.last_stateless_msg_, reader) != DDS::RETCODE_OK;
+      if (error && OpenDDS::DCPS::security_debug.auth_debug) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} Spdp::process_auth_resends() - ")
                    ACE_TEXT("Unable to write stateless message retry.\n")));
       }
       auth_resends_.insert(std::make_pair(pit->second.stateless_msg_deadline_, pit->first));
@@ -1111,10 +1137,12 @@ Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileM
   // If discovery hasn't initialized / validated this participant yet, ignore volatile message
   DiscoveredParticipantIter iter = participants_.find(src_participant);
   if (iter == participants_.end()) {
-    ACE_DEBUG((LM_WARNING,
-      ACE_TEXT("(%P|%t) Spdp::handle_participant_crypto_tokens() - ")
-      ACE_TEXT("received tokens for undiscovered participant %C. Ignoring.\n"),
-               std::string(DCPS::GuidConverter(src_participant)).c_str()));
+    if (OpenDDS::DCPS::security_debug.auth_warn) {
+      ACE_ERROR((LM_WARNING,
+        ACE_TEXT("(%P|%t) {auth_warn} Spdp::handle_participant_crypto_tokens() - ")
+        ACE_TEXT("received tokens for undiscovered participant %C. Ignoring.\n"),
+        std::string(DCPS::GuidConverter(src_participant)).c_str()));
+    }
     return;
   }
   DiscoveredParticipant& dp = iter->second;
@@ -1145,61 +1173,86 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& d
 
   dp->shared_secret_handle_ = auth->get_shared_secret(dp->handshake_handle_, se);
   if (dp->shared_secret_handle_ == 0) {
-    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
-      ACE_TEXT("Spdp::match_authenticated() - ")
-      ACE_TEXT("Unable to get shared secret handle. Security Exception[%d.%d]: %C\n"),
-        se.code, se.minor_code, se.message.in()));
-    return false;
-  }
-
-  if (auth->get_authenticated_peer_credential_token(dp->authenticated_peer_credential_token_, dp->handshake_handle_, se) == false) {
-    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
-      ACE_TEXT("Spdp::match_authenticated() - ")
-      ACE_TEXT("Unable to get authenticated peer credential token. Security Exception[%d.%d]: %C\n"),
-        se.code, se.minor_code, se.message.in()));
-    return false;
-  }
-
-  dp->permissions_handle_ = access->validate_remote_permissions(auth, identity_handle_, dp->identity_handle_, dp->permissions_token_, dp->authenticated_peer_credential_token_, se);
-  if (participant_sec_attr_.is_access_protected == true && dp->permissions_handle_ == DDS::HANDLE_NIL) {
-    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
-      ACE_TEXT("Spdp::match_authenticated() - ")
-      ACE_TEXT("Unable to validate remote participant with access control plugin. Security Exception[%d.%d]: %C\n"),
-        se.code, se.minor_code, se.message.in()));
-    return false;
-  }
-
-  if (participant_sec_attr_.is_access_protected == true) {
-    if (access->check_remote_participant(dp->permissions_handle_, domain_, dp->pdata_.ddsParticipantDataSecure, se) == false) {
-      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
+    if (OpenDDS::DCPS::security_debug.auth_warn) {
+      ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
         ACE_TEXT("Spdp::match_authenticated() - ")
-        ACE_TEXT("Remote participant check failed. Security Exception[%d.%d]: %C\n"),
-          se.code, se.minor_code, se.message.in()));
+        ACE_TEXT("Unable to get shared secret handle. Security Exception[%d.%d]: %C\n"),
+        se.code, se.minor_code, se.message.in()));
+    }
+    return false;
+  }
+
+  if (!auth->get_authenticated_peer_credential_token(
+      dp->authenticated_peer_credential_token_, dp->handshake_handle_, se)) {
+    if (DCPS::security_debug.auth_warn) {
+      ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
+        ACE_TEXT("Spdp::match_authenticated() - ")
+        ACE_TEXT("Unable to get authenticated peer credential token. ")
+        ACE_TEXT("Security Exception[%d.%d]: %C\n"),
+        se.code, se.minor_code, se.message.in()));
+    }
+    return false;
+  }
+
+  dp->permissions_handle_ = access->validate_remote_permissions(
+    auth, identity_handle_, dp->identity_handle_,
+    dp->permissions_token_, dp->authenticated_peer_credential_token_, se);
+  if (participant_sec_attr_.is_access_protected == true &&
+      dp.permissions_handle_ == DDS::HANDLE_NIL) {
+    if (OpenDDS::DCPS::security_debug.auth_warn) {
+      ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
+        ACE_TEXT("Spdp::match_authenticated() - ")
+        ACE_TEXT("Unable to validate remote participant with access control plugin. ")
+        ACE_TEXT("Security Exception[%d.%d]: %C\n"),
+        se.code, se.minor_code, se.message.in()));
+    }
+    return false;
+  }
+
+  if (participant_sec_attr_.is_access_protected) {
+    if (access->check_remote_participant(dp->permissions_handle_, domain_,
+        dp->pdata_.ddsParticipantDataSecure, se) == false) {
+      if (OpenDDS::DCPS::security_debug.auth_warn) {
+        ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
+          ACE_TEXT("Spdp::match_authenticated() - ")
+          ACE_TEXT("Remote participant check failed. Security Exception[%d.%d]: %C\n"),
+            se.code, se.minor_code, se.message.in()));
+      }
       return false;
     }
   }
 
-  if (DCPS::DCPS_debug_level > 3) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Spdp::match_authenticated - ")
+  if (DCPS::security_debug.auth_debug) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} Spdp::match_authenticated - ")
                ACE_TEXT("auth and access control complete for peer %C\n"),
                std::string(DCPS::GuidConverter(guid)).c_str()));
   }
 
-  dp->crypto_handle_ = key_factory->register_matched_remote_participant(crypto_handle_, dp->identity_handle_, dp->permissions_handle_, dp->shared_secret_handle_, se);
+  dp->crypto_handle_ = key_factory->register_matched_remote_participant(
+    crypto_handle_, dp->identity_handle_, dp->permissions_handle_,
+    dp->shared_secret_handle_, se);
   if (dp->crypto_handle_ == DDS::HANDLE_NIL) {
-    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
-               ACE_TEXT("Spdp::match_authenticated() - ")
-               ACE_TEXT("Unable to register remote participant with crypto key factory plugin. Security Exception[%d.%d]: %C\n"),
-               se.code, se.minor_code, se.message.in()));
+    if (DCPS::security_debug.auth_warn) {
+      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
+        ACE_TEXT("Spdp::match_authenticated() - Unable to register remote ")
+        ACE_TEXT("participant with crypto key factory plugin. ")
+        ACE_TEXT("Security Exception[%d.%d]: %C\n"),
+        se.code, se.minor_code, se.message.in()));
+    }
     return false;
   }
 
   if (crypto_handle_ != DDS::HANDLE_NIL) {
-    if (key_exchange->create_local_participant_crypto_tokens(dp->crypto_tokens_, crypto_handle_, dp->crypto_handle_, se) == false) {
-      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
-                 ACE_TEXT("Spdp::match_authenticated() - ")
-                 ACE_TEXT("Unable to create local participant crypto tokens with crypto key exchange plugin. Security Exception[%d.%d]: %C\n"),
-                 se.code, se.minor_code, se.message.in()));
+    if (key_exchange->create_local_participant_crypto_tokens(
+        dp->crypto_tokens_, crypto_handle_, dp->crypto_handle_, se) == false) {
+      if (DCPS::security_debug.auth_warn) {
+        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_debug} ")
+          ACE_TEXT("Spdp::match_authenticated() - ")
+          ACE_TEXT("Unable to create local participant crypto ")
+          ACE_TEXT("tokens with crypto key exchange plugin. ")
+          ACE_TEXT("Security Exception[%d.%d]: %C\n"),
+          se.code, se.minor_code, se.message.in()));
+      }
       return false;
     }
   }
@@ -1283,26 +1336,38 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
       }
       case DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE: {
         dp.auth_state_ = DCPS::AS_HANDSHAKE_REPLY;
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Spdp::attempt_authentication() - Attempting authentication (expecting reply) for participant:   %C\n"), std::string(DCPS::GuidConverter(guid)).c_str()));
+        if (OpenDDS::DCPS::security_debug.auth_debug) {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} DEBUG: Spdp::attempt_authentication() - ")
+            ACE_TEXT("Attempting authentication (expecting reply) for participant: %C\n"),
+            std::string(DCPS::GuidConverter(guid)).c_str()));
+        }
         return; // We'll need to wait for an inbound handshake request from the remote participant
       }
       case DDS::Security::VALIDATION_PENDING_HANDSHAKE_REQUEST: {
         dp.auth_state_ = DCPS::AS_HANDSHAKE_REQUEST;
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Spdp::attempt_authentication() - Attempting authentication (sending request) for participant:   %C\n"), std::string(DCPS::GuidConverter(guid)).c_str()));
+        if (OpenDDS::DCPS::security_debug.auth_debug) {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} DEBUG: Spdp::attempt_authentication() - ")
+            ACE_TEXT("Attempting authentication (sending request) for participant: %C\n"),
+            std::string(DCPS::GuidConverter(guid)).c_str()));
+        }
         break; // We've got more to do, move on to handshake request
       }
       case DDS::Security::VALIDATION_FAILED: {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Spdp::attempt_authentication() - ")
-          ACE_TEXT("Remote participant identity is invalid. Security Exception[%d.%d]: %C\n"),
+        if (OpenDDS::DCPS::security_debug.auth_debug) {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} DEBUG: Spdp::attempt_authentication() - ")
+            ACE_TEXT("Remote participant identity is invalid. Security Exception[%d.%d]: %C\n"),
             se.code, se.minor_code, se.message.in()));
+        }
         dp.auth_state_ = DCPS::AS_UNAUTHENTICATED;
         purge_auth_deadlines(participants_.find(guid));
         return;
       }
       default: {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Spdp::attempt_authentication() - ")
-          ACE_TEXT("Unexpected return value while validating remote identity. Security Exception[%d.%d]: %C\n"),
+        if (OpenDDS::DCPS::security_debug.auth_debug) {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} DEBUG: Spdp::attempt_authentication() - ")
+            ACE_TEXT("Unexpected return value while validating remote identity. Security Exception[%d.%d]: %C\n"),
             se.code, se.minor_code, se.message.in()));
+        }
         dp.auth_state_ = DCPS::AS_UNAUTHENTICATED;
         purge_auth_deadlines(participants_.find(guid));
         return;
@@ -2047,7 +2112,10 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
   ICE::Endpoint* endpoint = get_ice_endpoint();
   if (endpoint && (buff_.size() >= 4) && ACE_OS::memcmp(buff_.rd_ptr(), "RTPS", 4)) {
 # ifndef ACE_RECVPKTINFO
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() potential STUN message received but this version of the ACE library doesn't support the local_address extension in ACE_SOCK_Dgram::recv\n")));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() ")
+      ACE_TEXT("potential STUN message received but this version of the ACE ")
+      ACE_TEXT("library doesn't support the local_address extension in ")
+      ACE_TEXT("ACE_SOCK_Dgram::recv\n")));
     ACE_NOTSUP_RETURN(0);
 # else
 
