@@ -192,10 +192,10 @@ private:
 
   void data_received(const DataSubmessage& data, const ParameterList& plist, const ACE_INET_Addr& from);
 
-  void match_unauthenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp);
+  void match_unauthenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& dp_iter);
 
 #ifdef OPENDDS_SECURITY
-  bool match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp);
+  bool match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& dp_iter);
   void attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp);
   void update_agent_info(const DCPS::RepoId& local_guid, const ICE::AgentInfo& agent_info);
 #endif
