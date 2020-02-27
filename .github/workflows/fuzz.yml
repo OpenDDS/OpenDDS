@@ -1,0 +1,22 @@
+name: fuzz
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '0 7 * * SUN'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      DDS_ROOT: ${{ github.workspace }}
+
+    steps:
+    - name: checkout OpenDDS
+      uses: actions/checkout@v1
+    - name: Run fuzz
+      run: |
+        rm -rf tools/modeling/plugins tools/rapidjson tests/googletest;
+        perl ${env:DDS_ROOT}/tools/scripts/dds_fuzz.pl;
+      shell: pwsh
