@@ -984,7 +984,8 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
     reply.message_data.length(1);
 
     DDS::Security::ValidationResult_t vr = auth->process_handshake(
-      reply.message_data[0], msg.message_data[0], dp.handshake_handle_, se);
+      reply.message_data[0], msg.message_data[0],
+      iter->second.handshake_handle_, se);
     if (vr == DDS::Security::VALIDATION_FAILED) {
       if (OpenDDS::DCPS::security_debug.auth_warn) {
         ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} WARNING: ")
@@ -1198,7 +1199,7 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& d
     auth, identity_handle_, dp->identity_handle_,
     dp->permissions_token_, dp->authenticated_peer_credential_token_, se);
   if (participant_sec_attr_.is_access_protected == true &&
-      dp.permissions_handle_ == DDS::HANDLE_NIL) {
+      dp->permissions_handle_ == DDS::HANDLE_NIL) {
     if (OpenDDS::DCPS::security_debug.auth_warn) {
       ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
         ACE_TEXT("Spdp::match_authenticated() - ")
