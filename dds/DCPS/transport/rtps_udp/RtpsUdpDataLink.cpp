@@ -1559,6 +1559,8 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
   }
 
   guard.release();
+  g.release();
+
   if (on_start) {
     link->invoke_on_start_callbacks(id_, src, true);
   }
