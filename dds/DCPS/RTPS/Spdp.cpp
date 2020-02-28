@@ -585,7 +585,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
           if (DCPS::security_debug.auth_debug) {
             ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} Spdp::handle_participant_data - ")
               ACE_TEXT("Incompatible security attributes in discovered participant: %C\n"),
-              std::string(DCPS::GuidConverter(guid)).c_str()));
+              OPENDDS_STRING(DCPS::GuidConverter(guid)).c_str()));
           }
           participants_.erase(guid);
         } else { // allow_unauthenticated_participants == true
@@ -604,7 +604,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
             if (DCPS::security_debug.auth_debug) {
               ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} Spdp::handle_participant_data - ")
                 ACE_TEXT("Incompatible security attributes in discovered participant: %C\n"),
-                std::string(DCPS::GuidConverter(guid)).c_str()));
+                OPENDDS_STRING(DCPS::GuidConverter(guid)).c_str()));
             }
             participants_.erase(guid);
           } else { // allow_unauthenticated_participants == true
@@ -859,7 +859,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
       ACE_DEBUG((LM_WARNING,
         ACE_TEXT("(%P|%t) {auth_warn} Spdp::handle_handshake_message() - ")
         ACE_TEXT("received handshake for undiscovered participant %C. Ignoring.\n"),
-                 std::string(DCPS::GuidConverter(src_participant)).c_str()));
+                 OPENDDS_STRING(DCPS::GuidConverter(src_participant)).c_str()));
     }
     return;
   }
@@ -994,7 +994,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
           ACE_TEXT("expecting %C from %C. Security Exception[%d.%d]: %C\n"),
           iter->second.auth_state_ == DCPS::AS_HANDSHAKE_REQUEST_SENT ?
             "reply" : "final message",
-          std::string(DCPS::GuidConverter(src_participant)).c_str(),
+          OPENDDS_STRING(DCPS::GuidConverter(src_participant)).c_str(),
           se.code, se.minor_code, se.message.in()));
       }
       return;
@@ -1142,7 +1142,7 @@ Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileM
       ACE_DEBUG((LM_WARNING,
         ACE_TEXT("(%P|%t) {auth_warn} Spdp::handle_participant_crypto_tokens() - ")
         ACE_TEXT("received tokens for undiscovered participant %C. Ignoring.\n"),
-        std::string(DCPS::GuidConverter(src_participant)).c_str()));
+        OPENDDS_STRING(DCPS::GuidConverter(src_participant)).c_str()));
     }
     return;
   }
@@ -1226,7 +1226,7 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& d
   if (DCPS::security_debug.auth_debug) {
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} Spdp::match_authenticated - ")
                ACE_TEXT("auth and access control complete for peer %C\n"),
-               std::string(DCPS::GuidConverter(guid)).c_str()));
+               OPENDDS_STRING(DCPS::GuidConverter(guid)).c_str()));
   }
 
   dp->crypto_handle_ = key_factory->register_matched_remote_participant(
@@ -1340,7 +1340,7 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
         if (DCPS::security_debug.auth_debug) {
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} DEBUG: Spdp::attempt_authentication() - ")
             ACE_TEXT("Attempting authentication (expecting reply) for participant: %C\n"),
-            std::string(DCPS::GuidConverter(guid)).c_str()));
+            OPENDDS_STRING(DCPS::GuidConverter(guid)).c_str()));
         }
         return; // We'll need to wait for an inbound handshake request from the remote participant
       }
@@ -1349,7 +1349,7 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
         if (DCPS::security_debug.auth_debug) {
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} DEBUG: Spdp::attempt_authentication() - ")
             ACE_TEXT("Attempting authentication (sending request) for participant: %C\n"),
-            std::string(DCPS::GuidConverter(guid)).c_str()));
+            OPENDDS_STRING(DCPS::GuidConverter(guid)).c_str()));
         }
         break; // We've got more to do, move on to handshake request
       }
