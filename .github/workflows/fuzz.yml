@@ -25,9 +25,6 @@ jobs:
     - name: Remove not fuzzable directory
       run: rm -rf *
       working-directory: ./tools/modeling/plugins
-    - name: Remove not fuzzable directory
-      run: rm -rf *
-      working-directory: ./tools/rapidjson
     - name: Run fuzz
       run: |
         perl $DDS_ROOT/tools/scripts/dds_fuzz.pl
