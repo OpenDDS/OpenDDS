@@ -551,13 +551,13 @@ Serializer::align_w(size_t al)
     const size_t cur_spc = this->current_->space();
     if (cur_spc <= len) {
       len -= cur_spc;
-      if (zero_init_pad_) {
+      if (zero_init_padding_) {
         this->smemcpy(this->current_->wr_ptr(), ALIGN_PAD, cur_spc);
       }
       this->current_->wr_ptr(cur_spc);
       this->align_cont_w();
     } else {
-      if (zero_ini_pad_) {
+      if (zero_init_padding_) {
         this->smemcpy(this->current_->wr_ptr(), ALIGN_PAD, len);
       }
       this->current_->wr_ptr(len);

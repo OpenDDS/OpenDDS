@@ -65,7 +65,7 @@ public:
   explicit Serializer(ACE_Message_Block* chain
     , bool swap_bytes = false
     , Alignment align = ALIGN_NONE
-    , zero_init_padding =
+    , bool zero_init_padding =
 #ifdef ACE_INITIALIZE_MEMORY_BEFORE_USE
       true
 #else
@@ -366,7 +366,7 @@ private:
    * Should we zero initialize the padding bytes being inserted into the
    * stream?
    */
-  bool zero_init_pad_;
+  bool zero_init_padding_;
 
   /// Number of bytes off of max alignment (8) that the current_ block's
   /// rd_ptr() started at.
@@ -378,6 +378,7 @@ private:
 
   static const size_t cdr_max_align = 8;
   static const size_t xcdr2_max_align = 4;
+  /// Buffer that is copied for zero padding
   static const char ALIGN_PAD[cdr_max_align];
   static bool use_rti_serialization_;
 

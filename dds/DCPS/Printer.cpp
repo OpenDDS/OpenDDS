@@ -11,7 +11,6 @@ Printer::Printer()
 : indent_char_(' ')
 , indent_char_count_(4)
 , initial_indent_level_(0)
-, print_type_names_(false)
 , print_field_names_(true)
 {
 }
