@@ -42,12 +42,9 @@ class OpenDDS_Dcps_Export Serializer {
 public:
 
   enum Alignment {
-    ALIGN_NONE,           // no alignment needed
-    ALIGN_INITIALIZE,     // align to CDR rules and zero-out padding
-    ALIGN_CDR             // align to CDR rules with uninitialized padding
-#ifdef ACE_INITIALIZE_MEMORY_BEFORE_USE
-      = ALIGN_INITIALIZE  // if the above macro is set, always init padding
-#endif
+    ALIGN_NONE, // no alignment needed
+    ALIGN_CDR, // align for CDR and XCDR1 (8 bytes)
+    ALIGN_XCDR2 // align for XCDR2 (4 bytes)
   };
 
 
@@ -65,9 +62,16 @@ public:
    * responsibility of the owner of this object to determine whether
    * this should be performed or not.
    */
-  explicit Serializer(ACE_Message_Block* chain,
-                      bool swap_bytes = false,
-                      Alignment align = ALIGN_NONE);
+  explicit Serializer(ACE_Message_Block* chain
+    , bool swap_bytes = false
+    , Alignment align = ALIGN_NONE
+    , zero_init_padding =
+#ifdef ACE_INITIALIZE_MEMORY_BEFORE_USE
+      true
+#else
+      false
+#endif
+  );
 
   virtual ~Serializer();
 
@@ -300,6 +304,11 @@ public:
   /// Alignments of 2, 4, or 8 are supported by CDR and this implementation.
   int align_w(size_t alignment);
 
+  /**
+   * Return maximum alignment dictated by the alignment policy.
+   */
+  size_t max_align() const;
+
 private:
   /// Read an array of values from the chain.
   /// NOTE: This assumes that the buffer contains elements that are
@@ -353,6 +362,12 @@ private:
   /// Current alignment mode, see Alignment enum above.
   Alignment alignment_;
 
+  /**
+   * Should we zero initialize the padding bytes being inserted into the
+   * stream?
+   */
+  bool zero_init_pad_;
+
   /// Number of bytes off of max alignment (8) that the current_ block's
   /// rd_ptr() started at.
   unsigned char align_rshift_;
@@ -361,8 +376,9 @@ private:
   /// wr_ptr() started at.
   unsigned char align_wshift_;
 
-  static const size_t MAX_ALIGN = 8;
-  static const char ALIGN_PAD[MAX_ALIGN];
+  static const size_t cdr_max_align = 8;
+  static const size_t xcdr2_max_align = 4;
+  static const char ALIGN_PAD[cdr_max_align];
   static bool use_rti_serialization_;
 
 public:

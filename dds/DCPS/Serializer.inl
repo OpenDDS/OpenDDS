@@ -13,6 +13,8 @@
 #include <string>
 #endif
 
+#include <algorithm>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -228,7 +230,7 @@ Serializer::skip(ACE_CDR::UShort n, int size)
       this->good_bit_ = false;
       return false;
     }
-    this->align_r(size_t(size) > MAX_ALIGN ? MAX_ALIGN : size_t(size));
+    align_r(std::min(size_t(size), max_align()));
   }
   for (size_t len = static_cast<size_t>(n * size); len;) {
     if (!this->current_) {
@@ -549,13 +551,13 @@ Serializer::align_w(size_t al)
     const size_t cur_spc = this->current_->space();
     if (cur_spc <= len) {
       len -= cur_spc;
-      if (this->alignment_ == ALIGN_INITIALIZE) {
+      if (zero_init_pad_) {
         this->smemcpy(this->current_->wr_ptr(), ALIGN_PAD, cur_spc);
       }
       this->current_->wr_ptr(cur_spc);
       this->align_cont_w();
     } else {
-      if (this->alignment_ == ALIGN_INITIALIZE) {
+      if (zero_ini_pad_) {
         this->smemcpy(this->current_->wr_ptr(), ALIGN_PAD, len);
       }
       this->current_->wr_ptr(len);
@@ -570,13 +572,13 @@ ACE_INLINE void
 Serializer::align_cont_r()
 {
   const size_t thisblock =
-    (ptrdiff_t(this->current_->rd_ptr()) - this->align_rshift_) % MAX_ALIGN;
+    (ptrdiff_t(current_->rd_ptr()) - align_rshift_) % max_align();
 
   this->current_ = this->current_->cont();
 
   if (this->current_) {
     this->align_rshift_ =
-      (ptrdiff_t(this->current_->rd_ptr()) - thisblock) % MAX_ALIGN;
+      (ptrdiff_t(current_->rd_ptr()) - thisblock) % max_align();
   }
 }
 
@@ -584,14 +586,19 @@ ACE_INLINE void
 Serializer::align_cont_w()
 {
   const size_t thisblock =
-    (ptrdiff_t(this->current_->wr_ptr()) - this->align_wshift_) % MAX_ALIGN;
+    (ptrdiff_t(current_->wr_ptr()) - align_wshift_) % max_align();
 
   this->current_ = this->current_->cont();
 
   if (this->current_) {
     this->align_wshift_ =
-      (ptrdiff_t(this->current_->wr_ptr()) - thisblock) % MAX_ALIGN;
+      (ptrdiff_t(current_->wr_ptr()) - thisblock) % max_align();
   }
+}
+
+ACE_INLINE size_t Serializer::max_align() const
+{
+  return alignment_ == ALIGN_XCDR2 ? xcdr2_max_align : cdr_max_align;
 }
 
 //

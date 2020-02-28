@@ -136,7 +136,7 @@ bool test(const T& foo, const CORBA::Octet (&expected)[N],
     !bigendian;
 #endif
   ACE_Message_Block mb(65536);
-  Serializer ser(&mb, swap, Serializer::ALIGN_INITIALIZE);
+  Serializer ser(&mb, swap, Serializer::ALIGN_CDR, true /* zero init padding */);
   if (!(ser << foo) || mb.length() != N) {
     std::cerr << "ERROR: " << name << " should serialize to " << N << " bytes"
                  " (actual: " << mb.length() << ')' << std::endl;
@@ -154,7 +154,7 @@ bool test(const T& foo, const CORBA::Octet (&expected)[N],
     return false;
   }
   mb.reset();
-  Serializer ser3(&mb, swap, Serializer::ALIGN_INITIALIZE);
+  Serializer ser3(&mb, swap, Serializer::ALIGN_CDR, true /* zero init padding */);
   if (!(ser3 << roundtrip) || mb.length() != N
       || std::memcmp(expected, mb.rd_ptr(), N) != 0) {
     std::cerr << "ERROR: failed to reserialize " << name << std::endl;

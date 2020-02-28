@@ -896,7 +896,9 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
     }
 
     ACE_Message_Block temp_buff(64 * 1024);
-    DCPS::Serializer ser(&temp_buff, DCPS::Serializer::SWAP_BE, DCPS::Serializer::ALIGN_INITIALIZE);
+    Serializer out_serializer(
+      &temp_buff, DCPS::Serializer::SWAP_BE,
+      DCPS::Serializer::ALIGN_CDR, true /* zero init padding */);
     if (!(ser << plist)) {
       ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Spdp::handle_handshake_message() - ")
         ACE_TEXT("Failed to serialize parameter list.\n")));
@@ -1337,7 +1339,9 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
     }
 
     ACE_Message_Block temp_buff(64 * 1024);
-    DCPS::Serializer ser(&temp_buff, DCPS::Serializer::SWAP_BE, DCPS::Serializer::ALIGN_INITIALIZE);
+    Serializer out_serializer(
+      &temp_buff, DCPS::Serializer::SWAP_BE,
+      DCPS::Serializer::ALIGN_CDR, true /* zero init padding */);
     if (!(ser << plist)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::attempt_authentication() - ")
         ACE_TEXT("Failed to serialize parameter list.\n")));

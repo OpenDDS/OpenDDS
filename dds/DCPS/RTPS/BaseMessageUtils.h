@@ -55,7 +55,8 @@ void marshal_key_hash(const T& msg, KeyHash_t& hash) {
     // If it is bounded and can always fit in 16 bytes, we will use the
     // marshaled key
     ACE_Message_Block mb(HASH_LIMIT);
-    Serializer out_serializer(&mb, swap_bytes, Serializer::ALIGN_INITIALIZE);
+    Serializer out_serializer(
+      &mb, swap_bytes, Serializer::ALIGN_CDR, true /* zero init padding */);
     out_serializer << ko;
     std::memcpy(hash.value, mb.rd_ptr(), mb.length());
 
@@ -64,7 +65,8 @@ void marshal_key_hash(const T& msg, KeyHash_t& hash) {
     size_t size = 0, padding = 0;
     gen_find_size(ko, size, padding);
     ACE_Message_Block mb(size + padding);
-    Serializer out_serializer(&mb, swap_bytes, Serializer::ALIGN_INITIALIZE);
+    Serializer out_serializer(
+      &mb, swap_bytes, Serializer::ALIGN_CDR, true /* zero init padding */);
     out_serializer << ko;
 
     MD5_CTX ctx;

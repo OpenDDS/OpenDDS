@@ -23,13 +23,14 @@ namespace DCPS {
 const char Serializer::ALIGN_PAD[] = {0};
 
 Serializer::Serializer(ACE_Message_Block* chain,
-                       bool swap_bytes, Alignment align)
+                       bool swap_bytes, Alignment align, bool zero_init_pad)
   : current_(chain)
   , swap_bytes_(swap_bytes)
   , good_bit_(true)
   , alignment_(align)
-  , align_rshift_(chain ? ptrdiff_t(chain->rd_ptr()) % MAX_ALIGN : 0)
-  , align_wshift_(chain ? ptrdiff_t(chain->wr_ptr()) % MAX_ALIGN : 0)
+  , zero_init_pad_(zero_init_pad)
+  , align_rshift_(chain ? ptrdiff_t(chain->rd_ptr()) % max_align() : 0)
+  , align_wshift_(chain ? ptrdiff_t(chain->wr_ptr()) % max_align() : 0)
 {
 }
 
@@ -40,8 +41,8 @@ Serializer::~Serializer()
 void
 Serializer::reset_alignment()
 {
-  align_rshift_ = current_ ? ptrdiff_t(current_->rd_ptr()) % MAX_ALIGN : 0;
-  align_wshift_ = current_ ? ptrdiff_t(current_->wr_ptr()) % MAX_ALIGN : 0;
+  align_rshift_ = current_ ? ptrdiff_t(current_->rd_ptr()) % max_align() : 0;
+  align_wshift_ = current_ ? ptrdiff_t(current_->wr_ptr()) % max_align() : 0;
 }
 
 void

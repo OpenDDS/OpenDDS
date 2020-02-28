@@ -58,9 +58,9 @@ struct ArrayValues {
 
 void
 insertions(ACE_Message_Block* chain, const Values& values,
-           bool swap, Serializer::Alignment align)
+           bool swap, Serializer::Alignment align, bool zero_init_pad)
 {
-  Serializer serializer(chain, swap, align);
+  Serializer serializer(chain, swap, align, zero_init_pad);
 
   serializer << ACE_OutputCDR::from_octet(values.octetValue);
   serializer << values.shortValue;
@@ -86,11 +86,12 @@ insertions(ACE_Message_Block* chain, const Values& values,
 #endif
 }
 
-void
-array_insertions(ACE_Message_Block* chain, const ArrayValues& values,
-                 ACE_CDR::ULong length, bool swap, Serializer::Alignment align)
+void array_insertions(
+  ACE_Message_Block* chain, const ArrayValues& values,
+  ACE_CDR::ULong length, bool swap, Serializer::Alignment align,
+  bool zero_init_pad)
 {
-  Serializer serializer(chain, swap, align);
+  Serializer serializer(chain, swap, align, zero_init_pad);
 
   serializer.write_octet_array(values.octetValue, length);
   serializer.write_short_array(values.shortValue, length);
@@ -424,12 +425,12 @@ const int chaindefs[] = {2, 3, 4, 5, 6, 7, 8, 9, 10, 25, 30, 35, 40, 45, 50, 128
 
 void
 runTest(const Values& expected, const ArrayValues& expectedArray,
-        bool swap, Serializer::Alignment align)
+        bool swap, Serializer::Alignment align, bool zero_init_pad = false)
 {
   ACE_Message_Block* testchain = getchain(sizeof(chaindefs)/sizeof(chaindefs[0]), chaindefs);
   const char* out = swap ? "" : "OUT";
   std::cout << std::endl << "STARTING INSERTION OF SINGLE VALUES WITH" << out << " SWAPPING" << std::endl;
-  insertions(testchain, expected, swap, align);
+  insertions(testchain, expected, swap, align, zero_init_pad);
   size_t bytesWritten = testchain->total_length();
   std::cout << std::endl << "BYTES WRITTEN: " << bytesWritten << std::endl;
   displayChain(testchain);
@@ -462,7 +463,7 @@ runTest(const Values& expected, const ArrayValues& expectedArray,
 
   testchain = getchain(sizeof(chaindefs)/sizeof(chaindefs[0]), chaindefs);
   std::cout << std::endl << "STARTING INSERTION OF ARRAY VALUES WITH" << out << " SWAPPING" << std::endl;
-  array_insertions(testchain, expectedArray, ARRAYSIZE, swap, align);
+  array_insertions(testchain, expectedArray, ARRAYSIZE, swap, align, zero_init_pad);
   bytesWritten = testchain->total_length();
   std::cout << std::endl << "BYTES WRITTEN: " << bytesWritten << std::endl;
   displayChain(testchain);
@@ -559,15 +560,14 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   runTest(expected, expectedArray, true /*swap*/, align);
   runTest(expected, expectedArray, false /*swap*/, align);
 
-  std::cout << "\n\n*** Alignment = ALIGN_INITIALIZE" << std::endl;
-  align = Serializer::ALIGN_INITIALIZE;
-  runTest(expected, expectedArray, true /*swap*/, align);
-  runTest(expected, expectedArray, false /*swap*/, align);
-
-  std::cout << "\n\n*** Alignment = ALIGN_CDR" << std::endl;
+  std::cout << "\n\n*** Alignment = ALIGN_CDR, zero_init_pad = false" << std::endl;
   align = Serializer::ALIGN_CDR;
   runTest(expected, expectedArray, true /*swap*/, align);
   runTest(expected, expectedArray, false /*swap*/, align);
+
+  std::cout << "\n\n*** Alignment = ALIGN_CDR, zero_init_pad = true" << std::endl;
+  runTest(expected, expectedArray, true /*swap*/, align, true);
+  runTest(expected, expectedArray, false /*swap*/, align, true);
 
   if (!runAlignmentTest() || !runAlignmentResetTest() || !runAlignmentOverrunTest()) {
     failed = true;
