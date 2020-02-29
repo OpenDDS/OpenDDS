@@ -21,6 +21,7 @@ void Annotations::register_all()
   register_one<FinalAnnotation>();
   register_one<AppendableAnnotation>();
   register_one<MutableAnnotation>();
+  register_one<OpenDDS::DataRepresentationAnnotation>();
 }
 
 Annotations::Annotations()
@@ -349,4 +350,62 @@ std::string MutableAnnotation::definition() const
 std::string MutableAnnotation::name() const
 {
   return "mutable";
+}
+
+namespace OpenDDS {
+
+  // @OpenDDS::data_representation ===========================================
+
+  std::string DataRepresentationAnnotation::definition() const
+  {
+    return
+      "@annotation data_representation {\n"
+      "  enum Kind_t {\n"
+      "    XCDR1,\n"
+      "    XML,\n"
+      "    XCDR2\n"
+      "  };\n"
+      "  Kind_t kind;\n"
+      "};\n";
+  }
+
+  std::string DataRepresentationAnnotation::name() const
+  {
+    return "data_representation";
+  }
+
+  DataRepresentationKind DataRepresentationAnnotation::node_value(
+    AST_Decl* node) const
+  {
+    DataRepresentationKind mask = data_representation_kind_none;
+    if (node) {
+      for (AST_Annotation_Appls::iterator i = node->annotations().begin();
+          i != node->annotations().end(); ++i) {
+        mask = value_from_appl(i->get());
+      }
+    }
+    return mask ? mask : default_value();
+  }
+
+  DataRepresentationKind DataRepresentationAnnotation::default_value() const
+  {
+    return data_representation_kind_any;
+  }
+
+  DataRepresentationKind DataRepresentationAnnotation::value_from_appl(
+    AST_Annotation_Appl* appl) const
+  {
+    if (appl && appl->annotation_decl() == declaration()) {
+      switch (get_u32_annotation_member_value(appl, "kind")) {
+      case 0:
+        return data_representation_kind_xcdr1;
+      case 1:
+        return data_representation_kind_xml;
+      case 2:
+        return data_representation_kind_xcdr2;
+      }
+    }
+    return data_representation_kind_none;
+  }
+
 }

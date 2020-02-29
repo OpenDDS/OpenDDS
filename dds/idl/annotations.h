@@ -8,6 +8,10 @@
  * To add a new annotation, implement a subclass of Annotation, implementing at
  * least definition() and name(), then add a register_one call for the class to
  * Annotations::register_all() in annotations.cpp.
+ *
+ * OpenDDS-specific annotations should go in the OpenDDS C++ namespace and the
+ * OpenDDS IDL module. Only standardized annotations should be outside those
+ * scopes.
  */
 
 #ifndef OPENDDS_IDL_ANNOTATIONS_HEADER
@@ -140,6 +144,8 @@ protected:
   }
 };
 
+// @key ======================================================================
+
 class KeyAnnotation : public AnnotationWithValue<bool> {
 public:
   std::string definition() const;
@@ -147,6 +153,8 @@ public:
 
   bool union_value(AST_Union* node) const;
 };
+
+// @topic ====================================================================
 
 class TopicAnnotation : public AnnotationWithValue<bool> {
 public:
@@ -163,11 +171,15 @@ private:
   bool value_from_appl(AST_Annotation_Appl* appl) const;
 };
 
+// @nested ===================================================================
+
 class NestedAnnotation : public AnnotationWithValue<bool> {
 public:
   std::string definition() const;
   std::string name() const;
 };
+
+// @default_nested ===========================================================
 
 class DefaultNestedAnnotation : public AnnotationWithValue<bool> {
 public:
@@ -175,11 +187,15 @@ public:
   std::string name() const;
 };
 
+// @id =======================================================================
+
 class IdAnnotation : public AnnotationWithValue<ACE_UINT32> {
 public:
   std::string definition() const;
   std::string name() const;
 };
+
+// @autoid ===================================================================
 
 enum AutoidKind {
   autoidkind_sequential,
@@ -194,6 +210,8 @@ public:
   AutoidKind default_value() const;
 };
 
+// @hashid ===================================================================
+
 class HashidAnnotation : public AnnotationWithValue<std::string> {
 public:
   std::string definition() const;
@@ -201,6 +219,8 @@ public:
 
   std::string default_value() const;
 };
+
+// @extensibility ============================================================
 
 enum ExtensibilityKind {
   extensibilitykind_final,
@@ -216,25 +236,56 @@ public:
   ExtensibilityKind default_value() const;
 };
 
-// @annotation final = @extensibility(FINAL);
+// @final ====================================================================
+
 class FinalAnnotation : public Annotation {
 public:
   std::string definition() const;
   std::string name() const;
 };
 
-// @annotation appendable = @extensibility(APPENDABLE);
+// @appendable ===============================================================
+
 class AppendableAnnotation : public Annotation {
 public:
   std::string definition() const;
   std::string name() const;
 };
 
-// @annotation mutable = @extensibility(MUTABLE);
+// @mutable ==================================================================
+
 class MutableAnnotation : public Annotation {
 public:
   std::string definition() const;
   std::string name() const;
 };
+
+// OpenDDS Specific Annotations
+namespace OpenDDS {
+
+  // @OpenDDS::data_representation ===========================================
+
+  enum DataRepresentationKind {
+    data_representation_kind_none = 0x00,
+    data_representation_kind_xcdr1 = 0x01,
+    data_representation_kind_xml = 0x02,
+    data_representation_kind_xcdr2 = 0x04,
+    data_representation_kind_any = 0xffffffff
+  };
+
+  /// Replacement for @::data_representation which requires bitmask
+  class DataRepresentationAnnotation :
+      public AnnotationWithEnumValue<DataRepresentationKind> {
+  public:
+    std::string definition() const;
+    std::string name() const;
+
+    DataRepresentationKind node_value(AST_Decl* node) const;
+    DataRepresentationKind default_value() const;
+
+  protected:
+    DataRepresentationKind value_from_appl(AST_Annotation_Appl* appl) const;
+  };
+}
 
 #endif
