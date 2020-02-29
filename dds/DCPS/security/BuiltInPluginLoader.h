@@ -28,7 +28,10 @@ public:
   virtual int init(int argc, ACE_TCHAR* argv[]);
 
 private:
-  bool initialized = false;
+  bool initialized;
+  
+public:
+  BuiltinPluginLoader() : initialized(false) {}
 };
 
 ACE_STATIC_SVC_DECLARE_EXPORT(DdsSecurity, BuiltInPluginLoader)
