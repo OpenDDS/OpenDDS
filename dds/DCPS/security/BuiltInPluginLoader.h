@@ -29,7 +29,6 @@ public:
 
 private:
   bool initialized;
-  
 public:
   BuiltInPluginLoader() : initialized(false) {}
 };
