@@ -31,7 +31,7 @@ private:
   bool initialized;
   
 public:
-  BuiltinPluginLoader() : initialized(false) {}
+  BuiltInPluginLoader() : initialized(false) {}
 };
 
 ACE_STATIC_SVC_DECLARE_EXPORT(DdsSecurity, BuiltInPluginLoader)
