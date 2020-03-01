@@ -57,7 +57,7 @@ TransportClient::~TransportClient()
 
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 
-  for (PendingMap::iterator it = prev_pending_.begin(); it != prev_pending_.end(); ++it) {
+  for (PrevPendingMap::iterator it = prev_pending_.begin(); it != prev_pending_.end(); ++it) {
     for (size_t i = 0; i < impls_.size(); ++i) {
       RcHandle<TransportImpl> impl = impls_[i].lock();
       if (impl) {
