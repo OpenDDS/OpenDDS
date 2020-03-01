@@ -376,7 +376,9 @@ sub parse_step_expr {
 sub parse_version {
   my $version = shift;
   my %result = ();
-  if ($version =~ /^(0|[1-9]\d*)\.(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)))?$/) {
+  my $field = qr/0|[1-9]\d*/;
+  my $metafield = qr/(?:$field|\d*[a-zA-Z-][0-9a-zA-Z-]*)/;
+  if ($version =~ /^($field)\.($field)\.($field)(?:-($metafield(?:\.$metafield)*))?$/) {
     $result{major} = $1;
     $result{minor} = $2;
     $result{micro} = $3 || "0";
@@ -385,13 +387,15 @@ sub parse_version {
 
     $result{series_string} = "$result{major}.$result{minor}";
     $result{series_string_with_metadata} = "$result{series_string}$metadata_maybe";
-    $result{full_release_string} = "$result{series_string}.$result{micro}";
-    $result{complete_string} = "$result{full_release_string}$metadata_maybe";
+    $result{release_string} = "$result{series_string}.$result{micro}";
+    $result{release_string_with_metadata} = "$result{release_string}$metadata_maybe";
     if ($result{micro} eq "0") {
       $result{string} = $result{series_string_with_metadata};
     } else {
-      $result{string} = $result{complete_string};
+      $result{string} = $result{release_string_with_metadata};
     }
+    my @metadata_fields = split(/\./, $result{metadata});
+    $result{metadata_fields} = \@metadata_fields;
   }
   return %result;
 }
@@ -422,14 +426,18 @@ sub version_greater_equal {
     return 0;
   }
 
-  my @lfields = split(/\./, $left->{metadata});
-  my @rfields = split(/\./, $right->{metadata});
+  my @lfields = @{$left->{metadata_fields}};
+  my @rfields = @{$right->{metadata_fields}};
   my $llen = scalar(@lfields);
   my $rlen = scalar(@rfields);
+  return 1 if ($llen == 0 && $rlen > 0);
+  return 0 if ($llen > 0 && $rlen == 0);
   my $mlen = $llen > $rlen ? $llen : $rlen;
-  for (my $i = 0; $i <= $mlen; $i += 1) {
-    return 1 if ($i >= $rlen);
-    return 0 if ($i >= $llen);
+  for (my $i = 0; $i < $mlen; $i += 1) {
+    my $morel = $i < $llen;
+    my $morer = $i < $rlen;
+    return 1 if ($morel && !$morer);
+    return 0 if (!$morel && $morer);
     my $li = $lfields[$i];
     my $lnum = $li =~ /^\d+$/ ? 1 : 0;
     my $ri = $rfields[$i];
@@ -448,11 +456,16 @@ sub version_greater_equal {
   return 1;
 }
 
+sub version_not_equal {
+  my $left = shift();
+  my $right = shift();
+  return $left->{string} ne $right->{string};
+}
+
 sub version_greater {
   my $left = shift();
   my $right = shift();
-  return version_greater_equal($left, $right) &&
-    $left->{complete_string} ne $right->{complete_string};
+  return version_greater_equal($left, $right) && version_not_equal($left, $right);
 }
 
 sub version_lesser {
@@ -1007,10 +1020,12 @@ sub verify_update_version_h_file {
     $settings->{parsed_next_version} : $settings->{parsed_version};
   my $metaversion = quotemeta($parsed_version->{string});
   my $release = $post_release ? "0" : "1";
+  my $metadata = quotemeta($parsed_version->{metadata});
 
   my $matched_major = 0;
   my $matched_minor = 0;
   my $matched_micro = 0;
+  my $matched_metadata = 0;
   my $matched_release = 0;
   my $matched_version = 0;
 
@@ -1022,6 +1037,8 @@ sub verify_update_version_h_file {
       ++$matched_minor;
     } elsif ($_ =~ /^#define DDS_MICRO_VERSION $parsed_version->{micro}$/) {
       ++$matched_micro;
+    } elsif ($_ =~ /^#define OPENDDS_VERSION_METADATA "$metadata"$/) {
+      ++$matched_metadata;
     } elsif ($_ =~ /^#define OPENDDS_IS_RELEASE $release$/) {
       ++$matched_release;
     } elsif ($_ =~ /^#define DDS_VERSION "$metaversion"$/) {
@@ -1034,6 +1051,7 @@ sub verify_update_version_h_file {
     $matched_major == 1 &&
     $matched_minor == 1 &&
     $matched_micro == 1 &&
+    $matched_metadata == 1 &&
     $matched_release == 1 &&
     $matched_version == 1;
 }
@@ -1056,12 +1074,14 @@ sub remedy_update_version_h_file {
   my $corrected_major = 0;
   my $corrected_minor = 0;
   my $corrected_micro = 0;
+  my $corrected_metadata = 0;
   my $corrected_release = 0;
   my $corrected_version = 0;
 
   my $major_line = "#define DDS_MAJOR_VERSION $parsed_version->{major}";
   my $minor_line = "#define DDS_MINOR_VERSION $parsed_version->{minor}";
   my $micro_line = "#define DDS_MICRO_VERSION $parsed_version->{micro}";
+  my $metadata_line = "#define OPENDDS_VERSION_METADATA \"$parsed_version->{metadata}\"";
   my $release_line = "#define OPENDDS_IS_RELEASE $release";
   my $version_line = "#define DDS_VERSION \"$version\"";
 
@@ -1078,6 +1098,9 @@ sub remedy_update_version_h_file {
     }
     elsif (s/^#define DDS_MICRO_VERSION .*$/$micro_line/) {
       ++$corrected_micro;
+    }
+    elsif (s/^#define OPENDDS_VERSION_METADATA .*$/$metadata_line/) {
+      ++$corrected_metadata;
     }
     elsif (s/^#define OPENDDS_IS_RELEASE .*$/$release_line/) {
       ++$corrected_release;
@@ -1097,6 +1120,7 @@ sub remedy_update_version_h_file {
     $corrected_major == 1 &&
     $corrected_minor == 1 &&
     $corrected_micro == 1 &&
+    $corrected_metadata == 1 &&
     $corrected_release == 1 &&
     $corrected_version == 1;
 }
@@ -2126,8 +2150,9 @@ my %global_settings = (
 
 if (verify_release_flag_file(\%global_settings)) {
   $global_settings{release_flag_file_exists} = 1;
-  print "Release flag file found, assuming release is done. Remove " .
-    "$global_settings{release_flag_file_path} if this is not the case\n";
+  print
+    "Release flag file found, assuming release is done! Remove the\n" .
+    "\"$release_flag_filename\" file in the workspace if that is not the case.\n";
 }
 
 my @release_steps  = (
@@ -2329,7 +2354,7 @@ my @release_steps  = (
     name    => 'Upload to GitHub',
     verify  => sub{verify_github_upload(@_)},
     message => sub{message_github_upload(@_)},
-    remedy  => sub{remedy_github_upload(@_)}
+    remedy  => sub{remedy_github_upload(@_)},
   },
   {
     name    => 'Release Website',
@@ -2343,14 +2368,14 @@ my @release_steps  = (
     verify => sub{verify_release_flag_file(@_)},
     message => sub{ return "Release flag file needs to be created."},
     remedy => sub{touch_file("$_[0]->{release_flag_file_name_path}"); return 0;},
-    is_release_flag_step => 1, # Everything after this is post-release
+    post_release => 1,
   },
   {
     name    => 'Update NEWS for Post-Release',
     verify  => sub{verify_news_template_file_section(@_)},
     message => sub{message_news_template_file_section(@_)},
     remedy  => sub{remedy_news_template_file_section(@_)},
-    skip    => $global_settings{micro},
+    post_release => 1,
   },
   {
     name    => 'Update VERSION.txt for Post-Release',
@@ -2358,6 +2383,7 @@ my @release_steps  = (
     message => sub{message_update_version_file(@_)},
     remedy  => sub{remedy_update_version_file(@_, 1)},
     can_force => 1,
+    post_release => 1,
   },
   {
     name    => 'Update Version.h for Post-Release',
@@ -2365,6 +2391,7 @@ my @release_steps  = (
     message => sub{message_update_version_h_file(@_)},
     remedy  => sub{remedy_update_version_h_file(@_, 1)},
     can_force => 1,
+    post_release => 1,
   },
   {
     name    => 'Update PROBLEM-REPORT-FORM for Post-Release',
@@ -2372,20 +2399,22 @@ my @release_steps  = (
     message => sub{message_update_prf_file(@_, 1)},
     remedy  => sub{remedy_update_prf_file(@_, 1)},
     can_force => 1,
+    post_release => 1,
   },
   {
     name    => 'Commit Post-Release Changes',
     verify  => sub{verify_git_status_clean(@_, 1)},
     message => sub{message_commit_git_changes(@_)},
     remedy  => sub{remedy_git_status_clean(@_)},
-    skip    => $global_settings{micro},
+    post_release => 1,
   },
   {
     name    => 'Push Post-Release Changes',
     prereqs => ['Verify Remote'],
     verify  => sub{verify_git_changes_pushed(@_, 1)},
     message => sub{message_git_changes_pushed(@_)},
-    remedy  => sub{remedy_git_changes_pushed(@_, 0)}
+    remedy  => sub{remedy_git_changes_pushed(@_, 0)},
+    post_release => 1,
   },
   {
     name    => 'Email DDS-Release-Announce list',
@@ -2396,7 +2425,6 @@ my @release_steps  = (
 );
 
 # For all steps, check for missing required attributes, fill others
-my $found_release_flag_step = 0;
 foreach my $step_index (1..scalar(@release_steps)) {
   my $step = $release_steps[$step_index - 1];
   my @required = (
@@ -2418,11 +2446,8 @@ foreach my $step_index (1..scalar(@release_steps)) {
   if (not exists $step->{can_force}) {
     $step->{can_force} = 0;
   }
-  if (not exists $step->{is_release_step}) {
-    $step->{is_release_step} = !$found_release_flag_step;
-  }
-  if (exists $step->{is_release_flag_step} && $step->{is_release_flag_step}) {
-    $found_release_flag_step = 1;
+  if (not exists $step->{post_release}) {
+    $step->{post_release} = 0;
   }
 }
 
@@ -2447,7 +2472,8 @@ sub run_step {
 
   return if (
     !$settings->{list_all} && ($step->{skip} || $step->{verified} ||
-    ($settings->{release_flag_file_exists} && $step->{is_release_step})));
+    ($settings->{release_flag_file_exists} && !$step->{post_release}) ||
+    ($settings->{micro} && $step->{post_release})));
   print "$step_count: $title\n";
   return if $settings->{list};
 
