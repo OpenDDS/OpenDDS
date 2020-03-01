@@ -179,18 +179,23 @@ private:
   typedef OPENDDS_VECTOR(WeakRcHandle<TransportImpl>) ImplsType;
 
   struct PendingAssoc : RcEventHandler {
-    bool active_, removed_;
+    ACE_Thread_Mutex mutex_;
+    bool active_, scheduled_;
     ImplsType impls_;
     CORBA::ULong blob_index_;
     AssociationData data_;
     TransportImpl::ConnectionAttribs attribs_;
+    WeakRcHandle<TransportClient> client_;
 
-    PendingAssoc()
+    explicit PendingAssoc(TransportClient* tc)
       : active_(false)
-      , removed_(false)
+      , scheduled_(false)
       , blob_index_(0)
+      , client_(RcHandle<TransportClient>(tc, inc_count()))
     {}
 
+    void reset_client();
+    bool safe_to_remove();
     bool initiate_connect(TransportClient* tc, Guard& guard);
     int handle_timeout(const ACE_Time_Value& time, const void* arg);
   };
@@ -198,6 +203,9 @@ private:
   typedef RcHandle<PendingAssoc> PendingAssoc_rch;
 
   typedef OPENDDS_MAP_CMP(RepoId, PendingAssoc_rch, GUID_tKeyLessThan) PendingMap;
+  typedef OPENDDS_MULTIMAP_CMP(RepoId, PendingAssoc_rch, GUID_tKeyLessThan) PrevPendingMap;
+
+  void clean_prev_pending();
 
   class PendingAssocTimer : public ReactorInterceptor {
   public:
@@ -248,6 +256,8 @@ private:
       virtual void execute()
       {
         if (timer_->reactor()) {
+          ACE_Guard<ACE_Thread_Mutex> guard(assoc_->mutex_);
+          assoc_->scheduled_ = true;
           timer_->reactor()->schedule_timer(assoc_.in(),
                                             transport_client_,
                                             transport_client_->passive_connect_duration_.value());
@@ -263,7 +273,9 @@ private:
       virtual void execute()
       {
         if (timer_->reactor()) {
+          ACE_Guard<ACE_Thread_Mutex> guard(assoc_->mutex_);
           timer_->reactor()->cancel_timer(assoc_.in());
+          assoc_->scheduled_ = false;
         }
       }
     };
@@ -275,6 +287,7 @@ private:
   TransportConfig_rch config_;
   ImplsType impls_;
   PendingMap pending_;
+  PrevPendingMap prev_pending_;
   DataLinkSet links_;
 
   DataLinkIndex data_link_index_;

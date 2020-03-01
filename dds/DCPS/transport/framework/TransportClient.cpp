@@ -57,21 +57,25 @@ TransportClient::~TransportClient()
 
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 
-  ReactorInterceptor::CommandPtr command;
-
-  for (PendingMap::iterator it = pending_.begin(); it != pending_.end(); ++it) {
+  for (PendingMap::iterator it = prev_pending_.begin(); it != prev_pending_.end(); ++it) {
     for (size_t i = 0; i < impls_.size(); ++i) {
       RcHandle<TransportImpl> impl = impls_[i].lock();
       if (impl) {
         impl->stop_accepting_or_connecting(*this, it->second->data_.remote_id_);
       }
     }
-
-    command = pending_assoc_timer_->cancel_timer(this, it->second);
   }
+}
 
-  if (command) {
-    command->wait();
+void
+TransportClient::clean_prev_pending()
+{
+  for (PendingMap::iterator it = prev_pending_.begin(); it != prev_pending_.end();) {
+    if (it->second->safe_to_remove()) {
+      prev_pending_.erase(it++);
+    } else {
+      ++it;
+    }
   }
 }
 
@@ -226,11 +230,13 @@ TransportClient::associate(const AssociationData& data, bool active)
     return false;
   }
 
+  clean_prev_pending();
+
   PendingMap::iterator iter = pending_.find(data.remote_id_);
 
   if (iter == pending_.end()) {
     RepoId remote_copy(data.remote_id_);
-    iter = pending_.insert(std::make_pair(remote_copy, make_rch<PendingAssoc>())).first;
+    iter = pending_.insert(std::make_pair(remote_copy, make_rch<PendingAssoc>(this))).first;
 
     GuidConverter tc_assoc(repo_id_);
     GuidConverter remote_new(data.remote_id_);
@@ -286,18 +292,21 @@ TransportClient::associate(const AssociationData& data, bool active)
             // If the current thread is not an event handler for the transport's reactor, e.g., the ORB's thread, then the order of acquired locks will be lock_ -> transport reactor lock.
             // Event handlers in the transport reactor may call passive_connection which calls use_datalink which acquires lock_.  The locking order in this case is transport reactor lock -> lock_.
             // To avoid deadlock, we must reverse the lock.
+            TransportImpl::ConnectionAttribs attribs = pend->attribs_;
+            RcHandle<TransportClient> client = rchandle_from(this);
             ACE_GUARD_RETURN(Reverse_Lock_t, unlock_guard, reverse_lock_, false);
-            res = impl->accept_datalink(remote, pend->attribs_, rchandle_from(this));
+            res = impl->accept_datalink(remote, attribs, client);
           }
 
           //NEED to check that pend is still valid here after you re-acquire the lock_ after accepting the datalink
-          PendingMap::iterator iter_after_accept = pending_.find(data.remote_id_);
+          iter = pending_.find(data.remote_id_);
 
-          if (iter_after_accept == pending_.end()) {
+          if (iter == pending_.end()) {
             //If Pending Assoc is no longer in pending_ then use_datalink_i has been called from an
             //active side connection and completed, thus pend was removed from pending_.  Can return true.
             return true;
           }
+          pend = iter->second;
 
           if (res.success_) {
             if (res.link_.is_nil()) {
@@ -310,8 +319,6 @@ TransportClient::associate(const AssociationData& data, bool active)
           }
         }
       }
-
-      //pend->impls_.push_back(impl);
     }
 
     pending_assoc_timer_->schedule_timer(this, iter->second);
@@ -320,14 +327,32 @@ TransportClient::associate(const AssociationData& data, bool active)
   return true;
 }
 
+void
+TransportClient::PendingAssoc::reset_client() {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  client_.reset();
+}
+
+bool
+TransportClient::PendingAssoc::safe_to_remove() {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  return !client_ && !scheduled_;
+}
+
 int
 TransportClient::PendingAssoc::handle_timeout(const ACE_Time_Value&,
                                               const void* arg)
 {
-  TransportClient* tc = static_cast<TransportClient*>(const_cast<void*>(arg));
+  RcHandle<TransportClient> client;
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    client = client_.lock();
+    scheduled_ = false;
+  }
 
-  tc->use_datalink(data_.remote_id_, DataLink_rch());
-
+  if (client && client.get() == static_cast<TransportClient*>(const_cast<void*>(arg))) {
+    client->use_datalink(data_.remote_id_, DataLink_rch());
+  }
   return 0;
 }
 
@@ -542,11 +567,12 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
     }
   }
 
+  iter->second->reset_client();
+  pending_assoc_timer_->cancel_timer(this, pend);
+  prev_pending_.insert(std::make_pair(iter->first, iter->second));
   pending_.erase(iter);
 
   guard.release();
-
-  pending_assoc_timer_->cancel_timer(this, pend);
 
   transport_assoc_done(active_flag | (ok ? ASSOC_OK : 0), remote_id);
 }
@@ -571,6 +597,11 @@ void
 TransportClient::stop_associating()
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
+  for (PendingMap::iterator it = pending_.begin(); it != pending_.end(); ++it) {
+    it->second->reset_client();
+    pending_assoc_timer_->cancel_timer(this, it->second);
+    prev_pending_.insert(std::make_pair(it->first, it->second));
+  }
   pending_.clear();
 }
 
@@ -583,7 +614,13 @@ TransportClient::stop_associating(const GUID_t* repos, CORBA::ULong length)
     return;
   } else {
     for (CORBA::ULong i = 0; i < length; ++i) {
-      pending_.erase(repos[i]);
+      PendingMap::iterator iter = pending_.find(repos[i]);
+      if (iter != pending_.end()) {
+        iter->second->reset_client();
+        pending_assoc_timer_->cancel_timer(this, iter->second);
+        prev_pending_.insert(std::make_pair(iter->first, iter->second));
+        pending_.erase(iter);
+      }
     }
   }
 }
@@ -605,7 +642,12 @@ TransportClient::disassociate(const RepoId& peerId)
 
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 
-  if (pending_.erase(peerId)) {
+  PendingMap::iterator iter = pending_.find(peerId);
+  if (iter != pending_.end()) {
+    iter->second->reset_client();
+    pending_assoc_timer_->cancel_timer(this, iter->second);
+    prev_pending_.insert(std::make_pair(iter->first, iter->second));
+    pending_.erase(iter);
     return;
   }
 
