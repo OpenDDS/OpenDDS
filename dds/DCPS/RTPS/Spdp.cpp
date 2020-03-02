@@ -1052,6 +1052,8 @@ Spdp::process_auth_deadlines(const DCPS::MonotonicTimePoint& now)
                    ACE_TEXT("Removing discovered participant due to authentication timeout: %C\n"),
                    OPENDDS_STRING(DCPS::GuidConverter(pos->second)).c_str()));
       }
+      const DCPS::MonotonicTimePoint ptime = pos->first;
+      const RepoId part_id = pos->second;
       if (participant_sec_attr_.allow_unauthenticated_participants == false) {
         ICE::Endpoint* sedp_endpoint = sedp_.get_ice_endpoint();
         if (sedp_endpoint) {
@@ -1066,12 +1068,10 @@ Spdp::process_auth_deadlines(const DCPS::MonotonicTimePoint& now)
       } else {
         purge_auth_resends(pit);
         pit->second.auth_state_ = DCPS::AS_UNAUTHENTICATED;
-        const DCPS::MonotonicTimePoint time = pos->first;
-        const RepoId part_id = pos->second;
         auth_deadlines_.erase(pos);
         match_unauthenticated(part_id, pit);
       }
-      pos = auth_deadlines_.lower_bound(time);
+      pos = auth_deadlines_.lower_bound(ptime);
       limit = auth_deadlines_.upper_bound(now);
     } else {
       auth_deadlines_.erase(pos++);
