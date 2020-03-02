@@ -61,7 +61,7 @@ TransportClient::~TransportClient()
     for (size_t i = 0; i < impls_.size(); ++i) {
       RcHandle<TransportImpl> impl = impls_[i].lock();
       if (impl) {
-        impl->stop_accepting_or_connecting(*this, it->second->data_.remote_id_);
+        impl->stop_accepting_or_connecting(it->second->client_, it->second->data_.remote_id_);
       }
     }
   }
