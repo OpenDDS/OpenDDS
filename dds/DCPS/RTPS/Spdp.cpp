@@ -1061,8 +1061,8 @@ Spdp::process_auth_deadlines(const DCPS::MonotonicTimePoint& now)
         if (spdp_endpoint) {
           ICE::Agent::instance()->stop_ice(spdp_endpoint, guid_, pit->first);
         }
+        auth_deadlines_.erase(pos);
         remove_discovered_participant(pit);
-        auth_deadlines_.erase(pos++);
       } else {
         purge_auth_resends(pit);
         pit->second.auth_state_ = DCPS::AS_UNAUTHENTICATED;
@@ -1070,9 +1070,9 @@ Spdp::process_auth_deadlines(const DCPS::MonotonicTimePoint& now)
         const RepoId part_id = pos->second;
         auth_deadlines_.erase(pos);
         match_unauthenticated(part_id, pit);
-        pos = auth_deadlines_.lower_bound(time);
-        limit = auth_deadlines_.upper_bound(now);
       }
+      pos = auth_deadlines_.lower_bound(time);
+      limit = auth_deadlines_.upper_bound(now);
     } else {
       auth_deadlines_.erase(pos++);
     }
