@@ -61,7 +61,7 @@ TransportClient::~TransportClient()
     for (size_t i = 0; i < impls_.size(); ++i) {
       RcHandle<TransportImpl> impl = impls_[i].lock();
       if (impl) {
-        impl->stop_accepting_or_connecting(*this, it->second->data_.remote_id_);
+        impl->stop_accepting_or_connecting(it->second->client_, it->second->data_.remote_id_);
       }
     }
   }
@@ -70,7 +70,7 @@ TransportClient::~TransportClient()
 void
 TransportClient::clean_prev_pending()
 {
-  for (PendingMap::iterator it = prev_pending_.begin(); it != prev_pending_.end();) {
+  for (PrevPendingMap::iterator it = prev_pending_.begin(); it != prev_pending_.end();) {
     if (it->second->safe_to_remove()) {
       prev_pending_.erase(it++);
     } else {
