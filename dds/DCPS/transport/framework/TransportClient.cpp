@@ -70,7 +70,7 @@ TransportClient::~TransportClient()
 void
 TransportClient::clean_prev_pending()
 {
-  for (PendingMap::iterator it = prev_pending_.begin(); it != prev_pending_.end();) {
+  for (PrevPendingMap::iterator it = prev_pending_.begin(); it != prev_pending_.end();) {
     if (it->second->safe_to_remove()) {
       prev_pending_.erase(it++);
     } else {
