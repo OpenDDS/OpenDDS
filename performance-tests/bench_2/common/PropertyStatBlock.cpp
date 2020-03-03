@@ -1,5 +1,6 @@
 #include "PropertyStatBlock.h"
 
+#include <cctype>
 #include <cmath>
 #include <iomanip>
 #include <string>
