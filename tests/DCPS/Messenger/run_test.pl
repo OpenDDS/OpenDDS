@@ -27,7 +27,6 @@ my $sub_opts = "$dbg_lvl";
 my $repo_bit_opt = "";
 my $stack_based = 0;
 my $is_rtps_disc = 0;
-my $secure = 0;
 my $DCPSREPO;
 
 my $thread_per_connection = "";
@@ -83,19 +82,16 @@ elsif ($test->flag('rtps_disc_half_sec_pub')) {
     $pub_opts .= " -DCPSConfigFile rtps_disc_sec.ini";
     $sub_opts .= " -DCPSConfigFile rtps_disc.ini";
     $is_rtps_disc = 1;
-    $secure = 1;
 }
 elsif ($test->flag('rtps_disc_half_sec_sub')) {
     $pub_opts .= " -DCPSConfigFile rtps_disc.ini";
     $sub_opts .= " -DCPSConfigFile rtps_disc_sec.ini";
     $is_rtps_disc = 1;
-    $secure = 1;
 }
 elsif ($test->flag('rtps_disc_sec')) {
     $pub_opts .= " -DCPSConfigFile rtps_disc_sec.ini";
     $sub_opts .= " -DCPSConfigFile rtps_disc_sec.ini";
     $is_rtps_disc = 1;
-    $secure = 1;
 }
 elsif ($test->flag('rtps_disc_tcp')) {
     $pub_opts .= " -DCPSConfigFile rtps_disc_tcp.ini";
@@ -134,12 +130,6 @@ else {
 }
 
 $test->report_unused_flags(!$flag_found);
-
-if ($secure) {
-  my $seclog = " -DCPSSecurityDebugLevel 9";
-  $pub_opts .= $seclog;
-  $sub_opts .= $seclog;
-}
 
 $pub_opts .= $thread_per_connection;
 
