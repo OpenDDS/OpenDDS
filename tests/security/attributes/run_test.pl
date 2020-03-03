@@ -371,6 +371,15 @@ foreach my $gov_file (@gov_files) {
 
         my $test = new PerlDDS::TestFramework();
 
+        # Suppress encdec_error in Full Message Scenarios
+        if ($scenario =~ /^FullMsg/) {
+          $test->{dcps_security_debug} = join(',', qw/
+            access_warn auth_warn auth_debug
+            encdec_warn encdec_debug
+            bookkeeping
+          /);
+        }
+
         $test->{dcps_debug_level} = 4;
         $test->{dcps_transport_debug_level} = 2;
         # will manually set -DCPSConfigFile
