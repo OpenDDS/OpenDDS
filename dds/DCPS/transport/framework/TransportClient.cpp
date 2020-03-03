@@ -377,15 +377,18 @@ TransportClient::initiate_connect_i(TransportImpl::AcceptConnectResult& result,
 
   {
     //can't call connect while holding lock due to possible reactor deadlock
-    guard.release();
     GuidConverter local(repo_id_);
     GuidConverter remote_conv(remote.repo_id_);
     VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::initiate_connect_i - "
                         "attempt to connect_datalink between local %C and remote %C\n",
                         OPENDDS_STRING(local).c_str(),
                         OPENDDS_STRING(remote_conv).c_str()), 0);
-    result = impl->connect_datalink(remote, attribs_, rchandle_from(this));
-    guard.acquire();
+    {
+      TransportImpl::ConnectionAttribs attribs = attribs_;
+      RcHandle<TransportClient> client = rchandle_from(this);
+      ACE_GUARD_RETURN(Reverse_Lock_t, unlock_guard, reverse_lock_, false);
+      result = impl->connect_datalink(remote, attribs, client);
+    }
     if (!result.success_) {
       if (DCPS_debug_level) {
         GuidConverter writer_converter(repo_id_);
