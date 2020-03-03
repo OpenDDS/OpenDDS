@@ -833,7 +833,8 @@ bool RtpsUdpReceiveStrategy::getDirectedWriteReaders(RepoIdSet& directedWriteRea
 {
   directedWriteReaders.clear();
   for (CORBA::ULong i = 0; i < ds.inlineQos.length(); ++i) {
-    if (ds.inlineQos[i]._d() == RTPS::PID_DIRECTED_WRITE) {
+    if (ds.inlineQos[i]._d() == RTPS::PID_DIRECTED_WRITE
+        && receiver_.source_version_.minor >= 4) {
       directedWriteReaders.insert(ds.inlineQos[i].guid());
     }
   }
