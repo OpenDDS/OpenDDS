@@ -438,14 +438,6 @@ are not already there:
 Failure to do so will result in ACE failing to access any sockets and OpenDDS
 will not be able to function.
 
-In addition to this if no networks are active when OpenDDS is initialized, then
-the result will similar. For now it will be up to the app developer to assess
-network availability before initializing OpenDDS. On Android this can be done
-using the
-[ConnectivityManager](https://developer.android.com/reference/android/net/ConnectivityManager),
-but the exact method for doing so will depend on the API level and the needs of
-the app.
-
 Android builds of OpenDDS use the LinuxNetworkConfigMonitor to reconfigure
 OpenDDS connections automatically when the device switches from one network
 (cellular or wifi) to another. Apps that need to refresh or reassociate UI or
@@ -455,19 +447,19 @@ other elements with OpenDDS readers and writers can register with the
 ```Java
 // ...
     ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
-        cm.registerDefaultNetworkCallback(new ConnectivityManager.NetworkCallback() {
-            @Override
-            public void onAvailable(Network network) {
-                super.onAvailable(network);
-                // ...
-            }
+    cm.registerDefaultNetworkCallback(new ConnectivityManager.NetworkCallback() {
+        @Override
+        public void onAvailable(Network network) {
+            super.onAvailable(network);
+            // ...
+        }
 
-            @Override
-            public void onLost(Network network) {
-                super.onLost(network);
-                // ...
-            }
-        });
+        @Override
+        public void onLost(Network network) {
+            super.onLost(network);
+            // ...
+        }
+    });
 // ...
 ```
 
