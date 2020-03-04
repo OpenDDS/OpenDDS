@@ -10,8 +10,15 @@
 
 namespace Builder {
 
+#ifdef _MSC_VER
+# define Bench_Builder_Export_No_MSVC
+#else
+# define Bench_Builder_Export_No_MSVC Bench_Builder_Export
+#endif
+
 template <typename ListenerType>
-class ListenerFactory {
+class Bench_Builder_Export_No_MSVC ListenerFactory {
+#undef Bench_Builder_Export_No_MSVC
 public:
   using Listener = ListenerType;
   using Listener_var = typename ListenerType::_var_type;
