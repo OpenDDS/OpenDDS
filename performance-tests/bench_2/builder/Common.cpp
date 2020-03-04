@@ -40,8 +40,8 @@ TimeStamp operator+(const TimeStamp& lhs, const TimeStamp& rhs)
   result.sec = lhs.sec + rhs.sec;
   uint64_t nsec = static_cast<uint64_t>(lhs.nsec) + static_cast<uint64_t>(rhs.nsec);
   if (nsec >= static_cast<uint64_t>(1e9)) {
-    result.sec += nsec / static_cast<uint64_t>(1e9);
-    result.nsec = nsec % static_cast<uint64_t>(1e9);
+    result.sec += static_cast<CORBA::Long>(nsec / static_cast<uint64_t>(1e9));
+    result.nsec = static_cast<CORBA::ULong>(nsec % static_cast<uint64_t>(1e9));
   } else {
     result.nsec = nsec;
   }
@@ -56,7 +56,7 @@ TimeStamp operator-(const TimeStamp& lhs, const TimeStamp& rhs)
     result.nsec = lhs.nsec - rhs.nsec;
   } else {
     --result.sec;
-    result.nsec = 1e9 - (rhs.nsec - lhs.nsec);
+    result.nsec = static_cast<CORBA::ULong>(1e9) - (rhs.nsec - lhs.nsec);
   }
   return result;
 }
