@@ -68,7 +68,7 @@ bool ForwardAction::init(const ActionConfig& config, ActionReport& report, Build
 
   auto copy_threshold_prop = get_property(config.params, "copy_threshold", Builder::PVK_ULL);
   if (copy_threshold_prop) {
-    copy_threshold_ = copy_threshold_prop->value.ull_prop();
+    copy_threshold_ = static_cast<size_t>(copy_threshold_prop->value.ull_prop());
   }
 
   size_t queue_size = data_dws_.size() + 1;

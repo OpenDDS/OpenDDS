@@ -43,7 +43,7 @@ TimeStamp operator+(const TimeStamp& lhs, const TimeStamp& rhs)
     result.sec += static_cast<CORBA::Long>(nsec / static_cast<uint64_t>(1e9));
     result.nsec = static_cast<CORBA::ULong>(nsec % static_cast<uint64_t>(1e9));
   } else {
-    result.nsec = nsec;
+    result.nsec = static_cast<CORBA::ULong>(nsec);
   }
   return result;
 }

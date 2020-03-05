@@ -180,7 +180,7 @@ void PropertyStatBlock::finalize()
 {
   double median_result = 0.0;
   double mad_result = 0.0;
-  size_t count = median_sample_count_->value.ull_prop();
+  uint64_t count = median_sample_count_->value.ull_prop();
 
   // write buffer
   Builder::PropertyIndex buff_prop = get_or_create_property(*(median_.get_seq()), std::string(median_->name) + "_buffer", Builder::PVK_DOUBLE_SEQ);
