@@ -49,7 +49,7 @@ OpenDDS 3.14 is currently in development, so this list might change.
 - GuardCondition _narrow (#1407)
 - "make install" with DESTDIR (#1429, #1440)
 - Support for multiple transport instances in the same transport configuration (#1465)
-- The reliability QoS for DataWriters and Topics is now immutable (#1131, #1584)
+- The reliability QoS for DataWriters and Topics is now immutable, matching the DDS 1.4 spec (#1584)
 
 ### Notes:
 - The configure script now defaults to not including tests (#1287)
