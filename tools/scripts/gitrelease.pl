@@ -378,7 +378,7 @@ sub parse_version {
   my %result = ();
   my $field = qr/0|[1-9]\d*/;
   my $metafield = qr/(?:$field|\d*[a-zA-Z-][0-9a-zA-Z-]*)/;
-  if ($version =~ /^($field)\.($field)\.($field)(?:-($metafield(?:\.$metafield)*))?$/) {
+  if ($version =~ /^($field)\.($field)(?:\.($field))?(?:-($metafield(?:\.$metafield)*))?$/) {
     $result{major} = $1;
     $result{minor} = $2;
     $result{micro} = $3 || "0";

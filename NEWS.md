@@ -1,7 +1,7 @@
 # OpenDDS Releases
 
 ## Version 3.14 of OpenDDS
-OpenDDS 3.14 is currently in development, so this list might change.
+OpenDDS 3.14 was released on Mar  5 2020.
 
 ### Additions:
 - XTypes IDL annotations for topic types, Union topic types (#1067, #1422):
