@@ -1245,7 +1245,7 @@ sub verify_git_tag {
   open(GITTAG, "git tag --list '$git_name_prefix*' |") or die "Opening $!";
   while (<GITTAG>) {
     chomp;
-    if (/$settings->{git_tag}/) {
+    if (/^$settings->{git_tag}$/) {
       $found = 1;
     }
   }
