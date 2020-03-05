@@ -62,7 +62,7 @@ bool WriteAction::init(const ActionConfig& config, ActionReport& report, Builder
   if (data_buffer_bytes_prop) {
     data_buffer_bytes = data_buffer_bytes_prop->value.ull_prop();
   }
-  data_.buffer.length(data_buffer_bytes);
+  data_.buffer.length(static_cast<CORBA::ULong>(data_buffer_bytes));
 
   size_t max_count = 0;
   auto max_count_prop = get_property(config.params, "max_count", Builder::PVK_ULL);
@@ -78,7 +78,7 @@ bool WriteAction::init(const ActionConfig& config, ActionReport& report, Builder
   }
   new_key_count_ = new_key_count;
 
-  uint64_t new_key_probability = 0;
+  double new_key_probability = 0.0;
   auto new_key_probability_prop = get_property(config.params, "new_key_probability", Builder::PVK_DOUBLE);
   if (new_key_probability_prop) {
     new_key_probability = new_key_probability_prop->value.double_prop();
@@ -87,27 +87,27 @@ bool WriteAction::init(const ActionConfig& config, ActionReport& report, Builder
 
   data_.msg_count = 0;
 
-  size_t total_hops = 0;
+  CORBA::ULongLong total_hops = 0;
   auto total_hops_prop = get_property(config.params, "total_hops", Builder::PVK_ULL);
   if (total_hops_prop) {
     total_hops = total_hops_prop->value.ull_prop();
   }
-  data_.total_hops = total_hops;
+  data_.total_hops = static_cast<CORBA::ULong>(total_hops);
 
-  size_t hop_count = 1;
+  CORBA::ULongLong hop_count = 1;
   auto hop_count_prop = get_property(config.params, "hop_count", Builder::PVK_ULL);
   if (hop_count_prop) {
     hop_count = hop_count_prop->value.ull_prop();
   }
-  data_.hop_count = hop_count;
+  data_.hop_count = static_cast<CORBA::ULong>(hop_count);
 
   // First check frequency as double (seconds)
   auto write_frequency_prop = get_property(config.params, "write_frequency", Builder::PVK_DOUBLE);
   if (write_frequency_prop) {
     double period = 1.0 / write_frequency_prop->value.double_prop();
     int64_t sec = static_cast<int64_t>(period);
-    uint64_t usec = static_cast<uint64_t>((period - static_cast<double>(sec)) * 1e6);
-    write_period_ = ACE_Time_Value(sec, usec);
+    uint64_t usec = static_cast<uint64_t>((period - static_cast<double>(sec)) * 1000000u);
+    write_period_ = ACE_Time_Value(sec, static_cast<suseconds_t>(usec));
   }
 
   // Then check period as double (seconds)
@@ -115,14 +115,14 @@ bool WriteAction::init(const ActionConfig& config, ActionReport& report, Builder
   if (write_period_prop) {
     double period = write_period_prop->value.double_prop();
     int64_t sec = static_cast<int64_t>(period);
-    uint64_t usec = static_cast<uint64_t>((period - static_cast<double>(sec)) * 1e6);
-    write_period_ = ACE_Time_Value(sec, usec);
+    uint64_t usec = static_cast<uint64_t>((period - static_cast<double>(sec)) * 1000000u);
+    write_period_ = ACE_Time_Value(sec, static_cast<suseconds_t>(usec));
   }
 
   // Finally check period as TimeStamp
   write_period_prop = get_property(config.params, "write_period", Builder::PVK_TIME);
   if (write_period_prop) {
-    write_period_ = ACE_Time_Value(write_period_prop->value.time_prop().sec, write_period_prop->value.time_prop().nsec / 1e3);
+    write_period_ = ACE_Time_Value(write_period_prop->value.time_prop().sec, static_cast<suseconds_t>(write_period_prop->value.time_prop().nsec / 1000u));
   }
 
   handler_.reset(new MemFunHandler<WriteAction>(&WriteAction::do_write, *this));

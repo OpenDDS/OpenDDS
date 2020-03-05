@@ -150,7 +150,7 @@ void PropertyStatBlock::update(double value)
   auto prev_mean = mean_->value.double_prop();
   auto prev_var_x_sample_count = var_x_sample_count_->value.double_prop();
 
-  auto next_median_buffer_index = sample_count_->value.ull_prop() % median_buffer_.size();
+  size_t next_median_buffer_index = static_cast<size_t>(sample_count_->value.ull_prop() % median_buffer_.size());
 
   sample_count_->value.ull_prop(sample_count_->value.ull_prop() + 1);
   if (sample_count_->value.ull_prop() < median_buffer_.size()) {
@@ -180,15 +180,15 @@ void PropertyStatBlock::finalize()
 {
   double median_result = 0.0;
   double mad_result = 0.0;
-  size_t count = median_sample_count_->value.ull_prop();
+  uint64_t count = median_sample_count_->value.ull_prop();
 
   // write buffer
   Builder::PropertyIndex buff_prop = get_or_create_property(*(median_.get_seq()), std::string(median_->name) + "_buffer", Builder::PVK_DOUBLE_SEQ);
   Builder::DoubleSeq ds;
-  ds.length(count);
+  ds.length(static_cast<CORBA::ULong>(count));
   for (size_t i = 0; i < count; ++i) {
     size_t pos = (count < median_buffer_.size() ? 0 : ((sample_count_->value.ull_prop() + 1 + i) % median_buffer_.size()));
-    ds[i] = median_buffer_[pos];
+    ds[static_cast<CORBA::ULong>(i)] = median_buffer_[pos];
   }
   buff_prop->value.double_seq_prop(ds);
 
@@ -220,14 +220,14 @@ SimpleStatBlock PropertyStatBlock::to_simple_stat_block() const
 {
   SimpleStatBlock result;
 
-  result.sample_count_ = sample_count_->value.ull_prop();
+  result.sample_count_ = static_cast<size_t>(sample_count_->value.ull_prop());
   result.min_ = min_->value.double_prop();
   result.max_ = max_->value.double_prop();
   result.mean_ = mean_->value.double_prop();
   result.var_x_sample_count_ = var_x_sample_count_->value.double_prop();
 
   result.median_buffer_ = median_buffer_;
-  result.median_sample_count_ = median_sample_count_->value.ull_prop();
+  result.median_sample_count_ = static_cast<size_t>(median_sample_count_->value.ull_prop());
   result.median_ = median_->value.double_prop();
   result.median_absolute_deviation_ = median_absolute_deviation_->value.double_prop();
 
@@ -249,7 +249,7 @@ ConstPropertyStatBlock::ConstPropertyStatBlock(const Builder::PropertySeq& seq, 
   Builder::ConstPropertyIndex median_buffer = get_property(seq, prefix + "_median_buffer", Builder::PVK_DOUBLE_SEQ);
   median_buffer_.resize(median_buffer->value.double_seq_prop().length());
   for (size_t i = 0; i < median_buffer_.size(); ++i) {
-    median_buffer_[i] = median_buffer->value.double_seq_prop()[i];
+    median_buffer_[i] = median_buffer->value.double_seq_prop()[static_cast<CORBA::ULong>(i)];
   }
 
   median_sample_count_ = get_property(seq, prefix + "_median_sample_count", Builder::PVK_ULL);
@@ -263,14 +263,14 @@ SimpleStatBlock ConstPropertyStatBlock::to_simple_stat_block() const
 {
   SimpleStatBlock result;
 
-  result.sample_count_ = sample_count_->value.ull_prop();
+  result.sample_count_ = static_cast<size_t>(sample_count_->value.ull_prop());
   result.min_ = min_->value.double_prop();
   result.max_ = max_->value.double_prop();
   result.mean_ = mean_->value.double_prop();
   result.var_x_sample_count_ = var_x_sample_count_->value.double_prop();
 
   result.median_buffer_ = median_buffer_;
-  result.median_sample_count_ = median_sample_count_->value.ull_prop();
+  result.median_sample_count_ = static_cast<size_t>(median_sample_count_->value.ull_prop());
   result.median_ = median_->value.double_prop();
   result.median_absolute_deviation_ = median_absolute_deviation_->value.double_prop();
 
