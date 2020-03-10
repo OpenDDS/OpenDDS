@@ -5,6 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include "ace/OS_NS_unistd.h"
+
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/MultiTask.h"
 #include "dds/DCPS/ReactorTask.h"

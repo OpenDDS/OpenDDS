@@ -19,9 +19,9 @@ namespace DCPS {
 
 class MultiTask : public RcEventHandler {
 public:
-  explicit MultiTask(RcHandle<ReactorInterceptor> interceptor, const TimeDuration& period)
+  explicit MultiTask(RcHandle<ReactorInterceptor> interceptor, const TimeDuration& delay)
     : interceptor_(interceptor)
-    , period_(period)
+    , delay_(delay)
     , timer_(-1)
     , next_time_()
     , cancel_estimate_()
@@ -31,9 +31,9 @@ public:
 
   virtual ~MultiTask() {}
 
-  void enable(const TimeDuration& period)
+  void enable(const TimeDuration& delay)
   {
-    interceptor_->execute_or_enqueue(new ScheduleEnableCommand(this, period));
+    interceptor_->execute_or_enqueue(new ScheduleEnableCommand(this, delay));
   }
 
   void disable()
@@ -51,24 +51,24 @@ public:
 
 private:
   RcHandle<ReactorInterceptor> interceptor_;
-  const TimeDuration period_;
+  const TimeDuration delay_;
   long timer_;
   MonotonicTimePoint next_time_;
   TimeDuration cancel_estimate_;
   mutable ACE_Thread_Mutex mutex_;
 
   struct ScheduleEnableCommand : public ReactorInterceptor::Command {
-    ScheduleEnableCommand(MultiTask* multi_task, const TimeDuration& period)
-      : multi_task_(multi_task), period_(period)
+    ScheduleEnableCommand(MultiTask* multi_task, const TimeDuration& delay)
+      : multi_task_(multi_task), delay_(delay)
     { }
 
     virtual void execute()
     {
-      multi_task_->enable_i(period_);
+      multi_task_->enable_i(delay_);
     }
 
     MultiTask* const multi_task_;
-    const TimeDuration period_;
+    const TimeDuration delay_;
   };
 
   struct ScheduleDisableCommand : public ReactorInterceptor::Command {
@@ -96,7 +96,7 @@ private:
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     const MonotonicTimePoint now = MonotonicTimePoint::now();
     if (timer_ == -1) {
-      timer_ = reactor()->schedule_timer(this, 0, per.value(), period_.value());
+      timer_ = reactor()->schedule_timer(this, 0, per.value(), delay_.value());
 
       if (timer_ == -1) {
         ACE_ERROR((LM_ERROR, "(%P|%t) MultiTask::enable"
@@ -106,12 +106,12 @@ private:
       }
     } else {
       while (next_time_ < now) {
-        next_time_ = next_time_ + period_;
+        next_time_ = next_time_ + delay_;
       }
       if ((now + per) < (next_time_ + cancel_estimate_)) {
         reactor()->cancel_timer(timer_);
         const MonotonicTimePoint now2 = MonotonicTimePoint::now();
-        timer_ = reactor()->schedule_timer(this, 0, per.value(), period_.value());
+        timer_ = reactor()->schedule_timer(this, 0, per.value(), delay_.value());
 
         if (timer_ == -1) {
           ACE_ERROR((LM_ERROR, "(%P|%t) MultiTask::enable"
@@ -140,8 +140,8 @@ class PmfMultiTask : public MultiTask {
 public:
   typedef void (Delegate::*PMF)(const MonotonicTimePoint&);
 
-  PmfMultiTask(RcHandle<ReactorInterceptor> interceptor, const TimeDuration& period, Delegate& delegate, PMF function)
-    : MultiTask(interceptor, period)
+  PmfMultiTask(RcHandle<ReactorInterceptor> interceptor, const TimeDuration& delay, Delegate& delegate, PMF function)
+    : MultiTask(interceptor, delay)
     , delegate_(delegate)
     , function_(function) {}
 

@@ -217,7 +217,7 @@ private:
     virtual int handle_exception(ACE_HANDLE fd = ACE_INVALID_HANDLE);
 
     void open();
-    void bump_up_local_write_i();
+    void shorten_local_sender_delay_i();
     void write(WriteFlags flags);
     void write_i(WriteFlags flags);
     void write_i(const DCPS::RepoId& guid, WriteFlags flags);

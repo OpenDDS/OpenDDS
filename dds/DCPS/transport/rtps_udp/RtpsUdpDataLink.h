@@ -645,7 +645,8 @@ private:
   };
   HeldDataDeliveryHandler held_data_delivery_handler_;
   const size_t max_bundle_size_;
-  TimeDuration quick_reply_delay_;
+  TimeDuration quick_heartbeat_delay_;
+  TimeDuration quick_heartbeat_response_delay_;
 
 #ifdef OPENDDS_SECURITY
   mutable ACE_Thread_Mutex ch_lock_;

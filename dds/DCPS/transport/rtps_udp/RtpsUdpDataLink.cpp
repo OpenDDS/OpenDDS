@@ -88,7 +88,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-const double QUICK_REPLY_DELAY_RATIO = 0.1;
 const size_t ONE_SAMPLE_PER_PACKET = 1;
 
 RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
@@ -112,7 +111,8 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
   , relay_beacon_(reactor_task->interceptor(), *this, &RtpsUdpDataLink::send_relay_beacon)
   , held_data_delivery_handler_(this)
   , max_bundle_size_(config.max_bundle_size_)
-  , quick_reply_delay_(config.heartbeat_response_delay_ * QUICK_REPLY_DELAY_RATIO)
+  , quick_heartbeat_delay_(config.heartbeat_period_ * config.quick_reply_ratio_)
+  , quick_heartbeat_response_delay_(config.heartbeat_response_delay_ * config.quick_reply_ratio_)
 #ifdef OPENDDS_SECURITY
   , security_config_(Security::SecurityRegistry::instance()->default_config())
   , local_crypto_handle_(DDS::HANDLE_NIL)
@@ -524,7 +524,7 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
   }
 
   if (enable_heartbeat) {
-    heartbeat_.enable(config().heartbeat_period_ * 0.1);
+    heartbeat_.enable(quick_heartbeat_delay_);
   }
 }
 
@@ -562,7 +562,7 @@ RtpsUdpDataLink::register_for_reader(const RepoId& writerid,
   }
   g.release();
   if (enableheartbeat) {
-    heartbeat_.enable(config().heartbeat_period_ * 0.1);
+    heartbeat_.enable(quick_heartbeat_delay_);
   }
 }
 
@@ -1142,7 +1142,7 @@ RtpsUdpDataLink::RtpsWriter::end_historic_samples_i(const DataSampleHeader& head
     // which already holds a RCH to the datalink... this is just to avoid adding another parameter to pass it
     RtpsUdpDataLink_rch link = link_.lock();
     if (link) {
-      link->heartbeat_.enable(link->config().heartbeat_period_ * 0.1);
+      link->heartbeat_.enable(link->quick_heartbeat_delay_);
     }
   }
 }
@@ -1682,7 +1682,7 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
     info.ack_pending_ = true;
 
     if (immediate_reply) {
-      link->heartbeat_reply_.schedule(link->quick_reply_delay_);
+      link->heartbeat_reply_.schedule(link->quick_heartbeat_response_delay_);
       return false;
     } else {
       return true; // timer will invoke send_heartbeat_replies()

@@ -576,7 +576,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       if (from_relay) {
         tport_->write_i(guid, SpdpTransport::SEND_TO_RELAY);
       } else {
-        tport_->bump_up_local_write_i();
+        tport_->shorten_local_sender_delay_i();
       }
     }
 
@@ -1821,11 +1821,11 @@ Spdp::SpdpTransport::close()
 }
 
 void
-Spdp::SpdpTransport::bump_up_local_write_i()
+Spdp::SpdpTransport::shorten_local_sender_delay_i()
 {
-  const TimeDuration quick_resend = outer_->config_->resend_period() * 0.1;
-  const TimeDuration min_resend = TimeDuration::from_msec(100);
   if (local_sender_) {
+    const TimeDuration quick_resend = outer_->config_->resend_period() * outer_->config_->quick_resend_ratio();
+    const TimeDuration min_resend = outer_->config_->min_resend_delay();
     local_sender_->enable(std::max(quick_resend, min_resend));
   }
 }
