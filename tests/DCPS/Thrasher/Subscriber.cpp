@@ -139,7 +139,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
                           ACE_TEXT(" create_datareader failed!\n")), 7);
 
       Utils::wait_match(reader, 1, Utils::GTE); // might never get up to n_publishers if they are exiting
-      listener_p->wait_received(OpenDDS::DCPS::TimeDuration(15, 0), expected_samples);
+      listener_p->wait_received(OpenDDS::DCPS::TimeDuration(280, 0), expected_samples);
       Utils::wait_match(reader, 0);
 
       for (size_t x = 0; x < n_publishers; ++x) {

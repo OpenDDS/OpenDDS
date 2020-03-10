@@ -1,0 +1,440 @@
+#include <tao/DoubleSeq.pidl>
+#include "dds/DdsDcpsCore.idl"
+
+module Builder {
+
+// ---
+// Common Section
+// ---
+
+  // A common definition for timestamps
+  struct TimeStamp {
+    long sec;
+    unsigned long nsec;
+  };
+
+  typedef sequence<string> StringSeq;
+
+  typedef sequence<double> DoubleSeq;
+
+  enum PropertyValueKind { PVK_TIME, PVK_STRING, PVK_DOUBLE, PVK_DOUBLE_SEQ, PVK_ULL };
+  union PropertyValue switch (PropertyValueKind) {
+    case PVK_TIME:
+      TimeStamp time_prop;
+    case PVK_STRING:
+      string string_prop;
+    case PVK_DOUBLE:
+      double double_prop;
+    case PVK_DOUBLE_SEQ:
+       DoubleSeq double_seq_prop;
+    case PVK_ULL:
+      unsigned long long ull_prop;
+  };
+
+  struct Property {
+    string name;
+    PropertyValue value;
+  };
+
+  typedef sequence<Property> PropertySeq;
+
+// ---
+// QoS Library Section
+// ---
+
+  struct TopicFilteredDataWriterQos {
+    string filter_expression;
+    DDS::DataWriterQos qos;
+  };
+
+  typedef sequence<TopicFilteredDataWriterQos> TopicFilteredDataWriterQosSeq;
+
+  struct TopicFilteredDataReaderQos {
+    string filter_expression;
+    DDS::DataReaderQos qos;
+  };
+
+  typedef sequence<TopicFilteredDataReaderQos> TopicFilteredDataReaderQosSeq;
+
+  struct QosProfiles {
+    string name;
+    string base_name;
+    DDS::DataWriterQos datawriter_qos;
+    DDS::DataReaderQos datareader_qos;
+    TopicFilteredDataWriterQosSeq topic_filtered_datawriter_qos;
+    TopicFilteredDataReaderQosSeq topic_filtered_datareader_qos;
+  };
+
+  struct QosLibrary {
+    string name;
+    QosProfiles qos_profiles;
+    DDS::DataWriterQos datawriter_qos; // shorthand for a single profile with a single qos
+    DDS::DataReaderQos datareader_qos; // shorthand for a single profile with a single qos
+  };
+
+// ---
+// QoS Mask Section
+// ---
+
+  struct PropertyQosPolicyMask {
+              boolean has_value;
+              boolean has_binary_value;
+              };
+
+  struct UserDataQosPolicyMask {
+              boolean has_value;
+              };
+
+  struct GroupDataQosPolicyMask {
+              boolean has_value;
+              };
+
+  struct TopicDataQosPolicyMask {
+              boolean has_value;
+              };
+
+  struct PartitionQosPolicyMask {
+              boolean has_name;
+              };
+
+  struct DurabilityQosPolicyMask {
+              boolean has_kind;
+              };
+
+  struct DurabilityServiceQosPolicyMask {
+              boolean has_service_cleanup_delay;
+              boolean has_history_kind;
+              boolean has_history_depth;
+              boolean has_max_samples;
+              boolean has_max_instances;
+              boolean has_max_samples_per_instance;
+              };
+
+  struct DeadlineQosPolicyMask {
+              boolean has_period;
+              };
+
+  struct LatencyBudgetQosPolicyMask {
+              boolean has_duration;
+              };
+
+  struct LivelinessQosPolicyMask {
+              boolean has_kind;
+              boolean has_lease_duration;
+              };
+
+  struct ReliabilityQosPolicyMask {
+              boolean has_kind;
+              boolean has_max_blocking_time;
+              };
+
+  struct DestinationOrderQosPolicyMask {
+              boolean has_kind;
+              };
+
+  struct HistoryQosPolicyMask {
+              boolean has_kind;
+              boolean has_depth;
+              };
+
+  struct ResourceLimitsQosPolicyMask {
+              boolean has_max_samples;
+              boolean has_max_instances;
+              boolean has_max_samples_per_instance;
+              };
+
+  struct TransportPriorityQosPolicyMask {
+              boolean has_value;
+              };
+
+  struct LifespanQosPolicyMask {
+              boolean has_duration;
+              };
+
+  struct OwnershipQosPolicyMask {
+              boolean has_kind;
+              };
+
+  struct OwnershipStrengthQosPolicyMask {
+              boolean has_value;
+              };
+
+  struct PresentationQosPolicyMask {
+              boolean has_access_scope;
+              boolean has_coherent_access;
+              boolean has_ordered_access;
+              };
+
+  struct TimeBasedFilterQosPolicyMask {
+              boolean has_minimum_separation;
+              };
+
+  struct TopicQosMask {
+              TopicDataQosPolicyMask topic_data;
+              DurabilityQosPolicyMask durability;
+              DurabilityServiceQosPolicyMask durability_service;
+              DeadlineQosPolicyMask deadline;
+              LatencyBudgetQosPolicyMask latency_budget;
+              LivelinessQosPolicyMask liveliness;
+              ReliabilityQosPolicyMask reliability;
+              DestinationOrderQosPolicyMask destination_order;
+              HistoryQosPolicyMask history;
+              ResourceLimitsQosPolicyMask resource_limits;
+              TransportPriorityQosPolicyMask transport_priority;
+              LifespanQosPolicyMask lifespan;
+              OwnershipQosPolicyMask ownership;
+              };
+
+  struct WriterDataLifecycleQosPolicyMask {
+              boolean has_autodispose_unregistered_instances;
+              };
+
+  struct DataWriterQosMask {
+              DurabilityQosPolicyMask durability;
+              DurabilityServiceQosPolicyMask durability_service;
+              DeadlineQosPolicyMask deadline;
+              LatencyBudgetQosPolicyMask latency_budget;
+              LivelinessQosPolicyMask liveliness;
+              ReliabilityQosPolicyMask reliability;
+              DestinationOrderQosPolicyMask destination_order;
+              HistoryQosPolicyMask history;
+              ResourceLimitsQosPolicyMask resource_limits;
+              TransportPriorityQosPolicyMask transport_priority;
+              LifespanQosPolicyMask lifespan;
+              UserDataQosPolicyMask user_data;
+              OwnershipQosPolicyMask ownership;
+              OwnershipStrengthQosPolicyMask ownership_strength;
+              WriterDataLifecycleQosPolicyMask writer_data_lifecycle;
+              };
+
+  struct EntityFactoryQosPolicyMask {
+              boolean has_autoenable_created_entities;
+              };
+
+  struct PublisherQosMask {
+              PresentationQosPolicyMask presentation;
+              PartitionQosPolicyMask partition;
+              GroupDataQosPolicyMask group_data;
+              EntityFactoryQosPolicyMask entity_factory;
+              };
+
+  struct ReaderDataLifecycleQosPolicyMask {
+              boolean has_autopurge_nowriter_samples_delay;
+              boolean has_autopurge_disposed_samples_delay;
+              };
+
+  struct DataReaderQosMask {
+              DurabilityQosPolicyMask durability;
+              DeadlineQosPolicyMask deadline;
+              LatencyBudgetQosPolicyMask latency_budget;
+              LivelinessQosPolicyMask liveliness;
+              ReliabilityQosPolicyMask reliability;
+              DestinationOrderQosPolicyMask destination_order;
+              HistoryQosPolicyMask history;
+              ResourceLimitsQosPolicyMask resource_limits;
+              UserDataQosPolicyMask user_data;
+              OwnershipQosPolicyMask ownership;
+              TimeBasedFilterQosPolicyMask time_based_filter;
+              ReaderDataLifecycleQosPolicyMask reader_data_lifecycle;
+              };
+
+  struct SubscriberQosMask {
+              PresentationQosPolicyMask presentation;
+              PartitionQosPolicyMask partition;
+              GroupDataQosPolicyMask group_data;
+              EntityFactoryQosPolicyMask entity_factory;
+              };
+
+  struct DomainParticipantFactoryQosMask {
+              EntityFactoryQosPolicyMask entity_factory;
+              };
+
+  struct DomainParticipantQosMask {
+              UserDataQosPolicyMask user_data;
+              EntityFactoryQosPolicyMask entity_factory;
+              PropertyQosPolicyMask property;
+              };
+
+// ---
+// Configuration Section
+// ---
+
+  // ConfigProperty
+
+  struct ConfigProperty {
+    string name;
+    string value;
+  };
+
+  typedef sequence<ConfigProperty> ConfigPropertySeq;
+
+  // ConfigSection
+
+  struct ConfigSection {
+    string name;
+    ConfigPropertySeq properties;
+  };
+
+  typedef sequence<ConfigSection> ConfigSectionSeq;
+
+  // Writer
+
+  struct DataWriterConfig {
+    string name;
+    string topic_name;
+    string listener_type_name;
+    unsigned long listener_status_mask;
+    string transport_config_name;
+    DDS::DataWriterQos qos;
+    DataWriterQosMask qos_mask;
+  };
+
+  typedef sequence<DataWriterConfig> DataWriterConfigSeq;
+
+  // Reader
+
+  struct DataReaderConfig {
+    string name;
+    string topic_name;
+    string listener_type_name;
+    unsigned long listener_status_mask;
+    PropertySeq listener_properties;
+    string transport_config_name;
+    DDS::DataReaderQos qos;
+    DataReaderQosMask qos_mask;
+  };
+
+  typedef sequence<DataReaderConfig> DataReaderConfigSeq;
+
+  // Publisher
+
+  struct PublisherConfig {
+    string name;
+    string listener_type_name;
+    unsigned long listener_status_mask;
+    string transport_config_name;
+    DDS::PublisherQos qos;
+    PublisherQosMask qos_mask;
+    DataWriterConfigSeq datawriters;
+  };
+
+  typedef sequence<PublisherConfig> PublisherConfigSeq;
+
+  // Subscription
+
+  struct SubscriberConfig {
+    string name;
+    string listener_type_name;
+    unsigned long listener_status_mask;
+    string transport_config_name;
+    DDS::SubscriberQos qos;
+    SubscriberQosMask qos_mask;
+    DataReaderConfigSeq datareaders;
+  };
+
+  typedef sequence<SubscriberConfig> SubscriberConfigSeq;
+
+  // Topic
+
+  struct TopicConfig {
+    string name;
+    string type_name;
+    DDS::TopicQos qos;
+    TopicQosMask qos_mask;
+    string listener_type_name;
+    unsigned long listener_status_mask;
+    string transport_config_name;
+  };
+
+  typedef sequence<TopicConfig> TopicConfigSeq;
+
+  // Participant
+
+  struct ParticipantConfig {
+    string name;
+    unsigned short domain;
+    DDS::DomainParticipantQos qos;
+    DomainParticipantQosMask qos_mask;
+    string listener_type_name;
+    unsigned long listener_status_mask;
+    string transport_config_name;
+    StringSeq type_names;
+    TopicConfigSeq topics;
+    PublisherConfigSeq publishers;
+    SubscriberConfigSeq subscribers;
+  };
+
+  typedef sequence<ParticipantConfig> ParticipantConfigSeq;
+
+  // TransportInstance
+
+  struct TransportInstanceConfig {
+    string name;
+    string type;
+    unsigned short domain;
+  };
+
+  typedef sequence<TransportInstanceConfig> TransportInstanceConfigSeq;
+
+  // Discovery
+
+  struct DiscoveryConfig {
+    string name;
+    string type; // "rtps" or "repo"
+    string ior; // only used for info "repo", format as URI (e.g. "file://repo.ior")
+    unsigned short domain;
+  };
+
+  typedef sequence<DiscoveryConfig> DiscoveryConfigSeq;
+
+  // Process
+
+  @topic
+  struct ProcessConfig {
+    ConfigSectionSeq config_sections;
+    DiscoveryConfigSeq discoveries;
+    TransportInstanceConfigSeq instances;
+    ParticipantConfigSeq participants;
+  };
+
+// ---
+// Report Section
+// ---
+
+  struct DataReaderReport {
+    PropertySeq properties;
+  };
+
+  typedef sequence<DataReaderReport> DataReaderReportSeq;
+
+  struct DataWriterReport {
+    PropertySeq properties;
+  };
+
+  typedef sequence<DataWriterReport> DataWriterReportSeq;
+
+  struct SubscriberReport {
+    DataReaderReportSeq datareaders;
+  };
+
+  typedef sequence<SubscriberReport> SubscriberReportSeq;
+
+  struct PublisherReport {
+    DataWriterReportSeq datawriters;
+  };
+
+  typedef sequence<PublisherReport> PublisherReportSeq;
+
+  struct ParticipantReport {
+    SubscriberReportSeq subscribers;
+    PublisherReportSeq publishers;
+  };
+
+  typedef sequence<ParticipantReport> ParticipantReportSeq;
+
+  struct ProcessReport {
+    ParticipantReportSeq participants;
+  };
+
+};
+

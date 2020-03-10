@@ -131,6 +131,7 @@ sub report_errors_in_file {
 my $config = new PerlACE::ConfigList;
 $PerlDDS::Coverage_Test = $config->check_config("Coverage");
 $PerlDDS::SafetyProfile = $config->check_config("OPENDDS_SAFETY_PROFILE");
+$PerlDDS::security = $config->check_config("OPENDDS_SECURITY");
 
 # used to prevent multiple special processes from running remotely
 $PerlDDS::Special_Process_Created = 0;
@@ -324,6 +325,10 @@ sub new {
   $self->{report_errors_in_log_file} = 1;
   $self->{dcps_debug_level} = 1;
   $self->{dcps_transport_debug_level} = 1;
+  $self->{dcps_security_debug} = defined $ENV{DCPSSecurityDebug} ?
+    $ENV{DCPSSecurityDebug} : "";
+  $self->{dcps_security_debug_level} = defined $ENV{DCPSSecurityDebugLevel} ?
+    $ENV{DCPSSecurityDebugLevel} : ($PerlDDS::security ? "9" : "");
   $self->{add_orb_log_file} = 1;
   $self->{wait_after_first_proc} = 25;
   $self->{finished} = 0;
@@ -573,6 +578,15 @@ sub process {
       $self->{dcps_transport_debug_level}) {
     my $debug = " -DCPSTransportDebugLevel $self->{dcps_transport_debug_level}";
     $params .= $debug;
+  }
+
+  if ($params !~ /-DCPSSecurityDebug(?:Level)? /) {
+    if ($self->{dcps_security_debug}) {
+      $params .=  " -DCPSSecurityDebug $self->{dcps_security_debug}";
+    }
+    elsif ($self->{dcps_security_debug_level}) {
+      $params .=  " -DCPSSecurityDebugLevel $self->{dcps_security_debug_level}";
+    }
   }
 
   if ($self->{add_orb_log_file} && $params !~ /-ORBLogFile ([^ ]+)/) {

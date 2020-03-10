@@ -20,6 +20,7 @@
 #include "dds/DCPS/unique_ptr.h"
 #include "dds/DCPS/ReactorTask.h"
 #include "dds/DCPS/NetworkConfigMonitor.h"
+#include "dds/DCPS/NetworkConfigModifier.h"
 
 #include "ace/Task.h"
 #include "ace/Configuration.h"
@@ -403,6 +404,9 @@ public:
    */
   void default_configuration_file(const ACE_TCHAR* path);
 
+#ifdef OPENDDS_NETWORK_CONFIG_MODIFIER
+  NetworkConfigModifier* network_config_modifier();
+#endif
   NetworkConfigMonitor_rch network_config_monitor();
 
 private:

@@ -291,10 +291,9 @@ namespace ParameterListConverter {
 // DDS::ParticipantBuiltinTopicData
 
 bool to_param_list(const DDS::ParticipantBuiltinTopicData& pbtd,
-                  ParameterList& param_list)
+                   ParameterList& param_list)
 {
-  if (not_default(pbtd.user_data))
-  {
+  if (not_default(pbtd.user_data)) {
     Parameter param_ud;
     param_ud.user_data(pbtd.user_data);
     add_param(param_list, param_ud);
@@ -304,7 +303,7 @@ bool to_param_list(const DDS::ParticipantBuiltinTopicData& pbtd,
 }
 
 bool from_param_list(const ParameterList& param_list,
-                    DDS::ParticipantBuiltinTopicData& pbtd)
+                     DDS::ParticipantBuiltinTopicData& pbtd)
 {
   pbtd.user_data.value.length(0);
 
@@ -327,7 +326,7 @@ bool from_param_list(const ParameterList& param_list,
 
 #ifdef OPENDDS_SECURITY
 bool to_param_list(const DDS::Security::ParticipantBuiltinTopicData& pbtd,
-                  ParameterList& param_list)
+                   ParameterList& param_list)
 {
   to_param_list(pbtd.base, param_list);
 
@@ -339,8 +338,7 @@ bool to_param_list(const DDS::Security::ParticipantBuiltinTopicData& pbtd,
   param_pt.permissions_token(pbtd.permissions_token);
   add_param(param_list, param_pt);
 
-  if (not_default(pbtd.property))
-  {
+  if (not_default(pbtd.property)) {
     Parameter param_p;
     param_p.property(pbtd.property);
     add_param(param_list, param_p);
@@ -354,7 +352,7 @@ bool to_param_list(const DDS::Security::ParticipantBuiltinTopicData& pbtd,
 }
 
 bool from_param_list(const ParameterList& param_list,
-                    DDS::Security::ParticipantBuiltinTopicData& pbtd)
+                     DDS::Security::ParticipantBuiltinTopicData& pbtd)
 {
   if (!from_param_list(param_list, pbtd.base))
     return false;
@@ -389,7 +387,7 @@ bool from_param_list(const ParameterList& param_list,
 }
 
 bool to_param_list(const DDS::Security::ParticipantBuiltinTopicDataSecure& pbtds,
-                  ParameterList& param_list)
+                   ParameterList& param_list)
 {
   to_param_list(pbtds.base, param_list);
 
@@ -401,7 +399,7 @@ bool to_param_list(const DDS::Security::ParticipantBuiltinTopicDataSecure& pbtds
 }
 
 bool from_param_list(const ParameterList& param_list,
-                    DDS::Security::ParticipantBuiltinTopicDataSecure& pbtds)
+                     DDS::Security::ParticipantBuiltinTopicDataSecure& pbtds)
 {
   if (!from_param_list(param_list, pbtds.base))
     return false;
@@ -426,7 +424,7 @@ bool from_param_list(const ParameterList& param_list,
 
 OpenDDS_Rtps_Export
 bool to_param_list(const ParticipantProxy_t& proxy,
-                  ParameterList& param_list)
+                   ParameterList& param_list)
 {
   Parameter beq_param;
   beq_param.builtinEndpointQos(proxy.builtinEndpointQos);
@@ -503,8 +501,7 @@ bool to_param_list(const ParticipantProxy_t& proxy,
   ml_param.count(proxy.manualLivelinessCount);
   add_param(param_list, ml_param);
 
-  if (not_default(proxy.property))
-  {
+  if (not_default(proxy.property)) {
     Parameter param_p;
     param_p.property(proxy.property);
     add_param(param_list, param_p);
@@ -520,7 +517,7 @@ bool to_param_list(const ParticipantProxy_t& proxy,
 }
 
 bool from_param_list(const ParameterList& param_list,
-                    ParticipantProxy_t& proxy)
+                     ParticipantProxy_t& proxy)
 {
   // Start by setting defaults
   proxy.availableBuiltinEndpoints = 0;
@@ -611,7 +608,7 @@ bool from_param_list(const ParameterList& param_list,
 
 OpenDDS_Rtps_Export
 bool to_param_list(const Duration_t& duration,
-                  ParameterList& param_list)
+                   ParameterList& param_list)
 {
   if ((duration.seconds != 100) ||
       (duration.fraction != 0))
@@ -626,7 +623,7 @@ bool to_param_list(const Duration_t& duration,
 
 OpenDDS_Rtps_Export
 bool from_param_list(const ParameterList& param_list,
-                    Duration_t& duration)
+                     Duration_t& duration)
 {
   duration.seconds = 100;
   duration.fraction = 0;
@@ -651,7 +648,7 @@ bool from_param_list(const ParameterList& param_list,
 
 OpenDDS_Rtps_Export
 bool to_param_list(const SPDPdiscoveredParticipantData& participant_data,
-                  ParameterList& param_list)
+                   ParameterList& param_list)
 {
   to_param_list(participant_data.ddsParticipantData, param_list);
   to_param_list(participant_data.participantProxy, param_list);
@@ -661,7 +658,7 @@ bool to_param_list(const SPDPdiscoveredParticipantData& participant_data,
 }
 
 bool from_param_list(const ParameterList& param_list,
-                    SPDPdiscoveredParticipantData& participant_data)
+                     SPDPdiscoveredParticipantData& participant_data)
 {
   bool result = from_param_list(param_list, participant_data.ddsParticipantData);
   if (result) {
@@ -676,7 +673,7 @@ bool from_param_list(const ParameterList& param_list,
 
 #ifdef OPENDDS_SECURITY
 bool to_param_list(const OpenDDS::Security::SPDPdiscoveredParticipantData& participant_data,
-                  ParameterList& param_list)
+                   ParameterList& param_list)
 {
 
   if (participant_data.dataKind == OpenDDS::Security::DPDK_SECURE) {
@@ -698,7 +695,7 @@ bool to_param_list(const OpenDDS::Security::SPDPdiscoveredParticipantData& parti
 }
 
 bool from_param_list(const ParameterList& param_list,
-                    OpenDDS::Security::SPDPdiscoveredParticipantData& participant_data)
+                     OpenDDS::Security::SPDPdiscoveredParticipantData& participant_data)
 {
   bool result = false;
 
@@ -735,8 +732,8 @@ bool from_param_list(const ParameterList& param_list,
 // OpenDDS::DCPS::DiscoveredWriterData
 
 bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
-                  ParameterList& param_list,
-                  bool map)
+                   ParameterList& param_list,
+                   bool map)
 {
   // Ignore builtin topic key
 
@@ -905,7 +902,7 @@ bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
 }
 
 bool from_param_list(const ParameterList& param_list,
-                    DCPS::DiscoveredWriterData& writer_data)
+                     DCPS::DiscoveredWriterData& writer_data)
 {
   // Collect the rtps_udp locators before appending them to allLocators
   DCPS::LocatorSeq rtps_udp_locators;
@@ -1062,8 +1059,8 @@ bool from_param_list(const ParameterList& param_list,
 // OpenDDS::DCPS::DiscoveredReaderData
 
 bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
-                  ParameterList& param_list,
-                  bool map)
+                   ParameterList& param_list,
+                   bool map)
 {
   // Ignore builtin topic key
   {
@@ -1238,7 +1235,7 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
 }
 
 bool from_param_list(const ParameterList& param_list,
-                    DCPS::DiscoveredReaderData& reader_data)
+                     DCPS::DiscoveredReaderData& reader_data)
 {
   // Collect the rtps_udp locators before appending them to allLocators
 
@@ -1312,7 +1309,7 @@ bool from_param_list(const ParameterList& param_list,
         // Interoperability note:
         // Spec creators for RTPS have reliability indexed at 1
         {
-          const CORBA::Short rtpsKind = (const CORBA::Short)(param.reliability().kind);
+          const CORBA::Short rtpsKind = static_cast<CORBA::Short>(param.reliability().kind);
           const CORBA::Short OLD_RELIABLE_VALUE = 3;
           if (rtpsKind == RTPS::RELIABLE || rtpsKind == OLD_RELIABLE_VALUE) {
             reader_data.ddsSubscriptionData.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
@@ -1398,7 +1395,7 @@ bool to_param_list(const DDS::Security::EndpointSecurityInfo& info,
 }
 
 bool from_param_list(const ParameterList& param_list,
-                    DDS::Security::EndpointSecurityInfo& info)
+                     DDS::Security::EndpointSecurityInfo& info)
 {
   info.endpoint_security_attributes = 0;
   info.plugin_endpoint_security_attributes = 0;
@@ -1421,7 +1418,7 @@ bool from_param_list(const ParameterList& param_list,
 }
 
 bool to_param_list(const DDS::Security::DataTags& tags,
-                  ParameterList& param_list)
+                   ParameterList& param_list)
 {
   Parameter param;
   param.data_tags(tags);
@@ -1430,7 +1427,7 @@ bool to_param_list(const DDS::Security::DataTags& tags,
 }
 
 bool from_param_list(const ParameterList& param_list,
-                    DDS::Security::DataTags& tags)
+                     DDS::Security::DataTags& tags)
 {
   tags.tags.length(0);
 
@@ -1452,8 +1449,8 @@ bool from_param_list(const ParameterList& param_list,
 }
 
 bool to_param_list(const DiscoveredPublication_SecurityWrapper& wrapper,
-                  ParameterList& param_list,
-                  bool map)
+                   ParameterList& param_list,
+                   bool map)
 {
   bool result = to_param_list(wrapper.data, param_list, map);
 
@@ -1464,7 +1461,7 @@ bool to_param_list(const DiscoveredPublication_SecurityWrapper& wrapper,
 }
 
 bool from_param_list(const ParameterList& param_list,
-                    DiscoveredPublication_SecurityWrapper& wrapper)
+                     DiscoveredPublication_SecurityWrapper& wrapper)
 {
   bool result = from_param_list(param_list, wrapper.data) &&
                from_param_list(param_list, wrapper.security_info) &&
@@ -1474,8 +1471,8 @@ bool from_param_list(const ParameterList& param_list,
 }
 
 bool to_param_list(const DiscoveredSubscription_SecurityWrapper& wrapper,
-                  ParameterList& param_list,
-                  bool map)
+                   ParameterList& param_list,
+                   bool map)
 {
   bool result = to_param_list(wrapper.data, param_list, map);
 
@@ -1486,7 +1483,7 @@ bool to_param_list(const DiscoveredSubscription_SecurityWrapper& wrapper,
 }
 
 bool from_param_list(const ParameterList& param_list,
-                    DiscoveredSubscription_SecurityWrapper& wrapper)
+                     DiscoveredSubscription_SecurityWrapper& wrapper)
 {
   bool result = from_param_list(param_list, wrapper.data) &&
                from_param_list(param_list, wrapper.security_info) &&
@@ -1496,7 +1493,7 @@ bool from_param_list(const ParameterList& param_list,
 }
 
 bool to_param_list(const ICE::AgentInfoMap& ai_map,
-                  ParameterList& param_list)
+                   ParameterList& param_list)
 {
   for (ICE::AgentInfoMap::const_iterator map_pos = ai_map.begin(), limit = ai_map.end(); map_pos != limit; ++map_pos) {
     const ICE::AgentInfo& agent_info = map_pos->second;
@@ -1533,7 +1530,7 @@ bool to_param_list(const ICE::AgentInfoMap& ai_map,
 }
 
 bool from_param_list(const ParameterList& param_list,
-                    ICE::AgentInfoMap& ai_map)
+                     ICE::AgentInfoMap& ai_map)
 {
   for (CORBA::ULong idx = 0, count = param_list.length(); idx != count; ++idx) {
     const Parameter& parameter = param_list[idx];

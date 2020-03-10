@@ -193,10 +193,10 @@ private:
 
   void data_received(const DataSubmessage& data, const ParameterList& plist, const ACE_INET_Addr& from);
 
-  void match_unauthenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp);
+  void match_unauthenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& dp_iter);
 
 #ifdef OPENDDS_SECURITY
-  bool match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp);
+  bool match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& dp_iter);
   void attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp);
   void update_agent_info(const DCPS::RepoId& local_guid, const ICE::AgentInfo& agent_info);
 #endif
@@ -210,7 +210,7 @@ private:
     static const WriteFlags SEND_TO_LOCAL = (1 << 0);
     static const WriteFlags SEND_TO_RELAY = (1 << 1);
 
-    SpdpTransport(Spdp* outer, bool securityGuids);
+    explicit SpdpTransport(Spdp* outer);
     ~SpdpTransport();
 
     virtual int handle_input(ACE_HANDLE h);
@@ -306,6 +306,18 @@ private:
     DCPS::NetworkInterface nic_;
     CmgAction action_;
   };
+
+#ifdef OPENDDS_SECURITY
+  class SendStun : public DCPS::JobQueue::Job {
+  public:
+    SendStun(SpdpTransport* tport, const ACE_INET_Addr& address, const STUN::Message& message) : tport_(tport), address_(address), message_(message) {}
+    void execute();
+  private:
+    SpdpTransport* tport_;
+    ACE_INET_Addr address_;
+    STUN::Message message_;
+  };
+#endif
 
   ACE_Event_Handler_var eh_; // manages our refcount on tport_
   bool eh_shutdown_;

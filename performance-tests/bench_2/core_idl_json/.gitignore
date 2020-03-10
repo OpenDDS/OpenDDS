@@ -1,0 +1,6 @@
+DdsDcpsCoreTypeSupport.idl
+DdsDcpsCoreTypeSupportImpl.cpp
+DdsDcpsCoreTypeSupportImpl.h
+DdsDcpsGuidTypeSupport.idl
+DdsDcpsGuidTypeSupportImpl.cpp
+DdsDcpsGuidTypeSupportImpl.h

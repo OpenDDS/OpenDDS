@@ -790,12 +790,14 @@ void
 DataWriterImpl::update_locators(const RepoId& readerId,
                                 const TransportLocatorSeq& locators)
 {
-  ACE_GUARD(ACE_Thread_Mutex, reader_info_guard, reader_info_lock_);
-  RepoIdToReaderInfoMap::const_iterator iter = reader_info_.find(readerId);
-
-  if (iter != reader_info_.end()) {
-    TransportClient::update_locators(readerId, locators);
+  {
+    ACE_GUARD(ACE_Thread_Mutex, reader_info_guard, reader_info_lock_);
+    RepoIdToReaderInfoMap::const_iterator iter = reader_info_.find(readerId);
+    if (iter == reader_info_.end()) {
+      return;
+    }
   }
+  TransportClient::update_locators(readerId, locators);
 }
 
 void
@@ -2455,6 +2457,7 @@ DataWriterImpl::prepare_to_delete()
 {
   this->set_deleted(true);
   this->stop_associating();
+  this->terminate_send_if_suspended();
 }
 
 PublicationInstance_rch

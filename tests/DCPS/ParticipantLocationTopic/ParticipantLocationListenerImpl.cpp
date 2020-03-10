@@ -61,11 +61,11 @@ void ParticipantLocationListenerImpl::on_data_available(DDS::DataReader_ptr read
     << ((participant.change_mask & OpenDDS::DCPS::LOCATION_RELAY) ? "RELAY " : "")
     << std::endl
     << " local: " << participant.local_addr << std::endl
-    << "      : " << participant.local_timestamp << std::endl
+    << "      : " << participant.local_timestamp.sec << std::endl
     << "   ice: " << participant.ice_addr << std::endl
-    << "      : " << participant.ice_timestamp << std::endl
+    << "      : " << participant.ice_timestamp.sec << std::endl
     << " relay: " << participant.relay_addr << std::endl
-    << "      : " << participant.relay_timestamp << std::endl;
+    << "      : " << participant.relay_timestamp.sec << std::endl;
 
     // update locations if SampleInfo is valid.
     if (si.valid_data == 1)

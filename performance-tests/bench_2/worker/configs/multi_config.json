@@ -1,0 +1,243 @@
+{
+  "enable_time": { "sec": -1, "nsec": 0 },
+  "start_time": { "sec": -3, "nsec": 0 },
+  "stop_time": { "sec": -3, "nsec": 0 },
+  "destruction_time": { "sec": -1, "nsec": 0 },
+
+  "process": {
+    "config_sections": [
+      { "name": "common",
+        "properties": [
+          { "name": "DCPSSecurity",
+            "value": "0"
+          },
+          { "name": "DCPSDebugLevel",
+            "value": "0"
+          }
+        ]
+      }
+    ],
+    "discoveries": [
+      { "name": "bench_test_rtps",
+        "type": "rtps",
+        "domain": 7
+      }
+    ],
+    "instances": [
+      { "name": "rtps_instance_01",
+        "type": "rtps_udp",
+        "domain": 7
+      },
+      { "name": "rtps_instance_02",
+        "type": "rtps_udp",
+        "domain": 17
+      }
+    ],
+    "participants": [
+      { "name": "participant_01",
+        "domain": 7,
+        "listener_type_name": "bench_partl",
+        "listener_status_mask": 4294967295,
+        "transport_config_name": "rtps_instance_01",
+
+        "qos": { "entity_factory": { "autoenable_created_entities": false } },
+        "qos_mask": { "entity_factory": { "has_autoenable_created_entities": false } },
+
+        "topics": [
+          { "name": "topic_01",
+            "type_name": "Bench::Data",
+            "listener_type_name": "bench_tl",
+            "listener_status_mask": 4294967295
+          },
+          { "name": "topic_02",
+            "type_name": "Builder::ProcessConfig",
+            "listener_type_name": "bench_tl",
+            "listener_status_mask": 4294967295
+          }
+        ],
+        "subscribers": [
+          { "name": "subscriber_01_01",
+            "listener_type_name": "bench_sl",
+            "listener_status_mask": 4294967295,
+            "datareaders": [
+              { "name": "datareader_01_01_01",
+                "topic_name": "topic_01",
+                "listener_type_name": "bench_drl",
+                "listener_status_mask": 4294967295,
+
+                "qos": { "reliability": { "kind": "DDS::RELIABLE_RELIABILITY_QOS" } },
+                "qos_mask": { "reliability": { "has_kind": true } }
+              },
+              { "name": "datareader_01_01_02",
+                "topic_name": "topic_02",
+                "listener_type_name": "bench_drl",
+                "listener_status_mask": 4294967295,
+
+                "qos": { "reliability": { "kind": "DDS::RELIABLE_RELIABILITY_QOS" } },
+                "qos_mask": { "reliability": { "has_kind": true } }
+              }
+            ]
+          },
+          { "name": "subscriber_02_01",
+            "listener_type_name": "bench_sl",
+            "listener_status_mask": 4294967295,
+            "datareaders": [
+              { "name": "datareader_01_02_01",
+                "topic_name": "topic_01",
+                "listener_type_name": "bench_drl",
+                "listener_status_mask": 4294967295,
+
+                "qos": { "reliability": { "kind": "DDS::RELIABLE_RELIABILITY_QOS" } },
+                "qos_mask": { "reliability": { "has_kind": true } }
+              },
+              { "name": "datareader_01_02_02",
+                "topic_name": "topic_02",
+                "listener_type_name": "bench_drl",
+                "listener_status_mask": 4294967295,
+
+                "qos": { "reliability": { "kind": "DDS::RELIABLE_RELIABILITY_QOS" } },
+                "qos_mask": { "reliability": { "has_kind": true } }
+              }
+            ]
+          }
+        ],
+        "publishers": [
+          { "name": "publisher_01_01",
+            "listener_type_name": "bench_pl",
+            "listener_status_mask": 4294967295,
+            "datawriters": [
+              { "name": "datawriter_01_01_01",
+                "topic_name": "topic_01",
+                "listener_type_name": "bench_dwl",
+                "listener_status_mask": 4294967295
+              },
+              { "name": "datawriter_01_01_02",
+                "topic_name": "topic_02",
+                "listener_type_name": "bench_dwl",
+                "listener_status_mask": 4294967295
+              }
+            ]
+          },
+          { "name": "publisher_01_02",
+            "listener_type_name": "bench_pl",
+            "listener_status_mask": 4294967295,
+            "datawriters": [
+              { "name": "datawriter_01_02_01",
+                "topic_name": "topic_01",
+                "listener_type_name": "bench_dwl",
+                "listener_status_mask": 4294967295
+              },
+              { "name": "datawriter_01_02_02",
+                "topic_name": "topic_02",
+                "listener_type_name": "bench_dwl",
+                "listener_status_mask": 4294967295
+              }
+            ]
+          }
+        ]
+      },
+      { "name": "participant_02",
+        "domain": 7,
+        "listener_type_name": "bench_partl",
+        "listener_status_mask": 4294967295,
+        "transport_config_name": "rtps_instance_02",
+
+        "qos": { "entity_factory": { "autoenable_created_entities": false } },
+        "qos_mask": { "entity_factory": { "has_autoenable_created_entities": false } },
+
+        "topics": [
+          { "name": "topic_01",
+            "type_name": "Bench::Data",
+            "listener_type_name": "bench_tl",
+            "listener_status_mask": 4294967295
+          },
+          { "name": "topic_02",
+            "type_name": "Builder::ProcessConfig",
+            "listener_type_name": "bench_tl",
+            "listener_status_mask": 4294967295
+          }
+        ],
+        "subscribers": [
+          { "name": "subscriber_02_01",
+            "listener_type_name": "bench_sl",
+            "listener_status_mask": 4294967295,
+            "datareaders": [
+              { "name": "datareader_02_01_01",
+                "topic_name": "topic_01",
+                "listener_type_name": "bench_drl",
+                "listener_status_mask": 4294967295,
+
+                "qos": { "reliability": { "kind": "RELIABLE_RELIABILITY_QOS" } },
+                "qos_mask": { "reliability": { "has_kind": true } }
+              },
+              { "name": "datareader_02_01_02",
+                "topic_name": "topic_02",
+                "listener_type_name": "bench_drl",
+                "listener_status_mask": 4294967295,
+
+                "qos": { "reliability": { "kind": "RELIABLE_RELIABILITY_QOS" } },
+                "qos_mask": { "reliability": { "has_kind": true } }
+              }
+            ]
+          },
+          { "name": "subscriber_02_01",
+            "listener_type_name": "bench_sl",
+            "listener_status_mask": 4294967295,
+            "datareaders": [
+              { "name": "datareader_02_02_01",
+                "topic_name": "topic_01",
+                "listener_type_name": "bench_drl",
+                "listener_status_mask": 4294967295,
+
+                "qos": { "reliability": { "kind": "RELIABLE_RELIABILITY_QOS" } },
+                "qos_mask": { "reliability": { "has_kind": true } }
+              },
+              { "name": "datareader_02_02_02",
+                "topic_name": "topic_02",
+                "listener_type_name": "bench_drl",
+                "listener_status_mask": 4294967295,
+
+                "qos": { "reliability": { "kind": "RELIABLE_RELIABILITY_QOS" } },
+                "qos_mask": { "reliability": { "has_kind": true } }
+              }
+            ]
+          }
+        ],
+        "publishers": [
+          { "name": "publisher_02_01",
+            "listener_type_name": "bench_pl",
+            "listener_status_mask": 4294967295,
+            "datawriters": [
+              { "name": "datawriter_02_01_01",
+                "topic_name": "topic_01",
+                "listener_type_name": "bench_dwl",
+                "listener_status_mask": 4294967295
+              },
+              { "name": "datawriter_02_01_02",
+                "topic_name": "topic_02",
+                "listener_type_name": "bench_dwl",
+                "listener_status_mask": 4294967295
+              }
+            ]
+          },
+          { "name": "publisher_02_02",
+            "listener_type_name": "bench_pl",
+            "listener_status_mask": 4294967295,
+            "datawriters": [
+              { "name": "datawriter_02_02_01",
+                "topic_name": "topic_01",
+                "listener_type_name": "bench_dwl",
+                "listener_status_mask": 4294967295
+              },
+              { "name": "datawriter_02_02_02",
+                "topic_name": "topic_02",
+                "listener_type_name": "bench_dwl",
+                "listener_status_mask": 4294967295
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
