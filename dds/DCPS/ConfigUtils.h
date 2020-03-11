@@ -56,7 +56,7 @@ namespace DCPS {
   {
 #ifdef OPENDDS_SAFETY_PROFILE
     char* end;
-    const double conv = std::strtod(s.c_str(), &end, 10);
+    const double conv = std::strtod(s.c_str(), &end);
     if (end == s.c_str()) return false;
     value = static_cast<T>(conv);
 #else
