@@ -6,6 +6,8 @@
 
 #include <dds/DCPS/GuidUtils.h>
 
+#include <unordered_set>
+
 namespace RtpsRelay {
 
 inline OpenDDS::DCPS::RepoId guid_to_repoid(const GUID_t& a_guid)
@@ -31,7 +33,29 @@ inline OpenDDS::DCPS::RepoId to_participant_guid(const OpenDDS::DCPS::RepoId& gu
   return retval;
 }
 
-typedef std::set<OpenDDS::DCPS::RepoId, OpenDDS::DCPS::GUID_tKeyLessThan> GuidSet;
+struct GuidHash {
+  std::size_t operator() (const OpenDDS::DCPS::RepoId& guid) const
+  {
+    return
+      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[0]) << 15) ^
+      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[1]) << 14) ^
+      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[2]) << 13) ^
+      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[3]) << 12) ^
+      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[4]) << 11) ^
+      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[5]) << 10) ^
+      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[6]) << 9) ^
+      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[7]) << 8) ^
+      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[8]) << 7) ^
+      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[9]) << 6) ^
+      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[10]) << 5) ^
+      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[11]) << 4) ^
+      (std::hash<::CORBA::Octet>{}(guid.entityId.entityKey[0]) << 3) ^
+      (std::hash<::CORBA::Octet>{}(guid.entityId.entityKey[1]) << 2) ^
+      (std::hash<::CORBA::Octet>{}(guid.entityId.entityKey[2]) << 1) ^
+      (std::hash<::CORBA::Octet>{}(guid.entityId.entityKind) << 0);
+  }
+};
+typedef std::unordered_set<OpenDDS::DCPS::RepoId, GuidHash> GuidSet;
 
 inline bool operator==(const RelayAddresses& x,
                        const RelayAddresses& y)
@@ -193,11 +217,31 @@ public:
     }
   }
 
+  void insert_reader_participant_guids(WriterPtr writer, GuidSet& to) const
+  {
+    const auto pos = writers_.find(writer);
+    if (pos != writers_.end()) {
+      for (const auto reader : pos->second) {
+        to.insert(reader->participant_guid());
+      }
+    }
+  }
+
   void get_writers(ReaderPtr reader, WriterSet& writers) const
   {
     const auto pos = readers_.find(reader);
     if (pos != readers_.end()) {
       writers.insert(pos->second.begin(), pos->second.end());
+    }
+  }
+
+  void insert_writer_participant_guids(ReaderPtr reader, GuidSet& to) const
+  {
+    const auto pos = readers_.find(reader);
+    if (pos != readers_.end()) {
+      for (const auto writer : pos->second) {
+        to.insert(writer->participant_guid());
+      }
     }
   }
 
