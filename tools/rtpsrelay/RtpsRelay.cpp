@@ -75,6 +75,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   OpenDDS::DCPS::TimeDuration lifespan(60);   // 1 minute
   unsigned short stun_port = 3478;
   std::string user_data;
+  std::size_t max_throughput = 80; // in MBps
 
 #ifdef OPENDDS_SECURITY
   std::string identity_ca_file;
@@ -111,6 +112,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-UserData"))) {
       user_data = arg;
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-MaxThroughput"))) {
+      max_throughput = ACE_OS::atoi(arg);
       args.consume_arg();
 #ifdef OPENDDS_SECURITY
     } else if ((arg = args.get_the_parameter("-IdentityCA"))) {
@@ -258,11 +262,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     addr_to_string(data_horizontal_addr)
   };
 
+  Governor governor(max_throughput * 1024 * 1024);
   AssociationTable association_table;
 
-  HorizontalHandler spdp_horizontal_handler(reactor);
-  HorizontalHandler sedp_horizontal_handler(reactor);
-  HorizontalHandler data_horizontal_handler(reactor);
+  HorizontalHandler spdp_horizontal_handler(reactor, governor);
+  HorizontalHandler sedp_horizontal_handler(reactor, governor);
+  HorizontalHandler data_horizontal_handler(reactor, governor);
 
   const auto application_participant_id = application_participant_impl->get_id();
 
@@ -389,12 +394,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  SpdpHandler spdp_vertical_handler(reactor, relay_addresses, association_table, responsible_relay_writer, responsible_relay_reader, lifespan, rtps_discovery, application_domain, application_participant_id, crypto, spdp);
-  SedpHandler sedp_vertical_handler(reactor, relay_addresses, association_table, responsible_relay_writer, responsible_relay_reader, lifespan, rtps_discovery, application_domain, application_participant_id, crypto, sedp);
-  DataHandler data_vertical_handler(reactor, relay_addresses, association_table, responsible_relay_writer, responsible_relay_reader, lifespan, rtps_discovery, application_domain, application_participant_id, crypto);
+  SpdpHandler spdp_vertical_handler(reactor, governor, relay_addresses, association_table, responsible_relay_writer, responsible_relay_reader, lifespan, rtps_discovery, application_domain, application_participant_id, crypto, spdp);
+  SedpHandler sedp_vertical_handler(reactor, governor, relay_addresses, association_table, responsible_relay_writer, responsible_relay_reader, lifespan, rtps_discovery, application_domain, application_participant_id, crypto, sedp);
+  DataHandler data_vertical_handler(reactor, governor, relay_addresses, association_table, responsible_relay_writer, responsible_relay_reader, lifespan, rtps_discovery, application_domain, application_participant_id, crypto);
 
 #ifdef OPENDDS_SECURITY
-  StunHandler stun_handler(reactor);
+  StunHandler stun_handler(reactor, governor);
 #endif
 
   spdp_horizontal_handler.vertical_handler(&spdp_vertical_handler);

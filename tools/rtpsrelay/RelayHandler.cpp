@@ -54,8 +54,9 @@ namespace {
 }
 #endif
 
-RelayHandler::RelayHandler(ACE_Reactor* reactor)
+RelayHandler::RelayHandler(ACE_Reactor* reactor, Governor& governor)
   : ACE_Event_Handler(reactor)
+  , governor_(governor)
   , bytes_received_(0)
   , messages_received_(0)
   , bytes_sent_(0)
@@ -172,6 +173,7 @@ int RelayHandler::handle_output(ACE_HANDLE)
     if (bytes < 0) {
       ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::handle_output failed to send to %C: %m\n", addr_to_string(out.first).c_str()));
     } else {
+      governor_.add_bytes(bytes);
       bytes_sent_ += bytes;
       ++messages_sent_;
     }
@@ -181,7 +183,23 @@ int RelayHandler::handle_output(ACE_HANDLE)
 
   if (outgoing_.empty()) {
     reactor()->remove_handler(this, WRITE_MASK);
+  } else {
+    // Check if rate limiting.
+    const auto now = OpenDDS::DCPS::MonotonicTimePoint::now();
+    const auto send_time = governor_.get_next_send_time();
+
+    if (send_time > now) {
+      reactor()->remove_handler(this, WRITE_MASK);
+      reactor()->schedule_timer(this, 0, (send_time - now).value());
+    }
   }
+
+  return 0;
+}
+
+int RelayHandler::handle_timeout(const ACE_Time_Value&, const void*)
+{
+  reactor()->register_handler(this, WRITE_MASK);
 
   return 0;
 }
@@ -200,6 +218,7 @@ void RelayHandler::enqueue_message(const ACE_INET_Addr& addr, const OpenDDS::DCP
 }
 
 VerticalHandler::VerticalHandler(ACE_Reactor* reactor,
+                                 Governor& governor,
                                  const RelayAddresses& relay_addresses,
                                  const AssociationTable& association_table,
                                  GuidRelayAddressesDataWriter_ptr responsible_relay_writer,
@@ -209,7 +228,7 @@ VerticalHandler::VerticalHandler(ACE_Reactor* reactor,
                                  DDS::DomainId_t application_domain,
                                  const OpenDDS::DCPS::RepoId& application_participant_guid,
                                  const CRYPTO_TYPE& crypto)
-  : RelayHandler(reactor)
+  : RelayHandler(reactor, governor)
   , association_table_(association_table)
   , responsible_relay_writer_(responsible_relay_writer)
   , responsible_relay_reader_(responsible_relay_reader)
@@ -506,8 +525,8 @@ void VerticalHandler::unregister_relay_addresses(const OpenDDS::DCPS::RepoId& gu
   }
 }
 
-HorizontalHandler::HorizontalHandler(ACE_Reactor* reactor)
-  : RelayHandler(reactor)
+HorizontalHandler::HorizontalHandler(ACE_Reactor* reactor, Governor& governor)
+  : RelayHandler(reactor, governor)
   , vertical_handler_(nullptr)
 {}
 
@@ -573,6 +592,7 @@ void HorizontalHandler::process_message(const ACE_INET_Addr&,
 }
 
 SpdpHandler::SpdpHandler(ACE_Reactor* reactor,
+                         Governor& governor,
                          const RelayAddresses& relay_addresses,
                          const AssociationTable& association_table,
                          GuidRelayAddressesDataWriter_ptr responsible_relay_writer,
@@ -583,7 +603,7 @@ SpdpHandler::SpdpHandler(ACE_Reactor* reactor,
                          const OpenDDS::DCPS::RepoId& application_participant_guid,
                          const CRYPTO_TYPE& crypto,
                          const ACE_INET_Addr& application_participant_addr)
-: VerticalHandler(reactor, relay_addresses, association_table, responsible_relay_writer, responsible_relay_reader, lifespan, rtps_discovery, application_domain, application_participant_guid , crypto)
+: VerticalHandler(reactor, governor, relay_addresses, association_table, responsible_relay_writer, responsible_relay_reader, lifespan, rtps_discovery, application_domain, application_participant_guid , crypto)
 , application_participant_addr_(application_participant_addr)
 {}
 
@@ -675,6 +695,7 @@ void SpdpHandler::replay(const OpenDDS::DCPS::RepoId& from,
 }
 
 SedpHandler::SedpHandler(ACE_Reactor* reactor,
+                         Governor& governor,
                          const RelayAddresses& relay_addresses,
                          const AssociationTable& association_table,
                          GuidRelayAddressesDataWriter_ptr responsible_relay_writer,
@@ -685,7 +706,7 @@ SedpHandler::SedpHandler(ACE_Reactor* reactor,
                          const OpenDDS::DCPS::RepoId& application_participant_guid,
                          const CRYPTO_TYPE& crypto,
                          const ACE_INET_Addr& application_participant_addr)
-: VerticalHandler(reactor, relay_addresses, association_table, responsible_relay_writer, responsible_relay_reader, lifespan, rtps_discovery, application_domain, application_participant_guid, crypto)
+: VerticalHandler(reactor, governor, relay_addresses, association_table, responsible_relay_writer, responsible_relay_reader, lifespan, rtps_discovery, application_domain, application_participant_guid, crypto)
   , application_participant_addr_(application_participant_addr)
 {}
 
@@ -742,6 +763,7 @@ bool SedpHandler::do_normal_processing(const ACE_INET_Addr& remote,
 }
 
 DataHandler::DataHandler(ACE_Reactor* reactor,
+                         Governor& governor,
                          const RelayAddresses& relay_addresses,
                          const AssociationTable& association_table,
                          GuidRelayAddressesDataWriter_ptr responsible_relay_writer,
@@ -752,7 +774,7 @@ DataHandler::DataHandler(ACE_Reactor* reactor,
                          const OpenDDS::DCPS::RepoId& application_participant_guid,
                          const CRYPTO_TYPE& crypto
                          )
-: VerticalHandler(reactor, relay_addresses, association_table, responsible_relay_writer, responsible_relay_reader, lifespan, rtps_discovery, application_domain, application_participant_guid, crypto)
+: VerticalHandler(reactor, governor, relay_addresses, association_table, responsible_relay_writer, responsible_relay_reader, lifespan, rtps_discovery, application_domain, application_participant_guid, crypto)
 {}
 
 ACE_INET_Addr DataHandler::extract_relay_address(const RelayAddresses& relay_addresses) const
@@ -762,8 +784,8 @@ ACE_INET_Addr DataHandler::extract_relay_address(const RelayAddresses& relay_add
 
 #ifdef OPENDDS_SECURITY
 
-StunHandler::StunHandler(ACE_Reactor* reactor)
-  : RelayHandler(reactor)
+StunHandler::StunHandler(ACE_Reactor* reactor, Governor& governor)
+  : RelayHandler(reactor, governor)
 {}
 
 void StunHandler::process_message(const ACE_INET_Addr& remote_address,

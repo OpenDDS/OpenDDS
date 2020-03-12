@@ -2,6 +2,7 @@
 #define RTPSRELAY_RELAY_HANDLER_H_
 
 #include "AssociationTable.h"
+#include "Governor.h"
 
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 
@@ -46,16 +47,19 @@ public:
   void max_fan_out(size_t fan_out) { max_fan_out_ = std::max(max_fan_out_, fan_out); }
 
 protected:
-  explicit RelayHandler(ACE_Reactor* reactor);
+  explicit RelayHandler(ACE_Reactor* reactor, Governor& governor);
 
   int handle_input(ACE_HANDLE handle) override;
   int handle_output(ACE_HANDLE handle) override;
+  int handle_timeout(const ACE_Time_Value&, const void*) override;
+
   ACE_HANDLE get_handle() const override { return socket_.get_handle(); }
 
   virtual void process_message(const ACE_INET_Addr& remote,
                                const OpenDDS::DCPS::MonotonicTimePoint& now,
                                const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg) = 0;
 private:
+  Governor& governor_;
   ACE_INET_Addr relay_address_;
   ACE_SOCK_Dgram socket_;
   typedef std::queue<std::pair<ACE_INET_Addr, OpenDDS::DCPS::Message_Block_Shared_Ptr>> OutgoingType;
@@ -76,6 +80,7 @@ public:
   typedef std::map<OpenDDS::DCPS::RepoId, std::set<ACE_INET_Addr>, OpenDDS::DCPS::GUID_tKeyLessThan> GuidAddrMap;
 
   VerticalHandler(ACE_Reactor* reactor,
+                  Governor& governor,
                   const RelayAddresses& relay_addresses,
                   const AssociationTable& association_table,
                   GuidRelayAddressesDataWriter_ptr responsible_relay_writer,
@@ -148,7 +153,7 @@ private:
 // Sends to and receives from other relays.
 class HorizontalHandler : public RelayHandler {
 public:
-  explicit HorizontalHandler(ACE_Reactor* reactor);
+  explicit HorizontalHandler(ACE_Reactor* reactor, Governor& governor);
   void vertical_handler(VerticalHandler* vertical_handler) { vertical_handler_ = vertical_handler; }
   void enqueue_message(const ACE_INET_Addr& addr,
                        const GuidSet& to,
@@ -164,6 +169,7 @@ private:
 class SpdpHandler : public VerticalHandler {
 public:
   SpdpHandler(ACE_Reactor* reactor,
+              Governor& governor,
               const RelayAddresses& relay_addresses,
               const AssociationTable& association_table,
               GuidRelayAddressesDataWriter_ptr responsible_relay_writer,
@@ -197,6 +203,7 @@ private:
 class SedpHandler : public VerticalHandler {
 public:
   SedpHandler(ACE_Reactor* reactor,
+              Governor& governor,
               const RelayAddresses& relay_addresses,
               const AssociationTable& association_table,
               GuidRelayAddressesDataWriter_ptr responsible_relay_writer,
@@ -222,6 +229,7 @@ private:
 class DataHandler : public VerticalHandler {
 public:
   DataHandler(ACE_Reactor* reactor,
+              Governor& governor,
               const RelayAddresses& relay_addresses,
               const AssociationTable& association_table,
               GuidRelayAddressesDataWriter_ptr responsible_relay_writer,
@@ -241,7 +249,7 @@ private:
 
 class StunHandler : public RelayHandler {
 public:
-  explicit StunHandler(ACE_Reactor* reactor);
+  explicit StunHandler(ACE_Reactor* reactor, Governor& governor);
 
 private:
   void process_message(const ACE_INET_Addr& remote,
