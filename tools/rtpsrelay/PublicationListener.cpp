@@ -14,7 +14,7 @@ void PublicationListener::on_data_available(DDS::DataReader_ptr reader)
 {
   DDS::PublicationBuiltinTopicDataDataReader_var dr = DDS::PublicationBuiltinTopicDataDataReader::_narrow(reader);
   if (!dr) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: PublicationListener::on_data_available failed to narrow PublicationBuiltinTopicDataDataReader\n"));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: PublicationListener::on_data_available failed to narrow PublicationBuiltinTopicDataDataReader\n")));
     return;
   }
 
@@ -27,7 +27,7 @@ void PublicationListener::on_data_available(DDS::DataReader_ptr reader)
                                    DDS::ANY_VIEW_STATE,
                                    DDS::ANY_INSTANCE_STATE);
   if (ret != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: PublicationListener::on_data_available failed to read\n"));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: PublicationListener::on_data_available failed to read\n")));
     return;
   }
 
@@ -84,7 +84,7 @@ void PublicationListener::write_sample(const DDS::PublicationBuiltinTopicData& d
 
   DDS::ReturnCode_t ret = writer_->write(entry, DDS::HANDLE_NIL);
   if (ret != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: PublicationListener::write_sample failed to write\n"));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: PublicationListener::write_sample failed to write\n")));
   }
 }
 
@@ -98,7 +98,7 @@ void PublicationListener::unregister_instance(const DDS::SampleInfo& info)
 
   DDS::ReturnCode_t ret = writer_->unregister_instance(entry, DDS::HANDLE_NIL);
   if (ret != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: PublicationListener::unregister_instance failed to unregister_instance\n"));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: PublicationListener::unregister_instance failed to unregister_instance\n")));
   }
 }
 

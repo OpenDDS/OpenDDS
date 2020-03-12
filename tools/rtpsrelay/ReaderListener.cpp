@@ -12,7 +12,7 @@ void ReaderListener::on_data_available(DDS::DataReader_ptr reader)
 {
   ReaderEntryDataReader_var dr = ReaderEntryDataReader::_narrow(reader);
   if (!dr) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: ReaderListener::on_data_available failed to narrow RtpsRelay::ReaderEntryDataReader\n"));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: ReaderListener::on_data_available failed to narrow RtpsRelay::ReaderEntryDataReader\n")));
     return;
   }
 
@@ -25,7 +25,7 @@ void ReaderListener::on_data_available(DDS::DataReader_ptr reader)
                                    DDS::ANY_VIEW_STATE,
                                    DDS::ANY_INSTANCE_STATE);
   if (ret != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: ReaderListener::on_data_available failed to read\n"));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: ReaderListener::on_data_available failed to read\n")));
     return;
   }
 

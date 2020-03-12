@@ -12,7 +12,7 @@ void WriterListener::on_data_available(DDS::DataReader_ptr reader)
 {
   WriterEntryDataReader_var dr = WriterEntryDataReader::_narrow(reader);
   if (!dr) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: WriterListener::on_data_available failed to narrow RtpsRelay::WriterEntryDataReader\n"));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: WriterListener::on_data_available failed to narrow RtpsRelay::WriterEntryDataReader\n")));
     return;
   }
 
@@ -25,7 +25,7 @@ void WriterListener::on_data_available(DDS::DataReader_ptr reader)
                                    DDS::ANY_VIEW_STATE,
                                    DDS::ANY_INSTANCE_STATE);
   if (ret != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: WriterListener::on_data_available failed to read\n"));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: WriterListener::on_data_available failed to read\n")));
     return;
   }
 

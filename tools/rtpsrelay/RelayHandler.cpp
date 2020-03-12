@@ -69,11 +69,11 @@ int RelayHandler::open(const ACE_INET_Addr& local)
   relay_address_ = local;
 
   if (socket_.open(local) != 0) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::open failed to open socket on '%C'\n", addr_to_string(relay_address_).c_str()));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: RelayHandler::open failed to open socket on '%C'\n"), addr_to_string(relay_address_).c_str()));
     return -1;
   }
   if (socket_.enable(ACE_NONBLOCK) != 0) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::open failed to enable ACE_NONBLOCK\n"));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: RelayHandler::open failed to enable ACE_NONBLOCK\n")));
     return -1;
   }
 
@@ -87,12 +87,12 @@ int RelayHandler::open(const ACE_INET_Addr& local)
                          (void *) &send_buffer_size,
                          sizeof(send_buffer_size)) < 0
       && errno != ENOTSUP) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::open: failed to set the send buffer size to %d errno %m\n", send_buffer_size));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: RelayHandler::open: failed to set the send buffer size to %d errno %m\n"), send_buffer_size));
     return -1;
   }
 
   if (reactor()->register_handler(this, READ_MASK) != 0) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::open failed to register READ_MASK handler\n"));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: RelayHandler::open failed to register READ_MASK handler\n")));
     return -1;
   }
 
@@ -108,7 +108,7 @@ int RelayHandler::handle_input(ACE_HANDLE handle)
   if (ACE_OS::ioctl (handle,
                      FIONREAD,
                      &inlen) == -1) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::handle_input failed to get available byte count: %m\n"));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: RelayHandler::handle_input failed to get available byte count: %m\n")));
     return 0;
   }
 #else
@@ -116,7 +116,7 @@ int RelayHandler::handle_input(ACE_HANDLE handle)
 #endif
 
   if (inlen < 0) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::handle_input available byte count is negative\n"));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: RelayHandler::handle_input available byte count is negative\n")));
     return 0;
   }
 
@@ -126,11 +126,11 @@ int RelayHandler::handle_input(ACE_HANDLE handle)
   const auto bytes = socket_.recv(buffer->wr_ptr(), buffer->space(), remote);
 
   if (bytes < 0) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::handle_input failed to recv: %m\n"));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: RelayHandler::handle_input failed to recv: %m\n")));
     return 0;
   } else if (bytes == 0) {
     // Okay.  Empty datagram.
-    ACE_DEBUG((LM_WARNING, "(%P|%t) %N:%l WARNING: RelayHandler::handle_input received an empty datagram\n"));
+    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) %N:%l WARNING: RelayHandler::handle_input received an empty datagram from %C\n"), addr_to_string(remote).c_str()));
     return 0;
   }
 
@@ -171,7 +171,7 @@ int RelayHandler::handle_output(ACE_HANDLE)
     const auto bytes = socket_.send(buffers, idx, out.first, 0);
 
     if (bytes < 0) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::handle_output failed to send to %C: %m\n", addr_to_string(out.first).c_str()));
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: RelayHandler::handle_output failed to send to %C: %m\n"), addr_to_string(out.first).c_str()));
     } else {
       governor_.add_bytes(bytes);
       bytes_sent_ += bytes;
@@ -257,7 +257,7 @@ void VerticalHandler::process_message(const ACE_INET_Addr& remote,
 
   OpenDDS::RTPS::MessageParser mp(*msg);
   if (!parse_message(mp, msg, src_guid, to, is_beacon, true)) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: VerticalHandler::process_message failed to parse_message\n"));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: VerticalHandler::process_message failed to parse_message from %C\n"), addr_to_string(remote).c_str()));
     return;
   }
 
@@ -319,7 +319,7 @@ bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser
   ACE_UNUSED_ARG(msg);
 
   if (!message_parser.parseHeader()) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::parse_message failed to deserialize RTPS header\n"));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: VerticalHandler::parse_message failed to deserialize RTPS header\n")));
     return false;
   }
 
@@ -338,7 +338,7 @@ bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser
       OpenDDS::DCPS::RepoId dest;
       OpenDDS::DCPS::GuidPrefix_t_forany guidPrefix(dest.guidPrefix);
       if (!(message_parser >> guidPrefix)) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::parse_message failed to deserialize INFO_DST\n"));
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: VerticalHandler::parse_message failed to deserialize INFO_DST from %C\n"), guid_to_string(src_guid).c_str()));
         return false;
       }
       dest.entityId = OpenDDS::DCPS::ENTITYID_PARTICIPANT;
@@ -351,13 +351,13 @@ bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser
       case OpenDDS::RTPS::SRTPS_PREFIX:
         {
           if (application_participant_crypto_handle_ == DDS::HANDLE_NIL) {
-            ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::parse_message no crypto handle for application participant\n"));
+            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: VerticalHandler::parse_message no crypto handle for application participant\n")));
             return false;
           }
 
           DDS::Security::ParticipantCryptoHandle remote_crypto_handle = rtps_discovery_->get_crypto_handle(application_domain_, application_participant_guid_, src_guid);
           if (remote_crypto_handle == DDS::HANDLE_NIL) {
-            ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::parse_message no crypto handle for client %C\n", guid_to_string(src_guid).c_str()));
+            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: VerticalHandler::parse_message no crypto handle for message from %C\n"), guid_to_string(src_guid).c_str()));
             return false;
           }
 
@@ -365,7 +365,7 @@ bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser
           DDS::Security::SecurityException ex;
 
           if (msg->cont() != nullptr) {
-            ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::parse_message does not support message block chaining\n"));
+            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: VerticalHandler::parse_message does not support message block chaining\n")));
             return false;
           }
 
@@ -373,7 +373,7 @@ bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser
           std::memcpy(encoded_buffer.get_buffer(), msg->rd_ptr(), msg->length());
 
           if (!crypto_->decode_rtps_message(plain_buffer, encoded_buffer, application_participant_crypto_handle_, remote_crypto_handle, ex)) {
-            ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: Message from %C could not be verified [%d.%d]: \"%C\"\n", guid_to_string(src_guid).c_str(), ex.code, ex.minor_code, ex.message.in()));
+            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: VerticalHandler::parse_message message from %C could not be verified [%d.%d]: \"%C\"\n"), guid_to_string(src_guid).c_str(), ex.code, ex.minor_code, ex.message.in()));
             return false;
           }
 
@@ -390,7 +390,7 @@ bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser
           unsigned short octetsToInlineQos;
           if (!(message_parser >> extraFlags) ||
               !(message_parser >> octetsToInlineQos)) {
-            ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: could not parse submessage\n"));
+            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: VerticalHandler::parse_message could not parse submessage from %C\n"), guid_to_string(src_guid).c_str()));
             return false;
           }
         }
@@ -405,13 +405,13 @@ bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser
           OpenDDS::DCPS::EntityId_t writerId;
           if (!(message_parser >> readerId) ||
               !(message_parser >> writerId)) {
-            ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: could not parse submessage\n"));
+            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: VerticalHandler::parse_message could not parse submessage from %C\n"), guid_to_string(src_guid).c_str()));
             return false;
           }
           if (rtps_discovery_->get_crypto_handle(application_domain_, application_participant_guid_) != DDS::HANDLE_NIL &&
               !(OpenDDS::DCPS::RtpsUdpDataLink::separate_message(writerId) ||
                 writerId == OpenDDS::DCPS::ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER)) {
-            ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: submessage %d could not be verified writerId=%02X%02X%02X%02X\n", submessage_header.submessageId, writerId.entityKey[0], writerId.entityKey[1], writerId.entityKey[2], writerId.entityKind));
+            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: VerticalHandler::parse_message submessage from %C with id %d could not be verified writerId=%02X%02X%02X%02X\n"), guid_to_string(src_guid).c_str(), submessage_header.submessageId, writerId.entityKey[0], writerId.entityKey[1], writerId.entityKey[2], writerId.entityKind));
             return false;
           }
         }
@@ -426,7 +426,7 @@ bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser
   }
 
   if (message_parser.remaining() != 0) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::parse_message trailing bytes\n"));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: VerticalHandler::parse_message trailing bytes from %C\n"), guid_to_string(src_guid).c_str()));
     return false;
   }
 
@@ -453,7 +453,7 @@ void VerticalHandler::send(const GuidSet& to,
             enqueue_message(addr, msg);
           }
         } else {
-          ACE_DEBUG((LM_WARNING, "(%P|%t) %N:%l WARNING: VerticalHandler::send failed to get address\n"));
+          ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) %N:%l WARNING: VerticalHandler::send failed to get address for %C\n"), guid_to_string(guid).c_str()));
         }
       }
     }
@@ -491,7 +491,7 @@ RelayAddresses VerticalHandler::read_relay_addresses(const OpenDDS::DCPS::RepoId
   const auto ret = responsible_relay_reader_->read_instance(received_data, info_seq, 1, handle,
                                                             DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
   if (ret != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: VerticalHandler::read_relay_addresses failed to read\n"));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: VerticalHandler::read_relay_addresses failed to read addresses for %C\n"), guid_to_string(guid).c_str()));
     return relay_addresses;
   }
 
@@ -508,7 +508,7 @@ void VerticalHandler::write_relay_addresses(const OpenDDS::DCPS::RepoId& guid,
 
   const auto ret = responsible_relay_writer_->write(gra, DDS::HANDLE_NIL);
   if (ret != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: VerticalHandler::write_relay_addresses failed to write\n"));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: VerticalHandler::write_relay_addresses failed to write\n")));
   }
 }
 
@@ -521,7 +521,7 @@ void VerticalHandler::unregister_relay_addresses(const OpenDDS::DCPS::RepoId& gu
 
   const auto ret = responsible_relay_writer_->unregister_instance(gra, DDS::HANDLE_NIL);
   if (ret != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: VerticalHandler::unregister_relay_addresses failed to unregister_instance\n"));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: VerticalHandler::unregister_relay_addresses failed to unregister_instance\n")));
   }
 }
 
@@ -570,7 +570,7 @@ void HorizontalHandler::process_message(const ACE_INET_Addr&,
 
   RelayHeader relay_header;
   if (!(mp >> relay_header)) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: RelayHandler::handle_input failed to deserialize Relay header\n"));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: RelayHandler::handle_input failed to deserialize Relay header\n")));
     return;
   }
 
@@ -585,7 +585,7 @@ void HorizontalHandler::process_message(const ACE_INET_Addr&,
         vertical_handler_->enqueue_message(addr, msg);
       }
     } else {
-      ACE_DEBUG((LM_WARNING, "(%P|%t) %N:%l WARNING: HorizontalHandler::process_message failed to get address\n"));
+      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) %N:%l WARNING: HorizontalHandler::process_message failed to get address for %C\n"), guid_to_string(guid_to_repoid(guid)).c_str()));
     }
   }
   max_fan_out(relay_header.to().size());
@@ -796,25 +796,25 @@ void StunHandler::process_message(const ACE_INET_Addr& remote_address,
   OpenDDS::STUN::Message message;
   message.block = msg.get();
   if (!(serializer >> message)) {
-    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) VerticalHandler::process_message: WARNING Could not deserialize STUN mssage\n")));
+    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) %N:%l VerticalHandler::process_message: WARNING Could not deserialize STUN message from %C\n"), addr_to_string(remote_address).c_str()));
     return;
   }
 
   if (message.class_ != OpenDDS::STUN::REQUEST) {
-    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) VerticalHandler::process_message: WARNING Unknown STUN message class\n")));
+    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) %N:%l VerticalHandler::process_message: WARNING Unknown STUN message class from %C\n"), addr_to_string(remote_address).c_str()));
     return;
   }
 
   std::vector<OpenDDS::STUN::AttributeType> unknown_attributes = message.unknown_comprehension_required_attributes();
 
   if (!unknown_attributes.empty()) {
-    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) VerticalHandler::process_message: WARNING Unknown comprehension requird attributes\n")));
+    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) %N:%l VerticalHandler::process_message: WARNING Unknown comprehension requird attributes from %C\n"), addr_to_string(remote_address).c_str()));
     send(remote_address, make_unknown_attributes_error_response(message, unknown_attributes));
     return;
   }
 
   if (!message.has_fingerprint()) {
-    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) VerticalHandler::process_message: WARNING No FINGERPRINT attribute\n")));
+    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) %N:%l VerticalHandler::process_message: WARNING No FINGERPRINT attribute from %C\n"), addr_to_string(remote_address).c_str()));
     send(remote_address, make_bad_request_error_response(message, "Bad Request: FINGERPRINT must be pesent"));
     return;
   }
@@ -835,7 +835,7 @@ void StunHandler::process_message(const ACE_INET_Addr& remote_address,
 
   default:
     // Unknown method.  Stop processing.
-    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) VerticalHandler::process_message: WARNING Unknown STUN method\n")));
+    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) %N:%l VerticalHandler::process_message: WARNING Unknown STUN method from %C\n"), addr_to_string(remote_address).c_str()));
     send(remote_address, make_bad_request_error_response(message, "Bad Request: Unknown method"));
     break;
   }
