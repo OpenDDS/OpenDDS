@@ -572,7 +572,11 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     // Since we've just seen a new participant, let's send out our
     // own announcement, so they don't have to wait.
     if (from != ACE_INET_Addr()) {
-      this->tport_->write_i(guid, from_relay ? SpdpTransport::SEND_TO_RELAY : SpdpTransport::SEND_TO_LOCAL);
+      if (from_relay) {
+        tport_->write_i(guid, SpdpTransport::SEND_TO_RELAY);
+      } else {
+        tport_->shorten_local_sender_delay_i();
+      }
     }
 
 #ifdef OPENDDS_SECURITY
@@ -1770,8 +1774,8 @@ Spdp::SpdpTransport::open()
 
   job_queue_ = DCPS::make_rch<DCPS::JobQueue>(reactor);
 
-  local_sender_ = DCPS::make_rch<SpdpPeriodic>(reactor_task_.interceptor(), ref(*this), &SpdpTransport::send_local);
-  local_sender_->enable(false, outer_->config_->resend_period());
+  local_sender_ = DCPS::make_rch<SpdpMulti>(reactor_task_.interceptor(), outer_->config_->resend_period(), ref(*this), &SpdpTransport::send_local);
+  local_sender_->enable(TimeDuration());
 
 #ifdef OPENDDS_SECURITY
   auth_deadline_processor_ = DCPS::make_rch<SpdpSporadic>(reactor_task_.interceptor(), ref(*this), &SpdpTransport::process_auth_deadlines);
@@ -1888,6 +1892,16 @@ Spdp::SpdpTransport::close()
   reactor->remove_handler(multicast_socket_.get_handle(), mask);
   reactor->remove_handler(unicast_socket_.get_handle(), mask);
   reactor_task_.stop();
+}
+
+void
+Spdp::SpdpTransport::shorten_local_sender_delay_i()
+{
+  if (local_sender_) {
+    const TimeDuration quick_resend = outer_->config_->resend_period() * outer_->config_->quick_resend_ratio();
+    const TimeDuration min_resend = outer_->config_->min_resend_delay();
+    local_sender_->enable(std::max(quick_resend, min_resend));
+  }
 }
 
 void

@@ -37,6 +37,7 @@ RtpsUdpInst::RtpsUdpInst(const OPENDDS_STRING& name)
   , multicast_group_address_str_("239.255.0.2:7401")
   , nak_depth_(0)
   , max_bundle_size_(TransportSendStrategy::UDP_MAX_MESSAGE_SIZE - RTPS::RTPSHDR_SZ) // default maximum bundled message size is max udp message size (see TransportStrategy) minus RTPS header
+  , quick_reply_ratio_(0.1)
   , nak_response_delay_(0, 200*1000 /*microseconds*/) // default from RTPS
   , heartbeat_period_(1) // no default in RTPS spec
   , heartbeat_response_delay_(0, 500*1000 /*microseconds*/) // default from RTPS
@@ -94,6 +95,8 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("nak_depth"), nak_depth_, size_t);
 
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("max_bundle_size"), max_bundle_size_, size_t);
+
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("quick_reply_ratio"), quick_reply_ratio_, double);
 
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("ttl"), ttl_, unsigned char);
 
