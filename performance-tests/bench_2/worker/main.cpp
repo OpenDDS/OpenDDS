@@ -159,28 +159,22 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     data_registration(new Bench::DataTypeSupportImpl());
 
   // Register some Bench-specific listener factories
-  Builder::ListenerFactory<DDS::TopicListener>::Registration
-    topic_registration("bench_tl", [](const Builder::PropertySeq&){
+  Builder::register_topic_listener("bench_tl", [](const Builder::PropertySeq&){
       return DDS::TopicListener_var(new Bench::WorkerTopicListener());
     });
-  Builder::ListenerFactory<DDS::DataReaderListener>::Registration
-    datareader_registration("bench_drl", [](const Builder::PropertySeq& properties){
+  Builder::register_data_reader_listener("bench_drl", [](const Builder::PropertySeq& properties){
       return DDS::DataReaderListener_var(new Bench::WorkerDataReaderListener(properties));
     });
-  Builder::ListenerFactory<DDS::SubscriberListener>::Registration
-    subscriber_registration("bench_sl", [](const Builder::PropertySeq&){
+  Builder::register_subscriber_listener("bench_sl", [](const Builder::PropertySeq&){
       return DDS::SubscriberListener_var(new Bench::WorkerSubscriberListener());
     });
-  Builder::ListenerFactory<DDS::DataWriterListener>::Registration
-    datawriter_registration("bench_dwl", [](const Builder::PropertySeq&){
+  Builder::register_data_writer_listener("bench_dwl", [](const Builder::PropertySeq&){
       return DDS::DataWriterListener_var(new Bench::WorkerDataWriterListener());
     });
-  Builder::ListenerFactory<DDS::PublisherListener>::Registration
-    publisher_registration("bench_pl", [](const Builder::PropertySeq&){
+  Builder::register_publisher_listener("bench_pl", [](const Builder::PropertySeq&){
       return DDS::PublisherListener_var(new Bench::WorkerPublisherListener());
     });
-  Builder::ListenerFactory<DDS::DomainParticipantListener>::Registration
-    participant_registration("bench_partl", [](const Builder::PropertySeq&){
+  Builder::register_domain_participant_listener("bench_partl", [](const Builder::PropertySeq&){
       return DDS::DomainParticipantListener_var(new Bench::WorkerParticipantListener());
     });
 
