@@ -1727,14 +1727,26 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     string expr = "  strm.push_indent();\n";
     for (size_t i = 0; i < fields.size(); ++i) {
       const string field_name = fields[i]->local_name()->get_string();
+      const bool composite_type =
+        resolveActualType(fields[i]->field_type())->node_type() == AST_Decl::NT_struct;
       expr +=
         "  strm.print_indent();\n"
         "  if (strm.printer().print_field_names()) {\n"
-        "    strm.os() << \"" + field_name + ": \";\n"
-        "  }\n"
+        "    strm.os() << \"" + field_name + ":";
+      if (composite_type) {
+        expr += "\" << std::endl";
+      } else {
+        expr += " \"";
+      }
+      expr += ";\n"
+        "  }\n";
+      expr +=
         "  " + streamCommon(
-          field_name, fields[i]->field_type(), "<< stru", intro, cxx, true) +
-          " << std::endl;\n";
+          field_name, fields[i]->field_type(), "<< stru", intro, cxx, true);
+      if (!composite_type) {
+        expr += " << std::endl";
+      }
+      expr += ";\n";
     }
     be_global->impl_ << intro << expr <<
       "  return strm.os();\n";
