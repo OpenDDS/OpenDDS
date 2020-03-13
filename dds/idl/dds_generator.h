@@ -525,14 +525,17 @@ inline bool needSyntheticDefault(AST_Type* disc, size_t n_labels)
   }
 }
 
-typedef std::string (*CommonFn)(const std::string& name, AST_Type* type,
-                                const std::string& prefix, std::string& intro,
-                                const std::string&);
+typedef std::string (*CommonFn)(
+  const std::string& name, AST_Type* type,
+  const std::string& prefix, std::string& intro,
+  const std::string&, bool printing);
 
 inline
-void generateCaseBody(CommonFn commonFn, AST_UnionBranch* branch,
-                      const char* statementPrefix, const char* namePrefix,
-                      const char* uni, bool generateBreaks, bool parens)
+void generateCaseBody(
+  CommonFn commonFn, AST_UnionBranch* branch,
+  const char* statementPrefix, const char* namePrefix,
+  const char* uni, bool generateBreaks, bool parens,
+  bool printing = false)
 {
   using namespace AstTypeClassification;
   const BE_GlobalData::LanguageMapping lmap = be_global->language_mapping();
@@ -580,8 +583,9 @@ void generateCaseBody(CommonFn commonFn, AST_UnionBranch* branch,
   } else {
     const char* breakString = generateBreaks ? "    break;\n" : "";
     std::string intro;
-    std::string expr = commonFn(name + (parens ? "()" : ""), branch->field_type(),
-                                std::string(namePrefix) + "uni", intro, uni);
+    std::string expr = commonFn(
+      name + (parens ? "()" : ""), branch->field_type(),
+      std::string(namePrefix) + "uni", intro, uni, printing);
     be_global->impl_ <<
       (intro.empty() ? "" : "  ") << intro;
     if (*statementPrefix) {

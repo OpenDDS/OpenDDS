@@ -569,7 +569,7 @@ bool v8_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
 namespace {
   std::string branchGenTo(const std::string& name, AST_Type* type,
                           const std::string&, std::string&,
-                          const std::string&)
+                          const std::string&, bool)
   {
     const std::string source = "src." + name + "()",
       prop = "Nan::New<v8::String>(\"" + name + "\").ToLocalChecked()";
@@ -580,7 +580,7 @@ namespace {
   }
   std::string branchGenFrom(const std::string& name, AST_Type* type,
                             const std::string&, std::string&,
-                            const std::string&)
+                            const std::string&, bool)
   {
     std::ostringstream strm;
     const Classification cls = classify(type);

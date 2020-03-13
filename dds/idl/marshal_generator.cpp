@@ -1135,7 +1135,7 @@ namespace {
   // common to both fields (in structs) and branches (in unions)
   string findSizeCommon(const string& name, AST_Type* type,
                         const string& prefix, string& intro,
-                        const string& = "") // same sig as streamCommon
+                        const string& = "", bool = false) // same sig as streamCommon
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const bool is_union_member = prefix == "uni";
@@ -1204,7 +1204,7 @@ namespace {
   // common to both fields (in structs) and branches (in unions)
   string streamCommon(const string& name, AST_Type* type,
                       const string& prefix, string& intro,
-                      const string& stru = "")
+                      const string& stru = "", bool printing = false)
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const bool is_union_member = prefix.substr(3) == "uni";
@@ -1220,7 +1220,7 @@ namespace {
 
     WrapDirection dir = (shift == ">>") ? WD_INPUT : WD_OUTPUT;
     if ((fld_cls & CL_STRING) && (dir == WD_INPUT)) {
-      if (fld_cls & CL_BOUNDED) {
+      if ((fld_cls & CL_BOUNDED) && !printing) {
         const string args = expr + (use_cxx11 ? ", " : ".out(), ") + bounded_arg(type);
         return "(strm " + shift + ' ' + getWrapper(args, type, WD_INPUT) + ')';
       }
@@ -1258,7 +1258,7 @@ namespace {
         if (!accessor && !use_cxx11) {
           local += ".in()";
         }
-        if (fld_cls & CL_BOUNDED) {
+        if ((fld_cls & CL_BOUNDED) && !printing) {
           const string args = (fieldref + local).substr(3) + ", " + bounded_arg(type);
           return "(strm " + shift + ' ' + getWrapper(args, type, WD_OUTPUT) + ')';
         }
@@ -1733,7 +1733,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         "    strm.os() << \"" + field_name + ": \";\n"
         "  }\n"
         "  " + streamCommon(
-          field_name, fields[i]->field_type(), "<< stru", intro, cxx) +
+          field_name, fields[i]->field_type(), "<< stru", intro, cxx, true) +
           " << std::endl;\n";
     }
     be_global->impl_ << intro << expr <<
