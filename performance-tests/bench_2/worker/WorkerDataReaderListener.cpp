@@ -330,7 +330,7 @@ WorkerDataReaderListener::unset_datareader(Builder::DataReader& datareader)
       new_writer = true;
       if (it->second.data_received_.disjoint()) {
         if (missing_data_details.str().empty()) {
-          missing_data_details << "Topic Name: " << datareader_->get_topic_name() << ", Reliable: " << (reliable_ ? "true" : "false") << ", Durable: " << (durable_ ? "true" : "false") << std::flush;
+          missing_data_details << "ERROR :: Topic Name: " << datareader_->get_topic_name() << ", Reliable: " << (reliable_ ? "true" : "false") << ", Durable: " << (durable_ ? "true" : "false") << std::flush;
         }
         auto msr = it->second.data_received_.missing_sequence_ranges();
         for (auto it2 = msr.begin(); it2 != msr.end(); ++it2) {
@@ -352,7 +352,7 @@ WorkerDataReaderListener::unset_datareader(Builder::DataReader& datareader)
     // if we didn't meet the expected sample count, add difference to missing sample count
     if (expected_sample_count_ && sample_count_ < expected_sample_count_) {
       missing_data_count += expected_sample_count_ - sample_count_;
-      missing_data_details << " Expected Sample Deficit: " << expected_sample_count_ - sample_count_ << std::flush;
+      missing_data_details << " ERROR Expected Sample Deficit: " << expected_sample_count_ - sample_count_ << std::flush;
     }
 
     out_of_order_data_count_->value.ull_prop(out_of_order_data_count);

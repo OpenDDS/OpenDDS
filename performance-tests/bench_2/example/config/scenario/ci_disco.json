@@ -1,0 +1,11 @@
+{
+  "name": "Simple Echo",
+  "desc": "This is a typical echo client / server combo",
+  "any_node": [
+    {
+      "config": "ci_disco.json",
+      "count": 20
+    }
+  ],
+  "timeout": 120
+}

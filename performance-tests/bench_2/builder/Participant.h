@@ -27,6 +27,7 @@ protected:
   const uint16_t domain_;
   const std::string listener_type_name_;
   const uint32_t listener_status_mask_;
+  Builder::PropertySeq listener_properties_;
   const std::string transport_config_name_;
   ParticipantReport& report_;
   DDS::DomainParticipantListener_var listener_;

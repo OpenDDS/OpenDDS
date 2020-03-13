@@ -9,6 +9,11 @@ namespace Bench {
 
 class WorkerTopicListener : public Builder::TopicListener {
 public:
+
+  WorkerTopicListener();
+  WorkerTopicListener(const Builder::PropertySeq& properties);
+  virtual ~WorkerTopicListener();
+
   void on_inconsistent_topic(DDS::Topic_ptr the_topic, const DDS::InconsistentTopicStatus& status) override;
   void set_topic(Builder::Topic& topic) override;
 

@@ -7,6 +7,10 @@ namespace Bench {
 class WorkerSubscriberListener : public Builder::SubscriberListener {
 public:
 
+  WorkerSubscriberListener();
+  WorkerSubscriberListener(const Builder::PropertySeq& properties);
+  virtual ~WorkerSubscriberListener();
+
   // From DDS::DataReaderListener
 
   void on_requested_deadline_missed(DDS::DataReader_ptr reader, const DDS::RequestedDeadlineMissedStatus& status) override;

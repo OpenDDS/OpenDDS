@@ -11,6 +11,7 @@ Publisher::Publisher(const PublisherConfig& config, PublisherReport& report, DDS
   : name_(config.name.in())
   , listener_type_name_(config.listener_type_name.in())
   , listener_status_mask_(config.listener_status_mask)
+  , listener_properties_(config.listener_properties)
   , transport_config_name_(config.transport_config_name.in())
   , report_(report)
   , participant_(participant)
@@ -35,7 +36,7 @@ Publisher::Publisher(const PublisherConfig& config, PublisherReport& report, DDS
   // Create Listener From Factory
   listener_ = DDS::PublisherListener::_nil();
   if (!listener_type_name_.empty()) {
-    listener_ = create_listener(listener_type_name_);
+    listener_ = create_listener(listener_type_name_, listener_properties_);
     if (!listener_) {
       std::stringstream ss;
       ss << "publisher listener creation failed for subscriber '" << name_ << "' with listener type name '" << listener_type_name_ << "'" << std::flush;

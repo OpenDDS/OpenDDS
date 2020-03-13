@@ -35,10 +35,11 @@ using namespace Bench::TestController;
 
 std::string bench_root;
 
-void handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std::ostringstream& result_out);
+int handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std::ostringstream& result_out);
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
+  int result = 0;
   const char* cstr = ACE_OS::getenv("BENCH_ROOT");
   bench_root = cstr ? cstr : "";
   if (bench_root.empty()) {
@@ -345,7 +346,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
           << std::endl
           << "Ended at " << iso8601() << std::endl
           << std::endl;
-        handle_reports(reports, ss);
+        result = handle_reports(reports, ss);
         scenario_end = ss.str();
       }
       result_file << scenario_end;
@@ -365,11 +366,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   std::cout << "Finished" << std::endl;
 
-  return 0;
+  return result;
 };
 
-void handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std::ostringstream& result_out)
+int handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std::ostringstream& result_out)
 {
+  int result = 0;
   using Builder::ZERO;
 
   Builder::TimeStamp max_construction_time = ZERO;
@@ -479,7 +481,8 @@ void handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std:
   result_out << std::endl;
 
   result_out << "Discovery Stats:" << std::endl;
-  result_out << "  Total Undermatched Readers: " << total_undermatched_readers <<
+  result_out << ((total_undermatched_readers != 0 || total_undermatched_writers != 0) ? "  ERROR" : "  ") <<
+    "Total Undermatched Readers: " << total_undermatched_readers <<
     ", Total Undermatched Writers: " << total_undermatched_writers << std::endl;
   result_out << "  Max Discovery Time Delta: " << max_discovery_time_delta << " seconds" << std::endl;
 
@@ -515,4 +518,12 @@ void handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std:
   result_out << std::endl;
 
   consolidated_round_trip_jitter_stats.pretty_print(result_out, "round trip jitter");
+
+  if (total_undermatched_readers ||
+      total_undermatched_writers ||
+      total_out_of_order_data_count ||
+      total_duplicate_data_count) {
+    result = -1;
+  }
+  return result;
 }

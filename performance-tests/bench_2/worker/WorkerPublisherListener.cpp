@@ -2,6 +2,18 @@
 
 namespace Bench {
 
+WorkerPublisherListener::WorkerPublisherListener()
+{
+}
+
+WorkerPublisherListener::WorkerPublisherListener(const Builder::PropertySeq&)
+{
+}
+
+WorkerPublisherListener::~WorkerPublisherListener()
+{
+}
+
 // From DDS::DataWriterListener
 
 void WorkerPublisherListener::on_offered_deadline_missed(DDS::DataWriter_ptr /*writer*/, const DDS::OfferedDeadlineMissedStatus& /*status*/) {

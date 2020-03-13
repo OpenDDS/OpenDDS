@@ -409,3 +409,9 @@ tests/DCPS/RtpsRelay/Smoke/run_test.pl single: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN
 tests/DCPS/RtpsRelay/STUN/run_test.pl: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE !IPV6
 
 tests/DCPS/ParticipantLocationTopic/run_test.pl noice: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE !IPV6
+
+performance-tests/bench_2/run_test.pl disco: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE! CXX11 RTPS
+performance-tests/bench_2/run_test.pl fan: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE! CXX11 RTPS
+performance-tests/bench_2/run_test.pl fan_frag: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE! CXX11 RTPS
+performance-tests/bench_2/run_test.pl echo: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE! CXX11 RTPS
+performance-tests/bench_2/run_test.pl echo_frag: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE! CXX11 RTPS
