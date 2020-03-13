@@ -523,7 +523,7 @@ int handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std::
       total_undermatched_writers ||
       total_out_of_order_data_count ||
       total_duplicate_data_count) {
-    result = -1;
+    result = 1;
   }
   return result;
 }
