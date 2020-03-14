@@ -991,9 +991,8 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
   DDS::Security::HandshakeHandle handshake_handle,
   DDS::Security::SecurityException & ex)
 {
-
-  ACE_Guard<ACE_Thread_Mutex> handshake_data_guard(handshake_mutex_);
   ACE_Guard<ACE_Thread_Mutex> identity_data_guard(identity_mutex_);
+  ACE_Guard<ACE_Thread_Mutex> handshake_data_guard(handshake_mutex_);
 
   DDS::OctetSeq challenge1, hash_c2;
   SSL::Certificate::unique_ptr remote_cert(new SSL::Certificate);
@@ -1182,8 +1181,8 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_final_hands
   const DDS::Security::ValidationResult_t Failure = DDS::Security::VALIDATION_FAILED;
   const DDS::Security::ValidationResult_t ValidationOkay = DDS::Security::VALIDATION_OK;
 
-  ACE_Guard<ACE_Thread_Mutex> handshake_data_guard(handshake_mutex_);
   ACE_Guard<ACE_Thread_Mutex> identity_data_guard(identity_mutex_);
+  ACE_Guard<ACE_Thread_Mutex> handshake_data_guard(handshake_mutex_);
 
   HandshakeDataPair handshake_data = get_handshake_data(handshake_handle);
   if (!handshake_data.first || !handshake_data.second) {

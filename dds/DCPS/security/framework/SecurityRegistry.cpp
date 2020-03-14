@@ -369,6 +369,7 @@ SecurityConfig_rch
 SecurityRegistry::fix_empty_default()
 {
 #if defined(OPENDDS_SECURITY)
+  GuardType guard(default_load_lock_);
   if (!default_config()) {
     load_security_plugin_lib(DEFAULT_PLUGIN_NAME);
   }
