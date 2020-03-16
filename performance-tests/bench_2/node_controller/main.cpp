@@ -618,11 +618,11 @@ int run_cycle(
       return 1;
     }
 
-    for (size_t node = 0; node < configs.length(); node++) {
+    for (CORBA::ULong node = 0; node < configs.length(); node++) {
       if (configs[node].node_id == this_node_id) {
         worker_manager.timeout(configs[node].timeout);
-        size_t config_count = configs[node].workers.length();
-        for (size_t config = 0; config < config_count; config++) {
+        CORBA::ULong config_count = configs[node].workers.length();
+        for (CORBA::ULong config = 0; config < config_count; config++) {
           WorkerId& id = configs[node].workers[config].worker_id;
           const WorkerId end = id + configs[node].workers[config].count;
           for (; id < end; id++) {

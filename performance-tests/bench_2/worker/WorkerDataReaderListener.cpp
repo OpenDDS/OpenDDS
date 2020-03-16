@@ -16,14 +16,14 @@ WorkerDataReaderListener::WorkerDataReaderListener(const Builder::PropertySeq& p
   size_t expected_match_count = 0;
   auto expected_match_count_prop = get_property(properties, "expected_match_count", Builder::PVK_ULL);
   if (expected_match_count_prop) {
-    expected_match_count = expected_match_count_prop->value.ull_prop();
+    expected_match_count = static_cast<size_t>(expected_match_count_prop->value.ull_prop());
   }
   expected_match_count_ = expected_match_count;
 
   size_t expected_sample_count = 0;
   auto expected_sample_count_prop = get_property(properties, "expected_sample_count", Builder::PVK_ULL);
   if (expected_sample_count_prop) {
-    expected_sample_count = expected_sample_count_prop->value.ull_prop();
+    expected_sample_count = static_cast<size_t>(expected_sample_count_prop->value.ull_prop());
   }
   expected_sample_count_ = expected_sample_count;
 }
@@ -250,7 +250,7 @@ WorkerDataReaderListener::set_datareader(Builder::DataReader& datareader)
   const Builder::PropertySeq& global_properties = get_global_properties();
   Builder::ConstPropertyIndex buffer_size_prop =
     get_property(global_properties, "default_stat_median_buffer_size", Builder::PVK_ULL);
-  size_t buffer_size = buffer_size_prop ? buffer_size_prop->value.ull_prop() : DEFAULT_STAT_BLOCK_BUFFER_SIZE;
+  size_t buffer_size = buffer_size_prop ? static_cast<size_t>(buffer_size_prop->value.ull_prop()) : DEFAULT_STAT_BLOCK_BUFFER_SIZE;
 
   latency_stat_block_ =
     std::make_shared<PropertyStatBlock>(datareader_->get_report().properties, "latency", buffer_size);
@@ -334,7 +334,7 @@ WorkerDataReaderListener::unset_datareader(Builder::DataReader& datareader)
         }
         auto msr = it->second.data_received_.missing_sequence_ranges();
         for (auto it2 = msr.begin(); it2 != msr.end(); ++it2) {
-          missing_data_count += (it2->second.getValue() - (it2->first.getValue() - 1)); // update count
+          missing_data_count += static_cast<ptrdiff_t>(it2->second.getValue() - (it2->first.getValue() - 1)); // update count
           if (new_writer) {
             missing_data_details << " [PH: " << it->first << " (" << it->second.data_received_.low().getValue() << "-" << it->second.data_received_.high().getValue() << ")] " << std::flush;
             new_writer = false;

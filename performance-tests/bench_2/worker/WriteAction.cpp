@@ -60,21 +60,21 @@ bool WriteAction::init(const ActionConfig& config, ActionReport& report, Builder
   size_t data_buffer_bytes = 256;
   auto data_buffer_bytes_prop = get_property(config.params, "data_buffer_bytes", Builder::PVK_ULL);
   if (data_buffer_bytes_prop) {
-    data_buffer_bytes = data_buffer_bytes_prop->value.ull_prop();
+    data_buffer_bytes = static_cast<size_t>(data_buffer_bytes_prop->value.ull_prop());
   }
   data_.buffer.length(static_cast<CORBA::ULong>(data_buffer_bytes));
 
   size_t max_count = 0;
   auto max_count_prop = get_property(config.params, "max_count", Builder::PVK_ULL);
   if (max_count_prop) {
-    max_count = max_count_prop->value.ull_prop();
+    max_count = static_cast<size_t>(max_count_prop->value.ull_prop());
   }
   max_count_ = max_count;
 
   size_t new_key_count = 0;
   auto new_key_count_prop = get_property(config.params, "new_key_count", Builder::PVK_ULL);
   if (new_key_count_prop) {
-    new_key_count = new_key_count_prop->value.ull_prop();
+    new_key_count = static_cast<size_t>(new_key_count_prop->value.ull_prop());
   }
   new_key_count_ = new_key_count;
 

@@ -11,7 +11,7 @@ WorkerDataWriterListener::WorkerDataWriterListener(const Builder::PropertySeq& p
   size_t expected_match_count = 0;
   auto expected_match_count_prop = get_property(properties, "expected_match_count", Builder::PVK_ULL);
   if (expected_match_count_prop) {
-    expected_match_count = expected_match_count_prop->value.ull_prop();
+    expected_match_count = static_cast<size_t>(expected_match_count_prop->value.ull_prop());
   }
   expected_match_count_ = expected_match_count;
 }
