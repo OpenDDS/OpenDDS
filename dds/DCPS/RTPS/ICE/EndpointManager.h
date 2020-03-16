@@ -60,6 +60,12 @@ struct EndpointManager {
     return agent_info_;
   }
 
+  typedef std::set<std::string> FoundationSet;
+  const FoundationSet& foundations() const
+  {
+    return foundations_;
+  }
+
   void add_agent_info_listener(const DCPS::RepoId& a_local_guid,
                                AgentInfoListener* a_agent_info_listener)
   {
@@ -161,6 +167,7 @@ private:
   ACE_INET_Addr stun_server_address_;       // Address of the STUN server.
   ACE_UINT64 ice_tie_breaker_;
   AgentInfo agent_info_;
+  FoundationSet foundations_;
 
   // State variables for getting and maintaining the server reflexive address.
   bool requesting_;
