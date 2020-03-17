@@ -190,7 +190,7 @@ void Checklist::unfreeze()
     const CandidatePair& cp = *pos;
 
     // The second check allows the Checklist to start work on remote
-    // foundations that also below to its local agent meaning that the
+    // foundations that also belong to its local agent meaning that the
     // remote agent is probably another EndpointManager in this
     // process.  They will share an AgentImpl and therefore the same
     // set of active foundations.  This will cause deadlock since both
