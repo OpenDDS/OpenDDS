@@ -217,15 +217,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     std::mutex cv_mutex;
 
     if (!(config.create_time == ZERO)) {
+      std::chrono::time_point<std::chrono::high_resolution_clock> timeout_time;
       if (config.create_time < ZERO) {
-        auto dur = -get_duration(config.create_time);
-        std::unique_lock<std::mutex> lock(cv_mutex);
-        while (cv.wait_for(lock, dur) != std::cv_status::timeout) {}
+        timeout_time = std::chrono::high_resolution_clock::now() - get_duration(config.create_time);
       } else {
-        auto timeout_time = std::chrono::system_clock::time_point(get_duration(config.create_time));
-        std::unique_lock<std::mutex> lock(cv_mutex);
-        while (cv.wait_until(lock, timeout_time) != std::cv_status::timeout) {}
+        timeout_time = std::chrono::high_resolution_clock::time_point(get_duration(config.create_time));
       }
+      std::unique_lock<std::mutex> lock(cv_mutex);
+      while (cv.wait_until(lock, timeout_time) != std::cv_status::timeout) {}
     }
 
     Log::log() << "Beginning process construction / entity creation." << std::endl;
@@ -246,15 +245,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
       std::cerr << "No test enable time specified. Press any key to enable process entities." << std::endl;
       std::getline(std::cin, line);
     } else {
+      std::chrono::time_point<std::chrono::high_resolution_clock> timeout_time;
       if (config.enable_time < ZERO) {
-        auto dur = -get_duration(config.enable_time);
-        std::unique_lock<std::mutex> lock(cv_mutex);
-        while (cv.wait_for(lock, dur) != std::cv_status::timeout) {}
+        timeout_time = std::chrono::high_resolution_clock::now() - get_duration(config.enable_time);
       } else {
-        auto timeout_time = std::chrono::system_clock::time_point(get_duration(config.enable_time));
-        std::unique_lock<std::mutex> lock(cv_mutex);
-        while (cv.wait_until(lock, timeout_time) != std::cv_status::timeout) {}
+        timeout_time = std::chrono::high_resolution_clock::time_point(get_duration(config.enable_time));
       }
+      std::unique_lock<std::mutex> lock(cv_mutex);
+      while (cv.wait_until(lock, timeout_time) != std::cv_status::timeout) {}
     }
 
     Log::log() << "Enabling DDS entities (if not already enabled)." << std::endl;
@@ -269,15 +267,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
       std::cerr << "No test start time specified. Press any key to start process testing." << std::endl;
       std::getline(std::cin, line);
     } else {
+      std::chrono::time_point<std::chrono::high_resolution_clock> timeout_time;
       if (config.start_time < ZERO) {
-        auto dur = -get_duration(config.start_time);
-        std::unique_lock<std::mutex> lock(cv_mutex);
-        while (cv.wait_for(lock, dur) != std::cv_status::timeout) {}
+        timeout_time = std::chrono::high_resolution_clock::now() - get_duration(config.start_time);
       } else {
-        auto timeout_time = std::chrono::system_clock::time_point(get_duration(config.start_time));
-        std::unique_lock<std::mutex> lock(cv_mutex);
-        while (cv.wait_until(lock, timeout_time) != std::cv_status::timeout) {}
+        timeout_time = std::chrono::high_resolution_clock::time_point(get_duration(config.start_time));
       }
+      std::unique_lock<std::mutex> lock(cv_mutex);
+      while (cv.wait_until(lock, timeout_time) != std::cv_status::timeout) {}
     }
 
     Log::log() << "Starting process tests." << std::endl;
@@ -292,15 +289,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
       std::cerr << "No stop time specified. Press any key to stop process testing." << std::endl;
       std::getline(std::cin, line);
     } else {
+      std::chrono::time_point<std::chrono::high_resolution_clock> timeout_time;
       if (config.stop_time < ZERO) {
-        auto dur = -get_duration(config.stop_time);
-        std::unique_lock<std::mutex> lock(cv_mutex);
-        while (cv.wait_for(lock, dur) != std::cv_status::timeout) {}
+        timeout_time = std::chrono::high_resolution_clock::now() - get_duration(config.stop_time);
       } else {
-        auto timeout_time = std::chrono::system_clock::time_point(get_duration(config.stop_time));
-        std::unique_lock<std::mutex> lock(cv_mutex);
-        while (cv.wait_until(lock, timeout_time) != std::cv_status::timeout) {}
+        timeout_time = std::chrono::high_resolution_clock::time_point(get_duration(config.stop_time));
       }
+      std::unique_lock<std::mutex> lock(cv_mutex);
+      while (cv.wait_until(lock, timeout_time) != std::cv_status::timeout) {}
     }
 
     Log::log() << "Stopping process tests." << std::endl;
@@ -321,15 +317,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
       std::cerr << "No destruction time specified. Press any key to destroy process entities." << std::endl;
       std::getline(std::cin, line);
     } else {
+      std::chrono::time_point<std::chrono::high_resolution_clock> timeout_time;
       if (config.destruction_time < ZERO) {
-        auto dur = -get_duration(config.destruction_time);
-        std::unique_lock<std::mutex> lock(cv_mutex);
-        while (cv.wait_for(lock, dur) != std::cv_status::timeout) {}
+        timeout_time = std::chrono::high_resolution_clock::now() - get_duration(config.destruction_time);
       } else {
-        auto timeout_time = std::chrono::system_clock::time_point(get_duration(config.destruction_time));
-        std::unique_lock<std::mutex> lock(cv_mutex);
-        while (cv.wait_until(lock, timeout_time) != std::cv_status::timeout) {}
+        timeout_time = std::chrono::high_resolution_clock::time_point(get_duration(config.destruction_time));
       }
+      std::unique_lock<std::mutex> lock(cv_mutex);
+      while (cv.wait_until(lock, timeout_time) != std::cv_status::timeout) {}
     }
 
     process.detach_listeners();

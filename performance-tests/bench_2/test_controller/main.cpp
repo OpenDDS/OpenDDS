@@ -357,6 +357,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       if (reports.size() != allocated_scenario.expected_reports) {
         result_file << "ERROR: Only received " << reports.size() << "out of " << allocated_scenario.expected_reports << " valid reports!" << std::endl;
         std::cerr << "ERROR: Only received " << reports.size() << " out of " << allocated_scenario.expected_reports << " valid reports!" << std::endl;
+	result = 1;
       }
     }
   } catch (const std::runtime_error& e) {
@@ -393,6 +394,8 @@ int handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std::
   Bench::SimpleStatBlock consolidated_jitter_stats;
   Bench::SimpleStatBlock consolidated_round_trip_latency_stats;
   Bench::SimpleStatBlock consolidated_round_trip_jitter_stats;
+
+  bool missing_durable_data = false;
 
   for (size_t r = 0; r < parsed_reports.size(); ++r) {
 
@@ -454,7 +457,11 @@ int handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std::
             if (missing_data_count_prop->value.ull_prop()) {
               Builder::ConstPropertyIndex missing_data_details_prop = get_property(dr_report.properties, "missing_data_details", Builder::PVK_STRING);
               if (missing_data_details_prop) {
-                result_out << "Missing Data (" << missing_data_count_prop->value.ull_prop() << ") Details: " << missing_data_details_prop->value.string_prop() << std::endl;
+                std::string mdd(missing_data_details_prop->value.string_prop());
+                result_out << "Missing Data (" << missing_data_count_prop->value.ull_prop() << ") Details: " << mdd << std::endl;
+                if (mdd.find("Durable: true") != std::string::npos) {
+                  missing_durable_data = true;
+                }
               }
             }
             total_missing_data_count += missing_data_count_prop->value.ull_prop();
@@ -522,7 +529,8 @@ int handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std::
   if (total_undermatched_readers ||
       total_undermatched_writers ||
       total_out_of_order_data_count ||
-      total_duplicate_data_count) {
+      total_duplicate_data_count ||
+      missing_durable_data) {
     result = 1;
   }
   return result;

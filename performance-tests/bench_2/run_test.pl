@@ -42,7 +42,7 @@ elsif ($test->flag('fan_frag')) {
   $is_rtps_disc = 1;
 }
 elsif ($test->flag('echo')) {
-  $tc_opts .= " ci_echo  --override-start-time 15";
+  $tc_opts .= " ci_echo --override-start-time 15";
   $is_rtps_disc = 1;
 }
 elsif ($test->flag('echo_frag')) {
@@ -50,16 +50,16 @@ elsif ($test->flag('echo_frag')) {
   $is_rtps_disc = 1;
 }
 elsif ($test->flag('sm10')) {
-  $tc_opts .= " showtime_mixed_10";
+  $tc_opts .= " showtime_mixed_10 --override-start-time 25";
   $is_rtps_disc = 1;
 }
 elsif ($test->flag('sm30')) {
-  $tc_opts .= " showtime_mixed_30";
+  $tc_opts .= " showtime_mixed_30 --override-start-time 45";
   $is_rtps_disc = 1;
 }
 else {
   $flag_found = 0;
-  $tc_opts .= " showtime_mixed_10";
+  $tc_opts .= " showtime_mixed_10 --override-start-time 25";
   $is_rtps_disc = 1;
 }
 
