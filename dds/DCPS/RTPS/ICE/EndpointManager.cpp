@@ -229,6 +229,11 @@ void EndpointManager::regenerate_agent_info(bool password_only)
     AgentInfo::CandidatesType::iterator last = std::unique(agent_info_.candidates.begin(), agent_info_.candidates.end(), candidates_equal);
     agent_info_.candidates.erase(last, agent_info_.candidates.end());
 
+    foundations_.clear();
+    for (AgentInfo::CandidatesType::const_iterator pos = agent_info_.candidates.begin(), limit = agent_info_.candidates.end(); pos != limit; ++pos) {
+      foundations_.insert(pos->foundation);
+    }
+
     // Start over.
     UsernameToChecklistType old_checklists = username_to_checklist_;
 
