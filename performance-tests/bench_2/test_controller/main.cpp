@@ -357,7 +357,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       if (reports.size() != allocated_scenario.expected_reports) {
         result_file << "ERROR: Only received " << reports.size() << "out of " << allocated_scenario.expected_reports << " valid reports!" << std::endl;
         std::cerr << "ERROR: Only received " << reports.size() << " out of " << allocated_scenario.expected_reports << " valid reports!" << std::endl;
-	result = 1;
+        result = 1;
       }
     }
   } catch (const std::runtime_error& e) {
