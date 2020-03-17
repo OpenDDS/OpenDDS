@@ -223,8 +223,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
       } else {
         timeout_time = std::chrono::high_resolution_clock::time_point(get_duration(config.create_time));
       }
-      std::unique_lock<std::mutex> lock(cv_mutex);
-      while (cv.wait_until(lock, timeout_time) != std::cv_status::timeout) {}
+      std::this_thread::sleep_until(timeout_time);
     }
 
     Log::log() << "Beginning process construction / entity creation." << std::endl;
@@ -251,8 +250,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
       } else {
         timeout_time = std::chrono::high_resolution_clock::time_point(get_duration(config.enable_time));
       }
-      std::unique_lock<std::mutex> lock(cv_mutex);
-      while (cv.wait_until(lock, timeout_time) != std::cv_status::timeout) {}
+      std::this_thread::sleep_until(timeout_time);
     }
 
     Log::log() << "Enabling DDS entities (if not already enabled)." << std::endl;
@@ -273,8 +271,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
       } else {
         timeout_time = std::chrono::high_resolution_clock::time_point(get_duration(config.start_time));
       }
-      std::unique_lock<std::mutex> lock(cv_mutex);
-      while (cv.wait_until(lock, timeout_time) != std::cv_status::timeout) {}
+      std::this_thread::sleep_until(timeout_time);
     }
 
     Log::log() << "Starting process tests." << std::endl;
@@ -295,8 +292,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
       } else {
         timeout_time = std::chrono::high_resolution_clock::time_point(get_duration(config.stop_time));
       }
-      std::unique_lock<std::mutex> lock(cv_mutex);
-      while (cv.wait_until(lock, timeout_time) != std::cv_status::timeout) {}
+      std::this_thread::sleep_until(timeout_time);
     }
 
     Log::log() << "Stopping process tests." << std::endl;
@@ -323,8 +319,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
       } else {
         timeout_time = std::chrono::high_resolution_clock::time_point(get_duration(config.destruction_time));
       }
-      std::unique_lock<std::mutex> lock(cv_mutex);
-      while (cv.wait_until(lock, timeout_time) != std::cv_status::timeout) {}
+      std::this_thread::sleep_until(timeout_time);
     }
 
     process.detach_listeners();

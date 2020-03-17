@@ -39,7 +39,7 @@ int handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std::
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
-  int result = 0;
+  int result = EXIT_SUCCESS;
   const char* cstr = ACE_OS::getenv("BENCH_ROOT");
   bench_root = cstr ? cstr : "";
   if (bench_root.empty()) {
@@ -357,12 +357,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       if (reports.size() != allocated_scenario.expected_reports) {
         result_file << "ERROR: Only received " << reports.size() << "out of " << allocated_scenario.expected_reports << " valid reports!" << std::endl;
         std::cerr << "ERROR: Only received " << reports.size() << " out of " << allocated_scenario.expected_reports << " valid reports!" << std::endl;
-        result = 1;
+        result = EXIT_FAILURE;
       }
     }
   } catch (const std::runtime_error& e) {
     std::cerr << "Error: " << e.what() << std::endl;
-    return 1;
+    return EXIT_FAILURE;
   }
 
   std::cout << "Finished" << std::endl;
@@ -372,7 +372,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
 int handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std::ostringstream& result_out)
 {
-  int result = 0;
+  int result = EXIT_SUCCESS;
   using Builder::ZERO;
 
   Builder::TimeStamp max_construction_time = ZERO;
@@ -488,9 +488,11 @@ int handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std::
   result_out << std::endl;
 
   result_out << "Discovery Stats:" << std::endl;
-  result_out << ((total_undermatched_readers != 0 || total_undermatched_writers != 0) ? "  ERROR" : "  ") <<
+  result_out <<
+    (total_undermatched_readers != 0 ? "  ERROR: " : "  ") <<
     "Total Undermatched Readers: " << total_undermatched_readers <<
-    ", Total Undermatched Writers: " << total_undermatched_writers << std::endl;
+    (total_undermatched_writers != 0 ? ", ERROR: " : ", ") <<
+    "Total Undermatched Writers: " << total_undermatched_writers << std::endl;
   result_out << "  Max Discovery Time Delta: " << max_discovery_time_delta << " seconds" << std::endl;
 
   result_out << std::endl;
@@ -531,7 +533,7 @@ int handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std::
       total_out_of_order_data_count ||
       total_duplicate_data_count ||
       missing_durable_data) {
-    result = 1;
+    result = EXIT_FAILURE;
   }
   return result;
 }

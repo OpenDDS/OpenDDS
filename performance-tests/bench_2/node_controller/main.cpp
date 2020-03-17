@@ -118,7 +118,7 @@ public:
 
   std::shared_ptr<ACE_Process_Options> get_proc_opts() const
   {
-    std::shared_ptr<ACE_Process_Options> proc_opts(new ACE_Process_Options());
+    std::shared_ptr<ACE_Process_Options> proc_opts = std::make_shared<ACE_Process_Options>();
     std::stringstream ss;
     ss << join_path(bench_root, "worker", "worker")
       << " " << config_filename_
