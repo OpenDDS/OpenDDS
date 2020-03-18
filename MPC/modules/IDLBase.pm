@@ -107,13 +107,12 @@ my $tsreg  = 'TypeSupport\.idl';
 # ************************************************************
 
 sub do_cached_parse {
-  my($self, $file, $flags, $called_from_base) = @_;
+  my($self, $file, $flags) = @_;
 
-  ## If we are being called from the base type (i.e., IDLBase::get_output)
-  ## we need to set the default_nested to true.  Otherwise, in certain
-  ## environments, we can get extra output files being added to the project
-  ## that are never going to exist.
-  $self->{'default_nested'} = $called_from_base;
+  # By default opendds_idl considers all types not to be topic types (aka
+  # "nested") unless --no-default-nested was passed or annotations say
+  # otherwise.
+  $self->{'default_nested'} = 1;
 
   ## Set up the macros and include paths supplied in the command flags
   my %macros = ('__OPENDDS_IDL' => 1);
@@ -127,8 +126,8 @@ sub do_cached_parse {
       elsif ($arg =~ /^\-I(.+)/) {
         push(@include, $1);
       }
-      elsif ($arg eq '--default-nested') {
-        $self->{'default_nested'} = 1;
+      elsif ($arg =~ /^--(no-)?default-nested$/) {
+        $self->{'default_nested'} = !$1;
       }
     }
   }
@@ -159,10 +158,8 @@ sub get_output {
   my @filenames;
   my %seen;
 
-  ## Parse the IDL file and get back the types and names.  We pass the
-  ## file, flags and a boolean that indicates that the method is being
-  ## called from the base project (and not from the TYPESUPPORTHelper).
-  my($data, $fwd) = $self->do_cached_parse($file, $flags, 1);
+  ## Parse the IDL file and get back the types and names.
+  my($data, $fwd) = $self->do_cached_parse($file, $flags);
 
   ## Get the file names based on the type and name of each entry
   my @tmp;
@@ -366,14 +363,14 @@ sub parse {
     elsif ($str =~ s/^L'(.|\\.|\\[0-7]{1,3}|\\x[a-f\d]{1,2}|\\u[a-f\d]{1,4})'//i) {
       ## Wchar literal
     }
-    elsif ($str =~ s/^@([a-z_]+)(?:\s*\((TRUE|FALSE)\))?//) {
-      my $nkey = $1;
-      my $val  = (defined $2 && $2 eq 'FALSE' ? 0 : 1);
-      if ($nkey eq 'default_nested' || $nkey eq 'nested') {
-        $cnested = $val;
-      }
-      elsif ($nkey eq 'topic') {
-        $cnested = !$val;
+    elsif ($str =~ s/^@([a-z_]+)(?:\s*\((.*)\))?//) {
+      # Topic Type Annotations
+      my $name = $1;
+      if ($name eq 'default_nested' || $name eq 'nested') {
+        $cnested = (defined $2 && $2 eq 'FALSE') ? 0 : 1;
+      } elsif ($name eq 'topic') {
+        # @topic can have parameters, but we can ignore them here
+        $cnested = 0;
       }
     }
     elsif ($str =~ s/^([a-z_][\w]*)//i) {

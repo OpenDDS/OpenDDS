@@ -5,6 +5,7 @@
  * See: http://www.opendds.org/license.html
  */
 
+#ifdef OPENDDS_SECURITY
 #ifndef OPENDDS_RTPS_ICE_AGENT_IMPL_H
 #define OPENDDS_RTPS_ICE_AGENT_IMPL_H
 
@@ -17,6 +18,8 @@
 
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/ReactorInterceptor.h"
+#include "dds/DCPS/Service_Participant.h"
+#include "dds/DCPS/NetworkConfigMonitor.h"
 
 #include "Ice.h"
 
@@ -29,6 +32,7 @@ struct Task;
 struct EndpointManager;
 
 typedef std::pair<std::string, std::string> FoundationType;
+typedef std::vector<FoundationType> FoundationList;
 
 class ActiveFoundationSet {
 public:
@@ -38,7 +42,7 @@ public:
     x.first->second += 1;
   }
 
-  void remove(const FoundationType& a_foundation)
+  bool remove(const FoundationType& a_foundation)
   {
     FoundationsType::iterator pos = foundations_.find(a_foundation);
     OPENDDS_ASSERT(pos != foundations_.end());
@@ -46,7 +50,10 @@ public:
 
     if (pos->second == 0) {
       foundations_.erase(pos);
+      return true;
     }
+
+    return false;
   }
 
   bool contains(const FoundationType& a_foundation) const
@@ -64,16 +71,18 @@ private:
   FoundationsType foundations_;
 };
 
-class AgentImpl : public Agent, public DCPS::ReactorInterceptor {
+class AgentImpl : public Agent, public DCPS::ReactorInterceptor, public DCPS::ShutdownListener, public virtual DCPS::NetworkConfigListener {
 public:
-  ActiveFoundationSet active_foundations;
-
   AgentImpl();
 
   Configuration& get_configuration()
   {
     return configuration_;
   }
+
+  void shutdown();
+
+  void notify_shutdown();
 
   void add_endpoint(Endpoint* a_endpoint);
 
@@ -113,11 +122,34 @@ public:
     return remote_peer_reflexive_counter_++;
   }
 
+  bool contains(const FoundationType& a_foundation) const
+  {
+    return active_foundations_.contains(a_foundation);
+  }
+
+  void add(const FoundationType& a_foundation)
+  {
+    active_foundations_.add(a_foundation);
+  }
+
+  void remove(const FoundationType& a_foundation);
+
   void unfreeze(const FoundationType& a_foundation);
 
   ACE_Recursive_Thread_Mutex mutex;
 
 private:
+  void network_change() const;
+  void add_address(const DCPS::NetworkInterface& interface,
+                   const ACE_INET_Addr& address);
+  void remove_address(const DCPS::NetworkInterface& interface,
+                      const ACE_INET_Addr& address);
+  void process_deferred();
+
+  ActiveFoundationSet active_foundations_;
+  FoundationList to_unfreeze_;
+  bool unfreeze_;
+  bool ncm_listener_added_;
   Configuration configuration_;
   size_t remote_peer_reflexive_counter_;
   typedef std::map<Endpoint*, EndpointManager*> EndpointManagerMapType;
@@ -139,3 +171,4 @@ private:
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* OPENDDS_RTPS_ICE_AGENT_IMPL_H */
+#endif /* OPENDDS_SECURITY */

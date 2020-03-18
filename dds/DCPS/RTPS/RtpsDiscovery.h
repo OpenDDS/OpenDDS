@@ -48,6 +48,28 @@ public:
     resend_period_ = period;
   }
 
+  double quick_resend_ratio() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> g(lock_);
+    return quick_resend_ratio_;
+  }
+  void quick_resend_ratio(double ratio)
+  {
+    ACE_Guard<ACE_Thread_Mutex> g(lock_);
+    quick_resend_ratio_ = ratio;
+  }
+
+  DCPS::TimeDuration min_resend_delay() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> g(lock_);
+    return min_resend_delay_;
+  }
+  void min_resend_delay(const DCPS::TimeDuration& delay)
+  {
+    ACE_Guard<ACE_Thread_Mutex> g(lock_);
+    min_resend_delay_ = delay;
+  }
+
   DCPS::TimeDuration lease_duration() const
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::TimeDuration());
@@ -345,8 +367,10 @@ public:
   }
 
 private:
-  mutable ACE_SYNCH_MUTEX lock_;
+  mutable ACE_Thread_Mutex lock_;
   DCPS::TimeDuration resend_period_;
+  double quick_resend_ratio_;
+  DCPS::TimeDuration min_resend_delay_;
   DCPS::TimeDuration lease_duration_;
   u_short pb_, dg_, pg_, d0_, d1_, dx_;
   unsigned char ttl_;
@@ -481,6 +505,7 @@ public:
   u_short get_sedp_port(DDS::DomainId_t domain,
                         const DCPS::RepoId& local_participant) const;
 
+  void spdp_rtps_relay_address(const ACE_INET_Addr& address);
   void sedp_rtps_relay_address(const ACE_INET_Addr& address);
   void sedp_stun_server_address(const ACE_INET_Addr& address);
 

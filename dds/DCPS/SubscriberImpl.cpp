@@ -53,13 +53,12 @@ SubscriberImpl::SubscriberImpl(DDS::InstanceHandle_t       handle,
   domain_id_(participant->get_domain_id()),
   raw_latency_buffer_size_(0),
   raw_latency_buffer_type_(DataCollector<double>::KeepOldest),
-  monitor_(0),
   access_depth_ (0)
 {
   //Note: OK to duplicate a nil.
   listener_ = DDS::SubscriberListener::_duplicate(a_listener);
 
-  monitor_ = TheServiceParticipant->monitor_factory_->create_subscriber_monitor(this);
+  monitor_.reset(TheServiceParticipant->monitor_factory_->create_subscriber_monitor(this));
 }
 
 SubscriberImpl::~SubscriberImpl()
@@ -272,7 +271,7 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
         GuidConverter converter(dr_servant->get_subscription_id());
         ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) SubscriberImpl::delete_datareader(%C): ")
           ACE_TEXT("will return \"%C\" because datareader %s\n"),
-          OPENDDS_STRING(converter).c_str(), retcode_to_string(rc).c_str(),
+          OPENDDS_STRING(converter).c_str(), retcode_to_string(rc),
           reason));
       }
       return rc;

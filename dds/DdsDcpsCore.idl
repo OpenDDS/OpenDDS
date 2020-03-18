@@ -428,6 +428,38 @@ module DDS {
 
 };
 
+module OpenDDS {
+  module DCPS {
+    // Make the IDL compiler produce include of zero-copy read info
+    // sequence template.
+    #pragma DCPS_SUPPORT_ZERO_COPY_READ
+
+    // OpenDDS extension built-in topic for participant
+    // network location/connection details.
+    typedef unsigned long ParticipantLocation;
+
+    typedef octet OctetGuidArray16[16];
+
+    const ParticipantLocation LOCATION_LOCAL = 0x0001 << 0;
+    const ParticipantLocation LOCATION_ICE = 0x0001 << 1;
+    const ParticipantLocation LOCATION_RELAY = 0x0001 << 2;
+
+    BUILT_IN_TOPIC_TYPE
+    struct ParticipantLocationBuiltinTopicData {
+            BUILT_IN_TOPIC_KEY OctetGuidArray16 guid;
+            ParticipantLocation location;
+            ParticipantLocation change_mask;
+            string local_addr;
+            DDS::Time_t local_timestamp;
+            string ice_addr;
+            DDS::Time_t ice_timestamp;
+            string relay_addr;
+            DDS::Time_t relay_timestamp;
+    };
+
+  };// End of module DCPS
+}; // End of module OpenDDS
+
 #undef BUILT_IN_TOPIC_TYPE
 #undef BUILT_IN_TOPIC_KEY
 

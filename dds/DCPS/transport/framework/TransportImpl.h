@@ -80,7 +80,7 @@ public:
   /// TransportImpl subclass to do the dirty work since it really
   /// is the one that knows how to populate the supplied
   /// TransportLocator object.
-  virtual bool connection_info_i(TransportLocator& local_info) const = 0;
+  virtual bool connection_info_i(TransportLocator& local_info, ConnectionInfoFlags flags) const = 0;
 
   virtual void register_for_reader(const RepoId& /*participant*/,
                                    const RepoId& /*writerid*/,
@@ -101,6 +101,10 @@ public:
   virtual void unregister_for_writer(const RepoId& /*participant*/,
                                      const RepoId& /*readerid*/,
                                      const RepoId& /*writerid*/) { }
+
+  virtual void update_locators(const RepoId& /*remote*/,
+                               const TransportLocatorSeq& /*locators*/) { }
+
 
   /// Interface to the transport's reactor for scheduling timers.
   ACE_Reactor_Timer_Interface* timer() const;
@@ -262,7 +266,7 @@ public:
   /// to a TransportInterfaceInfo object that will be "populated"
   /// with this TransportImpl's connection information (ie, how
   /// another process would connect to this TransportImpl).
-  bool connection_info(TransportLocator& local_info) const;
+  bool connection_info(TransportLocator& local_info, ConnectionInfoFlags flags) const;
 
   /// Lock to protect the config_ and reactor_task_ data members.
   mutable LockType lock_;
@@ -279,7 +283,7 @@ public:
   DataLinkCleanupTask dl_clean_task_;
 
   /// Monitor object for this entity
-  Monitor* monitor_;
+  unique_ptr<Monitor> monitor_;
 
 protected:
   /// Id of the last link established.

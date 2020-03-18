@@ -57,9 +57,6 @@ public:
   virtual void unbind_link(DataLink* link);
   TcpInst& config() const;
 
-  void add_reconnect_task(RcHandle<TcpReconnectTask> task);
-  void remove_reconnect_task(RcHandle<TcpReconnectTask> task);
-
 private:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
                                                const ConnectionAttribs& attribs,
@@ -76,7 +73,7 @@ private:
 
   virtual void shutdown_i();
 
-  virtual bool connection_info_i(TransportLocator& local_info) const;
+  virtual bool connection_info_i(TransportLocator& local_info, ConnectionInfoFlags flags) const;
 
   /// Called by the DataLink to release itself.
   virtual void release_datalink(DataLink* link);
@@ -142,8 +139,13 @@ private:
   /// Used to accept passive connections on our local_address_.
   unique_ptr<TcpAcceptor> acceptor_;
 
+  class Connector : public ACE_Connector<TcpConnection, ACE_SOCK_Connector>
+  {
+    virtual int fini();
+  };
+
   /// Open TcpConnections using non-blocking connect.
-  ACE_Connector<TcpConnection, ACE_SOCK_Connector> connector_;
+  Connector connector_;
 
   /// This is the map of connected DataLinks.
   AddrLinkMap links_;
@@ -159,16 +161,6 @@ private:
   /// This protects the connections_ and the pending_connections_
   /// data members.
   LockType connections_lock_;
-
-  /// This task is used to resolve some deadlock situation
-  /// during reconnecting.
-  /// TODO: reuse the reconnect_task in the TcpConnection
-  ///       for new connection checking.
-  unique_ptr<TcpConnectionReplaceTask> con_checker_;
-
-  typedef OPENDDS_SET( RcHandle<TcpReconnectTask> ) RC_TASK_SET;
-  RC_TASK_SET rc_tasks_;
-  LockType rc_tasks_lock_;
 };
 
 } // namespace DCPS

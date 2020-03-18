@@ -1,25 +1,108 @@
 # OpenDDS Releases
 
-## Version 3.14 of OpenDDS
-Released %TIMESTAMP%
+## Version 3.15 of OpenDDS
+OpenDDS 3.15 is currently in development, so this list might change.
 
 ### Additions:
-- Union topic types and IDL annotations for topic types (#1067):
-  - Like structures, unions can now be used to define a topic.
-  - `#pragma DCPS_DATA_TYPE` and `#pragma DCPS_DATA_KEY` are now deprecated in
-    favor of the `@topic` and `@key` IDL annotations.
-  - See section 2.1.1 of the OpenDDS 3.14 Developer's Guide for more
-    information on both of these features.
-- Monitor and the ishapes demo now use Qt5
-- Expanded Android Documentation in `docs/android.md`
-- Updated dissector to work with Wireshark 3.0
+- TODO: Add your features here
 
 ### Fixes:
-- Java API can now be used on Android
+- TODO: Add your fixes here
 
 ### Notes:
-- Removed outdated `-Gws` option of `opendds_idl`. This option produced sample
-  descriptions for the Wireshark dissector before OpenDDS v3.7.
+- TODO: Add your notes here
+
+## Version 3.14 of OpenDDS
+OpenDDS 3.14 was released on Mar  5 2020.
+
+### Additions:
+- XTypes IDL annotations for topic types, Union topic types (#1067, #1422):
+  - `#pragma DCPS_DATA_TYPE` and `#pragma DCPS_DATA_KEY` are now deprecated in
+    favor of the `@topic` and `@key` IDL annotations.
+  - Like structures, unions can now be used to define a topic.
+  - See section 2.1.1 of the OpenDDS 3.14 Developer's Guide for more
+    information on both of these features.
+  - See `docs/migrating_to_topic_type_annotations.md` for a guide on how to
+    migrate existing IDL to use topic type annotations.
+- Added a C++11 mode to opendds_idl's code generation (#954, #1030, #1379)
+- RtpsRelay, a server that assists with peer-based discovery on the internet, see the "Internet-Enabled RTPS" Chapter in the Developer's Guide (#1057, #1068, #1286, #1341)
+- Support for IETF ICE for NAT firewall traversal, see the "Internet-Enabled RTPS" Chapter in the Developer's Guide (#1069)
+- Dynamic network interface changes on supported platforms (#1365, #1551)
+- An OpenDDS-specific Built-In Topic to report network location/connection details (#1389)
+- Performance improvements to RTPS Discovery and the RTPS_UDP transport (#1045, #1177, #1138, #1202, #1251, #1260, #1262, #1265, #1324, #1402)
+- CMake package for building applications that use OpenDDS, see `docs/cmake.md` (#981)
+- Query Condition and Content-Filtered Topic can filter dispose/unregister messages (#900)
+- Support for publishing using the [Node.js module](https://www.npmjs.com/package/opendds) with V8 (#1065)
+- opendds_idl can generate code to convert IDL structures to RapidJSON (#1097, #1254)
+- Full-message protection (RTPS Protection) in DDS Security (#1280)
+- RTPS protocol version 2.4 (#1367, #1374, #1364, #1359, #1404, #1381, #1518, #1522, #1530, #1540)
+- TCP transport: configurable connection timeout (#1493)
+- A new benchmarking and performance analysis tool in `performance-tests/bench_2` (#1546)
+
+### Platform Support and Dependencies:
+- Support for Java Development Kit up to version 12 (#1137)
+- Monitor GUI and the ishapes example now use Qt5, see `docs/qt.md` (#929, #932, #1083)
+- Improved Android support, see `docs/android.md` (#1066, #1446)
+- iOS support (#1535, #1545, #1551)
+- Updated dissector to work with Wireshark 3 (#1080)
+
+### Fixes:
+- DDS Security improvements (#1310, #1482, #1531)
+- Java API can now be used on Android (#1156)
+- Support equals() and hashCode() in Java (#1331)
+- Improved Java bindings builds (#1146, #1157, #1160, #1167)
+- InconsistentTopicStatus support in RTPS Discovery (#1158, #1164)
+- Presentation QoS coherent_access (#1094)
+- RTPS_UDP transport supports combination of best effort and reliable readers of the same writer (#1449)
+- Improved support for fragmented data (#1474, #1547)
+- Topics need to be enabled to use with DataReader/Writer (#1193)
+- TCP Reconnect (#1273, #1464, #1487, #1497, #1501, #1506, #1519, #1523, #1526)
+- Shared memory transport improvements (#1301)
+- GuardCondition _narrow (#1407)
+- "make install" with DESTDIR (#1429, #1440)
+- Support for multiple transport instances in the same transport configuration (#1465)
+- The reliability QoS for DataWriters and Topics is now immutable, matching the DDS 1.4 spec (#1584)
+
+### Notes:
+- The configure script now defaults to not including tests (#1287)
+- Removed obsolete `-Gws` option in `opendds_idl`. This option produced sample
+  descriptions for the Wireshark dissector before OpenDDS v3.7. (#966, #1031)
+
+## Version 3.13.3 of OpenDDS
+Released Fri Oct 11 16:13:35 UTC 2019
+
+### Fixes:
+- Updated IDL V8 generation to use decimal strings (#1055)
+- Updated Dissector for Wireshark 3.0 (#1080)
+- Added support for Visual Studio 2019 (#1053)
+- .NET compatibility (#1096)
+- Security: improved support for DH keys (#1092)
+- Security: general updates (#1091, #1101, #1118)
+- GoogleTest version update (#1112, #1115)
+- Improved performance of GUID comparison and lookup (#1128, #1133)
+- Fixed Monitor library interaction with DomainParticipant (#1132)
+- Configure script MSVC version detection (#1141)
+- Security with some submessages encoded and some plain (#1166)
+- Receive Strategy buffer management (#1192)
+- Error check in TcpTransport::configure_i (#1209)
+- Service Participant, Reactors, and signals (#1206, #1215, #1231)
+- Modeling SDK Eclipse plugins updated to latest Eclipse (#1222)
+- Secure discovery for unregister/dispose (#1225, #1227, #1232)
+- InstanceState and reactor interceptor with reader data lifecycle (#1237, #1248)
+- Serializer: input validity check when aligning (#1239)
+- Transport framework improvements (#1249)
+- Use monotonic time for relative timeouts on platforms that support it (#1272)
+- SPDP: start counter at a random value and detect bad sequence numbers (#1274)
+
+## Version 3.13.2 of OpenDDS
+
+### Fixes:
+- Service Participant, Transport Registry, RTPS libs updated to support certain Restart scenarios (#1081)
+- Wrong entity_refs_ counter when deleting data reader in the TopicDescriptionImpl (#936)
+- Add an include required for std::back_inserter (#965)
+- DDS Security on VxWorks7 (#968)
+- Fix unregister with nil handle (#1064)
+- Install with java: Fix classpath for i2jrt.jar and i2jrt_compact.jar in .mpbs (#1079)
 
 ## Version 3.13.1 of OpenDDS
 

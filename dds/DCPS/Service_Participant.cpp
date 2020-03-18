@@ -17,11 +17,15 @@
 #include "ConfigUtils.h"
 #include "RecorderImpl.h"
 #include "ReplayerImpl.h"
+#include "NetworkConfigMonitor.h"
+#include "NetworkConfigModifier.h"
+#include "LinuxNetworkConfigMonitor.h"
 #include "StaticDiscovery.h"
 #if defined(OPENDDS_SECURITY)
 #include "security/framework/SecurityRegistry.h"
 #endif
 
+#include "ace/config.h"
 #include "ace/Singleton.h"
 #include "ace/Arg_Shifter.h"
 #include "ace/Reactor.h"
@@ -199,6 +203,7 @@ Service_Participant::Service_Participant()
     bidir_giop_(true),
     monitor_enabled_(false),
     shut_down_(false),
+    shutdown_listener_(0),
     default_configuration_file_(ACE_TEXT(""))
 {
   initialize();
@@ -249,6 +254,10 @@ Service_Participant::shutdown()
     return;
   }
 
+  if (shutdown_listener_) {
+    shutdown_listener_->notify_shutdown();
+  }
+
   shut_down_ = true;
   try {
     TransportRegistry::instance()->release();
@@ -260,6 +269,14 @@ Service_Participant::shutdown()
       dp_factory_servant_.reset();
 
       domainRepoMap_.clear();
+
+      {
+        ACE_GUARD(ACE_Thread_Mutex, guard, network_config_monitor_lock_);
+        if (network_config_monitor_) {
+          network_config_monitor_->close();
+          network_config_monitor_.reset();
+        }
+      }
 
       reactor_task_.stop();
 
@@ -460,10 +477,13 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
       got_info = true;
 
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSRTISerialization"))) != 0) {
-      Serializer::set_use_rti_serialization(ACE_OS::atoi(currentArg));
+      if (ACE_OS::atoi(currentArg) == 0) {
+        ACE_ERROR((LM_WARNING,
+          ACE_TEXT("(%P|%t) WARNING: Service_Participant::parse_args ")
+          ACE_TEXT("Argument ignored: DCPSRTISerialization is required to be enabled\n")));
+      }
       arg_shifter.consume_arg();
       got_use_rti_serialization = true;
-
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSChunks"))) != 0) {
       n_chunks_ = ACE_OS::atoi(currentArg);
       arg_shifter.consume_arg();
@@ -1476,9 +1496,13 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
     if (got_use_rti_serialization) {
       ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSRTISerialization")));
     } else {
-      bool should_use = false;
+      bool should_use = true;
       GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSRTISerialization"), should_use, bool)
-      Serializer::set_use_rti_serialization(should_use);
+      if (!should_use) {
+        ACE_ERROR((LM_WARNING,
+          ACE_TEXT("(%P|%t) WARNING: Service_Participant::load_common_configuration ")
+          ACE_TEXT("Argument ignored: DCPSRTISerialization is required to be enabled\n")));
+      }
     }
 
     if (got_chunks) {
@@ -1937,6 +1961,12 @@ Service_Participant::add_discovery(Discovery_rch discovery)
   }
 }
 
+void
+Service_Participant::set_shutdown_listener(ShutdownListener* listener)
+{
+  shutdown_listener_ = listener;
+}
+
 const Service_Participant::RepoKeyDiscoveryMap&
 Service_Participant::discoveryMap() const
 {
@@ -2020,6 +2050,42 @@ void Service_Participant::default_configuration_file(const ACE_TCHAR* path)
 {
   default_configuration_file_ = path;
 }
+
+NetworkConfigMonitor_rch Service_Participant::network_config_monitor()
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, network_config_monitor_lock_, NetworkConfigMonitor_rch());
+
+  if (!network_config_monitor_) {
+#ifdef OPENDDS_LINUX_NETWORK_CONFIG_MONITOR
+    if (DCPS_debug_level > 0) {
+      ACE_DEBUG((LM_DEBUG,
+               "%T (%P|%t) Service_Participant::network_config_monitor(). Creating LinuxNetworkConfigMonitor\n"));
+    }
+    network_config_monitor_ = make_rch<LinuxNetworkConfigMonitor>(reactor_task_.interceptor());
+#elif defined(OPENDDS_NETWORK_CONFIG_MODIFIER)
+    if (DCPS_debug_level > 0) {
+      ACE_DEBUG((LM_DEBUG,
+               "%T (%P|%t) Service_Participant::network_config_monitor(). Creating NetworkConfigModifier\n"));
+    }
+    network_config_monitor_ = make_rch<NetworkConfigModifier>();
+#endif
+
+    if (network_config_monitor_ && !network_config_monitor_->open()) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Service_Participant::network_config_monitor could not open network config monitor\n ")));
+      network_config_monitor_->close();
+      network_config_monitor_.reset();
+    }
+  }
+
+  return network_config_monitor_;
+}
+
+#ifdef OPENDDS_NETWORK_CONFIG_MODIFIER
+NetworkConfigModifier* Service_Participant::network_config_modifier()
+{
+  return dynamic_cast<NetworkConfigModifier*>(network_config_monitor().get());
+}
+#endif
 
 } // namespace DCPS
 } // namespace OpenDDS

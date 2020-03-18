@@ -40,7 +40,7 @@ public:
   size_t capacity() const;
   void bind(TransportSendStrategy* strategy);
 
-  virtual void retain_all(const RepoId& pub_id) = 0;
+  virtual void retain_all(const RepoId& pub_id);
   virtual void insert(SequenceNumber sequence,
                       TransportSendStrategy::QueueType* queue,
                       ACE_Message_Block* chain) = 0;
@@ -76,8 +76,10 @@ public:
   static const size_t UNLIMITED;
 
   void release_all();
+  typedef OPENDDS_VECTOR(BufferType) BufferVec;
   typedef OPENDDS_MAP(SequenceNumber, BufferType) BufferMap;
   void release_acked(SequenceNumber seq);
+  void remove_acked(SequenceNumber seq, BufferVec& removed);
   size_t n_chunks() const;
 
   SingleSendBuffer(size_t capacity, size_t max_samples_per_packet);
@@ -108,8 +110,9 @@ public:
                        ACE_Message_Block* chain);
 
 private:
-  void check_capacity_i();
+  void check_capacity_i(BufferVec& removed);
   void release_i(BufferMap::iterator buffer_iter);
+  void remove_i(BufferMap::iterator buffer_iter, BufferVec& removed);
 
   RemoveResult retain_buffer(const RepoId& pub_id, BufferType& buffer);
   void insert_buffer(BufferType& buffer,

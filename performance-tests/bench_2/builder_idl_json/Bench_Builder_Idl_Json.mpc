@@ -1,0 +1,28 @@
+project: dcpslib, dcps_rapidjson, ../bench_builder_idl_lib {
+  dcps_ts_flags += -Sdefault \
+                   -Wb,export_include=Bench_Builder_Idl_Json_Export.h \
+                   -Wb,export_macro=Bench_Builder_Idl_Json_Export \
+                   -Wb,cpp_include=$(BENCH_BUILDER_ROOT)/builder_idl/BuilderC.h \
+                   -Wb,cpp_include=$(BENCH_BUILDER_ROOT)/builder_idl/BuilderTypeSupportImpl.h \
+                   -Wb,cpp_include=$(BENCH_BUILDER_ROOT)/core_idl_json/DdsDcpsCoreTypeSupportImpl.h \
+                   -Wb,cpp_include=dds/DdsDcpsCoreTypeSupportImpl.h \
+                   -I$(DDS_ROOT)/dds
+
+  after += Bench_Core_Idl_Json
+  libs += Bench_Core_Idl_Json
+
+  dynamicflags  += BENCH_BUILDER_IDL_JSON_BUILD_DLL
+  includes += $(DDS_ROOT)/dds
+
+  requires += no_opendds_safety_profile
+
+  libout = $(BENCH_BUILDER_ROOT)/lib
+
+  Modify_Custom(Idl) {
+    automatic_in = 0
+  }
+
+  TypeSupport_Files {
+    ../builder_idl/Builder.idl
+  }
+}

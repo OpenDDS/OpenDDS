@@ -9,7 +9,9 @@
 
 #include "debug.h"
 
-#include "dds/DCPS/PoolAllocator.h"
+#include "PoolAllocator.h"
+
+#include <ace/Log_Msg.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -36,9 +38,13 @@ SecurityDebug::SecurityDebug()
 void
 SecurityDebug::set_all_flags_to(bool value)
 {
-  warn = value;
+  encdec_error = value;
+  encdec_warn = value;
+  encdec_debug = value;
+  auth_debug = value;
+  auth_warn = value;
+  access_warn = value;
   bookkeeping = value;
-  encdec = value;
   showkeys = value;
   chlookup = value;
 }
@@ -54,16 +60,27 @@ SecurityDebug::parse_flags(const ACE_TCHAR* flags)
     if (flag.length()) {
       if (flag == "all") {
         set_all_flags_to(true);
-      } else if (flag == "warn") {
-        warn = true;
+      } else if (flag == "encdec_error") {
+        encdec_error = true;
+      } else if (flag == "encdec_warn") {
+        encdec_warn = true;
+      } else if (flag == "encdec_debug") {
+        encdec_debug = true;
+      } else if (flag == "auth_debug") {
+        auth_debug = true;
+      } else if (flag == "auth_warn") {
+        auth_warn = true;
+      } else if (flag == "access_warn") {
+        access_warn = true;
       } else if (flag == "bookkeeping") {
         bookkeeping = true;
-      } else if (flag == "encdec") {
-        encdec = true;
       } else if (flag == "showkeys") {
         showkeys = true;
       } else if (flag == "chlookup") {
         chlookup = true;
+      } else {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) SecurityDebug::parse_flags: ")
+          ACE_TEXT("Unknown Security Debug Category: \"%C\"\n"), flag.c_str()));
       }
     }
     if (pos == OPENDDS_STRING::npos) {
@@ -76,9 +93,10 @@ SecurityDebug::parse_flags(const ACE_TCHAR* flags)
 void
 SecurityDebug::set_debug_level(unsigned level)
 {
-  warn = level > 0;
-  bookkeeping = level >= 4;
-  encdec = level >= 8;
+  access_warn = level >= 1;
+  auth_warn = encdec_error = level >= 3;
+  auth_debug = encdec_warn = bookkeeping = level >= 4;
+  encdec_debug = level >= 8;
   showkeys = level >= 9;
   chlookup = level >= 10;
 }

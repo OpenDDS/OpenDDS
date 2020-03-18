@@ -831,7 +831,6 @@ bool run_test()
                "SimpleDataReader(reader2) could not associate with writer1\n"));
     return false;
   }
-  sdr2.wait_for_assoc(writer1);
 
   const TransportLocatorSeq& part2_loc = sdr2.connection_info();
   if (part2_loc.length() < 1) {
@@ -867,11 +866,15 @@ bool run_test()
   if (!part1.send_data(writer1.entityId, seq, part2_addr)) {
     return false;
   }
+
+  reactor_wait();
+
   // this heartbeat isn't final, so reader needs to ack even if it has all data:
   if (!part1.send_hb(writer1.entityId, seq, seq, part2_addr)) {
     return false;
   }
   reactor_wait();
+  sdr2.wait_for_assoc(writer1);
 
   seq.low = 3; // #2 is the "lost" message
   if (!part1.send_data(writer1.entityId, seq, part2_addr)) {

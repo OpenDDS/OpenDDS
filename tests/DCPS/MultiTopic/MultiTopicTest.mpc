@@ -1,6 +1,0 @@
-project: dcpsexe, dcps_test, dcps_tcp, content_subscription {
-  requires += multi_topic
-  TypeSupport_Files {
-    MultiTopicTest.idl
-  }
-}

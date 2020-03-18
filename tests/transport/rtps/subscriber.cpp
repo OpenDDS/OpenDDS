@@ -40,7 +40,7 @@ public:
     : done_(false)
     , sub_id_(sub_id)
     , pub_id_(GUID_UNKNOWN)
-    , seq_()
+    , seq_(SequenceNumber::ZERO())
     , control_msg_count_(0)
   {}
 
@@ -61,6 +61,11 @@ public:
 
   void data_received(const ReceivedDataSample& sample)
   {
+    ++seq_;
+    if (seq_ == 6) {
+      ++seq_; // publisher.cpp deliberately skips #6 to test GAP generation
+    }
+
     switch (sample.header_.message_id_) {
     case SAMPLE_DATA: {
       Serializer ser(sample.sample_.get(),
@@ -78,7 +83,8 @@ public:
       }
 
       if (data.key == 99) {
-        ACE_DEBUG((LM_INFO, "data_received(): Received terminating sample\n"));
+        ACE_DEBUG((LM_INFO, "data_received() seq# = %d: terminating sample\n",
+                   sample.header_.sequence_.getValue()));
         done_ = true;
         return;
       }
@@ -91,10 +97,9 @@ public:
       ACE_TCHAR buffer[32];
       std::string timestr(ACE_TEXT_ALWAYS_CHAR(ACE_OS::ctime_r(&seconds, buffer, 32)));
       std::ostringstream oss;
-      oss << "data_received():\n\t"
+      oss << "data_received() seq# = " << sample.header_.sequence_.getValue() << "\n\t"
         "id = " << int(sample.header_.message_id_) << "\n\t"
         "timestamp = " << atv.usec() << " usec " << timestr << "\t"
-        "seq# = " << sample.header_.sequence_.getValue() << "\n\t"
         "byte order = " << sample.header_.byte_order_ << "\n\t"
         "length = " << sample.header_.message_length_ << "\n\t"
         "publication = " << OPENDDS_STRING(pub) << "\n\t"
@@ -103,14 +108,10 @@ public:
       ACE_DEBUG((LM_INFO, "%C", oss.str().c_str()));
 
       if (sample.header_.message_id_ != SAMPLE_DATA
-          || sample.header_.sequence_ != seq_++ || !sample.header_.byte_order_
+          || sample.header_.sequence_ != seq_ || !sample.header_.byte_order_
           || sample.header_.message_length_ != 533
           || pub.checksum() != GuidConverter(pub_id_).checksum()) {
         ACE_ERROR((LM_ERROR, "ERROR: DataSampleHeader malformed\n"));
-      }
-
-      if (seq_ == 2) {
-        ++seq_; // publisher.cpp deliberately skips #2 to test GAP generation
       }
 
       if (data.key != 0x09230923 || std::strlen(data.value.in()) != 520) {
@@ -143,21 +144,22 @@ public:
       }
 
       std::ostringstream oss;
+      oss << "data_received() seq# = " << sample.header_.sequence_.getValue();
       switch (sample.header_.message_id_) {
       case INSTANCE_REGISTRATION:
-        oss << "data_received(): Received Instance Registration\n\t";
+        oss << ": Instance Registration\n";
         break;
       case DISPOSE_INSTANCE:
-        oss << "data_received(): Received Dispose Instance\n\t";
+        oss << ": Dispose Instance\n";
         break;
       case UNREGISTER_INSTANCE:
-        oss << "data_received(): Received Unregister Instance\n\t";
+        oss << ": Unregister Instance\n";
         break;
       case DISPOSE_UNREGISTER_INSTANCE:
-        oss << "data_received(): Received Dispose & Unregister Instance\n\t";
+        oss << ": Dispose & Unregister Instance\n";
         break;
       }
-      oss << "data.key = " << data.key << "\n";
+      oss << "\tdata.key = " << data.key << "\n";
       ACE_DEBUG((LM_INFO, "%C", oss.str().c_str()));
       break;
     }

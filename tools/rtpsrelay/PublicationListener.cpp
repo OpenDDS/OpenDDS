@@ -5,11 +5,9 @@
 namespace RtpsRelay {
 
 PublicationListener::PublicationListener(OpenDDS::DCPS::DomainParticipantImpl* participant,
-                                         WriterEntryDataWriter_ptr writer,
-                                         const RelayAddresses& relay_addresses)
+                                         WriterEntryDataWriter_ptr writer)
   : participant_(participant)
   , writer_(writer)
-  , relay_addresses_(relay_addresses)
 {}
 
 void PublicationListener::on_data_available(DDS::DataReader_ptr reader)
@@ -33,7 +31,7 @@ void PublicationListener::on_data_available(DDS::DataReader_ptr reader)
     return;
   }
 
-  for (size_t idx = 0; idx != infos.length(); ++idx) {
+  for (CORBA::ULong idx = 0; idx != infos.length(); ++idx) {
     switch (infos[idx].instance_state) {
     case DDS::ALIVE_INSTANCE_STATE:
       write_sample(data[idx], infos[idx]);
@@ -49,9 +47,8 @@ void PublicationListener::on_data_available(DDS::DataReader_ptr reader)
 void PublicationListener::write_sample(const DDS::PublicationBuiltinTopicData& data,
                                        const DDS::SampleInfo& info)
 {
-  const OpenDDS::DCPS::RepoId id = participant_->get_repoid(info.instance_handle);
   GUID_t guid;
-  std::memcpy(&guid, &id, sizeof(GUID_t));
+  assign(guid, participant_->get_repoid(info.instance_handle));
 
   DDS::DataWriterQos data_writer_qos;
   data_writer_qos.durability = data.durability;
@@ -83,8 +80,6 @@ void PublicationListener::write_sample(const DDS::PublicationBuiltinTopicData& d
     data.type_name.in(),
     data_writer_qos,
     publisher_qos,
-
-    relay_addresses_
   };
 
   DDS::ReturnCode_t ret = writer_->write(entry, DDS::HANDLE_NIL);
@@ -95,9 +90,8 @@ void PublicationListener::write_sample(const DDS::PublicationBuiltinTopicData& d
 
 void PublicationListener::unregister_instance(const DDS::SampleInfo& info)
 {
-  const OpenDDS::DCPS::RepoId id = participant_->get_repoid(info.instance_handle);
   GUID_t guid;
-  std::memcpy(&guid, &id, sizeof(GUID_t));
+  assign(guid, participant_->get_repoid(info.instance_handle));
 
   WriterEntry entry;
   entry.guid(guid);

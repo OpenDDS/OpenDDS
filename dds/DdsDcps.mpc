@@ -72,21 +72,16 @@ project(OpenDDS_Dcps): core, coverage_optional, \
     ../MPC
     ../AUTHORS
     ../README.md
-    ../VERSION
+    ../VERSION.txt
     ../LICENSE
     ../NEWS.md
     ../rules.dds.GNU
   }
 
-  InstallData_Files {
-    gendir = bin
-    ../bin/PerlDDS
-  }
-
   verbatim(gnuace, postinstall) {
-"	echo export DDS_ROOT=$(DESTDIR)$(INSTALL_PREFIX)/share/dds> $(DESTDIR)$(INSTALL_PREFIX)/share/dds/dds-devel.sh"
+"	echo export DDS_ROOT=$(INSTALL_PREFIX)/share/dds> $(DESTDIR)$(INSTALL_PREFIX)/share/dds/dds-devel.sh"
 "	@$(MKDIR) $(DESTDIR)$(INSTALL_PREFIX)/share/dds/dds"
-"	ln -sf $(DESTDIR)$(INSTALL_PREFIX)/include/dds/Version.h $(DESTDIR)$(INSTALL_PREFIX)/share/dds/dds"
+"	ln -sf $(INSTALL_PREFIX)/include/dds/Version.h $(DESTDIR)$(INSTALL_PREFIX)/share/dds/dds"
 "	cp $(DDS_ROOT)/user_macros.GNU $(DESTDIR)$(INSTALL_PREFIX)/share/dds $(ACE_NUL_STDERR)"
 "	@$(MKDIR) $(DESTDIR)$(INSTALL_PREFIX)/$(INSTALL_LIB)/cmake/OpenDDS"
 "	cp $(DDS_ROOT)/cmake/*.cmake $(DESTDIR)$(INSTALL_PREFIX)/$(INSTALL_LIB)/cmake/OpenDDS"

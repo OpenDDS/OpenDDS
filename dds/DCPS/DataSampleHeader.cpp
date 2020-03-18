@@ -476,8 +476,7 @@ DataSampleHeader::join(const DataSampleHeader& first,
   return true;
 }
 
-const char *
-to_string(const MessageId value)
+const char* to_string(MessageId value)
 {
   switch (value) {
   case SAMPLE_DATA:
@@ -505,12 +504,14 @@ to_string(const MessageId value)
   case END_HISTORIC_SAMPLES:
     return "END_HISTORIC_SAMPLES";
   default:
-    return "Unknown";
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: to_string(MessageId): ")
+      ACE_TEXT("%d is either invalid or not recognized.\n"),
+      value));
+    return "Invalid MessageId";
   }
 }
 
-const char *
-to_string(const SubMessageId value)
+const char* to_string(SubMessageId value)
 {
   switch (value) {
   case SUBMESSAGE_NONE:
@@ -524,7 +525,10 @@ to_string(const SubMessageId value)
   case MULTICAST_NAKACK:
     return "MULTICAST_NAKACK";
   default:
-    return "Unknown";
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: to_string(SubMessageId): ")
+      ACE_TEXT("%d is either invalid or not recognized.\n"),
+      value));
+    return "Invalid SubMessageId";
   }
 }
 
@@ -607,55 +611,17 @@ OPENDDS_STRING to_string(const DataSampleHeader& value)
 
 #ifndef OPENDDS_SAFETY_PROFILE
 /// Message Id enumeration insertion onto an ostream.
-std::ostream& operator<<(std::ostream& str, const MessageId value)
+std::ostream& operator<<(std::ostream& os, const MessageId value)
 {
-  switch (value) {
-  case SAMPLE_DATA:
-    return str << "SAMPLE_DATA";
-  case DATAWRITER_LIVELINESS:
-    return str << "DATAWRITER_LIVELINESS";
-  case INSTANCE_REGISTRATION:
-    return str << "INSTANCE_REGISTRATION";
-  case UNREGISTER_INSTANCE:
-    return str << "UNREGISTER_INSTANCE";
-  case DISPOSE_INSTANCE:
-    return str << "DISPOSE_INSTANCE";
-  case GRACEFUL_DISCONNECT:
-    return str << "GRACEFUL_DISCONNECT";
-  case REQUEST_ACK:
-    return str << "REQUEST_ACK";
-  case SAMPLE_ACK:
-    return str << "SAMPLE_ACK";
-  case END_COHERENT_CHANGES:
-    return str << "END_COHERENT_CHANGES";
-  case TRANSPORT_CONTROL:
-    return str << "TRANSPORT_CONTROL";
-  case DISPOSE_UNREGISTER_INSTANCE:
-    return str << "DISPOSE_UNREGISTER_INSTANCE";
-  case END_HISTORIC_SAMPLES:
-    return str << "END_HISTORIC_SAMPLES";
-  default:
-    return str << "Unknown";
-  }
+  os << to_string(value);
+  return os;
 }
 
 /// Sub-Message Id enumeration insertion onto an ostream.
-std::ostream& operator<<(std::ostream& os, const SubMessageId rhs)
+std::ostream& operator<<(std::ostream& os, const SubMessageId value)
 {
-  switch (rhs) {
-  case SUBMESSAGE_NONE:
-    return os << "SUBMESSAGE_NONE";
-  case MULTICAST_SYN:
-    return os << "MULTICAST_SYN";
-  case MULTICAST_SYNACK:
-    return os << "MULTICAST_SYNACK";
-  case MULTICAST_NAK:
-    return os << "MULTICAST_NAK";
-  case MULTICAST_NAKACK:
-    return os << "MULTICAST_NAKACK";
-  default:
-    return os << "Unknown";
-  }
+  os << to_string(value);
+  return os;
 }
 
 /// Message header insertion onto an ostream.

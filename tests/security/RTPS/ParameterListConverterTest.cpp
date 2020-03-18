@@ -180,8 +180,8 @@ TEST(ToParamListTest, From_SPDPdiscoveredParticipantData_IdentityStatusToken)
   w1.leaseDuration = temp.leaseDuration;
 
   ParameterList p;
-  ASSERT_EQ(0, ParameterListConverter::to_param_list(w1, p));
-  ASSERT_EQ(0, ParameterListConverter::from_param_list(p, w2));
+  ASSERT_EQ(true, ParameterListConverter::to_param_list(w1, p));
+  ASSERT_EQ(true, ParameterListConverter::from_param_list(p, w2));
 
   ASSERT_EQ(0, strcmp("Property 0", w2.ddsParticipantDataSecure.identity_status_token.properties[0].name));
   ASSERT_EQ(0, strcmp("PropertyValue 0", w2.ddsParticipantDataSecure.identity_status_token.properties[0].value));

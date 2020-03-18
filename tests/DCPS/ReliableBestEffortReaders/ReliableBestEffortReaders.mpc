@@ -1,0 +1,18 @@
+project(*pub) : dcpsexe, dcps_test, dcps_rtps_udp, dcps_cm {
+  exename = publisher
+
+  Source_Files {
+    Domain.cpp
+    publisher.cpp
+  }
+}
+
+project(*sub) : dcpsexe, dcps_test, dcps_rtps_udp, dcps_cm {
+  exename = subscriber
+
+  Source_Files {
+    Domain.cpp
+    DataReaderListenerImpl.cpp
+    subscriber.cpp
+  }
+}

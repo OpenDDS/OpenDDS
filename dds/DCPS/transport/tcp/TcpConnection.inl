@@ -29,12 +29,6 @@ OpenDDS::DCPS::TcpConnection::is_connector() const
   return this->is_connector_;
 }
 
-ACE_INLINE bool
-OpenDDS::DCPS::TcpConnection::is_connected() const
-{
-  return this->connected_.value();
-}
-
 ACE_INLINE ACE_INET_Addr
 OpenDDS::DCPS::TcpConnection::get_remote_address()
 {

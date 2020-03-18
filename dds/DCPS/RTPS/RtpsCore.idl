@@ -9,6 +9,7 @@
 #define RTPS_RTPSCORE_IDL
 
 #include "dds/DdsDcpsInfoUtils.idl"
+#include "dds/DdsDcpsInfrastructure.idl"
 
 #ifdef OPENDDS_SECURITY
 #include "dds/DdsSecurityParams.idl"
@@ -83,20 +84,24 @@ module OpenDDS {
     // Section 9.3: "Mapping of the RTPS Types"
 
     /* Type used to hold a timestamp. */
-    struct Time_t { // IETF RFC 1305: time = seconds + fraction / 2^32
-      long seconds;
+    // IETF RFC 1305 (NTP format): time = seconds + fraction / 2^32
+    struct Time_t {
+      unsigned long seconds;
       unsigned long fraction;
     };
 
     // see TIME_* constants in BaseMessageTypes.h
     typedef Time_t Timestamp_t;
 
-    /* Duration_t isn't defined in the PSM. It is used to hold time-differences.
-       Should have at least nano-second resolution.  Table 9.13's row for
-       PID_PARTICIPANT_LEASE_DURATION indicates this a 2-item struct or array,
-       just like Time_t (which does have the needed resolution).  So we'll use
-       Time_t for the Duration_t datatype. */
-    typedef Time_t Duration_t;
+    /* Duration_t wasn't defined in the PSM prior to RTPS 2.4. The updated struct
+       is now the same as what we'd assumed, with the added caveat that fractional
+       seconds are now fully utilized and as such we need to make note of protocol
+       version and vendor id when interpreting this field.
+    */
+    struct Duration_t {
+      long seconds;
+      unsigned long fraction;
+    };
 
     const long LOCATOR_KIND_INVALID = -1;
     const long LOCATOR_KIND_RESERVED = 0;
@@ -132,7 +137,7 @@ module OpenDDS {
 
     // Constants for the ReliabilityKind_t::value field
     const short BEST_EFFORT = 1;
-    const short RELIABLE = 3;
+    const short RELIABLE = 2;
 
     struct KeyHash_t {
       DCPS::OctetArray16 value;
@@ -161,6 +166,7 @@ module OpenDDS {
     const IceAgentType_t ICE_LITE = 0x1;
 
     struct IceGeneral_t {
+      string key;
       IceAgentType_t agent_type;
       string username;
       string password;
@@ -173,6 +179,7 @@ module OpenDDS {
     const IceCandidateType_t ICE_RELAYED = 0x3;
 
     struct IceCandidate_t {
+      string key;
       DCPS::Locator_t locator;
       string foundation;
       unsigned long priority;
@@ -205,16 +212,20 @@ module OpenDDS {
     const BuiltinEndpointSet_t BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER =
       1 << 11;
 
+    typedef unsigned long BuiltinEndpointQos_t;
+    const BuiltinEndpointQos_t BEST_EFFORT_PARTICIPANT_MESSAGE_DATA_READER =
+      1 << 0;
+
     union Parameter;
 
     /* contains a list of Parameters, terminated with a sentinel */
     /* custom de/serializer implemented in opendds_idl: see 9.4.2.11 */
     typedef sequence<Parameter> ParameterList;
 
+    // Identifies the original writer of a forwarded message
     struct OriginalWriterInfo_t {
       DCPS::GUID_t originalWriterGUID;
       SequenceNumber_t originalWriterSN;
-      ParameterList originalWriterQos;
     };
 
     typedef unsigned short ParameterId_t;
@@ -248,26 +259,17 @@ module OpenDDS {
     const ParameterId_t PID_VENDORID = 0x0016;
     const ParameterId_t PID_UNICAST_LOCATOR = 0x002f;
     const ParameterId_t PID_MULTICAST_LOCATOR = 0x0030;
-    const ParameterId_t PID_MULTICAST_IPADDRESS = 0x0011;
     const ParameterId_t PID_DEFAULT_UNICAST_LOCATOR = 0x0031;
     const ParameterId_t PID_DEFAULT_MULTICAST_LOCATOR = 0x0048;
     const ParameterId_t PID_METATRAFFIC_UNICAST_LOCATOR = 0x0032;
     const ParameterId_t PID_METATRAFFIC_MULTICAST_LOCATOR = 0x0033;
-    const ParameterId_t PID_DEFAULT_UNICAST_IPADDRESS = 0x000c;
-    const ParameterId_t PID_DEFAULT_UNICAST_PORT = 0x000e;
-    const ParameterId_t PID_METATRAFFIC_UNICAST_IPADDRESS = 0x0045;
-    const ParameterId_t PID_METATRAFFIC_UNICAST_PORT = 0x000d;
-    const ParameterId_t PID_METATRAFFIC_MULTICAST_IPADDRESS = 0x000b;
-    const ParameterId_t PID_METATRAFFIC_MULTICAST_PORT = 0x0046;
     const ParameterId_t PID_EXPECTS_INLINE_QOS = 0x0043;
     const ParameterId_t PID_PARTICIPANT_MANUAL_LIVELINESS_COUNT = 0x0034;
     const ParameterId_t PID_PARTICIPANT_BUILTIN_ENDPOINTS = 0x0044;
     const ParameterId_t PID_PARTICIPANT_LEASE_DURATION = 0x0002;
     const ParameterId_t PID_CONTENT_FILTER_PROPERTY = 0x0035;
     const ParameterId_t PID_PARTICIPANT_GUID = 0x0050;
-    const ParameterId_t PID_PARTICIPANT_ENTITYID = 0x0051;
     const ParameterId_t PID_GROUP_GUID = 0x0052;
-    const ParameterId_t PID_GROUP_ENTITYID = 0x0053;
     const ParameterId_t PID_BUILTIN_ENDPOINT_SET = 0x0058;
     const ParameterId_t PID_PROPERTY_LIST = 0x0059;
     const ParameterId_t PID_TYPE_MAX_SIZE_SERIALIZED = 0x0060;
@@ -279,13 +281,17 @@ module OpenDDS {
     //   (the following constants are in the same order as Table 9.14)
     const ParameterId_t PID_CONTENT_FILTER_INFO = 0x0055;
     const ParameterId_t PID_COHERENT_SET = 0x0056;
-    // PID_DIRECTED_WRITE is not supported
-    //    const ParameterId_t PID_DIRECTED_WRITE = 0x0057;
+    const ParameterId_t PID_DIRECTED_WRITE = 0x0057;
     const ParameterId_t PID_ORIGINAL_WRITER_INFO = 0x0061;
 
     // ParameterId Bitmask values (Table 9.11)
     const ParameterId_t PIDMASK_VENDOR_SPECIFIC = 0x8000;
     const ParameterId_t PIDMASK_INCOMPATIBLE = 0x4000;
+
+    const ParameterId_t PID_DOMAIN_ID = 0x000f;
+    const ParameterId_t PID_DOMAIN_TAG = 0x4014;
+
+    const ParameterId_t PID_BUILTIN_ENDPOINT_QOS = 0x0077;
 
     typedef unsigned long OpenDDSParticipantFlagsBits_t;
     const OpenDDSParticipantFlagsBits_t PFLAGS_EMPTY = 0x0;
@@ -370,23 +376,6 @@ module OpenDDS {
       case PID_METATRAFFIC_MULTICAST_LOCATOR:
         DCPS::Locator_t locator;
 
-      case PID_MULTICAST_IPADDRESS:
-      case PID_DEFAULT_UNICAST_IPADDRESS:
-      case PID_METATRAFFIC_UNICAST_IPADDRESS:
-      case PID_METATRAFFIC_MULTICAST_IPADDRESS:
-        unsigned long ipv4_address;
-        //NOTE: the spec uses "IPv4Address_t" which is not defined anywhere.
-        //      We have chosen unsigned long to match the type of
-        //      the address field in the LocatorUDPv4_t struct.
-
-      case PID_DEFAULT_UNICAST_PORT:
-      case PID_METATRAFFIC_UNICAST_PORT:
-      case PID_METATRAFFIC_MULTICAST_PORT:
-        unsigned long udpv4_port;
-        //NOTE: the spec uses "Port_t" which is not defined anywhere.
-        //      We have chosen unsigned long to match the type of
-        //      the port field in the LocatorUDPv4_t struct.
-
       case PID_EXPECTS_INLINE_QOS:
         boolean expects_inline_qos;
 
@@ -406,14 +395,11 @@ module OpenDDS {
       case PID_ENDPOINT_GUID:
       case PID_GROUP_GUID:
       case PID_OPENDDS_ASSOCIATED_WRITER:
+      case PID_DIRECTED_WRITE:
         DCPS::GUID_t guid;
 
       case PID_OPENDDS_PARTICIPANT_FLAGS:
         OpenDDSParticipantFlags_t participant_flags;
-
-      case PID_PARTICIPANT_ENTITYID:
-      case PID_GROUP_ENTITYID:
-        DCPS::EntityId_t entity_id;
 
       case PID_BUILTIN_ENDPOINT_SET:
         BuiltinEndpointSet_t builtin_endpoints;
@@ -474,6 +460,15 @@ module OpenDDS {
       case PID_OPENDDS_ICE_CANDIDATE:
         IceCandidate_t ice_candidate;
 
+      case PID_DOMAIN_ID:
+        DDS::DomainId_t domainId;
+
+      case PID_DOMAIN_TAG:
+        DCPS::String256 domainTag;
+
+      case PID_BUILTIN_ENDPOINT_QOS:
+        BuiltinEndpointQos_t builtinEndpointQos;
+
       default:
         DDS::OctetSeq unknown_data;
     };
@@ -485,8 +480,10 @@ module OpenDDS {
     const octet FLAG_M = 2; // InfoReplyIp4: Multicast present
     const octet FLAG_D = 4; // Data: sample Data present
     const octet FLAG_L = 4; // Heartbeat: Liveliness
-    const octet FLAG_K_IN_FRAG = 4; // DataFrag: Key present
-    const octet FLAG_K_IN_DATA = 8; // Data: Key present
+    const octet FLAG_K_IN_FRAG = 4;  // DataFrag: Key present
+    const octet FLAG_K_IN_DATA = 8;  // Data: Key present
+    const octet FLAG_N_IN_FRAG = 8;  // DataFrag:  indicates that the SerializedPayload has non-standard encoding
+    const octet FLAG_N_IN_DATA = 16; // Data: indicates that the SerializedPayload has non-standard encoding
 
     /* all Submessages are composed of a leading SubmessageHeader */
     struct SubmessageHeader {
@@ -556,11 +553,14 @@ module OpenDDS {
     };
 
     struct ParticipantProxy_t {
+      DDS::DomainId_t domainId;
+      DCPS::String256 domainTag;
       ProtocolVersion_t protocolVersion;
       DCPS::GuidPrefix_t guidPrefix;  // optional in SPDPdiscoveredParticipantData
       VendorId_t vendorId;
       boolean expectsInlineQos;
       BuiltinEndpointSet_t availableBuiltinEndpoints;
+      BuiltinEndpointQos_t builtinEndpointQos;
       DCPS::LocatorSeq metatrafficUnicastLocatorList;
       DCPS::LocatorSeq metatrafficMulticastLocatorList;
       DCPS::LocatorSeq defaultMulticastLocatorList;

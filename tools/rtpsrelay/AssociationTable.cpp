@@ -7,18 +7,17 @@
 namespace RtpsRelay {
 
 void AssociationTable::insert(const WriterEntry& writer_entry,
-                              RelayAddressesMap& relay_addresses_map)
+                              GuidSet& guids)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-  const auto local = writer_entry.relay_addresses() == relay_addresses_;
   const auto writer_guid = guid_to_repoid(writer_entry.guid());
   const auto p = writers_.find(writer_guid);
   if (p == writers_.end()) {
-    WriterPtr writer(new Writer(writer_entry, local));
+    WriterPtr writer(new Writer(writer_entry));
     writers_[writer_guid] = writer;
-    index_.insert(writer, relay_addresses_map);
+    index_.insert(writer, guids);
   } else {
-    index_.reinsert(p->second, writer_entry, local, relay_addresses_map);
+    index_.reinsert(p->second, writer_entry, guids);
   }
 }
 
@@ -32,18 +31,17 @@ void AssociationTable::remove(const WriterEntry& writer)
 }
 
 void AssociationTable::insert(const ReaderEntry& reader_entry,
-                              RelayAddressesMap& relay_addresses_map)
+                              GuidSet& guids)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-  const auto local = reader_entry.relay_addresses() == relay_addresses_;
   const auto reader_guid = guid_to_repoid(reader_entry.guid());
   const auto p = readers_.find(reader_guid);
   if (p == readers_.end()) {
-    ReaderPtr reader(new Reader(reader_entry, reader_entry.relay_addresses() == relay_addresses_));
+    ReaderPtr reader(new Reader(reader_entry));
     readers_[reader_guid] = reader;
-    index_.insert(reader, relay_addresses_map);
+    index_.insert(reader, guids);
   } else {
-    index_.reinsert(p->second, reader_entry, local, relay_addresses_map);
+    index_.reinsert(p->second, reader_entry, guids);
   }
 }
 
@@ -56,38 +54,14 @@ void AssociationTable::remove(const ReaderEntry& reader)
   readers_.erase(pos);
 }
 
-  void AssociationTable::populate_relay_addresses_map(RelayAddressesMap& relay_addresses_map,
-                                                      const OpenDDS::DCPS::RepoId& from,
-                                                      const GuidSet& to) const
+void AssociationTable::lookup_destinations(GuidSet& to,
+                                           const OpenDDS::DCPS::RepoId& from) const
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-
   if (!to.empty()) {
-    for (const auto& guid : to) {
-      OpenDDS::DCPS::RepoId prefix(guid);
-      prefix.entityId = OpenDDS::DCPS::ENTITYID_UNKNOWN;
-
-      {
-        const auto pos = writers_.lower_bound(prefix);
-        if (pos != writers_.end() &&
-            std::memcmp(pos->first.guidPrefix, prefix.guidPrefix, sizeof(prefix.guidPrefix)) == 0) {
-          add_writer(pos->second, relay_addresses_map);
-          continue;
-        }
-      }
-
-      {
-        const auto pos = readers_.lower_bound(prefix);
-        if (pos != readers_.end() &&
-            std::memcmp(pos->first.guidPrefix, prefix.guidPrefix, sizeof(prefix.guidPrefix)) == 0) {
-          add_reader(pos->second, relay_addresses_map);
-          continue;
-        }
-      }
-    }
-
     return;
   }
+
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
   // Match on the prefix.
   OpenDDS::DCPS::RepoId prefix(from);
@@ -100,7 +74,7 @@ void AssociationTable::remove(const ReaderEntry& reader)
       index->get_readers(pos->second, readers);
     }
     for (const auto reader : readers) {
-      add_reader(reader, relay_addresses_map);
+      to.insert(reader->participant_guid());
     }
   }
 
@@ -112,7 +86,7 @@ void AssociationTable::remove(const ReaderEntry& reader)
     }
 
     for (const auto writer : writers) {
-      add_writer(writer, relay_addresses_map);
+      to.insert(writer->participant_guid());
     }
   }
 }

@@ -57,7 +57,7 @@ public:
 
   bool remove_sample(const DataSampleElement* sample);
 
-  bool remove_all_msgs(RepoId pub_id);
+  bool remove_all_msgs(const RepoId& pub_id);
 
   /// Calls send_start() on the links in link_set and also adds
   /// the links from link_set to *this.
@@ -84,6 +84,8 @@ public:
   LockType& lock() { return lock_; }
   MapType& map() { return map_; }
   //@}
+
+  void terminate_send_if_suspended();
 
 private:
 

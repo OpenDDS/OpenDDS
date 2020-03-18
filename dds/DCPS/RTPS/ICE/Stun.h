@@ -1,4 +1,3 @@
-
 /*
  *
  *
@@ -6,6 +5,7 @@
  * See: http://www.opendds.org/license.html
  */
 
+#ifdef OPENDDS_SECURITY
 #ifndef OPENDDS_RTPS_STUN_H
 #define OPENDDS_RTPS_STUN_H
 
@@ -44,6 +44,11 @@ enum Family {
 };
 
 const ACE_UINT32 MAGIC_COOKIE = 0x2112A442;
+const size_t HEADER_SIZE = 20;
+
+const ACE_UINT16 BAD_REQUEST = 400;
+const ACE_UINT16 UNAUTHORIZED = 401;
+const ACE_UINT16 UNKNOWN_ATTRIBUTE = 420;
 
 enum AttributeType {
   MAPPED_ADDRESS     = 0x0001,
@@ -65,7 +70,7 @@ enum AttributeType {
   LAST_ATTRIBUTE     = 0xFFFF
 };
 
-struct Attribute {
+struct OpenDDS_Rtps_Export Attribute {
   Attribute() : type(LAST_ATTRIBUTE), unknown_length(0) {}
 
   AttributeType type;
@@ -89,31 +94,56 @@ struct Attribute {
   ACE_UINT16 length() const;
 };
 
+OpenDDS_Rtps_Export
 Attribute make_mapped_address(const ACE_INET_Addr& addr);
+
+OpenDDS_Rtps_Export
 Attribute make_username(const std::string& username);
+
+OpenDDS_Rtps_Export
 Attribute make_message_integrity();
+
+OpenDDS_Rtps_Export
 Attribute make_error_code(ACE_UINT16 code, const std::string& reason);
+
+OpenDDS_Rtps_Export
 Attribute make_unknown_attributes(const std::vector<AttributeType>& unknown_attributes);
+
+OpenDDS_Rtps_Export
 Attribute make_xor_mapped_address(const ACE_INET_Addr& addr);
+
+OpenDDS_Rtps_Export
 Attribute make_unknown_attribute(ACE_UINT16 type, ACE_UINT16 length);
+
+OpenDDS_Rtps_Export
 Attribute make_priority(ACE_UINT32 priority);
+
+OpenDDS_Rtps_Export
 Attribute make_use_candidate();;
 
+OpenDDS_Rtps_Export
 Attribute make_fingerprint();
+
+OpenDDS_Rtps_Export
 Attribute make_ice_controlling(ACE_UINT64 ice_tie_breaker);
+
+OpenDDS_Rtps_Export
 Attribute make_ice_controlled(ACE_UINT64 ice_tie_breaker);
 
+OpenDDS_Rtps_Export
 bool operator>>(DCPS::Serializer& serializer, Attribute& attribute);
+
+OpenDDS_Rtps_Export
 bool operator<<(DCPS::Serializer& serializer, const Attribute& attribute);
 
-struct TransactionId {
+struct OpenDDS_Rtps_Export TransactionId {
   ACE_UINT8 data[12];
   bool operator<(const TransactionId& other) const;
   bool operator==(const TransactionId& other) const;
   bool operator!=(const TransactionId& other) const;
 };
 
-struct Message {
+struct OpenDDS_Rtps_Export Message {
   typedef std::vector<Attribute> AttributesType;
   typedef AttributesType::const_iterator const_iterator;
 
@@ -125,6 +155,8 @@ struct Message {
   : class_(REQUEST), method(BINDING), block(0), length_(0), length_for_message_integrity_(0) {}
 
   void generate_transaction_id();
+
+  void clear_transaction_id();
 
   void append_attribute(const Attribute& attribute)
   {
@@ -210,3 +242,4 @@ private:
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* OPENDDS_RTPS_STUN_H */
+#endif /* OPENDDS_SECURITY */

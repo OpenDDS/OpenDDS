@@ -232,7 +232,6 @@ void InstanceState::schedule_release()
 
   if (delay.sec != DDS::DURATION_INFINITE_SEC &&
       delay.nanosec != DDS::DURATION_INFINITE_NSEC) {
-    cancel_release();
 
     execute_or_enqueue(new ScheduleCommand(this, TimeDuration(delay)));
 
@@ -330,6 +329,10 @@ void InstanceState::CancelCommand::execute()
 
 void InstanceState::ScheduleCommand::execute()
 {
+  if (instance_state_->release_timer_id_ != -1) {
+    instance_state_->reactor()->cancel_timer(instance_state_);
+  }
+
   instance_state_->release_timer_id_ =
     instance_state_->reactor()->schedule_timer(instance_state_, 0, delay_.value());
 
@@ -340,7 +343,7 @@ void InstanceState::ScheduleCommand::execute()
   }
 }
 
-OPENDDS_STRING InstanceState::instance_state_string(DDS::InstanceStateKind value)
+const char* InstanceState::instance_state_string(DDS::InstanceStateKind value)
 {
   switch (value) {
   case DDS::ALIVE_INSTANCE_STATE:
@@ -354,13 +357,11 @@ OPENDDS_STRING InstanceState::instance_state_string(DDS::InstanceStateKind value
   case DDS::ANY_INSTANCE_STATE:
     return "ANY_INSTANCE_STATE";
   default:
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: OpenDDS::DCPS::InstanceState::instance_state_string(): ")
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: InstanceState::instance_state_string: ")
       ACE_TEXT("%d is either invalid or not recognized.\n"),
-      value
-    ));
+      value));
 
-    return "(Unknown Instance State: " + to_dds_string(value) + ")";
+    return "Invalid instance state";
   }
 }
 

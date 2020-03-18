@@ -78,6 +78,14 @@ public:
   /// The default is 2 seconds (2000 millseconds).
   int passive_reconnect_duration_;
 
+  /// The time period in milliseconds for the acceptor side
+  /// of a connection to wait for the connection to be established.
+  /// If not connected within this period then this link is removed
+  /// from pending and any other links are attempted.
+  /// The default is 5 seconds (5000 millseconds).
+  int active_conn_timeout_period_;
+
+
   bool is_reliable() const { return true; }
 
   /// The public address is our publicly advertised address.
@@ -87,7 +95,7 @@ public:
     return (pub_address_str_ == "") ? local_address_str_ : pub_address_str_;
   }
 
-  virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info) const;
+  virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info, ConnectionInfoFlags flags) const;
 
   OPENDDS_STRING local_address_string() const { return local_address_str_; }
   ACE_INET_Addr local_address() const { return local_address_; }

@@ -5,11 +5,9 @@
 namespace RtpsRelay {
 
 SubscriptionListener::SubscriptionListener(OpenDDS::DCPS::DomainParticipantImpl* participant,
-                                           ReaderEntryDataWriter_ptr writer,
-                                           const RelayAddresses& relay_addresses)
+                                           ReaderEntryDataWriter_ptr writer)
   : participant_(participant)
   , writer_(writer)
-  , relay_addresses_(relay_addresses)
 {}
 
 void SubscriptionListener::on_data_available(DDS::DataReader_ptr reader)
@@ -33,7 +31,7 @@ void SubscriptionListener::on_data_available(DDS::DataReader_ptr reader)
     return;
   }
 
-  for (size_t idx = 0; idx != infos.length(); ++idx) {
+  for (CORBA::ULong idx = 0; idx != infos.length(); ++idx) {
     switch (infos[idx].instance_state) {
     case DDS::ALIVE_INSTANCE_STATE:
       write_sample(data[idx], infos[idx]);
@@ -49,9 +47,8 @@ void SubscriptionListener::on_data_available(DDS::DataReader_ptr reader)
 void SubscriptionListener::write_sample(const DDS::SubscriptionBuiltinTopicData& data,
                                         const DDS::SampleInfo& info)
 {
-  const OpenDDS::DCPS::RepoId id = participant_->get_repoid(info.instance_handle);
   GUID_t guid;
-  std::memcpy(&guid, &id, sizeof(GUID_t));
+  assign(guid, participant_->get_repoid(info.instance_handle));
 
   DDS::DataReaderQos data_reader_qos;
   data_reader_qos.durability = data.durability;
@@ -80,8 +77,6 @@ void SubscriptionListener::write_sample(const DDS::SubscriptionBuiltinTopicData&
     data.type_name.in(),
     data_reader_qos,
     subscriber_qos,
-
-    relay_addresses_
   };
 
   DDS::ReturnCode_t ret = writer_->write(entry, DDS::HANDLE_NIL);
@@ -92,9 +87,8 @@ void SubscriptionListener::write_sample(const DDS::SubscriptionBuiltinTopicData&
 
 void SubscriptionListener::unregister_instance(const DDS::SampleInfo& info)
 {
-  const OpenDDS::DCPS::RepoId id = participant_->get_repoid(info.instance_handle);
   GUID_t guid;
-  std::memcpy(&guid, &id, sizeof(GUID_t));
+  assign(guid, participant_->get_repoid(info.instance_handle));
 
   ReaderEntry entry;
   entry.guid(guid);

@@ -47,4 +47,11 @@ OpenDDS::DCPS::TransportRetainedElement::owned_by_transport ()
   return true;
 }
 
+ACE_INLINE
+bool
+OpenDDS::DCPS::TransportRetainedElement::is_retained_replaced() const
+{
+  return true;
+}
+
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

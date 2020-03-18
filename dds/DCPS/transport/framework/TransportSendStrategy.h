@@ -80,7 +80,7 @@ public:
   /// (basically, an "unsend" attempt) from this strategy object.
   RemoveResult remove_sample(const DataSampleElement* sample);
 
-  void remove_all_msgs(RepoId pub_id);
+  void remove_all_msgs(const RepoId& pub_id);
 
   /// Called by our ThreadSynch object when we should be able to
   /// start sending any partial packet bytes and/or compose a new
@@ -113,6 +113,7 @@ public:
   /// This is called whenver the connection is lost and reconnect fails.
   /// It removes all samples in the backpressure queue and packet queue.
   void terminate_send(bool graceful_disconnecting = false);
+  virtual void terminate_send_if_suspended();
 
   // Moved clear() declaration below as Enums can't be foward declared.
 
@@ -284,14 +285,11 @@ public:
     MODE_TERMINATED
   };
 
-  /// Clear queued messages and messages in current packet.
-  // The API now has a defaulted mode (the default is the same as
-  // as the earlier hard-coded value).
-  // Clear locks the local mutex. In certain situations its
-  // important to set the new mode in the clear itself.
-  // Since the default is the earlier hard-coded value, this
-  // shouldn't have any impact.
-  void clear(SendMode mode = MODE_DIRECT);
+  /// Clear queued messages and messages in current packet and set the
+  /// current mode to new_mod if the current mode equals old_mode or
+  /// old_mode is MODE_NOT_SET.
+
+  void clear(SendMode new_mode, SendMode old_mode = MODE_NOT_SET);
 
   /// Access the current sending mode.
   SendMode mode() const;

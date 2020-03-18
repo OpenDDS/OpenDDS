@@ -40,6 +40,7 @@
 #include "dds/DCPS/RTPS/RtpsSecurityC.h"
 #endif
 
+#include "ace/Atomic_Op.h"
 #include "ace/Task_Ex_T.h"
 #include "ace/Thread_Mutex.h"
 #include "ace/Condition_Thread_Mutex.h"
@@ -87,7 +88,8 @@ public:
   void acknowledge();
 
   void shutdown();
-  void unicast_locators(DCPS::LocatorSeq& locators) const;
+  DCPS::LocatorSeq unicast_locators() const;
+  DCPS::LocatorSeq multicast_locators() const;
 
   // @brief return the ip address we have bound to.
   // Valid after init() call
@@ -113,12 +115,16 @@ public:
 
   bool disassociate(const ParticipantData_t& pdata);
 
+  void update_locators(const ParticipantData_t& pdata);
+
 #ifdef OPENDDS_SECURITY
   DDS::ReturnCode_t write_stateless_message(DDS::Security::ParticipantStatelessMessage& msg,
                                             const DCPS::RepoId& reader);
 
   DDS::ReturnCode_t write_volatile_message(DDS::Security::ParticipantVolatileMessageSecure& msg,
                                            const DCPS::RepoId& reader);
+
+  void write_durable_dcps_participant_secure(const DCPS::RepoId& reader);
 
   DDS::ReturnCode_t write_dcps_participant_secure(const Security::SPDPdiscoveredParticipantData& msg,
                                                   const DCPS::RepoId& part);
@@ -172,6 +178,7 @@ private:
   };
 
   Spdp& spdp_;
+  DCPS::SequenceNumber participant_secure_sequence_;
 
 #ifdef OPENDDS_SECURITY
   DDS::Security::ParticipantSecurityAttributes participant_sec_attr_;
@@ -254,8 +261,8 @@ private:
       : type_(mt), id_(id), pgmdata_(data) {}
 #endif
 
-    static OPENDDS_STRING msgTypeToString(MsgType type);
-    OPENDDS_STRING msgTypeToString() const;
+    static const char* msgTypeToString(MsgType type);
+    const char* msgTypeToString() const;
   };
 
 
@@ -264,6 +271,7 @@ private:
     Endpoint(const DCPS::RepoId& repo_id, Sedp& sedp)
       : repo_id_(repo_id)
       , sedp_(sedp)
+      , shutting_down_(false)
 #ifdef OPENDDS_SECURITY
       , participant_crypto_handle_(DDS::HANDLE_NIL)
       , endpoint_crypto_handle_(DDS::HANDLE_NIL)
@@ -304,9 +312,12 @@ private:
     }
 #endif
 
+    void shutting_down() { shutting_down_ = true; }
+
   protected:
     DCPS::RepoId repo_id_;
     Sedp& sedp_;
+    ACE_Atomic_Op<ACE_Thread_Mutex, bool> shutting_down_;
 #ifdef OPENDDS_SECURITY
     DDS::Security::ParticipantCryptoHandle participant_crypto_handle_;
     DDS::Security::NativeCryptoHandle endpoint_crypto_handle_;
@@ -315,7 +326,7 @@ private:
 
   class Writer : public DCPS::TransportSendListener, public Endpoint {
   public:
-    Writer(const DCPS::RepoId& pub_id, Sedp& sedp);
+    Writer(const DCPS::RepoId& pub_id, Sedp& sedp, ACE_INT64 seq_init = 1);
     virtual ~Writer();
 
     bool assoc(const DCPS::AssociationData& subscription);
@@ -361,13 +372,18 @@ private:
                                                     DCPS::SequenceNumber& sequence);
 
     DDS::ReturnCode_t write_dcps_participant_secure(const Security::SPDPdiscoveredParticipantData& msg,
-                                                    const DCPS::RepoId& reader,
-                                                    DCPS::SequenceNumber& sequence);
+                                                    const DCPS::RepoId& reader, DCPS::SequenceNumber& sequence);
 #endif
 
     DDS::ReturnCode_t write_unregister_dispose(const DCPS::RepoId& rid, CORBA::UShort pid = PID_ENDPOINT_GUID);
 
     void end_historic_samples(const DCPS::RepoId& reader);
+
+    const DCPS::SequenceNumber& get_seq() const
+    {
+      return seq_;
+    }
+
 
   private:
     Header header_;
@@ -387,26 +403,28 @@ private:
 
   };
 
-  Writer publications_writer_;
+  typedef DCPS::RcHandle<Writer> Writer_rch;
+
+  Writer_rch publications_writer_;
 
 #ifdef OPENDDS_SECURITY
-  Writer publications_secure_writer_;
+  Writer_rch publications_secure_writer_;
 #endif
 
-  Writer subscriptions_writer_;
+  Writer_rch subscriptions_writer_;
 
 #ifdef OPENDDS_SECURITY
-  Writer subscriptions_secure_writer_;
+  Writer_rch subscriptions_secure_writer_;
 #endif
 
-  Writer participant_message_writer_;
+  Writer_rch participant_message_writer_;
 
 #ifdef OPENDDS_SECURITY
-  Writer participant_message_secure_writer_;
-  Writer participant_stateless_message_writer_;
-  Writer dcps_participant_secure_writer_;
+  Writer_rch participant_message_secure_writer_;
+  Writer_rch participant_stateless_message_writer_;
+  Writer_rch dcps_participant_secure_writer_;
 
-  Writer participant_volatile_message_secure_writer_;
+  Writer_rch participant_volatile_message_secure_writer_;
 #endif
 
   class Reader
@@ -416,7 +434,6 @@ private:
   public:
     Reader(const DCPS::RepoId& sub_id, Sedp& sedp)
       : Endpoint(sub_id, sedp)
-      , shutting_down_(false)
     {}
 
     virtual ~Reader();
@@ -431,8 +448,6 @@ private:
     void notify_subscription_reconnected(const DCPS::WriterIdSeq&) {}
     void notify_subscription_lost(const DCPS::WriterIdSeq&) {}
     void remove_associations(const DCPS::WriterIdSeq&, bool) {}
-
-    ACE_Atomic_Op<ACE_SYNCH_MUTEX, bool> shutting_down_;
   };
 
   typedef DCPS::RcHandle<Reader> Reader_rch;
@@ -472,7 +487,7 @@ private:
     }
     ~Task();
 
-    void enqueue(DCPS::MessageId id, DCPS::unique_ptr<ParticipantData_t> pdata);
+    void enqueue(DCPS::MessageId id, DCPS::unique_ptr<ParticipantData_t> pdata, bool bSecureParticipant = false);
 
     void enqueue(DCPS::MessageId id, DCPS::unique_ptr<DiscoveredPublication> wdata);
     void enqueue(DCPS::MessageId id, DCPS::unique_ptr<DiscoveredSubscription> rdata);
@@ -652,9 +667,6 @@ private:
                     const DCPS::RepoId& writer, const DCPS::RepoId& reader);
 #endif
 
-  static DCPS::RepoId make_id(const DCPS::RepoId& participant_id,
-                              const EntityId_t& entity);
-
   static void set_inline_qos(DCPS::TransportLocatorSeq& locators);
 
   void write_durable_publication_data(const DCPS::RepoId& reader, bool secure);
@@ -817,6 +829,9 @@ private:
   ACE_Condition_Thread_Mutex cond_;
   unsigned int acks_;
 };
+
+bool locators_changed(const ParticipantProxy_t& x,
+                      const ParticipantProxy_t& y);
 
 }
 }

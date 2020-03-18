@@ -45,10 +45,10 @@ struct RelayAddressesLessThan {
 
 struct GuidAddr {
   OpenDDS::DCPS::RepoId guid;
-  std::string address;
+  ACE_INET_Addr address;
 
   GuidAddr() : guid(OpenDDS::DCPS::GUID_UNKNOWN) {}
-  GuidAddr(const OpenDDS::DCPS::RepoId& a_guid, const std::string& a_address)
+  GuidAddr(const OpenDDS::DCPS::RepoId& a_guid, const ACE_INET_Addr& a_address)
     : guid(a_guid)
     , address(a_address)
   {}
@@ -72,6 +72,18 @@ struct GuidAddr {
     return address < other.address;
   }
 };
+
+inline void assign(EntityId_t& eid, const OpenDDS::DCPS::EntityId_t& a_eid)
+{
+  std::memcpy(&eid._entityKey[0], a_eid.entityKey, sizeof(a_eid.entityKey));
+  eid.entityKind(a_eid.entityKind);
+}
+
+inline void assign(GUID_t& guid, const OpenDDS::DCPS::RepoId& a_guid)
+{
+  std::memcpy(&guid._guidPrefix[0], a_guid.guidPrefix, sizeof(a_guid.guidPrefix));
+  assign(guid.entityId(), a_guid.entityId);
+}
 
 }
 

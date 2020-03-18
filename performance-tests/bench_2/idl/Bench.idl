@@ -1,0 +1,239 @@
+#include "Builder.idl"
+#include "dds/DdsDcpsGuid.idl"
+
+module Bench {
+
+  struct UniqueId {
+    unsigned long long high;
+    unsigned long long low;
+  };
+
+  typedef sequence<octet> OctetSeq;
+
+// ---
+// Data Section
+// ---
+
+#pragma DCPS_DATA_TYPE "Bench::Data"
+#pragma DCPS_DATA_KEY  "Bench::Data id.high"
+#pragma DCPS_DATA_KEY  "Bench::Data id.low"
+  struct Data {
+    UniqueId id;
+    unsigned long msg_count;
+    unsigned long total_hops;
+    unsigned long hop_count;
+    Builder::TimeStamp created_time;
+    Builder::TimeStamp sent_time;
+    OctetSeq buffer;
+  };
+
+// ---
+// Action Section
+// ---
+
+  struct ActionConfig {
+    string name;
+    string type;
+    Builder::PropertySeq params;
+    Builder::StringSeq readers;
+    Builder::StringSeq writers;
+  };
+
+  typedef sequence<ActionConfig> ActionConfigSeq;
+
+  struct ActionReport {
+    Builder::PropertySeq properties;
+  };
+
+  typedef sequence<ActionReport> ActionReportSeq;
+
+// ---
+// Worker Section
+// ---
+
+  struct WorkerConfig {
+    Builder::TimeStamp create_time;
+    Builder::TimeStamp enable_time;
+    Builder::TimeStamp start_time;
+    Builder::TimeStamp stop_time;
+    Builder::TimeStamp destruction_time;
+    Builder::PropertySeq properties;
+    Builder::ProcessConfig process;
+    ActionConfigSeq actions;
+    ActionReportSeq action_reports;
+  };
+
+  struct WorkerReport {
+    Builder::TimeStamp construction_time;
+    Builder::TimeStamp enable_time;
+    Builder::TimeStamp start_time;
+    Builder::TimeStamp stop_time;
+    Builder::TimeStamp destruction_time;
+
+    Builder::ProcessReport process_report;
+
+    // Discovery Stats
+    unsigned long undermatched_readers;
+    unsigned long undermatched_writers;
+    Builder::TimeStamp max_discovery_time_delta;
+
+    // Latency Stats
+    unsigned long long latency_sample_count;
+    double latency_min;
+    double latency_max;
+    double latency_mean;
+    double latency_var_x_sample_count;
+    double latency_stdev;
+    double latency_weighted_median;
+    unsigned long long latency_weighted_median_overflow;
+
+    // Jitter Stats
+    unsigned long long jitter_sample_count;
+    double jitter_min;
+    double jitter_max;
+    double jitter_mean;
+    double jitter_var_x_sample_count;
+    double jitter_stdev;
+    double jitter_weighted_median;
+    unsigned long long jitter_weighted_median_overflow;
+
+    // Round-Trip Latency Stats
+    unsigned long long round_trip_latency_sample_count;
+    double round_trip_latency_min;
+    double round_trip_latency_max;
+    double round_trip_latency_mean;
+    double round_trip_latency_var_x_sample_count;
+    double round_trip_latency_stdev;
+    double round_trip_latency_weighted_median;
+    unsigned long long round_trip_latency_weighted_median_overflow;
+
+    // Round-Trip Jitter Stats
+    unsigned long long round_trip_jitter_sample_count;
+    double round_trip_jitter_min;
+    double round_trip_jitter_max;
+    double round_trip_jitter_mean;
+    double round_trip_jitter_var_x_sample_count;
+    double round_trip_jitter_stdev;
+    double round_trip_jitter_weighted_median;
+    unsigned long long round_trip_jitter_weighted_median_overflow;
+  };
+
+  /*
+   * Interface between the Test Controller and the Node Controllers
+   */
+  module NodeController {
+    typedef OpenDDS::DCPS::GUID_t NodeId;
+    typedef unsigned long WorkerId;
+
+    const short default_control_domain = 89;
+
+    enum StateEnum {
+      AVAILABLE,
+      BUSY
+    };
+
+#pragma DCPS_DATA_TYPE "Bench::NodeController::Status"
+#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.guidPrefix[11]"
+#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.guidPrefix[10]"
+#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.guidPrefix[9]"
+#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.guidPrefix[8]"
+#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.guidPrefix[7]"
+#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.guidPrefix[6]"
+#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.guidPrefix[5]"
+#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.guidPrefix[4]"
+#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.guidPrefix[3]"
+#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.guidPrefix[2]"
+#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.guidPrefix[1]"
+#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.guidPrefix[0]"
+#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.entityId.entityKey[2]"
+#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.entityId.entityKey[1]"
+#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.entityId.entityKey[0]"
+#pragma DCPS_DATA_KEY "Bench::NodeController::Status node_id.entityId.entityKind"
+    struct Status {
+      NodeId node_id;
+      StateEnum state;
+      // Optional Human Friendly Name
+      string name;
+    };
+    const string status_topic_name = "Node_Controller_Status";
+
+    struct WorkerConfig {
+      // JSON Serialized Bench::WorkerConfig
+      string config;
+      // Number of workers to spawn using this config (Must be >=1)
+      unsigned long count;
+      // If count > 1, then this is were the range of worker ids start
+      WorkerId worker_id;
+    };
+    typedef sequence<WorkerConfig> WorkerConfigs;
+
+#pragma DCPS_DATA_TYPE "Bench::NodeController::Config"
+    struct Config {
+      NodeId node_id;
+      /*
+       * Number of seconds to wait for workers to finish before reporting them
+       * as failed. 0 means never timeout.
+       */
+      unsigned long timeout;
+      WorkerConfigs workers;
+    };
+    const string config_topic_name = "Node_Controller_Config";
+    typedef sequence<Config> Configs;
+
+#pragma DCPS_DATA_TYPE "Bench::NodeController::Report"
+    struct Report {
+      NodeId node_id;
+      WorkerId worker_id;
+      boolean failed;
+      // JSON Serialized Bench::WorkerReport
+      string details;
+      string log;
+    };
+    const string report_topic_name = "Node_Controller_Report";
+  };
+
+  /*
+   * Scenario Format for the Test Controller
+   */
+  module TestController {
+    struct WorkerPrototype {
+      // Filename of the JSON Serialized Bench::WorkerConfig
+      string config;
+      // Number of workers to spawn using this prototype (Must be >=1)
+      unsigned long count;
+    };
+    typedef sequence<WorkerPrototype> WorkerPrototypes;
+
+    struct NodePrototype {
+      WorkerPrototypes workers;
+      // Number of Nodes to spawn using this prototype (Must be >=1)
+      unsigned long count;
+      // This NodePrototype must have a Node to itself
+      boolean exclusive;
+    };
+    typedef sequence<NodePrototype> NodePrototypes;
+
+    // This is the type of the scenario configuration
+    struct ScenarioPrototype {
+      // Unused Metadata
+      string name;
+      string desc;
+      // Workers that must be deployed in sets
+      NodePrototypes nodes;
+      // Workers that can be assigned to any node
+      WorkerPrototypes any_node;
+      /*
+       * Number of seconds to wait for the scenario to end before deeming it
+       * hopeless. 0 means never timeout.
+       */
+      unsigned long timeout;
+    };
+
+    // Result of Applying a Scenario Prototype to a List of Discovered Nodes
+    struct AllocatedScenario {
+      NodeController::Configs configs;
+      unsigned long expected_reports;
+      unsigned long timeout;
+    };
+  };
+};

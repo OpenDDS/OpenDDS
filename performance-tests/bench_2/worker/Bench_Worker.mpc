@@ -1,0 +1,6 @@
+project: ../bench_builder_exe, ../bench_exe {
+  exename = worker
+
+  libs  += OpenDDS_Rtps_Udp OpenDDS_Udp OpenDDS_Tcp OpenDDS_Multicast
+  after += OpenDDS_Rtps_Udp OpenDDS_Udp OpenDDS_Tcp OpenDDS_Multicast
+}

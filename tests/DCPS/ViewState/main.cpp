@@ -550,7 +550,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
             ACE_ERROR ((LM_ERROR,
               ACE_TEXT("(%P|%t) ERROR: expected an invalid data sample (dispose notification), instance state is %C.\n"),
               OpenDDS::DCPS::InstanceState::instance_state_string(
-                info4[2].instance_state).c_str()));
+                info4[2].instance_state)));
             test_failed = 1;
           }
 

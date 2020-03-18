@@ -25,7 +25,7 @@ use warnings;
 ## Version of OCI's TAO to download
 my $oci_tao_version = '2.2a';
 ## Version of DOC Group ACE/TAO to download, uses the ACE version number
-my $doc_tao_version = '6.5.6';
+my $doc_tao_version = '6.5.8';
 
 my $backup_timestamp = strftime "%Y-%m-%d-%H-%M-%S", localtime time;
 
@@ -100,17 +100,31 @@ my %platforminfo =
                             ],
                 },
    'android' => {
-     'libpath' => 'LD_LIBRARY_PATH',
-     'aceplatform' => 'android',
-     'aceconfig' => 'android',
-     'no_host' => 1,
-     'usage' => [
-       "Use --macros=ANDROID_ABI=<ARCH> to specify the target archtecture.",
-       "Defaults to armeabi-v7a which is 32-bit ARMv7.",
-       "See docs/android.md for details.",
-     ],
-     'needs_i2jrt_corba' => 1,
-   },
+                  'libpath' => 'LD_LIBRARY_PATH',
+                  'aceplatform' => 'android',
+                  'aceconfig' => 'android',
+                  'no_host' => 1,
+                  'usage' => [
+                      "Use --macros=ANDROID_ABI=<ARCH> to specify the",
+                      "target architecture.",
+                      "Defaults to armeabi-v7a which is 32-bit ARMv7.",
+                      "See docs/android.md for details.",
+                    ],
+                  'needs_i2jrt_corba' => 1,
+                  'java_platform' => 'android',
+                },
+    'ios' => {
+                'compilers' => ['clang++'],
+                'libpath' => 'DYLD_LIBRARY_PATH',
+                'no_host' => 1,
+                'aceconfig' => 'macosx-iOS',
+                'aceplatform' => 'macosx_iOS',
+                'usage' => [
+                    "Use --macros=IPHONE_TARGET=SIMULATOR or",
+                    "--macros=IPHONE_TARGET=HARDWARE",
+                    "to specify the target architecture."
+                  ],
+              }
   );
 
 sub targetUsage {
@@ -154,8 +168,9 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'std=s', 'C++ standard version (for compilers that use -std)',
     'target=s', 'Cross-compile target (none): see --target-help',
     'target-compiler=s', 'Compiler for target (if req\'d): see --target-help',
-    'host-tools=s', 'DDS_ROOT of host tools for cross compile' .
-      $argIndent . '(build them)',
+    'host-tools=s', 'DDS_ROOT of host tools for cross compile (build)',
+    'host-ace=s', 'Define host ACE_ROOT (uses relative path from' .
+      $argIndent . 'target DDS_ROOT to target ACE_ROOT)',
     'host-tools-only!', 'Just build the host tools (no)',
     'prefix=s', 'Installation prefix (none)',
    ],
@@ -170,8 +185,9 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'ace=s', 'ACE (use ACE_ROOT, ACE_wrappers, or download)',
     'tao=s', 'TAO (use TAO_ROOT, ACE_ROOT/TAO, or download)',
     'mpc=s', 'MPC (use MPC_ROOT, ACE_ROOT/MPC, or download)',
-    'doc-group|doc_group!', 'Use the DOC Group release of TAO',
-    'ace-github-latest!', 'Clone latest ACE/TAO/MPC from GitHub',
+    'doc-group|doc_group!', 'Use the DOC Group release of TAO (no)',
+    'ace-github-latest!', 'Clone latest ACE/TAO/MPC from GitHub (no)',
+    'force-ace-tao', 'Force configuration of ACE/TAO (no)',
    ],
    ['Advanced configuration:',
     'configh=s@', 'Extra text for config.h',
@@ -195,7 +211,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'wireshark-build|wireshark_build=s', 'Wireshark CMake Build Location',
     'wireshark-lib|wireshark_lib=s',
       'Optional Wireshark CMake libraries location' .
-      $argIndent .'relative to wireshark-build (guesses)',
+      $argIndent . 'relative to wireshark-build (guesses)',
     'glib:s', 'GLib for Wireshark (use GLIB_ROOT or system pkg)',
     '<default>rapidjson:s',
       'RapidJSON for Wireshark dissector and JSON' .
@@ -211,8 +227,9 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'cmake:s', 'Path to cmake binary for compiling Google Test' .
       $argIndent . 'Framework. (Check Path and Check Normal' .
       $argIndent . 'Locations)',
-    'gtest:s', 'Path to Google Test Framework, required for' .
-      $argIndent . 'tests (uses GTEST_ROOT or system package)',
+    'gtest=s', 'Path to Google Test Framework, required for' .
+      $argIndent . 'tests (uses GTEST_ROOT).' .
+      $argIndent . 'If not built, will try to build using CMake.',
    ],
    ['Optional OpenDDS features:',
     'built-in-topics!', 'Built-in Topics (yes)',
@@ -225,9 +242,8 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'object-model-profile!', 'Object Model Profile (yes)',
     'persistence-profile!', 'Persistence Profile (yes)',
     'safety-profile:s', 'Safety Profile: base or extended (none)',
-    'tests!', 'Build tests, examples, and performance tests' .
-      $argIndent . '(yes) Implies --gtest as tests require Google' .
-      $argIndent . 'Test and --cmake',
+    'tests!', 'Build tests, examples, and performance tests (no)' .
+      $argIndent . 'Requires --gtest if missing git submodule',
     'security!', 'DDS Security plugin (no) Implies --openssl and' .
       $argIndent . '--xerces3',
    ],
@@ -338,6 +354,7 @@ my %opts = %{parseArgs()};
 
 my $debug = exists $opts{'debug'} ? $opts{'debug'} : 1;
 my $backup = exists $opts{'backup'} ? $opts{'backup'} : 1;
+my $force_ace_tao = exists $opts{'force-ace-tao'} ? $opts{'force-ace-tao'} : 0;
 
 $opts{'host'} = perlOS_to_host() unless $opts{'host'};
 
@@ -346,11 +363,11 @@ my $is_windows = $opts{'host'} eq 'win32';
 my ($slash, $exeext) = $is_windows ? ('\\', '.exe') : ('/', '');
 
 my %specific =
-  ($slash eq '/' ?
-   ('ext' => 'sh', 'export' => 'export', 'pathsep' => ':', 'refpre' => '${',
-    'refpost' => '}', 'comment' => '#') :
+  ($is_windows ?
    ('ext' => 'cmd', 'export' => 'set', 'pathsep' => ';', 'refpre' => '%',
-    'refpost' => '%', 'comment' => '::')
+    'refpost' => '%', 'comment' => '::') :
+   ('ext' => 'sh', 'export' => 'export', 'pathsep' => ':', 'refpre' => '${',
+    'refpost' => '}', 'comment' => '#')
   );
 
 sub which {
@@ -373,6 +390,78 @@ sub addCurLibPathRef {
   my $libpathname = $platforminfo{$platform}->{'libpath'};
   my $curLibPathRef = $specific{'refpre'} . $libpathname . $specific{'refpost'};
   $buildEnvRef->{$libpathname} = $curLibPathRef;
+}
+
+sub run_command {
+  my $command_ref = shift;
+  my @command = @{$command_ref};
+  my $command_str = join(' ', @command);
+  my %args = (
+    DUMP_OUTPUT_ON_ERROR => 0,
+    @_,
+  );
+
+  if ($opts{'dry-run'}) {
+    print "Dry-run: Would run \"$command_str\"\n";
+    return 0;
+  }
+
+  print "Running \"$command_str\"\n" if $opts{'verbose'};
+  my $saved_stdout;
+  my $saved_stderr;
+  my $tmp_fd;
+  my $tmp_path;
+
+  if ($args{DUMP_OUTPUT_ON_ERROR}) {
+    ($tmp_fd, $tmp_path) = File::Temp::tempfile();
+    open($saved_stdout, '>&', STDOUT);
+    open(STDOUT, '>&', $tmp_fd);
+    open($saved_stderr, '>&', STDERR);
+    open(STDERR, '>&', $tmp_fd);
+  }
+
+  my $failed = system(@command) ? 1 : 0;
+  my $system_status = $?;
+  my $system_error = $!;
+
+  if ($args{DUMP_OUTPUT_ON_ERROR}) {
+    open(STDOUT, '>&', $saved_stdout);
+    open(STDERR, '>&', $saved_stderr);
+    close($tmp_fd);
+  }
+
+  if ($failed) {
+    my $error_message;
+    my $ran = 1;
+    if ($system_status == -1) {
+      $error_message = "Failed to Run: $system_error";
+      $ran = 0;
+    }
+    elsif ($system_status & 127) {
+      $error_message = sprintf("Exited on Signal %d", ($system_status & 127));
+      $error_message .= " and Created Coredump" if ($system_status & 128);
+    }
+    else {
+      $error_message = sprintf("Returned %d", $system_status >> 8);
+    }
+    print STDERR "Command \"$command_str\" $error_message\n";
+
+    if ($ran and $args{DUMP_OUTPUT_ON_ERROR}) {
+      open($tmp_fd, $tmp_path);
+      print STDERR "Dumping Output from Failed Command\n";
+      while (my $line = <$tmp_fd>) {
+        print STDERR "$line";
+      }
+      print STDERR "\nEnd of Dumped Output from Failed Command\n";
+      close($tmp_fd);
+    }
+  }
+
+  if ($args{DUMP_OUTPUT_ON_ERROR}) {
+    unlink($tmp_path);
+  }
+
+  return $failed;
 }
 
 my $curpathRef = $specific{'refpre'} . 'PATH' . $specific{'refpost'};
@@ -423,7 +512,7 @@ if (defined $opts{'safety-profile'} && $opts{'safety-profile'} eq '') {
   $opts{'safety-profile'} = 'extended';
 }
 
-my $build_host_tools;
+my $build_host_tools = 0;
 if ($opts{'host'} ne $opts{'target'} || $opts{'safety-profile'}) {
   $build_host_tools = !$opts{'host-tools'};
   print "Cross-compile build " .
@@ -431,6 +520,7 @@ if ($opts{'host'} ne $opts{'target'} || $opts{'safety-profile'}) {
     if $opts{'verbose'};
   $cross_compile = 1;
 }
+my $has_host_compiler = $build_host_tools || !$cross_compile;
 
 if ($platforminfo{$opts{'target'}}->{'compiler_root_env'}) {
   # This target puts its cross-compiler in the PATH before the host compiler,
@@ -449,43 +539,44 @@ if (!exists $platforminfo{$opts{'target'}}->{'needs_i2jrt_corba'}) {
 
 ## compiler
 
-if ($opts{'compiler'}) {
-  my $standard = 0;
-  for my $stdcomp (@{$platforminfo{$opts{'host'}}->{'compilers'}}) {
-    $standard = 1 if $opts{'compiler'} eq $stdcomp;
+if ($has_host_compiler) {
+  if ($opts{'compiler'}) {
+    my $standard = 0;
+    for my $stdcomp (@{$platforminfo{$opts{'host'}}->{'compilers'}}) {
+      $standard = 1 if $opts{'compiler'} eq $stdcomp;
+    }
+    $opts{'nonstdcompiler'} = 1 unless $standard;
   }
-  $opts{'nonstdcompiler'} = 1 unless $standard;
-}
-else {
-  print "Auto-detecting compiler\n" if $opts{'verbose'};
-  for my $stdcomp (@{$platforminfo{$opts{'host'}}->{'compilers'}}) {
-    my $path = which($stdcomp);
-    if ($path) {
-      print "Found $stdcomp at: $path\n" if $opts{'verbose'};
-      $opts{'compiler'} = $stdcomp;
-      last;
+  else {
+    print "Auto-detecting compiler\n" if $opts{'verbose'};
+    for my $stdcomp (@{$platforminfo{$opts{'host'}}->{'compilers'}}) {
+      my $path = which($stdcomp);
+      if ($path) {
+        print "Found $stdcomp at: $path\n" if $opts{'verbose'};
+        $opts{'compiler'} = $stdcomp;
+        last;
+      }
+    }
+    if (!defined $opts{'compiler'}) {
+      die "ERROR: Can't find a compiler, set PATH or run this script with the ".
+        "--compiler option.\n" . ($is_windows ? "  For Microsoft Visual C++, ".
+                                  "run this script from the Visual Studio ".
+                                  "Command Prompt.\n" : '') . "Stopped";
     }
   }
-  if (!defined $opts{'compiler'}) {
-    die "ERROR: Can't find a compiler, set PATH or run this script with the ".
-      "--compiler option.\n" . ($is_windows ? "  For Microsoft Visual C++, ".
-                                "run this script from the Visual Studio ".
-                                "Command Prompt.\n" : '') . "Stopped";
-  }
-}
-print "compiler is: $opts{'compiler'}\n" if $opts{'verbose'};
+  print "compiler is: $opts{'compiler'}\n" if $opts{'verbose'};
 
-if ($opts{'compiler'} =~ /cl(\.exe)?$/i) {
-  my $savepath = $ENV{'PATH'};
-  my $clpath = which($opts{'compiler'});
-  if ($clpath) {
-    $clpath =~ s/vc\\bin(\\(x86_)?amd64)?/common7\\ide/i;
-    $ENV{'PATH'} .= ";$clpath";
-  }
+  if ($opts{'compiler'} =~ /cl(\.exe)?$/i) {
+    my $savepath = $ENV{'PATH'};
+    my $clpath = which($opts{'compiler'});
+    if ($clpath) {
+      $clpath =~ s/vc\\bin(\\(x86_)?amd64)?/common7\\ide/i;
+      $ENV{'PATH'} .= ";$clpath";
+    }
 
-  # Have CL Tell Us Its Target Architecture and Version
-  my ($tmp_fd, $tmp_filename) = File::Temp::tempfile();
-  my $cl_check = << "EOF";
+    # Have CL Tell Us Its Target Architecture and Version
+    my ($tmp_fd, $tmp_filename) = File::Temp::tempfile();
+    my $cl_check = << "EOF";
 #ifdef _M_X64
 #  define ARCH x64
 #elif defined(_M_IX86)
@@ -499,73 +590,74 @@ if ($opts{'compiler'} =~ /cl(\.exe)?$/i) {
 #endif
 CL is _MSC_VER ARCH
 EOF
-  print $tmp_fd $cl_check;
-  close($tmp_fd);
-  my $cl_command = "\"$opts{'compiler'}\" /EP $tmp_filename 2>&1";
-  print "Running $cl_command\n" if $opts{'verbose'};
-  open(my $cl_out_fd, "-|", $cl_command)
-    or die "ERROR: Could not detect Visual C++ version, try running this ".
-      "script from the Visual Studio Command Prompt.\nStopped";
-  my $ver = 0;
-  my $arch = '';
-  while (my $line = <$cl_out_fd>) {
-    chomp ($line);
-    print "CL says: $line\n" if $opts{'verbose'};
-    # Convert _MSC_VER to the form \d+\.\d
-    if ($line =~ /^CL is (\d+)\d (\w+)$/) {
-      $ver = int($1) / 10;
-      $arch = $2;
-      last;
+    print $tmp_fd $cl_check;
+    close($tmp_fd);
+    my $cl_command = "\"$opts{'compiler'}\" /EP $tmp_filename 2>&1";
+    print "Running $cl_command\n" if $opts{'verbose'};
+    open(my $cl_out_fd, "-|", $cl_command)
+      or die "ERROR: Could not detect Visual C++ version, try running this ".
+        "script from the Visual Studio Command Prompt.\nStopped";
+    my $ver = 0;
+    my $arch = '';
+    while (my $line = <$cl_out_fd>) {
+      chomp ($line);
+      print "CL says: $line\n" if $opts{'verbose'} && $line !~ /^\s*$/;
+      # Convert _MSC_VER to the form \d+\.\d
+      if ($line =~ /^CL is (\d+)\d (\w+)$/) {
+        $ver = int($1) / 10;
+        $arch = $2;
+        last;
+      }
     }
-  }
-  close($cl_out_fd);
-  unlink($tmp_filename)
-    or warn "Unable to delete temporary file $tmp_filename: $!";
-  print "CL Version is $ver, architecture is $arch\n" if $opts{'verbose'};
-  if (!$ver && !$arch) {
-    die "cl version probe failed, invalid output from cl\nStopped";
-  }
-  if ($arch eq 'Unknown') {
-    die "cl version probe failed, no known architecture macro was defined\nStopped";
-  }
-  if (!exists $platforminfo{'win32'}->{'cl_archs'}->{$arch}) {
-    die "cl version probe failed, invalid architecture \"$arch\"\nStopped";
-  }
-  if (!$platforminfo{'win32'}->{'cl_archs'}->{$arch}) {
-    die "ERROR: Windows for $arch isn't supported\nStopped";
-  }
-  if (!exists $platforminfo{'win32'}->{'cl_versions'}->{$ver}) {
-    die "ERROR: Unknown or unsupported Visual C++ compiler version: $ver\n"
-      . "Stopped";
-  }
-
-  $opts{'compiler_version'} = $platforminfo{'win32'}->{'cl_versions'}->{$ver};
-  $opts{'compiler_target_architecture'} = $arch;
-
-  if ($ver >= 19) {
-    push(@{$opts{'features'}}, 'no_cxx11=0');
-    print "Visual C++ has C++11 support\n" if $opts{'verbose'};
-  }
-  $ENV{'PATH'} = $savepath;
-  print "Detected Visual C++ version: $opts{'compiler_version'}\n"
-    if $opts{'verbose'};
-}
-elsif ($opts{'compiler'} =~ /g\+\+/) {
-  if ($opts{'std'}) {
-    push(@{$opts{'macros'}}, 'CCFLAGS += -std=' . $opts{'std'});
-    print "Added platform_macros for -std=$opts{std}\n" if $opts{'verbose'};
-  }
-  else {
-    my $ver = `$opts{'compiler'} --version`;
-    if ($ver =~ /\(.*\) (\d+)\.\d+/ && $1 >= 6) {
-      $opts{'std'} = 'gnu++14';
-      print "Detected GCC >=6, default -std=gnu++14\n" if $opts{'verbose'};
+    close($cl_out_fd);
+    unlink($tmp_filename)
+      or warn "Unable to delete temporary file $tmp_filename: $!";
+    print "CL Version is $ver, architecture is $arch\n" if $opts{'verbose'};
+    if (!$ver && !$arch) {
+      die "cl version probe failed, invalid output from cl\nStopped";
     }
-  }
+    if ($arch eq 'Unknown') {
+      die "cl version probe failed, no known architecture macro was defined\nStopped";
+    }
+    if (!exists $platforminfo{'win32'}->{'cl_archs'}->{$arch}) {
+      die "cl version probe failed, invalid architecture \"$arch\"\nStopped";
+    }
+    if (!$platforminfo{'win32'}->{'cl_archs'}->{$arch}) {
+      die "ERROR: Windows for $arch isn't supported\nStopped";
+    }
+    if (!exists $platforminfo{'win32'}->{'cl_versions'}->{$ver}) {
+      die "ERROR: Unknown or unsupported Visual C++ compiler version: $ver\n"
+        . "Stopped";
+    }
 
-  if ($opts{'std'} && $opts{'std'} =~ /(0x|11|1y|14|1z|17)$/) {
-    push(@{$opts{'features'}}, 'no_cxx11=0');
-    print "Compiler has C++11 support\n" if $opts{'verbose'};
+    $opts{'compiler_version'} = $platforminfo{'win32'}->{'cl_versions'}->{$ver};
+    $opts{'compiler_target_architecture'} = $arch;
+
+    if ($ver >= 19) {
+      push(@{$opts{'features'}}, 'no_cxx11=0');
+      print "Visual C++ has C++11 support\n" if $opts{'verbose'};
+    }
+    $ENV{'PATH'} = $savepath;
+    print "Detected Visual C++ version: $opts{'compiler_version'}\n"
+      if $opts{'verbose'};
+  }
+  elsif ($opts{'compiler'} =~ /g\+\+/) {
+    if ($opts{'std'}) {
+      push(@{$opts{'macros'}}, 'CCFLAGS += -std=' . $opts{'std'});
+      print "Added platform_macros for -std=$opts{std}\n" if $opts{'verbose'};
+    }
+    else {
+      my $ver = `$opts{'compiler'} --version`;
+      if ($ver =~ /\(.*\) (\d+)\.\d+/ && $1 >= 6) {
+        $opts{'std'} = 'gnu++14';
+        print "Detected GCC >=6, default -std=gnu++14\n" if $opts{'verbose'};
+      }
+    }
+
+    if ($opts{'std'} && $opts{'std'} =~ /(0x|11|1y|14|1z|17)$/) {
+      push(@{$opts{'features'}}, 'no_cxx11=0');
+      print "Compiler has C++11 support\n" if $opts{'verbose'};
+    }
   }
 }
 
@@ -671,25 +763,25 @@ if (!$ace_src || !$tao_src) {
     my $urlbase = 'https://github.com/DOCGroup';
 
     print "Cloning git repo: $urlbase/ACE_TAO\n";
-    my $err = system("git clone -q --depth 1 $urlbase/ACE_TAO");
-    die 'ERROR: Failed to clone ACE/TAO from GitHub'
+    my $err = run_command(['git', 'clone', '-q', '--depth=1', "$urlbase/ACE_TAO"]);
+    die "ERROR: Failed to clone ACE/TAO from GitHub\nStopped"
       if $err ||
         ! -r 'ACE_TAO/ACE/ace/ACE.h' ||
           ! -r 'ACE_TAO/TAO/tao/ORB.h';
 
     my $cur_dir = getcwd;
     chdir('ACE_TAO');
-    system('git --no-pager log -1 --oneline');
+    run_command(['git', '--no-pager', 'log', '-1', '--oneline']);
     chdir($cur_dir);
 
     print "Cloning git repo: $urlbase/MPC into ACE_TAO/ACE/MPC\n";
-    $err = system("git clone -q --depth 1 $urlbase/MPC ACE_TAO/ACE/MPC");
-    die 'ERROR: Failed to clone MPC (into ACE_TAO/ACE/MPC) from GitHub'
+    $err = run_command(['git', 'clone', '-q', '--depth=1', "$urlbase/MPC", 'ACE_TAO/ACE/MPC']);
+    die "ERROR: Failed to clone MPC (into ACE_TAO/ACE/MPC) from GitHub\nStopped"
       if $err ||
         ! -r 'ACE_TAO/ACE/MPC/mwc.pl';
 
     chdir('ACE_TAO/ACE/MPC');
-    system('git --no-pager log -1 --oneline');
+    run_command(['git', '--no-pager', 'log', '-1', '--oneline']);
     chdir($cur_dir);
 
     $ace_src = normalizePath('ACE_TAO/ACE');
@@ -736,19 +828,13 @@ if (!$ace_src || !$tao_src) {
       if ($@) {
         if (which('wget')) {
           print $download_message . " (using wget)\n";
-          if ($opts{'dry-run'}) {
-            print "Dry-run: would run wget $urlbase$file\n";
-          }
-          elsif (system("wget $urlbase$file")) {
+          if (run_command(['wget', "$urlbase$file"])) {
             die "ERROR from wget, stopped";
           }
         }
         elsif (which('curl')) {
           print $download_message . " (using curl)\n";
-          if ($opts{'dry-run'}) {
-            print "Dry-run: would run curl -L $urlbase$file -o $file\n";
-          }
-          elsif (system("curl -L $urlbase$file -o $file")) {
+          if (run_command(['curl', '-L', "$urlbase$file", '-o', "$file"])) {
             die "ERROR: from curl, stopped";
           }
         }
@@ -768,14 +854,7 @@ if (!$ace_src || !$tao_src) {
       my $err = 1;
       my $ddsroot = getcwd;
       if (!$is_windows) {
-        if ($opts{'dry-run'}) {
-          print "Dry-run: would run " . ($^O eq 'solaris' ? 'g' : '') .
-            "tar xzf $ddsroot/$file\n";
-          $err = 0;
-        }
-        else {
-          $err = system(($^O eq 'solaris' ? 'g' : '') . "tar xzf $ddsroot/$file");
-        }
+        $err = run_command([($^O eq 'solaris' ? 'g' : '') . 'tar', 'xzf', "$ddsroot/$file"]);
       }
       else {
         # Try Archive::Zip
@@ -838,11 +917,7 @@ sub clone_host_and_target {
     chdir($source_dir);
   }
   print "cloning build tree\n" if $opts{'verbose'};
-  if (!$opts{'dry-run'}) {
-    eval {
-      system("$targetEnv{'MPC_ROOT'}/clone_build_tree.pl host target");
-    };
-  }
+  run_command(["$targetEnv{'MPC_ROOT'}/clone_build_tree.pl", 'host', 'target']);
   if ($source_dir ne '.') {
     print "Changing dir back to $cur_dir\n" if $opts{'verbose'};
     chdir($cur_dir);
@@ -881,7 +956,8 @@ sub dump_and_unlink { # removes temp files created by dry-run
 
 sub write_config_h {
   my %buildEnv = %{shift()};
-  my $pi = $platforminfo{$opts{$buildEnv{'build'}}};
+  my $platform = $opts{$buildEnv{'build'}};
+  my $pi = $platforminfo{$platform};
   $opts{'optimize'} = 0 if !exists $opts{'optimize'};
 
   my $CFGH = backup_and_open("$buildEnv{'ACE_ROOT'}/ace/config.h");
@@ -890,7 +966,7 @@ sub write_config_h {
       print $CFGH "$line\n";
     }
   }
-  my $cfg = $opts{$buildEnv{'build'}};
+  my $cfg = $platform;
   if ($pi->{'aceconfig'}) {
     $cfg = $pi->{'aceconfig'};
     $cfg =~ s/\$UNAMER/my $u = `uname -r`; chomp $u; $u/e;
@@ -965,12 +1041,23 @@ sub write_platform_macros {
       }
       if ($cross_compile) {
         print $PMG 'TAO_IDL = $(HOST_ACE)/bin/tao_idl', "\n";
+        if ($is_windows) {
+          print $PMG "HOST_EXE_EXT = .exe\n";
+        }
         print $PMG 'TAO_IDL_DEP = $(TAO_IDL)$(HOST_EXE_EXT)', "\n";
-        print $PMG 'TAO_IDL_PREPROCESSOR = ', $opts{'compiler'}, "\n";
+        if ($has_host_compiler) {
+          print $PMG 'TAO_IDL_PREPROCESSOR = ', $opts{'compiler'}, "\n";
+        }
         print $PMG 'TAO_IDLFLAGS += -g $(HOST_ACE)/bin/ace_gperf', "\n";
         print $PMG 'build_tao_idl_be = 0', "\n";
         unless ($build_host_tools) {
-          print $PMG 'HOST_ACE = $(HOST_DDS)', nested($ace_src, '.'), "\n";
+          my $host_ace;
+          if (exists $opts{'host-ace'}) {
+            $host_ace = $opts{'host-ace'};
+          } else {
+            $host_ace = '$(HOST_DDS)' . nested($ace_src, '.');
+          }
+          print $PMG "HOST_ACE = $host_ace\n";
         }
         if ($opts{'target-compiler'}) {
           my $tcomp = $opts{'target-compiler'};
@@ -1048,13 +1135,7 @@ if ($host_tools_only) {
 }
 
 # Use this to check if tests are enabled (instead of $opts{'tests'} directly).
-my $tests = !exists $opts{'tests'} || $opts{'tests'};
-
-if ($tests) {
-  print "--tests implies --gtest and --cmake\n" if $opts{'verbose'};
-  $opts{'gtest'} = '' if (!exists $opts{'gtest'});
-  $opts{'cmake'} = '' if (!exists $opts{'cmake'});
-}
+my $tests = exists $opts{'tests'} && $opts{'tests'};
 
 my @ace_features = ('xerces3');
 
@@ -1062,7 +1143,17 @@ if (exists $opts{'java'}) {
   if ($opts{'static'} && !$host_tools_only) {
     die "ERROR: --static can't be used with --java\nStopped";
   }
-  setEnv('JAVA_PLATFORM', perlOS_to_java_platform());
+  my $host_java_platform = perlOS_to_java_platform();
+  if ($cross_compile) {
+    if (exists $platforminfo{$opts{'target'}}->{'java_platform'}) {
+      setEnv('JAVA_PLATFORM', $platforminfo{$opts{'target'}}->{'java_platform'});
+      setHostEnv('JAVA_PLATFORM', $host_java_platform);
+    } else {
+      die "Cross-compile with Java for $opts{'target'} in not supported.\nStopped";
+    }
+  } else {
+    setEnv('JAVA_PLATFORM', $host_java_platform);
+  }
 }
 
 my $try_to_use_qt_system_pkg =
@@ -1155,12 +1246,12 @@ sub system_default_install_dir {
 }
 
 my $build_gtest = 0;
-if (exists $opts{'gtest'}) {
-  my $sanity = 'include/gtest/gtest.h';
+if (exists $opts{'gtest'} || $tests) {
+  my $gtest_sanity = 'include/gtest/gtest.h';
 
   if ($opts{'gtest'}) {
-    die "ERROR: '$sanity' not found in supplied gtest directory '$opts{'gtest'}'"
-      if ! -f File::Spec->catfile($opts{'gtest'}, $sanity);
+    die "ERROR: '$gtest_sanity' not found in supplied gtest directory '$opts{'gtest'}'"
+      if ! -f File::Spec->catfile($opts{'gtest'}, $gtest_sanity);
 
     env_from_opt('gtest', 'GTEST_ROOT');
 
@@ -1171,18 +1262,19 @@ if (exists $opts{'gtest'}) {
     my $sys_dir = File::Spec->catdir((system_default_install_dir(),
                               $is_windows ? 'googletest-distribution' : ''));
 
-    if (-f File::Spec->catfile($sm_src, $sanity)) {
+    if (-f File::Spec->catfile($sm_src, $gtest_sanity)) {
       # Check for existing build
       $build_gtest = ! -d File::Spec->catdir($sm_dir, 'build/install');
       $opts{'gtest'} = $sm_dir;
       # No need to set env. variable with submodule.
     }
-    elsif (-f File::Spec->catfile($sys_dir, $sanity)) {
+    elsif (-f File::Spec->catfile($sys_dir, $gtest_sanity)) {
       $opts{'gtest'} = $sys_dir;
       env_from_opt('gtest', 'GTEST_ROOT');
     }
     else {
-      die "ERROR: Google Test '$sanity' not found in submodule src '$sm_src' or default install dir '$sys_dir'\nStopped"
+      die "ERROR: Google Test '$gtest_sanity' not found in submodule src '$sm_src' or " .
+        "default install dir '$sys_dir', please pass a correct version of Google Test to --gtest\nStopped";
     }
   }
 }
@@ -1425,6 +1517,8 @@ sub win32_cmake_generator {
 }
 
 if ($build_gtest) {
+  print("Building Google Test...\n");
+
   my $cwd = Cwd::getcwd();
   my $build_dir = $opts{'gtest'} . $slash . 'build';
   my $install_dir = $build_dir . $slash . 'install';
@@ -1453,13 +1547,14 @@ if ($build_gtest) {
     or  die "ERROR '$!': failed to change into $build_dir from $cwd.\nStopped";
 
   for my $cmd (@cmake_cmds) {
-    print "Running @{$cmd}...\n";
-    system(@{$cmd}) == 0
-      or die "ERROR: Invoking @{$cmd} failed with error '$?'.\nStopped";
+    run_command($cmd, DUMP_OUTPUT_ON_ERROR => !$opts{'verbose'}) == 0
+      or die "ERROR: Invoking @{$cmd} failed.\nStopped";
   }
 
   chdir($cwd)
     or die "ERROR '$!': failed to change back to $cwd.\nStopped";
+
+  print("Done Building Google Test\n");
 }
 
 if (exists $opts{'jboss'} && !exists $opts{'java'}) {
@@ -1700,7 +1795,7 @@ sub disable_feature {
 my $buildtao;
 sub generate_workspace {
   my $buildEnv = shift;
-  $buildtao = 0;
+  $buildtao = $force_ace_tao;
   my $is_target = $buildEnv->{'build'} eq 'target';
 
   for my $feat (qw/built-in-topics ownership-profile/) {
@@ -1710,7 +1805,7 @@ sub generate_workspace {
   }
 
   if ($opts{'security'}) {
-      disable_feature(\@features, 'no-opendds-security');
+    disable_feature(\@features, 'no-opendds-security');
   }
 
   # default of these depends on whether we are doing a safety-profile build
@@ -1726,6 +1821,26 @@ sub generate_workspace {
     elsif (exists $opts{$feat} && !$opts{$feat}) {
       disable_feature(\@features, $feat);
     }
+  }
+
+  if ($is_target && $opts{'target'} eq 'android') {
+    # We can't detect C++11 compatibility in cross compilers at the moment,
+    # but all the NDKs we officially support are C++11+ by default, so enable
+    # C++11 features unless an explicit 'no_cxx11' feature already is set.
+    my $set = 1;
+    for my $feature (@{$opts{'features'}}) {
+      if ($feature =~ /no_cxx11/) {
+        $set = 0;
+      }
+    }
+    disable_feature(\@features, 'no_cxx11') if ($set);
+    if ($opts{'verbose'}) {
+      print "Setting no_cxx11=0 for Android: $set\n";
+    }
+
+    # Disable including $JAVA_HOME/include on Android. Android NDK includes a
+    # jni.h
+    disable_feature(\@features, 'jni_include')
   }
 
   my $mpctype = (!$is_windows || ($cross_compile && $is_target))
@@ -1760,11 +1875,11 @@ EOT
   }
 
   if ($opts{'safety-profile'} && $is_target) {
-    $buildtao = 0; # TAO will be built seperately
+    $buildtao = 0; # TAO will be built separately
   }
   else {
     # build tao if tao_idl does not exist
-    $buildtao = 1 if !-x "$buildEnv->{'ACE_ROOT'}/bin/tao_idl$exeext";
+    $buildtao = $buildtao || !-x "$buildEnv->{'ACE_ROOT'}/bin/tao_idl$exeext";
   }
 
   locate_mpc($ace_src);
@@ -1787,6 +1902,10 @@ EOT
       if (!$found) {
         push(@features, "java_pre_jpms=0");
       }
+    }
+
+    if ($opts{'java'} && $cross_compile) {
+      push(@features, "jni_check=0");
     }
 
     if ($buildtao && @features) {
@@ -1895,8 +2014,14 @@ EOT
   }
 
   my $static = (($opts{'static'} && $is_windows) ||
-    ($cross_compile && $buildEnv->{'build'} eq 'host' && $mpctype ne 'gnuace'))
-    ? '-static' : '';
+    ($cross_compile && $buildEnv->{'build'} eq 'host' && $mpctype ne 'gnuace'));
+
+  my @mpcopts = ();
+  if (defined $opts{'mpcopts'}) {
+    for my $i (@{$opts{'mpcopts'}}) {
+      push(@mpcopts, split(/ /, $i));
+    }
+  }
 
   # We are not using CIAO or DAnCE, but MPC.cfg expands $CIAO_ROOT and
   # $DANCE_ROOT so leaving them empty/undefined would cause /MPC/config
@@ -1909,35 +2034,30 @@ EOT
   print "ENV: saving current environment\n" if $opts{'verbose'};
   mergeToEnv($buildEnv);
 
-  my $mwcargs = "-type $mpctype $buildEnv->{'DDS_ROOT'}$slash$ws $static";
-  $mwcargs .= ' ' . join(' ', @{$opts{'mpcopts'}}) if defined $opts{'mpcopts'};
+  my @mwccmd = ('perl', "$ENV{'ACE_ROOT'}/bin/mwc.pl", '-type', "$mpctype");
+  if ($static) {
+    push(@mwccmd, '-static');
+  }
+
+  my @mwcargs = ("$buildEnv->{'DDS_ROOT'}$slash$ws", @mpcopts);
   if (!$buildtao && @features) {
     for my $feature (@features) {
-      $mwcargs .= " -features " . ($feature =~ /=/ ? $feature : "$feature=1");
+      push(@mwcargs, '-features', ($feature =~ /=/ ? $feature : "$feature=1"));
     }
   }
 
-  print "OpenDDS mwc command line: $mwcargs\n" if $opts{'verbose'};
   print 'Running MPC to generate ', ($mpctype eq 'gnuace' ? 'makefiles' :
                                      'project files'), ".\n";
-  if (!$opts{'dry-run'}) {
-    if (system("perl $ENV{'ACE_ROOT'}/bin/mwc.pl $mwcargs") != 0) {
-      die "ERROR: Error from MPC, stopped";
-    }
+  if (run_command([@mwccmd, @mwcargs])) {
+    die "ERROR: Error from MPC, stopped";
   }
   $buildEnv->{'mpctype'} = $mpctype;
 
   # If this is a target safety profile build
   if (defined $opts{'no-opendds-safety-profile'}) {
     # Generate ACE workspace separately, to exclude TAO
-    my $mwcargs = "-type $mpctype $static " . $buildEnv->{'ACE_ROOT'}. "/ace";
-    $mwcargs .= ' ' . join(' ', @{$opts{'mpcopts'}}) if defined $opts{'mpcopts'};
-    print "ACE mwc command line: $mwcargs\n" if $opts{'verbose'};
-
-    if (!$opts{'dry-run'}) {
-      if (system("perl $ENV{'ACE_ROOT'}/bin/mwc.pl $mwcargs") != 0) {
-        die "ERROR: Error from MPC, stopped";
-      }
+    if (run_command([@mwccmd, "$buildEnv->{'ACE_ROOT'}/ace", @mpcopts])) {
+      die "ERROR: Error from MPC, stopped";
     }
   }
 
@@ -2012,7 +2132,7 @@ sub check_mac_version {
 
 sub configure_build {
   my $buildEnvRef = shift;
-  if (-r "$buildEnvRef->{ACE_ROOT}/ace/config.h") {
+  if (-r "$buildEnvRef->{ACE_ROOT}/ace/config.h" && !$force_ace_tao) {
     print "ACE_ROOT/ace/config.h exists, skipping configuration of ACE+TAO\n";
   }
   else {
@@ -2241,6 +2361,7 @@ sub write_cmake_file {
       object-model-profile
       persistence-profile
       inline
+      suppress-anys
     );
 
     my %disabled_by_default = map {$_, 0} qw(

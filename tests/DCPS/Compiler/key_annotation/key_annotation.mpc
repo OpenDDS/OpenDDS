@@ -1,0 +1,17 @@
+project(*): dcps_test, msvc_bigobj {
+  exename = key_annotation
+  exeout = .
+
+  Source_Files {
+    main.cpp
+  }
+
+  TypeSupport_Files {
+    key_annotation.idl
+  }
+
+  IDL_Files {
+    key_annotation.idl
+    key_annotationTypeSupport.idl
+  }
+}

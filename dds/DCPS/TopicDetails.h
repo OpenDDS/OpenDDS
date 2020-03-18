@@ -23,6 +23,7 @@ namespace OpenDDS {
     struct TopicDetails {
 
       struct RemoteTopic {
+        RemoteTopic() : data_type_name_(), inconsistent_(false), endpoints_() {}
         OPENDDS_STRING data_type_name_;
         bool inconsistent_;
         RepoIdSet endpoints_;
@@ -67,13 +68,11 @@ namespace OpenDDS {
             ++inconsistent_topic_count_;
             if (DCPS::DCPS_debug_level) {
               ACE_DEBUG((LM_WARNING,
-                         ACE_TEXT("(%P|%t) EndpointManager::check_inconsistent_topic - WARNING ")
-                         ACE_TEXT("topic %C discovered data type %C doesn't ")
-                         ACE_TEXT("match known data type %C, ignoring ")
-                         ACE_TEXT("discovered topic.\n"),
+                         ACE_TEXT("(%P|%t) TopicDetails::set_local - WARNING ")
+                         ACE_TEXT("topic %C with data type %C doesn't match discovered data type %C\n"),
                          name_.c_str(),
-                         remote.data_type_name_.c_str(),
-                         local_data_type_name_.c_str()));
+                         local_data_type_name_.c_str(),
+                         remote.data_type_name_.c_str()));
             }
           } else {
             endpoints_.insert(remote.endpoints_.begin(), remote.endpoints_.end());
@@ -133,8 +132,8 @@ namespace OpenDDS {
         // Initialize.
         RemoteTopic& remote = remote_topic_iter->second;
         remote.data_type_name_ = type_name;
-        remote.inconsistent_ = local_data_type_name_ != remote.data_type_name_;
-        if (!remote.inconsistent_) {
+        remote.inconsistent_ = topic_callbacks_ && local_data_type_name_ != remote.data_type_name_;
+        if (topic_callbacks_ && !remote.inconsistent_) {
           remote.data_type_name_.clear();
         }
         remote.endpoints_.insert(guid);
@@ -143,13 +142,11 @@ namespace OpenDDS {
           ++inconsistent_topic_count_;
           if (DCPS::DCPS_debug_level) {
             ACE_DEBUG((LM_WARNING,
-                       ACE_TEXT("(%P|%t) EndpointManager::check_inconsistent_topic - WARNING ")
-                       ACE_TEXT("topic %C discovered data type %C doesn't ")
-                       ACE_TEXT("match known data type %C, ignoring ")
-                       ACE_TEXT("discovered topic.\n"),
+                       ACE_TEXT("(%P|%t) TopicDetails::add_pub_sub - WARNING ")
+                       ACE_TEXT("topic %C with data type %C now does not match discovered data type %C\n"),
                        name_.c_str(),
-                       remote.data_type_name_.c_str(),
-                       local_data_type_name_.c_str()));
+                       local_data_type_name_.c_str(),
+                       remote.data_type_name_.c_str()));
           }
           if (topic_callbacks_) {
             topic_callbacks_->inconsistent_topic(inconsistent_topic_count_);
@@ -158,11 +155,11 @@ namespace OpenDDS {
           --inconsistent_topic_count_;
           if (DCPS::DCPS_debug_level) {
             ACE_DEBUG((LM_WARNING,
-                       ACE_TEXT("(%P|%t) EndpointManager::check_inconsistent_topic - WARNING ")
-                       ACE_TEXT("topic %C discovered data type now ")
-                       ACE_TEXT("matches known data type %C\n"),
+                       ACE_TEXT("(%P|%t) TopicDetails::add_pub_sub - WARNING ")
+                       ACE_TEXT("topic %C with data type %C now matches discovered data type %C\n"),
                        name_.c_str(),
-                       local_data_type_name_.c_str()));
+                       local_data_type_name_.c_str(),
+                       remote.data_type_name_.c_str()));
           }
           if (topic_callbacks_) {
             topic_callbacks_->inconsistent_topic(inconsistent_topic_count_);

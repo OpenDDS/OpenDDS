@@ -12,6 +12,8 @@
 #include <dds/DdsDcpsPublicationC.h>
 #include <dds/DCPS/WaitSet.h>
 
+#include "tests/Utils/StatusMatching.h"
+
 #include "MessengerTypeSupportC.h"
 #include "Writer.h"
 
@@ -25,44 +27,6 @@ Writer::Writer(DDS::DataWriter_ptr writer1, DDS::DataWriter_ptr writer2,
     timeout_writes_(0),
     my_pid_(my_pid)
 {
-}
-
-namespace {
-  void wait_for_match(DDS::DataWriter_ptr writer, bool match = true)
-  {
-    DDS::StatusCondition_var condition = writer->get_statuscondition();
-    condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
-
-    DDS::WaitSet_var ws = new DDS::WaitSet;
-    ws->attach_condition(condition);
-
-    DDS::Duration_t timeout =
-      { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
-
-    DDS::ConditionSeq conditions;
-    DDS::PublicationMatchedStatus matches = {0, 0, 0, 0, 0};
-
-    while (true) {
-      if (writer->get_publication_matched_status(matches) != ::DDS::RETCODE_OK) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("%N:%l: wait_for_match()")
-                   ACE_TEXT(" ERROR: get_publication_matched_status failed!\n")));
-        ACE_OS::exit(-1);
-      }
-
-      if (match ? (matches.current_count < 1) : (matches.current_count > 0)) {
-        if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
-          ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("%N:%l: wait_for_match()")
-                     ACE_TEXT(" ERROR: wait failed!\n")));
-          ACE_OS::exit(-1);
-        }
-      } else {
-        break;
-      }
-    }
-    ws->detach_condition(condition);
-  }
 }
 
 void
@@ -82,8 +46,8 @@ Writer::write(bool reliable, int num_messages)
 
   try {
     // Block until Subscriber is available
-    wait_for_match(writer1_);
-    wait_for_match(writer2_);
+    Utils::wait_match(writer1_, 1, Utils::GTE);
+    Utils::wait_match(writer2_, 1, Utils::GTE);
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writers matched\n")));
 
     // Write samples
@@ -110,15 +74,16 @@ Writer::write(bool reliable, int num_messages)
     pid << std::setw(5) << my_pid_;
 
     Messenger::Message message1;
-    message1.writer_id  = 1;
-    message1.from       = "Comic Book Guy 1";
+    message1.writer_id = 1;
+    message1.from = "Comic Book Guy 1";
     message1.process_id = pid.str().c_str();
-    message1.text       = "Worst. Movie. Ever.";
-    message1.sample_id  = 0;
+    message1.participant_id = 0;
+    message1.text = "Worst. Movie. Ever.";
+    message1.sample_id = 0;
 
     Messenger::Message message2 = message1;
-    message2.writer_id  = 2;
-    message2.from       = "Comic Book Guy 2";
+    message2.writer_id = 2;
+    message2.from = "Comic Book Guy 2";
 
     DDS::InstanceHandle_t handle1 = message_dw1->register_instance(message1);
     DDS::InstanceHandle_t handle2 = message_dw2->register_instance(message2);
@@ -193,8 +158,8 @@ Writer::write(bool reliable, int num_messages)
     // Let readers disconnect first, once they either get the data or
     // give up and time-out.  This allows the writer to be alive while
     // processing requests for retransmission from the readers.
-    wait_for_match(writer1_, false);
-    wait_for_match(writer2_, false);
+    Utils::wait_match(writer1_, 0);
+    Utils::wait_match(writer2_, 0);
 
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in svc():");

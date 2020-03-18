@@ -300,6 +300,8 @@ public:
    */
   void data_delivered(const DataSampleElement* sample);
 
+  void transport_discovery_change();
+
   /**
    * This is called by transport to notify that the control
    * message is delivered.
@@ -389,6 +391,9 @@ public:
   virtual void unregister_for_reader(const RepoId& participant,
                                      const RepoId& writerid,
                                      const RepoId& readerid);
+
+  virtual void update_locators(const RepoId& remote,
+                               const TransportLocatorSeq& locators);
 
   void notify_publication_disconnected(const ReaderIdSeq& subids);
   void notify_publication_reconnected(const ReaderIdSeq& subids);
@@ -661,10 +666,10 @@ private:
   SendStateDataSampleList             available_data_list_;
 
   /// Monitor object for this entity
-  Monitor* monitor_;
+  unique_ptr<Monitor> monitor_;
 
   /// Periodic Monitor object for this entity
-  Monitor* periodic_monitor_;
+  unique_ptr<Monitor> periodic_monitor_;
 
 
   // Do we need to set the sequence repair header bit?

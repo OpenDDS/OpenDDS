@@ -27,8 +27,8 @@ namespace RtpsRelay {
 class RelayHandler : public ACE_Event_Handler {
 public:
   int open(const ACE_INET_Addr& local);
-  void enqueue_message(const std::string& addr, const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg);
-  const std::string& relay_address() const { return relay_address_; }
+  void enqueue_message(const ACE_INET_Addr& addr, const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg);
+  const ACE_INET_Addr& relay_address() const { return relay_address_; }
   size_t bytes_received() const { return bytes_received_; }
   size_t messages_received() const { return messages_received_; }
   size_t bytes_sent() const { return bytes_sent_; }
@@ -46,21 +46,19 @@ public:
   void max_fan_out(size_t fan_out) { max_fan_out_ = std::max(max_fan_out_, fan_out); }
 
 protected:
-    RelayHandler(ACE_Reactor* reactor,
-               const AssociationTable& association_table);
+  explicit RelayHandler(ACE_Reactor* reactor);
 
   int handle_input(ACE_HANDLE handle) override;
   int handle_output(ACE_HANDLE handle) override;
   ACE_HANDLE get_handle() const override { return socket_.get_handle(); }
 
-  const AssociationTable& association_table_;
   virtual void process_message(const ACE_INET_Addr& remote,
                                const OpenDDS::DCPS::MonotonicTimePoint& now,
                                const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg) = 0;
 private:
-  std::string relay_address_;
+  ACE_INET_Addr relay_address_;
   ACE_SOCK_Dgram socket_;
-  typedef std::queue<std::pair<std::string, OpenDDS::DCPS::Message_Block_Shared_Ptr>> OutgoingType;
+  typedef std::queue<std::pair<ACE_INET_Addr, OpenDDS::DCPS::Message_Block_Shared_Ptr>> OutgoingType;
   OutgoingType outgoing_;
   ACE_Thread_Mutex outgoing_mutex_;
   size_t bytes_received_;
@@ -75,11 +73,13 @@ class HorizontalHandler;
 // Sends to and receives from peers.
 class VerticalHandler : public RelayHandler {
 public:
-  typedef std::map<OpenDDS::DCPS::RepoId, std::set<std::string>, OpenDDS::DCPS::GUID_tKeyLessThan> GuidAddrMap;
+  typedef std::map<OpenDDS::DCPS::RepoId, std::set<ACE_INET_Addr>, OpenDDS::DCPS::GUID_tKeyLessThan> GuidAddrMap;
 
   VerticalHandler(ACE_Reactor* reactor,
                   const RelayAddresses& relay_addresses,
                   const AssociationTable& association_table,
+                  GuidRelayAddressesDataWriter_ptr responsible_relay_writer,
+                  GuidRelayAddressesDataReader_ptr responsible_relay_reader,
                   const OpenDDS::DCPS::TimeDuration& lifespan,
                   const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
                   DDS::DomainId_t application_domain,
@@ -98,7 +98,7 @@ public:
   }
 
 protected:
-  virtual std::string extract_relay_address(const RelayAddresses& relay_addresses) const = 0;
+  virtual ACE_INET_Addr extract_relay_address(const RelayAddresses& relay_addresses) const = 0;
   virtual bool do_normal_processing(const ACE_INET_Addr& /*remote*/,
                                     const OpenDDS::DCPS::RepoId& /*src_guid*/,
                                     const GuidSet& /*to*/,
@@ -108,9 +108,13 @@ protected:
   void process_message(const ACE_INET_Addr& remote,
                        const OpenDDS::DCPS::MonotonicTimePoint& now,
                        const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg) override;
-  void send(const RelayAddressesMap& relay_addresses_map,
+  void send(const GuidSet& to,
             const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg);
+  RelayAddressesMap populate_relay_addresses_map(const GuidSet& to);
 
+  const AssociationTable& association_table_;
+  GuidRelayAddressesDataWriter_ptr responsible_relay_writer_;
+  GuidRelayAddressesDataReader_ptr responsible_relay_reader_;
   const RelayAddresses& relay_addresses_;
   HorizontalHandler* horizontal_handler_;
   GuidAddrMap guid_addr_map_;
@@ -128,10 +132,14 @@ private:
                      GuidSet& to,
                      bool& is_pad_only,
                      bool check_submessages);
+  RelayAddresses read_relay_addresses(const OpenDDS::DCPS::RepoId& guid) const;
+  void write_relay_addresses(const OpenDDS::DCPS::RepoId& guid,
+                             const RelayAddresses& relay_addresses);
+  void unregister_relay_addresses(const OpenDDS::DCPS::RepoId& guid);
 
   OpenDDS::RTPS::RtpsDiscovery_rch rtps_discovery_;
-  const DDS::DomainId_t application_domain_;
 #ifdef OPENDDS_SECURITY
+  const DDS::DomainId_t application_domain_;
   const DDS::Security::CryptoTransform_var crypto_;
   const DDS::Security::ParticipantCryptoHandle application_participant_crypto_handle_;
 #endif
@@ -140,10 +148,9 @@ private:
 // Sends to and receives from other relays.
 class HorizontalHandler : public RelayHandler {
 public:
-  HorizontalHandler(ACE_Reactor* reactor,
-                    const AssociationTable& association_table);
+  explicit HorizontalHandler(ACE_Reactor* reactor);
   void vertical_handler(VerticalHandler* vertical_handler) { vertical_handler_ = vertical_handler; }
-  void enqueue_message(const std::string& addr,
+  void enqueue_message(const ACE_INET_Addr& addr,
                        const GuidSet& to,
                        const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg);
 
@@ -159,6 +166,8 @@ public:
   SpdpHandler(ACE_Reactor* reactor,
               const RelayAddresses& relay_addresses,
               const AssociationTable& association_table,
+              GuidRelayAddressesDataWriter_ptr responsible_relay_writer,
+              GuidRelayAddressesDataReader_ptr responsible_relay_reader,
               const OpenDDS::DCPS::TimeDuration& lifespan,
               const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
               DDS::DomainId_t application_domain,
@@ -166,17 +175,16 @@ public:
               const CRYPTO_TYPE& crypto,
               const ACE_INET_Addr& application_participant_addr);
 
-  void replay(const OpenDDS::DCPS::RepoId& guid,
-              const RelayAddressesMap& relay_addresses_map);
+  void replay(const OpenDDS::DCPS::RepoId& from,
+              const GuidSet& to);
 
 private:
   const ACE_INET_Addr application_participant_addr_;
-  const std::string application_participant_addr_str_;
   typedef std::map<OpenDDS::DCPS::RepoId, OpenDDS::DCPS::Message_Block_Shared_Ptr, OpenDDS::DCPS::GUID_tKeyLessThan> SpdpMessages;
   SpdpMessages spdp_messages_;
   ACE_Thread_Mutex spdp_messages_mutex_;
 
-  std::string extract_relay_address(const RelayAddresses& relay_addresses) const override;
+  ACE_INET_Addr extract_relay_address(const RelayAddresses& relay_addresses) const override;
 
   bool do_normal_processing(const ACE_INET_Addr& remote,
                             const OpenDDS::DCPS::RepoId& src_guid,
@@ -191,6 +199,8 @@ public:
   SedpHandler(ACE_Reactor* reactor,
               const RelayAddresses& relay_addresses,
               const AssociationTable& association_table,
+              GuidRelayAddressesDataWriter_ptr responsible_relay_writer,
+              GuidRelayAddressesDataReader_ptr responsible_relay_reader,
               const OpenDDS::DCPS::TimeDuration& lifespan,
               const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
               DDS::DomainId_t application_domain,
@@ -200,9 +210,8 @@ public:
 
 private:
   const ACE_INET_Addr application_participant_addr_;
-  const std::string application_participant_addr_str_;
 
-  std::string extract_relay_address(const RelayAddresses& relay_addresses) const override;
+  ACE_INET_Addr extract_relay_address(const RelayAddresses& relay_addresses) const override;
 
   bool do_normal_processing(const ACE_INET_Addr& remote,
                             const OpenDDS::DCPS::RepoId& src_guid,
@@ -215,6 +224,8 @@ public:
   DataHandler(ACE_Reactor* reactor,
               const RelayAddresses& relay_addresses,
               const AssociationTable& association_table,
+              GuidRelayAddressesDataWriter_ptr responsible_relay_writer,
+              GuidRelayAddressesDataReader_ptr responsible_relay_reader,
               const OpenDDS::DCPS::TimeDuration& lifespan,
               const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
               DDS::DomainId_t application_domain,
@@ -223,8 +234,23 @@ public:
               );
 
 private:
-  std::string extract_relay_address(const RelayAddresses& relay_addresses) const override;
+  ACE_INET_Addr extract_relay_address(const RelayAddresses& relay_addresses) const override;
 };
+
+#ifdef OPENDDS_SECURITY
+
+class StunHandler : public RelayHandler {
+public:
+  explicit StunHandler(ACE_Reactor* reactor);
+
+private:
+  void process_message(const ACE_INET_Addr& remote,
+                       const OpenDDS::DCPS::MonotonicTimePoint& now,
+                       const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg) override;
+  void send(const ACE_INET_Addr& addr, OpenDDS::STUN::Message message);
+
+};
+#endif /* OPENDDS_SECURITY */
 
 }
 

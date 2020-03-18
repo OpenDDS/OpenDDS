@@ -88,6 +88,9 @@ public:
   WriterStats(
     int amount = 0,
     DataCollector<double>::OnFull type = DataCollector<double>::KeepOldest);
+#ifdef ACE_HAS_CPP11
+  WriterStats(const WriterStats&) = default;
+#endif
 
   /// Add a datum to the latency statistics.
   void add_stat(const TimeDuration& delay);
@@ -360,6 +363,8 @@ public:
   /// process a message that has been received - could be control or a data sample.
   virtual void data_received(const ReceivedDataSample& sample);
 
+  void transport_discovery_change();
+
   virtual bool check_transport_qos(const TransportInst& inst);
 
   RepoId get_subscription_id() const;
@@ -555,6 +560,9 @@ public:
   virtual void unregister_for_writer(const RepoId& /*participant*/,
                                      const RepoId& /*readerid*/,
                                      const RepoId& /*writerid*/);
+
+  virtual void update_locators(const RepoId& remote,
+                               const TransportLocatorSeq& locators);
 
   virtual ICE::Endpoint* get_ice_endpoint();
 
@@ -860,10 +868,10 @@ private:
   ReadConditionSet read_conditions_;
 
   /// Monitor object for this entity
-  Monitor* monitor_;
+  unique_ptr<Monitor> monitor_;
 
   /// Periodic Monitor object for this entity
-  Monitor* periodic_monitor_;
+  unique_ptr<Monitor>  periodic_monitor_;
 
   bool transport_disabled_;
 };

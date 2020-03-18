@@ -106,21 +106,20 @@ to_dds_string(unsigned long to_convert, bool as_hex)
   return OPENDDS_STRING(buf);
 }
 
-OPENDDS_STRING
-to_hex_dds_string(const unsigned char* data, const size_t size, const char delim, const size_t delim_every)
+OPENDDS_STRING to_hex_dds_string(
+  const unsigned char* data, const size_t size, const char delim, const size_t delim_every)
 {
   return to_hex_dds_string(reinterpret_cast<const char*>(data), size, delim, delim_every);
 }
 
-static inline
-char nibble_to_hex_char(char nibble)
+static inline char nibble_to_hex_char(char nibble)
 {
   nibble &= 0x0F;
   return ((nibble < 0xA) ? '0' : ('a' - 0xA)) + nibble;
 }
 
-OPENDDS_STRING
-to_hex_dds_string(const char* data, size_t size, const char delim, const size_t delim_every)
+OPENDDS_STRING to_hex_dds_string(
+  const char* data, size_t size, const char delim, const size_t delim_every)
 {
   const bool valid_delim = delim && delim_every;
   size_t l = size * 2;
@@ -143,8 +142,7 @@ to_hex_dds_string(const char* data, size_t size, const char delim, const size_t 
   return rv;
 }
 
-OPENDDS_STRING
-retcode_to_string(DDS::ReturnCode_t value)
+const char* retcode_to_string(DDS::ReturnCode_t value)
 {
   switch (value) {
   case DDS::RETCODE_OK:
@@ -178,11 +176,10 @@ retcode_to_string(DDS::ReturnCode_t value)
     return "Not allowed by security";
 #endif
   default:
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: OpenDDS::DCPS::retcode_to_string: ")
-      ACE_TEXT("%d is either completely invalid or unknown to this function.\n"),
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: retcode_to_string: ")
+      ACE_TEXT("%d is either invalid or not recognized.\n"),
       value));
-    return OPENDDS_STRING("(Unknown Return Code: ") + to_dds_string(value) + ")";
+    return "Invalid return code";
   }
 }
 

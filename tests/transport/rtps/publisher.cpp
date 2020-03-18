@@ -283,7 +283,7 @@ int DDS_TEST::test(ACE_TString host, u_short port)
   log_time(now);
   const double conv = 4294.967296; // NTP fractional (2^-32) sec per microsec
   const InfoTimestampSubmessage it = { {INFO_TS, 1, 8},
-    {static_cast<ACE_CDR::Long>(now.sec()),
+    {static_cast<ACE_CDR::ULong>(now.sec()),
      static_cast<ACE_CDR::ULong>(now.usec() * conv)} };
 
   DataSubmessage ds = { {DATA, 7, 20 + 24 + 12 + sizeof(text)}, 0, 16,
@@ -345,7 +345,7 @@ int DDS_TEST::test(ACE_TString host, u_short port)
     control_sample.key = 0x04030201;
     DataSampleHeader dsh;
     dsh.message_id_ = INSTANCE_REGISTRATION;
-    dsh.sequence_ = SequenceNumber::SEQUENCENUMBER_UNKNOWN();
+    dsh.sequence_ = 2;
     dsh.publication_id_ = local_guid;
     dsh.key_fields_only_ = true;
 
@@ -378,6 +378,7 @@ int DDS_TEST::test(ACE_TString host, u_short port)
     // Send a dispose instance
     {
       dsh.message_id_ = DISPOSE_INSTANCE;
+      dsh.sequence_ = 3;
       OpenDDS::DCPS::Message_Block_Ptr di_mb (new ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
                                                        ACE_Message_Block::MB_DATA,
                                                        new ACE_Message_Block(dsh.message_length_)));
@@ -398,6 +399,7 @@ int DDS_TEST::test(ACE_TString host, u_short port)
     // Send an unregister instance
     {
       dsh.message_id_ = UNREGISTER_INSTANCE;
+      dsh.sequence_ = 4;
       OpenDDS::DCPS::Message_Block_Ptr ui_mb  (new ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
                                                        ACE_Message_Block::MB_DATA,
                                                        new ACE_Message_Block(dsh.message_length_)));
@@ -418,6 +420,7 @@ int DDS_TEST::test(ACE_TString host, u_short port)
     // Send a dispose & unregister instance
     {
       dsh.message_id_ = DISPOSE_UNREGISTER_INSTANCE;
+      dsh.sequence_ = 5;
       OpenDDS::DCPS::Message_Block_Ptr ui_mb (new ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
                                                        ACE_Message_Block::MB_DATA,
                                                        new ACE_Message_Block(dsh.message_length_)));
@@ -455,7 +458,7 @@ int DDS_TEST::test(ACE_TString host, u_short port)
   DataSampleHeader& dsh = elements[index].header_;
   dsh.message_id_ = SAMPLE_DATA;
   dsh.publication_id_ = local_guid;
-  dsh.sequence_ = 3; // test GAP generation
+  dsh.sequence_ = 7; // test GAP generation
   const ACE_Time_Value tv = ACE_OS::gettimeofday();
   log_time(tv);
   DDS::Time_t st = time_value_to_time(tv);

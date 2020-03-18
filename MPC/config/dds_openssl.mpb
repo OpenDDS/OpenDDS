@@ -1,4 +1,16 @@
 feature(openssl): openssl {
+  // Android preloads the system SSL library (either OpenSSL or BoringSSL) for
+  // the Java Android API, so we must:
+  //   1. Statically link OpenSSL to this library
+  //   2. Keep our OpenSSL symbols internal
+  // Number 1 is described in android.md. We are doing number 2 here.
+  verbatim (gnuace, top, 1) {
+    comma := ,
+    exclude_openssl_libs := -Wl$(comma)--exclude-libs$(comma)libcrypto.a -Wl$(comma)--exclude-libs$(comma)libssl.a
+  }
+  specific (gnuace) {
+    compile_flags += $(if $(ANDROID_ABI),$(exclude_openssl_libs))
+  }
 }
 
 feature(!no_vxworks_openssl) {

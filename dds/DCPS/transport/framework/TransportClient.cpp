@@ -57,21 +57,25 @@ TransportClient::~TransportClient()
 
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 
-  ReactorInterceptor::CommandPtr command;
-
-  for (PendingMap::iterator it = pending_.begin(); it != pending_.end(); ++it) {
+  for (PrevPendingMap::iterator it = prev_pending_.begin(); it != prev_pending_.end(); ++it) {
     for (size_t i = 0; i < impls_.size(); ++i) {
       RcHandle<TransportImpl> impl = impls_[i].lock();
       if (impl) {
-        impl->stop_accepting_or_connecting(*this, it->second->data_.remote_id_);
+        impl->stop_accepting_or_connecting(it->second->client_, it->second->data_.remote_id_);
       }
     }
-
-    command = pending_assoc_timer_->cancel_timer(this, it->second);
   }
+}
 
-  if (command) {
-    command->wait();
+void
+TransportClient::clean_prev_pending()
+{
+  for (PrevPendingMap::iterator it = prev_pending_.begin(); it != prev_pending_.end();) {
+    if (it->second->safe_to_remove()) {
+      prev_pending_.erase(it++);
+    } else {
+      ++it;
+    }
   }
 }
 
@@ -120,6 +124,7 @@ void
 TransportClient::enable_transport_using_config(bool reliable, bool durable,
                                                const TransportConfig_rch& tc)
 {
+  config_ = tc;
   swap_bytes_ = tc->swap_bytes_;
   cdr_encapsulation_ = false;
   reliable_ = reliable;
@@ -136,6 +141,8 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
   }
   passive_connect_duration_ = TimeDuration::from_msec(duration);
 
+  populate_connection_info();
+
   const size_t n = tc->instances_.size();
 
   for (size_t i = 0; i < n; ++i) {
@@ -146,9 +153,6 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
 
       if (impl) {
         impls_.push_back(impl);
-        const CORBA::ULong len = conn_info_.length();
-        conn_info_.length(len + 1);
-        impl->connection_info(conn_info_[len]);
 
 #if defined(OPENDDS_SECURITY)
         impl->local_crypto_handle(get_crypto_handle());
@@ -167,6 +171,24 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
   }
 }
 
+void
+TransportClient::populate_connection_info()
+{
+  conn_info_.length(0);
+
+  const size_t n = config_->instances_.size();
+  for (size_t i = 0; i < n; ++i) {
+    TransportInst_rch inst = config_->instances_[i];
+    if (check_transport_qos(*inst)) {
+      TransportImpl_rch impl = inst->impl();
+      if (impl) {
+        const CORBA::ULong len = conn_info_.length();
+        conn_info_.length(len + 1);
+        impl->connection_info(conn_info_[len], CONNINFO_ALL);
+      }
+    }
+  }
+}
 
 bool
 TransportClient::associate(const AssociationData& data, bool active)
@@ -208,11 +230,13 @@ TransportClient::associate(const AssociationData& data, bool active)
     return false;
   }
 
+  clean_prev_pending();
+
   PendingMap::iterator iter = pending_.find(data.remote_id_);
 
   if (iter == pending_.end()) {
     RepoId remote_copy(data.remote_id_);
-    iter = pending_.insert(std::make_pair(remote_copy, make_rch<PendingAssoc>())).first;
+    iter = pending_.insert(std::make_pair(remote_copy, make_rch<PendingAssoc>(this))).first;
 
     GuidConverter tc_assoc(repo_id_);
     GuidConverter remote_new(data.remote_id_);
@@ -268,33 +292,33 @@ TransportClient::associate(const AssociationData& data, bool active)
             // If the current thread is not an event handler for the transport's reactor, e.g., the ORB's thread, then the order of acquired locks will be lock_ -> transport reactor lock.
             // Event handlers in the transport reactor may call passive_connection which calls use_datalink which acquires lock_.  The locking order in this case is transport reactor lock -> lock_.
             // To avoid deadlock, we must reverse the lock.
+            TransportImpl::ConnectionAttribs attribs = pend->attribs_;
+            RcHandle<TransportClient> client = rchandle_from(this);
             ACE_GUARD_RETURN(Reverse_Lock_t, unlock_guard, reverse_lock_, false);
-            res = impl->accept_datalink(remote, pend->attribs_, rchandle_from(this));
+            res = impl->accept_datalink(remote, attribs, client);
           }
 
           //NEED to check that pend is still valid here after you re-acquire the lock_ after accepting the datalink
-          PendingMap::iterator iter_after_accept = pending_.find(data.remote_id_);
+          iter = pending_.find(data.remote_id_);
 
-          if (iter_after_accept == pending_.end()) {
+          if (iter == pending_.end()) {
             //If Pending Assoc is no longer in pending_ then use_datalink_i has been called from an
             //active side connection and completed, thus pend was removed from pending_.  Can return true.
             return true;
           }
+          pend = iter->second;
 
           if (res.success_) {
             if (res.link_.is_nil()) {
                 // In this case, it may be waiting for the TCP connection to be established.  Just wait without trying other transports.
                 pending_assoc_timer_->schedule_timer(this, iter->second);
+            } else {
+              use_datalink_i(data.remote_id_, res.link_, guard);
+              return true;
             }
-            else {
-                use_datalink_i(data.remote_id_, res.link_, guard);
-            }
-            return true;
           }
         }
       }
-
-      //pend->impls_.push_back(impl);
     }
 
     pending_assoc_timer_->schedule_timer(this, iter->second);
@@ -303,14 +327,32 @@ TransportClient::associate(const AssociationData& data, bool active)
   return true;
 }
 
+void
+TransportClient::PendingAssoc::reset_client() {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  client_.reset();
+}
+
+bool
+TransportClient::PendingAssoc::safe_to_remove() {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  return !client_ && !scheduled_;
+}
+
 int
 TransportClient::PendingAssoc::handle_timeout(const ACE_Time_Value&,
                                               const void* arg)
 {
-  TransportClient* tc = static_cast<TransportClient*>(const_cast<void*>(arg));
+  RcHandle<TransportClient> client;
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    client = client_.lock();
+    scheduled_ = false;
+  }
 
-  tc->use_datalink(data_.remote_id_, DataLink_rch());
-
+  if (client && client.get() == static_cast<TransportClient*>(const_cast<void*>(arg))) {
+    client->use_datalink(data_.remote_id_, DataLink_rch());
+  }
   return 0;
 }
 
@@ -335,15 +377,18 @@ TransportClient::initiate_connect_i(TransportImpl::AcceptConnectResult& result,
 
   {
     //can't call connect while holding lock due to possible reactor deadlock
-    guard.release();
     GuidConverter local(repo_id_);
     GuidConverter remote_conv(remote.repo_id_);
     VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::initiate_connect_i - "
                         "attempt to connect_datalink between local %C and remote %C\n",
                         OPENDDS_STRING(local).c_str(),
                         OPENDDS_STRING(remote_conv).c_str()), 0);
-    result = impl->connect_datalink(remote, attribs_, rchandle_from(this));
-    guard.acquire();
+    {
+      TransportImpl::ConnectionAttribs attribs = attribs_;
+      RcHandle<TransportClient> client = rchandle_from(this);
+      ACE_GUARD_RETURN(Reverse_Lock_t, unlock_guard, reverse_lock_, false);
+      result = impl->connect_datalink(remote, attribs, client);
+    }
     if (!result.success_) {
       if (DCPS_debug_level) {
         GuidConverter writer_converter(repo_id_);
@@ -411,7 +456,6 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
                               "between %C and remote %C unsuccessful\n",
                               OPENDDS_STRING(tmp_local).c_str(),
                               OPENDDS_STRING(tmp_remote).c_str()), 0);
-          break;
         }
 
         if (res.success_) {
@@ -526,11 +570,12 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
     }
   }
 
+  iter->second->reset_client();
+  pending_assoc_timer_->cancel_timer(this, pend);
+  prev_pending_.insert(std::make_pair(iter->first, iter->second));
   pending_.erase(iter);
 
   guard.release();
-
-  pending_assoc_timer_->cancel_timer(this, pend);
 
   transport_assoc_done(active_flag | (ok ? ASSOC_OK : 0), remote_id);
 }
@@ -544,10 +589,10 @@ TransportClient::add_link(const DataLink_rch& link, const RepoId& peer)
   TransportReceiveListener_rch trl = get_receive_listener();
 
   if (trl) {
-    link->make_reservation(peer, repo_id_, trl);
+    link->make_reservation(peer, repo_id_, trl, reliable_);
 
   } else {
-    link->make_reservation(peer, repo_id_, get_send_listener());
+    link->make_reservation(peer, repo_id_, get_send_listener(), reliable_);
   }
 }
 
@@ -555,6 +600,11 @@ void
 TransportClient::stop_associating()
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
+  for (PendingMap::iterator it = pending_.begin(); it != pending_.end(); ++it) {
+    it->second->reset_client();
+    pending_assoc_timer_->cancel_timer(this, it->second);
+    prev_pending_.insert(std::make_pair(it->first, it->second));
+  }
   pending_.clear();
 }
 
@@ -567,7 +617,13 @@ TransportClient::stop_associating(const GUID_t* repos, CORBA::ULong length)
     return;
   } else {
     for (CORBA::ULong i = 0; i < length; ++i) {
-      pending_.erase(repos[i]);
+      PendingMap::iterator iter = pending_.find(repos[i]);
+      if (iter != pending_.end()) {
+        iter->second->reset_client();
+        pending_assoc_timer_->cancel_timer(this, iter->second);
+        prev_pending_.insert(std::make_pair(iter->first, iter->second));
+        pending_.erase(iter);
+      }
     }
   }
 }
@@ -589,7 +645,12 @@ TransportClient::disassociate(const RepoId& peerId)
 
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 
-  if (pending_.erase(peerId)) {
+  PendingMap::iterator iter = pending_.find(peerId);
+  if (iter != pending_.end()) {
+    iter->second->reset_client();
+    pending_assoc_timer_->cancel_timer(this, iter->second);
+    prev_pending_.insert(std::make_pair(iter->first, iter->second));
+    pending_.erase(iter);
     return;
   }
 
@@ -657,7 +718,7 @@ TransportClient::register_for_reader(const RepoId& participant,
   for (ImplsType::iterator pos = impls_.begin(), limit = impls_.end();
        pos != limit;
        ++pos) {
-    RcHandle<TransportImpl> impl = (*pos).lock();
+    RcHandle<TransportImpl> impl = pos->lock();
     if (impl) {
       impl->register_for_reader(participant, writerid, readerid, locators, listener);
     }
@@ -673,7 +734,7 @@ TransportClient::unregister_for_reader(const RepoId& participant,
   for (ImplsType::iterator pos = impls_.begin(), limit = impls_.end();
        pos != limit;
        ++pos) {
-    RcHandle<TransportImpl> impl = (*pos).lock();
+    RcHandle<TransportImpl> impl = pos->lock();
     if (impl) {
       impl->unregister_for_reader(participant, writerid, readerid);
     }
@@ -691,7 +752,7 @@ TransportClient::register_for_writer(const RepoId& participant,
   for (ImplsType::iterator pos = impls_.begin(), limit = impls_.end();
        pos != limit;
        ++pos) {
-    RcHandle<TransportImpl> impl = (*pos).lock();
+    RcHandle<TransportImpl> impl = pos->lock();
     if (impl) {
       impl->register_for_writer(participant, readerid, writerid, locators, listener);
     }
@@ -707,9 +768,24 @@ TransportClient::unregister_for_writer(const RepoId& participant,
   for (ImplsType::iterator pos = impls_.begin(), limit = impls_.end();
        pos != limit;
        ++pos) {
-    RcHandle<TransportImpl> impl = (*pos).lock();
+    RcHandle<TransportImpl> impl = pos->lock();
     if (impl) {
       impl->unregister_for_writer(participant, readerid, writerid);
+    }
+  }
+}
+
+void
+TransportClient::update_locators(const RepoId& remote,
+                                 const TransportLocatorSeq& locators)
+{
+  ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
+  for (ImplsType::iterator pos = impls_.begin(), limit = impls_.end();
+       pos != limit;
+       ++pos) {
+    RcHandle<TransportImpl> impl = pos->lock();
+    if (impl) {
+      impl->update_locators(remote, locators);
     }
   }
 }
@@ -725,7 +801,7 @@ TransportClient::get_ice_endpoint()
   for (ImplsType::iterator pos = impls_.begin(), limit = impls_.end();
        pos != limit;
        ++pos) {
-    RcHandle<TransportImpl> impl = (*pos).lock();
+    RcHandle<TransportImpl> impl = pos->lock();
     if (impl) {
       ICE::Endpoint* endpoint = impl->get_ice_endpoint();
       if (endpoint) { return endpoint; }
@@ -989,6 +1065,11 @@ bool
 TransportClient::remove_all_msgs()
 {
   return links_.remove_all_msgs(repo_id_);
+}
+
+void
+TransportClient::terminate_send_if_suspended() {
+  links_.terminate_send_if_suspended();
 }
 
 }

@@ -3,7 +3,6 @@
 # OpenDDS
 
 [![Build Status](https://travis-ci.org/objectcomputing/OpenDDS.svg?branch=master)](https://travis-ci.org/objectcomputing/OpenDDS)
-[![Build status](https://ci.appveyor.com/api/projects/status/github/objectcomputing/OpenDDS?svg=true)](https://ci.appveyor.com/project/mitza-oci/opendds/branch/master)
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/opendds/badge.svg)](https://scan.coverity.com/projects/opendds)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/4647c7248ac14e7bb60c142c626ba574)](https://www.codacy.com/app/OpenDDS/OpenDDS?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=objectcomputing/OpenDDS&amp;utm_campaign=Badge_Grade)
 [![Azure DevOps](https://dev.azure.com/opendds/OpenDDS/_apis/build/status/objectcomputing.OpenDDS)](https://dev.azure.com/opendds/OpenDDS/_build/latest?definitionId=1)
@@ -80,7 +79,7 @@ transport protocols:
 * RTPS over UDP/IP (unicast and multicast)
 
 RTPS (Interoperability) features are based on the [DDS-RTPS Specification
-formal/2014-09-01 (version 2.2)](http://www.omg.org/spec/DDSI-RTPS/2.2).  See
+formal/2019-04-03 (version 2.3)](http://www.omg.org/spec/DDSI-RTPS/2.3).  See
 the OpenDDS Developer's Guide and the file [docs/design/RTPS](docs/design/RTPS)
 for more details on RTPS.
 
@@ -104,19 +103,19 @@ first -- the `configure` script will download it for you.
 
 There are two distributions of ACE/TAO that can be used with OpenDDS:
 
-* OCI ACE/TAO 2.2a patch 16
+* OCI ACE/TAO 2.2a patch 17 or later
   * This will be automatically downloaded by default when using the configure
     script.
   * Can be manually downloaded from:
     * http://download.objectcomputing.com/TAO-2.2a_patches/
-* DOC Group ACE 6.5.5 / TAO 2.5.5
-  * When using the configure script, DOG Group ACE/TAO can be downloaded using
+* DOC Group ACE 6.5.8 / TAO 2.5.8 or later
+  * When using the configure script, DOC Group ACE/TAO can be downloaded using
     one of these arguments:
     * `--doc-group` for the latest release
     * `--ace-github-latest` to use the master branch of ACE/TAO as is. This
       also downloads the master branch of MPC as is.
   * Can be manually downloaded from:
-    * [`github.com/DOCGroup/ACE_TAO`](https://github.com/DOCGroup/ACE_TAO/releases)
+    * https://github.com/DOCGroup/ACE_TAO/releases
     * http://download.dre.vanderbilt.edu/
 
 ### Perl
@@ -131,9 +130,7 @@ https://www.activestate.com/activeperl).
 ### Optional Dependencies
 
 * [Google Test](docs/dependencies.md#google-test), for various tests.
-  * Starting with OpenDDS 3.14, Google Test is required for OpenDDS tests.
-    Tests are built by default, so that means Google Test is required unless
-    `--no-tests` is passed to `configure`.
+  * Google Test is required for OpenDDS tests. If tests are not built, Google Test is not needed.
 * [CMake](docs/dependencies.md#cmake), for building Google Test and the OpenDDS
   CMake module.
 * [Java](docs/dependencies.md#java), for Java bindings.
@@ -142,7 +139,7 @@ https://www.activestate.com/activeperl).
   dissector.
 * [RapidJSON](docs/dependencies.md#rapidjson), for optional dissector sample
   dissection support and JSON typesupport.
-* [Xerces](docs/dependencies.md#xerces), for XML QOS and DDS Security.
+* [Xerces-C++](docs/dependencies.md#xerces), for XML QoS and DDS Security.
 * [OpenSSL](docs/dependencies.md#openssl), for DDS Security.
 
 ## Supported Platforms
@@ -152,12 +149,12 @@ https://www.activestate.com/activeperl).
 This release of OpenDDS has been tested under the following platforms:
 
 Linux family:
-* Red Hat EL and CentOS 6.6 and 6.9, x86\_64
-* Red Hat EL and CentOS 7.2 and 7.3, x86\_64
-* Fedora 24 and 29, x86\_64
-* Debian 9.4, i686
-* Ubuntu 16.04 LTS, x86\_64
-* openSUSE 42.1, and 42.2, x86\_64
+* Red Hat EL and CentOS 6.6, 6.8, 6.9 (x86\_64)
+* Red Hat EL and CentOS 7.2, 7.3, 7.4 (x86\_64)
+* Fedora 24 and 31 (x86\_64)
+* Debian 9.4 (i686)
+* Ubuntu 18.04 LTS, (x86\_64)
+* openSUSE 42.1 (x86\_64)
 * [Docker](docs/docker.md)
 
 Windows family:
@@ -166,13 +163,13 @@ Windows family:
 * Windows 10 (64-bit)
 
 Others:
-* macOS 10.13 (High Sierra)
+* macOS 10.15.2 (Catalina)
 
 Embedded/Mobile/IoT:
 * LynxOS-178 (OpenDDS Safety Profile)
 * VxWorks 6.9 and 7 (see below)
 * [Linux on Raspberry Pi](http://opendds.org/quickstart/GettingStartedPi.html)
-* [Android 9.0 "Pie" (API Level 28)](docs/android.md)
+* [Android 9.0 "Pie" (API Level 28) NDK r18b](docs/android.md)
 
 We have built OpenDDS for VxWorks 6.9 and 7 and have run basic
 system and performance tests (but not the entire regression test suite).
@@ -190,21 +187,20 @@ This release of OpenDDS has been tested using the following compilers:
 * Microsoft Visual C++ 11 (Visual Studio 2012) - Update 4
 * Microsoft Visual C++ 12 (Visual Studio 2013) - Update 5
 * Microsoft Visual C++ 14 (Visual Studio 2015) - Update 3
-* Microsoft Visual C++ 14.1 (Visual Studio 2017) cl 19.12.25835
-* gcc 4.4.7, 4.8, 4.9
-* gcc 5.4
-* gcc 6.2, 6.3
+* Microsoft Visual C++ 14.1 (Visual Studio 2017) cl 19.16.27034
+* Microsoft Visual C++ 14.2 (Visual Studio 2019) cl 19.24.28316
+* gcc 4.4.7, 4.8.5
+* gcc 6.3
 * gcc 7.2
-* gcc 8.1, 8.2
-* Clang 6.0 (llvm.org) and 9.0 (Apple)
+* gcc 9.2
+* Clang 6.0 (llvm.org) and 11.0 (Apple)
 
 ## Building and Installing
 
-For building and installation instructions
-see the [`INSTALL.md`](INSTALL.md) file in this directory.
+For building and installation instructions see the [`INSTALL.md`](INSTALL.md)
+file in this directory.
 
 ## Quick Start with Docker
 
 See [`docs/docker.md`](docs/docker.md) for how to use the pre-built docker
 image.
-

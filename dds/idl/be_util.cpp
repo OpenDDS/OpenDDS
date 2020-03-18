@@ -13,11 +13,12 @@
 //=============================================================================
 
 #include "be_util.h"
+
 #include "be_extern.h"
 
-#include "ast_generator.h"
+#include <ast_generator.h>
 
-#include "ace/OS_NS_strings.h"
+#include <ace/OS_NS_strings.h>
 
 // Prepare an argument for a BE
 void
@@ -98,7 +99,6 @@ void
 be_util::usage()
 {
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT(" --[no-]default-nested\ttreat unannotated types as if they were nested\n")
     ACE_TEXT(" -o <dir>\t\tsets output directory for all files\n")
     ACE_TEXT(" -Lface\t\t\tgenerate FACE IDL to C++ mapping\n")
     ACE_TEXT(" -Lspcpp\t\tgenerate Safety Profile IDL to C++ mapping\n")
@@ -114,6 +114,7 @@ be_util::usage()
     ACE_TEXT("\t\t\t\t-Wb,v8 is an alternative form for this option\n")
     ACE_TEXT(" -Grapidjson\t\tgenerate TypeSupport for converting data samples ")
     ACE_TEXT("to RapidJSON JavaScript objects\n")
+    ACE_TEXT(" --[no-]default-nested\tTopic types must be declared. True by default.\n")
     ACE_TEXT(" --no-dcps-data-type-warnings\t\tdon't warn about #pragma DCPS_DATA_TYPE\n")
     ACE_TEXT(" -Wb,export_macro=<macro name>\t\tsets export macro ")
     ACE_TEXT("for all files\n")
@@ -148,11 +149,11 @@ be_util::generator_init()
   return gen;
 }
 
-const std::string&
+const char*
 be_util::dds_root()
 {
-  static std::string value = ACE_OS::getenv("DDS_ROOT");
-  if (value.empty()) {
+  static const char* value = ACE_OS::getenv("DDS_ROOT");
+  if (!value || !value[0]) {
     ACE_ERROR((LM_ERROR, "Error - The environment variable DDS_ROOT must be set.\n"));
     BE_abort();
   }

@@ -74,6 +74,7 @@ GuidGenerator::GuidGenerator()
   ACE_OS::macaddr_node_t macaddress;
   const int result = ACE_OS::getmacaddress(&macaddress);
 
+#ifndef ACE_HAS_IOS
   if (-1 != result) {
     ACE_OS::memcpy(node_id_, macaddress.node, NODE_ID_SIZE);
   } else {
@@ -81,12 +82,20 @@ GuidGenerator::GuidGenerator()
       node_id_[i] = static_cast<unsigned char>(ACE_OS::rand());
     }
   }
+#else
+// iOS has non-unique MAC addresses
+  ACE_UNUSED_ARG(result);
+
+  for (int i = 0; i < NODE_ID_SIZE; ++i) {
+    node_id_[i] = static_cast<unsigned char>(ACE_OS::rand());
+  }
+#endif /* ACE_HAS_IOS */
 }
 
 ACE_UINT16
 GuidGenerator::getCount()
 {
-  ACE_Guard<ACE_SYNCH_MUTEX> guard(counter_lock_);
+  ACE_Guard<ACE_Thread_Mutex> guard(counter_lock_);
   return counter_++;
 }
 
@@ -127,7 +136,7 @@ GuidGenerator::interfaceName(const char* iface)
 
   alloc->free(addrs);
   return found ? 0 : -1;
-#elif defined ACE_LINUX || defined __ANDROID_API__
+#elif defined ACE_LINUX || defined ACE_ANDROID
   ifreq ifr;
   // Guarantee that iface will fit in ifr.ifr_name and still be null terminated
   // ifr.ifr_name is sized to IFNAMSIZ

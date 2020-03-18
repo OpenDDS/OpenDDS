@@ -62,6 +62,14 @@ project(*RtpsFragmentation): dcpsexe, dcps_test, dcps_rtps_udp {
   }
 }
 
+project(*RtpsDuration): dcps_rtpsexe, dcps_test {
+  exename = *
+
+  Source_Files {
+    RtpsDuration.cpp
+  }
+}
+
 project(*GuidGenerator): dcps_rtpsexe, dcps_test {
   exename   = *
 
@@ -92,6 +100,14 @@ project(*BIT_DataReader): dcps_rtps_udp, dcps_default_discovery, dcps_test {
 
   Source_Files {
     ut_BIT_DataReader.cpp
+  }
+}
+
+project(*MultiTask): dcpsexe, dcps_test {
+  exename   = *
+
+  Source_Files {
+    ut_MultiTask.cpp
   }
 }
 

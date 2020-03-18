@@ -78,8 +78,6 @@ DataReaderImpl::DataReaderImpl()
   statistics_enabled_(false),
   raw_latency_buffer_size_(0),
   raw_latency_buffer_type_(DataCollector<double>::KeepOldest),
-  monitor_(0),
-  periodic_monitor_(0),
   transport_disabled_(false)
 {
   reactor_ = TheServiceParticipant->timer();
@@ -120,8 +118,8 @@ DataReaderImpl::DataReaderImpl()
   this->budget_exceeded_status_.total_count_change = 0;
   this->budget_exceeded_status_.last_instance_handle = DDS::HANDLE_NIL;
 
-  monitor_ = TheServiceParticipant->monitor_factory_->create_data_reader_monitor(this);
-  periodic_monitor_ = TheServiceParticipant->monitor_factory_->create_data_reader_periodic_monitor(this);
+  monitor_.reset(TheServiceParticipant->monitor_factory_->create_data_reader_monitor(this));
+  periodic_monitor_.reset(TheServiceParticipant->monitor_factory_->create_data_reader_periodic_monitor(this));
 }
 
 // This method is called when there are no longer any reference to the
@@ -2093,7 +2091,7 @@ DataReaderImpl::writer_became_alive(WriterInfo& info,
         ACE_TEXT("reader %C from writer %C previous state %C.\n"),
         OPENDDS_STRING(reader_converter).c_str(),
         OPENDDS_STRING(writer_converter).c_str(),
-        info.get_state_str().c_str()));
+        info.get_state_str()));
   }
 
   // caller should already have the samples_lock_ !!!
@@ -2165,10 +2163,9 @@ DataReaderImpl::writer_became_dead(WriterInfo& info,
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderImpl::writer_became_dead: ")
         ACE_TEXT("reader %C from writer %C previous state %C.\n"),
-
         OPENDDS_STRING(reader_converter).c_str(),
         OPENDDS_STRING(writer_converter).c_str(),
-        info.get_state_str().c_str()));
+        info.get_state_str()));
   }
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
@@ -2768,7 +2765,6 @@ void DataReaderImpl::notify_liveliness_change()
       output_str += current->second->get_state_str();
     }
 
-    output_str + "\n";
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderImpl::notify_liveliness_change: ")
         ACE_TEXT("listener at 0x%x, mask 0x%x.\n")
@@ -3245,6 +3241,20 @@ DataReaderImpl::unregister_for_writer(const RepoId& participant,
   TransportClient::unregister_for_writer(participant, readerid, writerid);
 }
 
+void
+DataReaderImpl::update_locators(const RepoId& writerId,
+                                const TransportLocatorSeq& locators)
+{
+  {
+    ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, writers_lock_);
+    WriterMapType::const_iterator iter = writers_.find(writerId);
+    if (iter == writers_.end()) {
+      return;
+    }
+  }
+  TransportClient::update_locators(writerId, locators);
+}
+
 ICE::Endpoint*
 DataReaderImpl::get_ice_endpoint()
 {
@@ -3398,6 +3408,17 @@ void EndHistoricSamplesMissedSweeper::CancelCommand::execute()
     info_->historic_samples_timer_ = WriterInfo::NO_TIMER;
     sweeper_->info_set_.erase(info_);
   }
+}
+
+void DataReaderImpl::transport_discovery_change()
+{
+  populate_connection_info();
+  const TransportLocatorSeq& trans_conf_info = connection_info();
+  Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
+  disco->update_subscription_locators(domain_id_,
+                                      dp_id_,
+                                      subscription_id_,
+                                      trans_conf_info);
 }
 
 } // namespace DCPS

@@ -1,3 +1,5 @@
+dist: bionic
+group: travis_latest
 language: cpp
 
 compiler:
@@ -27,9 +29,9 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - libxerces-c-dev
-            - g++-6
+            - g++-8
             - openjdk-8-jdk-headless
-      env: COMPILER=g++-6 USE_JAVA=1 NO_DEBUG=1 NO_TESTS=1
+      env: COMPILER=g++-8 USE_JAVA=1 NO_DEBUG=1 NO_TESTS=1
     - os: osx
       osx_image: xcode10.1
       compiler: clang
@@ -37,8 +39,6 @@ matrix:
 
 addons:
   apt:
-    sources:
-      - ubuntu-toolchain-r-test
     packages:
       - libxerces-c-dev
       - libssl-dev
@@ -73,7 +73,7 @@ before_script:
   - if [ "$CXX" == "g++" ]; then CONFIG_OPTIONS+=" --std=c++11"; fi
   - if [ "$VERSIONED_NS" == 1 ]; then CONFIG_OPTIONS+=" --features=versioned_namespace=1"; fi
   - if [ "$DDS_SECURITY" == 1 ]; then CONFIG_OPTIONS+=" --security"; fi
-  - ./configure --mpcopts="-workers 4" --compiler=$COMPILER $CONFIG_OPTIONS
+  - ./configure --mpcopts="-workers 4" --compiler=$COMPILER --tests $CONFIG_OPTIONS
   - tools/scripts/show_build_config.pl
   - if [ "$SAFETY_PROFILE" == "1" ]; then
         export LD_LIBRARY_PATH+=:$TRAVIS_BUILD_DIR/build/target/ACE_TAO/ACE/lib:$TRAVIS_BUILD_DIR/build/target/lib;
@@ -81,8 +81,18 @@ before_script:
 
 script:
   - travis_wait 47 make -s -j 3
+  - FILES=$(git clean -nd -e ext); if [ "$FILES" != "" ]; then
+        echo ERROR These files should be gitignored;
+        echo $FILES;
+        exit 1;
+    fi
   - if [ "$SAFETY_PROFILE" != "1" ]; then
       $DDS_ROOT/tests/cmake_integration/run_ci_tests.pl;
+    fi
+  - if [ "$NO_TESTS" == "1" ]; then
+      echo Building Messenger;
+      $ACE_ROOT/bin/mwc.pl -type gnuace tests/DCPS/Messenger;
+      make -C tests/DCPS/Messenger;
     fi
   - if [ "$SAFETY_PROFILE" == "1" ]; then
         cd build/target/tests/DCPS/Messenger && ./run_test.pl rtps_disc;

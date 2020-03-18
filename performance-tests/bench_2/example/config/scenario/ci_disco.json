@@ -1,0 +1,11 @@
+{
+  "name": "Continuous Integration Discovery Test",
+  "desc": "This is a small quick test for (quiet) discovery capability with many participant processes",
+  "any_node": [
+    {
+      "config": "ci_disco.json",
+      "count": 20
+    }
+  ],
+  "timeout": 120
+}

@@ -756,7 +756,12 @@ TransportSendStrategy::terminate_send(bool graceful_disconnecting)
 }
 
 void
-TransportSendStrategy::clear(SendMode mode)
+TransportSendStrategy::terminate_send_if_suspended()
+{
+}
+
+void
+TransportSendStrategy::clear(SendMode new_mode, SendMode old_mode)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","clear",6);
 
@@ -765,6 +770,9 @@ TransportSendStrategy::clear(SendMode mode)
   QueueType queue;
   {
     GuardType guard(this->lock_);
+
+    if (old_mode != MODE_NOT_SET && this->mode_ != old_mode)
+      return;
 
     if (this->header_.length_ > 0) {
       // Clear the messages in the pkt_chain_ that is partially sent.
@@ -789,13 +797,13 @@ TransportSendStrategy::clear(SendMode mode)
     this->pkt_chain_ = 0;
     this->header_complete_ = false;
     this->start_counter_ = 0;
-    this->mode_ = mode;
+    this->mode_ = new_mode;
     this->mode_before_suspend_ = MODE_NOT_SET;
   }
 
   // We need remove the queued elements outside the lock,
-  // otherwise we have a deadlock situation when remove vistor
-  // calls the data_droped on each dropped elements.
+  // otherwise we have a deadlock situation when remove visitor
+  // calls the data_dropped on each dropped elements.
 
   // Clear all samples in queue.
   RemoveAllVisitor remove_all_visitor;
@@ -1261,7 +1269,7 @@ TransportSendStrategy::send_stop(RepoId /*repoId*/)
 }
 
 void
-TransportSendStrategy::remove_all_msgs(RepoId pub_id)
+TransportSendStrategy::remove_all_msgs(const RepoId& pub_id)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","remove_all_msgs",6);
 

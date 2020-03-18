@@ -1,0 +1,27 @@
+{
+  "name": "Showtime Durable 20",
+  "desc": "This is the showtime scenario with durable writers/readers and 20 'nodes'",
+  "nodes": [
+    {
+      "workers": [
+        {
+          "config": "showtime_durable_daemon.json",
+          "count": 1
+        },
+        {
+          "config": "showtime_durable_worker.json",
+          "count": 1
+        }
+      ],
+      "count": 20,
+      "exclusive": false
+    }
+  ],
+  "any_node": [
+    {
+      "config": "showtime_durable_master.json",
+      "count": 1
+    }
+  ],
+  "timeout": 180
+}

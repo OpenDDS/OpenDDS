@@ -81,7 +81,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("%N:%l: on_data_available()")
                  ACE_TEXT(" ERROR: take_next_sample unexpected status: %C\n"),
-                 retcode_to_string(status).c_str()));
+                 retcode_to_string(status)));
       this->verify_result_ = false;
     }
 

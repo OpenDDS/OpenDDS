@@ -1,3 +1,6 @@
+#ifndef OPENDDS_IDL_ANNOTATIONS_HEADER
+#define OPENDDS_IDL_ANNOTATIONS_HEADER
+
 #include <string>
 #include <map>
 
@@ -56,8 +59,25 @@ public:
   BuiltinAnnotationWithBoolValue();
   virtual ~BuiltinAnnotationWithBoolValue();
 
+  /**
+   * Default value if the node DOESN'T have the annotation. This is different
+   * than the default value in the annotation definition.
+   */
   virtual bool default_value() const;
+
+  /**
+   * Returns the value according to the annotation if it exists, else returns
+   * default_value().
+   */
   virtual bool node_value(AST_Decl* node) const;
+
+  /**
+   * If node has the annotation, this sets value to the annotation value and
+   * returns true.
+   * If node does not have the annotation, this sets value to default_value()
+   * and returns false.
+   */
+  virtual bool node_value_exists(AST_Decl* node, bool& value) const;
 
 protected:
   bool value_from_appl(AST_Annotation_Appl* appl) const;
@@ -104,3 +124,5 @@ public:
   virtual std::string definition() const;
   virtual std::string name() const;
 };
+
+#endif

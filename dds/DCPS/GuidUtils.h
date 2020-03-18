@@ -11,7 +11,6 @@
 #include "dds/DdsDcpsGuidC.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DCPS/PoolAllocator.h"
-
 #include "dcps_export.h"
 
 #include "tao/Basic_Types.h"
@@ -180,6 +179,9 @@ OpenDDS_Dcps_Export inline GUID_t make_guid(
   std::memcpy(&result.entityId, &entity, sizeof(EntityId_t));
   return result;
 }
+
+OpenDDS_Dcps_Export
+void intersect(const RepoIdSet& a, const RepoIdSet& b, RepoIdSet& result);
 
 } // namespace DCPS
 } // namespace OpenDDS

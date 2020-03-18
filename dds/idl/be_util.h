@@ -18,8 +18,6 @@
 
 #include <string>
 
-class TAO_OutStream;
-class AST_Decl;
 class AST_Generator;
 
 namespace be_util {
@@ -37,7 +35,7 @@ namespace be_util {
   AST_Generator* generator_init();
 
   /// Get DDS_ROOT. It is a fatal error if it wasn't set.
-  const std::string& dds_root();
+  const char* dds_root();
 };
 
 #endif // if !defined

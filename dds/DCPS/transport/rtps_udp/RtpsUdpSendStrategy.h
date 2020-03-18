@@ -68,8 +68,6 @@ protected:
   }
 
   virtual void add_delayed_notification(TransportQueueElement* element);
-  virtual RemoveResult do_remove_sample(const RepoId& pub_id,
-    const TransportQueueElement::MatchCriteria& criteria);
 
 private:
   bool marshal_transport_header(ACE_Message_Block* mb);
@@ -120,6 +118,7 @@ private:
   char rtps_header_data_[RTPS::RTPSHDR_SZ];
   ACE_Data_Block rtps_header_db_;
   ACE_Message_Block rtps_header_mb_;
+  bool network_is_unreachable_;
 };
 
 } // namespace DCPS

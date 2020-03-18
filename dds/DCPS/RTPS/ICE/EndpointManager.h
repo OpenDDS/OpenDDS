@@ -5,6 +5,7 @@
  * See: http://www.opendds.org/license.html
  */
 
+#ifdef OPENDDS_SECURITY
 #ifndef OPENDDS_RTPS_ICE_ENDPOINT_MANAGER_H
 #define OPENDDS_RTPS_ICE_ENDPOINT_MANAGER_H
 
@@ -57,6 +58,12 @@ struct EndpointManager {
   const AgentInfo& agent_info() const
   {
     return agent_info_;
+  }
+
+  typedef std::set<std::string> FoundationSet;
+  const FoundationSet& foundations() const
+  {
+    return foundations_;
   }
 
   void add_agent_info_listener(const DCPS::RepoId& a_local_guid,
@@ -129,6 +136,8 @@ struct EndpointManager {
     username_to_checklist_.erase(pos);
   }
 
+  void unfreeze();
+
   void unfreeze(const FoundationType& a_foundation);
 
   void compute_active_foundations(ActiveFoundationSet& a_active_foundations) const;
@@ -137,6 +146,20 @@ struct EndpointManager {
 
   void schedule_for_destruction();
 
+  void ice_connect(const GuidSetType& guids, const ACE_INET_Addr& addr)
+  {
+    endpoint->ice_connect(guids, addr);
+  }
+
+  void ice_disconnect(const GuidSetType& guids)
+  {
+    endpoint->ice_disconnect(guids);
+  }
+
+  void network_change();
+
+  void send(const ACE_INET_Addr& address, const STUN::Message& message);
+
 private:
   bool scheduled_for_destruction_;
   AddressListType host_addresses_;          // Cached list of host addresses.
@@ -144,6 +167,7 @@ private:
   ACE_INET_Addr stun_server_address_;       // Address of the STUN server.
   ACE_UINT64 ice_tie_breaker_;
   AgentInfo agent_info_;
+  FoundationSet foundations_;
 
   // State variables for getting and maintaining the server reflexive address.
   bool requesting_;
@@ -202,7 +226,9 @@ private:
                const ACE_INET_Addr& a_remote_address,
                const STUN::Message& a_message);
 
-  void indication(const STUN::Message& a_message);
+  void indication(const ACE_INET_Addr& a_local_address,
+                  const ACE_INET_Addr& a_remote_address,
+                  const STUN::Message& a_message);
 
   void success_response(const ACE_INET_Addr& a_local_address,
                         const ACE_INET_Addr& a_remote_address,
@@ -231,3 +257,4 @@ private:
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* OPENDDS_RTPS_ICE_ENDPOINT_MANAGER_H */
+#endif /* OPENDDS_SECURITY */

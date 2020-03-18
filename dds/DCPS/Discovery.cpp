@@ -12,6 +12,7 @@
 #include "Registered_Data_Types.h"
 #include "DdsDcpsCoreC.h"
 #include "Marked_Default_Qos.h"
+#include "dds/DCPS/SafetyProfileStreams.h"
 
 #ifndef DDS_HAS_MINIMUM_BIT
 #include "DdsDcpsCoreTypeSupportImpl.h"
@@ -66,6 +67,43 @@ Discovery::create_bit_topics(DomainParticipantImpl* participant)
                       ACE_TEXT("Nil %C Topic\n"),
                       BUILT_IN_PARTICIPANT_TOPIC),
                      DDS::RETCODE_ERROR);
+  }
+
+  // Participant location topic
+  type_support =
+    Registered_Data_Types->lookup(participant, BUILT_IN_PARTICIPANT_LOCATION_TOPIC_TYPE);
+
+  if (CORBA::is_nil(type_support)) {
+    OpenDDS::DCPS::ParticipantLocationBuiltinTopicDataTypeSupport_var ts =
+      new OpenDDS::DCPS::ParticipantLocationBuiltinTopicDataTypeSupportImpl;
+
+    DDS::ReturnCode_t ret = ts->register_type(participant,
+      BUILT_IN_PARTICIPANT_LOCATION_TOPIC_TYPE);
+
+    if (ret != DDS::RETCODE_OK) {
+      ACE_ERROR_RETURN((LM_ERROR,
+        ACE_TEXT("(%P|%t) ")
+        ACE_TEXT("Discovery::create_bit_topics, ")
+        ACE_TEXT("register BUILT_IN_PARTICIPANT_LOCATION_TOPIC_TYPE returned %C.\n"),
+        retcode_to_string(ret)),
+        ret);
+    }
+  }
+
+  DDS::Topic_var bit_part_loc_topic =
+    participant->create_topic(BUILT_IN_PARTICIPANT_LOCATION_TOPIC,
+      BUILT_IN_PARTICIPANT_LOCATION_TOPIC_TYPE,
+      TOPIC_QOS_DEFAULT,
+      DDS::TopicListener::_nil(),
+      DEFAULT_STATUS_MASK);
+
+  if (CORBA::is_nil(bit_part_loc_topic)) {
+    ACE_ERROR_RETURN((LM_ERROR,
+      ACE_TEXT("(%P|%t) ")
+      ACE_TEXT("Discovery::create_bit_topics, ")
+      ACE_TEXT("Nil %C Topic\n"),
+      BUILT_IN_PARTICIPANT_LOCATION_TOPIC),
+      DDS::RETCODE_ERROR);
   }
 
   // Topic topic
@@ -178,10 +216,14 @@ Discovery::create_bit_topics(DomainParticipantImpl* participant)
                      DDS::RETCODE_ERROR);
   }
 
+
   bit_part_topic->enable();
   bit_topic_topic->enable();
   bit_sub_topic->enable();
   bit_pub_topic->enable();
+
+  bit_part_loc_topic->enable();
+
 #else
   ACE_UNUSED_ARG(participant);
 #endif /* DDS_HAS_MINIMUM_BIT */
@@ -192,6 +234,18 @@ Discovery::create_bit_topics(DomainParticipantImpl* participant)
 Discovery::Config::~Config()
 {
 }
+
+void Discovery::update_publication_locators(DDS::DomainId_t,
+                                            const RepoId&,
+                                            const RepoId&,
+                                            const TransportLocatorSeq&)
+{}
+
+void Discovery::update_subscription_locators(DDS::DomainId_t,
+                                             const RepoId&,
+                                             const RepoId&,
+                                             const TransportLocatorSeq&)
+{}
 
 } // namespace DCPS
 } // namespace OpenDDS

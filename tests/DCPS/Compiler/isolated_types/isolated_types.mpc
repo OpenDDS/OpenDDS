@@ -1,0 +1,8 @@
+project(DDS*): dcpsexe, dcps_test {
+  dcps_ts_flags += --default-nested
+
+  TypeSupport_Files {
+    StructTest.idl
+    UnionTest.idl
+  }
+}

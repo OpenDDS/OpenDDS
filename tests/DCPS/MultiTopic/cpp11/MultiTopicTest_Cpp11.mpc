@@ -1,0 +1,12 @@
+project: dcpsexe, dcps_test, content_subscription, opendds_cxx11 {
+  requires += multi_topic
+  idlflags += -I..
+  TypeSupport_Files {
+    ../MultiTopicTest.idl
+  }
+  includes += .
+  macros += CPP11_MAPPING
+  Source_Files {
+    ../MultiTopicTest.cpp
+  }
+}

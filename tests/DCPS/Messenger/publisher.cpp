@@ -29,24 +29,21 @@
 #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
+#include <cstdlib>
+
 #include "MessengerTypeSupportImpl.h"
 #include "Writer.h"
 #include "Args.h"
 
 #ifdef OPENDDS_SECURITY
-const char auth_ca_file[] = "file:../../security/certs/identity/identity_ca_cert.pem";
-const char perm_ca_file[] = "file:../../security/certs/permissions/permissions_ca_cert.pem";
-const char id_cert_file[] = "file:../../security/certs/identity/test_participant_01_cert.pem";
-const char id_key_file[] = "file:../../security/certs/identity/test_participant_01_private_key.pem";
+#include <dds/DCPS/security/framework/Properties.h>
+
+const char auth_ca_file_from_tests[] = "security/certs/identity/identity_ca_cert.pem";
+const char perm_ca_file_from_tests[] = "security/certs/permissions/permissions_ca_cert.pem";
+const char id_cert_file_from_tests[] = "security/certs/identity/test_participant_01_cert.pem";
+const char id_key_file_from_tests[] = "security/certs/identity/test_participant_01_private_key.pem";
 const char governance_file[] = "file:./governance_signed.p7s";
 const char permissions_file[] = "file:./permissions_1_signed.p7s";
-
-const char DDSSEC_PROP_IDENTITY_CA[] = "dds.sec.auth.identity_ca";
-const char DDSSEC_PROP_IDENTITY_CERT[] = "dds.sec.auth.identity_certificate";
-const char DDSSEC_PROP_IDENTITY_PRIVKEY[] = "dds.sec.auth.private_key";
-const char DDSSEC_PROP_PERM_CA[] = "dds.sec.access.permissions_ca";
-const char DDSSEC_PROP_PERM_GOV_DOC[] = "dds.sec.access.governance";
-const char DDSSEC_PROP_PERM_DOC[] = "dds.sec.access.permissions";
 #endif
 
 bool dw_reliable() {
@@ -64,6 +61,7 @@ void append(DDS::PropertySeq& props, const char* name, const char* value, bool p
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
+  int status = EXIT_SUCCESS;
   DDS::DomainParticipantFactory_var dpf;
   DDS::DomainParticipant_var participant;
 
@@ -75,9 +73,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       dpf = TheParticipantFactoryWithArgs(argc, argv);
 
       std::cout << "Starting publisher with " << argc << " args" << std::endl;
-      int error;
-      if ((error = parse_args(argc, argv)) != 0) {
-        return error;
+      if ((status = parse_args(argc, argv)) != EXIT_SUCCESS) {
+        return status;
       }
 
       DDS::DomainParticipantQos part_qos;
@@ -86,14 +83,28 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       DDS::PropertySeq& props = part_qos.property.value;
       append(props, "OpenDDS.RtpsRelay.Groups", "Messenger", true);
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
+      // Determine the path to the keys
+      OPENDDS_STRING path_to_tests;
+      const char* dds_root = ACE_OS::getenv("DDS_ROOT");
+      if (dds_root && dds_root[0]) {
+        // Use DDS_ROOT in case we are one of the CMake tests
+        path_to_tests = OPENDDS_STRING("file:") + dds_root + "/tests/";
+      } else {
+        // Else if DDS_ROOT isn't defined try to do it relative to the traditional location
+        path_to_tests = "file:../../";
+      }
+      const OPENDDS_STRING auth_ca_file = path_to_tests + auth_ca_file_from_tests;
+      const OPENDDS_STRING perm_ca_file = path_to_tests + perm_ca_file_from_tests;
+      const OPENDDS_STRING id_cert_file = path_to_tests + id_cert_file_from_tests;
+      const OPENDDS_STRING id_key_file = path_to_tests + id_key_file_from_tests;
       if (TheServiceParticipant->get_security()) {
-        append(props, DDSSEC_PROP_IDENTITY_CA, auth_ca_file);
-        append(props, DDSSEC_PROP_IDENTITY_CERT, id_cert_file);
-        append(props, DDSSEC_PROP_IDENTITY_PRIVKEY, id_key_file);
-        append(props, DDSSEC_PROP_PERM_CA, perm_ca_file);
-        append(props, DDSSEC_PROP_PERM_GOV_DOC, governance_file);
-        append(props, DDSSEC_PROP_PERM_DOC, permissions_file);
+        append(props, DDS::Security::Properties::AuthIdentityCA, auth_ca_file.c_str());
+        append(props, DDS::Security::Properties::AuthIdentityCertificate, id_cert_file.c_str());
+        append(props, DDS::Security::Properties::AuthPrivateKey, id_key_file.c_str());
+        append(props, DDS::Security::Properties::AccessPermissionsCA, perm_ca_file.c_str());
+        append(props, DDS::Security::Properties::AccessGovernance, governance_file);
+        append(props, DDS::Security::Properties::AccessPermissions, permissions_file);
       }
 #endif
 
@@ -107,7 +118,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: main()")
                           ACE_TEXT(" ERROR: create_participant failed!\n")),
-                         -1);
+                         EXIT_FAILURE);
       }
 
       // Register TypeSupport (Messenger::Message)
@@ -118,7 +129,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: main()")
                           ACE_TEXT(" ERROR: register_type failed!\n")),
-                         -1);
+                         EXIT_FAILURE);
       }
 
       // Create Topic
@@ -134,7 +145,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: main()")
                           ACE_TEXT(" ERROR: create_topic failed!\n")),
-                         -1);
+                         EXIT_FAILURE);
       }
 
       // Create Publisher
@@ -147,7 +158,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: main()")
                           ACE_TEXT(" ERROR: create_publisher failed!\n")),
-                         -1);
+                         EXIT_FAILURE);
       }
 
       DDS::DataWriterQos qos;
@@ -169,7 +180,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: main()")
                           ACE_TEXT(" ERROR: create_datawriter failed!\n")),
-                         -1);
+                         EXIT_FAILURE);
       }
 
       // Start writing threads
@@ -202,6 +213,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       std::cerr << "deleting DW" << std::endl;
       delete writer;
     }
+
     // Clean-up!
     std::cerr << "deleting contained entities" << std::endl;
     participant->delete_contained_entities();
@@ -212,8 +224,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
-    ACE_OS::exit(-1);
+    status = EXIT_FAILURE;
   }
 
-  return 0;
+  return status;
 }

@@ -22,8 +22,6 @@ static const std::string PLUGIN_NAME("BuiltIn");
 int
 BuiltInPluginLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
 {
-  static bool initialized(false);
-
   if (initialized) return 0;  // already initialized
 
   SecurityPluginInst_rch plugin = DCPS::make_rch<BuiltInSecurityPluginInst>();

@@ -67,7 +67,7 @@ public:
       ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Null SPDP Transport\n")));
       return false;
     }
-    addr = spdp_->tport_->default_multicast_;
+    addr = spdp_->tport_->multicast_address_;
     return true;
   }
 
@@ -275,7 +275,7 @@ bool run_test()
 #ifdef OPENDDS_SAFETY_PROFILE
     "127.0.0.1"
 #elif defined(ACE_HAS_IPV6)
-    "::1/128"
+    "0:0:0:0:0:0:0:1"
 #else
     "localhost"
 #endif
@@ -295,6 +295,20 @@ bool run_test()
     return false;
   }
 
+#if defined (ACE_HAS_IPV6)
+  ACE_INET_Addr tmp;
+  test_part_sock.get_local_addr(tmp);
+  if (tmp.get_type() == AF_INET6 && send_addr.get_type() == AF_INET) {
+    // need to map IPV4 multicast address to IPV6 address
+    LocatorSeq locators;
+    locators.length(1);
+    locators[0].kind = address_to_kind(send_addr);
+    locators[0].port = send_addr.get_port_number();
+    address_to_bytes(locators[0].address, send_addr);
+    locator_to_address(send_addr, locators[0], tmp.get_type() != AF_INET);
+  }
+#endif
+
   // Create a Parameter List
   OpenDDS::RTPS::ParameterList plist;
 
@@ -311,13 +325,20 @@ bool run_test()
 
   OpenDDS::DCPS::LocatorSeq nonEmptyList(1);
   nonEmptyList.length(1);
-  nonEmptyList[0].kind = LOCATOR_KIND_UDPv4;
   nonEmptyList[0].port = 12345;
+
+#ifdef ACE_HAS_IPV6
+  nonEmptyList[0].kind = LOCATOR_KIND_UDPv6;
+  std::memset(nonEmptyList[0].address, 0, 15);
+  nonEmptyList[0].address[15] = 1;
+#else
+  nonEmptyList[0].kind = LOCATOR_KIND_UDPv4;
   std::memset(nonEmptyList[0].address, 0, 12);
   nonEmptyList[0].address[12] = 127;
   nonEmptyList[0].address[13] = 0;
   nonEmptyList[0].address[14] = 0;
   nonEmptyList[0].address[15] = 1;
+#endif
 
   const OpenDDS::RTPS::SPDPdiscoveredParticipantData pdata = {
     {
@@ -325,12 +346,15 @@ bool run_test()
       qos.user_data
     },
     {
+      domain,
+      "",
       PROTOCOLVERSION,
       {gp[0], gp[1], gp[2], gp[3], gp[4], gp[5],
        gp[6], gp[7], gp[8], gp[9], gp[10], gp[11]},
       VENDORID_OPENDDS,
       false /*expectsIQoS*/,
       availableBuiltinEndpoints,
+      0,
       LocatorSeq() /* sedp_multicast */,
       LocatorSeq() /* sedp_unicast */,
       nonEmptyList /*defaultMulticastLocatorList*/,
@@ -345,7 +369,7 @@ bool run_test()
     }
   };
 
-  if (OpenDDS::RTPS::ParameterListConverter::to_param_list(pdata, plist) < 0) {
+  if (!OpenDDS::RTPS::ParameterListConverter::to_param_list(pdata, plist)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
       ACE_TEXT("spdp_transport - run_test - ")
       ACE_TEXT("failed to convert from SPDPdiscoveredParticipantData ")

@@ -5,6 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
+#ifdef OPENDDS_SECURITY
+
 #include "Checklist.h"
 
 #include "EndpointManager.h"
@@ -16,8 +18,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace ICE {
-
-#ifdef OPENDDS_SECURITY
 
 using OpenDDS::DCPS::MonotonicTimePoint;
 using OpenDDS::DCPS::TimeDuration;
@@ -161,7 +161,6 @@ void Checklist::generate_candidate_pairs()
     check_interval_ = endpoint_manager_->agent_impl->get_configuration().T_a();
     double s = static_cast<double>(frozen_.size());
     max_check_interval_ = endpoint_manager_->agent_impl->get_configuration().checklist_period() * (1.0 / s);
-    enqueue(MonotonicTimePoint::now());
   }
 }
 
@@ -185,37 +184,55 @@ void Checklist::check_invariants() const
 
 void Checklist::unfreeze()
 {
+  bool flag = false;
+
   for (CandidatePairsType::iterator pos = frozen_.begin(), limit = frozen_.end(); pos != limit;) {
     const CandidatePair& cp = *pos;
 
-    if (!endpoint_manager_->agent_impl->active_foundations.contains(cp.foundation)) {
-      endpoint_manager_->agent_impl->active_foundations.add(cp.foundation);
+    // The second check allows the Checklist to start work on remote
+    // foundations that also belong to its local agent meaning that the
+    // remote agent is probably another EndpointManager in this
+    // process.  They will share an AgentImpl and therefore the same
+    // set of active foundations.  This will cause deadlock since both
+    // cannot be the first to use the foundation unless we explicitly
+    // allow it.
+    if (!endpoint_manager_->agent_impl->contains(cp.foundation) ||
+        endpoint_manager_->foundations().count(cp.foundation.second)) {
+      endpoint_manager_->agent_impl->add(cp.foundation);
       waiting_.push_back(cp);
       waiting_.sort(CandidatePair::priority_sorted);
       frozen_.erase(pos++);
-    }
-
-    else {
+      flag = true;
+    } else {
       ++pos;
     }
+  }
+
+  if (flag) {
+    enqueue(MonotonicTimePoint::now());
   }
 }
 
 void Checklist::unfreeze(const FoundationType& a_foundation)
 {
+  bool flag = false;
+
   for (CandidatePairsType::iterator pos = frozen_.begin(), limit = frozen_.end(); pos != limit;) {
     const CandidatePair& cp = *pos;
 
     if (cp.foundation == a_foundation) {
-      endpoint_manager_->agent_impl->active_foundations.add(cp.foundation);
+      endpoint_manager_->agent_impl->add(cp.foundation);
       waiting_.push_back(cp);
       waiting_.sort(CandidatePair::priority_sorted);
       frozen_.erase(pos++);
-    }
-
-    else {
+      flag = true;
+    } else {
       ++pos;
     }
+  }
+
+  if (flag) {
+    enqueue(MonotonicTimePoint::now());
   }
 }
 
@@ -229,11 +246,11 @@ void Checklist::add_valid_pair(const CandidatePair& valid_pair)
 void Checklist::fix_foundations()
 {
   for (CandidatePairsType::const_iterator pos = waiting_.begin(), limit = waiting_.end(); pos != limit; ++pos) {
-    endpoint_manager_->agent_impl->active_foundations.remove(pos->foundation);
+    endpoint_manager_->agent_impl->remove(pos->foundation);
   }
 
   for (CandidatePairsType::const_iterator pos = in_progress_.begin(), limit = in_progress_.end(); pos != limit; ++pos) {
-    endpoint_manager_->agent_impl->active_foundations.remove(pos->foundation);
+    endpoint_manager_->agent_impl->remove(pos->foundation);
   }
 }
 
@@ -274,7 +291,7 @@ void Checklist::add_triggered_check(const CandidatePair& a_candidate_pair)
 
   if (pos != frozen_.end()) {
     frozen_.erase(pos);
-    endpoint_manager_->agent_impl->active_foundations.add(a_candidate_pair.foundation);
+    endpoint_manager_->agent_impl->add(a_candidate_pair.foundation);
     waiting_.push_back(a_candidate_pair);
     waiting_.sort(CandidatePair::priority_sorted);
     triggered_check_queue_.push_back(a_candidate_pair);
@@ -292,7 +309,7 @@ void Checklist::add_triggered_check(const CandidatePair& a_candidate_pair)
 
   if (pos != in_progress_.end()) {
     // Duplicating to waiting.
-    endpoint_manager_->agent_impl->active_foundations.add(a_candidate_pair.foundation);
+    endpoint_manager_->agent_impl->add(a_candidate_pair.foundation);
     waiting_.push_back(a_candidate_pair);
     waiting_.sort(CandidatePair::priority_sorted);
     triggered_check_queue_.push_back(a_candidate_pair);
@@ -310,7 +327,7 @@ void Checklist::add_triggered_check(const CandidatePair& a_candidate_pair)
 
   if (pos != failed_.end()) {
     failed_.erase(pos);
-    endpoint_manager_->agent_impl->active_foundations.add(a_candidate_pair.foundation);
+    endpoint_manager_->agent_impl->add(a_candidate_pair.foundation);
     waiting_.push_back(a_candidate_pair);
     waiting_.sort(CandidatePair::priority_sorted);
     triggered_check_queue_.push_back(a_candidate_pair);
@@ -318,7 +335,7 @@ void Checklist::add_triggered_check(const CandidatePair& a_candidate_pair)
   }
 
   // Not in checklist.
-  endpoint_manager_->agent_impl->active_foundations.add(a_candidate_pair.foundation);
+  endpoint_manager_->agent_impl->add(a_candidate_pair.foundation);
   waiting_.push_back(a_candidate_pair);
   waiting_.sort(CandidatePair::priority_sorted);
   triggered_check_queue_.push_back(a_candidate_pair);
@@ -326,13 +343,14 @@ void Checklist::add_triggered_check(const CandidatePair& a_candidate_pair)
 
 void Checklist::remove_from_in_progress(const CandidatePair& a_candidate_pair)
 {
-  endpoint_manager_->agent_impl->active_foundations.remove(a_candidate_pair.foundation);
+  endpoint_manager_->agent_impl->remove(a_candidate_pair.foundation);
   // Candidates can be in progress multiple times.
   CandidatePairsType::iterator pos = std::find(in_progress_.begin(), in_progress_.end(), a_candidate_pair);
   in_progress_.erase(pos);
 }
 
-void Checklist::generate_triggered_check(const ACE_INET_Addr& local_address, const ACE_INET_Addr& remote_address,
+void Checklist::generate_triggered_check(const ACE_INET_Addr& local_address,
+                                         const ACE_INET_Addr& remote_address,
                                          ACE_UINT32 priority,
                                          bool use_candidate)
 {
@@ -405,7 +423,7 @@ void Checklist::succeeded(const ConnectivityCheck& cc)
       while (!waiting_.empty()) {
         CandidatePair cp = waiting_.front();
         waiting_.pop_front();
-        endpoint_manager_->agent_impl->active_foundations.remove(cp.foundation);
+        endpoint_manager_->agent_impl->remove(cp.foundation);
         failed_.push_back(cp);
       }
 
@@ -413,6 +431,7 @@ void Checklist::succeeded(const ConnectivityCheck& cc)
     }
 
     nominated_is_live_ = true;
+    endpoint_manager_->ice_connect(guids_, nominated_->remote.address);
     last_indication_.set_to_now();
 
     while (!connectivity_checks_.empty()) {
@@ -588,7 +607,7 @@ void Checklist::error_response(const ACE_INET_Addr& /*local_address*/,
       a_message.get_error_code(),
       a_message.get_error_reason().c_str()));
 
-    if (a_message.get_error_code() == 420 && a_message.has_unknown_attributes()) {
+    if (a_message.get_error_code() == STUN::UNKNOWN_ATTRIBUTE && a_message.has_unknown_attributes()) {
       std::vector<STUN::AttributeType> unknown_attributes = a_message.get_unknown_attributes();
 
       for (std::vector<STUN::AttributeType>::const_iterator pos = unknown_attributes.begin(),
@@ -597,7 +616,7 @@ void Checklist::error_response(const ACE_INET_Addr& /*local_address*/,
       }
     }
 
-    if (a_message.get_error_code() == 400 && a_message.get_error_code() == 420) {
+    if (a_message.get_error_code() == STUN::BAD_REQUEST && a_message.get_error_code() == STUN::UNKNOWN_ATTRIBUTE) {
       // Waiting and/or resending won't fix these errors.
       failed(cc);
       connectivity_checks_.erase(pos);
@@ -623,14 +642,12 @@ void Checklist::do_next_check(const MonotonicTimePoint& a_now)
     in_progress_.push_back(cp);
     in_progress_.sort(CandidatePair::priority_sorted);
 
-    endpoint_manager_->endpoint->send(cc.candidate_pair().remote.address, cc.request());
+    endpoint_manager_->send(cc.candidate_pair().remote.address, cc.request());
     connectivity_checks_.push_back(cc);
     endpoint_manager_->set_responsible_checklist(cc.request().transaction_id, this);
     check_interval_ = endpoint_manager_->agent_impl->get_configuration().T_a();
     return;
   }
-
-  unfreeze();
 
   // Ordinary check.
   if (!waiting_.empty()) {
@@ -642,7 +659,7 @@ void Checklist::do_next_check(const MonotonicTimePoint& a_now)
     in_progress_.push_back(cp);
     in_progress_.sort(CandidatePair::priority_sorted);
 
-    endpoint_manager_->endpoint->send(cc.candidate_pair().remote.address, cc.request());
+    endpoint_manager_->send(cc.candidate_pair().remote.address, cc.request());
     connectivity_checks_.push_back(cc);
     endpoint_manager_->set_responsible_checklist(cc.request().transaction_id, this);
     check_interval_ = endpoint_manager_->agent_impl->get_configuration().T_a();
@@ -658,9 +675,7 @@ void Checklist::do_next_check(const MonotonicTimePoint& a_now)
       if (!cc.cancelled()) {
         // Failing can allow nomination to proceed.
         failed(cc);
-      }
-
-      else {
+      } else {
         remove_from_in_progress(cc.candidate_pair());
       }
 
@@ -671,7 +686,7 @@ void Checklist::do_next_check(const MonotonicTimePoint& a_now)
     if (!cc.cancelled()) {
       // Reset the password in the event that it changed.
       cc.password(remote_agent_info_.password);
-      endpoint_manager_->endpoint->send(cc.candidate_pair().remote.address, cc.request());
+      endpoint_manager_->send(cc.candidate_pair().remote.address, cc.request());
     }
 
     connectivity_checks_.push_back(cc);
@@ -681,7 +696,7 @@ void Checklist::do_next_check(const MonotonicTimePoint& a_now)
     break;
   }
 
-  // Waiting for the remote.
+  // Waiting for the remote or frozen.
   check_interval_ = endpoint_manager_->agent_impl->get_configuration().checklist_period();
 }
 
@@ -726,12 +741,18 @@ void Checklist::execute(const MonotonicTimePoint& a_now)
     message.password = remote_agent_info_.password;
     message.append_attribute(STUN::make_message_integrity());
     message.append_attribute(STUN::make_fingerprint());
-    endpoint_manager_->endpoint->send(selected_address(), message);
+    endpoint_manager_->send(selected_address(), message);
     flag = true;
     interval = std::min(interval, endpoint_manager_->agent_impl->get_configuration().indication_period());
 
     // Check that we are receiving indications.
+    const bool before = nominated_is_live_;
     nominated_is_live_ = (a_now - last_indication_) < endpoint_manager_->agent_impl->get_configuration().nominated_ttl();
+    if (before && !nominated_is_live_) {
+      endpoint_manager_->ice_disconnect(guids_);
+    } else if (!before && nominated_is_live_) {
+      endpoint_manager_->ice_connect(guids_, nominated_->remote.address);
+    }
   }
 
   if (flag) {
@@ -794,9 +815,9 @@ void Checklist::indication()
   last_indication_.set_to_now();
 }
 
-#endif /* OPENDDS_SECURITY */
 
 } // namespace ICE
 } // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
+#endif /* OPENDDS_SECURITY */

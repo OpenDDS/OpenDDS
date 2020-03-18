@@ -57,6 +57,15 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
     ReturnCode_t ret = ws->attach_condition(gc);
     if (ret != RETCODE_OK) return ret;
 
+    // 0. test basic interface interactions from client code
+    {
+      ConditionSeq conditions;
+      ws->get_conditions(conditions);
+      if (conditions.length() != 1) return RETCODE_ERROR;
+      GuardCondition_var gc2 = GuardCondition::_narrow(conditions[0]);
+      if (gc2 != gc) return RETCODE_ERROR;
+    }
+
     // 1. Wait shouldn't block if the condition is already triggered
     ret = gc->set_trigger_value(true);
     if (ret != RETCODE_OK) return ret;
