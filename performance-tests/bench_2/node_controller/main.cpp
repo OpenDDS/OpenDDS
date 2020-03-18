@@ -116,9 +116,9 @@ public:
     }
   }
 
-  ACE_Process_Options get_proc_opts() const
+  std::shared_ptr<ACE_Process_Options> get_proc_opts() const
   {
-    ACE_Process_Options proc_opts;
+    std::shared_ptr<ACE_Process_Options> proc_opts = std::make_shared<ACE_Process_Options>();
     std::stringstream ss;
     ss << join_path(bench_root, "worker", "worker")
       << " " << config_filename_
@@ -126,7 +126,7 @@ public:
       << " --log " << log_filename_ << std::flush;
     const std::string command = ss.str();
     std::cerr << command + "\n" << std::flush;
-    proc_opts.command_line("%s", command.c_str());
+    proc_opts->command_line("%s", command.c_str());
     return proc_opts;
   }
 
@@ -234,8 +234,8 @@ public:
       std::lock_guard<std::mutex> guard(lock_);
       for (auto worker_i : all_workers_) {
         auto& worker = worker_i.second;
-        ACE_Process_Options proc_opts = worker->get_proc_opts();
-        pid_t pid = process_manager_.spawn(proc_opts);
+        std::shared_ptr<ACE_Process_Options> proc_opts = worker->get_proc_opts();
+        pid_t pid = process_manager_.spawn(*proc_opts);
         if (pid != ACE_INVALID_PID) {
           worker->set_pid(pid);
           pid_to_worker_id_[pid] = worker->id();
@@ -550,7 +550,7 @@ int run_cycle(
   ConfigDataReader_var config_reader_impl,
   ReportDataWriter_var report_writer_impl)
 {
-  NodeId this_node_id = reinterpret_cast<OpenDDS::DCPS::DomainParticipantImpl*>(participant.in())->get_id();
+  NodeId this_node_id = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(participant.in())->get_id();
 
   // Wait for Status Publication with Test Controller and Write Status
   {
@@ -618,11 +618,11 @@ int run_cycle(
       return 1;
     }
 
-    for (size_t node = 0; node < configs.length(); node++) {
+    for (CORBA::ULong node = 0; node < configs.length(); node++) {
       if (configs[node].node_id == this_node_id) {
         worker_manager.timeout(configs[node].timeout);
-        size_t config_count = configs[node].workers.length();
-        for (size_t config = 0; config < config_count; config++) {
+        CORBA::ULong config_count = configs[node].workers.length();
+        for (CORBA::ULong config = 0; config < config_count; config++) {
           WorkerId& id = configs[node].workers[config].worker_id;
           const WorkerId end = id + configs[node].workers[config].count;
           for (; id < end; id++) {

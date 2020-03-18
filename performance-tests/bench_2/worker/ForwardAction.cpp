@@ -74,7 +74,7 @@ bool ForwardAction::init(const ActionConfig& config, ActionReport& report, Build
   size_t queue_size = data_dws_.size() + 1;
   auto queue_size_prop = get_property(config.params, "queue_size", Builder::PVK_ULL);
   if (queue_size_prop) {
-    queue_size = queue_size_prop->value.ull_prop();
+    queue_size = static_cast<size_t>(queue_size_prop->value.ull_prop());
   }
 
   // because of the way we're doing indices, vector size should be one more than effective queue size

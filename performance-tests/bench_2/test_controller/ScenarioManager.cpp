@@ -129,9 +129,9 @@ void ScenarioManager::customize_configs(std::map<std::string, std::string>& work
 
     // Apply Individual Overrides
     if (!overrides_.bench_partition_suffix.empty()) {
-      for (size_t i = 0; i < wc.process.participants.length(); ++i) {
-        for (size_t j = 0; j < wc.process.participants[i].subscribers.length(); ++j) {
-          for (size_t k = 0; k < wc.process.participants[i].subscribers[j].qos.partition.name.length(); ++k) {
+      for (CORBA::ULong i = 0; i < wc.process.participants.length(); ++i) {
+        for (CORBA::ULong j = 0; j < wc.process.participants[i].subscribers.length(); ++j) {
+          for (CORBA::ULong k = 0; k < wc.process.participants[i].subscribers[j].qos.partition.name.length(); ++k) {
             std::string temp(wc.process.participants[i].subscribers[j].qos.partition.name[k].in());
             if (temp.substr(0, 6) == "bench_") {
               wc.process.participants[i].subscribers[j].qos.partition.name[k] = (temp + overrides_.bench_partition_suffix).c_str();
@@ -139,8 +139,8 @@ void ScenarioManager::customize_configs(std::map<std::string, std::string>& work
             }
           }
         }
-        for (size_t j = 0; j < wc.process.participants[i].publishers.length(); ++j) {
-          for (size_t k = 0; k < wc.process.participants[i].publishers[j].qos.partition.name.length(); ++k) {
+        for (CORBA::ULong j = 0; j < wc.process.participants[i].publishers.length(); ++j) {
+          for (CORBA::ULong k = 0; k < wc.process.participants[i].publishers[j].qos.partition.name.length(); ++k) {
             std::string temp(wc.process.participants[i].publishers[j].qos.partition.name[k].in());
             if (temp.substr(0, 6) == "bench_") {
               wc.process.participants[i].publishers[j].qos.partition.name[k] = (temp + overrides_.bench_partition_suffix).c_str();
@@ -302,7 +302,7 @@ std::vector<WorkerReport> ScenarioManager::execute(const AllocatedScenario& allo
   wait_set->attach_condition(guard_condition);
 
   // Timeout Thread
-  unsigned reports_left = allocated_scenario.expected_reports;
+  size_t reports_left = allocated_scenario.expected_reports;
   std::mutex reports_left_mutex;
   std::condition_variable timeout_cv;
   const std::chrono::seconds timeout(allocated_scenario.timeout);
@@ -350,7 +350,7 @@ std::vector<WorkerReport> ScenarioManager::execute(const AllocatedScenario& allo
       throw std::runtime_error("Take from report reader failed");
     }
 
-    for (size_t r = 0; r < reports.length(); r++) {
+    for (CORBA::ULong r = 0; r < reports.length(); r++) {
       if (info[r].valid_data) {
         if (reports[r].failed) {
           ++worker_failures;
@@ -386,7 +386,7 @@ std::vector<WorkerReport> ScenarioManager::execute(const AllocatedScenario& allo
     }
     {
       std::lock_guard<std::mutex> guard(reports_left_mutex);
-      reports_left = allocated_scenario.expected_reports - parsed_reports.size() - worker_failures - parse_failures;
+      reports_left = static_cast<size_t>(allocated_scenario.expected_reports) - parsed_reports.size() - worker_failures - parse_failures;
       if (reports_left == 0) {
         break;
       }

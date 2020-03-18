@@ -11,6 +11,7 @@ DataWriter::DataWriter(const DataWriterConfig& config, DataWriterReport& report,
   , topic_name_(config.topic_name.in())
   , listener_type_name_(config.listener_type_name.in())
   , listener_status_mask_(config.listener_status_mask)
+  , listener_properties_(config.listener_properties)
   , transport_config_name_(config.transport_config_name.in())
   , report_(report)
   , publisher_(publisher)
@@ -76,7 +77,7 @@ DataWriter::DataWriter(const DataWriterConfig& config, DataWriterReport& report,
   // Create Listener From Factory
   listener_ = DDS::DataWriterListener::_nil();
   if (!listener_type_name_.empty()) {
-    listener_ = create_listener(listener_type_name_);
+    listener_ = create_listener(listener_type_name_, listener_properties_);
     if (!listener_) {
       std::stringstream ss;
       ss << "datareader listener creation failed for datawriter '" << name_

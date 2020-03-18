@@ -1,0 +1,15 @@
+{
+  "name": "Continuous Integration Rapid-Fire Echo Test",
+  "desc": "This is a small quick test for rapid-fire data send / receive capability",
+  "any_node": [
+    {
+      "config": "ci_echo_client.json",
+      "count": 1
+    },
+    {
+      "config": "ci_echo_server.json",
+      "count": 1
+    }
+  ],
+  "timeout": 120
+}

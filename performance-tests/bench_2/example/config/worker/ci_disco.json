@@ -40,6 +40,9 @@
         "topics": [
           { "name": "topic_01",
             "type_name": "Bench::Data"
+          },
+          { "name": "topic_02",
+            "type_name": "Bench::Data"
           }
         ],
         "subscribers": [
@@ -51,10 +54,20 @@
                 "listener_status_mask": 4294967295,
                 "listener_properties": [
                   { "name": "expected_match_count",
-                    "value": { "_d": "PVK_ULL", "ull_prop": 1 }
-                  },
-                  { "name": "expected_sample_count",
-                    "value": { "_d": "PVK_ULL", "ull_prop": 10 }
+                    "value": { "_d": "PVK_ULL", "ull_prop": 20 }
+                  }
+                ],
+
+                "qos": { "reliability": { "kind": "RELIABLE_RELIABILITY_QOS" } },
+                "qos_mask": { "reliability": { "has_kind": true } }
+              },
+              { "name": "datareader_02",
+                "topic_name": "topic_02",
+                "listener_type_name": "bench_drl",
+                "listener_status_mask": 4294967295,
+                "listener_properties": [
+                  { "name": "expected_match_count",
+                    "value": { "_d": "PVK_ULL", "ull_prop": 20 }
                   }
                 ],
 
@@ -70,30 +83,27 @@
               { "name": "datawriter_01",
                 "topic_name": "topic_01",
                 "listener_type_name": "bench_dwl",
-                "listener_status_mask": 4294967295
+                "listener_status_mask": 4294967295,
+                "listener_properties": [
+                  { "name": "expected_match_count",
+                    "value": { "_d": "PVK_ULL", "ull_prop": 20 }
+                  }
+                ]
+              },
+              { "name": "datawriter_02",
+                "topic_name": "topic_02",
+                "listener_type_name": "bench_dwl",
+                "listener_status_mask": 4294967295,
+                "listener_properties": [
+                  { "name": "expected_match_count",
+                    "value": { "_d": "PVK_ULL", "ull_prop": 20 }
+                  }
+                ]
               }
             ]
           }
         ]
       }
     ]
-  },
-  "actions": [
-    {
-      "name": "write_action_01",
-      "type": "write",
-      "writers": [ "datawriter_01" ],
-      "params": [
-        { "name": "data_buffer_bytes",
-          "value": { "_d": "PVK_ULL", "ull_prop": 512 }
-        },
-        { "name": "max_count",
-          "value": { "_d": "PVK_ULL", "ull_prop": 10 }
-        },
-        { "name": "write_frequency",
-          "value": { "_d": "PVK_DOUBLE", "double_prop": 2.0 }
-        }
-      ]
-    }
-  ]
+  }
 }

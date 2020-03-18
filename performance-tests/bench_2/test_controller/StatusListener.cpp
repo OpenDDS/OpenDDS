@@ -34,7 +34,7 @@ void StatusListener::on_data_available(DDS::DataReader_ptr reader)
     return;
   }
 
-  for (size_t i = 0; i < statuses.length(); i++) {
+  for (CORBA::ULong i = 0; i < statuses.length(); i++) {
     auto& node = statuses[i];
     Nodes::iterator iter = nodes_.find(node.node_id);
     bool already_discovered = iter != nodes_.end();

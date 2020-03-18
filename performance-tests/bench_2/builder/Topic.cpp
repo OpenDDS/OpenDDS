@@ -13,6 +13,7 @@ Topic::Topic(const TopicConfig& config, DDS::DomainParticipant_var& participant)
   , type_name_((strlen(config.type_name.in()) == 0 && TypeSupportRegistry::get_type_names().size() == 1) ? TypeSupportRegistry::get_type_names().front() : config.type_name.in())
   , listener_type_name_(config.listener_type_name.in())
   , listener_status_mask_(config.listener_status_mask)
+  , listener_properties_(config.listener_properties)
   , transport_config_name_(config.transport_config_name.in())
   , participant_(participant)
 {
@@ -64,7 +65,7 @@ Topic::Topic(const TopicConfig& config, DDS::DomainParticipant_var& participant)
   // Create Listener From Factory
   listener_ = DDS::TopicListener::_nil();
   if (!listener_type_name_.empty()) {
-    listener_ = create_listener(listener_type_name_);
+    listener_ = create_listener(listener_type_name_, listener_properties_);
     if (!listener_) {
       std::stringstream ss;
       ss << "topic listener creation failed for topic '" << name_ << "' with listener type name '" << listener_type_name_ << "'" << std::flush;

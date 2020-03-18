@@ -159,23 +159,23 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     data_registration(new Bench::DataTypeSupportImpl());
 
   // Register some Bench-specific listener factories
-  Builder::register_topic_listener("bench_tl", [](const Builder::PropertySeq&){
-      return DDS::TopicListener_var(new Bench::WorkerTopicListener());
+  Builder::register_topic_listener("bench_tl", [](const Builder::PropertySeq& properties){
+      return DDS::TopicListener_var(new Bench::WorkerTopicListener(properties));
     });
   Builder::register_data_reader_listener("bench_drl", [](const Builder::PropertySeq& properties){
       return DDS::DataReaderListener_var(new Bench::WorkerDataReaderListener(properties));
     });
-  Builder::register_subscriber_listener("bench_sl", [](const Builder::PropertySeq&){
-      return DDS::SubscriberListener_var(new Bench::WorkerSubscriberListener());
+  Builder::register_subscriber_listener("bench_sl", [](const Builder::PropertySeq& properties){
+      return DDS::SubscriberListener_var(new Bench::WorkerSubscriberListener(properties));
     });
-  Builder::register_data_writer_listener("bench_dwl", [](const Builder::PropertySeq&){
-      return DDS::DataWriterListener_var(new Bench::WorkerDataWriterListener());
+  Builder::register_data_writer_listener("bench_dwl", [](const Builder::PropertySeq& properties){
+      return DDS::DataWriterListener_var(new Bench::WorkerDataWriterListener(properties));
     });
-  Builder::register_publisher_listener("bench_pl", [](const Builder::PropertySeq&){
-      return DDS::PublisherListener_var(new Bench::WorkerPublisherListener());
+  Builder::register_publisher_listener("bench_pl", [](const Builder::PropertySeq& properties){
+      return DDS::PublisherListener_var(new Bench::WorkerPublisherListener(properties));
     });
-  Builder::register_domain_participant_listener("bench_partl", [](const Builder::PropertySeq&){
-      return DDS::DomainParticipantListener_var(new Bench::WorkerParticipantListener());
+  Builder::register_domain_participant_listener("bench_partl", [](const Builder::PropertySeq& properties){
+      return DDS::DomainParticipantListener_var(new Bench::WorkerParticipantListener(properties));
     });
 
   // Disable some Proactor debug chatter to stdout (eventually make this configurable?)
@@ -217,15 +217,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     std::mutex cv_mutex;
 
     if (!(config.create_time == ZERO)) {
+      std::chrono::time_point<std::chrono::high_resolution_clock> timeout_time;
       if (config.create_time < ZERO) {
-        auto dur = -get_duration(config.create_time);
-        std::unique_lock<std::mutex> lock(cv_mutex);
-        while (cv.wait_for(lock, dur) != std::cv_status::timeout) {}
+        timeout_time = std::chrono::high_resolution_clock::now() - get_duration(config.create_time);
       } else {
-        auto timeout_time = std::chrono::system_clock::time_point(get_duration(config.create_time));
-        std::unique_lock<std::mutex> lock(cv_mutex);
-        while (cv.wait_until(lock, timeout_time) != std::cv_status::timeout) {}
+        timeout_time = std::chrono::high_resolution_clock::time_point(get_duration(config.create_time));
       }
+      std::this_thread::sleep_until(timeout_time);
     }
 
     Log::log() << "Beginning process construction / entity creation." << std::endl;
@@ -246,15 +244,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
       std::cerr << "No test enable time specified. Press any key to enable process entities." << std::endl;
       std::getline(std::cin, line);
     } else {
+      std::chrono::time_point<std::chrono::high_resolution_clock> timeout_time;
       if (config.enable_time < ZERO) {
-        auto dur = -get_duration(config.enable_time);
-        std::unique_lock<std::mutex> lock(cv_mutex);
-        while (cv.wait_for(lock, dur) != std::cv_status::timeout) {}
+        timeout_time = std::chrono::high_resolution_clock::now() - get_duration(config.enable_time);
       } else {
-        auto timeout_time = std::chrono::system_clock::time_point(get_duration(config.enable_time));
-        std::unique_lock<std::mutex> lock(cv_mutex);
-        while (cv.wait_until(lock, timeout_time) != std::cv_status::timeout) {}
+        timeout_time = std::chrono::high_resolution_clock::time_point(get_duration(config.enable_time));
       }
+      std::this_thread::sleep_until(timeout_time);
     }
 
     Log::log() << "Enabling DDS entities (if not already enabled)." << std::endl;
@@ -269,15 +265,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
       std::cerr << "No test start time specified. Press any key to start process testing." << std::endl;
       std::getline(std::cin, line);
     } else {
+      std::chrono::time_point<std::chrono::high_resolution_clock> timeout_time;
       if (config.start_time < ZERO) {
-        auto dur = -get_duration(config.start_time);
-        std::unique_lock<std::mutex> lock(cv_mutex);
-        while (cv.wait_for(lock, dur) != std::cv_status::timeout) {}
+        timeout_time = std::chrono::high_resolution_clock::now() - get_duration(config.start_time);
       } else {
-        auto timeout_time = std::chrono::system_clock::time_point(get_duration(config.start_time));
-        std::unique_lock<std::mutex> lock(cv_mutex);
-        while (cv.wait_until(lock, timeout_time) != std::cv_status::timeout) {}
+        timeout_time = std::chrono::high_resolution_clock::time_point(get_duration(config.start_time));
       }
+      std::this_thread::sleep_until(timeout_time);
     }
 
     Log::log() << "Starting process tests." << std::endl;
@@ -292,15 +286,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
       std::cerr << "No stop time specified. Press any key to stop process testing." << std::endl;
       std::getline(std::cin, line);
     } else {
+      std::chrono::time_point<std::chrono::high_resolution_clock> timeout_time;
       if (config.stop_time < ZERO) {
-        auto dur = -get_duration(config.stop_time);
-        std::unique_lock<std::mutex> lock(cv_mutex);
-        while (cv.wait_for(lock, dur) != std::cv_status::timeout) {}
+        timeout_time = std::chrono::high_resolution_clock::now() - get_duration(config.stop_time);
       } else {
-        auto timeout_time = std::chrono::system_clock::time_point(get_duration(config.stop_time));
-        std::unique_lock<std::mutex> lock(cv_mutex);
-        while (cv.wait_until(lock, timeout_time) != std::cv_status::timeout) {}
+        timeout_time = std::chrono::high_resolution_clock::time_point(get_duration(config.stop_time));
       }
+      std::this_thread::sleep_until(timeout_time);
     }
 
     Log::log() << "Stopping process tests." << std::endl;
@@ -321,15 +313,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
       std::cerr << "No destruction time specified. Press any key to destroy process entities." << std::endl;
       std::getline(std::cin, line);
     } else {
+      std::chrono::time_point<std::chrono::high_resolution_clock> timeout_time;
       if (config.destruction_time < ZERO) {
-        auto dur = -get_duration(config.destruction_time);
-        std::unique_lock<std::mutex> lock(cv_mutex);
-        while (cv.wait_for(lock, dur) != std::cv_status::timeout) {}
+        timeout_time = std::chrono::high_resolution_clock::now() - get_duration(config.destruction_time);
       } else {
-        auto timeout_time = std::chrono::system_clock::time_point(get_duration(config.destruction_time));
-        std::unique_lock<std::mutex> lock(cv_mutex);
-        while (cv.wait_until(lock, timeout_time) != std::cv_status::timeout) {}
+        timeout_time = std::chrono::high_resolution_clock::time_point(get_duration(config.destruction_time));
       }
+      std::this_thread::sleep_until(timeout_time);
     }
 
     process.detach_listeners();

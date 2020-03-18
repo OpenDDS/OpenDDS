@@ -2,7 +2,6 @@
 
 namespace Builder {
 
-Bench_Builder_Export
 void register_domain_participant_listener(const std::string& name, const std::function<DDS::DomainParticipantListener::_var_type(const Builder::PropertySeq&)>& factory)
 {
   Log::log() << "Listener registration created for name '" << name << "'" << std::endl;
@@ -13,7 +12,6 @@ void register_domain_participant_listener(const std::string& name, const std::fu
   }
 }
 
-Bench_Builder_Export
 void register_topic_listener(const std::string& name, const std::function<DDS::TopicListener::_var_type(const Builder::PropertySeq&)>& factory)
 {
   Log::log() << "Listener registration created for name '" << name << "'" << std::endl;
@@ -24,7 +22,6 @@ void register_topic_listener(const std::string& name, const std::function<DDS::T
   }
 }
 
-Bench_Builder_Export
 void register_publisher_listener(const std::string& name, const std::function<DDS::PublisherListener::_var_type(const Builder::PropertySeq&)>& factory)
 {
   Log::log() << "Listener registration created for name '" << name << "'" << std::endl;
@@ -35,7 +32,6 @@ void register_publisher_listener(const std::string& name, const std::function<DD
   }
 }
 
-Bench_Builder_Export
 void register_subscriber_listener(const std::string& name, const std::function<DDS::SubscriberListener::_var_type(const Builder::PropertySeq&)>& factory)
 {
   Log::log() << "Listener registration created for name '" << name << "'" << std::endl;
@@ -46,7 +42,6 @@ void register_subscriber_listener(const std::string& name, const std::function<D
   }
 }
 
-Bench_Builder_Export
 void register_data_writer_listener(const std::string& name, const std::function<DDS::DataWriterListener::_var_type(const Builder::PropertySeq&)>& factory)
 {
   Log::log() << "Listener registration created for name '" << name << "'" << std::endl;
@@ -57,7 +52,6 @@ void register_data_writer_listener(const std::string& name, const std::function<
   }
 }
 
-Bench_Builder_Export
 void register_data_reader_listener(const std::string& name, const std::function<DDS::DataReaderListener::_var_type(const Builder::PropertySeq&)>& factory)
 {
   Log::log() << "Listener registration created for name '" << name << "'" << std::endl;

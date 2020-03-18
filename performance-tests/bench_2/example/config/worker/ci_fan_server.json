@@ -1,7 +1,7 @@
 {
   "enable_time": { "sec": -1, "nsec": 0 },
   "start_time": { "sec": -3, "nsec": 0 },
-  "stop_time": { "sec": -10, "nsec": 0 },
+  "stop_time": { "sec": -15, "nsec": 0 },
   "destruction_time": { "sec": -1, "nsec": 0 },
 
   "process": {
@@ -40,6 +40,9 @@
         "topics": [
           { "name": "topic_01",
             "type_name": "Bench::Data"
+          },
+          { "name": "topic_02",
+            "type_name": "Bench::Data"
           }
         ],
         "subscribers": [
@@ -52,9 +55,6 @@
                 "listener_properties": [
                   { "name": "expected_match_count",
                     "value": { "_d": "PVK_ULL", "ull_prop": 1 }
-                  },
-                  { "name": "expected_sample_count",
-                    "value": { "_d": "PVK_ULL", "ull_prop": 10 }
                   }
                 ],
 
@@ -67,10 +67,15 @@
         "publishers": [
           { "name": "publisher_01",
             "datawriters": [
-              { "name": "datawriter_01",
-                "topic_name": "topic_01",
+              { "name": "datawriter_02",
+                "topic_name": "topic_02",
                 "listener_type_name": "bench_dwl",
-                "listener_status_mask": 4294967295
+                "listener_status_mask": 4294967295,
+                "listener_properties": [
+                  { "name": "expected_match_count",
+                    "value": { "_d": "PVK_ULL", "ull_prop": 1 }
+                  }
+                ]
               }
             ]
           }
@@ -80,20 +85,10 @@
   },
   "actions": [
     {
-      "name": "write_action_01",
-      "type": "write",
-      "writers": [ "datawriter_01" ],
-      "params": [
-        { "name": "data_buffer_bytes",
-          "value": { "_d": "PVK_ULL", "ull_prop": 512 }
-        },
-        { "name": "max_count",
-          "value": { "_d": "PVK_ULL", "ull_prop": 10 }
-        },
-        { "name": "write_frequency",
-          "value": { "_d": "PVK_DOUBLE", "double_prop": 2.0 }
-        }
-      ]
+      "name": "forward_action_01",
+      "type": "forward",
+      "readers": [ "datareader_01" ],
+      "writers": [ "datawriter_02" ]
     }
   ]
 }
