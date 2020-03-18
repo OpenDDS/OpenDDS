@@ -524,9 +524,9 @@ sub process_file {
             elsif ($count > 1) {
               print STDERR (", $last");
             }
-            print("\n");
+            print STDERR ("\n");
           } else {
-            print("    - (Applies to whole file)\n") if $debug;
+            print STDERR ("    - (Applies to the whole file)\n") if $debug;
           }
         }
       }
