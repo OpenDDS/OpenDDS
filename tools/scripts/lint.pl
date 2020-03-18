@@ -17,7 +17,7 @@ my $simple_output = 0;
 my $help = 0;
 
 my $usage_message =
-  "usage: dds_fuzz.pl [-h|--help] | [--debug] [--[no-]ace-fuzz] [--simple-output]\n";
+  "usage: lint.pl [-h|--help] | [--debug] [--[no-]ace-fuzz] [--simple-output]\n";
 
 # TODO: Way to define specific checks to do
 # TODO: Way to give arguments to ace fuzz.pl
@@ -84,7 +84,7 @@ sub is_binary_file {
 
 # <name> => <regex to match to path> or <sub(filename, full_filename)>
 my %path_conditions = (
-  not_this_file => qr@^tools/scripts/dds_fuzz.pl$@,
+  not_this_file => qr@^tools/scripts/opendds_link.pl$@,
 
   dir => sub {
     my $filename = shift;

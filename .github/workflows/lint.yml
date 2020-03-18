@@ -1,4 +1,4 @@
-name: fuzz
+name: lint
 
 on:
   push:
@@ -22,12 +22,6 @@ jobs:
     - name: git clone dependent repositories
       run: |
         git clone --depth 1 git://github.com/DOCGroup/ACE_TAO.git $DOC_ROOT
-    - name: Remove not fuzzable directory
-      run: rm -rf *
-      working-directory: ./tools/modeling/plugins
-    - name: Remove not fuzzable directory
-      run: rm -rf *
-      working-directory: ./tools/rapidjson
-    - name: Run fuzz
+    - name: Run lint.pl
       run: |
-        perl $DDS_ROOT/tools/scripts/dds_fuzz.pl
+        perl $DDS_ROOT/tools/scripts/lint.pl
