@@ -252,8 +252,11 @@ private:
   size_t marshaled_size_;
 };
 
+OpenDDS_Dcps_Export
 const char* to_string(MessageId value);
+OpenDDS_Dcps_Export
 const char* to_string(SubMessageId value);
+OpenDDS_Dcps_Export
 OPENDDS_STRING to_string(const DataSampleHeader& value);
 
 /// Marshal/Insertion into a buffer.
