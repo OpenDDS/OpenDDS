@@ -1,6 +1,6 @@
 {
   "name": "Scalability",
-  "desc": "This scenario is inteded to test fan-in of multiple writers, writing aggregage feeds, to a single reader",
+  "desc": "This scenario is inteded to test fan-in of multiple writers, writing aggregage feeds, to a primary and backup reader",
   "nodes": [],
   "any_node": [
     {

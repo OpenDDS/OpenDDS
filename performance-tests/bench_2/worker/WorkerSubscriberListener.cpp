@@ -2,6 +2,18 @@
 
 namespace Bench {
 
+WorkerSubscriberListener::WorkerSubscriberListener()
+{
+}
+
+WorkerSubscriberListener::WorkerSubscriberListener(const Builder::PropertySeq&)
+{
+}
+
+WorkerSubscriberListener::~WorkerSubscriberListener()
+{
+}
+
 // From DDS::DataReaderListener
 
 void WorkerSubscriberListener::on_requested_deadline_missed(DDS::DataReader_ptr /*reader*/, const DDS::RequestedDeadlineMissedStatus& /*status*/) {

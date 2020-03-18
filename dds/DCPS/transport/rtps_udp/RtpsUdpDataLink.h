@@ -24,6 +24,7 @@
 #include "dds/DCPS/ReactorTask.h"
 #include "dds/DCPS/ReactorTask_rch.h"
 #include "dds/DCPS/PeriodicTask.h"
+#include "dds/DCPS/MultiTask.h"
 #include "dds/DCPS/transport/framework/TransportSendBuffer.h"
 #include "dds/DCPS/NetworkConfigMonitor.h"
 
@@ -571,8 +572,11 @@ private:
 
   } nack_reply_, heartbeat_reply_;
 
+  typedef PmfMultiTask<RtpsUdpDataLink> Multi;
+  Multi heartbeat_;
+
   typedef PmfPeriodicTask<RtpsUdpDataLink> Periodic;
-  Periodic heartbeat_, heartbeatchecker_, relay_beacon_;
+  Periodic heartbeatchecker_, relay_beacon_;
 
   /// Data structure representing an "interesting" remote entity for static discovery.
   struct InterestingRemote {
@@ -660,7 +664,8 @@ private:
   };
   HeldDataDeliveryHandler held_data_delivery_handler_;
   const size_t max_bundle_size_;
-  TimeDuration quick_reply_delay_;
+  TimeDuration quick_heartbeat_delay_;
+  TimeDuration quick_heartbeat_response_delay_;
 
 #ifdef OPENDDS_SECURITY
   mutable ACE_Thread_Mutex ch_lock_;

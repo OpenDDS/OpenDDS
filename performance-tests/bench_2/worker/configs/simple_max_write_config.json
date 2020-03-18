@@ -50,8 +50,11 @@
                 "listener_type_name": "bench_drl",
                 "listener_status_mask": 4294967295,
                 "listener_properties": [
-                  { "name": "expected_count",
+                  { "name": "expected_match_count",
                     "value": { "_d": "PVK_ULL", "ull_prop": 1 }
+                  },
+                  { "name": "expected_sample_count",
+                    "value": { "_d": "PVK_ULL", "ull_prop": 10 }
                   }
                 ],
 

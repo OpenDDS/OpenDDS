@@ -1,0 +1,33 @@
+name: fuzz
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '0 7 * * SUN'
+
+env:
+  DDS_ROOT: ${{ github.workspace }}
+  DOC_ROOT: ${{ github.workspace }}/ACE
+  ACE_ROOT: ${{ github.workspace }}/ACE/ACE
+  MPC_ROOT: ${{ github.workspace }}/ACE/MPC
+  TAO_ROOT: ${{ github.workspace }}/ACE/TAO
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout OpenDDS
+      uses: actions/checkout@v1
+    - name: git clone dependent repositories
+      run: |
+        git clone --depth 1 git://github.com/DOCGroup/ACE_TAO.git $DOC_ROOT
+    - name: Remove not fuzzable directory
+      run: rm -rf *
+      working-directory: ./tools/modeling/plugins
+    - name: Remove not fuzzable directory
+      run: rm -rf *
+      working-directory: ./tools/rapidjson
+    - name: Run fuzz
+      run: |
+        perl $DDS_ROOT/tools/scripts/dds_fuzz.pl

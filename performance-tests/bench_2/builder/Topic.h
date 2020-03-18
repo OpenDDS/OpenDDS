@@ -20,6 +20,7 @@ protected:
   const std::string type_name_;
   const std::string listener_type_name_;
   uint32_t listener_status_mask_;
+  Builder::PropertySeq listener_properties_;
   const std::string transport_config_name_;
   DDS::DomainParticipant_var participant_;
   DDS::TopicListener_var listener_;

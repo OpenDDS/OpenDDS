@@ -6,7 +6,17 @@ WorkerDataWriterListener::WorkerDataWriterListener()
 {
 }
 
-WorkerDataWriterListener::WorkerDataWriterListener(size_t expected) : expected_count_(expected)
+WorkerDataWriterListener::WorkerDataWriterListener(const Builder::PropertySeq& properties)
+{
+  size_t expected_match_count = 0;
+  auto expected_match_count_prop = get_property(properties, "expected_match_count", Builder::PVK_ULL);
+  if (expected_match_count_prop) {
+    expected_match_count = static_cast<size_t>(expected_match_count_prop->value.ull_prop());
+  }
+  expected_match_count_ = expected_match_count;
+}
+
+WorkerDataWriterListener::~WorkerDataWriterListener()
 {
 }
 
@@ -37,21 +47,21 @@ WorkerDataWriterListener::on_publication_matched(
   const DDS::PublicationMatchedStatus& status)
 {
   std::unique_lock<std::mutex> lock(mutex_);
-  if (expected_count_ != 0) {
-    if (static_cast<size_t>(status.current_count) == expected_count_) {
+  if (expected_match_count_ != 0) {
+    if (static_cast<size_t>(status.current_count) == expected_match_count_) {
       //std::cout << "WorkerDataWriterListener reached expected count!" << std::endl;
       if (datawriter_) {
         last_discovery_time_->value.time_prop(Builder::get_time());
       }
     }
   } else {
-    if (static_cast<size_t>(status.current_count) > matched_count_) {
+    if (static_cast<size_t>(status.current_count) > match_count_) {
       if (datawriter_) {
         last_discovery_time_->value.time_prop(Builder::get_time());
       }
     }
   }
-  matched_count_ = status.current_count;
+  match_count_ = status.current_count;
 }
 
 void

@@ -35,10 +35,11 @@ using namespace Bench::TestController;
 
 std::string bench_root;
 
-void handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std::ostringstream& result_out);
+int handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std::ostringstream& result_out);
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
+  int result = EXIT_SUCCESS;
   const char* cstr = ACE_OS::getenv("BENCH_ROOT");
   bench_root = cstr ? cstr : "";
   if (bench_root.empty()) {
@@ -345,7 +346,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
           << std::endl
           << "Ended at " << iso8601() << std::endl
           << std::endl;
-        handle_reports(reports, ss);
+        result = handle_reports(reports, ss);
         scenario_end = ss.str();
       }
       result_file << scenario_end;
@@ -356,20 +357,22 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       if (reports.size() != allocated_scenario.expected_reports) {
         result_file << "ERROR: Only received " << reports.size() << "out of " << allocated_scenario.expected_reports << " valid reports!" << std::endl;
         std::cerr << "ERROR: Only received " << reports.size() << " out of " << allocated_scenario.expected_reports << " valid reports!" << std::endl;
+        result = EXIT_FAILURE;
       }
     }
   } catch (const std::runtime_error& e) {
     std::cerr << "Error: " << e.what() << std::endl;
-    return 1;
+    return EXIT_FAILURE;
   }
 
   std::cout << "Finished" << std::endl;
 
-  return 0;
+  return result;
 };
 
-void handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std::ostringstream& result_out)
+int handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std::ostringstream& result_out)
 {
+  int result = EXIT_SUCCESS;
   using Builder::ZERO;
 
   Builder::TimeStamp max_construction_time = ZERO;
@@ -391,6 +394,8 @@ void handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std:
   Bench::SimpleStatBlock consolidated_jitter_stats;
   Bench::SimpleStatBlock consolidated_round_trip_latency_stats;
   Bench::SimpleStatBlock consolidated_round_trip_jitter_stats;
+
+  bool missing_durable_data = false;
 
   for (size_t r = 0; r < parsed_reports.size(); ++r) {
 
@@ -452,7 +457,11 @@ void handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std:
             if (missing_data_count_prop->value.ull_prop()) {
               Builder::ConstPropertyIndex missing_data_details_prop = get_property(dr_report.properties, "missing_data_details", Builder::PVK_STRING);
               if (missing_data_details_prop) {
-                result_out << "Missing Data (" << missing_data_count_prop->value.ull_prop() << ") Details: " << missing_data_details_prop->value.string_prop() << std::endl;
+                std::string mdd(missing_data_details_prop->value.string_prop());
+                result_out << "Missing Data (" << missing_data_count_prop->value.ull_prop() << ") Details: " << mdd << std::endl;
+                if (mdd.find("Durable: true") != std::string::npos) {
+                  missing_durable_data = true;
+                }
               }
             }
             total_missing_data_count += missing_data_count_prop->value.ull_prop();
@@ -479,8 +488,11 @@ void handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std:
   result_out << std::endl;
 
   result_out << "Discovery Stats:" << std::endl;
-  result_out << "  Total Undermatched Readers: " << total_undermatched_readers <<
-    ", Total Undermatched Writers: " << total_undermatched_writers << std::endl;
+  result_out <<
+    (total_undermatched_readers != 0 ? "  ERROR: " : "  ") <<
+    "Total Undermatched Readers: " << total_undermatched_readers <<
+    (total_undermatched_writers != 0 ? ", ERROR: " : ", ") <<
+    "Total Undermatched Writers: " << total_undermatched_writers << std::endl;
   result_out << "  Max Discovery Time Delta: " << max_discovery_time_delta << " seconds" << std::endl;
 
   result_out << std::endl;
@@ -515,4 +527,13 @@ void handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std:
   result_out << std::endl;
 
   consolidated_round_trip_jitter_stats.pretty_print(result_out, "round trip jitter");
+
+  if (total_undermatched_readers ||
+      total_undermatched_writers ||
+      total_out_of_order_data_count ||
+      total_duplicate_data_count ||
+      missing_durable_data) {
+    result = EXIT_FAILURE;
+  }
+  return result;
 }

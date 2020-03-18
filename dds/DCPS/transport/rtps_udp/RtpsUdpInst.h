@@ -40,6 +40,7 @@ public:
 
   size_t nak_depth_;
   size_t max_bundle_size_;
+  double quick_reply_ratio_;
   TimeDuration nak_response_delay_, heartbeat_period_,
     heartbeat_response_delay_, handshake_timeout_, durable_data_timeout_;
 

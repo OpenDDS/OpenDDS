@@ -8,7 +8,8 @@ class WorkerDataWriterListener : public Builder::DataWriterListener {
 public:
 
   WorkerDataWriterListener();
-  WorkerDataWriterListener(size_t expected);
+  WorkerDataWriterListener(const Builder::PropertySeq& properties);
+  virtual ~WorkerDataWriterListener();
 
   // From DDS::DataWriterListener
 
@@ -24,8 +25,8 @@ public:
 
 protected:
   std::mutex mutex_;
-  size_t expected_count_{0};
-  size_t matched_count_{0};
+  size_t expected_match_count_{0};
+  size_t match_count_{0};
   Builder::DataWriter* datawriter_{0};
   Builder::PropertyIndex last_discovery_time_;
 };

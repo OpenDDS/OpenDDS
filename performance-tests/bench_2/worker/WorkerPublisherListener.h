@@ -7,6 +7,10 @@ namespace Bench {
 class WorkerPublisherListener : public Builder::PublisherListener {
 public:
 
+  WorkerPublisherListener();
+  WorkerPublisherListener(const Builder::PropertySeq& properties);
+  virtual ~WorkerPublisherListener();
+
   // From DDS::DataWriterListener
 
   void on_offered_deadline_missed(DDS::DataWriter_ptr writer, const DDS::OfferedDeadlineMissedStatus& status) override;

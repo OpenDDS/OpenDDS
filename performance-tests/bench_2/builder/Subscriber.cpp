@@ -11,6 +11,7 @@ Subscriber::Subscriber(const SubscriberConfig& config, SubscriberReport& report,
   : name_(config.name.in())
   , listener_type_name_(config.listener_type_name.in())
   , listener_status_mask_(config.listener_status_mask)
+  , listener_properties_(config.listener_properties)
   , transport_config_name_(config.transport_config_name.in())
   , report_(report)
   , participant_(participant)
@@ -35,7 +36,7 @@ Subscriber::Subscriber(const SubscriberConfig& config, SubscriberReport& report,
   // Create Listener From Factory
   listener_ = DDS::SubscriberListener::_nil();
   if (!listener_type_name_.empty()) {
-    listener_ = create_listener(listener_type_name_);
+    listener_ = create_listener(listener_type_name_, listener_properties_);
     if (!listener_) {
       std::stringstream ss;
       ss << "subscriber listener creation failed for subscriber '" << name_ << "' with listener type name '" << listener_type_name_ << "'" << std::flush;
