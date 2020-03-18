@@ -406,10 +406,6 @@ sub process_file {
       push(@checks_for_this_file, $name);
       $line_numbers{$name} = ();
     }
-    if ($cmake_file && $line =~ /\t/) {
-      push(@tabs_failed, $line_number);
-    }
-    $line_number += 1;
   }
   return if (not scalar @checks_for_this_file);
 
