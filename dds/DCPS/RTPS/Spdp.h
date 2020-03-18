@@ -19,6 +19,7 @@
 #include "dds/DCPS/ReactorTask.h"
 #include "dds/DCPS/PeriodicTask.h"
 #include "dds/DCPS/SporadicTask.h"
+#include "dds/DCPS/MultiTask.h"
 #include "dds/DCPS/JobQueue.h"
 #include "dds/DCPS/NetworkConfigMonitor.h"
 #include "dds/DCPS/RTPS/ICE/Ice.h"
@@ -216,6 +217,7 @@ private:
     virtual int handle_exception(ACE_HANDLE fd = ACE_INVALID_HANDLE);
 
     void open();
+    void shorten_local_sender_delay_i();
     void write(WriteFlags flags);
     void write_i(WriteFlags flags);
     void write_i(const DCPS::RepoId& guid, WriteFlags flags);
@@ -265,8 +267,9 @@ private:
     DCPS::RcHandle<DCPS::JobQueue> job_queue_;
     typedef DCPS::PmfPeriodicTask<SpdpTransport> SpdpPeriodic;
     typedef DCPS::PmfSporadicTask<SpdpTransport> SpdpSporadic;
+    typedef DCPS::PmfMultiTask<SpdpTransport> SpdpMulti;
     void send_local(const DCPS::MonotonicTimePoint& now);
-    DCPS::RcHandle<SpdpPeriodic> local_sender_;
+    DCPS::RcHandle<SpdpMulti> local_sender_;
 #ifdef OPENDDS_SECURITY
     void process_auth_deadlines(const DCPS::MonotonicTimePoint& now);
     DCPS::RcHandle<SpdpSporadic> auth_deadline_processor_;

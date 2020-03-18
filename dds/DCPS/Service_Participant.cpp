@@ -274,6 +274,7 @@ Service_Participant::shutdown()
         ACE_GUARD(ACE_Thread_Mutex, guard, network_config_monitor_lock_);
         if (network_config_monitor_) {
           network_config_monitor_->close();
+          network_config_monitor_.reset();
         }
       }
 
@@ -2072,6 +2073,7 @@ NetworkConfigMonitor_rch Service_Participant::network_config_monitor()
     if (network_config_monitor_ && !network_config_monitor_->open()) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Service_Participant::network_config_monitor could not open network config monitor\n ")));
       network_config_monitor_->close();
+      network_config_monitor_.reset();
     }
   }
 

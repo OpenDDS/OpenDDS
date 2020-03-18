@@ -115,10 +115,10 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
 namespace {
   ssize_t recv_err(const char* msg, const ACE_INET_Addr& remote, bool& stop)
   {
-    if (security_debug.warn) {
+    if (security_debug.encdec_error) {
       ACE_TCHAR addr_buff[256] = {};
       remote.addr_to_string(addr_buff, 256);
-      ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpReceiveStrategy::receive_bytes - "
+      ACE_ERROR((LM_ERROR, "(%P|%t) {encdec_error} RtpsUdpReceiveStrategy::receive_bytes - "
                  "from %s secure RTPS processing failed: %C\n", addr_buff, msg));
     }
     stop = true;
@@ -200,8 +200,9 @@ RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
     peer.entityId = RTPS::ENTITYID_PARTICIPANT;
     const ParticipantCryptoHandle sender = link_->peer_crypto_handle(peer);
     if (sender == DDS::HANDLE_NIL) {
-      if (security_debug.warn) {
-        ACE_DEBUG((LM_WARNING, "decode_rtps_message no remote participant crypto handle, dropping\n"));
+      if (security_debug.encdec_warn) {
+        ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) {encdec_warn} RtpsUdpReceiveStrategy::receive_bytes: ")
+          ACE_TEXT("decode_rtps_message no remote participant crypto handle, dropping\n")));
       }
       stop = true;
       return ret;
@@ -210,13 +211,14 @@ RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
     DDS::OctetSeq plain;
     SecurityException ex = {"", 0, 0};
     if (!crypto->decode_rtps_message(plain, encoded, receiver, sender, ex)) {
-      if (security_debug.warn) {
-        ACE_DEBUG((LM_WARNING, "decode_rtps_message SecurityException [%d.%d]: %C\n",
+      if (security_debug.encdec_warn) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) {encdec_warn} decode_rtps_message SecurityException [%d.%d]: %C\n",
                    ex.code, ex.minor_code, ex.message.in()));
       }
       if (ex.code == OPENDDS_EXCEPTION_CODE_NO_KEY && ex.minor_code == OPENDDS_EXCEPTION_MINOR_CODE_NO_KEY) {
-        if (security_debug.warn) {
-          ACE_DEBUG((LM_WARNING, "decode_rtps_message remote participant has crypto handle but no key, dropping\n"));
+        if (security_debug.encdec_warn) {
+          ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) {encdec_warn} RtpsUdpReceiveStrategy::receive_bytes: ")
+            ACE_TEXT("decode_rtps_message remote participant has crypto handle but no key, dropping\n")));
         }
         stop = true;
         return ret;
@@ -256,9 +258,9 @@ bool RtpsUdpReceiveStrategy::check_encoded(const EntityId_t& sender)
 
   if (link_->local_crypto_handle() != DDS::HANDLE_NIL
       && !encoded_rtps_ && !RtpsUdpDataLink::separate_message(sender)) {
-    if (security_debug.warn) {
+    if (security_debug.encdec_warn) {
       const GuidConverter conv(sendGuid);
-      ACE_DEBUG((LM_WARNING, "(%P|%t) RtpsUdpReceiveStrategy::check_encoded "
+      ACE_ERROR((LM_WARNING, "(%P|%t) RtpsUdpReceiveStrategy::check_encoded "
                  "Full message from %C requires protection, dropping\n",
                  OPENDDS_STRING(conv).c_str()));
     }
@@ -270,9 +272,9 @@ bool RtpsUdpReceiveStrategy::check_encoded(const EntityId_t& sender)
     ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_VALID | ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_SUBMESSAGE_PROTECTED;
 
   if ((esa & MASK_PROTECT_SUBMSG) == MASK_PROTECT_SUBMSG && !encoded_submsg_) {
-    if (security_debug.warn) {
+    if (security_debug.encdec_warn) {
       const GuidConverter conv(sendGuid);
-      ACE_DEBUG((LM_WARNING, "(%P|%t) RtpsUdpReceiveStrategy::check_encoded "
+      ACE_ERROR((LM_WARNING, "(%P|%t) RtpsUdpReceiveStrategy::check_encoded "
                  "Submessage from %C requires protection, dropping\n",
                  OPENDDS_STRING(conv).c_str()));
     }
@@ -560,8 +562,8 @@ RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage)
     return;
 
   } else {
-    if (security_debug.warn) {
-      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {warn} RtpsUdpReceiveStrategy: ")
+    if (security_debug.encdec_warn) {
+      ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) {encdec_warn} RtpsUdpReceiveStrategy: ")
                  ACE_TEXT("preprocess_secure_submsg failed RPCH %d, [%d.%d]: %C\n"),
                  peer_pch, ex.code, ex.minor_code, ex.message.in()));
     }
@@ -570,8 +572,8 @@ RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage)
 
   if (!ok) {
     bool dw = category == DATAWRITER_SUBMESSAGE;
-    if (security_debug.warn) {
-      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {warn} RtpsUdpReceiveStrategy: ")
+    if (security_debug.encdec_warn) {
+      ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) {encdec_warn} RtpsUdpReceiveStrategy: ")
                  ACE_TEXT("decode_data%C_submessage failed [%d.%d]: \"%C\" ")
                  ACE_TEXT("(rpch: %u, local d%cch: %u, remote d%cch: %u)\n"),
                  dw ? "writer" : "reader",
@@ -702,8 +704,8 @@ bool RtpsUdpReceiveStrategy::decode_payload(ReceivedDataSample& sample,
       sample.header_.byte_order_ = RtpsSampleHeader::payload_byte_order(sample);
     }
 
-  } else if (security_debug.warn) {
-    ACE_DEBUG((LM_WARNING, "(%P|%t) {warn} RtpsUdpReceiveStrategy: "
+  } else if (security_debug.encdec_warn) {
+    ACE_ERROR((LM_WARNING, "(%P|%t) {encdec_warn} RtpsUdpReceiveStrategy: "
                "decode_serialized_payload failed [%d.%d]: %C\n",
                ex.code, ex.minor_code, ex.message.in()));
   }
@@ -831,7 +833,8 @@ bool RtpsUdpReceiveStrategy::getDirectedWriteReaders(RepoIdSet& directedWriteRea
 {
   directedWriteReaders.clear();
   for (CORBA::ULong i = 0; i < ds.inlineQos.length(); ++i) {
-    if (ds.inlineQos[i]._d() == RTPS::PID_DIRECTED_WRITE) {
+    if (ds.inlineQos[i]._d() == RTPS::PID_DIRECTED_WRITE
+        && receiver_.source_version_.minor >= 4) {
       directedWriteReaders.insert(ds.inlineQos[i].guid());
     }
   }

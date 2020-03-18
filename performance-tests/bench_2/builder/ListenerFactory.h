@@ -8,10 +8,19 @@
 #include <iostream>
 #include <sstream>
 
+#include "dds/DdsDcpsDomainC.h"
+
 namespace Builder {
 
+#ifdef _MSC_VER
+# define Bench_Builder_Export_No_MSVC
+#else
+# define Bench_Builder_Export_No_MSVC Bench_Builder_Export
+#endif
+
 template <typename ListenerType>
-class ListenerFactory {
+class Bench_Builder_Export_No_MSVC ListenerFactory {
+#undef Bench_Builder_Export_No_MSVC
 public:
   using Listener = ListenerType;
   using Listener_var = typename ListenerType::_var_type;
@@ -75,5 +84,23 @@ std::mutex ListenerFactory<ListenerType>::s_mutex;
 
 template <typename ListenerType>
 typename ListenerFactory<ListenerType>::listener_factory_map ListenerFactory<ListenerType>::s_factory_map;
+
+Bench_Builder_Export
+void register_domain_participant_listener(const std::string& name, const std::function<DDS::DomainParticipantListener::_var_type(const Builder::PropertySeq&)>& factory);
+
+Bench_Builder_Export
+void register_topic_listener(const std::string& name, const std::function<DDS::TopicListener::_var_type(const Builder::PropertySeq&)>& factory);
+
+Bench_Builder_Export
+void register_publisher_listener(const std::string& name, const std::function<DDS::PublisherListener::_var_type(const Builder::PropertySeq&)>& factory);
+
+Bench_Builder_Export
+void register_subscriber_listener(const std::string& name, const std::function<DDS::SubscriberListener::_var_type(const Builder::PropertySeq&)>& factory);
+
+Bench_Builder_Export
+void register_data_writer_listener(const std::string& name, const std::function<DDS::DataWriterListener::_var_type(const Builder::PropertySeq&)>& factory);
+
+Bench_Builder_Export
+void register_data_reader_listener(const std::string& name, const std::function<DDS::DataReaderListener::_var_type(const Builder::PropertySeq&)>& factory);
 
 }

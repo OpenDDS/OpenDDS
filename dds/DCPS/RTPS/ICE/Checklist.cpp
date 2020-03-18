@@ -189,7 +189,15 @@ void Checklist::unfreeze()
   for (CandidatePairsType::iterator pos = frozen_.begin(), limit = frozen_.end(); pos != limit;) {
     const CandidatePair& cp = *pos;
 
-    if (!endpoint_manager_->agent_impl->contains(cp.foundation)) {
+    // The second check allows the Checklist to start work on remote
+    // foundations that also belong to its local agent meaning that the
+    // remote agent is probably another EndpointManager in this
+    // process.  They will share an AgentImpl and therefore the same
+    // set of active foundations.  This will cause deadlock since both
+    // cannot be the first to use the foundation unless we explicitly
+    // allow it.
+    if (!endpoint_manager_->agent_impl->contains(cp.foundation) ||
+        endpoint_manager_->foundations().count(cp.foundation.second)) {
       endpoint_manager_->agent_impl->add(cp.foundation);
       waiting_.push_back(cp);
       waiting_.sort(CandidatePair::priority_sorted);

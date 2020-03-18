@@ -1166,6 +1166,8 @@ Sedp::Task::svc_i(const ParticipantData_t* ppdata)
   const BuiltinEndpointQos_t& beq =
     pdata->participantProxy.builtinEndpointQos;
 
+  ACE_GUARD(ACE_Thread_Mutex, g, sedp_->lock_);
+
   // See RTPS v2.1 section 8.5.5.1
   if (spdp_->available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER &&
       avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR) {
@@ -1207,7 +1209,6 @@ Sedp::Task::svc_i(const ParticipantData_t* ppdata)
     sedp_->deferred_publications_.erase (pos++);
   }
 
-  ACE_GUARD(ACE_Thread_Mutex, g, sedp_->lock_);
   if (spdp_->shutting_down()) { return; }
 
   proto.remote_id_.entityId = ENTITYID_PARTICIPANT;
@@ -1254,24 +1255,26 @@ Sedp::disassociate(const ParticipantData_t& pdata)
     pdata.participantProxy.availableBuiltinEndpoints;
 
   { // Release lock, so we can call into transport
+    BuiltinEndpointSet_t local_avail = spdp_.available_builtin_endpoints();
+
     ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
     ACE_GUARD_RETURN(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock, false);
 
-    if (spdp_.available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER) {
+    if (local_avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER) {
       disassociate_helper(avail, DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR, part,
                           ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER, *publications_writer_);
     }
     disassociate_helper(avail, DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER, part,
       ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER, *publications_reader_);
 
-    if (spdp_.available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER) {
+    if (local_avail & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER) {
       disassociate_helper(avail, DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR, part,
                           ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER, *subscriptions_writer_);
     }
     disassociate_helper(avail, DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER, part,
       ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER, *subscriptions_reader_);
 
-    if (spdp_.available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER) {
+    if (local_avail & DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER) {
       disassociate_helper(avail, BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER, part,
                           ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER, *participant_message_writer_);
     }
@@ -1283,21 +1286,21 @@ Sedp::disassociate(const ParticipantData_t& pdata)
 #ifdef OPENDDS_SECURITY
     using namespace DDS::Security;
 
-    if (spdp_.available_builtin_endpoints() & SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER) {
+    if (local_avail & SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER) {
       disassociate_helper(avail, SEDP_BUILTIN_PUBLICATIONS_SECURE_READER, part,
                           ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER, *publications_secure_writer_);
     }
     disassociate_helper(avail, SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER, part,
       ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER, *publications_secure_reader_);
 
-    if (spdp_.available_builtin_endpoints() & SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER) {
+    if (local_avail & SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER) {
       disassociate_helper(avail, SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER, part,
                           ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER, *subscriptions_secure_writer_);
     }
     disassociate_helper(avail, SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER, part,
       ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER, *subscriptions_secure_reader_);
 
-    if (spdp_.available_builtin_endpoints() & DDS::Security::BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER) {
+    if (local_avail & DDS::Security::BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER) {
       disassociate_helper(avail, BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER, part,
                           ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER, *participant_message_secure_writer_);
     }
@@ -1935,9 +1938,9 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
 #ifndef DDS_HAS_MINIMUM_BIT
       {
         // Release lock for call into pub_bit
-        ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
         DCPS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
         if (bit) { // bit may be null if the DomainParticipant is shutting down
+          ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
           instance_handle =
             bit->store_synthetic_data(wdata_copy.ddsPublicationData,
                                       DDS::NEW_VIEW_STATE);
@@ -1983,6 +1986,10 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
                        ACE_TEXT("calling match_endpoints update\n")));
           }
           match_endpoints(guid, top_it->second);
+          iter = discovered_publications_.find(guid);
+          if (iter == discovered_publications_.end()) {
+            return;
+          }
         }
       }
 
@@ -2262,9 +2269,9 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
 #ifndef DDS_HAS_MINIMUM_BIT
       {
         // Release lock for call into sub_bit
-        ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
         DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
         if (bit) { // bit may be null if the DomainParticipant is shutting down
+          ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
           instance_handle =
             bit->store_synthetic_data(rdata_copy.ddsSubscriptionData,
                                       DDS::NEW_VIEW_STATE);
@@ -2310,6 +2317,10 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
                                  ACE_TEXT("calling match_endpoints update\n")));
           }
           match_endpoints(guid, top_it->second);
+          iter = discovered_subscriptions_.find(guid);
+          if (iter == discovered_subscriptions_.end()) {
+            return;
+          }
         }
       }
 

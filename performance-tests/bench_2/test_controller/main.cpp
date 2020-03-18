@@ -378,13 +378,13 @@ void handle_reports(const std::vector<Bench::WorkerReport>& parsed_reports, std:
   Builder::TimeStamp max_stop_time = ZERO;
   Builder::TimeStamp max_destruction_time = ZERO;
 
-  size_t total_undermatched_readers = 0;
-  size_t total_undermatched_writers = 0;
-  size_t total_lost_sample_count = 0;
-  size_t total_rejected_sample_count = 0;
-  size_t total_out_of_order_data_count = 0;
-  size_t total_duplicate_data_count = 0;
-  size_t total_missing_data_count = 0;
+  uint64_t total_undermatched_readers = 0;
+  uint64_t total_undermatched_writers = 0;
+  uint64_t total_lost_sample_count = 0;
+  uint64_t total_rejected_sample_count = 0;
+  uint64_t total_out_of_order_data_count = 0;
+  uint64_t total_duplicate_data_count = 0;
+  uint64_t total_missing_data_count = 0;
   Builder::TimeStamp max_discovery_time_delta = ZERO;
 
   Bench::SimpleStatBlock consolidated_latency_stats;

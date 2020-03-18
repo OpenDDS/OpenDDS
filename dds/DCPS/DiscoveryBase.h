@@ -1156,7 +1156,7 @@ namespace OpenDDS {
           if (call_writer) {
             if (DCPS_debug_level > 3) {
               ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) EndpointManager::match - ")
-                         ACE_TEXT("adding writer association\n")));
+                         ACE_TEXT("adding writer %C association for reader %C\n"), OPENDDS_STRING(GuidConverter(writer)).c_str(), OPENDDS_STRING(GuidConverter(reader)).c_str()));
             }
             DcpsUpcalls thr(drr, reader, wa, !writer_active, dwr);
             if (call_reader) {
@@ -1170,7 +1170,7 @@ namespace OpenDDS {
           } else if (call_reader) {
             if (DCPS_debug_level > 3) {
               ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) EndpointManager::match - ")
-                         ACE_TEXT("adding reader association\n")));
+                         ACE_TEXT("adding reader %C association for writer %C\n"), OPENDDS_STRING(GuidConverter(reader)).c_str(), OPENDDS_STRING(GuidConverter(writer)).c_str()));
             }
             drr->add_association(reader, wa, !writer_active);
           }
@@ -1180,7 +1180,7 @@ namespace OpenDDS {
             if (DCPS_debug_level > 3) {
               ACE_DEBUG((LM_DEBUG,
                          ACE_TEXT("(%P|%t) EndpointManager::match - ")
-                         ACE_TEXT("calling writer association_complete\n")));
+                         ACE_TEXT("calling writer %C association_complete for %C\n"), OPENDDS_STRING(GuidConverter(writer)).c_str(), OPENDDS_STRING(GuidConverter(reader)).c_str()));
             }
             dwr->association_complete(reader);
           }
@@ -1696,7 +1696,12 @@ namespace OpenDDS {
 
       void remove_discovered_participant(DiscoveredParticipantIter iter)
       {
+        RepoId part_id = iter->first;
         bool removed = endpoint_manager().disassociate(iter->second.pdata_);
+        iter = participants_.find(part_id); // refresh iter after disassociate, which can unlock
+        if (iter == participants_.end()) {
+          return;
+        }
         if (removed) {
 #ifndef DDS_HAS_MINIMUM_BIT
           ParticipantBuiltinTopicDataDataReaderImpl* bit = part_bit();
