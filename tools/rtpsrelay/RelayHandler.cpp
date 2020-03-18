@@ -800,6 +800,10 @@ void StunHandler::process_message(const ACE_INET_Addr& remote_address,
     return;
   }
 
+  if (message.class_ == OpenDDS::STUN::INDICATION) {
+    return;
+  }
+
   if (message.class_ != OpenDDS::STUN::REQUEST) {
     ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) %N:%l VerticalHandler::process_message: WARNING Unknown STUN message class from %C\n"), addr_to_string(remote_address).c_str()));
     return;
