@@ -244,7 +244,7 @@ struct OpenDDS_Dcps_Export DataSampleHeader : public PoolAllocationBase {
   static void split_payload(const ACE_Message_Block& orig, size_t size,
                             Message_Block_Ptr& head, Message_Block_Ptr& tail);
 
-  /// Returns false if the sample is dispose and/or unregister,
+  /// Returns true if the sample has a complete serialized payload.
   bool valid_data() const;
 
 private:

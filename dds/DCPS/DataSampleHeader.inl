@@ -166,9 +166,5 @@ ACE_INLINE
 bool
 OpenDDS::DCPS::DataSampleHeader::valid_data() const
 {
-  return !(message_id_ == DISPOSE_INSTANCE
-    || message_id_ == DISPOSE_UNREGISTER_INSTANCE
-    || message_id_ == UNREGISTER_INSTANCE
-    || message_id_ == INSTANCE_REGISTRATION
-  );
+  return message_id_ == SAMPLE_DATA;
 }
