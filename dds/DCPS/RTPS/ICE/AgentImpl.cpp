@@ -208,6 +208,16 @@ void  AgentImpl::receive(Endpoint* a_endpoint,
                          const ACE_INET_Addr& a_remote_address,
                          const STUN::Message& a_message)
 {
+  if (a_local_address == ACE_INET_Addr()) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) AgentImpl::receive: ERROR local_address is empty, ICE will not work on this platform\n")));
+    return;
+  }
+
+  if (a_remote_address == ACE_INET_Addr()) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) AgentImpl::receive: ERROR remote_address is empty, ICE will not work on this platform\n")));
+    return;
+  }
+
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, mutex);
   check_invariants();
   EndpointManagerMapType::const_iterator pos = endpoint_managers_.find(a_endpoint);
