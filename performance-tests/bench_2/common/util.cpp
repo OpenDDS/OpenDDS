@@ -94,7 +94,11 @@ std::vector<std::string> get_dir_contents(const std::string& path)
   if (dir) {
     ACE_DIRENT* entry;
     while ((entry = ACE_OS::readdir(dir))) {
+#ifdef ACE_HAS_TCHAR_DIRENT
       rv.push_back(ACE_TEXT_ALWAYS_CHAR(entry->d_name));
+#else
+      rv.push_back(entry->d_name);
+#endif
     }
     ACE_OS::closedir(dir);
   } else {
