@@ -94,7 +94,7 @@ std::vector<std::string> get_dir_contents(const std::string& path)
   if (dir) {
     ACE_DIRENT* entry;
     while ((entry = ACE_OS::readdir(dir))) {
-      rv.push_back(entry->d_name);
+      rv.push_back(ACE_TEXT_ALWAYS_CHAR(entry->d_name));
     }
     ACE_OS::closedir(dir);
   } else {
