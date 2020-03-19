@@ -21,18 +21,24 @@ public:
   {
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
-    // Reset at 1GB.
-    if (bytes_sent_ > 1024 * 1024 * 1024) {
-      interval_start_ = OpenDDS::DCPS::MonotonicTimePoint::now();
+    const auto now = OpenDDS::DCPS::MonotonicTimePoint::now();
+    const auto minimum_time = OpenDDS::DCPS::TimeDuration::from_msec(bytes_sent_ / max_throughput_);
+    const auto actual_time = now - interval_start_;
+
+    // Reset at 1s if not limiting.
+    if (actual_time > minimum_time &&
+        actual_time > OpenDDS::DCPS::TimeDuration(1)) {
+      interval_start_ = now;
       bytes_sent_ = 0;
     }
+
     bytes_sent_ += count;
   }
 
   OpenDDS::DCPS::MonotonicTimePoint get_next_send_time() const
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, OpenDDS::DCPS::MonotonicTimePoint::zero_value);
-    return interval_start_  + OpenDDS::DCPS::TimeDuration::from_msec(bytes_sent_ / max_throughput_);
+    return interval_start_ + OpenDDS::DCPS::TimeDuration::from_msec(bytes_sent_ / max_throughput_);
   }
 
 private:
