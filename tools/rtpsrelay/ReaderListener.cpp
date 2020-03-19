@@ -3,9 +3,11 @@
 namespace RtpsRelay {
 
 ReaderListener::ReaderListener(AssociationTable& association_table,
-                               SpdpHandler& spdp_handler)
+                               SpdpHandler& spdp_handler,
+                               DomainStatisticsWriter& stats_writer)
   : association_table_(association_table)
   , spdp_handler_(spdp_handler)
+  , stats_writer_(stats_writer)
 {}
 
 void ReaderListener::on_data_available(DDS::DataReader_ptr reader)
@@ -37,11 +39,13 @@ void ReaderListener::on_data_available(DDS::DataReader_ptr reader)
         GuidSet to;
         association_table_.insert(data[idx], to);
         spdp_handler_.replay(from, to);
+        stats_writer_.total_readers(association_table_.reader_count());
       }
       break;
     case DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE:
     case DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE:
       association_table_.remove(data[idx]);
+      stats_writer_.total_readers(association_table_.reader_count());
       break;
     }
   }

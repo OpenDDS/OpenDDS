@@ -82,4 +82,16 @@ void AssociationTable::lookup_destinations(GuidSet& to,
   }
 }
 
+size_t AssociationTable::writer_count() const
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, 0);
+  return writers_.size();
+}
+
+size_t AssociationTable::reader_count() const
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, 0);
+  return readers_.size();
+}
+
 }

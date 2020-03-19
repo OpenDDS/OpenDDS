@@ -5,10 +5,14 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include "DomainStatisticsListener.h"
+#include "DomainStatisticsWriter.h"
+#include "HandlerStatisticsListener.h"
+#include "ParticipantListener.h"
+#include "ParticipantStatisticsListener.h"
 #include "PublicationListener.h"
 #include "ReaderListener.h"
 #include "RelayHandler.h"
-#include "StatisticsHandler.h"
 #include "SubscriptionListener.h"
 #include "WriterListener.h"
 
@@ -70,12 +74,18 @@ namespace {
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   DDS::DomainId_t relay_domain = 0;
-  DDS::DomainId_t application_domain = 1;
   ACE_INET_Addr nic_horizontal, nic_vertical;
-  OpenDDS::DCPS::TimeDuration lifespan(60);   // 1 minute
   unsigned short stun_port = 3478;
   std::string user_data;
   std::size_t max_throughput = 80; // in MBps
+  bool run_relay = true;
+  bool publish_handler_statistics = true;
+  bool publish_domain_statistics = true;
+  bool publish_participant_statistics = true;
+  bool report_handler_statistics = false;
+  bool report_domain_statistics = false;
+  bool report_participant_statistics = false;
+  RelayHandlerConfig config;
 
 #ifdef OPENDDS_SECURITY
   std::string identity_ca_file;
@@ -102,10 +112,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       relay_domain = ACE_OS::atoi(arg);
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-ApplicationDomain"))) {
-      application_domain = ACE_OS::atoi(arg);
+      config.application_domain(ACE_OS::atoi(arg));
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-Lifespan"))) {
-      lifespan = OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg));
+      config.lifespan(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-StunPort"))) {
       stun_port = ACE_OS::atoi(arg);
@@ -115,6 +125,42 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-MaxThroughput"))) {
       max_throughput = ACE_OS::atoi(arg);
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-StatisticsInterval"))) {
+      config.statistics_interval(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-RunRelay"))) {
+      run_relay = ACE_OS::atoi(arg);
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-PublishHandlerStatistics"))) {
+      publish_handler_statistics = ACE_OS::atoi(arg);
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-PublishDomainStatistics"))) {
+      publish_domain_statistics = ACE_OS::atoi(arg);
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-PublishParticipantStatistics"))) {
+      publish_participant_statistics = ACE_OS::atoi(arg);
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-PublishStatistics"))) {
+      bool flag = ACE_OS::atoi(arg);
+      publish_handler_statistics = flag;
+      publish_domain_statistics = flag;
+      publish_participant_statistics = flag;
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-ReportHandlerStatistics"))) {
+      report_handler_statistics = ACE_OS::atoi(arg);
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-ReportDomainStatistics"))) {
+      report_domain_statistics = ACE_OS::atoi(arg);
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-ReportParticipantStatistics"))) {
+      report_participant_statistics = ACE_OS::atoi(arg);
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-ReportStatistics"))) {
+      bool flag = ACE_OS::atoi(arg);
+      report_handler_statistics = flag;
+      report_domain_statistics = flag;
+      report_participant_statistics = flag;
       args.consume_arg();
 #ifdef OPENDDS_SECURITY
     } else if ((arg = args.get_the_parameter("-IdentityCA"))) {
@@ -197,39 +243,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 #endif
 
+  // Set up the relay participant.
   DDS::DomainParticipantQos participant_qos;
-  factory->get_default_participant_qos(participant_qos);
-  participant_qos.user_data.value.length(static_cast<CORBA::ULong>(user_data.length()));
-  std::memcpy(participant_qos.user_data.value.get_buffer(), user_data.data(), user_data.length());
-
-  DDS::PropertySeq& properties = participant_qos.property.value;
-  append(properties, OpenDDS::RTPS::RTPS_DISCOVERY_ENDPOINT_ANNOUNCEMENTS, "false");
-
-#ifdef OPENDDS_SECURITY
-  if (secure) {
-    append(properties, DDS::Security::Properties::AuthIdentityCA, identity_ca_file);
-    append(properties, DDS::Security::Properties::AccessPermissionsCA, permissions_ca_file);
-    append(properties, DDS::Security::Properties::AuthIdentityCertificate, identity_certificate_file);
-    append(properties, DDS::Security::Properties::AuthPrivateKey, identity_key_file);
-    append(properties, DDS::Security::Properties::AccessGovernance, governance_file);
-    append(properties, DDS::Security::Properties::AccessPermissions, permissions_file);
-  }
-#endif
-
-  DDS::DomainParticipant_var application_participant = factory->create_participant(application_domain, participant_qos, nullptr,
-                                                                                   OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-  if (!application_participant) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: Failed to create application participant\n")));
-    return EXIT_FAILURE;
-  }
-
-  OpenDDS::DCPS::DomainParticipantImpl* application_participant_impl =
-    dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(application_participant.in());
-  if (application_participant_impl == 0) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: Failed to get application participant impl\n")));
-    return EXIT_FAILURE;
-  }
-
   factory->get_default_participant_qos(participant_qos);
   DDS::DomainParticipant_var relay_participant = factory->create_participant(relay_domain, participant_qos, nullptr,
                                                                              OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -238,72 +253,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  const auto addr_horizontal = nic_horizontal.get_ip_address();
-  auto port_horizontal = nic_horizontal.get_port_number();
-  const ACE_INET_Addr spdp_horizontal_addr(port_horizontal++, addr_horizontal);
-  const ACE_INET_Addr sedp_horizontal_addr(port_horizontal++, addr_horizontal);
-  const ACE_INET_Addr data_horizontal_addr(port_horizontal++, addr_horizontal);
-
-  const auto addr_vertical = nic_vertical.get_ip_address();
-  auto port_vertical = nic_vertical.get_port_number();
-  const ACE_INET_Addr spdp_vertical_addr(port_vertical++, addr_vertical);
-  const ACE_INET_Addr sedp_vertical_addr(port_vertical++, addr_vertical);
-  const ACE_INET_Addr data_vertical_addr(port_vertical++, addr_vertical);
-
-  ACE_INET_Addr stun_addr = nic_vertical;
-  stun_addr.set_port_number(stun_port);
-
-  ACE_Reactor reactor_(new ACE_Select_Reactor, true);
-  const auto reactor = &reactor_;
-
-  RelayAddresses relay_addresses {
-    addr_to_string(spdp_horizontal_addr),
-    addr_to_string(sedp_horizontal_addr),
-    addr_to_string(data_horizontal_addr)
-  };
-
-  Governor governor(max_throughput * 1024 * 1024);
-  AssociationTable association_table;
-
-  HorizontalHandler spdp_horizontal_handler(reactor, governor);
-  HorizontalHandler sedp_horizontal_handler(reactor, governor);
-  HorizontalHandler data_horizontal_handler(reactor, governor);
-
-  const auto application_participant_id = application_participant_impl->get_id();
-
-  const auto discovery = TheServiceParticipant->get_discovery(application_domain);
-  const auto rtps_discovery = OpenDDS::DCPS::dynamic_rchandle_cast<OpenDDS::RTPS::RtpsDiscovery>(discovery);
-
-  ACE_INET_Addr spdp(rtps_discovery->get_spdp_port(application_domain, application_participant_id), "127.0.0.1");
-  ACE_INET_Addr sedp(rtps_discovery->get_sedp_port(application_domain, application_participant_id), "127.0.0.1");
-
-#ifdef OPENDDS_SECURITY
-  OpenDDS::Security::SecurityConfig_rch conf = TheSecurityRegistry->default_config();
-  DDS::Security::CryptoTransform_var crypto = conf->get_crypto_transform();
-#else
-  const int crypto = 0;
-#endif
-
-  DDS::Subscriber_var bit_subscriber = application_participant->get_builtin_subscriber();
-
-  GuidRelayAddressesTypeSupport_var guid_relay_addresses_ts =
-    new GuidRelayAddressesTypeSupportImpl;
-  if (guid_relay_addresses_ts->register_type(relay_participant, "") != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to register GuidRelayAddresses type\n")));
-    return EXIT_FAILURE;
-  }
-
-  DDS::Topic_var responsible_relay_topic =
-    relay_participant->create_topic("Responsible Relay",
-                                    guid_relay_addresses_ts->get_type_name(),
-                                    TOPIC_QOS_DEFAULT, nullptr,
-                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-  if (!responsible_relay_topic) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to create Responsible Relay topic\n")));
-    return EXIT_FAILURE;
-  }
-
+  // Set up relay topics.
   ReaderEntryTypeSupport_var reader_entry_ts =
     new ReaderEntryTypeSupportImpl;
   if (reader_entry_ts->register_type(relay_participant, "") != DDS::RETCODE_OK) {
@@ -336,6 +286,79 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
+  GuidRelayAddressesTypeSupport_var guid_relay_addresses_ts =
+    new GuidRelayAddressesTypeSupportImpl;
+  if (guid_relay_addresses_ts->register_type(relay_participant, "") != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to register GuidRelayAddresses type\n")));
+    return EXIT_FAILURE;
+  }
+
+  DDS::Topic_var responsible_relay_topic =
+    relay_participant->create_topic("Responsible Relay",
+                                    guid_relay_addresses_ts->get_type_name(),
+                                    TOPIC_QOS_DEFAULT, nullptr,
+                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+  if (!responsible_relay_topic) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to create Responsible Relay topic\n")));
+    return EXIT_FAILURE;
+  }
+
+  HandlerStatisticsTypeSupport_var handler_statistics_ts =
+    new HandlerStatisticsTypeSupportImpl;
+  if (handler_statistics_ts->register_type(relay_participant, "") != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to register HandlerStatistics type\n")));
+    return EXIT_FAILURE;
+  }
+
+  DDS::Topic_var handler_statistics_topic =
+    relay_participant->create_topic("Handler Statistics",
+                                    handler_statistics_ts->get_type_name(),
+                                    TOPIC_QOS_DEFAULT, nullptr,
+                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+  if (!handler_statistics_topic) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to create Handler Statistics topic\n")));
+    return EXIT_FAILURE;
+  }
+
+  ParticipantStatisticsTypeSupport_var participant_statistics_ts =
+    new ParticipantStatisticsTypeSupportImpl;
+  if (participant_statistics_ts->register_type(relay_participant, "") != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to register ParticipantStatistics type\n")));
+    return EXIT_FAILURE;
+  }
+
+  DDS::Topic_var participant_statistics_topic =
+    relay_participant->create_topic("Participant Statistics",
+                                    participant_statistics_ts->get_type_name(),
+                                    TOPIC_QOS_DEFAULT, nullptr,
+                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+  if (!participant_statistics_topic) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to create Participant Statistics topic\n")));
+    return EXIT_FAILURE;
+  }
+
+  DomainStatisticsTypeSupport_var domain_statistics_ts =
+    new DomainStatisticsTypeSupportImpl;
+  if (domain_statistics_ts->register_type(relay_participant, "") != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to register DomainStatistics type\n")));
+    return EXIT_FAILURE;
+  }
+
+  DDS::Topic_var domain_statistics_topic =
+    relay_participant->create_topic("Domain Statistics",
+                                    domain_statistics_ts->get_type_name(),
+                                    TOPIC_QOS_DEFAULT, nullptr,
+                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+  if (!domain_statistics_topic) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to create Domain Statistics topic\n")));
+    return EXIT_FAILURE;
+  }
+
+  // Setup relay publisher and subscriber.
   DDS::Publisher_var relay_publisher = relay_participant->create_publisher(PUBLISHER_QOS_DEFAULT, nullptr,
                                                                            OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
@@ -352,6 +375,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
+  // Setup relay reader/writer qos.
   DDS::DataWriterQos writer_qos;
   relay_publisher->get_default_datawriter_qos(writer_qos);
 
@@ -364,150 +388,305 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   reader_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
   reader_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
-  DDS::DataWriter_var responsible_relay_writer_var =
-    relay_publisher->create_datawriter(responsible_relay_topic, writer_qos, nullptr,
-                                       OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  // Setup statistics reportings.
+  DDS::DataReaderListener_var handler_statistics_listener;
+  DDS::DataReader_var handler_statistics_reader_var;
+  if (report_handler_statistics) {
+    handler_statistics_listener = new HandlerStatisticsListener();
+    handler_statistics_reader_var = relay_subscriber->create_datareader(handler_statistics_topic, reader_qos,
+                                                                        handler_statistics_listener,
+                                                                        DDS::DATA_AVAILABLE_STATUS);
 
-  if (!responsible_relay_writer_var) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to create Responsible Relay data writer\n")));
+    if (!handler_statistics_reader_var) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to create Handler Statistics data reader\n")));
+      return EXIT_FAILURE;
+    }
+  }
+
+  DDS::DataReaderListener_var domain_statistics_listener;
+  DDS::DataReader_var domain_statistics_reader_var;
+  if (report_domain_statistics) {
+    domain_statistics_listener = new DomainStatisticsListener();
+    domain_statistics_reader_var = relay_subscriber->create_datareader(domain_statistics_topic, reader_qos,
+                                                                       domain_statistics_listener,
+                                                                       DDS::DATA_AVAILABLE_STATUS);
+
+    if (!domain_statistics_reader_var) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to create Domain Statistics data reader\n")));
+      return EXIT_FAILURE;
+    }
+  }
+
+  DDS::DataReaderListener_var participant_statistics_listener;
+  DDS::DataReader_var participant_statistics_reader_var;
+  if (report_participant_statistics) {
+    participant_statistics_listener = new ParticipantStatisticsListener();
+    participant_statistics_reader_var = relay_subscriber->create_datareader(participant_statistics_topic, reader_qos,
+                                                                            participant_statistics_listener,
+                                                                            DDS::DATA_AVAILABLE_STATUS);
+
+    if (!participant_statistics_reader_var) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to create Participant Statistics data reader\n")));
+      return EXIT_FAILURE;
+    }
+  }
+
+  // Setup statistics publishing.
+  if (publish_handler_statistics && !config.handler_statistics_writer(relay_publisher->create_datawriter(handler_statistics_topic, writer_qos, nullptr, OpenDDS::DCPS::DEFAULT_STATUS_MASK))) {
     return EXIT_FAILURE;
   }
 
-  GuidRelayAddressesDataWriter_ptr responsible_relay_writer = GuidRelayAddressesDataWriter::_narrow(responsible_relay_writer_var);
-
-  if (!responsible_relay_writer) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to narrow Responsible Relay data writer\n")));
+  if (publish_domain_statistics && !config.domain_statistics_writer(relay_publisher->create_datawriter(domain_statistics_topic, writer_qos, nullptr, OpenDDS::DCPS::DEFAULT_STATUS_MASK))) {
     return EXIT_FAILURE;
   }
 
-  DDS::DataReader_var responsible_relay_reader_var =
-    relay_subscriber->create_datareader(responsible_relay_topic, reader_qos, nullptr, 0);
-  if (!responsible_relay_reader_var) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to create Reponsible Relay data reader\n")));
+  if (publish_participant_statistics && !config.participant_statistics_writer(relay_publisher->create_datawriter(participant_statistics_topic, writer_qos, nullptr, OpenDDS::DCPS::DEFAULT_STATUS_MASK))) {
     return EXIT_FAILURE;
   }
 
-  GuidRelayAddressesDataReader_ptr responsible_relay_reader = GuidRelayAddressesDataReader::_narrow(responsible_relay_reader_var);
+  if (run_relay) {
+    // Configure ports and addresses.
+    const auto addr_horizontal = nic_horizontal.get_ip_address();
+    auto port_horizontal = nic_horizontal.get_port_number();
+    const ACE_INET_Addr spdp_horizontal_addr(port_horizontal++, addr_horizontal);
+    const ACE_INET_Addr sedp_horizontal_addr(port_horizontal++, addr_horizontal);
+    const ACE_INET_Addr data_horizontal_addr(port_horizontal++, addr_horizontal);
 
-  if (!responsible_relay_reader) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to narrow Responsible Relay data reader\n")));
-    return EXIT_FAILURE;
-  }
+    const auto addr_vertical = nic_vertical.get_ip_address();
+    auto port_vertical = nic_vertical.get_port_number();
+    const ACE_INET_Addr spdp_vertical_addr(port_vertical++, addr_vertical);
+    const ACE_INET_Addr sedp_vertical_addr(port_vertical++, addr_vertical);
+    const ACE_INET_Addr data_vertical_addr(port_vertical++, addr_vertical);
 
-  SpdpHandler spdp_vertical_handler(reactor, governor, relay_addresses, association_table, responsible_relay_writer, responsible_relay_reader, lifespan, rtps_discovery, application_domain, application_participant_id, crypto, spdp);
-  SedpHandler sedp_vertical_handler(reactor, governor, relay_addresses, association_table, responsible_relay_writer, responsible_relay_reader, lifespan, rtps_discovery, application_domain, application_participant_id, crypto, sedp);
-  DataHandler data_vertical_handler(reactor, governor, relay_addresses, association_table, responsible_relay_writer, responsible_relay_reader, lifespan, rtps_discovery, application_domain, application_participant_id, crypto);
+    ACE_INET_Addr stun_addr = nic_vertical;
+    stun_addr.set_port_number(stun_port);
+
+    RelayAddresses relay_addresses {
+      addr_to_string(spdp_horizontal_addr),
+        addr_to_string(sedp_horizontal_addr),
+        addr_to_string(data_horizontal_addr)
+        };
+    config.relay_addresses(relay_addresses);
+
+    // Set up the application participant.
+    DDS::DomainParticipantQos participant_qos;
+    factory->get_default_participant_qos(participant_qos);
+    participant_qos.user_data.value.length(static_cast<CORBA::ULong>(user_data.length()));
+    std::memcpy(participant_qos.user_data.value.get_buffer(), user_data.data(), user_data.length());
+
+    DDS::PropertySeq& properties = participant_qos.property.value;
+    append(properties, OpenDDS::RTPS::RTPS_DISCOVERY_ENDPOINT_ANNOUNCEMENTS, "false");
 
 #ifdef OPENDDS_SECURITY
-  StunHandler stun_handler(reactor, governor);
+    if (secure) {
+      append(properties, DDS::Security::Properties::AuthIdentityCA, identity_ca_file);
+      append(properties, DDS::Security::Properties::AccessPermissionsCA, permissions_ca_file);
+      append(properties, DDS::Security::Properties::AuthIdentityCertificate, identity_certificate_file);
+      append(properties, DDS::Security::Properties::AuthPrivateKey, identity_key_file);
+      append(properties, DDS::Security::Properties::AccessGovernance, governance_file);
+      append(properties, DDS::Security::Properties::AccessPermissions, permissions_file);
+    }
 #endif
 
-  spdp_horizontal_handler.vertical_handler(&spdp_vertical_handler);
-  sedp_horizontal_handler.vertical_handler(&sedp_vertical_handler);
-  data_horizontal_handler.vertical_handler(&data_vertical_handler);
+    DDS::DomainParticipant_var application_participant = factory->create_participant(config.application_domain(), participant_qos, nullptr,
+                                                          OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    if (!application_participant) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: Failed to create application participant\n")));
+      return EXIT_FAILURE;
+    }
 
-  spdp_vertical_handler.horizontal_handler(&spdp_horizontal_handler);
-  sedp_vertical_handler.horizontal_handler(&sedp_horizontal_handler);
-  data_vertical_handler.horizontal_handler(&data_horizontal_handler);
+    OpenDDS::DCPS::DomainParticipantImpl* application_participant_impl =
+      dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(application_participant.in());
+    if (application_participant_impl == 0) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: Failed to get application participant impl\n")));
+      return EXIT_FAILURE;
+    }
 
-  spdp_horizontal_handler.open(spdp_horizontal_addr);
-  sedp_horizontal_handler.open(sedp_horizontal_addr);
-  data_horizontal_handler.open(data_horizontal_addr);
+    config.application_participant_guid(application_participant_impl->get_id());
 
-  spdp_vertical_handler.open(spdp_vertical_addr);
-  sedp_vertical_handler.open(sedp_vertical_addr);
-  data_vertical_handler.open(data_vertical_addr);
+    const auto discovery = TheServiceParticipant->get_discovery(config.application_domain());
+    const auto rtps_discovery = OpenDDS::DCPS::dynamic_rchandle_cast<OpenDDS::RTPS::RtpsDiscovery>(discovery);
+
+    ACE_INET_Addr spdp(rtps_discovery->get_spdp_port(config.application_domain(), config.application_participant_guid()), "127.0.0.1");
+    ACE_INET_Addr sedp(rtps_discovery->get_sedp_port(config.application_domain(), config.application_participant_guid()), "127.0.0.1");
 
 #ifdef OPENDDS_SECURITY
-  stun_handler.open(stun_addr);
+    OpenDDS::Security::SecurityConfig_rch conf = TheSecurityRegistry->default_config();
+    DDS::Security::CryptoTransform_var crypto = conf->get_crypto_transform();
+#else
+    const int crypto = 0;
 #endif
 
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l SPDP Horizontal listening on %C\n"), addr_to_string(spdp_horizontal_handler.relay_address()).c_str()));
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l SEDP Horizontal listening on %C\n"), addr_to_string(sedp_horizontal_handler.relay_address()).c_str()));
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l Data Horizontal listening on %C\n"), addr_to_string(data_horizontal_handler.relay_address()).c_str()));
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l SPDP Vertical listening on %C\n"), addr_to_string(spdp_vertical_handler.relay_address()).c_str()));
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l SEDP Vertical listening on %C\n"), addr_to_string(sedp_vertical_handler.relay_address()).c_str()));
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l Data Vertical listening on %C\n"), addr_to_string(data_vertical_handler.relay_address()).c_str()));
+    ACE_Reactor reactor_(new ACE_Select_Reactor, true);
+    const auto reactor = &reactor_;
+    AssociationTable association_table;
+    Governor governor(max_throughput * 1024 * 1024);
+
+    // Setup readers and writers for managing the association table.
+    DDS::DataWriter_var responsible_relay_writer_var =
+      relay_publisher->create_datawriter(responsible_relay_topic, writer_qos, nullptr,
+                                         OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+    if (!responsible_relay_writer_var) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to create Responsible Relay data writer\n")));
+      return EXIT_FAILURE;
+    }
+
+    GuidRelayAddressesDataWriter_ptr responsible_relay_writer = GuidRelayAddressesDataWriter::_narrow(responsible_relay_writer_var);
+
+    if (!responsible_relay_writer) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to narrow Responsible Relay data writer\n")));
+      return EXIT_FAILURE;
+    }
+
+    DDS::DataReader_var responsible_relay_reader_var =
+      relay_subscriber->create_datareader(responsible_relay_topic, reader_qos, nullptr, 0);
+    if (!responsible_relay_reader_var) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to create Reponsible Relay data reader\n")));
+      return EXIT_FAILURE;
+    }
+
+    GuidRelayAddressesDataReader_ptr responsible_relay_reader = GuidRelayAddressesDataReader::_narrow(responsible_relay_reader_var);
+
+    if (!responsible_relay_reader) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to narrow Responsible Relay data reader\n")));
+      return EXIT_FAILURE;
+    }
+
+    SpdpHandler spdp_vertical_handler(config, "SPDP Vertical", reactor, governor, association_table, responsible_relay_writer, responsible_relay_reader, rtps_discovery, crypto, spdp);
+    SedpHandler sedp_vertical_handler(config, "SEDP Vertical", reactor, governor, association_table, responsible_relay_writer, responsible_relay_reader, rtps_discovery, crypto, sedp);
+    DataHandler data_vertical_handler(config, "DATA Vertical", reactor, governor, association_table, responsible_relay_writer, responsible_relay_reader, rtps_discovery, crypto);
+
 #ifdef OPENDDS_SECURITY
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l STUN listening on %C\n"), addr_to_string(stun_handler.relay_address()).c_str()));
+    StunHandler stun_handler(config, "STUN", reactor, governor);
 #endif
 
-  DDS::DataWriter_var reader_writer_var = relay_publisher->create_datawriter(readers_topic, writer_qos, nullptr,
-                                                                             OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    HorizontalHandler spdp_horizontal_handler(config, "SPDP Horizontal", reactor, governor);
+    HorizontalHandler sedp_horizontal_handler(config, "SEDP Horizontal", reactor, governor);
+    HorizontalHandler data_horizontal_handler(config, "DATA Horizontal", reactor, governor);
 
-  if (!reader_writer_var) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to create Reader data writer\n")));
-    return EXIT_FAILURE;
+    spdp_horizontal_handler.vertical_handler(&spdp_vertical_handler);
+    sedp_horizontal_handler.vertical_handler(&sedp_vertical_handler);
+    data_horizontal_handler.vertical_handler(&data_vertical_handler);
+
+    spdp_vertical_handler.horizontal_handler(&spdp_horizontal_handler);
+    sedp_vertical_handler.horizontal_handler(&sedp_horizontal_handler);
+    data_vertical_handler.horizontal_handler(&data_horizontal_handler);
+
+    DDS::Subscriber_var bit_subscriber = application_participant->get_builtin_subscriber();
+
+    DDS::DataReader_var participant_reader = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC);
+    DomainStatisticsWriter domain_statistics_writer(config);
+    DDS::DataReaderListener_var participant_listener = new ParticipantListener(domain_statistics_writer);
+    DDS::ReturnCode_t ret = participant_reader->set_listener(participant_listener, DDS::DATA_AVAILABLE_STATUS);
+    if (ret != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: Failed to set listener on ParticipantBuiltinTopicDataDataReader\n")));
+      return EXIT_FAILURE;
+    }
+
+    // Setup the reader writer and reader reader.
+    DDS::DataWriter_var reader_writer_var = relay_publisher->create_datawriter(readers_topic, writer_qos, nullptr,
+                                                                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+    if (!reader_writer_var) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to create Reader data writer\n")));
+      return EXIT_FAILURE;
+    }
+
+    ReaderEntryDataWriter_ptr reader_writer = ReaderEntryDataWriter::_narrow(reader_writer_var);
+
+    if (!reader_writer) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to narrow Reader data writer\n")));
+      return EXIT_FAILURE;
+    }
+
+    DDS::DataReaderListener_var reader_listener =
+      new ReaderListener(association_table, spdp_vertical_handler, domain_statistics_writer);
+    DDS::DataReader_var reader_reader_var = relay_subscriber->create_datareader(readers_topic, reader_qos,
+                                                                                reader_listener,
+                                                                                DDS::DATA_AVAILABLE_STATUS);
+
+    if (!reader_reader_var) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to create Reader data reader\n")));
+      return EXIT_FAILURE;
+    }
+
+    // Setup a subscription listener to feed the reader writer.
+    DDS::DataReader_var subscription_reader = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC);
+    DDS::DataReaderListener_var subscription_listener =
+      new SubscriptionListener(application_participant_impl, reader_writer, domain_statistics_writer);
+    ret = subscription_reader->set_listener(subscription_listener, DDS::DATA_AVAILABLE_STATUS);
+    if (ret != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: Failed to set listener on SubscriptionBuiltinTopicDataDataReader\n")));
+      return EXIT_FAILURE;
+    }
+
+    // Setup the writer writer and writer reader.
+    DDS::DataWriter_var writer_writer_var = relay_publisher->create_datawriter(writers_topic, writer_qos, nullptr,
+                                                                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+    if (!writer_writer_var) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to create Writer data writer\n")));
+      return EXIT_FAILURE;
+    }
+
+    WriterEntryDataWriter_ptr writer_writer = WriterEntryDataWriter::_narrow(writer_writer_var);
+
+    if (!writer_writer) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to narrow Writer data writer\n")));
+      return EXIT_FAILURE;
+    }
+
+    DDS::DataReaderListener_var writer_listener =
+      new WriterListener(association_table, spdp_vertical_handler, domain_statistics_writer);
+    DDS::DataReader_var writer_reader = relay_subscriber->create_datareader(writers_topic, reader_qos,
+                                                                            writer_listener,
+                                                                            DDS::DATA_AVAILABLE_STATUS);
+    if (!writer_reader) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to create Writer data reader\n")));
+      return EXIT_FAILURE;
+    }
+
+    // Setup a publiation listener to feed the writer writer.
+    DDS::DataReader_var publication_reader = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC);
+    DDS::DataReaderListener_var publication_listener(new PublicationListener(application_participant_impl,
+                                                                             writer_writer,
+                                                                             domain_statistics_writer));
+    ret = publication_reader->set_listener(publication_listener, DDS::DATA_AVAILABLE_STATUS);
+    if (ret != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: Failed to set listener on PublicationBuiltinTopicDataDataReader\n")));
+      return EXIT_FAILURE;
+    }
+
+    spdp_horizontal_handler.open(spdp_horizontal_addr);
+    sedp_horizontal_handler.open(sedp_horizontal_addr);
+    data_horizontal_handler.open(data_horizontal_addr);
+
+    spdp_vertical_handler.open(spdp_vertical_addr);
+    sedp_vertical_handler.open(sedp_vertical_addr);
+    data_vertical_handler.open(data_vertical_addr);
+
+#ifdef OPENDDS_SECURITY
+    stun_handler.open(stun_addr);
+#endif
+
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l SPDP Horizontal listening on %C\n"), addr_to_string(spdp_horizontal_handler.relay_address()).c_str()));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l SEDP Horizontal listening on %C\n"), addr_to_string(sedp_horizontal_handler.relay_address()).c_str()));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l Data Horizontal listening on %C\n"), addr_to_string(data_horizontal_handler.relay_address()).c_str()));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l SPDP Vertical listening on %C\n"), addr_to_string(spdp_vertical_handler.relay_address()).c_str()));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l SEDP Vertical listening on %C\n"), addr_to_string(sedp_vertical_handler.relay_address()).c_str()));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l Data Vertical listening on %C\n"), addr_to_string(data_vertical_handler.relay_address()).c_str()));
+#ifdef OPENDDS_SECURITY
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l STUN listening on %C\n"), addr_to_string(stun_handler.relay_address()).c_str()));
+#endif
+
+    reactor->run_reactor_event_loop();
+  } else if (report_handler_statistics || report_domain_statistics || report_participant_statistics) {
+    // Run forever.
+    for (;;) {
+      ACE_OS::sleep(60);
+    }
   }
-
-  ReaderEntryDataWriter_ptr reader_writer = ReaderEntryDataWriter::_narrow(reader_writer_var);
-
-  if (!reader_writer) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to narrow Reader data writer\n")));
-    return EXIT_FAILURE;
-  }
-
-  DDS::DataReaderListener_var reader_listener =
-    new ReaderListener(association_table, spdp_vertical_handler);
-  DDS::DataReader_var reader_reader_var = relay_subscriber->create_datareader(readers_topic, reader_qos,
-                                                                              reader_listener,
-                                                                              DDS::DATA_AVAILABLE_STATUS);
-
-  if (!reader_reader_var) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to create Reader data reader\n")));
-    return EXIT_FAILURE;
-  }
-
-  DDS::DataReader_var subscription_reader = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC);
-  DDS::DataReaderListener_var subscription_listener =
-    new SubscriptionListener(application_participant_impl, reader_writer);
-  DDS::ReturnCode_t ret = subscription_reader->set_listener(subscription_listener, DDS::DATA_AVAILABLE_STATUS);
-  if (ret != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: Failed to set listener on SubscriptionBuiltinTopicDataDataReader\n")));
-    return EXIT_FAILURE;
-  }
-
-  DDS::DataWriter_var writer_writer_var = relay_publisher->create_datawriter(writers_topic, writer_qos, nullptr,
-                                                                             OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-  if (!writer_writer_var) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to create Writer data writer\n")));
-    return EXIT_FAILURE;
-  }
-
-  WriterEntryDataWriter_ptr writer_writer = WriterEntryDataWriter::_narrow(writer_writer_var);
-
-  if (!writer_writer) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to narrow Writer data writer\n")));
-    return EXIT_FAILURE;
-  }
-
-  DDS::DataReaderListener_var writer_listener =
-    new WriterListener(association_table, spdp_vertical_handler);
-  DDS::DataReader_var writer_reader = relay_subscriber->create_datareader(writers_topic, reader_qos,
-                                                                          writer_listener,
-                                                                          DDS::DATA_AVAILABLE_STATUS);
-  if (!writer_reader) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to create Writer data reader\n")));
-    return EXIT_FAILURE;
-  }
-
-  DDS::DataReader_var publication_reader = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC);
-  DDS::DataReaderListener_var publication_listener(new PublicationListener(application_participant_impl,
-                                                                           writer_writer));
-  ret = publication_reader->set_listener(publication_listener, DDS::DATA_AVAILABLE_STATUS);
-  if (ret != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: Failed to set listener on PublicationBuiltinTopicDataDataReader\n")));
-    return EXIT_FAILURE;
-  }
-
-  StatisticsHandler statistics_h(reactor,
-                                 &spdp_vertical_handler, &spdp_horizontal_handler,
-                                 &sedp_vertical_handler, &sedp_horizontal_handler,
-                                 &data_vertical_handler, &data_horizontal_handler);
-  statistics_h.open();
-
-  reactor->run_reactor_event_loop();
 
   return EXIT_SUCCESS;
 }

@@ -3,6 +3,7 @@
 
 #include "AssociationTable.h"
 #include "ListenerBase.h"
+#include "DomainStatisticsWriter.h"
 
 #include <dds/DCPS/DomainParticipantImpl.h>
 
@@ -11,7 +12,8 @@ namespace RtpsRelay {
 class PublicationListener : public ListenerBase {
 public:
   PublicationListener(OpenDDS::DCPS::DomainParticipantImpl* participant,
-                      WriterEntryDataWriter_ptr writer);
+                      WriterEntryDataWriter_ptr writer,
+                      DomainStatisticsWriter& stats_writer);
 private:
   void on_data_available(DDS::DataReader_ptr reader) override;
   void write_sample(const DDS::PublicationBuiltinTopicData& data,
@@ -20,6 +22,7 @@ private:
 
   OpenDDS::DCPS::DomainParticipantImpl* participant_;
   WriterEntryDataWriter_ptr writer_;
+  DomainStatisticsWriter& stats_writer_;
 };
 
 }

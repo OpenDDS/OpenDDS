@@ -25,6 +25,15 @@
 
 namespace RtpsRelay {
 
+bool
+operator<(const Duration_t& x, const Duration_t& y)
+{
+  if (x.sec() != y.sec()) {
+    return x.sec() < y.sec();
+  }
+  return x.nanosec() < y.nanosec();
+}
+
 #ifdef OPENDDS_SECURITY
 namespace {
   OpenDDS::STUN::Message make_bad_request_error_response(const OpenDDS::STUN::Message& a_message,
@@ -54,15 +63,17 @@ namespace {
 }
 #endif
 
-RelayHandler::RelayHandler(ACE_Reactor* reactor, Governor& governor)
+RelayHandler::RelayHandler(const RelayHandlerConfig& config,
+                           const std::string& name,
+                           ACE_Reactor* reactor,
+                           Governor& governor)
   : ACE_Event_Handler(reactor)
   , governor_(governor)
-  , bytes_received_(0)
-  , messages_received_(0)
-  , bytes_sent_(0)
-  , messages_sent_(0)
-  , max_fan_out_(0)
-{}
+  , config_(config)
+{
+  handler_statistics_.application_participant_guid(repoid_to_guid(config.application_participant_guid()));
+  handler_statistics_.name(name);
+}
 
 int RelayHandler::open(const ACE_INET_Addr& local)
 {
@@ -94,6 +105,14 @@ int RelayHandler::open(const ACE_INET_Addr& local)
   if (reactor()->register_handler(this, READ_MASK) != 0) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: RelayHandler::open failed to register READ_MASK handler\n")));
     return -1;
+  }
+
+  if (config_.handler_statistics_writer() || config_.participant_statistics_writer()) {
+    reset_statistics(OpenDDS::DCPS::MonotonicTimePoint::now());
+    if (reactor()->schedule_timer(this, &this->handler_statistics_, config_.statistics_interval().value(), config_.statistics_interval().value()) == -1) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: RelayHandler::open failed to register schedule statistics timer\n")));
+      return -1;
+    }
   }
 
   return 0;
@@ -136,8 +155,14 @@ int RelayHandler::handle_input(ACE_HANDLE handle)
 
   buffer->length(bytes);
 
-  bytes_received_ += bytes;
-  ++messages_received_;
+  handler_statistics_._bytes_in += bytes;
+  ++handler_statistics_._messages_in;
+
+  if (config_.participant_statistics_writer()) {
+    auto& ps = participant_statistics_[remote];
+    ps._bytes_in += bytes;
+    ++ps._messages_in;
+  }
 
   process_message(remote, OpenDDS::DCPS::MonotonicTimePoint::now(), buffer);
   return 0;
@@ -174,8 +199,14 @@ int RelayHandler::handle_output(ACE_HANDLE)
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: RelayHandler::handle_output failed to send to %C: %m\n"), addr_to_string(out.first).c_str()));
     } else {
       governor_.add_bytes(bytes);
-      bytes_sent_ += bytes;
-      ++messages_sent_;
+      handler_statistics_._bytes_out += bytes;
+      ++handler_statistics_._messages_out;
+
+      if (config_.participant_statistics_writer()) {
+        auto& ps = participant_statistics_[out.first];
+        ps._bytes_out += bytes;
+        ++ps._messages_out;
+      }
     }
 
     outgoing_.pop();
@@ -187,21 +218,77 @@ int RelayHandler::handle_output(ACE_HANDLE)
     // Check if rate limiting.
     const auto now = OpenDDS::DCPS::MonotonicTimePoint::now();
     const auto send_time = governor_.get_next_send_time();
+    const auto d = send_time - now;
+    const auto dds_d = d.to_dds_duration();
+    const Duration_t relay_duration = { dds_d.sec, dds_d.nanosec };
 
     if (send_time > now) {
       reactor()->remove_handler(this, WRITE_MASK);
-      reactor()->schedule_timer(this, 0, (send_time - now).value());
+      reactor()->schedule_timer(this, 0, d.value());
+
+      handler_statistics_._max_queue_latency = std::max(handler_statistics_._max_queue_latency, relay_duration);
     }
   }
 
   return 0;
 }
 
-int RelayHandler::handle_timeout(const ACE_Time_Value&, const void*)
+int RelayHandler::handle_timeout(const ACE_Time_Value& ace_now, const void* ptr)
 {
-  reactor()->register_handler(this, WRITE_MASK);
+  if (ptr == &this->handler_statistics_) {
+    // Statistics.
+    const OpenDDS::DCPS::MonotonicTimePoint now(ace_now);
+    const auto duration = now - last_report_time_;
+    const auto dds_duration = duration.to_dds_duration();
+
+    if (config_.handler_statistics_writer()) {
+      handler_statistics_._interval._sec = dds_duration.sec;
+      handler_statistics_._interval._nanosec = dds_duration.nanosec;
+      handler_statistics_._local_active_participants = local_active_participants();
+
+      const auto ret = config_.handler_statistics_writer()->write(handler_statistics_, DDS::HANDLE_NIL);
+      if (ret != DDS::RETCODE_OK) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: RelayHandler::handle_timeout failed to write handler statistics\n")));
+      }
+    }
+
+    if (config_.participant_statistics_writer()) {
+      for (auto& p : participant_statistics_) {
+        auto& stats = p.second;
+        stats.application_participant_guid(handler_statistics_._application_participant_guid);
+        stats.name(handler_statistics_._name);
+        stats.address(addr_to_string(p.first));
+        stats._interval._sec = dds_duration.sec;
+        stats._interval._nanosec = dds_duration.nanosec;
+
+        const auto ret = config_.participant_statistics_writer()->write(stats, DDS::HANDLE_NIL);
+        if (ret != DDS::RETCODE_OK) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: RelayHandler::handle_timeout failed to write participant statistics\n")));
+        }
+      }
+    }
+
+    reset_statistics(now);
+  } else {
+    // Governor.
+    reactor()->register_handler(this, WRITE_MASK);
+  }
 
   return 0;
+}
+
+void RelayHandler::reset_statistics(const OpenDDS::DCPS::MonotonicTimePoint& now)
+{
+  last_report_time_ = now;
+  handler_statistics_._bytes_in = 0;
+  handler_statistics_._messages_in = 0;
+  handler_statistics_._bytes_out = 0;
+  handler_statistics_._messages_out = 0;
+  handler_statistics_._max_fan_out = 0;
+  handler_statistics_._max_queue_size = 0;
+  handler_statistics_._max_queue_latency._sec = 0;
+  handler_statistics_._max_queue_latency._nanosec = 0;
+  participant_statistics_.clear();
 }
 
 void RelayHandler::enqueue_message(const ACE_INET_Addr& addr, const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg)
@@ -211,40 +298,34 @@ void RelayHandler::enqueue_message(const ACE_INET_Addr& addr, const OpenDDS::DCP
   const auto empty = outgoing_.empty();
 
   outgoing_.push(std::make_pair(addr, msg));
+  handler_statistics_._max_queue_size = std::max(handler_statistics_._max_queue_size, static_cast<uint32_t>(outgoing_.size()));
 
   if (empty) {
     reactor()->register_handler(this, WRITE_MASK);
   }
 }
 
-VerticalHandler::VerticalHandler(ACE_Reactor* reactor,
+VerticalHandler::VerticalHandler(const RelayHandlerConfig& config,
+                                 const std::string& name,
+                                 ACE_Reactor* reactor,
                                  Governor& governor,
-                                 const RelayAddresses& relay_addresses,
                                  const AssociationTable& association_table,
                                  GuidRelayAddressesDataWriter_ptr responsible_relay_writer,
                                  GuidRelayAddressesDataReader_ptr responsible_relay_reader,
-                                 const OpenDDS::DCPS::TimeDuration& lifespan,
                                  const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
-                                 DDS::DomainId_t application_domain,
-                                 const OpenDDS::DCPS::RepoId& application_participant_guid,
                                  const CRYPTO_TYPE& crypto)
-  : RelayHandler(reactor, governor)
+: RelayHandler(config, name, reactor, governor)
   , association_table_(association_table)
   , responsible_relay_writer_(responsible_relay_writer)
   , responsible_relay_reader_(responsible_relay_reader)
-  , relay_addresses_(relay_addresses)
   , horizontal_handler_(nullptr)
-  , lifespan_(lifespan)
-  , application_participant_guid_(application_participant_guid)
   , rtps_discovery_(rtps_discovery)
 #ifdef OPENDDS_SECURITY
-  , application_domain_(application_domain)
   , crypto_(crypto)
-  , application_participant_crypto_handle_(rtps_discovery_->get_crypto_handle(application_domain_, application_participant_guid_))
+  , application_participant_crypto_handle_(rtps_discovery_->get_crypto_handle(config.application_domain(), config.application_participant_guid()))
 #endif
 {
   ACE_UNUSED_ARG(crypto);
-  ACE_UNUSED_ARG(application_domain);
 }
 
 void VerticalHandler::process_message(const ACE_INET_Addr& remote,
@@ -265,7 +346,7 @@ void VerticalHandler::process_message(const ACE_INET_Addr& remote,
   const GuidAddr ga(src_guid, remote);
 
   // Compute the new expiration time for this SPDP client.
-  const auto expiration = now + lifespan_;
+  const auto expiration = now + config_.lifespan();
   const auto res = guid_expiration_map_.insert(std::make_pair(ga, expiration));
   if (!res.second) {
     // The SPDP client already exists.  Remove the previous expiration.
@@ -279,12 +360,12 @@ void VerticalHandler::process_message(const ACE_INET_Addr& remote,
     res.first->second = expiration;
     // Assert ownership.
     const auto relay_addresses = read_relay_addresses(src_guid);
-    if (relay_addresses != relay_addresses_) {
-      write_relay_addresses(src_guid, relay_addresses_);
+    if (relay_addresses != config_.relay_addresses()) {
+      write_relay_addresses(src_guid, config_.relay_addresses());
     }
   } else {
     // Assert ownership.
-    write_relay_addresses(src_guid, relay_addresses_);
+    write_relay_addresses(src_guid, config_.relay_addresses());
   }
   // Assign the new expiration time.
   expiration_guid_map_.insert(std::make_pair(expiration, ga));
@@ -305,7 +386,7 @@ void VerticalHandler::process_message(const ACE_INET_Addr& remote,
 
   if (do_normal_processing(remote, src_guid, to, msg)) {
     association_table_.lookup_destinations(to, src_guid);
-    send(to, msg);
+    send(remote, to, msg);
   }
 }
 
@@ -345,7 +426,7 @@ bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser
       to.insert(dest);
     }
 
-    if (check_submessages && src_guid != application_participant_guid_) {
+    if (check_submessages && src_guid != config_.application_participant_guid()) {
 #ifdef OPENDDS_SECURITY
       switch (submessage_header.submessageId) {
       case OpenDDS::RTPS::SRTPS_PREFIX:
@@ -355,7 +436,7 @@ bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser
             return false;
           }
 
-          DDS::Security::ParticipantCryptoHandle remote_crypto_handle = rtps_discovery_->get_crypto_handle(application_domain_, application_participant_guid_, src_guid);
+          DDS::Security::ParticipantCryptoHandle remote_crypto_handle = rtps_discovery_->get_crypto_handle(config_.application_domain(), config_.application_participant_guid(), src_guid);
           if (remote_crypto_handle == DDS::HANDLE_NIL) {
             ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: VerticalHandler::parse_message no crypto handle for message from %C\n"), guid_to_string(src_guid).c_str()));
             return false;
@@ -408,7 +489,7 @@ bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser
             ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: VerticalHandler::parse_message could not parse submessage from %C\n"), guid_to_string(src_guid).c_str()));
             return false;
           }
-          if (rtps_discovery_->get_crypto_handle(application_domain_, application_participant_guid_) != DDS::HANDLE_NIL &&
+          if (rtps_discovery_->get_crypto_handle(config_.application_domain(), config_.application_participant_guid()) != DDS::HANDLE_NIL &&
               !(OpenDDS::DCPS::RtpsUdpDataLink::separate_message(writerId) ||
                 writerId == OpenDDS::DCPS::ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER)) {
             ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: VerticalHandler::parse_message submessage from %C with id %d could not be verified writerId=%02X%02X%02X%02X\n"), guid_to_string(src_guid).c_str(), submessage_header.submessageId, writerId.entityKey[0], writerId.entityKey[1], writerId.entityKey[2], writerId.entityKind));
@@ -433,7 +514,8 @@ bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser
   return true;
 }
 
-void VerticalHandler::send(const GuidSet& to,
+void VerticalHandler::send(const ACE_INET_Addr& from,
+                           const GuidSet& to,
                            const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg)
 {
   const auto relay_addresses_map = populate_relay_addresses_map(to);
@@ -443,7 +525,7 @@ void VerticalHandler::send(const GuidSet& to,
     const auto& addrs = p.first;
     const auto& guids = p.second;
     fan_out += guids.size();
-    if (addrs != relay_addresses_) {
+    if (addrs != config_.relay_addresses()) {
       horizontal_handler_->enqueue_message(extract_relay_address(addrs), guids, msg);
     } else {
       for (const auto& guid : guids) {
@@ -458,7 +540,7 @@ void VerticalHandler::send(const GuidSet& to,
       }
     }
   }
-  max_fan_out(fan_out);
+  max_fan_out(from, fan_out);
 }
 
 RelayAddressesMap VerticalHandler::populate_relay_addresses_map(const GuidSet& to)
@@ -525,8 +607,11 @@ void VerticalHandler::unregister_relay_addresses(const OpenDDS::DCPS::RepoId& gu
   }
 }
 
-HorizontalHandler::HorizontalHandler(ACE_Reactor* reactor, Governor& governor)
-  : RelayHandler(reactor, governor)
+HorizontalHandler::HorizontalHandler(const RelayHandlerConfig& config,
+                                     const std::string& name,
+                                     ACE_Reactor* reactor,
+                                     Governor& governor)
+: RelayHandler(config, name, reactor, governor)
   , vertical_handler_(nullptr)
 {}
 
@@ -560,7 +645,7 @@ void HorizontalHandler::enqueue_message(const ACE_INET_Addr& addr,
   }
 }
 
-void HorizontalHandler::process_message(const ACE_INET_Addr&,
+void HorizontalHandler::process_message(const ACE_INET_Addr& from,
                                         const OpenDDS::DCPS::MonotonicTimePoint&,
                                         const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg)
 {
@@ -588,22 +673,20 @@ void HorizontalHandler::process_message(const ACE_INET_Addr&,
       ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) %N:%l WARNING: HorizontalHandler::process_message failed to get address for %C\n"), guid_to_string(guid_to_repoid(guid)).c_str()));
     }
   }
-  max_fan_out(relay_header.to().size());
+  max_fan_out(from, relay_header.to().size());
 }
 
-SpdpHandler::SpdpHandler(ACE_Reactor* reactor,
+SpdpHandler::SpdpHandler(const RelayHandlerConfig& config,
+                         const std::string& name,
+                         ACE_Reactor* reactor,
                          Governor& governor,
-                         const RelayAddresses& relay_addresses,
                          const AssociationTable& association_table,
                          GuidRelayAddressesDataWriter_ptr responsible_relay_writer,
                          GuidRelayAddressesDataReader_ptr responsible_relay_reader,
-                         const OpenDDS::DCPS::TimeDuration& lifespan,
                          const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
-                         DDS::DomainId_t application_domain,
-                         const OpenDDS::DCPS::RepoId& application_participant_guid,
                          const CRYPTO_TYPE& crypto,
                          const ACE_INET_Addr& application_participant_addr)
-: VerticalHandler(reactor, governor, relay_addresses, association_table, responsible_relay_writer, responsible_relay_reader, lifespan, rtps_discovery, application_domain, application_participant_guid , crypto)
+: VerticalHandler(config, name, reactor, governor, association_table, responsible_relay_writer, responsible_relay_reader, rtps_discovery, crypto)
 , application_participant_addr_(application_participant_addr)
 {}
 
@@ -617,7 +700,7 @@ bool SpdpHandler::do_normal_processing(const ACE_INET_Addr& remote,
                                        const GuidSet& to,
                                        const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg)
 {
-  if (src_guid == application_participant_guid_) {
+  if (src_guid == config_.application_participant_guid()) {
     if (remote != application_participant_addr_) {
       // Something is impersonating our application participant.
       return false;
@@ -634,27 +717,27 @@ bool SpdpHandler::do_normal_processing(const ACE_INET_Addr& remote,
           }
         }
       }
-      max_fan_out(to.size());
+      max_fan_out(remote, to.size());
     } else {
       // Forward to all peers except the application participant.
       for (const auto& p : guid_addr_map_) {
-        if (p.first != application_participant_guid_) {
+        if (p.first != config_.application_participant_guid()) {
           for (const auto& addr : p.second) {
             enqueue_message(addr, msg);
           }
         }
       }
-      max_fan_out(guid_addr_map_.size());
+      max_fan_out(remote, guid_addr_map_.size());
     }
 
     return false;
   }
 
   // SPDP message is from a client.
-  if (to.empty() || to.count(application_participant_guid_) != 0) {
+  if (to.empty() || to.count(config_.application_participant_guid()) != 0) {
     // Forward to the application participant.
     enqueue_message(application_participant_addr_, msg);
-    max_fan_out(1);
+    max_fan_out(remote, 1);
   }
 
   // Cache it.
@@ -691,22 +774,20 @@ void SpdpHandler::replay(const OpenDDS::DCPS::RepoId& from,
     return;
   }
 
-  send(to, pos->second);
+  send(ACE_INET_Addr(), to, pos->second);
 }
 
-SedpHandler::SedpHandler(ACE_Reactor* reactor,
+SedpHandler::SedpHandler(const RelayHandlerConfig& config,
+                         const std::string& name,
+                         ACE_Reactor* reactor,
                          Governor& governor,
-                         const RelayAddresses& relay_addresses,
                          const AssociationTable& association_table,
                          GuidRelayAddressesDataWriter_ptr responsible_relay_writer,
                          GuidRelayAddressesDataReader_ptr responsible_relay_reader,
-                         const OpenDDS::DCPS::TimeDuration& lifespan,
                          const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
-                         DDS::DomainId_t application_domain,
-                         const OpenDDS::DCPS::RepoId& application_participant_guid,
                          const CRYPTO_TYPE& crypto,
                          const ACE_INET_Addr& application_participant_addr)
-: VerticalHandler(reactor, governor, relay_addresses, association_table, responsible_relay_writer, responsible_relay_reader, lifespan, rtps_discovery, application_domain, application_participant_guid, crypto)
+: VerticalHandler(config, name, reactor, governor, association_table, responsible_relay_writer, responsible_relay_reader, rtps_discovery, crypto)
   , application_participant_addr_(application_participant_addr)
 {}
 
@@ -720,7 +801,7 @@ bool SedpHandler::do_normal_processing(const ACE_INET_Addr& remote,
                                        const GuidSet& to,
                                        const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg)
 {
-  if (src_guid == application_participant_guid_) {
+  if (src_guid == config_.application_participant_guid()) {
     if (remote != application_participant_addr_) {
       // Something is impersonating our application participant.
       return false;
@@ -737,44 +818,41 @@ bool SedpHandler::do_normal_processing(const ACE_INET_Addr& remote,
           }
         }
       }
-      max_fan_out(to.size());
+      max_fan_out(remote, to.size());
     } else {
       // Forward to all peers except the application participant.
       for (const auto& p : guid_addr_map_) {
-        if (p.first != application_participant_guid_) {
+        if (p.first != config_.application_participant_guid()) {
           for (const auto& addr : p.second) {
             enqueue_message(addr, msg);
           }
         }
       }
-      max_fan_out(guid_addr_map_.size());
+      max_fan_out(remote, guid_addr_map_.size());
     }
 
     return false;
   }
 
   // SEDP message is from a client.
-  if (to.empty() || to.count(application_participant_guid_) != 0) {
+  if (to.empty() || to.count(config_.application_participant_guid()) != 0) {
     // Forward to the application participant.
     enqueue_message(application_participant_addr_, msg);
-    max_fan_out(1);
+    max_fan_out(remote, 1);
   }
   return true;
 }
 
-DataHandler::DataHandler(ACE_Reactor* reactor,
+DataHandler::DataHandler(const RelayHandlerConfig& config,
+                         const std::string& name,
+                         ACE_Reactor* reactor,
                          Governor& governor,
-                         const RelayAddresses& relay_addresses,
                          const AssociationTable& association_table,
                          GuidRelayAddressesDataWriter_ptr responsible_relay_writer,
                          GuidRelayAddressesDataReader_ptr responsible_relay_reader,
-                         const OpenDDS::DCPS::TimeDuration& lifespan,
                          const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
-                         DDS::DomainId_t application_domain,
-                         const OpenDDS::DCPS::RepoId& application_participant_guid,
-                         const CRYPTO_TYPE& crypto
-                         )
-: VerticalHandler(reactor, governor, relay_addresses, association_table, responsible_relay_writer, responsible_relay_reader, lifespan, rtps_discovery, application_domain, application_participant_guid, crypto)
+                         const CRYPTO_TYPE& crypto)
+: VerticalHandler(config, name, reactor, governor, association_table, responsible_relay_writer, responsible_relay_reader, rtps_discovery, crypto)
 {}
 
 ACE_INET_Addr DataHandler::extract_relay_address(const RelayAddresses& relay_addresses) const
@@ -784,8 +862,11 @@ ACE_INET_Addr DataHandler::extract_relay_address(const RelayAddresses& relay_add
 
 #ifdef OPENDDS_SECURITY
 
-StunHandler::StunHandler(ACE_Reactor* reactor, Governor& governor)
-  : RelayHandler(reactor, governor)
+StunHandler::StunHandler(const RelayHandlerConfig& config,
+                         const std::string& name,
+                         ACE_Reactor* reactor,
+                         Governor& governor)
+  : RelayHandler(config, name, reactor, governor)
 {}
 
 void StunHandler::process_message(const ACE_INET_Addr& remote_address,
