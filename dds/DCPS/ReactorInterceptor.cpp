@@ -23,7 +23,7 @@ ReactorInterceptor::ReactorInterceptor(ACE_Reactor* reactor,
   : owner_(owner)
   , state_(NONE)
 {
-  this->reactor(reactor);
+  RcEventHandler::reactor(reactor);
 }
 
 ReactorInterceptor::~ReactorInterceptor()
@@ -49,7 +49,7 @@ void ReactorInterceptor::process_command_queue_i()
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   state_ = PROCESSING;
-  while (!command_queue_.empty()) {
+  if (!command_queue_.empty()) {
     cq.swap(command_queue_);
     ACE_Guard<ACE_Reverse_Lock<ACE_Thread_Mutex> > rev_guard(rev_lock);
     while (!cq.empty()) {
@@ -59,7 +59,12 @@ void ReactorInterceptor::process_command_queue_i()
       command->executed();
     }
   }
-  state_ = NONE;
+  if (!command_queue_.empty()) {
+    state_ = NOTIFIED;
+    reactor()->notify(this);
+  } else {
+    state_ = NONE;
+  }
 }
 
 }
