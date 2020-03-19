@@ -366,7 +366,13 @@ void Checklist::generate_triggered_check(const ACE_INET_Addr& local_address,
   // 7.3.1.4
   Candidate local;
   bool flag = get_local_candidate(local_address, local);
-  OPENDDS_ASSERT(flag);
+  if (!flag) {
+    // Network addresses may have changed so that local_address is not valid.
+    ACE_TCHAR addr_buff[256] = {};
+    local_address.addr_to_string(addr_buff, 256);
+    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) Checklist::generate_triggered_check: WARNING local_address %s is no longer a local candidate\n"), addr_buff));
+    return;
+  }
 
   CandidatePair cp(local, remote, local_is_controlling_, use_candidate);
 
