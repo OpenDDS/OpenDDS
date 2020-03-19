@@ -37,31 +37,31 @@ public:
     domain_statistics_.local_writers() += 1;
     write_sample();
   }
-  
+
   void remove_local_writer()
   {
     domain_statistics_.local_writers() -= 1;
     write_sample();
   }
-  
+
   void add_local_reader()
   {
     domain_statistics_.local_readers() += 1;
     write_sample();
   }
-  
+
   void remove_local_reader()
   {
     domain_statistics_.local_readers() -= 1;
     write_sample();
   }
-  
+
   void total_writers(size_t count)
   {
     domain_statistics_.total_writers(count);
     write_sample();
   }
-  
+
   void total_readers(size_t count)
   {
     domain_statistics_.total_readers(count);
