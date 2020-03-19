@@ -1699,11 +1699,11 @@ if (exists $opts{'qt'}) {
   # Try to guess if Qt vcpkg is being used
   my $vcpkg_tools = join($slash, $targetEnv{'QTDIR'}, "tools", "qt5");
   my $assume_vcpkg =
-    (-r $vcpkg_tools . $slash . $qt_moc) &&
+    (-r $vcpkg_tools . $slash . 'bin' . $slash . $qt_moc) &&
     !exists $ENV{'QT5_LIBDIR'} &&
     !exists $ENV{'QT5_BINDIR'};
   if ($assume_vcpkg) {
-    $qt_bin = $vcpkg_tools;
+    $qt_bin = $vcpkg_tools . $slash . 'bin';
     if ($debug) {
       $qt_lib = join($slash, $targetEnv{'QTDIR'}, "debug", "lib");
       $qt_path = join($slash, $targetEnv{'QTDIR'}, "debug",
