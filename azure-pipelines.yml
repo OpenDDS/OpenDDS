@@ -116,6 +116,9 @@ jobs:
       Release64:
         BuildPlatform: x64
         BuildConfiguration: Release
+      Debug64WChar:
+        BuildPlatform: x64
+        BuildConfiguration: Debug
   variables:
     VCPKG_ROOT: $(Build.SourcesDirectory)\vcpkg
   steps:
@@ -146,6 +149,7 @@ jobs:
       modifyEnvironment: true
   - script: |
       if %BuildConfiguration%==Release set OPT=--no-tests --no-debug --optimize
+      if %BuildConfiguration%==Debug set OPT=--features=uses_wchar=1
       set SEC=--security --xerces3=$(VcPkgInst) --openssl=$(VcPkgInst)
       if %BuildConfiguration%==Debug if %BuildPlatform%==x64 set SEC= # Debug64 Fills up Disk with Security
       call configure -v --ace-github-latest --tests %SEC% %OPT%
