@@ -33,7 +33,14 @@ public:
 
   void enable(const TimeDuration& delay)
   {
-    interceptor_->execute_or_enqueue(new ScheduleEnableCommand(this, delay));
+    bool worth_passing_along = false;
+    {
+      ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+      worth_passing_along = (timer_ == -1) || ((MonotonicTimePoint::now() + delay + cancel_estimate_) < next_time_);
+    }
+    if (worth_passing_along) {
+      interceptor_->execute_or_enqueue(new ScheduleEnableCommand(this, delay));
+    }
   }
 
   void disable()
@@ -87,6 +94,10 @@ private:
   int handle_timeout(const ACE_Time_Value& tv, const void*)
   {
     const MonotonicTimePoint now(tv);
+    {
+      ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+      next_time_ = now + delay_;
+    }
     execute(now);
     return 0;
   }
@@ -105,20 +116,18 @@ private:
         next_time_ = now + per;
       }
     } else {
-      while (next_time_ < now) {
-        next_time_ = next_time_ + delay_;
-      }
-      if ((now + per) < (next_time_ + cancel_estimate_)) {
+      const MonotonicTimePoint estimated_next_time = now + per + cancel_estimate_;
+      if (estimated_next_time < next_time_) {
         reactor()->cancel_timer(timer_);
         const MonotonicTimePoint now2 = MonotonicTimePoint::now();
         timer_ = reactor()->schedule_timer(this, 0, per.value(), delay_.value());
+        cancel_estimate_ = now2 - now;
 
         if (timer_ == -1) {
           ACE_ERROR((LM_ERROR, "(%P|%t) MultiTask::enable"
                      " failed to reschedule timer %p\n", ACE_TEXT("")));
         } else {
           next_time_ = now2 + per;
-          cancel_estimate_ = now2 - now;
         }
       }
     }

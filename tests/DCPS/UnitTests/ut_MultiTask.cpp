@@ -53,12 +53,16 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_CHECK(total_count == 2);
     obj.set_do_enable(true);
     const MonotonicTimePoint deadline = MonotonicTimePoint::now() + TimeDuration::from_msec(2000);
+    size_t enable_calls = 0;
     while (MonotonicTimePoint::now() < deadline) {
+      ++enable_calls;
       multi.enable(TimeDuration::from_msec(100));
-      ACE_OS::sleep(0);
+      ACE_OS::sleep(ACE_Time_Value(0, 1000));
     }
     obj.set_do_enable(false);
+    ACE_DEBUG((LM_DEBUG, "enable_calls = %d\n", enable_calls));
     ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count));
+    TEST_CHECK(total_count >= 19);
     TEST_CHECK(total_count <= 21);
     const unsigned int prev_total_count = total_count;
     ACE_OS::sleep(5);
