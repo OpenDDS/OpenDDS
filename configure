@@ -227,7 +227,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'cmake:s', 'Path to cmake binary for compiling Google Test' .
       $argIndent . 'Framework. (Check Path and Check Normal' .
       $argIndent . 'Locations)',
-    'gtest=s', 'Path to Google Test Framework, required for' .
+    'gtest:s', 'Path to Google Test Framework, required for' .
       $argIndent . 'tests (uses GTEST_ROOT).' .
       $argIndent . 'If not built, will try to build using CMake.',
    ],
@@ -1531,6 +1531,7 @@ if ($build_gtest) {
   my @cmake_cmds = ([$cmake,
                      "-DCMAKE_INSTALL_PREFIX=$install_dir",
                      '-DCMAKE_INSTALL_LIBDIR=lib',
+                     '-DCMAKE_POSITION_INDEPENDENT_CODE=TRUE',
                      @cmake_platform_args,
                      '..'],
                     ["$cmake", "--build", ".", "--target", "install"]);
