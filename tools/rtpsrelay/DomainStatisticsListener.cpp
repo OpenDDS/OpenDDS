@@ -5,6 +5,8 @@
 #include "lib/RelayTypeSupportImpl.h"
 #include "lib/QosIndex.h"
 
+#include <iostream>
+
 namespace RtpsRelay {
 
 void DomainStatisticsListener::on_data_available(DDS::DataReader_ptr reader)

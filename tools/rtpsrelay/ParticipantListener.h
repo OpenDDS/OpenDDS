@@ -8,9 +8,9 @@ namespace RtpsRelay {
 
 class ParticipantListener : public ListenerBase {
 public:
-  ParticipantListener(DomainStatisticsWriter& stats_writer);
+  explicit ParticipantListener(DomainStatisticsWriter& stats_writer);
 private:
-  void on_data_available(DDS::DataReader_ptr /*reader*/) override;
+  void on_data_available(DDS::DataReader_ptr reader) override;
 
   DomainStatisticsWriter& stats_writer_;
 };

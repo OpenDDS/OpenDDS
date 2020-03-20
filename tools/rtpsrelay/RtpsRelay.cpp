@@ -254,14 +254,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   // Set up relay topics.
-  ReaderEntryTypeSupport_var reader_entry_ts =
-    new ReaderEntryTypeSupportImpl;
+  ReaderEntryTypeSupport_var reader_entry_ts = new ReaderEntryTypeSupportImpl;
   if (reader_entry_ts->register_type(relay_participant, "") != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to register ReaderEntry type\n")));
     return EXIT_FAILURE;
   }
+  CORBA::String_var reader_entry_type_name = reader_entry_ts->get_type_name();
 
-  DDS::Topic_var readers_topic = relay_participant->create_topic("Readers", reader_entry_ts->get_type_name(),
+  DDS::Topic_var readers_topic = relay_participant->create_topic("Readers", reader_entry_type_name,
                                                                  TOPIC_QOS_DEFAULT, nullptr,
                                                                  OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
@@ -270,14 +270,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  WriterEntryTypeSupport_var writer_entry_ts =
-    new WriterEntryTypeSupportImpl;
+  WriterEntryTypeSupport_var writer_entry_ts = new WriterEntryTypeSupportImpl;
   if (writer_entry_ts->register_type(relay_participant, "") != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to register WriterEntry type\n")));
     return EXIT_FAILURE;
   }
+  CORBA::String_var writer_entry_type_name = writer_entry_ts->get_type_name();
 
-  DDS::Topic_var writers_topic = relay_participant->create_topic("Writers", writer_entry_ts->get_type_name(),
+  DDS::Topic_var writers_topic = relay_participant->create_topic("Writers", writer_entry_type_name,
                                                                  TOPIC_QOS_DEFAULT, nullptr,
                                                                  OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
@@ -286,16 +286,16 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  GuidRelayAddressesTypeSupport_var guid_relay_addresses_ts =
-    new GuidRelayAddressesTypeSupportImpl;
+  GuidRelayAddressesTypeSupport_var guid_relay_addresses_ts = new GuidRelayAddressesTypeSupportImpl;
   if (guid_relay_addresses_ts->register_type(relay_participant, "") != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to register GuidRelayAddresses type\n")));
     return EXIT_FAILURE;
   }
+  CORBA::String_var guid_relay_addresses_type_name = guid_relay_addresses_ts->get_type_name();
 
   DDS::Topic_var responsible_relay_topic =
     relay_participant->create_topic("Responsible Relay",
-                                    guid_relay_addresses_ts->get_type_name(),
+                                    guid_relay_addresses_type_name,
                                     TOPIC_QOS_DEFAULT, nullptr,
                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
@@ -304,16 +304,16 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  HandlerStatisticsTypeSupport_var handler_statistics_ts =
-    new HandlerStatisticsTypeSupportImpl;
+  HandlerStatisticsTypeSupport_var handler_statistics_ts = new HandlerStatisticsTypeSupportImpl;
   if (handler_statistics_ts->register_type(relay_participant, "") != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to register HandlerStatistics type\n")));
     return EXIT_FAILURE;
   }
+  CORBA::String_var handler_statistics_type_name = handler_statistics_ts->get_type_name();
 
   DDS::Topic_var handler_statistics_topic =
     relay_participant->create_topic("Handler Statistics",
-                                    handler_statistics_ts->get_type_name(),
+                                    handler_statistics_type_name,
                                     TOPIC_QOS_DEFAULT, nullptr,
                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
@@ -322,8 +322,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  ParticipantStatisticsTypeSupport_var participant_statistics_ts =
-    new ParticipantStatisticsTypeSupportImpl;
+  ParticipantStatisticsTypeSupport_var participant_statistics_ts = new ParticipantStatisticsTypeSupportImpl;
+  CORBA::String_var participant_statistics_type_name = participant_statistics_ts->get_type_name();
   if (participant_statistics_ts->register_type(relay_participant, "") != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to register ParticipantStatistics type\n")));
     return EXIT_FAILURE;
@@ -331,7 +331,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   DDS::Topic_var participant_statistics_topic =
     relay_participant->create_topic("Participant Statistics",
-                                    participant_statistics_ts->get_type_name(),
+                                    participant_statistics_type_name,
                                     TOPIC_QOS_DEFAULT, nullptr,
                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
@@ -340,16 +340,16 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  DomainStatisticsTypeSupport_var domain_statistics_ts =
-    new DomainStatisticsTypeSupportImpl;
+  DomainStatisticsTypeSupport_var domain_statistics_ts = new DomainStatisticsTypeSupportImpl;
   if (domain_statistics_ts->register_type(relay_participant, "") != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to register DomainStatistics type\n")));
     return EXIT_FAILURE;
   }
+  CORBA::String_var domain_statistics_type_name = domain_statistics_ts->get_type_name();
 
   DDS::Topic_var domain_statistics_topic =
     relay_participant->create_topic("Domain Statistics",
-                                    domain_statistics_ts->get_type_name(),
+                                    domain_statistics_type_name,
                                     TOPIC_QOS_DEFAULT, nullptr,
                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
@@ -463,9 +463,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
     RelayAddresses relay_addresses {
       addr_to_string(spdp_horizontal_addr),
-        addr_to_string(sedp_horizontal_addr),
-        addr_to_string(data_horizontal_addr)
-        };
+      addr_to_string(sedp_horizontal_addr),
+      addr_to_string(data_horizontal_addr)
+    };
     config.relay_addresses(relay_addresses);
 
     // Set up the application participant.

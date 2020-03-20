@@ -9,7 +9,7 @@ namespace RtpsRelay {
 
 class DomainStatisticsWriter {
 public:
-  DomainStatisticsWriter(const RelayHandlerConfig& config)
+  explicit DomainStatisticsWriter(const RelayHandlerConfig& config)
     : config_(config)
   {
     domain_statistics_.application_participant_guid(repoid_to_guid(config_.application_participant_guid()));
@@ -22,37 +22,37 @@ public:
 
   void add_local_participant()
   {
-    domain_statistics_.local_participants() += 1;
+    ++domain_statistics_.local_participants();
     write_sample();
   }
 
   void remove_local_participant()
   {
-    domain_statistics_.local_participants() -= 1;
+    --domain_statistics_.local_participants();
     write_sample();
   }
 
   void add_local_writer()
   {
-    domain_statistics_.local_writers() += 1;
+    ++domain_statistics_.local_writers();
     write_sample();
   }
 
   void remove_local_writer()
   {
-    domain_statistics_.local_writers() -= 1;
+    --domain_statistics_.local_writers();
     write_sample();
   }
 
   void add_local_reader()
   {
-    domain_statistics_.local_readers() += 1;
+    ++domain_statistics_.local_readers();
     write_sample();
   }
 
   void remove_local_reader()
   {
-    domain_statistics_.local_readers() -= 1;
+    --domain_statistics_.local_readers();
     write_sample();
   }
 
