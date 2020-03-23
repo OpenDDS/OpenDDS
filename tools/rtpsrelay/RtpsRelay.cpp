@@ -32,7 +32,6 @@
 #include <ace/Select_Reactor.h>
 
 #include <cstdlib>
-#include <iostream>
 
 #ifdef OPENDDS_SECURITY
 #include <dds/DCPS/security/framework/Properties.h>

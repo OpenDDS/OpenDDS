@@ -30,7 +30,7 @@ void ParticipantStatisticsListener::on_data_available(DDS::DataReader_ptr reader
     return;
   }
 
-  ACE_TCHAR timestamp[AceTimestampSize];
+  ACE_TCHAR timestamp[OpenDDS::DCPS::AceTimestampSize];
   ACE::timestamp(timestamp, sizeof(timestamp) / sizeof(ACE_TCHAR));
 
   for (CORBA::ULong idx = 0; idx != infos.length(); ++idx) {
