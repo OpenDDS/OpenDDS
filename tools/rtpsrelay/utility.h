@@ -29,20 +29,6 @@ inline std::string guid_to_string(const OpenDDS::DCPS::GUID_t& a_guid)
   return ss.str();
 }
 
-struct RelayAddressesLessThan {
-  inline bool operator()(const RelayAddresses& x,
-                         const RelayAddresses& y) const
-  {
-    if (x.spdp_relay_address() != y.spdp_relay_address()) {
-      return x.spdp_relay_address() < y.spdp_relay_address();
-    }
-    if (x.sedp_relay_address() != y.sedp_relay_address()) {
-      return x.sedp_relay_address() < y.sedp_relay_address();
-    }
-    return x.data_relay_address() < y.data_relay_address();
-  }
-};
-
 struct GuidAddr {
   OpenDDS::DCPS::RepoId guid;
   ACE_INET_Addr address;

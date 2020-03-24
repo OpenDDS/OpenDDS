@@ -51,8 +51,9 @@ void SubscriptionListener::on_data_available(DDS::DataReader_ptr reader)
 void SubscriptionListener::write_sample(const DDS::SubscriptionBuiltinTopicData& data,
                                         const DDS::SampleInfo& info)
 {
+  const auto repoid = participant_->get_repoid(info.instance_handle);
   GUID_t guid;
-  assign(guid, participant_->get_repoid(info.instance_handle));
+  assign(guid, repoid);
 
   DDS::DataReaderQos data_reader_qos;
   data_reader_qos.durability = data.durability;
@@ -83,6 +84,7 @@ void SubscriptionListener::write_sample(const DDS::SubscriptionBuiltinTopicData&
     subscriber_qos,
   };
 
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l SubscriptionListener::write_sample add local reader %C\n"), guid_to_string(repoid).c_str()));
   DDS::ReturnCode_t ret = writer_->write(entry, DDS::HANDLE_NIL);
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: SubscriptionListener::write_sample failed to write\n")));
@@ -91,12 +93,14 @@ void SubscriptionListener::write_sample(const DDS::SubscriptionBuiltinTopicData&
 
 void SubscriptionListener::unregister_instance(const DDS::SampleInfo& info)
 {
+  const auto repoid = participant_->get_repoid(info.instance_handle);
   GUID_t guid;
-  assign(guid, participant_->get_repoid(info.instance_handle));
+  assign(guid, repoid);
 
   ReaderEntry entry;
   entry.guid(guid);
 
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l SubscriptionListener::unregister_intance remove local reader %C\n"), guid_to_string(repoid).c_str()));
   DDS::ReturnCode_t ret = writer_->unregister_instance(entry, DDS::HANDLE_NIL);
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: SubscriptionListener::unregister_instance failed to unregister_instance\n")));

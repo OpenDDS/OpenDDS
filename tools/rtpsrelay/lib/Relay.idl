@@ -47,16 +47,11 @@ module RtpsRelay {
     DDS::SubscriberQos subscriber_qos;
   };
 
-  struct RelayAddresses {
-    string spdp_relay_address;
-    string sedp_relay_address;
-    string data_relay_address;
-  };
-
   @topic
-  struct GuidRelayAddresses {
+  struct GuidNameAddress {
     @key GUID_t guid;
-    RelayAddresses relay_addresses;
+    @key string name;
+    string address;
   };
 
   typedef sequence<GUID_t> GuidSequence;

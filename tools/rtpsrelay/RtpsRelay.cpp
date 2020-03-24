@@ -285,9 +285,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  GuidRelayAddressesTypeSupport_var guid_relay_addresses_ts = new GuidRelayAddressesTypeSupportImpl;
+  GuidNameAddressTypeSupport_var guid_relay_addresses_ts = new GuidNameAddressTypeSupportImpl;
   if (guid_relay_addresses_ts->register_type(relay_participant, "") != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to register GuidRelayAddresses type\n")));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to register GuidNameAddress type\n")));
     return EXIT_FAILURE;
   }
   CORBA::String_var guid_relay_addresses_type_name = guid_relay_addresses_ts->get_type_name();
@@ -460,13 +460,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     ACE_INET_Addr stun_addr = nic_vertical;
     stun_addr.set_port_number(stun_port);
 
-    RelayAddresses relay_addresses {
-      addr_to_string(spdp_horizontal_addr),
-      addr_to_string(sedp_horizontal_addr),
-      addr_to_string(data_horizontal_addr)
-    };
-    config.relay_addresses(relay_addresses);
-
     // Set up the application participant.
     DDS::DomainParticipantQos participant_qos;
     factory->get_default_participant_qos(participant_qos);
@@ -531,7 +524,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       return EXIT_FAILURE;
     }
 
-    GuidRelayAddressesDataWriter_ptr responsible_relay_writer = GuidRelayAddressesDataWriter::_narrow(responsible_relay_writer_var);
+    GuidNameAddressDataWriter_ptr responsible_relay_writer = GuidNameAddressDataWriter::_narrow(responsible_relay_writer_var);
 
     if (!responsible_relay_writer) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to narrow Responsible Relay data writer\n")));
@@ -545,24 +538,24 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       return EXIT_FAILURE;
     }
 
-    GuidRelayAddressesDataReader_ptr responsible_relay_reader = GuidRelayAddressesDataReader::_narrow(responsible_relay_reader_var);
+    GuidNameAddressDataReader_ptr responsible_relay_reader = GuidNameAddressDataReader::_narrow(responsible_relay_reader_var);
 
     if (!responsible_relay_reader) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to narrow Responsible Relay data reader\n")));
       return EXIT_FAILURE;
     }
 
-    SpdpHandler spdp_vertical_handler(config, "SPDP Vertical", reactor, governor, association_table, responsible_relay_writer, responsible_relay_reader, rtps_discovery, crypto, spdp);
-    SedpHandler sedp_vertical_handler(config, "SEDP Vertical", reactor, governor, association_table, responsible_relay_writer, responsible_relay_reader, rtps_discovery, crypto, sedp);
-    DataHandler data_vertical_handler(config, "DATA Vertical", reactor, governor, association_table, responsible_relay_writer, responsible_relay_reader, rtps_discovery, crypto);
+    SpdpHandler spdp_vertical_handler(config, "VSPDP", spdp_horizontal_addr, reactor, governor, association_table, responsible_relay_writer, responsible_relay_reader, rtps_discovery, crypto, spdp);
+    SedpHandler sedp_vertical_handler(config, "VSEDP", sedp_horizontal_addr, reactor, governor, association_table, responsible_relay_writer, responsible_relay_reader, rtps_discovery, crypto, sedp);
+    DataHandler data_vertical_handler(config, "VDATA", data_horizontal_addr, reactor, governor, association_table, responsible_relay_writer, responsible_relay_reader, rtps_discovery, crypto);
 
 #ifdef OPENDDS_SECURITY
     StunHandler stun_handler(config, "STUN", reactor, governor);
 #endif
 
-    HorizontalHandler spdp_horizontal_handler(config, "SPDP Horizontal", reactor, governor);
-    HorizontalHandler sedp_horizontal_handler(config, "SEDP Horizontal", reactor, governor);
-    HorizontalHandler data_horizontal_handler(config, "DATA Horizontal", reactor, governor);
+    HorizontalHandler spdp_horizontal_handler(config, "HSPDP", reactor, governor);
+    HorizontalHandler sedp_horizontal_handler(config, "HSEDP", reactor, governor);
+    HorizontalHandler data_horizontal_handler(config, "HDATA", reactor, governor);
 
     spdp_horizontal_handler.vertical_handler(&spdp_vertical_handler);
     sedp_horizontal_handler.vertical_handler(&sedp_vertical_handler);
@@ -657,26 +650,29 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       return EXIT_FAILURE;
     }
 
-    spdp_horizontal_handler.open(spdp_horizontal_addr);
-    sedp_horizontal_handler.open(sedp_horizontal_addr);
-    data_horizontal_handler.open(data_horizontal_addr);
-
-    spdp_vertical_handler.open(spdp_vertical_addr);
-    sedp_vertical_handler.open(sedp_vertical_addr);
-    data_vertical_handler.open(data_vertical_addr);
+    if (spdp_horizontal_handler.open(spdp_horizontal_addr) == -1 ||
+        sedp_horizontal_handler.open(sedp_horizontal_addr) == -1 ||
+        data_horizontal_handler.open(data_horizontal_addr) == -1 ||
+        spdp_vertical_handler.open(spdp_vertical_addr) == -1 ||
+        sedp_vertical_handler.open(sedp_vertical_addr) == -1 ||
+        data_vertical_handler.open(data_vertical_addr) == -1) {
+      return EXIT_FAILURE;
+    }
 
 #ifdef OPENDDS_SECURITY
-    stun_handler.open(stun_addr);
+    if (stun_handler.open(stun_addr) == -1) {
+      return EXIT_FAILURE;
+    }
 #endif
 
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l SPDP Horizontal listening on %C\n"), addr_to_string(spdp_horizontal_handler.relay_address()).c_str()));
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l SEDP Horizontal listening on %C\n"), addr_to_string(sedp_horizontal_handler.relay_address()).c_str()));
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l Data Horizontal listening on %C\n"), addr_to_string(data_horizontal_handler.relay_address()).c_str()));
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l SPDP Vertical listening on %C\n"), addr_to_string(spdp_vertical_handler.relay_address()).c_str()));
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l SEDP Vertical listening on %C\n"), addr_to_string(sedp_vertical_handler.relay_address()).c_str()));
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l Data Vertical listening on %C\n"), addr_to_string(data_vertical_handler.relay_address()).c_str()));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l SPDP Horizontal listening on %C\n"), addr_to_string(spdp_horizontal_addr).c_str()));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l SEDP Horizontal listening on %C\n"), addr_to_string(sedp_horizontal_addr).c_str()));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l Data Horizontal listening on %C\n"), addr_to_string(data_horizontal_addr).c_str()));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l SPDP Vertical listening on %C\n"), addr_to_string(spdp_vertical_addr).c_str()));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l SEDP Vertical listening on %C\n"), addr_to_string(sedp_vertical_addr).c_str()));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l Data Vertical listening on %C\n"), addr_to_string(data_vertical_addr).c_str()));
 #ifdef OPENDDS_SECURITY
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l STUN listening on %C\n"), addr_to_string(stun_handler.relay_address()).c_str()));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l STUN listening on %C\n"), addr_to_string(stun_addr).c_str()));
 #endif
 
     reactor->run_reactor_event_loop();

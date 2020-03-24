@@ -57,36 +57,6 @@ struct GuidHash {
 };
 typedef std::unordered_set<OpenDDS::DCPS::RepoId, GuidHash> GuidSet;
 
-inline bool operator==(const RelayAddresses& x,
-                       const RelayAddresses& y)
-{
-  return x.spdp_relay_address() == y.spdp_relay_address() &&
-    x.sedp_relay_address() == y.sedp_relay_address() &&
-    x.data_relay_address() == y.data_relay_address();
-}
-
-inline bool operator!=(const RelayAddresses& x,
-                       const RelayAddresses& y)
-{
-  return x.spdp_relay_address() != y.spdp_relay_address() ||
-    x.sedp_relay_address() != y.sedp_relay_address() ||
-    x.data_relay_address() != y.data_relay_address();
-}
-
-inline bool operator<(const RelayAddresses& x,
-                      const RelayAddresses& y)
-{
-  if (x.spdp_relay_address() != y.spdp_relay_address()) {
-    return x.spdp_relay_address() < y.spdp_relay_address();
-  }
-  if (x.sedp_relay_address() != y.sedp_relay_address()) {
-    return x.sedp_relay_address() < y.sedp_relay_address();
-  }
-  return x.data_relay_address() < y.data_relay_address();
-}
-
-typedef std::map<RelayAddresses, GuidSet> RelayAddressesMap;
-
 class NoIndex;
 
 class RtpsRelayLib_Export Writer {
