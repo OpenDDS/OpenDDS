@@ -47,22 +47,60 @@ module RtpsRelay {
     DDS::SubscriberQos subscriber_qos;
   };
 
-  struct RelayAddresses {
-    string spdp_relay_address;
-    string sedp_relay_address;
-    string data_relay_address;
-  };
-
   @topic
-  struct GuidRelayAddresses {
+  struct GuidNameAddress {
     @key GUID_t guid;
-    RelayAddresses relay_addresses;
+    @key string name;
+    string address;
   };
 
   typedef sequence<GUID_t> GuidSequence;
 
   struct RelayHeader {
     GuidSequence to;
+  };
+
+  struct Duration_t {
+    long sec;
+    unsigned long nanosec;
+  };
+
+  @topic
+  struct HandlerStatistics {
+    @key GUID_t application_participant_guid;
+    @key string name;
+    Duration_t interval;
+    unsigned long messages_in;
+    unsigned long long bytes_in;
+    unsigned long messages_out;
+    unsigned long long bytes_out;
+    unsigned long max_fan_out;
+    unsigned long max_queue_size;
+    Duration_t max_queue_latency;
+    unsigned long local_active_participants;
+  };
+
+  @topic
+  struct DomainStatistics {
+    @key GUID_t application_participant_guid;
+    unsigned long local_participants;
+    unsigned long local_writers;
+    unsigned long local_readers;
+    unsigned long total_writers;
+    unsigned long total_readers;
+  };
+
+  @topic
+  struct ParticipantStatistics {
+    @key GUID_t application_participant_guid;
+    @key string name;
+    @key string address;
+    Duration_t interval;
+    unsigned long messages_in;
+    unsigned long long bytes_in;
+    unsigned long messages_out;
+    unsigned long long bytes_out;
+    unsigned long max_fan_out;
   };
 
 };

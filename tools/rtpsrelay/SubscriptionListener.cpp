@@ -5,16 +5,18 @@
 namespace RtpsRelay {
 
 SubscriptionListener::SubscriptionListener(OpenDDS::DCPS::DomainParticipantImpl* participant,
-                                           ReaderEntryDataWriter_ptr writer)
+                                           ReaderEntryDataWriter_ptr writer,
+                                           DomainStatisticsWriter& stats_writer)
   : participant_(participant)
   , writer_(writer)
+  , stats_writer_(stats_writer)
 {}
 
 void SubscriptionListener::on_data_available(DDS::DataReader_ptr reader)
 {
   DDS::SubscriptionBuiltinTopicDataDataReader_var dr = DDS::SubscriptionBuiltinTopicDataDataReader::_narrow(reader);
   if (!dr) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: SubscriptionListener::on_data_available failed to narrow PublicationBuiltinTopicDataDataReader\n"));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: SubscriptionListener::on_data_available failed to narrow PublicationBuiltinTopicDataDataReader\n")));
     return;
   }
 
@@ -27,7 +29,7 @@ void SubscriptionListener::on_data_available(DDS::DataReader_ptr reader)
                                    DDS::ANY_VIEW_STATE,
                                    DDS::ANY_INSTANCE_STATE);
   if (ret != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: SubscriptionListener::on_data_available failed to read\n"));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: SubscriptionListener::on_data_available failed to read\n")));
     return;
   }
 
@@ -35,10 +37,12 @@ void SubscriptionListener::on_data_available(DDS::DataReader_ptr reader)
     switch (infos[idx].instance_state) {
     case DDS::ALIVE_INSTANCE_STATE:
       write_sample(data[idx], infos[idx]);
+      stats_writer_.add_local_reader();
       break;
     case DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE:
     case DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE:
       unregister_instance(infos[idx]);
+      stats_writer_.remove_local_reader();
       break;
     }
   }
@@ -47,8 +51,9 @@ void SubscriptionListener::on_data_available(DDS::DataReader_ptr reader)
 void SubscriptionListener::write_sample(const DDS::SubscriptionBuiltinTopicData& data,
                                         const DDS::SampleInfo& info)
 {
+  const auto repoid = participant_->get_repoid(info.instance_handle);
   GUID_t guid;
-  assign(guid, participant_->get_repoid(info.instance_handle));
+  assign(guid, repoid);
 
   DDS::DataReaderQos data_reader_qos;
   data_reader_qos.durability = data.durability;
@@ -79,23 +84,26 @@ void SubscriptionListener::write_sample(const DDS::SubscriptionBuiltinTopicData&
     subscriber_qos,
   };
 
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l SubscriptionListener::write_sample add local reader %C\n"), guid_to_string(repoid).c_str()));
   DDS::ReturnCode_t ret = writer_->write(entry, DDS::HANDLE_NIL);
   if (ret != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: SubscriptionListener::write_sample failed to write\n"));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: SubscriptionListener::write_sample failed to write\n")));
   }
 }
 
 void SubscriptionListener::unregister_instance(const DDS::SampleInfo& info)
 {
+  const auto repoid = participant_->get_repoid(info.instance_handle);
   GUID_t guid;
-  assign(guid, participant_->get_repoid(info.instance_handle));
+  assign(guid, repoid);
 
   ReaderEntry entry;
   entry.guid(guid);
 
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l SubscriptionListener::unregister_intance remove local reader %C\n"), guid_to_string(repoid).c_str()));
   DDS::ReturnCode_t ret = writer_->unregister_instance(entry, DDS::HANDLE_NIL);
   if (ret != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) %N:%l ERROR: SubscriptionListener::unregister_instance failed to unregister_instance\n"));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: SubscriptionListener::unregister_instance failed to unregister_instance\n")));
   }
 }
 

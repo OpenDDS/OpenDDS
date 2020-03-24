@@ -119,6 +119,11 @@ struct VarLess : public std::binary_function<V, V, bool> {
   }
 };
 
+/// Size of TCHAR buffer for use with ACE::timestamp, e.g.,
+///  ACE_TCHAR buffer[AceTimestampSize];
+///  ACE::timestamp(buffer, AceTimestampSize);
+const size_t AceTimestampSize = 27;
+
 } // namespace OpenDDS
 } // namespace DCPS
 

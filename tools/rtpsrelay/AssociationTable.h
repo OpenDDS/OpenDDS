@@ -21,6 +21,9 @@ public:
   void lookup_destinations(GuidSet& to,
                            const OpenDDS::DCPS::RepoId& from) const;
 
+  size_t writer_count() const;
+  size_t reader_count() const;
+
 private:
   typedef std::map<OpenDDS::DCPS::RepoId, WriterPtr, OpenDDS::DCPS::GUID_tKeyLessThan> WritersMap;
   WritersMap writers_;
