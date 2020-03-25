@@ -336,10 +336,7 @@ private:
         serializer << ACE_OutputCDR::from_octet(0);
         serializer << ACE_OutputCDR::from_octet(swap ? !ACE_CDR_BYTE_ORDER : ACE_CDR_BYTE_ORDER);
         serializer << ACE_CDR::UShort(0);
-      }
-      // If this is RTI serialization, start counting byte offset AFTER
-      // the header
-      if (cdr) {
+
         // Start counting byte-offset AFTER header
         serializer.reset_alignment();
       }
@@ -382,11 +379,7 @@ private:
         serializer << ACE_OutputCDR::from_octet(0);
         serializer << ACE_OutputCDR::from_octet(swap ? !ACE_CDR_BYTE_ORDER : ACE_CDR_BYTE_ORDER);
         serializer << ACE_CDR::UShort(0);
-      }
 
-      // If this is RTI serialization, start counting byte offset AFTER
-      // the header
-      if (cdr) {
         // Start counting byte-offset AFTER header
         serializer.reset_alignment();
       }

@@ -5,14 +5,15 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include <ace/Message_Block.h>
-#include <ace/CDR_Stream.h>
 #include "Serializer.h"
 
-#ifndef OPENDDS_SAFETY_PROFILE
-#include <string>
-#endif
+#include "SafetyProfileStreams.h"
 
+#include <ace/Message_Block.h>
+
+#ifndef OPENDDS_SAFETY_PROFILE
+#  include <string>
+#endif
 #include <algorithm>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -208,6 +209,24 @@ ACE_INLINE Serializer::Alignment
 Serializer::alignment() const
 {
   return this->alignment_;
+}
+
+ACE_INLINE
+void Serializer::alignment(Serializer::Alignment value)
+{
+  alignment_ = value;
+}
+
+ACE_INLINE
+bool Serializer::zero_init_padding() const
+{
+  return zero_init_padding_;
+}
+
+ACE_INLINE
+void Serializer::zero_init_padding(bool value)
+{
+  zero_init_padding_ = value;
 }
 
 ACE_INLINE bool
@@ -596,9 +615,104 @@ Serializer::align_cont_w()
   }
 }
 
-ACE_INLINE size_t Serializer::max_align() const
+ACE_INLINE
+size_t Serializer::max_align() const
 {
-  return alignment_ == ALIGN_XCDR2 ? xcdr2_max_align : cdr_max_align;
+  return static_cast<size_t>(alignment_);
+}
+
+ACE_INLINE
+Serializer::Endianness Serializer::endianness() const
+{
+  return swap_bytes_ ? ENDIAN_NONNATIVE : ENDIAN_NATIVE;
+}
+
+ACE_INLINE
+void Serializer::endianness(Serializer::Endianness value)
+{
+  swap_bytes_ = value == ENDIAN_NONNATIVE;
+}
+
+ACE_INLINE
+Serializer::Encoding Serializer::encoding() const
+{
+  return encoding_;
+}
+
+ACE_INLINE
+Serializer::XcdrVersion Serializer::xcdr_version() const
+{
+  switch (encoding_) {
+  case ENC_CDR_PLAIN: // fallthrough
+  case ENC_CDR_PARAMLIST:
+    return XCDR1;
+  case ENC_XCDR2_PLAIN: // fallthrough
+  case ENC_XCDR2_PARAMLIST: // fallthrough
+  case ENC_XCDR2_DELIMITED:
+    return XCDR2;
+  default:
+    return XCDR_NONE;
+  }
+}
+
+ACE_INLINE
+bool Serializer::read_header()
+{
+  ACE_CDR::Octet data[4];
+  if (!read_octet_array(&data[0], sizeof(data))) {
+    return false;
+  }
+  const ACE_CDR::UShort raw_enc =
+    (static_cast<ACE_CDR::UShort>(data[0]) << 8) | data[1];
+  const Encoding enc = static_cast<Encoding>(raw_enc & 0xfffe);
+  switch (enc) {
+  case ENC_CDR_PLAIN: // fallthrough
+  case ENC_CDR_PARAMLIST: // fallthrough
+  case ENC_XCDR2_PLAIN: // fallthrough
+  case ENC_XCDR2_PARAMLIST: // fallthrough
+  case ENC_XCDR2_DELIMITED:
+    endianness(static_cast<Endianness>(data[1] & 1));
+    encoding(enc);
+    break;
+
+  default:
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
+      ACE_TEXT("Serializer::read_header: ")
+      ACE_TEXT("Unsupported Encoding: %C\n"),
+      encoding_to_string(raw_enc).c_str()));
+    return false;
+  }
+  if (DCPS_debug_level && (data[2] || data[3])) {
+    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING ")
+      ACE_TEXT("Serializer::read_header: ")
+      ACE_TEXT("Unexpected non-zero CDR header options: %C\n"),
+      to_hex_dds_string(&data[2], 2).c_str()));
+  }
+  return true;
+}
+
+ACE_INLINE
+bool Serializer::write_header()
+{
+  ACE_CDR::Octet data[4];
+  data[0] = encoding_ >> 8;
+  data[1] = (encoding_ & 0xfe) | endianness();
+  // Encoding "Options" Currently Reserved, Set to Zero
+  data[2] = 0;
+  data[3] = 0;
+  return write_octet_array(&data[0], sizeof(data));
+}
+
+ACE_INLINE
+bool Serializer::read_delimiter(unsigned& size)
+{
+  align_r(4);
+  ACE_CDR::ULong dheader;
+  if (!(*this >> dheader)) {
+    return false;
+  }
+  size = dheader;
+  return true;
 }
 
 //

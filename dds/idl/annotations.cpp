@@ -35,9 +35,15 @@ Annotations::~Annotations()
   }
 }
 
-Annotation* Annotations::operator[](const std::string& annotation)
+Annotation* Annotations::operator[](const std::string& annotation) const
 {
-  return map_[annotation];
+  const MapType::const_iterator i = map_.find(annotation);
+  if (i == map_.end()) {
+    idl_global->err()->misc_error(
+      (std::string("No such annotation: ") + annotation).c_str());
+    BE_abort();
+  }
+  return i->second;
 }
 
 Annotation::Annotation()
@@ -49,9 +55,14 @@ Annotation::~Annotation()
 {
 }
 
+std::string Annotation::module() const
+{
+  return "::";
+}
+
 std::string Annotation::fullname() const
 {
-  return std::string("::@") + name();
+  return module() + std::string("@") + name();
 }
 
 AST_Annotation_Decl* Annotation::declaration() const
@@ -311,11 +322,6 @@ std::string ExtensibilityAnnotation::name() const
   return "extensibility";
 }
 
-ExtensibilityKind ExtensibilityAnnotation::default_value() const
-{
-  return extensibilitykind_appendable;
-}
-
 // @final ====================================================================
 
 std::string FinalAnnotation::definition() const
@@ -359,13 +365,15 @@ namespace OpenDDS {
   std::string DataRepresentationAnnotation::definition() const
   {
     return
-      "@annotation data_representation {\n"
-      "  enum Kind_t {\n"
-      "    XCDR1,\n"
-      "    XML,\n"
-      "    XCDR2\n"
+      "module OpenDDS {\n"
+      "  @annotation data_representation {\n"
+      "    enum Kind_t {\n"
+      "      XCDR1,\n"
+      "      XML,\n"
+      "      XCDR2\n"
+      "    };\n"
+      "    Kind_t kind;\n"
       "  };\n"
-      "  Kind_t kind;\n"
       "};\n";
   }
 
@@ -387,11 +395,6 @@ namespace OpenDDS {
     return mask ? mask : default_value();
   }
 
-  DataRepresentationKind DataRepresentationAnnotation::default_value() const
-  {
-    return data_representation_kind_any;
-  }
-
   DataRepresentationKind DataRepresentationAnnotation::value_from_appl(
     AST_Annotation_Appl* appl) const
   {
@@ -408,4 +411,8 @@ namespace OpenDDS {
     return data_representation_kind_none;
   }
 
+  std::string DataRepresentationAnnotation::module() const
+  {
+    return "::OpenDDS::";
+  }
 }

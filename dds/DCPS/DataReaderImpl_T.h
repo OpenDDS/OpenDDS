@@ -1,17 +1,18 @@
-#ifndef dds_DCPS_DataReaderImpl_T_h
-#define dds_DCPS_DataReaderImpl_T_h
-#include "dds/DCPS/MultiTopicImpl.h"
-#include "dds/DCPS/RakeResults_T.h"
-#include "dds/DCPS/SubscriberImpl.h"
-#include "dds/DCPS/BuiltInTopicUtils.h"
-#include "dds/DCPS/Util.h"
-#include "dds/DCPS/TypeSupportImpl.h"
-#include "dds/DCPS/Watchdog.h"
-#include "dcps_export.h"
-#include "dds/DCPS/GuidConverter.h"
+#ifndef OPENDDS_DDS_DCPS_DATAREADERIMPL_T_H
+#define OPENDDS_DDS_DCPS_DATAREADERIMPL_T_H
 
-#include "ace/Bound_Ptr.h"
-#include "ace/Time_Value.h"
+#include "MultiTopicImpl.h"
+#include "RakeResults_T.h"
+#include "SubscriberImpl.h"
+#include "BuiltInTopicUtils.h"
+#include "Util.h"
+#include "TypeSupportImpl.h"
+#include "Watchdog.h"
+#include "dcps_export.h"
+#include "GuidConverter.h"
+
+#include <ace/Bound_Ptr.h>
+#include <ace/Time_Value.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -900,26 +901,18 @@ namespace OpenDDS {
     const bool cdr = sample.header_.cdr_encapsulation_;
 
     OpenDDS::DCPS::Serializer ser(
-      sample.sample_.get(),
-      sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
-      cdr ? OpenDDS::DCPS::Serializer::ALIGN_CDR
-          : OpenDDS::DCPS::Serializer::ALIGN_NONE);
-
-    if (cdr) {
-      ACE_CDR::ULong header;
-      if (!(ser >> header)) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %CDataReaderImpl::lookup_instance ")
-                  ACE_TEXT("deserialization header failed.\n"),
-                  TraitsType::type_name()));
-        return;
-      }
-
-    // Start counting byte-offset AFTER header
-    ser.reset_alignment();
+      sample.sample_.get(), sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
+      OpenDDS::DCPS::Serializer::ALIGN_NONE);
+    if (cdr && !ser.read_header()) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
+        ACE_TEXT("%CDataReaderImpl::lookup_instance: ")
+        ACE_TEXT("deserialization of CDR header failed.\n"),
+        TraitsType::type_name()));
+      return;
     }
 
     if (sample.header_.key_fields_only_) {
-      ser >> OpenDDS::DCPS::KeyOnly< MessageType>(data);
+      ser >> OpenDDS::DCPS::KeyOnly<MessageType>(data);
     } else {
       ser >> data;
     }
@@ -978,25 +971,18 @@ protected:
     const bool cdr = sample.header_.cdr_encapsulation_;
 
     OpenDDS::DCPS::Serializer ser(
-                                  sample.sample_.get(),
-                                  sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
-                                  cdr ? OpenDDS::DCPS::Serializer::ALIGN_CDR : OpenDDS::DCPS::Serializer::ALIGN_NONE);
-
-    if (cdr) {
-      ACE_CDR::ULong header;
-      if (!(ser >> header)) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %CDataReaderImpl::dds_demarshal ")
-                  ACE_TEXT("deserialization header failed, dropping sample.\n"),
-                  TraitsType::type_name()));
-        return;
-      }
-
-    // Start counting byte-offset AFTER header
-    ser.reset_alignment();
+      sample.sample_.get(), sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
+      OpenDDS::DCPS::Serializer::ALIGN_NONE);
+    if (cdr && !ser.read_header()) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
+        ACE_TEXT("%CDataReaderImpl::lookup_instance: ")
+        ACE_TEXT("deserialization of CDR header failed.\n"),
+        TraitsType::type_name()));
+      return;
     }
 
     if (marshaling_type == OpenDDS::DCPS::KEY_ONLY_MARSHALING) {
-      ser >> OpenDDS::DCPS::KeyOnly< MessageType>(*data);
+      ser >> OpenDDS::DCPS::KeyOnly<MessageType>(*data);
     } else {
       ser >> *data;
     }
@@ -2262,4 +2248,4 @@ void DataReaderImpl_T<MessageType>::MessageTypeWithAllocator::operator delete(vo
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif /* dds_DCPS_DataReaderImpl_T_h */
+#endif /* OPENDDS_DDS_DCPS_DATAREADERIMPL_T_H */

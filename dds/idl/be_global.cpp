@@ -32,6 +32,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <cstring>
 #include <vector>
 #include <set>
 
@@ -54,6 +55,8 @@ BE_GlobalData::BE_GlobalData()
   , language_mapping_(LANGMAP_NONE)
   , root_default_nested_(true)
   , warn_about_dcps_data_type_(true)
+  , default_extensibility_(extensibilitykind_appendable)
+  , default_data_representation_(OpenDDS::data_representation_kind_xcdr1)
 {
 }
 
@@ -310,7 +313,7 @@ BE_GlobalData::spawn_options()
   return idl_global->idl_flags();
 }
 
-void invalid_option(char * option)
+void invalid_option(char* option)
 {
   ACE_ERROR((LM_ERROR,
     ACE_TEXT("IDL: I don't understand the '%C' option\n"), option));
@@ -408,6 +411,19 @@ BE_GlobalData::parse_args(long& i, char** av)
       root_default_nested_ = false;
     } else if (!ACE_OS::strncasecmp(av[i], NO_DCPS_DATA_TYPE_WARNINGS_FLAG, NO_DCPS_DATA_TYPE_WARNINGS_FLAG_SIZE)) {
       warn_about_dcps_data_type_ = false;
+    } else if (!std::strcmp(av[i], "--default-extensibility")) {
+      if (!std::strcmp(av[i + 1], "final")) {
+        default_extensibility_ = extensibilitykind_final;
+      } else if (!std::strcmp(av[i + 1], "appendable")) {
+        default_extensibility_ = extensibilitykind_appendable;
+      } else if (!std::strcmp(av[i + 1], "mutable")) {
+        default_extensibility_ = extensibilitykind_mutable;
+      } else {
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("Invalid argument to --default-extensibility: %C\n"),
+          av[i + 1]));
+        idl_global->parse_args_exit(1);
+      }
     } else {
       invalid_option(av[i]);
     }
@@ -702,4 +718,57 @@ bool BE_GlobalData::warn_about_dcps_data_type()
   }
   warn_about_dcps_data_type_ = false;
   return idl_global->print_warnings();
+}
+
+ExtensibilityKind BE_GlobalData::extensibility(AST_Decl* node) const
+{
+  if (builtin_annotations_["::@final"]->find_on(node)) {
+    return extensibilitykind_final;
+  }
+
+  if (builtin_annotations_["::@appendable"]->find_on(node)) {
+    return extensibilitykind_appendable;
+  }
+
+  if (builtin_annotations_["::@mutable"]->find_on(node)) {
+    return extensibilitykind_mutable;
+  }
+
+  ExtensibilityAnnotation* extensibility_annotation =
+    dynamic_cast<ExtensibilityAnnotation*>(
+      builtin_annotations_["::@extensibility"]);
+  ExtensibilityKind value;
+  if (!extensibility_annotation->node_value_exists(node, value)) {
+    value = default_extensibility_;
+  }
+  return value;
+}
+
+OpenDDS::DataRepresentationKind BE_GlobalData::default_data_representation(
+  AST_Decl* node) const
+{
+  using namespace OpenDDS;
+  DataRepresentationAnnotation* data_representation_annotation =
+    dynamic_cast<DataRepresentationAnnotation*>(
+      builtin_annotations_["::OpenDDS::@data_representation"]);
+  DataRepresentationKind value;
+  if (!data_representation_annotation->node_value_exists(node, value)) {
+    value = default_data_representation_;
+  }
+  return value;
+}
+
+unsigned BE_GlobalData::get_id(
+  AST_Structure* type, AST_Field* member, unsigned index) const
+{
+  // TODO: Support @hashid and @autoid
+  ACE_UNUSED_ARG(type);
+
+  IdAnnotation* id_annotation =
+    dynamic_cast<IdAnnotation*>(builtin_annotations_["::@id"]);
+  ACE_UINT32 value;
+  if (!id_annotation->node_value_exists(member, value)) {
+    value = index;
+  }
+  return value;
 }

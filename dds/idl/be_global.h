@@ -207,6 +207,14 @@ public:
    */
   bool warn_about_dcps_data_type();
 
+  ExtensibilityKind extensibility(AST_Decl* node) const;
+
+  OpenDDS::DataRepresentationKind default_data_representation(
+    AST_Decl* node) const;
+
+  unsigned get_id(
+    AST_Structure* type, AST_Field* member, unsigned index) const;
+
 private:
   /// Name of the IDL file we are processing.
   const char* filename_;
@@ -224,6 +232,8 @@ private:
 
   bool root_default_nested_;
   bool warn_about_dcps_data_type_;
+  ExtensibilityKind default_extensibility_;
+  OpenDDS::DataRepresentationKind default_data_representation_;
 
   bool is_nested(AST_Decl* node);
   bool is_default_nested(UTL_Scope* scope);

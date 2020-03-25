@@ -1640,7 +1640,20 @@ bool marshal_generator::gen_struct(AST_Structure* node,
 {
   NamespaceGuard ng;
   be_global->add_include("dds/DCPS/Serializer.h");
-  string cxx = scoped(name); // name as a C++ class
+  const string cxx = scoped(name); // name as a C++ class
+  const ExtensibilityKind exten = be_global->extensibility(node);
+  const OpenDDS::DataRepresentationKind repr =
+    be_global->default_data_representation(node);
+  const bool only_xcdr1 = repr == OpenDDS::data_representation_kind_xcdr1;
+  const bool maybe_xcdr1 = repr & OpenDDS::data_representation_kind_xcdr1;
+  const bool not_only_xcdr1 = maybe_xcdr1 && !only_xcdr1;
+  const bool only_xcdr2 = repr == OpenDDS::data_representation_kind_xcdr2;
+  const bool maybe_xcdr2 = repr & OpenDDS::data_representation_kind_xcdr2;
+  const bool not_only_xcdr2 = maybe_xcdr2 && !only_xcdr2;
+  const bool not_final = exten != extensibilitykind_final;
+  const bool parameter_list = exten == extensibilitykind_mutable;
+  const bool maybe_delimited = not_final && maybe_xcdr2;
+  const bool not_only_delimited = not_final && not_only_xcdr2;
 
   for (size_t i = 0; i < LENGTH(special_structs); ++i) {
     if (special_structs[i].check(cxx)) {
@@ -1700,20 +1713,82 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     extraction.addArg("stru", cxx + "&");
     extraction.endArgs();
     string expr, intro;
-    for (size_t i = 0; i < fields.size(); ++i) {
-      if (i) expr += "\n    && ";
-      const string field_name = fields[i]->local_name()->get_string(),
-        cond = rtpsCustom.getConditional(field_name);
-      if (!cond.empty()) {
-        expr += rtpsCustom.preFieldRead(field_name);
-        expr += "(!(" + cond + ") || ";
+    if (maybe_delimited) {
+      be_global->impl_ <<
+        "  unsigned size;\n";
+      const char* indent = "  ";
+      if (not_only_delimited) {
+        indent = "    ";
+        be_global->impl_ <<
+          "  if (strm.xcdr_version() == Serializer::XCDR2) {\n";
       }
-      expr += streamCommon(field_name, fields[i]->field_type(), ">> stru", intro, cxx);
-      if (!cond.empty()) {
-        expr += ")";
+      be_global->impl_ <<
+        indent << "if (!strm.read_delimiter()) {\n" <<
+        indent << "  return false;\n" <<
+        indent << "}\n";
+      if (not_only_delimited) {
+        be_global->impl_ <<
+          "}\n";
       }
     }
-    be_global->impl_ << intro << "  return " << expr << ";\n";
+    if (parameter_list) {
+      be_global->impl_ <<
+        "  unsigned member_id, member_size;\n"
+        "  while (true) {\n"
+        "    if (!strm.read_parameter_id(member_id, member_size)) {\n"
+        "      return false;\n"
+        "    }\n";
+      if (maybe_xcdr1) {
+        be_global->impl_ <<
+          "    if (member_id == Serializer::pid_list_end";
+        if (not_only_xcdr1) {
+          be_global->impl_ << " &&\n"
+            "        strm.xcdr_version() == Serializer::XCDR1";
+        }
+        be_global->impl_ << ") {\n"
+          "      return true;\n"
+          "    }\n";
+      }
+
+      std::ostringstream cases;
+      for (size_t i = 0; i < fields.size(); ++i) {
+        const unsigned id = be_global->get_id(node, fields[i], i);
+        const string field_name = fields[i]->local_name()->get_string();
+        cases <<
+          "    case " << id << ": {\n"
+          "      if (!" << streamCommon(field_name, fields[i]->field_type(),
+            ">> stru", intro, cxx) << ") {\n"
+          "        return false;\n"
+          "      }\n"
+          "      break;\n"
+          "    }\n";
+      }
+      be_global->impl_ << intro <<
+        "    switch (member_id) {\n"
+        << cases.str() <<
+        "    default:\n"
+        "      strm.skip(member_size);\n"
+        "      break;\n"
+        "    }\n"
+        "  }\n"
+        "  return false;\n";
+    } else {
+      for (size_t i = 0; i < fields.size(); ++i) {
+        if (i) expr += "\n    && ";
+        const string field_name = fields[i]->local_name()->get_string();
+        const string cond = rtpsCustom.getConditional(field_name);
+        if (!cond.empty()) {
+          expr += rtpsCustom.preFieldRead(field_name);
+          expr += "(!(" + cond + ") || ";
+        }
+        expr += streamCommon(
+          field_name, fields[i]->field_type(), ">> stru", intro, cxx);
+        if (!cond.empty()) {
+          expr += ")";
+        }
+      }
+      be_global->impl_ << intro << "  return " << expr << ";\n";
+    }
   }
 
   if (be_global->printer()) {

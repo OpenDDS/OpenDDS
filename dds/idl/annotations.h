@@ -38,7 +38,7 @@ public:
   ~Annotations();
 
   void register_all();
-  Annotation* operator[](const std::string& annotation);
+  Annotation* operator[](const std::string& annotation) const;
 
   template<typename T>
   void register_one()
@@ -63,6 +63,7 @@ public:
 
   virtual std::string definition() const = 0;
   virtual std::string name() const = 0;
+  virtual std::string module() const;
   virtual std::string fullname() const;
 
   AST_Annotation_Decl* declaration() const;
@@ -124,7 +125,9 @@ protected:
    * Get value from an annotation application. Returns default_value if appl is
    * null. Must be specialized.
    */
-  T value_from_appl(AST_Annotation_Appl* appl) const;
+  virtual T value_from_appl(AST_Annotation_Appl*) const {
+    return T();
+  }
 };
 
 template<>
@@ -232,8 +235,6 @@ class ExtensibilityAnnotation : public AnnotationWithEnumValue<ExtensibilityKind
 public:
   std::string definition() const;
   std::string name() const;
-
-  ExtensibilityKind default_value() const;
 };
 
 // @final ====================================================================
@@ -279,9 +280,9 @@ namespace OpenDDS {
   public:
     std::string definition() const;
     std::string name() const;
+    std::string module() const;
 
     DataRepresentationKind node_value(AST_Decl* node) const;
-    DataRepresentationKind default_value() const;
 
   protected:
     DataRepresentationKind value_from_appl(AST_Annotation_Appl* appl) const;

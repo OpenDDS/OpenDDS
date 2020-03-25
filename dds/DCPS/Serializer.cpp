@@ -29,9 +29,24 @@ Serializer::Serializer(ACE_Message_Block* chain,
   , good_bit_(true)
   , alignment_(align)
   , zero_init_padding_(zero_init_padding)
-  , align_rshift_(chain ? ptrdiff_t(chain->rd_ptr()) % max_align() : 0)
-  , align_wshift_(chain ? ptrdiff_t(chain->wr_ptr()) % max_align() : 0)
+  , align_rshift_(0)
+  , align_wshift_(0)
+  , encoding_(ENC_UNSUPPORTED)
 {
+  if (align != ALIGN_NONE) {
+    reset_alignment();
+  }
+}
+
+Serializer::Serializer(
+  ACE_Message_Block* chain, Encoding encoding, Endianness endianness)
+  : current_(chain)
+  , swap_bytes_(endianness != ENDIAN_NATIVE)
+  , good_bit_(true)
+  , align_rshift_(0)
+  , align_wshift_(0)
+{
+  this->encoding(encoding);
 }
 
 Serializer::~Serializer()
@@ -237,6 +252,135 @@ Serializer::read_string(ACE_CDR::WChar*& dest,
   }
 
   return length;
+}
+
+void Serializer::encoding(Serializer::Encoding value)
+{
+  encoding_ = value;
+
+  switch (value) {
+  case ENC_CDR_PARAMLIST: // fallthrough
+  case ENC_CDR_PLAIN:
+    alignment(Serializer::ALIGN_CDR);
+    reset_alignment();
+    break;
+
+  case ENC_XCDR2_PARAMLIST: // fallthrough
+  case ENC_XCDR2_DELIMITED: // fallthrough
+  case ENC_XCDR2_PLAIN:
+    alignment(Serializer::ALIGN_XCDR2);
+    reset_alignment();
+    zero_init_padding(true);
+    return;
+
+  case ENC_CDR_UNALIGNED:
+    alignment(Serializer::ALIGN_NONE);
+    break;
+
+  default:
+    break;
+  }
+
+  zero_init_padding(
+#ifdef ACE_INITIALIZE_MEMORY_BEFORE_USE
+    true
+#else
+    false
+#endif
+  );
+}
+
+OPENDDS_STRING Serializer::encoding_to_string(ACE_CDR::UShort value)
+{
+  ACE_CDR::Octet data[2];
+  switch (static_cast<Encoding>(value)) {
+  case ENC_CDR_PLAIN:
+    return "CDR/XCDR1 Plain";
+  case ENC_CDR_PARAMLIST:
+    return "CDR/XCDR1 Parameter List";
+  case ENC_XCDR2_PLAIN:
+    return "XCDR2 Plain";
+  case ENC_XCDR2_PARAMLIST:
+    return "XCDR2 Parameter List";
+  case ENC_XCDR2_DELIMITED:
+    return "XCDR2 Delimited";
+  case ENC_XML:
+    return "XML";
+  default:
+    data[0] = value >> 8;
+    data[1] = value & 0xff;
+    return to_hex_dds_string(&data[0], 2);
+  }
+}
+
+bool Serializer::read_parameter_id(unsigned& id, unsigned& size)
+{
+  const XcdrVersion xcdr = xcdr_version();
+  if (xcdr == XCDR1) {
+    // Get the "short" id and size
+    align_r(4);
+    ACE_CDR::UShort pid;
+    if (!(*this >> pid)) {
+      return false;
+    }
+    const ACE_CDR::UShort short_id = pid & 0x3fff;
+    ACE_CDR::UShort short_size;
+    if (!(*this >> short_size)) {
+      return false;
+    }
+
+    // TODO: handle PID flags
+
+    // If extended, get the "long" id and size
+    if (short_id == pid_extended) {
+      ACE_CDR::ULong long_id, long_size;
+      if (!(*this >> long_id) || !(*this >> long_size)) {
+        return false;
+      }
+      const unsigned short_size_left = short_size - 8;
+      if (short_size_left) {
+        skip(short_size_left);
+      }
+      id = long_id;
+      size = long_size;
+    } else {
+      id = short_id;
+      size = short_size;
+    }
+
+    reset_alignment();
+  } else if (xcdr == XCDR2) {
+    ACE_CDR::ULong emheader;
+    if (!(*this >> emheader)) {
+      return false;
+    }
+
+    // TODO: Handle Must Understand Flag
+
+    // Get Size
+    const unsigned short lc = (emheader >> 28) & 0x7;
+    if (lc < 4) {
+      size = 1 << lc;
+    } else {
+      ACE_CDR::ULong next_int;
+      if (!(*this >> next_int)) {
+        return false;
+      }
+      if (lc == 6) {
+        size = 4 * next_int;
+      } else if (lc == 7) {
+        size = 8 * next_int;
+      } else { // 4 or 5
+        size = next_int;
+      }
+    }
+
+    id = emheader & 0xfffffff;
+  } else {
+    return false;
+  }
+
+  return true;
 }
 
 } // namespace DCPS
