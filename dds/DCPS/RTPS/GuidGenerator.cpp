@@ -74,6 +74,7 @@ GuidGenerator::GuidGenerator()
   ACE_OS::macaddr_node_t macaddress;
   const int result = ACE_OS::getmacaddress(&macaddress);
 
+#ifndef ACE_HAS_IOS
   if (-1 != result) {
     ACE_OS::memcpy(node_id_, macaddress.node, NODE_ID_SIZE);
   } else {
@@ -81,6 +82,14 @@ GuidGenerator::GuidGenerator()
       node_id_[i] = static_cast<unsigned char>(ACE_OS::rand());
     }
   }
+#else
+// iOS has non-unique MAC addresses
+  ACE_UNUSED_ARG(result);
+
+  for (int i = 0; i < NODE_ID_SIZE; ++i) {
+    node_id_[i] = static_cast<unsigned char>(ACE_OS::rand());
+  }
+#endif /* ACE_HAS_IOS */
 }
 
 ACE_UINT16

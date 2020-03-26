@@ -75,18 +75,20 @@ int AgentImpl::handle_timeout(const ACE_Time_Value& a_now, const void* /*act*/)
   task->in_queue_ = false;
 
   task->execute(now);
+  process_deferred();
+  check_invariants();
 
   if (!tasks_.empty()) {
     const TimeDuration delay = std::max(get_configuration().T_a(), tasks_.top()->release_time_ - now);
     execute_or_enqueue(new ScheduleTimerCommand(reactor(), this, delay));
   }
 
-  check_invariants();
   return 0;
 }
 
 AgentImpl::AgentImpl() :
   ReactorInterceptor(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner()),
+  unfreeze_(false),
   ncm_listener_added_(false),
   remote_peer_reflexive_counter_(0)
   {
@@ -206,20 +208,34 @@ void  AgentImpl::receive(Endpoint* a_endpoint,
                          const ACE_INET_Addr& a_remote_address,
                          const STUN::Message& a_message)
 {
+  if (a_local_address == ACE_INET_Addr()) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) AgentImpl::receive: ERROR local_address is empty, ICE will not work on this platform\n")));
+    return;
+  }
+
+  if (a_remote_address == ACE_INET_Addr()) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) AgentImpl::receive: ERROR remote_address is empty, ICE will not work on this platform\n")));
+    return;
+  }
+
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, mutex);
   check_invariants();
   EndpointManagerMapType::const_iterator pos = endpoint_managers_.find(a_endpoint);
   OPENDDS_ASSERT(pos != endpoint_managers_.end());
   pos->second->receive(a_local_address, a_remote_address, a_message);
+  process_deferred();
   check_invariants();
+}
+
+void AgentImpl::remove(const FoundationType& a_foundation)
+{
+  // Foundations that are completely removed from the set of active foundations may unfreeze a checklist.
+  unfreeze_ = active_foundations_.remove(a_foundation) || unfreeze_;
 }
 
 void AgentImpl::unfreeze(const FoundationType& a_foundation)
 {
-  for (EndpointManagerMapType::const_iterator pos = endpoint_managers_.begin(),
-       limit = endpoint_managers_.end(); pos != limit; ++pos) {
-    pos->second->unfreeze(a_foundation);
-  }
+  to_unfreeze_.push_back(a_foundation);
 }
 
 void AgentImpl::check_invariants() const
@@ -232,7 +248,7 @@ void AgentImpl::check_invariants() const
     pos->second->check_invariants();
   }
 
-  OPENDDS_ASSERT(expected == active_foundations);
+  OPENDDS_ASSERT(expected == active_foundations_);
 }
 
 void AgentImpl::shutdown()
@@ -262,6 +278,29 @@ void AgentImpl::remove_address(const DCPS::NetworkInterface&,
                                const ACE_INET_Addr&)
 {
   network_change();
+}
+
+void AgentImpl::process_deferred()
+{
+  // A successful connectivity check unfreezed a foundation.
+  // Communicate this to all endpoints and checklists.
+  for (FoundationList::const_iterator fpos = to_unfreeze_.begin(), flimit = to_unfreeze_.end(); fpos != flimit; ++fpos) {
+    for (EndpointManagerMapType::const_iterator pos = endpoint_managers_.begin(),
+           limit = endpoint_managers_.end(); pos != limit; ++pos) {
+      pos->second->unfreeze(*fpos);
+    }
+  }
+  to_unfreeze_.clear();
+
+  // A foundation was completely removed.
+  // Communicate this to all endpoints and checklists.
+  if (unfreeze_) {
+    for (EndpointManagerMapType::const_iterator pos = endpoint_managers_.begin(),
+           limit = endpoint_managers_.end(); pos != limit; ++pos) {
+      pos->second->unfreeze();
+    }
+    unfreeze_ = false;
+  }
 }
 
 #endif /* OPENDDS_SECURITY */

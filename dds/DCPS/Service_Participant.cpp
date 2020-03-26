@@ -17,12 +17,15 @@
 #include "ConfigUtils.h"
 #include "RecorderImpl.h"
 #include "ReplayerImpl.h"
+#include "NetworkConfigMonitor.h"
+#include "NetworkConfigModifier.h"
 #include "LinuxNetworkConfigMonitor.h"
 #include "StaticDiscovery.h"
 #if defined(OPENDDS_SECURITY)
 #include "security/framework/SecurityRegistry.h"
 #endif
 
+#include "ace/config.h"
 #include "ace/Singleton.h"
 #include "ace/Arg_Shifter.h"
 #include "ace/Reactor.h"
@@ -271,6 +274,7 @@ Service_Participant::shutdown()
         ACE_GUARD(ACE_Thread_Mutex, guard, network_config_monitor_lock_);
         if (network_config_monitor_) {
           network_config_monitor_->close();
+          network_config_monitor_.reset();
         }
       }
 
@@ -2053,18 +2057,35 @@ NetworkConfigMonitor_rch Service_Participant::network_config_monitor()
 
   if (!network_config_monitor_) {
 #ifdef OPENDDS_LINUX_NETWORK_CONFIG_MONITOR
+    if (DCPS_debug_level > 0) {
+      ACE_DEBUG((LM_DEBUG,
+               "%T (%P|%t) Service_Participant::network_config_monitor(). Creating LinuxNetworkConfigMonitor\n"));
+    }
     network_config_monitor_ = make_rch<LinuxNetworkConfigMonitor>(reactor_task_.interceptor());
+#elif defined(OPENDDS_NETWORK_CONFIG_MODIFIER)
+    if (DCPS_debug_level > 0) {
+      ACE_DEBUG((LM_DEBUG,
+               "%T (%P|%t) Service_Participant::network_config_monitor(). Creating NetworkConfigModifier\n"));
+    }
+    network_config_monitor_ = make_rch<NetworkConfigModifier>();
 #endif
 
     if (network_config_monitor_ && !network_config_monitor_->open()) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Service_Participant::get_domain_participant_factory could not open network config monitor\n ")));
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Service_Participant::network_config_monitor could not open network config monitor\n ")));
       network_config_monitor_->close();
+      network_config_monitor_.reset();
     }
   }
 
   return network_config_monitor_;
 }
 
+#ifdef OPENDDS_NETWORK_CONFIG_MODIFIER
+NetworkConfigModifier* Service_Participant::network_config_modifier()
+{
+  return dynamic_cast<NetworkConfigModifier*>(network_config_monitor().get());
+}
+#endif
 
 } // namespace DCPS
 } // namespace OpenDDS

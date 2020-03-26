@@ -146,6 +146,7 @@ private:
   mutable SecurityConfig_rch default_config_;
 
   mutable LockType lock_;
+  mutable LockType default_load_lock_;
 };
 
 } // namespace Security

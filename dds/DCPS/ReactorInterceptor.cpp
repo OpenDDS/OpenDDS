@@ -21,8 +21,9 @@ namespace DCPS {
 ReactorInterceptor::ReactorInterceptor(ACE_Reactor* reactor,
                                        ACE_thread_t owner)
   : owner_(owner)
+  , state_(NONE)
 {
-  this->reactor(reactor);
+  RcEventHandler::reactor(reactor);
 }
 
 ReactorInterceptor::~ReactorInterceptor()
@@ -43,15 +44,26 @@ int ReactorInterceptor::handle_exception(ACE_HANDLE /*fd*/)
 
 void ReactorInterceptor::process_command_queue_i()
 {
-  ACE_GUARD(ACE_Thread_Mutex, guard, mutex_);
+  OPENDDS_DEQUE(CommandPtr) cq;
   ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(mutex_);
-  while (!command_queue_.empty()) {
-    CommandPtr command = command_queue_.front();
-    command_queue_.pop();
-    ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rev_guard, rev_lock);
-    command->execute();
-    command->executed();
-    command.reset();
+
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  state_ = PROCESSING;
+  if (!command_queue_.empty()) {
+    cq.swap(command_queue_);
+    ACE_Guard<ACE_Reverse_Lock<ACE_Thread_Mutex> > rev_guard(rev_lock);
+    while (!cq.empty()) {
+      CommandPtr command = cq.front();
+      cq.pop_front();
+      command->execute();
+      command->executed();
+    }
+  }
+  if (!command_queue_.empty()) {
+    state_ = NOTIFIED;
+    reactor()->notify(this);
+  } else {
+    state_ = NONE;
   }
 }
 

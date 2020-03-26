@@ -69,26 +69,29 @@ void AssociationTable::lookup_destinations(GuidSet& to,
 
   for (auto pos = writers_.lower_bound(prefix), limit = writers_.end();
        pos != limit && std::memcmp(pos->first.guidPrefix, prefix.guidPrefix, sizeof(prefix.guidPrefix)) == 0; ++pos) {
-    ReaderSet readers;
     for (const auto index : pos->second->indexes) {
-      index->get_readers(pos->second, readers);
-    }
-    for (const auto reader : readers) {
-      to.insert(reader->participant_guid());
+      index->insert_reader_participant_guids(pos->second, to);
     }
   }
 
   for (auto pos = readers_.lower_bound(prefix), limit = readers_.end();
        pos != limit && std::memcmp(pos->first.guidPrefix, prefix.guidPrefix, sizeof(prefix.guidPrefix)) == 0; ++pos) {
-    WriterSet writers;
     for (const auto index : pos->second->indexes) {
-      index->get_writers(pos->second, writers);
-    }
-
-    for (const auto writer : writers) {
-      to.insert(writer->participant_guid());
+      index->insert_writer_participant_guids(pos->second, to);
     }
   }
+}
+
+size_t AssociationTable::writer_count() const
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, 0);
+  return writers_.size();
+}
+
+size_t AssociationTable::reader_count() const
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, 0);
+  return readers_.size();
 }
 
 }

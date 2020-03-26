@@ -43,6 +43,8 @@ using DCPS::TimeDuration;
 
 RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   : resend_period_(30 /*seconds*/) // see RTPS v2.1 9.6.1.4.2
+  , quick_resend_ratio_(0.1)
+  , min_resend_delay_(TimeDuration::from_msec(100))
   , lease_duration_(300)
   , pb_(7400) // see RTPS v2.1 9.6.1.3 for PB, DG, PG, D0, D1 defaults
   , dg_(250)
@@ -133,6 +135,28 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
               value.c_str(), rtps_name.c_str()), -1);
           }
           config->resend_period(TimeDuration(resend));
+        } else if (name == "QuickResendRatio") {
+          const OPENDDS_STRING& value = it->second;
+          double ratio;
+          if (!DCPS::convertToDouble(value, ratio)) {
+            ACE_ERROR_RETURN((LM_ERROR,
+              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+              ACE_TEXT("Invalid entry (%C) for QuickResendRatio in ")
+              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+              value.c_str(), rtps_name.c_str()), -1);
+          }
+          config->quick_resend_ratio(ratio);
+        } else if (name == "MinResendDelay") {
+          const OPENDDS_STRING& value = it->second;
+          int delay;
+          if (!DCPS::convertToInteger(value, delay)) {
+            ACE_ERROR_RETURN((LM_ERROR,
+              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+              ACE_TEXT("Invalid entry (%C) for MinResendDelay in ")
+              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+              value.c_str(), rtps_name.c_str()), -1);
+          }
+          config->min_resend_delay(TimeDuration::from_msec(delay));
         } else if (name == "LeaseDuration") {
           const OPENDDS_STRING& value = it->second;
           int duration;

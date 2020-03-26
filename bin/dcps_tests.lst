@@ -144,6 +144,7 @@ tests/DCPS/Reliability/run_test.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE !OPENDDS
 tests/DCPS/Reliability/run_test.pl rtps: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/Reliability/run_test.pl keep-last-one: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/Reliability/run_test.pl rtps keep-last-one: !DCPS_MIN
+tests/DCPS/ReliableBestEffortReaders/run_test.pl: RTPS !DCPS_MIN
 
 tests/DCPS/WriteDataContainer/run_test.pl: !DCPS_MIN
 
@@ -341,6 +342,7 @@ tests/transport/rtps/run_test.pl: !DCPS_MIN RTPS
 tests/transport/rtps_reliability/run_test.pl: !DCPS_MIN RTPS
 tests/transport/spdp/run_test.pl: !DCPS_MIN RTPS
 tests/transport/rtps_directed_write/run_test.pl: !DCPS_MIN RTPS
+tests/transport/best_effort_reader/run_test.pl: !DCPS_MIN RTPS
 
 tests/DCPS/ManyTopicTest/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/ManyTopicTest/run_test.pl rtps: !DCPS_MIN RTPS
@@ -407,3 +409,9 @@ tests/DCPS/RtpsRelay/Smoke/run_test.pl single: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN
 tests/DCPS/RtpsRelay/STUN/run_test.pl: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE !IPV6
 
 tests/DCPS/ParticipantLocationTopic/run_test.pl noice: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE !IPV6
+
+performance-tests/bench_2/run_test.pl disco: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
+performance-tests/bench_2/run_test.pl fan: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
+performance-tests/bench_2/run_test.pl fan_frag: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
+performance-tests/bench_2/run_test.pl echo: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
+performance-tests/bench_2/run_test.pl echo_frag: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON

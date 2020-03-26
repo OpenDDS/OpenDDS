@@ -139,8 +139,13 @@ private:
   /// Used to accept passive connections on our local_address_.
   unique_ptr<TcpAcceptor> acceptor_;
 
+  class Connector : public ACE_Connector<TcpConnection, ACE_SOCK_Connector>
+  {
+    virtual int fini();
+  };
+
   /// Open TcpConnections using non-blocking connect.
-  ACE_Connector<TcpConnection, ACE_SOCK_Connector> connector_;
+  Connector connector_;
 
   /// This is the map of connected DataLinks.
   AddrLinkMap links_;

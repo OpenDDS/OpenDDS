@@ -253,6 +253,7 @@ later, `nullptr` should be used instead. `NULL` should never be used.
   - `methodsAreCamelCaseWithInitialLower` OR
     `methods_are_lower_case_with_underscores`
   - `member_data_use_underscores_and_end_with_an_underscore_`
+  - `ThisIsANamespaceScopedOrStaticClassMemberConstant`
 
 ### Comments
 

@@ -1,0 +1,27 @@
+project: dcpslib {
+  idlflags      += -Wb,stub_export_include=Bench_Builder_Idl_Export.h \
+                   -Wb,stub_export_macro=Bench_Builder_Idl_Export \
+                   -I$(DDS_ROOT)/dds
+  dcps_ts_flags += -Wb,export_macro=Bench_Builder_Idl_Export
+
+  dynamicflags  += BENCH_BUILDER_IDL_BUILD_DLL
+  includes += $(DDS_ROOT)/dds
+
+  requires += no_opendds_safety_profile
+
+  expand(BENCH_BUILDER_ROOT) {
+    $BENCH_BUILDER_ROOT
+    $(DDS_ROOT)/performance-tests/bench_2
+  }
+
+  libout = $(BENCH_BUILDER_ROOT)/lib
+
+  Idl_Files {
+    Builder.idl
+  }
+
+  TypeSupport_Files {
+    Builder.idl
+  }
+}
+

@@ -1883,8 +1883,8 @@ bool CryptoBuiltInImpl::decode_datawriter_submessage(
     return CommonUtilities::set_security_error(ex, -1, 0, "Invalid Datawriter handle");
   }
 
-  if (security_debug.encdec) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {encdec} CryptoBuiltInImpl::decode_datawriter_submessage ")
+  if (security_debug.encdec_debug) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {encdec_debug} CryptoBuiltInImpl::decode_datawriter_submessage ")
       ACE_TEXT("Sending DWCH is %u, Receiving DRCH is %u\n"),
       sending_datawriter_crypto, receiving_datareader_crypto));
   }
@@ -1908,8 +1908,8 @@ bool CryptoBuiltInImpl::decode_datareader_submessage(
   //    return CommonUtilities::set_security_error(ex, -1, 0, "Invalid Datawriter handle");
   //  }
 
-  if (security_debug.encdec) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {encdec} CryptoBuiltInImpl::decode_datareader_submessage ")
+  if (security_debug.encdec_debug) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {encdec_debug} CryptoBuiltInImpl::decode_datareader_submessage ")
       ACE_TEXT("Sending DRCH is %u, Receiving DWCH is %u\n"),
       sending_datareader_crypto, receiving_datawriter_crypto));
   }
@@ -1935,8 +1935,8 @@ bool CryptoBuiltInImpl::decode_serialized_payload(
     return CommonUtilities::set_security_error(ex, -1, 0, "Invalid Datawriter handle");
   }
 
-  if (security_debug.encdec) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {encdec} CryptoBuiltInImpl::decode_serialized_payload ")
+  if (security_debug.encdec_debug) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {encdec_debug} CryptoBuiltInImpl::decode_serialized_payload ")
       ACE_TEXT("Sending DWCH is %u, Receiving DRCH is %u\n"),
       sending_datawriter_crypto, receiving_datareader_crypto));
   }
@@ -1948,8 +1948,8 @@ bool CryptoBuiltInImpl::decode_serialized_payload(
   }
   if (!encrypt_options_[sending_datawriter_crypto].payload_) {
     plain_buffer = encoded_buffer;
-    if (security_debug.encdec) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {encdec} CryptoBuiltInImpl::decode_serialized_payload ")
+    if (security_debug.encdec_debug) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {encdec_debug} CryptoBuiltInImpl::decode_serialized_payload ")
         ACE_TEXT("Sending datawriter isn't encrypting as far as we know, returning input as plaintext\n"),
         sending_datawriter_crypto, receiving_datareader_crypto));
     }

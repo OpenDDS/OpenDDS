@@ -1,0 +1,84 @@
+{
+  "enable_time": { "sec": -1, "nsec": 0 },
+  "start_time": { "sec": -3, "nsec": 0 },
+  "stop_time": { "sec": -90, "nsec": 0 },
+  "destruction_time": { "sec": -1, "nsec": 0 },
+
+  "process": {
+    "config_sections": [
+      { "name": "common",
+        "properties": [
+          { "name": "DCPSSecurity",
+            "value": "0"
+          },
+          { "name": "DCPSDebugLevel",
+            "value": "0"
+          }
+        ]
+      }
+    ],
+    "discoveries": [
+      { "name": "bench_test_rtps",
+        "type": "rtps",
+        "domain": 7
+      }
+    ],
+    "instances": [
+      { "name": "rtps_instance_01",
+        "type": "rtps_udp",
+        "domain": 7
+      }
+    ],
+    "participants": [
+      { "name": "participant_01",
+        "domain": 7,
+        "transport_config_name": "rtps_instance_01",
+
+        "qos": { "entity_factory": { "autoenable_created_entities": false } },
+        "qos_mask": { "entity_factory": { "has_autoenable_created_entities": false } },
+
+        "topics": [
+          { "name": "topic_01",
+            "type_name": "Bench::Data"
+          },
+          { "name": "topic_02",
+            "type_name": "Bench::Data"
+          }
+        ],
+        "subscribers": [
+          { "name": "subscriber_01",
+            "datareaders": [
+              { "name": "datareader_01",
+                "topic_name": "topic_01",
+                "listener_type_name": "bench_drl",
+                "listener_status_mask": 4294967295,
+
+                "qos": { "reliability": { "kind": "RELIABLE_RELIABILITY_QOS" } },
+                "qos_mask": { "reliability": { "has_kind": true } }
+              }
+            ]
+          }
+        ],
+        "publishers": [
+          { "name": "publisher_01",
+            "datawriters": [
+              { "name": "datawriter_02",
+                "topic_name": "topic_02",
+                "listener_type_name": "bench_dwl",
+                "listener_status_mask": 4294967295
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "actions": [
+    {
+      "name": "forward_action_01",
+      "type": "forward",
+      "readers": [ "datareader_01" ],
+      "writers": [ "datawriter_02" ]
+    }
+  ]
+}

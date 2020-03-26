@@ -99,14 +99,27 @@ public:
 
 protected:
 
+  enum ReactorState {
+    NONE,
+    NOTIFIED,
+    PROCESSING
+  };
+
   CommandPtr enqueue_i(Command* c, bool immediate)
   {
     c->reset();
     c->set_reactor(reactor());
+    bool do_notify = false;
     const CommandPtr command(c, keep_count());
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, CommandPtr());
-    command_queue_.push(command);
-    if (!immediate) {
+    {
+      ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+      command_queue_.push_back(command);
+      if (state_ == NONE) {
+        state_ = NOTIFIED;
+        do_notify = true;
+      }
+    }
+    if (!immediate && do_notify) {
       reactor()->notify(this);
     }
     return command;
@@ -121,7 +134,8 @@ protected:
 
   ACE_thread_t owner_;
   ACE_Thread_Mutex mutex_;
-  OPENDDS_QUEUE(CommandPtr) command_queue_;
+  OPENDDS_DEQUE(CommandPtr) command_queue_;
+  ReactorState state_;
 };
 
 typedef RcHandle<ReactorInterceptor> ReactorInterceptor_rch;
