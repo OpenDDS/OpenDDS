@@ -13,63 +13,24 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include <ace/Time_Value.h>
-#include "dds/Versioned_Namespace.h"
+#include "EndpointManager.h"
+#include "Ice.h"
+#include "Task.h"
 
 #include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/NetworkConfigMonitor.h"
 #include "dds/DCPS/ReactorInterceptor.h"
 #include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/NetworkConfigMonitor.h"
+#include "dds/Versioned_Namespace.h"
 
-#include "Ice.h"
+#include <ace/Time_Value.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace ICE {
 
-struct Task;
-struct EndpointManager;
-
-typedef std::pair<std::string, std::string> FoundationType;
 typedef std::vector<FoundationType> FoundationList;
-
-class ActiveFoundationSet {
-public:
-  void add(const FoundationType& a_foundation)
-  {
-    std::pair<FoundationsType::iterator, bool> x = foundations_.insert(std::make_pair(a_foundation, 0));
-    x.first->second += 1;
-  }
-
-  bool remove(const FoundationType& a_foundation)
-  {
-    FoundationsType::iterator pos = foundations_.find(a_foundation);
-    OPENDDS_ASSERT(pos != foundations_.end());
-    pos->second -= 1;
-
-    if (pos->second == 0) {
-      foundations_.erase(pos);
-      return true;
-    }
-
-    return false;
-  }
-
-  bool contains(const FoundationType& a_foundation) const
-  {
-    return foundations_.find(a_foundation) != foundations_.end();
-  }
-
-  bool operator==(const ActiveFoundationSet& a_other) const
-  {
-    return foundations_ == a_other.foundations_;
-  }
-
-private:
-  typedef std::map<FoundationType, size_t> FoundationsType;
-  FoundationsType foundations_;
-};
 
 class AgentImpl : public Agent, public DCPS::ReactorInterceptor, public DCPS::ShutdownListener, public virtual DCPS::NetworkConfigListener {
 public:
@@ -115,7 +76,7 @@ public:
                const ACE_INET_Addr& a_remote_address,
                const STUN::Message& a_message);
 
-  void enqueue(Task* a_task);
+  void enqueue(const DCPS::MonotonicTimePoint& a_release_time, WeakTaskPtr a_task);
 
   size_t remote_peer_reflexive_counter()
   {
@@ -152,12 +113,23 @@ private:
   bool ncm_listener_added_;
   Configuration configuration_;
   size_t remote_peer_reflexive_counter_;
-  typedef std::map<Endpoint*, EndpointManager*> EndpointManagerMapType;
+  typedef std::map<Endpoint*, EndpointManagerPtr> EndpointManagerMapType;
   EndpointManagerMapType endpoint_managers_;
-  struct TaskCompare {
-    bool operator()(const Task* x, const Task* y) const;
+  struct Item {
+    DCPS::MonotonicTimePoint release_time_;
+    WeakTaskPtr task_;
+    Item(const DCPS::MonotonicTimePoint& release_time,
+         WeakTaskPtr task)
+      : release_time_(release_time)
+      , task_(task)
+    {}
+    bool operator<(const Item& other) const
+    {
+      return this->release_time_ > other.release_time_;
+    }
   };
-  std::priority_queue<Task*, std::vector<Task*>, TaskCompare> tasks_;
+  std::priority_queue<Item> tasks_;
+  DCPS::MonotonicTimePoint last_execute_;
 
   bool reactor_is_shut_down() const;
   int handle_timeout(const ACE_Time_Value& a_now, const void* /*act*/);

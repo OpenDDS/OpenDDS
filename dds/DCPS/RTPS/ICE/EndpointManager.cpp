@@ -7,12 +7,14 @@
 
 #include "EndpointManager.h"
 
-#include <ace/Reverse_Lock_T.h>
-#include "dds/DCPS/security/framework/SecurityRegistry.h"
-#include "dds/DCPS/security/framework/SecurityConfig.h"
-#include "dds/DCPS/SafetyProfileStreams.h"
-
+#include "AgentImpl.h"
 #include "Checklist.h"
+
+#include "dds/DCPS/SafetyProfileStreams.h"
+#include "dds/DCPS/security/framework/SecurityConfig.h"
+#include "dds/DCPS/security/framework/SecurityRegistry.h"
+
+#include <ace/Reverse_Lock_T.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -26,11 +28,10 @@ using DCPS::MonotonicTimePoint;
 EndpointManager::EndpointManager(AgentImpl* a_agent_impl, Endpoint* a_endpoint) :
   agent_impl(a_agent_impl),
   endpoint(a_endpoint),
-  scheduled_for_destruction_(false),
   requesting_(true),
   send_count_(0),
-  server_reflexive_task_(this),
-  change_password_task_(this)
+  server_reflexive_task_(DCPS::make_rch<ServerReflexiveTask>(rchandle_from(this))),
+  change_password_task_(DCPS::make_rch<ChangePasswordTask>(rchandle_from(this)))
 {
 
   binding_request_.clear_transaction_id();
@@ -56,7 +57,7 @@ void EndpointManager::start_ice(const DCPS::RepoId& a_local_guid,
   GuidPair guidp(a_local_guid, a_remote_guid);
 
   // Try to find by guid.
-  Checklist* guid_checklist = 0;
+  ChecklistPtr guid_checklist;
   {
     GuidPairToChecklistType::const_iterator pos = guid_pair_to_checklist_.find(guidp);
 
@@ -66,7 +67,7 @@ void EndpointManager::start_ice(const DCPS::RepoId& a_local_guid,
   }
 
   // Try to find by username.
-  Checklist* username_checklist = 0;
+  ChecklistPtr username_checklist;
   {
     UsernameToChecklistType::const_iterator pos = username_to_checklist_.find(a_remote_agent_info.username);
 
@@ -117,7 +118,7 @@ void EndpointManager::stop_ice(const DCPS::RepoId& a_local_guid,
   GuidPairToChecklistType::const_iterator pos = guid_pair_to_checklist_.find(guidp);
 
   if (pos != guid_pair_to_checklist_.end()) {
-    Checklist* guid_checklist = pos->second;
+    ChecklistPtr guid_checklist = pos->second;
     guid_checklist->remove_guid(guidp);
   }
 }
@@ -240,11 +241,11 @@ void EndpointManager::regenerate_agent_info(bool password_only)
     for (UsernameToChecklistType::const_iterator pos = old_checklists.begin(),
          limit = old_checklists.end();
          pos != limit; ++pos) {
-      Checklist* old_checklist = pos->second;
+      ChecklistPtr old_checklist = pos->second;
       AgentInfo const remote_agent_info = old_checklist->original_remote_agent_info();
       GuidSetType const guids = old_checklist->guids();
       old_checklist->remove_guids();
-      Checklist* new_checklist = create_checklist(remote_agent_info);
+      ChecklistPtr new_checklist = create_checklist(remote_agent_info);
       new_checklist->add_guids(guids);
     }
   }
@@ -372,9 +373,9 @@ bool EndpointManager::error_response(const STUN::Message& a_message)
   return true;
 }
 
-Checklist* EndpointManager::create_checklist(const AgentInfo& remote_agent_info)
+ChecklistPtr EndpointManager::create_checklist(const AgentInfo& remote_agent_info)
 {
-  Checklist* checklist = new Checklist(this, agent_info_, remote_agent_info, ice_tie_breaker_);
+  ChecklistPtr checklist = DCPS::make_rch<Checklist>(this, DCPS::ref(agent_info_), DCPS::ref(remote_agent_info), ice_tie_breaker_);
   // Add the deferred triggered first in case there was a nominating check.
   DeferredTriggeredChecksType::iterator pos = deferred_triggered_checks_.find(remote_agent_info.username);
 
@@ -542,7 +543,7 @@ void EndpointManager::request(const ACE_INET_Addr& a_local_address,
 
     if (pos != username_to_checklist_.end()) {
       // We have a checklist.
-      Checklist* checklist = pos->second;
+      ChecklistPtr checklist = pos->second;
       checklist->generate_triggered_check(a_local_address, a_remote_address, priority, use_candidate);
     }
 
@@ -696,7 +697,7 @@ void EndpointManager::compute_active_foundations(ActiveFoundationSet& a_active_f
 {
   for (UsernameToChecklistType::const_iterator pos = username_to_checklist_.begin(),
        limit = username_to_checklist_.end(); pos != limit; ++pos) {
-    const Checklist* checklist = pos->second;
+    ChecklistPtr checklist = pos->second;
     checklist->compute_active_foundations(a_active_foundations);
   }
 }
@@ -705,19 +706,8 @@ void EndpointManager::check_invariants() const
 {
   for (UsernameToChecklistType::const_iterator pos = username_to_checklist_.begin(),
        limit = username_to_checklist_.end(); pos != limit; ++pos) {
-    const Checklist* checklist = pos->second;
+    ChecklistPtr checklist = pos->second;
     checklist->check_invariants();
-  }
-}
-
-void EndpointManager::schedule_for_destruction()
-{
-  scheduled_for_destruction_ = true;
-  UsernameToChecklistType old_checklists = username_to_checklist_;
-
-  for (UsernameToChecklistType::const_iterator pos = old_checklists.begin(),
-       limit = old_checklists.end(); pos != limit; ++pos) {
-    pos->second->remove_guids();
   }
 }
 
@@ -737,7 +727,7 @@ void EndpointManager::unfreeze(const FoundationType& a_foundation)
   }
 }
 
-EndpointManager::ServerReflexiveTask::ServerReflexiveTask(EndpointManager* a_endpoint_manager)
+EndpointManager::ServerReflexiveTask::ServerReflexiveTask(DCPS::RcHandle<EndpointManager> a_endpoint_manager)
   : Task(a_endpoint_manager->agent_impl),
     endpoint_manager(a_endpoint_manager)
 {
@@ -746,26 +736,27 @@ EndpointManager::ServerReflexiveTask::ServerReflexiveTask(EndpointManager* a_end
 
 void EndpointManager::ServerReflexiveTask::execute(const MonotonicTimePoint& a_now)
 {
-  if (endpoint_manager->scheduled_for_destruction_) {
-    delete endpoint_manager;
-    return;
+  DCPS::RcHandle<EndpointManager> em = endpoint_manager.lock();
+  if (em) {
+    em->server_reflexive_task(a_now);
+    enqueue(a_now + em->agent_impl->get_configuration().server_reflexive_address_period());
   }
-
-  endpoint_manager->server_reflexive_task(a_now);
-  enqueue(a_now + endpoint_manager->agent_impl->get_configuration().server_reflexive_address_period());
 }
 
-EndpointManager::ChangePasswordTask::ChangePasswordTask(EndpointManager* a_endpoint_manager)
+EndpointManager::ChangePasswordTask::ChangePasswordTask(DCPS::RcHandle<EndpointManager> a_endpoint_manager)
   : Task(a_endpoint_manager->agent_impl),
     endpoint_manager(a_endpoint_manager)
 {
-  enqueue(MonotonicTimePoint::now() + endpoint_manager->agent_impl->get_configuration().change_password_period());
+  enqueue(MonotonicTimePoint::now() + a_endpoint_manager->agent_impl->get_configuration().change_password_period());
 }
 
 void EndpointManager::ChangePasswordTask::execute(const MonotonicTimePoint& a_now)
 {
-  endpoint_manager->change_password(true);
-  enqueue(a_now + endpoint_manager->agent_impl->get_configuration().change_password_period());
+  DCPS::RcHandle<EndpointManager> em = endpoint_manager.lock();
+  if (em) {
+    em->change_password(true);
+    enqueue(a_now + em->agent_impl->get_configuration().change_password_period());
+  }
 }
 
 void EndpointManager::network_change()
@@ -776,6 +767,14 @@ void EndpointManager::network_change()
 void EndpointManager::send(const ACE_INET_Addr& address, const STUN::Message& message)
 {
   endpoint->send(address, message);
+}
+
+void EndpointManager::purge()
+{
+  UsernameToChecklistType checklists = username_to_checklist_;
+  for (UsernameToChecklistType::const_iterator pos = checklists.begin(), limit = checklists.end(); pos != limit; ++pos) {
+    pos->second->remove_guids();
+  }
 }
 
 #endif /* OPENDDS_SECURITY */

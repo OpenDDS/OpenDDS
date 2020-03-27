@@ -22,11 +22,6 @@ namespace ICE {
 using DCPS::TimeDuration;
 using DCPS::MonotonicTimePoint;
 
-bool AgentImpl::TaskCompare::operator()(const Task* x, const Task* y) const
-{
-  return x->release_time_ > y->release_time_;
-}
-
 struct ScheduleTimerCommand : public DCPS::ReactorInterceptor::Command {
   ACE_Reactor* reactor;
   ACE_Event_Handler* event_handler;
@@ -42,17 +37,14 @@ struct ScheduleTimerCommand : public DCPS::ReactorInterceptor::Command {
   }
 };
 
-void AgentImpl::enqueue(Task* a_task)
+void AgentImpl::enqueue(const DCPS::MonotonicTimePoint& a_release_time,
+                        WeakTaskPtr wtask)
 {
-  if (!a_task->in_queue_) {
-    tasks_.push(a_task);
-    a_task->in_queue_ = true;
-
-    if (a_task == tasks_.top()) {
-      const TimeDuration delay = std::max(get_configuration().T_a(), a_task->release_time_ - MonotonicTimePoint::now());
-      execute_or_enqueue(new ScheduleTimerCommand(reactor(), this, delay));
-    }
+  if (tasks_.empty() || a_release_time < tasks_.top().release_time_) {
+    const MonotonicTimePoint release = std::max(last_execute_ + get_configuration().T_a(), a_release_time);
+    execute_or_enqueue(new ScheduleTimerCommand(reactor(), this, release - MonotonicTimePoint::now()));
   }
+  tasks_.push(Item(a_release_time, wtask));
 }
 
 bool AgentImpl::reactor_is_shut_down() const
@@ -70,17 +62,22 @@ int AgentImpl::handle_timeout(const ACE_Time_Value& a_now, const void* /*act*/)
     return 0;
   }
 
-  Task* task = tasks_.top();
-  tasks_.pop();
-  task->in_queue_ = false;
+  if (tasks_.top().release_time_ <= now) {
+    Item item = tasks_.top();
+    tasks_.pop();
 
-  task->execute(now);
+    TaskPtr task = item.task_.lock();
+    if (task) {
+      task->execute(now);
+      last_execute_ = now;
+    }
+  }
   process_deferred();
   check_invariants();
 
   if (!tasks_.empty()) {
-    const TimeDuration delay = std::max(get_configuration().T_a(), tasks_.top()->release_time_ - now);
-    execute_or_enqueue(new ScheduleTimerCommand(reactor(), this, delay));
+    const MonotonicTimePoint release = std::max(last_execute_ + get_configuration().T_a(), tasks_.top().release_time_);
+    execute_or_enqueue(new ScheduleTimerCommand(reactor(), this, release - now));
   }
 
   return 0;
@@ -101,7 +98,7 @@ void AgentImpl::add_endpoint(Endpoint* a_endpoint)
   check_invariants();
 
   if (endpoint_managers_.find(a_endpoint) == endpoint_managers_.end()) {
-    EndpointManager* em = new EndpointManager(this, a_endpoint);
+    EndpointManagerPtr em = DCPS::make_rch<EndpointManager>(this, a_endpoint);
     endpoint_managers_[a_endpoint] = em;
   }
 
@@ -124,9 +121,9 @@ void AgentImpl::remove_endpoint(Endpoint* a_endpoint)
   EndpointManagerMapType::iterator pos = endpoint_managers_.find(a_endpoint);
 
   if (pos != endpoint_managers_.end()) {
-    EndpointManager* em = pos->second;
+    EndpointManagerPtr em = pos->second;
+    em->purge();
     endpoint_managers_.erase(pos);
-    em->schedule_for_destruction();
   }
 
   check_invariants();
