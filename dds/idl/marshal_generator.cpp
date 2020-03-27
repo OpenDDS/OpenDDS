@@ -1794,36 +1794,51 @@ bool marshal_generator::gen_struct(AST_Structure* node,
   if (be_global->printer()) {
     be_global->add_include("<dds/DCPS/Printer.h>");
     PreprocessorIfGuard g("ndef OPENDDS_SAFETY_PROFILE");
+    g.extra_newline(true);
     Function shift("operator<<", "std::ostream&");
     shift.addArg("strm", "Printable");
     shift.addArg("stru", "const " + cxx + "&");
     shift.endArgs();
+    shift.extra_newline_ = false;
     string intro;
     string expr = "  strm.push_indent();\n";
     for (size_t i = 0; i < fields.size(); ++i) {
       const string field_name = fields[i]->local_name()->get_string();
-      const bool composite_type =
-        resolveActualType(fields[i]->field_type())->node_type() == AST_Decl::NT_struct;
+      AST_Type* const field_type = resolveActualType(fields[i]->field_type());
+      const AST_Decl::NodeType node_type = field_type->node_type();
+      const bool is_composite_type = node_type == AST_Decl::NT_struct;
+      const bool is_string_type = node_type == AST_Decl::NT_string ||
+        node_type == AST_Decl::NT_wstring;
       expr +=
+        "\n"
+        "  // Print " + field_name  + "\n"
         "  strm.print_indent();\n"
         "  if (strm.printer().print_field_names()) {\n"
         "    strm.os() << \"" + field_name + ":";
-      if (composite_type) {
+      if (is_composite_type) {
         expr += "\" << std::endl";
       } else {
         expr += " \"";
       }
       expr += ";\n"
         "  }\n";
+      if (is_string_type) {
+        expr +=
+          "  strm.os() << '\"';\n";
+      }
       expr +=
         "  " + streamCommon(
           field_name, fields[i]->field_type(), "<< stru", intro, cxx, true);
-      if (!composite_type) {
+      if (is_string_type) {
+        expr += " << '\"'";
+      }
+      if (!is_composite_type) {
         expr += " << std::endl";
       }
       expr += ";\n";
     }
     be_global->impl_ << intro << expr <<
+      "\n"
       "  return strm.os();\n";
   }
 

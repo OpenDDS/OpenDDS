@@ -184,9 +184,11 @@ struct ScopedNamespaceGuard  {
 struct Function {
   bool has_arg_;
   std::string preamble_;
+  bool extra_newline_;
 
   Function(const char* name, const char* returntype)
     : has_arg_(false)
+    , extra_newline_(true)
   {
     using std::string;
     ACE_CString ace_exporter = be_global->export_macro();
@@ -217,7 +219,10 @@ struct Function {
 
   ~Function()
   {
-    be_global->impl_ << "}\n\n";
+    be_global->impl_ << "}\n";
+    if (extra_newline_) {
+      be_global->impl_ << "\n";
+    }
   }
 };
 
@@ -231,6 +236,7 @@ public:
   , impl_(impl)
   , header_(header)
   , indent_(indent)
+  , extra_newline_(false)
   {
     output("#" + indent + "if" + what + "\n");
   }
@@ -238,6 +244,9 @@ public:
   ~PreprocessorIfGuard()
   {
     output("#" + indent_ + "endif // if" + what_ + "\n");
+    if (extra_newline_) {
+      output("\n");
+    }
   }
 
   void output(const std::string& str) const
@@ -250,11 +259,17 @@ public:
     }
   }
 
+  void extra_newline(bool value)
+  {
+    extra_newline_ = value;
+  }
+
 private:
   const std::string what_;
   const bool impl_;
   const bool header_;
   const std::string indent_;
+  bool extra_newline_;
 };
 
 inline std::string scoped(UTL_ScopedName* sn)
