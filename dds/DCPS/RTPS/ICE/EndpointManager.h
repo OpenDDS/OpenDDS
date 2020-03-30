@@ -238,14 +238,14 @@ private:
 
   struct ServerReflexiveTask : public Task {
     DCPS::WeakRcHandle<EndpointManager> endpoint_manager;
-    ServerReflexiveTask(DCPS::RcHandle<EndpointManager> a_endpoint_manager);
+    explicit ServerReflexiveTask(DCPS::RcHandle<EndpointManager> a_endpoint_manager);
     void execute(const DCPS::MonotonicTimePoint& a_now);
   };
   DCPS::RcHandle<ServerReflexiveTask> server_reflexive_task_;
 
   struct ChangePasswordTask : public Task {
     DCPS::WeakRcHandle<EndpointManager> endpoint_manager;
-    ChangePasswordTask(DCPS::RcHandle<EndpointManager> a_endpoint_manager);
+    explicit ChangePasswordTask(DCPS::RcHandle<EndpointManager> a_endpoint_manager);
     void execute(const DCPS::MonotonicTimePoint& a_now);
   };
   DCPS::RcHandle<ChangePasswordTask> change_password_task_;

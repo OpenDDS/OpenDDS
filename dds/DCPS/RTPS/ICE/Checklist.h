@@ -32,14 +32,14 @@ public:
   void add(const FoundationType& a_foundation)
   {
     std::pair<FoundationsType::iterator, bool> x = foundations_.insert(std::make_pair(a_foundation, 0));
-    x.first->second += 1;
+    ++x.first->second;
   }
 
   bool remove(const FoundationType& a_foundation)
   {
     FoundationsType::iterator pos = foundations_.find(a_foundation);
     OPENDDS_ASSERT(pos != foundations_.end());
-    pos->second -= 1;
+    --pos->second;
 
     if (pos->second == 0) {
       foundations_.erase(pos);

@@ -125,7 +125,7 @@ private:
     {}
     bool operator<(const Item& other) const
     {
-      return this->release_time_ > other.release_time_;
+      return release_time_ > other.release_time_;
     }
   };
   std::priority_queue<Item> tasks_;

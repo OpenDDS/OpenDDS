@@ -26,7 +26,7 @@ namespace ICE {
 class AgentImpl;
 
 struct Task : public DCPS::RcObject {
-  Task(AgentImpl* a_agent_impl) : agent_impl_(a_agent_impl) {}
+  explicit Task(AgentImpl* a_agent_impl) : agent_impl_(a_agent_impl) {}
   virtual ~Task() {};
   virtual void execute(const DCPS::MonotonicTimePoint& a_now) = 0;
   void enqueue(const DCPS::MonotonicTimePoint& release_time);
