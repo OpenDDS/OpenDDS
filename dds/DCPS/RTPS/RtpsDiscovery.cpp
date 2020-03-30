@@ -55,6 +55,9 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   , ttl_(1)
   , sedp_multicast_(true)
   , default_multicast_group_("239.255.0.1") /*RTPS v2.1 9.6.1.4.1*/
+#ifdef ACE_HAS_IPV6
+  , default_multicast_ipv6_group_("FF03::1")
+#endif
   , max_auth_time_(300, 0)
   , auth_resend_period_(1, 0)
   , max_spdp_sequence_msg_reset_check_(3)
@@ -663,6 +666,33 @@ RtpsDiscovery::get_sedp_port(DDS::DomainId_t domain,
 
   return 0;
 }
+
+#ifdef ACE_HAS_IPV6
+
+u_short
+RtpsDiscovery::get_ipv6_spdp_port(DDS::DomainId_t domain,
+                                  const DCPS::RepoId& local_participant) const
+{
+  ParticipantHandle p = get_part(domain, local_participant);
+  if (p) {
+    return p->get_ipv6_spdp_port();
+  }
+
+  return 0;
+}
+
+u_short
+RtpsDiscovery::get_ipv6_sedp_port(DDS::DomainId_t domain,
+                                  const DCPS::RepoId& local_participant) const
+{
+  ParticipantHandle p = get_part(domain, local_participant);
+  if (p) {
+    return p->get_ipv6_sedp_port();
+  }
+
+  return 0;
+}
+#endif
 
 void
 RtpsDiscovery::spdp_rtps_relay_address(const ACE_INET_Addr& address)

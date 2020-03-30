@@ -213,6 +213,19 @@ public:
     default_multicast_group_ = group;
   }
 
+#ifdef ACE_HAS_IPV6
+  OPENDDS_STRING default_multicast_ipv6_group() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, "");
+    return default_multicast_ipv6_group_;
+  }
+  void default_multicast_ipv6_group(const OPENDDS_STRING& group)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    default_multicast_ipv6_group_ = group;
+  }
+#endif
+
   AddrVec spdp_send_addrs() const
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, AddrVec());
@@ -377,6 +390,9 @@ private:
   bool sedp_multicast_;
   OPENDDS_STRING multicast_interface_, sedp_local_address_, spdp_local_address_;
   OPENDDS_STRING default_multicast_group_;  /// FUTURE: handle > 1 group.
+#ifdef ACE_HAS_IPV6
+  OPENDDS_STRING default_multicast_ipv6_group_;
+#endif
   OPENDDS_STRING guid_interface_;
   AddrVec spdp_send_addrs_;
   DCPS::TimeDuration max_auth_time_;
@@ -504,7 +520,12 @@ public:
                         const DCPS::RepoId& local_participant) const;
   u_short get_sedp_port(DDS::DomainId_t domain,
                         const DCPS::RepoId& local_participant) const;
-
+#ifdef ACE_HAS_IPV6
+  u_short get_ipv6_spdp_port(DDS::DomainId_t domain,
+                             const DCPS::RepoId& local_participant) const;
+  u_short get_ipv6_sedp_port(DDS::DomainId_t domain,
+                             const DCPS::RepoId& local_participant) const;
+#endif
   void spdp_rtps_relay_address(const ACE_INET_Addr& address);
   void sedp_rtps_relay_address(const ACE_INET_Addr& address);
   void sedp_stun_server_address(const ACE_INET_Addr& address);

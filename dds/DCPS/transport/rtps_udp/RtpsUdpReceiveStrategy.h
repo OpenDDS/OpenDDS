@@ -78,6 +78,8 @@ public:
 private:
   bool getDirectedWriteReaders(RepoIdSet& directedWriteReaders, const RTPS::DataSubmessage& ds) const;
 
+  const ACE_SOCK_Dgram& choose_recv_socket(ACE_HANDLE fd) const;
+
   virtual ssize_t receive_bytes(iovec iov[],
                                 int n,
                                 ACE_INET_Addr& remote_address,

@@ -32,10 +32,10 @@ LinuxNetworkConfigMonitor::LinuxNetworkConfigMonitor(ReactorInterceptor_rch inte
 
 bool LinuxNetworkConfigMonitor::open()
 {
-  // Listener to changes in links and IPV4 addresses.
+  // Listen to changes in links and IPV4 and IPV6 addresses.
   const pid_t pid = getpid();
   ACE_Netlink_Addr addr;
-  addr.set(pid, RTMGRP_NOTIFY | RTMGRP_LINK | RTMGRP_IPV4_IFADDR);
+  addr.set(pid, RTMGRP_NOTIFY | RTMGRP_LINK | RTMGRP_IPV4_IFADDR | RTMGRP_IPV6_IFADDR);
   if (socket_.open(addr, AF_NETLINK, NETLINK_ROUTE) != 0) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: LinuxNetworkConfigMonitor::open: could not open socket: %m\n")));
     return false;
@@ -153,6 +153,9 @@ void LinuxNetworkConfigMonitor::process_message(const nlmsghdr* header)
       case AF_INET:
         address_length = 4;
         break;
+      case AF_INET6:
+        address_length = 16;
+        break;
       default:
         return;
       }
@@ -179,6 +182,9 @@ void LinuxNetworkConfigMonitor::process_message(const nlmsghdr* header)
       switch (msg->ifa_family) {
       case AF_INET:
         address_length = 4;
+        break;
+      case AF_INET6:
+        address_length = 16;
         break;
       default:
         return;

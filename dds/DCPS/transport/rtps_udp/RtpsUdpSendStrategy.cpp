@@ -224,11 +224,25 @@ RtpsUdpSendStrategy::send_multi_i(const iovec iov[], int n,
   return result;
 }
 
+const ACE_SOCK_Dgram&
+RtpsUdpSendStrategy::choose_send_socket(const ACE_INET_Addr& addr) const
+{
+#ifdef ACE_HAS_IPV6
+  if (addr.get_type() == AF_INET6) {
+    return link_->ipv6_unicast_socket();
+  }
+#endif
+  ACE_UNUSED_ARG(addr);
+  return link_->unicast_socket();
+}
+
 ssize_t
 RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
                                    const ACE_INET_Addr& addr)
 {
   const ACE_INET_Addr a = link_->config().rtps_relay_only_ ? link_->config().rtps_relay_address() : addr;
+  const ACE_SOCK_Dgram& socket = choose_send_socket(a);
+
 #ifdef ACE_LACKS_SENDMSG
   char buffer[UDP_MAX_MESSAGE_SIZE];
   char *iter = buffer;
@@ -241,9 +255,9 @@ RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
     std::memcpy(iter, iov[i].iov_base, iov[i].iov_len);
     iter += iov[i].iov_len;
   }
-  const ssize_t result = link_->unicast_socket().send(buffer, iter - buffer, a);
+  const ssize_t result = socket.send(buffer, iter - buffer, a);
 #else
-  const ssize_t result = link_->unicast_socket().send(iov, n, a);
+  const ssize_t result = socket.send(iov, n, a);
 #endif
   if (result < 0) {
     const int err = errno;

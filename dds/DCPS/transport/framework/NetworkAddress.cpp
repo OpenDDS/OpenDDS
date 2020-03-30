@@ -344,7 +344,7 @@ bool set_socket_multicast_ttl(const ACE_SOCK_Dgram& socket, const unsigned char&
 {
   ACE_HANDLE handle = socket.get_handle();
   const void* ttlp = &ttl;
-#if defined(ACE_LINUX) || defined(__linux__)
+#if defined(ACE_LINUX) || defined(__linux__) || defined(ACE_HAS_MAC_OSX)
   int ttl_2 = ttl;
   ttlp = &ttl_2;
 #define TTL ttl_2

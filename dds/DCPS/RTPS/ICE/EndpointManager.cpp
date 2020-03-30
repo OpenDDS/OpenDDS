@@ -181,14 +181,32 @@ void EndpointManager::change_password(bool password_only)
 void EndpointManager::set_host_addresses(const AddressListType& a_host_addresses)
 {
   // Section IETF RFC 8445 5.1.1.1
-  // TODO(jrw972):  Handle IPv6.
   AddressListType host_addresses;
 
   for (AddressListType::const_iterator pos = a_host_addresses.begin(), limit = a_host_addresses.end();
        pos != limit; ++pos) {
+    OPENDDS_ASSERT(!pos->is_any());
+
     if (pos->is_loopback()) {
       continue;
     }
+
+#if ACE_HAS_IPV6
+    if (pos->is_ipv4_compat_ipv6()) {
+      continue;
+    }
+
+    // TODO(jrw972):  Include once supported in ACE.
+    // if (pos->is_sitelocal()) {
+    //   continue;
+    // }
+
+#if !IPV6_ONLY
+    if (pos->is_ipv4_mapped_ipv6()) {
+      continue;
+    }
+#endif
+#endif
 
     host_addresses.push_back(*pos);
   }

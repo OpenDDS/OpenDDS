@@ -36,6 +36,10 @@ public:
   unsigned char ttl_;
   ACE_INET_Addr multicast_group_address_;
   OPENDDS_STRING multicast_group_address_str_;
+#ifdef ACE_HAS_IPV6
+  ACE_INET_Addr ipv6_multicast_group_address_;
+  OPENDDS_STRING ipv6_multicast_group_address_str_;
+#endif
   OPENDDS_STRING multicast_interface_;
 
   size_t nak_depth_;
@@ -73,6 +77,38 @@ public:
     local_address_.set_port_number(port_number);
     set_port_in_addr_string(local_address_config_str_, port_number);
   }
+  void local_address(const ACE_INET_Addr& addr)
+  {
+    local_address_ = addr;
+    ACE_TCHAR buffer[256];
+    local_address_.addr_to_string(buffer, 256);
+    local_address_config_str_ = buffer;
+  }
+#ifdef ACE_HAS_IPV6
+  OPENDDS_STRING ipv6_local_address_string() const { return ipv6_local_address_config_str_; }
+  ACE_INET_Addr ipv6_local_address() const { return ipv6_local_address_; }
+  void ipv6_local_address(const char* str)
+  {
+    ipv6_local_address_config_str_ = str;
+    ipv6_local_address_.set(str);
+  }
+  void ipv6_local_address(u_short port_number, const char* host_name)
+  {
+    ipv6_local_address_config_str_ = OPENDDS_STRING("[") + host_name + "]" + ":" + to_dds_string(port_number);
+    ipv6_local_address_.set(port_number, host_name);
+  }
+  void ipv6_local_address_set_port(u_short port_number) {
+    ipv6_local_address_.set_port_number(port_number);
+    set_port_in_addr_string(ipv6_local_address_config_str_, port_number);
+  }
+  void ipv6_local_address(const ACE_INET_Addr& addr)
+  {
+    ipv6_local_address_ = addr;
+    ACE_TCHAR buffer[256];
+    ipv6_local_address_.addr_to_string(buffer, 256);
+    ipv6_local_address_config_str_ = buffer;
+  }
+#endif
 
   /// Relay address and stun server address may change, these use a mutex
   ///{
@@ -105,14 +141,12 @@ private:
 
   ACE_INET_Addr local_address_;
   OPENDDS_STRING local_address_config_str_;
+  ACE_INET_Addr ipv6_local_address_;
+  OPENDDS_STRING ipv6_local_address_config_str_;
   ACE_INET_Addr rtps_relay_address_;
   mutable ACE_SYNCH_MUTEX rtps_relay_config_lock_;
   ACE_INET_Addr stun_server_address_;
   mutable ACE_SYNCH_MUTEX stun_server_config_lock_;
-
-#ifdef OPENDDS_SECURITY
-  ICE::AddressListType host_addresses() const;
-#endif
 };
 
 inline void RtpsUdpInst::rtps_relay_address(const ACE_INET_Addr& address)

@@ -78,18 +78,43 @@ RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
                         unicast_socket_.get_handle()),
                        RtpsUdpDataLink_rch());
     }
+#ifdef ACE_HAS_IPV6
+    if (reactor()->remove_handler(ipv6_unicast_socket_.get_handle(), ACE_Event_Handler::READ_MASK) != 0) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: ")
+                        ACE_TEXT("RtpsUdpReceiveStrategy::start_i: ")
+                        ACE_TEXT("failed to unregister handler for ipv6 unicast ")
+                        ACE_TEXT("socket %d\n"),
+                        ipv6_unicast_socket_.get_handle()),
+                       RtpsUdpDataLink_rch());
+    }
+#endif
   }
-  if (!link->open(unicast_socket_)) {
+
+  if (!link->open(unicast_socket_
+#ifdef ACE_HAS_IPV6
+                  , ipv6_unicast_socket_
+#endif
+                  )) {
     ACE_ERROR((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("RtpsUdpTransport::make_datalink: ")
-                      ACE_TEXT("failed to open DataLink for socket %d\n"),
-                      unicast_socket_.get_handle()));
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("RtpsUdpTransport::make_datalink: ")
+               ACE_TEXT("failed to open DataLink for sockets %d %d\n"),
+               unicast_socket_.get_handle(),
+#ifdef ACE_HAS_IPV6
+               ipv6_unicast_socket_.get_handle()
+#else
+               -1
+#endif
+               ));
     return RtpsUdpDataLink_rch();
   }
 
   // RtpsUdpDataLink now owns the socket
   unicast_socket_.set_handle(ACE_INVALID_HANDLE);
+#ifdef ACE_HAS_IPV6
+  ipv6_unicast_socket_.set_handle(ACE_INVALID_HANDLE);
+#endif
 
   return link;
 }
@@ -235,7 +260,7 @@ RtpsUdpTransport::get_connection_addr(const TransportBLOB& remote,
   for (CORBA::ULong i = 0; i < locators.length(); ++i) {
     ACE_INET_Addr addr;
     // If conversion was successful
-    if (locator_to_address(addr, locators[i], map_ipv4_to_ipv6()) == 0) {
+    if (locator_to_address(addr, locators[i], false) == 0) {
       // if this is a unicast address, or if we are allowing multicast
       if (!addr.is_multicast() || config().use_multicast_) {
         return addr;
@@ -353,34 +378,60 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
   // detect and report errors during DataReader/Writer setup instead
   // of during association.
 
-  int protocol_family = PF_UNSPEC;
-  if (!open_appropriate_socket_type(unicast_socket_, config.local_address(), &protocol_family)) {
+  ACE_INET_Addr address = config.local_address();
+
+  if (unicast_socket_.open(address, PF_INET) != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("RtpsUdpTransport::configure_i: open_appropriate_socket_type:")
+                      ACE_TEXT("RtpsUdpTransport::configure_i: open:")
                       ACE_TEXT("%m\n")),
-                      false);
+                     false);
   }
 
+  if (unicast_socket_.get_local_addr(address) != 0) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("RtpsUdpTransport::configure_i: get_local_addr:")
+                      ACE_TEXT("%m\n")),
+                     false);
+  }
+
+  config.local_address(address);
+
 #ifdef ACE_RECVPKTINFO
-  if (protocol_family == PF_INET) {
-    int sockopt = 1;
-    if (unicast_socket_.set_option(IPPROTO_IP, ACE_RECVPKTINFO, &sockopt, sizeof sockopt) == -1) {
-      ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsUdpTransport::configure_i: set_option: %m\n")), false);
-    }
+  int sockopt = 1;
+  if (unicast_socket_.set_option(IPPROTO_IP, ACE_RECVPKTINFO, &sockopt, sizeof sockopt) == -1) {
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsUdpTransport::configure_i: set_option: %m\n")), false);
   }
 #endif
 
-  if (config.local_address().get_port_number() == 0) {
+#ifdef ACE_HAS_IPV6
+  address = config.ipv6_local_address();
 
-    ACE_INET_Addr address;
-    if (unicast_socket_.get_local_addr(address) != 0) {
-      ACE_ERROR_RETURN((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::configure_i - %p\n"),
-        ACE_TEXT("cannot get local addr")), false);
-    }
-    config.local_address_set_port(address.get_port_number());
+  if (ipv6_unicast_socket_.open(address, PF_INET6) != 0) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("RtpsUdpTransport::configure_i: open:")
+                      ACE_TEXT("%m\n")),
+                     false);
   }
+
+  if (ipv6_unicast_socket_.get_local_addr(address) != 0) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("RtpsUdpTransport::configure_i: get_local_addr:")
+                      ACE_TEXT("%m\n")),
+                     false);
+  }
+
+  config.ipv6_local_address(address);
+
+#ifdef ACE_RECVPKTINFO6
+  if (ipv6_unicast_socket_.set_option(IPPROTO_IPV6, ACE_RECVPKTINFO6, &sockopt, sizeof sockopt) == -1) {
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsUdpTransport::configure_i: set_option: %m\n")), false);
+  }
+#endif
+#endif
 
   create_reactor_task();
 
@@ -397,6 +448,18 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
                         unicast_socket_.get_handle()),
                        false);
     }
+#ifdef ACE_HAS_IPV6
+    if (reactor()->register_handler(ipv6_unicast_socket_.get_handle(), &ice_endpoint_,
+                                    ACE_Event_Handler::READ_MASK) != 0) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: ")
+                        ACE_TEXT("RtpsUdpReceiveStrategy::start_i: ")
+                        ACE_TEXT("failed to register handler for ipv6 unicast ")
+                        ACE_TEXT("socket %d\n"),
+                        ipv6_unicast_socket_.get_handle()),
+                       false);
+    }
+#endif
   }
 #endif
 
@@ -432,22 +495,22 @@ RtpsUdpTransport::release_datalink(DataLink* /*link*/)
 
 
 
-bool
-RtpsUdpTransport::map_ipv4_to_ipv6() const
+#ifdef OPENDDS_SECURITY
+
+const ACE_SOCK_Dgram&
+RtpsUdpTransport::IceEndpoint::choose_recv_socket(ACE_HANDLE fd) const
 {
-  bool map = false;
-  ACE_INET_Addr tmp;
-  const ACE_SOCK_Dgram& socket = link_ ? link_->unicast_socket() : unicast_socket_;
-  socket.get_local_addr(tmp);
-  if (tmp.get_type() != AF_INET) {
-    map = true;
+#ifdef ACE_HAS_IPV6
+  if (fd == transport.ipv6_unicast_socket_.get_handle()) {
+    return transport.ipv6_unicast_socket_;
   }
-  return map;
+#endif
+  ACE_UNUSED_ARG(fd);
+  return transport.unicast_socket_;
 }
 
-#ifdef OPENDDS_SECURITY
 int
-RtpsUdpTransport::IceEndpoint::handle_input(ACE_HANDLE /*fd*/)
+RtpsUdpTransport::IceEndpoint::handle_input(ACE_HANDLE fd)
 {
   struct iovec iov[1];
   char buffer[0x10000];
@@ -456,7 +519,7 @@ RtpsUdpTransport::IceEndpoint::handle_input(ACE_HANDLE /*fd*/)
   ACE_INET_Addr remote_address;
 
   bool stop;
-  RtpsUdpReceiveStrategy::receive_bytes_helper(iov, 1, transport.unicast_socket_, remote_address, transport.get_ice_endpoint(), stop);
+  RtpsUdpReceiveStrategy::receive_bytes_helper(iov, 1, choose_recv_socket(fd), remote_address, transport.get_ice_endpoint(), stop);
 
   return 0;
 }
@@ -500,13 +563,59 @@ namespace {
 
 ICE::AddressListType
 RtpsUdpTransport::IceEndpoint::host_addresses() const {
-  return transport.config().host_addresses();
+  ICE::AddressListType addresses;
+  ACE_INET_Addr addr;
+
+  transport.unicast_socket_.get_local_addr(addr);
+  if (addr.is_any()) {
+    ICE::AddressListType addrs;
+    DCPS::get_interface_addrs(addrs);
+    for (ICE::AddressListType::iterator pos = addrs.begin(), limit = addrs.end(); pos != limit; ++pos) {
+      if (pos->get_type() == AF_INET) {
+        pos->set_port_number(addr.get_port_number());
+        addresses.push_back(*pos);
+      }
+    }
+  } else {
+    addresses.push_back(addr);
+  }
+
+#ifdef ACE_HAS_IPV6
+  transport.ipv6_unicast_socket_.get_local_addr(addr);
+  if (addr.is_any()) {
+    ICE::AddressListType addrs;
+    DCPS::get_interface_addrs(addrs);
+    for (ICE::AddressListType::iterator pos = addrs.begin(), limit = addrs.end(); pos != limit; ++pos) {
+      if (pos->get_type() == AF_INET6) {
+        pos->set_port_number(addr.get_port_number());
+        addresses.push_back(*pos);
+      }
+    }
+  } else {
+    addresses.push_back(addr);
+  }
+#endif
+
+  return addresses;
+}
+
+ACE_SOCK_Dgram&
+RtpsUdpTransport::IceEndpoint::choose_send_socket(const ACE_INET_Addr& destination) const
+{
+#ifdef ACE_HAS_IPV6
+  if (destination.get_type() == AF_INET6) {
+    return transport.link_ ? transport.link_->ipv6_unicast_socket() : transport.ipv6_unicast_socket_;
+  }
+#endif
+
+  ACE_UNUSED_ARG(destination);
+  return transport.link_ ? transport.link_->unicast_socket() : transport.unicast_socket_;
 }
 
 void
 RtpsUdpTransport::IceEndpoint::send(const ACE_INET_Addr& destination, const STUN::Message& message)
 {
-  ACE_SOCK_Dgram& socket = transport.link_ ? transport.link_->unicast_socket() : transport.unicast_socket_;
+  ACE_SOCK_Dgram& socket = choose_send_socket(destination);
 
   ACE_Message_Block block(20 + message.length());
   DCPS::Serializer serializer(&block, DCPS::Serializer::SWAP_BE);

@@ -1511,10 +1511,8 @@ bool to_param_list(const ICE::AgentInfoMap& ai_map,
            limit = agent_info.candidates.end(); pos != limit; ++pos) {
       IceCandidate_t ice_candidate;
       ice_candidate.key = map_pos->first.c_str();
-      ice_candidate.locator.kind = LOCATOR_KIND_UDPv4;
-      const sockaddr_in* in = static_cast<const sockaddr_in*>(pos->address.get_addr());
-      std::memset(&ice_candidate.locator.address[0], 0, 12);
-      std::memcpy(&ice_candidate.locator.address[12], &in->sin_addr, 4);
+      ice_candidate.locator.kind = address_to_kind(pos->address);
+      address_to_bytes(ice_candidate.locator.address, pos->address);
       ice_candidate.locator.port = pos->address.get_port_number();
       ice_candidate.foundation = pos->foundation.c_str();
       ice_candidate.priority = pos->priority;
@@ -1546,11 +1544,20 @@ bool from_param_list(const ParameterList& param_list,
     case PID_OPENDDS_ICE_CANDIDATE: {
       const IceCandidate_t& ice_candidate = parameter.ice_candidate();
       ICE::Candidate candidate;
-      candidate.address.set_type(AF_INET);
-      if (candidate.address.set_address(reinterpret_cast<const char*>(ice_candidate.locator.address) + 12, 4, 0 /*network order*/) != 0) {
+#if IPV6_ONLY
+      // https://tools.ietf.org/html/rfc8445
+
+      // IPv4-mapped IPv6 addresses SHOULD NOT be included in the
+      // address candidates unless the application using ICE does not
+      // support IPv4 (i.e., it is an IPv6-only application
+      // [RFC4038]).
+      const bool map_ipv4_to_ipv6 = true;
+#else
+      const bool map_ipv4_to_ipv6 = false;
+#endif
+      if (locator_to_address(candidate.address, ice_candidate.locator, map_ipv4_to_ipv6) != 0) {
         return false;
       }
-      candidate.address.set_port_number(ice_candidate.locator.port);
       candidate.foundation = ice_candidate.foundation;
       candidate.priority = ice_candidate.priority;
       candidate.type = static_cast<ICE::CandidateType>(ice_candidate.type);

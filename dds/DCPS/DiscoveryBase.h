@@ -1630,6 +1630,12 @@ namespace OpenDDS {
           location_data_.ice_timestamp.nanosec = 0;
           location_data_.relay_timestamp.sec = 0;
           location_data_.relay_timestamp.nanosec = 0;
+          location_data_.local6_timestamp.sec = 0;
+          location_data_.local6_timestamp.nanosec = 0;
+          location_data_.ice6_timestamp.sec = 0;
+          location_data_.ice6_timestamp.nanosec = 0;
+          location_data_.relay6_timestamp.sec = 0;
+          location_data_.relay6_timestamp.nanosec = 0;
 
 #ifdef OPENDDS_SECURITY
           security_info_.participant_security_attributes = 0;

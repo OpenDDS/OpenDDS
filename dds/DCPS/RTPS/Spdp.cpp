@@ -57,6 +57,22 @@ namespace {
     return false;
   }
 
+  DCPS::ParticipantLocation compute_location_mask(const ACE_INET_Addr& address, bool from_relay)
+  {
+    if (address.get_type() == AF_INET6) {
+      return from_relay ? DCPS::LOCATION_RELAY6 : DCPS::LOCATION_LOCAL6;
+    }
+    return from_relay ? DCPS::LOCATION_RELAY : DCPS::LOCATION_LOCAL;
+  }
+
+  DCPS::ParticipantLocation compute_ice_location_mask(const ACE_INET_Addr& address)
+  {
+    if (address.get_type() == AF_INET6) {
+      return DCPS::LOCATION_ICE6;
+    }
+    return DCPS::LOCATION_ICE;
+  }
+
 #ifdef OPENDDS_SECURITY
   bool operator==(const DDS::Security::Property_t& rhs, const DDS::Security::Property_t& lhs) {
     return rhs.name == lhs.name && rhs.value == lhs.value && rhs.propagate == lhs.propagate;
@@ -453,6 +469,21 @@ Spdp::process_location_updates_i(DiscoveredParticipantIter iter)
       location_data.relay_addr = addr.c_str();
       location_data.relay_timestamp = now.to_dds_time();
       break;
+    case DCPS::LOCATION_LOCAL6:
+      address_change = addr.compare(location_data.local6_addr.in()) != 0;
+      location_data.local6_addr = addr.c_str();
+      location_data.local6_timestamp = now.to_dds_time();
+      break;
+    case DCPS::LOCATION_ICE6:
+      address_change = addr.compare(location_data.ice6_addr.in()) != 0;
+      location_data.ice6_addr = addr.c_str();
+      location_data.ice6_timestamp = now.to_dds_time();
+      break;
+    case DCPS::LOCATION_RELAY6:
+      address_change = addr.compare(location_data.relay6_addr.in()) != 0;
+      location_data.relay6_addr = addr.c_str();
+      location_data.relay6_timestamp = now.to_dds_time();
+      break;
     }
 
     const DDS::Time_t expr = (now - rtps_duration_to_time_duration(
@@ -468,6 +499,16 @@ Spdp::process_location_updates_i(DiscoveredParticipantIter iter)
       location_data.location &= ~(DCPS::LOCATION_RELAY);
       location_data.change_mask |= DCPS::LOCATION_RELAY;
       location_data.relay_timestamp = now.to_dds_time();
+    }
+    if ((location_data.location & DCPS::LOCATION_LOCAL6) && DCPS::operator<(location_data.local6_timestamp, expr)) {
+      location_data.location &= ~(DCPS::LOCATION_LOCAL6);
+      location_data.change_mask |= DCPS::LOCATION_LOCAL6;
+      location_data.local6_timestamp = now.to_dds_time();
+    }
+    if ((location_data.location & DCPS::LOCATION_RELAY6) && DCPS::operator<(location_data.relay6_timestamp, expr)) {
+      location_data.location &= ~(DCPS::LOCATION_RELAY6);
+      location_data.change_mask |= DCPS::LOCATION_RELAY6;
+      location_data.relay6_timestamp = now.to_dds_time();
     }
 
     if (old_mask != location_data.location || address_change) {
@@ -520,7 +561,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
   }
 
   const bool from_relay = from == config_->spdp_rtps_relay_address();
-  const DCPS::ParticipantLocation location_mask = from_relay ? DCPS::LOCATION_RELAY : DCPS::LOCATION_LOCAL;
+  const DCPS::ParticipantLocation location_mask = compute_location_mask(from, from_relay);
 
   // Find the participant - iterator valid only as long as we hold the lock
   DiscoveredParticipantIter iter = participants_.find(guid);
@@ -1681,10 +1722,57 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
   data_.writerSN.high = 0;
   data_.writerSN.low = 0;
 
+#ifdef ACE_HAS_MAC_OSX
+  multicast_socket_.opts(ACE_SOCK_Dgram_Mcast::OPT_BINDADDR_NO |
+                         ACE_SOCK_Dgram_Mcast::DEFOPT_NULLIFACE);
+#ifdef ACE_HAS_IPV6
+  multicast_ipv6_socket_.opts(ACE_SOCK_Dgram_Mcast::OPT_BINDADDR_NO |
+                              ACE_SOCK_Dgram_Mcast::DEFOPT_NULLIFACE);
+#endif
+#endif
+
+  multicast_interface_ = outer_->disco_->multicast_interface();
+
   // Ports are set by the formulas in RTPS v2.1 Table 9.8
   const u_short port_common = outer_->config_->pb() +
     (outer_->config_->dg() * outer_->domain_);
   mc_port_ = port_common + outer_->config_->d0();
+
+  multicast_address_str_ = outer_->config_->default_multicast_group();
+  multicast_address_.set_type(AF_INET);
+  if (0 != multicast_address_.set(mc_port_, multicast_address_str_.c_str())) {
+    ACE_ERROR((
+          LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::SpdpTransport() - ")
+          ACE_TEXT("failed setting default multicast address %C:%hu %p\n"),
+          multicast_address_str_.c_str(), mc_port_, ACE_TEXT("ACE_INET_Addr::set")));
+    throw std::runtime_error("failed to set default_multicast address");
+  }
+
+#ifdef ACE_HAS_IPV6
+  multicast_ipv6_address_str_ = outer_->config_->default_multicast_ipv6_group();
+  multicast_ipv6_address_.set_type(AF_INET6);
+  if (0 != multicast_ipv6_address_.set(mc_port_, multicast_ipv6_address_str_.c_str())) {
+    ACE_ERROR((
+          LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::SpdpTransport() - ")
+          ACE_TEXT("failed setting default ipv6 multicast address %C:%hu %p\n"),
+          multicast_ipv6_address_str_.c_str(), mc_port_, ACE_TEXT("ACE_INET_Addr::set")));
+    throw std::runtime_error("failed to set default_multicast_ipv6 address");
+  }
+#endif
+
+  send_addrs_.insert(multicast_address_);
+#ifdef ACE_HAS_IPV6
+  send_addrs_.insert(multicast_ipv6_address_);
+#endif
+
+  typedef RtpsDiscovery::AddrVec::const_iterator iter;
+  const RtpsDiscovery::AddrVec addrs = outer_->config_->spdp_send_addrs();
+  for (iter it = addrs.begin(),
+       end = addrs.end(); it != end; ++it) {
+    send_addrs_.insert(ACE_INET_Addr(it->c_str()));
+  }
 
   u_short participantId = 0;
 
@@ -1695,6 +1783,14 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
   while (!open_unicast_socket(port_common, participantId)) {
     ++participantId;
   }
+#ifdef ACE_HAS_IPV6
+  if (!open_unicast_ipv6_socket(port_common, participantId)) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::SpdpTransport() - ")
+               ACE_TEXT("failed to open IPV6 unicast socket %p\n")));
+    throw std::runtime_error("failed to open ipv6 unicast socket");
+  }
+#endif
 
 #ifdef OPENDDS_SAFETY_PROFILE
   if (participantId > startingParticipantId && ACE_OS::getpid() == -1) {
@@ -1708,45 +1804,6 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
     outer_->guid_.guidPrefix[9] = hdr_.guidPrefix[9];
   }
 #endif
-
-  multicast_address_str_ = outer_->config_->default_multicast_group();
-  if (0 != multicast_address_.set(mc_port_, multicast_address_str_.c_str())) {
-    ACE_DEBUG((
-          LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::SpdpTransport() - ")
-          ACE_TEXT("failed setting default_multicast address %C:%hu %p\n"),
-          multicast_address_str_.c_str(), mc_port_, ACE_TEXT("ACE_INET_Addr::set")));
-    throw std::runtime_error("failed to set default_multicast address");
-  }
-
-#ifdef ACE_HAS_MAC_OSX
-  multicast_socket_.opts(ACE_SOCK_Dgram_Mcast::OPT_BINDADDR_NO |
-                         ACE_SOCK_Dgram_Mcast::DEFOPT_NULLIFACE);
-#endif
-
-  multicast_interface_ = outer_->disco_->multicast_interface();
-
-  DCPS::NetworkConfigMonitor_rch ncm = TheServiceParticipant->network_config_monitor();
-  if (ncm) {
-    const DCPS::NetworkInterfaces nics = ncm->add_listener(*this);
-
-    for (DCPS::NetworkInterfaces::const_iterator pos = nics.begin(), limit = nics.end(); pos != limit; ++pos) {
-      join_multicast_group(*pos);
-    }
-  } else {
-    DCPS::NetworkInterface nic(0, multicast_interface_, true);
-    nic.addresses.insert(ACE_INET_Addr());
-    join_multicast_group(nic, true);
-  }
-
-  send_addrs_.insert(multicast_address_);
-
-  typedef RtpsDiscovery::AddrVec::const_iterator iter;
-  const RtpsDiscovery::AddrVec addrs = outer_->config_->spdp_send_addrs();
-  for (iter it = addrs.begin(),
-       end = addrs.end(); it != end; ++it) {
-    send_addrs_.insert(ACE_INET_Addr(it->c_str()));
-  }
 }
 
 void
@@ -1760,10 +1817,12 @@ Spdp::SpdpTransport::open()
     throw std::runtime_error("failed to register unicast input handler");
   }
 
-  if (reactor->register_handler(multicast_socket_.get_handle(),
+#ifdef ACE_HAS_IPV6
+  if (reactor->register_handler(unicast_ipv6_socket_.get_handle(),
                                 this, ACE_Event_Handler::READ_MASK) != 0) {
-    throw std::runtime_error("failed to register multicast input handler");
+    throw std::runtime_error("failed to register unicast input handler");
   }
+#endif
 
   job_queue_ = DCPS::make_rch<DCPS::JobQueue>(reactor);
 
@@ -1793,6 +1852,15 @@ Spdp::SpdpTransport::open()
     ICE::Agent::instance()->add_endpoint(endpoint);
   }
 #endif
+
+  DCPS::NetworkConfigMonitor_rch ncm = TheServiceParticipant->network_config_monitor();
+  if (ncm) {
+    ncm->add_listener(*this);
+  } else {
+    DCPS::NetworkInterface nic(0, multicast_interface_, true);
+    nic.addresses.insert(ACE_INET_Addr());
+    join_multicast_group(nic, true);
+  }
 }
 
 Spdp::SpdpTransport::~SpdpTransport()
@@ -1817,13 +1885,13 @@ Spdp::SpdpTransport::~SpdpTransport()
     outer_->eh_shutdown_ = true;
   }
   outer_->shutdown_cond_.signal();
-  DCPS::NetworkConfigMonitor_rch ncm = TheServiceParticipant->network_config_monitor();
-  if (ncm) {
-    ncm->remove_listener(*this);
-  }
 
   unicast_socket_.close();
   multicast_socket_.close();
+#ifdef ACE_HAS_IPV6
+  unicast_ipv6_socket_.close();
+  multicast_ipv6_socket_.close();
+#endif
 }
 
 void
@@ -1863,6 +1931,11 @@ Spdp::SpdpTransport::close()
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) SpdpTransport::close\n")));
   }
 
+  DCPS::NetworkConfigMonitor_rch ncm = TheServiceParticipant->network_config_monitor();
+  if (ncm) {
+    ncm->remove_listener(*this);
+  }
+
 #ifdef OPENDDS_SECURITY
   ICE::Endpoint* endpoint = get_ice_endpoint();
   if (endpoint) {
@@ -1891,6 +1964,10 @@ Spdp::SpdpTransport::close()
     ACE_Event_Handler::READ_MASK | ACE_Event_Handler::DONT_CALL;
   reactor->remove_handler(multicast_socket_.get_handle(), mask);
   reactor->remove_handler(unicast_socket_.get_handle(), mask);
+#ifdef ACE_HAS_IPV6
+  reactor->remove_handler(multicast_ipv6_socket_.get_handle(), mask);
+  reactor->remove_handler(unicast_ipv6_socket_.get_handle(), mask);
+#endif
   reactor_task_.stop();
 }
 
@@ -2051,10 +2128,26 @@ Spdp::SpdpTransport::send(WriteFlags flags)
   }
 }
 
+const ACE_SOCK_Dgram&
+Spdp::SpdpTransport::choose_send_socket(const ACE_INET_Addr& addr) const
+{
+#ifdef ACE_HAS_IPV6
+  if (addr.get_type() == AF_INET6) {
+    return unicast_ipv6_socket_;
+  }
+#endif
+  ACE_UNUSED_ARG(addr);
+  return unicast_socket_;
+}
+
 void
 Spdp::SpdpTransport::send(const ACE_INET_Addr& addr)
 {
-  const ssize_t res = unicast_socket_.send(wbuff_.rd_ptr(), wbuff_.length(), addr);
+  ssize_t res;
+
+  const ACE_SOCK_Dgram& socket = choose_send_socket(addr);
+  res = socket.send(wbuff_.rd_ptr(), wbuff_.length(), addr);
+
   if (res < 0) {
     const int err = errno;
     if (err != ENETUNREACH || !network_is_unreachable_) {
@@ -2073,11 +2166,29 @@ Spdp::SpdpTransport::send(const ACE_INET_Addr& addr)
   }
 }
 
+const ACE_SOCK_Dgram&
+Spdp::SpdpTransport::choose_recv_socket(ACE_HANDLE h) const
+{
+#ifdef ACE_HAS_IPV6
+  if (h == unicast_ipv6_socket_.get_handle()) {
+    return unicast_ipv6_socket_;
+  }
+  if (h == multicast_ipv6_socket_.get_handle()) {
+    return multicast_ipv6_socket_;
+  }
+#endif
+  if (h == multicast_socket_.get_handle()) {
+    return multicast_socket_;
+  }
+
+  return unicast_socket_;
+}
+
 int
 Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
 {
-  const ACE_SOCK_Dgram& socket = (h == unicast_socket_.get_handle())
-                                 ? unicast_socket_ : multicast_socket_;
+  const ACE_SOCK_Dgram& socket = choose_recv_socket(h);
+
   ACE_INET_Addr remote;
   buff_.reset();
 
@@ -2099,7 +2210,7 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
 #pragma warning(pop)
 #endif
   const ssize_t bytes = socket.recv(iov, 1, remote, 0
-#ifdef ACE_RECVPKTINFO
+#if defined(ACE_RECVPKTINFO) || defined(ACE_RECVPKTINFO6)
                                     , &local
 #endif
                                     );
@@ -2270,24 +2381,37 @@ ICE::AddressListType
 Spdp::SpdpTransport::host_addresses() const
 {
   ICE::AddressListType addresses;
+  ACE_INET_Addr addr;
 
-  //if local_address_string is empty, or only the port has been set
-  //need to get interface addresses to populate into the locator
-  const OPENDDS_STRING spdpaddr = outer_->config_->spdp_local_address();
-  if (spdpaddr.empty() ||
-      spdpaddr.rfind(':') == 0) {
-    if (TheServiceParticipant->default_address().empty()) {
-      DCPS::get_interface_addrs(addresses);
-    } else {
-      addresses.push_back(ACE_INET_Addr(static_cast<u_short>(0), TheServiceParticipant->default_address().c_str()));
+  unicast_socket_.get_local_addr(addr);
+  if (addr.is_any()) {
+    ICE::AddressListType addrs;
+    DCPS::get_interface_addrs(addrs);
+    for (ICE::AddressListType::iterator pos = addrs.begin(), limit = addrs.end(); pos != limit; ++pos) {
+      if (pos->get_type() == AF_INET) {
+        pos->set_port_number(addr.get_port_number());
+        addresses.push_back(*pos);
+      }
     }
   } else {
-    addresses.push_back(ACE_INET_Addr(static_cast<u_short>(0), spdpaddr.c_str()));
+    addresses.push_back(addr);
   }
 
-  for (ICE::AddressListType::iterator pos = addresses.begin(), limit = addresses.end(); pos != limit; ++pos) {
-    pos->set_port_number(uni_port_);
+#ifdef ACE_HAS_IPV6
+  unicast_ipv6_socket_.get_local_addr(addr);
+  if (addr.is_any()) {
+    ICE::AddressListType addrs;
+    DCPS::get_interface_addrs(addrs);
+    for (ICE::AddressListType::iterator pos = addrs.begin(), limit = addrs.end(); pos != limit; ++pos) {
+      if (pos->get_type() == AF_INET6) {
+        pos->set_port_number(addr.get_port_number());
+        addresses.push_back(*pos);
+      }
+    }
+  } else {
+    addresses.push_back(addr);
   }
+#endif
 
   return addresses;
 }
@@ -2310,7 +2434,10 @@ Spdp::SendStun::execute()
   const_cast<STUN::Message&>(message_).block = &tport_->wbuff_;
   serializer << message_;
 
-  const ssize_t res = tport_->unicast_socket_.send(tport_->wbuff_.rd_ptr(), tport_->wbuff_.length(), address_);
+  ssize_t res;
+  const ACE_SOCK_Dgram& socket = tport_->choose_send_socket(address_);
+  res = socket.send(tport_->wbuff_.rd_ptr(), tport_->wbuff_.length(), address_);
+
   if (res < 0) {
     const int e = errno;
     ACE_TCHAR addr_buff[256] = {};
@@ -2334,20 +2461,20 @@ Spdp::SpdpTransport::ice_connect(const ICE::GuidSetType& guids, const ACE_INET_A
   for (ICE::GuidSetType::const_iterator pos = guids.begin(), limit = guids.end(); pos != limit; ++pos) {
     DiscoveredParticipantIter iter = outer_->participants_.find(pos->remote);
     if (iter != outer_->participants_.end()) {
-      outer_->enqueue_location_update_i(iter, DCPS::LOCATION_ICE, addr);
+      outer_->enqueue_location_update_i(iter, compute_ice_location_mask(addr), addr);
       outer_->process_location_updates_i(iter);
     }
   }
 }
 
 void
-Spdp::SpdpTransport::ice_disconnect(const ICE::GuidSetType& guids)
+Spdp::SpdpTransport::ice_disconnect(const ICE::GuidSetType& guids, const ACE_INET_Addr& addr)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, outer_->lock_);
   for (ICE::GuidSetType::const_iterator pos = guids.begin(), limit = guids.end(); pos != limit; ++pos) {
     DiscoveredParticipantIter iter = outer_->participants_.find(pos->remote);
     if (iter != outer_->participants_.end()) {
-      outer_->enqueue_location_update_i(iter, DCPS::LOCATION_ICE, ACE_INET_Addr());
+      outer_->enqueue_location_update_i(iter, compute_ice_location_mask(addr), ACE_INET_Addr());
       outer_->process_location_updates_i(iter);
     }
   }
@@ -2374,8 +2501,9 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
     spdpaddr = "0.0.0.0";
   }
 
+  local_addr.set_type(AF_INET);
   if (0 != local_addr.set(uni_port_, spdpaddr.c_str())) {
-    ACE_DEBUG((
+    ACE_ERROR((
           LM_ERROR,
           ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_socket() - ")
           ACE_TEXT("failed setting unicast local_addr to port %d %p\n"),
@@ -2383,8 +2511,7 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
     throw std::runtime_error("failed to set unicast local address");
   }
 
-  int protocol_family = PF_UNSPEC;
-  if (!DCPS::open_appropriate_socket_type(unicast_socket_, local_addr, &protocol_family)) {
+  if (unicast_socket_.open(local_addr, PF_INET, 0, 1) != 0) {
     if (DCPS::DCPS_debug_level > 3) {
       ACE_DEBUG((
             LM_WARNING,
@@ -2394,8 +2521,9 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
             uni_port_, ACE_TEXT("ACE_SOCK_Dgram::open")));
     }
     return false;
+  }
 
-  } else if (DCPS::DCPS_debug_level > 3) {
+  if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((
           LM_INFO,
           ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_socket() - ")
@@ -2413,75 +2541,187 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
   }
 
 #ifdef ACE_RECVPKTINFO
-  if (protocol_family == PF_INET) {
-    int sockopt = 1;
-    if (unicast_socket_.set_option(IPPROTO_IP, ACE_RECVPKTINFO, &sockopt, sizeof sockopt) == -1) {
-      ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_socket: set_option: %m\n")), false);
-    }
+  int sockopt = 1;
+  if (unicast_socket_.set_option(IPPROTO_IP, ACE_RECVPKTINFO, &sockopt, sizeof sockopt) == -1) {
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_socket: set_option: %m\n")), false);
   }
 #endif
 
   return true;
 }
 
+#ifdef ACE_HAS_IPV6
+bool
+Spdp::SpdpTransport::open_unicast_ipv6_socket(u_short port_common,
+                                              u_short participant_id)
+{
+  uni_port_ = port_common + outer_->config_->d1() + (outer_->config_->pg() * participant_id);
+
+  ACE_INET_Addr local_addr;
+  OPENDDS_STRING spdpaddr = outer_->config_->spdp_local_address().c_str();
+
+  if (spdpaddr.empty()) {
+    spdpaddr = "::";
+  }
+
+  local_addr.set_type(AF_INET6);
+  if (0 != local_addr.set(uni_port_, spdpaddr.c_str())) {
+    ACE_ERROR((
+          LM_ERROR,
+          ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_ipv6_socket() - ")
+          ACE_TEXT("failed setting unicast ipv6 local_addr to port %d %p\n"),
+          uni_port_, ACE_TEXT("ACE_INET_Addr::set")));
+    throw std::runtime_error("failed to set unicast ipv6 local address");
+  }
+
+  if (unicast_ipv6_socket_.open(local_addr, PF_INET6, 0, 1) != 0) {
+    ACE_ERROR((
+               LM_ERROR,
+               ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_ipv6_socket() - ")
+               ACE_TEXT("failed to open_appropriate_socket_type unicast ipv6 socket on port %d %p.  "),
+               uni_port_, ACE_TEXT("ACE_SOCK_Dgram::open")));
+    throw std::runtime_error("failed to open unicast ipv6 socket");
+  }
+
+  if (DCPS::DCPS_debug_level > 3) {
+    ACE_DEBUG((
+          LM_INFO,
+          ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_ipv6_socket() - ")
+          ACE_TEXT("opened unicast ipv6 socket on port %d\n"),
+          uni_port_));
+  }
+
+  if (!DCPS::set_socket_multicast_ttl(unicast_ipv6_socket_, outer_->config_->ttl())) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_ipv6_socket() - ")
+               ACE_TEXT("failed to set TTL value to %d ")
+               ACE_TEXT("for port:%hu %p\n"),
+               outer_->config_->ttl(), uni_port_, ACE_TEXT("DCPS::set_socket_multicast_ttl:")));
+    throw std::runtime_error("failed to set TTL");
+  }
+
+#ifdef ACE_RECVPKTINFO6
+  int sockopt = 1;
+  if (unicast_ipv6_socket_.set_option(IPPROTO_IPV6, ACE_RECVPKTINFO6, &sockopt, sizeof sockopt) == -1) {
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_ipv6_socket: set_option: %m\n")), false);
+  }
+#endif
+
+  return true;
+}
+#endif /* ACE_HAS_IPV6 */
+
 void
 Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
                                           bool all_interfaces)
 {
-  if (joined_interfaces_.count(nic.name()) != 0 || nic.addresses.empty() || !nic.can_multicast()) {
-    return;
-  }
-
   if (!multicast_interface_.empty() && nic.name() != multicast_interface_) {
     return;
   }
 
-  if (DCPS::DCPS_debug_level > 3) {
-    ACE_DEBUG((LM_INFO,
-               ACE_TEXT("(%P|%t) Spdp::SpdpTransport::join_multicast_group ")
-               ACE_TEXT("joining group %C %C:%hu\n"),
-               nic.name().c_str(),
-               multicast_address_str_.c_str(),
-               mc_port_));
+  if (nic.addresses.empty() || !nic.can_multicast()) {
+    return;
   }
 
-  if (0 == multicast_socket_.join(multicast_address_, 1, all_interfaces ? 0 : ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()))) {
-    joined_interfaces_.insert(nic.name());
-    if (job_queue_) {
-      // Don't write until open() because sedp will not be ready.
-      write_i(SEND_TO_LOCAL);
+  if (joined_interfaces_.count(nic.name()) == 0 && nic.has_ipv4()) {
+    if (DCPS::DCPS_debug_level > 3) {
+      ACE_DEBUG((LM_INFO,
+                 ACE_TEXT("(%P|%t) Spdp::SpdpTransport::join_multicast_group ")
+                 ACE_TEXT("joining group %C:%hu on %C\n"),
+                 multicast_address_str_.c_str(),
+                 mc_port_,
+                 nic.name().c_str()));
     }
-  } else {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::join_multicast_group() - ")
-               ACE_TEXT("failed to join multicast group %C:%hu %p\n"),
-               multicast_address_str_.c_str(), mc_port_, ACE_TEXT("ACE_SOCK_Dgram_Mcast::join")));
+
+    if (0 == multicast_socket_.join(multicast_address_, 1, all_interfaces ? 0 : ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()))) {
+      joined_interfaces_.insert(nic.name());
+
+      if (reactor()->register_handler(multicast_socket_.get_handle(),
+                                    this, ACE_Event_Handler::READ_MASK) != 0) {
+        throw std::runtime_error("failed to register multicast input handler");
+      }
+
+      write_i(SEND_TO_LOCAL);
+    } else {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::join_multicast_group() - ")
+                 ACE_TEXT("failed to join multicast group %C:%hu on %s: %p\n"),
+                 multicast_address_str_.c_str(), mc_port_, all_interfaces ? "all interfaces" : ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()), ACE_TEXT("ACE_SOCK_Dgram_Mcast::join")));
+    }
   }
+
+#ifdef ACE_HAS_IPV6
+  if (joined_ipv6_interfaces_.count(nic.name()) == 0 && nic.has_ipv6()) {
+    if (DCPS::DCPS_debug_level > 3) {
+      ACE_DEBUG((LM_INFO,
+                 ACE_TEXT("(%P|%t) Spdp::SpdpTransport::join_multicast_group ")
+                 ACE_TEXT("joining group %C:%hu on %C\n"),
+                 multicast_ipv6_address_str_.c_str(),
+                 mc_port_,
+                 nic.name().c_str()));
+    }
+
+    if (0 == multicast_ipv6_socket_.join(multicast_ipv6_address_, 1, all_interfaces ? 0 : ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()))) {
+      joined_ipv6_interfaces_.insert(nic.name());
+
+      if (reactor()->register_handler(multicast_ipv6_socket_.get_handle(),
+                                    this, ACE_Event_Handler::READ_MASK) != 0) {
+        throw std::runtime_error("failed to register multicast ipv6 input handler");
+      }
+
+      write_i(SEND_TO_LOCAL);
+    } else {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::join_multicast_group() - ")
+                 ACE_TEXT("failed to join multicast group %C:%hu on %s: %p\n"),
+                 multicast_ipv6_address_str_.c_str(), mc_port_, all_interfaces ? "all interfaces" : ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()), ACE_TEXT("ACE_SOCK_Dgram_Mcast::join")));
+    }
+  }
+#endif
 }
 
 void
 Spdp::SpdpTransport::leave_multicast_group(const DCPS::NetworkInterface& nic)
 {
-  if (joined_interfaces_.count(nic.name()) == 0 || !nic.addresses.empty()) {
-    return;
+  if (joined_interfaces_.count(nic.name()) != 0 && !nic.has_ipv4()) {
+    if (DCPS::DCPS_debug_level > 3) {
+      ACE_DEBUG((LM_INFO,
+                 ACE_TEXT("(%P|%t) Spdp::SpdpTransport::leave_multicast_group ")
+                 ACE_TEXT("leaving group %C %C:%hu\n"),
+                 nic.name().c_str(),
+                 multicast_address_str_.c_str(),
+                 mc_port_));
+    }
+
+    if (0 != multicast_socket_.leave(multicast_address_, ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()))) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::leave_multicast_group() - ")
+                 ACE_TEXT("failed to leave multicast group %C:%hu %p\n"),
+                 multicast_address_str_.c_str(), mc_port_, ACE_TEXT("ACE_SOCK_Dgram_Mcast::leave")));
+    }
+    joined_interfaces_.erase(nic.name());
   }
 
-  if (DCPS::DCPS_debug_level > 3) {
-    ACE_DEBUG((LM_INFO,
-               ACE_TEXT("(%P|%t) Spdp::SpdpTransport::leave_multicast_group ")
-               ACE_TEXT("leaving group %C %C:%hu\n"),
-               nic.name().c_str(),
-               multicast_address_str_.c_str(),
-               mc_port_));
-  }
+#ifdef ACE_HAS_IPV6
+  if (joined_ipv6_interfaces_.count(nic.name()) != 0 && !nic.has_ipv6()) {
+    if (DCPS::DCPS_debug_level > 3) {
+      ACE_DEBUG((LM_INFO,
+                 ACE_TEXT("(%P|%t) Spdp::SpdpTransport::leave_multicast_group ")
+                 ACE_TEXT("leaving group %C %C:%hu\n"),
+                 nic.name().c_str(),
+                 multicast_ipv6_address_str_.c_str(),
+                 mc_port_));
+    }
 
-  if (0 != multicast_socket_.leave(multicast_address_, ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()))) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::leave_multicast_group() - ")
-               ACE_TEXT("failed to leave multicast group %C:%hu %p\n"),
-               multicast_address_str_.c_str(), mc_port_, ACE_TEXT("ACE_SOCK_Dgram_Mcast::leave")));
+    if (0 != multicast_ipv6_socket_.leave(multicast_ipv6_address_, ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()))) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::leave_multicast_group() - ")
+                 ACE_TEXT("failed to leave multicast ipv6 group %C:%hu %p\n"),
+                 multicast_ipv6_address_str_.c_str(), mc_port_, ACE_TEXT("ACE_SOCK_Dgram_Mcast::leave")));
+    }
+    joined_ipv6_interfaces_.erase(nic.name());
   }
-  joined_interfaces_.erase(nic.name());
+#endif
 }
 
 void
