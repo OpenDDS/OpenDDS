@@ -68,9 +68,9 @@ module RtpsRelay {
   struct ParticipantStatistics {
     string address;
     unsigned long messages_in;
-    unsigned long bytes_in;
+    unsigned long long bytes_in;
     unsigned long messages_out;
-    unsigned long bytes_out;
+    unsigned long long bytes_out;
     unsigned long max_fan_out;
   };
 

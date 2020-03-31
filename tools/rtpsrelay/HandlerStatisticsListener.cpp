@@ -53,8 +53,7 @@ void HandlerStatisticsListener::on_data_available(DDS::DataReader_ptr reader)
                 << std::endl;
 
       if (report_participant_statistics_) {
-        for (size_t idx = 0; idx != hs.participant_statistics().size(); ++idx) {
-          const auto& ps = hs.participant_statistics()[idx];
+        for (const auto& ps : hs.participant_statistics()) {
           std::cout << timestamp << ' '
                     << "source_timestamp=" << infos[idx].source_timestamp.sec << '.' << infos[idx].source_timestamp.nanosec << ' '
                     << "application_participant_guid=" << guid_to_string(guid_to_repoid(hs.application_participant_guid())) << ' '

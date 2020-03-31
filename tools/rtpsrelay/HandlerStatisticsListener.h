@@ -7,7 +7,7 @@ namespace RtpsRelay {
 
 class HandlerStatisticsListener : public ListenerBase {
 public:
-  HandlerStatisticsListener(bool report_participant_statistics)
+  explicit HandlerStatisticsListener(bool report_participant_statistics)
     : report_participant_statistics_(report_participant_statistics)
   {}
 
