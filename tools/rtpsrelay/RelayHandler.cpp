@@ -106,7 +106,7 @@ int RelayHandler::open(const ACE_INET_Addr& address)
     return -1;
   }
 
-  if (config_.handler_statistics_writer() || config_.participant_statistics_writer()) {
+  if (config_.handler_statistics_writer() || config_.publish_participant_statistics()) {
     reset_statistics(OpenDDS::DCPS::MonotonicTimePoint::now());
     if (reactor()->schedule_timer(this, &this->handler_statistics_, config_.statistics_interval().value(), config_.statistics_interval().value()) == -1) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: RelayHandler::open %C failed to register schedule statistics timer\n"), name_.c_str()));
@@ -157,7 +157,7 @@ int RelayHandler::handle_input(ACE_HANDLE handle)
   handler_statistics_._bytes_in += bytes;
   ++handler_statistics_._messages_in;
 
-  if (config_.participant_statistics_writer()) {
+  if (config_.publish_participant_statistics()) {
     auto& ps = participant_statistics_[remote];
     ps._bytes_in += bytes;
     ++ps._messages_in;
@@ -201,7 +201,7 @@ int RelayHandler::handle_output(ACE_HANDLE)
       handler_statistics_._bytes_out += bytes;
       ++handler_statistics_._messages_out;
 
-      if (config_.participant_statistics_writer()) {
+      if (config_.publish_participant_statistics()) {
         auto& ps = participant_statistics_[out.first];
         ps._bytes_out += bytes;
         ++ps._messages_out;
@@ -249,20 +249,13 @@ int RelayHandler::handle_timeout(const ACE_Time_Value& ace_now, const void* ptr)
       if (ret != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: RelayHandler::handle_timeout %C failed to write handler statistics\n"), name_.c_str()));
       }
-    }
 
-    if (config_.participant_statistics_writer()) {
-      for (auto& p : participant_statistics_) {
-        auto& stats = p.second;
-        stats.application_participant_guid(handler_statistics_._application_participant_guid);
-        stats.name(name_);
-        stats.address(addr_to_string(p.first));
-        stats._interval._sec = dds_duration.sec;
-        stats._interval._nanosec = dds_duration.nanosec;
-
-        const auto ret = config_.participant_statistics_writer()->write(stats, DDS::HANDLE_NIL);
-        if (ret != DDS::RETCODE_OK) {
-          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: RelayHandler::handle_timeout %C failed to write participant statistics\n"), name_.c_str()));
+      if (config_.publish_participant_statistics()) {
+        size_t idx = 0;
+        handler_statistics_.participant_statistics().resize(participant_statistics_.size());
+        for (auto& p : participant_statistics_) {
+          handler_statistics_.participant_statistics()[idx] = p.second;
+          handler_statistics_.participant_statistics()[idx].address(addr_to_string(p.first));
         }
       }
     }
