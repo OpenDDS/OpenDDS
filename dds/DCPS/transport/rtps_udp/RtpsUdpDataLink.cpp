@@ -1302,7 +1302,8 @@ RtpsUdpDataLink::RtpsWriter::add_gap_submsg_i(RTPS::SubmessageSeq& msg,
       //Change the non-directed Gap into multiple directed gaps to prevent
       //delivering to currently undiscovered durable readers
       DestToEntityMap::const_iterator iter = dtem.begin();
-      while (iter != dtem.end()) {
+      bool reset_info_dst = iter != dtem.end();
+      for (; iter != dtem.end(); ++iter) {
         std::memcpy(idst.guidPrefix, iter->first.guidPrefix, sizeof(GuidPrefix_t));
         msg.length(ml + 1);
         msg[ml++].info_dst_sm(idst);
@@ -1313,8 +1314,12 @@ RtpsUdpDataLink::RtpsWriter::add_gap_submsg_i(RTPS::SubmessageSeq& msg,
           msg.length(ml + 1);
           msg[ml++].gap_sm(gap);
         } //END iter over reader entity ids
-        ++iter;
       } //END iter over reader GuidPrefix_t's
+      if (reset_info_dst) {
+        std::memset(idst.guidPrefix, 0, sizeof(GuidPrefix_t));
+        msg.length(ml + 1);
+        msg[ml++].info_dst_sm(idst);
+      }
     }
   }
 }
@@ -2363,7 +2368,7 @@ RtpsUdpDataLink::send_bundled_submessages(MetaSubmessageVec& meta_submessages)
       MetaSubmessage& res = **it;
       RepoId dst = res.dst_guid_;
       dst.entityId = ENTITYID_UNKNOWN;
-      if (dst != GUID_UNKNOWN && dst != prev_dst) {
+      if (dst != prev_dst) {
         std::memcpy(&idst.guidPrefix, dst.guidPrefix, sizeof(idst.guidPrefix));
         ser << idst;
       }
@@ -3421,7 +3426,7 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
         ri->second.durable_data_.clear();
         if (Transport_debug_level > 3) {
           const GuidConverter gw(id_), gr(ri->first);
-          VDBG_LVL((LM_INFO, "(%P|%t) RtpsUdpDataLink::send_heartbeats - "
+          VDBG_LVL((LM_INFO, "(%P|%t) RtpsUdpDataLink::gather_heartbeats - "
             "removed expired durable data for %C -> %C\n",
             OPENDDS_STRING(gw).c_str(), OPENDDS_STRING(gr).c_str()), 3);
         }
