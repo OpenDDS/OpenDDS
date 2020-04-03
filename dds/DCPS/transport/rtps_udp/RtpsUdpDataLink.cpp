@@ -109,6 +109,7 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
                      config.heartbeat_response_delay_)
   , heartbeat_(reactor_task->interceptor(), config.heartbeat_period_, *this, &RtpsUdpDataLink::send_heartbeats)
   , heartbeatchecker_(reactor_task->interceptor(), *this, &RtpsUdpDataLink::check_heartbeats)
+  , reader_associator_(reactor_task->interceptor(), *this, &RtpsUdpDataLink::send_association_ack_nacks)
   , relay_beacon_(reactor_task->interceptor(), *this, &RtpsUdpDataLink::send_relay_beacon)
   , held_data_delivery_handler_(this)
   , max_bundle_size_(config.max_bundle_size_)
@@ -359,6 +360,8 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
                       ACE_TEXT("UdpDataLink::open: start failed!\n")),
                      false);
   }
+
+  reader_associator_.enable(false, cfg.heartbeat_period_);
 
   if (cfg.rtps_relay_address() != ACE_INET_Addr() ||
       cfg.use_rtps_relay_) {
@@ -822,6 +825,7 @@ RtpsUdpDataLink::stop_i()
   heartbeat_reply_.cancel();
   heartbeat_.disable_and_wait();
   heartbeatchecker_.disable_and_wait();
+  reader_associator_.disable_and_wait();
   relay_beacon_.disable_and_wait();
   unicast_socket_.close();
   multicast_socket_.close();
@@ -1298,7 +1302,8 @@ RtpsUdpDataLink::RtpsWriter::add_gap_submsg_i(RTPS::SubmessageSeq& msg,
       //Change the non-directed Gap into multiple directed gaps to prevent
       //delivering to currently undiscovered durable readers
       DestToEntityMap::const_iterator iter = dtem.begin();
-      while (iter != dtem.end()) {
+      bool reset_info_dst = iter != dtem.end();
+      for (; iter != dtem.end(); ++iter) {
         std::memcpy(idst.guidPrefix, iter->first.guidPrefix, sizeof(GuidPrefix_t));
         msg.length(ml + 1);
         msg[ml++].info_dst_sm(idst);
@@ -1309,8 +1314,12 @@ RtpsUdpDataLink::RtpsWriter::add_gap_submsg_i(RTPS::SubmessageSeq& msg,
           msg.length(ml + 1);
           msg[ml++].gap_sm(gap);
         } //END iter over reader entity ids
-        ++iter;
       } //END iter over reader GuidPrefix_t's
+      if (reset_info_dst) {
+        std::memset(idst.guidPrefix, 0, sizeof(GuidPrefix_t));
+        msg.length(ml + 1);
+        msg[ml++].info_dst_sm(idst);
+      }
     }
   }
 }
@@ -2073,6 +2082,60 @@ RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(MetaSubmessageVec& meta_submessa
   }
 }
 
+void
+RtpsUdpDataLink::RtpsReader::gather_association_ack_nacks(MetaSubmessageVec& meta_submessages)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  gather_association_ack_nacks_i(meta_submessages);
+}
+
+void
+RtpsUdpDataLink::RtpsReader::gather_association_ack_nacks_i(MetaSubmessageVec& meta_submessages)
+{
+  using namespace OpenDDS::RTPS;
+
+  RtpsUdpDataLink_rch link = link_.lock();
+
+  if (!link) {
+    return;
+  }
+
+  GuardType guard(link->strategy_lock_);
+  if (link->receive_strategy() == 0) {
+    return;
+  }
+
+  for (WriterInfoMap::iterator wi = remote_writers_.begin(); wi != remote_writers_.end(); ++wi) {
+    if (wi->second.first_valid_hb_ && wi->second.first_delivered_data_) {
+      MetaSubmessage meta_submessage(id_, wi->first);
+
+      AckNackSubmessage acknack = {
+        {
+          ACKNACK,
+          CORBA::Octet(FLAG_E),
+          0 /*length*/
+        },
+        id_.entityId,
+        wi->first.entityId,
+        { // SequenceNumberSet: acking bitmapBase - 1
+          {
+            0,
+            1
+          },
+          0,
+          LongSeq8()
+        },
+        {
+          ++wi->second.acknack_count_
+        }
+      };
+      meta_submessage.sm_.acknack_sm(acknack);
+
+      meta_submessages.push_back(meta_submessage);
+    }
+  }
+}
+
 #ifdef OPENDDS_SECURITY
 namespace {
   const ACE_INET_Addr BUNDLING_PLACEHOLDER;
@@ -2305,7 +2368,7 @@ RtpsUdpDataLink::send_bundled_submessages(MetaSubmessageVec& meta_submessages)
       MetaSubmessage& res = **it;
       RepoId dst = res.dst_guid_;
       dst.entityId = ENTITYID_UNKNOWN;
-      if (dst != GUID_UNKNOWN && dst != prev_dst) {
+      if (dst != prev_dst) {
         std::memcpy(&idst.guidPrefix, dst.guidPrefix, sizeof(idst.guidPrefix));
         ser << idst;
       }
@@ -2800,6 +2863,9 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   // we don't need to do anything further.
   if (!is_final || bitmapNonEmpty(acknack.readerSNState)) {
     ri->second.requested_changes_.push_back(acknack.readerSNState);
+    // Determine if the reader needs a heartbeat.
+    DisjointSequence reqs;
+    ri->second.requires_heartbeat_ = process_requested_changes_i(reqs, ri->second);
   }
 
   TqeSet to_deliver;
@@ -2928,7 +2994,7 @@ RtpsUdpDataLink::RtpsWriter::send_and_gather_nack_replies(MetaSubmessageVec& met
         }
         if (Transport_debug_level > 5) {
           const GuidConverter local_conv(id_), remote_conv(ri->first);
-          ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::send_nack_replies "
+          ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::send_and_gather_nack_replies "
                      "local %C remote %C requested resend\n",
                      OPENDDS_STRING(local_conv).c_str(),
                      OPENDDS_STRING(remote_conv).c_str()));
@@ -3055,10 +3121,11 @@ RtpsUdpDataLink::RtpsWriter::send_nackfrag_replies_i(DisjointSequence& gaps,
   }
 }
 
-void
+bool
 RtpsUdpDataLink::RtpsWriter::process_requested_changes_i(DisjointSequence& requests,
                                                          const ReaderInfo& reader)
 {
+  bool inserted = false;
   for (size_t i = 0; i < reader.requested_changes_.size(); ++i) {
     const RTPS::SequenceNumberSet& sn_state = reader.requested_changes_[i];
     SequenceNumber base;
@@ -3070,11 +3137,14 @@ RtpsUdpDataLink::RtpsWriter::process_requested_changes_i(DisjointSequence& reque
       // the heartbeat range, treat it as a request for that seq#.
       if (!send_buff_.is_nil() && send_buff_->contains(base)) {
         requests.insert(base);
+        inserted = true;
       }
     } else {
       requests.insert(base, sn_state.numBits, sn_state.bitmap.get_buffer());
+      inserted = true;
     }
   }
+  return inserted;
 }
 
 void
@@ -3094,7 +3164,7 @@ RtpsUdpDataLink::RtpsWriter::send_directed_nack_replies_i(const RepoId& readerId
   }
 
   DisjointSequence requests;
-  process_requested_changes_i(requests, reader);
+  reader.requires_heartbeat_ = !process_requested_changes_i(requests, reader);
   reader.requested_changes_.clear();
 
   DisjointSequence gaps;
@@ -3332,6 +3402,9 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
   // Directed, non-final pre-association heartbeats
   RepoIdSet pre_assoc_hb_guids;
 
+  // Directed, final mid-association heartbeats.
+  RepoIdSet mid_assoc_hb_guids;
+
   typedef ReaderInfoMap::iterator ri_iter;
   const ri_iter end = remote_readers_.end();
   for (ri_iter ri = remote_readers_.begin(); ri != end; ++ri) {
@@ -3353,7 +3426,7 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
         ri->second.durable_data_.clear();
         if (Transport_debug_level > 3) {
           const GuidConverter gw(id_), gr(ri->first);
-          VDBG_LVL((LM_INFO, "(%P|%t) RtpsUdpDataLink::send_heartbeats - "
+          VDBG_LVL((LM_INFO, "(%P|%t) RtpsUdpDataLink::gather_heartbeats - "
             "removed expired durable data for %C -> %C\n",
             OPENDDS_STRING(gw).c_str(), OPENDDS_STRING(gr).c_str()), 3);
         }
@@ -3367,8 +3440,13 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
         marked_to = true;
       }
     }
-    if (!marked_to && !ri->second.handshake_done_) {
-      pre_assoc_hb_guids.insert(ri->first);
+    if (!marked_to) {
+      if (!ri->second.handshake_done_) {
+        pre_assoc_hb_guids.insert(ri->first);
+      } else if (ri->second.requires_heartbeat_) {
+        mid_assoc_hb_guids.insert(ri->first);
+        ri->second.requires_heartbeat_ = false;
+      }
     }
   }
 
@@ -3404,6 +3482,16 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
     pre_assoc_hb.dst_guid_ = (*it);
     pre_assoc_hb.sm_.heartbeat_sm().readerId = it->entityId;
     meta_submessages.push_back(pre_assoc_hb);
+  }
+
+  // Directed, final mid-association heartbeats
+  MetaSubmessage mid_assoc_hb = meta_submessage;
+  mid_assoc_hb.to_guids_.clear();
+  mid_assoc_hb.sm_.heartbeat_sm().smHeader.flags |= FLAG_F;
+  for (RepoIdSet::const_iterator it = mid_assoc_hb_guids.begin(); it != mid_assoc_hb_guids.end(); ++it) {
+    mid_assoc_hb.dst_guid_ = (*it);
+    mid_assoc_hb.sm_.heartbeat_sm().readerId = it->entityId;
+    meta_submessages.push_back(mid_assoc_hb);
   }
 
   if (is_final && !has_data && !has_durable_data) {
@@ -3457,6 +3545,21 @@ RtpsUdpDataLink::check_heartbeats(const DCPS::MonotonicTimePoint& now)
     const InterestingRemote& remote = iter->second;
     remote.listener->writer_does_not_exist(rid, remote.localid);
   }
+}
+
+void
+RtpsUdpDataLink::send_association_ack_nacks(const DCPS::MonotonicTimePoint& /*now*/)
+{
+  MetaSubmessageVec meta_submessages;
+
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, readers_lock_);
+    for (RtpsReaderMap::const_iterator pos = readers_.begin(), limit = readers_.end(); pos != limit; ++pos) {
+      pos->second->gather_association_ack_nacks(meta_submessages);
+    }
+  }
+
+  send_bundled_submessages(meta_submessages);
 }
 
 void
