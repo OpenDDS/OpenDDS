@@ -245,18 +245,16 @@ int RelayHandler::handle_timeout(const ACE_Time_Value& ace_now, const void* ptr)
       handler_statistics_._interval._nanosec = dds_duration.nanosec;
       handler_statistics_._local_active_participants = local_active_participants();
 
+      if (config_.publish_participant_statistics()) {
+        for (auto& p : participant_statistics_) {
+          p.second.address(addr_to_string(p.first));
+          handler_statistics_.participant_statistics().push_back(p.second);
+        }
+      }
+
       const auto ret = config_.handler_statistics_writer()->write(handler_statistics_, DDS::HANDLE_NIL);
       if (ret != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: RelayHandler::handle_timeout %C failed to write handler statistics\n"), name_.c_str()));
-      }
-
-      if (config_.publish_participant_statistics()) {
-        size_t idx = 0;
-        handler_statistics_.participant_statistics().resize(participant_statistics_.size());
-        for (auto& p : participant_statistics_) {
-          handler_statistics_.participant_statistics()[idx] = p.second;
-          handler_statistics_.participant_statistics()[idx].address(addr_to_string(p.first));
-        }
       }
     }
 
@@ -280,6 +278,7 @@ void RelayHandler::reset_statistics(const OpenDDS::DCPS::MonotonicTimePoint& now
   handler_statistics_._max_queue_size = 0;
   handler_statistics_._max_queue_latency._sec = 0;
   handler_statistics_._max_queue_latency._nanosec = 0;
+  handler_statistics_.participant_statistics().clear();
   participant_statistics_.clear();
 }
 
