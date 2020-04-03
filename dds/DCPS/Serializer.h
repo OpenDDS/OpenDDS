@@ -31,6 +31,106 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+enum Endianness {
+  ENDIAN_BIG = 0,
+  ENDIAN_LITTLE = 1,
+#ifdef ACE_LITTLE_ENDIAN
+  ENDIAN_NATIVE = ENDIAN_LITTLE,
+  ENDIAN_NONNATIVE = ENDIAN_BIG
+#else
+  ENDIAN_NATIVE = ENDIAN_BIG,
+  ENDIAN_NONNATIVE = ENDIAN_LITTLE
+#endif
+};
+
+/**
+ * Represents the settings of the CDR Stream. Passed to Serializer, cdr_size(),
+ * and cdr_max_size().
+ */
+class OpenDDS_Dcps_Export Encoding {
+public:
+  /**
+   * Predefined CDR Kind.
+   * For CDR header encoding kinds that can have an endianness on the LSB,
+   * define them with the LSB set to 0 (even).
+   */
+  enum Kind {
+    KIND_CDR_PLAIN = 0x0000,
+    KIND_CDR_PARAMLIST = 0x0002,
+    KIND_XCDR2_PLAIN = 0x0010,
+    KIND_XCDR2_PARAMLIST = 0x0012,
+    KIND_XCDR2_DELIMITED = 0x0014,
+    KIND_XML = 0x0100,
+    // Values below are OpenDDS specific and so should not encodable in a CDR
+    // header, which has a 2 bytes for the encoding type.
+    KIND_CUSTOM = 0x10000,
+    KIND_UNKNOWN = KIND_CUSTOM + 0,
+    /// This is unaligned CDR with no XCDR behavior.
+    KIND_CDR_UNALIGNED = KIND_CUSTOM + 2,
+  };
+
+  enum Alignment {
+    ALIGN_NONE = 0, // No Alignment Needed
+    ALIGN_CDR = 8, // Align for CDR and XCDR1
+    ALIGN_XCDR2 = 4, // Align for XCDR2
+    ALIGN_MAX = ALIGN_CDR // Don't actually use this, this is for Serializer::ALIGN_PAD
+  };
+
+  /**
+   * XCDR version derived from the Encoding kind.
+   */
+  enum XcdrVersion {
+    XCDR_NONE,
+    XCDR1,
+    XCDR2
+  };
+
+  /// Use KIND_UNKNOWN and ENDIAN_NATIVE
+  Encoding();
+
+  explicit Encoding(Kind kind, Endianness endianness = ENDIAN_NATIVE);
+
+  Encoding(Kind kind, bool swap_bytes);
+
+  Kind kind() const;
+  void kind(Kind value);
+
+  Endianness endianness() const;
+  void endianness(Endianness value);
+
+  Alignment alignment() const;
+  void alignment(Alignment value);
+
+  /**
+   * Should the padding bytes being inserted into the stream be zero
+   * initialized?
+   */
+  bool zero_init_padding() const;
+  void zero_init_padding(bool value);
+
+  /// Return the maximum alignment dictated by the alignment policy.
+  size_t max_align() const;
+
+  /// Return XCDR version based what encoding is being used.
+  XcdrVersion xcdr_version() const;
+
+  static OPENDDS_STRING encoding_value_to_string(ACE_CDR::UShort value);
+
+private:
+  Kind kind_;
+  Endianness endianness_;
+  Alignment alignment_;
+  bool zero_init_padding_;
+};
+
+class Serializer;
+
+OpenDDS_Dcps_Export
+bool operator>>(Serializer& s, Encoding& encoding);
+
+OpenDDS_Dcps_Export
+bool operator<<(Serializer& s, const Encoding& encoding);
+
 /**
  * @class Serializer
  *
@@ -43,46 +143,10 @@ namespace DCPS {
 class OpenDDS_Dcps_Export Serializer {
 public:
 
-  enum Alignment {
-    ALIGN_NONE = 0, // No Alignment Needed
-    ALIGN_CDR = 8, // Align for CDR and XCDR1
-    ALIGN_XCDR2 = 4, // Align for XCDR2
-    ALIGN_MAX = ALIGN_CDR // Don't actually use this, this is for ALIGN_PAD
-  };
-
-  enum Endianness {
-    ENDIAN_BIG = 0,
-    ENDIAN_LITTLE = 1,
-#ifdef ACE_LITTLE_ENDIAN
-    ENDIAN_NATIVE = ENDIAN_LITTLE,
-    ENDIAN_NONNATIVE = ENDIAN_BIG
-#else
-    ENDIAN_NATIVE = ENDIAN_BIG,
-    ENDIAN_NONNATIVE = ENDIAN_LITTLE
-#endif
-  };
-
-  /**
-   * Used mainly for CDR Header. LSB is used for endianness in CDR header, so
-   * avoid odd values.
-   */
-  enum Encoding {
-    ENC_CDR_PLAIN = 0x0000,
-    ENC_CDR_PARAMLIST = 0x0002,
-    ENC_XCDR2_PLAIN = 0x0010,
-    ENC_XCDR2_PARAMLIST = 0x0012,
-    ENC_XCDR2_DELIMITED = 0x0014,
-    ENC_XML = 0x0100,
-    ENC_CUSTOM = 0x10000, // Not encoded in CDR Header
-    ENC_UNSUPPORTED = ENC_CUSTOM + 0,
-    ENC_CDR_UNALIGNED = ENC_CUSTOM + 2,
-  };
-
-  enum XcdrVersion {
-    XCDR_NONE,
-    XCDR1,
-    XCDR2
-  };
+  // Alias Alignment for Backwards Compatibility
+  typedef Encoding::Alignment Alignment;
+  static const Alignment ALIGN_NONE = Encoding::ALIGN_NONE;
+  static const Alignment ALIGN_CDR = Encoding::ALIGN_CDR;
 
   /**
    * Constructor with a message block chain.  This installs the
@@ -93,10 +157,42 @@ public:
    * and the lifetime of the chain must be longer than the use of
    * this object.
    *
+   * This constructor is meant for using a specific predefined encoding scheme.
+   */
+  Serializer(ACE_Message_Block* chain, const Encoding& encoding);
+
+  /**
+   * More convenient version of the constructor above if you don't need to
+   * reuse the Encoding object.
+   */
+  Serializer(ACE_Message_Block* chain, Encoding::Kind kind,
+    Endianness endianness = ENDIAN_NATIVE);
+
+  /**
+   * This constructor is for reading a stream that might or might not have a
+   * RTPS CDR header. If has_cdr_header is true, the Serializer will attempt to
+   * read and set itself up using the header. Use good_bit() to see if it
+   * succeeded. If has_cdr_header is false it will use
+   * Encoding::KIND_CDR_UNALIGNED and is_little_endian to create the Encoding
+   * object. is_little_endian is made to be used with "byte_order" values
+   * littered around OpenDDS, which correspond to ACE_CDR_BYTE_ORDER in
+   * ace/CDR_Base.h.
+   */
+  Serializer(ACE_Message_Block* chain, bool has_cdr_header,
+    bool is_little_endian);
+
+  /**
+   * This constructor is designed to be mostly compatible with the pre-3.15
+   * constructor, except ALIGN_INITIALIZE has been removed from Alignment and
+   * the option to zero initialize padding was made into an extra argument.
+   *
    * Bytes are swapped when either reading or writing from the
    * message chain if the swap_bytes argument is true.  It is the
    * responsibility of the owner of this object to determine whether
    * this should be performed or not.
+   *
+   * Settings are used to create Encoding object with
+   * Encoding::KIND_CDR_UNALIGNED.
    */
   explicit Serializer(ACE_Message_Block* chain
     , bool swap_bytes = false
@@ -109,13 +205,10 @@ public:
 #endif
   );
 
-  /**
-   * Initialize the Serializer with a specific encoding. Uses encoding().
-   */
-  Serializer(ACE_Message_Block* chain, Encoding encoding,
-    Endianness endianness = ENDIAN_NATIVE);
-
   virtual ~Serializer();
+
+  const Encoding& encoding() const;
+  void encoding(const Encoding& value);
 
   /// Establish byte swapping behavior.
   void swap_bytes(bool do_swap);
@@ -123,12 +216,15 @@ public:
   /// Examine byte swapping behavior.
   bool swap_bytes() const;
 
+  /// Get the Explict Endianness of the Stream
+  Endianness endianness() const;
+
+  /// Set the Explict Endianness of the Stream
+  void endianness(Endianness value);
+
   /// Examine alignment behavior.
   Alignment alignment() const;
   void alignment(Alignment value);
-
-  bool zero_init_padding() const;
-  void zero_init_padding(bool value);
 
   /// Reset alignment as if a new instance were created
   void reset_alignment();
@@ -351,58 +447,20 @@ public:
   int align_w(size_t alignment);
 
   /**
-   * Return maximum alignment dictated by the alignment policy.
-   */
-  size_t max_align() const;
-
-  Endianness endianness() const;
-  void endianness(Endianness value);
-
-  Encoding encoding() const;
-
-  /**
-   * Sets alignment, whether or not to zero initialized padding, and XCDR
-   * behavior based on what the encoding calls for. Calls reset_alignment() if
-   * using a standard CDR encoding.
-   */
-  void encoding(Encoding value);
-
-  /// Return XCDR version based what encoding is being used.
-  XcdrVersion xcdr_version() const;
-
-  /**
-   * Read a CDR header like what is used in RTPS serialized data. Sets up
-   * Serializer based on the header.
-   *
-   * Returns true if successful.
-   */
-  bool read_header();
-
-  /**
-   * Write a CDR header like what is used in RTPS serialized data. Uses the
-   * current Serializer settings.
-   *
-   * Returns true if successful.
-   */
-  bool write_header();
-
-  /**
-   * Read XCDR Parameter ID used in parameter list.
+   * Read a XCDR Parameter ID used in XCDR parameter lists.
    *
    * Returns true if successful.
    */
   bool read_parameter_id(unsigned& id, unsigned& size);
 
   /**
-   * Read Delimiter used for XCDR2 delimited data.
+   * Read a Delimiter used for XCDR2 delimited data.
    *
    * Returns true if successful.
    */
   bool read_delimiter(unsigned& size);
 
 private:
-  static OPENDDS_STRING encoding_to_string(ACE_CDR::UShort value);
-
   /// Read an array of values from the chain.
   /// NOTE: This assumes that the buffer contains elements that are
   ///       properly aligned.  The buffer must have padding if the
@@ -446,34 +504,29 @@ private:
   /// Currently active message block in chain.
   ACE_Message_Block* current_;
 
+  /// Encoding Settings
+  Encoding encoding_;
+
   /// Indicates whether bytes will be swapped for this stream.
   bool swap_bytes_;
 
   /// Indicates the current state of the stream abstraction.
   bool good_bit_;
 
-  /// Current alignment mode, see Alignment enum above.
-  Alignment alignment_;
-
   /**
-   * Should we zero initialize the padding bytes being inserted into the
-   * stream?
+   * Number of bytes off of max alignment that the current_ block's / rd_ptr()
+   * started at.
    */
-  bool zero_init_padding_;
-
-  /// Number of bytes off of max alignment (8) that the current_ block's
-  /// rd_ptr() started at.
   unsigned char align_rshift_;
 
-  /// Number of bytes off of max alignment (8) that the current_ block's
-  /// wr_ptr() started at.
+  /**
+   * Number of bytes off of max alignment that the current_ block's wr_ptr()
+   * started at.
+   */
   unsigned char align_wshift_;
 
-  /// What encoding to assume. Mostly used for RTPS CDR Streams.
-  Encoding encoding_;
-
   /// Buffer that is copied for zero padding
-  static const char ALIGN_PAD[ALIGN_MAX];
+  static const char ALIGN_PAD[Encoding::ALIGN_MAX];
 
 public:
   static const size_t WCHAR_SIZE = 2; // Serialize wchar as UTF-16BE

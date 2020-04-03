@@ -1712,7 +1712,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     extraction.addArg("strm", "Serializer&");
     extraction.addArg("stru", cxx + "&");
     extraction.endArgs();
-    string expr, intro;
+    string intro;
     if (maybe_delimited) {
       be_global->impl_ <<
         "  unsigned size;\n";
@@ -1773,6 +1773,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         "  }\n"
         "  return false;\n";
     } else {
+      string expr;
       for (size_t i = 0; i < fields.size(); ++i) {
         if (i) expr += "\n    && ";
         const string field_name = fields[i]->local_name()->get_string();
@@ -2145,7 +2146,7 @@ namespace {
         "  }\n"
         "  ACE_Message_Block param(size + pad);\n"
         "  Serializer strm(&param, outer_strm.swap_bytes(), "
-        "outer_strm.alignment());\n"
+        "outer_strm.encoding().alignment());\n"
         "  if (!insertParamData(strm, uni)) {\n"
         "    return false;\n"
         "  }\n"
@@ -2154,7 +2155,7 @@ namespace {
         "  if (!outer_strm.write_octet_array(data, ACE_CDR::ULong(param.length()))) {\n"
         "    return false;\n"
         "  }\n"
-        "  if (post_pad < 4 && outer_strm.alignment() != "
+        "  if (post_pad < 4 && outer_strm.encoding().alignment() != "
         "Serializer::ALIGN_NONE) {\n"
         "    static const ACE_CDR::Octet padding[3] = {0};\n"
         "    return outer_strm.write_octet_array(padding, "

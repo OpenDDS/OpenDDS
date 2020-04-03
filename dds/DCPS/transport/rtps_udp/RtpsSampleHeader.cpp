@@ -79,10 +79,9 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
     return;
   }
 
-  const bool little_endian = flags & FLAG_E;
   const size_t starting_length = mb.total_length();
-  Serializer ser(&mb, ACE_CDR_BYTE_ORDER != little_endian,
-                 Serializer::ALIGN_CDR);
+  Serializer ser(&mb, Encoding::KIND_CDR_PLAIN,
+    (flags & FLAG_E) ? ENDIAN_LITTLE : ENDIAN_BIG);
 
   ACE_CDR::UShort octetsToNextHeader = 0;
 

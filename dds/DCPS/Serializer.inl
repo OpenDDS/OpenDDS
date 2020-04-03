@@ -7,8 +7,6 @@
 
 #include "Serializer.h"
 
-#include "SafetyProfileStreams.h"
-
 #include <ace/Message_Block.h>
 
 #ifndef OPENDDS_SAFETY_PROFILE
@@ -20,6 +18,128 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
+
+ACE_INLINE
+Encoding::Kind Encoding::kind() const
+{
+  return kind_;
+}
+
+ACE_INLINE
+void Encoding::kind(Encoding::Kind value)
+{
+  kind_ = value;
+
+  switch (value) {
+  case KIND_CDR_PARAMLIST: // fallthrough
+  case KIND_CDR_PLAIN:
+    alignment(ALIGN_CDR);
+    break;
+
+  case KIND_XCDR2_PARAMLIST: // fallthrough
+  case KIND_XCDR2_DELIMITED: // fallthrough
+  case KIND_XCDR2_PLAIN:
+    alignment(ALIGN_XCDR2);
+    zero_init_padding(true);
+    return;
+
+  case KIND_CDR_UNALIGNED:
+    alignment(ALIGN_NONE);
+    break;
+
+  default:
+    kind_ = KIND_UNKNOWN;
+    alignment(ALIGN_NONE);
+    break;
+  }
+
+  zero_init_padding(
+#ifdef ACE_INITIALIZE_MEMORY_BEFORE_USE
+    true
+#else
+    false
+#endif
+  );
+}
+
+ACE_INLINE
+Endianness Encoding::endianness() const
+{
+  return endianness_;
+}
+
+ACE_INLINE
+void Encoding::endianness(Endianness value)
+{
+  endianness_ = value;
+}
+
+ACE_INLINE
+Encoding::Alignment Encoding::alignment() const
+{
+  return alignment_;
+}
+
+ACE_INLINE
+void Encoding::alignment(Encoding::Alignment value)
+{
+  alignment_ = value;
+}
+
+ACE_INLINE
+bool Encoding::zero_init_padding() const
+{
+  return zero_init_padding_;
+}
+
+ACE_INLINE
+void Encoding::zero_init_padding(bool value)
+{
+  zero_init_padding_ = value;
+}
+
+ACE_INLINE
+size_t Encoding::max_align() const
+{
+  return static_cast<size_t>(alignment_);
+}
+
+ACE_INLINE
+Encoding::XcdrVersion Encoding::xcdr_version() const
+{
+  switch (kind_) {
+  case KIND_CDR_PLAIN: // fallthrough
+  case KIND_CDR_PARAMLIST:
+    return XCDR1;
+  case KIND_XCDR2_PLAIN: // fallthrough
+  case KIND_XCDR2_PARAMLIST: // fallthrough
+  case KIND_XCDR2_DELIMITED:
+    return XCDR2;
+  default:
+    return XCDR_NONE;
+  }
+}
+
+ACE_INLINE
+const Encoding& Serializer::encoding() const
+{
+  return encoding_;
+}
+
+ACE_INLINE
+void Serializer::encoding(const Encoding& value)
+{
+  encoding_ = value;
+  swap_bytes_ = value.endianness() != ENDIAN_NATIVE;
+}
+
+ACE_INLINE
+void Serializer::endianness(Endianness value)
+{
+  Encoding encoding = this->encoding();
+  encoding.endianness(value);
+  this->encoding(encoding);
+}
 
 // NOTE: I use the ternary operators in here for conditionals to help
 //       the compiler inline the code -- and it does end up fairly
@@ -83,14 +203,14 @@ Serializer::doread(char* dest, size_t size, bool swap, size_t offset)
   //
   // Move to the next chained block if this one is spent.
   //
-  if (this->current_->length() == 0) {
-
-    if (this->alignment_ == ALIGN_NONE) {
-      this->current_ = this->current_->cont();
+  if (current_->length() == 0) {
+    if (encoding().alignment()) {
+      align_cont_r();
     } else {
-      this->align_cont_r();
+      current_ = current_->cont();
     }
   }
+
   //
   // Return the current location in the read.
   //
@@ -168,12 +288,11 @@ Serializer::dowrite(const char* src, size_t size, bool swap, size_t offset)
   //
   // Move to the next chained block if this one is spent.
   //
-  if (this->current_->space() == 0) {
-
-    if (this->alignment_ == ALIGN_NONE) {
-      this->current_ = this->current_->cont();
+  if (current_->space() == 0) {
+    if (encoding().alignment()) {
+      align_cont_w();
     } else {
-      this->align_cont_w();
+      current_ = current_->cont();
     }
   }
 
@@ -193,10 +312,12 @@ Serializer::buffer_write(const char* src, size_t size, bool swap)
   }
 }
 
-ACE_INLINE void
-Serializer::swap_bytes(bool do_swap)
+ACE_INLINE
+void Serializer::swap_bytes(bool do_swap)
 {
-  this->swap_bytes_ = do_swap;
+  Encoding enc = encoding_;
+  enc.endianness(do_swap ? ENDIAN_NONNATIVE : ENDIAN_NATIVE);
+  encoding(enc);
 }
 
 ACE_INLINE bool
@@ -205,28 +326,18 @@ Serializer::swap_bytes() const
   return this->swap_bytes_;
 }
 
-ACE_INLINE Serializer::Alignment
-Serializer::alignment() const
+ACE_INLINE
+Serializer::Alignment Serializer::alignment() const
 {
-  return this->alignment_;
+  return encoding().alignment();
 }
 
 ACE_INLINE
 void Serializer::alignment(Serializer::Alignment value)
 {
-  alignment_ = value;
-}
-
-ACE_INLINE
-bool Serializer::zero_init_padding() const
-{
-  return zero_init_padding_;
-}
-
-ACE_INLINE
-void Serializer::zero_init_padding(bool value)
-{
-  zero_init_padding_ = value;
+  Encoding enc = encoding_;
+  enc.alignment(value);
+  encoding(enc);
 }
 
 ACE_INLINE bool
@@ -244,12 +355,12 @@ Serializer::length() const
 ACE_INLINE bool
 Serializer::skip(ACE_CDR::UShort n, int size)
 {
-  if (size > 1 && this->alignment_ != ALIGN_NONE) {
+  if (size > 1 && encoding().alignment() != Encoding::ALIGN_NONE) {
     if (!this->current_) {
       this->good_bit_ = false;
       return false;
     }
-    align_r(std::min(size_t(size), max_align()));
+    align_r(std::min(size_t(size), encoding().max_align()));
   }
   for (size_t len = static_cast<size_t>(n * size); len;) {
     if (!this->current_) {
@@ -365,7 +476,9 @@ Serializer::read_octet_array(ACE_CDR::Octet* x, ACE_CDR::ULong length)
 ACE_INLINE bool
 Serializer::read_short_array(ACE_CDR::Short* x, ACE_CDR::ULong length)
 {
-  this->alignment() == Serializer::ALIGN_NONE ? 0 : this->align_r(sizeof(ACE_CDR::Short));
+  if (encoding().alignment()) {
+    align_r(sizeof(ACE_CDR::Short));
+  }
   this->read_array(reinterpret_cast<char*>(x), sizeof(ACE_CDR::Short), length);
   return this->good_bit();
 }
@@ -373,7 +486,9 @@ Serializer::read_short_array(ACE_CDR::Short* x, ACE_CDR::ULong length)
 ACE_INLINE bool
 Serializer::read_ushort_array(ACE_CDR::UShort* x, ACE_CDR::ULong length)
 {
-  this->alignment() == Serializer::ALIGN_NONE ? 0 : this->align_r(sizeof(ACE_CDR::UShort));
+  if (encoding().alignment()) {
+    align_r(sizeof(ACE_CDR::UShort));
+  }
   this->read_array(reinterpret_cast<char*>(x), sizeof(ACE_CDR::UShort), length);
   return this->good_bit();
 }
@@ -381,7 +496,9 @@ Serializer::read_ushort_array(ACE_CDR::UShort* x, ACE_CDR::ULong length)
 ACE_INLINE bool
 Serializer::read_long_array(ACE_CDR::Long* x, ACE_CDR::ULong length)
 {
-  this->alignment() == Serializer::ALIGN_NONE ? 0 : this->align_r(sizeof(ACE_CDR::Long));
+  if (encoding().alignment()) {
+    align_r(sizeof(ACE_CDR::Long));
+  }
   this->read_array(reinterpret_cast<char*>(x), sizeof(ACE_CDR::Long), length);
   return this->good_bit();
 }
@@ -389,7 +506,9 @@ Serializer::read_long_array(ACE_CDR::Long* x, ACE_CDR::ULong length)
 ACE_INLINE bool
 Serializer::read_ulong_array(ACE_CDR::ULong* x, ACE_CDR::ULong length)
 {
-  this->alignment() == Serializer::ALIGN_NONE ? 0 : this->align_r(sizeof(ACE_CDR::ULong));
+  if (encoding().alignment()) {
+    align_r(sizeof(ACE_CDR::ULong));
+  }
   this->read_array(reinterpret_cast<char*>(x), sizeof(ACE_CDR::ULong), length);
   return this->good_bit();
 }
@@ -397,7 +516,9 @@ Serializer::read_ulong_array(ACE_CDR::ULong* x, ACE_CDR::ULong length)
 ACE_INLINE bool
 Serializer::read_longlong_array(ACE_CDR::LongLong* x, ACE_CDR::ULong length)
 {
-  this->alignment() == Serializer::ALIGN_NONE ? 0 : this->align_r(sizeof(ACE_CDR::LongLong));
+  if (encoding().alignment()) {
+    align_r(sizeof(ACE_CDR::LongLong));
+  }
   this->read_array(reinterpret_cast<char*>(x), sizeof(ACE_CDR::LongLong), length);
   return this->good_bit();
 }
@@ -405,7 +526,9 @@ Serializer::read_longlong_array(ACE_CDR::LongLong* x, ACE_CDR::ULong length)
 ACE_INLINE bool
 Serializer::read_ulonglong_array(ACE_CDR::ULongLong* x, ACE_CDR::ULong length)
 {
-  this->alignment() == Serializer::ALIGN_NONE ? 0 : this->align_r(sizeof(ACE_CDR::ULongLong));
+  if (encoding().alignment()) {
+    align_r(sizeof(ACE_CDR::ULongLong));
+  }
   this->read_array(reinterpret_cast<char*>(x), sizeof(ACE_CDR::ULongLong), length);
   return this->good_bit();
 }
@@ -413,7 +536,9 @@ Serializer::read_ulonglong_array(ACE_CDR::ULongLong* x, ACE_CDR::ULong length)
 ACE_INLINE bool
 Serializer::read_float_array(ACE_CDR::Float* x, ACE_CDR::ULong length)
 {
-  this->alignment() == Serializer::ALIGN_NONE ? 0 : this->align_r(sizeof(ACE_CDR::Float));
+  if (encoding().alignment()) {
+    align_r(sizeof(ACE_CDR::Float));
+  }
   this->read_array(reinterpret_cast<char*>(x), sizeof(ACE_CDR::Float), length);
   return this->good_bit();
 }
@@ -421,7 +546,9 @@ Serializer::read_float_array(ACE_CDR::Float* x, ACE_CDR::ULong length)
 ACE_INLINE bool
 Serializer::read_double_array(ACE_CDR::Double* x, ACE_CDR::ULong length)
 {
-  this->alignment() == Serializer::ALIGN_NONE ? 0 : this->align_r(sizeof(ACE_CDR::Double));
+  if (encoding().alignment()) {
+    align_r(sizeof(ACE_CDR::Double));
+  }
   this->read_array(reinterpret_cast<char*>(x), sizeof(ACE_CDR::Double), length);
   return this->good_bit();
 }
@@ -429,7 +556,9 @@ Serializer::read_double_array(ACE_CDR::Double* x, ACE_CDR::ULong length)
 ACE_INLINE bool
 Serializer::read_longdouble_array(ACE_CDR::LongDouble* x, ACE_CDR::ULong length)
 {
-  this->alignment() == Serializer::ALIGN_NONE ? 0 : this->align_r(8);
+  if (encoding().alignment()) {
+    align_r(8);
+  }
   this->read_array(reinterpret_cast<char*>(x), sizeof(ACE_CDR::LongDouble), length);
   return this->good_bit();
 }
@@ -470,7 +599,9 @@ Serializer::write_octet_array(const ACE_CDR::Octet* x, ACE_CDR::ULong length)
 ACE_INLINE bool
 Serializer::write_short_array(const ACE_CDR::Short* x, ACE_CDR::ULong length)
 {
-  this->alignment() == Serializer::ALIGN_NONE ? 0 : this->align_w(sizeof(ACE_CDR::Short));
+  if (encoding().alignment()) {
+    align_w(sizeof(ACE_CDR::Short));
+  }
   this->write_array(reinterpret_cast<const char*>(x), sizeof(ACE_CDR::Short), length);
   return this->good_bit();
 }
@@ -478,7 +609,9 @@ Serializer::write_short_array(const ACE_CDR::Short* x, ACE_CDR::ULong length)
 ACE_INLINE bool
 Serializer::write_ushort_array(const ACE_CDR::UShort* x, ACE_CDR::ULong length)
 {
-  this->alignment() == Serializer::ALIGN_NONE ? 0 : this->align_w(sizeof(ACE_CDR::UShort));
+  if (encoding().alignment()) {
+    align_w(sizeof(ACE_CDR::UShort));
+  }
   this->write_array(reinterpret_cast<const char*>(x), sizeof(ACE_CDR::UShort), length);
   return this->good_bit();
 }
@@ -486,7 +619,9 @@ Serializer::write_ushort_array(const ACE_CDR::UShort* x, ACE_CDR::ULong length)
 ACE_INLINE bool
 Serializer::write_long_array(const ACE_CDR::Long* x, ACE_CDR::ULong length)
 {
-  this->alignment() == Serializer::ALIGN_NONE ? 0 : this->align_w(sizeof(ACE_CDR::Long));
+  if (encoding().alignment()) {
+    align_w(sizeof(ACE_CDR::Long));
+  }
   this->write_array(reinterpret_cast<const char*>(x), sizeof(ACE_CDR::Long), length);
   return this->good_bit();
 }
@@ -494,7 +629,9 @@ Serializer::write_long_array(const ACE_CDR::Long* x, ACE_CDR::ULong length)
 ACE_INLINE bool
 Serializer::write_ulong_array(const ACE_CDR::ULong* x, ACE_CDR::ULong length)
 {
-  this->alignment() == Serializer::ALIGN_NONE ? 0 : this->align_w(sizeof(ACE_CDR::ULong));
+  if (encoding().alignment()) {
+    align_w(sizeof(ACE_CDR::ULong));
+  }
   this->write_array(reinterpret_cast<const char*>(x), sizeof(ACE_CDR::ULong), length);
   return this->good_bit();
 }
@@ -503,7 +640,9 @@ ACE_INLINE bool
 Serializer::write_longlong_array(const ACE_CDR::LongLong* x,
                                  ACE_CDR::ULong length)
 {
-  this->alignment() == Serializer::ALIGN_NONE ? 0 : this->align_w(sizeof(ACE_CDR::LongLong));
+  if (encoding().alignment()) {
+    align_w(sizeof(ACE_CDR::LongLong));
+  }
   this->write_array(reinterpret_cast<const char*>(x), sizeof(ACE_CDR::LongLong), length);
   return this->good_bit();
 }
@@ -512,7 +651,9 @@ ACE_INLINE bool
 Serializer::write_ulonglong_array(const ACE_CDR::ULongLong* x,
                                   ACE_CDR::ULong length)
 {
-  this->alignment() == Serializer::ALIGN_NONE ? 0 : this->align_w(sizeof(ACE_CDR::ULongLong));
+  if (encoding().alignment()) {
+    align_w(sizeof(ACE_CDR::ULongLong));
+  }
   this->write_array(reinterpret_cast<const char*>(x), sizeof(ACE_CDR::ULongLong), length);
   return this->good_bit();
 }
@@ -520,7 +661,9 @@ Serializer::write_ulonglong_array(const ACE_CDR::ULongLong* x,
 ACE_INLINE bool
 Serializer::write_float_array(const ACE_CDR::Float* x, ACE_CDR::ULong length)
 {
-  this->alignment() == Serializer::ALIGN_NONE ? 0 : this->align_w(sizeof(ACE_CDR::Float));
+  if (encoding().alignment()) {
+    align_w(sizeof(ACE_CDR::Float));
+  }
   this->write_array(reinterpret_cast<const char*>(x), sizeof(ACE_CDR::Float), length);
   return this->good_bit();
 }
@@ -528,7 +671,9 @@ Serializer::write_float_array(const ACE_CDR::Float* x, ACE_CDR::ULong length)
 ACE_INLINE bool
 Serializer::write_double_array(const ACE_CDR::Double* x, ACE_CDR::ULong length)
 {
-  this->alignment() == Serializer::ALIGN_NONE ? 0 : this->align_w(sizeof(ACE_CDR::Double));
+  if (encoding().alignment()) {
+    align_w(sizeof(ACE_CDR::Double));
+  }
   this->write_array(reinterpret_cast<const char*>(x), sizeof(ACE_CDR::Double), length);
   return this->good_bit();
 }
@@ -537,7 +682,9 @@ ACE_INLINE bool
 Serializer::write_longdouble_array(const ACE_CDR::LongDouble* x,
                                    ACE_CDR::ULong length)
 {
-  this->alignment() == Serializer::ALIGN_NONE ? 0 : this->align_w(8);
+  if (encoding().alignment()) {
+    align_w(8);
+  }
   this->write_array(reinterpret_cast<const char*>(x), sizeof(ACE_CDR::LongDouble), length);
   return this->good_bit();
 }
@@ -570,13 +717,13 @@ Serializer::align_w(size_t al)
     const size_t cur_spc = this->current_->space();
     if (cur_spc <= len) {
       len -= cur_spc;
-      if (zero_init_padding_) {
+      if (encoding().zero_init_padding()) {
         this->smemcpy(this->current_->wr_ptr(), ALIGN_PAD, cur_spc);
       }
       this->current_->wr_ptr(cur_spc);
       this->align_cont_w();
     } else {
-      if (zero_init_padding_) {
+      if (encoding().zero_init_padding()) {
         this->smemcpy(this->current_->wr_ptr(), ALIGN_PAD, len);
       }
       this->current_->wr_ptr(len);
@@ -591,13 +738,13 @@ ACE_INLINE void
 Serializer::align_cont_r()
 {
   const size_t thisblock =
-    (ptrdiff_t(current_->rd_ptr()) - align_rshift_) % max_align();
+    (ptrdiff_t(current_->rd_ptr()) - align_rshift_) % encoding().max_align();
 
   this->current_ = this->current_->cont();
 
   if (this->current_) {
     this->align_rshift_ =
-      (ptrdiff_t(current_->rd_ptr()) - thisblock) % max_align();
+      (ptrdiff_t(current_->rd_ptr()) - thisblock) % encoding().max_align();
   }
 }
 
@@ -605,102 +752,14 @@ ACE_INLINE void
 Serializer::align_cont_w()
 {
   const size_t thisblock =
-    (ptrdiff_t(current_->wr_ptr()) - align_wshift_) % max_align();
+    (ptrdiff_t(current_->wr_ptr()) - align_wshift_) % encoding().max_align();
 
   this->current_ = this->current_->cont();
 
   if (this->current_) {
     this->align_wshift_ =
-      (ptrdiff_t(current_->wr_ptr()) - thisblock) % max_align();
+      (ptrdiff_t(current_->wr_ptr()) - thisblock) % encoding().max_align();
   }
-}
-
-ACE_INLINE
-size_t Serializer::max_align() const
-{
-  return static_cast<size_t>(alignment_);
-}
-
-ACE_INLINE
-Serializer::Endianness Serializer::endianness() const
-{
-  return swap_bytes_ ? ENDIAN_NONNATIVE : ENDIAN_NATIVE;
-}
-
-ACE_INLINE
-void Serializer::endianness(Serializer::Endianness value)
-{
-  swap_bytes_ = value == ENDIAN_NONNATIVE;
-}
-
-ACE_INLINE
-Serializer::Encoding Serializer::encoding() const
-{
-  return encoding_;
-}
-
-ACE_INLINE
-Serializer::XcdrVersion Serializer::xcdr_version() const
-{
-  switch (encoding_) {
-  case ENC_CDR_PLAIN: // fallthrough
-  case ENC_CDR_PARAMLIST:
-    return XCDR1;
-  case ENC_XCDR2_PLAIN: // fallthrough
-  case ENC_XCDR2_PARAMLIST: // fallthrough
-  case ENC_XCDR2_DELIMITED:
-    return XCDR2;
-  default:
-    return XCDR_NONE;
-  }
-}
-
-ACE_INLINE
-bool Serializer::read_header()
-{
-  ACE_CDR::Octet data[4];
-  if (!read_octet_array(&data[0], sizeof(data))) {
-    return false;
-  }
-  const ACE_CDR::UShort raw_enc =
-    (static_cast<ACE_CDR::UShort>(data[0]) << 8) | data[1];
-  const Encoding enc = static_cast<Encoding>(raw_enc & 0xfffe);
-  switch (enc) {
-  case ENC_CDR_PLAIN: // fallthrough
-  case ENC_CDR_PARAMLIST: // fallthrough
-  case ENC_XCDR2_PLAIN: // fallthrough
-  case ENC_XCDR2_PARAMLIST: // fallthrough
-  case ENC_XCDR2_DELIMITED:
-    endianness(static_cast<Endianness>(data[1] & 1));
-    encoding(enc);
-    break;
-
-  default:
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
-      ACE_TEXT("Serializer::read_header: ")
-      ACE_TEXT("Unsupported Encoding: %C\n"),
-      encoding_to_string(raw_enc).c_str()));
-    return false;
-  }
-  if (DCPS_debug_level && (data[2] || data[3])) {
-    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING ")
-      ACE_TEXT("Serializer::read_header: ")
-      ACE_TEXT("Unexpected non-zero CDR header options: %C\n"),
-      to_hex_dds_string(&data[2], 2).c_str()));
-  }
-  return true;
-}
-
-ACE_INLINE
-bool Serializer::write_header()
-{
-  ACE_CDR::Octet data[4];
-  data[0] = encoding_ >> 8;
-  data[1] = (encoding_ & 0xfe) | endianness();
-  // Encoding "Options" Currently Reserved, Set to Zero
-  data[2] = 0;
-  data[3] = 0;
-  return write_octet_array(&data[0], sizeof(data));
 }
 
 ACE_INLINE
@@ -733,7 +792,9 @@ operator<<(Serializer& s, ACE_CDR::Char x)
 ACE_INLINE bool
 operator<<(Serializer& s, ACE_CDR::Short x)
 {
-  s.alignment() == Serializer::ALIGN_NONE ? 0 : s.align_w(sizeof(ACE_CDR::Short));
+  if (s.encoding().alignment()) {
+    s.align_w(sizeof(ACE_CDR::Short));
+  }
   s.buffer_write(reinterpret_cast<char*>(&x), sizeof(ACE_CDR::Short), s.swap_bytes());
   return s.good_bit();
 }
@@ -741,7 +802,9 @@ operator<<(Serializer& s, ACE_CDR::Short x)
 ACE_INLINE bool
 operator<<(Serializer& s, ACE_CDR::UShort x)
 {
-  s.alignment() == Serializer::ALIGN_NONE ? 0 : s.align_w(sizeof(ACE_CDR::UShort));
+  if (s.encoding().alignment()) {
+    s.align_w(sizeof(ACE_CDR::UShort));
+  }
   s.buffer_write(reinterpret_cast<char*>(&x), sizeof(ACE_CDR::UShort), s.swap_bytes());
   return s.good_bit();
 }
@@ -749,7 +812,9 @@ operator<<(Serializer& s, ACE_CDR::UShort x)
 ACE_INLINE bool
 operator<<(Serializer& s, ACE_CDR::Long x)
 {
-  s.alignment() == Serializer::ALIGN_NONE ? 0 : s.align_w(sizeof(ACE_CDR::Long));
+  if (s.encoding().alignment()) {
+    s.align_w(sizeof(ACE_CDR::Long));
+  }
   s.buffer_write(reinterpret_cast<char*>(&x), sizeof(ACE_CDR::Long), s.swap_bytes());
   return s.good_bit();
 }
@@ -757,7 +822,9 @@ operator<<(Serializer& s, ACE_CDR::Long x)
 ACE_INLINE bool
 operator<<(Serializer& s, ACE_CDR::ULong x)
 {
-  s.alignment() == Serializer::ALIGN_NONE ? 0 : s.align_w(sizeof(ACE_CDR::ULong));
+  if (s.encoding().alignment()) {
+    s.align_w(sizeof(ACE_CDR::ULong));
+  }
   s.buffer_write(reinterpret_cast<char*>(&x), sizeof(ACE_CDR::ULong), s.swap_bytes());
   return s.good_bit();
 }
@@ -765,7 +832,9 @@ operator<<(Serializer& s, ACE_CDR::ULong x)
 ACE_INLINE bool
 operator<<(Serializer& s, ACE_CDR::LongLong x)
 {
-  s.alignment() == Serializer::ALIGN_NONE ? 0 : s.align_w(sizeof(ACE_CDR::LongLong));
+  if (s.encoding().alignment()) {
+    s.align_w(sizeof(ACE_CDR::LongLong));
+  }
   s.buffer_write(reinterpret_cast<char*>(&x), sizeof(ACE_CDR::LongLong), s.swap_bytes());
   return s.good_bit();
 }
@@ -773,7 +842,9 @@ operator<<(Serializer& s, ACE_CDR::LongLong x)
 ACE_INLINE bool
 operator<<(Serializer& s, ACE_CDR::ULongLong x)
 {
-  s.alignment() == Serializer::ALIGN_NONE ? 0 : s.align_w(sizeof(ACE_CDR::ULongLong));
+  if (s.encoding().alignment()) {
+    s.align_w(sizeof(ACE_CDR::ULongLong));
+  }
   s.buffer_write(reinterpret_cast<char*>(&x), sizeof(ACE_CDR::ULongLong), s.swap_bytes());
   return s.good_bit();
 }
@@ -781,7 +852,9 @@ operator<<(Serializer& s, ACE_CDR::ULongLong x)
 ACE_INLINE bool
 operator<<(Serializer& s, ACE_CDR::LongDouble x)
 {
-  s.alignment() == Serializer::ALIGN_NONE ? 0 : s.align_w(8);
+  if (s.encoding().alignment()) {
+    s.align_w(8);
+  }
   s.buffer_write(reinterpret_cast<char*>(&x), sizeof(ACE_CDR::LongDouble), s.swap_bytes());
   return s.good_bit();
 }
@@ -789,7 +862,9 @@ operator<<(Serializer& s, ACE_CDR::LongDouble x)
 ACE_INLINE bool
 operator<<(Serializer& s, ACE_CDR::Float x)
 {
-  s.alignment() == Serializer::ALIGN_NONE ? 0 : s.align_w(sizeof(ACE_CDR::Float));
+  if (s.encoding().alignment()) {
+    s.align_w(sizeof(ACE_CDR::Float));
+  }
   s.buffer_write(reinterpret_cast<char*>(&x), sizeof(ACE_CDR::Float), s.swap_bytes());
   return s.good_bit();
 }
@@ -797,7 +872,9 @@ operator<<(Serializer& s, ACE_CDR::Float x)
 ACE_INLINE bool
 operator<<(Serializer& s, ACE_CDR::Double x)
 {
-  s.alignment() == Serializer::ALIGN_NONE ? 0 : s.align_w(sizeof(ACE_CDR::Double));
+  if (s.encoding().alignment()) {
+    s.align_w(sizeof(ACE_CDR::Double));
+  }
   s.buffer_write(reinterpret_cast<char*>(&x), sizeof(ACE_CDR::Double), s.swap_bytes());
   return s.good_bit();
 }
@@ -972,7 +1049,9 @@ operator>>(Serializer& s, ACE_CDR::Char& x)
 ACE_INLINE bool
 operator>>(Serializer& s, ACE_CDR::Short& x)
 {
-  s.alignment() == Serializer::ALIGN_NONE ? 0 : s.align_r(sizeof(ACE_CDR::Short));
+  if (s.encoding().alignment()) {
+    s.align_r(sizeof(ACE_CDR::Short));
+  }
   s.buffer_read(reinterpret_cast<char*>(&x), sizeof(ACE_CDR::Short), s.swap_bytes());
   return s.good_bit();
 }
@@ -980,7 +1059,9 @@ operator>>(Serializer& s, ACE_CDR::Short& x)
 ACE_INLINE bool
 operator>>(Serializer& s, ACE_CDR::UShort& x)
 {
-  s.alignment() == Serializer::ALIGN_NONE ? 0 : s.align_r(sizeof(ACE_CDR::UShort));
+  if (s.encoding().alignment()) {
+    s.align_r(sizeof(ACE_CDR::UShort));
+  }
   s.buffer_read(reinterpret_cast<char*>(&x), sizeof(ACE_CDR::UShort), s.swap_bytes());
   return s.good_bit();
 }
@@ -988,7 +1069,9 @@ operator>>(Serializer& s, ACE_CDR::UShort& x)
 ACE_INLINE bool
 operator>>(Serializer& s, ACE_CDR::Long& x)
 {
-  s.alignment() == Serializer::ALIGN_NONE ? 0 : s.align_r(sizeof(ACE_CDR::Long));
+  if (s.encoding().alignment()) {
+    s.align_r(sizeof(ACE_CDR::Long));
+  }
   s.buffer_read(reinterpret_cast<char*>(&x), sizeof(ACE_CDR::Long), s.swap_bytes());
   return s.good_bit();
 }
@@ -996,7 +1079,9 @@ operator>>(Serializer& s, ACE_CDR::Long& x)
 ACE_INLINE bool
 operator>>(Serializer& s, ACE_CDR::ULong& x)
 {
-  s.alignment() == Serializer::ALIGN_NONE ? 0 : s.align_r(sizeof(ACE_CDR::ULong));
+  if (s.encoding().alignment()) {
+    s.align_r(sizeof(ACE_CDR::ULong));
+  }
   s.buffer_read(reinterpret_cast<char*>(&x), sizeof(ACE_CDR::ULong), s.swap_bytes());
   return s.good_bit();
 }
@@ -1004,7 +1089,9 @@ operator>>(Serializer& s, ACE_CDR::ULong& x)
 ACE_INLINE bool
 operator>>(Serializer& s, ACE_CDR::LongLong& x)
 {
-  s.alignment() == Serializer::ALIGN_NONE ? 0 : s.align_r(sizeof(ACE_CDR::LongLong));
+  if (s.encoding().alignment()) {
+    s.align_r(sizeof(ACE_CDR::LongLong));
+  }
   s.buffer_read(reinterpret_cast<char*>(&x), sizeof(ACE_CDR::LongLong), s.swap_bytes());
   return s.good_bit();
 }
@@ -1012,7 +1099,9 @@ operator>>(Serializer& s, ACE_CDR::LongLong& x)
 ACE_INLINE bool
 operator>>(Serializer& s, ACE_CDR::ULongLong& x)
 {
-  s.alignment() == Serializer::ALIGN_NONE ? 0 : s.align_r(sizeof(ACE_CDR::ULongLong));
+  if (s.encoding().alignment()) {
+    s.align_r(sizeof(ACE_CDR::ULongLong));
+  }
   s.buffer_read(reinterpret_cast<char*>(&x), sizeof(ACE_CDR::ULongLong), s.swap_bytes());
   return s.good_bit();
 }
@@ -1020,7 +1109,9 @@ operator>>(Serializer& s, ACE_CDR::ULongLong& x)
 ACE_INLINE bool
 operator>>(Serializer& s, ACE_CDR::LongDouble& x)
 {
-  s.alignment() == Serializer::ALIGN_NONE ? 0 : s.align_r(8);
+  if (s.encoding().alignment()) {
+    s.align_r(8);
+  }
   s.buffer_read(reinterpret_cast<char*>(&x), sizeof(ACE_CDR::LongDouble), s.swap_bytes());
   return s.good_bit();
 }
@@ -1028,7 +1119,9 @@ operator>>(Serializer& s, ACE_CDR::LongDouble& x)
 ACE_INLINE bool
 operator>>(Serializer& s, ACE_CDR::Float& x)
 {
-  s.alignment() == Serializer::ALIGN_NONE ? 0 : s.align_r(sizeof(ACE_CDR::Float));
+  if (s.encoding().alignment()) {
+    s.align_r(sizeof(ACE_CDR::Float));
+  }
   s.buffer_read(reinterpret_cast<char*>(&x), sizeof(ACE_CDR::Float), s.swap_bytes());
   return s.good_bit();
 }
@@ -1036,7 +1129,9 @@ operator>>(Serializer& s, ACE_CDR::Float& x)
 ACE_INLINE bool
 operator>>(Serializer& s, ACE_CDR::Double& x)
 {
-  s.alignment() == Serializer::ALIGN_NONE ? 0 : s.align_r(sizeof(ACE_CDR::Double));
+  if (s.encoding().alignment()) {
+    s.align_r(sizeof(ACE_CDR::Double));
+  }
   s.buffer_read(reinterpret_cast<char*>(&x), sizeof(ACE_CDR::Double), s.swap_bytes());
   return s.good_bit();
 }

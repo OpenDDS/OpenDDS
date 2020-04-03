@@ -1,5 +1,5 @@
-#ifndef dds_DCPS_DataWriterImpl_T_h
-#define dds_DCPS_DataWriterImpl_T_h
+#ifndef OPENDDS_DDS_DCPS_DATAWRITERIMPL_T_H
+#define OPENDDS_DDS_DCPS_DATAWRITERIMPL_T_H
 
 #include "dds/DCPS/PublicationInstance.h"
 #include "dds/DCPS/DataWriterImpl.h"
@@ -296,26 +296,29 @@ private:
   ACE_Message_Block* dds_marshal(const MessageType& instance_data,
                                  OpenDDS::DCPS::MarshalingType marshaling_type)
   {
-    const bool cdr = this->cdr_encapsulation(), swap = this->swap_bytes();
-
+    const bool cdr_header = cdr_encapsulation();
+    // TODO: Decide on CDR Kind based on Policies
+    const Encoding encoding(
+      cdr_header ? Encoding::KIND_CDR_PLAIN : Encoding::KIND_CDR_UNALIGNED,
+      swap_bytes());
     Message_Block_Ptr mb;
     ACE_Message_Block* tmp_mb;
 
     if (marshaling_type == OpenDDS::DCPS::KEY_ONLY_MARSHALING) {
       // Don't use the cached allocator for the registered sample message
       // block.
-
-      OpenDDS::DCPS::KeyOnly<const MessageType > ko_instance_data(instance_data);
+      OpenDDS::DCPS::KeyOnly<const MessageType> ko_instance_data(instance_data);
       size_t effective_size = 0, padding = 0;
       if (key_marshaled_size_) {
         effective_size = key_marshaled_size_;
       } else {
+        // TODO: cdr_size for Topic Type
         TraitsType::gen_find_size(ko_instance_data, effective_size, padding);
-        if (cdr) {
+        if (cdr_header) {
           effective_size += cdr_header_size;
         }
       }
-      if (cdr) {
+      if (cdr_header) {
         effective_size += padding;
       }
 
@@ -329,29 +332,34 @@ private:
           get_db_lock()),
         0);
       mb.reset(tmp_mb);
-      OpenDDS::DCPS::Serializer serializer(mb.get(), swap, cdr
-                                           ? OpenDDS::DCPS::Serializer::ALIGN_CDR
-                                           : OpenDDS::DCPS::Serializer::ALIGN_NONE);
-      if (cdr) {
-        serializer << ACE_OutputCDR::from_octet(0);
-        serializer << ACE_OutputCDR::from_octet(swap ? !ACE_CDR_BYTE_ORDER : ACE_CDR_BYTE_ORDER);
-        serializer << ACE_CDR::UShort(0);
 
-        // Start counting byte-offset AFTER header
-        serializer.reset_alignment();
+      OpenDDS::DCPS::Serializer serializer(mb.get(), encoding);
+      if (cdr_header && !(serializer << encoding)) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+          ACE_TEXT("%CDataWriterImpl::dds_marshal(): ")
+          ACE_TEXT("key only data encoding header serialization error.\n"),
+          TraitsType::type_name()));
+        return 0;
       }
-      serializer << ko_instance_data;
+      if (!(serializer << ko_instance_data)) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+          ACE_TEXT("%CDataWriterImpl::dds_marshal(): ")
+          ACE_TEXT("key only data serialization error.\n"),
+          TraitsType::type_name()));
+        return 0;
+      }
+
     } else { // OpenDDS::DCPS::FULL_MARSHALING
       size_t effective_size = 0, padding = 0;
       if (marshaled_size_) {
         effective_size = marshaled_size_;
       } else {
         TraitsType::gen_find_size(instance_data, effective_size, padding);
-        if (cdr) {
+        if (cdr_header) {
           effective_size += cdr_header_size;
         }
       }
-      if (cdr) {
+      if (cdr_header) {
         effective_size += padding;
       }
 
@@ -372,34 +380,32 @@ private:
           mb_allocator_.get()),
         0);
       mb.reset(tmp_mb);
-      OpenDDS::DCPS::Serializer serializer(mb.get(), swap, cdr
-                                           ? OpenDDS::DCPS::Serializer::ALIGN_CDR
-                                           : OpenDDS::DCPS::Serializer::ALIGN_NONE);
-      if (cdr) {
-        serializer << ACE_OutputCDR::from_octet(0);
-        serializer << ACE_OutputCDR::from_octet(swap ? !ACE_CDR_BYTE_ORDER : ACE_CDR_BYTE_ORDER);
-        serializer << ACE_CDR::UShort(0);
 
-        // Start counting byte-offset AFTER header
-        serializer.reset_alignment();
+      OpenDDS::DCPS::Serializer serializer(mb.get(), encoding);
+      if (cdr_header && !(serializer << encoding)) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+          ACE_TEXT("%CDataWriterImpl::dds_marshal(): ")
+          ACE_TEXT("data encoding header serialization error.\n"),
+          TraitsType::type_name()));
+        return 0;
       }
-
       if (!(serializer << instance_data)) {
-        ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: %CDataWriterImpl::dds_marshal(): ")
-          ACE_TEXT("instance_data serialization error.\n"),
-          TraitsType::type_name()),
-          0);
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+          ACE_TEXT("%CDataWriterImpl::dds_marshal(): ")
+          ACE_TEXT("data serialization error.\n"),
+          TraitsType::type_name()));
+        return 0;
       }
     }
 
     return mb.release();
   }
 
-/**
- * Find the instance handle for the given instance_data using
- * the data type's key(s).  If the instance does not already exist
- * create a new instance handle for it.
- */
+  /**
+   * Find the instance handle for the given instance_data using the data type's
+   * key(s). If the instance does not already exist create a new instance
+   * handle for it.
+   */
   DDS::ReturnCode_t get_or_create_instance_handle(
     DDS::InstanceHandle_t& handle,
     const MessageType& instance_data,
@@ -478,4 +484,4 @@ private:
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif /* dds_DCPS_DataWriterImpl_T_h */
+#endif /* OPENDDS_DDS_DCPS_DATAWRITERIMPL_T_H */

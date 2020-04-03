@@ -158,8 +158,6 @@ public:
   void signal_liveliness_secure(DDS::LivelinessQosPolicyKind kind);
 #endif
 
-  static const bool host_is_bigendian_;
-
   ICE::Endpoint* get_ice_endpoint();
 
   void rtps_relay_address(const ACE_INET_Addr& address);

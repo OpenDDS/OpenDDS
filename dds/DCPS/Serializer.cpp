@@ -6,8 +6,13 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+
 #include "Serializer.h"
+
+#include "SafetyProfileStreams.h"
+
 #include <tao/String_Alloc.h>
+
 #include <ace/OS_NS_string.h>
 #include <ace/OS_Memory.h>
 
@@ -20,33 +25,149 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-const char Serializer::ALIGN_PAD[] = {0};
-
-Serializer::Serializer(ACE_Message_Block* chain,
-                       bool swap_bytes, Alignment align, bool zero_init_padding)
-  : current_(chain)
-  , swap_bytes_(swap_bytes)
-  , good_bit_(true)
-  , alignment_(align)
-  , zero_init_padding_(zero_init_padding)
-  , align_rshift_(0)
-  , align_wshift_(0)
-  , encoding_(ENC_UNSUPPORTED)
+Encoding::Encoding()
+: endianness_(ENDIAN_NATIVE)
 {
-  if (align != ALIGN_NONE) {
-    reset_alignment();
+  kind(KIND_UNKNOWN);
+}
+
+Encoding::Encoding(Encoding::Kind kind, Endianness endianness)
+: endianness_(endianness)
+{
+  this->kind(kind);
+}
+
+Encoding::Encoding(Encoding::Kind kind, bool swap_bytes)
+: endianness_(swap_bytes ? ENDIAN_NONNATIVE : ENDIAN_NATIVE)
+{
+  this->kind(kind);
+}
+
+bool operator>>(Serializer& s, Encoding& encoding)
+{
+  ACE_CDR::Octet data[4];
+  if (!s.read_octet_array(&data[0], sizeof(data))) {
+    return false;
+  }
+  const ACE_CDR::UShort raw_kind =
+    (static_cast<ACE_CDR::UShort>(data[0]) << 8) | data[1];
+  const Encoding::Kind kind = static_cast<Encoding::Kind>(raw_kind & 0xfffe);
+  switch (kind) {
+  case Encoding::KIND_CDR_PLAIN: // fallthrough
+  case Encoding::KIND_CDR_PARAMLIST: // fallthrough
+  case Encoding::KIND_XCDR2_PLAIN: // fallthrough
+  case Encoding::KIND_XCDR2_PARAMLIST: // fallthrough
+  case Encoding::KIND_XCDR2_DELIMITED:
+    encoding.endianness(static_cast<Endianness>(data[1] & 1));
+    encoding.kind(kind);
+    break;
+
+  default:
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
+      ACE_TEXT("operator>>(Serializer&, Encoding&): ")
+      ACE_TEXT("Unsupported Encoding Kind: %C\n"),
+      encoding.encoding_value_to_string(raw_kind).c_str()));
+    return false;
+  }
+  if (DCPS_debug_level && (data[2] || data[3])) {
+    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING ")
+      ACE_TEXT("operator>>(Serializer&, Encoding&): ")
+      ACE_TEXT("Unexpected non-zero CDR header options: %C\n"),
+      to_hex_dds_string(&data[2], 2).c_str()));
+  }
+  s.reset_alignment();
+  return true;
+}
+
+bool operator<<(Serializer& s, const Encoding& encoding)
+{
+  ACE_CDR::Octet data[4];
+  Encoding::Kind k = encoding.kind();
+  data[0] = k >> 8;
+  data[1] = (k & 0xfe) | encoding.endianness();
+  // Encoding "Options" Currently Reserved, Set to Zero
+  data[2] = 0;
+  data[3] = 0;
+  const bool ok = s.write_octet_array(&data[0], sizeof(data));
+  s.reset_alignment();
+  return ok;
+}
+
+OPENDDS_STRING Encoding::encoding_value_to_string(ACE_CDR::UShort value)
+{
+  ACE_CDR::Octet data[2];
+  switch (static_cast<Kind>(value)) {
+  case KIND_CDR_PLAIN:
+    return "CDR/XCDR1 Plain";
+  case KIND_CDR_PARAMLIST:
+    return "CDR/XCDR1 Parameter List";
+  case KIND_XCDR2_PLAIN:
+    return "XCDR2 Plain";
+  case KIND_XCDR2_PARAMLIST:
+    return "XCDR2 Parameter List";
+  case KIND_XCDR2_DELIMITED:
+    return "XCDR2 Delimited";
+  case KIND_XML:
+    return "XML";
+  default:
+    data[0] = value >> 8;
+    data[1] = value & 0xff;
+    return to_hex_dds_string(&data[0], 2);
   }
 }
 
-Serializer::Serializer(
-  ACE_Message_Block* chain, Encoding encoding, Endianness endianness)
+const char Serializer::ALIGN_PAD[] = {0};
+
+Serializer::Serializer(ACE_Message_Block* chain, const Encoding& encoding)
   : current_(chain)
-  , swap_bytes_(endianness != ENDIAN_NATIVE)
   , good_bit_(true)
   , align_rshift_(0)
   , align_wshift_(0)
 {
   this->encoding(encoding);
+}
+
+Serializer::Serializer(ACE_Message_Block* chain, Encoding::Kind kind,
+  Endianness endianness)
+  : current_(chain)
+  , good_bit_(true)
+  , align_rshift_(0)
+  , align_wshift_(0)
+{
+  encoding(Encoding(kind, endianness));
+}
+
+Serializer::Serializer(ACE_Message_Block* chain, bool has_cdr_header,
+  bool is_little_endian)
+  : current_(chain)
+  , good_bit_(true)
+  , align_rshift_(0)
+  , align_wshift_(0)
+{
+  Encoding enc;
+  bool ok = true;
+  if (has_cdr_header) {
+    ok = *this >> enc;
+  } else {
+    enc.kind(Encoding::KIND_CDR_UNALIGNED);
+    enc.endianness(is_little_endian ? ENDIAN_LITTLE : ENDIAN_BIG );
+  }
+  if (ok) {
+    encoding(enc);
+  }
+}
+
+Serializer::Serializer(ACE_Message_Block* chain, bool swap_bytes,
+  Encoding::Alignment align, bool zero_init_padding)
+  : current_(chain)
+  , good_bit_(true)
+  , align_rshift_(0)
+  , align_wshift_(0)
+{
+  Encoding enc(Encoding::KIND_UNKNOWN, swap_bytes);
+  enc.alignment(align);
+  enc.zero_init_padding(zero_init_padding);
+  encoding(enc);
 }
 
 Serializer::~Serializer()
@@ -56,8 +177,11 @@ Serializer::~Serializer()
 void
 Serializer::reset_alignment()
 {
-  align_rshift_ = current_ ? ptrdiff_t(current_->rd_ptr()) % max_align() : 0;
-  align_wshift_ = current_ ? ptrdiff_t(current_->wr_ptr()) % max_align() : 0;
+  const ptrdiff_t align = encoding().max_align();
+  if (current_ && align) {
+    align_rshift_ = ptrdiff_t(current_->rd_ptr()) % align;
+    align_wshift_ = ptrdiff_t(current_->wr_ptr()) % align;
+  }
 }
 
 void
@@ -132,7 +256,10 @@ Serializer::read_string(ACE_CDR::Char*& dest,
     ACE_CDR::Char* str_alloc(ACE_CDR::ULong),
     void str_free(ACE_CDR::Char*))
 {
-  this->alignment_ == ALIGN_NONE ? 0 : this->align_r(sizeof(ACE_CDR::ULong));
+  if (encoding().alignment()) {
+    align_r(sizeof(ACE_CDR::ULong));
+  }
+
   //
   // Ensure no bad values leave the routine.
   //
@@ -191,7 +318,10 @@ Serializer::read_string(ACE_CDR::WChar*& dest,
     ACE_CDR::WChar* str_alloc(ACE_CDR::ULong),
     void str_free(ACE_CDR::WChar*))
 {
-  this->alignment_ == ALIGN_NONE ? 0 : this->align_r(sizeof(ACE_CDR::ULong));
+  if (encoding().alignment()) {
+    align_r(sizeof(ACE_CDR::ULong));
+  }
+
   //
   // Ensure no bad values leave the routine.
   //
@@ -254,69 +384,10 @@ Serializer::read_string(ACE_CDR::WChar*& dest,
   return length;
 }
 
-void Serializer::encoding(Serializer::Encoding value)
-{
-  encoding_ = value;
-
-  switch (value) {
-  case ENC_CDR_PARAMLIST: // fallthrough
-  case ENC_CDR_PLAIN:
-    alignment(Serializer::ALIGN_CDR);
-    reset_alignment();
-    break;
-
-  case ENC_XCDR2_PARAMLIST: // fallthrough
-  case ENC_XCDR2_DELIMITED: // fallthrough
-  case ENC_XCDR2_PLAIN:
-    alignment(Serializer::ALIGN_XCDR2);
-    reset_alignment();
-    zero_init_padding(true);
-    return;
-
-  case ENC_CDR_UNALIGNED:
-    alignment(Serializer::ALIGN_NONE);
-    break;
-
-  default:
-    break;
-  }
-
-  zero_init_padding(
-#ifdef ACE_INITIALIZE_MEMORY_BEFORE_USE
-    true
-#else
-    false
-#endif
-  );
-}
-
-OPENDDS_STRING Serializer::encoding_to_string(ACE_CDR::UShort value)
-{
-  ACE_CDR::Octet data[2];
-  switch (static_cast<Encoding>(value)) {
-  case ENC_CDR_PLAIN:
-    return "CDR/XCDR1 Plain";
-  case ENC_CDR_PARAMLIST:
-    return "CDR/XCDR1 Parameter List";
-  case ENC_XCDR2_PLAIN:
-    return "XCDR2 Plain";
-  case ENC_XCDR2_PARAMLIST:
-    return "XCDR2 Parameter List";
-  case ENC_XCDR2_DELIMITED:
-    return "XCDR2 Delimited";
-  case ENC_XML:
-    return "XML";
-  default:
-    data[0] = value >> 8;
-    data[1] = value & 0xff;
-    return to_hex_dds_string(&data[0], 2);
-  }
-}
-
 bool Serializer::read_parameter_id(unsigned& id, unsigned& size)
 {
-  const XcdrVersion xcdr = xcdr_version();
-  if (xcdr == XCDR1) {
+  const Encoding::XcdrVersion xcdr = encoding().xcdr_version();
+  if (xcdr == Encoding::XCDR1) {
     // Get the "short" id and size
     align_r(4);
     ACE_CDR::UShort pid;
@@ -349,7 +420,7 @@ bool Serializer::read_parameter_id(unsigned& id, unsigned& size)
     }
 
     reset_alignment();
-  } else if (xcdr == XCDR2) {
+  } else if (xcdr == Encoding::XCDR2) {
     ACE_CDR::ULong emheader;
     if (!(*this >> emheader)) {
       return false;

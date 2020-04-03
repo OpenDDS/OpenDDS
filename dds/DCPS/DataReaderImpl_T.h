@@ -895,15 +895,10 @@ namespace OpenDDS {
                                OpenDDS::DCPS::SubscriptionInstance_rch& instance)
   {
     //!!! caller should already have the sample_lock_
-
-    MessageType data;
-
-    const bool cdr = sample.header_.cdr_encapsulation_;
-
+    const bool cdr_header = sample.header_.cdr_encapsulation_;
     OpenDDS::DCPS::Serializer ser(
-      sample.sample_.get(), sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
-      OpenDDS::DCPS::Serializer::ALIGN_NONE);
-    if (cdr && !ser.read_header()) {
+      sample.sample_.get(), cdr_header, sample.header_.byte_order_);
+    if (cdr_header && !ser.good_bit()) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
         ACE_TEXT("%CDataReaderImpl::lookup_instance: ")
         ACE_TEXT("deserialization of CDR header failed.\n"),
@@ -911,12 +906,12 @@ namespace OpenDDS {
       return;
     }
 
+    MessageType data;
     if (sample.header_.key_fields_only_) {
       ser >> OpenDDS::DCPS::KeyOnly<MessageType>(data);
     } else {
       ser >> data;
     }
-
     if (!ser.good_bit()) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %CDataReaderImpl::lookup_instance ")
                  ACE_TEXT("deserialization failed.\n"),
@@ -967,20 +962,19 @@ protected:
                              bool& filtered,
                              OpenDDS::DCPS::MarshalingType marshaling_type)
   {
-    unique_ptr<MessageTypeWithAllocator> data(new (*data_allocator()) MessageTypeWithAllocator);
-    const bool cdr = sample.header_.cdr_encapsulation_;
-
+    const bool cdr_header = sample.header_.cdr_encapsulation_;
     OpenDDS::DCPS::Serializer ser(
-      sample.sample_.get(), sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
-      OpenDDS::DCPS::Serializer::ALIGN_NONE);
-    if (cdr && !ser.read_header()) {
+      sample.sample_.get(), cdr_header, sample.header_.byte_order_);
+    if (cdr_header && !ser.good_bit()) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
-        ACE_TEXT("%CDataReaderImpl::lookup_instance: ")
+        ACE_TEXT("%CDataReaderImpl::dds_demarshal: ")
         ACE_TEXT("deserialization of CDR header failed.\n"),
         TraitsType::type_name()));
       return;
     }
 
+    unique_ptr<MessageTypeWithAllocator> data(
+      new (*data_allocator()) MessageTypeWithAllocator);
     const bool key_only_marshaling =
       marshaling_type == OpenDDS::DCPS::KEY_ONLY_MARSHALING;
     if (key_only_marshaling) {
@@ -988,7 +982,6 @@ protected:
     } else {
       ser >> *data;
     }
-
     if (!ser.good_bit()) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %CDataReaderImpl::dds_demarshal ")
                  ACE_TEXT("deserialization failed, dropping sample.\n"),

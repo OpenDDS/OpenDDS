@@ -337,7 +337,7 @@ RtpsUdpSendStrategy::encode_payload(const RepoId& pub_id,
           const bool swapPl = iQos[iQosLen - 4] != ACE_CDR_BYTE_ORDER;
           const char* rawIQos = reinterpret_cast<const char*>(iQos.get_buffer());
           ACE_Message_Block mbIQos(rawIQos, iQosLen);
-          Serializer ser(&mbIQos, swapPl, Serializer::ALIGN_CDR);
+          Serializer ser(&mbIQos, swapPl, Encoding::ALIGN_CDR);
 
           RTPS::DataSubmessage& data = submessages[i].data_sm();
           if (!(ser >> data.inlineQos)) { // appends to any existing inlineQos
