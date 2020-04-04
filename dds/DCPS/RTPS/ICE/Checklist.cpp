@@ -431,6 +431,8 @@ void Checklist::succeeded(const ConnectivityCheck& cc)
       else {
         remove_from_in_progress(cc.candidate_pair());
       }
+
+      endpoint_manager_->unset_responsible_checklist(cc.request().transaction_id, rchandle_from(this));
     }
 
     OPENDDS_ASSERT(frozen_.empty());
@@ -665,6 +667,7 @@ void Checklist::do_next_check(const MonotonicTimePoint& a_now)
         remove_from_in_progress(cc.candidate_pair());
       }
 
+      endpoint_manager_->unset_responsible_checklist(cc.request().transaction_id, rchandle_from(this));
       continue;
     }
 
@@ -722,7 +725,7 @@ void Checklist::execute(const MonotonicTimePoint& a_now)
     message.password = remote_agent_info_.password;
     message.append_attribute(STUN::make_message_integrity());
     message.append_attribute(STUN::make_fingerprint());
-    endpoint_manager_->send(selected_address(), message);
+    endpoint_manager_->send(nominated_->remote.address, message);
     flag = true;
     interval = std::min(interval, endpoint_manager_->agent_impl->get_configuration().indication_period());
 
