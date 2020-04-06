@@ -418,8 +418,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     std::cerr << "register_type failed for Status" << std::endl;
     return 1;
   }
+  CORBA::String_var type_name = status_ts->get_type_name();
   DDS::Topic_var status_topic = participant->create_topic(
-    status_topic_name, status_ts->get_type_name(), TOPIC_QOS_DEFAULT, nullptr,
+    status_topic_name, type_name, TOPIC_QOS_DEFAULT, nullptr,
     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!status_topic) {
     std::cerr << "create_topic status failed" << std::endl;
@@ -430,8 +431,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     std::cerr << "register_type failed for Config" << std::endl;
     return 1;
   }
+  type_name = config_ts->get_type_name();
   DDS::Topic_var config_topic = participant->create_topic(
-    config_topic_name, config_ts->get_type_name(), TOPIC_QOS_DEFAULT, nullptr,
+    config_topic_name, type_name, TOPIC_QOS_DEFAULT, nullptr,
     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!config_topic) {
     std::cerr << "create_topic config failed" << std::endl;
@@ -442,8 +444,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     std::cerr << "register_type failed for Report" << std::endl;
     return 1;
   }
+  type_name = report_ts->get_type_name();
   DDS::Topic_var report_topic = participant->create_topic(
-    report_topic_name, report_ts->get_type_name(), TOPIC_QOS_DEFAULT, nullptr,
+    report_topic_name,type_name, TOPIC_QOS_DEFAULT, nullptr,
     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!report_topic) {
     std::cerr << "create_topic report failed" << std::endl;
