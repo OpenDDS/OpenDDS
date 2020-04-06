@@ -2106,7 +2106,7 @@ RtpsUdpDataLink::RtpsReader::gather_association_ack_nacks_i(MetaSubmessageVec& m
   }
 
   for (WriterInfoMap::iterator wi = remote_writers_.begin(); wi != remote_writers_.end(); ++wi) {
-    if (wi->second.first_valid_hb_ && wi->second.first_delivered_data_) {
+    if (wi->second.first_valid_hb_ || wi->second.first_delivered_data_) {
       MetaSubmessage meta_submessage(id_, wi->first);
 
       AckNackSubmessage acknack = {
@@ -2865,7 +2865,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
     ri->second.requested_changes_.push_back(acknack.readerSNState);
     // Determine if the reader needs a heartbeat.
     DisjointSequence reqs;
-    ri->second.requires_heartbeat_ = process_requested_changes_i(reqs, ri->second);
+    ri->second.requires_heartbeat_ = !process_requested_changes_i(reqs, ri->second);
   }
 
   TqeSet to_deliver;
