@@ -2140,6 +2140,10 @@ sub configure_build {
 
     write_config_h($buildEnvRef);
     write_default_features($buildEnvRef);
+    if ($buildEnvRef->{'build'} eq 'target' && $opts{'target'} eq 'android') {
+        print "Android Target detected, setting no_hidden_visibility=1\n" if $opts{'verbose'};
+        push(@{$opts{'macros'}}, 'no_hidden_visibility=1');
+    }
     write_platform_macros($buildEnvRef);
   }
   generate_workspace($buildEnvRef);
