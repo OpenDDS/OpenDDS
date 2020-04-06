@@ -446,7 +446,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
   type_name = report_ts->get_type_name();
   DDS::Topic_var report_topic = participant->create_topic(
-    report_topic_name,type_name, TOPIC_QOS_DEFAULT, nullptr,
+    report_topic_name, type_name, TOPIC_QOS_DEFAULT, nullptr,
     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!report_topic) {
     std::cerr << "create_topic report failed" << std::endl;
