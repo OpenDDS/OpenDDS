@@ -19,8 +19,9 @@ Participant::Participant(const ParticipantConfig& config, ParticipantReport& rep
   Log::log() << "Creating participant: '" << name_ << "' in domain " << domain_ << std::endl;
 
   // Customize QoS Object
+  DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
   DDS::DomainParticipantQos qos;
-  TheParticipantFactory->get_default_participant_qos(qos);
+  dpf->get_default_participant_qos(qos);
 
   //UserDataQosPolicyMask user_data;
   APPLY_QOS_MASK(qos, config.qos, config.qos_mask, user_data, value);
@@ -47,8 +48,8 @@ Participant::Participant(const ParticipantConfig& config, ParticipantReport& rep
   }
 
   // Create Participant
-  participant_ = TheParticipantFactory->create_participant(domain_, qos, listener_, listener_status_mask_);
-  if (CORBA::is_nil(participant_.in())) {
+  participant_ = dpf->create_participant(domain_, qos, listener_, listener_status_mask_);
+  if (!participant_) {
     throw std::runtime_error("participant creation failed");
   }
 
@@ -91,7 +92,8 @@ Participant::~Participant() {
   if (participant_) {
     Log::log() << "deleting entities for participant " << name_ << std::endl;
     participant_->delete_contained_entities();
-    TheParticipantFactory->delete_participant(participant_.in());
+    DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
+    dpf->delete_participant(participant_);
   }
 }
 
@@ -102,4 +104,3 @@ void Participant::enable() {
 }
 
 }
-
