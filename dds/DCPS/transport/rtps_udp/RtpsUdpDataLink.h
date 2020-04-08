@@ -318,7 +318,7 @@ private:
                        MetaSubmessageVec& meta_submessages);
     void acked_by_all_helper_i(TqeSet& to_deliver);
     void send_directed_nack_replies_i(const RepoId& readerId, ReaderInfo& reader, MetaSubmessageVec& meta_submessages);
-    bool process_requested_changes_i(DisjointSequence& requests, const ReaderInfo& reader);
+    void process_requested_changes_i(DisjointSequence& requests, const ReaderInfo& reader);
     void send_nackfrag_replies_i(DisjointSequence& gaps, AddrSet& gap_recipients);
 
   public:

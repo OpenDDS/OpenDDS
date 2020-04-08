@@ -2865,7 +2865,8 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
     ri->second.requested_changes_.push_back(acknack.readerSNState);
     // Determine if the reader needs a heartbeat.
     DisjointSequence reqs;
-    ri->second.requires_heartbeat_ = process_requested_changes_i(reqs, ri->second);
+    process_requested_changes_i(reqs, ri->second);
+    ri->second.requires_heartbeat_ = reqs.empty();
   }
 
   TqeSet to_deliver;
@@ -3121,30 +3122,27 @@ RtpsUdpDataLink::RtpsWriter::send_nackfrag_replies_i(DisjointSequence& gaps,
   }
 }
 
-bool
+void
 RtpsUdpDataLink::RtpsWriter::process_requested_changes_i(DisjointSequence& requests,
                                                          const ReaderInfo& reader)
 {
-  bool inserted = false;
   for (size_t i = 0; i < reader.requested_changes_.size(); ++i) {
     const RTPS::SequenceNumberSet& sn_state = reader.requested_changes_[i];
     SequenceNumber base;
     base.setValue(sn_state.bitmapBase.high, sn_state.bitmapBase.low);
-    if (sn_state.numBits == 1 && !(sn_state.bitmap[0] & 1)
+    if ((sn_state.numBits == 0 ||
+         (sn_state.numBits == 1 && !(sn_state.bitmap[0] & 1)))
         && base == heartbeat_high(reader)) {
       // Since there is an entry in requested_changes_, the DR must have
       // sent a non-final AckNack.  If the base value is the high end of
       // the heartbeat range, treat it as a request for that seq#.
       if (!send_buff_.is_nil() && send_buff_->contains(base)) {
         requests.insert(base);
-        inserted = true;
       }
     } else {
       requests.insert(base, sn_state.numBits, sn_state.bitmap.get_buffer());
-      inserted = true;
     }
   }
-  return inserted;
 }
 
 void
@@ -3164,7 +3162,8 @@ RtpsUdpDataLink::RtpsWriter::send_directed_nack_replies_i(const RepoId& readerId
   }
 
   DisjointSequence requests;
-  reader.requires_heartbeat_ = !process_requested_changes_i(requests, reader);
+  process_requested_changes_i(requests, reader);
+  reader.requires_heartbeat_ = requests.empty();
   reader.requested_changes_.clear();
 
   DisjointSequence gaps;
