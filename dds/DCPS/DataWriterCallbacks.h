@@ -31,7 +31,7 @@ namespace DCPS {
 * @brief Defines the interface for Discovery callbacks into the DataWriter.
 *
 */
-class DataWriterCallbacks
+class OpenDDS_Dcps_Export DataWriterCallbacks
   : public virtual RcObject {
 public:
 
