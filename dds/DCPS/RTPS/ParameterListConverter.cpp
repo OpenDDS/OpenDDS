@@ -1544,7 +1544,7 @@ bool from_param_list(const ParameterList& param_list,
     case PID_OPENDDS_ICE_CANDIDATE: {
       const IceCandidate_t& ice_candidate = parameter.ice_candidate();
       ICE::Candidate candidate;
-#if IPV6_ONLY
+#if IPV6_V6ONLY
       // https://tools.ietf.org/html/rfc8445
 
       // IPv4-mapped IPv6 addresses SHOULD NOT be included in the

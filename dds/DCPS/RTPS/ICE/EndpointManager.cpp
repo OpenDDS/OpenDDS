@@ -201,7 +201,7 @@ void EndpointManager::set_host_addresses(const AddressListType& a_host_addresses
     //   continue;
     // }
 
-#if !IPV6_ONLY
+#if !IPV6_V6ONLY
     if (pos->is_ipv4_mapped_ipv6()) {
       continue;
     }
