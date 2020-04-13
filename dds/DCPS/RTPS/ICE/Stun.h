@@ -18,6 +18,7 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+#include <cstring>
 #include <map>
 #include <string>
 #include <vector>
