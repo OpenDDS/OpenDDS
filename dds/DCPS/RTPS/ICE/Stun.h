@@ -18,6 +18,7 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+#include <cstring>
 #include <map>
 #include <string>
 #include <vector>
@@ -138,6 +139,10 @@ bool operator<<(DCPS::Serializer& serializer, const Attribute& attribute);
 
 struct OpenDDS_Rtps_Export TransactionId {
   ACE_UINT8 data[12];
+  TransactionId()
+  {
+    std::memset(data, 0, sizeof data);
+  }
   bool operator<(const TransactionId& other) const;
   bool operator==(const TransactionId& other) const;
   bool operator!=(const TransactionId& other) const;
