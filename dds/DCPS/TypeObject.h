@@ -11,6 +11,7 @@
 #include "dds/DCPS/RcHandle_T.h"
 #include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/RTPS/md5.h"
+#include "dds/DCPS/Serializer.h"
 
 #include "ace/CDR_Base.h"
 
@@ -1456,6 +1457,8 @@ namespace XTypes {
     }
   };
 
+  bool operator<<(DCPS::Serializer& ser, const TypeObject& type_object);
+
   typedef Sequence<TypeObject> TypeObjectSeq;
 
   // Set of TypeObjects representing a strong component: Equivalence class
@@ -1499,6 +1502,8 @@ namespace XTypes {
   // };
   // typedef sequence<TypeInformation> TypeInformationSeq;
 
+  TypeIdentifierPtr makeTypeIdentifier(const TypeObject& type_object);
+
 } // namespace XTypes
 
 
@@ -1510,6 +1515,45 @@ RcHandle<XTypes::TypeIdentifier> getTypeIdentifier();
 
 template<>
 RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<XTypes::TkNone>();
+
+template<>
+RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::Boolean>();
+
+template<>
+RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::Octet>();
+
+template<>
+RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::Short>();
+
+template<>
+RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::Long>();
+
+template<>
+RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::LongLong>();
+
+template<>
+RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::UShort>();
+
+template<>
+RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::ULong>();
+
+template<>
+RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::ULongLong>();
+
+template<>
+RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::Float>();
+
+template<>
+RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::Double>();
+
+template<>
+RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::LongDouble>();
+
+template<>
+RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::Char>();
+
+template<>
+RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::WChar>();
 
 } // namespace DCPS
 } // namespace OpenDDS

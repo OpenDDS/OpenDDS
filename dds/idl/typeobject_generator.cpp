@@ -23,6 +23,12 @@ typeobject_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
 
 namespace {
 
+void
+get_type_identifier(AST_Type* type)
+{
+  be_global->impl_ << "getTypeIdentifier<" << scoped(type->name()) <<  ">()";
+}
+
 }
 
 bool
@@ -71,7 +77,7 @@ typeobject_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
     be_global->impl_ << "    " << member_id++ << ",";
     // TODO: Set StructMemberFlags.
     be_global->impl_ << "    " << 0 << ",";
-    be_global->impl_ << "    getTypeIdentifier<" << scoped((*pos)->field_type()->name()) <<  ">()";
+    get_type_identifier((*pos)->field_type());
     be_global->impl_ << "  ),";
     be_global->impl_ << "  XTypes::MinimalMemberDetail::make(\"" << (*pos)->local_name()->get_string() << "\")";
     be_global->impl_ <<  ")\n";
@@ -85,14 +91,13 @@ typeobject_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
     "    return to;"
     "  }\n";
 
-  // be_global->impl_ <<
-  //   "};\n\n"
-  //   "template<>\n"
-  //                  << decl << "\n"
-  //   "{\n"
-  //   "  static MetaStructImpl<" << clazz << "> msi;\n"
-  //   "  return msi;\n"
-  //   "}\n\n";
+  be_global->impl_ <<
+    "template<>\n"
+    "RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<" << clazz << ">()"
+    "{\n"
+    "    static RcHandle<XTypes::TypeIdentifier> ti = XTypes::makeTypeIdentifier(getTypeObject<" << clazz << ">());\n"
+    "    return ti;"
+    "  }\n";
 
   return true;
 }
