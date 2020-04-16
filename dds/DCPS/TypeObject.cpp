@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -59,112 +57,116 @@ namespace DCPS {
 template<>
 RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<void>()
 {
-  static RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_NONE);
+  static const RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_NONE);
   return ti;
 }
 
 template<>
 RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::Boolean>()
 {
-  static RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_BOOLEAN);
+  static const RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_BOOLEAN);
   return ti;
 }
 
 template<>
 RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::Octet>()
 {
-  static RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_BYTE);
+  static const RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_BYTE);
   return ti;
 }
 
 template<>
 RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::Short>()
 {
-  static RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_INT16);
+  static const RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_INT16);
   return ti;
 }
 
 template<>
 RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::Long>()
 {
-  static RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_INT32);
+  static const RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_INT32);
   return ti;
 }
 
 template<>
 RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::LongLong>()
 {
-  static RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_INT64);
+  static const RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_INT64);
   return ti;
 }
 
 template<>
 RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::UShort>()
 {
-  static RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_UINT16);
+  static const RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_UINT16);
   return ti;
 }
 
 template<>
 RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::ULong>()
 {
-  static RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_UINT32);
+  static const RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_UINT32);
   return ti;
 }
 
 template<>
 RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::ULongLong>()
 {
-  static RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_UINT64);
+  static const RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_UINT64);
   return ti;
 }
 
 template<>
 RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::Float>()
 {
-  static RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_FLOAT32);
+  static const RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_FLOAT32);
   return ti;
 }
 
 template<>
 RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::Double>()
 {
-  static RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_FLOAT64);
+  static const RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_FLOAT64);
   return ti;
 }
 
 template<>
 RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::LongDouble>()
 {
-  static RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_FLOAT128);
+  static const RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_FLOAT128);
   return ti;
 }
 
 template<>
 RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::Char>()
 {
-  static RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_CHAR8);
+  static const RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_CHAR8);
   return ti;
 }
 
 template<>
 RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::WChar>()
 {
-  static RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_CHAR16);
+  static const RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_CHAR16);
   return ti;
 }
 
 template<>
 RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::Char*>()
 {
-  static RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TI_STRING8_SMALL);
+  static const RcHandle<XTypes::TypeIdentifier> ti =
+    XTypes::TypeIdentifier::make(XTypes::TI_STRING8_SMALL,
+                                 XTypes::StringSTypeDefn::make(0));
   return ti;
 }
 
 template<>
 RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::WChar*>()
 {
-  static RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TI_STRING16_SMALL);
+  static const RcHandle<XTypes::TypeIdentifier> ti =
+    XTypes::TypeIdentifier::make(XTypes::TI_STRING16_SMALL,
+                                 XTypes::StringSTypeDefn::make(0));
   return ti;
 }
 
