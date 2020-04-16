@@ -26,6 +26,7 @@ RUN cd /opt/OpenDDS && \
     ./configure --prefix=/usr/local --security --std=c++11 ${ACE_CONFIG_OPTION} && \
     make && \
     make install && \
+    ldconfig && \
     . /opt/OpenDDS/setenv.sh && \
     cp -a ${MPC_ROOT} /usr/local/share/MPC
 
