@@ -1820,7 +1820,7 @@ Spdp::SpdpTransport::open()
 #ifdef ACE_HAS_IPV6
   if (reactor->register_handler(unicast_ipv6_socket_.get_handle(),
                                 this, ACE_Event_Handler::READ_MASK) != 0) {
-    throw std::runtime_error("failed to register unicast input handler");
+    throw std::runtime_error("failed to register unicast IPv6 input handler");
   }
 #endif
 
