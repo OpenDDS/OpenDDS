@@ -11,7 +11,9 @@
 
 #ifdef OPENDDS_NETWORK_CONFIG_MODIFIER
 
-#include "ace/os_include/os_ifaddrs.h"
+#include <ace/OS_NS_sys_socket.h>
+
+#include <ace/os_include/os_ifaddrs.h>
 
 #include <net/if.h>
 
