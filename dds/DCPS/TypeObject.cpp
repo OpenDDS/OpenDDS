@@ -7,45 +7,57 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
+#include "Hash.h"
 #include "TypeObject.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
-namespace DCPS {
 namespace XTypes {
+
+MinimalMemberDetail MinimalMemberDetail::make(const std::string& name)
+{
+  unsigned char result[16];
+  DCPS::MD5Hash(result, name.c_str(), name.size());
+
+  MinimalMemberDetail m;
+  std::memcpy(m.name_hash, result, sizeof m.name_hash);
+  return m;
+}
+
 
 TypeIdentifierPtr makeTypeIdentifier(const TypeObject& type_object)
 {
-  ACE_Message_Block buff(64 * 1024);
-  DCPS::Serializer ser(&buff);
+  ACE_Message_Block buff(64 * 1024); //TODO: find size
+  DCPS::Serializer ser(&buff); //TODO: XCDR2_LE
   ser << type_object;
 
-  MD5_CTX ctx;
-  MD5_Init(&ctx);
-  MD5_Update(&ctx, buff.rd_ptr(), buff.length());
   unsigned char result[16];
-  MD5_Final(result, &ctx);
+  DCPS::MD5Hash(result, buff.rd_ptr(), buff.length());
 
   // First 14 bytes of MD5 of the serialized TypeObject using XCDR
   // version 2 with Little Endian encoding
   EquivalenceHash eh;
   std::memcpy(eh, result, sizeof eh);
 
-  switch (type_object.kind) {
-  case EK_COMPLETE:
-    return TypeIdentifier::make(EK_COMPLETE, eh);
-    break;
-  case EK_MINIMAL:
-    return TypeIdentifier::make(EK_MINIMAL, eh);
-    break;
+  if (type_object.kind == EK_MINIMAL || type_object.kind == EK_COMPLETE) {
+    return TypeIdentifier::make(type_object.kind, eh);
   }
+
+  return TypeIdentifierPtr();
+}
+
+bool operator<<(DCPS::Serializer& ser, const TypeObject& type_object)
+{
+  //TODO
+  return true;
 }
 
 }
+namespace DCPS {
 
 template<>
-RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<XTypes::TkNone>()
+RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<void>()
 {
   static RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_NONE);
   return ti;
@@ -139,6 +151,20 @@ template<>
 RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::WChar>()
 {
   static RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_CHAR16);
+  return ti;
+}
+
+template<>
+RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::Char*>()
+{
+  static RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TI_STRING8_SMALL);
+  return ti;
+}
+
+template<>
+RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::WChar*>()
+{
+  static RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TI_STRING16_SMALL);
   return ti;
 }
 

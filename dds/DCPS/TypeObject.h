@@ -10,18 +10,17 @@
 
 #include "dds/DCPS/RcHandle_T.h"
 #include "dds/DCPS/RcObject.h"
-#include "dds/DCPS/RTPS/md5.h"
 #include "dds/DCPS/Serializer.h"
 
 #include "ace/CDR_Base.h"
 
+#include <cstring>
 #include <string>
 #include <vector>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
-namespace DCPS {
 namespace XTypes {
 
   template <typename T>
@@ -65,7 +64,6 @@ namespace XTypes {
 
   // Primitive TKs
   const TypeKind TK_NONE       = 0x00;
-  struct TkNone {};
   const TypeKind TK_BOOLEAN    = 0x01;
   const TypeKind TK_BYTE       = 0x02;
   const TypeKind TK_INT16      = 0x03;
@@ -172,7 +170,7 @@ namespace XTypes {
       return tohi;
     }
   };
-  
+
   // Flags that apply to struct/union/collection/enum/bitmask/bitset
   // members/elements and DO affect type assignability
   // Depending on the flag it may not apply to members of all types
@@ -227,6 +225,8 @@ namespace XTypes {
   // Forward declaration
   struct TypeIdentifier;
 
+  using DCPS::RcHandle;
+  using DCPS::make_rch;
   typedef RcHandle<TypeIdentifier> TypeIdentifierPtr;
 
   // 1 Byte
@@ -272,9 +272,9 @@ namespace XTypes {
     SBound                 bound;
     TypeIdentifierPtr element_identifier;
 
-    static PlainSequenceSElemDefn make (const PlainCollectionHeader& header,
-                                        const SBound& bound,
-                                        const TypeIdentifierPtr& element_identifier)
+    static PlainSequenceSElemDefn make(const PlainCollectionHeader& header,
+                                       const SBound& bound,
+                                       const TypeIdentifierPtr& element_identifier)
     {
       PlainSequenceSElemDefn p;
       p.header = header;
@@ -289,9 +289,9 @@ namespace XTypes {
     LBound                 bound;
     TypeIdentifierPtr element_identifier;
 
-    static PlainSequenceLElemDefn make (const PlainCollectionHeader& header,
-                                        const LBound& bound,
-                                        const TypeIdentifierPtr& element_identifier)
+    static PlainSequenceLElemDefn make(const PlainCollectionHeader& header,
+                                       const LBound& bound,
+                                       const TypeIdentifierPtr& element_identifier)
     {
       PlainSequenceLElemDefn p;
       p.header = header;
@@ -306,9 +306,9 @@ namespace XTypes {
     SBoundSeq              array_bound_seq;
     TypeIdentifierPtr element_identifier;
 
-    static PlainArraySElemDefn make (const PlainCollectionHeader& header,
-                                     const SBoundSeq& array_bound_seq,
-                                     const TypeIdentifierPtr& element_identifier)
+    static PlainArraySElemDefn make(const PlainCollectionHeader& header,
+                                    const SBoundSeq& array_bound_seq,
+                                    const TypeIdentifierPtr& element_identifier)
     {
       PlainArraySElemDefn p;
       p.header = header;
@@ -323,9 +323,9 @@ namespace XTypes {
     LBoundSeq              array_bound_seq;
     TypeIdentifierPtr element_identifier;
 
-    static PlainArrayLElemDefn make (const PlainCollectionHeader& header,
-                                     const LBoundSeq& array_bound_seq,
-                                     const TypeIdentifierPtr& element_identifier)
+    static PlainArrayLElemDefn make(const PlainCollectionHeader& header,
+                                    const LBoundSeq& array_bound_seq,
+                                    const TypeIdentifierPtr& element_identifier)
     {
       PlainArrayLElemDefn p;
       p.header = header;
@@ -626,7 +626,7 @@ namespace XTypes {
       return ti;
     }
   };
-  typedef Sequence<TypeIdentifierPtr > TypeIdentifierSeq;
+  typedef Sequence<TypeIdentifierPtr> TypeIdentifierSeq;
 
   // --- Annotation usage: -----------------------------------------------
 
@@ -760,18 +760,7 @@ namespace XTypes {
   struct MinimalMemberDetail {
     NameHash                                  name_hash;
 
-    static MinimalMemberDetail make(const std::string& name)
-    {
-      MD5_CTX ctx;
-      MD5_Init(&ctx);
-      MD5_Update(&ctx, name.data(), name.size());
-      unsigned char result[16];
-      MD5_Final(result, &ctx);
-
-      MinimalMemberDetail m;
-      std::memcpy(m.name_hash, result, sizeof m.name_hash);
-      return m;
-    }
+    static MinimalMemberDetail make(const std::string& name);
   };
 
   // Member of an aggregate type
@@ -1457,6 +1446,7 @@ namespace XTypes {
     }
   };
 
+  OpenDDS_Dcps_Export
   bool operator<<(DCPS::Serializer& ser, const TypeObject& type_object);
 
   typedef Sequence<TypeObject> TypeObjectSeq;
@@ -1506,6 +1496,7 @@ namespace XTypes {
 
 } // namespace XTypes
 
+namespace DCPS {
 
 template<typename T>
 const XTypes::TypeObject& getTypeObject();
@@ -1514,7 +1505,7 @@ template<typename T>
 RcHandle<XTypes::TypeIdentifier> getTypeIdentifier();
 
 template<>
-RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<XTypes::TkNone>();
+RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<void>();
 
 template<>
 RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::Boolean>();
@@ -1554,6 +1545,12 @@ RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::Char>();
 
 template<>
 RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::WChar>();
+
+template<>
+RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::Char*>();
+
+template<>
+RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::WChar*>();
 
 } // namespace DCPS
 } // namespace OpenDDS
