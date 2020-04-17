@@ -2646,7 +2646,8 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::join_multicast_group() - ")
                  ACE_TEXT("failed to join multicast group %C:%hu on %s: %p\n"),
-                 multicast_address_str_.c_str(), mc_port_, all_interfaces ? "all interfaces" : ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()), ACE_TEXT("ACE_SOCK_Dgram_Mcast::join")));
+                 multicast_address_str_.c_str(), mc_port_,
+                 all_interfaces ? ACE_TEXT("all interfaces") : ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()), ACE_TEXT("ACE_SOCK_Dgram_Mcast::join")));
     }
   }
 
