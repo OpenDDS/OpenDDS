@@ -79,6 +79,7 @@ bool SignedDocument::load(const std::string& uri, DDS::Security::SecurityExcepti
   switch (uri_info.scheme) {
   case URI::URI_FILE:
     PKCS7_from_SMIME_file(uri_info.everything_else);
+
     break;
 
   case URI::URI_DATA:
@@ -281,7 +282,8 @@ int SignedDocument::cache_verifiable(BIO* from)
 
 PKCS7* SignedDocument::PKCS7_from_SMIME_file(const std::string& path)
 {
-  std::ifstream in(path.c_str(), std::ios::binary);
+  /**
+   std::ifstream in(path.c_str(), std::ios::binary);
 
   DCPS::SequenceBackInsertIterator<DDS::OctetSeq> back_inserter(original_);
 
@@ -296,6 +298,29 @@ PKCS7* SignedDocument::PKCS7_from_SMIME_file(const std::string& path)
                path.c_str()));
     return NULL;
   }
+**/
+
+int n;
+  char b;
+  FILE* fp = ACE_OS::fopen(path.c_str(), "rb");
+
+  std::vector<char> data;
+
+  int i = 0;
+  while (!feof(fp)) {
+    n = ACE_OS::fread(&b,1,1,fp);
+    data.push_back(b);
+    ++i;
+  }
+
+  ACE_OS::fclose(fp);
+
+
+  DCPS::SequenceBackInsertIterator<DDS::OctetSeq> back_inserter(original_);
+
+  std::copy(data.begin(),
+            data.end(),
+            back_inserter);
 
   // To appease the other DDS security implementations
   *back_inserter = 0u;

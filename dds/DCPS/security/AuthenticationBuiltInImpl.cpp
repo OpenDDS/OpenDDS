@@ -1361,6 +1361,7 @@ bool AuthenticationBuiltInImpl::check_class_versions(const char* remote_class_id
 
 std::string AuthenticationBuiltInImpl::build_class_id(const std::string& message_ext)
 {
+  /**
   std::stringstream class_id_stream;
   class_id_stream << Auth_Plugin_Name
     << ":" << Auth_Plugin_Major_Version
@@ -1368,6 +1369,13 @@ std::string AuthenticationBuiltInImpl::build_class_id(const std::string& message
     << "+" << message_ext;
 
   return class_id_stream.str();
+**/
+  std::string class_id_stream = Auth_Plugin_Name +
+    + ":" + Auth_Plugin_Major_Version
+    + "." + Auth_Plugin_Minor_Version
+    + "+" + message_ext;
+
+  return class_id_stream;
 }
 
 std::string AuthenticationBuiltInImpl::get_extension(const char* class_id)
