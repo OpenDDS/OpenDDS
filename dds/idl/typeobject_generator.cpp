@@ -170,5 +170,25 @@ typeobject_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
   const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator,
   const char*)
 {
+  be_global->add_include("dds/DCPS/TypeObject.h", BE_GlobalData::STREAM_H);
+  NamespaceGuard ng;
+  const string clazz = scoped(name);
+
+  {
+    const string decl_gto = "getTypeObject<" + clazz + ">";
+    Function gto(decl_gto.c_str(), "const XTypes::TypeObject&", "");
+    gto.endArgs();
+    be_global->impl_ <<
+      "  static const XTypes::TypeObject to = XTypes::TypeObject::make(XTypes::MinimalTypeObject());\n" //TODO
+      "  return to;\n";
+  }
+  {
+    const string decl_gti = "getTypeIdentifier<" + clazz + ">";
+    Function gti(decl_gti.c_str(), "RcHandle<XTypes::TypeIdentifier>", "");
+    gti.endArgs();
+    be_global->impl_ <<
+      "  static const RcHandle<XTypes::TypeIdentifier> ti = XTypes::makeTypeIdentifier(getTypeObject<" << clazz << ">());\n"
+      "  return ti;\n";
+  }
   return true;
 }
