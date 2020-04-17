@@ -193,13 +193,13 @@ namespace XTypes {
   typedef MemberFlag   BitflagFlag;             // Unused. No flags apply
   typedef MemberFlag   BitsetMemberFlag;        // Unused. No flags apply
 
-  // Mask used to remove the flags that do no affect assignability
+  // Mask used to remove the flags that do not affect assignability
   // Selects  T1, T2, O, M, K, D
   const MemberFlag MemberFlagMinimalMask = 0x003f;
 
-  // Flags that apply to type declarationa and DO affect assignability
+  // Flags that apply to type declarations and DO affect assignability
   // Depending on the flag it may not apply to all types
-  // When not all, the applicable  types are listed
+  // When not all, the applicable types are listed
   typedef ACE_CDR::UShort TypeFlag;
   const TypeFlag IS_FINAL = 1 << 0;        // F |
   const TypeFlag IS_APPENDABLE = 1 << 1;   // A |-  Struct, Union
@@ -543,6 +543,15 @@ namespace XTypes {
       return ti;
     }
 
+    static TypeIdentifierPtr makeBoundedString(bool wide, unsigned int bound)
+    {
+      return bound > 255 ?
+        make(wide ? TI_STRING16_LARGE : TI_STRING8_LARGE,
+             StringLTypeDefn::make(bound)) :
+        make(wide ? TI_STRING16_SMALL : TI_STRING8_SMALL,
+             StringSTypeDefn::make(bound));
+    }
+
     static TypeIdentifierPtr make(ACE_CDR::Octet k,
                                   const PlainSequenceSElemDefn& seq_sdefn)
     {
@@ -755,7 +764,7 @@ namespace XTypes {
   };
 
   // MINIMAL Details for a member of an aggregate type
-  struct MinimalMemberDetail {
+  struct OpenDDS_Dcps_Export MinimalMemberDetail {
     NameHash                                  name_hash;
 
     static MinimalMemberDetail make(const std::string& name);
@@ -1490,6 +1499,7 @@ namespace XTypes {
   // };
   // typedef sequence<TypeInformation> TypeInformationSeq;
 
+  OpenDDS_Dcps_Export
   TypeIdentifierPtr makeTypeIdentifier(const TypeObject& type_object);
 
 } // namespace XTypes
@@ -1502,52 +1512,52 @@ const XTypes::TypeObject& getTypeObject();
 template<typename T>
 RcHandle<XTypes::TypeIdentifier> getTypeIdentifier();
 
-template<>
+template<> OpenDDS_Dcps_Export
 RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<void>();
 
-template<>
+template<> OpenDDS_Dcps_Export
 RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::Boolean>();
 
-template<>
+template<> OpenDDS_Dcps_Export
 RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::Octet>();
 
-template<>
+template<> OpenDDS_Dcps_Export
 RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::Short>();
 
-template<>
+template<> OpenDDS_Dcps_Export
 RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::Long>();
 
-template<>
+template<> OpenDDS_Dcps_Export
 RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::LongLong>();
 
-template<>
+template<> OpenDDS_Dcps_Export
 RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::UShort>();
 
-template<>
+template<> OpenDDS_Dcps_Export
 RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::ULong>();
 
-template<>
+template<> OpenDDS_Dcps_Export
 RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::ULongLong>();
 
-template<>
+template<> OpenDDS_Dcps_Export
 RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::Float>();
 
-template<>
+template<> OpenDDS_Dcps_Export
 RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::Double>();
 
-template<>
+template<> OpenDDS_Dcps_Export
 RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::LongDouble>();
 
-template<>
+template<> OpenDDS_Dcps_Export
 RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::Char>();
 
-template<>
+template<> OpenDDS_Dcps_Export
 RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::WChar>();
 
-template<>
+template<> OpenDDS_Dcps_Export
 RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::Char*>();
 
-template<>
+template<> OpenDDS_Dcps_Export
 RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::WChar*>();
 
 } // namespace DCPS
