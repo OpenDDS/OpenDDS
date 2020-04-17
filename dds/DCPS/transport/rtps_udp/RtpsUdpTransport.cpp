@@ -96,16 +96,16 @@ RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
                   , ipv6_unicast_socket_
 #endif
                   )) {
+#ifdef ACE_HAS_IPV6
+    const ACE_HANDLE v6handle = ipv6_unicast_socket_.get_handle();
+#else
+    const ACE_HANDLE v6handle = -1;
+#endif
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
                ACE_TEXT("RtpsUdpTransport::make_datalink: ")
                ACE_TEXT("failed to open DataLink for sockets %d %d\n"),
-               unicast_socket_.get_handle(),
-#ifdef ACE_HAS_IPV6
-               ipv6_unicast_socket_.get_handle()
-#else
-               -1
-#endif
+               unicast_socket_.get_handle(), v6handle
                ));
     return RtpsUdpDataLink_rch();
   }
