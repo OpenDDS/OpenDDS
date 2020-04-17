@@ -186,11 +186,17 @@ struct Function {
   std::string preamble_;
   bool extra_newline_;
 
-  Function(const char* name, const char* returntype)
+  Function(const char* name, const char* returntype,
+           const char* template_args = 0)
     : has_arg_(false)
     , extra_newline_(true)
   {
     using std::string;
+    if (template_args) {
+      const string tmpl = string("template<") + template_args + "> ";
+      be_global->header_ << tmpl;
+      be_global->impl_ << tmpl;
+    }
     ACE_CString ace_exporter = be_global->export_macro();
     bool use_exp = ace_exporter != "";
     string exporter = use_exp ? (string(" ") + ace_exporter.c_str()) : "";

@@ -12,13 +12,13 @@
 #include "rtps_export.h"
 #include "BaseMessageTypes.h"
 
+#include "dds/DCPS/Hash.h"
 #include "dds/DCPS/Message_Block_Ptr.h"
 #include "dds/DCPS/Serializer.h"
 #include "dds/DCPS/TypeSupportImpl.h"
+
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DdsDcpsInfoUtilsTypeSupportImpl.h"
-
-#include "md5.h"
 
 #include "ace/INET_Addr.h"
 #include "ace/Message_Block.h"
@@ -69,10 +69,7 @@ void marshal_key_hash(const T& msg, KeyHash_t& hash) {
       &mb, swap_bytes, Serializer::ALIGN_CDR, true /* zero init padding */);
     out_serializer << ko;
 
-    MD5_CTX ctx;
-    MD5_Init(&ctx);
-    MD5_Update(&ctx, mb.rd_ptr(), static_cast<unsigned long>(mb.length()));
-    MD5_Final(hash.value, &ctx);
+    DCPS::MD5Hash(hash.value, mb.rd_ptr(), mb.length());
   }
 }
 
