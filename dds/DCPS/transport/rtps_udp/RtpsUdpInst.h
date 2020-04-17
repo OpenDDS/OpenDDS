@@ -82,7 +82,7 @@ public:
     local_address_ = addr;
     ACE_TCHAR buffer[256];
     local_address_.addr_to_string(buffer, 256);
-    local_address_config_str_ = buffer;
+    local_address_config_str_ = ACE_TEXT_ALWAYS_CHAR(buffer);
   }
 #ifdef ACE_HAS_IPV6
   OPENDDS_STRING ipv6_local_address_string() const { return ipv6_local_address_config_str_; }
@@ -106,7 +106,7 @@ public:
     ipv6_local_address_ = addr;
     ACE_TCHAR buffer[256];
     ipv6_local_address_.addr_to_string(buffer, 256);
-    ipv6_local_address_config_str_ = buffer;
+    ipv6_local_address_config_str_ = ACE_TEXT_ALWAYS_CHAR(buffer);
   }
 #endif
 
