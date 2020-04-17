@@ -99,7 +99,7 @@ RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
 #ifdef ACE_HAS_IPV6
     const ACE_HANDLE v6handle = ipv6_unicast_socket_.get_handle();
 #else
-    const ACE_HANDLE v6handle = -1;
+    const ACE_HANDLE v6handle = ACE_INVALID_HANDLE;
 #endif
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
