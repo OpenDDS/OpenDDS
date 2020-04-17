@@ -65,6 +65,17 @@ module RtpsRelay {
     unsigned long nanosec;
   };
 
+  struct ParticipantStatistics {
+    string address;
+    unsigned long messages_in;
+    unsigned long long bytes_in;
+    unsigned long messages_out;
+    unsigned long long bytes_out;
+    unsigned long max_fan_out;
+  };
+
+  typedef sequence<ParticipantStatistics> ParticipantStatisticsSequence;
+
   @topic
   struct HandlerStatistics {
     @key GUID_t application_participant_guid;
@@ -78,6 +89,7 @@ module RtpsRelay {
     unsigned long max_queue_size;
     Duration_t max_queue_latency;
     unsigned long local_active_participants;
+    ParticipantStatisticsSequence participant_statistics;
   };
 
   @topic
@@ -88,19 +100,6 @@ module RtpsRelay {
     unsigned long local_readers;
     unsigned long total_writers;
     unsigned long total_readers;
-  };
-
-  @topic
-  struct ParticipantStatistics {
-    @key GUID_t application_participant_guid;
-    @key string name;
-    @key string address;
-    Duration_t interval;
-    unsigned long messages_in;
-    unsigned long long bytes_in;
-    unsigned long messages_out;
-    unsigned long long bytes_out;
-    unsigned long max_fan_out;
   };
 
 };

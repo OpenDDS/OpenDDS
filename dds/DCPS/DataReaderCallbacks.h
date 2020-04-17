@@ -32,7 +32,7 @@ namespace DCPS {
 * @brief Defines the interface for Discovery callbacks into the DataReader.
 *
 */
-class DataReaderCallbacks
+class OpenDDS_Dcps_Export DataReaderCallbacks
   : public virtual RcObject {
 public:
 

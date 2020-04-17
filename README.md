@@ -116,7 +116,7 @@ There are two distributions of ACE/TAO that can be used with OpenDDS:
       also downloads the master branch of MPC as is.
   * Can be manually downloaded from:
     * https://github.com/DOCGroup/ACE_TAO/releases
-    * http://download.dre.vanderbilt.edu/
+    * https://download.dre.vanderbilt.edu/
 
 ### Perl
 

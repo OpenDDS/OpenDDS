@@ -30,10 +30,10 @@ public:
   RelayHandlerConfig()
     : statistics_interval_(60) // 1 minute
     , handler_statistics_writer_(nullptr)
-    , participant_statistics_writer_(nullptr)
     , domain_statistics_writer_(nullptr)
     , lifespan_(60) // 1 minute
     , application_domain_(1)
+    , publish_participant_statistics_(true)
   {}
 
   void statistics_interval(const OpenDDS::DCPS::TimeDuration& flag)
@@ -67,29 +67,6 @@ public:
   HandlerStatisticsDataWriter_ptr handler_statistics_writer() const
   {
     return handler_statistics_writer_;
-  }
-
-  bool participant_statistics_writer(DDS::DataWriter_var writer_var)
-  {
-    if (!writer_var) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to create Participant Statistics data writer\n")));
-      return false;
-    }
-
-    participant_statistics_writer_ = ParticipantStatisticsDataWriter::_narrow(writer_var);
-
-    if (!participant_statistics_writer_) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to narrow Participant Statistics data writer\n")));
-      return false;
-    }
-
-    participant_statistics_writer_var_ = writer_var;
-    return true;
-  }
-
-  ParticipantStatisticsDataWriter_ptr participant_statistics_writer() const
-  {
-    return participant_statistics_writer_;
   }
 
   bool domain_statistics_writer(DDS::DataWriter_var writer_var)
@@ -145,17 +122,27 @@ public:
     return application_domain_;
   }
 
+  void publish_participant_statistics(bool flag)
+  {
+    publish_participant_statistics_ = flag;
+  }
+
+  bool publish_participant_statistics() const
+  {
+    return publish_participant_statistics_;
+  }
+
 private:
   OpenDDS::DCPS::TimeDuration statistics_interval_;
   DDS::DataWriter_var handler_statistics_writer_var_;
   HandlerStatisticsDataWriter_ptr handler_statistics_writer_;
   DDS::DataWriter_var participant_statistics_writer_var_;
-  ParticipantStatisticsDataWriter_ptr participant_statistics_writer_;
   DDS::DataWriter_var domain_statistics_writer_var_;
   DomainStatisticsDataWriter_ptr domain_statistics_writer_;
   OpenDDS::DCPS::RepoId application_participant_guid_;
   OpenDDS::DCPS::TimeDuration lifespan_;
   DDS::DomainId_t application_domain_;
+  bool publish_participant_statistics_;
 };
 
 class RelayHandler : public ACE_Event_Handler {
@@ -185,7 +172,7 @@ protected:
   {
     handler_statistics_._max_fan_out = std::max(handler_statistics_._max_fan_out, static_cast<uint32_t>(fan_out));
 
-    if (config_.participant_statistics_writer()) {
+    if (config_.publish_participant_statistics()) {
       auto& ps = participant_statistics_[from];
       ps._max_fan_out = std::max(ps._max_fan_out, static_cast<uint32_t>(fan_out));
     }
