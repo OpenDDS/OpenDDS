@@ -31,6 +31,13 @@ typeobject_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
 
 namespace {
 
+string array_tag_type(UTL_ScopedName* name)
+{
+  const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+  return (use_cxx11 ? dds_generator::scoped_helper(name, "_") : scoped(name))
+    + "_tag";
+}
+
 void
 call_get_type_identifier(AST_Type* type)
 {
@@ -46,9 +53,9 @@ call_get_type_identifier(AST_Type* type)
     return;
   }
 
-  const string suffix = (fld_cls & CL_ARRAY) ? "_tag" : "";
-  be_global->impl_ <<
-    "getTypeIdentifier<" << scoped(type->name()) << suffix << ">()";
+  const string name = (fld_cls & CL_ARRAY) ? array_tag_type(type->name())
+    : scoped(type->name());
+  be_global->impl_ << "getTypeIdentifier<" << name << ">()";
 }
 
 }
@@ -151,7 +158,7 @@ typeobject_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
   NamespaceGuard ng;
   const string clazz = scoped(name);
   const string decl =
-    "getTypeIdentifier<" + clazz + (array ? "_tag" : "") + '>';
+    "getTypeIdentifier<" + (array ? array_tag_type(name) : clazz) + '>';
   Function gti(decl.c_str(), "RcHandle<XTypes::TypeIdentifier>", "");
   gti.endArgs();
   be_global->impl_ << "  return RcHandle<XTypes::TypeIdentifier>();\n"; //TODO
