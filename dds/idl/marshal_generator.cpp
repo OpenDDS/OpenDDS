@@ -1793,7 +1793,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
   }
 
   if (be_global->printer()) {
-    be_global->add_include("<dds/DCPS/Printer.h>");
+    be_global->add_include("dds/DCPS/Printer.h");
     PreprocessorIfGuard g("ndef OPENDDS_SAFETY_PROFILE");
     g.extra_newline(true);
     Function shift("operator<<", "std::ostream&");
