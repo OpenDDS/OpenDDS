@@ -31,7 +31,7 @@ typeobject_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
 
 namespace {
 
-string array_tag_type(UTL_ScopedName* name)
+string tag_type(UTL_ScopedName* name)
 {
   const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
   return (use_cxx11 ? dds_generator::scoped_helper(name, "_") : scoped(name))
@@ -43,6 +43,11 @@ call_get_type_identifier(AST_Type* type)
 {
   const Classification fld_cls = classify(type);
 
+  if (fld_cls & CL_FIXED) { // XTypes has no Fixed type in its data model
+    be_global->impl_ << "getTypeIdentifier<void>() /* No Fixed in XTypes */";
+    return;
+  }
+
   if ((fld_cls & (CL_STRING | CL_BOUNDED)) == (CL_STRING | CL_BOUNDED)) {
     AST_Type* const atype = resolveActualType(type);
     AST_String* const str = AST_String::narrow_from_decl(atype);
@@ -53,8 +58,10 @@ call_get_type_identifier(AST_Type* type)
     return;
   }
 
-  const string name = (fld_cls & CL_ARRAY) ? array_tag_type(type->name())
-    : scoped(type->name());
+  const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+  const bool use_tag = (fld_cls & CL_ARRAY) ||
+    (use_cxx11 && (fld_cls & CL_SEQUENCE));
+  const string name = use_tag ? tag_type(type->name()) : scoped(type->name());
   be_global->impl_ << "getTypeIdentifier<" << name << ">()";
 }
 
@@ -157,8 +164,10 @@ typeobject_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
   be_global->add_include("dds/DCPS/TypeObject.h", BE_GlobalData::STREAM_H);
   NamespaceGuard ng;
   const string clazz = scoped(name);
+  const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+  const bool use_tag = array || use_cxx11;
   const string decl =
-    "getTypeIdentifier<" + (array ? array_tag_type(name) : clazz) + '>';
+    "getTypeIdentifier<" + (use_tag ? tag_type(name) : clazz) + '>';
   Function gti(decl.c_str(), "RcHandle<XTypes::TypeIdentifier>", "");
   gti.endArgs();
   be_global->impl_ << "  return RcHandle<XTypes::TypeIdentifier>();\n"; //TODO
