@@ -2511,7 +2511,7 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
     throw std::runtime_error("failed to set unicast local address");
   }
 
-  if (unicast_socket_.open(local_addr, PF_INET, 0, 1) != 0) {
+  if (unicast_socket_.open(local_addr, PF_INET) != 0) {
     if (DCPS::DCPS_debug_level > 3) {
       ACE_DEBUG((
             LM_WARNING,
@@ -2574,7 +2574,7 @@ Spdp::SpdpTransport::open_unicast_ipv6_socket(u_short port_common,
     throw std::runtime_error("failed to set unicast ipv6 local address");
   }
 
-  if (unicast_ipv6_socket_.open(local_addr, PF_INET6, 0, 1) != 0) {
+  if (unicast_ipv6_socket_.open(local_addr, PF_INET6) != 0) {
     ACE_ERROR((
                LM_ERROR,
                ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_ipv6_socket() - ")
