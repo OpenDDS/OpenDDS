@@ -48,6 +48,12 @@ call_get_type_identifier(AST_Type* type)
     return;
   }
 
+  const Classification CL_WCHAR = CL_SCALAR | CL_PRIMITIVE | CL_WIDE;
+  if ((fld_cls & CL_WCHAR) == CL_WCHAR) {
+    be_global->impl_ << "getTypeIdentifier<ACE_OutputCDR::from_wchar>()";
+    return;
+  }
+
   if ((fld_cls & (CL_STRING | CL_BOUNDED)) == (CL_STRING | CL_BOUNDED)) {
     AST_Type* const atype = resolveActualType(type);
     AST_String* const str = AST_String::narrow_from_decl(atype);
