@@ -17,7 +17,7 @@
 #ifndef OPENDDS_IDL_ANNOTATIONS_HEADER
 #define OPENDDS_IDL_ANNOTATIONS_HEADER
 
-#include "dds/Versioned_Namespace.h"
+#include "../Versioned_Namespace.h"
 
 #include <ast_expression.h>
 
