@@ -3144,7 +3144,7 @@ Sedp::Writer::write_dcps_participant_secure(const Security::SPDPdiscoveredPartic
   if (sedp_endpoint) {
     ai_map["SEDP"] = ICE::Agent::instance()->get_local_agent_info(sedp_endpoint);
   }
-  ICE::Endpoint* spdp_endpoint = sedp_.spdp_.get_ice_endpoint();
+  ICE::Endpoint* spdp_endpoint = sedp_.spdp_.get_ice_endpoint_if_added();
   if (spdp_endpoint) {
     ai_map["SPDP"] = ICE::Agent::instance()->get_local_agent_info(spdp_endpoint);
   }

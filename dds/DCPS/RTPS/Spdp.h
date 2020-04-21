@@ -160,7 +160,7 @@ public:
 
   BuiltinEndpointSet_t available_builtin_endpoints() const { return available_builtin_endpoints_; }
 
-  ICE::Endpoint* get_ice_endpoint();
+  ICE::Endpoint* get_ice_endpoint_if_added();
 
   ParticipantData_t build_local_pdata(
 #ifdef OPENDDS_SECURITY
@@ -281,6 +281,7 @@ private:
     void send_relay_beacon(const DCPS::MonotonicTimePoint& now);
     DCPS::RcHandle<SpdpPeriodic> relay_beacon_;
     bool network_is_unreachable_;
+    bool ice_endpoint_added_;
   } *tport_;
 
   struct ChangeMulticastGroup : public DCPS::JobQueue::Job {
