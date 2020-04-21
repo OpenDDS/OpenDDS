@@ -358,6 +358,7 @@ std::string MutableAnnotation::name() const
   return "mutable";
 }
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 
   // @OpenDDS::data_representation ===========================================
@@ -416,3 +417,4 @@ namespace OpenDDS {
     return "::OpenDDS::";
   }
 }
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

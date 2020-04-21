@@ -17,6 +17,8 @@
 #ifndef OPENDDS_IDL_ANNOTATIONS_HEADER
 #define OPENDDS_IDL_ANNOTATIONS_HEADER
 
+#include "dds/Versioned_Namespace.h"
+
 #include <ast_expression.h>
 
 #include <ace/Basic_Types.h>
@@ -262,6 +264,7 @@ public:
 };
 
 // OpenDDS Specific Annotations
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 
   // @OpenDDS::data_representation ===========================================
@@ -288,5 +291,6 @@ namespace OpenDDS {
     DataRepresentationKind value_from_appl(AST_Annotation_Appl* appl) const;
   };
 }
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif

@@ -1552,7 +1552,7 @@ template<> OpenDDS_Dcps_Export
 RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::Char>();
 
 template<> OpenDDS_Dcps_Export
-RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::WChar>();
+RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_OutputCDR::from_wchar>();
 
 template<> OpenDDS_Dcps_Export
 RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::Char*>();

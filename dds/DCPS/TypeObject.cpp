@@ -48,6 +48,9 @@ TypeIdentifierPtr makeTypeIdentifier(const TypeObject& type_object)
 bool operator<<(DCPS::Serializer& ser, const TypeObject& type_object)
 {
   //TODO
+  // XCDR2 Appendable Union: DELIMITED_CDR (7.4.2) = DHEADER + PLAIN_CDR2
+  // DHEADER = UInt32 size of object that follows
+  // Union = discriminator followed by active member (if any)
   return true;
 }
 
@@ -146,7 +149,7 @@ RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::Char>()
 }
 
 template<>
-RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::WChar>()
+RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_OutputCDR::from_wchar>()
 {
   static const RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_CHAR16);
   return ti;
