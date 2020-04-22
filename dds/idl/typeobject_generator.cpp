@@ -22,10 +22,63 @@ typeobject_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
   be_global->add_include("dds/DCPS/TypeObject.h", BE_GlobalData::STREAM_H);
   NamespaceGuard ng;
   const string clazz = scoped(name);
-  const string decl = "getTypeIdentifier<" + clazz + ">";
-  Function gti(decl.c_str(), "RcHandle<XTypes::TypeIdentifier>", "");
-  gti.endArgs();
-  be_global->impl_ << "  return RcHandle<XTypes::TypeIdentifier>();\n"; //TODO
+
+  {
+    const string decl_gto = "getTypeObject<" + clazz + ">";
+    Function gto(decl_gto.c_str(), "const XTypes::TypeObject&", "");
+    gto.endArgs();
+
+    be_global->impl_ <<
+      "  static const XTypes::TypeObject to = XTypes::TypeObject(\n"
+      "    XTypes::MinimalTypeObject(\n"
+      "      XTypes::MinimalEnumeratedType(\n"
+      "        XTypes::EnumTypeFlag(),\n" // not used
+      "        XTypes::MinimalEnumeratedHeader(\n"
+      "          XTypes::CommonEnumeratedHeader(\n"
+      "            XTypes::BitBound(32)\n" // TODO:  Fill in with @bit_bound annotation.
+      "          )\n"
+      "        ),\n"
+      "        XTypes::MinimalEnumeratedLiteralSeq()\n";
+
+    size_t default_literal_idx = 0;
+    for (size_t i = 0; i != contents.size(); ++i) {
+      if (contents[i]->annotations().find("@default_literal")) {
+        default_literal_idx = i;
+      }
+    }
+
+    for (size_t i = 0; i != contents.size(); ++i) {
+      be_global->impl_ <<
+        "        .append(\n"
+        "          XTypes::MinimalEnumeratedLiteral(\n"
+        "            XTypes::CommonEnumeratedLiteral(\n"
+        "              " << contents[i]->constant_value()->ev()->u.eval << ",\n"
+        "              XTypes::EnumeratedLiteralFlag(\n"
+        "                " << (i == default_literal_idx ? "XTypes::IS_DEFAULT" : "0") <<
+        "              )"
+        "            ),\n"
+        "            XTypes::MinimalMemberDetail(\n"
+        "              \"" << contents[i]->local_name()->get_string() << "\"\n"
+        "            )\n"
+        "          )\n"
+        "        )\n";
+    }
+
+    be_global->impl_ <<
+      "        .sort()\n"
+      "      )\n"
+      "    )\n"
+      "  );\n"
+      "  return to;\n";
+  }
+  {
+    const string decl_gti = "getTypeIdentifier<" + clazz + ">";
+    Function gti(decl_gti.c_str(), "RcHandle<XTypes::TypeIdentifier>", "");
+    gti.endArgs();
+    be_global->impl_ <<
+      "  static const RcHandle<XTypes::TypeIdentifier> ti = XTypes::makeTypeIdentifier(getTypeObject<" << clazz << ">());\n"
+      "  return ti;\n";
+  }
   return true;
 }
 
@@ -86,15 +139,15 @@ typeobject_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
     Function gto(decl_gto.c_str(), "const XTypes::TypeObject&", "");
     gto.endArgs();
 
-    // TODO: Pick the appropriate flags.
     // TODO: Support struct inheritance.
     be_global->impl_ <<
-      "  static const XTypes::TypeObject to = XTypes::TypeObject::make(\n"
-      "    XTypes::MinimalTypeObject::make(\n"
-      "      XTypes::MinimalStructType::make(XTypes::IS_FINAL | XTypes::IS_NESTED | XTypes::IS_AUTOID_HASH,\n"
-      "        XTypes::MinimalStructHeader::make(\n"
+      "  static const XTypes::TypeObject to = XTypes::TypeObject(\n"
+      "    XTypes::MinimalTypeObject(\n"
+      "      XTypes::MinimalStructType(\n"
+      "        XTypes::IS_FINAL | XTypes::IS_NESTED | XTypes::IS_AUTOID_HASH,\n" // TODO: Pick the appropriate flags.
+      "        XTypes::MinimalStructHeader(\n"
       "          getTypeIdentifier<void>(),\n"
-      "          XTypes::MinimalTypeDetail::make()\n"
+      "          XTypes::MinimalTypeDetail()\n"
       "        ),\n"
       "        XTypes::MinimalStructMemberSeq()\n";
 
@@ -102,25 +155,26 @@ typeobject_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
     for (std::vector<AST_Field*>::const_iterator pos = fields.begin(), limit = fields.end(); pos != limit; ++pos) {
       be_global->impl_ <<
         "        .append(\n"
-        "          XTypes::MinimalStructMember::make(\n"
-        "            XTypes::CommonStructMember::make(\n"
+        "          XTypes::MinimalStructMember(\n"
+        "            XTypes::CommonStructMember(\n"
         "              " << member_id++ << ",\n"
-      // TODO: Set StructMemberFlags.
-        "              0,\n"
+
+        "              XTypes::StructMemberFlag(),\n" // TODO: Set StructMemberFlags.
         "              ";
       call_get_type_identifier((*pos)->field_type());
       be_global->impl_ << "\n"
         "            ),\n"
-        "            XTypes::MinimalMemberDetail::make(\"" << (*pos)->local_name()->get_string() << "\")\n"
+        "            XTypes::MinimalMemberDetail(\"" << (*pos)->local_name()->get_string() << "\")\n"
         "          )\n"
         "        )\n";
     }
 
-  be_global->impl_ <<
-    "      )\n"
-    "    )\n"
-    "  );\n"
-    "  return to;\n";
+    be_global->impl_ <<
+      "        .sort()\n"
+      "        )\n"
+      "      )\n"
+      "    );\n"
+      "  return to;\n";
   }
   {
     const string decl_gti = "getTypeIdentifier<" + clazz + ">";
@@ -194,7 +248,7 @@ typeobject_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     Function gto(decl_gto.c_str(), "const XTypes::TypeObject&", "");
     gto.endArgs();
     be_global->impl_ <<
-      "  static const XTypes::TypeObject to = XTypes::TypeObject::make(XTypes::MinimalTypeObject());\n" //TODO
+      "  static const XTypes::TypeObject to = XTypes::TypeObject(XTypes::MinimalTypeObject());\n" //TODO
       "  return to;\n";
   }
   {

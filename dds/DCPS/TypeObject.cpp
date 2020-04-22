@@ -13,14 +13,12 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {
 
-MinimalMemberDetail MinimalMemberDetail::make(const std::string& name)
+MinimalMemberDetail::MinimalMemberDetail(const std::string& name)
 {
   unsigned char result[16];
   DCPS::MD5Hash(result, name.c_str(), name.size());
 
-  MinimalMemberDetail m;
-  std::memcpy(m.name_hash, result, sizeof m.name_hash);
-  return m;
+  std::memcpy(name_hash, result, sizeof name_hash);
 }
 
 
@@ -160,7 +158,7 @@ RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::Char*>()
 {
   static const RcHandle<XTypes::TypeIdentifier> ti =
     XTypes::TypeIdentifier::make(XTypes::TI_STRING8_SMALL,
-                                 XTypes::StringSTypeDefn::make(0));
+                                 XTypes::StringSTypeDefn(0));
   return ti;
 }
 
@@ -169,7 +167,7 @@ RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::WChar*>()
 {
   static const RcHandle<XTypes::TypeIdentifier> ti =
     XTypes::TypeIdentifier::make(XTypes::TI_STRING16_SMALL,
-                                 XTypes::StringSTypeDefn::make(0));
+                                 XTypes::StringSTypeDefn(0));
   return ti;
 }
 

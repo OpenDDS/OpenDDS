@@ -45,6 +45,12 @@ namespace XTypes {
       members.push_back(member);
       return *this;
     }
+
+    Sequence& sort()
+    {
+      std::sort(members.begin(), members.end());
+      return *this;
+    }
   };
 
   // Based on dds-xtypes_typeobject.idl
@@ -159,13 +165,13 @@ namespace XTypes {
     EquivalenceKind kind;
     EquivalenceHash hash;
 
-    static TypeObjectHashId make(const EquivalenceKind& kind,
-                                 const EquivalenceHash& hash)
+    TypeObjectHashId() {}
+
+    TypeObjectHashId(const EquivalenceKind& a_kind,
+                     const EquivalenceHash& a_hash)
+      : kind(a_kind)
     {
-      TypeObjectHashId tohi;
-      tohi.kind = kind;
-      std::memcpy(tohi.hash, hash, sizeof hash);
-      return tohi;
+      std::memcpy(hash, a_hash, sizeof hash);
     }
   };
 
@@ -231,38 +237,35 @@ namespace XTypes {
   struct StringSTypeDefn {
     SBound                  bound;
 
-    static StringSTypeDefn make(const SBound bound)
-    {
-      StringSTypeDefn s;
-      s.bound = bound;
-      return s;
-    }
+    StringSTypeDefn() {}
+
+    StringSTypeDefn(const SBound a_bound)
+      : bound(a_bound)
+    {}
   };
 
   // 4 Bytes
   struct StringLTypeDefn {
     LBound                  bound;
 
-    static StringLTypeDefn make(const LBound bound)
-    {
-      StringLTypeDefn s;
-      s.bound = bound;
-      return s;
-    }
+    StringLTypeDefn() {}
+
+    StringLTypeDefn(const LBound a_bound)
+      : bound(a_bound)
+    {}
   };
 
   struct PlainCollectionHeader {
     EquivalenceKind        equiv_kind;
     CollectionElementFlag  element_flags;
 
-    static PlainCollectionHeader make(const EquivalenceKind& equiv_kind,
-                                      const CollectionElementFlag& element_flags)
-    {
-      PlainCollectionHeader pch;
-      pch.equiv_kind = equiv_kind;
-      pch.element_flags = element_flags;
-      return pch;
-    }
+    PlainCollectionHeader() {}
+
+    PlainCollectionHeader(const EquivalenceKind& a_equiv_kind,
+                          const CollectionElementFlag& a_element_flags)
+      : equiv_kind(a_equiv_kind)
+      , element_flags(a_element_flags)
+    {}
   };
 
   struct PlainSequenceSElemDefn {
@@ -270,16 +273,15 @@ namespace XTypes {
     SBound                 bound;
     TypeIdentifierPtr element_identifier;
 
-    static PlainSequenceSElemDefn make(const PlainCollectionHeader& header,
-                                       const SBound& bound,
-                                       const TypeIdentifierPtr& element_identifier)
-    {
-      PlainSequenceSElemDefn p;
-      p.header = header;
-      p.bound = bound;
-      p.element_identifier = element_identifier;
-      return p;
-    }
+    PlainSequenceSElemDefn() {}
+
+    PlainSequenceSElemDefn(const PlainCollectionHeader& a_header,
+                           const SBound& a_bound,
+                           const TypeIdentifierPtr& a_element_identifier)
+      : header(a_header)
+      , bound(a_bound)
+      , element_identifier(a_element_identifier)
+    {}
   };
 
   struct PlainSequenceLElemDefn {
@@ -287,16 +289,15 @@ namespace XTypes {
     LBound                 bound;
     TypeIdentifierPtr element_identifier;
 
-    static PlainSequenceLElemDefn make(const PlainCollectionHeader& header,
-                                       const LBound& bound,
-                                       const TypeIdentifierPtr& element_identifier)
-    {
-      PlainSequenceLElemDefn p;
-      p.header = header;
-      p.bound = bound;
-      p.element_identifier = element_identifier;
-      return p;
-    }
+    PlainSequenceLElemDefn() {}
+
+    PlainSequenceLElemDefn(const PlainCollectionHeader& a_header,
+                           const LBound& a_bound,
+                           const TypeIdentifierPtr& a_element_identifier)
+      : header(a_header)
+      , bound(a_bound)
+      , element_identifier(a_element_identifier)
+    {}
   };
 
   struct PlainArraySElemDefn {
@@ -304,16 +305,15 @@ namespace XTypes {
     SBoundSeq              array_bound_seq;
     TypeIdentifierPtr element_identifier;
 
-    static PlainArraySElemDefn make(const PlainCollectionHeader& header,
-                                    const SBoundSeq& array_bound_seq,
-                                    const TypeIdentifierPtr& element_identifier)
-    {
-      PlainArraySElemDefn p;
-      p.header = header;
-      p.array_bound_seq = array_bound_seq;
-      p.element_identifier = element_identifier;
-      return p;
-    }
+    PlainArraySElemDefn() {}
+
+    PlainArraySElemDefn(const PlainCollectionHeader& a_header,
+                        const SBoundSeq& a_array_bound_seq,
+                        const TypeIdentifierPtr& a_element_identifier)
+      : header(a_header)
+      , array_bound_seq(a_array_bound_seq)
+      , element_identifier(a_element_identifier)
+    {}
   };
 
   struct PlainArrayLElemDefn {
@@ -321,16 +321,15 @@ namespace XTypes {
     LBoundSeq              array_bound_seq;
     TypeIdentifierPtr element_identifier;
 
-    static PlainArrayLElemDefn make(const PlainCollectionHeader& header,
-                                    const LBoundSeq& array_bound_seq,
-                                    const TypeIdentifierPtr& element_identifier)
-    {
-      PlainArrayLElemDefn p;
-      p.header = header;
-      p.array_bound_seq = array_bound_seq;
-      p.element_identifier = element_identifier;
-      return p;
-    }
+    PlainArrayLElemDefn() {}
+
+    PlainArrayLElemDefn(const PlainCollectionHeader& a_header,
+                        const LBoundSeq& a_array_bound_seq,
+                        const TypeIdentifierPtr& a_element_identifier)
+      : header(a_header)
+      , array_bound_seq(a_array_bound_seq)
+      , element_identifier(a_element_identifier)
+    {}
   };
 
   struct PlainMapSTypeDefn {
@@ -340,20 +339,19 @@ namespace XTypes {
     CollectionElementFlag  key_flags;
     TypeIdentifierPtr key_identifier;
 
-    static PlainMapSTypeDefn make(const PlainCollectionHeader&  header,
-                                  const SBound&                 bound,
-                                  const TypeIdentifierPtr& element_identifier,
-                                  const CollectionElementFlag&  key_flags,
-                                  const TypeIdentifierPtr& key_identifier)
-    {
-      PlainMapSTypeDefn p;
-      p.header = header;
-      p.bound = bound;
-      p.element_identifier = element_identifier;
-      p.key_flags = key_flags;
-      p.key_identifier = key_identifier;
-      return p;
-    }
+    PlainMapSTypeDefn() {}
+
+    PlainMapSTypeDefn(const PlainCollectionHeader&  a_header,
+                      const SBound&                 a_bound,
+                      const TypeIdentifierPtr& a_element_identifier,
+                      const CollectionElementFlag&  a_key_flags,
+                      const TypeIdentifierPtr& a_key_identifier)
+      : header(a_header)
+      , bound(a_bound)
+      , element_identifier(a_element_identifier)
+      , key_flags(a_key_flags)
+      , key_identifier(a_key_identifier)
+    {}
   };
 
   struct PlainMapLTypeDefn {
@@ -363,20 +361,19 @@ namespace XTypes {
     CollectionElementFlag  key_flags;
     TypeIdentifierPtr key_identifier;
 
-    static PlainMapLTypeDefn make(const PlainCollectionHeader&  header,
-                                  const LBound&                 bound,
-                                  const TypeIdentifierPtr& element_identifier,
-                                  const CollectionElementFlag&  key_flags,
-                                  const TypeIdentifierPtr& key_identifier)
-    {
-      PlainMapLTypeDefn p;
-      p.header = header;
-      p.bound = bound;
-      p.element_identifier = element_identifier;
-      p.key_flags = key_flags;
-      p.key_identifier = key_identifier;
-      return p;
-    }
+    PlainMapLTypeDefn() {}
+
+    PlainMapLTypeDefn(const PlainCollectionHeader&  a_header,
+                      const LBound&                 a_bound,
+                      const TypeIdentifierPtr& a_element_identifier,
+                      const CollectionElementFlag&  a_key_flags,
+                      const TypeIdentifierPtr& a_key_identifier)
+      : header(a_header)
+      , bound(a_bound)
+      , element_identifier(a_element_identifier)
+      , key_flags(a_key_flags)
+      , key_identifier(a_key_identifier)
+    {}
   };
 
   // Used for Types that have cyclic depencencies with other types
@@ -385,26 +382,20 @@ namespace XTypes {
     ACE_CDR::Long   scc_length; // StronglyConnectedComponent.length
     ACE_CDR::Long   scc_index ; // identify type in Strongly Connected Comp.
 
-    static StronglyConnectedComponentId make(const TypeObjectHashId& sc_component_id,
-                                             const ACE_CDR::Long& scc_length,
-                                             const ACE_CDR::Long& scc_index)
-    {
-      StronglyConnectedComponentId s;
-      s.sc_component_id = sc_component_id;
-      s.scc_length = scc_length;
-      s.scc_index = scc_index;
-      return s;
-    }
+    StronglyConnectedComponentId() {}
+
+    StronglyConnectedComponentId(const TypeObjectHashId& a_sc_component_id,
+                                 const ACE_CDR::Long& a_scc_length,
+                                 const ACE_CDR::Long& a_scc_index)
+      : sc_component_id(a_sc_component_id)
+      , scc_length(a_scc_length)
+      , scc_index(a_scc_index)
+    {}
   };
 
   // Future extensibility
   struct ExtendedTypeDefn {
     // Empty. Available for future extension
-
-    static ExtendedTypeDefn make()
-    {
-      return ExtendedTypeDefn();
-    }
   };
 
 
@@ -547,9 +538,9 @@ namespace XTypes {
     {
       return bound > 255 ?
         make(wide ? TI_STRING16_LARGE : TI_STRING8_LARGE,
-             StringLTypeDefn::make(bound)) :
+             StringLTypeDefn(bound)) :
         make(wide ? TI_STRING16_SMALL : TI_STRING8_SMALL,
-             StringSTypeDefn::make(bound));
+             StringSTypeDefn(bound));
     }
 
     static TypeIdentifierPtr make(ACE_CDR::Octet k,
@@ -744,16 +735,13 @@ namespace XTypes {
     StructMemberFlag                           member_flags;
     TypeIdentifierPtr                   member_type_id;
 
-    static CommonStructMember make(const MemberId& member_id,
-                                   const StructMemberFlag& member_flags,
-                                   const TypeIdentifierPtr& member_type_id)
-    {
-      CommonStructMember c;
-      c.member_id = member_id;
-      c.member_flags = member_flags;
-      c.member_type_id = member_type_id;
-      return c;
-    }
+    CommonStructMember (const MemberId& a_member_id,
+                        const StructMemberFlag& a_member_flags,
+                        const TypeIdentifierPtr& a_member_type_id)
+      : member_id(a_member_id)
+      , member_flags(a_member_flags)
+      , member_type_id(a_member_type_id)
+    {}
   };
 
   // COMPLETE Details for a member of an aggregate type
@@ -767,7 +755,8 @@ namespace XTypes {
   struct OpenDDS_Dcps_Export MinimalMemberDetail {
     NameHash                                  name_hash;
 
-    static MinimalMemberDetail make(const std::string& name);
+    MinimalMemberDetail() {}
+    MinimalMemberDetail(const std::string& name);
   };
 
   // Member of an aggregate type
@@ -782,17 +771,19 @@ namespace XTypes {
   struct MinimalStructMember {
     CommonStructMember                         common;
     MinimalMemberDetail                        detail;
-    static MinimalStructMember make(const CommonStructMember& common,
-                                    const MinimalMemberDetail& detail)
+
+    MinimalStructMember(const CommonStructMember& a_common,
+                        const MinimalMemberDetail& a_detail)
+      : common(a_common)
+      , detail(a_detail)
+    {}
+
+    bool operator<(const MinimalStructMember& other) const
     {
-      MinimalStructMember msm;
-      msm.common = common;
-      msm.detail = detail;
-      return msm;
+      return common.member_id < other.common.member_id;
     }
   };
   // Ordered by common.member_id
-  // TODO: Implement sorting.
   typedef Sequence<MinimalStructMember> MinimalStructMemberSeq;
 
   struct AppliedBuiltinTypeAnnotations {
@@ -801,11 +792,6 @@ namespace XTypes {
 
   struct MinimalTypeDetail {
     // Empty. Available for future extension
-
-    static MinimalTypeDetail make()
-    {
-      return MinimalTypeDetail();
-    }
   };
 
   struct CompleteTypeDetail {
@@ -823,14 +809,13 @@ namespace XTypes {
     TypeIdentifierPtr                 base_type;
     MinimalTypeDetail                        detail;
 
-    static MinimalStructHeader make(const TypeIdentifierPtr& base_type,
-                                    const MinimalTypeDetail& detail)
-    {
-      MinimalStructHeader msh;
-      msh.base_type = base_type;
-      msh.detail = detail;
-      return msh;
-    }
+    MinimalStructHeader() {}
+
+    MinimalStructHeader(const TypeIdentifierPtr& a_base_type,
+                        const MinimalTypeDetail& a_detail)
+      : base_type(a_base_type)
+      , detail(a_detail)
+    {}
   };
 
   struct CompleteStructType {
@@ -844,16 +829,15 @@ namespace XTypes {
     MinimalStructHeader        header;
     MinimalStructMemberSeq     member_seq;
 
-    static MinimalStructType make(const StructTypeFlag& struct_flags,
-                                  const MinimalStructHeader& header,
-                                  const MinimalStructMemberSeq& member_seq)
-    {
-      MinimalStructType mst;
-      mst.struct_flags = struct_flags;
-      mst.header = header;
-      mst.member_seq = member_seq;
-      return mst;
-    }
+    MinimalStructType() {}
+
+    MinimalStructType(const StructTypeFlag& a_struct_flags,
+                      const MinimalStructHeader& a_header,
+                      const MinimalStructMemberSeq& a_member_seq)
+      : struct_flags(a_struct_flags)
+      , header(a_header)
+      , member_seq(a_member_seq)
+    {}
   };
 
   // --- Union: ----------------------------------------------------------
@@ -923,18 +907,17 @@ namespace XTypes {
     MinimalDiscriminatorMember   discriminator;
     MinimalUnionMemberSeq        member_seq;
 
-    static MinimalUnionType make(const UnionTypeFlag& union_flags,
-                                 const MinimalUnionHeader& header,
-                                 const MinimalDiscriminatorMember& discriminator,
-                                 const MinimalUnionMemberSeq& member_seq)
-    {
-      MinimalUnionType mut;
-      mut.union_flags = union_flags;
-      mut.header = header;
-      mut.discriminator = discriminator;
-      mut.member_seq = member_seq;
-      return mut;
-    }
+    MinimalUnionType() {}
+
+    MinimalUnionType(const UnionTypeFlag& a_union_flags,
+                     const MinimalUnionHeader& a_header,
+                     const MinimalDiscriminatorMember& a_discriminator,
+                     const MinimalUnionMemberSeq& a_member_seq)
+      : union_flags(a_union_flags)
+      , header(a_header)
+      , discriminator(a_discriminator)
+      , member_seq(a_member_seq)
+    {}
   };
 
   // --- Annotation: ----------------------------------------------------
@@ -1111,6 +1094,14 @@ namespace XTypes {
   struct CommonEnumeratedLiteral {
     ACE_CDR::Long                     value;
     EnumeratedLiteralFlag    flags;
+
+    CommonEnumeratedLiteral() {}
+
+    CommonEnumeratedLiteral(const ACE_CDR::Long& a_value,
+                            const EnumeratedLiteralFlag a_flags)
+      : value(a_value)
+      , flags(a_flags)
+    {}
   };
 
   // Constant in an enumerated type
@@ -1125,12 +1116,30 @@ namespace XTypes {
   struct MinimalEnumeratedLiteral {
     CommonEnumeratedLiteral  common;
     MinimalMemberDetail      detail;
+
+    MinimalEnumeratedLiteral() {}
+
+    MinimalEnumeratedLiteral(const CommonEnumeratedLiteral& a_common,
+                             const MinimalMemberDetail& a_detail)
+      : common(a_common)
+      , detail(a_detail)
+    {}
+
+    bool operator<(const MinimalEnumeratedLiteral& other) const {
+      return common.value < other.common.value;
+    }
   };
   // Ordered by EnumeratedLiteral.common.value
   typedef Sequence<MinimalEnumeratedLiteral> MinimalEnumeratedLiteralSeq;
 
   struct CommonEnumeratedHeader {
     BitBound                bit_bound;
+
+    CommonEnumeratedHeader() {}
+
+    CommonEnumeratedHeader(const BitBound& a_bit_bound)
+      : bit_bound(a_bit_bound)
+    {}
   };
 
   struct CompleteEnumeratedHeader {
@@ -1140,6 +1149,12 @@ namespace XTypes {
 
   struct MinimalEnumeratedHeader {
     CommonEnumeratedHeader  common;
+
+    MinimalEnumeratedHeader() {}
+
+    MinimalEnumeratedHeader(const CommonEnumeratedHeader& a_common)
+      : common(a_common)
+    {}
   };
 
   // Enumerated type
@@ -1154,6 +1169,16 @@ namespace XTypes {
     EnumTypeFlag                  enum_flags; // unused
     MinimalEnumeratedHeader       header;
     MinimalEnumeratedLiteralSeq   literal_seq;
+
+    MinimalEnumeratedType() {}
+
+    MinimalEnumeratedType(const EnumTypeFlag& a_enum_flags,
+                          const MinimalEnumeratedHeader& a_header,
+                          const MinimalEnumeratedLiteralSeq& a_literal_seq)
+      : enum_flags(a_enum_flags)
+      , header(a_header)
+      , literal_seq(a_literal_seq)
+    {}
   };
 
   // --- Bitmask: --------------------------------------------------------
@@ -1341,86 +1366,57 @@ namespace XTypes {
     // ===================  Future extensibility  ============
     MinimalExtendedType    extended_type;
 
-    static MinimalTypeObject make(const MinimalAliasType& alias)
-    {
-      MinimalTypeObject mto;
-      mto.kind = TK_ALIAS;
-      mto.alias_type = alias;
-      return mto;
-    }
+    MinimalTypeObject() {}
 
-    static MinimalTypeObject make(const MinimalAnnotationType& annotation)
-    {
-      MinimalTypeObject mto;
-      mto.kind = TK_ANNOTATION;
-      mto.annotation_type = annotation;
-      return mto;
-    }
+    MinimalTypeObject(const MinimalAliasType& alias)
+      : kind(TK_ALIAS)
+      , alias_type(alias)
+    {}
 
-    static MinimalTypeObject make(const MinimalStructType& struct_)
-    {
-      MinimalTypeObject mto;
-      mto.kind = TK_STRUCTURE;
-      mto.struct_type = struct_;
-      return mto;
-    }
+    MinimalTypeObject(const MinimalAnnotationType& annotation)
+      : kind(TK_ANNOTATION)
+      , annotation_type(annotation)
+    {}
 
-    static MinimalTypeObject make(const MinimalUnionType& union_)
-    {
-      MinimalTypeObject mto;
-      mto.kind = TK_UNION;
-      mto.union_type = union_;
-      return mto;
-    }
+    MinimalTypeObject(const MinimalStructType& struct_)
+      : kind(TK_STRUCTURE)
+      , struct_type(struct_)
+    {}
 
-    static MinimalTypeObject make(const MinimalBitsetType& bitset)
-    {
-      MinimalTypeObject mto;
-      mto.kind = TK_BITSET;
-      mto.bitset_type = bitset;
-      return mto;
-    }
+    MinimalTypeObject(const MinimalUnionType& union_)
+      : kind(TK_UNION)
+      , union_type(union_)
+    {}
 
-    static MinimalTypeObject make(const MinimalSequenceType& sequence)
-    {
-      MinimalTypeObject mto;
-      mto.kind = TK_SEQUENCE;
-      mto.sequence_type = sequence;
-      return mto;
-    }
+    MinimalTypeObject(const MinimalBitsetType& bitset)
+      : kind(TK_BITSET)
+      , bitset_type(bitset)
+    {}
 
-    static MinimalTypeObject make(const MinimalArrayType& array)
-    {
-      MinimalTypeObject mto;
-      mto.kind = TK_ARRAY;
-      mto.array_type = array;
-      return mto;
-    }
+    MinimalTypeObject(const MinimalSequenceType& sequence)
+      : kind(TK_SEQUENCE)
+      , sequence_type(sequence)
+    {}
 
-    static MinimalTypeObject make(const MinimalMapType& map)
-    {
-      MinimalTypeObject mto;
-      mto.kind = TK_MAP;
-      mto.map_type = map;
-      return mto;
-    }
+    MinimalTypeObject(const MinimalArrayType& array)
+      : kind(TK_ARRAY)
+      , array_type(array)
+    {}
 
-    static MinimalTypeObject make(const MinimalEnumeratedType& enum_)
-    {
-      MinimalTypeObject mto;
-      mto.kind = TK_ENUM;
-      mto.enumerated_type = enum_;
-      return mto;
-    }
+    MinimalTypeObject(const MinimalMapType& map)
+      : kind(TK_MAP)
+      , map_type(map)
+    {}
 
-    static MinimalTypeObject make(const MinimalBitmaskType& bitmask)
-    {
-      MinimalTypeObject mto;
-      mto.kind = TK_BITMASK;
-      mto.bitmask_type = bitmask;
-      return mto;
-    }
+    MinimalTypeObject(const MinimalEnumeratedType& enum_)
+      : kind(TK_ENUM)
+      , enumerated_type(enum_)
+    {}
 
+    MinimalTypeObject(const MinimalBitmaskType& bitmask)
+      : kind(TK_BITMASK)
+      , bitmask_type(bitmask)
+    {}
   };
 
   // @extensibility(APPENDABLE)  @nested
@@ -1436,21 +1432,15 @@ namespace XTypes {
     CompleteTypeObject   complete;
     MinimalTypeObject    minimal;
 
-    static TypeObject make(const CompleteTypeObject& complete)
-    {
-      TypeObject to;
-      to.kind = EK_COMPLETE;
-      to.complete = complete;
-      return to;
-    }
+    TypeObject(const CompleteTypeObject& a_complete)
+      : kind(EK_COMPLETE)
+      , complete(a_complete)
+    {}
 
-    static TypeObject make(const MinimalTypeObject& minimal)
-    {
-      TypeObject to;
-      to.kind = EK_MINIMAL;
-      to.minimal = minimal;
-      return to;
-    }
+    TypeObject(const MinimalTypeObject& a_minimal)
+      : kind(EK_MINIMAL)
+      , minimal(a_minimal)
+    {}
   };
 
   OpenDDS_Dcps_Export
