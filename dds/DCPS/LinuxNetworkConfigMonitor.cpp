@@ -26,6 +26,7 @@ namespace DCPS {
 const size_t MAX_NETLINK_MESSAGE_SIZE = 4096;
 
 LinuxNetworkConfigMonitor::LinuxNetworkConfigMonitor(ReactorInterceptor_rch interceptor)
+  : interceptor_(interceptor)
 {
   reactor(interceptor->reactor());
 }
@@ -79,9 +80,9 @@ bool LinuxNetworkConfigMonitor::open()
 
   read_messages();
 
-  if (reactor()->register_handler(this, READ_MASK) != 0) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: LinuxNetworkConfigMonitor::open: could not register for input: %m\n")));
-    return false;
+  ReactorInterceptor_rch interceptor = interceptor_.lock();
+  if (interceptor) {
+    interceptor->execute_or_enqueue(new RegisterHandler(this));
   }
 
   return true;
@@ -91,7 +92,11 @@ bool LinuxNetworkConfigMonitor::close()
 {
   bool retval = true;
 
-  reactor()->remove_handler(this, READ_MASK);
+  ReactorInterceptor_rch interceptor = interceptor_.lock();
+  if (interceptor) {
+    ReactorInterceptor::CommandPtr command = interceptor->execute_or_enqueue(new RemoveHandler(this));
+    command->wait();
+  }
 
   if (socket_.close() != 0) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: LinuxNetworkConfigMonitor::close: could not close socket: %m\n")));
