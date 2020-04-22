@@ -90,8 +90,16 @@ public:
 
   ACE_SOCK_Dgram& unicast_socket();
   ACE_SOCK_Dgram_Mcast& multicast_socket();
+#ifdef ACE_HAS_IPV6
+  ACE_SOCK_Dgram& ipv6_unicast_socket();
+  ACE_SOCK_Dgram_Mcast& ipv6_multicast_socket();
+#endif
 
-  bool open(const ACE_SOCK_Dgram& unicast_socket);
+  bool open(const ACE_SOCK_Dgram& unicast_socket
+#ifdef ACE_HAS_IPV6
+            , const ACE_SOCK_Dgram& ipv6_unicast_socket
+#endif
+            );
 
   void received(const RTPS::DataSubmessage& data,
                 const GuidPrefix_t& src_prefix);
@@ -234,6 +242,11 @@ private:
   ACE_SOCK_Dgram unicast_socket_;
   ACE_SOCK_Dgram_Mcast multicast_socket_;
   OPENDDS_SET(OPENDDS_STRING) joined_interfaces_;
+#ifdef ACE_HAS_IPV6
+  ACE_SOCK_Dgram ipv6_unicast_socket_;
+  ACE_SOCK_Dgram_Mcast ipv6_multicast_socket_;
+  OPENDDS_SET(OPENDDS_STRING) ipv6_joined_interfaces_;
+#endif
 
   RcHandle<SingleSendBuffer> get_writer_send_buffer(const RepoId& pub_id);
 

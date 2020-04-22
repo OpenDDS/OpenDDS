@@ -27,6 +27,8 @@ typedef OPENDDS_VECTOR(ACE_INET_Addr) AddressListType;
 bool candidates_equal(const Candidate& x, const Candidate& y);
 bool candidates_sorted(const Candidate& x, const Candidate& y);
 
+ACE_UINT32 local_priority(const ACE_INET_Addr& addr);
+
 Candidate make_host_candidate(const ACE_INET_Addr& address);
 Candidate make_server_reflexive_candidate(const ACE_INET_Addr& address, const ACE_INET_Addr& base, const ACE_INET_Addr& server_address);
 Candidate make_peer_reflexive_candidate(const ACE_INET_Addr& address, const ACE_INET_Addr& base, const ACE_INET_Addr& server_address, ACE_UINT32 priority);
@@ -61,7 +63,7 @@ public:
   virtual void send(const ACE_INET_Addr& address, const STUN::Message& message) = 0;
   virtual ACE_INET_Addr stun_server_address() const = 0;
   virtual void ice_connect(const GuidSetType&, const ACE_INET_Addr&) {}
-  virtual void ice_disconnect(const GuidSetType&) {}
+  virtual void ice_disconnect(const GuidSetType&, const ACE_INET_Addr&) {}
 };
 
 class OpenDDS_Rtps_Export AgentInfoListener {

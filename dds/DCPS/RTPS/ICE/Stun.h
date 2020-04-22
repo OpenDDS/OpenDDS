@@ -131,12 +131,6 @@ Attribute make_ice_controlling(ACE_UINT64 ice_tie_breaker);
 OpenDDS_Rtps_Export
 Attribute make_ice_controlled(ACE_UINT64 ice_tie_breaker);
 
-OpenDDS_Rtps_Export
-bool operator>>(DCPS::Serializer& serializer, Attribute& attribute);
-
-OpenDDS_Rtps_Export
-bool operator<<(DCPS::Serializer& serializer, const Attribute& attribute);
-
 struct OpenDDS_Rtps_Export TransactionId {
   ACE_UINT8 data[12];
   TransactionId()
@@ -147,6 +141,32 @@ struct OpenDDS_Rtps_Export TransactionId {
   bool operator==(const TransactionId& other) const;
   bool operator!=(const TransactionId& other) const;
 };
+
+struct AttributeHolder {
+  Attribute& attribute;
+  const TransactionId& tid;
+
+  AttributeHolder(Attribute& a, const TransactionId& t)
+    : attribute(a)
+    , tid(t)
+  {}
+};
+
+struct ConstAttributeHolder {
+  const Attribute& attribute;
+  const TransactionId& tid;
+
+  ConstAttributeHolder(const Attribute& a, const TransactionId& t)
+    : attribute(a)
+    , tid(t)
+  {}
+};
+
+OpenDDS_Rtps_Export
+bool operator>>(DCPS::Serializer& serializer, AttributeHolder& holder);
+
+OpenDDS_Rtps_Export
+bool operator<<(DCPS::Serializer& serializer, ConstAttributeHolder& holder);
 
 struct OpenDDS_Rtps_Export Message {
   typedef std::vector<Attribute> AttributesType;

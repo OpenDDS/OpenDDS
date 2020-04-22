@@ -407,17 +407,21 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   if (run_relay) {
     // Configure ports and addresses.
-    const auto addr_horizontal = nic_horizontal.get_ip_address();
     auto port_horizontal = nic_horizontal.get_port_number();
-    const ACE_INET_Addr spdp_horizontal_addr(port_horizontal++, addr_horizontal);
-    const ACE_INET_Addr sedp_horizontal_addr(port_horizontal++, addr_horizontal);
-    const ACE_INET_Addr data_horizontal_addr(port_horizontal++, addr_horizontal);
+    ACE_INET_Addr spdp_horizontal_addr(nic_horizontal);
+    spdp_horizontal_addr.set_port_number(port_horizontal++);
+    ACE_INET_Addr sedp_horizontal_addr(nic_horizontal);
+    sedp_horizontal_addr.set_port_number(port_horizontal++);
+    ACE_INET_Addr data_horizontal_addr(nic_horizontal);
+    data_horizontal_addr.set_port_number(port_horizontal++);
 
-    const auto addr_vertical = nic_vertical.get_ip_address();
     auto port_vertical = nic_vertical.get_port_number();
-    const ACE_INET_Addr spdp_vertical_addr(port_vertical++, addr_vertical);
-    const ACE_INET_Addr sedp_vertical_addr(port_vertical++, addr_vertical);
-    const ACE_INET_Addr data_vertical_addr(port_vertical++, addr_vertical);
+    ACE_INET_Addr spdp_vertical_addr(nic_vertical);
+    spdp_vertical_addr.set_port_number(port_vertical++);
+    ACE_INET_Addr sedp_vertical_addr(nic_vertical);
+    sedp_vertical_addr.set_port_number(port_vertical++);
+    ACE_INET_Addr data_vertical_addr(nic_vertical);
+    data_vertical_addr.set_port_number(port_vertical++);
 
     ACE_INET_Addr stun_addr = nic_vertical;
     stun_addr.set_port_number(stun_port);
@@ -461,8 +465,23 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     const auto discovery = TheServiceParticipant->get_discovery(config.application_domain());
     const auto rtps_discovery = OpenDDS::DCPS::dynamic_rchandle_cast<OpenDDS::RTPS::RtpsDiscovery>(discovery);
 
-    ACE_INET_Addr spdp(rtps_discovery->get_spdp_port(config.application_domain(), config.application_participant_guid()), "127.0.0.1");
-    ACE_INET_Addr sedp(rtps_discovery->get_sedp_port(config.application_domain(), config.application_participant_guid()), "127.0.0.1");
+    ACE_INET_Addr spdp;
+    if (spdp_vertical_addr.get_type() == AF_INET) {
+      spdp = ACE_INET_Addr(rtps_discovery->get_spdp_port(config.application_domain(), config.application_participant_guid()), "127.0.0.1");
+#ifdef ACE_HAS_IPV6
+    } else if (spdp_vertical_addr.get_type() == AF_INET6) {
+      spdp = ACE_INET_Addr(rtps_discovery->get_ipv6_spdp_port(config.application_domain(), config.application_participant_guid()), "::1");
+#endif
+    }
+
+    ACE_INET_Addr sedp;
+    if (sedp_vertical_addr.get_type() == AF_INET) {
+      sedp = ACE_INET_Addr(rtps_discovery->get_sedp_port(config.application_domain(), config.application_participant_guid()), "127.0.0.1");
+#ifdef ACE_HAS_IPV6
+    } else if (sedp_vertical_addr.get_type() == AF_INET6) {
+      sedp = ACE_INET_Addr(rtps_discovery->get_ipv6_sedp_port(config.application_domain(), config.application_participant_guid()), "::1");
+#endif
+    }
 
 #ifdef OPENDDS_SECURITY
     OpenDDS::Security::SecurityConfig_rch conf = TheSecurityRegistry->default_config();

@@ -19,6 +19,7 @@
 #include "dds/DCPS/RTPS/MessageTypes.h"
 
 #include "ace/INET_Addr.h"
+#include "ace/SOCK_Dgram.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -73,6 +74,7 @@ private:
   bool marshal_transport_header(ACE_Message_Block* mb);
   ssize_t send_multi_i(const iovec iov[], int n,
                        const OPENDDS_SET(ACE_INET_Addr)& addrs);
+  const ACE_SOCK_Dgram& choose_send_socket(const ACE_INET_Addr& addr) const;
   ssize_t send_single_i(const iovec iov[], int n,
                         const ACE_INET_Addr& addr);
 

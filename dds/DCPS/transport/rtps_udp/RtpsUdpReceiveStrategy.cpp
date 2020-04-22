@@ -58,7 +58,7 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
 {
   ACE_INET_Addr local_address;
   const ssize_t ret = socket.recv(iov, n, remote_address, 0
-#ifdef ACE_RECVPKTINFO
+#if defined(ACE_RECVPKTINFO) || defined(ACE_RECVPKTINFO6)
                                   , &local_address
 #endif
   );
@@ -76,6 +76,7 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
     ACE_UNUSED_ARG(stop);
     ACE_NOTSUP_RETURN(-1);
 # else
+
     // Assume STUN
     stop = true;
     size_t bytes = ret;
@@ -127,6 +128,23 @@ namespace {
 }
 #endif
 
+const ACE_SOCK_Dgram&
+RtpsUdpReceiveStrategy::choose_recv_socket(ACE_HANDLE fd) const
+{
+#ifdef ACE_HAS_IPV6
+  if (fd == link_->ipv6_multicast_socket().get_handle()) {
+    return link_->ipv6_multicast_socket();
+  }
+  if (fd == link_->ipv6_unicast_socket().get_handle()) {
+    return link_->ipv6_unicast_socket();
+  }
+#endif
+  if (fd == link_->multicast_socket().get_handle()) {
+    return link_->multicast_socket();
+  }
+  return link_->unicast_socket();
+}
+
 ssize_t
 RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
                                       int n,
@@ -134,9 +152,7 @@ RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
                                       ACE_HANDLE fd,
                                       bool& stop)
 {
-  const ACE_SOCK_Dgram& socket =
-    (fd == link_->unicast_socket().get_handle())
-    ? link_->unicast_socket() : link_->multicast_socket();
+  const ACE_SOCK_Dgram& socket = choose_recv_socket(fd);
 #ifdef ACE_LACKS_SENDMSG
   ACE_UNUSED_ARG(stop);
   char buffer[0x10000];
@@ -747,16 +763,18 @@ RtpsUdpReceiveStrategy::start_i()
                      -1);
   }
 
-  if (link_->config().use_multicast_) {
-    if (reactor->register_handler(link_->multicast_socket().get_handle(), this,
-                                  ACE_Event_Handler::READ_MASK) != 0) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("RtpsUdpReceiveStrategy::start_i: ")
-                        ACE_TEXT("failed to register handler for multicast\n")),
-                       -1);
-    }
+#ifdef ACE_HAS_IPV6
+  if (reactor->register_handler(link_->ipv6_unicast_socket().get_handle(), this,
+                                ACE_Event_Handler::READ_MASK) != 0) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("RtpsUdpReceiveStrategy::start_i: ")
+                      ACE_TEXT("failed to register handler for unicast ")
+                      ACE_TEXT("socket %d\n"),
+                      link_->unicast_socket().get_handle()),
+                     -1);
   }
+#endif
 
   return 0;
 }
@@ -776,9 +794,18 @@ RtpsUdpReceiveStrategy::stop_i()
   reactor->remove_handler(link_->unicast_socket().get_handle(),
                           ACE_Event_Handler::READ_MASK);
 
+#ifdef ACE_HAS_IPV6
+  reactor->remove_handler(link_->ipv6_unicast_socket().get_handle(),
+                          ACE_Event_Handler::READ_MASK);
+#endif
+
   if (link_->config().use_multicast_) {
     reactor->remove_handler(link_->multicast_socket().get_handle(),
                             ACE_Event_Handler::READ_MASK);
+#ifdef ACE_HAS_IPV6
+    reactor->remove_handler(link_->ipv6_multicast_socket().get_handle(),
+                            ACE_Event_Handler::READ_MASK);
+#endif
   }
 }
 
