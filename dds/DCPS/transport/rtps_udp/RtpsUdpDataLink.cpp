@@ -463,7 +463,7 @@ RtpsUdpDataLink::join_multicast_group(const DCPS::NetworkInterface& nic,
       if (get_reactor()->register_handler(multicast_socket_.get_handle(),
                                           receive_strategy(),
                                           ACE_Event_Handler::READ_MASK) != 0) {
-        throw std::runtime_error("failed to register multicast input handler");
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) RtpsUdpDataLink::join_multicast_group failed to register multicast input handler\n")));
       }
     } else {
       ACE_ERROR((LM_ERROR,
@@ -489,7 +489,7 @@ RtpsUdpDataLink::join_multicast_group(const DCPS::NetworkInterface& nic,
       if (get_reactor()->register_handler(ipv6_multicast_socket_.get_handle(),
                                           receive_strategy(),
                                           ACE_Event_Handler::READ_MASK) != 0) {
-        throw std::runtime_error("failed to register multicast input handler");
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) RtpsUdpDataLink::join_multicast_group failed to register ipv6 multicast input handler\n")));
       }
     } else {
       ACE_ERROR((LM_ERROR,

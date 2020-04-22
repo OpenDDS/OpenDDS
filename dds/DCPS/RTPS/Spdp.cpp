@@ -2638,7 +2638,8 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
 
       if (reactor()->register_handler(multicast_socket_.get_handle(),
                                     this, ACE_Event_Handler::READ_MASK) != 0) {
-        throw std::runtime_error("failed to register multicast input handler");
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Spdp::SpdpTransport::join_multicast_group failed to register multicast input handler\n")));
+        return;
       }
 
       write_i(SEND_TO_LOCAL);
@@ -2667,7 +2668,8 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
 
       if (reactor()->register_handler(multicast_ipv6_socket_.get_handle(),
                                     this, ACE_Event_Handler::READ_MASK) != 0) {
-        throw std::runtime_error("failed to register multicast ipv6 input handler");
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Spdp::SpdpTransport::join_multicast_group failed to register multicast ipv6 input handler\n")));
+        return;
       }
 
       write_i(SEND_TO_LOCAL);
