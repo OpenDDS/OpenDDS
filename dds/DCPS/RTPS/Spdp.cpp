@@ -341,7 +341,7 @@ Spdp::~Spdp()
         if (sedp_endpoint) {
           stop_ice(sedp_endpoint, part->first, part->second.pdata_.participantProxy.availableBuiltinEndpoints);
         }
-        ICE::Endpoint* spdp_endpoint = get_ice_endpoint();
+        ICE::Endpoint* spdp_endpoint = tport_->get_ice_endpoint();
         if (spdp_endpoint) {
           ICE::Agent::instance()->stop_ice(spdp_endpoint, guid_, part->first);
         }
@@ -534,9 +534,9 @@ Spdp::process_location_updates_i(DiscoveredParticipantIter iter)
 #endif
 
 ICE::Endpoint*
-Spdp::get_ice_endpoint()
+Spdp::get_ice_endpoint_if_added()
 {
-  return tport_->get_ice_endpoint();
+  return tport_->ice_endpoint_added_ ? tport_->get_ice_endpoint() : 0;
 }
 
 void
@@ -695,7 +695,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       if (sedp_endpoint) {
         stop_ice(sedp_endpoint, iter->first, iter->second.pdata_.participantProxy.availableBuiltinEndpoints);
       }
-      ICE::Endpoint* spdp_endpoint = get_ice_endpoint();
+      ICE::Endpoint* spdp_endpoint = tport_->get_ice_endpoint();
       if (spdp_endpoint) {
         ICE::Agent::instance()->stop_ice(spdp_endpoint, guid_, iter->first);
       }
@@ -1104,7 +1104,7 @@ Spdp::process_auth_deadlines(const DCPS::MonotonicTimePoint& now)
         if (sedp_endpoint) {
           stop_ice(sedp_endpoint, pit->first, pit->second.pdata_.participantProxy.availableBuiltinEndpoints);
         }
-        ICE::Endpoint* spdp_endpoint = get_ice_endpoint();
+        ICE::Endpoint* spdp_endpoint = tport_->get_ice_endpoint();
         if (spdp_endpoint) {
           ICE::Agent::instance()->stop_ice(spdp_endpoint, guid_, pit->first);
         }
@@ -1554,7 +1554,7 @@ Spdp::remove_expired_participants()
         if (sedp_endpoint) {
           stop_ice(sedp_endpoint, part->first, part->second.pdata_.participantProxy.availableBuiltinEndpoints);
         }
-        ICE::Endpoint* spdp_endpoint = get_ice_endpoint();
+        ICE::Endpoint* spdp_endpoint = tport_->get_ice_endpoint();
         if (spdp_endpoint) {
           ICE::Agent::instance()->stop_ice(spdp_endpoint, guid_, part->first);
         }
@@ -1704,6 +1704,7 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
   , wbuff_(64 * 1024)
   , reactor_task_(false)
   , network_is_unreachable_(false)
+  , ice_endpoint_added_(false)
 {
   hdr_.prefix[0] = 'R';
   hdr_.prefix[1] = 'T';
@@ -1850,6 +1851,7 @@ Spdp::SpdpTransport::open()
   ICE::Endpoint* endpoint = get_ice_endpoint();
   if (endpoint) {
     ICE::Agent::instance()->add_endpoint(endpoint);
+    ice_endpoint_added_ = true;
   }
 #endif
 
@@ -1940,6 +1942,7 @@ Spdp::SpdpTransport::close()
   ICE::Endpoint* endpoint = get_ice_endpoint();
   if (endpoint) {
     ICE::Agent::instance()->remove_endpoint(endpoint);
+    ice_endpoint_added_ = false;
   }
 
   if (auth_deadline_processor_) {
@@ -3195,7 +3198,7 @@ void Spdp::process_participant_ice(const ParameterList& plist,
       stop_ice(sedp_endpoint, guid, pdata.participantProxy.availableBuiltinEndpoints);
     }
   }
-  ICE::Endpoint* spdp_endpoint = get_ice_endpoint();
+  ICE::Endpoint* spdp_endpoint = tport_->get_ice_endpoint();
   if (spdp_endpoint) {
     ICE::AgentInfoMap::const_iterator spdp_pos = ai_map.find("SPDP");
     if (spdp_pos != ai_map.end()) {
