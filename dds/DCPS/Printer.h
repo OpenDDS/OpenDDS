@@ -1,3 +1,8 @@
+/*
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #ifndef OPENDDS_DCPS_PRINTER_HEADER
 #define OPENDDS_DCPS_PRINTER_HEADER
 

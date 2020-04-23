@@ -349,20 +349,20 @@ the basic list of library file for OpenDDS are as follows:
 
   - Core OpenDDS library and its dependencies:
 
-   - If not already included because of a separate C++ NDK project, you must
-     include the Clang C++ Standard Library. This is located at
-     `$TOOLCHAIN/sysroot/usr/lib/$ABI_PREFIX/libc++_shared.so` where
-     `$ABI_PREFIX` is an identifier for the architecture and can be found in the
-     [ABI/architecture table](#abi-table).
+    - If not already included because of a separate C++ NDK project, you must
+      include the Clang C++ Standard Library. This is located at
+      `$TOOLCHAIN/sysroot/usr/lib/$ABI_PREFIX/libc++_shared.so` where
+      `$ABI_PREFIX` is an identifier for the architecture and can be found in
+      the [ABI/architecture table](#abi-table).
 
-   - `$ACE_ROOT/lib/libACE.so`
-   - `$ACE_ROOT/lib/libTAO.so`
-   - `$ACE_ROOT/lib/libTAO_AnyTypeCode.so`
-   - `$ACE_ROOT/lib/libTAO_BiDirGIOP.so`
-   - `$ACE_ROOT/lib/libTAO_CodecFactory.so`
-   - `$ACE_ROOT/lib/libTAO_PI.so`
+    - `$ACE_ROOT/lib/libACE.so`
+    - `$ACE_ROOT/lib/libTAO.so`
+    - `$ACE_ROOT/lib/libTAO_AnyTypeCode.so`
+    - `$ACE_ROOT/lib/libTAO_BiDirGIOP.so`
+    - `$ACE_ROOT/lib/libTAO_CodecFactory.so`
+    - `$ACE_ROOT/lib/libTAO_PI.so`
 
-   - `$DDS_ROOT/lib/libOpenDDS_Dcps.so`
+    - `$DDS_ROOT/lib/libOpenDDS_Dcps.so`
 
  - The following are the transport libraries, one for each transport type. You
    will need at least one of these, depending on the transport(s) you want to

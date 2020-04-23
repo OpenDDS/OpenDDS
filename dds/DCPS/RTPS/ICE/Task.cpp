@@ -18,8 +18,7 @@ namespace ICE {
 
 void Task::enqueue(const DCPS::MonotonicTimePoint& a_release_time)
 {
-  release_time_ = a_release_time;
-  agent_impl_->enqueue(this);
+  agent_impl_->enqueue(a_release_time, rchandle_from(this));
 }
 
 #endif /* OPENDDS_SECURITY */

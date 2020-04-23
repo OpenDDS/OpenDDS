@@ -904,10 +904,10 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
     }
 
     ACE_Message_Block temp_buff(64 * 1024);
-    Serializer out_serializer(
+    DCPS::Serializer out_serializer(
       &temp_buff, DCPS::Serializer::SWAP_BE,
       DCPS::Serializer::ALIGN_CDR, true /* zero init padding */);
-    if (!(ser << plist)) {
+    if (!(out_serializer << plist)) {
       if (DCPS::security_debug.auth_warn) {
         ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} Spdp::handle_handshake_message() - ")
           ACE_TEXT("Failed to serialize parameter list.\n")));
@@ -1419,10 +1419,10 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
     }
 
     ACE_Message_Block temp_buff(64 * 1024);
-    Serializer out_serializer(
+    DCPS::Serializer out_serializer(
       &temp_buff, DCPS::Serializer::SWAP_BE,
       DCPS::Serializer::ALIGN_CDR, true /* zero init padding */);
-    if (!(ser << plist)) {
+    if (!(out_serializer << plist)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::attempt_authentication() - ")
         ACE_TEXT("Failed to serialize parameter list.\n")));
       return;
@@ -1751,13 +1751,6 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
        end = addrs.end(); it != end; ++it) {
     send_addrs_.insert(ACE_INET_Addr(it->c_str()));
   }
-
-#ifdef OPENDDS_SECURITY
-  ICE::Endpoint* endpoint = get_ice_endpoint();
-  if (endpoint) {
-    ICE::Agent::instance()->add_endpoint(endpoint);
-  }
-#endif
 }
 
 void
@@ -1797,6 +1790,13 @@ Spdp::SpdpTransport::open()
       outer_->config_->use_rtps_relay()) {
     relay_beacon_->enable(false, outer_->config_->spdp_rtps_relay_beacon_period());
   }
+
+#ifdef OPENDDS_SECURITY
+  ICE::Endpoint* endpoint = get_ice_endpoint();
+  if (endpoint) {
+    ICE::Agent::instance()->add_endpoint(endpoint);
+  }
+#endif
 }
 
 Spdp::SpdpTransport::~SpdpTransport()

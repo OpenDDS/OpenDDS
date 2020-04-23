@@ -1134,6 +1134,12 @@ if ($host_tools_only) {
   }
 }
 
+if ((exists $opts{'wireshark'} || exists $opts{'wireshark-cmake'}) &&
+    !exists $opts{'glib'}) {
+  print "--wireshark and --wireshark-cmake imply --glib\n" if $opts{'verbose'};
+  $opts{'glib'} = '';
+}
+
 # Use this to check if tests are enabled (instead of $opts{'tests'} directly).
 my $tests = exists $opts{'tests'} && $opts{'tests'};
 
@@ -1566,25 +1572,18 @@ if (exists $opts{'jboss'} && !exists $opts{'ant'}) {
   die "ERROR: --ant is required for --jboss (OpenDDS JMS Provider).\nStopped";
 }
 
-if (exists $opts{'wireshark'} || exists $opts{'wireshark-cmake'}) {
-  if (!exists $opts{'glib'}) {
-    $opts{'glib'} = '';
+if (exists $opts{'wireshark-cmake'}) {
+  if (exists $opts{'wireshark'}) {
+    die "ERROR: --wireshark and --wireshark-cmake can not be used at the same time.\nStopped";
   }
 
-  if (exists $opts{'wireshark-cmake'}) {
-
-    if (exists $opts{'wireshark'}) {
-      die "ERROR: --wireshark and --wireshark-cmake can not be used at the same time.\nStopped";
+  if (! -d ($opts{'wireshark-build'} . '/' . $opts{'wireshark-lib'})) {
+    if ($wireshark_lib_defaulted) {
+      die "ERROR: The default value for wireshark-lib: " . $opts{'wireshark-lib'} .
+          " does not exist, please supply wireshark-lib with the correct value";
     }
-
-    if (! -d ($opts{'wireshark-build'} . '/' . $opts{'wireshark-lib'})) {
-      if ($wireshark_lib_defaulted) {
-        die "ERROR: The default value for wireshark-lib: " . $opts{'wireshark-lib'} .
-            " does not exist, please supply wireshark-lib with the correct value";
-      }
-      else {
-        die "ERROR: The supplied wireshark-lib: " . $opts{'wireshark-lib'} . " does not exist.";
-      }
+    else {
+      die "ERROR: The supplied wireshark-lib: " . $opts{'wireshark-lib'} . " does not exist.";
     }
   }
 }
@@ -1656,18 +1655,18 @@ if (exists $opts{'qt'}) {
   if ($try_to_use_qt_system_pkg) {
     # Try to use pkg-config to get Qt locations
     `pkg-config --print-variables Qt5Core`;
-    if ($!) {
+    if ($?) {
       die "ERROR: Trying to use system Qt package but could not confirm " .
         "Qt and/or pkg-config exists on the system$qt_help_mesg";
     }
     $qt_include = `pkg-config --variable=includedir Qt5Core`;
-    die "ERROR: could not resolve system Qt include location$qt_help_mesg" if ($!);
+    die "ERROR: could not resolve system Qt include location$qt_help_mesg" if ($?);
     chomp $qt_include;
     $qt_bin = `pkg-config --variable=host_bins Qt5Core`;
-    die "ERROR: could not resolve system Qt build tools location$qt_help_mesg" if ($!);
+    die "ERROR: could not resolve system Qt build tools location$qt_help_mesg" if ($?);
     chomp $qt_bin;
     $qt_lib = `pkg-config --variable=libdir Qt5Core`;
-    die "ERROR: could not resolve system Qt lib location$qt_help_mesg" if ($!);
+    die "ERROR: could not resolve system Qt lib location$qt_help_mesg" if ($?);
     chomp $qt_lib;
   }
   else {
