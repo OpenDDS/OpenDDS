@@ -1497,17 +1497,17 @@ namespace XTypes {
   };
   typedef Sequence<TypeIdentifierPair> TypeIdentifierPairSeq;
 
-  struct TypeIdentfierWithSize {
+  struct TypeIdentifierWithSize {
     TypeIdentifier  type_id;
     ACE_CDR::ULong  typeobject_serialized_size;
   };
-  typedef Sequence<TypeIdentfierWithSize> TypeIdentfierWithSizeSeq;
+  typedef Sequence<TypeIdentifierWithSize> TypeIdentifierWithSizeSeq;
 
   struct TypeIdentifierWithDependencies {
-    TypeIdentfierWithSize            typeid_with_size;
+    TypeIdentifierWithSize            typeid_with_size;
     // The total additional types related to minimal_type
     ACE_CDR::Long                             dependent_typeid_count;
-    std::vector<TypeIdentfierWithSize>  dependent_typeids;
+    std::vector<TypeIdentifierWithSize>  dependent_typeids;
   };
   typedef Sequence<TypeIdentifierWithDependencies> TypeIdentifierWithDependenciesSeq;
 
