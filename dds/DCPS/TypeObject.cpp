@@ -156,18 +156,14 @@ RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_OutputCDR::from_wchar>()
 template<>
 RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::Char*>()
 {
-  static const RcHandle<XTypes::TypeIdentifier> ti =
-    XTypes::TypeIdentifier::make(XTypes::TI_STRING8_SMALL,
-                                 XTypes::StringSTypeDefn(0));
+  static const RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::makeString(false, XTypes::StringSTypeDefn(XTypes::INVALID_SBOUND));
   return ti;
 }
 
 template<>
 RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::WChar*>()
 {
-  static const RcHandle<XTypes::TypeIdentifier> ti =
-    XTypes::TypeIdentifier::make(XTypes::TI_STRING16_SMALL,
-                                 XTypes::StringSTypeDefn(0));
+  static const RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::makeString(true, XTypes::StringSTypeDefn(XTypes::INVALID_SBOUND));
   return ti;
 }
 

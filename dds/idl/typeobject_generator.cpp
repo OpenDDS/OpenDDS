@@ -15,13 +15,138 @@
 using std::string;
 using namespace AstTypeClassification;
 
+namespace {
+
+string tag_type(UTL_ScopedName* name)
+{
+  return dds_generator::scoped_helper(name, "_") + "_tag";
+}
+
+void
+call_get_type_identifier(AST_Type* type)
+{
+  AST_Type* const actual_type = resolveActualType(type);
+
+  // If an alias, then use the name.
+  if (type != actual_type) {
+    be_global->impl_ << "getTypeIdentifier<" << tag_type(type->name()) << ">()";
+    return;
+  }
+
+  const Classification fld_cls = classify(type);
+
+  if (fld_cls & CL_FIXED) { // XTypes has no Fixed type in its data model
+    be_global->impl_ << "getTypeIdentifier<void>() /* No Fixed in XTypes */";
+    return;
+  }
+
+  // If primitive, then use built-in name.
+  const Classification CL_WCHAR = CL_SCALAR | CL_PRIMITIVE | CL_WIDE;
+  if ((fld_cls & CL_WCHAR) == CL_WCHAR) {
+    be_global->impl_ << "getTypeIdentifier<ACE_OutputCDR::from_wchar>()";
+    return;
+  }
+
+  if ((fld_cls & (CL_STRING | CL_BOUNDED)) == (CL_STRING | CL_BOUNDED)) {
+    AST_String* const str = AST_String::narrow_from_decl(type);
+    const unsigned int bound = str->max_size()->ev()->u.ulval;
+    if (bound > 255) {
+      be_global->impl_ <<
+        "XTypes::TypeIdentifier::makeString(" << bool(fld_cls & CL_WIDE)
+                                              << ", XTypes::StringLTypeDefn(" << bound << "))";
+    } else {
+      be_global->impl_ <<
+        "XTypes::TypeIdentifier::makeString(" << bool(fld_cls & CL_WIDE)
+                                              << ", XTypes::StringSTypeDefn(" << bound << "))";
+    }
+
+    return;
+  }
+
+  if (((fld_cls & (CL_SCALAR | CL_PRIMITIVE)) == (CL_SCALAR | CL_PRIMITIVE)) ||
+      ((fld_cls & CL_STRING) == CL_STRING)) {
+    be_global->impl_ << "getTypeIdentifier<" << scoped(type->name()) << ">()";
+    return;
+  }
+
+  if (fld_cls & CL_SEQUENCE) {
+    // TODO: Is an anonymous sequence always plain?
+    AST_Sequence* sequence = AST_Sequence::narrow_from_decl(type);
+    ACE_CDR::ULong size = 0;
+
+    if (!sequence->unbounded()) {
+      size = sequence->max_size()->ev()->u.ulval;
+    }
+
+    if (size > 255) {
+      be_global->impl_ <<
+        "XTypes::TypeIdentifier::makePlainSequence(";
+      call_get_type_identifier(sequence->base_type());
+      be_global->impl_ << ", XTypes::LBound(" << size << "))";
+    } else {
+      be_global->impl_ <<
+        "XTypes::TypeIdentifier::makePlainSequence(";
+      call_get_type_identifier(sequence->base_type());
+      be_global->impl_ << ", XTypes::SBound(" << size << "))";
+    }
+    return;
+  }
+
+  if (fld_cls & CL_ARRAY) {
+    // TODO: Is an anonymous array always plain?
+    AST_Array* array = AST_Array::narrow_from_decl(type);
+
+    ACE_CDR::ULong max_bound = 0;
+
+    for (ACE_CDR::ULong dim = 0; dim != array->n_dims(); ++dim) {
+      max_bound = std::max(max_bound, array->dims()[dim]->ev()->u.ulval);
+    }
+
+    if (max_bound > 255) {
+      be_global->impl_ <<
+        "XTypes::TypeIdentifier::makePlainArray(";
+      call_get_type_identifier(array->base_type());
+      be_global->impl_ << ", XTypes::LBoundSeq()";
+      for (ACE_CDR::ULong dim = 0; dim != array->n_dims(); ++dim) {
+        be_global->impl_ << ".append(XTypes::LBound(" << array->dims()[dim]->ev()->u.ulval << "))";
+      }
+      be_global->impl_ << ")";
+    } else {
+      be_global->impl_ <<
+        "XTypes::TypeIdentifier::makePlainArray(";
+      call_get_type_identifier(array->base_type());
+      be_global->impl_ << ", XTypes::SBoundSeq()";
+      for (ACE_CDR::ULong dim = 0; dim != array->n_dims(); ++dim) {
+        be_global->impl_ << ".append(XTypes::SBound(" << array->dims()[dim]->ev()->u.ulval << "))";
+      }
+      be_global->impl_ << ")";
+    }
+    return;
+  }
+
+  if (fld_cls & (CL_STRUCTURE | CL_ENUM)) {
+    // Currently, we don't have anonymous structs or enums.
+    be_global->impl_ << "getTypeIdentifier<" << tag_type(type->name()) << ">()";
+    return;
+  }
+
+  // Anonymous.  Construct type object and hash to get type identifier.
+  // TODO
+  be_global->impl_ << "ANONYMOUS";
+  return;
+}
+
+}
+
 bool
 typeobject_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
   const std::vector<AST_EnumVal*>& contents, const char*)
 {
   be_global->add_include("dds/DCPS/TypeObject.h", BE_GlobalData::STREAM_H);
   NamespaceGuard ng;
-  const string clazz = scoped(name);
+  const string clazz = tag_type(name);
+
+  be_global->header_ << "struct " << clazz << " {};\n";
 
   {
     const string decl_gto = "getTypeObject<" + clazz + ">";
@@ -82,57 +207,15 @@ typeobject_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
   return true;
 }
 
-namespace {
-
-string tag_type(UTL_ScopedName* name)
-{
-  const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-  return (use_cxx11 ? dds_generator::scoped_helper(name, "_") : scoped(name))
-    + "_tag";
-}
-
-void
-call_get_type_identifier(AST_Type* type)
-{
-  const Classification fld_cls = classify(type);
-
-  if (fld_cls & CL_FIXED) { // XTypes has no Fixed type in its data model
-    be_global->impl_ << "getTypeIdentifier<void>() /* No Fixed in XTypes */";
-    return;
-  }
-
-  const Classification CL_WCHAR = CL_SCALAR | CL_PRIMITIVE | CL_WIDE;
-  if ((fld_cls & CL_WCHAR) == CL_WCHAR) {
-    be_global->impl_ << "getTypeIdentifier<ACE_OutputCDR::from_wchar>()";
-    return;
-  }
-
-  if ((fld_cls & (CL_STRING | CL_BOUNDED)) == (CL_STRING | CL_BOUNDED)) {
-    AST_Type* const atype = resolveActualType(type);
-    AST_String* const str = AST_String::narrow_from_decl(atype);
-    const unsigned int bound = str->max_size()->ev()->u.ulval;
-    be_global->impl_ <<
-      "XTypes::TypeIdentifier::makeBoundedString(" << bool(fld_cls & CL_WIDE)
-                                                   << ", " << bound << ')';
-    return;
-  }
-
-  const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-  const bool use_tag = (fld_cls & CL_ARRAY) ||
-    (use_cxx11 && (fld_cls & CL_SEQUENCE));
-  const string name = use_tag ? tag_type(type->name()) : scoped(type->name());
-  be_global->impl_ << "getTypeIdentifier<" << name << ">()";
-}
-
-}
-
 bool
-typeobject_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
+typeobject_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
   const std::vector<AST_Field*>& fields, AST_Type::SIZE_TYPE, const char*)
 {
   be_global->add_include("dds/DCPS/TypeObject.h", BE_GlobalData::STREAM_H);
   NamespaceGuard ng;
-  const string clazz = scoped(name);
+  const string clazz = tag_type(name);
+
+  be_global->header_ << "struct " << clazz << " {};\n";
 
   {
     const string decl_gto = "getTypeObject<" + clazz + ">";
@@ -191,57 +274,59 @@ bool
 typeobject_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
                                   AST_Type* base, const char*)
 {
-  bool array = false;
-  unsigned int bound = 0;
-  AST_Type* elem;
-
-  switch (base->node_type()) {
-  case AST_Decl::NT_array:
-    {
-      AST_Array* arr = AST_Array::narrow_from_decl(base);
-      elem = resolveActualType(arr->base_type());
-      array = true;
-      //   for (size_t i = 0; i < arr->n_dims(); ++i) {
-      //      n_elems *= arr->dims()[i]->ev()->u.ulval;
-      //    }
-      break;
-    }
-  case AST_Decl::NT_sequence:
-    {
-      AST_Sequence* seq = AST_Sequence::narrow_from_decl(base);
-      elem = resolveActualType(seq->base_type());
-      if (!seq->unbounded()) {
-        bound = seq->max_size()->ev()->u.ulval;
-      }
-      break;
-    }
-  default:
-    return true;
-  }
-
-  Classification elem_cls = classify(elem);
-
   be_global->add_include("dds/DCPS/TypeObject.h", BE_GlobalData::STREAM_H);
   NamespaceGuard ng;
-  const string clazz = scoped(name);
-  const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-  const bool use_tag = array || use_cxx11;
-  const string decl =
-    "getTypeIdentifier<" + (use_tag ? tag_type(name) : clazz) + '>';
-  Function gti(decl.c_str(), "RcHandle<XTypes::TypeIdentifier>", "");
-  gti.endArgs();
-  be_global->impl_ << "  return RcHandle<XTypes::TypeIdentifier>();\n"; //TODO
+  const string clazz = tag_type(name);
+
+  be_global->header_ << "struct " << clazz << " {};\n";
+
+  {
+    const string decl_gto = "getTypeObject<" + clazz + ">";
+    Function gto(decl_gto.c_str(), "const XTypes::TypeObject&", "");
+    gto.endArgs();
+
+    be_global->impl_ <<
+      "  static const XTypes::TypeObject to = XTypes::TypeObject(\n"
+      "    XTypes::MinimalTypeObject(\n"
+      "      XTypes::MinimalAliasType(\n"
+      "        XTypes::AliasTypeFlag(),\n" // Not used.
+      "        XTypes::MinimalAliasHeader(),\n"
+      "        XTypes::MinimalAliasBody(\n"
+      "          XTypes::CommonAliasBody(\n"
+      "            XTypes::AliasMemberFlag(),\n"
+      "            "; // TODO: How should this be populated?
+    call_get_type_identifier(base);
+    be_global->impl_ <<
+      "\n"
+      "          )\n"
+      "        )\n"
+      "      )\n"
+      "    )\n"
+      "  );\n"
+      "  return to;\n";
+  }
+  {
+    const string decl_gti = "getTypeIdentifier<" + clazz + ">";
+    Function gti(decl_gti.c_str(), "RcHandle<XTypes::TypeIdentifier>", "");
+    gti.endArgs();
+    be_global->impl_ <<
+      "  static const RcHandle<XTypes::TypeIdentifier> ti = XTypes::makeTypeIdentifier(getTypeObject<" << clazz << ">());\n"
+      "  return ti;\n";
+  }
+
   return true;
 }
 
 bool
-typeobject_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
-  const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator,
+typeobject_generator::gen_union(AST_Union*, UTL_ScopedName* name,
+  const std::vector<AST_UnionBranch*>&, AST_Type*,
   const char*)
 {
   be_global->add_include("dds/DCPS/TypeObject.h", BE_GlobalData::STREAM_H);
   NamespaceGuard ng;
-  const string clazz = scoped(name);
+  const string clazz = tag_type(name);
+
+  be_global->header_ << "struct " << clazz << " {};\n";
 
   {
     const string decl_gto = "getTypeObject<" + clazz + ">";

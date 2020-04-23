@@ -516,66 +516,73 @@ namespace XTypes {
       return ti;
     }
 
-    static TypeIdentifierPtr make(ACE_CDR::Octet k,
-                                  const StringSTypeDefn& string_sdefn)
+    static TypeIdentifierPtr makeString(bool wide, const StringSTypeDefn& string_sdefn)
     {
-      TypeIdentifierPtr ti = make_rch<TypeIdentifier>();
-      ti->kind = k;
+      TypeIdentifierPtr ti = make(wide ? TI_STRING16_SMALL : TI_STRING8_SMALL);
       ti->string_sdefn = string_sdefn;
       return ti;
     }
 
-    static TypeIdentifierPtr make(ACE_CDR::Octet k,
-                                  const StringLTypeDefn& string_ldefn)
+    static TypeIdentifierPtr makeString(bool wide, const StringLTypeDefn& string_ldefn)
     {
-      TypeIdentifierPtr ti = make_rch<TypeIdentifier>();
-      ti->kind = k;
+      TypeIdentifierPtr ti = make(wide ? TI_STRING16_LARGE : TI_STRING8_LARGE);
       ti->string_ldefn = string_ldefn;
       return ti;
     }
 
-    static TypeIdentifierPtr makeBoundedString(bool wide, unsigned int bound)
+    static TypeIdentifierPtr makePlainSequence(const TypeIdentifierPtr& base_type,
+                                               const SBound& bound)
     {
-      return bound > 255 ?
-        make(wide ? TI_STRING16_LARGE : TI_STRING8_LARGE,
-             StringLTypeDefn(bound)) :
-        make(wide ? TI_STRING16_SMALL : TI_STRING8_SMALL,
-             StringSTypeDefn(bound));
-    }
-
-    static TypeIdentifierPtr make(ACE_CDR::Octet k,
-                                  const PlainSequenceSElemDefn& seq_sdefn)
-    {
-      TypeIdentifierPtr ti = make_rch<TypeIdentifier>();
-      ti->kind = k;
-      ti->seq_sdefn = seq_sdefn;
+      TypeIdentifierPtr ti = make(TI_PLAIN_SEQUENCE_SMALL);
+      ti->seq_sdefn = PlainSequenceSElemDefn
+        (
+         PlainCollectionHeader
+         (EquivalenceKind(EK_MINIMAL), // TODO: Pick the correct kind.
+          CollectionElementFlag()), // TODO: Set this
+         bound,
+         base_type);
       return ti;
     }
 
-    static TypeIdentifierPtr make(ACE_CDR::Octet k,
-                                  const PlainSequenceLElemDefn& seq_ldefn)
+    static TypeIdentifierPtr makePlainSequence(const TypeIdentifierPtr& base_type,
+                                               const LBound& bound)
     {
-      TypeIdentifierPtr ti = make_rch<TypeIdentifier>();
-      ti->kind = k;
-      ti->seq_ldefn = seq_ldefn;
+      TypeIdentifierPtr ti = make(TI_PLAIN_SEQUENCE_LARGE);
+      ti->seq_ldefn = PlainSequenceLElemDefn
+        (
+         PlainCollectionHeader
+         (EquivalenceKind(EK_MINIMAL), // TODO:  Pick the correct kind.
+          CollectionElementFlag()), // TODO Set this.
+         bound,
+         base_type);
       return ti;
     }
 
-    static TypeIdentifierPtr make(ACE_CDR::Octet k,
-                                  const PlainArraySElemDefn& array_sdefn)
+    static TypeIdentifierPtr makePlainArray(const TypeIdentifierPtr& base_type,
+                                            const SBoundSeq& bound_seq)
     {
-      TypeIdentifierPtr ti = make_rch<TypeIdentifier>();
-      ti->kind = k;
-      ti->array_sdefn = array_sdefn;
+      TypeIdentifierPtr ti = make(TI_PLAIN_ARRAY_SMALL);
+      ti->array_sdefn = PlainArraySElemDefn
+        (
+         PlainCollectionHeader
+         (EquivalenceKind(EK_MINIMAL), // TODO: Pick the correct kind.
+          CollectionElementFlag()), // TODO: Set this
+         bound_seq,
+         base_type);
       return ti;
     }
 
-    static TypeIdentifierPtr make(ACE_CDR::Octet k,
-                                  const PlainArrayLElemDefn& array_ldefn)
+    static TypeIdentifierPtr makePlainArray(const TypeIdentifierPtr& base_type,
+                                            const LBoundSeq& bound_seq)
     {
-      TypeIdentifierPtr ti = make_rch<TypeIdentifier>();
-      ti->kind = k;
-      ti->array_ldefn = array_ldefn;
+      TypeIdentifierPtr ti = make(TI_PLAIN_ARRAY_LARGE);
+      ti->array_ldefn = PlainArrayLElemDefn
+        (
+         PlainCollectionHeader
+         (EquivalenceKind(EK_MINIMAL), // TODO:  Pick the correct kind.
+          CollectionElementFlag()), // TODO Set this.
+         bound_seq,
+         base_type);
       return ti;
     }
 
@@ -968,6 +975,14 @@ namespace XTypes {
   struct CommonAliasBody {
     AliasMemberFlag          related_flags;
     TypeIdentifierPtr related_type;
+
+    CommonAliasBody() {}
+
+    CommonAliasBody(const AliasMemberFlag& a_related_flags,
+                    const TypeIdentifierPtr& a_related_type)
+      : related_flags(a_related_flags)
+      , related_type(a_related_type)
+    {}
   };
 
   struct CompleteAliasBody {
@@ -978,6 +993,12 @@ namespace XTypes {
 
   struct MinimalAliasBody {
     CommonAliasBody       common;
+
+    MinimalAliasBody() {}
+
+    MinimalAliasBody(const CommonAliasBody a_common)
+      : common(a_common)
+    {}
   };
 
   struct CompleteAliasHeader {
@@ -998,6 +1019,16 @@ namespace XTypes {
     AliasTypeFlag         alias_flags;
     MinimalAliasHeader    header;
     MinimalAliasBody      body;
+
+    MinimalAliasType() {}
+
+    MinimalAliasType(const AliasTypeFlag& a_alias_flags,
+                     const MinimalAliasHeader& a_header,
+                     const MinimalAliasBody& a_body)
+      : alias_flags(a_alias_flags)
+      , header(a_header)
+      , body(a_body)
+    {}
   };
 
   // --- Collections: ----------------------------------------------------
@@ -1491,7 +1522,6 @@ namespace XTypes {
 
   OpenDDS_Dcps_Export
   TypeIdentifierPtr makeTypeIdentifier(const TypeObject& type_object);
-
 } // namespace XTypes
 
 namespace DCPS {

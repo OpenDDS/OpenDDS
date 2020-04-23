@@ -12,10 +12,6 @@
 
 class typeobject_generator : public dds_generator {
 public:
-  typeobject_generator()
-    : first_struct_(true)
-  {}
-
   bool gen_enum(AST_Enum* node, UTL_ScopedName* name,
                 const std::vector<AST_EnumVal*>& contents, const char* repoid);
 
@@ -28,9 +24,6 @@ public:
   bool gen_union(AST_Union* node, UTL_ScopedName* name,
                  const std::vector<AST_UnionBranch*>& branches,
                  AST_Type* type, const char* repoid);
-
-private:
-  bool first_struct_;
 };
 
 #endif
