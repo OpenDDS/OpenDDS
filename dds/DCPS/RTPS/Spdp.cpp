@@ -2558,7 +2558,8 @@ bool
 Spdp::SpdpTransport::open_unicast_ipv6_socket(u_short port_common,
                                               u_short participant_id)
 {
-  uni_port_ = port_common + outer_->config_->d1() + (outer_->config_->pg() * participant_id);
+  // Open will fail on some systems if the IPV6 port is the same as the IPV4 port.
+  ipv6_uni_port_ = uni_port_ + 1;
 
   ACE_INET_Addr local_addr;
   OPENDDS_STRING spdpaddr = outer_->config_->spdp_local_address().c_str();
@@ -2568,12 +2569,12 @@ Spdp::SpdpTransport::open_unicast_ipv6_socket(u_short port_common,
   }
 
   local_addr.set_type(AF_INET6);
-  if (0 != local_addr.set(uni_port_, spdpaddr.c_str())) {
+  if (0 != local_addr.set(ipv6_uni_port_, spdpaddr.c_str())) {
     ACE_ERROR((
           LM_ERROR,
           ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_ipv6_socket() - ")
           ACE_TEXT("failed setting unicast ipv6 local_addr to port %d %p\n"),
-          uni_port_, ACE_TEXT("ACE_INET_Addr::set")));
+          ipv6_uni_port_, ACE_TEXT("ACE_INET_Addr::set")));
     throw std::runtime_error("failed to set unicast ipv6 local address");
   }
 
@@ -2582,7 +2583,7 @@ Spdp::SpdpTransport::open_unicast_ipv6_socket(u_short port_common,
                LM_ERROR,
                ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_ipv6_socket() - ")
                ACE_TEXT("failed to open_appropriate_socket_type unicast ipv6 socket on port %d %p.  "),
-               uni_port_, ACE_TEXT("ACE_SOCK_Dgram::open")));
+               ipv6_uni_port_, ACE_TEXT("ACE_SOCK_Dgram::open")));
     throw std::runtime_error("failed to open unicast ipv6 socket");
   }
 
@@ -2591,7 +2592,7 @@ Spdp::SpdpTransport::open_unicast_ipv6_socket(u_short port_common,
           LM_INFO,
           ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_ipv6_socket() - ")
           ACE_TEXT("opened unicast ipv6 socket on port %d\n"),
-          uni_port_));
+          ipv6_uni_port_));
   }
 
   if (!DCPS::set_socket_multicast_ttl(unicast_ipv6_socket_, outer_->config_->ttl())) {
@@ -2599,7 +2600,7 @@ Spdp::SpdpTransport::open_unicast_ipv6_socket(u_short port_common,
                ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_ipv6_socket() - ")
                ACE_TEXT("failed to set TTL value to %d ")
                ACE_TEXT("for port:%hu %p\n"),
-               outer_->config_->ttl(), uni_port_, ACE_TEXT("DCPS::set_socket_multicast_ttl:")));
+               outer_->config_->ttl(), ipv6_uni_port_, ACE_TEXT("DCPS::set_socket_multicast_ttl:")));
     throw std::runtime_error("failed to set TTL");
   }
 
