@@ -214,24 +214,19 @@ RtpsUdpInst::populate_locator(TransportLocator& info, ConnectionInfoFlags flags)
   }
 #endif
 
-  //if local_address_string is empty, or only the port has been set
-  //need to get interface addresses to populate into the locator
   if (flags & CONNINFO_UNICAST) {
-    if (local_address_string().empty() ||
-        local_address_string().rfind(':') == 0) {
+    if (local_address().is_any()) {
       typedef OPENDDS_VECTOR(ACE_INET_Addr) AddrVector;
       AddrVector addrs;
-      if (TheServiceParticipant->default_address ().empty ()) {
-        get_interface_addrs(addrs);
-      } else {
-        addrs.push_back (ACE_INET_Addr (static_cast<u_short> (0), TheServiceParticipant->default_address().c_str()));
-      }
+      get_interface_addrs(addrs);
       for (AddrVector::iterator adr_it = addrs.begin(); adr_it != addrs.end(); ++adr_it) {
-        idx = locators.length();
-        locators.length(idx + 1);
-        locators[idx].kind = address_to_kind(*adr_it);
-        locators[idx].port = local_address().get_port_number();
-        RTPS::address_to_bytes(locators[idx].address, *adr_it);
+        if (adr_it->get_type() == AF_INET) {
+          idx = locators.length();
+          locators.length(idx + 1);
+          locators[idx].kind = address_to_kind(*adr_it);
+          locators[idx].port = local_address().get_port_number();
+          RTPS::address_to_bytes(locators[idx].address, *adr_it);
+        }
       }
     } else {
       idx = locators.length();
@@ -241,6 +236,29 @@ RtpsUdpInst::populate_locator(TransportLocator& info, ConnectionInfoFlags flags)
       RTPS::address_to_bytes(locators[idx].address,
                              local_address());
     }
+#ifdef ACE_HAS_IPV6
+    if (ipv6_local_address().is_any()) {
+      typedef OPENDDS_VECTOR(ACE_INET_Addr) AddrVector;
+      AddrVector addrs;
+      get_interface_addrs(addrs);
+      for (AddrVector::iterator adr_it = addrs.begin(); adr_it != addrs.end(); ++adr_it) {
+        if (adr_it->get_type() == AF_INET6) {
+          idx = locators.length();
+          locators.length(idx + 1);
+          locators[idx].kind = address_to_kind(*adr_it);
+          locators[idx].port = ipv6_local_address().get_port_number();
+          RTPS::address_to_bytes(locators[idx].address, *adr_it);
+        }
+      }
+    } else {
+      idx = locators.length();
+      locators.length(idx + 1);
+      locators[idx].kind = address_to_kind(ipv6_local_address());
+      locators[idx].port = ipv6_local_address().get_port_number();
+      RTPS::address_to_bytes(locators[idx].address,
+                             ipv6_local_address());
+    }
+#endif
   }
 
   info.transport_type = "rtps_udp";
