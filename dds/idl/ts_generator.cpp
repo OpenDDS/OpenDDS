@@ -202,7 +202,7 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
       "  virtual bool has_dcps_key();\n"
       "  const char* default_type_name() const;\n"
       "\n"
-      "  void representations_allowed_by_type(DDS::DataRepresentationIdSeq& seq);\n"
+      "  void representations_allowed_by_type(::DDS::DataRepresentationIdSeq& seq);\n"
       "\n"
       "  static " << short_name << "TypeSupport::_ptr_type _narrow(CORBA::Object_ptr obj);\n"
       "};\n";
@@ -256,7 +256,7 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
       "}\n"
       "\n"
       "void " << short_name << "TypeSupportImpl::representations_allowed_by_type(\n"
-      "  DDS::DataRepresentationIdSeq& seq)\n"
+      "  ::DDS::DataRepresentationIdSeq& seq)\n"
       "{\n"
       "  MarshalTraitsType::representations_allowed_by_type(seq);\n"
       "}\n"
