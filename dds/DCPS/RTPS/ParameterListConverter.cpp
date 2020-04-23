@@ -226,6 +226,11 @@ namespace {
     return flags.bits != PFLAGS_EMPTY;
   }
 
+  bool not_default(const DDS::DataRepresentationQosPolicy& qos)
+  {
+    return qos.value.length();
+  }
+
   void normalize(DDS::Duration_t& dur)
   {
     // Interoperability note:
@@ -867,6 +872,13 @@ bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
     add_param(param_list, param);
   }
 
+  if (not_default(writer_data.ddsPublicationData.representation))
+  {
+    Parameter param;
+    param.representation(writer_data.ddsPublicationData.representation);
+    add_param(param_list, param);
+  }
+
   {
     Parameter param;
     param.guid(writer_data.writerProxy.remoteWriterGuid);
@@ -944,6 +956,8 @@ bool from_param_list(const ParameterList& param_list,
       TheServiceParticipant->initial_TopicDataQosPolicy();
   writer_data.ddsPublicationData.group_data =
       TheServiceParticipant->initial_GroupDataQosPolicy();
+  writer_data.ddsPublicationData.representation =
+    TheServiceParticipant->initial_DataRepresentationQosPolicy();
 
   CORBA::ULong length = param_list.length();
   for (CORBA::ULong i = 0; i < length; ++i) {
@@ -1021,6 +1035,9 @@ bool from_param_list(const ParameterList& param_list,
         break;
       case PID_GROUP_DATA:
         writer_data.ddsPublicationData.group_data = param.group_data();
+        break;
+      case PID_DATA_REPRESENTATION:
+        writer_data.ddsPublicationData.representation = param.representation();
         break;
       case PID_ENDPOINT_GUID:
         writer_data.writerProxy.remoteWriterGuid = param.guid();
@@ -1198,6 +1215,13 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
     add_param(param_list, param);
   }
 
+  if (not_default(reader_data.ddsSubscriptionData.representation))
+  {
+    Parameter param;
+    param.representation(reader_data.ddsSubscriptionData.representation);
+    add_param(param_list, param);
+  }
+
   CORBA::ULong i;
   CORBA::ULong locator_len = reader_data.readerProxy.allLocators.length();
   // Serialize from allLocators, rather than the unicastLocatorList
@@ -1275,6 +1299,8 @@ bool from_param_list(const ParameterList& param_list,
   reader_data.contentFilterProperty.filterClassName = "";
   reader_data.contentFilterProperty.filterExpression = "";
   reader_data.contentFilterProperty.expressionParameters.length(0);
+  reader_data.ddsSubscriptionData.representation =
+    TheServiceParticipant->initial_DataRepresentationQosPolicy();
 
   CORBA::ULong length = param_list.length();
   for (CORBA::ULong i = 0; i < length; ++i) {
@@ -1343,6 +1369,9 @@ bool from_param_list(const ParameterList& param_list,
         break;
       case PID_GROUP_DATA:
         reader_data.ddsSubscriptionData.group_data = param.group_data();
+        break;
+      case PID_DATA_REPRESENTATION:
+        reader_data.ddsSubscriptionData.representation = param.representation();
         break;
       case PID_ENDPOINT_GUID:
         reader_data.readerProxy.remoteReaderGuid = param.guid();

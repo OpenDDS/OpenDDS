@@ -1630,7 +1630,79 @@ namespace {
     *expr += findSizeCommon(key_name, ast_type, "stru.t", *intro);
   }
 
-}
+  std::string fill_datareprseq(
+    const OpenDDS::DataRepresentation& repr,
+    const std::string& name,
+    const std::string& indent)
+  {
+    std::vector<std::string> values;
+    if (repr.xcdr1) {
+      values.push_back("DDS::XCDR_DATA_REPRESENTATION");
+    }
+    if (repr.xcdr2) {
+      values.push_back("DDS::XCDR2_DATA_REPRESENTATION");
+    }
+    if (repr.xml) {
+      values.push_back("DDS::XML_DATA_REPRESENTATION");
+    }
+    if (repr.unaligned_cdr) {
+      values.push_back("UNALIGNED_CDR_DATA_REPRESENTATION");
+    }
+
+    std::ostringstream ss;
+    ss << indent << name << ".length(" << values.size() << ");\n";
+    for (size_t i = 0; i < values.size(); ++i) {
+      ss << indent << name << "[" << i << "] = " << values[i] << ";\n";
+    }
+    return ss.str();
+  }
+
+  bool generate_marshal_traits(
+    AST_Decl* node, std::string cxx,
+    const OpenDDS::DataRepresentation& repr, ExtensibilityKind exten,
+    bool is_bounded, bool key_is_bounded)
+  {
+    be_global->header_ <<
+      "template <>\n"
+      "struct MarshalTraits<" << cxx << "> {\n"
+      "  static bool gen_is_bounded_size() { return " <<
+        (is_bounded ? "true" : "false") << "; }\n"
+      "  static bool gen_is_bounded_key_size() { return " <<
+        (key_is_bounded ? "true" : "false") << "; }\n"
+      "\n"
+      "  static void representations_allowed_by_type(DDS::DataRepresentationIdSeq& seq)\n"
+      "  {\n"
+        << fill_datareprseq(repr, "seq", "    ") <<
+      "  }\n"
+      "\n"
+    /*
+     * This is used for the CDR header.
+     * This is just for the base type, nested types can have different
+     * extensibilities.
+     */
+      "  static Encoding::Extensibility extensibility() { return Encoding::";
+    switch (exten) {
+    case extensibilitykind_final:
+      be_global->header_ << "FINAL";
+      break;
+    case extensibilitykind_appendable:
+      be_global->header_ << "APPENDABLE";
+      break;
+    case extensibilitykind_mutable:
+      be_global->header_ << "MUTABLE";
+      break;
+    default:
+      idl_global->err()->misc_error(
+        "Unexpected extensibility while generating MarshalTraits", node);
+      return false;
+    }
+    be_global->header_ << "; }\n"
+      "};\n";
+
+    return true;
+  }
+
+} // anonymous namespace
 
 bool marshal_generator::gen_struct(AST_Structure* node,
                                    UTL_ScopedName* name,
@@ -1642,18 +1714,15 @@ bool marshal_generator::gen_struct(AST_Structure* node,
   be_global->add_include("dds/DCPS/Serializer.h");
   const string cxx = scoped(name); // name as a C++ class
   const ExtensibilityKind exten = be_global->extensibility(node);
-  const OpenDDS::DataRepresentationKind repr =
-    be_global->default_data_representation(node);
-  const bool only_xcdr1 = repr == OpenDDS::data_representation_kind_xcdr1;
-  const bool maybe_xcdr1 = repr & OpenDDS::data_representation_kind_xcdr1;
-  const bool not_only_xcdr1 = maybe_xcdr1 && !only_xcdr1;
-  const bool only_xcdr2 = repr == OpenDDS::data_representation_kind_xcdr2;
-  const bool maybe_xcdr2 = repr & OpenDDS::data_representation_kind_xcdr2;
-  const bool not_only_xcdr2 = maybe_xcdr2 && !only_xcdr2;
+  const OpenDDS::DataRepresentation repr =
+    be_global->data_representations(node);
+
+  const bool xcdr = repr.xcdr1 || repr.xcdr2;
   const bool not_final = exten != extensibilitykind_final;
-  const bool parameter_list = exten == extensibilitykind_mutable;
-  const bool maybe_delimited = not_final && maybe_xcdr2;
-  const bool not_only_delimited = not_final && not_only_xcdr2;
+  const bool parameter_list = exten == extensibilitykind_mutable && xcdr;
+  const bool maybe_delimited = not_final && repr.xcdr2;
+  const bool not_only_delimited = not_final && repr.not_only_xcdr2();
+  const bool get_cdr_size = parameter_list || maybe_delimited;
 
   for (size_t i = 0; i < LENGTH(special_structs); ++i) {
     if (special_structs[i].check(cxx)) {
@@ -1723,12 +1792,12 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           "  if (strm.xcdr_version() == Serializer::XCDR2) {\n";
       }
       be_global->impl_ <<
-        indent << "if (!strm.read_delimiter()) {\n" <<
+        indent << "if (!strm.read_delimiter(size)) {\n" <<
         indent << "  return false;\n" <<
         indent << "}\n";
       if (not_only_delimited) {
         be_global->impl_ <<
-          "}\n";
+          "  }\n";
       }
     }
     if (parameter_list) {
@@ -1738,10 +1807,10 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         "    if (!strm.read_parameter_id(member_id, member_size)) {\n"
         "      return false;\n"
         "    }\n";
-      if (maybe_xcdr1) {
+      if (repr.xcdr1) {
         be_global->impl_ <<
           "    if (member_id == Serializer::pid_list_end";
-        if (not_only_xcdr1) {
+        if (repr.not_only_xcdr1()) {
           be_global->impl_ << " &&\n"
             "        strm.xcdr_version() == Serializer::XCDR1";
         }
@@ -2092,12 +2161,10 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       }
     }
 
-    be_global->header_ <<
-      "template <>\n"
-      "struct MarshalTraits<" << cxx << "> {\n"
-      "  static bool gen_is_bounded_size() { return " << (is_bounded_struct ? "true" : "false") << "; }\n"
-      "  static bool gen_is_bounded_key_size() { return " << (bounded_key ? "true" : "false") << "; }\n"
-      "};\n";
+    if (!generate_marshal_traits(
+        node, cxx, repr, exten, is_bounded_struct, bounded_key)) {
+      return false;
+    }
   }
 
   return true;
@@ -2263,6 +2330,10 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
   be_global->add_include("dds/DCPS/Serializer.h");
   string cxx = scoped(name); // name as a C++ class
   Classification disc_cls = classify(discriminator);
+
+  const ExtensibilityKind exten = be_global->extensibility(node);
+  const OpenDDS::DataRepresentation repr =
+    be_global->data_representations(node);
 
   for (size_t i = 0; i < LENGTH(special_unions); ++i) {
     if (special_unions[i].check(cxx)) {
@@ -2436,13 +2507,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     be_global->impl_ << "  return true;\n";
   }
 
-  be_global->header_ <<
-    "template <>\n"
-    "struct MarshalTraits<" << cxx << "> {\n"
-    "  static bool gen_is_bounded_size() { return " << (is_bounded ? "true" : "false") << "; }\n"
-    // Key is the discriminator, so it's always bounded
-    "  static bool gen_is_bounded_key_size() { return true; }\n"
-    "};\n";
-
-  return true;
+  return generate_marshal_traits(
+    node, cxx, repr, exten, is_bounded,
+    true /* Only the discriminator, which is always bounded, can be the key */);
 }

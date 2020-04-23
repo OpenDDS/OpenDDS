@@ -6,14 +6,17 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+
 #include "TopicImpl.h"
+
 #include "Qos_Helper.h"
 #include "FeatureDisabledQosCheck.h"
 #include "Definitions.h"
 #include "Service_Participant.h"
 #include "DomainParticipantImpl.h"
 #include "MonitorFactory.h"
-#include "dds/DCPS/transport/framework/TransportExceptions.h"
+#include "DCPS_Utils.h"
+#include "transport/framework/TransportExceptions.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -45,9 +48,9 @@ TopicImpl::~TopicImpl()
 {
 }
 
-DDS::ReturnCode_t
-TopicImpl::set_qos(const DDS::TopicQos & qos)
+DDS::ReturnCode_t TopicImpl::set_qos(const DDS::TopicQos& qos_arg)
 {
+  DDS::TopicQos qos = qos_arg;
 
   OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
   OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
@@ -55,6 +58,11 @@ TopicImpl::set_qos(const DDS::TopicQos & qos)
   OPENDDS_NO_DURABILITY_KIND_TRANSIENT_PERSISTENT_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
 
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos)) {
+    DDS::DataRepresentationIdSeq type_allowed_reprs;
+    type_support_->representations_allowed_by_type(type_allowed_reprs);
+    check_data_representation_qos(
+      qos.representation.value, type_allowed_reprs);
+
     if (qos_ == qos)
       return DDS::RETCODE_OK;
 
@@ -133,6 +141,11 @@ TopicImpl::enable()
   if (!this->participant_->is_enabled()) {
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
+
+  DDS::DataRepresentationIdSeq type_allowed_reprs;
+  type_support_->representations_allowed_by_type(type_allowed_reprs);
+  check_data_representation_qos(
+    qos_.representation.value, type_allowed_reprs);
 
   if (id_ == GUID_UNKNOWN) {
     const DDS::DomainId_t dom_id = participant_->get_domain_id();

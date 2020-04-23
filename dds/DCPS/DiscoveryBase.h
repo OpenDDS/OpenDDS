@@ -957,6 +957,7 @@ namespace OpenDDS {
           tempDrQos.time_based_filter = bit.time_based_filter;
           tempDrQos.reader_data_lifecycle =
             TheServiceParticipant->initial_ReaderDataLifecycleQosPolicy();
+          tempDrQos.representation = bit.representation;
           drQos = &tempDrQos;
           tempSubQos.presentation = bit.presentation;
           tempSubQos.partition = bit.partition;
@@ -992,6 +993,7 @@ namespace OpenDDS {
           tempDwQos.ownership_strength = bit.ownership_strength;
           tempDwQos.writer_data_lifecycle =
             TheServiceParticipant->initial_WriterDataLifecycleQosPolicy();
+          tempDwQos.representation = bit.representation;
           dwQos = &tempDwQos;
           tempPubQos.presentation = bit.presentation;
           tempPubQos.partition = bit.partition;

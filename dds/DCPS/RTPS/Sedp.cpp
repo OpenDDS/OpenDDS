@@ -3534,6 +3534,7 @@ Sedp::populate_discovered_writer_msg(
   dwd.ddsPublicationData.ownership = pub.qos_.ownership;
   dwd.ddsPublicationData.ownership_strength = pub.qos_.ownership_strength;
   dwd.ddsPublicationData.destination_order = pub.qos_.destination_order;
+  dwd.ddsPublicationData.representation = pub.qos_.representation;
   dwd.ddsPublicationData.presentation = pub.publisher_qos_.presentation;
   dwd.ddsPublicationData.partition = pub.publisher_qos_.partition;
   dwd.ddsPublicationData.topic_data = topic_details.local_qos().topic_data;
@@ -3565,6 +3566,7 @@ Sedp::populate_discovered_reader_msg(
   drd.ddsSubscriptionData.destination_order = sub.qos_.destination_order;
   drd.ddsSubscriptionData.user_data = sub.qos_.user_data;
   drd.ddsSubscriptionData.time_based_filter = sub.qos_.time_based_filter;
+  drd.ddsSubscriptionData.representation  = sub.qos_.representation;
   drd.ddsSubscriptionData.presentation = sub.subscriber_qos_.presentation;
   drd.ddsSubscriptionData.partition = sub.subscriber_qos_.partition;
   drd.ddsSubscriptionData.topic_data = topic_details.local_qos().topic_data;

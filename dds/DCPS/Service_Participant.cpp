@@ -699,6 +699,9 @@ Service_Participant::initialize()
 
   initial_WriterDataLifecycleQosPolicy_.autodispose_unregistered_instances = true;
 
+  // Will get interpreted based on how the type was annotated.
+  initial_DataRepresentationQosPolicy_.value.length(0);
+
   initial_ReaderDataLifecycleQosPolicy_.autopurge_nowriter_samples_delay.sec = DDS::DURATION_INFINITE_SEC;
   initial_ReaderDataLifecycleQosPolicy_.autopurge_nowriter_samples_delay.nanosec = DDS::DURATION_INFINITE_NSEC;
   initial_ReaderDataLifecycleQosPolicy_.autopurge_disposed_samples_delay.sec = DDS::DURATION_INFINITE_SEC;
@@ -721,6 +724,7 @@ Service_Participant::initialize()
   initial_TopicQos_.transport_priority = initial_TransportPriorityQosPolicy_;
   initial_TopicQos_.lifespan = initial_LifespanQosPolicy_;
   initial_TopicQos_.ownership = initial_OwnershipQosPolicy_;
+  initial_TopicQos_.representation = initial_DataRepresentationQosPolicy_;
 
   initial_DataWriterQos_.durability = initial_DurabilityQosPolicy_;
   initial_DataWriterQos_.durability_service = initial_DurabilityServiceQosPolicy_;
@@ -744,6 +748,7 @@ Service_Participant::initialize()
   initial_DataWriterQos_.ownership_strength = initial_OwnershipStrengthQosPolicy_;
 #endif
   initial_DataWriterQos_.writer_data_lifecycle = initial_WriterDataLifecycleQosPolicy_;
+  initial_DataWriterQos_.representation = initial_DataRepresentationQosPolicy_;
 
   initial_PublisherQos_.presentation = initial_PresentationQosPolicy_;
   initial_PublisherQos_.partition = initial_PartitionQosPolicy_;
@@ -762,6 +767,7 @@ Service_Participant::initialize()
   initial_DataReaderQos_.time_based_filter = initial_TimeBasedFilterQosPolicy_;
   initial_DataReaderQos_.ownership = initial_OwnershipQosPolicy_;
   initial_DataReaderQos_.reader_data_lifecycle = initial_ReaderDataLifecycleQosPolicy_;
+  initial_DataReaderQos_.representation = initial_DataRepresentationQosPolicy_;
 
   initial_SubscriberQos_.presentation = initial_PresentationQosPolicy_;
   initial_SubscriberQos_.partition = initial_PartitionQosPolicy_;

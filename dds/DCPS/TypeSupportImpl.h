@@ -47,6 +47,10 @@ public:
 
   virtual char* get_type_name();
 
+  /// Get allowed representations defined by IDL annotations
+  virtual void representations_allowed_by_type(
+    DDS::DataRepresentationIdSeq& seq) = 0;
+
 private:
   virtual const char* default_type_name() const = 0;
 

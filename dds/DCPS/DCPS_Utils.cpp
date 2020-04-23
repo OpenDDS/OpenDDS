@@ -6,12 +6,13 @@
  */
 
 #include "DCPS/DdsDcps_pch.h"
-#include "dds/DCPS/DCPS_Utils.h"
-#include "dds/DCPS/Qos_Helper.h"
-#include "dds/DCPS/Definitions.h"
+#include "DCPS_Utils.h"
 
-#include "ace/ACE.h"  /* For ACE::wild_match() */
-#include "ace/OS_NS_string.h"
+#include "Qos_Helper.h"
+#include "Definitions.h"
+
+#include <ace/ACE.h> /* For ACE::wild_match() */
+#include <ace/OS_NS_string.h>
 
 #include <cstring>
 
@@ -309,6 +310,30 @@ compatibleQOS(const DDS::DataWriterQos * writerQos,
                                     DDS::OWNERSHIP_QOS_POLICY_ID);
   }
 
+  {
+    // Find a common data representation
+    const CORBA::ULong reader_count = readerQos->representation.value.length();
+    const CORBA::ULong writer_count = writerQos->representation.value.length();
+    bool found = false;
+    for (CORBA::ULong wi = 0; !found && wi < writer_count; ++wi) {
+      for (CORBA::ULong ri = 0; !found && ri < reader_count; ++ri) {
+        if (readerQos->representation.value[ri] ==
+            writerQos->representation.value[wi]) {
+          found = true;
+          break;
+        }
+      }
+    }
+
+    if (!found) {
+      increment_incompatibility_count(writerStatus,
+        DDS::DATA_REPRESENTATION_QOS_POLICY_ID);
+      increment_incompatibility_count(readerStatus,
+        DDS::DATA_REPRESENTATION_QOS_POLICY_ID);
+      compatible = false;
+    }
+  }
+
   return compatible;
 }
 
@@ -355,6 +380,64 @@ bool should_check_association_upon_change(const DDS::DomainParticipantQos & /*qo
   return false;
 }
 
-}}
+Encoding::Kind repr_ext_to_encoding_kind(
+  DDS::DataRepresentationId_t repr, Encoding::Extensibility ext)
+{
+  switch(repr) {
+  case UNALIGNED_CDR_DATA_REPRESENTATION:
+    return Encoding::KIND_CDR_UNALIGNED;
+
+  case DDS::XCDR_DATA_REPRESENTATION:
+    switch (ext) {
+    case Encoding::FINAL:
+    case Encoding::APPENDABLE: // fallthrough
+      return Encoding::KIND_CDR_PLAIN;
+    case Encoding::MUTABLE:
+      return Encoding::KIND_CDR_PARAMLIST;
+    }
+    break;
+
+  case DDS::XCDR2_DATA_REPRESENTATION:
+    switch (ext) {
+    case Encoding::FINAL:
+      return Encoding::KIND_XCDR2_PLAIN;
+    case Encoding::APPENDABLE:
+      return Encoding::KIND_XCDR2_DELIMITED;
+    case Encoding::MUTABLE:
+      return Encoding::KIND_XCDR2_PARAMLIST;
+    }
+    break;
+
+  case DDS::XML_DATA_REPRESENTATION:
+    return Encoding::KIND_XML;
+  }
+
+  return Encoding::KIND_UNKNOWN;
+}
+
+void check_data_representation_qos(
+  DDS::DataRepresentationIdSeq& representations_allowed_by_qos,
+  const DDS::DataRepresentationIdSeq& representations_allowed_by_type)
+{
+  if (!representations_allowed_by_qos.length()) {
+    const CORBA::ULong type_repr_count =
+      representations_allowed_by_type.length();
+    if (type_repr_count) {
+      representations_allowed_by_qos.length(type_repr_count);
+      for (CORBA::ULong i = 0; i < type_repr_count; ++i) {
+        representations_allowed_by_qos[i] = representations_allowed_by_type[i];
+      }
+    } else {
+      // If no direction on what to use, use XCDR (XTypes 1.3 7.6.3.1.1) and
+      // unaligned CDR.
+      representations_allowed_by_qos.length(2);
+      representations_allowed_by_qos[0] = DDS::XCDR_DATA_REPRESENTATION;
+      representations_allowed_by_qos[1] = UNALIGNED_CDR_DATA_REPRESENTATION;
+    }
+  }
+}
+
+} // namespace DCPS
+} // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

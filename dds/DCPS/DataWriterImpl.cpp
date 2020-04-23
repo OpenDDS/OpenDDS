@@ -6,7 +6,9 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+
 #include "DataWriterImpl.h"
+
 #include "FeatureDisabledQosCheck.h"
 #include "DomainParticipantImpl.h"
 #include "PublisherImpl.h"
@@ -22,27 +24,24 @@
 #include "TypeSupportImpl.h"
 #include "SendStateDataSampleList.h"
 #include "DataSampleElement.h"
-
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
-#include "CoherentChangeControl.h"
-#endif
-
-#include "AssociationData.h"
-#include "dds/DdsDcpsCoreC.h"
-#include "dds/DdsDcpsGuidTypeSupportImpl.h"
-
-#if !defined (DDS_HAS_MINIMUM_BIT)
-#include "BuiltInTopicUtils.h"
-#include "dds/DdsDcpsCoreTypeSupportC.h"
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
-
 #include "Util.h"
-#include "dds/DCPS/transport/framework/EntryExit.h"
-#include "dds/DCPS/transport/framework/TransportExceptions.h"
-#include "dds/DCPS/transport/framework/TransportRegistry.h"
+#include "DCPS_Utils.h"
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#  include "CoherentChangeControl.h"
+#endif
+#include "AssociationData.h"
+#include "transport/framework/EntryExit.h"
+#include "transport/framework/TransportExceptions.h"
+#include "transport/framework/TransportRegistry.h"
+#ifndef DDS_HAS_MINIMUM_BIT
+#  include "BuiltInTopicUtils.h"
+#  include <dds/DdsDcpsCoreTypeSupportC.h>
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#include <dds/DdsDcpsCoreC.h>
+#include <dds/DdsDcpsGuidTypeSupportImpl.h>
 
-#include "ace/Reactor.h"
-#include "ace/Auto_Ptr.h"
+#include <ace/Reactor.h>
+#include <ace/Auto_Ptr.h>
 
 #include <stdexcept>
 
@@ -865,8 +864,9 @@ DataWriterImpl::update_subscription_params(const RepoId& readerId,
 }
 
 DDS::ReturnCode_t
-DataWriterImpl::set_qos(const DDS::DataWriterQos & qos)
+DataWriterImpl::set_qos(const DDS::DataWriterQos& qos_arg)
 {
+  DDS::DataWriterQos qos = qos_arg;
 
   OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
   OPENDDS_NO_OWNERSHIP_STRENGTH_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
@@ -875,6 +875,12 @@ DataWriterImpl::set_qos(const DDS::DataWriterQos & qos)
   OPENDDS_NO_DURABILITY_KIND_TRANSIENT_PERSISTENT_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
 
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos)) {
+    DDS::DataRepresentationIdSeq type_allowed_reprs;
+    topic_servant_->get_type_support()->representations_allowed_by_type(
+      type_allowed_reprs);
+    check_data_representation_qos(
+      qos.representation.value, type_allowed_reprs);
+
     if (qos_ == qos)
       return DDS::RETCODE_OK;
 
@@ -1290,6 +1296,12 @@ DataWriterImpl::enable()
   if (participant) {
     dp_id_ = participant->get_id();
   }
+
+  DDS::DataRepresentationIdSeq type_allowed_reprs;
+  topic_servant_->get_type_support()->representations_allowed_by_type(
+    type_allowed_reprs);
+  check_data_representation_qos(
+    qos_.representation.value, type_allowed_reprs);
 
   // Note: do configuration based on QoS in enable() because
   //       before enable is called the QoS can be changed -- even

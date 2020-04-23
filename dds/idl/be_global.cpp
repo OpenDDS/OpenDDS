@@ -56,8 +56,8 @@ BE_GlobalData::BE_GlobalData()
   , root_default_nested_(true)
   , warn_about_dcps_data_type_(true)
   , default_extensibility_(extensibilitykind_appendable)
-  , default_data_representation_(OpenDDS::data_representation_kind_xcdr1)
 {
+  default_data_representation_.set_all(false);
 }
 
 BE_GlobalData::~BE_GlobalData()
@@ -744,14 +744,14 @@ ExtensibilityKind BE_GlobalData::extensibility(AST_Decl* node) const
   return value;
 }
 
-OpenDDS::DataRepresentationKind BE_GlobalData::default_data_representation(
+OpenDDS::DataRepresentation BE_GlobalData::data_representations(
   AST_Decl* node) const
 {
   using namespace OpenDDS;
   DataRepresentationAnnotation* data_representation_annotation =
     dynamic_cast<DataRepresentationAnnotation*>(
       builtin_annotations_["::OpenDDS::@data_representation"]);
-  DataRepresentationKind value;
+  DataRepresentation value;
   if (!data_representation_annotation->node_value_exists(node, value)) {
     value = default_data_representation_;
   }

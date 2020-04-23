@@ -93,18 +93,9 @@ public:
    * Default value if the node DOESN'T have the annotation. This is different
    * than the default value in the annotation definition.
    */
-  T default_value() const
+  virtual T default_value() const
   {
     return T();
-  }
-
-  /**
-   * Returns the value according to the annotation if it exists, else returns
-   * default_value().
-   */
-  T node_value(AST_Decl* node) const
-  {
-    return value_from_appl(find_on(node));
   }
 
   /**
@@ -113,11 +104,21 @@ public:
    * If node does not have the annotation, this sets value to default_value()
    * and returns false.
    */
-  bool node_value_exists(AST_Decl* node, T& value) const
+  virtual bool node_value_exists(AST_Decl* node, T& value) const
   {
     AST_Annotation_Appl* appl = find_on(node);
     value = value_from_appl(appl);
     return appl;
+  }
+
+  /**
+   * Returns the value according to the annotation if it exists, else returns
+   * default_value().
+   */
+  virtual T node_value(AST_Decl* node) const
+  {
+    T value;
+    return node_value_exists(node, value) ? value : default_value();
   }
 
 protected:
@@ -219,8 +220,6 @@ class HashidAnnotation : public AnnotationWithValue<std::string> {
 public:
   std::string definition() const;
   std::string name() const;
-
-  std::string default_value() const;
 };
 
 // @extensibility ============================================================
@@ -266,26 +265,99 @@ namespace OpenDDS {
 
   // @OpenDDS::data_representation ===========================================
 
-  enum DataRepresentationKind {
-    data_representation_kind_none = 0x00,
-    data_representation_kind_xcdr1 = 0x01,
-    data_representation_kind_xml = 0x02,
-    data_representation_kind_xcdr2 = 0x04,
-    data_representation_kind_any = 0xffffffff
+  struct DataRepresentation {
+    bool xcdr1;
+    bool xcdr2;
+    bool xml;
+    bool unaligned_cdr;
+
+    DataRepresentation()
+    {
+      set_all(false);
+    }
+
+    void add(const DataRepresentation& other)
+    {
+      xcdr1 |= other.xcdr1;
+      xcdr2 |= other.xcdr2;
+      xml |= other.xml;
+      unaligned_cdr |= other.unaligned_cdr;
+    }
+
+    void set_all(bool value)
+    {
+      xcdr1 = value;
+      xcdr2 = value;
+      xml = value;
+      unaligned_cdr = value;
+    }
+
+    bool none() const
+    {
+      return !xcdr1 && !xcdr2 && !xml && !unaligned_cdr;
+    }
+
+    bool all() const
+    {
+      return xcdr1 && xcdr2 && xml && unaligned_cdr;
+    }
+
+    bool only_xcdr1() const
+    {
+      return xcdr1 && !xcdr2 && !xml && !unaligned_cdr;
+    }
+
+    bool not_only_xcdr1() const
+    {
+      return xcdr1 && (xcdr2 || xml || unaligned_cdr);
+    }
+
+    bool only_xcdr2() const
+    {
+      return !xcdr1 && xcdr2 && !xml && !unaligned_cdr;
+    }
+
+    bool not_only_xcdr2() const
+    {
+      return xcdr2 && (xcdr1 || xml || unaligned_cdr);
+    }
+
+    bool only_xml() const
+    {
+      return !xcdr1 && !xcdr2 && xml && !unaligned_cdr;
+    }
+
+    bool not_only_xml() const
+    {
+      return xml && (xcdr1 || xcdr2 || unaligned_cdr);
+    }
+
+    bool only_unaligned_cdr() const
+    {
+      return !xcdr1 && !xcdr2 && !xml && unaligned_cdr;
+    }
+
+    bool not_only_unaligned_cdr() const
+    {
+      return unaligned_cdr && (xcdr1 || xcdr2 || xml);
+    }
   };
 
-  /// Replacement for @::data_representation which requires bitmask
+  /**
+   * Used to specifiy the allowed RTPS data representations in XTypes.
+   * Replacement for @::data_representation which requires bitmask.
+   */
   class DataRepresentationAnnotation :
-      public AnnotationWithEnumValue<DataRepresentationKind> {
+    public AnnotationWithValue<DataRepresentation> {
   public:
     std::string definition() const;
     std::string name() const;
     std::string module() const;
 
-    DataRepresentationKind node_value(AST_Decl* node) const;
+    bool node_value_exists(AST_Decl* node, DataRepresentation& value) const;
 
   protected:
-    DataRepresentationKind value_from_appl(AST_Annotation_Appl* appl) const;
+    DataRepresentation value_from_appl(AST_Annotation_Appl* appl) const;
   };
 }
 

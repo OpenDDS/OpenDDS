@@ -259,7 +259,8 @@ bool operator==(const DDS::TopicQos& qos1,
     && qos1.resource_limits == qos2.resource_limits
     && qos1.transport_priority == qos2.transport_priority
     && qos1.lifespan == qos2.lifespan
-    && qos1.ownership == qos2.ownership;
+    && qos1.ownership == qos2.ownership
+    && qos1.representation == qos2.representation;
 }
 
 ACE_INLINE
@@ -283,7 +284,8 @@ bool operator==(const DDS::DataWriterQos& qos1,
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
     && qos1.ownership_strength == qos2.ownership_strength
 #endif
-    && qos1.writer_data_lifecycle == qos2.writer_data_lifecycle;
+    && qos1.writer_data_lifecycle == qos2.writer_data_lifecycle
+    && qos1.representation == qos2.representation;
 }
 
 ACE_INLINE
@@ -312,7 +314,8 @@ bool operator==(const DDS::DataReaderQos& qos1,
     && qos1.resource_limits == qos2.resource_limits
     && qos1.user_data == qos2.user_data
     && qos1.time_based_filter == qos2.time_based_filter
-    && qos1.reader_data_lifecycle == qos2.reader_data_lifecycle;
+    && qos1.reader_data_lifecycle == qos2.reader_data_lifecycle
+    && qos1.representation == qos2.representation;
 }
 
 ACE_INLINE
@@ -331,6 +334,24 @@ bool operator==(const DDS::DomainParticipantFactoryQos& qos1,
                 const DDS::DomainParticipantFactoryQos& qos2)
 {
   return qos1.entity_factory == qos2.entity_factory;
+}
+
+ACE_INLINE
+bool operator==(
+  const DDS::DataRepresentationQosPolicy& qos1,
+  const DDS::DataRepresentationQosPolicy& qos2)
+{
+  const CORBA::ULong count = qos1.value.length();
+  const CORBA::ULong count2 = qos1.value.length();
+  if (count != count2) {
+    return false;
+  }
+  for (CORBA::ULong i = 0; i < count; ++i) {
+    if (qos1.value[i] != qos2.value[i]) {
+      return false;
+    }
+  }
+  return true;
 }
 
 ACE_INLINE
@@ -541,6 +562,14 @@ bool operator!=(const DDS::SubscriberQos& qos1,
 ACE_INLINE
 bool operator!=(const DDS::DomainParticipantFactoryQos& qos1,
                 const DDS::DomainParticipantFactoryQos& qos2)
+{
+  return !(qos1 == qos2);
+}
+
+ACE_INLINE
+bool operator!=(
+  const DDS::DataRepresentationQosPolicy& qos1,
+  const DDS::DataRepresentationQosPolicy& qos2)
 {
   return !(qos1 == qos2);
 }
@@ -896,7 +925,8 @@ bool Qos_Helper::valid(const DDS::TopicQos& qos)
     && valid(qos.resource_limits)
     && valid(qos.transport_priority)
     && valid(qos.lifespan)
-    && valid(qos.ownership);
+    && valid(qos.ownership)
+    && valid(qos.representation);
 }
 
 ACE_INLINE
@@ -988,6 +1018,13 @@ bool Qos_Helper::valid(const DDS::DataWriterQos& qos)
         ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
         ACE_TEXT("invalid writer_data_lifecycle qos.\n")), false);
 
+  if (!valid(qos.representation)) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+      ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
+      ACE_TEXT("invalid data representation qos.\n")));
+    return false;
+  }
+
   return true;
 }
 
@@ -1016,7 +1053,8 @@ bool Qos_Helper::valid(const DDS::DataReaderQos& qos)
     && valid(qos.user_data)
     && valid(qos.time_based_filter)
     && valid(qos.reader_data_lifecycle)
-    && valid(qos.ownership);
+    && valid(qos.ownership)
+    && valid(qos.representation);
 }
 
 ACE_INLINE
@@ -1033,6 +1071,29 @@ ACE_INLINE
 bool Qos_Helper::valid(const DDS::DomainParticipantFactoryQos& qos)
 {
   return valid(qos.entity_factory);
+}
+
+ACE_INLINE
+bool Qos_Helper::valid(const DDS::DataRepresentationQosPolicy& qos)
+{
+  const CORBA::ULong count = qos.value.length();
+  for (CORBA::ULong i = 0; i < count; ++i) {
+    CORBA::Short value = qos.value[i];
+    switch (value) {
+    case DDS::XCDR_DATA_REPRESENTATION: // fallthrough
+    case DDS::XML_DATA_REPRESENTATION: // fallthrough
+    case DDS::XCDR2_DATA_REPRESENTATION: // fallthrough
+    case UNALIGNED_CDR_DATA_REPRESENTATION:
+      break;
+
+    default:
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid(const DataRepresentationQosPolicy&): ")
+        ACE_TEXT("Unkown DataRepresentationId_t: %d\n"), value));
+      return false;
+    };
+  }
+  return true;
 }
 
 ACE_INLINE
@@ -1098,11 +1159,7 @@ ACE_INLINE
 bool Qos_Helper::changeable(const DDS::PresentationQosPolicy& qos1,
                             const DDS::PresentationQosPolicy& qos2)
 {
-  if (qos1 == qos2)
-    return true;
-
-  else
-    return false;
+  return qos1 == qos2;
 }
 
 // ---------------------------------------------------------------
@@ -1248,7 +1305,8 @@ bool Qos_Helper::changeable(const DDS::TopicQos& qos1,
     && changeable(qos1.resource_limits, qos2.resource_limits)
     && changeable(qos1.transport_priority, qos2.transport_priority)
     && changeable(qos1.lifespan, qos2.lifespan)
-    && changeable(qos1.ownership, qos2.ownership);
+    && changeable(qos1.ownership, qos2.ownership)
+    && changeable(qos1.representation, qos2.representation);
 }
 
 ACE_INLINE
@@ -1274,7 +1332,8 @@ bool Qos_Helper::changeable(const DDS::DataWriterQos& qos1,
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
     && changeable(qos1.ownership_strength, qos2.ownership_strength)
 #endif
-    && changeable(qos1.writer_data_lifecycle, qos2.writer_data_lifecycle);
+    && changeable(qos1.writer_data_lifecycle, qos2.writer_data_lifecycle)
+    && changeable(qos1.representation, qos2.representation);
 }
 
 ACE_INLINE
@@ -1304,7 +1363,8 @@ bool Qos_Helper::changeable(const DDS::DataReaderQos& qos1,
     && changeable(qos1.user_data, qos2.user_data)
     && changeable(qos1.time_based_filter, qos2.time_based_filter)
     && changeable(qos1.reader_data_lifecycle, qos2.reader_data_lifecycle)
-    && changeable(qos1.ownership, qos2.ownership);
+    && changeable(qos1.ownership, qos2.ownership)
+    && changeable(qos1.representation, qos2.representation);
 }
 
 ACE_INLINE
@@ -1326,6 +1386,14 @@ bool Qos_Helper::changeable(const DDS::DomainParticipantFactoryQos& qos1,
 }
 
 ACE_INLINE
+bool Qos_Helper::changeable(
+  const DDS::DataRepresentationQosPolicy& qos1,
+  const DDS::DataRepresentationQosPolicy& qos2)
+{
+  return qos1 == qos2;
+}
+
+ACE_INLINE
 bool Qos_Helper::copy_from_topic_qos(DDS::DataReaderQos& a_datareader_qos,
                                      const DDS::TopicQos& a_topic_qos)
 {
@@ -1343,6 +1411,7 @@ bool Qos_Helper::copy_from_topic_qos(DDS::DataReaderQos& a_datareader_qos,
   a_datareader_qos.history = a_topic_qos.history;
   a_datareader_qos.resource_limits = a_topic_qos.resource_limits;
   a_datareader_qos.ownership = a_topic_qos.ownership;
+  a_datareader_qos.representation = a_topic_qos.representation;
   return true;
 }
 
@@ -1369,6 +1438,7 @@ bool Qos_Helper::copy_from_topic_qos(DDS::DataWriterQos& a_datawriter_qos,
   a_datawriter_qos.transport_priority = a_topic_qos.transport_priority;
   a_datawriter_qos.lifespan = a_topic_qos.lifespan;
   a_datawriter_qos.ownership = a_topic_qos.ownership;
+  a_datawriter_qos.representation = a_topic_qos.representation;
   return true;
 }
 
