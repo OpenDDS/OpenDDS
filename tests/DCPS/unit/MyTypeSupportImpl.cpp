@@ -100,6 +100,12 @@ MyTypeSupportImpl::getMetaStructForType()
   throw std::runtime_error("unimplemented");
 }
 
+void MyTypeSupportImpl::representations_allowed_by_type(
+  DDS::DataRepresentationIdSeq& seq)
+{
+  seq.length(0); // Let OpenDDS Default
+}
+
 DDS::ReturnCode_t MyDataReaderImpl::read_generic(
   OpenDDS::DCPS::DataReaderImpl::GenericBundle&, DDS::SampleStateMask,
   DDS::ViewStateMask, DDS::InstanceStateMask, bool)

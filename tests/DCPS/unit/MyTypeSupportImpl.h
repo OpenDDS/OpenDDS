@@ -65,6 +65,8 @@ public:
 #endif
 
   bool has_dcps_key() { return false; }
+
+  void representations_allowed_by_type(DDS::DataRepresentationIdSeq& seq);
 };
 
 class MyDataReaderImpl :  public virtual OpenDDS::DCPS::DataReaderImpl
