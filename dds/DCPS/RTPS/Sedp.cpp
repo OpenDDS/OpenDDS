@@ -2352,7 +2352,7 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
         const RepoIdSet& assoc =
           (top_it == topics_.end()) ? RepoIdSet() : top_it->second.endpoints();
         for (RepoIdSet::const_iterator i = assoc.begin(); i != assoc.end(); ++i) {
-          if (i->entityId.entityKind & 4) continue; // subscription
+          if (DCPS::GuidConverter(*i).isReader()) continue; // subscription
           LocalPublicationIter lpi = local_publications_.find(*i);
           if (lpi != local_publications_.end()) {
             lpi->second.publication_->update_locators(guid, rdata.readerProxy.allLocators);

@@ -777,14 +777,14 @@ namespace OpenDDS {
       void match_endpoints(RepoId repoId, const TopicDetails& td,
                            bool remove = false)
       {
-        const bool reader = repoId.entityId.entityKind & 4;
+        const bool reader = GuidConverter(repoId).isReader();
         // Copy the endpoint set - lock can be released in match()
         RepoIdSet endpoints_copy = td.endpoints();
 
         for (RepoIdSet::const_iterator iter = endpoints_copy.begin();
              iter != endpoints_copy.end(); ++iter) {
           // check to make sure it's a Reader/Writer or Writer/Reader match
-          if (bool(iter->entityId.entityKind & 4) != reader) {
+          if (GuidConverter(*iter).isReader() != reader) {
             if (remove) {
               remove_assoc(*iter, repoId);
             } else {
@@ -798,8 +798,7 @@ namespace OpenDDS {
       remove_assoc(const RepoId& remove_from,
                    const RepoId& removing)
       {
-        const bool reader = remove_from.entityId.entityKind & 4;
-        if (reader) {
+        if (GuidConverter(remove_from).isReader()) {
           const LocalSubscriptionIter lsi = local_subscriptions_.find(remove_from);
           if (lsi != local_subscriptions_.end()) {
             lsi->second.matched_endpoints_.erase(removing);
