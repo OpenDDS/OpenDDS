@@ -1785,11 +1785,10 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
     ++participantId;
   }
 #ifdef ACE_HAS_IPV6
-  if (!open_unicast_ipv6_socket(port_common, participantId)) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::SpdpTransport() - ")
-               ACE_TEXT("failed to open IPV6 unicast socket %p\n")));
-    throw std::runtime_error("failed to open ipv6 unicast socket");
+  u_short port = uni_port_;
+
+  while (!open_unicast_ipv6_socket(port)) {
+    ++port;
   }
 #endif
 
@@ -2555,11 +2554,9 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
 
 #ifdef ACE_HAS_IPV6
 bool
-Spdp::SpdpTransport::open_unicast_ipv6_socket(u_short port_common,
-                                              u_short participant_id)
+Spdp::SpdpTransport::open_unicast_ipv6_socket(u_short port)
 {
-  // Open will fail on some systems if the IPV6 port is the same as the IPV4 port.
-  ipv6_uni_port_ = uni_port_ + 1;
+  ipv6_uni_port_ = port;
 
   ACE_INET_Addr local_addr;
   OPENDDS_STRING spdpaddr = outer_->config_->spdp_local_address().c_str();
@@ -2579,12 +2576,15 @@ Spdp::SpdpTransport::open_unicast_ipv6_socket(u_short port_common,
   }
 
   if (unicast_ipv6_socket_.open(local_addr, PF_INET6) != 0) {
-    ACE_ERROR((
-               LM_ERROR,
-               ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_ipv6_socket() - ")
-               ACE_TEXT("failed to open_appropriate_socket_type unicast ipv6 socket on port %d %p.  "),
-               ipv6_uni_port_, ACE_TEXT("ACE_SOCK_Dgram::open")));
-    throw std::runtime_error("failed to open unicast ipv6 socket");
+    if (DCPS::DCPS_debug_level > 3) {
+      ACE_DEBUG((
+                 LM_WARNING,
+                 ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_ipv6_socket() - ")
+                 ACE_TEXT("failed to open_appropriate_socket_type unicast ipv6 socket on port %d %p.  ")
+                 ACE_TEXT("Trying next port...\n"),
+                 uni_port_, ACE_TEXT("ACE_SOCK_Dgram::open")));
+    }
+    return false;
   }
 
   if (DCPS::DCPS_debug_level > 3) {

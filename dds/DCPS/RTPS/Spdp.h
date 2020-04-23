@@ -236,7 +236,7 @@ private:
     void dispose_unregister();
     bool open_unicast_socket(u_short port_common, u_short participant_id);
 #ifdef ACE_HAS_IPV6
-    bool open_unicast_ipv6_socket(u_short port_common, u_short participant_id);
+    bool open_unicast_ipv6_socket(u_short port);
 #endif
     void acknowledge();
 
