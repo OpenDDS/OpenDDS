@@ -30,17 +30,16 @@ DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
       exit(1);
     }
 
-    Messenger::Message message;
-    DDS::SampleInfo si ;
-    DDS::ReturnCode_t status = message_dr->take_next_sample(message, si) ;
+    Messenger::Message st_msg;
+    DDS::SampleInfo st_info;
+    DDS::ReturnCode_t status = message_dr->take_next_sample(st_msg, st_info) ;
 
     if (status == DDS::RETCODE_OK) {
-      cout << "Message: subject    = " << message.subject.in() << endl
-           << "         subject_id = " << message.subject_id   << endl
-           << "         from       = " << message.from.in()    << endl
-           << "         count      = " << message.count        << endl
-           << "         text       = " << message.text.in()    << endl;
-      cout << "SampleInfo.sample_rank = " << si.sample_rank << endl;
+      printf("--sub-- Msg:  rank: %2u  state: %u %u %u  subj_id: %3d  cnt: %2d  from: %-16s  subj: %-10s  text: %-20s\n",
+        st_info.sample_rank,
+        st_info.sample_state, st_info.view_state, st_info.instance_state,
+        st_msg.subject_id, st_msg.count, st_msg.from.in(), st_msg.subject.in(), st_msg.text.in());
+      fflush(stdout);
     } else if (status == DDS::RETCODE_NO_DATA) {
       cerr << "ERROR: reader received DDS::RETCODE_NO_DATA!" << endl;
     } else {

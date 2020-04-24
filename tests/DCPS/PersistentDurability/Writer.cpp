@@ -6,13 +6,13 @@
 using namespace Messenger;
 using namespace std;
 
-int const num_instances_per_writer = 2;
-int const num_messages = 5;
+static int s_i_msg_cnt = 5;
+static int s_i_subject = 99;
 
 Writer::Writer (::DDS::DataWriter_ptr writer)
   : writer_ (::DDS::DataWriter::_duplicate (writer))
   , timeout_writes_ (0)
-  , count_ (0)
+  , count_ (1)
   , dwl_servant_ (0)
 {
   ::DDS::DataWriterListener_var dwl = writer->get_listener ();
@@ -25,6 +25,7 @@ Writer::~Writer ()
 }
 
 
+//------------------------------------------------------------------------------
 int
 Writer::svc ()
 {
@@ -34,7 +35,32 @@ Writer::svc ()
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("(%P|%t) Writer::svc begins.\n")));
 
-  ::DDS::InstanceHandleSeq handles;
+  int i_subject;
+
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, this->lock_, -1);
+    i_subject = s_i_subject++;
+  }
+
+  this->write_loop(i_subject, nullptr, nullptr, nullptr, s_i_msg_cnt);
+
+  ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::svc finished.\n")));
+
+  return 0;
+}
+
+//------------------------------------------------------------------------------
+int
+Writer::write_loop(int i_subject, char const *pc_from, char const *pc_subj, char const *pc_text, int i_msgs)
+{
+  static char const s_ac_from[] = "Comic Book Guy";
+  static char const s_ac_subj[] = "Review";
+  static char const s_ac_text[] = "Worst. Movie. Ever.";
+
+  if (nullptr == pc_from)  pc_from = s_ac_from;
+  if (nullptr == pc_subj)  pc_subj = s_ac_subj;
+  if (nullptr == pc_text)  pc_text = s_ac_text;
+
   try
   {
     Messenger::MessageDataWriter_var message_dw =
@@ -47,18 +73,38 @@ Writer::svc ()
     }
 
     Messenger::Message message;
-    message.subject_id = 99;
+    message.subject_id = i_subject;
+    message.count      = 0;
     ::DDS::InstanceHandle_t handle = message_dw->register_instance(message);
 
-    message.from    = CORBA::string_dup ("Comic Book Guy");
-    message.subject = CORBA::string_dup ("Review");
-    message.text    = CORBA::string_dup ("Worst. Movie. Ever.");
+    printf("--pub-- write   hdl %2u  subj %3d  count %3d   new\n", handle, message.subject_id, message.count);
+    fflush(stdout);
+
+    message.from    = CORBA::string_dup(pc_from);
+    message.subject = CORBA::string_dup(pc_subj);
+    message.text    = CORBA::string_dup(pc_text);
 
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT ("(%P|%t) %T Writer::svc starting to write.\n")));
 
-    this->write (message_dw.in (), handle, message);
+    for (int i_msg = 0; i_msg < i_msgs; ++i_msg)
+    {
+      int i_count;
+      {
+        ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, this->lock_, -1);
+        i_count = this->count_++;
+      }
 
+      ::DDS::ReturnCode_t i_rc = this->write_one(message_dw.in (), handle, message, i_count);
+
+      if (i_rc != ::DDS::RETCODE_OK)
+      {
+        ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT("(%P|%t) ERROR: Writer::svc, ")
+                    ACE_TEXT ("%dth write_one() returned %d.\n"),
+                    i_msg, i_rc));
+      }
+    }
   }
   catch (CORBA::Exception& e)
   {
@@ -66,19 +112,27 @@ Writer::svc ()
          << e << endl;
   }
 
-  ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::svc finished.\n")));
-
   return 0;
 }
 
+//------------------------------------------------------------------------------
+int Writer::set_count(int i_count)
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, this->lock_, -1);
+  this->count_ = i_count;
+  return 0;
+}
+
+//------------------------------------------------------------------------------
 bool
-Writer::start ()
+Writer::start (int i_threads, int i_msg_cnt, int i_subject_1st)
 {
   ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) Starting Writer \n")));
+  s_i_msg_cnt = i_msg_cnt;
+  s_i_subject = i_subject_1st;
 
   // Launch threads.
-  if (this->activate (THR_NEW_LWP | THR_JOINABLE,
-                      num_instances_per_writer) == -1)
+  if (this->activate (THR_NEW_LWP | THR_JOINABLE, i_threads) == -1)
   {
     ACE_ERROR_RETURN ((LM_ERROR,
                        ACE_TEXT ("(%P|%t) %p\n"),
@@ -111,32 +165,21 @@ Writer::get_timeout_writes () const
   return timeout_writes_.value ();
 }
 
-int
-Writer::write (Messenger::MessageDataWriter_ptr message_dw,
-               ::DDS::InstanceHandle_t& handle,
-               Messenger::Message& message)
+//------------------------------------------------------------------------------
+::DDS::ReturnCode_t
+Writer::write_one(Messenger::MessageDataWriter_ptr message_dw, ::DDS::InstanceHandle_t& handle, Messenger::Message& message, int i_count)
 {
-  for (int i = 0; i < num_messages; ++i)
+  message.count = i_count;
+
+  printf("--pub-- write   hdl %2u  subj %3d  count %3d   write\n", handle, message.subject_id, message.count);
+  fflush(stdout);
+
+  ::DDS::ReturnCode_t const ret = message_dw->write (message, handle);
+
+  if (ret == ::DDS::RETCODE_TIMEOUT)
   {
-    ++this->count_;
-    message.count = this->count_;
-
-    ::DDS::ReturnCode_t const ret = message_dw->write (message, handle);
-
-    if (ret != ::DDS::RETCODE_OK)
-    {
-      ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("(%P|%t) ERROR: Writer::svc, ")
-                  ACE_TEXT ("%dth write() returned %d.\n"),
-                  i,
-                  -1));
-      if (ret == ::DDS::RETCODE_TIMEOUT)
-      {
-        ++this->timeout_writes_;
-      }
-    }
-
+    ++this->timeout_writes_;
   }
 
-  return 0;
+  return ret;
 }

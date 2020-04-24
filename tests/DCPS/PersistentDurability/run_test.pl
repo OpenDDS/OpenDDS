@@ -51,6 +51,7 @@ print $Publisher1->CommandLine() . "\n";
 print $Publisher2->CommandLine() . "\n";
 print $Subscriber->CommandLine() . "\n";
 
+print "INFO: start Repo\n";
 $DCPSREPO->Spawn ();
 if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
     print STDERR "ERROR: waiting for Info Repo IOR file\n";
@@ -61,6 +62,7 @@ if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
 $durability_cache = 'data';
 rmtree($durability_cache) if -d $durability_cache;
 
+print "INFO: start publisher 1\n";
 $Publisher1->Spawn ();
 
 # Wait for the publisher to end before starting the subscriber so that
@@ -77,10 +79,12 @@ else {
 
 # Now spawn the publisher that will actually wait for the DataReader
 # to complete its reads.
+print "INFO: start publisher 2\n";
 $Publisher2->Spawn ();
 
 sleep (1);
 
+print "INFO: start subscriber\n";
 $Subscriber->Spawn ();
 
 $PublisherResult = $Publisher2->WaitKill (300);
@@ -88,13 +92,18 @@ if ($PublisherResult != 0) {
     print STDERR "ERROR: publisher 2 returned $PublisherResult\n";
     $status = 1;
 }
+else {
+    print "INFO: publisher 2 completed\n";
+}
 
 $SubscriberResult = $Subscriber->WaitKill (15);
 if ($SubscriberResult != 0) {
     print STDERR "ERROR: subscriber returned $SubscriberResult\n";
     $status = 1;
 }
-
+else {
+    print "INFO: subscriber  completed\n";
+}
 
 rmtree($durability_cache) if -d $durability_cache;
 

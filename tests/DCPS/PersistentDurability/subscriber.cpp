@@ -100,6 +100,8 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       sub->get_default_datareader_qos(dr_qos);
       dr_qos.durability.kind = DDS::PERSISTENT_DURABILITY_QOS;
 
+      printf("--sub------- Call create_datareader()\n");
+      fflush(stdout);
       DDS::DataReader_var dr =
         sub->create_datareader(topic, dr_qos, listener,
                                OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -108,12 +110,22 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         exit(1);
       }
 
-      int const expected = 10;
-      while (listener_servant->num_reads() < expected)
+      printf("--sub------- Wait for 12 msgs\n");
+      fflush(stdout);
+      for (int i_expected = 12;  listener_servant->num_reads() < i_expected;  /*empty*/)
       {
         ACE_OS::sleep (1);
       }
 
+      printf("--sub------- Wait for 4 secs\n");
+      fflush(stdout);
+      for (int i_max_secs = 4;  i_max_secs > 0;  --i_max_secs)
+      {
+        ACE_OS::sleep (1);
+      }
+
+      printf("--sub------- Delete and shutdown ...\n");
+      fflush(stdout);
       if (!CORBA::is_nil (participant.in ())) {
         participant->delete_contained_entities();
       }

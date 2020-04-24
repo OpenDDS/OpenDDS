@@ -17,6 +17,9 @@
 #include "dds/DCPS/StaticIncludes.h"
 #include "dds/DCPS/unique_ptr.h"
 
+#include <dds/DCPS/DataWriterImpl_T.h>
+#include "MessengerTypeSupportImpl.h"
+
 #include <ace/Atomic_Op_T.h>
 #include <ace/streams.h>
 #include <ace/Get_Opt.h>
@@ -26,6 +29,12 @@
 #include <stdexcept>
 
 using namespace Messenger;
+
+typedef OpenDDS::DCPS::DataWriterImpl_T<Messenger::Message> Message_DataWriterImplType;
+
+static int const s_i_writer_threads  = 2;
+static int const s_i_writer_msgs     = 5;
+static int const s_i_writer_subj_1st = 99;
 
 bool do_write = false, delete_data = false;
 const ACE_TCHAR *dir = ACE_TEXT("");
@@ -61,6 +70,81 @@ parse_args (int argc, ACE_TCHAR *argv[])
   return 0;
 }
 
+//------------------------------------------------------------------------------
+static void local_show_instances(::DDS::DataWriter *pst_writer_gen)
+{
+  static char const *s_pc_init = "(init)";
+
+  Message_DataWriterImplType *pst_writer_impl = dynamic_cast<Message_DataWriterImplType*>(pst_writer_gen);
+
+  if (NULL == pst_writer_impl)
+  {
+    cerr << "Data Writer could not be narrowed to ImplType"<< endl;
+    exit(1);
+  }
+
+  OpenDDS::DCPS::DataWriterImpl::InstanceHandleVec st_vec_inst;
+
+  st_vec_inst.clear();
+  pst_writer_impl->get_instance_handles(st_vec_inst);
+
+  printf("--pub-- Check Instances = %2u\n", (uint32_t)st_vec_inst.size());
+  fflush(stdout);
+
+  uint32_t ui32_ndx = 0;
+  for (OpenDDS::DCPS::DataWriterImpl::InstanceHandleVec::iterator iter = st_vec_inst.begin();  iter != st_vec_inst.end();  ++iter, ++ui32_ndx)
+  {
+    Messenger::Message      st_msg;
+    ::DDS::InstanceHandle_t st_hdl = *iter;
+    size_t                  siz_samples = 0;
+
+    st_msg.from       = s_pc_init;
+    st_msg.subject    = s_pc_init;
+    st_msg.text       = s_pc_init;
+    st_msg.subject_id = 0;
+    st_msg.count      = 0;
+    st_msg.ull        = 0;
+    st_msg.source_pid = 0;
+
+    pst_writer_impl->num_samples(st_hdl, siz_samples);
+
+    pst_writer_impl->get_key_value(st_msg, st_hdl);
+
+    printf("--pub-- ndx %2u  hdl %2u  samps %2u      subj_id: %3d  \n",
+      ui32_ndx, st_hdl, (uint32_t)siz_samples, st_msg.subject_id);
+    fflush(stdout);
+
+    // printf("--pub-- ndx %2u  hdl %2u  samps %2u      subj_id: %3d  cnt: %2d  from: %-16s  subj: %-10s  text: %-20s\n",
+      // ui32_ndx, st_hdl, (uint32_t)siz_samples, st_msg.subject_id, st_msg.count,
+      // st_msg.from.in(), st_msg.subject.in(), st_msg.text.in());
+    // fflush(stdout);
+  }
+}
+
+//------------------------------------------------------------------------------
+static void local_find_instances(::DDS::DataWriter *pst_writer_gen, int i_subj_1st, int i_subj_cnt)
+{
+  Message_DataWriterImplType *pst_writer_impl = dynamic_cast<Message_DataWriterImplType*>(pst_writer_gen);
+
+  if (NULL == pst_writer_impl)
+  {
+    cerr << "Data Writer could not be narrowed to ImplType"<< endl;
+    exit(1);
+  }
+
+  ::DDS::InstanceHandle_t st_hdl;
+  Messenger::Message      st_msg;
+
+  for (int i_subj = i_subj_1st;  i_subj < i_subj_1st + i_subj_cnt;  ++i_subj)
+  {
+    st_msg.subject_id = i_subj;
+    st_hdl = pst_writer_impl->lookup_instance(st_msg);
+    printf("--pub-- Find key %3d = hdl %2u\n", i_subj, st_hdl);
+    fflush(stdout);
+  }
+}
+
+//------------------------------------------------------------------------------
 int
 ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {
@@ -157,6 +241,11 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           exit (1);
         }
 
+        printf("--pub------- After create_datawriter()\n");
+        fflush(stdout);
+        local_show_instances(dw.in());
+        local_find_instances(dw.in(), s_i_writer_subj_1st, s_i_writer_threads);
+
         // Only write samples if configured to do so.  The expectation
         // is to otherwise retrieve the data from the PERSISTENT data
         // durability cache.
@@ -165,11 +254,18 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           // Write samples.
           OpenDDS::DCPS::unique_ptr<Writer> writer (new Writer (dw.in ()));
 
-          if (!writer->start () || !writer->end ())
+          printf("--pub------- Run   writer threads\n");
+          fflush(stdout);
+          if (!writer->start(s_i_writer_threads, s_i_writer_msgs, s_i_writer_subj_1st) || !writer->end())
           {
             // Error logging performed in above method call.
             exit (1);
           }
+
+          printf("--pub------- After writer threads\n");
+          fflush(stdout);
+          local_show_instances(dw.in());
+          local_find_instances(dw.in(), s_i_writer_subj_1st, s_i_writer_threads);
 
           // Explicitly destroy the DataWriter.
           if (pub->delete_datawriter (dw.in ())
@@ -178,6 +274,8 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
             cerr << "Unable to delete DataWriter" << endl;
             exit (1);
           }
+          printf("--pub------- After delete_datawriter()\n");
+          fflush(stdout);
         }
         else
         {
@@ -197,6 +295,27 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
             exit (1);
           }
 
+          OpenDDS::DCPS::unique_ptr<Writer> writer (new Writer (dw.in ()));
+
+          printf("--pub------- Call  write new subject\n");
+          fflush(stdout);
+          writer->write_loop(s_i_writer_subj_1st + s_i_writer_threads, "Main", "One more", "Nothing here", 1);
+          printf("--pub------- After write new subject\n");
+          fflush(stdout);
+          local_show_instances(dw.in());
+          local_find_instances(dw.in(), s_i_writer_subj_1st, s_i_writer_threads+1);
+
+          printf("--pub------- Call  write 1st subject\n");
+          fflush(stdout);
+          writer->set_count(s_i_writer_threads * s_i_writer_msgs - 1);
+          writer->write_loop(s_i_writer_subj_1st, nullptr, nullptr, nullptr, 1);
+          printf("--pub------- After write 1st subject\n");
+          fflush(stdout);
+          local_show_instances(dw.in());
+          local_find_instances(dw.in(), s_i_writer_subj_1st, s_i_writer_threads+1);
+
+          printf("--pub------- Wait for DataReader to finish\n");
+          fflush(stdout);
           // Wait for DataReader to finish.
           ::DDS::InstanceHandleSeq handles;
           for (attempts = 1; attempts != max_attempts; ++attempts)
@@ -249,6 +368,8 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           exit (1);
         }
 
+        printf("--pub------- Test service cleanup\n");
+        fflush(stdout);
         // Write samples using multiple threads.
         OpenDDS::DCPS::unique_ptr<Writer> writer (new Writer (dummy_dw.in ()));
 
@@ -260,10 +381,14 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           exit (1);
         }
 
+        printf("--pub------- Sleep %d\n", delay_seconds + 3);
+        fflush(stdout);
         // Allow durability cleanup to occur
         ACE_OS::sleep (delay_seconds + 3);
       }
 
+      printf("--pub------- Delete and shutdown ...\n");
+      fflush(stdout);
       participant->delete_contained_entities();
       dpf->delete_participant(participant.in ());
       TheServiceParticipant->shutdown ();
