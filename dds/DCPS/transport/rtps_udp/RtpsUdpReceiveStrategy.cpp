@@ -838,6 +838,7 @@ RtpsUdpReceiveStrategy::check_header(const RtpsSampleHeader& header)
     const RTPS::DataFragSubmessage& rtps = header.submessage_.data_frag_sm();
     frags_.first = rtps.fragmentStartingNum.value;
     frags_.second = frags_.first + (rtps.fragmentsInSubmessage - 1);
+    total_frags_ = (rtps.sampleSize / rtps.fragmentSize) + (rtps.sampleSize % rtps.fragmentSize ? 1 : 0);
   }
 
   return header.valid();
@@ -873,7 +874,7 @@ RtpsUdpReceiveStrategy::reassemble(ReceivedDataSample& data)
 {
   using namespace RTPS;
   receiver_.fill_header(data.header_); // set publication_id_.guidPrefix
-  if (reassembly_.reassemble(frags_, data)) {
+  if (link_->is_target(data.header_.publication_id_) && reassembly_.reassemble(frags_, data, total_frags_)) {
 
     // Reassembly was successful, replace DataFrag with Data.  This doesn't have
     // to be a fully-formed DataSubmessage, just enough for this class to use
@@ -942,14 +943,17 @@ RtpsUdpReceiveStrategy::remove_fragments(const SequenceRange& range,
 bool
 RtpsUdpReceiveStrategy::has_fragments(const SequenceRange& range,
                                       const RepoId& pub_id,
-                                      FragmentInfo* frag_info)
+                                      FragmentInfo* frag_info,
+                                      FragmentTotalInfo* total_info)
 {
   for (SequenceNumber sn = range.first; sn <= range.second; ++sn) {
-    if (reassembly_.has_frags(sn, pub_id)) {
-      if (frag_info) {
+    ACE_UINT32 total_frags = 0;
+    if (reassembly_.has_frags(sn, pub_id, total_frags)) {
+      if (frag_info && total_info) {
         std::pair<SequenceNumber, RTPS::FragmentNumberSet> p;
         p.first = sn;
         frag_info->push_back(p);
+        total_info->push_back(total_frags);
         RTPS::FragmentNumberSet& missing_frags = frag_info->back().second;
         missing_frags.numBits = 0; // make sure this is a valid number before passing to get_gaps
         missing_frags.bitmap.length(8); // start at max length

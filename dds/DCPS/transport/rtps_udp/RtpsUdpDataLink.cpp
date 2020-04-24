@@ -2536,6 +2536,7 @@ RtpsUdpDataLink::RtpsReader::generate_nack_frags_i(NackFragSubmessageVec& nf,
   typedef OPENDDS_MAP(SequenceNumber, RTPS::FragmentNumber_t)::iterator iter_t;
   typedef RtpsUdpReceiveStrategy::FragmentInfo::value_type Frag_t;
   RtpsUdpReceiveStrategy::FragmentInfo frag_info;
+  RtpsUdpReceiveStrategy::FragmentTotalInfo total_info;
 
   // This is an internal method, locks already locked,
   // we just need a local handle to the link
@@ -2545,18 +2546,20 @@ RtpsUdpDataLink::RtpsReader::generate_nack_frags_i(NackFragSubmessageVec& nf,
   // 1. sequence #s in the reception gaps that we have partially received
   OPENDDS_VECTOR(SequenceRange) missing = wi.recvd_.missing_sequence_ranges();
   for (size_t i = 0; i < missing.size(); ++i) {
-    link->receive_strategy()->has_fragments(missing[i], pub_id, &frag_info);
+    link->receive_strategy()->has_fragments(missing[i], pub_id, &frag_info, &total_info);
   }
   // 1b. larger than the last received seq# but less than the heartbeat.lastSN
   if (!wi.recvd_.empty()) {
     const SequenceRange range(wi.recvd_.high(), wi.hb_range_.second);
-    link->receive_strategy()->has_fragments(range, pub_id, &frag_info);
+    link->receive_strategy()->has_fragments(range, pub_id, &frag_info, &total_info);
   }
   for (size_t i = 0; i < frag_info.size(); ++i) {
     // If we've received a HeartbeatFrag, we know the last (available) frag #
     const iter_t heartbeat_frag = wi.frags_.find(frag_info[i].first);
     if (heartbeat_frag != wi.frags_.end()) {
-      extend_bitmap_range(frag_info[i].second, heartbeat_frag->second.value);
+      extend_bitmap_range(frag_info[i].second, std::min(heartbeat_frag->second.value, total_info[i]));
+    } else if (frag_info[i].second.numBits == 1 && total_info[i]) {
+      extend_bitmap_range(frag_info[i].second, total_info[i]);
     }
   }
 
@@ -2574,8 +2577,8 @@ RtpsUdpDataLink::RtpsReader::generate_nack_frags_i(NackFragSubmessageVec& nf,
     }
 
     const SequenceRange range(iter->first, iter->first);
-    if (link->receive_strategy()->has_fragments(range, pub_id, &frag_info)) {
-      extend_bitmap_range(frag_info.back().second, iter->second.value);
+    if (link->receive_strategy()->has_fragments(range, pub_id, &frag_info, &total_info)) {
+      extend_bitmap_range(frag_info.back().second, std::min(iter->second.value, total_info.back()));
     } else {
       // it was not in the recv strategy, so the entire range is "missing"
       frag_info.push_back(Frag_t(iter->first, RTPS::FragmentNumberSet()));
@@ -2620,7 +2623,7 @@ RtpsUdpDataLink::extend_bitmap_range(RTPS::FragmentNumberSet& fnSet,
     return; // can't extend to some number under the base
   }
   // calculate the index to the extent to determine the new_num_bits
-  const CORBA::ULong new_num_bits = std::min(CORBA::ULong(255),
+  const CORBA::ULong new_num_bits = std::min(CORBA::ULong(256),
                                              extent - fnSet.bitmapBase.value + 1),
                      len = (new_num_bits + 31) / 32;
   if (new_num_bits < fnSet.numBits) {
@@ -2628,7 +2631,7 @@ RtpsUdpDataLink::extend_bitmap_range(RTPS::FragmentNumberSet& fnSet,
   }
   fnSet.bitmap.length(len);
   // We are missing from one past old bitmap end to the new end
-  DisjointSequence::fill_bitmap_range(fnSet.numBits + 1, new_num_bits,
+  DisjointSequence::fill_bitmap_range(fnSet.numBits, new_num_bits,
                                       fnSet.bitmap.get_buffer(), len,
                                       fnSet.numBits);
 }

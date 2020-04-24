@@ -25,9 +25,9 @@ public:
   /// is set.  Returns true/false to indicate if data should be delivered to
   /// the datalink.  The 'data' argument may be modified by this method.
   bool reassemble(const SequenceNumber& transportSeq, bool firstFrag,
-                  ReceivedDataSample& data);
+                  ReceivedDataSample& data, ACE_UINT32 total_frags = 0);
 
-  bool reassemble(const SequenceRange& seqRange, ReceivedDataSample& data);
+  bool reassemble(const SequenceRange& seqRange, ReceivedDataSample& data, ACE_UINT32 total_frags = 0);
 
   /// Called by TransportReceiveStrategy to indicate that we can
   /// stop tracking partially-reassembled messages when we know the
@@ -41,6 +41,10 @@ public:
   /// DataSampleHeader sequence number from the given publication.
   bool has_frags(const SequenceNumber& seq, const RepoId& pub_id) const;
 
+  /// Returns true if this object is storing fragments for the given
+  /// DataSampleHeader sequence number from the given publication.
+  bool has_frags(const SequenceNumber& seq, const RepoId& pub_id, ACE_UINT32& total_frags) const;
+
   /// Populates bitmap for missing fragment sequence numbers and set numBits
   /// for the given message sequence and publisher ID.
   /// @returns the base fragment sequence number for bit zero in the bitmap
@@ -51,7 +55,7 @@ public:
 private:
 
   bool reassemble_i(const SequenceRange& seqRange, bool firstFrag,
-                    ReceivedDataSample& data);
+                    ReceivedDataSample& data, ACE_UINT32 total_frags);
 
   // A FragKey represents the identifier for an original (pre-fragmentation)
   // message.  Since DataSampleHeader sequence numbers are distinct for each
@@ -90,6 +94,9 @@ private:
   // a null ACE_Message_Block*, it's one that was data_unavailable().
   typedef OPENDDS_MAP(FragKey, OPENDDS_LIST(FragRange) ) FragMap;
   FragMap fragments_;
+
+  typedef OPENDDS_MAP(FragKey, ACE_UINT32) FragTotalMap;
+  FragTotalMap total_fragments_;
 
   OPENDDS_SET(FragKey) have_first_;
 

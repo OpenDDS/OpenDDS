@@ -139,7 +139,7 @@ TransportReassembly::insert(OPENDDS_LIST(FragRange)& flist,
         }
       }
       return true;
-    } else if (fr.transport_seq_.first == seqRange.first && fr.transport_seq_.second == seqRange.second) {
+    } else if (fr.transport_seq_.first <= seqRange.first && fr.transport_seq_.second >= seqRange.second) {
       VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::insert() "
         "duplicate fragment range, dropping\n"));
       return false;
@@ -157,7 +157,20 @@ bool
 TransportReassembly::has_frags(const SequenceNumber& seq,
                                const RepoId& pub_id) const
 {
-  return fragments_.count(FragKey(pub_id, seq));
+  return fragments_.count(FragKey(pub_id, seq)) > 0;
+}
+
+bool
+TransportReassembly::has_frags(const SequenceNumber& seq,
+                               const RepoId& pub_id,
+                               ACE_UINT32& total_frags) const
+{
+  FragKey key(pub_id, seq);
+  FragTotalMap::const_iterator iter = total_fragments_.find(key);
+  if (iter != total_fragments_.end()) {
+    total_frags = iter->second;
+  }
+  return fragments_.count(key) > 0;
 }
 
 CORBA::ULong
@@ -214,24 +227,27 @@ TransportReassembly::get_gaps(const SequenceNumber& seq, const RepoId& pub_id,
 
 bool
 TransportReassembly::reassemble(const SequenceRange& seqRange,
-                                ReceivedDataSample& data)
+                                ReceivedDataSample& data,
+                                ACE_UINT32 total_frags)
 {
-  return reassemble_i(seqRange, seqRange.first == 1, data);
+  return reassemble_i(seqRange, seqRange.first == 1, data, total_frags);
 }
 
 bool
 TransportReassembly::reassemble(const SequenceNumber& transportSeq,
                                 bool firstFrag,
-                                ReceivedDataSample& data)
+                                ReceivedDataSample& data,
+                                ACE_UINT32 total_frags)
 {
   return reassemble_i(SequenceRange(transportSeq, transportSeq),
-                      firstFrag, data);
+                      firstFrag, data, total_frags);
 }
 
 bool
 TransportReassembly::reassemble_i(const SequenceRange& seqRange,
                                   bool firstFrag,
-                                  ReceivedDataSample& data)
+                                  ReceivedDataSample& data,
+                                  ACE_UINT32 total_frags)
 {
   if (Transport_debug_level > 5) {
     GuidConverter conv(data.header_.publication_id_);
@@ -245,6 +261,15 @@ TransportReassembly::reassemble_i(const SequenceRange& seqRange,
 
   if (firstFrag) {
     have_first_.insert(key);
+  }
+
+  if (total_frags) {
+    FragTotalMap::iterator iter = total_fragments_.find(key);
+    if (iter == total_fragments_.end()) {
+      total_fragments_[key] = total_frags;
+    } else if (iter->second < total_frags) {
+      iter->second = total_frags;
+    }
   }
 
   FragMap::iterator iter = fragments_.find(key);
@@ -270,6 +295,7 @@ TransportReassembly::reassemble_i(const SequenceRange& seqRange,
       && !iter->second.front().rec_ds_.header_.more_fragments_) {
     swap(data, iter->second.front().rec_ds_);
     fragments_.erase(iter);
+    total_fragments_.erase(key);
     have_first_.erase(key);
     VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::reassemble() "
       "removed frag, returning %C\n", data.sample_ ? "true" : "false"));
@@ -339,6 +365,7 @@ TransportReassembly::data_unavailable(const SequenceNumber& dataSampleSeq,
 {
   const FragKey key(pub_id, dataSampleSeq);
   fragments_.erase(key);
+  total_fragments_.erase(key);
   have_first_.erase(key);
 }
 
