@@ -1527,58 +1527,58 @@ namespace XTypes {
 namespace DCPS {
 
 template<typename T>
-const XTypes::TypeObject& getTypeObject();
+const XTypes::TypeObject& getMinimalTypeObject();
 
 template<typename T>
-RcHandle<XTypes::TypeIdentifier> getTypeIdentifier();
+RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier();
 
 template<> OpenDDS_Dcps_Export
-RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<void>();
+RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<void>();
 
 template<> OpenDDS_Dcps_Export
-RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::Boolean>();
+RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_CDR::Boolean>();
 
 template<> OpenDDS_Dcps_Export
-RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::Octet>();
+RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_CDR::Octet>();
 
 template<> OpenDDS_Dcps_Export
-RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::Short>();
+RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_CDR::Short>();
 
 template<> OpenDDS_Dcps_Export
-RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::Long>();
+RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_CDR::Long>();
 
 template<> OpenDDS_Dcps_Export
-RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::LongLong>();
+RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_CDR::LongLong>();
 
 template<> OpenDDS_Dcps_Export
-RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::UShort>();
+RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_CDR::UShort>();
 
 template<> OpenDDS_Dcps_Export
-RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::ULong>();
+RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_CDR::ULong>();
 
 template<> OpenDDS_Dcps_Export
-RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::ULongLong>();
+RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_CDR::ULongLong>();
 
 template<> OpenDDS_Dcps_Export
-RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::Float>();
+RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_CDR::Float>();
 
 template<> OpenDDS_Dcps_Export
-RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::Double>();
+RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_CDR::Double>();
 
 template<> OpenDDS_Dcps_Export
-RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::LongDouble>();
+RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_CDR::LongDouble>();
 
 template<> OpenDDS_Dcps_Export
-RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::Char>();
+RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_CDR::Char>();
 
 template<> OpenDDS_Dcps_Export
-RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_OutputCDR::from_wchar>();
+RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_OutputCDR::from_wchar>();
 
 template<> OpenDDS_Dcps_Export
-RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::Char*>();
+RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_CDR::Char*>();
 
 template<> OpenDDS_Dcps_Export
-RcHandle<XTypes::TypeIdentifier> getTypeIdentifier<ACE_CDR::WChar*>();
+RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_CDR::WChar*>();
 
 } // namespace DCPS
 } // namespace OpenDDS
