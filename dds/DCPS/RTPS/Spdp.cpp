@@ -382,7 +382,7 @@ Spdp::write_secure_updates()
 {
   if (shutdown_flag_.value()) { return; }
 
-  const Security::SPDPdiscoveredParticipantData& pdata =
+  const Security::SPDPdiscoveredParticipantData pdata =
     build_local_pdata(Security::DPDK_SECURE);
 
   sedp_.write_dcps_participant_secure(pdata, GUID_UNKNOWN);
@@ -1511,8 +1511,7 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
 
 void Spdp::update_agent_info(const DCPS::RepoId&, const ICE::AgentInfo&)
 {
-  if (is_security_enabled())
-  {
+  if (is_security_enabled()) {
     write_secure_updates();
   }
 }
@@ -1685,8 +1684,9 @@ bool Spdp::announce_domain_participant_qos()
 {
 
 #ifdef OPENDDS_SECURITY
-  if (is_security_enabled())
+  if (is_security_enabled()) {
     write_secure_updates();
+  }
 #endif
 
   return true;
@@ -1826,6 +1826,20 @@ Spdp::SpdpTransport::open()
 
   job_queue_ = DCPS::make_rch<DCPS::JobQueue>(reactor);
 
+  // Add the endpoint before any sending occurs.
+#ifdef OPENDDS_SECURITY
+  ICE::Endpoint* endpoint = get_ice_endpoint();
+  if (endpoint) {
+    ICE::Agent::instance()->add_endpoint(endpoint);
+    ice_endpoint_added_ = true;
+  }
+
+  // Now that the endpoint is added, SEDP can write the SPDP info.
+  if (outer_->is_security_enabled()) {
+    outer_->write_secure_updates();
+  }
+#endif
+
   local_sender_ = DCPS::make_rch<SpdpMulti>(reactor_task_.interceptor(), outer_->config_->resend_period(), ref(*this), &SpdpTransport::send_local);
   local_sender_->enable(TimeDuration());
 
@@ -1845,14 +1859,6 @@ Spdp::SpdpTransport::open()
       outer_->config_->use_rtps_relay()) {
     relay_beacon_->enable(false, outer_->config_->spdp_rtps_relay_beacon_period());
   }
-
-#ifdef OPENDDS_SECURITY
-  ICE::Endpoint* endpoint = get_ice_endpoint();
-  if (endpoint) {
-    ICE::Agent::instance()->add_endpoint(endpoint);
-    ice_endpoint_added_ = true;
-  }
-#endif
 
   DCPS::NetworkConfigMonitor_rch ncm = TheServiceParticipant->network_config_monitor();
   if (ncm) {
@@ -2681,7 +2687,7 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::join_multicast_group() - ")
                  ACE_TEXT("failed to join multicast group %C:%hu on %s: %p\n"),
-                 multicast_ipv6_address_str_.c_str(), mc_port_, all_interfaces ? "all interfaces" : ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()), ACE_TEXT("ACE_SOCK_Dgram_Mcast::join")));
+                 multicast_ipv6_address_str_.c_str(), mc_port_, all_interfaces ? ACE_TEXT("all interfaces") : ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()), ACE_TEXT("ACE_SOCK_Dgram_Mcast::join")));
     }
   }
 #endif
