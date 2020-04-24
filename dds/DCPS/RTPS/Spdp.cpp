@@ -382,7 +382,7 @@ Spdp::write_secure_updates()
 {
   if (shutdown_flag_.value()) { return; }
 
-  const Security::SPDPdiscoveredParticipantData& pdata =
+  const Security::SPDPdiscoveredParticipantData pdata =
     build_local_pdata(Security::DPDK_SECURE);
 
   sedp_.write_dcps_participant_secure(pdata, GUID_UNKNOWN);
@@ -1511,8 +1511,7 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
 
 void Spdp::update_agent_info(const DCPS::RepoId&, const ICE::AgentInfo&)
 {
-  if (is_security_enabled())
-  {
+  if (is_security_enabled()) {
     write_secure_updates();
   }
 }
@@ -1685,8 +1684,9 @@ bool Spdp::announce_domain_participant_qos()
 {
 
 #ifdef OPENDDS_SECURITY
-  if (is_security_enabled())
+  if (is_security_enabled()) {
     write_secure_updates();
+  }
 #endif
 
   return true;
@@ -1785,11 +1785,10 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
     ++participantId;
   }
 #ifdef ACE_HAS_IPV6
-  if (!open_unicast_ipv6_socket(port_common, participantId)) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::SpdpTransport() - ")
-               ACE_TEXT("failed to open IPV6 unicast socket %p\n")));
-    throw std::runtime_error("failed to open ipv6 unicast socket");
+  u_short port = uni_port_;
+
+  while (!open_unicast_ipv6_socket(port)) {
+    ++port;
   }
 #endif
 
@@ -1827,6 +1826,20 @@ Spdp::SpdpTransport::open()
 
   job_queue_ = DCPS::make_rch<DCPS::JobQueue>(reactor);
 
+  // Add the endpoint before any sending occurs.
+#ifdef OPENDDS_SECURITY
+  ICE::Endpoint* endpoint = get_ice_endpoint();
+  if (endpoint) {
+    ICE::Agent::instance()->add_endpoint(endpoint);
+    ice_endpoint_added_ = true;
+  }
+
+  // Now that the endpoint is added, SEDP can write the SPDP info.
+  if (outer_->is_security_enabled()) {
+    outer_->write_secure_updates();
+  }
+#endif
+
   local_sender_ = DCPS::make_rch<SpdpMulti>(reactor_task_.interceptor(), outer_->config_->resend_period(), ref(*this), &SpdpTransport::send_local);
   local_sender_->enable(TimeDuration());
 
@@ -1846,14 +1859,6 @@ Spdp::SpdpTransport::open()
       outer_->config_->use_rtps_relay()) {
     relay_beacon_->enable(false, outer_->config_->spdp_rtps_relay_beacon_period());
   }
-
-#ifdef OPENDDS_SECURITY
-  ICE::Endpoint* endpoint = get_ice_endpoint();
-  if (endpoint) {
-    ICE::Agent::instance()->add_endpoint(endpoint);
-    ice_endpoint_added_ = true;
-  }
-#endif
 
   DCPS::NetworkConfigMonitor_rch ncm = TheServiceParticipant->network_config_monitor();
   if (ncm) {
@@ -2555,10 +2560,9 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
 
 #ifdef ACE_HAS_IPV6
 bool
-Spdp::SpdpTransport::open_unicast_ipv6_socket(u_short port_common,
-                                              u_short participant_id)
+Spdp::SpdpTransport::open_unicast_ipv6_socket(u_short port)
 {
-  uni_port_ = port_common + outer_->config_->d1() + (outer_->config_->pg() * participant_id);
+  ipv6_uni_port_ = port;
 
   ACE_INET_Addr local_addr;
   OPENDDS_STRING spdpaddr = outer_->config_->spdp_local_address().c_str();
@@ -2568,22 +2572,25 @@ Spdp::SpdpTransport::open_unicast_ipv6_socket(u_short port_common,
   }
 
   local_addr.set_type(AF_INET6);
-  if (0 != local_addr.set(uni_port_, spdpaddr.c_str())) {
+  if (0 != local_addr.set(ipv6_uni_port_, spdpaddr.c_str())) {
     ACE_ERROR((
           LM_ERROR,
           ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_ipv6_socket() - ")
           ACE_TEXT("failed setting unicast ipv6 local_addr to port %d %p\n"),
-          uni_port_, ACE_TEXT("ACE_INET_Addr::set")));
+          ipv6_uni_port_, ACE_TEXT("ACE_INET_Addr::set")));
     throw std::runtime_error("failed to set unicast ipv6 local address");
   }
 
   if (unicast_ipv6_socket_.open(local_addr, PF_INET6) != 0) {
-    ACE_ERROR((
-               LM_ERROR,
-               ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_ipv6_socket() - ")
-               ACE_TEXT("failed to open_appropriate_socket_type unicast ipv6 socket on port %d %p.  "),
-               uni_port_, ACE_TEXT("ACE_SOCK_Dgram::open")));
-    throw std::runtime_error("failed to open unicast ipv6 socket");
+    if (DCPS::DCPS_debug_level > 3) {
+      ACE_DEBUG((
+                 LM_WARNING,
+                 ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_ipv6_socket() - ")
+                 ACE_TEXT("failed to open_appropriate_socket_type unicast ipv6 socket on port %d %p.  ")
+                 ACE_TEXT("Trying next port...\n"),
+                 uni_port_, ACE_TEXT("ACE_SOCK_Dgram::open")));
+    }
+    return false;
   }
 
   if (DCPS::DCPS_debug_level > 3) {
@@ -2591,7 +2598,7 @@ Spdp::SpdpTransport::open_unicast_ipv6_socket(u_short port_common,
           LM_INFO,
           ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_ipv6_socket() - ")
           ACE_TEXT("opened unicast ipv6 socket on port %d\n"),
-          uni_port_));
+          ipv6_uni_port_));
   }
 
   if (!DCPS::set_socket_multicast_ttl(unicast_ipv6_socket_, outer_->config_->ttl())) {
@@ -2599,7 +2606,7 @@ Spdp::SpdpTransport::open_unicast_ipv6_socket(u_short port_common,
                ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_ipv6_socket() - ")
                ACE_TEXT("failed to set TTL value to %d ")
                ACE_TEXT("for port:%hu %p\n"),
-               outer_->config_->ttl(), uni_port_, ACE_TEXT("DCPS::set_socket_multicast_ttl:")));
+               outer_->config_->ttl(), ipv6_uni_port_, ACE_TEXT("DCPS::set_socket_multicast_ttl:")));
     throw std::runtime_error("failed to set TTL");
   }
 
@@ -2680,7 +2687,7 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::join_multicast_group() - ")
                  ACE_TEXT("failed to join multicast group %C:%hu on %s: %p\n"),
-                 multicast_ipv6_address_str_.c_str(), mc_port_, all_interfaces ? "all interfaces" : ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()), ACE_TEXT("ACE_SOCK_Dgram_Mcast::join")));
+                 multicast_ipv6_address_str_.c_str(), mc_port_, all_interfaces ? ACE_TEXT("all interfaces") : ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()), ACE_TEXT("ACE_SOCK_Dgram_Mcast::join")));
     }
   }
 #endif

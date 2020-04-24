@@ -155,7 +155,7 @@ public:
   u_short get_sedp_port() const { return sedp_.local_address().get_port_number(); }
 
 #ifdef ACE_HAS_IPV6
-  u_short get_ipv6_spdp_port() const { return tport_ ? tport_->uni_port_ : 0; }
+  u_short get_ipv6_spdp_port() const { return tport_ ? tport_->ipv6_uni_port_ : 0; }
 
   u_short get_ipv6_sedp_port() const { return sedp_.ipv6_local_address().get_port_number(); }
 #endif
@@ -236,7 +236,7 @@ private:
     void dispose_unregister();
     bool open_unicast_socket(u_short port_common, u_short participant_id);
 #ifdef ACE_HAS_IPV6
-    bool open_unicast_ipv6_socket(u_short port_common, u_short participant_id);
+    bool open_unicast_ipv6_socket(u_short port);
 #endif
     void acknowledge();
 
@@ -273,6 +273,7 @@ private:
     OPENDDS_STRING multicast_address_str_;
     ACE_SOCK_Dgram_Mcast multicast_socket_;
 #ifdef ACE_HAS_IPV6
+    u_short ipv6_uni_port_;
     ACE_SOCK_Dgram unicast_ipv6_socket_;
     OPENDDS_STRING multicast_ipv6_interface_;
     ACE_INET_Addr multicast_ipv6_address_;
