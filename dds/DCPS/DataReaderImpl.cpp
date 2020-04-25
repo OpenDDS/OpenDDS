@@ -170,10 +170,10 @@ void DataReaderImpl::init(
     topic_servant_ = a_topic;
   }
 
+#ifndef DDS_HAS_MINIMUM_BIT
   CORBA::String_var topic_name = a_topic_desc->get_name();
-
-#if !defined (DDS_HAS_MINIMUM_BIT)
-  is_bit_ = topicIsBIT(topic_name.in(), topic_servant_->type_name());
+  CORBA::String_var topic_type_name = a_topic_desc->get_type_name();
+  is_bit_ = topicIsBIT(topic_name.in(), topic_type_name.in());
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
   qos_ = qos;
