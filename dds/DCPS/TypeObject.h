@@ -864,6 +864,18 @@ namespace XTypes {
     UnionMemberFlag             member_flags;
     TypeIdentifierPtr    type_id;
     UnionCaseLabelSeq           label_seq;
+
+    CommonUnionMember() {}
+
+    CommonUnionMember(const MemberId& a_member_id,
+                      const UnionMemberFlag& a_member_flags,
+                      const TypeIdentifierPtr& a_type_id,
+                      const UnionCaseLabelSeq& a_label_seq)
+      : member_id(a_member_id)
+      , member_flags(a_member_flags)
+      , type_id(a_type_id)
+      , label_seq(a_label_seq)
+    {}
   };
 
   // Member of a union type
@@ -878,6 +890,19 @@ namespace XTypes {
   struct MinimalUnionMember {
     CommonUnionMember   common;
     MinimalMemberDetail detail;
+
+    MinimalUnionMember() {}
+
+    MinimalUnionMember(const CommonUnionMember& a_common,
+                       const MinimalMemberDetail& a_detail)
+      : common(a_common)
+      , detail(a_detail)
+    {}
+
+    bool operator<(const MinimalUnionMember& other) const
+    {
+      return common.member_id < other.common.member_id;
+    }
   };
   // Ordered by MinimalUnionMember.common.member_id
   typedef Sequence<MinimalUnionMember> MinimalUnionMemberSeq;
@@ -885,6 +910,14 @@ namespace XTypes {
   struct CommonDiscriminatorMember {
     UnionDiscriminatorFlag       member_flags;
     TypeIdentifierPtr     type_id;
+
+    CommonDiscriminatorMember() {}
+
+    CommonDiscriminatorMember(const UnionDiscriminatorFlag& a_member_flags,
+                              const TypeIdentifierPtr& a_type_id)
+      : member_flags(a_member_flags)
+      , type_id(a_type_id)
+    {}
   };
 
   // Member of a union type
@@ -897,6 +930,12 @@ namespace XTypes {
   // Member of a union type
   struct MinimalDiscriminatorMember {
     CommonDiscriminatorMember   common;
+
+    MinimalDiscriminatorMember() {}
+
+    MinimalDiscriminatorMember(const CommonDiscriminatorMember& a_common)
+      : common(a_common)
+    {}
   };
 
   struct CompleteUnionHeader {
@@ -905,6 +944,12 @@ namespace XTypes {
 
   struct MinimalUnionHeader {
     MinimalTypeDetail           detail;
+
+    MinimalUnionHeader() {}
+
+    MinimalUnionHeader(const MinimalTypeDetail& a_detail)
+      : detail(a_detail)
+    {}
   };
 
   struct CompleteUnionType {
