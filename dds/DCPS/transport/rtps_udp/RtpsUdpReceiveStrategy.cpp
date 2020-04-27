@@ -943,17 +943,14 @@ RtpsUdpReceiveStrategy::remove_fragments(const SequenceRange& range,
 bool
 RtpsUdpReceiveStrategy::has_fragments(const SequenceRange& range,
                                       const RepoId& pub_id,
-                                      FragmentInfo* frag_info,
-                                      FragmentTotalInfo* total_info)
+                                      FragmentInfo* frag_info)
 {
   for (SequenceNumber sn = range.first; sn <= range.second; ++sn) {
-    ACE_UINT32 total_frags = 0;
-    if (reassembly_.has_frags(sn, pub_id, total_frags)) {
-      if (frag_info && total_info) {
+    if (reassembly_.has_frags(sn, pub_id)) {
+      if (frag_info) {
         std::pair<SequenceNumber, RTPS::FragmentNumberSet> p;
         p.first = sn;
         frag_info->push_back(p);
-        total_info->push_back(total_frags);
         RTPS::FragmentNumberSet& missing_frags = frag_info->back().second;
         missing_frags.numBits = 0; // make sure this is a valid number before passing to get_gaps
         missing_frags.bitmap.length(8); // start at max length

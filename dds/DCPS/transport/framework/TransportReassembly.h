@@ -41,10 +41,6 @@ public:
   /// DataSampleHeader sequence number from the given publication.
   bool has_frags(const SequenceNumber& seq, const RepoId& pub_id) const;
 
-  /// Returns true if this object is storing fragments for the given
-  /// DataSampleHeader sequence number from the given publication.
-  bool has_frags(const SequenceNumber& seq, const RepoId& pub_id, ACE_UINT32& total_frags) const;
-
   /// Populates bitmap for missing fragment sequence numbers and set numBits
   /// for the given message sequence and publisher ID.
   /// @returns the base fragment sequence number for bit zero in the bitmap
@@ -88,17 +84,25 @@ private:
     ReceivedDataSample rec_ds_;
   };
 
-  // Each element of the FragMap "fragments_" represents one sent message
+  // Each element of the FragRangeList represents one sent message
   // (one DataSampleHeader before fragmentation).  The list must have at
   // least one value in it.  If a FragRange in the list has a sample_ with
   // a null ACE_Message_Block*, it's one that was data_unavailable().
-  typedef OPENDDS_MAP(FragKey, OPENDDS_LIST(FragRange) ) FragMap;
-  FragMap fragments_;
+  typedef OPENDDS_LIST(FragRange) FragRangeList;
 
-  typedef OPENDDS_MAP(FragKey, ACE_UINT32) FragTotalMap;
-  FragTotalMap total_fragments_;
+  struct FragInfo {
+    FragInfo()
+      : have_first_(false), range_list_(), total_frags_(0) {}
+    FragInfo(bool hf, const FragRangeList& rl, ACE_UINT32 tf)
+      : have_first_(hf), range_list_(rl), total_frags_(tf) {}
 
-  OPENDDS_SET(FragKey) have_first_;
+    bool have_first_;
+    FragRangeList range_list_;
+    ACE_UINT32 total_frags_;
+  };
+
+  typedef OPENDDS_MAP(FragKey, FragInfo) FragInfoMap;
+  FragInfoMap fragments_;
 
   static bool insert(OPENDDS_LIST(FragRange)& flist,
                      const SequenceRange& seqRange,
