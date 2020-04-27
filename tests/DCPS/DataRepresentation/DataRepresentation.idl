@@ -1,0 +1,23 @@
+@topic
+struct DefaultedType {
+  long value;
+};
+
+@topic
+@::OpenDDS::data_representation(XCDR1)
+@::OpenDDS::data_representation(UNALIGNED_CDR)
+struct ExplicitDefaultType {
+  long value;
+};
+
+@topic
+@::OpenDDS::data_representation(XCDR1)
+struct Xcdr1Type {
+  long value;
+};
+
+@topic
+@::OpenDDS::data_representation(XML)
+struct XmlType {
+  long value;
+};
