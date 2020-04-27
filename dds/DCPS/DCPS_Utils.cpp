@@ -416,23 +416,18 @@ Encoding::Kind repr_ext_to_encoding_kind(
 }
 
 void check_data_representation_qos(
-  DDS::DataRepresentationIdSeq& representations_allowed_by_qos,
-  const DDS::DataRepresentationIdSeq& representations_allowed_by_type)
+  DDS::DataRepresentationIdSeq& child,
+  const DDS::DataRepresentationIdSeq& parent)
 {
-  if (!representations_allowed_by_qos.length()) {
-    const CORBA::ULong type_repr_count =
-      representations_allowed_by_type.length();
-    if (type_repr_count) {
-      representations_allowed_by_qos.length(type_repr_count);
-      for (CORBA::ULong i = 0; i < type_repr_count; ++i) {
-        representations_allowed_by_qos[i] = representations_allowed_by_type[i];
-      }
+  if (!child.length()) {
+    if (parent.length()) {
+      child = parent;
     } else {
       // If no direction on what to use, use XCDR (XTypes 1.3 7.6.3.1.1) and
       // unaligned CDR.
-      representations_allowed_by_qos.length(2);
-      representations_allowed_by_qos[0] = DDS::XCDR_DATA_REPRESENTATION;
-      representations_allowed_by_qos[1] = UNALIGNED_CDR_DATA_REPRESENTATION;
+      child.length(2);
+      child[0] = DDS::XCDR_DATA_REPRESENTATION;
+      child[1] = UNALIGNED_CDR_DATA_REPRESENTATION;
     }
   }
 }

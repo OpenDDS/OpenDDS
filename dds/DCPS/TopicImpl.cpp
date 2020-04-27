@@ -42,6 +42,12 @@ TopicImpl::TopicImpl(const char*                    topic_name,
   inconsistent_topic_status_.total_count = 0;
   inconsistent_topic_status_.total_count_change = 0;
   monitor_.reset(TheServiceParticipant->monitor_factory_->create_topic_monitor(this));
+
+  // Make sure Data Representation QoS is initialized
+  DDS::DataRepresentationIdSeq type_allowed_reprs;
+  type_support_->representations_allowed_by_type(type_allowed_reprs);
+  DCPS::check_data_representation_qos(
+    qos_.representation.value, type_allowed_reprs);
 }
 
 TopicImpl::~TopicImpl()
@@ -58,9 +64,10 @@ DDS::ReturnCode_t TopicImpl::set_qos(const DDS::TopicQos& qos_arg)
   OPENDDS_NO_DURABILITY_KIND_TRANSIENT_PERSISTENT_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
 
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos)) {
+    // Make sure Data Representation QoS is initialized
     DDS::DataRepresentationIdSeq type_allowed_reprs;
     type_support_->representations_allowed_by_type(type_allowed_reprs);
-    check_data_representation_qos(
+    DCPS::check_data_representation_qos(
       qos.representation.value, type_allowed_reprs);
 
     if (qos_ == qos)
@@ -142,9 +149,10 @@ TopicImpl::enable()
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
+  // Make sure Data Representation QoS is initialized
   DDS::DataRepresentationIdSeq type_allowed_reprs;
   type_support_->representations_allowed_by_type(type_allowed_reprs);
-  check_data_representation_qos(
+  DCPS::check_data_representation_qos(
     qos_.representation.value, type_allowed_reprs);
 
   if (id_ == GUID_UNKNOWN) {
@@ -225,6 +233,12 @@ TopicImpl::inconsistent_topic(int count)
   }
 
   notify_status_condition();
+}
+
+void TopicImpl::check_data_representation_qos(
+  DDS::DataRepresentationIdSeq& qos) const
+{
+  DCPS::check_data_representation_qos(qos, qos_.representation.value);
 }
 
 } // namespace DCPS

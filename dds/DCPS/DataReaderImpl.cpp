@@ -856,11 +856,8 @@ DDS::ReturnCode_t DataReaderImpl::set_qos(const DDS::DataReaderQos& qos_arg)
   OPENDDS_NO_DURABILITY_KIND_TRANSIENT_PERSISTENT_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
 
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos)) {
-    DDS::DataRepresentationIdSeq type_allowed_reprs;
-    topic_servant_->get_type_support()->representations_allowed_by_type(
-      type_allowed_reprs);
-    check_data_representation_qos(
-      qos.representation.value, type_allowed_reprs);
+    // Make sure Data Representation QoS is initialized
+    topic_servant_->check_data_representation_qos(qos_.representation.value);
 
     if (qos_ == qos)
       return DDS::RETCODE_OK;
@@ -1175,11 +1172,8 @@ DataReaderImpl::enable()
     dp_id_ = participant->get_id();
   }
 
-  DDS::DataRepresentationIdSeq type_allowed_reprs;
-  topic_servant_->get_type_support()->representations_allowed_by_type(
-    type_allowed_reprs);
-  check_data_representation_qos(
-    qos_.representation.value, type_allowed_reprs);
+  // Make sure Data Representation QoS is initialized
+  topic_servant_->check_data_representation_qos(qos_.representation.value);
 
   if (qos_.history.kind == DDS::KEEP_ALL_HISTORY_QOS) {
     // The spec says qos_.history.depth is "has no effect"
