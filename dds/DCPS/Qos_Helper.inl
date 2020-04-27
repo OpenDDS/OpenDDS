@@ -1398,7 +1398,7 @@ bool Qos_Helper::copy_from_topic_qos(DDS::DataReaderQos& a_datareader_qos,
                                      const DDS::TopicQos& a_topic_qos)
 {
   if (!Qos_Helper::valid(a_topic_qos) || !Qos_Helper::consistent(a_topic_qos)) {
-        return false;
+    return false;
   }
     // the caller can get the default before calling this
     // method if it wants to.

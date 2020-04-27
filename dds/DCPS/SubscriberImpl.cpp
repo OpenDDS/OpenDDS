@@ -1046,7 +1046,7 @@ SubscriberImpl::validate_datareader_qos(const DDS::DataReaderQos & qos,
                    ACE_TEXT("DATAREADER_QOS_USE_TOPIC_QOS can not be used ")
                    ACE_TEXT("to create a MultiTopic DataReader.\n")));
       }
-      return DDS::DataReader::_nil();
+      return false;
     }
 #else
     ACE_UNUSED_ARG(mt);
