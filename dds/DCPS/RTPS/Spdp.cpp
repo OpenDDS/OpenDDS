@@ -1865,7 +1865,13 @@ Spdp::SpdpTransport::open()
     ncm->add_listener(*this);
   } else {
     DCPS::NetworkInterface nic(0, multicast_interface_, true);
-    nic.addresses.insert(ACE_INET_Addr());
+    ACE_INET_Addr addr;
+    addr.set_type(AF_INET);
+    nic.addresses.insert(addr);
+#ifdef ACE_HAS_IPV6
+    addr.set_type(AF_INET6);
+    nic.addresses.insert(addr);
+#endif
     join_multicast_group(nic, true);
   }
 }
