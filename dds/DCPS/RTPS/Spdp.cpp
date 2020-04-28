@@ -1751,13 +1751,6 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
        end = addrs.end(); it != end; ++it) {
     send_addrs_.insert(ACE_INET_Addr(it->c_str()));
   }
-
-#ifdef OPENDDS_SECURITY
-  ICE::Endpoint* endpoint = get_ice_endpoint();
-  if (endpoint) {
-    ICE::Agent::instance()->add_endpoint(endpoint);
-  }
-#endif
 }
 
 void
@@ -1797,6 +1790,13 @@ Spdp::SpdpTransport::open()
       outer_->config_->use_rtps_relay()) {
     relay_beacon_->enable(false, outer_->config_->spdp_rtps_relay_beacon_period());
   }
+
+#ifdef OPENDDS_SECURITY
+  ICE::Endpoint* endpoint = get_ice_endpoint();
+  if (endpoint) {
+    ICE::Agent::instance()->add_endpoint(endpoint);
+  }
+#endif
 }
 
 Spdp::SpdpTransport::~SpdpTransport()

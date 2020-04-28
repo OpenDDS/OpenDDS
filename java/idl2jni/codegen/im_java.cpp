@@ -486,46 +486,46 @@ bool idl_mapping_java::gen_enum(UTL_ScopedName *name,
                                 const std::vector<AST_EnumVal *> &contents, const char *repoid)
 {
   ostringstream oss;
-  const char *enum_name = name->last_component()->get_string();
-  oss <<
-  "  private static " << enum_name << "[] __values = {\n";
 
+  const char *enum_name = name->last_component()->get_string();
+  oss << "  private static " << enum_name << "[] __values = {\n";
   for (size_t i = 0; i < contents.size(); ++i) {
-    oss <<
-    "    new " << enum_name << '(' << i << ')';
+    oss << "    new " << enum_name << '(' << i << ')';
 
     if (i < contents.size() - 1) oss << ',';
 
     oss << '\n';
   }
-
-  oss
-  << "  };\n\n";
+  oss << "  };\n\n";
 
   for (size_t i = 0; i < contents.size(); ++i) {
     const char *enumerator_name = contents[i]->local_name()->get_string();
     oss <<
-    "  public static final int _" << enumerator_name
-    << " = " << i << ";\n"
-    "  public static final " << enum_name << ' '
-    << enumerator_name << " = __values[" << i << "];\n\n";
+      "  public static final int _" << enumerator_name << " = " << i << ";\n"
+      "  public static final " << enum_name << ' ' << enumerator_name << " = __values[" << i << "];\n"
+      "\n";
   }
 
   oss <<
-  "  public int value() { return _value; }\n\n"
-  "  private int _value;\n\n"
-  "  public static " << enum_name << " from_int(int value) {\n"
-  "    if (value >= 0 && value < " << contents.size() << ") {\n"
-  "      return __values[value];\n"
-  "    } else {\n"
-  "      return new " << enum_name << "(value);\n"
-  "    }\n"
-  "  }\n\n"
-  "  protected " << enum_name << "(int value) { _value = value; }\n\n"
-  "  public Object readResolve()\n"
-  "      throws java.io.ObjectStreamException {\n"
-  "    return from_int(value());\n"
-  "  }\n\n";
+    "  public int value() { return _value; }\n"
+    "\n"
+    "  private int _value;\n"
+    "\n"
+    "  public static " << enum_name << " from_int(int value) {\n"
+    "    if (value >= 0 && value < " << contents.size() << ") {\n"
+    "      return __values[value];\n"
+    "    } else {\n"
+    "      return new " << enum_name << "(value);\n"
+    "    }\n"
+    "  }\n"
+    "\n"
+    "  protected " << enum_name << "(int value) { _value = value; }\n"
+    "\n"
+    "  public Object readResolve()\n"
+    "      throws java.io.ObjectStreamException {\n"
+    "    return from_int(value());\n"
+    "  }\n"
+    "\n";
 
   JavaName jn(name);
   return java_class_gen(jn, JCLASS,
@@ -648,11 +648,12 @@ bool idl_mapping_java::gen_interf(UTL_ScopedName *name, bool local,
   string extends_stub = string("i2jrt.TAO") +
                         (local ? "Local" : "") + "Object";
 
-  string allRepoIds = '"' + string(repoid) + '"',
-                      body_ops, body_stub =
-                        "  protected " + jn_stub.clazz_ + "(long ptr) {\n"
-                        "    super(ptr);\n"
-                        "  }\n\n";
+  string allRepoIds = '"' + string(repoid) + '"';
+  string body_ops;
+  string body_stub =
+    "  protected " + jn_stub.clazz_ + "(long ptr) {\n"
+    "    super(ptr);\n"
+    "  }\n\n";
 
   for (size_t i = 0; i < attrs.size(); ++i) {
     AST_Attribute *attr = attrs[i];
@@ -790,12 +791,12 @@ bool idl_mapping_java::gen_union(UTL_ScopedName *name,
                                  AST_Expression::ExprType udisc_type,
                                  const AST_Union::DefaultValue &default_value, const char *repoid)
 {
-  string body_branches,
-  disc_ty = type(discriminator),
-            disc_val = isEnum(discriminator) ? ".value()" : "",
-                       pre_disc_set = isEnum(discriminator) ? (disc_ty + ".from_int(") : "",
-                                      post_disc_set = isEnum(discriminator) ? ")" : "",
-                                                      default_disc_check;
+  string body_branches;
+  string disc_ty = type(discriminator);
+  string disc_val = isEnum(discriminator) ? ".value()" : "";
+  string pre_disc_set = isEnum(discriminator) ? (disc_ty + ".from_int(") : "";
+  string post_disc_set = isEnum(discriminator) ? ")" : "";
+  string default_disc_check;
   bool hasDefault(false);
 
   for (size_t i = 0; i < branches.size(); ++i) {

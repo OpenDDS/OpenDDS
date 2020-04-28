@@ -6,14 +6,17 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+
 #include "TopicImpl.h"
+
 #include "Qos_Helper.h"
 #include "FeatureDisabledQosCheck.h"
 #include "Definitions.h"
 #include "Service_Participant.h"
 #include "DomainParticipantImpl.h"
 #include "MonitorFactory.h"
-#include "dds/DCPS/transport/framework/TransportExceptions.h"
+#include "DCPS_Utils.h"
+#include "transport/framework/TransportExceptions.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -39,15 +42,21 @@ TopicImpl::TopicImpl(const char*                    topic_name,
   inconsistent_topic_status_.total_count = 0;
   inconsistent_topic_status_.total_count_change = 0;
   monitor_.reset(TheServiceParticipant->monitor_factory_->create_topic_monitor(this));
+
+  // Make sure Data Representation QoS is initialized
+  DDS::DataRepresentationIdSeq type_allowed_reprs;
+  type_support_->representations_allowed_by_type(type_allowed_reprs);
+  DCPS::check_data_representation_qos(
+    qos_.representation.value, type_allowed_reprs);
 }
 
 TopicImpl::~TopicImpl()
 {
 }
 
-DDS::ReturnCode_t
-TopicImpl::set_qos(const DDS::TopicQos & qos)
+DDS::ReturnCode_t TopicImpl::set_qos(const DDS::TopicQos& qos_arg)
 {
+  DDS::TopicQos qos = qos_arg;
 
   OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
   OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
@@ -55,6 +64,12 @@ TopicImpl::set_qos(const DDS::TopicQos & qos)
   OPENDDS_NO_DURABILITY_KIND_TRANSIENT_PERSISTENT_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
 
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos)) {
+    // Make sure Data Representation QoS is initialized
+    DDS::DataRepresentationIdSeq type_allowed_reprs;
+    type_support_->representations_allowed_by_type(type_allowed_reprs);
+    DCPS::check_data_representation_qos(
+      qos.representation.value, type_allowed_reprs);
+
     if (qos_ == qos)
       return DDS::RETCODE_OK;
 
@@ -134,6 +149,12 @@ TopicImpl::enable()
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
+  // Make sure Data Representation QoS is initialized
+  DDS::DataRepresentationIdSeq type_allowed_reprs;
+  type_support_->representations_allowed_by_type(type_allowed_reprs);
+  DCPS::check_data_representation_qos(
+    qos_.representation.value, type_allowed_reprs);
+
   if (id_ == GUID_UNKNOWN) {
     const DDS::DomainId_t dom_id = participant_->get_domain_id();
     Discovery_rch disco = TheServiceParticipant->get_discovery(dom_id);
@@ -212,6 +233,12 @@ TopicImpl::inconsistent_topic(int count)
   }
 
   notify_status_condition();
+}
+
+void TopicImpl::check_data_representation_qos(
+  DDS::DataRepresentationIdSeq& qos) const
+{
+  DCPS::check_data_representation_qos(qos, qos_.representation.value);
 }
 
 } // namespace DCPS

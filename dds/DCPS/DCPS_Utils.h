@@ -5,13 +5,16 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DCPS_UTILS_H
-#define DCPS_UTILS_H
+#ifndef OPENDDS_DDS_DCPS_DCPS_UTILS_H
+#define OPENDDS_DDS_DCPS_DCPS_UTILS_H
 
 #include "dcps_export.h"
-#include "dds/DdsDcpsInfrastructureC.h"
-#include "dds/DdsDcpsPublicationC.h"
-#include "dds/DdsDcpsInfoUtilsC.h"
+
+#include "Serializer.h"
+
+#include <dds/DdsDcpsInfrastructureC.h>
+#include <dds/DdsDcpsPublicationC.h>
+#include <dds/DdsDcpsInfoUtilsC.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -91,8 +94,22 @@ OpenDDS_Dcps_Export
 bool should_check_association_upon_change(const DDS::DomainParticipantQos & qos1,
                                           const DDS::DomainParticipantQos & qos2);
 
-}}
+OpenDDS_Dcps_Export
+Encoding::Kind repr_ext_to_encoding_kind(
+  DDS::DataRepresentationId_t repr, Encoding::Extensibility ext);
+
+/**
+ * If the representation sequence of the child is empty then fill it from the
+ * QoS of the parent.
+ */
+OpenDDS_Dcps_Export
+void check_data_representation_qos(
+  DDS::DataRepresentationIdSeq& child,
+  const DDS::DataRepresentationIdSeq& parent);
+
+} // namespace DCPS
+} // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif /* DCPS_UTILS_H */
+#endif /* OPENDDS_DDS_DCPS_DCPS_UTILS_H */

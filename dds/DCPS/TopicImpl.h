@@ -85,6 +85,12 @@ public:
 
   void inconsistent_topic(int count);
 
+  /**
+   * If the representation sequence of a reader or writer is empty then fill it
+   * either from the QoS of the topic or what the type allows.
+   */
+  void check_data_representation_qos(DDS::DataRepresentationIdSeq& qos) const;
+
 private:
   /// The topic qos
   DDS::TopicQos                qos_;

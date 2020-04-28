@@ -158,6 +158,7 @@ public:
 
   bool suppress_idl() const { return suppress_idl_; }
   bool suppress_typecode() const { return suppress_typecode_; }
+  bool suppress_xtypes() const { return suppress_xtypes_; }
 
   static bool writeFile(const char* fileName, const std::string &content);
 
@@ -209,8 +210,7 @@ public:
 
   ExtensibilityKind extensibility(AST_Decl* node) const;
 
-  OpenDDS::DataRepresentationKind default_data_representation(
-    AST_Decl* node) const;
+  OpenDDS::DataRepresentation data_representations(AST_Decl* node) const;
 
   unsigned get_id(
     AST_Structure* type, AST_Field* member, unsigned index) const;
@@ -219,7 +219,7 @@ private:
   /// Name of the IDL file we are processing.
   const char* filename_;
 
-  bool java_, suppress_idl_, suppress_typecode_,
+  bool java_, suppress_idl_, suppress_typecode_, suppress_xtypes_,
     no_default_gen_, generate_itl_, generate_v8_,
     generate_rapidjson_, face_ts_, printer_;
 
@@ -233,7 +233,7 @@ private:
   bool root_default_nested_;
   bool warn_about_dcps_data_type_;
   ExtensibilityKind default_extensibility_;
-  OpenDDS::DataRepresentationKind default_data_representation_;
+  OpenDDS::DataRepresentation default_data_representation_;
 
   bool is_nested(AST_Decl* node);
   bool is_default_nested(UTL_Scope* scope);

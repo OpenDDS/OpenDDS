@@ -45,6 +45,7 @@ BE_GlobalData::BE_GlobalData()
   , java_(false)
   , suppress_idl_(false)
   , suppress_typecode_(false)
+  , suppress_xtypes_(false)
   , no_default_gen_(false)
   , generate_itl_(false)
   , generate_v8_(false)
@@ -56,8 +57,8 @@ BE_GlobalData::BE_GlobalData()
   , root_default_nested_(true)
   , warn_about_dcps_data_type_(true)
   , default_extensibility_(extensibilitykind_appendable)
-  , default_data_representation_(OpenDDS::data_representation_kind_xcdr1)
 {
+  default_data_representation_.set_all(false);
 }
 
 BE_GlobalData::~BE_GlobalData()
@@ -394,6 +395,9 @@ BE_GlobalData::parse_args(long& i, char** av)
     case 't':
       suppress_typecode_ = true;
       break;
+    case 'x':
+      suppress_xtypes_ = true;
+      false;
     case 'a':
       // ignore, accepted for tao_idl compatibility
       break;
@@ -744,14 +748,14 @@ ExtensibilityKind BE_GlobalData::extensibility(AST_Decl* node) const
   return value;
 }
 
-OpenDDS::DataRepresentationKind BE_GlobalData::default_data_representation(
+OpenDDS::DataRepresentation BE_GlobalData::data_representations(
   AST_Decl* node) const
 {
   using namespace OpenDDS;
   DataRepresentationAnnotation* data_representation_annotation =
     dynamic_cast<DataRepresentationAnnotation*>(
       builtin_annotations_["::OpenDDS::@data_representation"]);
-  DataRepresentationKind value;
+  DataRepresentation value;
   if (!data_representation_annotation->node_value_exists(node, value)) {
     value = default_data_representation_;
   }

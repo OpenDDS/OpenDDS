@@ -123,6 +123,8 @@ void StaticEndpointManager::init_bit()
       // If the TopicQos becomes available, this can be populated.
       //data.topic_data = topic_details.qos_.topic_data;
       data.group_data = writer.publisher_qos.group_data;
+      data.representation = writer.qos.representation;
+
 #ifndef DDS_HAS_MINIMUM_BIT
       OpenDDS::DCPS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
       if (bit) { // bit may be null if the DomainParticipant is shutting down
@@ -166,6 +168,7 @@ void StaticEndpointManager::init_bit()
       // // If the TopicQos becomes available, this can be populated.
       //data.topic_data = topic_details.qos_.topic_data;
       data.group_data = reader.subscriber_qos.group_data;
+      data.representation = reader.qos.representation;
 
 #ifndef DDS_HAS_MINIMUM_BIT
       OpenDDS::DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();

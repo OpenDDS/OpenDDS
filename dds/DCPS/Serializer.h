@@ -76,6 +76,12 @@ public:
     ALIGN_MAX = ALIGN_CDR // Don't actually use this, this is for Serializer::ALIGN_PAD
   };
 
+  enum Extensibility {
+    FINAL,
+    APPENDABLE,
+    MUTABLE
+  };
+
   /**
    * XCDR version derived from the Encoding kind.
    */

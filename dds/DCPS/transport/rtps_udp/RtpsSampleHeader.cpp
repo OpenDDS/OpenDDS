@@ -257,6 +257,7 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
         for (CORBA::ULong i = 0; i < rtps.inlineQos.length(); ++i) {
           if (rtps.inlineQos[i]._d() == PID_KEY_HASH) {
             rds.sample_.reset(new ACE_Message_Block(20));
+            // TODO(iguessthislldo) Convert to Encoding
             // CDR_BE encapsuation scheme (endianness is not used for key hash)
             rds.sample_->copy("\x00\x00\x00\x00", 4);
             const CORBA::Octet* data = rtps.inlineQos[i].key_hash().value;
@@ -286,6 +287,7 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
     }
 
     if (rtps.smHeader.flags & (FLAG_D | FLAG_K_IN_DATA)) {
+      // TODO(iguessthislldo: Convert to use Encoding
       // Peek at the byte order from the encapsulation containing the payload.
       opendds.byte_order_ = payload_byte_order(rds);
     }

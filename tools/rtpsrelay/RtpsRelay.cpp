@@ -9,7 +9,6 @@
 #include "DomainStatisticsWriter.h"
 #include "HandlerStatisticsListener.h"
 #include "ParticipantListener.h"
-#include "ParticipantStatisticsListener.h"
 #include "PublicationListener.h"
 #include "ReaderListener.h"
 #include "RelayHandler.h"
@@ -80,7 +79,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   bool run_relay = true;
   bool publish_handler_statistics = true;
   bool publish_domain_statistics = true;
-  bool publish_participant_statistics = true;
   bool report_handler_statistics = false;
   bool report_domain_statistics = false;
   bool report_participant_statistics = false;
@@ -138,13 +136,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       publish_domain_statistics = ACE_OS::atoi(arg);
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-PublishParticipantStatistics"))) {
-      publish_participant_statistics = ACE_OS::atoi(arg);
+      config.publish_participant_statistics(ACE_OS::atoi(arg));
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-PublishStatistics"))) {
       bool flag = ACE_OS::atoi(arg);
       publish_handler_statistics = flag;
       publish_domain_statistics = flag;
-      publish_participant_statistics = flag;
+      config.publish_participant_statistics(flag);
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-ReportHandlerStatistics"))) {
       report_handler_statistics = ACE_OS::atoi(arg);
@@ -321,24 +319,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  ParticipantStatisticsTypeSupport_var participant_statistics_ts = new ParticipantStatisticsTypeSupportImpl;
-  CORBA::String_var participant_statistics_type_name = participant_statistics_ts->get_type_name();
-  if (participant_statistics_ts->register_type(relay_participant, "") != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to register ParticipantStatistics type\n")));
-    return EXIT_FAILURE;
-  }
-
-  DDS::Topic_var participant_statistics_topic =
-    relay_participant->create_topic("Participant Statistics",
-                                    participant_statistics_type_name,
-                                    TOPIC_QOS_DEFAULT, nullptr,
-                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-  if (!participant_statistics_topic) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to create Participant Statistics topic\n")));
-    return EXIT_FAILURE;
-  }
-
   DomainStatisticsTypeSupport_var domain_statistics_ts = new DomainStatisticsTypeSupportImpl;
   if (domain_statistics_ts->register_type(relay_participant, "") != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to register DomainStatistics type\n")));
@@ -391,7 +371,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   DDS::DataReaderListener_var handler_statistics_listener;
   DDS::DataReader_var handler_statistics_reader_var;
   if (report_handler_statistics) {
-    handler_statistics_listener = new HandlerStatisticsListener();
+    handler_statistics_listener = new HandlerStatisticsListener(report_participant_statistics);
     handler_statistics_reader_var = relay_subscriber->create_datareader(handler_statistics_topic, reader_qos,
                                                                         handler_statistics_listener,
                                                                         DDS::DATA_AVAILABLE_STATUS);
@@ -416,30 +396,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
   }
 
-  DDS::DataReaderListener_var participant_statistics_listener;
-  DDS::DataReader_var participant_statistics_reader_var;
-  if (report_participant_statistics) {
-    participant_statistics_listener = new ParticipantStatisticsListener();
-    participant_statistics_reader_var = relay_subscriber->create_datareader(participant_statistics_topic, reader_qos,
-                                                                            participant_statistics_listener,
-                                                                            DDS::DATA_AVAILABLE_STATUS);
-
-    if (!participant_statistics_reader_var) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: failed to create Participant Statistics data reader\n")));
-      return EXIT_FAILURE;
-    }
-  }
-
   // Setup statistics publishing.
   if (publish_handler_statistics && !config.handler_statistics_writer(relay_publisher->create_datawriter(handler_statistics_topic, writer_qos, nullptr, OpenDDS::DCPS::DEFAULT_STATUS_MASK))) {
     return EXIT_FAILURE;
   }
 
   if (publish_domain_statistics && !config.domain_statistics_writer(relay_publisher->create_datawriter(domain_statistics_topic, writer_qos, nullptr, OpenDDS::DCPS::DEFAULT_STATUS_MASK))) {
-    return EXIT_FAILURE;
-  }
-
-  if (publish_participant_statistics && !config.participant_statistics_writer(relay_publisher->create_datawriter(participant_statistics_topic, writer_qos, nullptr, OpenDDS::DCPS::DEFAULT_STATUS_MASK))) {
     return EXIT_FAILURE;
   }
 

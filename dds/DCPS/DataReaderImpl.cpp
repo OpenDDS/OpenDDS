@@ -6,8 +6,9 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+
 #include "DataReaderImpl.h"
-#include "tao/ORB_Core.h"
+
 #include "SubscriptionInstance.h"
 #include "ReceivedDataElementList.h"
 #include "DomainParticipantImpl.h"
@@ -20,23 +21,26 @@
 #include "SubscriberImpl.h"
 #include "Transient_Kludge.h"
 #include "Util.h"
+#include "DCPS_Utils.h"
 #include "RequestedDeadlineWatchdog.h"
 #include "QueryConditionImpl.h"
 #include "ReadConditionImpl.h"
 #include "MonitorFactory.h"
-#include "dds/DCPS/transport/framework/EntryExit.h"
-#include "dds/DCPS/transport/framework/TransportExceptions.h"
-#include "dds/DdsDcpsCoreC.h"
-#include "dds/DdsDcpsGuidTypeSupportImpl.h"
-#include "dds/DCPS/SafetyProfileStreams.h"
+#include "transport/framework/EntryExit.h"
+#include "transport/framework/TransportExceptions.h"
+#include "SafetyProfileStreams.h"
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "BuiltInTopicUtils.h"
-#include "dds/DdsDcpsCoreTypeSupportC.h"
+#include <dds/DdsDcpsCoreTypeSupportC.h>
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
+#include <dds/DdsDcpsCoreC.h>
+#include <dds/DdsDcpsGuidTypeSupportImpl.h>
 
-#include "ace/Reactor.h"
-#include "ace/Auto_Ptr.h"
-#include "ace/OS_NS_sys_time.h"
+#include <tao/ORB_Core.h>
+
+#include <ace/Reactor.h>
+#include <ace/Auto_Ptr.h>
+#include <ace/OS_NS_sys_time.h>
 
 #include <cstdio>
 #include <stdexcept>
@@ -843,15 +847,18 @@ DDS::ReturnCode_t DataReaderImpl::delete_contained_entities()
   return DDS::RETCODE_OK;
 }
 
-DDS::ReturnCode_t DataReaderImpl::set_qos(
-    const DDS::DataReaderQos & qos)
+DDS::ReturnCode_t DataReaderImpl::set_qos(const DDS::DataReaderQos& qos_arg)
 {
+  DDS::DataReaderQos qos = qos_arg;
 
   OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
   OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
   OPENDDS_NO_DURABILITY_KIND_TRANSIENT_PERSISTENT_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
 
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos)) {
+    // Make sure Data Representation QoS is initialized
+    topic_servant_->check_data_representation_qos(qos_.representation.value);
+
     if (qos_ == qos)
       return DDS::RETCODE_OK;
 
@@ -1164,6 +1171,9 @@ DataReaderImpl::enable()
   if (participant) {
     dp_id_ = participant->get_id();
   }
+
+  // Make sure Data Representation QoS is initialized
+  topic_servant_->check_data_representation_qos(qos_.representation.value);
 
   if (qos_.history.kind == DDS::KEEP_ALL_HISTORY_QOS) {
     // The spec says qos_.history.depth is "has no effect"

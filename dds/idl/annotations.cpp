@@ -358,6 +358,7 @@ std::string MutableAnnotation::name() const
   return "mutable";
 }
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 
   // @OpenDDS::data_representation ===========================================
@@ -370,7 +371,8 @@ namespace OpenDDS {
       "    enum Kind_t {\n"
       "      XCDR1,\n"
       "      XML,\n"
-      "      XCDR2\n"
+      "      XCDR2,\n"
+      "      UNALIGNED_CDR\n"
       "    };\n"
       "    Kind_t kind;\n"
       "  };\n"
@@ -382,33 +384,45 @@ namespace OpenDDS {
     return "data_representation";
   }
 
-  DataRepresentationKind DataRepresentationAnnotation::node_value(
-    AST_Decl* node) const
+  bool DataRepresentationAnnotation::node_value_exists(
+    AST_Decl* node, DataRepresentation& value) const
   {
-    DataRepresentationKind mask = data_representation_kind_none;
+    value = DataRepresentation();
+    bool found = false;
     if (node) {
       for (AST_Annotation_Appls::iterator i = node->annotations().begin();
           i != node->annotations().end(); ++i) {
-        mask = value_from_appl(i->get());
+        AST_Annotation_Appl* appl = i->get();
+        if (appl && appl->annotation_decl() == declaration()) {
+          found = true;
+          value.add(value_from_appl(appl));
+        }
       }
     }
-    return mask ? mask : default_value();
+    return found;
   }
 
-  DataRepresentationKind DataRepresentationAnnotation::value_from_appl(
+  DataRepresentation DataRepresentationAnnotation::value_from_appl(
     AST_Annotation_Appl* appl) const
   {
+    DataRepresentation value;
     if (appl && appl->annotation_decl() == declaration()) {
       switch (get_u32_annotation_member_value(appl, "kind")) {
-      case 0:
-        return data_representation_kind_xcdr1;
-      case 1:
-        return data_representation_kind_xml;
-      case 2:
-        return data_representation_kind_xcdr2;
+      case 0: // Kint_t::XCDR1
+        value.xcdr1 = true;
+        break;
+      case 1: // Kint_t::XML
+        value.xml = true;
+        break;
+      case 2: // Kint_t::XCDR2
+        value.xcdr2 = true;
+        break;
+      case 3: // Kint_t::UNALIGNED_CDR
+        value.unaligned_cdr = true;
+        break;
       }
     }
-    return data_representation_kind_none;
+    return value;
   }
 
   std::string DataRepresentationAnnotation::module() const
@@ -416,3 +430,4 @@ namespace OpenDDS {
     return "::OpenDDS::";
   }
 }
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

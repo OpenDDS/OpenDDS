@@ -12,14 +12,14 @@
 
 TEST(RapidJsonTest, ParseTest)
 {
-  std::ifstream ifs("RapidJsonTest.json");
+  std::ifstream ifs("RapidJsonTest.json", std::ios_base::in | std::ios_base::binary);
 
   ASSERT_EQ(ifs.good(), true);
 
   rapidjson::Document doc;
   rapidjson::IStreamWrapper isw(ifs);
 
-  doc.ParseStream(isw);
+  doc.ParseStream<rapidjson::kParseDefaultFlags , rapidjson::UTF8<>, rapidjson::IStreamWrapper>(isw);
   ASSERT_EQ(doc.IsObject(), true);
 
   Mod::Sample sample;
@@ -44,7 +44,13 @@ TEST(RapidJsonTest, ParseTest)
   ASSERT_EQ(sample.bt.b, false);
   ASSERT_EQ(sample.bt.c, '\r');
   ASSERT_EQ(std::string(sample.bt.str.in()), "The most JSON of rapids");
-  ASSERT_EQ(std::wstring(sample.bt.wstr.in()), L"Τηισ ισ α τεστ οφ τηε εμεργενψυ βροαδψαστ συστεμ. פךקשדק לקקפ טםור ישמגד ןמדןגק איק הקיןבךק שא שךך אןצקד");
+  std::wstring wstr_file(sample.bt.wstr.in());
+  //This doesn't work on Windows because of how Visual Studio wants to treat the unicode it finds in a source file. We'll have to manually encode all unicode characters
+  //const wchar_t* expected = L"Τηισ ισ α τεστ οφ τηε εμεργενψυ βροαδψαστ συστεμ. פךקשדק לקקפ טםור ישמגד ןמדןגק איק הקיןבךק שא שךך אןצקד";
+  //                             Τ     η     ι     σ           ι     σ           α           τ     ε     σ     τ          ο      φ           τ     η     ε           ε     μ     ε     ρ     γ     ε     ν     ψ     υ           β     ρ     ο     α     δ     ψ     α     σ     τ           σ     υ     σ     τ     ε     μ     .           p     l     e     a     s     e           k     e     e     p           y     o     u     r           h     a     n     d     s           i     n     s     i     d     e           t     h     e           v     e     h     i     c     l     e           a     t           a     l     l           t     i     m     e     s
+  const wchar_t expected[] = L"\u03a4\u03b7\u03b9\u03c3\u0020\u03b9\u03c3\u0020\u03b1\u0020\u03c4\u03b5\u03c3\u03c4\u0020\u03bf\u03c6\u0020\u03c4\u03b7\u03b5\u0020\u03b5\u03bc\u03b5\u03c1\u03b3\u03b5\u03bd\u03c8\u03c5\u0020\u03b2\u03c1\u03bf\u03b1\u03b4\u03c8\u03b1\u03c3\u03c4\u0020\u03c3\u03c5\u03c3\u03c4\u03b5\u03bc\u002e\u0020\u05e4\u05da\u05e7\u05e9\u05d3\u05e7\u0020\u05dc\u05e7\u05e7\u05e4\u0020\u05d8\u05dd\u05d5\u05e8\u0020\u05d9\u05e9\u05de\u05d2\u05d3\u0020\u05df\u05de\u05d3\u05df\u05d2\u05e7\u0020\u05d0\u05d9\u05e7\u0020\u05d4\u05e7\u05d9\u05df\u05d1\u05da\u05e7\u0020\u05e9\u05d0\u0020\u05e9\u05da\u05da\u0020\u05d0\u05df\u05e6\u05e7\u05d3";
+  std::wstring wstr_expected(expected);
+  ASSERT_EQ(wstr_file, wstr_expected);
   ASSERT_EQ(sample.seq1.length(), 7u);
   ASSERT_EQ(sample.seq1[0], 1);
   ASSERT_EQ(sample.seq1[1], 1);
@@ -111,7 +117,7 @@ TEST(RapidJsonTest, SerializeTest)
   sample.bt.b = false;
   sample.bt.c = '\r';
   sample.bt.str = "The most JSON of rapids";
-  sample.bt.wstr = L"Τηισ ισ α τεστ οφ τηε εμεργενψυ βροαδψαστ συστεμ. פךקשדק לקקפ טםור ישמגד ןמדןגק איק הקיןבךק שא שךך אןצקד";
+  sample.bt.wstr = L"\u03a4\u03b7\u03b9\u03c3\u0020\u03b9\u03c3\u0020\u03b1\u0020\u03c4\u03b5\u03c3\u03c4\u0020\u03bf\u03c6\u0020\u03c4\u03b7\u03b5\u0020\u03b5\u03bc\u03b5\u03c1\u03b3\u03b5\u03bd\u03c8\u03c5\u0020\u03b2\u03c1\u03bf\u03b1\u03b4\u03c8\u03b1\u03c3\u03c4\u0020\u03c3\u03c5\u03c3\u03c4\u03b5\u03bc\u002e\u0020\u05e4\u05da\u05e7\u05e9\u05d3\u05e7\u0020\u05dc\u05e7\u05e7\u05e4\u0020\u05d8\u05dd\u05d5\u05e8\u0020\u05d9\u05e9\u05de\u05d2\u05d3\u0020\u05df\u05de\u05d3\u05df\u05d2\u05e7\u0020\u05d0\u05d9\u05e7\u0020\u05d4\u05e7\u05d9\u05df\u05d1\u05da\u05e7\u0020\u05e9\u05d0\u0020\u05e9\u05da\u05da\u0020\u05d0\u05df\u05e6\u05e7\u05d3";
   sample.seq1.length(7);
   sample.seq1[0] = 1;
   sample.seq1[1] = 1;
