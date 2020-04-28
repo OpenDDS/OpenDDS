@@ -642,16 +642,18 @@ EOF
       if $opts{'verbose'};
   }
   elsif ($opts{'compiler'} =~ /g\+\+/) {
-    if ($opts{'std'}) {
-      push(@{$opts{'macros'}}, 'CCFLAGS += -std=' . $opts{'std'});
-      print "Added platform_macros for -std=$opts{std}\n" if $opts{'verbose'};
-    }
-    else {
+    # When no std has been passed try to detect a std version
+    if (!$opts{'std'}) {
       my $ver = `$opts{'compiler'} --version`;
       if ($ver =~ /\(.*\) (\d+)\.\d+/ && $1 >= 6) {
         $opts{'std'} = 'gnu++14';
         print "Detected GCC >=6, default -std=gnu++14\n" if $opts{'verbose'};
       }
+    }
+    # When a std has been set by the user or we detected one, set it in platform_macros.GNU
+    if ($opts{'std'}) {
+      push(@{$opts{'macros'}}, 'CCFLAGS += -std=' . $opts{'std'});
+      print "Added platform_macros for -std=$opts{std}\n" if $opts{'verbose'};
     }
 
     if ($opts{'std'} && $opts{'std'} =~ /(0x|11|1y|14|1z|17)$/) {
