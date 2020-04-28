@@ -1872,7 +1872,9 @@ Spdp::SpdpTransport::open()
     addr.set_type(AF_INET6);
     nic.addresses.insert(addr);
 #endif
-    join_multicast_group(nic, true);
+    job_queue_->enqueue(DCPS::make_rch<ChangeMulticastGroup>(rchandle_from(this), nic,
+                                                             ChangeMulticastGroup::CMG_JOIN, true));
+
   }
 }
 
@@ -1882,6 +1884,7 @@ Spdp::SpdpTransport::~SpdpTransport()
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) SpdpTransport::~SpdpTransport\n")));
   }
   try {
+    ACE_GUARD(ACE_Thread_Mutex, g, outer_->lock_);
     dispose_unregister();
   }
   catch (const CORBA::Exception& ex) {
@@ -2631,6 +2634,8 @@ void
 Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
                                           bool all_interfaces)
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, outer_->lock_);
+
   if (!multicast_interface_.empty() && nic.name() != multicast_interface_) {
     return;
   }
@@ -2702,6 +2707,8 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
 void
 Spdp::SpdpTransport::leave_multicast_group(const DCPS::NetworkInterface& nic)
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, outer_->lock_);
+
   if (joined_interfaces_.count(nic.name()) != 0 && !nic.has_ipv4()) {
     if (DCPS::DCPS_debug_level > 3) {
       ACE_DEBUG((LM_INFO,
@@ -3114,6 +3121,8 @@ Spdp::remote_crypto_handle(const DCPS::RepoId& remote_participant) const
 
 void Spdp::SpdpTransport::send_relay_beacon(const MonotonicTimePoint& /*now*/)
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, outer_->lock_);
+
   if (outer_->config_->spdp_rtps_relay_address() == ACE_INET_Addr()) {
     return;
   }
