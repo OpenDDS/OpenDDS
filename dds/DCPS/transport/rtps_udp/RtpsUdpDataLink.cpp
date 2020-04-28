@@ -451,10 +451,9 @@ RtpsUdpDataLink::join_multicast_group(const DCPS::NetworkInterface& nic,
     if (DCPS::DCPS_debug_level > 3) {
       ACE_DEBUG((LM_INFO,
                  ACE_TEXT("(%P|%t) RtpsUdpDataLink::join_multicast_group ")
-                 ACE_TEXT("joining group %C %C:%hu\n"),
+                 ACE_TEXT("joining group %C %C\n"),
                  nic.name().c_str(),
-                 config().multicast_group_address_str_.c_str(),
-                 config().multicast_group_address_.get_port_number()));
+                 config().multicast_group_address_str_.c_str()));
     }
 
     if (0 == multicast_socket_.join(config().multicast_group_address_, 1, all_interfaces ? 0 : ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()))) {
@@ -477,10 +476,9 @@ RtpsUdpDataLink::join_multicast_group(const DCPS::NetworkInterface& nic,
     if (DCPS::DCPS_debug_level > 3) {
       ACE_DEBUG((LM_INFO,
                  ACE_TEXT("(%P|%t) RtpsUdpDataLink::join_multicast_group ")
-                 ACE_TEXT("joining group %C %C:%hu\n"),
+                 ACE_TEXT("joining group %C %C\n"),
                  nic.name().c_str(),
-                 config().ipv6_multicast_group_address_str_.c_str(),
-                 config().ipv6_multicast_group_address_.get_port_number()));
+                 config().ipv6_multicast_group_address_str_.c_str()));
     }
 
     if (0 == ipv6_multicast_socket_.join(config().ipv6_multicast_group_address_, 1, all_interfaces ? 0 : ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()))) {
