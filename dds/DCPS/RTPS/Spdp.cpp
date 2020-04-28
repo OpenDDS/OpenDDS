@@ -1872,7 +1872,9 @@ Spdp::SpdpTransport::open()
     addr.set_type(AF_INET6);
     nic.addresses.insert(addr);
 #endif
-    join_multicast_group(nic, true);
+    job_queue_->enqueue(DCPS::make_rch<ChangeMulticastGroup>(rchandle_from(this), nic,
+                                                             ChangeMulticastGroup::CMG_JOIN, true));
+
   }
 }
 

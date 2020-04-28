@@ -309,16 +309,18 @@ private:
     enum CmgAction {CMG_JOIN, CMG_LEAVE};
 
     ChangeMulticastGroup(DCPS::RcHandle<SpdpTransport> tport,
-                         const DCPS::NetworkInterface& nic, CmgAction action)
+                         const DCPS::NetworkInterface& nic, CmgAction action,
+                         bool all_interfaces = false)
       : tport_(tport)
       , nic_(nic)
       , action_(action)
+      , all_interfaces_(all_interfaces)
     {}
 
     void execute()
     {
       if (action_ == CMG_JOIN) {
-        tport_->join_multicast_group(nic_);
+        tport_->join_multicast_group(nic_, all_interfaces_);
       } else {
         tport_->leave_multicast_group(nic_);
       }
@@ -327,6 +329,7 @@ private:
     DCPS::RcHandle<SpdpTransport> tport_;
     DCPS::NetworkInterface nic_;
     CmgAction action_;
+    bool all_interfaces_;
   };
 
 #ifdef OPENDDS_SECURITY
