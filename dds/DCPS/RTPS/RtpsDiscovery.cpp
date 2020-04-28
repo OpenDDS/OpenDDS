@@ -67,6 +67,7 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   , use_rtps_relay_(false)
   , rtps_relay_only_(false)
   , use_ice_(false)
+  , use_ncm_(true)
 {}
 
 RtpsDiscovery::RtpsDiscovery(const RepoKey& key)

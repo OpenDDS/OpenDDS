@@ -254,6 +254,7 @@ bool run_test()
 {
   // Create and initialize RtpsDiscovery
   RtpsDiscovery rd("test");
+  rd.config()->use_ncm(false);
   const DDS::DomainId_t domain = 0;
   const DDS::DomainParticipantQos qos = TheServiceParticipant->initial_DomainParticipantQos();
   RepoId id = rd.generate_participant_guid();
