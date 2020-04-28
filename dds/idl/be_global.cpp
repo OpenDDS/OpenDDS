@@ -45,6 +45,7 @@ BE_GlobalData::BE_GlobalData()
   , java_(false)
   , suppress_idl_(false)
   , suppress_typecode_(false)
+  , suppress_xtypes_(false)
   , no_default_gen_(false)
   , generate_itl_(false)
   , generate_v8_(false)
@@ -394,6 +395,9 @@ BE_GlobalData::parse_args(long& i, char** av)
     case 't':
       suppress_typecode_ = true;
       break;
+    case 'x':
+      suppress_xtypes_ = true;
+      false;
     case 'a':
       // ignore, accepted for tao_idl compatibility
       break;

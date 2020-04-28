@@ -158,6 +158,7 @@ public:
 
   bool suppress_idl() const { return suppress_idl_; }
   bool suppress_typecode() const { return suppress_typecode_; }
+  bool suppress_xtypes() const { return suppress_xtypes_; }
 
   static bool writeFile(const char* fileName, const std::string &content);
 
@@ -218,7 +219,7 @@ private:
   /// Name of the IDL file we are processing.
   const char* filename_;
 
-  bool java_, suppress_idl_, suppress_typecode_,
+  bool java_, suppress_idl_, suppress_typecode_, suppress_xtypes_,
     no_default_gen_, generate_itl_, generate_v8_,
     generate_rapidjson_, face_ts_, printer_;
 
