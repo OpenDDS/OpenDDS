@@ -2574,9 +2574,7 @@ RtpsUdpDataLink::RtpsReader::generate_nack_frags_i(NackFragSubmessageVec& nf,
     }
 
     const SequenceRange range(iter->first, iter->first);
-    if (link->receive_strategy()->has_fragments(range, pub_id, &frag_info)) {
-      extend_bitmap_range(frag_info.back().second, iter->second.value);
-    } else {
+    if (!link->receive_strategy()->has_fragments(range, pub_id, &frag_info)) {
       // it was not in the recv strategy, so the entire range is "missing"
       frag_info.push_back(Frag_t(iter->first, RTPS::FragmentNumberSet()));
       RTPS::FragmentNumberSet& fnSet = frag_info.back().second;
@@ -2620,7 +2618,7 @@ RtpsUdpDataLink::extend_bitmap_range(RTPS::FragmentNumberSet& fnSet,
     return; // can't extend to some number under the base
   }
   // calculate the index to the extent to determine the new_num_bits
-  const CORBA::ULong new_num_bits = std::min(CORBA::ULong(255),
+  const CORBA::ULong new_num_bits = std::min(CORBA::ULong(256),
                                              extent - fnSet.bitmapBase.value + 1),
                      len = (new_num_bits + 31) / 32;
   if (new_num_bits < fnSet.numBits) {
@@ -2628,7 +2626,7 @@ RtpsUdpDataLink::extend_bitmap_range(RTPS::FragmentNumberSet& fnSet,
   }
   fnSet.bitmap.length(len);
   // We are missing from one past old bitmap end to the new end
-  DisjointSequence::fill_bitmap_range(fnSet.numBits + 1, new_num_bits,
+  DisjointSequence::fill_bitmap_range(fnSet.numBits, new_num_bits,
                                       fnSet.bitmap.get_buffer(), len,
                                       fnSet.numBits);
 }
