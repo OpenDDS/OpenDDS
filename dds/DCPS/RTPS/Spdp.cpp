@@ -1861,7 +1861,7 @@ Spdp::SpdpTransport::open()
   }
 
   DCPS::NetworkConfigMonitor_rch ncm = TheServiceParticipant->network_config_monitor();
-  if (ncm) {
+  if (outer_->config_->use_ncm() && ncm) {
     ncm->add_listener(*this);
   } else {
     DCPS::NetworkInterface nic(0, multicast_interface_, true);

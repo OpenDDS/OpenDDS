@@ -379,6 +379,17 @@ public:
     use_ice_ = ui;
   }
 
+  bool use_ncm() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, bool());
+    return use_ncm_;
+  }
+  void use_ncm(bool ui)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    use_ncm_ = ui;
+  }
+
 private:
   mutable ACE_Thread_Mutex lock_;
   DCPS::TimeDuration resend_period_;
@@ -407,6 +418,7 @@ private:
   bool rtps_relay_only_;
   ACE_INET_Addr sedp_stun_server_address_;
   bool use_ice_;
+  bool use_ncm_;
 };
 
 typedef OpenDDS::DCPS::RcHandle<RtpsDiscoveryConfig> RtpsDiscoveryConfig_rch;
