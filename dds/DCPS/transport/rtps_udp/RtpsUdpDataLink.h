@@ -420,13 +420,11 @@ private:
     bool process_hb_frag_i(const RTPS::HeartBeatFragSubmessage& hb_frag, const RepoId& src, MetaSubmessageVec& meta_submessages);
 
     void gather_ack_nacks(MetaSubmessageVec& meta_submessages, bool finalFlag = false);
-    void gather_association_ack_nacks(MetaSubmessageVec& meta_submessages);
 
   protected:
     void gather_ack_nacks_i(MetaSubmessageVec& meta_submessages, bool finalFlag = false);
     void generate_nack_frags_i(NackFragSubmessageVec& nack_frags,
                                WriterInfo& wi, const RepoId& pub_id);
-    void gather_association_ack_nacks_i(MetaSubmessageVec& meta_submessages);
 
     mutable ACE_Thread_Mutex mutex_;
     WeakRcHandle<RtpsUdpDataLink> link_;
@@ -557,7 +555,6 @@ private:
   void send_directed_heartbeats(OPENDDS_VECTOR(RTPS::HeartBeatSubmessage)& hbs);
   void check_heartbeats(const DCPS::MonotonicTimePoint& now);
   void send_heartbeat_replies();
-  void send_association_ack_nacks(const DCPS::MonotonicTimePoint& now);
   void send_relay_beacon(const DCPS::MonotonicTimePoint& now);
 
   CORBA::Long best_effort_heartbeat_count_;
@@ -594,7 +591,7 @@ private:
   Multi heartbeat_;
 
   typedef PmfPeriodicTask<RtpsUdpDataLink> Periodic;
-  Periodic heartbeatchecker_, reader_associator_, relay_beacon_;
+  Periodic heartbeatchecker_, relay_beacon_;
 
   /// Data structure representing an "interesting" remote entity for static discovery.
   struct InterestingRemote {
