@@ -23,7 +23,7 @@ string tag_type(UTL_ScopedName* name)
 }
 
 void
-call_get_type_identifier(AST_Type* type)
+call_get_minimal_type_identifier(AST_Type* type)
 {
   AST_Type* const actual_type = resolveActualType(type);
 
@@ -85,12 +85,12 @@ call_get_type_identifier(AST_Type* type)
     if (size > 255) {
       be_global->impl_ <<
         "XTypes::TypeIdentifier::makePlainSequence(";
-      call_get_type_identifier(sequence->base_type());
+      call_get_minimal_type_identifier(sequence->base_type());
       be_global->impl_ << ", XTypes::LBound(" << size << "))";
     } else {
       be_global->impl_ <<
         "XTypes::TypeIdentifier::makePlainSequence(";
-      call_get_type_identifier(sequence->base_type());
+      call_get_minimal_type_identifier(sequence->base_type());
       be_global->impl_ << ", XTypes::SBound(" << size << "))";
     }
     return;
@@ -109,7 +109,7 @@ call_get_type_identifier(AST_Type* type)
     if (max_bound > 255) {
       be_global->impl_ <<
         "XTypes::TypeIdentifier::makePlainArray(";
-      call_get_type_identifier(array->base_type());
+      call_get_minimal_type_identifier(array->base_type());
       be_global->impl_ << ", XTypes::LBoundSeq()";
       for (ACE_CDR::ULong dim = 0; dim != array->n_dims(); ++dim) {
         be_global->impl_ << ".append(XTypes::LBound(" << array->dims()[dim]->ev()->u.ulval << "))";
@@ -118,7 +118,7 @@ call_get_type_identifier(AST_Type* type)
     } else {
       be_global->impl_ <<
         "XTypes::TypeIdentifier::makePlainArray(";
-      call_get_type_identifier(array->base_type());
+      call_get_minimal_type_identifier(array->base_type());
       be_global->impl_ << ", XTypes::SBoundSeq()";
       for (ACE_CDR::ULong dim = 0; dim != array->n_dims(); ++dim) {
         be_global->impl_ << ".append(XTypes::SBound(" << array->dims()[dim]->ev()->u.ulval << "))";
@@ -248,7 +248,7 @@ typeobject_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
 
         "              XTypes::StructMemberFlag(),\n" // TODO: Set StructMemberFlags.
         "              ";
-      call_get_type_identifier((*pos)->field_type());
+      call_get_minimal_type_identifier((*pos)->field_type());
       be_global->impl_ << "\n"
         "            ),\n"
         "            XTypes::MinimalMemberDetail(\"" << (*pos)->local_name()->get_string() << "\")\n"
@@ -297,9 +297,9 @@ typeobject_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
       "        XTypes::MinimalAliasHeader(),\n"
       "        XTypes::MinimalAliasBody(\n"
       "          XTypes::CommonAliasBody(\n"
-      "            XTypes::AliasMemberFlag(),\n"
-      "            "; // TODO: How should this be populated?
-    call_get_type_identifier(base);
+      "            XTypes::AliasMemberFlag(),\n" // TODO: How should this be populated?
+      "            ";
+    call_get_minimal_type_identifier(base);
     be_global->impl_ <<
       "\n"
       "          )\n"
@@ -323,7 +323,7 @@ typeobject_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
 
 bool
 typeobject_generator::gen_union(AST_Union*, UTL_ScopedName* name,
-  const std::vector<AST_UnionBranch*>&, AST_Type*,
+  const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator,
   const char*)
 {
   be_global->add_include("dds/DCPS/TypeObject.h", BE_GlobalData::STREAM_H);
@@ -336,8 +336,83 @@ typeobject_generator::gen_union(AST_Union*, UTL_ScopedName* name,
     const string decl_gto = "getMinimalTypeObject<" + clazz + ">";
     Function gto(decl_gto.c_str(), "const XTypes::TypeObject&", "");
     gto.endArgs();
+
     be_global->impl_ <<
-      "  static const XTypes::TypeObject to = XTypes::TypeObject(XTypes::MinimalTypeObject());\n" //TODO
+      "  static const XTypes::TypeObject to = XTypes::TypeObject(\n"
+      "    XTypes::MinimalTypeObject(\n"
+      "      XTypes::MinimalUnionType(\n"
+      "        XTypes::UnionTypeFlag(XTypes::IS_FINAL),\n" // TODO: Set these based on annotation.
+      "        XTypes::MinimalUnionHeader(\n"
+      "          XTypes::MinimalTypeDetail()\n" // Not used.
+      "        ),\n"
+      "        XTypes::MinimalDiscriminatorMember(\n"
+      "          XTypes::CommonDiscriminatorMember(\n"
+      "            XTypes::UnionDiscriminatorFlag(),\n" // TODO:  Set this.
+      "            ";
+    call_get_minimal_type_identifier(discriminator);
+    be_global->impl_ <<
+      "\n"
+      "          )\n"
+      "        ),\n"
+      "        XTypes::MinimalUnionMemberSeq()\n";
+    ACE_CDR::ULong member_id = 0;
+    for (std::vector<AST_UnionBranch*>::const_iterator pos = branches.begin(), limit = branches.end(); pos != limit; ++pos) {
+      AST_UnionBranch* branch = *pos;
+      bool is_default = false;
+      for (unsigned long j = 0; j < branch->label_list_length(); ++j) {
+        AST_UnionLabel* label = branch->label(j);
+        if (label->label_kind() == AST_UnionLabel::UL_default) {
+          is_default = true;
+          break;
+        }
+      }
+
+      be_global->impl_ <<
+        "        .append(\n"
+        "          XTypes::MinimalUnionMember(\n"
+        "            XTypes::CommonUnionMember(\n"
+        "              " << member_id++ << ",\n"
+        "              XTypes::UnionMemberFlag(\n"
+        "                0\n";  // TODO: Populate this.
+      if (is_default) {
+        be_global->impl_ <<
+          "              | XTypes::IS_DEFAULT\n";
+      }
+
+      be_global->impl_ <<
+        "              ),\n"
+        "              ";
+      call_get_minimal_type_identifier(branch->field_type());
+      be_global->impl_ <<
+        ",\n"
+        "              XTypes::UnionCaseLabelSeq()\n";
+
+      for (unsigned long j = 0; j < branch->label_list_length(); ++j) {
+        AST_UnionLabel* label = branch->label(j);
+        if (label->label_kind() == AST_UnionLabel::UL_default) {
+          // Do nothing.
+        } else if (discriminator->node_type() == AST_Decl::NT_enum) {
+          be_global->impl_ <<
+            "              .append(static_cast<ACE_CDR::Long>(" << getEnumLabel(label->label_val(), discriminator) << "))\n";
+        } else {
+          be_global->impl_ <<
+            "              .append(" << *label->label_val()->ev() << ")\n";
+        }
+      }
+
+      be_global->impl_ <<
+        "              .sort()\n"
+        "            ),\n"
+        "            XTypes::MinimalMemberDetail(\"" << (*pos)->local_name()->get_string() << "\")\n"
+        "          )\n"
+        "        )\n";
+    }
+
+    be_global->impl_ <<
+      "      .sort()\n"
+      "      )\n"
+      "    )\n"
+      "  );\n"
       "  return to;\n";
   }
   {
