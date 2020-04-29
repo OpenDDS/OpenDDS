@@ -17,6 +17,7 @@
 #include "Task.h"
 
 #include "dds/DCPS/TimeTypes.h"
+#include "dds/DCPS/GuidUtils.h"
 
 #include <map>
 
