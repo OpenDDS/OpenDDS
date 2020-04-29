@@ -564,9 +564,8 @@ namespace {
 ICE::AddressListType
 RtpsUdpTransport::IceEndpoint::host_addresses() const {
   ICE::AddressListType addresses;
-  ACE_INET_Addr addr;
 
-  addr = transport.config().local_address();
+  ACE_INET_Addr addr = transport.config().local_address();
   if (addr != ACE_INET_Addr()) {
     if (addr.is_any()) {
       ICE::AddressListType addrs;
