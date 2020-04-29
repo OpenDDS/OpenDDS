@@ -18,6 +18,11 @@
 #include "Task.h"
 #include "AgentImpl.h"
 
+#if !OPENDDS_SAFETY_PROFILE
+#include "dds/DCPS/GuidUtils.h"
+#include <iostream>
+#endif
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
