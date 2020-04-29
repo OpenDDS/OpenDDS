@@ -85,40 +85,38 @@ OpenDDS::DCPS::OfferedDeadlineWatchdog::execute(
       missed = instance->cur_sample_tv_ - instance->last_sample_tv_ > interval_;
     }
 
-    if (missed) {
+    if (missed && timer_called) {
       ACE_GUARD(ACE_Recursive_Thread_Mutex, monitor, this->status_lock_);
 
-      if (timer_called) {
-        ++this->status_.total_count;
-        this->status_.total_count_change =
-          this->status_.total_count - this->last_total_count_;
-        this->status_.last_instance_handle = instance->instance_handle_;
+      ++this->status_.total_count;
+      this->status_.total_count_change =
+        this->status_.total_count - this->last_total_count_;
+      this->status_.last_instance_handle = instance->instance_handle_;
 
-        writer.set_status_changed_flag(
-          DDS::OFFERED_DEADLINE_MISSED_STATUS, true);
+      writer.set_status_changed_flag(
+                                     DDS::OFFERED_DEADLINE_MISSED_STATUS, true);
 
-        DDS::DataWriterListener_var listener =
-          writer.listener_for(
-            DDS::OFFERED_DEADLINE_MISSED_STATUS);
+      DDS::DataWriterListener_var listener =
+        writer.listener_for(
+                            DDS::OFFERED_DEADLINE_MISSED_STATUS);
 
-        if (listener) {
-          // Copy before releasing the lock.
-          DDS::OfferedDeadlineMissedStatus const status = this->status_;
+      if (listener) {
+        // Copy before releasing the lock.
+        DDS::OfferedDeadlineMissedStatus const status = this->status_;
 
-          // Release the lock during the upcall.
-          ACE_GUARD(reverse_lock_type, reverse_monitor, this->reverse_status_lock_);
+        // Release the lock during the upcall.
+        ACE_GUARD(reverse_lock_type, reverse_monitor, this->reverse_status_lock_);
 
-          // @todo Will this operation ever throw?  If so we may want to
-          //       catch all exceptions, and act accordingly.
-          listener->on_offered_deadline_missed(&writer, status);
+        // @todo Will this operation ever throw?  If so we may want to
+        //       catch all exceptions, and act accordingly.
+        listener->on_offered_deadline_missed(&writer, status);
 
-          // We need to update the last total count value to our current total
-          // so that the next time we will calculate the correct total_count_change;
-          this->last_total_count_ = this->status_.total_count;
-        }
-
-        writer.notify_status_condition();
+        // We need to update the last total count value to our current total
+        // so that the next time we will calculate the correct total_count_change;
+        this->last_total_count_ = this->status_.total_count;
       }
+
+      writer.notify_status_condition();
     }
 
     // This next part is without status_lock_ held to avoid reactor deadlock.
