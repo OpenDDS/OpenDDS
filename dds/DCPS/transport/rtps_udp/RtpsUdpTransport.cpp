@@ -566,33 +566,37 @@ RtpsUdpTransport::IceEndpoint::host_addresses() const {
   ICE::AddressListType addresses;
   ACE_INET_Addr addr;
 
-  transport.unicast_socket_.get_local_addr(addr);
-  if (addr.is_any()) {
-    ICE::AddressListType addrs;
-    DCPS::get_interface_addrs(addrs);
-    for (ICE::AddressListType::iterator pos = addrs.begin(), limit = addrs.end(); pos != limit; ++pos) {
-      if (pos->get_type() == AF_INET) {
-        pos->set_port_number(addr.get_port_number());
-        addresses.push_back(*pos);
+  addr = transport.config().local_address();
+  if (addr != ACE_INET_Addr()) {
+    if (addr.is_any()) {
+      ICE::AddressListType addrs;
+      DCPS::get_interface_addrs(addrs);
+      for (ICE::AddressListType::iterator pos = addrs.begin(), limit = addrs.end(); pos != limit; ++pos) {
+        if (pos->get_type() == AF_INET) {
+          pos->set_port_number(addr.get_port_number());
+          addresses.push_back(*pos);
+        }
       }
+    } else {
+      addresses.push_back(addr);
     }
-  } else {
-    addresses.push_back(addr);
   }
 
 #ifdef ACE_HAS_IPV6
-  transport.ipv6_unicast_socket_.get_local_addr(addr);
-  if (addr.is_any()) {
-    ICE::AddressListType addrs;
-    DCPS::get_interface_addrs(addrs);
-    for (ICE::AddressListType::iterator pos = addrs.begin(), limit = addrs.end(); pos != limit; ++pos) {
-      if (pos->get_type() == AF_INET6) {
-        pos->set_port_number(addr.get_port_number());
-        addresses.push_back(*pos);
+  addr = transport.config().ipv6_local_address();
+  if (addr != ACE_INET_Addr()) {
+    if (addr.is_any()) {
+      ICE::AddressListType addrs;
+      DCPS::get_interface_addrs(addrs);
+      for (ICE::AddressListType::iterator pos = addrs.begin(), limit = addrs.end(); pos != limit; ++pos) {
+        if (pos->get_type() == AF_INET6) {
+          pos->set_port_number(addr.get_port_number());
+          addresses.push_back(*pos);
+        }
       }
+    } else {
+      addresses.push_back(addr);
     }
-  } else {
-    addresses.push_back(addr);
   }
 #endif
 

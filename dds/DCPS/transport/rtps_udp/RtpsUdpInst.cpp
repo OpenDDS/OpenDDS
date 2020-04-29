@@ -215,48 +215,52 @@ RtpsUdpInst::populate_locator(TransportLocator& info, ConnectionInfoFlags flags)
 #endif
 
   if (flags & CONNINFO_UNICAST) {
-    if (local_address().is_any()) {
-      typedef OPENDDS_VECTOR(ACE_INET_Addr) AddrVector;
-      AddrVector addrs;
-      get_interface_addrs(addrs);
-      for (AddrVector::iterator adr_it = addrs.begin(); adr_it != addrs.end(); ++adr_it) {
-        if (adr_it->get_type() == AF_INET) {
-          idx = locators.length();
-          locators.length(idx + 1);
-          locators[idx].kind = address_to_kind(*adr_it);
-          locators[idx].port = local_address().get_port_number();
-          RTPS::address_to_bytes(locators[idx].address, *adr_it);
+    if (local_address() != ACE_INET_Addr()) {
+      if (local_address().is_any()) {
+        typedef OPENDDS_VECTOR(ACE_INET_Addr) AddrVector;
+        AddrVector addrs;
+        get_interface_addrs(addrs);
+        for (AddrVector::iterator adr_it = addrs.begin(); adr_it != addrs.end(); ++adr_it) {
+          if (adr_it->get_type() == AF_INET) {
+            idx = locators.length();
+            locators.length(idx + 1);
+            locators[idx].kind = address_to_kind(*adr_it);
+            locators[idx].port = local_address().get_port_number();
+            RTPS::address_to_bytes(locators[idx].address, *adr_it);
+          }
         }
+      } else {
+        idx = locators.length();
+        locators.length(idx + 1);
+        locators[idx].kind = address_to_kind(local_address());
+        locators[idx].port = local_address().get_port_number();
+        RTPS::address_to_bytes(locators[idx].address,
+                               local_address());
       }
-    } else {
-      idx = locators.length();
-      locators.length(idx + 1);
-      locators[idx].kind = address_to_kind(local_address());
-      locators[idx].port = local_address().get_port_number();
-      RTPS::address_to_bytes(locators[idx].address,
-                             local_address());
     }
 #ifdef ACE_HAS_IPV6
-    if (ipv6_local_address().is_any()) {
-      typedef OPENDDS_VECTOR(ACE_INET_Addr) AddrVector;
-      AddrVector addrs;
-      get_interface_addrs(addrs);
-      for (AddrVector::iterator adr_it = addrs.begin(); adr_it != addrs.end(); ++adr_it) {
-        if (adr_it->get_type() == AF_INET6) {
-          idx = locators.length();
-          locators.length(idx + 1);
-          locators[idx].kind = address_to_kind(*adr_it);
-          locators[idx].port = ipv6_local_address().get_port_number();
-          RTPS::address_to_bytes(locators[idx].address, *adr_it);
+    if (ipv6_local_address() != ACE_INET_Addr()) {
+      if (ipv6_local_address().is_any()) {
+        typedef OPENDDS_VECTOR(ACE_INET_Addr) AddrVector;
+        AddrVector addrs;
+        get_interface_addrs(addrs);
+        for (AddrVector::iterator adr_it = addrs.begin(); adr_it != addrs.end(); ++adr_it) {
+          if (adr_it->get_type() == AF_INET6) {
+            idx = locators.length();
+            locators.length(idx + 1);
+            locators[idx].kind = address_to_kind(*adr_it);
+            locators[idx].port = ipv6_local_address().get_port_number();
+            RTPS::address_to_bytes(locators[idx].address, *adr_it);
+          }
         }
+      } else {
+        idx = locators.length();
+        locators.length(idx + 1);
+        locators[idx].kind = address_to_kind(ipv6_local_address());
+        locators[idx].port = ipv6_local_address().get_port_number();
+        RTPS::address_to_bytes(locators[idx].address,
+                               ipv6_local_address());
       }
-    } else {
-      idx = locators.length();
-      locators.length(idx + 1);
-      locators[idx].kind = address_to_kind(ipv6_local_address());
-      locators[idx].port = ipv6_local_address().get_port_number();
-      RTPS::address_to_bytes(locators[idx].address,
-                             ipv6_local_address());
     }
 #endif
   }
