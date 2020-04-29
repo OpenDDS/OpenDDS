@@ -109,7 +109,6 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
                      config.heartbeat_response_delay_)
   , heartbeat_(reactor_task->interceptor(), config.heartbeat_period_, *this, &RtpsUdpDataLink::send_heartbeats)
   , heartbeatchecker_(reactor_task->interceptor(), *this, &RtpsUdpDataLink::check_heartbeats)
-  , reader_associator_(reactor_task->interceptor(), *this, &RtpsUdpDataLink::send_association_ack_nacks)
   , relay_beacon_(reactor_task->interceptor(), *this, &RtpsUdpDataLink::send_relay_beacon)
   , held_data_delivery_handler_(this)
   , max_bundle_size_(config.max_bundle_size_)
@@ -393,8 +392,6 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket
                       ACE_TEXT("UdpDataLink::open: start failed!\n")),
                      false);
   }
-
-  reader_associator_.enable(false, cfg.heartbeat_period_);
 
   if (cfg.rtps_relay_address() != ACE_INET_Addr() ||
       cfg.use_rtps_relay_) {
@@ -919,7 +916,6 @@ RtpsUdpDataLink::stop_i()
   heartbeat_reply_.cancel();
   heartbeat_.disable_and_wait();
   heartbeatchecker_.disable_and_wait();
-  reader_associator_.disable_and_wait();
   relay_beacon_.disable_and_wait();
   unicast_socket_.close();
   multicast_socket_.close();
@@ -2180,60 +2176,6 @@ RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(MetaSubmessageVec& meta_submessa
   }
 }
 
-void
-RtpsUdpDataLink::RtpsReader::gather_association_ack_nacks(MetaSubmessageVec& meta_submessages)
-{
-  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-  gather_association_ack_nacks_i(meta_submessages);
-}
-
-void
-RtpsUdpDataLink::RtpsReader::gather_association_ack_nacks_i(MetaSubmessageVec& meta_submessages)
-{
-  using namespace OpenDDS::RTPS;
-
-  RtpsUdpDataLink_rch link = link_.lock();
-
-  if (!link) {
-    return;
-  }
-
-  GuardType guard(link->strategy_lock_);
-  if (link->receive_strategy() == 0) {
-    return;
-  }
-
-  for (WriterInfoMap::iterator wi = remote_writers_.begin(); wi != remote_writers_.end(); ++wi) {
-    if (wi->second.first_valid_hb_ && wi->second.first_delivered_data_) {
-      MetaSubmessage meta_submessage(id_, wi->first);
-
-      AckNackSubmessage acknack = {
-        {
-          ACKNACK,
-          CORBA::Octet(FLAG_E),
-          0 /*length*/
-        },
-        id_.entityId,
-        wi->first.entityId,
-        { // SequenceNumberSet: acking bitmapBase - 1
-          {
-            0,
-            1
-          },
-          0,
-          LongSeq8()
-        },
-        {
-          ++wi->second.acknack_count_
-        }
-      };
-      meta_submessage.sm_.acknack_sm(acknack);
-
-      meta_submessages.push_back(meta_submessage);
-    }
-  }
-}
-
 #ifdef OPENDDS_SECURITY
 namespace {
   const ACE_INET_Addr BUNDLING_PLACEHOLDER;
@@ -2375,7 +2317,7 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(AddrDestMetaSubmessageMap& adr_m
     for (DestMetaSubmessageMap::iterator dest_it = addr_it->second.begin(); dest_it != addr_it->second.end(); ++dest_it) {
       for (MetaSubmessageIterVec::iterator resp_it = dest_it->second.begin(); resp_it != dest_it->second.end(); ++resp_it) {
         // Check before every meta_submessage to see if we need to prefix a INFO_DST
-        if (dest_it->first != GUID_UNKNOWN && dest_it->first != prev_dst) {
+        if (dest_it->first != prev_dst) {
           // If adding an INFO_DST prefix bumped us over the limit, push the
           // size difference into the next bundle, reset prev_dst, and keep
           // going
@@ -3640,21 +3582,6 @@ RtpsUdpDataLink::check_heartbeats(const DCPS::MonotonicTimePoint& now)
     const InterestingRemote& remote = iter->second;
     remote.listener->writer_does_not_exist(rid, remote.localid);
   }
-}
-
-void
-RtpsUdpDataLink::send_association_ack_nacks(const DCPS::MonotonicTimePoint& /*now*/)
-{
-  MetaSubmessageVec meta_submessages;
-
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, readers_lock_);
-    for (RtpsReaderMap::const_iterator pos = readers_.begin(), limit = readers_.end(); pos != limit; ++pos) {
-      pos->second->gather_association_ack_nacks(meta_submessages);
-    }
-  }
-
-  send_bundled_submessages(meta_submessages);
 }
 
 void
