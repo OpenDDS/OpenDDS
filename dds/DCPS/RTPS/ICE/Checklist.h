@@ -17,7 +17,11 @@
 #include "Task.h"
 
 #include "dds/DCPS/TimeTypes.h"
+
+#if !OPENDDS_SAFETY_PROFILE
 #include "dds/DCPS/GuidUtils.h"
+#include <iostream>
+#endif
 
 #include <map>
 
