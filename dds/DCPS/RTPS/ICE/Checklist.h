@@ -19,6 +19,11 @@
 #include "dds/DCPS/TimeTypes.h"
 #include "dds/DCPS/GuidUtils.h"
 
+#if !OPENDDS_SAFETY_PROFILE
+#include "dds/DCPS/GuidUtils.h"
+#include <iostream>
+#endif
+
 #include <map>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
