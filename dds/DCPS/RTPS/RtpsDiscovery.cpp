@@ -54,9 +54,13 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   , dx_(2)
   , ttl_(1)
   , sedp_multicast_(true)
-  , default_multicast_group_("239.255.0.1") /*RTPS v2.1 9.6.1.4.1*/
+  , sedp_local_address_(static_cast<u_short>(0), "0.0.0.0")
+  , spdp_local_address_(static_cast<u_short>(0), "0.0.0.0")
+  , default_multicast_group_(static_cast<u_short>(0), "239.255.0.1") /*RTPS v2.1 9.6.1.4.1*/
 #ifdef ACE_HAS_IPV6
-  , default_multicast_ipv6_group_("FF03::1")
+  , ipv6_sedp_local_address_(static_cast<u_short>(0), "::")
+  , ipv6_spdp_local_address_(static_cast<u_short>(0), "::")
+  , ipv6_default_multicast_group_(static_cast<u_short>(0), "FF03::1")
 #endif
   , max_auth_time_(300, 0)
   , auth_resend_period_(1, 0)
@@ -120,7 +124,8 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
 
       // spdpaddr defaults to DCPSDefaultAddress if set
       if (!TheServiceParticipant->default_address().empty()) {
-        config->spdp_local_address(TheServiceParticipant->default_address().c_str());
+        ACE_INET_Addr addr(TheServiceParticipant->default_address().c_str());
+        config->spdp_local_address(addr);
       }
 
       DCPS::ValueMap values;
@@ -263,14 +268,17 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
         } else if (name == "MulticastInterface") {
           config->multicast_interface(it->second);
         } else if (name == "SedpLocalAddress") {
-          config->sedp_local_address(it->second);
+          ACE_INET_Addr addr(it->second.c_str());
+          config->sedp_local_address(addr);
         } else if (name == "SpdpLocalAddress") {
-          config->spdp_local_address(it->second);
+          ACE_INET_Addr addr(it->second.c_str());
+          config->spdp_local_address(addr);
         } else if (name == "GuidInterface") {
           config->guid_interface(it->second);
         } else if (name == "InteropMulticastOverride") {
           /// FUTURE: handle > 1 group.
-          config->default_multicast_group(it->second);
+          ACE_INET_Addr addr(it->second.c_str());
+          config->default_multicast_group(addr);
         } else if (name == "SpdpSendAddrs") {
           AddrVec spdp_send_addrs;
           const OPENDDS_STRING& value = it->second;

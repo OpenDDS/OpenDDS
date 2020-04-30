@@ -402,7 +402,6 @@ tests/FACE/Compiler/idl_test_fixed/run_test.pl: !DCPS_MIN !WCHAR !NO_BUILT_IN_TO
 tests/DCPS/UnregisterType/run_test.pl: !DCPS_MIN
 
 tests/DCPS/RtpsRelay/Unit/run_test.pl: !DCPS_MIN CXX11 !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE
-tests/DCPS/RtpsRelay/Unit/run_test.pl ipv6: !DCPS_MIN CXX11 !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE IPV6
 tests/DCPS/RtpsRelay/Smoke/run_test.pl: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE
 tests/DCPS/RtpsRelay/Smoke/run_test.pl secure: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE
 tests/DCPS/RtpsRelay/Smoke/run_test.pl join: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE

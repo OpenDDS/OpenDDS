@@ -270,7 +270,6 @@ private:
     ACE_SOCK_Dgram unicast_socket_;
     OPENDDS_STRING multicast_interface_;
     ACE_INET_Addr multicast_address_;
-    OPENDDS_STRING multicast_address_str_;
     ACE_SOCK_Dgram_Mcast multicast_socket_;
 #ifdef ACE_HAS_IPV6
     u_short ipv6_uni_port_;
