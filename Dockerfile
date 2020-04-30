@@ -1,6 +1,7 @@
 ARG BASIS=ubuntu:bionic
 FROM $BASIS
 
+ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
     cmake \
     curl \
@@ -15,9 +16,9 @@ RUN apt-get update && apt-get install -y \
     git
 
 WORKDIR /usr/src/gtest
-RUN cmake CMakeLists.txt && make && cp ./*.a /usr/lib
+RUN cmake CMakeLists.txt && make && cp $(find . -name "*.a") /usr/lib
 WORKDIR /usr/src/gmock
-RUN cmake CMakeLists.txt && make && cp ./*.a /usr/lib
+RUN cmake CMakeLists.txt && make && cp $(find . -name "*.a") /usr/lib
 
 ADD . /opt/OpenDDS
 
