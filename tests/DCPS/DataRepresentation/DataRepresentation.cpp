@@ -190,8 +190,11 @@ bool check_policies(const char* what, bool expected_to_match,
   }
 
   if (print) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l check_policies() ERROR: ")
+      ACE_TEXT("Listing incompatible QoS policy ids found:")));
     for (CORBA::ULong i = 0; i < policy_count; ++i) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT(" - %u\n"), policies[i]));
+      ACE_ERROR((LM_ERROR, ACE_TEXT(" - policy_id: %u, count: %d\n"),
+        policies[i].policy_id, policies[i].count));
     }
   }
 
