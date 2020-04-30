@@ -37,6 +37,7 @@ public:
   int start();
   void stop();
 
+  int handle_simple_dds_input(ACE_HANDLE fd);
   int handle_dds_input(ACE_HANDLE fd);
 
   /// The subclass needs to provide the implementation
