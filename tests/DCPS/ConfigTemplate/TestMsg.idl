@@ -1,0 +1,7 @@
+
+#pragma DCPS_DATA_TYPE "TestMsg"
+
+struct TestMsg {
+  string from;
+  long value;
+};
