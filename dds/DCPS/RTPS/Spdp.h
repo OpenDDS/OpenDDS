@@ -276,7 +276,6 @@ private:
     ACE_SOCK_Dgram unicast_ipv6_socket_;
     OPENDDS_STRING multicast_ipv6_interface_;
     ACE_INET_Addr multicast_ipv6_address_;
-    OPENDDS_STRING multicast_ipv6_address_str_;
     ACE_SOCK_Dgram_Mcast multicast_ipv6_socket_;
     OPENDDS_SET(OPENDDS_STRING) joined_ipv6_interfaces_;
 #endif

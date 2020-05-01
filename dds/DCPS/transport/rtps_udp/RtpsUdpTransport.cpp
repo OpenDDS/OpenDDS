@@ -369,7 +369,7 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
   // Override with DCPSDefaultAddress.
   if (config.local_address() == ACE_INET_Addr () &&
       !TheServiceParticipant->default_address ().empty ()) {
-    ACE_INET_Addr addr(static_cast<u_short>(0), TheServiceParticipant->default_address().c_str());
+    ACE_INET_Addr addr(u_short(0), TheServiceParticipant->default_address().c_str());
     config.local_address(addr);
   }
 

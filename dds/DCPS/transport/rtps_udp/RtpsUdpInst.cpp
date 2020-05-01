@@ -47,10 +47,10 @@ RtpsUdpInst::RtpsUdpInst(const OPENDDS_STRING& name)
   , use_ice_(false)
   , opendds_discovery_guid_(GUID_UNKNOWN)
   , multicast_group_address_(7401, "239.255.0.2")
-  , local_address_(static_cast<u_short>(0), "0.0.0.0")
+  , local_address_(u_short(0), "0.0.0.0")
 #ifdef ACE_HAS_IPV6
   , ipv6_multicast_group_address_(7401, "FF03::2")
-  , ipv6_local_address_(static_cast<u_short>(0), "::")
+  , ipv6_local_address_(u_short(0), "::")
 #endif
 {}
 
