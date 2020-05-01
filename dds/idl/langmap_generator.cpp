@@ -1757,10 +1757,13 @@ bool langmap_generator::gen_const(UTL_ScopedName* name, bool,
     generator_->const_keyword(type) << ' ' << type_name << ' ' << nm << " = ";
 
   if (is_enum) {
+    UTL_ScopedName* const enumerator = constant->constant_value()->n();
     if (generator_->scoped_enum()) {
-      be_global->lang_header_ << type_name << "::";
+      be_global->lang_header_ << type_name << "::"
+        << to_string(enumerator->last_component()) << ";\n";
+    } else {
+      be_global->lang_header_ << scoped(enumerator) << ";\n";
     }
-    be_global->lang_header_ << scoped(constant->constant_value()->n()) << ";\n";
   } else {
     be_global->lang_header_ << *constant->constant_value()->ev() << ";\n";
   }
