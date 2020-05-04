@@ -377,7 +377,7 @@ Sedp::init(const RepoId& guid,
 
     ACE_INET_Addr mc_addr = disco.default_multicast_group();
     mc_addr.set_port_number(mc_port);
-    rtps_inst->multicast_group_address(mc_addr);
+    rtps_inst->multicast_group_address_ = mc_addr;
 
     rtps_inst->ttl_ = disco.ttl();
     rtps_inst->multicast_interface_ = disco.multicast_interface();
@@ -386,9 +386,9 @@ Sedp::init(const RepoId& guid,
     rtps_inst->use_multicast_ = false;
   }
 
-  rtps_inst->local_address(disco.config()->sedp_local_address());
+  rtps_inst->local_address_ = disco.config()->sedp_local_address();
 #ifdef ACE_HAS_IPV6
-  rtps_inst->ipv6_local_address(disco.config()->ipv6_sedp_local_address());
+  rtps_inst->ipv6_local_address_ = disco.config()->ipv6_sedp_local_address();
 #endif
 
   rtps_relay_address(disco.config()->sedp_rtps_relay_address());
