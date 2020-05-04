@@ -2610,8 +2610,8 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
       ACE_DEBUG((LM_INFO,
                  ACE_TEXT("(%P|%t) Spdp::SpdpTransport::join_multicast_group ")
                  ACE_TEXT("joining group %s on %C\n"),
-                 all_interfaces ? "all interfaces" : nic.name().c_str(),
-                 nic.name().c_str()));
+                 buff,
+                 all_interfaces ? "all interfaces" : nic.name().c_str()));
     }
 
     if (0 == multicast_socket_.join(multicast_address_, 1, all_interfaces ? 0 : ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()))) {
