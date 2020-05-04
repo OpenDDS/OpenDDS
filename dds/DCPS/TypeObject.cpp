@@ -46,6 +46,17 @@ TypeIdentifierPtr makeTypeIdentifier(const TypeObject& type_object)
 
 // Serialization support for TypeObject and its components
 
+size_t find_size(const TypeIdentifier& stru, size_t& size)
+{
+  return size;
+}
+
+bool operator<<(DCPS::Serializer& ser, const TypeIdentifier& stru)
+{
+  return true;
+}
+
+
 size_t find_size(const CompleteStructType& stru, size_t& size)
 {
   return size;
@@ -261,6 +272,36 @@ size_t find_size(const MinimalBitsetType& stru, size_t& size)
 }
 
 bool operator<<(DCPS::Serializer& ser, const MinimalBitsetType& stru)
+{
+  return true;
+}
+
+size_t find_size(const TypeIdentifierWithSize& stru, size_t& size)
+{
+  return size;
+}
+
+bool operator<<(DCPS::Serializer& ser, const TypeIdentifierWithSize& stru)
+{
+  return true;
+}
+
+size_t find_size(const TypeIdentifierWithSizeSeq& stru, size_t& size)
+{
+  return size;
+}
+
+bool operator<<(DCPS::Serializer& ser, const TypeIdentifierWithSizeSeq& stru)
+{
+  return true;
+}
+
+size_t find_size(const TypeIdentifierWithDependencies& stru, size_t& size)
+{
+  return size;
+}
+
+bool operator<<(DCPS::Serializer& ser, const TypeIdentifierWithDependencies& stru)
 {
   return true;
 }

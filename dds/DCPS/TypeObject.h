@@ -631,6 +631,10 @@ namespace XTypes {
       return ti;
     }
   };
+
+  size_t find_size(const TypeIdentifier& stru, size_t& size);
+  bool operator<<(DCPS::Serializer& ser, const TypeIdentifier& stru);
+
   typedef Sequence<TypeIdentifierPtr> TypeIdentifierSeq;
 
   // --- Annotation usage: -----------------------------------------------
@@ -1620,7 +1624,12 @@ namespace XTypes {
     TypeIdentifier  type_id;
     ACE_CDR::ULong  typeobject_serialized_size;
   };
+  size_t find_size(const TypeIdentifierWithSize& stru, size_t& size);
+  bool operator<<(DCPS::Serializer& ser, const TypeIdentifierWithSize& stru);
+
   typedef Sequence<TypeIdentifierWithSize> TypeIdentifierWithSizeSeq;
+  size_t find_size(const TypeIdentifierWithSizeSeq& stru, size_t& size);
+  bool operator<<(DCPS::Serializer& ser, const TypeIdentifierWithSizeSeq& stru);
 
   struct TypeIdentifierWithDependencies {
     TypeIdentifierWithSize            typeid_with_size;
@@ -1628,6 +1637,9 @@ namespace XTypes {
     ACE_CDR::Long                             dependent_typeid_count;
     std::vector<TypeIdentifierWithSize>  dependent_typeids;
   };
+  size_t find_size(const TypeIdentifierWithDependencies& stru, size_t& size);
+  bool operator<<(DCPS::Serializer& ser, const TypeIdentifierWithDependencies& stru);
+
   typedef Sequence<TypeIdentifierWithDependencies> TypeIdentifierWithDependenciesSeq;
 
   // // This appears in the builtin DDS topics PublicationBuiltinTopicData
