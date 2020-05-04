@@ -142,7 +142,7 @@ module OpenDDS { module XTypes {    // spec: DDS::XTypes
         @position(0)  TRY_CONSTRUCT1,     // T1 | 00 = INVALID, 01 = DISCARD
         @position(1)  TRY_CONSTRUCT2,     // T2 | 10 = USE_DEFAULT, 11 = TRIM
         @position(2)  IS_EXTERNAL,        // X  StructMember, UnionMember,
-	                                  //    CollectionElement
+                                          //    CollectionElement
         @position(3)  IS_OPTIONAL,        // O  StructMember
         @position(4)  IS_MUST_UNDERSTAND, // M  StructMember
         @position(5)  IS_KEY,          // K  StructMember, UnionDiscriminator
@@ -204,7 +204,7 @@ module OpenDDS { module XTypes {    // spec: DDS::XTypes
     // 1 Byte
     @extensibility(FINAL) @nested
     struct StringSTypeDefn {
-    	SBound                  bound;
+        SBound                  bound;
     };
 
     // 4 Bytes
