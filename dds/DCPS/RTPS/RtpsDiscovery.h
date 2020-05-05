@@ -390,15 +390,15 @@ public:
     use_ncm_ = ui;
   }
 
-  size_t udp_max_message_size() const
+  size_t sedp_max_message_size() const
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, size_t());
-    return udp_max_message_size_;
+    return sedp_max_message_size_;
   }
-  void udp_max_message_size(size_t value)
+  void sedp_max_message_size(size_t value)
   {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-    udp_max_message_size_ = value;
+    sedp_max_message_size_ = value;
   }
 
 private:
@@ -430,7 +430,7 @@ private:
   ACE_INET_Addr sedp_stun_server_address_;
   bool use_ice_;
   bool use_ncm_;
-  size_t udp_max_message_size_;
+  size_t sedp_max_message_size_;
 };
 
 typedef OpenDDS::DCPS::RcHandle<RtpsDiscoveryConfig> RtpsDiscoveryConfig_rch;

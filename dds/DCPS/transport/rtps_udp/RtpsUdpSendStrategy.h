@@ -65,7 +65,7 @@ protected:
 
   virtual size_t max_message_size() const
   {
-    return udp_max_message_size_;
+    return max_message_size_;
   }
 
   virtual void add_delayed_notification(TransportQueueElement* element);
@@ -116,7 +116,7 @@ private:
   const OPENDDS_SET(ACE_INET_Addr)* override_dest_;
   const ACE_INET_Addr* override_single_dest_;
 
-  const size_t udp_max_message_size_;
+  const size_t max_message_size_;
   RTPS::Header rtps_header_;
   char rtps_header_data_[RTPS::RTPSHDR_SZ];
   ACE_Data_Block rtps_header_db_;
