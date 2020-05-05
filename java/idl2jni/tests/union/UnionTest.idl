@@ -1,0 +1,7 @@
+enum E { E1, E2, E3 };
+union U switch (E) {
+ case E2:
+   octet o;
+ case E3:
+   short s;
+};
