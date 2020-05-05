@@ -14,15 +14,19 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-NetworkInterfaces NetworkConfigMonitor::add_listener(NetworkConfigListener_wrch listener)
+void NetworkConfigMonitor::add_listener(NetworkConfigListener_wrch listener)
 {
   {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, listeners_mutex_, NetworkInterfaces());
+    ACE_GUARD(ACE_Thread_Mutex, g, listeners_mutex_);
     listeners_.insert(listener);
   }
 
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, network_interfaces_mutex_, NetworkInterfaces());
-  return network_interfaces_;
+  const RcHandle<NetworkConfigListener> list = listener.lock();
+
+  ACE_GUARD(ACE_Thread_Mutex, g, network_interfaces_mutex_);
+  for (NetworkInterfaces::const_iterator pos = network_interfaces_.begin(), limit = network_interfaces_.end(); pos != limit; ++pos) {
+    list->add_interface(*pos);
+  }
 }
 
 void NetworkConfigMonitor::remove_listener(NetworkConfigListener_wrch listener)
@@ -80,17 +84,6 @@ void NetworkConfigMonitor::remove_interface(int index)
   {
     ACE_GUARD(ACE_Thread_Mutex, g, listeners_mutex_);
     listeners = listeners_;
-  }
-
-  while (!nic.addresses.empty()) {
-    const ACE_INET_Addr addr = *nic.addresses.begin();
-    nic.addresses.erase(nic.addresses.begin());
-    for (Listeners::const_iterator pos = listeners.begin(), limit = listeners.end(); pos != limit; ++pos) {
-      const RcHandle<NetworkConfigListener> listener(pos->lock());
-      if (listener) {
-        listener->remove_address(nic, addr);
-      }
-    }
   }
 
   for (Listeners::const_iterator pos = listeners.begin(), limit = listeners.end(); pos != limit; ++pos) {

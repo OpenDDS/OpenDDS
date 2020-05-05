@@ -281,6 +281,30 @@ int SignedDocument::cache_verifiable(BIO* from)
 
 PKCS7* SignedDocument::PKCS7_from_SMIME_file(const std::string& path)
 {
+#ifdef ACE_ANDROID
+  CORBA::Octet *buffer;
+
+  char b[1024];
+  FILE* fp = ACE_OS::fopen(path.c_str(), "rb");
+
+  int n;
+  int i = 0;
+  while (!feof(fp)) {
+    n = ACE_OS::fread(&b, 1, 1024, fp);
+    i += n;
+
+    original_.length(i + 1); // +1 for null byte at end of cert
+    buffer = original_.get_buffer();
+    ACE_OS::memcpy(buffer + i - n, b, n);
+  }
+
+  ACE_OS::fclose(fp);
+
+  // To appease the other DDS security implementations which
+  // append a null byte at the end of the cert.
+  buffer[i + 1] = 0u;
+
+#else
   std::ifstream in(path.c_str(), std::ios::binary);
 
   DCPS::SequenceBackInsertIterator<DDS::OctetSeq> back_inserter(original_);
@@ -299,6 +323,7 @@ PKCS7* SignedDocument::PKCS7_from_SMIME_file(const std::string& path)
 
   // To appease the other DDS security implementations
   *back_inserter = 0u;
+#endif
 
   return original_.length() ? PKCS7_from_data(original_) : 0;
 }

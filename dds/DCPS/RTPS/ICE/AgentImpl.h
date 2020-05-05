@@ -97,7 +97,7 @@ public:
 
   void unfreeze(const FoundationType& a_foundation);
 
-  ACE_Recursive_Thread_Mutex mutex;
+  mutable ACE_Recursive_Thread_Mutex mutex;
 
 private:
   void network_change() const;

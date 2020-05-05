@@ -79,6 +79,8 @@ namespace XTypes {
   const TypeKind TK_FLOAT32    = 0x09;
   const TypeKind TK_FLOAT64    = 0x0A;
   const TypeKind TK_FLOAT128   = 0x0B;
+  const TypeKind TK_INT8       = 0x0C; // XTypes 1.3 Annex B
+  const TypeKind TK_UINT8      = 0x0D; // XTypes 1.3 Annex B
   const TypeKind TK_CHAR8      = 0x10;
   const TypeKind TK_CHAR16     = 0x11;
 
@@ -631,6 +633,10 @@ namespace XTypes {
       return ti;
     }
   };
+
+  size_t find_size(const TypeIdentifier& stru, size_t& size);
+  bool operator<<(DCPS::Serializer& ser, const TypeIdentifier& stru);
+
   typedef Sequence<TypeIdentifierPtr> TypeIdentifierSeq;
 
   // --- Annotation usage: -----------------------------------------------
@@ -1620,7 +1626,12 @@ namespace XTypes {
     TypeIdentifierPtr  type_id;
     ACE_CDR::ULong  typeobject_serialized_size;
   };
+  size_t find_size(const TypeIdentifierWithSize& stru, size_t& size);
+  bool operator<<(DCPS::Serializer& ser, const TypeIdentifierWithSize& stru);
+
   typedef Sequence<TypeIdentifierWithSize> TypeIdentifierWithSizeSeq;
+  size_t find_size(const TypeIdentifierWithSizeSeq& stru, size_t& size);
+  bool operator<<(DCPS::Serializer& ser, const TypeIdentifierWithSizeSeq& stru);
 
   struct TypeIdentifierWithDependencies {
     TypeIdentifierWithSize            typeid_with_size;
@@ -1628,6 +1639,9 @@ namespace XTypes {
     ACE_CDR::Long                             dependent_typeid_count;
     std::vector<TypeIdentifierWithSize>  dependent_typeids;
   };
+  size_t find_size(const TypeIdentifierWithDependencies& stru, size_t& size);
+  bool operator<<(DCPS::Serializer& ser, const TypeIdentifierWithDependencies& stru);
+
   typedef Sequence<TypeIdentifierWithDependencies> TypeIdentifierWithDependenciesSeq;
 
   // // This appears in the builtin DDS topics PublicationBuiltinTopicData

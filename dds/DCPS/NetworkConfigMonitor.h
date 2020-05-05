@@ -40,6 +40,25 @@ public:
   void index(int index) { index_ = index; }
   const OPENDDS_STRING& name() const { return name_; }
   bool can_multicast() const { return can_multicast_; }
+  bool has_ipv4() const
+  {
+    for (AddressSet::const_iterator pos = addresses.begin(), limit = addresses.end(); pos != limit; ++pos) {
+      if (pos->get_type() == AF_INET) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  bool has_ipv6() const
+  {
+    for (AddressSet::const_iterator pos = addresses.begin(), limit = addresses.end(); pos != limit; ++pos) {
+      if (pos->get_type() == AF_INET6) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   AddressSet addresses;
 
@@ -62,12 +81,26 @@ struct NetworkInterfaceIndex {
 
 class NetworkConfigListener : public virtual RcObject {
 public:
-  virtual void add_interface(const NetworkInterface& /*interface*/) {}
-  virtual void remove_interface(const NetworkInterface& /*interface*/) {}
+  virtual void add_interface(const NetworkInterface& interface)
+  {
+    for (NetworkInterface::AddressSet::const_iterator pos = interface.addresses.begin(), limit = interface.addresses.end();
+         pos != limit; ++pos) {
+      add_address(interface, *pos);
+    }
+  }
+
+  virtual void remove_interface(const NetworkInterface& interface)
+  {
+    for (NetworkInterface::AddressSet::const_iterator pos = interface.addresses.begin(), limit = interface.addresses.end();
+         pos != limit; ++pos) {
+      remove_address(interface, *pos);
+    }
+  }
+
   virtual void add_address(const NetworkInterface& /*interface*/,
-                           const ACE_INET_Addr& /*address*/) {}
+                           const ACE_INET_Addr& /*address*/) = 0;
   virtual void remove_address(const NetworkInterface& /*interface*/,
-                              const ACE_INET_Addr& /*address*/) {}
+                              const ACE_INET_Addr& /*address*/) = 0;
 };
 
 typedef WeakRcHandle<NetworkConfigListener> NetworkConfigListener_wrch;
@@ -79,7 +112,7 @@ public:
   virtual bool open() = 0;
   virtual bool close() = 0;
 
-  NetworkInterfaces add_listener(NetworkConfigListener_wrch listener);
+  void add_listener(NetworkConfigListener_wrch listener);
   void remove_listener(NetworkConfigListener_wrch listener);
   NetworkInterfaces get() const;
 

@@ -139,6 +139,7 @@ protected:
 };
 
 typedef RcHandle<ReactorInterceptor> ReactorInterceptor_rch;
+typedef WeakRcHandle<ReactorInterceptor> ReactorInterceptor_wrch;
 
 } // namespace DCPS
 } // namespace OpenDDS

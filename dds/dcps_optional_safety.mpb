@@ -156,12 +156,12 @@ feature(!no_opendds_safety_profile, !built_in_topics) : dds_suppress_any_support
   }
 
   TypeSupport_Files {
-    dcps_ts_flags += -SI -Lspcpp -Wb,ts_cpp_include=DdsDcpsInfrastructureC.h
+    dcps_ts_flags += -SI -Sx -Lspcpp -Wb,ts_cpp_include=DdsDcpsInfrastructureC.h
     DdsDcpsConditionSeq.idl
   }
 
   TypeSupport_Files {
-    dcps_ts_flags += -SI -Lspcpp -Wb,ts_cpp_include=DdsDcpsSubscriptionC.h
+    dcps_ts_flags += -SI -Sx -Lspcpp -Wb,ts_cpp_include=DdsDcpsSubscriptionC.h
     DdsDcpsDataReaderSeq.idl
   }
 }

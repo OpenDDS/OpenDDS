@@ -117,10 +117,11 @@ private:
   /// is not possible because the network location returned by
   /// connection_info_i() can't be shared among participants.
   RtpsUdpDataLink_rch link_;
-  bool map_ipv4_to_ipv6() const;
 
   ACE_SOCK_Dgram unicast_socket_;
-
+#ifdef ACE_HAS_IPV6
+  ACE_SOCK_Dgram ipv6_unicast_socket_;
+#endif
   TransportClient_wrch default_listener_;
 
 #if defined(OPENDDS_SECURITY)
@@ -134,8 +135,10 @@ private:
     IceEndpoint(RtpsUdpTransport& a_transport)
       : transport(a_transport) {}
 
+    const ACE_SOCK_Dgram& choose_recv_socket(ACE_HANDLE fd) const;
     virtual int handle_input(ACE_HANDLE fd);
     virtual ICE::AddressListType host_addresses() const;
+    ACE_SOCK_Dgram& choose_send_socket(const ACE_INET_Addr& address) const;
     virtual void send(const ACE_INET_Addr& address, const STUN::Message& message);
     virtual ACE_INET_Addr stun_server_address() const;
   };
