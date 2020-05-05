@@ -375,14 +375,9 @@ Sedp::init(const RepoId& guid,
     // Bind to a specific multicast group
     const u_short mc_port = disco.pb() + disco.dg() * domainId + disco.dx();
 
-    OPENDDS_STRING mc_addr = disco.default_multicast_group();
-    if (rtps_inst->multicast_group_address_.set(mc_port, mc_addr.c_str())) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: Sedp::init - ")
-                 ACE_TEXT("failed setting multicast local_addr to port %hu\n"),
-                          mc_port));
-      return DDS::RETCODE_ERROR;
-    }
+    ACE_INET_Addr mc_addr = disco.default_multicast_group();
+    mc_addr.set_port_number(mc_port);
+    rtps_inst->multicast_group_address_ = mc_addr;
 
     rtps_inst->ttl_ = disco.ttl();
     rtps_inst->multicast_interface_ = disco.multicast_interface();
@@ -391,11 +386,10 @@ Sedp::init(const RepoId& guid,
     rtps_inst->use_multicast_ = false;
   }
 
-  const OPENDDS_STRING sedp_addr = disco.sedp_local_address();
-  if (!sedp_addr.empty()) {
-    rtps_inst->local_address_config_str_ = sedp_addr;
-    rtps_inst->local_address_.set(sedp_addr.c_str());
-  }
+  rtps_inst->local_address_ = disco.config()->sedp_local_address();
+#ifdef ACE_HAS_IPV6
+  rtps_inst->ipv6_local_address_ = disco.config()->ipv6_sedp_local_address();
+#endif
 
   rtps_relay_address(disco.config()->sedp_rtps_relay_address());
   rtps_inst->rtps_relay_beacon_period_ = disco.config()->sedp_rtps_relay_beacon_period();

@@ -40,7 +40,8 @@ AppConfig::AppConfig(int argc, ACE_TCHAR* argv[], bool setLocalAddress) :
     }
     rtpsInst->datalink_release_delay_ = 0;
     if (setLocalAddress) {
-      rtpsInst->local_address(port, ACE_TEXT_ALWAYS_CHAR(host.c_str()));
+      ACE_INET_Addr addr(port, ACE_TEXT_ALWAYS_CHAR(host.c_str()));
+      rtpsInst->local_address(addr);
     }
 
     OpenDDS::DCPS::TransportConfig_rch cfg = TheTransportRegistry->create_config("cfg");

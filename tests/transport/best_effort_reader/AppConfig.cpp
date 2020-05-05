@@ -73,7 +73,8 @@ bool AppConfig::configureTransport(){
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Failed to cast to RtpsUdpInst*%m\n")), false);
     }
     rtpsUdp->datalink_release_delay_ = 0;
-    rtpsUdp->local_address(port, ACE_TEXT_ALWAYS_CHAR(host.c_str()));
+    ACE_INET_Addr addr(port, ACE_TEXT_ALWAYS_CHAR(host.c_str()));
+    rtpsUdp->local_address(addr);
 
     OpenDDS::DCPS::TransportConfig_rch cfg = TheTransportRegistry->create_config("cfg");
     cfg->instances_.push_back(transpt);

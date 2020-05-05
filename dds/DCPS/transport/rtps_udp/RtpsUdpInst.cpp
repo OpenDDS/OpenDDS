@@ -33,12 +33,6 @@ RtpsUdpInst::RtpsUdpInst(const OPENDDS_STRING& name)
 #endif
   , use_multicast_(true)
   , ttl_(1)
-  , multicast_group_address_(7401, "239.255.0.2")
-  , multicast_group_address_str_("239.255.0.2:7401")
-#ifdef ACE_HAS_IPV6
-  , ipv6_multicast_group_address_(7401, "FF03::2")
-  , ipv6_multicast_group_address_str_("[FF03::2]:7401")
-#endif
   , nak_depth_(0)
   , max_bundle_size_(TransportSendStrategy::UDP_MAX_MESSAGE_SIZE - RTPS::RTPSHDR_SZ) // default maximum bundled message size is max udp message size (see TransportStrategy) minus RTPS header
   , quick_reply_ratio_(0.1)
@@ -52,12 +46,13 @@ RtpsUdpInst::RtpsUdpInst(const OPENDDS_STRING& name)
   , rtps_relay_only_(false)
   , use_ice_(false)
   , opendds_discovery_guid_(GUID_UNKNOWN)
-{
-  local_address(0, "0.0.0.0");
+  , multicast_group_address_(7401, "239.255.0.2")
+  , local_address_(u_short(0), "0.0.0.0")
 #ifdef ACE_HAS_IPV6
-  ipv6_local_address(0, "::");
+  , ipv6_multicast_group_address_(7401, "FF03::2")
+  , ipv6_local_address_(u_short(0), "::")
 #endif
-}
+{}
 
 TransportImpl_rch
 RtpsUdpInst::new_impl()
@@ -75,7 +70,8 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
   GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("local_address"),
                            local_address_s);
   if (!local_address_s.is_empty()) {
-    local_address(ACE_TEXT_ALWAYS_CHAR(local_address_s.c_str()));
+    ACE_INET_Addr addr(local_address_s.c_str());
+    local_address(addr);
   }
 
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("send_buffer_size"), this->send_buffer_size_, ACE_UINT32);
@@ -93,8 +89,8 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
       // Concatenate a port number if the user does not supply one.
       group_address_s += ACE_TEXT(":7401");
     }
-    multicast_group_address_.set(group_address_s.c_str());
-    multicast_group_address_str_ = ACE_TEXT_ALWAYS_CHAR(group_address_s.c_str());
+    ACE_INET_Addr addr(group_address_s.c_str());
+    multicast_group_address(addr);
   }
 
   GET_CONFIG_STRING_VALUE(cf, sect, ACE_TEXT("multicast_interface"),

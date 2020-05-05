@@ -1739,28 +1739,12 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
     (outer_->config_->dg() * outer_->domain_);
   mc_port_ = port_common + outer_->config_->d0();
 
-  multicast_address_str_ = outer_->config_->default_multicast_group();
-  multicast_address_.set_type(AF_INET);
-  if (0 != multicast_address_.set(mc_port_, multicast_address_str_.c_str())) {
-    ACE_ERROR((
-          LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::SpdpTransport() - ")
-          ACE_TEXT("failed setting default multicast address %C:%hu %p\n"),
-          multicast_address_str_.c_str(), mc_port_, ACE_TEXT("ACE_INET_Addr::set")));
-    throw std::runtime_error("failed to set default_multicast address");
-  }
+  multicast_address_ = outer_->config_->default_multicast_group();
+  multicast_address_.set_port_number(mc_port_);
 
 #ifdef ACE_HAS_IPV6
-  multicast_ipv6_address_str_ = outer_->config_->default_multicast_ipv6_group();
-  multicast_ipv6_address_.set_type(AF_INET6);
-  if (0 != multicast_ipv6_address_.set(mc_port_, multicast_ipv6_address_str_.c_str())) {
-    ACE_ERROR((
-          LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::SpdpTransport() - ")
-          ACE_TEXT("failed setting default ipv6 multicast address %C:%hu %p\n"),
-          multicast_ipv6_address_str_.c_str(), mc_port_, ACE_TEXT("ACE_INET_Addr::set")));
-    throw std::runtime_error("failed to set default_multicast_ipv6 address");
-  }
+  multicast_ipv6_address_ = outer_->config_->ipv6_default_multicast_group();
+  multicast_ipv6_address_.set_port_number(mc_port_);
 #endif
 
   send_addrs_.insert(multicast_address_);
@@ -1865,12 +1849,11 @@ Spdp::SpdpTransport::open()
     ncm->add_listener(*this);
   } else {
     DCPS::NetworkInterface nic(0, multicast_interface_, true);
-    ACE_INET_Addr addr;
-    addr.set_type(AF_INET);
+    ACE_INET_Addr addr("0.0.0.0");
     nic.addresses.insert(addr);
 #ifdef ACE_HAS_IPV6
-    addr.set_type(AF_INET6);
-    nic.addresses.insert(addr);
+    ACE_INET_Addr addr2("[::]");
+    nic.addresses.insert(addr2);
 #endif
     job_queue_->enqueue(DCPS::make_rch<ChangeMulticastGroup>(rchandle_from(this), nic,
                                                              ChangeMulticastGroup::CMG_JOIN, true));
@@ -2515,22 +2498,8 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
 {
   uni_port_ = port_common + outer_->config_->d1() + (outer_->config_->pg() * participant_id);
 
-  ACE_INET_Addr local_addr;
-  OPENDDS_STRING spdpaddr = outer_->config_->spdp_local_address().c_str();
-
-  if (spdpaddr.empty()) {
-    spdpaddr = "0.0.0.0";
-  }
-
-  local_addr.set_type(AF_INET);
-  if (0 != local_addr.set(uni_port_, spdpaddr.c_str())) {
-    ACE_ERROR((
-          LM_ERROR,
-          ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_socket() - ")
-          ACE_TEXT("failed setting unicast local_addr to port %d %p\n"),
-          uni_port_, ACE_TEXT("ACE_INET_Addr::set")));
-    throw std::runtime_error("failed to set unicast local address");
-  }
+  ACE_INET_Addr local_addr = outer_->config_->spdp_local_address();
+  local_addr.set_port_number(uni_port_);
 
   if (unicast_socket_.open(local_addr, PF_INET) != 0) {
     if (DCPS::DCPS_debug_level > 3) {
@@ -2577,22 +2546,8 @@ Spdp::SpdpTransport::open_unicast_ipv6_socket(u_short port)
 {
   ipv6_uni_port_ = port;
 
-  ACE_INET_Addr local_addr;
-  OPENDDS_STRING spdpaddr = outer_->config_->spdp_local_address().c_str();
-
-  if (spdpaddr.empty()) {
-    spdpaddr = "::";
-  }
-
-  local_addr.set_type(AF_INET6);
-  if (0 != local_addr.set(ipv6_uni_port_, spdpaddr.c_str())) {
-    ACE_ERROR((
-          LM_ERROR,
-          ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_ipv6_socket() - ")
-          ACE_TEXT("failed setting unicast ipv6 local_addr to port %d %p\n"),
-          ipv6_uni_port_, ACE_TEXT("ACE_INET_Addr::set")));
-    throw std::runtime_error("failed to set unicast ipv6 local address");
-  }
+  ACE_INET_Addr local_addr = outer_->config_->ipv6_spdp_local_address();
+  local_addr.set_port_number(ipv6_uni_port_);
 
   if (unicast_ipv6_socket_.open(local_addr, PF_INET6) != 0) {
     if (DCPS::DCPS_debug_level > 3) {
@@ -2650,12 +2605,13 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
 
   if (joined_interfaces_.count(nic.name()) == 0 && nic.has_ipv4()) {
     if (DCPS::DCPS_debug_level > 3) {
+      ACE_TCHAR buff[256];
+      multicast_address_.addr_to_string(buff, 256);
       ACE_DEBUG((LM_INFO,
                  ACE_TEXT("(%P|%t) Spdp::SpdpTransport::join_multicast_group ")
-                 ACE_TEXT("joining group %C:%hu on %C\n"),
-                 multicast_address_str_.c_str(),
-                 mc_port_,
-                 nic.name().c_str()));
+                 ACE_TEXT("joining group %s on %C\n"),
+                 buff,
+                 all_interfaces ? "all interfaces" : nic.name().c_str()));
     }
 
     if (0 == multicast_socket_.join(multicast_address_, 1, all_interfaces ? 0 : ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()))) {
@@ -2669,23 +2625,27 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
 
       write_i(SEND_TO_LOCAL);
     } else {
+      ACE_TCHAR buff[256];
+      multicast_address_.addr_to_string(buff, 256);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::join_multicast_group() - ")
-                 ACE_TEXT("failed to join multicast group %C:%hu on %s: %p\n"),
-                 multicast_address_str_.c_str(), mc_port_,
-                 all_interfaces ? ACE_TEXT("all interfaces") : ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()), ACE_TEXT("ACE_SOCK_Dgram_Mcast::join")));
+                 ACE_TEXT("failed to join multicast group %s on %C: %p\n"),
+                 buff,
+                 all_interfaces ? "all interfaces" : nic.name().c_str(),
+                 ACE_TEXT("ACE_SOCK_Dgram_Mcast::join")));
     }
   }
 
 #ifdef ACE_HAS_IPV6
   if (joined_ipv6_interfaces_.count(nic.name()) == 0 && nic.has_ipv6()) {
     if (DCPS::DCPS_debug_level > 3) {
+      ACE_TCHAR buff[256];
+      multicast_ipv6_address_.addr_to_string(buff, 256);
       ACE_DEBUG((LM_INFO,
                  ACE_TEXT("(%P|%t) Spdp::SpdpTransport::join_multicast_group ")
-                 ACE_TEXT("joining group %C:%hu on %C\n"),
-                 multicast_ipv6_address_str_.c_str(),
-                 mc_port_,
-                 nic.name().c_str()));
+                 ACE_TEXT("joining group %s on %C\n"),
+                 buff,
+                 all_interfaces ? "all interfaces" : nic.name().c_str()));
     }
 
     if (0 == multicast_ipv6_socket_.join(multicast_ipv6_address_, 1, all_interfaces ? 0 : ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()))) {
@@ -2699,10 +2659,14 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
 
       write_i(SEND_TO_LOCAL);
     } else {
+      ACE_TCHAR buff[256];
+      multicast_ipv6_address_.addr_to_string(buff, 256);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::join_multicast_group() - ")
-                 ACE_TEXT("failed to join multicast group %C:%hu on %s: %p\n"),
-                 multicast_ipv6_address_str_.c_str(), mc_port_, all_interfaces ? ACE_TEXT("all interfaces") : ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()), ACE_TEXT("ACE_SOCK_Dgram_Mcast::join")));
+                 ACE_TEXT("failed to join multicast group %s on %C: %p\n"),
+                 buff,
+                 all_interfaces ? "all interfaces" : nic.name().c_str(),
+                 ACE_TEXT("ACE_SOCK_Dgram_Mcast::join")));
     }
   }
 #endif
@@ -2715,19 +2679,24 @@ Spdp::SpdpTransport::leave_multicast_group(const DCPS::NetworkInterface& nic)
 
   if (joined_interfaces_.count(nic.name()) != 0 && !nic.has_ipv4()) {
     if (DCPS::DCPS_debug_level > 3) {
+      ACE_TCHAR buff[256];
+      multicast_address_.addr_to_string(buff, 256);
       ACE_DEBUG((LM_INFO,
                  ACE_TEXT("(%P|%t) Spdp::SpdpTransport::leave_multicast_group ")
-                 ACE_TEXT("leaving group %C %C:%hu\n"),
-                 nic.name().c_str(),
-                 multicast_address_str_.c_str(),
-                 mc_port_));
+                 ACE_TEXT("leaving group %s on %C\n"),
+                 buff,
+                 nic.name().c_str()));
     }
 
     if (0 != multicast_socket_.leave(multicast_address_, ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()))) {
+      ACE_TCHAR buff[256];
+      multicast_address_.addr_to_string(buff, 256);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::leave_multicast_group() - ")
-                 ACE_TEXT("failed to leave multicast group %C:%hu %p\n"),
-                 multicast_address_str_.c_str(), mc_port_, ACE_TEXT("ACE_SOCK_Dgram_Mcast::leave")));
+                 ACE_TEXT("failed to leave multicast group %s on %C: %p\n"),
+                 buff,
+                 nic.name().c_str(),
+                 ACE_TEXT("ACE_SOCK_Dgram_Mcast::leave")));
     }
     joined_interfaces_.erase(nic.name());
   }
@@ -2735,19 +2704,24 @@ Spdp::SpdpTransport::leave_multicast_group(const DCPS::NetworkInterface& nic)
 #ifdef ACE_HAS_IPV6
   if (joined_ipv6_interfaces_.count(nic.name()) != 0 && !nic.has_ipv6()) {
     if (DCPS::DCPS_debug_level > 3) {
+      ACE_TCHAR buff[256];
+      multicast_ipv6_address_.addr_to_string(buff, 256);
       ACE_DEBUG((LM_INFO,
                  ACE_TEXT("(%P|%t) Spdp::SpdpTransport::leave_multicast_group ")
-                 ACE_TEXT("leaving group %C %C:%hu\n"),
-                 nic.name().c_str(),
-                 multicast_ipv6_address_str_.c_str(),
-                 mc_port_));
+                 ACE_TEXT("leaving group %s on %C\n"),
+                 buff,
+                 nic.name().c_str()));
     }
 
     if (0 != multicast_ipv6_socket_.leave(multicast_ipv6_address_, ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()))) {
+      ACE_TCHAR buff[256];
+      multicast_ipv6_address_.addr_to_string(buff, 256);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::leave_multicast_group() - ")
-                 ACE_TEXT("failed to leave multicast ipv6 group %C:%hu %p\n"),
-                 multicast_ipv6_address_str_.c_str(), mc_port_, ACE_TEXT("ACE_SOCK_Dgram_Mcast::leave")));
+                 ACE_TEXT("failed to leave multicast ipv6 group %s on %C: %p\n"),
+                 buff,
+                 nic.name().c_str(),
+                 ACE_TEXT("ACE_SOCK_Dgram_Mcast::leave")));
     }
     joined_ipv6_interfaces_.erase(nic.name());
   }
