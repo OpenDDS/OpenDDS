@@ -42,6 +42,7 @@ public:
 #endif
   OPENDDS_STRING multicast_interface_;
 
+  size_t udp_max_message_size_;
   size_t nak_depth_;
   size_t max_bundle_size_;
   double quick_reply_ratio_;

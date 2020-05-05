@@ -39,6 +39,7 @@ RtpsUdpInst::RtpsUdpInst(const OPENDDS_STRING& name)
   , ipv6_multicast_group_address_(7401, "FF03::2")
   , ipv6_multicast_group_address_str_("[FF03::2]:7401")
 #endif
+  , udp_max_message_size_(RtpsUdpSendStrategy::UDP_MAX_MESSAGE_SIZE)
   , nak_depth_(0)
   , max_bundle_size_(TransportSendStrategy::UDP_MAX_MESSAGE_SIZE - RTPS::RTPSHDR_SZ) // default maximum bundled message size is max udp message size (see TransportStrategy) minus RTPS header
   , quick_reply_ratio_(0.1)
@@ -99,6 +100,8 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
 
   GET_CONFIG_STRING_VALUE(cf, sect, ACE_TEXT("multicast_interface"),
                           multicast_interface_);
+
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("udp_max_message_size"), udp_max_message_size_, size_t);
 
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("nak_depth"), nak_depth_, size_t);
 

@@ -370,6 +370,7 @@ Sedp::init(const RepoId& guid,
   // possible network lossiness.
   static const double HANDSHAKE_MULTIPLIER = 5;
   rtps_inst->handshake_timeout_ = disco.resend_period() * HANDSHAKE_MULTIPLIER;
+  rtps_inst->udp_max_message_size_ = disco.config()->udp_max_message_size();
 
   if (disco.sedp_multicast()) {
     // Bind to a specific multicast group

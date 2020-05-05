@@ -15,6 +15,7 @@
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/Registered_Data_Types.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
+#include "dds/DCPS/transport/framework/TransportSendStrategy.h"
 
 #include "ace/Reactor.h"
 #include "ace/Select_Reactor.h"
@@ -68,6 +69,7 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   , rtps_relay_only_(false)
   , use_ice_(false)
   , use_ncm_(true)
+  , udp_max_message_size_(DCPS::TransportSendStrategy::UDP_MAX_MESSAGE_SIZE)
 {}
 
 RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
@@ -508,10 +510,22 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
             config->max_spdp_sequence_msg_reset_check(value);
           } else {
             ACE_ERROR_RETURN((LM_ERROR,
-              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-              ACE_TEXT("Invalid entry (%C) for MaxSpdpSequenceMsgResetChecks in ")
-              ACE_TEXT("[rtps_discovery/%C] section.\n"),
-              string_value.c_str(), rtps_name.c_str()), -1);
+                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+                              ACE_TEXT("Invalid entry (%C) for MaxSpdpSequenceMsgResetChecks in ")
+                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+                              string_value.c_str(), rtps_name.c_str()), -1);
+          }
+        } else if (name == "UdpMaxMessageSize") {
+          const OPENDDS_STRING& string_value = it->second;
+          size_t value;
+          if (DCPS::convertToInteger(string_value, value)) {
+            config->udp_max_message_size(value);
+          } else {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+                              ACE_TEXT("Invalid entry (%C) for UdpMaxMessageSize in ")
+                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+                              string_value.c_str(), rtps_name.c_str()), -1);
           }
         } else {
           ACE_ERROR_RETURN((LM_ERROR,
