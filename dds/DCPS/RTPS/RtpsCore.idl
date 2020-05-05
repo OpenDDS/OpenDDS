@@ -472,7 +472,7 @@ module OpenDDS {
 
       case PID_BUILTIN_ENDPOINT_QOS:
         BuiltinEndpointQos_t builtinEndpointQos;
-      
+
       case PID_XTYPES_TYPE_INFORMATION:
         DDS::OctetSeq type_information;
 
