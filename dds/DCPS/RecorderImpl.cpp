@@ -28,6 +28,7 @@
 #include "dds/DdsDcpsCoreC.h"
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
 #include "dds/DCPS/SafetyProfileStreams.h"
+#include "TypeSupportImpl.h"
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "BuiltInTopicUtils.h"
 #include "dds/DdsDcpsCoreTypeSupportC.h"
@@ -987,6 +988,16 @@ RecorderImpl::enable()
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) RecorderImpl::add_subscription\n")));
 
+    OpenDDS::DCPS::TypeSupportImpl* const typesupport =
+      dynamic_cast<OpenDDS::DCPS::TypeSupportImpl*>(topic_servant_->get_type_support());
+    size_t sto = XTypes::find_size(typesupport->getMinimalTypeObject());
+    XTypes::TypeIdentifierPtr type_iden = XTypes::makeTypeIdentifier(typesupport->getMinimalTypeObject());
+    XTypes::TypeInformation type_info;
+    type_info.minimal.typeid_with_size.type_id = type_iden;
+    type_info.minimal.typeid_with_size.typeobject_serialized_size = sto;
+    type_info.minimal.dependent_typeid_count = 0;
+    type_info.complete.dependent_typeid_count = 0;
+
     this->subscription_id_ =
       disco->add_subscription(this->domain_id_,
                               this->participant_servant_->get_id(),
@@ -997,7 +1008,9 @@ RecorderImpl::enable()
                               this->subqos_,
                               filterClassName,
                               filterExpression,
-                              exprParams);
+                              exprParams,
+                              type_info,
+                              swap_bytes());
 
     if (this->subscription_id_ == OpenDDS::DCPS::GUID_UNKNOWN) {
       ACE_ERROR((LM_ERROR,

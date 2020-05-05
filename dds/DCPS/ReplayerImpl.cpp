@@ -21,6 +21,7 @@
 #include "DataDurabilityCache.h"
 #include "OfferedDeadlineWatchdog.h"
 #include "MonitorFactory.h"
+#include "TypeSupportImpl.h"
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 #include "CoherentChangeControl.h"
 #endif
@@ -359,6 +360,17 @@ ReplayerImpl::enable()
 
 
   Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
+
+  OpenDDS::DCPS::TypeSupportImpl* const typesupport =
+    dynamic_cast<OpenDDS::DCPS::TypeSupportImpl*>(topic_servant_->get_type_support());
+  size_t sto = XTypes::find_size(typesupport->getMinimalTypeObject());
+  XTypes::TypeIdentifierPtr type_iden = XTypes::makeTypeIdentifier(typesupport->getMinimalTypeObject());
+  XTypes::TypeInformation type_info;
+  type_info.minimal.typeid_with_size.type_id = type_iden;
+  type_info.minimal.typeid_with_size.typeobject_serialized_size = sto;
+  type_info.minimal.dependent_typeid_count = 0;
+  type_info.complete.dependent_typeid_count = 0;
+
   this->publication_id_ =
     disco->add_publication(this->domain_id_,
                            this->participant_servant_->get_id(),
@@ -366,7 +378,9 @@ ReplayerImpl::enable()
                            this,
                            this->qos_,
                            trans_conf_info,
-                           this->publisher_qos_);
+                           this->publisher_qos_,
+                           type_info,
+                           swap_bytes());
 
   if (this->publication_id_ == GUID_UNKNOWN) {
     ACE_ERROR((LM_ERROR,

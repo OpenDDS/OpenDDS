@@ -1617,7 +1617,7 @@ namespace XTypes {
   typedef Sequence<TypeIdentifierPair> TypeIdentifierPairSeq;
 
   struct TypeIdentifierWithSize {
-    TypeIdentifier  type_id;
+    TypeIdentifierPtr  type_id;
     ACE_CDR::ULong  typeobject_serialized_size;
   };
   typedef Sequence<TypeIdentifierWithSize> TypeIdentifierWithSizeSeq;
@@ -1632,17 +1632,13 @@ namespace XTypes {
 
   // // This appears in the builtin DDS topics PublicationBuiltinTopicData
   // // and SubscriptionBuiltinTopicData
-  // @extensibility(MUTABLE) @nested
-  // struct TypeInformation {
-  //   @id(0x1001) TypeIdentifierWithDependencies minimal;
-  //   @id(0x1002) TypeIdentifierWithDependencies complete;
-  // };
-  // typedef sequence<TypeInformation> TypeInformationSeq;
 
   struct TypeInformation {
     TypeIdentifierWithDependencies minimal;
     TypeIdentifierWithDependencies complete;
   };
+  typedef Sequence<TypeInformation> TypeInformationSeq;
+
 
   OpenDDS_Dcps_Export
   size_t find_size(const TypeInformation& type_info);
@@ -1650,6 +1646,8 @@ namespace XTypes {
   OpenDDS_Dcps_Export
   bool operator<<(DCPS::Serializer& ser, const TypeInformation& type_info);
 
+  OpenDDS_Dcps_Export
+  bool operator>>(DCPS::Serializer& ser, TypeInformation& type_info);
 
   OpenDDS_Dcps_Export
   TypeIdentifierPtr makeTypeIdentifier(const TypeObject& type_object);

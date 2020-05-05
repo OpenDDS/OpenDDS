@@ -21,11 +21,12 @@
 #include "DataDurabilityCache.h"
 #include "OfferedDeadlineWatchdog.h"
 #include "MonitorFactory.h"
-#include "TypeSupportImpl.h"
 #include "SendStateDataSampleList.h"
 #include "DataSampleElement.h"
 #include "Util.h"
 #include "DCPS_Utils.h"
+#include "TypeObject.h"
+#include "TypeSupportImpl.h"
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 #  include "CoherentChangeControl.h"
 #endif
@@ -1446,6 +1447,16 @@ DataWriterImpl::enable()
 
   publisher->get_qos(pub_qos);
 
+  TypeSupportImpl* const typesupport =
+      dynamic_cast<TypeSupportImpl*>(topic_servant_->get_type_support());
+  size_t sto = XTypes::find_size(typesupport->getMinimalTypeObject());
+  XTypes::TypeIdentifierPtr type_iden = XTypes::makeTypeIdentifier(typesupport->getMinimalTypeObject());
+  XTypes::TypeInformation type_info;
+  type_info.minimal.typeid_with_size.type_id = type_iden;
+  type_info.minimal.typeid_with_size.typeobject_serialized_size = sto;
+  type_info.minimal.dependent_typeid_count = 0;
+  type_info.complete.dependent_typeid_count = 0;
+  
   this->publication_id_ =
     disco->add_publication(this->domain_id_,
                            this->dp_id_,
@@ -1453,7 +1464,9 @@ DataWriterImpl::enable()
                            this,
                            this->qos_,
                            trans_conf_info,
-                           pub_qos);
+                           pub_qos,
+                           type_info,
+                           swap_bytes());
 
 
   if (!publisher || this->publication_id_ == GUID_UNKNOWN) {

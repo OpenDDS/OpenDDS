@@ -5,6 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 #include "InfoRepoDiscovery.h"
+#include "dds/DCPS/TypeObject.h"
+#include "dds/DCPS/TypeSupportImpl.h"
 
 #include "dds/DCPS/InfoRepoDiscovery/DataReaderRemoteC.h"
 #include "dds/DCPS/InfoRepoDiscovery/DataReaderRemoteImpl.h"
@@ -600,7 +602,9 @@ InfoRepoDiscovery::add_publication(DDS::DomainId_t domainId,
                                    DCPS::DataWriterCallbacks* publication,
                                    const DDS::DataWriterQos& qos,
                                    const DCPS::TransportLocatorSeq& transInfo,
-                                   const DDS::PublisherQos& publisherQos)
+                                   const DDS::PublisherQos& publisherQos,
+                                   const XTypes::TypeInformation& type_info,
+                                   bool swap_bytes)
 {
   RepoId pubId;
 
@@ -695,7 +699,9 @@ InfoRepoDiscovery::add_subscription(DDS::DomainId_t domainId,
                                     const DDS::SubscriberQos& subscriberQos,
                                     const char* filterClassName,
                                     const char* filterExpr,
-                                    const DDS::StringSeq& params)
+                                    const DDS::StringSeq& params,
+                                    const XTypes::TypeInformation& type_info,
+                                    bool swap_bytes)
 {
   RepoId subId;
 

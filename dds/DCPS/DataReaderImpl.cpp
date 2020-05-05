@@ -29,6 +29,8 @@
 #include "transport/framework/EntryExit.h"
 #include "transport/framework/TransportExceptions.h"
 #include "SafetyProfileStreams.h"
+#include "TypeSupportImpl.h"
+#include "TypeObject.h"
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "BuiltInTopicUtils.h"
 #include <dds/DdsDcpsCoreTypeSupportC.h>
@@ -1268,6 +1270,16 @@ DataReaderImpl::enable()
     DDS::SubscriberQos sub_qos;
     subscriber->get_qos(sub_qos);
 
+    TypeSupportImpl* const typesupport =
+      dynamic_cast<TypeSupportImpl*>(topic_servant_->get_type_support());
+    size_t sto = XTypes::find_size(typesupport->getMinimalTypeObject());
+    XTypes::TypeIdentifierPtr type_iden = XTypes::makeTypeIdentifier(typesupport->getMinimalTypeObject());
+    XTypes::TypeInformation type_info;
+    type_info.minimal.typeid_with_size.type_id = type_iden;
+    type_info.minimal.typeid_with_size.typeobject_serialized_size = sto;
+    type_info.minimal.dependent_typeid_count = 0;
+    type_info.complete.dependent_typeid_count = 0;
+    
     this->subscription_id_ =
         disco->add_subscription(this->domain_id_,
             this->dp_id_,
@@ -1278,7 +1290,9 @@ DataReaderImpl::enable()
             sub_qos,
             filterClassName,
             filterExpression,
-            exprParams);
+            exprParams,
+            type_info,
+            swap_bytes());
 
     if (this->subscription_id_ == OpenDDS::DCPS::GUID_UNKNOWN) {
       ACE_ERROR((LM_WARNING,

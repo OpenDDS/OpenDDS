@@ -1780,7 +1780,8 @@ Sedp::Task::svc_i(DCPS::MessageId message_id,
 
 void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
                                           const DCPS::DiscoveredWriterData& wdata,
-                                          const RepoId& guid
+                                          const RepoId& guid,
+                                          const XTypes::TypeInformation& type_info
 #ifdef OPENDDS_SECURITY
                                           ,
                                           bool have_ice_agent_info,
@@ -1824,6 +1825,7 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
 
       { // Reduce scope of pub and td
         DiscoveredPublication prepub(wdata);
+        prepub.type_info = type_info;
 
 #ifdef OPENDDS_SECURITY
         prepub.have_ice_agent_info_ = have_ice_agent_info;
@@ -2066,7 +2068,7 @@ Sedp::data_received(DCPS::MessageId message_id,
     return;
   }
 
-  process_discovered_writer_data(message_id, wdata, guid
+  process_discovered_writer_data(message_id, wdata, guid, dpub.type_info
 #ifdef OPENDDS_SECURITY
                                  , dpub.have_ice_agent_info_, dpub.ice_agent_info_
 #endif
@@ -2105,7 +2107,8 @@ void Sedp::data_received(DCPS::MessageId message_id,
 
 void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
                                           const DCPS::DiscoveredReaderData& rdata,
-                                          const RepoId& guid
+                                          const RepoId& guid,
+                                          const XTypes::TypeInformation& type_info
 #ifdef OPENDDS_SECURITY
                                           ,
                                           bool have_ice_agent_info,
@@ -2149,6 +2152,7 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
     if (iter == discovered_subscriptions_.end()) { // add new
       { // Reduce scope of sub and td
         DiscoveredSubscription presub(rdata);
+        presub.type_info = type_info;
 #ifdef OPENDDS_SECURITY
         presub.have_ice_agent_info_ = have_ice_agent_info;
         presub.ice_agent_info_ = ice_agent_info;
@@ -2444,7 +2448,7 @@ Sedp::data_received(DCPS::MessageId message_id,
     return;
   }
 
-  process_discovered_reader_data(message_id, rdata, guid
+  process_discovered_reader_data(message_id, rdata, guid, dsub.type_info
 #ifdef OPENDDS_SECURITY
                                  , dsub.have_ice_agent_info_, dsub.ice_agent_info_
 #endif
@@ -3295,7 +3299,8 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       }
 
       DCPS::unique_ptr<DiscoveredPublication> wdata(new DiscoveredPublication);
-      if (!ParameterListConverter::from_param_list(data, wdata->writer_data_)) {
+      bool swap_bytes = sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER;
+      if (!ParameterListConverter::from_param_list(data, wdata->writer_data_, wdata->type_info, swap_bytes)) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to convert from ParameterList ")
@@ -3365,7 +3370,8 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       }
 
       DCPS::unique_ptr<DiscoveredSubscription> rdata(new DiscoveredSubscription);
-      if (!ParameterListConverter::from_param_list(data, rdata->reader_data_)) {
+      bool swap_bytes = sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER;
+      if (!ParameterListConverter::from_param_list(data, rdata->reader_data_, rdata->type_info, swap_bytes)) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to convert from ParameterList ")
@@ -3790,7 +3796,7 @@ Sedp::write_publication_data_unsecure(
     populate_discovered_writer_msg(dwd, rid, lp);
 
     // Convert to parameter list
-    if (!ParameterListConverter::to_param_list(dwd, plist, map_ipv4_to_ipv6())) {
+    if (!ParameterListConverter::to_param_list(dwd, plist, lp.type_info, lp.swap_bytes, map_ipv4_to_ipv6())) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data - ")
                  ACE_TEXT("Failed to convert DiscoveredWriterData ")
@@ -3844,7 +3850,7 @@ Sedp::write_publication_data_secure(
     dwd.security_info.plugin_endpoint_security_attributes = lp.security_attribs_.plugin_endpoint_attributes;
 
     // Convert to parameter list
-    if (!ParameterListConverter::to_param_list(dwd, plist, map_ipv4_to_ipv6())) {
+    if (!ParameterListConverter::to_param_list(dwd, plist, lp.type_info,  lp.swap_bytes, map_ipv4_to_ipv6())) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data - ")
                  ACE_TEXT("Failed to convert DiscoveredWriterData ")
@@ -3937,7 +3943,7 @@ Sedp::write_subscription_data_unsecure(
     populate_discovered_reader_msg(drd, rid, ls);
 
     // Convert to parameter list
-    if (!ParameterListConverter::to_param_list(drd, plist, map_ipv4_to_ipv6())) {
+    if (!ParameterListConverter::to_param_list(drd, plist, ls.type_info,  ls.swap_bytes, map_ipv4_to_ipv6())) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data - ")
                  ACE_TEXT("Failed to convert DiscoveredReaderData ")
@@ -3990,7 +3996,7 @@ Sedp::write_subscription_data_secure(
     drd.security_info.plugin_endpoint_security_attributes = ls.security_attribs_.plugin_endpoint_attributes;
 
     // Convert to parameter list
-    if (!ParameterListConverter::to_param_list(drd, plist, map_ipv4_to_ipv6())) {
+    if (!ParameterListConverter::to_param_list(drd, plist,  ls.type_info, ls.swap_bytes,map_ipv4_to_ipv6())) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data - ")
                  ACE_TEXT("Failed to convert DiscoveredReaderData ")

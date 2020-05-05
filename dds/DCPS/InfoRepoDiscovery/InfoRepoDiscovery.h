@@ -14,7 +14,8 @@
 #include "dds/DCPS/InfoRepoDiscovery/DataReaderRemoteC.h"
 #include "dds/DCPS/InfoRepoDiscovery/InfoC.h"
 #include "dds/DCPS/transport/framework/TransportConfig_rch.h"
-
+#include "dds/DCPS/TypeObject.h"
+#include "dds/DCPS/TypeSupportImpl.h"
 #include "ace/Task.h"
 
 #include "InfoRepoDiscovery_Export.h"
@@ -159,7 +160,9 @@ public:
     OpenDDS::DCPS::DataWriterCallbacks* publication,
     const DDS::DataWriterQos& qos,
     const OpenDDS::DCPS::TransportLocatorSeq& transInfo,
-    const DDS::PublisherQos& publisherQos);
+    const DDS::PublisherQos& publisherQos,
+    const XTypes::TypeInformation& type_info,
+    bool swap_bytes);
 
   virtual bool remove_publication(
     DDS::DomainId_t domainId,
@@ -191,7 +194,9 @@ public:
     const DDS::SubscriberQos& subscriberQos,
     const char* filterClassName,
     const char* filterExpression,
-    const DDS::StringSeq& exprParams);
+    const DDS::StringSeq& exprParams,
+    const XTypes::TypeInformation& type_info,
+    bool swap_bytes);
 
   virtual bool remove_subscription(
     DDS::DomainId_t domainId,

@@ -11,6 +11,7 @@
 #include "topic_keys.h"
 
 #include "utl_identifier.h"
+#include "typeobject_generator.h"
 
 #include "ace/OS_NS_sys_stat.h"
 
@@ -124,7 +125,7 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
     "dds/DCPS/BuiltInTopicUtils.h", "dds/DCPS/Util.h",
     "dds/DCPS/ContentFilteredTopicImpl.h", "dds/DCPS/RakeData.h",
     "dds/DCPS/MultiTopicDataReader_T.h", "dds/DCPS/DataWriterImpl_T.h",
-    "dds/DCPS/DataReaderImpl_T.h"
+    "dds/DCPS/DataReaderImpl_T.h", "dds/DCPS/TypeObject.h"
   };
   add_includes(cpp_includes, BE_GlobalData::STREAM_CPP);
 
@@ -204,6 +205,7 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
       "\n"
       "  void representations_allowed_by_type(::DDS::DataRepresentationIdSeq& seq);\n"
       "\n"
+      "  virtual const OpenDDS::XTypes::TypeObject& getMinimalTypeObject() const; \n"
       "  static " << short_name << "TypeSupport::_ptr_type _narrow(CORBA::Object_ptr obj);\n"
       "};\n";
   }
@@ -261,6 +263,10 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
       "  MarshalTraitsType::representations_allowed_by_type(seq);\n"
       "}\n"
       "\n"
+      "const OpenDDS::XTypes::TypeObject& " << short_name << "TypeSupportImpl::getMinimalTypeObject() const\n"
+      "{\n"
+      "  return OpenDDS::DCPS::getMinimalTypeObject<OpenDDS::DCPS::" << typeobject_generator::tag_type(name) << ">();\n"
+      "}\n\n"
       << short_name << "TypeSupport::_ptr_type " << short_name << "TypeSupportImpl::_narrow(CORBA::Object_ptr obj)\n"
       "{\n"
       "  return TypeSupportType::_narrow(obj);\n"

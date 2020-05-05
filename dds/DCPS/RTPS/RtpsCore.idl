@@ -289,6 +289,9 @@ module OpenDDS {
     const ParameterId_t PIDMASK_VENDOR_SPECIFIC = 0x8000;
     const ParameterId_t PIDMASK_INCOMPATIBLE = 0x4000;
 
+    // TypeInformation for XTypes 7.6.3.2.2 XTypes Spec
+    const ParameterId_t PID_XTYPES_TYPE_INFORMATION = 0x0075;
+
     const ParameterId_t PID_DOMAIN_ID = 0x000f;
     const ParameterId_t PID_DOMAIN_TAG = 0x4014;
 
@@ -469,6 +472,9 @@ module OpenDDS {
 
       case PID_BUILTIN_ENDPOINT_QOS:
         BuiltinEndpointQos_t builtinEndpointQos;
+      
+      case PID_XTYPES_TYPE_INFORMATION:
+        DDS::OctetSeq type_information;
 
       case PID_DATA_REPRESENTATION:
         DDS::DataRepresentationQosPolicy representation;
