@@ -11,7 +11,9 @@
 
 #ifdef OPENDDS_NETWORK_CONFIG_MODIFIER
 
-#include "ace/os_include/os_ifaddrs.h"
+#include <ace/OS_NS_sys_socket.h>
+
+#include <ace/os_include/os_ifaddrs.h>
 
 #include <net/if.h>
 
@@ -40,7 +42,8 @@ bool NetworkConfigModifier::open()
 
   // Using logic from ACE::get_ip_interfaces_getifaddrs
   // but need ifa_name which is not returned by it
-  int count = 0;
+  typedef std::map<std::string, NetworkInterface> Nics;
+  Nics nics;
 
   // Pull the address out of each INET interface.
   for (p_if = p_ifa; p_if != 0; p_if = p_if->ifa_next) {
@@ -59,18 +62,32 @@ bool NetworkConfigModifier::open()
       if (addr->sin_addr.s_addr != INADDR_ANY) {
         address.set((u_short) 0, addr->sin_addr.s_addr, 0);
 
-        NetworkInterface iface(count, p_if->ifa_name, p_if->ifa_flags & IFF_MULTICAST);
-        iface.addresses.insert(address);
+        std::pair<Nics::iterator, bool> p = nics.insert(std::make_pair(p_if->ifa_name, NetworkInterface(ACE_OS::if_nametoindex(p_if->ifa_name), p_if->ifa_name, p_if->ifa_flags & IFF_MULTICAST)));
 
-        NetworkConfigMonitor::add_interface(iface);
-        NetworkConfigMonitor::add_address(count, address);
-
-        ++count;
+        p.first->second.addresses.insert(address);
       }
     }
+# if defined (ACE_HAS_IPV6)
+    else if (p_if->ifa_addr->sa_family == AF_INET6) {
+      struct sockaddr_in6 *addr = reinterpret_cast<sockaddr_in6 *> (p_if->ifa_addr);
+
+      // Skip the ANY address
+      if (!IN6_IS_ADDR_UNSPECIFIED(&addr->sin6_addr)) {
+        address.set(reinterpret_cast<struct sockaddr_in *> (addr), sizeof(sockaddr_in6));
+
+        std::pair<Nics::iterator, bool> p = nics.insert(std::make_pair(p_if->ifa_name, NetworkInterface(ACE_OS::if_nametoindex(p_if->ifa_name), p_if->ifa_name, p_if->ifa_flags & IFF_MULTICAST)));
+
+        p.first->second.addresses.insert(address);
+      }
+    }
+# endif /* ACE_HAS_IPV6 */
   }
 
   ::freeifaddrs (p_ifa);
+
+  for (Nics::const_iterator pos = nics.begin(), limit = nics.end(); pos != limit; ++pos) {
+    NetworkConfigMonitor::add_interface(pos->second);
+  }
 
   return true;
 }
@@ -111,7 +128,7 @@ void NetworkConfigModifier::add_interface(const OPENDDS_STRING &name)
     if ((p_if->ifa_flags & IFF_UP) != IFF_UP)
       continue;
 
-    if (p_if->ifa_addr->sa_family == AF_INET) {
+    if (p_if->ifa_addr->sa_family == AF_INET || p_if->ifa_addr->sa_family == AF_INET6) {
       if (name == p_if->ifa_name) {
         p_nic = new NetworkInterface(count, p_if->ifa_name, p_if->ifa_flags & IFF_MULTICAST);
         break;
@@ -198,7 +215,7 @@ void NetworkConfigModifier::validate_interfaces_index()
     if ((p_if->ifa_flags & IFF_UP) != IFF_UP)
       continue;
 
-    if (p_if->ifa_addr->sa_family == AF_INET) {
+    if (p_if->ifa_addr->sa_family == AF_INET || p_if->ifa_addr->sa_family == AF_INET6) {
       const OPENDDS_STRING name(p_if->ifa_name);
       NetworkInterfaces nics = get();
       NetworkInterfaces::iterator nic_pos = std::find_if(nics.begin(), nics.end(), NetworkInterfaceName(name));

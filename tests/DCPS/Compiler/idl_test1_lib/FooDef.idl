@@ -182,6 +182,8 @@ module Xyz {
   };
 };
 
+const Xyz::TestEnum enumConst = Xyz::TE_2;
+
 module N1 {
   struct FwdDeclStruct;
 };

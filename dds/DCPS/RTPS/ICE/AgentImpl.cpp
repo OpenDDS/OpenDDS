@@ -106,10 +106,11 @@ void AgentImpl::add_endpoint(Endpoint* a_endpoint)
 
   if (!endpoint_managers_.empty() && !ncm_listener_added_) {
     DCPS::NetworkConfigMonitor_rch ncm = TheServiceParticipant->network_config_monitor();
+    ncm_listener_added_ = true;
+    guard.release();
     if (ncm) {
       ncm->add_listener(*this);
     }
-    ncm_listener_added_ = true;
   }
 }
 
@@ -130,16 +131,17 @@ void AgentImpl::remove_endpoint(Endpoint* a_endpoint)
 
   if (endpoint_managers_.empty() && ncm_listener_added_) {
     DCPS::NetworkConfigMonitor_rch ncm = TheServiceParticipant->network_config_monitor();
+    ncm_listener_added_ = false;
+    guard.release();
     if (ncm) {
       ncm->remove_listener(*this);
     }
-    ncm_listener_added_ = false;
   }
 }
 
 AgentInfo AgentImpl::get_local_agent_info(Endpoint* a_endpoint) const
 {
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, const_cast<ACE_Recursive_Thread_Mutex&>(mutex), AgentInfo());
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, mutex, AgentInfo());
   EndpointManagerMapType::const_iterator pos = endpoint_managers_.find(a_endpoint);
   OPENDDS_ASSERT(pos != endpoint_managers_.end());
   return pos->second->agent_info();
@@ -193,7 +195,7 @@ ACE_INET_Addr  AgentImpl::get_address(Endpoint* a_endpoint,
                                       const DCPS::RepoId& a_local_guid,
                                       const DCPS::RepoId& a_remote_guid) const
 {
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, const_cast<ACE_Recursive_Thread_Mutex&>(mutex), ACE_INET_Addr());
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, mutex, ACE_INET_Addr());
   EndpointManagerMapType::const_iterator pos = endpoint_managers_.find(a_endpoint);
   OPENDDS_ASSERT(pos != endpoint_managers_.end());
   return pos->second->get_address(a_local_guid, a_remote_guid);
@@ -205,12 +207,12 @@ void  AgentImpl::receive(Endpoint* a_endpoint,
                          const ACE_INET_Addr& a_remote_address,
                          const STUN::Message& a_message)
 {
-  if (a_local_address == ACE_INET_Addr()) {
+  if (a_local_address.is_any()) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) AgentImpl::receive: ERROR local_address is empty, ICE will not work on this platform\n")));
     return;
   }
 
-  if (a_remote_address == ACE_INET_Addr()) {
+  if (a_remote_address.is_any()) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) AgentImpl::receive: ERROR remote_address is empty, ICE will not work on this platform\n")));
     return;
   }
@@ -257,8 +259,10 @@ void AgentImpl::notify_shutdown()
 {
   shutdown();
 }
+
 void AgentImpl::network_change() const
 {
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, mutex);
   for (EndpointManagerMapType::const_iterator pos = endpoint_managers_.begin(),
          limit = endpoint_managers_.end(); pos != limit; ++pos) {
     pos->second->network_change();

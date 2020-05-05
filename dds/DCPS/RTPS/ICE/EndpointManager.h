@@ -148,9 +148,9 @@ struct EndpointManager : public DCPS::RcObject {
     endpoint->ice_connect(guids, addr);
   }
 
-  void ice_disconnect(const GuidSetType& guids)
+  void ice_disconnect(const GuidSetType& guids, const ACE_INET_Addr& addr)
   {
-    endpoint->ice_disconnect(guids);
+    endpoint->ice_disconnect(guids, addr);
   }
 
   void network_change();

@@ -90,8 +90,16 @@ public:
 
   ACE_SOCK_Dgram& unicast_socket();
   ACE_SOCK_Dgram_Mcast& multicast_socket();
+#ifdef ACE_HAS_IPV6
+  ACE_SOCK_Dgram& ipv6_unicast_socket();
+  ACE_SOCK_Dgram_Mcast& ipv6_multicast_socket();
+#endif
 
-  bool open(const ACE_SOCK_Dgram& unicast_socket);
+  bool open(const ACE_SOCK_Dgram& unicast_socket
+#ifdef ACE_HAS_IPV6
+            , const ACE_SOCK_Dgram& ipv6_unicast_socket
+#endif
+            );
 
   void received(const RTPS::DataSubmessage& data,
                 const GuidPrefix_t& src_prefix);
@@ -234,6 +242,11 @@ private:
   ACE_SOCK_Dgram unicast_socket_;
   ACE_SOCK_Dgram_Mcast multicast_socket_;
   OPENDDS_SET(OPENDDS_STRING) joined_interfaces_;
+#ifdef ACE_HAS_IPV6
+  ACE_SOCK_Dgram ipv6_unicast_socket_;
+  ACE_SOCK_Dgram_Mcast ipv6_multicast_socket_;
+  OPENDDS_SET(OPENDDS_STRING) ipv6_joined_interfaces_;
+#endif
 
   RcHandle<SingleSendBuffer> get_writer_send_buffer(const RepoId& pub_id);
 
@@ -407,13 +420,11 @@ private:
     bool process_hb_frag_i(const RTPS::HeartBeatFragSubmessage& hb_frag, const RepoId& src, MetaSubmessageVec& meta_submessages);
 
     void gather_ack_nacks(MetaSubmessageVec& meta_submessages, bool finalFlag = false);
-    void gather_association_ack_nacks(MetaSubmessageVec& meta_submessages);
 
   protected:
     void gather_ack_nacks_i(MetaSubmessageVec& meta_submessages, bool finalFlag = false);
     void generate_nack_frags_i(NackFragSubmessageVec& nack_frags,
                                WriterInfo& wi, const RepoId& pub_id);
-    void gather_association_ack_nacks_i(MetaSubmessageVec& meta_submessages);
 
     mutable ACE_Thread_Mutex mutex_;
     WeakRcHandle<RtpsUdpDataLink> link_;
@@ -544,7 +555,6 @@ private:
   void send_directed_heartbeats(OPENDDS_VECTOR(RTPS::HeartBeatSubmessage)& hbs);
   void check_heartbeats(const DCPS::MonotonicTimePoint& now);
   void send_heartbeat_replies();
-  void send_association_ack_nacks(const DCPS::MonotonicTimePoint& now);
   void send_relay_beacon(const DCPS::MonotonicTimePoint& now);
 
   CORBA::Long best_effort_heartbeat_count_;
@@ -581,7 +591,7 @@ private:
   Multi heartbeat_;
 
   typedef PmfPeriodicTask<RtpsUdpDataLink> Periodic;
-  Periodic heartbeatchecker_, reader_associator_, relay_beacon_;
+  Periodic heartbeatchecker_, relay_beacon_;
 
   /// Data structure representing an "interesting" remote entity for static discovery.
   struct InterestingRemote {
