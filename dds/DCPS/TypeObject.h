@@ -79,6 +79,8 @@ namespace XTypes {
   const TypeKind TK_FLOAT32    = 0x09;
   const TypeKind TK_FLOAT64    = 0x0A;
   const TypeKind TK_FLOAT128   = 0x0B;
+  const TypeKind TK_INT8       = 0x0C; // XTypes 1.3 Annex B
+  const TypeKind TK_UINT8      = 0x0D; // XTypes 1.3 Annex B
   const TypeKind TK_CHAR8      = 0x10;
   const TypeKind TK_CHAR16     = 0x11;
 
