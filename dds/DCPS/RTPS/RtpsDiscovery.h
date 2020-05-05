@@ -158,26 +158,34 @@ public:
     ttl_ = time_to_live;
   }
 
-  OPENDDS_STRING sedp_local_address() const
+  ACE_INET_Addr sedp_local_address() const
   {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, "");
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ACE_INET_Addr());
     return sedp_local_address_;
   }
-  void sedp_local_address(const OPENDDS_STRING& mi)
+  void sedp_local_address(const ACE_INET_Addr& mi)
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-    sedp_local_address_ = mi;
+    if (mi.get_type() == AF_INET) {
+      ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+      sedp_local_address_ = mi;
+    } else {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsDiscoveryConfig::sedp_local_address set failed because address family is not AF_INET\n")));
+    }
   }
 
-  OPENDDS_STRING spdp_local_address() const
+  ACE_INET_Addr spdp_local_address() const
   {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, "");
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ACE_INET_Addr());
     return spdp_local_address_;
   }
-  void spdp_local_address(const OPENDDS_STRING& mi)
+  void spdp_local_address(const ACE_INET_Addr& mi)
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-    spdp_local_address_ = mi;
+    if (mi.get_type() == AF_INET) {
+      ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+      spdp_local_address_ = mi;
+    } else {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsDiscoveryConfig::spdp_local_address set failed because address family is not AF_INET\n")));
+    }
   }
 
   bool sedp_multicast() const
@@ -202,27 +210,65 @@ public:
     multicast_interface_ = mi;
   }
 
-  OPENDDS_STRING default_multicast_group() const
+  ACE_INET_Addr default_multicast_group() const
   {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, "");
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ACE_INET_Addr());
     return default_multicast_group_;
   }
-  void default_multicast_group(const OPENDDS_STRING& group)
+  void default_multicast_group(const ACE_INET_Addr& group)
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-    default_multicast_group_ = group;
+    if (group.get_type() == AF_INET) {
+      ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+      default_multicast_group_ = group;
+    } else {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsDiscoveryConfig::default_multicast_group set failed because address family is not AF_INET\n")));
+    }
   }
 
 #ifdef ACE_HAS_IPV6
-  OPENDDS_STRING default_multicast_ipv6_group() const
+  ACE_INET_Addr ipv6_spdp_local_address() const
   {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, "");
-    return default_multicast_ipv6_group_;
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ACE_INET_Addr());
+    return ipv6_spdp_local_address_;
   }
-  void default_multicast_ipv6_group(const OPENDDS_STRING& group)
+  void ipv6_spdp_local_address(const ACE_INET_Addr& mi)
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-    default_multicast_ipv6_group_ = group;
+    if (mi.get_type() == AF_INET6) {
+      ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+      ipv6_spdp_local_address_ = mi;
+    } else {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsDiscoveryConfig::ipv6_spdp_local_address set failed because address family is not AF_INET6\n")));
+    }
+  }
+
+  ACE_INET_Addr ipv6_sedp_local_address() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ACE_INET_Addr());
+    return ipv6_sedp_local_address_;
+  }
+  void ipv6_sedp_local_address(const ACE_INET_Addr& mi)
+  {
+    if (mi.get_type() == AF_INET6) {
+      ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+      ipv6_sedp_local_address_ = mi;
+    } else {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsDiscoveryConfig::ipv6_sedp_local_address set failed because address family is not AF_INET6\n")));
+    }
+  }
+
+  ACE_INET_Addr ipv6_default_multicast_group() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ACE_INET_Addr());
+    return ipv6_default_multicast_group_;
+  }
+  void ipv6_default_multicast_group(const ACE_INET_Addr& group)
+  {
+    if (group.get_type() == AF_INET6) {
+      ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+      ipv6_default_multicast_group_ = group;
+    } else {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsDiscoveryConfig::ipv6_default_multicast_group set failed because address family is not AF_INET6\n")));
+    }
   }
 #endif
 
@@ -410,10 +456,12 @@ private:
   u_short pb_, dg_, pg_, d0_, d1_, dx_;
   unsigned char ttl_;
   bool sedp_multicast_;
-  OPENDDS_STRING multicast_interface_, sedp_local_address_, spdp_local_address_;
-  OPENDDS_STRING default_multicast_group_;  /// FUTURE: handle > 1 group.
+  OPENDDS_STRING multicast_interface_;
+  ACE_INET_Addr sedp_local_address_, spdp_local_address_;
+  ACE_INET_Addr default_multicast_group_;  /// FUTURE: handle > 1 group.
 #ifdef ACE_HAS_IPV6
-  OPENDDS_STRING default_multicast_ipv6_group_;
+  ACE_INET_Addr ipv6_sedp_local_address_, ipv6_spdp_local_address_;
+  ACE_INET_Addr ipv6_default_multicast_group_;
 #endif
   OPENDDS_STRING guid_interface_;
   AddrVec spdp_send_addrs_;
@@ -502,11 +550,11 @@ public:
   unsigned char ttl() const { return config_->ttl(); }
   void ttl(unsigned char time_to_live) { config_->ttl(time_to_live); }
 
-  OPENDDS_STRING sedp_local_address() const { return config_->sedp_local_address(); }
-  void sedp_local_address(const OPENDDS_STRING& mi) { config_->sedp_local_address(mi); }
+  ACE_INET_Addr sedp_local_address() const { return config_->sedp_local_address(); }
+  void sedp_local_address(const ACE_INET_Addr& mi) { config_->sedp_local_address(mi); }
 
-  OPENDDS_STRING spdp_local_address() const { return config_->spdp_local_address(); }
-  void spdp_local_address(const OPENDDS_STRING& mi) { config_->spdp_local_address(mi); }
+  ACE_INET_Addr spdp_local_address() const { return config_->spdp_local_address(); }
+  void spdp_local_address(const ACE_INET_Addr& mi) { config_->spdp_local_address(mi); }
 
   bool sedp_multicast() const { return config_->sedp_multicast(); }
   void sedp_multicast(bool sm) { config_->sedp_multicast(sm); }
@@ -514,8 +562,8 @@ public:
   OPENDDS_STRING multicast_interface() const { return config_->multicast_interface(); }
   void multicast_interface(const OPENDDS_STRING& mi) { config_->multicast_interface(mi); }
 
-  OPENDDS_STRING default_multicast_group() const { return config_->default_multicast_group(); }
-  void default_multicast_group(const OPENDDS_STRING& group) { config_->default_multicast_group(group); }
+  ACE_INET_Addr default_multicast_group() const { return config_->default_multicast_group(); }
+  void default_multicast_group(const ACE_INET_Addr& group) { config_->default_multicast_group(group); }
 
   AddrVec spdp_send_addrs() const { return config_->spdp_send_addrs(); }
   void spdp_send_addrs(const AddrVec& addrs) { return config_->spdp_send_addrs(addrs); }

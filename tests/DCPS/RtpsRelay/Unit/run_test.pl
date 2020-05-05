@@ -10,6 +10,8 @@ use PerlDDS::Run_Test;
 use strict;
 
 my $test = new PerlDDS::TestFramework();
+$test->{add_transport_config} = 0;
+
 $test->process('test', 'rtps_relay_unit_tests');
 $test->start_process('test');
 exit $test->finish(60);

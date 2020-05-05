@@ -446,14 +446,16 @@ RtpsUdpDataLink::join_multicast_group(const DCPS::NetworkInterface& nic,
 
   if (joined_interfaces_.count(nic.name()) == 0 && nic.has_ipv4()) {
     if (DCPS::DCPS_debug_level > 3) {
+      ACE_TCHAR buff[256];
+      config().multicast_group_address().addr_to_string(buff, 256);
       ACE_DEBUG((LM_INFO,
                  ACE_TEXT("(%P|%t) RtpsUdpDataLink::join_multicast_group ")
-                 ACE_TEXT("joining group %C %C\n"),
-                 nic.name().c_str(),
-                 config().multicast_group_address_str_.c_str()));
+                 ACE_TEXT("joining group %s on %C\n"),
+                 buff,
+                 nic.name().c_str()));
     }
 
-    if (0 == multicast_socket_.join(config().multicast_group_address_, 1, all_interfaces ? 0 : ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()))) {
+    if (0 == multicast_socket_.join(config().multicast_group_address(), 1, all_interfaces ? 0 : ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()))) {
       joined_interfaces_.insert(nic.name());
 
       if (get_reactor()->register_handler(multicast_socket_.get_handle(),
@@ -471,14 +473,17 @@ RtpsUdpDataLink::join_multicast_group(const DCPS::NetworkInterface& nic,
 #ifdef ACE_HAS_IPV6
   if (ipv6_joined_interfaces_.count(nic.name()) == 0 && nic.has_ipv6()) {
     if (DCPS::DCPS_debug_level > 3) {
+      ACE_TCHAR buff[256];
+      config().ipv6_multicast_group_address().addr_to_string(buff, 256);
+
       ACE_DEBUG((LM_INFO,
                  ACE_TEXT("(%P|%t) RtpsUdpDataLink::join_multicast_group ")
-                 ACE_TEXT("joining group %C %C\n"),
-                 nic.name().c_str(),
-                 config().ipv6_multicast_group_address_str_.c_str()));
+                 ACE_TEXT("joining group %s on %C\n"),
+                 buff,
+                 nic.name().c_str()));
     }
 
-    if (0 == ipv6_multicast_socket_.join(config().ipv6_multicast_group_address_, 1, all_interfaces ? 0 : ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()))) {
+    if (0 == ipv6_multicast_socket_.join(config().ipv6_multicast_group_address(), 1, all_interfaces ? 0 : ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()))) {
       ipv6_joined_interfaces_.insert(nic.name());
 
       if (get_reactor()->register_handler(ipv6_multicast_socket_.get_handle(),
@@ -500,15 +505,16 @@ RtpsUdpDataLink::leave_multicast_group(const DCPS::NetworkInterface& nic)
 {
   if (joined_interfaces_.count(nic.name()) != 0 && !nic.has_ipv4()) {
     if (DCPS::DCPS_debug_level > 3) {
+      ACE_TCHAR buff[256];
+      config().multicast_group_address().addr_to_string(buff, 256);
       ACE_DEBUG((LM_INFO,
                  ACE_TEXT("(%P|%t) RtpsUdpDataLink::leave_multicast_group ")
-                 ACE_TEXT("leaving group %C %C:%hu\n"),
-                 nic.name().c_str(),
-                 config().multicast_group_address_str_.c_str(),
-                 config().multicast_group_address_.get_port_number()));
+                 ACE_TEXT("leaving group %s on %C\n"),
+                 buff,
+                 nic.name().c_str()));
     }
 
-    if (0 == multicast_socket_.leave(config().multicast_group_address_, ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()))) {
+    if (0 == multicast_socket_.leave(config().multicast_group_address(), ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()))) {
       joined_interfaces_.erase(nic.name());
     } else {
       ACE_ERROR((LM_ERROR,
@@ -520,15 +526,16 @@ RtpsUdpDataLink::leave_multicast_group(const DCPS::NetworkInterface& nic)
 #ifdef ACE_HAS_IPV6
   if (ipv6_joined_interfaces_.count(nic.name()) != 0 && !nic.has_ipv6()) {
     if (DCPS::DCPS_debug_level > 3) {
+      ACE_TCHAR buff[256];
+      config().multicast_group_address().addr_to_string(buff, 256);
       ACE_DEBUG((LM_INFO,
                  ACE_TEXT("(%P|%t) RtpsUdpDataLink::leave_ipv6_multicast_group ")
-                 ACE_TEXT("leaving group %C %C:%hu\n"),
-                 nic.name().c_str(),
-                 config().ipv6_multicast_group_address_str_.c_str(),
-                 config().ipv6_multicast_group_address_.get_port_number()));
+                 ACE_TEXT("leaving group %s on %C\n"),
+                 buff,
+                 nic.name().c_str()));
     }
 
-    if (0 == ipv6_multicast_socket_.leave(config().ipv6_multicast_group_address_, ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()))) {
+    if (0 == ipv6_multicast_socket_.leave(config().ipv6_multicast_group_address(), ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()))) {
       ipv6_joined_interfaces_.erase(nic.name());
     } else {
       ACE_ERROR((LM_ERROR,
