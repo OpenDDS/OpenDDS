@@ -50,7 +50,7 @@ namespace {
   }
 
   void add_type_info_param(ParameterList& param_list, const XTypes::TypeInformation& type_info, bool swap_bytes) {
-    Parameter param; 
+    Parameter param;
     //create message block smart pointer to put data into using the size of a type information object
     OpenDDS::DCPS::Message_Block_Ptr data (
       new ACE_Message_Block( OpenDDS::XTypes::find_size(type_info))) ;

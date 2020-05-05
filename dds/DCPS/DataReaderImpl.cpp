@@ -1279,7 +1279,7 @@ DataReaderImpl::enable()
     type_info.minimal.typeid_with_size.typeobject_serialized_size = sto;
     type_info.minimal.dependent_typeid_count = 0;
     type_info.complete.dependent_typeid_count = 0;
-    
+
     this->subscription_id_ =
         disco->add_subscription(this->domain_id_,
             this->dp_id_,
