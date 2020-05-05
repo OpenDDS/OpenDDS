@@ -397,7 +397,7 @@ BE_GlobalData::parse_args(long& i, char** av)
       break;
     case 'x':
       suppress_xtypes_ = true;
-      false;
+      break;
     case 'a':
       // ignore, accepted for tao_idl compatibility
       break;
