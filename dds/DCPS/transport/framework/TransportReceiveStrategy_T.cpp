@@ -107,28 +107,26 @@ TransportReceiveStrategy<TH, DSH>::handle_simple_dds_input(ACE_HANDLE fd)
   }
 
   ACE_Message_Block* cur_rb = receive_buffers_[buffer_index_];
-  iovec iov[1];
+  iovec iov;
 #ifdef _MSC_VER
 #pragma warning(push)
 // iov_len is 32-bit on 64-bit VC++, but we don't want a cast here
 // since on other platforms iov_len is 64-bit
 #pragma warning(disable : 4267)
 #endif
-  iov[0].iov_len = cur_rb->space();
+  iov.iov_len = cur_rb->space();
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
-  iov[0].iov_base = cur_rb->wr_ptr();
+  iov.iov_base = cur_rb->wr_ptr();
 
   ACE_INET_Addr remote_address;
   bool stop = false;
-  ssize_t bytes_remaining = receive_bytes(iov,
+  ssize_t bytes_remaining = receive_bytes(&iov,
                                           1,
                                           remote_address,
                                           fd,
                                           stop);
-
-  //ACE_DEBUG((LM_DEBUG, "TransportReceiveStrategy[%@]::handle_simple_dds_input(%d) - read %d bytes (stop = %C)\n", this, fd, bytes_remaining, stop ? "true" : "false"));
 
   cur_rb->wr_ptr(bytes_remaining);
 
@@ -173,7 +171,7 @@ TransportReceiveStrategy<TH, DSH>::handle_simple_dds_input(ACE_HANDLE fd)
     if (!check_header(data_sample_header_)) {
       return 0;
     }
-    size_t dsh_ml = data_sample_header_.message_length();
+    const size_t dsh_ml = data_sample_header_.message_length();
     ACE_Message_Block* current_sample_block = 0;
     ACE_NEW_MALLOC_RETURN(
       current_sample_block,
@@ -185,7 +183,7 @@ TransportReceiveStrategy<TH, DSH>::handle_simple_dds_input(ACE_HANDLE fd)
       -1);
     current_sample_block->rd_ptr(cur_rb->rd_ptr());
     current_sample_block->wr_ptr(current_sample_block->rd_ptr() + dsh_ml);
-    cur_rb->rd_ptr(current_sample_block->rd_ptr() + dsh_ml);
+    cur_rb->rd_ptr(dsh_ml);
     bytes_remaining -= dsh_ml;
     ReceivedDataSample rds(current_sample_block);
     if (data_sample_header_.into_received_data_sample(rds)) {
@@ -235,11 +233,8 @@ TransportReceiveStrategy<TH, DSH>::handle_simple_dds_input(ACE_HANDLE fd)
       ),
       -1);
   } else {
-    //ACE_DEBUG((LM_DEBUG, "DON'T NEED REALLOCATE - SAVING BUFFER!\n"));
     cur_rb->reset();
   }
-
-  //buffer_index_ = successor_index(buffer_index_);
 
   return 0;
 }
