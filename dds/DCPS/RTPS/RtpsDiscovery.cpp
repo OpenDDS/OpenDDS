@@ -299,7 +299,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
         } else if (name == "InteropMulticastOverride") {
           /// FUTURE: handle > 1 group.
           ACE_INET_Addr addr;
-          if (addr.set(it->second.c_str())) {
+          if (addr.set(u_short(0), it->second.c_str())) {
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("(%P|%t) ERROR: RtpsDiscovery::Config::discovery_config(): ")
                               ACE_TEXT("failed to parse InteropMulticastOverride %C\n"),
