@@ -51,24 +51,22 @@ bool operator>>(Serializer& s, Encoding& encoding)
   }
   const ACE_CDR::UShort raw_kind =
     (static_cast<ACE_CDR::UShort>(data[0]) << 8) | data[1];
+  /**
+   * Assume we can ignore last bit except for endianness on kinds that need
+   * them.
+   */
   const Encoding::Kind kind = static_cast<Encoding::Kind>(raw_kind & 0xfffe);
-  switch (kind) {
-  case Encoding::KIND_CDR_PLAIN: // fallthrough
-  case Encoding::KIND_CDR_PARAMLIST: // fallthrough
-  case Encoding::KIND_XCDR2_PLAIN: // fallthrough
-  case Encoding::KIND_XCDR2_PARAMLIST: // fallthrough
-  case Encoding::KIND_XCDR2_DELIMITED:
-    encoding.endianness(static_cast<Endianness>(data[1] & 1));
-    encoding.kind(kind);
-    break;
-
-  default:
+  if (!Encoding::has_cdr_header(kind) || !Encoding::supported(kind)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
       ACE_TEXT("operator>>(Serializer&, Encoding&): ")
       ACE_TEXT("Unsupported Encoding Kind: %C\n"),
-      encoding.encoding_value_to_string(raw_kind).c_str()));
+      Encoding::kind_to_string(kind).c_str()));
     return false;
   }
+  if (Encoding::has_endianness(kind)) {
+    encoding.endianness(static_cast<Endianness>(raw_kind & 1));
+  }
+  encoding.kind(kind);
   if (DCPS_debug_level && (data[2] || data[3])) {
     ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING ")
       ACE_TEXT("operator>>(Serializer&, Encoding&): ")
@@ -83,8 +81,22 @@ bool operator<<(Serializer& s, const Encoding& encoding)
 {
   ACE_CDR::Octet data[4];
   Encoding::Kind k = encoding.kind();
-  data[0] = k >> 8;
-  data[1] = (k & 0xfe) | encoding.endianness();
+  if (!Encoding::has_cdr_header(k)) {
+    if (DCPS_debug_level) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
+        ACE_TEXT("operator<<(Serializer&, Encoding&): ")
+        ACE_TEXT("Trying to write a CDR Header for an encoding that shouldn't ")
+        ACE_TEXT("have one or is unsupported: %C\n"),
+        Encoding::kind_to_string(k).c_str()));
+    }
+    return false;
+  }
+  data[0] = (k >> 8) & 0xff;
+  data[1] = k & 0xff;
+  if (encoding.has_endianness()) {
+    data[1] &= 0xfe;
+    data[1] |= encoding.endianness();
+  }
   // Encoding "Options" Currently Reserved, Set to Zero
   data[2] = 0;
   data[3] = 0;
@@ -93,10 +105,8 @@ bool operator<<(Serializer& s, const Encoding& encoding)
   return ok;
 }
 
-OPENDDS_STRING Encoding::encoding_value_to_string(ACE_CDR::UShort value)
-{
-  ACE_CDR::Octet data[2];
-  switch (static_cast<Kind>(value)) {
+OPENDDS_STRING Encoding::kind_to_string(Kind value) {
+  switch (value) {
   case KIND_CDR_PLAIN:
     return "CDR/XCDR1 Plain";
   case KIND_CDR_PARAMLIST:
@@ -109,10 +119,12 @@ OPENDDS_STRING Encoding::encoding_value_to_string(ACE_CDR::UShort value)
     return "XCDR2 Delimited";
   case KIND_XML:
     return "XML";
+  case KIND_UNKNOWN:
+    return "<UNKOWN>";
+  case KIND_CDR_UNALIGNED:
+    return "Unaligned CDR";
   default:
-    data[0] = value >> 8;
-    data[1] = value & 0xff;
-    return to_hex_dds_string(&data[0], 2);
+    return to_dds_string(static_cast<unsigned>(value), true);
   }
 }
 
@@ -256,10 +268,6 @@ Serializer::read_string(ACE_CDR::Char*& dest,
     ACE_CDR::Char* str_alloc(ACE_CDR::ULong),
     void str_free(ACE_CDR::Char*))
 {
-  if (encoding().alignment()) {
-    align_r(sizeof(ACE_CDR::ULong));
-  }
-
   //
   // Ensure no bad values leave the routine.
   //
@@ -270,14 +278,11 @@ Serializer::read_string(ACE_CDR::Char*& dest,
   // Extract the string length.
   //
   ACE_CDR::ULong length; // includes the null
-  this->buffer_read(reinterpret_cast<char*>(&length), sizeof(ACE_CDR::ULong), this->swap_bytes());
-
-  if (!this->good_bit_) {
+  if (!(*this >> length)) {
     return 0;
   }
 
   if (length == 0) {
-    // not legal CDR, but we need to accept it since other implementations may generate this
     dest = str_alloc(0);
     return 0;
   }
@@ -318,10 +323,6 @@ Serializer::read_string(ACE_CDR::WChar*& dest,
     ACE_CDR::WChar* str_alloc(ACE_CDR::ULong),
     void str_free(ACE_CDR::WChar*))
 {
-  if (encoding().alignment()) {
-    align_r(sizeof(ACE_CDR::ULong));
-  }
-
   //
   // Ensure no bad values leave the routine.
   //
@@ -329,13 +330,10 @@ Serializer::read_string(ACE_CDR::WChar*& dest,
   dest = 0;
 
   //
-  // Extract the string length.
+  // Extract the string size.
   //
-  ACE_CDR::ULong bytecount = 0;
-  this->buffer_read(reinterpret_cast<char*>(&bytecount),
-                    sizeof(ACE_CDR::ULong), this->swap_bytes());
-
-  if (!this->good_bit_) {
+  ACE_CDR::ULong bytecount; // includes the null
+  if (!(*this >> bytecount)) {
     return 0;
   }
 
@@ -346,7 +344,7 @@ Serializer::read_string(ACE_CDR::WChar*& dest,
   //
   ACE_CDR::ULong length = 0;
   if (bytecount <= this->current_->total_length()) {
-    length = bytecount / WCHAR_SIZE;
+    length = bytecount / char16_cdr_size;
     dest = str_alloc(length);
 
     if (dest == 0) {
@@ -355,11 +353,11 @@ Serializer::read_string(ACE_CDR::WChar*& dest,
     }
 
 #if ACE_SIZEOF_WCHAR == 2
-    this->read_array(reinterpret_cast<char*>(dest), WCHAR_SIZE, length, SWAP_BE);
+    read_array(reinterpret_cast<char*>(dest), char16_cdr_size, length, swap_the_bytes);
 #else
     for (size_t i = 0; i < length && this->good_bit_; ++i) {
       ACE_UINT16 as_utf16;
-      this->buffer_read(reinterpret_cast<char*>(&as_utf16), WCHAR_SIZE, SWAP_BE);
+      buffer_read(reinterpret_cast<char*>(&as_utf16), char16_cdr_size, swap_bytes());
       if (this->good_bit_) {
         dest[i] = as_utf16;
       }
@@ -384,7 +382,7 @@ Serializer::read_string(ACE_CDR::WChar*& dest,
   return length;
 }
 
-bool Serializer::read_parameter_id(unsigned& id, unsigned& size)
+bool Serializer::read_parameter_id(unsigned& id, size_t& size)
 {
   const Encoding::XcdrVersion xcdr = encoding().xcdr_version();
   if (xcdr == Encoding::XCDR1) {
@@ -400,7 +398,7 @@ bool Serializer::read_parameter_id(unsigned& id, unsigned& size)
       return false;
     }
 
-    // TODO: handle PID flags
+    // TODO(iguessthislldo): handle PID flags
 
     // If extended, get the "long" id and size
     if (short_id == pid_extended) {
@@ -426,9 +424,10 @@ bool Serializer::read_parameter_id(unsigned& id, unsigned& size)
       return false;
     }
 
-    // TODO: Handle Must Understand Flag
+    // TODO(iguessthislldo): Handle Must Understand Flag
 
     // Get Size
+    // TODO(iguessthislldo) LC
     const unsigned short lc = (emheader >> 28) & 0x7;
     if (lc < 4) {
       size = 1 << lc;
@@ -447,7 +446,62 @@ bool Serializer::read_parameter_id(unsigned& id, unsigned& size)
     }
 
     id = emheader & 0xfffffff;
-  } else {
+  } else { // Not XCDR or something we're not prepared for.
+    return false;
+  }
+
+  return true;
+}
+
+bool Serializer::write_parameter_id(unsigned id, size_t size)
+{
+  const Encoding::XcdrVersion xcdr = encoding().xcdr_version();
+  if (xcdr == Encoding::XCDR1) {
+    align_w(4);
+
+    // Determine if we need to use a short or long PID
+    const bool long_pid = id > (1 << 14) || size > (1 << 16);
+
+    // Write the short part of the PID
+    /*
+     * TODO(iguessthislldo): Control when to use "must understand" and "impl
+     * extension"?
+     *
+     * The XTypes CDR rules seem to imply they're alway here but that doesn't
+     * sound quite right.
+     *
+     * Also see TODOs above and the TODO below.
+     */
+    const ACE_CDR::UShort pid_id =
+      pid_impl_extension + pid_must_understand +
+      (long_pid ? pid_extended : static_cast<ACE_CDR::UShort>(id));
+    if (!(*this << pid_id)) {
+      return false;
+    }
+    const ACE_CDR::UShort pid_size = long_pid ? 8 : size;
+    if (!(*this << pid_size)) {
+      return false;
+    }
+
+    // If PID is long, write the extended/long part.
+    if (long_pid && (
+          !(*this << static_cast<ACE_CDR::ULong>(id)) ||
+          !(*this << static_cast<ACE_CDR::ULong>(size)))) {
+      return false;
+    }
+
+    reset_alignment();
+  } else if (xcdr == Encoding::XCDR2) {
+
+    ACE_CDR::ULong emheader = id;
+    // TODO(iguessthislldo): Conditionally insert must understand flag?
+    id += emheader_must_understand;
+    // TODO(iguessthislldo) LC
+    if (!(*this << emheader)) {
+      return false;
+    }
+
+  } else { // Not XCDR or something we're not prepared for.
     return false;
   }
 

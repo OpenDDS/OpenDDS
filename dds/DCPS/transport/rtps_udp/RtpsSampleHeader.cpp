@@ -146,8 +146,8 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
 
     frag_ = (kind == DATA_FRAG);
 
-    // marshaled_size_ is # of bytes of submessage we have read from "mb"
-    marshaled_size_ = starting_length - mb.total_length();
+    // serialized_size_ is # of bytes of submessage we have read from "mb"
+    serialized_size_ = starting_length - mb.total_length();
 
     if (octetsToNextHeader == 0 && kind != PAD && kind != INFO_TS) {
       // see RTPS v2.1 section 9.4.5.1.3
@@ -162,16 +162,16 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
       // These Submessages have a payload which we haven't deserialized yet.
       // The TransportReceiveStrategy will know this via message_length().
       // octetsToNextHeader does not count the SubmessageHeader (4 bytes)
-      message_length_ = octetsToNextHeader + SMHDR_SZ - marshaled_size_;
+      message_length_ = octetsToNextHeader + SMHDR_SZ - serialized_size_;
     } else {
       // These Submessages _could_ have extra data that we don't know about
       // (from a newer minor version of the RTPS spec).  Either way, indicate
       // to the TransportReceiveStrategy that there is no data payload here.
       message_length_ = 0;
-      ACE_CDR::UShort marshaled = static_cast<ACE_CDR::UShort>(marshaled_size_);
+      ACE_CDR::UShort marshaled = static_cast<ACE_CDR::UShort>(serialized_size_);
       if (octetsToNextHeader + SMHDR_SZ > marshaled) {
         valid_ = ser.skip(octetsToNextHeader + SMHDR_SZ - marshaled);
-        marshaled_size_ = octetsToNextHeader + SMHDR_SZ;
+        serialized_size_ = octetsToNextHeader + SMHDR_SZ;
       }
     }
   }

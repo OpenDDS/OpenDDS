@@ -477,7 +477,7 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
             this->receive_buffers_[this->buffer_index_]->wr_ptr()));
 
       if (this->receive_buffers_[this->buffer_index_]->total_length()
-          < this->receive_transport_header_.max_marshaled_size()) {
+          < this->receive_transport_header_.get_max_serialized_size()) {
         //
         // Not enough room in the buffer for the entire Transport
         // header that we need to read, so relinquish control until
@@ -505,7 +505,7 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
             *this->receive_buffers_[this->buffer_index_];
           size_t xbytes = mb.length();
 
-          xbytes = (std::min)(xbytes, TH::max_marshaled_size());
+          xbytes = (std::min)(xbytes, TH::get_max_serialized_size());
 
           ACE::format_hexdump(mb.rd_ptr(), xbytes, xbuffer, sizeof(xbuffer));
 
@@ -610,7 +610,7 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
           if (Transport_debug_level > 2) {
             ACE_TCHAR ebuffer[350];
             ACE_Message_Block& mb = *this->receive_buffers_[this->buffer_index_];
-            const size_t sz = (std::min)(DSH::max_marshaled_size(), mb.length());
+            const size_t sz = (std::min)(DSH::get_max_serialized_size(), mb.length());
             ACE::format_hexdump(mb.rd_ptr(), sz, ebuffer, sizeof(ebuffer));
             ACE_DEBUG((LM_DEBUG, "(%P|%t) DBG:   "
               "Partial DataSampleHeader:\n%s\n", ebuffer));
@@ -626,10 +626,10 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
           // only do the hexdump if it will be printed - to not impact performance.
           if (Transport_debug_level > 5) {
             ACE_TCHAR ebuffer[4096];
-            ACE::format_hexdump
-            (this->receive_buffers_[this->buffer_index_]->rd_ptr(),
-             this->data_sample_header_.max_marshaled_size(),
-             ebuffer, sizeof(ebuffer));
+            ACE::format_hexdump(
+              this->receive_buffers_[this->buffer_index_]->rd_ptr(),
+              this->data_sample_header_.get_max_serialized_size(),
+              ebuffer, sizeof(ebuffer));
 
             VDBG((LM_DEBUG,"(%P|%t) DBG:   "
                   "Hex Dump:\n%s\n", ebuffer));
@@ -667,13 +667,13 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
           //
           // Decrement packet size.
           //
+          const size_t header_size =
+            this->data_sample_header_.get_serialized_size();
           VDBG((LM_DEBUG,"(%P|%t) DBG:   "
-                "this->data_sample_header_.marshaled_size() "
-                "== %d.\n",
-                this->data_sample_header_.marshaled_size()));
+                "this->data_sample_header_.get_serialized_size() == %d.\n",
+                header_size));
 
-          this->pdu_remaining_
-          -= this->data_sample_header_.marshaled_size();
+          this->pdu_remaining_ -= header_size;
 
           VDBG((LM_DEBUG,"(%P|%t) DBG:   "
                 "Amount of transport packet remaining: %d.\n",

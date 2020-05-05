@@ -95,7 +95,7 @@ TransportSendStrategy::TransportSendStrategy(
 
   // We cache this value in data member since it doesn't change, and we
   // don't want to keep asking for it over and over.
-  this->max_header_size_ = TransportHeader::max_marshaled_size();
+  max_header_size_ = TransportHeader::get_max_serialized_size();
 
   delayed_delivered_notification_queue_.reserve(this->max_samples_);
 }
@@ -999,7 +999,7 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
 
       const size_t space_needed =
         (max_message_size > 0)
-        ? /* fragmenting */ DataSampleHeader::max_marshaled_size() + MIN_FRAG
+        ? /* fragmenting */ DataSampleHeader::get_max_serialized_size() + MIN_FRAG
         : /* not fragmenting */ element_length;
 
       if ((exclusive && (this->elems_.size() != 0))

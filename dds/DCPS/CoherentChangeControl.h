@@ -15,9 +15,9 @@
 #include "Serializer.h"
 #include "SequenceNumber.h"
 #include "RepoIdTypes.h"
-#include "dds/DdsDcpsInfoUtilsC.h"
-
 #include "PoolAllocator.h"
+#include <dds/DdsDcpsInfoUtilsC.h>
+
 #include <iosfwd>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -30,10 +30,11 @@ namespace OpenDDS {
 namespace DCPS {
 
 struct WriterCoherentSample {
-  WriterCoherentSample (ACE_UINT32 num_sample = 0,
-                        SequenceNumber last_sample = SequenceNumber());
+  WriterCoherentSample(
+    ACE_UINT32 num_sample = 0,
+    SequenceNumber last_sample = SequenceNumber());
 
-  void reset ();
+  void reset();
   ACE_UINT32 num_samples_;
   SequenceNumber last_sample_;
 };
@@ -48,27 +49,25 @@ struct OpenDDS_Dcps_Export CoherentChangeControl {
   RepoId                publisher_id_;
   GroupCoherentSamples  group_coherent_samples_;
 
-  CoherentChangeControl() ;
+  CoherentChangeControl();
 
   /// Similar to IDL compiler generated methods.
-  size_t max_marshaled_size() ;
+  size_t get_max_serialized_size();
 
-  void reset ();
+  void reset();
 };
 
 
 /// Marshal/Insertion into a buffer.
 OpenDDS_Dcps_Export
-ACE_CDR::Boolean
-operator<< (OpenDDS::DCPS::Serializer& serializer, OpenDDS::DCPS::CoherentChangeControl& value);
+bool operator<<(Serializer& serializer, CoherentChangeControl& value);
 
 OpenDDS_Dcps_Export
-ACE_CDR::Boolean
-operator>> (OpenDDS::DCPS::Serializer& serializer, OpenDDS::DCPS::CoherentChangeControl& value);
+bool operator>>(Serializer& serializer, CoherentChangeControl& value);
 
 /// Message header insertion onto an ostream.
 OpenDDS_Dcps_Export
-std::ostream& operator<<(std::ostream& str, const OpenDDS::DCPS::CoherentChangeControl& value);
+std::ostream& operator<<(std::ostream& str, const CoherentChangeControl& value);
 
 } // namespace DCPS
 } // namespace OpenDDS

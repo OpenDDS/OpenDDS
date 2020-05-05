@@ -600,7 +600,7 @@ DataLink::create_control(char submessage_id,
   ACE_NEW_MALLOC_RETURN(message,
                         static_cast<ACE_Message_Block*>(
                           this->mb_allocator_->malloc(sizeof(ACE_Message_Block))),
-                        ACE_Message_Block(header.max_marshaled_size(),
+                        ACE_Message_Block(header.get_max_serialized_size(),
                                           ACE_Message_Block::MB_DATA,
                                           data.release(),
                                           0,  // data

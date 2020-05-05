@@ -93,16 +93,17 @@ DDS::ReturnCode_t blob_to_locators(const DCPS::TransportBLOB& blob,
 void locators_to_blob(const DCPS::LocatorSeq& locators,
                       DCPS::TransportBLOB& blob)
 {
-  using OpenDDS::DCPS::Serializer;
-  size_t size_locator = 0, padding_locator = 0;
-  DCPS::gen_find_size(locators, size_locator, padding_locator);
-  ACE_Message_Block mb_locator(size_locator + padding_locator + 1);
-  Serializer ser_loc(&mb_locator, ACE_CDR_BYTE_ORDER, Serializer::ALIGN_CDR);
-  ser_loc << locators;
+  using namespace OpenDDS::DCPS;
+  size_t size = 0;
+  Encoding encoding(Encoding::KIND_CDR_PLAIN, ENDIAN_LITTLE);
+  serialized_size(encoding, size, locators);
+  ACE_Message_Block mb_locator(size + 1);
+  Serializer ser(&mb_locator, encoding);
+  ser << locators;
   // Add a bool for 'requires inline qos', see Sedp::set_inline_qos():
   // if the bool is no longer the last octet of the sequence then that function
   // must be changed as well.
-  ser_loc << ACE_OutputCDR::from_boolean(false);
+  ser << ACE_OutputCDR::from_boolean(false);
   message_block_to_sequence(mb_locator, blob);
 }
 

@@ -10,15 +10,11 @@
 
 #include "dcps_export.h"
 #include "EntityImpl.h"
-#include "dds/DdsDcpsTopicC.h"
-#include "dds/DdsDcpsSubscriptionExtC.h"
-#include "dds/DdsDcpsDomainC.h"
-#include "dds/DdsDcpsTopicC.h"
 #include "Definitions.h"
-#include "dds/DCPS/DataReaderCallbacks.h"
-#include "dds/DCPS/transport/framework/ReceivedDataSample.h"
-#include "dds/DCPS/transport/framework/TransportReceiveListener.h"
-#include "dds/DCPS/transport/framework/TransportClient.h"
+#include "DataReaderCallbacks.h"
+#include "transport/framework/ReceivedDataSample.h"
+#include "transport/framework/TransportReceiveListener.h"
+#include "transport/framework/TransportClient.h"
 #include "DisjointSequence.h"
 #include "SubscriptionInstance.h"
 #include "InstanceState.h"
@@ -31,7 +27,6 @@
 #include "GroupRakeData.h"
 #include "CoherentChangeControl.h"
 #include "AssociationData.h"
-#include "dds/DdsDcpsInfrastructureC.h"
 #include "RcHandle_T.h"
 #include "RcObject.h"
 #include "WriterInfo.h"
@@ -44,12 +39,17 @@
 #include "DomainParticipantImpl.h"
 #include "TimeTypes.h"
 
-#include "ace/String_Base.h"
-#include "ace/Reverse_Lock_T.h"
-#include "ace/Atomic_Op.h"
-#include "ace/Reactor.h"
+#include <dds/DdsDcpsTopicC.h>
+#include <dds/DdsDcpsSubscriptionExtC.h>
+#include <dds/DdsDcpsDomainC.h>
+#include <dds/DdsDcpsTopicC.h>
+#include <dds/DdsDcpsInfrastructureC.h>
 
-#include "dds/DCPS/PoolAllocator.h"
+#include <ace/String_Base.h>
+#include <ace/Reverse_Lock_T.h>
+#include <ace/Atomic_Op.h>
+#include <ace/Reactor.h>
+
 #include <memory>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)

@@ -473,6 +473,11 @@ protected:
   // type specific DataWriter's part of enable.
   virtual DDS::ReturnCode_t enable_specific() = 0;
 
+  /**
+   * Setup CDR serialization options in type-specific DataWrtier.
+   */
+  virtual DDS::ReturnCode_t setup_serialization() = 0;
+
   /// The number of chunks for the cached allocator.
   size_t                     n_chunks_;
 

@@ -340,8 +340,8 @@ namespace {
         be_global->impl_ <<
           "      " << fieldType << "_forany rhsForany(const_cast<" <<
           fieldType << "_slice*>(*rhsArr));\n"
-          "      size_t size = 0, padding = 0;\n"
-          "      gen_find_size(rhsForany, size, padding);\n"
+          "      size_t size = 0;\n"
+          "      serialized_size(encoding, size, rhsForany);\n"
           "      ACE_Message_Block mb(size);\n"
           "      Serializer ser_out(&mb);\n"
           "      ser_out << rhsForany;\n"

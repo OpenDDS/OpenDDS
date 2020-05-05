@@ -12,16 +12,15 @@
 #include "rtps_export.h"
 #include "BaseMessageTypes.h"
 
-#include "dds/DCPS/Hash.h"
-#include "dds/DCPS/Message_Block_Ptr.h"
-#include "dds/DCPS/Serializer.h"
-#include "dds/DCPS/TypeSupportImpl.h"
+#include <dds/DCPS/Hash.h>
+#include <dds/DCPS/Message_Block_Ptr.h>
+#include <dds/DCPS/Serializer.h>
+#include <dds/DCPS/TypeSupportImpl.h>
+#include <dds/DdsDcpsInfoUtilsC.h>
+#include <dds/DdsDcpsInfoUtilsTypeSupportImpl.h>
 
-#include "dds/DdsDcpsInfoUtilsC.h"
-#include "dds/DdsDcpsInfoUtilsTypeSupportImpl.h"
-
-#include "ace/INET_Addr.h"
-#include "ace/Message_Block.h"
+#include <ace/INET_Addr.h>
+#include <ace/Message_Block.h>
 
 #include <cstring>
 
@@ -36,37 +35,34 @@ namespace RTPS {
 template <typename T>
 void marshal_key_hash(const T& msg, KeyHash_t& hash) {
   using DCPS::Serializer;
+  using DCPS::Encoding;
 
   DCPS::KeyOnly<const T> ko(msg);
 
-  static const size_t HASH_LIMIT = 16;
-  std::memset(hash.value, 0, HASH_LIMIT);
+  static const size_t hash_limit = 16;
+  std::memset(hash.value, 0, hash_limit);
 
-  // Key Hash must use big endian ordering.
-  // Native==Little endian means we need to swap
-#if defined ACE_LITTLE_ENDIAN
-  static const bool swap_bytes = true;
-#else
-  static const bool swap_bytes = false;
-#endif
+  Encoding encoding(Encoding::KIND_CDR_PLAIN, DCPS::ENDIAN_BIG);
+  encoding.zero_init_padding(true);
+
+  size_t max_key_size = 0;
+  max_serialized_size(encoding, max_key_size, ko);
 
   if (DCPS::MarshalTraits<T>::gen_is_bounded_key_size() &&
-      gen_max_marshaled_size(ko, true /*align*/) <= HASH_LIMIT) {
+      max_key_size <= hash_limit) {
     // If it is bounded and can always fit in 16 bytes, we will use the
     // marshaled key
-    ACE_Message_Block mb(HASH_LIMIT);
-    Serializer out_serializer(
-      &mb, swap_bytes, Serializer::ALIGN_CDR, true /* zero init padding */);
+    ACE_Message_Block mb(hash_limit);
+    Serializer out_serializer(&mb, encoding);
     out_serializer << ko;
     std::memcpy(hash.value, mb.rd_ptr(), mb.length());
 
   } else {
     // We will use the hash of the marshaled key
-    size_t size = 0, padding = 0;
-    gen_find_size(ko, size, padding);
-    ACE_Message_Block mb(size + padding);
-    Serializer out_serializer(
-      &mb, swap_bytes, Serializer::ALIGN_CDR, true /* zero init padding */);
+    size_t size = 0;
+    serialized_size(encoding, size, ko);
+    ACE_Message_Block mb(size);
+    Serializer out_serializer(&mb, encoding);
     out_serializer << ko;
 
     DCPS::MD5Hash(hash.value, mb.rd_ptr(), mb.length());

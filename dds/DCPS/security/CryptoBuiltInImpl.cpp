@@ -35,6 +35,10 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 using namespace DDS::Security;
 using namespace OpenDDS::Security::CommonUtilities;
 using OpenDDS::DCPS::Serializer;
+using OpenDDS::DCPS::Encoding;
+using OpenDDS::DCPS::ENDIAN_BIG;
+using OpenDDS::DCPS::align;
+using OpenDDS::DCPS::serialized_size;
 using OpenDDS::DCPS::Message_Block_Ptr;
 using OpenDDS::DCPS::security_debug;
 
@@ -586,6 +590,7 @@ namespace {
 
   ParticipantCryptoTokenSeq keys_to_tokens(const KeyMaterial_AES_GCM_GMAC_Seq& keys)
   {
+    const Encoding encoding(Encoding::KIND_CDR_PLAIN, ENDIAN_BIG);
     ParticipantCryptoTokenSeq tokens;
     for (unsigned int i = 0; i < keys.length(); ++i) {
       CryptoToken t;
@@ -594,11 +599,11 @@ namespace {
       DDS::BinaryProperty_t& p = t.binary_properties[0];
       p.name = Token_KeyMat_Name;
       p.propagate = true;
-      size_t size = 0, padding = 0;
-      DCPS::gen_find_size(keys[i], size, padding);
-      p.value.length(static_cast<unsigned int>(size + padding));
-      ACE_Message_Block mb(to_mb(p.value.get_buffer()), size + padding);
-      Serializer ser(&mb, Serializer::SWAP_BE, Serializer::ALIGN_CDR);
+      size_t size = 0;
+      serialized_size(encoding, size, keys[i]);
+      p.value.length(static_cast<unsigned int>(size));
+      ACE_Message_Block mb(to_mb(p.value.get_buffer()), size);
+      Serializer ser(&mb, encoding);
       if (ser << keys[i]) {
         push_back(tokens, t);
       }
@@ -856,20 +861,20 @@ bool CryptoBuiltInImpl::encode_serialized_payload(
     return false; // either encrypt() or authtag() already set 'ex'
   }
 
-  size_t size = 0, padding = 0;
-  using DCPS::gen_find_size;
-  gen_find_size(header, size, padding);
+  const Encoding encoding(Encoding::KIND_CDR_PLAIN, ENDIAN_BIG);
+  size_t size = 0;
+  serialized_size(encoding, size, header);
 
   if (pOut != &plain_buffer) {
     size += CRYPTO_CONTENT_ADDED_LENGTH;
   }
 
   size += pOut->length();
-  gen_find_size(footer, size, padding);
+  serialized_size(encoding, size, footer);
 
-  encoded_buffer.length(static_cast<unsigned int>(size + padding));
-  ACE_Message_Block mb(to_mb(encoded_buffer.get_buffer()), size + padding);
-  Serializer ser(&mb, Serializer::SWAP_BE, Serializer::ALIGN_CDR);
+  encoded_buffer.length(static_cast<unsigned int>(size));
+  ACE_Message_Block mb(to_mb(encoded_buffer.get_buffer()), size);
+  Serializer ser(&mb, encoding);
   ser << header;
 
   if (pOut != &plain_buffer) {
@@ -878,7 +883,7 @@ bool CryptoBuiltInImpl::encode_serialized_payload(
   ser.write_octet_array(pOut->get_buffer(), pOut->length());
 
   ser << footer;
-  return true;
+  return ser.good_bit();
 }
 
 void CryptoBuiltInImpl::Session::create_key(const KeyMaterial& master)
@@ -1042,15 +1047,6 @@ namespace {
     return 0;
   }
 
-  // Update 'size' and 'padding' in the same way that gen_find_size does, but for aligning to 'alignment'
-  void align(size_t alignment, size_t& size, size_t& padding)
-  {
-    const size_t offset = (size + padding) % alignment;
-    if (offset) {
-      padding += alignment - offset;
-    }
-  }
-
   unsigned int roundUp(unsigned int length, unsigned int alignment)
   {
     const unsigned int offset = length % alignment;
@@ -1145,27 +1141,27 @@ bool CryptoBuiltInImpl::encode_submessage(
     return false; // either encrypt() or authtag() already set 'ex'
   }
 
-  size_t size = 0, padding = 0;
+  const Encoding encoding(Encoding::KIND_CDR_PLAIN, ENDIAN_BIG);
+  size_t size = 0;
+
   size += RTPS::SMHDR_SZ; // prefix submessage header
-  using DCPS::gen_find_size;
-  gen_find_size(header, size, padding);
-  const ACE_UINT16 hdrLen = static_cast<ACE_UINT16>(size + padding - RTPS::SMHDR_SZ);
+  serialized_size(encoding, size, header);
+  const ACE_UINT16 hdrLen = static_cast<ACE_UINT16>(size - RTPS::SMHDR_SZ);
 
   if (!authOnly) {
     size += RTPS::SMHDR_SZ + SEQLEN_SZ;
   }
 
   size += pOut->length(); // submessage inside wrapper
-  align(SM_ALIGN, size, padding);
+  align(size, SM_ALIGN);
 
   size += RTPS::SMHDR_SZ; // postfix submessage header
-  const size_t preFooter = size + padding;
-  gen_find_size(footer, size, padding);
+  const size_t preFooter = size;
+  serialized_size(encoding, size, footer);
 
-  encoded_rtps_submessage.length(static_cast<unsigned int>(size + padding));
-  ACE_Message_Block mb(to_mb(encoded_rtps_submessage.get_buffer()),
-                       size + padding);
-  Serializer ser(&mb, Serializer::SWAP_BE, Serializer::ALIGN_CDR);
+  encoded_rtps_submessage.length(static_cast<unsigned int>(size));
+  ACE_Message_Block mb(to_mb(encoded_rtps_submessage.get_buffer()), size);
+  Serializer ser(&mb, encoding);
   RTPS::SubmessageHeader smHdr = {RTPS::SEC_PREFIX, 0, hdrLen};
   ser << smHdr;
   ser << header;
@@ -1181,11 +1177,11 @@ bool CryptoBuiltInImpl::encode_submessage(
   ser.align_w(SM_ALIGN);
 
   smHdr.submessageId = RTPS::SEC_POSTFIX;
-  smHdr.submessageLength = static_cast<ACE_UINT16>(size + padding - preFooter);
+  smHdr.submessageLength = static_cast<ACE_UINT16>(size - preFooter);
   ser << smHdr;
   ser << footer;
 
-  return true;
+  return set.good_bit();
 }
 
 bool CryptoBuiltInImpl::encode_datawriter_submessage(
@@ -1344,25 +1340,25 @@ bool CryptoBuiltInImpl::encode_rtps_message(
     return false; // either encrypt() or authtag() already set 'ex'
   }
 
-  size_t size = 0, padding = 0;
-  size += RTPS::RTPSHDR_SZ + RTPS::SMHDR_SZ; // RTPS Header, SRTPS Prefix
-  using DCPS::gen_find_size;
-  gen_find_size(cryptoHdr, size, padding);
-  const ACE_UINT16 cryptoHdrLen = static_cast<ACE_UINT16>(size + padding - RTPS::RTPSHDR_SZ - RTPS::SMHDR_SZ);
+  const Encoding encoding(Encoding::KIND_CDR_PLAIN, ENDIAN_BIG);
+  size_t size = RTPS::RTPSHDR_SZ + RTPS::SMHDR_SZ; // RTPS Header, SRTPS Prefix
+  serialized_size(encoding, size, cryptoHdr);
+  const ACE_UINT16 cryptoHdrLen =
+    static_cast<ACE_UINT16>(size - RTPS::RTPSHDR_SZ - RTPS::SMHDR_SZ);
 
   if (addSecBody) {
     size += RTPS::SMHDR_SZ + SEQLEN_SZ;
   }
 
   size += pOut->length();
-  align(SM_ALIGN, size, padding);
+  align(size, SM_ALIGN);
 
   size += RTPS::SMHDR_SZ; // SRTPS Postfix
-  gen_find_size(cryptoFooter, size, padding);
+  serialized_size(encoding, size, cryptoFooter);
 
-  encoded_rtps_message.length(static_cast<unsigned int>(size + padding));
-  ACE_Message_Block mb(to_mb(encoded_rtps_message.get_buffer()), size + padding);
-  Serializer ser(&mb, Serializer::SWAP_BE, Serializer::ALIGN_CDR);
+  encoded_rtps_message.length(static_cast<unsigned int>(size));
+  ACE_Message_Block mb(to_mb(encoded_rtps_message.get_buffer()), size);
+  Serializer ser(&mb, encoding);
 
   ser.write_octet_array(plain_rtps_message.get_buffer(), RTPS::RTPSHDR_SZ);
 
@@ -1385,7 +1381,7 @@ bool CryptoBuiltInImpl::encode_rtps_message(
   ser << smHdr;
   ser << cryptoFooter;
 
-  return true;
+  return ser.good_bit();
 }
 
 namespace {
@@ -1708,7 +1704,8 @@ bool CryptoBuiltInImpl::decode_rtps_message(
       if (!(parser >> sizeOfEncrypted)) {
         return CommonUtilities::set_security_error(ex, -13, i, "Failed to deserialize CryptoContent length");
       }
-      const unsigned short sz = static_cast<unsigned short>(DCPS::max_marshaled_size_ulong());
+      const unsigned short sz =
+        static_cast<unsigned short>(DCPS::uint32_cdr_size);
       if (sizeOfEncrypted + sz > parser.submessageHeader().submessageLength) {
         return CommonUtilities::set_security_error(ex, -14, i, "CryptoContent length out of bounds");
       }

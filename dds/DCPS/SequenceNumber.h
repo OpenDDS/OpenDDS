@@ -193,10 +193,11 @@ operator+(int lhs, const SequenceNumber& rhs)
   return rhs + lhs;
 }
 
-inline void
-gen_find_size(const SequenceNumber& /*sn*/, size_t& size, size_t& padding) {
-  find_size_ulong(size, padding);
-  size += gen_max_marshaled_size(CORBA::Long());
+inline
+void serialized_size(const Encoding& encoding, size_t& size,
+  const SequenceNumber& /*sn*/)
+{
+  max_serialized_size_ulong(encoding, size, 2);
 }
 
 typedef std::pair<SequenceNumber, SequenceNumber> SequenceRange;

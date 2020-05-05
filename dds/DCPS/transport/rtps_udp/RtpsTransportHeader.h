@@ -24,7 +24,7 @@ namespace DCPS {
 /// Adapt the TransportReceiveStrategy for RTPS's "transport" (message) Header
 struct RtpsTransportHeader {
 
-  static size_t max_marshaled_size();
+  static size_t get_max_serialized_size();
 
   RtpsTransportHeader();
   explicit RtpsTransportHeader(ACE_Message_Block& mb);
