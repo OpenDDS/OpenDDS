@@ -1849,10 +1849,10 @@ Spdp::SpdpTransport::open()
     ncm->add_listener(*this);
   } else {
     DCPS::NetworkInterface nic(0, multicast_interface_, true);
-    ACE_INET_Addr addr("0.0.0.0");
+    ACE_INET_Addr addr(u_short(0), "0.0.0.0");
     nic.addresses.insert(addr);
 #ifdef ACE_HAS_IPV6
-    ACE_INET_Addr addr2("[::]");
+    ACE_INET_Addr addr2(u_short(0), "::");
     nic.addresses.insert(addr2);
 #endif
     job_queue_->enqueue(DCPS::make_rch<ChangeMulticastGroup>(rchandle_from(this), nic,

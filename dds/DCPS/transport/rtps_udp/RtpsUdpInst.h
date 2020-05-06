@@ -76,7 +76,7 @@ public:
   }
 
 #ifdef ACE_HAS_IPV6
-  ACE_INET_Addr ipv6_multicast_group_address() const { return ipv6_local_address_; }
+  ACE_INET_Addr ipv6_multicast_group_address() const { return ipv6_multicast_group_address_; }
   void ipv6_multicast_group_address(const ACE_INET_Addr& addr)
   {
     if (addr.get_type() == AF_INET6) {
