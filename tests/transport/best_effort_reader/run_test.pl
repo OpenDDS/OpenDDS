@@ -18,7 +18,7 @@ sub do_test {
   my $test = new PerlDDS::TestFramework();
   my $sublog = "sub". ($mcast ? "_multicast" : "") . ".log";
 
-  $test->process('subscriber', 'subscriber', "-h localhost -p $port -ORBLogFile $sublog");
+  $test->process('subscriber', 'subscriber', "-h 127.0.0.1 -p $port -ORBLogFile $sublog");
   $test->start_process('subscriber');
   if (PerlACE::waitforfile_timed($subready, 30) == -1) {
     print STDERR "ERROR: waiting for subscriber file\n";
@@ -26,7 +26,7 @@ sub do_test {
     return 1;
   }
 
-  $test->process('publisher', 'publisher', $mcast ? "-h 239.255.0.2 -p 7401" : "-h localhost -p $port");
+  $test->process('publisher', 'publisher', $mcast ? "-h 239.255.0.2 -p 7401" : "-h 127.0.0.1 -p $port");
   $test->start_process('publisher');
 
   my $result = $test->finish(60);
