@@ -379,8 +379,7 @@ ReplayerImpl::enable()
                            this->qos_,
                            trans_conf_info,
                            this->publisher_qos_,
-                           type_info,
-                           swap_bytes());
+                           type_info);
 
   if (this->publication_id_ == GUID_UNKNOWN) {
     ACE_ERROR((LM_ERROR,

@@ -10,7 +10,6 @@
 
 #include "dcps_export.h"
 #include "dds/DCPS/Definitions.h"
-#include "dds/DCPS/TypeObject.h"
 #include "dds/DdsDcpsTypeSupportExtC.h"
 #include "LocalObject.h"
 
@@ -20,7 +19,11 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
+
 namespace OpenDDS {
+namespace XTypes{
+class TypeObject;
+}
 namespace DCPS {
 
 class MetaStruct;

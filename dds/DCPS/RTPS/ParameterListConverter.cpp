@@ -36,28 +36,29 @@ namespace {
     param_list[length] = param;
   }
 
-  void extract_type_info_param(const Parameter& param, XTypes::TypeInformation& type_info, bool swap_bytes) {
+  void extract_type_info_param(const Parameter& param, XTypes::TypeInformation& type_info) {
     ACE_Data_Block db(param.type_information().length(), ACE_Message_Block::MB_DATA,
-          reinterpret_cast<const char*>(param.type_information().get_buffer()),
-          0 /*alloc*/, 0 /*lock*/, ACE_Message_Block::DONT_DELETE, 0 /*db_alloc*/);
+                      reinterpret_cast<const char*>(param.type_information().get_buffer()),
+                      0 /*alloc*/, 0 /*lock*/, ACE_Message_Block::DONT_DELETE, 0 /*db_alloc*/);
     ACE_Message_Block data(&db, ACE_Message_Block::DONT_DELETE, 0 /*mb_alloc*/);
-          data.wr_ptr(data.space());
-    OpenDDS::DCPS::Serializer serializer(&data, swap_bytes);
+    data.wr_ptr(data.space());
+    DCPS::Serializer serializer(&data, DCPS::Encoding::Kind::KIND_XCDR2_PARAMLIST,
+                                DCPS::Endianness::ENDIAN_LITTLE);
     if (!(serializer >> type_info)) {
-          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) from_param_list ")
-          ACE_TEXT("deserialization type information failed.\n")));
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) extract_type_info_param ")
+                ACE_TEXT("deserialization type information failed.\n")));
     }
   }
 
-  void add_type_info_param(ParameterList& param_list, const XTypes::TypeInformation& type_info, bool swap_bytes) {
+  void add_type_info_param(ParameterList& param_list, const XTypes::TypeInformation& type_info) {
     Parameter param;
-    //create message block smart pointer to put data into using the size of a type information object
-    OpenDDS::DCPS::Message_Block_Ptr data (
-      new ACE_Message_Block( OpenDDS::XTypes::find_size(type_info))) ;
-    OpenDDS::DCPS::Serializer serializer(
-      data.get(),
-      swap_bytes);
-    serializer << type_info;
+    DCPS::Message_Block_Ptr data (new ACE_Message_Block( XTypes::find_size(type_info)));
+    DCPS::Serializer serializer(data.get(), DCPS::Encoding::Kind::KIND_XCDR2_PARAMLIST,
+                                DCPS::Endianness::ENDIAN_LITTLE);
+    if (!(serializer << type_info)) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) add_type_info_param ")
+                ACE_TEXT("serialization type information failed.\n")));
+    }
     //copy serialized data into octet sequence
     ssize_t size = data->length();
     param.type_information(DDS::OctetSeq(size));
@@ -772,7 +773,6 @@ bool from_param_list(const ParameterList& param_list,
 bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
                    ParameterList& param_list,
                    const XTypes::TypeInformation& type_info,
-                   bool swap_bytes,
                    bool map)
 {
   // Ignore builtin topic key
@@ -783,7 +783,7 @@ bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
     param._d(PID_TOPIC_NAME);
     add_param(param_list, param);
   }
-  add_type_info_param(param_list, type_info, swap_bytes);
+  add_type_info_param(param_list, type_info);
   {
     Parameter param;
     param.string_data(writer_data.ddsPublicationData.type_name);
@@ -951,8 +951,7 @@ bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
 
 bool from_param_list(const ParameterList& param_list,
                      DCPS::DiscoveredWriterData& writer_data,
-                     XTypes::TypeInformation& type_info,
-                     bool swap_bytes)
+                     XTypes::TypeInformation& type_info)
 {
   // Collect the rtps_udp locators before appending them to allLocators
   DCPS::LocatorSeq rtps_udp_locators;
@@ -1099,7 +1098,7 @@ bool from_param_list(const ParameterList& param_list,
         // ignore
         break;
       case PID_XTYPES_TYPE_INFORMATION:
-        extract_type_info_param(param, type_info, swap_bytes);
+        extract_type_info_param(param, type_info);
         break;
       default:
         if (param._d() & PIDMASK_INCOMPATIBLE) {
@@ -1119,7 +1118,6 @@ bool from_param_list(const ParameterList& param_list,
 bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
                    ParameterList& param_list,
                    const XTypes::TypeInformation& type_info,
-                   bool swap_bytes,
                    bool map)
 {
   // Ignore builtin topic key
@@ -1129,7 +1127,7 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
     param._d(PID_TOPIC_NAME);
     add_param(param_list, param);
   }
-  add_type_info_param(param_list, type_info, swap_bytes);
+  add_type_info_param(param_list, type_info);
   {
     Parameter param;
     param.string_data(reader_data.ddsSubscriptionData.type_name);
@@ -1304,8 +1302,7 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
 
 bool from_param_list(const ParameterList& param_list,
                      DCPS::DiscoveredReaderData& reader_data,
-                     XTypes::TypeInformation& type_info,
-                     bool swap_bytes)
+                     XTypes::TypeInformation& type_info)
 {
   // Collect the rtps_udp locators before appending them to allLocators
 
@@ -1447,7 +1444,7 @@ bool from_param_list(const ParameterList& param_list,
         // ignore
         break;
       case PID_XTYPES_TYPE_INFORMATION:
-        extract_type_info_param(param, type_info, swap_bytes);
+        extract_type_info_param(param, type_info);
       default:
         if (param._d() & PIDMASK_INCOMPATIBLE) {
           return false;

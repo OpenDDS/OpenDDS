@@ -1465,8 +1465,7 @@ DataWriterImpl::enable()
                            this->qos_,
                            trans_conf_info,
                            pub_qos,
-                           type_info,
-                           swap_bytes());
+                           type_info);
 
 
   if (!publisher || this->publication_id_ == GUID_UNKNOWN) {

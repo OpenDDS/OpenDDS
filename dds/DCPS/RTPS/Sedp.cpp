@@ -3293,8 +3293,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       }
 
       DCPS::unique_ptr<DiscoveredPublication> wdata(new DiscoveredPublication);
-      bool swap_bytes = sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER;
-      if (!ParameterListConverter::from_param_list(data, wdata->writer_data_, wdata->type_info, swap_bytes)) {
+      if (!ParameterListConverter::from_param_list(data, wdata->writer_data_, wdata->type_info)) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to convert from ParameterList ")
@@ -3364,8 +3363,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       }
 
       DCPS::unique_ptr<DiscoveredSubscription> rdata(new DiscoveredSubscription);
-      bool swap_bytes = sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER;
-      if (!ParameterListConverter::from_param_list(data, rdata->reader_data_, rdata->type_info, swap_bytes)) {
+      if (!ParameterListConverter::from_param_list(data, rdata->reader_data_, rdata->type_info)) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to convert from ParameterList ")
@@ -3790,7 +3788,7 @@ Sedp::write_publication_data_unsecure(
     populate_discovered_writer_msg(dwd, rid, lp);
 
     // Convert to parameter list
-    if (!ParameterListConverter::to_param_list(dwd, plist, lp.type_info, lp.swap_bytes, false)) {
+    if (!ParameterListConverter::to_param_list(dwd, plist, lp.type_info, false)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data - ")
                  ACE_TEXT("Failed to convert DiscoveredWriterData ")
@@ -3844,7 +3842,7 @@ Sedp::write_publication_data_secure(
     dwd.security_info.plugin_endpoint_security_attributes = lp.security_attribs_.plugin_endpoint_attributes;
 
     // Convert to parameter list
-    if (!ParameterListConverter::to_param_list(dwd, plist, lp.type_info,  lp.swap_bytes, false)) {
+    if (!ParameterListConverter::to_param_list(dwd, plist, lp.type_info, false)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data - ")
                  ACE_TEXT("Failed to convert DiscoveredWriterData ")
@@ -3937,7 +3935,7 @@ Sedp::write_subscription_data_unsecure(
     populate_discovered_reader_msg(drd, rid, ls);
 
     // Convert to parameter list
-    if (!ParameterListConverter::to_param_list(drd, plist, ls.type_info,  ls.swap_bytes, false)) {
+    if (!ParameterListConverter::to_param_list(drd, plist, ls.type_info, false)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data - ")
                  ACE_TEXT("Failed to convert DiscoveredReaderData ")
@@ -3990,7 +3988,7 @@ Sedp::write_subscription_data_secure(
     drd.security_info.plugin_endpoint_security_attributes = ls.security_attribs_.plugin_endpoint_attributes;
 
     // Convert to parameter list
-    if (!ParameterListConverter::to_param_list(drd, plist, ls.type_info, ls.swap_bytes, false)) {
+    if (!ParameterListConverter::to_param_list(drd, plist, ls.type_info, false)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data - ")
                  ACE_TEXT("Failed to convert DiscoveredReaderData ")

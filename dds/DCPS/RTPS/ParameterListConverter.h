@@ -110,14 +110,12 @@ OpenDDS_Rtps_Export
 bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
                    ParameterList& param_list,
                    const XTypes::TypeInformation& type_info,
-                   bool swap_bytes,
                    bool map = false /*map IPV4 to IPV6 addr*/);
 
 OpenDDS_Rtps_Export
 bool from_param_list(const ParameterList& param_list,
                      DCPS::DiscoveredWriterData& writer_data,
-                     XTypes::TypeInformation& type_info,
-                     bool swap_bytes);
+                     XTypes::TypeInformation& type_info);
 
 // OpenDDS::DCPS::DiscoveredReaderData
 
@@ -125,14 +123,12 @@ OpenDDS_Rtps_Export
 bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
                    ParameterList& param_list,
                    const XTypes::TypeInformation& type_info,
-                   bool swap_bytes,
                    bool map = false /*map IPV4 to IPV6 addr*/);
 
 OpenDDS_Rtps_Export
 bool from_param_list(const ParameterList& param_list,
                      DCPS::DiscoveredReaderData& reader_data,
-                     XTypes::TypeInformation& type_info,
-                     bool swap_bytes);
+                     XTypes::TypeInformation& type_info);
 
 #ifdef OPENDDS_SECURITY
 // DDS::Security::EndpointSecurityInfo

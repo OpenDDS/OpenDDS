@@ -161,8 +161,7 @@ public:
     const DDS::DataWriterQos& qos,
     const OpenDDS::DCPS::TransportLocatorSeq& transInfo,
     const DDS::PublisherQos& publisherQos,
-    const XTypes::TypeInformation& type_info,
-    bool swap_bytes);
+    const XTypes::TypeInformation& type_info);
 
   virtual bool remove_publication(
     DDS::DomainId_t domainId,
@@ -195,8 +194,7 @@ public:
     const char* filterClassName,
     const char* filterExpression,
     const DDS::StringSeq& exprParams,
-    const XTypes::TypeInformation& type_info,
-    bool swap_bytes);
+    const XTypes::TypeInformation& type_info);
 
   virtual bool remove_subscription(
     DDS::DomainId_t domainId,

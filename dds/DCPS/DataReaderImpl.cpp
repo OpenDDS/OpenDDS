@@ -1288,8 +1288,7 @@ DataReaderImpl::enable()
             filterClassName,
             filterExpression,
             exprParams,
-            type_info,
-            swap_bytes());
+            type_info);
 
     if (this->subscription_id_ == OpenDDS::DCPS::GUID_UNKNOWN) {
       ACE_ERROR((LM_WARNING,
