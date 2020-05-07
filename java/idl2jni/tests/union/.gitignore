@@ -2,9 +2,9 @@
 /E.java
 /EHelper.java
 /EHolder.java
-/U.java
-/UHelper.java
-/UHolder.java
+/NoDefault.java
+/NoDefaultHelper.java
+/NoDefaultHolder.java
 /UnionTestC.cpp
 /UnionTestC.h
 /UnionTestC.inl
@@ -14,3 +14,6 @@
 /UnionTestJS.h
 /UnionTestS.cpp
 /UnionTestS.h
+/WithDefault.java
+/WithDefaultHelper.java
+/WithDefaultHolder.java
