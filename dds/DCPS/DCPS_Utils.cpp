@@ -390,7 +390,7 @@ Encoding::Kind repr_ext_to_encoding_kind(
   case DDS::XCDR_DATA_REPRESENTATION:
     switch (ext) {
     case Encoding::FINAL:
-    case Encoding::APPENDABLE: // fallthrough
+    case Encoding::APPENDABLE:
       return Encoding::KIND_CDR_PLAIN;
     case Encoding::MUTABLE:
       return Encoding::KIND_CDR_PARAMLIST;

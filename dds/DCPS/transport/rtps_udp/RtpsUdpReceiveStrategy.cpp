@@ -612,8 +612,6 @@ void
 RtpsUdpReceiveStrategy::sec_submsg_to_octets(DDS::OctetSeq& encoded,
                                              const RTPS::Submessage& postfix)
 {
-  /// Submessages are 4 byte aligned (See RTPS 2.3 9.4.1)
-  const size_t submsg_align = 4;
   const Encoding encoding(Encoding::KIND_CDR_PLAIN, ENDIAN_BIG);
   size_t size = 0;
   serialized_size(encoding, size, secure_prefix_);
@@ -624,14 +622,14 @@ RtpsUdpReceiveStrategy::sec_submsg_to_octets(DDS::OctetSeq& encoded,
     if (kind == RTPS::DATA || kind == RTPS::DATA_FRAG) {
       size += secure_sample_.sample_->size();
     }
-    align(size, submsg_align);
+    align(size, SMHDR_SZ);
   }
   serialized_size(encoding, size, postfix);
 
   ACE_Message_Block mb(size);
   Serializer ser(&mb, encoding);
   ser << secure_prefix_;
-  ser.align_r(submsg_align);
+  ser.align_r(SMHDR_SZ);
 
   for (size_t i = 0; i < secure_submessages_.size(); ++i) {
     ser << secure_submessages_[i];
@@ -642,7 +640,7 @@ RtpsUdpReceiveStrategy::sec_submsg_to_octets(DDS::OctetSeq& encoded,
       ser.write_octet_array(sample_bytes,
                             static_cast<unsigned int>(secure_sample_.sample_->length()));
     }
-    ser.align_r(submsg_align);
+    ser.align_r(SMHDR_SZ);
   }
   ser << postfix;
 

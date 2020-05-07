@@ -1080,9 +1080,9 @@ bool Qos_Helper::valid(const DDS::DataRepresentationQosPolicy& qos)
   for (CORBA::ULong i = 0; i < count; ++i) {
     CORBA::Short value = qos.value[i];
     switch (value) {
-    case DDS::XCDR_DATA_REPRESENTATION: // fallthrough
-    case DDS::XML_DATA_REPRESENTATION: // fallthrough
-    case DDS::XCDR2_DATA_REPRESENTATION: // fallthrough
+    case DDS::XCDR_DATA_REPRESENTATION:
+    case DDS::XML_DATA_REPRESENTATION:
+    case DDS::XCDR2_DATA_REPRESENTATION:
     case UNALIGNED_CDR_DATA_REPRESENTATION:
       break;
 

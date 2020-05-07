@@ -898,7 +898,7 @@ namespace {
     const Encoding encoding(Encoding::KIND_CDR_PARAMLIST);
     size_t size = 0;
     for (CORBA::ULong i = 0; i < subm.length(); ++i) {
-      encoding.align(size);
+      encoding.align(size, RTPS::SMHDR_SZ);
       serialized_size(encoding, size, subm[i]);
     }
 
@@ -907,7 +907,7 @@ namespace {
     for (CORBA::ULong i = 0; i < subm.length(); ++i) {
       Serializer ser(hdr, encoding);
       ser << subm[i];
-      ser.align_w(encoding.max_align());
+      ser.align_w(RTPS::SMHDR_SZ);
     }
     return hdr;
   }

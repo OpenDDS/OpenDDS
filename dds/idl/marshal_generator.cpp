@@ -972,7 +972,7 @@ namespace {
   };
 
   /**
-   * Convert an compiler Encoding value and to the string name of the corresponding
+   * Convert a compiler Encoding value to the string name of the corresponding
    * OpenDDS::DCPS::Encoding::XcdrVersion.
    */
   string encoding_to_xcdr_version(Encoding encoding) {
@@ -2052,7 +2052,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       max_serialized_size.endArgs();
       if (is_bounded_struct) {
         be_global->impl_ <<
-          "  switch(encoding.xcdr_version()) {\n";
+          "  switch (encoding.xcdr_version()) {\n";
         for (unsigned e = 0; e < encoding_count; ++e) {
           const Encoding encoding = static_cast<Encoding>(e);
           size_t size = 0;
@@ -2111,7 +2111,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
 
       if (bounded_key) { // Only generate a size if the key is bounded
         be_global->impl_ <<
-          "  switch(encoding.xcdr_version()) {\n";
+          "  switch (encoding.xcdr_version()) {\n";
         for (unsigned e = 0; e < encoding_count; ++e) {
           const Encoding encoding = static_cast<Encoding>(e);
           size_t size = 0;
@@ -2141,7 +2141,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       serialized_size.endArgs();
 
       be_global->impl_ <<
-        "  switch(encoding.xcdr_version()) {\n";
+        "  switch (encoding.xcdr_version()) {\n";
       for (unsigned e = 0; e < encoding_count; ++e) {
         string expr, intro;
         const Encoding encoding = static_cast<Encoding>(e);
@@ -2552,7 +2552,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
     if (is_bounded) {
       be_global->impl_ <<
-        "  switch(encoding.xcdr_version()) {\n";
+        "  switch (encoding.xcdr_version()) {\n";
       for (unsigned e = 0; e < encoding_count; ++e) {
         const Encoding encoding = static_cast<Encoding>(e);
         size_t size = 0;
@@ -2580,7 +2580,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
     if (has_key) {
       be_global->impl_ <<
-        "  switch(encoding.xcdr_version()) {\n";
+        "  switch (encoding.xcdr_version()) {\n";
       for (unsigned e = 0; e < encoding_count; ++e) {
         const Encoding encoding = static_cast<Encoding>(e);
         size_t size = 0;

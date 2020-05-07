@@ -4280,7 +4280,7 @@ Sedp::populate_transport_locator_sequence(DCPS::TransportLocatorSeq*& rTls,
       const Encoding encoding(Encoding::KIND_CDR_PLAIN, ENDIAN_BIG);
       size_t size = 0;
       DCPS::serialized_size(encoding, size, locs);
-      DCPS::max_serialized_size_boolean(encoding,size);
+      DCPS::max_serialized_size_boolean(encoding, size);
 
       ACE_Message_Block mb_locator(size);
       Serializer ser_loc(&mb_locator, encoding);

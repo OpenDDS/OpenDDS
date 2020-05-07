@@ -59,8 +59,8 @@ public:
     {
     }
 
-    EncodingMode(Encoding::Kind kind, bool native_endianness)
-    : encoding_(kind, native_endianness)
+    EncodingMode(Encoding::Kind kind, bool swap_the_bytes)
+    : encoding_(kind, swap_the_bytes)
     , valid_(encoding_.kind() != Encoding::KIND_UNKNOWN)
     , bounded_(MarshalTraitsType::gen_is_bounded_size())
     , buffer_size_(0)
@@ -366,10 +366,10 @@ public:
         }
         break;
 
-      case Encoding::KIND_CDR_PLAIN: // fallthrough
-      case Encoding::KIND_CDR_PARAMLIST: // fallthrough
-      case Encoding::KIND_XCDR2_PLAIN: // fallthrough
-      case Encoding::KIND_XCDR2_PARAMLIST: // fallthrough
+      case Encoding::KIND_CDR_PLAIN:
+      case Encoding::KIND_CDR_PARAMLIST:
+      case Encoding::KIND_XCDR2_PLAIN:
+      case Encoding::KIND_XCDR2_PARAMLIST:
       case Encoding::KIND_XCDR2_DELIMITED:
         if (encap_kind == Encoding::KIND_UNKNOWN) {
           encap_kind = kind;
@@ -396,15 +396,15 @@ public:
     }
 
     // Try to Setup Encoding Modes
-    const bool native_endianness = swap_bytes();
-    encapsulated_encoding_mode_ = EncodingMode(encap_kind, native_endianness);
-    non_encapsulated_encoding_mode_ = EncodingMode(nonencap_kind, native_endianness);
+    const bool swap_the_bytes = swap_bytes();
+    encapsulated_encoding_mode_ = EncodingMode(encap_kind, swap_the_bytes);
+    non_encapsulated_encoding_mode_ = EncodingMode(nonencap_kind, swap_the_bytes);
     if (!encapsulated_encoding_mode_.valid() &&
         !non_encapsulated_encoding_mode_.valid()) {
       if (::OpenDDS::DCPS::DCPS_debug_level) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
           ACE_TEXT("%CDataWriterImpl::setup_serialization: ")
-          ACE_TEXT("All allowed data representations are unsupported!\n"),
+          ACE_TEXT("None of allowed data representations are supported!\n"),
           TraitsType::type_name()));
       }
       return DDS::RETCODE_ERROR;

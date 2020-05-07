@@ -42,13 +42,13 @@ void Encoding::kind(Encoding::Kind value)
   kind_ = value;
 
   switch (value) {
-  case KIND_CDR_PARAMLIST: // fallthrough
+  case KIND_CDR_PARAMLIST:
   case KIND_CDR_PLAIN:
     alignment(ALIGN_CDR);
     break;
 
-  case KIND_XCDR2_PARAMLIST: // fallthrough
-  case KIND_XCDR2_DELIMITED: // fallthrough
+  case KIND_XCDR2_PARAMLIST:
+  case KIND_XCDR2_DELIMITED:
   case KIND_XCDR2_PLAIN:
     alignment(ALIGN_XCDR2);
     zero_init_padding(true);
@@ -137,11 +137,11 @@ ACE_INLINE
 Encoding::XcdrVersion Encoding::xcdr_version() const
 {
   switch (kind_) {
-  case KIND_CDR_PLAIN: // fallthrough
+  case KIND_CDR_PLAIN:
   case KIND_CDR_PARAMLIST:
     return XCDR1;
-  case KIND_XCDR2_PLAIN: // fallthrough
-  case KIND_XCDR2_PARAMLIST: // fallthrough
+  case KIND_XCDR2_PLAIN:
+  case KIND_XCDR2_PARAMLIST:
   case KIND_XCDR2_DELIMITED:
     return XCDR2;
   default:
@@ -165,11 +165,11 @@ ACE_INLINE
 bool Encoding::supported(Kind kind)
 {
   switch (kind) {
-  case KIND_CDR_PARAMLIST: // fallthrough
-  case KIND_CDR_PLAIN: // fallthrough
-  case KIND_XCDR2_PARAMLIST: // fallthrough
-  case KIND_XCDR2_DELIMITED: // fallthrough
-  case KIND_XCDR2_PLAIN: // fallthrough
+  case KIND_CDR_PARAMLIST:
+  case KIND_CDR_PLAIN:
+  case KIND_XCDR2_PARAMLIST:
+  case KIND_XCDR2_DELIMITED:
+  case KIND_XCDR2_PLAIN:
   case KIND_CDR_UNALIGNED:
     return true;
   default:
@@ -187,10 +187,10 @@ ACE_INLINE
 bool Encoding::has_endianness(Kind kind)
 {
   switch (kind) {
-  case KIND_CDR_PARAMLIST: // fallthrough
-  case KIND_CDR_PLAIN: // fallthrough
-  case KIND_XCDR2_PARAMLIST: // fallthrough
-  case KIND_XCDR2_DELIMITED: // fallthrough
+  case KIND_CDR_PARAMLIST:
+  case KIND_CDR_PLAIN:
+  case KIND_XCDR2_PARAMLIST:
+  case KIND_XCDR2_DELIMITED:
   case KIND_XCDR2_PLAIN:
     return true;
   default:
