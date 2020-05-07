@@ -674,7 +674,7 @@ namespace OpenDDS {
         RepoIdSet matched_endpoints_;
         SequenceNumber sequence_;
         RepoIdSet remote_expectant_opendds_associations_;
-        XTypes::TypeInformation type_info;
+        XTypes::TypeInformation type_info_;
 #ifdef OPENDDS_SECURITY
         bool have_ice_agent_info;
         ICE::AgentInfo ice_agent_info;
