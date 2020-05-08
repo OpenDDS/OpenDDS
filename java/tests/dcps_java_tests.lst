@@ -9,6 +9,7 @@
 # Paths are relative to $DDS_ROOT
 
 java/tests/hello/run_test.pl
+java/idl2jni/tests/union/run_test.pl
 java/tests/builtintopics/run_test.pl: !NO_BUILT_IN_TOPICS
 java/tests/complex_idl/run_test.pl
 java/tests/multirepo/run_test.pl
@@ -45,4 +46,3 @@ java/tests/messenger/both/run_test.pl
 java/tests/zerocopy/run_test.pl
 
 java/tests/participant_location/run_test.pl -noice: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE !IPV6
-
