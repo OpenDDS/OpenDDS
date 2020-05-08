@@ -10,6 +10,7 @@
 #include "transport/framework/TransportDefs.h"
 #include "Dynamic_Cached_Allocator_With_Overflow_T.h"
 #include "DataSampleHeader.h"
+#include "RcObject.h"
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/PoolAllocationBase.h"
 #include "dds/DCPS/RcHandle_T.h"
@@ -31,6 +32,7 @@ typedef Cached_Allocator_With_Overflow<DataSampleElement, ACE_Null_Mutex>
 class TransportSendListener;
 struct PublicationInstance;
 typedef RcHandle<PublicationInstance> PublicationInstance_rch;
+typedef WeakRcHandle<PublicationInstance> PublicationInstance_wrch;
 
 /**
 * Currently we contain entire messages in a single ACE_Message_Block
