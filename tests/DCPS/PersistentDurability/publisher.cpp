@@ -308,7 +308,7 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           printf("--pub------- Call  write 1st subject\n");
           fflush(stdout);
           writer->set_count(s_i_writer_threads * s_i_writer_msgs - 1);
-          writer->write_loop(s_i_writer_subj_1st, nullptr, nullptr, nullptr, 1);
+          writer->write_loop(s_i_writer_subj_1st, NULL, NULL, NULL, 1);
           printf("--pub------- After write 1st subject\n");
           fflush(stdout);
           local_show_instances(dw.in());

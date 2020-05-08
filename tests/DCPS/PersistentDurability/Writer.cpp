@@ -42,7 +42,7 @@ Writer::svc ()
     i_subject = s_i_subject++;
   }
 
-  this->write_loop(i_subject, nullptr, nullptr, nullptr, s_i_msg_cnt);
+  this->write_loop(i_subject, NULL, NULL, NULL, s_i_msg_cnt);
 
   ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::svc finished.\n")));
 
@@ -57,9 +57,9 @@ Writer::write_loop(int i_subject, char const *pc_from, char const *pc_subj, char
   static char const s_ac_subj[] = "Review";
   static char const s_ac_text[] = "Worst. Movie. Ever.";
 
-  if (nullptr == pc_from)  pc_from = s_ac_from;
-  if (nullptr == pc_subj)  pc_subj = s_ac_subj;
-  if (nullptr == pc_text)  pc_text = s_ac_text;
+  if (NULL == pc_from)  pc_from = s_ac_from;
+  if (NULL == pc_subj)  pc_subj = s_ac_subj;
+  if (NULL == pc_text)  pc_text = s_ac_text;
 
   try
   {
