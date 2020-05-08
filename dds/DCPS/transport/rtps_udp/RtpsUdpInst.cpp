@@ -33,8 +33,6 @@ RtpsUdpInst::RtpsUdpInst(const OPENDDS_STRING& name)
 #endif
   , use_multicast_(true)
   , ttl_(1)
-  , multicast_group_address_(7401, "239.255.0.2")
-  , multicast_group_address_str_("239.255.0.2:7401")
   , nak_depth_(0)
   , max_bundle_size_(TransportSendStrategy::UDP_MAX_MESSAGE_SIZE - RTPS::RTPSHDR_SZ) // default maximum bundled message size is max udp message size (see TransportStrategy) minus RTPS header
   , quick_reply_ratio_(0.1)
@@ -48,8 +46,13 @@ RtpsUdpInst::RtpsUdpInst(const OPENDDS_STRING& name)
   , rtps_relay_only_(false)
   , use_ice_(false)
   , opendds_discovery_guid_(GUID_UNKNOWN)
-{
-}
+  , multicast_group_address_(7401, "239.255.0.2")
+  , local_address_(u_short(0), "0.0.0.0")
+#ifdef ACE_HAS_IPV6
+  , ipv6_multicast_group_address_(7401, "FF03::2")
+  , ipv6_local_address_(u_short(0), "::")
+#endif
+{}
 
 TransportImpl_rch
 RtpsUdpInst::new_impl()
@@ -67,7 +70,8 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
   GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("local_address"),
                            local_address_s);
   if (!local_address_s.is_empty()) {
-    local_address(ACE_TEXT_ALWAYS_CHAR(local_address_s.c_str()));
+    ACE_INET_Addr addr(local_address_s.c_str());
+    local_address(addr);
   }
 
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("send_buffer_size"), this->send_buffer_size_, ACE_UINT32);
@@ -85,8 +89,8 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
       // Concatenate a port number if the user does not supply one.
       group_address_s += ACE_TEXT(":7401");
     }
-    multicast_group_address_.set(group_address_s.c_str());
-    multicast_group_address_str_ = ACE_TEXT_ALWAYS_CHAR(group_address_s.c_str());
+    ACE_INET_Addr addr(group_address_s.c_str());
+    multicast_group_address(addr);
   }
 
   GET_CONFIG_STRING_VALUE(cf, sect, ACE_TEXT("multicast_interface"),
@@ -195,34 +199,66 @@ RtpsUdpInst::populate_locator(TransportLocator& info, ConnectionInfoFlags flags)
     RTPS::address_to_bytes(locators[idx].address,
                            this->multicast_group_address_);
   }
+#ifdef ACE_HAS_IPV6
+  if ((flags & CONNINFO_MULTICAST) && use_multicast_ && ipv6_multicast_group_address_ != ACE_INET_Addr()) {
+    idx = locators.length();
+    locators.length(idx + 1);
+    locators[idx].kind = address_to_kind(this->ipv6_multicast_group_address_);
+    locators[idx].port = this->ipv6_multicast_group_address_.get_port_number();
+    RTPS::address_to_bytes(locators[idx].address,
+                           this->ipv6_multicast_group_address_);
+  }
+#endif
 
-  //if local_address_string is empty, or only the port has been set
-  //need to get interface addresses to populate into the locator
   if (flags & CONNINFO_UNICAST) {
-    if (local_address_string().empty() ||
-        local_address_string().rfind(':') == 0) {
-      typedef OPENDDS_VECTOR(ACE_INET_Addr) AddrVector;
-      AddrVector addrs;
-      if (TheServiceParticipant->default_address ().empty ()) {
+    if (local_address() != ACE_INET_Addr()) {
+      if (local_address().is_any()) {
+        typedef OPENDDS_VECTOR(ACE_INET_Addr) AddrVector;
+        AddrVector addrs;
         get_interface_addrs(addrs);
+        for (AddrVector::iterator adr_it = addrs.begin(); adr_it != addrs.end(); ++adr_it) {
+          if (adr_it->get_type() == AF_INET) {
+            idx = locators.length();
+            locators.length(idx + 1);
+            locators[idx].kind = address_to_kind(*adr_it);
+            locators[idx].port = local_address().get_port_number();
+            RTPS::address_to_bytes(locators[idx].address, *adr_it);
+          }
+        }
       } else {
-        addrs.push_back (ACE_INET_Addr (static_cast<u_short> (0), TheServiceParticipant->default_address().c_str()));
-      }
-      for (AddrVector::iterator adr_it = addrs.begin(); adr_it != addrs.end(); ++adr_it) {
         idx = locators.length();
         locators.length(idx + 1);
-        locators[idx].kind = address_to_kind(*adr_it);
+        locators[idx].kind = address_to_kind(local_address());
         locators[idx].port = local_address().get_port_number();
-        RTPS::address_to_bytes(locators[idx].address, *adr_it);
+        RTPS::address_to_bytes(locators[idx].address,
+                               local_address());
       }
-    } else {
-      idx = locators.length();
-      locators.length(idx + 1);
-      locators[idx].kind = address_to_kind(local_address());
-      locators[idx].port = local_address().get_port_number();
-      RTPS::address_to_bytes(locators[idx].address,
-                             local_address());
     }
+#ifdef ACE_HAS_IPV6
+    if (ipv6_local_address() != ACE_INET_Addr()) {
+      if (ipv6_local_address().is_any()) {
+        typedef OPENDDS_VECTOR(ACE_INET_Addr) AddrVector;
+        AddrVector addrs;
+        get_interface_addrs(addrs);
+        for (AddrVector::iterator adr_it = addrs.begin(); adr_it != addrs.end(); ++adr_it) {
+          if (adr_it->get_type() == AF_INET6) {
+            idx = locators.length();
+            locators.length(idx + 1);
+            locators[idx].kind = address_to_kind(*adr_it);
+            locators[idx].port = ipv6_local_address().get_port_number();
+            RTPS::address_to_bytes(locators[idx].address, *adr_it);
+          }
+        }
+      } else {
+        idx = locators.length();
+        locators.length(idx + 1);
+        locators[idx].kind = address_to_kind(ipv6_local_address());
+        locators[idx].port = ipv6_local_address().get_port_number();
+        RTPS::address_to_bytes(locators[idx].address,
+                               ipv6_local_address());
+      }
+    }
+#endif
   }
 
   info.transport_type = "rtps_udp";
@@ -242,34 +278,6 @@ RtpsUdpInst::get_blob(const TransportLocatorSeq& trans_info) const
 
   return 0;
 }
-
-#ifdef OPENDDS_SECURITY
-
-ICE::AddressListType
-RtpsUdpInst::host_addresses() const {
-  ICE::AddressListType addresses;
-
-  //if local_address_string is empty, or only the port has been set
-  //need to get interface addresses to populate into the locator
-  if (this->local_address_string().empty() ||
-      this->local_address_string().rfind(':') == 0) {
-    if (TheServiceParticipant->default_address ().empty ()) {
-      get_interface_addrs(addresses);
-    } else {
-      addresses.push_back (ACE_INET_Addr (static_cast<u_short> (0), TheServiceParticipant->default_address().c_str()));
-    }
-  } else {
-    addresses.push_back(this->local_address());
-  }
-
-  for (ICE::AddressListType::iterator pos = addresses.begin(), limit = addresses.end(); pos != limit; ++pos) {
-    pos->set_port_number(this->local_address().get_port_number());
-  }
-
-  return addresses;
-}
-
-#endif
 
 void
 RtpsUdpInst::update_locators(const RepoId& remote_id,

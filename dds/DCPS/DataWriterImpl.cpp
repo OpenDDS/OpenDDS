@@ -689,7 +689,7 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
         set_status_changed_flag(DDS::PUBLICATION_MATCHED_STATUS, true);
 
         DDS::DataWriterListener_var listener =
-          this->listener_for(DDS::SUBSCRIPTION_MATCHED_STATUS);
+          this->listener_for(DDS::PUBLICATION_MATCHED_STATUS);
 
         if (!CORBA::is_nil(listener.in())) {
           listener->on_publication_matched(this, this->publication_match_status_);

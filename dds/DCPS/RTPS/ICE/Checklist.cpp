@@ -23,8 +23,6 @@ namespace ICE {
 using OpenDDS::DCPS::MonotonicTimePoint;
 using OpenDDS::DCPS::TimeDuration;
 
-const ACE_UINT32 PEER_REFLEXIVE_PRIORITY = (110 << 24) + (65535 << 8) + ((256 - 1) << 0);  // No local preference, component 1.
-
 CandidatePair::CandidatePair(const Candidate& a_local,
                              const Candidate& a_remote,
                              bool a_local_is_controlling,
@@ -63,7 +61,9 @@ ConnectivityCheck::ConnectivityCheck(const CandidatePair& a_candidate_pair,
   request_.class_ = STUN::REQUEST;
   request_.method = STUN::BINDING;
   request_.generate_transaction_id();
-  request_.append_attribute(STUN::make_priority(PEER_REFLEXIVE_PRIORITY));
+
+  // No local preference, component 1.
+  request_.append_attribute(STUN::make_priority((110 << 24) + (local_priority(a_candidate_pair.local.address) << 8) + ((256 - 1) << 0)));
 
   if (a_candidate_pair.local_is_controlling) {
     request_.append_attribute(STUN::make_ice_controlling(a_ice_tie_breaker));
@@ -114,7 +114,14 @@ void Checklist::generate_candidate_pairs()
     AgentInfo::CandidatesType::const_iterator remote_pos = remote_agent_info_.candidates.begin();
     AgentInfo::CandidatesType::const_iterator remote_limit = remote_agent_info_.candidates.end();
     for (; remote_pos != remote_limit; ++remote_pos) {
+#if ACE_HAS_IPV6
+      if ((local_pos->address.is_linklocal() && remote_pos->address.is_linklocal()) ||
+          (!local_pos->address.is_linklocal() && !remote_pos->address.is_linklocal())) {
+        frozen_.push_back(CandidatePair(*local_pos, *remote_pos, local_is_controlling_));
+      }
+#else
       frozen_.push_back(CandidatePair(*local_pos, *remote_pos, local_is_controlling_));
+#endif
     }
   }
 
@@ -733,7 +740,7 @@ void Checklist::execute(const MonotonicTimePoint& a_now)
     const bool before = nominated_is_live_;
     nominated_is_live_ = (a_now - last_indication_) < endpoint_manager_->agent_impl->get_configuration().nominated_ttl();
     if (before && !nominated_is_live_) {
-      endpoint_manager_->ice_disconnect(guids_);
+      endpoint_manager_->ice_disconnect(guids_, nominated_->remote.address);
     } else if (!before && nominated_is_live_) {
       endpoint_manager_->ice_connect(guids_, nominated_->remote.address);
     }

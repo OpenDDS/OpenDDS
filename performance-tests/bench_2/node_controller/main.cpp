@@ -519,14 +519,17 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
     ACE_Reactor::instance()->run_reactor_event_loop();
   });
-  ACE_Process_Manager process_manager(ACE_Process_Manager::DEFAULT_SIZE, ACE_Reactor::instance());
-  int exit_status = 0;
-  while (true) {
-    exit_status = run_cycle(name, process_manager, participant,
-      status_writer_impl, config_reader_impl, report_writer_impl);
 
-    if (run_mode == RunMode::one_shot || (run_mode == RunMode::daemon_exit_on_error && exit_status != 0)) {
-      break;
+  int exit_status = 0;
+  {
+    ACE_Process_Manager process_manager(ACE_Process_Manager::DEFAULT_SIZE, ACE_Reactor::instance());
+    while (true) {
+      exit_status = run_cycle(name, process_manager, participant,
+        status_writer_impl, config_reader_impl, report_writer_impl);
+
+      if (run_mode == RunMode::one_shot || (run_mode == RunMode::daemon_exit_on_error && exit_status != 0)) {
+        break;
+      }
     }
   }
 

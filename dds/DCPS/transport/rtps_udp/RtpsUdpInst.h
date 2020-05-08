@@ -34,8 +34,6 @@ public:
 
   bool use_multicast_;
   unsigned char ttl_;
-  ACE_INET_Addr multicast_group_address_;
-  OPENDDS_STRING multicast_group_address_str_;
   OPENDDS_STRING multicast_interface_;
 
   size_t nak_depth_;
@@ -56,23 +54,47 @@ public:
   virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info, ConnectionInfoFlags flags) const;
   const TransportBLOB* get_blob(const OpenDDS::DCPS::TransportLocatorSeq& trans_info) const;
 
-  OPENDDS_STRING local_address_string() const { return local_address_config_str_; }
+  ACE_INET_Addr multicast_group_address() const { return multicast_group_address_; }
+  void multicast_group_address(const ACE_INET_Addr& addr)
+  {
+    if (addr.get_type() == AF_INET) {
+      multicast_group_address_ = addr;
+    } else {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsUdpInst::multicast_group_address set failed because address family is not AF_INET\n")));
+    }
+  }
+
   ACE_INET_Addr local_address() const { return local_address_; }
-  void local_address(const char* str)
+  void local_address(const ACE_INET_Addr& addr)
   {
-    local_address_config_str_ = str;
-    local_address_.set(str);
+    if (addr.get_type() == AF_INET) {
+      local_address_ = addr;
+    } else {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsUdpInst::local_address set failed because address family is not AF_INET\n")));
+    }
   }
-  void local_address(u_short port_number, const char* host_name)
+
+#ifdef ACE_HAS_IPV6
+  ACE_INET_Addr ipv6_multicast_group_address() const { return ipv6_local_address_; }
+  void ipv6_multicast_group_address(const ACE_INET_Addr& addr)
   {
-    local_address_config_str_ = host_name;
-    local_address_config_str_ += ":" + to_dds_string(port_number);
-    local_address_.set(port_number, host_name);
+    if (addr.get_type() == AF_INET6) {
+      ipv6_multicast_group_address_ = addr;
+    } else {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsUdpInst::ipv6_multicast_group_address set failed because address family is not AF_INET6\n")));
+    }
   }
-  void local_address_set_port(u_short port_number) {
-    local_address_.set_port_number(port_number);
-    set_port_in_addr_string(local_address_config_str_, port_number);
+
+  ACE_INET_Addr ipv6_local_address() const { return ipv6_local_address_; }
+  void ipv6_local_address(const ACE_INET_Addr& addr)
+  {
+    if (addr.get_type() == AF_INET6) {
+      ipv6_local_address_ = addr;
+    } else {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsUdpInst::ipv6_local_address set failed because address family is not AF_INET6\n")));
+    }
   }
+#endif
 
   /// Relay address and stun server address may change, these use a mutex
   ///{
@@ -103,16 +125,17 @@ private:
   TransportReceiveListener_rch opendds_discovery_default_listener_;
   RepoId opendds_discovery_guid_;
 
+  ACE_INET_Addr multicast_group_address_;
   ACE_INET_Addr local_address_;
-  OPENDDS_STRING local_address_config_str_;
+#ifdef ACE_HAS_IPV6
+  ACE_INET_Addr ipv6_multicast_group_address_;
+  ACE_INET_Addr ipv6_local_address_;
+#endif
+
   ACE_INET_Addr rtps_relay_address_;
   mutable ACE_SYNCH_MUTEX rtps_relay_config_lock_;
   ACE_INET_Addr stun_server_address_;
   mutable ACE_SYNCH_MUTEX stun_server_config_lock_;
-
-#ifdef OPENDDS_SECURITY
-  ICE::AddressListType host_addresses() const;
-#endif
 };
 
 inline void RtpsUdpInst::rtps_relay_address(const ACE_INET_Addr& address)

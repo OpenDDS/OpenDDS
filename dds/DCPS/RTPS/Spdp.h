@@ -154,13 +154,19 @@ public:
 
   u_short get_sedp_port() const { return sedp_.local_address().get_port_number(); }
 
+#ifdef ACE_HAS_IPV6
+  u_short get_ipv6_spdp_port() const { return tport_ ? tport_->ipv6_uni_port_ : 0; }
+
+  u_short get_ipv6_sedp_port() const { return sedp_.ipv6_local_address().get_port_number(); }
+#endif
+
   void sedp_rtps_relay_address(const ACE_INET_Addr& address) { sedp_.rtps_relay_address(address); }
 
   void sedp_stun_server_address(const ACE_INET_Addr& address) { sedp_.stun_server_address(address); }
 
   BuiltinEndpointSet_t available_builtin_endpoints() const { return available_builtin_endpoints_; }
 
-  ICE::Endpoint* get_ice_endpoint();
+  ICE::Endpoint* get_ice_endpoint_if_added();
 
   ParticipantData_t build_local_pdata(
 #ifdef OPENDDS_SECURITY
@@ -213,6 +219,8 @@ private:
     explicit SpdpTransport(Spdp* outer);
     ~SpdpTransport();
 
+    const ACE_SOCK_Dgram& choose_recv_socket(ACE_HANDLE h) const;
+
     virtual int handle_input(ACE_HANDLE h);
     virtual int handle_exception(ACE_HANDLE fd = ACE_INVALID_HANDLE);
 
@@ -222,10 +230,14 @@ private:
     void write_i(WriteFlags flags);
     void write_i(const DCPS::RepoId& guid, WriteFlags flags);
     void send(WriteFlags flags);
+    const ACE_SOCK_Dgram& choose_send_socket(const ACE_INET_Addr& addr) const;
     void send(const ACE_INET_Addr& addr);
     void close();
     void dispose_unregister();
     bool open_unicast_socket(u_short port_common, u_short participant_id);
+#ifdef ACE_HAS_IPV6
+    bool open_unicast_ipv6_socket(u_short port);
+#endif
     void acknowledge();
 
     void join_multicast_group(const DCPS::NetworkInterface& nic,
@@ -244,7 +256,7 @@ private:
     ACE_INET_Addr stun_server_address() const;
   #ifndef DDS_HAS_MINIMUM_BIT
     void ice_connect(const ICE::GuidSetType& guids, const ACE_INET_Addr& addr);
-    void ice_disconnect(const ICE::GuidSetType& guids);
+    void ice_disconnect(const ICE::GuidSetType& guids, const ACE_INET_Addr& addr);
   #endif
 #endif
 
@@ -258,8 +270,15 @@ private:
     ACE_SOCK_Dgram unicast_socket_;
     OPENDDS_STRING multicast_interface_;
     ACE_INET_Addr multicast_address_;
-    OPENDDS_STRING multicast_address_str_;
     ACE_SOCK_Dgram_Mcast multicast_socket_;
+#ifdef ACE_HAS_IPV6
+    u_short ipv6_uni_port_;
+    ACE_SOCK_Dgram unicast_ipv6_socket_;
+    OPENDDS_STRING multicast_ipv6_interface_;
+    ACE_INET_Addr multicast_ipv6_address_;
+    ACE_SOCK_Dgram_Mcast multicast_ipv6_socket_;
+    OPENDDS_SET(OPENDDS_STRING) joined_ipv6_interfaces_;
+#endif
     OPENDDS_SET(OPENDDS_STRING) joined_interfaces_;
     OPENDDS_SET(ACE_INET_Addr) send_addrs_;
     ACE_Message_Block buff_, wbuff_;
@@ -281,22 +300,25 @@ private:
     void send_relay_beacon(const DCPS::MonotonicTimePoint& now);
     DCPS::RcHandle<SpdpPeriodic> relay_beacon_;
     bool network_is_unreachable_;
+    bool ice_endpoint_added_;
   } *tport_;
 
   struct ChangeMulticastGroup : public DCPS::JobQueue::Job {
     enum CmgAction {CMG_JOIN, CMG_LEAVE};
 
     ChangeMulticastGroup(DCPS::RcHandle<SpdpTransport> tport,
-                         const DCPS::NetworkInterface& nic, CmgAction action)
+                         const DCPS::NetworkInterface& nic, CmgAction action,
+                         bool all_interfaces = false)
       : tport_(tport)
       , nic_(nic)
       , action_(action)
+      , all_interfaces_(all_interfaces)
     {}
 
     void execute()
     {
       if (action_ == CMG_JOIN) {
-        tport_->join_multicast_group(nic_);
+        tport_->join_multicast_group(nic_, all_interfaces_);
       } else {
         tport_->leave_multicast_group(nic_);
       }
@@ -305,6 +327,7 @@ private:
     DCPS::RcHandle<SpdpTransport> tport_;
     DCPS::NetworkInterface nic_;
     CmgAction action_;
+    bool all_interfaces_;
   };
 
 #ifdef OPENDDS_SECURITY

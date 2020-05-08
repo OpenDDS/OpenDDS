@@ -234,7 +234,8 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       host = "127.0.0.1";
     }
 #endif
-    rtps_inst->local_address(port, ACE_TEXT_ALWAYS_CHAR(host.c_str()));
+    ACE_INET_Addr addr(port, ACE_TEXT_ALWAYS_CHAR(host.c_str()));
+    rtps_inst->local_address(addr);
     rtps_inst->datalink_release_delay_ = 0;
 
     TransportConfig_rch cfg = TheTransportRegistry->create_config("cfg");
