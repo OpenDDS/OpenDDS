@@ -10,29 +10,130 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {
 
-  // Assuming caller always passes objects of structure or union type
-  bool TypeAssignability::assignable(const TypeObject& ta, const TypeObject& tb) const
+  bool TypeAssignability::assignable(const TypeObject& ta,
+                                     const TypeObject& tb) const
   {
-    switch (ta.kind) {
-    case TK_STRUCTURE:
-      return assignable_struct(ta, tb);
-    case TK_UNION:
-      return assignable_union(ta, tb);
-    default:
-      return false;
+    if (EK_MINIMAL == ta.kind && EK_MINIMAL == tb.kind) {
+      switch (ta.minimal.kind) {
+      case TK_ALIAS:
+        return assignable_alias(ta.minimal, tb.minimal);
+      case TK_ANNOTATION:
+        return assignable_annotation(ta.minimal, tb.minimal);
+      case TK_STRUCTURE:
+        return assignable_struct(ta.minimal, tb.minimal);
+      case TK_UNION:
+        return assignable_union(ta.minimal, tb.minimal);
+      case TK_BITSET:
+        return assignable_bitset(ta.minimal, tb.minimal);
+      case TK_SEQUENCE:
+        return assignable_sequence(ta.minimal, tb.minimal);
+      case TK_ARRAY:
+        return assignable_sequence(ta.minimal, tb.minimal);
+      case TK_MAP:
+        return assignable_map(ta.minimal, tb.minimal);
+      case TK_ENUM:
+        return assignable_enum(ta.minimal, tb.minimal);
+      case TK_BITMASK:
+        return assignable_bitmask(ta.minimal, tb.minimal);
+      default:
+        return assignable_extended(ta.minimal, tb.minimal);
+      }
     }
+
+    return false;
   }
 
-  bool TypeAssignability::assignable_struct(const TypeObject& ta, const TypeObject& tb) const
+  bool TypeAssignability::assignable_alias(const MinimalTypeObject& ta,
+                                           const MinimalTypeObject& tb) const
   {
-    
+    return false; // TODO: Implement this
   }
   
-  bool TypeAssignability::assignable_union(const TypeObject& ta, const TypeObject& tb) const
+  bool TypeAssignability::assignable_annotation(const MinimalTypeObject& ta,
+                                                const MinimalTypeObject& tb) const
   {
+    return false; // TODO: Implement this
+  }
+
+  bool TypeAssignability::assignable_struct(const MinimalTypeObject& ta,
+                                            const MinimalTypeObject& tb) const
+  {
+    return false; // TODO: Implement this
   }
   
-  bool TypeAssignability::assignable_primitive(const TypeIdentifier& ta, const TypeIdentifier& tb) const
+  bool TypeAssignability::assignable_union(const MinimalTypeObject& ta,
+                                           const MinimalTypeObject& tb) const
+  {
+    if (TK_UNION != tb.kind) {
+      return false;
+    }
+
+    // Extensibility kind must match
+    TypeFlag extensibility_mask = IS_FINAL | IS_APPENDABLE | IS_MUTABLE;
+    if (ta.union_type.union_flags && extensibility_mask !=
+        tb.union_type.union_flags && extensibility_mask) {
+      return false;
+    }
+
+    // Discriminator type must be strongly assignable
+    ACE_CDR::Octet a_disc = ta.union_type.discriminator.common.type_id->kind;
+    ACE_CDR::Octet b_disc = tb.union_type.discriminator.common.type_id->kind;
+    if ((TK_BOOLEAN == a_disc || TK_BYTE == a_disc || TK_INT16 == a_disc ||
+         TK_INT32 == a_disc || TK_INT64 == a_disc || TK_UINT16 == a_disc ||
+         TK_UINT32 == a_disc || TK_UINT64 == a_disc || TK_INT8 == a_disc ||
+         TK_UINT8 == a_disc || TK_CHAR8 == a_disc || TK_CHAR16 == a_disc) &&
+        a_disc != b_disc) {
+      return false;
+    }
+
+    return true;
+  }
+
+  bool TypeAssignability::assignable_bitset(const MinimalTypeObject& ta,
+                                            const MinimalTypeObject& tb) const
+  {
+    return false; // TODO: Implement this
+  }
+
+  bool TypeAssignability::assignable_sequence(const MinimalTypeObject& ta,
+                                              const MinimalTypeObject& tb) const
+  {
+    return false; // TODO: Implement this
+  }
+
+  bool TypeAssignability::assignable_array(const MinimalTypeObject& ta,
+                                           const MinimalTypeObject& tb) const
+  {
+    return false; // TODO: Implement this
+  }
+
+  bool TypeAssignability::assignable_map(const MinimalTypeObject& ta,
+                                         const MinimalTypeObject& tb) const
+  {
+    return false; // TODO: Implement this
+  }
+
+  bool TypeAssignability::assignable_enum(const MinimalTypeObject& ta,
+                                          const MinimalTypeObject& tb) const
+  {
+    return false; // TODO: Implement this
+  }
+
+  bool TypeAssignability::assignable_bitmask(const MinimalTypeObject& ta,
+                                             const MinimalTypeObject& tb) const
+  {
+    return false; // TODO: Implement this
+  }
+
+  bool TypeAssignability::assignable_extended(const MinimalTypeObject& ta,
+                                              const MinimalTypeObject& tb) const
+  {
+    return false; // Reserved for future extensibility
+  }
+
+
+  bool TypeAssignability::assignable_primitive(const TypeIdentifier& ta,
+                                               const TypeIdentifier& tb) const
   {
     if (ta.kind == tb.kind) {
       return true;
@@ -81,7 +182,8 @@ namespace XTypes {
     return false;
   }
 
-  bool TypeAssignability::assignable_string(const TypeIdentifier& ta, const TypeIdentifier& tb) const
+  bool TypeAssignability::assignable_string(const TypeIdentifier& ta,
+                                            const TypeIdentifier& tb) const
   {
     if (TI_STRING8_SMALL == ta.kind || TI_STRING8_LARGE == ta.kind) {
       if (TI_STRING8_SMALL == tb.kind || TI_STRING8_LARGE == tb.kind) {

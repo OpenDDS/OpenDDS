@@ -18,8 +18,29 @@ namespace XTypes {
     bool assignable(const TypeObject& ta, const TypeObject& tb) const;
 
   private:
-    bool assignable_struct(const TypeObject& ta, const TypeObject& tb) const;
-    bool assignable_union(const TypeObject& ta, const TypeObject& tb) const;
+    bool assignable_alias(const MinimalTypeObject& ta,
+                          const MinimalTypeObject& tb) const;
+    bool assignable_annotation(const MinimalTypeObject& ta,
+                               const MinimalTypeObject& tb) const;
+    bool assignable_struct(const MinimalTypeObject& ta,
+                           const MinimalTypeObject& tb) const;
+    bool assignable_union(const MinimalTypeObject& ta,
+                          const MinimalTypeObject& tb) const;
+    bool assignable_bitset(const MinimalTypeObject& ta,
+                           const MinimalTypeObject& tb) const;
+    bool assignable_sequence(const MinimalTypeObject& ta,
+                             const MinimalTypeObject& tb) const;
+    bool assignable_array(const MinimalTypeObject& ta,
+                          const MinimalTypeObject& tb) const;
+    bool assignable_map(const MinimalTypeObject& ta,
+                        const MinimalTypeObject& tb) const;
+    bool assignable_enum(const MinimalTypeObject& ta,
+                         const MinimalTypeObject& tb) const;
+    bool assignable_bitmask(const MinimalTypeObject& ta,
+                            const MinimalTypeObject& tb) const;
+    bool assignable_extended(const MinimalTypeObject& ta,
+                             const MinimalTypeObject& tb) const;
+
     bool assignable_primitive(const TypeIdentifier& ta, const TypeIdentifier& tb) const;
     bool assignable_string(const TypeIdentifier& ta, const TypeIdentifier& tb) const;
   };
