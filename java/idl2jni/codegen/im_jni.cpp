@@ -19,9 +19,9 @@
 
 using namespace std;
 
-string idl_mapping_jni::scoped(UTL_ScopedName *name)
+string idl_mapping_jni::scoped(UTL_ScopedName *name, bool omit_local)
 {
-  return scoped_helper(name, "::");
+  return scoped_helper(name, "::", omit_local);
 }
 
 string idl_mapping_jni::taoType(AST_Type *decl)
@@ -1680,14 +1680,10 @@ bool idl_mapping_jni::gen_union(UTL_ScopedName *name,
 
         //for the "toJava" side, use actual enumerators instead of ints
         if (ul->label_val()->ev()->et == AST_Expression::EV_enum) {
-          string enum_val = scoped(ul->label_val()->n()),
-                            enum_type = scoped(discriminator->name());
-          size_t idx = enum_type.rfind("::");
-
-          if (idx != string::npos) enum_type.resize(idx);
-
+          const string prefix = scoped(discriminator->name(), true);
+          UTL_ScopedName* n = ul->label_val()->n();
           branchesToJava +=
-            "    case " + enum_type + "::" + enum_val + ":\n";
+            "    case " + prefix + "::" + n->last_component()->get_string() + ":\n";
 
         } else {
           branchesToJava += "    case " + oss.str() + ":\n";
