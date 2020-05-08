@@ -963,10 +963,10 @@ DataLink::release_resources()
 }
 
 bool
-DataLink::is_target(const RepoId& remote_sub_id)
+DataLink::is_target(const RepoId& remote_id)
 {
   GuardType guard(this->pub_sub_maps_lock_);
-  return assoc_by_remote_.count(remote_sub_id);
+  return assoc_by_remote_.count(remote_id);
 }
 
 GUIDSeq*

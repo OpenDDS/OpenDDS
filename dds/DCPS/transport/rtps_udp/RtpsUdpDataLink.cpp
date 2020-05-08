@@ -109,7 +109,6 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
                      config.heartbeat_response_delay_)
   , heartbeat_(reactor_task->interceptor(), config.heartbeat_period_, *this, &RtpsUdpDataLink::send_heartbeats)
   , heartbeatchecker_(reactor_task->interceptor(), *this, &RtpsUdpDataLink::check_heartbeats)
-  , reader_associator_(reactor_task->interceptor(), *this, &RtpsUdpDataLink::send_association_ack_nacks)
   , relay_beacon_(reactor_task->interceptor(), *this, &RtpsUdpDataLink::send_relay_beacon)
   , held_data_delivery_handler_(this)
   , max_bundle_size_(config.max_bundle_size_)
@@ -282,42 +281,49 @@ RtpsUdpDataLink::RtpsWriter::remove_all_msgs()
 }
 
 bool
-RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
+RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket
+#ifdef ACE_HAS_IPV6
+                      , const ACE_SOCK_Dgram& ipv6_unicast_socket
+#endif
+                      )
 {
   unicast_socket_ = unicast_socket;
+#ifdef ACE_HAS_IPV6
+  ipv6_unicast_socket_ = ipv6_unicast_socket;
+#endif
 
   RtpsUdpInst& cfg = config();
-
-  NetworkConfigMonitor_rch ncm = TheServiceParticipant->network_config_monitor();
-
-  DCPS::NetworkInterfaces nics;
-  if (ncm) {
-    nics = ncm->add_listener(*this);
-  }
 
   if (cfg.use_multicast_) {
 #ifdef ACE_HAS_MAC_OSX
     multicast_socket_.opts(ACE_SOCK_Dgram_Mcast::OPT_BINDADDR_NO |
                            ACE_SOCK_Dgram_Mcast::DEFOPT_NULLIFACE);
+#ifdef ACE_HAS_IPV6
+    ipv6_multicast_socket_.opts(ACE_SOCK_Dgram_Mcast::OPT_BINDADDR_NO |
+                                ACE_SOCK_Dgram_Mcast::DEFOPT_NULLIFACE);
 #endif
-    if (ncm) {
-      for (DCPS::NetworkInterfaces::const_iterator pos = nics.begin(), limit = nics.end(); pos != limit; ++pos) {
-        join_multicast_group(*pos);
-      }
-    } else {
-      NetworkInterface nic(0, cfg.multicast_interface_, true);
-      nic.addresses.insert(ACE_INET_Addr());
-      join_multicast_group(nic, true);
-    }
+#endif
   }
 
-  if (!OpenDDS::DCPS::set_socket_multicast_ttl(unicast_socket_, cfg.ttl_)) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("RtpsUdpDataLink::open: ")
-                      ACE_TEXT("failed to set TTL: %d\n"),
-                      cfg.ttl_),
-                     false);
+  if (cfg.use_multicast_) {
+    if (!OpenDDS::DCPS::set_socket_multicast_ttl(unicast_socket_, cfg.ttl_)) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: ")
+                        ACE_TEXT("RtpsUdpDataLink::open: ")
+                        ACE_TEXT("failed to set TTL: %d\n"),
+                        cfg.ttl_),
+                       false);
+    }
+#ifdef ACE_HAS_IPV6
+    if (!OpenDDS::DCPS::set_socket_multicast_ttl(ipv6_unicast_socket_, cfg.ttl_)) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: ")
+                        ACE_TEXT("RtpsUdpDataLink::open: ")
+                        ACE_TEXT("failed to set TTL: %d\n"),
+                        cfg.ttl_),
+                       false);
+    }
+#endif
   }
 
   if (cfg.send_buffer_size_ > 0) {
@@ -333,6 +339,19 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
                         snd_size),
                        false);
     }
+#ifdef ACE_HAS_IPV6
+    if (ipv6_unicast_socket_.set_option(SOL_SOCKET,
+                                        SO_SNDBUF,
+                                        (void *) &snd_size,
+                                        sizeof(snd_size)) < 0
+        && errno != ENOTSUP) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: ")
+                        ACE_TEXT("RtpsUdpDataLink::open: failed to set the send buffer size to %d errno %m\n"),
+                        snd_size),
+                       false);
+    }
+#endif
   }
 
   if (cfg.rcv_buffer_size_ > 0) {
@@ -348,6 +367,19 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
                         rcv_size),
                        false);
     }
+#ifdef ACE_HAS_IPV6
+    if (ipv6_unicast_socket_.set_option(SOL_SOCKET,
+                                        SO_RCVBUF,
+                                        (void *) &rcv_size,
+                                        sizeof(int)) < 0
+        && errno != ENOTSUP) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: ")
+                        ACE_TEXT("RtpsUdpDataLink::open: failed to set the receive buffer size to %d errno %m \n"),
+                        rcv_size),
+                       false);
+    }
+#endif
   }
 
   send_strategy()->send_buffer(&multi_buff_);
@@ -361,11 +393,18 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
                      false);
   }
 
-  reader_associator_.enable(false, cfg.heartbeat_period_);
-
   if (cfg.rtps_relay_address() != ACE_INET_Addr() ||
       cfg.use_rtps_relay_) {
     relay_beacon_.enable(false, cfg.rtps_relay_beacon_period_);
+  }
+
+  NetworkConfigMonitor_rch ncm = TheServiceParticipant->network_config_monitor();
+  if (ncm) {
+    ncm->add_listener(*this);
+  } else {
+    NetworkInterface nic(0, cfg.multicast_interface_, true);
+    nic.addresses.insert(ACE_INET_Addr());
+    join_multicast_group(nic, true);
   }
 
   return true;
@@ -397,55 +436,114 @@ RtpsUdpDataLink::join_multicast_group(const DCPS::NetworkInterface& nic,
     return;
   }
 
-  if (joined_interfaces_.count(nic.name()) != 0 || nic.addresses.empty() || !nic.can_multicast()) {
-    return;
-  }
-
   if (!config().multicast_interface_.empty() && nic.name() != config().multicast_interface_) {
     return;
   }
 
-  if (DCPS::DCPS_debug_level > 3) {
-    ACE_DEBUG((LM_INFO,
-               ACE_TEXT("(%P|%t) RtpsUdpDataLink::join_multicast_group ")
-               ACE_TEXT("joining group %C %C:%hu\n"),
-               nic.name().c_str(),
-               config().multicast_group_address_str_.c_str(),
-               config().multicast_group_address_.get_port_number()));
+  if (nic.addresses.empty() || !nic.can_multicast()) {
+    return;
   }
 
-  if (0 == multicast_socket_.join(config().multicast_group_address_, 1, all_interfaces ? 0 : ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()))) {
-    joined_interfaces_.insert(nic.name());
-  } else {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::join_multicast_group(): ")
-               ACE_TEXT("ACE_SOCK_Dgram_Mcast::join failed: %m\n")));
+  if (joined_interfaces_.count(nic.name()) == 0 && nic.has_ipv4()) {
+    if (DCPS::DCPS_debug_level > 3) {
+      ACE_TCHAR buff[256];
+      config().multicast_group_address().addr_to_string(buff, 256);
+      ACE_DEBUG((LM_INFO,
+                 ACE_TEXT("(%P|%t) RtpsUdpDataLink::join_multicast_group ")
+                 ACE_TEXT("joining group %s on %C\n"),
+                 buff,
+                 nic.name().c_str()));
+    }
+
+    if (0 == multicast_socket_.join(config().multicast_group_address(), 1, all_interfaces ? 0 : ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()))) {
+      joined_interfaces_.insert(nic.name());
+
+      if (get_reactor()->register_handler(multicast_socket_.get_handle(),
+                                          receive_strategy(),
+                                          ACE_Event_Handler::READ_MASK) != 0) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) RtpsUdpDataLink::join_multicast_group failed to register multicast input handler\n")));
+      }
+    } else {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::join_multicast_group(): ")
+                 ACE_TEXT("ACE_SOCK_Dgram_Mcast::join failed: %m\n")));
+    }
   }
+
+#ifdef ACE_HAS_IPV6
+  if (ipv6_joined_interfaces_.count(nic.name()) == 0 && nic.has_ipv6()) {
+    if (DCPS::DCPS_debug_level > 3) {
+      ACE_TCHAR buff[256];
+      config().ipv6_multicast_group_address().addr_to_string(buff, 256);
+
+      ACE_DEBUG((LM_INFO,
+                 ACE_TEXT("(%P|%t) RtpsUdpDataLink::join_multicast_group ")
+                 ACE_TEXT("joining group %s on %C\n"),
+                 buff,
+                 nic.name().c_str()));
+    }
+
+    if (0 == ipv6_multicast_socket_.join(config().ipv6_multicast_group_address(), 1, all_interfaces ? 0 : ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()))) {
+      ipv6_joined_interfaces_.insert(nic.name());
+
+      if (get_reactor()->register_handler(ipv6_multicast_socket_.get_handle(),
+                                          receive_strategy(),
+                                          ACE_Event_Handler::READ_MASK) != 0) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) RtpsUdpDataLink::join_multicast_group failed to register ipv6 multicast input handler\n")));
+      }
+    } else {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::join_multicast_group(): ")
+                 ACE_TEXT("ACE_SOCK_Dgram_Mcast::join failed: %m\n")));
+    }
+  }
+#endif
 }
 
 void
 RtpsUdpDataLink::leave_multicast_group(const DCPS::NetworkInterface& nic)
 {
-  if (joined_interfaces_.count(nic.name()) == 0 || !nic.addresses.empty()) {
-    return;
+  if (joined_interfaces_.count(nic.name()) != 0 && !nic.has_ipv4()) {
+    if (DCPS::DCPS_debug_level > 3) {
+      ACE_TCHAR buff[256];
+      config().multicast_group_address().addr_to_string(buff, 256);
+      ACE_DEBUG((LM_INFO,
+                 ACE_TEXT("(%P|%t) RtpsUdpDataLink::leave_multicast_group ")
+                 ACE_TEXT("leaving group %s on %C\n"),
+                 buff,
+                 nic.name().c_str()));
+    }
+
+    if (0 == multicast_socket_.leave(config().multicast_group_address(), ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()))) {
+      joined_interfaces_.erase(nic.name());
+    } else {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::leave_multicast_group(): ")
+                 ACE_TEXT("ACE_SOCK_Dgram_Mcast::leave failed: %m\n")));
+    }
   }
 
-  if (DCPS::DCPS_debug_level > 3) {
-    ACE_DEBUG((LM_INFO,
-               ACE_TEXT("(%P|%t) RtpsUdpDataLink::leave_multicast_group ")
-               ACE_TEXT("leaving group %C %C:%hu\n"),
-               nic.name().c_str(),
-               config().multicast_group_address_str_.c_str(),
-               config().multicast_group_address_.get_port_number()));
-  }
+#ifdef ACE_HAS_IPV6
+  if (ipv6_joined_interfaces_.count(nic.name()) != 0 && !nic.has_ipv6()) {
+    if (DCPS::DCPS_debug_level > 3) {
+      ACE_TCHAR buff[256];
+      config().multicast_group_address().addr_to_string(buff, 256);
+      ACE_DEBUG((LM_INFO,
+                 ACE_TEXT("(%P|%t) RtpsUdpDataLink::leave_ipv6_multicast_group ")
+                 ACE_TEXT("leaving group %s on %C\n"),
+                 buff,
+                 nic.name().c_str()));
+    }
 
-  if (0 == multicast_socket_.leave(config().multicast_group_address_, ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()))) {
-    joined_interfaces_.erase(nic.name());
-  } else {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::leave_multicast_group(): ")
-               ACE_TEXT("ACE_SOCK_Dgram_Mcast::leave failed: %m\n")));
+    if (0 == ipv6_multicast_socket_.leave(config().ipv6_multicast_group_address(), ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()))) {
+      ipv6_joined_interfaces_.erase(nic.name());
+    } else {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::leave_ipv6_multicast_group(): ")
+                 ACE_TEXT("ACE_SOCK_Dgram_Mcast::leave failed: %m\n")));
+    }
   }
+#endif
 }
 
 void
@@ -825,10 +923,13 @@ RtpsUdpDataLink::stop_i()
   heartbeat_reply_.cancel();
   heartbeat_.disable_and_wait();
   heartbeatchecker_.disable_and_wait();
-  reader_associator_.disable_and_wait();
   relay_beacon_.disable_and_wait();
   unicast_socket_.close();
   multicast_socket_.close();
+#ifdef ACE_HAS_IPV6
+  ipv6_unicast_socket_.close();
+  ipv6_multicast_socket_.close();
+#endif
 }
 
 RcHandle<SingleSendBuffer>
@@ -2078,60 +2179,6 @@ RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(MetaSubmessageVec& meta_submessa
   }
 }
 
-void
-RtpsUdpDataLink::RtpsReader::gather_association_ack_nacks(MetaSubmessageVec& meta_submessages)
-{
-  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-  gather_association_ack_nacks_i(meta_submessages);
-}
-
-void
-RtpsUdpDataLink::RtpsReader::gather_association_ack_nacks_i(MetaSubmessageVec& meta_submessages)
-{
-  using namespace OpenDDS::RTPS;
-
-  RtpsUdpDataLink_rch link = link_.lock();
-
-  if (!link) {
-    return;
-  }
-
-  GuardType guard(link->strategy_lock_);
-  if (link->receive_strategy() == 0) {
-    return;
-  }
-
-  for (WriterInfoMap::iterator wi = remote_writers_.begin(); wi != remote_writers_.end(); ++wi) {
-    if (wi->second.first_valid_hb_ && wi->second.first_delivered_data_) {
-      MetaSubmessage meta_submessage(id_, wi->first);
-
-      AckNackSubmessage acknack = {
-        {
-          ACKNACK,
-          CORBA::Octet(FLAG_E),
-          0 /*length*/
-        },
-        id_.entityId,
-        wi->first.entityId,
-        { // SequenceNumberSet: acking bitmapBase - 1
-          {
-            0,
-            1
-          },
-          0,
-          LongSeq8()
-        },
-        {
-          ++wi->second.acknack_count_
-        }
-      };
-      meta_submessage.sm_.acknack_sm(acknack);
-
-      meta_submessages.push_back(meta_submessage);
-    }
-  }
-}
-
 #ifdef OPENDDS_SECURITY
 namespace {
   const ACE_INET_Addr BUNDLING_PLACEHOLDER;
@@ -2275,7 +2322,7 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(
     for (DestMetaSubmessageMap::iterator dest_it = addr_it->second.begin(); dest_it != addr_it->second.end(); ++dest_it) {
       for (MetaSubmessageIterVec::iterator resp_it = dest_it->second.begin(); resp_it != dest_it->second.end(); ++resp_it) {
         // Check before every meta_submessage to see if we need to prefix a INFO_DST
-        if (dest_it->first != GUID_UNKNOWN && dest_it->first != prev_dst) {
+        if (dest_it->first != prev_dst) {
           // If adding an INFO_DST prefix bumped us over the limit, push the
           // size difference into the next bundle, reset prev_dst, and keep
           // going
@@ -2477,9 +2524,7 @@ RtpsUdpDataLink::RtpsReader::generate_nack_frags_i(NackFragSubmessageVec& nf,
     }
 
     const SequenceRange range(iter->first, iter->first);
-    if (link->receive_strategy()->has_fragments(range, pub_id, &frag_info)) {
-      extend_bitmap_range(frag_info.back().second, iter->second.value);
-    } else {
+    if (!link->receive_strategy()->has_fragments(range, pub_id, &frag_info)) {
       // it was not in the recv strategy, so the entire range is "missing"
       frag_info.push_back(Frag_t(iter->first, RTPS::FragmentNumberSet()));
       RTPS::FragmentNumberSet& fnSet = frag_info.back().second;
@@ -2523,7 +2568,7 @@ RtpsUdpDataLink::extend_bitmap_range(RTPS::FragmentNumberSet& fnSet,
     return; // can't extend to some number under the base
   }
   // calculate the index to the extent to determine the new_num_bits
-  const CORBA::ULong new_num_bits = std::min(CORBA::ULong(255),
+  const CORBA::ULong new_num_bits = std::min(CORBA::ULong(256),
                                              extent - fnSet.bitmapBase.value + 1),
                      len = (new_num_bits + 31) / 32;
   if (new_num_bits < fnSet.numBits) {
@@ -2531,7 +2576,7 @@ RtpsUdpDataLink::extend_bitmap_range(RTPS::FragmentNumberSet& fnSet,
   }
   fnSet.bitmap.length(len);
   // We are missing from one past old bitmap end to the new end
-  DisjointSequence::fill_bitmap_range(fnSet.numBits + 1, new_num_bits,
+  DisjointSequence::fill_bitmap_range(fnSet.numBits, new_num_bits,
                                       fnSet.bitmap.get_buffer(), len,
                                       fnSet.numBits);
 }
@@ -3547,21 +3592,6 @@ RtpsUdpDataLink::check_heartbeats(const DCPS::MonotonicTimePoint& now)
     const InterestingRemote& remote = iter->second;
     remote.listener->writer_does_not_exist(rid, remote.localid);
   }
-}
-
-void
-RtpsUdpDataLink::send_association_ack_nacks(const DCPS::MonotonicTimePoint& /*now*/)
-{
-  MetaSubmessageVec meta_submessages;
-
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, readers_lock_);
-    for (RtpsReaderMap::const_iterator pos = readers_.begin(), limit = readers_.end(); pos != limit; ++pos) {
-      pos->second->gather_association_ack_nacks(meta_submessages);
-    }
-  }
-
-  send_bundled_submessages(meta_submessages);
 }
 
 void

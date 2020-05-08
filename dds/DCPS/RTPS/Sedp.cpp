@@ -377,14 +377,9 @@ Sedp::init(const RepoId& guid,
     // Bind to a specific multicast group
     const u_short mc_port = disco.pb() + disco.dg() * domainId + disco.dx();
 
-    OPENDDS_STRING mc_addr = disco.default_multicast_group();
-    if (rtps_inst->multicast_group_address_.set(mc_port, mc_addr.c_str())) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: Sedp::init - ")
-                 ACE_TEXT("failed setting multicast local_addr to port %hu\n"),
-                          mc_port));
-      return DDS::RETCODE_ERROR;
-    }
+    ACE_INET_Addr mc_addr = disco.default_multicast_group();
+    mc_addr.set_port_number(mc_port);
+    rtps_inst->multicast_group_address_ = mc_addr;
 
     rtps_inst->ttl_ = disco.ttl();
     rtps_inst->multicast_interface_ = disco.multicast_interface();
@@ -393,11 +388,10 @@ Sedp::init(const RepoId& guid,
     rtps_inst->use_multicast_ = false;
   }
 
-  const OPENDDS_STRING sedp_addr = disco.sedp_local_address();
-  if (!sedp_addr.empty()) {
-    rtps_inst->local_address_config_str_ = sedp_addr;
-    rtps_inst->local_address_.set(sedp_addr.c_str());
-  }
+  rtps_inst->local_address_ = disco.config()->sedp_local_address();
+#ifdef ACE_HAS_IPV6
+  rtps_inst->ipv6_local_address_ = disco.config()->ipv6_sedp_local_address();
+#endif
 
   rtps_relay_address(disco.config()->sedp_rtps_relay_address());
   rtps_inst->rtps_relay_beacon_period_ = disco.config()->sedp_rtps_relay_beacon_period();
@@ -759,22 +753,22 @@ Sedp::local_address() const
   return rtps_inst->local_address_;
 }
 
+#ifdef ACE_HAS_IPV6
+const ACE_INET_Addr&
+Sedp::ipv6_local_address() const
+{
+  DCPS::RtpsUdpInst_rch rtps_inst =
+      DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
+  return rtps_inst->ipv6_local_address_;
+}
+#endif
+
 const ACE_INET_Addr&
 Sedp::multicast_group() const
 {
   DCPS::RtpsUdpInst_rch rtps_inst =
       DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
   return rtps_inst->multicast_group_address_;
-}
-
-bool
-Sedp::map_ipv4_to_ipv6() const
-{
-  bool map = false;
-  if (local_address().get_type() != AF_INET) {
-    map = true;
-  }
-  return map;
 }
 
 void
@@ -3109,7 +3103,7 @@ Sedp::Writer::write_dcps_participant_secure(const Security::SPDPdiscoveredPartic
   if (sedp_endpoint) {
     ai_map["SEDP"] = ICE::Agent::instance()->get_local_agent_info(sedp_endpoint);
   }
-  ICE::Endpoint* spdp_endpoint = sedp_.spdp_.get_ice_endpoint();
+  ICE::Endpoint* spdp_endpoint = sedp_.spdp_.get_ice_endpoint_if_added();
   if (spdp_endpoint) {
     ai_map["SPDP"] = ICE::Agent::instance()->get_local_agent_info(spdp_endpoint);
   }
@@ -3795,7 +3789,7 @@ Sedp::write_publication_data_unsecure(
     populate_discovered_writer_msg(dwd, rid, lp);
 
     // Convert to parameter list
-    if (!ParameterListConverter::to_param_list(dwd, plist, map_ipv4_to_ipv6())) {
+    if (!ParameterListConverter::to_param_list(dwd, plist, false)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data - ")
                  ACE_TEXT("Failed to convert DiscoveredWriterData ")
@@ -3849,7 +3843,7 @@ Sedp::write_publication_data_secure(
     dwd.security_info.plugin_endpoint_security_attributes = lp.security_attribs_.plugin_endpoint_attributes;
 
     // Convert to parameter list
-    if (!ParameterListConverter::to_param_list(dwd, plist, map_ipv4_to_ipv6())) {
+    if (!ParameterListConverter::to_param_list(dwd, plist, false)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data - ")
                  ACE_TEXT("Failed to convert DiscoveredWriterData ")
@@ -3942,7 +3936,7 @@ Sedp::write_subscription_data_unsecure(
     populate_discovered_reader_msg(drd, rid, ls);
 
     // Convert to parameter list
-    if (!ParameterListConverter::to_param_list(drd, plist, map_ipv4_to_ipv6())) {
+    if (!ParameterListConverter::to_param_list(drd, plist, false)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data - ")
                  ACE_TEXT("Failed to convert DiscoveredReaderData ")
@@ -3995,7 +3989,7 @@ Sedp::write_subscription_data_secure(
     drd.security_info.plugin_endpoint_security_attributes = ls.security_attribs_.plugin_endpoint_attributes;
 
     // Convert to parameter list
-    if (!ParameterListConverter::to_param_list(drd, plist, map_ipv4_to_ipv6())) {
+    if (!ParameterListConverter::to_param_list(drd, plist, false)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data - ")
                  ACE_TEXT("Failed to convert DiscoveredReaderData ")

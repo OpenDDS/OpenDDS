@@ -202,8 +202,9 @@ public:
   void terminate_send_if_suspended();
 
   /// This is called on publisher side to see if this link communicates
-  /// with the provided sub.
-  bool is_target(const RepoId& remote_sub_id);
+  /// with the provided sub or by the subscriber side to see if this link
+  /// communicates with the provided pub
+  bool is_target(const RepoId& remote_id);
 
   /// This is called by DataLinkCleanupTask thread to remove the associations
   /// based on the snapshot in release_resources().

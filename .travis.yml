@@ -53,6 +53,7 @@ before_install:
 branches:
   only:
     - master
+    - xtypes
 
 before_script:
   - export

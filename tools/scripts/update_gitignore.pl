@@ -21,14 +21,15 @@ $SIG{PIPE} = 'IGNORE';
 
 for my $dir (keys %dirs) {
   print "$dir: ", join(' ', @{$dirs{$dir}}), "\n";
+  my $path = "$dir/.gitignore";
   my @existing;
-  if (-r "$dir/.gitignore") {
-    open GIIN, "$dir/.gitignore" or die "can't open existing .gitignore";
+  if (-r $path) {
+    open GIIN, $path or die "can't open existing gitignore at $path ($!)";
     @existing = <GIIN>;
     close GIIN;
     chomp @existing;
   }
-  open GIOUT, ">$dir/.gitignore" or die "can't write to .gitignore";
+  open GIOUT, ">$path" or die "can't write $path ($!)";
   my @files = grep /\S/, @existing;
   push(@files, @{$dirs{$dir}});
   for my $file (sort {lc($a) cmp lc($b)} @files) {

@@ -1,29 +1,24 @@
 ARG BASIS=ubuntu:bionic
 FROM $BASIS
 
+ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
     cmake \
     curl \
     g++ \
-    google-mock \
     make \
-    libgtest-dev \
     libxerces-c-dev \
     libssl-dev \
     perl-base \
     perl-modules \
     git
 
-WORKDIR /usr/src/gtest
-RUN cmake CMakeLists.txt && make && cp ./*.a /usr/lib
-WORKDIR /usr/src/gmock
-RUN cmake CMakeLists.txt && make && cp ./*.a /usr/lib
-
 ADD . /opt/OpenDDS
 
 ARG ACE_CONFIG_OPTION="--doc-group"
 RUN cd /opt/OpenDDS && \
-    ./configure --prefix=/usr/local --security --std=c++11 ${ACE_CONFIG_OPTION} && \
+    ./configure --prefix=/usr/local --security ${ACE_CONFIG_OPTION} && \
+    ./tools/scripts/show_build_config.pl && \
     make && \
     make install && \
     ldconfig && \

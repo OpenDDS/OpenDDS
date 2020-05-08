@@ -84,6 +84,7 @@ public:
                              AST_Type::SIZE_TYPE /*size*/)
   { return true; }
 
+  static std::string to_string(Identifier* id);
   static std::string scoped_helper(UTL_ScopedName* sn, const char* sep);
   static std::string module_scope_helper(UTL_ScopedName* sn, const char* sep);
 };
@@ -164,8 +165,7 @@ struct ScopedNamespaceGuard  {
       const char* str = name->head()->get_string();
       if (str && str[0]) {
         ++n_;
-        os_ << keyword << (name->head()->escaped() ? " _" : " ")
-            << str << " {\n";
+        os_ << keyword << ' ' << dds_generator::to_string(name->head()) << " {\n";
       }
     }
     if (std::strcmp(keyword, "module") == 0) semi_ = ";";

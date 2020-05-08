@@ -94,8 +94,10 @@ public:
   // @brief return the ip address we have bound to.
   // Valid after init() call
   const ACE_INET_Addr& local_address() const;
+#ifdef ACE_HAS_IPV6
+  const ACE_INET_Addr& ipv6_local_address() const;
+#endif
   const ACE_INET_Addr& multicast_group() const;
-  bool map_ipv4_to_ipv6() const;
 
   void associate(const ParticipantData_t& pdata);
 

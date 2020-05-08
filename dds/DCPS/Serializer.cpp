@@ -137,6 +137,7 @@ Serializer::Serializer(ACE_Message_Block* chain, const Encoding& encoding)
   , align_wshift_(0)
 {
   this->encoding(encoding);
+  reset_alignment();
 }
 
 Serializer::Serializer(ACE_Message_Block* chain, Encoding::Kind kind,
@@ -147,6 +148,7 @@ Serializer::Serializer(ACE_Message_Block* chain, Encoding::Kind kind,
   , align_wshift_(0)
 {
   encoding(Encoding(kind, endianness));
+  reset_alignment();
 }
 
 Serializer::Serializer(ACE_Message_Block* chain, bool has_cdr_header,
@@ -162,10 +164,11 @@ Serializer::Serializer(ACE_Message_Block* chain, bool has_cdr_header,
     ok = *this >> enc;
   } else {
     enc.kind(Encoding::KIND_CDR_UNALIGNED);
-    enc.endianness(is_little_endian ? ENDIAN_LITTLE : ENDIAN_BIG );
+    enc.endianness(is_little_endian ? ENDIAN_LITTLE : ENDIAN_BIG);
   }
   if (ok) {
     encoding(enc);
+    reset_alignment();
   }
 }
 
@@ -180,6 +183,7 @@ Serializer::Serializer(ACE_Message_Block* chain, bool swap_bytes,
   enc.alignment(align);
   enc.zero_init_padding(zero_init_padding);
   encoding(enc);
+  reset_alignment();
 }
 
 Serializer::~Serializer()

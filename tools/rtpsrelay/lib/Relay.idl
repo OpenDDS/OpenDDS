@@ -101,5 +101,4 @@ module RtpsRelay {
     unsigned long total_writers;
     unsigned long total_readers;
   };
-
 };

@@ -39,4 +39,4 @@ tests/security/attributes/run_test.pl --scenario FullMsgEncrypt_SubMsgEncrypt_Pa
 #tests/security/attributes/run_test.pl -scenario FullMsgSign_PayloadEncrypt_Frag
 tests/security/TopicWithoutPermissions/run_test.pl
 tests/DCPS/ParticipantLocationTopic/run_test.pl: CXX11 !NO_BUILT_IN_TOPICS !IPV6
-
+tests/DCPS/ParticipantLocationTopic/run_test.pl ipv6: CXX11 !NO_BUILT_IN_TOPICS IPV6
