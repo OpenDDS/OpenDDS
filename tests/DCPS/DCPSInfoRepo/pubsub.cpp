@@ -167,7 +167,7 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
   dwQos->reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
   dwQos->representation.value.length(1);
   dwQos->representation.value[0] = DDS::XCDR_DATA_REPRESENTATION;
- 
+
   OpenDDS::DCPS::TransportLocatorSeq tii;
   tii.length(1);
   tii[0].transport_type = "fake transport for test";
