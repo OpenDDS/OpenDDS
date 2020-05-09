@@ -266,20 +266,13 @@ bool run_test()
   // Create a "test participant" which will use sockets directly
   // This will act like a remote participant.
   ACE_SOCK_Dgram test_part_sock;
-  ACE_INET_Addr test_part_addr;
-  test_part_addr.set_type(AF_INET);
-  if (!open_appropriate_socket_type(test_part_sock, test_part_addr)) {
+  ACE_INET_Addr test_part_addr(u_short(0), "0.0.0.0");
+  if (test_part_sock.open(test_part_addr) != 0) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: run_test() unable to open test_part_sock\n")));
     return false;
   }
   test_part_sock.get_local_addr(test_part_addr);
-  test_part_addr.set(test_part_addr.get_port_number(),
-#ifdef OPENDDS_SAFETY_PROFILE
-    "127.0.0.1"
-#else
-    "localhost"
-#endif
-    );
+  test_part_addr.set(test_part_addr.get_port_number(), "127.0.0.1");
 
   GuidGenerator gen;
   GUID_t test_part_guid;
