@@ -76,13 +76,24 @@ namespace XTypes {
     }
 
     // Discriminator type must be strongly assignable
-    ACE_CDR::Octet a_disc = ta.union_type.discriminator.common.type_id->kind;
-    ACE_CDR::Octet b_disc = tb.union_type.discriminator.common.type_id->kind;
-    if ((TK_BOOLEAN == a_disc || TK_BYTE == a_disc || TK_INT16 == a_disc ||
-         TK_INT32 == a_disc || TK_INT64 == a_disc || TK_UINT16 == a_disc ||
-         TK_UINT32 == a_disc || TK_UINT64 == a_disc || TK_INT8 == a_disc ||
-         TK_UINT8 == a_disc || TK_CHAR8 == a_disc || TK_CHAR16 == a_disc) &&
-        a_disc != b_disc) {
+    const TypeIdentifier& tia = *ta.union_type.discriminator.common.type_id.in();
+    const TypeIdentifier& tib = *tb.union_type.discriminator.common.type_id.in();
+    ACE_CDR::Octet a_disc = tia.kind;
+    ACE_CDR::Octet b_disc = tib.kind;
+    if (TK_BOOLEAN == a_disc || TK_BYTE == a_disc || TK_INT16 == a_disc ||
+        TK_INT32 == a_disc || TK_INT64 == a_disc || TK_UINT16 == a_disc ||
+        TK_UINT32 == a_disc || TK_UINT64 == a_disc || TK_INT8 == a_disc ||
+        TK_UINT8 == a_disc || TK_CHAR8 == a_disc || TK_CHAR16 == a_disc) {
+      if (!(a_disc == b_disc ||
+            (assignable_primitive(tia, tib) && is_delimited(tib)))) {
+        return false;
+      }
+    } else if (EK_COMPLETE == a_disc || EK_MINIMAL == a_disc) {
+      if ((b_disc == a_disc && tia.equivalence_hash != tib.equivalence_hash) ||
+          b_disc != a_disc) {
+        // TODO: Check if tia is-assignable-from tib and tib is delimited
+      }
+    } else { // Invalid types for discriminator
       return false;
     }
 
@@ -140,42 +151,22 @@ namespace XTypes {
     }
 
     if (EK_COMPLETE == tb.kind || EK_MINIMAL == tb.kind) {
-      const TypeObject& type_obj = lookup(tb);
-      if (EK_COMPLETE == type_obj.kind) {
-        if (TK_BITMASK != type_obj.complete.kind ||
-            !(TK_UINT8 == ta.kind || TK_UINT16 == ta.kind ||
-              TK_UINT32 == ta.kind || TK_UINT64 == ta.kind)) {
-          return false;
-        }
+      const TypeObject& type_obj = lookup_minimal(tb);
+      if (TK_BITMASK != type_obj.minimal.kind ||
+          !(TK_UINT8 == ta.kind || TK_UINT16 == ta.kind ||
+            TK_UINT32 == ta.kind || TK_UINT64 == ta.kind)) {
+        return false;
+      }
 
-        BitBound bit_bound = type_obj.complete.bitmask_type.header.common.bit_bound;
-        if (TK_UINT8 == ta.kind) {
-          return 1 <= bit_bound && bit_bound <= 8;
-        } else if (TK_UINT16 == ta.kind) {
-          return 9 <= bit_bound && bit_bound <= 16;
-        } else if (TK_UINT32 == ta.kind) {
-          return 17 <= bit_bound && bit_bound <= 32;
-        } else if (TK_UINT64 == ta.kind) {
-          return 33 <= bit_bound && bit_bound <= 64;
-        }
-
-      } else { // EK_MINIMAL == type_obj.kind
-        if (TK_BITMASK != type_obj.minimal.kind ||
-            !(TK_UINT8 == ta.kind || TK_UINT16 == ta.kind ||
-              TK_UINT32 == ta.kind || TK_UINT64 == ta.kind)) {
-          return false;
-        }
-
-        BitBound bit_bound = type_obj.minimal.bitmask_type.header.common.bit_bound;
-        if (TK_UINT8 == ta.kind) {
-          return 1 <= bit_bound && bit_bound <= 8;
-        } else if (TK_UINT16 == ta.kind) {
-          return 9 <= bit_bound && bit_bound <= 16;
-        } else if (TK_UINT32 == ta.kind) {
-          return 17 <= bit_bound && bit_bound <= 32;
-        } else if (TK_UINT64 == ta.kind) {
-          return 33 <= bit_bound && bit_bound <= 64;
-        }
+      BitBound bit_bound = type_obj.minimal.bitmask_type.header.common.bit_bound;
+      if (TK_UINT8 == ta.kind) {
+        return 1 <= bit_bound && bit_bound <= 8;
+      } else if (TK_UINT16 == ta.kind) {
+        return 9 <= bit_bound && bit_bound <= 16;
+      } else if (TK_UINT32 == ta.kind) {
+        return 17 <= bit_bound && bit_bound <= 32;
+      } else if (TK_UINT64 == ta.kind) {
+        return 33 <= bit_bound && bit_bound <= 64;
       }
     }
 
@@ -196,6 +187,34 @@ namespace XTypes {
         return true;
       }
       return false;
+    }
+  }
+
+  bool TypeAssignability::is_delimited(const TypeIdentifier& ti) const
+  {
+    switch (ti.kind) {
+    case TK_BOOLEAN:
+    case TK_BYTE:
+    case TK_INT16:
+    case TK_INT32:
+    case TK_INT64:
+    case TK_UINT16:
+    case TK_UINT32:
+    case TK_UINT64:
+    case TK_FLOAT32:
+    case TK_FLOAT64:
+    case TK_FLOAT128:
+    case TK_INT8:
+    case TK_UINT8:
+    case TK_CHAR8:
+    case TK_CHAR16:
+    case TI_STRING8_SMALL:
+    case TI_STRING8_LARGE:
+    case TI_STRING16_SMALL:
+    case TI_STRING16_LARGE:
+      return true;
+    default:
+      return true; // TODO: Add other types
     }
   }
 
