@@ -48,7 +48,7 @@ namespace XTypes {
   {
     return false; // TODO: Implement this
   }
-  
+
   bool TypeAssignability::assignable_annotation(const MinimalTypeObject& ta,
                                                 const MinimalTypeObject& tb) const
   {
@@ -60,7 +60,7 @@ namespace XTypes {
   {
     return false; // TODO: Implement this
   }
-  
+
   bool TypeAssignability::assignable_union(const MinimalTypeObject& ta,
                                            const MinimalTypeObject& tb) const
   {
@@ -127,13 +127,26 @@ namespace XTypes {
   bool TypeAssignability::assignable_enum(const MinimalTypeObject& ta,
                                           const MinimalTypeObject& tb) const
   {
-    return false; // TODO: Implement this
+    return true; // TODO: Implement this
   }
 
   bool TypeAssignability::assignable_bitmask(const MinimalTypeObject& ta,
                                              const MinimalTypeObject& tb) const
   {
-    return false; // TODO: Implement this
+    BitBound ta_bit_bound = ta.bitmask_type.header.common.bit_bound;
+    if (TK_BITMASK == tb.kind) {
+      return ta_bit_bound == tb.bitmask.type.header.common.bit_bound;
+    } else if (TK_UINT8 == tb.kind) {
+      return 1 <= ta_bit_bound && ta_bit_bound <= 8;
+    } else if (TK_UINT16 == tb.kind) {
+      return 9 <= ta_bit_bound && ta_bit_bound <= 16;
+    } else if (TK_UINT32 == tb.kind) {
+      return 17 <= ta_bit_bound && ta_bit_bound <= 32;
+    } else if (TK_UINT64 == tb.kind) {
+      return 33 <= ta_bit_bound && ta_bit_bound <= 64;
+    }
+
+    return false;
   }
 
   bool TypeAssignability::assignable_extended(const MinimalTypeObject& ta,
