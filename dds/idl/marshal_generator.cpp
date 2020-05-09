@@ -2213,7 +2213,7 @@ namespace {
         "  }\n"
         "  ACE_Message_Block param(size + pad);\n"
         "  Serializer strm(&param, outer_strm.swap_bytes(), "
-        "outer_strm.encoding().alignment());\n"
+        "outer_strm.encoding().alignment(), outer_strm.encoding().zero_init_padding());\n"
         "  if (!insertParamData(strm, uni)) {\n"
         "    return false;\n"
         "  }\n"
