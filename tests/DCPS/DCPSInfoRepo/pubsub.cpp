@@ -165,7 +165,9 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
   ::DDS::DataWriterQos_var dwQos = new ::DDS::DataWriterQos;
   *dwQos = TheServiceParticipant->initial_DataWriterQos();
   dwQos->reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-
+  dwQos->representation.value.length(1);
+  dwQos->representation.value[0] = DDS::XCDR_DATA_REPRESENTATION;
+ 
   OpenDDS::DCPS::TransportLocatorSeq tii;
   tii.length(1);
   tii[0].transport_type = "fake transport for test";
@@ -279,6 +281,8 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
   ::DDS::DataReaderQos_var drQos = new ::DDS::DataReaderQos;
   *drQos = TheServiceParticipant->initial_DataReaderQos();
   drQos->reliability.kind = ::DDS::RELIABLE_RELIABILITY_QOS;
+  drQos->representation.value.length(1);
+  drQos->representation.value[0] = DDS::XCDR_DATA_REPRESENTATION;
 
   ::DDS::SubscriberQos_var subQos = new ::DDS::SubscriberQos;
   *subQos = TheServiceParticipant->initial_SubscriberQos();
