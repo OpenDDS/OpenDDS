@@ -341,13 +341,27 @@ bool operator==(
   const DDS::DataRepresentationQosPolicy& qos1,
   const DDS::DataRepresentationQosPolicy& qos2)
 {
-  const CORBA::ULong count = qos1.value.length();
-  const CORBA::ULong count2 = qos1.value.length();
+  DDS::DataRepresentationQosPolicy newqos1 = qos1;
+  if (newqos1.value.length() == 0) {
+    newqos1.value.length(2);
+    newqos1.value[0] = DDS::XCDR_DATA_REPRESENTATION;
+    newqos1.value[1] = UNALIGNED_CDR_DATA_REPRESENTATION;
+  }
+
+  DDS::DataRepresentationQosPolicy newqos2 = qos2;
+  if (newqos2.value.length() == 0) {
+    newqos2.value.length(2);
+    newqos2.value[0] = DDS::XCDR_DATA_REPRESENTATION;
+    newqos2.value[1] = UNALIGNED_CDR_DATA_REPRESENTATION;
+  }
+
+  const CORBA::ULong count = newqos1.value.length();
+  const CORBA::ULong count2 = newqos2.value.length();
   if (count != count2) {
     return false;
   }
   for (CORBA::ULong i = 0; i < count; ++i) {
-    if (qos1.value[i] != qos2.value[i]) {
+    if (newqos1.value[i] != newqos2.value[i]) {
       return false;
     }
   }
