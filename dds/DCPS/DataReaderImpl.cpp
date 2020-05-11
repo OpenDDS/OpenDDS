@@ -854,13 +854,7 @@ DDS::ReturnCode_t DataReaderImpl::set_qos(const DDS::DataReaderQos& qos_arg)
 
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos)) {
     // Make sure Data Representation QoS is initialized
-    topic_servant_->check_data_representation_qos(qos_.representation.value);
-
-    if (qos.representation.value.length() == 0) {
-      qos.representation.value.length(2);
-      qos.representation.value[0] = DDS::XCDR_DATA_REPRESENTATION;
-      qos.representation.value[1] = UNALIGNED_CDR_DATA_REPRESENTATION;
-    }
+    topic_servant_->check_data_representation_qos(qos.representation.value);
 
     if (qos_ == qos)
       return DDS::RETCODE_OK;
