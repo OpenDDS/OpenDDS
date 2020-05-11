@@ -39,8 +39,9 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - libxerces-c-dev
+            - libwireshark-dev
             - g++-10
-      env: COMPILER=g++-10 NO_DEBUG=1
+      env: COMPILER=g++-10 WIRESHARK=1
     - os: osx
       osx_image: xcode10.1
       compiler: clang
@@ -78,6 +79,7 @@ before_script:
   - if [ "$CXX" == "g++" ]; then CONFIG_OPTIONS+=" --std=c++11"; fi
   - if [ "$VERSIONED_NS" == 1 ]; then CONFIG_OPTIONS+=" --features=versioned_namespace=1"; fi
   - if [ "$DDS_SECURITY" == 1 ]; then CONFIG_OPTIONS+=" --security"; fi
+  - if [ "$WIRESHARK" == 1 ]; then CONFIG_OPTIONS+=" --wireshark"; fi
   - ./configure --mpcopts="-workers 4" --compiler=$COMPILER --tests $CONFIG_OPTIONS
   - tools/scripts/show_build_config.pl
   - if [ "$SAFETY_PROFILE" == "1" ]; then
