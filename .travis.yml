@@ -41,7 +41,7 @@ matrix:
             - libxerces-c-dev
             - libwireshark-dev
             - g++-10
-      env: COMPILER=g++-10 WIRESHARK=1
+      env: COMPILER=g++-10 WIRESHARK=1 NO_TESTS=1
     - os: osx
       osx_image: xcode10.1
       compiler: clang
