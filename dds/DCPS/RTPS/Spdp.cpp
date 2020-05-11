@@ -1799,6 +1799,15 @@ Spdp::SpdpTransport::open()
 {
   reactor_task_.open(0);
 
+#ifdef OPENDDS_SECURITY
+  // Add the endpoint before any sending and receiving occurs.
+  ICE::Endpoint* endpoint = get_ice_endpoint();
+  if (endpoint) {
+    ICE::Agent::instance()->add_endpoint(endpoint);
+    ice_endpoint_added_ = true;
+  }
+#endif
+
   ACE_Reactor* reactor = reactor_task_.get_reactor();
   if (reactor->register_handler(unicast_socket_.get_handle(),
                                 this, ACE_Event_Handler::READ_MASK) != 0) {
@@ -1814,14 +1823,7 @@ Spdp::SpdpTransport::open()
 
   job_queue_ = DCPS::make_rch<DCPS::JobQueue>(reactor);
 
-  // Add the endpoint before any sending occurs.
 #ifdef OPENDDS_SECURITY
-  ICE::Endpoint* endpoint = get_ice_endpoint();
-  if (endpoint) {
-    ICE::Agent::instance()->add_endpoint(endpoint);
-    ice_endpoint_added_ = true;
-  }
-
   // Now that the endpoint is added, SEDP can write the SPDP info.
   if (outer_->is_security_enabled()) {
     outer_->write_secure_updates();
@@ -1853,10 +1855,10 @@ Spdp::SpdpTransport::open()
     ncm->add_listener(*this);
   } else {
     DCPS::NetworkInterface nic(0, multicast_interface_, true);
-    ACE_INET_Addr addr("0.0.0.0");
+    ACE_INET_Addr addr(u_short(0), "0.0.0.0");
     nic.addresses.insert(addr);
 #ifdef ACE_HAS_IPV6
-    ACE_INET_Addr addr2("[::]");
+    ACE_INET_Addr addr2(u_short(0), "::");
     nic.addresses.insert(addr2);
 #endif
     job_queue_->enqueue(DCPS::make_rch<ChangeMulticastGroup>(rchandle_from(this), nic,
