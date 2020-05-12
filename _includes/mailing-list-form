@@ -1,0 +1,308 @@
+<?php
+
+?>
+
+<style type="text/css" scoped>
+
+	.mauticform_wrapper { 
+		max-width: 800px;
+		margin-left: auto;
+		margin-right:auto;
+		padding: 15px 25px 25px 25px;
+		background:#fff;
+	}
+	
+	.mauticform-innerform {
+	
+	}
+	
+	.mauticform-row,
+	.mauticform-checkboxgrp-row, 
+	.mauticform-radiogrp-row { 
+		display: block; 
+		margin-bottom: 10px;
+	}
+	
+	.mauticform-input, 
+	.mauticform-selectbox {
+		width: 100%; 
+		height:3em;
+		padding-left:10px;
+		text-indent:10px;	
+		background: #f8f8f8; 
+		border:none;
+		border-radius:0;
+		box-sizing: border-box; 
+		color:#7a7b7f;
+		-webkit-border-radius: 0px;
+	}
+	
+	.mauticform-textarea {	
+		width: 100%; 
+		min-height:6em; 
+		padding: .5em .2em;
+		text-indent:10px;
+		border: none; 
+		background: #f8f8f8; 
+		border-radius: 0; 
+		box-sizing: border-box; 
+		color:#7a7b7f;
+		-webkit-border-radius: 0px; 	
+	}
+	
+	.mauticform-checkboxgrp-checkbox, 
+	.mauticform-radiogrp-radio {
+		height: 1.2em;
+		width: 1.2em;
+	}
+	
+	.mauticform-select { 
+		width: 100%; 
+		color:#7a7b7f;	
+	}
+	
+	/* TEXT AND LABELS */
+	
+	.mauticform-label,
+	.mauticform-freetext,
+	.mauticform-checkboxgrp-label, 
+	.mauticform-radiogrp-label	{
+		display: block;
+		font-family: Roboto, Verdana, sans-serif;
+		font-weight: normal !important;
+		color: #7a7b7f;
+	}
+	
+	.mauticform-label,
+	.mauticform-freetext {
+		font-size: 1em;
+	}
+	
+	.mauticform-checkboxgrp-label, 
+	.mauticform-radiogrp-label {
+		font-size: 0.9em;
+		color: #7a7b7f;
+		margin-top:0;
+	}
+		
+	.mauticform-row.mauticform-required .mauticform-label:after { 
+		color: #7a7b7f !important; 
+		content: " *"; 
+		display: inline; 
+	}
+	
+	.mauticform-innerform h2,
+	.mauticform-innerform h3,
+	.mauticform-innerform h4,
+	.mauticform-innerform h5,
+	.mauticform-innerform h6 {
+		color:#255aa8 !important;
+		text-align: center;
+	}
+	
+	.mauticform-innerform p {
+		font-size: 0.9em;
+	}
+	
+	.mauticform-innerform a {
+		color:#7a7b7f;
+		text-decoration:underline;
+	}
+	
+	/* BUTTON */
+	
+	.mauticform-innerform .button-link {
+		display:flex !important;
+		justify-content:center !important;
+	}
+	
+	.mauticform-button.btn-default {
+		display:flex !important;
+		justify-content:center !important;
+	}
+	
+	.mauticform-pagebreak-wrapper .mauticform-button-wrapper {  
+		display: inline; 
+	}
+	
+	.mauticform-button-wrapper .mauticform-button.btn-default, 
+	.mauticform-pagebreak-wrapper .mauticform-pagebreak.btn-default {
+		color: #fff !important;
+		background-color: #2559a7;
+		border-color: #ddd;
+	}
+	
+	.mauticform-button-wrapper .mauticform-button, 
+	.mauticform-pagebreak-wrapper .mauticform-pagebreak {
+		display: inline-block;
+		margin: 30px auto !important;
+		font-weight: 700;
+		text-align: center;
+		vertical-align: middle;
+		cursor: pointer;
+		background-image: none;
+		border: 1px solid transparent;
+		white-space: nowrap;
+		padding: 15px 25px;
+		font-size: 14px;
+		line-height: 1;
+		text-transform: uppercase;
+		border-radius: 0 !important;
+		-webkit-user-select: none;
+		-moz-user-select: none;
+		-ms-user-select: none;
+		user-select: none;
+	}
+		
+	.mauticform-button-wrapper .mauticform-button.btn-default[disabled], 
+	.mauticform-pagebreak-wrapper .mauticform-pagebreak.btn-default[disabled] {
+		background-color: #2559a7; 
+		border-color: #ddd; 
+		opacity: 0.75; 
+		cursor: not-allowed; 
+	}
+	
+	
+	/* SUCCESS MESSAGE */
+	
+	.mauticform_wrapper form {
+		display: table;
+		width:100%;
+	}
+
+	.mauticform-post-success .mauticform-innerform {
+		display: table-header-group;
+	}
+
+	.mauticform-post-success .mauticform-message {
+		display: table-footer-group;
+	}
+	
+	.mauticform-message {
+		color: #2559a7 !important;
+		text-align:center;
+	}
+	
+	
+	/* ERROR AND HELP MESSAGES */
+	
+	.mauticform-helpmessage { 
+		display: block; 
+		font-size: 0.9em; 
+		margin-bottom: 3px; 
+	}
+	
+	.mauticform-errormsg { 
+		display: block; 
+		color: red; 
+		margin: 15px 0; 
+	}
+	
+	.mauticform-error { 
+		margin: 15px 0; 
+		color:red; 
+	}
+	
+	/* MAUTIC DEFAULTS */
+	
+	.mauticform-name { 
+		font-weight: bold; 
+		font-size: 1.5em; 
+		margin-bottom: 3px; 
+	}
+	
+    .mauticform-description { 
+		margin-top: 2px; 
+		margin-bottom: 10px; 
+	}
+	
+	/* COLUMNS */
+	
+	.mauticform-two {
+		-moz-column-count: 2;
+		-moz-column-gap: 15px;
+		-webkit-column-count: 2;
+		-webkit-column-gap: 15px;
+	}
+	
+	.mauticform-three {
+		-moz-column-count: 3;
+		-moz-column-gap: 15px;
+		-webkit-column-count: 3;
+		-webkit-column-gap: 15px;
+	}
+	
+	
+	/* MOBILE USERS */
+	
+	@media screen and (max-width: 1024px) {
+		.mauticform-checkboxgrp-checkbox, 
+		.mauticform-radiogrp-radio {
+			height: 1.9em;
+			width: 1.9em;
+		}
+	}
+	
+	@media only screen and (min-device-width : 320px) and (max-device-width : 480px) {
+		.mauticform-input, 
+		.mauticform-textarea, 
+		.mauticform-selectbox { 
+			width: 100%;  
+		}
+	}
+	
+	@media screen and (max-width: 900px) {
+		.mauticform-two, 
+		.mauticform-three {
+			-moz-column-count: 1;
+			-webkit-column-count: 1;
+		}
+	}
+	
+
+</style>
+<div id="mauticform_wrapper_mailinglistopendds" class="mauticform_wrapper">
+    <form autocomplete="false" role="form" method="post" action="https://mautic.objectcomputing.com/form/submit?formId=256" id="mauticform_mailinglistopendds"  data-mautic-form="mailinglistopendds" enctype="multipart/form-data">
+        <div class="mauticform-error" id="mauticform_mailinglistopendds_error"></div>
+        <div class="mauticform-message" id="mauticform_mailinglistopendds_message"></div>
+        <div class="mauticform-innerform">
+
+            
+          <div class="mauticform-page-wrapper mauticform-page-1" data-mautic-form-page="1">
+
+            <div id="mauticform_mailinglistopendds_header"  class="mauticform-row mauticform-freehtml mauticform-field-1">
+                <div id="mauticform_input_mailinglistopendds_header" name="mauticform[header]" value="" class="mauticform-freehtml">
+                    <h3>Get OpenDDS Updates in Your Inbox</h3>
+                </div>
+            </div>
+
+            <div id="mauticform_mailinglistopendds_first_name"  data-validate="first_name" data-validation-type="text" class="mauticform-row mauticform-text mauticform-field-2 mauticform-required">
+                <label id="mauticform_label_mailinglistopendds_first_name" for="mauticform_input_mailinglistopendds_first_name" class="mauticform-label">First Name</label>
+                <input id="mauticform_input_mailinglistopendds_first_name" name="mauticform[first_name]" value="" class="mauticform-input" type="text" />
+                <span class="mauticform-errormsg" style="display: none;">Please enter your first name.</span>
+            </div>
+
+            <div id="mauticform_mailinglistopendds_last_name"  data-validate="last_name" data-validation-type="text" class="mauticform-row mauticform-text mauticform-field-3 mauticform-required">
+                <label id="mauticform_label_mailinglistopendds_last_name" for="mauticform_input_mailinglistopendds_last_name" class="mauticform-label">Last Name</label>
+                <input id="mauticform_input_mailinglistopendds_last_name" name="mauticform[last_name]" value="" class="mauticform-input" type="text" />
+                <span class="mauticform-errormsg" style="display: none;">Please enter your last name.</span>
+            </div>
+
+            <div id="mauticform_mailinglistopendds_email_address"  data-validate="email_address" data-validation-type="email" class="mauticform-row mauticform-email mauticform-field-4 mauticform-required">
+                <label id="mauticform_label_mailinglistopendds_email_address" for="mauticform_input_mailinglistopendds_email_address" class="mauticform-label">Email Address</label>
+                <input id="mauticform_input_mailinglistopendds_email_address" name="mauticform[email_address]" value="" class="mauticform-input" type="email" />
+                <span class="mauticform-errormsg" style="display: none;">Please enter your email address to subscribe.</span>
+            </div>
+
+            <div id="mauticform_mailinglistopendds_subscribe"  class="mauticform-row mauticform-button-wrapper mauticform-field-5">
+                <button type="submit" name="mauticform[subscribe]" id="mauticform_input_mailinglistopendds_subscribe" name="mauticform[subscribe]" value="" class="mauticform-button btn btn-default" value="1">Subscribe</button>
+            </div>
+            </div>
+        </div>
+
+        <input type="hidden" name="mauticform[formId]" id="mauticform_mailinglistopendds_id" value="256"/>
+        <input type="hidden" name="mauticform[return]" id="mauticform_mailinglistopendds_return" value=""/>
+        <input type="hidden" name="mauticform[formName]" id="mauticform_mailinglistopendds_name" value="mailinglistopendds"/>
+
+        </form>
+</div>
