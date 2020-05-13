@@ -176,7 +176,7 @@ namespace OpenDDS {
 
         DiscoveredWriterData writer_data_;
         DDS::InstanceHandle_t bit_ih_;
-        XTypes::TypeInformation type_info;
+        XTypes::TypeInformation type_info_;
 
 #ifdef OPENDDS_SECURITY
         DDS::Security::EndpointSecurityAttributes security_attribs_;
