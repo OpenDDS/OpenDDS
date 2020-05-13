@@ -875,8 +875,7 @@ DataWriterImpl::set_qos(const DDS::DataWriterQos& qos_arg)
   OPENDDS_NO_DURABILITY_KIND_TRANSIENT_PERSISTENT_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
 
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos)) {
-    // Make sure Data Representation QoS is initialized
-    topic_servant_->check_data_representation_qos(qos.representation.value);
+    topic_servant_->inherit_data_representation_qos(qos.representation.value);
 
     if (qos_ == qos)
       return DDS::RETCODE_OK;
@@ -1294,8 +1293,11 @@ DataWriterImpl::enable()
     dp_id_ = participant->get_id();
   }
 
-  // Make sure Data Representation QoS is initialized
-  topic_servant_->check_data_representation_qos(qos_.representation.value);
+  topic_servant_->inherit_data_representation_qos(qos_.representation.value);
+
+  if (!topic_servant_->check_data_representation(qos_.representation.value, true)) {
+    return DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
 
   // Note: do configuration based on QoS in enable() because
   //       before enable is called the QoS can be changed -- even

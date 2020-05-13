@@ -103,7 +103,7 @@ Encoding::Kind repr_ext_to_encoding_kind(
  * QoS of the parent.
  */
 OpenDDS_Dcps_Export
-void check_data_representation_qos(
+void inherit_data_representation_qos(
   DDS::DataRepresentationIdSeq& child,
   const DDS::DataRepresentationIdSeq& parent);
 

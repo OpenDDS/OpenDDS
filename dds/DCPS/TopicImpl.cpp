@@ -42,12 +42,6 @@ TopicImpl::TopicImpl(const char*                    topic_name,
   inconsistent_topic_status_.total_count = 0;
   inconsistent_topic_status_.total_count_change = 0;
   monitor_.reset(TheServiceParticipant->monitor_factory_->create_topic_monitor(this));
-
-  // Make sure Data Representation QoS is initialized
-  DDS::DataRepresentationIdSeq type_allowed_reprs;
-  type_support_->representations_allowed_by_type(type_allowed_reprs);
-  DCPS::check_data_representation_qos(
-    qos_.representation.value, type_allowed_reprs);
 }
 
 TopicImpl::~TopicImpl()
@@ -64,12 +58,6 @@ DDS::ReturnCode_t TopicImpl::set_qos(const DDS::TopicQos& qos_arg)
   OPENDDS_NO_DURABILITY_KIND_TRANSIENT_PERSISTENT_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
 
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos)) {
-    // Make sure Data Representation QoS is initialized
-    DDS::DataRepresentationIdSeq type_allowed_reprs;
-    type_support_->representations_allowed_by_type(type_allowed_reprs);
-    DCPS::check_data_representation_qos(
-      qos.representation.value, type_allowed_reprs);
-
     if (qos_ == qos)
       return DDS::RETCODE_OK;
 
@@ -149,11 +137,9 @@ TopicImpl::enable()
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
-  // Make sure Data Representation QoS is initialized
-  DDS::DataRepresentationIdSeq type_allowed_reprs;
-  type_support_->representations_allowed_by_type(type_allowed_reprs);
-  DCPS::check_data_representation_qos(
-    qos_.representation.value, type_allowed_reprs);
+  if (!check_data_representation(qos_.representation.value, false)) {
+    return DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
 
   if (id_ == GUID_UNKNOWN) {
     const DDS::DomainId_t dom_id = participant_->get_domain_id();
@@ -235,10 +221,48 @@ TopicImpl::inconsistent_topic(int count)
   notify_status_condition();
 }
 
-void TopicImpl::check_data_representation_qos(
+void TopicImpl::inherit_data_representation_qos(
   DDS::DataRepresentationIdSeq& qos) const
 {
-  DCPS::check_data_representation_qos(qos, qos_.representation.value);
+  DCPS::inherit_data_representation_qos(qos, qos_.representation.value);
+}
+
+bool TopicImpl::check_data_representation(const DDS::DataRepresentationIdSeq& qos_ids, bool is_data_writer) {
+  DDS::DataRepresentationIdSeq type_allowed_reprs;
+  type_support_->representations_allowed_by_type(type_allowed_reprs);
+  //default for blank annotation is to allow all types of data representation
+  if(type_allowed_reprs.length() == 0){
+    return true;
+  }
+  //Data Writer will only use the 1st QoS declared
+  if(is_data_writer) {
+    DDS::DataRepresentationId_t id=DDS::XCDR_DATA_REPRESENTATION;
+    if(qos_ids.length() != 0){
+      id = qos_ids[0];
+    }
+    bool found = false;
+    for (int j = 0; j < type_allowed_reprs.length(); j++){
+      if(id == type_allowed_reprs[j]){
+        found = true;
+        break;
+      }
+    }
+    return found;
+  }
+
+  else{
+    for (int i = 0; i < qos_ids.length(); i++) {
+      bool found = false;
+      for (int j = 0; j < type_allowed_reprs.length(); j++){
+        if(qos_ids[i] == type_allowed_reprs[j]){
+        found = true;
+        break;
+        }
+      }
+      return found;
+    }
+  }
+  return true;
 }
 
 } // namespace DCPS
