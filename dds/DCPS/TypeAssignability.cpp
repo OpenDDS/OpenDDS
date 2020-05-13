@@ -111,11 +111,15 @@ namespace XTypes {
   bool TypeAssignability::assignable_sequence(const MinimalTypeObject& ta,
                                               const MinimalTypeObject& tb) const
   {
-    if (TK_ARRAY != tb.kind) {
+    if (TK_SEQUENCE != tb.kind) {
       return false;
     }
 
-    // Bounds must be equal
+    // Element types must be strongly assignable
+    if (!strongly_assignable(*ta.sequence_type.element.common.type.in(),
+                             *tb.sequence_type.element.common.type.in())) {
+      return false;
+    }
 
     return true;
   }
@@ -123,13 +127,49 @@ namespace XTypes {
   bool TypeAssignability::assignable_array(const MinimalTypeObject& ta,
                                            const MinimalTypeObject& tb) const
   {
-    return false; // TODO: Implement this
+    if (TK_ARRAY != tb.kind) {
+      return false;
+    }
+
+    // Bounds must match
+    const LBoundSeq& bounds_a = ta.array_type.header.common.bound_seq;
+    const LBoundSeq& bounds_b = tb.array_type.header.common.bound_seq;
+    if (bounds_a.members.size() != bounds_b.members.size()) {
+      return false;
+    }
+
+    for (size_t i = 0; i < bounds_a.members.size(); ++i) {
+      if (bounds_a.members[i] != bounds_b.members[i]) {
+        return false;
+      }
+    }
+
+    // Element types must be strongly assignable
+    if (!strongly_assignable(*ta.array_type.element.common.type.in(),
+                             *tb.array_type.element.common.type.in())) {
+      return false;
+    }
+
+    return true;
   }
 
   bool TypeAssignability::assignable_map(const MinimalTypeObject& ta,
                                          const MinimalTypeObject& tb) const
   {
-    return false; // TODO: Implement this
+    if (TK_MAP != tb.kind) {
+      return false;
+    }
+
+    // Key element types must be strongly assignable
+    // Value element types must also be strongly assignable
+    if (!strongly_assignable(*ta.map_type.key.common.type.in(),
+                             *tb.map_type.key.common.type.in()) ||
+        !strongly_assignable(*ta.map_type.element.common.type.in(),
+                             *tb.map_type.element.common.type.in())) {
+      return false;
+    }
+
+    return true;
   }
 
   bool TypeAssignability::assignable_enum(const MinimalTypeObject& ta,
@@ -169,6 +209,7 @@ namespace XTypes {
         const ACE_CDR::Octet*
           h = tb.enumerated_type.literal_seq.members[i].detail.name_hash;
         ACE_CDR::ULong key_b = (h[0] << 24) | (h[1] << 16) | (h[2] << 8) | (h[3]);
+
         // Literals that have the same name must have the same value.
         if (ta_maps.find(key_b) == ta_maps.end() ||
             ta_maps[key_b] != tb.enumerated_type.literal_seq.members[i].common.value) {
@@ -251,6 +292,12 @@ namespace XTypes {
       }
       return false;
     }
+  }
+
+  bool TypeAssignability::strongly_assignable(const TypeIdentifier& tia,
+                                              const TypeIdentifier& tib) const
+  {
+    return false; // TODO: Implement this helper
   }
 
   bool TypeAssignability::is_delimited(const TypeIdentifier& ti) const

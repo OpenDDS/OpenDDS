@@ -44,6 +44,7 @@ namespace XTypes {
     bool assignable_primitive(const TypeIdentifier& ta, const TypeIdentifier& tb) const;
     bool assignable_string(const TypeIdentifier& ta, const TypeIdentifier& tb) const;
 
+    bool strongly_assignable(const TypeIdentifier& ta, const TypeIdentifier& tb) const;
     bool is_delimited(const TypeIdentifier& ti) const;
   };
 
