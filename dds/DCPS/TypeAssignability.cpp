@@ -5,6 +5,8 @@
 
 #include "TypeAssignability.h"
 
+#include <map>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -70,8 +72,8 @@ namespace XTypes {
 
     // Extensibility kind must match
     TypeFlag extensibility_mask = IS_FINAL | IS_APPENDABLE | IS_MUTABLE;
-    if (ta.union_type.union_flags && extensibility_mask !=
-        tb.union_type.union_flags && extensibility_mask) {
+    if (ta.union_type.union_flags & extensibility_mask !=
+        tb.union_type.union_flags & extensibility_mask) {
       return false;
     }
 
@@ -109,7 +111,13 @@ namespace XTypes {
   bool TypeAssignability::assignable_sequence(const MinimalTypeObject& ta,
                                               const MinimalTypeObject& tb) const
   {
-    return false; // TODO: Implement this
+    if (TK_ARRAY != tb.kind) {
+      return false;
+    }
+
+    // Bounds must be equal
+
+    return true;
   }
 
   bool TypeAssignability::assignable_array(const MinimalTypeObject& ta,
@@ -127,7 +135,49 @@ namespace XTypes {
   bool TypeAssignability::assignable_enum(const MinimalTypeObject& ta,
                                           const MinimalTypeObject& tb) const
   {
-    return true; // TODO: Implement this
+    if (TK_ENUM != tb.kind) {
+      return false;
+    }
+
+    // Assuming that EnumTypeFlag is used and contains extensibility
+    // of the containing type.
+    TypeFlag extensibility_mask = IS_FINAL | IS_APPENDABLE | IS_MUTABLE;
+    TypeFlag ta_ext = ta.enumerated_type.enum_flags & extensibility_mask;
+    TypeFlag tb_ext = tb.enumerated_type.enum_flags & extensibility_mask;
+    if (ta_ext != tb_ext) {
+      return false;
+    }
+
+    std::map<ACE_CDR::ULong, ACE_CDR::Long> ta_maps;
+
+    // If extensibility is FINAL, both must have the same literals.
+    if (IS_FINAL == ta_ext) {
+      size_t size_a = ta.enumerated_type.literal_seq.members.size();
+      size_t size_b = tb.enumerated_type.literal_seq.members.size();
+      if (size_a != size_b) {
+        return false;
+      }
+
+      for (size_t i = 0; i < size_a; ++i) {
+        const ACE_CDR::Octet*
+          h = ta.enumerated_type.literal_seq.members[i].detail.name_hash;
+        ACE_CDR::ULong key_a = (h[0] << 24) | (h[1] << 16) | (h[2] << 8) | (h[3]);
+        ta_maps[key_a] = ta.enumerated_type.literal_seq.members[i].common.value;
+      }
+
+      for (size_t i = 0; i < size_b; ++i) {
+        const ACE_CDR::Octet*
+          h = tb.enumerated_type.literal_seq.members[i].detail.name_hash;
+        ACE_CDR::ULong key_b = (h[0] << 24) | (h[1] << 16) | (h[2] << 8) | (h[3]);
+        // Literals that have the same name must have the same value.
+        if (ta_maps.find(key_b) == ta_maps.end() ||
+            ta_maps[key_b] != tb.enumerated_type.literal_seq.members[i].common.value) {
+          return false;
+        }
+      }
+    }
+
+    return true;
   }
 
   bool TypeAssignability::assignable_bitmask(const MinimalTypeObject& ta,
@@ -152,7 +202,7 @@ namespace XTypes {
   bool TypeAssignability::assignable_extended(const MinimalTypeObject& ta,
                                               const MinimalTypeObject& tb) const
   {
-    return false; // Reserved for future extensibility
+    return false; // Reserved for future extensions
   }
 
 
