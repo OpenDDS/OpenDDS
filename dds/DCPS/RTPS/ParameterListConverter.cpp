@@ -717,7 +717,7 @@ bool from_param_list(const ParameterList& param_list,
       break;
     }
 
-    default : {
+    default: {
       result = from_param_list(param_list, participant_data.ddsParticipantDataSecure.base.base);
       break;
     }

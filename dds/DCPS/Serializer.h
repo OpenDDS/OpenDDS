@@ -696,39 +696,39 @@ namespace IDL {
 OpenDDS_Dcps_Export
 bool max_serialized_size(
   const Encoding& encoding, size_t& size, const ACE_CDR::Short& value,
-   size_t count = 1);
+  size_t count = 1);
 OpenDDS_Dcps_Export
 bool max_serialized_size(
   const Encoding& encoding, size_t& size, const ACE_CDR::UShort& value,
-   size_t count = 1);
+  size_t count = 1);
 OpenDDS_Dcps_Export
 bool max_serialized_size(
   const Encoding& encoding, size_t& size, const ACE_CDR::Long& value,
-   size_t count = 1);
+  size_t count = 1);
 OpenDDS_Dcps_Export
 bool max_serialized_size(
   const Encoding& encoding, size_t& size, const ACE_CDR::ULong& value,
-   size_t count = 1);
+  size_t count = 1);
 OpenDDS_Dcps_Export
 bool max_serialized_size(
   const Encoding& encoding, size_t& size, const ACE_CDR::LongLong& value,
-   size_t count = 1);
+  size_t count = 1);
 OpenDDS_Dcps_Export
 bool max_serialized_size(
   const Encoding& encoding, size_t& size, const ACE_CDR::ULongLong& value,
-   size_t count = 1);
+  size_t count = 1);
 OpenDDS_Dcps_Export
 bool max_serialized_size(
   const Encoding& encoding, size_t& size, const ACE_CDR::Float& value,
-   size_t count = 1);
+  size_t count = 1);
 OpenDDS_Dcps_Export
 bool max_serialized_size(
   const Encoding& encoding, size_t& size, const ACE_CDR::Double& value,
-   size_t count = 1);
+  size_t count = 1);
 OpenDDS_Dcps_Export
 bool max_serialized_size(
   const Encoding& encoding, size_t& size, const ACE_CDR::LongDouble& value,
-   size_t count = 1);
+  size_t count = 1);
 
 // predefined type method disambiguators.
 OpenDDS_Dcps_Export
