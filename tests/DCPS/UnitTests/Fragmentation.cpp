@@ -37,7 +37,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
     DataSampleHeader dsh;
     const size_t N = 300;
     dsh.message_length_ = N;
-    ACE_Message_Block header_mb(DataSampleHeader::max_marshaled_size());
+    ACE_Message_Block header_mb(DataSampleHeader::get_max_serialized_size());
     header_mb << dsh;
 
     { // simple case: no content-filter, data in a single messageblock
