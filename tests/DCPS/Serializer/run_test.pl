@@ -10,11 +10,9 @@ use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 
-my $args = "--test" ;
-
 my $test = new PerlDDS::TestFramework();
-$test->process("SerializerTest", "SerializerTest", $args);
+$test->process("SerializerTest", "SerializerTest");
 $test->start_process("SerializerTest");
 my $status = $test->finish(60);
-print STDERR "ERROR: client returned $status\n" if $status ;
-exit ($status ne 0)? 1 : 0 ;
+print STDERR "ERROR: client returned $status\n" if $status;
+exit $status ? 1 : 0;
