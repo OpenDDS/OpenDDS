@@ -2338,19 +2338,19 @@ namespace {
         "  if (!(outer_strm << uni._d())) {\n"
         "    return false;\n"
         "  }\n"
-        /* TODO(iguessthislldo): ?????????
+        "  const Encoding encoding(\n"
+        "    Encoding::KIND_CDR_PARAMLIST, outer_strm.swap_bytes());\n"
         "  size_t size = 0;\n"
         "  serialized_size(encoding, size, uni);\n"
         "  size -= 4; // parameterId & length\n"
-        "  const size_t post_pad = 4 - ((size + pad) % 4);\n"
-        "  const size_t total = size + pad + ((post_pad < 4) ? post_pad : 0);\n"
-        "  if (size + pad > ACE_UINT16_MAX || "
+        "  const size_t post_pad = 4 - ((size) % 4);\n"
+        "  const size_t total = size + ((post_pad < 4) ? post_pad : 0);\n"
+        "  if (size > ACE_UINT16_MAX || "
         "!(outer_strm << ACE_CDR::UShort(total))) {\n"
         "    return false;\n"
         "  }\n"
-        "  ACE_Message_Block param(size + pad);\n"
-        "  Serializer strm(&param, outer_strm.swap_bytes(), "
-        "outer_strm.encoding().alignment());\n"
+        "  ACE_Message_Block param(size);\n"
+        "  Serializer strm(&param, encoding);\n"
         "  if (!insertParamData(strm, uni)) {\n"
         "    return false;\n"
         "  }\n"
@@ -2365,7 +2365,6 @@ namespace {
         "    return outer_strm.write_octet_array(padding, "
         "ACE_CDR::ULong(post_pad));\n"
         "  }\n"
-        */
         "  return true;\n";
     }
     {
@@ -2397,8 +2396,9 @@ namespace {
         "    return false;\n"
         "  }\n"
         "  param.wr_ptr(size);\n"
-        "  Serializer strm(&param, outer_strm.swap_bytes(), "
-        "Serializer::ALIGN_CDR);\n"
+        "  const Encoding encoding(\n"
+        "    Encoding::KIND_CDR_PARAMLIST, outer_strm.swap_bytes());\n"
+        "  Serializer strm(&param, encoding);"
         "  switch (disc) {\n";
       generateSwitchBody(streamCommon, branches, discriminator,
                          "return", ">> ", cxx.c_str(), true);

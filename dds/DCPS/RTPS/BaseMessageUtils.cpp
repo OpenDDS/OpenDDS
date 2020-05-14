@@ -49,6 +49,15 @@ int locator_to_address(ACE_INET_Addr& dest,
   return -1;
 }
 
+namespace {
+  inline
+  const DCPS::Encoding& get_locators_encoding() {
+    using namespace OpenDDS::DCPS;
+    static const Encoding encoding(Encoding::KIND_CDR_PLAIN, ENDIAN_BIG);
+    return encoding;
+  }
+}
+
 DDS::ReturnCode_t blob_to_locators(const DCPS::TransportBLOB& blob,
                                    DCPS::LocatorSeq& locators,
                                    bool* requires_inline_qos,
@@ -60,7 +69,7 @@ DDS::ReturnCode_t blob_to_locators(const DCPS::TransportBLOB& blob,
   ACE_Message_Block mb(&db, ACE_Message_Block::DONT_DELETE, 0 /*mb_alloc*/);
   mb.wr_ptr(mb.space());
 
-  DCPS::Serializer ser(&mb, ACE_CDR_BYTE_ORDER, DCPS::Serializer::ALIGN_CDR);
+  DCPS::Serializer ser(&mb, get_locators_encoding());
   if (!(ser >> locators)) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) blob_to_locators: ")
@@ -94,16 +103,22 @@ void locators_to_blob(const DCPS::LocatorSeq& locators,
                       DCPS::TransportBLOB& blob)
 {
   using namespace OpenDDS::DCPS;
+  const Encoding& encoding = get_locators_encoding();
   size_t size = 0;
-  Encoding encoding(Encoding::KIND_CDR_PLAIN, ENDIAN_LITTLE);
   serialized_size(encoding, size, locators);
   ACE_Message_Block mb_locator(size + 1);
   Serializer ser(&mb_locator, encoding);
-  ser << locators;
+  if (!(ser << locators)) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) locators_to_blob: ")
+      ACE_TEXT("Failed to serialize locators to blob\n")));
+  }
   // Add a bool for 'requires inline qos', see Sedp::set_inline_qos():
   // if the bool is no longer the last octet of the sequence then that function
   // must be changed as well.
-  ser << ACE_OutputCDR::from_boolean(false);
+  if (!(ser << ACE_OutputCDR::from_boolean(false))) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) locators_to_blob: ")
+      ACE_TEXT("Failed to serialize boolean for blob\n")));
+  }
   message_block_to_sequence(mb_locator, blob);
 }
 
