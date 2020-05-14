@@ -25,6 +25,26 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+OPENDDS_STRING endianness_to_string(Endianness endianness)
+{
+  switch (endianness) {
+  case ENDIAN_BIG:
+    return "big-endian ("
+#ifdef ACE_LITTLE_ENDIAN
+      "non-"
+#endif
+      "native)";
+  case ENDIAN_LITTLE:
+    return "little-endian ("
+#ifndef ACE_LITTLE_ENDIAN
+      "non-"
+#endif
+      "native)";
+  default:
+    return "invalid endianness";
+  }
+}
+
 Encoding::Encoding()
 : endianness_(ENDIAN_NATIVE)
 {
@@ -126,6 +146,15 @@ OPENDDS_STRING Encoding::kind_to_string(Kind value) {
   default:
     return to_dds_string(static_cast<unsigned>(value), true);
   }
+}
+
+OPENDDS_STRING Encoding::to_string() const {
+  OPENDDS_STRING rv = Encoding::kind_to_string(kind_) + ", " +
+    endianness_to_string(endianness_);
+  if (!zero_init_padding_ ) {
+    rv += ", non-initialized padding";
+  }
+  return rv;
 }
 
 const char Serializer::ALIGN_PAD[] = {0};
@@ -392,7 +421,9 @@ bool Serializer::read_parameter_id(unsigned& id, size_t& size)
   const Encoding::XcdrVersion xcdr = encoding().xcdr_version();
   if (xcdr == Encoding::XCDR1) {
     // Get the "short" id and size
-    align_r(4);
+    if (!align_r(4)) {
+      return false;
+    }
     ACE_CDR::UShort pid;
     if (!(*this >> pid)) {
       return false;
@@ -462,7 +493,9 @@ bool Serializer::write_parameter_id(unsigned id, size_t size)
 {
   const Encoding::XcdrVersion xcdr = encoding().xcdr_version();
   if (xcdr == Encoding::XCDR1) {
-    align_w(4);
+    if (!align_w(4)) {
+      return false;
+    }
 
     // Determine if we need to use a short or long PID
     const bool long_pid = id > (1 << 14) || size > (1 << 16);

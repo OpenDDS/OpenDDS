@@ -73,6 +73,9 @@ enum Endianness {
 #endif
 };
 
+OpenDDS_Dcps_Export
+OPENDDS_STRING endianness_to_string(Endianness endianness);
+
 const size_t boolean_cdr_size = 1;
 const size_t byte_cdr_size = 1;
 const size_t int8_cdr_size = 1;
@@ -85,7 +88,7 @@ const size_t int64_cdr_size = 8;
 const size_t uint64_cdr_size = 8;
 const size_t float32_cdr_size = 4;
 const size_t float64_cdr_size = 8;
-const size_t float128_cdr_size = 8;
+const size_t float128_cdr_size = 16;
 const size_t char8_cdr_size = 1;
 const size_t char16_cdr_size = 2;
 
@@ -103,6 +106,9 @@ class OpenDDS_Dcps_Export Encoding {
 public:
   /**
    * Encoding Kinds.
+   *
+   * TODO(iguessthislldo) Separate this into real encoding and the
+   * encapsulation header encoding values.
    *
    * For encapsulation header encoding kinds that can have an endianness on the
    * LSB, define them with the LSB set to 0 (even). If this assumption can't be
@@ -214,6 +220,8 @@ public:
 
   /// Returns has_endianness(this->kind_)
   bool has_endianness() const;
+
+  OPENDDS_STRING to_string() const;
 
   static OPENDDS_STRING kind_to_string(Kind value);
 
@@ -554,12 +562,12 @@ public:
 
   /// Align for reading: moves current_->rd_ptr() past the alignment padding.
   /// Alignments of 2, 4, or 8 are supported by CDR and this implementation.
-  int align_r(size_t alignment);
+  bool align_r(size_t alignment);
 
   /// Align for writing: moves current_->wr_ptr() past the padding, possibly
   /// zero-filling the pad bytes (based on the alignment_ setting).
   /// Alignments of 2, 4, or 8 are supported by CDR and this implementation.
-  int align_w(size_t alignment);
+  bool align_w(size_t alignment);
 
   /**
    * Read a XCDR parameter ID used in XCDR parameter lists.
@@ -774,7 +782,7 @@ void serialized_size_ulong(const Encoding& encoding, size_t& size,
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#ifdef __ACE_INLINE__
+#if defined __ACE_INLINE__ && !defined OPENDDS_DDS_DCPS_SERIALIZER_INL
 #  include "Serializer.inl"
 #endif
 
