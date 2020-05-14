@@ -68,48 +68,104 @@ namespace XTypes {
       case TK_UINT8:
       case TK_CHAR8:
       case TK_CHAR16:
-        return assignable_primitive(tia, tb); // TODO: Implement this helper
-
+        return assignable_primitive(tia, tb);
       case TI_STRING8_SMALL:
       case TI_STRING8_LARGE:
       case TI_STRING16_SMALL:
       case TI_STRING16_LARGE:
-        return assignable_string(tia, tb); // TODO: Implement this helper
-
+        return assignable_string(tia, tb);
       case TI_PLAIN_SEQUENCE_SMALL:
       case TI_PLAIN_SEQUENCE_LARGE:
-        return assignable_sequence(tia, tb); // TODO: Implement this helper
-
+        return assignable_plain_sequence(tia, tb);
       case TI_PLAIN_ARRAY_SMALL:
       case TI_PLAIN_ARRAY_LARGE:
-        return assignable_array(tia, tb); // TODO: Implement this helper
-
+        return assignable_plain_array(tia, tb);
       case TI_PLAIN_MAP_SMALL:
       case TI_PLAIN_MAP_LARGE:
-        return assignable_map(tia, tb); // TODO: Implement this helper
-
+        return assignable_plain_map(tia, tb);
       case TI_STRONGLY_CONNECTED_COMPONENT:
         // Does alias ever have SCC as its base type?
         return false;
-
       case EK_COMPLETE:
         // Supporting minimal base type only
         return false;
-
       case EK_MINIMAL:
         const MinimalTypeObject& base_type_a = lookup_minimal(tia);
         TypeObject wrapper_a(base_type_a), wrapper_b(tb);
         return assignable(wrapper_a, wrapper_b);
-
       default:
-        return false;
+        return false; // Future extensions
       }
     } else if (TK_ALIAS != ta.kind && TK_ALIAS == tb.kind) {
       const TypeIdentifier& tib = *tb.alias_type.body.common.related_type.in();
-      
+      switch (ta.kind) {
+      case TK_ANNOTATION:
+        return assignable_annotation(ta, tib);
+      case TK_STRUCTURE:
+        return assignable_structure(ta, tib);
+      case TK_UNION:
+        return assignable_union(ta, tib);
+      case TK_BITSET:
+        return assignable_bitset(ta, tib);
+      case TK_SEQUENCE:
+        return assignable_sequence(ta, tib);
+      case TK_ARRAY:
+        return assignable_array(ta, tib);
+      case TK_MAP:
+        return assignable_map(ta, tib);
+      case TK_ENUM:
+        return assignable_enum(ta, tib);
+      case TK_BITMASK:
+        return assignable_bitmask(ta, tib);
+      default:
+        return false; // Future extensions
+      }
     } else if (TK_ALIAS == ta.kind && TK_ALIAS == tb.kind) {
       const TypeIdentifier& tia = *ta.alias_type.body.common.related_type.in();
       const TypeIdentifier& tib = *tb.alias_type.body.common.related_type.in();
+      switch (tia.kind) {
+      case TK_BOOLEAN:
+      case TK_BYTE:
+      case TK_INT16:
+      case TK_INT32:
+      case TK_INT64:
+      case TK_UINT16:
+      case TK_UINT32:
+      case TK_UINT64:
+      case TK_FLOAT32:
+      case TK_FLOAT64:
+      case TK_FLOAT128:
+      case TK_INT8:
+      case TK_UINT8:
+      case TK_CHAR8:
+      case TK_CHAR16:
+        return assignable_primitive(tia, tib);
+      case TI_STRING8_SMALL:
+      case TI_STRING8_LARGE:
+      case TI_STRING16_SMALL:
+      case TI_STRING16_LARGE:
+        return assignable_string(tia, tib);
+      case TI_PLAIN_SEQUENCE_SMALL:
+      case TI_PLAIN_SEQUENCE_LARGE:
+        return assignable_plain_sequence(tia, tib);
+      case TI_PLAIN_ARRAY_SMALL:
+      case TI_PLAIN_ARRAY_LARGE:
+        return assignable_plain_array(tia, tib);
+      case TI_PLAIN_MAP_SMALL:
+      case TI_PLAIN_MAP_LARGE:
+        return assignable_plain_map(tia, tib);
+      case TI_STRONGLY_CONNECTED_COMPONENT:
+        return false;
+      case EK_COMPLETE:
+        return false;
+      case EK_MINIMAL:
+        const MinimalTypeObject& base_type_a = lookup_minimal(tia);
+        const MinimalTypeObject& base_type_b = lookup_minimal(tib);
+        TypeObject wrapper_a(base_type_a), wrapper_b(base_type_b);
+        return assignable(wrapper_a, wrapper_b);
+      default:
+        return false; // Future extensions
+      }
     }
 
     return false;
@@ -121,8 +177,20 @@ namespace XTypes {
     return false; // TODO: Implement this
   }
 
+  bool TypeAssignability::assignable_annotation(const MinimalTypeObject& ta,
+                                                const TypeIdentifier& tb) const
+  {
+    return false; // TODO: Implement this
+  }
+
   bool TypeAssignability::assignable_struct(const MinimalTypeObject& ta,
                                             const MinimalTypeObject& tb) const
+  {
+    return false; // TODO: Implement this
+  }
+
+  bool TypeAssignability::assignable_struct(const MinimalTypeObject& ta,
+                                            const TypeIdentifier& tb) const
   {
     return false; // TODO: Implement this
   }
@@ -166,8 +234,20 @@ namespace XTypes {
     return true;
   }
 
+  bool TypeAssignability::assignable_union(const MinimalTypeObject& ta,
+                                           const TypeIdentifier& tb) const
+  {
+    return false; // TODO: Implement this
+  }
+
   bool TypeAssignability::assignable_bitset(const MinimalTypeObject& ta,
                                             const MinimalTypeObject& tb) const
+  {
+    return false; // TODO: Implement this
+  }
+
+  bool TypeAssignability::assignable_bitset(const MinimalTypeObject& ta,
+                                            const TypeIdentifier& tb) const
   {
     return false; // TODO: Implement this
   }
@@ -186,6 +266,12 @@ namespace XTypes {
     }
 
     return true;
+  }
+
+  bool TypeAssignability::assignable_sequence(const MinimalTypeObject& ta,
+                                              const TypeIdentifier& tb) const
+  {
+    return false; // TODO: Implement this
   }
 
   bool TypeAssignability::assignable_array(const MinimalTypeObject& ta,
@@ -217,6 +303,12 @@ namespace XTypes {
     return true;
   }
 
+  bool TypeAssignability::assignable_array(const MinimalTypeObject& ta,
+                                           const TypeIdentifier& tb) const
+  {
+    return false; // TODO: Implement this
+  }
+
   bool TypeAssignability::assignable_map(const MinimalTypeObject& ta,
                                          const MinimalTypeObject& tb) const
   {
@@ -234,6 +326,12 @@ namespace XTypes {
     }
 
     return true;
+  }
+
+  bool TypeAssignability::assignable_map(const MinimalTypeObject& ta,
+                                         const TypeIdentifier& tb) const
+  {
+    return false; // TODO: Implement this
   }
 
   bool TypeAssignability::assignable_enum(const MinimalTypeObject& ta,
@@ -285,6 +383,12 @@ namespace XTypes {
     return true;
   }
 
+  bool TypeAssignability::assignable_enum(const MinimalTypeObject& ta,
+                                          const TypeIdentifier& tb) const
+  {
+    return false; // TODO: Implement this
+  }
+
   bool TypeAssignability::assignable_bitmask(const MinimalTypeObject& ta,
                                              const MinimalTypeObject& tb) const
   {
@@ -302,6 +406,12 @@ namespace XTypes {
     }
 
     return false;
+  }
+
+  bool TypeAssignability::assignable_bitmask(const MinimalTypeObject& ta,
+                                             const TypeIdentifier& tb) const
+  {
+    return false; // TODO: Implement this
   }
 
   bool TypeAssignability::assignable_extended(const MinimalTypeObject& ta,
@@ -341,6 +451,12 @@ namespace XTypes {
     return false;
   }
 
+  bool TypeAssignability::assignable_primitive(const TypeIdentifier& ta,
+                                               const MinimalTypeObject& tb) const
+  {
+    return false; // TODO: Implement this
+  }
+
   bool TypeAssignability::assignable_string(const TypeIdentifier& ta,
                                             const TypeIdentifier& tb) const
   {
@@ -356,6 +472,48 @@ namespace XTypes {
       }
       return false;
     }
+  }
+
+  bool TypeAssignability::assignable_string(const TypeIdentifier& ta,
+                                            const MinimalTypeObject& tb) const
+  {
+    return false; // TODO: Implement this
+  }
+
+  bool TypeAssignability::assignable_plain_sequence(const TypeIdentifier& ta,
+                                                    const TypeIdentifier& tb) const
+  {
+    return false; // TODO: Implement this
+  }
+
+  bool TypeAssignability::assignable_plain_sequence(const TypeIdentifier& ta,
+                                                    const MinimalTypeObject& tb) const
+  {
+    return false; // TODO: Implement this
+  }
+
+  bool TypeAssignability::assignable_plain_array(const TypeIdentifier& ta,
+                                                 const TypeIdentifier& tb) const
+  {
+    return false; // TODO: Implement this
+  }
+
+  bool TypeAssignability::assignable_plain_array(const TypeIdentifier& ta,
+                                                 const MinimalTypeObject& tb) const
+  {
+    return false; // TODO: Implement this
+  }
+
+  bool TypeAssignability::assignable_plain_map(const TypeIdentifier& ta,
+                                               const TypeIdentifier& tb) const
+  {
+    return false; // TODO: Implement this
+  }
+
+  bool TypeAssignability::assignable_plain_map(const TypeIdentifier& ta,
+                                               const MinimalTypeObject& tb) const
+  {
+    return false; // TODO: Implement this
   }
 
   bool TypeAssignability::strongly_assignable(const TypeIdentifier& tia,
