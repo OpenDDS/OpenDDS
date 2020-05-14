@@ -16,9 +16,11 @@ namespace XTypes {
                                      const TypeObject& tb) const
   {
     if (EK_MINIMAL == ta.kind && EK_MINIMAL == tb.kind) {
-      switch (ta.minimal.kind) {
-      case TK_ALIAS:
+      if (TK_ALIAS == ta.minimal.kind || TK_ALIAS == tb.minimal.kind) {
         return assignable_alias(ta.minimal, tb.minimal);
+      }
+
+      switch (ta.minimal.kind) {
       case TK_ANNOTATION:
         return assignable_annotation(ta.minimal, tb.minimal);
       case TK_STRUCTURE:
@@ -48,7 +50,69 @@ namespace XTypes {
   bool TypeAssignability::assignable_alias(const MinimalTypeObject& ta,
                                            const MinimalTypeObject& tb) const
   {
-    return false; // TODO: Implement this
+    if (TK_ALIAS == ta.kind && TK_ALIAS != tb.kind) {
+      const TypeIdentifier& tia = *ta.alias_type.body.common.related_type.in();
+      switch (tia.kind) {
+      case TK_BOOLEAN:
+      case TK_BYTE:
+      case TK_INT16:
+      case TK_INT32:
+      case TK_INT64:
+      case TK_UINT16:
+      case TK_UINT32:
+      case TK_UINT64:
+      case TK_FLOAT32:
+      case TK_FLOAT64:
+      case TK_FLOAT128:
+      case TK_INT8:
+      case TK_UINT8:
+      case TK_CHAR8:
+      case TK_CHAR16:
+        return assignable_primitive(tia, tb); // TODO: Implement this helper
+
+      case TI_STRING8_SMALL:
+      case TI_STRING8_LARGE:
+      case TI_STRING16_SMALL:
+      case TI_STRING16_LARGE:
+        return assignable_string(tia, tb); // TODO: Implement this helper
+
+      case TI_PLAIN_SEQUENCE_SMALL:
+      case TI_PLAIN_SEQUENCE_LARGE:
+        return assignable_sequence(tia, tb); // TODO: Implement this helper
+
+      case TI_PLAIN_ARRAY_SMALL:
+      case TI_PLAIN_ARRAY_LARGE:
+        return assignable_array(tia, tb); // TODO: Implement this helper
+
+      case TI_PLAIN_MAP_SMALL:
+      case TI_PLAIN_MAP_LARGE:
+        return assignable_map(tia, tb); // TODO: Implement this helper
+
+      case TI_STRONGLY_CONNECTED_COMPONENT:
+        // Does alias ever have SCC as its base type?
+        return false;
+
+      case EK_COMPLETE:
+        // Supporting minimal base type only
+        return false;
+
+      case EK_MINIMAL:
+        const MinimalTypeObject& base_type_a = lookup_minimal(tia);
+        TypeObject wrapper_a(base_type_a), wrapper_b(tb);
+        return assignable(wrapper_a, wrapper_b);
+
+      default:
+        return false;
+      }
+    } else if (TK_ALIAS != ta.kind && TK_ALIAS == tb.kind) {
+      const TypeIdentifier& tib = *tb.alias_type.body.common.related_type.in();
+      
+    } else if (TK_ALIAS == ta.kind && TK_ALIAS == tb.kind) {
+      const TypeIdentifier& tia = *ta.alias_type.body.common.related_type.in();
+      const TypeIdentifier& tib = *tb.alias_type.body.common.related_type.in();
+    }
+
+    return false;
   }
 
   bool TypeAssignability::assignable_annotation(const MinimalTypeObject& ta,
