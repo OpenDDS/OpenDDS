@@ -543,13 +543,27 @@ TEST_F(BeginHandshakeReplyTest, BeginHandshakeReply_PendingHandshakeMessage_Succ
   DDS::Security::HandshakeMessageToken reply_token(request_token);
 
   r = auth.begin_handshake_reply(mp2.handshake_handle,
-                                 reply_token, // Token received from mp1 after it called begin_handhsake_request
+                                 reply_token, // Token received from mp1 after it called begin_handshake_request
+                                 mp1.id_handle,
+                                 mp2.id_handle,
+                                 mp2.mock_participant_builtin_topic_data,
+                                 ex);
+  const DDS::Security::HandshakeHandle mp2_handshake_handle = mp2.handshake_handle;
+
+  ASSERT_EQ(r, DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE);
+  ASSERT_NE(mp2_handshake_handle, DDS::HANDLE_NIL);
+
+  // Suppose the initiator didn't get the reply and resends the request.
+
+  r = auth.begin_handshake_reply(mp2.handshake_handle,
+                                 reply_token, // Token received from mp1 after it called begin_handshake_request
                                  mp1.id_handle,
                                  mp2.id_handle,
                                  mp2.mock_participant_builtin_topic_data,
                                  ex);
 
   ASSERT_EQ(r, DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE);
+  ASSERT_EQ(mp2_handshake_handle, mp2.handshake_handle);
 }
 
 TEST_F(AuthenticationTest, BeginHandshakeRequest_BeginHandshakeReply_ProcessHandshake_Success)
