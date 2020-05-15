@@ -332,10 +332,10 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
     return DDS::Security::VALIDATION_FAILED;
   }
 
-  const LocalParticipantData& local_data = *(handshake_data.first);
-  RemoteParticipantData& remote_data = *(handshake_data.second);
+  const LocalParticipantData& local_data = *handshake_data.first;
+  RemoteParticipantData& remote_data = *handshake_data.second;
 
-  const LocalAuthCredentialData& local_credential_data = *(local_data.credentials);
+  const LocalAuthCredentialData& local_credential_data = *local_data.credentials;
 
   SSL::DiffieHellman::unique_ptr diffie_hellman(new SSL::DiffieHellman(new SSL::ECDH_PRIME_256_V1_CEUM));
 
