@@ -2338,7 +2338,7 @@ namespace {
         "  if (!(outer_strm << uni._d())) {\n"
         "    return false;\n"
         "  }\n"
-        "  size_t size = serialized_size(encoding, uni);\n"
+        "  size_t size = serialized_size(outer_strm.encoding(), uni);\n"
         "  size -= 4; // parameterId & length\n"
         "  const size_t post_pad = 4 - ((size) % 4);\n"
         "  const size_t total = size + ((post_pad < 4) ? post_pad : 0);\n"
