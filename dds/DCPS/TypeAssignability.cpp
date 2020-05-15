@@ -102,7 +102,7 @@ namespace XTypes {
       case TK_ANNOTATION:
         return assignable_annotation(ta, tib);
       case TK_STRUCTURE:
-        return assignable_structure(ta, tib);
+        return assignable_struct(ta, tib);
       case TK_UNION:
         return assignable_union(ta, tib);
       case TK_BITSET:
@@ -171,6 +171,10 @@ namespace XTypes {
     return false;
   }
 
+  /**
+   * @brief The first type must be TK_ANNOTATION.
+   *        The second type must not be TK_ALIAS.
+   */
   bool TypeAssignability::assignable_annotation(const MinimalTypeObject& ta,
                                                 const MinimalTypeObject& tb) const
   {
@@ -178,6 +182,10 @@ namespace XTypes {
     return false;
   }
 
+  /**
+   * @brief The first type must be TK_ANNOTATION.
+   *        The second type can be anything.
+   */
   bool TypeAssignability::assignable_annotation(const MinimalTypeObject& ta,
                                                 const TypeIdentifier& tb) const
   {
@@ -185,18 +193,30 @@ namespace XTypes {
     return false;
   }
 
+  /**
+   * @brief The first type must be TK_STRUCTURE.
+   *        The second type must not be TK_ALIAS.
+   */
   bool TypeAssignability::assignable_struct(const MinimalTypeObject& ta,
                                             const MinimalTypeObject& tb) const
   {
     return false; // TODO: Implement this
   }
 
+  /**
+   * @brief The first type must be TK_STRUCTURE.
+   *        The second type can be anything.
+   */
   bool TypeAssignability::assignable_struct(const MinimalTypeObject& ta,
                                             const TypeIdentifier& tb) const
   {
     return false; // TODO: Implement this
   }
 
+  /**
+   * @brief The first type must be TK_UNION.
+   *        The second type must not be TK_ALIAS.
+   */
   bool TypeAssignability::assignable_union(const MinimalTypeObject& ta,
                                            const MinimalTypeObject& tb) const
   {
@@ -236,24 +256,40 @@ namespace XTypes {
     return true;
   }
 
+  /**
+   * @brief The first type must be TK_UNION.
+   *        The second type can be anything.
+   */
   bool TypeAssignability::assignable_union(const MinimalTypeObject& ta,
                                            const TypeIdentifier& tb) const
   {
     return false; // TODO: Implement this
   }
 
+  /**
+   * @brief The first type must be TK_BITSET.
+   *        The second type must not be TK_ALIAS.
+   */
   bool TypeAssignability::assignable_bitset(const MinimalTypeObject& ta,
                                             const MinimalTypeObject& tb) const
   {
     return false; // TODO: Implement this
   }
 
+  /**
+   * @brief The first type must be TK_BITSET.
+   *        The second type can be anything.
+   */
   bool TypeAssignability::assignable_bitset(const MinimalTypeObject& ta,
                                             const TypeIdentifier& tb) const
   {
     return false; // TODO: Implement this
   }
 
+  /**
+   * @brief The first type must be TK_SEQUENCE.
+   *        The second type must not be TK_ALIAS.
+   */
   bool TypeAssignability::assignable_sequence(const MinimalTypeObject& ta,
                                               const MinimalTypeObject& tb) const
   {
@@ -261,21 +297,43 @@ namespace XTypes {
       return false;
     }
 
-    // Element types must be strongly assignable
-    if (!strongly_assignable(*ta.sequence_type.element.common.type.in(),
-                             *tb.sequence_type.element.common.type.in())) {
-      return false;
-    }
-
-    return true;
+    return strongly_assignable(*ta.sequence_type.element.common.type.in(),
+                               *tb.sequence_type.element.common.type.in());
   }
 
+  /**
+   * @brief The first type must be TK_SEQUENCE.
+   *        The second type can be anything.
+   */
   bool TypeAssignability::assignable_sequence(const MinimalTypeObject& ta,
                                               const TypeIdentifier& tb) const
   {
-    return false; // TODO: Implement this
+    if (TI_PLAIN_SEQUENCE_SMALL == tb.kind) {
+      return strongly_assignable(*ta.element.common.type.in(),
+                                 *tb.seq_sdefn.element_identifier.in());
+    } else if (TI_PLAIN_SEQUENCE_LARGE == tb.kind) {
+      return strongly_assignable(*ta.element.common.type.in(),
+                                 *tb.seq_ldefn.element_identifier.in());
+    } else if (EK_MINIMAL == tb.kind) {
+      const MinimalTypeObject& tob = lookup_minimal(tb);
+      if (TK_SEQUENCE == tob.kind) {
+        return assignable_sequence(ta, tob);
+      } else if (TK_ALIAS == tob.kind) {
+        const TypeIdentifier& base = *tob.alias_type.body.common.related_type.in();
+        return assignable_sequence(ta, base);
+      }
+    } else if (EK_COMPLETE == tb.kind) {
+      // Assuming tb.kind of EK_COMPLETE is not supported
+      return false;
+    }
+
+    return false;
   }
 
+  /**
+   * @brief The first type must be TK_ARRAY.
+   *        The second type must not be TK_ALIAS.
+   */
   bool TypeAssignability::assignable_array(const MinimalTypeObject& ta,
                                            const MinimalTypeObject& tb) const
   {
@@ -296,21 +354,66 @@ namespace XTypes {
       }
     }
 
-    // Element types must be strongly assignable
-    if (!strongly_assignable(*ta.array_type.element.common.type.in(),
-                             *tb.array_type.element.common.type.in())) {
-      return false;
-    }
-
-    return true;
+    return strongly_assignable(*ta.array_type.element.common.type.in(),
+                               *tb.array_type.element.common.type.in());
   }
 
+  /**
+   * @brief The first type must be TK_ARRAY.
+   *        The second type can be anything.
+   */
   bool TypeAssignability::assignable_array(const MinimalTypeObject& ta,
                                            const TypeIdentifier& tb) const
   {
-    return false; // TODO: Implement this
+    const LBoundSeq& bounds_a = ta.array_type.header.common.bound_seq;
+    if (TI_PLAIN_ARRAY_SMALL == tb.kind) {
+      SBoundSeq bounds_b = tb.array_sdefn.array_bound_seq;
+      if (bounds_a.members.size() != bounds_b.members.size()) {
+        return false;
+      }
+
+      for (size_t i = 0; i < bounds_a.members.size(); ++i) {
+        if (bounds_a.members[i] != static_cast<LBound>(bounds_b.members[i])) {
+          return false;
+        }
+      }
+
+      return strongly_assignable(*ta.array_type.element.common.type.in(),
+                                 *tb.array_sdefn.element_identifier.in());
+    } else if (TI_PLAIN_ARRAY_LARGE == tb.kind) {
+      LBoundSeq bounds_b = tb.array_ldefn.array_bound_seq;
+      if (bounds_a.members.size() != bounds_b.members.size()) {
+        return false;
+      }
+
+      for (size_t i = 0; i < bounds_a.members.size(); ++i) {
+        if (bounds_a.members[i] != bounds_b.members[i]) {
+          return false;
+        }
+      }
+
+      return strongly_assignable(*ta.array_type.element.common.type.in(),
+                                 *tb.array_ldefn.element_identifier.in());
+    } else if (EK_MINIMAL == tb.kind) {
+      const MinimalTypeObject& tob = lookup_minimal(tb);
+      if (TK_ARRAY == tob.kind) {
+        return assignable_array(ta, tob);
+      } else if (TK_ALIAS == tob.kind) {
+        const TypeIdentifier& base = *tob.alias_type.body.common.related_type.in();
+        return assignable_array(ta, base);
+      }
+    } else if (EK_COMPLETE == tb.kind) {
+      // Assuming tb.kind of EK_COMPLETE is not supported
+      return false;
+    }
+
+    return false;
   }
 
+  /**
+   * @brief The first type must be TK_MAP.
+   *        The second type must not be TK_ALIAS.
+   */
   bool TypeAssignability::assignable_map(const MinimalTypeObject& ta,
                                          const MinimalTypeObject& tb) const
   {
@@ -318,24 +421,49 @@ namespace XTypes {
       return false;
     }
 
-    // Key element types must be strongly assignable
-    // Value element types must also be strongly assignable
-    if (!strongly_assignable(*ta.map_type.key.common.type.in(),
-                             *tb.map_type.key.common.type.in()) ||
-        !strongly_assignable(*ta.map_type.element.common.type.in(),
-                             *tb.map_type.element.common.type.in())) {
-      return false;
-    }
-
-    return true;
+    return strongly_assignable(*ta.map_type.key.common.type.in(),
+                               *tb.map_type.key.common.type.in()) &&
+      strongly_assignable(*ta.map_type.element.common.type.in(),
+                          *tb.map_type.element.common.type.in());
   }
 
+  /**
+   * @brief The first type must be TK_MAP.
+   *        The second type can be anything.
+   */
   bool TypeAssignability::assignable_map(const MinimalTypeObject& ta,
                                          const TypeIdentifier& tb) const
   {
-    return false; // TODO: Implement this
+    if (TI_PLAIN_MAP_SMALL == tb.kind) {
+      return strongly_assignable(*ta.map_type.key.common.type.in(),
+                                 *tb.map_sdefn.key_identifier.in()) &&
+        strongly_assignable(*ta.map_type.element.common.type.in(),
+                            *tb.map_sdefn.element_identifier.in());
+    } else if (TI_PLAIN_MAP_LARGE == tb.kind) {
+      return strongly_assignable(*ta.map_type.key.common.type.in(),
+                                 *tb.map_ldefn.key_identifier.in()) &&
+        strongly_assignable(*ta.map_type.element.common.type.in(),
+                            *tb.map_ldefn.element_identifier.in());
+    } else if (EK_MINIMAL == tb.kind) {
+      const MinimalTypeObject& tob = lookup_minimal(tb);
+      if (TK_MAP == tob.kind) {
+        return assignable_map(ta, tob);
+      } else if (TK_ALIAS == tob.kind) {
+        const TypeIdentifier& base = *tob.alias_type.body.common.related_type.in();
+        return assignable_map(ta, base);
+      }
+    } else if (EK_COMPLETE == tb.kind) {
+      // Assuming tb.kind of EK_COMPLETE is not supported
+      return false;
+    }
+
+    return false;
   }
 
+  /**
+   * @brief The first type must be TK_ENUM.
+   *        The second type must not be TK_ALIAS.
+   */
   bool TypeAssignability::assignable_enum(const MinimalTypeObject& ta,
                                           const MinimalTypeObject& tb) const
   {
@@ -385,12 +513,20 @@ namespace XTypes {
     return true;
   }
 
+  /**
+   * @brief The first type must be TK_ENUM.
+   *        The second type can be anything.
+   */
   bool TypeAssignability::assignable_enum(const MinimalTypeObject& ta,
                                           const TypeIdentifier& tb) const
   {
     return false; // TODO: Implement this
   }
 
+  /**
+   * @brief The first type must be TK_BITMASK.
+   *        The second type must not be TK_ALIAS.
+   */
   bool TypeAssignability::assignable_bitmask(const MinimalTypeObject& ta,
                                              const MinimalTypeObject& tb) const
   {
@@ -410,12 +546,20 @@ namespace XTypes {
     return false;
   }
 
+  /**
+   * @brief The first type must be TK_BITMASK.
+   *        The second type can be anything.
+   */
   bool TypeAssignability::assignable_bitmask(const MinimalTypeObject& ta,
                                              const TypeIdentifier& tb) const
   {
     return false; // TODO: Implement this
   }
 
+  /**
+   * @brief The first type must be a future extension type kind.
+   *        The second type must not be TK_ALIAS.
+   */
   bool TypeAssignability::assignable_extended(const MinimalTypeObject& ta,
                                               const MinimalTypeObject& tb) const
   {
@@ -423,7 +567,10 @@ namespace XTypes {
     return false;
   }
 
-
+  /**
+   * @brief The first type must be a primitive type.
+   *        The second type can be anything.
+   */
   bool TypeAssignability::assignable_primitive(const TypeIdentifier& ta,
                                                const TypeIdentifier& tb) const
   {
@@ -440,7 +587,8 @@ namespace XTypes {
   }
 
   /**
-   * @brief The second type must not be TK_ALIAS
+   * @brief The first type must be a primitive type.
+   *        The second type must not be TK_ALIAS.
    */
   bool TypeAssignability::assignable_primitive(const TypeIdentifier& ta,
                                                const MinimalTypeObject& tb) const
@@ -458,11 +606,15 @@ namespace XTypes {
       return 9 <= bit_bound && bit_bound <= 16;
     } else if (TK_UINT32 == ta.kind) {
       return 17 <= bit_bound && bit_bound <= 32;
-    } else { // TK_UINT64 == ta.kind
+    } else { // TK_UINT64
       return 33 <= bit_bound && bit_bound <= 64;
     }
   }
 
+  /**
+   * @brief The first type must be a string type.
+   *        The second type can be anything.
+   */
   bool TypeAssignability::assignable_string(const TypeIdentifier& ta,
                                             const TypeIdentifier& tb) const
   {
@@ -472,7 +624,7 @@ namespace XTypes {
       }
       return false;
 
-    } else { // TI_STRING16_SMALL == ta.kind || TI_STRING16_LARGE == ta.kind
+    } else { // TI_STRING16_SMALL or TI_STRING16_LARGE
       if (TI_STRING16_SMALL == tb.kind || TI_STRING16_LARGE == tb.kind) {
         return true;
       }
@@ -481,18 +633,19 @@ namespace XTypes {
   }
 
   /**
-   * @brief The second type must not be TK_ALIAS
+   * @brief The first type must be a string type.
+   *        The second type must not be TK_ALIAS.
    */
   bool TypeAssignability::assignable_string(const TypeIdentifier& ta,
                                             const MinimalTypeObject& tb) const
   {
-    // The second type cannot be string since string type does not have
+    // The second type cannot be string since string types do not have
     // type object. Thus the first type is not assignable from the second type.
     return false;
   }
 
   /**
-   * @brief The first type is a plain sequence.
+   * @brief The first type must be a plain sequence type.
    *        The second type can be anything.
    */
   bool TypeAssignability::assignable_plain_sequence(const TypeIdentifier& ta,
@@ -534,7 +687,7 @@ namespace XTypes {
   }
 
   /**
-   * @brief The first type must be a plain sequence.
+   * @brief The first type must be a plain sequence type.
    *        The second type must not be TK_ALIAS.
    */
   bool TypeAssignability::assignable_plain_sequence(const TypeIdentifier& ta,
@@ -554,7 +707,7 @@ namespace XTypes {
   }
 
   /**
-   * @brief The first type must be a plain array.
+   * @brief The first type must be a plain array type.
    *        The second type can be anything.
    */
   bool TypeAssignability::assignable_plain_array(const TypeIdentifier& ta,
@@ -642,7 +795,7 @@ namespace XTypes {
   }
 
   /**
-   * @brief The first type must be a plain array.
+   * @brief The first type must be a plain array type.
    *        The second type must not be TK_ALIAS.
    */
   bool TypeAssignability::assignable_plain_array(const TypeIdentifier& ta,
@@ -685,7 +838,7 @@ namespace XTypes {
   }
 
   /**
-   * @brief The first type is a plain map.
+   * @brief The first type must be a plain map type.
    *        The second type can be anything.
    */
   bool TypeAssignability::assignable_plain_map(const TypeIdentifier& ta,
@@ -733,7 +886,7 @@ namespace XTypes {
   }
 
   /**
-   * @brief The first type is a plain map.
+   * @brief The first type must be a plain map type.
    *        The second type must not be TK_ALIAS.
    */
   bool TypeAssignability::assignable_plain_map(const TypeIdentifier& ta,
