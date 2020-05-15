@@ -1,34 +1,31 @@
-#include "dds/DCPS/transport/rtps_udp/RtpsUdpInst.h"
+#include <TestMsg.h>
+
+#include <dds/DCPS/transport/rtps_udp/RtpsUdpInst.h>
 #ifdef ACE_AS_STATIC_LIBS
-#include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
+#  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
-
-#include "dds/DCPS/transport/framework/TransportRegistry.h"
-#include "dds/DCPS/transport/framework/TransportReceiveListener.h"
-#include "dds/DCPS/transport/framework/TransportClient.h"
-#include "dds/DCPS/transport/framework/TransportExceptions.h"
-#include "dds/DCPS/transport/framework/ReceivedDataSample.h"
-
-
-#include "dds/DCPS/RepoIdBuilder.h"
-#include "dds/DCPS/GuidConverter.h"
-#include "dds/DCPS/AssociationData.h"
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/Qos_Helper.h"
+#include <dds/DCPS/transport/framework/TransportRegistry.h>
+#include <dds/DCPS/transport/framework/TransportReceiveListener.h>
+#include <dds/DCPS/transport/framework/TransportClient.h>
+#include <dds/DCPS/transport/framework/TransportExceptions.h>
+#include <dds/DCPS/transport/framework/ReceivedDataSample.h>
+#include <dds/DCPS/RepoIdBuilder.h>
+#include <dds/DCPS/GuidConverter.h>
+#include <dds/DCPS/AssociationData.h>
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/Qos_Helper.h>
 
 #include <ace/OS_main.h>
 #include <ace/String_Base.h>
 #include <ace/Get_Opt.h>
 #include <ace/OS_NS_time.h>
-#include "ace/OS_NS_unistd.h"
+#include <ace/OS_NS_unistd.h>
 
 #include <cstdio>
 #include <cstring>
 #include <ctime>
 #include <iostream>
 #include <sstream>
-
-#include "TestMsg.h"
 
 using namespace OpenDDS::DCPS;
 

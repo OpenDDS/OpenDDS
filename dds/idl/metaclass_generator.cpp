@@ -340,13 +340,15 @@ namespace {
         be_global->impl_ <<
           "      " << fieldType << "_forany rhsForany(const_cast<" <<
           fieldType << "_slice*>(*rhsArr));\n"
+          // TODO(iguessthislldo) I'm not 100% certain this will always work
+          "      const Encoding encoding(Encoding::KIND_CDR_UNALIGNED);\n"
           "      size_t size = 0;\n"
           "      serialized_size(encoding, size, rhsForany);\n"
           "      ACE_Message_Block mb(size);\n"
-          "      Serializer ser_out(&mb);\n"
+          "      Serializer ser_out(&mb, encoding);\n"
           "      ser_out << rhsForany;\n"
           "      " << fieldType << "_forany lhsForany(*lhsArr);\n"
-          "      Serializer ser_in(&mb);\n"
+          "      Serializer ser_in(&mb, encoding);\n"
           "      ser_in >> lhsForany;\n";
       } else {
         std::string indent = "      ";

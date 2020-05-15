@@ -49,13 +49,11 @@ int locator_to_address(ACE_INET_Addr& dest,
   return -1;
 }
 
-namespace {
-  inline
-  const DCPS::Encoding& get_locators_encoding() {
-    using namespace OpenDDS::DCPS;
-    static const Encoding encoding(Encoding::KIND_CDR_PLAIN, ENDIAN_BIG);
-    return encoding;
-  }
+const DCPS::Encoding& get_locators_encoding()
+{
+  using namespace OpenDDS::DCPS;
+  static const Encoding encoding(Encoding::KIND_CDR_PLAIN, ENDIAN_BIG);
+  return encoding;
 }
 
 DDS::ReturnCode_t blob_to_locators(const DCPS::TransportBLOB& blob,

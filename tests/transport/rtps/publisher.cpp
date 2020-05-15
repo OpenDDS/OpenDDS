@@ -1,27 +1,26 @@
-#include "dds/DCPS/transport/rtps_udp/RtpsUdpInst.h"
-#include "dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h"
+#include <TestMsg.h>
+
+#include <dds/DCPS/transport/rtps_udp/RtpsUdpInst.h>
+#include <dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h>
 #ifdef ACE_AS_STATIC_LIBS
-#include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
+#  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
-
-#include "dds/DCPS/transport/framework/TransportRegistry.h"
-#include "dds/DCPS/transport/framework/TransportSendListener.h"
-#include "dds/DCPS/transport/framework/TransportClient.h"
-#include "dds/DCPS/transport/framework/TransportExceptions.h"
-
-#include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
-#include "dds/DCPS/RTPS/BaseMessageTypes.h"
-#include "dds/DCPS/RTPS/BaseMessageUtils.h"
-
-#include "dds/DCPS/RepoIdBuilder.h"
-#include "dds/DCPS/Serializer.h"
-#include "dds/DCPS/AssociationData.h"
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/SendStateDataSampleList.h"
-#include "dds/DCPS/DataSampleElement.h"
-#include "dds/DCPS/Qos_Helper.h"
-#include "dds/DCPS/Marked_Default_Qos.h"
-#include "dds/DCPS/Message_Block_Ptr.h"
+#include <dds/DCPS/transport/framework/TransportRegistry.h>
+#include <dds/DCPS/transport/framework/TransportSendListener.h>
+#include <dds/DCPS/transport/framework/TransportClient.h>
+#include <dds/DCPS/transport/framework/TransportExceptions.h>
+#include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
+#include <dds/DCPS/RTPS/BaseMessageTypes.h>
+#include <dds/DCPS/RTPS/BaseMessageUtils.h>
+#include <dds/DCPS/RepoIdBuilder.h>
+#include <dds/DCPS/Serializer.h>
+#include <dds/DCPS/AssociationData.h>
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/SendStateDataSampleList.h>
+#include <dds/DCPS/DataSampleElement.h>
+#include <dds/DCPS/Qos_Helper.h>
+#include <dds/DCPS/Marked_Default_Qos.h>
+#include <dds/DCPS/Message_Block_Ptr.h>
 
 #include <tao/CORBA_String.h>
 
@@ -34,14 +33,12 @@
 #include <ace/Message_Block.h>
 #include <ace/OS_NS_sys_time.h>
 #include <ace/OS_NS_time.h>
-#include "ace/OS_NS_unistd.h"
+#include <ace/OS_NS_unistd.h>
 
 #include <iostream>
 #include <sstream>
 #include <cstring>
 #include <ctime>
-
-#include "TestMsg.h"
 
 class DDS_TEST {  // friended by RtpsUdpDataLink and DataSampleElement
 public:

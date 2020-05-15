@@ -249,6 +249,30 @@ void serialized_size(
   const Encoding& encoding, size_t& size, const Encoding& value);
 
 /**
+ * Convenience function for when the max_serialized_size of just a single value
+ * with no alignment is needed.
+ */
+template <typename T>
+size_t max_serialized_size(const Encoding& encoding, const T& value)
+{
+  size_t size = 0;
+  max_serialized_size(encoding, size, value);
+  return size;
+}
+
+/**
+ * Convenience function for when the serialized_size of just a single value
+ * with no alignment is needed.
+ */
+template <typename T>
+size_t serialized_size(const Encoding& encoding, const T& value)
+{
+  size_t size = 0;
+  serialized_size(encoding, size, value);
+  return size;
+}
+
+/**
  * @class Serializer
  *
  * @brief Class to serialize and deserialize data for DDS.

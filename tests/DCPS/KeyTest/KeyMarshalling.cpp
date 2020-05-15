@@ -5,18 +5,21 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "ace/OS_main.h"
-
-#include "dds/DCPS/Definitions.h"
-#include "dds/DCPS/RTPS/BaseMessageUtils.h"
-
 #include "../common/TestSupport.h"
 #include "KeyTestTypeSupportImpl.h"
 #include "KeyTest2TypeSupportImpl.h"
 
+#include <ace/OS_main.h>
+
+#include <dds/DCPS/Serializer.h>
+#include <dds/DCPS/Definitions.h>
+#include <dds/DCPS/RTPS/BaseMessageUtils.h>
+
 #include <iostream>
 
 using namespace OpenDDS::DCPS;
+
+const Encoding encoding(Encoding::KIND_CDR_UNALIGNED);
 
 void print_hex(void* d)
 {
@@ -28,9 +31,7 @@ void print_hex(void* d)
   printf("\n");
 }
 
-
-int
-ACE_TMAIN(int, ACE_TCHAR*[])
+void run_test(const Encoding& encoding)
 {
   {
     Messenger1::Message message;  // no key
@@ -42,18 +43,17 @@ ACE_TMAIN(int, ACE_TCHAR*[])
 
     // Use Key-Only marshalling (no keys means it should be empty)
     KeyOnly<const Messenger1::Message> ko_message(message);
-    size_t size = 0, padding = 0;
-    gen_find_size(ko_message, size, padding);
+    const size_t size = serialized_size(encoding, ko_message);
     ACE_Message_Block mb(size);
     Serializer out_serializer(&mb);
-    out_serializer << ko_message;
+    TEST_CHECK(out_serializer << ko_message);
     size_t key_length = mb.length();
     TEST_CHECK(key_length == 0);
     Serializer in_serializer(&mb);
     Messenger1::Message dm_message;
-    dm_message.subject_id=0;  // avoid unitialized data
-    dm_message.count=0;
-    in_serializer >> KeyOnly<Messenger1::Message>(dm_message);
+    dm_message.subject_id = 0; // avoid unitialized data
+    dm_message.count = 0;
+    TEST_CHECK(in_serializer >> KeyOnly<Messenger1::Message>(dm_message));
     TEST_CHECK(strcmp(message.from, dm_message.from) != 0);
     TEST_CHECK(strcmp(message.subject, dm_message.subject) != 0);
     TEST_CHECK(message.subject_id != dm_message.subject_id);
@@ -65,7 +65,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     Messenger2::Message message;
     message.from = "from";
     message.subject = "subject";
-    message.subject_id = 1234;   // key
+    message.subject_id = 1234; // key
     message.text = "text";
     message.count = 4321;
 
@@ -73,15 +73,14 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     size_t key_length = 0;
     {
       // Use normal messaging (all fields should be equal).
-      size_t size = 0, padding = 0;
-      gen_find_size(message, size, padding);
+      const size_t size = serialized_size(encoding, message);
       ACE_Message_Block mb(size);
       Serializer out_serializer(&mb);
-      out_serializer << message;
+      TEST_CHECK(out_serializer << message);
       full_length = mb.length();
       Serializer in_serializer(&mb);
       Messenger2::Message dm_message;
-      in_serializer >> dm_message;
+      TEST_CHECK(in_serializer >> dm_message);
       TEST_CHECK(strcmp(message.from, dm_message.from) == 0);
       TEST_CHECK(strcmp(message.subject, dm_message.subject) == 0);
       TEST_CHECK(message.subject_id == dm_message.subject_id);
@@ -93,17 +92,16 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       // Use Key-Only marshalling (only the key fields should be equal)
       const Messenger2::Message& mess_const_ref = message;
       KeyOnly<const Messenger2::Message> ko_message(mess_const_ref);
-      size_t size = 0, padding = 0;
-      gen_find_size(ko_message, size, padding);
+      const size_t size = serialized_size(encoding, ko_message);
       ACE_Message_Block mb(size);
-      ::OpenDDS::DCPS::Serializer out_serializer(&mb);
-      out_serializer << ko_message;
+      Serializer out_serializer(&mb);
+      TEST_CHECK(out_serializer << ko_message);
       key_length = mb.length();
-      ::OpenDDS::DCPS::Serializer in_serializer(&mb);
+      Serializer in_serializer(&mb);
       Messenger2::Message dm_message;
       dm_message.subject_id=0;  // avoid unitialized data
       dm_message.count=0;
-      in_serializer >> KeyOnly<Messenger2::Message>(dm_message);
+      TEST_CHECK(in_serializer >> KeyOnly<Messenger2::Message>(dm_message));
       TEST_CHECK(strcmp(message.from, dm_message.from) != 0);
       TEST_CHECK(strcmp(message.subject, dm_message.subject) != 0);
       TEST_CHECK(message.subject_id == dm_message.subject_id);
@@ -135,12 +133,11 @@ ACE_TMAIN(int, ACE_TCHAR*[])
 
     // Use Key-Only marshalling (only the key fields should be equal)
     KeyOnly<const Messenger4::Message> ko_message(message);
-    size_t size = 0, padding = 0;
-    gen_find_size(ko_message, size, padding);
+    const size_t size = serialized_size(encoding, ko_message);
     ACE_Message_Block mb(size);
-    ::OpenDDS::DCPS::Serializer out_serializer(&mb);
-    out_serializer << ko_message;
-    ::OpenDDS::DCPS::Serializer in_serializer(&mb);
+    Serializer out_serializer(&mb);
+    TEST_CHECK(out_serializer << ko_message);
+    Serializer in_serializer(&mb);
     Messenger4::Message dm_message;
     dm_message.short_field = 0;
     dm_message.unsigned_short_field = 0;
@@ -156,7 +153,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     dm_message.boolean_field = 0;
     dm_message.octet_field = 0;
     dm_message.enum_field = Messenger4::FIRST;
-    in_serializer >> KeyOnly<Messenger4::Message>(dm_message);
+    TEST_CHECK(in_serializer >> KeyOnly<Messenger4::Message>(dm_message))
     TEST_CHECK(message.short_field == dm_message.short_field);
     TEST_CHECK(message.unsigned_short_field == dm_message.unsigned_short_field);
     TEST_CHECK(message.long_field == dm_message.long_field);
@@ -197,12 +194,11 @@ ACE_TMAIN(int, ACE_TCHAR*[])
 
     // Use Key-Only marshalling (only the key fields should be equal)
     KeyOnly<const Messenger4::NestedMessage> ko_message(message);
-    size_t size = 0, padding = 0;
-    gen_find_size(ko_message, size, padding);
+    const size_t size = serialized_size(encoding, ko_message);
     ACE_Message_Block mb(size);
-    ::OpenDDS::DCPS::Serializer out_serializer(&mb);
-    out_serializer << ko_message;
-    ::OpenDDS::DCPS::Serializer in_serializer(&mb);
+    Serializer out_serializer(&mb);
+    TEST_CHECK(out_serializer << ko_message);
+    Serializer in_serializer(&mb);
     Messenger4::NestedMessage dm_message;
     dm_message.mess.short_field = 0;
     dm_message.mess.unsigned_short_field = 0;
@@ -218,7 +214,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     dm_message.mess.boolean_field = 0;
     dm_message.mess.octet_field = 0;
     dm_message.mess.enum_field = Messenger4::FIRST;
-    in_serializer >> KeyOnly<Messenger4::NestedMessage>(dm_message);
+    TEST_CHECK(in_serializer >> KeyOnly<Messenger4::NestedMessage>(dm_message));
     TEST_CHECK(message.mess.short_field == dm_message.mess.short_field);
     TEST_CHECK(message.mess.unsigned_short_field == dm_message.mess.unsigned_short_field);
     TEST_CHECK(message.mess.long_field == dm_message.mess.long_field);
@@ -250,19 +246,18 @@ ACE_TMAIN(int, ACE_TCHAR*[])
 
     // Use Key-Only marshalling (only the key fields should be equal)
     KeyOnly<const Messenger7::Message> ko_message(message);
-    size_t size = 0, padding = 0;
-    gen_find_size(ko_message, size, padding);
+    const size_t size = serialized_size(encoding, ko_message);
     ACE_Message_Block mb(size);
-    ::OpenDDS::DCPS::Serializer out_serializer(&mb);
-    out_serializer << ko_message;
-    ::OpenDDS::DCPS::Serializer in_serializer(&mb);
+    Serializer out_serializer(&mb);
+    TEST_CHECK(out_serializer << ko_message);
+    Serializer in_serializer(&mb);
     Messenger7::Message dm_message;
     dm_message.header.subject_id = 0;
     dm_message.count = 0;
     dm_message.responses[0] = 0;
     dm_message.responses[1] = 0;
     dm_message.responses[2] = 0;
-    in_serializer >> KeyOnly<Messenger7::Message>(dm_message);
+    TEST_CHECK(in_serializer >> KeyOnly<Messenger7::Message>(dm_message));
     TEST_CHECK(strcmp(message.header.from, dm_message.header.from) != 0);
     TEST_CHECK(strcmp(message.header.subject, dm_message.header.subject) != 0);
     TEST_CHECK(message.header.subject_id != dm_message.header.subject_id);
@@ -286,17 +281,16 @@ ACE_TMAIN(int, ACE_TCHAR*[])
 
     // Use Key-Only marshalling (only the key fields should be equal)
     KeyOnly<const Messenger9::Message> ko_message(message);
-    size_t size = 0, padding = 0;
-    gen_find_size(ko_message, size, padding);
+    const size_t size = serialized_size(encoding, ko_message);
     ACE_Message_Block mb(size);
-    ::OpenDDS::DCPS::Serializer out_serializer(&mb);
-    out_serializer << ko_message;
-    ::OpenDDS::DCPS::Serializer in_serializer(&mb);
+    Serializer out_serializer(&mb);
+    TEST_CHECK(out_serializer << ko_message);
+    Serializer in_serializer(&mb);
     Messenger9::Message dm_message;
     dm_message.headers[0].subject_id = 0;
     dm_message.headers[1].subject_id = 0;
     dm_message.count = 0;
-    in_serializer >> KeyOnly<Messenger9::Message>(dm_message);
+    TEST_CHECK(in_serializer >> KeyOnly<Messenger9::Message>(dm_message));
     TEST_CHECK(strcmp(message.headers[0].from, dm_message.headers[0].from) != 0);
     TEST_CHECK(strcmp(message.headers[0].subject, dm_message.headers[0].subject) != 0);
     TEST_CHECK(message.headers[0].subject_id != dm_message.headers[0].subject_id);
@@ -312,7 +306,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   {
     Messenger1::Message message;  // No Key, length = 0, bounded = true
     std::cout << "Messenger1::Message" << std::endl;
-    size_t length = gen_max_marshaled_size(KeyOnly<const Messenger1::Message>(message), false /*align*/);
+    const size_t length = max_serialized_size(
+      encoding, KeyOnly<const Messenger1::Message>(message));
     bool is_bounded = MarshalTraits<Messenger1::Message>::gen_is_bounded_key_size();
     std::cout << "  is bounded = " << is_bounded << std::endl;
     std::cout << "  length = " << length << std::endl;
@@ -328,7 +323,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     Messenger2::Message message;  // long Key, length = 4, bounded = true
     message.subject_id = 0x01020304;
     std::cout << "Messenger2::Message" << std::endl;
-    size_t length = gen_max_marshaled_size(KeyOnly<const Messenger2::Message>(message), false /*align*/);
+    const size_t length = max_serialized_size(
+      encoding, KeyOnly<const Messenger2::Message>(message));
     bool is_bounded = MarshalTraits<Messenger2::Message>::gen_is_bounded_key_size();
     std::cout << "  is bounded = " << is_bounded << std::endl;
     std::cout << "  length = " << length << std::endl;
@@ -345,7 +341,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     message.subject_id = 0x01020304;
     message.count      = 0x05060708;
     std::cout << "Messenger3::Message" << std::endl;
-    size_t length = gen_max_marshaled_size(KeyOnly<const Messenger3::Message>(message), false /*align*/);
+    const size_t length = max_serialized_size(
+      encoding, KeyOnly<const Messenger3::Message>(message));
     bool is_bounded = MarshalTraits<Messenger3::Message>::gen_is_bounded_key_size();
     std::cout << "  is bounded = " << is_bounded << std::endl;
     std::cout << "  length = " << length << std::endl;
@@ -360,7 +357,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   {
     Messenger4::Message message;  // Keys of many types, length = 0, bounded = false
     std::cout << "Messenger4::Message" << std::endl;
-    size_t length = gen_max_marshaled_size(KeyOnly<const Messenger4::Message>(message), false /*align*/);
+    const size_t length = max_serialized_size(
+      encoding, KeyOnly<const Messenger4::Message>(message));
     bool is_bounded = MarshalTraits<Messenger4::Message>::gen_is_bounded_key_size();
     std::cout << "  is bounded = " << is_bounded << std::endl;
     std::cout << "  length = " << length << std::endl;
@@ -375,7 +373,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   {
     Messenger5::Message message;  // Wide string Key, length = 0, bounded = false
     std::cout << "Messenger5::Message" << std::endl;
-    size_t length = gen_max_marshaled_size(KeyOnly<const Messenger5::Message>(message), false /*align*/);
+    const size_t length = max_serialized_size(
+      encoding, KeyOnly<const Messenger5::Message>(message));
     bool is_bounded = MarshalTraits<Messenger5::Message>::gen_is_bounded_key_size();
     std::cout << "  is bounded = " << is_bounded << std::endl;
     std::cout << "  length = " << length << std::endl;
@@ -392,7 +391,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     message.payload.header.subject_id = 0x01020304;
 
     std::cout << "Messenger6::Message" << std::endl;
-    size_t length = gen_max_marshaled_size(KeyOnly<const Messenger6::Message>(message), false /*align*/);
+    const size_t length = max_serialized_size(
+      encoding, KeyOnly<const Messenger6::Message>(message));
     bool is_bounded = MarshalTraits<Messenger6::Message>::gen_is_bounded_key_size();
     std::cout << "  is bounded = " << is_bounded << std::endl;
     std::cout << "  length = " << length << std::endl;
@@ -408,7 +408,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     Messenger7::Message message;  // Long Key, length = 4, bounded = true
     message.responses[0] = 0x01020304;
     std::cout << "Messenger7::Message" << std::endl;
-    size_t length = gen_max_marshaled_size(KeyOnly<const Messenger7::Message>(message), false /*align*/);
+    const size_t length = max_serialized_size(
+      encoding, KeyOnly<const Messenger7::Message>(message));
     bool is_bounded = MarshalTraits<Messenger7::Message>::gen_is_bounded_key_size();
     std::cout << "  is bounded = " << is_bounded << std::endl;
     std::cout << "  length = " << length << std::endl;
@@ -424,7 +425,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     Messenger8::Message message;  // Long Key, length = 4, bounded = true
     message.header.responses[0] = 0x01020304;
     std::cout << "Messenger8::Message" << std::endl;
-    size_t length = gen_max_marshaled_size(KeyOnly<const Messenger8::Message>(message), false /*align*/);
+    const size_t length = max_serialized_size(
+      encoding, KeyOnly<const Messenger8::Message>(message));
     bool is_bounded = MarshalTraits<Messenger8::Message>::gen_is_bounded_key_size();
     std::cout << "  is bounded = " << is_bounded << std::endl;
     std::cout << "  length = " << length << std::endl;
@@ -440,7 +442,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     Messenger9::Message message;  // Long Key, length = 4, bounded = true
     message.headers[1].subject_id = 0x01020304;
     std::cout << "Messenger9::Message" << std::endl;
-    size_t length = gen_max_marshaled_size(KeyOnly<const Messenger9::Message>(message), false /*align*/);
+    const size_t length = max_serialized_size(
+      encoding, KeyOnly<const Messenger9::Message>(message));
     bool is_bounded = MarshalTraits<Messenger9::Message>::gen_is_bounded_key_size();
     std::cout << "  is bounded = " << is_bounded << std::endl;
     std::cout << "  length = " << length << std::endl;
@@ -456,7 +459,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     Messenger10::Message message;  // String and long Keys, length = 0, bounded = false
     message.count = 0x01020304;
     std::cout << "Messenger10::Message" << std::endl;
-    size_t length = gen_max_marshaled_size(KeyOnly<const Messenger10::Message>(message), false /*align*/);
+    const size_t length = max_serialized_size(
+      encoding, KeyOnly<const Messenger10::Message>(message));
     bool is_bounded = MarshalTraits<Messenger10::Message>::gen_is_bounded_key_size();
     std::cout << "  is bounded = " << is_bounded << std::endl;
     std::cout << "  length = " << length << std::endl;
@@ -475,7 +479,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     message.long_3 = 0x090a0b0c;
     message.long_4 = 0x0d0e0f10;
     std::cout << "Messenger11::Message" << std::endl;
-    size_t length = gen_max_marshaled_size(KeyOnly<const Messenger11::Message>(message), false /*align*/);
+    const size_t length = max_serialized_size(
+      encoding, KeyOnly<const Messenger11::Message>(message));
     bool is_bounded = MarshalTraits<Messenger11::Message>::gen_is_bounded_key_size();
     std::cout << "  is bounded = " << is_bounded << std::endl;
     std::cout << "  length = " << length << std::endl;
@@ -495,7 +500,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     message.long_4 = 0x0d0e0f10;
     message.long_5 = 0x11121314;
     std::cout << "Messenger12::Message" << std::endl;
-    size_t length = gen_max_marshaled_size(KeyOnly<const Messenger12::Message>(message), false /*align*/);
+    const size_t length = max_serialized_size(
+      encoding, KeyOnly<const Messenger12::Message>(message));
     bool is_bounded = MarshalTraits<Messenger12::Message>::gen_is_bounded_key_size();
     std::cout << "  is bounded = " << is_bounded << std::endl;
     std::cout << "  length = " << length << std::endl;
@@ -506,6 +512,19 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     OpenDDS::RTPS::marshal_key_hash(message, hash);
     print_hex(hash.value);
   }
+}
 
+const Encoding encodings[] = {
+  Encoding(Encoding::KIND_CDR_UNALIGNED),
+  Encoding(Encoding::KIND_CDR_PLAIN),
+  Encoding(Encoding::KIND_XCDR2_PLAIN)
+};
+const size_t encoding_count = sizeof(encodings) / sizeof(encodings[0]);
+
+int ACE_TMAIN(int, ACE_TCHAR*[])
+{
+  for (unsigned i = 0; i < encoding_count; ++i) {
+    run_test(encodings[i]);
+  }
   return 0;
 }

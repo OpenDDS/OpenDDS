@@ -1,5 +1,5 @@
-#ifndef test_transport_TestMsg_H
-#define test_transport_TestMsg_H
+#ifndef OPENDDS_TRANSPORT_TEST_MSG_H
+#define OPENDDS_TRANSPORT_TEST_MSG_H
 
 #include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/TypeSupportImpl.h>
@@ -14,17 +14,20 @@ struct TestMsg {
     : key(msgKey), value(msgValue) {}
 };
 
-void gen_find_size(const TestMsg& stru, size_t& size, size_t& padding);
+bool max_serialize_size(const Encoding&, size_t&, const TestMsg&);
+
+void serialized_size(
+  const Encoding& encoding, size_t& size, const TestMsg& stru);
 
 bool operator<<(Serializer& strm, const TestMsg& stru);
 
 bool operator>>(Serializer& strm, TestMsg& stru);
 
-size_t gen_max_marshaled_size(const TestMsg&, bool);
+bool max_serialize_size(
+  const Encoding& encoding, size_t& size, KeyOnly<const TestMsg> stru);
 
-size_t gen_max_marshaled_size(KeyOnly<const TestMsg>, bool /*align*/);
-
-void gen_find_size(KeyOnly<const TestMsg> stru, size_t& size, size_t& padding);
+void serialized_size(
+  const Encoding& encoding, size_t& size, KeyOnly<const TestMsg> stru);
 
 bool operator<<(Serializer& strm, KeyOnly<const TestMsg> stru);
 
@@ -40,4 +43,4 @@ static bool gen_is_bounded_key_size() { return true; }
 } }
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif /* test_transport_TestMsg_H */
+#endif /* OPENDDS_TRANSPORT_TEST_MSG_H */

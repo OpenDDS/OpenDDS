@@ -702,7 +702,7 @@ namespace {
         if (n_elems > 1) {
           be_global->impl_ <<
             "  OpenDDS::DCPS::max_serialized_size_ulong(encoding, size, "
-              << n_elems - 1 << ")\n";
+              << n_elems - 1 << ");\n";
         }
       } else if (elem_cls & CL_PRIMITIVE) {
         std::ostringstream n_elems_ss;

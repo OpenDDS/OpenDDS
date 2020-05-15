@@ -5,136 +5,79 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "ace/OS_main.h"
-
-#include "dds/DCPS/Definitions.h"
-#include "../common/TestSupport.h"
 #include "BoundTestTypeSupportImpl.h"
 #include "BoundTest2TypeSupportImpl.h"
+
+#include <dds/DCPS/Definitions.h>
+#include <dds/DCPS/Serializer.h>
+
+#include <ace/OS_main.h>
 
 #include <iostream>
 
 using namespace OpenDDS::DCPS;
 
-int
-ACE_TMAIN(int, ACE_TCHAR*[])
+const Encoding encoding(Encoding::KIND_CDR_UNALIGNED);
+
+template<typename Type>
+bool assert_impl(
+  const char* type_name, bool expected_bounded, size_t expected_size)
 {
-  {
-    Bound::SimpleBoundedMessage message;
+  bool failed = false;
+  Type value;
 
-    TEST_CHECK(MarshalTraits<Bound::SimpleBoundedMessage>::gen_is_bounded_size());
-    TEST_CHECK(gen_max_marshaled_size(message, false /*align*/) == 66);
+  const bool actual_bounded = MarshalTraits<Type>::gen_is_bounded_size();
+  if (actual_bounded != expected_bounded) {
+    ACE_ERROR((LM_ERROR, "KeyTest/IsBounded: ERROR: %C: "
+      "expected to%C be bounded, but it is%C\n",
+      type_name, expected_bounded ? "" : " not", actual_bounded ? "" : "n't"));
+    failed = true;
   }
 
-  {
-    Bound::StringMessage message;
-
-    TEST_CHECK(!MarshalTraits<Bound::StringMessage>::gen_is_bounded_size());
-    TEST_CHECK(gen_max_marshaled_size(message, false /*align*/) == 0);
+  const size_t actual_size = max_serialized_size(encoding, value);
+  if (actual_size != expected_size) {
+    ACE_ERROR((LM_ERROR, "KeyTest/IsBounded: ERROR: %C: "
+      "expected max size to be %B, but it is %B\n",
+      type_name, expected_size, actual_size));
+    failed = true;
   }
 
-  {
-    Bound::WStringMessage message;
+  return failed;
+}
 
-    TEST_CHECK(!MarshalTraits<Bound::WStringMessage>::gen_is_bounded_size());
-    TEST_CHECK(gen_max_marshaled_size(message, false /*align*/) == 0);
-  }
+template<typename Type>
+bool assert_bounded(
+  const char* type_name, size_t expected_size)
+{
+  return assert_impl<Type>(type_name, true, expected_size);
+}
 
-  {
-    Bound::SimpleBoundedArrayMessage message;
+template<typename Type>
+bool assert_unbounded(
+  const char* type_name)
+{
+  return assert_impl<Type>(type_name, false, 0);
+}
 
-    TEST_CHECK(MarshalTraits<Bound::SimpleBoundedArrayMessage>::gen_is_bounded_size());
-    std::cout << gen_max_marshaled_size(message, false /*align*/) << std::endl;
-    TEST_CHECK(gen_max_marshaled_size(message, false /*align*/) == 7460);
-  }
+int ACE_TMAIN(int, ACE_TCHAR*[])
+{
+  bool failed = false;
 
-  {
-    Bound::StringArrayMessage message;
+  failed |= assert_bounded<Bound::SimpleBoundedMessage>("Bound::SimpleBoundedMessage", 65);
+  failed |= assert_unbounded<Bound::StringMessage>("Bound::StringMessage");
+  failed |= assert_unbounded<Bound::WStringMessage>("Bound::WStringMessage");
+  failed |= assert_bounded<Bound::SimpleBoundedArrayMessage>("Bound::SimpleBoundedArrayMessage", 7350);
+  failed |= assert_unbounded<Bound::StringArrayMessage>("Bound::StringArrayMessage");
+  failed |= assert_unbounded<Bound::WStringArrayMessage>("Bound::WStringArrayMessage");
+  failed |= assert_bounded<Bound::BoundedNestedMessage>("Bound::BoundedNestedMessage", 10);
+  failed |= assert_unbounded<Bound::UnboundedNestedMessage>("Bound::UnboundedNestedMessage");
+  failed |= assert_bounded<Bound::BoundedSequenceOfBoundedMessage>("Bound::BoundedSequenceOfBoundedMessage", 84);
+  failed |= assert_unbounded<Bound::UnboundedSequenceOfBoundedMessage>("Bound::UnboundedSequenceOfBoundedMessage");
+  failed |= assert_unbounded<Bound::BoundedSequenceOfUnboundedMessage>("Bound::BoundedSequenceOfUnboundedMessage");
+  failed |= assert_unbounded<Bound::UnboundedSequenceOfUnboundedMessage>("Bound::UnboundedSequenceOfUnboundedMessage");
+  failed |= assert_bounded<Bound::BoundedUnionMessage>("Bound::BoundedUnionMessage", 6);
+  failed |= assert_unbounded<Bound::UnboundedUnionMessage>("Bound::UnboundedUnionMessage");
+  failed |= assert_unbounded<Bound::RecursiveMessage>("Bound::RecursiveMessage");
 
-    TEST_CHECK(!MarshalTraits<Bound::StringArrayMessage>::gen_is_bounded_size());
-    std::cout << gen_max_marshaled_size(message, false /*align*/) << std::endl;
-    TEST_CHECK(gen_max_marshaled_size(message, false /*align*/) == 0);
-  }
-
-  {
-    Bound::WStringArrayMessage message;
-
-    TEST_CHECK(!MarshalTraits<Bound::WStringArrayMessage>::gen_is_bounded_size());
-    std::cout << gen_max_marshaled_size(message, false /*align*/) << std::endl;
-    TEST_CHECK(gen_max_marshaled_size(message, false /*align*/) == 0);
-  }
-
-  {
-    Bound::BoundedNestedMessage message;
-
-    TEST_CHECK(MarshalTraits<Bound::BoundedNestedMessage>::gen_is_bounded_size());
-    std::cout << gen_max_marshaled_size(message, false /*align*/) << std::endl;
-    TEST_CHECK(gen_max_marshaled_size(message, false /*align*/) == 10);
-  }
-
-  {
-    Bound::UnboundedNestedMessage message;
-
-    TEST_CHECK(!MarshalTraits<Bound::UnboundedNestedMessage>::gen_is_bounded_size());
-    std::cout << gen_max_marshaled_size(message, false /*align*/) << std::endl;
-    TEST_CHECK(gen_max_marshaled_size(message, false /*align*/) == 0);
-  }
-
-  {
-    Bound::BoundedSequenceOfBoundedMessage message;
-
-    TEST_CHECK(MarshalTraits<Bound::BoundedSequenceOfBoundedMessage>::gen_is_bounded_size());
-    std::cout << gen_max_marshaled_size(message, false /*align*/) << std::endl;
-    TEST_CHECK(gen_max_marshaled_size(message, false /*align*/) == 84);
-  }
-
-  {
-    Bound::UnboundedSequenceOfBoundedMessage message;
-
-    TEST_CHECK(!MarshalTraits<Bound::UnboundedSequenceOfBoundedMessage>::gen_is_bounded_size());
-    std::cout << gen_max_marshaled_size(message, false /*align*/) << std::endl;
-    TEST_CHECK(gen_max_marshaled_size(message, false /*align*/) == 0);
-  }
-
-  {
-    Bound::BoundedSequenceOfUnboundedMessage message;
-
-    TEST_CHECK(!MarshalTraits<Bound::BoundedSequenceOfUnboundedMessage>::gen_is_bounded_size());
-    std::cout << gen_max_marshaled_size(message, false /*align*/) << std::endl;
-    TEST_CHECK(gen_max_marshaled_size(message, false /*align*/) == 0);
-  }
-
-  {
-    Bound::UnboundedSequenceOfUnboundedMessage message;
-
-    TEST_CHECK(!MarshalTraits<Bound::UnboundedSequenceOfUnboundedMessage>::gen_is_bounded_size());
-    std::cout << gen_max_marshaled_size(message, false /*align*/) << std::endl;
-    TEST_CHECK(gen_max_marshaled_size(message, false /*align*/) == 0);
-  }
-
-  {
-    Bound::BoundedUnionMessage message;
-
-    TEST_CHECK(MarshalTraits<Bound::BoundedUnionMessage>::gen_is_bounded_size());
-    std::cout << gen_max_marshaled_size(message, false /*align*/) << std::endl;
-    TEST_CHECK(gen_max_marshaled_size(message, false /*align*/) == 6);
-  }
-
-  {
-    Bound::UnboundedUnionMessage message;
-
-    TEST_CHECK(!MarshalTraits<Bound::UnboundedUnionMessage>::gen_is_bounded_size());
-    std::cout << gen_max_marshaled_size(message, false /*align*/) << std::endl;
-    TEST_CHECK(gen_max_marshaled_size(message, false /*align*/) == 0);
-  }
-
-  {
-    Bound::RecursiveMessage message;
-
-    TEST_CHECK(!MarshalTraits<Bound::UnboundedUnionMessage>::gen_is_bounded_size());
-    std::cout << gen_max_marshaled_size(message, false /*align*/) << std::endl;
-    TEST_CHECK(gen_max_marshaled_size(message, false /*align*/) == 0);
-  }
-
-  return 0;
+  return failed;
 }

@@ -143,6 +143,9 @@ address_to_kind(const ACE_INET_Addr& addr)
 }
 
 OpenDDS_Rtps_Export
+const DCPS::Encoding& get_locators_encoding();
+
+OpenDDS_Rtps_Export
 int locator_to_address(ACE_INET_Addr& dest,
                        const DCPS::Locator_t& locator,
                        bool map /*map IPV4 to IPV6 addr*/);
