@@ -492,7 +492,8 @@ namespace XTypes {
   }
 
   /**
-   * @brief The first type is a plain sequence. The second type can be anything.
+   * @brief The first type is a plain sequence.
+   *        The second type can be anything.
    */
   bool TypeAssignability::assignable_plain_sequence(const TypeIdentifier& ta,
                                                     const TypeIdentifier& tb) const
@@ -516,13 +517,7 @@ namespace XTypes {
     } else if (EK_MINIMAL == tb.kind) {
       const MinimalTypeObject& tob = lookup_minimal(tb);
       if (TK_SEQUENCE == tob.kind) {
-        if (TI_PLAIN_SEQUENCE_SMALL == ta.kind) {
-          return strongly_assignable(*ta.seq_sdefn.element_identifier.in(),
-                                     *tob.sequence_type.element.common.type.in());
-        } else { // TI_PLAIN_SEQUENCE_LARGE
-          return strongly_assignable(*ta.seq_ldefn.element_identifier.in(),
-                                     *tob.sequence_type.element.common.type.in());
-        }
+        return assignable_plain_sequence(ta, tob);
       } else if (TK_ALIAS == tob.kind) {
         const TypeIdentifier& base = *tob.alias_type.body.common.related_type.in();
         return assignable_plain_sequence(ta, base);
@@ -540,7 +535,7 @@ namespace XTypes {
 
   /**
    * @brief The first type must be a plain sequence.
-   * The second type must not be TK_ALIAS.
+   *        The second type must not be TK_ALIAS.
    */
   bool TypeAssignability::assignable_plain_sequence(const TypeIdentifier& ta,
                                                     const MinimalTypeObject& tb) const
@@ -551,7 +546,7 @@ namespace XTypes {
                                    *tb.sequence_type.element.common.type.in());
       } else { // TI_PLAIN_SEQUENCE_LARGE
         return strongly_assignable(*ta.seq_ldefn.element_identifier.in(),
-                                   *tb.sequence_type.element.common.type.i());
+                                   *tb.sequence_type.element.common.type.in());
       }
     }
 
@@ -559,7 +554,8 @@ namespace XTypes {
   }
 
   /**
-   * @brief The first type must be a plain array. The second type can be anything.
+   * @brief The first type must be a plain array.
+   *        The second type can be anything.
    */
   bool TypeAssignability::assignable_plain_array(const TypeIdentifier& ta,
                                                  const TypeIdentifier& tb) const
@@ -631,36 +627,7 @@ namespace XTypes {
     } else if (EK_MINIMAL == tb.kind) {
       const MinimalTypeObject& tob = lookup_minimal(tb);
       if (TK_ARRAY == tob.kind) {
-        Sequence<LBound> bounds_b = tob.array_type.header.common.bound_seq;
-        if (TI_PLAIN_ARRAY_SMALL == ta.kind) {
-          Sequence<SBound> bounds_a = ta.array_sdefn.array_bound_seq;
-          if (bounds_a.size() != bounds_b.size()) {
-            return false;
-          }
-
-          for (size_t i = 0; i < bounds_a.size(); ++i) {
-            if (static_cast<LBound>(bounds_a[i]) != bounds_b[i]) {
-              return false;
-            }
-          }
-
-          return strongly_assignable(*ta.array_sdefn.element_identifier.in(),
-                                     *tob.array_type.element.common.type.in());
-        } else { // TI_PLAIN_ARRAY_LARGE
-          Sequence<LBound> bounds_a = ta.array_ldefn.array_bound_seq;
-          if (bounds_a.size() != bounds_b.size()) {
-            return false;
-          }
-
-          for (size_t i = 0; i < bounds_a.size(); ++i) {
-            if (bounds_a[i] != bounds_b[i]) {
-              return false;
-            }
-          }
-
-          return strongly_assignable(*ta.array_ldefn.element_identifier.in(),
-                                     *tob.array_type.element.common.type.in());
-        }
+        return assignable_plain_array(ta, tob);
       } else if (TK_ALIAS == tob.kind) {
         const TypeIdentifier& base = *tob.alias_type.body.common.related_type.in();
         return assignable_plain_array(ta, base);
@@ -675,22 +642,63 @@ namespace XTypes {
   }
 
   /**
-   * @brief The second type must not be TK_ALIAS
+   * @brief The first type must be a plain array.
+   *        The second type must not be TK_ALIAS.
    */
   bool TypeAssignability::assignable_plain_array(const TypeIdentifier& ta,
                                                  const MinimalTypeObject& tb) const
   {
-    return false; // TODO: Implement this
-  }
+    if (TK_ARRAY == tb.kind) {
+      Sequence<LBound> bounds_b = tb.array_type.header.common.bound_seq;
+      if (TI_PLAIN_ARRAY_SMALL == ta.kind) {
+        Sequence<SBound> bounds_a = ta.array_sdefn.array_bound_seq;
+        if (bounds_a.size() != bounds_b.size()) {
+          return false;
+        }
 
-  bool TypeAssignability::assignable_plain_map(const TypeIdentifier& ta,
-                                               const TypeIdentifier& tb) const
-  {
-    return false; // TODO: Implement this
+        for (size_t i = 0; i < bounds_a.size(); ++i) {
+          if (static_cast<LBound>(bounds_a[i]) != bounds_b[i]) {
+              return false;
+          }
+        }
+
+        return strongly_assignable(*ta.array_sdefn.element_identifier.in(),
+                                   *tb.array_type.element.common.type.in());
+      } else { // TI_PLAIN_ARRAY_LARGE
+        Sequence<LBound> bounds_a = ta.array_ldefn.array_bound_seq;
+        if (bounds_a.size() != bounds_b.size()) {
+          return false;
+        }
+
+        for (size_t i = 0; i < bounds_a.size(); ++i) {
+          if (bounds_a[i] != bounds_b[i]) {
+            return false;
+          }
+        }
+
+        return strongly_assignable(*ta.array_ldefn.element_identifier.in(),
+                                   *tb.array_type.element.common.type.in());
+      }
+    }
+
+    return false;
   }
 
   /**
-   * @brief The second type must not be TK_ALIAS
+   * @brief The first type is a plain map.
+   *        The second type can be anything.
+   */
+  bool TypeAssignability::assignable_plain_map(const TypeIdentifier& ta,
+                                               const TypeIdentifier& tb) const
+  {
+
+
+    return false;
+  }
+
+  /**
+   * @brief The first type is a plain map.
+   *        The second type must not be TK_ALIAS.
    */
   bool TypeAssignability::assignable_plain_map(const TypeIdentifier& ta,
                                                const MinimalTypeObject& tb) const
