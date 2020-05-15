@@ -135,10 +135,6 @@ jobs:
       CLANG6:
         ConfigOpts: --compiler=clang++-6.0 --security
         PackageDeps: libxerces-c-dev libssl-dev cmake clang-6.0
-      CLANG9:
-        ConfigOpts: --compiler=clang++-9 --security
-        PackageDeps: libxerces-c-dev libssl-dev cmake clang-9
-        Repo: llvm-toolchain-$(lsb_release -cs)-9
       CLANG10:
         ConfigOpts: --compiler=clang++-10 --security
         PackageDeps: libxerces-c-dev libssl-dev cmake clang-10
@@ -149,9 +145,6 @@ jobs:
       GCC6:
         ConfigOpts: --compiler=g++-6 --xerces --features=uses_wchar=1 --no-debug
         PackageDeps: libxerces-c-dev g++-6
-      GCC9:
-        ConfigOpts: --compiler=g++-9 --no-inline
-        PackageDeps: g++-9
       GCC10:
         ConfigOpts: --compiler=g++-10 --no-inline
         PackageDeps: g++-10
