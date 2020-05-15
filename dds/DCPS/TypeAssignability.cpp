@@ -633,8 +633,8 @@ namespace XTypes {
         return assignable_plain_array(ta, base);
       }
     } else if (EK_COMPLETE == tb.kind) {
-      // Assuming tb.kind of EK_COMPLETE is not supported (similar to
-      // the way assignability for plain sequences are being handled)
+      // Assuming tb.kind of EK_COMPLETE is not supported (similar to the way
+      // assignability for plain sequences and plain maps are being handled)
       return false;
     }
 
@@ -691,7 +691,43 @@ namespace XTypes {
   bool TypeAssignability::assignable_plain_map(const TypeIdentifier& ta,
                                                const TypeIdentifier& tb) const
   {
-
+    if (TI_PLAIN_MAP_SMALL == tb.kind) {
+      if (TI_PLAIN_MAP_SMALL == ta.kind) {
+        return strongly_assignable(*ta.map_sdefn.key_identifier.in(),
+                                   *tb.map_sdefn.key_identifier.in()) &&
+          strongly_assignable(*ta.map_sdefn.element_identifier.in(),
+                              *tb.map_sdefn.element_identifier.in());
+      } else { // TI_PLAIN_MAP_LARGE
+        return strongly_assignable(*ta.map_ldefn.key_identifier.in(),
+                                   *tb.map_sdefn.key_identifier.in()) &&
+          strongly_assignable(*ta.map_ldefn.element_identifier.in(),
+                              *tb.map_sdefn.element_identifier.in());
+      }
+    } else if (TI_PLAIN_MAP_LARGE == tb.kind) {
+      if (TI_PLAIN_MAP_SMALL == ta.kind) {
+        return strongly_assignable(*ta.map_sdefn.key_identifier.in(),
+                                   *tb.map_ldefn.key_identifier.in()) &&
+          strongly_assignable(*ta.map_sdefn.element_identifier.in(),
+                              *tb.map_ldefn.element_identifier.in());
+      } else { // TI_PLAIN_MAP_LARGE
+        return strongly_assignable(*ta.map_ldefn.key_identifier.in(),
+                                   *tb.map_ldefn.key_identifier.in()) &&
+          strongly_assignable(*ta.map_ldefn.element_identifier.in(),
+                              *tb.map_ldefn.element_identifier.in());
+      }
+    } else if (EK_MINIMAL == tb.kind) {
+      const MinimalTypeObject& tob = lookup_minimal(tb);
+      if (TK_MAP == tob.kind) {
+        return assignable_plain_map(ta, tob);
+      } else if (TK_ALIAS == tob.kind) {
+        const TypeIdentifier& base = *tob.alias_type.body.common.related_type.in();
+        return assignable_plain_map(ta, base);
+      }
+    } else if (EK_COMPLETE == tb.kind) {
+      // Assuming tb.kind of EK_COMPLETE is not supported (similar to how
+      // assignability for plain sequences and plain arrays are being handled)
+      return false;
+    }
 
     return false;
   }
@@ -703,7 +739,21 @@ namespace XTypes {
   bool TypeAssignability::assignable_plain_map(const TypeIdentifier& ta,
                                                const MinimalTypeObject& tb) const
   {
-    return false; // TODO: Implement this
+    if (TK_MAP == tb.kind) {
+      if (TI_PLAIN_MAP_SMALL == ta.kind) {
+        return strongly_assignable(*ta.map_sdefn.key_identifier.in(),
+                                   *tb.map_type.key.common.type.in()) &&
+          strongly_assignable(*ta.map_sdefn.element_identifier.in(),
+                              *tb.map_type.element.common.type.in());
+      } else { // TI_PLAIN_MAP_LARGE
+        return strongly_assignable(*ta.map_ldefn.key_identifier.in(),
+                                   *tb.map_type.key.common.type.in()) &&
+          strongly_assignable(*ta.map_ldefn.element_identifier.in(),
+                              *tb.map_type.element.common.type.in());
+      }
+    }
+
+    return false;
   }
 
   bool TypeAssignability::strongly_assignable(const TypeIdentifier& tia,
