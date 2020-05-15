@@ -501,7 +501,7 @@ namespace XTypes {
       if (TI_PLAIN_SEQUENCE_SMALL == ta.kind) {
         return strongly_assignable(*ta.seq_sdefn.element_identifier.in(),
                                    *tb.seq_sdefn.element_identifier.in());
-      } else { // ta is a plain large sequence
+      } else { // TI_PLAIN_SEQUENCE_LARGE
         return strongly_assignable(*ta.seq_ldefn.element_identifier.in(),
                                    *tb.seq_sdefn.element_identifier.in());
       }
@@ -509,7 +509,7 @@ namespace XTypes {
       if (TI_PLAIN_SEQUENCE_SMALL == ta.kind) {
         return strongly_assignable(*ta.seq_sdefn.element_identifier.in(),
                                    *tb.seq_ldefn.element_identifier.in());
-      } else { // ta is a plain large sequence
+      } else { // TI_PLAIN_SEQUENCE_LARGE
         return strongly_assignable(*ta.seq_ldefn.element_identifier.in(),
                                    *tb.seq_ldefn.element_identifier.in());
       }
@@ -519,7 +519,7 @@ namespace XTypes {
         if (TI_PLAIN_SEQUENCE_SMALL == ta.kind) {
           return strongly_assignable(*ta.seq_sdefn.element_identifier.in(),
                                      *tob.sequence_type.element.common.type.in());
-        } else { // ta is a plain large sequence
+        } else { // TI_PLAIN_SEQUENCE_LARGE
           return strongly_assignable(*ta.seq_ldefn.element_identifier.in(),
                                      *tob.sequence_type.element.common.type.in());
         }
@@ -531,7 +531,7 @@ namespace XTypes {
       // TODO: Can tb.kind be EK_COMPLETE? More generally, can a MinimalTypeObject
       // depend on a TypeIdentifier that identifies a class of types which have
       // COMPLETE equivalence relation.
-      // Assuming tb.kind of EK_COMPLETE is not supported.
+      // For now, assuming tb.kind of EK_COMPLETE is not supported.
       return false;
     }
 
@@ -549,7 +549,7 @@ namespace XTypes {
       if (TI_PLAIN_SEQUENCE_SMALL == ta.kind) {
         return strongly_assignable(*ta.seq_sdefn.element_identifier.in(),
                                    *tb.sequence_type.element.common.type.in());
-      } else { // ta is a plain large sequence
+      } else { // TI_PLAIN_SEQUENCE_LARGE
         return strongly_assignable(*ta.seq_ldefn.element_identifier.in(),
                                    *tb.sequence_type.element.common.type.i());
       }
@@ -558,10 +558,120 @@ namespace XTypes {
     return false;
   }
 
+  /**
+   * @brief The first type must be a plain array. The second type can be anything.
+   */
   bool TypeAssignability::assignable_plain_array(const TypeIdentifier& ta,
                                                  const TypeIdentifier& tb) const
   {
-    return false; // TODO: Implement this
+    if (TI_PLAIN_ARRAY_SMALL == tb.kind) {
+      if (TI_PLAIN_ARRAY_SMALL == ta.kind) {
+        Sequence<SBound> bounds_a = ta.array_sdefn.array_bound_seq;
+        Sequence<SBound> bounds_b = tb.array_sdefn.array_bound_seq;
+        if (bounds_a.size() != bounds_b.size()) {
+          return false;
+        }
+
+        for (size_t i = 0; i < bounds_a.size(); ++i) {
+          if (bounds_a[i] != bounds_b[i]) {
+            return false;
+          }
+        }
+
+        return strongly_assignable(*ta.array_sdefn.element_identifier.in(),
+                                   *tb.array_sdefn.element_identifier.in());
+      } else { // TI_PLAIN_ARRAY_LARGE
+        Sequence<LBound> bounds_a = ta.array_ldefn.array_bound_seq;
+        Sequence<SBound> bounds_b = tb.array_sdefn.array_bound_seq;
+        if (bounds_a.size() != bounds_b.size()) {
+          return false;
+        }
+
+        for (size_t i = 0; i < bounds_a.size(); ++i) {
+          if (bounds_a[i] != static_cast<LBound>(bounds_b[i])) {
+            return false;
+          }
+        }
+
+        return strongly_assignable(*ta.array_ldefn.element_identifier.in(),
+                                   *tb.array_sdefn.element_identifier.in());
+      }
+    } else if (TI_PLAIN_ARRAY_LARGE == tb.kind) {
+      if (TI_PLAIN_ARRAY_SMALL == ta.kind) {
+        Sequence<SBound> bounds_a = ta.array_sdefn.array_bound_seq;
+        Sequence<LBound> bounds_b = tb.array_ldefn.array_bound_seq;
+        if (bounds_a.size() != bounds_b.size()) {
+          return false;
+        }
+
+        for (size_t i = 0; i < bounds_a.size(); ++i) {
+          if (static_cast<LBound>(bounds_a[i]) != bounds_b[i]) {
+            return false;
+          }
+        }
+
+        return strongly_assignable(*ta.array_sdefn.element_identifier.in(),
+                                   *tb.array_ldefn.element_identifier.in());
+      } else { // TI_PLAIN_ARRAY_LARGE
+        Sequence<LBound> bounds_a = ta.array_ldefn.array_bound_seq;
+        Sequence<LBound> bounds_b = tb.array_ldefn.array_bound_seq;
+        if (bounds_a.size() != bounds_b.size()) {
+          return false;
+        }
+
+        for (size_t i = 0; i < bounds_a.size(); ++i) {
+          if (bounds_a[i] != bounds_b[i]) {
+            return false;
+          }
+        }
+
+        return strongly_assignable(*ta.array_ldefn.element_identifier.in(),
+                                   *tb.array_ldefn.element_identifier.in());
+      }
+    } else if (EK_MINIMAL == tb.kind) {
+      const MinimalTypeObject& tob = lookup_minimal(tb);
+      if (TK_ARRAY == tob.kind) {
+        Sequence<LBound> bounds_b = tob.array_type.header.common.bound_seq;
+        if (TI_PLAIN_ARRAY_SMALL == ta.kind) {
+          Sequence<SBound> bounds_a = ta.array_sdefn.array_bound_seq;
+          if (bounds_a.size() != bounds_b.size()) {
+            return false;
+          }
+
+          for (size_t i = 0; i < bounds_a.size(); ++i) {
+            if (static_cast<LBound>(bounds_a[i]) != bounds_b[i]) {
+              return false;
+            }
+          }
+
+          return strongly_assignable(*ta.array_sdefn.element_identifier.in(),
+                                     *tob.array_type.element.common.type.in());
+        } else { // TI_PLAIN_ARRAY_LARGE
+          Sequence<LBound> bounds_a = ta.array_ldefn.array_bound_seq;
+          if (bounds_a.size() != bounds_b.size()) {
+            return false;
+          }
+
+          for (size_t i = 0; i < bounds_a.size(); ++i) {
+            if (bounds_a[i] != bounds_b[i]) {
+              return false;
+            }
+          }
+
+          return strongly_assignable(*ta.array_ldefn.element_identifier.in(),
+                                     *tob.array_type.element.common.type.in());
+        }
+      } else if (TK_ALIAS == tob.kind) {
+        const TypeIdentifier& base = *tob.alias_type.body.common.related_type.in();
+        return assignable_plain_array(ta, base);
+      }
+    } else if (EK_COMPLETE == tb.kind) {
+      // Assuming tb.kind of EK_COMPLETE is not supported (similar to
+      // the way assignability for plain sequences are being handled)
+      return false;
+    }
+
+    return false;
   }
 
   /**
