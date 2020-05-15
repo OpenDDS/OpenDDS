@@ -1408,6 +1408,7 @@ sub has_feature {
   return 0;
 }
 
+my @features;
 if ($opts{'java'}) {
   my $feat = 'java_pre_jpms';
   unless (has_feature($feat)) {
@@ -1417,7 +1418,7 @@ if ($opts{'java'}) {
       if (/javac (\d+)/) {
         print "Found javac major version $1\n" if $opts{'verbose'};
         if ($1 > 1) {
-          push(@{$opts{'features'}}, "$feat=0");
+          push(@features, "$feat=0");
           print "Feature $feat=0 due to Java version\n" if $opts{'verbose'};
         }
         last;
@@ -1462,7 +1463,6 @@ if (exists $opts{'boost'} && exists $opts{'boost-version'}) {
 
 # Enable MPC features and populate expected environment variables
 # for all required "optional" dependencies.
-my @features;
 for my $key (keys %optdep) {
   if (exists $opts{$key}) {
     print "Enabling $key\n" if $opts{'verbose'};

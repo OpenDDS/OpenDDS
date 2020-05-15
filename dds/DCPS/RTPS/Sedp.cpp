@@ -3042,7 +3042,7 @@ Sedp::Writer::write_stateless_message(const DDS::Security::ParticipantStatelessM
   DCPS::serialized_size(encoding, size, msg);
 
   ACE_Message_Block payload(
-    DCPS::DataSampleHeader::get_max_serialzied_size(),
+    DCPS::DataSampleHeader::get_max_serialized_size(),
     ACE_Message_Block::MB_DATA,
     new ACE_Message_Block(size));
   Serializer serializer(payload.cont(), encoding);

@@ -1181,7 +1181,7 @@ bool CryptoBuiltInImpl::encode_submessage(
   ser << smHdr;
   ser << footer;
 
-  return set.good_bit();
+  return ser.good_bit();
 }
 
 bool CryptoBuiltInImpl::encode_datawriter_submessage(
