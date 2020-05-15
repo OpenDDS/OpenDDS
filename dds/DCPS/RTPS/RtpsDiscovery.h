@@ -436,6 +436,17 @@ public:
     use_ncm_ = ui;
   }
 
+  size_t sedp_max_message_size() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, size_t());
+    return sedp_max_message_size_;
+  }
+  void sedp_max_message_size(size_t value)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    sedp_max_message_size_ = value;
+  }
+
 private:
   mutable ACE_Thread_Mutex lock_;
   DCPS::TimeDuration resend_period_;
@@ -467,6 +478,7 @@ private:
   ACE_INET_Addr sedp_stun_server_address_;
   bool use_ice_;
   bool use_ncm_;
+  size_t sedp_max_message_size_;
 };
 
 typedef OpenDDS::DCPS::RcHandle<RtpsDiscoveryConfig> RtpsDiscoveryConfig_rch;

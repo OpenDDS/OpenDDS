@@ -19,9 +19,9 @@
 
 using namespace std;
 
-string idl_mapping_jni::scoped(UTL_ScopedName *name)
+string idl_mapping_jni::scoped(UTL_ScopedName *name, bool omit_local)
 {
-  return scoped_helper(name, "::");
+  return scoped_helper(name, "::", omit_local);
 }
 
 string idl_mapping_jni::taoType(AST_Type *decl)
@@ -1641,14 +1641,17 @@ ostream &operator<< (ostream &o, AST_Expression::AST_ExprValue *ev)
 }
 
 bool idl_mapping_jni::gen_union(UTL_ScopedName *name,
-                                const std::vector<AST_UnionBranch *> &branches, AST_Type *discriminator,
-                                AST_Expression::ExprType, const AST_Union::DefaultValue &, const char *)
+                                const std::vector<AST_UnionBranch *> &branches,
+                                AST_Type *discriminator,
+                                AST_Expression::ExprType,
+                                const AST_Union::DefaultValue &default_value,
+                                const char *)
 {
   string disc_ty = type(discriminator),
-                   disc_sig = jvmSignature(discriminator),
-                              disc_meth = jniFnName(discriminator),
-                                          branchesToCxx, branchesToJava;
-  bool someBranchUsesExplicitDisc(false);
+    disc_sig = jvmSignature(discriminator),
+    disc_meth = jniFnName(discriminator),
+    branchesToCxx, branchesToJava;
+  bool someBranchUsesExplicitDisc(false), hasDefault(false);
 
   for (size_t i = 0; i < branches.size(); ++i) {
     unsigned long n_labels = branches[i]->label_list_length();
@@ -1659,6 +1662,7 @@ bool idl_mapping_jni::gen_union(UTL_ScopedName *name,
       ostringstream oss;
 
       if (ul->label_kind() == AST_UnionLabel::UL_default) {
+        hasDefault = true;
         useExplicitDisc = true;
         branchesToCxx  += "    default:\n";
         branchesToJava += "    default:\n";
@@ -1676,14 +1680,10 @@ bool idl_mapping_jni::gen_union(UTL_ScopedName *name,
 
         //for the "toJava" side, use actual enumerators instead of ints
         if (ul->label_val()->ev()->et == AST_Expression::EV_enum) {
-          string enum_val = scoped(ul->label_val()->n()),
-                            enum_type = scoped(discriminator->name());
-          size_t idx = enum_type.rfind("::");
-
-          if (idx != string::npos) enum_type.resize(idx);
-
+          const string prefix = scoped(discriminator->name(), true);
+          UTL_ScopedName* n = ul->label_val()->n();
           branchesToJava +=
-            "    case " + enum_type + "::" + enum_val + ":\n";
+            "    case " + prefix + "::" + n->last_component()->get_string() + ":\n";
 
         } else {
           branchesToJava += "    case " + oss.str() + ":\n";
@@ -1764,16 +1764,16 @@ bool idl_mapping_jni::gen_union(UTL_ScopedName *name,
   string unionJVMsig = scoped_helper(name, "/");
   bool disc_is_enum(disc_meth == "Object");
   string disc_name = disc_is_enum ? "disc_val" : "disc",
-                     extra_enum1 = disc_is_enum ?
-                                   "  jmethodID mid_disc_val = jni->GetMethodID (jni->GetObjectClass "
-                                   "(disc), \"value\", \"()I\");\n"
-                                   "  jint disc_val = jni->CallIntMethod (disc, mid_disc_val);\n"
-                                   "  jni->DeleteLocalRef (disc);\n"
-                                   : "",
-                                   extra_enum2 = disc_is_enum ?
-                                                 "static_cast<" + taoType(discriminator) + "> (disc_val)"
-                                                 : "disc",
-                                                 explicitDiscSetup, explicitDiscCleanup;
+    extra_enum1 = disc_is_enum ?
+    "  jmethodID mid_disc_val = jni->GetMethodID (jni->GetObjectClass "
+    "(disc), \"value\", \"()I\");\n"
+    "  jint disc_val = jni->CallIntMethod (disc, mid_disc_val);\n"
+    "  jni->DeleteLocalRef (disc);\n"
+    : "",
+    extra_enum2 = disc_is_enum ?
+    "static_cast<" + taoType(discriminator) + "> (disc_val)"
+    : "disc",
+    explicitDiscSetup, explicitDiscCleanup;
 
   if (someBranchUsesExplicitDisc && disc_is_enum) {
     string enum_sig = scoped_helper(discriminator->name(), "/");
@@ -1789,6 +1789,30 @@ bool idl_mapping_jni::gen_union(UTL_ScopedName *name,
   } else if (someBranchUsesExplicitDisc) {
     explicitDiscSetup =
       "  " + disc_ty + " jdisc = source._d ();\n";
+  }
+
+  if (!hasDefault && default_value.computed_ != 0) {
+    branchesToJava +=
+      "    default:\n"
+      "      {\n"
+      "        jmethodID mid = jni->GetMethodID (clazz, \"__default\", \"("
+      + disc_sig + ")V\");\n";
+    if (disc_is_enum) {
+      branchesToJava +=
+        "        jobject disc;\n"
+        "        copyToJava (jni, disc, source._d ());\n";
+    } else {
+      branchesToJava +=
+        "        " + disc_ty + " disc = source._d ();\n";
+    }
+    branchesToJava +=
+      "        jni->CallVoidMethod (target, mid, disc);\n";
+    if (disc_is_enum) {
+      branchesToJava +=
+        "        jni->DeleteLocalRef (disc);\n";
+    }
+    branchesToJava +=
+      "      }\n";
   }
 
   c.cppfile <<

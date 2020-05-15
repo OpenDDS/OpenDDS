@@ -403,7 +403,12 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket
     ncm->add_listener(*this);
   } else {
     NetworkInterface nic(0, cfg.multicast_interface_, true);
-    nic.addresses.insert(ACE_INET_Addr());
+    ACE_INET_Addr addr(u_short(0), "0.0.0.0");
+    nic.addresses.insert(addr);
+#ifdef ACE_HAS_IPV6
+    ACE_INET_Addr addr2(u_short(0), "::");
+    nic.addresses.insert(addr2);
+#endif
     join_multicast_group(nic, true);
   }
 

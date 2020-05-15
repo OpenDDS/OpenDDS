@@ -421,7 +421,7 @@ bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser
       to.insert(dest);
     }
 
-    if (check_submessages && src_guid != config_.application_participant_guid()) {
+    if (check_submessages) {
 #ifdef OPENDDS_SECURITY
       switch (submessage_header.submessageId) {
       case OpenDDS::RTPS::SRTPS_PREFIX:

@@ -1,0 +1,15 @@
+enum E { E1, E2, E3, E4 };
+union NoDefault switch (E) {
+ case E2:
+   octet o;
+ case E3:
+ case E4:
+   short s;
+};
+
+union WithDefault switch (E) {
+ case E1:
+   boolean b;
+ default:
+   string s;
+};
