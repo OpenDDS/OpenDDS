@@ -107,6 +107,8 @@ TransportReceiveStrategy<TH, DSH>::handle_simple_dds_input(ACE_HANDLE fd)
   }
 
   ACE_Message_Block* cur_rb = receive_buffers_[buffer_index_];
+  cur_rb->reset();
+
   iovec iov;
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -131,22 +133,18 @@ TransportReceiveStrategy<TH, DSH>::handle_simple_dds_input(ACE_HANDLE fd)
   cur_rb->wr_ptr(bytes_remaining);
 
   if (stop) {
-    cur_rb->reset();
     return 0;
   }
 
   if (bytes_remaining < 0) {
-    cur_rb->reset();
     relink();
     return -1;
   }
 
   if (bytes_remaining == 0) {
     if (gracefully_disconnected_) {
-      cur_rb->reset();
       return -1;
     } else {
-      cur_rb->reset();
       relink();
       return -1;
     }
@@ -158,14 +156,12 @@ TransportReceiveStrategy<TH, DSH>::handle_simple_dds_input(ACE_HANDLE fd)
 
   receive_transport_header_ = *cur_rb;
   if (!receive_transport_header_.valid()) {
-    cur_rb->reset();
     ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: TransportHeader invalid.\n")), -1);
   }
 
 
   bytes_remaining = receive_transport_header_.length_;
   if (!check_header(receive_transport_header_)) {
-    cur_rb->reset();
     return 0;
   }
 
@@ -174,7 +170,6 @@ TransportReceiveStrategy<TH, DSH>::handle_simple_dds_input(ACE_HANDLE fd)
     data_sample_header_ = *cur_rb;
     bytes_remaining -= data_sample_header_.marshaled_size();
     if (!check_header(data_sample_header_)) {
-      cur_rb->reset();
       return 0;
     }
     const size_t dsh_ml = data_sample_header_.message_length();
@@ -238,8 +233,6 @@ TransportReceiveStrategy<TH, DSH>::handle_simple_dds_input(ACE_HANDLE fd)
         &mb_allocator_                      // Our message block cache
       ),
       -1);
-  } else {
-    cur_rb->reset();
   }
 
   return 0;
