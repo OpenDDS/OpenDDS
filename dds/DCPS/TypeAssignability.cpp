@@ -174,13 +174,15 @@ namespace XTypes {
   bool TypeAssignability::assignable_annotation(const MinimalTypeObject& ta,
                                                 const MinimalTypeObject& tb) const
   {
-    return false; // TODO: Implement this
+    // No rule for annotation in the spec
+    return false;
   }
 
   bool TypeAssignability::assignable_annotation(const MinimalTypeObject& ta,
                                                 const TypeIdentifier& tb) const
   {
-    return false; // TODO: Implement this
+    // No rule for annotation in the spec
+    return false;
   }
 
   bool TypeAssignability::assignable_struct(const MinimalTypeObject& ta,
@@ -417,7 +419,8 @@ namespace XTypes {
   bool TypeAssignability::assignable_extended(const MinimalTypeObject& ta,
                                               const MinimalTypeObject& tb) const
   {
-    return false; // Reserved for future extensions
+    // Future extensions
+    return false;
   }
 
 
@@ -429,32 +432,35 @@ namespace XTypes {
     }
 
     if (EK_COMPLETE == tb.kind || EK_MINIMAL == tb.kind) {
-      const TypeObject& type_obj = lookup_minimal(tb);
-      if (TK_BITMASK != type_obj.minimal.kind ||
-          !(TK_UINT8 == ta.kind || TK_UINT16 == ta.kind ||
-            TK_UINT32 == ta.kind || TK_UINT64 == ta.kind)) {
-        return false;
-      }
-
-      BitBound bit_bound = type_obj.minimal.bitmask_type.header.common.bit_bound;
-      if (TK_UINT8 == ta.kind) {
-        return 1 <= bit_bound && bit_bound <= 8;
-      } else if (TK_UINT16 == ta.kind) {
-        return 9 <= bit_bound && bit_bound <= 16;
-      } else if (TK_UINT32 == ta.kind) {
-        return 17 <= bit_bound && bit_bound <= 32;
-      } else if (TK_UINT64 == ta.kind) {
-        return 33 <= bit_bound && bit_bound <= 64;
-      }
+      const MinimalTypeObject& type_obj = lookup_minimal(tb);
+      return assignable_primitive(ta, type_obj);
     }
 
     return false;
   }
 
+  /**
+   * @brief The second type must not be TK_ALIAS
+   */
   bool TypeAssignability::assignable_primitive(const TypeIdentifier& ta,
                                                const MinimalTypeObject& tb) const
   {
-    return false; // TODO: Implement this
+    if (TK_BITMASK != tb.kind ||
+        !(TK_UINT8 == ta.kind || TK_UINT16 == ta.kind ||
+          TK_UINT32 == ta.kind || TK_UINT64 == ta.kind)) {
+      return false;
+    }
+
+    BitBound bit_bound = tb.bitmask_type.header.common.bit_bound;
+    if (TK_UINT8 == ta.kind) {
+      return 1 <= bit_bound && bit_bound <= 8;
+    } else if (TK_UINT16 == ta.kind) {
+      return 9 <= bit_bound && bit_bound <= 16;
+    } else if (TK_UINT32 == ta.kind) {
+      return 17 <= bit_bound && bit_bound <= 32;
+    } else { // TK_UINT64 == ta.kind
+      return 33 <= bit_bound && bit_bound <= 64;
+    }
   }
 
   bool TypeAssignability::assignable_string(const TypeIdentifier& ta,
@@ -474,22 +480,82 @@ namespace XTypes {
     }
   }
 
+  /**
+   * @brief The second type must not be TK_ALIAS
+   */
   bool TypeAssignability::assignable_string(const TypeIdentifier& ta,
                                             const MinimalTypeObject& tb) const
   {
-    return false; // TODO: Implement this
+    // The second type cannot be string since string type does not have
+    // type object. Thus the first type is not assignable from the second type.
+    return false;
   }
 
+  /**
+   * @brief The first type is a plain sequence. The second type can be anything.
+   */
   bool TypeAssignability::assignable_plain_sequence(const TypeIdentifier& ta,
                                                     const TypeIdentifier& tb) const
   {
-    return false; // TODO: Implement this
+    if (TI_PLAIN_SEQUENCE_SMALL == tb.kind) {
+      if (TI_PLAIN_SEQUENCE_SMALL == ta.kind) {
+        return strongly_assignable(*ta.seq_sdefn.element_identifier.in(),
+                                   *tb.seq_sdefn.element_identifier.in());
+      } else { // ta is a plain large sequence
+        return strongly_assignable(*ta.seq_ldefn.element_identifier.in(),
+                                   *tb.seq_sdefn.element_identifier.in());
+      }
+    } else if (TI_PLAIN_SEQUENCE_LARGE == tb.kind) {
+      if (TI_PLAIN_SEQUENCE_SMALL == ta.kind) {
+        return strongly_assignable(*ta.seq_sdefn.element_identifier.in(),
+                                   *tb.seq_ldefn.element_identifier.in());
+      } else { // ta is a plain large sequence
+        return strongly_assignable(*ta.seq_ldefn.element_identifier.in(),
+                                   *tb.seq_ldefn.element_identifier.in());
+      }
+    } else if (EK_MINIMAL == tb.kind) {
+      const MinimalTypeObject& tob = lookup_minimal(tb);
+      if (TK_SEQUENCE == tob.kind) {
+        if (TI_PLAIN_SEQUENCE_SMALL == ta.kind) {
+          return strongly_assignable(*ta.seq_sdefn.element_identifier.in(),
+                                     *tob.sequence_type.element.common.type.in());
+        } else { // ta is a plain large sequence
+          return strongly_assignable(*ta.seq_ldefn.element_identifier.in(),
+                                     *tob.sequence_type.element.common.type.in());
+        }
+      } else if (TK_ALIAS == tob.kind) {
+        const TypeIdentifier& base = *tob.alias_type.body.common.related_type.in();
+        return assignable_plain_sequence(ta, base);
+      }
+    } else if (EK_COMPLETE == tb.kind) {
+      // TODO: Can tb.kind be EK_COMPLETE? More generally, can a MinimalTypeObject
+      // depend on a TypeIdentifier that identifies a class of types which have
+      // COMPLETE equivalence relation.
+      // Assuming tb.kind of EK_COMPLETE is not supported.
+      return false;
+    }
+
+    return false;
   }
 
+  /**
+   * @brief The first type must be a plain sequence.
+   * The second type must not be TK_ALIAS.
+   */
   bool TypeAssignability::assignable_plain_sequence(const TypeIdentifier& ta,
                                                     const MinimalTypeObject& tb) const
   {
-    return false; // TODO: Implement this
+    if (TK_SEQUENCE == tb.kind) {
+      if (TI_PLAIN_SEQUENCE_SMALL == ta.kind) {
+        return strongly_assignable(*ta.seq_sdefn.element_identifier.in(),
+                                   *tb.sequence_type.element.common.type.in());
+      } else { // ta is a plain large sequence
+        return strongly_assignable(*ta.seq_ldefn.element_identifier.in(),
+                                   *tb.sequence_type.element.common.type.i());
+      }
+    }
+
+    return false;
   }
 
   bool TypeAssignability::assignable_plain_array(const TypeIdentifier& ta,
@@ -498,6 +564,9 @@ namespace XTypes {
     return false; // TODO: Implement this
   }
 
+  /**
+   * @brief The second type must not be TK_ALIAS
+   */
   bool TypeAssignability::assignable_plain_array(const TypeIdentifier& ta,
                                                  const MinimalTypeObject& tb) const
   {
@@ -510,6 +579,9 @@ namespace XTypes {
     return false; // TODO: Implement this
   }
 
+  /**
+   * @brief The second type must not be TK_ALIAS
+   */
   bool TypeAssignability::assignable_plain_map(const TypeIdentifier& ta,
                                                const MinimalTypeObject& tb) const
   {
