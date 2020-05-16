@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: checkout OpenDDS
-      uses: actions/checkout@v1
+      uses: actions/checkout@v2
     - name: git clone dependent repositories
       run: |
         git clone --depth 1 git://github.com/DOCGroup/ACE_TAO.git $DOC_ROOT

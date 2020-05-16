@@ -37,6 +37,13 @@ public:
   int start();
   void stop();
 
+  /// Useful as a simpler altnernative to handle_dds_input
+  /// when dealing with UDP protocols with maximum packet size.
+  /// Behaves the same as handle_dds_input, but only makes use
+  /// of a single recieve buffer and doesn't require message block
+  /// chains that need to be updated / maintained
+  int handle_simple_dds_input(ACE_HANDLE fd);
+
   int handle_dds_input(ACE_HANDLE fd);
 
   /// The subclass needs to provide the implementation
