@@ -520,7 +520,20 @@ namespace XTypes {
   bool TypeAssignability::assignable_enum(const MinimalTypeObject& ta,
                                           const TypeIdentifier& tb) const
   {
-    return false; // TODO: Implement this
+    if (EK_MINIMAL == tb.kind) {
+      const MinimalTypeObject& tob = lookup_minimal(tb);
+      if (TK_ENUM == tob.kind) {
+        return assignable_enum(ta, tob);
+      } else if (TK_ALIAS == tob.kind) {
+        const TypeIdentifier& base = *tob.alias_type.body.common.related_type.in();
+        return assignable_enum(ta, base);
+      }
+    } else if (EK_COMPLETE == tb.kind) {
+      // Assuming tb.kind of EK_COMPLETE is not supported
+      return false;
+    }
+
+    return false;
   }
 
   /**
@@ -530,17 +543,9 @@ namespace XTypes {
   bool TypeAssignability::assignable_bitmask(const MinimalTypeObject& ta,
                                              const MinimalTypeObject& tb) const
   {
-    BitBound ta_bit_bound = ta.bitmask_type.header.common.bit_bound;
     if (TK_BITMASK == tb.kind) {
-      return ta_bit_bound == tb.bitmask.type.header.common.bit_bound;
-    } else if (TK_UINT8 == tb.kind) {
-      return 1 <= ta_bit_bound && ta_bit_bound <= 8;
-    } else if (TK_UINT16 == tb.kind) {
-      return 9 <= ta_bit_bound && ta_bit_bound <= 16;
-    } else if (TK_UINT32 == tb.kind) {
-      return 17 <= ta_bit_bound && ta_bit_bound <= 32;
-    } else if (TK_UINT64 == tb.kind) {
-      return 33 <= ta_bit_bound && ta_bit_bound <= 64;
+      return ta.bitmask_type.header.common.bit_bound ==
+        tb.bitmask_type.header.common.bit_bound;
     }
 
     return false;
@@ -553,7 +558,29 @@ namespace XTypes {
   bool TypeAssignability::assignable_bitmask(const MinimalTypeObject& ta,
                                              const TypeIdentifier& tb) const
   {
-    return false; // TODO: Implement this
+    BitBound ta_bit_bound = ta.bitmask_type.header.common.bit_bound;
+    if (TK_UINT8 == tb.kind) {
+      return 1 <= ta_bit_bound && ta_bit_bound <= 8;
+    } else if (TK_UINT16 == tb.kind) {
+      return 9 <= ta_bit_bound && ta_bit_bound <= 16;
+    } else if (TK_UINT32 == tb.kind) {
+      return 17 <= ta_bit_bound && ta_bit_bound <= 32;
+    } else if (TK_UINT64 == tb.kind) {
+      return 33 <= ta_bit_bound && ta_bit_bound <= 64;
+    } else if (EK_MINIMAL == tb.kind) {
+      const MinimalTypeObject& tob = lookup_minimal(tb);
+      if (TK_BITMASK == tob.kind) {
+        return assignable_bitmask(ta, tob);
+      } else if (TK_ALIAS == tob.kind) {
+        const TypeIdentifier& base = *tob.alias_type.body.common.related_type.in();
+        return assignable_bitmask(ta, base);
+      }
+    } else if (EK_COMPLETE == tb.kind) {
+      // Assuming tb.kind of EK_COMPLETE is not supported
+      return false;
+    }
+
+    return false;
   }
 
   /**
@@ -578,9 +605,17 @@ namespace XTypes {
       return true;
     }
 
-    if (EK_COMPLETE == tb.kind || EK_MINIMAL == tb.kind) {
-      const MinimalTypeObject& type_obj = lookup_minimal(tb);
-      return assignable_primitive(ta, type_obj);
+    if (EK_MINIMAL == tb.kind) {
+      const MinimalTypeObject& tob = lookup_minimal(tb);
+      if (TK_BITMASK == tob.kind) {
+        return assignable_primitive(ta, tob);
+      } else if (TK_ALIAS == tob.kind) {
+        const TypeIdentifier& base = *tob.alias_type.body.common.related_type.in();
+        return assignable_primitive(ta, base);
+      }
+    } else if (EK_COMPLETE == tb.kind) {
+      // Assuming tb.kind of EK_COMPLETE is not supported
+      return false;
     }
 
     return false;
@@ -618,18 +653,26 @@ namespace XTypes {
   bool TypeAssignability::assignable_string(const TypeIdentifier& ta,
                                             const TypeIdentifier& tb) const
   {
-    if (TI_STRING8_SMALL == ta.kind || TI_STRING8_LARGE == ta.kind) {
-      if (TI_STRING8_SMALL == tb.kind || TI_STRING8_LARGE == tb.kind) {
+    if (TI_STRING8_SMALL == tb.kind || TI_STRING8_LARGE == tb.kind) {
+      if (TI_STRING8_SMALL == ta.kind || TI_STRING8_LARGE == ta.kind) {
         return true;
       }
-      return false;
-
-    } else { // TI_STRING16_SMALL or TI_STRING16_LARGE
-      if (TI_STRING16_SMALL == tb.kind || TI_STRING16_LARGE == tb.kind) {
+    } else if (TI_STRING16_SMALL == tb.kind || TI_STRING16_LARGE == tb.kind) {
+      if (TI_STRING16_SMALL == ta.kind || TI_STRING16_LARGE == ta.kind) {
         return true;
       }
+    } else if (EK_MINIMAL == tb.kind) {
+      const MinimalTypeObject& tob = lookup_minimal(tb);
+      if (TK_ALIAS == tob.kind) {
+        const TypeIdentifier& base = *tob.alias_type.body.common.related_type.in();
+        return assignable_string(ta, base);
+      }
+    } else if (EK_MINIMAL == tb.kind) {
+      // Assuming tb.kind of EK_COMPLETE is not supported
       return false;
     }
+
+    return false;
   }
 
   /**
