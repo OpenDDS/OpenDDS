@@ -106,6 +106,8 @@ public class TestPublisher {
         dw_qos.ownership.kind = OwnershipQosPolicyKind.from_int(0);
         dw_qos.ownership_strength = new OwnershipStrengthQosPolicy();
         dw_qos.writer_data_lifecycle = new WriterDataLifecycleQosPolicy();
+        dw_qos.representation = new DataRepresentationQosPolicy();
+        dw_qos.representation.value = new short[0];
 
         DataWriterQosHolder qosh = new DataWriterQosHolder(dw_qos);
         pub.get_default_datawriter_qos(qosh);

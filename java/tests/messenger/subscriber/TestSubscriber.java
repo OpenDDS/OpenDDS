@@ -89,6 +89,8 @@ public class TestSubscriber {
         dr_qos.reader_data_lifecycle = new ReaderDataLifecycleQosPolicy();
         dr_qos.reader_data_lifecycle.autopurge_nowriter_samples_delay = new Duration_t();
         dr_qos.reader_data_lifecycle.autopurge_disposed_samples_delay = new Duration_t();
+        dr_qos.representation = new DataRepresentationQosPolicy();
+        dr_qos.representation.value = new short[0];
 
         DataReaderQosHolder qosh = new DataReaderQosHolder(dr_qos);
         sub.get_default_datareader_qos(qosh);
