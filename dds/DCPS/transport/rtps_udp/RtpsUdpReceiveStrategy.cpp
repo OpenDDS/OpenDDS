@@ -30,6 +30,7 @@ RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link, const Guid
   : link_(link)
   , last_received_()
   , recvd_sample_(0)
+  , total_frags_(0)
   , receiver_(local_prefix)
 #ifdef OPENDDS_SECURITY
   , secure_sample_(0)
