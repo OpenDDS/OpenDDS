@@ -45,7 +45,7 @@ RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link, const Guid
 int
 RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
 {
-  return handle_dds_input(fd);
+  return handle_simple_dds_input(fd);
 }
 
 ssize_t

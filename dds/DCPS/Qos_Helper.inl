@@ -342,7 +342,7 @@ bool operator==(
   const DDS::DataRepresentationQosPolicy& qos2)
 {
   const CORBA::ULong count = qos1.value.length();
-  const CORBA::ULong count2 = qos1.value.length();
+  const CORBA::ULong count2 = qos2.value.length();
   if (count != count2) {
     return false;
   }
