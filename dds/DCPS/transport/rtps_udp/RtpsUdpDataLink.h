@@ -546,15 +546,15 @@ private:
     }
     send_bundled_submessages(meta_submessages);
     if (schedule_timer) {
-      heartbeat_reply_.schedule();
+      heartbeat_reply_.enable(normal_heartbeat_response_delay_);
     }
   }
 
   void send_nack_replies();
   void send_heartbeats(const DCPS::MonotonicTimePoint& now);
+  void send_heartbeat_replies(const DCPS::MonotonicTimePoint& now);
   void send_directed_heartbeats(OPENDDS_VECTOR(RTPS::HeartBeatSubmessage)& hbs);
   void check_heartbeats(const DCPS::MonotonicTimePoint& now);
-  void send_heartbeat_replies();
   void send_relay_beacon(const DCPS::MonotonicTimePoint& now);
 
   CORBA::Long best_effort_heartbeat_count_;
@@ -585,10 +585,10 @@ private:
     TimeDuration timeout_;
     MonotonicTimePoint scheduled_;
 
-  } nack_reply_, heartbeat_reply_;
+  } nack_reply_;
 
   typedef PmfMultiTask<RtpsUdpDataLink> Multi;
-  Multi heartbeat_;
+  Multi heartbeat_, heartbeat_reply_;
 
   typedef PmfPeriodicTask<RtpsUdpDataLink> Periodic;
   Periodic heartbeatchecker_, relay_beacon_;
@@ -680,6 +680,7 @@ private:
   HeldDataDeliveryHandler held_data_delivery_handler_;
   const size_t max_bundle_size_;
   TimeDuration quick_heartbeat_delay_;
+  TimeDuration normal_heartbeat_response_delay_;
   TimeDuration quick_heartbeat_response_delay_;
 
 #ifdef OPENDDS_SECURITY

@@ -1833,7 +1833,6 @@ Spdp::SpdpTransport::open()
 #endif
 
   local_sender_ = DCPS::make_rch<SpdpMulti>(reactor_task_.interceptor(), outer_->config_->resend_period(), ref(*this), &SpdpTransport::send_local);
-  local_sender_->enable(TimeDuration());
 
 #ifdef OPENDDS_SECURITY
   auth_deadline_processor_ = DCPS::make_rch<SpdpSporadic>(reactor_task_.interceptor(), ref(*this), &SpdpTransport::process_auth_deadlines);

@@ -105,14 +105,14 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
   , best_effort_heartbeat_count_(0)
   , nack_reply_(this, &RtpsUdpDataLink::send_nack_replies,
                 config.nak_response_delay_)
-  , heartbeat_reply_(this, &RtpsUdpDataLink::send_heartbeat_replies,
-                     config.heartbeat_response_delay_)
   , heartbeat_(reactor_task->interceptor(), config.heartbeat_period_, *this, &RtpsUdpDataLink::send_heartbeats)
+  , heartbeat_reply_(reactor_task->interceptor(), config.heartbeat_period_, *this, &RtpsUdpDataLink::send_heartbeat_replies)
   , heartbeatchecker_(reactor_task->interceptor(), *this, &RtpsUdpDataLink::check_heartbeats)
   , relay_beacon_(reactor_task->interceptor(), *this, &RtpsUdpDataLink::send_relay_beacon)
   , held_data_delivery_handler_(this)
   , max_bundle_size_(config.max_bundle_size_)
   , quick_heartbeat_delay_(config.heartbeat_period_ * config.quick_reply_ratio_)
+  , normal_heartbeat_response_delay_(config.heartbeat_response_delay_)
   , quick_heartbeat_response_delay_(config.heartbeat_response_delay_ * config.quick_reply_ratio_)
 #ifdef OPENDDS_SECURITY
   , security_config_(Security::SecurityRegistry::instance()->default_config())
@@ -620,6 +620,7 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
   }
 
   bool enable_heartbeat = false;
+  bool enable_replies = false;
 
   if (conv.isWriter()) {
     if (remote_reliable) {
@@ -656,6 +657,7 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
       }
       RtpsReader_rch reader = rr->second;
       readers_of_writer_.insert(RtpsReaderMultiMap::value_type(remote_id, rr->second));
+      enable_replies = true;
       g.release();
       reader->add_writer(remote_id, WriterInfo());
     } else {
@@ -665,6 +667,9 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
 
   if (enable_heartbeat) {
     heartbeat_.enable(quick_heartbeat_delay_);
+  }
+  if (enable_replies) {
+    heartbeat_reply_.enable(normal_heartbeat_response_delay_);
   }
 }
 
@@ -925,7 +930,7 @@ RtpsUdpDataLink::stop_i()
   }
 
   nack_reply_.cancel();
-  heartbeat_reply_.cancel();
+  heartbeat_reply_.disable_and_wait();
   heartbeat_.disable_and_wait();
   heartbeatchecker_.disable_and_wait();
   relay_beacon_.disable_and_wait();
@@ -1824,7 +1829,7 @@ RtpsUdpDataLink::received(const RTPS::HeartBeatSubmessage& heartbeat,
   }
 
   if (schedule_acknack) {
-    heartbeat_reply_.schedule();
+    heartbeat_reply_.enable(normal_heartbeat_response_delay_);
   }
 
   datareader_dispatch(heartbeat, src_prefix,
@@ -1928,7 +1933,7 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
     info.ack_pending_ = true;
 
     if (immediate_reply) {
-      link->heartbeat_reply_.schedule(link->quick_heartbeat_response_delay_);
+      link->heartbeat_reply_.enable(link->quick_heartbeat_response_delay_);
     } else {
       result = true; // timer will invoke send_heartbeat_replies()
     }
@@ -2432,7 +2437,7 @@ RtpsUdpDataLink::send_bundled_submessages(MetaSubmessageVec& meta_submessages)
 }
 
 void
-RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
+RtpsUdpDataLink::send_heartbeat_replies(const DCPS::MonotonicTimePoint& /*now*/)
 {
   using namespace OpenDDS::RTPS;
 
