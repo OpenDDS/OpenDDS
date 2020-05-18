@@ -282,7 +282,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   Xyz::Foo my_foo;
 
   // greenx < redx < bluex
-  const Xyz::ColorX orig_color = Xyz::ColorX::greenx;
+  const Xyz::ColorX orig_color = Xyz::greenx;
 
   // -- //+# is keeping track of the find_size
   my_foo.key = 99; //4
@@ -329,7 +329,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     my_foo.key = 77;
-    my_foo.xcolor = Xyz::ColorX::redx;
+    my_foo.xcolor = Xyz::redx;
     foomap[my_foo] = &my_foo;
     if (foomap[foo2] != &foo2) {
       ACE_ERROR((LM_ERROR, "FooKeyLessThan failed with map - 2\n"));
@@ -341,7 +341,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       failed = true;
     }
 
-    if (foomap[my_foo]->xcolor != Xyz::ColorX::redx) {
+    if (foomap[my_foo]->xcolor != Xyz::redx) {
       ACE_ERROR((LM_ERROR, "FooKeyLessThan failed with map - 3b\n"));
       failed = true;
     }

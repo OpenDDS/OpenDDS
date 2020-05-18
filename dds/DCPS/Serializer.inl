@@ -1020,7 +1020,7 @@ operator<<(Serializer& s, const ACE_CDR::WChar* x)
 
 #if ACE_SIZEOF_WCHAR == 2
     s.write_array(reinterpret_cast<const char*>(x), char16_cdr_size, length,
-      swap_bytes);
+      s.swap_bytes());
 #else
     for (size_t i = 0; i < length && s.good_bit(); ++i) {
       const ACE_UINT16 as_utf16 = static_cast<ACE_UINT16>(x[i]);
