@@ -394,7 +394,7 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   remote_data.diffie_hellman = DCPS::move(diffie_hellman);
   remote_data.hash_c1 = hash_c1;
 
-  if (handshake_handle != DDS::HANDLE_NIL) {
+  if (handshake_handle == DDS::HANDLE_NIL) {
     handshake_handle = get_next_handle();
   }
 
@@ -633,8 +633,8 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
     return Failure;
   }
 
-  LocalParticipantData& local_data = *(handshake_data.first);
-  RemoteParticipantData& remote_data = *(handshake_data.second);
+  const LocalParticipantData& local_data = *handshake_data.first;
+  RemoteParticipantData& remote_data = *handshake_data.second;
 
   DDS::Security::HandshakeMessageToken message_data_in(request_token);
   TokenReader message_in(message_data_in);
@@ -782,7 +782,10 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
   remote_data.hash_c1 = hash_c1;
   remote_data.hash_c2 = hash_c2;
 
-  handshake_handle = get_next_handle();
+  if (handshake_handle == DDS::HANDLE_NIL) {
+    handshake_handle = get_next_handle();
+  }
+
   {
     ACE_Guard<ACE_Thread_Mutex> guard(handshake_mutex_);
     handshake_data_[handshake_handle] = handshake_data;

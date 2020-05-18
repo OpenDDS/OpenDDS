@@ -1073,7 +1073,7 @@ TEST_F(AuthenticationTest, GetSharedSecret_InitiatorAndReplier_Match)
   ASSERT_EQ(r, DDS::Security::VALIDATION_OK);
 
   SharedSecretHandle_var secret1 = mp1.auth.get_shared_secret(mp1.handshake_handle, ex);
-  SharedSecretHandle_var secret2 = mp1.auth.get_shared_secret(mp2.handshake_handle, ex);
+  SharedSecretHandle_var secret2 = mp2.auth.get_shared_secret(mp2.handshake_handle, ex);
   ASSERT_NE((void*)0, secret1);
   ASSERT_NE((void*)0, secret2);
   DDS::OctetSeq_var secret1_data = secret1->sharedSecret();
