@@ -22,8 +22,6 @@ using DDS::DomainParticipantQos;
 using namespace testing;
 
 
-static const ::CORBA::Boolean CFALSE(false);
-static const ::CORBA::Boolean CTRUE(true);
 static const char* Expected_Permissions_Token_Class_Id ="DDS:Access:Permissions:1.0";
 static const char* Expected_Permissions_Cred_Token_Class_Id ="DDS:Access:PermissionsCredential";
 //static const char* identity_ca_file = "certs/opendds_identity_ca_cert.pem";

@@ -1660,6 +1660,7 @@ namespace OpenDDS {
         bool has_last_stateless_msg_;
         MonotonicTimePoint stateless_msg_deadline_;
         DDS::Security::ParticipantStatelessMessage last_stateless_msg_;
+        DDS::Security::HandshakeMessageToken last_handshake_request_data_;
 
         MonotonicTimePoint auth_deadline_;
         AuthState auth_state_;
