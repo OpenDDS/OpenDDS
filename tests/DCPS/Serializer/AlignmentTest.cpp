@@ -263,23 +263,32 @@ bool runAlignmentResetTest()
 bool runAlignmentOverrunTest()
 {
   std::cerr << "\nRunning alignment overrun test...\n";
-  ACE_Message_Block mb(4);
 
   for (size_t encoding = 0; encoding < encoding_count; ++encoding) {
+    ACE_Message_Block mb(4);
+
     Serializer s1(&mb, encodings[encoding]);
     ACE_CDR::Long x = 42;
     if (!(s1 << x)) {
+      std::cerr << "runAlignmentOverrunTest: 1st serialization using " <<
+        encodings[encoding].to_string() << " failed\n";
       return false;
     }
     if (s1 << x) {
+      std::cerr << "runAlignmentOverrunTest: 2st serialization using " <<
+        encodings[encoding].to_string() << " succeeded when it should've failed\n";
       return false;
     }
 
     Serializer s2(&mb, encodings[encoding]);
     if (!(s2 >> x)) {
+      std::cerr << "runAlignmentOverrunTest: 1st deserialization using " <<
+        encodings[encoding].to_string() << " failed\n";
       return false;
     }
     if (s2 >> x) {
+      std::cerr << "runAlignmentOverrunTest: 2nd deserialization using " <<
+        encodings[encoding].to_string() << " succeeded when it should've failed\n";
       return false;
     }
   }
