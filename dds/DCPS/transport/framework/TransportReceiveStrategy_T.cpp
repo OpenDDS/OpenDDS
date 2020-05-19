@@ -168,7 +168,7 @@ TransportReceiveStrategy<TH, DSH>::handle_simple_dds_input(ACE_HANDLE fd)
   while (bytes_remaining > 0) {
     data_sample_header_.pdu_remaining(bytes_remaining);
     data_sample_header_ = *cur_rb;
-    bytes_remaining -= data_sample_header_.marshaled_size();
+    bytes_remaining -= data_sample_header_.get_serialized_size();
     if (!check_header(data_sample_header_)) {
       return 0;
     }
