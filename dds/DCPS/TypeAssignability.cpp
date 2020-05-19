@@ -231,26 +231,61 @@ namespace XTypes {
       return false;
     }
 
-    // Discriminator type must be strongly assignable
+    // Discriminator type must be one of these: (i) non-float primitive types,
+    // or (ii) enumerated types, or (iii) an alias type that resolves to
+    // one of the above two type kinds
     const TypeIdentifier& tia = *ta.union_type.discriminator.common.type_id.in();
     const TypeIdentifier& tib = *tb.union_type.discriminator.common.type_id.in();
-    ACE_CDR::Octet a_disc = tia.kind;
-    ACE_CDR::Octet b_disc = tib.kind;
-    if (TK_BOOLEAN == a_disc || TK_BYTE == a_disc || TK_INT16 == a_disc ||
-        TK_INT32 == a_disc || TK_INT64 == a_disc || TK_UINT16 == a_disc ||
-        TK_UINT32 == a_disc || TK_UINT64 == a_disc || TK_INT8 == a_disc ||
-        TK_UINT8 == a_disc || TK_CHAR8 == a_disc || TK_CHAR16 == a_disc) {
-      if (!(a_disc == b_disc ||
-            (assignable_primitive(tia, tib) && is_delimited(tib)))) {
+    if (!strongly_assignable(tia, tib)) {
+      return false;
+    }
+
+    // Both discriminators are keys or neither are keys
+    MemberFlag flags_a = ta.union_type.discriminator.common.member_flags;
+    MemberFlag flags_b = tb.union_type.discriminator.common.member_flags;
+    if (((flags_a & IS_KEY == IS_KEY) && (flags_b & IS_KEY != IS_KEY)) ||
+        ((flags_a & IS_KEY != IS_KEY) && (flags_b & IS_KEY == IS_KEY))) {
+      return false;
+    }
+
+    // Members with the same id must have the same name, and vice versa
+    map<MemberId, NameHash> id_to_name_a;
+    map<ACE_CDR::ULong, MemberId> name_to_id_a;
+    for (size_t i = 0; i < ta.union_type.member_seq.members.size(); ++i) {
+      MemberId id = ta.union_type.member_seq.members[i].common.member_id;
+      NameHash h = ta.union_type.member_seq.members[i].detail.name_hash;
+      ACE_CDR::ULong name = (h[0] << 24) | (h[1] << 16) | (h[2] << 8) | (h[3]);
+      id_to_name_a[id] = name;
+      name_to_id_a[name] = id;
+    }
+
+    for (size_t i = 0; i < tb.union_type.member_seq.members.size(); ++i) {
+      MemberId id = tb.union_type.member_seq.members[i].common.member_id;
+      NameHash h = tb.union_type.member_seq.members[i].detail.name_hash;
+      ACE_CDR::ULong name = (h[0] << 24) | (h[1] << 16) | (h[2] << 8) | (h[3]);
+      if (id_to_name_a.find(id) != id_to_name_a.end() &&
+          id_to_name_a[id] != name) {
         return false;
       }
-    } else if (EK_COMPLETE == a_disc || EK_MINIMAL == a_disc) {
-      if ((b_disc == a_disc && tia.equivalence_hash != tib.equivalence_hash) ||
-          b_disc != a_disc) {
-        // TODO: Check if tia is-assignable-from tib and tib is delimited
+
+      if (name_to_id_a.find(name) != name_to_id_a.end() &&
+          name_to_id_a[name] != id) {
+        return false;
       }
-    } else { // Invalid types for discriminator
-      return false;
+    }
+
+    // All non-default labels in T2 that select some member in T1,
+    // the type of the selected member in T1 is assignable from the
+    // type of the T2 member
+    for (size_t i = 0; i < tb.union_type.member_seq.members.size(); ++i) {
+      UnionMemberFlag
+        flags_b = tb.union_type.member_seq.members[i].common.member_flags;
+      if (flags_b & IS_DEFAULT == IS_DEFAULT) {
+        continue;
+      }
+      UnionCaseLabelSeq
+        label_seq_b = tb.union_type.member_seq.members[i].common.label_seq;
+      
     }
 
     return true;
@@ -273,7 +308,8 @@ namespace XTypes {
   bool TypeAssignability::assignable_bitset(const MinimalTypeObject& ta,
                                             const MinimalTypeObject& tb) const
   {
-    return false; // TODO: Implement this
+    // No rule for bitset in the spec
+    return false;
   }
 
   /**
@@ -283,7 +319,8 @@ namespace XTypes {
   bool TypeAssignability::assignable_bitset(const MinimalTypeObject& ta,
                                             const TypeIdentifier& tb) const
   {
-    return false; // TODO: Implement this
+    // No rule for bitset in the spec
+    return false;
   }
 
   /**
@@ -491,15 +528,13 @@ namespace XTypes {
       }
 
       for (size_t i = 0; i < size_a; ++i) {
-        const ACE_CDR::Octet*
-          h = ta.enumerated_type.literal_seq.members[i].detail.name_hash;
+        NameHash h = ta.enumerated_type.literal_seq.members[i].detail.name_hash;
         ACE_CDR::ULong key_a = (h[0] << 24) | (h[1] << 16) | (h[2] << 8) | (h[3]);
         ta_maps[key_a] = ta.enumerated_type.literal_seq.members[i].common.value;
       }
 
       for (size_t i = 0; i < size_b; ++i) {
-        const ACE_CDR::Octet*
-          h = tb.enumerated_type.literal_seq.members[i].detail.name_hash;
+        NameHash h = tb.enumerated_type.literal_seq.members[i].detail.name_hash;
         ACE_CDR::ULong key_b = (h[0] << 24) | (h[1] << 16) | (h[2] << 8) | (h[3]);
 
         // Literals that have the same name must have the same value.
