@@ -22,7 +22,7 @@ const Encoding aligned_encoding(Encoding::KIND_CDR_PLAIN);
 template<typename FOO>
 int try_marshaling(const FOO& in_foo, FOO& out_foo,
                    size_t expected_ms, size_t expected_cs,
-                   size_t expected_ms_align, size_t expected_cs_align,
+                   size_t expected_pad, size_t expected_ms_align,
                    const char* name)
 {
   const bool bounded = OpenDDS::DCPS::MarshalTraits<FOO>::gen_is_bounded_size();
@@ -31,6 +31,7 @@ int try_marshaling(const FOO& in_foo, FOO& out_foo,
   const size_t ms_align = OpenDDS::DCPS::max_serialized_size(aligned_encoding, in_foo);
   const size_t cs = OpenDDS::DCPS::serialized_size(unaligned_encoding, in_foo);
   const size_t cs_align = OpenDDS::DCPS::serialized_size(aligned_encoding, in_foo);
+  const size_t expected_cs_align = expected_cs + expected_pad;
 
   ACE_DEBUG((LM_DEBUG,
              ACE_TEXT("%C: gen_is_bounded_size(foo) => %d\n"),
@@ -48,10 +49,10 @@ int try_marshaling(const FOO& in_foo, FOO& out_foo,
              ACE_TEXT("%C: serialized_size(aligned_encoding, foo) => %B\n"),
              name, cs_align));
 
-  // NOTE: gen_max_marshaled_size is not always > for unbounded.
+  // NOTE: max_serialized_size is not always > for unbounded.
   if (bounded && ms < cs) {
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("%C: gen_max_marshaled_size(foo) %B < gen_find_size(foo) %B\n"),
+               ACE_TEXT("%C: max_serialized_size(foo) %B < serialized_size(foo) %B\n"),
                name, ms, cs));
     failed = true;
     return false;
