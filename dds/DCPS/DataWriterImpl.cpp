@@ -1315,24 +1315,27 @@ DataWriterImpl::enable()
 
   //Note: the QoS used to set n_chunks_ is Changable=No so
   // it is OK that we cannot change the size of our allocators.
-  data_container_ .reset(new WriteDataContainer(this,
-                                                max_samples_per_instance,
-                                                history_depth,
-                                                max_durable_per_instance,
-                                                qos_.reliability.max_blocking_time,
-                                                n_chunks_,
-                                                domain_id_,
-                                                topic_name_,
-                                                get_type_name(),
+  data_container_ = RcHandle<WriteDataContainer>
+    (new WriteDataContainer
+     (this,
+      max_samples_per_instance,
+      history_depth,
+      max_durable_per_instance,
+      qos_.reliability.max_blocking_time,
+      n_chunks_,
+      domain_id_,
+      topic_name_,
+      get_type_name(),
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
-                                                durability_cache,
-                                                qos_.durability_service,
+      durability_cache,
+      qos_.durability_service,
 #endif
-                                                max_instances,
-                                                max_total_samples,
-                                                lock_,
-                                                offered_deadline_missed_status_,
-                                                last_deadline_missed_total_count_));
+      max_instances,
+      max_total_samples,
+      lock_,
+      offered_deadline_missed_status_,
+      last_deadline_missed_total_count_),
+     keep_count());
 
   // +1 because we might allocate one before releasing another
   // TBD - see if this +1 can be removed.

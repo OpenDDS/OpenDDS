@@ -596,7 +596,7 @@ private:
   /// coherent change set.
   ACE_UINT32                      coherent_samples_;
   /// The sample data container.
-  unique_ptr<WriteDataContainer>  data_container_;
+  RcHandle<WriteDataContainer>  data_container_;
   /// The lock to protect the activate subscriptions
   /// and status changes.
   ACE_Recursive_Thread_Mutex      lock_;

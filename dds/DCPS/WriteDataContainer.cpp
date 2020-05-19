@@ -113,7 +113,6 @@ WriteDataContainer::WriteDataContainer(
   , deadline_task_(DCPS::make_rch<DCPS::PmfSporadicTask<WriteDataContainer> >(TheServiceParticipant->interceptor(), ref(*this), &WriteDataContainer::process_deadlines))
   , deadline_period_(TimeDuration::max_value)
   , deadline_status_lock_(deadline_status_lock)
-  , deadline_reverse_status_lock_(deadline_status_lock_)
   , deadline_status_(deadline_status)
   , deadline_last_total_count_(deadline_last_total_count)
 {
@@ -1493,12 +1492,13 @@ WriteDataContainer::set_deadline_period(const TimeDuration& deadline_period)
 {
   // Call comes from DataWriterImpl_t which should arleady have the lock_.
 
+  // Deadline for all instances starting from now.
+  const MonotonicTimePoint deadline = MonotonicTimePoint::now() + deadline_period;
+
   // Reset the deadline timer if the period has changed.
   if (deadline_period_ != deadline_period) {
     if (deadline_period_ == TimeDuration::max_value) {
       OPENDDS_ASSERT(deadline_map_.empty());
-
-      const MonotonicTimePoint deadline = MonotonicTimePoint::now() + deadline_period;
 
       for (PublicationInstanceMapType::iterator iter = instances_.begin();
            iter != instances_.end();
@@ -1517,14 +1517,11 @@ WriteDataContainer::set_deadline_period(const TimeDuration& deadline_period)
 
       deadline_map_.clear();
     } else {
-      // TODO: Which is correct?  The first can cause immediate deadline misses?  The second corresponds to the existing behavior.
-      //const TimeDuration adjustment = deadline_period - deadline_period_;
-      const TimeDuration adjustment = deadline_period;
       DeadlineMapType new_map;
       for (PublicationInstanceMapType::iterator iter = instances_.begin();
            iter != instances_.end();
            ++iter) {
-        iter->second->deadline_ += adjustment;
+        iter->second->deadline_ = deadline;
         new_map.insert(std::make_pair(iter->second->deadline_, iter->second));
       }
       std::swap(new_map, deadline_map_);
@@ -1573,7 +1570,8 @@ WriteDataContainer::process_deadlines(const MonotonicTimePoint& now)
       const DDS::OfferedDeadlineMissedStatus status = deadline_status_;
 
       // Release the lock during the upcall.
-      ACE_GUARD(ACE_Reverse_Lock<ACE_Recursive_Thread_Mutex>, rev_dwi_guard, deadline_reverse_status_lock_);
+      ACE_Reverse_Lock<ACE_Recursive_Thread_Mutex> deadline_reverse_status_lock(deadline_status_lock_);
+      ACE_GUARD(ACE_Reverse_Lock<ACE_Recursive_Thread_Mutex>, rev_dwi_guard, deadline_reverse_status_lock);
 
       // @todo Will this operation ever throw?  If so we may want to
       //       catch all exceptions, and act accordingly.

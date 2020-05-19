@@ -535,13 +535,11 @@ private:
   /// Timer responsible for reporting missed offered deadlines.
   RcHandle<DCPS::PmfSporadicTask<WriteDataContainer> > deadline_task_;
   TimeDuration deadline_period_; // TimeDuration::zero_value means no deadline.
-  typedef std::multimap<MonotonicTimePoint, PublicationInstance_rch> DeadlineMapType;
+  typedef OPENDDS_MULTIMAP(MonotonicTimePoint, PublicationInstance_rch) DeadlineMapType;
   DeadlineMapType deadline_map_;
 
   /// Lock for synchronization of @c status_ member.
   ACE_Recursive_Thread_Mutex& deadline_status_lock_;
-  /// Reverse lock used for releasing the @c status_lock_ listener upcall.
-  ACE_Reverse_Lock<ACE_Recursive_Thread_Mutex> deadline_reverse_status_lock_;
 
   /// Reference to the missed requested deadline status structure.
   DDS::OfferedDeadlineMissedStatus& deadline_status_;
