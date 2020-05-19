@@ -249,18 +249,29 @@ bool TopicImpl::check_data_representation(const DDS::DataRepresentationIdSeq& qo
     }
     return found;
   }
-
+  // if 0 length data reader then look for XCDR_DATA_REPRESENTATION
+  else if (qos_ids.length() == 0) {
+    bool found = false;
+    for (int j = 0; j < type_allowed_reprs.length(); j++) {
+      if(DDS::XCDR_DATA_REPRESENTATION == type_allowed_reprs[j]) {
+        found = true;
+        break;
+      }
+    }
+    return found;
+  }
+  // if non 0 length data reader compare both lists for a compatible QoS
   else{
+    bool found = false;
     for (int i = 0; i < qos_ids.length(); i++) {
-      bool found = false;
-      for (int j = 0; j < type_allowed_reprs.length(); j++){
-        if(qos_ids[i] == type_allowed_reprs[j]){
+      for (int j = 0; j < type_allowed_reprs.length(); j++) {
+        if(qos_ids[i] == type_allowed_reprs[j]) {
         found = true;
         break;
         }
       }
-      return found;
     }
+    return found;
   }
   return true;
 }
