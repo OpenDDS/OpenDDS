@@ -1537,7 +1537,7 @@ bool to_param_list(const DiscoveredPublication_SecurityWrapper& wrapper,
 
 bool from_param_list(const ParameterList& param_list,
                      DiscoveredPublication_SecurityWrapper& wrapper,
-                     const XTypes::TypeInformation& type_info)
+                     XTypes::TypeInformation& type_info)
 {
   bool result = from_param_list(param_list, wrapper.data, type_info) &&
                from_param_list(param_list, wrapper.security_info) &&
@@ -1561,7 +1561,7 @@ bool to_param_list(const DiscoveredSubscription_SecurityWrapper& wrapper,
 
 bool from_param_list(const ParameterList& param_list,
                      DiscoveredSubscription_SecurityWrapper& wrapper,
-                     const XTypes::TypeInformation& type_info)
+                     XTypes::TypeInformation& type_info)
 {
   bool result = from_param_list(param_list, wrapper.data, type_info) &&
                from_param_list(param_list, wrapper.security_info) &&

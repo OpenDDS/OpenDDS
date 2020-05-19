@@ -156,22 +156,26 @@ bool from_param_list(const ParameterList& param_list,
 OpenDDS_Rtps_Export
 bool to_param_list(const DiscoveredPublication_SecurityWrapper& wrapper,
                    ParameterList& param_list,
+                   const XTypes::TypeInformation& type_info,
                    bool map = false /*map IPV4 to IPV6 addr*/);
 
 OpenDDS_Rtps_Export
 bool from_param_list(const ParameterList& param_list,
-                     DiscoveredPublication_SecurityWrapper& wrapper);
+                     DiscoveredPublication_SecurityWrapper& wrapper,
+                     XTypes::TypeInformation& type_info);
 
 // DiscoveredSubscription_SecurityWrapper
 
 OpenDDS_Rtps_Export
 bool to_param_list(const DiscoveredSubscription_SecurityWrapper& wrapper,
                    ParameterList& param_list,
+                   const XTypes::TypeInformation& type_info,
                    bool map = false /*map IPV4 to IPV6 addr*/);
 
 OpenDDS_Rtps_Export
 bool from_param_list(const ParameterList& param_list,
-                     DiscoveredSubscription_SecurityWrapper& wrapper);
+                     DiscoveredSubscription_SecurityWrapper& wrapper,
+                     XTypes::TypeInformation& type_info);
 
 // Extensions for ICE
 

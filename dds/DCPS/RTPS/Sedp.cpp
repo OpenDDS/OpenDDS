@@ -2095,7 +2095,7 @@ void Sedp::data_received(DCPS::MessageId message_id,
     return;
   }
 
-  process_discovered_writer_data(message_id, wrapper.data, guid, dpub.type_info_, wrapper.have_ice_agent_info, wrapper.ice_agent_info, &wrapper.security_info);
+  process_discovered_writer_data(message_id, wrapper.data, guid, wrapper.type_info, wrapper.have_ice_agent_info, wrapper.ice_agent_info, &wrapper.security_info);
 }
 #endif
 
@@ -2475,7 +2475,7 @@ void Sedp::data_received(DCPS::MessageId message_id,
     return;
   }
 
-  process_discovered_reader_data(message_id, wrapper.data, guid, dsub.type_info_, wrapper.have_ice_agent_info, wrapper.ice_agent_info, &wrapper.security_info);
+  process_discovered_reader_data(message_id, wrapper.data, guid, wrapper.type_info, wrapper.have_ice_agent_info, wrapper.ice_agent_info, &wrapper.security_info);
 }
 #endif
 
@@ -3329,7 +3329,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
 
       DCPS::unique_ptr<DiscoveredPublication_SecurityWrapper> wdata_secure(new DiscoveredPublication_SecurityWrapper);
 
-      if (!ParameterListConverter::from_param_list(data, *wdata_secure, wdata->type_info_)) {
+      if (!ParameterListConverter::from_param_list(data, *wdata_secure, wdata_secure->type_info)) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to convert from ParameterList ")
@@ -3400,9 +3400,9 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
         return;
       }
 
-      DCPS::unique_ptr<DiscoveredSubscription_SecurityWrapper> rdata(new DiscoveredSubscription_SecurityWrapper);
+      DCPS::unique_ptr<DiscoveredSubscription_SecurityWrapper> rdata_secure(new DiscoveredSubscription_SecurityWrapper);
 
-      if (!ParameterListConverter::from_param_list(data, *rdata, rdata->type_info_)) {
+      if (!ParameterListConverter::from_param_list(data, *rdata_secure, rdata_secure->type_info)) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to convert from ParameterList ")
@@ -3410,7 +3410,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
         return;
       }
 
-      rdata->have_ice_agent_info = false;
+      rdata_secure->have_ice_agent_info = false;
       ICE::AgentInfoMap ai_map;
       if (!ParameterListConverter::from_param_list(data, ai_map)) {
         ACE_ERROR((LM_ERROR,
@@ -3421,14 +3421,14 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       }
       ICE::AgentInfoMap::const_iterator pos = ai_map.find("DATA");
       if (pos != ai_map.end()) {
-        rdata->have_ice_agent_info = true;
-        rdata->ice_agent_info = pos->second;
+        rdata_secure->have_ice_agent_info = true;
+        rdata_secure->ice_agent_info = pos->second;
       }
 
-      if ((rdata->data).readerProxy.expectsInlineQos) {
-        set_inline_qos((rdata->data).readerProxy.allLocators);
+      if ((rdata_secure->data).readerProxy.expectsInlineQos) {
+        set_inline_qos((rdata_secure->data).readerProxy.allLocators);
       }
-      sedp_.task_.enqueue(id, move(rdata));
+      sedp_.task_.enqueue(id, move(rdata_secure));
 #endif
 
     } else if (sample.header_.publication_id_.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER
