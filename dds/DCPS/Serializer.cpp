@@ -387,7 +387,7 @@ Serializer::read_string(ACE_CDR::WChar*& dest,
     }
 
 #if ACE_SIZEOF_WCHAR == 2
-    read_array(reinterpret_cast<char*>(dest), char16_cdr_size, length, swap_the_bytes);
+    read_array(reinterpret_cast<char*>(dest), char16_cdr_size, length, swap_bytes());
 #else
     for (size_t i = 0; i < length && this->good_bit_; ++i) {
       ACE_UINT16 as_utf16;
