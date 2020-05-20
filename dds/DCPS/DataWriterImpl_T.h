@@ -106,9 +106,7 @@ public:
       if (bounded_) {
         return buffer_size_;
       }
-      size_t sample_size;
-      serialized_size(encoding_, sample_size, x);
-      return header_size_ + sample_size;
+      return header_size_ + serialized_size(encoding_, x);
     }
 
     /// Size of a buffer needed to store a specific key only sample
@@ -117,9 +115,7 @@ public:
       if (key_only_bounded_) {
         return key_only_buffer_size_;
       }
-      size_t sample_size;
-      serialized_size(encoding_, sample_size, x);
-      return header_size_ + sample_size;
+      return header_size_ + serialized_size(encoding_, x);
     }
 
   private:
