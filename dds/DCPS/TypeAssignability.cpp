@@ -48,6 +48,12 @@ namespace XTypes {
     return false;
   }
 
+  bool TypeAssignability::assignable(const TypeIdentifier& ta,
+                                     const TypeIdentifier& tb) const
+  {
+    return false; // TODO: Implement this
+  }
+
   bool TypeAssignability::assignable_alias(const MinimalTypeObject& ta,
                                            const MinimalTypeObject& tb) const
   {
@@ -445,7 +451,20 @@ namespace XTypes {
   bool TypeAssignability::assignable_union(const MinimalTypeObject& ta,
                                            const TypeIdentifier& tb) const
   {
-    return false; // TODO: Implement this
+    if (EK_MINIMAL == tb.kind) {
+      const MinimalTypeObject& tob = lookup_minimal(tb);
+      if (TK_UNION == tob.kind) {
+        return assignable_union(ta, tob);
+      } else if (TK_ALIAS == tob.kind) {
+        const TypeIdentifier& base = *tob.alias_type.body.common.related_type.in();
+        return assignable_union(ta, base);
+      }
+    } else if (EK_COMPLETE == tb.kind) {
+      // Assuming tb.kind of EK_COMPLETE is not supported
+      return false;
+    }
+
+    return false;
   }
 
   /**
