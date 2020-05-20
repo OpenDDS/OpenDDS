@@ -452,6 +452,13 @@ private:
                                 const ACE_TCHAR* filename);
 
   /**
+   * Load the domain range template configuration to the
+   * Service_Participant singleton.
+   */
+  int load_domain_range_configuration(ACE_Configuration_Heap& cf,
+                                const ACE_TCHAR* filename);
+
+  /**
    * Load the discovery configuration to the Service_Participant
    * singleton.
    */
@@ -555,6 +562,20 @@ private:
   /// is used when the entity tree does not specify one.  If
   /// not set, the default transport configuration is used.
   ACE_TString global_transport_config_;
+
+  // domain range template support
+  struct domain_range_template
+  {
+    int range_start;
+    int range_end;
+    OPENDDS_STRING discovery_template_name;
+    OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING) customizations;
+  };
+
+  std::vector<domain_range_template> domain_range_templates_;
+
+  // TODO: use a map to enforce one template per range
+  // TODO: need a way to check for overlapping ranges in templates.
 
 public:
   /// Pointer to the monitor factory that is used to create

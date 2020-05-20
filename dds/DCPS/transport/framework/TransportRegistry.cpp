@@ -320,6 +320,14 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
   return 0;
 }
 
+int
+TransportRegistry::load_transport_template_configuration(ACE_Configuration_Heap& cf,
+                                                         const ACE_TCHAR* section_name)
+{
+
+  return 0;
+}
+
 void
 TransportRegistry::load_transport_lib(const OPENDDS_STRING& transport_type)
 {

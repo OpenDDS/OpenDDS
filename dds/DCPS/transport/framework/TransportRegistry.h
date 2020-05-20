@@ -93,12 +93,19 @@ public:
 
   /// For internal use by OpenDDS DCPS layer:
   /// Transfer the configuration in ACE_Configuration_Heap object to
-  /// the TransportRegistry.  This is called by the Service_Participant
+  /// the TransportRegistry. This is called by the Service_Participant
   /// at initialization time. This function iterates each section in
   /// the configuration file, and creates TransportInst and
   /// TransportConfig objects and adds them to the registry.
   int load_transport_configuration(const OPENDDS_STRING& file_name,
                                    ACE_Configuration_Heap& cf);
+
+  /// For internal use by OpenDDS DCPS layer:
+  /// Process the transport_template configuration in the
+  /// ACE_Configuration_Heap object.
+  /// Called by the Service_Participant at initialization time.
+  int load_transport_template_configuration(ACE_Configuration_Heap& cf,
+                                            const ACE_TCHAR* section_name);
 
   /// For internal use by OpenDDS DCPS layer:
   /// If the default config is empty when it's about to be used, allow the
@@ -136,6 +143,17 @@ private:
   bool released_;
 
   mutable LockType lock_;
+
+  // transport template support
+  struct transport_template
+  {
+    OPENDDS_STRING transport_template_name;
+    bool instantiate_per_participant;
+    OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING) customizations;
+  };
+
+  std::vector<transport_template> transport_templates_;
+
 };
 
 } // namespace DCPS
