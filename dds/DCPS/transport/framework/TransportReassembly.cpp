@@ -157,7 +157,22 @@ bool
 TransportReassembly::has_frags(const SequenceNumber& seq,
                                const RepoId& pub_id) const
 {
-  return fragments_.count(FragKey(pub_id, seq)) > 0;
+  const FragInfoMap::const_iterator it = fragments_.find(FragKey(pub_id, seq));
+  return it != fragments_.end() && !it->second.complete_;
+}
+
+void
+TransportReassembly::clear_completed(const RepoId& pub_id)
+{
+  FragInfoMap::iterator begin = fragments_.lower_bound(FragKey(pub_id, SequenceNumber()));
+  const FragInfoMap::iterator end = fragments_.upper_bound(FragKey(pub_id, SequenceNumber(SequenceNumber::MAX_VALUE)));
+  while (begin != end) {
+    if (begin->second.complete_) {
+      fragments_.erase(begin++);
+    } else {
+      ++begin;
+    }
+  }
 }
 
 CORBA::ULong
@@ -168,7 +183,7 @@ TransportReassembly::get_gaps(const SequenceNumber& seq, const RepoId& pub_id,
   // length is number of (allocated) words in bitmap, max of 8
   // numBits is number of valid bits in the bitmap, <= length * 32, to account for partial words
   const FragInfoMap::const_iterator iter = fragments_.find(FragKey(pub_id, seq));
-  if (iter == fragments_.end() || length == 0) {
+  if (iter == fragments_.end() || iter->second.complete_ || length == 0) {
     // Nothing missing
     return 0;
   }
@@ -260,6 +275,9 @@ TransportReassembly::reassemble_i(const SequenceRange& seqRange,
       "stored first frag, returning false (incomplete)\n"));
     return false;
   } else {
+    if (iter->second.complete_) {
+      return false;
+    }
     if (firstFrag) {
       iter->second.have_first_ = true;
     }
@@ -281,7 +299,8 @@ TransportReassembly::reassemble_i(const SequenceRange& seqRange,
       && iter->second.range_list_.size() == 1
       && !iter->second.range_list_.front().rec_ds_.header_.more_fragments_) {
     swap(data, iter->second.range_list_.front().rec_ds_);
-    fragments_.erase(iter);
+    iter->second.range_list_.clear();
+    iter->second.complete_ = true;
     VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::reassemble() "
       "removed frag, returning %C\n", data.sample_ ? "true" : "false"));
     return data.sample_.get(); // could be false if we had data_unavailable()

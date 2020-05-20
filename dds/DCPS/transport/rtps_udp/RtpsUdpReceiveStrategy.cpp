@@ -941,6 +941,12 @@ RtpsUdpReceiveStrategy::remove_fragments(const SequenceRange& range,
   }
 }
 
+void
+RtpsUdpReceiveStrategy::clear_completed_fragments(const RepoId& pub_id)
+{
+  reassembly_.clear_completed(pub_id);
+}
+
 bool
 RtpsUdpReceiveStrategy::has_fragments(const SequenceRange& range,
                                       const RepoId& pub_id,
