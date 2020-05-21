@@ -42,7 +42,7 @@ namespace {
                       0 /*alloc*/, 0 /*lock*/, ACE_Message_Block::DONT_DELETE, 0 /*db_alloc*/);
     ACE_Message_Block data(&db, ACE_Message_Block::DONT_DELETE, 0 /*mb_alloc*/);
     data.wr_ptr(data.space());
-    DCPS::Serializer serializer(&data, DCPS::Encoding::Kind::KIND_XCDR2_PARAMLIST,
+    DCPS::Serializer serializer(&data, DCPS::Encoding::KIND_XCDR2_PARAMLIST,
                                 DCPS::ENDIAN_LITTLE);
     if (!(serializer >> type_info)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) extract_type_info_param ")
@@ -53,7 +53,7 @@ namespace {
   void add_type_info_param(ParameterList& param_list, const XTypes::TypeInformation& type_info) {
     Parameter param;
     DCPS::Message_Block_Ptr data (new ACE_Message_Block( XTypes::find_size(type_info)));
-    DCPS::Serializer serializer(data.get(), DCPS::Encoding::Kind::KIND_XCDR2_PARAMLIST,
+    DCPS::Serializer serializer(data.get(), DCPS::Encoding::KIND_XCDR2_PARAMLIST,
                                 DCPS::ENDIAN_LITTLE);
     if (!(serializer << type_info)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) add_type_info_param ")
