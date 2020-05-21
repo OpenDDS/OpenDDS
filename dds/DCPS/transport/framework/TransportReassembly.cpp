@@ -182,8 +182,12 @@ TransportReassembly::get_gaps(const SequenceNumber& seq, const RepoId& pub_id,
 {
   // length is number of (allocated) words in bitmap, max of 8
   // numBits is number of valid bits in the bitmap, <= length * 32, to account for partial words
+  if (length == 0) {
+    return 0;
+  }
+
   const FragInfoMap::const_iterator iter = fragments_.find(FragKey(pub_id, seq));
-  if (iter == fragments_.end() || iter->second.complete_ || length == 0) {
+  if (iter == fragments_.end() || iter->second.complete_) {
     // Nothing missing
     return 0;
   }
