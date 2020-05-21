@@ -96,7 +96,7 @@ ACE_INLINE
 TimePoint_T<AceClock>&
 TimePoint_T<AceClock>::operator+=(const TimeDuration& td)
 {
-  value_ += td;
+  value_ += td.value();
   return *this;
 }
 
@@ -105,7 +105,7 @@ ACE_INLINE
 TimePoint_T<AceClock>&
 TimePoint_T<AceClock>::operator-=(const TimeDuration& td)
 {
-  value_ -= td;
+  value_ -= td.value();
   return *this;
 }
 

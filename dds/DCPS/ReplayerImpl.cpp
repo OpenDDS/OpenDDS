@@ -19,7 +19,6 @@
 #include "Serializer.h"
 #include "Transient_Kludge.h"
 #include "DataDurabilityCache.h"
-#include "OfferedDeadlineWatchdog.h"
 #include "MonitorFactory.h"
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 #include "CoherentChangeControl.h"

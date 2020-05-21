@@ -50,7 +50,6 @@ namespace DCPS {
 
 class PublisherImpl;
 class DomainParticipantImpl;
-class OfferedDeadlineWatchdog;
 class Monitor;
 class DataSampleElement;
 class SendStateDataSampleList;
@@ -426,9 +425,6 @@ public:
   bool persist_data();
 #endif
 
-  // Reset time interval for each instance.
-  void reschedule_deadline();
-
   /// Wait for pending samples to drain.
   void wait_pending();
 
@@ -600,7 +596,7 @@ private:
   /// coherent change set.
   ACE_UINT32                      coherent_samples_;
   /// The sample data container.
-  unique_ptr<WriteDataContainer>  data_container_;
+  RcHandle<WriteDataContainer>  data_container_;
   /// The lock to protect the activate subscriptions
   /// and status changes.
   ACE_Recursive_Thread_Mutex      lock_;
@@ -650,9 +646,6 @@ private:
   /// Total number of offered deadlines missed during last offered
   /// deadline status check.
   CORBA::Long last_deadline_missed_total_count_;
-  /// Watchdog responsible for reporting missed offered
-  /// deadlines.
-  RcHandle<OfferedDeadlineWatchdog> watchdog_;
 
   /// Flag indicates that this datawriter is a builtin topic
   /// datawriter.
