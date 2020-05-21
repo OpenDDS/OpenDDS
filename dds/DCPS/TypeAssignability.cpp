@@ -361,6 +361,7 @@ namespace XTypes {
       MemberId id = tb.struct_type.member_seq.members[i].common.member_id;
       const TypeIdentifier&
         tib = *tb.struct_type.member_seq.members[i].common.member_type_id.in();
+      // Can tib be an alias of a string type?
       if ((TI_STRING8_SMALL == tib.kind || TI_STRING16_SMALL == tib.kind ||
            TI_STRING8_LARGE == tib.kind || TI_STRING16_LARGE == tib.kind) &&
           flags & IS_KEY == IS_KEY) {
@@ -372,9 +373,10 @@ namespace XTypes {
         }
 
         for (size_t j = 0; j < matched_members.size(); ++j) {
-          if (id == matched_members[j].first->common.member_id) {            
-            const TypeIdentifier& 
+          if (id == matched_members[j].first->common.member_id) {
+            const TypeIdentifier&
               tia =  *matched_members[j].first->common.member_type_id.in();
+            // Can tia be an alias of a string type?
             if (TI_STRING8_SMALL != tia.kind && TI_STRING16_SMALL != tia.kind &&
                 TI_STRING8_LARGE != tia.kind && TI_STRING16_LARGE != tia.kind) {
               return false;
@@ -395,7 +397,10 @@ namespace XTypes {
       }
     }
 
-    // 
+    // For any enumerated key member m2 in T2, the m1 member of T1 with
+    // the same member ID verifies that all literals in m2.type appear as
+    // literals in m1.type
+
 
     return false;
   }
@@ -1397,9 +1402,9 @@ namespace XTypes {
   {
     // TODO: Finish this function
     if (TK_STRUCTURE == type.kind) {
-      
+
     } else if (TK_UNION == type.kind) {
-      
+
     }
   }
 
