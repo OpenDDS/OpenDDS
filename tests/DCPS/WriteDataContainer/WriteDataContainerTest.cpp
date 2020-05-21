@@ -137,7 +137,10 @@ public:
   ACE_Recursive_Thread_Mutex& lock_wdc(WriteDataContainer* wdc) { return wdc->lock_; }
 
   WriteDataContainer* get_test_data_container(::DDS::DataWriterQos const & dw_qos,
-    Test::SimpleDataWriterImpl* fast_dw)
+                                              Test::SimpleDataWriterImpl* fast_dw,
+                                              ACE_Recursive_Thread_Mutex& deadline_status_lock,
+                                              DDS::OfferedDeadlineMissedStatus& deadline_status,
+                                              CORBA::Long& deadline_last_total_count)
   {
     const bool reliable = dw_qos.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS;
 
@@ -196,7 +199,10 @@ public:
                                   dw_qos.durability_service,
 #endif
                                   max_instances,
-                                  max_total_samples);
+                                  max_total_samples,
+                                  deadline_status_lock,
+                                  deadline_status,
+                                  deadline_last_total_count);
   }
 
   void get_default_datawriter_qos(::DDS::DataWriterQos& initial_DataWriterQos_) {
@@ -359,6 +365,10 @@ int run_test(int argc, ACE_TCHAR *argv[])
     ::DDS::DataWriterQos dw_qos;
     test->get_default_datawriter_qos(dw_qos);
 
+    ACE_Recursive_Thread_Mutex deadline_status_lock;
+    DDS::OfferedDeadlineMissedStatus deadline_status;
+    CORBA::Long deadline_last_total_count;
+
       try { // the real testing.
 
         { //Test Case 1 scope
@@ -375,7 +385,8 @@ int run_test(int argc, ACE_TCHAR *argv[])
 
           OpenDDS::DCPS::unique_ptr<Test::SimpleDataWriterImpl> fast_dw(new Test::SimpleDataWriterImpl());
           test->substitute_dw_particpant(fast_dw.get(), tpi);
-          WriteDataContainer* test_data_container  = test->get_test_data_container(dw_qos, fast_dw.get());
+
+          WriteDataContainer* test_data_container  = test->get_test_data_container(dw_qos, fast_dw.get(), deadline_status_lock, deadline_status, deadline_last_total_count);
 
           test->log_dw_qos_limits(dw_qos);
           test->log_perceived_qos_limits(test_data_container);
@@ -488,7 +499,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
 
           OpenDDS::DCPS::unique_ptr<Test::SimpleDataWriterImpl> fast_dw(new Test::SimpleDataWriterImpl());
           test->substitute_dw_particpant(fast_dw.get(), tpi);
-          WriteDataContainer* test_data_container  = test->get_test_data_container(dw_qos, fast_dw.get());
+          WriteDataContainer* test_data_container  = test->get_test_data_container(dw_qos, fast_dw.get(), deadline_status_lock, deadline_status, deadline_last_total_count);
 
           test->log_dw_qos_limits(dw_qos);
           test->log_perceived_qos_limits(test_data_container);
@@ -624,7 +635,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
 
           OpenDDS::DCPS::unique_ptr<Test::SimpleDataWriterImpl> fast_dw(new Test::SimpleDataWriterImpl());
           test->substitute_dw_particpant(fast_dw.get(), tpi);
-          WriteDataContainer* test_data_container  = test->get_test_data_container(dw_qos, fast_dw.get());
+          WriteDataContainer* test_data_container  = test->get_test_data_container(dw_qos, fast_dw.get(), deadline_status_lock, deadline_status, deadline_last_total_count);
 
           test->log_dw_qos_limits(dw_qos);
           test->log_perceived_qos_limits(test_data_container);
@@ -762,7 +773,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
 
           OpenDDS::DCPS::unique_ptr<Test::SimpleDataWriterImpl> fast_dw(new Test::SimpleDataWriterImpl());
           test->substitute_dw_particpant(fast_dw.get(), tpi);
-          WriteDataContainer* test_data_container  = test->get_test_data_container(dw_qos, fast_dw.get());
+          WriteDataContainer* test_data_container  = test->get_test_data_container(dw_qos, fast_dw.get(), deadline_status_lock, deadline_status, deadline_last_total_count);
 
           test->log_dw_qos_limits(dw_qos);
           test->log_perceived_qos_limits(test_data_container);

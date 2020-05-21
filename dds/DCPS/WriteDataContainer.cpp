@@ -19,7 +19,6 @@
 #include "Util.h"
 #include "Time_Helper.h"
 #include "GuidConverter.h"
-#include "OfferedDeadlineWatchdog.h"
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
 #include "dds/DCPS/transport/framework/TransportCustomizedElement.h"
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
@@ -84,7 +83,10 @@ WriteDataContainer::WriteDataContainer(
   const DDS::DurabilityServiceQosPolicy& durability_service,
 #endif
   CORBA::Long max_instances,
-  CORBA::Long max_total_samples)
+  CORBA::Long max_total_samples,
+  ACE_Recursive_Thread_Mutex& deadline_status_lock,
+  DDS::OfferedDeadlineMissedStatus& deadline_status,
+  CORBA::Long& deadline_last_total_count)
   : transaction_id_(0),
     publication_id_(GUID_UNKNOWN),
     writer_(writer),
@@ -108,8 +110,12 @@ WriteDataContainer::WriteDataContainer(
   , durability_cache_(durability_cache)
   , durability_service_(durability_service)
 #endif
+  , deadline_task_(DCPS::make_rch<DCPS::PmfSporadicTask<WriteDataContainer> >(TheServiceParticipant->interceptor(), ref(*this), &WriteDataContainer::process_deadlines))
+  , deadline_period_(TimeDuration::max_value)
+  , deadline_status_lock_(deadline_status_lock)
+  , deadline_status_(deadline_status)
+  , deadline_last_total_count_(deadline_last_total_count)
 {
-
   if (DCPS_debug_level >= 2) {
     ACE_DEBUG((LM_DEBUG,
                "(%P|%t) WriteDataContainer "
@@ -120,6 +126,8 @@ WriteDataContainer::WriteDataContainer(
 
 WriteDataContainer::~WriteDataContainer()
 {
+  deadline_task_->cancel_and_wait();
+
   if (this->unsent_data_.size() > 0) {
     ACE_DEBUG((LM_WARNING,
                ACE_TEXT("(%P|%t) WARNING: WriteDataContainer::~WriteDataContainer() - ")
@@ -190,11 +198,7 @@ WriteDataContainer::enqueue(
   // Extract the instance queue.
   InstanceDataSampleList& instance_list = instance->samples_;
 
-  if (this->writer_->watchdog_.in()) {
-    instance->last_sample_tv_ = instance->cur_sample_tv_;
-    instance->cur_sample_tv_.set_to_now();
-    this->writer_->watchdog_->execute(*this->writer_, instance, false);
-  }
+  extend_deadline(instance);
 
   //
   // Enqueue to the next_send_sample_ thread of unsent_data_
@@ -301,6 +305,8 @@ WriteDataContainer::register_instance(
 
     instance->instance_handle_ = instance_handle;
 
+    extend_deadline(instance);
+
   } else {
 
     int const find_attempt = find(instances_, instance_handle, instance);
@@ -321,10 +327,6 @@ WriteDataContainer::register_instance(
 
   // The registered_sample is shallow copied.
   registered_sample.reset(instance->registered_sample_->duplicate());
-
-  if (this->writer_->watchdog_.in()) {
-    this->writer_->watchdog_->schedule_timer(instance);
-  }
 
   return DDS::RETCODE_OK;
 }
@@ -356,8 +358,7 @@ WriteDataContainer::unregister(
     registered_sample.reset(instance->registered_sample_->duplicate());
   }
 
-  if (this->writer_->watchdog_.in())
-    this->writer_->watchdog_->cancel_timer(instance);
+  cancel_deadline(instance);
 
   return DDS::RETCODE_OK;
 }
@@ -412,8 +413,8 @@ WriteDataContainer::dispose(DDS::InstanceHandle_t instance_handle,
     }
   }
 
-  if (this->writer_->watchdog_.in())
-    this->writer_->watchdog_->cancel_timer(instance);
+  cancel_deadline(instance);
+
   return DDS::RETCODE_OK;
 }
 
@@ -1344,20 +1345,6 @@ WriteDataContainer::persist_data()
 }
 #endif
 
-void WriteDataContainer::reschedule_deadline()
-{
-  for (PublicationInstanceMapType::iterator iter = instances_.begin();
-       iter != instances_.end();
-       ++iter) {
-    if (iter->second->deadline_timer_id_ != -1) {
-      if (this->writer_->watchdog_->reset_timer_interval(iter->second->deadline_timer_id_) == -1) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) WriteDataContainer::reschedule_deadline %p\n")
-                   ACE_TEXT("reset_timer_interval")));
-      }
-    }
-  }
-}
-
 void
 WriteDataContainer::wait_pending()
 {
@@ -1498,6 +1485,158 @@ WriteDataContainer::log_send_state_lists (OPENDDS_STRING description)
              orphaned_to_transport_.size(),
              num_all_samples(),
              instances_.size()));
+}
+
+void
+WriteDataContainer::set_deadline_period(const TimeDuration& deadline_period)
+{
+  // Call comes from DataWriterImpl_t which should arleady have the lock_.
+
+  // Deadline for all instances starting from now.
+  const MonotonicTimePoint deadline = MonotonicTimePoint::now() + deadline_period;
+
+  // Reset the deadline timer if the period has changed.
+  if (deadline_period_ != deadline_period) {
+    if (deadline_period_ == TimeDuration::max_value) {
+      OPENDDS_ASSERT(deadline_map_.empty());
+
+      for (PublicationInstanceMapType::iterator iter = instances_.begin();
+           iter != instances_.end();
+           ++iter) {
+        iter->second->deadline_ = deadline;
+        deadline_map_.insert(std::make_pair(deadline, iter->second));
+      }
+
+      if (!deadline_map_.empty()) {
+        deadline_task_->schedule(deadline_period);
+      }
+    } else if (deadline_period == TimeDuration::max_value) {
+      if (!deadline_map_.empty()) {
+        deadline_task_->cancel();
+      }
+
+      deadline_map_.clear();
+    } else {
+      DeadlineMapType new_map;
+      for (PublicationInstanceMapType::iterator iter = instances_.begin();
+           iter != instances_.end();
+           ++iter) {
+        iter->second->deadline_ = deadline;
+        new_map.insert(std::make_pair(iter->second->deadline_, iter->second));
+      }
+      std::swap(new_map, deadline_map_);
+
+      if (!deadline_map_.empty()) {
+        deadline_task_->cancel();
+        deadline_task_->schedule(deadline_map_.begin()->first - MonotonicTimePoint::now());
+      }
+    }
+
+    deadline_period_ = deadline_period;
+  }
+}
+
+void
+WriteDataContainer::process_deadlines(const MonotonicTimePoint& now)
+{
+  // Lock the DataWriterImpl.
+  ACE_GUARD (ACE_Recursive_Thread_Mutex, dwi_guard, deadline_status_lock_);
+  // Lock ourselves.
+  ACE_GUARD (ACE_Recursive_Thread_Mutex, wdc_guard, lock_);
+
+  if (deadline_map_.empty()) {
+    return;
+  }
+
+  bool notify = false;
+
+  for (DeadlineMapType::iterator pos = deadline_map_.begin(), limit = deadline_map_.end();
+       pos != limit && pos->first < now; pos = deadline_map_.begin()) {
+
+    PublicationInstance_rch instance = pos->second;
+    deadline_map_.erase(pos);
+
+    ++deadline_status_.total_count;
+    deadline_status_.total_count_change = deadline_status_.total_count - deadline_last_total_count_;
+    deadline_status_.last_instance_handle = instance->instance_handle_;
+
+    writer_->set_status_changed_flag(DDS::OFFERED_DEADLINE_MISSED_STATUS, true);
+    notify = true;
+
+    DDS::DataWriterListener_var listener = writer_->listener_for(DDS::OFFERED_DEADLINE_MISSED_STATUS);
+
+    if (listener) {
+      // Copy before releasing the lock.
+      const DDS::OfferedDeadlineMissedStatus status = deadline_status_;
+
+      // Release the lock during the upcall.
+      ACE_Reverse_Lock<ACE_Recursive_Thread_Mutex> deadline_reverse_status_lock(deadline_status_lock_);
+      ACE_GUARD(ACE_Reverse_Lock<ACE_Recursive_Thread_Mutex>, rev_dwi_guard, deadline_reverse_status_lock);
+
+      // @todo Will this operation ever throw?  If so we may want to
+      //       catch all exceptions, and act accordingly.
+      listener->on_offered_deadline_missed(writer_, status);
+
+      // We need to update the last total count value to our current total
+      // so that the next time we will calculate the correct total_count_change;
+      deadline_last_total_count_ = deadline_status_.total_count;
+    }
+
+    instance->deadline_ += deadline_period_;
+    deadline_map_.insert(std::make_pair(instance->deadline_, instance));
+  }
+
+  if (notify) {
+    writer_->notify_status_condition();
+  }
+
+  deadline_task_->schedule(deadline_map_.begin()->first - now);
+}
+
+void
+WriteDataContainer::extend_deadline(const PublicationInstance_rch& instance)
+{
+  // Call comes from DataWriterImpl_t which should arleady have the lock_.
+
+  if (deadline_period_ == TimeDuration::max_value) {
+    return;
+  }
+
+  std::pair<DeadlineMapType::iterator, DeadlineMapType::iterator> r = deadline_map_.equal_range(instance->deadline_);
+  while (r.first != r.second && r.first->second != instance) {
+    ++r.first;
+  }
+  if (r.first != r.second) {
+    // The instance was in the map.
+    deadline_map_.erase(r.first);
+  }
+  instance->deadline_ = MonotonicTimePoint::now() + deadline_period_;
+  bool schedule = deadline_map_.empty();
+  deadline_map_.insert(std::make_pair(instance->deadline_, instance));
+  if (schedule) {
+    deadline_task_->schedule(deadline_period_);
+  }
+}
+
+void
+WriteDataContainer::cancel_deadline(const PublicationInstance_rch& instance)
+{
+  // Call comes from DataWriterImpl_t which should arleady have the lock_.
+
+  if (deadline_period_ == TimeDuration::max_value) {
+    return;
+  }
+
+  std::pair<DeadlineMapType::iterator, DeadlineMapType::iterator> r = deadline_map_.equal_range(instance->deadline_);
+  while (r.first != r.second && r.first->second != instance) {
+    ++r.first;
+  }
+  if (r.first != r.second) {
+    deadline_map_.erase(r.first);
+    if (deadline_map_.empty()) {
+      deadline_task_->cancel();
+    }
+  }
 }
 
 } // namespace OpenDDS
