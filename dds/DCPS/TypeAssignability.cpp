@@ -13,6 +13,9 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {
 
+  /**
+   * @brief Both input type objects must be minimal
+   */
   bool TypeAssignability::assignable(const TypeObject& ta,
                                      const TypeObject& tb) const
   {
@@ -48,12 +51,62 @@ namespace XTypes {
     return false;
   }
 
+  /**
+   * @brief Both input can be of any type
+   */
   bool TypeAssignability::assignable(const TypeIdentifier& ta,
                                      const TypeIdentifier& tb) const
   {
-    return false; // TODO: Implement this
+    switch (ta.kind) {
+    case TK_BOOLEAN:
+    case TK_BYTE:
+    case TK_INT16:
+    case TK_INT32:
+    case TK_INT64:
+    case TK_UINT16:
+    case TK_UINT32:
+    case TK_UINT64:
+    case TK_FLOAT32:
+    case TK_FLOAT64:
+    case TK_FLOAT128:
+    case TK_INT8:
+    case TK_UINT8:
+    case TK_CHAR8:
+    case TK_CHAR16:
+      return assignable_primitive(ta, tb);
+    case TI_STRING8_SMALL:
+    case TI_STRING8_LARGE:
+    case TI_STRING16_SMALL:
+    case TI_STRING16_LARGE:
+      return assignable_string(ta, tb);
+    case TI_PLAIN_SEQUENCE_SMALL:
+    case TI_PLAIN_SEQUENCE_LARGE:
+      return assignable_plain_sequence(ta, tb);
+    case TI_PLAIN_ARRAY_SMALL:
+    case TI_PLAIN_ARRAY_LARGE:
+      return assignable_plain_array(ta, tb);
+    case TI_PLAIN_MAP_SMALL:
+    case TI_PLAIN_MAP_LARGE:
+      return assignable_plain_map(ta, tb);
+    case TI_STRONGLY_CONNECTED_COMPONENT:
+      // No rule in the spec for strongly connected components
+      return false;
+    case EK_COMPLETE:
+      // Assuming only equivalence kind of EK_MINIMAL is supported
+      return false;
+    case EK_MINIMAL:
+      const MinimalTypeObject& base_type_a = lookup_minimal(ta);
+      const MinimalTypeObject& base_type_b = lookup_minimal(tb);
+      TypeObject wrapper_a(base_type_a), wrapper_b(base_type_b);
+      return assignable(wrapper_a, wrapper_b);
+    default:
+      return false; // Future extensions
+    }
   }
 
+  /**
+   * @brief At least one input type object must be TK_ALIAS
+   */
   bool TypeAssignability::assignable_alias(const MinimalTypeObject& ta,
                                            const MinimalTypeObject& tb) const
   {
@@ -130,49 +183,7 @@ namespace XTypes {
     } else if (TK_ALIAS == ta.kind && TK_ALIAS == tb.kind) {
       const TypeIdentifier& tia = *ta.alias_type.body.common.related_type.in();
       const TypeIdentifier& tib = *tb.alias_type.body.common.related_type.in();
-      switch (tia.kind) {
-      case TK_BOOLEAN:
-      case TK_BYTE:
-      case TK_INT16:
-      case TK_INT32:
-      case TK_INT64:
-      case TK_UINT16:
-      case TK_UINT32:
-      case TK_UINT64:
-      case TK_FLOAT32:
-      case TK_FLOAT64:
-      case TK_FLOAT128:
-      case TK_INT8:
-      case TK_UINT8:
-      case TK_CHAR8:
-      case TK_CHAR16:
-        return assignable_primitive(tia, tib);
-      case TI_STRING8_SMALL:
-      case TI_STRING8_LARGE:
-      case TI_STRING16_SMALL:
-      case TI_STRING16_LARGE:
-        return assignable_string(tia, tib);
-      case TI_PLAIN_SEQUENCE_SMALL:
-      case TI_PLAIN_SEQUENCE_LARGE:
-        return assignable_plain_sequence(tia, tib);
-      case TI_PLAIN_ARRAY_SMALL:
-      case TI_PLAIN_ARRAY_LARGE:
-        return assignable_plain_array(tia, tib);
-      case TI_PLAIN_MAP_SMALL:
-      case TI_PLAIN_MAP_LARGE:
-        return assignable_plain_map(tia, tib);
-      case TI_STRONGLY_CONNECTED_COMPONENT:
-        return false;
-      case EK_COMPLETE:
-        return false;
-      case EK_MINIMAL:
-        const MinimalTypeObject& base_type_a = lookup_minimal(tia);
-        const MinimalTypeObject& base_type_b = lookup_minimal(tib);
-        TypeObject wrapper_a(base_type_a), wrapper_b(base_type_b);
-        return assignable(wrapper_a, wrapper_b);
-      default:
-        return false; // Future extensions
-      }
+      return assignable(tia, tib);
     }
 
     return false;
@@ -207,7 +218,186 @@ namespace XTypes {
   bool TypeAssignability::assignable_struct(const MinimalTypeObject& ta,
                                             const MinimalTypeObject& tb) const
   {
-    return false; // TODO: Implement this
+    if (TK_STRUCTURE != tb.kind) {
+      return false;
+    }
+
+    // Extensibility kind must match
+    TypeFlag extensibility_mask = IS_FINAL | IS_APPENDABLE | IS_MUTABLE;
+    if (ta.struct_type.struct_flags & extensibility_mask !=
+        tb.struct_type.struct_flags & extensibility_mask) {
+      return false;
+    }
+
+    // Any members in T1 and T2 that have the same name also have
+    // the same ID, and vice versa
+    std::vector<std::pair<const MinimalStructMember*,
+                          const MinimalStructMember*>> matched_members;
+    for (size_t i = 0; i < ta.struct_type.member_seq.members.size(); ++i) {
+      MemberId id_a = ta.struct_type.member_seq.members[i].common.member_id;
+      NameHash h_a = ta.struct_type.member_seq.members[i].detail.name_hash;
+      ACE_CDR::ULong
+        name_a = (h_a[0] << 24) | (h_a[1] << 16) | (h_a[2] << 8) | (h_a[3]);
+      for (size_t j = 0; j < tb.struct_type.member_seq.members.size(); ++j) {
+        MemberId id_b = tb.struct_type.member_seq.members[j].common.member_id;
+        NameHash h_b = tb.struct_type.member_seq.members[j].detail.name_hash;
+        ACE_CDR::ULong
+          name_b = (h_b[0] << 24) | (h_b[1] << 16) | (h_b[2] << 8) | (h_b[3]);
+        if ((name_a == name_b && id_a != id_b) ||
+            (id_a == id_b && name_a != name_b)) {
+          return false;
+        } else if (name_a == name_b && id_a == id_b) {
+          matched_members.push_back(std::pair<const MinimalStructMember*,
+                                    const MinimalStructMember*>
+                                    (&ta.struct_type.member_seq.members[i],
+                                     &tb.struct_type.member_seq.members[j]));
+          break;
+        }
+      }
+    }
+
+    // There is at least one member m1 of T1 and one corresponding member
+    // m2 of T2 such that m1.id == m2.id.
+    if (matched_members.size() == 0) {
+      return false;
+    }
+
+    // For any member m2 of T2, if there is a member m1 of T1 with the same
+    // ID, then the type KeyErased(m1.type) is-assignable-from the type
+    // KeyErased(m2.type)
+    for (size_t i = 0; i < matched_members.size(); ++i) {
+      const TypeIdentifier&
+        tia = *matched_members[i].first->common.member_type_id.in();
+      const TypeIdentifier&
+        tib = *matched_members[i].second->common.member_type_id.in();
+      // KeyErased(T) is only defined for structs and unions
+      if (EK_MINIMAL == tia.kind && EK_MINIMAL == tib.kind) {
+        const MinimalTypeObject& toa = lookup_minimal(tia);
+        const MinimalTypeObject& tob = lookup_minimal(tib);
+        if ((TK_STRUCTURE == toa.kind || TK_UNION == toa.kind) &&
+            (TK_STRUCTURE == tob.kind || TK_UNION == tob.kind)) {
+          MinimalTypeObject key_erased_a = toa, key_erased_b = tob;
+          erase_key(key_erased_a);
+          erase_key(key_erased_b);
+          if (!assignable(key_erased_a, key_erased_b)) {
+            return false;
+          }
+        }
+      }
+    }
+
+    // Members for which both optional is false and must_understand is true in
+    // either T1 or T2 appear in both T1 and T2.
+    // Members marked as key in either T1 or T2 appear in both T1 and T2.
+    for (size_t i = 0; i < ta.struct_type.member_seq.members.size(); ++i) {
+      MemberFlag flags = ta.struct_type.member_seq.members[i].common.member_flags;
+      MemberId id = ta.struct_type.member_seq.members[i].common.member_id;
+      bool found = false;
+      if (flags & IS_OPTIONAL == 0 &&
+          flags & IS_MUST_UNDERSTAND == IS_MUST_UNDERSTAND) {
+        for (size_t j = 0; j < matched_members.size(); ++j) {
+          if (id == matched_members[j].first->common.member_id) {
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          return false;
+        }
+      }
+
+      found = false;
+      if (flags & IS_KEY == IS_KEY) {
+        for (size_t j = 0; j < matched_members.size(); ++j) {
+          if (id == matched_members[j].first->common.member_id) {
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          return false;
+        }
+      }
+    }
+
+    for (size_t i = 0; i < tb.struct_type.member_seq.members.size(); ++i) {
+      MemberFlag flags = tb.struct_type.member_seq.members[i].common.member_flags;
+      MemberId id = tb.struct_type.member_seq.members[i].common.member_id;
+      bool found = false;
+      if (flags & IS_OPTIONAL == 0 &&
+          flags & IS_MUST_UNDERSTAND == IS_MUST_UNDERSTAND) {
+        for (size_t j = 0; j < matched_members.size(); ++j) {
+          if (id == matched_members[j].second->common.member_id) {
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          return false;
+        }
+      }
+
+      found = false;
+      if (flags & IS_KEY == IS_KEY) {
+        for (size_t j = 0; j < matched_members.size(); ++j) {
+          if (id == matched_members[j].second->common.member_id) {
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          return false;
+        }
+      }
+    }
+
+    // For any string key member m2 in T2, the m1 member of T1 with the
+    // same member ID verifies m1.type.length >= m2.type.length.
+    // TODO: Does the spec mean that m1 type must also be string and that
+    // m1.type.bound >= m2.type.bound? Also is m1 required to be assignable
+    // from m2 when they are both string?
+    for (size_t i = 0; i < tb.struct_type.member_seq.members.size(); ++i) {
+      MemberFlag flags = tb.struct_type.member_seq.members[i].common.member_flags;
+      MemberId id = tb.struct_type.member_seq.members[i].common.member_id;
+      const TypeIdentifier&
+        tib = *tb.struct_type.member_seq.members[i].common.member_type_id.in();
+      if ((TI_STRING8_SMALL == tib.kind || TI_STRING16_SMALL == tib.kind ||
+           TI_STRING8_LARGE == tib.kind || TI_STRING16_LARGE == tib.kind) &&
+          flags & IS_KEY == IS_KEY) {
+        LBound bound_b;
+        if (TI_STRING8_SMALL == tib.kind || TI_STRING16_SMALL == tib.kind) {
+          bound_b = static_cast<LBound> (tib.string_sdefn.bound);
+        } else {
+          bound_b = tib.string_ldefn.bound;
+        }
+
+        for (size_t j = 0; j < matched_members.size(); ++j) {
+          if (id == matched_members[j].first->common.member_id) {            
+            const TypeIdentifier& 
+              tia =  *matched_members[j].first->common.member_type_id.in();
+            if (TI_STRING8_SMALL != tia.kind && TI_STRING16_SMALL != tia.kind &&
+                TI_STRING8_LARGE != tia.kind && TI_STRING16_LARGE != tia.kind) {
+              return false;
+            }
+            LBound bound_a;
+            if (TI_STRING8_SMALL == tia.kind || TI_STRING16_SMALL == tia.kind) {
+              bound_a = static_cast<LBound> (tia.string_sdefn.bound);
+            } else { // TI_STRING8_LARGE or TI_STRING16_LARGE
+              bound_a = tia.string_ldefn.bound;
+            }
+
+            if (bound_a < bound_b) {
+              return false;
+            }
+            break;
+          }
+        }
+      }
+    }
+
+    // 
+
+    return false;
   }
 
   /**
@@ -217,7 +407,20 @@ namespace XTypes {
   bool TypeAssignability::assignable_struct(const MinimalTypeObject& ta,
                                             const TypeIdentifier& tb) const
   {
-    return false; // TODO: Implement this
+    if (EK_MINIMAL == tb.kind) {
+      const MinimalTypeObject& tob = lookup_minimal(tb);
+      if (TK_STRUCTURE == tob.kind) {
+        return assignable_struct(ta, tob);
+      } else if (TK_ALIAS == tob.kind) {
+        const TypeIdentifier& base = *tob.alias_type.body.common.related_type.in();
+        return assignable_struct(ta, base);
+      }
+    } else if (EK_COMPLETE == tb.kind) {
+      // Assuming tb.kind of EK_COMPLETE is not supported
+      return false;
+    }
+
+    return false;
   }
 
   /**
@@ -868,7 +1071,7 @@ namespace XTypes {
         const TypeIdentifier& base = *tob.alias_type.body.common.related_type.in();
         return assignable_string(ta, base);
       }
-    } else if (EK_MINIMAL == tb.kind) {
+    } else if (EK_COMPLETE == tb.kind) {
       // Assuming tb.kind of EK_COMPLETE is not supported
       return false;
     }
@@ -1184,6 +1387,19 @@ namespace XTypes {
       return true;
     default:
       return true; // TODO: Add other types
+    }
+  }
+
+  /**
+   * @brief The input type is either structure or union
+   */
+  void TypeAssignability::erase_key(MinimalTypeObject& type) const
+  {
+    // TODO: Finish this function
+    if (TK_STRUCTURE == type.kind) {
+      
+    } else if (TK_UNION == type.kind) {
+      
     }
   }
 

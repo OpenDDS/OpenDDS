@@ -84,6 +84,7 @@ namespace XTypes {
     // General helpers
     bool strongly_assignable(const TypeIdentifier& ta, const TypeIdentifier& tb) const;
     bool is_delimited(const TypeIdentifier& ti) const;
+    void erase_key(MinimalTypeObject& type) const;
 
   };
 
