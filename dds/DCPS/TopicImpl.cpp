@@ -137,10 +137,6 @@ TopicImpl::enable()
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
-  if (!check_data_representation(qos_.representation.value, false)) {
-    return DDS::RETCODE_PRECONDITION_NOT_MET;
-  }
-
   if (id_ == GUID_UNKNOWN) {
     const DDS::DomainId_t dom_id = participant_->get_domain_id();
     Discovery_rch disco = TheServiceParticipant->get_discovery(dom_id);

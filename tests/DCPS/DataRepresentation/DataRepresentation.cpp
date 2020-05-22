@@ -326,18 +326,13 @@ public:
   {
   }
 
-  void set_topic(const char* type_name, const Reprs& reprs, bool expected = true)
+  void set_topic(const char* type_name, const Reprs& reprs)
   {
     topic_name_ = std::string(type_name) + " Topic";
     if (reprs.size()) {
       topic_name_ += " " + reprs_to_string(reprs);
     }
     topic_ = create_topic(participant_, topic_name_.c_str(), type_name, reprs);
-    if (!topic_ == !expected) {
-        add_result(true);
-    } else {
-      add_result(false);
-    }
   }
 
   void add_result(bool passed)
@@ -541,7 +536,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
     test.test_case(xml_repr, default_repr, false, false);
     test.test_case(default_repr, xml_repr, false, true, false);
 
-    test.set_topic(explictly_default_type.type_name(), xcdr2_repr, false);
+    test.set_topic(explictly_default_type.type_name(), xcdr2_repr);
+    test.test_case(default_repr, default_repr, true);
+    test.test_case(explicit_default_reprs, default_repr, true);
+    test.test_case(default_repr, explicit_default_reprs, true);
+    test.test_case(xcdr2_repr, default_repr, false, false);
+    test.test_case(default_repr, xcdr2_repr, false, true, false);
+    test.test_case(xml_repr, default_repr, false, false);
+    test.test_case(default_repr, xml_repr, false, true, false);
 
     RegisteredType<Xcdr1Type> xcdr1_type;
     if (!xcdr1_type.register_type(participant.in())) {
@@ -557,16 +559,39 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
     test.test_case(xml_repr, default_repr, false, false);
     test.test_case(default_repr, xml_repr, false, true, false);
 
-    test.set_topic(xcdr1_type.type_name(), xcdr2_repr, false);
+    test.set_topic(xcdr1_type.type_name(), xcdr2_repr);
+    test.test_case(default_repr, default_repr, true);
+    test.test_case(explicit_default_reprs, default_repr, true);
+    test.test_case(default_repr, explicit_default_reprs, true);
+    test.test_case(xcdr2_repr, default_repr, false, false);
+    test.test_case(default_repr, xcdr2_repr, false, true, false);
+    test.test_case(xml_repr, default_repr, false, false);
+    test.test_case(default_repr, xml_repr, false, true, false);
 
     RegisteredType<XmlType> xml_type;
     if (!xml_type.register_type(participant.in())) {
       return 1;
     }
 
-    test.set_topic(xml_type.type_name(), default_repr, false);
+    test.set_topic(xml_type.type_name(), default_repr);
+    test.test_case(default_repr, default_repr, true, false);
+    test.test_case(explicit_default_reprs, default_repr, true, false);
+    test.test_case(default_repr, explicit_default_reprs, true, false);
+    test.test_case(xcdr2_repr, default_repr, false, false);
+    test.test_case(default_repr, xcdr2_repr, false, false);
+    test.test_case(xml_repr, default_repr, false, true, false);
+    test.test_case(default_repr, xml_repr, false, false);
+    test.test_case(xml_repr, xml_repr, true);
 
-    test.set_topic(xcdr1_type.type_name(), xml_repr, false);
+    test.set_topic(xcdr1_type.type_name(), xml_repr);
+    test.test_case(default_repr, default_repr, true);
+    test.test_case(explicit_default_reprs, default_repr, true);
+    test.test_case(default_repr, explicit_default_reprs, true);
+    test.test_case(xcdr2_repr, default_repr, false, false);
+    test.test_case(default_repr, xcdr2_repr, false, true, false);
+    test.test_case(xml_repr, default_repr, false, false);
+    test.test_case(default_repr, xml_repr, false, true, false);
+    test.test_case(xml_repr, xml_repr, true, false);
 
     if (test.any_failed()) {
       exit_status = 1;
