@@ -231,8 +231,7 @@ namespace XTypes {
 
     // Any members in T1 and T2 that have the same name also have
     // the same ID, and vice versa
-    std::vector<std::pair<const MinimalStructMember*,
-                          const MinimalStructMember*>> matched_members;
+    MatchedSet matched_members;
     for (size_t i = 0; i < ta.struct_type.member_seq.members.size(); ++i) {
       MemberId id_a = ta.struct_type.member_seq.members[i].common.member_id;
       NameHash h_a = ta.struct_type.member_seq.members[i].detail.name_hash;
@@ -400,9 +399,35 @@ namespace XTypes {
     // For any enumerated key member m2 in T2, the m1 member of T1 with
     // the same member ID verifies that all literals in m2.type appear as
     // literals in m1.type
+    for (size_t i = 0; i < matched_members.size(); ++i) {
+      const CommonStructMember& member = matched_members[i].second->common;
+      MemberFlag flags = member.member_flags;
+      MemberId id = member.member_id;
+      if (flags & IS_KEY == IS_KEY &&
+          EK_MINIMAL == member.member_type_id->kind) {
+        const MinimalTypeObject& tob = lookup_minimal(*member.member_type_id.in());
+        if (TK_ENUM == tob.kind) {
+          if (!apply_struct_rule_enum_key(tob, matched_members[i].first->common)) {
+            return false;
+          }
+        } else if (TK_ALIAS == tob.kind) {
+          const TypeIdentifier& base_b = get_base_type(tob);
+          if (EK_MINIMAL == base_b.kind) {
+            const MinimalTypeObject& base_obj_b = lookup_minimal(base_b);
+            if (TK_ENUM == base_obj_b.kind &&
+                !apply_struct_rule_enum_key(base_obj_b,
+                                            matched_members[i].first->common)) {
+              return false;
+            }
+          }
+        }
+      }
+    }
 
+    // For any sequence or map key member m2 in T2, the m1 member of T1
+    // with the same member ID verifies m1.type.length >= m2.type.length
 
-    return false;
+    return true;
   }
 
   /**
@@ -1406,6 +1431,83 @@ namespace XTypes {
     } else if (TK_UNION == type.kind) {
 
     }
+  }
+
+  /**
+   * @brief The input must be of type TK_ALIAS
+   *        Return the non-alias base type identifier of the input
+   */
+  const TypeIdentifier& TypeAssignability::get_base_type(const MinimalTypeObject&
+                                                         type) const
+  {
+    const TypeIdentifier& base = *type.alias_type.body.common.related_type.in();
+    switch (base.kind) {
+    case EK_COMPLETE:
+    case EK_MINIMAL:
+      const MinimalTypeObject& type_obj = lookup_minimal(base);
+      if (TK_ALIAS == type_obj.kind) {
+        return get_base_type(type_obj);
+      }
+      return base;
+    default:
+      return base;
+    }
+  }
+
+  /**
+   * @brief The first argument must be TK_ENUM and is the type object
+   * of a key member of the containing struct. Therefore, there must be a
+   * member with the same ID (and name) in the other struct type.
+   */
+  bool TypeAssignability::apply_struct_rule_enum_mem(const MinimalTypeObject& tb,
+                                                     const CommonStructMember& ma)
+                                                     const
+  {
+    if (EK_MINIMAL != ma.member_type_id.kind) {
+      return false;
+    }
+
+    const MinimalEnumeratedLiteralSeq& literals_b = tb.enumerated_type.literal_seq;
+    const MinimalTypeObject& toa = lookup_minimal(*ma.member_type_id.in());
+    const MinimalEnumeratedLiteralSeq* literals_a = 0;
+    if (TK_ENUM == toa.kind) {
+      literals_a = &toa.enumerated_type.literal_seq;
+    } else if (TK_ALIAS == toa.kind) {
+      const TypeIdentifier& base_a = get_base_type(toa);
+      if (EK_MINIMAL == base_a.kind) {
+        const MinimalTypeObject& base_obj_a = lookup_minimal(base_a);
+        if (TK_ENUM == base_obj_a.kind) {
+          literals_a = &base_obj_a.enumerated_type.literal_seq;
+        } else {
+          return false;
+        }
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+
+    // All literals in tb must appear as literals in toa
+    for (size_t j = 0; j < literals_b.members.size(); ++j) {
+      NameHash h_b = literals_b.members[j].detail.name_hash;
+      ACE_CDR::ULong
+        key_b = (h_b[0] << 24) | (h_b[1] << 16) | (h_b[2] << 8) | (h_b[3]);
+      bool found = false;
+      for (size_t k = 0; k < literals_a->members.size(); ++k) {
+        NameHash h_a = literals_a->members[k].detail.name_hash;
+        ACE_CDR::ULong
+          key_a = (h_a[0] << 24) | (h_a[1] << 16) | (h_a[2] << 8) | (h_a[3]);
+        if (key_a == key_b) {
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        return false;
+      }
+    }
+    return true;
   }
 
 } // namespace XTypes

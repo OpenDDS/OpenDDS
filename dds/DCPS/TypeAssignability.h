@@ -8,10 +8,17 @@
 
 #include "dds/DCPS/TypeObject.h"
 
+#include <utility>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace XTypes {
+
+  // Set of pairs of members with each pair contains members from
+  // two structure types that have the same member ID and name
+  typedef std::vector<std::pair<const MinimalStructMember*,
+                                const MinimalStructMember*> > MatchedSet;
 
   class TypeAssignability {
   public:
@@ -82,10 +89,15 @@ namespace XTypes {
                               const MinimalTypeObject& tb) const;
 
     // General helpers
-    bool strongly_assignable(const TypeIdentifier& ta, const TypeIdentifier& tb) const;
+    bool strongly_assignable(const TypeIdentifier& ta,
+                             const TypeIdentifier& tb) const;
     bool is_delimited(const TypeIdentifier& ti) const;
     void erase_key(MinimalTypeObject& type) const;
+    const TypeIdentifier& get_base_type(const MinimalTypeObject& type) const;
 
+    // Helpers for assignability of struct
+    bool apply_struct_rule_enum_key(const MinimalTypeObject& tb,
+                                    const CommonStructMember& ma) const;
   };
 
 } // namepace XTypes
