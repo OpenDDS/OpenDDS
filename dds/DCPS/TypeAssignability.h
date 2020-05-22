@@ -100,6 +100,7 @@ namespace XTypes {
                               const CommonStructMember& ma) const;
     bool struct_rule_seq_key(LBound b, const CommonStructMember& m) const;
     bool struct_rule_map_key(LBound b, const CommonStructMember& m) const;
+    bool struct_rule_string_key(LBound b, const CommonStructMember& m) const;
   };
 
 } // namepace XTypes
