@@ -98,9 +98,9 @@ namespace XTypes {
     // Helpers for assignability of struct
     bool struct_rule_enum_key(const MinimalTypeObject& tb,
                               const CommonStructMember& ma) const;
-    bool struct_rule_seq_key(LBound b, const CommonStructMember& m) const;
-    bool struct_rule_map_key(LBound b, const CommonStructMember& m) const;
-    bool struct_rule_string_key(LBound b, const CommonStructMember& m) const;
+    bool get_sequence_bound(LBound& b, const CommonStructMember& m) const;
+    bool get_map_bound(LBound& b, const CommonStructMember& m) const;
+    bool get_string_bound(LBound& b, const CommonStructMember& m) const;
   };
 
 } // namepace XTypes
