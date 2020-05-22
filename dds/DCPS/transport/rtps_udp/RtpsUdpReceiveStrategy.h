@@ -59,6 +59,7 @@ public:
   typedef std::pair<SequenceNumber, RTPS::FragmentNumberSet> SeqFragPair;
   typedef OPENDDS_VECTOR(SeqFragPair) FragmentInfo;
 
+  void clear_completed_fragments(const RepoId& pub_id);
   bool has_fragments(const SequenceRange& range, const RepoId& pub_id, FragmentInfo* frag_info = 0);
 
   /// Prevent delivery of the currently in-progress data sample to the

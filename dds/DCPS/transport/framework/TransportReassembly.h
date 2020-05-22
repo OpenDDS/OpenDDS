@@ -37,6 +37,10 @@ public:
   void data_unavailable(const SequenceNumber& dataSampleSeq,
                         const RepoId& pub_id);
 
+  /// Clears out "completed" sequence numbers in order to allow resends for
+  /// new associations to the same (given) publication id
+  void clear_completed(const RepoId& pub_id);
+
   /// Returns true if this object is storing fragments for the given
   /// DataSampleHeader sequence number from the given publication.
   bool has_frags(const SequenceNumber& seq, const RepoId& pub_id) const;
@@ -92,10 +96,11 @@ private:
 
   struct FragInfo {
     FragInfo()
-      : have_first_(false), range_list_(), total_frags_(0) {}
+      : complete_(false), have_first_(false), range_list_(), total_frags_(0) {}
     FragInfo(bool hf, const FragRangeList& rl, ACE_UINT32 tf)
-      : have_first_(hf), range_list_(rl), total_frags_(tf) {}
+      : complete_(false), have_first_(hf), range_list_(rl), total_frags_(tf) {}
 
+    bool complete_;
     bool have_first_;
     FragRangeList range_list_;
     ACE_UINT32 total_frags_;
