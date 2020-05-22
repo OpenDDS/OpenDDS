@@ -394,6 +394,7 @@ DomainParticipantImpl::create_topic_i(
     return DDS::Topic::_nil();
   }
 
+  // See if there is a Topic with the same name.
   TopicMap::mapped_type* entry = 0;
   bool found = false;
   {
@@ -419,9 +420,12 @@ DomainParticipantImpl::create_topic_i(
     }
   }
 
+  /*
+   * If there is a topic with the same name, return the topic if it has the
+   * same type name and QoS, else it is an error.
+   */
   if (found) {
-    CORBA::String_var found_type
-    = entry->pair_.svt_->get_type_name();
+    CORBA::String_var found_type = entry->pair_.svt_->get_type_name();
 
     if (ACE_OS::strcmp(type_name, found_type) == 0) {
       DDS::TopicQos found_qos;
@@ -437,23 +441,25 @@ DomainParticipantImpl::create_topic_i(
         }
         return DDS::Topic::_duplicate(entry->pair_.obj_.in());
 
-      } else {
+      } else { // Same Name and Type, Different QoS
         if (DCPS_debug_level >= 1) {
-          ACE_DEBUG((LM_DEBUG,
-                     ACE_TEXT("(%P|%t) DomainParticipantImpl::create_topic, ")
-                     ACE_TEXT("qos not match: topic_name=%C type_name=%C\n"),
-                     topic_name, type_name));
+          ACE_ERROR((LM_ERROR,
+            ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::create_topic: ")
+            ACE_TEXT("topic with name \"%C\" and type %C already exists, ")
+            ACE_TEXT("but the QoS doesn't match.\n"),
+            topic_name, type_name));
         }
 
         return DDS::Topic::_nil();
       }
 
-    } else { // no match
+    } else { // Same Name, Different Type
       if (DCPS_debug_level >= 1) {
-        ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) DomainParticipantImpl::create_topic, ")
-                   ACE_TEXT(" not match: topic_name=%C type_name=%C\n"),
-                   topic_name, type_name));
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::create_topic: ")
+          ACE_TEXT("topic with name \"%C\" already exists, but its type, %C ")
+          ACE_TEXT("is not the same as %C.\n"),
+          topic_name, found_type.in(), type_name));
       }
 
       return DDS::Topic::_nil();
