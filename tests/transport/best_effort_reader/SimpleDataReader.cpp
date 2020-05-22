@@ -17,6 +17,8 @@
 #include <iostream>
 #include <sstream>
 
+using namespace OpenDDS::DCPS;
+
 SimpleDataReader::SimpleDataReader(const AppConfig& ac, const int readerIndex, AssociationData& ad)
   : config(ac), index(readerIndex), done_(false)
 {
@@ -92,6 +94,7 @@ void SimpleDataReader::data_received(const ReceivedDataSample& sample)
 // ========== ========== ========== ========== ========== ========== ==========
 // private:
 bool SimpleDataReader::deserializeEncapsulationHeader(Serializer& s) {
+  // TODO(iguessthislldo): convert
   ACE_CDR::ULong encap;
   return (s >> encap); // read and ignore 32-bit CDR Encapsulation header
 }

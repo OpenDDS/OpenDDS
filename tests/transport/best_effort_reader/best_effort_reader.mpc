@@ -5,7 +5,7 @@ project(*pub) : dcpsexe, dcps_test, dcps_rtps_udp {
   after += opendds_tests_transport_testmsg
   libs += opendds_tests_transport_testmsg
   libpaths += $(TEST_ROOT)/tests/transport/TestMsg
-  includes += $(TEST_ROOT)/tests/tests/transport/TestMsg
+  includes += $(TEST_ROOT)/tests/transport/TestMsg
 
   Source_Files {
     AppConfig.cpp
@@ -21,7 +21,7 @@ project(*sub) : dcpsexe, dcps_test, dcps_rtps_udp {
   after += opendds_tests_transport_testmsg
   libs += opendds_tests_transport_testmsg
   libpaths += $(TEST_ROOT)/tests/transport/TestMsg
-  includes += $(TEST_ROOT)/tests/tests/transport/TestMsg
+  includes += $(TEST_ROOT)/tests/transport/TestMsg
 
   Source_Files {
     AppConfig.cpp

@@ -1,27 +1,31 @@
-#include "TestMsg.h"
 #include "AppConfig.h"
 
-#include "dds/DCPS/transport/framework/TransportReceiveListener.h"
-#include "dds/DCPS/transport/framework/TransportClient.h"
-#include "dds/DCPS/transport/framework/TransportExceptions.h"
-#include "dds/DCPS/transport/framework/ReceivedDataSample.h"
+#include <TestMsg.h>
 
-#include "dds/DCPS/GuidConverter.h"
-#include "dds/DCPS/AssociationData.h"
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/Qos_Helper.h"
+#include <dds/DCPS/transport/framework/TransportReceiveListener.h>
+#include <dds/DCPS/transport/framework/TransportClient.h>
+#include <dds/DCPS/transport/framework/TransportExceptions.h>
+#include <dds/DCPS/transport/framework/ReceivedDataSample.h>
+#include <dds/DCPS/GuidConverter.h>
+#include <dds/DCPS/AssociationData.h>
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/Qos_Helper.h>
 
 #include <ace/OS_main.h>
 #include <ace/String_Base.h>
 #include <ace/Get_Opt.h>
 #include <ace/OS_NS_time.h>
-#include "ace/OS_NS_unistd.h"
+#include <ace/OS_NS_unistd.h>
 
 #include <cstdio>
 #include <cstring>
 #include <ctime>
 #include <iostream>
 #include <sstream>
+
+using namespace OpenDDS::DCPS;
+
+const Encoding encoding(Encoding::KIND_CDR_PLAIN, ENDIAN_LITTLE);
 
 class SimpleDataReader : public TransportReceiveListener, public TransportClient
 {
@@ -62,6 +66,7 @@ public:
 
 private:
   bool deserializeEncapsulationHeader(Serializer& s) {
+    // TODO(iguessthislldo): convert
     ACE_CDR::ULong encap;
     return (s >> encap); // read and ignore 32-bit CDR Encapsulation header
   }
@@ -100,9 +105,7 @@ void SimpleDataReader::data_received(const ReceivedDataSample& sample)
     return;
   }
 
-  Serializer ser(sample.sample_.get(),
-                 sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
-                 Serializer::ALIGN_CDR);
+  Serializer ser(sample.sample_.get(), encoding);
   TestMsg data;
   if (!deserializeData(data, ser)) {
     return;

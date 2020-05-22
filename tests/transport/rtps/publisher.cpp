@@ -40,13 +40,19 @@
 #include <cstring>
 #include <ctime>
 
+using namespace OpenDDS::DCPS;
+using namespace OpenDDS::RTPS;
+
 class DDS_TEST {  // friended by RtpsUdpDataLink and DataSampleElement
 public:
-  static void force_inline_qos(bool val) {
-    OpenDDS::DCPS::RtpsUdpDataLink::force_inline_qos_ = val;
+  static void force_inline_qos(bool val)
+  {
+    RtpsUdpDataLink::force_inline_qos_ = val;
   }
 
-  static void set_next_send_sample(DataSampleElement& element, DataSampleElement *next_send_sample) {
+  static void set_next_send_sample(
+      DataSampleElement& element, DataSampleElement* next_send_sample)
+  {
     element.set_next_send_sample(next_send_sample);
   }
 
@@ -74,7 +80,7 @@ const char text[] = "Implementation of the protocol that are processing a "
   "that use future versions of the protocol which may include additional "
   "submessage headers before the inlineQos.\n";
 
-const bool host_is_bigendian = !ACE_CDR_BYTE_ORDER;
+const Encoding& locators_encoding = get_locators_encoding();
 
 class SimpleDataWriter : public TransportSendListener, public TransportClient
 {
@@ -188,9 +194,6 @@ public:
   InlineQosMode inline_qos_mode_;
 };
 
-using namespace OpenDDS::DCPS;
-using namespace OpenDDS::RTPS;
-
 int DDS_TEST::test(ACE_TString host, u_short port)
 {
   if (host.empty() || port == 0) {
@@ -233,8 +236,8 @@ int DDS_TEST::test(ACE_TString host, u_short port)
   local.participantId(0x89abcdef); // guidPrefix2
   local.entityKey(0x012345);
   local.entityKind(ENTITYKIND_USER_WRITER_WITH_KEY);
-  OpenDDS::RTPS::GUID_t local_guid(local);
-  const OpenDDS::RTPS::GuidPrefix_t& local_prefix = local_guid.guidPrefix;
+  GUID_t local_guid(local);
+  const GuidPrefix_t& local_prefix = local_guid.guidPrefix;
 
   RepoIdBuilder remote; // these values must match what's in subscriber.cpp
   remote.federationId(0x01234567);  // guidPrefix1
@@ -248,12 +251,15 @@ int DDS_TEST::test(ACE_TString host, u_short port)
   locators[0].port = remote_addr.get_port_number();
   address_to_bytes(locators[0].address, remote_addr);
 
-  size_t size_locator = 0, padding_locator = 0;
-  gen_find_size(locators, size_locator, padding_locator);
-  ACE_Message_Block mb_locator(size_locator + padding_locator + 1);
-  Serializer ser_loc(&mb_locator, ACE_CDR_BYTE_ORDER, Serializer::ALIGN_CDR);
-  ser_loc << locators;
-  ser_loc << ACE_OutputCDR::from_boolean(false); // requires inline QoS
+  size_t size_locator = 0;
+  serialized_size(locators_encoding, size_locator, locators);
+  ACE_Message_Block mb_locator(size_locator + 1);
+  Serializer ser_loc(&mb_locator, locators_encoding);
+  if (!(ser_loc << locators) ||
+      !(ser_loc << ACE_OutputCDR::from_boolean(false))) { // requires inline QoS
+    std::cerr << "publisher serialize locators failed\n";
+    return 1;
+  }
 
   SimpleDataWriter sdw(local_guid);
   sdw.enable_transport(true /*reliable*/, false /*durable*/);
@@ -291,20 +297,21 @@ int DDS_TEST::test(ACE_TString host, u_short port)
   data.value = text;
 
   ds.inlineQos.length(1);
-  OpenDDS::RTPS::KeyHash_t hash;
+  KeyHash_t hash;
   marshal_key_hash(data, hash);
   ds.inlineQos[0].key_hash(hash);
 
+  const Encoding encoding(Encoding::KIND_CDR_PLAIN, ENDIAN_LITTLE);
+  // TODO(iguessthislldo): Convert
   const ACE_CDR::ULong encap = 0x00000100; // {CDR_LE, options} in BE format
-  size_t size = 0, padding = 0;
-  gen_find_size(hdr, size, padding);
-  gen_find_size(it, size, padding);
-  gen_find_size(ds, size, padding);
-  find_size_ulong(size, padding);
-  gen_find_size(data, size, padding);
+  size_t size = serialized_size(encoding, hdr);
+  serialized_size(encoding, size, it);
+  serialized_size(encoding, size, ds);
+  serialized_size_ulong(encoding, size);
+  serialized_size(encoding, size, data);
 
-  ACE_Message_Block msg(size + padding);
-  Serializer ser(&msg, host_is_bigendian, Serializer::ALIGN_CDR);
+  ACE_Message_Block msg(size);
+  Serializer ser(&msg, encoding);
   bool ok = (ser << hdr) && (ser << it) && (ser << ds)
     && (ser << encap) && (ser << data);
   if (!ok) {
@@ -315,11 +322,10 @@ int DDS_TEST::test(ACE_TString host, u_short port)
   ACE_INET_Addr local_addr;
   ACE_SOCK_Dgram sock;
   if (!open_appropriate_socket_type(sock, local_addr)) {
-    ACE_ERROR_RETURN((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: ")
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
       ACE_TEXT("publisher: open_appropriate_socket_type:")
-      ACE_TEXT("%m\n")),
-      false);
+      ACE_TEXT("%m\n")));
+    return 1;
   }
 
   ACE_INET_Addr dest;
@@ -348,23 +354,24 @@ int DDS_TEST::test(ACE_TString host, u_short port)
 
     // Calculate the data buffer length
     size = 0;
-    padding = 0;
-    OpenDDS::DCPS::KeyOnly<const TestMsg> ko_instance_data(control_sample);
-    find_size_ulong(size, padding);   // encap
-    gen_find_size(ko_instance_data, size, padding);
-    dsh.message_length_ = static_cast<ACE_UINT32>(size + padding);
+    KeyOnly<const TestMsg> ko_instance_data(control_sample);
+    // TODO(iguessthislldo): Convert
+    serialized_size_ulong(encoding, size); // encap
+    serialized_size(encoding, size, ko_instance_data);
+    dsh.message_length_ = static_cast<ACE_UINT32>(size);
 
     {
-      OpenDDS::DCPS::Message_Block_Ptr ir_mb (new ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
-                                                       ACE_Message_Block::MB_DATA,
-                                                       new ACE_Message_Block(dsh.message_length_)));
-      *ir_mb << dsh;
+      Message_Block_Ptr ir_mb(
+        new ACE_Message_Block(DataSampleHeader::get_max_serialized_size(),
+        ACE_Message_Block::MB_DATA,
+        new ACE_Message_Block(dsh.message_length_)));
+      if (!(*ir_mb << dsh)) {
+        std::cerr << "ERROR: failed to serialize header for instance registration\n";
+        return 1;
+      }
 
-      OpenDDS::DCPS::Serializer serializer(ir_mb->cont(),
-                                           host_is_bigendian,
-                                           Serializer::ALIGN_CDR);
-      ok = (serializer << encap) && (serializer << ko_instance_data);
-      if (!ok) {
+      Serializer serializer(ir_mb->cont(), encoding);
+      if (!(serializer << encap) || !(serializer << ko_instance_data)) {
         std::cerr << "ERROR: failed to serialize data for instance registration\n";
         return 1;
       }
@@ -376,15 +383,17 @@ int DDS_TEST::test(ACE_TString host, u_short port)
     {
       dsh.message_id_ = DISPOSE_INSTANCE;
       dsh.sequence_ = 3;
-      OpenDDS::DCPS::Message_Block_Ptr di_mb (new ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
-                                                       ACE_Message_Block::MB_DATA,
-                                                       new ACE_Message_Block(dsh.message_length_)));
-      *di_mb << dsh;
-      OpenDDS::DCPS::Serializer serializer(di_mb->cont(),
-                                           host_is_bigendian,
-                                           Serializer::ALIGN_CDR);
-      ok = (serializer << encap) && (serializer << ko_instance_data);
-      if (!ok) {
+      Message_Block_Ptr di_mb(
+        new ACE_Message_Block(DataSampleHeader::get_max_serialized_size(),
+        ACE_Message_Block::MB_DATA,
+        new ACE_Message_Block(dsh.message_length_)));
+      if (!(*di_mb << dsh)) {
+        std::cerr << "ERROR: failed to serialize header for instance registration\n";
+        return 1;
+      }
+
+      Serializer serializer(di_mb->cont(), encoding);
+      if (!(serializer << encap) || !(serializer << ko_instance_data)) {
         std::cerr << "ERROR: failed to serialize data for dispose instance\n";
         return 1;
       }
@@ -397,15 +406,17 @@ int DDS_TEST::test(ACE_TString host, u_short port)
     {
       dsh.message_id_ = UNREGISTER_INSTANCE;
       dsh.sequence_ = 4;
-      OpenDDS::DCPS::Message_Block_Ptr ui_mb  (new ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
-                                                       ACE_Message_Block::MB_DATA,
-                                                       new ACE_Message_Block(dsh.message_length_)));
-      *ui_mb << dsh;
-      OpenDDS::DCPS::Serializer serializer(ui_mb->cont(),
-                                           host_is_bigendian,
-                                           Serializer::ALIGN_CDR);
-      ok = (serializer << encap) && (serializer << ko_instance_data);
-      if (!ok) {
+      Message_Block_Ptr ui_mb(
+        new ACE_Message_Block(DataSampleHeader::get_max_serialized_size(),
+        ACE_Message_Block::MB_DATA,
+        new ACE_Message_Block(dsh.message_length_)));
+      if (!(*ui_mb << dsh)) {
+        std::cerr << "ERROR: failed to serialize header for instance registration\n";
+        return 1;
+      }
+
+      Serializer serializer(ui_mb->cont(), encoding);
+      if (!(serializer << encap) || !(serializer << ko_instance_data)) {
         std::cerr << "ERROR: failed to serialize data for unregister instance\n";
         return 1;
       }
@@ -418,15 +429,16 @@ int DDS_TEST::test(ACE_TString host, u_short port)
     {
       dsh.message_id_ = DISPOSE_UNREGISTER_INSTANCE;
       dsh.sequence_ = 5;
-      OpenDDS::DCPS::Message_Block_Ptr ui_mb (new ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
-                                                       ACE_Message_Block::MB_DATA,
-                                                       new ACE_Message_Block(dsh.message_length_)));
-      *ui_mb << dsh;
-      OpenDDS::DCPS::Serializer serializer(ui_mb->cont(),
-                                           host_is_bigendian,
-                                           Serializer::ALIGN_CDR);
-      ok = (serializer << encap) && (serializer << ko_instance_data);
-      if (!ok) {
+      Message_Block_Ptr ui_mb(
+        new ACE_Message_Block(DataSampleHeader::get_max_serialized_size(),
+        ACE_Message_Block::MB_DATA,
+        new ACE_Message_Block(dsh.message_length_)));
+      if (!(*ui_mb << dsh)) {
+        std::cerr << "ERROR: failed to serialize header for instance registration\n";
+        return 1;
+      }
+      Serializer serializer(ui_mb->cont(), encoding);
+      if (!(serializer << encap) || !(serializer << ko_instance_data)) {
         std::cerr << "ERROR: failed to serialize data for dispose unregister instance\n";
         return 1;
       }
@@ -439,8 +451,10 @@ int DDS_TEST::test(ACE_TString host, u_short port)
   // 2b. send sample data through the OpenDDS transport
 
   DataSampleElement elements[] = {
-    DataSampleElement(local_guid, &sdw, OpenDDS::DCPS::PublicationInstance_rch()),  // Data Sample
-    DataSampleElement(local_guid, &sdw, OpenDDS::DCPS::PublicationInstance_rch()),  // Data Sample (key=99 means end)
+    // Data Sample
+    DataSampleElement(local_guid, &sdw, PublicationInstance_rch()),
+    // Data Sample (key=99 means end)
+    DataSampleElement(local_guid, &sdw, PublicationInstance_rch()),
   };
   SendStateDataSampleList list;
   list.head_ = elements;
@@ -464,21 +478,22 @@ int DDS_TEST::test(ACE_TString host, u_short port)
 
   // Calculate the data buffer length
   size = 0;
-  padding = 0;
-  find_size_ulong(size, padding);   // encap
-  gen_find_size(data, size, padding);
-  dsh.message_length_ = static_cast<ACE_UINT32>(size + padding);
+  // TODO(iguessthislldo): convert
+  serialized_size_ulong(encoding, size); // encap
+  serialized_size(encoding, size, data);
+  dsh.message_length_ = static_cast<ACE_UINT32>(size);
 
   elements[index].sample_.reset(
-    new ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
+    new ACE_Message_Block(DataSampleHeader::get_max_serialized_size(),
       ACE_Message_Block::MB_DATA, new ACE_Message_Block(dsh.message_length_)));
 
-  *elements[index].sample_ << dsh;
+  if (!(*elements[index].sample_ << dsh)) {
+    std::cerr << "ERROR: failed to serialize header for instance registration\n";
+    return 1;
+  }
 
-  Serializer ser2(elements[index].sample_->cont(), host_is_bigendian,
-                  Serializer::ALIGN_CDR);
-  ok = (ser2 << encap) && (ser2 << data);
-  if (!ok) {
+  Serializer ser2(elements[index].sample_->cont(), encoding);
+  if (!(ser2 << encap) || !(ser2 << data)) {
     std::cerr << "ERROR: failed to serialize data for elements[" << index << "]\n";
     return 1;
   }
@@ -500,21 +515,23 @@ int DDS_TEST::test(ACE_TString host, u_short port)
 
   // Calculate the data buffer length
   size = 0;
-  padding = 0;
-  find_size_ulong(size, padding);   // encap
-  gen_find_size(data, size, padding);
-  dsh2.message_length_ = static_cast<ACE_UINT32>(size + padding);
+  // TODO(iguessthislldo): convert
+  serialized_size_ulong(encoding, size); // encap
+  serialized_size(encoding, size, data);
+  dsh2.message_length_ = static_cast<ACE_UINT32>(size);
 
   elements[index].sample_.reset(
-    new ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
-      ACE_Message_Block::MB_DATA, new ACE_Message_Block(dsh2.message_length_)));
+    new ACE_Message_Block(DataSampleHeader::get_max_serialized_size(),
+      ACE_Message_Block::MB_DATA, new ACE_Message_Block(dsh.message_length_)));
 
-  *elements[index].sample_ << dsh2;
+  if (!(*elements[index].sample_ << dsh2)) {
+    std::cerr << "ERROR: failed to serialize header for instance registration\n";
+    return 1;
+  }
 
-  Serializer ser3(elements[index].sample_->cont(), host_is_bigendian,
-                  Serializer::ALIGN_CDR);
-  ok = (ser3 << encap) && (ser3 << data.key) && (ser3 << data.value);
-  if (!ok) {
+
+  Serializer ser3(elements[index].sample_->cont(), encoding);
+  if (!(ser3 << encap) || !(ser3 << data.key) || !(ser3 << data.value)) {
     std::cerr << "ERROR: failed to serialize data for elements[" << index << "]\n";
     return 1;
   }
@@ -568,10 +585,10 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
     return DDS_TEST::test(host, port);
 
-  } catch (const CORBA::BAD_PARAM& ) {
+  } catch (const CORBA::BAD_PARAM&) {
     std::cerr << "ERROR: caught CORBA::BAD_PARAM exception\n";
     return 1;
-  } catch (const OpenDDS::DCPS::Transport::NotConfigured& ) {
+  } catch (const Transport::NotConfigured&) {
     std::cerr << "ERROR: caught OpenDDS::DCPS::Transport::NotConfigured exception\n";
     return 1;
   }
