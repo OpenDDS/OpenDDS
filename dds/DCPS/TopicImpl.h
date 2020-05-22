@@ -86,12 +86,6 @@ public:
   void inconsistent_topic(int count);
 
   /**
-   * If the representation sequence of a reader or writer is empty then fill it
-   * from the QoS of the topic.
-   */
-  void inherit_data_representation_qos(DDS::DataRepresentationIdSeq& qos) const;
-
-  /**
    * Compare the QoS of the IDL Type and the Topic/DataWriter/DataReader to see
    * whether the type matches all values in the QoS.
    */

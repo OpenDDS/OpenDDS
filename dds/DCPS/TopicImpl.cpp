@@ -221,14 +221,11 @@ TopicImpl::inconsistent_topic(int count)
   notify_status_condition();
 }
 
-void TopicImpl::inherit_data_representation_qos(
-  DDS::DataRepresentationIdSeq& qos) const
-{
-  DCPS::inherit_data_representation_qos(qos, qos_.representation.value);
-}
-
 bool TopicImpl::check_data_representation(const DDS::DataRepresentationIdSeq& qos_ids, bool is_data_writer) {
   DDS::DataRepresentationIdSeq type_allowed_reprs;
+  if(!type_support_){
+    return true;
+  }
   type_support_->representations_allowed_by_type(type_allowed_reprs);
   //default for blank annotation is to allow all types of data representation
   if(type_allowed_reprs.length() == 0){

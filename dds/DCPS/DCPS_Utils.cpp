@@ -437,17 +437,6 @@ Encoding::Kind repr_ext_to_encoding_kind(
   return Encoding::KIND_UNKNOWN;
 }
 
-void inherit_data_representation_qos(
-  DDS::DataRepresentationIdSeq& child,
-  const DDS::DataRepresentationIdSeq& parent)
-{
-  if (!child.length()) {
-    if (parent.length()) {
-      child = parent;
-    }
-  }
-}
-
 } // namespace DCPS
 } // namespace OpenDDS
 

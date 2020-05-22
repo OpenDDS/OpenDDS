@@ -853,7 +853,6 @@ DDS::ReturnCode_t DataReaderImpl::set_qos(const DDS::DataReaderQos& qos_arg)
   OPENDDS_NO_DURABILITY_KIND_TRANSIENT_PERSISTENT_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
 
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos)) {
-    topic_servant_->inherit_data_representation_qos(qos_.representation.value);
 
     if (qos_ == qos)
       return DDS::RETCODE_OK;
@@ -1168,10 +1167,10 @@ DataReaderImpl::enable()
     dp_id_ = participant->get_id();
   }
 
-  topic_servant_->inherit_data_representation_qos(qos_.representation.value);
-
-  if (!topic_servant_->check_data_representation(qos_.representation.value, false)) {
-    return DDS::RETCODE_PRECONDITION_NOT_MET;
+  if(topic_servant_) {
+    if (!topic_servant_->check_data_representation(qos_.representation.value, false)) {
+      return DDS::RETCODE_PRECONDITION_NOT_MET;
+    }
   }
 
   if (qos_.history.kind == DDS::KEEP_ALL_HISTORY_QOS) {

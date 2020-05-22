@@ -875,8 +875,6 @@ DataWriterImpl::set_qos(const DDS::DataWriterQos& qos_arg)
   OPENDDS_NO_DURABILITY_KIND_TRANSIENT_PERSISTENT_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
 
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos)) {
-    topic_servant_->inherit_data_representation_qos(qos.representation.value);
-
     if (qos_ == qos)
       return DDS::RETCODE_OK;
 
@@ -1292,8 +1290,6 @@ DataWriterImpl::enable()
   if (participant) {
     dp_id_ = participant->get_id();
   }
-
-  topic_servant_->inherit_data_representation_qos(qos_.representation.value);
 
   if (!topic_servant_->check_data_representation(qos_.representation.value, true)) {
     return DDS::RETCODE_PRECONDITION_NOT_MET;
