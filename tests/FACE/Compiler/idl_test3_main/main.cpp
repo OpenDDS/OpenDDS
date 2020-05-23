@@ -536,12 +536,17 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   //    ** see breakdown in comment at the end of this file
   //  AStructSeq theStructSeq; //+4 = 911
   //  ArrayOfAStruct structArray; //+(3*885) = 3566 {padding +4+3*123 = 506}
-  my_foo.x = 0.99f;                //+4 = 3570
-  my_foo.y = 0.11f;                //+4 = 3574
-  my_foo.theWChar = L'a';          //+3 = 3577
-  //  wstring theWString;          //+4 = 3593    {padding +1 = 507}
-  //  long double theLongDouble;  //+16 = 3597 {if no wstring, padding +4 = 511}
-  my_foo.theUnion.rv("a string");  //+4+4+8+1 = 3636 {padding +3 = 510}
+  my_foo.theUnion.rv("a string"); // +4+4+8+1 = 3583
+  //  SeqOfAUnion theSeqOfUnion; // +4 = 3587 {padding +3 = 509}
+  //  BigUnion theBigUnion; // +4 = 3591
+  //  BigUnionSeq theSeqOfBigUnion; // +4 = 3595
+  my_foo.x = 0.99f; // +4 = 3599
+  my_foo.y = 0.11f; // +4 = 3603
+  my_foo.theWChar = L'a'; // +2 = 3605
+  //  wstring theWString;
+  // +4 = 3609 {padding +2 = 511} if wstring else +0 = 3605
+  //  long double theLongDouble;
+  // +16 = 3625 if wstring else 3621 {padding +6 = 515}
 
   Xyz::Foo foo2;
   foo2.key = 99;
@@ -597,11 +602,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   Xyz::Foo ss_foo;
 
-  const size_t sz = 3626 // see running totals above
+  const size_t sz = 3625 // see running totals above
 #if defined OPENDDS_SAFETY_PROFILE || defined NO_TEST_WSTRING
     - 4 // theWString is gone
 #endif
-    , pad = 510
+    , pad = 511
 #if defined OPENDDS_SAFETY_PROFILE || defined NO_TEST_WSTRING
     + 4 // theWString is gone, long double is aligned to 8
 #endif

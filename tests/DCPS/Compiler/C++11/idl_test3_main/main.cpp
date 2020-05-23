@@ -570,7 +570,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   my_foo.theSeqOfUnion()[1].gv(as); //+885 = 4491   {padding +123 = 629}
 
   //  BigUnion theBigUnion;        //+4 = 4495
-  //  BigUnionSeq theSeqOfBitUnion;//+4 = 4499
+  //  BigUnionSeq theSeqOfBigUnion;//+4 = 4499
   my_foo.x() = 0.99f;                //+4 = 4503
   my_foo.y() = 0.11f;                //+4 = 4507
   my_foo.theWChar() = L'a'; //+2 = 4509
