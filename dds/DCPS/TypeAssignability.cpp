@@ -264,22 +264,29 @@ namespace XTypes {
     // ID, then the type KeyErased(m1.type) is-assignable-from the type
     // KeyErased(m2.type)
     for (size_t i = 0; i < matched_members.size(); ++i) {
-      const TypeIdentifier&
-        tia = *matched_members[i].first->common.member_type_id.in();
-      const TypeIdentifier&
-        tib = *matched_members[i].second->common.member_type_id.in();
-      // KeyErased(T) is only defined for structs and unions
-      if (EK_MINIMAL == tia.kind && EK_MINIMAL == tib.kind) {
-        const MinimalTypeObject& toa = typelookup_.lookup_minimal(tia);
-        const MinimalTypeObject& tob = typelookup_.lookup_minimal(tib);
-        if ((TK_STRUCTURE == toa.kind || TK_UNION == toa.kind) &&
-            (TK_STRUCTURE == tob.kind || TK_UNION == tob.kind)) {
-          MinimalTypeObject key_erased_a = toa, key_erased_b = tob;
-          erase_key(key_erased_a);
-          erase_key(key_erased_b);
-          if (!assignable(key_erased_a, key_erased_b)) {
-            return false;
-          }
+      const CommonStructMember& member = matched_members[i].second->common;
+      const MinimalTypeObject* toa = 0;
+      const MinimalTypeObject* tob = 0;
+      bool type_matched = false;
+      // KeyErased(T) is defined only for struct and union
+      if (get_struct_member(&tob, member)) {
+        if (!get_struct_member(&toa, matched_members[i].first->common)) {
+          return false;
+        }
+        type_matched = true;
+      } else if (get_union_member(&tob, member)) {
+        if (!get_union_member(&toa, matched_members[i].first->common)) {
+          return false;
+        }
+        type_matched = true;
+      }
+
+      if (type_matched) {
+        MinimalTypeObject key_erased_a = *toa, key_erased_b = *tob;
+        erase_key(key_erased_a);
+        erase_key(key_erased_b);
+        if (!assignable(key_erased_a, key_erased_b)) {
+          return false;
         }
       }
     }
@@ -429,7 +436,7 @@ namespace XTypes {
         const MinimalTypeObject* toa = 0;
         const MinimalTypeObject* tob = 0;
         bool type_matched = false;
-        if(get_struct_member(&tob, member)) {
+        if (get_struct_member(&tob, member)) {
           if (!get_struct_member(&toa, matched_members[i].first->common)) {
             return false;
           }
@@ -451,6 +458,12 @@ namespace XTypes {
         }
       } // IS_KEY
     }
+
+    // For any union key member m2 in T2, the m1 member of T1 with the
+    // same ID verifies that: for every discriminator value of m2.type
+    // that selects a member m22 in m2.type, the discriminator value
+    // selects a member m11 in m1.type that verifies KeyHolder(m11.type)
+    // is-assignable-from KeyHolder(m22.type)
 
     return true;
   }
