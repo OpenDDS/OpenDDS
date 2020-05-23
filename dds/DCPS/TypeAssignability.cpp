@@ -5,7 +5,6 @@
 
 #include "TypeAssignability.h"
 
-#include <map>
 #include <set>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -95,8 +94,8 @@ namespace XTypes {
       // Assuming only equivalence kind of EK_MINIMAL is supported
       return false;
     case EK_MINIMAL:
-      const MinimalTypeObject& base_type_a = lookup_minimal(ta);
-      const MinimalTypeObject& base_type_b = lookup_minimal(tb);
+      const MinimalTypeObject& base_type_a = typelookup_.lookup_minimal(ta);
+      const MinimalTypeObject& base_type_b = typelookup_.lookup_minimal(tb);
       TypeObject wrapper_a(base_type_a), wrapper_b(base_type_b);
       return assignable(wrapper_a, wrapper_b);
     default:
@@ -150,7 +149,7 @@ namespace XTypes {
         // Supporting minimal base type only
         return false;
       case EK_MINIMAL:
-        const MinimalTypeObject& base_type_a = lookup_minimal(tia);
+        const MinimalTypeObject& base_type_a = typelookup_.lookup_minimal(tia);
         TypeObject wrapper_a(base_type_a), wrapper_b(tb);
         return assignable(wrapper_a, wrapper_b);
       default:
@@ -256,7 +255,7 @@ namespace XTypes {
     }
 
     // There is at least one member m1 of T1 and one corresponding member
-    // m2 of T2 such that m1.id == m2.id.
+    // m2 of T2 such that m1.id == m2.id
     if (matched_members.size() == 0) {
       return false;
     }
@@ -271,8 +270,8 @@ namespace XTypes {
         tib = *matched_members[i].second->common.member_type_id.in();
       // KeyErased(T) is only defined for structs and unions
       if (EK_MINIMAL == tia.kind && EK_MINIMAL == tib.kind) {
-        const MinimalTypeObject& toa = lookup_minimal(tia);
-        const MinimalTypeObject& tob = lookup_minimal(tib);
+        const MinimalTypeObject& toa = typelookup_.lookup_minimal(tia);
+        const MinimalTypeObject& tob = typelookup_.lookup_minimal(tib);
         if ((TK_STRUCTURE == toa.kind || TK_UNION == toa.kind) &&
             (TK_STRUCTURE == tob.kind || TK_UNION == tob.kind)) {
           MinimalTypeObject key_erased_a = toa, key_erased_b = tob;
@@ -352,43 +351,6 @@ namespace XTypes {
 
     // For any string key member m2 in T2, the m1 member of T1 with the
     // same member ID verifies m1.type.length >= m2.type.length
-    /*
-    for (size_t i = 0; i < matched_members.size(); ++i) {
-      const CommonStructMember& member = matched_members[i].second->common;
-      MemberFlag flags = member.member_flags;
-      if (flags & IS_KEY == IS_KEY) {
-        ACE_CDR::Octet kind = member.member_type_id->kind;
-        LBound bound_b = 0;
-        bool is_string = false;
-        if (EK_MINIMAL == kind) {
-          const MinimalTypeObject& tob = lookup_minimal(*member.member_type_id.in());
-          if (TK_ALIAS == tob.kind) {
-            const TypeIdentifier& base_b = get_base_type(tob);
-            if (TI_STRING8_SMALL == base_b.kind ||
-                TI_STRING16_SMALL == base_b.kind) {
-              bound_b = static_cast<LBound>(base_b.string_sdefn.bound);
-              is_string = true;
-            } else if (TI_STRING8_LARGE == base_b.kind ||
-                       TI_STRING16_LARGE == base_b.kind) {
-              bound_b = base_b.string_ldefn.bound;
-              is_string = true;
-            }
-          }
-        } else if (TI_STRING8_SMALL == kind || TI_STRING16_SMALL == kind) {
-          bound_b = static_cast<LBound>(member.member_type_id->string_sdefn.bound);
-          is_string = true;
-        } else if (TI_STRING8_LARGE == kind || TI_STRING16_LARGE == kind) {
-          bound_b = member.member_type_id->string_ldefn.bound;
-          is_string = true;
-        }
-
-        if (is_string && !struct_rule_string_key(bound_b,
-                                                 matched_member[i].first->common)) {
-          return false;
-        }
-      }
-    }
-    */
     for (size_t i = 0; i < matched_members.size(); ++i) {
       const CommonStructMember& member = matched_members[i].second->common;
       MemberFlag flags = member.member_flags;
@@ -411,7 +373,8 @@ namespace XTypes {
       MemberFlag flags = member.member_flags;
       if (flags & IS_KEY == IS_KEY &&
           EK_MINIMAL == member.member_type_id->kind) {
-        const MinimalTypeObject& tob = lookup_minimal(*member.member_type_id.in());
+        const MinimalTypeObject&
+          tob = typelookup_.lookup_minimal(*member.member_type_id.in());
         if (TK_ENUM == tob.kind) {
           if (!struct_rule_enum_key(tob, matched_members[i].first->common)) {
             return false;
@@ -419,7 +382,8 @@ namespace XTypes {
         } else if (TK_ALIAS == tob.kind) {
           const TypeIdentifier& base_b = get_base_type(tob);
           if (EK_MINIMAL == base_b.kind) {
-            const MinimalTypeObject& base_obj_b = lookup_minimal(base_b);
+            const MinimalTypeObject&
+              base_obj_b = typelookup_.lookup_minimal(base_b);
             if (TK_ENUM == base_obj_b.kind &&
                 !struct_rule_enum_key(base_obj_b,
                                             matched_members[i].first->common)) {
@@ -432,72 +396,6 @@ namespace XTypes {
 
     // For any sequence or map key member m2 in T2, the m1 member of T1
     // with the same member ID verifies m1.type.length >= m2.type.length
-    /*
-    for (size_t i = 0; i < matched_members.size(); ++i) {
-      const CommonStructMember& member = matched_members[i].second->common;
-      MemberFlags flags = member.member_flags;
-      ACE_CDR::Octet kind = member.member_type_id->kind;
-      LBound bound_b = 0;
-      bool is_sequence = false, is_map = false;
-      if (flags & IS_KEY == IS_KEY) {
-        const CommonStructMember& mem_a = matched_members[i].first->common;
-        if (EK_MINIMAL == kind) {
-          const MinimalTypeObject& tob = lookup_minimal(*member.member_type_id.in());
-          if (TK_SEQUENCE == tob.kind) {
-            bound_b = tob.sequence_type.header.common.bound;
-            is_sequence = true;
-          } else if (TK_MAP == tob.kind) {
-            bound_b = tob.map_type.header.common.bound;
-            is_map = true;
-          } else if (TK_ALIAS == tob.kind) {
-            const TypeIdentifier& base_b = get_base_type(tob);
-            if (EK_MINIMAL == base_b.kind) {
-              const MinimalTypeObject& base_obj_b = lookup_minimal(base_b);
-              if (TK_SEQUENCE == base_obj_b.kind) {
-                bound_b = base_obj_b.sequence_type.header.common.bound;
-                is_sequence = true;
-              } else if (TK_MAP == base_obj_b.kind) {
-                bound_b = base_obj_b.map_type.header.common.bound;
-                is_map = true;
-              }
-            } else if (TI_PLAIN_SEQUENCE_SMALL == base_b.kind) {
-              bound_b = static_cast<LBound>(base_b.member_type_id->seq_sdefn.bound);
-              is_sequence = true;
-            } else if (TI_PLAIN_SEQUENCE_LARGE == base_b.kind) {
-              bound_b = base_b.member_type_id->seq_ldefn.bound;
-              is_sequence = true;
-            } else if (TI_PLAIN_MAP_SMALL == base_b.kind) {
-              bound_b = static_cast<LBound>(base_b.member_type_id->map_sdefn.bound);
-              is_map = true;
-            } else if (TI_PLAIN_MAP_LARGE == base_b.kind) {
-              bound_b = base_b.member_type_id->map_ldefn.bound;
-              is_map = true;
-            }
-          }
-        } else if (TI_PLAIN_SEQUENCE_SMALL == kind) {
-          bound_b = static_cast<LBound>(member.member_type_id->seq_sdefn.bound);
-          is_sequence = true;
-        } else if (TI_PLAIN_SEQUENCE_LARGE == kind) {
-          bound_b = member.member_type_id->seq_ldefn.bound;
-          is_sequence = true;
-        } else if (TI_PLAIN_MAP_SMALL == kind) {
-          bound_b = static_cast<LBound>(member.member_type_id->map_sdefn.bound);
-          is_map = true;
-        } else if (TI_PLAIN_MAP_LARGE == kind) {
-          bound_b = member.member_type_id->map_ldefn.bound;
-          is_map = true;
-        }
-
-        if (is_sequence && !struct_rule_seq_key(bound_b, mem_a)) {
-          return false;
-        }
-        if (is_map && !struct_rule_map_key(bound_b, mem_a)) {
-          return false;
-        }
-      } // IS_KEY
-    }
-    */
-
     for (size_t i = 0; i < matched_members.size(); ++i) {
       const CommonStructMember& member = matched_members[i].second->common;
       MemberFlags flags = member.member_flags;
@@ -524,6 +422,35 @@ namespace XTypes {
     // For any structure or union key member m2 in T2, the m1 member
     // of T1 with the same member ID verifies that KeyHolder(m1.type)
     // is-assignable-from KeyHolder(m2.type)
+    for (size_t i = 0; i < matched_members.size(); ++i) {
+      const CommonStructMember& member = matched_members[i].second->common;
+      MemberFlags flags = member.member_flags;
+      if (flags & IS_KEY == IS_KEY) {
+        const MinimalTypeObject* toa = 0;
+        const MinimalTypeObject* tob = 0;
+        bool type_matched = false;
+        if(get_struct_member(&tob, member)) {
+          if (!get_struct_member(&toa, matched_members[i].first->common)) {
+            return false;
+          }
+          type_matched = true;
+        } else if (get_union_member(&tob, member)) {
+          if (!get_union_member(&toa, matched_members[i].first->common)) {
+            return false;
+          }
+          type_matched = true;
+        }
+
+        if (type_matched) {
+          MinimalTypeObject key_holder_a = *toa, key_holder_b = *tob;
+          hold_key(key_holder_a);
+          hold_key(key_holder_b);
+          if (!assignable(key_holder_a, key_holder_b)) {
+            return false;
+          }
+        }
+      } // IS_KEY
+    }
 
     return true;
   }
@@ -536,7 +463,7 @@ namespace XTypes {
                                             const TypeIdentifier& tb) const
   {
     if (EK_MINIMAL == tb.kind) {
-      const MinimalTypeObject& tob = lookup_minimal(tb);
+      const MinimalTypeObject& tob = typelookup_.lookup_minimal(tb);
       if (TK_STRUCTURE == tob.kind) {
         return assignable_struct(ta, tob);
       } else if (TK_ALIAS == tob.kind) {
@@ -783,7 +710,7 @@ namespace XTypes {
                                            const TypeIdentifier& tb) const
   {
     if (EK_MINIMAL == tb.kind) {
-      const MinimalTypeObject& tob = lookup_minimal(tb);
+      const MinimalTypeObject& tob = typelookup_.lookup_minimal(tb);
       if (TK_UNION == tob.kind) {
         return assignable_union(ta, tob);
       } else if (TK_ALIAS == tob.kind) {
@@ -849,7 +776,7 @@ namespace XTypes {
       return strongly_assignable(*ta.element.common.type.in(),
                                  *tb.seq_ldefn.element_identifier.in());
     } else if (EK_MINIMAL == tb.kind) {
-      const MinimalTypeObject& tob = lookup_minimal(tb);
+      const MinimalTypeObject& tob = typelookup_.lookup_minimal(tb);
       if (TK_SEQUENCE == tob.kind) {
         return assignable_sequence(ta, tob);
       } else if (TK_ALIAS == tob.kind) {
@@ -929,7 +856,7 @@ namespace XTypes {
       return strongly_assignable(*ta.array_type.element.common.type.in(),
                                  *tb.array_ldefn.element_identifier.in());
     } else if (EK_MINIMAL == tb.kind) {
-      const MinimalTypeObject& tob = lookup_minimal(tb);
+      const MinimalTypeObject& tob = typelookup_.lookup_minimal(tb);
       if (TK_ARRAY == tob.kind) {
         return assignable_array(ta, tob);
       } else if (TK_ALIAS == tob.kind) {
@@ -979,7 +906,7 @@ namespace XTypes {
         strongly_assignable(*ta.map_type.element.common.type.in(),
                             *tb.map_ldefn.element_identifier.in());
     } else if (EK_MINIMAL == tb.kind) {
-      const MinimalTypeObject& tob = lookup_minimal(tb);
+      const MinimalTypeObject& tob = typelookup_.lookup_minimal(tb);
       if (TK_MAP == tob.kind) {
         return assignable_map(ta, tob);
       } else if (TK_ALIAS == tob.kind) {
@@ -1053,7 +980,7 @@ namespace XTypes {
                                           const TypeIdentifier& tb) const
   {
     if (EK_MINIMAL == tb.kind) {
-      const MinimalTypeObject& tob = lookup_minimal(tb);
+      const MinimalTypeObject& tob = typelookup_.lookup_minimal(tb);
       if (TK_ENUM == tob.kind) {
         return assignable_enum(ta, tob);
       } else if (TK_ALIAS == tob.kind) {
@@ -1100,7 +1027,7 @@ namespace XTypes {
     } else if (TK_UINT64 == tb.kind) {
       return 33 <= ta_bit_bound && ta_bit_bound <= 64;
     } else if (EK_MINIMAL == tb.kind) {
-      const MinimalTypeObject& tob = lookup_minimal(tb);
+      const MinimalTypeObject& tob = typelookup_.lookup_minimal(tb);
       if (TK_BITMASK == tob.kind) {
         return assignable_bitmask(ta, tob);
       } else if (TK_ALIAS == tob.kind) {
@@ -1138,7 +1065,7 @@ namespace XTypes {
     }
 
     if (EK_MINIMAL == tb.kind) {
-      const MinimalTypeObject& tob = lookup_minimal(tb);
+      const MinimalTypeObject& tob = typelookup_.lookup_minimal(tb);
       if (TK_BITMASK == tob.kind) {
         return assignable_primitive(ta, tob);
       } else if (TK_ALIAS == tob.kind) {
@@ -1194,7 +1121,7 @@ namespace XTypes {
         return true;
       }
     } else if (EK_MINIMAL == tb.kind) {
-      const MinimalTypeObject& tob = lookup_minimal(tb);
+      const MinimalTypeObject& tob = typelookup_.lookup_minimal(tb);
       if (TK_ALIAS == tob.kind) {
         const TypeIdentifier& base = *tob.alias_type.body.common.related_type.in();
         return assignable_string(ta, base);
@@ -1243,7 +1170,7 @@ namespace XTypes {
                                    *tb.seq_ldefn.element_identifier.in());
       }
     } else if (EK_MINIMAL == tb.kind) {
-      const MinimalTypeObject& tob = lookup_minimal(tb);
+      const MinimalTypeObject& tob = typelookup_.lookup_minimal(tb);
       if (TK_SEQUENCE == tob.kind) {
         return assignable_plain_sequence(ta, tob);
       } else if (TK_ALIAS == tob.kind) {
@@ -1353,7 +1280,7 @@ namespace XTypes {
                                    *tb.array_ldefn.element_identifier.in());
       }
     } else if (EK_MINIMAL == tb.kind) {
-      const MinimalTypeObject& tob = lookup_minimal(tb);
+      const MinimalTypeObject& tob = typelookup_.lookup_minimal(tb);
       if (TK_ARRAY == tob.kind) {
         return assignable_plain_array(ta, tob);
       } else if (TK_ALIAS == tob.kind) {
@@ -1444,7 +1371,7 @@ namespace XTypes {
                               *tb.map_ldefn.element_identifier.in());
       }
     } else if (EK_MINIMAL == tb.kind) {
-      const MinimalTypeObject& tob = lookup_minimal(tb);
+      const MinimalTypeObject& tob = typelookup_.lookup_minimal(tb);
       if (TK_MAP == tob.kind) {
         return assignable_plain_map(ta, tob);
       } else if (TK_ALIAS == tob.kind) {
@@ -1519,7 +1446,7 @@ namespace XTypes {
   }
 
   /**
-   * @brief The input type is either structure or union
+   * @brief The input type must be structure or union
    */
   void TypeAssignability::erase_key(MinimalTypeObject& type) const
   {
@@ -1532,8 +1459,16 @@ namespace XTypes {
   }
 
   /**
+   * @brief The input type must be structure or union
+   */
+  void TypeAssignability::hold_key(MinimalTypeObject& type) const
+  {
+    // TODO: Implement this
+  }
+
+  /**
    * @brief The input must be of type TK_ALIAS
-   *        Return the non-alias base type identifier of the input
+   * Return the non-alias base type identifier of the input
    */
   const TypeIdentifier& TypeAssignability::get_base_type(const MinimalTypeObject&
                                                          type) const
@@ -1542,7 +1477,7 @@ namespace XTypes {
     switch (base.kind) {
     case EK_COMPLETE:
     case EK_MINIMAL:
-      const MinimalTypeObject& type_obj = lookup_minimal(base);
+      const MinimalTypeObject& type_obj = typelookup_.lookup_minimal(base);
       if (TK_ALIAS == type_obj.kind) {
         return get_base_type(type_obj);
       }
@@ -1565,14 +1500,15 @@ namespace XTypes {
     }
 
     const MinimalEnumeratedLiteralSeq& literals_b = tb.enumerated_type.literal_seq;
-    const MinimalTypeObject& toa = lookup_minimal(*ma.member_type_id.in());
+    const MinimalTypeObject&
+      toa = typelookup_.lookup_minimal(*ma.member_type_id.in());
     const MinimalEnumeratedLiteralSeq* literals_a = 0;
     if (TK_ENUM == toa.kind) {
       literals_a = &toa.enumerated_type.literal_seq;
     } else if (TK_ALIAS == toa.kind) {
       const TypeIdentifier& base_a = get_base_type(toa);
       if (EK_MINIMAL == base_a.kind) {
-        const MinimalTypeObject& base_obj_a = lookup_minimal(base_a);
+        const MinimalTypeObject& base_obj_a = typelookup_.lookup_minimal(base_a);
         if (TK_ENUM == base_obj_a.kind) {
           literals_a = &base_obj_a.enumerated_type.literal_seq;
         } else {
@@ -1608,53 +1544,6 @@ namespace XTypes {
   }
 
   /**
-   * @brief Verify if the second argument is of type sequence and
-   * has bound greater than or equal to the first argument
-   */
-  /*
-  bool TypeAssignability::struct_rule_seq_key(LBound bound_b,
-                                              const CommonStructMember& ma) const
-  {
-    ACE_CDR::Octet kind = ma.member_type_id->kind;
-    LBound bound_a = 0;
-    bool type_matched = false;
-    if (EK_MINIMAL == kind) {
-      const MinimalTypeObject& toa = lookup_minimal(*ma.member_type_id.in());
-      if (TK_SEQUENCE == toa.kind) {
-        bound_a = toa.sequence_type.header.common.bound;
-        type_matched = true;
-      } else if (TK_ALIAS == toa.kind) {
-        const TypeIdentifier& base_a = get_base_type(toa);
-        if (EK_MINIMAL == base_a.kind) {
-          const MinimalTypeObject& base_obj_a = lookup_minimal(base_a);
-          if (TK_SEQUENCE == base_obj_a.kind) {
-            bound_a = base_obj_a.sequence_type.header.common.bound;
-            type_matched = true;
-          }
-        } else if (TI_PLAIN_SEQUENCE_SMALL == base_a.kind) {
-          bound_a = static_cast<LBound>(base_a.seq_sdefn.bound);
-          type_matched = true;
-        } else if (TI_PLAIN_SEQUENCE_LARGE == base_a.kind) {
-          bound_a = base_a.seq_ldefn.bound;
-          type_matched = true;
-        }
-      }
-    } else if (TI_PLAIN_SEQUENCE_SMALL == kind) {
-      bound_a = static_cast<LBound>(ma.member_type_id->seq_sdefn.bound);
-      type_matched = true;
-    } else if (TI_PLAIN_SEQUENCE_LARGE == kind) {
-      bound_a = ma.member_type_id->seq_ldefn.bound;
-      type_matched = true;
-    }
-
-    if (type_matched && bound_a >= bound_b) {
-      return true;
-    }
-    return false;
-  }
-  */
-
-  /**
    * @brief Check whether a struct member is of sequence type and
    * if so compute its bound into the first argument
    */
@@ -1664,14 +1553,15 @@ namespace XTypes {
     ACE_CDR::Octet kind = member.member_type_id->kind;
     bool is_sequence = false;
     if (EK_MINIMAL == kind) {
-      const MinimalTypeObject& tobj = lookup_minimal(*member.member_type_id.in());
+      const MinimalTypeObject&
+        tobj = typelookup_.lookup_minimal(*member.member_type_id.in());
       if (TK_SEQUENCE == tobj.kind) {
         bound = tobj.sequence_type.header.common.bound;
         is_sequence = true;
       } else if (TK_ALIAS == tobj.kind) {
         const TypeIdentifier& base = get_base_type(tobj);
         if (EK_MINIMAL == base.kind) {
-          const MinimalTypeObject& base_obj = lookup_minimal(base);
+          const MinimalTypeObject& base_obj = typelookup_.lookup_minimal(base);
           if (TK_SEQUENCE == base_obj.kind) {
             bound = base_obj.sequence_type.header.common.bound;
             is_sequence = true;
@@ -1695,53 +1585,6 @@ namespace XTypes {
   }
 
   /**
-   * @brief Verify if the second argument is of type map and
-   * has bound greater than or equal to the first argument
-   */
-  /*
-  bool TypeAssignability::struct_rule_map_key(LBound bound_b,
-                                              const CommonStructMember& ma) const
-  {
-    ACE_CDR::Octet kind = ma.member_type_id->kind;
-    LBound bound_a = 0;
-    bool type_matched = false;
-    if (EK_MINIMAL == kind) {
-      const MinimalTypeObject& toa = lookup_minimal(*ma.member_type_id.in());
-      if (TK_MAP == toa.kind) {
-        bound_a = toa.map_type.header.common.bound;
-        type_matched = true;
-      } else if (TK_ALIAS == toa.kind) {
-        const TypeIdentifier& base_a = get_base_type(toa);
-        if (EK_MINIMAL == base_a.kind) {
-          const MinimalTypeObject& base_obj_a = lookup_minimal(base_a);
-          if (TK_MAP == base_obj_a.kind) {
-            bound_a = base_obj_a.map_type.header.common.bound;
-            type_matched = true;
-          }
-        } else if (TI_PLAIN_MAP_SMALL == base_a.kind) {
-          bound_a = static_cast<LBound>(base_a.map_sdefn.bound);
-          type_matched = true;
-        } else if (TI_PLAIN_MAP_LARGE == base_a.kind) {
-          bound_a = base_a.map_ldefn.bound;
-          type_matched = true;
-        }
-      }
-    } else if (TI_PLAIN_MAP_SMALL == kind) {
-      bound_a = static_cast<LBound>(ma.member_type_id->map_sdefn.bound);
-      type_matched = true;
-    } else if (TI_PLAIN_MAP_LARGE == kind) {
-      bound_a = ma.member_type_id->map_ldefn.bound;
-      type_matched = true;
-    }
-
-    if (type_matched && bound_a >= bound_b) {
-      return true;
-    }
-    return false;
-  }
-  */
-
-  /**
    * @brief Check whether a struct member is of map type and if so
    * compute its bound into the first argument
    */
@@ -1751,14 +1594,15 @@ namespace XTypes {
     ACE_CDR::Octet kind = member.member_type_id->kind;
     bool is_map = false;
     if (EK_MINIMAL == kind) {
-      const MinimalTypeObject& tobj = lookup_minimal(*member.member_type_id.in());
+      const MinimalTypeObject&
+        tobj = typelookup_.lookup_minimal(*member.member_type_id.in());
       if (TK_MAP == tobj.kind) {
         bound = tobj.map_type.header.common.bound;
         is_map = true;
       } else if (TK_ALIAS == tobj.kind) {
         const TypeIdentifier& base = get_base_type(tobj);
         if (EK_MINIMAL == base.kind) {
-          const MinimalTypeObject& base_obj = lookup_minimal(base);
+          const MinimalTypeObject& base_obj = typelookup_.lookup_minimal(base);
           if (TK_MAP == base_obj.kind) {
             bound = base_obj.map_type.header.common.bound;
             is_map = true;
@@ -1781,46 +1625,6 @@ namespace XTypes {
     return is_map;
   }
 
-
-  /**
-   * @brief Verify if the second argument is a string and has bound
-   * greater than or equal to the first argument
-   */
-  /*
-  bool TypeAssignability::struct_rule_string_key(LBound bound_b,
-                                                 const CommonStructMember& ma) const
-  {
-    ACE_CDR::Octet kind = ma.member_type_id->kind;
-    LBound bound_a = 0;
-    bool type_matched = false;
-    if (EK_MINIMAL == kind) {
-      const MinimalTypeObject& toa = lookup_minimal(*ma.member_type_id.in());
-      if (TK_ALIAS == toa.kind) {
-        const TypeIdentifier& base_a = get_base_type(toa);
-        if (TI_STRING8_SMALL == base_a.kind ||
-            TI_STRING16_SMALL == base_a.kind) {
-          bound_a = static_cast<LBound>(base_a.string_sdefn.bound);
-          type_matched = true;
-        } else if (TI_STRING8_LARGE == base_a.kind ||
-                   TI_STRING16_LARGE == base_a.kind) {
-          bound_a = base_a.string_ldefn.bound;
-          type_matched = true;
-        }
-      }
-    } else if (TI_STRING8_SMALL == kind || TI_STRING16_SMALL == kind) {
-      bound_a = static_cast<LBound>(ma.member_type_id->string_sdefn.bound);
-      type_matched = true;
-    } else if (TI_STRING8_LARGE == kind || TI_STRING16_LARGE == kind) {
-      bound_a = ma.member_type_id->string_ldefn.bound;
-      type_matched = true;
-    }
-
-    if (type_matched && bound_a >= bound_b) {
-      return true;
-    }
-    return false;
-  }
-  */
   /**
    * @brief Check whether the input struct member is of string type and
    * if so compute its bound into the first argument
@@ -1831,7 +1635,8 @@ namespace XTypes {
     ACE_CDR::Octet kind = member.member_type_id->kind;
     bool is_string = false;
     if (EK_MINIMAL == kind) {
-      const MinimalTypeObject& tobj = lookup_minimal(*member.member_type_id.in());
+      const MinimalTypeObject&
+        tobj = typelookup_.lookup_minimal(*member.member_type_id.in());
       if (TK_ALIAS == tobj.kind) {
         const TypeIdentifier& base = get_base_type(tobj);
         if (TI_STRING8_SMALL == base.kind || TI_STRING16_SMALL == base.kind) {
@@ -1851,6 +1656,64 @@ namespace XTypes {
       is_string = true;
     }
     return is_string;
+  }
+
+  /**
+   * @brief Check if the second argument is of a struct type and if so
+   * return its type object as the first argument
+   */
+  bool TypeAssignability::get_struct_member(const MinimalTypeObject** ret,
+                                            const CommonStructMember& member) const
+  {
+    ACE_CDR::Octet kind = member.member_type_id->kind;
+    bool is_struct = false;
+    if (EK_MINIMAL == kind) {
+      const MinimalTypeObject&
+        tobj = typelookup_.lookup_minimal(*member.member_type_id.in());
+      if (TK_STRUCTURE == tobj.kind) {
+        *ret = &tobj;
+        is_struct = true;
+      } else if (TK_ALIAS == tobj.kind) {
+        const TypeIdentifier& base = get_base_type(tobj);
+        if (EK_MINIMAL == base.kind) {
+          const MinimalTypeObject& base_obj = typelookup_.lookup_minimal(base);
+          if (TK_STRUCTURE == base_obj.kind) {
+            *ret = &base_obj;
+            is_struct = true;
+          }
+        }
+      }
+    }
+    return is_struct;
+  }
+
+  /**
+   * @brief Check if the second argument is of a union type and if so
+   * return its type object as the first argument
+   */
+  bool TypeAssignability::get_union_member(const MinimalTypeObject** ret,
+                                           const CommonStructMember& member) const
+  {
+    ACE_CDR::Octet kind = member.member_type_id->kind;
+    bool is_union = false;
+    if (EK_MINIMAL == kind) {
+      const MinimalTypeObject&
+        tobj = typelookup_.lookup_minimal(*member.member_type_id.in());
+      if (TK_UNION == tobj.kind) {
+        *ret = &tobj;
+        is_union = true;
+      } else if (TK_ALIAS == tobj.kind) {
+        const TypeIdentifier& base = get_base_type(tobj);
+        if (EK_MINIMAL == base.kind) {
+          const MinimalTypeObject& base_obj = typelookup_.lookup_minimal(base);
+          if (TK_UNION == base_obj.kind) {
+            *ret = &base_obj;
+            is_union = true;
+          }
+        }
+      }
+    }
+    return is_union;
   }
 
 } // namespace XTypes

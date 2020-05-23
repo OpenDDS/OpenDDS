@@ -9,11 +9,23 @@
 #include "dds/DCPS/TypeObject.h"
 
 #include <utility>
+#include <map>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace XTypes {
+
+  class TypeLookup {
+  public:
+    const MinimalTypeObject& lookup_minimal(const TypeIdentifier& ti) const
+    {
+      return table_[ti];
+    }
+
+  private:
+    std::map<TypeIdentifier, MinimalTypeObject> table_;
+  };
 
   // Set of pairs of members with each pair contains members from
   // two structure types that have the same member ID and name
@@ -92,15 +104,23 @@ namespace XTypes {
     bool strongly_assignable(const TypeIdentifier& ta,
                              const TypeIdentifier& tb) const;
     bool is_delimited(const TypeIdentifier& ti) const;
-    void erase_key(MinimalTypeObject& type) const;
     const TypeIdentifier& get_base_type(const MinimalTypeObject& type) const;
 
     // Helpers for assignability of struct
+    void erase_key(MinimalTypeObject& type) const;
+    void hold_key(MinimalTypeObject& type) const;
     bool struct_rule_enum_key(const MinimalTypeObject& tb,
                               const CommonStructMember& ma) const;
     bool get_sequence_bound(LBound& b, const CommonStructMember& m) const;
     bool get_map_bound(LBound& b, const CommonStructMember& m) const;
     bool get_string_bound(LBound& b, const CommonStructMember& m) const;
+    bool get_struct_member(const MinimalTypeObject** ret,
+                           const CommonStructMember& m) const;
+    bool get_union_member(const MinimalTypeObject** ret,
+                          const CommonStructMember& m) const;
+
+  private:
+    TypeLookup typelookup_;
   };
 
 } // namepace XTypes
