@@ -20,11 +20,13 @@ namespace XTypes {
   public:
     const MinimalTypeObject& lookup_minimal(const TypeIdentifier& ti) const
     {
-      return table_[ti];
+      return tmp_;
+      //      return table_[ti];
     }
 
   private:
-    std::map<TypeIdentifier, MinimalTypeObject> table_;
+    MinimalTypeObject tmp_;
+    //    std::map<TypeIdentifier, MinimalTypeObject> table_;
   };
 
   // Set of pairs of members with each pair contains members from

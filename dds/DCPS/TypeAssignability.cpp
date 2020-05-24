@@ -93,11 +93,12 @@ namespace XTypes {
     case EK_COMPLETE:
       // Assuming only equivalence kind of EK_MINIMAL is supported
       return false;
-    case EK_MINIMAL:
+    case EK_MINIMAL: {
       const MinimalTypeObject& base_type_a = typelookup_.lookup_minimal(ta);
       const MinimalTypeObject& base_type_b = typelookup_.lookup_minimal(tb);
       TypeObject wrapper_a(base_type_a), wrapper_b(base_type_b);
       return assignable(wrapper_a, wrapper_b);
+    }
     default:
       return false; // Future extensions
     }
@@ -148,10 +149,11 @@ namespace XTypes {
       case EK_COMPLETE:
         // Supporting minimal base type only
         return false;
-      case EK_MINIMAL:
+      case EK_MINIMAL: {
         const MinimalTypeObject& base_type_a = typelookup_.lookup_minimal(tia);
         TypeObject wrapper_a(base_type_a), wrapper_b(tb);
         return assignable(wrapper_a, wrapper_b);
+      }
       default:
         return false; // Future extensions
       }
@@ -223,8 +225,8 @@ namespace XTypes {
 
     // Extensibility kind must match
     TypeFlag extensibility_mask = IS_FINAL | IS_APPENDABLE | IS_MUTABLE;
-    if (ta.struct_type.struct_flags & extensibility_mask !=
-        tb.struct_type.struct_flags & extensibility_mask) {
+    if ((ta.struct_type.struct_flags & extensibility_mask) !=
+        (tb.struct_type.struct_flags & extensibility_mask)) {
       return false;
     }
 
@@ -233,12 +235,12 @@ namespace XTypes {
     MatchedSet matched_members;
     for (size_t i = 0; i < ta.struct_type.member_seq.members.size(); ++i) {
       MemberId id_a = ta.struct_type.member_seq.members[i].common.member_id;
-      NameHash h_a = ta.struct_type.member_seq.members[i].detail.name_hash;
+      const NameHash& h_a = ta.struct_type.member_seq.members[i].detail.name_hash;
       ACE_CDR::ULong
         name_a = (h_a[0] << 24) | (h_a[1] << 16) | (h_a[2] << 8) | (h_a[3]);
       for (size_t j = 0; j < tb.struct_type.member_seq.members.size(); ++j) {
         MemberId id_b = tb.struct_type.member_seq.members[j].common.member_id;
-        NameHash h_b = tb.struct_type.member_seq.members[j].detail.name_hash;
+        const NameHash& h_b = tb.struct_type.member_seq.members[j].detail.name_hash;
         ACE_CDR::ULong
           name_b = (h_b[0] << 24) | (h_b[1] << 16) | (h_b[2] << 8) | (h_b[3]);
         if ((name_a == name_b && id_a != id_b) ||
@@ -298,8 +300,8 @@ namespace XTypes {
       MemberFlag flags = ta.struct_type.member_seq.members[i].common.member_flags;
       MemberId id = ta.struct_type.member_seq.members[i].common.member_id;
       bool found = false;
-      if (flags & IS_OPTIONAL == 0 &&
-          flags & IS_MUST_UNDERSTAND == IS_MUST_UNDERSTAND) {
+      if ((flags & IS_OPTIONAL) == 0 &&
+          (flags & IS_MUST_UNDERSTAND) == IS_MUST_UNDERSTAND) {
         for (size_t j = 0; j < matched_members.size(); ++j) {
           if (id == matched_members[j].first->common.member_id) {
             found = true;
@@ -312,7 +314,7 @@ namespace XTypes {
       }
 
       found = false;
-      if (flags & IS_KEY == IS_KEY) {
+      if ((flags & IS_KEY) == IS_KEY) {
         for (size_t j = 0; j < matched_members.size(); ++j) {
           if (id == matched_members[j].first->common.member_id) {
             found = true;
@@ -329,8 +331,8 @@ namespace XTypes {
       MemberFlag flags = tb.struct_type.member_seq.members[i].common.member_flags;
       MemberId id = tb.struct_type.member_seq.members[i].common.member_id;
       bool found = false;
-      if (flags & IS_OPTIONAL == 0 &&
-          flags & IS_MUST_UNDERSTAND == IS_MUST_UNDERSTAND) {
+      if ((flags & IS_OPTIONAL) == 0 &&
+          (flags & IS_MUST_UNDERSTAND) == IS_MUST_UNDERSTAND) {
         for (size_t j = 0; j < matched_members.size(); ++j) {
           if (id == matched_members[j].second->common.member_id) {
             found = true;
@@ -343,7 +345,7 @@ namespace XTypes {
       }
 
       found = false;
-      if (flags & IS_KEY == IS_KEY) {
+      if ((flags & IS_KEY) == IS_KEY) {
         for (size_t j = 0; j < matched_members.size(); ++j) {
           if (id == matched_members[j].second->common.member_id) {
             found = true;
@@ -362,7 +364,7 @@ namespace XTypes {
       const CommonStructMember& member = matched_members[i].second->common;
       MemberFlag flags = member.member_flags;
       LBound bound_a, bound_b;
-      if (flags & IS_KEY == IS_KEY && get_string_bound(bound_b, member)) {
+      if ((flags & IS_KEY) == IS_KEY && get_string_bound(bound_b, member)) {
         if (!get_string_bound(bound_a, matched_members[i].first->common)) {
           return false;
         }
@@ -378,7 +380,7 @@ namespace XTypes {
     for (size_t i = 0; i < matched_members.size(); ++i) {
       const CommonStructMember& member = matched_members[i].second->common;
       MemberFlag flags = member.member_flags;
-      if (flags & IS_KEY == IS_KEY &&
+      if ((flags & IS_KEY) == IS_KEY &&
           EK_MINIMAL == member.member_type_id->kind) {
         const MinimalTypeObject&
           tob = typelookup_.lookup_minimal(*member.member_type_id.in());
@@ -405,9 +407,9 @@ namespace XTypes {
     // with the same member ID verifies m1.type.length >= m2.type.length
     for (size_t i = 0; i < matched_members.size(); ++i) {
       const CommonStructMember& member = matched_members[i].second->common;
-      MemberFlags flags = member.member_flags;
+      MemberFlag flags = member.member_flags;
       LBound bound_a, bound_b;
-      if (flags & IS_KEY == IS_KEY) {
+      if ((flags & IS_KEY) == IS_KEY) {
         if (get_sequence_bound(bound_b, member)) {
           if (!get_sequence_bound(bound_a, matched_members[i].first->common)) {
             return false;
@@ -431,8 +433,8 @@ namespace XTypes {
     // is-assignable-from KeyHolder(m2.type)
     for (size_t i = 0; i < matched_members.size(); ++i) {
       const CommonStructMember& member = matched_members[i].second->common;
-      MemberFlags flags = member.member_flags;
-      if (flags & IS_KEY == IS_KEY) {
+      MemberFlag flags = member.member_flags;
+      if ((flags & IS_KEY) == IS_KEY) {
         const MinimalTypeObject* toa = 0;
         const MinimalTypeObject* tob = 0;
         bool type_matched = false;
@@ -504,8 +506,8 @@ namespace XTypes {
 
     // Extensibility kind must match
     TypeFlag extensibility_mask = IS_FINAL | IS_APPENDABLE | IS_MUTABLE;
-    if (ta.union_type.union_flags & extensibility_mask !=
-        tb.union_type.union_flags & extensibility_mask) {
+    if ((ta.union_type.union_flags & extensibility_mask) !=
+        (tb.union_type.union_flags & extensibility_mask)) {
       return false;
     }
 
@@ -520,7 +522,7 @@ namespace XTypes {
 
     // If extensibility is final, then the set of labels must be identical.
     // Assuming labels are mapped to values identically in both input types.
-    if (ta.union_type.union_flags & extensibility_mask == IS_FINAL) {
+    if ((ta.union_type.union_flags & extensibility_mask) == IS_FINAL) {
       for (size_t i = 0; i < tb.union_type.member_seq.members.size(); ++i) {
         const UnionCaseLabelSeq&
           labels_b = tb.union_type.member_seq.members[i].common.label_seq;
@@ -547,7 +549,7 @@ namespace XTypes {
       for (size_t i = 0; i < tb.union_type.member_seq.members.size(); ++i) {
         const UnionMemberFlag&
           flags_b = tb.union_type.member_seq.members[i].common.member_flags;
-        if (flags_b & IS_DEFAULT != IS_DEFAULT) {
+        if ((flags_b & IS_DEFAULT) != IS_DEFAULT) {
           const UnionCaseLabelSeq&
             labels_b = tb.union_type.member_seq.members[i].common.label_seq;
           for (size_t j = 0; j < labels_b.members.size(); ++j) {
@@ -576,17 +578,17 @@ namespace XTypes {
     // Both discriminators are keys or neither are keys
     MemberFlag flags_a = ta.union_type.discriminator.common.member_flags;
     MemberFlag flags_b = tb.union_type.discriminator.common.member_flags;
-    if (((flags_a & IS_KEY == IS_KEY) && (flags_b & IS_KEY != IS_KEY)) ||
-        ((flags_a & IS_KEY != IS_KEY) && (flags_b & IS_KEY == IS_KEY))) {
+    if ((((flags_a & IS_KEY) == IS_KEY) && ((flags_b & IS_KEY) != IS_KEY)) ||
+        (((flags_a & IS_KEY) != IS_KEY) && ((flags_b & IS_KEY) == IS_KEY))) {
       return false;
     }
 
     // Members with the same id must have the same name, and vice versa
-    std::map<MemberId, NameHash> id_to_name_a;
+    std::map<MemberId, ACE_CDR::ULong> id_to_name_a;
     std::map<ACE_CDR::ULong, MemberId> name_to_id_a;
     for (size_t i = 0; i < ta.union_type.member_seq.members.size(); ++i) {
       MemberId id = ta.union_type.member_seq.members[i].common.member_id;
-      NameHash h = ta.union_type.member_seq.members[i].detail.name_hash;
+      const NameHash& h = ta.union_type.member_seq.members[i].detail.name_hash;
       ACE_CDR::ULong name = (h[0] << 24) | (h[1] << 16) | (h[2] << 8) | (h[3]);
       id_to_name_a[id] = name;
       name_to_id_a[name] = id;
@@ -594,7 +596,7 @@ namespace XTypes {
 
     for (size_t i = 0; i < tb.union_type.member_seq.members.size(); ++i) {
       MemberId id = tb.union_type.member_seq.members[i].common.member_id;
-      NameHash h = tb.union_type.member_seq.members[i].detail.name_hash;
+      const NameHash& h = tb.union_type.member_seq.members[i].detail.name_hash;
       ACE_CDR::ULong name = (h[0] << 24) | (h[1] << 16) | (h[2] << 8) | (h[3]);
       if (id_to_name_a.find(id) != id_to_name_a.end() &&
           id_to_name_a[id] != name) {
@@ -613,7 +615,7 @@ namespace XTypes {
     for (size_t i = 0; i < tb.union_type.member_seq.members.size(); ++i) {
       UnionMemberFlag
         flags_b = tb.union_type.member_seq.members[i].common.member_flags;
-      if (flags_b & IS_DEFAULT != IS_DEFAULT) {
+      if ((flags_b & IS_DEFAULT) != IS_DEFAULT) {
         const UnionCaseLabelSeq&
           label_seq_b = tb.union_type.member_seq.members[i].common.label_seq;
         for (size_t j = 0; j < ta.union_type.member_seq.members.size(); ++j) {
@@ -657,13 +659,13 @@ namespace XTypes {
     for (size_t i = 0; i < ta.union_type.member_seq.members.size(); ++i) {
       UnionMemberFlag
         flags_a = ta.union_type.member_seq.members[i].common.member_flags;
-      if (flags_a & IS_DEFAULT != IS_DEFAULT) {
+      if ((flags_a & IS_DEFAULT) != IS_DEFAULT) {
         const UnionCaseLabelSeq&
           label_seq_a = ta.union_type.member_seq.members[i].common.label_seq;
         for (size_t j = 0; j < tb.union_type.member_seq.members.size(); ++j) {
           UnionMemberFlag
             flags_b = tb.union_type.member_seq.members[j].common.member_flags;
-          if (flags_b & IS_DEFAULT == IS_DEFAULT) {
+          if ((flags_b & IS_DEFAULT) == IS_DEFAULT) {
             const UnionCaseLabelSeq&
               label_seq_b = tb.union_type.member_seq.members[j].common.label_seq;
             bool matched = false;
@@ -693,11 +695,11 @@ namespace XTypes {
     for (size_t i = 0; i < ta.union_type.member_seq.members.size(); ++i) {
       UnionMemberFlag
         flags_a = ta.union_type.member_seq.members[i].common.member_flags;
-      if (flags_a & IS_DEFAULT == IS_DEFAULT) {
+      if ((flags_a & IS_DEFAULT) == IS_DEFAULT) {
         for (size_t j = 0; j < tb.union_type.member_seq.members.size(); ++j) {
           UnionMemberFlag
             flags_b = tb.union_type.member_seq.members[j].common.member_flags;
-          if (flags_b & IS_DEFAULT == IS_DEFAULT) {
+          if ((flags_b & IS_DEFAULT) == IS_DEFAULT) {
             const TypeIdentifier&
               tia = *ta.union_type.member_seq.members[i].common.type_id.in();
             const TypeIdentifier&
@@ -783,10 +785,10 @@ namespace XTypes {
                                               const TypeIdentifier& tb) const
   {
     if (TI_PLAIN_SEQUENCE_SMALL == tb.kind) {
-      return strongly_assignable(*ta.element.common.type.in(),
+      return strongly_assignable(*ta.sequence_type.element.common.type.in(),
                                  *tb.seq_sdefn.element_identifier.in());
     } else if (TI_PLAIN_SEQUENCE_LARGE == tb.kind) {
-      return strongly_assignable(*ta.element.common.type.in(),
+      return strongly_assignable(*ta.sequence_type.element.common.type.in(),
                                  *tb.seq_ldefn.element_identifier.in());
     } else if (EK_MINIMAL == tb.kind) {
       const MinimalTypeObject& tob = typelookup_.lookup_minimal(tb);
@@ -841,7 +843,7 @@ namespace XTypes {
   {
     const LBoundSeq& bounds_a = ta.array_type.header.common.bound_seq;
     if (TI_PLAIN_ARRAY_SMALL == tb.kind) {
-      SBoundSeq bounds_b = tb.array_sdefn.array_bound_seq;
+      const SBoundSeq& bounds_b = tb.array_sdefn.array_bound_seq;
       if (bounds_a.members.size() != bounds_b.members.size()) {
         return false;
       }
@@ -855,7 +857,7 @@ namespace XTypes {
       return strongly_assignable(*ta.array_type.element.common.type.in(),
                                  *tb.array_sdefn.element_identifier.in());
     } else if (TI_PLAIN_ARRAY_LARGE == tb.kind) {
-      LBoundSeq bounds_b = tb.array_ldefn.array_bound_seq;
+      const LBoundSeq& bounds_b = tb.array_ldefn.array_bound_seq;
       if (bounds_a.members.size() != bounds_b.members.size()) {
         return false;
       }
@@ -965,13 +967,15 @@ namespace XTypes {
       }
 
       for (size_t i = 0; i < size_a; ++i) {
-        NameHash h = ta.enumerated_type.literal_seq.members[i].detail.name_hash;
+        const NameHash&
+          h = ta.enumerated_type.literal_seq.members[i].detail.name_hash;
         ACE_CDR::ULong key_a = (h[0] << 24) | (h[1] << 16) | (h[2] << 8) | (h[3]);
         ta_maps[key_a] = ta.enumerated_type.literal_seq.members[i].common.value;
       }
 
       for (size_t i = 0; i < size_b; ++i) {
-        NameHash h = tb.enumerated_type.literal_seq.members[i].detail.name_hash;
+        const NameHash&
+          h = tb.enumerated_type.literal_seq.members[i].detail.name_hash;
         ACE_CDR::ULong key_b = (h[0] << 24) | (h[1] << 16) | (h[2] << 8) | (h[3]);
 
         // Literals that have the same name must have the same value.
@@ -1229,15 +1233,15 @@ namespace XTypes {
                                                  const TypeIdentifier& tb) const
   {
     if (TI_PLAIN_ARRAY_SMALL == tb.kind) {
+      const Sequence<SBound>& bounds_b = tb.array_sdefn.array_bound_seq;
       if (TI_PLAIN_ARRAY_SMALL == ta.kind) {
-        Sequence<SBound> bounds_a = ta.array_sdefn.array_bound_seq;
-        Sequence<SBound> bounds_b = tb.array_sdefn.array_bound_seq;
-        if (bounds_a.size() != bounds_b.size()) {
+        const Sequence<SBound>& bounds_a = ta.array_sdefn.array_bound_seq;
+        if (bounds_a.members.size() != bounds_b.members.size()) {
           return false;
         }
 
-        for (size_t i = 0; i < bounds_a.size(); ++i) {
-          if (bounds_a[i] != bounds_b[i]) {
+        for (size_t i = 0; i < bounds_a.members.size(); ++i) {
+          if (bounds_a.members[i] != bounds_b.members[i]) {
             return false;
           }
         }
@@ -1246,13 +1250,12 @@ namespace XTypes {
                                    *tb.array_sdefn.element_identifier.in());
       } else { // TI_PLAIN_ARRAY_LARGE
         Sequence<LBound> bounds_a = ta.array_ldefn.array_bound_seq;
-        Sequence<SBound> bounds_b = tb.array_sdefn.array_bound_seq;
-        if (bounds_a.size() != bounds_b.size()) {
+        if (bounds_a.members.size() != bounds_b.members.size()) {
           return false;
         }
 
-        for (size_t i = 0; i < bounds_a.size(); ++i) {
-          if (bounds_a[i] != static_cast<LBound>(bounds_b[i])) {
+        for (size_t i = 0; i < bounds_a.members.size(); ++i) {
+          if (bounds_a.members[i] != static_cast<LBound>(bounds_b.members[i])) {
             return false;
           }
         }
@@ -1261,15 +1264,15 @@ namespace XTypes {
                                    *tb.array_sdefn.element_identifier.in());
       }
     } else if (TI_PLAIN_ARRAY_LARGE == tb.kind) {
+      const Sequence<LBound>& bounds_b = tb.array_ldefn.array_bound_seq;
       if (TI_PLAIN_ARRAY_SMALL == ta.kind) {
-        Sequence<SBound> bounds_a = ta.array_sdefn.array_bound_seq;
-        Sequence<LBound> bounds_b = tb.array_ldefn.array_bound_seq;
-        if (bounds_a.size() != bounds_b.size()) {
+        const Sequence<SBound>& bounds_a = ta.array_sdefn.array_bound_seq;
+        if (bounds_a.members.size() != bounds_b.members.size()) {
           return false;
         }
 
-        for (size_t i = 0; i < bounds_a.size(); ++i) {
-          if (static_cast<LBound>(bounds_a[i]) != bounds_b[i]) {
+        for (size_t i = 0; i < bounds_a.members.size(); ++i) {
+          if (static_cast<LBound>(bounds_a.members[i]) != bounds_b.members[i]) {
             return false;
           }
         }
@@ -1277,14 +1280,13 @@ namespace XTypes {
         return strongly_assignable(*ta.array_sdefn.element_identifier.in(),
                                    *tb.array_ldefn.element_identifier.in());
       } else { // TI_PLAIN_ARRAY_LARGE
-        Sequence<LBound> bounds_a = ta.array_ldefn.array_bound_seq;
-        Sequence<LBound> bounds_b = tb.array_ldefn.array_bound_seq;
-        if (bounds_a.size() != bounds_b.size()) {
+        const Sequence<LBound>& bounds_a = ta.array_ldefn.array_bound_seq;
+        if (bounds_a.members.size() != bounds_b.members.size()) {
           return false;
         }
 
-        for (size_t i = 0; i < bounds_a.size(); ++i) {
-          if (bounds_a[i] != bounds_b[i]) {
+        for (size_t i = 0; i < bounds_a.members.size(); ++i) {
+          if (bounds_a.members[i] != bounds_b.members[i]) {
             return false;
           }
         }
@@ -1317,15 +1319,15 @@ namespace XTypes {
                                                  const MinimalTypeObject& tb) const
   {
     if (TK_ARRAY == tb.kind) {
-      Sequence<LBound> bounds_b = tb.array_type.header.common.bound_seq;
+      const Sequence<LBound>& bounds_b = tb.array_type.header.common.bound_seq;
       if (TI_PLAIN_ARRAY_SMALL == ta.kind) {
-        Sequence<SBound> bounds_a = ta.array_sdefn.array_bound_seq;
-        if (bounds_a.size() != bounds_b.size()) {
+        const Sequence<SBound>& bounds_a = ta.array_sdefn.array_bound_seq;
+        if (bounds_a.members.size() != bounds_b.members.size()) {
           return false;
         }
 
-        for (size_t i = 0; i < bounds_a.size(); ++i) {
-          if (static_cast<LBound>(bounds_a[i]) != bounds_b[i]) {
+        for (size_t i = 0; i < bounds_a.members.size(); ++i) {
+          if (static_cast<LBound>(bounds_a.members[i]) != bounds_b.members[i]) {
               return false;
           }
         }
@@ -1333,13 +1335,13 @@ namespace XTypes {
         return strongly_assignable(*ta.array_sdefn.element_identifier.in(),
                                    *tb.array_type.element.common.type.in());
       } else { // TI_PLAIN_ARRAY_LARGE
-        Sequence<LBound> bounds_a = ta.array_ldefn.array_bound_seq;
-        if (bounds_a.size() != bounds_b.size()) {
+        const Sequence<LBound>& bounds_a = ta.array_ldefn.array_bound_seq;
+        if (bounds_a.members.size() != bounds_b.members.size()) {
           return false;
         }
 
-        for (size_t i = 0; i < bounds_a.size(); ++i) {
-          if (bounds_a[i] != bounds_b[i]) {
+        for (size_t i = 0; i < bounds_a.members.size(); ++i) {
+          if (bounds_a.members[i] != bounds_b.members[i]) {
             return false;
           }
         }
@@ -1489,12 +1491,13 @@ namespace XTypes {
     const TypeIdentifier& base = *type.alias_type.body.common.related_type.in();
     switch (base.kind) {
     case EK_COMPLETE:
-    case EK_MINIMAL:
+    case EK_MINIMAL: {
       const MinimalTypeObject& type_obj = typelookup_.lookup_minimal(base);
       if (TK_ALIAS == type_obj.kind) {
         return get_base_type(type_obj);
       }
       return base;
+    }
     default:
       return base;
     }
@@ -1508,7 +1511,7 @@ namespace XTypes {
   bool TypeAssignability::struct_rule_enum_key(const MinimalTypeObject& tb,
                                                const CommonStructMember& ma) const
   {
-    if (EK_MINIMAL != ma.member_type_id.kind) {
+    if (EK_MINIMAL != ma.member_type_id->kind) {
       return false;
     }
 
@@ -1536,12 +1539,12 @@ namespace XTypes {
 
     // All literals in tb must appear as literals in toa
     for (size_t j = 0; j < literals_b.members.size(); ++j) {
-      NameHash h_b = literals_b.members[j].detail.name_hash;
+      const NameHash& h_b = literals_b.members[j].detail.name_hash;
       ACE_CDR::ULong
         key_b = (h_b[0] << 24) | (h_b[1] << 16) | (h_b[2] << 8) | (h_b[3]);
       bool found = false;
       for (size_t k = 0; k < literals_a->members.size(); ++k) {
-        NameHash h_a = literals_a->members[k].detail.name_hash;
+        const NameHash& h_a = literals_a->members[k].detail.name_hash;
         ACE_CDR::ULong
           key_a = (h_a[0] << 24) | (h_a[1] << 16) | (h_a[2] << 8) | (h_a[3]);
         if (key_a == key_b) {
