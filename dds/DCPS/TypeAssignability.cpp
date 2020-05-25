@@ -457,15 +457,48 @@ namespace XTypes {
           if (!assignable(key_holder_a, key_holder_b)) {
             return false;
           }
+
+          // For any union key member m2 in T2, the m1 member of T1 with the
+          // same ID verifies that: for every discriminator value of m2.type
+          // that selects a member m22 in m2.type, the discriminator value
+          // selects a member m11 in m1.type that verifies KeyHolder(m11.type)
+          // is-assignable-from KeyHolder(m22.type)
+          if (TK_UNION == tob->kind) {
+            const MinimalUnionMemberSeq& mseq_a = toa->union_type.member_seq;
+            const MinimalUnionMemberSeq& mseq_b = tob->union_type.member_seq;
+            for (size_t j = 0; j < mseq_b.members.size(); ++j) {
+              const UnionCaseLabelSeq&
+                labels_b = mseq_b.members[j].common.label_seq;
+              for (size_t k = 0; k < mseq_a.members.size(); ++k) {
+                const UnionCaseLabelSeq&
+                  labels_a = mseq_a.members[k].common.label_seq;
+                bool matched = false;
+                for (size_t p = 0; p < labels_b.members.size(); ++p) {
+                  for (size_t q = 0; q < labels_a.members.size(); ++q) {
+                    if (labels_b.members[p] == labels_a.members[q]) {
+                      const TypeIdentifier&
+                        tib = *mseq_b.members[j].common.type_id.in();
+                      const TypeIdentifier&
+                        tia = *mseq_a.members[k].common.type_id.in();
+                      MinimalTypeObject kh_b = typelookup_.lookup_minimal(tib);
+                      MinimalTypeObject kh_a = typelookup_.lookup_minimal(tia);
+                      hold_key(kh_b);
+                      hold_key(kh_a);
+                      if (!assignable(kh_a, kh_b)) {
+                        return false;
+                      }
+                      matched = true;
+                      break;
+                    }
+                  } // labels_a
+                  if (matched) break;
+                } // labels_b
+              } // mseq_a
+            } // mseq_b
+          }
         }
       } // IS_KEY
     }
-
-    // For any union key member m2 in T2, the m1 member of T1 with the
-    // same ID verifies that: for every discriminator value of m2.type
-    // that selects a member m22 in m2.type, the discriminator value
-    // selects a member m11 in m1.type that verifies KeyHolder(m11.type)
-    // is-assignable-from KeyHolder(m22.type)
 
     return true;
   }
@@ -1195,7 +1228,7 @@ namespace XTypes {
         return assignable_plain_sequence(ta, base);
       }
     } else if (EK_COMPLETE == tb.kind) {
-      // TODO: Can tb.kind be EK_COMPLETE? More generally, can a MinimalTypeObject
+      // Can tb.kind be EK_COMPLETE? More generally, can a MinimalTypeObject
       // depend on a TypeIdentifier that identifies a class of types which have
       // COMPLETE equivalence relation.
       // For now, assuming tb.kind of EK_COMPLETE is not supported.
