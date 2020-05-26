@@ -3,6 +3,7 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include "DCPS/DdsDcps_pch.h"
 #include "TypeAssignability.h"
 
 #include <set>
@@ -1459,12 +1460,201 @@ namespace XTypes {
     return false;
   }
 
+  /**
+   * @brief If types T1 and T2 are equivalent using the MINIMAL relation,
+   * or alternatively if T1 is-assignable-from T2 and T2 is a delimited type,
+   * then T1 is said to be strongly assignable from T2
+   */
   bool TypeAssignability::strongly_assignable(const TypeIdentifier& tia,
                                               const TypeIdentifier& tib) const
   {
-    return false; // TODO: Implement this helper
+    if (equal_type_id(tia, tib)) {
+      return true;
+    }
+
+    if (assignable(tia, tib) && is_delimited(tib)) {
+      return true;
+    }
+    return false;
   }
 
+  /**
+   * @brief Check whether two type identifiers are equal
+   */
+  bool TypeAssignability::equal_type_id(const TypeIdentifier& tia,
+                                        const TypeIdentifier& tib) const
+  {
+    switch (tia.kind) {
+    case TK_BOOLEAN:
+    case TK_BYTE:
+    case TK_INT16:
+    case TK_INT32:
+    case TK_INT64:
+    case TK_UINT16:
+    case TK_UINT32:
+    case TK_UINT64:
+    case TK_FLOAT32:
+    case TK_FLOAT64:
+    case TK_FLOAT128:
+    case TK_INT8:
+    case TK_UINT8:
+    case TK_CHAR8:
+    case TK_CHAR16: {
+      if (tib.kind == tia.kind) {
+        return true;
+      }
+      break;
+    }
+    case TI_STRING8_SMALL:
+    case TI_STRING16_SMALL: {
+      if (tib.kind == tia.kind &&
+          tib.string_sdefn.bound == tia.string_sdefn.bound) {
+        return true;
+      }
+      break;
+    }
+    case TI_STRING8_LARGE:
+    case TI_STRING16_LARGE: {
+      if (tib.kind == tia.kind &&
+          tib.string_ldefn.bound == tia.string_ldefn.bound) {
+        return true;
+      }
+      break;
+    }
+    case TI_PLAIN_SEQUENCE_SMALL: {
+      if (tib.kind == tia.kind &&
+          tib.seq_sdefn.bound == tia.seq_sdefn.bound &&
+          equal_type_id(*tia.seq_sdefn.element_identifier.in(),
+                        *tib.seq_sdefn.element_identifier.in())) {
+        return true;
+      }
+      break;
+    }
+    case TI_PLAIN_SEQUENCE_LARGE: {
+      if (tib.kind == tia.kind &&
+          tib.seq_ldefn.bound == tia.seq_ldefn.bound &&
+          equal_type_id(*tia.seq_ldefn.element_identifier.in(),
+                        *tib.seq_ldefn.element_identifier.in())) {
+        return true;
+      }
+      break;
+    }
+    case TI_PLAIN_ARRAY_SMALL: {
+      if (tib.kind == tia.kind) {
+        const SBoundSeq& bounds_a = tia.array_sdefn.array_bound_seq;
+        const SBoundSeq& bounds_b = tia.array_sdefn.array_bound_seq;
+        if (bounds_a.members.size() != bounds_b.members.size()) {
+          break;
+        }
+        bool equal_bounds = true;
+        for (size_t i = 0; i < bounds_a.members.size(); ++i) {
+          if (bounds_a.members[i] != bounds_b.members[i]) {
+            equal_bounds = false;
+            break;
+          }
+        }
+        if (!equal_bounds) {
+          break;
+        }
+        if (equal_type_id(*tia.array_sdefn.element_identifier.in(),
+                          *tib.array_sdefn.element_identifier.in())) {
+          return true;
+        }
+      }
+      break;
+    }
+    case TI_PLAIN_ARRAY_LARGE: {
+      if (tib.kind == tia.kind) {
+        const LBoundSeq& bounds_a = tia.array_ldefn.array_bound_seq;
+        const LBoundSeq& bounds_b = tib.array_ldefn.array_bound_seq;
+        if (bounds_a.members.size() != bounds_b.members.size()) {
+          break;
+        }
+        bool equal_bounds = true;
+        for (size_t i = 0; i < bounds_a.members.size(); ++i) {
+          if (bounds_a.members[i] != bounds_b.members[i]) {
+            equal_bounds = false;
+            break;
+          }
+        }
+        if (!equal_bounds) {
+          break;
+        }
+        if (equal_type_id(*tia.array_ldefn.element_identifier.in(),
+                          *tib.array_ldefn.element_identifier.in())) {
+          return true;
+        }
+      }
+      break;
+    }
+    case TI_PLAIN_MAP_SMALL: {
+      if (tib.kind == tia.kind &&
+          tib.map_sdefn.bound == tia.map_sdefn.bound &&
+          equal_type_id(*tia.map_sdefn.key_identifier.in(),
+                        *tib.map_sdefn.key_identifier.in()) &&
+          equal_type_id(*tia.map_sdefn.element_identifier.in(),
+                        *tib.map_sdefn.element_identifier.in())) {
+        return true;
+      }
+      break;
+    }
+    case TI_PLAIN_MAP_LARGE: {
+      if (tib.kind == tia.kind &&
+          tib.map_ldefn.bound == tia.map_ldefn.bound &&
+          equal_type_id(*tia.map_ldefn.key_identifier.in(),
+                        *tib.map_ldefn.key_identifier.in()) &&
+          equal_type_id(*tia.map_ldefn.element_identifier.in(),
+                        *tib.map_ldefn.element_identifier.in())) {
+        return true;
+      }
+      break;
+    }
+    case TI_STRONGLY_CONNECTED_COMPONENT: {
+      if (tib.kind == tia.kind &&
+          tib.sc_component_id.scc_length == tia.sc_component_id.scc_length &&
+          tib.sc_component_id.sc_component_id.kind ==
+          tia.sc_component_id.sc_component_id.kind) {
+        const EquivalenceHash& ha = tia.sc_component_id.sc_component_id.hash;
+        const EquivalenceHash& hb = tib.sc_component_id.sc_component_id.hash;
+        bool equal_hash = true;
+        for (size_t i = 0; i < 14; ++i) {
+          if (ha[i] != hb[i]) {
+            equal_hash = false;
+            break;
+          }
+        }
+        if (equal_hash) {
+          return true;
+        }
+      }
+      break;
+    }
+    case EK_COMPLETE:
+    case EK_MINIMAL: {
+      if (tib.kind == tia.kind) {
+        bool equal_hash = true;
+        for (size_t i = 0; i < 14; ++i) {
+          if (tia.equivalence_hash[i] != tib.equivalence_hash[i]) {
+            equal_hash = false;
+            break;
+          }
+        }
+        if (equal_hash) {
+          return true;
+        }
+      }
+      break;
+    }
+    default:
+      return false; // Future extensions
+    }
+
+    return false;
+  }
+
+  /**
+   * @brief Concept of delimited types (sub-clause 7.2.4.2)
+   */
   bool TypeAssignability::is_delimited(const TypeIdentifier& ti) const
   {
     switch (ti.kind) {
@@ -1488,8 +1678,76 @@ namespace XTypes {
     case TI_STRING16_SMALL:
     case TI_STRING16_LARGE:
       return true;
+    case TI_PLAIN_SEQUENCE_SMALL:
+      return is_delimited(*ti.seq_sdefn.element_identifier.in());
+    case TI_PLAIN_SEQUENCE_LARGE:
+      return is_delimited(*ti.seq_ldefn.element_identifier.in());
+    case TI_PLAIN_ARRAY_SMALL:
+      return is_delimited(*ti.array_sdefn.element_identifier.in());
+    case TI_PLAIN_ARRAY_LARGE:
+      return is_delimited(*ti.array_ldefn.element_identifier.in());
+    case TI_PLAIN_MAP_SMALL:
+      return is_delimited(*ti.map_sdefn.key_identifier.in()) &&
+        is_delimited(*ti.map_sdefn.element_identifier.in());
+    case TI_PLAIN_MAP_LARGE:
+      return is_delimited(*ti.map_ldefn.key_identifier.in()) &&
+        is_delimited(*ti.map_ldefn.element_identifier.in());
+    case EK_COMPLETE:
+    case EK_MINIMAL: {
+      const MinimalTypeObject& tobj = typelookup_.lookup_minimal(ti);
+      return is_delimited(tobj);
+    }
     default:
-      return true; // TODO: Add other types
+      // Future extensions and strongly connected components
+      return false;
+    }
+  }
+
+  /**
+   * @brief Check if a type is delimited (sub-clause 7.2.4.2)
+   */
+  bool TypeAssignability::is_delimited(const MinimalTypeObject& tobj) const
+  {
+    switch (tobj.kind) {
+    case TK_ALIAS: {
+      const TypeIdentifier& base = get_base_type(tobj);
+      return is_delimited(base);
+    }
+    case TK_ANNOTATION:
+      return is_delimited_with_flags(tobj.annotation_type.annotation_flag);
+    case TK_STRUCTURE:
+      return is_delimited_with_flags(tobj.struct_type.struct_flags);
+    case TK_UNION:
+      return is_delimited_with_flags(tobj.union_type.union_flags);
+    case TK_BITSET:
+      return is_delimited_with_flags(tobj.bitset_type.bitset_flags);
+    case TK_SEQUENCE:
+      return is_delimited(*tobj.sequence_type.element.common.type.in());
+    case TK_ARRAY:
+      return is_delimited(*tobj.array_type.element.common.type.in());
+    case TK_MAP:
+      return is_delimited(*tobj.map_type.key.common.type.in()) &&
+        is_delimited(*tobj.map_type.element.common.type.in());
+    case TK_ENUM:
+    case TK_BITMASK:
+      return true;
+    default:
+      return false; // Future extensions
+    }
+  }
+
+  bool TypeAssignability::is_delimited_with_flags(TypeFlag flags) const
+  {
+    if ((flags & IS_FINAL) == IS_FINAL) {
+      return false;
+    } else if ((flags & IS_MUTABLE) == IS_MUTABLE) {
+      // Mutable types are delimited with both encoding versions 1 and 2
+      return true;
+    } else { // Default extensibility is APPENDABLE (7.3.1.2.1.8)
+      // Types with extensibility kind APPENDABLE are delimited
+      // if serialized with encoding version 2 and are not
+      // delimited if serialized with encoding version 1
+      return true;
     }
   }
 
@@ -1503,7 +1761,7 @@ namespace XTypes {
     if (TK_STRUCTURE == type.kind) {
       MinimalStructMemberSeq& mseq = type.struct_type.member_seq;
       for (size_t i = 0; i < mseq.members.size(); ++i) {
-        MemberFlag& flags = mseq.member[i].common.member_flags;
+        MemberFlag& flags = mseq.members[i].common.member_flags;
         if ((flags & IS_KEY) == IS_KEY) {
           flags &= ~IS_KEY;
         }

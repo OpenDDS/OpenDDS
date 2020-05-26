@@ -106,6 +106,10 @@ namespace XTypes {
     bool strongly_assignable(const TypeIdentifier& ta,
                              const TypeIdentifier& tb) const;
     bool is_delimited(const TypeIdentifier& ti) const;
+    bool is_delimited(const MinimalTypeObject& tobj) const;
+    bool is_delimited_with_flags(TypeFlag flags) const;
+    bool equal_type_id(const TypeIdentifier& tia,
+                       const TypeIdentifier& tib) const;
     const TypeIdentifier& get_base_type(const MinimalTypeObject& type) const;
 
     // Helpers for assignability of struct
