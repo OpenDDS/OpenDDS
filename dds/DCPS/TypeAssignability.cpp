@@ -1494,24 +1494,78 @@ namespace XTypes {
   }
 
   /**
-   * @brief The input type must be structure or union
+   * @brief Key-Erased type of an aggregated type T (struct or union)
+   * is constructed from T by removing the key designation from
+   * any member that has it (sub-clause 7.2.2.4.6)
    */
   void TypeAssignability::erase_key(MinimalTypeObject& type) const
   {
-    // TODO: Finish this function
     if (TK_STRUCTURE == type.kind) {
-
+      MinimalStructMemberSeq& mseq = type.struct_type.member_seq;
+      for (size_t i = 0; i < mseq.members.size(); ++i) {
+        MemberFlag& flags = mseq.member[i].common.member_flags;
+        if ((flags & IS_KEY) == IS_KEY) {
+          flags &= ~IS_KEY;
+        }
+      }
     } else if (TK_UNION == type.kind) {
-
+      MemberFlag& flags = type.union_type.discriminator.common.member_flags;
+      if ((flags & IS_KEY) == IS_KEY) {
+        flags &= ~IS_KEY;
+      }
+    } else if (TK_ALIAS == type.kind) {
+      const TypeIdentifier& base = get_base_type(type);
+      MinimalTypeObject base_obj = typelookup_.lookup_minimal(base);
+      erase_key(base_obj);
+      type = base_obj;
     }
   }
 
   /**
-   * @brief The input type must be structure or union
+   * @brief Key-Holder type of an aggregated type T (struct or union)
+   * is constructed from T (sub-clause 7.2.2.4.7)
    */
   void TypeAssignability::hold_key(MinimalTypeObject& type) const
   {
-    // TODO: Implement this
+    if (TK_STRUCTURE == type.kind) {
+      MinimalStructMemberSeq& mseq = type.struct_type.member_seq;
+      bool found_key = false;
+      for (size_t i = 0; i < mseq.members.size(); ++i) {
+        MemberFlag flags = mseq.members[i].common.member_flags;
+        if ((flags & IS_KEY) == IS_KEY) {
+          found_key = true;
+          break;
+        }
+      }
+
+      if (found_key) { // Remove all non-key members
+        Sequence<MinimalStructMember> key_members;
+        for (size_t i = 0; i < mseq.members.size(); ++i) {
+          MemberFlag flags = mseq.members[i].common.member_flags;
+          if ((flags & IS_KEY) == IS_KEY) {
+            key_members.append(mseq.members[i]);
+          }
+        }
+        mseq.members = key_members.members;
+      } else { // Add a key designator to each member
+        for (size_t i = 0; i < mseq.members.size(); ++i) {
+          MemberFlag flags = mseq.members[i].common.member_flags;
+          if ((flags & IS_KEY) != IS_KEY) {
+            mseq.members[i].common.member_flags |= IS_KEY;
+          }
+        }
+      }
+    } else if (TK_UNION == type.kind) {
+      if ((type.union_type.discriminator.common.member_flags & IS_KEY) == IS_KEY) {
+        // Remove all non-key members
+        type.union_type.member_seq = Sequence<MinimalUnionMember>();
+      }
+    } else if (TK_ALIAS == type.kind) {
+      const TypeIdentifier& base = get_base_type(type);
+      MinimalTypeObject base_obj = typelookup_.lookup_minimal(base);
+      hold_key(base_obj);
+      type = base_obj;
+    }
   }
 
   /**
