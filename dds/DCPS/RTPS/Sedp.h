@@ -571,7 +571,8 @@ private:
 
   void process_discovered_writer_data(DCPS::MessageId message_id,
                                       const DCPS::DiscoveredWriterData& wdata,
-                                      const DCPS::RepoId& guid
+                                      const DCPS::RepoId& guid,
+                                      const XTypes::TypeInformation& type_info
 #ifdef OPENDDS_SECURITY
                                       ,
                                       bool have_ice_agent_info,
@@ -590,7 +591,8 @@ private:
 
   void process_discovered_reader_data(DCPS::MessageId message_id,
                                       const DCPS::DiscoveredReaderData& rdata,
-                                      const DCPS::RepoId& guid
+                                      const DCPS::RepoId& guid,
+                                      const XTypes::TypeInformation& type_info
 #ifdef OPENDDS_SECURITY
                                       ,
                                       bool have_ice_agent_info,

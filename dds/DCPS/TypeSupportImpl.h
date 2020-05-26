@@ -20,6 +20,9 @@
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
+namespace XTypes{
+class TypeObject;
+}
 namespace DCPS {
 
 class MetaStruct;
@@ -50,6 +53,8 @@ public:
   /// Get allowed representations defined by IDL annotations
   virtual void representations_allowed_by_type(
     DDS::DataRepresentationIdSeq& seq) = 0;
+
+  virtual const XTypes::TypeObject& getMinimalTypeObject() const = 0;
 
 private:
   virtual const char* default_type_name() const = 0;

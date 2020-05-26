@@ -1774,7 +1774,8 @@ Sedp::Task::svc_i(DCPS::MessageId message_id,
 
 void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
                                           const DCPS::DiscoveredWriterData& wdata,
-                                          const RepoId& guid
+                                          const RepoId& guid,
+                                          const XTypes::TypeInformation& type_info
 #ifdef OPENDDS_SECURITY
                                           ,
                                           bool have_ice_agent_info,
@@ -1818,6 +1819,7 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
 
       { // Reduce scope of pub and td
         DiscoveredPublication prepub(wdata);
+        prepub.type_info_ = type_info;
 
 #ifdef OPENDDS_SECURITY
         prepub.have_ice_agent_info_ = have_ice_agent_info;
@@ -2060,7 +2062,7 @@ Sedp::data_received(DCPS::MessageId message_id,
     return;
   }
 
-  process_discovered_writer_data(message_id, wdata, guid
+  process_discovered_writer_data(message_id, wdata, guid, dpub.type_info_
 #ifdef OPENDDS_SECURITY
                                  , dpub.have_ice_agent_info_, dpub.ice_agent_info_
 #endif
@@ -2093,13 +2095,14 @@ void Sedp::data_received(DCPS::MessageId message_id,
     return;
   }
 
-  process_discovered_writer_data(message_id, wrapper.data, guid, wrapper.have_ice_agent_info, wrapper.ice_agent_info, &wrapper.security_info);
+  process_discovered_writer_data(message_id, wrapper.data, guid, wrapper.type_info, wrapper.have_ice_agent_info, wrapper.ice_agent_info, &wrapper.security_info);
 }
 #endif
 
 void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
                                           const DCPS::DiscoveredReaderData& rdata,
-                                          const RepoId& guid
+                                          const RepoId& guid,
+                                          const XTypes::TypeInformation& type_info
 #ifdef OPENDDS_SECURITY
                                           ,
                                           bool have_ice_agent_info,
@@ -2143,6 +2146,7 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
     if (iter == discovered_subscriptions_.end()) { // add new
       { // Reduce scope of sub and td
         DiscoveredSubscription presub(rdata);
+        presub.type_info_ = type_info;
 #ifdef OPENDDS_SECURITY
         presub.have_ice_agent_info_ = have_ice_agent_info;
         presub.ice_agent_info_ = ice_agent_info;
@@ -2438,7 +2442,7 @@ Sedp::data_received(DCPS::MessageId message_id,
     return;
   }
 
-  process_discovered_reader_data(message_id, rdata, guid
+  process_discovered_reader_data(message_id, rdata, guid, dsub.type_info_
 #ifdef OPENDDS_SECURITY
                                  , dsub.have_ice_agent_info_, dsub.ice_agent_info_
 #endif
@@ -2471,7 +2475,7 @@ void Sedp::data_received(DCPS::MessageId message_id,
     return;
   }
 
-  process_discovered_reader_data(message_id, wrapper.data, guid, wrapper.have_ice_agent_info, wrapper.ice_agent_info, &wrapper.security_info);
+  process_discovered_reader_data(message_id, wrapper.data, guid, wrapper.type_info, wrapper.have_ice_agent_info, wrapper.ice_agent_info, &wrapper.security_info);
 }
 #endif
 
@@ -3289,7 +3293,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       }
 
       DCPS::unique_ptr<DiscoveredPublication> wdata(new DiscoveredPublication);
-      if (!ParameterListConverter::from_param_list(data, wdata->writer_data_)) {
+      if (!ParameterListConverter::from_param_list(data, wdata->writer_data_, wdata->type_info_)) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to convert from ParameterList ")
@@ -3325,7 +3329,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
 
       DCPS::unique_ptr<DiscoveredPublication_SecurityWrapper> wdata_secure(new DiscoveredPublication_SecurityWrapper);
 
-      if (!ParameterListConverter::from_param_list(data, *wdata_secure)) {
+      if (!ParameterListConverter::from_param_list(data, *wdata_secure, wdata_secure->type_info)) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to convert from ParameterList ")
@@ -3359,7 +3363,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       }
 
       DCPS::unique_ptr<DiscoveredSubscription> rdata(new DiscoveredSubscription);
-      if (!ParameterListConverter::from_param_list(data, rdata->reader_data_)) {
+      if (!ParameterListConverter::from_param_list(data, rdata->reader_data_, rdata->type_info_)) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to convert from ParameterList ")
@@ -3396,9 +3400,9 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
         return;
       }
 
-      DCPS::unique_ptr<DiscoveredSubscription_SecurityWrapper> rdata(new DiscoveredSubscription_SecurityWrapper);
+      DCPS::unique_ptr<DiscoveredSubscription_SecurityWrapper> rdata_secure(new DiscoveredSubscription_SecurityWrapper);
 
-      if (!ParameterListConverter::from_param_list(data, *rdata)) {
+      if (!ParameterListConverter::from_param_list(data, *rdata_secure, rdata_secure->type_info)) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to convert from ParameterList ")
@@ -3406,7 +3410,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
         return;
       }
 
-      rdata->have_ice_agent_info = false;
+      rdata_secure->have_ice_agent_info = false;
       ICE::AgentInfoMap ai_map;
       if (!ParameterListConverter::from_param_list(data, ai_map)) {
         ACE_ERROR((LM_ERROR,
@@ -3417,14 +3421,14 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       }
       ICE::AgentInfoMap::const_iterator pos = ai_map.find("DATA");
       if (pos != ai_map.end()) {
-        rdata->have_ice_agent_info = true;
-        rdata->ice_agent_info = pos->second;
+        rdata_secure->have_ice_agent_info = true;
+        rdata_secure->ice_agent_info = pos->second;
       }
 
-      if ((rdata->data).readerProxy.expectsInlineQos) {
-        set_inline_qos((rdata->data).readerProxy.allLocators);
+      if ((rdata_secure->data).readerProxy.expectsInlineQos) {
+        set_inline_qos((rdata_secure->data).readerProxy.allLocators);
       }
-      sedp_.task_.enqueue(id, move(rdata));
+      sedp_.task_.enqueue(id, move(rdata_secure));
 #endif
 
     } else if (sample.header_.publication_id_.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER
@@ -3784,7 +3788,7 @@ Sedp::write_publication_data_unsecure(
     populate_discovered_writer_msg(dwd, rid, lp);
 
     // Convert to parameter list
-    if (!ParameterListConverter::to_param_list(dwd, plist, false)) {
+    if (!ParameterListConverter::to_param_list(dwd, plist, lp.type_info_, false)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data - ")
                  ACE_TEXT("Failed to convert DiscoveredWriterData ")
@@ -3838,7 +3842,7 @@ Sedp::write_publication_data_secure(
     dwd.security_info.plugin_endpoint_security_attributes = lp.security_attribs_.plugin_endpoint_attributes;
 
     // Convert to parameter list
-    if (!ParameterListConverter::to_param_list(dwd, plist, false)) {
+    if (!ParameterListConverter::to_param_list(dwd, plist, lp.type_info_, false)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data - ")
                  ACE_TEXT("Failed to convert DiscoveredWriterData ")
@@ -3931,7 +3935,7 @@ Sedp::write_subscription_data_unsecure(
     populate_discovered_reader_msg(drd, rid, ls);
 
     // Convert to parameter list
-    if (!ParameterListConverter::to_param_list(drd, plist, false)) {
+    if (!ParameterListConverter::to_param_list(drd, plist, ls.type_info_, false)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data - ")
                  ACE_TEXT("Failed to convert DiscoveredReaderData ")
@@ -3984,7 +3988,7 @@ Sedp::write_subscription_data_secure(
     drd.security_info.plugin_endpoint_security_attributes = ls.security_attribs_.plugin_endpoint_attributes;
 
     // Convert to parameter list
-    if (!ParameterListConverter::to_param_list(drd, plist, false)) {
+    if (!ParameterListConverter::to_param_list(drd, plist, ls.type_info_, false)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data - ")
                  ACE_TEXT("Failed to convert DiscoveredReaderData ")
