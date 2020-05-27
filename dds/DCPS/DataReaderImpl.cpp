@@ -1167,7 +1167,7 @@ DataReaderImpl::enable()
     dp_id_ = participant->get_id();
   }
 
-  if(topic_servant_) {
+  if (topic_servant_) {
     if (!topic_servant_->check_data_representation(qos_.representation.value, false)) {
       return DDS::RETCODE_PRECONDITION_NOT_MET;
     }

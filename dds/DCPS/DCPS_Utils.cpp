@@ -316,10 +316,10 @@ compatibleQOS(const DDS::DataWriterQos * writerQos,
     const CORBA::ULong writer_count = writerQos->representation.value.length();
     bool found = false;
 
-    if (writer_count == 0 && reader_count == 0){
+    if (writer_count == 0 && reader_count == 0) {
       found = true;
     }
-    if (writer_count == 0){
+    if (writer_count == 0) {
       for (CORBA::ULong ri = 0; !found && ri < reader_count; ++ri) {
         if (readerQos->representation.value[ri] ==
             DDS::XCDR_DATA_REPRESENTATION) {
@@ -328,7 +328,7 @@ compatibleQOS(const DDS::DataWriterQos * writerQos,
         }
     }
     }
-    if (reader_count == 0){
+    if (reader_count == 0 {
       for (CORBA::ULong wi = 0; !found && wi < writer_count; ++wi) {
         if (writerQos->representation.value[wi] ==
             DDS::XCDR_DATA_REPRESENTATION) {
