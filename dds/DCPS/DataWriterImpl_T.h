@@ -10,8 +10,6 @@
 #include "SafetyProfileStreams.h"
 #include "DCPS_Utils.h"
 
-/* #include <dds/DdsDcpsCoreC.h> */
-
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -45,6 +43,9 @@ public:
    * Used to hold the encoding and get the buffer sizes needed to store the
    * results of the encoding. This is used to isolate the RTPS CDR encapsulated
    * mode from the classical OpenDDS mode.
+   *
+   * TODO(iguessthislldo): Remove this class if multiple DataWriter encoding
+   * modes aren't necessary?
    */
   class EncodingMode {
   public:
@@ -341,6 +342,24 @@ public:
 
   DDS::ReturnCode_t setup_serialization()
   {
+    /**
+     * TODO(iguessthislldo): Update when we can determine what encoding we need
+     * to use from from a data representation QoS.
+     */
+    encoding_mode_ = EncodingMode(
+      cdr_encapsulation() ?
+        Encoding::KIND_CDR_PLAIN : Encoding::KIND_CDR_UNALIGNED,
+      swap_bytes());
+    if (!encoding_mode_.valid()) {
+      if (::OpenDDS::DCPS::DCPS_debug_level) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+          ACE_TEXT("%CDataWriterImpl::setup_serialization: ")
+          ACE_TEXT("Invalid Encoding Mode\n"),
+          TraitsType::type_name()));
+      }
+      return DDS::RETCODE_ERROR;
+    }
+#if 0
     /*
      * We need to get the encoding kinds for encapsulated and non-encapsulated
      * encoding modes. We do this by picking the first supported representation
@@ -405,12 +424,11 @@ public:
       }
       return DDS::RETCODE_ERROR;
     }
+#endif
 
     // Set up allocator with reserved space for data if it is bounded
     if (MarshalTraitsType::gen_is_bounded_size()) {
-      const size_t chunk_size = std::max(
-        encapsulated_encoding_mode_.buffer_size(),
-        non_encapsulated_encoding_mode_.buffer_size());
+      const size_t chunk_size = encoding_mode_.buffer_size();
       data_allocator_.reset(new DataAllocator(n_chunks_, chunk_size));
       if (::OpenDDS::DCPS::DCPS_debug_level >= 2) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ")
@@ -446,9 +464,7 @@ private:
                                  OpenDDS::DCPS::MarshalingType marshaling_type)
   {
     const bool has_cdr_header = cdr_encapsulation();
-    const EncodingMode& encoding_mode = has_cdr_header ?
-      encapsulated_encoding_mode_ : non_encapsulated_encoding_mode_;
-    const Encoding& encoding = encoding_mode.encoding();
+    const Encoding& encoding = encoding_mode_.encoding();
     Message_Block_Ptr mb;
     ACE_Message_Block* tmp_mb;
 
@@ -458,7 +474,7 @@ private:
       KeyOnlyType ko_instance_data(instance_data);
       ACE_NEW_RETURN(tmp_mb,
         ACE_Message_Block(
-          encoding_mode.buffer_size(ko_instance_data),
+          encoding_mode_.buffer_size(ko_instance_data),
           ACE_Message_Block::MB_DATA,
           0, // cont
           0, // data
@@ -488,7 +504,7 @@ private:
         static_cast<ACE_Message_Block*>(
           mb_allocator_->malloc(sizeof(ACE_Message_Block))),
         ACE_Message_Block(
-          encoding_mode.buffer_size(instance_data),
+          encoding_mode_.buffer_size(instance_data),
           ACE_Message_Block::MB_DATA,
           0, // cont
           0, // data
@@ -592,16 +608,15 @@ private:
   unique_ptr<DataAllocator> data_allocator_;
   unique_ptr<MessageBlockAllocator> mb_allocator_;
   unique_ptr<DataBlockAllocator> db_allocator_;
-  EncodingMode encapsulated_encoding_mode_;
-  EncodingMode non_encapsulated_encoding_mode_;
+  EncodingMode encoding_mode_;
 
   // A class, normally provided by an unit test, that needs access to
   // private methods/members.
   friend class ::DDS_TEST;
 };
 
-}
-}
+} // namespace DCPS
+} // namepsace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
