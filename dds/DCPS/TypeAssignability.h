@@ -6,128 +6,90 @@
 #ifndef OPENDDS_DCPS_TYPE_ASSIGNABILITY_H
 #define OPENDDS_DCPS_TYPE_ASSIGNABILITY_H
 
-#include "dds/DCPS/TypeObject.h"
+#include "TypeObject.h"
 
 #include <utility>
-#include <map>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace XTypes {
 
-  class TypeLookup {
-  public:
-    const MinimalTypeObject& lookup_minimal(const TypeIdentifier& ti) const
-    {
-      return tmp_;
-      //      return table_[ti];
-    }
+class TypeLookup {
+public:
+  const MinimalTypeObject& lookup_minimal(const TypeIdentifier& ti) const
+  {
+    return tmp_;
+  }
 
-  private:
-    MinimalTypeObject tmp_;
-    //    std::map<TypeIdentifier, MinimalTypeObject> table_;
-  };
+private:
+  MinimalTypeObject tmp_;
+};
 
-  // Set of pairs of members with each pair contains members from
-  // two structure types that have the same member ID and name
-  typedef std::vector<std::pair<const MinimalStructMember*,
-                                const MinimalStructMember*> > MatchedSet;
+// Set of pairs of members with each pair contains members from
+// two structure types that have the same member ID and name
+typedef std::pair<const MinimalStructMember*, const MinimalStructMember*> MemberPair;
+typedef OPENDDS_VECTOR(MemberPair) MatchedSet;
 
-  class TypeAssignability {
-  public:
-    bool assignable(const TypeObject& ta, const TypeObject& tb) const;
+class TypeAssignability {
+public:
+  bool assignable(const TypeObject& ta, const TypeObject& tb) const;
 
-  private:
-    bool assignable(const TypeIdentifier& ta, const TypeIdentifier& tb) const;
-    bool assignable_alias(const MinimalTypeObject& ta,
-                          const MinimalTypeObject& tb) const;
-    bool assignable_annotation(const MinimalTypeObject& ta,
-                               const MinimalTypeObject& tb) const;
-    bool assignable_annotation(const MinimalTypeObject& ta,
-                               const TypeIdentifier& tb) const;
-    bool assignable_struct(const MinimalTypeObject& ta,
-                           const MinimalTypeObject& tb) const;
-    bool assignable_struct(const MinimalTypeObject& ta,
-                           const TypeIdentifier& tb) const;
-    bool assignable_union(const MinimalTypeObject& ta,
-                          const MinimalTypeObject& tb) const;
-    bool assignable_union(const MinimalTypeObject& ta,
-                          const TypeIdentifier& tb) const;
-    bool assignable_bitset(const MinimalTypeObject& ta,
-                           const MinimalTypeObject& tb) const;
-    bool assignable_bitset(const MinimalTypeObject& ta,
-                           const TypeIdentifier& tb) const;
-    bool assignable_sequence(const MinimalTypeObject& ta,
-                             const MinimalTypeObject& tb) const;
-    bool assignable_sequence(const MinimalTypeObject& ta,
-                             const TypeIdentifier& tb) const;
-    bool assignable_array(const MinimalTypeObject& ta,
-                          const MinimalTypeObject& tb) const;
-    bool assignable_array(const MinimalTypeObject& ta,
-                          const TypeIdentifier& tb) const;
-    bool assignable_map(const MinimalTypeObject& ta,
-                        const MinimalTypeObject& tb) const;
-    bool assignable_map(const MinimalTypeObject& ta,
-                        const TypeIdentifier& tb) const;
-    bool assignable_enum(const MinimalTypeObject& ta,
-                         const MinimalTypeObject& tb) const;
-    bool assignable_enum(const MinimalTypeObject& ta,
-                         const TypeIdentifier& tb) const;
-    bool assignable_bitmask(const MinimalTypeObject& ta,
-                            const MinimalTypeObject& tb) const;
-    bool assignable_bitmask(const MinimalTypeObject& ta,
-                            const TypeIdentifier& tb) const;
-    bool assignable_extended(const MinimalTypeObject& ta,
-                             const MinimalTypeObject& tb) const;
+private:
+  bool assignable(const TypeIdentifier& ta, const TypeIdentifier& tb) const;
+  bool assignable_alias(const MinimalTypeObject& ta, const MinimalTypeObject& tb) const;
+  bool assignable_annotation(const MinimalTypeObject& ta, const MinimalTypeObject& tb) const;
+  bool assignable_annotation(const MinimalTypeObject& ta, const TypeIdentifier& tb) const;
+  bool assignable_struct(const MinimalTypeObject& ta, const MinimalTypeObject& tb) const;
+  bool assignable_struct(const MinimalTypeObject& ta, const TypeIdentifier& tb) const;
+  bool assignable_union(const MinimalTypeObject& ta, const MinimalTypeObject& tb) const;
+  bool assignable_union(const MinimalTypeObject& ta, const TypeIdentifier& tb) const;
+  bool assignable_bitset(const MinimalTypeObject& ta, const MinimalTypeObject& tb) const;
+  bool assignable_bitset(const MinimalTypeObject& ta, const TypeIdentifier& tb) const;
+  bool assignable_sequence(const MinimalTypeObject& ta, const MinimalTypeObject& tb) const;
+  bool assignable_sequence(const MinimalTypeObject& ta, const TypeIdentifier& tb) const;
+  bool assignable_array(const MinimalTypeObject& ta, const MinimalTypeObject& tb) const;
+  bool assignable_array(const MinimalTypeObject& ta, const TypeIdentifier& tb) const;
+  bool assignable_map(const MinimalTypeObject& ta, const MinimalTypeObject& tb) const;
+  bool assignable_map(const MinimalTypeObject& ta, const TypeIdentifier& tb) const;
+  bool assignable_enum(const MinimalTypeObject& ta, const MinimalTypeObject& tb) const;
+  bool assignable_enum(const MinimalTypeObject& ta, const TypeIdentifier& tb) const;
+  bool assignable_bitmask(const MinimalTypeObject& ta, const MinimalTypeObject& tb) const;
+  bool assignable_bitmask(const MinimalTypeObject& ta, const TypeIdentifier& tb) const;
+  bool assignable_extended(const MinimalTypeObject& ta, const MinimalTypeObject& tb) const;
 
-    bool assignable_primitive(const TypeIdentifier& ta,
-                              const TypeIdentifier& tb) const;
-    bool assignable_primitive(const TypeIdentifier& ta,
-                              const MinimalTypeObject& tb) const;
-    bool assignable_string(const TypeIdentifier& ta,
-                           const TypeIdentifier& tb) const;
-    bool assignable_string(const TypeIdentifier& ta,
-                           const MinimalTypeObject& tb) const;
-    bool assignable_plain_sequence(const TypeIdentifier& ta,
-                                   const TypeIdentifier& tb) const;
-    bool assignable_plain_sequence(const TypeIdentifier& ta,
-                                   const MinimalTypeObject& tb) const;
-    bool assignable_plain_array(const TypeIdentifier& ta,
-                                const TypeIdentifier& tb) const;
-    bool assignable_plain_array(const TypeIdentifier& ta,
-                                const MinimalTypeObject& tb) const;
-    bool assignable_plain_map(const TypeIdentifier& ta,
-                              const TypeIdentifier& tb) const;
-    bool assignable_plain_map(const TypeIdentifier& ta,
-                              const MinimalTypeObject& tb) const;
+  bool assignable_primitive(const TypeIdentifier& ta, const TypeIdentifier& tb) const;
+  bool assignable_primitive(const TypeIdentifier& ta, const MinimalTypeObject& tb) const;
+  bool assignable_string(const TypeIdentifier& ta, const TypeIdentifier& tb) const;
+  bool assignable_string(const TypeIdentifier& ta, const MinimalTypeObject& tb) const;
+  bool assignable_plain_sequence(const TypeIdentifier& ta, const TypeIdentifier& tb) const;
+  bool assignable_plain_sequence(const TypeIdentifier& ta, const MinimalTypeObject& tb) const;
+  bool assignable_plain_array(const TypeIdentifier& ta, const TypeIdentifier& tb) const;
+  bool assignable_plain_array(const TypeIdentifier& ta, const MinimalTypeObject& tb) const;
+  bool assignable_plain_map(const TypeIdentifier& ta, const TypeIdentifier& tb) const;
+  bool assignable_plain_map(const TypeIdentifier& ta, const MinimalTypeObject& tb) const;
 
-    // General helpers
-    bool strongly_assignable(const TypeIdentifier& ta,
-                             const TypeIdentifier& tb) const;
-    bool is_delimited(const TypeIdentifier& ti) const;
-    bool is_delimited(const MinimalTypeObject& tobj) const;
-    bool is_delimited_with_flags(TypeFlag flags) const;
-    bool equal_type_id(const TypeIdentifier& tia,
-                       const TypeIdentifier& tib) const;
-    const TypeIdentifier& get_base_type(const MinimalTypeObject& type) const;
+  // General helpers
+  bool strongly_assignable(const TypeIdentifier& ta, const TypeIdentifier& tb) const;
+  bool is_delimited(const TypeIdentifier& ti) const;
+  bool is_delimited(const MinimalTypeObject& tobj) const;
+  bool is_delimited_with_flags(TypeFlag flags) const;
+  bool equal_type_id(const TypeIdentifier& tia, const TypeIdentifier& tib) const;
+  const TypeIdentifier& get_base_type(const MinimalTypeObject& type) const;
 
-    // Helpers for assignability of struct
-    void erase_key(MinimalTypeObject& type) const;
-    void hold_key(MinimalTypeObject& type) const;
-    bool struct_rule_enum_key(const MinimalTypeObject& tb,
-                              const CommonStructMember& ma) const;
-    bool get_sequence_bound(LBound& b, const CommonStructMember& m) const;
-    bool get_map_bound(LBound& b, const CommonStructMember& m) const;
-    bool get_string_bound(LBound& b, const CommonStructMember& m) const;
-    bool get_struct_member(const MinimalTypeObject** ret,
-                           const CommonStructMember& m) const;
-    bool get_union_member(const MinimalTypeObject** ret,
-                          const CommonStructMember& m) const;
+  // Helpers for assignability of struct
+  void erase_key(MinimalTypeObject& type) const;
+  void hold_key(MinimalTypeObject& type) const;
+  bool struct_rule_enum_key(const MinimalTypeObject& tb, const CommonStructMember& ma) const;
+  bool get_sequence_bound(LBound& b, const CommonStructMember& m) const;
+  bool get_map_bound(LBound& b, const CommonStructMember& m) const;
+  bool get_string_bound(LBound& b, const CommonStructMember& m) const;
+  bool get_struct_member(const MinimalTypeObject*& ret, const CommonStructMember& m) const;
+  bool get_union_member(const MinimalTypeObject*& ret, const CommonStructMember& m) const;
 
-  private:
-    TypeLookup typelookup_;
-  };
+private:
+  TypeLookup typelookup_;
+};
 
 } // namepace XTypes
 } // namespace OpenDDS
