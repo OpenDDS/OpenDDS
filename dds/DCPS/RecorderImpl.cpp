@@ -990,13 +990,19 @@ RecorderImpl::enable()
 
     OpenDDS::DCPS::TypeSupportImpl* const typesupport =
       dynamic_cast<OpenDDS::DCPS::TypeSupportImpl*>(topic_servant_->get_type_support());
-    size_t sto = XTypes::find_size(typesupport->getMinimalTypeObject());
-    XTypes::TypeIdentifierPtr type_iden = XTypes::makeTypeIdentifier(typesupport->getMinimalTypeObject());
     XTypes::TypeInformation type_info;
-    type_info.minimal.typeid_with_size.type_id = type_iden;
-    type_info.minimal.typeid_with_size.typeobject_serialized_size = sto;
     type_info.minimal.dependent_typeid_count = 0;
     type_info.complete.dependent_typeid_count = 0;
+    if (typesupport) {
+      size_t sto = XTypes::find_size(typesupport->getMinimalTypeObject());
+      XTypes::TypeIdentifierPtr type_iden = XTypes::makeTypeIdentifier(typesupport->getMinimalTypeObject());
+      type_info.minimal.typeid_with_size.type_id = type_iden;
+      type_info.minimal.typeid_with_size.typeobject_serialized_size = sto;
+    } else {
+      type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
+      //TODO : How is XTypes going work with recorder replayer?
+      // Should it record the type_info when it receives data and then give that type info to replayer somehow?
+    }
 
     this->subscription_id_ =
       disco->add_subscription(this->domain_id_,
