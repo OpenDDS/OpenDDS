@@ -321,26 +321,23 @@ compatibleQOS(const DDS::DataWriterQos * writerQos,
     }
     if (writer_count == 0) {
       for (CORBA::ULong ri = 0; !found && ri < reader_count; ++ri) {
-        if (readerQos->representation.value[ri] ==
-            DDS::XCDR_DATA_REPRESENTATION) {
+        if (readerQos->representation.value[ri] == DDS::XCDR_DATA_REPRESENTATION) {
           found = true;
           break;
         }
+      }
     }
-    }
-    if (reader_count == 0 {
+    if (reader_count == 0) {
       for (CORBA::ULong wi = 0; !found && wi < writer_count; ++wi) {
-        if (writerQos->representation.value[wi] ==
-            DDS::XCDR_DATA_REPRESENTATION) {
+        if (writerQos->representation.value[wi] == DDS::XCDR_DATA_REPRESENTATION) {
           found = true;
           break;
         }
-    }
+      }
     }
     for (CORBA::ULong wi = 0; !found && wi < writer_count; ++wi) {
       for (CORBA::ULong ri = 0; !found && ri < reader_count; ++ri) {
-        if (readerQos->representation.value[ri] ==
-            writerQos->representation.value[wi]) {
+        if (readerQos->representation.value[ri] == writerQos->representation.value[wi]) {
           found = true;
           break;
         }

@@ -254,13 +254,13 @@ bool TopicImpl::check_data_representation(const DDS::DataRepresentationIdSeq& qo
     return found;
   }
   // if non 0 length data reader compare both lists for a compatible QoS
-  else{
+  else {
     bool found = false;
     for (int i = 0; i < qos_ids.length(); ++i) {
       for (int j = 0; j < type_allowed_reprs.length(); ++j) {
         if (qos_ids[i] == type_allowed_reprs[j]) {
-        found = true;
-        break;
+          found = true;
+          break;
         }
       }
     }
