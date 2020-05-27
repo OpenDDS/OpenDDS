@@ -20,10 +20,10 @@
 #include <sstream>
 #include <iomanip>
 
-Writer::Writer(DDS::DataWriter_ptr writer1, DDS::DataWriter_ptr writer2,
+Writer::Writer(DDS::DataWriter_ptr writer1, /*DDS::DataWriter_ptr writer2,*/
                int my_pid)
   : writer1_(DDS::DataWriter::_duplicate(writer1)),
-    writer2_(DDS::DataWriter::_duplicate(writer2)),
+    //writer2_(DDS::DataWriter::_duplicate(writer2)),
     timeout_writes_(0),
     my_pid_(my_pid)
 {
@@ -47,14 +47,14 @@ Writer::write(bool reliable, int num_messages)
   try {
     // Block until Subscriber is available
     Utils::wait_match(writer1_, 1, Utils::GTE);
-    Utils::wait_match(writer2_, 1, Utils::GTE);
+    //Utils::wait_match(writer2_, 1, Utils::GTE);
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writers matched\n")));
 
     // Write samples
     Messenger::MessageDataWriter_var message_dw1
       = Messenger::MessageDataWriter::_narrow(writer1_);
-    Messenger::MessageDataWriter_var message_dw2
-      = Messenger::MessageDataWriter::_narrow(writer2_);
+    /*Messenger::MessageDataWriter_var message_dw2
+      = Messenger::MessageDataWriter::_narrow(writer2_);*/
 
     if (CORBA::is_nil(message_dw1.in())) {
         ACE_ERROR((LM_ERROR,
@@ -81,12 +81,12 @@ Writer::write(bool reliable, int num_messages)
     message1.text = "Worst. Movie. Ever.";
     message1.sample_id = 0;
 
-    Messenger::Message message2 = message1;
+    /*Messenger::Message message2 = message1;
     message2.writer_id = 2;
-    message2.from = "Comic Book Guy 2";
+    message2.from = "Comic Book Guy 2";*/
 
     DDS::InstanceHandle_t handle1 = message_dw1->register_instance(message1);
-    DDS::InstanceHandle_t handle2 = message_dw2->register_instance(message2);
+    //DDS::InstanceHandle_t handle2 = message_dw2->register_instance(message2);
 
     for (int i = 0; i < num_messages; i++) {
 
@@ -124,7 +124,7 @@ Writer::write(bool reliable, int num_messages)
         }
       } while (error == DDS::RETCODE_TIMEOUT);
 
-      extend_sample(message2);
+      /*extend_sample(message2);
       for (CORBA::ULong j = 0; j < message2.data.length(); ++j) {
         message2.data[j] = 255 - (j % 256);
       }
@@ -149,17 +149,17 @@ Writer::write(bool reliable, int num_messages)
                        ACE_TEXT(" ERROR: write dw2 returned %d!\n"), error));
           }
         }
-      } while (error == DDS::RETCODE_TIMEOUT);
+      } while (error == DDS::RETCODE_TIMEOUT);*/
 
       ++message1.sample_id;
-      ++message2.sample_id;
+      //++message2.sample_id;
     }
 
     // Let readers disconnect first, once they either get the data or
     // give up and time-out.  This allows the writer to be alive while
     // processing requests for retransmission from the readers.
     Utils::wait_match(writer1_, 0);
-    Utils::wait_match(writer2_, 0);
+    //Utils::wait_match(writer2_, 0);
 
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in svc():");

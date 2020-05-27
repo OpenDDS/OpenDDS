@@ -56,8 +56,8 @@ public:
 
   bool data_consistent() const;
 
-  static const unsigned int NUM_PROCESSES = 2;
-  static const unsigned int NUM_WRITERS_PER_PROCESS = 2;
+  static const unsigned int NUM_PROCESSES = 1;
+  static const unsigned int NUM_WRITERS_PER_PROCESS = 1;
   static const unsigned int NUM_SAMPLES_PER_WRITER = 10;
 
 private:
