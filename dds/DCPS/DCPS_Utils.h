@@ -98,15 +98,6 @@ OpenDDS_Dcps_Export
 Encoding::Kind repr_ext_to_encoding_kind(
   DDS::DataRepresentationId_t repr, Encoding::Extensibility ext);
 
-/**
- * If the representation sequence of the child is empty then fill it from the
- * QoS of the parent.
- */
-OpenDDS_Dcps_Export
-void check_data_representation_qos(
-  DDS::DataRepresentationIdSeq& child,
-  const DDS::DataRepresentationIdSeq& parent);
-
 } // namespace DCPS
 } // namespace OpenDDS
 

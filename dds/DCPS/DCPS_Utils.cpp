@@ -315,10 +315,29 @@ compatibleQOS(const DDS::DataWriterQos * writerQos,
     const CORBA::ULong reader_count = readerQos->representation.value.length();
     const CORBA::ULong writer_count = writerQos->representation.value.length();
     bool found = false;
+
+    if (writer_count == 0 && reader_count == 0) {
+      found = true;
+    }
+    if (writer_count == 0) {
+      for (CORBA::ULong ri = 0; !found && ri < reader_count; ++ri) {
+        if (readerQos->representation.value[ri] == DDS::XCDR_DATA_REPRESENTATION) {
+          found = true;
+          break;
+        }
+      }
+    }
+    if (reader_count == 0) {
+      for (CORBA::ULong wi = 0; !found && wi < writer_count; ++wi) {
+        if (writerQos->representation.value[wi] == DDS::XCDR_DATA_REPRESENTATION) {
+          found = true;
+          break;
+        }
+      }
+    }
     for (CORBA::ULong wi = 0; !found && wi < writer_count; ++wi) {
       for (CORBA::ULong ri = 0; !found && ri < reader_count; ++ri) {
-        if (readerQos->representation.value[ri] ==
-            writerQos->representation.value[wi]) {
+        if (readerQos->representation.value[ri] == writerQos->representation.value[wi]) {
           found = true;
           break;
         }
@@ -413,23 +432,6 @@ Encoding::Kind repr_ext_to_encoding_kind(
   }
 
   return Encoding::KIND_UNKNOWN;
-}
-
-void check_data_representation_qos(
-  DDS::DataRepresentationIdSeq& child,
-  const DDS::DataRepresentationIdSeq& parent)
-{
-  if (!child.length()) {
-    if (parent.length()) {
-      child = parent;
-    } else {
-      // If no direction on what to use, use XCDR (XTypes 1.3 7.6.3.1.1) and
-      // unaligned CDR.
-      child.length(2);
-      child[0] = DDS::XCDR_DATA_REPRESENTATION;
-      child[1] = UNALIGNED_CDR_DATA_REPRESENTATION;
-    }
-  }
 }
 
 } // namespace DCPS
