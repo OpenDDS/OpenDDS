@@ -17,11 +17,6 @@ using namespace AstTypeClassification;
 
 namespace {
 
-string tag_type(UTL_ScopedName* name)
-{
-  return dds_generator::scoped_helper(name, "_") + "_xtag";
-}
-
 void
 call_get_minimal_type_identifier(AST_Type* type)
 {
@@ -33,7 +28,7 @@ call_get_minimal_type_identifier(AST_Type* type)
 
   // If an alias, then use the name.
   if (type != actual_type) {
-    be_global->impl_ << "getMinimalTypeIdentifier<" << tag_type(type->name()) << ">()";
+    be_global->impl_ << "getMinimalTypeIdentifier<" << typeobject_generator::tag_type(type->name()) << ">()";
     return;
   }
 
@@ -130,7 +125,7 @@ call_get_minimal_type_identifier(AST_Type* type)
 
   if (fld_cls & (CL_STRUCTURE | CL_ENUM | CL_UNION)) {
     // Currently, we don't have anonymous structs or enums.
-    be_global->impl_ << "getMinimalTypeIdentifier<" << tag_type(type->name()) << ">()";
+    be_global->impl_ << "getMinimalTypeIdentifier<" << typeobject_generator::tag_type(type->name()) << ">()";
     return;
   }
 
@@ -140,6 +135,11 @@ call_get_minimal_type_identifier(AST_Type* type)
   return;
 }
 
+}
+
+string typeobject_generator::tag_type(UTL_ScopedName* name)
+{
+  return dds_generator::scoped_helper(name, "_") + "_xtag";
 }
 
 bool

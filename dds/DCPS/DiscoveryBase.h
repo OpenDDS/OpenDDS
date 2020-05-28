@@ -141,6 +141,7 @@ namespace OpenDDS {
 
         DiscoveredReaderData reader_data_;
         DDS::InstanceHandle_t bit_ih_;
+        XTypes::TypeInformation type_info_;
 
 #ifdef OPENDDS_SECURITY
         DDS::Security::EndpointSecurityAttributes security_attribs_;
@@ -175,6 +176,7 @@ namespace OpenDDS {
 
         DiscoveredWriterData writer_data_;
         DDS::InstanceHandle_t bit_ih_;
+        XTypes::TypeInformation type_info_;
 
 #ifdef OPENDDS_SECURITY
         DDS::Security::EndpointSecurityAttributes security_attribs_;
@@ -361,7 +363,8 @@ namespace OpenDDS {
                                    DataWriterCallbacks* publication,
                                    const DDS::DataWriterQos& qos,
                                    const TransportLocatorSeq& transInfo,
-                                   const DDS::PublisherQos& publisherQos)
+                                   const DDS::PublisherQos& publisherQos,
+                                   const XTypes::TypeInformation& type_info)
       {
         ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, RepoId());
 
@@ -373,7 +376,7 @@ namespace OpenDDS {
         pb.qos_ = qos;
         pb.trans_info_ = transInfo;
         pb.publisher_qos_ = publisherQos;
-
+        pb.type_info_ = type_info;
         const OPENDDS_STRING& topic_name = topic_names_[topicId];
 
 #ifdef OPENDDS_SECURITY
@@ -501,7 +504,8 @@ namespace OpenDDS {
                                     const DDS::SubscriberQos& subscriberQos,
                                     const char* filterClassName,
                                     const char* filterExpr,
-                                    const DDS::StringSeq& params)
+                                    const DDS::StringSeq& params,
+                                    const XTypes::TypeInformation& type_info)
       {
         ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, RepoId());
 
@@ -516,7 +520,7 @@ namespace OpenDDS {
         sb.filterProperties.filterClassName = filterClassName;
         sb.filterProperties.filterExpression = filterExpr;
         sb.filterProperties.expressionParameters = params;
-
+        sb.type_info_ = type_info;
         const OPENDDS_STRING& topic_name = topic_names_[topicId];
 
 #ifdef OPENDDS_SECURITY
@@ -670,6 +674,7 @@ namespace OpenDDS {
         RepoIdSet matched_endpoints_;
         SequenceNumber sequence_;
         RepoIdSet remote_expectant_opendds_associations_;
+        XTypes::TypeInformation type_info_;
 #ifdef OPENDDS_SECURITY
         bool have_ice_agent_info;
         ICE::AgentInfo ice_agent_info;
@@ -1487,10 +1492,11 @@ namespace OpenDDS {
                       DataWriterCallbacks* publication,
                       const DDS::DataWriterQos& qos,
                       const TransportLocatorSeq& transInfo,
-                      const DDS::PublisherQos& publisherQos)
+                      const DDS::PublisherQos& publisherQos,
+                      const XTypes::TypeInformation& type_info)
       {
         return endpoint_manager().add_publication(topicId, publication, qos,
-                                                  transInfo, publisherQos);
+                                                  transInfo, publisherQos, type_info);
       }
 
       void
@@ -1528,10 +1534,11 @@ namespace OpenDDS {
                        const DDS::SubscriberQos& subscriberQos,
                        const char* filterClassName,
                        const char* filterExpr,
-                       const DDS::StringSeq& params)
+                       const DDS::StringSeq& params,
+                       const XTypes::TypeInformation& type_info)
       {
         return endpoint_manager().add_subscription(topicId, subscription, qos, transInfo,
-                                                   subscriberQos, filterClassName, filterExpr, params);
+                                                   subscriberQos, filterClassName, filterExpr, params, type_info);
       }
 
       void
@@ -1955,9 +1962,10 @@ namespace OpenDDS {
                                                     DataWriterCallbacks* publication,
                                                     const DDS::DataWriterQos& qos,
                                                     const TransportLocatorSeq& transInfo,
-                                                    const DDS::PublisherQos& publisherQos)
+                                                    const DDS::PublisherQos& publisherQos,
+                                                    const XTypes::TypeInformation& type_info)
       {
-        return get_part(domainId, participantId)->add_publication(topicId, publication, qos, transInfo, publisherQos);
+        return get_part(domainId, participantId)->add_publication(topicId, publication, qos, transInfo, publisherQos, type_info);
       }
 
       virtual bool remove_publication(DDS::DomainId_t domainId,
@@ -2003,11 +2011,12 @@ namespace OpenDDS {
                                                      const DDS::SubscriberQos& subscriberQos,
                                                      const char* filterClassName,
                                                      const char* filterExpr,
-                                                     const DDS::StringSeq& params)
+                                                     const DDS::StringSeq& params,
+                                                     const XTypes::TypeInformation& type_info)
       {
         return get_part(domainId, participantId)->
           add_subscription(
-            topicId, subscription, qos, transInfo, subscriberQos, filterClassName, filterExpr, params);
+            topicId, subscription, qos, transInfo, subscriberQos, filterClassName, filterExpr, params, type_info);
       }
 
       virtual bool remove_subscription(DDS::DomainId_t domainId,

@@ -1910,7 +1910,15 @@ DomainParticipantImpl::create_new_topic(
 
   if ((enabled_ == true)
       && (qos_.entity_factory.autoenable_created_entities)) {
-    topic_servant->enable();
+    const DDS::ReturnCode_t ret = topic_servant->enable();
+
+    if (ret != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_WARNING,
+          ACE_TEXT("(%P|%t) WARNING: ")
+          ACE_TEXT("DomainParticipantImpl::create_new_topic, ")
+          ACE_TEXT("enable failed.\n")));
+      return DDS::Topic::_nil();
+    }
   }
 
   DDS::Topic_ptr obj(topic_servant);

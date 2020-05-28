@@ -29,6 +29,8 @@
 #include "transport/framework/EntryExit.h"
 #include "transport/framework/TransportExceptions.h"
 #include "SafetyProfileStreams.h"
+#include "TypeSupportImpl.h"
+#include "TypeObject.h"
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "BuiltInTopicUtils.h"
 #include <dds/DdsDcpsCoreTypeSupportC.h>
@@ -853,8 +855,6 @@ DDS::ReturnCode_t DataReaderImpl::set_qos(const DDS::DataReaderQos& qos_arg)
   OPENDDS_NO_DURABILITY_KIND_TRANSIENT_PERSISTENT_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
 
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos)) {
-    // Make sure Data Representation QoS is initialized
-    topic_servant_->check_data_representation_qos(qos_.representation.value);
 
     if (qos_ == qos)
       return DDS::RETCODE_OK;
@@ -1169,8 +1169,11 @@ DataReaderImpl::enable()
     dp_id_ = participant->get_id();
   }
 
-  // Make sure Data Representation QoS is initialized
-  topic_servant_->check_data_representation_qos(qos_.representation.value);
+  if (topic_servant_) {
+    if (!topic_servant_->check_data_representation(qos_.representation.value, false)) {
+      return DDS::RETCODE_PRECONDITION_NOT_MET;
+    }
+  }
 
   if (qos_.history.kind == DDS::KEEP_ALL_HISTORY_QOS) {
     // The spec says qos_.history.depth is "has no effect"
@@ -1265,6 +1268,16 @@ DataReaderImpl::enable()
     DDS::SubscriberQos sub_qos;
     subscriber->get_qos(sub_qos);
 
+    TypeSupportImpl* const typesupport =
+      dynamic_cast<TypeSupportImpl*>(topic_servant_->get_type_support());
+    size_t sto = XTypes::find_size(typesupport->getMinimalTypeObject());
+    XTypes::TypeIdentifierPtr type_iden = XTypes::makeTypeIdentifier(typesupport->getMinimalTypeObject());
+    XTypes::TypeInformation type_info;
+    type_info.minimal.typeid_with_size.type_id = type_iden;
+    type_info.minimal.typeid_with_size.typeobject_serialized_size = sto;
+    type_info.minimal.dependent_typeid_count = 0;
+    type_info.complete.dependent_typeid_count = 0;
+
     this->subscription_id_ =
         disco->add_subscription(this->domain_id_,
             this->dp_id_,
@@ -1275,7 +1288,8 @@ DataReaderImpl::enable()
             sub_qos,
             filterClassName,
             filterExpression,
-            exprParams);
+            exprParams,
+            type_info);
 
     if (this->subscription_id_ == OpenDDS::DCPS::GUID_UNKNOWN) {
       ACE_ERROR((LM_WARNING,

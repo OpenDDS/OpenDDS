@@ -21,11 +21,12 @@
 #include "DataDurabilityCache.h"
 #include "OfferedDeadlineWatchdog.h"
 #include "MonitorFactory.h"
-#include "TypeSupportImpl.h"
 #include "SendStateDataSampleList.h"
 #include "DataSampleElement.h"
 #include "Util.h"
 #include "DCPS_Utils.h"
+#include "TypeObject.h"
+#include "TypeSupportImpl.h"
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 #  include "CoherentChangeControl.h"
 #endif
@@ -876,9 +877,6 @@ DataWriterImpl::set_qos(const DDS::DataWriterQos& qos_arg)
   OPENDDS_NO_DURABILITY_KIND_TRANSIENT_PERSISTENT_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
 
   if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos)) {
-    // Make sure Data Representation QoS is initialized
-    topic_servant_->check_data_representation_qos(qos.representation.value);
-
     if (qos_ == qos)
       return DDS::RETCODE_OK;
 
@@ -1295,8 +1293,9 @@ DataWriterImpl::enable()
     dp_id_ = participant->get_id();
   }
 
-  // Make sure Data Representation QoS is initialized
-  topic_servant_->check_data_representation_qos(qos_.representation.value);
+  if (!topic_servant_->check_data_representation(qos_.representation.value, true)) {
+    return DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
 
   // Note: do configuration based on QoS in enable() because
   //       before enable is called the QoS can be changed -- even
@@ -1450,6 +1449,17 @@ DataWriterImpl::enable()
   const TransportLocatorSeq& trans_conf_info = connection_info();
   DDS::PublisherQos pub_qos;
   publisher->get_qos(pub_qos);
+
+  TypeSupportImpl* const typesupport =
+      dynamic_cast<TypeSupportImpl*>(topic_servant_->get_type_support());
+  size_t sto = XTypes::find_size(typesupport->getMinimalTypeObject());
+  XTypes::TypeIdentifierPtr type_iden = XTypes::makeTypeIdentifier(typesupport->getMinimalTypeObject());
+  XTypes::TypeInformation type_info;
+  type_info.minimal.typeid_with_size.type_id = type_iden;
+  type_info.minimal.typeid_with_size.typeobject_serialized_size = sto;
+  type_info.minimal.dependent_typeid_count = 0;
+  type_info.complete.dependent_typeid_count = 0;
+
   this->publication_id_ =
     disco->add_publication(this->domain_id_,
                            this->dp_id_,
@@ -1457,7 +1467,10 @@ DataWriterImpl::enable()
                            this,
                            this->qos_,
                            trans_conf_info,
-                           pub_qos);
+                           pub_qos,
+                           type_info);
+
+
   if (!publisher || this->publication_id_ == GUID_UNKNOWN) {
     ACE_DEBUG((LM_WARNING,
                ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::enable, ")
