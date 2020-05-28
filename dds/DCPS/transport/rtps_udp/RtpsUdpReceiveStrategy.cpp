@@ -632,7 +632,7 @@ RtpsUdpReceiveStrategy::sec_submsg_to_octets(DDS::OctetSeq& encoded,
   size_t size = serialized_size(encoding, secure_prefix_);
 
   for (size_t i = 0; i < secure_submessages_.size(); ++i) {
-    serialized_size(encoding, secure_submessages_[i]);
+    serialized_size(encoding, size, secure_submessages_[i]);
     const RTPS::SubmessageKind kind = secure_submessages_[i]._d();
     if (kind == RTPS::DATA || kind == RTPS::DATA_FRAG) {
       size += secure_sample_.sample_->size();
