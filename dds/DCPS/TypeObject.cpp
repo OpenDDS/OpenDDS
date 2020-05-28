@@ -5,13 +5,26 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
-#include "Hash.h"
 #include "TypeObject.h"
+
+#include "Hash.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
+
+using DCPS::Encoding;
+using DCPS::serialized_size;
+using DCPS::operator<<;
+
 namespace XTypes {
+
+const Encoding& get_typeobject_encoding()
+{
+  static const Encoding encoding(
+    Encoding::KIND_XCDR2_PLAIN, DCPS::ENDIAN_LITTLE);
+  return encoding;
+}
 
 MinimalMemberDetail::MinimalMemberDetail(const std::string& name)
 {
@@ -24,9 +37,8 @@ MinimalMemberDetail::MinimalMemberDetail(const std::string& name)
 
 TypeIdentifierPtr makeTypeIdentifier(const TypeObject& type_object)
 {
-  const Encoding encoding(Encoding::KIND_XCDR2_PLAIN, DCPS::ENDIAN_LITTLE);
-  size_t size = 0;
-  serialized_size(encoding, size, type_object);
+  const Encoding& encoding = get_typeobject_encoding();
+  size_t size = serialized_size(encoding, type_object);
   ACE_Message_Block buff(size);
   DCPS::Serializer ser(&buff, encoding);
   ser << type_object;
@@ -46,271 +58,278 @@ TypeIdentifierPtr makeTypeIdentifier(const TypeObject& type_object)
   return TypeIdentifierPtr();
 }
 
+} // namespace XTypes
+
+namespace DCPS {
 
 // Serialization support for TypeObject and its components
 
 void serialized_size(const Encoding& encoding, size_t& size,
-  const TypeIdentifier& stru)
+  const XTypes::TypeIdentifier& stru)
 {
 }
 
-bool operator<<(DCPS::Serializer& ser, const TypeIdentifier& stru)
+bool operator<<(Serializer& ser, const XTypes::TypeIdentifier& stru)
 {
   return true;
 }
 
 
 void serialized_size(const Encoding& encoding, size_t& size,
-  const CompleteStructType& stru)
+  const XTypes::CompleteStructType& stru)
 {
 }
 
-bool operator<<(DCPS::Serializer& ser, const CompleteStructType& stru)
+bool operator<<(Serializer& ser, const XTypes::CompleteStructType& stru)
 {
   return true;
 }
 
 
 void serialized_size(const Encoding& encoding, size_t& size,
-  const MinimalStructType& stru)
+  const XTypes::MinimalStructType& stru)
 {
 }
 
-bool operator<<(DCPS::Serializer& ser, const MinimalStructType& stru)
+bool operator<<(Serializer& ser, const XTypes::MinimalStructType& stru)
 {
   return true;
 }
 
 
 void serialized_size(const Encoding& encoding, size_t& size,
-  const CompleteUnionType& stru)
+  const XTypes::CompleteUnionType& stru)
 {
 }
 
-bool operator<<(DCPS::Serializer& ser, const CompleteUnionType& stru)
+bool operator<<(Serializer& ser, const XTypes::CompleteUnionType& stru)
 {
   return true;
 }
 
 
 void serialized_size(const Encoding& encoding, size_t& size,
-  const MinimalUnionType& stru)
+  const XTypes::MinimalUnionType& stru)
 {
 }
 
-bool operator<<(DCPS::Serializer& ser, const MinimalUnionType& stru)
+bool operator<<(Serializer& ser, const XTypes::MinimalUnionType& stru)
 {
   return true;
 }
 
 
 void serialized_size(const Encoding& encoding, size_t& size,
-  const CompleteAnnotationType& stru)
+  const XTypes::CompleteAnnotationType& stru)
 {
 }
 
-bool operator<<(DCPS::Serializer& ser, const CompleteAnnotationType& stru)
+bool operator<<(Serializer& ser, const XTypes::CompleteAnnotationType& stru)
 {
   return true;
 }
 
 
 void serialized_size(const Encoding& encoding, size_t& size,
-  const MinimalAnnotationType& stru)
+  const XTypes::MinimalAnnotationType& stru)
 {
 }
 
-bool operator<<(DCPS::Serializer& ser, const MinimalAnnotationType& stru)
+bool operator<<(Serializer& ser, const XTypes::MinimalAnnotationType& stru)
 {
   return true;
 }
 
 
 void serialized_size(const Encoding& encoding, size_t& size,
-  const CompleteAliasType& stru)
+  const XTypes::CompleteAliasType& stru)
 {
 }
 
-bool operator<<(DCPS::Serializer& ser, const CompleteAliasType& stru)
+bool operator<<(Serializer& ser, const XTypes::CompleteAliasType& stru)
 {
   return true;
 }
 
 
 void serialized_size(const Encoding& encoding, size_t& size,
-  const MinimalAliasType& stru)
+  const XTypes::MinimalAliasType& stru)
 {
 }
 
-bool operator<<(DCPS::Serializer& ser, const MinimalAliasType& stru)
+bool operator<<(Serializer& ser, const XTypes::MinimalAliasType& stru)
 {
   return true;
 }
 
 
 void serialized_size(const Encoding& encoding, size_t& size,
-  const CompleteSequenceType& stru)
+  const XTypes::CompleteSequenceType& stru)
 {
 }
 
-bool operator<<(DCPS::Serializer& ser, const CompleteSequenceType& stru)
+bool operator<<(Serializer& ser, const XTypes::CompleteSequenceType& stru)
 {
   return true;
 }
 
 
 void serialized_size(const Encoding& encoding, size_t& size,
-  const MinimalSequenceType& stru)
+  const XTypes::MinimalSequenceType& stru)
 {
 }
 
-bool operator<<(DCPS::Serializer& ser, const MinimalSequenceType& stru)
+bool operator<<(Serializer& ser, const XTypes::MinimalSequenceType& stru)
 {
   return true;
 }
 
 
 void serialized_size(const Encoding& encoding, size_t& size,
-  const CompleteArrayType& stru)
+  const XTypes::CompleteArrayType& stru)
 {
 }
 
-bool operator<<(DCPS::Serializer& ser, const CompleteArrayType& stru)
+bool operator<<(Serializer& ser, const XTypes::CompleteArrayType& stru)
 {
   return true;
 }
 
 
 void serialized_size(const Encoding& encoding, size_t& size,
-  const MinimalArrayType& stru)
+  const XTypes::MinimalArrayType& stru)
 {
 }
 
-bool operator<<(DCPS::Serializer& ser, const MinimalArrayType& stru)
+bool operator<<(Serializer& ser, const XTypes::MinimalArrayType& stru)
 {
   return true;
 }
 
 
 void serialized_size(const Encoding& encoding, size_t& size,
-  const CompleteMapType& stru)
+  const XTypes::CompleteMapType& stru)
 {
 }
 
-bool operator<<(DCPS::Serializer& ser, const CompleteMapType& stru)
-{
-  return true;
-}
-
-
-void serialized_size(const Encoding& encoding, size_t& size, const MinimalMapType& stru)
-{
-}
-
-bool operator<<(DCPS::Serializer& ser, const MinimalMapType& stru)
-{
-  return true;
-}
-
-
-void serialized_size(const Encoding& encoding, size_t& size, const CompleteEnumeratedType& stru)
-{
-}
-
-bool operator<<(DCPS::Serializer& ser, const CompleteEnumeratedType& stru)
+bool operator<<(Serializer& ser, const XTypes::CompleteMapType& stru)
 {
   return true;
 }
 
 
 void serialized_size(const Encoding& encoding, size_t& size,
-  const MinimalEnumeratedType& stru)
+  const XTypes::MinimalMapType& stru)
 {
 }
 
-bool operator<<(DCPS::Serializer& ser, const MinimalEnumeratedType& stru)
-{
-  return true;
-}
-
-
-void serialized_size(const Encoding& encoding, size_t& size, const CompleteBitmaskType& stru)
-{
-}
-
-bool operator<<(DCPS::Serializer& ser, const CompleteBitmaskType& stru)
+bool operator<<(Serializer& ser, const XTypes::MinimalMapType& stru)
 {
   return true;
 }
 
 
 void serialized_size(const Encoding& encoding, size_t& size,
-  const MinimalBitmaskType& stru)
+  const XTypes::CompleteEnumeratedType& stru)
 {
 }
 
-bool operator<<(DCPS::Serializer& ser, const MinimalBitmaskType& stru)
+bool operator<<(Serializer& ser, const XTypes::CompleteEnumeratedType& stru)
 {
   return true;
 }
 
 
 void serialized_size(const Encoding& encoding, size_t& size,
-  const CompleteBitsetType& stru)
+  const XTypes::MinimalEnumeratedType& stru)
 {
 }
 
-bool operator<<(DCPS::Serializer& ser, const CompleteBitsetType& stru)
+bool operator<<(Serializer& ser, const XTypes::MinimalEnumeratedType& stru)
 {
   return true;
 }
 
 
 void serialized_size(const Encoding& encoding, size_t& size,
-  const MinimalBitsetType& stru)
+  const XTypes::CompleteBitmaskType& stru)
 {
 }
 
-bool operator<<(DCPS::Serializer& ser, const MinimalBitsetType& stru)
-{
-  return true;
-}
-
-size_t find_size(const TypeIdentifierWithSize& stru, size_t& size)
-{
-  return size;
-}
-
-bool operator<<(DCPS::Serializer& ser, const TypeIdentifierWithSize& stru)
-{
-  return true;
-}
-
-size_t find_size(const TypeIdentifierWithSizeSeq& stru, size_t& size)
-{
-  return size;
-}
-
-bool operator<<(DCPS::Serializer& ser, const TypeIdentifierWithSizeSeq& stru)
-{
-  return true;
-}
-
-size_t find_size(const TypeIdentifierWithDependencies& stru, size_t& size)
-{
-  return size;
-}
-
-bool operator<<(DCPS::Serializer& ser, const TypeIdentifierWithDependencies& stru)
+bool operator<<(Serializer& ser, const XTypes::CompleteBitmaskType& stru)
 {
   return true;
 }
 
 
 void serialized_size(const Encoding& encoding, size_t& size,
-  const CompleteTypeObject& type_object)
+  const XTypes::MinimalBitmaskType& stru)
 {
-  DCPS::max_serialized_size_octet(encoding, size); // discriminator
+}
+
+bool operator<<(Serializer& ser, const XTypes::MinimalBitmaskType& stru)
+{
+  return true;
+}
+
+
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::CompleteBitsetType& stru)
+{
+}
+
+bool operator<<(Serializer& ser, const XTypes::CompleteBitsetType& stru)
+{
+  return true;
+}
+
+
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::MinimalBitsetType& stru)
+{
+}
+
+bool operator<<(Serializer& ser, const XTypes::MinimalBitsetType& stru)
+{
+  return true;
+}
+
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::TypeIdentifierWithSize& stru)
+{
+}
+
+bool operator<<(Serializer& ser, const XTypes::TypeIdentifierWithSize& stru)
+{
+  return true;
+}
+
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::TypeIdentifierWithSizeSeq& stru)
+{
+}
+
+bool operator<<(Serializer& ser, const XTypes::TypeIdentifierWithSizeSeq& stru)
+{
+  return true;
+}
+
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::TypeIdentifierWithDependencies& stru)
+{
+}
+
+bool operator<<(Serializer& ser, const XTypes::TypeIdentifierWithDependencies& stru)
+{
+  return true;
+}
+
+
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::CompleteTypeObject& type_object)
+{
+  using namespace XTypes;
+  max_serialized_size_octet(encoding, size); // discriminator
 
   switch (type_object.kind) {
   case TK_ALIAS:
@@ -338,8 +357,9 @@ void serialized_size(const Encoding& encoding, size_t& size,
   }
 }
 
-bool operator<<(DCPS::Serializer& ser, const CompleteTypeObject& type_object)
+bool operator<<(Serializer& ser, const XTypes::CompleteTypeObject& type_object)
 {
+  using namespace XTypes;
   switch (type_object.kind) {
   case TK_ALIAS:
     return ser << type_object.alias_type;
@@ -367,9 +387,10 @@ bool operator<<(DCPS::Serializer& ser, const CompleteTypeObject& type_object)
 }
 
 void serialized_size(const Encoding& encoding, size_t& size,
-  const MinimalTypeObject& type_object)
+  const XTypes::MinimalTypeObject& type_object)
 {
-  DCPS::max_serialized_size_octet(encoding, size); // discriminator
+  using namespace XTypes;
+  max_serialized_size_octet(encoding, size); // discriminator
 
   switch (type_object.kind) {
   case TK_ALIAS:
@@ -397,8 +418,9 @@ void serialized_size(const Encoding& encoding, size_t& size,
   }
 }
 
-bool operator<<(DCPS::Serializer& ser, const MinimalTypeObject& type_object)
+bool operator<<(Serializer& ser, const XTypes::MinimalTypeObject& type_object)
 {
+  using namespace XTypes;
   if (!(ser << ACE_OutputCDR::from_octet(type_object.kind))) {
     return false;
   }
@@ -430,10 +452,11 @@ bool operator<<(DCPS::Serializer& ser, const MinimalTypeObject& type_object)
 }
 
 void serialized_size(const Encoding& encoding, size_t& size,
-  const TypeObject& type_object)
+  const XTypes::TypeObject& type_object)
 {
-  DCPS::max_serialized_size_ulong(encoding, size); // DHEADER
-  DCPS::max_serialized_size_octet(encoding, size); // discriminator
+  using namespace XTypes;
+  max_serialized_size_ulong(encoding, size); // DHEADER
+  max_serialized_size_octet(encoding, size); // discriminator
 
   switch (type_object.kind) {
   case EK_COMPLETE:
@@ -443,16 +466,16 @@ void serialized_size(const Encoding& encoding, size_t& size,
   }
 }
 
-bool operator<<(DCPS::Serializer& ser, const TypeObject& type_object)
+bool operator<<(Serializer& ser, const XTypes::TypeObject& type_object)
 {
+  using namespace XTypes;
   // XCDR2 Appendable Union: DELIMITED_CDR (7.4.2) = DHEADER + PLAIN_CDR2
   // DHEADER = UInt32 size of object that follows
   // subtracting the DHEADER's own size doesn't impact alignment since the
   // maximum alignment in PLAIN_CDR2 is 4
-  size_t object_size = 0;
-  serialized_size(ser.encoding(), object_size, type_object);
+  size_t object_size = serialized_size(ser.encoding(), type_object);
   size_t dheader_size = 0;
-  DCPS::max_serialized_size_ulong(ser.encoding(), dheader_size);
+  max_serialized_size_ulong(ser.encoding(), dheader_size);
   if (!ser.write_delimiter(object_size - dheader_size)) {
     return false;
   }
@@ -472,21 +495,19 @@ bool operator<<(DCPS::Serializer& ser, const TypeObject& type_object)
 }
 
 void serialized_size(const Encoding& encoding, size_t& size,
-  const TypeInformation& type_info)
+  const XTypes::TypeInformation& type_info)
 {
   //TODO
 }
 
-bool operator<<(DCPS::Serializer& ser, const TypeInformation& type_info)
+bool operator<<(Serializer& ser, const XTypes::TypeInformation& type_info)
 {
   return true; //TODO
 }
-bool operator>>(DCPS::Serializer& ser, TypeInformation& type_info)
+bool operator>>(Serializer& ser, XTypes::TypeInformation& type_info)
 {
   return true; //TODO
 }
-}
-namespace DCPS {
 
 template<>
 RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<void>()

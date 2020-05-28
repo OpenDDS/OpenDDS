@@ -988,16 +988,17 @@ RecorderImpl::enable()
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) RecorderImpl::add_subscription\n")));
 
-    OpenDDS::DCPS::TypeSupportImpl* const typesupport =
-      dynamic_cast<OpenDDS::DCPS::TypeSupportImpl*>(topic_servant_->get_type_support());
+    TypeSupportImpl* const typesupport =
+      dynamic_cast<TypeSupportImpl*>(topic_servant_->get_type_support());
     XTypes::TypeInformation type_info;
     type_info.minimal.dependent_typeid_count = 0;
     type_info.complete.dependent_typeid_count = 0;
     if (typesupport) {
-      size_t sto = XTypes::find_size(typesupport->getMinimalTypeObject());
-      XTypes::TypeIdentifierPtr type_iden = XTypes::makeTypeIdentifier(typesupport->getMinimalTypeObject());
+      const XTypes::TypeObject& type_object = typesupport->getMinimalTypeObject();
+      XTypes::TypeIdentifierPtr type_iden = XTypes::makeTypeIdentifier(type_object);
       type_info.minimal.typeid_with_size.type_id = type_iden;
-      type_info.minimal.typeid_with_size.typeobject_serialized_size = sto;
+      type_info.minimal.typeid_with_size.typeobject_serialized_size =
+        serialized_size(XTypes::get_typeobject_encoding(), type_object);
     } else {
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
       //TODO : How is XTypes going work with recorder replayer?
