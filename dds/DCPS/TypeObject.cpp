@@ -476,7 +476,10 @@ bool operator<<(DCPS::Serializer& ser, const TypeInformation& type_info)
 {
   return true; //TODO
 }
-
+bool operator>>(DCPS::Serializer& ser, TypeInformation& type_info)
+{
+  return true; //TODO
+}
 }
 namespace DCPS {
 

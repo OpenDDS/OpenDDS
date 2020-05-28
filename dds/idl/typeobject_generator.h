@@ -24,6 +24,8 @@ public:
   bool gen_union(AST_Union* node, UTL_ScopedName* name,
                  const std::vector<AST_UnionBranch*>& branches,
                  AST_Type* type, const char* repoid);
+
+  static std::string tag_type(UTL_ScopedName* name);
 };
 
 #endif
