@@ -138,7 +138,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                        -1);
     }
 
-    DDS::DataWriter_var dw2 =
+    /*DDS::DataWriter_var dw2 =
       pub->create_datawriter(topic.in(),
                              qos,
                              DDS::DataWriterListener::_nil(),
@@ -149,10 +149,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         ACE_TEXT("%N:%l: main()")
                         ACE_TEXT(" ERROR: create_datawriter 2 failed!\n")),
                        -1);
-    }
+    }*/
 
     {
-      Writer writer(dw, dw2, my_pid);
+      Writer writer(dw, /*dw2,*/ my_pid);
       writer.write(reliable, num_msgs);
     }
 
