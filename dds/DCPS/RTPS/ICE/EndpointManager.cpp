@@ -726,7 +726,7 @@ void EndpointManager::check_invariants() const
   for (DeferredTriggeredChecksType::const_iterator pos = deferred_triggered_checks_.begin(),
          limit = deferred_triggered_checks_.end(); pos != limit; ++pos) {
     const DeferredTriggeredCheckListType& list = pos->second;
-
+    ACE_UNUSED_ARG(list);
     OPENDDS_ASSERT(!list.empty());
     OPENDDS_ASSERT(list.front().expiration_date >= MonotonicTimePoint::now() - agent_impl->get_configuration().server_reflexive_address_period() - agent_impl->get_configuration().server_reflexive_address_period());
   }
