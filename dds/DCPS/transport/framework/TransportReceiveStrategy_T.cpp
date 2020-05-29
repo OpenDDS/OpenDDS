@@ -130,8 +130,6 @@ TransportReceiveStrategy<TH, DSH>::handle_simple_dds_input(ACE_HANDLE fd)
                                           fd,
                                           stop);
 
-  cur_rb->wr_ptr(bytes_remaining);
-
   if (stop) {
     return 0;
   }
@@ -140,6 +138,8 @@ TransportReceiveStrategy<TH, DSH>::handle_simple_dds_input(ACE_HANDLE fd)
     relink();
     return -1;
   }
+
+  cur_rb->wr_ptr(bytes_remaining);
 
   if (bytes_remaining == 0) {
     if (gracefully_disconnected_) {
