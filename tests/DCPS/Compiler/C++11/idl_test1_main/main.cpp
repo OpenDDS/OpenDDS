@@ -1,19 +1,19 @@
-#include "../idl_test1_lib/FooDefTypeSupportImpl.h"
-#include "dds/DCPS/Message_Block_Ptr.h"
-#include "ace/ACE.h"
-#include "ace/Log_Msg.h"
+#include <FooDefTypeSupportImpl.h>
+
+#include <dds/DCPS/Message_Block_Ptr.h>
+
+#include <ace/ACE.h>
+#include <ace/Log_Msg.h>
+
 #include <map>
 
-namespace {
-  template <typename T>
-  size_t find_size(const T& data, size_t& padding)
-  {
-    size_t size = 0;
-    padding = 0;
-    OpenDDS::DCPS::gen_find_size(data, size, padding);
-    return size;
-  }
-}
+using OpenDDS::DCPS::Encoding;
+using OpenDDS::DCPS::Serializer;
+using OpenDDS::DCPS::max_serialized_size;
+using OpenDDS::DCPS::serialized_size;
+using OpenDDS::DCPS::Message_Block_Ptr;
+
+const Encoding encoding(Encoding::KIND_CDR_UNALIGNED);
 
 bool idl2cxx11_test()
 {
@@ -52,165 +52,190 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   bool dump_buffer = false;
 
   if (argc > 1) dump_buffer = true;
-  size_t padding;
 
   {
     Xyz::StructAUnion sau;
     sau.sau_f1().rsv("joe", Xyz::ColorX::redx);
-    // size = union descr/4 + string length/4 + string contents/4
-    if (find_size(sau, padding) != 4+4+4) {
+    const size_t expected_size =
+      4 + // union discriminator
+      4 + // string length
+      4; // string contents
+    const size_t actual_size = serialized_size(encoding, sau);
+    if (expected_size != actual_size) {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("StructAUnion find_size failed with = %B\n"),
-        find_size(sau, padding)));
-      failed = true;
-    }
-    if (padding != 0) {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("StructAUnion find_size padding failed with = %B\n"),
-        padding));
+        ACE_TEXT("ERROR: StructAUnion expected serialized_size to return %B, ")
+        ACE_TEXT("but it returned %B.\n"),
+        expected_size, actual_size));
       failed = true;
     }
   }
+
   {
     Xyz::BoundedSeqStruct bss;
-    bss.seq().resize(2); //4 for seq length
-    bss.seq()[0] = "four"; //4+5 strlen + string
-    bss.seq()[1] = "five5"; //4+6 strlen + string
-    size_t size_bss = find_size(bss, padding);
-    if (size_bss != 23) {
+    bss.seq().resize(2);
+    bss.seq()[0] = "four";
+    bss.seq()[1] = "five5";
+    const size_t expected_size =
+      4 + // seq length
+      4 + 5 + // seq[0]
+      4 + 6; // seq[1]
+    size_t actual_size = serialized_size(encoding, bss);
+    if (expected_size != actual_size) {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("BoundedSeqStruct find_size failed with = %B ; expecting 23\n"),
-        size_bss));
-      failed = true;
-    }
-    if (padding != 3) {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("BoundedSeqStruct find_size padding failed with = %B\n"),
-        padding));
+        ACE_TEXT("ERROR: BoundedSeqStruct expected serialized_size to return ")
+        ACE_TEXT("%B, but it returned %B.\n"),
+        expected_size, actual_size));
       failed = true;
     }
   }
+
   {
+    const unsigned seqlen = 2;
     Xyz::ArrayOfShortsSeq ash;
-    ash.resize(2); //4 for seq length + 5*2 for arry *2 length
-    size_t size_ash = find_size(ash, padding);
-    if (size_ash != 24) {
+    ash.resize(seqlen);
+    const size_t expected_size =
+      4 + // seq length
+      5 * 2 * seqlen; // ArrayOfShorts * seqlen
+    size_t actual_size = serialized_size(encoding, ash);
+    if (expected_size != actual_size) {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("ArrayOfShortsSeq find_size failed with = %B ; expecting 24\n"),
-        size_ash));
-      failed = true;
-    }
-    if (padding != 0) {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("ArrayOfShortsSeq find_size padding failed with = %B\n"),
-        padding));
+        ACE_TEXT("ERROR: ArrayOfShortsSeq expected serialized_size to return ")
+        ACE_TEXT("%B, but it returned %B.\n"),
+        expected_size, actual_size));
       failed = true;
     }
   }
+
   {
     Xyz::StructContainingArrayOfAStruct aas;
-    aas.f1()[0].v2s().resize(2); //4 for v1 + 4 for length seq + 2*2
-    aas.f1()[1].v2s().resize(1); //4 for v1 + 4 for length seq + 2
-    aas.f1()[2].v2s().resize(0); //4 for v1 + 4 for length seq + 0
-    size_t size_aas = find_size(aas, padding);
-    if (size_aas != 30) {
+    aas.f1()[0].v2s().resize(2);
+    aas.f1()[1].v2s().resize(1);
+    aas.f1()[2].v2s().resize(0);
+    const size_t expected_size =
+      4 + // f1[0].v1
+      4 + // f1[0].v2s length
+      2 * 2 + // f1[0].v2s contents
+      4 + // f1[1].v1
+      4 + // f1[1].v2s length
+      2 * 1 + // f1[1].v2s contents
+      4 + // f1[2].v1
+      4 + // f1[2].v2s length
+      2 * 0; // f1[2].v2s contents
+    size_t actual_size = serialized_size(encoding, aas);
+    if (expected_size != actual_size) {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("StructContainingArrayOfAStruct find_size failed with = %B ; expecting 30\n"),
-        size_aas));
-      failed = true;
-    }
-    if (padding != 2) {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("StructContainingArrayOfAStruct find_size padding failed with = %B\n"),
-        padding));
+        ACE_TEXT("ERROR: StructContainingArrayOfAStruct expected ")
+        ACE_TEXT("serialized_size to return %B, but it returned %B.\n"),
+        expected_size, actual_size));
       failed = true;
     }
   }
+
   {
     Xyz::StructContainingArrayOfAStructSeq aas;
-    aas.f1()[0].resize(1); //4 for length
-    aas.f1()[0][0].v2s().resize(2); //4 for v1 + 4 for length seq + 2*2
-    aas.f1()[1].resize(1);//4 for length
-    aas.f1()[1][0].v2s().resize(1); //4 for v1 + 4 for length seq + 2
-    aas.f1()[2].resize(1);//4 for length
-    aas.f1()[2][0].v2s().resize(0); //4 for v1 + 4 for length seq + 0
-    size_t size_aas = find_size(aas, padding);
-    if (size_aas != 42) {
+    aas.f1()[0].resize(1);
+    aas.f1()[0][0].v2s().resize(2);
+    aas.f1()[1].resize(1);
+    aas.f1()[1][0].v2s().resize(1);
+    aas.f1()[2].resize(1);
+    aas.f1()[2][0].v2s().resize(0);
+    const size_t expected_size =
+      // f1[0]
+        4 + // length
+        // [0]
+          4 + // v1
+          // v2s
+            4 + // length
+            2 * 2 + // contents
+      // f1[1]
+        4 + // length
+        // [0]
+          4 + // v1
+          // v2s
+            4 + // length
+            2 * 1 + // contents
+      // f1[2]
+        4 + // length
+        // [0]
+          4 + // v1
+          // v2s
+            4 + // length
+            2 * 0; // contents
+    size_t actual_size = serialized_size(encoding, aas);
+    if (expected_size != actual_size) {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("StructContainingArrayOfAStructSeq find_size failed ")
-        ACE_TEXT("with = %B ; expecting 42\n"),
-        size_aas));
-      failed = true;
-    }
-    if (padding != 2) {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("StructContainingArrayOfAStructSeq find_size padding failed with = %B\n"),
-        padding));
+        ACE_TEXT("ERROR: StructContainingArrayOfAStructSeq expected ")
+        ACE_TEXT("serialized_size to return %B, but it returned %B.\n"),
+        expected_size, actual_size));
       failed = true;
     }
   }
+
   {
-  N1::FwdDeclStructSeqWrapper fwddeclstructs;
-  fwddeclstructs.wrapped().resize(2);
-  fwddeclstructs.wrapped()[0].v1() = -5;
-  fwddeclstructs.wrapped()[1].v1() = 43;
+    N1::FwdDeclStructSeqWrapper fwddeclstructs;
+    fwddeclstructs.wrapped().resize(2);
+    fwddeclstructs.wrapped()[0].v1() = -5;
+    fwddeclstructs.wrapped()[1].v1() = 43;
 
-  OpenDDS::DCPS::Message_Block_Ptr b (new ACE_Message_Block( 100000)) ;
-  OpenDDS::DCPS::Serializer serializer( b.get(), false) ;
+    Message_Block_Ptr b(new ACE_Message_Block(100000));
+    Serializer serializer(b.get(), encoding);
 
-  serializer << fwddeclstructs;
+    if (!(serializer << fwddeclstructs)) {
+      ACE_ERROR((LM_ERROR, "FwdDeclStructSeqWrapper serialization failed\n"));
+      failed = true;
+    }
 
-  OpenDDS::DCPS::Serializer deserializer( b.get(), false) ;
-  N1::FwdDeclStructSeqWrapper fwddeclstructs2;
-  deserializer >> fwddeclstructs2;
+    Serializer deserializer(b.get(), encoding);
+    N1::FwdDeclStructSeqWrapper fwddeclstructs2;
+    deserializer >> fwddeclstructs2;
 
-  if (fwddeclstructs2.wrapped().size() != 2)
-    {
+    if (fwddeclstructs2.wrapped().size() != 2) {
       ACE_ERROR((LM_ERROR, "FwdDeclSameNamespaceStructs Size failed\n"));
       failed = true;
     }
 
-  if (fwddeclstructs2.wrapped()[0].v1() != -5)
-    {
+    if (fwddeclstructs2.wrapped()[0].v1() != -5) {
       ACE_ERROR((LM_ERROR, "FwdDeclSameNamespaceStructs array index 0 failed\n"));
       failed = true;
     }
 
-  if (fwddeclstructs2.wrapped()[1].v1() != 43)
-    {
+    if (fwddeclstructs2.wrapped()[1].v1() != 43) {
       ACE_ERROR((LM_ERROR, "FwdDeclSameNamespaceStructs array index 1 failed\n"));
       failed = true;
     }
   }
 
   {
-  N2::FwdDeclStructSeqWrapper fwddeclstructs;
-  fwddeclstructs.wrapped().resize(2);
-  fwddeclstructs.wrapped()[0].v1() = -5;
-  fwddeclstructs.wrapped()[1].v1() = 43;
-  OpenDDS::DCPS::Message_Block_Ptr b (new ACE_Message_Block( 100000)) ;
-  OpenDDS::DCPS::Serializer serializer( b.get(), false) ;
+    N2::FwdDeclStructSeqWrapper fwddeclstructs;
+    fwddeclstructs.wrapped().resize(2);
+    fwddeclstructs.wrapped()[0].v1() = -5;
+    fwddeclstructs.wrapped()[1].v1() = 43;
+    Message_Block_Ptr b(new ACE_Message_Block(100000));
 
-  serializer << fwddeclstructs;
+    Serializer serializer(b.get(), encoding);
+    if (!(serializer << fwddeclstructs)) {
+      ACE_ERROR((LM_ERROR, "FwdDeclSameNamespaceStructs serialization failed\n"));
+      failed = true;
+    }
 
-  OpenDDS::DCPS::Serializer deserializer( b.get(), false) ;
-  N2::FwdDeclStructSeqWrapper fwddeclstructs2;
-  deserializer >> fwddeclstructs2;
+    Serializer deserializer(b.get(), encoding);
+    N2::FwdDeclStructSeqWrapper fwddeclstructs2;
+    if (!(serializer >> fwddeclstructs2)) {
+      ACE_ERROR((LM_ERROR, "FwdDeclSameNamespaceStructs deserialization failed\n"));
+      failed = true;
+    }
 
-  if (fwddeclstructs2.wrapped().size() != 2)
-    {
+    if (fwddeclstructs2.wrapped().size() != 2) {
       ACE_ERROR((LM_ERROR, "FwdDeclDiffNamespaceStructs Size failed\n"));
       failed = true;
     }
 
-  if (fwddeclstructs2.wrapped()[0].v1() != -5)
-    {
+    if (fwddeclstructs2.wrapped()[0].v1() != -5) {
       ACE_ERROR((LM_ERROR, "FwdDeclDiffNamespaceStructs array index 0 failed\n"));
       failed = true;
     }
 
-  if (fwddeclstructs2.wrapped()[1].v1() != 43)
-    {
+    if (fwddeclstructs2.wrapped()[1].v1() != 43) {
       ACE_ERROR((LM_ERROR, "FwdDeclDiffNamespaceStructs array index 1 failed\n"));
       failed = true;
     }
@@ -218,18 +243,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   {
     Xyz::StructOfArrayOfArrayOfShorts2 aas;
-    size_t size_aas = find_size(aas, padding);
-    if (size_aas != 18) {
+    const size_t expected_size = 18;
+    const size_t actual_size = serialized_size(encoding, aas);
+    if (actual_size != expected_size) {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("StructOfArrayOfArrayOfShorts2 find_size failed ")
-        ACE_TEXT("with = %B ; expecting 18\n"),
-        size_aas));
-      failed = true;
-    }
-    if (padding != 0) {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("StructOfArrayOfArrayOfShorts2 find_size padding failed with = %B\n"),
-        padding));
+        ACE_TEXT("StructOfArrayOfArrayOfShorts2 serialized_size failed ")
+        ACE_TEXT("with = %B ; expecting %B\n"),
+        actual_size, expected_size));
       failed = true;
     }
 
@@ -240,15 +260,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
     }
 
-    ACE_Message_Block mb(size_aas);
-    OpenDDS::DCPS::Serializer ss(&mb);
+    ACE_Message_Block mb(actual_size);
+    Serializer ss(&mb, encoding);
 
     if (!(ss << aas)) {
       ACE_ERROR((LM_ERROR, "Serializing StructOfArrayOfArrayOfShorts2 failed\n"));
       failed = true;
     }
 
-    OpenDDS::DCPS::Serializer ss2(&mb);
+    Serializer ss2(&mb, encoding);
 
     Xyz::StructOfArrayOfArrayOfShorts2 aas2;
     if (!(ss2 >> aas2)) {
@@ -271,13 +291,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   if (!OpenDDS::DCPS::DDSTraits<Xyz::AStruct>::gen_has_key()) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("_dcps_has_key(Xyz::AStruct) returned false when expecting true.\n")
+      ACE_TEXT("gen_has_key(Xyz::AStruct) returned false when expecting true.\n")
       ));
   }
 
   if (OpenDDS::DCPS::DDSTraits<Xyz::StructContainingArrayOfAStructSeq>::gen_has_key()) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("_dcps_has_key(Xyz::StructContainingArrayOfAStructSeq) returned true when expecting false.\n")
+      ACE_TEXT("gen_has_key(Xyz::StructContainingArrayOfAStructSeq) returned true when expecting false.\n")
       ));
   }
 
@@ -356,50 +376,54 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     ACE_DEBUG((LM_DEBUG, "NOTE: _dcps_has_key(foo) returned false\n"));
   }
 
-  const CORBA::Boolean expected_bounded = false;
-  const size_t expected_find_size = 79;
-  const size_t expected_padding = 7;
+  const size_t expected_max_size = 0;
+  const bool expected_bounded = false;
+  const size_t expected_size = 79;
 
-  size_t ms = OpenDDS::DCPS::gen_max_marshaled_size(my_foo, false /*align*/);
-  CORBA::Boolean bounded = OpenDDS::DCPS::MarshalTraits<Xyz::Foo>::gen_is_bounded_size();
-  size_t cs = find_size(my_foo, padding);
+  const size_t actual_max_size = max_serialized_size(encoding, my_foo);
+  const bool actual_bounded =
+    OpenDDS::DCPS::MarshalTraits<Xyz::Foo>::gen_is_bounded_size();
+  const size_t actual_size = serialized_size(encoding, my_foo);
 
-  ACE_DEBUG((LM_DEBUG,"OpenDDS::DCPS::gen_max_marshaled_size(my_foo) => %B\n", ms));
-  ACE_DEBUG((LM_DEBUG,"OpenDDS::DCPS::gen_is_bounded_size(my_foo) => %d\n", int(bounded)));
-  ACE_DEBUG((LM_DEBUG,"OpenDDS::DCPS::gen_find_size(my_foo) => %B\n", cs));
+  ACE_DEBUG((LM_DEBUG,"max_serialized_size(my_foo) => %B\n", actual_max_size));
+  ACE_DEBUG((LM_DEBUG,"gen_is_bounded_size(my_foo) => %d\n", int(actual_bounded)));
+  ACE_DEBUG((LM_DEBUG,"serialized_size(my_foo) => %B\n", actual_size));
 
-  if (bounded != expected_bounded) {
-    ACE_ERROR((LM_ERROR, "OpenDDS::DCPS::gen_is_bounded_size(Foo) failed - expected %d got %d\n",
-      int(expected_bounded), int(bounded)));
+  if (actual_max_size != expected_max_size) {
+    ACE_ERROR((LM_ERROR,
+      "max_serialized_size(my_foo) failed: returned %B when was expecting %B\n",
+      actual_max_size, expected_max_size));
     failed = true;
   }
 
-  if (!bounded && cs != expected_find_size) {
+
+  if (actual_bounded != expected_bounded) {
     ACE_ERROR((LM_ERROR,
-      "OpenDDS::DCPS::gen_find_size(Foo) returned %B when was expecting %B\n",
-      cs, expected_find_size));
+      "gen_is_bounded_size(my_foo) failed: expected %d got %d\n",
+      int(expected_bounded), int(actual_bounded)));
     failed = true;
   }
 
-  if (padding != expected_padding) {
+  if (actual_size != expected_size) {
     ACE_ERROR((LM_ERROR,
-      "OpenDDS::DCPS::gen_find_size(Foo) padding = %B when was expecting %B\n",
-      padding, expected_padding));
+      "serialized_size(my_foo) failed: returned %B when was expecting %B\n",
+      actual_size, expected_size));
     failed = true;
   }
 
   // test serializing
 
-  const size_t buff_size = bounded ? ms : cs;
+  const size_t buff_size = actual_bounded ? actual_max_size : actual_size;
   ACE_Message_Block mb(buff_size);
-  OpenDDS::DCPS::Serializer ss(&mb);
-  OpenDDS::DCPS::Serializer ss2(&mb);
+  Serializer ss(&mb, encoding);
+  Serializer ss2(&mb, encoding);
 
   Xyz::Foo ss_foo;
   try {
-    ACE_TCHAR ebuffer[512]; ebuffer[0] = ACE_TEXT('\0');
-    ACE_TCHAR obuffer[512]; obuffer[0] = ACE_TEXT('\0');
-
+    ACE_TCHAR ebuffer[512];
+    ebuffer[0] = ACE_TEXT('\0');
+    ACE_TCHAR obuffer[512];
+    obuffer[0] = ACE_TEXT('\0');
 
     if (dump_buffer) {
       ACE::format_hexdump(mb.rd_ptr(), mb.length(), ebuffer, sizeof(ebuffer));
@@ -493,13 +517,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
-    return -1;
+    failed = true;
   }
 
-  if (failed)
-    ACE_ERROR((LM_ERROR, "%s FAILED!\n", argv[0]));
-  else
-    ACE_ERROR((LM_ERROR, "%s PASSED\n", argv[0]));
+  ACE_ERROR((LM_ERROR, "%s %C\n", argv[0], failed ? "FAILED" : "PASSED"));
 
   return failed; // let the test framework know it failed
 }

@@ -6,14 +6,15 @@
  */
 
 #include "ts_generator.h"
+
 #include "be_extern.h"
 #include "be_util.h"
 #include "topic_keys.h"
-
-#include "utl_identifier.h"
 #include "typeobject_generator.h"
 
-#include "ace/OS_NS_sys_stat.h"
+#include <utl_identifier.h>
+
+#include <ace/OS_NS_sys_stat.h>
 
 #include <cstring>
 #include <fstream>
@@ -151,7 +152,8 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
 
   be_global->header_ <<
     "OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL\n"
-    "namespace OpenDDS { namespace DCPS {\n"
+    "namespace OpenDDS {\n"
+    "namespace DCPS {\n"
     "template <>\n"
     "struct DDSTraits<" << cxxName << "> {\n"
     "  typedef " << cxxName << " MessageType;\n"
@@ -161,17 +163,43 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
     "  typedef " << cxxName << "DataWriter DataWriterType;\n"
     "  typedef " << cxxName << "DataReader DataReaderType;\n"
     "  typedef " << cxxName << "_OpenDDS_KeyLessThan LessThanType;\n"
+    "  typedef OpenDDS::DCPS::KeyOnly<const " << cxxName << "> KeyOnlyType;\n"
     "\n"
     "  static const char* type_name() { return \"" << cxxName << "\"; }\n"
     "  static bool gen_has_key() { return " << (key_count ? "true" : "false") << "; }\n"
     "  static size_t key_count() { return " << key_count << "; }\n"
     "\n"
-    "  static size_t gen_max_marshaled_size(const MessageType& x, bool align) { return ::OpenDDS::DCPS::gen_max_marshaled_size(x, align); }\n"
-    "  static void gen_find_size(const MessageType& arr, size_t& size, size_t& padding) { ::OpenDDS::DCPS::gen_find_size(arr, size, padding); }\n"
+    "  static bool max_serialized_size(\n"
+    "    const ::OpenDDS::DCPS::Encoding& encoding, size_t& size,\n"
+    "    const MessageType& value)\n"
+    "  {\n"
+    "    return ::OpenDDS::DCPS::max_serialized_size(encoding, size, value);\n"
+    "  }\n"
     "\n"
-    "  static size_t gen_max_marshaled_size(const OpenDDS::DCPS::KeyOnly<const MessageType>& x, bool align) { return ::OpenDDS::DCPS::gen_max_marshaled_size(x, align); }\n"
-    "  static void gen_find_size(const OpenDDS::DCPS::KeyOnly<const MessageType>& arr, size_t& size, size_t& padding) { ::OpenDDS::DCPS::gen_find_size(arr, size, padding); }\n"
-    "};\n}  }\nOPENDDS_END_VERSIONED_NAMESPACE_DECL\n\n";
+    "  static void serialized_size(\n"
+    "    const ::OpenDDS::DCPS::Encoding& encoding, size_t& size,\n"
+    "    const MessageType& value)\n"
+    "  {\n"
+    "    ::OpenDDS::DCPS::serialized_size(encoding, size, value);\n"
+    "  }\n"
+    "\n"
+    "  static bool max_serialized_size(\n"
+    "    const ::OpenDDS::DCPS::Encoding& encoding, size_t& size,\n"
+    "    const KeyOnlyType& value)\n"
+    "  {\n"
+    "    return ::OpenDDS::DCPS::max_serialized_size(encoding, size, value);\n"
+    "  }\n"
+    "\n"
+    "  static void serialized_size(\n"
+    "    const ::OpenDDS::DCPS::Encoding& encoding, size_t& size,\n"
+    "    const KeyOnlyType& value)\n"
+    "  {\n"
+    "    ::OpenDDS::DCPS::serialized_size(encoding, size, value);\n"
+    "  }\n"
+    "};\n"
+    "} // namespace DCPS\n"
+    "} // namespace OpenDDS\n"
+    "OPENDDS_END_VERSIONED_NAMESPACE_DECL\n\n";
 
   be_global->header_ << be_global->versioning_begin() << "\n";
   {

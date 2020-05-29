@@ -21,6 +21,9 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {
 
+OpenDDS_Dcps_Export
+const DCPS::Encoding& get_typeobject_encoding();
+
   template <typename T>
   struct Optional {
     bool present;
@@ -634,9 +637,6 @@ namespace XTypes {
     }
   };
 
-  size_t find_size(const TypeIdentifier& stru, size_t& size);
-  bool operator<<(DCPS::Serializer& ser, const TypeIdentifier& stru);
-
   typedef Sequence<TypeIdentifierPtr> TypeIdentifierSeq;
 
   // --- Annotation usage: -----------------------------------------------
@@ -837,9 +837,6 @@ namespace XTypes {
     CompleteStructMemberSeq    member_seq;
   };
 
-  size_t find_size(const CompleteStructType& stru, size_t& size);
-  bool operator<<(DCPS::Serializer& ser, const CompleteStructType& stru);
-
   struct MinimalStructType {
     StructTypeFlag             struct_flags;
     MinimalStructHeader        header;
@@ -855,9 +852,6 @@ namespace XTypes {
       , member_seq(a_member_seq)
     {}
   };
-
-  size_t find_size(const MinimalStructType& stru, size_t& size);
-  bool operator<<(DCPS::Serializer& ser, const MinimalStructType& stru);
 
   // --- Union: ----------------------------------------------------------
 
@@ -965,9 +959,6 @@ namespace XTypes {
     CompleteUnionMemberSeq       member_seq;
   };
 
-  size_t find_size(const CompleteUnionType& stru, size_t& size);
-  bool operator<<(DCPS::Serializer& ser, const CompleteUnionType& stru);
-
   struct MinimalUnionType {
     UnionTypeFlag                union_flags;
     MinimalUnionHeader           header;
@@ -986,9 +977,6 @@ namespace XTypes {
       , member_seq(a_member_seq)
     {}
   };
-
-  size_t find_size(const MinimalUnionType& stru, size_t& size);
-  bool operator<<(DCPS::Serializer& ser, const MinimalUnionType& stru);
 
   // --- Annotation: ----------------------------------------------------
   struct CommonAnnotationParameter {
@@ -1027,18 +1015,11 @@ namespace XTypes {
     CompleteAnnotationParameterSeq member_seq;
   };
 
-  size_t find_size(const CompleteAnnotationType& stru, size_t& size);
-  bool operator<<(DCPS::Serializer& ser, const CompleteAnnotationType& stru);
-
   struct MinimalAnnotationType {
     AnnotationTypeFlag             annotation_flag;
     MinimalAnnotationHeader        header;
     MinimalAnnotationParameterSeq  member_seq;
   };
-
-  size_t find_size(const MinimalAnnotationType& stru, size_t& size);
-  bool operator<<(DCPS::Serializer& ser, const MinimalAnnotationType& stru);
-
 
   // --- Alias: ----------------------------------------------------------
   struct CommonAliasBody {
@@ -1084,9 +1065,6 @@ namespace XTypes {
     CompleteAliasBody     body;
   };
 
-  size_t find_size(const CompleteAliasType& stru, size_t& size);
-  bool operator<<(DCPS::Serializer& ser, const CompleteAliasType& stru);
-
   struct MinimalAliasType {
     AliasTypeFlag         alias_flags;
     MinimalAliasHeader    header;
@@ -1102,9 +1080,6 @@ namespace XTypes {
       , body(a_body)
     {}
   };
-
-  size_t find_size(const MinimalAliasType& stru, size_t& size);
-  bool operator<<(DCPS::Serializer& ser, const MinimalAliasType& stru);
 
   // --- Collections: ----------------------------------------------------
   struct CompleteElementDetail {
@@ -1146,17 +1121,11 @@ namespace XTypes {
     CompleteCollectionElement  element;
   };
 
-  size_t find_size(const CompleteSequenceType& stru, size_t& size);
-  bool operator<<(DCPS::Serializer& ser, const CompleteSequenceType& stru);
-
   struct MinimalSequenceType {
     CollectionTypeFlag         collection_flag;
     MinimalCollectionHeader    header;
     MinimalCollectionElement   element;
   };
-
-  size_t find_size(const MinimalSequenceType& stru, size_t& size);
-  bool operator<<(DCPS::Serializer& ser, const MinimalSequenceType& stru);
 
   // --- Array: ------------------------------------------------------
   struct CommonArrayHeader {
@@ -1178,17 +1147,11 @@ namespace XTypes {
     CompleteCollectionElement   element;
   };
 
-  size_t find_size(const CompleteArrayType& stru, size_t& size);
-  bool operator<<(DCPS::Serializer& ser, const CompleteArrayType& stru);
-
   struct MinimalArrayType  {
     CollectionTypeFlag         collection_flag;
     MinimalArrayHeader         header;
     MinimalCollectionElement   element;
   };
-
-  size_t find_size(const MinimalArrayType& stru, size_t& size);
-  bool operator<<(DCPS::Serializer& ser, const MinimalArrayType& stru);
 
   // --- Map: ------------------------------------------------------
   struct CompleteMapType {
@@ -1198,18 +1161,12 @@ namespace XTypes {
     CompleteCollectionElement     element;
   };
 
-  size_t find_size(const CompleteMapType& stru, size_t& size);
-  bool operator<<(DCPS::Serializer& ser, const CompleteMapType& stru);
-
   struct MinimalMapType {
     CollectionTypeFlag          collection_flag;
     MinimalCollectionHeader     header;
     MinimalCollectionElement    key;
     MinimalCollectionElement    element;
   };
-
-  size_t find_size(const MinimalMapType& stru, size_t& size);
-  bool operator<<(DCPS::Serializer& ser, const MinimalMapType& stru);
 
   // --- Enumeration: ----------------------------------------------------
   typedef ACE_CDR::UShort BitBound;
@@ -1288,9 +1245,6 @@ namespace XTypes {
     CompleteEnumeratedLiteralSeq    literal_seq;
   };
 
-  size_t find_size(const CompleteEnumeratedType& stru, size_t& size);
-  bool operator<<(DCPS::Serializer& ser, const CompleteEnumeratedType& stru);
-
   // Enumerated type
   struct MinimalEnumeratedType  {
     EnumTypeFlag                  enum_flags; // unused
@@ -1307,9 +1261,6 @@ namespace XTypes {
       , literal_seq(a_literal_seq)
     {}
   };
-
-  size_t find_size(const MinimalEnumeratedType& stru, size_t& size);
-  bool operator<<(DCPS::Serializer& ser, const MinimalEnumeratedType& stru);
 
   // --- Bitmask: --------------------------------------------------------
   // Bit in a bit mask
@@ -1346,17 +1297,11 @@ namespace XTypes {
     CompleteBitflagSeq       flag_seq;
   };
 
-  size_t find_size(const CompleteBitmaskType& stru, size_t& size);
-  bool operator<<(DCPS::Serializer& ser, const CompleteBitmaskType& stru);
-
   struct MinimalBitmaskType {
     BitmaskTypeFlag          bitmask_flags; // unused
     MinimalBitmaskHeader     header;
     MinimalBitflagSeq        flag_seq;
   };
-
-  size_t find_size(const MinimalBitmaskType& stru, size_t& size);
-  bool operator<<(DCPS::Serializer& ser, const MinimalBitmaskType& stru);
 
   // --- Bitset: ----------------------------------------------------------
   struct CommonBitfield {
@@ -1394,17 +1339,11 @@ namespace XTypes {
     CompleteBitfieldSeq    field_seq;
   };
 
-  size_t find_size(const CompleteBitsetType& stru, size_t& size);
-  bool operator<<(DCPS::Serializer& ser, const CompleteBitsetType& stru);
-
   struct MinimalBitsetType  {
     BitsetTypeFlag       bitset_flags; // unused
     MinimalBitsetHeader  header;
     MinimalBitfieldSeq   field_seq;
   };
-
-  size_t find_size(const MinimalBitsetType& stru, size_t& size);
-  bool operator<<(DCPS::Serializer& ser, const MinimalBitsetType& stru);
 
   // --- Type Object: ---------------------------------------------------
   // The types associated with each case selection must have extensibility
@@ -1413,9 +1352,6 @@ namespace XTypes {
   struct CompleteExtendedType {
     // Empty. Available for future extension
   };
-
-  inline size_t find_size(const CompleteExtendedType&, size_t& size) { return size; }
-  inline bool operator<<(DCPS::Serializer&, const CompleteExtendedType&) { return true; }
 
   // @extensibility(FINAL)     @nested
   // union CompleteTypeObject switch (octet) {
@@ -1462,15 +1398,9 @@ namespace XTypes {
     CompleteExtendedType   extended_type;
   };
 
-  size_t find_size(const CompleteTypeObject& type_object, size_t& size);
-  bool operator<<(DCPS::Serializer& ser, const CompleteTypeObject& type_object);
-
   struct MinimalExtendedType {
     // Empty. Available for future extension
   };
-
-  inline size_t find_size(const MinimalExtendedType&, size_t& size) { return size; }
-  inline bool operator<<(DCPS::Serializer&, const MinimalExtendedType&) { return true; }
 
   // @extensibility(FINAL)     @nested
   // union MinimalTypeObject switch (octet) {
@@ -1569,9 +1499,6 @@ namespace XTypes {
     {}
   };
 
-  size_t find_size(const MinimalTypeObject& type_object, size_t& size);
-  bool operator<<(DCPS::Serializer& ser, const MinimalTypeObject& type_object);
-
   // @extensibility(APPENDABLE)  @nested
   // union TypeObject switch (octet) { // EquivalenceKind
   // case EK_COMPLETE:
@@ -1595,12 +1522,6 @@ namespace XTypes {
       , minimal(a_minimal)
     {}
   };
-
-  OpenDDS_Dcps_Export
-  size_t find_size(const TypeObject& type_object);
-
-  OpenDDS_Dcps_Export
-  bool operator<<(DCPS::Serializer& ser, const TypeObject& type_object);
 
   typedef Sequence<TypeObject> TypeObjectSeq;
 
@@ -1626,12 +1547,7 @@ namespace XTypes {
     TypeIdentifierPtr  type_id;
     ACE_CDR::ULong  typeobject_serialized_size;
   };
-  size_t find_size(const TypeIdentifierWithSize& stru, size_t& size);
-  bool operator<<(DCPS::Serializer& ser, const TypeIdentifierWithSize& stru);
-
   typedef Sequence<TypeIdentifierWithSize> TypeIdentifierWithSizeSeq;
-  size_t find_size(const TypeIdentifierWithSizeSeq& stru, size_t& size);
-  bool operator<<(DCPS::Serializer& ser, const TypeIdentifierWithSizeSeq& stru);
 
   struct TypeIdentifierWithDependencies {
     TypeIdentifierWithSize            typeid_with_size;
@@ -1639,8 +1555,6 @@ namespace XTypes {
     ACE_CDR::Long                             dependent_typeid_count;
     std::vector<TypeIdentifierWithSize>  dependent_typeids;
   };
-  size_t find_size(const TypeIdentifierWithDependencies& stru, size_t& size);
-  bool operator<<(DCPS::Serializer& ser, const TypeIdentifierWithDependencies& stru);
 
   typedef Sequence<TypeIdentifierWithDependencies> TypeIdentifierWithDependenciesSeq;
 
@@ -1652,16 +1566,6 @@ namespace XTypes {
     TypeIdentifierWithDependencies complete;
   };
   typedef Sequence<TypeInformation> TypeInformationSeq;
-
-
-  OpenDDS_Dcps_Export
-  size_t find_size(const TypeInformation& type_info);
-
-  OpenDDS_Dcps_Export
-  bool operator<<(DCPS::Serializer& ser, const TypeInformation& type_info);
-
-  OpenDDS_Dcps_Export
-  bool operator>>(DCPS::Serializer& ser, TypeInformation& type_info);
 
   OpenDDS_Dcps_Export
   TypeIdentifierPtr makeTypeIdentifier(const TypeObject& type_object);
@@ -1722,6 +1626,143 @@ RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_CDR::Char*>();
 
 template<> OpenDDS_Dcps_Export
 RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_CDR::WChar*>();
+
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::CompleteStructType& stru);
+bool operator<<(Serializer& ser, const XTypes::CompleteStructType& stru);
+
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::MinimalStructType& stru);
+bool operator<<(Serializer& ser, const XTypes::MinimalStructType& stru);
+
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::CompleteUnionType& stru);
+bool operator<<(Serializer& ser, const XTypes::CompleteUnionType& stru);
+
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::MinimalUnionType& stru);
+bool operator<<(Serializer& ser, const XTypes::MinimalUnionType& stru);
+
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::CompleteAnnotationType& stru);
+bool operator<<(Serializer& ser, const XTypes::CompleteAnnotationType& stru);
+
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::MinimalAnnotationType& stru);
+bool operator<<(Serializer& ser, const XTypes::MinimalAnnotationType& stru);
+
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::CompleteAliasType& stru);
+bool operator<<(Serializer& ser, const XTypes::CompleteAliasType& stru);
+
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::MinimalAliasType& stru);
+bool operator<<(Serializer& ser, const XTypes::MinimalAliasType& stru);
+
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::CompleteSequenceType& stru);
+bool operator<<(Serializer& ser, const XTypes::CompleteSequenceType& stru);
+
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::MinimalSequenceType& stru);
+bool operator<<(Serializer& ser, const XTypes::MinimalSequenceType& stru);
+
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::CompleteArrayType& stru);
+bool operator<<(Serializer& ser, const XTypes::CompleteArrayType& stru);
+
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::MinimalArrayType& stru);
+bool operator<<(Serializer& ser, const XTypes::MinimalArrayType& stru);
+
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::CompleteMapType& stru);
+bool operator<<(Serializer& ser, const XTypes::CompleteMapType& stru);
+
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::MinimalMapType& stru);
+bool operator<<(Serializer& ser, const XTypes::MinimalMapType& stru);
+
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::CompleteEnumeratedType& stru);
+bool operator<<(Serializer& ser, const XTypes::CompleteEnumeratedType& stru);
+
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::MinimalEnumeratedType& stru);
+bool operator<<(Serializer& ser, const XTypes::MinimalEnumeratedType& stru);
+
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::MinimalBitmaskType& stru);
+bool operator<<(Serializer& ser, const XTypes::MinimalBitmaskType& stru);
+
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::CompleteBitmaskType& stru);
+bool operator<<(Serializer& ser, const XTypes::CompleteBitmaskType& stru);
+
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::CompleteBitsetType& stru);
+bool operator<<(Serializer& ser, const XTypes::CompleteBitsetType& stru);
+
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::MinimalBitsetType& stru);
+bool operator<<(Serializer& ser, const XTypes::MinimalBitsetType& stru);
+
+inline void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::CompleteExtendedType&)
+{
+  ACE_UNUSED_ARG(encoding);
+  ACE_UNUSED_ARG(size);
+}
+inline bool operator<<(Serializer&, const XTypes::CompleteExtendedType&) { return true; }
+
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::CompleteTypeObject& type_object);
+bool operator<<(Serializer& ser, const XTypes::CompleteTypeObject& type_object);
+
+inline void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::MinimalExtendedType&)
+{
+  ACE_UNUSED_ARG(encoding);
+  ACE_UNUSED_ARG(size);
+}
+inline bool operator<<(Serializer&, const XTypes::MinimalExtendedType&) { return true; }
+
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::MinimalTypeObject& type_object);
+bool operator<<(Serializer& ser, const XTypes::MinimalTypeObject& type_object);
+
+OpenDDS_Dcps_Export
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::TypeObject& type_object);
+
+OpenDDS_Dcps_Export
+bool operator<<(Serializer& ser, const XTypes::TypeObject& type_object);
+
+OpenDDS_Dcps_Export
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::TypeInformation& type_info);
+
+OpenDDS_Dcps_Export
+bool operator<<(Serializer& ser, const XTypes::TypeInformation& type_info);
+
+OpenDDS_Dcps_Export
+bool operator>>(Serializer& ser, XTypes::TypeInformation& type_info);
+
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::TypeIdentifier& stru);
+bool operator<<(Serializer& ser, const XTypes::TypeIdentifier& stru);
+
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::TypeIdentifierWithSize& stru);
+bool operator<<(Serializer& ser, const XTypes::TypeIdentifierWithSize& stru);
+
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::TypeIdentifierWithSizeSeq& stru);
+bool operator<<(Serializer& ser, const XTypes::TypeIdentifierWithSizeSeq& stru);
+
+void serialized_size(const Encoding& encoding, size_t& size,
+  const XTypes::TypeIdentifierWithDependencies& stru);
+bool operator<<(Serializer& ser, const XTypes::TypeIdentifierWithDependencies& stru);
 
 } // namespace DCPS
 } // namespace OpenDDS

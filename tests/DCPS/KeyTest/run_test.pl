@@ -14,20 +14,7 @@ use PerlDDS::Run_Test;
 use FileHandle;
 use Cwd;
 
-my $status = 0;
-my $test = new PerlDDS::TestFramework();
-my $valid;
-
-if ($test->flag('keymarshalling')) {
-  $test->process('Test', 'KeyMarshalling', $LONE_PROCESS);
-  $valid = 1;
-} elsif ($test->flag('md5')) {
-  $test->process('Test', 'KeyTest_MD5', $LONE_PROCESS);
-  $valid = 1;
-} elsif ($test->flag('isbounded')) {
-  $test->process('Test', 'IsBounded', $LONE_PROCESS);
-  $valid = 1;
-} elsif ($test->flag('compiler')) {
+sub compiler_test {
   # These files each represent an expected error from the key processing
   # code in the opendds_idl compiler.  Run the compiler against each of
   # them and verify that an error occurs.
@@ -54,15 +41,36 @@ if ($test->flag('keymarshalling')) {
     if ($idl_ret == 0) {
       print STDERR "ERROR: opendds_idl processed $file cleanly when expecting " .
           "error\n";
-      $status = 1;
+      return 1;
     }
+  }
+  return 0;
+}
+
+my %framework_tests = (
+  'keymarshalling' => 'KeyMarshalling',
+  'md5' => 'KeyTest_MD5',
+  'isbounded' => 'IsBounded',
+);
+my @all_tests = keys(%framework_tests);
+push(@all_tests, 'compiler');
+my %all_tests_hash = map {$_ => 1} @all_tests;
+
+foreach $arg (@ARGV) {
+  if (!exists($all_tests_hash{$arg})) {
+    die("Invalid argument: $arg\n");
   }
 }
 
-if ($valid) {
-  $test->start_process('Test');
-  sleep 5;
-  $status = $test->finish(30);
+my $failed = 0;
+foreach $testname (scalar(@ARGV) ? @ARGV : @all_tests) {
+  if ($testname eq 'compiler') {
+    $failed |= compiler_test();
+  } else {
+    my $test = new PerlDDS::TestFramework();
+    $test->process($testname, $framework_tests{$testname}, $LONE_PROCESS);
+    $test->start_process($testname);
+    $failed |= $test->finish(30) ? 1 : 0;
+  }
 }
-
-exit $status;
+exit($failed);

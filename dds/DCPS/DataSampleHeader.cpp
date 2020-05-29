@@ -151,7 +151,8 @@ bool DataSampleHeader::partial(const ACE_Message_Block& mb)
     return true;
   }
 
-  size_t expected = max_marshaled_size();
+  const Encoding encoding(Encoding::KIND_CDR_UNALIGNED);
+  size_t expected = get_max_serialized_size();
   if (!(flags & LIFESPAN_MASK)) expected -= LIFESPAN_LENGTH;
   if (!(flags & COHERENT_MASK)) expected -= COHERENT_LENGTH;
 
@@ -161,8 +162,8 @@ bool DataSampleHeader::partial(const ACE_Message_Block& mb)
     if (!mb_peek(seqLen, mb, expected, swap)) {
       return true;
     }
-    size_t guidsize = 0, padding = 0;
-    gen_find_size(GUID_t(), guidsize, padding);
+    size_t guidsize = 0;
+    serialized_size(encoding, guidsize, GUID_t());
     expected += sizeof(seqLen) + guidsize * seqLen;
   }
 
@@ -172,31 +173,28 @@ bool DataSampleHeader::partial(const ACE_Message_Block& mb)
 void
 DataSampleHeader::init(ACE_Message_Block* buffer)
 {
-  this->marshaled_size_ = 0;
-
-  Serializer reader(buffer);
+  Encoding encoding(Encoding::KIND_CDR_UNALIGNED);
+  Serializer reader(buffer, encoding);
+  serialized_size_ = 0;
 
   // Only byte-sized reads until we get the byte_order_ flag.
 
   if (!(reader >> this->message_id_)) {
     return;
   }
-
-  this->marshaled_size_ += sizeof(this->message_id_);
+  serialized_size_ += sizeof(message_id_);
 
   if (!(reader >> this->submessage_id_)) {
     return;
   }
-
-  this->marshaled_size_ += sizeof(this->submessage_id_);
+  serialized_size_ += sizeof(submessage_id_);
 
   // Extract the flag values.
   ACE_CDR::Octet byte;
   if (!(reader >> ACE_InputCDR::to_octet(byte))) {
     return;
   }
-
-  this->marshaled_size_ += sizeof(byte);
+  serialized_size_ += sizeof(byte);
 
   this->byte_order_         = byte & mask_flag(BYTE_ORDER_FLAG);
   this->coherent_change_    = byte & mask_flag(COHERENT_CHANGE_FLAG);
@@ -214,63 +212,53 @@ DataSampleHeader::init(ACE_Message_Block* buffer)
   if (!(reader >> ACE_InputCDR::to_octet(byte))) {
     return;
   }
-
-  this->marshaled_size_ += sizeof(byte);
-
+  serialized_size_ += sizeof(byte);
   this->cdr_encapsulation_ = byte & mask_flag(CDR_ENCAP_FLAG);
   this->key_fields_only_   = byte & mask_flag(KEY_ONLY_FLAG);
 
   if (!(reader >> this->message_length_)) {
     return;
   }
-
-  this->marshaled_size_ += sizeof(this->message_length_);
+  serialized_size_ += sizeof(message_length_);
 
   if (!(reader >> this->sequence_)) {
     return;
   }
-
-  size_t padding = 0;
-  gen_find_size(this->sequence_, this->marshaled_size_, padding);
+  serialized_size(encoding, serialized_size_, sequence_);
 
   if (!(reader >> this->source_timestamp_sec_)) {
     return;
   }
-
-  this->marshaled_size_ += sizeof(this->source_timestamp_sec_);
+  serialized_size_ += sizeof(source_timestamp_sec_);
 
   if (!(reader >> this->source_timestamp_nanosec_)) {
     return;
   }
-
-  this->marshaled_size_ += sizeof(this->source_timestamp_nanosec_);
+  serialized_size_ += sizeof(source_timestamp_nanosec_);
 
   if (this->lifespan_duration_) {
     if (!(reader >> this->lifespan_duration_sec_)) {
       return;
     }
-
-    this->marshaled_size_ += sizeof(this->lifespan_duration_sec_);
+    serialized_size_ += sizeof(lifespan_duration_sec_);
 
     if (!(reader >> this->lifespan_duration_nanosec_)) {
       return;
     }
-
-    this->marshaled_size_ += sizeof(this->lifespan_duration_nanosec_);
+    serialized_size_ += sizeof(lifespan_duration_nanosec_);
   }
 
   if (!(reader >> this->publication_id_)) {
     return;
   }
-
-  gen_find_size(this->publication_id_, this->marshaled_size_, padding);
+  serialized_size(encoding, serialized_size_, publication_id_);
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   if (this->group_coherent_) {
     if (!(reader >> this->publisher_id_)) {
       return;
     }
-    gen_find_size(this->publisher_id_, this->marshaled_size_, padding);
+    serialized_size(encoding, serialized_size_, publisher_id_);
   }
 #endif
 
@@ -278,7 +266,7 @@ DataSampleHeader::init(ACE_Message_Block* buffer)
     if (!(reader >> this->content_filter_entries_)) {
       return;
     }
-    gen_find_size(this->content_filter_entries_, this->marshaled_size_, padding);
+    serialized_size(encoding, serialized_size_, content_filter_entries_);
   }
 }
 
@@ -336,17 +324,17 @@ operator<<(ACE_Message_Block& buffer, const DataSampleHeader& value)
 void
 DataSampleHeader::add_cfentries(const GUIDSeq* guids, ACE_Message_Block* mb)
 {
+  Encoding encoding(Encoding::KIND_CDR_UNALIGNED,
+    ACE_CDR_BYTE_ORDER != test_flag(BYTE_ORDER_FLAG, mb));
   size_t size = 0;
   if (guids) {
-    size_t padding = 0; // GUIDs are always aligned
-    gen_find_size(*guids, size, padding);
+    serialized_size(encoding, size, *guids);
   } else {
     size = sizeof(CORBA::ULong);
   }
   ACE_Message_Block* optHdr = alloc_msgblock(*mb, size, false);
 
-  const bool swap = (ACE_CDR_BYTE_ORDER != test_flag(BYTE_ORDER_FLAG, mb));
-  Serializer ser(optHdr, swap);
+  Serializer ser(optHdr, encoding);
   if (guids) {
     ser << *guids;
   } else {
@@ -389,10 +377,12 @@ DataSampleHeader::split(const ACE_Message_Block& orig, size_t size,
                         Message_Block_Ptr& head, Message_Block_Ptr& tail)
 {
   Message_Block_Ptr dup (orig.duplicate());
+  const Encoding encoding(Encoding::KIND_CDR_UNALIGNED);
 
   const size_t length = dup->total_length();
   DataSampleHeader hdr(*dup); // deserialize entire header (with cfentries)
   const size_t hdr_len = length - dup->total_length();
+  const size_t this_max_serialized_size = get_max_serialized_size();
 
   ACE_Message_Block* payload = dup.get();
   //skip zero length message blocks
@@ -404,13 +394,14 @@ DataSampleHeader::split(const ACE_Message_Block& orig, size_t size,
   Message_Block_Ptr payload_head(payload);
 
   if (size < hdr_len) { // need to fragment the content_filter_entries_
-    head.reset(alloc_msgblock(*dup, max_marshaled_size(), true));
+    head.reset(alloc_msgblock(*dup, this_max_serialized_size, true));
     hdr.more_fragments_ = true;
     hdr.message_length_ = 0; // no room for payload data
     *head << hdr;
     const size_t avail = size - head->length() - 4 /* sequence length */;
-    const CORBA::ULong n_entries =
-      static_cast<CORBA::ULong>(avail / gen_max_marshaled_size(GUID_t()));
+    size_t guid_size = 0;
+    max_serialized_size(encoding, guid_size, GUID_t());
+    const CORBA::ULong n_entries = static_cast<CORBA::ULong>(avail / guid_size);
     GUIDSeq entries(n_entries);
     entries.length(n_entries);
     // remove from the end of hdr's entries (order doesn't matter)
@@ -421,7 +412,7 @@ DataSampleHeader::split(const ACE_Message_Block& orig, size_t size,
     }
     add_cfentries(&entries, head.get());
 
-    tail.reset(alloc_msgblock(*dup, max_marshaled_size(), true));
+    tail.reset(alloc_msgblock(*dup, this_max_serialized_size, true));
     hdr.more_fragments_ = false;
     hdr.content_filter_ = (hdr.content_filter_entries_.length() > 0);
     hdr.message_length_ = static_cast<ACE_UINT32>(payload->total_length());
@@ -439,7 +430,7 @@ DataSampleHeader::split(const ACE_Message_Block& orig, size_t size,
   hdr.more_fragments_ = true;
   hdr.message_length_ = static_cast<ACE_UINT32>(payload_head->total_length());
 
-  head.reset(alloc_msgblock(*dup, max_marshaled_size(), true));
+  head.reset(alloc_msgblock(*dup, this_max_serialized_size, true));
   *head << hdr;
   head->cont(payload_head.release());
   if (hdr.content_filter_) {
@@ -450,7 +441,7 @@ DataSampleHeader::split(const ACE_Message_Block& orig, size_t size,
   hdr.content_filter_ = false;
   hdr.message_length_ = static_cast<ACE_UINT32>(payload_tail->total_length());
 
-  tail.reset(alloc_msgblock(*dup, max_marshaled_size(), true));
+  tail.reset(alloc_msgblock(*dup, this_max_serialized_size, true));
   *tail << hdr;
   tail->cont(payload_tail.release());
 }

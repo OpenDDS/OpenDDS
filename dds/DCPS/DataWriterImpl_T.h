@@ -1,13 +1,14 @@
 #ifndef OPENDDS_DDS_DCPS_DATAWRITERIMPL_T_H
 #define OPENDDS_DDS_DCPS_DATAWRITERIMPL_T_H
 
-#include "dds/DCPS/PublicationInstance.h"
-#include "dds/DCPS/DataWriterImpl.h"
-#include "dds/DCPS/DataReaderImpl.h"
-#include "dds/DCPS/Util.h"
-#include "dds/DCPS/TypeSupportImpl.h"
+#include "PublicationInstance.h"
+#include "DataWriterImpl.h"
+#include "DataReaderImpl.h"
+#include "Util.h"
+#include "TypeSupportImpl.h"
 #include "dcps_export.h"
-#include "dds/DCPS/SafetyProfileStreams.h"
+#include "SafetyProfileStreams.h"
+#include "DCPS_Utils.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -32,33 +33,104 @@ DataWriterImpl_T
 public:
   typedef DDSTraits<MessageType> TraitsType;
   typedef MarshalTraits<MessageType> MarshalTraitsType;
+  typedef KeyOnly<const MessageType> KeyOnlyType;
 
   typedef OPENDDS_MAP_CMP_T(MessageType, DDS::InstanceHandle_t,
                             typename TraitsType::LessThanType) InstanceMap;
   typedef ::OpenDDS::DCPS::Dynamic_Cached_Allocator_With_Overflow<ACE_Thread_Mutex> DataAllocator;
 
-  enum {
-    cdr_header_size = 4
+  /**
+   * Used to hold the encoding and get the buffer sizes needed to store the
+   * results of the encoding. This is used to isolate the RTPS CDR encapsulated
+   * mode from the classical OpenDDS mode.
+   *
+   * TODO(iguessthislldo): Remove this class if multiple DataWriter encoding
+   * modes aren't necessary?
+   */
+  class EncodingMode {
+  public:
+    EncodingMode()
+    : encoding_(Encoding::KIND_UNKNOWN)
+    , valid_(false)
+    , bounded_(false)
+    , buffer_size_(0)
+    , key_only_bounded_(false)
+    , key_only_buffer_size_(0)
+    , header_size_(0)
+    {
+    }
+
+    EncodingMode(Encoding::Kind kind, bool swap_the_bytes)
+    : encoding_(kind, swap_the_bytes)
+    , valid_(encoding_.kind() != Encoding::KIND_UNKNOWN)
+    , bounded_(MarshalTraitsType::gen_is_bounded_size())
+    , buffer_size_(0)
+    , key_only_bounded_(MarshalTraitsType::gen_is_bounded_key_size())
+    , key_only_buffer_size_(0)
+    , header_size_(0)
+    {
+      if (valid_) {
+        max_serialized_size(encoding_, header_size_, encoding_);
+        MessageType x;
+        if (bounded_) {
+          buffer_size_ = header_size_;
+          TraitsType::max_serialized_size(encoding_, buffer_size_, x);
+        }
+        if (key_only_bounded_) {
+          const KeyOnlyType key_only_x(x);
+          key_only_buffer_size_ = header_size_;
+          TraitsType::max_serialized_size(
+            encoding_, key_only_buffer_size_, key_only_x);
+        }
+      }
+    }
+
+    bool valid() const
+    {
+      return valid_;
+    }
+
+    const Encoding& encoding() const
+    {
+      return encoding_;
+    }
+
+    /// Size of a buffer needed to store a sample if it's bounded
+    size_t buffer_size() const
+    {
+      return buffer_size_;
+    }
+
+    /// Size of a buffer needed to store a specific sample
+    size_t buffer_size(const MessageType& x) const
+    {
+      if (bounded_) {
+        return buffer_size_;
+      }
+      return header_size_ + serialized_size(encoding_, x);
+    }
+
+    /// Size of a buffer needed to store a specific key only sample
+    size_t buffer_size(const KeyOnlyType& x) const
+    {
+      if (key_only_bounded_) {
+        return key_only_buffer_size_;
+      }
+      return header_size_ + serialized_size(encoding_, x);
+    }
+
+  private:
+    Encoding encoding_;
+    bool valid_;
+    bool bounded_;
+    size_t buffer_size_;
+    bool key_only_bounded_;
+    size_t key_only_buffer_size_;
+    size_t header_size_;
   };
 
   DataWriterImpl_T()
-    : marshaled_size_(0)
-    , key_marshaled_size_(0)
   {
-    MessageType data;
-    if (MarshalTraitsType::gen_is_bounded_size()) {
-      marshaled_size_ = 8 + TraitsType::gen_max_marshaled_size(data, true);
-      // worst case: CDR encapsulation (4 bytes) + Padding for alignment (4 bytes)
-    } else {
-      marshaled_size_ = 0; // should use gen_find_size when marshaling
-    }
-    if (MarshalTraitsType::gen_is_bounded_key_size()) {
-      OpenDDS::DCPS::KeyOnly<const MessageType> ko(data);
-      key_marshaled_size_ = 8 + TraitsType::gen_max_marshaled_size(ko, true);
-      // worst case: CDR Encapsulation (4 bytes) + Padding for alignment (4 bytes)
-    } else {
-      key_marshaled_size_ = 0; // should use gen_find_size when marshaling
-    }
   }
 
   virtual ~DataWriterImpl_T()
@@ -238,21 +310,6 @@ public:
    */
   virtual DDS::ReturnCode_t enable_specific()
   {
-    if(MarshalTraitsType::gen_is_bounded_size()) {
-      data_allocator_.reset(new DataAllocator(n_chunks_, marshaled_size_));
-      if (::OpenDDS::DCPS::DCPS_debug_level >= 2) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %CDataWriterImpl::")
-                   ACE_TEXT("enable_specific-data Dynamic_Cached_Allocator_With_Overflow %x ")
-                   ACE_TEXT("with %d chunks\n"),
-                   TraitsType::type_name(),
-                   data_allocator_.get(),
-                   n_chunks_));
-      }
-    } else if (::OpenDDS::DCPS::DCPS_debug_level >= 2) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %CDataWriterImpl::enable_specific")
-                 ACE_TEXT(" is unbounded data - allocate from heap\n"), TraitsType::type_name()));
-    }
-
     mb_allocator_.reset(new ::OpenDDS::DCPS::MessageBlockAllocator(n_chunks_ * association_chunk_multiplier_));
     db_allocator_.reset(new ::OpenDDS::DCPS::DataBlockAllocator(n_chunks_));
 
@@ -283,6 +340,116 @@ public:
     return data_allocator_.get();
   };
 
+  DDS::ReturnCode_t setup_serialization()
+  {
+    /**
+     * TODO(iguessthislldo): Update when we can determine what encoding we need
+     * to use from from a data representation QoS.
+     */
+    encoding_mode_ = EncodingMode(
+      cdr_encapsulation() ?
+        Encoding::KIND_CDR_PLAIN : Encoding::KIND_CDR_UNALIGNED,
+      swap_bytes());
+    if (!encoding_mode_.valid()) {
+      if (::OpenDDS::DCPS::DCPS_debug_level) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+          ACE_TEXT("%CDataWriterImpl::setup_serialization: ")
+          ACE_TEXT("Invalid Encoding Mode\n"),
+          TraitsType::type_name()));
+      }
+      return DDS::RETCODE_ERROR;
+    }
+#if 0
+    /*
+     * We need to get the encoding kinds for encapsulated and non-encapsulated
+     * encoding modes. We do this by picking the first supported representation
+     * that is supported by the mode, which is sorta what the XTypes spec says
+     * to do, except it only assumes one mode. One mode (but not both) may be
+     * left set to KIND_UNKNOWN, disabling it and preventing it from matching
+     * with readers just available through that mode.
+     */
+    Encoding::Kind encap_kind = Encoding::KIND_UNKNOWN;
+    Encoding::Kind nonencap_kind = Encoding::KIND_UNKNOWN;
+    for (CORBA::ULong i = 0; i < qos_.representation.value.length(); ++i) {
+      const DDS::DataRepresentationId_t repr = qos_.representation.value[i];
+      const Encoding::Kind kind =
+        repr_ext_to_encoding_kind(repr, MarshalTraitsType::extensibility());
+      switch (kind) {
+      case Encoding::KIND_CDR_UNALIGNED:
+        if (nonencap_kind == Encoding::KIND_UNKNOWN) {
+          nonencap_kind = kind;
+        }
+        break;
+
+      case Encoding::KIND_CDR_PLAIN:
+      case Encoding::KIND_CDR_PARAMLIST:
+      case Encoding::KIND_XCDR2_PLAIN:
+      case Encoding::KIND_XCDR2_PARAMLIST:
+      case Encoding::KIND_XCDR2_DELIMITED:
+        if (encap_kind == Encoding::KIND_UNKNOWN) {
+          encap_kind = kind;
+        }
+        break;
+
+      case Encoding::KIND_XML:
+        // Not Supported, Ignore
+        break;
+
+      case Encoding::KIND_UNKNOWN:
+        if (::OpenDDS::DCPS::DCPS_debug_level) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+            ACE_TEXT("%CDataWriterImpl::setup_serialization: ")
+            ACE_TEXT("Encountered unknown DataRepresentationId_t value: %d\n"),
+            TraitsType::type_name(), repr));
+        }
+        return DDS::RETCODE_ERROR;
+      }
+      if (encap_kind != Encoding::KIND_UNKNOWN &&
+          nonencap_kind != Encoding::KIND_UNKNOWN) {
+        break;
+      }
+    }
+
+    // Try to Setup Encoding Modes
+    const bool swap_the_bytes = swap_bytes();
+    encapsulated_encoding_mode_ = EncodingMode(encap_kind, swap_the_bytes);
+    non_encapsulated_encoding_mode_ = EncodingMode(nonencap_kind, swap_the_bytes);
+    if (!encapsulated_encoding_mode_.valid() &&
+        !non_encapsulated_encoding_mode_.valid()) {
+      if (::OpenDDS::DCPS::DCPS_debug_level) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+          ACE_TEXT("%CDataWriterImpl::setup_serialization: ")
+          ACE_TEXT("None of allowed data representations are supported!\n"),
+          TraitsType::type_name()));
+      }
+      return DDS::RETCODE_ERROR;
+    }
+#endif
+
+    // Set up allocator with reserved space for data if it is bounded
+    if (MarshalTraitsType::gen_is_bounded_size()) {
+      const size_t chunk_size = encoding_mode_.buffer_size();
+      data_allocator_.reset(new DataAllocator(n_chunks_, chunk_size));
+      if (::OpenDDS::DCPS::DCPS_debug_level >= 2) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ")
+          ACE_TEXT("%CDataWriterImpl::setup_serialization: ")
+          ACE_TEXT("using data allocator at %x with %u %u byte chunks\n"),
+          TraitsType::type_name(),
+          data_allocator_.get(),
+          n_chunks_,
+          chunk_size));
+      }
+    } else if (::OpenDDS::DCPS::DCPS_debug_level >= 2) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ")
+        ACE_TEXT("%CDataWriterImpl::setup_serialization: ")
+        ACE_TEXT("sample size is unbounded, not using data allocator, ")
+        ACE_TEXT("always allocating from heap\n"),
+        TraitsType::type_name()));
+    }
+
+    return DDS::RETCODE_OK;
+  }
+
 private:
 
   /**
@@ -296,35 +463,18 @@ private:
   ACE_Message_Block* dds_marshal(const MessageType& instance_data,
                                  OpenDDS::DCPS::MarshalingType marshaling_type)
   {
-    const bool cdr_header = cdr_encapsulation();
-    // TODO: Decide on CDR Kind based on Policies
-    const Encoding encoding(
-      cdr_header ? Encoding::KIND_CDR_PLAIN : Encoding::KIND_CDR_UNALIGNED,
-      swap_bytes());
+    const bool has_cdr_header = cdr_encapsulation();
+    const Encoding& encoding = encoding_mode_.encoding();
     Message_Block_Ptr mb;
     ACE_Message_Block* tmp_mb;
 
     if (marshaling_type == OpenDDS::DCPS::KEY_ONLY_MARSHALING) {
       // Don't use the cached allocator for the registered sample message
       // block.
-      OpenDDS::DCPS::KeyOnly<const MessageType> ko_instance_data(instance_data);
-      size_t effective_size = 0, padding = 0;
-      if (key_marshaled_size_) {
-        effective_size = key_marshaled_size_;
-      } else {
-        // TODO: cdr_size for Topic Type
-        TraitsType::gen_find_size(ko_instance_data, effective_size, padding);
-        if (cdr_header) {
-          effective_size += cdr_header_size;
-        }
-      }
-      if (cdr_header) {
-        effective_size += padding;
-      }
-
+      KeyOnlyType ko_instance_data(instance_data);
       ACE_NEW_RETURN(tmp_mb,
         ACE_Message_Block(
-          effective_size,
+          encoding_mode_.buffer_size(ko_instance_data),
           ACE_Message_Block::MB_DATA,
           0, // cont
           0, // data
@@ -334,7 +484,7 @@ private:
       mb.reset(tmp_mb);
 
       OpenDDS::DCPS::Serializer serializer(mb.get(), encoding);
-      if (cdr_header && !(serializer << encoding)) {
+      if (has_cdr_header && !(serializer << encoding)) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
           ACE_TEXT("%CDataWriterImpl::dds_marshal(): ")
           ACE_TEXT("key only data encoding header serialization error.\n"),
@@ -350,24 +500,11 @@ private:
       }
 
     } else { // OpenDDS::DCPS::FULL_MARSHALING
-      size_t effective_size = 0, padding = 0;
-      if (marshaled_size_) {
-        effective_size = marshaled_size_;
-      } else {
-        TraitsType::gen_find_size(instance_data, effective_size, padding);
-        if (cdr_header) {
-          effective_size += cdr_header_size;
-        }
-      }
-      if (cdr_header) {
-        effective_size += padding;
-      }
-
       ACE_NEW_MALLOC_RETURN(tmp_mb,
         static_cast<ACE_Message_Block*>(
           mb_allocator_->malloc(sizeof(ACE_Message_Block))),
         ACE_Message_Block(
-          effective_size,
+          encoding_mode_.buffer_size(instance_data),
           ACE_Message_Block::MB_DATA,
           0, // cont
           0, // data
@@ -382,7 +519,7 @@ private:
       mb.reset(tmp_mb);
 
       OpenDDS::DCPS::Serializer serializer(mb.get(), encoding);
-      if (cdr_header && !(serializer << encoding)) {
+      if (has_cdr_header && !(serializer << encoding)) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
           ACE_TEXT("%CDataWriterImpl::dds_marshal(): ")
           ACE_TEXT("data encoding header serialization error.\n"),
@@ -468,19 +605,18 @@ private:
   }
 
   InstanceMap instance_map_;
-  size_t marshaled_size_;
-  size_t key_marshaled_size_;
   unique_ptr<DataAllocator> data_allocator_;
   unique_ptr<MessageBlockAllocator> mb_allocator_;
   unique_ptr<DataBlockAllocator> db_allocator_;
+  EncodingMode encoding_mode_;
 
   // A class, normally provided by an unit test, that needs access to
   // private methods/members.
   friend class ::DDS_TEST;
 };
 
-}
-}
+} // namespace DCPS
+} // namepsace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 

@@ -361,16 +361,17 @@ ReplayerImpl::enable()
 
   Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
 
-  OpenDDS::DCPS::TypeSupportImpl* const typesupport =
-    dynamic_cast<OpenDDS::DCPS::TypeSupportImpl*>(topic_servant_->get_type_support());
+  TypeSupportImpl* const typesupport =
+    dynamic_cast<TypeSupportImpl*>(topic_servant_->get_type_support());
   XTypes::TypeInformation type_info;
   type_info.minimal.dependent_typeid_count = 0;
   type_info.complete.dependent_typeid_count = 0;
   if (typesupport) {
-    size_t sto = XTypes::find_size(typesupport->getMinimalTypeObject());
-    XTypes::TypeIdentifierPtr type_iden = XTypes::makeTypeIdentifier(typesupport->getMinimalTypeObject());
+    const XTypes::TypeObject& type_object = typesupport->getMinimalTypeObject();
+    XTypes::TypeIdentifierPtr type_iden = XTypes::makeTypeIdentifier(type_object);
     type_info.minimal.typeid_with_size.type_id = type_iden;
-    type_info.minimal.typeid_with_size.typeobject_serialized_size = sto;
+    type_info.minimal.typeid_with_size.typeobject_serialized_size =
+      serialized_size(XTypes::get_typeobject_encoding(), type_object);
   } else {
     type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
     //TODO : How is XTypes going work with recorder replayer?
@@ -1068,12 +1069,11 @@ ReplayerImpl::create_sample_data_message(Message_Block_Ptr   data,
 
   // header_data.publication_id_ = publication_id_;
   // header_data.publisher_id_ = this->publisher_servant_->publisher_id_;
-  size_t max_marshaled_size = header_data.max_marshaled_size();
   ACE_Message_Block* tmp;
   ACE_NEW_MALLOC_RETURN(tmp,
                         static_cast<ACE_Message_Block*>(
                           mb_allocator_->malloc(sizeof(ACE_Message_Block))),
-                        ACE_Message_Block(max_marshaled_size,
+                        ACE_Message_Block(DataSampleHeader::get_max_serialized_size(),
                                           ACE_Message_Block::MB_DATA,
                                           data.release(),   //cont
                                           0,   //data

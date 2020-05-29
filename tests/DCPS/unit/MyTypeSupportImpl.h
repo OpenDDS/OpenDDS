@@ -124,10 +124,17 @@ public:
 class MyDataWriterImpl :  public virtual OpenDDS::DCPS::DataWriterImpl
 {
 public:
-  virtual ::DDS::ReturnCode_t enable_specific (
-      ) {return ::DDS::RETCODE_OK;};
+  ::DDS::ReturnCode_t enable_specific()
+  {
+    return ::DDS::RETCODE_OK;
+  }
 
   virtual void unregistered(DDS::InstanceHandle_t /* instance_handle */) {};
+
+  DDS::ReturnCode_t setup_serialization()
+  {
+    return DDS::RETCODE_OK;
+  }
 };
 
 #endif /* MYTYPESUPPORTIMPL_H_  */

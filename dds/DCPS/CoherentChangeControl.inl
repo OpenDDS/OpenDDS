@@ -39,8 +39,7 @@ CoherentChangeControl::CoherentChangeControl()
 
 
 ACE_INLINE
-size_t
-CoherentChangeControl::max_marshaled_size()
+size_t CoherentChangeControl::get_max_serialized_size()
 {
   size_t sz = sizeof(this->coherent_samples_)
               + sizeof(this->group_coherent_);

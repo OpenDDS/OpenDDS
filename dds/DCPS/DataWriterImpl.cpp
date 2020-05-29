@@ -559,12 +559,13 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
         ACE_DEBUG((LM_INFO, "(%P|%t) Sending historic samples\n"));
       }
 
-      size_t size = 0, padding = 0;
-      gen_find_size(remote_id, size, padding);
+      const Encoding encoding(Encoding::KIND_CDR_UNALIGNED);
+      size_t size = 0;
+      serialized_size(encoding, size, remote_id);
       Message_Block_Ptr data(
         new ACE_Message_Block(size, ACE_Message_Block::MB_DATA, 0, 0, 0,
                               get_db_lock()));
-      Serializer ser(data.get());
+      Serializer ser(data.get(), encoding);
       ser << remote_id;
 
       DataSampleHeader header;
@@ -1439,19 +1440,24 @@ DataWriterImpl::enable()
     return DDS::RETCODE_ERROR;
   }
 
+  // Done after enable_transport so we know its swap_bytes.
+  const DDS::ReturnCode_t setup_serialization_result = setup_serialization();
+  if (setup_serialization_result != DDS::RETCODE_OK) {
+    return setup_serialization_result;
+  }
+
   const TransportLocatorSeq& trans_conf_info = connection_info();
-
   DDS::PublisherQos pub_qos;
-
   publisher->get_qos(pub_qos);
 
   TypeSupportImpl* const typesupport =
       dynamic_cast<TypeSupportImpl*>(topic_servant_->get_type_support());
-  size_t sto = XTypes::find_size(typesupport->getMinimalTypeObject());
-  XTypes::TypeIdentifierPtr type_iden = XTypes::makeTypeIdentifier(typesupport->getMinimalTypeObject());
+  const XTypes::TypeObject& type_object = typesupport->getMinimalTypeObject();
+  XTypes::TypeIdentifierPtr type_iden = XTypes::makeTypeIdentifier(type_object);
   XTypes::TypeInformation type_info;
   type_info.minimal.typeid_with_size.type_id = type_iden;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = sto;
+  type_info.minimal.typeid_with_size.typeobject_serialized_size =
+    serialized_size(XTypes::get_typeobject_encoding(), type_object);
   type_info.minimal.dependent_typeid_count = 0;
   type_info.complete.dependent_typeid_count = 0;
 
@@ -2050,7 +2056,7 @@ DataWriterImpl::create_control_message(MessageId message_id,
                         static_cast<ACE_Message_Block*>(
                           mb_allocator_->malloc(sizeof(ACE_Message_Block))),
                         ACE_Message_Block(
-                          DataSampleHeader::max_marshaled_size(),
+                          DataSampleHeader::get_max_serialized_size(),
                           ACE_Message_Block::MB_DATA,
                           header_data.message_length_ ? data.release() : 0, //cont
                           0, //data
@@ -2145,13 +2151,12 @@ DataWriterImpl::create_sample_data_message(Message_Block_Ptr data,
 
   header_data.publication_id_ = publication_id_;
   header_data.publisher_id_ = publisher->publisher_id_;
-  size_t max_marshaled_size = header_data.max_marshaled_size();
 
   ACE_Message_Block* tmp_message;
   ACE_NEW_MALLOC_RETURN(tmp_message,
                         static_cast<ACE_Message_Block*>(
                           mb_allocator_->malloc(sizeof(ACE_Message_Block))),
-                        ACE_Message_Block(max_marshaled_size,
+                        ACE_Message_Block(DataSampleHeader::get_max_serialized_size(),
                                           ACE_Message_Block::MB_DATA,
                                           data.release(), //cont
                                           0, //data
@@ -2298,10 +2303,9 @@ DataWriterImpl::end_coherent_changes(const GroupCoherentSamples& group_samples)
     end_msg.group_coherent_samples_ = group_samples;
   }
 
-  size_t max_marshaled_size = end_msg.max_marshaled_size();
-
   Message_Block_Ptr data(
-    new ACE_Message_Block(max_marshaled_size,
+    new ACE_Message_Block(
+      end_msg.get_max_serialized_size(),
       ACE_Message_Block::MB_DATA,
       0, // cont
       0, // data

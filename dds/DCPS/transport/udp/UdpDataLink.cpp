@@ -182,7 +182,7 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
       static_cast<ACE_UINT32>(data_block->length());
     ACE_Message_Block* sample_header_block;
     ACE_NEW_RETURN(sample_header_block,
-                   ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
+                   ACE_Message_Block(DataSampleHeader::get_max_serialized_size(),
                                      ACE_Message_Block::MB_DATA,
                                      0, //cont
                                      0, //data
@@ -200,7 +200,7 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
     ACE_Message_Block* transport_header_block;
     TransportHeader transport_header;
     ACE_NEW_RETURN(transport_header_block,
-                   ACE_Message_Block(TransportHeader::max_marshaled_size(),
+                   ACE_Message_Block(TransportHeader::get_max_serialized_size(),
                                      ACE_Message_Block::MB_DATA,
                                      0,
                                      0,

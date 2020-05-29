@@ -5,15 +5,17 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef GUIDUTILS_H
-#define GUIDUTILS_H
+#ifndef OPENDDS_DDS_DCPS_GUIDUTILS_H
+#define OPENDDS_DDS_DCPS_GUIDUTILS_H
 
-#include "dds/DdsDcpsGuidC.h"
-#include "dds/DdsDcpsInfoUtilsC.h"
-#include "dds/DCPS/PoolAllocator.h"
 #include "dcps_export.h"
+#include "PoolAllocator.h"
+#include "Serializer.h"
 
-#include "tao/Basic_Types.h"
+#include <dds/DdsDcpsGuidC.h>
+#include <dds/DdsDcpsInfoUtilsC.h>
+
+#include <tao/Basic_Types.h>
 
 #ifndef OPENDDS_SAFETY_PROFILE
 #include <iosfwd>
@@ -101,10 +103,10 @@ struct OpenDDS_Dcps_Export GUID_tKeyLessThan {
 
 typedef OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan) RepoIdSet;
 
-inline size_t
-gen_max_marshaled_size(const GUID_t&)
+inline
+void max_serialized_size(const Encoding& /*encoding*/, size_t& size, const GUID_t&)
 {
-  return 16;
+  size += 16;
 }
 
 #ifndef OPENDDS_SAFETY_PROFILE
@@ -188,4 +190,4 @@ void intersect(const RepoIdSet& a, const RepoIdSet& b, RepoIdSet& result);
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif /* GUIDUTILS_H */
+#endif /* OPENDDS_DDS_DCPS_GUIDUTILS_H */

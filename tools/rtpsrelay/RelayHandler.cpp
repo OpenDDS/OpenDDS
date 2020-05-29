@@ -611,8 +611,13 @@ void HorizontalHandler::enqueue_message(const ACE_INET_Addr& addr,
                                         const GuidSet& guids,
                                         const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg)
 {
+  using namespace OpenDDS::DCPS;
+
+  const Encoding encoding(Encoding::KIND_CDR_PLAIN);
+
   // Determine how many guids we can pack into a single UDP message.
-  const auto max_guids_per_message = (OpenDDS::DCPS::TransportSendStrategy::UDP_MAX_MESSAGE_SIZE - msg->length() - 4) / sizeof(OpenDDS::DCPS::RepoId);
+  const auto max_guids_per_message =
+    (TransportSendStrategy::UDP_MAX_MESSAGE_SIZE - msg->length() - 4) / sizeof(RepoId);
 
   auto remaining = guids.size();
   auto pos = guids.begin();
@@ -627,10 +632,10 @@ void HorizontalHandler::enqueue_message(const ACE_INET_Addr& addr,
       to.push_back(repoid_to_guid(*pos));
     }
 
-    size_t size = 0, padding = 0;
-    OpenDDS::DCPS::gen_find_size(relay_header, size, padding);
-    OpenDDS::DCPS::Message_Block_Shared_Ptr header_block(new ACE_Message_Block(size + padding));
-    OpenDDS::DCPS::Serializer ser(header_block.get());
+    size_t size = 0;
+    serialized_size(encoding, size, relay_header);
+    Message_Block_Shared_Ptr header_block(new ACE_Message_Block(size));
+    Serializer ser(header_block.get(), encoding);
     ser << relay_header;
     header_block->cont(msg.get()->duplicate());
     RelayHandler::enqueue_message(addr, header_block);

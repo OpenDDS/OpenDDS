@@ -15,30 +15,40 @@ bool dump_buffer = false;
 #define DONT_CHECK_CS 0
 #define DONT_CHECK_MS 0
 
+using OpenDDS::DCPS::Encoding;
+const Encoding unaligned_encoding(Encoding::KIND_CDR_UNALIGNED);
+const Encoding aligned_encoding(Encoding::KIND_CDR_PLAIN);
+
 template<typename FOO>
 int try_marshaling(const FOO& in_foo, FOO& out_foo,
                    size_t expected_ms, size_t expected_cs,
                    size_t expected_pad, size_t expected_ms_align,
                    const char* name)
 {
-  CORBA::Boolean bounded = OpenDDS::DCPS::MarshalTraits<FOO>::gen_is_bounded_size();
-  size_t ms = OpenDDS::DCPS::gen_max_marshaled_size(in_foo, false);
-  size_t ms_align = OpenDDS::DCPS::gen_max_marshaled_size(in_foo, true);
-  size_t cs = 0, padding = 0;
-  OpenDDS::DCPS::gen_find_size(in_foo, cs, padding);
+  const size_t expected_cs_align = expected_cs + expected_pad;
+
+  const bool bounded = OpenDDS::DCPS::MarshalTraits<FOO>::gen_is_bounded_size();
+
+  const size_t ms = OpenDDS::DCPS::max_serialized_size(unaligned_encoding, in_foo);
+  const size_t ms_align = OpenDDS::DCPS::max_serialized_size(aligned_encoding, in_foo);
+  const size_t cs = OpenDDS::DCPS::serialized_size(unaligned_encoding, in_foo);
+  const size_t cs_align = OpenDDS::DCPS::serialized_size(aligned_encoding, in_foo);
 
   ACE_DEBUG((LM_DEBUG,
              ACE_TEXT("%C: gen_is_bounded_size(foo) => %d\n"),
              name, int(bounded)));
   ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("%C: gen_max_marshaled_size(foo, false) => %B\n"),
+             ACE_TEXT("%C: max_serialized_size(unaligned_encoding, foo) => %B\n"),
              name, ms));
   ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("%C: gen_max_marshaled_size(foo, true) => %B\n"),
+             ACE_TEXT("%C: max_serialized_size(aligned_encoding, foo) => %B\n"),
              name, ms_align));
   ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("%C: gen_find_size(foo) => %B, padding %B\n"),
-             name, cs, padding));
+             ACE_TEXT("%C: serialized_size(unaligned_encoding, foo) => %B\n"),
+             name, cs));
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("%C: serialized_size(aligned_encoding, foo) => %B\n"),
+             name, cs_align));
 
   // NOTE: gen_max_marshaled_size is not always > for unbounded.
   if (bounded && ms < cs) {
@@ -51,7 +61,7 @@ int try_marshaling(const FOO& in_foo, FOO& out_foo,
 
   if (expected_cs != DONT_CHECK_CS && cs != expected_cs) {
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("%C: gen_find_size(foo) got %B but expected %B\n"),
+               ACE_TEXT("%C: serialized_size(unaligned_encoding, foo) got %B but expected %B\n"),
                name, cs, expected_cs));
     failed = true;
     return false;
@@ -59,23 +69,23 @@ int try_marshaling(const FOO& in_foo, FOO& out_foo,
 
   if (expected_ms != DONT_CHECK_MS && ms != expected_ms) {
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("%C: gen_max_marshaled_size(foo, false) got %B but expected %B\n"),
+               ACE_TEXT("%C: max_serialized_size(unaligned_encoding, foo) got %B but expected %B\n"),
                name, ms, expected_ms));
     failed = true;
     return false;
   }
 
-  if (expected_pad != padding) {
+  if (expected_cs_align != cs_align) {
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("%C: gen_find_size(foo) padding got %B but expected %B\n"),
-               name, padding, expected_pad));
+               ACE_TEXT("%C: serialized_size(aligned_encoding, foo) padding got %B but expected %B\n"),
+               name, cs_align, expected_cs_align));
     failed = true;
     return false;
   }
 
   if (bounded && expected_ms_align != ms_align) {
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("%C: gen_max_marshaled_size(foo, true) got %B but expected %B\n"),
+               ACE_TEXT("%C: max_serialized_size(aligned_encoding, foo) got %B but expected %B\n"),
                name, ms_align, expected_ms_align));
     failed = true;
     return false;
@@ -570,12 +580,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   my_foo.theSeqOfUnion[1].gv(as); //+885 = 4491   {padding +123 = 629}
 
   //  BigUnion theBigUnion;        //+4 = 4495
-  //  BigUnionSeq theSeqOfBitUnion;//+4 = 4499
+  //  BigUnionSeq theSeqOfBigUnion;//+4 = 4499
   my_foo.x = 0.99f;                //+4 = 4503
   my_foo.y = 0.11f;                //+4 = 4507
-  my_foo.theWChar = L'a';          //+3 = 4510
-  //  wstring theWString;          //+4 = 4514    {padding +1 = 630}
-  //  long double theLongDouble;  //+16 = 4530
+  my_foo.theWChar = L'a';          //+2 = 4509
+  //  wstring theWString;          //+4 = 4513    {padding +2 = 631}
+  //  long double theLongDouble;  //+16 = 4529
 
   Xyz::Foo foo2;
   foo2.key = 99;
@@ -630,11 +640,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   Xyz::Foo ss_foo;
 
-  const size_t sz = 4530 // see running totals above
+  const size_t sz = 4529 // see running totals above
 #ifdef OPENDDS_SAFETY_PROFILE
     - 4 // theWString is gone
 #endif
-    , pad = 630;
+    , pad = 631;
 
   try {
     if (try_marshaling(my_foo, ss_foo, DONT_CHECK_MS, sz, pad, DONT_CHECK_MS,

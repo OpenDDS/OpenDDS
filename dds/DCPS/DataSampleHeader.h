@@ -222,10 +222,10 @@ struct OpenDDS_Dcps_Export DataSampleHeader : public PoolAllocationBase {
   DataSampleHeader& operator=(ACE_Message_Block& buffer);
 
   /// Amount of data read when initializing from a buffer.
-  size_t marshaled_size() const;
+  size_t get_serialized_size() const;
 
   /// Similar to IDL compiler generated methods.
-  static size_t max_marshaled_size();
+  static size_t get_max_serialized_size();
 
   /// Implement load from buffer.
   void init(ACE_Message_Block* buffer);
@@ -249,7 +249,7 @@ struct OpenDDS_Dcps_Export DataSampleHeader : public PoolAllocationBase {
 
 private:
   /// Keep track of the amount of data read from a buffer.
-  size_t marshaled_size_;
+  size_t serialized_size_;
 };
 
 OpenDDS_Dcps_Export

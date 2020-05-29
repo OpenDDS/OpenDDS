@@ -1,16 +1,14 @@
-#include "dds/DCPS/Serializer.h"
-#include "dds/DCPS/Definitions.h"
+#include "common.h"
 
-#include "ace/ACE.h"
-#include "ace/Arg_Shifter.h"
-#include "ace/Get_Opt.h"
-#include "ace/Message_Block.h"
-#include "ace/OS_NS_string.h"
+#include <ace/ACE.h>
+#include <ace/Message_Block.h>
+#include <ace/OS_NS_string.h>
 
 #include <iostream>
 #include <string>
 
 using OpenDDS::DCPS::Serializer;
+using OpenDDS::DCPS::Encoding;
 
 const size_t ARRAYSIZE = 15;
 
@@ -56,11 +54,10 @@ struct ArrayValues {
   ACE_CDR::WChar      wcharValue[ARRAYSIZE];
 };
 
-void
-insertions(ACE_Message_Block* chain, const Values& values,
-           bool swap, Serializer::Alignment align, bool zero_init_pad)
+void insertions(ACE_Message_Block* chain, const Values& values,
+  const Encoding& encoding)
 {
-  Serializer serializer(chain, swap, align, zero_init_pad);
+  Serializer serializer(chain, encoding);
 
   serializer << ACE_OutputCDR::from_octet(values.octetValue);
   serializer << values.shortValue;
@@ -88,10 +85,9 @@ insertions(ACE_Message_Block* chain, const Values& values,
 
 void array_insertions(
   ACE_Message_Block* chain, const ArrayValues& values,
-  ACE_CDR::ULong length, bool swap, Serializer::Alignment align,
-  bool zero_init_pad)
+  ACE_CDR::ULong length, const Encoding& encoding)
 {
-  Serializer serializer(chain, swap, align, zero_init_pad);
+  Serializer serializer(chain, encoding);
 
   serializer.write_octet_array(values.octetValue, length);
   serializer.write_short_array(values.shortValue, length);
@@ -107,11 +103,10 @@ void array_insertions(
   serializer.write_wchar_array(values.wcharValue, length);
 }
 
-void
-extractions(ACE_Message_Block* chain, Values& values,
-            bool swap, Serializer::Alignment align)
+void extractions(ACE_Message_Block* chain, Values& values,
+  const Encoding& encoding)
 {
-  Serializer serializer(chain, swap, align);
+  Serializer serializer(chain, encoding);
 
   serializer >> ACE_InputCDR::to_octet(values.octetValue);
   serializer >> values.shortValue;
@@ -137,11 +132,10 @@ extractions(ACE_Message_Block* chain, Values& values,
 #endif
 }
 
-void
-array_extractions(ACE_Message_Block* chain, ArrayValues& values,
-                  ACE_CDR::ULong length, bool swap, Serializer::Alignment align)
+void array_extractions(ACE_Message_Block* chain, ArrayValues& values,
+  ACE_CDR::ULong length, const Encoding& encoding)
 {
-  Serializer serializer(chain, swap, align);
+  Serializer serializer(chain, encoding);
 
   serializer.read_octet_array(values.octetValue, length);
   serializer.read_short_array(values.shortValue, length);
@@ -423,14 +417,13 @@ checkArrayValues(const ArrayValues& expected, const ArrayValues& observed)
 
 const int chaindefs[] = {2, 3, 4, 5, 6, 7, 8, 9, 10, 25, 30, 35, 40, 45, 50, 128, 256, 512, 1024};
 
-void
-runTest(const Values& expected, const ArrayValues& expectedArray,
-        bool swap, Serializer::Alignment align, bool zero_init_pad = false)
+void runTest(const Values& expected, const ArrayValues& expectedArray,
+  const Encoding& encoding)
 {
   ACE_Message_Block* testchain = getchain(sizeof(chaindefs)/sizeof(chaindefs[0]), chaindefs);
-  const char* out = swap ? "" : "OUT";
+  const char* out = encoding.endianness() ? "" : "OUT";
   std::cout << std::endl << "STARTING INSERTION OF SINGLE VALUES WITH" << out << " SWAPPING" << std::endl;
-  insertions(testchain, expected, swap, align, zero_init_pad);
+  insertions(testchain, expected, encoding);
   size_t bytesWritten = testchain->total_length();
   std::cout << std::endl << "BYTES WRITTEN: " << bytesWritten << std::endl;
   displayChain(testchain);
@@ -447,7 +440,7 @@ runTest(const Values& expected, const ArrayValues& expectedArray,
 #endif
 #endif
                     };
-  extractions(testchain, observed, swap, align);
+  extractions(testchain, observed, encoding);
   if (testchain->total_length()) {
     std::cout << "ERROR: BYTES READ != BYTES WRITTEN" << std::endl;
     failed = true;
@@ -463,13 +456,13 @@ runTest(const Values& expected, const ArrayValues& expectedArray,
 
   testchain = getchain(sizeof(chaindefs)/sizeof(chaindefs[0]), chaindefs);
   std::cout << std::endl << "STARTING INSERTION OF ARRAY VALUES WITH" << out << " SWAPPING" << std::endl;
-  array_insertions(testchain, expectedArray, ARRAYSIZE, swap, align, zero_init_pad);
+  array_insertions(testchain, expectedArray, ARRAYSIZE, encoding);
   bytesWritten = testchain->total_length();
   std::cout << std::endl << "BYTES WRITTEN: " << bytesWritten << std::endl;
   displayChain(testchain);
   std::cout << "EXTRACTING ARRAY VALUES WITH" << out << " SWAPPING" << std::endl;
   ArrayValues observedArray;
-  array_extractions(testchain, observedArray, ARRAYSIZE, swap, align);
+  array_extractions(testchain, observedArray, ARRAYSIZE, encoding);
   if (testchain->total_length()) {
     std::cout << "ERROR: BYTES READ != BYTES WRITTEN" << std::endl;
     failed = true;
@@ -477,10 +470,6 @@ runTest(const Values& expected, const ArrayValues& expectedArray,
   checkArrayValues(expectedArray, observedArray);
   testchain->release();
 }
-
-bool runAlignmentTest();
-bool runAlignmentResetTest();
-bool runAlignmentOverrunTest();
 
 int
 ACE_TMAIN(int, ACE_TCHAR*[])
@@ -555,19 +544,10 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   std::cout << "Size of Values: " << sizeof(Values) << std::endl;
   std::cout << "Size of ArrayValues: " << sizeof(ArrayValues) << std::endl;
 
-  std::cout << "\n\n*** Alignment = ALIGN_NONE" << std::endl;
-  Serializer::Alignment align = Serializer::ALIGN_NONE;
-  runTest(expected, expectedArray, true /*swap*/, align);
-  runTest(expected, expectedArray, false /*swap*/, align);
-
-  std::cout << "\n\n*** Alignment = ALIGN_CDR, zero_init_pad = false" << std::endl;
-  align = Serializer::ALIGN_CDR;
-  runTest(expected, expectedArray, true /*swap*/, align);
-  runTest(expected, expectedArray, false /*swap*/, align);
-
-  std::cout << "\n\n*** Alignment = ALIGN_CDR, zero_init_pad = true" << std::endl;
-  runTest(expected, expectedArray, true /*swap*/, align, true);
-  runTest(expected, expectedArray, false /*swap*/, align, true);
+  for (size_t encoding = 0; encoding < encoding_count; ++encoding) {
+    std::cout << "\n\n*** "  << encodings[encoding].to_string() << std::endl;
+    runTest(expected, expectedArray, encodings[encoding]);
+  }
 
   if (!runAlignmentTest() || !runAlignmentResetTest() || !runAlignmentOverrunTest()) {
     failed = true;

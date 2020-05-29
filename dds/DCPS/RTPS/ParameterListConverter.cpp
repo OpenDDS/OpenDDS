@@ -7,15 +7,15 @@
 
 #include "ParameterListConverter.h"
 
-#include "dds/DCPS/GuidUtils.h"
-#include "dds/DCPS/Qos_Helper.h"
-#include "dds/DCPS/Service_Participant.h"
-
-#include "dds/DCPS/RTPS/BaseMessageUtils.h"
-
+#include "BaseMessageUtils.h"
 #ifdef OPENDDS_SECURITY
-#include "dds/DCPS/RTPS/SecurityHelpers.h"
+#  include "SecurityHelpers.h"
 #endif
+
+#include <dds/DCPS/GuidUtils.h>
+#include <dds/DCPS/Qos_Helper.h>
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/TypeObject.h>
 
 #include <cstring>
 
@@ -42,8 +42,7 @@ namespace {
                       0 /*alloc*/, 0 /*lock*/, ACE_Message_Block::DONT_DELETE, 0 /*db_alloc*/);
     ACE_Message_Block data(&db, ACE_Message_Block::DONT_DELETE, 0 /*mb_alloc*/);
     data.wr_ptr(data.space());
-    DCPS::Serializer serializer(&data, DCPS::Encoding::KIND_XCDR2_PARAMLIST,
-                                DCPS::ENDIAN_LITTLE);
+    DCPS::Serializer serializer(&data, XTypes::get_typeobject_encoding());
     if (!(serializer >> type_info)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) extract_type_info_param ")
                 ACE_TEXT("deserialization type information failed.\n")));
@@ -52,9 +51,10 @@ namespace {
 
   void add_type_info_param(ParameterList& param_list, const XTypes::TypeInformation& type_info) {
     Parameter param;
-    DCPS::Message_Block_Ptr data (new ACE_Message_Block( XTypes::find_size(type_info)));
-    DCPS::Serializer serializer(data.get(), DCPS::Encoding::KIND_XCDR2_PARAMLIST,
-                                DCPS::ENDIAN_LITTLE);
+    const DCPS::Encoding& encoding = XTypes::get_typeobject_encoding();
+    DCPS::Message_Block_Ptr data(new ACE_Message_Block(
+      DCPS::serialized_size(encoding, type_info)));
+    DCPS::Serializer serializer(data.get(), encoding);
     if (!(serializer << type_info)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) add_type_info_param ")
                 ACE_TEXT("serialization type information failed.\n")));
@@ -751,7 +751,7 @@ bool from_param_list(const ParameterList& param_list,
       break;
     }
 
-    default : {
+    default: {
       result = from_param_list(param_list, participant_data.ddsParticipantDataSecure.base.base);
       break;
     }
@@ -1445,6 +1445,7 @@ bool from_param_list(const ParameterList& param_list,
         break;
       case PID_XTYPES_TYPE_INFORMATION:
         extract_type_info_param(param, type_info);
+        break;
       default:
         if (param._d() & PIDMASK_INCOMPATIBLE) {
           return false;

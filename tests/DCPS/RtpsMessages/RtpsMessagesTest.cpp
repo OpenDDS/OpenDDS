@@ -1,32 +1,42 @@
-#include "dds/DCPS/RTPS/BaseMessageTypes.h"
-#include "dds/DCPS/RTPS/MessageTypes.h"
-#include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
-#include "dds/DCPS/RTPS/BaseMessageUtils.h"
-#include "dds/DCPS/TypeSupportImpl.h"
+#include <dds/DCPS/RTPS/BaseMessageTypes.h>
+#include <dds/DCPS/RTPS/MessageTypes.h>
+#include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
+#include <dds/DCPS/RTPS/BaseMessageUtils.h>
+#include <dds/DCPS/TypeSupportImpl.h>
+#include <dds/DCPS/SafetyProfileStreams.h>
 
 #include <iostream>
 #include <cstring>
 
 using OpenDDS::DCPS::KeyOnly;
 using OpenDDS::DCPS::Serializer;
+using OpenDDS::DCPS::Encoding;
 using namespace OpenDDS::RTPS;
+
+Encoding get_encoding(OpenDDS::DCPS::Endianness endianness) {
+  Encoding encoding(Encoding::KIND_CDR_PLAIN, endianness);
+  encoding.zero_init_padding(true);
+  return encoding;
+}
+const Encoding le_encoding = get_encoding(OpenDDS::DCPS::ENDIAN_LITTLE);
+const Encoding be_encoding = get_encoding(OpenDDS::DCPS::ENDIAN_BIG);
 
 struct TestMsg {
   ACE_CDR::ULong key;
   TAO::String_Manager value;
 };
 
-size_t gen_max_marshaled_size(KeyOnly<const TestMsg>, bool /*align*/)
+bool max_serialized_size(
+  const Encoding& encoding, size_t& size, KeyOnly<const TestMsg>& stru)
 {
-  return 4;
+  max_serialized_size(encoding, size, stru.t.key);
+  return true;
 }
 
-void gen_find_size(KeyOnly<const TestMsg>, size_t& size, size_t& padding)
+void serialized_size(
+  const Encoding& encoding, size_t& size, KeyOnly<const TestMsg>& stru)
 {
-  if ((size + padding) % 4) {
-    padding += 4 - ((size + padding) % 4);
-  }
-  size += 4;
+  max_serialized_size(encoding, size, stru.t.key);
 }
 
 bool operator<<(Serializer& strm, KeyOnly<const TestMsg> stru)
@@ -38,7 +48,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS { namespace DCPS {
 template <>
 struct MarshalTraits<TestMsg> {
-static bool gen_is_bounded_size() { return true; }
+static bool gen_is_bounded_size() { return false; }
 static bool gen_is_bounded_key_size() { return true; }
 };
 } }
@@ -49,12 +59,15 @@ struct BigKey {
   TAO::String_Manager value;
 };
 
-size_t gen_max_marshaled_size(KeyOnly<const BigKey>, bool /*align*/)
+bool max_serialized_size(
+  const Encoding&, size_t& size, KeyOnly<const BigKey>&)
 {
-  return 24;
+  size += 24;
+  return true;
 }
 
-void gen_find_size(KeyOnly<const BigKey>, size_t& size, size_t& /*padding*/)
+void serialized_size(
+  const Encoding&, size_t& size, KeyOnly<const BigKey>&)
 {
   size += 24;
 }
@@ -120,41 +133,39 @@ bool test_key_hash()
 
 template<typename T, size_t N>
 bool test(const T& foo, const CORBA::Octet (&expected)[N],
-          const char* name, bool bigendian = false)
+          const char* name, const Encoding& encoding = le_encoding)
 {
-  size_t size = 0, padding = 0;
-  OpenDDS::DCPS::gen_find_size(foo, size, padding);
-  if (size + padding != N) {
+  const size_t size = OpenDDS::DCPS::serialized_size(encoding, foo);
+  if (size != N) {
     std::cerr << "ERROR: " << name << " expected size " << N << " actual size "
-                 "from gen_find_size " << size << " padding " << padding
-              << std::endl;
+                 "from serialized_size" << size << std::endl;
+    return false;
   }
-  const bool swap =
-#ifdef ACE_LITTLE_ENDIAN
-    bigendian;
-#else
-    !bigendian;
-#endif
-  ACE_Message_Block mb(65536);
-  Serializer ser(&mb, swap, Serializer::ALIGN_CDR, true /* zero init padding */);
+
+  ACE_Message_Block mb(size);
+  Serializer ser(&mb, encoding);
   if (!(ser << foo) || mb.length() != N) {
     std::cerr << "ERROR: " << name << " should serialize to " << N << " bytes"
                  " (actual: " << mb.length() << ')' << std::endl;
     return false;
   }
   if (std::memcmp(expected, mb.rd_ptr(), N) != 0) {
-    std::cerr << "ERROR: " << name << " serialized bytes mismatched"
-              << std::endl;
+    std::cerr
+      << "ERROR: " << name << " serialized bytes mismatched\n"
+      << "Expected:\n"
+      << OpenDDS::DCPS::to_hex_dds_string(expected, N, '\n', 8) << std::endl
+      << "Got:\n"
+      << OpenDDS::DCPS::to_hex_dds_string(mb.rd_ptr(), N, '\n', 8) << std::endl;
     return false;
   }
-  Serializer ser2(&mb, swap, Serializer::ALIGN_CDR);
+  Serializer ser2(&mb, encoding);
   T roundtrip;
   if (!(ser2 >> roundtrip) || mb.rd_ptr() != mb.wr_ptr()) {
     std::cerr << "ERROR: failed to deserialize " << name << std::endl;
     return false;
   }
   mb.reset();
-  Serializer ser3(&mb, swap, Serializer::ALIGN_CDR, true /* zero init padding */);
+  Serializer ser3(&mb, encoding);
   if (!(ser3 << roundtrip) || mb.length() != N
       || std::memcmp(expected, mb.rd_ptr(), N) != 0) {
     std::cerr << "ERROR: failed to reserialize " << name << std::endl;
@@ -165,12 +176,6 @@ bool test(const T& foo, const CORBA::Octet (&expected)[N],
 
 bool test_messages()
 {
-  const bool swap_LE = // value of the "swap" flag for Little-Endian data
-#ifdef ACE_LITTLE_ENDIAN
-    false;
-#else
-    true;
-#endif
   bool ok = true;
   {
     const Header hdr = { {'R', 'T', 'P', 'S'}, PROTOCOLVERSION_2_2,
@@ -200,7 +205,7 @@ bool test_messages()
       0, 0, 0, 0, 0, 0, 0, 1,     // readerSNState.bitmapBase
       0, 0, 0, 1, 0, 0, 0, 1,     // readerSNState.numBits, bitmap[0]
       0, 0, 0, 2};                // count
-    ok &= test(sm, expected_BE, "bigendian AckNackSubmessage", true);
+    ok &= test(sm, expected_BE, "bigendian AckNackSubmessage", be_encoding);
   }
   {
     DataSubmessage ds = { {DATA, 1, 20}, 0, 16, ENTITYID_UNKNOWN,
@@ -224,40 +229,42 @@ bool test_messages()
     ds.inlineQos = iqos;
     ds.smHeader.submessageLength = 112;
     const CORBA::Octet expected_iqos[] = {
-      21, 3, 112, 0,              // smHeader
-      0, 0, 16, 0,                // extraFlags, octetsToInlineQos
-      0, 0, 0, 0, 0, 0, 2, 194,   // readerId, writerId
-      0, 0, 0, 0, 2, 0, 0, 0,     // writerSN
-      5, 0, 20, 0, 14, 0, 0, 0,   // PID_TOPIC_NAME, param len, string len
+      0x15, 0x3, 0x70, 0, // smHeader
+      0, 0, 0x10, 0, // extraFlags, octetsToInlineQos
+      0, 0, 0, 0, 0, 0, 0x2, 0xc2, // readerId, writerId
+      0, 0, 0, 0, 0x2, 0, 0, 0, // writerSN
+      0x5, 0, 0x14, 0, 0xe, 0, 0, 0, // PID_TOPIC_NAME, param len, string len
       'm', 'y', '_', 't', 'o', 'p', 'i', 'c', '_', 'n', 'a', 'm', 'e', 0, 0, 0,
-      7, 0, 20, 0, 13, 0, 0, 0,   // PID_TYPE_NAME, param len, string len
+      0x7, 0, 0x14, 0, 0xd, 0, 0, 0, // PID_TYPE_NAME, param len, string len
       'm', 'y', '_', 't', 'y', 'p', 'e', '_', 'n', 'a', 'm', 'e', 0, 0, 0, 0,
-      53, 0, 36, 0,               // PID_CONTENT_FILTER_PROPERTY, param len
-      1, 0, 0, 0, 0, 0, 0, 0,     // contentFilteredTopicName
-      1, 0, 0, 0, 0, 0, 0, 0,     // relatedTopicName
-      1, 0, 0, 0, 0, 0, 0, 0,     // filterClassName
-      1, 0, 0, 0, 0, 0, 0, 0,     // filterExpression
-      0, 0, 0, 0,                 // expressionParameters
-      1, 0, 0, 0};                // PID_SENTINEL, ignored
+      0x35, 0, 0x24, 0, // PID_CONTENT_FILTER_PROPERTY, param len
+      0x1, 0, 0, 0, 0, 0, 0, 0, // contentFilteredTopicName
+      0x1, 0, 0, 0, 0, 0, 0, 0, // relatedTopicName
+      0x1, 0, 0, 0, 0, 0, 0, 0, // filterClassName
+      0x1, 0, 0, 0, 0, 0, 0, 0, // filterExpression
+      0, 0, 0, 0, // expressionParameters
+      0x1, 0, 0, 0 // PID_SENTINEL, ignored
+    };
     ok &= test(ds, expected_iqos, "DataSubmessage with inlineQos");
     ds.smHeader.flags &= ~1;
     const CORBA::Octet expected_iqos_BE[] = {
-      21, 2, 0, 112,              // smHeader
-      0, 0, 0, 16,                // extraFlags, octetsToInlineQos
-      0, 0, 0, 0, 0, 0, 2, 194,   // readerId, writerId
-      0, 0, 0, 0, 0, 0, 0, 2,     // writerSN
-      0, 5, 0, 20, 0, 0, 0, 14,   // PID_TOPIC_NAME, param len, string len
+      0x15, 0x2, 0, 0x70, // smHeader
+      0, 0, 0, 0x10, // extraFlags, octetsToInlineQos
+      0, 0, 0, 0, 0, 0, 0x2, 0xc2, // readerId, writerId
+      0, 0, 0, 0, 0, 0, 0, 0x2, // writerSN
+      0, 0x5, 0, 0x14, 0, 0, 0, 0xe, // PID_TOPIC_NAME, param len, string len
       'm', 'y', '_', 't', 'o', 'p', 'i', 'c', '_', 'n', 'a', 'm', 'e', 0, 0, 0,
-      0, 7, 0, 20, 0, 0, 0, 13,   // PID_TYPE_NAME, param len, string len
+      0, 0x7, 0, 0x14, 0, 0, 0, 0xd, // PID_TYPE_NAME, param len, string len
       'm', 'y', '_', 't', 'y', 'p', 'e', '_', 'n', 'a', 'm', 'e', 0, 0, 0, 0,
-      0, 53, 0, 36,               // PID_CONTENT_FILTER_PROPERTY, param len
-      0, 0, 0, 1, 0, 0, 0, 0,     // contentFilteredTopicName
-      0, 0, 0, 1, 0, 0, 0, 0,     // relatedTopicName
-      0, 0, 0, 1, 0, 0, 0, 0,     // filterClassName
-      0, 0, 0, 1, 0, 0, 0, 0,     // filterExpression
-      0, 0, 0, 0,                 // expressionParameters
-      0, 1, 0, 0};                // PID_SENTINEL, ignored
-    ok &= test(ds, expected_iqos_BE, "BE DataSubmessage with inlineQos", true);
+      0, 0x35, 0, 0x24, // PID_CONTENT_FILTER_PROPERTY, param len
+      0, 0, 0, 0x1, 0, 0, 0, 0, // contentFilteredTopicName
+      0, 0, 0, 0x1, 0, 0, 0, 0, // relatedTopicName
+      0, 0, 0, 0x1, 0, 0, 0, 0, // filterClassName
+      0, 0, 0, 0x1, 0, 0, 0, 0, // filterExpression
+      0, 0, 0, 0, // expressionParameters
+      0, 0x1, 0, 0 // PID_SENTINEL, ignored
+    };
+    ok &= test(ds, expected_iqos_BE, "BE DataSubmessage with inlineQos", be_encoding);
     const CORBA::Octet input_large_otiq[] = {
       21, 3, 92, 0,               // smHeader
       0, 0, 36, 0,                // extraFlags, octetsToInlineQos
@@ -272,7 +279,7 @@ bool test_messages()
     ACE_Message_Block mb(reinterpret_cast<const char*>(input_large_otiq),
                          sizeof(input_large_otiq));
     mb.wr_ptr(sizeof(input_large_otiq));
-    Serializer ser(&mb, swap_LE, Serializer::ALIGN_CDR);
+    Serializer ser(&mb, le_encoding);
     DataSubmessage ds2;
     if (!(ser >> ds2) || mb.length() || ds2.inlineQos.length() != 2
         || ds2.inlineQos[0]._d() != PID_TOPIC_NAME
@@ -307,7 +314,7 @@ bool test_messages()
     ACE_Message_Block mb(reinterpret_cast<const char*>(input_large_otiq),
                          sizeof(input_large_otiq));
     mb.wr_ptr(sizeof(input_large_otiq));
-    Serializer ser(&mb, swap_LE, Serializer::ALIGN_CDR);
+    Serializer ser(&mb, le_encoding);
     DataFragSubmessage df2;
     if (!(ser >> df2) || mb.length()) {
       std::cerr << "ERROR: failed to deserialize DataSubmessage with larger "

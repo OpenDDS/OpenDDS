@@ -75,8 +75,6 @@ public:
   const GUID_t guid_;
 };
 
-const bool host_is_bigendian = !ACE_CDR_BYTE_ORDER;
-
 struct TestParticipant: ACE_Event_Handler {
   TestParticipant(ACE_SOCK_Dgram& sock, const OpenDDS::DCPS::GuidPrefix_t& prefix)
     : sock_(sock)
@@ -119,31 +117,35 @@ struct TestParticipant: ACE_Event_Handler {
   bool send_data(const OpenDDS::DCPS::EntityId_t& writer,
                  const SequenceNumber_t& seq, OpenDDS::RTPS::ParameterList& plist, const ACE_INET_Addr& send_to)
   {
+    using OpenDDS::DCPS::Encoding;
+
     const DataSubmessage ds = {
       {DATA, FLAG_E | FLAG_D, 0},
       0, DATA_OCTETS_TO_IQOS, ENTITYID_UNKNOWN, writer, seq, ParameterList()
     };
 
-    size_t size = 0, padding = 0;
-    gen_find_size(hdr_, size, padding);
-    gen_find_size(ds, size, padding);
-    find_size_ulong(size, padding);
-    gen_find_size(plist, size, padding);
+    const Encoding encoding(
+      Encoding::KIND_CDR_PLAIN, OpenDDS::DCPS::ENDIAN_LITTLE);
 
-    ACE_Message_Block mb(size + padding);
-    Serializer ser(&mb, host_is_bigendian, Serializer::ALIGN_CDR);
+    size_t size = 0;
+    serialized_size(encoding, size, hdr_);
+    serialized_size(encoding, size, ds);
+    serialized_size_ulong(encoding, size);
+    serialized_size(encoding, size, plist);
 
+    ACE_Message_Block mb(size);
+    Serializer ser(&mb, encoding);
+
+    // TODO(iguessthislldo) Use common encapsulation code, NOTE that 3 is "PL_CDR_LE", not "CDR_LE"
     const ACE_CDR::ULong encap = 0x00000300; // {CDR_LE, options} in BE format
 
-    const bool ok = (ser << hdr_) && (ser << ds) && (ser << encap);
-    if (!ok) {
-      ACE_DEBUG((LM_DEBUG, "ERROR: failed to serialize data\n"));
+    if (!(ser << hdr_ && ser << ds && ser << encap)) {
+      ACE_DEBUG((LM_DEBUG, "ERROR: failed to serialize headers\n"));
       return false;
     }
 
-    const bool ok2 = (ser << plist);
-    if (!ok2) {
-      ACE_DEBUG((LM_DEBUG, "ERROR: failed to serialize data\n"));
+    if (!(ser << plist)) {
+      ACE_DEBUG((LM_DEBUG, "ERROR: failed to serialize payload\n"));
       return false;
     }
 

@@ -156,23 +156,27 @@ bool marshal_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
 
 namespace {
 
-  string getMaxSizeExprPrimitive(AST_Type* type)
+  string getMaxSizeExprPrimitive(AST_Type* type,
+    const string& count_expr = "count", const string& size_expr = "size",
+    const string& encoding_expr = "encoding")
   {
     if (type->node_type() != AST_Decl::NT_pre_defined) {
       return "";
     }
     AST_PredefinedType* pt = AST_PredefinedType::narrow_from_decl(type);
+    const string first_args = encoding_expr + ", " + size_expr;
     switch (pt->pt()) {
     case AST_PredefinedType::PT_octet:
-      return "max_marshaled_size_octet()";
+      return "max_serialized_size_octet(" + first_args + ", " + count_expr + ")";
     case AST_PredefinedType::PT_char:
-      return "max_marshaled_size_char()";
+      return "max_serialized_size_char(" + first_args + ", " + count_expr + ")";
     case AST_PredefinedType::PT_wchar:
-      return "max_marshaled_size_wchar()";
+      return "max_serialized_size_wchar(" + first_args + ", " + count_expr + ")";
     case AST_PredefinedType::PT_boolean:
-      return "max_marshaled_size_boolean()";
+      return "max_serialized_size_boolean(" + first_args + ", " + count_expr + ")";
     default:
-      return "gen_max_marshaled_size(" + scoped(type->name()) + "())";
+      return "max_serialized_size(" + first_args + ", " +
+        scoped(type->name()) + "(), " + count_expr + ")";
     }
   }
 
@@ -239,15 +243,13 @@ namespace {
   {
     // At this point the stream must be 4-byte aligned (from the sequence
     // length), but it might need to be 8-byte aligned for primitives > 4.
+    // (If XCDR version is < 2)
     switch (AST_PredefinedType::narrow_from_decl(elem)->pt()) {
     case AST_PredefinedType::PT_longlong:
     case AST_PredefinedType::PT_ulonglong:
     case AST_PredefinedType::PT_double:
     case AST_PredefinedType::PT_longdouble:
-      return
-        "  if ((size + padding) % 8) {\n"
-        "    padding += 4;\n"
-        "  }\n";
+      return "  encoding.align(size, 8);\n";
     default:
       return "";
     }
@@ -261,20 +263,16 @@ namespace {
   bool genRtpsSpecialSequence(const string& cxx)
   {
     {
-      Function find_size("gen_find_size", "void");
-      find_size.addArg("seq", "const " + cxx + "&");
-      find_size.addArg("size", "size_t&");
-      find_size.addArg("padding", "size_t&");
-      find_size.endArgs();
+      Function serialized_size("serialized_size", "void");
+      serialized_size.addArg("encoding", "const Encoding&");
+      serialized_size.addArg("size", "size_t&");
+      serialized_size.addArg("seq", "const " + cxx + "&");
+      serialized_size.endArgs();
       be_global->impl_ <<
         "  for (CORBA::ULong i = 0; i < seq.length(); ++i) {\n"
         "    if (seq[i]._d() == OpenDDS::RTPS::PID_SENTINEL) continue;\n"
-        "    size_t param_size = 0, param_padding = 0;\n"
-        "    gen_find_size(seq[i], param_size, param_padding);\n"
-        "    size += param_size + param_padding;\n"
-        "    if (size % 4) {\n"
-        "      size += 4 - (size % 4);\n"
-        "    }\n"
+        "    serialized_size(encoding, size, seq[i]);\n"
+        "    OpenDDS::DCPS::align(size, 4);\n"
         "  }\n"
         "  size += 4; /* PID_SENTINEL */\n";
     }
@@ -323,15 +321,15 @@ namespace {
   bool genPropertySpecialSequence(const string& cxx)
   {
     {
-      Function find_size("gen_find_size", "void");
-      find_size.addArg("seq", "const " + cxx + "&");
-      find_size.addArg("size", "size_t&");
-      find_size.addArg("padding", "size_t&");
-      find_size.endArgs();
+      Function serialized_size("serialized_size", "void");
+      serialized_size.addArg("encoding", "const Encoding&");
+      serialized_size.addArg("size", "size_t&");
+      serialized_size.addArg("seq", "const " + cxx + "&");
+      serialized_size.endArgs();
       be_global->impl_ <<
-        "  find_size_ulong(size, padding);\n"
+        "  OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n"
         "  for (CORBA::ULong i = 0; i < seq.length(); ++i) {\n"
-        "    gen_find_size(seq[i], size, padding);\n"
+        "    serialized_size(encoding, size, seq[i]);\n"
         "  }\n";
     }
     {
@@ -439,22 +437,22 @@ namespace {
     }
 
     {
-      Function find_size("gen_find_size", "void");
-      find_size.addArg(use_cxx11 ? "wrap" : "seq", const_cxx);
-      find_size.addArg("size", "size_t&");
-      find_size.addArg("padding", "size_t&");
-      find_size.endArgs();
+      Function serialized_size("serialized_size", "void");
+      serialized_size.addArg("encoding", "const Encoding&");
+      serialized_size.addArg("size", "size_t&");
+      serialized_size.addArg(use_cxx11 ? "wrap" : "seq", const_cxx);
+      serialized_size.endArgs();
       be_global->impl_ << const_unwrap <<
-        "  find_size_ulong(size, padding);\n"
+        "  OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n"
         "  if (" << check_empty << ") {\n"
         "    return;\n"
         "  }\n";
       if (elem_cls & CL_ENUM) {
         be_global->impl_ <<
-          "  size += " << get_length << " * max_marshaled_size_ulong();\n";
+          "  OpenDDS::DCPS::max_serialized_size_ulong(encoding, size, " + get_length + ");\n";
       } else if (elem_cls & CL_PRIMITIVE) {
         be_global->impl_ << checkAlignment(elem) <<
-          "  size += " << get_length << " * " << getMaxSizeExprPrimitive(elem) << ";\n";
+          "  " + getMaxSizeExprPrimitive(elem, get_length) << ";\n";
       } else if (elem_cls & CL_INTERFACE) {
         be_global->impl_ <<
           "  // sequence of objrefs is not marshaled\n";
@@ -466,9 +464,9 @@ namespace {
           "  for (CORBA::ULong i = 0; i < " << get_length << "; ++i) {\n";
         if (elem_cls & CL_STRING) {
           be_global->impl_ <<
-            "    find_size_ulong(size, padding);\n";
+            "    OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n";
           const string strlen_suffix = (elem_cls & CL_WIDE)
-            ? " * OpenDDS::DCPS::Serializer::WCHAR_SIZE;\n"
+            ? " * OpenDDS::DCPS::char16_cdr_size;\n"
             : " + 1;\n";
           if (use_cxx11) {
             be_global->impl_ <<
@@ -484,14 +482,14 @@ namespace {
             "    " << cxx_elem << "_var tmp_var = " << cxx_elem
             << "_dup(seq[i]);\n"
             "    " << cxx_elem << "_forany tmp = tmp_var.inout();\n"
-            "    gen_find_size(tmp, size, padding);\n";
+            "    serialized_size(encoding, size, tmp);\n";
         } else if (use_cxx11 && (elem_cls & (CL_ARRAY | CL_SEQUENCE))) {
           be_global->impl_ <<
-            "    gen_find_size(IDL::DistinctType<const " << cxx_elem << ", " <<
-            elem_underscores << "_tag>(seq[i]), size, padding);\n";
+            "    serialized_size(encoding, size, IDL::DistinctType<const "
+            << cxx_elem << ", " << elem_underscores << "_tag>(seq[i]));\n";
         } else { // Struct, Union, non-C++11 Sequence
           be_global->impl_ <<
-            "    gen_find_size(seq[i], size, padding);\n";
+            "    serialized_size(encoding, size, seq[i]);\n";
         }
         be_global->impl_ <<
           "  }\n";
@@ -692,37 +690,31 @@ namespace {
       n_elems *= arr->dims()[i]->ev()->u.ulval;
     }
     {
-      Function find_size("gen_find_size", "void");
-      find_size.addArg(use_cxx11 ? "wrap" : "arr", const_cxx);
-      find_size.addArg("size", "size_t&");
-      find_size.addArg("padding", "size_t&");
-      find_size.endArgs();
+      Function serialized_size("serialized_size", "void");
+      serialized_size.addArg("encoding", "const Encoding&");
+      serialized_size.addArg("size", "size_t&");
+      serialized_size.addArg(use_cxx11 ? "wrap" : "arr", const_cxx);
+      serialized_size.endArgs();
       be_global->impl_ << const_unwrap;
       if (elem_cls & CL_ENUM) {
         be_global->impl_ <<
-          "  find_size_ulong(size, padding);\n";
-          if (n_elems > 1) {
-            be_global->impl_ <<
-              "  size += " << n_elems - 1 << " * max_marshaled_size_ulong();\n";
-          }
-      } else if (elem_cls & CL_PRIMITIVE) {
-        const string align = getAlignment(elem);
-        if (!align.empty()) {
+          "  OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n";
+        if (n_elems > 1) {
           be_global->impl_ <<
-            "  if ((size + padding) % " << align << ") {\n"
-            "    padding += " << align << " - ((size + padding) % " << align
-            << ");\n"
-            "  }\n";
+            "  OpenDDS::DCPS::max_serialized_size_ulong(encoding, size, "
+              << n_elems - 1 << ");\n";
         }
+      } else if (elem_cls & CL_PRIMITIVE) {
+        std::ostringstream n_elems_ss;
+        n_elems_ss << n_elems;
         be_global->impl_ <<
-          "  size += " << n_elems << " * " << getMaxSizeExprPrimitive(elem)
-          << ";\n";
+          "  " << getMaxSizeExprPrimitive(elem, n_elems_ss.str()) << ";\n";
       } else { // String, Struct, Array, Sequence, Union
         string indent = "  ";
         NestedForLoops nfl("CORBA::ULong", "i", arr, indent);
         if (elem_cls & CL_STRING) {
           be_global->impl_ <<
-            indent << "find_size_ulong(size, padding);\n" <<
+            indent << "OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n" <<
             indent;
           if (use_cxx11) {
             be_global->impl_ << "size += arr" << nfl.index_ << ".size()";
@@ -730,14 +722,14 @@ namespace {
             be_global->impl_ << "size += ACE_OS::strlen(arr" << nfl.index_ << ".in())";
           }
           be_global->impl_ << ((elem_cls & CL_WIDE)
-            ? " * OpenDDS::DCPS::Serializer::WCHAR_SIZE;\n"
+            ? " * OpenDDS::DCPS::char16_cdr_size;\n"
             : " + 1;\n");
         } else if (!use_cxx11 && (elem_cls & CL_ARRAY)) {
           be_global->impl_ <<
             indent << cxx_elem << "_var tmp_var = " << cxx_elem
             << "_dup(arr" << nfl.index_ << ");\n" <<
             indent << cxx_elem << "_forany tmp = tmp_var.inout();\n" <<
-            indent << "gen_find_size(tmp, size, padding);\n";
+            indent << "serialized_size(encoding, size, tmp);\n";
         } else { // Struct, Sequence, Union, C++11 Array
           string pre, post;
           if (use_cxx11 && (elem_cls & (CL_ARRAY | CL_SEQUENCE))) {
@@ -746,8 +738,8 @@ namespace {
             post = ')';
           }
           be_global->impl_ <<
-            indent << "gen_find_size(" << pre << "arr" << nfl.index_
-            << post << ", size, padding);\n";
+            indent << "serialized_size(encoding, size, "
+              << pre << "arr" << nfl.index_ << post << ");\n";
         }
       }
     }
@@ -972,34 +964,82 @@ namespace {
     return bounded;
   }
 
-  void align(size_t alignment, size_t& size, size_t& padding)
-  {
-    if ((size + padding) % alignment) {
-      padding += alignment - ((size + padding) % alignment);
+  enum Encoding {
+    encoding_unaligned_cdr,
+    encoding_xcdr1,
+    encoding_xcdr2,
+    encoding_count
+  };
+
+  /**
+   * Convert a compiler Encoding value to the string name of the corresponding
+   * OpenDDS::DCPS::Encoding::XcdrVersion.
+   */
+  string encoding_to_xcdr_version(Encoding encoding) {
+    switch (encoding) {
+    case encoding_xcdr1:
+      return "Encoding::XCDR1";
+    case encoding_xcdr2:
+      return "Encoding::XCDR2";
+    default:
+      return "Encoding::XCDR_NONE";
     }
   }
 
-  void max_marshaled_size(AST_Type* type, size_t& size, size_t& padding);
+  size_t max_alignment(Encoding encoding)
+  {
+    switch (encoding) {
+    case encoding_xcdr1:
+      return 8;
+    case encoding_xcdr2:
+      return 4;
+    default:
+      return 0;
+    }
+  }
+
+  void align(Encoding encoding, size_t& value, size_t by)
+  {
+    const size_t align_by = std::min(max_alignment(encoding), by);
+    if (align_by) {
+      const size_t offset_by = value % align_by;
+      if (offset_by) {
+        value += align_by - offset_by;
+      }
+    }
+  }
+
+  void idl_max_serialized_size_dheader(
+    Encoding encoding, ExtensibilityKind exten, size_t& size)
+  {
+    if (exten != extensibilitykind_final && encoding == encoding_xcdr2) {
+      align(encoding, size, 4);
+      size += 4;
+    }
+  }
+
+  void idl_max_serialized_size(Encoding encoding, size_t& size, AST_Type* type);
 
   // Max marshaled size of repeating 'type' 'n' times in the stream
   // (for an array or sequence)
-  void mms_repeating(AST_Type* type, size_t n, size_t& size, size_t& padding)
+  void idl_max_serialized_size_repeating(
+    Encoding encoding, size_t& size, AST_Type* type, size_t n)
   {
     if (n > 0) {
       // 1st element may need padding relative to whatever came before
-      max_marshaled_size(type, size, padding);
+      idl_max_serialized_size(encoding, size, type);
     }
     if (n > 1) {
       // subsequent elements may need padding relative to prior element
-      size_t prev_size = size, prev_pad = padding;
-      max_marshaled_size(type, size, padding);
+      // TODO(iguessthislldo): https://github.com/objectcomputing/OpenDDS/pull/1668#discussion_r432521888
+      const size_t prev_size = size;
+      idl_max_serialized_size(encoding, size, type);
       size += (n - 2) * (size - prev_size);
-      padding += (n - 2) * (padding - prev_pad);
     }
   }
 
-  // Should only be called on bounded types (see above function)
-  void max_marshaled_size(AST_Type* type, size_t& size, size_t& padding)
+  /// Should only be called on bounded types
+  void idl_max_serialized_size(Encoding encoding, size_t& size, AST_Type* type)
   {
     type = resolveActualType(type);
     switch (type->node_type()) {
@@ -1013,26 +1053,27 @@ namespace {
         break;
       case AST_PredefinedType::PT_short:
       case AST_PredefinedType::PT_ushort:
-        align(2, size, padding);
+        align(encoding, size, 2);
         size += 2;
         break;
       case AST_PredefinedType::PT_wchar:
-        size += 3; // see Serializer::max_marshaled_size_wchar()
+        align(encoding, size, 2);
+        size += 2;
         break;
       case AST_PredefinedType::PT_long:
       case AST_PredefinedType::PT_ulong:
       case AST_PredefinedType::PT_float:
-        align(4, size, padding);
+        align(encoding, size, 4);
         size += 4;
         break;
       case AST_PredefinedType::PT_longlong:
       case AST_PredefinedType::PT_ulonglong:
       case AST_PredefinedType::PT_double:
-        align(8, size, padding);
+        align(encoding, size, 8);
         size += 8;
         break;
       case AST_PredefinedType::PT_longdouble:
-        align(8, size, padding);
+        align(encoding, size, 16);
         size += 16;
         break;
       default:
@@ -1042,13 +1083,15 @@ namespace {
       break;
     }
     case AST_Decl::NT_enum:
-      align(4, size, padding);
+      // TODO(iguessthislldo): XCDR Stuff?
+      align(encoding, size, 4);
       size += 4;
       break;
     case AST_Decl::NT_string:
     case AST_Decl::NT_wstring: {
       AST_String* string_node = dynamic_cast<AST_String*>(type);
-      align(4, size, padding);
+      // TODO(iguessthislldo): XCDR Stuff?
+      align(encoding, size, 4);
       size += 4;
       const int width = (string_node->width() == 1) ? 1 : 2 /*UTF-16*/;
       size += width * string_node->max_size()->ev()->u.ulval;
@@ -1060,52 +1103,54 @@ namespace {
     case AST_Decl::NT_struct: {
       const Fields fields(dynamic_cast<AST_Structure*>(type));
       const Fields::Iterator fields_end = fields.end();
+      const ExtensibilityKind exten = be_global->extensibility(type);
+      idl_max_serialized_size_dheader(encoding, exten, size);
+      // TODO(iguessthislldo) Paremter Lists?
       for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
-        max_marshaled_size((*i)->field_type(), size, padding);
+        idl_max_serialized_size(encoding, size, (*i)->field_type());
       }
       break;
     }
     case AST_Decl::NT_sequence: {
       AST_Sequence* seq_node = dynamic_cast<AST_Sequence*>(type);
       AST_Type* base_node = seq_node->base_type();
+      // TODO(iguessthislldo): XCDR Stuff?
       size_t bound = seq_node->max_size()->ev()->u.ulval;
-      align(4, size, padding);
+      align(encoding, size, 4);
       size += 4;
-      mms_repeating(base_node, bound, size, padding);
+      idl_max_serialized_size_repeating(encoding, size, base_node, bound);
       break;
     }
     case AST_Decl::NT_array: {
       AST_Array* array_node = dynamic_cast<AST_Array*>(type);
       AST_Type* base_node = array_node->base_type();
+      // TODO(iguessthislldo): XCDR Stuff?
       size_t array_size = 1;
       AST_Expression** dims = array_node->dims();
       for (unsigned long i = 0; i < array_node->n_dims(); i++) {
         array_size *= dims[i]->ev()->u.ulval;
       }
-      mms_repeating(base_node, array_size, size, padding);
+      idl_max_serialized_size_repeating(encoding, size, base_node, array_size);
       break;
     }
     case AST_Decl::NT_union: {
       AST_Union* union_node = dynamic_cast<AST_Union*>(type);
-      max_marshaled_size(union_node->disc_type(), size, padding);
-      size_t largest_field_size = 0, largest_field_pad = 0;
-      const size_t starting_size = size, starting_pad = padding;
+      // TODO(iguessthislldo): XCDR Stuff?
+      idl_max_serialized_size(encoding, size, union_node->disc_type());
+      size_t largest_field_size = 0;
+      const size_t starting_size = size;
       const Fields fields(union_node);
       const Fields::Iterator fields_end = fields.end();
       for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
-        max_marshaled_size((*i)->field_type(), size, padding);
-        size_t field_size = size - starting_size,
-          field_pad = padding - starting_pad;
+        idl_max_serialized_size(encoding, size, (*i)->field_type());
+        size_t field_size = size - starting_size;
         if (field_size > largest_field_size) {
           largest_field_size = field_size;
-          largest_field_pad = field_pad;
         }
         // rewind:
         size = starting_size;
-        padding = starting_pad;
       }
       size += largest_field_size;
-      padding += largest_field_pad;
       break;
     }
     default:
@@ -1148,32 +1193,23 @@ namespace {
     const string indent = (is_union_member) ? "    " : "  ";
 
     if (fld_cls & CL_ENUM) {
-      return indent + "find_size_ulong(size, padding);\n";
+      return indent + "OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n";
     } else if (fld_cls & CL_STRING) {
       const string suffix = is_union_member ? "" : ".in()";
       const string get_size = use_cxx11 ? (qual + ".size()")
         : ("ACE_OS::strlen(" + qual + suffix + ")");
-      return indent + "find_size_ulong(size, padding);\n" +
+      return indent + "OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n" +
         indent + "size += " + get_size
-        + ((fld_cls & CL_WIDE) ? " * OpenDDS::DCPS::Serializer::WCHAR_SIZE;\n"
+        + ((fld_cls & CL_WIDE) ? " * OpenDDS::DCPS::char16_cdr_size;\n"
                                : " + 1;\n");
     } else if (fld_cls & CL_PRIMITIVE) {
-      string align = getAlignment(type);
-      if (!align.empty()) {
-        align =
-          indent + "if ((size + padding) % " + align + ") {\n" +
-          indent + "  padding += " + align + " - ((size + padding) % "
-          + align + ");\n" +
-          indent + "}\n";
-      }
       AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(type);
       if (p->pt() == AST_PredefinedType::PT_longdouble) {
         // special case use to ACE's NONNATIVE_LONGDOUBLE in CDR_Base.h
-        return align +
-          indent + "size += gen_max_marshaled_size(ACE_CDR::LongDouble());\n";
+        return indent +
+          "max_serialized_size(encoding, size, ACE_CDR::LongDouble());\n";
       }
-      return align +
-        indent + "size += gen_max_marshaled_size(" +
+      return indent + "max_serialized_size(encoding, size, " +
         getWrapper(qual, type, WD_OUTPUT) + ");\n";
     } else if (fld_cls == CL_UNKNOWN) {
       return ""; // warning will be issued for the serialize functions
@@ -1197,7 +1233,7 @@ namespace {
         fieldref += '.';
       }
       return indent +
-        "gen_find_size(" + fieldref + local + ", size, padding);\n";
+        "serialized_size(encoding, size, " + fieldref + local + ");\n";
     }
   }
 
@@ -1280,16 +1316,16 @@ namespace {
   bool genBinaryProperty_t(const string& cxx)
   {
     {
-      Function find_size("gen_find_size", "void");
-      find_size.addArg("stru", "const " + cxx + "&");
-      find_size.addArg("size", "size_t&");
-      find_size.addArg("padding", "size_t&");
-      find_size.endArgs();
+      Function serialized_size("serialized_size", "void");
+      serialized_size.addArg("encoding", "const Encoding&");
+      serialized_size.addArg("size", "size_t&");
+      serialized_size.addArg("stru", "const " + cxx + "&");
+      serialized_size.endArgs();
       be_global->impl_ <<
         "  if (stru.propagate) {\n"
-        "    find_size_ulong(size, padding);\n"
+        "    OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n"
         "    size += ACE_OS::strlen(stru.name.in()) + 1;\n"
-        "    gen_find_size(stru.value, size, padding);\n"
+        "    serialized_size(encoding, size, stru.value);\n"
         "  }\n";
     }
     {
@@ -1323,16 +1359,16 @@ namespace {
   bool genProperty_t(const string& cxx)
   {
     {
-      Function find_size("gen_find_size", "void");
-      find_size.addArg("stru", "const " + cxx + "&");
-      find_size.addArg("size", "size_t&");
-      find_size.addArg("padding", "size_t&");
-      find_size.endArgs();
+      Function serialized_size("serialized_size", "void");
+      serialized_size.addArg("encoding", "const Encoding&");
+      serialized_size.addArg("size", "size_t&");
+      serialized_size.addArg("stru", "const " + cxx + "&");
+      serialized_size.endArgs();
       be_global->impl_ <<
         "  if (stru.propagate) {\n"
-        "    find_size_ulong(size, padding);\n"
+        "    OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n"
         "    size += ACE_OS::strlen(stru.name.in()) + 1;\n"
-        "    find_size_ulong(size, padding);\n"
+        "    OpenDDS::DCPS::serialized_size_ulong(encoding, size);\n"
         "    size += ACE_OS::strlen(stru.value.in()) + 1;\n"
         "  }\n";
     }
@@ -1367,14 +1403,14 @@ namespace {
   bool genPropertyQosPolicy(const string& cxx)
   {
     {
-      Function find_size("gen_find_size", "void");
-      find_size.addArg("stru", "const " + cxx + "&");
-      find_size.addArg("size", "size_t&");
-      find_size.addArg("padding", "size_t&");
-      find_size.endArgs();
+      Function serialized_size("serialized_size", "void");
+      serialized_size.addArg("encoding", "const Encoding&");
+      serialized_size.addArg("size", "size_t&");
+      serialized_size.addArg("stru", "const " + cxx + "&");
+      serialized_size.endArgs();
       be_global->impl_ <<
-        "  gen_find_size(stru.value, size, padding);\n"
-        "  gen_find_size(stru.binary_value, size, padding);\n";
+        "  serialized_size(encoding, size, stru.value);\n"
+        "  serialized_size(encoding, size, stru.binary_value);\n";
     }
     {
       Function insertion("operator<<", "bool");
@@ -1410,14 +1446,14 @@ namespace {
   bool genSecuritySubmessage(const string& cxx)
   {
     {
-      Function find_size("gen_find_size", "void");
-      find_size.addArg("stru", "const " + cxx + "&");
-      find_size.addArg("size", "size_t&");
-      find_size.addArg("padding", "size_t&");
-      find_size.endArgs();
+      Function serialized_size("serialized_size", "void");
+      serialized_size.addArg("encoding", "const Encoding&");
+      serialized_size.addArg("size", "size_t&");
+      serialized_size.addArg("stru", "const " + cxx + "&");
+      serialized_size.endArgs();
       be_global->impl_ <<
-        "  gen_find_size(stru.smHeader, size, padding);\n"
-        "  size += stru.content.length() * max_marshaled_size_octet();\n";
+        "  serialized_size(encoding, size, stru.smHeader);\n"
+        "  max_serialized_size_octet(encoding, size, stru.content.length());\n";
     }
     {
       Function insertion("operator<<", "bool");
@@ -1456,11 +1492,11 @@ namespace {
   bool genRtpsSpecialStruct(const string& cxx)
   {
     {
-      Function find_size("gen_find_size", "void");
-      find_size.addArg("stru", "const " + cxx + "&");
-      find_size.addArg("size", "size_t&");
-      find_size.addArg("padding", "size_t&");
-      find_size.endArgs();
+      Function serialized_size("serialized_size", "void");
+      serialized_size.addArg("encoding", "const Encoding&");
+      serialized_size.addArg("size", "size_t&");
+      serialized_size.addArg("stru", "const " + cxx + "&");
+      serialized_size.endArgs();
       be_global->impl_ <<
         "  size += "
         << ((cxx == "OpenDDS::RTPS::SequenceNumberSet") ? "12" : "8")
@@ -1563,18 +1599,20 @@ namespace {
   };
 
   typedef void (*KeyIterationFn)(
+    Encoding encoding,
     const string& key_name, AST_Type* ast_type,
-    size_t* size, size_t* padding,
+    size_t* size,
     string* expr, string* intro);
 
   bool
   iterate_over_keys(
+    Encoding encoding,
     AST_Structure* node,
     const std::string& struct_name,
     IDL_GlobalData::DCPS_Data_Type_Info* info,
     TopicKeys& keys,
     KeyIterationFn fn,
-    size_t* size, size_t* padding,
+    size_t* size,
     string* expr, string* intro)
   {
     if (!info) {
@@ -1594,7 +1632,7 @@ namespace {
         } else {
           ast_type = straight_ast_type;
         }
-        fn(key_access, ast_type, size, padding, expr, intro);
+        fn(encoding, key_access, ast_type, size, expr, intro);
       }
     } else {
       IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
@@ -1608,24 +1646,23 @@ namespace {
                     << " (" << key_name << "). " << error << std::endl;
           return false;
         }
-        fn(key_name, field_type, size, padding, expr, intro);
+        fn(encoding, key_name, field_type, size, expr, intro);
       }
     }
     return true;
   }
 
-  void
-  gen_max_marshaled_size_iteration(
-    const string&, AST_Type* ast_type,
-    size_t* size, size_t* padding, string*, string*)
+  // Args must match KeyIterationFn.
+  void idl_max_serialized_size_iteration(
+    Encoding encoding, const string&, AST_Type* ast_type,
+    size_t* size, string*, string*)
   {
-    max_marshaled_size(ast_type, *size, *padding);
+    idl_max_serialized_size(encoding, *size, ast_type);
   }
 
-  void
-  gen_find_size_iteration(
-    const string& key_name, AST_Type* ast_type,
-    size_t*, size_t*, string* expr, string* intro)
+  void serialized_size_iteration(
+    Encoding, const string& key_name, AST_Type* ast_type,
+    size_t*, string* expr, string* intro)
   {
     *expr += findSizeCommon(key_name, ast_type, "stru.t", *intro);
   }
@@ -1722,7 +1759,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
   const bool parameter_list = exten == extensibilitykind_mutable && xcdr;
   const bool maybe_delimited = not_final && repr.xcdr2;
   const bool not_only_delimited = not_final && repr.not_only_xcdr2();
-  const bool get_cdr_size = parameter_list || maybe_delimited;
+  const bool get_serialized_size = parameter_list || maybe_delimited;
 
   for (size_t i = 0; i < LENGTH(special_structs); ++i) {
     if (special_structs[i].check(cxx)) {
@@ -1732,11 +1769,11 @@ bool marshal_generator::gen_struct(AST_Structure* node,
 
   RtpsFieldCustomizer rtpsCustom(cxx);
   {
-    Function find_size("gen_find_size", "void");
-    find_size.addArg("stru", "const " + cxx + "&");
-    find_size.addArg("size", "size_t&");
-    find_size.addArg("padding", "size_t&");
-    find_size.endArgs();
+    Function serialized_size("serialized_size", "void");
+    serialized_size.addArg("encoding", "const Encoding&");
+    serialized_size.addArg("size", "size_t&");
+    serialized_size.addArg("stru", "const " + cxx + "&");
+    serialized_size.endArgs();
     string expr, intro;
     for (size_t i = 0; i < fields.size(); ++i) {
       AST_Type* field_type = resolveActualType(fields[i]->field_type());
@@ -1761,20 +1798,74 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     insertion.addArg("strm", "Serializer&");
     insertion.addArg("stru", "const " + cxx + "&");
     insertion.endArgs();
-    string expr, intro = rtpsCustom.preamble_;
-    for (size_t i = 0; i < fields.size(); ++i) {
-      if (i) expr += "\n    && ";
-      const string field_name = fields[i]->local_name()->get_string(),
-        cond = rtpsCustom.getConditional(field_name);
-      if (!cond.empty()) {
-        expr += "(!(" + cond + ") || ";
+
+    // Get CDR Size if we need it.
+    if (get_serialized_size) {
+      be_global->impl_ <<
+        "  size_t total_size = 0;\n"
+        "  serialized_size(strm.encoding(), total_size, stru);\n";
+    }
+
+    // Write the CDR Size if delimited
+    if (maybe_delimited) {
+      const char* indent = "  ";
+      if (not_only_delimited) {
+        indent = "    ";
+        be_global->impl_ <<
+          "  if (strm.encoding().xcdr_version() == Serializer::XCDR2) {\n";
       }
-      expr += streamCommon(field_name, fields[i]->field_type(), "<< stru", intro, cxx);
-      if (!cond.empty()) {
-        expr += ")";
+      be_global->impl_ <<
+        indent << "if (!strm.write_delimiter(total_size)) {\n" <<
+        indent << "  return false;\n" <<
+        indent << "}\n";
+      if (not_only_delimited) {
+        be_global->impl_ <<
+          "  }\n";
       }
     }
-    be_global->impl_ << intro << "  return " << expr << ";\n";
+
+    // Write the fields
+    string intro = rtpsCustom.preamble_;
+    if (parameter_list) {
+      std::ostringstream fields_encode;
+      for (size_t i = 0; i < fields.size(); ++i) {
+        const unsigned id = be_global->get_id(node, fields[i], i);
+        const string field_name = fields[i]->local_name()->get_string();
+        fields_encode <<
+          "\n"
+          " {\n"
+          "   size_t field_size = 0;\n"
+          "   serialized_size(encoding(), field_size);\n"
+          "   if (!strm.write_parameter_id(" << id << ", field_size)) {\n"
+          "     return false;\n"
+          "   }\n"
+          "   if (!" <<
+            streamCommon(field_name, fields[i]->field_type(),
+              "<< stru", intro, cxx) << ") {\n"
+          "     return false;\n"
+          "   }\n"
+          " }\n";
+      }
+      be_global->impl_ <<
+        intro <<
+        fields_encode .str() << "\n"
+        "  return true;\n";
+    } else {
+      string expr;
+      for (size_t i = 0; i < fields.size(); ++i) {
+        if (i) expr += "\n    && ";
+        const string field_name = fields[i]->local_name()->get_string(),
+          cond = rtpsCustom.getConditional(field_name);
+        if (!cond.empty()) {
+          expr += "(!(" + cond + ") || ";
+        }
+        expr += streamCommon(field_name, fields[i]->field_type(), "<< stru", intro, cxx);
+        if (!cond.empty()) {
+          expr += ")";
+        }
+      }
+      be_global->impl_ << intro << "  return " << expr << ";\n";
+    }
   }
   {
     Function extraction("operator>>", "bool");
@@ -1784,7 +1875,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     string intro;
     if (maybe_delimited) {
       be_global->impl_ <<
-        "  unsigned size;\n";
+        "  unsigned total_size;\n";
       const char* indent = "  ";
       if (not_only_delimited) {
         indent = "    ";
@@ -1801,10 +1892,19 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       }
     }
     if (parameter_list) {
+      if (repr.xcdr2) {
+        /**
+         * We don't have a sentinel pid in XCDR2 paramter lists, but we have
+         * the size, so we need to stop after we hit this offset.
+         */
+        be_global->impl_ <<
+          "  const size_t end_of_fields = pos_rd() + total_size;\n";
+      }
       be_global->impl_ <<
-        "  unsigned member_id, member_size;\n"
+        "  unsigned field_id;\n"
+        "  size_t field_size;\n"
         "  while (true) {\n"
-        "    if (!strm.read_parameter_id(member_id, member_size)) {\n"
+        "    if (!strm.read_parameter_id(field_id, field_size)) {\n"
         "      return false;\n"
         "    }\n";
       if (repr.xcdr1) {
@@ -1817,6 +1917,22 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         be_global->impl_ << ") {\n"
           "      return true;\n"
           "    }\n";
+
+      } else if (repr.xcdr2) {
+        be_global->impl_ << "\n"
+          "    if (pos_rd() >= end_of_fields";
+        if (repr.not_only_xcdr2()) {
+          be_global->impl_ << " &&\n"
+            "        strm.xcdr_version() == Serializer::XCDR2";
+        }
+        be_global->impl_ << ") {\n"
+          "      return true;\n"
+          "    }\n";
+
+      } else {
+        idl_global->err()->misc_error(
+          "Could not determine parameter list end condition", node);
+        return false;
       }
 
       std::ostringstream cases;
@@ -1836,7 +1952,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         "    switch (member_id) {\n"
         << cases.str() <<
         "    default:\n"
-        "      strm.skip(member_size);\n"
+        "      strm.skip(field_size);\n"
         "      break;\n"
         "    }\n"
         "  }\n"
@@ -1930,25 +2046,31 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       }
     }
     {
-      Function max_marsh("gen_max_marshaled_size", "size_t");
-      max_marsh.addArg("stru", "const " + cxx + "&");
-      max_marsh.addArg("align", "bool");
-      max_marsh.endArgs();
+      Function max_serialized_size("max_serialized_size", "bool");
+      max_serialized_size.addArg("encoding", "const Encoding&");
+      max_serialized_size.addArg("size", "size_t&");
+      max_serialized_size.addArg("stru", "const " + cxx + "&");
+      max_serialized_size.endArgs();
       if (is_bounded_struct) {
-        size_t size = 0, padding = 0;
-        for (size_t i = 0; i < fields.size(); ++i) {
-          max_marshaled_size(fields[i]->field_type(), size, padding);
+        be_global->impl_ <<
+          "  switch (encoding.xcdr_version()) {\n";
+        for (unsigned e = 0; e < encoding_count; ++e) {
+          const Encoding encoding = static_cast<Encoding>(e);
+          size_t size = 0;
+          for (size_t i = 0; i < fields.size(); ++i) {
+            idl_max_serialized_size(encoding, size, fields[i]->field_type());
+          }
+          be_global->impl_ <<
+            "  case " << encoding_to_xcdr_version(encoding) << ":\n"
+            "    size += " << size << ";\n"
+            "    break;\n";
         }
-        if (padding) {
-          be_global->impl_
-            << "  return align ? " << size + padding << " : " << size << ";\n";
-        } else {
-          be_global->impl_
-            << "  return " << size << ";\n";
-        }
+        be_global->impl_ <<
+          "  }\n"
+          "  return true;\n";
       } else { // unbounded
         be_global->impl_
-          << "  return 0;\n";
+          << "  return false;\n";
       }
     }
 
@@ -1982,46 +2104,61 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     }
 
     {
-      Function max_marsh("gen_max_marshaled_size", "size_t");
-      max_marsh.addArg("stru", "KeyOnly<const " + cxx + ">");
-      max_marsh.addArg("align", "bool");
-      max_marsh.endArgs();
+      Function max_serialized_size("max_serialized_size", "bool");
+      max_serialized_size.addArg("encoding", "const Encoding&");
+      max_serialized_size.addArg("size", "size_t&");
+      max_serialized_size.addArg("stru", "KeyOnly<const " + cxx + ">");
+      max_serialized_size.endArgs();
 
-      if (bounded_key) {  // Only generate a size if the key is bounded
-        size_t size = 0, padding = 0;
-
-        if (!iterate_over_keys(node, cxx, info, keys,
-          gen_max_marshaled_size_iteration, &size, &padding, 0, 0)) {
-          return false;
+      if (bounded_key) { // Only generate a size if the key is bounded
+        be_global->impl_ <<
+          "  switch (encoding.xcdr_version()) {\n";
+        for (unsigned e = 0; e < encoding_count; ++e) {
+          const Encoding encoding = static_cast<Encoding>(e);
+          size_t size = 0;
+          if (!iterate_over_keys(encoding, node, cxx, info, keys,
+              idl_max_serialized_size_iteration, &size, 0, 0)) {
+            return false;
+          }
+          be_global->impl_ <<
+            "  case " << encoding_to_xcdr_version(encoding) << ":\n"
+            "    size += " << size << ";\n"
+            "    break;\n";
         }
-
-        if (padding) {
-          be_global->impl_
-            << "  return align ? " << size + padding << " : " << size << ";\n";
-        } else {
-          be_global->impl_
-            << "  return " << size << ";\n";
-        }
+        be_global->impl_ <<
+          "  }\n"
+          "  return true;\n";
       } else { // unbounded
         be_global->impl_
-          << "  return 0;\n";
+          << "  return false;\n";
       }
     }
 
     {
-      Function find_size("gen_find_size", "void");
-      find_size.addArg("stru", "KeyOnly<const " + cxx + ">");
-      find_size.addArg("size", "size_t&");
-      find_size.addArg("padding", "size_t&");
-      find_size.endArgs();
-      string expr, intro;
+      Function serialized_size("serialized_size", "void");
+      serialized_size.addArg("encoding", "const Encoding&");
+      serialized_size.addArg("size", "size_t&");
+      serialized_size.addArg("stru", "KeyOnly<const " + cxx + ">");
+      serialized_size.endArgs();
 
-      if (!iterate_over_keys(node, cxx, info, keys,
-        gen_find_size_iteration, 0, 0, &expr, &intro)) {
-        return false;
+      be_global->impl_ <<
+        "  switch (encoding.xcdr_version()) {\n";
+      for (unsigned e = 0; e < encoding_count; ++e) {
+        string expr, intro;
+        const Encoding encoding = static_cast<Encoding>(e);
+        if (!iterate_over_keys(encoding, node, cxx, info, keys,
+            serialized_size_iteration, 0, &expr, &intro)) {
+          return false;
+        }
+        be_global->impl_ <<
+          "  case " << encoding_to_xcdr_version(encoding) << ":\n"
+          "    {\n"
+          << intro << expr <<
+          "    break;\n"
+          "    }\n";
       }
-
-      be_global->impl_ << intro << expr;
+      be_global->impl_ <<
+        "  }\n";
     }
 
     {
@@ -2183,11 +2320,11 @@ namespace {
   {
     const string cxx = "OpenDDS::RTPS::Parameter";
     {
-      Function find_size("gen_find_size", "void");
-      find_size.addArg("uni", "const " + cxx + "&");
-      find_size.addArg("size", "size_t&");
-      find_size.addArg("padding", "size_t&");
-      find_size.endArgs();
+      Function serialized_size("serialized_size", "void");
+      serialized_size.addArg("encoding", "const Encoding&");
+      serialized_size.addArg("size", "size_t&");
+      serialized_size.addArg("uni", "const " + cxx + "&");
+      serialized_size.endArgs();
       generateSwitchForUnion("uni._d()", findSizeCommon, branches,
                              discriminator, "", "", cxx.c_str());
       be_global->impl_ <<
@@ -2202,18 +2339,16 @@ namespace {
         "  if (!(outer_strm << uni._d())) {\n"
         "    return false;\n"
         "  }\n"
-        "  size_t size = 0, pad = 0;\n"
-        "  gen_find_size(uni, size, pad);\n"
+        "  size_t size = serialized_size(outer_strm.encoding(), uni);\n"
         "  size -= 4; // parameterId & length\n"
-        "  const size_t post_pad = 4 - ((size + pad) % 4);\n"
-        "  const size_t total = size + pad + ((post_pad < 4) ? post_pad : 0);\n"
-        "  if (size + pad > ACE_UINT16_MAX || "
+        "  const size_t post_pad = 4 - (size % 4);\n"
+        "  const size_t total = size + ((post_pad < 4) ? post_pad : 0);\n"
+        "  if (size > ACE_UINT16_MAX || "
         "!(outer_strm << ACE_CDR::UShort(total))) {\n"
         "    return false;\n"
         "  }\n"
-        "  ACE_Message_Block param(size + pad);\n"
-        "  Serializer strm(&param, outer_strm.swap_bytes(), "
-        "outer_strm.encoding().alignment(), outer_strm.encoding().zero_init_padding());\n"
+        "  ACE_Message_Block param(size);\n"
+        "  Serializer strm(&param, outer_strm.encoding());"
         "  if (!insertParamData(strm, uni)) {\n"
         "    return false;\n"
         "  }\n"
@@ -2259,8 +2394,9 @@ namespace {
         "    return false;\n"
         "  }\n"
         "  param.wr_ptr(size);\n"
-        "  Serializer strm(&param, outer_strm.swap_bytes(), "
-        "Serializer::ALIGN_CDR);\n"
+        "  const Encoding encoding(\n"
+        "    Encoding::KIND_CDR_PARAMLIST, outer_strm.swap_bytes());\n"
+        "  Serializer strm(&param, encoding);"
         "  switch (disc) {\n";
       generateSwitchBody(streamCommon, branches, discriminator,
                          "return", ">> ", cxx.c_str(), true);
@@ -2283,11 +2419,11 @@ namespace {
   {
     const string cxx = "OpenDDS::RTPS::Submessage";
     {
-      Function find_size("gen_find_size", "void");
-      find_size.addArg("uni", "const " + cxx + "&");
-      find_size.addArg("size", "size_t&");
-      find_size.addArg("padding", "size_t&");
-      find_size.endArgs();
+      Function serialized_size("serialized_size", "void");
+      serialized_size.addArg("encoding", "const Encoding&");
+      serialized_size.addArg("size", "size_t&");
+      serialized_size.addArg("uni", "const " + cxx + "&");
+      serialized_size.endArgs();
       generateSwitchForUnion("uni._d()", findSizeCommon, branches,
                              discriminator, "", "", cxx.c_str());
     }
@@ -2343,25 +2479,21 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
   const string wrap_out = getWrapper("uni._d()", discriminator, WD_OUTPUT);
   {
-    Function find_size("gen_find_size", "void");
-    find_size.addArg("uni", "const " + cxx + "&");
-    find_size.addArg("size", "size_t&");
-    find_size.addArg("padding", "size_t&");
-    find_size.endArgs();
+    Function serialized_size("serialized_size", "void");
+    serialized_size.addArg("encoding", "const Encoding&");
+    serialized_size.addArg("size", "size_t&");
+    serialized_size.addArg("uni", "const " + cxx + "&");
+    serialized_size.endArgs();
     const string align = getAlignment(discriminator);
     if (!align.empty()) {
-      be_global->impl_ <<
-        "  if ((size + padding) % " << align << ") {\n"
-        "    padding += " << align << " - ((size + padding) % " << align
-        << ");\n"
-        "  }\n";
+      be_global->impl_ << "  encoding.align(size, " << align << ");\n";
     }
     if (disc_cls & CL_ENUM) {
       be_global->impl_ <<
-        "  size += max_marshaled_size_ulong();\n";
+        "  OpenDDS::DCPS::max_serialized_size_ulong(encoding, size);\n";
     } else {
       be_global->impl_ <<
-        "  size += gen_max_marshaled_size(" << wrap_out << ");\n";
+        "  max_serialized_size(encoding, size, " << wrap_out << ");\n";
     }
     generateSwitchForUnion("uni._d()", findSizeCommon, branches, discriminator,
                            "", "", cxx.c_str());
@@ -2410,70 +2542,73 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
   const bool is_bounded = is_bounded_type(node);
   {
-    Function max_marsh("gen_max_marshaled_size", "size_t");
-    max_marsh.addArg("uni", "const " + cxx + "&");
-    max_marsh.addArg("align", "bool");
-    max_marsh.endArgs();
+    Function max_serialized_size("max_serialized_size", "bool");
+    max_serialized_size.addArg("encoding", "const Encoding&");
+    max_serialized_size.addArg("size", "size_t&");
+    max_serialized_size.addArg("uni", "const " + cxx + "&");
+    max_serialized_size.endArgs();
+
     if (is_bounded) {
-      size_t size = 0, padding = 0;
-      max_marshaled_size(node, size, padding);
-      if (padding) {
-        be_global->impl_
-          << "  return align ? " << size + padding << " : " << size << ";\n";
-      } else {
-        be_global->impl_
-          << "  return " << size << ";\n";
+      be_global->impl_ <<
+        "  switch (encoding.xcdr_version()) {\n";
+      for (unsigned e = 0; e < encoding_count; ++e) {
+        const Encoding encoding = static_cast<Encoding>(e);
+        size_t size = 0;
+        idl_max_serialized_size(encoding, size, node);
+        be_global->impl_ <<
+          "  case " << encoding_to_xcdr_version(encoding) << ":\n"
+          "    size += " << size << ";\n"
+          "    break;\n";
       }
+      be_global->impl_ <<
+        "  }\n"
+        "  return true;\n";
     } else { // unbounded
       be_global->impl_
-        << "  return 0;\n";
+        << "  return false;\n";
     }
   }
 
   {
-    Function max_marsh("gen_max_marshaled_size", "size_t");
-    max_marsh.addArg("uni", "KeyOnly<const " + cxx + ">");
-    max_marsh.addArg("align", "bool");
-    max_marsh.endArgs();
+    Function max_serialized_size("max_serialized_size", "size_t");
+    max_serialized_size.addArg("encoding", "const Encoding&");
+    max_serialized_size.addArg("size", "size_t&");
+    max_serialized_size.addArg("uni", "KeyOnly<const " + cxx + ">");
+    max_serialized_size.endArgs();
 
     if (has_key) {
-      size_t size = 0, padding = 0;
-      max_marshaled_size(node->disc_type(), size, padding);
-      if (padding) {
-        be_global->impl_
-          << "  return align ? " << size + padding << " : " << size << ";\n";
-      } else {
-        be_global->impl_
-          << "  return " << size << ";\n";
-      }
-    } else {
-      be_global->impl_
-        << "  return 0;\n";
-    }
-  }
-
-  {
-    Function find_size("gen_find_size", "void");
-    find_size.addArg("uni", "KeyOnly<const " + cxx + ">");
-    find_size.addArg("size", "size_t&");
-    find_size.addArg("padding", "size_t&");
-    find_size.endArgs();
-
-    if (has_key) {
-      const string align = getAlignment(discriminator);
-      if (!align.empty()) {
+      be_global->impl_ <<
+        "  switch (encoding.xcdr_version()) {\n";
+      for (unsigned e = 0; e < encoding_count; ++e) {
+        const Encoding encoding = static_cast<Encoding>(e);
+        size_t size = 0;
+        idl_max_serialized_size(encoding, size, node->disc_type());
         be_global->impl_ <<
-          "  if ((size + padding) % " << align << ") {\n"
-          "    padding += " << align << " - ((size + padding) % " << align
-          << ");\n"
-          "  }\n";
+          "  case " << encoding_to_xcdr_version(encoding) << ":\n"
+          "    size += " << size << ";\n"
+          "    break;\n";
       }
+      be_global->impl_ <<
+        "  }\n";
+    }
+    be_global->impl_
+      << "  return true; // Union key is always bounded.\n";
+  }
+
+  {
+    Function serialized_size("serialized_size", "void");
+    serialized_size.addArg("encoding", "const Encoding&");
+    serialized_size.addArg("size", "size_t&");
+    serialized_size.addArg("uni", "KeyOnly<const " + cxx + ">");
+    serialized_size.endArgs();
+
+    if (has_key) {
       if (disc_cls & CL_ENUM) {
         be_global->impl_ <<
-          "  size += max_marshaled_size_ulong();\n";
+          "  OpenDDS::DCPS::max_serialized_size_ulong(encoding, size);\n";
       } else {
         be_global->impl_ <<
-          "  size += gen_max_marshaled_size(" << key_only_wrap_out << ");\n";
+          "  max_serialized_size(encoding, size, " << key_only_wrap_out << ");\n";
       }
     }
   }

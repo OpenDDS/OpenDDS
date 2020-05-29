@@ -52,8 +52,7 @@ TransportHeader::operator=(ACE_Message_Block& buffer)
 }
 
 ACE_INLINE
-size_t
-TransportHeader::max_marshaled_size()
+size_t TransportHeader::get_max_serialized_size()
 {
   // Representation takes no extra space for encoding.
   TransportHeader hdr(no_init);

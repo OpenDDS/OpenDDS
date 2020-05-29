@@ -1,12 +1,12 @@
-#include "dds/DCPS/Serializer.h"
-#include "dds/DCPS/Definitions.h"
+#include "common.h"
 
-#include "tao/CORBA_String.h"
+#include <tao/CORBA_String.h>
 
 #include <iostream>
 #include <typeinfo>
 
 using OpenDDS::DCPS::Serializer;
+using OpenDDS::DCPS::Encoding;
 
 struct DataTypeBase {
   virtual ~DataTypeBase() {}
@@ -17,7 +17,12 @@ struct DataTypeBase {
 
   virtual size_t space() = 0;
 
-  virtual size_t alignment() { return space(); }
+  size_t alignment(const Encoding& encoding)
+  {
+    return std::min(encoding.max_align(), _alignment());
+  }
+
+  virtual size_t _alignment() { return space(); }
 
   virtual const char* name() = 0;
 };
@@ -68,9 +73,7 @@ struct DataType<ACE_CDR::WChar> : DataTypeBase {
 
   void read(Serializer& s) { ACE_CDR::WChar w; s >> ACE_InputCDR::to_wchar(w); }
 
-  size_t space() { return 3; }
-
-  size_t alignment() { return 1; }
+  size_t space() { return 2; }
 
   const char* name() { return "wchar"; }
 };
@@ -85,9 +88,7 @@ struct DataType<ACE_CDR::LongDouble> : DataTypeBase {
 
   void read(Serializer& s) { ACE_CDR::LongDouble ld; s >> ld; }
 
-  size_t space() { return sizeof(ACE_CDR::LongDouble); }
-
-  size_t alignment() { return 8; }
+  size_t space() { return 16; }
 
   const char* name() { return "long double"; }
 };
@@ -101,7 +102,7 @@ struct DataType<const ACE_CDR::Char*> : DataTypeBase {
 
   size_t space() { return 4 + sizeof("hello") /*include null*/; }
 
-  size_t alignment() { return 4; }
+  size_t _alignment() { return 4; }
 
   const char* name() { return "string"; }
 };
@@ -116,7 +117,7 @@ struct DataType<const ACE_CDR::WChar*> : DataTypeBase {
 
   size_t space() { return 4 + 5 * 2 /*don't include null*/; }
 
-  size_t alignment() { return 4; }
+  size_t _alignment() { return 4; }
 
   const char* name() { return "wstring"; }
 };
@@ -159,8 +160,9 @@ DataTypeBase* types[] = {
   &dt_wstring,
 #endif
 };
+const size_t type_count = sizeof(types) / sizeof(types);
 
-bool testType(DataTypeBase* type, bool reset = false)
+bool testType(const Encoding& encoding, DataTypeBase* type, bool reset = false)
 {
   ACE_Message_Block mb(1024);
   bool ok = true;
@@ -174,12 +176,12 @@ bool testType(DataTypeBase* type, bool reset = false)
       mb.reset();
       mb.wr_ptr(memory);
 
-      Serializer s(&mb, false /* swap */, Serializer::ALIGN_CDR);
+      Serializer s(&mb, encoding);
       mb.wr_ptr(offset);
       type->write(s);
 
       const size_t len1 = mb.length() - memory;
-      const size_t align1 = type->alignment();
+      const size_t align1 = type->alignment(encoding);
       const size_t padding1 = (align1 > 1 && offset % align1)
                              ? align1 - (offset % align1) : 0;
       const size_t expected1 = offset + padding1 + type->space();
@@ -198,8 +200,8 @@ bool testType(DataTypeBase* type, bool reset = false)
       type->write(s);
       {
         const size_t len = mb.length() - memory;
-        const size_t align = type->alignment();
-        const size_t extraPadding = reset ? 0 : (len1 % align);
+        const size_t align = type->alignment(encoding);
+        const size_t extraPadding = (reset || !align) ? 0 : (len1 % align);
 
         const size_t padding = (align > 1 && offset % align)
                                ? align - (offset % align) : 0;
@@ -215,7 +217,7 @@ bool testType(DataTypeBase* type, bool reset = false)
 
       mb.rd_ptr(memory);
 
-      Serializer s2(&mb, false /* swap */, Serializer::ALIGN_CDR);
+      Serializer s2(&mb, encoding);
       mb.rd_ptr(offset);
       type->read(s2);
       if (reset) {
@@ -223,11 +225,11 @@ bool testType(DataTypeBase* type, bool reset = false)
       }
       type->read(s2);
 
-      const size_t leftover = mb.length();
+      const size_t leftover = mb.length(); // gets wr_ptr - rd_ptr
       if (leftover) {
         ok = false;
         std::cerr << "ERROR: " << leftover << " bytes remain after reading "
-                  << type->name() << std::endl;
+                  << type->name() << ", offset: " << offset << std::endl;
       }
     }
   }
@@ -238,8 +240,10 @@ bool runAlignmentTest()
 {
   std::cerr << "\nRunning alignment tests...\n";
   bool ok = true;
-  for (size_t i = 0; i < sizeof(types) / sizeof(types[0]); ++i) {
-    ok &= testType(types[i]);
+  for (size_t type = 0; type < type_count; ++type) {
+    for (size_t encoding = 0; encoding < encoding_count; ++encoding) {
+      ok &= testType(encodings[encoding], types[type]);
+    }
   }
   return ok;
 }
@@ -248,8 +252,10 @@ bool runAlignmentResetTest()
 {
   std::cerr << "\nRunning alignment reset tests...\n";
   bool ok = true;
-  for (size_t i = 0; i < sizeof(types) / sizeof(types[0]); ++i) {
-    ok &= testType(types[i], true);
+  for (size_t type = 0; type < type_count; ++type) {
+    for (size_t encoding = 0; encoding < encoding_count; ++encoding) {
+      ok &= testType(encodings[encoding], types[type], true);
+    }
   }
   return ok;
 }
@@ -257,23 +263,34 @@ bool runAlignmentResetTest()
 bool runAlignmentOverrunTest()
 {
   std::cerr << "\nRunning alignment overrun test...\n";
-  ACE_Message_Block mb(4);
 
-  Serializer s1(&mb, false, Serializer::ALIGN_CDR);
-  ACE_CDR::Long x = 42;
-  if (!(s1 << x)) {
-    return false;
-  }
-  if (s1 << x) {
-    return false;
-  }
+  for (size_t encoding = 0; encoding < encoding_count; ++encoding) {
+    ACE_Message_Block mb(4);
 
-  Serializer s2(&mb, false, Serializer::ALIGN_CDR);
-  if (!(s2 >> x)) {
-    return false;
-  }
-  if (s2 >> x) {
-    return false;
+    Serializer s1(&mb, encodings[encoding]);
+    ACE_CDR::Long x = 42;
+    if (!(s1 << x)) {
+      std::cerr << "runAlignmentOverrunTest: 1st serialization using " <<
+        encodings[encoding].to_string() << " failed\n";
+      return false;
+    }
+    if (s1 << x) {
+      std::cerr << "runAlignmentOverrunTest: 2st serialization using " <<
+        encodings[encoding].to_string() << " succeeded when it should've failed\n";
+      return false;
+    }
+
+    Serializer s2(&mb, encodings[encoding]);
+    if (!(s2 >> x)) {
+      std::cerr << "runAlignmentOverrunTest: 1st deserialization using " <<
+        encodings[encoding].to_string() << " failed\n";
+      return false;
+    }
+    if (s2 >> x) {
+      std::cerr << "runAlignmentOverrunTest: 2nd deserialization using " <<
+        encodings[encoding].to_string() << " succeeded when it should've failed\n";
+      return false;
+    }
   }
 
   return true;

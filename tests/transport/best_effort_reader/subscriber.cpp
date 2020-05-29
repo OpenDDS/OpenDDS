@@ -52,7 +52,7 @@ private:
   }
 
   AppConfig config;
-  AssociationData publication;
+  OpenDDS::DCPS::AssociationData publication;
 };
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])

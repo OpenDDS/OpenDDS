@@ -295,12 +295,12 @@ std::string idl_mapping_java::type(AST_Type *decl)
   }
   case AST_Decl::NT_string:
     return "String";
-  case AST_Decl::NT_enum: // fallthrough
-  case AST_Decl::NT_interface: // fallthrough
-  case AST_Decl::NT_interface_fwd: // fallthrough
-  case AST_Decl::NT_native: // fallthrough
-  case AST_Decl::NT_union: // fallthrough
-  case AST_Decl::NT_struct: // fallthrough
+  case AST_Decl::NT_enum:
+  case AST_Decl::NT_interface:
+  case AST_Decl::NT_interface_fwd:
+  case AST_Decl::NT_native:
+  case AST_Decl::NT_union:
+  case AST_Decl::NT_struct:
   case AST_Decl::NT_struct_fwd:
     return scoped(decl->name());
   case AST_Decl::NT_typedef: {

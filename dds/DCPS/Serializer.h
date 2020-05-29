@@ -5,6 +5,36 @@
  * See: http://www.opendds.org/license.html
  */
 
+/**
+ * @file Serializer.h
+ *
+ * The serialization interface for a C++ type called Type consists of the
+ * following overloads:
+ *
+ *   bool max_serialized_size(
+ *       const Encoding& encoding, size_t& size, const Type&);
+ *     Get the maximum possible byte size of Type in serialized form of the
+ *     encoding. Aligns size first if appropriate for the encoding. Returns
+ *     true if the type has a bounded maximum size, else false.
+ *
+ *     TODO(iguessthislldo): Make this a template? I don't see how this would
+ *     ever actually need a Type value. There are places like the
+ *     DataWriterImpl where we create an instance just to use this function.
+ *
+ *   void serialized_size(
+ *       const Encoding& encoding, size_t& size, const Type& value);
+ *     Get the byte size of the representation of value.
+ *
+ *   bool operator>>(Serializer& serializer, Type& value);
+ *     Tries to encode value into the stream of the serializer. Returns true if
+ *     successful, else false.
+ *
+ *   bool operator<<(Serializer& serializer, const Type& value);
+ *     Tries to decodes a representation of Type located at the current
+ *     position of the stream and use that to set value. Returns true if
+ *     successful, else false.
+ */
+
 #ifndef OPENDDS_DCPS_SERIALIZER_H
 #define OPENDDS_DCPS_SERIALIZER_H
 
@@ -21,6 +51,8 @@
 
 #include <ace/CDR_Base.h>
 #include <ace/CDR_Stream.h>
+
+#include <limits>
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Message_Block;
@@ -43,16 +75,46 @@ enum Endianness {
 #endif
 };
 
+OpenDDS_Dcps_Export
+OPENDDS_STRING endianness_to_string(Endianness endianness);
+
+const size_t boolean_cdr_size = 1;
+const size_t byte_cdr_size = 1;
+const size_t int8_cdr_size = 1;
+const size_t uint8_cdr_size = 1;
+const size_t int16_cdr_size = 2;
+const size_t uint16_cdr_size = 2;
+const size_t int32_cdr_size = 4;
+const size_t uint32_cdr_size = 4;
+const size_t int64_cdr_size = 8;
+const size_t uint64_cdr_size = 8;
+const size_t float32_cdr_size = 4;
+const size_t float64_cdr_size = 8;
+const size_t float128_cdr_size = 16;
+const size_t char8_cdr_size = 1;
+const size_t char16_cdr_size = 2;
+
 /**
- * Represents the settings of the CDR Stream. Passed to Serializer, cdr_size(),
- * and cdr_max_size().
+ * Align "value" by "by" if it's not already.
+ */
+OpenDDS_Dcps_Export
+void align(size_t& value, size_t by);
+
+/**
+ * Represents the settings of the serialized stream. Passed to things like
+ * Serializer, serialized_size(), and max_serialized_size(), etc.
  */
 class OpenDDS_Dcps_Export Encoding {
 public:
   /**
-   * Predefined CDR Kind.
-   * For CDR header encoding kinds that can have an endianness on the LSB,
-   * define them with the LSB set to 0 (even).
+   * Encoding Kinds.
+   *
+   * TODO(iguessthislldo) Separate this into real encoding and the
+   * encapsulation header encoding values.
+   *
+   * For encapsulation header encoding kinds that can have an endianness on the
+   * LSB, define them with the LSB set to 0 (even). If this assumption can't be
+   * true anymore, please update this class and remove this paragraph.
    */
   enum Kind {
     KIND_CDR_PLAIN = 0x0000,
@@ -61,8 +123,13 @@ public:
     KIND_XCDR2_PARAMLIST = 0x0012,
     KIND_XCDR2_DELIMITED = 0x0014,
     KIND_XML = 0x0100,
-    // Values below are OpenDDS specific and so should not encodable in a CDR
-    // header, which has a 2 bytes for the encoding type.
+    // TODO(iguessthislldo): XTypes spec also mentions a XML value of 0004!?!
+
+    // Implementation specific encoding kinds with CDR headers, if we have any,
+    // go after 0xC0000 and 0xFFFF.
+
+    // Values below are OpenDDS specific that don't don't have a encapsulation
+    // header value, so they are put above the 2 byte value limit.
     KIND_CUSTOM = 0x10000,
     KIND_UNKNOWN = KIND_CUSTOM + 0,
     /// This is unaligned CDR with no XCDR behavior.
@@ -73,7 +140,7 @@ public:
     ALIGN_NONE = 0, // No Alignment Needed
     ALIGN_CDR = 8, // Align for CDR and XCDR1
     ALIGN_XCDR2 = 4, // Align for XCDR2
-    ALIGN_MAX = ALIGN_CDR // Don't actually use this, this is for Serializer::ALIGN_PAD
+    ALIGN_MAX = ALIGN_CDR // For Serializer::ALIGN_PAD
   };
 
   enum Extensibility {
@@ -92,6 +159,7 @@ public:
   };
 
   /// Use KIND_UNKNOWN and ENDIAN_NATIVE
+  /// TODO(iguessthislldo) Change to KIND_CDR_PLAIN?
   Encoding();
 
   explicit Encoding(Kind kind, Endianness endianness = ENDIAN_NATIVE);
@@ -117,10 +185,42 @@ public:
   /// Return the maximum alignment dictated by the alignment policy.
   size_t max_align() const;
 
+  /**
+   * Align "value" to "by" and according to the stream's alignment.
+   */
+  void align(size_t& value, size_t by = std::numeric_limits<size_t>::max()) const;
+
   /// Return XCDR version based what encoding is being used.
   XcdrVersion xcdr_version() const;
 
-  static OPENDDS_STRING encoding_value_to_string(ACE_CDR::UShort value);
+  /**
+   * Returns true if the encoding kind is excepted to have a header for RTPS
+   * serialized data payloads.
+   */
+  static bool has_cdr_header(Kind kind);
+
+  /// Returns has_cdr_header(this->kind_)
+  bool has_cdr_header() const;
+
+  /**
+   * Returns true if the encoding kind is supported by OpenDDS.
+   */
+  static bool supported(Kind kind);
+
+  /// Returns supported(this->kind_)
+  bool supported() const;
+
+  /**
+   * Returns true if the endianness applies to this Encoding kind.
+   */
+  static bool has_endianness(Kind kind);
+
+  /// Returns has_endianness(this->kind_)
+  bool has_endianness() const;
+
+  OPENDDS_STRING to_string() const;
+
+  static OPENDDS_STRING kind_to_string(Kind value);
 
 private:
   Kind kind_;
@@ -136,6 +236,38 @@ bool operator>>(Serializer& s, Encoding& encoding);
 
 OpenDDS_Dcps_Export
 bool operator<<(Serializer& s, const Encoding& encoding);
+
+OpenDDS_Dcps_Export
+bool max_serialized_size(
+  const Encoding& encoding, size_t& size, const Encoding&);
+
+OpenDDS_Dcps_Export
+void serialized_size(
+  const Encoding& encoding, size_t& size, const Encoding& value);
+
+/**
+ * Convenience function for the max_serialized_size of a single value with no
+ * alignment needed.
+ */
+template <typename T>
+size_t max_serialized_size(const Encoding& encoding, const T& value)
+{
+  size_t size = 0;
+  max_serialized_size(encoding, size, value);
+  return size;
+}
+
+/**
+ * Convenience function for the serialized_size of a single value with no
+ * alignment needed.
+ */
+template <typename T>
+size_t serialized_size(const Encoding& encoding, const T& value)
+{
+  size_t size = 0;
+  serialized_size(encoding, size, value);
+  return size;
+}
 
 /**
  * @class Serializer
@@ -183,11 +315,17 @@ public:
    * object. is_little_endian is made to be used with "byte_order" values
    * littered around OpenDDS, which correspond to ACE_CDR_BYTE_ORDER in
    * ace/CDR_Base.h.
+   *
+   * TODO(iguessthislldo): Remove this constructor? It's probably less useful
+   * than I originally thought, as I think it's only useful in DataReader.
    */
   Serializer(ACE_Message_Block* chain, bool has_cdr_header,
     bool is_little_endian);
 
   /**
+   * TODO(iguessthislldo): Remove this constructor to force explicit encoding
+   * declaration.
+   *
    * This constructor is designed to be mostly compatible with the pre-3.15
    * constructor, except ALIGN_INITIALIZE has been removed from Alignment and
    * the option to zero initialize padding was made into an extra argument.
@@ -222,10 +360,10 @@ public:
   /// Examine byte swapping behavior.
   bool swap_bytes() const;
 
-  /// Get the Explict Endianness of the Stream
+  /// Get the Explicit Endianness of the Stream
   Endianness endianness() const;
 
-  /// Set the Explict Endianness of the Stream
+  /// Set the Explicit Endianness of the Stream
   void endianness(Endianness value);
 
   /// Examine alignment behavior.
@@ -316,11 +454,11 @@ public:
   friend OpenDDS_Dcps_Export
   bool operator<<(Serializer& s, ACE_CDR::ULongLong x);
   friend OpenDDS_Dcps_Export
-  bool operator<<(Serializer& s, ACE_CDR::LongDouble x);
-  friend OpenDDS_Dcps_Export
   bool operator<<(Serializer& s, ACE_CDR::Float x);
   friend OpenDDS_Dcps_Export
   bool operator<<(Serializer& s, ACE_CDR::Double x);
+  friend OpenDDS_Dcps_Export
+  bool operator<<(Serializer& s, ACE_CDR::LongDouble x);
   friend OpenDDS_Dcps_Export
   bool operator<<(Serializer& s, const ACE_CDR::Char* x);
   friend OpenDDS_Dcps_Export
@@ -367,7 +505,7 @@ public:
   friend OpenDDS_Dcps_Export
   bool operator<<(Serializer& s, FromBoundedString<wchar_t> x);
 #endif /* DDS_HAS_WCHAR */
-#endif /* !OPENDDS_SAFETYP_PROFILE */
+#endif /* !OPENDDS_SAFETY_PROFILE */
 
   // Extraction operators.
   friend OpenDDS_Dcps_Export
@@ -385,11 +523,11 @@ public:
   friend OpenDDS_Dcps_Export
   bool operator>>(Serializer& s, ACE_CDR::ULongLong& x);
   friend OpenDDS_Dcps_Export
-  bool operator>>(Serializer& s, ACE_CDR::LongDouble& x);
-  friend OpenDDS_Dcps_Export
   bool operator>>(Serializer& s, ACE_CDR::Float& x);
   friend OpenDDS_Dcps_Export
   bool operator>>(Serializer& s, ACE_CDR::Double& x);
+  friend OpenDDS_Dcps_Export
+  bool operator>>(Serializer& s, ACE_CDR::LongDouble& x);
   friend OpenDDS_Dcps_Export
   bool operator>>(Serializer& s, ACE_CDR::Char*& x);
   friend OpenDDS_Dcps_Export
@@ -445,26 +583,40 @@ public:
 
   /// Align for reading: moves current_->rd_ptr() past the alignment padding.
   /// Alignments of 2, 4, or 8 are supported by CDR and this implementation.
-  int align_r(size_t alignment);
+  bool align_r(size_t alignment);
 
   /// Align for writing: moves current_->wr_ptr() past the padding, possibly
   /// zero-filling the pad bytes (based on the alignment_ setting).
   /// Alignments of 2, 4, or 8 are supported by CDR and this implementation.
-  int align_w(size_t alignment);
+  bool align_w(size_t alignment);
 
   /**
-   * Read a XCDR Parameter ID used in XCDR parameter lists.
+   * Read a XCDR parameter ID used in XCDR parameter lists.
    *
    * Returns true if successful.
    */
-  bool read_parameter_id(unsigned& id, unsigned& size);
+  bool read_parameter_id(unsigned& id, size_t& size);
 
   /**
-   * Read a Delimiter used for XCDR2 delimited data.
+   * Write a XCDR parameter ID used in XCDR parameter lists.
    *
    * Returns true if successful.
    */
-  bool read_delimiter(unsigned& size);
+  bool write_parameter_id(unsigned id, size_t size);
+
+  /**
+   * Read a delimiter used for XCDR2 delimited data.
+   *
+   * Returns true if successful.
+   */
+  bool read_delimiter(size_t& size);
+
+  /**
+   * Write a delimiter used for XCDR2 delimited data.
+   *
+   * Returns true if successful.
+   */
+  bool write_delimiter(size_t size);
 
 private:
   /// Read an array of values from the chain.
@@ -535,16 +687,20 @@ private:
   static const char ALIGN_PAD[Encoding::ALIGN_MAX];
 
 public:
-  static const size_t WCHAR_SIZE = 2; // Serialize wchar as UTF-16BE
-
 #if defined ACE_LITTLE_ENDIAN
   static const bool SWAP_BE = true;
 #else
   static const bool SWAP_BE = false;
 #endif
 
+  // Flags and reserved ids used in parameter list ids.
   static const ACE_CDR::UShort pid_extended = 0x3f01;
   static const ACE_CDR::UShort pid_list_end = 0x3f02;
+  static const ACE_CDR::UShort pid_impl_extension = 0x8000;
+  static const ACE_CDR::UShort pid_must_understand = 0x4000;
+
+  // EMHEADER must understand flag
+  static const ACE_CDR::ULong emheader_must_understand = 1 << 31;
 };
 
 template<typename T> struct KeyOnly {
@@ -565,74 +721,90 @@ namespace IDL {
   };
 }
 
+// predefined type methods
+OpenDDS_Dcps_Export
+bool max_serialized_size(
+  const Encoding& encoding, size_t& size, const ACE_CDR::Short& value,
+  size_t count = 1);
+OpenDDS_Dcps_Export
+bool max_serialized_size(
+  const Encoding& encoding, size_t& size, const ACE_CDR::UShort& value,
+  size_t count = 1);
+OpenDDS_Dcps_Export
+bool max_serialized_size(
+  const Encoding& encoding, size_t& size, const ACE_CDR::Long& value,
+  size_t count = 1);
+OpenDDS_Dcps_Export
+bool max_serialized_size(
+  const Encoding& encoding, size_t& size, const ACE_CDR::ULong& value,
+  size_t count = 1);
+OpenDDS_Dcps_Export
+bool max_serialized_size(
+  const Encoding& encoding, size_t& size, const ACE_CDR::LongLong& value,
+  size_t count = 1);
+OpenDDS_Dcps_Export
+bool max_serialized_size(
+  const Encoding& encoding, size_t& size, const ACE_CDR::ULongLong& value,
+  size_t count = 1);
+OpenDDS_Dcps_Export
+bool max_serialized_size(
+  const Encoding& encoding, size_t& size, const ACE_CDR::Float& value,
+  size_t count = 1);
+OpenDDS_Dcps_Export
+bool max_serialized_size(
+  const Encoding& encoding, size_t& size, const ACE_CDR::Double& value,
+  size_t count = 1);
+OpenDDS_Dcps_Export
+bool max_serialized_size(
+  const Encoding& encoding, size_t& size, const ACE_CDR::LongDouble& value,
+  size_t count = 1);
+
+// predefined type method disambiguators.
+OpenDDS_Dcps_Export
+bool max_serialized_size(
+  const Encoding& encoding, size_t& size,
+  const ACE_OutputCDR::from_boolean value, size_t count = 1);
+OpenDDS_Dcps_Export
+bool max_serialized_size(
+  const Encoding& encoding, size_t& size,
+  const ACE_OutputCDR::from_char value, size_t count = 1);
+OpenDDS_Dcps_Export
+bool max_serialized_size(
+  const Encoding& encoding, size_t& size,
+  const ACE_OutputCDR::from_wchar value, size_t count = 1);
+OpenDDS_Dcps_Export
+bool max_serialized_size(
+  const Encoding& encoding, size_t& size,
+  const ACE_OutputCDR::from_octet value, size_t count = 1);
+
+/// predefined type method explicit disambiguators.
+OpenDDS_Dcps_Export
+void max_serialized_size_boolean(const Encoding& encoding, size_t& size,
+  size_t count = 1);
+OpenDDS_Dcps_Export
+void max_serialized_size_char(const Encoding& encoding, size_t& size,
+  size_t count = 1);
+OpenDDS_Dcps_Export
+void max_serialized_size_wchar(const Encoding& encoding, size_t& size,
+  size_t count = 1);
+OpenDDS_Dcps_Export
+void max_serialized_size_octet(const Encoding& encoding, size_t& size,
+  size_t count = 1);
+OpenDDS_Dcps_Export
+void max_serialized_size_ulong(const Encoding& encoding, size_t& size,
+  size_t count = 1);
+
+OpenDDS_Dcps_Export
+void serialized_size_ulong(const Encoding& encoding, size_t& size,
+  size_t count = 1);
+
 } // namespace DCPS
 } // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#if defined (__ACE_INLINE__)
-# include "Serializer.inl"
-#else  /* __ACE_INLINE__ */
-
-#include <ace/CDR_Stream.h>
-
-OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
-
-namespace OpenDDS {
-namespace DCPS {
-
-// predefined type gen_max_marshaled_size methods
-OpenDDS_Dcps_Export
-size_t gen_max_marshaled_size(const ACE_CDR::Short& x);
-OpenDDS_Dcps_Export
-size_t gen_max_marshaled_size(const ACE_CDR::UShort& x);
-OpenDDS_Dcps_Export
-size_t gen_max_marshaled_size(const ACE_CDR::Long& x);
-OpenDDS_Dcps_Export
-size_t gen_max_marshaled_size(const ACE_CDR::ULong& x);
-OpenDDS_Dcps_Export
-size_t gen_max_marshaled_size(const ACE_CDR::LongLong& x);
-OpenDDS_Dcps_Export
-size_t gen_max_marshaled_size(const ACE_CDR::ULongLong& x);
-OpenDDS_Dcps_Export
-size_t gen_max_marshaled_size(const ACE_CDR::LongDouble& x);
-OpenDDS_Dcps_Export
-size_t gen_max_marshaled_size(const ACE_CDR::Float& x);
-OpenDDS_Dcps_Export
-size_t gen_max_marshaled_size(const ACE_CDR::Double& x);
-
-// predefined type gen_max_marshaled_size method disambiguators.
-OpenDDS_Dcps_Export
-size_t gen_max_marshaled_size(const ACE_OutputCDR::from_boolean x);
-OpenDDS_Dcps_Export
-size_t gen_max_marshaled_size(const ACE_OutputCDR::from_char x);
-OpenDDS_Dcps_Export
-size_t gen_max_marshaled_size(const ACE_OutputCDR::from_wchar x);
-OpenDDS_Dcps_Export
-size_t gen_max_marshaled_size(const ACE_OutputCDR::from_octet x);
-
-/// predefined type max_marshaled_size method explicit disambiguators.
-OpenDDS_Dcps_Export
-size_t max_marshaled_size_boolean();
-OpenDDS_Dcps_Export
-size_t max_marshaled_size_char();
-OpenDDS_Dcps_Export
-size_t max_marshaled_size_wchar();
-OpenDDS_Dcps_Export
-size_t max_marshaled_size_octet();
-
-/// lengths of strings and sequences are ulong
-OpenDDS_Dcps_Export
-size_t max_marshaled_size_ulong();
-OpenDDS_Dcps_Export
-void find_size_ulong(size_t& size, size_t& padding);
-
-} // namespace DCPS
-} // namespace OpenDDS
-
-OPENDDS_END_VERSIONED_NAMESPACE_DECL
-
-
-#endif  /* __ACE_INLINE__ */
+#ifdef __ACE_INLINE__
+#  include "Serializer.inl"
+#endif
 
 #endif /* OPENDDS_DCPS_SERIALIZER_H */
