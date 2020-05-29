@@ -73,7 +73,7 @@ public:
       ACE_CDR::ULong encap;
       if (!(ser >> encap)) {
         ACE_ERROR((LM_ERROR,
-          "ERROR: data_received() seq# = %d: failed to deserialize encap\n",
+          "ERROR: data_received() seq# = %q: failed to deserialize encap\n",
           sample.header_.sequence_.getValue()));
         return;
       }
@@ -81,13 +81,13 @@ public:
       TestMsg data;
       if (!(ser >> data)) {
         ACE_ERROR((LM_ERROR,
-          "ERROR: data_received() seq# = %d: failed to deserialize data\n",
+          "ERROR: data_received() seq# = %q: failed to deserialize data\n",
           sample.header_.sequence_.getValue()));
         return;
       }
 
       if (data.key == 99) {
-        ACE_DEBUG((LM_INFO, "data_received() seq# = %d: terminating sample\n",
+        ACE_DEBUG((LM_INFO, "data_received() seq# = %q: terminating sample\n",
                    sample.header_.sequence_.getValue()));
         done_ = true;
         return;
@@ -133,7 +133,7 @@ public:
       ACE_CDR::ULong encap;
       if (!(ser >> encap)) {
         ACE_ERROR((LM_ERROR,
-          "ERROR: data_received() seq# = %d: failed to deserialize encap\n",
+          "ERROR: data_received() seq# = %q: failed to deserialize encap\n",
           sample.header_.sequence_.getValue()));
         return;
       }
@@ -141,7 +141,7 @@ public:
       TestMsg data;
       if (!(ser >> KeyOnly<TestMsg>(data))) {
         ACE_ERROR((LM_ERROR,
-          "ERROR: data_received() seq# = %d: failed to deserialize key-only data\n",
+          "ERROR: data_received() seq# = %q: failed to deserialize key-only data\n",
           sample.header_.sequence_.getValue()));
         return;
       }

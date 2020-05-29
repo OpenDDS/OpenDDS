@@ -125,7 +125,8 @@ bool operator<<(Serializer& s, const Encoding& encoding)
   return ok;
 }
 
-OPENDDS_STRING Encoding::kind_to_string(Kind value) {
+OPENDDS_STRING Encoding::kind_to_string(Kind value)
+{
   switch (value) {
   case KIND_CDR_PLAIN:
     return "CDR/XCDR1 Plain";
@@ -140,7 +141,7 @@ OPENDDS_STRING Encoding::kind_to_string(Kind value) {
   case KIND_XML:
     return "XML";
   case KIND_UNKNOWN:
-    return "<UNKOWN>";
+    return "<UNKNOWN>";
   case KIND_CDR_UNALIGNED:
     return "Unaligned CDR";
   default:
@@ -148,7 +149,8 @@ OPENDDS_STRING Encoding::kind_to_string(Kind value) {
   }
 }
 
-OPENDDS_STRING Encoding::to_string() const {
+OPENDDS_STRING Encoding::to_string() const
+{
   OPENDDS_STRING rv = Encoding::kind_to_string(kind_) + ", " +
     endianness_to_string(endianness_);
   if (!zero_init_padding_ ) {

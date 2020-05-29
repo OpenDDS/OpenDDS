@@ -25,8 +25,8 @@ void print_hex(void* d)
 {
   unsigned char* a = (unsigned char*) d;
   printf("0x");
-  for (int j=0;j<16; j++){
-    printf("%02x",a[j]);
+  for (int j = 0; j < 16; j++){
+    printf("%02x", a[j]);
   }
   printf("\n");
 }
@@ -149,11 +149,11 @@ void run_test(const Encoding& encoding)
     dm_message.wchar_field = 0;
     dm_message.float_field = 0;
     dm_message.double_field = 0;
-    ACE_CDR_LONG_DOUBLE_ASSIGNMENT(dm_message.long_double_field,0.0L);
+    ACE_CDR_LONG_DOUBLE_ASSIGNMENT(dm_message.long_double_field, 0.0L);
     dm_message.boolean_field = 0;
     dm_message.octet_field = 0;
     dm_message.enum_field = Messenger4::FIRST;
-    TEST_CHECK(in_serializer >> KeyOnly<Messenger4::Message>(dm_message))
+    TEST_CHECK(in_serializer >> KeyOnly<Messenger4::Message>(dm_message));
     TEST_CHECK(message.short_field == dm_message.short_field);
     TEST_CHECK(message.unsigned_short_field == dm_message.unsigned_short_field);
     TEST_CHECK(message.long_field == dm_message.long_field);
@@ -184,7 +184,7 @@ void run_test(const Encoding& encoding)
     message.mess.wchar_field = 'x';
     message.mess.float_field = 123.45f;
     message.mess.double_field = 123.456;
-    ACE_CDR_LONG_DOUBLE_ASSIGNMENT(message.mess.long_double_field,123.4567L);
+    ACE_CDR_LONG_DOUBLE_ASSIGNMENT(message.mess.long_double_field, 123.4567L);
     message.mess.boolean_field = true;
     message.mess.octet_field = 12;
     message.mess.enum_field = Messenger4::SECOND;
@@ -210,7 +210,7 @@ void run_test(const Encoding& encoding)
     dm_message.mess.wchar_field = 0;
     dm_message.mess.float_field = 0;
     dm_message.mess.double_field = 0;
-    ACE_CDR_LONG_DOUBLE_ASSIGNMENT(dm_message.mess.long_double_field,0.0L);
+    ACE_CDR_LONG_DOUBLE_ASSIGNMENT(dm_message.mess.long_double_field, 0.0L);
     dm_message.mess.boolean_field = 0;
     dm_message.mess.octet_field = 0;
     dm_message.mess.enum_field = Messenger4::FIRST;

@@ -1031,6 +1031,7 @@ namespace {
     }
     if (n > 1) {
       // subsequent elements may need padding relative to prior element
+      // TODO(iguessthislldo): https://github.com/objectcomputing/OpenDDS/pull/1668#discussion_r432521888
       const size_t prev_size = size;
       idl_max_serialized_size(encoding, size, type);
       size += (n - 2) * (size - prev_size);
@@ -2340,7 +2341,7 @@ namespace {
         "  }\n"
         "  size_t size = serialized_size(outer_strm.encoding(), uni);\n"
         "  size -= 4; // parameterId & length\n"
-        "  const size_t post_pad = 4 - ((size) % 4);\n"
+        "  const size_t post_pad = 4 - (size % 4);\n"
         "  const size_t total = size + ((post_pad < 4) ? post_pad : 0);\n"
         "  if (size > ACE_UINT16_MAX || "
         "!(outer_strm << ACE_CDR::UShort(total))) {\n"

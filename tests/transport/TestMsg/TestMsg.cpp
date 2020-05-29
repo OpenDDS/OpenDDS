@@ -6,9 +6,9 @@ TestMsg::TestMsg()
 {
 }
 
-TestMsg::TestMsg(ACE_CDR::ULong msgKey, TAO::String_Manager msgValue)
-: key(msgKey)
-, value(msgValue)
+TestMsg::TestMsg(ACE_CDR::ULong key, const char* value)
+: key(key)
+, value(value)
 {
 }
 

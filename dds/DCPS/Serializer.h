@@ -52,6 +52,8 @@
 #include <ace/CDR_Base.h>
 #include <ace/CDR_Stream.h>
 
+#include <limits>
+
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Message_Block;
 ACE_END_VERSIONED_NAMESPACE_DECL
@@ -186,12 +188,7 @@ public:
   /**
    * Align "value" to "by" and according to the stream's alignment.
    */
-  void align(size_t& value, size_t by) const;
-
-  /**
-   * Align "value" to the stream's max alignment.
-   */
-  void align(size_t& value) const;
+  void align(size_t& value, size_t by = std::numeric_limits<size_t>::max()) const;
 
   /// Return XCDR version based what encoding is being used.
   XcdrVersion xcdr_version() const;
@@ -249,8 +246,8 @@ void serialized_size(
   const Encoding& encoding, size_t& size, const Encoding& value);
 
 /**
- * Convenience function for when the max_serialized_size of just a single value
- * with no alignment is needed.
+ * Convenience function for the max_serialized_size of a single value with no
+ * alignment needed.
  */
 template <typename T>
 size_t max_serialized_size(const Encoding& encoding, const T& value)
@@ -261,8 +258,8 @@ size_t max_serialized_size(const Encoding& encoding, const T& value)
 }
 
 /**
- * Convenience function for when the serialized_size of just a single value
- * with no alignment is needed.
+ * Convenience function for the serialized_size of a single value with no
+ * alignment needed.
  */
 template <typename T>
 size_t serialized_size(const Encoding& encoding, const T& value)
@@ -806,7 +803,7 @@ void serialized_size_ulong(const Encoding& encoding, size_t& size,
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#if defined __ACE_INLINE__ && !defined OPENDDS_DDS_DCPS_SERIALIZER_INL
+#ifdef __ACE_INLINE__
 #  include "Serializer.inl"
 #endif
 

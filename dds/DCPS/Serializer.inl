@@ -5,9 +5,6 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DDS_DCPS_SERIALIZER_INL
-#define OPENDDS_DDS_DCPS_SERIALIZER_INL
-
 #include "Serializer.h"
 
 #include "debug.h"
@@ -126,15 +123,6 @@ void Encoding::align(size_t& value, size_t by) const
   const size_t max_alignment = max_align();
   if (max_alignment) {
     DCPS::align(value, std::min(max_alignment, by));
-  }
-}
-
-ACE_INLINE
-void Encoding::align(size_t& value) const
-{
-  const size_t max_alignment = max_align();
-  if (max_alignment) {
-    DCPS::align(value, max_alignment);
   }
 }
 
@@ -1559,5 +1547,3 @@ void serialized_size_ulong(const Encoding& encoding, size_t& size, size_t count)
 } // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
-
-#endif

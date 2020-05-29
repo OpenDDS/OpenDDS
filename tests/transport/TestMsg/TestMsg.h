@@ -11,7 +11,7 @@ struct TestMsg_Export TestMsg {
   TAO::String_Manager value;
 
   TestMsg();
-  TestMsg(ACE_CDR::ULong msgKey, TAO::String_Manager msgValue);
+  TestMsg(ACE_CDR::ULong key, const char* value);
 };
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
