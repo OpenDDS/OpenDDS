@@ -723,14 +723,12 @@ void EndpointManager::compute_active_foundations(ActiveFoundationSet& a_active_f
 void EndpointManager::check_invariants() const
 {
   // Check for expired deferred checks.
-  size_t deferred = 0;
   for (DeferredTriggeredChecksType::const_iterator pos = deferred_triggered_checks_.begin(),
          limit = deferred_triggered_checks_.end(); pos != limit; ++pos) {
     const DeferredTriggeredCheckListType& list = pos->second;
 
     OPENDDS_ASSERT(!list.empty());
     OPENDDS_ASSERT(list.front().expiration_date >= MonotonicTimePoint::now() - agent_impl->get_configuration().server_reflexive_address_period() - agent_impl->get_configuration().server_reflexive_address_period());
-    deferred += list.size();
   }
 
   for (UsernameToChecklistType::const_iterator pos = username_to_checklist_.begin(),
@@ -743,12 +741,14 @@ void EndpointManager::check_invariants() const
   for (TransactionIdToChecklistType::const_iterator pos = transaction_id_to_checklist_.begin(),
          limit = transaction_id_to_checklist_.end(); pos != limit; ++pos) {
     ChecklistPtr checklist = pos->second;
+    ACE_UNUSED_ARG(checklist);
     OPENDDS_ASSERT(checklist->has_transaction_id(pos->first));
   }
 
   for (GuidPairToChecklistType::const_iterator pos = guid_pair_to_checklist_.begin(),
          limit = guid_pair_to_checklist_.end(); pos != limit; ++pos) {
     ChecklistPtr checklist = pos->second;
+    ACE_UNUSED_ARG(checklist);
     OPENDDS_ASSERT(checklist->has_guid_pair(pos->first));
   }
 }
