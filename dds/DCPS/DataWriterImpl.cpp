@@ -19,7 +19,6 @@
 #include "Serializer.h"
 #include "Transient_Kludge.h"
 #include "DataDurabilityCache.h"
-#include "OfferedDeadlineWatchdog.h"
 #include "MonitorFactory.h"
 #include "SendStateDataSampleList.h"
 #include "DataSampleElement.h"
@@ -75,7 +74,6 @@ DataWriterImpl::DataWriterImpl()
     reactor_(0),
     liveliness_check_interval_(TimeDuration::max_value),
     last_deadline_missed_total_count_(0),
-    watchdog_(),
     is_bit_(false),
     min_suspended_transaction_id_(0),
     max_suspended_transaction_id_(0),
@@ -883,57 +881,36 @@ DataWriterImpl::set_qos(const DDS::DataWriterQos& qos_arg)
     if (enabled_ == true) {
       if (!Qos_Helper::changeable(qos_, qos)) {
         return DDS::RETCODE_IMMUTABLE_POLICY;
+      }
 
-      } else {
-        Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
-        DDS::PublisherQos publisherQos;
-        RcHandle<PublisherImpl> publisher = this->publisher_servant_.lock();
+      Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
+      DDS::PublisherQos publisherQos;
+      RcHandle<PublisherImpl> publisher = this->publisher_servant_.lock();
 
-        bool status = false;
-        if (publisher) {
-          publisher->get_qos(publisherQos);
-          status
-            = disco->update_publication_qos(domain_id_,
-                                            dp_id_,
-                                            this->publication_id_,
-                                            qos,
-                                            publisherQos);
-        }
-        if (!status) {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) DataWriterImpl::set_qos, ")
-                            ACE_TEXT("qos not updated.\n")),
-                           DDS::RETCODE_ERROR);
-        }
+      bool status = false;
+      if (publisher) {
+        publisher->get_qos(publisherQos);
+        status
+          = disco->update_publication_qos(domain_id_,
+                                          dp_id_,
+                                          this->publication_id_,
+                                          qos,
+                                          publisherQos);
+      }
+      if (!status) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) DataWriterImpl::set_qos, ")
+                          ACE_TEXT("qos not updated.\n")),
+                         DDS::RETCODE_ERROR);
+      }
+
+      if (!(qos_ == qos)) {
+        data_container_->set_deadline_period(TimeDuration(qos.deadline.period));
+        qos_ = qos;
       }
     }
 
-    if (!(qos_ == qos)) {
-      // Reset the deadline timer if the period has changed.
-      if (qos_.deadline.period.sec != qos.deadline.period.sec
-          || qos_.deadline.period.nanosec != qos.deadline.period.nanosec) {
-        if (qos_.deadline.period.sec == DDS::DURATION_INFINITE_SEC
-            && qos_.deadline.period.nanosec == DDS::DURATION_INFINITE_NSEC) {
-          this->watchdog_= make_rch<OfferedDeadlineWatchdog>(
-                               ref(this->lock_),
-                               qos.deadline,
-                               ref(*this),
-                               ref(this->offered_deadline_missed_status_),
-                               ref(this->last_deadline_missed_total_count_));
-
-        } else if (qos.deadline.period.sec == DDS::DURATION_INFINITE_SEC
-                   && qos.deadline.period.nanosec == DDS::DURATION_INFINITE_NSEC) {
-          this->watchdog_->cancel_all();
-          this->watchdog_.reset();
-
-        } else {
-          this->watchdog_->reset_interval(
-            TimeDuration(qos.deadline.period));
-        }
-      }
-
-      qos_ = qos;
-    }
+    qos_ = qos;
 
     return DDS::RETCODE_OK;
 
@@ -1344,21 +1321,27 @@ DataWriterImpl::enable()
 
   //Note: the QoS used to set n_chunks_ is Changable=No so
   // it is OK that we cannot change the size of our allocators.
-  data_container_ .reset(new WriteDataContainer(this,
-                                           max_samples_per_instance,
-                                           history_depth,
-                                           max_durable_per_instance,
-                                           qos_.reliability.max_blocking_time,
-                                           n_chunks_,
-                                           domain_id_,
-                                           topic_name_,
-                                           get_type_name(),
+  data_container_ = RcHandle<WriteDataContainer>
+    (new WriteDataContainer
+     (this,
+      max_samples_per_instance,
+      history_depth,
+      max_durable_per_instance,
+      qos_.reliability.max_blocking_time,
+      n_chunks_,
+      domain_id_,
+      topic_name_,
+      get_type_name(),
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
-                                           durability_cache,
-                                           qos_.durability_service,
+      durability_cache,
+      qos_.durability_service,
 #endif
-                                           max_instances,
-                                           max_total_samples));
+      max_instances,
+      max_total_samples,
+      lock_,
+      offered_deadline_missed_status_,
+      last_deadline_missed_total_count_),
+     keep_count());
 
   // +1 because we might allocate one before releasing another
   // TBD - see if this +1 can be removed.
@@ -1409,19 +1392,7 @@ DataWriterImpl::enable()
 
   participant->add_adjust_liveliness_timers(this);
 
-  // Setup the offered deadline watchdog if the configured deadline
-  // period is not the default (infinite).
-  DDS::Duration_t const deadline_period = this->qos_.deadline.period;
-
-  if (deadline_period.sec != DDS::DURATION_INFINITE_SEC
-      || deadline_period.nanosec != DDS::DURATION_INFINITE_NSEC) {
-    this->watchdog_ = make_rch<OfferedDeadlineWatchdog>(
-                           ref(this->lock_),
-                           this->qos_.deadline,
-                           ref(*this),
-                           ref(this->offered_deadline_missed_status_),
-                           ref(this->last_deadline_missed_total_count_));
-  }
+  data_container_->set_deadline_period(TimeDuration(qos_.deadline.period));
 
   Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
   disco->pre_writer(this);
@@ -2628,14 +2599,6 @@ DataWriterImpl::persist_data()
   return this->data_container_->persist_data();
 }
 #endif
-
-void
-DataWriterImpl::reschedule_deadline()
-{
-  if (this->watchdog_.in()) {
-    this->data_container_->reschedule_deadline();
-  }
-}
 
 void
 DataWriterImpl::wait_control_pending()

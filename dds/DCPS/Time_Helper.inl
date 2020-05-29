@@ -158,6 +158,10 @@ DDS::Time_t time_value_to_time(const ACE_Time_Value& tv)
 ACE_INLINE
 ACE_Time_Value duration_to_time_value(const DDS::Duration_t& t)
 {
+  if (t.sec == DDS::DURATION_INFINITE_SEC && t.nanosec == DDS::DURATION_INFINITE_NSEC) {
+    return ACE_Time_Value::max_time;
+  }
+
   CORBA::LongLong sec = t.sec + t.nanosec/1000/ACE_ONE_SECOND_IN_USECS;
   CORBA::ULong usec = t.nanosec/1000 % ACE_ONE_SECOND_IN_USECS;
 

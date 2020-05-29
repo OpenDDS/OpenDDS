@@ -389,6 +389,44 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
         TEST_CHECK(rds1.sample_ && rds1.sample_->total_length() == N);
         TEST_CHECK(check_reassembled(*rds1.sample_));
       }
+      // Test ignoring of frags from previously completed sequence numbers
+      {
+        ReceivedDataSample rds1(f.head_->cont()->duplicate()),
+          rds2(f2.head_->cont()->duplicate()),
+          rds3(f2.tail_->cont()->duplicate());
+        rds1.header_ = header1;
+        rds2.header_ = header2a;
+        rds3.header_ = header2b;
+        TransportReassembly tr;
+        TEST_CHECK(!tr.reassemble(1, true, rds1));
+        TEST_CHECK(!tr.reassemble(2, false, rds2));
+        TEST_CHECK(tr.reassemble(3, false, rds3));
+        TEST_CHECK(rds3.sample_ && rds3.sample_->total_length() == N);
+        TEST_CHECK(check_reassembled(*rds3.sample_));
+        // Now we're ignoring
+        ReceivedDataSample rds4(f.head_->cont()->duplicate()),
+          rds5(f2.head_->cont()->duplicate()),
+          rds6(f2.tail_->cont()->duplicate());
+        rds4.header_ = header1;
+        rds5.header_ = header2a;
+        rds6.header_ = header2b;
+        TEST_CHECK(!tr.reassemble(1, true, rds4));
+        TEST_CHECK(!tr.reassemble(2, false, rds5));
+        TEST_CHECK(!tr.reassemble(3, false, rds6));
+        // Back to normal
+        tr.clear_completed(rds1.header_.publication_id_); // clears completed SN
+        ReceivedDataSample rds7(f.head_->cont()->duplicate()),
+          rds8(f2.head_->cont()->duplicate()),
+          rds9(f2.tail_->cont()->duplicate());
+        rds7.header_ = header1;
+        rds8.header_ = header2a;
+        rds9.header_ = header2b;
+        TEST_CHECK(!tr.reassemble(1, true, rds7));
+        TEST_CHECK(!tr.reassemble(2, false, rds8));
+        TEST_CHECK(tr.reassemble(3, false, rds9));
+        TEST_CHECK(rds9.sample_ && rds9.sample_->total_length() == N);
+        TEST_CHECK(check_reassembled(*rds9.sample_));
+      }
       // Test data_unavailable() scenarios
       {
         ReceivedDataSample rds1(f.head_->cont()->duplicate()),

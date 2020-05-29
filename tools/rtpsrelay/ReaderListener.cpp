@@ -36,10 +36,14 @@ void ReaderListener::on_data_available(DDS::DataReader_ptr reader)
     case DDS::ALIVE_INSTANCE_STATE:
       {
         const auto from = guid_to_repoid(data[idx].guid());
-        GuidSet to;
+        GuidSet to_before, to_after;
         ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) %N:%l ReaderListener::on_data_available add global reader %C\n"), guid_to_string(from).c_str()));
-        association_table_.insert(data[idx], to);
-        spdp_handler_.replay(from, to);
+        association_table_.lookup_destinations(to_before, from);
+        association_table_.insert(data[idx], to_after);
+        for (const auto& to : to_before) {
+          to_after.erase(to);
+        }
+        spdp_handler_.replay(from, to_after);
         stats_writer_.total_readers(association_table_.reader_count());
       }
       break;

@@ -144,6 +144,11 @@ int RelayHandler::handle_input(ACE_HANDLE handle)
   const auto bytes = socket_.recv(buffer->wr_ptr(), buffer->space(), remote);
 
   if (bytes < 0) {
+    if (errno == ECONNRESET) {
+      // Sending to a non-existent client may result in an ICMP message that is delievered as connection reset.
+      return 0;
+    }
+
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %N:%l ERROR: RelayHandler::handle_input %C failed to recv: %m\n"), name_.c_str()));
     return 0;
   } else if (bytes == 0) {

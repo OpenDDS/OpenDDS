@@ -333,7 +333,7 @@ dds_visitor::visit_structure(AST_Structure* node)
                                       node->size_type(), node->repoID());
   }
 
-  if (be_global->java()) {
+  if (!node->imported() && be_global->java()) {
     java_ts_generator::generate(node);
   }
 

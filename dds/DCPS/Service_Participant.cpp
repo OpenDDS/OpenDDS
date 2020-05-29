@@ -246,6 +246,12 @@ Service_Participant::reactor_owner() const
   return reactor_task_.get_reactor_owner();
 }
 
+ReactorInterceptor_rch
+Service_Participant::interceptor() const
+{
+  return reactor_task_.interceptor();
+}
+
 void
 Service_Participant::shutdown()
 {

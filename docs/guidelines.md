@@ -32,6 +32,8 @@ of the guidelines.
   * [Documenting Code for Doxygen](#documenting-code-for-doxygen)
   * [Preprocessor](#preprocessor)
     * [Includes](#includes)
+      * [Order](#order)
+      * [Path](#path)
   * [Time](#time)
 
 ## Repository
@@ -329,6 +331,8 @@ For more information, see [the Doxygen manual](http://www.doxygen.nl/manual/).
 
 #### Includes
 
+##### Order
+
 As a safeguard against headers being dependant on a particular order, includes
 should be ordered based on a hierarchy going from local headers to system
 headers, with spaces between groups of includes. This order can be generalized
@@ -338,18 +342,25 @@ as the following:
    `Foo.cpp`).
 2. Headers from the local project.
 3. Headers from external OpenDDS-based libraries.
-4. User API OpenDDS Headers.
-4. Internal API OpenDDS Headers.
-5. Headers from external TAO-based libraries.
-6. Headers from TAO.
-7. Headers from external ACE-based libraries.
-8. Headers from ACE.
-9. Headers from external non-ACE-based libraries.
-10. Headers from system and C++ standard libraries.
+4. Headers from `dds/DCPS`.
+5. `dds/*C.h` Headers
+6. Headers from external TAO-based libraries.
+7. Headers from TAO.
+8. Headers from external ACE-based libraries.
+9. Headers from ACE.
+10. Headers from external non-ACE-based libraries.
+11. Headers from system and C++ standard libraries.
+
+##### Path
 
 Headers should only use local includes (`#include "foo/Foo.h"`) if the header
 is relative to the file. Otherwise system includes (`#include <foo/Foo.h>`)
 should be used to make it clear that the header is on the system include path.
+
+In addition to this, includes for a file that will always be relative to the
+including file should have a relative include path. For example, a
+`dds/DCPS/bar.cpp` should include `dds/DCPS/bar.h` using `#include "bar.h"`,
+not `#include <dds/DCPS/bar.h>` and especially not `#include "dds/DCPS/bar.h"`.
 
 ### Time
 

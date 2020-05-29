@@ -915,7 +915,23 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
   DCPS::RepoId reader = src_participant;
   reader.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
 
-  if (iter->second.auth_state_ == DCPS::AS_HANDSHAKE_REPLY && msg.related_message_identity.source_guid == GUID_UNKNOWN) {
+  if ((iter->second.auth_state_ == DCPS::AS_HANDSHAKE_REPLY || iter->second.auth_state_ == DCPS::AS_HANDSHAKE_REPLY_SENT) && msg.related_message_identity.source_guid == GUID_UNKNOWN) {
+    // The initiator will retry using the same request.  If the
+    // initiator retries very quickly and we change the response,
+    // i.e., different diffie, then we will never authenticate.  Thus,
+    // if the initiator sends the same request, then we should send
+    // the same response.
+    if (iter->second.has_last_stateless_msg_ &&
+        iter->second.last_handshake_request_data_ == msg.message_data[0]) {
+      if (sedp_.write_stateless_message(iter->second.last_stateless_msg_, reader) != DDS::RETCODE_OK) {
+        if (DCPS::security_debug.auth_warn) {
+          ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} Spdp::handle_handshake_message() - ")
+                     ACE_TEXT("Unable to write stateless message for handshake reply.\n")));
+        }
+        return;
+      }
+    }
+
     DDS::Security::ParticipantBuiltinTopicDataSecure pbtds = {
       {
         {
@@ -987,11 +1003,9 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
         return;
       }
       iter->second.has_last_stateless_msg_ = true;
-      iter->second.stateless_msg_deadline_ = MonotonicTimePoint::now() + config_->auth_resend_period();
       iter->second.last_stateless_msg_ = reply;
+      iter->second.last_handshake_request_data_ = msg.message_data[0];
       iter->second.auth_state_ = DCPS::AS_HANDSHAKE_REPLY_SENT;
-      auth_resends_.insert(std::make_pair(iter->second.stateless_msg_deadline_, src_participant));
-      tport_->auth_resend_processor_->schedule(config_->auth_resend_period());
       return;
     } else if (vr == DDS::Security::VALIDATION_OK_FINAL_MESSAGE) {
       // Theoretically, this shouldn't happen unless handshakes can involve fewer than 3 messages
@@ -1004,22 +1018,16 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
       }
       iter->second.has_last_stateless_msg_ = false;
       iter->second.auth_state_ = DCPS::AS_AUTHENTICATED;
-      purge_auth_deadlines(participants_.find(src_participant));
+      purge_auth_deadlines(iter);
       match_authenticated(src_participant, iter);
     } else if (vr == DDS::Security::VALIDATION_OK) {
       // Theoretically, this shouldn't happen unless handshakes can involve fewer than 3 messages
       iter->second.has_last_stateless_msg_ = false;
       iter->second.auth_state_ = DCPS::AS_AUTHENTICATED;
-      purge_auth_deadlines(participants_.find(src_participant));
+      purge_auth_deadlines(iter);
       match_authenticated(src_participant, iter);
     }
-  }
-
-  if (iter == participants_.end()) {
-    return;
-  }
-
-  if ((iter->second.auth_state_ == DCPS::AS_HANDSHAKE_REQUEST_SENT || iter->second.auth_state_ == DCPS::AS_HANDSHAKE_REPLY_SENT) && msg.related_message_identity.source_guid == guid_) {
+  } else if ((iter->second.auth_state_ == DCPS::AS_HANDSHAKE_REQUEST_SENT || iter->second.auth_state_ == DCPS::AS_HANDSHAKE_REPLY_SENT) && msg.related_message_identity.source_guid == guid_) {
     DDS::Security::ParticipantStatelessMessage reply;
     reply.message_identity.source_guid = guid_;
     reply.message_identity.sequence_number = 0;
@@ -1057,7 +1065,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
       iter->second.has_last_stateless_msg_ = true;
       iter->second.stateless_msg_deadline_ = MonotonicTimePoint::now() + config_->auth_resend_period();
       iter->second.last_stateless_msg_ = reply;
-      purge_auth_resends(participants_.find(src_participant));
+      purge_auth_resends(iter);
       auth_resends_.insert(std::make_pair(iter->second.stateless_msg_deadline_, src_participant));
       tport_->auth_resend_processor_->schedule(config_->auth_resend_period());
       // cache the outbound message, but don't change state, since roles shouldn't have changed?
@@ -1071,17 +1079,15 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
       }
       iter->second.has_last_stateless_msg_ = false;
       iter->second.auth_state_ = DCPS::AS_AUTHENTICATED;
-      purge_auth_deadlines(participants_.find(src_participant));
+      purge_auth_deadlines(iter);
       match_authenticated(src_participant, iter);
     } else if (vr == DDS::Security::VALIDATION_OK) {
       iter->second.has_last_stateless_msg_ = false;
       iter->second.auth_state_ = DCPS::AS_AUTHENTICATED;
-      purge_auth_deadlines(participants_.find(src_participant));
+      purge_auth_deadlines(iter);
       match_authenticated(src_participant, iter);
     }
   }
-
-  return;
 }
 
 void
@@ -1139,9 +1145,9 @@ Spdp::process_auth_resends(const DCPS::MonotonicTimePoint& now)
        pos != limit && pos->first <= now;) {
 
     DiscoveredParticipantIter pit = participants_.find(pos->second);
-    if (pit != participants_.end() && pit->second.stateless_msg_deadline_ <= now &&
-        (pit->second.auth_state_ == DCPS::AS_HANDSHAKE_REQUEST_SENT ||
-         pit->second.auth_state_ == DCPS::AS_HANDSHAKE_REPLY_SENT)) {
+    if (pit != participants_.end() &&
+        pit->second.stateless_msg_deadline_ <= now &&
+        pit->second.auth_state_ == DCPS::AS_HANDSHAKE_REQUEST_SENT) {
       RepoId reader = pit->first;
       reader.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
       pit->second.stateless_msg_deadline_ = now + config_->auth_resend_period();
@@ -1831,7 +1837,7 @@ Spdp::SpdpTransport::open()
 #endif
 
   local_sender_ = DCPS::make_rch<SpdpMulti>(reactor_task_.interceptor(), outer_->config_->resend_period(), ref(*this), &SpdpTransport::send_local);
-  local_sender_->enable(TimeDuration());
+  local_sender_->enable(outer_->config_->resend_period());
 
 #ifdef OPENDDS_SECURITY
   auth_deadline_processor_ = DCPS::make_rch<SpdpSporadic>(reactor_task_.interceptor(), ref(*this), &SpdpTransport::process_auth_deadlines);

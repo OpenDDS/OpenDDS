@@ -30,6 +30,7 @@ RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link, const Guid
   : link_(link)
   , last_received_()
   , recvd_sample_(0)
+  , total_frags_(0)
   , receiver_(local_prefix)
 #ifdef OPENDDS_SECURITY
   , secure_sample_(0)
@@ -937,6 +938,12 @@ RtpsUdpReceiveStrategy::remove_fragments(const SequenceRange& range,
   for (SequenceNumber sn = range.first; sn <= range.second; ++sn) {
     reassembly_.data_unavailable(sn, pub_id);
   }
+}
+
+void
+RtpsUdpReceiveStrategy::clear_completed_fragments(const RepoId& pub_id)
+{
+  reassembly_.clear_completed(pub_id);
 }
 
 bool

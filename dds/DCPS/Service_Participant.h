@@ -88,6 +88,8 @@ public:
 
   ACE_thread_t reactor_owner() const;
 
+  ReactorInterceptor_rch interceptor() const;
+
   void set_shutdown_listener(ShutdownListener* listener);
 
   /**
