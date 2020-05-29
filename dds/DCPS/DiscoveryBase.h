@@ -1712,26 +1712,25 @@ namespace OpenDDS {
         if (removed) {
 #ifndef DDS_HAS_MINIMUM_BIT
           ParticipantBuiltinTopicDataDataReaderImpl* bit = part_bit();
-          // bit may be null if the DomainParticipant is shutting down
-          if (bit && iter->second.bit_ih_ != DDS::HANDLE_NIL) {
-            ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
-            bit->set_instance_state(iter->second.bit_ih_,
-                                    DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
-          }
-          iter = participants_.find(part_id);
-          if (iter == participants_.end()) {
-            return;
-          }
           ParticipantLocationBuiltinTopicDataDataReaderImpl* loc_bit = part_loc_bit();
           // bit may be null if the DomainParticipant is shutting down
-          if (loc_bit && iter->second.location_ih_ != DDS::HANDLE_NIL) {
-            ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
-            loc_bit->set_instance_state(iter->second.location_ih_,
+          if ((bit && iter->second.bit_ih_ != DDS::HANDLE_NIL) ||
+              (loc_bit && iter->second.location_ih_ != DDS::HANDLE_NIL)) {
+            {
+              ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
+              if (bit && iter->second.bit_ih_ != DDS::HANDLE_NIL) {
+                bit->set_instance_state(iter->second.bit_ih_,
                                         DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
-          }
-          iter = participants_.find(part_id);
-          if (iter == participants_.end()) {
-            return;
+              }
+              if (loc_bit && iter->second.location_ih_ != DDS::HANDLE_NIL) {
+                loc_bit->set_instance_state(iter->second.location_ih_,
+                                            DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
+              }
+            }
+            iter = participants_.find(part_id);
+            if (iter == participants_.end()) {
+              return;
+            }
           }
 #endif /* DDS_HAS_MINIMUM_BIT */
           if (DCPS_debug_level > 3) {
