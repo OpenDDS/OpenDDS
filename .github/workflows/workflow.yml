@@ -1,0 +1,23 @@
+name: Build and deploy jekyll site
+
+on:
+  pull_request:
+    branches:
+      - gh-pages
+
+jobs:
+  jekyll:
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.6
+
+      - name: Jekyll
+        uses: limjh16/jekyll-action-ts@v2
+        with:
+          enable_cache: true
