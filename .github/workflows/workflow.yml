@@ -21,3 +21,9 @@ jobs:
         uses: limjh16/jekyll-action-ts@v2
         with:
           enable_cache: true
+
+      - name: Upload
+        uses: actions/upload-artifact@v2
+        with:
+          name: Site
+          path: _site
