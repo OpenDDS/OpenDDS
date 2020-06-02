@@ -63,12 +63,12 @@ Writer::write(bool reliable, int num_messages)
         ACE_OS::exit(-1);
     }
 
-    if (CORBA::is_nil(message_dw2.in())) {
+    /*if (CORBA::is_nil(message_dw2.in())) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("%N:%l: svc()")
                    ACE_TEXT(" ERROR: _narrow dw2 failed!\n")));
         ACE_OS::exit(-1);
-    }
+    }*/
 
     std::ostringstream pid;
     pid << std::setw(5) << my_pid_;
