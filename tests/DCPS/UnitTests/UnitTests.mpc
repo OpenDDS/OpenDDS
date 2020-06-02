@@ -117,3 +117,10 @@ project(*DataSampleHeader): dcps_test, googletest {
     DataSampleHeader.cpp
   }
 }
+
+project(*XtypesAssignability): dcps_test, googletest {
+  exename = *
+  Source_Files {
+    XtypesAssignability.cpp
+  }
+}
