@@ -244,7 +244,7 @@ typeobject_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
         "        .append(\n"
         "          XTypes::MinimalStructMember(\n"
         "            XTypes::CommonStructMember(\n"
-        "              " << member_id++ << ",\n"
+        "              " << member_id++ << ",\n" // TODO: other kinds of memberid
 
         "              XTypes::StructMemberFlag(),\n" // TODO: Set StructMemberFlags.
         "              ";
