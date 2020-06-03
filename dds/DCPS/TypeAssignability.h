@@ -31,7 +31,7 @@ private:
 typedef std::pair<const MinimalStructMember*, const MinimalStructMember*> MemberPair;
 typedef OPENDDS_VECTOR(MemberPair) MatchedSet;
 
-class TypeAssignability {
+class OpenDDS_Dcps_Export TypeAssignability {
 public:
   bool assignable(const TypeObject& ta, const TypeObject& tb) const;
   bool assignable(const TypeIdentifier& ta, const TypeIdentifier& tb) const;
