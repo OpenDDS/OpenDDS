@@ -75,7 +75,8 @@ TEST(PrimitiveTypesTest, Assignable)
   BitBound bound = 8;
   CommonEnumeratedHeader common_header(bound);
   MinimalBitmaskHeader header(common_header);
-  MinimalBitmaskType bitmask = {.header = header};
+  MinimalBitmaskType bitmask;
+  bitmask.header = header;
   MinimalTypeObject tob(bitmask);
   EXPECT_TRUE(test.assignable_primitive(tia, tob));
 
@@ -163,7 +164,8 @@ TEST(PrimitiveTypesTest, NotAssignable)
   BitBound bound = 9;
   CommonEnumeratedHeader common_header(bound);
   MinimalBitmaskHeader header(common_header);
-  MinimalBitmaskType bitmask = {.header = header};
+  MinimalBitmaskType bitmask;
+  bitmask.header = header;
   MinimalTypeObject tob(bitmask);
   EXPECT_FALSE(test.assignable_primitive(tia, tob));
 
