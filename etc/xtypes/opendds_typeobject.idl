@@ -339,7 +339,7 @@ module OpenDDS { module XTypes {    // spec: DDS::XTypes
         case TI_STRING16_LARGE:
             StringLTypeDefn         string_ldefn;
 
-        // ============  Plain collectios - use TypeIdentifierKind =========
+        // ============  Plain collections - use TypeIdentifierKind =========
         case TI_PLAIN_SEQUENCE_SMALL:
             PlainSequenceSElemDefn  seq_sdefn;
         case TI_PLAIN_SEQUENCE_LARGE:
