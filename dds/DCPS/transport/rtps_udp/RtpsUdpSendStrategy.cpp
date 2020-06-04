@@ -53,7 +53,7 @@ RtpsUdpSendStrategy::RtpsUdpSendStrategy(RtpsUdpDataLink* link,
   rtps_header_.vendorId = OpenDDS::RTPS::VENDORID_OPENDDS;
   std::memcpy(rtps_header_.guidPrefix, local_prefix,
               sizeof(GuidPrefix_t));
-  Serializer writer(&rtps_header_mb_);
+  Serializer writer(&rtps_header_mb_, Encoding::KIND_CDR_UNALIGNED, ENDIAN_NATIVE);
   // byte order doesn't matter for the RTPS Header
   writer << rtps_header_;
 }
@@ -140,7 +140,7 @@ RtpsUdpSendStrategy::OverrideToken::~OverrideToken()
 bool
 RtpsUdpSendStrategy::marshal_transport_header(ACE_Message_Block* mb)
 {
-  Serializer writer(mb); // byte order doesn't matter for the RTPS Header
+  Serializer writer(mb, Encoding::KIND_CDR_UNALIGNED, ENDIAN_NATIVE); // byte order doesn't matter for the RTPS Header
   return writer.write_octet_array(reinterpret_cast<ACE_CDR::Octet*>(rtps_header_data_),
     RTPS::RTPSHDR_SZ);
 }
@@ -352,7 +352,7 @@ RtpsUdpSendStrategy::encode_payload(const RepoId& pub_id,
           const bool swapPl = iQos[iQosLen - 4] != ACE_CDR_BYTE_ORDER;
           const char* rawIQos = reinterpret_cast<const char*>(iQos.get_buffer());
           ACE_Message_Block mbIQos(rawIQos, iQosLen);
-          Serializer ser(&mbIQos, swapPl, Encoding::ALIGN_CDR);
+          Serializer ser(&mbIQos, Encoding::KIND_CDR_PLAIN, swapPl ? ENDIAN_LITTLE : ENDIAN_BIG);
 
           RTPS::DataSubmessage& data = submessages[i].data_sm();
           if (!(ser >> data.inlineQos)) { // appends to any existing inlineQos
@@ -428,7 +428,7 @@ namespace {
     DDS::OctetSeq out(size);
     out.length(size);
     ACE_Message_Block mb(reinterpret_cast<const char*>(out.get_buffer()), size);
-    Serializer ser2(&mb, ser1.swap_bytes(), Serializer::ALIGN_CDR);
+    Serializer ser2(&mb,Encoding::KIND_CDR_PLAIN,  ser1.swap_bytes() ? ENDIAN_LITTLE : ENDIAN_BIG);
     ser2 << ACE_OutputCDR::from_octet(smHdr.submessageId);
     ser2 << ACE_OutputCDR::from_octet(smHdr.flags);
     ser2 << smHdr.submessageLength;

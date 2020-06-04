@@ -174,7 +174,7 @@ MulticastSession::syn_received(const Message_Block_Ptr& control)
   // Not from the remote peer for this session.
   if (this->remote_peer_ != header.source_) return;
 
-  Serializer serializer(control.get(), header.swap_bytes());
+  Serializer serializer(control.get(), Encoding::KIND_CDR_UNALIGNED, header.swap_bytes() ? ENDIAN_LITTLE : ENDIAN_BIG);
 
   MulticastPeer local_peer;
   serializer >> local_peer; // sent as remote_peer
@@ -214,7 +214,7 @@ MulticastSession::send_syn()
 
   Message_Block_Ptr data( new ACE_Message_Block(len));
 
-  Serializer serializer(data.get());
+  Serializer serializer(data.get(), Encoding::KIND_CDR_UNALIGNED, ENDIAN_NATIVE);
 
   serializer << this->remote_peer_;
 
@@ -244,7 +244,7 @@ MulticastSession::synack_received(const Message_Block_Ptr& control)
   // Not from the remote peer for this session.
   if (this->remote_peer_ != header.source_) return;
 
-  Serializer serializer(control.get(), header.swap_bytes());
+  Serializer serializer(control.get(), Encoding::KIND_CDR_UNALIGNED, header.swap_bytes() ?  ENDIAN_LITTLE : ENDIAN_BIG);
 
   MulticastPeer local_peer;
   serializer >> local_peer; // sent as remote_peer
@@ -277,7 +277,7 @@ MulticastSession::send_synack()
 
   Message_Block_Ptr data(new ACE_Message_Block(len));
 
-  Serializer serializer(data.get());
+  Serializer serializer(data.get(), Encoding::KIND_CDR_UNALIGNED, ENDIAN_NATIVE);
 
   serializer << this->remote_peer_;
 

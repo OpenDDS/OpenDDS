@@ -48,7 +48,10 @@ void Encoding::kind(Encoding::Kind value)
   case KIND_CDR_PLAIN:
     alignment(ALIGN_CDR);
     break;
-
+  case KIND_CDR_PLAIN_ZERO:
+    alignment(ALIGN_CDR);
+    zero_init_padding(true);
+    break;
   case KIND_XCDR2_PARAMLIST:
   case KIND_XCDR2_DELIMITED:
   case KIND_XCDR2_PLAIN:
@@ -131,6 +134,7 @@ Encoding::XcdrVersion Encoding::xcdr_version() const
 {
   switch (kind_) {
   case KIND_CDR_PLAIN:
+  case KIND_CDR_PLAIN_ZERO:
   case KIND_CDR_PARAMLIST:
     return XCDR1;
   case KIND_XCDR2_PLAIN:
@@ -160,6 +164,7 @@ bool Encoding::supported(Kind kind)
   switch (kind) {
   case KIND_CDR_PARAMLIST:
   case KIND_CDR_PLAIN:
+  case KIND_CDR_PLAIN_ZERO:
   case KIND_XCDR2_PARAMLIST:
   case KIND_XCDR2_DELIMITED:
   case KIND_XCDR2_PLAIN:
@@ -182,6 +187,7 @@ bool Encoding::has_endianness(Kind kind)
   switch (kind) {
   case KIND_CDR_PARAMLIST:
   case KIND_CDR_PLAIN:
+  case KIND_CDR_PLAIN_ZERO:
   case KIND_XCDR2_PARAMLIST:
   case KIND_XCDR2_DELIMITED:
   case KIND_XCDR2_PLAIN:

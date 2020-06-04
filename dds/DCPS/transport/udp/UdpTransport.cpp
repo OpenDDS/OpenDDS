@@ -255,7 +255,7 @@ UdpTransport::passive_connection(const ACE_INET_Addr& remote_address,
   CORBA::ULong octet_size =
     static_cast<CORBA::ULong>(data->length() - sizeof(Priority));
   Priority priority;
-  Serializer serializer(data.get());
+  Serializer serializer(data.get(), Encoding::KIND_CDR_UNALIGNED, ENDIAN_NATIVE);
   serializer >> priority;
   TransportBLOB blob(octet_size);
   blob.length(octet_size);

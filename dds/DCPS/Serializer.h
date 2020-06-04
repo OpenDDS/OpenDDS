@@ -120,6 +120,7 @@ public:
    */
   enum Kind {
     KIND_CDR_PLAIN = 0x0000,
+    KIND_CDR_PLAIN_ZERO = 0x0001,
     KIND_CDR_PARAMLIST = 0x0002,
     KIND_XCDR2_PLAIN = 0x0010,
     KIND_XCDR2_PARAMLIST = 0x0012,
@@ -323,33 +324,6 @@ public:
    */
   Serializer(ACE_Message_Block* chain, bool has_cdr_header,
     bool is_little_endian);
-
-  /**
-   * TODO(iguessthislldo): Remove this constructor to force explicit encoding
-   * declaration.
-   *
-   * This constructor is designed to be mostly compatible with the pre-3.15
-   * constructor, except ALIGN_INITIALIZE has been removed from Alignment and
-   * the option to zero initialize padding was made into an extra argument.
-   *
-   * Bytes are swapped when either reading or writing from the
-   * message chain if the swap_bytes argument is true.  It is the
-   * responsibility of the owner of this object to determine whether
-   * this should be performed or not.
-   *
-   * Settings are used to create Encoding object with
-   * Encoding::KIND_CDR_UNALIGNED.
-   */
-  explicit Serializer(ACE_Message_Block* chain
-    , bool swap_bytes = false
-    , Alignment align = ALIGN_NONE
-    , bool zero_init_padding =
-#ifdef ACE_INITIALIZE_MEMORY_BEFORE_USE
-      true
-#else
-      false
-#endif
-  );
 
   virtual ~Serializer();
 

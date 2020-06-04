@@ -138,11 +138,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   fwddeclstructs[0].v1 = -5;
   fwddeclstructs[1].v1 = 43;
   OpenDDS::DCPS::Message_Block_Ptr b (new ACE_Message_Block( 100000)) ;
-  OpenDDS::DCPS::Serializer serializer( b.get(), false) ;
+  OpenDDS::DCPS::Serializer serializer( b.get(), Encoding::KIND_CDR_UNALIGNED) ;
 
   serializer << fwddeclstructs;
 
-  OpenDDS::DCPS::Serializer deserializer( b.get(), false) ;
+  OpenDDS::DCPS::Serializer deserializer( b.get(), Encoding::KIND_CDR_UNALIGNED) ;
   N2::FwdDeclDiffNamespaceStructs fwddeclstructs2;
   deserializer >> fwddeclstructs2;
 
@@ -184,14 +184,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     ACE_Message_Block mb(size_aas);
-    OpenDDS::DCPS::Serializer ss(&mb);
+    OpenDDS::DCPS::Serializer ss(&mb, Encoding::KIND_CDR_UNALIGNED);
 
     if (!(ss << aas)) {
       ACE_ERROR((LM_ERROR, "Serializing StructOfArrayOfArrayOfShorts2 failed\n"));
       failed = true;
     }
 
-    OpenDDS::DCPS::Serializer ss2(&mb);
+    OpenDDS::DCPS::Serializer ss2(&mb, Encoding::KIND_CDR_UNALIGNED);
 
     Xyz::StructOfArrayOfArrayOfShorts2 aas2;
     if (!(ss2 >> aas2)) {
@@ -327,8 +327,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   const size_t buff_size = bounded ? ms : cs;
   ACE_Message_Block mb(buff_size);
-  OpenDDS::DCPS::Serializer ss(&mb);
-  OpenDDS::DCPS::Serializer ss2(&mb);
+  OpenDDS::DCPS::Serializer ss(&mb, Encoding::KIND_CDR_UNALIGNED);
+  OpenDDS::DCPS::Serializer ss2(&mb, Encoding::KIND_CDR_UNALIGNED);
 
   Xyz::Foo ss_foo;
   try {

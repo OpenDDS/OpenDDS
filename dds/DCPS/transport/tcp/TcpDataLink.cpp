@@ -400,7 +400,7 @@ OpenDDS::DCPS::TcpDataLink::request_ack_received(const ReceivedDataSample& sampl
 {
   if (sample.header_.sequence_ == -1 && sample.header_.message_length_ == sizeof(RepoId)) {
     RepoId local;
-    DCPS::Serializer ser(&(*sample.sample_));
+    DCPS::Serializer ser(&(*sample.sample_), Encoding::KIND_CDR_UNALIGNED, ENDIAN_NATIVE);
     if (ser >> local) {
       invoke_on_start_callbacks(local, sample.header_.publication_id_, true);
     }
@@ -500,7 +500,7 @@ OpenDDS::DCPS::TcpDataLink::send_association_msg(const RepoId& local, const Repo
                           0));
 
   *message << header_data;
-  DCPS::Serializer ser(message.get());
+  DCPS::Serializer ser(message.get(), Encoding::KIND_CDR_UNALIGNED, ENDIAN_NATIVE);
   ser << remote;
 
   TransportControlElement* send_element = new TransportControlElement(move(message));

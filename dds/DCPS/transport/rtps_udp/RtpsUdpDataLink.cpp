@@ -3722,7 +3722,7 @@ RtpsUdpDataLink::populate_security_handles(const RepoId& local_id,
     0 /*alloc*/, 0 /*lock*/, ACE_Message_Block::DONT_DELETE, 0 /*db_alloc*/);
   ACE_Message_Block mb(&db, ACE_Message_Block::DONT_DELETE, 0 /*mb_alloc*/);
   mb.wr_ptr(mb.space());
-  DCPS::Serializer ser(&mb, ACE_CDR_BYTE_ORDER, DCPS::Serializer::ALIGN_CDR);
+  DCPS::Serializer ser(&mb, Encoding::KIND_CDR_PLAIN, ENDIAN_NATIVE);
 
   const bool local_is_writer = GuidConverter(local_id).isWriter();
   const RepoId& writer_id = local_is_writer ? local_id : remote_id;

@@ -77,7 +77,7 @@ Writer::start()
 
       sample.sample_.reset(new ACE_Message_Block(sizeof(foo)));
 
-      ::OpenDDS::DCPS::Serializer ser(sample.sample_.get());
+      ::OpenDDS::DCPS::Serializer ser(sample.sample_.get(), OpenDDS::DCPS::Encoding::KIND_CDR_UNALIGNED, OpenDDS::DCPS::ENDIAN_NATIVE);
       ser << foo;
 
       dr_servant->data_received(sample);

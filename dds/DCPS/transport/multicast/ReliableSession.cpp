@@ -469,7 +469,7 @@ ReliableSession::send_naks()
 
     Message_Block_Ptr data(new ACE_Message_Block(len));
 
-    Serializer serializer(data.get());
+    Serializer serializer(data.get(), Encoding::KIND_CDR_UNALIGNED, ENDIAN_NATIVE);
 
     serializer << this->remote_peer_;
     serializer << size;
@@ -516,7 +516,7 @@ ReliableSession::nak_received(const Message_Block_Ptr& control)
   const TransportHeader& header =
     this->link_->receive_strategy()->received_header();
 
-  Serializer serializer(control.get(), header.swap_bytes());
+  Serializer serializer(control.get(), Encoding::KIND_CDR_UNALIGNED, header.swap_bytes() ?  ENDIAN_LITTLE : ENDIAN_BIG);
 
   MulticastPeer local_peer;
   CORBA::ULong size = 0;
@@ -583,7 +583,7 @@ ReliableSession::send_naks(DisjointSequence& received)
 
   Message_Block_Ptr data(new ACE_Message_Block(len));
 
-  Serializer serializer(data.get());
+  Serializer serializer(data.get(), Encoding::KIND_CDR_UNALIGNED, ENDIAN_NATIVE);
 
   serializer << this->remote_peer_;
   serializer << size;
@@ -617,7 +617,7 @@ ReliableSession::nakack_received(const Message_Block_Ptr& control)
   // Not from the remote peer for this session.
   if (this->remote_peer_ != header.source_) return;
 
-  Serializer serializer(control.get(), header.swap_bytes());
+  Serializer serializer(control.get(), Encoding::KIND_CDR_UNALIGNED, header.swap_bytes() ?  ENDIAN_LITTLE : ENDIAN_BIG);
 
   SequenceNumber low;
   serializer >> low;
@@ -661,7 +661,7 @@ ReliableSession::send_nakack(SequenceNumber low)
 
   Message_Block_Ptr data(new ACE_Message_Block(len));
 
-  Serializer serializer(data.get());
+  Serializer serializer(data.get(), Encoding::KIND_CDR_UNALIGNED, ENDIAN_NATIVE);
 
   serializer << low;
   // Broadcast control sample to all peers:
