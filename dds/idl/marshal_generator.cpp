@@ -1695,7 +1695,7 @@ namespace {
   }
 
   bool generate_marshal_traits(
-    AST_Decl* node, std::string cxx,
+    AST_Decl* node, const std::string& cxx,
     const OpenDDS::DataRepresentation& repr, ExtensibilityKind exten,
     bool is_bounded, bool key_is_bounded)
   {

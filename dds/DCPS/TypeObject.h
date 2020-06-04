@@ -457,7 +457,7 @@ const DCPS::Encoding& get_typeobject_encoding();
   // case TI_STRING16_LARGE:
   //   StringLTypeDefn         string_ldefn;
 
-  //   // ============  Plain collectios - use TypeIdentifierKind =========
+  //   // ============  Plain collections - use TypeIdentifierKind =========
   // case TI_PLAIN_SEQUENCE_SMALL:
   //   PlainSequenceSElemDefn  seq_sdefn;
   // case TI_PLAIN_SEQUENCE_LARGE:
@@ -494,7 +494,7 @@ const DCPS::Encoding& get_typeobject_encoding();
     StringSTypeDefn         string_sdefn;
     StringLTypeDefn         string_ldefn;
 
-    // ============  Plain collectios - use TypeIdentifierKind =========
+    // ============  Plain collections - use TypeIdentifierKind =========
     PlainSequenceSElemDefn  seq_sdefn;
     PlainSequenceLElemDefn  seq_ldefn;
 
