@@ -186,6 +186,7 @@ namespace OpenDDS
       return instance_;
     }
 
+    const Encoding encoding(Encoding::KIND_CDR_UNALIGNED);
 
     template<typename T>
     T
@@ -290,9 +291,7 @@ namespace OpenDDS
       offset += len;
 
       // hf_sequence
-      size_t size = 0;
-      const Encoding encoding(Encoding::KIND_CDR_UNALIGNED);
-      serialized_size(encoding, size, header.sequence_);
+      size_t size = serialized_size(encoding, header.sequence_);
       len = static_cast<gint>(size);
       proto_tree_add_uint64(ltree, hf_sequence, tvb_, offset, len,
                             gint64(header.sequence_.getValue()));
@@ -348,9 +347,7 @@ namespace OpenDDS
       offset += len;
 
       // hf_sample_sequence
-      size_t size = 0;
-      const Encoding encoding(Encoding::KIND_CDR_UNALIGNED);
-      serialized_size(encoding, size, sample.sequence_);
+      size_t size = serialized_size(encoding, sample.sequence_);
       len = static_cast<gint>(size);
       if (sample.message_id_ == SAMPLE_DATA) {
         proto_tree_add_uint64(ltree, hf_sample_sequence, tvb_, offset, len,
@@ -391,8 +388,7 @@ namespace OpenDDS
         }
 
       // hf_sample_publication
-      size = 0;
-      serialized_size(encoding, size, sample.publication_id_);
+      size = serialized_size(encoding, sample.publication_id_);
       len = static_cast<gint>(size);
       const guint8 *data_ptr =
         reinterpret_cast<const guint8*>(&sample.publication_id_);
@@ -408,8 +404,7 @@ namespace OpenDDS
       // hf_sample_publisher
       if (sample.group_coherent_)
         {
-          size = 0;
-          serialized_size(encoding, size, sample.publication_id_);
+          size = serialized_size(encoding, sample.publication_id_);
           len = static_cast<gint>(size);
           data_ptr = reinterpret_cast<const guint8*>(&sample.publisher_id_);
           if (sample.message_id_ != DCPS::TRANSPORT_CONTROL)
@@ -427,8 +422,7 @@ namespace OpenDDS
       // hf_sample_content_filt
       if (sample.content_filter_)
         {
-          size = 0;
-          serialized_size(encoding, size, sample.content_filter_entries_);
+          size = serialized_size(encoding, sample.content_filter_entries_);
           gint total_len = static_cast<gint>(size);
           len = sizeof(CORBA::ULong);
           if (sample.message_id_ != DCPS::TRANSPORT_CONTROL)
@@ -452,8 +446,7 @@ namespace OpenDDS
                   std::string guid = strm.str();
 
                   // Get Entry Size
-                  size = 0;
-                  serialized_size(encoding, size, filter);
+                  size = serialized_size(encoding, filter);
                   len = static_cast<gint>(size);
 
                   // Add to Wireshark
