@@ -53,8 +53,9 @@
 #include <ace/CDR_Stream.h>
 
 #include <limits>
-
-#include <string>
+#ifndef OPENDDS_SAFETY_PROFILE
+#  include <string>
+#endif
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Message_Block;
@@ -155,9 +156,9 @@ public:
    * XCDR version derived from the Encoding kind.
    */
   enum XcdrVersion {
-    XCDR_NONE,
-    XCDR1,
-    XCDR2
+    XCDR_VERSION_NONE,
+    XCDR_VERSION_1,
+    XCDR_VERSION_2
   };
 
   /// Use KIND_UNKNOWN and ENDIAN_NATIVE

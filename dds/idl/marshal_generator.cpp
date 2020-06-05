@@ -978,11 +978,11 @@ namespace {
   string encoding_to_xcdr_version(Encoding encoding) {
     switch (encoding) {
     case encoding_xcdr1:
-      return "Encoding::XCDR1";
+      return "Encoding::XCDR_VERSION_1";
     case encoding_xcdr2:
-      return "Encoding::XCDR2";
+      return "Encoding::XCDR_VERSION_2";
     default:
-      return "Encoding::XCDR_NONE";
+      return "Encoding::XCDR_VERSION_NONE";
     }
   }
 
@@ -1806,22 +1806,12 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         "  serialized_size(strm.encoding(), total_size, stru);\n";
     }
 
-    // Write the CDR Size if delimited
+    // Write the CDR Size if delimited.
     if (maybe_delimited) {
-      const char* indent = "  ";
-      if (not_only_delimited) {
-        indent = "    ";
-        be_global->impl_ <<
-          "  if (strm.encoding().xcdr_version() == Serializer::XCDR2) {\n";
-      }
       be_global->impl_ <<
-        indent << "if (!strm.write_delimiter(total_size)) {\n" <<
-        indent << "  return false;\n" <<
-        indent << "}\n";
-      if (not_only_delimited) {
-        be_global->impl_ <<
-          "  }\n";
-      }
+        "if (!strm.write_delimiter(total_size)) {\n"
+        "  return false;\n"
+        "}\n";
     }
 
     // Write the fields
@@ -1880,7 +1870,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       if (not_only_delimited) {
         indent = "    ";
         be_global->impl_ <<
-          "  if (strm.xcdr_version() == Serializer::XCDR2) {\n";
+          "  if (strm.xcdr_version() == Serializer::XCDR_VERSION_2) {\n";
       }
       be_global->impl_ <<
         indent << "if (!strm.read_delimiter(size)) {\n" <<
@@ -1912,7 +1902,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           "    if (member_id == Serializer::pid_list_end";
         if (repr.not_only_xcdr1()) {
           be_global->impl_ << " &&\n"
-            "        strm.xcdr_version() == Serializer::XCDR1";
+            "        strm.xcdr_version() == Serializer::XCDR_VERSION_1";
         }
         be_global->impl_ << ") {\n"
           "      return true;\n"
@@ -1923,7 +1913,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           "    if (pos_rd() >= end_of_fields";
         if (repr.not_only_xcdr2()) {
           be_global->impl_ << " &&\n"
-            "        strm.xcdr_version() == Serializer::XCDR2";
+            "        strm.xcdr_version() == Serializer::XCDR_VERSION_2";
         }
         be_global->impl_ << ") {\n"
           "      return true;\n"
