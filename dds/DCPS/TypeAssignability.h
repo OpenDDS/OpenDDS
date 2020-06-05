@@ -34,8 +34,11 @@ typedef OPENDDS_VECTOR(MemberPair) MatchedSet;
 class OpenDDS_Dcps_Export TypeAssignability {
 public:
   bool assignable(const TypeObject& ta, const TypeObject& tb) const;
+  bool assignable(const TypeObject& ta, const TypeIdentifier& tb) const;
   bool assignable(const TypeIdentifier& ta, const TypeIdentifier& tb) const;
+  bool assignable(const TypeIdentifier& ta, const TypeObject& tb) const;
 
+private:
   bool assignable_alias(const MinimalTypeObject& ta, const MinimalTypeObject& tb) const;
   bool assignable_annotation(const MinimalTypeObject& ta, const MinimalTypeObject& tb) const;
   bool assignable_annotation(const MinimalTypeObject& ta, const TypeIdentifier& tb) const;
@@ -68,7 +71,6 @@ public:
   bool assignable_plain_map(const TypeIdentifier& ta, const TypeIdentifier& tb) const;
   bool assignable_plain_map(const TypeIdentifier& ta, const MinimalTypeObject& tb) const;
 
-private:
   // General helpers
   bool strongly_assignable(const TypeIdentifier& ta, const TypeIdentifier& tb) const;
   bool is_delimited(const TypeIdentifier& ti) const;

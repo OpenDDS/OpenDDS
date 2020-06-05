@@ -52,6 +52,44 @@ bool TypeAssignability::assignable(const TypeObject& ta,
 }
 
 /**
+ * @brief The first argument must be a minimal type object
+ */
+bool TypeAssignability::assignable(const TypeObject& ta,
+                                   const TypeIdentifier& tb) const
+{
+  if (EK_MINIMAL == ta.kind) {
+    if (TK_ALIAS == ta.minimal.kind) {
+      return assignable(get_base_type(ta.minimal), tb);
+    }
+
+    switch (ta.minimal.kind) {
+    case TK_ANNOTATION:
+      return assignable_annotation(ta.minimal, tb);
+    case TK_STRUCTURE:
+      return assignable_struct(ta.minimal, tb);
+    case TK_UNION:
+      return assignable_union(ta.minimal, tb);
+    case TK_BITSET:
+      return assignable_bitset(ta.minimal, tb);
+    case TK_SEQUENCE:
+      return assignable_sequence(ta.minimal, tb);
+    case TK_ARRAY:
+      return assignable_array(ta.minimal, tb);
+    case TK_MAP:
+      return assignable_map(ta.minimal, tb);
+    case TK_ENUM:
+      return assignable_enum(ta.minimal, tb);
+    case TK_BITMASK:
+      return assignable_bitmask(ta.minimal, tb);
+    default:
+      return false;
+    }
+  }
+
+  return false;
+}
+
+/**
  * @brief Both input can be of any type
  */
 bool TypeAssignability::assignable(const TypeIdentifier& ta,
@@ -103,6 +141,65 @@ bool TypeAssignability::assignable(const TypeIdentifier& ta,
   default:
     return false; // Future extensions
   }
+}
+
+/**
+ * @brief The second argument must be a minimal type object
+ */
+bool TypeAssignability::assignable(const TypeIdentifier& ta,
+                                   const TypeObject& tb) const
+{
+  if (EK_MINIMAL == tb.kind) {
+    if (TK_ALIAS == tb.minimal.kind) {
+      return assignable(ta, get_base_type(tb.minimal));
+    }
+
+    switch (ta.kind) {
+    case TK_BOOLEAN:
+    case TK_BYTE:
+    case TK_INT16:
+    case TK_INT32:
+    case TK_INT64:
+    case TK_UINT16:
+    case TK_UINT32:
+    case TK_UINT64:
+    case TK_FLOAT32:
+    case TK_FLOAT64:
+    case TK_FLOAT128:
+    case TK_INT8:
+    case TK_UINT8:
+    case TK_CHAR8:
+    case TK_CHAR16:
+      return assignable_primitive(ta, tb.minimal);
+    case TI_STRING8_SMALL:
+    case TI_STRING8_LARGE:
+    case TI_STRING16_SMALL:
+    case TI_STRING16_LARGE:
+      return assignable_string(ta, tb.minimal);
+    case TI_PLAIN_SEQUENCE_SMALL:
+    case TI_PLAIN_SEQUENCE_LARGE:
+      return assignable_plain_sequence(ta, tb.minimal);
+    case TI_PLAIN_ARRAY_SMALL:
+    case TI_PLAIN_ARRAY_LARGE:
+      return assignable_plain_array(ta, tb.minimal);
+    case TI_PLAIN_MAP_SMALL:
+    case TI_PLAIN_MAP_LARGE:
+      return assignable_plain_map(ta, tb.minimal);
+    case TI_STRONGLY_CONNECTED_COMPONENT:
+      return false;
+    case EK_COMPLETE:
+      return false;
+    case EK_MINIMAL: {
+      const MinimalTypeObject& tobj_a = typelookup_.lookup_minimal(ta);
+      TypeObject wrapper_a(tobj_a);
+      return assignable(wrapper_a, tb);
+    }
+    default:
+      return false;
+    }
+  }
+
+  return false;
 }
 
 /**
@@ -1789,8 +1886,7 @@ void TypeAssignability::hold_key(MinimalTypeObject& type) const
  * @brief The input must be of type TK_ALIAS
  * Return the non-alias base type identifier of the input
  */
-const TypeIdentifier& TypeAssignability::get_base_type(const MinimalTypeObject&
-                                                       type) const
+const TypeIdentifier& TypeAssignability::get_base_type(const MinimalTypeObject& type) const
 {
   const TypeIdentifier& base = *type.alias_type.body.common.related_type;
   switch (base.kind) {
