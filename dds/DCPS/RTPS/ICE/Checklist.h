@@ -161,6 +161,16 @@ struct Checklist : public Task {
 
   void check_invariants() const;
 
+  bool has_transaction_id(const STUN::TransactionId& a_tid) const
+  {
+    return std::find(connectivity_checks_.begin(), connectivity_checks_.end(), a_tid) != connectivity_checks_.end();
+  }
+
+  bool has_guid_pair(const GuidPair& a_guid_pair) const
+  {
+    return guids_.find(a_guid_pair) != guids_.end();
+  }
+
   void unfreeze();
 
   void unfreeze(const FoundationType& a_foundation);
