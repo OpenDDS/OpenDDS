@@ -275,7 +275,8 @@ DataSampleHeader::init(ACE_Message_Block* buffer)
 bool
 operator<<(ACE_Message_Block& buffer, const DataSampleHeader& value)
 {
-  Serializer writer(&buffer, Encoding::KIND_CDR_UNALIGNED, value.byte_order_ ? ENDIAN_LITTLE : ENDIAN_BIG);
+  Serializer writer(&buffer, Encoding::KIND_CDR_UNALIGNED,
+                    value.byte_order_ ? ENDIAN_LITTLE : ENDIAN_BIG);
 
   writer << value.message_id_;
   writer << value.submessage_id_;

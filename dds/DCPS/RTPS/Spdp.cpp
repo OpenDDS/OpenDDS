@@ -36,11 +36,14 @@
 #include "ace/Auto_Ptr.h"
 
 namespace {
-  const OpenDDS::DCPS::Encoding encoding_plain_big(OpenDDS::DCPS::Encoding::KIND_CDR_PLAIN,
-                                                 OpenDDS::DCPS::ENDIAN_BIG);
-  const OpenDDS::DCPS::Encoding encoding_plain_native(OpenDDS::DCPS::Encoding::KIND_CDR_PLAIN);
-  const OpenDDS::DCPS::Encoding encoding_unaligned_big(OpenDDS::DCPS::Encoding::KIND_CDR_UNALIGNED,
-                                                     OpenDDS::DCPS::ENDIAN_BIG);
+  const OpenDDS::DCPS::Encoding encoding_plain_big(
+    OpenDDS::DCPS::Encoding::KIND_CDR_PLAIN,
+    OpenDDS::DCPS::ENDIAN_BIG);
+  const OpenDDS::DCPS::Encoding encoding_plain_native(
+    OpenDDS::DCPS::Encoding::KIND_CDR_PLAIN);
+  const OpenDDS::DCPS::Encoding encoding_unaligned_big(
+    OpenDDS::DCPS::Encoding::KIND_CDR_UNALIGNED,
+    OpenDDS::DCPS::ENDIAN_BIG);
 }
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL

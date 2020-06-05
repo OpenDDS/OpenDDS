@@ -412,7 +412,9 @@ void extract_participant_guid_from_cpdata(const DDS::OctetSeq& cpdata, DCPS::GUI
 
   ACE_Message_Block buffer(reinterpret_cast<const char*>(cpdata.get_buffer()), cpdata.length());
   buffer.wr_ptr(cpdata.length());
-  OpenDDS::DCPS::Serializer serializer(&buffer, DCPS::Encoding::KIND_CDR_PLAIN, DCPS::ENDIAN_BIG);
+  OpenDDS::DCPS::Serializer serializer(&buffer,
+                                       DCPS::Encoding::KIND_CDR_PLAIN,
+                                       DCPS::ENDIAN_BIG);
   RTPS::ParameterList params;
 
   if (serializer >> params) {

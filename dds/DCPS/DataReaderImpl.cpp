@@ -1454,7 +1454,8 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     this->writer_activity(sample.header_);
 
     Serializer serializer(
-        sample.sample_.get(), Encoding::KIND_CDR_UNALIGNED, sample.header_.byte_order_ ? ENDIAN_LITTLE : ENDIAN_BIG);
+        sample.sample_.get(), Encoding::KIND_CDR_UNALIGNED,
+        sample.header_.byte_order_ ? ENDIAN_LITTLE : ENDIAN_BIG);
     if (!(serializer >> control)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DataReaderImpl::data_received ")
           ACE_TEXT("deserialization coherent change control failed.\n")));
