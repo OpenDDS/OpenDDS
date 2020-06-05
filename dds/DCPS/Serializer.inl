@@ -129,13 +129,13 @@ Encoding::XcdrVersion Encoding::xcdr_version() const
   switch (kind_) {
   case KIND_CDR_PLAIN:
   case KIND_CDR_PARAMLIST:
-    return XCDR1;
+    return XCDR_VERSION_1;
   case KIND_XCDR2_PLAIN:
   case KIND_XCDR2_PARAMLIST:
   case KIND_XCDR2_DELIMITED:
-    return XCDR2;
+    return XCDR_VERSION_2;
   default:
-    return XCDR_NONE;
+    return XCDR_VERSION_NONE;
   }
 }
 
@@ -1543,6 +1543,14 @@ ACE_INLINE
 void serialized_size_ulong(const Encoding& encoding, size_t& size, size_t count)
 {
   max_serialized_size_ulong(encoding, size, count);
+}
+
+ACE_INLINE
+void serialized_size_delimiter(const Encoding& encoding, size_t& size)
+{
+  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {
+    max_serialized_size_ulong(encoding, size);
+  }
 }
 
 } // namespace DCPS
