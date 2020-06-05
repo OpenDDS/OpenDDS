@@ -215,7 +215,7 @@ MulticastSession::send_syn()
 
   Message_Block_Ptr data( new ACE_Message_Block(len));
 
-  Serializer serializer(data.get(), Encoding::KIND_CDR_UNALIGNED, ENDIAN_NATIVE);
+  Serializer serializer(data.get(), Encoding::KIND_CDR_UNALIGNED);
 
   serializer << this->remote_peer_;
 
@@ -279,7 +279,7 @@ MulticastSession::send_synack()
 
   Message_Block_Ptr data(new ACE_Message_Block(len));
 
-  Serializer serializer(data.get(), Encoding::KIND_CDR_UNALIGNED, ENDIAN_NATIVE);
+  Serializer serializer(data.get(), Encoding::KIND_CDR_UNALIGNED);
 
   serializer << this->remote_peer_;
 

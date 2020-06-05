@@ -18,6 +18,11 @@
 
 #ifdef OPENDDS_SECURITY
 
+namespace {
+  const OpenDDS::DCPS::Encoding encoding_unaligned_big(OpenDDS::DCPS::Encoding::KIND_CDR_UNALIGNED,
+                                                     OpenDDS::DCPS::ENDIAN_BIG);
+}
+
 void generate_transaction_id(OpenDDS::STUN::Message& message)
 {
   for (size_t idx = 0; idx != 12; ++idx) {
@@ -32,7 +37,7 @@ bool send(int& status,
 {
   OpenDDS::DCPS::Message_Block_Shared_Ptr block(new ACE_Message_Block(OpenDDS::STUN::HEADER_SIZE + request.length()));
   request.block = block.get();
-  OpenDDS::DCPS::Serializer serializer(block.get(), OpenDDS::DCPS::Encoding::KIND_CDR_UNALIGNED, OpenDDS::DCPS::ENDIAN_BIG);
+  OpenDDS::DCPS::Serializer serializer(block.get(), encoding_unaligned_big);
   if (!(serializer << request)) {
     std::cerr << "ERROR: Failed to serialize request" << std::endl;
     status = EXIT_FAILURE;
@@ -69,7 +74,7 @@ bool recv(int& status,
   buffer->length(bytes_received);
 
   response.block = buffer.get();
-  OpenDDS::DCPS::Serializer deserializer(buffer.get(), OpenDDS::DCPS::Encoding::KIND_CDR_UNALIGNED, OpenDDS::DCPS::ENDIAN_BIG);
+  OpenDDS::DCPS::Serializer deserializer(buffer.get(), encoding_unaligned_big);
   if (!(deserializer >> response)) {
     std::cerr << "ERROR: Failed to deserialize response" << std::endl;
     status = EXIT_FAILURE;

@@ -171,7 +171,7 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
                                      0),
                    0);
 
-    Serializer serializer(data_block, Encoding::KIND_CDR_UNALIGNED, ENDIAN_NATIVE);
+    Serializer serializer(data_block, Encoding::KIND_CDR_UNALIGNED);
     serializer << this->transport_priority();
     serializer.write_octet_array(info.data.get_buffer(),
                                  info.data.length());

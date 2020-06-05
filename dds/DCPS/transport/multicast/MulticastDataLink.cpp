@@ -360,7 +360,7 @@ MulticastDataLink::syn_received_no_session(MulticastPeer source,
 
   Message_Block_Ptr synack_data(new ACE_Message_Block(sizeof(MulticastPeer)));
 
-  Serializer serializer_write(synack_data.get(), Encoding::KIND_CDR_UNALIGNED, ENDIAN_NATIVE);
+  Serializer serializer_write(synack_data.get(), Encoding::KIND_CDR_UNALIGNED);
   serializer_write << source;
 
   DataSampleHeader header;

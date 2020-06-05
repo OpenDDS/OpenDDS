@@ -20,6 +20,10 @@
 
 #include <cstdlib>
 
+namespace {
+  const OpenDDS::DCPS::Encoding encoding_unaligned_native(OpenDDS::DCPS::Encoding::KIND_CDR_UNALIGNED);
+}
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -469,7 +473,7 @@ ReliableSession::send_naks()
 
     Message_Block_Ptr data(new ACE_Message_Block(len));
 
-    Serializer serializer(data.get(), Encoding::KIND_CDR_UNALIGNED, ENDIAN_NATIVE);
+    Serializer serializer(data.get(), encoding_unaligned_native);
 
     serializer << this->remote_peer_;
     serializer << size;
@@ -584,7 +588,7 @@ ReliableSession::send_naks(DisjointSequence& received)
 
   Message_Block_Ptr data(new ACE_Message_Block(len));
 
-  Serializer serializer(data.get(), Encoding::KIND_CDR_UNALIGNED, ENDIAN_NATIVE);
+  Serializer serializer(data.get(), encoding_unaligned_native);
 
   serializer << this->remote_peer_;
   serializer << size;
@@ -663,7 +667,7 @@ ReliableSession::send_nakack(SequenceNumber low)
 
   Message_Block_Ptr data(new ACE_Message_Block(len));
 
-  Serializer serializer(data.get(), Encoding::KIND_CDR_UNALIGNED, ENDIAN_NATIVE);
+  Serializer serializer(data.get(), encoding_unaligned_native);
 
   serializer << low;
   // Broadcast control sample to all peers:

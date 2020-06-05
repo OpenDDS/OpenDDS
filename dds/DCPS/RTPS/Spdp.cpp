@@ -35,6 +35,14 @@
 
 #include "ace/Auto_Ptr.h"
 
+namespace {
+  const OpenDDS::DCPS::Encoding encoding_plain_big(OpenDDS::DCPS::Encoding::KIND_CDR_PLAIN,
+                                                 OpenDDS::DCPS::ENDIAN_BIG);
+  const OpenDDS::DCPS::Encoding encoding_plain_native(OpenDDS::DCPS::Encoding::KIND_CDR_PLAIN);
+  const OpenDDS::DCPS::Encoding encoding_unaligned_big(OpenDDS::DCPS::Encoding::KIND_CDR_UNALIGNED,
+                                                     OpenDDS::DCPS::ENDIAN_BIG);
+}
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -966,8 +974,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
     }
 
     ACE_Message_Block temp_buff(64 * 1024);
-    DCPS::Serializer out_serializer(
-      &temp_buff, Encoding::KIND_CDR_PLAIN_ZERO, ENDIAN_BIG);
+    DCPS::Serializer out_serializer(&temp_buff, encoding_plain_big);
     if (!(out_serializer << plist)) {
       if (DCPS::security_debug.auth_warn) {
         ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} Spdp::handle_handshake_message() - ")
@@ -1470,8 +1477,7 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
     }
 
     ACE_Message_Block temp_buff(64 * 1024);
-    DCPS::Serializer out_serializer(
-      &temp_buff,  Encoding::KIND_CDR_PLAIN_ZERO, ENDIAN_BIG);
+    DCPS::Serializer out_serializer(&temp_buff,  encoding_plain_big);
     if (!(out_serializer << plist)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::attempt_authentication() - ")
         ACE_TEXT("Failed to serialize parameter list.\n")));
@@ -1925,7 +1931,7 @@ Spdp::SpdpTransport::dispose_unregister()
   plist[0]._d(PID_PARTICIPANT_GUID);
 
   wbuff_.reset();
-  DCPS::Serializer ser(&wbuff_, Encoding::KIND_CDR_PLAIN, ENDIAN_NATIVE);
+  DCPS::Serializer ser(&wbuff_, encoding_plain_native);
   CORBA::UShort options = 0;
   if (!(ser << hdr_) || !(ser << data_) || !(ser << encap_LE) || !(ser << options)
       || !(ser << plist)) {
@@ -2049,7 +2055,7 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
 
   wbuff_.reset();
   CORBA::UShort options = 0;
-  DCPS::Serializer ser(&wbuff_, Encoding::KIND_CDR_PLAIN, ENDIAN_NATIVE);
+  DCPS::Serializer ser(&wbuff_, encoding_plain_native);
   if (!(ser << hdr_) || !(ser << data_) || !(ser << encap_LE) || !(ser << options)
       || !(ser << plist)) {
     ACE_ERROR((LM_ERROR,
@@ -2114,7 +2120,7 @@ Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, WriteFlags flags)
 
   wbuff_.reset();
   CORBA::UShort options = 0;
-  DCPS::Serializer ser(&wbuff_, Encoding::KIND_CDR_PLAIN, ENDIAN_NATIVE );
+  DCPS::Serializer ser(&wbuff_, encoding_plain_native);
   if (!(ser << hdr_) || !(ser << info_dst) || !(ser << data_) || !(ser << encap_LE) || !(ser << options)
       || !(ser << plist)) {
     ACE_ERROR((LM_ERROR,
@@ -2262,7 +2268,7 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
 
 #ifdef OPENDDS_SECURITY
     // Assume STUN
-    DCPS::Serializer serializer(&buff_, Encoding::KIND_CDR_UNALIGNED, ENDIAN_BIG);
+    DCPS::Serializer serializer(&buff_, encoding_unaligned_big);
     STUN::Message message;
     message.block = &buff_;
     if (serializer >> message) {
@@ -2272,7 +2278,7 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
     return 0;
 # endif
   }
-  DCPS::Serializer ser(&buff_, Encoding::KIND_CDR_PLAIN, ENDIAN_NATIVE);
+  DCPS::Serializer ser(&buff_, encoding_plain_native);
   Header header;
   if (!(ser >> header)) {
     ACE_ERROR((LM_ERROR,
@@ -2448,7 +2454,7 @@ Spdp::SendStun::execute()
 {
   ACE_GUARD(ACE_Thread_Mutex, g, tport_->outer_->lock_);
   tport_->wbuff_.reset();
-  DCPS::Serializer serializer(&tport_->wbuff_, Encoding::KIND_CDR_UNALIGNED, ENDIAN_BIG);
+  DCPS::Serializer serializer(&tport_->wbuff_, encoding_unaligned_big);
   const_cast<STUN::Message&>(message_).block = &tport_->wbuff_;
   serializer << message_;
 
@@ -3122,7 +3128,7 @@ void Spdp::SpdpTransport::send_relay_beacon(const MonotonicTimePoint& /*now*/)
   static const PadSubmessage pad = { { PAD, FLAG_E, 0 } };
 
   wbuff_.reset();
-  DCPS::Serializer ser(&wbuff_, Encoding::KIND_CDR_PLAIN, ENDIAN_NATIVE);
+  DCPS::Serializer ser(&wbuff_, encoding_plain_native);
   if (!(ser << hdr_) || !(ser << pad)) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::send_relay_beacon() - ")

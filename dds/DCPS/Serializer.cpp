@@ -130,8 +130,6 @@ OPENDDS_STRING Encoding::kind_to_string(Kind value)
   switch (value) {
   case KIND_CDR_PLAIN:
     return "CDR/XCDR1 Plain";
-  case KIND_CDR_PLAIN_ZERO:
-    return "CDR/XCDR1 Plain Zero";
   case KIND_CDR_PARAMLIST:
     return "CDR/XCDR1 Parameter List";
   case KIND_XCDR2_PLAIN:

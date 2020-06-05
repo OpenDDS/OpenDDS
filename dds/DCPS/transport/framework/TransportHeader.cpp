@@ -29,7 +29,7 @@ const TransportHeader::no_init_t TransportHeader::no_init = {};
 
 bool operator<<(ACE_Message_Block& buffer, const TransportHeader& value)
 {
-  Serializer writer(&buffer, Encoding::KIND_CDR_UNALIGNED, ENDIAN_NATIVE);
+  Serializer writer(&buffer, Encoding::KIND_CDR_UNALIGNED);
 
   if (!writer.write_octet_array(value.protocol_, sizeof(value.protocol_)))
     return false;

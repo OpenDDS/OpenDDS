@@ -28,6 +28,10 @@
 
 #include <cstring>
 
+namespace {
+  const OpenDDS::DCPS::Encoding encoding_unaligned_native(OpenDDS::DCPS::Encoding::KIND_CDR_UNALIGNED);
+}
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -53,7 +57,7 @@ RtpsUdpSendStrategy::RtpsUdpSendStrategy(RtpsUdpDataLink* link,
   rtps_header_.vendorId = OpenDDS::RTPS::VENDORID_OPENDDS;
   std::memcpy(rtps_header_.guidPrefix, local_prefix,
               sizeof(GuidPrefix_t));
-  Serializer writer(&rtps_header_mb_, Encoding::KIND_CDR_UNALIGNED, ENDIAN_NATIVE);
+  Serializer writer(&rtps_header_mb_, encoding_unaligned_native);
   // byte order doesn't matter for the RTPS Header
   writer << rtps_header_;
 }
@@ -140,7 +144,7 @@ RtpsUdpSendStrategy::OverrideToken::~OverrideToken()
 bool
 RtpsUdpSendStrategy::marshal_transport_header(ACE_Message_Block* mb)
 {
-  Serializer writer(mb, Encoding::KIND_CDR_UNALIGNED, ENDIAN_NATIVE); // byte order doesn't matter for the RTPS Header
+  Serializer writer(mb, encoding_unaligned_native); // byte order doesn't matter for the RTPS Header
   return writer.write_octet_array(reinterpret_cast<ACE_CDR::Octet*>(rtps_header_data_),
     RTPS::RTPSHDR_SZ);
 }

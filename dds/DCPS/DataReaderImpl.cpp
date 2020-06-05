@@ -1624,7 +1624,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 
   case END_HISTORIC_SAMPLES: {
     if (sample.header_.message_length_ >= sizeof(RepoId)) {
-      Serializer ser(sample.sample_.get(), Encoding::KIND_CDR_UNALIGNED, ENDIAN_NATIVE);
+      Serializer ser(sample.sample_.get(), Encoding::KIND_CDR_UNALIGNED);
       RepoId readerId = GUID_UNKNOWN;
       if (!(ser >> readerId)) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DataReaderImpl::data_received ")
