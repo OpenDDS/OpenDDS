@@ -831,6 +831,10 @@ OpenDDS_Dcps_Export
 void serialized_size_ulong(const Encoding& encoding, size_t& size,
   size_t count = 1);
 
+/// Add delimiter to the size of a serialized size if the encoding has them.
+OpenDDS_Dcps_Export
+void serialized_size_delimiter(const Encoding& encoding, size_t& size);
+
 } // namespace DCPS
 } // namespace OpenDDS
 

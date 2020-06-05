@@ -1083,14 +1083,12 @@ namespace {
       break;
     }
     case AST_Decl::NT_enum:
-      // TODO(iguessthislldo): XCDR Stuff?
       align(encoding, size, 4);
       size += 4;
       break;
     case AST_Decl::NT_string:
     case AST_Decl::NT_wstring: {
       AST_String* string_node = dynamic_cast<AST_String*>(type);
-      // TODO(iguessthislldo): XCDR Stuff?
       align(encoding, size, 4);
       size += 4;
       const int width = (string_node->width() == 1) ? 1 : 2 /*UTF-16*/;
@@ -1105,7 +1103,7 @@ namespace {
       const Fields::Iterator fields_end = fields.end();
       const ExtensibilityKind exten = be_global->extensibility(type);
       idl_max_serialized_size_dheader(encoding, exten, size);
-      // TODO(iguessthislldo) Paremter Lists?
+      // TODO(iguessthislldo) Handle Parameter List
       for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
         idl_max_serialized_size(encoding, size, (*i)->field_type());
       }
@@ -1114,7 +1112,8 @@ namespace {
     case AST_Decl::NT_sequence: {
       AST_Sequence* seq_node = dynamic_cast<AST_Sequence*>(type);
       AST_Type* base_node = seq_node->base_type();
-      // TODO(iguessthislldo): XCDR Stuff?
+      const ExtensibilityKind exten = be_global->extensibility(type);
+      idl_max_serialized_size_dheader(encoding, exten, size);
       size_t bound = seq_node->max_size()->ev()->u.ulval;
       align(encoding, size, 4);
       size += 4;
@@ -1124,7 +1123,8 @@ namespace {
     case AST_Decl::NT_array: {
       AST_Array* array_node = dynamic_cast<AST_Array*>(type);
       AST_Type* base_node = array_node->base_type();
-      // TODO(iguessthislldo): XCDR Stuff?
+      const ExtensibilityKind exten = be_global->extensibility(type);
+      idl_max_serialized_size_dheader(encoding, exten, size);
       size_t array_size = 1;
       AST_Expression** dims = array_node->dims();
       for (unsigned long i = 0; i < array_node->n_dims(); i++) {
@@ -1135,7 +1135,9 @@ namespace {
     }
     case AST_Decl::NT_union: {
       AST_Union* union_node = dynamic_cast<AST_Union*>(type);
-      // TODO(iguessthislldo): XCDR Stuff?
+      const ExtensibilityKind exten = be_global->extensibility(type);
+      idl_max_serialized_size_dheader(encoding, exten, size);
+      // TODO(iguessthislldo) Handle Parameter List
       idl_max_serialized_size(encoding, size, union_node->disc_type());
       size_t largest_field_size = 0;
       const size_t starting_size = size;
@@ -1756,10 +1758,10 @@ bool marshal_generator::gen_struct(AST_Structure* node,
 
   const bool xcdr = repr.xcdr1 || repr.xcdr2;
   const bool not_final = exten != extensibilitykind_final;
-  const bool parameter_list = exten == extensibilitykind_mutable && xcdr;
-  const bool maybe_delimited = not_final && repr.xcdr2;
+  const bool may_be_parameter_list = exten == extensibilitykind_mutable && xcdr;
+  const bool may_be_delimited = not_final && repr.xcdr2;
   const bool not_only_delimited = not_final && repr.not_only_xcdr2();
-  const bool get_serialized_size = parameter_list || maybe_delimited;
+  const bool get_serialized_size = may_be_parameter_list || may_be_delimited;
 
   for (size_t i = 0; i < LENGTH(special_structs); ++i) {
     if (special_structs[i].check(cxx)) {
@@ -1774,6 +1776,12 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     serialized_size.addArg("size", "size_t&");
     serialized_size.addArg("stru", "const " + cxx + "&");
     serialized_size.endArgs();
+
+    if (may_be_delimited) {
+      be_global->impl_ <<
+        "  serialized_size_delimiter(encoding, size)\n";
+    }
+
     string expr, intro;
     for (size_t i = 0; i < fields.size(); ++i) {
       AST_Type* field_type = resolveActualType(fields[i]->field_type());
@@ -1807,7 +1815,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     }
 
     // Write the CDR Size if delimited.
-    if (maybe_delimited) {
+    if (may_be_delimited) {
       be_global->impl_ <<
         "if (!strm.write_delimiter(total_size)) {\n"
         "  return false;\n"
@@ -1816,7 +1824,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
 
     // Write the fields
     string intro = rtpsCustom.preamble_;
-    if (parameter_list) {
+    if (may_be_parameter_list) {
       std::ostringstream fields_encode;
       for (size_t i = 0; i < fields.size(); ++i) {
         const unsigned id = be_global->get_id(node, fields[i], i);
@@ -1863,7 +1871,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     extraction.addArg("stru", cxx + "&");
     extraction.endArgs();
     string intro;
-    if (maybe_delimited) {
+    if (may_be_delimited) {
       be_global->impl_ <<
         "  unsigned total_size;\n";
       const char* indent = "  ";
@@ -1881,7 +1889,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           "  }\n";
       }
     }
-    if (parameter_list) {
+    if (may_be_parameter_list) {
       if (repr.xcdr2) {
         /**
          * We don't have a sentinel pid in XCDR2 paramter lists, but we have
