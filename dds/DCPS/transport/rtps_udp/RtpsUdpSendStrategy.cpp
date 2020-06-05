@@ -352,7 +352,7 @@ RtpsUdpSendStrategy::encode_payload(const RepoId& pub_id,
           const bool swapPl = iQos[iQosLen - 4] != ACE_CDR_BYTE_ORDER;
           const char* rawIQos = reinterpret_cast<const char*>(iQos.get_buffer());
           ACE_Message_Block mbIQos(rawIQos, iQosLen);
-          Serializer ser(&mbIQos, Encoding::KIND_CDR_PLAIN, swapPl ? ENDIAN_LITTLE : ENDIAN_BIG);
+          Serializer ser(&mbIQos, Encoding::KIND_CDR_PLAIN, swapPl ? ENDIAN_NONNATIVE : ENDIAN_NATIVE);
 
           RTPS::DataSubmessage& data = submessages[i].data_sm();
           if (!(ser >> data.inlineQos)) { // appends to any existing inlineQos
@@ -428,7 +428,7 @@ namespace {
     DDS::OctetSeq out(size);
     out.length(size);
     ACE_Message_Block mb(reinterpret_cast<const char*>(out.get_buffer()), size);
-    Serializer ser2(&mb,Encoding::KIND_CDR_PLAIN,  ser1.swap_bytes() ? ENDIAN_LITTLE : ENDIAN_BIG);
+    Serializer ser2(&mb,Encoding::KIND_CDR_PLAIN,  ser1.swap_bytes() ? ENDIAN_NONNATIVE : ENDIAN_NATIVE);
     ser2 << ACE_OutputCDR::from_octet(smHdr.submessageId);
     ser2 << ACE_OutputCDR::from_octet(smHdr.flags);
     ser2 << smHdr.submessageLength;

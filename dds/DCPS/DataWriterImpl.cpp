@@ -2285,7 +2285,7 @@ DataWriterImpl::end_coherent_changes(const GroupCoherentSamples& group_samples)
 
   Serializer serializer(
     data.get(), Encoding::KIND_CDR_UNALIGNED,
-    this->swap_bytes() ? ENDIAN_LITTLE : ENDIAN_BIG);
+    this->swap_bytes() ? ENDIAN_NONNATIVE : ENDIAN_NATIVE);
 
   serializer << end_msg;
 

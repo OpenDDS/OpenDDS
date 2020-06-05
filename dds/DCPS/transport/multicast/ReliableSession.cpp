@@ -516,7 +516,8 @@ ReliableSession::nak_received(const Message_Block_Ptr& control)
   const TransportHeader& header =
     this->link_->receive_strategy()->received_header();
 
-  Serializer serializer(control.get(), Encoding::KIND_CDR_UNALIGNED, header.swap_bytes() ?  ENDIAN_LITTLE : ENDIAN_BIG);
+  Serializer serializer(control.get(), Encoding::KIND_CDR_UNALIGNED,
+                        header.swap_bytes() ? ENDIAN_NONNATIVE : ENDIAN_NATIVE);
 
   MulticastPeer local_peer;
   CORBA::ULong size = 0;
@@ -617,7 +618,8 @@ ReliableSession::nakack_received(const Message_Block_Ptr& control)
   // Not from the remote peer for this session.
   if (this->remote_peer_ != header.source_) return;
 
-  Serializer serializer(control.get(), Encoding::KIND_CDR_UNALIGNED, header.swap_bytes() ?  ENDIAN_LITTLE : ENDIAN_BIG);
+  Serializer serializer(control.get(), Encoding::KIND_CDR_UNALIGNED,
+                        header.swap_bytes() ? ENDIAN_NONNATIVE : ENDIAN_NATIVE);
 
   SequenceNumber low;
   serializer >> low;

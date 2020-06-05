@@ -340,7 +340,8 @@ MulticastDataLink::syn_received_no_session(MulticastPeer source,
     const Message_Block_Ptr& data,
     bool swap_bytes)
 {
-  Serializer serializer_read(data.get(), Encoding::KIND_CDR_UNALIGNED, swap_bytes ? ENDIAN_LITTLE : ENDIAN_BIG);
+  Serializer serializer_read(data.get(), Encoding::KIND_CDR_UNALIGNED,
+                             swap_bytes ? ENDIAN_NONNATIVE : ENDIAN_NATIVE);
 
   MulticastPeer local_peer;
   serializer_read >> local_peer;

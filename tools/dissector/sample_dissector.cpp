@@ -92,7 +92,8 @@ namespace OpenDDS
       char* data, size_t size, bool swap_bytes, Serializer::Alignment align
     ) :
       block(data, size),
-      serializer(&block, Encoding::KIND_CDR_UNALIGNED, swap_bytes ? ENDIAN_LITTLE : ENDIAN_BIG)
+      serializer(&block, Encoding::KIND_CDR_UNALIGNED,
+                 swap_bytes ? ENDIAN_NONNATIVE : ENDIAN_NATIVE)
     {
       block.wr_ptr(data + size);
       get_size_only = false;
@@ -103,7 +104,7 @@ namespace OpenDDS
       serializer(
         &block,
         Encoding::KIND_CDR_UNALIGNED,
-        other.serializer.swap_bytes() ? ENDIAN_LITTLE : ENDIAN_BIG
+        other.serializer.swap_bytes() ? ENDIAN_NONNATIVE : ENDIAN_NATIVE
       )
     {
       block.wr_ptr(other.block.wr_ptr() - other.block.rd_ptr());
