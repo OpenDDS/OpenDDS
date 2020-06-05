@@ -36,6 +36,7 @@ public:
 
   void schedule_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info, bool callback);
   ReactorInterceptor::CommandPtr cancel_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info);
+  void cancel_timer(OpenDDS::DCPS::PublicationId writer_id);
 
   // Arg will be PublicationId
   int handle_timeout(const ACE_Time_Value& current_time, const void* arg);
@@ -118,6 +119,23 @@ RemoveAssociationSweeper<T>::cancel_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS:
   info->scheduled_for_removal_ = false;
   info->removal_deadline_ = MonotonicTimePoint::zero_value;
   return execute_or_enqueue(new CancelCommand(this, info));
+}
+
+template <typename T>
+void
+RemoveAssociationSweeper<T>::cancel_timer(OpenDDS::DCPS::PublicationId writer_id)
+{
+  struct Predicate {
+    Predicate(const OpenDDS::DCPS::PublicationId writer_id) : writer_id_(writer_id) {}
+    OpenDDS::DCPS::PublicationId writer_id_;
+    bool operator() (const RcHandle<WriterInfo>& info) const {
+      return writer_id_ == info->writer_id_;
+    }
+  };
+  OPENDDS_VECTOR(RcHandle<WriterInfo>)::iterator pos = std::find_if(info_set_.begin(), info_set_.end(), Predicate(writer_id));
+  if (pos != info_set_.end()) {
+    cancel_timer(*pos);
+  }
 }
 
 template <typename T>
