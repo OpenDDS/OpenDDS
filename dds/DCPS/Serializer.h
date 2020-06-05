@@ -110,13 +110,11 @@ class OpenDDS_Dcps_Export Encoding {
 public:
   /**
    * Encoding Kinds.
-   *
-   * TODO(iguessthislldo) Separate this into real encoding and the
-   * encapsulation header encoding values.
-   *
-   * For encapsulation header encoding kinds that can have an endianness on the
-   * LSB, define them with the LSB set to 0 (even). If this assumption can't be
-   * true anymore, please update this class and remove this paragraph.
+   * TODO(iguessthislldo): Replace with:
+   * KIND_XCDR1
+   * KIND_CDR
+   * KIND_XCDR2
+   * KIND_UNALIGNED_CDR
    */
   enum Kind {
     KIND_CDR_PLAIN = 0x0000,
@@ -229,6 +227,38 @@ private:
   Endianness endianness_;
   Alignment alignment_;
   bool zero_init_padding_;
+};
+
+/**
+ * TODO(iguessthislldo): Switch this in
+ *
+ * Represents the RTPS encapsulation header for serialized data.
+ *
+ * This consists of 4 bytes that appear in front of the data. The first two
+ * bytes represents the kind of the encoding the data uses and the last two
+ * bytes are traditionally reserved.
+ *
+ * See XTypes 1.3 7.6.3.1.2
+ */
+class EncapsulationHeader {
+public:
+  enum Kind {
+    KIND_CDR_BE = 0x0000,
+    KIND_CDR_LE = 0x0001,
+    KIND_PL_CDR_BE = 0x0002,
+    KIND_PL_CDR_LE = 0x0003,
+    KIND_CDR2_BE = 0x0006,
+    KIND_CDR2_LE = 0x0007,
+    KIND_D_CDR2_BE = 0x0006,
+    KIND_D_CDR2_LE = 0x0007,
+    KIND_PL_CDR2_BE = 0x000a,
+    KIND_PL_CDR2_LE = 0x000b,
+    KIND_XML = 0x0004,
+  };
+
+private:
+  Kind kind_;
+  ACE_UINT16 options_;
 };
 
 class Serializer;
