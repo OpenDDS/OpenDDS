@@ -11,9 +11,6 @@
 
 #include <ace/Message_Block.h>
 
-#ifndef OPENDDS_SAFETY_PROFILE
-#  include <string>
-#endif
 #include <algorithm>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -862,18 +859,23 @@ Serializer::align_cont_w()
 ACE_INLINE
 bool Serializer::read_delimiter(size_t& size)
 {
-  ACE_CDR::ULong dheader;
-  if (!(*this >> dheader)) {
-    return false;
+  if (encoding().xcdr_version() == Encoding::XCDR_VERSION_2) {
+    ACE_CDR::ULong dheader;
+    if (!(*this >> dheader)) {
+      return false;
+    }
+    size = dheader;
   }
-  size = dheader;
   return true;
 }
 
 ACE_INLINE
 bool Serializer::write_delimiter(size_t size)
 {
-  return *this << static_cast<ACE_CDR::ULong>(size);
+  if (encoding().xcdr_version() == Encoding::XCDR_VERSION_2) {
+    return *this << static_cast<ACE_CDR::ULong>(size);
+  }
+  return true;
 }
 
 //

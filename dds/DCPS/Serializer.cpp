@@ -421,7 +421,7 @@ Serializer::read_string(ACE_CDR::WChar*& dest,
 bool Serializer::read_parameter_id(unsigned& id, size_t& size)
 {
   const Encoding::XcdrVersion xcdr = encoding().xcdr_version();
-  if (xcdr == Encoding::XCDR1) {
+  if (xcdr == Encoding::XCDR_VERSION_1) {
     // Get the "short" id and size
     if (!align_r(4)) {
       return false;
@@ -456,7 +456,7 @@ bool Serializer::read_parameter_id(unsigned& id, size_t& size)
     }
 
     reset_alignment();
-  } else if (xcdr == Encoding::XCDR2) {
+  } else if (xcdr == Encoding::XCDR_VERSION_2) {
     ACE_CDR::ULong emheader;
     if (!(*this >> emheader)) {
       return false;
@@ -484,8 +484,6 @@ bool Serializer::read_parameter_id(unsigned& id, size_t& size)
     }
 
     id = emheader & 0xfffffff;
-  } else { // Not XCDR or something we're not prepared for.
-    return false;
   }
 
   return true;
@@ -494,7 +492,7 @@ bool Serializer::read_parameter_id(unsigned& id, size_t& size)
 bool Serializer::write_parameter_id(unsigned id, size_t size)
 {
   const Encoding::XcdrVersion xcdr = encoding().xcdr_version();
-  if (xcdr == Encoding::XCDR1) {
+  if (xcdr == Encoding::XCDR_VERSION_1) {
     if (!align_w(4)) {
       return false;
     }
@@ -531,8 +529,7 @@ bool Serializer::write_parameter_id(unsigned id, size_t size)
     }
 
     reset_alignment();
-  } else if (xcdr == Encoding::XCDR2) {
-
+  } else if (xcdr == Encoding::XCDR_VERSION_2) {
     ACE_CDR::ULong emheader = id;
     // TODO(iguessthislldo): Conditionally insert must understand flag?
     id += emheader_must_understand;
@@ -540,9 +537,6 @@ bool Serializer::write_parameter_id(unsigned id, size_t size)
     if (!(*this << emheader)) {
       return false;
     }
-
-  } else { // Not XCDR or something we're not prepared for.
-    return false;
   }
 
   return true;
