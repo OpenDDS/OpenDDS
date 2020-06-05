@@ -87,6 +87,7 @@ bool operator>>(Serializer& s, Encoding& encoding)
     encoding.endianness(static_cast<Endianness>(raw_kind & 1));
   }
   encoding.kind(kind);
+  // TODO(iguessthidlldo) Support End Padding Described By XTypes 7.6.3.1.2
   if (DCPS_debug_level && (data[2] || data[3])) {
     ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING ")
       ACE_TEXT("operator>>(Serializer&, Encoding&): ")
@@ -118,6 +119,7 @@ bool operator<<(Serializer& s, const Encoding& encoding)
     data[1] |= encoding.endianness();
   }
   // Encoding "Options" Currently Reserved, Set to Zero
+  // TODO(iguessthidlldo) Support End Padding Described By XTypes 7.6.3.1.2
   data[2] = 0;
   data[3] = 0;
   const bool ok = s.write_octet_array(&data[0], sizeof(data));
