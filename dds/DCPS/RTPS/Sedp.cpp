@@ -4392,12 +4392,6 @@ Sedp::add_security_info(const DCPS::TransportLocatorSeq& locators,
   using DCPS::Serializer;
   using namespace DDS::Security;
 
-  if (std::memcmp(writer.guidPrefix, reader.guidPrefix,
-                  sizeof(DCPS::GuidPrefix_t)) == 0) {
-    // writer and reader belong to the same participant, no security needed
-    return locators;
-  }
-
   DCPS::RepoId remote_part;
   const DCPS::RepoId local_part = spdp_.guid();
   if (std::memcmp(writer.guidPrefix, local_part.guidPrefix, sizeof writer.guidPrefix) == 0) {
@@ -4409,7 +4403,12 @@ Sedp::add_security_info(const DCPS::TransportLocatorSeq& locators,
   }
 
   remote_part.entityId = ENTITYID_PARTICIPANT;
-  ParticipantCryptoHandle part_handle = spdp_.lookup_participant_crypto_info(remote_part).first;
+  ParticipantCryptoHandle part_handle;
+  if (std::memcmp(remote_part.guidPrefix, local_part.guidPrefix, sizeof remote_part.guidPrefix) != 0) {
+    part_handle = spdp_.lookup_participant_crypto_info(remote_part).first;
+  } else {
+    part_handle = spdp_.crypto_handle();
+  }
 
   if (part_handle == DDS::HANDLE_NIL) {
     // security not enabled for this discovered participant
@@ -4421,7 +4420,13 @@ Sedp::add_security_info(const DCPS::TransportLocatorSeq& locators,
   EndpointSecurityAttributesMask mask = 0;
 
   if (local_reader_crypto_handles_.find(reader) != local_reader_crypto_handles_.end() &&
-      remote_writer_crypto_handles_.find(writer) != remote_writer_crypto_handles_.end()) {
+      local_writer_crypto_handles_.find(writer) != local_writer_crypto_handles_.end()) {
+    dr_handle = local_reader_crypto_handles_[reader];
+    dw_handle = local_writer_crypto_handles_[writer];
+    mask = security_attributes_to_bitmask(local_reader_security_attribs_[reader])|
+      security_attributes_to_bitmask(local_writer_security_attribs_[writer]);
+  } else if (local_reader_crypto_handles_.find(reader) != local_reader_crypto_handles_.end() &&
+             remote_writer_crypto_handles_.find(writer) != remote_writer_crypto_handles_.end()) {
     dr_handle = local_reader_crypto_handles_[reader];
     dw_handle = remote_writer_crypto_handles_[writer];
     mask = security_attributes_to_bitmask(local_reader_security_attribs_[reader]);

@@ -1059,8 +1059,12 @@ namespace OpenDDS {
               // It might not exist due to security attributes, and that's OK
               if (iter != local_reader_crypto_handles_.end()) {
                 DDS::Security::DatareaderCryptoHandle drch = iter->second;
-                DDS::Security::DatawriterCryptoHandle dwch =
-                  generate_remote_matched_writer_crypto_handle(writer_participant, drch);
+                DDS::Security::DatawriterCryptoHandle dwch;
+                if (std::memcmp(writer_participant.guidPrefix, participant_id_.guidPrefix, sizeof participant_id_.guidPrefix) != 0) {
+                  dwch = generate_remote_matched_writer_crypto_handle(writer_participant, drch);
+                } else {
+                  dwch = local_writer_crypto_handles_[writer];
+                }
                 remote_writer_crypto_handles_[writer] = dwch;
                 DatawriterCryptoTokenSeqMap::iterator t_iter =
                   pending_remote_writer_crypto_tokens_.find(writer);
@@ -1093,9 +1097,13 @@ namespace OpenDDS {
               // It might not exist due to security attributes, and that's OK
               if (iter != local_writer_crypto_handles_.end()) {
                 DDS::Security::DatawriterCryptoHandle dwch = iter->second;
-                DDS::Security::DatareaderCryptoHandle drch =
-                  generate_remote_matched_reader_crypto_handle(
+                DDS::Security::DatareaderCryptoHandle drch;
+                if (std::memcmp(reader_participant.guidPrefix, participant_id_.guidPrefix, sizeof participant_id_.guidPrefix) != 0) {
+                  drch = generate_remote_matched_reader_crypto_handle(
                     reader_participant, dwch, relay_only_readers_.count(reader));
+                } else {
+                  drch = local_reader_crypto_handles_[reader];
+                }
                 remote_reader_crypto_handles_[reader] = drch;
                 DatareaderCryptoTokenSeqMap::iterator t_iter =
                   pending_remote_reader_crypto_tokens_.find(reader);
