@@ -28,7 +28,7 @@ namespace DCPS {
 namespace {
 
 struct Predicate {
-  explicit Predicate(const PublicationId writer_id) : writer_id_(writer_id) {}
+  explicit Predicate(const PublicationId& writer_id) : writer_id_(writer_id) {}
   PublicationId writer_id_;
   bool operator() (const RcHandle<WriterInfo>& info) const {
     return writer_id_ == info->writer_id_;
