@@ -1050,20 +1050,19 @@ bool TypeAssignability::assignable_enum(const MinimalTypeObject& ta,
     return false;
   }
 
-  std::map<ACE_CDR::ULong, ACE_CDR::Long> ta_maps;
+  const size_t size_a = ta.enumerated_type.literal_seq.members.size();
+  const size_t size_b = tb.enumerated_type.literal_seq.members.size();
+  std::map<ACE_CDR::ULong, ACE_CDR::Long> ta_name_to_value;
+  for (size_t i = 0; i < size_a; ++i) {
+    const NameHash& h = ta.enumerated_type.literal_seq.members[i].detail.name_hash;
+    ACE_CDR::ULong key_a = (h[0] << 24) | (h[1] << 16) | (h[2] << 8) | (h[3]);
+    ta_name_to_value[key_a] = ta.enumerated_type.literal_seq.members[i].common.value;
+  }
 
   // If extensibility is FINAL, both must have the same literals.
   if (IS_FINAL == ta_ext) {
-    size_t size_a = ta.enumerated_type.literal_seq.members.size();
-    size_t size_b = tb.enumerated_type.literal_seq.members.size();
     if (size_a != size_b) {
       return false;
-    }
-
-    for (size_t i = 0; i < size_a; ++i) {
-      const NameHash& h = ta.enumerated_type.literal_seq.members[i].detail.name_hash;
-      ACE_CDR::ULong key_a = (h[0] << 24) | (h[1] << 16) | (h[2] << 8) | (h[3]);
-      ta_maps[key_a] = ta.enumerated_type.literal_seq.members[i].common.value;
     }
 
     for (size_t i = 0; i < size_b; ++i) {
@@ -1071,8 +1070,37 @@ bool TypeAssignability::assignable_enum(const MinimalTypeObject& ta,
       ACE_CDR::ULong key_b = (h[0] << 24) | (h[1] << 16) | (h[2] << 8) | (h[3]);
 
       // Literals that have the same name must have the same value.
-      if (ta_maps.find(key_b) == ta_maps.end() ||
-          ta_maps[key_b] != tb.enumerated_type.literal_seq.members[i].common.value) {
+      if (ta_name_to_value.find(key_b) == ta_name_to_value.end() ||
+          ta_name_to_value[key_b] != tb.enumerated_type.literal_seq.members[i].common.value) {
+        return false;
+      }
+    }
+  } else {
+    // Any literals that have the same name also have the same value
+    for (size_t i = 0; i < size_b; ++i) {
+      const NameHash& h = tb.enumerated_type.literal_seq.members[i].detail.name_hash;
+      ACE_CDR::ULong key_b = (h[0] << 24) | (h[1] << 16) | (h[2] << 8) | (h[3]);
+      if (ta_name_to_value.find(key_b) != ta_name_to_value.end() &&
+          ta_name_to_value[key_b] != tb.enumerated_type.literal_seq.members[i].common.value) {
+        return false;
+      }
+    }
+
+    std::map<ACE_CDR::ULong, ACE_CDR::ULong> ta_value_to_name;
+    for (size_t i = 0; i < size_a; ++i) {
+      ACE_CDR::ULong value_a = ta.enumerated_type.literal_seq.members[i].common.value;
+      const NameHash& h = ta.enumerated_type.literal_seq.members[i].detail.name_hash;
+      ACE_CDR::ULong name_a = (h[0] << 24) | (h[1] << 16) | (h[2] << 8) | (h[3]);
+      ta_value_to_name[value_a] = name_a;
+    }
+
+    // Any literals that have the same value also have the same name
+    for (size_t i = 0; i < size_b; ++i) {
+      ACE_CDR::ULong value_b = tb.enumerated_type.literal_seq.members[i].common.value;
+      const NameHash& h = tb.enumerated_type.literal_seq.members[i].detail.name_hash;
+      ACE_CDR::ULong name_b = (h[0] << 24) | (h[1] << 16) | (h[2] << 8) | (h[3]);
+      if (ta_value_to_name.find(value_b) != ta_value_to_name.end() &&
+          ta_value_to_name[value_b] != name_b) {
         return false;
       }
     }
