@@ -25,6 +25,17 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
+namespace {
+
+struct Predicate {
+  explicit Predicate(const PublicationId& writer_id) : writer_id_(writer_id) {}
+  PublicationId writer_id_;
+  bool operator() (const RcHandle<WriterInfo>& info) const {
+    return writer_id_ == info->writer_id_;
+  }
+};
+
+}
 
 // Class to cleanup associations scheduled for removal
 template <typename T>
@@ -34,8 +45,9 @@ public:
                            ACE_thread_t owner,
                            T* reader);
 
-  void schedule_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info, bool callback);
-  ReactorInterceptor::CommandPtr cancel_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info);
+  void schedule_timer(RcHandle<WriterInfo>& info, bool callback);
+  ReactorInterceptor::CommandPtr cancel_timer(RcHandle<WriterInfo>& info);
+  void cancel_timer(const PublicationId& writer_id);
 
   // Arg will be PublicationId
   int handle_timeout(const ACE_Time_Value& current_time, const void* arg);
@@ -64,7 +76,7 @@ private:
 
   protected:
     RemoveAssociationSweeper<T>* sweeper_;
-    RcHandle<OpenDDS::DCPS::WriterInfo> info_;
+    RcHandle<WriterInfo> info_;
   };
 
   class ScheduleCommand : public CommandBase {
@@ -102,7 +114,7 @@ RemoveAssociationSweeper<T>::~RemoveAssociationSweeper()
 { }
 
 template <typename T>
-void RemoveAssociationSweeper<T>::schedule_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info, bool callback)
+void RemoveAssociationSweeper<T>::schedule_timer(RcHandle<WriterInfo>& info, bool callback)
 {
   info->scheduled_for_removal_ = true;
   info->notify_lost_ = callback;
@@ -113,11 +125,21 @@ void RemoveAssociationSweeper<T>::schedule_timer(OpenDDS::DCPS::RcHandle<OpenDDS
 
 template <typename T>
 ReactorInterceptor::CommandPtr
-RemoveAssociationSweeper<T>::cancel_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
+RemoveAssociationSweeper<T>::cancel_timer(RcHandle<WriterInfo>& info)
 {
   info->scheduled_for_removal_ = false;
   info->removal_deadline_ = MonotonicTimePoint::zero_value;
   return execute_or_enqueue(new CancelCommand(this, info));
+}
+
+template <typename T>
+void
+RemoveAssociationSweeper<T>::cancel_timer(const PublicationId& writer_id)
+{
+  OPENDDS_VECTOR(RcHandle<WriterInfo>)::iterator pos = std::find_if(info_set_.begin(), info_set_.end(), Predicate(writer_id));
+  if (pos != info_set_.end()) {
+    cancel_timer(*pos);
+  }
 }
 
 template <typename T>
