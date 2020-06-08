@@ -202,7 +202,8 @@ RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
     if (sender == DDS::HANDLE_NIL) {
       if (security_debug.encdec_warn) {
         ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) {encdec_warn} RtpsUdpReceiveStrategy::receive_bytes: ")
-          ACE_TEXT("decode_rtps_message no remote participant crypto handle, dropping\n")));
+                   ACE_TEXT("decode_rtps_message no remote participant crypto handle for %C, dropping\n"),
+                   OPENDDS_STRING(GuidConverter(peer)).c_str()));
       }
       stop = true;
       return ret;

@@ -259,13 +259,15 @@ DataReaderImpl::add_association(const RepoId& yourId,
           writer_id,
           info));
 
-      // Schedule timer if necessary
-      //   - only need to check reader qos - we know the writer must be >= reader
-      if (this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS) {
-        info->waiting_for_end_historic_samples_ = true;
-      }
+    // Schedule timer if necessary
+    //   - only need to check reader qos - we know the writer must be >= reader
+    if (this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS) {
+      info->waiting_for_end_historic_samples_ = true;
+    }
 
-      this->statistics_.insert(
+    remove_association_sweeper_->cancel_timer(writer_id);
+
+    this->statistics_.insert(
         StatsMapType::value_type(
             writer_id,
             WriterStats(raw_latency_buffer_size_, raw_latency_buffer_type_)));
