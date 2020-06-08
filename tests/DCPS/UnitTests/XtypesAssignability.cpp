@@ -650,16 +650,21 @@ TEST(SequenceTypeTest, Assignable)
   seq_b.element.common.type = TypeIdentifier::make(TK_CHAR16);
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(seq_a)),
                               TypeObject(MinimalTypeObject(seq_b))));
-  StringSTypeDefn str_sa;
-  str_sa.bound = 100;
-  StringLTypeDefn str_lb;
-  str_lb.bound = 1000;
-  seq_a.element.common.type = TypeIdentifier::makeString(false, str_sa);
-  seq_b.element.common.type = TypeIdentifier::makeString(false, str_lb);
+
+  seq_a.element.common.type = TypeIdentifier::makeString(false, StringSTypeDefn(100));
+  seq_b.element.common.type = TypeIdentifier::makeString(false, StringSTypeDefn(200));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(seq_a)),
                               TypeObject(MinimalTypeObject(seq_b))));
-  seq_a.element.common.type = TypeIdentifier::makeString(true, str_sa);
-  seq_b.element.common.type = TypeIdentifier::makeString(true, str_lb);
+  seq_a.element.common.type = TypeIdentifier::makeString(false, StringSTypeDefn(100));
+  seq_b.element.common.type = TypeIdentifier::makeString(false, StringLTypeDefn(200));
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(seq_a)),
+                              TypeObject(MinimalTypeObject(seq_b))));
+  seq_a.element.common.type = TypeIdentifier::makeString(true, StringSTypeDefn(100));
+  seq_b.element.common.type = TypeIdentifier::makeString(true, StringSTypeDefn(200));
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(seq_a)),
+                              TypeObject(MinimalTypeObject(seq_b))));
+  seq_a.element.common.type = TypeIdentifier::makeString(true, StringSTypeDefn(100));
+  seq_b.element.common.type = TypeIdentifier::makeString(true, StringLTypeDefn(200));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(seq_a)),
                               TypeObject(MinimalTypeObject(seq_b))));
 
@@ -714,7 +719,7 @@ TEST(SequenceTypeTest, NotAssignable)
   MinimalSequenceType seq_a, seq_b;
   seq_a.header.common.bound = 10;
   seq_b.header.common.bound = 20;
-  // Element types are the same
+
   seq_a.element.common.type = TypeIdentifier::make(TK_BOOLEAN);
   seq_b.element.common.type = TypeIdentifier::make(TK_INT32);
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(seq_a)),
@@ -775,16 +780,13 @@ TEST(SequenceTypeTest, NotAssignable)
   seq_b.element.common.type = TypeIdentifier::make(TK_INT64);
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(seq_a)),
                                TypeObject(MinimalTypeObject(seq_b))));
-  StringSTypeDefn str_sa;
-  str_sa.bound = 100;
-  StringLTypeDefn str_lb;
-  str_lb.bound = 1000;
-  seq_a.element.common.type = TypeIdentifier::makeString(false, str_sa);
-  seq_b.element.common.type = TypeIdentifier::makeString(true, str_lb);
+
+  seq_a.element.common.type = TypeIdentifier::makeString(false, StringSTypeDefn(50));
+  seq_b.element.common.type = TypeIdentifier::makeString(true, StringLTypeDefn(100));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(seq_a)),
                                TypeObject(MinimalTypeObject(seq_b))));
-  seq_a.element.common.type = TypeIdentifier::makeString(true, str_sa);
-  seq_b.element.common.type = TypeIdentifier::makeString(false, str_lb);
+  seq_a.element.common.type = TypeIdentifier::makeString(true, StringLTypeDefn(100));
+  seq_b.element.common.type = TypeIdentifier::makeString(false, StringSTypeDefn(50));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(seq_a)),
                                TypeObject(MinimalTypeObject(seq_b))));
 
@@ -796,7 +798,6 @@ TEST(SequenceTypeTest, NotAssignable)
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(seq_a)),
                                TypeObject(MinimalTypeObject(seq_b))));
 
-  // Different element types but T1 is-assignable-from T2 and T2 is delimited
   seq_a.element.common.type = TypeIdentifier::make(TK_UINT8);
   // Get a fake hash for the type object of a bitmask type
   EquivalenceHash hash;
