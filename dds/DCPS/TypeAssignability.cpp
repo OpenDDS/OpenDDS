@@ -13,6 +13,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {
 
+std::map<unsigned int, MinimalTypeObject> TypeLookup::table_;
+
 /**
  * @brief Both input type objects must be minimal
  */

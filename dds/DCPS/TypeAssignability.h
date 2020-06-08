@@ -9,21 +9,49 @@
 #include "TypeObject.h"
 
 #include <utility>
+#include <map>
+#include <cmath>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace XTypes {
 
+// Dummy class for type look up. Only use for facilitating tests.
 class TypeLookup {
 public:
   const MinimalTypeObject& lookup_minimal(const TypeIdentifier& ti) const
   {
-    return tmp_;
+    return table_[hash_to_unsigned(ti.equivalence_hash)];
+  }
+
+  static void insert_entry(const TypeIdentifier& ti, const MinimalTypeObject& tobj)
+  {
+    table_[hash_to_unsigned(ti.equivalence_hash)] = tobj;
+  }
+
+  static void get_equivalence_hash(EquivalenceHash& out)
+  {
+    static unsigned int hash = 0;
+    unsigned int tmp = ++hash;
+    for (int i = 13; i >= 0; --i) {
+      out[i] = tmp % 256;
+      tmp /= 256;
+    }
+  }
+
+  static unsigned int hash_to_unsigned(const EquivalenceHash& h)
+  {
+    unsigned int val = 0;
+    for (int i = 13; i >= 0; --i) {
+      unsigned int multiplier = (unsigned int)pow(256, 13-i);
+      val += h[i] * multiplier;
+    }
+    return val;
   }
 
 private:
-  MinimalTypeObject tmp_;
+  static std::map<unsigned int, MinimalTypeObject> table_;
 };
 
 // Set of pairs of members with each pair contains members from
