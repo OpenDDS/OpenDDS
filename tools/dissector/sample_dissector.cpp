@@ -101,11 +101,7 @@ namespace OpenDDS
 
     Wireshark_Bundle::Wireshark_Bundle(const Wireshark_Bundle& other) :
       block(other.block.rd_ptr(), other.block.size()),
-      serializer(
-        &block,
-        Encoding::KIND_CDR_UNALIGNED,
-        other.serializer.swap_bytes() ? ENDIAN_NONNATIVE : ENDIAN_NATIVE
-      )
+      serializer(&block, other.serializer.encoding())
     {
       block.wr_ptr(other.block.wr_ptr() - other.block.rd_ptr());
 

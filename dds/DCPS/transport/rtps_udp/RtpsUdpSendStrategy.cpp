@@ -433,8 +433,7 @@ namespace {
     DDS::OctetSeq out(size);
     out.length(size);
     ACE_Message_Block mb(reinterpret_cast<const char*>(out.get_buffer()), size);
-    Serializer ser2(&mb, Encoding::KIND_CDR_PLAIN,
-                    ser1.swap_bytes() ? ENDIAN_NONNATIVE : ENDIAN_NATIVE);
+    Serializer ser2(&mb, ser1.encoding());
     ser2 << ACE_OutputCDR::from_octet(smHdr.submessageId);
     ser2 << ACE_OutputCDR::from_octet(smHdr.flags);
     ser2 << smHdr.submessageLength;
