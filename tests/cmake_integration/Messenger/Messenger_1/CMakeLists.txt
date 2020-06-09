@@ -56,6 +56,12 @@ foreach(t ${all_targets})
   # https://github.com/objectcomputing/OpenDDS/issues/1336
   # See https://cmake.org/cmake/help/latest/policy/CMP0023.html
   target_link_libraries(${t} PUBLIC OpenDDS::OpenDDS)
+
+  # Assert the mapping used was C++03
+  get_property(mappings TARGET ${t} PROPERTY OPENDDS_LANGUAGE_MAPPINGS)
+  if(NOT "C++03" IN_LIST mappings)
+    message(FATAL_ERROR "${t}: C++03 NOT in mapping list: ${mappings}")
+  endif()
 endforeach()
 
 # Copy configs/scripts into build-output directory

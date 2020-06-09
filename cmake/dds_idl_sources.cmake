@@ -62,10 +62,31 @@ function(opendds_target_idl_sources target)
   set(multiValueArgs TAO_IDL_FLAGS DDS_IDL_FLAGS IDL_FILES)
   cmake_parse_arguments(_arg "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
+  # Language mapping usage are designated on an IDL file by IDL file basis,
+  # then at combined (or mixed together) on a target by target basis. If this
+  # target has any existing mappings set, combine those with any mappings on
+  # the IDL files. If we need to generate rules for a IDL file, then add those
+  # to the IDL file and the target.
+  get_property(language_mappings TARGET ${target}
+    PROPERTY "OPENDDS_LANGUAGE_MAPPINGS")
+  # Make sure OPENDDS_LANGUAGE_MAPPINGS is exported if supported
+  if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.12.0")
+    get_property(target_export_properties TARGET ${target}
+      PROPERTY "EXPORT_PROPERTIES")
+    if(NOT ("OPENDDS_LANGUAGE_MAPPINGS" IN_LIST target_export_properties))
+      list(APPEND target_export_properties "OPENDDS_LANGUAGE_MAPPINGS")
+      set_property(TARGET ${target} PROPERTY "EXPORT_PROPERTIES"
+        "${target_export_properties}")
+    endif()
+  endif()
+
   foreach(idl_file ${_arg_IDL_FILES})
     if (NOT IS_ABSOLUTE ${idl_file})
       set(idl_file ${CMAKE_CURRENT_LIST_DIR}/${idl_file})
     endif()
+
+    get_property(file_language_mappings SOURCE ${idl_file}
+      PROPERTY "OPENDDS_LANGUAGE_MAPPINGS")
 
     get_property(_generated_dependencies SOURCE ${idl_file}
       PROPERTY OPENDDS_IDL_GENERATED_DEPENDENCIES SET)
@@ -74,6 +95,7 @@ function(opendds_target_idl_sources target)
       # If an IDL-Generation command was already created this file can safely be
       # skipped; however, the dependencies still need to be added to the target.
       opendds_target_generated_dependencies(${target} ${idl_file} ${_arg_SCOPE})
+      list(APPEND language_mappings ${file_language_mappings})
 
     else()
       list(APPEND non_generated_idl_files ${idl_file})
@@ -81,6 +103,9 @@ function(opendds_target_idl_sources target)
   endforeach()
 
   if (NOT non_generated_idl_files)
+    list(REMOVE_DUPLICATES language_mappings)
+    set_property(TARGET ${target}
+      PROPERTY "OPENDDS_LANGUAGE_MAPPINGS" ${language_mappings})
     return()
   endif()
 
@@ -135,8 +160,11 @@ function(opendds_target_idl_sources target)
     unset(_ddsidl_cmd_arg_-GfaceTS)
     unset(_ddsidl_cmd_arg_-o)
     unset(_ddsidl_cmd_arg_-Wb,java)
+    unset(_ddsidl_cmd_arg_-Lc++11)
+    unset(file_language_mappings)
 
-    cmake_parse_arguments(_ddsidl_cmd_arg "-SI;-GfaceTS;-Wb,java" "-o" "" ${_ddsidl_flags})
+    cmake_parse_arguments(_ddsidl_cmd_arg
+      "-SI;-GfaceTS;-Wb,java;-Lc++11" "-o" "" ${_ddsidl_flags})
 
     get_filename_component(noext_name ${input} NAME_WE)
     get_filename_component(abs_filename ${input} ABSOLUTE)
@@ -162,13 +190,19 @@ function(opendds_target_idl_sources target)
       list(APPEND _cur_idl_headers ${output_prefix}C.h ${output_prefix}_TS.hpp)
       list(APPEND _cur_idl_cpp_files ${output_prefix}_TS.cpp)
       ## if this is FACE IDL, do not reprocess the original idl file throught tao_idl
+      list(APPEND file_language_mappings "FACE")
+    elseif (_ddsidl_cmd_arg_-Lc++11)
+      list(APPEND _cur_idl_headers "${output_prefix}C.h")
+      list(APPEND file_language_mappings "C++11")
     else()
       set(_cur_idl_file ${input})
+      list(APPEND file_language_mappings "C++03")
     endif()
 
     if (_ddsidl_cmd_arg_-Wb,java)
       set(_cur_java_list "${output_prefix}${file_ext}.TypeSupportImpl.java.list")
       list(APPEND file_dds_idl_flags -j)
+      list(APPEND file_language_mappings "Java")
     else()
       unset(_cur_java_list)
     endif()
@@ -200,6 +234,9 @@ function(opendds_target_idl_sources target)
     set_property(SOURCE ${abs_filename} APPEND PROPERTY
       OPENDDS_JAVA_OUTPUTS "@${_cur_java_list}")
 
+    set_property(SOURCE ${abs_filename} APPEND PROPERTY
+      OPENDDS_LANGUAGE_MAPPINGS ${file_language_mappings})
+
     if (NOT _arg_SKIP_TAO_IDL)
       tao_idl_command(${target}
         IDL_FLAGS
@@ -213,5 +250,11 @@ function(opendds_target_idl_sources target)
       OPENDDS_IDL_GENERATED_DEPENDENCIES TRUE)
 
     opendds_target_generated_dependencies(${target} ${abs_filename} ${_arg_SCOPE})
+
+    list(APPEND language_mappings ${file_language_mappings})
+    list(REMOVE_DUPLICATES language_mappings)
   endforeach()
+
+  set_property(TARGET ${target}
+    PROPERTY "OPENDDS_LANGUAGE_MAPPINGS" ${language_mappings})
 endfunction()
