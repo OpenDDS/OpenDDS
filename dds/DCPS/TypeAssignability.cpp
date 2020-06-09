@@ -15,31 +15,6 @@ namespace XTypes {
 
 std::map<unsigned int, MinimalTypeObject> TypeLookup::table_;
 
-void TypeLookup::insert_entry(const TypeIdentifier& ti, const MinimalTypeObject& tobj)
-{
-  table_[hash_to_unsigned(ti.equivalence_hash)] = tobj;
-}
-
-void TypeLookup::get_equivalence_hash(EquivalenceHash& out)
-{
-  static unsigned int hash = 0;
-  unsigned int tmp = ++hash;
-  for (int i = 13; i >= 0; --i) {
-    out[i] = tmp % 256;
-    tmp /= 256;
-  }
-}
-
-unsigned int TypeLookup::hash_to_unsigned(const EquivalenceHash& h)
-{
-  unsigned int val = 0;
-  for (int i = 13; i >= 0; --i) {
-    unsigned int multiplier = (unsigned int)pow(256, 13-i);
-    val += h[i] * multiplier;
-  }
-  return val;
-}
-
 /**
  * @brief Both input type objects must be minimal
  */
