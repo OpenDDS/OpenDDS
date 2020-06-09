@@ -36,6 +36,8 @@ using Bench::get_option_argument_int;
 using Bench::get_option_argument;
 using Bench::join_path;
 using Bench::create_temp_dir;
+using Bench::TestController::AllocatedScenarioDataReader;
+using Bench::TestController::AllocatedScenarioDataReader_var;
 
 std::string bench_root;
 std::string temp_dir;
@@ -46,7 +48,7 @@ int run_cycle(
   ACE_Process_Manager& process_manager,
   DDS::DomainParticipant_var participant,
   StatusDataWriter_var status_writer_impl,
-  ConfigDataReader_var config_reader_impl,
+  AllocatedScenarioDataReader_var config_reader_impl,
   ReportDataWriter_var report_writer_impl);
 
 std::string create_config(const std::string& file_base_name, const char* contents)
@@ -426,7 +428,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     std::cerr << "create_topic status failed" << std::endl;
     return 1;
   }
-  ConfigTypeSupport_var config_ts = new ConfigTypeSupportImpl;
+  Bench::TestController::AllocatedScenarioTypeSupport_var config_ts = new Bench::TestController::AllocatedScenarioTypeSupportImpl;
   if (config_ts->register_type(participant, "")) {
     std::cerr << "register_type failed for Config" << std::endl;
     return 1;
@@ -472,7 +474,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     std::cerr << "create_datareader config failed" << std::endl;
     return 1;
   }
-  ConfigDataReader_var config_reader_impl = ConfigDataReader::_narrow(config_reader);
+  AllocatedScenarioDataReader_var config_reader_impl = AllocatedScenarioDataReader::_narrow(config_reader);
   if (!config_reader_impl) {
     std::cerr << "narrow config reader failed" << std::endl;
     return 1;
@@ -553,7 +555,7 @@ int run_cycle(
   ACE_Process_Manager& process_manager,
   DDS::DomainParticipant_var participant,
   StatusDataWriter_var status_writer_impl,
-  ConfigDataReader_var config_reader_impl,
+  AllocatedScenarioDataReader_var config_reader_impl,
   ReportDataWriter_var report_writer_impl)
 {
   NodeId this_node_id = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(participant.in())->get_id();
@@ -611,10 +613,10 @@ int run_cycle(
       return 1;
     }
 
-    ConfigSeq configs;
+    Bench::TestController::AllocatedScenarioSeq allocated_scenario;
     DDS::SampleInfoSeq info;
     rc = config_reader_impl->take(
-      configs, info,
+      allocated_scenario, info,
       DDS::LENGTH_UNLIMITED,
       DDS::ANY_SAMPLE_STATE,
       DDS::ANY_VIEW_STATE,
@@ -623,6 +625,8 @@ int run_cycle(
       std::cerr << "Take node config failed" << std::endl;
       return 1;
     }
+
+    Bench::NodeController::Configs& configs = allocated_scenario[0].configs;
 
     for (CORBA::ULong node = 0; node < configs.length(); node++) {
       if (configs[node].node_id == this_node_id) {

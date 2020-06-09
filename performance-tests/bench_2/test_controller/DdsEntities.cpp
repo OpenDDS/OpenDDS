@@ -33,7 +33,7 @@ DdsEntities::DdsEntities(
     throw std::runtime_error("create_topic status failed");
   }
   delete [] status_type_name;
-  config_ts_ = new ConfigTypeSupportImpl;
+  config_ts_ = new Bench::TestController::AllocatedScenarioTypeSupportImpl;
   if (config_ts_->register_type(participant_, "")) {
     throw std::runtime_error("register_type failed for Config");
   }
@@ -75,8 +75,8 @@ DdsEntities::DdsEntities(
   if (!config_writer_) {
     throw std::runtime_error("create_datawriter config failed");
   }
-  config_writer_impl_ = ConfigDataWriter::_narrow(config_writer_);
-  if (!config_writer_impl_) {
+  scenario_writer_impl_ = Bench::TestController::AllocatedScenarioDataWriter::_narrow(config_writer_);
+  if (!scenario_writer_impl_) {
     throw std::runtime_error("narrow writer config failed");
   }
 

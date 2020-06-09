@@ -287,10 +287,8 @@ AllocatedScenario ScenarioManager::allocate_scenario(
 std::vector<WorkerReport> ScenarioManager::execute(const AllocatedScenario& allocated_scenario)
 {
   // Write Configs
-  for (unsigned i = 0; i < allocated_scenario.configs.length(); i++) {
-    if (dds_entities_.config_writer_impl_->write(allocated_scenario.configs[i], DDS::HANDLE_NIL) != DDS::RETCODE_OK) {
-      throw std::runtime_error("Config write failed!");
-    }
+  if (dds_entities_.scenario_writer_impl_->write(allocated_scenario, DDS::HANDLE_NIL) != DDS::RETCODE_OK) {
+    throw std::runtime_error("Config write failed!");
   }
 
   // Set up Waiting for Reading Reports or the Scenario Timeout
