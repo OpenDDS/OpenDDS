@@ -1687,7 +1687,8 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
     } else {
       ACE_TString default_address_str;
       GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("DCPSDefaultAddress"), default_address_str);
-      if (default_address_.set(u_short(0), default_address_str.c_str())) {
+      if (!default_address_str.empty() &&
+          default_address_.set(u_short(0), default_address_str.c_str())) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_common_configuration: ")
                           ACE_TEXT("failed to parse default address %C\n"),
