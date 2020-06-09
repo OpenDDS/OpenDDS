@@ -520,7 +520,6 @@ protected:
 
   virtual SendControlStatus send_control(const DataSampleHeader& header,
                                          Message_Block_Ptr msg);
-
 private:
 
   void track_sequence_number(GUIDSeq* filter_out);
