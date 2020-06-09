@@ -675,6 +675,15 @@ TEST(SequenceTypeTest, Assignable)
                                                                 static_cast<LBound>(150));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(seq_a)),
                               TypeObject(MinimalTypeObject(seq_b))));
+  // Sequence of plain array of integer
+  SBoundSeq bounds_a;
+  bounds_a.append(10).append(20).append(30);
+  seq_a.element.common.type = TypeIdentifier::makePlainArray(TypeIdentifier::make(TK_UINT16), bounds_a);
+  LBoundSeq bounds_b;
+  bounds_b.append(10).append(20).append(30);
+  seq_b.element.common.type = TypeIdentifier::makePlainArray(TypeIdentifier::make(TK_UINT16), bounds_b);
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(seq_a)),
+                              TypeObject(MinimalTypeObject(seq_b))));
 
   // Different element types but T1 is-assignable-from T2 and T2 is delimited
   seq_a.element.common.type = TypeIdentifier::make(TK_UINT8);
@@ -797,6 +806,15 @@ TEST(SequenceTypeTest, NotAssignable)
                                                                 static_cast<LBound>(150));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(seq_a)),
                                TypeObject(MinimalTypeObject(seq_b))));
+  // Sequence of plain array of integer
+  SBoundSeq bounds_a;
+  bounds_a.append(10).append(20).append(30);
+  seq_a.element.common.type = TypeIdentifier::makePlainArray(TypeIdentifier::make(TK_UINT16), bounds_a);
+  LBoundSeq bounds_b;
+  bounds_b.append(10).append(20).append(40);
+  seq_b.element.common.type = TypeIdentifier::makePlainArray(TypeIdentifier::make(TK_UINT16), bounds_b);
+  EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(seq_a)),
+                               TypeObject(MinimalTypeObject(seq_b))));
 
   seq_a.element.common.type = TypeIdentifier::make(TK_UINT8);
   // Get a fake hash for the type object of a bitmask type
@@ -833,6 +851,8 @@ TEST(SequenceTypeTest, NotAssignable)
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(seq_a)),
                                TypeObject(MinimalTypeObject(seq_b))));
 }
+
+
 
 int main(int argc, char* argv[])
 {
