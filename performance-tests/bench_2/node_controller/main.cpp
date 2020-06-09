@@ -30,6 +30,7 @@
 
 #include <util.h>
 #include <BenchTypeSupportImpl.h>
+#include <tests/Utils/StatusMatching.h>
 
 using namespace Bench::NodeController;
 using Bench::get_option_argument_int;
@@ -562,26 +563,8 @@ int run_cycle(
 
   // Wait for Status Publication with Test Controller and Write Status
   {
-    DDS::StatusCondition_var condition = status_writer_impl->get_statuscondition();
-    condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
-    DDS::WaitSet_var ws = new DDS::WaitSet;
-    ws->attach_condition(condition);
-    DDS::Duration_t timeout = {
-      DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC
-    };
-    DDS::ConditionSeq conditions;
-    DDS::PublicationMatchedStatus match{};
-    while (match.current_count == 0) {
-      if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
-        std::cerr << "Wait for test controller failed" << std::endl;
-        return 1;
-      }
-      if (status_writer_impl->get_publication_matched_status(match) != DDS::RETCODE_OK) {
-        std::cerr << "get_publication_matched_status failed" << std::endl;
-        return 1;
-      }
-    }
-    ws->detach_condition(condition);
+    DDS::DataWriter_var status_writer = DDS::DataWriter::_narrow(status_writer_impl);
+    Utils::wait_match(status_writer, 0, Utils::GT);
 
     Status status;
     status.node_id = this_node_id;
@@ -598,20 +581,28 @@ int run_cycle(
   // Wait for Our Worker Configs
   bool waiting = true;
   while (waiting) {
-    DDS::ReturnCode_t rc;
+    DDS::ReturnCode_t rc = DDS::RETCODE_ERROR;
 
     DDS::ReadCondition_var read_condition = config_reader_impl->create_readcondition(
         DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
     DDS::WaitSet_var ws = new DDS::WaitSet;
     ws->attach_condition(read_condition);
-    DDS::ConditionSeq active;
-    rc = ws->wait(active, {DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC});
+    const DDS::Duration_t wake_interval = { 3, 0 };
+    bool loop = true;
+    while (loop) {
+      if (read_condition->get_trigger_value()) {
+        loop = false;
+      } else {
+        DDS::ConditionSeq active;
+        rc = ws->wait(active, wake_interval);
+        if (rc != DDS::RETCODE_OK && rc != DDS::RETCODE_TIMEOUT) {
+          std::cerr << "Wait for node config failed" << std::endl;
+          return 1;
+        }
+      }
+    }
     ws->detach_condition(read_condition);
     config_reader_impl->delete_readcondition(read_condition);
-    if (rc != DDS::RETCODE_OK) {
-      std::cerr << "Wait for node config failed" << std::endl;
-      return 1;
-    }
 
     Bench::TestController::AllocatedScenarioSeq allocated_scenario;
     DDS::SampleInfoSeq info;
@@ -626,23 +617,24 @@ int run_cycle(
       return 1;
     }
 
-    Bench::NodeController::Configs& configs = allocated_scenario[0].configs;
-
-    for (CORBA::ULong node = 0; node < configs.length(); node++) {
-      if (configs[node].node_id == this_node_id) {
-        worker_manager.timeout(configs[node].timeout);
-        CORBA::ULong config_count = configs[node].workers.length();
-        for (CORBA::ULong config = 0; config < config_count; config++) {
-          WorkerId& id = configs[node].workers[config].worker_id;
-          const WorkerId end = id + configs[node].workers[config].count;
-          for (; id < end; id++) {
-            if (worker_manager.add_worker(this_node_id, configs[node].workers[config])) {
-              return 1;
+    for (CORBA::ULong scenario = 0; scenario < allocated_scenario.length(); ++scenario) {
+      Bench::NodeController::Configs& configs = allocated_scenario[scenario].configs;
+      for (CORBA::ULong node = 0; node < configs.length(); ++node) {
+        if (configs[node].node_id == this_node_id) {
+          worker_manager.timeout(configs[node].timeout);
+          CORBA::ULong config_count = configs[node].workers.length();
+          for (CORBA::ULong config = 0; config < config_count; config++) {
+            WorkerId& id = configs[node].workers[config].worker_id;
+            const WorkerId end = id + configs[node].workers[config].count;
+            for (; id < end; id++) {
+              if (worker_manager.add_worker(this_node_id, configs[node].workers[config])) {
+                return 1;
+              }
             }
           }
+          waiting = false;
+          break;
         }
-        waiting = false;
-        break;
       }
     }
   }
