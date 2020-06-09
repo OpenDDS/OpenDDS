@@ -5,7 +5,7 @@ OpenDDS 3.15 is currently in development, so this list might change.
 
 ### Additions:
 - Support for the C++11 mapping in the CMake module. `-Lc++11` can now be
-  passed with `OPENDDS_IDL_OPTIONS` in `OPENDDS_TARGET_SOURCES`. (#1727)
+  passed with `OPENDDS_IDL_OPTIONS` in `OPENDDS_TARGET_SOURCES`. (#1728)
 
 ### Fixes:
 - TODO: Add your fixes here
