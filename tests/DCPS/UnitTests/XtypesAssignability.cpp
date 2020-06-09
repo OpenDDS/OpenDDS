@@ -1121,6 +1121,43 @@ TEST(ArrayTypeTest, NotAssignable)
                                TypeObject(MinimalTypeObject(arr_b))));
 }
 
+TEST(MapTypeTest, Assignable)
+{
+  TypeAssignability test;
+  MinimalMapType map_a, map_b;
+  map_a.header.common.bound = 50;
+  map_b.header.common.bound = 100;
+
+  map_a.key.common.type = TypeIdentifier::make(TK_UINT32);
+  map_b.key.common.type = TypeIdentifier::make(TK_UINT32);
+  map_a.element.common.type = TypeIdentifier::make(TK_BOOLEAN);
+  map_b.element.common.type = TypeIdentifier::make(TK_BOOLEAN);
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(map_a)),
+                              TypeObject(MinimalTypeObject(map_b))));
+}
+
+TEST(MapTypeTest, NotAssignable)
+{
+  TypeAssignability test;
+  MinimalMapType map_a, map_b;
+  map_a.header.common.bound = 50;
+  map_b.header.common.bound = 100;
+
+  map_a.key.common.type = TypeIdentifier::make(TK_UINT32);
+  map_b.key.common.type = TypeIdentifier::make(TK_UINT16);
+  map_a.element.common.type = TypeIdentifier::make(TK_BOOLEAN);
+  map_b.element.common.type = TypeIdentifier::make(TK_BOOLEAN);
+  EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(map_a)),
+                               TypeObject(MinimalTypeObject(map_b))));
+
+  map_a.key.common.type = TypeIdentifier::make(TK_UINT32);
+  map_b.key.common.type = TypeIdentifier::make(TK_UINT32);
+  map_a.element.common.type = TypeIdentifier::make(TK_BYTE);
+  map_b.element.common.type = TypeIdentifier::make(TK_BOOLEAN);
+  EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(map_a)),
+                               TypeObject(MinimalTypeObject(map_b))));
+}
+
 int main(int argc, char* argv[])
 {
   ::testing::InitGoogleTest(&argc, argv);
