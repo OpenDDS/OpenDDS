@@ -54,14 +54,19 @@ namespace OpenDDS {
       EndpointSecurityAttributesMap;
 
     enum AuthState {
-      AS_UNKNOWN,
-      AS_VALIDATING_REMOTE,
-      AS_HANDSHAKE_REQUEST,
-      AS_HANDSHAKE_REQUEST_SENT,
-      AS_HANDSHAKE_REPLY,
-      AS_HANDSHAKE_REPLY_SENT,
-      AS_AUTHENTICATED,
-      AS_UNAUTHENTICATED
+      AUTH_STATE_UNKNOWN,
+      AUTH_STATE_VALIDATING_REMOTE,
+      AUTH_STATE_HANDSHAKE,
+      AUTH_STATE_AUTHENTICATED,
+      AUTH_STATE_UNAUTHENTICATED
+    };
+
+    enum HandshakeState {
+      HANDSHAKE_STATE_UNKNOWN,
+      HANDSHAKE_STATE_REQUEST,
+      HANDSHAKE_STATE_REQUEST_SENT,
+      HANDSHAKE_STATE_REPLY,
+      HANDSHAKE_STATE_REPLY_SENT
     };
 #endif
 
@@ -1586,7 +1591,9 @@ namespace OpenDDS {
         , seq_reset_count_(0)
 #ifdef OPENDDS_SECURITY
         , has_last_stateless_msg_(false)
-        , auth_state_(AS_UNKNOWN)
+        , auth_state_(AUTH_STATE_UNKNOWN)
+        , handshake_state_(HANDSHAKE_STATE_UNKNOWN)
+        , is_requester_(false)
         , identity_handle_(DDS::HANDLE_NIL)
         , handshake_handle_(DDS::HANDLE_NIL)
         , permissions_handle_(DDS::HANDLE_NIL)
@@ -1611,7 +1618,9 @@ namespace OpenDDS {
         , seq_reset_count_(0)
 #ifdef OPENDDS_SECURITY
         , has_last_stateless_msg_(false)
-        , auth_state_(AS_UNKNOWN)
+        , auth_state_(AUTH_STATE_UNKNOWN)
+        , handshake_state_(HANDSHAKE_STATE_UNKNOWN)
+        , is_requester_(false)
         , identity_handle_(DDS::HANDLE_NIL)
         , handshake_handle_(DDS::HANDLE_NIL)
         , permissions_handle_(DDS::HANDLE_NIL)
@@ -1670,6 +1679,8 @@ namespace OpenDDS {
 
         MonotonicTimePoint auth_deadline_;
         AuthState auth_state_;
+        HandshakeState handshake_state_;
+        bool is_requester_;
 
         DDS::Security::IdentityToken identity_token_;
         DDS::Security::PermissionsToken permissions_token_;

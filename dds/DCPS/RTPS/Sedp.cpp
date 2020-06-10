@@ -1846,7 +1846,7 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
           data.topic_data = wdata.ddsPublicationData.topic_data;
 
           DCPS::AuthState auth_state = spdp_.lookup_participant_auth_state(participant_id);
-          if (auth_state == DCPS::AS_AUTHENTICATED) {
+          if (auth_state == DCPS::AUTH_STATE_AUTHENTICATED) {
 
             DDS::Security::PermissionsHandle remote_permissions = spdp_.lookup_participant_permissions(participant_id);
 
@@ -1892,7 +1892,7 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
                 topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
               return;
             }
-          } else if (auth_state != DCPS::AS_UNAUTHENTICATED) {
+          } else if (auth_state != DCPS::AUTH_STATE_UNAUTHENTICATED) {
             ACE_ERROR((LM_WARNING,
               ACE_TEXT("(%P|%t) WARNING: ")
               ACE_TEXT("Sedp::data_received(dwd) - ")
@@ -2169,7 +2169,7 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
           data.topic_data = rdata.ddsSubscriptionData.topic_data;
 
           DCPS::AuthState auth_state = spdp_.lookup_participant_auth_state(participant_id);
-          if (auth_state == DCPS::AS_AUTHENTICATED) {
+          if (auth_state == DCPS::AUTH_STATE_AUTHENTICATED) {
 
             DDS::Security::PermissionsHandle remote_permissions = spdp_.lookup_participant_permissions(participant_id);
 
@@ -2223,7 +2223,7 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
             } else {
               relay_only_readers_.erase(guid);
             }
-          } else if (auth_state != DCPS::AS_UNAUTHENTICATED) {
+          } else if (auth_state != DCPS::AUTH_STATE_UNAUTHENTICATED) {
             ACE_ERROR((LM_WARNING,
               ACE_TEXT("(%P|%t) WARNING: ")
               ACE_TEXT("Sedp::data_received(dwd) - ")

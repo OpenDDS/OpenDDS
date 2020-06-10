@@ -582,8 +582,8 @@ RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage)
   } else {
     if (security_debug.encdec_warn) {
       ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) {encdec_warn} RtpsUdpReceiveStrategy: ")
-                 ACE_TEXT("preprocess_secure_submsg failed RPCH %d, [%d.%d]: %C\n"),
-                 peer_pch, ex.code, ex.minor_code, ex.message.in()));
+                 ACE_TEXT("preprocess_secure_submsg failed remote %C RPCH %d, [%d.%d]: %C\n"),
+                 OPENDDS_STRING(GuidConverter(peer)).c_str(), peer_pch, ex.code, ex.minor_code, ex.message.in()));
     }
     return;
   }
