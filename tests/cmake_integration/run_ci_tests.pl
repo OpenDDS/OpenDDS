@@ -42,7 +42,7 @@ exit 1 if !GetOptions(
     "arch=s" => \$arch,
     "skip-run-test" => \$skip_run_test);
 
-for my $x (qw(Messenger_1 Messenger_2)) {
+for my $x (qw(Messenger_1 Messenger_2 C++11_Messenger)) {
   my $build_dir="$ENV{'DDS_ROOT'}/tests/cmake_integration/Messenger/$x/build";
   mkdir($build_dir) or die "ERROR '$!': failed to make directory $build_dir";
   chdir($build_dir) or die "ERROR: '$!': failed to switch to $build_dir";
@@ -64,17 +64,21 @@ for my $x (qw(Messenger_1 Messenger_2)) {
     push @{$cmds[1]}, ("--config", "$build_config");
   }
 
-  for my $cmd (@cmds) {
-    run_command("@{$cmd}");
-  }
-
-  if (! $skip_run_test) {
-    if ($build_config ne "") {
-      my $run_dir = getcwd() . "/$build_config";
-      print "Switching to '$run_dir' to run tests\n";
-      print "$run_dir";
-      chdir($run_dir) or die "ERROR: '$!'";
+  for my $shared ('OFF', 'ON') {
+    @cmds_with_shared = @cmds;
+    splice @{$cmds_with_shared[0]}, 1, 0, ('-D', "BUILD_SHARED_LIBS=$shared");
+    for my $cmd (@cmds_with_shared) {
+      run_command("@{$cmd}");
     }
-    run_command("perl run_test.pl");
+
+    if (! $skip_run_test) {
+      if ($build_config ne "") {
+        my $run_dir = getcwd() . "/$build_config";
+        print "Switching to '$run_dir' to run tests\n";
+        print "$run_dir";
+        chdir($run_dir) or die "ERROR: '$!'";
+      }
+      run_command("perl run_test.pl");
+    }
   }
 }
