@@ -186,9 +186,9 @@ function(opendds_target_idl_sources target)
     set(_cur_idl_cpp_files ${output_prefix}TypeSupportImpl.cpp)
 
     if(_ddsidl_cmd_arg_-GfaceTS)
-      list(APPEND _cur_idl_headers ${output_prefix}_TS.hpp)
-      list(APPEND _cur_idl_cpp_files ${output_prefix}_TS.cpp)
-    endif
+      list(APPEND _cur_idl_headers "${output_prefix}_TS.hpp")
+      list(APPEND _cur_idl_cpp_files "${output_prefix}_TS.cpp")
+    endif()
 
     if(_ddsidl_cmd_arg_-Lface)
       list(APPEND _cur_idl_headers "${output_prefix}C.h")
