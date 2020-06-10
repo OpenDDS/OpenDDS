@@ -403,13 +403,9 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket
     ncm->add_listener(*this);
   } else {
     NetworkInterface nic(0, cfg.multicast_interface_, true);
-    ACE_INET_Addr addr(u_short(0), "0.0.0.0");
-    nic.addresses.insert(addr);
-#ifdef ACE_HAS_IPV6
-    ACE_INET_Addr addr2(u_short(0), "::");
-    nic.addresses.insert(addr2);
-#endif
-    join_multicast_group(nic, true);
+    nic.add_default_addrs();
+    const bool all = cfg.multicast_interface_.empty();
+    join_multicast_group(nic, all);
   }
 
   return true;
@@ -441,11 +437,7 @@ RtpsUdpDataLink::join_multicast_group(const DCPS::NetworkInterface& nic,
     return;
   }
 
-  if (!config().multicast_interface_.empty() && nic.name() != config().multicast_interface_) {
-    return;
-  }
-
-  if (nic.addresses.empty() || !nic.can_multicast()) {
+  if (nic.exclude_from_multicast(config().multicast_interface_.c_str())) {
     return;
   }
 

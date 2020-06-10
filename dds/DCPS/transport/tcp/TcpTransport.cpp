@@ -338,9 +338,9 @@ TcpTransport::configure_i(TcpInst& config)
   connector_.open(reactor_task()->get_reactor());
 
   // Override with DCPSDefaultAddress.
-  if (config.local_address() == ACE_INET_Addr () &&
-      !TheServiceParticipant->default_address ().empty ()) {
-    config.local_address(0, TheServiceParticipant->default_address ().c_str ());
+  if (config.local_address() == ACE_INET_Addr() &&
+      TheServiceParticipant->default_address() != ACE_INET_Addr()) {
+    config.local_address(TheServiceParticipant->default_address());
   }
 
   // Open our acceptor object so that we can accept passive connections

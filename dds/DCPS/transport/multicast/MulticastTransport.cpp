@@ -332,9 +332,9 @@ bool
 MulticastTransport::configure_i(MulticastInst& config)
 {
   // Override with DCPSDefaultAddress.
-  if (config.local_address_.empty () &&
-      !TheServiceParticipant->default_address ().empty ()) {
-    config.local_address_ = TheServiceParticipant->default_address ().c_str ();
+  if (config.local_address_.empty() &&
+      TheServiceParticipant->default_address() != ACE_INET_Addr()) {
+    config.local_address_ = TheServiceParticipant->default_address().get_host_name();
   }
 
   if (!config.group_address_.is_multicast()) {

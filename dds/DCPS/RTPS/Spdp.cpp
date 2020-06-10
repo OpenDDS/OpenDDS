@@ -1857,15 +1857,10 @@ Spdp::SpdpTransport::open()
     ncm->add_listener(*this);
   } else {
     DCPS::NetworkInterface nic(0, multicast_interface_, true);
-    ACE_INET_Addr addr(u_short(0), "0.0.0.0");
-    nic.addresses.insert(addr);
-#ifdef ACE_HAS_IPV6
-    ACE_INET_Addr addr2(u_short(0), "::");
-    nic.addresses.insert(addr2);
-#endif
+    nic.add_default_addrs();
+    const bool all = multicast_interface_.empty();
     job_queue_->enqueue(DCPS::make_rch<ChangeMulticastGroup>(rchandle_from(this), nic,
-                                                             ChangeMulticastGroup::CMG_JOIN, true));
-
+                                                             ChangeMulticastGroup::CMG_JOIN, all));
   }
 }
 
@@ -2603,11 +2598,7 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
 {
   ACE_GUARD(ACE_Thread_Mutex, g, outer_->lock_);
 
-  if (!multicast_interface_.empty() && nic.name() != multicast_interface_) {
-    return;
-  }
-
-  if (nic.addresses.empty() || !nic.can_multicast()) {
+  if (nic.exclude_from_multicast(multicast_interface_.c_str())) {
     return;
   }
 
