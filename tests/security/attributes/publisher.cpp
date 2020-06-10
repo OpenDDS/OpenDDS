@@ -135,9 +135,15 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args)
                             -13);
       }
 
+      DDS::PublisherQos pub_qos = PUBLISHER_QOS_DEFAULT;
+      if (!my_args.partition_.empty()) {
+        participant->get_default_publisher_qos(pub_qos);
+        my_args.partition_to_qos(pub_qos.partition);
+      }
+
       // Create Publisher
       DDS::Publisher_var pub =
-        participant->create_publisher(PUBLISHER_QOS_DEFAULT,
+        participant->create_publisher(pub_qos,
                                       DDS::PublisherListener::_nil(),
                                       OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
