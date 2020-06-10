@@ -1270,7 +1270,7 @@ DataWriterImpl::enable()
     dp_id_ = participant->get_id();
   }
 
-  if (!topic_servant_->check_data_representation(qos_.representation.value, true)) {
+  if (!topic_servant_->check_data_representation(get_effective_data_rep_qos(qos_.representation.value), true)) {
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
