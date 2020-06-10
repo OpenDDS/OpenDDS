@@ -62,11 +62,8 @@ function(opendds_target_idl_sources target)
   set(multiValueArgs TAO_IDL_FLAGS DDS_IDL_FLAGS IDL_FILES)
   cmake_parse_arguments(_arg "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-  # Language mapping usage are designated on an IDL file by IDL file basis,
-  # then at combined (or mixed together) on a target by target basis. If this
-  # target has any existing mappings set, combine those with any mappings on
-  # the IDL files. If we need to generate rules for a IDL file, then add those
-  # to the IDL file and the target.
+  # Language mappings used by the IDL files are mixed together with any
+  # existing OPENDDS_LANGUAGE_MAPPINGS value on the target.
   get_property(language_mappings TARGET ${target}
     PROPERTY "OPENDDS_LANGUAGE_MAPPINGS")
   # Make sure OPENDDS_LANGUAGE_MAPPINGS is exported if supported
@@ -161,10 +158,12 @@ function(opendds_target_idl_sources target)
     unset(_ddsidl_cmd_arg_-o)
     unset(_ddsidl_cmd_arg_-Wb,java)
     unset(_ddsidl_cmd_arg_-Lc++11)
+    unset(_ddsidl_cmd_arg_-Lface)
     unset(file_language_mappings)
 
     cmake_parse_arguments(_ddsidl_cmd_arg
-      "-SI;-GfaceTS;-Wb,java;-Lc++11" "-o" "" ${_ddsidl_flags})
+      "-SI;-GfaceTS;-Wb,java;-Lc++11;-Lface"
+      "-o" "" ${_ddsidl_flags})
 
     get_filename_component(noext_name ${input} NAME_WE)
     get_filename_component(abs_filename ${input} ABSOLUTE)
@@ -186,12 +185,15 @@ function(opendds_target_idl_sources target)
     set(_cur_idl_headers ${output_prefix}TypeSupportImpl.h)
     set(_cur_idl_cpp_files ${output_prefix}TypeSupportImpl.cpp)
 
-    if (_ddsidl_cmd_arg_-GfaceTS)
-      list(APPEND _cur_idl_headers ${output_prefix}C.h ${output_prefix}_TS.hpp)
+    if(_ddsidl_cmd_arg_-GfaceTS)
+      list(APPEND _cur_idl_headers ${output_prefix}_TS.hpp)
       list(APPEND _cur_idl_cpp_files ${output_prefix}_TS.cpp)
-      ## if this is FACE IDL, do not reprocess the original idl file throught tao_idl
+    endif
+
+    if(_ddsidl_cmd_arg_-Lface)
+      list(APPEND _cur_idl_headers "${output_prefix}C.h")
       list(APPEND file_language_mappings "FACE")
-    elseif (_ddsidl_cmd_arg_-Lc++11)
+    elseif(_ddsidl_cmd_arg_-Lc++11)
       list(APPEND _cur_idl_headers "${output_prefix}C.h")
       list(APPEND file_language_mappings "C++11")
     else()
