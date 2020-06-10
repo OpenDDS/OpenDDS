@@ -44,8 +44,8 @@ void Encoding::kind(Encoding::Kind value)
   case KIND_CDR_PARAMLIST:
   case KIND_CDR_PLAIN:
     alignment(ALIGN_CDR);
+    zero_init_padding(true);
     break;
-
   case KIND_XCDR2_PARAMLIST:
   case KIND_XCDR2_DELIMITED:
   case KIND_XCDR2_PLAIN:

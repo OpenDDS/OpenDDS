@@ -34,7 +34,8 @@ namespace {
       ACE_Message_Block temp(mb.data_block (), ACE_Message_Block::DONT_DELETE);
       temp.rd_ptr(mb.rd_ptr()+offset);
       temp.wr_ptr(mb.wr_ptr());
-      OpenDDS::DCPS::Serializer ser(&temp, swap);
+      OpenDDS::DCPS::Serializer ser(&temp, OpenDDS::DCPS::Encoding::KIND_CDR_UNALIGNED,
+                                    swap ? OpenDDS::DCPS::ENDIAN_NONNATIVE : OpenDDS::DCPS::ENDIAN_NATIVE);
       ser.buffer_read(reinterpret_cast<char*>(&dest), sizeof(T), swap);
       return true;
     }
@@ -47,7 +48,8 @@ namespace {
     if (temp->total_length() < sizeof(T)) {
       return false;
     }
-    OpenDDS::DCPS::Serializer ser(temp.get(), swap);
+    OpenDDS::DCPS::Serializer ser(temp.get(), OpenDDS::DCPS::Encoding::KIND_CDR_UNALIGNED,
+                                  swap ? OpenDDS::DCPS::ENDIAN_NONNATIVE : OpenDDS::DCPS::ENDIAN_NATIVE);
     ser.buffer_read(reinterpret_cast<char*>(&dest), sizeof(T), swap);
     return true;
   }
@@ -273,7 +275,8 @@ DataSampleHeader::init(ACE_Message_Block* buffer)
 bool
 operator<<(ACE_Message_Block& buffer, const DataSampleHeader& value)
 {
-  Serializer writer(&buffer, value.byte_order_ != ACE_CDR_BYTE_ORDER);
+  Serializer writer(&buffer, Encoding::KIND_CDR_UNALIGNED,
+                    value.byte_order_ ? ENDIAN_LITTLE : ENDIAN_BIG);
 
   writer << value.message_id_;
   writer << value.submessage_id_;

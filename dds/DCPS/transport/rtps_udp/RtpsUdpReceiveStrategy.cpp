@@ -96,7 +96,7 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
       bytes -= block_size;
     }
 
-    DCPS::Serializer serializer(head, DCPS::Serializer::SWAP_BE);
+    DCPS::Serializer serializer(head, Encoding::KIND_CDR_UNALIGNED, ENDIAN_BIG);
     STUN::Message message;
     message.block = head;
     if (serializer >> message) {

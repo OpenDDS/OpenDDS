@@ -9,21 +9,49 @@
 #include "TypeObject.h"
 
 #include <utility>
+#include <map>
+#include <cmath>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace XTypes {
 
-class TypeLookup {
+// Dummy class for type look up. Only use for facilitating tests.
+class OpenDDS_Dcps_Export TypeLookup {
 public:
   const MinimalTypeObject& lookup_minimal(const TypeIdentifier& ti) const
   {
-    return tmp_;
+    return table_[hash_to_unsigned(ti.equivalence_hash)];
+  }
+
+  static void insert_entry(const TypeIdentifier& ti, const MinimalTypeObject& tobj)
+  {
+    table_[hash_to_unsigned(ti.equivalence_hash)] = tobj;
+  }
+
+  static void get_equivalence_hash(EquivalenceHash& out)
+  {
+    static unsigned int hash = 0;
+    unsigned int tmp = ++hash;
+    for (int i = 13; i >= 0; --i) {
+      out[i] = tmp % 256;
+      tmp /= 256;
+    }
+  }
+
+  static unsigned int hash_to_unsigned(const EquivalenceHash& h)
+  {
+    unsigned int val = 0;
+    for (int i = 13; i >= 0; --i) {
+      unsigned int multiplier = (unsigned int)pow(256, 13-i);
+      val += h[i] * multiplier;
+    }
+    return val;
   }
 
 private:
-  MinimalTypeObject tmp_;
+  static std::map<unsigned int, MinimalTypeObject> table_;
 };
 
 // Set of pairs of members with each pair contains members from
@@ -34,8 +62,11 @@ typedef OPENDDS_VECTOR(MemberPair) MatchedSet;
 class OpenDDS_Dcps_Export TypeAssignability {
 public:
   bool assignable(const TypeObject& ta, const TypeObject& tb) const;
+  bool assignable(const TypeObject& ta, const TypeIdentifier& tb) const;
   bool assignable(const TypeIdentifier& ta, const TypeIdentifier& tb) const;
+  bool assignable(const TypeIdentifier& ta, const TypeObject& tb) const;
 
+private:
   bool assignable_alias(const MinimalTypeObject& ta, const MinimalTypeObject& tb) const;
   bool assignable_annotation(const MinimalTypeObject& ta, const MinimalTypeObject& tb) const;
   bool assignable_annotation(const MinimalTypeObject& ta, const TypeIdentifier& tb) const;
@@ -68,7 +99,6 @@ public:
   bool assignable_plain_map(const TypeIdentifier& ta, const TypeIdentifier& tb) const;
   bool assignable_plain_map(const TypeIdentifier& ta, const MinimalTypeObject& tb) const;
 
-private:
   // General helpers
   bool strongly_assignable(const TypeIdentifier& ta, const TypeIdentifier& tb) const;
   bool is_delimited(const TypeIdentifier& ti) const;

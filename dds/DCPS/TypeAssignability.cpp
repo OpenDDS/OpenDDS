@@ -13,6 +13,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {
 
+std::map<unsigned int, MinimalTypeObject> TypeLookup::table_;
+
 /**
  * @brief Both input type objects must be minimal
  */
@@ -36,7 +38,7 @@ bool TypeAssignability::assignable(const TypeObject& ta,
     case TK_SEQUENCE:
       return assignable_sequence(ta.minimal, tb.minimal);
     case TK_ARRAY:
-      return assignable_sequence(ta.minimal, tb.minimal);
+      return assignable_array(ta.minimal, tb.minimal);
     case TK_MAP:
       return assignable_map(ta.minimal, tb.minimal);
     case TK_ENUM:
@@ -45,6 +47,44 @@ bool TypeAssignability::assignable(const TypeObject& ta,
       return assignable_bitmask(ta.minimal, tb.minimal);
     default:
       return assignable_extended(ta.minimal, tb.minimal);
+    }
+  }
+
+  return false;
+}
+
+/**
+ * @brief The first argument must be a minimal type object
+ */
+bool TypeAssignability::assignable(const TypeObject& ta,
+                                   const TypeIdentifier& tb) const
+{
+  if (EK_MINIMAL == ta.kind) {
+    if (TK_ALIAS == ta.minimal.kind) {
+      return assignable(get_base_type(ta.minimal), tb);
+    }
+
+    switch (ta.minimal.kind) {
+    case TK_ANNOTATION:
+      return assignable_annotation(ta.minimal, tb);
+    case TK_STRUCTURE:
+      return assignable_struct(ta.minimal, tb);
+    case TK_UNION:
+      return assignable_union(ta.minimal, tb);
+    case TK_BITSET:
+      return assignable_bitset(ta.minimal, tb);
+    case TK_SEQUENCE:
+      return assignable_sequence(ta.minimal, tb);
+    case TK_ARRAY:
+      return assignable_array(ta.minimal, tb);
+    case TK_MAP:
+      return assignable_map(ta.minimal, tb);
+    case TK_ENUM:
+      return assignable_enum(ta.minimal, tb);
+    case TK_BITMASK:
+      return assignable_bitmask(ta.minimal, tb);
+    default:
+      return false;
     }
   }
 
@@ -103,6 +143,65 @@ bool TypeAssignability::assignable(const TypeIdentifier& ta,
   default:
     return false; // Future extensions
   }
+}
+
+/**
+ * @brief The second argument must be a minimal type object
+ */
+bool TypeAssignability::assignable(const TypeIdentifier& ta,
+                                   const TypeObject& tb) const
+{
+  if (EK_MINIMAL == tb.kind) {
+    if (TK_ALIAS == tb.minimal.kind) {
+      return assignable(ta, get_base_type(tb.minimal));
+    }
+
+    switch (ta.kind) {
+    case TK_BOOLEAN:
+    case TK_BYTE:
+    case TK_INT16:
+    case TK_INT32:
+    case TK_INT64:
+    case TK_UINT16:
+    case TK_UINT32:
+    case TK_UINT64:
+    case TK_FLOAT32:
+    case TK_FLOAT64:
+    case TK_FLOAT128:
+    case TK_INT8:
+    case TK_UINT8:
+    case TK_CHAR8:
+    case TK_CHAR16:
+      return assignable_primitive(ta, tb.minimal);
+    case TI_STRING8_SMALL:
+    case TI_STRING8_LARGE:
+    case TI_STRING16_SMALL:
+    case TI_STRING16_LARGE:
+      return assignable_string(ta, tb.minimal);
+    case TI_PLAIN_SEQUENCE_SMALL:
+    case TI_PLAIN_SEQUENCE_LARGE:
+      return assignable_plain_sequence(ta, tb.minimal);
+    case TI_PLAIN_ARRAY_SMALL:
+    case TI_PLAIN_ARRAY_LARGE:
+      return assignable_plain_array(ta, tb.minimal);
+    case TI_PLAIN_MAP_SMALL:
+    case TI_PLAIN_MAP_LARGE:
+      return assignable_plain_map(ta, tb.minimal);
+    case TI_STRONGLY_CONNECTED_COMPONENT:
+      return false;
+    case EK_COMPLETE:
+      return false;
+    case EK_MINIMAL: {
+      const MinimalTypeObject& tobj_a = typelookup_.lookup_minimal(ta);
+      TypeObject wrapper_a(tobj_a);
+      return assignable(wrapper_a, tb);
+    }
+    default:
+      return false;
+    }
+  }
+
+  return false;
 }
 
 /**
@@ -953,20 +1052,19 @@ bool TypeAssignability::assignable_enum(const MinimalTypeObject& ta,
     return false;
   }
 
-  std::map<ACE_CDR::ULong, ACE_CDR::Long> ta_maps;
+  const size_t size_a = ta.enumerated_type.literal_seq.members.size();
+  const size_t size_b = tb.enumerated_type.literal_seq.members.size();
+  std::map<ACE_CDR::ULong, ACE_CDR::Long> ta_name_to_value;
+  for (size_t i = 0; i < size_a; ++i) {
+    const NameHash& h = ta.enumerated_type.literal_seq.members[i].detail.name_hash;
+    ACE_CDR::ULong key_a = (h[0] << 24) | (h[1] << 16) | (h[2] << 8) | (h[3]);
+    ta_name_to_value[key_a] = ta.enumerated_type.literal_seq.members[i].common.value;
+  }
 
   // If extensibility is FINAL, both must have the same literals.
   if (IS_FINAL == ta_ext) {
-    size_t size_a = ta.enumerated_type.literal_seq.members.size();
-    size_t size_b = tb.enumerated_type.literal_seq.members.size();
     if (size_a != size_b) {
       return false;
-    }
-
-    for (size_t i = 0; i < size_a; ++i) {
-      const NameHash& h = ta.enumerated_type.literal_seq.members[i].detail.name_hash;
-      ACE_CDR::ULong key_a = (h[0] << 24) | (h[1] << 16) | (h[2] << 8) | (h[3]);
-      ta_maps[key_a] = ta.enumerated_type.literal_seq.members[i].common.value;
     }
 
     for (size_t i = 0; i < size_b; ++i) {
@@ -974,8 +1072,37 @@ bool TypeAssignability::assignable_enum(const MinimalTypeObject& ta,
       ACE_CDR::ULong key_b = (h[0] << 24) | (h[1] << 16) | (h[2] << 8) | (h[3]);
 
       // Literals that have the same name must have the same value.
-      if (ta_maps.find(key_b) == ta_maps.end() ||
-          ta_maps[key_b] != tb.enumerated_type.literal_seq.members[i].common.value) {
+      if (ta_name_to_value.find(key_b) == ta_name_to_value.end() ||
+          ta_name_to_value[key_b] != tb.enumerated_type.literal_seq.members[i].common.value) {
+        return false;
+      }
+    }
+  } else {
+    // Any literals that have the same name also have the same value
+    for (size_t i = 0; i < size_b; ++i) {
+      const NameHash& h = tb.enumerated_type.literal_seq.members[i].detail.name_hash;
+      ACE_CDR::ULong key_b = (h[0] << 24) | (h[1] << 16) | (h[2] << 8) | (h[3]);
+      if (ta_name_to_value.find(key_b) != ta_name_to_value.end() &&
+          ta_name_to_value[key_b] != tb.enumerated_type.literal_seq.members[i].common.value) {
+        return false;
+      }
+    }
+
+    std::map<ACE_CDR::ULong, ACE_CDR::ULong> ta_value_to_name;
+    for (size_t i = 0; i < size_a; ++i) {
+      ACE_CDR::ULong value_a = ta.enumerated_type.literal_seq.members[i].common.value;
+      const NameHash& h = ta.enumerated_type.literal_seq.members[i].detail.name_hash;
+      ACE_CDR::ULong name_a = (h[0] << 24) | (h[1] << 16) | (h[2] << 8) | (h[3]);
+      ta_value_to_name[value_a] = name_a;
+    }
+
+    // Any literals that have the same value also have the same name
+    for (size_t i = 0; i < size_b; ++i) {
+      ACE_CDR::ULong value_b = tb.enumerated_type.literal_seq.members[i].common.value;
+      const NameHash& h = tb.enumerated_type.literal_seq.members[i].detail.name_hash;
+      ACE_CDR::ULong name_b = (h[0] << 24) | (h[1] << 16) | (h[2] << 8) | (h[3]);
+      if (ta_value_to_name.find(value_b) != ta_value_to_name.end() &&
+          ta_value_to_name[value_b] != name_b) {
         return false;
       }
     }
@@ -1789,8 +1916,7 @@ void TypeAssignability::hold_key(MinimalTypeObject& type) const
  * @brief The input must be of type TK_ALIAS
  * Return the non-alias base type identifier of the input
  */
-const TypeIdentifier& TypeAssignability::get_base_type(const MinimalTypeObject&
-                                                       type) const
+const TypeIdentifier& TypeAssignability::get_base_type(const MinimalTypeObject& type) const
 {
   const TypeIdentifier& base = *type.alias_type.body.common.related_type;
   switch (base.kind) {
