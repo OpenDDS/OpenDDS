@@ -7,6 +7,11 @@
 
 #include "dds/DCPS/Time_Helper.h"
 
+namespace {
+  const OpenDDS::DCPS::Encoding encoding_plain_native(OpenDDS::DCPS::Encoding::KIND_CDR_PLAIN,
+                                                       OpenDDS::DCPS::ENDIAN_NATIVE);
+}
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -130,7 +135,7 @@ DCPS::LocatorSeq transport_locator_to_locator_seq(const DCPS::TransportLocator& 
 
 MessageParser::MessageParser(const ACE_Message_Block& in)
   : in_(in.duplicate())
-  , ser_(in_.get(), false, DCPS::Serializer::ALIGN_CDR)
+  , ser_(in_.get(), encoding_plain_native)
   , header_()
   , sub_()
   , smContentStart_(0)
@@ -138,7 +143,7 @@ MessageParser::MessageParser(const ACE_Message_Block& in)
 
 MessageParser::MessageParser(const DDS::OctetSeq& in)
   : fromSeq_(reinterpret_cast<const char*>(in.get_buffer()), in.length())
-  , ser_(&fromSeq_, false, DCPS::Serializer::ALIGN_CDR)
+  , ser_(&fromSeq_, encoding_plain_native)
   , header_()
   , sub_()
   , smContentStart_(0)

@@ -11,7 +11,8 @@
 
 using OpenDDS::DCPS::Encoding;
 
-const Encoding encoding(Encoding::KIND_CDR_PLAIN);
+const Encoding encoding_plain_native(Encoding::KIND_CDR_PLAIN);
+const Encoding encoding_unaligned_native(Encoding::KIND_CDR_UNALIGNED);
 
 namespace {
   unsigned int bcd(unsigned int i)
@@ -50,7 +51,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     ass.length(2); //4 for seq length
     ass[0] = "four"; //4+5 strlen + string
     ass[1] = "five5"; //4+6 strlen + string
-    size_t size_ass = serialized_size(encoding, ass);
+    size_t size_ass = serialized_size(encoding_plain_native, ass);
     if (size_ass != 26) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("AStringSeq find_size failed with = %B ; expecting 23\n"),
@@ -61,7 +62,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   {
     Xyz::ArrayOfShortsSeq ash;
     ash.length(2); //4 for seq length + 5*2 for arry *2 length
-    size_t size_ash = serialized_size(encoding, ash);
+    size_t size_ash = serialized_size(encoding_plain_native, ash);
     if (size_ash != 24) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("ArrayOfShortsSeq find_size failed with = %B ; expecting 24\n"),
@@ -74,7 +75,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     aas.f1[0].v2s.length(2); //4 for v1 + 4 for length seq + 2*2
     aas.f1[1].v2s.length(1); //4 for v1 + 4 for length seq + 2
     aas.f1[2].v2s.length(0); //4 for v1 + 4 for length seq + 0
-    size_t size_aas = serialized_size(encoding, aas);
+    size_t size_aas = serialized_size(encoding_plain_native, aas);
     if (size_aas != 32) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("StructContainingArrayOfAStruct find_size failed with = %B ; expecting 30\n"),
@@ -90,7 +91,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     aas.f1[1][0].v2s.length(1); //4 for v1 + 4 for length seq + 2
     aas.f1[2].length(1);//4 for length
     aas.f1[2][0].v2s.length(0); //4 for v1 + 4 for length seq + 0
-    size_t size_aas = serialized_size(encoding, aas);
+    size_t size_aas = serialized_size(encoding_plain_native, aas);
     if (size_aas != 44) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("StructContainingArrayOfAStructSeq find_size failed ")
@@ -105,11 +106,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   fwddeclstructs[0].v1 = -5;
   fwddeclstructs[1].v1 = 43;
   OpenDDS::DCPS::Message_Block_Ptr b(new ACE_Message_Block(100000));
-  OpenDDS::DCPS::Serializer serializer(b.get(), encoding);
+  OpenDDS::DCPS::Serializer serializer(b.get(), encoding_plain_native);
 
   serializer << fwddeclstructs;
 
-  OpenDDS::DCPS::Serializer deserializer(b.get(), encoding);
+  OpenDDS::DCPS::Serializer deserializer(b.get(), encoding_plain_native);
   N1::FwdDeclSameNamespaceStructs fwddeclstructs2;
   deserializer >> fwddeclstructs2;
 
@@ -137,12 +138,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   fwddeclstructs.length(2);
   fwddeclstructs[0].v1 = -5;
   fwddeclstructs[1].v1 = 43;
-  OpenDDS::DCPS::Message_Block_Ptr b (new ACE_Message_Block( 100000)) ;
-  OpenDDS::DCPS::Serializer serializer( b.get(), false) ;
+  OpenDDS::DCPS::Message_Block_Ptr b (new ACE_Message_Block( 100000));
+  OpenDDS::DCPS::Serializer serializer(b.get(), encoding_unaligned_native);
 
   serializer << fwddeclstructs;
 
-  OpenDDS::DCPS::Serializer deserializer( b.get(), false) ;
+  OpenDDS::DCPS::Serializer deserializer(b.get(), encoding_unaligned_native);
   N2::FwdDeclDiffNamespaceStructs fwddeclstructs2;
   deserializer >> fwddeclstructs2;
 
@@ -167,7 +168,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   {
     Xyz::StructOfArrayOfArrayOfShorts2 aas;
-    size_t size_aas = serialized_size(encoding, aas);
+    size_t size_aas = serialized_size(encoding_plain_native, aas);
     if (size_aas != 18) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("StructOfArrayOfArrayOfShorts2 find_size failed ")
@@ -184,14 +185,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     ACE_Message_Block mb(size_aas);
-    OpenDDS::DCPS::Serializer ss(&mb);
+    OpenDDS::DCPS::Serializer ss(&mb, encoding_unaligned_native);
 
     if (!(ss << aas)) {
       ACE_ERROR((LM_ERROR, "Serializing StructOfArrayOfArrayOfShorts2 failed\n"));
       failed = true;
     }
 
-    OpenDDS::DCPS::Serializer ss2(&mb);
+    OpenDDS::DCPS::Serializer ss2(&mb, encoding_unaligned_native);
 
     Xyz::StructOfArrayOfArrayOfShorts2 aas2;
     if (!(ss2 >> aas2)) {
@@ -302,9 +303,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   const bool expected_bounded = false;
   const size_t expected_find_size = 97;
 
-  size_t ms = OpenDDS::DCPS::max_serialized_size(encoding, my_foo);
+  size_t ms = OpenDDS::DCPS::max_serialized_size(encoding_plain_native, my_foo);
   const bool bounded = OpenDDS::DCPS::MarshalTraits<Xyz::Foo>::gen_is_bounded_size();
-  size_t cs = serialized_size(encoding, my_foo);
+  size_t cs = serialized_size(encoding_plain_native, my_foo);
 
   ACE_DEBUG((LM_DEBUG,"OpenDDS::DCPS::gen_max_marshaled_size(my_foo) => %B\n", ms));
   ACE_DEBUG((LM_DEBUG,"OpenDDS::DCPS::gen_is_bounded_size(my_foo) => %d\n", int(bounded)));
@@ -327,8 +328,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   const size_t buff_size = bounded ? ms : cs;
   ACE_Message_Block mb(buff_size);
-  OpenDDS::DCPS::Serializer ss(&mb);
-  OpenDDS::DCPS::Serializer ss2(&mb);
+  OpenDDS::DCPS::Serializer ss(&mb, encoding_unaligned_native);
+  OpenDDS::DCPS::Serializer ss2(&mb, encoding_unaligned_native);
 
   Xyz::Foo ss_foo;
   try {

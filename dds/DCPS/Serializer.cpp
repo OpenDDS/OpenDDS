@@ -203,20 +203,6 @@ Serializer::Serializer(ACE_Message_Block* chain, bool has_cdr_header,
   }
 }
 
-Serializer::Serializer(ACE_Message_Block* chain, bool swap_bytes,
-  Encoding::Alignment align, bool zero_init_padding)
-  : current_(chain)
-  , good_bit_(true)
-  , align_rshift_(0)
-  , align_wshift_(0)
-{
-  Encoding enc(Encoding::KIND_UNKNOWN, swap_bytes);
-  enc.alignment(align);
-  enc.zero_init_padding(zero_init_padding);
-  encoding(enc);
-  reset_alignment();
-}
-
 Serializer::~Serializer()
 {
 }
