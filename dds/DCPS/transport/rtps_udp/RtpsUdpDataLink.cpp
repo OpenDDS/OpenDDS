@@ -305,7 +305,7 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
       }
     } else {
       NetworkInterface nic(0, cfg.multicast_interface_, true);
-      nic.addresses.insert(ACE_INET_Addr());
+      nic.add_default_addrs();
       join_multicast_group(nic, true);
     }
   }
@@ -394,11 +394,7 @@ RtpsUdpDataLink::join_multicast_group(const DCPS::NetworkInterface& nic,
     return;
   }
 
-  if (joined_interfaces_.count(nic.name()) != 0 || nic.addresses.empty() || !nic.can_multicast()) {
-    return;
-  }
-
-  if (!config().multicast_interface_.empty() && nic.name() != config().multicast_interface_) {
+  if (nic.exclude_from_multicast(config().multicast_interface_.c_str())) {
     return;
   }
 

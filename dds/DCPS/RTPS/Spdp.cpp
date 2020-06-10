@@ -1737,7 +1737,7 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
     }
   } else {
     DCPS::NetworkInterface nic(0, multicast_interface_, true);
-    nic.addresses.insert(ACE_INET_Addr());
+    nic.add_default_addrs();
     join_multicast_group(nic, true);
   }
 
@@ -2268,10 +2268,10 @@ Spdp::SpdpTransport::host_addresses() const
   const OPENDDS_STRING spdpaddr = outer_->config_->spdp_local_address();
   if (spdpaddr.empty() ||
       spdpaddr.rfind(':') == 0) {
-    if (TheServiceParticipant->default_address().empty()) {
+    if (TheServiceParticipant->default_address() == ACE_INET_Addr()) {
       DCPS::get_interface_addrs(addresses);
     } else {
-      addresses.push_back(ACE_INET_Addr(static_cast<u_short>(0), TheServiceParticipant->default_address().c_str()));
+      addresses.push_back(TheServiceParticipant->default_address());
     }
   } else {
     addresses.push_back(ACE_INET_Addr(static_cast<u_short>(0), spdpaddr.c_str()));
@@ -2420,11 +2420,7 @@ void
 Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
                                           bool all_interfaces)
 {
-  if (joined_interfaces_.count(nic.name()) != 0 || nic.addresses.empty() || !nic.can_multicast()) {
-    return;
-  }
-
-  if (!multicast_interface_.empty() && nic.name() != multicast_interface_) {
+  if (nic.exclude_from_multicast(multicast_interface_.c_str())) {
     return;
   }
 

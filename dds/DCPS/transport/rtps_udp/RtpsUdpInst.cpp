@@ -200,10 +200,10 @@ RtpsUdpInst::populate_locator(TransportLocator& info, ConnectionInfoFlags flags)
         local_address_string().rfind(':') == 0) {
       typedef OPENDDS_VECTOR(ACE_INET_Addr) AddrVector;
       AddrVector addrs;
-      if (TheServiceParticipant->default_address ().empty ()) {
+      if (TheServiceParticipant->default_address() == ACE_INET_Addr()) {
         get_interface_addrs(addrs);
       } else {
-        addrs.push_back (ACE_INET_Addr (static_cast<u_short> (0), TheServiceParticipant->default_address().c_str()));
+        addrs.push_back(TheServiceParticipant->default_address());
       }
       for (AddrVector::iterator adr_it = addrs.begin(); adr_it != addrs.end(); ++adr_it) {
         idx = locators.length();
@@ -250,10 +250,10 @@ RtpsUdpInst::host_addresses() const {
   //need to get interface addresses to populate into the locator
   if (this->local_address_string().empty() ||
       this->local_address_string().rfind(':') == 0) {
-    if (TheServiceParticipant->default_address ().empty ()) {
+    if (TheServiceParticipant->default_address() == ACE_INET_Addr()) {
       get_interface_addrs(addresses);
     } else {
-      addresses.push_back (ACE_INET_Addr (static_cast<u_short> (0), TheServiceParticipant->default_address().c_str()));
+      addresses.push_back(TheServiceParticipant->default_address());
     }
   } else {
     addresses.push_back(this->local_address());

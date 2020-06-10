@@ -113,8 +113,10 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
       RtpsDiscoveryConfig_rch config = discovery->config();
 
       // spdpaddr defaults to DCPSDefaultAddress if set
-      if (!TheServiceParticipant->default_address().empty()) {
-        config->spdp_local_address(TheServiceParticipant->default_address().c_str());
+      if (TheServiceParticipant->default_address() != ACE_INET_Addr()) {
+        ACE_TCHAR buff[256];
+        TheServiceParticipant->default_address().addr_to_string(buff, sizeof(buff));
+        config->spdp_local_address(ACE_TEXT_ALWAYS_CHAR(buff));
       }
 
       DCPS::ValueMap values;
