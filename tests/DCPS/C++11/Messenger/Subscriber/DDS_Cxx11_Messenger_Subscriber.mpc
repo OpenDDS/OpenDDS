@@ -5,6 +5,7 @@ project: dcpsexe, dcps_test, dcps_transports_for_test{
   after    += DDS_Cxx11_Messenger_Idl
   libs     += DDS_Cxx11_Messenger_Idl
   libpaths += ../Idl
+  includes += ../Idl
 
   Source_Files {
     subscriber.cpp
