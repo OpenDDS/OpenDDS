@@ -313,10 +313,10 @@ one or more of the following:
  - `"C++11"`
    - IDL-to-C++11 mapping available when passing `-Lc++11`.
  - `"FACE"`
-   - Will appear if `-GfaceTS` is passed.
+   - Will appear if `-Lface` is passed.
  - `"Java"`
    - Currently unsupported in the CMake module, but this will appear in the
      list if `-Wb,java` is passed.
 
-If the CMake version is at least 3.12 then this property will exported with the
-target.
+If the CMake version is at least 3.12, then this property will exported with
+the target.

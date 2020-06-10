@@ -1,4 +1,4 @@
-project(OpenDDS_DevGuide_Messenger CXX)
+project(OpenDDS_C++11_Messenger CXX)
 cmake_minimum_required(VERSION 3.8.2)
 
 find_package(OpenDDS REQUIRED)
@@ -23,10 +23,6 @@ get_property(mappings TARGET ${idl} PROPERTY OPENDDS_LANGUAGE_MAPPINGS)
 if(NOT ("C++11" IN_LIST mappings))
   message(FATAL_ERROR "${idl}: C++11 NOT in mapping list: ${mappings}")
 endif()
-export(
-  TARGETS ${idl}
-  FILE "${CMAKE_CURRENT_BINARY_DIR}/MessengerIdlConfig.cmake"
-)
 
 # Publisher
 set(publisher "${target_prefix}publisher")
