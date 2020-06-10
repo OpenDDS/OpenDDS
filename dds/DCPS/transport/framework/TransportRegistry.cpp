@@ -27,8 +27,6 @@
 
 
 namespace {
-  const ACE_TString OLD_TRANSPORT_PREFIX = ACE_TEXT("transport_");
-
   /// Used for sorting
   bool predicate(const OpenDDS::DCPS::TransportInst_rch& lhs,
                  const OpenDDS::DCPS::TransportInst_rch& rhs)
@@ -102,7 +100,8 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
   for (int index = 0;
        cf.enumerate_sections(root, index, sect_name) == 0;
        ++index) {
-    if (ACE_OS::strcmp(sect_name.c_str(), TRANSPORT_SECTION_NAME) == 0) {
+    if (ACE_OS::strcmp(sect_name.c_str(), TRANSPORT_SECTION_NAME) == 0 ||
+        ACE_OS::strcmp(sect_name.c_str(), TRANSPORT_TEMPLATE_SECTION_NAME) == 0) {
       // found the [transport/*] section, now iterate through subsections...
       ACE_Configuration_Section_Key sect;
       if (cf.open_section(root, sect_name.c_str(), 0, sect) != 0) {
@@ -272,13 +271,6 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
           }
         }
       }
-    } else if (ACE_OS::strncmp(sect_name.c_str(), OLD_TRANSPORT_PREFIX.c_str(),
-                               OLD_TRANSPORT_PREFIX.length()) == 0) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("Obsolete transport configuration found (%s).\n"),
-                        sect_name.c_str()),
-                       -1);
     }
   }
 
@@ -324,6 +316,110 @@ int
 TransportRegistry::load_transport_template_configuration(ACE_Configuration_Heap& cf,
                                                          const ACE_TCHAR* section_name)
 {
+const ACE_Configuration_Section_Key& root = cf.root_section();
+  ACE_Configuration_Section_Key transport_sect;
+
+  if (cf.open_section(root, section_name, 0, transport_sect) != 0) {
+    if (DCPS_debug_level > 0) {
+      // This is not an error if the configuration file does not have
+      // any domain range (sub)section.
+      ACE_DEBUG((LM_NOTICE,
+                 ACE_TEXT("(%P|%t) NOTICE: Service_Participant::load_transport_template_configuration ")
+                 ACE_TEXT("failed to open [%s] section.\n"),
+                 section_name));
+    }
+
+    return 0;
+
+  } else {
+  // Ensure there are no properties in this section
+    ValueMap vm;
+    if (pullValues(cf, transport_sect, vm) > 0) {
+      // There are values inside [domain]
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) Service_Participant::load_transport_template_configuration(): ")
+                        ACE_TEXT("domain sections must have a subsection name\n")),
+                       -1);
+    }
+    // Process the subsections of this section (the individual domains)
+    KeyList keys;
+    if (processSections(cf, transport_sect, keys) != 0) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) Service_Participant::load_transport_template_configuration(): ")
+                        ACE_TEXT("too many nesting layers in the [transport_template] section.\n")),
+                       -1);
+    }
+
+    // Loop through the [transport_template/*] sections
+    for (KeyList::const_iterator it = keys.begin(); it != keys.end(); ++it) {
+      transport_template element;
+      element.instantiate_per_participant = false;
+      element.transport_template_name = it->first;
+
+      if (DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_DEBUG,
+                   ACE_TEXT("(%P|%t) [transport_template/%C]\n"),
+                   element.transport_template_name.c_str()));
+      }
+
+      ValueMap values;
+      pullValues(cf, it->second, values);
+      OPENDDS_STRING rule;
+      OPENDDS_STRING customization;
+
+      for (ValueMap::const_iterator it = values.begin(); it != values.end(); ++it) {
+        OPENDDS_STRING name = it->first;
+        if (name == "instantiation_rule") {
+          rule = it->second;
+          if (rule == "per_participant") {
+            element.instantiate_per_participant = true;
+          }
+          if (DCPS_debug_level > 0) {
+            OPENDDS_STRING flag = element.instantiate_per_participant ? "true" : "false";
+            ACE_DEBUG((LM_DEBUG,
+                       ACE_TEXT("(%P|%t) [transport_template/%C]: instantiantion rule == %C\n"),
+                       element.transport_template_name.c_str(), flag.c_str()));
+          }
+        } else if (name.find("customization") != std::string::npos) {
+          customization = it->second;
+          if (DCPS_debug_level > 0) {
+            ACE_DEBUG((LM_DEBUG,
+                       ACE_TEXT("(%P|%t) [transport_template/%C]: customization == %C\n"),
+                       element.transport_template_name.c_str(), customization.c_str()));
+          }
+          // split customization string
+          std::size_t pos = customization.find(":", 0);
+
+          if (pos == std::string::npos || pos == customization.length() - 1) {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("(%P|%t) Service_Participant::load_transport_template_configuration(): ")
+                              ACE_TEXT("customization %C missing ':' in [transport_template/%C] section.\n"),
+                              customization.c_str(), element.transport_template_name.c_str()),
+                              -1);
+          }
+
+          OPENDDS_STRING key = customization.substr(0, pos);
+          OPENDDS_STRING val = customization.substr(pos + 1);
+
+          element.customizations[key] = val;
+
+          // the transport_template should have already been processed by load_transport.
+          element.transport_inst = get_inst(element.transport_template_name);
+
+          if (!element.transport_inst) {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("(%P|%t) Service_Participant::load_transport_template_configuration(): ")
+                              ACE_TEXT("missing [transport_template/%C] section.\n"),
+                              element.transport_template_name.c_str()),
+                              -1);
+          }
+
+        }
+      }
+
+      transport_templates_.push_back(element);
+    }
+  }
 
   return 0;
 }

@@ -574,6 +574,8 @@ private:
 
   std::vector<domain_range_template> domain_range_templates_;
 
+  int parse_domain_range(OPENDDS_STRING& range, int& start, int& end);
+
   // TODO: use a map to enforce one template per range
   // TODO: need a way to check for overlapping ranges in templates.
 
