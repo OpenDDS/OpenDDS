@@ -236,7 +236,7 @@ bool TopicImpl::check_data_representation(const DDS::DataRepresentationIdSeq& qo
       }
     }
   }
-//if data reader compare both lists for a compatible QoS
+  //if data reader compare both lists for a compatible QoS
   else {
     for (int i = 0; i < qos_ids.length(); ++i) {
       for (int j = 0; j < type_allowed_reprs.length(); ++j) {
@@ -246,7 +246,7 @@ bool TopicImpl::check_data_representation(const DDS::DataRepresentationIdSeq& qo
       }
     }
   }
-  return true;
+  return false;
 }
 
 } // namespace DCPS

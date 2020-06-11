@@ -316,12 +316,12 @@ compatibleQOS(const DDS::DataWriterQos * writerQos,
     DDS::DataRepresentationIdSeq readerIds =
       get_effective_data_rep_qos(readerQos->representation.value);
     DDS::DataRepresentationIdSeq writerIds =
-      get_effective_data_rep_qos(readerQos->representation.value);
+      get_effective_data_rep_qos(writerQos->representation.value);
     const CORBA::ULong reader_count = readerIds.length();
     const CORBA::ULong writer_count = writerIds.length();
     for (CORBA::ULong wi = 0; !found && wi < writer_count; ++wi) {
       for (CORBA::ULong ri = 0; !found && ri < reader_count; ++ri) {
-        if (readerQos->representation.value[ri] == writerQos->representation.value[wi]) {
+        if (readerIds[ri] == writerIds[wi]) {
           found = true;
           break;
         }
