@@ -10,6 +10,7 @@
 #ifdef OPENDDS_SECURITY
 #  include <dds/DCPS/security/BuiltInPlugins.h>
 #  include <dds/DCPS/security/framework/Properties.h>
+#  include <dds/DCPS/security/BuiltInPluginLoader.h>
 #endif
 
 #include <ace/Init_ACE.h>
@@ -56,6 +57,11 @@ struct Application {
     OpenDDS::DCPS::TransportInst_rch ti = TheTransportRegistry->create_inst(transport_instance_name, "rtps_udp");
     OpenDDS::DCPS::TransportConfig_rch cfg = TheTransportRegistry->create_config(transport_config_name_);
     cfg->instances_.push_back(ti);
+
+#ifdef OPENDDS_SECURITY
+    OpenDDS::Security::BuiltInPluginLoader builtin_security_plugin_loader;
+    builtin_security_plugin_loader.init(0, 0);
+#endif
 
     DDS::DomainParticipantFactory_var dpf = TheServiceParticipant->get_domain_participant_factory();
     DDS::DomainParticipantFactoryQos factory_qos;
@@ -151,14 +157,18 @@ int main(int argc, char* argv[])
   try {
     {
       Application a1;
+      ACE_OS::sleep(1);
       {
         Application a2;
+        ACE_OS::sleep(1);
       }
       {
         Application a3;
+        ACE_OS::sleep(1);
       }
     }
     Application a4;
+    ACE_OS::sleep(1);
   } catch (std::string error) {
     ACE_ERROR((LM_ERROR, "Caught error: %C\n", error.c_str()));
     return EXIT_FAILURE;
