@@ -50,6 +50,7 @@ my @dirs = ('Messenger_1', 'Messenger_2');
 push @dirs, 'C++11_Messenger' unless $skip_cxx11;
 
 my %builds_lib = ('Messenger_2' => 1, 'C++11_Messenger' => 1);
+my %runtest_in_config_dir = ('Messenger_1' => 1, 'Messenger_2' => 1);
 
 for my $dir (@dirs) {
   my $build_dir="$ENV{'DDS_ROOT'}/tests/cmake_integration/Messenger/$dir/build";
@@ -81,13 +82,14 @@ for my $dir (@dirs) {
     run_command("@build_cmd");
 
     if (! $skip_run_test) {
-      if ($build_config ne "") {
+      if ($build_config ne "" && $runtest_in_config_dir{$dir}) {
         my $run_dir = getcwd() . "/$build_config";
         print "Switching to '$run_dir' to run tests\n";
         chdir($run_dir) or die "ERROR: '$!'";
       }
-      run_command("perl run_test.pl");
-      if ($build_config ne "") {
+      my $args = $build_config ? "-ExeSubDir $build_config -Config ARCH" : '';
+      run_command("perl run_test.pl $args");
+      if ($build_config ne "" && $runtest_in_config_dir{$dir}) {
         chdir($build_dir) or die "ERROR: '$!': failed to switch to $build_dir";
       }
     }
