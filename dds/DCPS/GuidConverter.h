@@ -108,6 +108,10 @@ public:
 
   OPENDDS_STRING uniqueId() const;
 
+#ifdef OPENDDS_SECURITY
+  bool isSecure() const;
+#endif
+
 protected:
   const GUID_t guid_;
 };

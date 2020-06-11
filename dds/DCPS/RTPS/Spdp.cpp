@@ -643,7 +643,6 @@ Spdp::handle_participant_data(DCPS::MessageId id,
         iter->second.property_qos_ = pdata.ddsParticipantDataSecure.base.property;
         iter->second.security_info_ = pdata.ddsParticipantDataSecure.base.security_info;
 
-        const bool already_authenticated = iter->second.auth_state_ == DCPS::AUTH_STATE_AUTHENTICATED;
         attempt_authentication(guid, iter->second);
         if (iter->second.auth_state_ == DCPS::AUTH_STATE_UNAUTHENTICATED) {
           if (participant_sec_attr_.allow_unauthenticated_participants == false) {
@@ -658,7 +657,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
             match_unauthenticated(guid, iter);
           }
         } else if (iter->second.auth_state_ == DCPS::AUTH_STATE_AUTHENTICATED) {
-          if (match_authenticated(guid, iter, already_authenticated) == false) {
+          if (match_authenticated(guid, iter) == false) {
             participants_.erase(guid);
           }
         }
@@ -919,13 +918,12 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
   DCPS::RepoId reader = src_participant;
   reader.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
 
+  // TODO: Fix constant.
   if (iter->second.handshake_state_ == DCPS::HANDSHAKE_STATE_UNKNOWN &&
-      iter->second.is_requester_) {
-    // TODO: Can we check that it is a request?
+      iter->second.is_requester_ &&
+      std::strcmp(msg.message_data[0].class_id.in(), "DDS:Auth:PKI-DH:1.0+Req") == 0) {
     iter->second.handshake_state_ = DCPS::HANDSHAKE_STATE_REPLY;
     iter->second.has_last_stateless_msg_ = false;
-    // TODO: What other clean-up should be performed?
-    // TODO: Are we leaking crypto-handles (general question)?
   }
 
   if ((iter->second.handshake_state_ == DCPS::HANDSHAKE_STATE_REPLY || iter->second.handshake_state_ == DCPS::HANDSHAKE_STATE_REPLY_SENT) && msg.related_message_identity.source_guid == GUID_UNKNOWN) {
@@ -1046,19 +1044,17 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
         }
       }
       iter->second.has_last_stateless_msg_ = false;
-      const bool already_authenticated = iter->second.auth_state_ == DCPS::AUTH_STATE_AUTHENTICATED;
       iter->second.auth_state_ = DCPS::AUTH_STATE_AUTHENTICATED;
       iter->second.handshake_state_ = DCPS::HANDSHAKE_STATE_UNKNOWN;
       purge_auth_deadlines(iter);
-      match_authenticated(src_participant, iter, already_authenticated);
+      match_authenticated(src_participant, iter);
     } else if (vr == DDS::Security::VALIDATION_OK) {
       // Theoretically, this shouldn't happen unless handshakes can involve fewer than 3 messages
       iter->second.has_last_stateless_msg_ = false;
-      const bool already_authenticated = iter->second.auth_state_ == DCPS::AUTH_STATE_AUTHENTICATED;
       iter->second.auth_state_ = DCPS::AUTH_STATE_AUTHENTICATED;
       iter->second.handshake_state_ = DCPS::HANDSHAKE_STATE_UNKNOWN;
       purge_auth_deadlines(iter);
-      match_authenticated(src_participant, iter, already_authenticated);
+      match_authenticated(src_participant, iter);
     }
   } else if ((iter->second.handshake_state_ == DCPS::HANDSHAKE_STATE_REQUEST_SENT || iter->second.handshake_state_ == DCPS::HANDSHAKE_STATE_REPLY_SENT) && msg.related_message_identity.source_guid == guid_) {
     DDS::Security::ParticipantStatelessMessage reply;
@@ -1123,18 +1119,16 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
         }
       }
       iter->second.has_last_stateless_msg_ = false;
-      const bool already_authenticated = iter->second.auth_state_ == DCPS::AUTH_STATE_AUTHENTICATED;
       iter->second.auth_state_ = DCPS::AUTH_STATE_AUTHENTICATED;
       iter->second.handshake_state_ = DCPS::HANDSHAKE_STATE_UNKNOWN;
       purge_auth_deadlines(iter);
-      match_authenticated(src_participant, iter, already_authenticated);
+      match_authenticated(src_participant, iter);
     } else if (vr == DDS::Security::VALIDATION_OK) {
       iter->second.has_last_stateless_msg_ = false;
-      const bool already_authenticated = iter->second.auth_state_ == DCPS::AUTH_STATE_AUTHENTICATED;
       iter->second.auth_state_ = DCPS::AUTH_STATE_AUTHENTICATED;
       iter->second.handshake_state_ = DCPS::HANDSHAKE_STATE_UNKNOWN;
       purge_auth_deadlines(iter);
-      match_authenticated(src_participant, iter, already_authenticated);
+      match_authenticated(src_participant, iter);
     }
   }
 }
@@ -1270,9 +1264,8 @@ Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileM
 }
 
 bool
-Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& dp_iter, bool already_authenticated)
+Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& dp_iter)
 {
-  // TODO: What can/should be omitted when already_authenticated?
   DDS::Security::SecurityException se = {"", 0, 0};
 
   Security::Authentication_var auth = security_config_->get_authentication();
@@ -1281,6 +1274,21 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& d
   Security::CryptoKeyExchange_var key_exchange = security_config_->get_crypto_key_exchange();
 
   DiscoveredParticipant* dp = &dp_iter->second;
+
+  const bool shared_secret_changed = dp->shared_secret_handle_ != 0;
+
+  if (shared_secret_changed) {
+    if (!auth->return_sharedsecret_handle(dp->shared_secret_handle_, se)) {
+      if (DCPS::security_debug.auth_warn) {
+        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
+                   ACE_TEXT("Spdp::match_authenticated() - ")
+                   ACE_TEXT("Unable to return sharedsecret handle. ")
+                   ACE_TEXT("Security Exception[%d.%d]: %C\n"),
+                   se.code, se.minor_code, se.message.in()));
+      }
+      return false;
+    }
+  }
 
   dp->shared_secret_handle_ = auth->get_shared_secret(dp->handshake_handle_, se);
   if (dp->shared_secret_handle_ == 0) {
@@ -1303,6 +1311,22 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& d
         se.code, se.minor_code, se.message.in()));
     }
     return false;
+  }
+
+  if (!auth->return_handshake_handle(dp->handshake_handle_, se)) {
+    if (DCPS::security_debug.auth_warn) {
+      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
+        ACE_TEXT("Spdp::match_authenticated() - ")
+        ACE_TEXT("Unable to return handshake handle. ")
+        ACE_TEXT("Security Exception[%d.%d]: %C\n"),
+        se.code, se.minor_code, se.message.in()));
+    }
+    return false;
+  }
+  dp->handshake_handle_ = DDS::HANDLE_NIL;
+
+  if (dp->permissions_handle_ != DDS::HANDLE_NIL) {
+    // TODO: Do we need to clean this up?  How.
   }
 
   dp->permissions_handle_ = access->validate_remote_permissions(
@@ -1339,18 +1363,20 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& d
                OPENDDS_STRING(DCPS::GuidConverter(guid)).c_str()));
   }
 
-  dp->crypto_handle_ = key_factory->register_matched_remote_participant(
-    crypto_handle_, dp->identity_handle_, dp->permissions_handle_,
-    dp->shared_secret_handle_, se);
   if (dp->crypto_handle_ == DDS::HANDLE_NIL) {
-    if (DCPS::security_debug.auth_warn) {
-      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
-        ACE_TEXT("Spdp::match_authenticated() - Unable to register remote ")
-        ACE_TEXT("participant with crypto key factory plugin. ")
-        ACE_TEXT("Security Exception[%d.%d]: %C\n"),
-        se.code, se.minor_code, se.message.in()));
+    dp->crypto_handle_ = key_factory->register_matched_remote_participant(
+      crypto_handle_, dp->identity_handle_, dp->permissions_handle_,
+      dp->shared_secret_handle_, se);
+    if (dp->crypto_handle_ == DDS::HANDLE_NIL) {
+      if (DCPS::security_debug.auth_warn) {
+        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
+          ACE_TEXT("Spdp::match_authenticated() - Unable to register remote ")
+          ACE_TEXT("participant with crypto key factory plugin. ")
+          ACE_TEXT("Security Exception[%d.%d]: %C\n"),
+          se.code, se.minor_code, se.message.in()));
+      }
+      return false;
     }
-    return false;
   }
 
   if (crypto_handle_ != DDS::HANDLE_NIL) {
@@ -1390,6 +1416,13 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& d
 
   // notify Sedp of association
   // Sedp may call has_discovered_participant, which is the participant must be added before these calls to associate.
+  if (shared_secret_changed) {
+    // A first attempt that focused solely on reassociating the
+    // voltatile readers didn't work.  This is a candidate for
+    // optimization later.
+    sedp_.disassociate(dp->pdata_);
+  }
+
   sedp_.associate(dp->pdata_);
   sedp_.associate_volatile(dp->pdata_);
   sedp_.associate_secure_writers_to_readers(dp->pdata_);
@@ -1643,6 +1676,44 @@ Spdp::remove_expired_participants()
       }
     }
   }
+}
+
+void
+Spdp::remove_discovered_participant_i(DiscoveredParticipantIter iter)
+{
+  ACE_UNUSED_ARG(iter);
+
+#ifdef OPENDDS_SECURITY
+  DDS::Security::SecurityException se = {"", 0, 0};
+  DDS::Security::Authentication_var auth = security_config_->get_authentication();
+
+  if (iter->second.handshake_handle_ != DDS::HANDLE_NIL) {
+    if (!auth->return_handshake_handle(iter->second.handshake_handle_, se)) {
+      if (DCPS::security_debug.auth_warn) {
+        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
+                   ACE_TEXT("DiscoveryBase::remove_discovered_participant() - ")
+                   ACE_TEXT("Unable to return handshake handle. ")
+                   ACE_TEXT("Security Exception[%d.%d]: %C\n"),
+                   se.code, se.minor_code, se.message.in()));
+      }
+    }
+  }
+
+  if (iter->second.shared_secret_handle_ != 0) {
+    if (!auth->return_sharedsecret_handle(iter->second.shared_secret_handle_, se)) {
+      if (DCPS::security_debug.auth_warn) {
+        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
+                   ACE_TEXT("Spdp::match_authenticated() - ")
+                   ACE_TEXT("Unable to return sharedsecret handle. ")
+                   ACE_TEXT("Security Exception[%d.%d]: %C\n"),
+                   se.code, se.minor_code, se.message.in()));
+      }
+    }
+  }
+
+  // TODO:  What other security related clean up needs to be performed? (is every register unregistered)
+  // TODO:  Is a local participant that is destroyed being cleaned up?
+#endif
 }
 
 void

@@ -817,6 +817,9 @@ protected:
   void start_ice(const DCPS::RepoId& guid, const DiscoveredSubscription& dsub);
   void stop_ice(const DCPS::RepoId& guid, const DiscoveredPublication& dpub);
   void stop_ice(const DCPS::RepoId& guid, const DiscoveredSubscription& dsub);
+
+  void disassociate_helper(const BuiltinEndpointSet_t& avail, const CORBA::ULong flags,
+                           const DCPS::RepoId& id, const EntityId_t& ent, DCPS::TransportClient& client);
 };
 
 /// A class to wait on acknowledgments from other threads

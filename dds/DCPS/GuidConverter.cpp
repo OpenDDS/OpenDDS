@@ -206,6 +206,14 @@ GuidConverter::uniqueId() const
   return id;
 }
 
+#ifdef OPENDDS_SECURITY
+bool
+GuidConverter::isSecure() const
+{
+  return guid_.entityId.entityKey[0] == 0xff;
+}
+#endif
+
 } // namespace DCPS
 } // namespace OpenDDS
 

@@ -175,6 +175,7 @@ public:
                                       );
 protected:
   Sedp& endpoint_manager() { return sedp_; }
+  void remove_discovered_participant_i(DiscoveredParticipantIter iter);
 
 #ifndef DDS_HAS_MINIMUM_BIT
   void enqueue_location_update_i(DiscoveredParticipantIter iter, DCPS::ParticipantLocation mask, const ACE_INET_Addr& from);
@@ -202,7 +203,7 @@ private:
   void match_unauthenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& dp_iter);
 
 #ifdef OPENDDS_SECURITY
-  bool match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& dp_iter, bool already_authenticated);
+  bool match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& dp_iter);
   void attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp);
   void update_agent_info(const DCPS::RepoId& local_guid, const ICE::AgentInfo& agent_info);
 #endif

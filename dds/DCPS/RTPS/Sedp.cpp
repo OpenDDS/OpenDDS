@@ -924,6 +924,47 @@ void Sedp::associate_volatile(const Security::SPDPdiscoveredParticipantData& pda
   }
 }
 
+void Sedp::disassociate_helper(const BuiltinEndpointSet_t& avail, const CORBA::ULong flags,
+                               const RepoId& id, const EntityId_t& ent, DCPS::TransportClient& client)
+{
+  if (avail & flags) {
+    RepoId temp = id;
+    temp.entityId = ent;
+
+#ifdef OPENDDS_SECURITY
+    const DCPS::GuidConverter traits(temp);
+    if (traits.isSecure()) {
+      using namespace DDS::Security;
+
+      DDS::Security::SecurityException se = {"", 0, 0};
+      DDS::Security::CryptoKeyFactory_var key_factory = spdp_.get_security_config()->get_crypto_key_factory();
+
+      if (traits.isReader()) {
+        DatareaderCryptoHandle& drch = remote_reader_crypto_handles_[temp];
+        if (!key_factory->unregister_datareader(drch, se)) {
+          ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::dissociate_volatile() - ")
+                     ACE_TEXT("Failure calling unregister_datareader(). Security Exception[%d.%d]: %C\n"),
+                     se.code, se.minor_code, se.message.in()));
+        }
+        drch = DDS::HANDLE_NIL;
+      }
+
+      if (traits.isWriter()) {
+        DatawriterCryptoHandle& dwch = remote_writer_crypto_handles_[temp];
+        if (!key_factory->unregister_datawriter(dwch, se)) {
+          ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::dissociate_volatile() - ")
+                     ACE_TEXT("Failure calling unregister_datawriter(). Security Exception[%d.%d]: %C\n"),
+                     se.code, se.minor_code, se.message.in()));
+        }
+        dwch = DDS::HANDLE_NIL;
+      }
+    }
+#endif
+
+    client.disassociate(temp);
+  }
+}
+
 void Sedp::associate_secure_writers_to_readers(const Security::SPDPdiscoveredParticipantData& pdata)
 {
   using namespace DDS::Security;
@@ -1226,19 +1267,6 @@ Sedp::Task::svc_secure_i(DCPS::MessageId id,
   spdp_->handle_participant_data(id, *pdata, DCPS::SequenceNumber::ZERO(), ACE_INET_Addr(), true);
 }
 #endif
-
-namespace {
-  void disassociate_helper(const BuiltinEndpointSet_t& avail, const CORBA::ULong flags,
-                           const RepoId& id, const EntityId_t& ent, DCPS::TransportClient& client)
-  {
-    if (avail & flags) {
-      RepoId temp = id;
-      temp.entityId = ent;
-      client.disassociate(temp);
-    }
-  }
-}
-
 
 bool
 Sedp::disassociate(const ParticipantData_t& pdata)

@@ -1749,9 +1749,14 @@ namespace OpenDDS {
             ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) LocalParticipant::remove_discovered_participant")
                        ACE_TEXT(" - erasing %C\n"), OPENDDS_STRING(conv).c_str()));
           }
+
+          remove_discovered_participant_i(iter);
+
           participants_.erase(iter);
         }
       }
+
+      virtual void remove_discovered_participant_i(DiscoveredParticipantIter) {}
 
 #ifndef DDS_HAS_MINIMUM_BIT
     DCPS::ParticipantBuiltinTopicDataDataReaderImpl* part_bit()
