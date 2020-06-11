@@ -18,7 +18,7 @@ namespace OpenDDS {
 namespace XTypes {
 
 // Dummy class for type look up. Only use for facilitating tests.
-class TypeLookup {
+class OpenDDS_Dcps_Export TypeLookup {
 public:
   const MinimalTypeObject& lookup_minimal(const TypeIdentifier& ti) const
   {
