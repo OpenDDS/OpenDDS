@@ -8,6 +8,7 @@
 
 use Getopt::Long;
 use Cwd;
+use strict;
 
 sub run_command ($) {
   my $command = shift;
@@ -35,41 +36,49 @@ my $build_config = "";
 my $generator = "";
 my $arch = "";
 my $skip_run_test;
+my $skip_cxx11;
 
 exit 1 if !GetOptions(
     "build-config=s" => \$build_config,
     "generator=s" => \$generator,
     "arch=s" => \$arch,
-    "skip-run-test" => \$skip_run_test);
+    "skip-run-test" => \$skip_run_test,
+    "skip-cxx11" => \$skip_cxx11,
+    );
 
-for my $x (qw(Messenger_1 Messenger_2 C++11_Messenger)) {
-  my $build_dir="$ENV{'DDS_ROOT'}/tests/cmake_integration/Messenger/$x/build";
+my @dirs = ('Messenger_1', 'Messenger_2');
+push @dirs, 'C++11_Messenger' unless $skip_cxx11;
+
+my %builds_lib = ('Messenger_2' => 1, 'C++11_Messenger' => 1);
+
+for my $dir (@dirs) {
+  my $build_dir="$ENV{'DDS_ROOT'}/tests/cmake_integration/Messenger/$dir/build";
   mkdir($build_dir) or die "ERROR '$!': failed to make directory $build_dir";
   chdir($build_dir) or die "ERROR: '$!': failed to switch to $build_dir";
 
-  my @cmds = (["cmake",
-               "-D", "CMAKE_PREFIX_PATH=$ENV{'DDS_ROOT'}",
-               "-D", "CMAKE_VERBOSE_MAKEFILE:BOOL=ON", ".."],
-              ["cmake", "--build", "."]);
+  my @generate_cmd = ("cmake",
+		      "-D", "CMAKE_PREFIX_PATH=$ENV{'DDS_ROOT'}",
+		      "-D", "CMAKE_VERBOSE_MAKEFILE:BOOL=ON");
+  my @build_cmd = ("cmake", "--build", ".");
 
   if ($generator ne "") {
-    splice @{$cmds[0]}, 1, 0, ("-G", qq("$generator"));
+    splice @generate_cmd, 1, 0, ("-G", qq("$generator"));
   }
 
   if ($arch ne "") {
-    splice @{$cmds[0]}, 1, 0, ("-A", "$arch");
+    splice @generate_cmd, 1, 0, ("-A", "$arch");
   }
 
   if ($build_config ne "") {
-    push @{$cmds[1]}, ("--config", "$build_config");
+    push @build_cmd, ("--config", "$build_config");
   }
 
-  for my $shared ('OFF', 'ON') {
-    @cmds_with_shared = @cmds;
-    splice @{$cmds_with_shared[0]}, 1, 0, ('-D', "BUILD_SHARED_LIBS=$shared");
-    for my $cmd (@cmds_with_shared) {
-      run_command("@{$cmd}");
-    }
+  my @lib_options = $builds_lib{$dir} ? ('OFF', 'ON') : ('');
+  for my $lib_option (@lib_options) {
+
+    my $lib_opt = $lib_option ? "-D BUILD_SHARED_LIBS=$lib_option" : '';
+    run_command("@generate_cmd $lib_opt ..");
+    run_command("@build_cmd");
 
     if (! $skip_run_test) {
       if ($build_config ne "") {
