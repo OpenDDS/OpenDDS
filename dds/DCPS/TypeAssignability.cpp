@@ -38,7 +38,7 @@ bool TypeAssignability::assignable(const TypeObject& ta,
     case TK_SEQUENCE:
       return assignable_sequence(ta.minimal, tb.minimal);
     case TK_ARRAY:
-      return assignable_sequence(ta.minimal, tb.minimal);
+      return assignable_array(ta.minimal, tb.minimal);
     case TK_MAP:
       return assignable_map(ta.minimal, tb.minimal);
     case TK_ENUM:
