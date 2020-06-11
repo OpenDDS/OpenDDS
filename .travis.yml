@@ -88,7 +88,7 @@ script:
         exit 1;
     fi
   - if [ "$SAFETY_PROFILE" != "1" ]; then
-      $DDS_ROOT/tests/cmake_integration/run_ci_tests.pl;
+      $DDS_ROOT/tests/cmake_integration/run_ci_tests.pl ${STATIC:+--no-shared};
     fi
   - if [ "$NO_TESTS" == "1" ]; then
       echo Building Messenger;

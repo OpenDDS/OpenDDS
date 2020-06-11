@@ -37,6 +37,7 @@ my $generator = "";
 my $arch = "";
 my $skip_run_test;
 my $skip_cxx11;
+my $no_shared;
 
 exit 1 if !GetOptions(
     "build-config=s" => \$build_config,
@@ -44,6 +45,7 @@ exit 1 if !GetOptions(
     "arch=s" => \$arch,
     "skip-run-test" => \$skip_run_test,
     "skip-cxx11" => \$skip_cxx11,
+    "no-shared" => \$no_shared,
     );
 
 my @dirs = ('Messenger_1', 'Messenger_2');
@@ -74,7 +76,7 @@ for my $dir (@dirs) {
     push @build_cmd, ("--config", "$build_config");
   }
 
-  my @lib_options = $builds_lib{$dir} ? ('OFF', 'ON') : ('');
+  my @lib_options = ($builds_lib{$dir} && !$no_shared) ? ('OFF', 'ON') : ('');
   for my $lib_option (@lib_options) {
 
     my $lib_opt = $lib_option ? "-D BUILD_SHARED_LIBS=$lib_option" : '';
