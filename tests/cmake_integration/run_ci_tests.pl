@@ -84,10 +84,12 @@ for my $dir (@dirs) {
       if ($build_config ne "") {
         my $run_dir = getcwd() . "/$build_config";
         print "Switching to '$run_dir' to run tests\n";
-        print "$run_dir";
         chdir($run_dir) or die "ERROR: '$!'";
       }
       run_command("perl run_test.pl");
+      if ($build_config ne "") {
+        chdir($build_dir) or die "ERROR: '$!': failed to switch to $build_dir";
+      }
     }
   }
 }
