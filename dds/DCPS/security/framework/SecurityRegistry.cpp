@@ -430,8 +430,7 @@ SecurityRegistry::add_config(const OPENDDS_STRING& name, SecurityConfig_rch& con
   return added_config;
 }
 
-SecurityPluginInst_rch SecurityRegistry::get_plugin_inst(
-  const OPENDDS_STRING& plugin_name, bool log_error)
+SecurityPluginInst_rch SecurityRegistry::get_plugin_inst(const OPENDDS_STRING& plugin_name)
 {
   GuardType guard(lock_);
 
@@ -445,17 +444,7 @@ SecurityPluginInst_rch SecurityRegistry::get_plugin_inst(
     guard.acquire();
 
     // Try to find it again
-    if (find(registered_plugins_, plugin_name, plugin_inst) != 0) {
-#endif
-      if (log_error) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) SecurityRegistry::create_inst: ")
-                   ACE_TEXT("plugin_type=%C is not registered.\n"),
-                   plugin_name.c_str()));
-      }
-      return SecurityPluginInst_rch();
-#if !defined(ACE_AS_STATIC_LIBS)
-    }
+    find(registered_plugins_, plugin_name, plugin_inst);
 #endif
   }
 

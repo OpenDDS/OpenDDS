@@ -47,8 +47,7 @@ public:
   /// Client Application calls this method to tear down the security framework.
   void release();
 
-  SecurityPluginInst_rch get_plugin_inst(
-    const OPENDDS_STRING& plugin_name, bool log_error = true);
+  SecurityPluginInst_rch get_plugin_inst(const OPENDDS_STRING& plugin_name);
 
   // Called by plugins to register their factory interface
   void register_plugin(const OPENDDS_STRING& plugin_name,

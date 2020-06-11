@@ -10,7 +10,9 @@
 #ifdef OPENDDS_SECURITY
 #  include <dds/DCPS/security/BuiltInPlugins.h>
 #  include <dds/DCPS/security/framework/Properties.h>
-#  include <dds/DCPS/security/BuiltInPluginLoader.h>
+#  ifdef ACE_AS_STATIC_LIBS
+#    include <dds/DCPS/security/BuiltInPluginLoader.h>
+#  endif
 #endif
 
 #include <ace/Init_ACE.h>
@@ -58,9 +60,8 @@ struct Application {
     OpenDDS::DCPS::TransportConfig_rch cfg = TheTransportRegistry->create_config(transport_config_name_);
     cfg->instances_.push_back(ti);
 
-#ifdef OPENDDS_SECURITY
-    OpenDDS::Security::BuiltInPluginLoader builtin_security_plugin_loader;
-    builtin_security_plugin_loader.init(0, 0);
+#if defined OPENDDS_SECURITY && defined ACE_AS_STATIC_LIBS
+    OpenDDS::Security::BuiltInPluginLoader().init(0, 0);
 #endif
 
     DDS::DomainParticipantFactory_var dpf = TheServiceParticipant->get_domain_participant_factory();
@@ -142,7 +143,7 @@ int main(int argc, char* argv[])
 {
   const std::string usage =
     std::string("usage: ") + argv[0] + " [--help|-h] [--secure]\n";
-  for (int i = 1; i < argc; i++) {
+  for (int i = 1; i < argc; ++i) {
     const std::string argument(argv[i]);
     if (argument == "--help" || argument == "-h") {
       std::cout << usage;
@@ -169,8 +170,8 @@ int main(int argc, char* argv[])
     }
     Application a4;
     ACE_OS::sleep(1);
-  } catch (std::string error) {
-    ACE_ERROR((LM_ERROR, "Caught error: %C\n", error.c_str()));
+  } catch (const std::string& error) {
+    ACE_ERROR((LM_ERROR, "Caught Error: %C\n", error.c_str()));
     return EXIT_FAILURE;
   }
 
