@@ -213,9 +213,11 @@ module Bench {
     // Result of Applying a Scenario Prototype to a List of Discovered Nodes
     @topic
     struct AllocatedScenario {
+      string scenario_id;
       NodeController::Configs configs;
       unsigned long expected_reports;
       unsigned long timeout;
+      Builder::TimeStamp launch_time;
     };
   };
 };

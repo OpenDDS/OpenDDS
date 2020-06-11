@@ -288,7 +288,21 @@ std::vector<WorkerReport> ScenarioManager::execute(const AllocatedScenario& allo
 {
   // Write Configs
   if (dds_entities_.scenario_writer_impl_->write(allocated_scenario, DDS::HANDLE_NIL) != DDS::RETCODE_OK) {
-    throw std::runtime_error("Config write failed!");
+    throw std::runtime_error("Config Write Failed!");
+  }
+
+  DDS::Duration_t delay = { 3, 0 };
+  if (dds_entities_.scenario_writer_impl_->wait_for_acknowledgments(delay) != DDS::RETCODE_OK) {
+    throw std::runtime_error("Wait For Ack Failed");
+  }
+
+  AllocatedScenario temp = allocated_scenario;
+  temp.configs.length(0);
+  temp.launch_time = Builder::get_time() + Builder::from_seconds(3);
+
+  // Write Configs
+  if (dds_entities_.scenario_writer_impl_->write(temp, DDS::HANDLE_NIL) != DDS::RETCODE_OK) {
+    throw std::runtime_error("Config Write Failed!");
   }
 
   // Set up Waiting for Reading Reports or the Scenario Timeout
@@ -321,18 +335,26 @@ std::vector<WorkerReport> ScenarioManager::execute(const AllocatedScenario& allo
   while (true) {
     DDS::ReturnCode_t rc;
 
-    DDS::ConditionSeq active;
-    const DDS::Duration_t infinity = { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
-    wait_set->wait(active, infinity);
-    for (unsigned i = 0; i < active.length(); i++) {
-      if (active[i] == guard_condition) {
-        timeout_cv.notify_all();
-        if (timeout_thread) {
-          timeout_thread->join();
+    while (!read_condition->get_trigger_value()) {
+      DDS::ConditionSeq active;
+      const DDS::Duration_t wake_interval = { 3, 0 };
+      rc = wait_set->wait(active, wake_interval);
+      if (rc != DDS::RETCODE_OK && rc != DDS::RETCODE_TIMEOUT) {
+        throw std::runtime_error("Error while waiting for reports");
+      }
+      if (rc == DDS::RETCODE_OK) {
+        for (unsigned i = 0; i < active.length(); i++) {
+          if (active[i] == guard_condition) {
+            timeout_cv.notify_all();
+            if (timeout_thread) {
+              timeout_thread->join();
+            }
+            std::stringstream ss;
+            ss << "Timedout waiting for the scenario to complete";
+            throw std::runtime_error(ss.str());
+          } else {
+          }
         }
-        std::stringstream ss;
-        ss << "Timedout waiting for the scenario to complete";
-        throw std::runtime_error(ss.str());
       }
     }
 

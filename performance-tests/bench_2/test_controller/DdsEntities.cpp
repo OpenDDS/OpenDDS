@@ -88,8 +88,10 @@ DdsEntities::DdsEntities(
   }
   DDS::DataReaderQos dr_qos;
   subscriber_->get_default_datareader_qos(dr_qos);
-  dr_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
+  dr_qos.history.kind = DDS::KEEP_LAST_HISTORY_QOS;
+  dr_qos.history.depth = 1;
   dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+  dr_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
   status_reader_ = subscriber_->create_datareader(
     status_topic_, dr_qos, &status_listener_,
     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -100,6 +102,9 @@ DdsEntities::DdsEntities(
   if (!status_reader_impl_) {
     throw std::runtime_error("narrow status reader failed");
   }
+  subscriber_->get_default_datareader_qos(dr_qos);
+  dr_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
+  dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
   report_reader_ = subscriber_->create_datareader(
     report_topic_, dr_qos, nullptr,
     OpenDDS::DCPS::DEFAULT_STATUS_MASK);

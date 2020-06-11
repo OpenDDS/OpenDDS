@@ -31,6 +31,7 @@
 #include <util.h>
 #include <BenchTypeSupportImpl.h>
 #include <tests/Utils/StatusMatching.h>
+#include <Common.h>
 
 using namespace Bench::NodeController;
 using Bench::get_option_argument_int;
@@ -490,8 +491,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
   DDS::DataWriterQos dw_qos;
   publisher->get_default_datawriter_qos(dw_qos);
-  dw_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
+  dw_qos.history.kind = DDS::KEEP_LAST_HISTORY_QOS;
+  dw_qos.history.depth = 1;
   dw_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+  dw_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
   DDS::DataWriter_var status_writer = publisher->create_datawriter(
     status_topic, dw_qos, nullptr, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!status_writer) {
@@ -503,6 +506,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     std::cerr << "narrow writer status failed" << std::endl;
     return 1;
   }
+  publisher->get_default_datawriter_qos(dw_qos);
+  dw_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
+  dw_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
   DDS::DataWriter_var report_writer = publisher->create_datawriter(
     report_topic, dw_qos, nullptr, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!report_writer) {
@@ -551,6 +557,112 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   return exit_status;
 }
 
+bool write_status(
+  const std::string& name,
+  const NodeId& this_node_id,
+  Bench::NodeController::StateEnum state,
+  StatusDataWriter_var status_writer_impl)
+{
+  Status status;
+  status.node_id = this_node_id;
+  status.state = state;
+  status.name = name.c_str();
+  if (status_writer_impl->write(status, DDS::HANDLE_NIL)) {
+    return false;
+  }
+  return true;
+}
+
+bool wait_for_scenario_data(AllocatedScenarioDataReader_var config_reader_impl) {
+
+  DDS::ReadCondition_var read_condition = config_reader_impl->create_readcondition(
+    DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
+  DDS::WaitSet_var ws(new DDS::WaitSet);
+  ws->attach_condition(read_condition);
+
+  while (!read_condition->get_trigger_value()) {
+    DDS::ConditionSeq active;
+    const DDS::Duration_t wake_interval = { 3, 0 };
+    DDS::ReturnCode_t rc = ws->wait(active, wake_interval);
+    if (rc != DDS::RETCODE_OK && rc != DDS::RETCODE_TIMEOUT) {
+      std::cerr << "Wait for node config failed" << std::endl;
+      return false;
+    }
+  }
+
+  ws->detach_condition(read_condition);
+  config_reader_impl->delete_readcondition(read_condition);
+
+  return true;
+}
+
+void wait_for_full_scenario(
+  const std::string& name,
+  NodeId this_node_id,
+  StatusDataWriter_var status_writer_impl,
+  AllocatedScenarioDataReader_var config_reader_impl,
+  Bench::TestController::AllocatedScenario& result)
+{
+  Bench::TestController::AllocatedScenario allocated_scenario;
+  std::chrono::system_clock::time_point initial_attempt;
+
+  bool complete = false;
+  while (!complete) {
+    while (!wait_for_scenario_data(config_reader_impl)) {
+      // There was an actual DDS failure of some kind (not just a timeout), give it a few seconds and retry
+      std::this_thread::sleep_for(std::chrono::seconds(3));
+    }
+
+    DDS::ReturnCode_t rc = DDS::RETCODE_ERROR;
+    Bench::TestController::AllocatedScenarioSeq scenarios;
+    DDS::SampleInfoSeq info;
+    rc = config_reader_impl->take(
+      scenarios, info,
+      DDS::LENGTH_UNLIMITED,
+      DDS::ANY_SAMPLE_STATE,
+      DDS::ANY_VIEW_STATE,
+      DDS::ANY_INSTANCE_STATE);
+    if (rc != DDS::RETCODE_OK) {
+      std::cerr << "Take node config failed\n" << std::flush;
+      continue;
+    }
+
+    if (allocated_scenario.scenario_id != TAO::String_Manager() && initial_attempt + std::chrono::seconds(30) < std::chrono::system_clock::now()) {
+      if (write_status(name, this_node_id, AVAILABLE, status_writer_impl)) {
+        allocated_scenario.scenario_id = TAO::String_Manager();
+      }
+    }
+
+    using Builder::ZERO;
+
+    for (CORBA::ULong scenario = 0; scenario < scenarios.length(); ++scenario) {
+      Bench::NodeController::Configs& configs = scenarios[scenario].configs;
+      for (CORBA::ULong node = 0; node < configs.length(); ++node) {
+        if (configs[node].node_id == this_node_id) {
+          if (allocated_scenario.scenario_id == TAO::String_Manager()) {
+            if (write_status(name, this_node_id, BUSY, status_writer_impl)) {
+              allocated_scenario = scenarios[scenario];
+              initial_attempt = std::chrono::system_clock::now();
+            }
+          } else if (scenarios[scenario].scenario_id == allocated_scenario.scenario_id) {
+            if (allocated_scenario.configs.length() == 0) {
+              allocated_scenario.configs = configs;
+            }
+            if (allocated_scenario.launch_time == ZERO) {
+              allocated_scenario.launch_time = scenarios[scenario].launch_time;
+            }
+          }
+          if (allocated_scenario.configs.length() != 0 && !(allocated_scenario.launch_time == ZERO)) {
+            complete = true;
+          }
+        }
+      }
+    }
+
+  }
+  result = allocated_scenario;
+}
+
 int run_cycle(
   const std::string& name,
   ACE_Process_Manager& process_manager,
@@ -561,95 +673,44 @@ int run_cycle(
 {
   NodeId this_node_id = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(participant.in())->get_id();
 
-  // Wait for Status Publication with Test Controller and Write Status
-  {
-    DDS::DataWriter_var status_writer = DDS::DataWriter::_narrow(status_writer_impl);
-    Utils::wait_match(status_writer, 0, Utils::GT);
-
-    Status status;
-    status.node_id = this_node_id;
-    status.state = AVAILABLE;
-    status.name = name.c_str();
-    if (status_writer_impl->write(status, DDS::HANDLE_NIL)) {
-      std::cerr << "Write status failed" << std::endl;
-      return 1;
-    }
-  }
-
   WorkerManager worker_manager(process_manager);
 
-  // Wait for Our Worker Configs
-  bool waiting = true;
-  while (waiting) {
-    DDS::ReturnCode_t rc = DDS::RETCODE_ERROR;
+  // Wait for Status Publication with Test Controller and Write Status
+  if (!write_status(name, this_node_id, AVAILABLE, status_writer_impl)) {
+    std::cerr << "Write status (available) failed\n" << std::flush;
+    return 1;
+  }
 
-    DDS::ReadCondition_var read_condition = config_reader_impl->create_readcondition(
-        DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
-    DDS::WaitSet_var ws = new DDS::WaitSet;
-    ws->attach_condition(read_condition);
-    const DDS::Duration_t wake_interval = { 3, 0 };
-    bool loop = true;
-    while (loop) {
-      if (read_condition->get_trigger_value()) {
-        loop = false;
-      } else {
-        DDS::ConditionSeq active;
-        rc = ws->wait(active, wake_interval);
-        if (rc != DDS::RETCODE_OK && rc != DDS::RETCODE_TIMEOUT) {
-          std::cerr << "Wait for node config failed" << std::endl;
-          return 1;
-        }
-      }
-    }
-    ws->detach_condition(read_condition);
-    config_reader_impl->delete_readcondition(read_condition);
+  Bench::TestController::AllocatedScenario scenario;
+  wait_for_full_scenario(name, this_node_id, status_writer_impl, config_reader_impl, scenario);
 
-    Bench::TestController::AllocatedScenarioSeq allocated_scenario;
-    DDS::SampleInfoSeq info;
-    rc = config_reader_impl->take(
-      allocated_scenario, info,
-      DDS::LENGTH_UNLIMITED,
-      DDS::ANY_SAMPLE_STATE,
-      DDS::ANY_VIEW_STATE,
-      DDS::ANY_INSTANCE_STATE);
-    if (rc != DDS::RETCODE_OK) {
-      std::cerr << "Take node config failed" << std::endl;
-      return 1;
-    }
-
-    for (CORBA::ULong scenario = 0; scenario < allocated_scenario.length(); ++scenario) {
-      Bench::NodeController::Configs& configs = allocated_scenario[scenario].configs;
-      for (CORBA::ULong node = 0; node < configs.length(); ++node) {
-        if (configs[node].node_id == this_node_id) {
-          worker_manager.timeout(configs[node].timeout);
-          CORBA::ULong config_count = configs[node].workers.length();
-          for (CORBA::ULong config = 0; config < config_count; config++) {
-            WorkerId& id = configs[node].workers[config].worker_id;
-            const WorkerId end = id + configs[node].workers[config].count;
-            for (; id < end; id++) {
-              if (worker_manager.add_worker(this_node_id, configs[node].workers[config])) {
-                return 1;
-              }
-            }
+  Bench::NodeController::Configs& configs = scenario.configs;
+  for (CORBA::ULong node = 0; node < configs.length(); ++node) {
+    if (configs[node].node_id == this_node_id) {
+      worker_manager.timeout(configs[node].timeout);
+      CORBA::ULong config_count = configs[node].workers.length();
+      for (CORBA::ULong config = 0; config < config_count; config++) {
+        WorkerId& id = configs[node].workers[config].worker_id;
+        const WorkerId end = id + configs[node].workers[config].count;
+        for (; id < end; id++) {
+          if (worker_manager.add_worker(this_node_id, configs[node].workers[config])) {
+            return 1;
           }
-          waiting = false;
-          break;
         }
       }
+      break;
     }
   }
 
-  // Report Busy Status
-  {
-    Status status;
-    status.node_id = this_node_id;
-    status.state = BUSY;
-    status.name = name.c_str();
-    if (status_writer_impl->write(status, DDS::HANDLE_NIL)) {
-      std::cerr << "Write status failed" << std::endl;
-      return 1;
-    }
+  using Builder::ZERO;
+
+  std::chrono::time_point<std::chrono::high_resolution_clock> timeout_time;
+  if (scenario.launch_time < ZERO) {
+    timeout_time = std::chrono::high_resolution_clock::now() - get_duration(scenario.launch_time);
+  } else {
+    timeout_time = std::chrono::high_resolution_clock::time_point(get_duration(scenario.launch_time));
   }
+  std::this_thread::sleep_until(timeout_time);
 
   // Run Workers and Wait for Them to Finish
   worker_manager.run_workers(report_writer_impl);
@@ -659,6 +720,8 @@ int run_cycle(
     std::cerr << "Waiting for report acknowledgment failed" << std::endl;
     return 1;
   }
+
+  std::this_thread::sleep_for(std::chrono::seconds(10));
 
   return 0;
 }
