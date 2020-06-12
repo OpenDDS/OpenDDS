@@ -23,7 +23,8 @@ static const std::string PLUGIN_NAME("BuiltIn");
 int
 BuiltInPluginLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
 {
-  SecurityPluginInst_rch plugin = TheSecurityRegistry->get_plugin_inst(PLUGIN_NAME);
+  SecurityPluginInst_rch plugin = TheSecurityRegistry->get_plugin_inst(
+    PLUGIN_NAME, false /* don't attempt to load the plugin */);
   if (!plugin) {
     plugin = DCPS::make_rch<BuiltInSecurityPluginInst>();
     TheSecurityRegistry->register_plugin(PLUGIN_NAME, plugin);

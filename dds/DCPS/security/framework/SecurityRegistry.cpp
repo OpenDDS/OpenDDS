@@ -430,13 +430,14 @@ SecurityRegistry::add_config(const OPENDDS_STRING& name, SecurityConfig_rch& con
   return added_config;
 }
 
-SecurityPluginInst_rch SecurityRegistry::get_plugin_inst(const OPENDDS_STRING& plugin_name)
+SecurityPluginInst_rch SecurityRegistry::get_plugin_inst(
+  const OPENDDS_STRING& plugin_name, bool attempt_fix)
 {
   GuardType guard(lock_);
 
   SecurityPluginInst_rch plugin_inst;
 
-  if (find(registered_plugins_, plugin_name, plugin_inst) != 0) {
+  if (find(registered_plugins_, plugin_name, plugin_inst) != 0 && attempt_fix) {
 #if !defined(ACE_AS_STATIC_LIBS)
     guard.release();
     // Not present, try to load library
