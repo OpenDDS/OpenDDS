@@ -82,6 +82,10 @@ if (NOT DEFINED TAO_ROOT)
     _OPENDDS_RETURN_ERR("Failed to locate TAO_ROOT")
   endif()
 
+  set(TAO_INCLUDE_DIRS
+    "${TAO_INCLUDE_DIR}"
+    "${TAO_INCLUDE_DIR}/orbsvcs"
+  )
 else()
   _OPENDDS_RETURN_ERR("TAO_ROOT has already been set")
 endif()

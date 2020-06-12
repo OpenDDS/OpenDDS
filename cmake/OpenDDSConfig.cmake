@@ -375,7 +375,7 @@ macro(_OPENDDS_ADD_TARGET_BINARY  target  path)
   endif()
 endmacro()
 
-macro(_OPENDDS_ADD_TARGET_LIB  target  var_prefix  include_dir)
+macro(_OPENDDS_ADD_TARGET_LIB target var_prefix include_dirs)
   set(_debug_lib "${${var_prefix}_LIBRARY_DEBUG}")
   set(_release_lib "${${var_prefix}_LIBRARY_RELEASE}")
   set(_deps "${${var_prefix}_DEPS}")
@@ -386,7 +386,7 @@ macro(_OPENDDS_ADD_TARGET_LIB  target  var_prefix  include_dir)
     add_library(${target} UNKNOWN IMPORTED)
     set_target_properties(${target}
       PROPERTIES
-        INTERFACE_INCLUDE_DIRECTORIES "${include_dir}"
+        INTERFACE_INCLUDE_DIRECTORIES "${include_dirs}"
         INTERFACE_LINK_LIBRARIES "${_deps}"
         INTERFACE_COMPILE_DEFINITIONS "${OPENDDS_DCPS_COMPILE_DEFS}"
     )
@@ -421,13 +421,6 @@ macro(_OPENDDS_ADD_TARGET_LIB  target  var_prefix  include_dir)
 endmacro()
 
 if(OPENDDS_FOUND)
-  set(OPENDDS_INCLUDE_DIRS
-    ${OPENDDS_INCLUDE_DIR}
-    ${ACE_INCLUDE_DIR}
-    ${TAO_INCLUDE_DIR}
-    ${TAO_INCLUDE_DIR}/orbsvcs
-  )
-
   _OPENDDS_ADD_TARGET_BINARY(opendds_idl "${OPENDDS_IDL}")
   _OPENDDS_ADD_TARGET_BINARY(tao_idl "${TAO_IDL}")
   _OPENDDS_ADD_TARGET_BINARY(ace_gperf "${ACE_GPERF}")
@@ -454,7 +447,7 @@ if(OPENDDS_FOUND)
       string(REPLACE "TAO_" "TAO::" _target ${_lib})
     endif()
 
-    _OPENDDS_ADD_TARGET_LIB(${_target} ${_VAR_PREFIX} "${TAO_INCLUDE_DIR}")
+    _OPENDDS_ADD_TARGET_LIB(${_target} ${_VAR_PREFIX} "${TAO_INCLUDE_DIRS}")
   endforeach()
 
   foreach(_lib ${_opendds_libs})
