@@ -3,16 +3,6 @@
 
 include(${CMAKE_CURRENT_LIST_DIR}/dds_idl_sources.cmake)
 
-function(opendds_include_dirs_once)
-  get_directory_property(includes INCLUDE_DIRECTORIES)
-
-  foreach (i ${OPENDDS_INCLUDE_DIRS})
-    if (NOT "${i}" IN_LIST includes)
-      include_directories(${i})
-    endif()
-  endforeach()
-endfunction()
-
 macro(OPENDDS_GET_SOURCES_AND_OPTIONS
   src_prefix
   idl_prefix
@@ -88,8 +78,6 @@ macro(OPENDDS_TARGET_SOURCES target)
   if (NOT TARGET ${target})
     message(FATAL_ERROR "Invalid target '${target}' passed into OPENDDS_TARGET_SOURCES")
   endif()
-
-  opendds_include_dirs_once()
 
   OPENDDS_GET_SOURCES_AND_OPTIONS(
     _sources
