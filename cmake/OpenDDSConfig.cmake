@@ -388,6 +388,7 @@ macro(_OPENDDS_ADD_TARGET_LIB  target  var_prefix  include_dir)
       PROPERTIES
         INTERFACE_INCLUDE_DIRECTORIES "${include_dir}"
         INTERFACE_LINK_LIBRARIES "${_deps}"
+        INTERFACE_COMPILE_DEFINITIONS "${OPENDDS_DCPS_COMPILE_DEFS}"
     )
 
     if (EXISTS "${_release_lib}")

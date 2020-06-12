@@ -151,12 +151,6 @@ macro(OPENDDS_TARGET_SOURCES target)
     list(APPEND _tao_options "-SS")
   endif()
 
-  if (OPENDDS_DCPS_COMPILE_DEFS)
-    target_compile_definitions(${target}
-      PUBLIC
-        ${OPENDDS_DCPS_COMPILE_DEFS})
-  endif()
-
   foreach(scope PUBLIC PRIVATE INTERFACE)
     if(_idl_sources_${scope})
       opendds_target_idl_sources(${target}
