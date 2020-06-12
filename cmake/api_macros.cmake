@@ -141,6 +141,10 @@ macro(OPENDDS_TARGET_SOURCES target)
     if(NOT "${_opendds_options}" MATCHES "-Wb,export_macro")
       list(APPEND _opendds_options "-Wb,export_macro=${target}_Export")
     endif()
+
+    if(NOT "${_opendds_options}" MATCHES "-Wb,export_include")
+      list(APPEND _opendds_options "-Wb,export_include=${_export_generated}")
+    endif()
   endif()
 
   if(NOT "${_tao_options}" MATCHES "-SS")
