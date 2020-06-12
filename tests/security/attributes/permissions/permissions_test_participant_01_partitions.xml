@@ -15,19 +15,19 @@
           <topics>
             <topic>*</topic>
           </topics>
-	  <partitions>
-	    <partition>foo</partition>
-	    <partition>bar</partition>
-	  </partitions>
+          <partitions>
+            <partition>foo</partition>
+            <partition>bar</partition>
+          </partitions>
         </publish>
         <subscribe>
           <topics>
             <topic>*</topic>
           </topics>
-	  <partitions>
-	    <partition>foo</partition>
-	    <partition>bar</partition>
-	  </partitions>
+          <partitions>
+            <partition>foo</partition>
+            <partition>bar</partition>
+          </partitions>
         </subscribe>
       </allow_rule>
       <default>DENY</default>
