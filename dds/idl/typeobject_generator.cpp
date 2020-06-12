@@ -212,7 +212,7 @@ typeobject_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
 }
 
 bool
-typeobject_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
+typeobject_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
   const std::vector<AST_Field*>& fields, AST_Type::SIZE_TYPE, const char*)
 {
   be_global->add_include("dds/DCPS/TypeObject.h", BE_GlobalData::STREAM_H);
@@ -225,13 +225,35 @@ typeobject_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
     const string decl_gto = "getMinimalTypeObject<" + clazz + ">";
     Function gto(decl_gto.c_str(), "const XTypes::TypeObject&", "");
     gto.endArgs();
-
+    const ExtensibilityKind exten = be_global->extensibility(node);
+    string bitwise_str;
+    switch (exten) {
+      case extensibilitykind_final:
+        bitwise_str = "XTypes::IS_FINAL";
+        break;
+      case extensibilitykind_appendable:
+        bitwise_str = "XTypes::IS_APPENDABLE";
+        break;
+      case extensibilitykind_mutable:
+        bitwise_str = "XTypes::IS_MUTABLE";
+        break;
+      default:
+        idl_global->err()->misc_error(
+          "Unexpected extensibility while setting flags", node);
+        return false;
+    }
+    if (be_global->is_nested(node)){
+      bitwise_str += " | XTypes::IS_NESTED";
+    }
+    if (0){ //TODO: Change once HASHID is supported in beglobal.cpp
+      bitwise_str += " | XTypes::IS_AUTOID_HASH";
+    }
     // TODO: Support struct inheritance.
     be_global->impl_ <<
       "  static const XTypes::TypeObject to = XTypes::TypeObject(\n"
       "    XTypes::MinimalTypeObject(\n"
       "      XTypes::MinimalStructType(\n"
-      "        XTypes::IS_FINAL | XTypes::IS_NESTED | XTypes::IS_AUTOID_HASH,\n" // TODO: Pick the appropriate flags.
+      "        " << bitwise_str << ",\n"
       "        XTypes::MinimalStructHeader(\n"
       "          getMinimalTypeIdentifier<void>(),\n"
       "          XTypes::MinimalTypeDetail()\n"
@@ -322,7 +344,7 @@ typeobject_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
 }
 
 bool
-typeobject_generator::gen_union(AST_Union*, UTL_ScopedName* name,
+typeobject_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
   const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator,
   const char*)
 {
@@ -336,12 +358,31 @@ typeobject_generator::gen_union(AST_Union*, UTL_ScopedName* name,
     const string decl_gto = "getMinimalTypeObject<" + clazz + ">";
     Function gto(decl_gto.c_str(), "const XTypes::TypeObject&", "");
     gto.endArgs();
-
+    const ExtensibilityKind exten = be_global->extensibility(node);
+    string bitwise_str;
+    switch (exten) {
+      case extensibilitykind_final:
+        bitwise_str = "XTypes::IS_FINAL";
+        break;
+      case extensibilitykind_appendable:
+        bitwise_str = "XTypes::IS_APPENDABLE";
+        break;
+      case extensibilitykind_mutable:
+        bitwise_str = "XTypes::IS_MUTABLE";
+        break;
+      default:
+        idl_global->err()->misc_error(
+          "Unexpected extensibility while setting flags", node);
+        return false;
+    }
+    if (be_global->is_nested(node)){
+      bitwise_str += " | XTypes::IS_NESTED";
+    }
     be_global->impl_ <<
       "  static const XTypes::TypeObject to = XTypes::TypeObject(\n"
       "    XTypes::MinimalTypeObject(\n"
       "      XTypes::MinimalUnionType(\n"
-      "        XTypes::UnionTypeFlag(XTypes::IS_FINAL),\n" // TODO: Set these based on annotation.
+      "        " << bitwise_str <<",\n"
       "        XTypes::MinimalUnionHeader(\n"
       "          XTypes::MinimalTypeDetail()\n" // Not used.
       "        ),\n"
