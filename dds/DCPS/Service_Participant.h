@@ -452,11 +452,23 @@ private:
                                 const ACE_TCHAR* filename);
 
   /**
-   * Load the domain range template configuration to the
-   * Service_Participant singleton.
+   * Load the domain range template configuration
+   * prior dicovery and domain configuration
    */
-  int load_domain_range_configuration(ACE_Configuration_Heap& cf,
-                                const ACE_TCHAR* filename);
+  int load_initial_domain_range_configuration(ACE_Configuration_Heap& cf);
+
+  /**
+   * finish loading the domain range template configuration
+   * after discovery and domain configuration
+   */
+  int load_final_domain_range_configuration(ACE_Configuration_Heap& cf);
+
+  /**
+   * Process the domain range template and activate the
+   * domain for the given domain ID
+   */
+  int configure_domain_range(DDS::DomainId_t domainId);
+
 
   /**
    * Load the discovery configuration to the Service_Participant
@@ -564,20 +576,19 @@ private:
   ACE_TString global_transport_config_;
 
   // domain range template support
-  struct domain_range_template
+  typedef struct domain_range_template
   {
-    int range_start;
-    int range_end;
+    DDS::DomainId_t range_start;
+    DDS::DomainId_t range_end;
     OPENDDS_STRING discovery_template_name;
     OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING) customizations;
-  };
+  } domain_range_template;
 
   std::vector<domain_range_template> domain_range_templates_;
 
   int parse_domain_range(OPENDDS_STRING& range, int& start, int& end);
 
-  // TODO: use a map to enforce one template per range
-  // TODO: need a way to check for overlapping ranges in templates.
+  bool has_domain_range();
 
 public:
   /// Pointer to the monitor factory that is used to create

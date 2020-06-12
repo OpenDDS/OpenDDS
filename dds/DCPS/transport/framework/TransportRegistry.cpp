@@ -597,6 +597,10 @@ bool TransportRegistry::has_type(const TransportType_rch& type) const
   return type_map_.count(name);
 }
 
+bool TransportRegistry::has_transport_template()
+{
+  return transport_templates_.size() > 0;
+}
 
 void
 TransportRegistry::release()
