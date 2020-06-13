@@ -288,6 +288,8 @@ AllocatedScenario ScenarioManager::allocate_scenario(
   ss << host << "_" << pid << std::flush;
   allocated_scenario.scenario_id = ss.str().c_str();
 
+  allocated_scenario.launch_time = Builder::ZERO;
+
   return allocated_scenario;
 }
 

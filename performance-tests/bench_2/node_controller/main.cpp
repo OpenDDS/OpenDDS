@@ -603,7 +603,11 @@ void wait_for_full_scenario(
   AllocatedScenarioDataReader_var config_reader_impl,
   Bench::TestController::AllocatedScenario& result)
 {
+  using Builder::ZERO;
+
   Bench::TestController::AllocatedScenario allocated_scenario;
+  allocated_scenario.scenario_id = TAO::String_Manager();
+  allocated_scenario.launch_time = ZERO;
   std::chrono::system_clock::time_point initial_attempt;
 
   bool complete = false;
@@ -630,10 +634,9 @@ void wait_for_full_scenario(
     if (allocated_scenario.scenario_id != TAO::String_Manager() && initial_attempt + std::chrono::seconds(30) < std::chrono::system_clock::now()) {
       if (write_status(name, this_node_id, AVAILABLE, status_writer_impl)) {
         allocated_scenario.scenario_id = TAO::String_Manager();
+        allocated_scenario.launch_time = ZERO;
       }
     }
-
-    using Builder::ZERO;
 
     for (CORBA::ULong scenario = 0; scenario < scenarios.length(); ++scenario) {
       Bench::NodeController::Configs& configs = scenarios[scenario].configs;
@@ -644,21 +647,16 @@ void wait_for_full_scenario(
               allocated_scenario = scenarios[scenario];
               initial_attempt = std::chrono::system_clock::now();
             }
-          } else if (scenarios[scenario].scenario_id == allocated_scenario.scenario_id) {
-            if (allocated_scenario.configs.length() == 0) {
-              allocated_scenario.configs = configs;
-            }
-            if (allocated_scenario.launch_time == ZERO) {
-              allocated_scenario.launch_time = scenarios[scenario].launch_time;
-            }
-          }
-          if (allocated_scenario.configs.length() != 0 && !(allocated_scenario.launch_time == ZERO)) {
-            complete = true;
           }
         }
       }
+      if (std::string(scenarios[scenario].scenario_id.in()) == std::string(allocated_scenario.scenario_id.in()) && !(scenarios[scenario].launch_time == ZERO)) {
+        allocated_scenario.launch_time = scenarios[scenario].launch_time;
+      }
     }
-
+    if (allocated_scenario.configs.length() != 0 && !(allocated_scenario.launch_time == ZERO)) {
+      complete = true;
+    }
   }
   result = allocated_scenario;
 }
