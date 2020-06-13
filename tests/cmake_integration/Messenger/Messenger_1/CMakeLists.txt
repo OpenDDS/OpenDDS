@@ -1,6 +1,8 @@
 # Distributed under the OpenDDS License. See accompanying LICENSE
 # file or http://www.opendds.org/license.html for details.
 #
+# This file is setup the way it is for testing purposes. For a cleaner example
+# see DevGuideExamples/DCPS/Messenger/CMakeLists.txt
 
 project(OpenDDS_Messenger1_cmake CXX)
 cmake_minimum_required(VERSION 3.8.2)
