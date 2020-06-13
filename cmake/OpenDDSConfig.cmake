@@ -60,6 +60,9 @@
 # When IDL sources are supplied, custom commands are generated which will
 # be invoked to compile the IDL sources into their component cpp/h files.
 #
+# NOTE: C/C++ items can also be accepted and added to the target, but passing
+# non-IDL sources was deprecated in OpenDDS 3.15.
+#
 # A custom command will also be added to generate the required IDL export
 # header file (*target*_export.h) to add the required export macros. This
 # file is then added as a dependency for the supplied target.

@@ -203,6 +203,9 @@ built-in [`target_sources`](https://cmake.org/cmake/help/latest/command/target_s
 When IDL sources are supplied, custom commands are generated which will
 be invoked to compile the IDL sources into their component cpp/h files.
 
+**NOTE:** C/C++ items can also be accepted and added to the target, but passing
+non-IDL sources was deprecated in OpenDDS 3.15.
+
 If the passed-in target is a shared library, a custom command will also be
 added to generate the required IDL export header file (*target*_export.h),
 which is necessary to properly export symbols for the IDL-Generated sources.

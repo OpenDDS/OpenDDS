@@ -11,7 +11,8 @@ OpenDDS 3.15 is currently in development, so this list might change.
 - TODO: Add your fixes here
 
 ### Notes:
-- TODO: Add your notes here
+- Passing C++ source files to the `OPENDDS_TARGET_SOURCES` macro in the CMake
+  module is now deprecated. (#1741)
 
 ## Version 3.14 of OpenDDS
 OpenDDS 3.14 was released on Mar  5 2020.
