@@ -421,6 +421,8 @@ macro(_OPENDDS_ADD_TARGET_LIB target var_prefix include_dirs)
 endmacro()
 
 if(OPENDDS_FOUND)
+  include("${CMAKE_CURRENT_LIST_DIR}/options.cmake")
+
   _OPENDDS_ADD_TARGET_BINARY(opendds_idl "${OPENDDS_IDL}")
   _OPENDDS_ADD_TARGET_BINARY(tao_idl "${TAO_IDL}")
   _OPENDDS_ADD_TARGET_BINARY(ace_gperf "${ACE_GPERF}")
@@ -481,7 +483,6 @@ if(OPENDDS_FOUND)
 
   endif()
 
-  include(${CMAKE_CURRENT_LIST_DIR}/options.cmake)
   include(${CMAKE_CURRENT_LIST_DIR}/api_macros.cmake)
 
   if(OPENDDS_CMAKE_VERBOSE)
