@@ -8,7 +8,10 @@ OpenDDS 3.15 is currently in development, so this list might change.
   passed with `OPENDDS_IDL_OPTIONS` in `OPENDDS_TARGET_SOURCES`. (#1728)
 
 ### Fixes:
-- TODO: Add your fixes here
+- CMake Module:
+  - Fixed `OPENDDS_TARGET_SOURCES` setting global include paths. (#1741)
+  - Fixed situations requiring C++ source files to be passed to
+    `OPENDDS_TARGET_SOURCES`. (#1741)
 
 ### Notes:
 - Passing C++ source files to the `OPENDDS_TARGET_SOURCES` macro in the CMake
