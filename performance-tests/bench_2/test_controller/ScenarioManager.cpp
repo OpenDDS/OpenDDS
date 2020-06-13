@@ -116,7 +116,7 @@ namespace {
 }
 
 void ScenarioManager::customize_configs(std::map<std::string, std::string>& worker_configs) {
-  Builder::TimeStamp now = Builder::get_time();
+  Builder::TimeStamp now = Builder::get_sys_time();
 
   for (auto it = worker_configs.begin(); it != worker_configs.end(); ++it) {
 
@@ -281,6 +281,13 @@ AllocatedScenario ScenarioManager::allocate_scenario(
     }
   }
 
+  char host[256];
+  ACE_OS::hostname(host, sizeof(host));
+  pid_t pid = ACE_OS::getpid();
+  std::stringstream ss;
+  ss << host << "_" << pid << std::flush;
+  allocated_scenario.scenario_id = ss.str().c_str();
+
   return allocated_scenario;
 }
 
@@ -298,7 +305,7 @@ std::vector<WorkerReport> ScenarioManager::execute(const AllocatedScenario& allo
 
   AllocatedScenario temp = allocated_scenario;
   temp.configs.length(0);
-  temp.launch_time = Builder::get_time() + Builder::from_seconds(3);
+  temp.launch_time = Builder::get_sys_time() + Builder::from_seconds(3);
 
   // Write Configs
   if (dds_entities_.scenario_writer_impl_->write(temp, DDS::HANDLE_NIL) != DDS::RETCODE_OK) {
