@@ -704,11 +704,11 @@ int run_cycle(
 
   using Builder::ZERO;
 
-  std::chrono::time_point<std::chrono::high_resolution_clock> timeout_time;
+  std::chrono::time_point<std::chrono::system_clock> timeout_time;
   if (scenario.launch_time < ZERO) {
-    timeout_time = std::chrono::high_resolution_clock::now() - get_duration(scenario.launch_time);
+    timeout_time = std::chrono::system_clock::now() - get_duration(scenario.launch_time);
   } else {
-    timeout_time = std::chrono::high_resolution_clock::time_point(get_duration(scenario.launch_time));
+    timeout_time = std::chrono::system_clock::time_point(get_duration(scenario.launch_time));
   }
   std::this_thread::sleep_until(timeout_time);
 
