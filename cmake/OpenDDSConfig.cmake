@@ -40,7 +40,7 @@
 #                      TAO_PortableServer(d).so/.dll getting imported as TAO::PortableServer.
 #
 # In addition to the imported targets above the following macro will be important
-# for adding IDL sources (and other C/C++ sources if desired) to a given target.
+# for adding IDL sources to a given target.
 #
 # OPENDDS_TARGET_SOURCES(target
 #   [items...]
@@ -50,7 +50,7 @@
 #
 # This macro behaves similarly to target_sources(...) with the following
 # differences:
-#   1) Items can be either C/C++ sources or IDL sources.
+#   1) Items are IDL sources instead of C/C++ sources.
 #   2) The scope-qualifier (PUBLIC, PRIVATE, INTERFACE) is not required.
 #      When it is omitted, PRIVATE is used by default.
 #   3) Command-line options can be supplied to the TAO/OpenDDS IDL compilers

@@ -192,7 +192,7 @@ provides an easy way to add IDL sources to CMake targets. This is achieved by
 the `OPENDDS_TARGET_SOURCES` macro, which behaves similarly to the
 built-in [`target_sources`](https://cmake.org/cmake/help/latest/command/target_sources.html) command except for the following:
 
-  - Items can be either C/C++ sources or IDL sources.
+  - Items are IDL sources instead of C/C++ sources.
   - The scope-qualifier (`PUBLIC`, `PRIVATE`, `INTERFACE`) is not required.
     When it is omitted, `PRIVATE` is used by default.
   - Command-line options can be supplied to the TAO/OpenDDS IDL compilers
@@ -220,19 +220,17 @@ OPENDDS_TARGET_SOURCES(target
 
 ### Example
 
-Taken from the [Messenger with direct IDL inclusion], here is a snippet showing
+Based on the [Messenger with direct IDL inclusion], here is a snippet showing
 how IDL files can be added directly to executable targets using the `OPENDDS_TARGET_SOURCES`
 macro:
 
 ```cmake
 add_executable(publisher
-    ${src}/publisher.cpp
+  "publisher.cpp"
+  "Writer.cpp"
 )
-OPENDDS_TARGET_SOURCES(publisher
-    ${src}/Writer.cpp
-    ${src}/Writer.h
-    ${src}/Messenger.idl
-)
+OPENDDS_TARGET_SOURCES(publisher "Messenger.idl")
+target_link_libraries(publisher OpenDDS::OpenDDS)
 ```
 
 This is fine for small IDL files and builds with a few targets that need the
@@ -243,16 +241,14 @@ auxiliary IDL library can be created for inclusion by other executables:
 
 ```cmake
 add_library(messenger)
-OPENDDS_TARGET_SOURCES(messenger ${src}/Messenger.idl)
+OPENDDS_TARGET_SOURCES(messenger "Messenger.idl")
+target_link_libraries(publisher messenger OpenDDS::Dcps)
 
 add_executable(publisher
-    ${src}/publisher.cpp
-    ${src}/Writer.cpp
-    ${src}/Writer.h
+  "publisher.cpp"
+  "Writer.cpp"
 )
-
-target_link_libraries(publisher messenger OpenDDS::OpenDDS)
-
+target_link_libraries(publisher OpenDDS::OpenDDS)
 ```
 
 Here the generated code from the IDL is only compiled once. This is especially

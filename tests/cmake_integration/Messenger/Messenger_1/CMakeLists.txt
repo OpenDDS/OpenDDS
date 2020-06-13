@@ -31,29 +31,25 @@ endforeach()
 
 # Publisher
 add_executable(${publisher}
-    ${dst}/publisher.cpp
+  "${dst}/publisher.cpp"
+  "${dst}/Writer.h"
+  "${dst}/Writer.cpp"
 )
 set_target_properties(${publisher}
   PROPERTIES OUTPUT_NAME publisher
 )
-OPENDDS_TARGET_SOURCES(${publisher}
-    ${dst}/Writer.cpp
-    ${dst}/Writer.h
-    ${dst}/Messenger.idl
-)
+OPENDDS_TARGET_SOURCES(${publisher} "${dst}/Messenger.idl")
 
 # Subscriber
 add_executable(${subscriber}
-    ${dst}/subscriber.cpp
+  "${dst}/subscriber.cpp"
+  "${dst}/DataReaderListener.h"
+  "${dst}/DataReaderListener.cpp"
 )
 set_target_properties(${subscriber}
   PROPERTIES OUTPUT_NAME subscriber
 )
-OPENDDS_TARGET_SOURCES(${subscriber}
-    ${dst}/DataReaderListener.cpp
-    ${dst}/DataReaderListener.h
-    ${dst}/Messenger.idl
-)
+OPENDDS_TARGET_SOURCES(${subscriber} "${dst}/Messenger.idl")
 
 foreach(t ${all_targets})
   # Using explicit scope here is a regression test for
