@@ -1507,6 +1507,128 @@ TEST(MapTypeTest, NotAssignable)
                                TypeObject(MinimalTypeObject(map_b))));
 }
 
+TEST(AliasTypeTest, Assignable)
+{
+  TypeAssignability test;
+  MinimalAliasType ali_a, ali_b;
+
+  // Assignability from non-alias type to alias type
+  ali_a.body.common.related_type = TypeIdentifier::make(TK_BOOLEAN);
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), *TypeIdentifier::make(TK_BOOLEAN)));
+  ali_a.body.common.related_type = TypeIdentifier::make(TK_BYTE);
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), *TypeIdentifier::make(TK_BYTE)));
+  ali_a.body.common.related_type = TypeIdentifier::make(TK_INT16);
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), *TypeIdentifier::make(TK_INT16)));
+  ali_a.body.common.related_type = TypeIdentifier::make(TK_INT32);
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), *TypeIdentifier::make(TK_INT32)));
+  ali_a.body.common.related_type = TypeIdentifier::make(TK_INT64);
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), *TypeIdentifier::make(TK_INT64)));
+  ali_a.body.common.related_type = TypeIdentifier::make(TK_UINT16);
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), *TypeIdentifier::make(TK_UINT16)));
+  ali_a.body.common.related_type = TypeIdentifier::make(TK_UINT32);
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), *TypeIdentifier::make(TK_UINT32)));
+  ali_a.body.common.related_type = TypeIdentifier::make(TK_UINT64);
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), *TypeIdentifier::make(TK_UINT64)));
+  ali_a.body.common.related_type = TypeIdentifier::make(TK_FLOAT32);
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), *TypeIdentifier::make(TK_FLOAT32)));
+  ali_a.body.common.related_type = TypeIdentifier::make(TK_FLOAT64);
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), *TypeIdentifier::make(TK_FLOAT64)));
+  ali_a.body.common.related_type = TypeIdentifier::make(TK_FLOAT128);
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), *TypeIdentifier::make(TK_FLOAT128)));
+  ali_a.body.common.related_type = TypeIdentifier::make(TK_INT8);
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), *TypeIdentifier::make(TK_INT8)));
+  ali_a.body.common.related_type = TypeIdentifier::make(TK_UINT8);
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), *TypeIdentifier::make(TK_UINT8)));
+  ali_a.body.common.related_type = TypeIdentifier::make(TK_CHAR8);
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), *TypeIdentifier::make(TK_CHAR8)));
+  ali_a.body.common.related_type = TypeIdentifier::make(TK_CHAR16);
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), *TypeIdentifier::make(TK_CHAR16)));
+
+  ali_a.body.common.related_type = TypeIdentifier::makeString(false, StringSTypeDefn(70));
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), *TypeIdentifier::makeString(false, StringLTypeDefn(120))));
+  ali_a.body.common.related_type = TypeIdentifier::makeString(true, StringSTypeDefn(70));
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), *TypeIdentifier::makeString(true, StringLTypeDefn(120))));
+
+  // Sequence
+  ali_a.body.common.related_type = TypeIdentifier::makePlainSequence(TypeIdentifier::make(TK_UINT32), static_cast<SBound>(100));
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), *TypeIdentifier::makePlainSequence(TypeIdentifier::make(TK_UINT32), static_cast<LBound>(200))));
+  MinimalSequenceType seq_b;
+  seq_b.header.common.bound = 300;
+  seq_b.element.common.type = TypeIdentifier::make(TK_UINT32);
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(seq_b))));
+
+  // Array
+  SBoundSeq bounds_a;
+  bounds_a.append(50).append(60).append(70);
+  ali_a.body.common.related_type = TypeIdentifier::makePlainArray(TypeIdentifier::make(TK_FLOAT32), bounds_a);
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), *TypeIdentifier::makePlainArray(TypeIdentifier::make(TK_FLOAT32), bounds_a)));
+  MinimalArrayType arr_b;
+  arr_b.header.common.bound_seq.append(50).append(60).append(70);
+  arr_b.element.common.type = TypeIdentifier::make(TK_FLOAT32);
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(arr_b))));
+
+  // Map
+  PlainMapLTypeDefn plain_map_a(PlainCollectionHeader(EK_MINIMAL, CollectionElementFlag()),
+                                static_cast<LBound>(111),
+                                TypeIdentifier::make(TK_INT64),
+                                CollectionElementFlag(),
+                                TypeIdentifier::make(TK_UINT32));
+  ali_a.body.common.related_type = TypeIdentifier::make(TI_PLAIN_MAP_LARGE, plain_map_a);
+  PlainMapSTypeDefn plain_map_b(PlainCollectionHeader(EK_MINIMAL, CollectionElementFlag()),
+                                static_cast<SBound>(200),
+                                TypeIdentifier::make(TK_INT64),
+                                CollectionElementFlag(),
+                                TypeIdentifier::make(TK_UINT32));
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)),
+                              *TypeIdentifier::make(TI_PLAIN_MAP_SMALL, plain_map_b)));
+  MinimalMapType map_b;
+  map_b.header.common.bound = 500;
+  map_b.key.common.type = TypeIdentifier::make(TK_UINT32);;
+  map_b.element.common.type = TypeIdentifier::make(TK_INT64);
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(map_b))));
+
+  // Enumeration
+  MinimalEnumeratedLiteralSeq literal_seq;
+  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(1, EnumeratedLiteralFlag(IS_DEFAULT)), MinimalMemberDetail("LITERAL1")));
+  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(2, EnumeratedLiteralFlag()), MinimalMemberDetail("LITERAL2")));
+  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(3, EnumeratedLiteralFlag()), MinimalMemberDetail("LITERAL3")));
+  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(4, EnumeratedLiteralFlag()), MinimalMemberDetail("LITERAL4")));
+  MinimalEnumeratedType enum_a(EnumTypeFlag(),
+                               MinimalEnumeratedHeader(CommonEnumeratedHeader(static_cast<BitBound>(4))),
+                               literal_seq);
+  EquivalenceHash hash;
+  TypeLookup::get_equivalence_hash(hash);
+  ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
+  TypeLookup::insert_entry(*ali_a.body.common.related_type, MinimalTypeObject(enum_a));
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(enum_a))));
+
+  // Bitmask
+  MinimalBitmaskType bitmask_a;
+  bitmask_a.header.common.bit_bound = 4;
+  MinimalBitflag flag;
+  flag.common.position = 0;
+  flag.detail = MinimalMemberDetail("BIT1");
+  bitmask_a.flag_seq.append(flag);
+  flag.common.position = 1;
+  flag.detail = MinimalMemberDetail("BIT2");
+  bitmask_a.flag_seq.append(flag);
+  flag.common.position = 2;
+  flag.detail = MinimalMemberDetail("BIT3");
+  bitmask_a.flag_seq.append(flag);
+  flag.common.position = 3;
+  flag.detail = MinimalMemberDetail("BIT4");
+  bitmask_a.flag_seq.append(flag);
+  TypeLookup::get_equivalence_hash(hash);
+  ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
+  TypeLookup::insert_entry(*ali_a.body.common.related_type, MinimalTypeObject(bitmask_a));
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(bitmask_a))));
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), *TypeIdentifier::make(TK_UINT8)));
+}
+
+TEST(AliasTypeTest, NotAssignable)
+{
+}
+
 int main(int argc, char* argv[])
 {
   ::testing::InitGoogleTest(&argc, argv);
