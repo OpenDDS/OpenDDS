@@ -125,10 +125,20 @@ module OpenDDS { module XTypes {    // spec: DDS::XTypes
     typedef sequence<SBound> SBoundSeq;
     const SBound INVALID_SBOUND = 0;
 
+#ifdef __OPENDDS_IDL
+# define OPENDDS_XTYPES_OCTET_SWITCH char
+# define OPENDDS_EK_MINIMAL '\xF1'
+# define OPENDDS_EK_COMPLETE '\xF2'
+#else
+# define OPENDDS_XTYPES_OCTET_SWITCH octet
+# define OPENDDS_EK_MINIMAL EK_MINIMAL
+# define OPENDDS_EK_COMPLETE EK_COMPLETE
+#endif
+
     @extensibility(FINAL) @nested
-    union TypeObjectHashId switch (char) { // spec: switch (octet)
-        case EK_COMPLETE:
-        case EK_MINIMAL:
+    union TypeObjectHashId switch (OPENDDS_XTYPES_OCTET_SWITCH) {
+    case OPENDDS_EK_COMPLETE:
+    case OPENDDS_EK_MINIMAL:
             EquivalenceHash  hash;
     };
 
@@ -194,7 +204,7 @@ module OpenDDS { module XTypes {    // spec: DDS::XTypes
     const   unsigned short TypeFlagMinimalMask = 0x0007; // Selects  M, A, F
 
 #ifdef __OPENDDS_IDL
-    union TypeIdentifier switch (char) { // spec: switch (octet)
+    union TypeIdentifier switch (OPENDDS_XTYPES_OCTET_SWITCH) {
     default:
       octet o;
     };
@@ -397,7 +407,7 @@ module OpenDDS { module XTypes {    // spec: DDS::XTypes
      * definition or the value applied in its usage.
      */
     @extensibility(FINAL) @nested
-    union AnnotationParameterValue switch (char) { // spec: switch (octet)
+    union AnnotationParameterValue switch (OPENDDS_XTYPES_OCTET_SWITCH) {
         case TK_BOOLEAN:
             boolean             boolean_value;
         case TK_BYTE:
@@ -1015,7 +1025,7 @@ module OpenDDS { module XTypes {    // spec: DDS::XTypes
     };
 
     @extensibility(FINAL)     @nested
-    union CompleteTypeObject switch (char) { // spec: switch (octet)
+    union CompleteTypeObject switch (OPENDDS_XTYPES_OCTET_SWITCH) {
         case TK_ALIAS:
             CompleteAliasType      alias_type;
         case TK_ANNOTATION:
@@ -1052,7 +1062,7 @@ module OpenDDS { module XTypes {    // spec: DDS::XTypes
 
 
     @extensibility(FINAL)     @nested
-    union MinimalTypeObject switch (char) { // spec: switch (octet)
+    union MinimalTypeObject switch (OPENDDS_XTYPES_OCTET_SWITCH) {
         case TK_ALIAS:
             MinimalAliasType       alias_type;
         case TK_ANNOTATION:
@@ -1080,10 +1090,10 @@ module OpenDDS { module XTypes {    // spec: DDS::XTypes
     };
 
     @extensibility(APPENDABLE)  @nested
-    union TypeObject switch (char) { // spec: switch (octet) // EquivalenceKind
-    case EK_COMPLETE:
+    union TypeObject switch (OPENDDS_XTYPES_OCTET_SWITCH) {
+    case OPENDDS_EK_COMPLETE:
         CompleteTypeObject   complete;
-    case EK_MINIMAL:
+    case OPENDDS_EK_MINIMAL:
         MinimalTypeObject    minimal;
     };
     typedef sequence<TypeObject> TypeObjectSeq;
