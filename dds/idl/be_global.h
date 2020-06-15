@@ -215,8 +215,6 @@ public:
   unsigned get_id(
     AST_Structure* type, AST_Field* member, unsigned index) const;
 
-  bool is_nested(AST_Decl* node);
-
 private:
   /// Name of the IDL file we are processing.
   const char* filename_;
@@ -237,6 +235,7 @@ private:
   ExtensibilityKind default_extensibility_;
   OpenDDS::DataRepresentation default_data_representation_;
 
+  bool is_nested(AST_Decl* node);
   bool is_default_nested(UTL_Scope* scope);
 };
 

@@ -242,10 +242,10 @@ typeobject_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
           "Unexpected extensibility while setting flags", node);
         return false;
     }
-    if (!be_global->is_topic_type(node)){
+    if (!be_global->is_topic_type(node)) {
       bitwise_str += " | XTypes::IS_NESTED";
     }
-    if (0){ //TODO: Change once HASHID is supported in be_global.cpp
+    if (0) { //TODO: Change once HASHID is supported in be_global.cpp
       bitwise_str += " | XTypes::IS_AUTOID_HASH";
     }
     // TODO: Support struct inheritance.
@@ -265,11 +265,10 @@ typeobject_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
     for (std::vector<AST_Field*>::const_iterator pos = fields.begin(), limit = fields.end(); pos != limit; ++pos) {
       string member_string;
       bool value;
-      if(be_global->check_key(*pos, value)){
-        member_string = "XTypes::StructMemberFlag(XTypes::IS_KEY)";
-      }
-      else{
-        member_string = "XTypes::StructMemberFlag()";
+      if (be_global->check_key(*pos, value)) {
+        member_string = "XTypes::IS_KEY";
+      } else {
+        member_string = "0";
       }
       be_global->impl_ <<
         "        .append(\n"
@@ -277,7 +276,7 @@ typeobject_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
         "            XTypes::CommonStructMember(\n"
         "              " << member_id++ << ",\n" // TODO: other kinds of memberid, see marshal_generator::gen_struct calling BE_GlobalData::get_id
 
-        "              "<< member_string << ",\n" //TODO: Additional flags are possible but not implemented
+        "              XTypes::StructMemberFlag( "<< member_string << " ),\n" //TODO: Additional flags are possible but not implemented
         "              ";
       call_get_minimal_type_identifier((*pos)->field_type());
       be_global->impl_ << "\n"
@@ -384,7 +383,7 @@ typeobject_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
           "Unexpected extensibility while setting flags", node);
         return false;
     }
-    if (!be_global->is_topic_type(node)){
+    if (!be_global->is_topic_type(node)) {
       bitwise_str += " | XTypes::IS_NESTED";
     }
     be_global->impl_ <<
@@ -417,11 +416,9 @@ typeobject_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
         }
       }
       string member_string;
-      bool value;
-      if(be_global->has_key(node)){
+      if (be_global->has_key(node)) {
         member_string = " XTypes::IS_KEY ";
-      }
-      else{
+      } else {
         member_string = "0";
       }
       be_global->impl_ <<
