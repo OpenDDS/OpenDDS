@@ -50,7 +50,7 @@ void Encoding::kind(Encoding::Kind value)
 
   case KIND_XCDR2:
     alignment(ALIGN_XCDR2);
-    return;
+    break;
 
   case KIND_UNALIGNED_CDR:
     alignment(ALIGN_NONE);

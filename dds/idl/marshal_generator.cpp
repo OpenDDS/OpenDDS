@@ -2358,7 +2358,7 @@ namespace {
         "    return false;\n"
         "  }\n"
         "  if (post_pad < 4 && outer_strm.encoding().alignment() != "
-        "Serializer::ALIGN_NONE) {\n"
+        "Encoding::ALIGN_NONE) {\n"
         "    static const ACE_CDR::Octet padding[3] = {0};\n"
         "    return outer_strm.write_octet_array(padding, "
         "ACE_CDR::ULong(post_pad));\n"

@@ -352,8 +352,8 @@ public:
   void endianness(Endianness value);
 
   /// Examine alignment behavior.
-  Alignment alignment() const;
-  void alignment(Alignment value);
+  Encoding::Alignment alignment() const;
+  void alignment(Encoding::Alignment value);
 
   /// Reset alignment as if a new instance were created
   void reset_alignment();
