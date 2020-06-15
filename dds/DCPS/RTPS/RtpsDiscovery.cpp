@@ -280,8 +280,8 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           config->sedp_local_address(addr);
         } else if (name == "SpdpLocalAddress") {
           ACE_INET_Addr addr;
-          if (addr.set(it->second.c_str())) {
-            ACE_ERROR_RETURN((LM_ERROR,
+          if (addr.set(u_short(0), it->second.c_str())) {
+              ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("(%P|%t) ERROR: RtpsDiscovery::Config::discovery_config(): ")
                               ACE_TEXT("failed to parse SpdpLocalAddress %C\n"),
                               it->second.c_str()),
