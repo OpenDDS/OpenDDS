@@ -12,8 +12,11 @@
 #include "tests/DCPS/FooType4/FooDefTypeSupportC.h"
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 
+using OpenDDS::DCPS::Encoding;
+
 const int default_key = 101010;
 
+const Encoding encoding(Encoding::KIND_UNALIGNED_CDR);
 
 Writer::Writer(::DDS::DataReader_ptr reader,
                int num_writes_per_thread,
@@ -38,6 +41,8 @@ Writer::start()
     foo.x = 0.0;
     foo.y = 0.0;
 
+    const size_t foo_size = serialized_size(encoding, foo);
+
     ::OpenDDS::DCPS::SequenceNumber seq;
 
     if (!multiple_instances_) {
@@ -60,7 +65,7 @@ Writer::start()
                      foo.x, foo.y, foo.key);
       OpenDDS::DCPS::ReceivedDataSample sample(0);
 
-      sample.header_.message_length_ = sizeof(foo);
+      sample.header_.message_length_ = foo_size;
       sample.header_.message_id_ = OpenDDS::DCPS::SAMPLE_DATA;
       sample.header_.sequence_ = seq.getValue();
 
@@ -75,11 +80,9 @@ Writer::start()
       sample.header_.source_timestamp_sec_ = static_cast<ACE_INT32>(now.sec());
       sample.header_.source_timestamp_nanosec_ = now.usec() * 1000;
 
-      sample.sample_.reset(new ACE_Message_Block(sizeof(foo)));
+      sample.sample_.reset(new ACE_Message_Block(foo_size));
 
-      ::OpenDDS::DCPS::Serializer ser(sample.sample_.get(),
-                                      OpenDDS::DCPS::Encoding::KIND_CDR_UNALIGNED,
-                                      OpenDDS::DCPS::ENDIAN_NATIVE);
+      ::OpenDDS::DCPS::Serializer ser(sample.sample_.get(), encoding);
       ser << foo;
 
       dr_servant->data_received(sample);

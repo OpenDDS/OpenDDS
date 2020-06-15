@@ -18,9 +18,10 @@
 
 #ifdef OPENDDS_SECURITY
 
+using OpenDDS::DCPS::Encoding;
+
 namespace {
-  const OpenDDS::DCPS::Encoding encoding_unaligned_big(OpenDDS::DCPS::Encoding::KIND_CDR_UNALIGNED,
-                                                     OpenDDS::DCPS::ENDIAN_BIG);
+  const Encoding encoding_unaligned_big(Encoding::KIND_UNALIGNED_CDR, OpenDDS::DCPS::ENDIAN_BIG);
 }
 
 void generate_transaction_id(OpenDDS::STUN::Message& message)

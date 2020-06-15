@@ -798,8 +798,11 @@ populate_locators(DCPS::TransportLocatorSeq& remote_data,
     pdata.participantProxy.metatrafficUnicastLocatorList;
   const CORBA::ULong locator_count = mll.length() + ull.length();
 
-  ACE_Message_Block mb_locator(4 + locator_count * sizeof(DCPS::Locator_t) + 1);
-  Serializer ser_loc(&mb_locator, Encoding::KIND_CDR_PLAIN, ENDIAN_BIG);
+  const Encoding& encoding = get_locators_encoding();
+  ACE_Message_Block mb_locator(
+    DCPS::uint32_cdr_size +
+    (locator_count * serialized_size(encoding, DCPS::Locator_t())) + DCPS::boolean_cdr_size);
+  Serializer ser_loc(&mb_locator, encoding);
   ser_loc << locator_count;
 
   for (CORBA::ULong i = 0; i < mll.length(); ++i) {
@@ -2983,7 +2986,7 @@ Sedp::Writer::write_parameter_list(const ParameterList& plist,
                                    DCPS::SequenceNumber& sequence)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
-  const Encoding encoding(Encoding::KIND_CDR_PARAMLIST, ENDIAN_LITTLE);
+  const Encoding encoding(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
 
   // Determine message length
   size_t size = 0;
@@ -2995,7 +2998,9 @@ Sedp::Writer::write_parameter_list(const ParameterList& plist,
                             ACE_Message_Block::MB_DATA,
                             new ACE_Message_Block(size));
   Serializer serializer(payload.cont(), encoding);
-  if (serializer << encoding && serializer << plist) {
+  DCPS::EncapsulationHeader encap;
+  if (encap.from_encoding(encoding, DCPS::MUTABLE) &&
+      serializer << encap && serializer << plist) {
     send_sample(payload, size, reader, sequence, reader != GUID_UNKNOWN);
   } else {
     result = DDS::RETCODE_ERROR;
@@ -3011,7 +3016,7 @@ Sedp::Writer::write_participant_message(const ParticipantMessageData& pmd,
                                         DCPS::SequenceNumber& sequence)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
-  const Encoding encoding(Encoding::KIND_CDR_PLAIN, ENDIAN_LITTLE);
+  const Encoding encoding(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
 
   // Determine message length
   size_t size = 0;
@@ -3023,7 +3028,9 @@ Sedp::Writer::write_participant_message(const ParticipantMessageData& pmd,
                             ACE_Message_Block::MB_DATA,
                             new ACE_Message_Block(size));
   Serializer serializer(payload.cont(), encoding);
-  if (serializer << encoding && serializer << pmd) {
+  DCPS::EncapsulationHeader encap;
+  if (encap.from_encoding(encoding, DCPS::FINAL) &&
+      serializer << encap && serializer << pmd) {
     send_sample(payload, size, reader, sequence);
   } else {
     result = DDS::RETCODE_ERROR;
@@ -3040,7 +3047,7 @@ Sedp::Writer::write_stateless_message(const DDS::Security::ParticipantStatelessM
                                       DCPS::SequenceNumber& sequence)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
-  const Encoding encoding(Encoding::KIND_CDR_PLAIN, ENDIAN_LITTLE);
+  const Encoding encoding(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
 
   size_t size = 0;
   DCPS::serialized_size_ulong(encoding, size);
@@ -3051,7 +3058,9 @@ Sedp::Writer::write_stateless_message(const DDS::Security::ParticipantStatelessM
     ACE_Message_Block::MB_DATA,
     new ACE_Message_Block(size));
   Serializer serializer(payload.cont(), encoding);
-  if (serializer << encoding && serializer << msg) {
+  DCPS::EncapsulationHeader encap;
+  if (encap.from_encoding(encoding, DCPS::FINAL) &&
+      serializer << encap && serializer << msg) {
     send_sample(payload, size, reader, sequence);
   } else {
     result = DDS::RETCODE_ERROR;
@@ -3067,7 +3076,7 @@ Sedp::Writer::write_volatile_message_secure(const DDS::Security::ParticipantVola
                                             DCPS::SequenceNumber& sequence)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
-  const Encoding encoding(Encoding::KIND_CDR_PLAIN, ENDIAN_LITTLE);
+  const Encoding encoding(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
 
   size_t size = 0;
   DCPS::serialized_size_ulong(encoding, size);
@@ -3078,7 +3087,9 @@ Sedp::Writer::write_volatile_message_secure(const DDS::Security::ParticipantVola
     ACE_Message_Block::MB_DATA,
     new ACE_Message_Block(size));
   Serializer serializer(payload.cont(), encoding);
-  if (serializer << encoding && serializer << msg) {
+  DCPS::EncapsulationHeader encap;
+  if (encap.from_encoding(encoding, DCPS::FINAL) &&
+      serializer << encap && serializer << msg) {
     send_sample(payload, size, reader, sequence);
   } else {
     result = DDS::RETCODE_ERROR;
@@ -3127,7 +3138,7 @@ Sedp::Writer::write_dcps_participant_secure(const Security::SPDPdiscoveredPartic
 DDS::ReturnCode_t
 Sedp::Writer::write_unregister_dispose(const RepoId& rid, CORBA::UShort pid)
 {
-  const Encoding encoding(Encoding::KIND_CDR_PARAMLIST, ENDIAN_LITTLE);
+  const Encoding encoding(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
 
   // Build param list for message
   Parameter param;
@@ -3155,7 +3166,9 @@ Sedp::Writer::write_unregister_dispose(const RepoId& rid, CORBA::UShort pid)
   }
 
   Serializer serializer(payload->cont(), encoding);
-  if (serializer << encoding && serializer << plist) {
+  DCPS::EncapsulationHeader encap;
+  if (encap.from_encoding(encoding, DCPS::MUTABLE) &&
+      serializer << encap && serializer << plist) {
     // Send
     write_control_msg(move(payload), size, DCPS::DISPOSE_UNREGISTER_INSTANCE);
     return DDS::RETCODE_OK;
@@ -3254,7 +3267,7 @@ static bool decode_parameter_list(
   ParameterList& data)
 {
   if (sample.header_.key_fields_only_ &&
-      encoding_kind == Encoding::KIND_CDR_PLAIN) {
+      encoding_kind == Encoding::KIND_XCDR1) {
     GUID_t guid;
     if (!(ser >> guid)) return false;
     data.length(1);
@@ -3281,14 +3294,19 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
     const DCPS::MessageId id =
       static_cast<DCPS::MessageId>(sample.header_.message_id_);
 
-    Serializer ser(sample.sample_.get(), true, false); // Read CDR Header
-    if (!ser.good_bit()) {
+    Encoding encoding;
+    Serializer ser(sample.sample_.get(), encoding);
+    DCPS::EncapsulationHeader encap;
+    if (!(ser >> encap)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
-        ACE_TEXT("failed to deserialize CDR header\n")));
+        ACE_TEXT("failed to serializer encapsulation header\n")));
       return;
     }
-
-    Encoding::Kind encoding_kind = ser.encoding().kind();
+    if (!encap.to_encoding(encoding, DCPS::MUTABLE)) {
+      return;
+    }
+    ser.encoding(encoding);
+    const Encoding::Kind encoding_kind = ser.encoding().kind();
 
     if (sample.header_.publication_id_.entityId == ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER) {
       ParameterList data;
@@ -4276,9 +4294,8 @@ Sedp::populate_transport_locator_sequence(DCPS::TransportLocatorSeq*& rTls,
     if (!participant_found) {
       return;
     } else if (locs.length()) {
-      const Encoding encoding(Encoding::KIND_CDR_PLAIN, ENDIAN_BIG);
-      size_t size = 0;
-      DCPS::serialized_size(encoding, size, locs);
+      const Encoding& encoding = get_locators_encoding();
+      size_t size = DCPS::serialized_size(encoding, locs);
       DCPS::max_serialized_size_boolean(encoding, size);
 
       ACE_Message_Block mb_locator(size);
@@ -4319,9 +4336,8 @@ Sedp::populate_transport_locator_sequence(DCPS::TransportLocatorSeq*& wTls,
     if (!participant_found) {
       return;
     } else if (locs.length()) {
-      const Encoding encoding(Encoding::KIND_CDR_PLAIN, ENDIAN_BIG);
-      size_t size = 0;
-      DCPS::serialized_size(encoding, size, locs);
+      const Encoding& encoding = get_locators_encoding();
+      size_t size = DCPS::serialized_size(encoding, locs);
       DCPS::max_serialized_size_boolean(encoding, size);
 
       ACE_Message_Block mb_locator(size);
@@ -4412,7 +4428,7 @@ Sedp::add_security_info(const DCPS::TransportLocatorSeq& locators,
         std::memcpy(endpointSecAttr.get_buffer(), &mask, endpointSecAttr.length());
         const DDS::BinaryProperty_t esa_p = {BLOB_PROP_ENDPOINT_SEC_ATTR,
                                              endpointSecAttr, true /*serialize*/};
-        const Encoding encoding(Encoding::KIND_CDR_PLAIN, ENDIAN_BIG);
+        const Encoding encoding(Encoding::KIND_XCDR1, ENDIAN_BIG);
         size_t size = 0;
         DCPS::serialized_size(encoding, size, prop);
         if (dw_handle != DDS::HANDLE_NIL) {

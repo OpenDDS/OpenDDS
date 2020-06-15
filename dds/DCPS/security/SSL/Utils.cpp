@@ -33,8 +33,7 @@ using DCPS::serialized_size;
 
 namespace {
   Encoding get_common_encoding() {
-    Encoding encoding(Encoding::KIND_CDR_PLAIN, DCPS::ENDIAN_BIG);
-    encoding.zero_init_padding(true);
+    Encoding encoding(Encoding::KIND_XCDR1, DCPS::ENDIAN_BIG);
     return encoding;
   }
 }

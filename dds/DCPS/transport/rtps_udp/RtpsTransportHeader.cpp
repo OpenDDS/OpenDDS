@@ -29,7 +29,7 @@ RtpsTransportHeader::init(ACE_Message_Block& mb)
 {
   // Byte order doesn't matter for RTPS::Header, since it's
   // exclusively structs/arrays of octet.
-  Serializer ser(&mb, Encoding::KIND_CDR_PLAIN);
+  Serializer ser(&mb, Encoding::KIND_XCDR1);
   valid_ = (ser >> header_);
 
   if (valid_) {

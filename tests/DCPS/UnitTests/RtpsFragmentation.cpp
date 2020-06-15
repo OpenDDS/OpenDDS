@@ -87,7 +87,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
       ds.inlineQos[1].string_data("my_type_name");
       ds.inlineQos[1]._d(PID_TYPE_NAME);
 
-      const Encoding encoding(Encoding::KIND_CDR_PLAIN, ENDIAN_LITTLE);
+      const Encoding encoding(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
       size_t size = 0;
       serialized_size(encoding, size, ts);
       serialized_size(encoding, size, ds);

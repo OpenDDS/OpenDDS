@@ -1012,7 +1012,7 @@ namespace {
   ACE_Message_Block* submsgs_to_msgblock(const RTPS::SubmessageSeq& subm)
   {
     // byte swapping is handled in the operator<<() implementation
-    const Encoding encoding(Encoding::KIND_CDR_PARAMLIST);
+    const Encoding encoding(Encoding::KIND_XCDR1);
     size_t size = 0;
     for (CORBA::ULong i = 0; i < subm.length(); ++i) {
       encoding.align(size, RTPS::SMHDR_SZ);
@@ -1396,8 +1396,7 @@ RtpsUdpDataLink::RtpsWriter::add_gap_submsg_i(RTPS::SubmessageSeq& msg,
       {gapListBase, 1, bitmap}
     };
 
-    size_t size = 0;
-    serialized_size(Encoding(Encoding::KIND_CDR_PLAIN), size, gap);
+    size_t size = serialized_size(Encoding(Encoding::KIND_XCDR1), gap);
     gap.smHeader.submessageLength =
       static_cast<CORBA::UShort>(size) - SMHDR_SZ;
 
@@ -2408,7 +2407,7 @@ RtpsUdpDataLink::send_bundled_submessages(MetaSubmessageVec& meta_submessages)
   AddrDestMetaSubmessageMap adr_map;
   build_meta_submessage_map(meta_submessages, adr_map);
 
-  const Encoding encoding(Encoding::KIND_CDR_PLAIN);
+  const Encoding encoding(Encoding::KIND_XCDR1);
 
   // Build reasonably-sized submessage bundles based on our destination map
   MetaSubmessageIterVecVec meta_submessage_bundles; // a vector of vectors of iterators pointing to meta_submessages
@@ -3722,7 +3721,7 @@ RtpsUdpDataLink::populate_security_handles(const RepoId& local_id,
     0 /*alloc*/, 0 /*lock*/, ACE_Message_Block::DONT_DELETE, 0 /*db_alloc*/);
   ACE_Message_Block mb(&db, ACE_Message_Block::DONT_DELETE, 0 /*mb_alloc*/);
   mb.wr_ptr(mb.space());
-  DCPS::Serializer ser(&mb, Encoding::KIND_CDR_PLAIN, ENDIAN_BIG);
+  DCPS::Serializer ser(&mb, Encoding::KIND_XCDR1, ENDIAN_BIG);
 
   const bool local_is_writer = GuidConverter(local_id).isWriter();
   const RepoId& writer_id = local_is_writer ? local_id : remote_id;
