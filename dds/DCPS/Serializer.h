@@ -121,7 +121,7 @@ public:
   enum Kind {
     /**
      * Extendible CDR version 1 from XTypes.
-     * This represents standard non-Types CDR if the type is final.
+     * This represents standard non-XTypes CDR if the type is final.
      */
     KIND_XCDR1,
     /**
@@ -182,8 +182,11 @@ public:
    */
   void align(size_t& value, size_t by = std::numeric_limits<size_t>::max()) const;
 
-  /// Return XCDR version based what encoding is being used.
+  /// Return XCDR behavior being used.
   XcdrVersion xcdr_version() const;
+
+  /// Set XCDR behavior to use
+  void xcdr_version(XcdrVersion value);
 
   /**
    * Returns true if the encoding kind is excepted to have a header for RTPS
@@ -203,6 +206,7 @@ private:
   Endianness endianness_;
   Alignment alignment_;
   bool zero_init_padding_;
+  XcdrVersion xcdr_version_;
 };
 
 /**
