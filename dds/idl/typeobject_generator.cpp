@@ -242,7 +242,7 @@ typeobject_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
           "Unexpected extensibility while setting flags", node);
         return false;
     }
-    if (be_global->is_topic_type(node)){
+    if (!be_global->is_topic_type(node)){
       bitwise_str += " | XTypes::IS_NESTED";
     }
     if (0){ //TODO: Change once HASHID is supported in be_global.cpp
@@ -384,7 +384,7 @@ typeobject_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
           "Unexpected extensibility while setting flags", node);
         return false;
     }
-    if (be_global->is_topic_type(node)){
+    if (!be_global->is_topic_type(node)){
       bitwise_str += " | XTypes::IS_NESTED";
     }
     be_global->impl_ <<
