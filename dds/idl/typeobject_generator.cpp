@@ -242,10 +242,10 @@ typeobject_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
           "Unexpected extensibility while setting flags", node);
         return false;
     }
-    if (be_global->is_nested(node)){
+    if (be_global->is_topic_type(node)){
       bitwise_str += " | XTypes::IS_NESTED";
     }
-    if (0){ //TODO: Change once HASHID is supported in beglobal.cpp
+    if (0){ //TODO: Change once HASHID is supported in be_global.cpp
       bitwise_str += " | XTypes::IS_AUTOID_HASH";
     }
     // TODO: Support struct inheritance.
@@ -261,14 +261,23 @@ typeobject_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
       "        XTypes::MinimalStructMemberSeq()\n";
 
     ACE_CDR::ULong member_id = 0;
+
     for (std::vector<AST_Field*>::const_iterator pos = fields.begin(), limit = fields.end(); pos != limit; ++pos) {
+      string member_string;
+      bool value;
+      if(be_global->check_key(*pos, value)){
+        member_string = "XTypes::StructMemberFlag(XTypes::IS_KEY)";
+      }
+      else{
+        member_string = "XTypes::StructMemberFlag()";
+      }
       be_global->impl_ <<
         "        .append(\n"
         "          XTypes::MinimalStructMember(\n"
         "            XTypes::CommonStructMember(\n"
         "              " << member_id++ << ",\n" // TODO: other kinds of memberid, see marshal_generator::gen_struct calling BE_GlobalData::get_id
 
-        "              XTypes::StructMemberFlag(),\n" // TODO: Set StructMemberFlags.
+        "              "<< member_string << ",\n" //TODO: Additional flags are possible but not implemented
         "              ";
       call_get_minimal_type_identifier((*pos)->field_type());
       be_global->impl_ << "\n"
@@ -319,7 +328,7 @@ typeobject_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
       "        XTypes::MinimalAliasHeader(),\n"
       "        XTypes::MinimalAliasBody(\n"
       "          XTypes::CommonAliasBody(\n"
-      "            XTypes::AliasMemberFlag(),\n" // TODO: How should this be populated?
+      "            XTypes::AliasMemberFlag(),\n" // TODO: Currently not used according to spec
       "            ";
     call_get_minimal_type_identifier(base);
     be_global->impl_ <<
@@ -375,7 +384,7 @@ typeobject_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
           "Unexpected extensibility while setting flags", node);
         return false;
     }
-    if (be_global->is_nested(node)){
+    if (be_global->is_topic_type(node)){
       bitwise_str += " | XTypes::IS_NESTED";
     }
     be_global->impl_ <<
@@ -407,14 +416,21 @@ typeobject_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
           break;
         }
       }
-
+      string member_string;
+      bool value;
+      if(be_global->has_key(node)){
+        member_string = " XTypes::IS_KEY ";
+      }
+      else{
+        member_string = "0";
+      }
       be_global->impl_ <<
         "        .append(\n"
         "          XTypes::MinimalUnionMember(\n"
         "            XTypes::CommonUnionMember(\n"
         "              " << member_id++ << ",\n"
         "              XTypes::UnionMemberFlag(\n"
-        "                0\n";  // TODO: Populate this.
+        "                " << member_string << "\n"; //TODO: Additional flags are possible but not implemented
       if (is_default) {
         be_global->impl_ <<
           "              | XTypes::IS_DEFAULT\n";
