@@ -301,7 +301,7 @@ int DDS_TEST::test(ACE_TString host, u_short port)
   marshal_key_hash(data, hash);
   ds.inlineQos[0].key_hash(hash);
 
-  const Encoding encoding(Encoding::KIND_CDR_PLAIN, ENDIAN_LITTLE);
+  const Encoding encoding(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
   // TODO(iguessthislldo): Convert
   const ACE_CDR::ULong encap = 0x00000100; // {CDR_LE, options} in BE format
   size_t size = serialized_size(encoding, hdr);

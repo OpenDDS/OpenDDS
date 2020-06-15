@@ -17,7 +17,7 @@
 
 using namespace OpenDDS::DCPS;
 
-const Encoding encoding(Encoding::KIND_CDR_UNALIGNED);
+const Encoding encoding(Encoding::KIND_UNALIGNED_CDR);
 
 template<typename Type>
 bool assert_impl(

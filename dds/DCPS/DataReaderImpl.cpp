@@ -1454,7 +1454,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     this->writer_activity(sample.header_);
 
     Serializer serializer(
-        sample.sample_.get(), Encoding::KIND_CDR_UNALIGNED,
+        sample.sample_.get(), Encoding::KIND_UNALIGNED_CDR,
         sample.header_.byte_order_ ? ENDIAN_LITTLE : ENDIAN_BIG);
     if (!(serializer >> control)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DataReaderImpl::data_received ")
@@ -1625,7 +1625,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 
   case END_HISTORIC_SAMPLES: {
     if (sample.header_.message_length_ >= sizeof(RepoId)) {
-      Serializer ser(sample.sample_.get(), Encoding::KIND_CDR_UNALIGNED);
+      Serializer ser(sample.sample_.get(), Encoding::KIND_UNALIGNED_CDR);
       RepoId readerId = GUID_UNKNOWN;
       if (!(ser >> readerId)) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DataReaderImpl::data_received ")

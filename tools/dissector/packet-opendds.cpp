@@ -186,7 +186,7 @@ namespace OpenDDS
       return instance_;
     }
 
-    const Encoding encoding(Encoding::KIND_CDR_UNALIGNED);
+    const Encoding encoding(Encoding::KIND_UNALIGNED_CDR);
 
     template<typename T>
     T

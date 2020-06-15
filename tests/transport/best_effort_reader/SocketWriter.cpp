@@ -30,7 +30,7 @@
 using namespace OpenDDS::DCPS;
 using namespace OpenDDS::RTPS;
 
-const Encoding SocketWriter::encoding(Encoding::KIND_CDR_PLAIN, ENDIAN_LITTLE);
+const Encoding SocketWriter::encoding(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
 
 const double SocketWriter::NTP_FRACTIONAL = 4294.967296; // NTP fractional (2^-32) sec per microsec
 

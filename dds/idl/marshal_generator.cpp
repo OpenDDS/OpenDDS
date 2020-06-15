@@ -1719,7 +1719,7 @@ namespace {
      * This is just for the base type, nested types can have different
      * extensibilities.
      */
-      "  static Encoding::Extensibility extensibility() { return Encoding::";
+      "  static Extensibility extensibility() { return ";
     switch (exten) {
     case extensibilitykind_final:
       be_global->header_ << "FINAL";
@@ -2393,7 +2393,7 @@ namespace {
         "  }\n"
         "  param.wr_ptr(size);\n"
         "  const Encoding encoding(\n"
-        "    Encoding::KIND_CDR_PARAMLIST, outer_strm.swap_bytes());\n"
+        "    Encoding::KIND_XCDR1, outer_strm.swap_bytes());\n"
         "  Serializer strm(&param, encoding);"
         "  switch (disc) {\n";
       generateSwitchBody(streamCommon, branches, discriminator,

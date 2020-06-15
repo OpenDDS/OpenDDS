@@ -22,7 +22,8 @@
 #endif /* __ACE_INLINE__ */
 
 namespace {
-  const OpenDDS::DCPS::Encoding encoding_unaligned_native(OpenDDS::DCPS::Encoding::KIND_CDR_UNALIGNED);
+  using OpenDDS::DCPS::Encoding;
+  const Encoding encoding_unaligned_native(Encoding::KIND_UNALIGNED_CDR);
 }
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL

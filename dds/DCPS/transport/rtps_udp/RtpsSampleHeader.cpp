@@ -80,7 +80,7 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
   }
 
   const size_t starting_length = mb.total_length();
-  Serializer ser(&mb, Encoding::KIND_CDR_PLAIN,
+  Serializer ser(&mb, Encoding::KIND_XCDR1,
     (flags & FLAG_E) ? ENDIAN_LITTLE : ENDIAN_BIG);
 
   ACE_CDR::UShort octetsToNextHeader = 0;

@@ -557,7 +557,7 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
         ACE_DEBUG((LM_INFO, "(%P|%t) Sending historic samples\n"));
       }
 
-      const Encoding encoding(Encoding::KIND_CDR_UNALIGNED);
+      const Encoding encoding(Encoding::KIND_UNALIGNED_CDR);
       size_t size = 0;
       serialized_size(encoding, size, remote_id);
       Message_Block_Ptr data(
@@ -2283,9 +2283,8 @@ DataWriterImpl::end_coherent_changes(const GroupCoherentSamples& group_samples)
       0, // alloc_strategy
       get_db_lock()));
 
-  Serializer serializer(
-    data.get(), Encoding::KIND_CDR_UNALIGNED,
-    this->swap_bytes() ? ENDIAN_NONNATIVE : ENDIAN_NATIVE);
+  Serializer serializer(data.get(), Encoding::KIND_UNALIGNED_CDR,
+    this->swap_bytes());
 
   serializer << end_msg;
 

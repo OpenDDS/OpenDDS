@@ -95,8 +95,7 @@ bool should_check_association_upon_change(const DDS::DomainParticipantQos & qos1
                                           const DDS::DomainParticipantQos & qos2);
 
 OpenDDS_Dcps_Export
-Encoding::Kind repr_ext_to_encoding_kind(
-  DDS::DataRepresentationId_t repr, Encoding::Extensibility ext);
+bool repr_to_encoding_kind(DDS::DataRepresentationId_t repr, Encoding::Kind& kind);
 
 } // namespace DCPS
 } // namespace OpenDDS

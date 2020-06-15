@@ -10,7 +10,7 @@
 using namespace key_annotation;
 
 const OpenDDS::DCPS::Encoding encoding(
-  OpenDDS::DCPS::Encoding::KIND_CDR_PLAIN);
+  OpenDDS::DCPS::Encoding::KIND_XCDR1);
 
 template <typename T>
 OpenDDS::DCPS::DDSTraits<T>& get_traits()

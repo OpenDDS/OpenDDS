@@ -15,7 +15,7 @@ using OpenDDS::DCPS::max_serialized_size;
 using OpenDDS::DCPS::serialized_size;
 using OpenDDS::DCPS::Message_Block_Ptr;
 
-const Encoding encoding(Encoding::KIND_CDR_UNALIGNED);
+const Encoding encoding(Encoding::KIND_UNALIGNED_CDR);
 
 // this test tests the opendds_idl generated code for type XyZ::Foo from idl_test1_lib.
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
