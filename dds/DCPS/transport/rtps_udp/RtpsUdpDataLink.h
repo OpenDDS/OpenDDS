@@ -293,6 +293,7 @@ private:
       : acknack_recvd_count_(0)
       , nackfrag_recvd_count_(0)
       , requires_heartbeat_(false)
+      , cur_cumulative_ack_(SequenceNumber::ZERO()) // Starting at zero instead of unknown makes the logic cleaner.
       , handshake_done_(false)
       , durable_(durable)
     {}
@@ -303,6 +304,31 @@ private:
   };
 
   typedef OPENDDS_MAP_CMP(RepoId, ReaderInfo, GUID_tKeyLessThan) ReaderInfoMap;
+
+  class ReplayDurableData : public JobQueue::Job {
+  public:
+    ReplayDurableData(WeakRcHandle<RtpsUdpDataLink> link, const RepoId& local_pub_id, const RepoId remote_sub_id)
+      : link_(link)
+      , local_pub_id_(local_pub_id)
+      , remote_sub_id_(remote_sub_id)
+    {}
+
+  private:
+    WeakRcHandle<RtpsUdpDataLink> link_;
+    const RepoId local_pub_id_;
+    const RepoId remote_sub_id_;
+
+    void execute() {
+      RtpsUdpDataLink_rch link = link_.lock();
+
+      if (!link) {
+        return;
+      }
+
+      ACE_DEBUG((LM_DEBUG, "Calling replay_durable_data on datalink\n"));
+      link->replay_durable_data(local_pub_id_, remote_sub_id_);
+    }
+  };
 
   class RtpsWriter : public RcObject {
   protected:
@@ -385,12 +411,11 @@ private:
     SequenceRange hb_range_;
     OPENDDS_MAP(SequenceNumber, RTPS::FragmentNumber_t) frags_;
     bool ack_pending_, first_activity_, first_valid_hb_, first_delivered_data_;
-    CORBA::Long heartbeat_recvd_count_, hb_frag_recvd_count_,
-      acknack_count_, nackfrag_count_;
+    CORBA::Long heartbeat_recvd_count_, hb_frag_recvd_count_, nackfrag_count_;
 
     WriterInfo()
       : ack_pending_(false), first_activity_(true), first_valid_hb_(true), first_delivered_data_(true)
-      , heartbeat_recvd_count_(0), hb_frag_recvd_count_(0), acknack_count_(0), nackfrag_count_(0)
+      , heartbeat_recvd_count_(0), hb_frag_recvd_count_(0), nackfrag_count_(0)
     { hb_range_.second = SequenceNumber::ZERO(); }
 
     bool should_nack() const;
@@ -402,7 +427,7 @@ private:
 
   class RtpsReader : public RcObject {
   public:
-    RtpsReader(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable) : link_(link), id_(id), durable_(durable), stopping_(false) {}
+    RtpsReader(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable) : link_(link), id_(id), durable_(durable), stopping_(false), acknack_count_(0) {}
 
     bool add_writer(const RepoId& id, const WriterInfo& info);
     bool has_writer(const RepoId& id) const;
@@ -432,6 +457,7 @@ private:
     bool durable_;
     WriterInfoMap remote_writers_;
     bool stopping_;
+    CORBA::Long acknack_count_;
   };
   typedef RcHandle<RtpsReader> RtpsReader_rch;
 

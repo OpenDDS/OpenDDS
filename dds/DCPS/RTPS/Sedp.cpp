@@ -924,6 +924,49 @@ void Sedp::associate_volatile(const Security::SPDPdiscoveredParticipantData& pda
   }
 }
 
+void Sedp::rekey_volatile(const Security::SPDPdiscoveredParticipantData& pdata)
+{
+  using namespace DDS::Security;
+
+  const BuiltinEndpointSet_t& avail = pdata.participantProxy.availableBuiltinEndpoints;
+
+  DDS::Security::SecurityException se = {"", 0, 0};
+  DDS::Security::CryptoKeyFactory_var key_factory = spdp_.get_security_config()->get_crypto_key_factory();
+  const DCPS::RepoId part_guid = make_id(pdata.participantProxy.guidPrefix, ENTITYID_PARTICIPANT);
+
+  if (avail & BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_WRITER) {
+    Spdp::ParticipantCryptoInfoPair info = spdp_.lookup_participant_crypto_info(part_guid);
+    if (info.first != DDS::HANDLE_NIL && info.second) {
+      const DCPS::RepoId writer_guid = make_id(part_guid, ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER);
+      if (!key_factory->rekey_remote_datawriter(remote_writer_crypto_handles_[writer_guid], info.second, se)) {
+        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::rekey_volatile() - ")
+                   ACE_TEXT("Failure calling rekey_remote_datawriter(). Security Exception[%d.%d]: %C\n"),
+                   se.code, se.minor_code, se.message.in()));
+      }
+    } else {
+      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::rekey_volatile() - ")
+                 ACE_TEXT("Unable to lookup remote participant crypto info.\n")));
+    }
+  }
+  if (avail & BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_READER) {
+    Spdp::ParticipantCryptoInfoPair info = spdp_.lookup_participant_crypto_info(part_guid);
+    if (info.first != DDS::HANDLE_NIL && info.second) {
+      const DCPS::RepoId reader_guid = make_id(part_guid, ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER);
+      if (!key_factory->rekey_remote_datareader(remote_reader_crypto_handles_[reader_guid], info.second, se)) {
+        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::rekey_voltatile() - ")
+                   ACE_TEXT("Failure calling rekey_remote_datawriter(). Security Exception[%d.%d]: %C\n"),
+                   se.code, se.minor_code, se.message.in()));
+      }
+    } else {
+      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::rekey_volatile() - ")
+                 ACE_TEXT("Unable to lookup remote participant crypto info.\n")));
+    }
+  }
+
+  spdp_.send_participant_crypto_tokens(part_guid);
+  send_builtin_crypto_tokens(pdata);
+}
+
 void Sedp::disassociate_helper(const BuiltinEndpointSet_t& avail, const CORBA::ULong flags,
                                const RepoId& id, const EntityId_t& ent, DCPS::TransportClient& client)
 {
@@ -1360,6 +1403,30 @@ Sedp::disassociate(const ParticipantData_t& pdata)
     return true;
   } else {
     return false;
+  }
+}
+
+void
+Sedp::replay_durable_data_for(const DCPS::RepoId& remote_sub_id)
+{
+  DCPS::GuidConverter conv(remote_sub_id);
+  ACE_DEBUG((LM_DEBUG, "Sedp::replay_durable_data_for %C\n", OPENDDS_STRING(conv).c_str()));
+  if (remote_sub_id.entityId == ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER) {
+    write_durable_publication_data(remote_sub_id, false);
+  } else if (remote_sub_id.entityId == ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER) {
+    write_durable_subscription_data(remote_sub_id, false);
+  } else if (remote_sub_id.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER) {
+    write_durable_participant_message_data(remote_sub_id);
+#ifdef OPENDDS_SECURITY
+  } else if (remote_sub_id.entityId == ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER) {
+    write_durable_publication_data(remote_sub_id, true);
+  } else if (remote_sub_id.entityId == ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER) {
+    write_durable_subscription_data(remote_sub_id, true);
+  } else if (remote_sub_id.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER) {
+    write_durable_participant_message_data(remote_sub_id);
+  } else if (remote_sub_id.entityId == ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER) {
+    write_durable_dcps_participant_secure(remote_sub_id);
+#endif
   }
 }
 
@@ -2973,6 +3040,13 @@ Sedp::Writer::control_delivered(const DCPS::Message_Block_Ptr& /* sample */)
 void
 Sedp::Writer::control_dropped(const DCPS::Message_Block_Ptr& /* sample */, bool)
 {
+}
+
+void
+Sedp::Writer::replay_durable_data_for(const DCPS::RepoId& remote_sub_id)
+{
+  // Ideally, we would have the data cached and ready for replay but we do not.
+  sedp_.replay_durable_data_for(remote_sub_id);
 }
 
 void Sedp::Writer::send_sample(const ACE_Message_Block& data,

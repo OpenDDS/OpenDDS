@@ -715,6 +715,11 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
   }
 }
 
+void DataWriterImpl::replay_durable_data_for(const RepoId& remote_sub_id)
+{
+  ACE_DEBUG((LM_DEBUG, "DataWriterImpl::replay_durable_data_for TODO\n"));
+}
+
 void DataWriterImpl::remove_all_associations()
 {
   DBG_ENTRY_LVL("DataWriterImpl", "remove_all_associations", 6);

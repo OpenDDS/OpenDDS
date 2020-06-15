@@ -600,10 +600,16 @@ module DDS {
 
       DatareaderCryptoHandle
       register_matched_remote_datareader(
-        in    DatawriterCryptoHandle   local_datawritert_crypto_handle,
+        in    DatawriterCryptoHandle   local_datawriter_crypto_handle,
         in    ParticipantCryptoHandle  remote_participant_crypto,
         in    SharedSecretHandle       shared_secret,
         in    boolean                  relay_only,
+        inout SecurityException        ex);
+
+      boolean
+      rekey_remote_datareader(
+        in    DatareaderCryptoHandle   remote_datareader_crypto_handle,
+        in    SharedSecretHandle       shared_secret,
         inout SecurityException        ex);
 
       DatareaderCryptoHandle
@@ -617,6 +623,12 @@ module DDS {
       register_matched_remote_datawriter(
         in    DatareaderCryptoHandle   local_datareader_crypto_handle,
         in    ParticipantCryptoHandle  remote_participant_crypt,
+        in    SharedSecretHandle       shared_secret,
+        inout SecurityException        ex );
+
+      boolean
+      rekey_remote_datawriter(
+        in    DatawriterCryptoHandle   remote_datawriter_crypto_handle,
         in    SharedSecretHandle       shared_secret,
         inout SecurityException        ex );
 

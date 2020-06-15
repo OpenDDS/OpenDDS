@@ -416,6 +416,56 @@ DatareaderCryptoHandle CryptoBuiltInImpl::register_matched_remote_datareader(
   return h;
 }
 
+bool CryptoBuiltInImpl::rekey_remote_datareader(
+  DatareaderCryptoHandle remote_datareader_crypto_handle,
+  SharedSecretHandle* shared_secret,
+  SecurityException& ex)
+{
+  if (DDS::HANDLE_NIL == remote_datareader_crypto_handle) {
+    CommonUtilities::set_security_error(ex, -1, 0, "Invalid Remote DataReader Crypto Handle");
+    return false;
+  }
+  if (!shared_secret) {
+    CommonUtilities::set_security_error(ex, -1, 0, "Invalid Shared Secret Handle");
+    return false;
+  }
+
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+
+  const KeyTable_t::iterator iter = keys_.find(remote_datareader_crypto_handle);
+  if (iter == keys_.end()) {
+    CommonUtilities::set_security_error(ex, -1, 0, "Invalid Remote DataReader Crypto Handle");
+    return DDS::HANDLE_NIL;
+  }
+
+  KeySeq& dr_keys = iter->second;
+  dr_keys[0] = make_volatile_key(shared_secret->challenge1(),
+                                 shared_secret->challenge2(),
+                                 shared_secret->sharedSecret());
+  if (!dr_keys[0].master_salt.length()
+      || !dr_keys[0].master_sender_key.length()) {
+    CommonUtilities::set_security_error(ex, -1, 0, "Couldn't create key for "
+                                        "volatile remote reader");
+    return DDS::HANDLE_NIL;
+  }
+
+  static const unsigned int SUBMSG_KEY_IDX = 0;
+  const KeyId_t sKey = std::make_pair(remote_datareader_crypto_handle, SUBMSG_KEY_IDX);
+  sessions_.erase(sKey);
+
+  if (security_debug.bookkeeping && !security_debug.showkeys) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} CryptoBuiltInImpl::rekey_remote_datareader ")
+               ACE_TEXT("created volatile key for RDRCH %d\n"), remote_datareader_crypto_handle));
+  }
+  if (security_debug.showkeys) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {showkeys} CryptoBuiltInImpl::rekey_remote_datareader ")
+               ACE_TEXT("created volatile key for RDRCH %d:\n%C"), remote_datareader_crypto_handle,
+               to_dds_string(dr_keys[0]).c_str()));
+  }
+
+  return true;
+}
+
 DatareaderCryptoHandle CryptoBuiltInImpl::register_local_datareader(
   ParticipantCryptoHandle participant_crypto,
   const DDS::PropertySeq& properties,
@@ -513,6 +563,56 @@ DatawriterCryptoHandle CryptoBuiltInImpl::register_matched_remote_datawriter(
   participant_to_entity_.insert(std::make_pair(remote_participant_crypto, e));
   encrypt_options_[h] = encrypt_options_[local_datareader_crypto_handle];
   return h;
+}
+
+bool CryptoBuiltInImpl::rekey_remote_datawriter(
+  DatawriterCryptoHandle remote_datawriter_crypto_handle,
+  SharedSecretHandle* shared_secret,
+  SecurityException& ex)
+{
+  if (DDS::HANDLE_NIL == remote_datawriter_crypto_handle) {
+    CommonUtilities::set_security_error(ex, -1, 0, "Invalid Remote DataWriter Crypto Handle");
+    return false;
+  }
+  if (!shared_secret) {
+    CommonUtilities::set_security_error(ex, -1, 0, "Invalid Shared Secret Handle");
+    return false;
+  }
+
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+
+  const KeyTable_t::iterator iter = keys_.find(remote_datawriter_crypto_handle);
+  if (iter == keys_.end()) {
+    CommonUtilities::set_security_error(ex, -1, 0, "Invalid Remote DataWriter Crypto Handle");
+    return DDS::HANDLE_NIL;
+  }
+
+  KeySeq& dr_keys = iter->second;
+  dr_keys[0] = make_volatile_key(shared_secret->challenge1(),
+                                 shared_secret->challenge2(),
+                                 shared_secret->sharedSecret());
+  if (!dr_keys[0].master_salt.length()
+      || !dr_keys[0].master_sender_key.length()) {
+    CommonUtilities::set_security_error(ex, -1, 0, "Couldn't create key for "
+                                        "volatile remote writer");
+    return DDS::HANDLE_NIL;
+  }
+
+  static const unsigned int SUBMSG_KEY_IDX = 0;
+  const KeyId_t sKey = std::make_pair(remote_datawriter_crypto_handle, SUBMSG_KEY_IDX);
+  sessions_.erase(sKey);
+
+  if (security_debug.bookkeeping && !security_debug.showkeys) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} CryptoBuiltInImpl::rekey_remote_datawriter ")
+               ACE_TEXT("created volatile key for RDWCH %d\n"), remote_datawriter_crypto_handle));
+  }
+  if (security_debug.showkeys) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {showkeys} CryptoBuiltInImpl::rekey_remote_datawriter ")
+               ACE_TEXT("created volatile key for RDWCH %d:\n%C"), remote_datawriter_crypto_handle,
+               to_dds_string(dr_keys[0]).c_str()));
+  }
+
+  return true;
 }
 
 bool CryptoBuiltInImpl::unregister_participant(ParticipantCryptoHandle handle, SecurityException& ex)

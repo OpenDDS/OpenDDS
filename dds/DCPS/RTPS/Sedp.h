@@ -104,6 +104,7 @@ public:
 #ifdef OPENDDS_SECURITY
   void associate_preauth(const Security::SPDPdiscoveredParticipantData& pdata);
   void associate_volatile(const Security::SPDPdiscoveredParticipantData& pdata);
+  void rekey_volatile(const Security::SPDPdiscoveredParticipantData& pdata);
   void associate_secure_writers_to_readers(const Security::SPDPdiscoveredParticipantData& pdata);
   void associate_secure_readers_to_writers(const Security::SPDPdiscoveredParticipantData& pdata);
 
@@ -348,6 +349,7 @@ private:
     void notify_publication_reconnected(const DCPS::ReaderIdSeq&) {}
     void notify_publication_lost(const DCPS::ReaderIdSeq&) {}
     void remove_associations(const DCPS::ReaderIdSeq&, bool) {}
+    void replay_durable_data_for(const DCPS::RepoId& remote_sub_id);
     void retrieve_inline_qos_data(InlineQosData&) const {}
 
     void send_sample(const ACE_Message_Block& data,
@@ -820,6 +822,7 @@ protected:
 
   void disassociate_helper(const BuiltinEndpointSet_t& avail, const CORBA::ULong flags,
                            const DCPS::RepoId& id, const EntityId_t& ent, DCPS::TransportClient& client);
+  void replay_durable_data_for(const DCPS::RepoId& remote_sub_id);
 };
 
 /// A class to wait on acknowledgments from other threads

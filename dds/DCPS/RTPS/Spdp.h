@@ -105,6 +105,7 @@ public:
   DDS::Security::ParticipantCryptoHandle remote_crypto_handle(const DCPS::RepoId& remote_participant) const;
 
   void handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg);
+  void send_handshake_request(const DCPS::RepoId& guid, DiscoveredParticipant& dp);
   void handle_handshake_message(const DDS::Security::ParticipantStatelessMessage& msg);
   void handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg);
 #endif
@@ -203,7 +204,11 @@ private:
   void match_unauthenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& dp_iter);
 
 #ifdef OPENDDS_SECURITY
-  bool match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& dp_iter);
+  DDS::ReturnCode_t send_stateless_message(const DCPS::RepoId& guid,
+                                           DiscoveredParticipant& dp,
+                                           DDS::Security::ParticipantStatelessMessage& msg,
+                                           bool resend);
+  bool match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& iter);
   void attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp);
   void update_agent_info(const DCPS::RepoId& local_guid, const ICE::AgentInfo& agent_info);
 #endif

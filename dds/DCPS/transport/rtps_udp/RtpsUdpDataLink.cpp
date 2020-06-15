@@ -62,7 +62,7 @@ bool bitmapNonEmpty(const OpenDDS::RTPS::SequenceNumberSet& snSet)
       }
       for (int bit = 31; bit >= 0; --bit) {
         if ((snSet.bitmap[i] & (1 << bit))
-            && snSet.numBits >= i * 32 + (31 - bit)) {
+            && snSet.numBits > i * 32 + (31 - bit)) {
           return true;
         }
       }
@@ -2182,7 +2182,7 @@ RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(MetaSubmessageVec& meta_submessa
           {ack.getHigh(), ack.getLow()},
           num_bits, bitmap
         },
-        {++wi->second.acknack_count_}
+        {++acknack_count_}
       };
       meta_submessage.sm_.acknack_sm(acknack);
 
@@ -2643,13 +2643,9 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
                           const GuidPrefix_t& src_prefix)
 {
   // local side is DW
-  RepoId local;
-  std::memcpy(local.guidPrefix, local_prefix_, sizeof(GuidPrefix_t));
-  local.entityId = acknack.writerId; // can't be ENTITYID_UNKNOWN
+  const RepoId local = RTPS::make_id(local_prefix_, acknack.writerId); // can't be ENTITYID_UNKNOWN
 
-  RepoId remote;
-  std::memcpy(remote.guidPrefix, src_prefix, sizeof(GuidPrefix_t));
-  remote.entityId = acknack.readerId;
+  const RepoId remote = RTPS::make_id(src_prefix, acknack.readerId);
 
   const MonotonicTimePoint now = MonotonicTimePoint::now();
   OPENDDS_VECTOR(DiscoveryListener*) callbacks;
@@ -2757,9 +2753,11 @@ RtpsUdpDataLink::RtpsWriter::gather_gaps_i(const RepoId& reader,
 
 void
 RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& acknack,
-                                             const RepoId& src,
+                                             const RepoId& src_prefix,
                                              MetaSubmessageVec& meta_submessages)
 {
+  const RepoId remote = RTPS::make_id(src_prefix, acknack.readerId);
+
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
   RtpsUdpDataLink_rch link = link_.lock();
@@ -2767,8 +2765,6 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   if (!link) {
     return;
   }
-
-  RepoId remote = src;
 
   bool first_ack = false;
 
@@ -2796,10 +2792,6 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
     ri->second.handshake_done_ = true;
     first_ack = true;
   }
-
-  // For first_acknowledged_by_reader
-  SequenceNumber received_sn_base;
-  received_sn_base.setValue(acknack.readerSNState.bitmapBase.high, acknack.readerSNState.bitmapBase.low);
 
   OPENDDS_MAP(SequenceNumber, TransportQueueElement*) pendingCallbacks;
   const bool is_final = acknack.smHeader.flags & RTPS::FLAG_F;
@@ -2917,10 +2909,16 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   SequenceNumber ack;
   ack.setValue(acknack.readerSNState.bitmapBase.high,
                acknack.readerSNState.bitmapBase.low);
-  if (ack != SequenceNumber::SEQUENCENUMBER_UNKNOWN()
-      && ack != SequenceNumber::ZERO()) {
-    ri->second.cur_cumulative_ack_ = ack;
+  if (ack != SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
+    if (ack >= ri->second.cur_cumulative_ack_) {
+      ri->second.cur_cumulative_ack_ = ack;
+    } else {
+      // Count increased but ack decreased.  Replay durable data for the reader.
+      ACE_DEBUG((LM_DEBUG, "Enqueuing ReplayDurableData\n"));
+      link->job_queue_->enqueue(make_rch<ReplayDurableData>(link_, id_, remote));
+    }
   }
+
   // If this ACKNACK was final, the DR doesn't expect a reply, and therefore
   // we don't need to do anything further.
   if (!is_final || bitmapNonEmpty(acknack.readerSNState)) {

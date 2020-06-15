@@ -62,11 +62,11 @@ namespace OpenDDS {
     };
 
     enum HandshakeState {
-      HANDSHAKE_STATE_UNKNOWN,
-      HANDSHAKE_STATE_REQUEST,
-      HANDSHAKE_STATE_REQUEST_SENT,
-      HANDSHAKE_STATE_REPLY,
-      HANDSHAKE_STATE_REPLY_SENT
+      // Requester/Replier
+      HANDSHAKE_STATE_EXPECTING_REPLY_OR_FINAL,
+
+      // Replier
+      HANDSHAKE_STATE_EXPECTING_REQUEST
     };
 #endif
 
@@ -1590,9 +1590,9 @@ namespace OpenDDS {
         , bit_ih_(DDS::HANDLE_NIL)
         , seq_reset_count_(0)
 #ifdef OPENDDS_SECURITY
-        , has_last_stateless_msg_(false)
+        , have_auth_req_msg_(false)
+        , have_handshake_msg_(false)
         , auth_state_(AUTH_STATE_UNKNOWN)
-        , handshake_state_(HANDSHAKE_STATE_UNKNOWN)
         , is_requester_(false)
         , identity_handle_(DDS::HANDLE_NIL)
         , handshake_handle_(DDS::HANDLE_NIL)
@@ -1617,9 +1617,9 @@ namespace OpenDDS {
         , last_seq_(seq)
         , seq_reset_count_(0)
 #ifdef OPENDDS_SECURITY
-        , has_last_stateless_msg_(false)
+        , have_auth_req_msg_(false)
+        , have_handshake_msg_(false)
         , auth_state_(AUTH_STATE_UNKNOWN)
-        , handshake_state_(HANDSHAKE_STATE_UNKNOWN)
         , is_requester_(false)
         , identity_handle_(DDS::HANDLE_NIL)
         , handshake_handle_(DDS::HANDLE_NIL)
@@ -1672,10 +1672,11 @@ namespace OpenDDS {
         ACE_UINT16 seq_reset_count_;
 
 #ifdef OPENDDS_SECURITY
-        bool has_last_stateless_msg_;
+        bool have_auth_req_msg_;
+        DDS::Security::ParticipantStatelessMessage auth_req_msg_;
+        bool have_handshake_msg_;
+        DDS::Security::ParticipantStatelessMessage handshake_msg_;
         MonotonicTimePoint stateless_msg_deadline_;
-        DDS::Security::ParticipantStatelessMessage last_stateless_msg_;
-        DDS::Security::HandshakeMessageToken last_handshake_request_data_;
 
         MonotonicTimePoint auth_deadline_;
         AuthState auth_state_;
