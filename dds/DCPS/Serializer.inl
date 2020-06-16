@@ -852,7 +852,7 @@ ACE_INLINE
 bool Serializer::write_delimiter(size_t size)
 {
   if (encoding().xcdr_version() == Encoding::XCDR_VERSION_2) {
-    return *this << static_cast<ACE_CDR::ULong>(size);
+    return *this << static_cast<ACE_CDR::ULong>(size - uint32_cdr_size);
   }
   return true;
 }
@@ -1545,7 +1545,8 @@ ACE_INLINE
 void serialized_size_parameter_id(
   const Encoding& encoding, size_t& size, size_t& xcdr1_running_size)
 {
-  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_1) {
+  const Encoding::XcdrVersion xcdr = encoding.xcdr_version();
+  if (xcdr == Encoding::XCDR_VERSION_1) {
     encoding.align(size, 4);
     size += uint16_cdr_size * 2;
     // TODO(iguessthislldo): Extended PID
@@ -1553,8 +1554,11 @@ void serialized_size_parameter_id(
     // Save and Zero Size to Reset the Alignment
     xcdr1_running_size += size;
     size = 0;
+  } else if (xcdr == Encoding::XCDR_VERSION_2) {
+    encoding.align(size, uint32_cdr_size);
+    size += uint32_cdr_size;
+    // TODO(iguessthislldo) LC
   }
-  // TODO(iguessthislldo): XCDR2
 }
 
 ACE_INLINE

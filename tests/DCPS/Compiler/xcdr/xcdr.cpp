@@ -12,6 +12,7 @@ using namespace OpenDDS::DCPS;
 
 const Encoding xcdr1(Encoding::KIND_XCDR1, ENDIAN_BIG);
 const Encoding xcdr2(Encoding::KIND_XCDR2, ENDIAN_BIG);
+// Big Endian just so it's easier to write expected CDR
 
 template <typename Type>
 void set_values(Type& value)
@@ -72,14 +73,46 @@ bool operator==(const DataView& a, const DataView& b)
       << b_expr << ":\n" << to_hex_dds_string(b.data, b.size, '\n', 8);
 }
 
+template<typename Type>
+void serializer_test(const Encoding& encoding, const std::string expected_cdr)
+{
+  ACE_Message_Block mb(1024);
+  Type value;
+  set_values(value);
+
+  // Serialize and Compare CDR
+  {
+    Serializer serializer(&mb, encoding);
+    EXPECT_TRUE(serializer << value);
+    EXPECT_PRED_FORMAT2(AssertDataView, mb, expected_cdr);
+  }
+
+  // Deserialize and Compare C++ Values
+  {
+    Serializer serializer(&mb, encoding);
+    Type result;
+    EXPECT_TRUE(serializer >> result);
+    EXPECT_PRED_FORMAT2(AssertValues<Type>, value, result);
+  }
+}
+
 // XCDR1 =====================================================================
 
 const std::string xcdr1_non_mutable_expected(
-  "\x7f\xff\x00\x00\x7f\xff\xff\xff"
-  "\x01\x00\x00\x00\x00\x00\x00\x00"
-  "\x7f\xff\xff\xff\xff\xff\xff\xff", 24);
+  // short_field
+  "\x7f\xff" // +2 = 2
+  // long_field
+  "\x00\x00" // +2 pad = 4
+  "\x7f\xff\xff\xff" // +4 = 8
+  // octet_field
+  "\x01" // +1 = 9
+  // long_long_field
+  "\x00\x00\x00\x00\x00\x00\x00" // +7 pad = 16
+  "\x7f\xff\xff\xff\xff\xff\xff\xff" // +8 = 24
+  , 24);
 
 // FinalXcdr1Type ------------------------------------------------------------
+
 TEST(FinalXcdr1Type_tests, serialized_size_test)
 {
   FinalXcdr1Type value;
@@ -88,27 +121,11 @@ TEST(FinalXcdr1Type_tests, serialized_size_test)
 
 TEST(FinalXcdr1Type_tests, serializer_test)
 {
-  ACE_Message_Block mb(1024);
-  FinalXcdr1Type value;
-
-  // Serialize
-  {
-    Serializer serializer(&mb, xcdr1);
-    set_values(value);
-    EXPECT_TRUE(serializer << value);
-    EXPECT_PRED_FORMAT2(AssertDataView, mb, xcdr1_non_mutable_expected);
-  }
-
-  // Deserialize
-  {
-    Serializer serializer(&mb, xcdr1);
-    FinalXcdr1Type result;
-    EXPECT_TRUE(serializer >> result);
-    EXPECT_PRED_FORMAT2(AssertValues<FinalXcdr1Type>, value, result);
-  }
+  serializer_test<FinalXcdr1Type>(xcdr1, xcdr1_non_mutable_expected);
 }
 
 // AppendableXcdr1Type -------------------------------------------------------
+
 TEST(AppendableXcdr1Type_tests, serialized_size_test)
 {
   AppendableXcdr1Type value;
@@ -117,40 +134,24 @@ TEST(AppendableXcdr1Type_tests, serialized_size_test)
 
 TEST(AppendableXcdr1Type_tests, serializer_test)
 {
-  ACE_Message_Block mb(1024);
-  AppendableXcdr1Type value;
-
-  // Serialize
-  {
-    Serializer serializer(&mb, xcdr1);
-    set_values(value);
-    EXPECT_TRUE(serializer << value);
-    EXPECT_PRED_FORMAT2(AssertDataView, mb, xcdr1_non_mutable_expected);
-  }
-
-  // Deserialize
-  {
-    Serializer serializer(&mb, xcdr1);
-    AppendableXcdr1Type result;
-    EXPECT_TRUE(serializer >> result);
-    EXPECT_PRED_FORMAT2(AssertValues<AppendableXcdr1Type>, value, result);
-  }
+  serializer_test<AppendableXcdr1Type>(xcdr1, xcdr1_non_mutable_expected);
 }
 
 // MutableXcdr1Type ----------------------------------------------------------
+
 const std::string xcdr1_mutable_expected(
   // short_field
   "\xc0\x00\x00\x02" // PID +4 = 4
   "\x7f\xff" // +2 = 6
-  "\x00\x00" // +2 pad = 8
   // long_field
+  "\x00\x00" // +2 pad = 8
   "\xc0\x01\x00\x04" // PID +4 = 12
   "\x7f\xff\xff\xff" // +4 = 16
   // octet_field
   "\xc0\x02\x00\x01" // PID +4 = 20
   "\x01" // +1 = 21
-  "\x00\x00\x00" // +3 = 24
   // long_long_field
+  "\x00\x00\x00" // +3 pad = 24
   "\xc0\x03\x00\x08" // PID +4 = 28
   "\x7f\xff\xff\xff\xff\xff\xff\xff" // +8 = 36
   // Sentinel
@@ -165,50 +166,96 @@ TEST(MutableXcdr1Type_tests, serialized_size_test)
 
 TEST(MutableXcdr1Type_tests, serializer_test)
 {
-  ACE_Message_Block mb(1024);
-  MutableXcdr1Type value;
-
-  // Serialize
-  {
-    Serializer serializer(&mb, xcdr1);
-    set_values(value);
-    EXPECT_TRUE(serializer << value);
-    EXPECT_PRED_FORMAT2(AssertDataView, mb, xcdr1_mutable_expected);
-  }
-
-  // Deserialize
-  {
-    Serializer serializer(&mb, xcdr1);
-    MutableXcdr1Type result;
-    EXPECT_TRUE(serializer >> result);
-    EXPECT_PRED_FORMAT2(AssertValues<MutableXcdr1Type>, value, result);
-  }
+  serializer_test<MutableXcdr1Type>(xcdr1, xcdr1_mutable_expected);
 }
 
-#if 0
 // XCDR2 =====================================================================
 
+const std::string xcdr2_final_expected(
+  // short_field
+  "\x7f\xff" // +2 = 2
+  // long_field
+  "\x00\x00" // +2 pad = 4
+  "\x7f\xff\xff\xff" // +4 = 8
+  // octet_field
+  "\x01" // +1 = 9
+  // long_long_field
+  "\x00\x00\x00" // +3 pad = 12
+  "\x7f\xff\xff\xff\xff\xff\xff\xff" // +8 = 20
+  , 20);
+
 // FinalXcdr1Type ------------------------------------------------------------
+
 TEST(FinalXcdr2Type_tests, serialized_size_test)
 {
   FinalXcdr2Type value;
-  EXPECT_EQ(serialized_size(xcdr2, value), size_t(20));
+  EXPECT_EQ(serialized_size(xcdr2, value), xcdr2_final_expected.size());
+}
+
+TEST(FinalXcdr2Type_tests, serializer_test)
+{
+  serializer_test<FinalXcdr2Type>(xcdr2, xcdr2_final_expected);
 }
 
 // AppendableXcdr1Type -------------------------------------------------------
+
+const std::string xcdr2_appendable_expected(
+  // Delimiter
+  "\x00\x00\x00\x14" // +4 = 4
+  // short_field
+  "\x7f\xff" // +2 = 6
+  // long_field
+  "\x00\x00" // +2 pad = 8
+  "\x7f\xff\xff\xff" // +4 = 12
+  // octet_field
+  "\x01" // +1 = 13
+  // long_long_field
+  "\x00\x00\x00" // +3 pad = 16
+  "\x7f\xff\xff\xff\xff\xff\xff\xff" // +8 = 24
+  , 24);
+
 TEST(AppendableXcdr2Type_tests, serialized_size_test)
 {
   AppendableXcdr2Type value;
-  EXPECT_EQ(serialized_size(xcdr2, value), size_t(24));
+  EXPECT_EQ(serialized_size(xcdr2, value), xcdr2_appendable_expected.size());
+}
+
+TEST(AppendableXcdr2Type_tests, serializer_test)
+{
+  serializer_test<AppendableXcdr2Type>(xcdr2, xcdr2_appendable_expected);
 }
 
 // MutableXcdr1Type ----------------------------------------------------------
+
+const std::string xcdr2_mutable_expected(
+  // Delimiter
+  "\x00\x00\x00\x24" // +4 = 4
+  // short_field
+  "\x00\x00\x00\x00" // +4 = 8
+  "\x7f\xff" // +2 = 10
+  // long_field
+  "\x00\x00" // +2 pad = 12
+  "\x00\x00\x00\x01" // +4 = 16
+  "\x7f\xff\xff\xff" // +4 = 20
+  // octet_field
+  "\x00\x00\x00\x02" // +4 = 24
+  "\x01" // +1 = 25
+  // long_long_field
+  "\x00\x00\x00" // +3 pad = 28
+  "\x00\x00\x00\x03" // +4 = 32
+  "\x7f\xff\xff\xff\xff\xff\xff\xff" // +8 = 40
+  , 40);
+
 TEST(MutableXcdr2Type_tests, serialized_size_test)
 {
   MutableXcdr2Type value;
-  EXPECT_EQ(serialized_size(xcdr2, value), size_t(56));
+  EXPECT_EQ(serialized_size(xcdr2, value), xcdr2_mutable_expected.size());
 }
-#endif
+
+TEST(MutableXcdr2Type_tests, serializer_test)
+{
+  serializer_test<MutableXcdr2Type>(xcdr2, xcdr2_mutable_expected);
+}
 
 int main(int argc, char* argv[])
 {

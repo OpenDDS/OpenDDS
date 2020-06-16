@@ -1930,10 +1930,25 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       be_global->impl_ <<
         "  unsigned member_id;\n"
         "  size_t field_size;\n"
-        "  while (true) {\n"
+        "  while (true) {\n";
+
+      if (repr.xcdr2) {
+        be_global->impl_ << "\n"
+          "    if (!strm.pos_rd() || strm.pos_rd() >= end_of_fields";
+        if (repr.not_only_xcdr2()) {
+          be_global->impl_ << " &&\n"
+            "        strm.xcdr_version() == Serializer::XCDR_VERSION_2";
+        }
+        be_global->impl_ << ") {\n"
+          "      return true;\n"
+          "    }\n";
+      }
+
+      be_global->impl_ <<
         "    if (!strm.read_parameter_id(member_id, field_size)) {\n"
         "      return false;\n"
         "    }\n";
+
       if (repr.xcdr1) {
         be_global->impl_ <<
           "    if (member_id == Serializer::pid_list_end";
@@ -1944,22 +1959,6 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         be_global->impl_ << ") {\n"
           "      return true;\n"
           "    }\n";
-
-      } else if (repr.xcdr2) {
-        be_global->impl_ << "\n"
-          "    if (strm.pos_rd() >= end_of_fields";
-        if (repr.not_only_xcdr2()) {
-          be_global->impl_ << " &&\n"
-            "        strm.xcdr_version() == Serializer::XCDR_VERSION_2";
-        }
-        be_global->impl_ << ") {\n"
-          "      return true;\n"
-          "    }\n";
-
-      } else {
-        idl_global->err()->misc_error(
-          "Could not determine parameter list end condition", node);
-        return false;
       }
 
       std::ostringstream cases;
