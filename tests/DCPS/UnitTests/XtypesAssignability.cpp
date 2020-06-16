@@ -1546,13 +1546,18 @@ void expect_true_non_alias_to_alias()
 
   // String
   ali_a.body.common.related_type = TypeIdentifier::makeString(false, StringSTypeDefn(70));
-  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), *TypeIdentifier::makeString(false, StringLTypeDefn(120))));
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)),
+                              *TypeIdentifier::makeString(false, StringLTypeDefn(120))));
   ali_a.body.common.related_type = TypeIdentifier::makeString(true, StringSTypeDefn(70));
-  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), *TypeIdentifier::makeString(true, StringLTypeDefn(120))));
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)),
+                              *TypeIdentifier::makeString(true, StringLTypeDefn(120))));
 
   // Sequence
-  ali_a.body.common.related_type = TypeIdentifier::makePlainSequence(TypeIdentifier::make(TK_UINT32), static_cast<SBound>(100));
-  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), *TypeIdentifier::makePlainSequence(TypeIdentifier::make(TK_UINT32), static_cast<LBound>(200))));
+  ali_a.body.common.related_type = TypeIdentifier::makePlainSequence(TypeIdentifier::make(TK_UINT32),
+                                                                     static_cast<SBound>(100));
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)),
+                              *TypeIdentifier::makePlainSequence(TypeIdentifier::make(TK_UINT32),
+                                                                 static_cast<LBound>(200))));
   MinimalSequenceType seq_b;
   seq_b.header.common.bound = 300;
   seq_b.element.common.type = TypeIdentifier::make(TK_UINT32);
@@ -1562,7 +1567,8 @@ void expect_true_non_alias_to_alias()
   SBoundSeq bounds_a;
   bounds_a.append(50).append(60).append(70);
   ali_a.body.common.related_type = TypeIdentifier::makePlainArray(TypeIdentifier::make(TK_FLOAT32), bounds_a);
-  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), *TypeIdentifier::makePlainArray(TypeIdentifier::make(TK_FLOAT32), bounds_a)));
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)),
+                              *TypeIdentifier::makePlainArray(TypeIdentifier::make(TK_FLOAT32), bounds_a)));
   MinimalArrayType arr_b;
   arr_b.header.common.bound_seq.append(50).append(60).append(70);
   arr_b.element.common.type = TypeIdentifier::make(TK_FLOAT32);
@@ -1590,10 +1596,14 @@ void expect_true_non_alias_to_alias()
 
   // Enumeration
   MinimalEnumeratedLiteralSeq literal_seq;
-  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(1, EnumeratedLiteralFlag(IS_DEFAULT)), MinimalMemberDetail("LITERAL1")));
-  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(2, EnumeratedLiteralFlag()), MinimalMemberDetail("LITERAL2")));
-  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(3, EnumeratedLiteralFlag()), MinimalMemberDetail("LITERAL3")));
-  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(4, EnumeratedLiteralFlag()), MinimalMemberDetail("LITERAL4")));
+  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(1, EnumeratedLiteralFlag(IS_DEFAULT)),
+                                              MinimalMemberDetail("LITERAL1")));
+  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(2, EnumeratedLiteralFlag()),
+                                              MinimalMemberDetail("LITERAL2")));
+  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(3, EnumeratedLiteralFlag()),
+                                              MinimalMemberDetail("LITERAL3")));
+  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(4, EnumeratedLiteralFlag()),
+                                              MinimalMemberDetail("LITERAL4")));
   MinimalEnumeratedType enum_a(EnumTypeFlag(),
                                MinimalEnumeratedHeader(CommonEnumeratedHeader(static_cast<BitBound>(4))),
                                literal_seq);
@@ -1683,13 +1693,18 @@ void expect_true_alias_to_non_alias()
 
   // String
   ali_a.body.common.related_type = TypeIdentifier::makeString(false, StringSTypeDefn(70));
-  EXPECT_TRUE(test.assignable(*TypeIdentifier::makeString(false, StringLTypeDefn(130)), TypeObject(MinimalTypeObject(ali_a))));
+  EXPECT_TRUE(test.assignable(*TypeIdentifier::makeString(false, StringLTypeDefn(130)),
+                              TypeObject(MinimalTypeObject(ali_a))));
   ali_a.body.common.related_type = TypeIdentifier::makeString(true, StringSTypeDefn(70));
-  EXPECT_TRUE(test.assignable(*TypeIdentifier::makeString(true, StringLTypeDefn(130)), TypeObject(MinimalTypeObject(ali_a))));
+  EXPECT_TRUE(test.assignable(*TypeIdentifier::makeString(true, StringLTypeDefn(130)),
+                              TypeObject(MinimalTypeObject(ali_a))));
 
   // Sequence
-  ali_a.body.common.related_type = TypeIdentifier::makePlainSequence(TypeIdentifier::make(TK_UINT32), static_cast<SBound>(100));
-  EXPECT_TRUE(test.assignable(*TypeIdentifier::makePlainSequence(TypeIdentifier::make(TK_UINT32), static_cast<LBound>(200)), TypeObject(MinimalTypeObject(ali_a))));
+  ali_a.body.common.related_type = TypeIdentifier::makePlainSequence(TypeIdentifier::make(TK_UINT32),
+                                                                     static_cast<SBound>(100));
+  EXPECT_TRUE(test.assignable(*TypeIdentifier::makePlainSequence(TypeIdentifier::make(TK_UINT32),
+                                                                 static_cast<LBound>(200)),
+                              TypeObject(MinimalTypeObject(ali_a))));
   MinimalSequenceType seq_b;
   seq_b.header.common.bound = 300;
   seq_b.element.common.type = TypeIdentifier::make(TK_UINT32);
@@ -1699,7 +1714,8 @@ void expect_true_alias_to_non_alias()
   SBoundSeq bounds_a;
   bounds_a.append(50).append(60).append(70);
   ali_a.body.common.related_type = TypeIdentifier::makePlainArray(TypeIdentifier::make(TK_FLOAT32), bounds_a);
-  EXPECT_TRUE(test.assignable(*TypeIdentifier::makePlainArray(TypeIdentifier::make(TK_FLOAT32), bounds_a), TypeObject(MinimalTypeObject(ali_a))));
+  EXPECT_TRUE(test.assignable(*TypeIdentifier::makePlainArray(TypeIdentifier::make(TK_FLOAT32), bounds_a),
+                              TypeObject(MinimalTypeObject(ali_a))));
   MinimalArrayType arr_b;
   arr_b.header.common.bound_seq.append(50).append(60).append(70);
   arr_b.element.common.type = TypeIdentifier::make(TK_FLOAT32);
@@ -1727,10 +1743,14 @@ void expect_true_alias_to_non_alias()
 
   // Enumeration
   MinimalEnumeratedLiteralSeq literal_seq;
-  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(1, EnumeratedLiteralFlag(IS_DEFAULT)), MinimalMemberDetail("LITERAL1")));
-  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(2, EnumeratedLiteralFlag()), MinimalMemberDetail("LITERAL2")));
-  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(3, EnumeratedLiteralFlag()), MinimalMemberDetail("LITERAL3")));
-  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(4, EnumeratedLiteralFlag()), MinimalMemberDetail("LITERAL4")));
+  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(1, EnumeratedLiteralFlag(IS_DEFAULT)),
+                                              MinimalMemberDetail("LITERAL1")));
+  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(2, EnumeratedLiteralFlag()),
+                                              MinimalMemberDetail("LITERAL2")));
+  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(3, EnumeratedLiteralFlag()),
+                                              MinimalMemberDetail("LITERAL3")));
+  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(4, EnumeratedLiteralFlag()),
+                                              MinimalMemberDetail("LITERAL4")));
   MinimalEnumeratedType enum_a(EnumTypeFlag(),
                                MinimalEnumeratedHeader(CommonEnumeratedHeader(static_cast<BitBound>(4))),
                                literal_seq);
@@ -1842,8 +1862,10 @@ void expect_true_alias_to_alias()
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
 
   // Sequence
-  ali_a.body.common.related_type = TypeIdentifier::makePlainSequence(TypeIdentifier::make(TK_UINT32), static_cast<SBound>(100));
-  ali_b.body.common.related_type = TypeIdentifier::makePlainSequence(TypeIdentifier::make(TK_UINT32), static_cast<LBound>(200));
+  ali_a.body.common.related_type = TypeIdentifier::makePlainSequence(TypeIdentifier::make(TK_UINT32),
+                                                                     static_cast<SBound>(100));
+  ali_b.body.common.related_type = TypeIdentifier::makePlainSequence(TypeIdentifier::make(TK_UINT32),
+                                                                     static_cast<LBound>(200));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
   MinimalSequenceType seq_b;
   seq_b.header.common.bound = 300;
@@ -1893,17 +1915,22 @@ void expect_true_alias_to_alias()
 
   // Enumeration
   MinimalEnumeratedLiteralSeq literal_seq;
-  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(1, EnumeratedLiteralFlag(IS_DEFAULT)), MinimalMemberDetail("LITERAL1")));
-  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(2, EnumeratedLiteralFlag()), MinimalMemberDetail("LITERAL2")));
-  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(3, EnumeratedLiteralFlag()), MinimalMemberDetail("LITERAL3")));
-  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(4, EnumeratedLiteralFlag()), MinimalMemberDetail("LITERAL4")));
+  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(1, EnumeratedLiteralFlag(IS_DEFAULT)),
+                                              MinimalMemberDetail("LITERAL1")));
+  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(2, EnumeratedLiteralFlag()),
+                                              MinimalMemberDetail("LITERAL2")));
+  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(3, EnumeratedLiteralFlag()),
+                                              MinimalMemberDetail("LITERAL3")));
+  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(4, EnumeratedLiteralFlag()),
+                                              MinimalMemberDetail("LITERAL4")));
   MinimalEnumeratedType enum_a(EnumTypeFlag(),
                                MinimalEnumeratedHeader(CommonEnumeratedHeader(static_cast<BitBound>(4))),
                                literal_seq);
   TypeLookup::get_equivalence_hash(hash);
   ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
   TypeLookup::insert_entry(*ali_a.body.common.related_type, MinimalTypeObject(enum_a));
-  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(5, EnumeratedLiteralFlag()), MinimalMemberDetail("LITERAL5")));
+  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(5, EnumeratedLiteralFlag()),
+                                              MinimalMemberDetail("LITERAL5")));
   MinimalEnumeratedType enum_b(EnumTypeFlag(),
                                MinimalEnumeratedHeader(CommonEnumeratedHeader(static_cast<BitBound>(5))),
                                literal_seq);
@@ -2005,13 +2032,18 @@ void expect_false_non_alias_to_alias()
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), *TypeIdentifier::make(TK_FLOAT32)));
 
   ali_a.body.common.related_type = TypeIdentifier::makeString(false, StringSTypeDefn(70));
-  EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), *TypeIdentifier::makeString(true, StringLTypeDefn(120))));
+  EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)),
+                               *TypeIdentifier::makeString(true, StringLTypeDefn(120))));
   ali_a.body.common.related_type = TypeIdentifier::makeString(true, StringSTypeDefn(70));
-  EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), *TypeIdentifier::makeString(false, StringLTypeDefn(120))));
+  EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)),
+                               *TypeIdentifier::makeString(false, StringLTypeDefn(120))));
 
   // Sequence
-  ali_a.body.common.related_type = TypeIdentifier::makePlainSequence(TypeIdentifier::make(TK_UINT32), static_cast<SBound>(100));
-  EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), *TypeIdentifier::makePlainSequence(TypeIdentifier::make(TK_FLOAT32), static_cast<LBound>(200))));
+  ali_a.body.common.related_type = TypeIdentifier::makePlainSequence(TypeIdentifier::make(TK_UINT32),
+                                                                     static_cast<SBound>(100));
+  EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)),
+                               *TypeIdentifier::makePlainSequence(TypeIdentifier::make(TK_FLOAT32),
+                                                                  static_cast<LBound>(200))));
   MinimalSequenceType seq_b;
   seq_b.header.common.bound = 300;
   seq_b.element.common.type = TypeIdentifier::make(TK_CHAR16);
@@ -2021,7 +2053,8 @@ void expect_false_non_alias_to_alias()
   SBoundSeq bounds_a;
   bounds_a.append(50).append(60).append(70);
   ali_a.body.common.related_type = TypeIdentifier::makePlainArray(TypeIdentifier::make(TK_FLOAT32), bounds_a);
-  EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), *TypeIdentifier::makePlainArray(TypeIdentifier::make(TK_INT32), bounds_a)));
+  EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)),
+                               *TypeIdentifier::makePlainArray(TypeIdentifier::make(TK_INT32), bounds_a)));
   MinimalArrayType arr_b;
   arr_b.header.common.bound_seq.append(50).append(60).append(70);
   arr_b.element.common.type = TypeIdentifier::make(TK_UINT64);
@@ -2049,10 +2082,14 @@ void expect_false_non_alias_to_alias()
 
   // Enumeration
   MinimalEnumeratedLiteralSeq literal_seq;
-  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(1, EnumeratedLiteralFlag(IS_DEFAULT)), MinimalMemberDetail("LITERAL1")));
-  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(2, EnumeratedLiteralFlag()), MinimalMemberDetail("LITERAL2")));
-  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(3, EnumeratedLiteralFlag()), MinimalMemberDetail("LITERAL3")));
-  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(4, EnumeratedLiteralFlag()), MinimalMemberDetail("LITERAL4")));
+  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(1, EnumeratedLiteralFlag(IS_DEFAULT)),
+                                              MinimalMemberDetail("LITERAL1")));
+  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(2, EnumeratedLiteralFlag()),
+                                              MinimalMemberDetail("LITERAL2")));
+  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(3, EnumeratedLiteralFlag()),
+                                              MinimalMemberDetail("LITERAL3")));
+  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(4, EnumeratedLiteralFlag()),
+                                              MinimalMemberDetail("LITERAL4")));
   MinimalEnumeratedType enum_a(EnumTypeFlag(),
                                MinimalEnumeratedHeader(CommonEnumeratedHeader(static_cast<BitBound>(4))),
                                literal_seq);
@@ -2061,7 +2098,8 @@ void expect_false_non_alias_to_alias()
   ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
   TypeLookup::insert_entry(*ali_a.body.common.related_type, MinimalTypeObject(enum_a));
   MinimalEnumeratedLiteralSeq literal_seq_b;
-  literal_seq_b.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(2, EnumeratedLiteralFlag(IS_DEFAULT)), MinimalMemberDetail("LITERAL3")));
+  literal_seq_b.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(2, EnumeratedLiteralFlag(IS_DEFAULT)),
+                                                MinimalMemberDetail("LITERAL3")));
   MinimalEnumeratedType enum_b(EnumTypeFlag(),
                                MinimalEnumeratedHeader(CommonEnumeratedHeader(static_cast<BitBound>(1))),
                                literal_seq_b);
@@ -2149,13 +2187,18 @@ void expect_false_alias_to_non_alias()
 
   // String
   ali_a.body.common.related_type = TypeIdentifier::makeString(false, StringSTypeDefn(70));
-  EXPECT_FALSE(test.assignable(*TypeIdentifier::makeString(true, StringLTypeDefn(130)), TypeObject(MinimalTypeObject(ali_a))));
+  EXPECT_FALSE(test.assignable(*TypeIdentifier::makeString(true, StringLTypeDefn(130)),
+                               TypeObject(MinimalTypeObject(ali_a))));
   ali_a.body.common.related_type = TypeIdentifier::makeString(true, StringSTypeDefn(70));
-  EXPECT_FALSE(test.assignable(*TypeIdentifier::makeString(false, StringLTypeDefn(130)), TypeObject(MinimalTypeObject(ali_a))));
+  EXPECT_FALSE(test.assignable(*TypeIdentifier::makeString(false, StringLTypeDefn(130)),
+                               TypeObject(MinimalTypeObject(ali_a))));
 
   // Sequence
-  ali_a.body.common.related_type = TypeIdentifier::makePlainSequence(TypeIdentifier::make(TK_UINT32), static_cast<SBound>(100));
-  EXPECT_FALSE(test.assignable(*TypeIdentifier::makePlainSequence(TypeIdentifier::make(TK_FLOAT128), static_cast<LBound>(200)), TypeObject(MinimalTypeObject(ali_a))));
+  ali_a.body.common.related_type = TypeIdentifier::makePlainSequence(TypeIdentifier::make(TK_UINT32),
+                                                                     static_cast<SBound>(100));
+  EXPECT_FALSE(test.assignable(*TypeIdentifier::makePlainSequence(TypeIdentifier::make(TK_FLOAT128),
+                                                                  static_cast<LBound>(200)),
+                               TypeObject(MinimalTypeObject(ali_a))));
   MinimalSequenceType seq_b;
   seq_b.header.common.bound = 300;
   seq_b.element.common.type = TypeIdentifier::make(TK_CHAR16);
@@ -2165,7 +2208,8 @@ void expect_false_alias_to_non_alias()
   SBoundSeq bounds_a;
   bounds_a.append(50).append(60).append(70);
   ali_a.body.common.related_type = TypeIdentifier::makePlainArray(TypeIdentifier::make(TK_FLOAT32), bounds_a);
-  EXPECT_FALSE(test.assignable(*TypeIdentifier::makePlainArray(TypeIdentifier::make(TK_BYTE), bounds_a), TypeObject(MinimalTypeObject(ali_a))));
+  EXPECT_FALSE(test.assignable(*TypeIdentifier::makePlainArray(TypeIdentifier::make(TK_BYTE), bounds_a),
+                               TypeObject(MinimalTypeObject(ali_a))));
   MinimalArrayType arr_b;
   arr_b.header.common.bound_seq.append(50).append(60).append(70);
   arr_b.element.common.type = TypeIdentifier::make(TK_FLOAT64);
@@ -2193,10 +2237,14 @@ void expect_false_alias_to_non_alias()
 
   // Enumeration
   MinimalEnumeratedLiteralSeq literal_seq;
-  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(1, EnumeratedLiteralFlag(IS_DEFAULT)), MinimalMemberDetail("LITERAL1")));
-  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(2, EnumeratedLiteralFlag()), MinimalMemberDetail("LITERAL2")));
-  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(3, EnumeratedLiteralFlag()), MinimalMemberDetail("LITERAL3")));
-  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(4, EnumeratedLiteralFlag()), MinimalMemberDetail("LITERAL4")));
+  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(1, EnumeratedLiteralFlag(IS_DEFAULT)),
+                                              MinimalMemberDetail("LITERAL1")));
+  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(2, EnumeratedLiteralFlag()),
+                                              MinimalMemberDetail("LITERAL2")));
+  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(3, EnumeratedLiteralFlag()),
+                                              MinimalMemberDetail("LITERAL3")));
+  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(4, EnumeratedLiteralFlag()),
+                                              MinimalMemberDetail("LITERAL4")));
   MinimalEnumeratedType enum_a(EnumTypeFlag(),
                                MinimalEnumeratedHeader(CommonEnumeratedHeader(static_cast<BitBound>(4))),
                                literal_seq);
@@ -2205,7 +2253,8 @@ void expect_false_alias_to_non_alias()
   ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
   TypeLookup::insert_entry(*ali_a.body.common.related_type, MinimalTypeObject(enum_a));
   MinimalEnumeratedLiteralSeq literal_seq_b;
-  literal_seq_b.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(6, EnumeratedLiteralFlag()), MinimalMemberDetail("LITERAL1")));
+  literal_seq_b.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(6, EnumeratedLiteralFlag()),
+                                                MinimalMemberDetail("LITERAL1")));
   MinimalEnumeratedType enum_b(EnumTypeFlag(),
                                MinimalEnumeratedHeader(CommonEnumeratedHeader(static_cast<BitBound>(1))),
                                literal_seq_b);
@@ -2315,8 +2364,10 @@ void expect_false_alias_to_alias()
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
 
   // Sequence
-  ali_a.body.common.related_type = TypeIdentifier::makePlainSequence(TypeIdentifier::make(TK_INT64), static_cast<SBound>(100));
-  ali_b.body.common.related_type = TypeIdentifier::makePlainSequence(TypeIdentifier::make(TK_UINT32), static_cast<LBound>(200));
+  ali_a.body.common.related_type = TypeIdentifier::makePlainSequence(TypeIdentifier::make(TK_INT64),
+                                                                     static_cast<SBound>(100));
+  ali_b.body.common.related_type = TypeIdentifier::makePlainSequence(TypeIdentifier::make(TK_UINT32),
+                                                                     static_cast<LBound>(200));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
   MinimalSequenceType seq_b;
   seq_b.header.common.bound = 300;
@@ -2366,10 +2417,14 @@ void expect_false_alias_to_alias()
 
   // Enumeration
   MinimalEnumeratedLiteralSeq literal_seq;
-  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(1, EnumeratedLiteralFlag(IS_DEFAULT)), MinimalMemberDetail("LITERAL1")));
-  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(2, EnumeratedLiteralFlag()), MinimalMemberDetail("LITERAL2")));
-  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(3, EnumeratedLiteralFlag()), MinimalMemberDetail("LITERAL3")));
-  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(4, EnumeratedLiteralFlag()), MinimalMemberDetail("LITERAL4")));
+  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(1, EnumeratedLiteralFlag(IS_DEFAULT)),
+                                              MinimalMemberDetail("LITERAL1")));
+  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(2, EnumeratedLiteralFlag()),
+                                              MinimalMemberDetail("LITERAL2")));
+  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(3, EnumeratedLiteralFlag()),
+                                              MinimalMemberDetail("LITERAL3")));
+  literal_seq.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(4, EnumeratedLiteralFlag()),
+                                              MinimalMemberDetail("LITERAL4")));
   MinimalEnumeratedType enum_a(EnumTypeFlag(),
                                MinimalEnumeratedHeader(CommonEnumeratedHeader(static_cast<BitBound>(4))),
                                literal_seq);
@@ -2377,7 +2432,8 @@ void expect_false_alias_to_alias()
   ali_a.body.common.related_type = TypeIdentifier::make(EK_MINIMAL, hash);
   TypeLookup::insert_entry(*ali_a.body.common.related_type, MinimalTypeObject(enum_a));
   MinimalEnumeratedLiteralSeq literal_seq_b;
-  literal_seq_b.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(5, EnumeratedLiteralFlag()), MinimalMemberDetail("LITERAL2")));
+  literal_seq_b.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(5, EnumeratedLiteralFlag()),
+                                                MinimalMemberDetail("LITERAL2")));
   MinimalEnumeratedType enum_b(EnumTypeFlag(),
                                MinimalEnumeratedHeader(CommonEnumeratedHeader(static_cast<BitBound>(1))),
                                literal_seq_b);
