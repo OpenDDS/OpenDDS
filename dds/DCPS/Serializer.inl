@@ -1542,22 +1542,31 @@ void serialized_size_delimiter(const Encoding& encoding, size_t& size)
 }
 
 ACE_INLINE
-void serialized_size_parameter_id(const Encoding& encoding, size_t& size)
+void serialized_size_parameter_id(
+  const Encoding& encoding, size_t& size, size_t& xcdr1_running_size)
 {
   if (encoding.xcdr_version() == Encoding::XCDR_VERSION_1) {
     encoding.align(size, 4);
     size += uint16_cdr_size * 2;
-    // TODO(iguessthislldo): Extended PID, Handle alignment resets?
+    // TODO(iguessthislldo): Extended PID
+
+    // Save and Zero Size to Reset the Alignment
+    xcdr1_running_size += size;
+    size = 0;
   }
   // TODO(iguessthislldo): XCDR2
 }
 
 ACE_INLINE
-void serialized_size_sentinel_parameter_id(const Encoding& encoding, size_t& size)
+void serialized_size_sentinel_parameter_id(
+  const Encoding& encoding, size_t& size, size_t& xcdr1_running_size)
 {
   if (encoding.xcdr_version() == Encoding::XCDR_VERSION_1) {
     encoding.align(size, uint16_cdr_size); // TODO(iguessthislldo): Not align 4?
     size += uint16_cdr_size * 2;
+
+    // Restore Saved Totals from Alignment Resets
+    size += xcdr1_running_size;
   }
 }
 

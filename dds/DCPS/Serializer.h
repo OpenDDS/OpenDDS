@@ -784,10 +784,12 @@ OpenDDS_Dcps_Export
 void serialized_size_delimiter(const Encoding& encoding, size_t& size);
 
 OpenDDS_Dcps_Export
-void serialized_size_parameter_id(const Encoding& encoding, size_t& size);
+void serialized_size_parameter_id(
+  const Encoding& encoding, size_t& size, size_t& xcdr1_running_size);
 
 OpenDDS_Dcps_Export
-void serialized_size_sentinel_parameter_id(const Encoding& encoding, size_t& size);
+void serialized_size_sentinel_parameter_id(
+  const Encoding& encoding, size_t& size, size_t& xcdr1_running_size);
 
 } // namespace DCPS
 } // namespace OpenDDS

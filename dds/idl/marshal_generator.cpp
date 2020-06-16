@@ -1778,6 +1778,13 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     serialized_size.addArg("stru", "const " + cxx + "&");
     serialized_size.endArgs();
 
+    if (may_be_parameter_list) {
+      be_global->impl_ <<
+        "  // For XCDR1 parameter lists this is used to hold the total size while size is\n"
+        "  // hijacked for field sizes because of alignment resets.\n"
+        "  size_t xcdr1_pl_running_total = 0;\n";
+    }
+
     if (may_be_delimited) {
       be_global->impl_ <<
         "  serialized_size_delimiter(encoding, size);\n";
@@ -1797,7 +1804,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       }
       if (may_be_parameter_list) {
         expr +=
-          "  serialized_size_parameter_id(encoding, size);\n";
+          "  serialized_size_parameter_id(encoding, size, xcdr1_pl_running_total);\n";
       }
       expr += findSizeCommon(field_name, fields[i]->field_type(), "stru", intro);
       if (!cond.empty()) {
@@ -1808,7 +1815,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
 
     if (repr.xcdr1 && may_be_parameter_list) {
       be_global->impl_ <<
-        "  serialized_size_sentinel_parameter_id(encoding, size);\n";
+        "  serialized_size_sentinel_parameter_id(encoding, size, xcdr1_pl_running_total);\n";
     }
   }
 

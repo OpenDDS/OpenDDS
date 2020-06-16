@@ -157,14 +157,11 @@ const std::string xcdr1_mutable_expected(
   "\x3f\x02\x00\x00" // +4 = 40
   , 40);
 
-// TODO(iguessthislldo): Broken need to support alignment resets in serialized_size
-/*
 TEST(MutableXcdr1Type_tests, serialized_size_test)
 {
   MutableXcdr1Type value;
   EXPECT_EQ(serialized_size(xcdr1, value), xcdr1_mutable_expected.size());
 }
-*/
 
 TEST(MutableXcdr1Type_tests, serializer_test)
 {
