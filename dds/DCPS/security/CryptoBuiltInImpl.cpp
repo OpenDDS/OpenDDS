@@ -1823,7 +1823,7 @@ bool CryptoBuiltInImpl::decode_submessage(
   ACE_CDR::UShort octetsToNext;
   de_ser >> octetsToNext;
   CryptoHeader ch;
-  de_ser.swap_bytes(Serializer::SWAP_BE);
+  de_ser.endianness(ENDIAN_BIG);
   de_ser >> ch;
   de_ser.skip(octetsToNext - CRYPTO_HEADER_LENGTH);
   if (!de_ser.good_bit()) {
@@ -1855,7 +1855,7 @@ bool CryptoBuiltInImpl::decode_submessage(
   ACE_CDR::UShort postfixOctetsToNext;
   post_ser >> postfixOctetsToNext;
   CryptoFooter cf;
-  post_ser.swap_bytes(Serializer::SWAP_BE);
+  de_ser.endianness(ENDIAN_BIG);
   post_ser >> cf;
   if (!post_ser.good_bit()) {
     ACE_ERROR((LM_ERROR,

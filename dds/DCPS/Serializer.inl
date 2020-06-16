@@ -43,14 +43,17 @@ void Encoding::kind(Encoding::Kind value)
   switch (value) {
   case KIND_XCDR1:
     alignment(ALIGN_CDR);
+    xcdr_version(XCDR1);
     break;
 
   case KIND_XCDR2:
     alignment(ALIGN_XCDR2);
-    return;
+    xcdr_version(XCDR2);
+    break;
 
   case KIND_UNALIGNED_CDR:
     alignment(ALIGN_NONE);
+    xcdr_version(XCDR_NONE);
     break;
 
   default:
@@ -115,14 +118,13 @@ void Encoding::align(size_t& value, size_t by) const
 ACE_INLINE
 Encoding::XcdrVersion Encoding::xcdr_version() const
 {
-  switch (kind_) {
-  case KIND_XCDR1:
-    return XCDR_VERSION_1;
-  case KIND_XCDR2:
-    return XCDR_VERSION_2;
-  default:
-    return XCDR_VERSION_NONE;
-  }
+  return xcdr_version_;
+}
+
+ACE_INLINE
+void Encoding::xcdr_version(Encoding::XcdrVersion value)
+{
+  xcdr_version_ = value;
 }
 
 ACE_INLINE

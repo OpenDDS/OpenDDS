@@ -47,7 +47,6 @@ using DCPS::Serializer;
 using DCPS::Encoding;
 using DCPS::ENDIAN_BIG;
 using DCPS::ENDIAN_LITTLE;
-using DCPS::ENDIAN_NATIVE;
 
 namespace {
   const CORBA::UShort encap_LE = 0x0300; // {PL_CDR_LE} in LE

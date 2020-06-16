@@ -229,44 +229,24 @@ bool TopicImpl::check_data_representation(const DDS::DataRepresentationIdSeq& qo
   }
   //Data Writer will only use the 1st QoS declared
   if (is_data_writer) {
-    DDS::DataRepresentationId_t id = DDS::XCDR_DATA_REPRESENTATION;
-    if (qos_ids.length() != 0) {
-      id = qos_ids[0];
-    }
-    bool found = false;
+    DDS::DataRepresentationId_t id = qos_ids[0];
     for (int j = 0; j < type_allowed_reprs.length(); ++j) {
       if (id == type_allowed_reprs[j]) {
-        found = true;
-        break;
+        return true;
       }
     }
-    return found;
   }
-  // if 0 length data reader then look for XCDR_DATA_REPRESENTATION
-  else if (qos_ids.length() == 0) {
-    bool found = false;
-    for (int j = 0; j < type_allowed_reprs.length(); ++j) {
-      if (DDS::XCDR_DATA_REPRESENTATION == type_allowed_reprs[j]) {
-        found = true;
-        break;
-      }
-    }
-    return found;
-  }
-  // if non 0 length data reader compare both lists for a compatible QoS
+  //if data reader compare both lists for a compatible QoS
   else {
-    bool found = false;
     for (int i = 0; i < qos_ids.length(); ++i) {
       for (int j = 0; j < type_allowed_reprs.length(); ++j) {
         if (qos_ids[i] == type_allowed_reprs[j]) {
-          found = true;
-          break;
+          return true;
         }
       }
     }
-    return found;
   }
-  return true;
+  return false;
 }
 
 } // namespace DCPS

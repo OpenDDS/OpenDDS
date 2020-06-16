@@ -360,8 +360,10 @@ public:
      */
     Encoding::Kind encap_kind = Encoding::KIND_UNKNOWN;
     Encoding::Kind nonencap_kind = Encoding::KIND_UNKNOWN;
-    for (CORBA::ULong i = 0; i < qos_.representation.value.length(); ++i) {
-      const DDS::DataRepresentationId_t repr = qos_.representation.value[i];
+    DDS::DataRepresentationIdSeq repIds =
+      get_effective_data_rep_qos(qos_.representation.value);
+    for (CORBA::ULong i = 0; i < repIds.length(); ++i) {
+      const DDS::DataRepresentationId_t repr = repIds[i];
       const Encoding::Kind kind =
         repr_ext_to_encoding_kind(repr, MarshalTraitsType::extensibility());
       switch (kind) {
