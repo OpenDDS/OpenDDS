@@ -43,17 +43,17 @@ void Encoding::kind(Encoding::Kind value)
   switch (value) {
   case KIND_XCDR1:
     alignment(ALIGN_CDR);
-    xcdr_version(XCDR1);
+    xcdr_version(XCDR_VERSION_1);
     break;
 
   case KIND_XCDR2:
     alignment(ALIGN_XCDR2);
-    xcdr_version(XCDR2);
+    xcdr_version(XCDR_VERSION_2);
     break;
 
   case KIND_UNALIGNED_CDR:
     alignment(ALIGN_NONE);
-    xcdr_version(XCDR_NONE);
+    xcdr_version(XCDR_VERSION_NONE);
     break;
 
   default:
