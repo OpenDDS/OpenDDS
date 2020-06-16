@@ -334,7 +334,8 @@ MulticastTransport::configure_i(MulticastInst& config)
   // Override with DCPSDefaultAddress.
   if (config.local_address_.empty() &&
       TheServiceParticipant->default_address() != ACE_INET_Addr()) {
-    config.local_address_ = TheServiceParticipant->default_address().get_host_name();
+    char buffer[INET6_ADDRSTRLEN];
+    config.local_address_ = TheServiceParticipant->default_address().get_host_addr(buffer, sizeof buffer);
   }
 
   if (!config.group_address_.is_multicast()) {
