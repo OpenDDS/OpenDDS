@@ -147,6 +147,8 @@ public:
   void process_participant_ice(const ParameterList& plist,
                                const ParticipantData_t& pdata,
                                const DCPS::RepoId& guid);
+
+  bool remote_is_requester(const DCPS::RepoId& guid) const;
 #endif
 
   DCPS::RcHandle<DCPS::JobQueue> job_queue() const { return tport_->job_queue_; }

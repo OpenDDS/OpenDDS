@@ -963,8 +963,13 @@ void Sedp::rekey_volatile(const Security::SPDPdiscoveredParticipantData& pdata)
     }
   }
 
-  spdp_.send_participant_crypto_tokens(part_guid);
-  send_builtin_crypto_tokens(pdata);
+  if (spdp_.remote_is_requester(part_guid)) {
+    // Send immediately because the remote has installed the shared secret.
+    ACE_DEBUG((LM_DEBUG, "Sedp::rekey_volatile calling send_participant_crypto_token\n"));
+    spdp_.send_participant_crypto_tokens(part_guid);
+    send_builtin_crypto_tokens(pdata);
+    // TODO: Send keys for the non-builtin readers and writers.
+  }
 }
 
 void Sedp::disassociate_helper(const BuiltinEndpointSet_t& avail, const CORBA::ULong flags,
@@ -2767,7 +2772,7 @@ Sedp::Task::svc_volatile_message_secure(DCPS::MessageId id,
 
 void
 Sedp::received_volatile_message_secure(DCPS::MessageId /* message_id */,
-                    const DDS::Security::ParticipantVolatileMessageSecure& msg)
+                                       const DDS::Security::ParticipantVolatileMessageSecure& msg)
 {
   if (spdp_.shutting_down()) {
     return;
@@ -2830,8 +2835,8 @@ Sedp::association_complete(const RepoId& localId,
     write_durable_dcps_participant_secure(remoteId);
   } else if (remoteId.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER) {
 
-    if (associated_volatile_readers_.insert(remoteId).second) {
-
+    if (associated_volatile_readers_.insert(remoteId).second && spdp_.remote_is_requester(remoteId)) {
+      // TODO: Will reliability resend these?
       spdp_.send_participant_crypto_tokens(remoteId);
 
       RemoteReaderVectors::iterator reader_map_iter = datawriter_crypto_tokens_.find(remoteId);

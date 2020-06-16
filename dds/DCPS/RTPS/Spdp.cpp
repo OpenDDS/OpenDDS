@@ -1083,6 +1083,12 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
         }
         return;
       case DDS::Security::VALIDATION_OK_FINAL_MESSAGE:
+        dp.auth_state_ = DCPS::AUTH_STATE_AUTHENTICATED;
+        purge_auth_deadlines(iter);
+        // Install the shared secret before sending the final so that
+        // we are prepared to receive the crypto tokens from the
+        // replier.
+        match_authenticated(src_participant, iter);
         if (send_stateless_message(src_participant, dp, reply, false) != DDS::RETCODE_OK) {
           if (DCPS::security_debug.auth_warn) {
             ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} WARNING: Spdp::handle_handshake_message() - ")
@@ -1096,7 +1102,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
                        OPENDDS_STRING(DCPS::GuidConverter(src_participant)).c_str()));
           }
         }
-        // Fall through.
+        return;
       case DDS::Security::VALIDATION_OK:
         dp.auth_state_ = DCPS::AUTH_STATE_AUTHENTICATED;
         purge_auth_deadlines(iter);
@@ -1365,8 +1371,7 @@ Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileM
     return;
   }
 
-  RepoId src_participant = msg.message_identity.source_guid;
-  src_participant.entityId = DCPS::ENTITYID_PARTICIPANT;
+  const RepoId src_participant = make_id(msg.message_identity.source_guid, DCPS::ENTITYID_PARTICIPANT);
 
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
@@ -1397,6 +1402,13 @@ Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileM
       ACE_TEXT("Security Exception[%d.%d]: %C\n"),
         se.code, se.minor_code, se.message.in()));
     return;
+  }
+
+  if (!dp.is_requester_) {
+    // TODO:  Will association_complete be called before this?
+    send_participant_crypto_tokens(src_participant);
+    sedp_.send_builtin_crypto_tokens(dp.pdata_);
+    // TODO: Send keys for the non-builtin readers and writers.
   }
 }
 
@@ -3437,6 +3449,17 @@ void Spdp::process_participant_ice(const ParameterList& plist,
     }
   }
 }
+
+bool Spdp::remote_is_requester(const DCPS::RepoId& guid) const
+{
+  // TODO:  Locking?
+  DiscoveredParticipantConstIter iter = participants_.find(make_id(guid, DCPS::ENTITYID_PARTICIPANT));
+  if (iter != participants_.end()) {
+    return iter->second.is_requester_;
+  }
+  return false;
+}
+
 #endif
 
 }
