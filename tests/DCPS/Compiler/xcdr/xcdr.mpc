@@ -1,0 +1,5 @@
+project: dcps_test, googletest {
+  TypeSupport_Files {
+    xcdr.idl
+  }
+}

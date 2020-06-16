@@ -1770,6 +1770,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
   }
 
   RtpsFieldCustomizer rtpsCustom(cxx);
+
   {
     Function serialized_size("serialized_size", "void");
     serialized_size.addArg("encoding", "const Encoding&");
@@ -1779,7 +1780,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
 
     if (may_be_delimited) {
       be_global->impl_ <<
-        "  serialized_size_delimiter(encoding, size)\n";
+        "  serialized_size_delimiter(encoding, size);\n";
     }
 
     string expr, intro;
@@ -1794,13 +1795,23 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       if (!cond.empty()) {
         expr += "  if (" + cond + ") {\n  ";
       }
+      if (may_be_parameter_list) {
+        expr +=
+          "  serialized_size_parameter_id(encoding, size);\n";
+      }
       expr += findSizeCommon(field_name, fields[i]->field_type(), "stru", intro);
       if (!cond.empty()) {
         expr += "  }\n";
       }
     }
     be_global->impl_ << intro << expr;
+
+    if (repr.xcdr1 && may_be_parameter_list) {
+      be_global->impl_ <<
+        "  serialized_size_sentinel_parameter_id(encoding, size);\n";
+    }
   }
+
   {
     Function insertion("operator<<", "bool");
     insertion.addArg("strm", "Serializer&");
@@ -1817,36 +1828,47 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     // Write the CDR Size if delimited.
     if (may_be_delimited) {
       be_global->impl_ <<
-        "if (!strm.write_delimiter(total_size)) {\n"
-        "  return false;\n"
-        "}\n";
+        "  if (!strm.write_delimiter(total_size)) {\n"
+        "    return false;\n"
+        "  }\n";
     }
 
     // Write the fields
     string intro = rtpsCustom.preamble_;
     if (may_be_parameter_list) {
+      be_global->impl_ <<
+        "  const Encoding& encoding = strm.encoding();\n";
       std::ostringstream fields_encode;
       for (size_t i = 0; i < fields.size(); ++i) {
         const unsigned id = be_global->get_id(node, fields[i], i);
         const string field_name = fields[i]->local_name()->get_string();
         fields_encode <<
           "\n"
-          " {\n"
-          "   size_t field_size = 0;\n"
-          "   serialized_size(encoding(), field_size);\n"
-          "   if (!strm.write_parameter_id(" << id << ", field_size)) {\n"
-          "     return false;\n"
-          "   }\n"
-          "   if (!" <<
+          "  {\n"
+          "    size_t size = 0;\n" <<
+            // TODO(iguessthislldo): Fix indent
+            findSizeCommon(field_name, fields[i]->field_type(), "stru", intro) <<
+          "    if (!strm.write_parameter_id(" << id << ", size)) {\n"
+          "      return false;\n"
+          "    }\n"
+          "    if (!" <<
             streamCommon(field_name, fields[i]->field_type(),
               "<< stru", intro, cxx) << ") {\n"
-          "     return false;\n"
-          "   }\n"
-          " }\n";
+          "      return false;\n"
+          "    }\n"
+          "  }\n";
+      }
+      string pl_sentinal;
+      if (repr.xcdr1 && may_be_parameter_list) {
+        fields_encode <<
+          "\n"
+          "  if (!strm.write_sentinel_parameter_id()) {\n"
+          "    return false;\n"
+          "  }\n";
       }
       be_global->impl_ <<
         intro <<
-        fields_encode .str() << "\n"
+        fields_encode.str() << "\n"
         "  return true;\n";
     } else {
       string expr;
@@ -1873,7 +1895,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     string intro;
     if (may_be_delimited) {
       be_global->impl_ <<
-        "  unsigned total_size;\n";
+        "  size_t total_size;\n";
       const char* indent = "  ";
       if (not_only_delimited) {
         indent = "    ";
@@ -1881,7 +1903,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           "  if (strm.xcdr_version() == Serializer::XCDR_VERSION_2) {\n";
       }
       be_global->impl_ <<
-        indent << "if (!strm.read_delimiter(size)) {\n" <<
+        indent << "if (!strm.read_delimiter(total_size)) {\n" <<
         indent << "  return false;\n" <<
         indent << "}\n";
       if (not_only_delimited) {
@@ -1892,17 +1914,17 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     if (may_be_parameter_list) {
       if (repr.xcdr2) {
         /**
-         * We don't have a sentinel pid in XCDR2 paramter lists, but we have
+         * We don't have a sentinel pid in XCDR2 parameter lists, but we have
          * the size, so we need to stop after we hit this offset.
          */
         be_global->impl_ <<
-          "  const size_t end_of_fields = pos_rd() + total_size;\n";
+          "  const char* end_of_fields = strm.pos_rd() + total_size;\n";
       }
       be_global->impl_ <<
-        "  unsigned field_id;\n"
+        "  unsigned member_id;\n"
         "  size_t field_size;\n"
         "  while (true) {\n"
-        "    if (!strm.read_parameter_id(field_id, field_size)) {\n"
+        "    if (!strm.read_parameter_id(member_id, field_size)) {\n"
         "      return false;\n"
         "    }\n";
       if (repr.xcdr1) {
@@ -1918,7 +1940,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
 
       } else if (repr.xcdr2) {
         be_global->impl_ << "\n"
-          "    if (pos_rd() >= end_of_fields";
+          "    if (strm.pos_rd() >= end_of_fields";
         if (repr.not_only_xcdr2()) {
           be_global->impl_ << " &&\n"
             "        strm.xcdr_version() == Serializer::XCDR_VERSION_2";

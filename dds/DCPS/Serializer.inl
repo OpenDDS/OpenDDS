@@ -857,6 +857,15 @@ bool Serializer::write_delimiter(size_t size)
   return true;
 }
 
+ACE_INLINE
+bool Serializer::write_sentinel_parameter_id()
+{
+  if (encoding().xcdr_version() == Encoding::XCDR_VERSION_1) {
+    return align_w(4) && *this << pid_list_end && *this << ACE_CDR::UShort(0);
+  }
+  return true;
+}
+
 //
 // The following insertion operators are done in the style of the
 // ACE_CDR insertion operators instead of a stream abstraction.  This
@@ -1529,6 +1538,26 @@ void serialized_size_delimiter(const Encoding& encoding, size_t& size)
 {
   if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {
     max_serialized_size_ulong(encoding, size);
+  }
+}
+
+ACE_INLINE
+void serialized_size_parameter_id(const Encoding& encoding, size_t& size)
+{
+  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_1) {
+    encoding.align(size, 4);
+    size += uint16_cdr_size * 2;
+    // TODO(iguessthislldo): Extended PID, Handle alignment resets?
+  }
+  // TODO(iguessthislldo): XCDR2
+}
+
+ACE_INLINE
+void serialized_size_sentinel_parameter_id(const Encoding& encoding, size_t& size)
+{
+  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_1) {
+    encoding.align(size, uint16_cdr_size); // TODO(iguessthislldo): Not align 4?
+    size += uint16_cdr_size * 2;
   }
 }
 

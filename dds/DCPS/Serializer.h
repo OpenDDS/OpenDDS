@@ -595,6 +595,13 @@ public:
   bool write_parameter_id(unsigned id, size_t size);
 
   /**
+   * Write a sentinal parameter ID used in XCDR1 parameter lists.
+   *
+   * Returns true if successful.
+   */
+  bool write_sentinel_parameter_id();
+
+  /**
    * Read a delimiter used for XCDR2 delimited data.
    *
    * Returns true if successful.
@@ -775,6 +782,10 @@ void serialized_size_ulong(const Encoding& encoding, size_t& size,
 /// Add delimiter to the size of a serialized size if the encoding has them.
 OpenDDS_Dcps_Export
 void serialized_size_delimiter(const Encoding& encoding, size_t& size);
+
+void serialized_size_parameter_id(const Encoding& encoding, size_t& size);
+
+void serialized_size_sentinel_parameter_id();
 
 } // namespace DCPS
 } // namespace OpenDDS
