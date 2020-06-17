@@ -1,0 +1,24 @@
+
+typedef short Short3[3];
+typedef short Short2x3[2][3];
+typedef sequence<long> LongSequence;
+typedef sequence<long, 3> Long3Sequence;
+
+@topic
+struct TestStruct {
+  Short3 short3array;
+  Short2x3 short2x3array;
+  LongSequence longseq;
+  Long3Sequence long3seq;
+
+  // anonymous types
+
+  short short5array_a[5];
+  short short2x3array_a[2][3];
+  short another_short5array_a[5];
+
+  //sequence<long> longseq_a;
+  //sequence<long> another_longseq_a;
+  //sequence<long, 5> long5seq_a;
+  //sequence<long, 5> another_long5seq_a;
+};

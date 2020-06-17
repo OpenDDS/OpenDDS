@@ -8,6 +8,7 @@
 #include "marshal_generator.h"
 #include "utl_identifier.h"
 #include "topic_keys.h"
+#include "anonymous.h"
 
 #include <string>
 #include <sstream>
@@ -658,132 +659,90 @@ namespace {
     }
   }
 
-  void gen_array(UTL_ScopedName* name, AST_Array* arr)
+  void gen_array(const Field& af, bool use_cxx11)
   {
-    be_global->add_include("dds/DCPS/Serializer.h");
-    NamespaceGuard ng;
-    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-    string cxx = scoped(name);
-    string const_cxx = cxx, unwrap, const_unwrap;
-    if (use_cxx11) {
-      const string underscores = dds_generator::scoped_helper(name, "_");
-      be_global->header_ <<
-        "struct " << underscores << "_tag {};\n\n";
-      unwrap = "  " + cxx + "& arr = wrap;\n  ACE_UNUSED_ARG(arr);\n";
-      const_unwrap = "  const " + cxx + "& arr = wrap;\n  ACE_UNUSED_ARG(arr);\n";
-      const_cxx = "IDL::DistinctType<const " + cxx + ", " + underscores + "_tag>";
-      cxx = "IDL::DistinctType<" + cxx + ", " + underscores + "_tag>";
-    } else {
-      const_cxx = "const " + cxx + "_forany&";
-      cxx += "_forany&";
-    }
-
-    AST_Type* elem = resolveActualType(arr->base_type());
+    const char* var_name = use_cxx11 ? "wrap" : "arr";
+    AST_Type* elem = resolveActualType(af.ast_elem);
     Classification elem_cls = classify(elem);
-    if (!elem->in_main_file()
-        && elem->node_type() != AST_Decl::NT_pre_defined) {
+    if (!elem->in_main_file() && elem->node_type() != AST_Decl::NT_pre_defined) {
       be_global->add_referenced(elem->file_name().c_str());
     }
-    string cxx_elem = scoped(arr->base_type()->name());
-    size_t n_elems = 1;
-    for (size_t i = 0; i < arr->n_dims(); ++i) {
-      n_elems *= arr->dims()[i]->ev()->u.ulval;
-    }
+    string cxx_elem = scoped(af.ast_elem->name());
     {
       Function find_size("gen_find_size", "void");
-      find_size.addArg(use_cxx11 ? "wrap" : "arr", const_cxx);
+      find_size.addArg(var_name, af.const_forany_ref);
       find_size.addArg("size", "size_t&");
       find_size.addArg("padding", "size_t&");
       find_size.endArgs();
-      be_global->impl_ << const_unwrap;
+      be_global->impl_ << af.const_unwrap;
       if (elem_cls & CL_ENUM) {
-        be_global->impl_ <<
-          "  find_size_ulong(size, padding);\n";
-          if (n_elems > 1) {
-            be_global->impl_ <<
-              "  size += " << n_elems - 1 << " * max_marshaled_size_ulong();\n";
-          }
+        be_global->impl_ << "  find_size_ulong(size, padding);\n";
+        if (af.n_elems > 1) {
+          be_global->impl_ << "  size += " << af.n_elems - 1 << " * max_marshaled_size_ulong();\n";
+        }
       } else if (elem_cls & CL_PRIMITIVE) {
         const string align = getAlignment(elem);
         if (!align.empty()) {
           be_global->impl_ <<
             "  if ((size + padding) % " << align << ") {\n"
-            "    padding += " << align << " - ((size + padding) % " << align
-            << ");\n"
+            "    padding += " << align << " - ((size + padding) % " << align << ");\n"
             "  }\n";
         }
-        be_global->impl_ <<
-          "  size += " << n_elems << " * " << getMaxSizeExprPrimitive(elem)
-          << ";\n";
+        be_global->impl_ << "  size += " << af.n_elems << " * " << getMaxSizeExprPrimitive(elem) << ";\n";
       } else { // String, Struct, Array, Sequence, Union
         string indent = "  ";
-        NestedForLoops nfl("CORBA::ULong", "i", arr, indent);
+        NestedForLoops nfl("CORBA::ULong", "i", af.arr, indent);
         if (elem_cls & CL_STRING) {
-          be_global->impl_ <<
-            indent << "find_size_ulong(size, padding);\n" <<
-            indent;
+          be_global->impl_ << indent << "find_size_ulong(size, padding);\n" << indent;
           if (use_cxx11) {
             be_global->impl_ << "size += arr" << nfl.index_ << ".size()";
           } else {
             be_global->impl_ << "size += ACE_OS::strlen(arr" << nfl.index_ << ".in())";
           }
-          be_global->impl_ << ((elem_cls & CL_WIDE)
-            ? " * OpenDDS::DCPS::Serializer::WCHAR_SIZE;\n"
-            : " + 1;\n");
+          be_global->impl_ << ((elem_cls & CL_WIDE) ? " * OpenDDS::DCPS::Serializer::WCHAR_SIZE;\n" : " + 1;\n");
         } else if (!use_cxx11 && (elem_cls & CL_ARRAY)) {
-          be_global->impl_ <<
-            indent << cxx_elem << "_var tmp_var = " << cxx_elem
-            << "_dup(arr" << nfl.index_ << ");\n" <<
-            indent << cxx_elem << "_forany tmp = tmp_var.inout();\n" <<
-            indent << "gen_find_size(tmp, size, padding);\n";
+          be_global->impl_ << indent << cxx_elem << "_var tmp_var = " << cxx_elem << "_dup(arr" << nfl.index_ << ");\n" <<
+            indent << cxx_elem << "_forany tmp = tmp_var.inout();\n" << indent << "gen_find_size(tmp, size, padding);\n";
         } else { // Struct, Sequence, Union, C++11 Array
           string pre, post;
           if (use_cxx11 && (elem_cls & (CL_ARRAY | CL_SEQUENCE))) {
-            pre = "IDL::DistinctType<const " + cxx_elem + ", " +
-              dds_generator::scoped_helper(arr->base_type()->name(), "_") + "_tag>(";
+            pre = "IDL::DistinctType<const " + cxx_elem + ", " + dds_generator::scoped_helper(af.ast_elem->name(), "_") + "_tag>(";
             post = ')';
           }
-          be_global->impl_ <<
-            indent << "gen_find_size(" << pre << "arr" << nfl.index_
-            << post << ", size, padding);\n";
+          be_global->impl_ << indent << "gen_find_size(" << pre << "arr" << nfl.index_ << post << ", size, padding);\n";
         }
       }
     }
     {
       Function insertion("operator<<", "bool");
       insertion.addArg("strm", "Serializer&");
-      insertion.addArg(use_cxx11 ? "wrap" : "arr", const_cxx);
+      insertion.addArg(var_name, af.const_forany_ref);
       insertion.endArgs();
-      be_global->impl_ << const_unwrap;
+      be_global->impl_ << af.const_unwrap;
       const std::string accessor = use_cxx11 ? ".data()" : ".in()";
       if (elem_cls & CL_PRIMITIVE) {
         string suffix;
-        for (unsigned int i = 1; i < arr->n_dims(); ++i)
+        for (unsigned int i = 1; i < af.arr->n_dims(); ++i)
           suffix += use_cxx11 ? accessor : "[0]";
-        be_global->impl_ <<
-          "  return strm.write_" << getSerializerName(elem)
-          << "_array(arr" << accessor << suffix << ", " << n_elems << ");\n";
+        be_global->impl_ << "  return strm.write_" << getSerializerName(elem)
+          << "_array(arr" << accessor << suffix << ", " << af.n_elems << ");\n";
       } else { // Enum, String, Struct, Array, Sequence, Union
-        {
-          string indent = "  ";
-          NestedForLoops nfl("CORBA::ULong", "i", arr, indent);
-          if (!use_cxx11 && (elem_cls & CL_ARRAY)) {
-            be_global->impl_ <<
-              indent << cxx_elem << "_var tmp_var = " << cxx_elem
-              << "_dup(arr" << nfl.index_ << ");\n" <<
-              indent << cxx_elem << "_forany tmp = tmp_var.inout();\n" <<
-              streamAndCheck("<< tmp", indent.size());
-          } else {
-            string suffix = (elem_cls & CL_STRING) ? (use_cxx11 ? "" : ".in()") : "";
-            string pre;
-            if (use_cxx11 && (elem_cls & (CL_ARRAY | CL_SEQUENCE))) {
-              pre = "IDL::DistinctType<const " + cxx_elem + ", " +
-                dds_generator::scoped_helper(arr->base_type()->name(), "_") + "_tag>(";
-              suffix += ')';
-            }
-            be_global->impl_ <<
-              streamAndCheck("<< " + pre + "arr" + nfl.index_ + suffix , indent.size());
+        string indent = "  ";
+        NestedForLoops nfl("CORBA::ULong", "i", af.arr, indent);
+        if (!use_cxx11 && (elem_cls & CL_ARRAY)) {
+          be_global->impl_ << indent << cxx_elem << "_var tmp_var = " << cxx_elem
+            << "_dup(arr" << nfl.index_ << ");\n" <<
+            indent << cxx_elem << "_forany tmp = tmp_var.inout();\n" <<
+            streamAndCheck("<< tmp", indent.size());
+        } else {
+          string suffix = (elem_cls & CL_STRING) ? (use_cxx11 ? "" : ".in()") : "";
+          string pre;
+          if (use_cxx11 && (elem_cls & (CL_ARRAY | CL_SEQUENCE))) {
+            pre = "IDL::DistinctType<const " + cxx_elem + ", " +
+              dds_generator::scoped_helper(af.ast_elem->name(), "_") + "_tag>(";
+            suffix += ')';
           }
+          be_global->impl_ << streamAndCheck("<< " + pre + "arr" + nfl.index_ + suffix , indent.size());
         }
         be_global->impl_ << "  return true;\n";
       }
@@ -791,49 +750,61 @@ namespace {
     {
       Function extraction("operator>>", "bool");
       extraction.addArg("strm", "Serializer&");
-      extraction.addArg(use_cxx11 ? "wrap" : "arr", cxx);
+      extraction.addArg(var_name, af.forany_ref);
       extraction.endArgs();
-      be_global->impl_ << unwrap;
+      be_global->impl_ << af.unwrap;
       const std::string accessor = use_cxx11 ? ".data()" : ".out()";
       if (elem_cls & CL_PRIMITIVE) {
         string suffix;
-        for (unsigned int i = 1; i < arr->n_dims(); ++i)
+        for (unsigned int i = 1; i < af.arr->n_dims(); ++i)
           suffix += use_cxx11 ? accessor : "[0]";
-        be_global->impl_ <<
-          "  return strm.read_" << getSerializerName(elem)
-          << "_array(arr" << accessor << suffix << ", " << n_elems << ");\n";
+        be_global->impl_ << "  return strm.read_" << getSerializerName(elem)
+          << "_array(arr" << accessor << suffix << ", " << af.n_elems << ");\n";
       } else { // Enum, String, Struct, Array, Sequence, Union
-        {
-          string indent = "  ";
-          NestedForLoops nfl("CORBA::ULong", "i", arr, indent);
-          if (!use_cxx11 && (elem_cls & CL_ARRAY)) {
-            const string typedefname = scoped(arr->base_type()->name());
-            be_global->impl_ <<
-              indent << typedefname << "_var tmp = " << typedefname
-              << "_alloc();\n" <<
-              indent << typedefname << "_forany fa = tmp.inout();\n"
-              << streamAndCheck(">> fa", indent.size()) <<
-              indent << typedefname << "_copy(arr" << nfl.index_ <<
-              ", tmp.in());\n";
-          } else {
-            string suffix = (elem_cls & CL_STRING) ? (use_cxx11 ? "" : ".out()") : "";
-            string pre;
-            if (use_cxx11 && (elem_cls & (CL_ARRAY | CL_SEQUENCE))) {
-              pre = "IDL::DistinctType<" + cxx_elem + ", " +
-                dds_generator::scoped_helper(arr->base_type()->name(), "_") + "_tag>(";
-              suffix += ')';
-            }
-            be_global->impl_ <<
-              streamAndCheck(">> " + pre + "arr" + nfl.index_ + suffix, indent.size());
+        string indent = "  ";
+        NestedForLoops nfl("CORBA::ULong", "i", af.arr, indent);
+        if (!use_cxx11 && (elem_cls & CL_ARRAY)) {
+          const string typedefname = scoped(af.ast_elem->name());
+          be_global->impl_ << indent << typedefname << "_var tmp = " << typedefname << "_alloc();\n"
+            << indent << typedefname << "_forany fa = tmp.inout();\n"
+            << streamAndCheck(">> fa", indent.size()) <<
+            indent << typedefname << "_copy(arr" << nfl.index_ << ", tmp.in());\n";
+        } else {
+          string suffix = (elem_cls & CL_STRING) ? (use_cxx11 ? "" : ".out()") : "";
+          string pre;
+          if (use_cxx11 && (elem_cls & (CL_ARRAY | CL_SEQUENCE))) {
+            pre = "IDL::DistinctType<" + cxx_elem + ", " +
+              dds_generator::scoped_helper(af.ast_elem->name(), "_") + "_tag>(";
+            suffix += ')';
           }
+          be_global->impl_ << streamAndCheck(">> " + pre + "arr" + nfl.index_ + suffix, indent.size());
         }
         be_global->impl_ << "  return true;\n";
       }
     }
   }
 
-  string getArrayForany(const char* prefix, const char* fname,
-                        const string& cxx_fld)
+  void gen_anonymous_array(const AST_Field& field)
+  {
+    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+    Field af(field);
+    gen_array(af, use_cxx11);
+  }
+
+  void gen_array(UTL_ScopedName* name, AST_Type* base)
+  {
+    be_global->add_include("dds/DCPS/Serializer.h");
+    NamespaceGuard ng;
+    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+    if (use_cxx11) {
+      const string underscores = dds_generator::scoped_helper(name, "_");
+      be_global->header_ << "struct " << underscores << "_tag {};\n\n";
+    }
+    Field af(name, base, use_cxx11);
+    gen_array(af, use_cxx11);
+  }
+
+  string getArrayForany(const char* prefix, const char* fname, const string& cxx_fld)
   {
     string local = fname;
     if (local.size() > 2 && local.substr(local.size() - 2, 2) == "()") {
@@ -1113,15 +1084,14 @@ namespace {
   }
 }
 
-bool marshal_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type* base,
-  const char*)
+bool marshal_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type* base, const char*)
 {
   switch (base->node_type()) {
   case AST_Decl::NT_sequence:
     gen_sequence(name, AST_Sequence::narrow_from_decl(base));
     break;
   case AST_Decl::NT_array:
-    gen_array(name, AST_Array::narrow_from_decl(base));
+    gen_array(name, base);
     break;
   default:
     return true;
@@ -1149,37 +1119,28 @@ namespace {
       return indent + "find_size_ulong(size, padding);\n";
     } else if (fld_cls & CL_STRING) {
       const string suffix = is_union_member ? "" : ".in()";
-      const string get_size = use_cxx11 ? (qual + ".size()")
-        : ("ACE_OS::strlen(" + qual + suffix + ")");
-      return indent + "find_size_ulong(size, padding);\n" +
-        indent + "size += " + get_size
-        + ((fld_cls & CL_WIDE) ? " * OpenDDS::DCPS::Serializer::WCHAR_SIZE;\n"
-                               : " + 1;\n");
+      const string get_size = use_cxx11 ? (qual + ".size()") : ("ACE_OS::strlen(" + qual + suffix + ")");
+      return indent + "find_size_ulong(size, padding);\n" + indent + "size += " + get_size
+        + ((fld_cls & CL_WIDE) ? " * OpenDDS::DCPS::Serializer::WCHAR_SIZE;\n" : " + 1;\n");
     } else if (fld_cls & CL_PRIMITIVE) {
       string align = getAlignment(type);
       if (!align.empty()) {
         align =
           indent + "if ((size + padding) % " + align + ") {\n" +
-          indent + "  padding += " + align + " - ((size + padding) % "
-          + align + ");\n" +
+          indent + "  padding += " + align + " - ((size + padding) % " + align + ");\n" +
           indent + "}\n";
       }
       AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(type);
       if (p->pt() == AST_PredefinedType::PT_longdouble) {
         // special case use to ACE's NONNATIVE_LONGDOUBLE in CDR_Base.h
-        return align +
-          indent + "size += gen_max_marshaled_size(ACE_CDR::LongDouble());\n";
+        return align + indent + "size += gen_max_marshaled_size(ACE_CDR::LongDouble());\n";
       }
-      return align +
-        indent + "size += gen_max_marshaled_size(" +
-        getWrapper(qual, type, WD_OUTPUT) + ");\n";
+      return align + indent + "size += gen_max_marshaled_size(" + getWrapper(qual, type, WD_OUTPUT) + ");\n";
     } else if (fld_cls == CL_UNKNOWN) {
       return ""; // warning will be issued for the serialize functions
     } else { // sequence, struct, union, array
-      string fieldref = prefix,
-             local = insert_cxx11_accessor_parens(name, is_union_member),
-             tdname = scoped(typedeff->name());
-
+      string fieldref = prefix, local = insert_cxx11_accessor_parens(name, is_union_member);
+      string tdname = Field::get_type_name(*typedeff);
       if (!use_cxx11 && (fld_cls & CL_ARRAY)) {
         intro += "  " + getArrayForany(prefix.c_str(), name.c_str(), tdname) + '\n';
         fieldref += '_';
@@ -1233,11 +1194,9 @@ namespace {
       }
       return "false";
     } else { // sequence, struct, union, array, enum, string(insertion)
-      string fieldref = prefix,
-             local = insert_cxx11_accessor_parens(name, is_union_member);
-
-      const bool accessor =
-        local.size() > 2 && local.substr(local.size() - 2) == "()";
+      string fieldref = prefix, local = insert_cxx11_accessor_parens(name, is_union_member);
+      string tdname = Field::get_type_name(*typedeff);
+      const bool accessor = local.size() > 2 && local.substr(local.size() - 2) == "()";
       if (!use_cxx11 && (fld_cls & CL_ARRAY)) {
         string pre = prefix;
         if (shift == ">>" || shift == "<<") {
@@ -1646,6 +1605,16 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     }
   }
 
+  // generate code for each anonymous-type field
+  for (size_t i = 0; i < fields.size(); ++i) {
+    if (Field::is_anonymous_array(*(fields[i]->field_type()))) {
+      gen_anonymous_array(*(fields[i]));
+    } else if (Field::is_anonymous_sequence(*(fields[i]->field_type()))) {
+      std::cout << "TODO: gen_anonymous_sequence()\n";
+      gen_sequence(name, AST_Sequence::narrow_from_decl(fields[i])); //??
+    }
+  }
+
   RtpsFieldCustomizer rtpsCustom(cxx);
   {
     Function find_size("gen_find_size", "void");
@@ -1685,6 +1654,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       if (!cond.empty()) {
         expr += "(!(" + cond + ") || ";
       }
+      std::cout << "field_name[" << field_name << "] cond[" << cond << "] cxx[" << cxx << "]\n";
       expr += streamCommon(field_name, fields[i]->field_type(), "<< stru", intro, cxx);
       if (!cond.empty()) {
         expr += ")";
@@ -1706,6 +1676,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         expr += rtpsCustom.preFieldRead(field_name);
         expr += "(!(" + cond + ") || ";
       }
+      std::cout << "field_name[" << field_name << "] cond[" << cond << "] cxx[" << cxx << "]\n";
       expr += streamCommon(field_name, fields[i]->field_type(), ">> stru", intro, cxx);
       if (!cond.empty()) {
         expr += ")";

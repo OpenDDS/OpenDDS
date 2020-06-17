@@ -1,0 +1,7 @@
+project: dcps {
+  idlflags += -as
+  dcps_ts_flags += -as
+  TypeSupport_Files {
+    test.idl
+  }
+}
