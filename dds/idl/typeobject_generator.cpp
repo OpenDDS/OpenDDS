@@ -158,7 +158,7 @@ typeobject_generator::gen_enum(AST_Enum* node, UTL_ScopedName* name,
     gto.endArgs();
     const ExtensibilityKind exten = be_global->extensibility(node);
     std::string type_flag_str;
-    gen_type_flag_str(type_flag_str, exten, 0, node);
+    gen_type_flag_str(type_flag_str, exten, false, node);
     be_global->impl_ <<
       "  static const XTypes::TypeObject to = XTypes::TypeObject(\n"
       "    XTypes::MinimalTypeObject(\n"
@@ -229,7 +229,7 @@ typeobject_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
     gto.endArgs();
     const ExtensibilityKind exten = be_global->extensibility(node);
     std::string type_flag_str;
-    gen_type_flag_str(type_flag_str, exten, 1, node);
+    gen_type_flag_str(type_flag_str, exten, true, node);
     if (!be_global->is_topic_type(node)) {
       type_flag_str += " | XTypes::IS_NESTED";
     }
@@ -309,7 +309,7 @@ typeobject_generator::gen_typedef(AST_Typedef* node, UTL_ScopedName* name,
     gto.endArgs();
     const ExtensibilityKind exten = be_global->extensibility(node);
     std::string type_flag_str;
-    gen_type_flag_str(type_flag_str, exten, 1, node);
+    gen_type_flag_str(type_flag_str, exten, true, node);
     be_global->impl_ <<
       "  static const XTypes::TypeObject to = XTypes::TypeObject(\n"
       "    XTypes::MinimalTypeObject(\n"
@@ -359,7 +359,7 @@ typeobject_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     gto.endArgs();
     const ExtensibilityKind exten = be_global->extensibility(node);
     std::string type_flag_str;
-    gen_type_flag_str(type_flag_str, exten, 1, node);
+    gen_type_flag_str(type_flag_str, exten, true, node);
     if (!be_global->is_topic_type(node)) {
       type_flag_str += " | XTypes::IS_NESTED";
     }
@@ -460,24 +460,25 @@ typeobject_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 void typeobject_generator::gen_type_flag_str(std::string& type_flag_str,
                                              ExtensibilityKind exten,
                                              bool can_be_mutable,
-                                             AST_Decl* node) {
-    switch (exten) {
-      case extensibilitykind_final:
-        type_flag_str = "XTypes::IS_FINAL";
-        break;
-      case extensibilitykind_appendable:
-        type_flag_str = "XTypes::IS_APPENDABLE";
-        break;
-      case extensibilitykind_mutable:
-        if (can_be_mutable) {
-          type_flag_str = "XTypes::IS_MUTABLE";
-        } else {
-          idl_global->err()->misc_error(
-          "Unexpected extensibility while setting flags: type cannot be mutable", node);
-        }
-        break;
-      default:
+                                             AST_Decl* node)
+{
+  switch (exten) {
+    case extensibilitykind_final:
+      type_flag_str = "XTypes::IS_FINAL";
+      break;
+    case extensibilitykind_appendable:
+      type_flag_str = "XTypes::IS_APPENDABLE";
+      break;
+    case extensibilitykind_mutable:
+      if (can_be_mutable) {
+        type_flag_str = "XTypes::IS_MUTABLE";
+      } else {
         idl_global->err()->misc_error(
-          "Unexpected extensibility while setting flags", node);
+          "Unexpected extensibility while setting flags: type cannot be mutable", node);
+      }
+      break;
+    default:
+      idl_global->err()->misc_error(
+        "Unexpected extensibility while setting flags", node);
     }
 }
