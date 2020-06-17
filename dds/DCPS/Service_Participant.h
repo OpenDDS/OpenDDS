@@ -469,7 +469,6 @@ private:
    */
   int configure_domain_range(DDS::DomainId_t domainId);
 
-
   /**
    * Load the discovery configuration to the Service_Participant
    * singleton.
@@ -582,6 +581,7 @@ private:
     DDS::DomainId_t range_end;
     OPENDDS_STRING discovery_template_name;
     OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING) customizations;
+
   } domain_range_template;
 
   std::vector<domain_range_template> domain_range_templates_;
@@ -589,6 +589,8 @@ private:
   int parse_domain_range(OPENDDS_STRING& range, int& start, int& end);
 
   bool has_domain_range();
+
+  OpenDDS::DCPS::Discovery::RepoKey get_rtps_template_instance_name(const DDS::DomainId_t);
 
 public:
   /// Pointer to the monitor factory that is used to create

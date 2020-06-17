@@ -121,6 +121,7 @@ static const char DEFAULT_PERSISTENT_DATA_DIR[] = "OpenDDS-durable-data-dir";
 static const ACE_TCHAR COMMON_SECTION_NAME[] = ACE_TEXT("common");
 static const ACE_TCHAR DOMAIN_SECTION_NAME[] = ACE_TEXT("domain");
 static const ACE_TCHAR DOMAIN_RANGE_SECTION_NAME[] = ACE_TEXT("DomainRange");
+static const ACE_TCHAR RTPS_TEMPLATE_INSTANCE_NAME[] = ACE_TEXT("rtps_template_instance");
 static const ACE_TCHAR REPO_SECTION_NAME[]   = ACE_TEXT("repository");
 static const ACE_TCHAR RTPS_SECTION_NAME[]   = ACE_TEXT("rtps_discovery");
 
@@ -1171,6 +1172,7 @@ Service_Participant::get_discovery(const DDS::DomainId_t domain)
   // changed defaultDiscovery_ using the API or config file
   Discovery::RepoKey repo = defaultDiscovery_;
   bool in_range = false;
+  const OpenDDS::DCPS::Discovery::RepoKey template_name = get_rtps_template_instance_name(domain);
 
   // Find if this domain has a repo key (really a discovery key)
   // mapped to it.
@@ -1204,8 +1206,21 @@ Service_Participant::get_discovery(const DDS::DomainId_t domain)
 
   if (location == this->discoveryMap_.end()) {
     if (in_range) {
-      configure_domain_range(domain);
+      int ret = configure_domain_range(domain);
 
+      // return the newly configured domain and return it
+      if (!ret) {
+        return this->discoveryMap_[template_name];
+      } else {
+        if (DCPS_debug_level > 0) {
+          ACE_DEBUG((LM_DEBUG,
+                     ACE_TEXT("(%P|%t) Service_Participant::get_discovery: ")
+                     ACE_TEXT("failed attempt to set RTPS discovery for domain range %d.\n"),
+                     domain));
+        }
+
+        return Discovery_rch();
+      }
     } else if ((repo == Discovery::DEFAULT_REPO) ||
         (repo == "-1")) {
       // Set the default repository IOR if it hasn't already happened
@@ -1409,7 +1424,6 @@ Service_Participant::load_configuration(
   while (ret == 0) {
     ret = config.enumerate_sections(config.root_section(), idx++, section_name);
     if (section_name == DOMAIN_RANGE_SECTION_NAME) {
-      //has_domain_template_ = true;
       if (DCPS_debug_level > 0) {
         ACE_DEBUG((LM_NOTICE,
                    ACE_TEXT("(%P|%t) NOTICE: Service_Participant::load_configuration ")
@@ -1418,7 +1432,6 @@ Service_Participant::load_configuration(
       }
     }
     else if (section_name == TRANSPORT_TEMPLATE_SECTION_NAME) {
-      //has_transport_template_ = true;
       if (DCPS_debug_level > 0) {
         ACE_DEBUG((LM_NOTICE,
                    ACE_TEXT("(%P|%t) NOTICE: Service_Participant::load_configuration ")
@@ -1532,7 +1545,6 @@ Service_Participant::load_configuration(
                       status),
                      -1);
   }
-
 
   // Needs to be loaded after transport configs and instances and domains.
   try {
@@ -2000,7 +2012,9 @@ int Service_Participant::load_initial_domain_range_configuration(ACE_Configurati
     for (KeyList::const_iterator it = keys.begin(); it != keys.end(); ++it) {
       OPENDDS_STRING domain_range = it->first;
 
-      domain_range_template range_element { -1, -1 };
+      domain_range_template range_element;
+      range_element.range_start = -1;
+      range_element.range_end = -1;
 
       int range_start = -1;
       int range_end = -1;
@@ -2179,12 +2193,56 @@ int Service_Participant::load_final_domain_range_configuration(ACE_Configuration
 
 int Service_Participant::configure_domain_range(DDS::DomainId_t domainId)
 {
-  // look up repokey for domain and then call
+  OpenDDS::DCPS::Discovery::RepoKey name = get_rtps_template_instance_name(domainId);
 
+if (this->discoveryMap_.find(name) == this->discoveryMap_.end()) {
+  // create an cf that has [rtps_discovery/name+domainId]
+  // copy sections from template adding customization
+  // then call
+  // status = this->load_discovery_configuration(cf, RTPS_SECTION_NAME);
 
-  //this->set_repo_domain(domainId, repoKey);
+  ACE_Configuration_Heap dcf;
+  dcf.open();
+  const ACE_Configuration_Section_Key& root = dcf.root_section();
+  ACE_Configuration_Section_Key sect;
+  dcf.open_section(root, RTPS_SECTION_NAME, 1 /* create */, sect);
+  ACE_Configuration_Section_Key sub_sect;
+  dcf.open_section(sect, name.c_str(), 1, sub_sect);
 
+  // in same cf add [domain/domsainId]
+  // add DiscoveryConfig=name+domainId
+  // and everything else in domain range
+  ACE_Configuration_Section_Key dsect;
+  dcf.open_section(root, "domain", 1, dsect);
+  ACE_Configuration_Section_Key dsub_sect;
+  dcf.open_section(dsect, std::to_string(domainId).c_str(), 1 /* create */, dsub_sect);
+  dcf.set_string_value(dsub_sect, "DiscoveryConfig", name.c_str());
 
+  // load discovery
+  int status = this->load_discovery_configuration(dcf, RTPS_SECTION_NAME);
+
+  printf ("\n\nload discovery = %d\n\n", status);
+
+  // load domain config
+  status = this->load_domain_configuration(dcf, 0);
+
+  printf ("\n\nload domain = %d\n\n", status);
+
+  if (DCPS_debug_level > 4) {
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) Service_Participant::configure_domain_range: ")
+               ACE_TEXT("configure domain %d.\n"),
+               domainId));
+  }
+}
+else {
+  if (DCPS_debug_level > 4) {
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) Service_Participant::configure_domain_range: ")
+               ACE_TEXT("domain %d already configured.\n"),
+               domainId));
+  }
+}
   return 0;
 }
 
@@ -2279,6 +2337,14 @@ bool
 Service_Participant::has_domain_range()
 {
   return domain_range_templates_.size() > 0;
+}
+
+OpenDDS::DCPS::Discovery::RepoKey
+Service_Participant::get_rtps_template_instance_name(const DDS::DomainId_t id)
+{
+  OpenDDS::DCPS::Discovery::RepoKey configured_name = RTPS_TEMPLATE_INSTANCE_NAME;
+  configured_name += "_" + std::to_string(id);
+  return configured_name;
 }
 
 #if defined OPENDDS_SAFETY_PROFILE && defined ACE_HAS_ALLOC_HOOKS
