@@ -1,5 +1,5 @@
 @final @OpenDDS::data_representation(XCDR1)
-struct FinalXcdr1Type {
+struct FinalXcdr1Struct {
   short short_field;
   long long_field;
   octet octet_field;
@@ -7,7 +7,7 @@ struct FinalXcdr1Type {
 };
 
 @appendable @OpenDDS::data_representation(XCDR1)
-struct AppendableXcdr1Type {
+struct AppendableXcdr1Struct {
   short short_field;
   long long_field;
   octet octet_field;
@@ -15,7 +15,7 @@ struct AppendableXcdr1Type {
 };
 
 @mutable @OpenDDS::data_representation(XCDR1)
-struct MutableXcdr1Type {
+struct MutableXcdr1Struct {
   short short_field;
   long long_field;
   octet octet_field;
@@ -23,7 +23,7 @@ struct MutableXcdr1Type {
 };
 
 @final @OpenDDS::data_representation(XCDR2)
-struct FinalXcdr2Type {
+struct FinalXcdr2Struct {
   short short_field;
   long long_field;
   octet octet_field;
@@ -31,7 +31,7 @@ struct FinalXcdr2Type {
 };
 
 @appendable @OpenDDS::data_representation(XCDR2)
-struct AppendableXcdr2Type {
+struct AppendableXcdr2Struct {
   short short_field;
   long long_field;
   octet octet_field;
@@ -39,7 +39,7 @@ struct AppendableXcdr2Type {
 };
 
 @mutable @OpenDDS::data_representation(XCDR2)
-struct MutableXcdr2Type {
+struct MutableXcdr2Struct {
   short short_field;
   long long_field;
   octet octet_field;

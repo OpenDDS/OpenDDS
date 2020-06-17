@@ -111,33 +111,33 @@ const std::string xcdr1_non_mutable_expected(
   "\x7f\xff\xff\xff\xff\xff\xff\xff" // +8 = 24
   , 24);
 
-// FinalXcdr1Type ------------------------------------------------------------
+// FinalXcdr1Struct ----------------------------------------------------------
 
-TEST(FinalXcdr1Type_tests, serialized_size_test)
+TEST(FinalXcdr1Struct_tests, serialized_size_test)
 {
-  FinalXcdr1Type value;
+  FinalXcdr1Struct value;
   EXPECT_EQ(serialized_size(xcdr1, value), xcdr1_non_mutable_expected.size());
 }
 
-TEST(FinalXcdr1Type_tests, serializer_test)
+TEST(FinalXcdr1Struct_tests, serializer_test)
 {
-  serializer_test<FinalXcdr1Type>(xcdr1, xcdr1_non_mutable_expected);
+  serializer_test<FinalXcdr1Struct>(xcdr1, xcdr1_non_mutable_expected);
 }
 
-// AppendableXcdr1Type -------------------------------------------------------
+// AppendableXcdr1Struct -----------------------------------------------------
 
-TEST(AppendableXcdr1Type_tests, serialized_size_test)
+TEST(AppendableXcdr1Struct_tests, serialized_size_test)
 {
-  AppendableXcdr1Type value;
+  AppendableXcdr1Struct value;
   EXPECT_EQ(serialized_size(xcdr1, value), xcdr1_non_mutable_expected.size());
 }
 
-TEST(AppendableXcdr1Type_tests, serializer_test)
+TEST(AppendableXcdr1Struct_tests, serializer_test)
 {
-  serializer_test<AppendableXcdr1Type>(xcdr1, xcdr1_non_mutable_expected);
+  serializer_test<AppendableXcdr1Struct>(xcdr1, xcdr1_non_mutable_expected);
 }
 
-// MutableXcdr1Type ----------------------------------------------------------
+// MutableXcdr1Struct --------------------------------------------------------
 
 const std::string xcdr1_mutable_expected(
   // short_field
@@ -158,15 +158,15 @@ const std::string xcdr1_mutable_expected(
   "\x3f\x02\x00\x00" // +4 = 40
   , 40);
 
-TEST(MutableXcdr1Type_tests, serialized_size_test)
+TEST(MutableXcdr1Struct_tests, serialized_size_test)
 {
-  MutableXcdr1Type value;
+  MutableXcdr1Struct value;
   EXPECT_EQ(serialized_size(xcdr1, value), xcdr1_mutable_expected.size());
 }
 
-TEST(MutableXcdr1Type_tests, serializer_test)
+TEST(MutableXcdr1Struct_tests, serializer_test)
 {
-  serializer_test<MutableXcdr1Type>(xcdr1, xcdr1_mutable_expected);
+  serializer_test<MutableXcdr1Struct>(xcdr1, xcdr1_mutable_expected);
 }
 
 // XCDR2 =====================================================================
@@ -184,20 +184,20 @@ const std::string xcdr2_final_expected(
   "\x7f\xff\xff\xff\xff\xff\xff\xff" // +8 = 20
   , 20);
 
-// FinalXcdr1Type ------------------------------------------------------------
+// FinalXcdr1Struct ----------------------------------------------------------
 
-TEST(FinalXcdr2Type_tests, serialized_size_test)
+TEST(FinalXcdr2Struct_tests, serialized_size_test)
 {
-  FinalXcdr2Type value;
+  FinalXcdr2Struct value;
   EXPECT_EQ(serialized_size(xcdr2, value), xcdr2_final_expected.size());
 }
 
-TEST(FinalXcdr2Type_tests, serializer_test)
+TEST(FinalXcdr2Struct_tests, serializer_test)
 {
-  serializer_test<FinalXcdr2Type>(xcdr2, xcdr2_final_expected);
+  serializer_test<FinalXcdr2Struct>(xcdr2, xcdr2_final_expected);
 }
 
-// AppendableXcdr1Type -------------------------------------------------------
+// AppendableXcdr1Struct -----------------------------------------------------
 
 const std::string xcdr2_appendable_expected(
   // Delimiter
@@ -214,18 +214,18 @@ const std::string xcdr2_appendable_expected(
   "\x7f\xff\xff\xff\xff\xff\xff\xff" // +8 = 24
   , 24);
 
-TEST(AppendableXcdr2Type_tests, serialized_size_test)
+TEST(AppendableXcdr2Struct_tests, serialized_size_test)
 {
-  AppendableXcdr2Type value;
+  AppendableXcdr2Struct value;
   EXPECT_EQ(serialized_size(xcdr2, value), xcdr2_appendable_expected.size());
 }
 
-TEST(AppendableXcdr2Type_tests, serializer_test)
+TEST(AppendableXcdr2Struct_tests, serializer_test)
 {
-  serializer_test<AppendableXcdr2Type>(xcdr2, xcdr2_appendable_expected);
+  serializer_test<AppendableXcdr2Struct>(xcdr2, xcdr2_appendable_expected);
 }
 
-// MutableXcdr1Type ----------------------------------------------------------
+// MutableXcdr1Struct --------------------------------------------------------
 
 const std::string xcdr2_mutable_expected(
   // Delimiter
@@ -246,15 +246,15 @@ const std::string xcdr2_mutable_expected(
   "\x7f\xff\xff\xff\xff\xff\xff\xff" // +8 = 40
   , 40);
 
-TEST(MutableXcdr2Type_tests, serialized_size_test)
+TEST(MutableXcdr2Struct_tests, serialized_size_test)
 {
-  MutableXcdr2Type value;
+  MutableXcdr2Struct value;
   EXPECT_EQ(serialized_size(xcdr2, value), xcdr2_mutable_expected.size());
 }
 
-TEST(MutableXcdr2Type_tests, serializer_test)
+TEST(MutableXcdr2Struct_tests, serializer_test)
 {
-  serializer_test<MutableXcdr2Type>(xcdr2, xcdr2_mutable_expected);
+  serializer_test<MutableXcdr2Struct>(xcdr2, xcdr2_mutable_expected);
 }
 
 int main(int argc, char* argv[])
