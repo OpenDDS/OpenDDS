@@ -1,4 +1,8 @@
-@final @OpenDDS::data_representation(XCDR1)
+// TODO(iguessthislldo): Add more fields
+// Generic XCDR1 Tests =======================================================
+
+@final
+@OpenDDS::data_representation(XCDR1)
 struct FinalXcdr1Struct {
   short short_field;
   long long_field;
@@ -6,7 +10,8 @@ struct FinalXcdr1Struct {
   long long long_long_field;
 };
 
-@appendable @OpenDDS::data_representation(XCDR1)
+@appendable
+@OpenDDS::data_representation(XCDR1)
 struct AppendableXcdr1Struct {
   short short_field;
   long long_field;
@@ -14,7 +19,8 @@ struct AppendableXcdr1Struct {
   long long long_long_field;
 };
 
-@mutable @OpenDDS::data_representation(XCDR1)
+@mutable
+@OpenDDS::data_representation(XCDR1)
 struct MutableXcdr1Struct {
   short short_field;
   long long_field;
@@ -22,7 +28,10 @@ struct MutableXcdr1Struct {
   long long long_long_field;
 };
 
-@final @OpenDDS::data_representation(XCDR2)
+// Generic XCDR2 Tests =======================================================
+
+@final
+@OpenDDS::data_representation(XCDR2)
 struct FinalXcdr2Struct {
   short short_field;
   long long_field;
@@ -30,7 +39,8 @@ struct FinalXcdr2Struct {
   long long long_long_field;
 };
 
-@appendable @OpenDDS::data_representation(XCDR2)
+@appendable
+@OpenDDS::data_representation(XCDR2)
 struct AppendableXcdr2Struct {
   short short_field;
   long long_field;
@@ -38,10 +48,79 @@ struct AppendableXcdr2Struct {
   long long long_long_field;
 };
 
-@mutable @OpenDDS::data_representation(XCDR2)
+@mutable
+@OpenDDS::data_representation(XCDR2)
 struct MutableXcdr2Struct {
   short short_field;
   long long_field;
   octet octet_field;
   long long long_long_field;
+};
+
+// Generic XCDR1/2 Tests =====================================================
+
+@final
+@OpenDDS::data_representation(XCDR1)
+@OpenDDS::data_representation(XCDR2)
+struct FinalXcdr12Struct {
+  short short_field;
+  long long_field;
+  octet octet_field;
+  long long long_long_field;
+};
+
+@appendable
+@OpenDDS::data_representation(XCDR1)
+@OpenDDS::data_representation(XCDR2)
+struct AppendableXcdr12Struct {
+  short short_field;
+  long long_field;
+  octet octet_field;
+  long long long_long_field;
+};
+
+@mutable
+@OpenDDS::data_representation(XCDR1)
+@OpenDDS::data_representation(XCDR2)
+struct MutableXcdr12Struct {
+  short short_field;
+  long long_field;
+  octet octet_field;
+  long long long_long_field;
+};
+
+// Appendable Tests ==========================================================
+// TODO(iguessthislldo)
+
+// Mutable Tests =============================================================
+
+@mutable
+@OpenDDS::data_representation(XCDR1)
+@OpenDDS::data_representation(XCDR2)
+struct MutableStruct {
+  @id(4) short short_field;
+  @id(6) long long_field;
+  @id(8) octet octet_field;
+  @id(10) long long long_long_field;
+};
+
+@mutable
+@OpenDDS::data_representation(XCDR1)
+@OpenDDS::data_representation(XCDR2)
+struct ReorderedMutableStruct {
+  @id(6) long long_field;
+  @id(10) long long long_long_field;
+  @id(8) octet octet_field;
+  @id(4) short short_field;
+};
+
+@mutable
+@OpenDDS::data_representation(XCDR1)
+@OpenDDS::data_representation(XCDR2)
+struct AdditionalFieldMutableStruct {
+  @id(6) long long_field;
+  @id(1) long additional_field;
+  @id(10) long long long_long_field;
+  @id(8) octet octet_field;
+  @id(4) short short_field;
 };
