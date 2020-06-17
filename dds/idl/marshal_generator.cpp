@@ -1902,12 +1902,12 @@ bool marshal_generator::gen_struct(AST_Structure* node,
     string intro;
     if (may_be_delimited) {
       be_global->impl_ <<
-        "  size_t total_size;\n";
+        "  size_t total_size = 0;\n";
       const char* indent = "  ";
       if (not_only_delimited) {
         indent = "    ";
         be_global->impl_ <<
-          "  if (strm.xcdr_version() == Serializer::XCDR_VERSION_2) {\n";
+          "  if (strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2) {\n";
       }
       be_global->impl_ <<
         indent << "if (!strm.read_delimiter(total_size)) {\n" <<
@@ -1934,10 +1934,10 @@ bool marshal_generator::gen_struct(AST_Structure* node,
 
       if (repr.xcdr2) {
         be_global->impl_ << "\n"
-          "    if (!strm.pos_rd() || strm.pos_rd() >= end_of_fields";
+          "    if ((!strm.pos_rd() || strm.pos_rd() >= end_of_fields)";
         if (repr.not_only_xcdr2()) {
           be_global->impl_ << " &&\n"
-            "        strm.xcdr_version() == Serializer::XCDR_VERSION_2";
+            "        strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2";
         }
         be_global->impl_ << ") {\n"
           "      return true;\n"
@@ -1954,7 +1954,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
           "    if (member_id == Serializer::pid_list_end";
         if (repr.not_only_xcdr1()) {
           be_global->impl_ << " &&\n"
-            "        strm.xcdr_version() == Serializer::XCDR_VERSION_1";
+            "        strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_1";
         }
         be_global->impl_ << ") {\n"
           "      return true;\n"
