@@ -238,7 +238,8 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args)
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   Args my_args;
-  if (run_test(argc, argv, my_args) != my_args.expected_result_) {
+  const int result = run_test(argc, argv, my_args);
+  if (result != my_args.expected_result_) {
     std::cerr << "Publisher exiting with unexpected result: " << result << std::endl;
     return 1;
   }
