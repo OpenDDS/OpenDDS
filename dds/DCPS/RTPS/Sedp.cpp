@@ -3286,13 +3286,43 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
     return;
   }
 
-  switch (sample.header_.message_id_) {
+  const DCPS::MessageId id =
+    static_cast<DCPS::MessageId>(sample.header_.message_id_);
+
+  switch (id) {
   case DCPS::SAMPLE_DATA:
   case DCPS::DISPOSE_INSTANCE:
   case DCPS::UNREGISTER_INSTANCE:
   case DCPS::DISPOSE_UNREGISTER_INSTANCE: {
-    const DCPS::MessageId id =
-      static_cast<DCPS::MessageId>(sample.header_.message_id_);
+    const DCPS::EntityId_t entity_id = sample.header_.publication_id_.entityId;
+    const bool full_message = !sample.header_.key_fields_only_;
+
+    const bool is_mutable =
+      entity_id == ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER ||
+#ifdef OPENDDS_SECURITY
+      entity_id == ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER ||
+#endif
+      entity_id == ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER ||
+#ifdef OPENDDS_SECURITY
+      entity_id == ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER ||
+      entity_id == ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER ||
+#endif
+      false;
+    const bool is_final =
+      (entity_id == ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER && full_message) ||
+#ifdef OPENDDS_SECURITY
+      (entity_id == ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER && full_message) ||
+      entity_id == ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER ||
+      entity_id == ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER ||
+#endif
+      false;
+    if (is_mutable == is_final) {
+      if (is_mutable) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Sedp::Reader::data_received: ")
+          ACE_TEXT("Error in entity id logic\n")));
+      }
+      break;
+    }
 
     Encoding encoding;
     Serializer ser(sample.sample_.get(), encoding);
@@ -3302,13 +3332,13 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
         ACE_TEXT("failed to serializer encapsulation header\n")));
       return;
     }
-    if (!encap.to_encoding(encoding, DCPS::MUTABLE)) {
+    if (!encap.to_encoding(encoding, is_mutable ? DCPS::MUTABLE: DCPS::FINAL)) {
       return;
     }
     ser.encoding(encoding);
     const Encoding::Kind encoding_kind = ser.encoding().kind();
 
-    if (sample.header_.publication_id_.entityId == ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER) {
+    if (entity_id == ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER) {
       ParameterList data;
       if (!decode_parameter_list(sample, ser, encoding_kind, data)) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
@@ -3343,7 +3373,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       sedp_.task_.enqueue(id, move(wdata));
 
 #ifdef OPENDDS_SECURITY
-    } else if (sample.header_.publication_id_.entityId == ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER) {
+    } else if (entity_id == ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER) {
       ParameterList data;
       if (!decode_parameter_list(sample, ser, encoding_kind, data)) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
@@ -3378,7 +3408,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       sedp_.task_.enqueue(id, move(wdata_secure));
 #endif
 
-    } else if (sample.header_.publication_id_.entityId == ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER) {
+    } else if (entity_id == ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER) {
       ParameterList data;
       if (!decode_parameter_list(sample, ser, encoding_kind, data)) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
@@ -3416,7 +3446,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       sedp_.task_.enqueue(id, move(rdata));
 
 #ifdef OPENDDS_SECURITY
-    } else if (sample.header_.publication_id_.entityId == ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER) {
+    } else if (entity_id == ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER) {
       ParameterList data;
       if (!decode_parameter_list(sample, ser, encoding_kind, data)) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
@@ -3455,8 +3485,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       sedp_.task_.enqueue(id, move(rdata_secure));
 #endif
 
-    } else if (sample.header_.publication_id_.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER
-               && !sample.header_.key_fields_only_) {
+    } else if (entity_id == ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER && full_message) {
       DCPS::unique_ptr<ParticipantMessageData> data(new ParticipantMessageData);
       if (!(ser >> *data)) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
@@ -3466,8 +3495,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       sedp_.task_.enqueue(id, move(data));
 
 #ifdef OPENDDS_SECURITY
-    } else if (sample.header_.publication_id_.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER
-               && !sample.header_.key_fields_only_) {
+    } else if (entity_id == ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER && full_message) {
 
       DCPS::unique_ptr<ParticipantMessageData> data(new ParticipantMessageData);
 
@@ -3478,10 +3506,9 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       }
       sedp_.task_.enqueue_participant_message_secure(id, move(data));
 
-    } else if (sample.header_.publication_id_.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER) {
+    } else if (entity_id == ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER) {
 
       DCPS::unique_ptr<DDS::Security::ParticipantStatelessMessage> data(new DDS::Security::ParticipantStatelessMessage);
-      ser.reset_alignment(); // https://issues.omg.org/browse/DDSIRTP23-63
       if (!(ser >> *data)) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to deserialize data\n")));
@@ -3489,11 +3516,10 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       }
       sedp_.task_.enqueue_stateless_message(id, move(data));
 
-    } else if (sample.header_.publication_id_.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER) {
+    } else if (entity_id == ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER) {
 
       DCPS::unique_ptr<DDS::Security::ParticipantVolatileMessageSecure> data(
         new DDS::Security::ParticipantVolatileMessageSecure);
-      ser.reset_alignment(); // https://issues.omg.org/browse/DDSIRTP23-63
       if (!(ser >> *data)) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to deserialize data\n")));
@@ -3501,7 +3527,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       }
       sedp_.task_.enqueue_volatile_message_secure(id, move(data));
 
-    } else if (sample.header_.publication_id_.entityId == ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER) {
+    } else if (entity_id == ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER) {
 
       ParameterList data;
       if (!decode_parameter_list(sample, ser, encoding_kind, data)) {
