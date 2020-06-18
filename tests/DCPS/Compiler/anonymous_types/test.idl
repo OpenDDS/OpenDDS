@@ -17,8 +17,8 @@ struct TestStruct {
   short short2x3array_a[2][3];
   short another_short5array_a[5];
 
-  //sequence<long> longseq_a;
+  sequence<long> longseq_a;
   //sequence<long> another_longseq_a;
-  //sequence<long, 5> long5seq_a;
+  sequence<long, 5> long5seq_a;
   //sequence<long, 5> another_long5seq_a;
 };

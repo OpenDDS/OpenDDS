@@ -36,44 +36,36 @@ std::string Field::get_type_name(AST_Type& field)
   return is_anonymous_type(field) ? get_anonymous_type_name(n) : n;
 }
 
-Field::Field(const AST_Field& field) :
+// for anonymous types
+Field::Field(AST_Field& field) :
   ast_type(field.field_type()),
   arr(AST_Array::narrow_from_decl(ast_type)),
   seq(AST_Sequence::narrow_from_decl(ast_type)),
   ast_elem(arr ? arr->base_type() : (seq ? seq->base_type() : nullptr)),
+  name(field.local_name()->get_string()),
   cls(CL_UNKNOWN), elem_sz(0), n_elems(1)
 {
-  init();
+  type = ast_elem ? ("_" + name) : name;
+  if (seq) { type += "_seq"; }
   std::string ftn = scoped(ast_type->name());
-  std::size_t i = ftn.find("::");
-  struct_name = ftn.substr(0, i);
-  name = ftn.substr(i + 2);
-  type = is_anonymous_type(*ast_type) ? ("_" + name) : name;
+  struct_name = ftn.substr(0, ftn.find("::"));
   scoped_type = struct_name + "::" + type;
-  forany_ref = scoped_type + "_forany&";
-  const_forany_ref = "const " + forany_ref;
+  //const bool use_cxx11 = (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11);
+  //underscores = use_cxx11 ? dds_generator::scoped_helper(sn, "_") : "";
+  init();
 }
 
-Field::Field(UTL_ScopedName* sn, AST_Type* base, bool use_cxx11) :
+Field::Field(UTL_ScopedName* sn, AST_Type* base) :
   ast_type(base),
   arr(AST_Array::narrow_from_decl(ast_type)),
   seq(AST_Sequence::narrow_from_decl(ast_type)),
   ast_elem(arr ? arr->base_type() : (seq ? seq->base_type() : nullptr)),
+  scoped_type(scoped(sn)),
   cls(CL_UNKNOWN), elem_sz(0), n_elems(1)
 {
+  const bool use_cxx11 = (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11);
+  underscores = use_cxx11 ? dds_generator::scoped_helper(sn, "_") : "";
   init();
-  scoped_type = scoped(sn);
-  if (use_cxx11) {
-    const std::string underscores = dds_generator::scoped_helper(sn, "_");
-    be_global->header_ << "struct " << underscores << "_tag {};\n\n";
-    unwrap       = "  "       + scoped_type + "& arr = wrap;\n  ACE_UNUSED_ARG(arr);\n";
-    const_unwrap = "  const " + scoped_type + "& arr = wrap;\n  ACE_UNUSED_ARG(arr);\n";
-    forany_ref       = "IDL::DistinctType<"       + scoped_type + ", " + underscores + "_tag>";
-    const_forany_ref = "IDL::DistinctType<const " + scoped_type + ", " + underscores + "_tag>";
-  } else {
-    forany_ref = scoped_type + "_forany&";
-    const_forany_ref = "const " + forany_ref;
-  }
 }
 
 void Field::init()
@@ -84,9 +76,39 @@ void Field::init()
       n_elems *= arr->dims()[i]->ev()->u.ulval;
     }
     length = std::to_string(n_elems);
+    arg = "arr";
   } else if (seq) {
     length = "length";
+    arg = "seq";
   }
+  if (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11) {
+    be_global->header_ << "struct " << underscores << "_tag {};\n\n";
+    unwrap = scoped_type + "& " + arg + " = wrap;\n  ACE_UNUSED_ARG(" + arg + ");\n";
+    const_unwrap = "  const " + unwrap;
+    unwrap = "  " + unwrap;
+    arg = "wrap";
+    ref       = "IDL::DistinctType<"       + scoped_type + ", " + underscores + "_tag>";
+    const_ref = "IDL::DistinctType<const " + scoped_type + ", " + underscores + "_tag>";
+  } else {
+    ref = scoped_type + (arr ? "_forany&" : "&");
+    const_ref = "const " + ref;
+  }
+
+  std::cout << "scoped_type [" << scoped_type << "]\n";
+  std::cout << "underscores [" << underscores << "]\n";
+  std::cout << "cls [" << cls << "]\n";
+  std::cout << "name [" << name << "]\n";
+  std::cout << "type [" << type << "]\n";\
+  std::cout << "struct_name [" << struct_name << "]\n";
+  std::cout << "elem_sz [" << elem_sz << "]\n";
+  std::cout << "elem [" << elem << "]\n";
+  std::cout << "n_elems [" << n_elems << "]\n";
+  std::cout << "length [" << length << "]\n";
+  std::cout << "ref [" << ref << "]\n";
+  std::cout << "const_ref [" << const_ref << "]\n";
+  std::cout << "arg [" << arg << "]\n";
+  std::cout << "unwrap [" << unwrap << "]\n";
+  std::cout << "const_unwrap [" << const_unwrap << "]\n";
 }
 
 void Field::set_element()

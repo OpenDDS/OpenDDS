@@ -65,7 +65,6 @@ namespace {
     const std::string& firstArg, bool skip = false)
   {
     const size_t n = fieldName.size() + 1 /* 1 for the dot */;
-  //const std::string fieldType = scoped(field->field_type()->name()); //??
     const std::string fieldType = Field::get_type_name(*(field->field_type()));
     be_global->impl_ <<
       "    if (std::strncmp(field, \"" << fieldName << ".\", " << n << ") == 0) {\n"
@@ -176,7 +175,6 @@ namespace {
         break;
       }
     }
-    //return scoped(type->name()); //??
     return Field::get_type_name(*type);
   }
 
@@ -229,7 +227,7 @@ namespace {
         "    }\n";
     } else if (cls & CL_STRUCTURE) {
       delegateToNested(fieldName, field, "ser", true);
-    } else { // array, sequence, union: //??
+    } else { // array, sequence, union:
       std::string pre, post;
       if (!use_cxx11 && (cls & CL_ARRAY)) {
         post = "_forany";
@@ -237,10 +235,18 @@ namespace {
         pre = "IDL::DistinctType<";
         post = ", " + dds_generator::scoped_helper(type->name(), "_") + "_tag>";
       }
-      be_global->impl_ <<
-        "    if (!gen_skip_over(ser, static_cast<" << pre << cxx_type << post << "*>(0))) {\n"
-        "      throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \" could not be skipped\");\n"
-        "    }\n";
+      if (Field::is_anonymous_sequence(*(field->field_type()))) {
+        Field f(*field);
+        be_global->impl_ <<
+          "    if (!gen_skip_over(ser, static_cast<" << f.scoped_type << "*>(0))) {\n"
+          "      throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \" could not be skipped\");\n"
+          "    }\n";
+      } else {
+        be_global->impl_ <<
+          "    if (!gen_skip_over(ser, static_cast<" << pre << cxx_type << post << "*>(0))) {\n"
+          "      throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \" could not be skipped\");\n"
+          "    }\n";
+      }
     }
   }
 
@@ -258,7 +264,6 @@ namespace {
       be_global->add_include("<cstring>", BE_GlobalData::STREAM_CPP);
     } else if (cls & CL_STRUCTURE) {
       size_t n = fieldName.size() + 1 /* 1 for the dot */;
-    //std::string fieldType = scoped(field->field_type()->name()); //??
       std::string fieldType = Field::get_type_name(*(field->field_type()));
       be_global->impl_ <<
         "    if (std::strncmp(field, \"" << fieldName << ".\", " << n << ") == 0) {\n"
@@ -287,7 +292,7 @@ namespace {
   }
 
   void
-  assign_field(AST_Field* field) //??
+  assign_field(AST_Field* field)
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     Classification cls = classify(field->field_type());
@@ -297,15 +302,26 @@ namespace {
       string_type(cls) : Field::get_type_name(*(field->field_type()));
     if ((cls & (CL_SCALAR | CL_STRUCTURE | CL_SEQUENCE | CL_UNION))
         || (use_cxx11 && (cls & CL_ARRAY))) {
-      be_global->impl_ <<
-        "    if (std::strcmp(field, \"" << fieldName << "\") == 0) {\n"
-        "      static_cast<T*>(lhs)->" << (use_cxx11 ? "_" : "") << fieldName <<
-        " = *static_cast<const " << fieldType <<
-        "*>(rhsMeta.getRawField(rhs, rhsFieldSpec));\n"
-        "      return;\n"
-        "    }\n";
+      if (Field::is_anonymous_sequence(*(field->field_type()))) {
+        Field af(*field);
+        be_global->impl_ <<
+          "    if (std::strcmp(field, \"" << af.name << "\") == 0) {\n"
+          "      static_cast<T*>(lhs)->" << (use_cxx11 ? "_" : "") << af.name <<
+          " = *static_cast<const " << af.scoped_type <<
+          "*>(rhsMeta.getRawField(rhs, rhsFieldSpec));\n"
+          "      return;\n"
+          "    }\n";
+      } else {
+        be_global->impl_ <<
+          "    if (std::strcmp(field, \"" << fieldName << "\") == 0) {\n"
+          "      static_cast<T*>(lhs)->" << (use_cxx11 ? "_" : "") << fieldName <<
+          " = *static_cast<const " << fieldType <<
+          "*>(rhsMeta.getRawField(rhs, rhsFieldSpec));\n"
+          "      return;\n"
+          "    }\n";
+      }
       be_global->add_include("<cstring>", BE_GlobalData::STREAM_CPP);
-    } else if (cls & CL_ARRAY) { //??
+    } else if (cls & CL_ARRAY) {
       AST_Type* unTD = resolveActualType(field->field_type());
       AST_Array* arr = AST_Array::narrow_from_decl(unTD);
       be_global->impl_ <<
@@ -575,32 +591,24 @@ metaclass_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
 
   // generate code for each anonymous-type field
   for (size_t i = 0; i < fields.size(); ++i) {
-    if (Field::is_anonymous_type(*(fields[i]->field_type()))) {
-    //if (Field::is_anonymous_array(*(fields[i]->field_type()))) {
+    if (Field::is_anonymous_array(*(fields[i]->field_type()))) {
       Field af(*(fields[i]));
       Function f("gen_skip_over", "bool");
       f.addArg("ser", "Serializer&");
       f.addArg("", af.scoped_type + "_forany*");
       f.endArgs();
-      if (af.arr) {
-        be_global->impl_ << "  return ser.skip(static_cast<ACE_UINT16>(" << af.length << "), " << af.elem_sz << ");\n";
-      } else if (af.seq) {
-        be_global->impl_ << "  for (ACE_CDR::ULong i = 0; i < length; ++i) {\n" <<
-          "    if (!gen_skip_over(ser, static_cast<" << af.scoped_type << "*>(0))) return false;\n  }\n  return true;\n";
-      }
+      be_global->impl_ << "  return ser.skip(static_cast<ACE_UINT16>(" << af.length << "), " << af.elem_sz << ");\n";
+    } else if (Field::is_anonymous_sequence(*(fields[i]->field_type()))) {
+      Field af(*(fields[i]));
+      Function f("gen_skip_over", "bool");
+      f.addArg("ser", "Serializer&");
+      f.addArg("", af.scoped_type + "*");
+      f.endArgs();
+      be_global->impl_ <<
+      "  ACE_CDR::ULong length;\n" <<
+      "  if (!(ser >> length)) return false;\n" <<
+      "  return ser.skip(static_cast<ACE_UINT16>(" << af.length << "), " << af.elem_sz << ");\n";
     }
-    //} else if (Field::is_anonymous_sequence(*(fields[i]->field_type()))) {
-    //  std::cout << "TODO: gen_anonymous_sequence()\n";
-    //  Field af(*(fields[i]));
-    //  Function f("gen_skip_over", "bool");
-    //  f.addArg("ser", "Serializer&");
-    //  f.addArg("", af.scoped_type + "_forany*");
-    //  f.endArgs();
-    //  be_global->impl_ << "  for (ACE_CDR::ULong i = 0; i < length; ++i) {\n" <<
-    //    "    if (!gen_skip_over(ser, static_cast<" << af.scoped_type << "*>(0))) return false;\n  }\n  return true;\n";
-    //  //  //be_global->impl_ << "  ACE_CDR::ULong length;\n  if (!(ser >> length)) return false;\n";
-    //  //  //be_global->impl_ << "  ACE_CDR::ULong length;\n  return ser.skip(static_cast<ACE_UINT16>(length));\n";
-    //}
   }
 
   {

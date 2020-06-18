@@ -390,12 +390,9 @@ namespace {
     return arg.str();
   }
 
-  void gen_sequence(UTL_ScopedName* tdname, AST_Sequence* seq)
+  void gen_sequence(const Field& sf)
   {
-    be_global->add_include("dds/DCPS/Serializer.h");
-    NamespaceGuard ng;
-    string cxx = scoped(tdname);
-
+    string cxx = sf.scoped_type;
     for (size_t i = 0; i < LENGTH(special_sequences); ++i) {
       if (special_sequences[i].check(cxx)) {
         special_sequences[i].gen(cxx);
@@ -403,7 +400,7 @@ namespace {
       }
     }
 
-    AST_Type* elem = resolveActualType(seq->base_type());
+    AST_Type* elem = resolveActualType(sf.seq->base_type());
     Classification elem_cls = classify(elem);
     if (!elem->in_main_file()) {
       if (elem->node_type() == AST_Decl::NT_pre_defined) {
@@ -417,33 +414,18 @@ namespace {
       }
     }
 
-    const string cxx_elem = scoped(seq->base_type()->name()),
-      elem_underscores = dds_generator::scoped_helper(seq->base_type()->name(), "_");
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const string check_empty = use_cxx11 ? "seq.empty()" : "seq.length() == 0";
     const string get_length = use_cxx11 ? "static_cast<uint32_t>(seq.size())" : "seq.length()";
     const string get_buffer = use_cxx11 ? "seq.data()" : "seq.get_buffer()";
-    string const_cxx = cxx, unwrap, const_unwrap;
-    if (use_cxx11) {
-      const string underscores = dds_generator::scoped_helper(tdname, "_");
-      be_global->header_ <<
-        "struct " << underscores << "_tag {};\n\n";
-      unwrap = "  " + cxx + "& seq = wrap;\n  ACE_UNUSED_ARG(seq);\n";
-      const_unwrap = "  const " + cxx + "& seq = wrap;\n  ACE_UNUSED_ARG(seq);\n";
-      const_cxx = "IDL::DistinctType<const " + cxx + ", " + underscores + "_tag>";
-      cxx = "IDL::DistinctType<" + cxx + ", " + underscores + "_tag>";
-    } else {
-      const_cxx = "const " + cxx + '&';
-      cxx += '&';
-    }
 
     {
       Function find_size("gen_find_size", "void");
-      find_size.addArg(use_cxx11 ? "wrap" : "seq", const_cxx);
+      find_size.addArg(sf.arg.c_str(), sf.const_ref);
       find_size.addArg("size", "size_t&");
       find_size.addArg("padding", "size_t&");
       find_size.endArgs();
-      be_global->impl_ << const_unwrap <<
+      be_global->impl_ << sf.const_unwrap <<
         "  find_size_ulong(size, padding);\n"
         "  if (" << check_empty << ") {\n"
         "    return;\n"
@@ -480,14 +462,14 @@ namespace {
           }
         } else if (!use_cxx11 && (elem_cls & CL_ARRAY)) {
           be_global->impl_ <<
-            "    " << cxx_elem << "_var tmp_var = " << cxx_elem
+            "    " << sf.elem << "_var tmp_var = " << sf.elem
             << "_dup(seq[i]);\n"
-            "    " << cxx_elem << "_forany tmp = tmp_var.inout();\n"
+            "    " << sf.elem << "_forany tmp = tmp_var.inout();\n"
             "    gen_find_size(tmp, size, padding);\n";
         } else if (use_cxx11 && (elem_cls & (CL_ARRAY | CL_SEQUENCE))) {
           be_global->impl_ <<
-            "    gen_find_size(IDL::DistinctType<const " << cxx_elem << ", " <<
-            elem_underscores << "_tag>(seq[i]), size, padding);\n";
+            "    gen_find_size(IDL::DistinctType<const " << sf.elem << ", " <<
+            sf.underscores << "_tag>(seq[i]), size, padding);\n";
         } else { // Struct, Union, non-C++11 Sequence
           be_global->impl_ <<
             "    gen_find_size(seq[i], size, padding);\n";
@@ -499,13 +481,13 @@ namespace {
     {
       Function insertion("operator<<", "bool");
       insertion.addArg("strm", "Serializer&");
-      insertion.addArg(use_cxx11 ? "wrap" : "seq", const_cxx);
+      insertion.addArg(sf.arg.c_str(), sf.const_ref);
       insertion.endArgs();
-      be_global->impl_ << const_unwrap <<
+      be_global->impl_ << sf.const_unwrap <<
         "  const CORBA::ULong length = " << get_length << ";\n";
-      if (!seq->unbounded()) {
+      if (!sf.seq->unbounded()) {
         be_global->impl_ <<
-          "  if (length > " << bounded_arg(seq) << ") {\n"
+          "  if (length > " << bounded_arg(sf.seq) << ") {\n"
           "    return false;\n"
           "  }\n";
       }
@@ -537,7 +519,7 @@ namespace {
         be_global->impl_ <<
           "  for (CORBA::ULong i = 0; i < length; ++i) {\n";
         if (!use_cxx11 && (elem_cls & CL_ARRAY)) {
-          const string typedefname = scoped(seq->base_type()->name());
+          const string typedefname = scoped(sf.seq->base_type()->name());
           be_global->impl_ <<
             "    " << typedefname << "_var tmp_var = " << typedefname
             << "_dup(seq[i]);\n"
@@ -549,8 +531,8 @@ namespace {
             streamAndCheck("<< " + getWrapper(args, elem, WD_OUTPUT), 4);
         } else if (use_cxx11 && (elem_cls & (CL_ARRAY | CL_SEQUENCE))) {
           be_global->impl_ <<
-            streamAndCheck("<< IDL::DistinctType<const " + cxx_elem + ", " +
-                           elem_underscores + "_tag>(seq[i])", 4);
+            streamAndCheck("<< IDL::DistinctType<const " + sf.elem + ", " +
+                           sf.underscores + "_tag>(seq[i])", 4);
         } else {
           be_global->impl_ << streamAndCheck("<< seq[i]", 4);
         }
@@ -562,14 +544,14 @@ namespace {
     {
       Function extraction("operator>>", "bool");
       extraction.addArg("strm", "Serializer&");
-      extraction.addArg(use_cxx11 ? "wrap" : "seq", cxx);
+      extraction.addArg(sf.arg.c_str(), sf.ref);
       extraction.endArgs();
-      be_global->impl_ << unwrap <<
+      be_global->impl_ << sf.unwrap <<
         "  CORBA::ULong length;\n"
         << streamAndCheck(">> length");
-      if (!seq->unbounded()) {
+      if (!sf.seq->unbounded()) {
         be_global->impl_ <<
-          "  if (length > " << (use_cxx11 ? bounded_arg(seq) : "seq.maximum()") << ") {\n"
+          "  if (length > " << (use_cxx11 ? bounded_arg(sf.seq) : "seq.maximum()") << ") {\n"
           "    return false;\n"
           "  }\n";
       }
@@ -603,7 +585,7 @@ namespace {
         be_global->impl_ <<
           "  for (CORBA::ULong i = 0; i < length; ++i) {\n";
         if (!use_cxx11 && (elem_cls & CL_ARRAY)) {
-          const string typedefname = scoped(seq->base_type()->name());
+          const string typedefname = scoped(sf.seq->base_type()->name());
           be_global->impl_ <<
             "    " << typedefname << "_var tmp = " << typedefname
             << "_alloc();\n"
@@ -624,8 +606,8 @@ namespace {
           }
         } else if (use_cxx11 && (elem_cls & (CL_ARRAY | CL_SEQUENCE))) {
           be_global->impl_ <<
-            streamAndCheck(">> IDL::DistinctType<" + cxx_elem + ", " +
-                           elem_underscores + "_tag>(seq[i])", 4);
+            streamAndCheck(">> IDL::DistinctType<" + sf.elem + ", " +
+                           sf.underscores + "_tag>(seq[i])", 4);
         } else { // Enum, Struct, Union, non-C++11 Array, non-C++11 Sequence
           be_global->impl_ << streamAndCheck(">> seq[i]", 4);
         }
@@ -659,9 +641,9 @@ namespace {
     }
   }
 
-  void gen_array(const Field& af, bool use_cxx11)
+  void gen_array(const Field& af)
   {
-    const char* var_name = use_cxx11 ? "wrap" : "arr";
+    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     AST_Type* elem = resolveActualType(af.ast_elem);
     Classification elem_cls = classify(elem);
     if (!elem->in_main_file() && elem->node_type() != AST_Decl::NT_pre_defined) {
@@ -670,7 +652,7 @@ namespace {
     string cxx_elem = scoped(af.ast_elem->name());
     {
       Function find_size("gen_find_size", "void");
-      find_size.addArg(var_name, af.const_forany_ref);
+      find_size.addArg(af.arg.c_str(), af.const_ref);
       find_size.addArg("size", "size_t&");
       find_size.addArg("padding", "size_t&");
       find_size.endArgs();
@@ -716,7 +698,7 @@ namespace {
     {
       Function insertion("operator<<", "bool");
       insertion.addArg("strm", "Serializer&");
-      insertion.addArg(var_name, af.const_forany_ref);
+      insertion.addArg(af.arg.c_str(), af.const_ref);
       insertion.endArgs();
       be_global->impl_ << af.const_unwrap;
       const std::string accessor = use_cxx11 ? ".data()" : ".in()";
@@ -750,7 +732,7 @@ namespace {
     {
       Function extraction("operator>>", "bool");
       extraction.addArg("strm", "Serializer&");
-      extraction.addArg(var_name, af.forany_ref);
+      extraction.addArg(af.arg.c_str(), af.ref);
       extraction.endArgs();
       be_global->impl_ << af.unwrap;
       const std::string accessor = use_cxx11 ? ".data()" : ".out()";
@@ -782,26 +764,6 @@ namespace {
         be_global->impl_ << "  return true;\n";
       }
     }
-  }
-
-  void gen_anonymous_array(const AST_Field& field)
-  {
-    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-    Field af(field);
-    gen_array(af, use_cxx11);
-  }
-
-  void gen_array(UTL_ScopedName* name, AST_Type* base)
-  {
-    be_global->add_include("dds/DCPS/Serializer.h");
-    NamespaceGuard ng;
-    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-    if (use_cxx11) {
-      const string underscores = dds_generator::scoped_helper(name, "_");
-      be_global->header_ << "struct " << underscores << "_tag {};\n\n";
-    }
-    Field af(name, base, use_cxx11);
-    gen_array(af, use_cxx11);
   }
 
   string getArrayForany(const char* prefix, const char* fname, const string& cxx_fld)
@@ -1088,10 +1050,25 @@ bool marshal_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type
 {
   switch (base->node_type()) {
   case AST_Decl::NT_sequence:
-    gen_sequence(name, AST_Sequence::narrow_from_decl(base));
+    {
+      be_global->add_include("dds/DCPS/Serializer.h");
+      NamespaceGuard ng;
+      Field sf(name, base);
+      gen_sequence(sf);
+    }
     break;
   case AST_Decl::NT_array:
-    gen_array(name, base);
+    {
+      be_global->add_include("dds/DCPS/Serializer.h");
+      NamespaceGuard ng;
+      const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+      if (use_cxx11) {
+        const string underscores = dds_generator::scoped_helper(name, "_");
+        be_global->header_ << "struct " << underscores << "_tag {};\n\n";
+      }
+      Field af(name, base);
+      gen_array(af);
+    }
     break;
   default:
     return true;
@@ -1608,10 +1585,11 @@ bool marshal_generator::gen_struct(AST_Structure* node,
   // generate code for each anonymous-type field
   for (size_t i = 0; i < fields.size(); ++i) {
     if (Field::is_anonymous_array(*(fields[i]->field_type()))) {
-      gen_anonymous_array(*(fields[i]));
+      Field af(*(fields[i]));
+      gen_array(af);
     } else if (Field::is_anonymous_sequence(*(fields[i]->field_type()))) {
-      std::cout << "TODO: gen_anonymous_sequence()\n";
-      gen_sequence(name, AST_Sequence::narrow_from_decl(fields[i])); //??
+      Field sf(*(fields[i]));
+      gen_sequence(sf);
     }
   }
 

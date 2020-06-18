@@ -25,22 +25,24 @@ struct Field {
   AST_Array* arr;
   AST_Sequence* seq;
   AST_Type* ast_elem;
+  std::string struct_name;
+  std::string scoped_type;
+  std::string underscores;
+  std::string name;
+  std::string type;
   AstTypeClassification::Classification cls;
   std::size_t elem_sz;
   std::string elem;
   std::size_t n_elems;
   std::string length;
-  std::string struct_name;
-  std::string name;
-  std::string type;
-  std::string scoped_type;
-  std::string forany_ref;
-  std::string const_forany_ref;
+  std::string ref;
+  std::string const_ref;
+  std::string arg;
   std::string unwrap;
   std::string const_unwrap;
 
-  Field(const AST_Field& field);
-  Field(UTL_ScopedName* sn, AST_Type* base, bool use_cxx11);
+  Field(AST_Field& field); //for anonymous types
+  Field(UTL_ScopedName* sn, AST_Type* base);
   void init();
   void set_element();
   std::string string_type(AstTypeClassification::Classification c);
