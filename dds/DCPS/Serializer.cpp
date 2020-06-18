@@ -175,13 +175,13 @@ bool EncapsulationHeader::to_encoding(
     break;
 
   default:
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) EncapsulationHeader::to_encoding: ")
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR EncapsulationHeader::to_encoding: ")
       ACE_TEXT("Unsupported Encoding: %C\n"), to_string().c_str()));
     return false;
   }
 
   if (wrong_extensibility) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) EncapsulationHeader::to_encoding: ")
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR EncapsulationHeader::to_encoding: ")
       ACE_TEXT("Unexpected Extensibility Encoding: %C\n"),
       to_string().c_str()));
     return false;
