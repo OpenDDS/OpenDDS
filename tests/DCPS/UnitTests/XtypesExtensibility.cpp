@@ -10,6 +10,8 @@
 using namespace extensibility;
 using namespace OpenDDS::XTypes;
 using namespace OpenDDS::DCPS;
+
+//tests the types capable of being FINAL with and without IS_NESTED
 TEST(TestFinal, flags_match) {
   const TypeObject& to_s = getMinimalTypeObject<extensibility_struct_final_xtag>();
   EXPECT_TRUE(to_s.minimal.struct_type.struct_flags & IS_FINAL);
@@ -46,6 +48,8 @@ TEST(TestFinal, flags_match) {
   EXPECT_TRUE(to_un.minimal.union_type.union_flags & IS_NESTED);
   EXPECT_FALSE(to_un.minimal.union_type.union_flags & IS_AUTOID_HASH);
 }
+
+//tests the types capable of being APPENDABLE with and without IS_NESTED
 TEST(TestAppendable, flags_match) {
   const TypeObject& to_s = getMinimalTypeObject<extensibility_struct_appendable_xtag>();
   EXPECT_FALSE(to_s.minimal.struct_type.struct_flags & IS_FINAL);
@@ -82,6 +86,8 @@ TEST(TestAppendable, flags_match) {
   EXPECT_FALSE(to_un.minimal.union_type.union_flags & IS_MUTABLE);
   EXPECT_FALSE(to_un.minimal.union_type.union_flags & IS_AUTOID_HASH);
 }
+
+//tests the types capable of being MUTABLE with and without IS_NESTED
 TEST(TestMutable, flags_match) {
   const TypeObject& to_s = getMinimalTypeObject<extensibility_struct_mutable_xtag>();
   EXPECT_FALSE(to_s.minimal.struct_type.struct_flags & IS_FINAL);
@@ -111,6 +117,9 @@ TEST(TestMutable, flags_match) {
   EXPECT_TRUE(to_un.minimal.union_type.union_flags & IS_NESTED);
   EXPECT_FALSE(to_un.minimal.union_type.union_flags & IS_AUTOID_HASH);
 }
+
+//tests the types capable of being APPENDABLE when the extensibility is not explicitly set.
+//Done with and without IS_NESTED
 TEST(TestDefault, flags_match) {
   const TypeObject& to_s = getMinimalTypeObject<extensibility_struct_default_xtag>();
   EXPECT_FALSE(to_s.minimal.struct_type.struct_flags & IS_FINAL);
@@ -147,17 +156,8 @@ TEST(TestDefault, flags_match) {
   EXPECT_TRUE(to_un.minimal.union_type.union_flags & IS_NESTED);
   EXPECT_FALSE(to_un.minimal.union_type.union_flags & IS_AUTOID_HASH);
 }
-TEST(TestNonExtensible, flags_match) {
-  const TypeObject& to = getMinimalTypeObject<extensibility_LongSeq_xtag>();
-  to.minimal.alias_type.body.common.related_type
-  EXPECT_FALSE(to.minimal.alias_type.body.common.related_type & IS_FINAL);
-  EXPECT_FALSE(to.minimal.union_type.union_flags & IS_APPENDABLE);
-  EXPECT_FALSE(to.minimal.union_type.union_flags & IS_MUTABLE);
-  EXPECT_FALSE(to.minimal.union_type.union_flags & IS_NESTED);
-  EXPECT_FALSE(to.minimal.union_type.union_flags & IS_AUTOID_HASH);
-}
-int main(int argc, char* argv[])
-{
+
+int main(int argc, char* argv[]) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
