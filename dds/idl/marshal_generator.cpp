@@ -1632,7 +1632,6 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       if (!cond.empty()) {
         expr += "(!(" + cond + ") || ";
       }
-      std::cout << "field_name[" << field_name << "] cond[" << cond << "] cxx[" << cxx << "]\n";
       expr += streamCommon(field_name, fields[i]->field_type(), "<< stru", intro, cxx);
       if (!cond.empty()) {
         expr += ")";
@@ -1654,7 +1653,6 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         expr += rtpsCustom.preFieldRead(field_name);
         expr += "(!(" + cond + ") || ";
       }
-      std::cout << "field_name[" << field_name << "] cond[" << cond << "] cxx[" << cxx << "]\n";
       expr += streamCommon(field_name, fields[i]->field_type(), ">> stru", intro, cxx);
       if (!cond.empty()) {
         expr += ")";

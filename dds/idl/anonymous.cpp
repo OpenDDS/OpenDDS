@@ -93,22 +93,6 @@ void Field::init()
     ref = scoped_type + (arr ? "_forany&" : "&");
     const_ref = "const " + ref;
   }
-
-  std::cout << "scoped_type [" << scoped_type << "]\n";
-  std::cout << "underscores [" << underscores << "]\n";
-  std::cout << "cls [" << cls << "]\n";
-  std::cout << "name [" << name << "]\n";
-  std::cout << "type [" << type << "]\n";\
-  std::cout << "struct_name [" << struct_name << "]\n";
-  std::cout << "elem_sz [" << elem_sz << "]\n";
-  std::cout << "elem [" << elem << "]\n";
-  std::cout << "n_elems [" << n_elems << "]\n";
-  std::cout << "length [" << length << "]\n";
-  std::cout << "ref [" << ref << "]\n";
-  std::cout << "const_ref [" << const_ref << "]\n";
-  std::cout << "arg [" << arg << "]\n";
-  std::cout << "unwrap [" << unwrap << "]\n";
-  std::cout << "const_unwrap [" << const_unwrap << "]\n";
 }
 
 void Field::set_element()
