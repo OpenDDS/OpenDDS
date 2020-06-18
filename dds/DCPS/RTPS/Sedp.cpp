@@ -251,7 +251,6 @@ namespace RTPS {
 using DCPS::RepoId;
 using DCPS::make_rch;
 using DCPS::TimeDuration;
-using DCPS::MonotonicTimePoint;
 using DCPS::SystemTimePoint;
 using DCPS::Serializer;
 using DCPS::Encoding;
@@ -3263,11 +3262,11 @@ Sedp::Reader::assoc(const DCPS::AssociationData& publication)
 static bool decode_parameter_list(
   const DCPS::ReceivedDataSample& sample,
   Serializer& ser,
-  Encoding::Kind encoding_kind,
+  DCPS::Extensibility extensibility,
   ParameterList& data)
 {
   if (sample.header_.key_fields_only_ &&
-      encoding_kind == Encoding::KIND_XCDR1) {
+      extensibility == DCPS::FINAL) {
     GUID_t guid;
     if (!(ser >> guid)) return false;
     data.length(1);
@@ -3297,6 +3296,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
     const DCPS::EntityId_t entity_id = sample.header_.publication_id_.entityId;
     const bool full_message = !sample.header_.key_fields_only_;
 
+    // Figure Out Extensibility of Data Based On Entity Id
     const bool is_mutable =
       entity_id == ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER ||
 #ifdef OPENDDS_SECURITY
@@ -3323,7 +3323,10 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       }
       break;
     }
+    const DCPS::Extensibility extensibility =
+      is_mutable ? DCPS::MUTABLE : DCPS::FINAL;
 
+    // Get Encoding from Encapsulation
     Encoding encoding;
     Serializer ser(sample.sample_.get(), encoding);
     DCPS::EncapsulationHeader encap;
@@ -3332,15 +3335,14 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
         ACE_TEXT("failed to serializer encapsulation header\n")));
       return;
     }
-    if (!encap.to_encoding(encoding, is_mutable ? DCPS::MUTABLE: DCPS::FINAL)) {
+    if (!encap.to_encoding(encoding, extensibility)) {
       return;
     }
     ser.encoding(encoding);
-    const Encoding::Kind encoding_kind = ser.encoding().kind();
 
     if (entity_id == ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER) {
       ParameterList data;
-      if (!decode_parameter_list(sample, ser, encoding_kind, data)) {
+      if (!decode_parameter_list(sample, ser, extensibility, data)) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to deserialize data\n")));
         return;
@@ -3375,7 +3377,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
 #ifdef OPENDDS_SECURITY
     } else if (entity_id == ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER) {
       ParameterList data;
-      if (!decode_parameter_list(sample, ser, encoding_kind, data)) {
+      if (!decode_parameter_list(sample, ser, extensibility, data)) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to deserialize data\n")));
         return;
@@ -3410,7 +3412,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
 
     } else if (entity_id == ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER) {
       ParameterList data;
-      if (!decode_parameter_list(sample, ser, encoding_kind, data)) {
+      if (!decode_parameter_list(sample, ser, extensibility, data)) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to deserialize data\n")));
         return;
@@ -3448,7 +3450,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
 #ifdef OPENDDS_SECURITY
     } else if (entity_id == ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER) {
       ParameterList data;
-      if (!decode_parameter_list(sample, ser, encoding_kind, data)) {
+      if (!decode_parameter_list(sample, ser, extensibility, data)) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to deserialize data\n")));
         return;
@@ -3530,7 +3532,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
     } else if (entity_id == ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER) {
 
       ParameterList data;
-      if (!decode_parameter_list(sample, ser, encoding_kind, data)) {
+      if (!decode_parameter_list(sample, ser, extensibility, data)) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to deserialize data\n")));
         return;
