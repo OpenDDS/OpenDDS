@@ -11,9 +11,12 @@ which simplifies IDL compilation.
 
 * [Requirements](#requirements)
 * [CMake Messenger Examples](#cmake-messenger-examples)
+  * [Developer's Guide Messenger Example](#developers-guide-messenger-example)
+  * [Advanced Examples](#advanced-examples)
 * [Configure-Generated Variables](#configure-generated-variables)
 * [Using the OpenDDS CMake Package](#using-the-opendds-cmake-package)
   * [Cache Variables/Options Understood by OpenDDS](#cache-variablesoptions-understood-by-opendds)
+  * [Libraries](#libraries)
   * [Example Using OpenDDS Source Tree](#example-using-opendds-source-tree)
     * [Unix](#unix)
     * [Windows](#windows)
@@ -35,6 +38,14 @@ However, to run the Messenger examples, version 3.8.2 or greater is required
 (due to some dependencies which simplify the custom file-copy targets).
 
 ## CMake Messenger Examples
+
+### Developer's Guide Messenger Example
+
+For a simple quick-start example of an `CMakeLists.txt` using OpenDDS see the
+[Developer's Guide Messenger
+example](../DevGuideExamples/DCPS/Messenger/CMakeLists.txt).
+
+### Advanced Examples
 
 Included with OpenDDS are two example CMake-Based Messenger applications which
 exist to showcase two different strategies for adding IDL files:
@@ -91,10 +102,38 @@ control the behavior of the OpenDDS CMake package.
 | `OPENDDS_CMAKE_VERBOSE`     | Print detailed status information at CMake-Generation time          | `OFF`   |
 | `OPENDDS_DEFAULT_NESTED`    | [Topic types must be declared explicitly.](#opendds_default_nested) | `ON`    |
 
+### Libraries
+
+The following libraries are some of what can be defined by the package:
+
+ - `OpenDDS::Dcps`
+   - Core OpenDDS Library
+ - `OpenDDS::Rtps`
+   - RTPS Discovery
+ - `OpenDDS::InfoRepoDiscovery`
+   - InfoRepo Discovery
+ - `OpenDDS::Rtps_Udp`
+   - RTPS Transport
+ - `OpenDDS::Multicast`
+   - Multicast Transport
+ - `OpenDDS::Shmem`
+   - Shared Memory Transport
+ - `OpenDDS::Tcp`
+   - TCP Transport
+ - `OpenDDS::Udp`
+   - UDP Transport
+ - `OpenDDS::Security`
+   - DDS Security Implementation, if Available
+ - `OpenDDS::OpenDDS`
+   - A Combination of all the Previous Libraries
+
+See [OpenDDSConfig.cmake](../cmake/OpenDDSConfig.cmake) for all the libraries
+and more details on them.
+
 ### Example Using OpenDDS Source Tree
 
 When using the CMake Package, the OpenDDS build environment variables (from
-setenv.sh or setenv.cmd) do not need to be set.  CMake's varaible
+`setenv.sh` or `setenv.cmd`) do not need to be set.  CMake's variable
 `CMAKE_PREFIX_PATH` needs to include the top directory of OpenDDS's source tree,
 that is the directory known as `DDS_ROOT` when OpenDDS was compiled.
 
@@ -153,7 +192,7 @@ provides an easy way to add IDL sources to CMake targets. This is achieved by
 the `OPENDDS_TARGET_SOURCES` macro, which behaves similarly to the
 built-in [`target_sources`](https://cmake.org/cmake/help/latest/command/target_sources.html) command except for the following:
 
-  - Items can be either C/C++ sources or IDL sources.
+  - Items are IDL sources instead of C/C++ sources.
   - The scope-qualifier (`PUBLIC`, `PRIVATE`, `INTERFACE`) is not required.
     When it is omitted, `PRIVATE` is used by default.
   - Command-line options can be supplied to the TAO/OpenDDS IDL compilers
@@ -163,6 +202,9 @@ built-in [`target_sources`](https://cmake.org/cmake/help/latest/command/target_s
 
 When IDL sources are supplied, custom commands are generated which will
 be invoked to compile the IDL sources into their component cpp/h files.
+
+**NOTE:** C/C++ items can also be accepted and added to the target, but passing
+non-IDL sources was deprecated in OpenDDS 3.15.
 
 If the passed-in target is a shared library, a custom command will also be
 added to generate the required IDL export header file (*target*_export.h),
@@ -181,37 +223,42 @@ OPENDDS_TARGET_SOURCES(target
 
 ### Example
 
-Taken from the [Messenger with direct IDL inclusion], here is a snippet showing
+Based on the [Messenger with direct IDL inclusion], here is a snippet showing
 how IDL files can be added directly to executable targets using the `OPENDDS_TARGET_SOURCES`
 macro:
 
 ```cmake
 add_executable(publisher
-    ${src}/publisher.cpp
+  "publisher.cpp"
+  "Writer.cpp"
 )
-OPENDDS_TARGET_SOURCES(publisher
-    ${src}/Writer.cpp
-    ${src}/Writer.h
-    ${src}/Messenger.idl
-)
+OPENDDS_TARGET_SOURCES(publisher "Messenger.idl")
+target_link_libraries(publisher OpenDDS::OpenDDS)
 ```
+
+This is fine for small IDL files and builds with a few targets that need the
+code generated from IDL, but it can be improved upon.
 
 Another snippet, based upon [Messenger with auxiliary IDL library], showcases how an
 auxiliary IDL library can be created for inclusion by other executables:
 
 ```cmake
 add_library(messenger)
-OPENDDS_TARGET_SOURCES(messenger ${src}/Messenger.idl)
+OPENDDS_TARGET_SOURCES(messenger "Messenger.idl")
+target_link_libraries(publisher messenger OpenDDS::Dcps)
 
 add_executable(publisher
-    ${src}/publisher.cpp
-    ${src}/Writer.cpp
-    ${src}/Writer.h
+  "publisher.cpp"
+  "Writer.cpp"
 )
-
-target_link_libraries(publisher messenger OpenDDS::OpenDDS)
-
+target_link_libraries(publisher OpenDDS::OpenDDS)
 ```
+
+Here the generated code from the IDL is only compiled once. This is especially
+advantageous if you have a significant amount of IDL and/or have many targets
+that require the IDL. Additionally if the library is a shared library,
+executables can share that file and this reduces the size of the executable
+files.
 
 *Note:* This may issue a warning in earlier version of CMake due to the messenger library
 not having any sources added with it in the call to `add_library`.
