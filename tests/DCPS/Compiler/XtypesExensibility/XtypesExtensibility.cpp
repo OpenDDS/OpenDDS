@@ -81,7 +81,7 @@ TEST(TestDefault, flags_match)
 
   EXPECT_EQ(getMinimalTypeObject<extensibility_struct_default_nested_xtag>()
             .minimal.struct_type.struct_flags , IS_APPENDABLE + IS_NESTED);
-
+  
   EXPECT_EQ(getMinimalTypeObject<extensibility_union_default_nested_xtag>()
             .minimal.union_type.union_flags, IS_APPENDABLE + IS_NESTED);
 }
