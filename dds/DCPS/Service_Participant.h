@@ -453,21 +453,21 @@ private:
 
   /**
    * Load the domain range template configuration
-   * prior dicovery and domain configuration
+   * prior to discovery and domain configuration
    */
-  int load_initial_domain_range_configuration(ACE_Configuration_Heap& cf);
+  int load_domain_ranges(ACE_Configuration_Heap& cf);
 
   /**
-   * finish loading the domain range template configuration
-   * after discovery and domain configuration
+   * Load the discovery template information
    */
-  int load_final_domain_range_configuration(ACE_Configuration_Heap& cf);
+  int load_discovery_templates(ACE_Configuration_Heap& cf);
+
 
   /**
    * Process the domain range template and activate the
    * domain for the given domain ID
    */
-  int configure_domain_range(DDS::DomainId_t domainId);
+  int configure_domain_range(DDS::DomainId_t domainId, ACE_Configuration_Heap &);
 
   /**
    * Load the discovery configuration to the Service_Participant
@@ -575,22 +575,27 @@ private:
   ACE_TString global_transport_config_;
 
   // domain range template support
-  typedef struct domain_range_template
+  struct DomainRange
   {
     DDS::DomainId_t range_start;
     DDS::DomainId_t range_end;
     OPENDDS_STRING discovery_template_name;
     OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING) customizations;
+    OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING) domain_info;
+    OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING) disc_info;
 
-  } domain_range_template;
+    DomainRange() : range_start(-1), range_end(-1) {};
+  };
 
-  std::vector<domain_range_template> domain_range_templates_;
+  std::vector<DomainRange> domain_ranges_;
 
   int parse_domain_range(OPENDDS_STRING& range, int& start, int& end);
 
   bool has_domain_range();
 
-  OpenDDS::DCPS::Discovery::RepoKey get_rtps_template_instance_name(const DDS::DomainId_t);
+  bool get_domain_range_info(const DDS::DomainId_t id, DomainRange& inst);
+
+  OpenDDS::DCPS::Discovery::RepoKey get_discovery_template_instance_name(const DDS::DomainId_t id);
 
 public:
   /// Pointer to the monitor factory that is used to create
