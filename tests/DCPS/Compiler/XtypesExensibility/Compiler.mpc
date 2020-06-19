@@ -1,4 +1,4 @@
-project(*XtypesExtensibility): dcps_test, googletest {
+project(*XtypesExtensibility): dcps_test, googletest, msvc_bigobj{
   exename = *
   Source_Files {
     XtypesExtensibility.cpp
