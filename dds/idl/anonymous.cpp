@@ -26,7 +26,7 @@ bool Field::is_anonymous_type(AST_Type& field)
 
 std::string Field::get_anonymous_type_name(const std::string& scoped_name)
 {
-  std::size_t i = scoped_name.find("::") + 2;
+  const std::size_t i = scoped_name.find("::") + 2;
   return scoped_name.substr(0, i) + "_" + scoped_name.substr(i);
 }
 
