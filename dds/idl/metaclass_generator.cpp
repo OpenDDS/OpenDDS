@@ -65,15 +65,19 @@ namespace {
     const std::string& firstArg, bool skip = false)
   {
     const size_t n = fieldName.size() + 1 /* 1 for the dot */;
-    const std::string fieldType = Field::get_type_name(*(field->field_type()));
+    const std::string fieldType = Field::get_type_name(*field->field_type());
     be_global->impl_ <<
-      "    if (std::strncmp(field, \"" << fieldName << ".\", " << n << ") == 0) {\n"
-      "      return getMetaStruct<" << fieldType << ">().getValue(" << firstArg << ", field + " << n << ");\n"
+      "    if (std::strncmp(field, \"" << fieldName << ".\", " << n
+      << ") == 0) {\n"
+      "      return getMetaStruct<" << fieldType << ">().getValue("
+      << firstArg << ", field + " << n << ");\n"
       "    }" << (skip ? "" : "\n");
     if (skip) {
       be_global->impl_ << " else {\n"
-        "      if (!gen_skip_over(" << firstArg << ", static_cast<" << fieldType << "*>(0))) {\n"
-        "        throw std::runtime_error(\"Field '" << fieldName << "' could not be skipped\");\n"
+        "      if (!gen_skip_over(" << firstArg << ", static_cast<" << fieldType
+        << "*>(0))) {\n"
+        "        throw std::runtime_error(\"Field '" << fieldName <<
+        "' could not be skipped\");\n"
         "      }\n"
         "    }\n";
     }
@@ -89,7 +93,9 @@ namespace {
       std::string prefix, suffix;
       if (cls & CL_ENUM) {
         AST_Type* enum_type = resolveActualType(field->field_type());
-        prefix = "gen_" + dds_generator::scoped_helper(enum_type->name(), "_") + "_names[";
+        prefix = "gen_" +
+          dds_generator::scoped_helper(enum_type->name(), "_")
+          + "_names[";
         if (use_cxx11) {
           prefix += "static_cast<int>(";
         }
@@ -100,11 +106,13 @@ namespace {
       const std::string string_to_ptr = use_cxx11 ? "" : ".in()";
       be_global->impl_ <<
         "    if (std::strcmp(field, \"" << fieldName << "\") == 0) {\n"
-        "      return " + prefix + "typed." + fieldName + (cls & CL_STRING ? string_to_ptr : "") + suffix + ";\n"
+        "      return " + prefix + "typed." + fieldName
+        + (cls & CL_STRING ? string_to_ptr : "") + suffix + ";\n"
         "    }\n";
       be_global->add_include("<cstring>", BE_GlobalData::STREAM_CPP);
     } else if (cls & CL_STRUCTURE) {
-      delegateToNested(fieldName, field, "&typed." + std::string(use_cxx11 ? "_" : "") + fieldName);
+      delegateToNested(fieldName, field,
+                       "&typed." + std::string(use_cxx11 ? "_" : "") + fieldName);
       be_global->add_include("<cstring>", BE_GlobalData::STREAM_CPP);
     }
   }
@@ -195,7 +203,8 @@ namespace {
         "    if (std::strcmp(field, \"" << fieldName << "\") == 0) {\n"
         "      " << cxx_type << " val;\n"
         "      if (!(ser >> " << val << ")) {\n"
-        "        throw std::runtime_error(\"Field '" << fieldName << "' could not be deserialized\");\n"
+        "        throw std::runtime_error(\"Field '" << fieldName << "' could "
+        "not be deserialized\");\n"
         "      }\n"
         "      return val;\n"
         "    } else {\n";
@@ -203,24 +212,29 @@ namespace {
         be_global->impl_ <<
           "      ACE_CDR::ULong len;\n"
           "      if (!(ser >> len)) {\n"
-          "        throw std::runtime_error(\"String '" << fieldName << "' length could not be deserialized\");\n"
+          "        throw std::runtime_error(\"String '" << fieldName <<
+          "' length could not be deserialized\");\n"
           "      }\n"
           "      if (!ser.skip(static_cast<ACE_UINT16>(len))) {\n"
-          "        throw std::runtime_error(\"String '" << fieldName << "' contents could not be skipped\");\n"
+          "        throw std::runtime_error(\"String '" << fieldName <<
+          "' contents could not be skipped\");\n"
           "      }\n";
       } else if (cls & CL_WIDE) {
         be_global->impl_ <<
           "      ACE_CDR::Octet len;\n"
           "      if (!(ser >> ACE_InputCDR::to_octet(len))) {\n"
-          "        throw std::runtime_error(\"WChar '" << fieldName << "' length could not be deserialized\");\n"
+          "        throw std::runtime_error(\"WChar '" << fieldName <<
+          "' length could not be deserialized\");\n"
           "      }\n"
           "      if (!ser.skip(static_cast<ACE_UINT16>(len))) {\n"
-          "        throw std::runtime_error(\"WChar '" << fieldName << "' contents could not be skipped\");\n"
+          "        throw std::runtime_error(\"WChar '" << fieldName <<
+          "' contents could not be skipped\");\n"
           "      }\n";
       } else {
         be_global->impl_ <<
           "      if (!ser.skip(1, " << size << ")) {\n"
-          "        throw std::runtime_error(\"Field '" << fieldName << "' could not be skipped\");\n"
+          "        throw std::runtime_error(\"Field '" << fieldName <<
+          "' could not be skipped\");\n"
           "      }\n";
       }
       be_global->impl_ <<
@@ -238,13 +252,17 @@ namespace {
       if (Field::is_anonymous_sequence(*(field->field_type()))) {
         Field f(*field);
         be_global->impl_ <<
-          "    if (!gen_skip_over(ser, static_cast<" << f.scoped_type << "*>(0))) {\n"
-          "      throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \" could not be skipped\");\n"
+          "    if (!gen_skip_over(ser, static_cast<" << f.scoped_type_
+          << "*>(0))) {\n"
+          "      throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \""
+          " could not be skipped\");\n"
           "    }\n";
       } else {
         be_global->impl_ <<
-          "    if (!gen_skip_over(ser, static_cast<" << pre << cxx_type << post << "*>(0))) {\n"
-          "      throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \" could not be skipped\");\n"
+          "    if (!gen_skip_over(ser, static_cast<" << pre << cxx_type << post
+          << "*>(0))) {\n"
+          "      throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \""
+          " could not be skipped\");\n"
           "    }\n";
       }
     }
@@ -259,16 +277,20 @@ namespace {
     if (cls & CL_SCALAR) {
       be_global->impl_ <<
         "    if (std::strcmp(field, \"" << fieldName << "\") == 0) {\n"
-        "      return make_field_cmp(&T::" << (use_cxx11 ? "_" : "") << fieldName << ", next);\n"
+        "      return make_field_cmp(&T::" << (use_cxx11 ? "_" : "")
+        << fieldName << ", next);\n"
         "    }\n";
       be_global->add_include("<cstring>", BE_GlobalData::STREAM_CPP);
     } else if (cls & CL_STRUCTURE) {
       size_t n = fieldName.size() + 1 /* 1 for the dot */;
       std::string fieldType = Field::get_type_name(*(field->field_type()));
       be_global->impl_ <<
-        "    if (std::strncmp(field, \"" << fieldName << ".\", " << n << ") == 0) {\n"
-        "      return make_struct_cmp(&T::" << (use_cxx11 ? "_" : "") << fieldName <<
-        ", getMetaStruct<" << fieldType << ">().create_qc_comparator(field + " << n << "), next);\n"
+        "    if (std::strncmp(field, \"" << fieldName << ".\", " << n <<
+        ") == 0) {\n"
+        "      return make_struct_cmp(&T::" << (use_cxx11 ? "_" : "")
+        << fieldName <<
+        ", getMetaStruct<" << fieldType << ">().create_qc_comparator("
+        "field + " << n << "), next);\n"
         "    }\n";
     }
   }
@@ -286,7 +308,8 @@ namespace {
     const char* fieldName = field->local_name()->get_string();
     be_global->impl_ <<
       "    if (std::strcmp(field, \"" << fieldName << "\") == 0) {\n"
-      "      return &static_cast<const T*>(stru)->" << (use_cxx11 ? "_" : "") << fieldName << ";\n"
+      "      return &static_cast<const T*>(stru)->" << (use_cxx11 ? "_" : "")
+      << fieldName << ";\n"
       "    }\n";
     be_global->add_include("<cstring>", BE_GlobalData::STREAM_CPP);
   }
@@ -299,15 +322,16 @@ namespace {
     if (!cls) return; // skip CL_UNKNOWN types
     const char* fieldName = field->local_name()->get_string();
     const std::string fieldType = (cls & CL_STRING) ?
-      string_type(cls) : Field::get_type_name(*(field->field_type()));
+      string_type(cls)
+      : Field::get_type_name(*(field->field_type()));
     if ((cls & (CL_SCALAR | CL_STRUCTURE | CL_SEQUENCE | CL_UNION))
         || (use_cxx11 && (cls & CL_ARRAY))) {
       if (Field::is_anonymous_sequence(*(field->field_type()))) {
         Field af(*field);
         be_global->impl_ <<
-          "    if (std::strcmp(field, \"" << af.name << "\") == 0) {\n"
-          "      static_cast<T*>(lhs)->" << (use_cxx11 ? "_" : "") << af.name <<
-          " = *static_cast<const " << af.scoped_type <<
+          "    if (std::strcmp(field, \"" << af.name_ << "\") == 0) {\n"
+          "      static_cast<T*>(lhs)->" << (use_cxx11 ? "_" : "") << af.name_ <<
+          " = *static_cast<const " << af.scoped_type_ <<
           "*>(rhsMeta.getRawField(rhs, rhsFieldSpec));\n"
           "      return;\n"
           "    }\n";
@@ -326,7 +350,8 @@ namespace {
       AST_Array* arr = AST_Array::narrow_from_decl(unTD);
       be_global->impl_ <<
         "    if (std::strcmp(field, \"" << fieldName << "\") == 0) {\n"
-        "      " << fieldType << "* lhsArr = &static_cast<T*>(lhs)->" << fieldName << ";\n"
+        "      " << fieldType << "* lhsArr = &static_cast<T*>(lhs)->" <<
+        fieldName << ";\n"
         "      const " << fieldType << "* rhsArr = static_cast<const " <<
         fieldType << "*>(rhsMeta.getRawField(rhs, rhsFieldSpec));\n";
       be_global->add_include("<cstring>", BE_GlobalData::STREAM_CPP);
@@ -365,15 +390,19 @@ namespace {
     Classification cls = classify(field->field_type());
     if (!(cls & CL_SCALAR)) return;
     const char* fieldName = field->local_name()->get_string();
-    be_global->impl_ << "    if (std::strcmp(field, \"" << fieldName << "\") == 0) {\n";
+    be_global->impl_ <<
+      "    if (std::strcmp(field, \"" << fieldName << "\") == 0) {\n";
     be_global->add_include("<cstring>", BE_GlobalData::STREAM_CPP);
     if (!use_cxx11 && (cls & CL_STRING)) {
       be_global->impl_ << // ACE_OS::strcmp has overloads for narrow & wide
         "      return 0 == ACE_OS::strcmp(static_cast<const T*>(lhs)->"
-        << fieldName << ".in(), static_cast<const T*>(rhs)->" << fieldName << ".in());\n";
+        << fieldName << ".in(), static_cast<const T*>(rhs)->" << fieldName
+        << ".in());\n";
     } else {
-      be_global->impl_ << "      return static_cast<const T*>(lhs)->" << (use_cxx11 ? "_" : "")
-        << fieldName << " == static_cast<const T*>(rhs)->" << (use_cxx11 ? "_" : "") << fieldName << ";\n";
+      be_global->impl_ <<
+        "      return static_cast<const T*>(lhs)->" << (use_cxx11 ? "_" : "")
+        << fieldName << " == static_cast<const T*>(rhs)->" << (use_cxx11 ? "_" : "")
+        << fieldName << ";\n";
     }
     be_global->impl_ << "    }\n";
   }
@@ -431,9 +460,14 @@ namespace {
       first_struct_ = false;
     }
 
-    be_global->add_include("dds/DCPS/FilterEvaluator.h", BE_GlobalData::STREAM_CPP);
-    std::string decl = "const MetaStruct& getMetaStruct<" + clazz + ">()", exp = be_global->export_macro().c_str();
-    be_global->header_ << "template<>\n" << exp << (exp.length() ? "\n" : "") << decl << ";\n";
+    be_global->add_include("dds/DCPS/FilterEvaluator.h",
+      BE_GlobalData::STREAM_CPP);
+
+    std::string decl = "const MetaStruct& getMetaStruct<" + clazz + ">()",
+      exp = be_global->export_macro().c_str();
+    be_global->header_ << "template<>\n" << exp << (exp.length() ? "\n" : "")
+      << decl << ";\n";
+
     size_t key_count = 0;
     IDL_GlobalData::DCPS_Data_Type_Info* info = 0;
     const bool is_topic_type = be_global->is_topic_type(node);
@@ -595,19 +629,19 @@ metaclass_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
       Field af(*(fields[i]));
       Function f("gen_skip_over", "bool");
       f.addArg("ser", "Serializer&");
-      f.addArg("", af.scoped_type + "_forany*");
+      f.addArg("", af.scoped_type_ + "_forany*");
       f.endArgs();
-      be_global->impl_ << "  return ser.skip(static_cast<ACE_UINT16>(" << af.length << "), " << af.elem_sz << ");\n";
+      be_global->impl_ << "  return ser.skip(static_cast<ACE_UINT16>(" << af.length_ << "), " << af.elem_sz_ << ");\n";
     } else if (Field::is_anonymous_sequence(*(fields[i]->field_type()))) {
       Field af(*(fields[i]));
       Function f("gen_skip_over", "bool");
       f.addArg("ser", "Serializer&");
-      f.addArg("", af.scoped_type + "*");
+      f.addArg("", af.scoped_type_ + "*");
       f.endArgs();
       be_global->impl_ <<
       "  ACE_CDR::ULong length;\n" <<
       "  if (!(ser >> length)) return false;\n" <<
-      "  return ser.skip(static_cast<ACE_UINT16>(" << af.length << "), " << af.elem_sz << ");\n";
+      "  return ser.skip(static_cast<ACE_UINT16>(" << af.length_ << "), " << af.elem_sz_ << ");\n";
     }
   }
 
@@ -675,9 +709,11 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
     // fixed-length sequence/array element -> skip all elements at once
     int sz = 1;
     to_cxx_type(elem, sz);
-    be_global->impl_ << "  return ser.skip(static_cast<ACE_UINT16>(" << len << "), " << sz << ");\n";
+    be_global->impl_ <<
+      "  return ser.skip(static_cast<ACE_UINT16>(" << len << "), " << sz << ");\n";
   } else {
-    be_global->impl_ << "  for (ACE_CDR::ULong i = 0; i < " << len << "; ++i) {\n";
+    be_global->impl_ <<
+      "  for (ACE_CDR::ULong i = 0; i < " << len << "; ++i) {\n";
     if ((elem_cls & CL_PRIMITIVE) && (elem_cls & CL_WIDE)) {
       be_global->impl_ <<
         "    ACE_CDR::Octet o;\n"
@@ -697,17 +733,21 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
         post = ", " + dds_generator::scoped_helper(elem_orig->name(), "_") + "_tag>";
       }
       be_global->impl_ <<
-        "    if (!gen_skip_over(ser, static_cast<" << pre << cxx_elem << post << "*>(0))) return false;\n";
+        "    if (!gen_skip_over(ser, static_cast<" << pre << cxx_elem << post
+        << "*>(0))) return false;\n";
     }
-    be_global->impl_ << "  }\n";
-    be_global->impl_ << "  return true;\n";
+    be_global->impl_ <<
+      "  }\n";
+    be_global->impl_ <<
+      "  return true;\n";
   }
 
   return true;
 }
 
 static std::string
-func(const std::string&, AST_Type* br_type, const std::string&, std::string&, const std::string&)
+func(const std::string&, AST_Type* br_type, const std::string&,
+  std::string&, const std::string&)
 {
   const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
   std::stringstream ss;
@@ -725,7 +765,8 @@ func(const std::string&, AST_Type* br_type, const std::string&, std::string&, co
   } else if (br_cls & CL_SCALAR) {
     int sz = 1;
     to_cxx_type(br_type, sz);
-    ss << "    if (!ser.skip(1, " << sz << ")) return false;\n";
+    ss <<
+      "    if (!ser.skip(1, " << sz << ")) return false;\n";
   } else {
     std::string pre, post;
     if (!use_cxx11 && (br_cls & CL_ARRAY)) {
@@ -734,16 +775,20 @@ func(const std::string&, AST_Type* br_type, const std::string&, std::string&, co
       pre = "IDL::DistinctType<";
       post = ", " + dds_generator::scoped_helper(br_type->name(), "_") + "_tag>";
     }
-    ss << "    if (!gen_skip_over(ser, static_cast<" << pre
+    ss <<
+      "    if (!gen_skip_over(ser, static_cast<" << pre
       << scoped(br_type->name()) << post << "*>(0))) return false;\n";
   }
-  ss << "    return true;\n";
+
+  ss <<
+    "    return true;\n";
   return ss.str();
 }
 
 bool
 metaclass_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
-  const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator, const char*)
+  const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator,
+  const char*)
 {
   const std::string clazz = scoped(name);
   ContentSubscriptionGuard csg;
@@ -766,7 +811,8 @@ metaclass_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
       "  }\n";
     if (generateSwitchForUnion("disc", func, branches, discriminator, "", "", "",
                                false, true, false)) {
-      be_global->impl_ << "  return true;\n";
+      be_global->impl_ <<
+        "  return true;\n";
     }
   }
   return true;

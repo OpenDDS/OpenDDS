@@ -9,8 +9,8 @@
 #define anonymous_H
 
 #include "dds_generator.h"
-#include "utl_scoped_name.h"
-#include "ast.h"
+#include <utl_scoped_name.h>
+#include <ast.h>
 
 #include <string>
 
@@ -21,27 +21,27 @@ struct Field {
   static std::string get_anonymous_type_name(const std::string& scoped_name);
   static std::string get_type_name(AST_Type& field);
 
-  AST_Type* ast_type;
-  AST_Array* arr;
-  AST_Sequence* seq;
-  AST_Type* ast_elem;
-  std::string struct_name;
-  std::string scoped_type;
-  std::string underscores;
-  std::string name;
-  std::string type;
-  AstTypeClassification::Classification cls;
-  std::size_t elem_sz;
-  std::string elem;
-  std::size_t n_elems;
-  std::string length;
-  std::string ref;
-  std::string const_ref;
-  std::string arg;
-  std::string unwrap;
-  std::string const_unwrap;
+  AST_Type* ast_type_;
+  AST_Array* arr_;
+  AST_Sequence* seq_;
+  AST_Type* ast_elem_;
+  std::string struct_name_;
+  std::string scoped_type_;
+  std::string underscores_;
+  std::string name_;
+  std::string type_;
+  AstTypeClassification::Classification cls_;
+  std::size_t elem_sz_;
+  std::string elem_;
+  std::size_t n_elems_;
+  std::string length_;
+  std::string ref_;
+  std::string const_ref_;
+  std::string arg_;
+  std::string unwrap_;
+  std::string const_unwrap_;
 
-  Field(AST_Field& field); //for anonymous types
+  explicit Field(AST_Field& field); //for anonymous types
   Field(UTL_ScopedName* sn, AST_Type* base);
   void init();
   void set_element();

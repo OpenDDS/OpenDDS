@@ -1,8 +1,10 @@
+#include <tao/LongSeq.pidl>
 
 typedef short Short3[3];
 typedef short Short2x3[2][3];
 typedef sequence<long> LongSequence;
 typedef sequence<long, 3> Long3Sequence;
+typedef sequence<long, 3> L3Seq;
 
 @topic
 struct TestStruct {
@@ -10,6 +12,7 @@ struct TestStruct {
   Short2x3 short2x3array;
   LongSequence longseq;
   Long3Sequence long3seq;
+  L3Seq another_long3seq;
 
   // anonymous types
 

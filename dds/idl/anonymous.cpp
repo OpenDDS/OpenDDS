@@ -32,94 +32,94 @@ std::string Field::get_anonymous_type_name(const std::string& scoped_name)
 
 std::string Field::get_type_name(AST_Type& field)
 {
-  std::string n = scoped(field.name());
+  const std::string n = scoped(field.name());
   return is_anonymous_type(field) ? get_anonymous_type_name(n) : n;
 }
 
 // for anonymous types
 Field::Field(AST_Field& field) :
-  ast_type(field.field_type()),
-  arr(AST_Array::narrow_from_decl(ast_type)),
-  seq(AST_Sequence::narrow_from_decl(ast_type)),
-  ast_elem(arr ? arr->base_type() : (seq ? seq->base_type() : nullptr)),
-  name(field.local_name()->get_string()),
-  cls(CL_UNKNOWN), elem_sz(0), n_elems(1)
+  ast_type_(field.field_type()),
+  arr_(AST_Array::narrow_from_decl(ast_type_)),
+  seq_(AST_Sequence::narrow_from_decl(ast_type_)),
+  ast_elem_(arr_ ? arr_->base_type() : (seq_ ? seq_->base_type() : nullptr)),
+  name_(field.local_name()->get_string()),
+  cls_(CL_UNKNOWN), elem_sz_(0), n_elems_(1)
 {
-  type = ast_elem ? ("_" + name) : name;
-  if (seq) { type += "_seq"; }
-  std::string ftn = scoped(ast_type->name());
-  struct_name = ftn.substr(0, ftn.find("::"));
-  scoped_type = struct_name + "::" + type;
+  type_ = ast_elem_ ? ("_" + name_) : name_;
+  if (seq_) { type_ += "_seq"; }
+  const std::string ftn = scoped(ast_type_->name());
+  struct_name_ = ftn.substr(0, ftn.find("::"));
+  scoped_type_ = struct_name_ + "::" + type_;
   //const bool use_cxx11 = (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11);
-  //underscores = use_cxx11 ? dds_generator::scoped_helper(sn, "_") : "";
+  //underscores_ = use_cxx11 ? dds_generator::scoped_helper(sn, "_") : "";
   init();
 }
 
 Field::Field(UTL_ScopedName* sn, AST_Type* base) :
-  ast_type(base),
-  arr(AST_Array::narrow_from_decl(ast_type)),
-  seq(AST_Sequence::narrow_from_decl(ast_type)),
-  ast_elem(arr ? arr->base_type() : (seq ? seq->base_type() : nullptr)),
-  scoped_type(scoped(sn)),
-  cls(CL_UNKNOWN), elem_sz(0), n_elems(1)
+  ast_type_(base),
+  arr_(AST_Array::narrow_from_decl(ast_type_)),
+  seq_(AST_Sequence::narrow_from_decl(ast_type_)),
+  ast_elem_(arr_ ? arr_->base_type() : (seq_ ? seq_->base_type() : nullptr)),
+  scoped_type_(scoped(sn)),
+  cls_(CL_UNKNOWN), elem_sz_(0), n_elems_(1)
 {
   const bool use_cxx11 = (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11);
-  underscores = use_cxx11 ? dds_generator::scoped_helper(sn, "_") : "";
+  underscores_ = use_cxx11 ? dds_generator::scoped_helper(sn, "_") : "";
   init();
 }
 
 void Field::init()
 {
   set_element();
-  if (arr) {
-    for (size_t i = 0; i < arr->n_dims(); ++i) {
-      n_elems *= arr->dims()[i]->ev()->u.ulval;
+  if (arr_) {
+    for (size_t i = 0; i < arr_->n_dims(); ++i) {
+      n_elems_ *= arr_->dims()[i]->ev()->u.ulval;
     }
-    length = std::to_string(n_elems);
-    arg = "arr";
-  } else if (seq) {
-    length = "length";
-    arg = "seq";
+    length_ = std::to_string(n_elems_);
+    arg_ = "arr";
+  } else if (seq_) {
+    length_ = "length";
+    arg_ = "seq";
   }
   if (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11) {
-    be_global->header_ << "struct " << underscores << "_tag {};\n\n";
-    unwrap = scoped_type + "& " + arg + " = wrap;\n  ACE_UNUSED_ARG(" + arg + ");\n";
-    const_unwrap = "  const " + unwrap;
-    unwrap = "  " + unwrap;
-    arg = "wrap";
-    ref       = "IDL::DistinctType<"       + scoped_type + ", " + underscores + "_tag>";
-    const_ref = "IDL::DistinctType<const " + scoped_type + ", " + underscores + "_tag>";
+    be_global->header_ << "struct " << underscores_ << "_tag {};\n\n";
+    unwrap_ = scoped_type_ + "& " + arg_ + " = wrap;\n  ACE_UNUSED_ARG(" + arg_ + ");\n";
+    const_unwrap_ = "  const " + unwrap_;
+    unwrap_ = "  " + unwrap_;
+    arg_ = "wrap";
+    ref_       = "IDL::DistinctType<"       + scoped_type_ + ", " + underscores_ + "_tag>";
+    const_ref_ = "IDL::DistinctType<const " + scoped_type_ + ", " + underscores_ + "_tag>";
   } else {
-    ref = scoped_type + (arr ? "_forany&" : "&");
-    const_ref = "const " + ref;
+    ref_ = scoped_type_ + (arr_ ? "_forany&" : "&");
+    const_ref_ = "const " + ref_;
   }
 }
 
 void Field::set_element()
 {
-  if (ast_elem) {
-    cls = classify(ast_elem);
-    if (cls & CL_ENUM) {
-      elem_sz = 4; elem = "ACE_CDR::ULong"; return;
-    } else if (cls & CL_STRING) {
-      elem_sz = 4; elem = string_type(cls); return; // encoding of str length is 4 bytes
-    } else if (cls & CL_PRIMITIVE) {
-      AST_Type* type = resolveActualType(ast_elem);
+  if (ast_elem_) {
+    cls_ = classify(ast_elem_);
+    if (cls_ & CL_ENUM) {
+      elem_sz_ = 4; elem_ = "ACE_CDR::ULong"; return;
+    } else if (cls_ & CL_STRING) {
+      elem_sz_ = 4; elem_ = string_type(cls_); return; // encoding of str length is 4 bytes
+    } else if (cls_ & CL_PRIMITIVE) {
+      AST_Type* type = resolveActualType(ast_elem_);
       AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(type);
       switch (p->pt()) {
-      case AST_PredefinedType::PT_long: elem_sz = 4; elem = "ACE_CDR::Long"; return;
-      case AST_PredefinedType::PT_ulong: elem_sz = 4; elem = "ACE_CDR::ULong"; return;
-      case AST_PredefinedType::PT_longlong: elem_sz = 8; elem = "ACE_CDR::LongLong"; return;
-      case AST_PredefinedType::PT_ulonglong: elem_sz = 8; elem = "ACE_CDR::ULongLong"; return;
-      case AST_PredefinedType::PT_short: elem_sz = 2; elem = "ACE_CDR::Short"; return;
-      case AST_PredefinedType::PT_ushort: elem_sz = 2; elem = "ACE_CDR::UShort"; return;
-      case AST_PredefinedType::PT_float: elem_sz = 4; elem = "ACE_CDR::Float"; return;
-      case AST_PredefinedType::PT_double: elem_sz = 8; elem = "ACE_CDR::Double"; return;
-      case AST_PredefinedType::PT_longdouble: elem_sz = 16; elem = "ACE_CDR::LongDouble"; return;
-      case AST_PredefinedType::PT_char: elem_sz = 1; elem = "ACE_CDR::Char"; return;
-      case AST_PredefinedType::PT_wchar: elem_sz = 1; elem = "ACE_CDR::WChar"; return; // encoding of wchar length is 1 byte
-      case AST_PredefinedType::PT_boolean: elem_sz = 1; elem = "ACE_CDR::Boolean"; return;
-      case AST_PredefinedType::PT_octet: elem_sz = 1; elem = "ACE_CDR::Octet"; return;
+      case AST_PredefinedType::PT_long: elem_sz_ = 4; elem_ = "ACE_CDR::Long"; return;
+      case AST_PredefinedType::PT_ulong: elem_sz_ = 4; elem_ = "ACE_CDR::ULong"; return;
+      case AST_PredefinedType::PT_longlong: elem_sz_ = 8; elem_ = "ACE_CDR::LongLong"; return;
+      case AST_PredefinedType::PT_ulonglong: elem_sz_ = 8; elem_ = "ACE_CDR::ULongLong"; return;
+      case AST_PredefinedType::PT_short: elem_sz_ = 2; elem_ = "ACE_CDR::Short"; return;
+      case AST_PredefinedType::PT_ushort: elem_sz_ = 2; elem_ = "ACE_CDR::UShort"; return;
+      case AST_PredefinedType::PT_float: elem_sz_ = 4; elem_ = "ACE_CDR::Float"; return;
+      case AST_PredefinedType::PT_double: elem_sz_ = 8; elem_ = "ACE_CDR::Double"; return;
+      case AST_PredefinedType::PT_longdouble: elem_sz_ = 16; elem_ = "ACE_CDR::LongDouble"; return;
+      case AST_PredefinedType::PT_char: elem_sz_ = 1; elem_ = "ACE_CDR::Char"; return;
+      case AST_PredefinedType::PT_wchar: elem_sz_ = 1; elem_ = "ACE_CDR::WChar"; return; // encoding of wchar length is 1 byte
+      case AST_PredefinedType::PT_boolean: elem_sz_ = 1; elem_ = "ACE_CDR::Boolean"; return;
+      case AST_PredefinedType::PT_octet: elem_sz_ = 1; elem_ = "ACE_CDR::Octet"; return;
       default: break;
       }
     }
