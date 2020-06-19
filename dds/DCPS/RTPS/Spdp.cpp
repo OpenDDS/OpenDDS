@@ -1761,29 +1761,31 @@ Spdp::remove_discovered_participant_i(DiscoveredParticipantIter iter)
   ACE_UNUSED_ARG(iter);
 
 #ifdef OPENDDS_SECURITY
-  DDS::Security::SecurityException se = {"", 0, 0};
-  DDS::Security::Authentication_var auth = security_config_->get_authentication();
+  if (security_config_) {
+    DDS::Security::SecurityException se = {"", 0, 0};
+    DDS::Security::Authentication_var auth = security_config_->get_authentication();
 
-  if (iter->second.handshake_handle_ != DDS::HANDLE_NIL) {
-    if (!auth->return_handshake_handle(iter->second.handshake_handle_, se)) {
-      if (DCPS::security_debug.auth_warn) {
-        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
-                   ACE_TEXT("DiscoveryBase::remove_discovered_participant() - ")
-                   ACE_TEXT("Unable to return handshake handle. ")
-                   ACE_TEXT("Security Exception[%d.%d]: %C\n"),
-                   se.code, se.minor_code, se.message.in()));
+    if (iter->second.handshake_handle_ != DDS::HANDLE_NIL) {
+      if (!auth->return_handshake_handle(iter->second.handshake_handle_, se)) {
+        if (DCPS::security_debug.auth_warn) {
+          ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
+                     ACE_TEXT("DiscoveryBase::remove_discovered_participant() - ")
+                     ACE_TEXT("Unable to return handshake handle. ")
+                     ACE_TEXT("Security Exception[%d.%d]: %C\n"),
+                     se.code, se.minor_code, se.message.in()));
+        }
       }
     }
-  }
 
-  if (iter->second.shared_secret_handle_ != 0) {
-    if (!auth->return_sharedsecret_handle(iter->second.shared_secret_handle_, se)) {
-      if (DCPS::security_debug.auth_warn) {
-        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
-                   ACE_TEXT("Spdp::match_authenticated() - ")
-                   ACE_TEXT("Unable to return sharedsecret handle. ")
-                   ACE_TEXT("Security Exception[%d.%d]: %C\n"),
-                   se.code, se.minor_code, se.message.in()));
+    if (iter->second.shared_secret_handle_ != 0) {
+      if (!auth->return_sharedsecret_handle(iter->second.shared_secret_handle_, se)) {
+        if (DCPS::security_debug.auth_warn) {
+          ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
+                     ACE_TEXT("Spdp::match_authenticated() - ")
+                     ACE_TEXT("Unable to return sharedsecret handle. ")
+                     ACE_TEXT("Security Exception[%d.%d]: %C\n"),
+                     se.code, se.minor_code, se.message.in()));
+        }
       }
     }
   }
