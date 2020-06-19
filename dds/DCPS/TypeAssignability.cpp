@@ -136,8 +136,7 @@ bool TypeAssignability::assignable(const TypeIdentifier& ta,
     return false;
   case EK_MINIMAL: {
     const MinimalTypeObject& base_type_a = typelookup_.lookup_minimal(ta);
-    TypeObject wrapper_a(base_type_a);
-    return assignable(wrapper_a, tb);
+    return assignable(TypeObject(base_type_a), tb);
   }
   default:
     return false; // Future extensions
@@ -192,8 +191,7 @@ bool TypeAssignability::assignable(const TypeIdentifier& ta,
       return false;
     case EK_MINIMAL: {
       const MinimalTypeObject& tobj_a = typelookup_.lookup_minimal(ta);
-      TypeObject wrapper_a(tobj_a);
-      return assignable(wrapper_a, tb);
+      return assignable(TypeObject(tobj_a), tb);
     }
     default:
       return false;
@@ -250,8 +248,7 @@ bool TypeAssignability::assignable_alias(const MinimalTypeObject& ta,
       return false;
     case EK_MINIMAL: {
       const MinimalTypeObject& base_type_a = typelookup_.lookup_minimal(tia);
-      TypeObject wrapper_a(base_type_a), wrapper_b(tb);
-      return assignable(wrapper_a, wrapper_b);
+      return assignable(TypeObject(base_type_a), TypeObject(tb));
     }
     default:
       return false; // Future extensions
@@ -293,8 +290,8 @@ bool TypeAssignability::assignable_alias(const MinimalTypeObject& ta,
  * @brief The first type must be TK_ANNOTATION.
  *        The second type must not be TK_ALIAS.
  */
-bool TypeAssignability::assignable_annotation(const MinimalTypeObject& ta,
-                                              const MinimalTypeObject& tb) const
+bool TypeAssignability::assignable_annotation(const MinimalTypeObject&,
+                                              const MinimalTypeObject&) const
 {
   // No rule for annotation in the spec
   return false;
@@ -304,8 +301,8 @@ bool TypeAssignability::assignable_annotation(const MinimalTypeObject& ta,
  * @brief The first type must be TK_ANNOTATION.
  *        The second type can be anything.
  */
-bool TypeAssignability::assignable_annotation(const MinimalTypeObject& ta,
-                                              const TypeIdentifier& tb) const
+bool TypeAssignability::assignable_annotation(const MinimalTypeObject&,
+                                              const TypeIdentifier&) const
 {
   // No rule for annotation in the spec
   return false;
@@ -381,7 +378,7 @@ bool TypeAssignability::assignable_struct(const MinimalTypeObject& ta,
       MinimalTypeObject key_erased_a = *toa, key_erased_b = *tob;
       erase_key(key_erased_a);
       erase_key(key_erased_b);
-      if (!assignable(key_erased_a, key_erased_b)) {
+      if (!assignable(TypeObject(key_erased_a), TypeObject(key_erased_b))) {
         return false;
       }
     }
@@ -543,7 +540,7 @@ bool TypeAssignability::assignable_struct(const MinimalTypeObject& ta,
         MinimalTypeObject key_holder_a = *toa, key_holder_b = *tob;
         hold_key(key_holder_a);
         hold_key(key_holder_b);
-        if (!assignable(key_holder_a, key_holder_b)) {
+        if (!assignable(TypeObject(key_holder_a), TypeObject(key_holder_b))) {
           return false;
         }
 
@@ -565,11 +562,13 @@ bool TypeAssignability::assignable_struct(const MinimalTypeObject& ta,
                   if (labels_b.members[p] == labels_a.members[q]) {
                     const TypeIdentifier& tib = *mseq_b.members[j].common.type_id;
                     const TypeIdentifier& tia = *mseq_a.members[k].common.type_id;
-                    MinimalTypeObject kh_b = typelookup_.lookup_minimal(tib);
-                    MinimalTypeObject kh_a = typelookup_.lookup_minimal(tia);
-                    hold_key(kh_b);
-                    hold_key(kh_a);
-                    if (!assignable(kh_a, kh_b)) {
+                    MinimalTypeObject kh_a, kh_b;
+                    bool ret_b = hold_key(tib, kh_b);
+                    bool ret_a = hold_key(tia, kh_a);
+                    if ((ret_a && ret_b && !assignable(TypeObject(kh_a), TypeObject(kh_b))) ||
+                        (ret_a && !ret_b && !assignable(TypeObject(kh_a), tib)) ||
+                        (!ret_a && ret_b && !assignable(tia, TypeObject(kh_b))) ||
+                        (!ret_a && !ret_b && !assignable(tia, tib))) {
                       return false;
                     }
                     matched = true;
@@ -843,8 +842,8 @@ bool TypeAssignability::assignable_union(const MinimalTypeObject& ta,
  * @brief The first type must be TK_BITSET.
  *        The second type must not be TK_ALIAS.
  */
-bool TypeAssignability::assignable_bitset(const MinimalTypeObject& ta,
-                                          const MinimalTypeObject& tb) const
+bool TypeAssignability::assignable_bitset(const MinimalTypeObject&,
+                                          const MinimalTypeObject&) const
 {
   // No rule for bitset in the spec
   return false;
@@ -854,8 +853,8 @@ bool TypeAssignability::assignable_bitset(const MinimalTypeObject& ta,
  * @brief The first type must be TK_BITSET.
  *        The second type can be anything.
  */
-bool TypeAssignability::assignable_bitset(const MinimalTypeObject& ta,
-                                          const TypeIdentifier& tb) const
+bool TypeAssignability::assignable_bitset(const MinimalTypeObject&,
+                                          const TypeIdentifier&) const
 {
   // No rule for bitset in the spec
   return false;
@@ -1184,8 +1183,8 @@ bool TypeAssignability::assignable_bitmask(const MinimalTypeObject& ta,
  * @brief The first type must be a future extension type kind.
  *        The second type must not be TK_ALIAS.
  */
-bool TypeAssignability::assignable_extended(const MinimalTypeObject& ta,
-                                            const MinimalTypeObject& tb) const
+bool TypeAssignability::assignable_extended(const MinimalTypeObject&,
+                                            const MinimalTypeObject&) const
 {
   // Future extensions
   return false;
@@ -1276,8 +1275,8 @@ bool TypeAssignability::assignable_string(const TypeIdentifier& ta,
  * @brief The first type must be a string type.
  *        The second type must not be TK_ALIAS.
  */
-bool TypeAssignability::assignable_string(const TypeIdentifier& ta,
-                                          const MinimalTypeObject& tb) const
+bool TypeAssignability::assignable_string(const TypeIdentifier&,
+                                          const MinimalTypeObject&) const
 {
   // The second type cannot be string since string types do not have
   // type object. Thus the first type is not assignable from the second type.
@@ -1839,7 +1838,8 @@ bool TypeAssignability::is_delimited_with_flags(TypeFlag flags) const
 /**
  * @brief Key-Erased type of an aggregated type T (struct or union)
  * is constructed from T by removing the key designation from
- * any member that has it (sub-clause 7.2.2.4.6)
+ * any member that has it (sub-clause 7.2.2.4.6).
+ * The input type must be either a struct or an union.
  */
 void TypeAssignability::erase_key(MinimalTypeObject& type) const
 {
@@ -1856,17 +1856,14 @@ void TypeAssignability::erase_key(MinimalTypeObject& type) const
     if ((flags & IS_KEY) == IS_KEY) {
       flags &= ~IS_KEY;
     }
-  } else if (TK_ALIAS == type.kind) {
-    const TypeIdentifier& base = get_base_type(type);
-    MinimalTypeObject base_obj = typelookup_.lookup_minimal(base);
-    erase_key(base_obj);
-    type = base_obj;
   }
 }
 
 /**
  * @brief Key-Holder type of an aggregated type T (struct or union)
  * is constructed from T (sub-clause 7.2.2.4.7)
+ * The input MinimalTypeObject is modified to get the corresponding KeyHolder type.
+ * The input must be either a struct or an union.
  */
 void TypeAssignability::hold_key(MinimalTypeObject& type) const
 {
@@ -1903,11 +1900,34 @@ void TypeAssignability::hold_key(MinimalTypeObject& type) const
       // Remove all non-key members
       type.union_type.member_seq = Sequence<MinimalUnionMember>();
     }
-  } else if (TK_ALIAS == type.kind) {
-    const TypeIdentifier& base = get_base_type(type);
-    MinimalTypeObject base_obj = typelookup_.lookup_minimal(base);
-    hold_key(base_obj);
-    type = base_obj;
+  }
+}
+
+/**
+ * @brief Return false if the input type does not have type object; the output
+ * MinimalTypeObject is not used in this case.
+ * Return true if the input type has type object; the output MinimalTypeObject
+ * contains the KeyHolder type of the corresponding type.
+ */
+bool TypeAssignability::hold_key(const TypeIdentifier& ti, MinimalTypeObject& to) const
+{
+  if (EK_MINIMAL != ti.kind && EK_COMPLETE != ti.kind) {
+    return false;
+  }
+
+  to = typelookup_.lookup_minimal(ti);
+  switch (to.kind) {
+  case TK_STRUCTURE:
+  case TK_UNION: {
+    hold_key(to);
+    return true;
+  }
+  case TK_ALIAS: {
+    const TypeIdentifier& base = get_base_type(to);
+    return hold_key(base, to);
+  }
+  default: // KeyHolder is not defined for other types
+    return true;
   }
 }
 

@@ -2659,6 +2659,36 @@ TEST(StructTypeTest, Assignable)
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(a)), TypeObject(MinimalTypeObject(b))));
 
   // Union key members
+  MinimalUnionType uni_a, uni_b;
+  uni_a.discriminator.common.type_id = TypeIdentifier::make(TK_CHAR8);
+  uni_a.member_seq.append(MinimalUnionMember(CommonUnionMember(1, UnionMemberFlag(),
+                                                               TypeIdentifier::makeString(false, StringLTypeDefn(120)),
+                                                               UnionCaseLabelSeq().append(1).append(2).append(3)),
+                                             MinimalMemberDetail("inner1")));
+  uni_a.member_seq.append(MinimalUnionMember(CommonUnionMember(2, IS_DEFAULT,
+                                                               TypeIdentifier::makeString(false, StringSTypeDefn(100)),
+                                                               UnionCaseLabelSeq().append(4).append(5).append(6)),
+                                             MinimalMemberDetail("inner2")));
+  uni_b.discriminator.common.type_id = TypeIdentifier::make(TK_CHAR8);
+  uni_b.member_seq.append(MinimalUnionMember(CommonUnionMember(1, IS_DEFAULT,
+                                                               TypeIdentifier::makeString(false, StringSTypeDefn(130)),
+                                                               UnionCaseLabelSeq().append(1).append(2)),
+                                             MinimalMemberDetail("inner1")));
+  uni_b.member_seq.append(MinimalUnionMember(CommonUnionMember(2, UnionMemberFlag(),
+                                                               TypeIdentifier::makeString(false, StringLTypeDefn(150)),
+                                                               UnionCaseLabelSeq().append(3).append(4)),
+                                             MinimalMemberDetail("inner2")));
+  TypeLookup::get_equivalence_hash(hash);
+  MinimalStructMember ma9(CommonStructMember(9, StructMemberFlag(), TypeIdentifier::make(EK_MINIMAL, hash)),
+                          MinimalMemberDetail("m9"));
+  TypeLookup::insert_entry(*ma9.common.member_type_id, MinimalTypeObject(uni_a));
+  TypeLookup::get_equivalence_hash(hash);
+  MinimalStructMember mb9(CommonStructMember(9, IS_KEY, TypeIdentifier::make(EK_MINIMAL, hash)),
+                          MinimalMemberDetail("m9"));
+  TypeLookup::insert_entry(*mb9.common.member_type_id, MinimalTypeObject(uni_b));
+  a.member_seq.append(ma9);
+  b.member_seq.append(mb9);
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(a)), TypeObject(MinimalTypeObject(b))));
 }
 
 TEST(StructTypeTest, NotAssignable)
