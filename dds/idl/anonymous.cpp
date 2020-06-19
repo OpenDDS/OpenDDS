@@ -24,16 +24,20 @@ bool Field::is_anonymous_type(AST_Type& field)
   return is_anonymous_array(field) || is_anonymous_sequence(field);
 }
 
-std::string Field::get_anonymous_type_name(const std::string& scoped_name)
-{
-  const std::size_t i = scoped_name.find("::") + 2;
-  return scoped_name.substr(0, i) + "_" + scoped_name.substr(i);
-}
-
 std::string Field::get_type_name(AST_Type& field)
 {
-  const std::string n = scoped(field.name());
-  return is_anonymous_type(field) ? get_anonymous_type_name(n) : n;
+  std::string n = scoped(field.name());
+  if (!is_anonymous_type(field)) {
+    return n;
+  }
+  const std::string scope = n.substr(0, n.find("::") + 2);
+  const std::string name = field.local_name()->get_string();
+  n = scope + "_" + name;
+  if (is_anonymous_sequence(field)) {
+    //TODO: use the class name generated in TAO IDL
+    return n + "_seq";
+  }
+  return n;
 }
 
 // for anonymous types
@@ -47,6 +51,7 @@ Field::Field(AST_Field& field) :
 {
   type_ = ast_elem_ ? ("_" + name_) : name_;
   if (seq_) { type_ += "_seq"; }
+
   const std::string ftn = scoped(ast_type_->name());
   struct_name_ = ftn.substr(0, ftn.find("::"));
   scoped_type_ = struct_name_ + "::" + type_;

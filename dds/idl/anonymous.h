@@ -18,7 +18,6 @@ struct Field {
   static bool is_anonymous_array(AST_Type& field);
   static bool is_anonymous_sequence(AST_Type& field);
   static bool is_anonymous_type(AST_Type& field);
-  static std::string get_anonymous_type_name(const std::string& scoped_name);
   static std::string get_type_name(AST_Type& field);
 
   AST_Type* ast_type_;

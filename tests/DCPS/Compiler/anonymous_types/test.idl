@@ -1,27 +1,31 @@
 #include <tao/LongSeq.pidl>
 
-typedef short Short3[3];
-typedef short Short2x3[2][3];
+typedef short Short3Array[3];
+typedef short Short2x3Array[2][3];
+typedef double Double2x3x4Array[2][3][4];
+
 typedef sequence<long> LongSequence;
 typedef sequence<long, 3> Long3Sequence;
-typedef sequence<long, 3> L3Seq;
 
 @topic
 struct TestStruct {
-  Short3 short3array;
-  Short2x3 short2x3array;
-  LongSequence longseq;
-  Long3Sequence long3seq;
-  L3Seq another_long3seq;
+  Short3Array s3arr;
+  Short2x3Array s2x3arr;
+  Double2x3x4Array d2x3x4arr;
 
-  // anonymous types
+  LongSequence lseq;
+  Long3Sequence l3seq;
 
-  short short5array_a[5];
-  short short2x3array_a[2][3];
-  short another_short5array_a[5];
+  // prefix a_ denotes anonymous type fields
 
-  sequence<long> longseq_a;
-  //sequence<long> another_longseq_a;
-  sequence<long, 5> long5seq_a;
-  //sequence<long, 5> another_long5seq_a;
+  short a_s3arr[3];
+  short a_s3arr_2nd[3];
+  short a_s2x3arr[2][3];
+  double a_d2x3x4arr[2][3][4];
+
+  sequence<long> a_lseq;
+//sequence<long> a_lseq_2nd;
+  sequence<long, 3> a_l3seq;
+//sequence<long, 3> a_l3seq_2nd;
+  sequence<long, 5> a_l5seq;
 };
