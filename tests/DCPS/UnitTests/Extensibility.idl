@@ -93,7 +93,6 @@ module extensibility {
    case 1: short B;
  };
 
- @topic
  enum enum_default {
    C1, C2, C3
  };
@@ -106,28 +105,5 @@ module extensibility {
    case 0: long A;
    case 1: short B;
  };
-
-
- typedef struct_final struct_final_alias;
-
- typedef struct_appendable struct_appendable_alias;
-
- typedef struct_mutable struct_mutable_alias;
-
- typedef struct_default struct_default_alias;
-
- typedef union_final union_final_alias;
-
- typedef union_appendable union_appendable_alias;
-
- typedef union_mutable union_mutable_alias;
-
- typedef union_default union_default_alias;
-
- typedef enum_final enum_final_alias;
-
- typedef enum_appendable enum_appendable_alias;
-
- typedef enum_default enum_default_alias;
 
 };

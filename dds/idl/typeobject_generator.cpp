@@ -307,14 +307,11 @@ typeobject_generator::gen_typedef(AST_Typedef* node, UTL_ScopedName* name,
     const string decl_gto = "getMinimalTypeObject<" + clazz + ">";
     Function gto(decl_gto.c_str(), "const XTypes::TypeObject&", "");
     gto.endArgs();
-    const ExtensibilityKind exten = be_global->extensibility(node);
-    std::string type_flag_str;
-    gen_type_flag_str(type_flag_str, exten, true, node);
     be_global->impl_ <<
       "  static const XTypes::TypeObject to = XTypes::TypeObject(\n"
       "    XTypes::MinimalTypeObject(\n"
       "      XTypes::MinimalAliasType(\n"
-      "        XTypes::AliasTypeFlag( " << type_flag_str << " ),\n"
+      "        XTypes::AliasTypeFlag(0),\n" //TODO: Currently not used according to spec
       "        XTypes::MinimalAliasHeader(),\n"
       "        XTypes::MinimalAliasBody(\n"
       "          XTypes::CommonAliasBody(\n"
