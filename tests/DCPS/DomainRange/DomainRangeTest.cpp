@@ -22,33 +22,12 @@
 #include "ace/OS_NS_stdlib.h"
 
 /*
-  NOTE:  The messages may not be processed by the reader in this test.
+  NOTE: The messages may not be processed by the reader in this test.
   This behavior is not an error.
 */
 
 const int /*DOMAIN_ID = 100,*/ MSGS_PER_WRITER = 10;
 const int TOTAL_WRITERS = 1, TOTAL_READERS = 1;
-
-unsigned char hextobyte(unsigned char c)
-{
-  if (c >= '0' && c <= '9') {
-    return c - '0';
-  }
-  if (c >= 'a' && c <= 'f') {
-    return 10 + c - 'a';
-  }
-  if (c >= 'A' && c <= 'F') {
-    return 10 + c - 'A';
-  }
-  return c;
-}
-
-unsigned char
-fromhex(const std::string& x,
-        size_t idx)
-{
-  return (hextobyte(x[idx * 2]) << 4) | (hextobyte(x[idx * 2 + 1]));
-}
 
 #define DEFAULT_FLAGS (THR_NEW_LWP | THR_JOINABLE | THR_INHERIT_SCHED)
 
@@ -154,61 +133,45 @@ void reader_done_callback()
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
+  std::vector<DDS::DomainId_t> domains;
+
   try {
     // Initialize DomainParticipantFactory
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
 
-    std::string dw_participant_id;
-    std::string dr_participant_id;
-    std::string reader_id;
-    std::string writer_id;
+    std::string dw_participant_id = "part_w";
+    std::string dr_participant_id = "part_r";
+    std::string reader_id = "reader";
+    std::string writer_id = "writer";
     bool reliable = true;
-    int domain_id_writer = 0, domain_id_reader = 0;
 
     {
       // New scope.
       ACE_Arg_Shifter shifter (argc, argv);
       while (shifter.is_anything_left ()) {
         const ACE_TCHAR* x;
-        x = shifter.get_the_parameter (ACE_TEXT("-dw_participant"));
+        x = shifter.get_the_parameter (ACE_TEXT("-domain"));
         if (x != NULL) {
-          dw_participant_id = ACE_TEXT_ALWAYS_CHAR(x);
-        }
-        x = shifter.get_the_parameter (ACE_TEXT("-dr_participant"));
-        if (x != NULL) {
-          dr_participant_id = ACE_TEXT_ALWAYS_CHAR(x);
-        }
-        x = shifter.get_the_parameter (ACE_TEXT("-reader"));
-        if (x != NULL) {
-          reader_id = ACE_TEXT_ALWAYS_CHAR(x);
-        }
-        x = shifter.get_the_parameter (ACE_TEXT("-writer"));
-        if (x != NULL) {
-          writer_id = ACE_TEXT_ALWAYS_CHAR(x);
-        }
-        x = shifter.get_the_parameter (ACE_TEXT("-wdomain"));
-        if (x != NULL) {
-          domain_id_writer = ACE_OS::atoi(x);
-          ACE_DEBUG((LM_DEBUG, "(%P|%t) main() - writer domain: %d\n", domain_id_writer));
-        }
-        x = shifter.get_the_parameter (ACE_TEXT("-rdomain"));
-        if (x != NULL) {
-          domain_id_reader = ACE_OS::atoi(x);
-          ACE_DEBUG((LM_DEBUG, "(%P|%t) main() - reader domain: %d\n", domain_id_reader));
-
+          domains.push_back(ACE_OS::atoi(x));
+          ACE_DEBUG((LM_DEBUG, "(%P|%t) main() - domain: %d added to test\n", ACE_OS::atoi(x)));
         }
 
         shifter.consume_arg ();
       }
     }
 
+  for (std::vector<DDS::DomainId_t>::const_iterator it = domains.begin();
+        it != domains.end(); ++it)
+  {
+    DDS::DomainId_t domain = *it;
+
     // Create DomainParticipant
     DDS::DomainParticipantQos dr_dp_qos;
     dpf->get_default_participant_qos(dr_dp_qos);
 
     DDS::DomainParticipant_var participant_reading =
-      dpf->create_participant(domain_id_reader,
+      dpf->create_participant(domain,
                               dr_dp_qos,
                               0,
                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -260,29 +223,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     // Setup Writer Side
     bool cleanup_participant = false;
-    DDS::DomainParticipant_var pub_side_participant;
-    if (domain_id_writer != domain_id_reader) {
-      cleanup_participant = true;
-      // Create DomainParticipant
-      DDS::DomainParticipantQos dw_dp_qos;
-      dpf->get_default_participant_qos(dw_dp_qos);
-
-      pub_side_participant =
-        dpf->create_participant(domain_id_writer,
-                                dw_dp_qos,
-                                0,
-                                OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-      if (!pub_side_participant) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("ERROR: %N:%l: main() -")
-                          ACE_TEXT(" create_participant failed!\n")),
-                         -1);
-      }
-
-    } else {
-      pub_side_participant = participant_reading;
-    }
+    DDS::DomainParticipant_var pub_side_participant = participant_reading;
 
     // Register TypeSupport
     TestMsgTypeSupport_var dw_ts =
@@ -401,7 +342,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       // Sleep allows an ACKNACK to be generated.
       ACE_OS::sleep(3);
     }
-    if (cleanup_participant) {
+
+      if (cleanup_participant) {
       // Clean-up! (Writer has own participant it needs to clean up before finishing)
       // otherwise using same participant as subscriber, so let sub cleanup
       pub_side_participant->delete_contained_entities();
@@ -410,6 +352,11 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     // Clean-up!
     participant_reading->delete_contained_entities();
     dpf->delete_participant(participant_reading);
+
+    // reset for next domain
+    readers_done = 0;
+
+  }
 
     TheServiceParticipant->shutdown();
 
