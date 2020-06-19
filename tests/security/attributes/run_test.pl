@@ -280,7 +280,7 @@ if (!($scenario eq "")) {
     $pub_extra_space = "100000";
   } else {
     print "\nUnrecognized scenario '$scenario'. Skipping.\n";
-    exit -1;
+    exit 1;
   }
 } else { # Not using scenarios
 
@@ -463,7 +463,7 @@ foreach my $gov_file (@gov_files) {
         #}
 
         if ($status != 0) {
-          $final_status = -1;
+          $final_status = 1;
         }
       }
     }
