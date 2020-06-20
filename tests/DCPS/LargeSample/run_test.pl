@@ -34,7 +34,7 @@ my($pub1opts) =
     $PerlDDS::SafetyProfile ? ('-p 1') : ('');
 
 $pub_opts .= " -r $reliable -n $num_msgs";
-$sub_opts .= " -r $reliable -n " . ($num_msgs * 4);
+$sub_opts .= " -r $reliable -n $num_msgs";
 
 $test->report_unused_flags();
 # use tcp if no transport is set on command line
