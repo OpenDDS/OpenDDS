@@ -217,7 +217,8 @@ TopicImpl::inconsistent_topic(int count)
   notify_status_condition();
 }
 
-bool TopicImpl::check_data_representation(const DDS::DataRepresentationIdSeq& qos_ids, bool is_data_writer) {
+bool TopicImpl::check_data_representation(const DDS::DataRepresentationIdSeq& qos_ids, bool is_data_writer)
+{
   DDS::DataRepresentationIdSeq type_allowed_reprs;
   if (!type_support_) {
     return true;
@@ -230,16 +231,14 @@ bool TopicImpl::check_data_representation(const DDS::DataRepresentationIdSeq& qo
   //Data Writer will only use the 1st QoS declared
   if (is_data_writer) {
     DDS::DataRepresentationId_t id = qos_ids[0];
-    for (int j = 0; j < type_allowed_reprs.length(); ++j) {
+    for (CORBA::ULong j = 0; j < type_allowed_reprs.length(); ++j) {
       if (id == type_allowed_reprs[j]) {
         return true;
       }
     }
-  }
-  //if data reader compare both lists for a compatible QoS
-  else {
-    for (int i = 0; i < qos_ids.length(); ++i) {
-      for (int j = 0; j < type_allowed_reprs.length(); ++j) {
+  } else { // if data reader compare both lists for a compatible QoS
+    for (CORBA::ULong i = 0; i < qos_ids.length(); ++i) {
+      for (CORBA::ULong j = 0; j < type_allowed_reprs.length(); ++j) {
         if (qos_ids[i] == type_allowed_reprs[j]) {
           return true;
         }

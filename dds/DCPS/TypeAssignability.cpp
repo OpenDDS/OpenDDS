@@ -136,9 +136,8 @@ bool TypeAssignability::assignable(const TypeIdentifier& ta,
     return false;
   case EK_MINIMAL: {
     const MinimalTypeObject& base_type_a = typelookup_.lookup_minimal(ta);
-    const MinimalTypeObject& base_type_b = typelookup_.lookup_minimal(tb);
-    TypeObject wrapper_a(base_type_a), wrapper_b(base_type_b);
-    return assignable(wrapper_a, wrapper_b);
+    TypeObject wrapper_a(base_type_a);
+    return assignable(wrapper_a, tb);
   }
   default:
     return false; // Future extensions
