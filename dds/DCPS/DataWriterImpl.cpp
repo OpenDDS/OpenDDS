@@ -1430,6 +1430,8 @@ DataWriterImpl::enable()
   type_info.minimal.typeid_with_size.typeobject_serialized_size =
     serialized_size(XTypes::get_typeobject_encoding(), type_object);
   type_info.minimal.dependent_typeid_count = 0;
+  type_info.complete.typeid_with_size.type_id = XTypes::TypeIdentifier::make();
+  type_info.complete.typeid_with_size.typeobject_serialized_size = 0;
   type_info.complete.dependent_typeid_count = 0;
 
   this->publication_id_ =

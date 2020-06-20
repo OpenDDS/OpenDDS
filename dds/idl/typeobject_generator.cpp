@@ -69,7 +69,7 @@ call_get_minimal_type_identifier(AST_Type* type)
   }
 
   if (fld_cls & CL_SEQUENCE) {
-    // TODO: Is an anonymous sequence always plain?
+    // TODO [anonymous]: Is an anonymous sequence always plain?
     AST_Sequence* sequence = AST_Sequence::narrow_from_decl(type);
     ACE_CDR::ULong size = 0;
 
@@ -92,7 +92,7 @@ call_get_minimal_type_identifier(AST_Type* type)
   }
 
   if (fld_cls & CL_ARRAY) {
-    // TODO: Is an anonymous array always plain?
+    // TODO [anonymous]: Is an anonymous array always plain?
     AST_Array* array = AST_Array::narrow_from_decl(type);
 
     ACE_CDR::ULong max_bound = 0;
@@ -130,7 +130,7 @@ call_get_minimal_type_identifier(AST_Type* type)
   }
 
   // Anonymous.  Construct type object and hash to get type identifier.
-  // TODO
+  // TODO [anonymous]:
   be_global->impl_ << "ANONYMOUS";
   return;
 }

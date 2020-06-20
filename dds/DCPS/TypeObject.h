@@ -545,7 +545,7 @@ const DCPS::Encoding& get_typeobject_encoding();
     // Future extensions
     ExtendedTypeDefn        extended_defn;
 
-    static TypeIdentifierPtr make(ACE_CDR::Octet k)
+    static TypeIdentifierPtr make(ACE_CDR::Octet k = TK_NONE)
     {
       TypeIdentifierPtr ti = make_rch<TypeIdentifier>();
       ti->kind = k;
@@ -573,8 +573,8 @@ const DCPS::Encoding& get_typeobject_encoding();
       ti->seq_sdefn = PlainSequenceSElemDefn
         (
          PlainCollectionHeader
-         (EquivalenceKind(EK_MINIMAL), // TODO: Pick the correct kind.
-          CollectionElementFlag()), // TODO: Set this
+         (EquivalenceKind(EK_MINIMAL), // TODO [anonymous]: Pick the correct kind.
+          CollectionElementFlag()), // TODO [anonymous]: Set this
          bound,
          base_type);
       return ti;
@@ -587,8 +587,8 @@ const DCPS::Encoding& get_typeobject_encoding();
       ti->seq_ldefn = PlainSequenceLElemDefn
         (
          PlainCollectionHeader
-         (EquivalenceKind(EK_MINIMAL), // TODO:  Pick the correct kind.
-          CollectionElementFlag()), // TODO Set this.
+         (EquivalenceKind(EK_MINIMAL), // TODO [anonymous]:  Pick the correct kind.
+          CollectionElementFlag()), // TODO [anonymous]: Set this.
          bound,
          base_type);
       return ti;
@@ -601,8 +601,8 @@ const DCPS::Encoding& get_typeobject_encoding();
       ti->array_sdefn = PlainArraySElemDefn
         (
          PlainCollectionHeader
-         (EquivalenceKind(EK_MINIMAL), // TODO: Pick the correct kind.
-          CollectionElementFlag()), // TODO: Set this
+         (EquivalenceKind(EK_MINIMAL), // TODO [anonymous]: Pick the correct kind.
+          CollectionElementFlag()), // TODO [anonymous]: Set this
          bound_seq,
          base_type);
       return ti;
@@ -615,8 +615,8 @@ const DCPS::Encoding& get_typeobject_encoding();
       ti->array_ldefn = PlainArrayLElemDefn
         (
          PlainCollectionHeader
-         (EquivalenceKind(EK_MINIMAL), // TODO:  Pick the correct kind.
-          CollectionElementFlag()), // TODO Set this.
+         (EquivalenceKind(EK_MINIMAL), // TODO [anonymous]:  Pick the correct kind.
+          CollectionElementFlag()), // TODO [anonymous]: Set this.
          bound_seq,
          base_type);
       return ti;

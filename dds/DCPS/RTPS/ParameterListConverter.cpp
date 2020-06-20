@@ -59,14 +59,10 @@ namespace {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) add_type_info_param ")
                 ACE_TEXT("serialization type information failed.\n")));
     }
-    //copy serialized data into octet sequence
-    ssize_t size = data->length();
+    const unsigned int size = static_cast<unsigned int>(data->length());
     param.type_information(DDS::OctetSeq(size));
     param.type_information().length(size);
-    //due to memcpy being a c function the char* needs to be taken out of the message block
     std::memcpy(param.type_information().get_buffer(), data->rd_ptr(), size);
-    //discriminator set to PID_XTYPES... which tells us what is in the discriminating union
-    param._d(PID_XTYPES_TYPE_INFORMATION);
     add_param(param_list, param);
   }
 

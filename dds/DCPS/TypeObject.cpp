@@ -26,7 +26,7 @@ const Encoding& get_typeobject_encoding()
   return encoding;
 }
 
-MinimalMemberDetail::MinimalMemberDetail(const std::string& name)
+MinimalMemberDetail::MinimalMemberDetail(const OPENDDS_STRING& name)
 {
   unsigned char result[16];
   DCPS::MD5Hash(result, name.c_str(), name.size());
@@ -55,7 +55,7 @@ TypeIdentifierPtr makeTypeIdentifier(const TypeObject& type_object)
     return TypeIdentifier::make(type_object.kind, eh);
   }
 
-  return TypeIdentifier::make(TK_NONE);
+  return TypeIdentifier::make();
 }
 
 } // namespace XTypes
@@ -2599,7 +2599,7 @@ bool operator>>(Serializer& strm, XTypes::TypeInformation& stru)
 template<>
 RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<void>()
 {
-  static const RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_NONE);
+  static const RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make();
   return ti;
 }
 
