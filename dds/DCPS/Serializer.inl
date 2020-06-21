@@ -1329,9 +1329,8 @@ operator>>(Serializer& s, ACE_InputCDR::to_wstring x)
          && ((x.bound_ == 0) || (length <= x.bound_));
 }
 
-#ifndef OPENDDS_SAFETY_PROFILE
 ACE_INLINE bool
-operator>>(Serializer& s, std::string& x)
+operator>>(Serializer& s, OPENDDS_STRING& x)
 {
   char* buf = 0;
   const size_t length = s.read_string(buf);
@@ -1348,7 +1347,7 @@ operator>>(Serializer& s, Serializer::ToBoundedString<char> x)
 
 #ifdef DDS_HAS_WCHAR
 ACE_INLINE bool
-operator>>(Serializer& s, std::wstring& x)
+operator>>(Serializer& s, OPENDDS_WSTRING& x)
 {
   ACE_CDR::WChar* buf = 0;
   const size_t length = s.read_string(buf);
@@ -1363,7 +1362,6 @@ operator>>(Serializer& s, Serializer::ToBoundedString<wchar_t> x)
   return (s >> x.str_) && (x.bound_ == 0 || x.str_.size() <= x.bound_);
 }
 #endif /* DDS_HAS_WCHAR */
-#endif /* !OPENDDS_SAFETY_PROFILE */
 
 //----------------------------------------------------------------------------
 // predefined type methods
