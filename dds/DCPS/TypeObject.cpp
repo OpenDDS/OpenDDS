@@ -1604,8 +1604,10 @@ void serialized_size(const Encoding& encoding, size_t& size,
     break;
   }
   case XTypes::TK_STRING16: {
+#ifdef DDS_HAS_WCHAR
     DCPS::serialized_size_ulong(encoding, size);
     size += ACE_OS::strlen(uni.string16_value.c_str()) * DCPS::char16_cdr_size;
+#endif
     break;
   }
   default: {
@@ -1667,7 +1669,11 @@ bool operator<<(Serializer& strm, const XTypes::AnnotationParameterValue& uni)
     return (strm << Serializer::FromBoundedString<char>(uni.string8_value, 128));
   }
   case XTypes::TK_STRING16: {
+#ifdef DDS_HAS_WCHAR
     return (strm << Serializer::FromBoundedString<wchar_t>(uni.string16_value, 128));
+#else
+    return false;
+#endif
   }
   default: {
     return (strm << uni.extended_value);
@@ -1818,12 +1824,14 @@ bool operator>>(Serializer& strm, XTypes::AnnotationParameterValue& uni)
     return false;
   }
   case XTypes::TK_STRING16: {
+#ifdef DDS_HAS_WCHAR
     OPENDDS_WSTRING tmp;
     if (strm >> Serializer::ToBoundedString<wchar_t>(tmp, 128)) {
       uni.string16_value = tmp;
       uni.kind = kind;
       return true;
     }
+#endif
     return false;
   }
   default: {
