@@ -84,7 +84,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   DDS::Security::IdentityToken id_token;
 
-  if (auth_plugin->get_identity_token(id_token, identity, ex) == false) {
+  if (!auth_plugin->get_identity_token(id_token, identity, ex)) {
     return DDS::HANDLE_NIL;
   }
 
@@ -97,16 +97,14 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   const SSL::Certificate& local_ca = local_access_credential_data->get_ca_cert();
   const SSL::SignedDocument& local_gov = local_access_credential_data->get_governance_doc();
 
-  int err = local_gov.verify_signature(local_ca);
-  if (err) {
+  if (local_gov.verify_signature(local_ca)) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Governance signature not verified");
     return DDS::HANDLE_NIL;
   }
 
   Governance::shared_ptr governance = DCPS::make_rch<Governance>();
 
-  err = governance->load(local_gov);
-  if (err) {
+  if (governance->load(local_gov)) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Invalid governance file");
     return DDS::HANDLE_NIL;
   }
@@ -114,13 +112,17 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   const SSL::SignedDocument& local_perm = local_access_credential_data->get_permissions_doc();
   Permissions::shared_ptr permissions = DCPS::make_rch<Permissions>();
 
-  err = permissions->load(local_perm);
-  if (err) {
+  if (permissions->load(local_perm)) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Invalid permission file");
     return DDS::HANDLE_NIL;
   }
 
-  // Compare the subject name for validation
+  if (local_perm.verify_signature(local_ca)) {
+    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Permissions signature not verified");
+    return DDS::HANDLE_NIL;
+  } else if (DCPS::DCPS_debug_level) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) AccessControlBuiltInImpl::validate_local_permissions: Permissions document verified.\n")));
+  }
 
   TokenReader tr(id_token);
   const char* id_sn = tr.get_property_value("dds.cert.sn");
@@ -130,18 +132,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   if (!id_sn || sn_id.parse(id_sn) != 0 || !permissions->contains_subject_name(sn_id)) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: No permissions subject name matches identity subject name");
     return DDS::HANDLE_NIL;
-  }
-
-  // Verify signature of permissions file
-  err = local_perm.verify_signature(local_ca);
-  if (err) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Permissions signature not verified");
-    return DDS::HANDLE_NIL;
-  } else {
-    if (OpenDDS::DCPS::DCPS_debug_level > 0) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT(
-        "(%P|%t) AccessControlBuiltInImpl::validate_local_permissions: Permissions document verified.\n")));
-    }
   }
 
   // Set and store the permissions credential token while we have the raw content
@@ -159,9 +149,9 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   perm_data.perm_token = permissions_token;
   perm_data.perm_cred_token = permissions_cred_token;
 
-  ::CORBA::Long perm_handle = generate_handle();
+  const int perm_handle = generate_handle();
 
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_mutex_, 0);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_mutex_, DDS::HANDLE_NIL);
 
   AccessData cache_this;
   cache_this.identity = identity;
@@ -202,12 +192,9 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return DDS::HANDLE_NIL;
   }
 
-  // Extract Governance and domain id data for new permissions entry
-  ::DDS::Security::PermissionsHandle local_ph = iter->second;
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_mutex_, DDS::HANDLE_NIL);
 
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_mutex_, 0);
-
-  ACPermsMap::iterator piter = local_ac_perms_.find(local_ph);
+  ACPermsMap::iterator piter = local_ac_perms_.find(iter->second);
 
   if (piter == local_ac_perms_.end()) {
     CommonUtilities::set_security_error(ex,-1, 0, "AccessControlBuiltInImpl::validate_remote_permissions: No matching local permissions handle present");
@@ -215,21 +202,17 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
   // permissions file
-  OpenDDS::Security::TokenReader remote_perm_wrapper(remote_credential_token);
+  TokenReader remote_perm_wrapper(remote_credential_token);
   SSL::SignedDocument remote_perm_doc;
 
-  int err = remote_perm_doc.deserialize(remote_perm_wrapper.get_bin_property_value("c.perm"));
-  if (err)
-  {
+  if (remote_perm_doc.deserialize(remote_perm_wrapper.get_bin_property_value("c.perm"))) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_remote_permissions: Failed to deserialize c.perm into signed-document");
     return DDS::HANDLE_NIL;
   }
 
   Permissions::shared_ptr remote_permissions = DCPS::make_rch<Permissions>();
 
-  err = remote_permissions->load(remote_perm_doc);
-  if (err)
-  {
+  if (remote_permissions->load(remote_perm_doc)) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_remote_permissions: Invalid permission file");
     return DDS::HANDLE_NIL;
   }
@@ -242,14 +225,13 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   local_ca.subject_name_to_str(ca_subject);
 
-  err = remote_perm_doc.verify_signature(local_ca);
-  if (err) {
+  if (remote_perm_doc.verify_signature(local_ca)) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_remote_permissions: Remote permissions signature not verified");
     return DDS::HANDLE_NIL;
   }
 
   // The remote permissions signature is verified
-  if (OpenDDS::DCPS::DCPS_debug_level > 0) {
+  if (DCPS::DCPS_debug_level) {
     ACE_DEBUG((LM_DEBUG, ACE_TEXT(
       "(%P|%t) AccessControlBuiltInImpl::validate_remote_permissions: Remote permissions document verified.\n")));
   }
@@ -269,7 +251,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   std::string remote_identity_sn;
   remote_cert->subject_name_to_str(remote_identity_sn);
 
-  OpenDDS::Security::SSL::SubjectName sn_id_remote;
+  SSL::SubjectName sn_id_remote;
 
   if (remote_identity_sn.empty() || sn_id_remote.parse(remote_identity_sn) != 0 || !remote_permissions->contains_subject_name(sn_id_remote)) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_remote_permissions: "
@@ -283,7 +265,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   perm_data.perm_token = remote_permissions_token;
   perm_data.perm_cred_token = remote_credential_token;
 
-  ::CORBA::Long perm_handle = generate_handle();
 
   AccessData cache_this;
   cache_this.identity = remote_identity_handle;
@@ -293,6 +274,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   cache_this.gov = piter->second.gov;
   cache_this.local_access_credential_data = local_access_credential_data;
 
+  const int perm_handle = generate_handle();
   local_ac_perms_.insert(std::make_pair(perm_handle, cache_this));
   return perm_handle;
 }
@@ -341,25 +323,23 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
       "Domain does not match validated permissions handle");
   }
 
-  ::DDS::Security::DomainId_t domain_to_find = domain_id;
-
   gov_iter begin = piter->second.gov->access_rules().begin();
   gov_iter end = piter->second.gov->access_rules().end();
 
   for (gov_iter giter = begin; giter != end; ++giter) {
-    size_t d = giter->domain_list.count(domain_to_find);
 
-    if (d > 0) {
+    if (giter->domain_list.count(domain_id)) {
       Governance::TopicAccessRules::iterator tr_iter;
 
       for (tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
-        if (tr_iter->topic_attrs.is_read_protected == false ||
-            tr_iter->topic_attrs.is_write_protected == false ) {
+        if (!tr_iter->topic_attrs.is_read_protected || !tr_iter->topic_attrs.is_write_protected) {
           return true;
         }
       }
 
-      if (giter->domain_attrs.is_access_protected == false) return true;
+      if (!giter->domain_attrs.is_access_protected) {
+        return true;
+      }
     }
   }
 
@@ -396,14 +376,13 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   gov_iter end = ac_iter->second.gov->access_rules().end();
 
   for (gov_iter giter = begin; giter != end; ++giter) {
-    size_t d = giter->domain_list.count(domain_id);
 
-    if (d > 0) {
+    if (giter->domain_list.count(domain_id)) {
       Governance::TopicAccessRules::iterator tr_iter;
 
       for (tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
-        if ( ::ACE::wild_match(topic_name, tr_iter->topic_expression.c_str(), true,false)) {
-          if (tr_iter->topic_attrs.is_write_protected == false ) {
+        if ( ::ACE::wild_match(topic_name, tr_iter->topic_expression.c_str(), true, false)) {
+          if (!tr_iter->topic_attrs.is_write_protected) {
             return true;
           }
         }
@@ -422,7 +401,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
   if (!local_rp_timer_.is_scheduled()) {
-    // Start timer
     if (!local_rp_timer_.start_timer(delta_time, permissions_handle)) {
       return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datawriter: Permissions timer could not be created.");
     }
@@ -460,14 +438,13 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   gov_iter end = ac_iter->second.gov->access_rules().end();
 
   for (gov_iter giter = begin; giter != end; ++giter) {
-    size_t d = giter->domain_list.count(domain_id);
 
-    if (d > 0) {
+    if (giter->domain_list.count(domain_id)) {
       Governance::TopicAccessRules::iterator tr_iter;
 
       for (tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
         if ( ::ACE::wild_match(topic_name, tr_iter->topic_expression.c_str(), true, false)) {
-          if (tr_iter->topic_attrs.is_read_protected == false ) {
+          if (!tr_iter->topic_attrs.is_read_protected) {
             return true;
           }
         }
@@ -530,15 +507,13 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   gov_iter end = ac_iter->second.gov->access_rules().end();
 
   for (gov_iter giter = begin; giter != end; ++giter) {
-    size_t d = giter->domain_list.count(domain_to_find);
 
-    if (d) {
+    if (giter->domain_list.count(domain_to_find)) {
       Governance::TopicAccessRules::iterator tr_iter;
 
       for (tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
         if (::ACE::wild_match(topic_name, tr_iter->topic_expression.c_str(), true, false)) {
-          if (tr_iter->topic_attrs.is_read_protected == false ||
-              tr_iter->topic_attrs.is_write_protected == false) {
+          if (!tr_iter->topic_attrs.is_read_protected || !tr_iter->topic_attrs.is_write_protected) {
             return true;
           }
         }
@@ -552,32 +527,35 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  // Iterate over grant rules
   Permissions::PermissionGrantRules::iterator pgr_iter;
   for (pgr_iter = ac_iter->second.perm->data().perm_rules.begin(); pgr_iter != ac_iter->second.perm->data().perm_rules.end(); ++pgr_iter) {
 
     // Check to make sure our participant subject name matches the grant we're looking at
     if (pgr_iter->subject == ac_iter->second.subject) {
-
+      Permissions::PublishSubscribe_t denied_type;
+      bool found_deny = false;
       // Iterate over allow / deny rules
-      perm_topic_rules_iter ptr_iter;
-      for (ptr_iter = pgr_iter->PermissionTopicRules.begin(); ptr_iter != pgr_iter->PermissionTopicRules.end(); ++ptr_iter) {
+      for (perm_topic_rules_iter ptr_iter = pgr_iter->PermissionTopicRules.begin(); ptr_iter != pgr_iter->PermissionTopicRules.end(); ++ptr_iter) {
 
-        // Check that our domain is listed and the permissions type is ALLOW before checking further
-        size_t d = ptr_iter->domain_list.count(domain_to_find);
-        if ((d > 0) && (ptr_iter->ad_type == Permissions::ALLOW)) {
+        if (ptr_iter->domain_list.count(domain_to_find)) {
 
-          // Iterate over pub / sub rules
           perm_topic_ps_rules_iter tpsr_iter;
           for (tpsr_iter = ptr_iter->topic_ps_rules.begin(); tpsr_iter != ptr_iter->topic_ps_rules.end(); ++tpsr_iter) {
 
-            // Iterate over topics
             std::vector<std::string>::iterator tl_iter;
             for (tl_iter = tpsr_iter->topic_list.begin(); tl_iter != tpsr_iter->topic_list.end(); ++tl_iter) {
 
-              // If we have a match, we're ok to allow topic creation
-              if (::ACE::wild_match(topic_name, (*tl_iter).c_str(), true, false))
-                return true;
+              if (::ACE::wild_match(topic_name, tl_iter->c_str(), true, false)) {
+                if (ptr_iter->ad_type == Permissions::ALLOW) {
+                  return true;
+                }
+                if (found_deny && denied_type != tpsr_iter->ps_type) {
+                  return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_topic: Both publish and subscribe are denied for this topic.");
+                } else if (!found_deny) {
+                  found_deny = true;
+                  denied_type = tpsr_iter->ps_type;
+                }
+              }
             }
           }
         }
@@ -586,16 +564,13 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
       // There is no matching rule for topic_name so use the value in default_permission
       if (strcmp(pgr_iter->default_permission.c_str(), "ALLOW") == 0) {
         return true;
-      }
-      else {
+      } else {
         return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_topic: No matching rule for topic, default permission is DENY.");
       }
     }
   }
 
-  //TODO: QoS rules are not implemented
-
-  return false;
+  return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_topic: No matching permissions grant");
 }
 
 ::CORBA::Boolean AccessControlBuiltInImpl::check_local_datawriter_register_instance(
@@ -658,10 +633,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   gov_iter end = ac_iter->second.gov->access_rules().end();
 
   for (gov_iter giter = begin; giter != end; ++giter) {
-    size_t d = giter->domain_list.count(domain_id);
-
-    if (d > 0) {
-      if (giter->domain_attrs.is_access_protected == false) return true;
+    if (giter->domain_list.count(domain_id) && !giter->domain_attrs.is_access_protected) {
+      return true;
     }
   }
 
@@ -677,24 +650,19 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   if (remote_class_id.length() > 0) {
     parse_class_id(remote_class_id, remote_plugin_class_name, remote_major_ver, remote_minor_ver);
-  }
-  else {
+  } else {
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_participant: Invalid remote class ID");
   }
 
   for (ACPermsMap::iterator local_iter = local_ac_perms_.begin(); local_iter != local_ac_perms_.end(); ++local_iter) {
-    if (local_iter->second.domain_id == domain_id) {
-      if (local_iter->first != permissions_handle) {
-        std::string local_class_id = local_iter->second.perm->data().perm_token.class_id.in();
+    if (local_iter->second.domain_id == domain_id && local_iter->first != permissions_handle) {
+      const std::string local_class_id = local_iter->second.perm->data().perm_token.class_id.in();
 
-        if (local_class_id.length() > 0) {
-          parse_class_id(local_class_id, local_plugin_class_name, local_major_ver, local_minor_ver);
-        }
-        else {
-          return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_participant: Invalid local class ID");
-        }
-
+      if (local_class_id.length() > 0) {
+        parse_class_id(local_class_id, local_plugin_class_name, local_major_ver, local_minor_ver);
         break;
+      } else {
+        return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_participant: Invalid local class ID");
       }
     }
   }
@@ -703,25 +671,16 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     if (local_major_ver != remote_major_ver) {
       return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_participant: Class ID major versions do not match");
     }
-  }
-  else {
+  } else {
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_participant: Class ID plugin class name do not match");
   }
 
-  // Check permissions topic grants
-
   Permissions::PermissionGrantRules::iterator pgr_iter;
-
-  // Check topic rules for the given domain id.
-
   for (pgr_iter = ac_iter->second.perm->data().perm_rules.begin(); pgr_iter != ac_iter->second.perm->data().perm_rules.end(); ++pgr_iter) {
     // Cycle through topic rules to find an allow
-    perm_topic_rules_iter ptr_iter;
 
-    for (ptr_iter = pgr_iter->PermissionTopicRules.begin(); ptr_iter != pgr_iter->PermissionTopicRules.end(); ++ptr_iter) {
-      size_t z = (ptr_iter->domain_list.count(domain_id));
-
-      if ((z > 0) && (ptr_iter->ad_type == Permissions::ALLOW)) {
+    for (perm_topic_rules_iter ptr_iter = pgr_iter->PermissionTopicRules.begin(); ptr_iter != pgr_iter->PermissionTopicRules.end(); ++ptr_iter) {
+      if (ptr_iter->domain_list.count(domain_id) && ptr_iter->ad_type == Permissions::ALLOW) {
         return true;
       }
     }
@@ -756,14 +715,13 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   gov_iter end = ac_iter->second.gov->access_rules().end();
 
   for (gov_iter giter = begin; giter != end; ++giter) {
-    size_t d = giter->domain_list.count(domain_id);
 
-    if (d > 0) {
+    if (giter->domain_list.count(domain_id)) {
       Governance::TopicAccessRules::iterator tr_iter;
 
       for (tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
         if (::ACE::wild_match(publication_data.base.base.topic_name, tr_iter->topic_expression.c_str(), true, false)) {
-          if (tr_iter->topic_attrs.is_write_protected == false) {
+          if (!tr_iter->topic_attrs.is_write_protected) {
             return true;
           }
         }
@@ -776,16 +734,14 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  if (!search_permissions(publication_data.base.base.topic_name, domain_id, 
+  if (!search_permissions(publication_data.base.base.topic_name, domain_id,
                           publication_data.base.base.partition, Permissions::PUBLISH,
                           ac_iter, ex)) {
     return false;
   }
 
-  if (!remote_rp_timer_.is_scheduled()) {
-    if (!remote_rp_timer_.start_timer(delta_time, permissions_handle)) {
-      return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Permissions timer could not be created.");
-    }
+  if (!remote_rp_timer_.is_scheduled() && !remote_rp_timer_.start_timer(delta_time, permissions_handle)) {
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Permissions timer could not be created.");
   }
 
   return true;
@@ -817,19 +773,17 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   gov_iter end = ac_iter->second.gov->access_rules().end();
 
   for (gov_iter giter = begin; giter != end; ++giter) {
-    size_t d = giter->domain_list.count(domain_id);
 
-    if (d > 0) {
+    if (giter->domain_list.count(domain_id)) {
       Governance::TopicAccessRules::iterator tr_iter;
 
       for (tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
         if (::ACE::wild_match(subscription_data.base.base.topic_name, tr_iter->topic_expression.c_str(), true, false)) {
-          if (tr_iter->topic_attrs.is_read_protected == false) {
+          if (!tr_iter->topic_attrs.is_read_protected) {
             return true;
           }
         }
       }
-
     }
   }
 
@@ -844,10 +798,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  if (!remote_rp_timer_.is_scheduled()) {
-    if (!remote_rp_timer_.start_timer(delta_time, permissions_handle)) {
-      return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Permissions timer could not be created.");
-    }
+  if (!remote_rp_timer_.is_scheduled() && !remote_rp_timer_.start_timer(delta_time, permissions_handle)) {
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Permissions timer could not be created.");
   }
 
   return true;
@@ -889,24 +841,19 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   if (remote_class_id.length() > 0) {
     parse_class_id(remote_class_id, remote_plugin_class_name, remote_major_ver, remote_minor_ver);
-  }
-  else {
+  } else {
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_topic: Invalid remote class ID");
   }
 
   for (ACPermsMap::iterator local_iter = local_ac_perms_.begin(); local_iter != local_ac_perms_.end(); ++local_iter) {
-    if (local_iter->second.domain_id == domain_id) {
-      if (local_iter->first != permissions_handle) {
-        std::string local_class_id = local_iter->second.perm->data().perm_token.class_id.in();
+    if (local_iter->second.domain_id == domain_id && local_iter->first != permissions_handle) {
+      const std::string local_class_id = local_iter->second.perm->data().perm_token.class_id.in();
 
-        if (local_class_id.length() > 0) {
-          parse_class_id(local_class_id, local_plugin_class_name, local_major_ver, local_minor_ver);
-        }
-        else {
-          return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_topic: Invalid local class ID");
-        }
-
+      if (local_class_id.length() > 0) {
+        parse_class_id(local_class_id, local_plugin_class_name, local_major_ver, local_minor_ver);
         break;
+      } else {
+        return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_topic: Invalid local class ID");
       }
     }
   }
@@ -915,8 +862,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     if (local_major_ver != remote_major_ver) {
       return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_topic: Class ID major versions do not match");
     }
-  }
-  else {
+  } else {
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_topic: Class ID plugin class name do not match");
   }
 
@@ -926,15 +872,13 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   gov_iter end = ac_iter->second.gov->access_rules().end();
 
   for (gov_iter giter = begin; giter != end; ++giter) {
-    size_t d = giter->domain_list.count(domain_id);
 
-    if (d) {
+    if (giter->domain_list.count(domain_id)) {
       Governance::TopicAccessRules::iterator tr_iter;
 
       for (tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
         if (::ACE::wild_match(topic_data.name, tr_iter->topic_expression.c_str(), true, false)) {
-          if (tr_iter->topic_attrs.is_read_protected == false ||
-              tr_iter->topic_attrs.is_write_protected == false) {
+          if (!tr_iter->topic_attrs.is_read_protected || !tr_iter->topic_attrs.is_write_protected) {
             return true;
           }
         }
@@ -960,8 +904,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
       for (ptr_iter = pgr_iter->PermissionTopicRules.begin(); ptr_iter != pgr_iter->PermissionTopicRules.end(); ++ptr_iter) {
 
         // Check that our domain is listed and the permissions type is ALLOW before checking further
-        size_t d = ptr_iter->domain_list.count(domain_id);
-        if ((d > 0) && (ptr_iter->ad_type == Permissions::ALLOW)) {
+        //TODO [now]: check Deny rules
+        if (ptr_iter->domain_list.count(domain_id) && ptr_iter->ad_type == Permissions::ALLOW) {
 
           // Iterate over pub / sub rules
           perm_topic_ps_rules_iter tpsr_iter;
@@ -976,8 +920,9 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
               for (tl_iter = tpsr_iter->topic_list.begin(); tl_iter != tpsr_iter->topic_list.end(); ++tl_iter) {
 
                 // If we have a match, we're ok to allow topic creation
-                if (::ACE::wild_match(topic_data.name, (*tl_iter).c_str(), true, false))
+                if (::ACE::wild_match(topic_data.name, (*tl_iter).c_str(), true, false)) {
                   return true;
+                }
               }
             }
           }
@@ -987,14 +932,11 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
       // There is no matching rule for topic_name so use the value in default_permission
       if (strcmp(pgr_iter->default_permission.c_str(), "ALLOW") == 0) {
         return true;
-      }
-      else {
+      } else {
         return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_topic: No matching rule for topic, default permission is DENY.");
       }
     }
   }
-
-  //TODO: QoS rules are not implemented
 
   return false;
 }
@@ -1120,8 +1062,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::get_permissions_credential_token: No PermissionToken found");
     return false;
   }
-
-  return true;
 }
 
 ::CORBA::Boolean AccessControlBuiltInImpl::set_listener(
@@ -1174,25 +1114,22 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ACPermsMap::iterator ac_iter = local_ac_perms_.find(permissions_handle);
 
   if (ac_iter == local_ac_perms_.end()) {
-    CommonUtilities::set_security_error(ex,-1, 0, "AccessControlBuiltInImpl::get_participant_sec_attributes: No matching permissions handle present");
+    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::get_participant_sec_attributes: No matching permissions handle present");
     return false;
   }
-
-  // Check the Governance file for allowable topic attributes
-  ::DDS::Security::DomainId_t domain_to_find = ac_iter->second.domain_id;
 
   gov_iter begin = ac_iter->second.gov->access_rules().begin();
   gov_iter end = ac_iter->second.gov->access_rules().end();
 
   for (gov_iter giter = begin; giter != end; ++giter) {
-    size_t d = giter->domain_list.count(domain_to_find);
 
-    if (d > 0) {
+    if (giter->domain_list.count(ac_iter->second.domain_id)) {
       attributes = giter->domain_attrs;
       return true;
     }
   }
 
+  CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::get_participant_sec_attributes: No matching domain in governance");
   return false;
 }
 
@@ -1218,30 +1155,28 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ACPermsMap::iterator piter = local_ac_perms_.find(permissions_handle);
 
   if (piter == local_ac_perms_.end()) {
-    CommonUtilities::set_security_error(ex,-1, 0, "AccessControlBuiltInImpl::get_topic_sec_attributes: No matching permissions handle present");
+    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::get_topic_sec_attributes: No matching permissions handle present");
     return false;
   }
-
-  ::DDS::Security::DomainId_t domain_to_find = piter->second.domain_id;
 
   gov_iter begin = piter->second.gov->access_rules().begin();
   gov_iter end = piter->second.gov->access_rules().end();
 
   for (gov_iter giter = begin; giter != end; ++giter) {
-    size_t d = giter->domain_list.count(domain_to_find);
 
-    if (d > 0) {
+    if (giter->domain_list.count(piter->second.domain_id)) {
       Governance::TopicAccessRules::iterator tr_iter;
 
       for (tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
-        if (::ACE::wild_match(topic_name,tr_iter->topic_expression.c_str(), true, false)) {
+        if (::ACE::wild_match(topic_name, tr_iter->topic_expression.c_str(), true, false)) {
           attributes = tr_iter->topic_attrs;
           return true;
         }
       }
     }
   }
-
+  
+  CommonUtilities::set_security_error(ex,-1, 0, "AccessControlBuiltInImpl::get_topic_sec_attributes: No matching domain/topic in governance");
   return false;
 }
 
