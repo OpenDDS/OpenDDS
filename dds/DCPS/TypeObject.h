@@ -6,9 +6,9 @@
 #ifndef OPENDDS_DCPS_TYPE_OBJECT_H
 #define OPENDDS_DCPS_TYPE_OBJECT_H
 
+#include "External.h"
+#include "PoolAllocationBase.h"
 #include "PoolAllocator.h"
-#include "RcHandle_T.h"
-#include "RcObject.h"
 #include "Serializer.h"
 
 #include <tao/Array_VarOut_T.h>
@@ -23,8 +23,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {
 
-OpenDDS_Dcps_Export
-const DCPS::Encoding& get_typeobject_encoding();
+  OpenDDS_Dcps_Export
+  const DCPS::Encoding& get_typeobject_encoding();
 
   template <typename T>
   struct Optional {
@@ -265,10 +265,6 @@ const DCPS::Encoding& get_typeobject_encoding();
   // Forward declaration
   struct TypeIdentifier;
 
-  using DCPS::RcHandle;
-  using DCPS::make_rch;
-  typedef RcHandle<TypeIdentifier> TypeIdentifierPtr;
-
   // 1 Byte
   struct StringSTypeDefn {
     SBound                  bound;
@@ -307,13 +303,13 @@ const DCPS::Encoding& get_typeobject_encoding();
   struct PlainSequenceSElemDefn {
     PlainCollectionHeader  header;
     SBound                 bound;
-    TypeIdentifierPtr element_identifier;
+    External<TypeIdentifier> element_identifier;
 
     PlainSequenceSElemDefn() {}
 
     PlainSequenceSElemDefn(const PlainCollectionHeader& a_header,
                            const SBound& a_bound,
-                           const TypeIdentifierPtr& a_element_identifier)
+                           const TypeIdentifier& a_element_identifier)
       : header(a_header)
       , bound(a_bound)
       , element_identifier(a_element_identifier)
@@ -323,13 +319,13 @@ const DCPS::Encoding& get_typeobject_encoding();
   struct PlainSequenceLElemDefn {
     PlainCollectionHeader  header;
     LBound                 bound;
-    TypeIdentifierPtr element_identifier;
+    External<TypeIdentifier> element_identifier;
 
     PlainSequenceLElemDefn() {}
 
     PlainSequenceLElemDefn(const PlainCollectionHeader& a_header,
                            const LBound& a_bound,
-                           const TypeIdentifierPtr& a_element_identifier)
+                           const TypeIdentifier& a_element_identifier)
       : header(a_header)
       , bound(a_bound)
       , element_identifier(a_element_identifier)
@@ -339,13 +335,13 @@ const DCPS::Encoding& get_typeobject_encoding();
   struct PlainArraySElemDefn {
     PlainCollectionHeader  header;
     SBoundSeq              array_bound_seq;
-    TypeIdentifierPtr element_identifier;
+    External<TypeIdentifier> element_identifier;
 
     PlainArraySElemDefn() {}
 
     PlainArraySElemDefn(const PlainCollectionHeader& a_header,
                         const SBoundSeq& a_array_bound_seq,
-                        const TypeIdentifierPtr& a_element_identifier)
+                        const TypeIdentifier& a_element_identifier)
       : header(a_header)
       , array_bound_seq(a_array_bound_seq)
       , element_identifier(a_element_identifier)
@@ -355,13 +351,13 @@ const DCPS::Encoding& get_typeobject_encoding();
   struct PlainArrayLElemDefn {
     PlainCollectionHeader  header;
     LBoundSeq              array_bound_seq;
-    TypeIdentifierPtr element_identifier;
+    External<TypeIdentifier> element_identifier;
 
     PlainArrayLElemDefn() {}
 
     PlainArrayLElemDefn(const PlainCollectionHeader& a_header,
                         const LBoundSeq& a_array_bound_seq,
-                        const TypeIdentifierPtr& a_element_identifier)
+                        const TypeIdentifier& a_element_identifier)
       : header(a_header)
       , array_bound_seq(a_array_bound_seq)
       , element_identifier(a_element_identifier)
@@ -371,17 +367,17 @@ const DCPS::Encoding& get_typeobject_encoding();
   struct PlainMapSTypeDefn {
     PlainCollectionHeader  header;
     SBound                 bound;
-    TypeIdentifierPtr element_identifier;
+    External<TypeIdentifier> element_identifier;
     CollectionElementFlag  key_flags;
-    TypeIdentifierPtr key_identifier;
+    External<TypeIdentifier> key_identifier;
 
     PlainMapSTypeDefn() {}
 
     PlainMapSTypeDefn(const PlainCollectionHeader&  a_header,
                       const SBound&                 a_bound,
-                      const TypeIdentifierPtr& a_element_identifier,
+                      const TypeIdentifier& a_element_identifier,
                       const CollectionElementFlag&  a_key_flags,
-                      const TypeIdentifierPtr& a_key_identifier)
+                      const TypeIdentifier& a_key_identifier)
       : header(a_header)
       , bound(a_bound)
       , element_identifier(a_element_identifier)
@@ -393,17 +389,17 @@ const DCPS::Encoding& get_typeobject_encoding();
   struct PlainMapLTypeDefn {
     PlainCollectionHeader  header;
     LBound                 bound;
-    TypeIdentifierPtr element_identifier;
+    External<TypeIdentifier> element_identifier;
     CollectionElementFlag  key_flags;
-    TypeIdentifierPtr key_identifier;
+    External<TypeIdentifier> key_identifier;
 
     PlainMapLTypeDefn() {}
 
     PlainMapLTypeDefn(const PlainCollectionHeader&  a_header,
                       const LBound&                 a_bound,
-                      const TypeIdentifierPtr& a_element_identifier,
+                      const TypeIdentifier& a_element_identifier,
                       const CollectionElementFlag&  a_key_flags,
-                      const TypeIdentifierPtr& a_key_identifier)
+                      const TypeIdentifier& a_key_identifier)
       : header(a_header)
       , bound(a_bound)
       , element_identifier(a_element_identifier)
@@ -519,58 +515,51 @@ const DCPS::Encoding& get_typeobject_encoding();
   //   ExtendedTypeDefn        extended_defn;
   // };
 
-  struct TypeIdentifier : public DCPS::RcObject {
-    ACE_CDR::Octet kind;
-    // ============ Strings - use TypeIdentifierKind ===================
-    StringSTypeDefn         string_sdefn;
-    StringLTypeDefn         string_ldefn;
+  class OpenDDS_Dcps_Export TypeIdentifier : public DCPS::PoolAllocationBase {
+  public:
+    explicit TypeIdentifier(ACE_CDR::Octet kind = TK_NONE);
+    TypeIdentifier(const TypeIdentifier& other);
+    TypeIdentifier& operator=(const TypeIdentifier& other);
+    ~TypeIdentifier() { reset(); }
 
-    // ============  Plain collections - use TypeIdentifierKind =========
-    PlainSequenceSElemDefn  seq_sdefn;
-    PlainSequenceLElemDefn  seq_ldefn;
+    ACE_CDR::Octet kind() const { return kind_; }
+    void kind(ACE_CDR::Octet k);
 
-    PlainArraySElemDefn     array_sdefn;
-    PlainArrayLElemDefn     array_ldefn;
+#define OPENDDS_UNION_ACCESSORS(T, N)                         \
+    const T& N() const { return *static_cast<T*>(active_); }  \
+    T& N() { return *static_cast<T*>(active_); }
+    OPENDDS_UNION_ACCESSORS(StringSTypeDefn, string_sdefn);
+    OPENDDS_UNION_ACCESSORS(StringLTypeDefn, string_ldefn);
+    OPENDDS_UNION_ACCESSORS(PlainSequenceSElemDefn, seq_sdefn);
+    OPENDDS_UNION_ACCESSORS(PlainSequenceLElemDefn, seq_ldefn);
+    OPENDDS_UNION_ACCESSORS(PlainArraySElemDefn, array_sdefn);
+    OPENDDS_UNION_ACCESSORS(PlainArrayLElemDefn, array_ldefn);
+    OPENDDS_UNION_ACCESSORS(PlainMapSTypeDefn, map_sdefn);
+    OPENDDS_UNION_ACCESSORS(PlainMapLTypeDefn, map_ldefn);
+    OPENDDS_UNION_ACCESSORS(StronglyConnectedComponentId, sc_component_id);
+    OPENDDS_UNION_ACCESSORS(EquivalenceHash, equivalence_hash);
+    OPENDDS_UNION_ACCESSORS(ExtendedTypeDefn, extended_defn);
+#undef OPENDDS_UNION_ACCESSORS
 
-    PlainMapSTypeDefn       map_sdefn;
-    PlainMapLTypeDefn       map_ldefn;
-
-    // ============  Types that are mutually dependent on each other ===
-    StronglyConnectedComponentId  sc_component_id;
-
-    // ============  The remaining cases - use EquivalenceKind =========
-    EquivalenceHash         equivalence_hash;
-
-    // ===================  Future extensibility  ============
-    // Future extensions
-    ExtendedTypeDefn        extended_defn;
-
-    static TypeIdentifierPtr make(ACE_CDR::Octet k = TK_NONE)
+    static TypeIdentifier makeString(bool wide, const StringSTypeDefn& string_sdefn)
     {
-      TypeIdentifierPtr ti = make_rch<TypeIdentifier>();
-      ti->kind = k;
+      TypeIdentifier ti(wide ? TI_STRING16_SMALL : TI_STRING8_SMALL);
+      ti.string_sdefn() = string_sdefn;
       return ti;
     }
 
-    static TypeIdentifierPtr makeString(bool wide, const StringSTypeDefn& string_sdefn)
+    static TypeIdentifier makeString(bool wide, const StringLTypeDefn& string_ldefn)
     {
-      TypeIdentifierPtr ti = make(wide ? TI_STRING16_SMALL : TI_STRING8_SMALL);
-      ti->string_sdefn = string_sdefn;
+      TypeIdentifier ti(wide ? TI_STRING16_LARGE : TI_STRING8_LARGE);
+      ti.string_ldefn() = string_ldefn;
       return ti;
     }
 
-    static TypeIdentifierPtr makeString(bool wide, const StringLTypeDefn& string_ldefn)
+    static TypeIdentifier makePlainSequence(const TypeIdentifier& base_type,
+                                            const SBound& bound)
     {
-      TypeIdentifierPtr ti = make(wide ? TI_STRING16_LARGE : TI_STRING8_LARGE);
-      ti->string_ldefn = string_ldefn;
-      return ti;
-    }
-
-    static TypeIdentifierPtr makePlainSequence(const TypeIdentifierPtr& base_type,
-                                               const SBound& bound)
-    {
-      TypeIdentifierPtr ti = make(TI_PLAIN_SEQUENCE_SMALL);
-      ti->seq_sdefn = PlainSequenceSElemDefn
+      TypeIdentifier ti(TI_PLAIN_SEQUENCE_SMALL);
+      ti.seq_sdefn() = PlainSequenceSElemDefn
         (
          PlainCollectionHeader
          (EquivalenceKind(EK_MINIMAL), // TODO [anonymous]: Pick the correct kind.
@@ -580,11 +569,11 @@ const DCPS::Encoding& get_typeobject_encoding();
       return ti;
     }
 
-    static TypeIdentifierPtr makePlainSequence(const TypeIdentifierPtr& base_type,
-                                               const LBound& bound)
+    static TypeIdentifier makePlainSequence(const TypeIdentifier& base_type,
+                                            const LBound& bound)
     {
-      TypeIdentifierPtr ti = make(TI_PLAIN_SEQUENCE_LARGE);
-      ti->seq_ldefn = PlainSequenceLElemDefn
+      TypeIdentifier ti(TI_PLAIN_SEQUENCE_LARGE);
+      ti.seq_ldefn() = PlainSequenceLElemDefn
         (
          PlainCollectionHeader
          (EquivalenceKind(EK_MINIMAL), // TODO [anonymous]:  Pick the correct kind.
@@ -594,11 +583,11 @@ const DCPS::Encoding& get_typeobject_encoding();
       return ti;
     }
 
-    static TypeIdentifierPtr makePlainArray(const TypeIdentifierPtr& base_type,
-                                            const SBoundSeq& bound_seq)
+    static TypeIdentifier makePlainArray(const TypeIdentifier& base_type,
+                                         const SBoundSeq& bound_seq)
     {
-      TypeIdentifierPtr ti = make(TI_PLAIN_ARRAY_SMALL);
-      ti->array_sdefn = PlainArraySElemDefn
+      TypeIdentifier ti(TI_PLAIN_ARRAY_SMALL);
+      ti.array_sdefn() = PlainArraySElemDefn
         (
          PlainCollectionHeader
          (EquivalenceKind(EK_MINIMAL), // TODO [anonymous]: Pick the correct kind.
@@ -608,11 +597,11 @@ const DCPS::Encoding& get_typeobject_encoding();
       return ti;
     }
 
-    static TypeIdentifierPtr makePlainArray(const TypeIdentifierPtr& base_type,
-                                            const LBoundSeq& bound_seq)
+    static TypeIdentifier makePlainArray(const TypeIdentifier& base_type,
+                                         const LBoundSeq& bound_seq)
     {
-      TypeIdentifierPtr ti = make(TI_PLAIN_ARRAY_LARGE);
-      ti->array_ldefn = PlainArrayLElemDefn
+      TypeIdentifier ti(TI_PLAIN_ARRAY_LARGE);
+      ti.array_ldefn() = PlainArrayLElemDefn
         (
          PlainCollectionHeader
          (EquivalenceKind(EK_MINIMAL), // TODO [anonymous]:  Pick the correct kind.
@@ -622,53 +611,70 @@ const DCPS::Encoding& get_typeobject_encoding();
       return ti;
     }
 
-    static TypeIdentifierPtr make(ACE_CDR::Octet k,
-                                  const PlainMapSTypeDefn& map_sdefn)
+    static TypeIdentifier make(ACE_CDR::Octet k,
+                               const PlainMapSTypeDefn& map_sdefn)
     {
-      TypeIdentifierPtr ti = make_rch<TypeIdentifier>();
-      ti->kind = k;
-      ti->map_sdefn = map_sdefn;
+      TypeIdentifier ti(k);
+      ti.map_sdefn() = map_sdefn;
       return ti;
     }
 
-    static TypeIdentifierPtr make(ACE_CDR::Octet k,
-                                  const PlainMapLTypeDefn& map_ldefn)
+    static TypeIdentifier make(ACE_CDR::Octet k,
+                               const PlainMapLTypeDefn& map_ldefn)
     {
-      TypeIdentifierPtr ti = make_rch<TypeIdentifier>();
-      ti->kind = k;
-      ti->map_ldefn = map_ldefn;
+      TypeIdentifier ti(k);
+      ti.map_ldefn() = map_ldefn;
       return ti;
     }
 
-    static TypeIdentifierPtr make(ACE_CDR::Octet k,
-                                  const StronglyConnectedComponentId& sc_component_id)
+    static TypeIdentifier make(ACE_CDR::Octet k,
+                               const StronglyConnectedComponentId& sc_component_id)
     {
-      TypeIdentifierPtr ti = make_rch<TypeIdentifier>();
-      ti->kind = k;
-      ti->sc_component_id = sc_component_id;
+      TypeIdentifier ti(k);
+      ti.sc_component_id() = sc_component_id;
       return ti;
     }
 
-    static TypeIdentifierPtr make(ACE_CDR::Octet k,
-                                  const EquivalenceHash& equivalence_hash)
+    static TypeIdentifier make(ACE_CDR::Octet k,
+                               const EquivalenceHash& equivalence_hash)
     {
-      TypeIdentifierPtr ti = make_rch<TypeIdentifier>();
-      ti->kind = k;
-      std::memcpy(ti->equivalence_hash, equivalence_hash, sizeof equivalence_hash);
+      TypeIdentifier ti(k);
+      std::memcpy(ti.equivalence_hash(), equivalence_hash, sizeof equivalence_hash);
       return ti;
     }
 
-    static TypeIdentifierPtr make(ACE_CDR::Octet k,
-                                  const ExtendedTypeDefn& extended_defn)
+    static TypeIdentifier make(ACE_CDR::Octet k,
+                               const ExtendedTypeDefn& extended_defn)
     {
-      TypeIdentifierPtr ti = make_rch<TypeIdentifier>();
-      ti->kind = k;
-      ti->extended_defn = extended_defn;
+      TypeIdentifier ti(k);
+      ti.extended_defn() = extended_defn;
       return ti;
     }
+
+  private:
+    ACE_CDR::Octet kind_;
+    void* active_;
+    union {
+      ACE_CDR::ULongLong max_alignment;
+#define OPENDDS_UNION_MEMBER(T, N) char N ## _[sizeof(T)]
+      OPENDDS_UNION_MEMBER(StringSTypeDefn, string_sdefn);
+      OPENDDS_UNION_MEMBER(StringLTypeDefn, string_ldefn);
+      OPENDDS_UNION_MEMBER(PlainSequenceSElemDefn, seq_sdefn);
+      OPENDDS_UNION_MEMBER(PlainSequenceLElemDefn, seq_ldefn);
+      OPENDDS_UNION_MEMBER(PlainArraySElemDefn, array_sdefn);
+      OPENDDS_UNION_MEMBER(PlainArrayLElemDefn, array_ldefn);
+      OPENDDS_UNION_MEMBER(PlainMapSTypeDefn, map_sdefn);
+      OPENDDS_UNION_MEMBER(PlainMapLTypeDefn, map_ldefn);
+      OPENDDS_UNION_MEMBER(StronglyConnectedComponentId, sc_component_id);
+      OPENDDS_UNION_MEMBER(EquivalenceHash, equivalence_hash);
+      OPENDDS_UNION_MEMBER(ExtendedTypeDefn, extended_defn);
+#undef OPENDDS_UNION_MEMBER
+    };
+    void activate(const TypeIdentifier* other = 0);
+    void reset();
   };
 
-  typedef Sequence<TypeIdentifierPtr> TypeIdentifierSeq;
+  typedef Sequence<TypeIdentifier> TypeIdentifierSeq;
 
   // --- Annotation usage: -----------------------------------------------
 
@@ -752,7 +758,7 @@ const DCPS::Encoding& get_typeobject_encoding();
   typedef Sequence<AppliedAnnotationParameter> AppliedAnnotationParameterSeq;
 
   struct AppliedAnnotation {
-    TypeIdentifierPtr                   annotation_typeid;
+    TypeIdentifier                   annotation_typeid;
     Optional<AppliedAnnotationParameterSeq>    param_seq;
   };
   // Sorted by AppliedAnnotation.annotation_typeid
@@ -777,11 +783,11 @@ const DCPS::Encoding& get_typeobject_encoding();
   struct CommonStructMember {
     MemberId                                   member_id;
     StructMemberFlag                           member_flags;
-    TypeIdentifierPtr                   member_type_id;
+    TypeIdentifier                   member_type_id;
 
     CommonStructMember (const MemberId& a_member_id,
                         const StructMemberFlag& a_member_flags,
-                        const TypeIdentifierPtr& a_member_type_id)
+                        const TypeIdentifier& a_member_type_id)
       : member_id(a_member_id)
       , member_flags(a_member_flags)
       , member_type_id(a_member_type_id)
@@ -845,17 +851,17 @@ const DCPS::Encoding& get_typeobject_encoding();
   };
 
   struct CompleteStructHeader {
-    TypeIdentifierPtr                 base_type;
+    TypeIdentifier                 base_type;
     CompleteTypeDetail                       detail;
   };
 
   struct MinimalStructHeader {
-    TypeIdentifierPtr                 base_type;
+    TypeIdentifier                 base_type;
     MinimalTypeDetail                        detail;
 
     MinimalStructHeader() {}
 
-    MinimalStructHeader(const TypeIdentifierPtr& a_base_type,
+    MinimalStructHeader(const TypeIdentifier& a_base_type,
                         const MinimalTypeDetail& a_detail)
       : base_type(a_base_type)
       , detail(a_detail)
@@ -893,14 +899,14 @@ const DCPS::Encoding& get_typeobject_encoding();
   struct CommonUnionMember {
     MemberId                    member_id;
     UnionMemberFlag             member_flags;
-    TypeIdentifierPtr    type_id;
+    TypeIdentifier    type_id;
     UnionCaseLabelSeq           label_seq;
 
     CommonUnionMember() {}
 
     CommonUnionMember(const MemberId& a_member_id,
                       const UnionMemberFlag& a_member_flags,
-                      const TypeIdentifierPtr& a_type_id,
+                      const TypeIdentifier& a_type_id,
                       const UnionCaseLabelSeq& a_label_seq)
       : member_id(a_member_id)
       , member_flags(a_member_flags)
@@ -940,12 +946,12 @@ const DCPS::Encoding& get_typeobject_encoding();
 
   struct CommonDiscriminatorMember {
     UnionDiscriminatorFlag       member_flags;
-    TypeIdentifierPtr     type_id;
+    TypeIdentifier     type_id;
 
     CommonDiscriminatorMember() {}
 
     CommonDiscriminatorMember(const UnionDiscriminatorFlag& a_member_flags,
-                              const TypeIdentifierPtr& a_type_id)
+                              const TypeIdentifier& a_type_id)
       : member_flags(a_member_flags)
       , type_id(a_type_id)
     {}
@@ -1012,7 +1018,7 @@ const DCPS::Encoding& get_typeobject_encoding();
   // --- Annotation: ----------------------------------------------------
   struct CommonAnnotationParameter {
     AnnotationParameterFlag      member_flags;
-    TypeIdentifierPtr     member_type_id;
+    TypeIdentifier     member_type_id;
   };
 
   // Member of an annotation type
@@ -1055,12 +1061,12 @@ const DCPS::Encoding& get_typeobject_encoding();
   // --- Alias: ----------------------------------------------------------
   struct CommonAliasBody {
     AliasMemberFlag          related_flags;
-    TypeIdentifierPtr related_type;
+    TypeIdentifier related_type;
 
     CommonAliasBody() {}
 
     CommonAliasBody(const AliasMemberFlag& a_related_flags,
-                    const TypeIdentifierPtr& a_related_type)
+                    const TypeIdentifier& a_related_type)
       : related_flags(a_related_flags)
       , related_type(a_related_type)
     {}
@@ -1120,7 +1126,7 @@ const DCPS::Encoding& get_typeobject_encoding();
 
   struct CommonCollectionElement {
     CollectionElementFlag     element_flags;
-    TypeIdentifierPtr  type;
+    TypeIdentifier  type;
   };
 
   struct CompleteCollectionElement {
@@ -1575,7 +1581,7 @@ const DCPS::Encoding& get_typeobject_encoding();
   typedef Sequence<TypeIdentifierPair> TypeIdentifierPairSeq;
 
   struct TypeIdentifierWithSize {
-    TypeIdentifierPtr  type_id;
+    TypeIdentifier  type_id;
     ACE_CDR::ULong  typeobject_serialized_size;
   };
   typedef Sequence<TypeIdentifierWithSize> TypeIdentifierWithSizeSeq;
@@ -1599,7 +1605,7 @@ const DCPS::Encoding& get_typeobject_encoding();
   typedef Sequence<TypeInformation> TypeInformationSeq;
 
   OpenDDS_Dcps_Export
-  TypeIdentifierPtr makeTypeIdentifier(const TypeObject& type_object);
+  TypeIdentifier makeTypeIdentifier(const TypeObject& type_object);
 } // namespace XTypes
 
 namespace DCPS {
@@ -1608,55 +1614,55 @@ template<typename T>
 const XTypes::TypeObject& getMinimalTypeObject();
 
 template<typename T>
-RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier();
+XTypes::TypeIdentifier getMinimalTypeIdentifier();
 
 template<> OpenDDS_Dcps_Export
-RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<void>();
+XTypes::TypeIdentifier getMinimalTypeIdentifier<void>();
 
 template<> OpenDDS_Dcps_Export
-RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_CDR::Boolean>();
+XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::Boolean>();
 
 template<> OpenDDS_Dcps_Export
-RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_CDR::Octet>();
+XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::Octet>();
 
 template<> OpenDDS_Dcps_Export
-RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_CDR::Short>();
+XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::Short>();
 
 template<> OpenDDS_Dcps_Export
-RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_CDR::Long>();
+XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::Long>();
 
 template<> OpenDDS_Dcps_Export
-RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_CDR::LongLong>();
+XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::LongLong>();
 
 template<> OpenDDS_Dcps_Export
-RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_CDR::UShort>();
+XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::UShort>();
 
 template<> OpenDDS_Dcps_Export
-RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_CDR::ULong>();
+XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::ULong>();
 
 template<> OpenDDS_Dcps_Export
-RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_CDR::ULongLong>();
+XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::ULongLong>();
 
 template<> OpenDDS_Dcps_Export
-RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_CDR::Float>();
+XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::Float>();
 
 template<> OpenDDS_Dcps_Export
-RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_CDR::Double>();
+XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::Double>();
 
 template<> OpenDDS_Dcps_Export
-RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_CDR::LongDouble>();
+XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::LongDouble>();
 
 template<> OpenDDS_Dcps_Export
-RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_CDR::Char>();
+XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::Char>();
 
 template<> OpenDDS_Dcps_Export
-RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_OutputCDR::from_wchar>();
+XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_OutputCDR::from_wchar>();
 
 template<> OpenDDS_Dcps_Export
-RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_CDR::Char*>();
+XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::Char*>();
 
 template<> OpenDDS_Dcps_Export
-RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_CDR::WChar*>();
+XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::WChar*>();
 
 
 template<typename T>

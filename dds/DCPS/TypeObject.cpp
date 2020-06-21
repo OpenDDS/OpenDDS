@@ -35,7 +35,117 @@ MinimalMemberDetail::MinimalMemberDetail(const OPENDDS_STRING& name)
 }
 
 
-TypeIdentifierPtr makeTypeIdentifier(const TypeObject& type_object)
+TypeIdentifier::TypeIdentifier(ACE_CDR::Octet kind)
+  : kind_(kind)
+  , active_(0)
+{
+  activate();
+}
+
+void TypeIdentifier::activate(const TypeIdentifier* other)
+{
+#define OPENDDS_BRANCH_ACTIVATE(T, N) \
+  active_ = new(N ## _) T;            \
+  if (other) N() = other->N();        \
+  break
+
+  switch (kind_) {
+  case TI_STRING8_SMALL:
+  case TI_STRING16_SMALL:
+    OPENDDS_BRANCH_ACTIVATE(StringSTypeDefn, string_sdefn);
+  case XTypes::TI_STRING8_LARGE:
+  case XTypes::TI_STRING16_LARGE:
+    OPENDDS_BRANCH_ACTIVATE(StringLTypeDefn, string_ldefn);
+  case XTypes::TI_PLAIN_SEQUENCE_SMALL:
+    OPENDDS_BRANCH_ACTIVATE(PlainSequenceSElemDefn, seq_sdefn);
+  case XTypes::TI_PLAIN_SEQUENCE_LARGE:
+    OPENDDS_BRANCH_ACTIVATE(PlainSequenceLElemDefn, seq_ldefn);
+  case XTypes::TI_PLAIN_ARRAY_SMALL:
+    OPENDDS_BRANCH_ACTIVATE(PlainArraySElemDefn, array_sdefn);
+  case XTypes::TI_PLAIN_ARRAY_LARGE:
+    OPENDDS_BRANCH_ACTIVATE(PlainArrayLElemDefn, array_ldefn);
+  case XTypes::TI_PLAIN_MAP_SMALL:
+    OPENDDS_BRANCH_ACTIVATE(PlainMapSTypeDefn, map_sdefn);
+  case XTypes::TI_PLAIN_MAP_LARGE:
+    OPENDDS_BRANCH_ACTIVATE(PlainMapLTypeDefn, map_ldefn);
+  case XTypes::TI_STRONGLY_CONNECTED_COMPONENT:
+    OPENDDS_BRANCH_ACTIVATE(StronglyConnectedComponentId, sc_component_id);
+  case XTypes::EK_COMPLETE:
+  case XTypes::EK_MINIMAL:
+    active_ = equivalence_hash_;
+    if (other) {
+      std::memcpy(equivalence_hash(), other->equivalence_hash(), sizeof(EquivalenceHash));
+    }
+    break;
+  default:
+    OPENDDS_BRANCH_ACTIVATE(ExtendedTypeDefn, extended_defn);
+  }
+}
+
+TypeIdentifier::TypeIdentifier(const TypeIdentifier& other)
+  : kind_(other.kind_)
+  , active_(0)
+{
+  activate(&other);
+}
+
+void TypeIdentifier::kind(ACE_CDR::Octet k)
+{
+  if (kind_ != k) {
+    reset();
+    kind_ = k;
+    activate();
+  }
+}
+
+void TypeIdentifier::reset()
+{
+  if (!active_) {
+    return;
+  }
+#define OPENDDS_BRANCH_RESET(T) static_cast<T*>(active_)->~T(); break
+  switch (kind_) {
+  case TI_STRING8_SMALL:
+  case TI_STRING16_SMALL:
+    OPENDDS_BRANCH_RESET(StringSTypeDefn);
+  case XTypes::TI_STRING8_LARGE:
+  case XTypes::TI_STRING16_LARGE:
+    OPENDDS_BRANCH_RESET(StringLTypeDefn);
+  case XTypes::TI_PLAIN_SEQUENCE_SMALL:
+    OPENDDS_BRANCH_RESET(PlainSequenceSElemDefn);
+  case XTypes::TI_PLAIN_SEQUENCE_LARGE:
+    OPENDDS_BRANCH_RESET(PlainSequenceLElemDefn);
+  case XTypes::TI_PLAIN_ARRAY_SMALL:
+    OPENDDS_BRANCH_RESET(PlainArraySElemDefn);
+  case XTypes::TI_PLAIN_ARRAY_LARGE:
+    OPENDDS_BRANCH_RESET(PlainArrayLElemDefn);
+  case XTypes::TI_PLAIN_MAP_SMALL:
+    OPENDDS_BRANCH_RESET(PlainMapSTypeDefn);
+  case XTypes::TI_PLAIN_MAP_LARGE:
+    OPENDDS_BRANCH_RESET(PlainMapLTypeDefn);
+  case XTypes::TI_STRONGLY_CONNECTED_COMPONENT:
+    OPENDDS_BRANCH_RESET(StronglyConnectedComponentId);
+  case XTypes::EK_COMPLETE:
+  case XTypes::EK_MINIMAL:
+    break; // no-op, data is just an array of octets
+  default:
+    OPENDDS_BRANCH_RESET(ExtendedTypeDefn);
+  }
+}
+
+TypeIdentifier& TypeIdentifier::operator=(const TypeIdentifier& other)
+{
+  if (&other == this) {
+    return *this;
+  }
+  reset();
+  kind_ = other.kind_;
+  activate(&other);
+  return *this;
+}
+
+
+TypeIdentifier makeTypeIdentifier(const TypeObject& type_object)
 {
   const Encoding& encoding = get_typeobject_encoding();
   size_t size = serialized_size(encoding, type_object);
@@ -55,7 +165,7 @@ TypeIdentifierPtr makeTypeIdentifier(const TypeObject& type_object)
     return TypeIdentifier::make(type_object.kind, eh);
   }
 
-  return TypeIdentifier::make();
+  return TypeIdentifier();
 }
 
 } // namespace XTypes
@@ -67,117 +177,119 @@ namespace DCPS {
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeIdentifier& uni)
 {
-  max_serialized_size(encoding, size, ACE_OutputCDR::from_octet(uni.kind));
-  switch (uni.kind) {
+  max_serialized_size(encoding, size, ACE_OutputCDR::from_octet(uni.kind()));
+  switch (uni.kind()) {
   case XTypes::TI_STRING8_SMALL:
   case XTypes::TI_STRING16_SMALL:
-    serialized_size(encoding, size, uni.string_sdefn);
+    serialized_size(encoding, size, uni.string_sdefn());
     break;
   case XTypes::TI_STRING8_LARGE:
   case XTypes::TI_STRING16_LARGE:
-    serialized_size(encoding, size, uni.string_ldefn);
+    serialized_size(encoding, size, uni.string_ldefn());
     break;
   case XTypes::TI_PLAIN_SEQUENCE_SMALL:
-    serialized_size(encoding, size, uni.seq_sdefn);
+    serialized_size(encoding, size, uni.seq_sdefn());
     break;
   case XTypes::TI_PLAIN_SEQUENCE_LARGE:
-    serialized_size(encoding, size, uni.seq_ldefn);
+    serialized_size(encoding, size, uni.seq_ldefn());
     break;
   case XTypes::TI_PLAIN_ARRAY_SMALL:
-    serialized_size(encoding, size, uni.array_sdefn);
+    serialized_size(encoding, size, uni.array_sdefn());
     break;
   case XTypes::TI_PLAIN_ARRAY_LARGE:
-    serialized_size(encoding, size, uni.array_ldefn);
+    serialized_size(encoding, size, uni.array_ldefn());
     break;
   case XTypes::TI_PLAIN_MAP_SMALL:
-    serialized_size(encoding, size, uni.map_sdefn);
+    serialized_size(encoding, size, uni.map_sdefn());
     break;
   case XTypes::TI_PLAIN_MAP_LARGE:
-    serialized_size(encoding, size, uni.map_ldefn);
+    serialized_size(encoding, size, uni.map_ldefn());
     break;
   case XTypes::TI_STRONGLY_CONNECTED_COMPONENT:
-    serialized_size(encoding, size, uni.sc_component_id);
+    serialized_size(encoding, size, uni.sc_component_id());
     break;
   case XTypes::EK_COMPLETE:
   case XTypes::EK_MINIMAL: {
-    XTypes::EquivalenceHash_forany uni_equivalence_hash(const_cast<XTypes::EquivalenceHash_slice*>(uni.equivalence_hash));
+    XTypes::EquivalenceHash_forany uni_equivalence_hash(const_cast<XTypes::EquivalenceHash_slice*>(uni.equivalence_hash()));
     serialized_size(encoding, size, uni_equivalence_hash);
     break;
   }
   default:
-    serialized_size(encoding, size, uni.extended_defn);
+    serialized_size(encoding, size, uni.extended_defn());
   }
 }
 
 bool operator<<(Serializer& strm, const XTypes::TypeIdentifier& uni)
 {
-  if (!(strm << ACE_OutputCDR::from_octet(uni.kind))) {
+  if (!(strm << ACE_OutputCDR::from_octet(uni.kind()))) {
     return false;
   }
-  switch (uni.kind) {
+  switch (uni.kind()) {
   case XTypes::TI_STRING8_SMALL:
   case XTypes::TI_STRING16_SMALL:
-    return (strm << uni.string_sdefn);
+    return (strm << uni.string_sdefn());
   case XTypes::TI_STRING8_LARGE:
   case XTypes::TI_STRING16_LARGE:
-    return (strm << uni.string_ldefn);
+    return (strm << uni.string_ldefn());
   case XTypes::TI_PLAIN_SEQUENCE_SMALL:
-    return (strm << uni.seq_sdefn);
+    return (strm << uni.seq_sdefn());
   case XTypes::TI_PLAIN_SEQUENCE_LARGE:
-    return (strm << uni.seq_ldefn);
+    return (strm << uni.seq_ldefn());
   case XTypes::TI_PLAIN_ARRAY_SMALL:
-    return (strm << uni.array_sdefn);
+    return (strm << uni.array_sdefn());
   case XTypes::TI_PLAIN_ARRAY_LARGE:
-    return (strm << uni.array_ldefn);
+    return (strm << uni.array_ldefn());
   case XTypes::TI_PLAIN_MAP_SMALL:
-    return (strm << uni.map_sdefn);
+    return (strm << uni.map_sdefn());
   case XTypes::TI_PLAIN_MAP_LARGE:
-    return (strm << uni.map_ldefn);
+    return (strm << uni.map_ldefn());
   case XTypes::TI_STRONGLY_CONNECTED_COMPONENT:
-    return (strm << uni.sc_component_id);
+    return (strm << uni.sc_component_id());
   case XTypes::EK_COMPLETE:
   case XTypes::EK_MINIMAL: {
-    XTypes::EquivalenceHash_forany uni_equivalence_hash(const_cast<XTypes::EquivalenceHash_slice*>(uni.equivalence_hash));
+    XTypes::EquivalenceHash_forany uni_equivalence_hash(const_cast<XTypes::EquivalenceHash_slice*>(uni.equivalence_hash()));
     return (strm << uni_equivalence_hash);
   }
   default:
-    return (strm << uni.extended_defn);
+    return (strm << uni.extended_defn());
   }
 }
 
 bool operator>>(Serializer& strm, XTypes::TypeIdentifier& uni)
 {
-  if (!(strm >> ACE_InputCDR::to_octet(uni.kind))) {
+  ACE_CDR::Octet k;
+  if (!(strm >> ACE_InputCDR::to_octet(k))) {
     return false;
   }
-  switch (uni.kind) {
+  uni = XTypes::TypeIdentifier(k);
+  switch (k) {
   case XTypes::TI_STRING8_SMALL:
   case XTypes::TI_STRING16_SMALL:
-    return (strm >> uni.string_sdefn);
+    return (strm >> uni.string_sdefn());
   case XTypes::TI_STRING8_LARGE:
   case XTypes::TI_STRING16_LARGE:
-    return (strm >> uni.string_ldefn);
+    return (strm >> uni.string_ldefn());
   case XTypes::TI_PLAIN_SEQUENCE_SMALL:
-    return (strm >> uni.seq_sdefn);
+    return (strm >> uni.seq_sdefn());
   case XTypes::TI_PLAIN_SEQUENCE_LARGE:
-    return (strm >> uni.seq_ldefn);
+    return (strm >> uni.seq_ldefn());
   case XTypes::TI_PLAIN_ARRAY_SMALL:
-    return (strm >> uni.array_sdefn);
+    return (strm >> uni.array_sdefn());
   case XTypes::TI_PLAIN_ARRAY_LARGE:
-    return (strm >> uni.array_ldefn);
+    return (strm >> uni.array_ldefn());
   case XTypes::TI_PLAIN_MAP_SMALL:
-    return (strm >> uni.map_sdefn);
+    return (strm >> uni.map_sdefn());
   case XTypes::TI_PLAIN_MAP_LARGE:
-    return (strm >> uni.map_ldefn);
+    return (strm >> uni.map_ldefn());
   case XTypes::TI_STRONGLY_CONNECTED_COMPONENT:
-    return (strm >> uni.sc_component_id);
+    return (strm >> uni.sc_component_id());
   case XTypes::EK_COMPLETE:
   case XTypes::EK_MINIMAL: {
-    XTypes::EquivalenceHash_forany uni_equivalence_hash(uni.equivalence_hash);
+    XTypes::EquivalenceHash_forany uni_equivalence_hash(uni.equivalence_hash());
     return (strm >> uni_equivalence_hash);
   }
   default:
-    return (strm >> uni.extended_defn);
+    return (strm >> uni.extended_defn());
   }
 }
 
@@ -351,13 +463,13 @@ bool operator>>(Serializer& strm, XTypes::CompleteTypeDetail& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::CompleteStructHeader& stru)
 {
-  serialized_size(encoding, size, *stru.base_type);
+  serialized_size(encoding, size, stru.base_type);
   serialized_size(encoding, size, stru.detail);
 }
 
 bool operator<<(Serializer& strm, const XTypes::CompleteStructHeader& stru)
 {
-  return (strm << *stru.base_type)
+  return (strm << stru.base_type)
     && (strm << stru.detail);
 }
 
@@ -365,13 +477,13 @@ bool operator<<(Serializer& strm, const XTypes::CompleteStructHeader& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::MinimalStructHeader& stru)
 {
-  serialized_size(encoding, size, *stru.base_type);
+  serialized_size(encoding, size, stru.base_type);
   serialized_size(encoding, size, stru.detail);
 }
 
 bool operator<<(Serializer& strm, const XTypes::MinimalStructHeader& stru)
 {
-  return (strm << *stru.base_type)
+  return (strm << stru.base_type)
     && (strm << stru.detail);
 }
 
@@ -731,19 +843,19 @@ bool operator<<(Serializer& strm, const XTypes::MinimalBitsetType& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeIdentifierWithSize& stru)
 {
-  serialized_size(encoding, size, *stru.type_id);
+  serialized_size(encoding, size, stru.type_id);
   max_serialized_size(encoding, size, stru.typeobject_serialized_size);
 }
 
 bool operator<<(Serializer& strm, const XTypes::TypeIdentifierWithSize& stru)
 {
-  return (strm << *stru.type_id)
+  return (strm << stru.type_id)
     && (strm << stru.typeobject_serialized_size);
 }
 
 bool operator>>(Serializer& strm, XTypes::TypeIdentifierWithSize& stru)
 {
-  return (strm >> *stru.type_id)
+  return (strm >> stru.type_id)
     && (strm >> stru.typeobject_serialized_size);
 }
 
@@ -813,19 +925,19 @@ bool operator>>(Serializer& strm, XTypes::TypeIdentifierWithDependencies& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::AppliedAnnotation& stru)
 {
-  serialized_size(encoding, size, *stru.annotation_typeid);
+  serialized_size(encoding, size, stru.annotation_typeid);
   serialized_size(encoding, size, stru.param_seq);
 }
 
 bool operator<<(Serializer& strm, const XTypes::AppliedAnnotation& stru)
 {
-  return (strm << *stru.annotation_typeid)
+  return (strm << stru.annotation_typeid)
     && (strm << stru.param_seq);
 }
 
 bool operator>>(Serializer& strm, XTypes::AppliedAnnotation& stru)
 {
-  return (strm >> *stru.annotation_typeid)
+  return (strm >> stru.annotation_typeid)
     && (strm >> stru.param_seq);
 }
 
@@ -1816,19 +1928,19 @@ void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::CommonAliasBody& stru)
 {
   max_serialized_size(encoding, size, stru.related_flags);
-  serialized_size(encoding, size, *stru.related_type);
+  serialized_size(encoding, size, stru.related_type);
 }
 
 bool operator<<(Serializer& strm, const XTypes::CommonAliasBody& stru)
 {
   return (strm << stru.related_flags)
-    && (strm << *stru.related_type);
+    && (strm << stru.related_type);
 }
 
 bool operator>>(Serializer& strm, XTypes::CommonAliasBody& stru)
 {
   return (strm >> stru.related_flags)
-    && (strm >> *stru.related_type);
+    && (strm >> stru.related_type);
 }
 
 
@@ -1836,19 +1948,19 @@ void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::CommonAnnotationParameter& stru)
 {
   max_serialized_size(encoding, size, stru.member_flags);
-  serialized_size(encoding, size, *stru.member_type_id);
+  serialized_size(encoding, size, stru.member_type_id);
 }
 
 bool operator<<(Serializer& strm, const XTypes::CommonAnnotationParameter& stru)
 {
   return (strm << stru.member_flags)
-    && (strm << *stru.member_type_id);
+    && (strm << stru.member_type_id);
 }
 
 bool operator>>(Serializer& strm, XTypes::CommonAnnotationParameter& stru)
 {
   return (strm >> stru.member_flags)
-    && (strm >> *stru.member_type_id);
+    && (strm >> stru.member_type_id);
 }
 
 
@@ -1919,19 +2031,19 @@ void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::CommonCollectionElement& stru)
 {
   max_serialized_size(encoding, size, stru.element_flags);
-  serialized_size(encoding, size, *stru.type);
+  serialized_size(encoding, size, stru.type);
 }
 
 bool operator<<(Serializer& strm, const XTypes::CommonCollectionElement& stru)
 {
   return (strm << stru.element_flags)
-    && (strm << *stru.type);
+    && (strm << stru.type);
 }
 
 bool operator>>(Serializer& strm, XTypes::CommonCollectionElement& stru)
 {
   return (strm >> stru.element_flags)
-    && (strm >> *stru.type);
+    && (strm >> stru.type);
 }
 
 
@@ -1956,19 +2068,19 @@ void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::CommonDiscriminatorMember& stru)
 {
   max_serialized_size(encoding, size, stru.member_flags);
-  serialized_size(encoding, size, *stru.type_id);
+  serialized_size(encoding, size, stru.type_id);
 }
 
 bool operator<<(Serializer& strm, const XTypes::CommonDiscriminatorMember& stru)
 {
   return (strm << stru.member_flags)
-    && (strm << *stru.type_id);
+    && (strm << stru.type_id);
 }
 
 bool operator>>(Serializer& strm, XTypes::CommonDiscriminatorMember& stru)
 {
   return (strm >> stru.member_flags)
-    && (strm >> *stru.type_id);
+    && (strm >> stru.type_id);
 }
 
 
@@ -2014,21 +2126,21 @@ void serialized_size(const Encoding& encoding, size_t& size,
 {
   max_serialized_size(encoding, size, stru.member_id);
   max_serialized_size(encoding, size, stru.member_flags);
-  serialized_size(encoding, size, *stru.member_type_id);
+  serialized_size(encoding, size, stru.member_type_id);
 }
 
 bool operator<<(Serializer& strm, const XTypes::CommonStructMember& stru)
 {
   return (strm << stru.member_id)
     && (strm << stru.member_flags)
-    && (strm << *stru.member_type_id);
+    && (strm << stru.member_type_id);
 }
 
 bool operator>>(Serializer& strm, XTypes::CommonStructMember& stru)
 {
   return (strm >> stru.member_id)
     && (strm >> stru.member_flags)
-    && (strm >> *stru.member_type_id);
+    && (strm >> stru.member_type_id);
 }
 
 
@@ -2037,7 +2149,7 @@ void serialized_size(const Encoding& encoding, size_t& size,
 {
   max_serialized_size(encoding, size, stru.member_id);
   max_serialized_size(encoding, size, stru.member_flags);
-  serialized_size(encoding, size, *stru.type_id);
+  serialized_size(encoding, size, stru.type_id);
   serialized_size(encoding, size, stru.label_seq);
 }
 
@@ -2045,7 +2157,7 @@ bool operator<<(Serializer& strm, const XTypes::CommonUnionMember& stru)
 {
   return (strm << stru.member_id)
     && (strm << stru.member_flags)
-    && (strm << *stru.type_id)
+    && (strm << stru.type_id)
     && (strm << stru.label_seq);
 }
 
@@ -2053,7 +2165,7 @@ bool operator>>(Serializer& strm, XTypes::CommonUnionMember& stru)
 {
   return (strm >> stru.member_id)
     && (strm >> stru.member_flags)
-    && (strm >> *stru.type_id)
+    && (strm >> stru.type_id)
     && (strm >> stru.label_seq);
 }
 
@@ -2597,114 +2709,114 @@ bool operator>>(Serializer& strm, XTypes::TypeInformation& stru)
 }
 
 template<>
-RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<void>()
+XTypes::TypeIdentifier getMinimalTypeIdentifier<void>()
 {
-  static const RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make();
+  static const XTypes::TypeIdentifier ti;
   return ti;
 }
 
 template<>
-RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_CDR::Boolean>()
+XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::Boolean>()
 {
-  static const RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_BOOLEAN);
+  static const XTypes::TypeIdentifier ti(XTypes::TK_BOOLEAN);
   return ti;
 }
 
 template<>
-RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_CDR::Octet>()
+XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::Octet>()
 {
-  static const RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_BYTE);
+  static const XTypes::TypeIdentifier ti(XTypes::TK_BYTE);
   return ti;
 }
 
 template<>
-RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_CDR::Short>()
+XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::Short>()
 {
-  static const RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_INT16);
+  static const XTypes::TypeIdentifier ti(XTypes::TK_INT16);
   return ti;
 }
 
 template<>
-RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_CDR::Long>()
+XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::Long>()
 {
-  static const RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_INT32);
+  static const XTypes::TypeIdentifier ti(XTypes::TK_INT32);
   return ti;
 }
 
 template<>
-RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_CDR::LongLong>()
+XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::LongLong>()
 {
-  static const RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_INT64);
+  static const XTypes::TypeIdentifier ti(XTypes::TK_INT64);
   return ti;
 }
 
 template<>
-RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_CDR::UShort>()
+XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::UShort>()
 {
-  static const RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_UINT16);
+  static const XTypes::TypeIdentifier ti(XTypes::TK_UINT16);
   return ti;
 }
 
 template<>
-RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_CDR::ULong>()
+XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::ULong>()
 {
-  static const RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_UINT32);
+  static const XTypes::TypeIdentifier ti(XTypes::TK_UINT32);
   return ti;
 }
 
 template<>
-RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_CDR::ULongLong>()
+XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::ULongLong>()
 {
-  static const RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_UINT64);
+  static const XTypes::TypeIdentifier ti(XTypes::TK_UINT64);
   return ti;
 }
 
 template<>
-RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_CDR::Float>()
+XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::Float>()
 {
-  static const RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_FLOAT32);
+  static const XTypes::TypeIdentifier ti(XTypes::TK_FLOAT32);
   return ti;
 }
 
 template<>
-RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_CDR::Double>()
+XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::Double>()
 {
-  static const RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_FLOAT64);
+  static const XTypes::TypeIdentifier ti(XTypes::TK_FLOAT64);
   return ti;
 }
 
 template<>
-RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_CDR::LongDouble>()
+XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::LongDouble>()
 {
-  static const RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_FLOAT128);
+  static const XTypes::TypeIdentifier ti(XTypes::TK_FLOAT128);
   return ti;
 }
 
 template<>
-RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_CDR::Char>()
+XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::Char>()
 {
-  static const RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_CHAR8);
+  static const XTypes::TypeIdentifier ti(XTypes::TK_CHAR8);
   return ti;
 }
 
 template<>
-RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_OutputCDR::from_wchar>()
+XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_OutputCDR::from_wchar>()
 {
-  static const RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::make(XTypes::TK_CHAR16);
+  static const XTypes::TypeIdentifier ti(XTypes::TK_CHAR16);
   return ti;
 }
 
 template<>
-RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_CDR::Char*>()
+XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::Char*>()
 {
-  static const RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::makeString(false, XTypes::StringSTypeDefn(XTypes::INVALID_SBOUND));
+  static const XTypes::TypeIdentifier ti = XTypes::TypeIdentifier::makeString(false, XTypes::StringSTypeDefn(XTypes::INVALID_SBOUND));
   return ti;
 }
 
 template<>
-RcHandle<XTypes::TypeIdentifier> getMinimalTypeIdentifier<ACE_CDR::WChar*>()
+XTypes::TypeIdentifier getMinimalTypeIdentifier<ACE_CDR::WChar*>()
 {
-  static const RcHandle<XTypes::TypeIdentifier> ti = XTypes::TypeIdentifier::makeString(true, XTypes::StringSTypeDefn(XTypes::INVALID_SBOUND));
+  static const XTypes::TypeIdentifier ti = XTypes::TypeIdentifier::makeString(true, XTypes::StringSTypeDefn(XTypes::INVALID_SBOUND));
   return ti;
 }
 
