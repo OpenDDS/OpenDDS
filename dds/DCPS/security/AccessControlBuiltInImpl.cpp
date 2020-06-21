@@ -417,7 +417,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  if (!search_local_permissions(topic_name, domain_id, partition, Permissions::PUBLISH, ac_iter, ex)) {
+  if (!search_permissions(topic_name, domain_id, partition, Permissions::PUBLISH, ac_iter, ex)) {
     return false;
   }
 
@@ -483,7 +483,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  if (!search_local_permissions(topic_name, domain_id, partition, Permissions::SUBSCRIBE, ac_iter, ex)) {
+  if (!search_permissions(topic_name, domain_id, partition, Permissions::SUBSCRIBE, ac_iter, ex)) {
     return false;
   }
 
@@ -776,7 +776,9 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  if (!search_remote_permissions(publication_data.base.base.topic_name, domain_id, ac_iter, Permissions::PUBLISH, ex)) {
+  if (!search_permissions(publication_data.base.base.topic_name, domain_id, 
+                          publication_data.base.base.partition, Permissions::PUBLISH,
+                          ac_iter, ex)) {
     return false;
   }
 
@@ -836,7 +838,9 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  if (!search_remote_permissions(subscription_data.base.base.topic_name, domain_id, ac_iter, Permissions::SUBSCRIBE, ex)) {
+  if (!search_permissions(subscription_data.base.base.topic_name, domain_id,
+                          subscription_data.base.base.partition, Permissions::SUBSCRIBE,
+                          ac_iter, ex)) {
     return false;
   }
 
@@ -1605,13 +1609,13 @@ CORBA::Boolean AccessControlBuiltInImpl::get_sec_attributes(::DDS::Security::Per
   return false;
 }
 
-CORBA::Boolean AccessControlBuiltInImpl::search_local_permissions(
-  const char * topic_name,
-  const ::DDS::Security::DomainId_t domain_id,
-  const ::DDS::PartitionQosPolicy & partition,
+bool AccessControlBuiltInImpl::search_permissions(
+  const char* topic_name,
+  const DDS::Security::DomainId_t domain_id,
+  const DDS::PartitionQosPolicy& partition,
   const Permissions::PublishSubscribe_t pub_or_sub,
   const ACPermsMap::iterator ac_iter,
-  ::DDS::Security::SecurityException & ex)
+  DDS::Security::SecurityException& ex)
 {
   std::string default_value;
 
@@ -1760,71 +1764,6 @@ CORBA::Boolean AccessControlBuiltInImpl::search_local_permissions(
   }
   else {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl: No matching rule for topic, default permission is DENY.");
-    return false;
-  }
-}
-
-CORBA::Boolean AccessControlBuiltInImpl::search_remote_permissions(
-  const char * topic_name,
-  const ::DDS::Security::DomainId_t domain_id,
-  const ACPermsMap::iterator ac_iter,
-  const Permissions::PublishSubscribe_t pub_or_sub,
-  ::DDS::Security::SecurityException & ex)
-{
-  perm_grant_iter pm_iter;
-  std::string default_value;
-
-  for (pm_iter = ac_iter->second.perm->data().perm_rules.begin(); pm_iter != ac_iter->second.perm->data().perm_rules.end(); ++pm_iter) {
-    default_value = pm_iter->default_permission;
-
-    perm_topic_rules_iter ptr_iter; // allow/deny rules
-
-    for (ptr_iter = pm_iter->PermissionTopicRules.begin(); ptr_iter != pm_iter->PermissionTopicRules.end(); ++ptr_iter) {
-      size_t  d = ptr_iter->domain_list.count(domain_id);
-
-      if ((d > 0) && (ptr_iter->ad_type == Permissions::ALLOW)) {
-        perm_topic_ps_rules_iter tpsr_iter;
-
-        for (tpsr_iter = ptr_iter->topic_ps_rules.begin(); tpsr_iter != ptr_iter->topic_ps_rules.end(); ++tpsr_iter) {
-          if (tpsr_iter->ps_type == pub_or_sub) {
-            std::vector<std::string>::iterator tl_iter; // topic list
-
-            for (tl_iter = tpsr_iter->topic_list.begin(); tl_iter != tpsr_iter->topic_list.end(); ++tl_iter) {
-              if (::ACE::wild_match(topic_name, (*tl_iter).c_str(), true, false)) {
-                return true;
-              }
-            }
-          }  // end if (tpsr_iter->ps_type)
-        } // end for
-      }
-      else if ((d > 0) && (ptr_iter->ad_type == Permissions::DENY)) {
-        perm_topic_ps_rules_iter tpsr_iter;
-
-        for (tpsr_iter = ptr_iter->topic_ps_rules.begin(); tpsr_iter != ptr_iter->topic_ps_rules.end(); ++tpsr_iter) {
-          if (tpsr_iter->ps_type == pub_or_sub) {
-            std::vector<std::string>::iterator tl_iter; // topic list
-
-            for (tl_iter = tpsr_iter->topic_list.begin(); tl_iter != tpsr_iter->topic_list.end(); ++tl_iter) {
-              if (::ACE::wild_match(topic_name, (*tl_iter).c_str(), true, false)) {
-                CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter: Permissions is DENY");
-                return false;
-              }
-            }
-          }
-        }
-
-      } // end of DENY
-    }
-
-  }
-
-  // If this point in the code is reached it means that either there are no PermissionTopicRules
-  // or the topic_name does not exist in the topic_list so return the value of default_permission
-  if (strcmp(default_value.c_str(), "ALLOW") == 0) {
-    return true;
-  }
-  else {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter: Topic not in Permissions, default is DENY");
     return false;
   }
 }

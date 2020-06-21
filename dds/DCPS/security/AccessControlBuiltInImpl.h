@@ -296,18 +296,12 @@ private:
                           DDS::Security::EndpointSecurityAttributes& attributes,
                           DDS::Security::SecurityException& ex);
 
-  bool search_local_permissions(const char* topic_name,
-                                DDS::Security::DomainId_t domain_id,
-                                const DDS::PartitionQosPolicy& partition,
-                                Permissions::PublishSubscribe_t pub_or_sub,
-                                ACPermsMap::iterator ac_iter,
-                                DDS::Security::SecurityException& ex);
-
-  bool search_remote_permissions(const char* topic_name,
-                                 DDS::Security::DomainId_t domain_id,
-                                 ACPermsMap::iterator ac_iter,
-                                 Permissions::PublishSubscribe_t pub_or_sub,
-                                 DDS::Security::SecurityException& ex);
+  bool search_permissions(const char* topic_name,
+                          DDS::Security::DomainId_t domain_id,
+                          const DDS::PartitionQosPolicy& partition,
+                          Permissions::PublishSubscribe_t pub_or_sub,
+                          ACPermsMap::iterator ac_iter,
+                          DDS::Security::SecurityException& ex);
 
   void parse_class_id(const std::string& class_id,
                       std::string& plugin_class_name,
