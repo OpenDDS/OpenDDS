@@ -300,7 +300,7 @@ private:
                           DDS::Security::DomainId_t domain_id,
                           const DDS::PartitionQosPolicy& partition,
                           Permissions::PublishSubscribe_t pub_or_sub,
-                          ACPermsMap::iterator ac_iter,
+                          const Permissions::Grant& grant,
                           DDS::Security::SecurityException& ex);
 
   void parse_class_id(const std::string& class_id,

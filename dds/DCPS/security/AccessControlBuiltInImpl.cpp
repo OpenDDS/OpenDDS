@@ -37,11 +37,9 @@ namespace Security {
 using DCPS::TimeDuration;
 
 typedef Governance::GovernanceAccessRules::iterator gov_iter;
-typedef Permissions::PermissionGrantRules::iterator perm_grant_iter;
-typedef Permissions::TopicRules::iterator perm_topic_rules_iter;
-typedef Permissions::Partitions::iterator perm_partitions_iter;
-typedef Permissions::TopicPsRules::iterator perm_topic_ps_rules_iter;
-typedef Permissions::PartitionPsList::iterator perm_partition_ps_iter;
+typedef Permissions::Grants::iterator grant_iter;
+typedef Permissions::Rules::iterator perm_topic_rules_iter;
+typedef Permissions::Actions::iterator perm_topic_actions_iter;
 
 static const std::string PermissionsTokenClassId("DDS:Access:Permissions:1.0");
 static const std::string AccessControl_Plugin_Name("DDS:Access:Permissions");
@@ -129,7 +127,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   OpenDDS::Security::SSL::SubjectName sn_id;
 
-  if (!id_sn || sn_id.parse(id_sn) != 0 || !permissions->contains_subject_name(sn_id)) {
+  if (!id_sn || sn_id.parse(id_sn) != 0 || !permissions->find_grant(sn_id)) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: No permissions subject name matches identity subject name");
     return DDS::HANDLE_NIL;
   }
@@ -253,7 +251,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   SSL::SubjectName sn_id_remote;
 
-  if (remote_identity_sn.empty() || sn_id_remote.parse(remote_identity_sn) != 0 || !remote_permissions->contains_subject_name(sn_id_remote)) {
+  if (remote_identity_sn.empty() || sn_id_remote.parse(remote_identity_sn) != 0 || !remote_permissions->find_grant(sn_id_remote)) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_remote_permissions: "
                                         "Remote identity subject name does not match any subject name in remote permissions grants");
     return DDS::HANDLE_NIL;
@@ -396,7 +394,12 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  if (!search_permissions(topic_name, domain_id, partition, Permissions::PUBLISH, ac_iter, ex)) {
+  Permissions::Grant grant;
+  if (!ac_iter->second.perm->find_grant(ac_iter->second.subject, &grant)) {
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datawriter: Permissions grant not found");
+  }
+
+  if (!search_permissions(topic_name, domain_id, partition, Permissions::PUBLISH, grant, ex)) {
     return false;
   }
 
@@ -448,9 +451,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
             return true;
           }
         }
-
       }
-
     }
   }
 
@@ -459,8 +460,13 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   if (!validate_date_time(ac_iter, delta_time, ex)) {
     return false;
   }
+  
+  Permissions::Grant grant;
+  if (!ac_iter->second.perm->find_grant(ac_iter->second.subject, &grant)) {
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Permissions grant not found");
+  }
 
-  if (!search_permissions(topic_name, domain_id, partition, Permissions::SUBSCRIBE, ac_iter, ex)) {
+  if (!search_permissions(topic_name, domain_id, partition, Permissions::SUBSCRIBE, grant, ex)) {
     return false;
   }
 
@@ -527,23 +533,23 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  Permissions::PermissionGrantRules::iterator pgr_iter;
-  for (pgr_iter = ac_iter->second.perm->data().perm_rules.begin(); pgr_iter != ac_iter->second.perm->data().perm_rules.end(); ++pgr_iter) {
+  Permissions::Grants::iterator pgr_iter;
+  for (pgr_iter = ac_iter->second.perm->data().grants.begin(); pgr_iter != ac_iter->second.perm->data().grants.end(); ++pgr_iter) {
 
     // Check to make sure our participant subject name matches the grant we're looking at
     if (pgr_iter->subject == ac_iter->second.subject) {
       Permissions::PublishSubscribe_t denied_type;
       bool found_deny = false;
       // Iterate over allow / deny rules
-      for (perm_topic_rules_iter ptr_iter = pgr_iter->PermissionTopicRules.begin(); ptr_iter != pgr_iter->PermissionTopicRules.end(); ++ptr_iter) {
+      for (perm_topic_rules_iter ptr_iter = pgr_iter->rules.begin(); ptr_iter != pgr_iter->rules.end(); ++ptr_iter) {
 
         if (ptr_iter->domain_list.count(domain_to_find)) {
 
-          perm_topic_ps_rules_iter tpsr_iter;
-          for (tpsr_iter = ptr_iter->topic_ps_rules.begin(); tpsr_iter != ptr_iter->topic_ps_rules.end(); ++tpsr_iter) {
+          perm_topic_actions_iter tpsr_iter;
+          for (tpsr_iter = ptr_iter->actions.begin(); tpsr_iter != ptr_iter->actions.end(); ++tpsr_iter) {
 
             std::vector<std::string>::iterator tl_iter;
-            for (tl_iter = tpsr_iter->topic_list.begin(); tl_iter != tpsr_iter->topic_list.end(); ++tl_iter) {
+            for (tl_iter = tpsr_iter->topics.begin(); tl_iter != tpsr_iter->topics.end(); ++tl_iter) {
 
               if (::ACE::wild_match(topic_name, tl_iter->c_str(), true, false)) {
                 if (ptr_iter->ad_type == Permissions::ALLOW) {
@@ -562,7 +568,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
       }
 
       // There is no matching rule for topic_name so use the value in default_permission
-      if (strcmp(pgr_iter->default_permission.c_str(), "ALLOW") == 0) {
+      if (pgr_iter->default_permission == Permissions::ALLOW) {
         return true;
       } else {
         return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_topic: No matching rule for topic, default permission is DENY.");
@@ -675,11 +681,11 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_participant: Class ID plugin class name do not match");
   }
 
-  Permissions::PermissionGrantRules::iterator pgr_iter;
-  for (pgr_iter = ac_iter->second.perm->data().perm_rules.begin(); pgr_iter != ac_iter->second.perm->data().perm_rules.end(); ++pgr_iter) {
+  Permissions::Grants::iterator pgr_iter;
+  for (pgr_iter = ac_iter->second.perm->data().grants.begin(); pgr_iter != ac_iter->second.perm->data().grants.end(); ++pgr_iter) {
     // Cycle through topic rules to find an allow
 
-    for (perm_topic_rules_iter ptr_iter = pgr_iter->PermissionTopicRules.begin(); ptr_iter != pgr_iter->PermissionTopicRules.end(); ++ptr_iter) {
+    for (perm_topic_rules_iter ptr_iter = pgr_iter->rules.begin(); ptr_iter != pgr_iter->rules.end(); ++ptr_iter) {
       if (ptr_iter->domain_list.count(domain_id) && ptr_iter->ad_type == Permissions::ALLOW) {
         return true;
       }
@@ -734,9 +740,14 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
+  Permissions::Grant grant;
+  if (!ac_iter->second.perm->find_grant(ac_iter->second.subject, &grant)) {
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter: Permissions grant not found");
+  }
+
   if (!search_permissions(publication_data.base.base.topic_name, domain_id,
                           publication_data.base.base.partition, Permissions::PUBLISH,
-                          ac_iter, ex)) {
+                          grant, ex)) {
     return false;
   }
 
@@ -792,9 +803,14 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
+  Permissions::Grant grant;
+  if (!ac_iter->second.perm->find_grant(ac_iter->second.subject, &grant)) {
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datareader: Permissions grant not found");
+  }
+
   if (!search_permissions(subscription_data.base.base.topic_name, domain_id,
                           subscription_data.base.base.partition, Permissions::SUBSCRIBE,
-                          ac_iter, ex)) {
+                          grant, ex)) {
     return false;
   }
 
@@ -893,8 +909,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
   // Iterate over grant rules
-  Permissions::PermissionGrantRules::iterator pgr_iter;
-  for (pgr_iter = ac_iter->second.perm->data().perm_rules.begin(); pgr_iter != ac_iter->second.perm->data().perm_rules.end(); ++pgr_iter) {
+  Permissions::Grants::iterator pgr_iter;
+  for (pgr_iter = ac_iter->second.perm->data().grants.begin(); pgr_iter != ac_iter->second.perm->data().grants.end(); ++pgr_iter) {
 
     // Check to make sure our participant subject name matches the grant we're looking at
     if (pgr_iter->subject == ac_iter->second.subject) {
@@ -903,20 +919,20 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
       bool found_deny = false;
       // Iterate over allow / deny rules
       perm_topic_rules_iter ptr_iter;
-      for (ptr_iter = pgr_iter->PermissionTopicRules.begin(); ptr_iter != pgr_iter->PermissionTopicRules.end(); ++ptr_iter) {
+      for (ptr_iter = pgr_iter->rules.begin(); ptr_iter != pgr_iter->rules.end(); ++ptr_iter) {
 
         if (ptr_iter->domain_list.count(domain_id)) {
 
           // Iterate over pub / sub rules
-          perm_topic_ps_rules_iter tpsr_iter;
-          for (tpsr_iter = ptr_iter->topic_ps_rules.begin(); tpsr_iter != ptr_iter->topic_ps_rules.end(); ++tpsr_iter) {
+          perm_topic_actions_iter tpsr_iter;
+          for (tpsr_iter = ptr_iter->actions.begin(); tpsr_iter != ptr_iter->actions.end(); ++tpsr_iter) {
 
             // Check to make sure they can publish or subscribe to the topic
             // TODO Add support for relay permissions once relay only key exchange is supported
             if (tpsr_iter->ps_type == Permissions::PUBLISH || tpsr_iter->ps_type == Permissions::SUBSCRIBE) {
 
               std::vector<std::string>::iterator tl_iter;
-              for (tl_iter = tpsr_iter->topic_list.begin(); tl_iter != tpsr_iter->topic_list.end(); ++tl_iter) {
+              for (tl_iter = tpsr_iter->topics.begin(); tl_iter != tpsr_iter->topics.end(); ++tl_iter) {
 
                 if (::ACE::wild_match(topic_data.name, tl_iter->c_str(), true, false)) {
                   if (ptr_iter->ad_type == Permissions::ALLOW) {
@@ -936,7 +952,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
       }
 
       // There is no matching rule for topic_name so use the value in default_permission
-      if (strcmp(pgr_iter->default_permission.c_str(), "ALLOW") == 0) {
+      if (pgr_iter->default_permission == Permissions::ALLOW) {
         return true;
       } else {
         return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_topic: No matching rule for topic, default permission is DENY.");
@@ -1368,10 +1384,10 @@ bool AccessControlBuiltInImpl::validate_date_time(
   time_t after_time = 0, cur_utc_time = 0;
   time_t current_date_time = time(0);
 
-  perm_grant_iter pbegin = ac_iter->second.perm->data().perm_rules.begin();
-  perm_grant_iter pend = ac_iter->second.perm->data().perm_rules.end();
+  grant_iter pbegin = ac_iter->second.perm->data().grants.begin();
+  grant_iter pend = ac_iter->second.perm->data().grants.end();
 
-  for (perm_grant_iter pm_iter = pbegin; pm_iter != pend; ++pm_iter) {
+  for (grant_iter pm_iter = pbegin; pm_iter != pend; ++pm_iter) {
     const time_t before_time = convert_permissions_time(pm_iter->validity.not_before);
 
     if (before_time == 0) {
@@ -1555,157 +1571,29 @@ bool AccessControlBuiltInImpl::search_permissions(
   const DDS::Security::DomainId_t domain_id,
   const DDS::PartitionQosPolicy& partition,
   const Permissions::PublishSubscribe_t pub_or_sub,
-  const ACPermsMap::iterator ac_iter,
+  const Permissions::Grant& grant,
   DDS::Security::SecurityException& ex)
 {
-  std::string default_value;
-
-  perm_grant_iter pbegin = ac_iter->second.perm->data().perm_rules.begin();
-  perm_grant_iter pend = ac_iter->second.perm->data().perm_rules.end();
-
-  for (perm_grant_iter pm_iter = pbegin; pm_iter != pend; ++pm_iter) {
-    perm_grant_iter pbegin = ac_iter->second.perm->data().perm_rules.begin();
-    perm_grant_iter pend = ac_iter->second.perm->data().perm_rules.end();
-
-    for (perm_grant_iter pm_iter = pbegin; pm_iter != pend; ++pm_iter) {
-      default_value = pm_iter->default_permission;
-
-      perm_topic_rules_iter ptr_iter; // allow/deny rules
-      perm_partitions_iter pp_iter;
-      int matched_allow_partitions = 0;
-      int matched_deny_partitions = 0;
-      CORBA::ULong num_param_partitions = 0;
-
-      for (ptr_iter = pm_iter->PermissionTopicRules.begin(); ptr_iter != pm_iter->PermissionTopicRules.end(); ++ptr_iter) {
-        size_t  d = ptr_iter->domain_list.count(domain_id);
-
-        if ((d > 0) && (ptr_iter->ad_type == Permissions::ALLOW)) {
-          perm_topic_ps_rules_iter tpsr_iter;
-
-          for (tpsr_iter = ptr_iter->topic_ps_rules.begin(); tpsr_iter != ptr_iter->topic_ps_rules.end(); ++tpsr_iter) {
-            if (tpsr_iter->ps_type == pub_or_sub) {
-              std::vector<std::string>::iterator tl_iter; // topic list
-
-              for (tl_iter = tpsr_iter->topic_list.begin(); tl_iter != tpsr_iter->topic_list.end(); ++tl_iter) {
-                if (::ACE::wild_match(topic_name, (*tl_iter).c_str(), true, false)) {
-                  // Topic matches now check that the partitions match
-                  if (partition.name.length() > 0) {
-                    // First look for the ad_type & ps_type in the partitions
-                    for (pp_iter = pm_iter->PermissionPartitions.begin(); pp_iter != pm_iter->PermissionPartitions.end(); pp_iter++) {
-                      size_t pd = pp_iter->domain_list.count(domain_id);
-
-                      if ((pd > 0) && (pp_iter->ad_type == Permissions::ALLOW)) {
-                        perm_partition_ps_iter pps_iter;
-
-                        for (pps_iter = pp_iter->partition_ps.begin(); pps_iter != pp_iter->partition_ps.end(); ++pps_iter) {
-                          if (pps_iter->ps_type == pub_or_sub) {
-                            std::vector<std::string>::iterator pl_iter; // partition list
-                            num_param_partitions = static_cast<unsigned int>(pps_iter->partition_list.size());
-
-                            for (pl_iter = pps_iter->partition_list.begin(); pl_iter != pps_iter->partition_list.end(); ++pl_iter) {
-                              // Check the pl_iter value against the list of partitions in the partition parameter
-                              for (CORBA::ULong i = 0; i < partition.name.length(); ++i) {
-                                if (::ACE::wild_match(partition.name[i], (*pl_iter).c_str(), true, false)) {
-                                  matched_allow_partitions++;
-                                  break;
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                  else { // No partitions to match
-                    return true;
-                  }
-
-                }
-              }
-            }
-          }
-        }
-        else if ((d > 0) && (ptr_iter->ad_type == Permissions::DENY)) {
-          perm_topic_ps_rules_iter tpsr_iter;
-
-          for (tpsr_iter = ptr_iter->topic_ps_rules.begin(); tpsr_iter != ptr_iter->topic_ps_rules.end(); ++tpsr_iter) {
-//            if (tpsr_iter->ps_type == Permissions::PUBLISH) {
-            if (tpsr_iter->ps_type == pub_or_sub) {
-              std::vector<std::string>::iterator tl_iter; // topic list
-
-              for (tl_iter = tpsr_iter->topic_list.begin(); tl_iter != tpsr_iter->topic_list.end(); ++tl_iter) {
-                if (::ACE::wild_match(topic_name, (*tl_iter).c_str(), true, false)) {
-                  // Topic matches now check that the partitions match
-                  if (partition.name.length() > 0) {
-                    // First look for the ad_type & ps_type in the partitions
-                    for (pp_iter = pm_iter->PermissionPartitions.begin(); pp_iter != pm_iter->PermissionPartitions.end(); pp_iter++) {
-                      size_t pd = pp_iter->domain_list.count(domain_id);
-
-                      if ((pd > 0) && (pp_iter->ad_type == Permissions::DENY)) {
-                        perm_partition_ps_iter pps_iter;
-
-                        for (pps_iter = pp_iter->partition_ps.begin(); pps_iter != pp_iter->partition_ps.end(); ++pps_iter) {
-//                          if (pps_iter->ps_type == Permissions::PUBLISH) {
-                          if (pps_iter->ps_type == pub_or_sub) {
-                            std::vector<std::string>::iterator pl_iter; // partition list
-
-                            for (pl_iter = pps_iter->partition_list.begin(); pl_iter != pps_iter->partition_list.end(); ++pl_iter) {
-                              // Check the pl_iter value against the list of partitions in the partition parameter
-                              for (CORBA::ULong i = 0; i < partition.name.length(); ++i) {
-                                if (::ACE::wild_match(partition.name[i], (*pl_iter).c_str(), true, false)) {
-                                  matched_deny_partitions++;
-                                  break;
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                  else {
-                    return false;
-                  }
-                }
-              }
-            }
-          }
-
-        } // end of DENY
-      }
-
-      // If a topic and partition match were found, return the appropriate value.
-      if ((matched_allow_partitions > 0) && (matched_deny_partitions > 0)) {
-        CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl: Topic is in both allow and deny.");
-        return false;
-      }
-      else {
-        if (matched_allow_partitions > 0) {
-          if (num_param_partitions > partition.name.length()) {
-            CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl: Requested more partitions than available in permissions file.");
-            return false;
-          }
-          else {
+  for (Permissions::Rules::const_iterator rit = grant.rules.begin(); rit != grant.rules.end(); ++rit) {
+    if (rit->domain_list.count(domain_id)) {
+      for (Permissions::Actions::const_iterator ait = rit->actions.begin(); ait != rit->actions.end(); ++ait) {
+        if (ait->ps_type == pub_or_sub &&
+            ait->topic_matches(topic_name) &&
+            ait->partitions_match(partition.name, rit->ad_type)) {
+          if (rit->ad_type == Permissions::ALLOW) {
             return true;
+          } else {
+            return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl: DENY rule matched");
           }
         }
-        else if (matched_deny_partitions > 0) {
-          return false;
-        }
-
       }
-
     }
   }
 
-  // If this point in the code is reached it means that either there are no PermissionTopicRules
-  // or the topic_name does not exist in the topic_list so return the value of default_permission
-  if (strcmp(default_value.c_str(), "ALLOW") == 0) {
+  if (grant.default_permission == Permissions::ALLOW) {
     return true;
-  }
-  else {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl: No matching rule for topic, default permission is DENY.");
-    return false;
+  } else {
+    return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl: No matching rule for topic, default permission is DENY.");
   }
 }
 

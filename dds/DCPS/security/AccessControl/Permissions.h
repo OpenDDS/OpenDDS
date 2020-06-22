@@ -39,48 +39,37 @@ public:
     std::string not_after;
   };
 
-  struct PermissionTopicPsRule {
+  struct Action {
     PublishSubscribe_t ps_type;
-    std::vector<std::string> topic_list;
+    std::vector<std::string> topics;
+    std::vector<std::string> partitions;
+
+    bool topic_matches(const char* topic) const;
+    bool partitions_match(const DDS::StringSeq& entity_partitions, AllowDeny_t allow_or_deny) const;
   };
 
-  struct PermissionPartitionPs {
-    PublishSubscribe_t ps_type;
-    std::vector<std::string> partition_list;
-  };
+  typedef std::list<Action> Actions;
 
-  typedef std::list<PermissionTopicPsRule> TopicPsRules;
-
-  struct PermissionTopicRule {
+  struct Rule {
     AllowDeny_t ad_type;
     std::set< ::DDS::Security::DomainId_t > domain_list;
-    TopicPsRules topic_ps_rules;
+    Actions actions;
   };
 
-  typedef std::list<PermissionPartitionPs> PartitionPsList;
+  typedef std::list<Rule> Rules;
 
-  struct PermissionsPartition {
-    AllowDeny_t ad_type;
-    std::set< ::DDS::Security::DomainId_t > domain_list;
-    PartitionPsList partition_ps;
-  };
-
-  typedef std::list<PermissionTopicRule> TopicRules;
-  typedef std::list<PermissionsPartition> Partitions;
-
-  struct PermissionGrantRule {
-    std::string grant_name;
+  struct Grant {
+    std::string name;
     SSL::SubjectName subject;
     Validity_t validity;
-    std::string default_permission;
-    TopicRules PermissionTopicRules;
-    Partitions PermissionPartitions;
+    AllowDeny_t default_permission;
+    Rules rules;
   };
 
-  typedef std::vector<PermissionGrantRule> PermissionGrantRules;
+  typedef std::vector<Grant> Grants;
 
   struct AcPerms {
-    PermissionGrantRules perm_rules;
+    Grants grants;
     DDS::Security::PermissionsToken perm_token;
     DDS::Security::PermissionsCredentialToken perm_cred_token;
   };
@@ -94,7 +83,7 @@ public:
     return perm_data_;
   }
 
-  bool contains_subject_name(const SSL::SubjectName& name) const;
+  bool find_grant(const SSL::SubjectName& name, Grant* found = 0) const;
 
 private:
 
