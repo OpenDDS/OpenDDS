@@ -24,7 +24,7 @@ namespace OpenDDS {
 
 namespace XTypes {
   struct TypeInformation;
-  class TypeObject;
+  struct TypeObject;
 }
 
 namespace DCPS {
