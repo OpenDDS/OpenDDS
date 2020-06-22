@@ -101,7 +101,7 @@ bool EncapsulationHeader::from_encoding(
     break;
   default:
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR EncapsulationHeader::from_encoding: ")
-      ACE_TEXT("Got Encoding With Unsupported Kind: %s\n"),
+      ACE_TEXT("Got Encoding With Unsupported Kind: %C\n"),
       Encoding::kind_to_string(encoding.kind()).c_str()));
     return false;
   }
@@ -228,8 +228,7 @@ bool operator>>(Serializer& s, EncapsulationHeader& value)
   }
   value.kind(static_cast<EncapsulationHeader::Kind>(
     (static_cast<ACE_UINT16>(data[0]) << 8) | data[1]));
-  value.options(static_cast<EncapsulationHeader::Kind>(
-    (static_cast<ACE_UINT16>(data[2]) << 8) | data[3]));
+  value.options((static_cast<ACE_UINT16>(data[2]) << 8) | data[3]);
   s.reset_alignment();
   return true;
 }

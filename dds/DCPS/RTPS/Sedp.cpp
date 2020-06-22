@@ -3265,8 +3265,7 @@ static bool decode_parameter_list(
   DCPS::Extensibility extensibility,
   ParameterList& data)
 {
-  if (sample.header_.key_fields_only_ &&
-      extensibility == DCPS::FINAL) {
+  if (sample.header_.key_fields_only_ && extensibility == DCPS::FINAL) {
     GUID_t guid;
     if (!(ser >> guid)) return false;
     data.length(1);
@@ -3332,7 +3331,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
     DCPS::EncapsulationHeader encap;
     if (!(ser >> encap)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
-        ACE_TEXT("failed to serializer encapsulation header\n")));
+        ACE_TEXT("failed to deserialize encapsulation header\n")));
       return;
     }
     if (!encap.to_encoding(encoding, extensibility)) {

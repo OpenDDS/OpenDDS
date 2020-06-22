@@ -221,6 +221,10 @@ private:
  */
 class OpenDDS_Dcps_Export EncapsulationHeader {
 public:
+  /**
+   * The known possible values of the first 2 bytes represented as big endian
+   * integers.
+   */
   enum Kind {
     KIND_CDR_BE = 0x0000,
     KIND_CDR_LE = 0x0001,
@@ -250,14 +254,16 @@ public:
   bool from_encoding(const Encoding& encoding, Extensibility extensibility);
 
   /**
-   * Translate to an encoding, returns false if it failed..
+   * Translate to an encoding, returns false if it failed.
    */
   bool to_encoding(Encoding& encoding, Extensibility expected_extensibility);
 
   OPENDDS_STRING to_string() const;
 
 private:
+  /// The first two bytes as a big endian integer
   Kind kind_;
+  /// The last two bytes as a big endian integer
   ACE_UINT16 options_;
 };
 

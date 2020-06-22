@@ -408,16 +408,16 @@ namespace OpenDDS {
     DataRepresentation value;
     if (appl && appl->annotation_decl() == declaration()) {
       switch (get_u32_annotation_member_value(appl, "kind")) {
-      case 0: // Kint_t::XCDR1
+      case 0: // Kind_t::XCDR1
         value.xcdr1 = true;
         break;
-      case 1: // Kint_t::XML
+      case 1: // Kind_t::XML
         value.xml = true;
         break;
-      case 2: // Kint_t::XCDR2
+      case 2: // Kind_t::XCDR2
         value.xcdr2 = true;
         break;
-      case 3: // Kint_t::UNALIGNED_CDR
+      case 3: // Kind_t::UNALIGNED_CDR
         value.unaligned_cdr = true;
         break;
       }
