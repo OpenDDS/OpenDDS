@@ -15,6 +15,14 @@
 #include <string>
 
 struct Field {
+  struct SeqLen {
+    AST_Type* seq_;
+    std::size_t len_;
+    SeqLen(Field& af);
+    struct Cmp { bool operator()(const SeqLen& a, const SeqLen& b) const; };
+  };
+  typedef std::set<SeqLen, SeqLen::Cmp> SeqLenSet;
+
   static bool is_anonymous_array(AST_Type& field);
   static bool is_anonymous_sequence(AST_Type& field);
   static bool is_anonymous_type(AST_Type& field);

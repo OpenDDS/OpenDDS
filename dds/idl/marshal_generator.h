@@ -9,6 +9,7 @@
 #define marshal_generator_H
 
 #include "dds_generator.h"
+#include "anonymous.h"
 
 class marshal_generator : public dds_generator {
 public:
@@ -25,6 +26,8 @@ public:
                  const std::vector<AST_UnionBranch*>& branches,
                  AST_Type* discriminator,
                  const char* repoid);
+private:
+  Field::SeqLenSet seqLen_;
 };
 
 #endif

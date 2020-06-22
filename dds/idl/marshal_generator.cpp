@@ -8,7 +8,6 @@
 #include "marshal_generator.h"
 #include "utl_identifier.h"
 #include "topic_keys.h"
-#include "anonymous.h"
 
 #include <string>
 #include <sstream>
@@ -1620,7 +1619,9 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       gen_array(af);
     } else if (Field::is_anonymous_sequence(*(fields[i]->field_type()))) {
       Field sf(*(fields[i]));
-      gen_sequence(sf);
+      if (seqLen_.insert(Field::SeqLen(sf)).second) {
+        gen_sequence(sf);
+      }
     }
   }
 

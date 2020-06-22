@@ -9,6 +9,18 @@
 
 using namespace AstTypeClassification;
 
+Field::SeqLen::SeqLen(Field& af) : seq_(af.ast_elem_), len_(0)
+{
+  if (!af.seq_->unbounded()) {
+    len_ = af.seq_->max_size()->ev()->u.ulval;
+  }
+}
+
+bool Field::SeqLen::Cmp::operator()(const SeqLen& a, const SeqLen& b) const
+{
+  return a.seq_ != b.seq_ || a.len_ != b.len_;
+}
+
 bool Field::is_anonymous_array(AST_Type& field)
 {
   return field.node_type() == AST_Decl::NT_array;
@@ -34,7 +46,6 @@ std::string Field::get_type_name(AST_Type& field)
   const std::string name = field.local_name()->get_string();
   n = scope + "_" + name;
   if (is_anonymous_sequence(field)) {
-    //TODO: use the class name generated in TAO IDL
     return n + "_seq";
   }
   return n;

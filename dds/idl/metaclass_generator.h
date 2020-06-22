@@ -9,6 +9,7 @@
 #define metaclass_generator_H
 
 #include "dds_generator.h"
+#include "anonymous.h"
 
 class metaclass_generator : public dds_generator {
 public:
@@ -31,6 +32,7 @@ public:
 
 private:
   bool first_struct_;
+  Field::SeqLenSet seqLen_;
 };
 
 #endif

@@ -24,8 +24,8 @@ struct TestStruct {
   double a_d2x3x4arr[2][3][4];
 
   sequence<long> a_lseq;
-//sequence<long> a_lseq_2nd;
+  sequence<long> a_lseq_2nd;
   sequence<long, 3> a_l3seq;
-//sequence<long, 3> a_l3seq_2nd;
+  sequence<long, 3> a_l3seq_2nd;
   sequence<long, 5> a_l5seq;
 };

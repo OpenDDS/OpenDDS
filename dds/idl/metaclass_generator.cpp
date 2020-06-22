@@ -634,14 +634,16 @@ metaclass_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
       be_global->impl_ << "  return ser.skip(static_cast<ACE_UINT16>(" << af.length_ << "), " << af.elem_sz_ << ");\n";
     } else if (Field::is_anonymous_sequence(*(fields[i]->field_type()))) {
       Field af(*(fields[i]));
-      Function f("gen_skip_over", "bool");
-      f.addArg("ser", "Serializer&");
-      f.addArg("", af.scoped_type_ + "*");
-      f.endArgs();
-      be_global->impl_ <<
-      "  ACE_CDR::ULong length;\n" <<
-      "  if (!(ser >> length)) return false;\n" <<
-      "  return ser.skip(static_cast<ACE_UINT16>(" << af.length_ << "), " << af.elem_sz_ << ");\n";
+      if (seqLen_.insert(Field::SeqLen(af)).second) {
+        Function f("gen_skip_over", "bool");
+        f.addArg("ser", "Serializer&");
+        f.addArg("", af.scoped_type_ + "*");
+        f.endArgs();
+        be_global->impl_ <<
+        "  ACE_CDR::ULong length;\n" <<
+        "  if (!(ser >> length)) return false;\n" <<
+        "  return ser.skip(static_cast<ACE_UINT16>(" << af.length_ << "), " << af.elem_sz_ << ");\n";
+      }
     }
   }
 
