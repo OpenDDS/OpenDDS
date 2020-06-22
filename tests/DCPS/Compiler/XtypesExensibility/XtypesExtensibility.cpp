@@ -2,11 +2,11 @@
  * This test is meant to test the annotations set by typeflags.
  * Currently IS_AUTOID_HASH is not implemented so that should always return false.
  ***/
-#include "gtest/gtest.h"
-
 #include "ExtensibilityTypeSupportImpl.h"
 
-#include "dds/DCPS/TypeObject.h"
+#include <dds/DCPS/TypeObject.h>
+
+#include <gtest/gtest.h>
 
 using namespace extensibility;
 using namespace OpenDDS::XTypes;
