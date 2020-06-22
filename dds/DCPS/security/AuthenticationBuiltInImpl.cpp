@@ -898,7 +898,7 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
 {
   ::CORBA::Boolean results = false;
 
-  if (NULL == listener) {
+  if (!listener) {
     set_security_error(ex, -1, 0, "Null listener provided");
   } else {
     results = true;
@@ -1322,10 +1322,16 @@ AuthenticationBuiltInImpl::make_handshake_pair(DDS::Security::IdentityHandle h1,
   return HandshakeDataPair();
 }
 
-bool AuthenticationBuiltInImpl::is_handshake_initiator(const OpenDDS::DCPS::GUID_t& local, const OpenDDS::DCPS::GUID_t& remote)
+bool AuthenticationBuiltInImpl::is_handshake_initiator(
+  const OpenDDS::DCPS::GUID_t& local, const OpenDDS::DCPS::GUID_t& remote)
 {
   const unsigned char* local_ = reinterpret_cast<const unsigned char*>(&local);
   const unsigned char* remote_ = reinterpret_cast<const unsigned char*>(&remote);
+
+  using DCPS::SecurityDebug;
+  if (DCPS::security_debug.force_auth_role != SecurityDebug::FORCE_AUTH_ROLE_NORMAL) {
+    return DCPS::security_debug.force_auth_role == SecurityDebug::FORCE_AUTH_ROLE_LEADER;
+  }
 
   /* if remote > local, pending request; else pending handshake message */
   return std::lexicographical_compare(local_, local_ + sizeof(local),
@@ -1335,9 +1341,9 @@ bool AuthenticationBuiltInImpl::is_handshake_initiator(const OpenDDS::DCPS::GUID
 
 bool AuthenticationBuiltInImpl::check_class_versions(const char* remote_class_id)
 {
-  if (NULL == remote_class_id) {
+  if (!remote_class_id) {
     return false;
-    }
+  }
   bool class_matches = false;
 
   // Slow, but this is just for the stub
