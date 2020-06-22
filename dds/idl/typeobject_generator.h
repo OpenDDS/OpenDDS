@@ -25,6 +25,8 @@ public:
                  const std::vector<AST_UnionBranch*>& branches,
                  AST_Type* type, const char* repoid);
 
+  void gen_type_flag_str(std::string& type_flag_str, ExtensibilityKind exten, bool can_be_mutable, AST_Decl* node);
+
   static std::string tag_type(UTL_ScopedName* name);
 };
 
