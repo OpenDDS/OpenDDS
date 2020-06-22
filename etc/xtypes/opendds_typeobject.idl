@@ -161,7 +161,7 @@ module OpenDDS { module XTypes {    // spec: DDS::XTypes
     typedef MemberFlag   BitflagFlag;             // Unused. No flags apply
     typedef MemberFlag   BitsetMemberFlag;        // Unused. No flags apply
 
-    // Mask used to remove the flags that do no affect assignability
+    // Mask used to remove the flags that do not affect assignability
     // Selects  T1, T2, O, M, K, D
     const   unsigned short  MemberFlagMinimalMask = 0x003f;
 
