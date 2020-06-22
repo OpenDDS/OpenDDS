@@ -420,12 +420,12 @@ const std::string mutable_struct_expected_xcdr2(
 
 // Baseline ------------------------------------------------------------------
 
-TEST(Mutable_tests, baseline_xcdr1_test)
+TEST(mutable_tests, baseline_xcdr1_test)
 {
   serializer_test<MutableStruct>(xcdr1, mutable_struct_expected_xcdr1);
 }
 
-TEST(Mutable_tests, baseline_xcdr2_test)
+TEST(mutable_tests, baseline_xcdr2_test)
 {
   serializer_test<MutableStruct>(xcdr2, mutable_struct_expected_xcdr2);
 }
