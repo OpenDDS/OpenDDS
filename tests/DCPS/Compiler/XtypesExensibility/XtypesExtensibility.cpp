@@ -1,5 +1,5 @@
 /***
- * This test is meant to test the annotations set by typeflags.  
+ * This test is meant to test the annotations set by typeflags.
  * Currently IS_AUTOID_HASH is not implemented so that should always return false.
  ***/
 #include "gtest/gtest.h"
@@ -81,7 +81,7 @@ TEST(TestDefault, flags_match)
 
   EXPECT_EQ(getMinimalTypeObject<extensibility_struct_default_nested_xtag>()
             .minimal.struct_type.struct_flags , IS_APPENDABLE | IS_NESTED);
-  
+
   EXPECT_EQ(getMinimalTypeObject<extensibility_union_default_nested_xtag>()
             .minimal.union_type.union_flags, IS_APPENDABLE | IS_NESTED);
 }

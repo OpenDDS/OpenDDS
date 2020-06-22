@@ -4,7 +4,7 @@
 * Distributed under the OpenDDS License.
 * See: http://www.opendds.org/license.html
 */
- 
+
 module extensibility {
  @extensibility(FINAL) @topic
  struct struct_final{
@@ -39,12 +39,12 @@ module extensibility {
    case 1: short B;
  };
 
- @extensibility(FINAL) @topic
+ @extensibility(FINAL)
  enum enum_final {
    A1, A2, A3
  };
 
- @extensibility(APPENDABLE) @topic
+ @extensibility(APPENDABLE)
  enum enum_appendable {
    B1, B2, B3
  };
